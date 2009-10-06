@@ -1,10 +1,15 @@
 grammar Regex::P6Regex::Grammar;
 
     token TOP {
-        <termish>+
+        <nibbler>
+    }
+
+    token nibbler {
+        <termish> [ <.ws> [ '||' | '|' ] <termish> ]*
     }
 
     token termish {
+        <.ws>
         <noun=quantified_atom>+
     }
 
@@ -27,5 +32,4 @@ grammar Regex::P6Regex::Grammar;
     token quantifier:sym<?> { $<sym>:=['?'] <quantmod> }
 
     token quantmod { ':'? [ '?' | '!' | '+' ]? }
-
 
