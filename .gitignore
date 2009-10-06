@@ -1,4 +1,6 @@
 Makefile
-parrot
-parrot_install
+/parrot
+/parrot_install
 .*.swp
+*.c
+*.o
