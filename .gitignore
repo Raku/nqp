@@ -4,3 +4,6 @@ Makefile
 .*.swp
 *.c
 *.o
+p6regex
+p6regex.pbc
+src/gen/*.pir
