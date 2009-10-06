@@ -15,6 +15,8 @@ Regex.pbc .
 
 .include 'src/Regex/Match.pir'
 
+.include 'src/Regex/OPP.pir'
+
 .include 'src/Regex/P6Regex.pir'
 
 .include 'src/Regex/Dumper.pir'
