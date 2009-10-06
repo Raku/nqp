@@ -7,7 +7,7 @@ Regex::OPP - Regex operator precedence parser
 
 =head1 DESCRIPTION
 
-See the source in F<Regex/OPP.pg> for the NQP-based code.
+See the source in F<Regex/OPP.pm> for the NQP-based code.
 
 =cut
 
