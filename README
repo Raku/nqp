@@ -1,5 +1,8 @@
 =head1 NQP - Not Quite Perl (6)
 
+NQP is Copyright (C) 2009 by Patrick R. Michaud.  See F<LICENSE>
+for licensing details.
+
 This is "Not Quite Perl" -- a compiler for quickly generating PIR
 routines from Perl6-like code.  The key feature of NQP is that it's
 designed to be a very small compiler (as compared with, say, perl6
@@ -8,5 +11,4 @@ transformers for Parrot (especially hll compilers).  In addition,
 unlike Rakudo, NQP attempts to restrict itself to generating code
 that can run in Parrot without the existence of any NQP-specific
 runtime libraries.
-
 
