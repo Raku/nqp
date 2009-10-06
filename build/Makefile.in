@@ -1,0 +1,46 @@
+# Copyright (C) 2006-2009, The Perl Foundation.
+# $Id$
+
+PARROT_ARGS      =
+
+# values from parrot_config
+PARROT_BIN_DIR     = @bindir@
+PARROT_VERSION     = @versiondir@
+PARROT_INCLUDE_DIR = @includedir@$(PARROT_VERSION)
+PARROT_LIB_DIR     = @libdir@$(PARROT_VERSION)
+PARROT_SRC_DIR     = @srcdir@$(PARROT_VERSION)
+HAS_ICU            = @has_icu@
+
+CC            = @cc@
+CFLAGS        = @ccflags@ @cc_shared@ @cc_debug@ @ccwarn@ @cc_hasjit@ @cg_flag@ @gc_flag@
+EXE           = @exe@
+LD            = @ld@
+LDFLAGS       = @ldflags@ @ld_debug@
+LD_LOAD_FLAGS = @ld_load_flags@
+LIBPARROT     = @inst_libparrot_ldflags@
+O             = @o@
+LOAD_EXT      = @load_ext@
+PERL          = @perl@
+CP            = @cp@
+MV            = @mv@
+RM_F          = @rm_f@
+MKPATH        = $(PERL) -MExtUtils::Command -e mkpath
+CHMOD         = $(PERL) -MExtUtils::Command -e chmod
+
+# locations of parrot resources
+PARROT           = $(PARROT_BIN_DIR)/parrot$(EXE)
+PBC_TO_EXE       = $(PARROT_BIN_DIR)/pbc_to_exe$(EXE)
+PARROT_TOOLS_DIR = $(PARROT_LIB_DIR)/tools
+PARROT_PERL_LIB  = $(PARROT_TOOLS_DIR)/lib
+
+NQP_LANG_DIR     = $(PARROT_LIB_DIR)/languages/nqp
+
+CLEANUPS = \
+  nqp.pbc \
+  nqp.c \
+  *.manifest \
+  *.pdb \
+  nqp$(O) \
+  $(NQPEXE) \
+
+
