@@ -32,15 +32,41 @@ PARROT           = $(PARROT_BIN_DIR)/parrot$(EXE)
 PBC_TO_EXE       = $(PARROT_BIN_DIR)/pbc_to_exe$(EXE)
 PARROT_TOOLS_DIR = $(PARROT_LIB_DIR)/tools
 PARROT_PERL_LIB  = $(PARROT_TOOLS_DIR)/lib
+PERL6GRAMMAR_PBC = $(PARROT_LIB_DIR)/library/PGE/Perl6Grammar.pbc
 
 NQP_LANG_DIR     = $(PARROT_LIB_DIR)/languages/nqp
 
 CLEANUPS = \
-  nqp.pbc \
-  nqp.c \
   *.manifest \
   *.pdb \
-  nqp$(O) \
-  $(NQPEXE) \
+  p6regex$(EXE) \
+  p6regex.pbc \
+  src/gen/*.pir \
 
 
+P6REGEX_SOURCES = \
+  src/Regex/P6Regex.pir \
+  src/gen/p6regex-grammar.pir \
+  src/parrot/PGE.pir \
+  src/parrot/p6regex-grammar.pir \
+
+
+p6regex$(EXE): p6regex.pbc
+	$(PBC_TO_EXE) p6regex.pbc
+
+p6regex.pbc: $(P6REGEX_SOURCES)
+	$(PARROT) -o p6regex.pbc src/Regex/P6Regex.pir
+
+src/gen/p6regex-grammar.pir: $(PARROT) $(PERL6GRAMMAR_PBC) src/Regex/P6Regex/Grammar.pm
+	$(PARROT) $(PARROT_ARGS) $(PERL6GRAMMAR_PBC) --output=src/gen/p6regex-grammar.pir --encoding=utf8 src/Regex/P6Regex/Grammar.pm
+
+## cleaning
+clean:
+	$(RM_F) $(CLEANUPS)
+
+distclean: realclean
+
+realclean: clean
+	$(RM_F) Makefile
+
+testclean:
