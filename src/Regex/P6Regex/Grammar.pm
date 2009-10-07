@@ -40,4 +40,7 @@ grammar Regex::P6Regex::Grammar;
 
     # proto token metachar { <...> }
     token metachar:sym<[ ]> { '[' <nibbler> ']' {*} }
+    token metachar:sym<\\> { \\ <backslash> {*} }
 
+    # proto token backslash { <...> }
+    token backslash:sym<w> { :i w {*} }
