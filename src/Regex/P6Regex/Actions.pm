@@ -23,6 +23,10 @@ method termish($/) {
 
 method quantified_atom($/) {
     my $past := $<atom>.ast;
+    if $<quantifier> {
+       $<quantifier>[0].ast.unshift($past);
+       $past := $<quantifier>[0].ast;
+    }
     make $past;
 }
 
@@ -31,3 +35,7 @@ method atom($/) {
     make $past;
 }
 
+method quantifier:sym<*>($/) {
+    my $past := PAST::Regex.new( :pasttype('quant') );
+    make $past;
+}

@@ -32,9 +32,9 @@ grammar Regex::P6Regex::Grammar;
     }
 
     # proto token quantifier { <...> }
-    token quantifier:sym<*> { $<sym>:=['*'] <quantmod> }
-    token quantifier:sym<+> { $<sym>:=['+'] <quantmod> }
-    token quantifier:sym<?> { $<sym>:=['?'] <quantmod> }
+    token quantifier:sym<*> { $<sym>:=['*'] <quantmod> {*} }
+    token quantifier:sym<+> { $<sym>:=['+'] <quantmod> {*} }
+    token quantifier:sym<?> { $<sym>:=['?'] <quantmod> {*} }
 
     token quantmod { ':'? [ '?' | '!' | '+' ]? }
 
