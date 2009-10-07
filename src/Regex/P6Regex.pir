@@ -19,6 +19,8 @@ Regex::P6Regex - Parser/compiler for Perl 6 regexes
     p6regex.'language'('Regex::P6Regex')
     $P0 = get_hll_namespace ['Regex';'P6Regex';'Grammar']
     p6regex.'parsegrammar'($P0)
+    $P0 = get_hll_namespace ['Regex';'P6Regex';'Actions']
+    p6regex.'parseactions'($P0)
 .end
 
 .sub 'main' :main
@@ -30,8 +32,13 @@ Regex::P6Regex - Parser/compiler for Perl 6 regexes
 .end
 
 .include 'src/gen/p6regex-grammar.pir'
+.include 'src/gen/p6regex-actions.pir'
 .include 'src/parrot/PGE.pir'
 .include 'src/parrot/p6regex-grammar.pir'
+
+# these will eventually move to Regex.pir
+.include 'src/PAST/Regex.pir'
+.include 'src/PAST/Compiler-Regex.pir'
 
 =cut
 

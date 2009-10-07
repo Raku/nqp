@@ -29,6 +29,7 @@ CHMOD         = $(PERL) -MExtUtils::Command -e chmod
 
 # locations of parrot resources
 PARROT           = $(PARROT_BIN_DIR)/parrot$(EXE)
+NQP              = $(PARROT_BIN_DIR)/parrot_nqp$(EXE)
 PBC_TO_EXE       = $(PARROT_BIN_DIR)/pbc_to_exe$(EXE)
 PARROT_TOOLS_DIR = $(PARROT_LIB_DIR)/tools
 PARROT_PERL_LIB  = $(PARROT_TOOLS_DIR)/lib
@@ -47,8 +48,11 @@ CLEANUPS = \
 P6REGEX_SOURCES = \
   src/Regex/P6Regex.pir \
   src/gen/p6regex-grammar.pir \
+  src/gen/p6regex-actions.pir \
   src/parrot/PGE.pir \
   src/parrot/p6regex-grammar.pir \
+  src/PAST/Regex.pir \
+  src/PAST/Compiler-Regex.pir \
 
 
 p6regex$(EXE): p6regex.pbc
@@ -58,7 +62,13 @@ p6regex.pbc: $(P6REGEX_SOURCES)
 	$(PARROT) -o p6regex.pbc src/Regex/P6Regex.pir
 
 src/gen/p6regex-grammar.pir: $(PARROT) $(PERL6GRAMMAR_PBC) src/Regex/P6Regex/Grammar.pm
-	$(PARROT) $(PARROT_ARGS) $(PERL6GRAMMAR_PBC) --output=src/gen/p6regex-grammar.pir --encoding=utf8 src/Regex/P6Regex/Grammar.pm
+	$(PARROT) $(PARROT_ARGS) $(PERL6GRAMMAR_PBC) \
+	    --output=src/gen/p6regex-grammar.pir --encoding=utf8 \
+	    src/Regex/P6Regex/Grammar.pm
+
+src/gen/p6regex-actions.pir: $(NQP) src/Regex/P6Regex/Actions.pm
+	$(NQP) --target=pir --output=src/gen/p6regex-actions.pir \
+	    --encoding=fixed_8 src/Regex/P6Regex/Actions.pm
 
 ## cleaning
 clean:

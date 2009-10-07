@@ -13,6 +13,13 @@ for regular expressions.
 
 .namespace ['PAST';'Regex']
 
+.sub '' :init :load
+    load_bytecode 'PCT.pbc'
+    .local pmc p6meta
+    p6meta = get_hll_global 'P6metaclass'
+    p6meta.'new_class'('PAST::Regex', 'parent'=>'PAST::Node')
+.end
+
 .sub 'backtrack' :method
     .param pmc value           :optional
     .param int has_value       :opt_flag

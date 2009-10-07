@@ -23,6 +23,8 @@ Return the POST representation of the regex AST rooted by C<node>.
 
 =cut
 
+.namespace ['PAST';'Compiler']
+
 .sub 'as_post' :method :multi(_, ['PAST';'Regex'])
     .param pmc node
     .param pmc options         :slurpy :named
@@ -492,6 +494,22 @@ second child of this node.
   frugal_7:
     ops.'push'(q2label)
     .return (ops)
+.end
+
+
+=item post_new(type, args :slurpy, options :slurpy :named)
+
+Helper method to create a new POST node of C<type>.
+
+=cut
+
+.sub 'post_new' :method
+    .param string type
+    .param pmc args            :slurpy
+    .param pmc options         :slurpy :named
+
+    $P0 = get_hll_global ['POST'], type
+    .tailcall $P0.'new'(args :flat, options :flat :named)
 .end
 
 =back
