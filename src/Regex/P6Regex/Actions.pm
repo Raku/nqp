@@ -1,7 +1,7 @@
 class Regex::P6Regex::Actions;
 
 method TOP($/) {
-    my $regex := PAST::Regex.new(
+    my $past := PAST::Regex.new(
         $<nibbler>.ast,
         PAST::Regex.new( :pasttype('pass') ),
         :pasttype('concat')
