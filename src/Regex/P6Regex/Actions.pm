@@ -23,9 +23,18 @@ method nibbler($/) {
 
 method termish($/) {
     my $past := PAST::Regex.new( :pasttype('concat') );
+    my $lastlit := 0;
     for $<noun> {
-        $past.push($_.ast);
+        my $ast := $_.ast;
+        if $lastlit && $ast.pasttype eq 'literal' {
+            $lastlit[0] := $lastlit[0] ~ $ast[0];
+        }
+        else {
+            $past.push($_.ast);
+            $lastlit := $ast.pasttype eq 'literal' ?? $ast !! 0;
+        }
     }
+    if +$past.list == 1 { $past := $past[0]; }
     make $past;
 }
 
