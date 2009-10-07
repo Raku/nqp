@@ -75,3 +75,14 @@ method quantmod($/) {
 method metachar:sym<[ ]>($/) {
     make $<nibbler>.ast;
 }
+
+method metachar:sym<bs>($/) {
+    Q:PIR { say 'metachar_backslash' };
+    make $<backslash>.ast;
+}
+
+method backslash:sym<w>($/) {
+    Q:PIR { say 'backslash_w' };
+    my $past := PAST::Regex.new( ~$/, :pasttype('charclass') );
+    make $past;
+}
