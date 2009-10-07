@@ -52,13 +52,31 @@ Return the POST representation of the regex AST rooted by C<node>.
     goto iter_loop
   iter_done:
 
+
     .local pmc faillabel
-    $S1 = concat prefix, 'fail'
-    faillabel = self.'post_new'('Label', 'result'=>$S1)
+    $S0 = concat prefix, 'fail'
+    faillabel = self.'post_new'('Label', 'result'=>$S0)
     reghash['fail'] = faillabel
 
-    .local string cur, rep, pos
-    (cur, rep, pos) = self.'!rxregs'('cur rep pos')
+    .local string cur, rep, pos, tgt, off, len
+    (cur, rep, pos, tgt, off, len) = self.'!rxregs'('cur rep pos tgt off len')
+
+    .local pmc startlabel
+    $S0 = concat prefix, 'start'
+    startlabel = self.'post_new'('Label', 'result'=>$S0)
+    $S0 = concat '(', cur
+    concat $S0, ', '
+    concat $S0, pos
+    concat $S0, ', '
+    concat $S0, tgt
+    concat $S0, ')'
+    ops.'push_pirop'('callmethod', '"!cursor_start"', 'self', 'result'=>$S0)
+    ops.'push_pirop'('length', len, tgt, 'result'=>len)
+    ops.'push_pirop'('set', off, 0)
+    ops.'push_pirop'('lt', pos, 2, startlabel)
+    ops.'push_pirop'('sub', off, pos, 1, 'result'=>off)
+    ops.'push_pirop'('substr', tgt, tgt, off, 'result'=>tgt)
+    ops.'push'(startlabel)
 
     $P0 = self.'post_regex'(node)
     ops.'push'($P0)
@@ -339,8 +357,12 @@ second child of this node.
     .local pmc ops
     ops = self.'reduce'(node)
     ops.'push_pirop'('inline', 'inline'=>'  # rx pass')
-    $S0 = ops.'result'()
-    ops.'push_pirop'('yield', $S0)
+    .local string cur, pos
+    cur = ops.'result'()
+    pos = self.'!rxregs'('pos')
+    $S0 = concat pos, " :named('pos')"
+    self.'!cursorop'(ops, '!matchify', 0, $S0)
+    ops.'push_pirop'('yield', cur)
     .return (ops)
 .end
 
