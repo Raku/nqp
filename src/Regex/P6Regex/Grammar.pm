@@ -36,5 +36,5 @@ grammar Regex::P6Regex::Grammar;
     token quantifier:sym<+> { $<sym>:=['+'] <quantmod> {*} }
     token quantifier:sym<?> { $<sym>:=['?'] <quantmod> {*} }
 
-    token quantmod { ':'? [ '?' | '!' | '+' ]? }
+    token quantmod { ':'? [ '?' | '!' | '+' ]? {*} }
 

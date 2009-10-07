@@ -36,16 +36,27 @@ method atom($/) {
 }
 
 method quantifier:sym<*>($/) {
-    my $past := PAST::Regex.new( :pasttype('quant') );
-    make $past;
+    make $<quantmod>.ast;
 }
 
 method quantifier:sym<+>($/) {
-    my $past := PAST::Regex.new( :pasttype('quant'), :min(1) );
+    my $past := $<quantmod>.ast;
+    $past.min(1);
     make $past;
 }
 
 method quantifier:sym<?>($/) {
-    my $past := PAST::Regex.new( :pasttype('quant'), :min(0), :max(1) );
+    my $past := $<quantmod>.ast;
+    $past.min(0);
+    $past.min(1);
+    make $past;
+}
+
+method quantmod($/) {
+    my $past := PAST::Regex.new( :pasttype('quant') );
+    my $str := ~$/;
+    if    $str eq ':' { $past.backtrack('r'); }
+    elsif $str eq ':?' or $str eq '?' { $past.backtrack('f') }
+    elsif $str eq ':*' or $str eq '!' { $past.backtrack('g') }
     make $past;
 }
