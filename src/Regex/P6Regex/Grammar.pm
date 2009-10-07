@@ -26,7 +26,7 @@ grammar Regex::P6Regex::Grammar;
         :dba('regex atom')
         [
         | \w [ \w+! <?before \w> ]?
-        # | <metachar> ::
+        | <metachar>
         ]
         {*}
     }
@@ -37,4 +37,7 @@ grammar Regex::P6Regex::Grammar;
     token quantifier:sym<?> { $<sym>:=['?'] <quantmod> {*} }
 
     token quantmod { ':'? [ '?' | '!' | '+' ]? {*} }
+
+    # proto token metachar { <...> }
+    token metachar:sym<[ ]> { '[' <nibbler> ']' {*} }
 

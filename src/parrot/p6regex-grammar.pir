@@ -5,3 +5,9 @@
     .param pmc dba             :named('dba') :optional
     .tailcall self.'!protoregex'('quantifier', 'action'=>action)
 .end
+
+.sub 'metachar' :method
+    .param pmc action          :named('action') :optional
+    .param pmc dba             :named('dba') :optional
+    .tailcall self.'!protoregex'('metachar', 'action'=>action)
+.end

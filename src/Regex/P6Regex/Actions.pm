@@ -31,7 +31,9 @@ method quantified_atom($/) {
 }
 
 method atom($/) {
-    my $past := PAST::Regex.new( ~$/ , :pasttype('literal') );
+    my $past := $<metachar>
+                ?? $<metachar>.ast
+                !! PAST::Regex.new( ~$/ , :pasttype('literal') );
     make $past;
 }
 
@@ -48,7 +50,7 @@ method quantifier:sym<+>($/) {
 method quantifier:sym<?>($/) {
     my $past := $<quantmod>.ast;
     $past.min(0);
-    $past.min(1);
+    $past.max(1);
     make $past;
 }
 
@@ -59,4 +61,9 @@ method quantmod($/) {
     elsif $str eq ':?' or $str eq '?' { $past.backtrack('f') }
     elsif $str eq ':*' or $str eq '!' { $past.backtrack('g') }
     make $past;
+}
+
+
+method metachar:sym<[ ]>($/) {
+    make $<nibbler>.ast;
 }
