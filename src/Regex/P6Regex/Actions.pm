@@ -39,3 +39,13 @@ method quantifier:sym<*>($/) {
     my $past := PAST::Regex.new( :pasttype('quant') );
     make $past;
 }
+
+method quantifier:sym<+>($/) {
+    my $past := PAST::Regex.new( :pasttype('quant'), :min(1) );
+    make $past;
+}
+
+method quantifier:sym<?>($/) {
+    my $past := PAST::Regex.new( :pasttype('quant'), :min(0), :max(1) );
+    make $past;
+}
