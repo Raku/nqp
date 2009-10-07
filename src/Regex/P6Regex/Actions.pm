@@ -10,7 +10,15 @@ method TOP($/) {
 }
 
 method nibbler($/) {
-    make $<termish>[0].ast;
+    my $past;
+    if +$<termish> > 1 {
+        $past := PAST::Regex.new( :pasttype('alt') );
+        for $<termish> { $past.push($_.ast); }
+    }
+    else {
+        $past := $<termish>[0].ast;
+    }
+    make $past;
 }
 
 method termish($/) {
