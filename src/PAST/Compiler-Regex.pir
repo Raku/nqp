@@ -39,7 +39,7 @@ Return the POST representation of the regex AST rooted by C<node>.
     .local string prefix, rname, rtype
     prefix = self.'unique'('rx')
     concat prefix, '_'
-    $P0 = split ' ', 'tgt string pos int off int len int rep int cur pmc act pmc'
+    $P0 = split ' ', 'tgt string pos int off int eos int rep int cur pmc act pmc'
     $P1 = iter $P0
   iter_loop:
     unless $P1 goto iter_done
@@ -58,8 +58,8 @@ Return the POST representation of the regex AST rooted by C<node>.
     faillabel = self.'post_new'('Label', 'result'=>$S0)
     reghash['fail'] = faillabel
 
-    .local string cur, rep, pos, tgt, off, len
-    (cur, rep, pos, tgt, off, len) = self.'!rxregs'('cur rep pos tgt off len')
+    .local string cur, rep, pos, tgt, off, eos
+    (cur, rep, pos, tgt, off, eos) = self.'!rxregs'('cur rep pos tgt off eos')
 
     .local pmc startlabel
     $S0 = concat prefix, 'start'
@@ -71,7 +71,7 @@ Return the POST representation of the regex AST rooted by C<node>.
     concat $S0, tgt
     concat $S0, ')'
     ops.'push_pirop'('callmethod', '"!cursor_start"', 'self', 'result'=>$S0)
-    ops.'push_pirop'('length', len, tgt, 'result'=>len)
+    ops.'push_pirop'('length', eos, tgt, 'result'=>eos)
     ops.'push_pirop'('set', off, 0)
     ops.'push_pirop'('lt', pos, 2, startlabel)
     ops.'push_pirop'('sub', off, pos, 1, 'result'=>off)
@@ -267,6 +267,30 @@ Same as 'alt' above, but use declarative/LTM semantics.
 .end
 
 
+=item charclass(PAST::Regex node)
+
+Match something in a character class, such as \w, \d, \s, dot, etc.
+
+=cut
+
+.sub 'charclass' :method
+    .param pmc node
+
+    .local pmc cur, pos, eos, fail, ops
+    (cur, pos, eos, fail) = self.'!rxregs'('cur pos eos fail')
+    ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
+
+    .local string cclass
+    cclass = node[0]
+
+    ops.'push_pirop'('inline', cclass, 'inline'=>'  # rx charclass %0')
+    ops.'push_pirop'('ge', pos, eos, fail)
+    ops.'push_pirop'('inc', pos)
+
+    .return (ops)
+.end
+
+
 =item concat(PAST::Regex node)
 
 Handle a concatenation of regexes.
@@ -304,8 +328,8 @@ second child of this node.
 .sub 'literal' :method :multi(_,['PAST';'Regex'])
     .param pmc node
 
-    .local pmc cur, pos, len, tgt, fail, off
-    (cur, pos, len, tgt, fail, off) = self.'!rxregs'('cur pos len tgt fail off')
+    .local pmc cur, pos, eos, tgt, fail, off
+    (cur, pos, eos, tgt, fail, off) = self.'!rxregs'('cur pos eos tgt fail off')
     .local pmc ops, cpast, cpost, lpast, lpost
     ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
 
@@ -334,7 +358,7 @@ second child of this node.
 
     # fail if there aren't enough characters left in string
     ops.'push_pirop'('add', '$I11', pos, litlen)
-    ops.'push_pirop'('gt', '$I11', len, fail)
+    ops.'push_pirop'('gt', '$I11', eos, fail)
 
     # compute string to be matched and fail if mismatch
     ops.'push_pirop'('sub', '$I11', pos, off)

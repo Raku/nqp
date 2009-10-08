@@ -86,6 +86,11 @@ method metachar:sym<[ ]>($/) {
     make $<nibbler>.ast;
 }
 
+method metachar:sym<.>($/) {
+    my $past := PAST::Regex.new( '.', :pasttype('charclass') );
+    make $past;
+}
+
 method metachar:sym<bs>($/) {
     Q:PIR { say 'metachar_backslash' };
     make $<backslash>.ast;

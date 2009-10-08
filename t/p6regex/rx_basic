@@ -1,3 +1,6 @@
 ##   Basic tests
-a			a		y	basic
-abc			abc		y	basic multichar
+a			a		y	basic literal
+abc			abc		y	basic multichar literal
+.			a		y	basic dot
+..			abc		y	basic multidot
+a.c			a.c		y	dot in mid pattern
