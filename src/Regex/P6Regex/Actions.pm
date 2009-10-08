@@ -88,7 +88,27 @@ method metachar:sym<[ ]>($/) {
 }
 
 method metachar:sym<.>($/) {
-    my $past := PAST::Regex.new( '.', :pasttype('charclass') );
+    my $past := PAST::Regex.new( :pasttype('charclass'), :subtype('.') );
+    make $past;
+}
+
+method metachar:sym<^>($/) {
+    my $past := PAST::Regex.new( :pasttype('anchor'), :subtype('bos') );
+    make $past;
+}
+
+method metachar:sym<^^>($/) {
+    my $past := PAST::Regex.new( :pasttype('anchor'), :subtype('bol') );
+    make $past;
+}
+
+method metachar:sym<$>($/) {
+    my $past := PAST::Regex.new( :pasttype('anchor'), :subtype('eos') );
+    make $past;
+}
+
+method metachar:sym<$$>($/) {
+    my $past := PAST::Regex.new( :pasttype('anchor'), :subtype('eol') );
     make $past;
 }
 

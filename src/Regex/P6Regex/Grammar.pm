@@ -1,7 +1,8 @@
-grammar Regex::P6Regex::Grammar;
+grammar Regex::P6Regex::Grammar is PCT::Grammar;
 
     token TOP {
         <nibbler>
+        [ <.ws> $ || <.panic: "Syntax error"> ]
         {*}
     }
 
@@ -40,8 +41,12 @@ grammar Regex::P6Regex::Grammar;
 
     # proto token metachar { <...> }
     token metachar:sym<[ ]> { '[' <nibbler> ']' {*} }
-    token metachar:sym<bs> { \\ <backslash> {*} }
     token metachar:sym<.> { $<sym>:=['.'] {*} }
+    token metachar:sym<^> { $<sym>:=['^'] {*} }
+    token metachar:sym<^^> { $<sym>:=['^^'] {*} }
+    token metachar:sym<$> { $<sym>:=['$'] {*} }
+    token metachar:sym<$$> { $<sym>:=['$$'] {*} }
+    token metachar:sym<bs> { \\ <backslash> {*} }
 
     # proto token backslash { <...> }
     token backslash:sym<w> { :i w {*} }

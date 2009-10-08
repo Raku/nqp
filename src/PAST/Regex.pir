@@ -48,6 +48,13 @@ for regular expressions.
 .end
 
 
+.sub 'subtype' :method
+    .param pmc value           :optional
+    .param int has_value       :opt_flag
+    .tailcall self.'attr'('subtype', value, has_value)
+.end
+
+
 =item peek()
 
 Returns the prefixes associated with the regex tree rooted

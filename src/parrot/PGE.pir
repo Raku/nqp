@@ -155,6 +155,15 @@ called C<name>.
     .const 'Sub' $P99 = '!protoregex_cmp'
     tokrx.'sort'($P99)
 
+    # say name
+    # $P0 = iter tokrx
+  # say_loop:
+    # unless $P0 goto say_done
+    # $P1 = shift $P0
+    # say $P1
+    # goto say_loop
+  # say_done:
+
     # It's built!  Now store the tokrx table where we can find it
     # again later without having to rebuild it.
     $S0 = concat name, '.tokrx'
@@ -170,7 +179,7 @@ called C<name>.
     $I0 = length $S0
     $S1 = b
     $I1 = length $S1
-    $I2 = cmp $I0, $I1
+    $I2 = cmp $I1, $I0
     .return ($I2)
 .end
 

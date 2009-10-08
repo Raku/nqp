@@ -23,6 +23,8 @@ Return the POST representation of the regex AST rooted by C<node>.
 
 =cut
 
+.include 'cclass.pasm'
+
 .namespace ['PAST';'Compiler']
 
 .sub 'as_post' :method :multi(_, ['PAST';'Regex'])
@@ -273,6 +275,68 @@ Same as 'alt' above, but use declarative/LTM semantics.
 .end
 
 
+=item anchor(PAST::Regex node)
+
+Match various anchor points, including ^, ^^, $, $$.
+
+=cut
+
+.sub 'anchor' :method :multi(_, ['PAST';'Regex'])
+    .param pmc node
+
+    .local pmc cur, tgt, pos, eos, fail, ops
+    (cur, tgt, pos, eos, fail) = self.'!rxregs'('cur tgt pos eos fail')
+    ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
+
+    .local string subtype
+    subtype = node.'subtype'()
+
+    ops.'push_pirop'('inline', subtype, 'inline'=>'  # rxanchor %0')
+
+    if subtype == 'bos' goto anchor_bos
+    if subtype == 'eos' goto anchor_eos
+
+    .local pmc donelabel
+    $S0 = self.'unique'('rxanchor')
+    concat $S0, '_done'
+    donelabel = self.'post_new'('Label', 'result'=>$S0)
+
+    if subtype == 'bol' goto anchor_bol
+    if subtype == 'eol' goto anchor_eol
+
+  anchor_bos:
+    ops.'push_pirop'('ne', pos, 0, fail)
+    goto done
+
+  anchor_eos:
+    ops.'push_pirop'('ne', pos, eos, fail)
+    goto done
+
+  anchor_bol:
+    ops.'push_pirop'('eq', pos, 0, donelabel)
+    ops.'push_pirop'('ge', pos, eos, fail)
+    ops.'push_pirop'('sub', '$I10', pos, 1)
+    ops.'push_pirop'('is_cclass', '$I10', .CCLASS_NEWLINE, tgt, '$I10')
+    ops.'push_pirop'('eq', '$I10', 0, fail)
+    ops.'push'(donelabel)
+    goto done
+
+  anchor_eol:
+    ops.'push_pirop'('is_cclass', '$I10', .CCLASS_NEWLINE, tgt, pos)
+    ops.'push_pirop'('ne', '$I10', 0, donelabel)
+    ops.'push_pirop'('ne', pos, eos, fail)
+    ops.'push_pirop'('eq', pos, 0, donelabel)
+    ops.'push_pirop'('sub', '$I10', pos, 1)
+    ops.'push_pirop'('is_cclass', '$I10', .CCLASS_NEWLINE, tgt, '$I10')
+    ops.'push_pirop'('ne', '$I10', 0, fail)
+    ops.'push'(donelabel)
+    goto done
+
+  done:
+    .return (ops)
+.end
+
+
 =item charclass(PAST::Regex node)
 
 Match something in a character class, such as \w, \d, \s, dot, etc.
@@ -287,7 +351,7 @@ Match something in a character class, such as \w, \d, \s, dot, etc.
     ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
 
     .local string cclass
-    cclass = node[0]
+    cclass = node.'subtype'()
 
     ops.'push_pirop'('inline', cclass, 'inline'=>'  # rx charclass %0')
     ops.'push_pirop'('ge', pos, eos, fail)
