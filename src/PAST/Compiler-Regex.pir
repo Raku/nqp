@@ -76,6 +76,17 @@ Return the POST representation of the regex AST rooted by C<node>.
     concat $S0, ')'
     ops.'push_pirop'('callmethod', '"!cursor_start"', 'self', 'result'=>$S0)
     ops.'push_pirop'('length', eos, tgt, 'result'=>eos)
+
+    # On Parrot, indexing into variable-width encoded strings 
+    # (such as utf8) becomes much more expensive as we move
+    # farther away from the beginning of the string (via calls
+    # to utf8_skip_forward).  For regexes that are starting a match 
+    # at a position other than the beginning of the string (e.g.,
+    # a subrule call), we can save a lot of useless scanning work
+    # in utf8_skip_forward by removing the first C<off = pos-1> 
+    # characters from the target and then performing all indexed
+    # operations on the resulting target relative to C<off>.
+    
     ops.'push_pirop'('set', off, 0)
     ops.'push_pirop'('lt', pos, 2, startlabel)
     ops.'push_pirop'('sub', off, pos, 1, 'result'=>off)
