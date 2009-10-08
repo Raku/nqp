@@ -41,3 +41,12 @@ The key files for the p6regex compiler are:
     src/Regex/P6Regex/Actions.pm     # actions to create PAST from parse
 
 
+Things that work (2009-10-08, 16h24 UTC):
+
+* bare literal strings
+* quantifiers  *, +, ?, *:, +:, ?:, *?, +?, ??, *!, +!, ?!
+* dot
+* \d, \s, \w, \D, \S, \W, \N
+* brackets for grouping
+* alternation (|| works, | cheats)
+* anchors ^, ^^, $, $$
