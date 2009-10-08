@@ -12,3 +12,5 @@ unlike Rakudo, NQP attempts to restrict itself to generating code
 that can run in Parrot without the existence of any NQP-specific
 runtime libraries.
 
+For details about the current status and how to use what's here,
+see F<STATUS>.
