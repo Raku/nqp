@@ -127,6 +127,7 @@ method metachar:sym<bs>($/) {
 }
 
 method backslash:sym<w>($/) {
-    my $past := PAST::Regex.new( :pasttype('charclass'), :subtype(~$<sym>) );
+    my $subtype := ~$<sym> eq 'n' ?? 'nl' !! ~$<sym>;
+    my $past := PAST::Regex.new( :pasttype('charclass'), :subtype($subtype) );
     make $past;
 }

@@ -382,6 +382,7 @@ Match something in a character class, such as \w, \d, \s, dot, etc.
     ops.'push_pirop'('inline', subtype, 'inline'=>'  # rx charclass %0')
     ops.'push_pirop'('ge', pos, eos, fail)
     if subtype == '.' goto charclass_done
+
     .local string cctest
     cctest = 'eq'
     $S0 = downcase subtype
@@ -393,6 +394,7 @@ Match something in a character class, such as \w, \d, \s, dot, etc.
     if $S0 == 's' goto cclass_space
     if $S0 == 'w' goto cclass_word
     if $S0 == 'n' goto cclass_newline
+    if $S0 == 'nl' goto cclass_newline
     self.'panic'('Unrecognized subtype "', subtype, '" in PAST::Regex charclass node')
   cclass_digit:
     .local int cclass
@@ -407,10 +409,14 @@ Match something in a character class, such as \w, \d, \s, dot, etc.
   cclass_newline:
     cclass = .CCLASS_NEWLINE
   cclass_done:
-
     ops.'push_pirop'('sub', '$I10', pos, off)
     ops.'push_pirop'('is_cclass', '$I11', cclass, tgt, '$I10')
     ops.'push_pirop'(cctest, '$I11', 0, fail)
+    unless $S0 == 'nl' goto charclass_done
+    # handle logical newline here
+    ops.'push_pirop'('substr', '$S10', tgt, '$I10', 2)
+    ops.'push_pirop'('iseq', '$I11', '$S10', '"\r\n"')
+    ops.'push_pirop'('add', pos, '$I11')
 
   charclass_done:
     ops.'push_pirop'('inc', pos)
