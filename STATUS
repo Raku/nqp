@@ -49,4 +49,4 @@ Things that work (2009-10-08, 16h24 UTC):
 * \d, \s, \w, \D, \S, \W, \N
 * brackets for grouping
 * alternation (|| works, | cheats)
-* anchors ^, ^^, $, $$
+* anchors ^, ^^, $, $$, <<, >>

@@ -49,6 +49,8 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
     token metachar:sym<$> { $<sym>:=['$'] {*} }
     token metachar:sym<$$> { $<sym>:=['$$'] {*} }
     token metachar:sym<bs> { \\ <backslash> {*} }
+    token metachar:sym<lwb> { $<sym>:=['<<'|'«'] {*} }
+    token metachar:sym<rwb> { $<sym>:=['>>'|'»'] {*} }
 
     # proto token backslash { <...> }
     token backslash:sym<w> { $<sym>:=[<[dswnDSWN]>] {*} }

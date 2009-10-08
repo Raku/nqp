@@ -112,6 +112,16 @@ method metachar:sym<$$>($/) {
     make $past;
 }
 
+method metachar:sym<lwb>($/) {
+    my $past := PAST::Regex.new( :pasttype('anchor'), :subtype('lwb') );
+    make $past;
+}
+
+method metachar:sym<rwb>($/) {
+    my $past := PAST::Regex.new( :pasttype('anchor'), :subtype('rwb') );
+    make $past;
+}
+
 method metachar:sym<bs>($/) {
     make $<backslash>.ast;
 }

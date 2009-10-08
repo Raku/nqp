@@ -295,6 +295,8 @@ Match various anchor points, including ^, ^^, $, $$.
 
     if subtype == 'bos' goto anchor_bos
     if subtype == 'eos' goto anchor_eos
+    if subtype == 'lwb' goto anchor_lwb
+    if subtype == 'rwb' goto anchor_rwb
 
     .local pmc donelabel
     $S0 = self.'unique'('rxanchor')
@@ -303,6 +305,8 @@ Match various anchor points, including ^, ^^, $, $$.
 
     if subtype == 'bol' goto anchor_bol
     if subtype == 'eol' goto anchor_eol
+
+    self.'panic'('Unrecognized subtype "', subtype, '" in PAST::Regex anchor node')
 
   anchor_bos:
     ops.'push_pirop'('ne', pos, 0, fail)
@@ -332,6 +336,26 @@ Match various anchor points, including ^, ^^, $, $$.
     ops.'push_pirop'('is_cclass', '$I11', .CCLASS_NEWLINE, tgt, '$I10')
     ops.'push_pirop'('ne', '$I11', 0, fail)
     ops.'push'(donelabel)
+    goto done
+
+  anchor_lwb:
+    ops.'push_pirop'('ge', pos, eos, fail)
+    ops.'push_pirop'('sub', '$I10', pos, off)
+    ops.'push_pirop'('is_cclass', '$I11', .CCLASS_WORD, tgt, '$I10')
+    ops.'push_pirop'('eq', '$I11', 0, fail)
+    ops.'push_pirop'('dec', '$I10')
+    ops.'push_pirop'('is_cclass', '$I11', .CCLASS_WORD, tgt, '$I10')
+    ops.'push_pirop'('ne', '$I11', 0, fail)
+    goto done
+
+  anchor_rwb:
+    ops.'push_pirop'('le', pos, 0, fail)
+    ops.'push_pirop'('sub', '$I10', pos, off)
+    ops.'push_pirop'('is_cclass', '$I11', .CCLASS_WORD, tgt, '$I10')
+    ops.'push_pirop'('ne', '$I11', 0, fail)
+    ops.'push_pirop'('dec', '$I10')
+    ops.'push_pirop'('is_cclass', '$I11', .CCLASS_WORD, tgt, '$I10')
+    ops.'push_pirop'('eq', '$I11', 0, fail)
     goto done
 
   done:
@@ -369,7 +393,7 @@ Match something in a character class, such as \w, \d, \s, dot, etc.
     if $S0 == 's' goto cclass_space
     if $S0 == 'w' goto cclass_word
     if $S0 == 'n' goto cclass_newline
-    self.'panic'('Unrecognized subtype "', subtype, '" in PAST::Regex node')
+    self.'panic'('Unrecognized subtype "', subtype, '" in PAST::Regex charclass node')
   cclass_digit:
     .local int cclass
     cclass = .CCLASS_NUMERIC
