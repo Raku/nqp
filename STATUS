@@ -41,7 +41,7 @@ The key files for the p6regex compiler are:
     src/Regex/P6Regex/Actions.pm     # actions to create PAST from parse
 
 
-Things that work (2009-10-08, 16h24 UTC):
+Things that work (2009-10-08, 22h23 UTC):
 
 * bare literal strings
 * quantifiers  *, +, ?, *:, +:, ?:, *?, +?, ??, *!, +!, ?!
@@ -50,3 +50,6 @@ Things that work (2009-10-08, 16h24 UTC):
 * brackets for grouping
 * alternation (|| works, | cheats)
 * anchors ^, ^^, $, $$, <<, >>
+* backslash-quoted punctuation
+* #-comments (mostly)
+* obsolete backslash sequences \A \Z \z \Q \E
