@@ -67,7 +67,7 @@ If C<regex> is omitted, then use the C<TOP> rule for the grammar.
     .param pmc regex
 
     .local pmc cur
-    cur = self.'!cursor_init'(target)
+    cur = self.'!cursor_init'(target, 'from'=>-1)
     cur = cur.regex()
     .return (cur)
 .end
@@ -84,6 +84,19 @@ Return the cursor's current position.
     .return ($P0)
 .end
 
+
+=item from()
+
+Return the cursor's from position.
+
+=cut
+
+.sub 'from' :method
+    $P0 = getattribute self, '$!from'
+    .return ($P0)
+.end
+
+
 =head2 Private methods
 
 =over 4
@@ -96,6 +109,7 @@ Create a new cursor for matching C<target>.
 
 .sub '!cursor_init' :method
     .param string target
+    .param int from            :named('from') :optional
 
     .local pmc parrotclass, cur
     $P0 = self.'HOW'()
@@ -106,9 +120,9 @@ Create a new cursor for matching C<target>.
     $P0 = target
     setattribute cur, '$!target', $P0
 
-    $P0 = box 0
+    $P0 = box from
     setattribute cur, '$!from', $P0
-    $P0 = box 0 
+    $P0 = box from
     setattribute cur, '$!pos', $P0
     .return (cur)
 .end
@@ -168,7 +182,10 @@ the address of a label to branch to when backtracking occurs.)
 
     .local pmc bstack, mstack
     bstack = getattribute self, '@!bstack'
-    mstack = getattribute self, '@!mstack'
+    unless null bstack goto have_bstack
+    bstack = new ['ResizableIntegerArray']
+    setattribute self, '@!bstack', bstack
+  have_bstack:
 
     push bstack, mark
     push bstack, pos
@@ -178,7 +195,7 @@ the address of a label to branch to when backtracking occurs.)
 .end
 
 
-=item !mark_fail([mark])
+=item !mark_fail([tomark])
 
 Remove the most recent C<mark> and backtrack the cursor to the
 point given by that mark.  If no C<mark> is provided, then
@@ -188,19 +205,26 @@ values of repetition count, cursor position, and mark (address).
 =cut
 
 .sub '!mark_fail' :method
-    .param int mark            :optional
-    .param int has_mark        :opt_flag
+    .param int tomark          :optional
+    .param int has_tomark      :opt_flag
 
     .local pmc bstack, mstack
     bstack = getattribute self, '@!bstack'
-    mstack = getattribute self, '@!mstack'
+    if null bstack goto cursor_fail
+    unless bstack goto cursor_fail
 
     # get the frame associated with the mark
-    .local int bptr, rep, pos, mark, mptr
-    bptr = self.'!mark_bptr'(mark, has_mark)
+    .local int bptr
+    bptr = elements bstack
 
-    # retrieve the mark, pos, rep, and match index from the frame
+  bptr_loop:
+    bptr = bptr - 4
+    if bptr < 0 goto cursor_fail
+    .local int rep, pos, mark, mptr
     mark = bstack[bptr]
+    unless has_tomark goto bptr_done
+    if mark != tomark goto bptr_loop
+  bptr_done:
     $I0  = bptr + 1
     pos  = bstack[$I0]
     inc $I0
@@ -213,6 +237,13 @@ values of repetition count, cursor position, and mark (address).
 
     # return mark values
     .return (rep, pos, mark)
+
+  cursor_fail:
+    null $P0
+    setattribute self, '@!bstack', $P0
+    setattribute self, '@!mstack', $P0
+    setattribute self, '$!match', $P0
+    .return (0, -2, 0)
 .end
 
 

@@ -61,9 +61,11 @@ Return the POST representation of the regex AST rooted by C<node>.
     .local string cur, rep, pos, tgt, off, eos
     (cur, rep, pos, tgt, off, eos) = self.'!rxregs'('cur rep pos tgt off eos')
 
-    .local pmc startlabel
+    .local pmc startlabel, donelabel
     $S0 = concat prefix, 'start'
     startlabel = self.'post_new'('Label', 'result'=>$S0)
+    $S0 = concat prefix, 'done'
+    donelabel = self.'post_new'('Label', 'result'=>$S0)
     $S0 = concat '(', cur
     concat $S0, ', '
     concat $S0, pos
@@ -82,8 +84,12 @@ Return the POST representation of the regex AST rooted by C<node>.
     ops.'push'($P0)
     ops.'push'(faillabel)
     self.'!cursorop'(ops, '!mark_fail', 3, rep, pos, '$I10')
-    ops.'push_pirop'('lt', pos, 0, faillabel)
+    ops.'push_pirop'('lt', pos, -1, donelabel)
+    ops.'push_pirop'('eq', pos, -1, faillabel)
     ops.'push_pirop'('jump', '$I10')
+    ops.'push'(donelabel)
+    ops.'push_pirop'('return', cur)
+    ops.'push_pirop'('goto', donelabel)
     .return (ops)
 .end
 
@@ -539,6 +545,38 @@ second child of this node.
     self.'!cursorop'(ops, '!mark_push', 0, ireg, pos, '$I10')
   frugal_7:
     ops.'push'(q2label)
+    .return (ops)
+.end
+
+
+=item scan(POST::Regex)
+
+Code for initial regex scan.
+
+=cut
+
+.sub 'scan' :method :multi(_, ['PAST';'Regex'])
+    .param pmc node
+
+    .local pmc cur, pos, eos, ops
+    (cur, pos, eos) = self.'!rxregs'('cur pos eos')
+    ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
+    .local pmc looplabel, donelabel
+    $S0 = self.'unique'('rxscan')
+    $S1 = concat $S0, '_loop'
+    looplabel = self.'post_new'('Label', 'result'=>$S1)
+    $S1 = concat $S0, '_done'
+    donelabel = self.'post_new'('Label', 'result'=>$S1)
+
+    ops.'push_pirop'('ge', pos, 0, donelabel)
+    ops.'push'(looplabel)
+    self.'!cursorop'(ops, 'from', 1, '$P10')
+    ops.'push_pirop'('inc', '$P10')
+    ops.'push_pirop'('set', pos, '$P10')
+    ops.'push_pirop'('ge', pos, eos, donelabel)
+    ops.'push_pirop'('set_addr', '$I10', looplabel)
+    self.'!cursorop'(ops, '!mark_push', 0, 0, pos, '$I10')
+    ops.'push'(donelabel)
     .return (ops)
 .end
 

@@ -2,6 +2,7 @@ class Regex::P6Regex::Actions;
 
 method TOP($/) {
     my $regex := PAST::Regex.new(
+        PAST::Regex.new( :pasttype('scan') ),
         $<nibbler>.ast,
         PAST::Regex.new( :pasttype('pass') ),
         :pasttype('concat')
