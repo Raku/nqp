@@ -51,4 +51,4 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
     token metachar:sym<bs> { \\ <backslash> {*} }
 
     # proto token backslash { <...> }
-    token backslash:sym<w> { :i w {*} }
+    token backslash:sym<w> { $<sym>:=[<[dswnDSWN]>] {*} }

@@ -346,15 +346,46 @@ Match something in a character class, such as \w, \d, \s, dot, etc.
 .sub 'charclass' :method
     .param pmc node
 
-    .local pmc cur, pos, eos, fail, ops
-    (cur, pos, eos, fail) = self.'!rxregs'('cur pos eos fail')
+    .local pmc cur, tgt, pos, eos, fail, ops
+    (cur, tgt, pos, eos, fail) = self.'!rxregs'('cur tgt pos eos fail')
     ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
 
-    .local string cclass
-    cclass = node.'subtype'()
+    .local string subtype
+    subtype = node.'subtype'()
 
-    ops.'push_pirop'('inline', cclass, 'inline'=>'  # rx charclass %0')
+    ops.'push_pirop'('inline', subtype, 'inline'=>'  # rx charclass %0')
     ops.'push_pirop'('ge', pos, eos, fail)
+    if subtype == '.' goto charclass_done
+    .local string cctest
+    cctest = 'eq'
+    $S0 = downcase subtype
+    if subtype == $S0 goto have_cctest
+    cctest = 'ne'
+  have_cctest:
+
+    if $S0 == 'd' goto cclass_digit
+    if $S0 == 's' goto cclass_space
+    if $S0 == 'w' goto cclass_word
+    if $S0 == 'n' goto cclass_newline
+    self.'panic'('Unrecognized subtype "', subtype, '" in PAST::Regex node')
+  cclass_digit:
+    .local int cclass
+    cclass = .CCLASS_NUMERIC
+    goto cclass_done
+  cclass_space:
+    cclass = .CCLASS_WHITESPACE
+    goto cclass_done
+  cclass_word:
+    cclass = .CCLASS_WORD
+    goto cclass_done
+  cclass_newline:
+    cclass = .CCLASS_NEWLINE
+  cclass_done:
+
+    ops.'push_pirop'('is_cclass', '$I10', cclass, tgt, pos)
+    ops.'push_pirop'(cctest, '$I10', 0, fail)
+
+  charclass_done:
     ops.'push_pirop'('inc', pos)
 
     .return (ops)
