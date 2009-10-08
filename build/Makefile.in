@@ -53,7 +53,11 @@ P6REGEX_SOURCES = \
   src/parrot/p6regex-grammar.pir \
   src/PAST/Regex.pir \
   src/PAST/Compiler-Regex.pir \
+  src/Regex/Cursor.pir \
+  src/Regex/Match.pir \
+  src/Regex/Dumper.pir \
 
+all: p6regex$(EXE)
 
 p6regex$(EXE): p6regex.pbc
 	$(PBC_TO_EXE) p6regex.pbc
@@ -69,6 +73,11 @@ src/gen/p6regex-grammar.pir: $(PARROT) $(PERL6GRAMMAR_PBC) src/Regex/P6Regex/Gra
 src/gen/p6regex-actions.pir: $(NQP) src/Regex/P6Regex/Actions.pm
 	$(NQP) --target=pir --output=src/gen/p6regex-actions.pir \
 	    --encoding=fixed_8 src/Regex/P6Regex/Actions.pm
+
+## testing
+
+test: all
+	prove -r t
 
 ## cleaning
 clean:

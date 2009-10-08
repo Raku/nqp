@@ -55,6 +55,24 @@ create one.
 .end
 
 
+=item parse(target [, regex])
+
+Parse C<target> in the current grammar starting with C<regex>.
+If C<regex> is omitted, then use the C<TOP> rule for the grammar.
+
+=cut
+
+.sub 'parse' :method
+    .param pmc target
+    .param pmc regex
+
+    .local pmc cur
+    cur = self.'!cursor_init'(target)
+    cur = cur.regex()
+    .return (cur)
+.end
+
+
 =item pos()
 
 Return the cursor's current position.

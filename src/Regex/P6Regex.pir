@@ -39,6 +39,9 @@ Regex::P6Regex - Parser/compiler for Perl 6 regexes
 # these will eventually move to Regex.pir
 .include 'src/PAST/Regex.pir'
 .include 'src/PAST/Compiler-Regex.pir'
+.include 'src/Regex/Cursor.pir'
+.include 'src/Regex/Match.pir'
+.include 'src/Regex/Dumper.pir'
 
 =cut
 

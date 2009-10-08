@@ -1,11 +1,12 @@
 class Regex::P6Regex::Actions;
 
 method TOP($/) {
-    my $past := PAST::Regex.new(
+    my $regex := PAST::Regex.new(
         $<nibbler>.ast,
         PAST::Regex.new( :pasttype('pass') ),
         :pasttype('concat')
     );
+    my $past := PAST::Block.new( $regex, :blocktype('method') );
     make $past;
 }
 
