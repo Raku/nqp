@@ -93,12 +93,10 @@ method metachar:sym<.>($/) {
 }
 
 method metachar:sym<bs>($/) {
-    Q:PIR { say 'metachar_backslash' };
     make $<backslash>.ast;
 }
 
 method backslash:sym<w>($/) {
-    Q:PIR { say 'backslash_w' };
     my $past := PAST::Regex.new( ~$/, :pasttype('charclass') );
     make $past;
 }
