@@ -1,5 +1,7 @@
 grammar Regex::P6Regex::Grammar is PCT::Grammar;
 
+    token ws { [ \s+ | '#' \N*\n ]* }
+
     token TOP {
         <nibbler>
         [ <.ws> $ || <.panic: "Syntax error"> ]
@@ -8,7 +10,10 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
 
     rule nibbler {
         ['||'|'|'|'&&'|'&']?
-        <termish> [ ['||'|'|'] <termish> ]*
+        <termish> 
+        [ ['||'|'|'] 
+          [ <termish> || <.panic: "Null pattern not allowed"> ]
+        ]*
         {*}
     }
 
@@ -20,8 +25,8 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
 
     token quantified_atom {
         <atom>
-	\s*
-        [ <quantifier> \s* ]?
+	<.ws>
+        [ <quantifier> <.ws> ]?
         {*}
     }
 
@@ -54,3 +59,10 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
 
     # proto token backslash { <...> }
     token backslash:sym<w> { $<sym>:=[<[dswnDSWN]>] {*} }
+    token backslash:sym<A> { 'A' <.obs: '\\A as beginning-of-string matcher;^'> }
+    token backslash:sym<z> { 'z' <.obs: '\\z as end-of-string matcher;$'> }
+    token backslash:sym<Z> { 'Z' <.obs: '\\Z as end-of-string matcher;\\n?$'> }
+    token backslash:sym<E> { 'E' <.obs: '\\E as quotemeta;quotes or literal variable match'> }
+    token backslash:sym<Q> { 'Q' <.obs: '\\Q as quotemeta;quotes or literal variable match'> }
+    token backslash:sym<misc> { \W {*} }
+

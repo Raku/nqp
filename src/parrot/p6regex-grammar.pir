@@ -17,3 +17,16 @@
     .param pmc dba             :named('dba') :optional
     .tailcall self.'!protoregex'('backslash', 'action'=>action)
 .end
+
+.sub 'obs' :method
+    .param string oldstr
+    .param pmc action          :named('action') :optional
+    .param pmc dba             :named('dba') :optional
+
+    .local string newstr
+    $P0 = split ';', oldstr
+    oldstr = $P0[0]
+    newstr = $P0[1]
+
+    self.'panic'('Obsolete use of ', oldstr, '; please use ', newstr, ' instead')
+.end

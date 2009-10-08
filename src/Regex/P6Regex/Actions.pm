@@ -131,3 +131,8 @@ method backslash:sym<w>($/) {
     my $past := PAST::Regex.new( :pasttype('charclass'), :subtype($subtype) );
     make $past;
 }
+
+method backslash:sym<misc>($/) {
+    my $past := PAST::Regex.new( ~$/ , :pasttype('literal') );
+    make $past;
+}

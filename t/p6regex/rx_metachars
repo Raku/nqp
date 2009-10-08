@@ -48,12 +48,12 @@ a\N+f			abcdef		y	not logical newline (\N)
 c \N d			abc\n\rdef	n	not logical newline (\N)
 c \N d			abc\r\ndef	n	not logical newline (\N)
 b \N \n			abc\ndef	y	not logical newline (\N)
-\Aabc			Aabc		/reserved/	retired metachars (\A)
-\Aabc			abc\ndef	/reserved/	retired metachars (\A)
-abc\Z			abcZ		/reserved/	retired metachars (\Z)
-abc\Z			abc\ndef	/reserved/	retired metachars (\Z)
-abc\z			abcz		/reserved/	retired metachars (\z)
-def\z			abc\ndef	/reserved/	retired metachars (\z)
+\Aabc			Aabc		/Obsolete/	retired metachars (\A)
+\Aabc			abc\ndef	/Obsolete/	retired metachars (\A)
+abc\Z			abcZ		/Obsolete/	retired metachars (\Z)
+abc\Z			abc\ndef	/Obsolete/	retired metachars (\Z)
+abc\z			abcz		/Obsolete/	retired metachars (\z)
+def\z			abc\ndef	/Obsolete/	retired metachars (\z)
 abc # def		abc#def		y	comments (#)
 abc # xyz		abc#def		y	comments (#)
 abc # def \n \$		abc#def		y	comments (#)
@@ -80,11 +80,11 @@ $$ \n			\n		y	line beginnings and endings ($$)
 ^ [ <[a..d]>+ | <[b..e]>+ ] $	bcd		y	alternation (|)
 ^ [ <[a..c]>+ | <[b..e]>+ ] $	bcd		y	alternation (|)
 ^ [ <[a..d]>+ | <[c..e]>+ ] $	bcd		y	alternation (|)
-b|			bcd		/rule error/	alternation (|) - null right arg illegal
+b|			bcd		/Null pattern/	alternation (|) - null right arg illegal
 |b			bcd		y	alternation (|) - null left arg ignored
-|			bcd		/rule error/	alternation (|) - null both args illegal
+|			bcd		/Null pattern/	alternation (|) - null both args illegal
 \|			|		y	alternation (|) - literal must be escaped
-|			|		/rule error/	alternation (|) - literal must be escaped
+|			|		/Null pattern/	alternation (|) - literal must be escaped
 # todo :pugs<feature>
 <[a..d]> & <[b..e]>	c		y	conjunction (&)
 <[a..d]> & <[d..e]>	c		n	conjunction (&)
@@ -112,18 +112,18 @@ a|&b			a|&b		/rule error/	alternation and conjunction (|&) - parse error
  | d | b		abc		y	leading alternation ignored
 # todo :pugs<feature> :pge<feature>
  b |  | d		abc		n	null pattern invalid
-\pabc			pabc		/reserved/	retired metachars (\p)
-\p{InConsonant}		a		/reserved/	retired metachars (\p)
-\Pabc			Pabc		/reserved/	retired metachars (\P)
-\P{InConsonant}		a		/reserved/	retired metachars (\P)
-\Labc\E			LabcE		/reserved/	retired metachars (\L...\E)
-\LABC\E			abc		/reserved/	retired metachars (\L...\E)
-\Uabc\E			UabcE		/reserved/	retired metachars (\U...\E)
-\Uabc\E			ABC		/reserved/	retired metachars (\U...\E)
-\Qabc\E			QabcE		/reserved/	retired metachars (\Q...\E)
-\Qabc d?\E		abc d		/reserved/	retired metachars (\Q...\E)
-\Gabc			Gabc		/reserved/	retired metachars (\G)
-\1abc			1abc		/reserved/	retired metachars (\1)
+\pabc			pabc		/Obsolete/	retired metachars (\p)
+\p{InConsonant}		a		/Obsolete/	retired metachars (\p)
+\Pabc			Pabc		/Obsolete/	retired metachars (\P)
+\P{InConsonant}		a		/Obsolete/	retired metachars (\P)
+\Labc\E			LabcE		/Obsolete/	retired metachars (\L...\E)
+\LABC\E			abc		/Obsolete/	retired metachars (\L...\E)
+\Uabc\E			UabcE		/Obsolete/	retired metachars (\U...\E)
+\Uabc\E			ABC		/Obsolete/	retired metachars (\U...\E)
+\Qabc\E			QabcE		/Obsolete/	retired metachars (\Q...\E)
+\Qabc d?\E		abc d		/Obsolete/	retired metachars (\Q...\E)
+\Gabc			Gabc		/Obsolete/	retired metachars (\G)
+\1abc			1abc		/Obsolete/	retired metachars (\1)
 # todo :pugs<feature>
 ^ \s+ $			\x0009\x0020\x00a0\x000a\x000b\x000c\x000d\x0085	y	0-255 whitespace (\s)
 # todo :pugs<feature>
