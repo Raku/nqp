@@ -284,8 +284,8 @@ Match various anchor points, including ^, ^^, $, $$.
 .sub 'anchor' :method :multi(_, ['PAST';'Regex'])
     .param pmc node
 
-    .local pmc cur, tgt, pos, eos, fail, ops
-    (cur, tgt, pos, eos, fail) = self.'!rxregs'('cur tgt pos eos fail')
+    .local pmc cur, tgt, pos, off, eos, fail, ops
+    (cur, tgt, pos, off, eos, fail) = self.'!rxregs'('cur tgt pos off eos fail')
     ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
 
     .local string subtype
@@ -315,20 +315,22 @@ Match various anchor points, including ^, ^^, $, $$.
   anchor_bol:
     ops.'push_pirop'('eq', pos, 0, donelabel)
     ops.'push_pirop'('ge', pos, eos, fail)
-    ops.'push_pirop'('sub', '$I10', pos, 1)
-    ops.'push_pirop'('is_cclass', '$I10', .CCLASS_NEWLINE, tgt, '$I10')
-    ops.'push_pirop'('eq', '$I10', 0, fail)
+    ops.'push_pirop'('sub', '$I10', pos, off)
+    ops.'push_pirop'('dec', '$I10')
+    ops.'push_pirop'('is_cclass', '$I11', .CCLASS_NEWLINE, tgt, '$I10')
+    ops.'push_pirop'('eq', '$I11', 0, fail)
     ops.'push'(donelabel)
     goto done
 
   anchor_eol:
-    ops.'push_pirop'('is_cclass', '$I10', .CCLASS_NEWLINE, tgt, pos)
-    ops.'push_pirop'('ne', '$I10', 0, donelabel)
+    ops.'push_pirop'('sub', '$I10', pos, off)
+    ops.'push_pirop'('is_cclass', '$I11', .CCLASS_NEWLINE, tgt, '$I10')
+    ops.'push_pirop'('ne', '$I11', 0, donelabel)
     ops.'push_pirop'('ne', pos, eos, fail)
     ops.'push_pirop'('eq', pos, 0, donelabel)
-    ops.'push_pirop'('sub', '$I10', pos, 1)
-    ops.'push_pirop'('is_cclass', '$I10', .CCLASS_NEWLINE, tgt, '$I10')
-    ops.'push_pirop'('ne', '$I10', 0, fail)
+    ops.'push_pirop'('dec', '$I10')
+    ops.'push_pirop'('is_cclass', '$I11', .CCLASS_NEWLINE, tgt, '$I10')
+    ops.'push_pirop'('ne', '$I11', 0, fail)
     ops.'push'(donelabel)
     goto done
 
@@ -346,8 +348,8 @@ Match something in a character class, such as \w, \d, \s, dot, etc.
 .sub 'charclass' :method
     .param pmc node
 
-    .local pmc cur, tgt, pos, eos, fail, ops
-    (cur, tgt, pos, eos, fail) = self.'!rxregs'('cur tgt pos eos fail')
+    .local pmc cur, tgt, pos, off, eos, fail, ops
+    (cur, tgt, pos, off, eos, fail) = self.'!rxregs'('cur tgt pos off eos fail')
     ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
 
     .local string subtype
@@ -382,8 +384,9 @@ Match something in a character class, such as \w, \d, \s, dot, etc.
     cclass = .CCLASS_NEWLINE
   cclass_done:
 
-    ops.'push_pirop'('is_cclass', '$I10', cclass, tgt, pos)
-    ops.'push_pirop'(cctest, '$I10', 0, fail)
+    ops.'push_pirop'('sub', '$I10', pos, off)
+    ops.'push_pirop'('is_cclass', '$I11', cclass, tgt, '$I10')
+    ops.'push_pirop'(cctest, '$I11', 0, fail)
 
   charclass_done:
     ops.'push_pirop'('inc', pos)
