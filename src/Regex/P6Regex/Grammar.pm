@@ -6,8 +6,9 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
         {*}
     }
 
-    token nibbler {
-        <termish> [ <.ws> [ '||' | '|' ] <termish> ]*
+    rule nibbler {
+        ['||'|'|'|'&&'|'&']?
+        <termish> [ ['||'|'|'] <termish> ]*
         {*}
     }
 
@@ -19,7 +20,8 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
 
     token quantified_atom {
         <atom>
-        <quantifier>?
+	\s*
+        [ <quantifier> \s* ]?
         {*}
     }
 
