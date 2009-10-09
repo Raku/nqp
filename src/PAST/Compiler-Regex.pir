@@ -333,19 +333,19 @@ Match various anchor points, including ^, ^^, $, $$.
     ops.'push_pirop'('sub', '$I10', pos, off)
     ops.'push_pirop'('dec', '$I10')
     ops.'push_pirop'('is_cclass', '$I11', .CCLASS_NEWLINE, tgt, '$I10')
-    ops.'push_pirop'('eq', '$I11', 0, fail)
+    ops.'push_pirop'('unless', '$I11', fail)
     ops.'push'(donelabel)
     goto done
 
   anchor_eol:
     ops.'push_pirop'('sub', '$I10', pos, off)
     ops.'push_pirop'('is_cclass', '$I11', .CCLASS_NEWLINE, tgt, '$I10')
-    ops.'push_pirop'('ne', '$I11', 0, donelabel)
+    ops.'push_pirop'('if', '$I11', donelabel)
     ops.'push_pirop'('ne', pos, eos, fail)
     ops.'push_pirop'('eq', pos, 0, donelabel)
     ops.'push_pirop'('dec', '$I10')
     ops.'push_pirop'('is_cclass', '$I11', .CCLASS_NEWLINE, tgt, '$I10')
-    ops.'push_pirop'('ne', '$I11', 0, fail)
+    ops.'push_pirop'('if', '$I11', fail)
     ops.'push'(donelabel)
     goto done
 
@@ -353,20 +353,20 @@ Match various anchor points, including ^, ^^, $, $$.
     ops.'push_pirop'('ge', pos, eos, fail)
     ops.'push_pirop'('sub', '$I10', pos, off)
     ops.'push_pirop'('is_cclass', '$I11', .CCLASS_WORD, tgt, '$I10')
-    ops.'push_pirop'('eq', '$I11', 0, fail)
+    ops.'push_pirop'('unless', '$I11', fail)
     ops.'push_pirop'('dec', '$I10')
     ops.'push_pirop'('is_cclass', '$I11', .CCLASS_WORD, tgt, '$I10')
-    ops.'push_pirop'('ne', '$I11', 0, fail)
+    ops.'push_pirop'('if', '$I11', fail)
     goto done
 
   anchor_rwb:
     ops.'push_pirop'('le', pos, 0, fail)
     ops.'push_pirop'('sub', '$I10', pos, off)
     ops.'push_pirop'('is_cclass', '$I11', .CCLASS_WORD, tgt, '$I10')
-    ops.'push_pirop'('ne', '$I11', 0, fail)
+    ops.'push_pirop'('if', '$I11', fail)
     ops.'push_pirop'('dec', '$I10')
     ops.'push_pirop'('is_cclass', '$I11', .CCLASS_WORD, tgt, '$I10')
-    ops.'push_pirop'('eq', '$I11', 0, fail)
+    ops.'push_pirop'('unless', '$I11', fail)
     goto done
 
   done:
@@ -397,7 +397,7 @@ Match something in a character class, such as \w, \d, \s, dot, etc.
     .local pmc cctest
     $S0 = downcase subtype
     $I0 = iseq subtype, $S0
-    cctest = self.'??!!'($I0, 'eq', 'ne')
+    cctest = self.'??!!'($I0, 'unless', 'if')
 
     if $S0 == 'd' goto cclass_digit
     if $S0 == 's' goto cclass_space
@@ -420,7 +420,7 @@ Match something in a character class, such as \w, \d, \s, dot, etc.
   cclass_done:
     ops.'push_pirop'('sub', '$I10', pos, off)
     ops.'push_pirop'('is_cclass', '$I11', cclass, tgt, '$I10')
-    ops.'push_pirop'(cctest, '$I11', 0, fail)
+    ops.'push_pirop'(cctest, '$I11', fail)
     unless $S0 == 'nl' goto charclass_done
     # handle logical newline here
     ops.'push_pirop'('substr', '$S10', tgt, '$I10', 2)
