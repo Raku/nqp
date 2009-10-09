@@ -87,3 +87,19 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
             ]?
         {*}
     }
+
+    token assertion:sym<[> { <?before '['> <cclass_elem>+ }
+    token assertion:sym<+> { <?before '+'|'-'> <cclass_elem>+ }
+
+    token cclass_elem {
+        $<sign>=['+'|'-'|<?>]
+        [
+        | '[' $<charspec>=(
+                  | '-' <.obs: "hyphen in enumerated character class;..">
+                  | [ \\ (.) | (<-[\]]>) ] [ '..' (.) ]?
+              )*
+          ']'
+        | $<name>=[\w+]
+        ]
+    }
+
