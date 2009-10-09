@@ -3,12 +3,12 @@
 # todo :pugs<feature>
 <[ z ]>			abc def		n	character class ignores ws
 # todo :pugs<feature>
-<[dcb]>**{3}		abcdef		y	repeated character class
+<[dcb]>**3		abcdef		y	repeated character class
 ^<[a]>			abcdef		y	anchored character class
 <-[e]>			abcdef		y	negated character class
 ^<[a]>?			abcdef		y	anchored optional character class
 <-[e]>?			abcdef		y	negated optional character class
-<-[dcb]>**{3}		abcdef		n	repeated negated character class
+<-[dcb]>**3		abcdef		n	repeated negated character class
 ^<-[e]>			abcdef		y	anchored negated character class
 ^<-[a]>			abcdef		n	anchored negated character class
 <[b..d]>		abcdef		y	character range
@@ -45,9 +45,9 @@
 ^\><[<]>		><		y	lt character class
 ^<[>]>\<		><		y	gt character class
 # todo :pugs<feature>
-^<[><]>**{2}		><		y	gt, lt character class
+^<[><]>**2		><		y	gt, lt character class
 # todo :pugs<feature>
-^<[<>]>**{2}		><		y	lt, gt  character class
+^<[<>]>**2		><		y	lt, gt  character class
 ^<-[><]>		><		n	not gt, lt character class
 ^<-[<>]>		><		n	not lt, gt  character class
 '... --- ...'		... --- ...	y	literal match (\')

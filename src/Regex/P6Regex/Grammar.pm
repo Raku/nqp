@@ -43,6 +43,13 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
     token quantifier:sym<*> { $<sym>=['*'] <quantmod> {*} }
     token quantifier:sym<+> { $<sym>=['+'] <quantmod> {*} }
     token quantifier:sym<?> { $<sym>=['?'] <quantmod> {*} }
+    token quantifier:sym<**> { 
+        $<sym>=['**'] <quantmod>
+        [
+        | $<min>=[\d+] [ '..' $<max>=[\d+|'*'] ]?
+        ]
+        {*}
+    }
 
     token quantmod { ':'? [ '?' | '!' | '+' ]? {*} }
 

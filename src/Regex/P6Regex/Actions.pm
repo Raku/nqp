@@ -73,6 +73,14 @@ method quantifier:sym<?>($/) {
     make $past;
 }
 
+method quantifier:sym<**>($/) {
+    my $past := $<quantmod>.ast;
+    $past.min(+$<min>);
+    if ! $<max> { $past.max(+$<min>); }
+    elsif $<max>[0] ne '*' { $past.max(+$<max>[0]); }
+    make $past;
+}
+
 method quantmod($/) {
     my $past := PAST::Regex.new( :pasttype('quant') );
     my $str := ~$/;
