@@ -53,9 +53,13 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
     token metachar:sym<^^> { $<sym>:=['^^'] {*} }
     token metachar:sym<$> { $<sym>:=['$'] {*} }
     token metachar:sym<$$> { $<sym>:=['$$'] {*} }
-    token metachar:sym<bs> { \\ <backslash> {*} }
     token metachar:sym<lwb> { $<sym>:=['<<'|'«'] {*} }
     token metachar:sym<rwb> { $<sym>:=['>>'|'»'] {*} }
+    token metachar:sym<bs> { \\ <backslash> {*} }
+    token metachar:sym<assert> { 
+        '<' <assertion> 
+        [ '>' || <.panic: "regex assertion not terminated by angle bracket"> ]
+    }
 
     # proto token backslash { <...> }
     token backslash:sym<w> { $<sym>:=[<[dswnDSWN]>] {*} }
@@ -66,3 +70,20 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
     token backslash:sym<Q> { 'Q' <.obs: '\\Q as quotemeta;quotes or literal variable match'> }
     token backslash:sym<misc> { \W {*} }
 
+    # proto token assertion { <...> }
+
+    token assertion:sym<?> { '?' [ <?before '>' > | <assertion> ] }
+    token assertion:sym<!> { '!' [ <?before '>' > | <assertion> ] }
+
+    token assertion:sym<method> {
+        '.' <assertion>
+    }
+
+    token assertion:sym<name> {
+        $<longname>=[\w+]
+            [
+            | <?before '>'>
+            | '=' <assertion>
+            ]?
+        {*}
+    }

@@ -18,6 +18,12 @@
     .tailcall self.'!protoregex'('backslash', 'action'=>action)
 .end
 
+.sub 'assertion' :method
+    .param pmc action          :named('action') :optional
+    .param pmc dba             :named('dba') :optional
+    .tailcall self.'!protoregex'('assertion', 'action'=>action)
+.end
+
 .sub 'obs' :method
     .param string oldstr
     .param pmc action          :named('action') :optional
