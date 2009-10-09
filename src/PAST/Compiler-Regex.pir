@@ -697,8 +697,14 @@ second child of this node.
     .local pmc ireg
     ireg = self.'uniquereg'('I')
     if min == 0 goto frugal_1
-    unless needrep goto frugal_2
+    unless needrep goto frugal_0
     ops.'push_pirop'('set', rep, 0)
+  frugal_0:
+    if null seppost goto frugal_2
+    .local pmc seplabel
+    $S0 = concat qname, '_sep'
+    seplabel = self.'post_new'('Label', 'result'=>$S0)
+    ops.'push_pirop'('goto', seplabel)
     goto frugal_2
   frugal_1:
     ops.'push_pirop'('set_addr', '$I10', q1label)
@@ -706,6 +712,10 @@ second child of this node.
     ops.'push_pirop'('goto', q2label)
   frugal_2:
     ops.'push'(q1label)
+    if null seppost goto frugal_2a
+    ops.'push'(seppost)
+    ops.'push'(seplabel)
+  frugal_2a:
     unless needrep goto frugal_3
     ops.'push_pirop'('set', ireg, rep)
   frugal_3:
