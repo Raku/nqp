@@ -96,7 +96,7 @@ Return the POST representation of the regex AST rooted by C<node>.
     $P0 = self.'post_regex'(node)
     ops.'push'($P0)
     ops.'push'(faillabel)
-    self.'!cursorop'(ops, '!mark_fail', 3, rep, pos, '$I10')
+    self.'!cursorop'(ops, '!mark_fail', 3, rep, pos, '$I10', 0)
     ops.'push_pirop'('lt', pos, -1, donelabel)
     ops.'push_pirop'('eq', pos, -1, faillabel)
     ops.'push_pirop'('jump', '$I10')

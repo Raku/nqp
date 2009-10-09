@@ -195,35 +195,31 @@ the address of a label to branch to when backtracking occurs.)
 .end
 
 
-=item !mark_fail([tomark])
+=item !mark_peek(mark)
 
-Remove the most recent C<mark> and backtrack the cursor to the
-point given by that mark.  If no C<mark> is provided, then
-backtracks the most recent mark.  Returns the backtracked
-values of repetition count, cursor position, and mark (address).
+Return information about the latest frame for C<mark>.
+If C<mark> is zero, return information about the latest frame.
 
 =cut
 
-.sub '!mark_fail' :method
-    .param int tomark          :optional
-    .param int has_tomark      :opt_flag
+.sub '!mark_peek' :method
+    .param int tomark
 
     .local pmc bstack, mstack
     bstack = getattribute self, '@!bstack'
-    if null bstack goto cursor_fail
-    unless bstack goto cursor_fail
+    if null bstack goto no_mark
+    unless bstack goto no_mark
 
-    # get the frame associated with the mark
     .local int bptr
     bptr = elements bstack
 
   bptr_loop:
     bptr = bptr - 4
-    if bptr < 0 goto cursor_fail
+    if bptr < 0 goto no_mark
     .local int rep, pos, mark, mptr
     mark = bstack[bptr]
-    unless has_tomark goto bptr_done
-    if mark != tomark goto bptr_loop
+    unless tomark goto bptr_done
+    unless mark == tomark goto bptr_loop
   bptr_done:
     $I0  = bptr + 1
     pos  = bstack[$I0]
@@ -231,19 +227,33 @@ values of repetition count, cursor position, and mark (address).
     rep  = bstack[$I0]
     inc $I0
     mptr = bstack[$I0]
+    .return (rep, pos, mark, bptr, bstack, mptr)
 
-    # release the backtracked stack elements
+  no_mark:
+    .return (0, -2, 0, -4)
+.end
+
+
+=item !mark_fail(tomark)
+
+Remove the most recent C<mark> and backtrack the cursor to the
+point given by that mark.  If C<mark> is zero, then
+backtracks the most recent mark.  Returns the backtracked
+values of repetition count, cursor position, and mark (address).
+
+=cut
+
+.sub '!mark_fail' :method
+    .param int mark
+
+    .local int rep, pos, mark, bptr, mptr
+    .local pmc bstack
+    (rep, pos, mark, bptr, bstack) = self.'!mark_peek'(mark)
+
+    unless bptr >= 0 goto done
     assign bstack, bptr
-
-    # return mark values
+  done:
     .return (rep, pos, mark)
-
-  cursor_fail:
-    null $P0
-    setattribute self, '@!bstack', $P0
-    setattribute self, '@!mstack', $P0
-    setattribute self, '$!match', $P0
-    .return (0, -2, 0)
 .end
 
 
@@ -260,7 +270,7 @@ match state.
 
     # backtrack
     .local int rep, pos, mark
-    (rep, pos, mark, $P0) = self.'!mark_fail'(mark)
+    (rep, pos, mark) = self.'!mark_fail'(mark)
 
     .return (rep, pos, mark)
 .end
