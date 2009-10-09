@@ -59,6 +59,7 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
     token metachar:sym<assert> { 
         '<' <assertion> 
         [ '>' || <.panic: "regex assertion not terminated by angle bracket"> ]
+        {*}
     }
 
     # proto token backslash { <...> }
@@ -88,8 +89,8 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
         {*}
     }
 
-    token assertion:sym<[> { <?before '['> <cclass_elem>+ }
-    token assertion:sym<+> { <?before '+'|'-'> <cclass_elem>+ }
+    token assertion:sym<[> { <?before '['> <cclass_elem>+ {*} }
+    token assertion:sym<+> { <?before '+'|'-'> <cclass_elem>+ {*} }
 
     token cclass_elem {
         $<sign>=['+'|'-'|<?>]
@@ -101,5 +102,6 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
           ']'
         | $<name>=[\w+]
         ]
+        {*}
     }
 

@@ -126,6 +126,10 @@ method metachar:sym<bs>($/) {
     make $<backslash>.ast;
 }
 
+method metachar:sym<assert>($/) {
+    make $<assertion>.ast;
+}
+
 method backslash:sym<w>($/) {
     my $subtype := ~$<sym> eq 'n' ?? 'nl' !! ~$<sym>;
     my $past := PAST::Regex.new( :pasttype('charclass'), :subtype($subtype) );
@@ -134,5 +138,40 @@ method backslash:sym<w>($/) {
 
 method backslash:sym<misc>($/) {
     my $past := PAST::Regex.new( ~$/ , :pasttype('literal') );
+    make $past;
+}
+
+method assertion:sym<[>($/) {
+    make $<cclass_elem>[0].ast;
+}
+
+method cclass_elem($/) {
+    my $str := '';
+    for $<charspec> {
+        if $_[1] {
+            my $a := $_[0];
+            my $b := $_[1][0];
+            my $c := Q:PIR {
+                         $P0 = find_lex '$a'
+                         $S0 = $P0
+                         $I0 = ord $S0
+                         $P1 = find_lex '$b'
+                         $S1 = $P1
+                         $I1 = ord $S1
+                         $S2 = ''
+                       cclass_loop:
+                         if $I0 > $I1 goto cclass_done
+                         $S0 = chr $I0
+                         $S2 .= $S0
+                         inc $I0
+                         goto cclass_loop
+                       cclass_done:
+                         %r = box $S2
+                     };
+            $str := $str ~ $c;            
+        }
+        else { $str := $str ~ $_[0]; }
+    }
+    my $past := PAST::Regex.new( $str, :pasttype('enumcharlist') );
     make $past;
 }

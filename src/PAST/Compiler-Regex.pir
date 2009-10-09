@@ -463,6 +463,35 @@ Handle a concatenation of regexes.
 .end
 
 
+=item enumcharlist(PAST::Regex node)
+
+Generate POST for matching a character from an enumerated
+character list.
+
+=cut
+
+.sub 'enumcharlist' :method :multi(_, ['PAST';'Regex'])
+    .param pmc node
+
+    .local pmc cur, tgt, pos, off, eos, fail, ops
+    (cur, tgt, pos, off, eos, fail) = self.'!rxregs'('cur tgt pos off eos fail')
+    ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
+
+    .local string charlist
+    charlist = node[0]
+
+    ops.'push_pirop'('inline', charlist, 'inline'=>'  # rx enumcharlist %0')
+    ops.'push_pirop'('ge', pos, eos, fail)
+    ops.'push_pirop'('sub', '$I10', pos, off)
+    ops.'push_pirop'('substr', '$S10', tgt, '$I10', 1)
+    $S0 = self.'escape'(charlist)
+    ops.'push_pirop'('index', '$I11', $S0, '$S10')
+    ops.'push_pirop'('lt', '$I11', 0, fail)
+    ops.'push_pirop'('inc', pos)
+    .return (ops)
+.end
+    
+
 =item literal(PAST::Regex node)
 
 Generate POST for matching a literal string provided as the
