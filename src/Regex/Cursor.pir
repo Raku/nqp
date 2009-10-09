@@ -180,18 +180,53 @@ the address of a label to branch to when backtracking occurs.)
     .param int pos
     .param int mark
 
-    .local pmc bstack, mstack
+    .local pmc bstack
     bstack = getattribute self, '@!bstack'
     unless null bstack goto have_bstack
     bstack = new ['ResizableIntegerArray']
     setattribute self, '@!bstack', bstack
   have_bstack:
 
+    # Determine the size (mptr) of the saved match stack (mstack)
+    # for the last mark.  If no matches have been saved,
+    # then mptr is -1.
+    .local int mptr
+    mptr = -1
+    $I0 = elements bstack
+    unless $I0 > 0 goto have_mptr
+    dec $I0
+    mptr = bstack[$I0]
+  have_mptr:
+
+    # Now see if we need to preserve the current match.
+    .local pmc match, mstack
+    match = getattribute self, '$!match'
+    # If there isn't a current match, we don't need to preserve it.
+    if null match goto mstack_done
+    # If no match stack has been created, do that now.
+    mstack = getattribute self, '@!mstack'
+    unless null match goto mstack_done
+    mstack = new ['ResizablePMCArray']
+    setattribute self, '@!mstack', mstack
+  have_mstack:
+    # If the current match is the same as the last saved match,
+    # we don't need a new entry on the stack.
+    if mptr < 0 goto mstack_set
+    $P0 = mstack[mptr]
+    $I1 = issame $P0, match
+    if $I1 goto mstack_done
+    # Put the current match object on the match stack and note
+    # its location in mptr.
+  mstack_set:
+    inc mptr
+    mstack[mptr] = match
+  mstack_done:
+
+    # Save our mark frame information.
     push bstack, mark
     push bstack, pos
     push bstack, rep
-    $I0 = -1
-    push bstack, $I0
+    push bstack, mptr
 .end
 
 
@@ -230,7 +265,7 @@ If C<mark> is zero, return information about the latest frame.
     .return (rep, pos, mark, bptr, bstack, mptr)
 
   no_mark:
-    .return (0, -2, 0, -4)
+    .return (0, -2, 0, -4, bstack, -1)
 .end
 
 
@@ -246,9 +281,28 @@ values of repetition count, cursor position, and mark (address).
 .sub '!mark_fail' :method
     .param int mark
 
+    # Get the frame information for C<mark>.
     .local int rep, pos, mark, bptr, mptr
     .local pmc bstack
-    (rep, pos, mark, bptr, bstack) = self.'!mark_peek'(mark)
+    (rep, pos, mark, bptr, bstack, mptr) = self.'!mark_peek'(mark)
+
+    # Now, restore the match object in effect at the time the mark was taken.
+    .local pmc match, mstack
+    null match
+    # If the mark frame's mptr is less than zero, the match object is null.
+    if mptr < 0 goto mstack_done
+    # Otherwise, retrieve the correct match object from @!mstack
+    mstack = getattribute self, '@!mstack'
+    if null mstack goto mstack_done
+    match = mstack[mptr]
+    # Adjust mstack to the size needed by the next lowest mark frame.
+    if bptr <= 0 goto mstack_done
+    $I0 = bptr - 1
+    $I1 = bstack[$I0]
+    inc $I1
+    assign mstack, $I1
+  mstack_done:
+    setattribute self, '$!match', match
 
     unless bptr >= 0 goto done
     assign bstack, bptr
