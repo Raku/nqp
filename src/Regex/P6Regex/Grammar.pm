@@ -44,9 +44,10 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
     token quantifier:sym<+> { $<sym>=['+'] <quantmod> {*} }
     token quantifier:sym<?> { $<sym>=['?'] <quantmod> {*} }
     token quantifier:sym<**> { 
-        $<sym>=['**'] <quantmod>
+        $<sym>=['**'] \s* <quantmod> \s*
         [
-        | $<min>=[\d+] [ '..' $<max>=[\d+|'*'] ]?
+        || $<min>=[\d+] [ '..' $<max>=[\d+|'*'] ]?
+        || <quantified_atom>
         ]
         {*}
     }
@@ -109,7 +110,7 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
         [
         | '[' $<charspec>=(
                   | '-' <.obs: "hyphen in enumerated character class;..">
-                  | [ \\ (.) | (<-[\]]>) ] [ '..' (.) ]?
+                  | [ \\ (.) | (<-[\]\\]>) ] [ '..' (.) ]?
               )*
           ']'
         | $<name>=[\w+]

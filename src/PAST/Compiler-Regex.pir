@@ -632,6 +632,13 @@ second child of this node.
     q2label = self.'post_new'('Label', 'result'=>$S0)
     cpost = self.'concat'(node)
 
+    .local pmc seppast, seppost
+    null seppost
+    seppast = node.'sep'()
+    unless seppast goto have_seppost
+    seppost = self.'post_regex'(seppast)
+  have_seppost:
+
     $S0 = max
     .local int needrep
     $I0 = isgt min, 1
@@ -675,6 +682,9 @@ second child of this node.
   greedy_4:
     unless max != 1 goto greedy_5
     self.'!cursorop'(ops, '!mark_push', 0, rep, pos, btreg)
+    if null seppost goto greedy_4a
+    ops.'push'(seppost)
+  greedy_4a:
     ops.'push_pirop'('goto', q1label)
   greedy_5:
     ops.'push'(q2label)

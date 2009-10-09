@@ -55,6 +55,13 @@ for regular expressions.
 .end
 
 
+.sub 'sep' :method
+    .param pmc value           :optional
+    .param int has_value       :opt_flag
+    .tailcall self.'attr'('sep', value, has_value)
+.end
+
+
 .sub 'subtype' :method
     .param pmc value           :optional
     .param int has_value       :opt_flag

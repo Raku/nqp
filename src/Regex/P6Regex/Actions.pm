@@ -75,9 +75,15 @@ method quantifier:sym<?>($/) {
 
 method quantifier:sym<**>($/) {
     my $past := $<quantmod>.ast;
-    $past.min(+$<min>);
-    if ! $<max> { $past.max(+$<min>); }
-    elsif $<max>[0] ne '*' { $past.max(+$<max>[0]); }
+    if $<quantified_atom> {
+        $past.min(1);
+        $past.sep($<quantified_atom>.ast);
+    }
+    else {
+        $past.min(+$<min>);
+        if ! $<max> { $past.max(+$<min>); }
+        elsif $<max>[0] ne '*' { $past.max(+$<max>[0]); }
+    }
     make $past;
 }
 
