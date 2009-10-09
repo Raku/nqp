@@ -477,16 +477,16 @@ character list.
 
     .local string charlist
     charlist = node[0]
+    charlist = self.'escape'(charlist)
     .local pmc negate, testop
     negate = node.'negate'()
     testop = self.'??!!'(negate, 'ge', 'lt')
 
-    ops.'push_pirop'('inline', charlist, negate, 'inline'=>'  # rx enumcharlist %0 negate=%1')
+    ops.'push_pirop'('inline', negate, 'inline'=>'  # rx enumcharlist negate=%0')
     ops.'push_pirop'('ge', pos, eos, fail)
     ops.'push_pirop'('sub', '$I10', pos, off)
     ops.'push_pirop'('substr', '$S10', tgt, '$I10', 1)
-    $S0 = self.'escape'(charlist)
-    ops.'push_pirop'('index', '$I11', $S0, '$S10')
+    ops.'push_pirop'('index', '$I11', charlist, '$S10')
     ops.'push_pirop'(testop, '$I11', 0, fail)
     ops.'push_pirop'('inc', pos)
     .return (ops)

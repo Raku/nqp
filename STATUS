@@ -1,4 +1,4 @@
-2009-10-08:  
+2009-10-09:  
 
 At the moment, nqp-rx is configured to build an executable called
 "p6regex", which is a Perl 6 regular expression compiler for Parrot.
@@ -41,7 +41,7 @@ The key files for the p6regex compiler are:
     src/Regex/P6Regex/Actions.pm     # actions to create PAST from parse
 
 
-Things that work (2009-10-08, 22h23 UTC):
+Things that work (2009-10-09, 08h07 UTC):
 
 * bare literal strings
 * quantifiers  *, +, ?, *:, +:, ?:, *?, +?, ??, *!, +!, ?!
@@ -52,4 +52,6 @@ Things that work (2009-10-08, 22h23 UTC):
 * anchors ^, ^^, $, $$, <<, >>
 * backslash-quoted punctuation
 * #-comments (mostly)
-* obsolete backslash sequences \A \Z \z \Q \E
+* obsolete backslash sequences \A \Z \z \Q
+* \b, \B, \e, \E, \f, \F, \h, \H, \r, \R, \t, \T, \v, \V
+* enumerated character lists <[ab0..9]>

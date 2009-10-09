@@ -64,10 +64,16 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
 
     # proto token backslash { <...> }
     token backslash:sym<w> { $<sym>:=[<[dswnDSWN]>] {*} }
+    token backslash:sym<b> { $<sym>:=[<[bB]>] {*} }
+    token backslash:sym<e> { $<sym>:=[<[eE]>] {*} }
+    token backslash:sym<f> { $<sym>:=[<[fF]>] {*} }
+    token backslash:sym<h> { $<sym>:=[<[hH]>] {*} }
+    token backslash:sym<r> { $<sym>:=[<[rR]>] {*} }
+    token backslash:sym<t> { $<sym>:=[<[tT]>] {*} }
+    token backslash:sym<v> { $<sym>:=[<[vV]>] {*} }
     token backslash:sym<A> { 'A' <.obs: '\\A as beginning-of-string matcher;^'> }
     token backslash:sym<z> { 'z' <.obs: '\\z as end-of-string matcher;$'> }
     token backslash:sym<Z> { 'Z' <.obs: '\\Z as end-of-string matcher;\\n?$'> }
-    token backslash:sym<E> { 'E' <.obs: '\\E as quotemeta;quotes or literal variable match'> }
     token backslash:sym<Q> { 'Q' <.obs: '\\Q as quotemeta;quotes or literal variable match'> }
     token backslash:sym<misc> { \W {*} }
 

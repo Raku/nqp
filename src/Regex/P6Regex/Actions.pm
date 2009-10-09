@@ -136,6 +136,49 @@ method backslash:sym<w>($/) {
     make $past;
 }
 
+method backslash:sym<b>($/) {
+    my $past := PAST::Regex.new( "\b", :pasttype('enumcharlist'),
+                    :negate($<sym> eq 'B'));
+    make $past;
+}
+
+method backslash:sym<e>($/) {
+    my $past := PAST::Regex.new( "\e", :pasttype('enumcharlist'),
+                    :negate($<sym> eq 'E'));
+    make $past;
+}
+
+method backslash:sym<f>($/) {
+    my $past := PAST::Regex.new( "\f", :pasttype('enumcharlist'), 
+                    :negate($<sym> eq 'F'));
+    make $past;
+}
+
+method backslash:sym<h>($/) {
+    my $past := PAST::Regex.new( "\x[09,20,a0,1680,180e,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,200a,202f,205f,3000]", :pasttype('enumcharlist'),
+                    :negate($<sym> eq 'H'));
+    make $past;
+}
+
+method backslash:sym<r>($/) {
+    my $past := PAST::Regex.new( "\r", :pasttype('enumcharlist'), 
+                    :negate($<sym> eq 'R'));
+    make $past;
+}
+
+method backslash:sym<t>($/) {
+    my $past := PAST::Regex.new( "\t", :pasttype('enumcharlist'), 
+                    :negate($<sym> eq 'T'));
+    make $past;
+}
+
+method backslash:sym<v>($/) {
+    my $past := PAST::Regex.new( "\x[0a,0b,0c,0d,85,2028,2029]", :pasttype('enumcharlist'),
+                    :negate($<sym> eq 'V'));
+    make $past;
+}
+
+
 method backslash:sym<misc>($/) {
     my $past := PAST::Regex.new( ~$/ , :pasttype('literal') );
     make $past;
@@ -173,6 +216,6 @@ method cclass_elem($/) {
         else { $str := $str ~ $_[0]; }
     }
     my $past := PAST::Regex.new( $str, :pasttype('enumcharlist') );
-    if $<sign> eq '-' { $past.negate(1); }
+    $past.negate( $<sign> eq '-' );
     make $past;
 }
