@@ -27,6 +27,13 @@ for regular expressions.
 .end
 
 
+.sub 'negate' :method
+    .param pmc value           :optional
+    .param int has_value       :opt_flag
+    .tailcall self.'attr'('negate', value, has_value)
+.end
+
+
 .sub 'min' :method
     .param pmc value           :optional
     .param int has_value       :opt_flag

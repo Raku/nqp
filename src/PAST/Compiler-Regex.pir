@@ -188,7 +188,7 @@ given, then "concat" is assumed.
 
 =cut
 
-.sub 'post_regex' :method :multi(_,['PAST';'Regex'])
+.sub 'post_regex' :method :multi(_, ['PAST';'Regex'])
     .param pmc node
     .param string cur          :optional
     .param int have_cur        :opt_flag
@@ -394,12 +394,10 @@ Match something in a character class, such as \w, \d, \s, dot, etc.
     ops.'push_pirop'('ge', pos, eos, fail)
     if subtype == '.' goto charclass_done
 
-    .local string cctest
-    cctest = 'eq'
+    .local pmc cctest
     $S0 = downcase subtype
-    if subtype == $S0 goto have_cctest
-    cctest = 'ne'
-  have_cctest:
+    $I0 = iseq subtype, $S0
+    cctest = self.'??!!'($I0, 'eq', 'ne')
 
     if $S0 == 'd' goto cclass_digit
     if $S0 == 's' goto cclass_space
@@ -479,14 +477,17 @@ character list.
 
     .local string charlist
     charlist = node[0]
+    .local pmc negate, testop
+    negate = node.'negate'()
+    testop = self.'??!!'(negate, 'ge', 'lt')
 
-    ops.'push_pirop'('inline', charlist, 'inline'=>'  # rx enumcharlist %0')
+    ops.'push_pirop'('inline', charlist, negate, 'inline'=>'  # rx enumcharlist %0 negate=%1')
     ops.'push_pirop'('ge', pos, eos, fail)
     ops.'push_pirop'('sub', '$I10', pos, off)
     ops.'push_pirop'('substr', '$S10', tgt, '$I10', 1)
     $S0 = self.'escape'(charlist)
     ops.'push_pirop'('index', '$I11', $S0, '$S10')
-    ops.'push_pirop'('lt', '$I11', 0, fail)
+    ops.'push_pirop'(testop, '$I11', 0, fail)
     ops.'push_pirop'('inc', pos)
     .return (ops)
 .end
@@ -763,6 +764,25 @@ Helper method to create a new POST node of C<type>.
     $P0 = get_hll_global ['POST'], type
     .tailcall $P0.'new'(args :flat, options :flat :named)
 .end
+
+=item ??!!(test, trueval, falseval)
+
+Helper method to perform ternary operation -- returns C<trueval> 
+if C<test> is true, C<falseval> otherwise.
+
+=cut
+
+.sub '??!!' :method
+    .param pmc test
+    .param pmc trueval
+    .param pmc falseval
+
+    if test goto true
+    .return (falseval)
+  true:
+    .return (trueval)
+.end
+    
 
 =back
 

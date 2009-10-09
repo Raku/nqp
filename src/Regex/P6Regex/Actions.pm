@@ -173,5 +173,6 @@ method cclass_elem($/) {
         else { $str := $str ~ $_[0]; }
     }
     my $past := PAST::Regex.new( $str, :pasttype('enumcharlist') );
+    if $<sign> eq '-' { $past.negate(1); }
     make $past;
 }

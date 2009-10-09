@@ -89,8 +89,7 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
         {*}
     }
 
-    token assertion:sym<[> { <?before '['> <cclass_elem>+ {*} }
-    token assertion:sym<+> { <?before '+'|'-'> <cclass_elem>+ {*} }
+    token assertion:sym<[> { <?before '['|'+'|'-'> <cclass_elem>+ {*} }
 
     token cclass_elem {
         $<sign>=['+'|'-'|<?>]
