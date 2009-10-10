@@ -19,7 +19,7 @@ grammars.
     load_bytecode 'P6object.pbc'
     .local pmc p6meta
     p6meta = new 'P6metaclass'
-    $P0 = p6meta.'new_class'('Regex::Cursor', 'attr'=>'$!target $!from $!pos $!match $!action @!bstack @!mstack')
+    $P0 = p6meta.'new_class'('Regex::Cursor', 'attr'=>'$!target $!from $!pos $!match $!action @!bstack @!cstack')
     $P0 = box 0
     set_global '$!generation', $P0
     .return ()
@@ -177,54 +177,46 @@ the address of a label to branch to when backtracking occurs.)
     .param int rep
     .param int pos
     .param int mark
+    .param pmc subcur          :optional
+    .param int has_subcur      :opt_flag
 
+    # cptr contains the desired number of elements in the cstack
+    .local int cptr
+    cptr = 0
+
+    # Initialize bstack if needed, and set cptr to be the cstack
+    # size requested by the top frame.
     .local pmc bstack
     bstack = getattribute self, '@!bstack'
-    unless null bstack goto have_bstack
+    if null bstack goto bstack_new
+    unless bstack goto bstack_done
+    $I0 = elements bstack
+    dec $I0
+    cptr = bstack[$I0]
+    goto bstack_done
+  bstack_new:
     bstack = new ['ResizableIntegerArray']
     setattribute self, '@!bstack', bstack
-  have_bstack:
+  bstack_done:
 
-    # Determine the size (mptr) of the saved match stack (mstack)
-    # for the last mark.  If no matches have been saved,
-    # then mptr is -1.
-    .local int mptr
-    mptr = -1
-    $I0 = elements bstack
-    unless $I0 > 0 goto have_mptr
-    dec $I0
-    mptr = bstack[$I0]
-  have_mptr:
-
-    # Now see if we need to preserve the current match.
-    .local pmc match, mstack
-    match = getattribute self, '$!match'
-    # If there isn't a current match, we don't need to preserve it.
-    if null match goto mstack_done
-    # If no match stack has been created, do that now.
-    mstack = getattribute self, '@!mstack'
-    unless null match goto mstack_done
-    mstack = new ['ResizablePMCArray']
-    setattribute self, '@!mstack', mstack
-  have_mstack:
-    # If the current match is the same as the last saved match,
-    # we don't need a new entry on the stack.
-    if mptr < 0 goto mstack_set
-    $P0 = mstack[mptr]
-    $I1 = issame $P0, match
-    if $I1 goto mstack_done
-    # Put the current match object on the match stack and note
-    # its location in mptr.
-  mstack_set:
-    inc mptr
-    mstack[mptr] = match
-  mstack_done:
+    # If a new subcursor is being pushed, then save it in cstack
+    # and change cptr to include the new subcursor.
+    unless has_subcur goto subcur_done
+    .local pmc cstack
+    cstack = getattribute self, '@!cstack'
+    unless null cstack goto have_cstack
+    cstack = new ['ResizablePMCArray']
+    setattribute self, '@!cstack', cstack
+  have_cstack:
+    cstack[cptr] = subcur
+    inc cptr
+  subcur_done:
 
     # Save our mark frame information.
     push bstack, mark
     push bstack, pos
     push bstack, rep
-    push bstack, mptr
+    push bstack, cptr
 .end
 
 
@@ -238,7 +230,7 @@ If C<mark> is zero, return information about the latest frame.
 .sub '!mark_peek' :method
     .param int tomark
 
-    .local pmc bstack, mstack
+    .local pmc bstack
     bstack = getattribute self, '@!bstack'
     if null bstack goto no_mark
     unless bstack goto no_mark
@@ -249,7 +241,7 @@ If C<mark> is zero, return information about the latest frame.
   bptr_loop:
     bptr = bptr - 4
     if bptr < 0 goto no_mark
-    .local int rep, pos, mark, mptr
+    .local int rep, pos, mark, cptr
     mark = bstack[bptr]
     unless tomark goto bptr_done
     unless mark == tomark goto bptr_loop
@@ -259,11 +251,11 @@ If C<mark> is zero, return information about the latest frame.
     inc $I0
     rep  = bstack[$I0]
     inc $I0
-    mptr = bstack[$I0]
-    .return (rep, pos, mark, bptr, bstack, mptr)
+    cptr = bstack[$I0]
+    .return (rep, pos, mark, bptr, bstack, cptr)
 
   no_mark:
-    .return (0, -2, 0, -4, bstack, -1)
+    .return (0, -2, 0, 0, bstack, 0)
 .end
 
 
@@ -280,29 +272,11 @@ values of repetition count, cursor position, and mark (address).
     .param int mark
 
     # Get the frame information for C<mark>.
-    .local int rep, pos, mark, bptr, mptr
+    .local int rep, pos, mark, bptr, cptr
     .local pmc bstack
-    (rep, pos, mark, bptr, bstack, mptr) = self.'!mark_peek'(mark)
+    (rep, pos, mark, bptr, bstack, cptr) = self.'!mark_peek'(mark)
 
-    # Now, restore the match object in effect at the time the mark was taken.
-    .local pmc match, mstack
-    null match
-    # If the mark frame's mptr is less than zero, the match object is null.
-    if mptr < 0 goto mstack_done
-    # Otherwise, retrieve the correct match object from @!mstack
-    mstack = getattribute self, '@!mstack'
-    if null mstack goto mstack_done
-    match = mstack[mptr]
-    # Adjust mstack to the size needed by the next lowest mark frame.
-    if bptr <= 0 goto mstack_done
-    $I0 = bptr - 1
-    $I1 = bstack[$I0]
-    inc $I1
-    assign mstack, $I1
-  mstack_done:
-    setattribute self, '$!match', match
-
-    unless bptr >= 0 goto done
+    if null bstack goto done
     assign bstack, bptr
   done:
     .return (rep, pos, mark)
