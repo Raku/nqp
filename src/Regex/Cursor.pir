@@ -276,10 +276,33 @@ values of repetition count, cursor position, and mark (address).
     .local pmc bstack
     (rep, pos, mark, bptr, bstack, cptr) = self.'!mark_peek'(mark)
 
+    .local pmc subcur
+    null subcur
+
+    # If there's no bstack, there's nothing else to do.
     if null bstack goto done
+
+    # If there's a subcursor associated with this mark, return it.
+    unless cptr > 0 goto cstack_done
+    .local pmc cstack
+    cstack = getattribute self, '@!cstack'
+    dec cptr
+    subcur = cstack[cptr]
+    # Set the cstack to the size requested by the soon-to-be-top mark frame.
+    unless bptr > 0 goto cstack_zero
+    $I0 = bptr - 1
+    $I0 = bstack[$I0]
+    assign cstack, $I0
+    goto cstack_done
+  cstack_zero:
+    assign cstack, 0
+  cstack_done:
+
+    # Pop the current mark frame and all above it.
     assign bstack, bptr
+
   done:
-    .return (rep, pos, mark)
+    .return (rep, pos, mark, subcur)
 .end
 
 
