@@ -75,6 +75,7 @@ Return the POST representation of the regex AST rooted by C<node>.
     concat $S0, tgt
     concat $S0, ')'
     ops.'push_pirop'('callmethod', '"!cursor_start"', 'self', 'result'=>$S0)
+    ops.'push_pirop'('.lex', 'unicode:"$\x{a2}"', cur)
     ops.'push_pirop'('length', eos, tgt, 'result'=>eos)
 
     # On Parrot, indexing into variable-width encoded strings 
@@ -561,7 +562,7 @@ second child of this node.
     pos = self.'!rxregs'('pos')
     $S0 = concat pos, " :named('pos')"
     self.'!cursorop'(ops, '!matchify', 0, $S0)
-    ops.'push_pirop'('yield', cur)
+    ops.'push_pirop'('return', cur)
     .return (ops)
 .end
 
@@ -766,6 +767,44 @@ Code for initial regex scan.
     ops.'push_pirop'('set_addr', '$I10', looplabel)
     self.'!cursorop'(ops, '!mark_push', 0, 0, pos, '$I10')
     ops.'push'(donelabel)
+    .return (ops)
+.end
+
+
+=item subrule(PAST::Regex node)
+
+Perform a subrule call.
+
+=cut
+
+.sub 'subrule' :method :multi(_, ['PAST';'Regex'])
+    .param pmc node
+
+    .local pmc cur, pos, fail, ops
+    (cur, pos, fail) = self.'!rxregs'('cur pos fail')
+    ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
+
+    .local pmc name, negate
+    $P0 = node.'name'()
+    name = self.'as_post'($P0, 'rtype'=>'~')
+    ops.'push'(name)
+
+    .local pmc negate
+    .local string testop
+    negate = node.'negate'()
+    testop = self.'??!!'(negate, 'if', 'unless')
+
+    .local pmc zerowidth
+    zerowidth = node.'zerowidth'()
+
+    ops.'push_pirop'('inline', name, negate, zerowidth, 'inline'=>"  # rx subrule %0 negate=%1 zerowidth=%2")
+
+    self.'!cursorop'(ops, '!cursor_pos', 0, pos)
+    ops.'push_pirop'('callmethod', name, cur, 'result'=>'$P10')
+    ops.'push_pirop'(testop, '$P10', fail)
+    if zerowidth goto done
+    ops.'push_pirop'('callmethod', "'pos'", '$P10', 'result'=>pos)
+  done:
     .return (ops)
 .end
 

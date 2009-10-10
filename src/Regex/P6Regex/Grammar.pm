@@ -87,8 +87,8 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
 
     # proto token assertion { <...> }
 
-    token assertion:sym<?> { '?' [ <?before '>' > | <assertion> ] }
-    token assertion:sym<!> { '!' [ <?before '>' > | <assertion> ] }
+    token assertion:sym<?> { '?' [ <?before '>' > | <assertion> ] {*} }
+    token assertion:sym<!> { '!' [ <?before '>' > | <assertion> ] {*} }
 
     token assertion:sym<method> {
         '.' <assertion>

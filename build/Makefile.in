@@ -54,6 +54,7 @@ P6REGEX_SOURCES = \
   src/PAST/Regex.pir \
   src/PAST/Compiler-Regex.pir \
   src/Regex/Cursor.pir \
+  src/Regex/Cursor-builtins.pir \
   src/Regex/Match.pir \
   src/Regex/Dumper.pir \
 

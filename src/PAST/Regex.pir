@@ -69,6 +69,13 @@ for regular expressions.
 .end
 
 
+.sub 'zerowidth' :method
+    .param pmc value           :optional
+    .param int has_value       :opt_flag
+    .tailcall self.'attr'('zerowidth', value, has_value)
+.end
+
+
 =item peek()
 
 Returns the prefixes associated with the regex tree rooted

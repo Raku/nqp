@@ -141,10 +141,8 @@ Create and initialize a new cursor from C<self>.
 
     .local pmc from, pos, target, action
     from = getattribute self, '$!pos'
-    from = clone from
     setattribute cur, '$!from', from
-    pos = clone from
-    setattribute cur, '$!pos', pos
+    setattribute cur, '$!pos', from
 
     target = getattribute self, '$!target'
     setattribute cur, '$!target', target

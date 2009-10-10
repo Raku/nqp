@@ -198,6 +198,25 @@ method backslash:sym<misc>($/) {
     make $past;
 }
 
+
+method assertion:sym<?>($/) {
+    my $past := $<assertion>.ast;
+    $past.zerowidth(1);
+    make $past;
+}
+
+method assertion:sym<!>($/) {
+    my $past := $<assertion>.ast;
+    $past.negate( !$past.negate );
+    $past.zerowidth(1);
+    make $past;
+}
+
+method assertion:sym<name>($/) {
+    my $past := PAST::Regex.new( :name(~$<longname>) , :pasttype('subrule') );
+    make $past;
+}
+
 method assertion:sym<[>($/) {
     make $<cclass_elem>[0].ast;
 }
