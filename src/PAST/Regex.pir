@@ -27,6 +27,13 @@ for regular expressions.
 .end
 
 
+.sub 'bindnames' :method
+    .param pmc value           :optional
+    .param int has_value       :opt_flag
+    .tailcall self.'attr'('bindnames', value, has_value)
+.end
+
+
 .sub 'negate' :method
     .param pmc value           :optional
     .param int has_value       :opt_flag

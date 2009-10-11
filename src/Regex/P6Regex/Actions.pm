@@ -213,7 +213,8 @@ method assertion:sym<!>($/) {
 }
 
 method assertion:sym<name>($/) {
-    my $past := PAST::Regex.new( :name(~$<longname>) , :pasttype('subrule') );
+    my $past := PAST::Regex.new( :name(~$<longname>) , :pasttype('subrule'),
+                                 :bindnames(~$<longname>) );
     make $past;
 }
 

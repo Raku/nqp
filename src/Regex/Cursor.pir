@@ -19,7 +19,7 @@ grammars.
     load_bytecode 'P6object.pbc'
     .local pmc p6meta
     p6meta = new 'P6metaclass'
-    $P0 = p6meta.'new_class'('Regex::Cursor', 'attr'=>'$!target $!from $!pos $!match $!action @!bstack @!cstack')
+    $P0 = p6meta.'new_class'('Regex::Cursor', 'attr'=>'$!target $!from $!pos $!match $!action $!names @!bstack @!cstack')
     $P0 = box 0
     set_global '$!generation', $P0
     $P0 = new ['Boolean']
@@ -46,15 +46,37 @@ for the Cursor if one hasn't been created yet.
     $I0 = isa match, ['Regex';'Match']
     if $I0 goto match_done
 
+    # First, create a Match object and bind it
   match_make:
     match = new ['Regex';'Match']
     setattribute self, '$!match', match
-    $P0 = getattribute self, '$!target'
-    setattribute match, '$!target', $P0
-    $P0 = getattribute self, '$!from'
-    setattribute match, '$!from', $P0
-    $P0 = getattribute self, '$!pos'
-    setattribute match, '$!to', $P0
+    .local pmc target, from, to
+    target = getattribute self, '$!target'
+    setattribute match, '$!target', target
+    from = getattribute self, '$!from'
+    setattribute match, '$!from', from
+    to = getattribute self, '$!pos'
+    setattribute match, '$!to', to
+
+    # If it's not a successful match, or if there are
+    # no saved subcursors, we're done.
+    if to < from goto match_done
+    .local pmc cstack, cstack_it
+    cstack = getattribute self, '@!cstack'
+    if null cstack goto cstack_done
+    unless cstack goto cstack_done
+    cstack_it = iter cstack
+  cstack_loop:
+    unless cstack_it goto cstack_done
+    .local pmc subcur, subnames, submatch
+    subcur = shift cstack_it
+    # If the subcursor isn't bound with a name, skip it
+    subnames = getattribute subcur, '$!names'
+    if null subnames goto cstack_loop
+    match = subcur.'MATCH'()
+    match[subnames] = submatch
+    goto cstack_loop
+  cstack_done:
 
   match_done:
     .return (match)
@@ -198,6 +220,18 @@ with a "real" Match object when requested.
     self.'!reduce'(name)
   done:
     .return (self)
+.end
+
+
+=item !cursor_names(names)
+
+Set the Cursor's name (for binding) to names.
+
+=cut
+
+=sub '!cursor_names' :method
+    .param pmc names
+    setattribute self, '$!names', names
 .end
 
 

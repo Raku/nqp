@@ -783,7 +783,7 @@ Perform a subrule call.
     (cur, pos, fail) = self.'!rxregs'('cur pos fail')
     ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
 
-    .local pmc name, negate
+    .local pmc name
     $P0 = node.'name'()
     name = self.'as_post'($P0, 'rtype'=>'~')
     ops.'push'(name)
@@ -796,13 +796,25 @@ Perform a subrule call.
     .local pmc zerowidth
     zerowidth = node.'zerowidth'()
 
+    .local pmc bindpast, bindpost
+    bindpast = node.'bindnames'()
+    unless bindpast goto bindpost_done
+    bindpost = self.'as_post'(bindpast, 'rtype'=>'*')
+  bindpost_done:
+
     ops.'push_pirop'('inline', name, negate, zerowidth, 'inline'=>"  # rx subrule %0 negate=%1 zerowidth=%2")
 
     self.'!cursorop'(ops, '!cursor_pos', 0, pos)
     ops.'push_pirop'('callmethod', name, cur, 'result'=>'$P10')
     ops.'push_pirop'(testop, '$P10', fail)
-    if zerowidth goto done
+    unless bindpast goto bindnames_done
+    ops.'push'(bindpost)
+    self.'!cursorop'(ops, '!cursor_names', 0, bindpost)
+  bindnames_done:
+    if zerowidth goto zerowidth_done
     ops.'push_pirop'('callmethod', "'pos'", '$P10', 'result'=>pos)
+  zerowidth_done:
+
   done:
     .return (ops)
 .end
