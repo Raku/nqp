@@ -41,7 +41,7 @@ Return the POST representation of the regex AST rooted by C<node>.
     .local string prefix, rname, rtype
     prefix = self.'unique'('rx')
     concat prefix, '_'
-    $P0 = split ' ', 'tgt string pos int off int eos int rep int cur pmc act pmc'
+    $P0 = split ' ', 'tgt string pos int off int eos int rep int cur pmc'
     $P1 = iter $P0
   iter_loop:
     unless $P1 goto iter_done
@@ -73,7 +73,7 @@ Return the POST representation of the regex AST rooted by C<node>.
     concat $S0, pos
     concat $S0, ', '
     concat $S0, tgt
-    concat $S0, ')'
+    concat $S0, ', $I10)'
     ops.'push_pirop'('callmethod', '"!cursor_start"', 'self', 'result'=>$S0)
     ops.'push_pirop'('.lex', 'unicode:"$\x{a2}"', cur)
     ops.'push_pirop'('length', eos, tgt, 'result'=>eos)
@@ -84,26 +84,26 @@ Return the POST representation of the regex AST rooted by C<node>.
     # to utf8_skip_forward).  For regexes that are starting a match 
     # at a position other than the beginning of the string (e.g.,
     # a subrule call), we can save a lot of useless scanning work
-    # in utf8_skip_forward by removing the first C<off = pos-1> 
+    # in utf8_skip_forward by removing the first C<off = from-1> 
     # characters from the target and then performing all indexed
     # operations on the resulting target relative to C<off>.
     
     ops.'push_pirop'('set', off, 0)
-    ops.'push_pirop'('lt', pos, 2, startlabel)
-    ops.'push_pirop'('sub', off, pos, 1, 'result'=>off)
+    ops.'push_pirop'('lt', '$I10', 2, startlabel)
+    ops.'push_pirop'('sub', off, '$I10', 1, 'result'=>off)
     ops.'push_pirop'('substr', tgt, tgt, off, 'result'=>tgt)
     ops.'push'(startlabel)
 
     $P0 = self.'post_regex'(node)
     ops.'push'($P0)
     ops.'push'(faillabel)
-    self.'!cursorop'(ops, '!mark_fail', 3, rep, pos, '$I10', 0)
+    self.'!cursorop'(ops, '!mark_fail', 4, rep, pos, '$I10', '$P10', 0)
     ops.'push_pirop'('lt', pos, -1, donelabel)
     ops.'push_pirop'('eq', pos, -1, faillabel)
     ops.'push_pirop'('jump', '$I10')
     ops.'push'(donelabel)
+    self.'!cursorop'(ops, '!cursor_fail', 0)
     ops.'push_pirop'('return', cur)
-    ops.'push_pirop'('goto', donelabel)
     .return (ops)
 .end
 
@@ -560,8 +560,7 @@ second child of this node.
     .local string cur, pos
     cur = ops.'result'()
     pos = self.'!rxregs'('pos')
-    $S0 = concat pos, " :named('pos')"
-    self.'!cursorop'(ops, '!matchify', 0, $S0)
+    self.'!cursorop'(ops, '!cursor_pass', 0, pos, '""')
     ops.'push_pirop'('return', cur)
     .return (ops)
 .end

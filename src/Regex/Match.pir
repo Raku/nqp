@@ -122,10 +122,10 @@ otherwise returns 0 (false).
 =cut
 
 .sub '' :vtable('get_bool') :method
+    $P0 = getattribute self, '$!from'
     $P1 = getattribute self, '$!to'
-    $I0 = $P1
-    $I1 = isge $I0, 0
-    .return ($I1)
+    $I0 = isge $P1, $P0
+    .return ($I0)
 .end
 
 

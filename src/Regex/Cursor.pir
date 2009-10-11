@@ -22,6 +22,9 @@ grammars.
     $P0 = p6meta.'new_class'('Regex::Cursor', 'attr'=>'$!target $!from $!pos $!match $!action @!bstack @!cstack')
     $P0 = box 0
     set_global '$!generation', $P0
+    $P0 = new ['Boolean']
+    assign $P0, 1
+    set_global '$!TRUE', $P0
     .return ()
 .end
 
@@ -31,26 +34,29 @@ grammars.
 
 =item MATCH()
 
-Return this cursor's current Match object.  If it doesn't have one,
-create one.
+Return this cursor's current Match object, generating a new one
+for the Cursor if one hasn't been created yet.
 
 =cut
 
 .sub 'MATCH' :method
     .local pmc match
     match = getattribute self, '$!match'
-    unless null match goto have_match
+    if null match goto match_make
+    $I0 = isa match, ['Regex';'Match']
+    if $I0 goto match_done
 
+  match_make:
     match = new ['Regex';'Match']
     setattribute self, '$!match', match
     $P0 = getattribute self, '$!target'
     setattribute match, '$!target', $P0
     $P0 = getattribute self, '$!from'
     setattribute match, '$!from', $P0
-    $P0 = box -1
+    $P0 = getattribute self, '$!pos'
     setattribute match, '$!to', $P0
 
-  have_match:
+  match_done:
     .return (match)
 .end
 
@@ -149,7 +155,49 @@ Create and initialize a new cursor from C<self>.
     action = getattribute self, '$!action'
     setattribute cur, '$!action', action
 
-    .return (cur, from, target)
+    .return (cur, from, target, from)
+.end
+
+
+=item !cursor_fail(pos)
+
+Permanently fail this cursor.
+
+=cut
+
+.sub '!cursor_fail' :method
+    .local pmc pos
+    pos = box -2
+    setattribute self, '$!pos', pos
+    null $P0
+    setattribute self, '$!match', $P0
+    setattribute self, '@!bstack', $P0
+    setattribute self, '@!cstack', $P0
+.end
+
+
+=item !cursor_pass(pos, name)
+
+Set the Cursor as passing at C<pos>; calling any reduction action
+C<name> associated with the cursor.  This method simply sets
+C<$!match> to a boolean true value to indicate the regex was
+successful; the C<MATCH> method above replaces this boolean true
+with a "real" Match object when requested.
+
+=cut
+
+.sub '!cursor_pass' :method
+    .param pmc pos
+    .param string name
+
+    setattribute self, '$!pos', pos
+    .local pmc match
+    match = get_global '$!TRUE'
+    setattribute self, '$!match', match
+    unless name goto done
+    self.'!reduce'(name)
+  done:
+    .return (self)
 .end
 
 
@@ -322,42 +370,6 @@ match state.
     (rep, pos, mark) = self.'!mark_fail'(mark)
 
     .return (rep, pos, mark)
-.end
-
-
-=item !matchify([name] [, 'pos'=>pos])
-
-Generate a successful match at pos.
-
-=cut
-
-.sub '!matchify' :method
-    .param string name         :optional
-    .param int has_name        :opt_flag
-    .param pmc pos             :named('pos') :optional
-    .param int has_pos         :opt_flag
-
-    unless has_pos goto pos_0
-    setattribute self, '$!pos', pos
-    goto pos_done
-  pos_0:
-    pos = getattribute self, '$!pos'
-  pos_done:
-
-    .local pmc match
-    match = self.'MATCH'()
-    setattribute match, '$!to', pos
-
-    .local pmc action
-    unless has_name goto action_done
-    action = getattribute self, '$!action'
-    if null action goto action_done
-    $P0 = find_method action, name
-    if null $P0 goto action_done
-    action.$P0(match)
-  action_done:
-
-    .return (match)
 .end
 
 
@@ -650,6 +662,27 @@ called C<name>.
     $S0 = concat name, '.toklen'
     prototable[$S0] = toklen
     .return (tokrx, toklen)
+.end
+
+
+=item !reduce(name)
+
+Perform any action associated with the current regex match.
+
+=cut
+
+.sub '!reduce' :method
+    .param string name
+    .local pmc action
+    action = getattribute self, '$!action'
+    if null action goto action_done
+    $P0 = find_method action, name
+    if null $P0 goto action_done
+    .local pmc match
+    match = self.'MATCH'()
+    $P1 = action.$P0(match)
+  action_done:
+    .return ($P1)
 .end
 
 
