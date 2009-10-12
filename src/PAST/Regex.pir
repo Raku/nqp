@@ -28,6 +28,13 @@ for regular expressions.
 .end
 
 
+.sub 'capnames' :method
+    .param pmc value           :optional
+    .param int has_value       :opt_flag
+    .tailcall self.'attr'('capnames', value, has_value)
+.end
+
+
 .sub 'negate' :method
     .param pmc value           :optional
     .param int has_value       :opt_flag
