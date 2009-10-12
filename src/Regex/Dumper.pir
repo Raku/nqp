@@ -3,7 +3,7 @@
 
 =head1 TITLE
 
-Regex::Dumper - various methods for displaying PGE structures
+Regex::Dumper - various methods for displaying Match structures
 
 =head2 C<Regex::Match> Methods
 
@@ -159,7 +159,7 @@ An alternate dump output for a Match object and all of its subcaptures.
     goto subrules_1
 
   dumper:
-    $I0 = isa $P0, ['PGE';'Match']
+    $I0 = isa $P0, ['Regex';'Match']
     unless $I0 goto dumper_0
     $S0 = $P0.'dump_str'(prefix1, b1, b2)
     out .= $S0

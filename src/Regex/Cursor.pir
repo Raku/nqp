@@ -73,7 +73,7 @@ for the Cursor if one hasn't been created yet.
     # If the subcursor isn't bound with a name, skip it
     subnames = getattribute subcur, '$!names'
     if null subnames goto cstack_loop
-    match = subcur.'MATCH'()
+    submatch = subcur.'MATCH'()
     match[subnames] = submatch
     goto cstack_loop
   cstack_done:
@@ -229,7 +229,7 @@ Set the Cursor's name (for binding) to names.
 
 =cut
 
-=sub '!cursor_names' :method
+.sub '!cursor_names' :method
     .param pmc names
     setattribute self, '$!names', names
 .end

@@ -21,13 +21,25 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     $I0 = is_cclass cclass, tgt, pos
     unless $I0 goto fail
     inc pos
-    cur.'!matchify'(name, 'pos'=>pos)
+    cur.'!cursor_pass'(pos, name)
   fail:
     .return (cur)
 .end
 
 .sub 'alpha' :method
-    .tailcall self.'!cclass'('alpha', .CCLASS_ALPHABETIC)
+    .local pmc cur
+    .local int pos
+    .local string tgt
+    (cur, pos, tgt) = self.'!cursor_start'()
+    $I0 = is_cclass .CCLASS_ALPHABETIC, tgt, pos
+    if $I0 goto pass
+    $S0 = substr tgt, pos, 1
+    if $S0 != '_' goto fail
+  pass:
+    inc pos
+    cur.'!cursor_pass'(pos, 'alpha')
+  fail:
+    .return (cur)
 .end
 
 .sub 'digit' :method

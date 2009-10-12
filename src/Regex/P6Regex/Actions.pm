@@ -201,20 +201,25 @@ method backslash:sym<misc>($/) {
 
 method assertion:sym<?>($/) {
     my $past := $<assertion>.ast;
-    $past.zerowidth(1);
+    $past.subtype('zerowidth');
     make $past;
 }
 
 method assertion:sym<!>($/) {
     my $past := $<assertion>.ast;
     $past.negate( !$past.negate );
-    $past.zerowidth(1);
+    $past.subtype('zerowidth');
+    make $past;
+}
+
+method assertion:sym<method>($/) {
+    my $past := $<assertion>.ast;
+    $past.subtype('method');
     make $past;
 }
 
 method assertion:sym<name>($/) {
-    my $past := PAST::Regex.new( :name(~$<longname>) , :pasttype('subrule'),
-                                 :bindnames(~$<longname>) );
+    my $past := PAST::Regex.new( :name(~$<longname>) , :pasttype('subrule') );
     make $past;
 }
 

@@ -793,28 +793,19 @@ Perform a subrule call.
     negate = node.'negate'()
     testop = self.'??!!'(negate, 'if', 'unless')
 
-    .local pmc zerowidth
-    zerowidth = node.'zerowidth'()
+    .local pmc subtype
+    subtype = node.'subtype'()
 
-    .local pmc bindpast, bindpost
-    bindpast = node.'bindnames'()
-    unless bindpast goto bindpost_done
-    bindpost = self.'as_post'(bindpast, 'rtype'=>'*')
-  bindpost_done:
-
-    ops.'push_pirop'('inline', name, negate, zerowidth, 'inline'=>"  # rx subrule %0 negate=%1 zerowidth=%2")
+    ops.'push_pirop'('inline', name, subtype, negate, 'inline'=>"  # rx subrule %0 subtype=%1 negate=%2")
 
     self.'!cursorop'(ops, '!cursor_pos', 0, pos)
     ops.'push_pirop'('callmethod', name, cur, 'result'=>'$P10')
     ops.'push_pirop'(testop, '$P10', fail)
-    unless bindpast goto bindnames_done
-    ops.'push'(bindpost)
-    self.'!cursorop'(ops, '!cursor_names', 0, bindpost)
-  bindnames_done:
-    if zerowidth goto zerowidth_done
-    ops.'push_pirop'('callmethod', "'pos'", '$P10', 'result'=>pos)
-  zerowidth_done:
-
+    if subtype == 'zerowidth' goto done
+    ops.'push_pirop'('callmethod', '"pos"', '$P10', 'result'=>pos)
+    self.'!cursorop'(ops, '!mark_push', 0, 0, -1, 0, '$P10')
+    if subtype == 'method' goto done
+    ops.'push_pirop'('callmethod', '"!cursor_names"', '$P10', name)
   done:
     .return (ops)
 .end

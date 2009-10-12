@@ -91,7 +91,7 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
     token assertion:sym<!> { '!' [ <?before '>' > | <assertion> ] {*} }
 
     token assertion:sym<method> {
-        '.' <assertion>
+        '.' <assertion> {*}
     }
 
     token assertion:sym<name> {

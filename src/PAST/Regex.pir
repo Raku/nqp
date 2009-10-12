@@ -20,17 +20,11 @@ for regular expressions.
     p6meta.'new_class'('PAST::Regex', 'parent'=>'PAST::Node')
 .end
 
+
 .sub 'backtrack' :method
     .param pmc value           :optional
     .param int has_value       :opt_flag
     .tailcall self.'attr'('backtrack', value, has_value)
-.end
-
-
-.sub 'bindnames' :method
-    .param pmc value           :optional
-    .param int has_value       :opt_flag
-    .tailcall self.'attr'('bindnames', value, has_value)
 .end
 
 
