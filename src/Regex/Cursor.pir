@@ -19,7 +19,7 @@ grammars.
     load_bytecode 'P6object.pbc'
     .local pmc p6meta
     p6meta = new 'P6metaclass'
-    $P0 = p6meta.'new_class'('Regex::Cursor', 'attr'=>'$!target $!from $!pos $!match $!action $!names @!bstack @!cstack')
+    $P0 = p6meta.'new_class'('Regex::Cursor', 'attr'=>'$!target $!from $!pos $!match $!action $!names @!bstack @!cstack @!caparray')
     $P0 = box 0
     set_global '$!generation', $P0
     $P0 = new ['Boolean']
@@ -58,6 +58,21 @@ for the Cursor if one hasn't been created yet.
     to = getattribute self, '$!pos'
     setattribute match, '$!to', to
 
+    # Create any arrayed subcaptures.
+    .local pmc caparray, caparray_it, caphash
+    caparray = getattribute self, '@!caparray'
+    if null caparray goto caparray_done
+    caparray_it = iter caparray
+    caphash = new ['Hash']
+  caparray_loop:
+    unless caparray_it goto caparray_done
+    $P0 = shift caparray_it
+    $P1 = new ['ResizablePMCArray']
+    match[$P0] = $P1
+    caphash[$P0] = $P1
+    goto caparray_loop
+  caparray_done:
+
     # If it's not a successful match, or if there are
     # no saved subcursors, we're done.
     if to < from goto match_done
@@ -74,6 +89,13 @@ for the Cursor if one hasn't been created yet.
     subnames = getattribute subcur, '$!names'
     if null subnames goto cstack_loop
     submatch = subcur.'MATCH'()
+    if null caparray goto cstack_bind
+    $I0 = exists caphash[subnames]
+    unless $I0 goto cstack_bind
+    $P0 = match[subnames]
+    push $P0, submatch
+    goto cstack_loop
+  cstack_bind:
     match[subnames] = submatch
     goto cstack_loop
   cstack_done:
@@ -223,9 +245,21 @@ with a "real" Match object when requested.
 .end
 
 
+=item !cursor_caparray(caparray :slurpy)
+
+Set the list of subcaptures that produce arrays to C<caparray>.
+
+=cut
+
+.sub '!cursor_caparray' :method
+    .param pmc caparray        :slurpy
+    setattribute self, '@!caparray', caparray
+.end
+
+
 =item !cursor_names(names)
 
-Set the Cursor's name (for binding) to names.
+Set the Cursor's name (for binding) to C<names>.
 
 =cut
 
@@ -404,62 +438,6 @@ match state.
     (rep, pos, mark) = self.'!mark_fail'(mark)
 
     .return (rep, pos, mark)
-.end
-
-
-=item !match_arrays(names :slurpy)
-
-Bind submatches C<names> of the current Match object to arrays.
-
-=cut
-
-.sub '!match_arrays' :method
-    .param pmc names           :slurpy
-
-    .local pmc match, names_it
-    match = self.'MATCH'()
-    names_it = iter names
-  names_loop:
-    unless names_it goto names_done
-    $P0 = shift names_it
-    $P1 = new ['ResizablePMCArray']
-    match[$P0] = $P1
-    goto names_loop
-  names_done:
-.end
-
-
-=item !match_bind(bindval, names :slurpy)
-
-Bind C<bindval>'s match object as submatches of the current cursor
-under C<names>.
-
-=cut
-
-.sub '!match_bind' :method
-    .param pmc bindval
-    .param pmc names           :slurpy
-
-    .local pmc match, names_it
-    match = self.'MATCH'()
-    $I0 = isa bindval, ['Regex';'Cursor']
-    unless $I0 goto have_bindval
-    bindval = bindval.'MATCH'()
-  have_bindval:
-    names_it = iter names
-  names_loop:
-    unless names_it goto names_done
-    $P0 = shift names_it
-    $P1 = match[$P0]
-    if null $P1 goto bind_1
-    $I0 = isa $P1, ['ResizablePMCArray']
-    unless $I0 goto bind_1
-    push $P1, bindval
-    goto names_loop
-  bind_1:
-    match[$P0] = bindval
-    goto names_loop
-  names_done:
 .end
 
 

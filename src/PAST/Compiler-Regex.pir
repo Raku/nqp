@@ -54,20 +54,38 @@ Return the POST representation of the regex AST rooted by C<node>.
     goto iter_loop
   iter_done:
 
-
-    .local pmc faillabel
-    $S0 = concat prefix, 'fail'
-    faillabel = self.'post_new'('Label', 'result'=>$S0)
-    reghash['fail'] = faillabel
-
-    .local string cur, rep, pos, tgt, off, eos
-    (cur, rep, pos, tgt, off, eos) = self.'!rxregs'('cur rep pos tgt off eos')
-
-    .local pmc startlabel, donelabel
+    .local pmc startlabel, donelabel, faillabel
     $S0 = concat prefix, 'start'
     startlabel = self.'post_new'('Label', 'result'=>$S0)
     $S0 = concat prefix, 'done'
     donelabel = self.'post_new'('Label', 'result'=>$S0)
+    $S0 = concat prefix, 'fail'
+    faillabel = self.'post_new'('Label', 'result'=>$S0)
+    reghash['fail'] = faillabel
+
+    # If capnames is available, it's a hash where each key is the
+    # name of a potential subcapture and the value is greater than 1
+    # if it's to be an array.  This builds a list of arrayed subcaptures
+    # for use by "!cursor_caparray" below.
+    .local pmc capnames, capnames_it, caparray
+    capnames = node.'capnames'()
+    caparray = box 0
+    unless capnames goto capnames_done
+    capnames_it = iter capnames
+    caparray = new ['ResizablePMCArray']
+  capnames_loop:
+    unless capnames_it goto capnames_done
+    $S0 = shift capnames_it
+    $I0 = capnames[$S0]
+    unless $I0 > 1 goto capnames_loop
+    $S0 = self.'escape'($S0)
+    push caparray, $S0
+    goto capnames_loop
+  capnames_done:
+
+    .local string cur, rep, pos, tgt, off, eos
+    (cur, rep, pos, tgt, off, eos) = self.'!rxregs'('cur rep pos tgt off eos')
+
     $S0 = concat '(', cur
     concat $S0, ', '
     concat $S0, pos
@@ -75,6 +93,10 @@ Return the POST representation of the regex AST rooted by C<node>.
     concat $S0, tgt
     concat $S0, ', $I10)'
     ops.'push_pirop'('callmethod', '"!cursor_start"', 'self', 'result'=>$S0)
+    unless caparray goto caparray_skip
+    self.'!cursorop'(ops, '!cursor_caparray', 0, caparray :flat)
+  caparray_skip:
+
     ops.'push_pirop'('.lex', 'unicode:"$\x{a2}"', cur)
     ops.'push_pirop'('length', eos, tgt, 'result'=>eos)
 
