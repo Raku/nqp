@@ -229,32 +229,38 @@ method assertion:sym<[>($/) {
 
 method cclass_elem($/) {
     my $str := '';
-    for $<charspec> {
-        if $_[1] {
-            my $a := $_[0];
-            my $b := $_[1][0];
-            my $c := Q:PIR {
-                         $P0 = find_lex '$a'
-                         $S0 = $P0
-                         $I0 = ord $S0
-                         $P1 = find_lex '$b'
-                         $S1 = $P1
-                         $I1 = ord $S1
-                         $S2 = ''
-                       cclass_loop:
-                         if $I0 > $I1 goto cclass_done
-                         $S0 = chr $I0
-                         $S2 .= $S0
-                         inc $I0
-                         goto cclass_loop
-                       cclass_done:
-                         %r = box $S2
-                     };
-            $str := $str ~ $c;            
+    my $past;
+    if $<name> {
+        $past := PAST::Regex.new( :name(~$<name>), :pasttype('subrule'),
+                                  :subtype('method') );
+    } else {
+        for $<charspec> {
+            if $_[1] {
+                my $a := $_[0];
+                my $b := $_[1][0];
+                my $c := Q:PIR {
+                             $P0 = find_lex '$a'
+                             $S0 = $P0
+                             $I0 = ord $S0
+                             $P1 = find_lex '$b'
+                             $S1 = $P1
+                             $I1 = ord $S1
+                             $S2 = ''
+                           cclass_loop:
+                             if $I0 > $I1 goto cclass_done
+                             $S0 = chr $I0
+                             $S2 .= $S0
+                             inc $I0
+                             goto cclass_loop
+                           cclass_done:
+                             %r = box $S2
+                         };
+                $str := $str ~ $c;            
+            }
+            else { $str := $str ~ $_[0]; }
         }
-        else { $str := $str ~ $_[0]; }
+        $past := PAST::Regex.new( $str, :pasttype('enumcharlist') );
     }
-    my $past := PAST::Regex.new( $str, :pasttype('enumcharlist') );
     $past.negate( $<sign> eq '-' );
     make $past;
 }
