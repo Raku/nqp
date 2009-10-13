@@ -177,6 +177,9 @@ method metachar:sym<var>($/) {
             $past.subtype('capture');
             $past.name($name); 
         }
+        else {
+            $past := PAST::Regex.new( $past, :name($name), :pasttype('subcapture'));
+        }
     }
     else {
         $past := PAST::Regex.new( '!BACKREF', $name, :pasttype('subrule'),
@@ -348,6 +351,11 @@ sub capnames($ast, $count) {
         }
         elsif $ast.name eq '0' || $ast.name > 0 { $count := $ast.name + 1; }
         %capnames{$ast.name} := 1;
+    }
+    elsif $pasttype eq 'subcapture' {
+        if $ast.name eq '0' || $ast.name > 0 { $count := $ast.name + 1; }
+        my %x := capnames($ast[0], $count);
+        $count := %x{''};
     }
     elsif $pasttype eq 'quant' {
         my %astcap := capnames($ast[0], $count);

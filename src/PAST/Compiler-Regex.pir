@@ -792,6 +792,55 @@ Code for initial regex scan.
 .end
 
 
+=item subcapture(PAST::Regex node)
+
+Perform a subcapture (capture of a portion of a regex).
+
+=cut
+
+.sub 'subcapture' :method :multi(_, ['PAST';'Regex'])
+    .param pmc node
+
+    .local pmc cur, pos, tgt, fail
+    (cur, pos, tgt, fail) = self.'!rxregs'('cur pos tgt fail')
+    .local pmc ops, cpast, cpost
+    ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
+    cpast = node[0]
+    cpost = self.'post_regex'(cpast)
+
+    .local pmc name
+    $P0 = node.'name'()
+    name = self.'as_post'($P0, 'rtype'=>'*')
+
+    .local string rxname 
+    rxname = self.'unique'('rxcap_')
+
+    .local pmc caplabel, donelabel
+    $S0 = concat rxname, '_fail'
+    caplabel = self.'post_new'('Label', 'result'=>$S0)
+    $S0 = concat rxname, '_done'
+    donelabel = self.'post_new'('Label', 'result'=>$S0)
+
+    ops.'push_pirop'('inline', name, 'inline'=>'  # rx subcapture %0')
+    ops.'push_pirop'('set_addr', '$I10', caplabel)
+    self.'!cursorop'(ops, '!mark_push', 0, 0, pos, '$I10')
+    ops.'push'(cpost)
+    ops.'push_pirop'('set_addr', '$I10', caplabel)
+    self.'!cursorop'(ops, '!mark_peek', 2, '$I12', '$I11', '$I10')
+    self.'!cursorop'(ops, '!cursor_pos', 0, '$I11')
+    self.'!cursorop'(ops, '!cursor_start', 1, '$P10')
+    ops.'push_pirop'('callmethod', '"!cursor_pass"', '$P10', pos, '""')
+    ops.'push'(name)
+    self.'!cursorop'(ops, '!mark_push', 0, 0, -1, 0, '$P10')
+    ops.'push_pirop'('callmethod', '"!cursor_names"', '$P10', name)
+    ops.'push_pirop'('goto', donelabel)
+    ops.'push'(caplabel)
+    ops.'push_pirop'('goto', fail)
+    ops.'push'(donelabel)
+    .return (ops)
+.end
+
+
 =item subrule(PAST::Regex node)
 
 Perform a subrule call.
@@ -808,7 +857,6 @@ Perform a subrule call.
     .local pmc name
     $P0 = node.'name'()
     name = self.'as_post'($P0, 'rtype'=>'*')
-    ops.'push'(name)
 
     .local pmc cpost, posargs, namedargs, subpost
     (cpost, posargs, namedargs) = self.'post_children'(node, 'signature'=>'v:')
@@ -832,6 +880,7 @@ Perform a subrule call.
     ops.'push_pirop'('callmethod', '"pos"', '$P10', 'result'=>pos)
     self.'!cursorop'(ops, '!mark_push', 0, 0, -1, 0, '$P10')
     if subtype == 'method' goto done
+    ops.'push'(name)
     ops.'push_pirop'('callmethod', '"!cursor_names"', '$P10', name)
   done:
     .return (ops)
