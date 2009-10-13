@@ -485,6 +485,24 @@ Handle a concatenation of regexes.
 .end
 
 
+=item cut(PAST::Regex node)
+
+Generate POST for the cut-group and cut-rule operators.
+
+=cut
+
+.sub 'cut' :method :multi(_, ['PAST';'Regex'])
+    .param pmc node
+
+    .local pmc cur, fail, ops
+    (cur, fail) = self.'!rxregs'('cur fail')
+    ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
+    ops.'push_pirop'('set_addr', '$I10', fail)
+    self.'!cursorop'(ops, '!mark_commit', 0, '$I10')
+    .return (ops)
+.end
+
+
 =item enumcharlist(PAST::Regex node)
 
 Generate POST for matching a character from an enumerated

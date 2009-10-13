@@ -42,7 +42,6 @@ method termish($/) {
             $lastlit := $ast.pasttype eq 'literal' ?? $ast !! 0;
         }
     }
-    if +$past.list == 1 { $past := $past[0]; }
     make $past;
 }
 
@@ -147,6 +146,11 @@ method metachar:sym<$>($/) {
 
 method metachar:sym<$$>($/) {
     my $past := PAST::Regex.new( :pasttype('anchor'), :subtype('eol') );
+    make $past;
+}
+
+method metachar:sym<:::>($/) {
+    my $past := PAST::Regex.new( :pasttype('cut') );
     make $past;
 }
 
