@@ -14,6 +14,7 @@ grammars.
 =cut
 
 .include 'cclass.pasm'
+.include 'src/Regex/constants.pir'
 
 .namespace ['Regex';'Cursor']
 
@@ -234,7 +235,7 @@ Permanently fail this cursor.
 
 .sub '!cursor_fail' :method
     .local pmc pos
-    pos = box -2
+    pos = box CURSOR_FAIL_RULE
     setattribute self, '$!pos', pos
     null $P0
     setattribute self, '$!match', $P0
@@ -394,7 +395,7 @@ If C<mark> is zero, return information about the latest frame.
     .return (rep, pos, mark, bptr, bstack, cptr)
 
   no_mark:
-    .return (0, -2, 0, 0, bstack, 0)
+    .return (0, CURSOR_FAIL_GROUP, 0, 0, bstack, 0)
 .end
 
 
@@ -449,17 +450,47 @@ values of repetition count, cursor position, and mark (address).
 
 Like C<!mark_fail> above this backtracks the cursor to C<mark>
 (releasing any intermediate marks), but preserves the current 
-match state.
+capture states.
 
 =cut
 
 .sub '!mark_commit' :method
     .param int mark
 
-    # backtrack
-    .local int rep, pos, mark
-    (rep, pos, mark) = self.'!mark_fail'(mark)
+    # find mark
+    .local int rep, pos, mark, bptr, cptr
+    .local pmc bstack
+    (rep, pos, mark, bptr, bstack) = self.'!mark_peek'(mark)
 
+    # get current cstack size into cptr
+    if null bstack goto done
+    unless bstack goto done
+    $I0 = elements bstack
+    dec $I0
+    cptr = bstack[$I0]
+
+    # Pop the mark frame and everything above it.
+    assign bstack, bptr
+
+    # If we don't need to hold any cstack information, we're done.
+    unless cptr > 0 goto done
+
+    # If the top frame is an auto-fail frame, (re)use it to hold
+    # our needed cptr, otherwise create a new auto-fail frame to do it.
+    unless bptr > 0 goto cstack_push
+    $I0 = bptr - 3             # pos is at top-3
+    $I1 = bstack[$I0]
+    unless $I1 < 0 goto cstack_push
+    $I0 = bptr - 1             # cptr is at top-1
+    bstack[$I0] = cptr
+    goto done
+  cstack_push:
+    push bstack, 0             # mark
+    push bstack, CURSOR_FAIL   # pos
+    push bstack, 0             # rep
+    push bstack, cptr          # cptr
+
+  done:
     .return (rep, pos, mark)
 .end
 
