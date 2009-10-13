@@ -706,7 +706,7 @@ second child of this node.
   greedy_1:
     if min == 0 goto greedy_2
     unless needmark goto greedy_loop
-    self.'!cursorop'(ops, '!mark_push', 0, 0, -1, btreg)
+    self.'!cursorop'(ops, '!mark_push', 0, 0, CURSOR_FAIL, btreg)
     goto greedy_loop
   greedy_2:
     self.'!cursorop'(ops, '!mark_push', 0, 0, pos, btreg)
@@ -850,7 +850,7 @@ Perform a subcapture (capture of a portion of a regex).
     self.'!cursorop'(ops, '!cursor_start', 1, '$P10')
     ops.'push_pirop'('callmethod', '"!cursor_pass"', '$P10', pos, '""')
     ops.'push'(name)
-    self.'!cursorop'(ops, '!mark_push', 0, 0, -1, 0, '$P10')
+    self.'!cursorop'(ops, '!mark_push', 0, 0, CURSOR_FAIL, 0, '$P10')
     ops.'push_pirop'('callmethod', '"!cursor_names"', '$P10', name)
     ops.'push_pirop'('goto', donelabel)
     ops.'push'(caplabel)
@@ -897,7 +897,7 @@ Perform a subrule call.
     ops.'push_pirop'(testop, '$P10', fail)
     if subtype == 'zerowidth' goto done
     ops.'push_pirop'('callmethod', '"pos"', '$P10', 'result'=>pos)
-    self.'!cursorop'(ops, '!mark_push', 0, 0, -1, 0, '$P10')
+    self.'!cursorop'(ops, '!mark_push', 0, 0, CURSOR_FAIL, 0, '$P10')
     if subtype == 'method' goto done
     ops.'push'(name)
     ops.'push_pirop'('callmethod', '"!cursor_names"', '$P10', name)
