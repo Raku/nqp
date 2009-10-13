@@ -81,6 +81,9 @@ src/gen/p6regex-actions.pir: $(NQP) src/Regex/P6Regex/Actions.pm
 test: all
 	prove -r t
 
+test_loud: all
+	prove -r -v t
+
 ## cleaning
 clean:
 	$(RM_F) $(CLEANUPS)
