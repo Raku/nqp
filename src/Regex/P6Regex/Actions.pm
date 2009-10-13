@@ -168,6 +168,19 @@ method metachar:sym<assert>($/) {
     make $<assertion>.ast;
 }
 
+method metachar:sym<var>($/) {
+    my $past;
+    my $name := $<pos> ?? +$<pos> !! ~$<name>;
+    if $<quantified_atom> {
+        $past := $<quantified_atom>[0].ast;
+        if $past.pasttype eq 'subrule' { 
+            $past.subtype('capture');
+            $past.name($name); 
+        }
+    }
+    make $past;
+}
+
 method backslash:sym<w>($/) {
     my $subtype := ~$<sym> eq 'n' ?? 'nl' !! ~$<sym>;
     my $past := PAST::Regex.new( :pasttype('charclass'), :subtype($subtype) );
@@ -329,6 +342,7 @@ sub capnames($ast, $count) {
             $ast.name($count);
             $count := $count + 1;
         }
+        elsif $ast.name eq '0' || $ast.name > 0 { $count := $ast.name + 1; }
         %capnames{$ast.name} := 1;
     }
     elsif $pasttype eq 'quant' {

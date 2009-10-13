@@ -71,6 +71,16 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
         {*}
     }
 
+    token metachar:sym<var> {
+        [ 
+        | '$<' $<name>=[<-[>]>+] '>' 
+        | '$' $<pos>=[\d+]
+        ]
+
+        [ <.ws> '=' <.ws> <quantified_atom> ]?
+        {*}
+    }
+
     # proto token backslash { <...> }
     token backslash:sym<w> { $<sym>=[<[dswnDSWN]>] {*} }
     token backslash:sym<b> { $<sym>=[<[bB]>] {*} }
