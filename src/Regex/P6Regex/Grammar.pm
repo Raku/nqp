@@ -56,6 +56,7 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
 
     # proto token metachar { <...> }
     token metachar:sym<[ ]> { '[' <nibbler> ']' {*} }
+    token metachar:sym<( )> { '(' <nibbler> ')' {*} }
     token metachar:sym<.> { $<sym>=['.'] {*} }
     token metachar:sym<^> { $<sym>=['^'] {*} }
     token metachar:sym<^^> { $<sym>=['^^'] {*} }

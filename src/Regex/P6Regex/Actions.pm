@@ -1,14 +1,17 @@
 class Regex::P6Regex::Actions;
 
 method TOP($/) {
-    my $regex := PAST::Regex.new(
+    my $rpast := $<nibbler>.ast;
+    my %capnames := capnames($rpast, 0);
+    %capnames{''} := 0;
+    $rpast := PAST::Regex.new(
         PAST::Regex.new( :pasttype('scan') ),
-        $<nibbler>.ast,
+        $rpast,
         PAST::Regex.new( :pasttype('pass') ),
         :pasttype('concat'),
-        :capnames($<nibbler>.ast.capnames)
+        :capnames(%capnames)
     );
-    my $past := PAST::Block.new( $regex, :blocktype('method') );
+    my $past := PAST::Block.new( $rpast, :blocktype('method') );
     make $past;
 }
 
@@ -16,19 +19,9 @@ method nibbler($/) {
     my $past;
     if +$<termish> > 1 {
         $past := PAST::Regex.new( :pasttype('alt') );
-        my %capnames;
         for $<termish> { 
             $past.push($_.ast); 
-            my $astcap := $_.ast.capnames;
-            if $astcap {
-                for $astcap {
-                    %capnames{$_} := %capnames{$_} == 1 && $astcap{$_} == 1
-                                     ?? 1
-                                     !! $astcap{$_};
-                }
-            }
         }
-        if %capnames { $past.capnames(%capnames); }
     }
     else {
         $past := $<termish>[0].ast;
@@ -39,7 +32,6 @@ method nibbler($/) {
 method termish($/) {
     my $past := PAST::Regex.new( :pasttype('concat') );
     my $lastlit := 0;
-    my %capnames;
     for $<noun> {
         my $ast := $_.ast;
         if $lastlit && $ast.pasttype eq 'literal' {
@@ -48,16 +40,9 @@ method termish($/) {
         else {
             $past.push($ast);
             $lastlit := $ast.pasttype eq 'literal' ?? $ast !! 0;
-            my $astcap := $ast.capnames;
-            if $astcap {
-                for $astcap {
-                    %capnames{$_} := +%capnames{$_} + $astcap{$_};
-                }
-            }
         }
     }
     if +$past.list == 1 { $past := $past[0]; }
-    elsif %capnames     { $past.capnames(%capnames) }
     make $past;
 }
 
@@ -65,13 +50,6 @@ method quantified_atom($/) {
     my $past := $<atom>.ast;
     if $<quantifier> {
        my $qast := $<quantifier>[0].ast;
-       if $past.capnames {
-           my %caphash;
-           for $past.capnames {
-               %caphash{$_} := 2;
-           }
-           $qast.capnames(%caphash);
-       }
        $qast.unshift($past);
        $past := $qast;
     }
@@ -128,6 +106,23 @@ method quantmod($/) {
 
 method metachar:sym<[ ]>($/) {
     make $<nibbler>.ast;
+}
+
+method metachar:sym<( )>($/) {
+    my $rpast := $<nibbler>.ast;
+    my %capnames := capnames($rpast, 0);
+    %capnames{''} := 0;
+    $rpast := PAST::Regex.new(
+        PAST::Regex.new( :pasttype('scan') ),
+        $rpast,
+        PAST::Regex.new( :pasttype('pass') ),
+        :pasttype('concat'),
+        :capnames(%capnames)
+    );
+    my $subpast := PAST::Block.new( $rpast, :blocktype('method') );
+    my $past := PAST::Regex.new( $subpast, :pasttype('subrule'),
+                                 :subtype('capture') );
+    make $past;
 }
 
 method metachar:sym<.>($/) {
@@ -231,7 +226,6 @@ method backslash:sym<misc>($/) {
 method assertion:sym<?>($/) {
     my $past := $<assertion>.ast;
     $past.subtype('zerowidth');
-    $past.capnames(0);
     make $past;
 }
 
@@ -239,23 +233,19 @@ method assertion:sym<!>($/) {
     my $past := $<assertion>.ast;
     $past.negate( !$past.negate );
     $past.subtype('zerowidth');
-    $past.capnames(0);
     make $past;
 }
 
 method assertion:sym<method>($/) {
     my $past := $<assertion>.ast;
     $past.subtype('method');
-    $past.capnames(0);
     make $past;
 }
 
 method assertion:sym<name>($/) {
     my $name := ~$<longname>;
-    my %capnames;
-    %capnames{$name} := 1;
-    my $past := PAST::Regex.new( :name($name) , :pasttype('subrule'),
-                                 :capnames(%capnames) );
+    my $past := PAST::Regex.new( $name, :name($name) , :pasttype('subrule'),
+                                 :subtype('capture') );
     make $past;
 }
 
@@ -267,8 +257,8 @@ method cclass_elem($/) {
     my $str := '';
     my $past;
     if $<name> {
-        $past := PAST::Regex.new( :name(~$<name>), :pasttype('subrule'),
-                                  :subtype('method') );
+        my $name := ~$<name>;
+        $past := PAST::Regex.new( $name, :pasttype('subrule'), :subtype('method') );
     } else {
         for $<charspec> {
             if $_[1] {
@@ -299,4 +289,48 @@ method cclass_elem($/) {
     }
     $past.negate( $<sign> eq '-' );
     make $past;
+}
+
+
+sub capnames($ast, $count) {
+    my %capnames;
+    my $pasttype := $ast.pasttype;
+    if $pasttype eq 'alt' {
+        my $max := $count;
+        for $ast.list {
+            my %x := capnames($_, $count);
+            for %x {
+                %capnames{$_} := +%capnames{$_} < 2 && %x{$_} == 1
+                                 ?? 1
+                                 !! 2;
+            }
+            if %x{''} > $max { $max := %x{''}; }
+        }
+        $count := $max;
+    }
+    elsif $pasttype eq 'concat' {
+        for $ast.list {
+            my %x := capnames($_, $count);
+            for %x {
+                %capnames{$_} := +%capnames{$_} + %x{$_};
+            }
+            $count := %x{''};
+        }
+    }
+    elsif $pasttype eq 'subrule' && $ast.subtype eq 'capture' {
+        if $ast.name eq '' { 
+            $ast.name($count);
+            $count := $count + 1;
+        }
+        %capnames{$ast.name} := 1;
+    }
+    elsif $pasttype eq 'quant' {
+        my %astcap := capnames($ast[0], $count);
+        for %astcap {
+            %capnames{$_} := 2;
+        }
+        $count := %astcap{''};
+    }
+    %capnames{''} := $count;
+    %capnames;
 }

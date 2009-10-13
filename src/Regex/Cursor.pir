@@ -13,6 +13,8 @@ grammars.
 
 =cut
 
+.include 'cclass.pasm'
+
 .namespace ['Regex';'Cursor']
 
 .sub '' :anon :load :init
@@ -66,11 +68,19 @@ for the Cursor if one hasn't been created yet.
     caphash = new ['Hash']
   caparray_loop:
     unless caparray_it goto caparray_done
-    $P0 = shift caparray_it
-    $P1 = new ['ResizablePMCArray']
-    match[$P0] = $P1
-    caphash[$P0] = $P1
+    .local string subname
+    .local pmc arr
+    .local int keyint
+    subname = shift caparray_it
+    arr = new ['ResizablePMCArray']
+    caphash[subname] = arr
+    keyint = is_cclass .CCLASS_NUMERIC, subname, 0
+    if keyint goto caparray_int
+    match[subname] = arr
     goto caparray_loop
+  caparray_int:
+    $I0 = subname
+    match[$I0] = arr
   caparray_done:
 
     # If it's not a successful match, or if there are
@@ -83,20 +93,33 @@ for the Cursor if one hasn't been created yet.
     cstack_it = iter cstack
   cstack_loop:
     unless cstack_it goto cstack_done
-    .local pmc subcur, subnames, submatch
+    .local pmc subcur, submatch
     subcur = shift cstack_it
     # If the subcursor isn't bound with a name, skip it
-    subnames = getattribute subcur, '$!names'
-    if null subnames goto cstack_loop
+    $P0 = getattribute subcur, '$!names'
+    if null $P0 goto cstack_loop
+    subname = $P0
     submatch = subcur.'MATCH'()
+    keyint = is_cclass .CCLASS_NUMERIC, subname, 0
     if null caparray goto cstack_bind
-    $I0 = exists caphash[subnames]
+    $I0 = exists caphash[subname]
     unless $I0 goto cstack_bind
-    $P0 = match[subnames]
+    if keyint goto cstack_array_int
+    $P0 = match[subname]
+    push $P0, submatch
+    goto cstack_loop
+  cstack_array_int:
+    $I0 = subname
+    $P0 = match[$I0]
     push $P0, submatch
     goto cstack_loop
   cstack_bind:
-    match[subnames] = submatch
+    if keyint goto cstack_bind_int
+    match[subname] = submatch
+    goto cstack_loop
+  cstack_bind_int:
+    $I0 = subname
+    match[$I0] = submatch
     goto cstack_loop
   cstack_done:
 

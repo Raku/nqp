@@ -807,8 +807,12 @@ Perform a subrule call.
 
     .local pmc name
     $P0 = node.'name'()
-    name = self.'as_post'($P0, 'rtype'=>'~')
+    name = self.'as_post'($P0, 'rtype'=>'*')
     ops.'push'(name)
+
+    .local pmc subpast, subpost
+    subpast = node[0]
+    subpost = self.'as_post'(subpast, 'rtype'=>'*')
 
     .local pmc negate
     .local string testop
@@ -821,7 +825,8 @@ Perform a subrule call.
     ops.'push_pirop'('inline', name, subtype, negate, 'inline'=>"  # rx subrule %0 subtype=%1 negate=%2")
 
     self.'!cursorop'(ops, '!cursor_pos', 0, pos)
-    ops.'push_pirop'('callmethod', name, cur, 'result'=>'$P10')
+    ops.'push'(subpost)
+    ops.'push_pirop'('callmethod', subpost, cur, 'result'=>'$P10')
     ops.'push_pirop'(testop, '$P10', fail)
     if subtype == 'zerowidth' goto done
     ops.'push_pirop'('callmethod', '"pos"', '$P10', 'result'=>pos)
