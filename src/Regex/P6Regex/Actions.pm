@@ -320,7 +320,8 @@ method assertion:sym<name>($/) {
 method assertion:sym<[>($/) {
     my $clist := $<cclass_elem>;
     my $past := $clist[0].ast;
-    if $past.negate {
+    if $past.negate && $past.pasttype eq 'subrule' {
+        $past.subtype('zerowidth');
         $past := PAST::Regex.new( 
                      $past, 
                      PAST::Regex.new( :pasttype('charclass'), :subtype('.') ) 
@@ -331,6 +332,7 @@ method assertion:sym<[>($/) {
     while $i < $n {
         my $ast := $clist[$i].ast;
         if $ast.negate {
+            $past.subtype('zerowidth');
             $past := PAST::Regex.new( $ast, $past, :pasttype('concat') );
         }
         else {
