@@ -277,9 +277,29 @@ method assertion:sym<name>($/) {
 }
 
 method assertion:sym<[>($/) {
-    make $<cclass_elem>[0].ast;
+    my $clist := $<cclass_elem>;
+    my $past := $clist[0].ast;
+    if $past.negate {
+        $past := PAST::Regex.new( 
+                     $past, 
+                     PAST::Regex.new( :pasttype('charclass'), :subtype('.') ) 
+                 );
+    }
+    my $i := 1;
+    my $n := +$clist;
+    while $i < $n {
+        my $ast := $clist[$i].ast;
+        if $ast.negate {
+            $past := PAST::Regex.new( $ast, $past, :pasttype('concat') );
+        }
+        else {
+            $past := PAST::Regex.new( $past, $ast, :pasttype('alt') );
+        }
+        $i := $i + 1;
+    }
+    make $past;
 }
-
+    
 method cclass_elem($/) {
     my $str := '';
     my $past;
