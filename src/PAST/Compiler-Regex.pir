@@ -24,6 +24,7 @@ Return the POST representation of the regex AST rooted by C<node>.
 =cut
 
 .include 'cclass.pasm'
+.include 'src/Regex/constants.pir'
 
 .namespace ['PAST';'Compiler']
 
@@ -120,8 +121,8 @@ Return the POST representation of the regex AST rooted by C<node>.
     ops.'push'($P0)
     ops.'push'(faillabel)
     self.'!cursorop'(ops, '!mark_fail', 4, rep, pos, '$I10', '$P10', 0)
-    ops.'push_pirop'('lt', pos, -1, donelabel)
-    ops.'push_pirop'('eq', pos, -1, faillabel)
+    ops.'push_pirop'('lt', pos, CURSOR_FAIL, donelabel)
+    ops.'push_pirop'('eq', pos, CURSOR_FAIL, faillabel)
     ops.'push_pirop'('jump', '$I10')
     ops.'push'(donelabel)
     self.'!cursorop'(ops, '!cursor_fail', 0)
