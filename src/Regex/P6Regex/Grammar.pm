@@ -11,6 +11,7 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
     }
 
     rule nibbler {
+        {*} #= open
         ['||'|'|'|'&&'|'&']?
         <termish> 
         [ ['||'|'|'] 
@@ -69,6 +70,7 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
     token metachar:sym<lwb> { $<sym>=['<<'|'«'] {*} }
     token metachar:sym<rwb> { $<sym>=['>>'|'»'] {*} }
     token metachar:sym<bs> { \\ <backslash> {*} }
+    token metachar:sym<mod> { <mod_internal> {*} }
     token metachar:sym<assert> { 
         '<' <assertion> 
         [ '>' || <.panic: "regex assertion not terminated by angle bracket"> ]
@@ -135,3 +137,8 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
         {*}
     }
 
+    token mod_internal { ':' $<n>=['!' | \d+]?  <mod_ident> » {*} }
+
+    token mod_ident:sym<ignorecase> { $<sym>=[i] 'gnorecase'? }
+    token mod_ident:sym<ratchet>    { $<sym>=[r] 'atchet'? }
+    token mod_ident:sym<sigspace>   { $<sym>=[s] 'igspace'? }

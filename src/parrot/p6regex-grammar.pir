@@ -24,6 +24,12 @@
     .tailcall self.'!protoregex'('assertion', 'action'=>action)
 .end
 
+.sub 'mod_ident' :method
+    .param pmc action          :named('action') :optional
+    .param pmc dba             :named('dba') :optional
+    .tailcall self.'!protoregex'('mod_ident', 'action'=>action)
+.end
+
 .sub 'obs' :method
     .param string oldstr
     .param pmc action          :named('action') :optional

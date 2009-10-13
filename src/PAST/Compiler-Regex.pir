@@ -328,6 +328,8 @@ Match various anchor points, including ^, ^^, $, $$.
 
     ops.'push_pirop'('inline', subtype, 'inline'=>'  # rxanchor %0')
 
+    if subtype == 'null' goto done
+    if subtype == 'fail' goto anchor_fail
     if subtype == 'bos' goto anchor_bos
     if subtype == 'eos' goto anchor_eos
     if subtype == 'lwb' goto anchor_lwb
@@ -342,6 +344,10 @@ Match various anchor points, including ^, ^^, $, $$.
     if subtype == 'eol' goto anchor_eol
 
     self.'panic'('Unrecognized subtype "', subtype, '" in PAST::Regex anchor node')
+
+  anchor_fail:
+    ops.'push_pirop'('goto', fail)
+    goto done
 
   anchor_bos:
     ops.'push_pirop'('ne', pos, 0, fail)

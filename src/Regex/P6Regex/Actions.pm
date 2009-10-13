@@ -1,5 +1,12 @@
 class Regex::P6Regex::Actions;
 
+## this will eventually be handled using contextuals
+our @MODIFIERS := Q:PIR { 
+        %r = new ['ResizablePMCArray'] 
+        $P0 = new ['Hash']
+        push %r, $P0
+    };
+
 method TOP($/) {
     my $rpast := $<nibbler>.ast;
     my %capnames := capnames($rpast, 0);
@@ -15,7 +22,18 @@ method TOP($/) {
     make $past;
 }
 
-method nibbler($/) {
+method nibbler($/, $key?) {
+    if $key eq 'open' {
+        my %old := @MODIFIERS[0];
+        my %new := Q:PIR {
+                       $P0 = find_lex '%old'
+                       %r = clone $P0
+                   };
+        @MODIFIERS.unshift(%new);
+        return 1;
+    }
+
+    @MODIFIERS.shift;
     my $past;
     if +$<termish> > 1 {
         $past := PAST::Regex.new( :pasttype('alt') );
@@ -166,6 +184,10 @@ method metachar:sym<rwb>($/) {
 
 method metachar:sym<bs>($/) {
     make $<backslash>.ast;
+}
+
+method metachar:sym<mod>($/) {
+    make $<mod_internal>.ast;
 }
 
 method metachar:sym<assert>($/) {
@@ -390,4 +412,11 @@ sub capnames($ast, $count) {
     }
     %capnames{''} := $count;
     %capnames;
+}
+
+method mod_internal($/) {
+    my %mods := @MODIFIERS[0];
+    %mods{ ~$<mod_ident><sym> } := 1;
+    my $past := PAST::Regex.new( :pasttype('anchor'), :subtype('null') );
+    make $past;
 }
