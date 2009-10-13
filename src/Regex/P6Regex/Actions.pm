@@ -121,7 +121,8 @@ method quantmod($/) {
     my $str := ~$/;
     if    $str eq ':' { $past.backtrack('r'); }
     elsif $str eq ':?' or $str eq '?' { $past.backtrack('f') }
-    elsif $str eq ':*' or $str eq '!' { $past.backtrack('g') }
+    elsif $str eq ':!' or $str eq '!' { $past.backtrack('g') }
+    elsif @MODIFIERS[0]<r>            { $past.backtrack('r') }
     make $past;
 }
 

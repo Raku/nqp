@@ -526,17 +526,20 @@ character list.
     .local string charlist
     charlist = node[0]
     charlist = self.'escape'(charlist)
-    .local pmc negate, testop
+    .local pmc subtype, negate, testop
+    subtype = node.'subtype'()
     negate = node.'negate'()
     testop = self.'??!!'(negate, 'ge', 'lt')
 
-    ops.'push_pirop'('inline', negate, 'inline'=>'  # rx enumcharlist negate=%0')
+    ops.'push_pirop'('inline', negate, subtype, 'inline'=>'  # rx enumcharlist negate=%0 %1')
     ops.'push_pirop'('ge', pos, eos, fail)
     ops.'push_pirop'('sub', '$I10', pos, off)
     ops.'push_pirop'('substr', '$S10', tgt, '$I10', 1)
     ops.'push_pirop'('index', '$I11', charlist, '$S10')
     ops.'push_pirop'(testop, '$I11', 0, fail)
+    if subtype == 'zerowidth' goto skip_zerowidth
     ops.'push_pirop'('inc', pos)
+  skip_zerowidth:
     .return (ops)
 .end
     
