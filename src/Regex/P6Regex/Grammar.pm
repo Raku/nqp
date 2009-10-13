@@ -1,12 +1,12 @@
 grammar Regex::P6Regex::Grammar is PCT::Grammar;
 
-    token ws { [ \s+ | '#' \N*\n ]* }
+    token ws { [ \s+ | '#' \N* ]* }
 
     token normspace { <?before \s | '#' > <.ws> }
 
     token TOP {
         <nibbler>
-        [ <.ws> $ || <.panic: "Syntax error"> ]
+        [ $ || <.panic: "Syntax error"> ]
         {*}
     }
 
@@ -21,15 +21,12 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
     }
 
     token termish {
-        <.ws>
         <noun=quantified_atom>+
         {*}
     }
 
     token quantified_atom {
-        <atom>
-	<.ws>
-        [ <quantifier> <.ws> ]?
+        <atom> [ <.ws> <quantifier> ]?
         {*}
     }
 
@@ -58,6 +55,7 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
     token quantmod { ':'? [ '?' | '!' | '+' ]? {*} }
 
     # proto token metachar { <...> }
+    token metachar:sym<ws> { <.normspace> {*} }
     token metachar:sym<[ ]> { '[' <nibbler> ']' {*} }
     token metachar:sym<( )> { '(' <nibbler> ')' {*} }
     token metachar:sym<.> { $<sym>=['.'] {*} }

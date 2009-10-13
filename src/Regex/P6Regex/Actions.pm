@@ -52,7 +52,8 @@ method termish($/) {
     my $lastlit := 0;
     for $<noun> {
         my $ast := $_.ast;
-        if $lastlit && $ast.pasttype eq 'literal' {
+        if !$ast { }
+        elsif $lastlit && $ast.pasttype eq 'literal' {
             $lastlit[0] := $lastlit[0] ~ $ast[0];
         }
         else {
@@ -66,6 +67,7 @@ method termish($/) {
 method quantified_atom($/) {
     my $past := $<atom>.ast;
     if $<quantifier> {
+       if !$past { $/.panic("Can't quantify zero-width atom"); }
        my $qast := $<quantifier>[0].ast;
        $qast.unshift($past);
        $past := $qast;
@@ -121,6 +123,15 @@ method quantmod($/) {
     elsif $str eq ':?' or $str eq '?' { $past.backtrack('f') }
     elsif $str eq ':*' or $str eq '!' { $past.backtrack('g') }
     make $past;
+}
+
+
+method metachar:sym<ws>($/) { 
+    my $past := @MODIFIERS[0]<s>
+                ?? PAST::Regex.new( 'ws', :pasttype('subrule'), 
+                                    :subtype('method') )
+                !! 0;
+    make $past; 
 }
 
 
@@ -421,6 +432,5 @@ method mod_internal($/) {
     my %mods := @MODIFIERS[0];
     my $n := $<n>[0] gt '' ?? +$<n>[0] !! 1;
     %mods{ ~$<mod_ident><sym> } := $n;
-    my $past := PAST::Regex.new( :pasttype('anchor'), :subtype('null') );
-    make $past;
+    make 0;
 }
