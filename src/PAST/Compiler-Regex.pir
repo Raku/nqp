@@ -556,12 +556,25 @@ second child of this node.
     .local pmc ops, cpast, cpost, lpast, lpost
     ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
 
+    .local string subtype
+    .local int ignorecase
+    subtype = node.'subtype'()
+    ignorecase = iseq subtype, 'ignorecase'
+
     # literal to be matched is our first child
+    .local int litconst
     lpast = node[0]
+    litconst = isa lpast, ['String']
+    unless litconst goto lpast_done
+    unless ignorecase goto lpast_done
+    $S0 = lpast
+    $S0 = downcase $S0
+    lpast = box $S0
+  lpast_done:
     lpost = self.'as_post'(lpast, 'rtype'=>'~')
 
     $S0 = lpost.'result'()
-    ops.'push_pirop'('inline', $S0, 'inline'=>'  # rx literal %0')
+    ops.'push_pirop'('inline', subtype, $S0, 'inline'=>'  # rx literal %0 %1')
     ops.'push'(lpost)
 
     # compute constant literal length at compile time
@@ -586,6 +599,9 @@ second child of this node.
     # compute string to be matched and fail if mismatch
     ops.'push_pirop'('sub', '$I11', pos, off)
     ops.'push_pirop'('substr', '$S10', tgt, '$I11', litlen)
+    unless ignorecase goto literal_test
+    ops.'push_pirop'('downcase', '$S10', '$S10')
+  literal_test:
     ops.'push_pirop'('ne', '$S10', lpost, fail)
 
     # increase position by literal length and move on

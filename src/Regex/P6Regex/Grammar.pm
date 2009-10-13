@@ -137,7 +137,13 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
         {*}
     }
 
-    token mod_internal { ':' $<n>=['!' | \d+]?  <mod_ident> » {*} }
+    token mod_internal { 
+        [
+        | ':' $<n>=('!' | \d+)**1  <mod_ident> » 
+        | ':' <mod_ident> [ '(' $<n>=[\d+] ')' ]?
+        ]
+        {*}
+    }
 
     token mod_ident:sym<ignorecase> { $<sym>=[i] 'gnorecase'? }
     token mod_ident:sym<ratchet>    { $<sym>=[r] 'atchet'? }

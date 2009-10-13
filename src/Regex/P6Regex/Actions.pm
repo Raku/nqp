@@ -74,9 +74,12 @@ method quantified_atom($/) {
 }
 
 method atom($/) {
-    my $past := $<metachar>
-                ?? $<metachar>.ast
-                !! PAST::Regex.new( ~$/ , :pasttype('literal') );
+    my $past;
+    if $<metachar> { $past := $<metachar>.ast }
+    else {
+        $past := PAST::Regex.new( ~$/ , :pasttype('literal') );
+        if @MODIFIERS[0]<i> { $past.subtype('ignorecase'); }
+    }
     make $past;
 }
 
@@ -416,7 +419,8 @@ sub capnames($ast, $count) {
 
 method mod_internal($/) {
     my %mods := @MODIFIERS[0];
-    %mods{ ~$<mod_ident><sym> } := 1;
+    my $n := $<n>[0] gt '' ?? +$<n>[0] !! 1;
+    %mods{ ~$<mod_ident><sym> } := $n;
     my $past := PAST::Regex.new( :pasttype('anchor'), :subtype('null') );
     make $past;
 }
