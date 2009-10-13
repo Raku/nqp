@@ -41,7 +41,7 @@ The key files for the p6regex compiler are:
     src/Regex/P6Regex/Actions.pm     # actions to create PAST from parse
 
 
-Things that work (2009-10-09, 16h23 UTC):
+Things that work (2009-10-13, 18h07 UTC):
 
 * bare literal strings
 * quantifiers  *, +, ?, *:, +:, ?:, *?, +?, ??, *!, +!, ?!
@@ -55,5 +55,14 @@ Things that work (2009-10-09, 16h23 UTC):
 * obsolete backslash sequences \A \Z \z \Q
 * \b, \B, \e, \E, \f, \F, \h, \H, \r, \R, \t, \T, \v, \V
 * enumerated character lists <[ab0..9]>
+* character class compositions <+foo-bar+[xyz]>
 * quantified by numeric range
 * quantified by separator
+* capturing subrules
+* capturing subpatterns
+* capture aliases
+* cut rule
+* Match objects created lazily
+* built-in methods <alpha> <digit> <xdigit> <ws> <wb> etc.
+* :ignorecase
+* :sigspace
