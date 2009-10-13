@@ -2,6 +2,8 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
 
     token ws { [ \s+ | '#' \N*\n ]* }
 
+    token normspace { <?before \s | '#' > <.ws> }
+
     token TOP {
         <nibbler>
         [ <.ws> $ || <.panic: "Syntax error"> ]
@@ -118,14 +120,16 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
 
     token cclass_elem {
         $<sign>=['+'|'-'|<?>]
+        <.normspace>?
         [
         | '[' $<charspec>=(
-                  | '-' <.obs: "hyphen in enumerated character class;..">
-                  | [ \\ (.) | (<-[\]\\]>) ] [ '..' (.) ]?
+                  | \s* '-' <.obs: "hyphen in enumerated character class;..">
+                  | \s* [ \\ (.) | (<-[\]\\]>) ] [ \s* '..' \s* (.) ]?
               )*
-          ']'
+          \s* ']'
         | $<name>=[\w+]
         ]
+        <.normspace>?
         {*}
     }
 
