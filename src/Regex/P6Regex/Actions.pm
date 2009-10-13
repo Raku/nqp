@@ -244,8 +244,15 @@ method assertion:sym<method>($/) {
 
 method assertion:sym<name>($/) {
     my $name := ~$<longname>;
-    my $past := PAST::Regex.new( $name, :name($name) , :pasttype('subrule'),
-                                 :subtype('capture') );
+    my $past;
+    if $<assertion> {
+        $past := $<assertion>[0].ast;
+        $past.name($name);
+    }
+    else {
+        $past := PAST::Regex.new( $name, :name($name) , :pasttype('subrule'),
+                                  :subtype('capture') );
+    }
     make $past;
 }
 
