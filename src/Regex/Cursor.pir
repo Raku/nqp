@@ -721,6 +721,53 @@ Perform any action associated with the current regex match.
 .end
 
 
+=item !BACKREF(name)
+
+Match the backreference given by C<name>.
+
+=cut
+
+.sub '!BACKREF' :method
+    .param string name
+    .local pmc cur
+    .local int pos, eos
+    .local string tgt
+    (cur, pos, tgt) = self.'!cursor_start'()
+
+    # search the cursor cstack for the latest occurrence of C<name>
+    .local pmc cstack
+    cstack = getattribute self, '@!cstack'
+    if null cstack goto pass
+    .local int cstack_it
+    cstack_it = elements cstack
+  cstack_loop:
+    dec cstack_it
+    unless cstack_it >= 0 goto pass
+    .local pmc subcur
+    subcur = cstack[cstack_it]
+    $P0 = getattribute subcur, '$!names'
+    if null $P0 goto cstack_loop
+    $S0 = $P0
+    if name != $S0 goto cstack_loop
+    # we found a matching subcursor, get the literal it matched
+  cstack_done:
+    .local int litlen
+    .local string litstr
+    $I1 = subcur.'pos'()
+    $I0 = subcur.'from'()
+    litlen = $I1 - $I0
+    litstr = substr tgt, $I0, litlen
+    # now test the literal against our target
+    $S0 = substr tgt, pos, litlen
+    unless $S0 == litstr goto fail
+    pos += litlen
+  pass:
+    cur.'!cursor_pass'(pos, '')
+  fail:
+    .return (cur)
+.end
+
+
 =back
 
 =head2 Vtable functions

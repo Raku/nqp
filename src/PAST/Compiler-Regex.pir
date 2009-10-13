@@ -810,9 +810,9 @@ Perform a subrule call.
     name = self.'as_post'($P0, 'rtype'=>'*')
     ops.'push'(name)
 
-    .local pmc subpast, subpost
-    subpast = node[0]
-    subpost = self.'as_post'(subpast, 'rtype'=>'*')
+    .local pmc cpost, posargs, namedargs, subpost
+    (cpost, posargs, namedargs) = self.'post_children'(node, 'signature'=>'v:')
+    subpost = shift posargs
 
     .local pmc negate
     .local string testop
@@ -822,11 +822,11 @@ Perform a subrule call.
     .local pmc subtype
     subtype = node.'subtype'()
 
-    ops.'push_pirop'('inline', name, subtype, negate, 'inline'=>"  # rx subrule %0 subtype=%1 negate=%2")
+    ops.'push_pirop'('inline', subpost, subtype, negate, 'inline'=>"  # rx subrule %0 subtype=%1 negate=%2")
 
     self.'!cursorop'(ops, '!cursor_pos', 0, pos)
-    ops.'push'(subpost)
-    ops.'push_pirop'('callmethod', subpost, cur, 'result'=>'$P10')
+    ops.'push'(cpost)
+    ops.'push_pirop'('callmethod', subpost, cur, posargs :flat, namedargs :flat, 'result'=>'$P10')
     ops.'push_pirop'(testop, '$P10', fail)
     if subtype == 'zerowidth' goto done
     ops.'push_pirop'('callmethod', '"pos"', '$P10', 'result'=>pos)

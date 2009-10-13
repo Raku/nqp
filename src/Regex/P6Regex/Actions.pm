@@ -178,6 +178,10 @@ method metachar:sym<var>($/) {
             $past.name($name); 
         }
     }
+    else {
+        $past := PAST::Regex.new( '!BACKREF', $name, :pasttype('subrule'),
+                                  :subtype('method') );
+    }
     make $past;
 }
 
