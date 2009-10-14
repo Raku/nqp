@@ -113,6 +113,7 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
         $<longname>=[\w+]
             [
             | <?before '>'>
+            | <.normspace> <nibbler>
             | '=' <assertion>
             ]?
         {*}
