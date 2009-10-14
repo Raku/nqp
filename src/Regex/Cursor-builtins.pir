@@ -11,6 +11,20 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
 
 .namespace ['Regex';'Cursor']
 
+.sub 'before' :method
+    .param pmc regex           :optional
+    .local pmc cur
+    .local int pos
+    (cur, pos) = self.'!cursor_start'()
+    if null regex goto fail
+    $P0 = cur.regex()
+    unless $P0 goto fail
+    cur.'!cursor_pass'(pos, 'before')
+  fail:
+    .return (cur)
+.end
+
+
 .sub 'ident' :method
     .local pmc cur
     .local int pos, eos
