@@ -26,7 +26,7 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
     }
 
     token quantified_atom {
-        <atom> [ <.ws> <quantifier> ]?
+        <atom> [ <.ws> [ <quantifier> | <?before ':'> <backmod> <!alpha> ] ]?
         {*}
     }
 
@@ -40,11 +40,11 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
     }
 
     # proto token quantifier { <...> }
-    token quantifier:sym<*> { $<sym>=['*'] <quantmod> {*} }
-    token quantifier:sym<+> { $<sym>=['+'] <quantmod> {*} }
-    token quantifier:sym<?> { $<sym>=['?'] <quantmod> {*} }
+    token quantifier:sym<*> { $<sym>=['*'] <backmod> {*} }
+    token quantifier:sym<+> { $<sym>=['+'] <backmod> {*} }
+    token quantifier:sym<?> { $<sym>=['?'] <backmod> {*} }
     token quantifier:sym<**> { 
-        $<sym>=['**'] \s* <quantmod> \s*
+        $<sym>=['**'] \s* <backmod> \s*
         [
         || $<min>=[\d+] [ '..' $<max>=[\d+|'*'] ]?
         || <quantified_atom>
@@ -52,7 +52,7 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
         {*}
     }
 
-    token quantmod { ':'? [ '?' | '!' | '+' ]? {*} }
+    token backmod { ':'? [ '?' | '!' | <!before ':'> ] }
 
     # proto token metachar { <...> }
     token metachar:sym<ws> { <.normspace> {*} }

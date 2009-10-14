@@ -67,10 +67,14 @@ method termish($/) {
 method quantified_atom($/) {
     my $past := $<atom>.ast;
     if $<quantifier> {
-       if !$past { $/.panic("Can't quantify zero-width atom"); }
-       my $qast := $<quantifier>[0].ast;
-       $qast.unshift($past);
-       $past := $qast;
+        if !$past { $/.panic("Can't quantify zero-width atom"); }
+        my $qast := $<quantifier>[0].ast;
+        $qast.unshift($past);
+        $past := $qast;
+    }
+    elsif $<backmod>[0] { backmod($past, $<backmod>[0]); }
+    if $past && !$past.backtrack && @MODIFIERS[0]<r> {
+        $past.backtrack('r');
     }
     make $past;
 }
@@ -86,46 +90,34 @@ method atom($/) {
 }
 
 method quantifier:sym<*>($/) {
-    make $<quantmod>.ast;
+    my $past := PAST::Regex.new( :pasttype('quant') );
+    make backmod($past, $<backmod>);
 }
 
 method quantifier:sym<+>($/) {
-    my $past := $<quantmod>.ast;
-    $past.min(1);
-    make $past;
+    my $past := PAST::Regex.new( :pasttype('quant'), :min(1) );
+    make backmod($past, $<backmod>);
 }
 
 method quantifier:sym<?>($/) {
-    my $past := $<quantmod>.ast;
-    $past.min(0);
-    $past.max(1);
+    my $past := PAST::Regex.new( :pasttype('quant'), :min(0), :max(1) );
+    make backmod($past, $<backmod>);
     make $past;
 }
 
 method quantifier:sym<**>($/) {
-    my $past := $<quantmod>.ast;
+    my $past;
     if $<quantified_atom> {
-        $past.min(1);
-        $past.sep($<quantified_atom>.ast);
+        $past := PAST::Regex.new( :pasttype('quant'), :min(1),
+                                  :sep( $<quantified_atom>.ast ) );
     }
     else {
-        $past.min(+$<min>);
+        $past := PAST::Regex.new( :pasttype('quant'), :min(+$<min>) );
         if ! $<max> { $past.max(+$<min>); }
         elsif $<max>[0] ne '*' { $past.max(+$<max>[0]); }
     }
-    make $past;
+    make backmod($past, $<backmod>);
 }
-
-method quantmod($/) {
-    my $past := PAST::Regex.new( :pasttype('quant') );
-    my $str := ~$/;
-    if    $str eq ':' { $past.backtrack('r'); }
-    elsif $str eq ':?' or $str eq '?' { $past.backtrack('f') }
-    elsif $str eq ':!' or $str eq '!' { $past.backtrack('g') }
-    elsif @MODIFIERS[0]<r>            { $past.backtrack('r') }
-    make $past;
-}
-
 
 method metachar:sym<ws>($/) { 
     my $past := @MODIFIERS[0]<s>
@@ -381,6 +373,12 @@ method cclass_elem($/) {
     make $past;
 }
 
+method mod_internal($/) {
+    my %mods := @MODIFIERS[0];
+    my $n := $<n>[0] gt '' ?? +$<n>[0] !! 1;
+    %mods{ ~$<mod_ident><sym> } := $n;
+    make 0;
+}
 
 sub capnames($ast, $count) {
     my %capnames;
@@ -431,9 +429,9 @@ sub capnames($ast, $count) {
     %capnames;
 }
 
-method mod_internal($/) {
-    my %mods := @MODIFIERS[0];
-    my $n := $<n>[0] gt '' ?? +$<n>[0] !! 1;
-    %mods{ ~$<mod_ident><sym> } := $n;
-    make 0;
+sub backmod($ast, $backmod) {
+    if $backmod eq ':' { $ast.backtrack('r') }
+    elsif $backmod eq ':?' || $backmod eq '?' { $ast.backtrack('f') }
+    elsif $backmod eq ':!' || $backmod eq '!' { $ast.backtrack('g') }
+    $ast;
 }
