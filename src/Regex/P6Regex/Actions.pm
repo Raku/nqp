@@ -8,18 +8,7 @@ our @MODIFIERS := Q:PIR {
     };
 
 method TOP($/) {
-    my $rpast := $<nibbler>.ast;
-    my %capnames := capnames($rpast, 0);
-    %capnames{''} := 0;
-    $rpast := PAST::Regex.new(
-        PAST::Regex.new( :pasttype('scan') ),
-        $rpast,
-        PAST::Regex.new( :pasttype('pass') ),
-        :pasttype('concat'),
-        :capnames(%capnames)
-    );
-    my $past := PAST::Block.new( $rpast, :blocktype('method') );
-    make $past;
+    make buildsub( $<nibbler>.ast );
 }
 
 method nibbler($/, $key?) {
@@ -133,17 +122,7 @@ method metachar:sym<[ ]>($/) {
 }
 
 method metachar:sym<( )>($/) {
-    my $rpast := $<nibbler>.ast;
-    my %capnames := capnames($rpast, 0);
-    %capnames{''} := 0;
-    $rpast := PAST::Regex.new(
-        PAST::Regex.new( :pasttype('scan') ),
-        $rpast,
-        PAST::Regex.new( :pasttype('pass') ),
-        :pasttype('concat'),
-        :capnames(%capnames)
-    );
-    my $subpast := PAST::Block.new( $rpast, :blocktype('method') );
+    my $subpast := buildsub($<nibbler>.ast);
     my $past := PAST::Regex.new( $subpast, :pasttype('subrule'),
                                  :subtype('capture') );
     make $past;
@@ -378,6 +357,19 @@ method mod_internal($/) {
     my $n := $<n>[0] gt '' ?? +$<n>[0] !! 1;
     %mods{ ~$<mod_ident><sym> } := $n;
     make 0;
+}
+
+sub buildsub($rpast) {
+    my %capnames := capnames($rpast, 0);
+    %capnames{''} := 0;
+    $rpast := PAST::Regex.new(
+        PAST::Regex.new( :pasttype('scan') ),
+        $rpast,
+        PAST::Regex.new( :pasttype('pass') ),
+        :pasttype('concat'),
+        :capnames(%capnames)
+    );
+    PAST::Block.new( $rpast, :blocktype('method') );
 }
 
 sub capnames($ast, $count) {
