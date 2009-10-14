@@ -256,15 +256,25 @@ method backslash:sym<misc>($/) {
 
 
 method assertion:sym<?>($/) {
-    my $past := $<assertion>.ast;
-    $past.subtype('zerowidth');
+    my $past;
+    if $<assertion> {
+        $past := $<assertion>.ast;
+        $past.subtype('zerowidth');
+    }
+    else { $past := 0; }
     make $past;
 }
 
 method assertion:sym<!>($/) {
-    my $past := $<assertion>.ast;
-    $past.negate( !$past.negate );
-    $past.subtype('zerowidth');
+    my $past;
+    if $<assertion> {
+        $past := $<assertion>.ast;
+        $past.negate( !$past.negate );
+        $past.subtype('zerowidth');
+    }
+    else { 
+        $past := PAST::Regex.new( :pasttype('anchor'), :subtype('fail') );
+    }
     make $past;
 }
 

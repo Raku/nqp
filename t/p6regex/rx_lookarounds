@@ -37,7 +37,7 @@ x | y | <?>	\t\n\r !"#$%&'()*+,-./:;<=>?@[\]^`_{|}0123456789ABCDEFGHIJabcdefghij
 
 abc <!> def	\t\n\r !"#$%&'()*+,-./:;<=>?@[\]^`_{|}0123456789ABCDEFGHIJabcdefghij	n	fail pattern <!>
 
-a[b}		\t\n\r !"#$%&'()*+,-./:;<=>?@[\]^`_{|}0123456789ABCDEFGHIJabcdefghij	/rule error/	mismatched close
+a[b}		\t\n\r !"#$%&'()*+,-./:;<=>?@[\]^`_{|}0123456789ABCDEFGHIJabcdefghij	/error/	mismatched close
 
 c <before .d>		abacad		/mob: <c @ 3>/				one character and lookahead <before>
 .* <before .d>		abacad		/mob: <abac @ 0>/			multiple characters and lookahead <before>
