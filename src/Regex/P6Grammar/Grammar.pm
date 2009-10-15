@@ -7,21 +7,21 @@ grammar Regex::P6Grammar::Grammar is Regex::P6Regex::Grammar;
         {*}
     }
 
-    token name { <.ident> ** [\:\:] {*} }
+    token name { <.ident> ** '::' {*} }
 
     token longname {
         [
-        | <.ident> [ \: sym \< <-[>]>*: \> ]?
+        | <.ident> [ ':sym<' <-[>]>* '>' ]?
         ]
         {*}
     }
 
-    rule grammar_stmt { grammar <name> [ is <base=name> ]? \; {*} }
+    rule grammar_stmt { grammar <name> [ is <base=name> ]? ';' {*} }
 
     rule regex_stmt {
         $<sym>=[regex|token|rule]
         <longname>
-        \{ <nibbler> \}
+        '{' <nibbler> '}'
         {*}
     }
 
