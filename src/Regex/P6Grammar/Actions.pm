@@ -12,12 +12,13 @@ method TOP($/) {
 method grammar_stmt($/) {
     my @ns := Regex::P6Grammar::Compiler.parse_name( ~$<name> );
     my $past := PAST::Block.new( :namespace(@ns) );
+    my $parent := $<base> ?? ~$<base>[0] !! 'Regex::Cursor';
     my $init := 
         PAST::Op.new(
             PAST::Var.new( :name('P6metaclass'), :scope('package'),
                            :namespace('') ),
             ~$<name>,
-            PAST::Val.new( :value('Regex::Cursor'), :named('parent') ),
+            PAST::Val.new( :value($parent), :named('parent') ),
             :pasttype('callmethod'), :name('new_class')
         );
     $past.loadinit($init);
