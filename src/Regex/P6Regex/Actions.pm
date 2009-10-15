@@ -128,6 +128,11 @@ method metachar:sym<( )>($/) {
     make $past;
 }
 
+method metachar:sym<'>($/) {
+    my $past := PAST::Regex.new( ~$<quote><val>, :pasttype('literal') );
+    make $past;
+}
+
 method metachar:sym<.>($/) {
     my $past := PAST::Regex.new( :pasttype('charclass'), :subtype('.') );
     make $past;
