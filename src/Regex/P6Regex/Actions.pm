@@ -292,18 +292,16 @@ method assertion:sym<method>($/) {
 method assertion:sym<name>($/) {
     my $name := ~$<longname>;
     my $past;
-    if $<nibbler> {
-        my $subpast := buildsub($<nibbler>[0].ast);
-        $past := PAST::Regex.new( $name, $subpast, :name($name),
-                                  :pasttype('subrule'), :subtype('capture') );
-    }
-    elsif $<assertion> {
+    if $<assertion> {
         $past := $<assertion>[0].ast;
         $past.name($name);
     }
     else {
-        $past := PAST::Regex.new( $name, :name($name) , :pasttype('subrule'),
-                                  :subtype('capture') );
+        $past := PAST::Regex.new( $name, :name($name),
+                                  :pasttype('subrule'), :subtype('capture') );
+        if $<nibbler> {
+            $past.push( buildsub($<nibbler>[0].ast) );
+        }
     }
     make $past;
 }
