@@ -41,7 +41,7 @@ The key files for the p6regex compiler are:
     src/Regex/P6Regex/Actions.pm     # actions to create PAST from parse
 
 
-Things that work (2009-10-13, 18h07 UTC):
+Things that work (2009-10-15, 06h16 UTC):
 
 * bare literal strings
 * quantifiers  *, +, ?, *:, +:, ?:, *?, +?, ??, *!, +!, ?!
@@ -66,3 +66,5 @@ Things that work (2009-10-13, 18h07 UTC):
 * built-in methods <alpha> <digit> <xdigit> <ws> <wb> etc.
 * :ignorecase
 * :sigspace
+* :ratchet
+* single-quoted literals (without quotes)
