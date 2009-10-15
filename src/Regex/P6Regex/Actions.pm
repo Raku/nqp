@@ -173,10 +173,6 @@ method metachar:sym<rwb>($/) {
     make $past;
 }
 
-method metachar:sym<{*}>($/) {
-    make 0;
-}
-
 method metachar:sym<bs>($/) {
     make $<backslash>.ast;
 }
@@ -187,6 +183,13 @@ method metachar:sym<mod>($/) {
 
 method metachar:sym<assert>($/) {
     make $<assertion>.ast;
+}
+
+method metachar:sym<{*}>($/) {
+    my $past := $<key>
+                ?? PAST::Regex.new( ~$<key>[0], :pasttype('reduce') )
+                !! 0;
+    make $past;
 }
 
 method metachar:sym<var>($/) {

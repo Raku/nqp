@@ -624,12 +624,10 @@ second child of this node.
 .sub 'pass' :method :multi(_,['PAST';'Regex'])
     .param pmc node
 
-    .local pmc ops
-    ops = self.'reduce'(node)
+    .local pmc cur, pos, ops
+    (cur, pos) = self.'!rxregs'('cur pos')
+    ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
     ops.'push_pirop'('inline', 'inline'=>'  # rx pass')
-    .local string cur, pos
-    cur = ops.'result'()
-    pos = self.'!rxregs'('pos')
     self.'!cursorop'(ops, '!cursor_pass', 0, pos, '""')
     ops.'push_pirop'('return', cur)
     .return (ops)
@@ -643,25 +641,21 @@ second child of this node.
 .sub 'reduce' :method :multi(_,['PAST';'Regex'])
     .param pmc node
 
-    .local pmc cur, act
-    (cur, act) = self.'!rxregs'('cur act')
-
-    .local pmc ops, name, redlabel
+    .local pmc cur, pos, ops
+    (cur, pos) = self.'!rxregs'('cur pos')
     ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
-    $P0 = node.'name'()
-    unless $P0 goto done
-    name = self.'as_post'($P0, 'rtype'=>'~')
-    redlabel = self.'post_new'('Label', 'name'=>'rxreduce_')
 
-    ops.'push_pirop'('inline', name, 'inline'=>'  # rx reduce %0')
-    ops.'push'(name)
-    ops.'push_pirop'('if_null', act, redlabel)
-    ops.'push_pirop'('find_method', '$P10', act, name)
-    ops.'push_pirop'('if_null', '$P10', redlabel)
-    self.'!cursorop'(ops, '!MATCH', 1, '$P11')
-    ops.'push_pirop'('callmethod', '$P10', act, '$P11')
-    ops.'push'(redlabel)
-  done:
+    .local pmc cpost, posargs, namedargs
+    (cpost, posargs, namedargs) = self.'post_children'(node, 'signature'=>'v:')
+
+    .local string name, key
+    name = '""'
+    key = posargs[0]
+
+    ops.'push_pirop'('inline', name, key, 'inline'=>'  # rx reduce name=%0 key=%1')
+    ops.'push'(cpost)
+    self.'!cursorop'(ops, '!cursor_pos', 0, pos)
+    self.'!cursorop'(ops, '!reduce', 0, name, posargs :flat, namedargs :flat)
     .return (ops)
 .end
 

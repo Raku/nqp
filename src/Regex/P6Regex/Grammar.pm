@@ -80,9 +80,14 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
     token metachar:sym<::> { $<sym>=['::'] {*} }
     token metachar:sym<lwb> { $<sym>=['<<'|'«'] {*} }
     token metachar:sym<rwb> { $<sym>=['>>'|'»'] {*} }
-    token metachar:sym<{*}> { $<sym>=['{*}'] {*} }
     token metachar:sym<bs> { \\ <backslash> {*} }
     token metachar:sym<mod> { <mod_internal> {*} }
+
+    token metachar:sym<{*}> { 
+        $<sym>=['{*}'] 
+        [ \h* '#= ' \h* $<key>=[[\S+] ** [\h+]] ]?
+        {*} 
+    }
     token metachar:sym<assert> { 
         '<' <assertion> 
         [ '>' || <.panic: 'regex assertion not terminated by angle bracket'> ]
