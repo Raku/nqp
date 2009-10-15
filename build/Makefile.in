@@ -44,6 +44,12 @@ CLEANUPS = \
   p6regex.pbc \
   src/gen/*.pir \
 
+P6GRAMMAR_SOURCES = \
+  src/Regex/P6Grammar.pir \
+  src/Regex/P6Grammar/Grammar.pm \
+  src/Regex/P6Grammar/Actions.pm \
+  src/gen/p6grammar-grammar.pir \
+  src/gen/p6grammar-actions.pir \
 
 P6REGEX_SOURCES = \
   src/Regex/P6Regex.pir \
@@ -59,7 +65,24 @@ P6REGEX_SOURCES = \
   src/Regex/Match.pir \
   src/Regex/Dumper.pir \
 
-all: p6regex$(EXE)
+all: p6regex$(EXE)  p6grammar$(EXE)
+
+
+
+p6grammar$(EXE): p6grammar.pbc
+	$(PBC_TO_EXE) p6grammar.pbc
+
+p6grammar.pbc: p6regex.pbc $(P6GRAMMAR_SOURCES)
+	$(PARROT) -o p6grammar.pbc src/Regex/P6Grammar.pir
+
+src/gen/p6grammar-grammar.pir: $(PARROT) $(PERL6GRAMMAR_PBC) src/Regex/P6Grammar/Grammar.pm
+	$(PARROT) $(PARROT_ARGS) $(PERL6GRAMMAR_PBC) \
+	    --output=src/gen/p6grammar-grammar.pir --encoding=utf8 \
+	    src/Regex/P6Grammar/Grammar.pm
+
+src/gen/p6grammar-actions.pir: $(NQP) src/Regex/P6Grammar/Actions.pm
+	$(NQP) --target=pir --output=src/gen/p6grammar-actions.pir \
+	    --encoding=fixed_8 src/Regex/P6Grammar/Actions.pm
 
 p6regex$(EXE): p6regex.pbc
 	$(PBC_TO_EXE) p6regex.pbc
