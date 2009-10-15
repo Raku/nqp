@@ -14,11 +14,11 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
         {*} 
     }
 
-    rule arglist { <arg> ** \, {*} }
+    rule arglist { <arg> ** ',' {*} }
 
     token TOP {
         <nibbler>
-        [ $ || <.panic: "Syntax error"> ]
+        [ $ || <.panic: 'Confused'> ]
         {*}
     }
 
@@ -27,7 +27,7 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
         ['||'|'|'|'&&'|'&']?
         <termish> 
         [ ['||'|'|'] 
-          [ <termish> || <.panic: "Null pattern not allowed"> ]
+          [ <termish> || <.panic: 'Null pattern not allowed'> ]
         ]*
         {*}
     }
@@ -43,7 +43,7 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
     }
 
     token atom {
-        :dba('regex atom')
+        # :dba('regex atom')
         [
         | \w [ \w+! <?before \w> ]?
         | <metachar>
@@ -85,7 +85,7 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
     token metachar:sym<mod> { <mod_internal> {*} }
     token metachar:sym<assert> { 
         '<' <assertion> 
-        [ '>' || <.panic: "regex assertion not terminated by angle bracket"> ]
+        [ '>' || <.panic: 'regex assertion not terminated by angle bracket'> ]
         {*}
     }
 
@@ -141,7 +141,7 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
         <.normspace>?
         [
         | '[' $<charspec>=(
-                  | \s* '-' <.obs: "hyphen in enumerated character class;..">
+                  | \s* '-' <.obs: 'hyphen in enumerated character class;..'>
                   | \s* [ \\ (.) | (<-[\]\\]>) ] [ \s* '..' \s* (.) ]?
               )*
           \s* ']'
