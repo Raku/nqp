@@ -9,6 +9,7 @@ our @MODIFIERS := Q:PIR {
 
 method TOP($/) {
     my $past := buildsub( $<nibbler>.ast );
+    $past.node($/);
     make $past;
 }
 
@@ -26,7 +27,7 @@ method nibbler($/, $key?) {
     @MODIFIERS.shift;
     my $past;
     if +$<termish> > 1 {
-        $past := PAST::Regex.new( :pasttype('alt') );
+        $past := PAST::Regex.new( :pasttype('alt'), :node($/) );
         for $<termish> { 
             $past.push($_.ast); 
         }
@@ -38,7 +39,7 @@ method nibbler($/, $key?) {
 }
 
 method termish($/) {
-    my $past := PAST::Regex.new( :pasttype('concat') );
+    my $past := PAST::Regex.new( :pasttype('concat'), :node($/) );
     my $lastlit := 0;
     for $<noun> {
         my $ast := $_.ast;
@@ -73,24 +74,24 @@ method atom($/) {
     my $past;
     if $<metachar> { $past := $<metachar>.ast }
     else {
-        $past := PAST::Regex.new( ~$/ , :pasttype('literal') );
+        $past := PAST::Regex.new( ~$/ , :pasttype('literal'), :node($/) );
         if @MODIFIERS[0]<i> { $past.subtype('ignorecase'); }
     }
     make $past;
 }
 
 method quantifier:sym<*>($/) {
-    my $past := PAST::Regex.new( :pasttype('quant') );
+    my $past := PAST::Regex.new( :pasttype('quant'), :node($/) );
     make backmod($past, $<backmod>);
 }
 
 method quantifier:sym<+>($/) {
-    my $past := PAST::Regex.new( :pasttype('quant'), :min(1) );
+    my $past := PAST::Regex.new( :pasttype('quant'), :min(1), :node($/) );
     make backmod($past, $<backmod>);
 }
 
 method quantifier:sym<?>($/) {
-    my $past := PAST::Regex.new( :pasttype('quant'), :min(0), :max(1) );
+    my $past := PAST::Regex.new( :pasttype('quant'), :min(0), :max(1), :node($/) );
     make backmod($past, $<backmod>);
     make $past;
 }
@@ -99,10 +100,10 @@ method quantifier:sym<**>($/) {
     my $past;
     if $<quantified_atom> {
         $past := PAST::Regex.new( :pasttype('quant'), :min(1),
-                                  :sep( $<quantified_atom>.ast ) );
+                                  :sep( $<quantified_atom>.ast ), :node($/) );
     }
     else {
-        $past := PAST::Regex.new( :pasttype('quant'), :min(+$<min>) );
+        $past := PAST::Regex.new( :pasttype('quant'), :min(+$<min>), :node($/) );
         if ! $<max> { $past.max(+$<min>); }
         elsif $<max>[0] ne '*' { $past.max(+$<max>[0]); }
     }
@@ -112,7 +113,7 @@ method quantifier:sym<**>($/) {
 method metachar:sym<ws>($/) { 
     my $past := @MODIFIERS[0]<s>
                 ?? PAST::Regex.new( 'ws', :pasttype('subrule'), 
-                                    :subtype('method') )
+                                    :subtype('method'), :node($/) )
                 !! 0;
     make $past; 
 }
@@ -125,52 +126,52 @@ method metachar:sym<[ ]>($/) {
 method metachar:sym<( )>($/) {
     my $subpast := buildsub($<nibbler>.ast);
     my $past := PAST::Regex.new( $subpast, :pasttype('subrule'),
-                                 :subtype('capture') );
+                                 :subtype('capture'), :node($/) );
     make $past;
 }
 
 method metachar:sym<'>($/) {
-    my $past := PAST::Regex.new( ~$<quote><val>, :pasttype('literal') );
+    my $past := PAST::Regex.new( ~$<quote><val>, :pasttype('literal'), :node($/) );
     make $past;
 }
 
 method metachar:sym<.>($/) {
-    my $past := PAST::Regex.new( :pasttype('charclass'), :subtype('.') );
+    my $past := PAST::Regex.new( :pasttype('charclass'), :subtype('.'), :node($/) );
     make $past;
 }
 
 method metachar:sym<^>($/) {
-    my $past := PAST::Regex.new( :pasttype('anchor'), :subtype('bos') );
+    my $past := PAST::Regex.new( :pasttype('anchor'), :subtype('bos'), :node($/) );
     make $past;
 }
 
 method metachar:sym<^^>($/) {
-    my $past := PAST::Regex.new( :pasttype('anchor'), :subtype('bol') );
+    my $past := PAST::Regex.new( :pasttype('anchor'), :subtype('bol'), :node($/) );
     make $past;
 }
 
 method metachar:sym<$>($/) {
-    my $past := PAST::Regex.new( :pasttype('anchor'), :subtype('eos') );
+    my $past := PAST::Regex.new( :pasttype('anchor'), :subtype('eos'), :node($/) );
     make $past;
 }
 
 method metachar:sym<$$>($/) {
-    my $past := PAST::Regex.new( :pasttype('anchor'), :subtype('eol') );
+    my $past := PAST::Regex.new( :pasttype('anchor'), :subtype('eol'), :node($/) );
     make $past;
 }
 
 method metachar:sym<:::>($/) {
-    my $past := PAST::Regex.new( :pasttype('cut') );
+    my $past := PAST::Regex.new( :pasttype('cut'), :node($/) );
     make $past;
 }
 
 method metachar:sym<lwb>($/) {
-    my $past := PAST::Regex.new( :pasttype('anchor'), :subtype('lwb') );
+    my $past := PAST::Regex.new( :pasttype('anchor'), :subtype('lwb'), :node($/) );
     make $past;
 }
 
 method metachar:sym<rwb>($/) {
-    my $past := PAST::Regex.new( :pasttype('anchor'), :subtype('rwb') );
+    my $past := PAST::Regex.new( :pasttype('anchor'), :subtype('rwb'), :node($/) );
     make $past;
 }
 
@@ -188,7 +189,7 @@ method metachar:sym<assert>($/) {
 
 method metachar:sym<{*}>($/) {
     my $past := $<key>
-                ?? PAST::Regex.new( ~$<key>[0], :pasttype('reduce') )
+                ?? PAST::Regex.new( ~$<key>[0], :pasttype('reduce'), :node($/) )
                 !! 0;
     make $past;
 }
@@ -203,67 +204,67 @@ method metachar:sym<var>($/) {
             $past.name($name); 
         }
         else {
-            $past := PAST::Regex.new( $past, :name($name), :pasttype('subcapture'));
+            $past := PAST::Regex.new( $past, :name($name), :pasttype('subcapture'), :node($/) );
         }
     }
     else {
         $past := PAST::Regex.new( '!BACKREF', $name, :pasttype('subrule'),
-                                  :subtype('method') );
+                                  :subtype('method'), :node($/) );
     }
     make $past;
 }
 
 method backslash:sym<w>($/) {
     my $subtype := ~$<sym> eq 'n' ?? 'nl' !! ~$<sym>;
-    my $past := PAST::Regex.new( :pasttype('charclass'), :subtype($subtype) );
+    my $past := PAST::Regex.new( :pasttype('charclass'), :subtype($subtype), :node($/) );
     make $past;
 }
 
 method backslash:sym<b>($/) {
     my $past := PAST::Regex.new( "\b", :pasttype('enumcharlist'),
-                    :negate($<sym> eq 'B'));
+                    :negate($<sym> eq 'B'), :node($/) );
     make $past;
 }
 
 method backslash:sym<e>($/) {
     my $past := PAST::Regex.new( "\e", :pasttype('enumcharlist'),
-                    :negate($<sym> eq 'E'));
+                    :negate($<sym> eq 'E'), :node($/) );
     make $past;
 }
 
 method backslash:sym<f>($/) {
     my $past := PAST::Regex.new( "\f", :pasttype('enumcharlist'), 
-                    :negate($<sym> eq 'F'));
+                    :negate($<sym> eq 'F'), :node($/) );
     make $past;
 }
 
 method backslash:sym<h>($/) {
     my $past := PAST::Regex.new( "\x[09,20,a0,1680,180e,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,200a,202f,205f,3000]", :pasttype('enumcharlist'),
-                    :negate($<sym> eq 'H'));
+                    :negate($<sym> eq 'H'), :node($/) );
     make $past;
 }
 
 method backslash:sym<r>($/) {
     my $past := PAST::Regex.new( "\r", :pasttype('enumcharlist'), 
-                    :negate($<sym> eq 'R'));
+                    :negate($<sym> eq 'R'), :node($/) );
     make $past;
 }
 
 method backslash:sym<t>($/) {
     my $past := PAST::Regex.new( "\t", :pasttype('enumcharlist'), 
-                    :negate($<sym> eq 'T'));
+                    :negate($<sym> eq 'T'), :node($/) );
     make $past;
 }
 
 method backslash:sym<v>($/) {
     my $past := PAST::Regex.new( "\x[0a,0b,0c,0d,85,2028,2029]", :pasttype('enumcharlist'),
-                    :negate($<sym> eq 'V'));
+                    :negate($<sym> eq 'V'), :node($/) );
     make $past;
 }
 
 
 method backslash:sym<misc>($/) {
-    my $past := PAST::Regex.new( ~$/ , :pasttype('literal') );
+    my $past := PAST::Regex.new( ~$/ , :pasttype('literal'), :node($/) );
     make $past;
 }
 
@@ -286,7 +287,7 @@ method assertion:sym<!>($/) {
         $past.subtype('zerowidth');
     }
     else { 
-        $past := PAST::Regex.new( :pasttype('anchor'), :subtype('fail') );
+        $past := PAST::Regex.new( :pasttype('anchor'), :subtype('fail'), :node($/) );
     }
     make $past;
 }
@@ -306,7 +307,7 @@ method assertion:sym<name>($/) {
     }
     else {
         $past := PAST::Regex.new( $name, :name($name),
-                                  :pasttype('subrule'), :subtype('capture') );
+                                  :pasttype('subrule'), :subtype('capture'), :node($/) );
         if $<nibbler> {
             $past.push( buildsub($<nibbler>[0].ast) );
         }
@@ -321,7 +322,8 @@ method assertion:sym<[>($/) {
         $past.subtype('zerowidth');
         $past := PAST::Regex.new( 
                      $past, 
-                     PAST::Regex.new( :pasttype('charclass'), :subtype('.') ) 
+                     PAST::Regex.new( :pasttype('charclass'), :subtype('.') ), 
+                     :node($/)
                  );
     }
     my $i := 1;
@@ -330,10 +332,10 @@ method assertion:sym<[>($/) {
         my $ast := $clist[$i].ast;
         if $ast.negate {
             $past.subtype('zerowidth');
-            $past := PAST::Regex.new( $ast, $past, :pasttype('concat') );
+            $past := PAST::Regex.new( $ast, $past, :pasttype('concat'), :node($/) );
         }
         else {
-            $past := PAST::Regex.new( $past, $ast, :pasttype('alt') );
+            $past := PAST::Regex.new( $past, $ast, :pasttype('alt'), :node($/) );
         }
         $i := $i + 1;
     }
@@ -345,7 +347,7 @@ method cclass_elem($/) {
     my $past;
     if $<name> {
         my $name := ~$<name>;
-        $past := PAST::Regex.new( $name, :pasttype('subrule'), :subtype('method') );
+        $past := PAST::Regex.new( $name, :pasttype('subrule'), :subtype('method'), :node($/) );
     } else {
         for $<charspec> {
             if $_[1] {
@@ -372,7 +374,7 @@ method cclass_elem($/) {
             }
             else { $str := $str ~ $_[0]; }
         }
-        $past := PAST::Regex.new( $str, :pasttype('enumcharlist') );
+        $past := PAST::Regex.new( $str, :pasttype('enumcharlist'), :node($/) );
     }
     $past.negate( $<sign> eq '-' );
     make $past;
@@ -393,9 +395,9 @@ sub buildsub($rpast) {
         $rpast,
         PAST::Regex.new( :pasttype('pass') ),
         :pasttype('concat'),
-        :capnames(%capnames)
+        :capnames(%capnames) 
     );
-    PAST::Block.new( $rpast, :blocktype('method') );
+    PAST::Block.new( $rpast, :blocktype('method'));
 }
 
 sub capnames($ast, $count) {

@@ -5,13 +5,14 @@ method TOP($/) {
     for $<regex_stmt> {
         $past.push( $_.ast );
     }
+    $past.node($/);
     make $past;
 }
 
 
 method grammar_stmt($/) {
     my @ns := Regex::P6Grammar::Compiler.parse_name( ~$<name> );
-    my $past := PAST::Block.new( :namespace(@ns) );
+    my $past := PAST::Block.new( :namespace(@ns), :node($/) );
     my $parent := $<base> ?? ~$<base>[0] !! 'Regex::Cursor';
     my $init := 
         PAST::Op.new(
@@ -19,7 +20,7 @@ method grammar_stmt($/) {
                            :namespace('') ),
             ~$<name>,
             PAST::Val.new( :value($parent), :named('parent') ),
-            :pasttype('callmethod'), :name('new_class')
+            :pasttype('callmethod'), :name('new_class'), :node($/)
         );
     $past.loadinit($init);
     make $past;
@@ -46,7 +47,7 @@ method regex_stmt($/, $key?) {
                   :pasttype('concat'),
                   :capnames(%capnames)
     );
-    my $past := PAST::Block.new( $rpast, :name(~$<longname>), :blocktype('method') );
+    my $past := PAST::Block.new( $rpast, :name(~$<longname>), :blocktype('method'), :node($/) );
     @MODIFIERS.shift;
     make $past;
 }
