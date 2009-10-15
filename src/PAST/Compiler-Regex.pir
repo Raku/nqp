@@ -39,6 +39,13 @@ Return the POST representation of the regex AST rooted by C<node>.
     reghash = new ['Hash']
     .lex '$*REG', reghash
 
+    .local pmc regexname
+    $P0 = get_global '@?BLOCK'
+    $P1 = $P0[0]
+    $S0 = $P1.'name'()
+    regexname = box $S0
+    .lex '$*REGEXNAME', regexname
+
     .local string prefix, rname, rtype
     prefix = self.'unique'('rx')
     concat prefix, '_'
@@ -627,8 +634,13 @@ second child of this node.
     .local pmc cur, pos, ops
     (cur, pos) = self.'!rxregs'('cur pos')
     ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
+
+    .local string regexname
+    $P0 = find_dynamic_lex '$*REGEXNAME'
+    regexname = self.'escape'($P0)
+
     ops.'push_pirop'('inline', 'inline'=>'  # rx pass')
-    self.'!cursorop'(ops, '!cursor_pass', 0, pos, '""')
+    self.'!cursorop'(ops, '!cursor_pass', 0, pos, regexname)
     ops.'push_pirop'('return', cur)
     .return (ops)
 .end
@@ -648,14 +660,15 @@ second child of this node.
     .local pmc cpost, posargs, namedargs
     (cpost, posargs, namedargs) = self.'post_children'(node, 'signature'=>'v:')
 
-    .local string name, key
-    name = '""'
+    .local string regexname, key
+    $P0 = find_dynamic_lex '$*REGEXNAME'
+    regexname = self.'escape'($P0)
     key = posargs[0]
 
-    ops.'push_pirop'('inline', name, key, 'inline'=>'  # rx reduce name=%0 key=%1')
+    ops.'push_pirop'('inline', regexname, key, 'inline'=>'  # rx reduce name=%0 key=%1')
     ops.'push'(cpost)
     self.'!cursorop'(ops, '!cursor_pos', 0, pos)
-    self.'!cursorop'(ops, '!reduce', 0, name, posargs :flat, namedargs :flat)
+    self.'!cursorop'(ops, '!reduce', 0, regexname, posargs :flat, namedargs :flat)
     .return (ops)
 .end
 

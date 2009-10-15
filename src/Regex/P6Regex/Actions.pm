@@ -8,7 +8,8 @@ our @MODIFIERS := Q:PIR {
     };
 
 method TOP($/) {
-    make buildsub( $<nibbler>.ast );
+    my $past := buildsub( $<nibbler>.ast );
+    make $past;
 }
 
 method nibbler($/, $key?) {
