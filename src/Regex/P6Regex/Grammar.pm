@@ -4,6 +4,18 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
 
     token normspace { <?before \s | '#' > <.ws> }
 
+    token quote { \' $<val>=[<-[']>*] \' {*} }
+
+    token arg { 
+        [
+        | <quote>
+        | $<value>=[\d+]
+        ]
+        {*} 
+    }
+
+    rule arglist { <arg> ** \, {*} }
+
     token TOP {
         <nibbler>
         [ $ || <.panic: "Syntax error"> ]
@@ -67,6 +79,7 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
     token metachar:sym<::> { $<sym>=['::'] {*} }
     token metachar:sym<lwb> { $<sym>=['<<'|'«'] {*} }
     token metachar:sym<rwb> { $<sym>=['>>'|'»'] {*} }
+    token metachar:sym<{*}> { $<sym>=['{*}'] {*} }
     token metachar:sym<bs> { \\ <backslash> {*} }
     token metachar:sym<mod> { <mod_internal> {*} }
     token metachar:sym<assert> { 
@@ -115,6 +128,7 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
             | <?before '>'>
             | <.normspace> <nibbler>
             | '=' <assertion>
+            | ':' <arglist>
             ]?
         {*}
     }
