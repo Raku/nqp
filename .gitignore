@@ -6,4 +6,6 @@ Makefile
 *.o
 p6regex
 p6regex.pbc
+p6grammar
+p6grammar.pbc
 src/gen/*.pir
