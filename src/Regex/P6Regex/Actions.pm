@@ -173,6 +173,10 @@ method metachar:sym<rwb>($/) {
     make $past;
 }
 
+method metachar:sym<{*}>($/) {
+    make 0;
+}
+
 method metachar:sym<bs>($/) {
     make $<backslash>.ast;
 }
