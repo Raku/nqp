@@ -420,45 +420,25 @@ Match something in a character class, such as \w, \d, \s, dot, etc.
 .sub 'charclass' :method
     .param pmc node
 
+    .local string subtype
+    .local int cclass, negate
+    (subtype, cclass, negate) = self.'!charclass_init'(node)
+
     .local pmc cur, tgt, pos, off, eos, fail, ops
     (cur, tgt, pos, off, eos, fail) = self.'!rxregs'('cur tgt pos off eos fail')
     ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
 
-    .local string subtype
-    subtype = node.'subtype'()
-
     ops.'push_pirop'('inline', subtype, 'inline'=>'  # rx charclass %0')
     ops.'push_pirop'('ge', pos, eos, fail)
-    if subtype == '.' goto charclass_done
+    if cclass == .CCLASS_ANY goto charclass_done
 
     .local pmc cctest
-    $S0 = downcase subtype
-    $I0 = iseq subtype, $S0
-    cctest = self.'??!!'($I0, 'unless', 'if')
+    cctest = self.'??!!'(negate, 'if', 'unless')
 
-    if $S0 == 'd' goto cclass_digit
-    if $S0 == 's' goto cclass_space
-    if $S0 == 'w' goto cclass_word
-    if $S0 == 'n' goto cclass_newline
-    if $S0 == 'nl' goto cclass_newline
-    self.'panic'('Unrecognized subtype "', subtype, '" in PAST::Regex charclass node')
-  cclass_digit:
-    .local int cclass
-    cclass = .CCLASS_NUMERIC
-    goto cclass_done
-  cclass_space:
-    cclass = .CCLASS_WHITESPACE
-    goto cclass_done
-  cclass_word:
-    cclass = .CCLASS_WORD
-    goto cclass_done
-  cclass_newline:
-    cclass = .CCLASS_NEWLINE
-  cclass_done:
     ops.'push_pirop'('sub', '$I10', pos, off)
     ops.'push_pirop'('is_cclass', '$I11', cclass, tgt, '$I10')
     ops.'push_pirop'(cctest, '$I11', fail)
-    unless $S0 == 'nl' goto charclass_done
+    unless subtype == 'nl' goto charclass_done
     # handle logical newline here
     ops.'push_pirop'('substr', '$S10', tgt, '$I10', 2)
     ops.'push_pirop'('iseq', '$I11', '$S10', '"\r\n"')
@@ -470,6 +450,109 @@ Match something in a character class, such as \w, \d, \s, dot, etc.
     .return (ops)
 .end
 
+
+=item !charclass_init(PAST::Regex node)
+
+Return the subtype, cclass value, and negation for a
+charclass C<node>.
+
+=cut
+
+.sub '!charclass_init' :method
+    .param pmc node
+
+    .local string subtype
+    .local int negate
+    subtype = node.'subtype'()
+    $S0 = downcase subtype
+    negate = isne subtype, $S0
+
+    $I0 = node.'negate'()
+    negate = xor negate, $I0
+
+    if $S0 == '.' goto cclass_dot
+    if $S0 == 'd' goto cclass_digit
+    if $S0 == 's' goto cclass_space
+    if $S0 == 'w' goto cclass_word
+    if $S0 == 'n' goto cclass_newline
+    if $S0 == 'nl' goto cclass_newline
+    self.'panic'('Unrecognized subtype "', subtype, '" in PAST::Regex charclass node')
+  cclass_dot:
+    .local int cclass
+    cclass = .CCLASS_ANY
+    goto cclass_done
+  cclass_digit:
+    cclass = .CCLASS_NUMERIC
+    goto cclass_done
+  cclass_space:
+    cclass = .CCLASS_WHITESPACE
+    goto cclass_done
+  cclass_word:
+    cclass = .CCLASS_WORD
+    goto cclass_done
+  cclass_newline:
+    cclass = .CCLASS_NEWLINE
+  cclass_done:
+    .return (subtype, cclass, negate)
+.end
+
+
+=item charclass_q(PAST::Regex node)
+
+Optimize certain quantified character class shortcuts, if it
+makes sense to do so.  If not, return a null PMC and the
+standard quantifier code will handle it.
+
+=cut
+
+.sub 'charclass_q' :method :multi(_, ['PAST';'Regex'])
+    .param pmc node
+    .param string backtrack
+    .param int min
+    .param int max
+
+    if backtrack != 'r' goto pessimistic
+
+    .local string subtype
+    .local int cclass, negate
+    (subtype, cclass, negate) = self.'!charclass_init'(node)
+
+    # positive logical newline matching is special, don't try to optimize it
+    if negate goto nl_done
+    if subtype == 'nl' goto pessimistic
+  nl_done:
+
+    .local pmc findop
+    findop = self.'??!!'(negate, 'find_cclass', 'find_not_cclass')
+
+  quant_r:
+    .local pmc cur, tgt, pos, off, eos, fail, ops
+    (cur, tgt, pos, off, eos, fail) = self.'!rxregs'('cur tgt pos off eos fail')
+    ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
+
+    ops.'push_pirop'('inline', subtype, backtrack, min, max, 'inline'=>'  # rx charclass_q %0 %1 %2..%3')
+    ops.'push_pirop'('sub', '$I10', pos, off)
+    ops.'push_pirop'(findop, '$I11', cclass, tgt, '$I10', eos)
+    unless min > 0 goto min_done
+    ops.'push_pirop'('add', '$I12', '$I10', min)
+    ops.'push_pirop'('lt', '$I11', '$I12', fail)
+  min_done:
+    unless max > 0 goto max_done
+    .local pmc maxlabel
+    maxlabel = self.'post_new'('Label', 'name'=>'rx_charclass_')
+    ops.'push_pirop'('add', '$I12', '$I10', max)
+    ops.'push_pirop'('le', '$I11', '$I12', maxlabel)
+    ops.'push_pirop'('set', '$I11', '$I12')
+    ops.'push'(maxlabel)
+  max_done:
+    ops.'push_pirop'('add', pos, off, '$I11')
+    .return (ops)
+
+  pessimistic:
+    null ops
+    .return (ops)
+.end
+    
 
 =item concat(PAST::Regex node)
 
@@ -694,6 +777,20 @@ second child of this node.
      if $I0 goto have_max
      max = -1                          # -1 represents Inf
    have_max:
+
+   optimize:
+     $I0 = node.'list'()
+     if $I0 != 1 goto optimize_done
+     .local pmc cpast
+     cpast = node[0]
+     $S0 = cpast.'pasttype'()
+     $S0 = concat $S0, '_q'
+     $I0 = can self, $S0
+     unless $I0 goto optimize_done
+     $P0 = self.$S0(cpast, backtrack, min, max)
+     if null $P0 goto optimize_done
+     .return ($P0)
+  optimize_done:
 
     .local pmc cur, pos, rep, fail
     (cur, pos, rep, fail) = self.'!rxregs'('cur pos rep fail')
