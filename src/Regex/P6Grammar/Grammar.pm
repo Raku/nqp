@@ -21,6 +21,7 @@ grammar Regex::P6Grammar::Grammar is Regex::P6Regex::Grammar;
     rule regex_stmt {
         $<sym>=[regex|token|rule]
         <longname>
+        {*} #= open
         '{' <nibbler> '}'
         {*}
     }
