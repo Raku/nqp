@@ -68,7 +68,6 @@ P6REGEX_SOURCES = \
 all: p6regex$(EXE)  p6grammar$(EXE)
 
 
-
 p6grammar$(EXE): p6grammar.pbc
 	$(PBC_TO_EXE) p6grammar.pbc
 
@@ -102,10 +101,10 @@ src/gen/p6regex-actions.pir: $(NQP) src/Regex/P6Regex/Actions.pm
 ## testing
 
 test: all
-	prove -r t
+	prove -r --exec $(PARROT) t
 
 test_loud: all
-	prove -r -v t
+	prove -r -v --exec $(PARROT) t
 
 ## cleaning
 clean:
