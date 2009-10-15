@@ -70,6 +70,7 @@ grammar Regex::P6Regex::Grammar is PCT::Grammar;
     token metachar:sym<ws> { <.normspace> {*} }
     token metachar:sym<[ ]> { '[' <nibbler> ']' {*} }
     token metachar:sym<( )> { '(' <nibbler> ')' {*} }
+    token metachar:sym<'> { <quote> {*} }
     token metachar:sym<.> { $<sym>=['.'] {*} }
     token metachar:sym<^> { $<sym>=['^'] {*} }
     token metachar:sym<^^> { $<sym>=['^^'] {*} }
