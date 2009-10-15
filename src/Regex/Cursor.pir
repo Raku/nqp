@@ -201,15 +201,23 @@ Create a new cursor for matching C<target>.
     .return (cur)
 .end
 
-=item !cursor_start()
+=item !cursor_start([lang])
 
-Create and initialize a new cursor from C<self>.
+Create and initialize a new cursor from C<self>.  If C<lang> is
+provided, then the new cursor has the same type as lang.
 
 =cut
 
 .sub '!cursor_start' :method
+    .param pmc lang            :optional
+    .param int has_lang        :opt_flag
+
+    if has_lang goto have_lang
+    lang = self
+  have_lang:
+
     .local pmc parrotclass, cur
-    $P0 = self.'HOW'()
+    $P0 = lang.'HOW'()
     parrotclass = getattribute $P0, 'parrotclass'
     cur = new parrotclass
 
