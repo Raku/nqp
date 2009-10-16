@@ -1,4 +1,4 @@
-grammar Regex::P6Regex::Grammar is PCT::Grammar;
+grammar Regex::P6Regex::Grammar;
 
     token ws { [ \s+ | '#' \N* ]* }
 

@@ -30,6 +30,15 @@
     .tailcall self.'!protoregex'('mod_ident', 'action'=>action)
 .end
 
+.sub 'panic' :method
+    .param pmc args            :slurpy
+
+    .local string message
+    message = join '', args
+
+    die message
+.end
+
 .sub 'obs' :method
     .param string oldstr
     .param pmc action          :named('action') :optional
