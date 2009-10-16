@@ -57,6 +57,8 @@ P6REGEX_SOURCES = \
   src/gen/p6regex-actions.pir \
   src/cheats/PGE.pir \
   src/cheats/p6regex-grammar.pir \
+  src/cheats/hll-compiler.pir \
+  src/cheats/regex-cursor-protoregex.pir \
   src/PAST/Regex.pir \
   src/PAST/Compiler-Regex.pir \
   src/Regex/constants.pir \
