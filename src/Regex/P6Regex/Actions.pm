@@ -199,7 +199,11 @@ method metachar:sym<var>($/) {
     my $name := $<pos> ?? +$<pos> !! ~$<name>;
     if $<quantified_atom> {
         $past := $<quantified_atom>[0].ast;
-        if $past.pasttype eq 'subrule' { 
+        if $past.pasttype eq 'quant' && $past[0].pasttype eq 'subrule' {
+            $past[0].subtype('capture');
+            $past[0].name($name);
+        }
+        elsif $past.pasttype eq 'subrule' { 
             $past.subtype('capture');
             $past.name($name); 
         }
