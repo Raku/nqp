@@ -31,6 +31,34 @@ Regex::P6Regex - Parser/compiler for Perl 6 regexes
     exit 0
 .end
 
+
+# we have to overload PCT::HLLCompiler's parse method to support P6Regex grammars
+
+.sub 'parse' :method
+    .param pmc source
+    .param pmc options         :slurpy :named
+
+    .local pmc parsegrammar, parseactions, match
+    parsegrammar = get_hll_global ['Regex';'P6Regex'], 'Grammar'
+    $I0 = isa parsegrammar, ['Regex';'Cursor']
+    unless $I0 goto parse_old
+
+    parseactions = get_hll_global ['Regex';'P6Regex'], 'Actions'
+    match = parsegrammar.'parse'(source, 'from'=>0, 'action'=>parseactions)
+    unless match goto err_parsefail
+    .return (match)
+
+  err_parsefail:
+    self.'panic'('Unable to parse source')
+    .return (match)
+
+  parse_old:
+    $P0 = get_hll_global ['PCT'], 'HLLCompiler'
+    $P1 = find_method $P0, 'parse'
+    .tailcall self.$P1(source, options :flat :named)
+.end
+
+
 # these will eventually move to Regex.pir
 .include 'src/PAST/Regex.pir'
 .include 'src/PAST/Compiler-Regex.pir'
