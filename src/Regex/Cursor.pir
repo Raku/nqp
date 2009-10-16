@@ -138,10 +138,16 @@ If C<regex> is omitted, then use the C<TOP> rule for the grammar.
 
 .sub 'parse' :method
     .param pmc target
-    .param pmc regex
+    .param pmc regex           :optional
+    .param int has_regex       :opt_flag
+    .param pmc options         :slurpy :named
+
+    if has_regex goto regex_done
+    regex = find_method self, 'TOP'
+  regex_done:
 
     .local pmc cur
-    cur = self.'!cursor_init'(target, 'from'=>-1)
+    cur = self.'!cursor_init'(target, options :flat :named)
     cur = cur.regex()
     .return (cur)
 .end
@@ -184,6 +190,7 @@ Create a new cursor for matching C<target>.
 .sub '!cursor_init' :method
     .param string target
     .param int from            :named('from') :optional
+    .param pmc action          :named('action') :optional
 
     .local pmc parrotclass, cur
     $P0 = self.'HOW'()
@@ -198,6 +205,8 @@ Create a new cursor for matching C<target>.
     setattribute cur, '$!from', $P0
     $P0 = box from
     setattribute cur, '$!pos', $P0
+
+    setattribute cur, '$!action', action
     .return (cur)
 .end
 
@@ -503,7 +512,7 @@ capture states.
 .end
 
 
-=item !reduce(name)
+=item !reduce(name [, key])
 
 Perform any action associated with the current regex match.
 
@@ -511,16 +520,22 @@ Perform any action associated with the current regex match.
 
 .sub '!reduce' :method
     .param string name
+    .param string key          :optional
+    .param int has_key         :opt_flag
     .local pmc action
     action = getattribute self, '$!action'
     if null action goto action_done
-    $P0 = find_method action, name
-    if null $P0 goto action_done
+    $I0 = can action, name
+    unless $I0 goto action_done
     .local pmc match
     match = self.'MATCH'()
-    $P1 = action.$P0(match)
+    if has_key goto action_key
+    action.name(match)
+    goto action_done
+  action_key:
+    .tailcall action.name(match, key)
   action_done:
-    .return ($P1)
+    .return ()
 .end
 
 
