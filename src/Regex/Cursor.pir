@@ -146,10 +146,11 @@ If C<regex> is omitted, then use the C<TOP> rule for the grammar.
     regex = find_method self, 'TOP'
   regex_done:
 
-    .local pmc cur
+    .local pmc cur, match
     cur = self.'!cursor_init'(target, options :flat :named)
     cur = cur.regex()
-    .return (cur)
+    match = cur.'MATCH'()
+    .return (match)
 .end
 
 
