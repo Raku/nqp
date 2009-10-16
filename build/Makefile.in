@@ -98,6 +98,11 @@ src/gen/p6regex-actions.pir: $(NQP) src/Regex/P6Regex/Actions.pm
 	$(NQP) --target=pir --output=src/gen/p6regex-actions.pir \
 	    --encoding=fixed_8 src/Regex/P6Regex/Actions.pm
 
+bootstrap: p6grammar
+	./p6grammar --target=pir src/Regex/P6Regex/Grammar.pm >p6regex-grammar.pir
+	./p6grammar --target=pir src/Regex/P6Grammar/Grammar.pm >p6grammar-grammar.pir
+	$(CP) p6*-grammar.pir src/gen
+
 ## testing
 
 test: all
