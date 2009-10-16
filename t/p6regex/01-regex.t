@@ -384,8 +384,7 @@ Description of the test.
     throw $P1
   match_it:
     $P0 = get_hll_global ['Regex'], 'Cursor'
-    $P1 = $P0.'parse'(target, rule, 'from'=>-1)
-    match = $P1.'MATCH'()
+    match = $P0.'parse'(target, rule, 'from'=>-1)
 
     .return (match)
 .end
