@@ -41,8 +41,7 @@
 
 .sub 'obs' :method
     .param string oldstr
-    .param pmc action          :named('action') :optional
-    .param pmc dba             :named('dba') :optional
+    .param pmc options         :slurpy :named
 
     .local string newstr
     $P0 = split ';', oldstr
