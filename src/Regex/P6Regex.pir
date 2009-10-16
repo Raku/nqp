@@ -15,7 +15,7 @@ Regex::P6Regex - Parser/compiler for Perl 6 regexes
     load_bytecode 'PCT.pbc'
     .local pmc p6meta, p6regex
     p6meta = get_hll_global 'P6metaclass'
-    p6regex = p6meta.'new_class'('Regex::P6Regex', 'parent'=>'PCT::HLLCompiler')
+    p6regex = p6meta.'new_class'('Regex::P6Regex::Compiler', 'parent'=>'PCT::HLLCompiler')
     p6regex.'language'('Regex::P6Regex')
     $P0 = get_hll_namespace ['Regex';'P6Regex';'Grammar']
     p6regex.'parsegrammar'($P0)
