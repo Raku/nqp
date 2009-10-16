@@ -7,6 +7,10 @@ our @MODIFIERS := Q:PIR {
         push %r, $P0
     };
 
+method arg($/) {
+    make $<quote> ?? ~$<quote><val> !! +$<val>;
+}
+
 method TOP($/) {
     my $past := buildsub( $<nibbler>.ast );
     $past.node($/);
@@ -314,6 +318,11 @@ method assertion:sym<name>($/) {
                                   :pasttype('subrule'), :subtype('capture'), :node($/) );
         if $<nibbler> {
             $past.push( buildsub($<nibbler>[0].ast) );
+        }
+        elsif $<arglist> {
+            for $<arglist>[0]<arg> {
+                $past.push( $_.ast );
+            }
         }
     }
     make $past;
