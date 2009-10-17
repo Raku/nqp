@@ -33,13 +33,11 @@ NQP              = $(PARROT_BIN_DIR)/parrot_nqp$(EXE)
 PBC_TO_EXE       = $(PARROT_BIN_DIR)/pbc_to_exe$(EXE)
 PARROT_TOOLS_DIR = $(PARROT_LIB_DIR)/tools
 PARROT_PERL_LIB  = $(PARROT_TOOLS_DIR)/lib
-PERL6GRAMMAR_PBC = $(PARROT_LIB_DIR)/library/PGE/Perl6Grammar.pbc
 
 NQP_LANG_DIR     = $(PARROT_LIB_DIR)/languages/nqp
 
 P6REGEX_SOURCES = \
   src/Regex/P6Regex.pir \
-  src/cheats/PGE.pir \
   src/cheats/p6regex-grammar.pir \
   src/cheats/hll-compiler.pir \
   src/cheats/regex-cursor-protoregex.pir \
@@ -76,14 +74,16 @@ P6GRAMMAR_G_1   = $(STAGE1)/$(P6GRAMMAR_G)
 CLEANUPS = \
   *.manifest \
   *.pdb \
-  p6regex$(EXE) \
   P6Regex.pbc \
+  P6Grammar.pbc \
   src/stage0/*.pbc \
-  src/stage1/*.pir \
+  src/stage1/src/gen/*.pir \
   src/stage1/*.pbc \
   src/gen/*.pir \
 
 all: $(P6REGEX_PBC) $(P6GRAMMAR_PBC)
+stage0: $(P6REGEX_PBC_0) $(P6GRAMMAR_PBC_0)
+stage1: $(P6REGEX_PBC_1) $(P6GRAMMAR_PBC_1)
 
 $(P6REGEX_A): $(NQP) src/Regex/P6Regex/Actions.pm
 	$(NQP) --target=pir --output=$(P6REGEX_A) \

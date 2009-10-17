@@ -10,7 +10,7 @@ regex-cursor-protoregex.pir - naive protoregex implementation
 
 =item !protoregex()
 
-This method adds rudimentary protoregex support to PGE.  It doesn't
+This method adds rudimentary protoregex support to Regex::Cursor.  It doesn't
 do longest token matching correctly; instead it tries regexes
 in reverse order of longest regex name.
 

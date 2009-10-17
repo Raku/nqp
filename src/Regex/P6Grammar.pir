@@ -39,14 +39,6 @@ Regex::P6Grammar - scaffolding compiler for NQP / Perl 6 grammars
 .end
 
 
-.sub '' :anon :load :init
-    .local pmc p6grammar
-    p6grammar = get_hll_global ['Regex';'P6Grammar'], 'Grammar'
-    $P0 = get_hll_global ['PGE';'Perl6Regex'], 'regex'
-    $P1 = get_class ['Regex';'P6Grammar';'Grammar']
-    $P1.'add_method'('regex', $P0)
-.end
-
 =cut
 
 # Local Variables:

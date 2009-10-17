@@ -22,7 +22,6 @@ Regex::P6Regex - Parser/compiler for Perl 6 regexes
 
 .include 'src/gen/p6regex-grammar.pir'
 .include 'src/gen/p6regex-actions.pir'
-.include 'src/cheats/PGE.pir'
 .include 'src/cheats/p6regex-grammar.pir'
 
 .namespace ['Regex';'P6Regex';'Compiler']
