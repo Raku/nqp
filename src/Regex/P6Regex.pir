@@ -33,9 +33,9 @@ Regex::P6Regex - Parser/compiler for Perl 6 regexes
     p6meta = get_hll_global 'P6metaclass'
     p6regex = p6meta.'new_class'('Regex::P6Regex::Compiler', 'parent'=>'HLL::Compiler')
     p6regex.'language'('Regex::P6Regex')
-    $P0 = get_hll_namespace ['Regex';'P6Regex';'Grammar']
+    $P0 = get_hll_global ['Regex';'P6Regex'], 'Grammar'
     p6regex.'parsegrammar'($P0)
-    $P0 = get_hll_namespace ['Regex';'P6Regex';'Actions']
+    $P0 = get_hll_global ['Regex';'P6Regex'], 'Actions'
     p6regex.'parseactions'($P0)
 .end
 
