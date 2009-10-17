@@ -22,9 +22,9 @@ grammar Regex::P6Regex::Grammar;
         {*}
     }
 
-    rule nibbler {
+    token nibbler {
         {*} #= open
-        ['||'|'|'|'&&'|'&']?
+        [ <.ws> ['||'|'|'|'&&'|'&'] ]?
         <termish> 
         [ ['||'|'|'] 
           [ <termish> || <.panic: 'Null pattern not allowed'> ]
@@ -85,7 +85,7 @@ grammar Regex::P6Regex::Grammar;
 
     token metachar:sym<{*}> { 
         $<sym>=['{*}'] 
-        [ \h* '#= ' \h* $<key>=[[\S+] ** [\h+]] ]?
+        [ \h* '#= ' \h* $<key>=[\S+ [\h+ \S+]*] ]?
         {*} 
     }
     token metachar:sym<assert> { 

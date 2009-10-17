@@ -22,7 +22,7 @@ grammar Regex::P6Grammar::Grammar is Regex::P6Regex::Grammar;
         $<sym>=[regex|token|rule]
         <longname>
         {*} #= open
-        '{' <nibbler> '}'
+        '{'<nibbler>'}'
         {*}
     }
 
