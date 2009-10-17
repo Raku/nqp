@@ -9,11 +9,17 @@ Regex::P6Grammar - scaffolding compiler for NQP / Perl 6 grammars
 
 =cut
 
-.namespace ['Regex';'P6Grammar';'Compiler']
-
 .sub '' :anon :load :init
     load_bytecode 'PCT.pbc'
     load_bytecode 'p6regex.pbc'
+.end
+
+.include 'src/gen/p6grammar-grammar.pir'
+.include 'src/gen/p6grammar-actions.pir'
+
+.namespace ['Regex';'P6Grammar';'Compiler']
+
+.sub '' :anon :load :init
     .local pmc p6meta, p6grammar
     p6meta = get_hll_global 'P6metaclass'
     p6grammar = p6meta.'new_class'('Regex::P6Grammar::Compiler', 'parent'=>'HLL::Compiler')
@@ -32,8 +38,6 @@ Regex::P6Grammar - scaffolding compiler for NQP / Perl 6 grammars
     exit 0
 .end
 
-.include 'src/gen/p6grammar-grammar.pir'
-.include 'src/gen/p6grammar-actions.pir'
 
 .sub '' :anon :load :init
     .local pmc p6grammar

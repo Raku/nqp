@@ -14,7 +14,7 @@ grammar Regex::P6Regex::Grammar;
         {*} 
     }
 
-    rule arglist { <arg> ** ',' {*} }
+    rule arglist { <arg> [ ',' <arg> ]* {*} }
 
     token TOP {
         <nibbler>
@@ -132,9 +132,9 @@ grammar Regex::P6Regex::Grammar;
         $<longname>=[\w+]
             [
             | <?before '>'>
-            | <.normspace> <nibbler>
             | '=' <assertion>
             | ':' <arglist>
+            | <.normspace> <nibbler>
             ]?
         {*}
     }
