@@ -18,9 +18,9 @@ Regex::P6Grammar - scaffolding compiler for NQP / Perl 6 grammars
     p6meta = get_hll_global 'P6metaclass'
     p6grammar = p6meta.'new_class'('Regex::P6Grammar::Compiler', 'parent'=>'PCT::HLLCompiler')
     p6grammar.'language'('Regex::P6Grammar')
-    $P0 = get_hll_namespace ['Regex';'P6Grammar';'Grammar']
+    $P0 = get_hll_global ['Regex';'P6Grammar'], 'Grammar'
     p6grammar.'parsegrammar'($P0)
-    $P0 = get_hll_namespace ['Regex';'P6Grammar';'Actions']
+    $P0 = get_hll_global ['Regex';'P6Grammar'], 'Actions'
     p6grammar.'parseactions'($P0)
 .end
 
