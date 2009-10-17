@@ -448,7 +448,11 @@ sub capnames($ast, $count) {
     }
     elsif $pasttype eq 'subcapture' {
         if $ast.name eq '0' || $ast.name > 0 { $count := $ast.name + 1; }
+        %capnames{$ast.name} := 1;
         my %x := capnames($ast[0], $count);
+        for %x {
+            %capnames{$_} := +%capnames{$_} + %x{$_};
+        }
         $count := %x{''};
     }
     elsif $pasttype eq 'quant' {
