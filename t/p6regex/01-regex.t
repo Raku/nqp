@@ -56,7 +56,7 @@ Description of the test.
 
 .sub main :main
     load_bytecode 'Test/Builder.pbc'
-    load_bytecode 'p6regex.pbc'
+    load_bytecode 'P6Regex.pbc'
     load_bytecode 'String/Utils.pbc'
     .include "iglobals.pasm"
 

@@ -37,24 +37,8 @@ PERL6GRAMMAR_PBC = $(PARROT_LIB_DIR)/library/PGE/Perl6Grammar.pbc
 
 NQP_LANG_DIR     = $(PARROT_LIB_DIR)/languages/nqp
 
-CLEANUPS = \
-  *.manifest \
-  *.pdb \
-  p6regex$(EXE) \
-  p6regex.pbc \
-  src/gen/*.pir \
-
-P6GRAMMAR_SOURCES = \
-  src/Regex/P6Grammar.pir \
-  src/Regex/P6Grammar/Grammar.pm \
-  src/Regex/P6Grammar/Actions.pm \
-  src/gen/p6grammar-grammar.pir \
-  src/gen/p6grammar-actions.pir \
-
 P6REGEX_SOURCES = \
   src/Regex/P6Regex.pir \
-  src/gen/p6regex-grammar.pir \
-  src/gen/p6regex-actions.pir \
   src/cheats/PGE.pir \
   src/cheats/p6regex-grammar.pir \
   src/cheats/hll-compiler.pir \
@@ -67,47 +51,97 @@ P6REGEX_SOURCES = \
   src/Regex/Match.pir \
   src/Regex/Dumper.pir \
 
-all: p6regex$(EXE)  p6grammar$(EXE)
+P6GRAMMAR_SOURCES = \
+  src/Regex/P6Grammar.pir \
+  src/Regex/P6Grammar/Grammar.pm \
+  src/Regex/P6Grammar/Actions.pm \
 
+STAGE0 = src/stage0
+STAGE1 = src/stage1
 
-p6grammar$(EXE): p6grammar.pbc
-	$(PBC_TO_EXE) p6grammar.pbc
+P6REGEX_PBC     = P6Regex.pbc
+P6REGEX_G       = src/gen/p6regex-grammar.pir
+P6REGEX_A       = src/gen/p6regex-actions.pir
+P6REGEX_PBC_0   = $(STAGE0)/$(P6REGEX_PBC)
+P6REGEX_PBC_1   = $(STAGE1)/$(P6REGEX_PBC)
+P6REGEX_G_1     = $(STAGE1)/$(P6REGEX_G)
 
-p6grammar.pbc: p6regex.pbc $(P6GRAMMAR_SOURCES)
-	$(PARROT) -o p6grammar.pbc src/Regex/P6Grammar.pir
+P6GRAMMAR_PBC   = P6Grammar.pbc
+P6GRAMMAR_G     = src/gen/p6grammar-grammar.pir
+P6GRAMMAR_A     = src/gen/p6grammar-actions.pir
+P6GRAMMAR_PBC_0 = $(STAGE0)/$(P6GRAMMAR_PBC)
+P6GRAMMAR_PBC_1 = $(STAGE1)/$(P6GRAMMAR_PBC)
+P6GRAMMAR_G_1   = $(STAGE1)/$(P6GRAMMAR_G)
 
-src/gen/p6grammar-grammar.pir: $(PARROT) $(PERL6GRAMMAR_PBC) src/Regex/P6Grammar/Grammar.pm
-	$(PARROT) $(PARROT_ARGS) $(PERL6GRAMMAR_PBC) \
-	    --output=src/gen/p6grammar-grammar.pir --encoding=utf8 \
-	    src/Regex/P6Grammar/Grammar.pm
+CLEANUPS = \
+  *.manifest \
+  *.pdb \
+  p6regex$(EXE) \
+  P6Regex.pbc \
+  src/stage0/*.pbc \
+  src/stage1/*.pir \
+  src/stage1/*.pbc \
+  src/gen/*.pir \
 
-src/gen/p6grammar-actions.pir: $(NQP) src/Regex/P6Grammar/Actions.pm
-	$(NQP) --target=pir --output=src/gen/p6grammar-actions.pir \
-	    --encoding=fixed_8 src/Regex/P6Grammar/Actions.pm
+all: $(P6REGEX_PBC) $(P6GRAMMAR_PBC)
 
-p6regex$(EXE): p6regex.pbc
-	$(PBC_TO_EXE) p6regex.pbc
+$(P6REGEX_A): $(NQP) src/Regex/P6Regex/Actions.pm
+	$(NQP) --target=pir --output=$(P6REGEX_A) \
+	    src/Regex/P6Regex/Actions.pm
 
-p6regex.pbc: $(P6REGEX_SOURCES)
-	$(PARROT) -o p6regex.pbc src/Regex/P6Regex.pir
+$(P6GRAMMAR_A): $(NQP) src/Regex/P6Grammar/Actions.pm
+	$(NQP) --target=pir --output=$(P6GRAMMAR_A) \
+	    src/Regex/P6Grammar/Actions.pm
 
-src/gen/p6regex-grammar.pir: $(PARROT) $(PERL6GRAMMAR_PBC) src/Regex/P6Regex/Grammar.pm
-	$(PARROT) $(PARROT_ARGS) $(PERL6GRAMMAR_PBC) \
-	    --output=src/gen/p6regex-grammar.pir --encoding=utf8 \
+$(P6REGEX_PBC_0): src/stage0/P6Regex-s0.pir
+	$(PARROT) -o $(P6REGEX_PBC_0) src/stage0/P6Regex-s0.pir
+
+$(P6GRAMMAR_PBC_0): $(P6REGEX_PBC_0) src/stage0/P6Grammar-s0.pir
+	$(PARROT) -o $(P6GRAMMAR_PBC_0) src/stage0/P6Grammar-s0.pir
+
+$(P6REGEX_G_1): $(P6GRAMMAR_PBC_0) src/Regex/P6Regex/Grammar.pm
+	$(MKPATH) $(STAGE1)/src/gen
+	$(PARROT) --library=$(STAGE0) $(P6GRAMMAR_PBC_0) \
+	    --target=pir --output=$(P6REGEX_G_1) \
 	    src/Regex/P6Regex/Grammar.pm
 
-src/gen/p6regex-actions.pir: $(NQP) src/Regex/P6Regex/Actions.pm
-	$(NQP) --target=pir --output=src/gen/p6regex-actions.pir \
-	    --encoding=fixed_8 src/Regex/P6Regex/Actions.pm
+$(P6GRAMMAR_G_1): $(P6GRAMMAR_PBC_0) src/Regex/P6Grammar/Grammar.pm
+	$(MKPATH) $(STAGE1)/src/gen
+	$(PARROT) --library=$(STAGE0) $(P6GRAMMAR_PBC_0) \
+	    --target=pir --output=$(P6GRAMMAR_G_1) \
+	    src/Regex/P6Grammar/Grammar.pm
+
+$(P6REGEX_PBC_1): $(P6REGEX_G_1) $(P6REGEX_A) $(P6REGEX_SOURCES)
+	$(PARROT) --include=$(STAGE1) -o $(P6REGEX_PBC_1) \
+	    src/Regex/P6Regex.pir
+
+$(P6GRAMMAR_PBC_1): $(P6REGEX_PBC_1) $(P6GRAMMAR_G_1) $(P6GRAMMAR_A) $(P6GRAMMAR_SOURCES)
+	$(PARROT) --include=$(STAGE1) -o $(P6GRAMMAR_PBC_1) \
+	    src/Regex/P6Grammar.pir
+
+$(P6REGEX_G): $(P6GRAMMAR_PBC_1) src/Regex/P6Regex/Grammar.pm
+	$(PARROT) --library=$(STAGE1) $(P6GRAMMAR_PBC_1) \
+	    --target=pir --output=$(P6REGEX_G) \
+	    src/Regex/P6Regex/Grammar.pm
+
+$(P6GRAMMAR_G): $(P6GRAMMAR_PBC_1) src/Regex/P6Grammar/Grammar.pm
+	$(PARROT) --library=$(STAGE1) $(P6GRAMMAR_PBC_1) \
+	    --target=pir --output=$(P6GRAMMAR_G) \
+	    src/Regex/P6Grammar/Grammar.pm
+
+$(P6REGEX_PBC): $(P6REGEX_G) $(P6REGEX_A) $(P6REGEX_SOURCES)
+	$(PARROT) -o $(P6REGEX_PBC) src/Regex/P6Regex.pir
+
+$(P6GRAMMAR_PBC): $(P6GRAMMAR_G) $(P6GRAMMAR_A) $(P6GRAMMAR_SOURCES)
+	$(PARROT) -o $(P6GRAMMAR_PBC) src/Regex/P6Grammar.pir
 
 bootstrap: p6grammar
 	./p6grammar --target=pir src/Regex/P6Regex/Grammar.pm >p6regex-grammar.pir
 	./p6grammar --target=pir src/Regex/P6Grammar/Grammar.pm >p6grammar-grammar.pir
-	$(CP) p6*-grammar.pir src/gen
 
 bootstrap-files: src/gen/p6regex-grammar.pir src/gen/p6grammar-grammar.pir
-	$(PERL) build/gen_bootstrap.pl src/Regex/P6Regex.pir >build/P6Regex-s0.pir
-	$(PERL) build/gen_bootstrap.pl src/Regex/P6Grammar.pir >build/P6Grammar-s0.pir
+	$(PERL) build/gen_bootstrap.pl src/Regex/P6Regex.pir >src/stage0/P6Regex-s0.pir
+	$(PERL) build/gen_bootstrap.pl src/Regex/P6Grammar.pir >src/stage0/P6Grammar-s0.pir
 	
 
 ## testing

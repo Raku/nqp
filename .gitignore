@@ -4,8 +4,9 @@ Makefile
 .*.swp
 *.c
 *.o
-p6regex
-p6regex.pbc
-p6grammar
-p6grammar.pbc
+P6Regex
+P6Regex.pbc
+P6Grammar
+P6Grammar.pbc
 src/gen/*.pir
+src/stage1

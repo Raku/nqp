@@ -11,7 +11,7 @@ Regex::P6Grammar - scaffolding compiler for NQP / Perl 6 grammars
 
 .sub '' :anon :load :init
     load_bytecode 'PCT.pbc'
-    load_bytecode 'p6regex.pbc'
+    load_bytecode 'P6Regex.pbc'
 .end
 
 ### .include 'src/gen/p6grammar-grammar.pir'
