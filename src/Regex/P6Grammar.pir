@@ -16,7 +16,7 @@ Regex::P6Grammar - scaffolding compiler for NQP / Perl 6 grammars
     load_bytecode 'p6regex.pbc'
     .local pmc p6meta, p6grammar
     p6meta = get_hll_global 'P6metaclass'
-    p6grammar = p6meta.'new_class'('Regex::P6Grammar::Compiler', 'parent'=>'PCT::HLLCompiler')
+    p6grammar = p6meta.'new_class'('Regex::P6Grammar::Compiler', 'parent'=>'HLL::Compiler')
     p6grammar.'language'('Regex::P6Grammar')
     $P0 = get_hll_global ['Regex';'P6Grammar'], 'Grammar'
     p6grammar.'parsegrammar'($P0)
