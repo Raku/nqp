@@ -105,6 +105,11 @@ bootstrap: p6grammar
 	./p6grammar --target=pir src/Regex/P6Grammar/Grammar.pm >p6grammar-grammar.pir
 	$(CP) p6*-grammar.pir src/gen
 
+bootstrap-files: src/gen/p6regex-grammar.pir src/gen/p6grammar-grammar.pir
+	$(PERL) build/gen_bootstrap.pl src/Regex/P6Regex.pir >build/P6Regex-s0.pir
+	$(PERL) build/gen_bootstrap.pl src/Regex/P6Grammar.pir >build/P6Grammar-s0.pir
+	
+
 ## testing
 
 test: all
