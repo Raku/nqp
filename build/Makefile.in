@@ -81,6 +81,8 @@ CLEANUPS = \
   *.pdb \
   P6Regex.pbc \
   P6Grammar.pbc \
+  nqp.pbc \
+  nqp$(EXE) \
   src/stage0/*.pbc \
   src/stage1/src/gen/*.pir \
   src/stage1/*.pbc \
