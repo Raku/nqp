@@ -29,7 +29,7 @@ CHMOD         = $(PERL) -MExtUtils::Command -e chmod
 
 # locations of parrot resources
 PARROT           = $(PARROT_BIN_DIR)/parrot$(EXE)
-NQP              = $(PARROT_BIN_DIR)/parrot_nqp$(EXE)
+PARROT_NQP       = $(PARROT_BIN_DIR)/parrot_nqp$(EXE)
 PBC_TO_EXE       = $(PARROT_BIN_DIR)/pbc_to_exe$(EXE)
 PARROT_TOOLS_DIR = $(PARROT_LIB_DIR)/tools
 PARROT_PERL_LIB  = $(PARROT_TOOLS_DIR)/lib
@@ -53,6 +53,11 @@ P6GRAMMAR_SOURCES = \
   src/Regex/P6Grammar.pir \
   src/Regex/P6Grammar/Grammar.pm \
   src/Regex/P6Grammar/Actions.pm \
+
+NQP_SOURCES = \
+  src/NQP/Grammar.pm \
+  src/NQP/Actions.pm \
+  src/NQP/Compiler.pir \
 
 STAGE0 = src/stage0
 STAGE1 = src/stage1
@@ -87,12 +92,12 @@ exe: P6Regex$(EXE) P6Grammar$(EXE)
 stage0: $(P6REGEX_PBC_0) $(P6GRAMMAR_PBC_0)
 stage1: $(P6REGEX_PBC_1) $(P6GRAMMAR_PBC_1)
 
-$(P6REGEX_A): $(NQP) src/Regex/P6Regex/Actions.pm
-	$(NQP) --target=pir --output=$(P6REGEX_A) \
+$(P6REGEX_A): $(PARROT_NQP) src/Regex/P6Regex/Actions.pm
+	$(PARROT_NQP) --target=pir --output=$(P6REGEX_A) \
 	    src/Regex/P6Regex/Actions.pm
 
-$(P6GRAMMAR_A): $(NQP) src/Regex/P6Grammar/Actions.pm
-	$(NQP) --target=pir --output=$(P6GRAMMAR_A) \
+$(P6GRAMMAR_A): $(PARROT_NQP) src/Regex/P6Grammar/Actions.pm
+	$(PARROT_NQP) --target=pir --output=$(P6GRAMMAR_A) \
 	    src/Regex/P6Grammar/Actions.pm
 
 $(P6REGEX_PBC_0): src/stage0/P6Regex-s0.pir
@@ -134,6 +139,14 @@ P6Regex$(EXE): $(P6REGEX_PBC) $(PBC_TO_EXE)
 
 P6Grammar$(EXE): $(P6GRAMMAR_PBC) $(PBC_TO_EXE)
 	$(PBC_TO_EXE) $(P6GRAMMAR_PBC)
+
+nqp$(EXE): $(P6GRAMMAR_PBC) $(PARROT_NQP) $(PBC_TO_EXE) $(NQP_SOURCES)
+	$(PARROT) $(P6GRAMMAR_PBC) --target=pir \
+	    src/NQP/Grammar.pm >src/gen/nqp-grammar.pir
+	$(PARROT_NQP) --target=pir \
+	    src/NQP/Actions.pm >src/gen/nqp-actions.pir
+	$(PARROT) -o nqp.pbc src/NQP/Compiler.pir
+	$(PBC_TO_EXE) nqp.pbc
 
 
 bootstrap: p6grammar
