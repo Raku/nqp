@@ -38,16 +38,36 @@ method regex_stmt($/, $key?) {
         @MODIFIERS.unshift(%h);
         return 0;
     }
-    my $rpast := $<nibbler>.ast;
-    my %capnames := Regex::P6Regex::Actions::capnames($rpast, 0);
-    %capnames{''} := 0;
-    $rpast := PAST::Regex.new(
-                  $rpast, 
-                  PAST::Regex.new( :pasttype('pass') ),
-                  :pasttype('concat'),
-                  :capnames(%capnames)
-    );
-    my $past := PAST::Block.new( $rpast, :name(~$<longname>), :blocktype('method'), :node($/) );
-    @MODIFIERS.shift;
+    my $name := ~$<longname>;
+    my $past;
+    if $<proto> {
+        $past := 
+            PAST::Block.new( :name($name),
+                PAST::Op.new( 
+                    PAST::Var.new( :name('self'), :scope('register') ),
+                    $name,
+                    :name('protoregex'),
+                    :pasttype('callmethod'),
+                ),
+                :blocktype('method'),
+                :lexical(0),
+                :node($/)
+            );
+    }
+    else {
+        my $rpast := $<nibbler>.ast;
+        my %capnames := Regex::P6Regex::Actions::capnames($rpast, 0);
+        %capnames{''} := 0;
+        $rpast := PAST::Regex.new(
+                      $rpast, 
+                      PAST::Regex.new( :pasttype('pass') ),
+                      :pasttype('concat'),
+                      :capnames(%capnames)
+        );
+        $past := PAST::Block.new( $rpast, :name($name), 
+                     :blocktype('method'), :node($/) );
+        @MODIFIERS.shift;
+    }
     make $past;
 }
+

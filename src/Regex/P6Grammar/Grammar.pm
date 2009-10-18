@@ -17,9 +17,12 @@ grammar Regex::P6Grammar::Grammar is Regex::P6Regex::Grammar;
     rule grammar_stmt { grammar <name> [ is <base=name> ]? ';' }
 
     rule regex_stmt {
-        $<sym>=[regex|token|rule]
-        <longname>
-        {*} #= open
-        '{'<nibbler>'}'
+        [
+        | $<proto>=[proto] [regex|token|rule] <longname> '{' '<...>' '}'
+        | $<sym>=[regex|token|rule]
+          <longname>
+          {*} #= open
+          '{'<nibbler>'}'
+        ]
     }
 
