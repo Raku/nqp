@@ -82,6 +82,8 @@ CLEANUPS = \
   src/gen/*.pir \
 
 all: $(P6REGEX_PBC) $(P6GRAMMAR_PBC)
+exe: P6Regex$(EXE) P6Grammar$(EXE)
+
 stage0: $(P6REGEX_PBC_0) $(P6GRAMMAR_PBC_0)
 stage1: $(P6REGEX_PBC_1) $(P6GRAMMAR_PBC_1)
 
@@ -134,6 +136,14 @@ $(P6REGEX_PBC): $(P6REGEX_G) $(P6REGEX_A) $(P6REGEX_SOURCES)
 
 $(P6GRAMMAR_PBC): $(P6GRAMMAR_G) $(P6GRAMMAR_A) $(P6GRAMMAR_SOURCES)
 	$(PARROT) -o $(P6GRAMMAR_PBC) src/Regex/P6Grammar.pir
+
+P6Regex$(EXE): $(P6REGEX_PBC) $(PBC_TO_EXE)
+	$(PBC_TO_EXE) $(P6REGEX_PBC)
+
+P6Grammar$(EXE): $(P6GRAMMAR_PBC) $(PBC_TO_EXE)
+	$(PBC_TO_EXE) $(P6GRAMMAR_PBC)
+	
+
 
 bootstrap: p6grammar
 	./p6grammar --target=pir src/Regex/P6Regex/Grammar.pm >p6regex-grammar.pir
