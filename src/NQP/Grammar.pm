@@ -3,7 +3,7 @@ grammar NQP::Grammar;
 token starter { \" }
 token stopper { \" }
 
-token TOP { ^ \s* <integer> \s* $ }
+token TOP { <quote_delimited> }
 
 token quote_delimited {
     <starter> <quote_atom>* <stopper>

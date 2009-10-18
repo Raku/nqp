@@ -1,7 +1,7 @@
 class NQP::Actions;
 
 method TOP($/, $key?) {
-    make PAST::Val.new( :value($<integer>.ast) );
+    make PAST::Val.new( :value($<quote_delimited>.ast) );
 }
 
 method integer($/) {
@@ -37,21 +37,31 @@ method escape:sym<nl>($/) { make "\n"; }
 method escape:sym<bs>($/) { make "\b"; }
 method escape:sym<tab>($/) { make "\t"; }
 
+method escape:sym<hex>($/) {
+    make ints_to_string( $<hexint> ?? $<hexint> !! $<hexints><hexint> );
+}
+
+method escape:sym<oct>($/) {
+    make ints_to_string( $<octint> ?? $<octint> !! $<octints><octint> );
+}
+
+
 sub string_to_int($src, $base) {
     Q:PIR {
-        .local string src
-        $P0 = find_lex '$src'
-        src = $P0
+        .local pmc src
+        .local string src_s
+        src = find_lex '$src'
+        src_s = src
         .local int base, pos, eos, result
         $P0 = find_lex '$base'
         base = $P0
         pos = 0
-        eos = length src
+        eos = length src_s
         result = 0
       str_loop:
         unless pos < eos goto str_done
         .local string char
-        char = substr src, pos, 1
+        char = substr src_s, pos, 1
         if char == '_' goto str_next
         .local int digitval
         digitval = index "00112233445566778899AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz", char
@@ -64,8 +74,32 @@ sub string_to_int($src, $base) {
         inc pos
         goto str_loop
       err_base:
-        die "Invalid radix conversion"
+	src.'panic'('Invalid radix conversion of "', char, '"')
       str_done:
+        %r = box result
+    };
+}
+
+sub ints_to_string($ints) {
+    Q:PIR {
+        .local string result
+        result = ''
+        .local pmc ints, ints_it
+        ints = find_lex '$ints'
+        $I0 = does ints, 'array'
+        unless $I0 goto ints_1
+        ints_it = iter ints
+      ints_loop:
+        unless ints_it goto ints_done
+        $P0 = shift ints_it
+        $I0 = $P0.'ast'()
+        $S0 = chr $I0
+        concat result, $S0
+        goto ints_loop
+      ints_1:
+        $I0 = ints.'ast'()
+        result = chr $I0
+      ints_done:
         %r = box result
     };
 }
