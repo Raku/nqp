@@ -344,7 +344,7 @@ method assertion:sym<[>($/) {
     while $i < $n {
         my $ast := $clist[$i].ast;
         if $ast.negate {
-            $past.subtype('zerowidth');
+            $ast.subtype('zerowidth');
             $past := PAST::Regex.new( $ast, $past, :pasttype('concat'), :node($/) );
         }
         else {
