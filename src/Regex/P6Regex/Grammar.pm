@@ -45,7 +45,7 @@ grammar Regex::P6Regex::Grammar;
         ]
     }
 
-    # proto token quantifier { <...> }
+    proto token quantifier { <...> }
     token quantifier:sym<*> { $<sym>=['*'] <backmod> }
     token quantifier:sym<+> { $<sym>=['+'] <backmod> }
     token quantifier:sym<?> { $<sym>=['?'] <backmod> }
@@ -59,7 +59,7 @@ grammar Regex::P6Regex::Grammar;
 
     token backmod { ':'? [ '?' | '!' | <!before ':'> ] }
 
-    # proto token metachar { <...> }
+    proto token metachar { <...> }
     token metachar:sym<ws> { <.normspace> }
     token metachar:sym<[ ]> { '[' <nibbler> ']' }
     token metachar:sym<( )> { '(' <nibbler> ')' }
@@ -94,7 +94,7 @@ grammar Regex::P6Regex::Grammar;
         [ <.ws> '=' <.ws> <quantified_atom> ]?
     }
 
-    # proto token backslash { <...> }
+    proto token backslash { <...> }
     token backslash:sym<w> { $<sym>=[<[dswnDSWN]>] }
     token backslash:sym<b> { $<sym>=[<[bB]>] }
     token backslash:sym<e> { $<sym>=[<[eE]>] }
@@ -109,7 +109,7 @@ grammar Regex::P6Regex::Grammar;
     token backslash:sym<Q> { 'Q' <.obs: '\\Q as quotemeta;quotes or literal variable match'> }
     token backslash:sym<misc> { \W }
 
-    # proto token assertion { <...> }
+    proto token assertion { <...> }
 
     token assertion:sym<?> { '?' [ <?before '>' > | <assertion> ] }
     token assertion:sym<!> { '!' [ <?before '>' > | <assertion> ] }
@@ -151,6 +151,7 @@ grammar Regex::P6Regex::Grammar;
         ]
     }
 
+    proto token mod_ident { <...> }
     token mod_ident:sym<ignorecase> { $<sym>=[i] 'gnorecase'? }
     token mod_ident:sym<ratchet>    { $<sym>=[r] 'atchet'? }
     token mod_ident:sym<sigspace>   { $<sym>=[s] 'igspace'? }

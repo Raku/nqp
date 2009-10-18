@@ -1,35 +1,5 @@
 .namespace ['Regex';'P6Regex';'Grammar']
 
-.sub 'quantifier' :method
-    .param pmc action          :named('action') :optional
-    .param pmc dba             :named('dba') :optional
-    .tailcall self.'!protoregex'('quantifier', 'action'=>action)
-.end
-
-.sub 'metachar' :method
-    .param pmc action          :named('action') :optional
-    .param pmc dba             :named('dba') :optional
-    .tailcall self.'!protoregex'('metachar', 'action'=>action)
-.end
-
-.sub 'backslash' :method
-    .param pmc action          :named('action') :optional
-    .param pmc dba             :named('dba') :optional
-    .tailcall self.'!protoregex'('backslash', 'action'=>action)
-.end
-
-.sub 'assertion' :method
-    .param pmc action          :named('action') :optional
-    .param pmc dba             :named('dba') :optional
-    .tailcall self.'!protoregex'('assertion', 'action'=>action)
-.end
-
-.sub 'mod_ident' :method
-    .param pmc action          :named('action') :optional
-    .param pmc dba             :named('dba') :optional
-    .tailcall self.'!protoregex'('mod_ident', 'action'=>action)
-.end
-
 .sub 'panic' :method
     .param pmc args            :slurpy
 
