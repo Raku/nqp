@@ -419,14 +419,12 @@ An operator precedence parser.
 
   opstack_loop:
     unless opstack goto opstack_done
-    say 'opstack'
     capture_lex reduce
     self.reduce()
     goto opstack_loop
   opstack_done:
 
   expr_done:
-    say 'expr_done'
     term = pop termstack
     pos = here.'pos'()
     here = self.'!cursor_start'()
