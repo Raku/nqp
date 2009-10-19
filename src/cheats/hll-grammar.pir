@@ -381,6 +381,45 @@ An operator precedence parser.
     term = here.'MATCH'()
     push termstack, term
 
+    # interleave any prefix/postfix we might have found
+    .local pmc prefixish, postfixish
+    prefixish = term['prefixish']
+    postfixish = term['postfixish']
+
+  prepostfix_loop:
+    unless prefixish goto prepostfix_done
+    unless postfixish goto prepostfix_done
+    .local string preprec, postprec
+    $P0 = prefixish[0]
+    preprec = $P0['prec']
+    $P1 = postfixish[0]
+    postprec = $P0['prec']
+    if postprec < preprec goto postltpre
+  postgtpre:
+    $P0 = shift prefixish
+    push opstack, $P0
+    goto prepostfix_loop
+  postltpre:
+    $P0 = shift postfixish
+    push opstack, $P0
+    goto prepostfix_loop
+  prepostfix_done:
+
+  prefix_loop:
+    unless prefixish goto prefix_done
+    $P0 = shift prefixish
+    push opstack, $P0
+    goto prefix_loop
+  prefix_done:
+
+  postfix_loop:
+    unless postfixish goto postfix_done
+    $P0 = shift postfixish
+    push opstack, $P0
+    goto postfix_loop
+  postfix_done:
+
+    # Now see if we can fetch an infix operator
     .local pmc infixcur, infix
     here = here.'ws'()
     infixcur = here.'infixish'()
@@ -395,6 +434,7 @@ An operator precedence parser.
     unless inprec goto err_inprec
 
   reduce_loop:
+    unless opstack goto reduce_done
     $P0 = opstack[-1]
     $P0 = $P0['O']
     opprec = $P0['prec']
@@ -448,7 +488,11 @@ An operator precedence parser.
     opstack = find_lex '@opstack'
 
     .local pmc op
+    .local string opassoc
     op = pop opstack
+    $P0 = op['O']
+    opassoc = $P0['assoc']
+    if opassoc == 'unary' goto op_unary
   op_infix:
     .local pmc right, left
     right = pop termstack
@@ -456,6 +500,22 @@ An operator precedence parser.
     op[0] = left
     op[1] = right
     self.'!reduce'('EXPR', 'INFIX', op)
+    goto done
+  op_unary:
+    .local pmc arg, afrom, ofrom
+    arg = pop termstack
+    op[0] = arg
+    afrom = arg.'from'()
+    ofrom = op.'from'()
+    if afrom < ofrom goto op_postfix
+  op_prefix:
+    self.'!reduce'('EXPR', 'PREFIX', op)
+    goto done
+  op_postfix:
+    self.'!reduce'('EXPR', 'POSTFIX', op)
+    goto done
+
+  done:
     push termstack, op
 .end
 

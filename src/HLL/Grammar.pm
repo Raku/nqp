@@ -1,15 +1,21 @@
 grammar HLL::Grammar;
 
     token termish {
+        <prefixish>*
         <noun>
+        <postfixish>*
     }
 
     proto token noun { <...> }
+    proto token infix { <...> }
+    proto token prefix { <...> }
+    proto token postfix { <...> }
+
     token noun:sym<term> { <term> }
 
-    token infixish {
-        <infix>
-    }
+    token infixish { <infix> }
+    token prefixish { <prefix> }
+    token postfixish { <postfix> }
 
     token quote_delimited {
         <starter> <quote_atom>* <stopper>

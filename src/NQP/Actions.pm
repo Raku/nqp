@@ -1,7 +1,9 @@
 class NQP::Actions is HLL::Actions;
 
 # These will eventually go in NQP::Grammar.
+NQP::Grammar.O(':prec<x=>, :assoc<unary>', '%autoincrement');
 NQP::Grammar.O(':prec<w=>, :assoc<left>', '%exponentiation');
+NQP::Grammar.O(':prec<v=>, :assoc<unary>', '%symbolic_unary');
 NQP::Grammar.O(':prec<u=>, :assoc<left>', '%multiplicative');
 NQP::Grammar.O(':prec<t=>, :assoc<left>', '%additive');
 

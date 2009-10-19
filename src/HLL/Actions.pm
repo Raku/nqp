@@ -2,19 +2,33 @@ class HLL::Actions;
 
 method EXPR($/, $key?) {
     unless $key { return 0; }
-    my $past;
+    my $past := PAST::Op.new( :node($/) );
+    for $/.list { $past.push($_.ast); }
     if $key eq 'INFIX' {
-        $past := PAST::Op.new( 
-                     $/[0].ast, $/[1].ast,
-                     :name( 'infix:<' ~ $<sym> ~ '>' )
-                 );
+       $past.name( 'infix:<' ~ $<sym> ~ '>' );
+    }
+    elsif $key eq 'PREFIX' {
+       $past.name( 'prefix:<' ~ $<sym> ~ '>' );
+    }
+    elsif $key eq 'POSTFIX' {
+       $past.name( 'postfix:<' ~ $<sym> ~ '>' );
     }
     make $past;
+}
+
+method prefixish($/) {
+    $<O> := $<prefix><O>;
+    $<sym> := $<prefix><sym>;
 }
 
 method infixish($/) {
     $<O> := $<infix><O>;
     $<sym> := $<infix><sym>;
+}
+
+method postfixish($/) {
+    $<O> := $<postfix><O>;
+    $<sym> := $<postfix><sym>;
 }
 
 method termish($/) {

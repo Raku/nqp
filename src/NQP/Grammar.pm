@@ -13,6 +13,12 @@ token infix:sym<%>  { $<sym>=['%']  <O('%multiplicative, :pirop<mod>')> }
 token infix:sym<+>  { $<sym>=['+']  <O('%additive      , :pirop<add>')> }
 token infix:sym<->  { $<sym>=['-']  <O('%additive      , :pirop<sub>')> }
 
+token prefix:sym<-> { $<sym>=['-']  <O('%symbolic_unary')> }
+token prefix:sym<--> { $<sym>=['--'] <O('%autoincrement')> }
+
+token postfix:sym<++> { $<sym>=['++'] <O('%autoincrement')> }
+
+
 token value {
     | <integer>
     | <quote_delimited>
