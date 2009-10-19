@@ -38,6 +38,8 @@ NQP::Compiler - NQP compiler
 .end
 
 
+.include 'src/cheats/nqp-grammar.pir'
+
 =cut
 
 # Local Variables:

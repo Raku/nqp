@@ -3,7 +3,7 @@ grammar NQP::Grammar;
 token starter { \" }
 token stopper { \" }
 
-token TOP { <value> }
+token TOP { <infix>* }
 
 token value {
     | <integer>
@@ -64,3 +64,10 @@ token charspec {
     | <.panic: 'Unrecognized \\c character'>
     ]
 }
+
+proto token infix { <...> }
+token infix:sym<+> { '+' <O('%additive       , :pirop<add>')> }
+token infix:sym<-> { '-' <O('%additive       , :pirop<sub>')> }
+token infix:sym<*> { '*' <O('%multiplicative , :pirop<mul>')> }
+token infix:sym</> { '/' <O('%multiplicative , :pirop<div>')> }
+

@@ -38,6 +38,8 @@ NQP_LANG_DIR     = $(PARROT_LIB_DIR)/languages/nqp
 
 P6REGEX_SOURCES = \
   src/Regex/P6Regex.pir \
+  src/Regex/P6Regex/Grammar.pm \
+  src/Regex/P6Regex/Actions.pm \
   src/cheats/p6regex-grammar.pir \
   src/cheats/hll-compiler.pir \
   src/cheats/regex-cursor-protoregex.pir \
@@ -58,6 +60,7 @@ NQP_SOURCES = \
   src/NQP/Grammar.pm \
   src/NQP/Actions.pm \
   src/NQP/Compiler.pir \
+  src/cheats/nqp-grammar.pir \
 
 STAGE0 = src/stage0
 STAGE1 = src/stage1

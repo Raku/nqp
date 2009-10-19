@@ -1,6 +1,9 @@
 class NQP::Actions;
 
-method TOP($/) {
+NQP::Grammar.O(':prec<u=>, :assoc<left>', '%multiplicative');
+NQP::Grammar.O(':prec<t=>, :assoc<left>', '%additive');
+
+method TOPx($/) {
     make $<value>.ast;
 }
 
