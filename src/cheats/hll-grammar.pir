@@ -361,6 +361,7 @@ An operator precedence parser.
 =cut
 
 .sub 'EXPR' :method
+    .const 'Sub' reduce = 'EXPR_reduce'
     .local string termish
     termish = 'termish'
 
@@ -386,7 +387,24 @@ An operator precedence parser.
     unless infixcur goto term_done
     infix = infixcur.'MATCH'()
 
-    push opstack, infix
+    unless opstack goto reduce_done
+    .local string inprec, inassoc, opprec
+    $P0 = infix['O']
+    inprec = $P0['prec']
+    inassoc = $P0['assoc']
+    unless inprec goto err_inprec
+    $P0 = opstack[-1]
+    $P0 = $P0['O']
+    opprec = $P0['prec']
+    unless opprec == inprec goto reduce_done
+    # equal precedence, use associativity to decide
+    unless inassoc == 'left' goto reduce_done
+    # left associative, reduce immediately
+    capture_lex reduce
+    self.reduce()
+  reduce_done:
+
+    push opstack, infix        # The Shift
     here = infixcur.'ws'()
     goto term_loop
   term_done:
@@ -394,7 +412,6 @@ An operator precedence parser.
   opstack_loop:
     unless opstack goto opstack_done
     say 'opstack'
-    .const 'Sub' reduce = 'EXPR_reduce'
     capture_lex reduce
     self.reduce()
     goto opstack_loop
@@ -414,6 +431,8 @@ An operator precedence parser.
   err_internal:
     $I0 = termstack
     here.'panic'('Internal operator parser error, @termstack == ', $I0)
+  err_inprec:
+    infixcur.'panic'('Missing infixish operator precedence')
 .end
 
 
