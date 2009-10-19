@@ -1,8 +1,5 @@
 grammar HLL::Grammar;
 
-    token starter { \" }
-    token stopper { \" }
-
     token quote_delimited {
         <starter> <quote_atom>* <stopper>
     }

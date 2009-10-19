@@ -1,8 +1,8 @@
 class NQP::Actions is HLL::Actions;
 
-method TOP($/) {
-    make $<value>.ast;
-}
+#method TOP($/) {
+#    make $<value>.ast;
+#}
 
 method value($/) {
     my $past := PAST::Val.new( 

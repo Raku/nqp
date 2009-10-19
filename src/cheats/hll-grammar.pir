@@ -12,10 +12,18 @@ src/cheats/hll-grammar.pir -- Additional HLL::Grammar methods
 
 
 .include 'cclass.pasm'
+.include 'src/Regex/constants.pir'
+
+.namespace ['HLL';'Grammar']
 
 .sub '' :load :init
     load_bytecode 'P6Regex.pbc'
+
+    .local pmc brackets
+    brackets = box unicode:"<>[](){}\xab\xbb\u0f3a\u0f3b\u0f3c\u0f3d\u169b\u169c\u2045\u2046\u207d\u207e\u208d\u208e\u2329\u232a\u2768\u2769\u276a\u276b\u276c\u276d\u276e\u276f\u2770\u2771\u2772\u2773\u2774\u2775\u27c5\u27c6\u27e6\u27e7\u27e8\u27e9\u27ea\u27eb\u2983\u2984\u2985\u2986\u2987\u2988\u2989\u298a\u298b\u298c\u298d\u298e\u298f\u2990\u2991\u2992\u2993\u2994\u2995\u2996\u2997\u2998\u29d8\u29d9\u29da\u29db\u29fc\u29fd\u3008\u3009\u300a\u300b\u300c\u300d\u300e\u300f\u3010\u3011\u3014\u3015\u3016\u3017\u3018\u3019\u301a\u301b\u301d\u301e\ufd3e\ufd3f\ufe17\ufe18\ufe35\ufe36\ufe37\ufe38\ufe39\ufe3a\ufe3b\ufe3c\ufe3d\ufe3e\ufe3f\ufe40\ufe41\ufe42\ufe43\ufe44\ufe47\ufe48\ufe59\ufe5a\ufe5b\ufe5c\ufe5d\ufe5e\uff08\uff09\uff3b\uff3d\uff5b\uff5d\uff5f\uff60\uff62\uff63"
+    set_global '$!brackets', brackets
 .end
+
 
 .include 'src/gen/hll-grammar.pir'
 .include 'src/gen/hll-actions.pir'
@@ -210,7 +218,135 @@ of the match.
     die message
 .end
 
-=back
+
+=item peek_delimiters(target, pos)
+
+Return the start/stop delimiter pair based on peeking at C<target>
+position C<pos>.
+
+=cut
+
+.sub 'peek_delimiters' :method
+    .param string target
+    .param int pos
+
+    .local string brackets, start, stop
+    $P0 = get_global '$!brackets'
+    brackets = $P0
+
+    # peek at the next character
+    start = substr target, pos, 1
+    # colon and word characters aren't valid delimiters
+    if start == ':' goto err_colon_delim
+    $I0 = is_cclass .CCLASS_WORD, start, 0
+    if $I0 goto err_word_delim
+    $I0 = is_cclass .CCLASS_WHITESPACE, start, 0
+    if $I0 goto err_ws_delim
+
+    # assume stop delim is same as start, for the moment
+    stop = start
+
+    # see if we have an opener or closer
+    $I0 = index brackets, start
+    if $I0 < 0 goto bracket_end
+    # if it's a closing bracket, that's an error also
+    $I1 = $I0 % 2
+    if $I1 goto err_close
+    # it's an opener, so get the closing bracket
+    inc $I0
+    stop = substr brackets, $I0, 1
+
+    # see if the opening bracket is repeated 
+    .local int len
+    len = 0
+  bracket_loop:
+    inc pos
+    inc len
+    $S0 = substr target, pos, 1
+    if $S0 == start goto bracket_loop
+    if len == 1 goto bracket_end
+    start = repeat start, len
+    stop = repeat stop, len
+  bracket_end:
+    .return (start, stop)
+
+  err_colon_delim:
+    self.'panic'('Colons may not be used to delimit quoting constructs')
+  err_word_delim:
+    self.'panic'('Alphanumeric character is not allowed as a delimiter')
+  err_ws_delim:
+    self.'panic'('Whitespace character is not allowed as a delimiter')
+  err_close:
+    self.'panic'('Use of a closing delimiter for an opener is reserved')
+.end
+
+
+.sub 'quote_EXPR' :method
+    .param pmc args            :slurpy
+
+    .local pmc cur
+    .local string target
+    .local int pos
+
+    (cur, pos, target) = self.'!cursor_start'()
+    .local pmc start, stop
+    (start, stop) = self.'peek_delimiters'(target, pos) 
+
+    .lex '$*QUOTE_START', start
+    .lex '$*QUOTE_STOP', stop
+
+    $P10 = cur.'quote_delimited'()
+    unless $P10 goto fail
+    cur.'!mark_push'(0, CURSOR_FAIL, 0, $P10)
+    $P10.'!cursor_names'('quote_delimited')
+    pos = $P10.'pos'()
+    cur.'!cursor_pass'(pos, 'quote_EXPR')
+  fail:
+    .return (cur)
+.end
+
+
+.sub 'starter' :method
+    .local pmc cur
+    .local string target, start
+    .local int pos
+
+    (cur, pos, target) = self.'!cursor_start'()
+
+    $P0 = find_dynamic_lex '$*QUOTE_START'
+    if null $P0 goto fail
+    start = $P0
+
+    $I0 = length start
+    $S0 = substr target, pos, $I0
+    unless $S0 == start goto fail
+    pos += $I0
+    cur.'!cursor_pass'(pos, 'starter')
+  fail:
+    .return (cur)
+.end
+
+
+.sub 'stopper' :method
+    .local pmc cur
+    .local string target, start
+    .local int pos
+
+    (cur, pos, target) = self.'!cursor_start'()
+
+    $P0 = find_dynamic_lex '$*QUOTE_STOP'
+    if null $P0 goto fail
+    start = $P0
+
+    $I0 = length start
+    $S0 = substr target, pos, $I0
+    unless $S0 == start goto fail
+    pos += $I0
+    cur.'!cursor_pass'(pos, 'stopper')
+  fail:
+    .return (cur)
+.end
+
 
 =cut
 
