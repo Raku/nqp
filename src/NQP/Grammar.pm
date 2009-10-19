@@ -1,6 +1,9 @@
 grammar NQP::Grammar is HLL::Grammar;
 
-token TOP { <quote> }
+token TOP { <EXPR> }
+
+proto token term { <...> }
+token term:sym<value> { <value> }
 
 token value {
     | <integer>

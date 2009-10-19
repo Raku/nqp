@@ -1,5 +1,11 @@
 class HLL::Actions;
 
+method termish($/) {
+    make $<noun>.ast;
+}
+
+method noun:sym<term>($/) { make $<term>.ast }
+
 method integer($/) {
     make $<decint> 
          ?? string_to_int( $<decint>, 10)

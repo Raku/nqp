@@ -348,6 +348,27 @@ position C<pos>.
 .end
 
 
+=item EXPR(...)
+
+An operator precedence parser.
+
+=cut
+
+.sub 'EXPR' :method
+    .local string termish
+    termish = 'termish'
+
+    .local pmc here, term
+    .local int pos
+    (here, pos) = self.'!cursor_start'()
+
+    here = here.termish()
+    unless here goto fail
+
+  fail:
+    .return (here)
+.end
+
 =cut
 
 # Local Variables:

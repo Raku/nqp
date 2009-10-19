@@ -1,5 +1,12 @@
 grammar HLL::Grammar;
 
+    token termish {
+        <noun>
+    }
+
+    proto token noun { <...> }
+    token noun:sym<term> { <term> }
+
     token quote_delimited {
         <starter> <quote_atom>* <stopper>
     }
