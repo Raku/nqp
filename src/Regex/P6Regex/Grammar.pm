@@ -124,6 +124,7 @@ grammar Regex::P6Regex::Grammar;
             | <?before '>'>
             | '=' <assertion>
             | ':' <arglist>
+            | '(' <arglist> ')'
             | <.normspace> <nibbler>
             ]?
     }

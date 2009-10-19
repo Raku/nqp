@@ -1034,12 +1034,7 @@ Perform a subrule call.
     ops.'push'(name)
     ops.'push_pirop'('callmethod', '"!cursor_names"', '$P10', name)
   subrule_pos:
-    .local pmc poslabel
-    poslabel = self.'post_new'('Label', 'name'=>'rxsubrule_')
-    ops.'push_pirop'('can', '$I10', '$P10', '"pos"')
-    ops.'push_pirop'('unless', '$I10', poslabel)
     ops.'push_pirop'('callmethod', '"pos"', '$P10', 'result'=>pos)
-    ops.'push'(poslabel)
   done:
     .return (ops)
 .end
