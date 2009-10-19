@@ -44,6 +44,8 @@ in reverse order of longest regex name.
     (tokrx, toklen) = self.'!protoregex_gen_tokrx'(prototable, name)
   have_tokrx:
 
+    unless tokrx goto token_fail
+
     .local pmc tokrx_it
     tokrx_it = iter tokrx
   token_loop:
@@ -55,6 +57,9 @@ in reverse order of longest regex name.
     goto token_loop
   token_done:
     .return (cur)
+
+  token_fail:
+    .return (0)
 .end
 
 
