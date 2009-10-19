@@ -12,6 +12,8 @@ method TOP($/) { make $<EXPR>.ast; }
 
 method term:sym<value>($/) { make $<value>.ast; }
 
+method circumfix:sym<( )>($/) { make $<EXPR>.ast; }
+
 method value($/) {
     my $past := PAST::Val.new( 
                     :value($<integer> 

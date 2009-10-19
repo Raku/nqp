@@ -10,8 +10,10 @@ grammar HLL::Grammar;
     proto token infix { <...> }
     proto token prefix { <...> }
     proto token postfix { <...> }
+    proto token circumfix { <...> }
 
     token noun:sym<term> { <term> }
+    token noun:sym<circumfix> { <circumfix> }
 
     token infixish { <infix> }
     token prefixish { <prefix> }

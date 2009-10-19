@@ -19,6 +19,7 @@ token prefix:sym<--> { $<sym>=['--'] <O('%autoincrement')> }
 
 token postfix:sym<++> { $<sym>=['++'] <O('%autoincrement')> }
 
+token circumfix:sym<( )> { '(' <EXPR> ')' }
 
 token value {
     | <integer>

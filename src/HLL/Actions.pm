@@ -36,6 +36,7 @@ method termish($/) {
 }
 
 method noun:sym<term>($/) { make $<term>.ast }
+method noun:sym<circumfix>($/) { make $<circumfix>.ast }
 
 method integer($/) {
     make $<decint> 
