@@ -393,9 +393,17 @@ An operator precedence parser.
     inprec = $P0['prec']
     inassoc = $P0['assoc']
     unless inprec goto err_inprec
+
+  reduce_loop:
     $P0 = opstack[-1]
     $P0 = $P0['O']
     opprec = $P0['prec']
+    unless opprec > inprec goto reduce_gt_done
+    capture_lex reduce
+    self.reduce()
+    goto reduce_loop
+  reduce_gt_done:
+
     unless opprec == inprec goto reduce_done
     # equal precedence, use associativity to decide
     unless inassoc == 'left' goto reduce_done
