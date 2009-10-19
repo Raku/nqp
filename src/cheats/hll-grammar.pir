@@ -367,11 +367,29 @@ An operator precedence parser.
     .local pmc here, infix, from, pos
     (here, pos) = self.'!cursor_start'()
 
+  term_loop:
     here = here.termish()
     unless here goto fail
     push termstack, here
 
+    here = here.'ws'()
+    infix = here.'infixish'()
+    unless infix goto term_done
+
+    push opstack, infix
+    here = infix.'ws'()
+    goto term_loop
+
   term_done:
+
+  opstack_loop:
+    unless opstack goto opstack_done
+    .const 'Sub' reduce = 'reduce'
+    capture_lex reduce
+    reduce()
+    goto opstack_loop
+  opstack_done:
+ 
     # $I0 = elements termstack
     # if $I0 != 1 goto err_internal
     from = getattribute self, '$!from'
@@ -386,6 +404,27 @@ An operator precedence parser.
   err_internal:
     $I0 = termstack
     here.'panic'('Internal operator parser error, @termstack == ', $I0)
+.end
+
+
+.sub 'reduce' :anon :outer('EXPR')
+    .local pmc termstack, opstack
+    termstack = find_lex '@termstack'
+    opstack = find_lex '@opstack'
+
+    .local pmc op, opmatch
+    op = pop opstack
+    opmatch = op.'MATCH'()
+  op_infix:
+    .local pmc rmatch, lmatch
+    $P0 = pop termstack
+    rmatch = $P0.'MATCH'()
+    $P0 = pop termstack
+    lmatch = $P0.'MATCH'()
+    opmatch[0] = lmatch
+    opmatch[1] = rmatch
+    op.'!reduce'('EXPR', 'INFIX')
+    push termstack, op
 .end
 
 =cut

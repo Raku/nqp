@@ -7,6 +7,10 @@ grammar HLL::Grammar;
     proto token noun { <...> }
     token noun:sym<term> { <term> }
 
+    token infixish {
+        <infix>
+    }
+
     token quote_delimited {
         <starter> <quote_atom>* <stopper>
     }

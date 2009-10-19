@@ -1,5 +1,23 @@
 class HLL::Actions;
 
+method EXPR($/, $key?) {
+    Q:PIR { say 'EXPR' };
+    unless $key { return 0; }
+    my $past;
+    if $key eq 'INFIX' {
+        $past := PAST::Op.new( 
+                     $/[0].ast, $/[1].ast,
+                     :name( 'infix:<' ~ $<sym> ~ '>' )
+                 );
+    }
+    make $past;
+}
+
+method infixish($/) {
+    $<O> := $<infix><O>;
+    $<sym> := $<infix><sym>;
+}
+
 method termish($/) {
     make $<noun>.ast;
 }
