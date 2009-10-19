@@ -6,8 +6,8 @@ proto token term { <...> }
 token term:sym<value> { <value> }
 
 proto token infix { <...> }
-token infix:sym<+> { $<sym>=['+'] }
-token infix:sym<-> { $<sym>=['-'] }
+token infix:sym<+> { $<sym>=['+'] <O('%additive, :pirop<add>')> }
+token infix:sym<-> { $<sym>=['-'] <O('%additive, :pirop<sub>')> }
 
 token value {
     | <integer>

@@ -104,7 +104,13 @@ C< :!pair >, and C<< :pair<strval> >>.
     # as a lookup of a previously saved hash to be merged in.
     .local string lookup
     .local int lpos
+    # Find the first whitespace or comma
     lpos = find_cclass .CCLASS_WHITESPACE, spec, pos, eos
+    $I0 = index spec, ',', pos
+    if $I0 < 0 goto have_lookup_lpos
+    if $I0 >= lpos goto have_lookup_lpos
+    lpos = $I0
+  have_lookup_lpos:
     $I0 = lpos - pos
     lookup = substr spec, pos, $I0
     .local pmc lhash, lhash_it

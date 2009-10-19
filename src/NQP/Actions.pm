@@ -1,5 +1,8 @@
 class NQP::Actions is HLL::Actions;
 
+# These will eventually go in NQP::Grammar.
+NQP::Grammar.O(':prec<t=>, :assoc<left>', '%additive');
+
 method TOP($/) { make $<EXPR>.ast; }
 
 method term:sym<value>($/) { make $<value>.ast; }

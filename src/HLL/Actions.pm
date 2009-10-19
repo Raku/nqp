@@ -1,7 +1,6 @@
 class HLL::Actions;
 
 method EXPR($/, $key?) {
-    Q:PIR { say 'EXPR' };
     unless $key { return 0; }
     my $past;
     if $key eq 'INFIX' {
