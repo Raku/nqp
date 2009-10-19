@@ -8,5 +8,8 @@ P6Regex
 P6Regex.pbc
 P6Grammar
 P6Grammar.pbc
+HLLGrammar.pbc
+nqp
+nqp.pbc
 src/gen/*.pir
 src/stage1
