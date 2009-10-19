@@ -1,16 +1,26 @@
 class NQP::Actions;
 
-method TOP($/, $key?) {
-    make PAST::Val.new( :value($<quote_delimited>.ast) );
+method TOP($/) {
+    make $<value>.ast;
+}
+
+method value($/) {
+    my $past := PAST::Val.new( 
+                    :value($<integer> ?? $<integer>.ast !! $<quote_delimited>.ast)
+    );
+    make $past;
 }
 
 method integer($/) {
-    make 
-      $<hexint> 
-         ?? $<hexint>.ast
-         !! $<octint>
-            ?? $<octint>.ast
-            !! string_to_int( $<digits>, $<base> eq 'b' ?? 2 !! 10 );
+    make $<decint> 
+         ?? string_to_int( $<decint>, 10)
+         !! ( $<hexint> 
+              ?? $<hexint>.ast
+              !! ( $<octint> 
+                   ?? $<octint>.ast
+                   !! string_to_int( $<binint>, 2)
+                 )
+            );
 }
 
 method hexint($/) {

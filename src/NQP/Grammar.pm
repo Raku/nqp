@@ -3,7 +3,12 @@ grammar NQP::Grammar;
 token starter { \" }
 token stopper { \" }
 
-token TOP { <quote_delimited> }
+token TOP { <value> }
+
+token value {
+    | <integer>
+    | <quote_delimited>
+}
 
 token quote_delimited {
     <starter> <quote_atom>* <stopper>
@@ -25,12 +30,12 @@ token octints { [<.ws><octint><.ws>] ** ',' }
 
 token integer {
     [
-    | 0 [ b $<digits>=[[<[01]>+] ** '_']
+    | 0 [ b $<binint>=[[<[01]>+] ** '_']
         | o <octint>
         | x <hexint>
-        | d $<digits>=[[\d+] ** '_']
+        | d $<decint>=[[\d+] ** '_']
         ]
-    | $<digits>=[\d+ [_\d+]*]
+    | $<decint>=[\d+ [_\d+]*]
     ]
 }
 
