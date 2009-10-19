@@ -1029,11 +1029,17 @@ Perform a subrule call.
     ops.'push_pirop'('callmethod', subpost, cur, posargs :flat, namedargs :flat, 'result'=>'$P10')
     ops.'push_pirop'(testop, '$P10', fail)
     if subtype == 'zerowidth' goto done
-    ops.'push_pirop'('callmethod', '"pos"', '$P10', 'result'=>pos)
+    if subtype == 'method' goto subrule_pos
     self.'!cursorop'(ops, '!mark_push', 0, 0, CURSOR_FAIL, 0, '$P10')
-    if subtype == 'method' goto done
     ops.'push'(name)
     ops.'push_pirop'('callmethod', '"!cursor_names"', '$P10', name)
+  subrule_pos:
+    .local pmc poslabel
+    poslabel = self.'post_new'('Label', 'name'=>'rxsubrule_')
+    ops.'push_pirop'('can', '$I10', '$P10', '"pos"')
+    ops.'push_pirop'('unless', '$I10', poslabel)
+    ops.'push_pirop'('callmethod', '"pos"', '$P10', 'result'=>pos)
+    ops.'push'(poslabel)
   done:
     .return (ops)
 .end
