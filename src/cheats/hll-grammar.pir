@@ -358,15 +358,34 @@ An operator precedence parser.
     .local string termish
     termish = 'termish'
 
-    .local pmc here, term
-    .local int pos
+    .local pmc opstack, termstack
+    opstack = new ['ResizablePMCArray']
+    .lex '@opstack', opstack
+    termstack = new ['ResizablePMCArray']
+    .lex '@termstack', termstack
+
+    .local pmc here, infix, from, pos
     (here, pos) = self.'!cursor_start'()
 
     here = here.termish()
     unless here goto fail
+    push termstack, here
 
+  term_done:
+    # $I0 = elements termstack
+    # if $I0 != 1 goto err_internal
+    from = getattribute self, '$!from'
+    pos = getattribute here, '$!pos'
+    here = pop termstack
+    setattribute here, '$!from', from
+    setattribute here, '$!pos', pos
+    here.'!reduce'('EXPR')
   fail:
     .return (here)
+
+  err_internal:
+    $I0 = termstack
+    here.'panic'('Internal operator parser error, @termstack == ', $I0)
 .end
 
 =cut

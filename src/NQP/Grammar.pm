@@ -5,6 +5,10 @@ token TOP { <EXPR> }
 proto token term { <...> }
 token term:sym<value> { <value> }
 
+proto token infix { <...> }
+token infix:sym<+> { '+' }
+token infix:sym<-> { '-' }
+
 token value {
     | <integer>
     | <quote_delimited>
