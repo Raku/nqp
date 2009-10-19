@@ -520,7 +520,7 @@ capture states.
 .end
 
 
-=item !reduce(name [, key])
+=item !reduce(name [, key] [, match])
 
 Perform any action associated with the current regex match.
 
@@ -530,13 +530,16 @@ Perform any action associated with the current regex match.
     .param string name
     .param string key          :optional
     .param int has_key         :opt_flag
+    .param pmc match           :optional
+    .param int has_match       :opt_flag
     .local pmc action
     action = getattribute self, '$!action'
     if null action goto action_done
     $I0 = can action, name
     unless $I0 goto action_done
-    .local pmc match
+    if has_match goto match_done
     match = self.'MATCH'()
+  match_done:
     if has_key goto action_key
     action.name(match)
     goto action_done

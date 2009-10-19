@@ -370,39 +370,43 @@ An operator precedence parser.
     termstack = new ['ResizablePMCArray']
     .lex '@termstack', termstack
 
-    .local pmc here, infix, from, pos
+    .local pmc here, from, pos
     (here, pos) = self.'!cursor_start'()
 
   term_loop:
     here = here.termish()
     unless here goto fail
-    push termstack, here
+    .local pmc term
+    term = here.'MATCH'()
+    push termstack, term
 
+    .local pmc infixcur, infix
     here = here.'ws'()
-    infix = here.'infixish'()
-    unless infix goto term_done
+    infixcur = here.'infixish'()
+    unless infixcur goto term_done
+    infix = infixcur.'MATCH'()
 
     push opstack, infix
-    here = infix.'ws'()
+    here = infixcur.'ws'()
     goto term_loop
-
   term_done:
 
   opstack_loop:
     unless opstack goto opstack_done
-    .const 'Sub' reduce = 'reduce'
+    say 'opstack'
+    .const 'Sub' reduce = 'EXPR_reduce'
     capture_lex reduce
-    reduce()
+    self.reduce()
     goto opstack_loop
   opstack_done:
- 
-    # $I0 = elements termstack
-    # if $I0 != 1 goto err_internal
-    from = getattribute self, '$!from'
-    pos = getattribute here, '$!pos'
-    here = pop termstack
-    setattribute here, '$!from', from
+
+  expr_done:
+    say 'expr_done'
+    term = pop termstack
+    pos = here.'pos'()
+    here = self.'!cursor_start'()
     setattribute here, '$!pos', pos
+    setattribute here, '$!match', term
     here.'!reduce'('EXPR')
   fail:
     .return (here)
@@ -413,23 +417,20 @@ An operator precedence parser.
 .end
 
 
-.sub 'reduce' :anon :outer('EXPR')
+.sub 'EXPR_reduce' :method :anon :outer('EXPR')
     .local pmc termstack, opstack
     termstack = find_lex '@termstack'
     opstack = find_lex '@opstack'
 
-    .local pmc op, opmatch
+    .local pmc op
     op = pop opstack
-    opmatch = op.'MATCH'()
   op_infix:
-    .local pmc rmatch, lmatch
-    $P0 = pop termstack
-    rmatch = $P0.'MATCH'()
-    $P0 = pop termstack
-    lmatch = $P0.'MATCH'()
-    opmatch[0] = lmatch
-    opmatch[1] = rmatch
-    op.'!reduce'('EXPR', 'INFIX')
+    .local pmc right, left
+    right = pop termstack
+    left = pop termstack
+    op[0] = left
+    op[1] = right
+    self.'!reduce'('EXPR', 'INFIX', op)
     push termstack, op
 .end
 
