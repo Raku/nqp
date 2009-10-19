@@ -1,6 +1,13 @@
 .include 'cclass.pasm'
 
-.namespace ['NQP';'Grammar']
+.sub '' :load :init
+    load_bytecode 'P6Regex.pbc'
+.end
+
+.include 'src/gen/hll-grammar.pir'
+.include 'src/gen/hll-actions.pir'
+
+.namespace ['HLL';'Grammar']
 
 .sub 'O' :method
     .param string spec
@@ -19,11 +26,9 @@
     unless null hash goto hash_done
 
     hash = new ['Hash']
-    
     .local int pos, eos
     pos = 0
     eos = length spec
-
   spec_loop:
     pos = find_not_cclass .CCLASS_WHITESPACE, spec, pos, eos
     if pos >= eos goto spec_done

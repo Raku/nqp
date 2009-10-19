@@ -10,7 +10,7 @@ NQP::Compiler - NQP compiler
 
 .sub '' :anon :load :init
     load_bytecode 'PCT.pbc'
-    load_bytecode 'P6Regex.pbc'
+    load_bytecode 'HLLGrammar.pbc'
 .end
 
 .include 'src/gen/nqp-grammar.pir'
@@ -36,9 +36,6 @@ NQP::Compiler - NQP compiler
     $P1 = $P0.'command_line'(args_str, 'encoding'=>'utf8', 'transcode'=>'ascii iso-8859-1')
     exit 0
 .end
-
-
-.include 'src/cheats/nqp-grammar.pir'
 
 =cut
 
