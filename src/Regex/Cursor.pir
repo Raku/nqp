@@ -46,8 +46,9 @@ for the Cursor if one hasn't been created yet.
     .local pmc match
     match = getattribute self, '$!match'
     if null match goto match_make
-    $I0 = isa match, ['Regex';'Match']
-    if $I0 goto match_done
+    $P0 = get_global '$!TRUE'
+    $I0 = issame match, $P0
+    unless $I0 goto match_done
 
     # First, create a Match object and bind it
   match_make:
