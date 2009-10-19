@@ -100,7 +100,13 @@ for the Cursor if one hasn't been created yet.
     $P0 = getattribute subcur, '$!names'
     if null $P0 goto cstack_loop
     subname = $P0
+    $I0 = isa subcur, ['Regex';'Cursor']
+    unless $I0 goto cstack_1
     submatch = subcur.'MATCH'()
+    goto cstack_2
+  cstack_1:
+    submatch = subcur
+  cstack_2:
     keyint = is_cclass .CCLASS_NUMERIC, subname, 0
     if null caparray goto cstack_bind
     $I0 = exists caphash[subname]
