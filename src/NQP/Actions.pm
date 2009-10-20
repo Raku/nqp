@@ -7,7 +7,8 @@ NQP::Grammar.O(':prec<w=>, :assoc<left>',  '%exponentiation');
 NQP::Grammar.O(':prec<v=>, :assoc<unary>', '%symbolic_unary');
 NQP::Grammar.O(':prec<u=>, :assoc<left>',  '%multiplicative');
 NQP::Grammar.O(':prec<t=>, :assoc<left>',  '%additive');
-NQP::Grammar.O(':prec<i=>, :assoc<right>',  '%assignment');
+NQP::Grammar.O(':prec<r=>, :assoc<list>',  '%concatenation'); 
+NQP::Grammar.O(':prec<i=>, :assoc<right>', '%assignment');
 
 method TOP($/) { make $<EXPR>.ast; }
 
@@ -16,7 +17,7 @@ method term:sym<value>($/) { make $<value>.ast; }
 method circumfix:sym<( )>($/) { make $<EXPR>.ast; }
 
 method postcircumfix:sym<[ ]>($/) {
-    make PAST::Var.new( 0, $<EXPR>.ast , :scope('keyed_int') );
+    make PAST::Var.new( $<EXPR>.ast , :scope('keyed_int') );
 }
 
 method value($/) {

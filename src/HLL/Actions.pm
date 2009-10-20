@@ -4,17 +4,18 @@ method EXPR($/, $key?) {
     unless $key { return 0; }
     my $past := $<OPER>.peek_ast;
     unless $past { 
+        if $key eq 'LIST' { $key := 'infix'; }
         my $name := Q:PIR {
             $P0 = find_lex '$key'
             $S0 = $P0
             $S0 = downcase $S0
             %r = box $S0
-        } ~ ':<' ~ $key ~ '>';
-        $past := PAST::OP.new( :name($name), :node($/) ); 
+        } ~ ':<' ~ $<OPER><sym> ~ '>';
+        $past := PAST::Op.new( :name($name), :node($/) ); 
     }
-    $past[0] := $/[0].ast;
-    if $key eq 'INFIX' {
-       $past[1] := $/[1].ast;
+    if $key eq 'POSTFIX' { $past.unshift($/[0].ast); }
+    else {
+        for $/.list { $past.push($_.ast); }
     }
     make $past;
 }

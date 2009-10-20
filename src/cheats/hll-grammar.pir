@@ -377,6 +377,7 @@ An operator precedence parser.
   term_loop:
     here = here.termish()
     unless here goto fail
+    termish = 'termish'
     .local pmc term
     term = here.'MATCH'()
     push termstack, term
@@ -499,13 +500,14 @@ An operator precedence parser.
     termstack = find_lex '@termstack'
     opstack = find_lex '@opstack'
 
-    .local pmc op
+    .local pmc op, opOPER, opO
     .local string opassoc
     op = pop opstack
-    $P0 = op['OPER']
-    $P0 = $P0['O']
-    opassoc = $P0['assoc']
+    opOPER = op['OPER']
+    opO = opOPER['O']
+    opassoc = opO['assoc']
     if opassoc == 'unary' goto op_unary
+    if opassoc == 'list' goto op_list
   op_infix:
     .local pmc right, left
     right = pop termstack
@@ -514,6 +516,7 @@ An operator precedence parser.
     op[1] = right
     self.'!reduce'('EXPR', 'INFIX', op)
     goto done
+
   op_unary:
     .local pmc arg, afrom, ofrom
     arg = pop termstack
@@ -526,6 +529,27 @@ An operator precedence parser.
     goto done
   op_postfix:
     self.'!reduce'('EXPR', 'POSTFIX', op)
+    goto done
+
+  op_list:
+    .local string sym
+    sym = opOPER['sym']
+    arg = pop termstack
+    unshift op, arg
+  op_sym_loop:
+    unless opstack goto op_sym_done
+    $P0 = opstack[-1]
+    $P0 = $P0['OPER']
+    $S0 = $P0['sym']
+    if sym != $S0 goto op_sym_done
+    arg = pop termstack
+    unshift op, arg
+    $P0 = pop opstack
+    goto op_sym_loop
+  op_sym_done:
+    arg = pop termstack
+    unshift op, arg
+    self.'!reduce'('EXPR', 'LIST', op)
     goto done
 
   done:
