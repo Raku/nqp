@@ -17,6 +17,8 @@ method term:sym<value>($/) { make $<value>.ast; }
 
 method circumfix:sym<( )>($/) { make $<EXPR>.ast; }
 
+method circumfix:sym<ang>($/) { make $<quote_EXPR>.ast; }
+
 method postcircumfix:sym<[ ]>($/) {
     make PAST::Var.new( $<EXPR>.ast , :scope('keyed_int') );
 }

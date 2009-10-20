@@ -22,6 +22,7 @@ token prefix:sym<--> { $<sym>=['--'] <O('%autoincrement')> }
 token postfix:sym<++> { $<sym>=['++'] <O('%autoincrement')> }
 
 token circumfix:sym<( )> { '(' <EXPR> ')' }
+token circumfix:sym<ang> { <?[<]>  <quote_EXPR: ':q', ':w'>  }
 
 token postcircumfix:sym<[ ]> { 
     '[' <EXPR> ']' 
