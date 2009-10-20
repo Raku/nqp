@@ -30,7 +30,7 @@ token postcircumfix:sym<[ ]> {
 
 token value {
     | <integer>
-    | <quote_delimited>
+    | <quote_EXPR>
 }
 
 proto token quote { <...> }

@@ -1,5 +1,7 @@
 grammar HLL::Grammar;
 
+    # method EXPR is in src/cheats/hll-grammar.pir
+
     token termish {
         <prefixish>*
         <noun>
@@ -23,6 +25,7 @@ grammar HLL::Grammar;
         | <OPER=postcircumfix=postcircumfix>
     }
 
+    # token quote_EXPR is in src/cheats/hll-grammar.pir
     token quote_delimited {
         <starter> <quote_atom>* <stopper>
     }

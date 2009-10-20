@@ -22,12 +22,9 @@ method postcircumfix:sym<[ ]>($/) {
 }
 
 method value($/) {
-    my $past := PAST::Val.new( 
-                    :value($<integer> 
-                      ?? $<integer>.ast 
-                      !! $<quote_delimited>.ast
-                      )
-                );
+    my $past := $<quote_EXPR>
+                ?? $<quote_EXPR>.ast
+                !! PAST::Val.new( :value($<integer>.ast) );
     make $past;
 }
 
