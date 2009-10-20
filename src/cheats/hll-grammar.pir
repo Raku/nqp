@@ -274,7 +274,7 @@ position C<pos>.
     start = repeat start, len
     stop = repeat stop, len
   bracket_end:
-    .return (start, stop)
+    .return (start, stop, pos)
 
   err_colon_delim:
     self.'panic'('Colons may not be used to delimit quoting constructs')
@@ -290,11 +290,40 @@ position C<pos>.
 .sub 'quote_EXPR' :method
     .param pmc args            :slurpy
 
+    .local pmc quotemod, true
+    .lex '%*QUOTEMOD', quotemod
+    quotemod = new ['Hash']
+
+    true = box 1
+    
+
+  args_loop:
+    unless args goto args_done
+    .local string mod
+    mod = shift args
+    mod = substr mod, 1
+    quotemod[mod] = true
+    if mod == 'qq' goto opt_qq
+    if mod == 'b' goto opt_b
+    goto args_loop
+  opt_qq:
+    quotemod['s'] = true
+    quotemod['a'] = true
+    quotemod['h'] = true
+    quotemod['f'] = true
+    quotemod['c'] = true
+    quotemod['b'] = true
+  opt_b:
+    quotemod['q'] = true
+    goto args_loop
+  args_done:
+
     .local pmc cur
     .local string target
     .local int pos
 
     (cur, pos, target) = self.'!cursor_start'()
+
     .local pmc start, stop
     (start, stop) = self.'peek_delimiters'(target, pos) 
 
@@ -309,6 +338,18 @@ position C<pos>.
     cur.'!cursor_pass'(pos, 'quote_EXPR')
   fail:
     .return (cur)
+.end
+
+
+.sub 'quotemod_check' :method
+    .param string mod
+
+    $P0 = find_dynamic_lex '%*QUOTEMOD'
+    $P1 = $P0[mod]
+    unless null $P1 goto done
+    $P1 = new ['Undef']
+  done:
+    .return ($P1)
 .end
 
 
@@ -335,18 +376,18 @@ position C<pos>.
 
 .sub 'stopper' :method
     .local pmc cur
-    .local string target, start
+    .local string target, stop
     .local int pos
 
     (cur, pos, target) = self.'!cursor_start'()
 
     $P0 = find_dynamic_lex '$*QUOTE_STOP'
     if null $P0 goto fail
-    start = $P0
+    stop = $P0
 
-    $I0 = length start
+    $I0 = length stop
     $S0 = substr target, pos, $I0
-    unless $S0 == start goto fail
+    unless $S0 == stop goto fail
     pos += $I0
     cur.'!cursor_pass'(pos, 'stopper')
   fail:

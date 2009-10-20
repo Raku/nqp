@@ -30,14 +30,14 @@ token postcircumfix:sym<[ ]> {
 
 token value {
     | <integer>
-    | <quote_EXPR>
+    | <quote>
 }
 
 proto token quote { <...> }
-token quote:sym<' '> { <?[']>            <quote_EXPR: ':q'>  }
-token quote:sym<" "> { <?["]>            <quote_EXPR: ':qq'> }
-token quote:sym<q>   { 'q'  <![(]> <.ws> <quote_EXPR: ':q'>  }
-token quote:sym<qq>  { 'qq' <![(]> <.ws> <quote_EXPR: ':qq'> }
+token quote:sym<apos> { <?[']>            <quote_EXPR: ':q'>  }
+token quote:sym<dblq> { <?["]>            <quote_EXPR: ':qq'> }
+token quote:sym<q>    { 'q'  <![(]> <.ws> <quote_EXPR: ':q'>  }
+token quote:sym<qq>   { 'qq' <![(]> <.ws> <quote_EXPR: ':qq'> }
 
 token nulltermish { 
     | <OPER=noun=noun> 

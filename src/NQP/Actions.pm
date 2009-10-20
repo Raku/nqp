@@ -22,8 +22,8 @@ method postcircumfix:sym<[ ]>($/) {
 }
 
 method value($/) {
-    my $past := $<quote_EXPR>
-                ?? $<quote_EXPR>.ast
+    my $past := $<quote>
+                ?? $<quote>.ast
                 !! PAST::Val.new( :value($<integer>.ast) );
     make $past;
 }
@@ -31,3 +31,9 @@ method value($/) {
 method nulltermish($/) {
     make $<noun> ?? $<noun>.ast !! 0;
 }
+
+method quote:sym<apos>($/) { make $<quote_EXPR>.ast; }
+method quote:sym<dblq>($/) { make $<quote_EXPR>.ast; }
+method quote:sym<qq>($/)   { make $<quote_EXPR>.ast; }
+method quote:sym<q>($/)    { make $<quote_EXPR>.ast; }
+
