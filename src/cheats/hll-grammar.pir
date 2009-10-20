@@ -377,15 +377,22 @@ An operator precedence parser.
   term_loop:
     here = here.termish()
     unless here goto fail
-    termish = 'termish'
     .local pmc term
     term = here.'MATCH'()
     push termstack, term
 
     # interleave any prefix/postfix we might have found
-    .local pmc prefixish, postfixish
-    prefixish = term['prefixish']
-    postfixish = term['postfixish']
+    .local pmc termOPER, prefixish, postfixish
+    termOPER = term
+  termOPER_loop:
+    $I0 = exists termOPER['OPER']
+    unless $I0 goto termOPER_done
+    termOPER = termOPER['OPER']
+    goto termOPER_loop
+  termOPER_done:
+    prefixish = termOPER['prefixish']
+    postfixish = termOPER['postfixish']
+    if null prefixish goto prefix_done
 
   prepostfix_loop:
     unless prefixish goto prepostfix_done
@@ -423,6 +430,7 @@ An operator precedence parser.
     delete term['prefixish']
 
   postfix_loop:
+    if null postfixish goto postfix_done
     unless postfixish goto postfix_done
     $P0 = pop postfixish
     push opstack, $P0
@@ -437,13 +445,19 @@ An operator precedence parser.
     unless infixcur goto term_done
     infix = infixcur.'MATCH'()
 
+    .local pmc inO
+    $P0 = infix['OPER']
+    inO = $P0['O']
+    termish = inO['nextterm']
+    if termish goto have_termish
+    termish = 'termish'
+  have_termish:
+
     unless opstack goto reduce_done
     .local string inprec, inassoc, opprec
-    $P0 = infix['OPER']
-    $P0 = $P0['O']
-    inprec = $P0['prec']
-    inassoc = $P0['assoc']
+    inprec = inO['prec']
     unless inprec goto err_inprec
+    inassoc = inO['assoc']
 
   reduce_loop:
     unless opstack goto reduce_done

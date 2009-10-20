@@ -9,6 +9,7 @@ NQP::Grammar.O(':prec<u=>, :assoc<left>',  '%multiplicative');
 NQP::Grammar.O(':prec<t=>, :assoc<left>',  '%additive');
 NQP::Grammar.O(':prec<r=>, :assoc<list>',  '%concatenation'); 
 NQP::Grammar.O(':prec<i=>, :assoc<right>', '%assignment');
+NQP::Grammar.O(':prec<g=>, :assoc<list>, :nextterm<nulltermish>',  '%comma');
 
 method TOP($/) { make $<EXPR>.ast; }
 
@@ -30,3 +31,6 @@ method value($/) {
     make $past;
 }
 
+method nulltermish($/) {
+    make $<noun> ?? $<noun>.ast !! 0;
+}

@@ -14,6 +14,7 @@ token infix:sym<+>  { $<sym>=['+']  <O('%additive      , :pirop<add>')> }
 token infix:sym<->  { $<sym>=['-']  <O('%additive      , :pirop<sub>')> }
 token infix:sym<=>  { $<sym>=['=']  <O('%assignment')> }
 token infix:sym<~>  { $<sym>=['~']  <O('%concatenation')> }
+token infix:sym<,>  { $<sym>=[',']  <O('%comma')> }
 
 token prefix:sym<-> { $<sym>=['-']  <O('%symbolic_unary')> }
 token prefix:sym<--> { $<sym>=['--'] <O('%autoincrement')> }
@@ -38,4 +39,7 @@ token quote:sym<" "> { <?["]>            <quote_EXPR: ':qq'> }
 token quote:sym<q>   { 'q'  <![(]> <.ws> <quote_EXPR: ':q'>  }
 token quote:sym<qq>  { 'qq' <![(]> <.ws> <quote_EXPR: ':qq'> }
 
-
+token nulltermish { 
+    | <OPER=noun=noun> 
+    | <?>
+}
