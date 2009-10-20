@@ -389,20 +389,26 @@ An operator precedence parser.
   prepostfix_loop:
     unless prefixish goto prepostfix_done
     unless postfixish goto prepostfix_done
+    .local pmc preO, postO
     .local string preprec, postprec
     $P0 = prefixish[0]
     $P0 = $P0['OPER']
-    preprec = $P0['prec']
+    preO = $P0['O']
+    preprec = preO['prec']
     $P0 = postfixish[0]
     $P0 = $P0['OPER']
-    postprec = $P0['prec']
-    if postprec < preprec goto postltpre
-  postgtpre:
-    $P0 = shift prefixish
+    postO = $P0['O']
+    postprec = postO['prec']
+    if postprec < preprec goto post_shift
+    if postprec > preprec goto pre_shift
+    $S0 = postO['uassoc']
+    if $S0 == 'right' goto pre_shift
+  post_shift:
+    $P0 = shift postfixish
     push opstack, $P0
     goto prepostfix_loop
-  postltpre:
-    $P0 = shift postfixish
+  pre_shift:
+    $P0 = shift prefixish
     push opstack, $P0
     goto prepostfix_loop
   prepostfix_done:

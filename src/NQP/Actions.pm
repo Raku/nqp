@@ -1,6 +1,7 @@
 class NQP::Actions is HLL::Actions;
 
 # These will eventually go in NQP::Grammar.
+NQP::Grammar.O(':prec<y=>, :assoc<unary>', '%methodop');
 NQP::Grammar.O(':prec<x=>, :assoc<unary>', '%autoincrement');
 NQP::Grammar.O(':prec<w=>, :assoc<left>',  '%exponentiation');
 NQP::Grammar.O(':prec<v=>, :assoc<unary>', '%symbolic_unary');
@@ -13,6 +14,10 @@ method TOP($/) { make $<EXPR>.ast; }
 method term:sym<value>($/) { make $<value>.ast; }
 
 method circumfix:sym<( )>($/) { make $<EXPR>.ast; }
+
+method postcircumfix:sym<[ ]>($/) {
+    make PAST::Op.new( $<EXPR>.ast , :name('postcircumfix:<[ ]>') );
+}
 
 method value($/) {
     my $past := PAST::Val.new( 

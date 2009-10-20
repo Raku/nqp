@@ -21,6 +21,11 @@ token postfix:sym<++> { $<sym>=['++'] <O('%autoincrement')> }
 
 token circumfix:sym<( )> { '(' <EXPR> ')' }
 
+token postcircumfix:sym<[ ]> { 
+    '[' <EXPR> ']' 
+    <O('%methodop')>
+}
+
 token value {
     | <integer>
     | <quote_delimited>

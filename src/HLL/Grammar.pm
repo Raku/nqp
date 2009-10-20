@@ -11,13 +11,17 @@ grammar HLL::Grammar;
     proto token prefix { <...> }
     proto token postfix { <...> }
     proto token circumfix { <...> }
+    proto token postcircumfix { <...> }
 
     token noun:sym<term> { <term> }
     token noun:sym<circumfix> { <circumfix> }
 
     token infixish { <OPER=infix=infix> }
     token prefixish { <OPER=prefix=prefix> }
-    token postfixish { <OPER=postfix=postfix> }
+    token postfixish { 
+        | <OPER=postfix=postfix> 
+        | <OPER=postcircumfix=postcircumfix>
+    }
 
     token quote_delimited {
         <starter> <quote_atom>* <stopper>
