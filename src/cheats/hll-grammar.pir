@@ -395,7 +395,7 @@ An operator precedence parser.
     $P0 = $P0['OPER']
     preO = $P0['O']
     preprec = preO['prec']
-    $P0 = postfixish[0]
+    $P0 = postfixish[-1]
     $P0 = $P0['OPER']
     postO = $P0['O']
     postprec = postO['prec']
@@ -404,7 +404,7 @@ An operator precedence parser.
     $S0 = postO['uassoc']
     if $S0 == 'right' goto pre_shift
   post_shift:
-    $P0 = shift postfixish
+    $P0 = pop postfixish
     push opstack, $P0
     goto prepostfix_loop
   pre_shift:
@@ -423,7 +423,7 @@ An operator precedence parser.
 
   postfix_loop:
     unless postfixish goto postfix_done
-    $P0 = shift postfixish
+    $P0 = pop postfixish
     push opstack, $P0
     goto postfix_loop
   postfix_done:
