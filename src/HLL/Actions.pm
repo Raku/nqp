@@ -82,9 +82,13 @@ method quote_delimited($/) {
 method quote_atom($/) {
     make $<escape> ?? $<escape>.ast !! ~$/;
 }
+
+method escape:sym<backslash>($/) { make "\\"; }
+method escape:sym<stopper>($/) { make ~$<stopper> }
     
-method escape:sym<nl>($/) { make "\n"; }
-method escape:sym<bs>($/) { make "\b"; }
+method escape:sym<bs>($/)  { make "\b"; }
+method escape:sym<nl>($/)  { make "\n"; }
+method escape:sym<cr>($/)  { make "\r"; }
 method escape:sym<tab>($/) { make "\t"; }
 
 method escape:sym<hex>($/) {
@@ -94,7 +98,6 @@ method escape:sym<hex>($/) {
 method escape:sym<oct>($/) {
     make ints_to_string( $<octint> ?? $<octint> !! $<octints><octint> );
 }
-
 
 sub string_to_int($src, $base) {
     Q:PIR {

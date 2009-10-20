@@ -56,14 +56,22 @@ grammar HLL::Grammar;
     }
 
     proto token escape { <...> }
-    token escape:sym<backslash> { \\ \\ }
-    token escape:sym<bs> { \\ b }
-    token escape:sym<oct> { \\ o [ <octint> | '[' <octints> ']' ] }
-    token escape:sym<hex> { \\ x [ <hexint> | '[' <hexints> ']' ] }
-    token escape:sym<chr> { \\ c <charspec> }
-    token escape:sym<nl> { \\ n }
-    token escape:sym<cr> { \\ r }
-    token escape:sym<tab> { \\ t }
+    token escape:sym<backslash> { \\ \\ <?quotemod_check('q')> }
+    token escape:sym<stopper>   { \\ <?quotemod_check('q')> <stopper> }
+
+    token escape:sym<bs>  { \\ b <?quotemod_check('b')> }
+    token escape:sym<nl>  { \\ n <?quotemod_check('b')> }
+    token escape:sym<cr>  { \\ r <?quotemod_check('b')> }
+    token escape:sym<tab> { \\ t <?quotemod_check('b')> }
+    token escape:sym<hex> { 
+        \\ x <?quotemod_check('b')> 
+        [ <hexint> | '[' <hexints> ']' ] 
+    }
+    token escape:sym<oct> { 
+        \\ o <?quotemod_check('b')> 
+        [ <octint> | '[' <octints> ']' ] 
+    }
+    token escape:sym<chr> { \\ c <?quotemod_check('b')> <charspec> }
 
     token charname {
         || <integer>
