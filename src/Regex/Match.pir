@@ -107,6 +107,14 @@ has been set then returns C<Str> above.
     .tailcall self.'Str'()
 .end
 
+.sub 'peek_ast' :method
+    .local pmc ast
+    ast = getattribute self, '$!ast'
+    unless null ast goto have_ast
+    ast = new ['Undef']
+  have_ast:
+    .return (ast)
+.end
 
 =back
 

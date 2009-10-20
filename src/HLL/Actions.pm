@@ -2,16 +2,19 @@ class HLL::Actions;
 
 method EXPR($/, $key?) {
     unless $key { return 0; }
-    my $past := PAST::Op.new( :node($/) );
-    for $/.list { $past.push($_.ast); }
+    my $past := $<OPER>.peek_ast;
+    unless $past { 
+        my $name := Q:PIR {
+            $P0 = find_lex '$key'
+            $S0 = $P0
+            $S0 = downcase $S0
+            %r = box $S0
+        } ~ ':<' ~ $key ~ '>';
+        $past := PAST::OP.new( :name($name), :node($/) ); 
+    }
+    $past[0] := $/[0].ast;
     if $key eq 'INFIX' {
-       $past.name( 'infix:<' ~ $<OPER><sym> ~ '>' );
-    }
-    elsif $key eq 'PREFIX' {
-       $past.name( 'prefix:<' ~ $<OPER><sym> ~ '>' );
-    }
-    elsif $key eq 'POSTFIX' {
-       $past.name( 'postfix:<' ~ $<OPER><sym> ~ '>' );
+       $past[1] := $/[1].ast;
     }
     make $past;
 }
