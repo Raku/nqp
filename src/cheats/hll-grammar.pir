@@ -391,8 +391,10 @@ An operator precedence parser.
     unless postfixish goto prepostfix_done
     .local string preprec, postprec
     $P0 = prefixish[0]
+    $P0 = $P0['OPER']
     preprec = $P0['prec']
-    $P1 = postfixish[0]
+    $P0 = postfixish[0]
+    $P0 = $P0['OPER']
     postprec = $P0['prec']
     if postprec < preprec goto postltpre
   postgtpre:
@@ -411,6 +413,7 @@ An operator precedence parser.
     push opstack, $P0
     goto prefix_loop
   prefix_done:
+    delete term['prefixish']
 
   postfix_loop:
     unless postfixish goto postfix_done
@@ -418,6 +421,7 @@ An operator precedence parser.
     push opstack, $P0
     goto postfix_loop
   postfix_done:
+    delete term['postfixish']
 
     # Now see if we can fetch an infix operator
     .local pmc infixcur, infix
@@ -428,7 +432,8 @@ An operator precedence parser.
 
     unless opstack goto reduce_done
     .local string inprec, inassoc, opprec
-    $P0 = infix['O']
+    $P0 = infix['OPER']
+    $P0 = $P0['O']
     inprec = $P0['prec']
     inassoc = $P0['assoc']
     unless inprec goto err_inprec
@@ -436,6 +441,7 @@ An operator precedence parser.
   reduce_loop:
     unless opstack goto reduce_done
     $P0 = opstack[-1]
+    $P0 = $P0['OPER']
     $P0 = $P0['O']
     opprec = $P0['prec']
     unless opprec > inprec goto reduce_gt_done
@@ -490,7 +496,8 @@ An operator precedence parser.
     .local pmc op
     .local string opassoc
     op = pop opstack
-    $P0 = op['O']
+    $P0 = op['OPER']
+    $P0 = $P0['O']
     opassoc = $P0['assoc']
     if opassoc == 'unary' goto op_unary
   op_infix:

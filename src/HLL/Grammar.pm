@@ -15,9 +15,9 @@ grammar HLL::Grammar;
     token noun:sym<term> { <term> }
     token noun:sym<circumfix> { <circumfix> }
 
-    token infixish { <infix> }
-    token prefixish { <prefix> }
-    token postfixish { <postfix> }
+    token infixish { <OPER=infix=infix> }
+    token prefixish { <OPER=prefix=prefix> }
+    token postfixish { <OPER=postfix=postfix> }
 
     token quote_delimited {
         <starter> <quote_atom>* <stopper>

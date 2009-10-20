@@ -5,30 +5,15 @@ method EXPR($/, $key?) {
     my $past := PAST::Op.new( :node($/) );
     for $/.list { $past.push($_.ast); }
     if $key eq 'INFIX' {
-       $past.name( 'infix:<' ~ $<sym> ~ '>' );
+       $past.name( 'infix:<' ~ $<OPER><sym> ~ '>' );
     }
     elsif $key eq 'PREFIX' {
-       $past.name( 'prefix:<' ~ $<sym> ~ '>' );
+       $past.name( 'prefix:<' ~ $<OPER><sym> ~ '>' );
     }
     elsif $key eq 'POSTFIX' {
-       $past.name( 'postfix:<' ~ $<sym> ~ '>' );
+       $past.name( 'postfix:<' ~ $<OPER><sym> ~ '>' );
     }
     make $past;
-}
-
-method prefixish($/) {
-    $<O> := $<prefix><O>;
-    $<sym> := $<prefix><sym>;
-}
-
-method infixish($/) {
-    $<O> := $<infix><O>;
-    $<sym> := $<infix><sym>;
-}
-
-method postfixish($/) {
-    $<O> := $<postfix><O>;
-    $<sym> := $<postfix><sym>;
 }
 
 method termish($/) {
