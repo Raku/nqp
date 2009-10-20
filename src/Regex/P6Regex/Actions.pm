@@ -204,13 +204,9 @@ method metachar:sym<var>($/) {
     if $<quantified_atom> {
         $past := $<quantified_atom>[0].ast;
         if $past.pasttype eq 'quant' && $past[0].pasttype eq 'subrule' {
-            $past[0].subtype('capture');
-            $past[0].name($name);
+            subrule_alias($past[0], $name);
         }
-        elsif $past.pasttype eq 'subrule' { 
-            $past.subtype('capture');
-            $past.name($name); 
-        }
+        elsif $past.pasttype eq 'subrule' { subrule_alias($past, $name); }
         else {
             $past := PAST::Regex.new( $past, :name($name), :pasttype('subcapture'), :node($/) );
         }
@@ -311,7 +307,7 @@ method assertion:sym<name>($/) {
     my $past;
     if $<assertion> {
         $past := $<assertion>[0].ast;
-        $past.name($name);
+        subrule_alias($past, $name);
     }
     else {
         $past := PAST::Regex.new( $name, :name($name),
@@ -439,16 +435,29 @@ sub capnames($ast, $count) {
         }
     }
     elsif $pasttype eq 'subrule' && $ast.subtype eq 'capture' {
-        if $ast.name eq '' { 
-            $ast.name($count);
-            $count := $count + 1;
+        my $name := $ast.name;
+        if $name eq '' { $name := $count; $ast.name($name); }
+        my @names := Q:PIR {
+            $P0 = find_lex '$name'
+            $S0 = $P0
+            %r = split '=', $S0
+        };
+        for @names {
+            if $_ eq '0' || $_ > 0 { $count := $_ + 1; }
+            %capnames{$_} := 1;
         }
-        elsif $ast.name eq '0' || $ast.name > 0 { $count := $ast.name + 1; }
-        %capnames{$ast.name} := 1;
     }
     elsif $pasttype eq 'subcapture' {
-        if $ast.name eq '0' || $ast.name > 0 { $count := $ast.name + 1; }
-        %capnames{$ast.name} := 1;
+        my $name := $ast.name;
+        my @names := Q:PIR {
+            $P0 = find_lex '$name'
+            $S0 = $P0
+            %r = split '=', $S0
+        };
+        for @names {
+            if $_ eq '0' || $_ > 0 { $count := $_ + 1; }
+            %capnames{$_} := 1;
+        }
         my %x := capnames($ast[0], $count);
         for %x {
             %capnames{$_} := +%capnames{$_} + %x{$_};
@@ -471,4 +480,10 @@ sub backmod($ast, $backmod) {
     elsif $backmod eq ':?' || $backmod eq '?' { $ast.backtrack('f') }
     elsif $backmod eq ':!' || $backmod eq '!' { $ast.backtrack('g') }
     $ast;
+}
+
+sub subrule_alias($past, $name) {
+    if $past<aliased> { $name := $name ~ '=' ~ $past.name; }
+    $past.name($name);
+    $past<aliased> := 1;
 }

@@ -26,6 +26,9 @@ grammars.
     $P0 = box 0
     set_global '$!generation', $P0
     $P0 = new ['Boolean']
+    assign $P0, 0
+    set_global '$!FALSE', $P0
+    $P0 = new ['Boolean']
     assign $P0, 1
     set_global '$!TRUE', $P0
     .return ()
@@ -95,12 +98,11 @@ for the Cursor if one hasn't been created yet.
     cstack_it = iter cstack
   cstack_loop:
     unless cstack_it goto cstack_done
-    .local pmc subcur, submatch
+    .local pmc subcur, submatch, names
     subcur = shift cstack_it
     # If the subcursor isn't bound with a name, skip it
-    $P0 = getattribute subcur, '$!names'
-    if null $P0 goto cstack_loop
-    subname = $P0
+    names = getattribute subcur, '$!names'
+    if null names goto cstack_loop
     $I0 = isa subcur, ['Regex';'Cursor']
     unless $I0 goto cstack_1
     submatch = subcur.'MATCH'()
@@ -108,6 +110,16 @@ for the Cursor if one hasn't been created yet.
   cstack_1:
     submatch = subcur
   cstack_2:
+    # See if we have multiple binds
+    .local pmc names_it
+    subname = names
+    names_it = get_global '$!FALSE'
+    $I0 = index subname, '='
+    if $I0 < 0 goto cstack_subname
+    names_it = split '=', subname
+  cstack_subname_loop:
+    subname = shift names_it
+  cstack_subname:
     keyint = is_cclass .CCLASS_NUMERIC, subname, 0
     if null caparray goto cstack_bind
     $I0 = exists caphash[subname]
@@ -115,19 +127,21 @@ for the Cursor if one hasn't been created yet.
     if keyint goto cstack_array_int
     $P0 = match[subname]
     push $P0, submatch
-    goto cstack_loop
+    goto cstack_bind_done
   cstack_array_int:
     $I0 = subname
     $P0 = match[$I0]
     push $P0, submatch
-    goto cstack_loop
+    goto cstack_bind_done
   cstack_bind:
     if keyint goto cstack_bind_int
     match[subname] = submatch
-    goto cstack_loop
+    goto cstack_bind_done
   cstack_bind_int:
     $I0 = subname
     match[$I0] = submatch
+  cstack_bind_done:
+    if names_it goto cstack_subname_loop
     goto cstack_loop
   cstack_done:
 
