@@ -8,6 +8,7 @@ rule statementlist {
 }
 
 token statement {
+    | <statement_control>
     | <EXPR>
 }
 
@@ -15,6 +16,29 @@ token eat_terminator {
     | ';'
     | $
 }
+
+token xblock {
+    <EXPR> <.ws> <pblock>
+}
+
+token pblock {
+    <?[{]> <blockoid>
+}
+
+token blockoid {
+    '{' ~ '}' <statementlist>
+}
+
+## Statement control
+
+proto token statement_control { <...> }
+
+token statement_control:sym<if> {
+    $<sym>=['if']
+    <xblock>
+}
+
+
 
 ## Terms
 

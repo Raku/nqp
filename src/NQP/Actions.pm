@@ -10,7 +10,25 @@ method statementlist($/) {
     make $past;
 }
 
-method statement($/) { make $<EXPR>.ast; }
+method statement($/) { 
+    my $past;
+    if $<EXPR> { $past := $<EXPR>.ast; }
+    elsif $<statement_control> { $past := $<statement_control>.ast; }
+    else { $past := 0; }
+    make $past;
+}
+
+method xblock($/) {
+    make PAST::Op.new( $<EXPR>.ast, $<pblock>.ast, :pasttype('if') );
+}
+
+method pblock($/) {
+    make $<blockoid>.ast;
+}
+
+method blockoid($/) {
+    make $<statementlist>.ast;
+}
 
 ## Terms
 
@@ -40,6 +58,8 @@ method term:sym<value>($/) { make $<value>.ast; }
 method circumfix:sym<( )>($/) { make $<EXPR>.ast; }
 
 method circumfix:sym<ang>($/) { make $<quote_EXPR>.ast; }
+
+method circumfix:sym<{ }>($/) { make $<pblock>.ast; }
 
 method postcircumfix:sym<[ ]>($/) {
     make PAST::Var.new( $<EXPR>.ast , :scope('keyed_int') );
