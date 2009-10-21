@@ -1,7 +1,16 @@
 class NQP::Actions is HLL::Actions;
 
+method TOP($/) { make $<statementlist>.ast; }
 
-method TOP($/) { make $<EXPR>.ast; }
+method statementlist($/) {
+    my $past := PAST::Stmts.new( :node($/) );
+    if $<statement> {
+        for $<statement> { $past.push( $_.ast ); }
+    }
+    make $past;
+}
+
+method statement($/) { make $<EXPR>.ast; }
 
 ## Terms
 

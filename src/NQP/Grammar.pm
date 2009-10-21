@@ -1,6 +1,20 @@
 grammar NQP::Grammar is HLL::Grammar;
 
-token TOP { <EXPR> [ $ || <.panic: 'Confused'> ] }
+token TOP { <statementlist> [ $ || <.panic: 'Confused'> ] }
+
+rule statementlist {
+    | $
+    | [<statement><.eat_terminator> ]*
+}
+
+token statement {
+    | <EXPR>
+}
+
+token eat_terminator {
+    | ';'
+    | $
+}
 
 ## Terms
 
