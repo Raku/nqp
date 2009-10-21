@@ -395,6 +395,28 @@ position C<pos>.
 .end
 
 
+.sub 'split_words' :method
+    .param string words
+    .local int pos, eos
+    .local pmc result
+    pos = 0
+    eos = length words
+    result = new ['ResizablePMCArray']
+  split_loop:
+    pos = find_not_cclass .CCLASS_WHITESPACE, words, pos, eos
+    unless pos < eos goto split_done
+    $I0 = find_cclass .CCLASS_WHITESPACE, words, pos, eos
+    $I1 = $I0 - pos
+    $S0 = substr words, pos, $I1
+    say $S0
+    push result, $S0
+    pos = $I0
+    goto split_loop
+  split_done:
+    .return (result)
+.end
+
+
 =item EXPR(...)
 
 An operator precedence parser.

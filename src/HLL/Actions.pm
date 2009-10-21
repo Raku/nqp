@@ -48,34 +48,47 @@ method octint($/) {
 }
 
 method quote_EXPR($/) {
-    make $<quote_delimited>.ast;
+    my $past := $<quote_delimited>.ast;
+    if HLL::Grammar::quotemod_check($/, 'w') {
+        if isaPAST($past) { 
+            $/.panic("Can't form :w list from non-constant strings (yet)");
+        }
+        else {
+            my @words := HLL::Grammar::split_words($/, $past);
+            if +@words > 1 {
+                $past := PAST::Op.new( :pasttype('list'), :node($/) );
+                for @words { $past.push($_); }
+            }
+        }
+    }
+    if !isaPAST($past) {
+        $past := PAST::Val.new( :value(~$past) );
+    }
+    make $past;
 }
 
 method quote_delimited($/) {
-    my $past := PAST::Op.new( :pirop('concat'), :node($/) );
-    my $str := '';
-    my $lastlit := 0;
+    my @parts;
+    my $lastlit := '';
     for $<quote_atom> {
         my $ast := $_.ast;
-        if isPAST($ast) {
-            if $lastlit && $ast.isa(PAST::Val) {
-                $lastlit.value( $lastlit.value ~ $ast.value );
-            }
-            else { 
-                $past.push($ast);
-                $lastlit := $ast.isa(PAST::Val) ?? $ast !! 0;
-            }
+        if !isaPAST($ast) {
+            $lastlit := $lastlit ~ $ast;
         }
-        elsif $lastlit {
-            $lastlit.value( $lastlit.value ~ $ast );
+        elsif $ast.isa(PAST::Val) {
+            $lastlit := $lastlit ~ $ast.value;
         }
         else {
-            $lastlit := PAST::Val.new( :value($ast) );
-            $past.push($lastlit);
+            if $lastlit gt '' { @parts.push($lastlit); }
+            @parts.push($ast);
+            $lastlit := '';
         }
     }
-    if +$past.list < 1 { $past := PAST::Val.new( :value('') ); }
-    elsif +$past.list == 1 { $past := $past[0]; }
+    if $lastlit gt '' { @parts.push($lastlit); }
+    my $past := @parts ?? @parts.shift !! '';
+    while @parts {
+        $past := PAST::Op.new( $past, @parts.shift, :pirop('concat') );
+    }
     make $past;
 }
 
@@ -157,7 +170,7 @@ sub ints_to_string($ints) {
     };
 }
 
-sub isPAST($x) {
+sub isaPAST($x) {
     Q:PIR {
         $P0 = find_lex '$x'
         $I0 = isa $P0, ['PAST';'Node']
