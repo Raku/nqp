@@ -2,6 +2,8 @@ grammar HLL::Grammar;
 
     # method EXPR is in src/cheats/hll-grammar.pir
 
+    token ws { <!ww> [ \s+ | '#' \N* ]* }
+
     token termish {
         <prefixish>*
         <noun>
