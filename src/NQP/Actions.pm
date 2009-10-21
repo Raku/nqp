@@ -11,7 +11,27 @@ NQP::Grammar.O(':prec<r=>, :assoc<list>',  '%concatenation');
 NQP::Grammar.O(':prec<i=>, :assoc<right>', '%assignment');
 NQP::Grammar.O(':prec<g=>, :assoc<list>, :nextterm<nulltermish>',  '%comma');
 
-method TOP($/) { make $<EXPR>.ast; }
+method TOP($/) { make $<subcall>.ast; }
+
+method subcall($/) {
+    my $past := $<arglist>.ast;
+    $past.name(~$<ident>);
+    $past.pasttype('call');
+    $past.node($/);
+    make $past;
+}
+
+method arglist($/) {
+    my $past := PAST::Op.new( :node($/) );
+    if $<EXPR> {
+        my $expr := $<EXPR>[0].ast;
+        if $expr.name eq 'infix:<,>' {
+            for $expr.list { $past.push($_); }
+        }
+        else { $past.push($expr); }
+    }
+    make $past;
+}
 
 method term:sym<value>($/) { make $<value>.ast; }
 

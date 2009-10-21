@@ -15,6 +15,7 @@ NQP::Compiler - NQP compiler
 
 .include 'src/gen/nqp-grammar.pir'
 .include 'src/gen/nqp-actions.pir'
+.include 'src/cheats/nqp-builtins.pir'
 
 .namespace ['NQP';'Compiler']
 

@@ -1,6 +1,10 @@
 grammar NQP::Grammar is HLL::Grammar;
 
-token TOP { <EXPR> }
+token TOP { <subcall> }
+
+token subcall { <ident> '(' <arglist> ')' }
+
+rule arglist { <EXPR>? }
 
 proto token term { <...> }
 token term:sym<value> { <value> }
