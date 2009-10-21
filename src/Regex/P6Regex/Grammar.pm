@@ -76,6 +76,13 @@ grammar Regex::P6Regex::Grammar;
     token metachar:sym<bs> { \\ <backslash> }
     token metachar:sym<mod> { <mod_internal> }
 
+    ## we cheat here, really should be regex_infix:sym<~>
+    token metachar:sym<~> { 
+        $<sym>=['~'] 
+        <.ws> <GOAL=quantified_atom> 
+        <.ws> <EXPR=quantified_atom>
+    }
+
     token metachar:sym<{*}> { 
         $<sym>=['{*}'] 
         [ \h* '#= ' \h* $<key>=[\S+ [\h+ \S+]*] ]?

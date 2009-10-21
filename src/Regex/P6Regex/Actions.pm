@@ -191,6 +191,19 @@ method metachar:sym<assert>($/) {
     make $<assertion>.ast;
 }
 
+method metachar:sym<~>($/) {
+    make PAST::Regex.new(
+        $<EXPR>.ast,
+        PAST::Regex.new( 
+            $<GOAL>.ast,
+            PAST::Regex.new( 'FAILGOAL', ~$<GOAL>, :pasttype('subrule'), 
+                             :subtype('method') ),
+            :pasttype('alt')
+        ),
+        :pasttype('concat')
+    );
+}
+
 method metachar:sym<{*}>($/) {
     my $past := $<key>
                 ?? PAST::Regex.new( ~$<key>[0], :pasttype('reduce'), :node($/) )

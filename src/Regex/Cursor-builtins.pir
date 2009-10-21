@@ -176,6 +176,20 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     .tailcall '!cclass'(self, 'blank', .CCLASS_BLANK)
 .end
 
+.sub 'FAILGOAL' :method
+    .param string goal
+    .local string dba
+    $P0 = getinterp
+    $P0 = $P0['sub';1]
+    dba = $P0
+  have_dba:
+    .local string message
+    message = concat "Unable to parse ", dba
+    message .= ", couldn't find final "
+    message .= goal
+    die message
+.end
+
     
 =head1 AUTHORS
 
