@@ -14,6 +14,7 @@ token statement {
 
 token eat_terminator {
     | ';'
+    | <?terminator>
     | $
 }
 
@@ -29,12 +30,17 @@ token blockoid {
     '{' ~ '}' <statementlist>
 }
 
+proto token terminator { <...> }
+
+token terminator:sym<;> { <?[;]> }
+token terminator:sym<}> { <?[}]> }
+
 ## Statement control
 
 proto token statement_control { <...> }
 
 token statement_control:sym<if> {
-    $<sym>=['if']
+    $<sym>=['if'] :s
     <xblock>
 }
 
@@ -77,6 +83,7 @@ token quote:sym<Q>    { 'Q'  <![(]> <.ws> <quote_EXPR> }
 
 token circumfix:sym<( )> { '(' <EXPR> ')' }
 token circumfix:sym<ang> { <?[<]>  <quote_EXPR: ':q', ':w'>  }
+token circumfix:sym<{ }> { <?[{]> <pblock> }
 
 ## Operators
 

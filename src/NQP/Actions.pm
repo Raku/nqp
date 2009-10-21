@@ -30,6 +30,12 @@ method blockoid($/) {
     make $<statementlist>.ast;
 }
 
+## Statement control
+
+method statement_control:sym<if>($/) {
+    make $<xblock>.ast;
+}
+
 ## Terms
 
 method term:sym<identifier>($/) {
