@@ -1,30 +1,22 @@
 class NQP::Actions is HLL::Actions;
 
-# These will eventually go in NQP::Grammar.
-NQP::Grammar.O(':prec<y=>, :assoc<unary>', '%methodop');
-NQP::Grammar.O(':prec<x=>, :assoc<unary>', '%autoincrement');
-NQP::Grammar.O(':prec<w=>, :assoc<left>',  '%exponentiation');
-NQP::Grammar.O(':prec<v=>, :assoc<unary>', '%symbolic_unary');
-NQP::Grammar.O(':prec<u=>, :assoc<left>',  '%multiplicative');
-NQP::Grammar.O(':prec<t=>, :assoc<left>',  '%additive');
-NQP::Grammar.O(':prec<r=>, :assoc<list>',  '%concatenation'); 
-NQP::Grammar.O(':prec<i=>, :assoc<right>', '%assignment');
-NQP::Grammar.O(':prec<g=>, :assoc<list>, :nextterm<nulltermish>',  '%comma');
 
-method TOP($/) { make $<subcall>.ast; }
+method TOP($/) { make $<EXPR>.ast; }
 
-method subcall($/) {
-    my $past := $<arglist>.ast;
+## Terms
+
+method term:sym<identifier>($/) {
+    my $past := $<args>.ast;
     $past.name(~$<ident>);
-    $past.pasttype('call');
-    $past.node($/);
     make $past;
 }
 
+method args($/) { make $<arglist>.ast; }
+
 method arglist($/) {
-    my $past := PAST::Op.new( :node($/) );
+    my $past := PAST::Op.new( :pasttype('call'), :node($/) );
     if $<EXPR> {
-        my $expr := $<EXPR>[0].ast;
+        my $expr := $<EXPR>.ast;
         if $expr.name eq 'infix:<,>' {
             for $expr.list { $past.push($_); }
         }
@@ -32,6 +24,7 @@ method arglist($/) {
     }
     make $past;
 }
+
 
 method term:sym<value>($/) { make $<value>.ast; }
 
@@ -50,9 +43,6 @@ method value($/) {
     make $past;
 }
 
-method nulltermish($/) {
-    make $<noun> ?? $<noun>.ast !! 0;
-}
 
 method quote:sym<apos>($/) { make $<quote_EXPR>.ast; }
 method quote:sym<dblq>($/) { make $<quote_EXPR>.ast; }
@@ -60,3 +50,20 @@ method quote:sym<qq>($/)   { make $<quote_EXPR>.ast; }
 method quote:sym<q>($/)    { make $<quote_EXPR>.ast; }
 method quote:sym<Q>($/)    { make $<quote_EXPR>.ast; }
 
+## Operators
+
+# These will eventually go in NQP::Grammar.
+NQP::Grammar.O(':prec<y=>, :assoc<unary>', '%methodop');
+NQP::Grammar.O(':prec<x=>, :assoc<unary>', '%autoincrement');
+NQP::Grammar.O(':prec<w=>, :assoc<left>',  '%exponentiation');
+NQP::Grammar.O(':prec<v=>, :assoc<unary>', '%symbolic_unary');
+NQP::Grammar.O(':prec<u=>, :assoc<left>',  '%multiplicative');
+NQP::Grammar.O(':prec<t=>, :assoc<left>',  '%additive');
+NQP::Grammar.O(':prec<r=>, :assoc<list>',  '%concatenation'); 
+NQP::Grammar.O(':prec<i=>, :assoc<right>', '%assignment');
+NQP::Grammar.O(':prec<g=>, :assoc<list>, :nextterm<nulltermish>',  '%comma');
+NQP::Grammar.O(':prec<f=>, :assoc<list>',  '%list_infix');
+
+method nulltermish($/) {
+    make $<noun> ?? $<noun>.ast !! 0;
+}
