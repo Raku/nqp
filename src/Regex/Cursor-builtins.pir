@@ -190,6 +190,17 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     die message
 .end
 
+.sub 'DEBUG' :method
+    .param pmc arg             :optional
+    .param int has_arg         :opt_flag
+
+    if has_arg goto have_arg
+    arg = get_global '$!TRUE'
+  have_arg:
+
+    setattribute self, '$!debug', arg
+    .return (1)
+.end
     
 =head1 AUTHORS
 

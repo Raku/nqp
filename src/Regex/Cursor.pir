@@ -22,7 +22,7 @@ grammars.
     load_bytecode 'P6object.pbc'
     .local pmc p6meta
     p6meta = new 'P6metaclass'
-    $P0 = p6meta.'new_class'('Regex::Cursor', 'attr'=>'$!target $!from $!pos $!match $!action $!names @!bstack @!cstack @!caparray')
+    $P0 = p6meta.'new_class'('Regex::Cursor', 'attr'=>'$!target $!from $!pos $!match $!action $!names $!debug @!bstack @!cstack @!caparray')
     $P0 = box 0
     set_global '$!generation', $P0
     $P0 = new ['Boolean']
@@ -252,7 +252,7 @@ provided, then the new cursor has the same type as lang.
     parrotclass = getattribute $P0, 'parrotclass'
     cur = new parrotclass
 
-    .local pmc from, pos, target, action
+    .local pmc from, pos, target, action, debug
     from = getattribute self, '$!pos'
     setattribute cur, '$!from', from
     setattribute cur, '$!pos', from
@@ -261,6 +261,8 @@ provided, then the new cursor has the same type as lang.
     setattribute cur, '$!target', target
     action = getattribute self, '$!action'
     setattribute cur, '$!action', action
+    debug = getattribute self, '$!debug'
+    setattribute cur, '$!debug', debug
 
     .return (cur, from, target, from)
 .end
@@ -341,6 +343,35 @@ Set the cursor's position to C<pos>.
 .sub '!cursor_pos' :method
     .param pmc pos
     setattribute self, '$!pos', pos
+.end
+
+
+=item !cursor_debug(args :slurpy)
+
+Log a debug message.
+
+=cut
+
+.sub '!cursor_debug' :method
+    .param pmc args            :slurpy
+    $P0 = getattribute self, '$!debug'
+    if null $P0 goto done
+    unless $P0 goto done
+    .local pmc from, pos, orig
+    .local int line
+    from = getattribute self, '$!from'
+    orig = getattribute self, '$!target'
+    line = orig.'lineof'(from)
+    inc line
+    printerr from
+    printerr '/'
+    printerr line
+    printerr ': '
+    $S0 = join '', args
+    printerr $S0
+    printerr "\n"
+  done:
+    .return (self)
 .end
 
 

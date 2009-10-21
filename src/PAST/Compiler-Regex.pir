@@ -39,11 +39,12 @@ Return the POST representation of the regex AST rooted by C<node>.
     reghash = new ['Hash']
     .lex '$*REG', reghash
 
-    .local pmc regexname
+    .local pmc regexname, regexname_esc
     $P0 = get_global '@?BLOCK'
     $P1 = $P0[0]
     $S0 = $P1.'name'()
     regexname = box $S0
+    regexname_esc = self.'escape'($S0)
     .lex '$*REGEXNAME', regexname
 
     .local string prefix, rname, rtype
@@ -101,6 +102,7 @@ Return the POST representation of the regex AST rooted by C<node>.
     concat $S0, tgt
     concat $S0, ', $I10)'
     ops.'push_pirop'('callmethod', '"!cursor_start"', 'self', 'result'=>$S0)
+    self.'!cursorop'(ops, '!cursor_debug', 0, '"START "', regexname_esc) 
     unless caparray goto caparray_skip
     self.'!cursorop'(ops, '!cursor_caparray', 0, caparray :flat)
   caparray_skip:
@@ -133,6 +135,7 @@ Return the POST representation of the regex AST rooted by C<node>.
     ops.'push_pirop'('jump', '$I10')
     ops.'push'(donelabel)
     self.'!cursorop'(ops, '!cursor_fail', 0)
+    self.'!cursorop'(ops, '!cursor_debug', 0, '"FAIL  "', regexname_esc)
     ops.'push_pirop'('return', cur)
     .return (ops)
 .end
@@ -724,6 +727,7 @@ second child of this node.
 
     ops.'push_pirop'('inline', 'inline'=>'  # rx pass')
     self.'!cursorop'(ops, '!cursor_pass', 0, pos, regexname)
+    self.'!cursorop'(ops, '!cursor_debug', 0, '"PASS  "', regexname, '" at pos="', pos)
     ops.'push_pirop'('return', cur)
     .return (ops)
 .end

@@ -21,6 +21,8 @@ in reverse order of longest regex name.
 .sub '!protoregex' :method
     .param string name
 
+    self.'!cursor_debug'('START ', name)
+
     .local pmc generation
     generation = get_global '$!generation'
 
@@ -56,9 +58,13 @@ in reverse order of longest regex name.
     if cur goto token_done
     goto token_loop
   token_done:
+    $P0 = cur.'pos'()
+    if $P0 < 0 goto token_fail
+    self.'!cursor_debug'('PASS  ', name, ' at pos=', $P0)
     .return (cur)
 
   token_fail:
+    self.'!cursor_debug'('FAIL  ', name)
     .return (0)
 .end
 
