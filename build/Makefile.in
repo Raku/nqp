@@ -179,11 +179,15 @@ bootstrap-files: src/gen/p6regex-grammar.pir src/gen/p6grammar-grammar.pir
 
 ## testing
 
-test: all
-	prove -r --exec $(PARROT) t
+test: p6regex_test
 
-test_loud: all
-	prove -r -v --exec $(PARROT) t
+test_loud: p6regex_test_loud
+
+p6regex_test: $(P6REGEX_PBC)
+	prove -r --exec $(PARROT) t/p6regex
+
+p6regex_test_loud: $(P6REGEX_PBC)
+	prove -r -v --exec $(PARROT) t/p6regex
 
 ## cleaning
 clean:
