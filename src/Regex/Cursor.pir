@@ -252,7 +252,8 @@ provided, then the new cursor has the same type as lang.
     parrotclass = getattribute $P0, 'parrotclass'
     cur = new parrotclass
 
-    .local pmc from, pos, target, action, debug
+    .local pmc from, pos, target, action, debug, type
+
     from = getattribute self, '$!pos'
     setattribute cur, '$!from', from
     setattribute cur, '$!pos', from
@@ -263,6 +264,12 @@ provided, then the new cursor has the same type as lang.
     setattribute cur, '$!action', action
     debug = getattribute self, '$!debug'
     setattribute cur, '$!debug', debug
+
+#    type = getattribute self, '$!type'
+#    if null type goto type_done
+#    if type != CURSOR_TYPE_PEEK goto type_done
+#    die "Attempt to create initial cursor from PEEK"
+  type_done:
 
     .return (cur, from, target, from)
 .end

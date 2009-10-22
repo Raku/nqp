@@ -1,3 +1,13 @@
+# Copyright (C) 2009, Patrick R. Michaud
+
+=head1 NAME
+
+    Regex::Cursor-protoregex-peek - simple protoregex implementation
+
+=head1 DESCRIPTION
+
+=over 4
+
 =item !protoregex(name)
 
 Perform a match for protoregex C<name>.
@@ -7,9 +17,14 @@ Perform a match for protoregex C<name>.
 .sub '!protoregex' :method
     .param string name
 
+    self.'!cursor_debug'('START ', name)
+
     .local pmc generation
     generation = get_global '$!generation'
 
+    # Get the protoregex table for the current grammar.  If
+    # a table doesn't exist or it's out of date, generate a
+    # new one.
     .local pmc parrotclass, prototable
     parrotclass = typeof self
     prototable = getprop '%!prototable', parrotclass
@@ -21,6 +36,9 @@ Perform a match for protoregex C<name>.
     prototable = self.'!protoregex_gen_table'(parrotclass)
   have_prototable:
 
+    # Obtain the toxrk and toklen hashes for the current grammar
+    # from the protoregex table.  If they haven't been computed
+    # yet for this table, then do that now.
     .local pmc tokrx, toklen
     $S0 = concat name, '.tokrx'
     tokrx = prototable[$S0]
@@ -30,24 +48,34 @@ Perform a match for protoregex C<name>.
     (tokrx, toklen) = self.'!protoregex_gen_tokrx'(prototable, name)
   have_tokrx:
 
+    # If there are no entries at all for this protoregex, we fail outright.
+    unless tokrx goto fail
+
+    # Figure out where we are in the current match.
     .local pmc target
     .local int pos
     target = getattribute self, '$!target'
     $P1 = getattribute self, '$!pos'
     pos = $P1
 
-    # Create a hash to keep track of the methods we've already called,
-    # so that we don't end up calling it twice.  
-    .local pmc mcalled
-    mcalled = new ['Hash']
-
+    # Use the character at the current match position to determine
+    # the longest possible token we could encounter at this point.
     .local string token
     $S0 = substr target, pos, 1
     $I0 = toklen[$S0]
     token = substr target, pos, $I0
 
+    # Create a hash to keep track of the methods we've already called,
+    # so that we don't end up calling it twice.  
+    .local pmc mcalled
+    mcalled = new ['Hash']
 
+    # Look in the tokrx hash for any rules that are keyed with the
+    # current token.  If there aren't any, or the rules we have don't
+    # match, then shorten the token by one character and try again
+    # until we either have a match or we've run out of candidates.
   token_loop:
+    self.'!cursor_debug'('TOKEN ', token)
     .local pmc rx, result
     rx = tokrx[token]
     if null rx goto token_next
@@ -58,7 +86,7 @@ Perform a match for protoregex C<name>.
     result = mcalled[rxaddr]
     unless null result goto token_next
     result = self.rx()
-    mcalled[rxaddr] = result
+    mcalled[rxaddr] = mcalled
     if result goto done
     goto token_next
   rx_array:
@@ -71,7 +99,7 @@ Perform a match for protoregex C<name>.
     result = mcalled[rxaddr]
     unless null result goto token_next
     result = self.rx()
-    mcalled[rxaddr] = result
+    mcalled[rxaddr] = mcalled
     if result goto done
     goto cand_loop
   cand_done:
@@ -80,10 +108,14 @@ Perform a match for protoregex C<name>.
     chopn token, 1
     goto token_loop
 
-  fail:
-    .tailcall self.'!cursor_start'()
   done:
+    pos = result.'pos'()
+    self.'!cursor_debug'('PASS  ', name, ' at pos=', pos)
     .return (result)
+
+  fail:
+    self.'!cursor_debug'('FAIL  ', name)
+    .return (0)
 .end
 
 
@@ -155,6 +187,8 @@ called C<name>.
     .param pmc prototable
     .param string name
 
+    self.'!cursor_debug'('Generating protoregex table for ', name)
+
     .local pmc toklen, tokrx
     toklen = new ['Hash']
     tokrx  = new ['Hash']
@@ -166,6 +200,11 @@ called C<name>.
     .local int mlen
     mprefix = concat name, ':sym<'
     mlen   = length mprefix
+
+    .local pmc peekcur
+    peekcur = self.'!cursor_start'()
+    $P0 = box CURSOR_TYPE_PEEK
+    setattribute peekcur, '$!type', $P0
     
     .local pmc method_it, method
     .local string method_name
@@ -181,25 +220,38 @@ called C<name>.
     # If it doesn't return any, we use '' as its only prefix.
     .local pmc rx, tokens, tokens_it
     rx = find_method self, method_name
-    (tokens :slurpy) = self.rx('peek'=>prototable)
-    if tokens goto have_tokens
-    push tokens, ''
-  have_tokens:
+    (tokens :slurpy) = peekcur.rx()
 
     # Now loop through all of the tokens for the method, updating
     # the longest initial key and adding it to the tokrx hash.
     # We automatically promote entries in tokrx to arrays when
     # there's more than one method candidate for a given token.
+    .local pmc seentok
+    seentok = new ['Hash']
   tokens_loop:
     unless tokens goto tokens_done
     .local string tkey, tfirst
-    tkey = shift tokens
+    tkey = ''
+    $P0 = shift tokens
+    $I0 = isa $P0, ['Regex';'Cursor']
+    if $I0 goto have_tkey
+    tkey = $P0
+  have_tkey:
+
+    # If we've already processed this token for this rule, don't enter it twice
+    $I0 = exists seentok[tkey]
+    if $I0 goto tokens_loop
+    seentok[tkey] = seentok
+
+    # Keep track of longest token lengths by first character
     tfirst = substr tkey, 0, 1
     $I0 = length tkey
     $I1 = toklen[tfirst]
     if $I0 <= $I1 goto toklen_done
     toklen[tfirst] = $I0
   toklen_done:
+
+    # Add the regex to the list under the token key
     .local pmc rxlist
     rxlist = tokrx[tkey]
     if null rxlist goto rxlist_0
@@ -232,3 +284,7 @@ called C<name>.
     prototable[$S0] = toklen
     .return (tokrx, toklen)
 .end
+
+=back
+
+=cut
