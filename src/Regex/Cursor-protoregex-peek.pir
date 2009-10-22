@@ -17,36 +17,11 @@ Perform a match for protoregex C<name>.
 .sub '!protoregex' :method
     .param string name
 
-    .local pmc generation
-    generation = get_global '$!generation'
-
-    # Get the protoregex table for the current grammar.  If
-    # a table doesn't exist or it's out of date, generate a
-    # new one.
-    .local pmc parrotclass, prototable
-    parrotclass = typeof self
-    prototable = getprop '%!prototable', parrotclass
-    if null prototable goto make_prototable
-    $P0 = getprop '$!generation', prototable
-    $I0 = issame $P0, generation
-    if $I0 goto have_prototable
-  make_prototable:
-    prototable = self.'!protoregex_gen_table'(parrotclass)
-  have_prototable:
+    .local pmc tokrx, toklen
+    (tokrx, toklen) = self.'!protoregex_tokrx'(name)
+  have_tokrx:
 
     self.'!cursor_debug'('PROTO ', name)
-
-    # Obtain the toxrk and toklen hashes for the current grammar
-    # from the protoregex table.  If they haven't been computed
-    # yet for this table, then do that now.
-    .local pmc tokrx, toklen
-    $S0 = concat name, '.tokrx'
-    tokrx = prototable[$S0]
-    $S0 = concat name, '.toklen'
-    toklen = prototable[$S0]
-    unless null tokrx goto have_tokrx
-    (tokrx, toklen) = self.'!protoregex_gen_tokrx'(prototable, name)
-  have_tokrx:
 
     # If there are no entries at all for this protoregex, we fail outright.
     unless tokrx goto fail
@@ -123,8 +98,9 @@ Perform a match for protoregex C<name>.
 
 =item !protoregex_generation()
 
-Set the C<$!generation> flag to indicate that protoregexes need to
-be recalculated.
+Reset the C<$!generation> flag to indicate that protoregexes 
+need to be recalculated (because new protoregexes have been
+added).
 
 =cut
 
@@ -136,58 +112,44 @@ be recalculated.
     .return ($P1)
 .end
 
-=item !protoregex_gen_table(parrotclass)
+=item !protoregex_tokrx(name)
 
-Generate a new protoregex table for C<parrotclass>.  This involves
-creating a hash keyed with method names containing ':sym<' from
-C<parrotclass> and all of its superclasses.  This new hash is
-then given the current C<$!generate> property so we can avoid
-recreating it.
-
-The categorization of the protoregex candidate lists 
-for individual protoregexes is handled (lazily) by 
-C<!protoregex_gen_tokrx> below.
+Return the token list for protoregex C<name>.  If the list
+doesn't already exist, or if the existing list is stale,
+create a new one and return it.
 
 =cut
 
-.sub '!protoregex_gen_table' :method
-    .param pmc parrotclass
-
-    .local pmc prototable
-    prototable = new ['Hash']
-    .local pmc class_it, method_it
-    $P0 = parrotclass.'inspect'('all_parents')
-    class_it = iter $P0
-  class_loop:
-    unless class_it goto class_done
-    $P0 = shift class_it
-    $P0 = $P0.'methods'()
-    method_it = iter $P0
-  method_loop:
-    unless method_it goto class_loop
-    $S0 = shift method_it
-    $I0 = index $S0, ':sym<'
-    if $I0 < 0 goto method_loop
-    prototable[$S0] = prototable
-    goto method_loop
-  class_done:
-    $P0 = get_global '$!generation'
-    setprop prototable, '$!generation', $P0
-    setprop parrotclass, '%!prototable', prototable
-    .return (prototable)
-.end
-    
-
-=item !protoregex_gen_tokrx(prototable, name)
-
-Generate this class' token list in prototable for the protoregex 
-called C<name>.
-
-=cut
-
-.sub '!protoregex_gen_tokrx' :method
-    .param pmc prototable
+.sub '!protoregex_tokrx' :method
     .param string name
+
+    .local pmc generation
+    generation = get_global '$!generation'
+
+    # Get the protoregex table for the current grammar.  If
+    # a table doesn't exist or it's out of date, generate a
+    # new one.
+    .local pmc parrotclass, prototable
+    parrotclass = typeof self
+    prototable = getprop '%!prototable', parrotclass
+    if null prototable goto make_prototable
+    $P0 = getprop '$!generation', prototable
+    $I0 = issame $P0, generation
+    if $I0 goto have_prototable
+  make_prototable:
+    prototable = self.'!protoregex_gen_table'(parrotclass)
+  have_prototable:
+
+    # Obtain the toxrk and toklen hashes for the current grammar
+    # from the protoregex table.  If they already exist, we're
+    # done, otherwise we create new ones below.
+    # yet for this table, then do that now.
+    .local pmc tokrx, toklen
+    $S0 = concat name, '.tokrx'
+    tokrx = prototable[$S0]
+    $S0 = concat name, '.toklen'
+    toklen = prototable[$S0]
+    unless null tokrx goto tokrx_done
 
     self.'!cursor_debug'('        Generating protoregex table for ', name)
 
@@ -217,9 +179,10 @@ called C<name>.
     .local pmc rx
     rx = find_method self, method_name
 
-    # Now let's find out its prefix tokens; calling the methodname
-    # with a !PREFIX__ suffix will give us a list of valid token prefixes.
-    # If there is no such !PREFIX__ method, we use '' as the only token prefix.
+    # Now find the prefix tokens for the method; calling the
+    # method name with a !PREFIX__ prefix should return us a list
+    # of valid token prefixes.  If no such method exists, then
+    # our token prefix is a null string.
     .local pmc tokens, tokens_it
     $S0 = concat '!PREFIX__', method_name
     $I0 = can self, $S0
@@ -232,9 +195,11 @@ called C<name>.
   method_peek_done:
 
     # Now loop through all of the tokens for the method, updating
-    # the longest initial key and adding it to the tokrx hash.
-    # We automatically promote entries in tokrx to arrays when
-    # there's more than one method candidate for a given token.
+    # the longest length per initial token character and adding
+    # the token to the tokrx hash.  Entries in the tokrx hash
+    # are automatically promoted to arrays when there's more
+    # than one candidate, and any arrays created are placed into
+    # sorttok so they can have a secondary sort below.
     .local pmc seentok, sorttok
     seentok = new ['Hash']
     sorttok = new ['ResizablePMCArray']
@@ -249,12 +214,13 @@ called C<name>.
   token_item:
     tkey = $P0
 
-    # If we've already processed this token for this rule, don't enter it twice
+    # If we've already processed this token for this rule, 
+    # don't enter it twice into tokrx.
     $I0 = exists seentok[tkey]
     if $I0 goto tokens_loop
     seentok[tkey] = seentok
 
-    # Keep track of longest token lengths by first character
+    # Keep track of longest token lengths by initial character
     tfirst = substr tkey, 0, 1
     $I0 = length tkey
     $I1 = toklen[tfirst]
@@ -262,7 +228,8 @@ called C<name>.
     toklen[tfirst] = $I0
   toklen_done:
 
-    # Add the regex to the list under the token key
+    # Add the regex to the list under the token key, promoting
+    # entries to lists as appropriate.
     .local pmc rxlist
     rxlist = tokrx[tkey]
     if null rxlist goto rxlist_0
@@ -303,6 +270,8 @@ called C<name>.
     prototable[$S0] = tokrx
     $S0 = concat name, '.toklen'
     prototable[$S0] = toklen
+
+  tokrx_done:
     .return (tokrx, toklen)
 .end
 
@@ -317,50 +286,74 @@ called C<name>.
     .return ($I2)
 .end
 
-=item !protoregex_peek(prototable, name)
+=item !protoregex_gen_table(parrotclass)
+
+Generate a new protoregex table for C<parrotclass>.  This involves
+creating a hash keyed with method names containing ':sym<' from
+C<parrotclass> and all of its superclasses.  This new hash is
+then given the current C<$!generate> property so we can avoid
+recreating it on future calls.
+
+=cut
+
+.sub '!protoregex_gen_table' :method
+    .param pmc parrotclass
+
+    .local pmc prototable
+    prototable = new ['Hash']
+    .local pmc class_it, method_it
+    $P0 = parrotclass.'inspect'('all_parents')
+    class_it = iter $P0
+  class_loop:
+    unless class_it goto class_done
+    $P0 = shift class_it
+    $P0 = $P0.'methods'()
+    method_it = iter $P0
+  method_loop:
+    unless method_it goto class_loop
+    $S0 = shift method_it
+    $I0 = index $S0, ':sym<'
+    if $I0 < 0 goto method_loop
+    prototable[$S0] = prototable
+    goto method_loop
+  class_done:
+    $P0 = get_global '$!generation'
+    setprop prototable, '$!generation', $P0
+    setprop parrotclass, '%!prototable', prototable
+    .return (prototable)
+.end
+    
+
+=item !protoregex_peek(name)
 
 Return the set of initial tokens for protoregex C<name>.
+These are conveniently available as the keys of the
+tokrx hash.
 
 =cut
 
 .sub '!protoregex_peek' :method
-    .param pmc prototable
     .param string name
 
-    .local string mprefix
-    .local int mlen
-    mprefix = concat name, ':sym<'
-    mlen = length mprefix
+    .local pmc tokrx
+    tokrx = self.'!protoregex_tokrx'(name)
+    unless tokrx goto peek_none
 
-    .local pmc results, method_it
-    .local string methodname
+    .local pmc results, tokrx_it
     results = new ['ResizablePMCArray']
-    method_it = iter prototable
-  method_loop:
-    unless method_it goto method_done
-    methodname = shift method_it
-    ($P0 :slurpy) = self.methodname()
-    splice results, $P0, 0, 0
-    goto method_loop
-  method_done:
+    tokrx_it = iter tokrx
+  tokrx_loop:
+    unless tokrx_it goto tokrx_done
+    $S0 = shift tokrx_it
+    push results, $S0
+    goto tokrx_loop
+  tokrx_done:
+    .return (results)
 
-    .local pmc deblist
-    deblist = new ['ResizablePMCArray']
-    $P0 = iter results
-  deblist_loop:
-    unless $P0 goto deblist_done
-    $S0 = shift $P0
-    $S0 = escape $S0
-    $S0 = concat '"', $S0
-    $S0 = concat $S0, '"'
-    push deblist, $S0
-    goto deblist_loop
-  deblist_done:
-    $S0 = join ', ', deblist
-    self.'!cursor_debug'('PEEK  ', name, ' tokens=(', $S0, ')')
-
-    .return (results :flat)
+  peek_none:
+    .return ('')
 .end
+
 
 .sub '!subrule_peek' :method
     .param string name
@@ -386,6 +379,16 @@ Return the set of initial tokens for protoregex C<name>.
 
   subrule_none:
     .return (prefix)
+.end
+
+
+.sub 'DUMP_TOKRX' :method
+    .param string name
+
+    .local pmc tokrx
+    tokrx = self.'!protoregex_tokrx'(name)
+    _dumper(tokrx, name)
+    .return (1)
 .end
 
 =back
