@@ -42,16 +42,29 @@ method regex_stmt($/, $key?) {
     my $past;
     if $<proto> {
         $past := 
-            PAST::Block.new( :name($name),
-                PAST::Op.new( 
-                    PAST::Var.new( :name('self'), :scope('register') ),
-                    $name,
-                    :name('!protoregex'),
-                    :pasttype('callmethod'),
+            PAST::Stmts.new(
+                PAST::Block.new( :name($name),
+                    PAST::Op.new( 
+                        PAST::Var.new( :name('self'), :scope('register') ),
+                        $name,
+                        :name('!protoregex'),
+                        :pasttype('callmethod'),
+                    ),
+                    :blocktype('method'),
+                    :lexical(0),
+                    :node($/)
                 ),
-                :blocktype('method'),
-                :lexical(0),
-                :node($/)
+                PAST::Block.new( :name('!PREFIX__' ~ $name),
+                    PAST::Op.new( 
+                        PAST::Var.new( :name('self'), :scope('register') ),
+                        $name,
+                        :name('!protoregex_peek'),
+                        :pasttype('callmethod'),
+                    ),
+                    :blocktype('method'),
+                    :lexical(0),
+                    :node($/)
+                )
             );
     }
     else {

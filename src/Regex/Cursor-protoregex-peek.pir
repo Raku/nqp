@@ -359,11 +359,29 @@ tokrx hash.
     .param string name
     .param string prefix
 
-    $S0 = concat '!PREFIX__', name
-    $I0 = can self, $S0
+    .local string peekname
+    peekname = concat '!PREFIX__', name
+    $I0 = can self, peekname
     unless $I0 goto subrule_none
+
+    # make sure we aren't recursing
+    .local pmc context
+    $P0 = getinterp
+    context = $P0['context';1]
+  caller_loop:
+    if null context goto caller_done
+    $P0 = context['current_sub']
+    $S0 = $P0
+    # stop if we find a name that doesn't begin with ! (33)
+    $I0 = ord $S0
+    if $I0 != 33 goto caller_done
+    if $S0 == peekname goto subrule_none
+    context = context['caller_ctx']
+    goto caller_loop
+  caller_done:
+
     .local pmc tokens, tokens_it
-    tokens = self.$S0()
+    tokens = self.peekname()
     unless tokens goto subrule_none
     unless prefix goto tokens_done
     tokens_it = iter tokens

@@ -241,8 +241,6 @@ at this node.
     .param string prefix
     .param pmc tail
 
-    goto subrule_none
-
     .local pmc name, negate, subtype
     name = self.'name'()
     negate = self.'negate'()
