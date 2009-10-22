@@ -19,7 +19,9 @@ method statement($/) {
 }
 
 method xblock($/) {
-    make PAST::Op.new( $<EXPR>.ast, $<pblock>.ast, :pasttype('if') );
+    my $pblock := $<pblock>.ast;
+#    $pblock.blocktype('immediate');
+    make PAST::Op.new( $<EXPR>.ast, $pblock, :pasttype('if'), :node($/) );
 }
 
 method pblock($/) {
@@ -33,7 +35,21 @@ method blockoid($/) {
 ## Statement control
 
 method statement_control:sym<if>($/) {
-    make $<xblock>.ast;
+    my $count := +$<xblock> - 1;
+    my $past := $<xblock>[$count].ast;
+    if $<else> {
+        my $else := $<else>[0].ast;
+#        $else.blocktype('immediate');
+        $past.push($else);
+    }
+    # build if/then/elsif structure
+    while $count > 0 {
+        $count--;
+        my $else := $past;
+        $past := $<xblock>[$count].ast;
+        $past.push($else);
+    }
+    make $past;
 }
 
 ## Terms

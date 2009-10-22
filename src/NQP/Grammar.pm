@@ -42,9 +42,9 @@ proto token statement_control { <...> }
 token statement_control:sym<if> {
     $<sym>=['if'] :s
     <xblock>
+    [ 'elsif'\s <xblock> ]*
+    [ 'else'\s <else=pblock> ]?
 }
-
-
 
 ## Terms
 
