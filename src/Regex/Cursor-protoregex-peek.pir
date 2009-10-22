@@ -17,8 +17,6 @@ Perform a match for protoregex C<name>.
 .sub '!protoregex' :method
     .param string name
 
-    self.'!cursor_debug'('PROTO ', name)
-
     .local pmc generation
     generation = get_global '$!generation'
 
@@ -35,6 +33,14 @@ Perform a match for protoregex C<name>.
   make_prototable:
     prototable = self.'!protoregex_gen_table'(parrotclass)
   have_prototable:
+
+    $P0 = getattribute self, '$!type'
+    if null $P0 goto peek_done
+    unless $P0 == CURSOR_TYPE_PEEK goto peek_done
+    .tailcall self.'!prototype_peek'(prototable, name)
+  peek_done:
+
+    self.'!cursor_debug'('PROTO ', name)
 
     # Obtain the toxrk and toklen hashes for the current grammar
     # from the protoregex table.  If they haven't been computed
@@ -296,6 +302,51 @@ called C<name>.
     $S0 = concat name, '.toklen'
     prototable[$S0] = toklen
     .return (tokrx, toklen)
+.end
+
+=item !protoregex_peek(prototable, name)
+
+Return the set of initial tokens for protoregex C<name>.
+
+=cut
+
+.sub '!protoregex_peek' :method
+    .param pmc prototable
+    .param string name
+
+    .local string mprefix
+    .local int mlen
+    mprefix = concat name, ':sym<'
+    mlen = length mprefix
+
+    .local pmc results, method_it
+    .local string methodname
+    results = new ['ResizablePMCArray']
+    method_it = iter prototable
+  method_loop:
+    unless method_it goto method_done
+    methodname = shift method_it
+    ($P0 :slurpy) = self.methodname()
+    splice results, $P0, 0, 0
+    goto method_loop
+  method_done:
+
+    .local pmc deblist
+    deblist = new ['ResizablePMCArray']
+    $P0 = iter results
+  deblist_loop:
+    unless $P0 goto deblist_done
+    $S0 = shift $P0
+    $S0 = escape $S0
+    $S0 = concat '"', $S0
+    $S0 = concat $S0, '"'
+    push deblist, $S0
+    goto deblist_loop
+  deblist_done:
+    $S0 = join ', ', deblist
+    self.'!cursor_debug'('PEEK  ', name, ' tokens=(', $S0, ')')
+
+    .return (results :flat)
 .end
 
 .sub '!protoregex_cmp' :anon
