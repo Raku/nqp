@@ -1,6 +1,6 @@
 grammar NQP::Grammar is HLL::Grammar;
 
-token TOP { <statementlist> [ $ || <.panic: 'Confused'> ] }
+token TOP { <?DEBUG> <statementlist> [ $ || <.panic: 'Confused'> ] }
 
 rule statementlist {
     | $

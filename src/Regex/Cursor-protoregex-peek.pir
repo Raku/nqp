@@ -17,7 +17,7 @@ Perform a match for protoregex C<name>.
 .sub '!protoregex' :method
     .param string name
 
-    self.'!cursor_debug'('START ', name)
+    self.'!cursor_debug'('PROTO ', name)
 
     .local pmc generation
     generation = get_global '$!generation'
@@ -64,6 +64,9 @@ Perform a match for protoregex C<name>.
     token1 = substr target, pos, 1
     $I0 = toklen[token1]
     token = substr target, pos, $I0
+    $S0 = escape token
+    $S1 = escape token1
+    self.'!cursor_debug'('        token1="', $S1, '", token="', $S0, '"')
 
     # Create a hash to keep track of the methods we've already called,
     # so that we don't end up calling it twice.  
@@ -75,7 +78,6 @@ Perform a match for protoregex C<name>.
     # match, then shorten the token by one character and try again
     # until we either have a match or we've run out of candidates.
   token_loop:
-    self.'!cursor_debug'('TOKEN token=', token, ', token1=', token1)
     .local pmc rx, result
     rx = tokrx[token]
     if null rx goto token_next
@@ -187,7 +189,7 @@ called C<name>.
     .param pmc prototable
     .param string name
 
-    self.'!cursor_debug'('Generating protoregex table for ', name)
+    self.'!cursor_debug'('        Generating protoregex table for ', name)
 
     .local pmc toklen, tokrx
     toklen = new ['Hash']
