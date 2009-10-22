@@ -165,8 +165,9 @@ create a new one and return it.
     mprefix = concat name, ':sym<'
     mlen   = length mprefix
 
-    .local pmc method_it, method
+    .local pmc method_it, method, sorttok
     .local string method_name
+    sorttok = new ['ResizablePMCArray']
     method_it = iter prototable
   method_loop:
     unless method_it goto method_done
@@ -200,9 +201,8 @@ create a new one and return it.
     # are automatically promoted to arrays when there's more
     # than one candidate, and any arrays created are placed into
     # sorttok so they can have a secondary sort below.
-    .local pmc seentok, sorttok
+    .local pmc seentok
     seentok = new ['Hash']
-    sorttok = new ['ResizablePMCArray']
   tokens_loop:
     unless tokens goto tokens_done
     .local string tkey, tfirst
