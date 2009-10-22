@@ -324,7 +324,7 @@ recreating it on future calls.
 .end
     
 
-=item !protoregex_peek(name)
+=item !PREFIX__!protoregex(name)
 
 Return the set of initial tokens for protoregex C<name>.
 These are conveniently available as the keys of the
@@ -332,7 +332,7 @@ tokrx hash.
 
 =cut
 
-.sub '!protoregex_peek' :method
+.sub '!PREFIX__!protoregex' :method
     .param string name
 
     .local pmc tokrx
@@ -355,7 +355,7 @@ tokrx hash.
 .end
 
 
-.sub '!subrule_peek' :method
+.sub '!PREFIX__!subrule' :method
     .param string name
     .param string prefix
 

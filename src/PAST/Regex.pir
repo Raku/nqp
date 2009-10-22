@@ -254,7 +254,7 @@ at this node.
     $P99 = get_hll_global ['PAST'], 'Var'
     selfpast = $P99.'new'( 'name'=>'self', 'scope'=>'register')
     $P99 = get_hll_global ['PAST'], 'Op'
-    spast = $P99.'new'( selfpast, name, prefix, 'name'=>'!subrule_peek', 'pasttype'=>'callmethod')
+    spast = $P99.'new'( selfpast, name, prefix, 'name'=>'!PREFIX__!subrule', 'pasttype'=>'callmethod')
     .return (spast)
 
   subrule_none:

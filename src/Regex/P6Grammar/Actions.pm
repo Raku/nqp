@@ -58,7 +58,7 @@ method regex_stmt($/, $key?) {
                     PAST::Op.new( 
                         PAST::Var.new( :name('self'), :scope('register') ),
                         $name,
-                        :name('!protoregex_peek'),
+                        :name('!PREFIX__!protoregex'),
                         :pasttype('callmethod'),
                     ),
                     :blocktype('method'),
