@@ -34,12 +34,6 @@ Perform a match for protoregex C<name>.
     prototable = self.'!protoregex_gen_table'(parrotclass)
   have_prototable:
 
-    $P0 = getattribute self, '$!type'
-    if null $P0 goto peek_done
-    unless $P0 == CURSOR_TYPE_PEEK goto peek_done
-    .tailcall self.'!prototype_peek'(prototable, name)
-  peek_done:
-
     self.'!cursor_debug'('PROTO ', name)
 
     # Obtain the toxrk and toklen hashes for the current grammar
@@ -209,11 +203,6 @@ called C<name>.
     mprefix = concat name, ':sym<'
     mlen   = length mprefix
 
-    .local pmc peekcur
-    peekcur = self.'!cursor_start'()
-    $P0 = box CURSOR_TYPE_PEEK
-    setattribute peekcur, '$!type', $P0
-    
     .local pmc method_it, method
     .local string method_name
     method_it = iter prototable
@@ -224,11 +213,30 @@ called C<name>.
     if $S0 != mprefix goto method_loop
 
     # Okay, we've found a method name intended for this protoregex.
-    # Now we look up the method itself, and ask it for its prefix tokens.
-    # If it doesn't return any, we use '' as its only prefix.
-    .local pmc rx, tokens, tokens_it
+    # Look up the method itself.
+    .local pmc rx
     rx = find_method self, method_name
-    (tokens :slurpy) = peekcur.rx()
+
+    # Now let's find out its prefix tokens; calling the methodname
+    # with a !PREFIX__ suffix will give us a list of valid token prefixes.
+    # If there is no such !PREFIX__ method, we use '' as the only token prefix.
+    .local pmc tokens, tokens_it
+    $S0 = concat '!PREFIX__', method_name
+    $I0 = can self, $S0
+    unless $I0 goto method_peek_none
+    tokens = self.$S0()
+    goto method_peek_done
+  method_peek_none:
+    tokens = new ['ResizablePMCArray']
+    push tokens, ''
+  method_peek_done:
+    # printerr name
+    # printerr ' '
+    # printerr $S0
+    # printerr ' tokens=('
+    # $S0 = join ' ', tokens
+    # printerr $S0
+    # printerr ")\n"
 
     # Now loop through all of the tokens for the method, updating
     # the longest initial key and adding it to the tokrx hash.

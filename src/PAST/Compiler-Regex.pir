@@ -107,9 +107,9 @@ Return the POST representation of the regex AST rooted by C<node>.
     goto token_loop
   token_done:
     $S0 = regexname
-    $S0 = concat $S0, '__PEEK'
+    $S0 = concat '!PREFIX__', $S0
     $P99 = get_hll_global ['PAST'], 'Block'
-    tpast = $P99.'new'(tpast, 'name'=>$S0, 'lexical'=>0)
+    tpast = $P99.'new'(tpast, 'name'=>$S0, 'lexical'=>0, 'blocktype'=>'method')
     tpost = self.'as_post'(tpast, 'rtype'=>'v')
     ops.'push'(tpost)
   peek_done:
