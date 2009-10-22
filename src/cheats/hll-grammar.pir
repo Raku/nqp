@@ -38,7 +38,7 @@ invocation for the subrule might be:
 
     token infix:sym<+> { <sym> <O( q{ %additive, :pirop<add> } )> }
 
-This says to add all of the attribute of the C<%addition> hash 
+This says to add all of the attribute of the C<%additive> hash
 (described below) and a C<pirop> entry into the match object
 returned by the C<< infix:sym<+> >> token (as the C<O> named
 capture).  Note that this is a alphabetic 'O", not a digit zero.
