@@ -8,8 +8,11 @@ rule statementlist {
 }
 
 token statement {
+    <!before <[\])}]> | $ >
+    [
     | <statement_control>
     | <EXPR>
+    ]
 }
 
 token eat_terminator {
