@@ -63,9 +63,7 @@ Return the POST representation of the regex AST rooted by C<node>.
     goto iter_loop
   iter_done:
 
-    .local pmc peeklabel, startlabel, donelabel, faillabel
-    $S0 = concat prefix, 'peek'
-    peeklabel = self.'post_new'('Label', 'result'=>$S0)
+    .local pmc startlabel, donelabel, faillabel
     $S0 = concat prefix, 'start'
     startlabel = self.'post_new'('Label', 'result'=>$S0)
     $S0 = concat prefix, 'done'
@@ -97,9 +95,10 @@ Return the POST representation of the regex AST rooted by C<node>.
     .local string cur, rep, pos, tgt, off, eos
     (cur, rep, pos, tgt, off, eos) = self.'!rxregs'('cur rep pos tgt off eos')
 
+    unless regexname goto peek_done
     .local pmc tpast, token, tpost
     $P99 = get_hll_global ['PAST'], 'Op'
-    tpast = $P99.'new'( 'pirop'=>'return v*', 'node'=>node )
+    tpast = $P99.'new'( 'pasttype'=>'list', 'node'=>node )
     (token :slurpy) = node.'prefix'('')
   token_loop:
     unless token goto token_done
@@ -107,12 +106,13 @@ Return the POST representation of the regex AST rooted by C<node>.
     push tpast, $P0
     goto token_loop
   token_done:
+    $S0 = regexname
+    $S0 = concat $S0, '__PEEK'
+    $P99 = get_hll_global ['PAST'], 'Block'
+    tpast = $P99.'new'(tpast, 'name'=>$S0, 'lexical'=>0)
     tpost = self.'as_post'(tpast, 'rtype'=>'v')
-    ops.'push_pirop'('getattribute', '$P10', 'self', '"$!type"')
-    ops.'push_pirop'('if_null', '$P10', peeklabel)
-    ops.'push_pirop'('ne', '$P10', CURSOR_TYPE_PEEK, peeklabel)
     ops.'push'(tpost)
-    ops.'push'(peeklabel)
+  peek_done:
 
     $S0 = concat '(', cur
     concat $S0, ', '

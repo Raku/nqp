@@ -120,6 +120,7 @@ $(P6GRAMMAR_PBC_0): $(P6REGEX_PBC_0) src/stage0/P6Grammar-s0.pir
 	$(PARROT) -o $(P6GRAMMAR_PBC_0) src/stage0/P6Grammar-s0.pir
 
 $(P6REGEX_PBC_1): $(P6GRAMMAR_PBC_0) $(P6REGEX_A) $(P6REGEX_SOURCES)
+	$(RM) $(P6REGEX_PBC) $(P6GRAMMAR_PBC)
 	$(MKPATH) $(STAGE1)/src/gen
 	$(PARROT) --library=$(STAGE0) $(P6GRAMMAR_PBC_0) \
 	    --target=pir --output=$(P6REGEX_G_1) \
