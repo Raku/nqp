@@ -237,7 +237,7 @@ at this node.
     .tailcall self.'prefix_concat'(prefix, tail)
 .end
 
-.sub 'prefix_subrule_XXX' :method
+.sub 'prefix_subrule' :method
     .param string prefix
     .param pmc tail
 

@@ -151,7 +151,7 @@ create a new one and return it.
     toklen = prototable[$S0]
     unless null tokrx goto tokrx_done
 
-    self.'!cursor_debug'('        Generating protoregex table for ', name)
+    self.'!cursor_debug'('Generating protoregex table for ', name)
 
     .local pmc toklen, tokrx
     toklen = new ['Hash']
