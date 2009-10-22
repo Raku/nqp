@@ -188,17 +188,13 @@ at this node.
 
     .local pmc negate
     negate = self.'negate'()
-    unless negate goto negate_done
-    .return (prefix)
-  negate_done:
-
-    .local string charlist
+    .local string subtype, charlist
+    subtype = self.'subtype'()
     charlist = self[0]
 
-    unless tail goto charlist_notail
+    if negate goto charlist_negate
 
-    .local string subtype
-    subtype = self.'subtype'()
+    unless tail goto charlist_notail
     if subtype == 'zerowidth' goto charlist_notail
 
     .local pmc result, head
@@ -223,6 +219,14 @@ at this node.
   charlist_notail:
     $P0 = split '', charlist
     .return ($P0 :flat)
+
+  charlist_negate:
+    if subtype == 'zerowidth' goto charlist_negate_0
+    unless tail goto charlist_negate_0
+    .return (prefix)
+  charlist_negate_0:
+    head = shift tail
+    .tailcall head.'prefix'(prefix, tail :flat)
 .end
 
 
