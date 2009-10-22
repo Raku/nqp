@@ -97,23 +97,21 @@ Return the POST representation of the regex AST rooted by C<node>.
     .local string cur, rep, pos, tgt, off, eos
     (cur, rep, pos, tgt, off, eos) = self.'!rxregs'('cur rep pos tgt off eos')
 
-    .local pmc peek
-    .local int peek_len
-    (peek :slurpy) = node.'prefix'('')
-    peek_len = elements peek
-    $I0 = 0
-  peek_loop:
-    unless $I0 < peek_len goto peek_done
-    $S0 = peek[$I0]
-    $S0 = self.'escape'($S0)
-    peek[$I0] = $S0
-    inc $I0
-    goto peek_loop
-  peek_done:
+    .local pmc tpast, token, tpost
+    $P99 = get_hll_global ['PAST'], 'Op'
+    tpast = $P99.'new'( 'pirop'=>'return v*', 'node'=>node )
+    (token :slurpy) = node.'prefix'('')
+  token_loop:
+    unless token goto token_done
+    $P0 = shift token
+    push tpast, $P0
+    goto token_loop
+  token_done:
+    tpost = self.'as_post'(tpast, 'rtype'=>'v')
     ops.'push_pirop'('getattribute', '$P10', 'self', '"$!type"')
     ops.'push_pirop'('if_null', '$P10', peeklabel)
     ops.'push_pirop'('ne', '$P10', CURSOR_TYPE_PEEK, peeklabel)
-    ops.'push_pirop'('return', peek :flat)
+    ops.'push'(tpost)
     ops.'push'(peeklabel)
 
     $S0 = concat '(', cur
