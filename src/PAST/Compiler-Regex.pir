@@ -63,7 +63,9 @@ Return the POST representation of the regex AST rooted by C<node>.
     goto iter_loop
   iter_done:
 
-    .local pmc startlabel, donelabel, faillabel
+    .local pmc peeklabel, startlabel, donelabel, faillabel
+    $S0 = concat prefix, 'peek'
+    peeklabel = self.'post_new'('Label', 'result'=>$S0)
     $S0 = concat prefix, 'start'
     startlabel = self.'post_new'('Label', 'result'=>$S0)
     $S0 = concat prefix, 'done'
@@ -94,6 +96,25 @@ Return the POST representation of the regex AST rooted by C<node>.
 
     .local string cur, rep, pos, tgt, off, eos
     (cur, rep, pos, tgt, off, eos) = self.'!rxregs'('cur rep pos tgt off eos')
+
+    .local pmc peek
+    .local int peek_len
+    (peek :slurpy) = node.'prefix'('')
+    peek_len = elements peek
+    $I0 = 0
+  peek_loop:
+    unless $I0 < peek_len goto peek_done
+    $S0 = peek[$I0]
+    $S0 = self.'escape'($S0)
+    peek[$I0] = $S0
+    inc $I0
+    goto peek_loop
+  peek_done:
+    ops.'push_pirop'('getattribute', '$P10', 'self', '"$!type"')
+    ops.'push_pirop'('if_null', '$P10', peeklabel)
+    ops.'push_pirop'('ne', '$P10', CURSOR_TYPE_PEEK, peeklabel)
+    ops.'push_pirop'('return', peek :flat)
+    ops.'push'(peeklabel)
 
     $S0 = concat '(', cur
     concat $S0, ', '

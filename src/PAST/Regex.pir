@@ -84,100 +84,157 @@ for regular expressions.
 .end
 
 
-=item peek()
+=item prefix()
 
 Returns the prefixes associated with the regex tree rooted
 at this node.
 
 =cut
 
-.sub 'peek' :method
-    .local pmc list
-    list = new ['ResizablePMCArray']
-
-    $I0 = isa self, ['PAST';'Regex']
-    unless $I0 goto peek_stop
-
-    .local pmc child_it
-    child_it = self.'iterator'()
+.sub 'prefix' :method
+    .param string prefix
+    .param pmc tail            :slurpy
 
     .local string pasttype
     pasttype = self.'pasttype'()
-    if pasttype == 'concat' goto concat
-    if pasttype == '' goto concat
-    if pasttype == 'literal' goto literal
-    if pasttype == 'alt' goto alt
-    if pasttype == 'alt_longest' goto alt_longest
+    if pasttype goto have_pasttype
+    pasttype = 'concat'
+  have_pasttype:
 
-  peek_stop:
-    list = 0
-    .return (list)
+    if pasttype == 'scan' goto prefix_skip
 
-  peek_zero:
-    list = 1
-    list[0] = ''
-    .return (list)
+    $S0 = concat 'prefix_', pasttype
+    $I0 = can self, $S0
+    unless $I0 goto prefix_done
+    .tailcall self.$S0(prefix, tail)
 
-  # temporal alternation returns the prefixes of its first child
-  alt:
-    unless child_it goto peek_stop
+  prefix_skip:
+    unless tail goto prefix_done
+    .local pmc head
+    head = shift tail
+    .tailcall head.'prefix'(prefix, tail :flat)
+
+  prefix_done:
+    .return (prefix)
+.end
+
+
+.sub 'prefix_alt' :method
+    .param string prefix
+    .param pmc tail
+
+    .local pmc child_it, results
+    child_it = self.'iterator'()
+    results = new ['ResizablePMCArray']
+  child_loop:
+    unless child_it goto child_done
     $P0 = shift child_it
-    .tailcall 'peek'($P0)
+    ($P1 :slurpy) = $P0.'prefix'(prefix, tail :flat)
+    splice results, $P1, 0, 0
+    goto child_loop
+  child_done:
+    .return (results :flat)
+.end
 
-  # declarative alternation returns prefixes of all children
-  alt_longest:
-    unless child_it goto alt_longest_done
-    $P0 = shift child_it
-    $P1 = 'peek'($P0)
-    $I0 = elements list
-    splice list, $P1, $I0, 0
-    goto alt_longest
-  alt_longest_done:
-    .return (list)
 
-  concat:
-    unless child_it goto peek_zero
-    $P0 = shift child_it
-    list = 'peek'($P0)
-    unless list goto peek_stop
-  concat_loop:
-    unless child_it goto concat_done
-    .local pmc catlist
-    $P0 = shift child_it
-    catlist = 'peek'($P0)
-    unless catlist goto concat_done
-    # concatenate all elements of list with catlist
-    .local pmc newlist, i1, i2
-    newlist = new ['ResizablePMCArray']
-    i1 = iter list
-  concat_i1_loop:
-    unless i1 goto concat_i1_done
-    $S1 = shift i1
-    i2 = iter catlist
-  concat_i2_loop:
-    unless i2 goto concat_i1_loop
-    $S2 = shift i2
-    $S2 = concat $S1, $S2
-    push newlist, $S2
-    goto concat_i2_loop
-  concat_i1_done:
-    list = newlist
-    goto concat_loop
-  concat_done:
-    .return (list)
+.sub 'prefix_alt_longest' :method
+    .param string prefix
+    .param pmc tail
+    .tailcall self.'prefix_alt'(prefix, tail :flat)
+.end
+
+
+.sub 'prefix_concat' :method
+    .param string prefix
+    .param pmc tail
+
+    $P0 = self.'list'()
+    splice tail, $P0, 0, 0
+    unless tail goto done
+    $P1 = shift tail
+    .tailcall $P1.'prefix'(prefix, tail :flat)
+  done:
+    .return (prefix)
+.end
+
+
+.sub 'prefix_literal' :method
+    .param string prefix
+    .param pmc tail
+
+    .local pmc lpast
+    lpast = self[0]
+    $I0 = isa lpast, ['String']
+    unless $I0 goto done
     
-  literal:
-    $P0 = self[0]
-    $I0 = isa $P0, 'String'
-    if $I0 goto literal_constant
-    .return (list)
-  literal_constant:
-    push list, $P0
-    .return (list)
+    .local string subtype
+    subtype = self.'subtype'()
+    if subtype == 'ignorecase' goto done
 
+    $S0 = lpast
+    prefix = concat prefix, $S0
+    unless tail goto done
+    $P0 = shift tail
+    .tailcall $P0.'prefix'(prefix, tail :flat)
+
+  done:
+    .return (prefix)
+.end
+
+
+.sub 'prefix_enumcharlist' :method
+    .param string prefix
+    .param pmc tail
+
+    .local pmc negate
+    negate = self.'negate'()
+    unless negate goto negate_done
+    .return (prefix)
+  negate_done:
+
+    .local string charlist
+    charlist = self[0]
+
+    unless tail goto charlist_notail
+
+    .local string subtype
+    subtype = self.'subtype'()
+    if subtype == 'zerowidth' goto charlist_notail
+
+    .local pmc result, head
+    result = new ['ResizablePMCArray']
+    head = shift tail
+
+    .local int pos, eos
+    eos = length charlist
+    pos = 0
+  charlist_loop:
+    unless pos < eos goto charlist_done
+    .local string char
+    char = substr charlist, pos, 1
+    $S0 = concat prefix, char
+    ($P0 :slurpy) = head.'prefix'($S0, tail :flat)
+    splice result, $P0, 0, 0
+    inc pos
+    goto charlist_loop
+  charlist_done:
+    .return (result :flat)
+
+  charlist_notail:
+    $P0 = split '', charlist
+    .return ($P0 :flat)
+.end
+
+
+.sub 'prefix_subcapture' :method
+    .param string prefix
+    .param pmc tail
+
+    .tailcall self.'prefix_concat'(prefix, tail)
 .end
 
 =back
+
 
 =head1 AUTHOR
 
