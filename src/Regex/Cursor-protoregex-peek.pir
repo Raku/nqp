@@ -230,13 +230,6 @@ called C<name>.
     tokens = new ['ResizablePMCArray']
     push tokens, ''
   method_peek_done:
-    # printerr name
-    # printerr ' '
-    # printerr $S0
-    # printerr ' tokens=('
-    # $S0 = join ' ', tokens
-    # printerr $S0
-    # printerr ")\n"
 
     # Now loop through all of the tokens for the method, updating
     # the longest initial key and adding it to the tokrx hash.
@@ -248,12 +241,13 @@ called C<name>.
   tokens_loop:
     unless tokens goto tokens_done
     .local string tkey, tfirst
-    tkey = ''
     $P0 = shift tokens
-    $I0 = isa $P0, ['Regex';'Cursor']
-    if $I0 goto have_tkey
+    $I0 = isa $P0, ['ResizablePMCArray']
+    unless $I0 goto token_item
+    splice tokens, $P0, 0, 0
+    goto tokens_loop
+  token_item:
     tkey = $P0
-  have_tkey:
 
     # If we've already processed this token for this rule, don't enter it twice
     $I0 = exists seentok[tkey]
