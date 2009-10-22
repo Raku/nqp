@@ -60,9 +60,9 @@ Perform a match for protoregex C<name>.
 
     # Use the character at the current match position to determine
     # the longest possible token we could encounter at this point.
-    .local string token
-    $S0 = substr target, pos, 1
-    $I0 = toklen[$S0]
+    .local string token1, token
+    token1 = substr target, pos, 1
+    $I0 = toklen[token1]
     token = substr target, pos, $I0
 
     # Create a hash to keep track of the methods we've already called,
@@ -75,7 +75,7 @@ Perform a match for protoregex C<name>.
     # match, then shorten the token by one character and try again
     # until we either have a match or we've run out of candidates.
   token_loop:
-    self.'!cursor_debug'('TOKEN ', token)
+    self.'!cursor_debug'('TOKEN token=', token, ', token1=', token1)
     .local pmc rx, result
     rx = tokrx[token]
     if null rx goto token_next
@@ -226,8 +226,9 @@ called C<name>.
     # the longest initial key and adding it to the tokrx hash.
     # We automatically promote entries in tokrx to arrays when
     # there's more than one method candidate for a given token.
-    .local pmc seentok
+    .local pmc seentok, sorttok
     seentok = new ['Hash']
+    sorttok = new ['ResizablePMCArray']
   tokens_loop:
     unless tokens goto tokens_done
     .local string tkey, tfirst
@@ -262,6 +263,7 @@ called C<name>.
     if $I0 goto tokens_loop
     $P0 = rxlist
     rxlist = new ['ResizablePMCArray']
+    push sorttok, rxlist
     push rxlist, $P0
     push rxlist, rx
     tokrx[tkey] = rxlist
@@ -276,6 +278,15 @@ called C<name>.
     goto method_loop
   method_done:
 
+    # in-place sort the keys that ended up with multiple entries
+    .const 'Sub' $P99 = '!protoregex_cmp'
+  sorttok_loop:
+    unless sorttok goto sorttok_done
+    rxlist = shift sorttok
+    rxlist.'sort'($P99)
+    goto sorttok_loop
+  sorttok_done:
+
     # It's built!  Now store the tokrx and toklen hashes in the
     # prototable and return them to the caller.
     $S0 = concat name, '.tokrx'
@@ -283,6 +294,17 @@ called C<name>.
     $S0 = concat name, '.toklen'
     prototable[$S0] = toklen
     .return (tokrx, toklen)
+.end
+
+.sub '!protoregex_cmp' :anon
+    .param pmc a
+    .param pmc b
+    $S0 = a
+    $I0 = length $S0
+    $S1 = b
+    $I1 = length $S1
+    $I2 = cmp $I1, $I0
+    .return ($I2)
 .end
 
 =back
