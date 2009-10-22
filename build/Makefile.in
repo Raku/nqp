@@ -136,13 +136,13 @@ $(P6GRAMMAR_PBC_1): $(P6GRAMMAR_PBC_0) $(P6REGEX_PBC_1) $(P6GRAMMAR_A) $(P6GRAMM
 	$(PARROT) --include=$(STAGE1) -o $(P6GRAMMAR_PBC_1) \
 	    src/Regex/P6Grammar.pir
 
-$(P6REGEX_PBC): $(P6GRAMMAR_PBC_1) $(P6REGEX_A) $(P6REGEX_SOURCES)
+$(P6REGEX_PBC): $(P6GRAMMAR_PBC) $(P6REGEX_A) $(P6REGEX_SOURCES)
 	$(PARROT) --library=$(STAGE1) $(P6GRAMMAR_PBC_1) \
 	    --target=pir --output=$(P6REGEX_G) \
 	    src/Regex/P6Regex/Grammar.pm
 	$(PARROT) -o $(P6REGEX_PBC) src/Regex/P6Regex.pir
 
-$(P6GRAMMAR_PBC): $(P6GRAMMAR_PBC_1) $(P6REGEX_PBC) $(P6GRAMMAR_A) $(P6GRAMMAR_SOURCES)
+$(P6GRAMMAR_PBC): $(P6GRAMMAR_PBC_1) $(P6GRAMMAR_A) $(P6GRAMMAR_SOURCES)
 	$(PARROT) --library=$(STAGE1) $(P6GRAMMAR_PBC_1) \
 	    --target=pir --output=$(P6GRAMMAR_G) \
 	    src/Regex/P6Grammar/Grammar.pm

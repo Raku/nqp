@@ -237,6 +237,32 @@ at this node.
     .tailcall self.'prefix_concat'(prefix, tail)
 .end
 
+.sub 'prefix_subrule_XXX' :method
+    .param string prefix
+    .param pmc tail
+
+    goto subrule_none
+
+    .local pmc name, negate, subtype
+    name = self.'name'()
+    negate = self.'negate'()
+    subtype = self.'subtype'()
+    $I0 = does name, 'string'
+    unless $I0 goto subrule_none
+    if negate goto subrule_none
+    if subtype == 'zerowidth' goto subrule_none
+
+    .local pmc selfpast, spast
+    $P99 = get_hll_global ['PAST'], 'Var'
+    selfpast = $P99.'new'( 'name'=>'self', 'scope'=>'register')
+    $P99 = get_hll_global ['PAST'], 'Op'
+    spast = $P99.'new'( selfpast, name, prefix, 'name'=>'!subrule_peek', 'pasttype'=>'callmethod')
+    .return (spast)
+
+  subrule_none:
+    .return (prefix)
+.end
+
 =back
 
 

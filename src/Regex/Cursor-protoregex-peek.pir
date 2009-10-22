@@ -312,6 +312,17 @@ called C<name>.
     .return (tokrx, toklen)
 .end
 
+.sub '!protoregex_cmp' :anon
+    .param pmc a
+    .param pmc b
+    $S0 = a
+    $I0 = length $S0
+    $S1 = b
+    $I1 = length $S1
+    $I2 = cmp $I1, $I0
+    .return ($I2)
+.end
+
 =item !protoregex_peek(prototable, name)
 
 Return the set of initial tokens for protoregex C<name>.
@@ -357,15 +368,30 @@ Return the set of initial tokens for protoregex C<name>.
     .return (results :flat)
 .end
 
-.sub '!protoregex_cmp' :anon
-    .param pmc a
-    .param pmc b
-    $S0 = a
-    $I0 = length $S0
-    $S1 = b
-    $I1 = length $S1
-    $I2 = cmp $I1, $I0
-    .return ($I2)
+.sub '!subrule_peek' :method
+    .param string name
+    .param string prefix
+
+    $S0 = concat '!PREFIX__', name
+    $I0 = can self, $S0
+    unless $I0 goto subrule_none
+    .local pmc tokens, tokens_it
+    tokens = self.$S0()
+    unless tokens goto subrule_none
+    unless prefix goto tokens_done
+    tokens_it = iter tokens
+    tokens = new ['ResizablePMCArray']
+  tokens_loop:
+    unless tokens_it goto tokens_done
+    $S0 = shift tokens_it
+    $S0 = concat prefix, $S0
+    push tokens, $S0
+    goto tokens_loop
+  tokens_done:
+    .return (tokens)
+
+  subrule_none:
+    .return (prefix)
 .end
 
 =back
