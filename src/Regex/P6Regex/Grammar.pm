@@ -46,11 +46,11 @@ grammar Regex::P6Regex::Grammar;
     }
 
     proto token quantifier { <...> }
-    token quantifier:sym<*> { $<sym>=['*'] <backmod> }
-    token quantifier:sym<+> { $<sym>=['+'] <backmod> }
-    token quantifier:sym<?> { $<sym>=['?'] <backmod> }
+    token quantifier:sym<*> { <sym> <backmod> }
+    token quantifier:sym<+> { <sym> <backmod> }
+    token quantifier:sym<?> { <sym> <backmod> }
     token quantifier:sym<**> { 
-        $<sym>=['**'] \s* <backmod> \s*
+        <sym> \s* <backmod> \s*
         [
         || $<min>=[\d+] [ '..' $<max>=[\d+|'*'] ]?
         || <quantified_atom>
@@ -64,13 +64,13 @@ grammar Regex::P6Regex::Grammar;
     token metachar:sym<[ ]> { '[' <nibbler> ']' }
     token metachar:sym<( )> { '(' <nibbler> ')' }
     token metachar:sym<'> { <quote> }
-    token metachar:sym<.> { $<sym>=['.'] }
-    token metachar:sym<^> { $<sym>=['^'] }
-    token metachar:sym<^^> { $<sym>=['^^'] }
-    token metachar:sym<$> { $<sym>=['$'] }
-    token metachar:sym<$$> { $<sym>=['$$'] }
-    token metachar:sym<:::> { $<sym>=[':::'] }
-    token metachar:sym<::> { $<sym>=['::'] }
+    token metachar:sym<.> { <sym> }
+    token metachar:sym<^> { <sym> }
+    token metachar:sym<^^> { <sym> }
+    token metachar:sym<$> { <sym> }
+    token metachar:sym<$$> { <sym> }
+    token metachar:sym<:::> { <sym> }
+    token metachar:sym<::> { <sym> }
     token metachar:sym<lwb> { $<sym>=['<<'|'«'] }
     token metachar:sym<rwb> { $<sym>=['>>'|'»'] }
     token metachar:sym<bs> { \\ <backslash> }
@@ -78,13 +78,13 @@ grammar Regex::P6Regex::Grammar;
 
     ## we cheat here, really should be regex_infix:sym<~>
     token metachar:sym<~> { 
-        $<sym>=['~'] 
+        <sym> 
         <.ws> <GOAL=quantified_atom> 
         <.ws> <EXPR=quantified_atom>
     }
 
     token metachar:sym<{*}> { 
-        $<sym>=['{*}'] 
+        <sym> 
         [ \h* '#= ' \h* $<key>=[\S+ [\h+ \S+]*] ]?
     }
     token metachar:sym<assert> { 
