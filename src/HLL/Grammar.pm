@@ -11,6 +11,7 @@ grammar HLL::Grammar;
     }
 
     proto token noun { <...> }
+    proto token term { <...> }
     proto token infix { <...> }
     proto token prefix { <...> }
     proto token postfix { <...> }

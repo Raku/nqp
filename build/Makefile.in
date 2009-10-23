@@ -181,15 +181,18 @@ bootstrap-files: src/gen/p6regex-grammar.pir src/gen/p6grammar-grammar.pir
 
 ## testing
 
-test: p6regex_test
+test: p6regex-test nqp-test
 
-test_loud: p6regex_test_loud
+test-loud: p6regex-test-loud
 
-p6regex_test: $(P6REGEX_PBC)
+p6regex-test: $(P6REGEX_PBC)
 	prove -r --exec $(PARROT) t/p6regex
 
-p6regex_test_loud: $(P6REGEX_PBC)
+p6regex-test-loud: $(P6REGEX_PBC)
 	prove -r -v --exec $(PARROT) t/p6regex
+
+nqp-test: nqp$(EXE)
+	prove -r --exec ./nqp$(EXE) t/nqp
 
 ## cleaning
 clean:

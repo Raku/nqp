@@ -633,6 +633,46 @@ An operator precedence parser.
     push termstack, op
 .end
 
+
+.sub 'MARKER' :method
+    .param pmc markname
+
+    .local pmc pos
+    pos = self.'pos'()
+    self.'!cursor_debug'('START MARKER name=', markname, ', pos=', pos)
+
+    .local pmc markhash
+    markhash = get_global '%!MARKHASH'
+    unless null markhash goto have_markhash
+    markhash = new ['Hash']
+    set_global '%!MARKHASH', markhash
+  have_markhash:
+    markhash[markname] = pos 
+    self.'!cursor_debug'('PASS  MARKER')
+    .return (1)
+.end
+
+
+.sub 'MARKED' :method
+    .param pmc markname
+
+    self.'!cursor_debug'('START MARKED name=', markname)
+
+    .local pmc markhash
+    markhash = get_global '%!MARKHASH'
+    if null markhash goto fail
+    $P0 = markhash[markname]
+    if null $P0 goto fail
+    $P1 = self.'pos'()
+    unless $P0 == $P1 goto fail
+    self.'!cursor_debug'('PASS  MARKED')
+    .return (1)
+  fail:
+    self.'!cursor_debug'('FAIL  MARKED')
+    .return (0)
+.end
+
+
 =cut
 
 # Local Variables:

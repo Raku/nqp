@@ -1,6 +1,9 @@
 grammar NQP::Grammar is HLL::Grammar;
 
-token TOP { <statementlist> [ $ || <.panic: 'Confused'> ] }
+token TOP { 
+    <statementlist> 
+    [ $ || <.panic: 'Confused'> ] 
+}
 
 rule statementlist {
     | $
@@ -17,6 +20,7 @@ token statement {
 
 token eat_terminator {
     | ';'
+    | <?MARKED('endstmt')>
     | <?terminator>
     | $
 }
@@ -34,6 +38,7 @@ token pblock {
 token blockoid {
     <.finishpad>
     '{' ~ '}' <statementlist>
+    [ \h* $$ <.ws> <?MARKER('endstmt')> ]?
 }
 
 token newpad { <?> }
