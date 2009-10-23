@@ -1,4 +1,4 @@
-#!./parrot nqp.pbc
+#! nqp
 
 # check control structure 'unless'
 
