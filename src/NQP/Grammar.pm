@@ -1,6 +1,6 @@
 grammar NQP::Grammar is HLL::Grammar;
 
-token TOP { <?DEBUG> <statementlist> <?DUMP_TOKRX: 'noun'> [ $ || <.panic: 'Confused'> ] }
+token TOP { <statementlist> [ $ || <.panic: 'Confused'> ] }
 
 rule statementlist {
     | $
@@ -26,12 +26,18 @@ token xblock {
 }
 
 token pblock {
-    <?[{]> <blockoid>
+    <?[{]> 
+    <.newpad>
+    <blockoid>
 }
 
 token blockoid {
+    <.finishpad>
     '{' ~ '}' <statementlist>
 }
+
+token newpad { <?> }
+token finishpad { <?> }
 
 proto token terminator { <...> }
 

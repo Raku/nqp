@@ -1,5 +1,7 @@
 class NQP::Actions is HLL::Actions;
 
+our @BLOCK := Q:PIR { %r = new ['ResizablePMCArray'] };
+
 method TOP($/) { make $<statementlist>.ast; }
 
 method statementlist($/) {
@@ -20,7 +22,7 @@ method statement($/) {
 
 method xblock($/) {
     my $pblock := $<pblock>.ast;
-#    $pblock.blocktype('immediate');
+    $pblock.blocktype('immediate');
     make PAST::Op.new( $<EXPR>.ast, $pblock, :pasttype('if'), :node($/) );
 }
 
@@ -29,7 +31,16 @@ method pblock($/) {
 }
 
 method blockoid($/) {
-    make $<statementlist>.ast;
+    my $past := $<statementlist>.ast;
+    my $BLOCK := @BLOCK.shift;
+    $BLOCK.push($past);
+    $BLOCK.node($/);
+    make $BLOCK;
+}
+
+method newpad($/) {
+    our @BLOCK;
+    @BLOCK.unshift( PAST::Block.new( PAST::Stmts.new() ) );
 }
 
 ## Statement control
@@ -39,7 +50,7 @@ method statement_control:sym<if>($/) {
     my $past := $<xblock>[$count].ast;
     if $<else> {
         my $else := $<else>[0].ast;
-#        $else.blocktype('immediate');
+        $else.blocktype('immediate');
         $past.push($else);
     }
     # build if/then/elsif structure
