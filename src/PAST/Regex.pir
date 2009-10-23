@@ -144,6 +144,19 @@ at this node.
 .end
 
 
+.sub 'prefix_anchor' :method
+    .param string prefix
+    .param pmc tail
+
+    unless tail goto anchor_done
+    .local pmc head
+    head = shift tail
+    .tailcall head.'prefix'(prefix, tail :flat)
+  anchor_done:
+    .return (prefix)
+.end
+
+
 .sub 'prefix_concat' :method
     .param string prefix
     .param pmc tail
