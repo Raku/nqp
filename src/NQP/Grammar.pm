@@ -60,6 +60,12 @@ token statement_control:sym<if> {
     [ 'else'\s <else=pblock> ]?
 }
 
+token statement_control:sym<unless> {
+    $<sym>=['unless'] :s
+    <xblock>
+    [ <!before 'else'> || <.panic: 'unless does not take "else", please rewrite using "if"'> ]
+}
+
 ## Terms
 
 proto token term { <...> }

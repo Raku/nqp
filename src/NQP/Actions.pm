@@ -63,6 +63,12 @@ method statement_control:sym<if>($/) {
     make $past;
 }
 
+method statement_control:sym<unless>($/) {
+    my $past := $<xblock>.ast;
+    $past.pasttype('unless');
+    make $past;
+}
+
 ## Terms
 
 method term:sym<identifier>($/) {
