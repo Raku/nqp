@@ -81,7 +81,7 @@ Perform a match for protoregex C<name>.
     goto cand_loop
   cand_done:
   token_next:
-    unless token goto fail
+    unless token > '' goto fail
     chopn token, 1
     goto token_loop
 
