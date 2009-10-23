@@ -54,14 +54,14 @@ token terminator:sym<}> { <?[}]> }
 proto token statement_control { <...> }
 
 token statement_control:sym<if> {
-    $<sym>=['if'] :s
+    <sym> :s
     <xblock>
     [ 'elsif'\s <xblock> ]*
     [ 'else'\s <else=pblock> ]?
 }
 
 token statement_control:sym<unless> {
-    $<sym>=['unless'] :s
+    <sym> :s
     <xblock>
     [ <!before 'else'> || <.panic: 'unless does not take "else", please rewrite using "if"'> ]
 }
@@ -117,24 +117,24 @@ token postcircumfix:sym<[ ]> {
     <O('%methodop')>
 }
 
-token prefix:sym<-->  { $<sym>=['--'] <O('%autoincrement')> }
-token postfix:sym<++> { $<sym>=['++'] <O('%autoincrement')> }
+token prefix:sym<-->  { <sym>  <O('%autoincrement')> }
+token postfix:sym<++> { <sym>  <O('%autoincrement')> }
 
-token infix:sym<**>   { $<sym>=['**'] <O('%exponentiation, :pirop<pow>')> }
+token infix:sym<**>   { <sym>  <O('%exponentiation, :pirop<pow>')> }
 
-token prefix:sym<->   { $<sym>=['-']  <O('%symbolic_unary')> }
-token prefix:sym<?>   { $<sym>=['?']  <O('%symbolic_unary, :pirop<istrue>')> }
-token prefix:sym<!>   { $<sym>=['!']  <O('%symbolic_unary, :pirop<isfalse>')> }
+token prefix:sym<->   { <sym>  <O('%symbolic_unary')> }
+token prefix:sym<?>   { <sym>  <O('%symbolic_unary, :pirop<istrue>')> }
+token prefix:sym<!>   { <sym>  <O('%symbolic_unary, :pirop<isfalse>')> }
 
-token infix:sym<*>    { $<sym>=['*']  <O('%multiplicative, :pirop<mul>')> }
-token infix:sym</>    { $<sym>=['/']  <O('%multiplicative, :pirop<div>')> }
-token infix:sym<%>    { $<sym>=['%']  <O('%multiplicative, :pirop<mod>')> }
+token infix:sym<*>    { <sym>  <O('%multiplicative, :pirop<mul>')> }
+token infix:sym</>    { <sym>  <O('%multiplicative, :pirop<div>')> }
+token infix:sym<%>    { <sym>  <O('%multiplicative, :pirop<mod>')> }
 
-token infix:sym<+>    { $<sym>=['+']  <O('%additive, :pirop<add>')> }
-token infix:sym<->    { $<sym>=['-']  <O('%additive, :pirop<sub>')> }
+token infix:sym<+>    { <sym>  <O('%additive, :pirop<add>')> }
+token infix:sym<->    { <sym>  <O('%additive, :pirop<sub>')> }
 
-token infix:sym<~>    { $<sym>=['~']  <O('%concatenation , :pirop<concat>')> }
+token infix:sym<~>    { <sym>  <O('%concatenation , :pirop<concat>')> }
 
-token infix:sym<:=>   { $<sym>=[':=']  <O('%assignment, :pasttype<bind>')> }
+token infix:sym<:=>   { <sym>  <O('%assignment, :pasttype<bind>')> }
 
-token infix:sym<,>    { $<sym>=[',']  <O('%comma')> }
+token infix:sym<,>    { <sym>  <O('%comma')> }
