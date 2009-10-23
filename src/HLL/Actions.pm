@@ -4,14 +4,19 @@ method EXPR($/, $key?) {
     unless $key { return 0; }
     my $past := $<OPER>.peek_ast;
     unless $past { 
-        if $key eq 'LIST' { $key := 'infix'; }
-        my $name := Q:PIR {
-            $P0 = find_lex '$key'
-            $S0 = $P0
-            $S0 = downcase $S0
-            %r = box $S0
-        } ~ ':<' ~ $<OPER><sym> ~ '>';
-        $past := PAST::Op.new( :name($name), :node($/) ); 
+        $past := PAST::Op.new( :node($/) );
+        if $<OPER><O><pasttype> { $past.pasttype( ~$<OPER><O><pasttype> ); }
+        elsif $<OPER><O><pirop>    { $past.pirop( ~$<OPER><O><pirop> ); }
+        else {
+            if $key eq 'LIST' { $key := 'infix'; }
+            my $name := Q:PIR {
+                $P0 = find_lex '$key'
+                $S0 = $P0
+                $S0 = downcase $S0
+                %r = box $S0
+            } ~ ':<' ~ $<OPER><sym> ~ '>';
+            $past.name($name);
+        }
     }
     if $key eq 'POSTFIX' { $past.unshift($/[0].ast); }
     else {

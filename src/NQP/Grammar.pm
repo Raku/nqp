@@ -123,6 +123,8 @@ token postfix:sym<++> { $<sym>=['++'] <O('%autoincrement')> }
 token infix:sym<**>   { $<sym>=['**'] <O('%exponentiation, :pirop<pow>')> }
 
 token prefix:sym<->   { $<sym>=['-']  <O('%symbolic_unary')> }
+token prefix:sym<?>   { $<sym>=['?']  <O('%symbolic_unary, :pirop<istrue>')> }
+token prefix:sym<!>   { $<sym>=['!']  <O('%symbolic_unary, :pirop<isfalse>')> }
 
 token infix:sym<*>    { $<sym>=['*']  <O('%multiplicative, :pirop<mul>')> }
 token infix:sym</>    { $<sym>=['/']  <O('%multiplicative, :pirop<div>')> }
