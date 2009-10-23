@@ -31,14 +31,18 @@ method regex_stmt($/, $key?) {
     my @MODIFIERS := Q:PIR { 
         %r = get_hll_global ['Regex';'P6Regex';'Actions'], '@MODIFIERS'
     };
+    my $name := ~$<longname>;
     if $key eq 'open' {
         my %h;
         if $<sym> eq 'token' { %h<r> := 1; }
         if $<sym> eq 'rule'  { %h<r> := 1;  %h<s> := 1; }
         @MODIFIERS.unshift(%h);
+        Q:PIR { 
+            $P0 = find_lex '$name'
+            set_hll_global ['Regex';'P6Regex';'Actions'], '$REGEXNAME', $P0
+        };
         return 0;
     }
-    my $name := ~$<longname>;
     my $past;
     if $<proto> {
         $past := 

@@ -322,6 +322,21 @@ method assertion:sym<name>($/) {
         $past := $<assertion>[0].ast;
         subrule_alias($past, $name);
     }
+    elsif $name eq 'sym' {
+        my $regexsym := Q:PIR {
+            $P0 = get_global '$REGEXNAME'
+            $S0 = $P0
+            $I0 = index $S0, ':sym<'
+            add $I0, 5
+            $S0 = substr $S0, $I0
+            chopn $S0, 1
+            %r = box $S0
+        };
+        $past := PAST::Regex.new( 
+            PAST::Regex.new( $regexsym, :pasttype('literal') ),
+            :name($name), :pasttype('subcapture'), :node($/) 
+        );
+    }
     else {
         $past := PAST::Regex.new( $name, :name($name),
                                   :pasttype('subrule'), :subtype('capture'), :node($/) );
