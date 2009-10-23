@@ -7,7 +7,13 @@ method TOP($/) { make $<statementlist>.ast; }
 method statementlist($/) {
     my $past := PAST::Stmts.new( :node($/) );
     if $<statement> {
-        for $<statement> { $past.push( $_.ast ); }
+        for $<statement> { 
+            my $ast := $_.ast;
+            if $ast.isa(PAST::Block) && !$ast.blocktype {
+                $ast.blocktype('immediate');
+            }
+            $past.push( $ast ); 
+        }
     }
     make $past;
 }
