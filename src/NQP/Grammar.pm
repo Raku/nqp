@@ -1,6 +1,9 @@
 grammar NQP::Grammar is HLL::Grammar;
 
-token TOP { 
+token TOP { <comp_unit> }
+
+token comp_unit { 
+    <.newpad>
     <statementlist> 
     [ $ || <.panic: 'Confused'> ] 
 }
@@ -67,6 +70,22 @@ token statement_control:sym<unless> {
 }
 
 ## Terms
+
+token noun:sym<variable>         { <variable> }
+token noun:sym<scoped>           { <scoped> }
+
+token variable {
+    <sigil> <twigil>? <desigilname=ident>
+}
+
+token sigil { <[$@%&]> }
+
+token twigil { <[*]> }
+
+rule scoped {
+    $<scope_declarator>=[my|our]
+    <variable>
+}
 
 proto token term { <...> }
 

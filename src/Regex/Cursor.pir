@@ -57,6 +57,7 @@ for the Cursor if one hasn't been created yet.
   match_make:
     match = new ['Regex';'Match']
     setattribute self, '$!match', match
+    setattribute match, '$!cursor', self
     .local pmc target, from, to
     target = getattribute self, '$!target'
     setattribute match, '$!target', target

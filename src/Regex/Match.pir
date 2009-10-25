@@ -17,13 +17,24 @@ This file implements Match objects for the regex engine.
     load_bytecode 'P6object.pbc'
     .local pmc p6meta
     p6meta = new 'P6metaclass'
-    $P0 = p6meta.'new_class'('Regex::Match', 'parent'=>'Capture', 'attr'=>'$!target $!from $!to $!ast')
+    $P0 = p6meta.'new_class'('Regex::Match', 'parent'=>'Capture', 'attr'=>'$!cursor $!target $!from $!to $!ast')
     .return ()
 .end
 
 =head2 Methods
 
 =over 4
+
+=item CURSOR()
+
+Returns the Cursor associated with this match object.
+
+=cut
+
+.sub 'CURSOR' :method
+    $P0 = getattribute self, '$!cursor'
+    .return ($P0)
+.end
 
 =item from()
 

@@ -2,7 +2,15 @@ class NQP::Actions is HLL::Actions;
 
 our @BLOCK := Q:PIR { %r = new ['ResizablePMCArray'] };
 
-method TOP($/) { make $<statementlist>.ast; }
+method TOP($/) { make $<comp_unit>.ast; }
+
+method comp_unit($/) {
+    my $past := $<statementlist>.ast;
+    my $BLOCK := @BLOCK.shift;
+    $BLOCK.push($past);
+    $BLOCK.node($/);
+    make $BLOCK;
+}
 
 method statementlist($/) {
     my $past := PAST::Stmts.new( :node($/) );
@@ -76,6 +84,27 @@ method statement_control:sym<unless>($/) {
 }
 
 ## Terms
+
+method noun:sym<variable>($/) { make $<variable>.ast; }
+method noun:sym<scoped>($/) { make $<scoped>.ast; }
+
+method variable($/) {
+    make PAST::Var.new( :name(~$/) );
+}
+
+method scoped($/) {
+    my $past := $<variable>.ast;
+    my $name := $past.name;
+    if @BLOCK[0].symbol($name) {
+        $/.CURSOR.panic("Redeclaration of symbol ", $name);
+    }
+    my $scope := $<scope_declarator> eq 'our' ?? 'package' !! 'lexical';
+    $past.scope($scope);
+    $past.isdecl(1);
+    $past.viviself('Undef');
+    @BLOCK[0].symbol( $name, :scope($scope) );
+    make $past;
+}
 
 method term:sym<identifier>($/) {
     my $past := $<args>.ast;
