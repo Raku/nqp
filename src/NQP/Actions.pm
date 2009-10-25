@@ -79,7 +79,7 @@ method statement_control:sym<unless>($/) {
 
 method term:sym<identifier>($/) {
     my $past := $<args>.ast;
-    $past.name(~$<ident>);
+    $past.name(~$<identifier>);
     make $past;
 }
 

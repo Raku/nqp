@@ -71,7 +71,7 @@ token statement_control:sym<unless> {
 proto token term { <...> }
 
 token term:sym<identifier> {
-    <ident> <args>
+    <identifier=ident> <args>
 }
 
 token args {
