@@ -87,6 +87,7 @@ method statement_control:sym<unless>($/) {
 
 method noun:sym<variable>($/) { make $<variable>.ast; }
 method noun:sym<scope_declarator>($/) { make $<scope_declarator>.ast; }
+method noun:sym<routine_declarator>($/) { make $<routine_declarator>.ast; }
 
 method variable($/) {
     make PAST::Var.new( :name(~$/) );
@@ -95,13 +96,23 @@ method variable($/) {
 method scope_declarator:sym<my>($/) { make $<scoped>.ast; }
 method scope_declarator:sym<our>($/) {
     my $past := $<scoped>.ast;
-    $past.scope('package');
     @BLOCK[0].symbol( $past.name, :scope('package') );
+    $past.scope('package');
+
+    # If we're modifying the scope of a block, then eliminate the
+    # variable assignment and just return the (named) block itself.
+    if $past<XXXroutine> {
+        $past := $past.viviself;
+        $past.nsentry($past.name);
+    }
+
     make $past;
 }
 
 method scoped($/) {
-    make $<variable_declarator>.ast;
+    make $<routine_declarator>
+         ?? $<routine_declarator>.ast
+         !! $<variable_declarator>.ast;
 }
 
 method variable_declarator($/) {
@@ -114,6 +125,23 @@ method variable_declarator($/) {
     $past.isdecl(1);
     $past.viviself('Undef');
     @BLOCK[0].symbol( $name, :scope('lexical') );
+    make $past;
+}
+
+method routine_declarator:sym<sub>($/) { make $<routine_def>.ast; }
+
+method routine_def($/) {
+    my $past := $<blockoid>.ast;
+    $past.blocktype('declaration');
+    if $<deflongname> {
+        my $name := ~$<deflongname>[0];
+        $past.name($name);
+        $past.nsentry('');
+        $past := PAST::Var.new( :name($name), :isdecl(1), :viviself($past),
+                     :scope('lexical') );
+        $past<XXXroutine> := 1;
+        @BLOCK[0].symbol( $name, :scope('lexical') );
+    }
     make $past;
 }
 

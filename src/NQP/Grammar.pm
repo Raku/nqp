@@ -71,8 +71,9 @@ token statement_control:sym<unless> {
 
 ## Terms
 
-token noun:sym<variable>         { <variable> }
-token noun:sym<scope_declarator> { <scope_declarator> }
+token noun:sym<variable>           { <variable> }
+token noun:sym<scope_declarator>   { <scope_declarator> }
+token noun:sym<routine_declarator> { <routine_declarator> }
 
 token variable {
     <sigil> <twigil>? <desigilname=ident>
@@ -88,9 +89,19 @@ token scope_declarator:sym<our> { <sym> <scoped> }
 
 rule scoped {
     | <variable_declarator>
+    | <routine_declarator>
 }
 
 token variable_declarator { <variable> }
+
+proto token routine_declarator { <...> }
+token routine_declarator:sym<sub> { <sym> <routine_def> }
+
+rule routine_def {
+    <deflongname=ident>?
+    <.newpad>
+    <blockoid>
+}
 
 proto token term { <...> }
 
