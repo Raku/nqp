@@ -145,6 +145,21 @@ method routine_def($/) {
     make $past;
 }
 
+method signature($/) {
+    my $BLOCKINIT := @BLOCK[0][0];
+    for $<parameter> { $BLOCKINIT.push($_.ast); }
+}
+
+method parameter($/) { make $<param_var>.ast; }
+
+method param_var($/) {
+    my $past := $<variable>.ast;
+    $past.isdecl(1);
+    $past.scope('parameter');
+    @BLOCK[0].symbol($past.name, :scope('lexical') );
+    make $past;
+}
+
 method term:sym<identifier>($/) {
     my $past := $<args>.ast;
     $past.name(~$<identifier>);

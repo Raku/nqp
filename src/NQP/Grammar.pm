@@ -100,8 +100,16 @@ token routine_declarator:sym<sub> { <sym> <routine_def> }
 rule routine_def {
     <deflongname=ident>?
     <.newpad>
+    [ '(' <signature> ')'
+        || <.panic: 'Routine declaration requires a signature'> ]
     <blockoid>
 }
+
+token signature { [ [<.ws><parameter><.ws>] ** ',' ]? }
+
+token parameter { <param_var> }
+
+token param_var { <variable> }
 
 proto token term { <...> }
 
