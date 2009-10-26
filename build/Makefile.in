@@ -88,10 +88,14 @@ CLEANUPS = \
   *.manifest \
   *.pdb \
   $(P6REGEX_PBC) \
+  P6Regex$(EXE) \
   $(P6GRAMMAR_PBC) \
+  P6Grammar$(EXE) \
   $(HLLGRAMMAR_PBC) \
   nqp.pbc \
   nqp$(EXE) \
+  *.c\
+  *.o\
   src/stage0/*.pbc \
   src/stage1/gen/* \
   src/stage1/*.pbc \
