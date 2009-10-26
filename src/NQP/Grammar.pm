@@ -72,7 +72,7 @@ token statement_control:sym<unless> {
 ## Terms
 
 token noun:sym<variable>         { <variable> }
-token noun:sym<scoped>           { <scoped> }
+token noun:sym<scope_declarator> { <scope_declarator> }
 
 token variable {
     <sigil> <twigil>? <desigilname=ident>
@@ -82,10 +82,15 @@ token sigil { <[$@%&]> }
 
 token twigil { <[*]> }
 
+proto token scope_declarator { <...> }
+token scope_declarator:sym<my>  { <sym> <scoped> }
+token scope_declarator:sym<our> { <sym> <scoped> }
+
 rule scoped {
-    $<scope_declarator>=[my|our]
-    <variable>
+    | <variable_declarator>
 }
+
+token variable_declarator { <variable> }
 
 proto token term { <...> }
 

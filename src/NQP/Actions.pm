@@ -86,23 +86,34 @@ method statement_control:sym<unless>($/) {
 ## Terms
 
 method noun:sym<variable>($/) { make $<variable>.ast; }
-method noun:sym<scoped>($/) { make $<scoped>.ast; }
+method noun:sym<scope_declarator>($/) { make $<scope_declarator>.ast; }
 
 method variable($/) {
     make PAST::Var.new( :name(~$/) );
 }
 
+method scope_declarator:sym<my>($/) { make $<scoped>.ast; }
+method scope_declarator:sym<our>($/) {
+    my $past := $<scoped>.ast;
+    $past.scope('package');
+    @BLOCK[0].symbol( $past.name, :scope('package') );
+    make $past;
+}
+
 method scoped($/) {
+    make $<variable_declarator>.ast;
+}
+
+method variable_declarator($/) {
     my $past := $<variable>.ast;
     my $name := $past.name;
     if @BLOCK[0].symbol($name) {
         $/.CURSOR.panic("Redeclaration of symbol ", $name);
     }
-    my $scope := $<scope_declarator> eq 'our' ?? 'package' !! 'lexical';
-    $past.scope($scope);
+    $past.scope('lexical');
     $past.isdecl(1);
     $past.viviself('Undef');
-    @BLOCK[0].symbol( $name, :scope($scope) );
+    @BLOCK[0].symbol( $name, :scope('lexical') );
     make $past;
 }
 
