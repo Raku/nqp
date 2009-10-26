@@ -144,7 +144,7 @@ token quote:sym<q>    { 'q'  <![(]> <.ws> <quote_EXPR: ':q'>  }
 token quote:sym<qq>   { 'qq' <![(]> <.ws> <quote_EXPR: ':qq'> }
 token quote:sym<Q>    { 'Q'  <![(]> <.ws> <quote_EXPR> }
 
-token circumfix:sym<( )> { '(' <EXPR> ')' }
+token circumfix:sym<( )> { '(' <.ws> <EXPR> ')' }
 token circumfix:sym<ang> { <?[<]>  <quote_EXPR: ':q', ':w'>  }
 token circumfix:sym<{ }> { <?[{]> <pblock> }
 
@@ -194,6 +194,10 @@ token infix:sym«lt»   { <sym>  <O('%relational, :pirop<islt ISs>')> }
 token infix:sym«gt»   { <sym>  <O('%relational, :pirop<isgt ISs>')> }
 token infix:sym«=:=»  { <sym>  <O('%relational, :pirop<issame>')> }
 
+token infix:sym<&&>   { <sym>  <O('%tight_and, :pasttype<if>')> }
+
+token infix:sym<||>   { <sym>  <O('%tight_or, :pasttype<unless>')> }
+token infix:sym<//>   { <sym>  <O('%tight_or, :pasttype<def_or>')> }
 
 token infix:sym<:=>   { <sym>  <O('%assignment, :pasttype<bind>')> }
 token infix:sym<::=>  { <sym>  <O('%assignment, :pasttype<bind>')> }
