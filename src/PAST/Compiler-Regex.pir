@@ -729,6 +729,17 @@ second child of this node.
 .end
 
 
+=item 'pastnode'(PAST::Regex node)
+
+=cut
+
+.sub 'pastnode' :method :multi(_, ['PAST';'Regex'])
+    .param pmc node
+    $P0 = node[0]
+    .tailcall self.'as_post'($P0)
+.end
+
+
 =item pass(PAST::Regex node)
 
 =cut
