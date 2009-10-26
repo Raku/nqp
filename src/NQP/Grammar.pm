@@ -165,7 +165,9 @@ token postfix:sym<++> { <sym>  <O('%autoincrement')> }
 
 token infix:sym<**>   { <sym>  <O('%exponentiation, :pirop<pow>')> }
 
-token prefix:sym<->   { <sym>  <O('%symbolic_unary')> }
+token prefix:sym<+>   { <sym>  <O('%symbolic_unary, :pirop<set N*>')> }
+token prefix:sym<~>   { <sym>  <O('%symbolic_unary, :pirop<set S*>')> }
+token prefix:sym<->   { <sym>  <O('%symbolic_unary, :pirop<neg>')> }
 token prefix:sym<?>   { <sym>  <O('%symbolic_unary, :pirop<istrue>')> }
 token prefix:sym<!>   { <sym>  <O('%symbolic_unary, :pirop<isfalse>')> }
 
@@ -178,6 +180,22 @@ token infix:sym<->    { <sym>  <O('%additive, :pirop<sub>')> }
 
 token infix:sym<~>    { <sym>  <O('%concatenation , :pirop<concat>')> }
 
-token infix:sym<:=>   { <sym>  <O('%assignment, :pasttype<bind>')> }
+token infix:sym«==»   { <sym>  <O('%relational, :pirop<iseq INn>')> }
+token infix:sym«!=»   { <sym>  <O('%relational, :pirop<isne INn>')> }
+token infix:sym«<=»   { <sym>  <O('%relational, :pirop<isle INn>')> }
+token infix:sym«>=»   { <sym>  <O('%relational, :pirop<isge INn>')> }
+token infix:sym«<»    { <sym>  <O('%relational, :pirop<islt INn>')> }
+token infix:sym«>»    { <sym>  <O('%relational, :pirop<isgt INn>')> }
+token infix:sym«eq»   { <sym>  <O('%relational, :pirop<iseq ISs>')> }
+token infix:sym«ne»   { <sym>  <O('%relational, :pirop<isne ISs>')> }
+token infix:sym«le»   { <sym>  <O('%relational, :pirop<isle ISs>')> }
+token infix:sym«ge»   { <sym>  <O('%relational, :pirop<isge ISs>')> }
+token infix:sym«lt»   { <sym>  <O('%relational, :pirop<islt ISs>')> }
+token infix:sym«gt»   { <sym>  <O('%relational, :pirop<isgt ISs>')> }
+token infix:sym«=:=»  { <sym>  <O('%relational, :pirop<issame>')> }
 
-token infix:sym<,>    { <sym>  <O('%comma')> }
+
+token infix:sym<:=>   { <sym>  <O('%assignment, :pasttype<bind>')> }
+token infix:sym<::=>  { <sym>  <O('%assignment, :pasttype<bind>')> }
+
+token infix:sym<,>    { <sym>  <O('%comma, :pasttype<list>')> }

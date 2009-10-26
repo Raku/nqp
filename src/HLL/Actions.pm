@@ -7,7 +7,7 @@ method EXPR($/, $key?) {
         $past := PAST::Op.new( :node($/) );
         if $<OPER><O><pasttype> { $past.pasttype( ~$<OPER><O><pasttype> ); }
         elsif $<OPER><O><pirop>    { $past.pirop( ~$<OPER><O><pirop> ); }
-        else {
+        unless $past.name {
             if $key eq 'LIST' { $key := 'infix'; }
             my $name := Q:PIR {
                 $P0 = find_lex '$key'

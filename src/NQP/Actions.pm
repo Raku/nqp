@@ -217,6 +217,7 @@ NQP::Grammar.O(':prec<v=>, :assoc<unary>', '%symbolic_unary');
 NQP::Grammar.O(':prec<u=>, :assoc<left>',  '%multiplicative');
 NQP::Grammar.O(':prec<t=>, :assoc<left>',  '%additive');
 NQP::Grammar.O(':prec<r=>, :assoc<list>',  '%concatenation'); 
+NQP::Grammar.O(':prec<m=>, :assoc<left>',  '%relational');
 NQP::Grammar.O(':prec<i=>, :assoc<right>', '%assignment');
 NQP::Grammar.O(':prec<g=>, :assoc<list>, :nextterm<nulltermish>',  '%comma');
 NQP::Grammar.O(':prec<f=>, :assoc<list>',  '%list_infix');
