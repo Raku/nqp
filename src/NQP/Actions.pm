@@ -83,6 +83,28 @@ method statement_control:sym<unless>($/) {
     make $past;
 }
 
+method statement_control:sym<while>($/) {
+    my $past := $<xblock>.ast;
+    $past.pasttype(~$<sym>);
+    make $past;
+}
+
+method statement_control:sym<repeat>($/) {
+    my $pasttype := 'repeat_' ~ ~$<wu>;
+    my $past;
+    if $<xblock> { 
+        $past := $<xblock>.ast;
+        $past.pasttype($pasttype);
+    }
+    else {
+        $past := $<pblock>.ast;
+        $past.blocktype('immediate');
+        $past := PAST::Op.new( $<EXPR>.ast, $past, 
+                               :pasttype($pasttype), :node($/) );
+    }
+    make $past;
+}
+
 ## Terms
 
 method noun:sym<variable>($/) { make $<variable>.ast; }

@@ -69,6 +69,19 @@ token statement_control:sym<unless> {
     [ <!before 'else'> || <.panic: 'unless does not take "else", please rewrite using "if"'> ]
 }
 
+token statement_control:sym<while> {
+    $<sym>=[while|until] :s
+    <xblock>
+}
+
+token statement_control:sym<repeat> {
+    <sym> :s
+    [ 
+    | $<wu>=[while|until]\s <xblock>
+    | <pblock> $<wu>=[while|until]\s <EXPR> 
+    ]
+}
+
 ## Terms
 
 token noun:sym<variable>           { <variable> }
