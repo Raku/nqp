@@ -231,6 +231,14 @@ method metachar:sym<var>($/) {
     make $past;
 }
 
+method metachar:sym<PIR>($/) {
+    make PAST::Regex.new(
+             PAST::Op.new( :inline(~$<pir>), :pasttype('inline'), ),
+             :pasttype('pastnode'), :node($/) 
+         );
+}
+            
+
 method backslash:sym<w>($/) {
     my $subtype := ~$<sym> eq 'n' ?? 'nl' !! ~$<sym>;
     my $past := PAST::Regex.new( :pasttype('charclass'), :subtype($subtype), :node($/) );

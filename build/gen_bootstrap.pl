@@ -20,6 +20,10 @@ sub make_bootstrap {
             print "### $_";
             make_bootstrap($1); 
         }
+        elsif (m{^\.include '(gen/[^']*)'}) {
+            print "### $_";
+            make_bootstrap("src/stage2/$1"); 
+        }
         else { print; }
     }
 }

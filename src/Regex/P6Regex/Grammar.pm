@@ -101,6 +101,10 @@ grammar Regex::P6Regex::Grammar;
         [ <.ws> '=' <.ws> <quantified_atom> ]?
     }
 
+    token metachar:sym<PIR> {
+        ':PIR{{' $<pir>=[.*?] '}}'
+    }
+
     proto token backslash { <...> }
     token backslash:sym<w> { $<sym>=[<[dswnDSWN]>] }
     token backslash:sym<b> { $<sym>=[<[bB]>] }

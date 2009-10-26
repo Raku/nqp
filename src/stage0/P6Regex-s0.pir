@@ -1098,6 +1098,17 @@ second child of this node.
 .end
 
 
+=item 'pastnode'(PAST::Regex node)
+
+=cut
+
+.sub 'pastnode' :method :multi(_, ['PAST';'Regex'])
+    .param pmc node
+    $P0 = node[0]
+    .tailcall self.'as_post'($P0)
+.end
+
+
 =item pass(PAST::Regex node)
 
 =cut
@@ -1551,6 +1562,7 @@ for the Cursor if one hasn't been created yet.
   match_make:
     match = new ['Regex';'Match']
     setattribute self, '$!match', match
+    setattribute match, '$!cursor', self
     .local pmc target, from, to
     target = getattribute self, '$!target'
     setattribute match, '$!target', target
@@ -2826,13 +2838,24 @@ This file implements Match objects for the regex engine.
     load_bytecode 'P6object.pbc'
     .local pmc p6meta
     p6meta = new 'P6metaclass'
-    $P0 = p6meta.'new_class'('Regex::Match', 'parent'=>'Capture', 'attr'=>'$!target $!from $!to $!ast')
+    $P0 = p6meta.'new_class'('Regex::Match', 'parent'=>'Capture', 'attr'=>'$!cursor $!target $!from $!to $!ast')
     .return ()
 .end
 
 =head2 Methods
 
 =over 4
+
+=item CURSOR()
+
+Returns the Cursor associated with this match object.
+
+=cut
+
+.sub 'CURSOR' :method
+    $P0 = getattribute self, '$!cursor'
+    .return ($P0)
+.end
 
 =item from()
 
@@ -3215,149 +3238,196 @@ An alternate dump output for a Match object and all of its subcaptures.
 #   fill-column: 100
 # End:
 # vim: expandtab shiftwidth=4 ft=pir:
-# .include 'src/cheats/regex-cursor-protoregex.pir'
 
-### .include 'src/gen/p6regex-grammar.pir'
+### .include 'src/cheats/p6regex-grammar.pir'
+.namespace ['Regex';'P6Regex';'Grammar']
+
+.sub 'panic' :method
+    .param pmc args            :slurpy
+
+    .local int pos
+    .local pmc target
+    $I0 = isa self, ['Regex';'Cursor']
+    if $I0 goto cursor_pos
+    pos = self.'to'()
+    target = self.'orig'()
+    goto have_pos
+  cursor_pos:
+    pos = self.'pos'()
+    target = getattribute self, '$!target'
+  have_pos:
+
+    $I1 = target.'lineof'(pos)
+    push args, ' at line '
+    push args, $I1
+
+    $S0 = target
+    $S0 = substr $S0, pos, 10
+    $S0 = escape $S0
+    push args, ', near "'
+    push args, $S0
+    push args, '"'
+
+    .local string message
+    message = join '', args
+
+    die message
+.end
+
+.sub 'obs' :method
+    .param string oldstr
+    .param pmc options         :slurpy :named
+
+    .local string newstr
+    $P0 = split ';', oldstr
+    oldstr = $P0[0]
+    newstr = $P0[1]
+
+    self.'panic'('Obsolete use of ', oldstr, '; please use ', newstr, ' instead')
+.end
+### .include 'gen/p6regex-grammar.pir'
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block11"  :subid("10_1256279193.78309")
+.sub "_block11"  :subid("10_1256533470.86421")
 .annotate "line", 0
-    .const 'Sub' $P456 = "146_1256279193.78309" 
+    .const 'Sub' $P463 = "148_1256533470.86421" 
+    capture_lex $P463
+    .const 'Sub' $P456 = "146_1256533470.86421" 
     capture_lex $P456
-    .const 'Sub' $P449 = "144_1256279193.78309" 
+    .const 'Sub' $P449 = "144_1256533470.86421" 
     capture_lex $P449
-    .const 'Sub' $P442 = "142_1256279193.78309" 
-    capture_lex $P442
-    .const 'Sub' $P422 = "137_1256279193.78309" 
-    capture_lex $P422
-    .const 'Sub' $P388 = "131_1256279193.78309" 
-    capture_lex $P388
-    .const 'Sub' $P377 = "128_1256279193.78309" 
-    capture_lex $P377
-    .const 'Sub' $P365 = "125_1256279193.78309" 
-    capture_lex $P365
-    .const 'Sub' $P360 = "123_1256279193.78309" 
-    capture_lex $P360
-    .const 'Sub' $P350 = "120_1256279193.78309" 
-    capture_lex $P350
-    .const 'Sub' $P340 = "117_1256279193.78309" 
-    capture_lex $P340
-    .const 'Sub' $P332 = "113_1256279193.78309" 
-    capture_lex $P332
-    .const 'Sub' $P327 = "111_1256279193.78309" 
-    capture_lex $P327
-    .const 'Sub' $P322 = "109_1256279193.78309" 
-    capture_lex $P322
-    .const 'Sub' $P317 = "107_1256279193.78309" 
-    capture_lex $P317
-    .const 'Sub' $P312 = "105_1256279193.78309" 
-    capture_lex $P312
-    .const 'Sub' $P307 = "103_1256279193.78309" 
-    capture_lex $P307
-    .const 'Sub' $P302 = "101_1256279193.78309" 
-    capture_lex $P302
-    .const 'Sub' $P297 = "99_1256279193.78309" 
-    capture_lex $P297
-    .const 'Sub' $P292 = "97_1256279193.78309" 
-    capture_lex $P292
-    .const 'Sub' $P287 = "95_1256279193.78309" 
-    capture_lex $P287
-    .const 'Sub' $P282 = "93_1256279193.78309" 
-    capture_lex $P282
-    .const 'Sub' $P277 = "91_1256279193.78309" 
-    capture_lex $P277
-    .const 'Sub' $P272 = "89_1256279193.78309" 
-    capture_lex $P272
-    .const 'Sub' $P257 = "85_1256279193.78309" 
+    .const 'Sub' $P429 = "139_1256533470.86421" 
+    capture_lex $P429
+    .const 'Sub' $P395 = "133_1256533470.86421" 
+    capture_lex $P395
+    .const 'Sub' $P384 = "130_1256533470.86421" 
+    capture_lex $P384
+    .const 'Sub' $P372 = "127_1256533470.86421" 
+    capture_lex $P372
+    .const 'Sub' $P367 = "125_1256533470.86421" 
+    capture_lex $P367
+    .const 'Sub' $P357 = "122_1256533470.86421" 
+    capture_lex $P357
+    .const 'Sub' $P347 = "119_1256533470.86421" 
+    capture_lex $P347
+    .const 'Sub' $P339 = "115_1256533470.86421" 
+    capture_lex $P339
+    .const 'Sub' $P334 = "113_1256533470.86421" 
+    capture_lex $P334
+    .const 'Sub' $P329 = "111_1256533470.86421" 
+    capture_lex $P329
+    .const 'Sub' $P324 = "109_1256533470.86421" 
+    capture_lex $P324
+    .const 'Sub' $P319 = "107_1256533470.86421" 
+    capture_lex $P319
+    .const 'Sub' $P314 = "105_1256533470.86421" 
+    capture_lex $P314
+    .const 'Sub' $P309 = "103_1256533470.86421" 
+    capture_lex $P309
+    .const 'Sub' $P304 = "101_1256533470.86421" 
+    capture_lex $P304
+    .const 'Sub' $P299 = "99_1256533470.86421" 
+    capture_lex $P299
+    .const 'Sub' $P294 = "97_1256533470.86421" 
+    capture_lex $P294
+    .const 'Sub' $P289 = "95_1256533470.86421" 
+    capture_lex $P289
+    .const 'Sub' $P284 = "93_1256533470.86421" 
+    capture_lex $P284
+    .const 'Sub' $P279 = "91_1256533470.86421" 
+    capture_lex $P279
+    .const 'Sub' $P268 = "87_1256533470.86421" 
+    capture_lex $P268
+    .const 'Sub' $P257 = "85_1256533470.86421" 
     capture_lex $P257
-    .const 'Sub' $P251 = "83_1256279193.78309" 
+    .const 'Sub' $P251 = "83_1256533470.86421" 
     capture_lex $P251
-    .const 'Sub' $P235 = "81_1256279193.78309" 
+    .const 'Sub' $P235 = "81_1256533470.86421" 
     capture_lex $P235
-    .const 'Sub' $P229 = "79_1256279193.78309" 
+    .const 'Sub' $P229 = "79_1256533470.86421" 
     capture_lex $P229
-    .const 'Sub' $P224 = "77_1256279193.78309" 
+    .const 'Sub' $P224 = "77_1256533470.86421" 
     capture_lex $P224
-    .const 'Sub' $P219 = "75_1256279193.78309" 
+    .const 'Sub' $P219 = "75_1256533470.86421" 
     capture_lex $P219
-    .const 'Sub' $P213 = "73_1256279193.78309" 
+    .const 'Sub' $P213 = "73_1256533470.86421" 
     capture_lex $P213
-    .const 'Sub' $P207 = "71_1256279193.78309" 
+    .const 'Sub' $P207 = "71_1256533470.86421" 
     capture_lex $P207
-    .const 'Sub' $P202 = "69_1256279193.78309" 
+    .const 'Sub' $P202 = "69_1256533470.86421" 
     capture_lex $P202
-    .const 'Sub' $P197 = "67_1256279193.78309" 
+    .const 'Sub' $P197 = "67_1256533470.86421" 
     capture_lex $P197
-    .const 'Sub' $P192 = "65_1256279193.78309" 
+    .const 'Sub' $P192 = "65_1256533470.86421" 
     capture_lex $P192
-    .const 'Sub' $P187 = "63_1256279193.78309" 
+    .const 'Sub' $P187 = "63_1256533470.86421" 
     capture_lex $P187
-    .const 'Sub' $P182 = "61_1256279193.78309" 
+    .const 'Sub' $P182 = "61_1256533470.86421" 
     capture_lex $P182
-    .const 'Sub' $P177 = "59_1256279193.78309" 
+    .const 'Sub' $P177 = "59_1256533470.86421" 
     capture_lex $P177
-    .const 'Sub' $P172 = "57_1256279193.78309" 
+    .const 'Sub' $P172 = "57_1256533470.86421" 
     capture_lex $P172
-    .const 'Sub' $P167 = "55_1256279193.78309" 
+    .const 'Sub' $P167 = "55_1256533470.86421" 
     capture_lex $P167
-    .const 'Sub' $P162 = "53_1256279193.78309" 
+    .const 'Sub' $P162 = "53_1256533470.86421" 
     capture_lex $P162
-    .const 'Sub' $P157 = "51_1256279193.78309" 
+    .const 'Sub' $P157 = "51_1256533470.86421" 
     capture_lex $P157
-    .const 'Sub' $P152 = "49_1256279193.78309" 
+    .const 'Sub' $P152 = "49_1256533470.86421" 
     capture_lex $P152
-    .const 'Sub' $P137 = "44_1256279193.78309" 
+    .const 'Sub' $P137 = "44_1256533470.86421" 
     capture_lex $P137
-    .const 'Sub' $P126 = "42_1256279193.78309" 
+    .const 'Sub' $P126 = "42_1256533470.86421" 
     capture_lex $P126
-    .const 'Sub' $P120 = "40_1256279193.78309" 
+    .const 'Sub' $P120 = "40_1256533470.86421" 
     capture_lex $P120
-    .const 'Sub' $P114 = "38_1256279193.78309" 
+    .const 'Sub' $P114 = "38_1256533470.86421" 
     capture_lex $P114
-    .const 'Sub' $P108 = "36_1256279193.78309" 
+    .const 'Sub' $P108 = "36_1256533470.86421" 
     capture_lex $P108
-    .const 'Sub' $P90 = "31_1256279193.78309" 
+    .const 'Sub' $P90 = "31_1256533470.86421" 
     capture_lex $P90
-    .const 'Sub' $P78 = "28_1256279193.78309" 
+    .const 'Sub' $P78 = "28_1256533470.86421" 
     capture_lex $P78
-    .const 'Sub' $P72 = "26_1256279193.78309" 
+    .const 'Sub' $P72 = "26_1256533470.86421" 
     capture_lex $P72
-    .const 'Sub' $P61 = "24_1256279193.78309" 
+    .const 'Sub' $P61 = "24_1256533470.86421" 
     capture_lex $P61
-    .const 'Sub' $P55 = "22_1256279193.78309" 
+    .const 'Sub' $P55 = "22_1256533470.86421" 
     capture_lex $P55
-    .const 'Sub' $P43 = "20_1256279193.78309" 
+    .const 'Sub' $P43 = "20_1256533470.86421" 
     capture_lex $P43
-    .const 'Sub' $P36 = "18_1256279193.78309" 
+    .const 'Sub' $P36 = "18_1256533470.86421" 
     capture_lex $P36
-    .const 'Sub' $P29 = "16_1256279193.78309" 
+    .const 'Sub' $P29 = "16_1256533470.86421" 
     capture_lex $P29
-    .const 'Sub' $P20 = "13_1256279193.78309" 
+    .const 'Sub' $P20 = "13_1256533470.86421" 
     capture_lex $P20
-    .const 'Sub' $P13 = "11_1256279193.78309" 
+    .const 'Sub' $P13 = "11_1256533470.86421" 
     capture_lex $P13
-.annotate "line", 165
-    .const 'Sub' $P456 = "146_1256279193.78309" 
-    capture_lex $P456
+.annotate "line", 169
+    .const 'Sub' $P463 = "148_1256533470.86421" 
+    capture_lex $P463
 .annotate "line", 1
-    .return ($P456)
+    .return ($P463)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "" :load :init :subid("post148") :outer("10_1256279193.78309")
+.sub "" :load :init :subid("post150") :outer("10_1256533470.86421")
 .annotate "line", 0
     get_hll_global $P12, ["Regex";"P6Regex";"Grammar"], "_block11" 
     .local pmc block
     set block, $P12
 .annotate "line", 1
-    get_hll_global $P463, "P6metaclass"
-    $P463."new_class"("Regex::P6Regex::Grammar", "Regex::Cursor" :named("parent"))
+    get_hll_global $P470, "P6metaclass"
+    $P470."new_class"("Regex::P6Regex::Grammar", "Regex::Cursor" :named("parent"))
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "ws"  :subid("11_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "ws"  :subid("11_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 3
     .local string rx14_tgt
     .local int rx14_pos
@@ -3423,7 +3493,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__ws"  :subid("12_1256279193.78309") :method
+.sub "!PREFIX__ws"  :subid("12_1256533470.86421") :method
 .annotate "line", 3
     new $P16, "ResizablePMCArray"
     push $P16, ""
@@ -3432,9 +3502,9 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "normspace"  :subid("13_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "normspace"  :subid("13_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 5
-    .const 'Sub' $P25 = "15_1256279193.78309" 
+    .const 'Sub' $P25 = "15_1256533470.86421" 
     capture_lex $P25
     .local string rx21_tgt
     .local int rx21_pos
@@ -3453,7 +3523,7 @@ An alternate dump output for a Match object and all of its subcaptures.
   rx21_start:
   # rx subrule "before" subtype=zerowidth negate=
     rx21_cur."!cursor_pos"(rx21_pos)
-    .const 'Sub' $P25 = "15_1256279193.78309" 
+    .const 'Sub' $P25 = "15_1256533470.86421" 
     capture_lex $P25
     $P10 = rx21_cur."before"($P25)
     unless $P10, rx21_fail
@@ -3480,7 +3550,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__normspace"  :subid("14_1256279193.78309") :method
+.sub "!PREFIX__normspace"  :subid("14_1256533470.86421") :method
 .annotate "line", 5
     new $P23, "ResizablePMCArray"
     push $P23, ""
@@ -3489,7 +3559,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block24"  :anon :subid("15_1256279193.78309") :method :outer("13_1256279193.78309")
+.sub "_block24"  :anon :subid("15_1256533470.86421") :method :outer("13_1256533470.86421")
 .annotate "line", 5
     .local string rx26_tgt
     .local int rx26_pos
@@ -3552,7 +3622,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "quote"  :subid("16_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "quote"  :subid("16_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 7
     .local string rx30_tgt
     .local int rx30_pos
@@ -3630,7 +3700,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__quote"  :subid("17_1256279193.78309") :method
+.sub "!PREFIX__quote"  :subid("17_1256533470.86421") :method
 .annotate "line", 7
     new $P32, "ResizablePMCArray"
     push $P32, "'"
@@ -3639,7 +3709,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "arg"  :subid("18_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "arg"  :subid("18_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 9
     .local string rx37_tgt
     .local int rx37_pos
@@ -3711,7 +3781,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__arg"  :subid("19_1256279193.78309") :method
+.sub "!PREFIX__arg"  :subid("19_1256533470.86421") :method
 .annotate "line", 9
     $P39 = self."!PREFIX__!subrule"("quote", "")
     new $P40, "ResizablePMCArray"
@@ -3722,7 +3792,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "arglist"  :subid("20_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "arglist"  :subid("20_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 16
     .local string rx44_tgt
     .local int rx44_pos
@@ -3817,7 +3887,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__arglist"  :subid("21_1256279193.78309") :method
+.sub "!PREFIX__arglist"  :subid("21_1256533470.86421") :method
 .annotate "line", 16
     new $P46, "ResizablePMCArray"
     push $P46, ""
@@ -3826,7 +3896,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "TOP"  :subid("22_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "TOP"  :subid("22_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 18
     .local string rx56_tgt
     .local int rx56_pos
@@ -3884,7 +3954,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__TOP"  :subid("23_1256279193.78309") :method
+.sub "!PREFIX__TOP"  :subid("23_1256533470.86421") :method
 .annotate "line", 18
     $P58 = self."!PREFIX__!subrule"("nibbler", "")
     new $P59, "ResizablePMCArray"
@@ -3894,7 +3964,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "nibbler"  :subid("24_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "nibbler"  :subid("24_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 23
     .local string rx62_tgt
     .local int rx62_pos
@@ -4047,7 +4117,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__nibbler"  :subid("25_1256279193.78309") :method
+.sub "!PREFIX__nibbler"  :subid("25_1256533470.86421") :method
 .annotate "line", 23
     new $P64, "ResizablePMCArray"
     push $P64, ""
@@ -4056,7 +4126,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "termish"  :subid("26_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "termish"  :subid("26_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 32
     .local string rx73_tgt
     .local int rx73_pos
@@ -4109,7 +4179,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__termish"  :subid("27_1256279193.78309") :method
+.sub "!PREFIX__termish"  :subid("27_1256533470.86421") :method
 .annotate "line", 32
     new $P75, "ResizablePMCArray"
     push $P75, ""
@@ -4118,9 +4188,9 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "quantified_atom"  :subid("28_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "quantified_atom"  :subid("28_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 36
-    .const 'Sub' $P86 = "30_1256279193.78309" 
+    .const 'Sub' $P86 = "30_1256533470.86421" 
     capture_lex $P86
     .local string rx79_tgt
     .local int rx79_pos
@@ -4169,7 +4239,7 @@ An alternate dump output for a Match object and all of its subcaptures.
   alt84_1:
   # rx subrule "before" subtype=zerowidth negate=
     rx79_cur."!cursor_pos"(rx79_pos)
-    .const 'Sub' $P86 = "30_1256279193.78309" 
+    .const 'Sub' $P86 = "30_1256533470.86421" 
     capture_lex $P86
     $P10 = rx79_cur."before"($P86)
     unless $P10, rx79_fail
@@ -4206,7 +4276,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__quantified_atom"  :subid("29_1256279193.78309") :method
+.sub "!PREFIX__quantified_atom"  :subid("29_1256533470.86421") :method
 .annotate "line", 36
     $P81 = self."!PREFIX__!subrule"("atom", "")
     new $P82, "ResizablePMCArray"
@@ -4216,7 +4286,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block85"  :anon :subid("30_1256279193.78309") :method :outer("28_1256279193.78309")
+.sub "_block85"  :anon :subid("30_1256533470.86421") :method :outer("28_1256533470.86421")
 .annotate "line", 37
     .local string rx87_tgt
     .local int rx87_pos
@@ -4267,9 +4337,9 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "atom"  :subid("31_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "atom"  :subid("31_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 40
-    .const 'Sub' $P100 = "33_1256279193.78309" 
+    .const 'Sub' $P100 = "33_1256533470.86421" 
     capture_lex $P100
     .local string rx91_tgt
     .local int rx91_pos
@@ -4315,7 +4385,7 @@ An alternate dump output for a Match object and all of its subcaptures.
   rxquantg97_done:
   # rx subrule "before" subtype=zerowidth negate=
     rx91_cur."!cursor_pos"(rx91_pos)
-    .const 'Sub' $P100 = "33_1256279193.78309" 
+    .const 'Sub' $P100 = "33_1256533470.86421" 
     capture_lex $P100
     $P10 = rx91_cur."before"($P100)
     unless $P10, rx91_fail
@@ -4351,7 +4421,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__atom"  :subid("32_1256279193.78309") :method
+.sub "!PREFIX__atom"  :subid("32_1256533470.86421") :method
 .annotate "line", 40
     $P93 = self."!PREFIX__!subrule"("metachar", "")
     new $P94, "ResizablePMCArray"
@@ -4362,7 +4432,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block99"  :anon :subid("33_1256279193.78309") :method :outer("31_1256279193.78309")
+.sub "_block99"  :anon :subid("33_1256533470.86421") :method :outer("31_1256533470.86421")
 .annotate "line", 43
     .local string rx101_tgt
     .local int rx101_pos
@@ -4412,7 +4482,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "quantifier"  :subid("34_1256279193.78309") :method
+.sub "quantifier"  :subid("34_1256533470.86421") :method
 .annotate "line", 48
     $P105 = self."!protoregex"("quantifier")
     .return ($P105)
@@ -4420,7 +4490,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__quantifier"  :subid("35_1256279193.78309") :method
+.sub "!PREFIX__quantifier"  :subid("35_1256533470.86421") :method
 .annotate "line", 48
     $P107 = self."!PREFIX__!protoregex"("quantifier")
     .return ($P107)
@@ -4428,7 +4498,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "quantifier:sym<*>"  :subid("36_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "quantifier:sym<*>"  :subid("36_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 49
     .local string rx109_tgt
     .local int rx109_pos
@@ -4491,7 +4561,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__quantifier:sym<*>"  :subid("37_1256279193.78309") :method
+.sub "!PREFIX__quantifier:sym<*>"  :subid("37_1256533470.86421") :method
 .annotate "line", 49
     $P111 = self."!PREFIX__!subrule"("backmod", "*")
     new $P112, "ResizablePMCArray"
@@ -4501,7 +4571,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "quantifier:sym<+>"  :subid("38_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "quantifier:sym<+>"  :subid("38_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 50
     .local string rx115_tgt
     .local int rx115_pos
@@ -4564,7 +4634,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__quantifier:sym<+>"  :subid("39_1256279193.78309") :method
+.sub "!PREFIX__quantifier:sym<+>"  :subid("39_1256533470.86421") :method
 .annotate "line", 50
     $P117 = self."!PREFIX__!subrule"("backmod", "+")
     new $P118, "ResizablePMCArray"
@@ -4574,7 +4644,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "quantifier:sym<?>"  :subid("40_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "quantifier:sym<?>"  :subid("40_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 51
     .local string rx121_tgt
     .local int rx121_pos
@@ -4637,7 +4707,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__quantifier:sym<?>"  :subid("41_1256279193.78309") :method
+.sub "!PREFIX__quantifier:sym<?>"  :subid("41_1256533470.86421") :method
 .annotate "line", 51
     $P123 = self."!PREFIX__!subrule"("backmod", "?")
     new $P124, "ResizablePMCArray"
@@ -4647,7 +4717,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "quantifier:sym<**>"  :subid("42_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "quantifier:sym<**>"  :subid("42_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 52
     .local string rx127_tgt
     .local int rx127_pos
@@ -4803,7 +4873,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__quantifier:sym<**>"  :subid("43_1256279193.78309") :method
+.sub "!PREFIX__quantifier:sym<**>"  :subid("43_1256533470.86421") :method
 .annotate "line", 52
     new $P129, "ResizablePMCArray"
     push $P129, "**"
@@ -4812,9 +4882,9 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backmod"  :subid("44_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "backmod"  :subid("44_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 60
-    .const 'Sub' $P145 = "46_1256279193.78309" 
+    .const 'Sub' $P145 = "46_1256533470.86421" 
     capture_lex $P145
     .local string rx138_tgt
     .local int rx138_pos
@@ -4869,7 +4939,7 @@ An alternate dump output for a Match object and all of its subcaptures.
   alt143_2:
   # rx subrule "before" subtype=zerowidth negate=1
     rx138_cur."!cursor_pos"(rx138_pos)
-    .const 'Sub' $P145 = "46_1256279193.78309" 
+    .const 'Sub' $P145 = "46_1256533470.86421" 
     capture_lex $P145
     $P10 = rx138_cur."before"($P145)
     if $P10, rx138_fail
@@ -4892,7 +4962,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backmod"  :subid("45_1256279193.78309") :method
+.sub "!PREFIX__backmod"  :subid("45_1256533470.86421") :method
 .annotate "line", 60
     new $P140, "ResizablePMCArray"
     push $P140, ""
@@ -4901,7 +4971,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block144"  :anon :subid("46_1256279193.78309") :method :outer("44_1256279193.78309")
+.sub "_block144"  :anon :subid("46_1256533470.86421") :method :outer("44_1256533470.86421")
 .annotate "line", 60
     .local string rx146_tgt
     .local int rx146_pos
@@ -4952,7 +5022,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar"  :subid("47_1256279193.78309") :method
+.sub "metachar"  :subid("47_1256533470.86421") :method
 .annotate "line", 62
     $P149 = self."!protoregex"("metachar")
     .return ($P149)
@@ -4960,7 +5030,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar"  :subid("48_1256279193.78309") :method
+.sub "!PREFIX__metachar"  :subid("48_1256533470.86421") :method
 .annotate "line", 62
     $P151 = self."!PREFIX__!protoregex"("metachar")
     .return ($P151)
@@ -4968,7 +5038,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<ws>"  :subid("49_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "metachar:sym<ws>"  :subid("49_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 63
     .local string rx153_tgt
     .local int rx153_pos
@@ -5008,7 +5078,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<ws>"  :subid("50_1256279193.78309") :method
+.sub "!PREFIX__metachar:sym<ws>"  :subid("50_1256533470.86421") :method
 .annotate "line", 63
     $P155 = self."!PREFIX__!subrule"("normspace", "")
     new $P156, "ResizablePMCArray"
@@ -5018,7 +5088,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<[ ]>"  :subid("51_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "metachar:sym<[ ]>"  :subid("51_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 64
     .local string rx158_tgt
     .local int rx158_pos
@@ -5074,7 +5144,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<[ ]>"  :subid("52_1256279193.78309") :method
+.sub "!PREFIX__metachar:sym<[ ]>"  :subid("52_1256533470.86421") :method
 .annotate "line", 64
     $P160 = self."!PREFIX__!subrule"("nibbler", "[")
     new $P161, "ResizablePMCArray"
@@ -5084,7 +5154,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<( )>"  :subid("53_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "metachar:sym<( )>"  :subid("53_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 65
     .local string rx163_tgt
     .local int rx163_pos
@@ -5140,7 +5210,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<( )>"  :subid("54_1256279193.78309") :method
+.sub "!PREFIX__metachar:sym<( )>"  :subid("54_1256533470.86421") :method
 .annotate "line", 65
     $P165 = self."!PREFIX__!subrule"("nibbler", "(")
     new $P166, "ResizablePMCArray"
@@ -5150,7 +5220,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<'>"  :subid("55_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "metachar:sym<'>"  :subid("55_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 66
     .local string rx168_tgt
     .local int rx168_pos
@@ -5192,7 +5262,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<'>"  :subid("56_1256279193.78309") :method
+.sub "!PREFIX__metachar:sym<'>"  :subid("56_1256533470.86421") :method
 .annotate "line", 66
     $P170 = self."!PREFIX__!subrule"("quote", "")
     new $P171, "ResizablePMCArray"
@@ -5202,7 +5272,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<.>"  :subid("57_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "metachar:sym<.>"  :subid("57_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 67
     .local string rx173_tgt
     .local int rx173_pos
@@ -5258,7 +5328,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<.>"  :subid("58_1256279193.78309") :method
+.sub "!PREFIX__metachar:sym<.>"  :subid("58_1256533470.86421") :method
 .annotate "line", 67
     new $P175, "ResizablePMCArray"
     push $P175, "."
@@ -5267,7 +5337,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<^>"  :subid("59_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "metachar:sym<^>"  :subid("59_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 68
     .local string rx178_tgt
     .local int rx178_pos
@@ -5323,7 +5393,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<^>"  :subid("60_1256279193.78309") :method
+.sub "!PREFIX__metachar:sym<^>"  :subid("60_1256533470.86421") :method
 .annotate "line", 68
     new $P180, "ResizablePMCArray"
     push $P180, "^"
@@ -5332,7 +5402,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<^^>"  :subid("61_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "metachar:sym<^^>"  :subid("61_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 69
     .local string rx183_tgt
     .local int rx183_pos
@@ -5388,7 +5458,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<^^>"  :subid("62_1256279193.78309") :method
+.sub "!PREFIX__metachar:sym<^^>"  :subid("62_1256533470.86421") :method
 .annotate "line", 69
     new $P185, "ResizablePMCArray"
     push $P185, "^^"
@@ -5397,7 +5467,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<$>"  :subid("63_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "metachar:sym<$>"  :subid("63_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 70
     .local string rx188_tgt
     .local int rx188_pos
@@ -5453,7 +5523,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<$>"  :subid("64_1256279193.78309") :method
+.sub "!PREFIX__metachar:sym<$>"  :subid("64_1256533470.86421") :method
 .annotate "line", 70
     new $P190, "ResizablePMCArray"
     push $P190, "$"
@@ -5462,7 +5532,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<$$>"  :subid("65_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "metachar:sym<$$>"  :subid("65_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 71
     .local string rx193_tgt
     .local int rx193_pos
@@ -5518,7 +5588,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<$$>"  :subid("66_1256279193.78309") :method
+.sub "!PREFIX__metachar:sym<$$>"  :subid("66_1256533470.86421") :method
 .annotate "line", 71
     new $P195, "ResizablePMCArray"
     push $P195, "$$"
@@ -5527,7 +5597,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<:::>"  :subid("67_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "metachar:sym<:::>"  :subid("67_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 72
     .local string rx198_tgt
     .local int rx198_pos
@@ -5583,7 +5653,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<:::>"  :subid("68_1256279193.78309") :method
+.sub "!PREFIX__metachar:sym<:::>"  :subid("68_1256533470.86421") :method
 .annotate "line", 72
     new $P200, "ResizablePMCArray"
     push $P200, ":::"
@@ -5592,7 +5662,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<::>"  :subid("69_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "metachar:sym<::>"  :subid("69_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 73
     .local string rx203_tgt
     .local int rx203_pos
@@ -5648,7 +5718,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<::>"  :subid("70_1256279193.78309") :method
+.sub "!PREFIX__metachar:sym<::>"  :subid("70_1256533470.86421") :method
 .annotate "line", 73
     new $P205, "ResizablePMCArray"
     push $P205, "::"
@@ -5657,7 +5727,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<lwb>"  :subid("71_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "metachar:sym<lwb>"  :subid("71_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 74
     .local string rx208_tgt
     .local int rx208_pos
@@ -5726,7 +5796,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<lwb>"  :subid("72_1256279193.78309") :method
+.sub "!PREFIX__metachar:sym<lwb>"  :subid("72_1256533470.86421") :method
 .annotate "line", 74
     new $P210, "ResizablePMCArray"
     push $P210, unicode:"\x{ab}"
@@ -5736,7 +5806,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<rwb>"  :subid("73_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "metachar:sym<rwb>"  :subid("73_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 75
     .local string rx214_tgt
     .local int rx214_pos
@@ -5805,7 +5875,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<rwb>"  :subid("74_1256279193.78309") :method
+.sub "!PREFIX__metachar:sym<rwb>"  :subid("74_1256533470.86421") :method
 .annotate "line", 75
     new $P216, "ResizablePMCArray"
     push $P216, unicode:"\x{bb}"
@@ -5815,7 +5885,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<bs>"  :subid("75_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "metachar:sym<bs>"  :subid("75_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 76
     .local string rx220_tgt
     .local int rx220_pos
@@ -5864,7 +5934,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<bs>"  :subid("76_1256279193.78309") :method
+.sub "!PREFIX__metachar:sym<bs>"  :subid("76_1256533470.86421") :method
 .annotate "line", 76
     $P222 = self."!PREFIX__!subrule"("backslash", "\\")
     new $P223, "ResizablePMCArray"
@@ -5874,7 +5944,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<mod>"  :subid("77_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "metachar:sym<mod>"  :subid("77_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 77
     .local string rx225_tgt
     .local int rx225_pos
@@ -5916,7 +5986,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<mod>"  :subid("78_1256279193.78309") :method
+.sub "!PREFIX__metachar:sym<mod>"  :subid("78_1256533470.86421") :method
 .annotate "line", 77
     $P227 = self."!PREFIX__!subrule"("mod_internal", "")
     new $P228, "ResizablePMCArray"
@@ -5926,7 +5996,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<~>"  :subid("79_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "metachar:sym<~>"  :subid("79_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 80
     .local string rx230_tgt
     .local int rx230_pos
@@ -6010,7 +6080,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<~>"  :subid("80_1256279193.78309") :method
+.sub "!PREFIX__metachar:sym<~>"  :subid("80_1256533470.86421") :method
 .annotate "line", 80
     $P232 = self."!PREFIX__!subrule"("ws", "~")
     new $P233, "ResizablePMCArray"
@@ -6020,7 +6090,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<{*}>"  :subid("81_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "metachar:sym<{*}>"  :subid("81_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 86
     .local string rx236_tgt
     .local int rx236_pos
@@ -6172,7 +6242,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<{*}>"  :subid("82_1256279193.78309") :method
+.sub "!PREFIX__metachar:sym<{*}>"  :subid("82_1256533470.86421") :method
 .annotate "line", 86
     new $P238, "ResizablePMCArray"
     push $P238, "{*}"
@@ -6181,7 +6251,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<assert>"  :subid("83_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "metachar:sym<assert>"  :subid("83_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 90
     .local string rx252_tgt
     .local int rx252_pos
@@ -6251,7 +6321,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<assert>"  :subid("84_1256279193.78309") :method
+.sub "!PREFIX__metachar:sym<assert>"  :subid("84_1256533470.86421") :method
 .annotate "line", 90
     $P254 = self."!PREFIX__!subrule"("assertion", "<")
     new $P255, "ResizablePMCArray"
@@ -6261,7 +6331,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<var>"  :subid("85_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "metachar:sym<var>"  :subid("85_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 95
     .local string rx258_tgt
     .local int rx258_pos
@@ -6408,7 +6478,7 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<var>"  :subid("86_1256279193.78309") :method
+.sub "!PREFIX__metachar:sym<var>"  :subid("86_1256533470.86421") :method
 .annotate "line", 95
     new $P260, "ResizablePMCArray"
     push $P260, "$"
@@ -6418,926 +6488,939 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash"  :subid("87_1256279193.78309") :method
+.sub "metachar:sym<PIR>"  :subid("87_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 104
-    $P269 = self."!protoregex"("backslash")
-    .return ($P269)
+    .local string rx269_tgt
+    .local int rx269_pos
+    .local int rx269_off
+    .local int rx269_eos
+    .local int rx269_rep
+    .local pmc rx269_cur
+    (rx269_cur, rx269_pos, rx269_tgt, $I10) = self."!cursor_start"()
+    rx269_cur."!cursor_debug"("START ", "metachar:sym<PIR>")
+    .lex unicode:"$\x{a2}", rx269_cur
+    length rx269_eos, rx269_tgt
+    set rx269_off, 0
+    lt $I10, 2, rx269_start
+    sub rx269_off, $I10, 1
+    substr rx269_tgt, rx269_tgt, rx269_off
+  rx269_start:
+.annotate "line", 105
+  # rx literal  ":PIR{{"
+    add $I11, rx269_pos, 6
+    gt $I11, rx269_eos, rx269_fail
+    sub $I11, rx269_pos, rx269_off
+    substr $S10, rx269_tgt, $I11, 6
+    ne $S10, ":PIR{{", rx269_fail
+    add rx269_pos, 6
+  # rx subcapture "pir"
+    set_addr $I10, rxcap_274_fail
+    rx269_cur."!mark_push"(0, rx269_pos, $I10)
+  # rx rxquantf272 ** 0..*
+    set_addr $I10, rxquantf272_loop
+    rx269_cur."!mark_push"(0, rx269_pos, $I10)
+    goto rxquantf272_done
+  rxquantf272_loop:
+  # rx charclass .
+    ge rx269_pos, rx269_eos, rx269_fail
+    inc rx269_pos
+    set_addr $I10, rxquantf272_loop
+    rx269_cur."!mark_push"($I273, rx269_pos, $I10)
+  rxquantf272_done:
+    set_addr $I10, rxcap_274_fail
+    ($I12, $I11) = rx269_cur."!mark_peek"($I10)
+    rx269_cur."!cursor_pos"($I11)
+    ($P10) = rx269_cur."!cursor_start"()
+    $P10."!cursor_pass"(rx269_pos, "")
+    rx269_cur."!mark_push"(0, -1, 0, $P10)
+    $P10."!cursor_names"("pir")
+    goto rxcap_274_done
+  rxcap_274_fail:
+    goto rx269_fail
+  rxcap_274_done:
+  # rx literal  "}}"
+    add $I11, rx269_pos, 2
+    gt $I11, rx269_eos, rx269_fail
+    sub $I11, rx269_pos, rx269_off
+    substr $S10, rx269_tgt, $I11, 2
+    ne $S10, "}}", rx269_fail
+    add rx269_pos, 2
+.annotate "line", 104
+  # rx pass
+    rx269_cur."!cursor_pass"(rx269_pos, "metachar:sym<PIR>")
+    rx269_cur."!cursor_debug"("PASS  ", "metachar:sym<PIR>", " at pos=", rx269_pos)
+    .return (rx269_cur)
+  rx269_fail:
+    (rx269_rep, rx269_pos, $I10, $P10) = rx269_cur."!mark_fail"(0)
+    lt rx269_pos, -1, rx269_done
+    eq rx269_pos, -1, rx269_fail
+    jump $I10
+  rx269_done:
+    rx269_cur."!cursor_fail"()
+    rx269_cur."!cursor_debug"("FAIL  ", "metachar:sym<PIR>")
+    .return (rx269_cur)
+    .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash"  :subid("88_1256279193.78309") :method
+.sub "!PREFIX__metachar:sym<PIR>"  :subid("88_1256533470.86421") :method
 .annotate "line", 104
-    $P271 = self."!PREFIX__!protoregex"("backslash")
+    new $P271, "ResizablePMCArray"
+    push $P271, ":PIR{{"
     .return ($P271)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<w>"  :subid("89_1256279193.78309") :method :outer("10_1256279193.78309")
-.annotate "line", 105
-    .local string rx273_tgt
-    .local int rx273_pos
-    .local int rx273_off
-    .local int rx273_eos
-    .local int rx273_rep
-    .local pmc rx273_cur
-    (rx273_cur, rx273_pos, rx273_tgt, $I10) = self."!cursor_start"()
-    rx273_cur."!cursor_debug"("START ", "backslash:sym<w>")
-    .lex unicode:"$\x{a2}", rx273_cur
-    length rx273_eos, rx273_tgt
-    set rx273_off, 0
-    lt $I10, 2, rx273_start
-    sub rx273_off, $I10, 1
-    substr rx273_tgt, rx273_tgt, rx273_off
-  rx273_start:
+.sub "backslash"  :subid("89_1256533470.86421") :method
+.annotate "line", 108
+    $P276 = self."!protoregex"("backslash")
+    .return ($P276)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Grammar"]
+.sub "!PREFIX__backslash"  :subid("90_1256533470.86421") :method
+.annotate "line", 108
+    $P278 = self."!PREFIX__!protoregex"("backslash")
+    .return ($P278)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Grammar"]
+.sub "backslash:sym<w>"  :subid("91_1256533470.86421") :method :outer("10_1256533470.86421")
+.annotate "line", 109
+    .local string rx280_tgt
+    .local int rx280_pos
+    .local int rx280_off
+    .local int rx280_eos
+    .local int rx280_rep
+    .local pmc rx280_cur
+    (rx280_cur, rx280_pos, rx280_tgt, $I10) = self."!cursor_start"()
+    rx280_cur."!cursor_debug"("START ", "backslash:sym<w>")
+    .lex unicode:"$\x{a2}", rx280_cur
+    length rx280_eos, rx280_tgt
+    set rx280_off, 0
+    lt $I10, 2, rx280_start
+    sub rx280_off, $I10, 1
+    substr rx280_tgt, rx280_tgt, rx280_off
+  rx280_start:
   # rx subcapture "sym"
-    set_addr $I10, rxcap_276_fail
-    rx273_cur."!mark_push"(0, rx273_pos, $I10)
+    set_addr $I10, rxcap_283_fail
+    rx280_cur."!mark_push"(0, rx280_pos, $I10)
   # rx enumcharlist negate=0 
-    ge rx273_pos, rx273_eos, rx273_fail
-    sub $I10, rx273_pos, rx273_off
-    substr $S10, rx273_tgt, $I10, 1
+    ge rx280_pos, rx280_eos, rx280_fail
+    sub $I10, rx280_pos, rx280_off
+    substr $S10, rx280_tgt, $I10, 1
     index $I11, "dswnDSWN", $S10
-    lt $I11, 0, rx273_fail
-    inc rx273_pos
-    set_addr $I10, rxcap_276_fail
-    ($I12, $I11) = rx273_cur."!mark_peek"($I10)
-    rx273_cur."!cursor_pos"($I11)
-    ($P10) = rx273_cur."!cursor_start"()
-    $P10."!cursor_pass"(rx273_pos, "")
-    rx273_cur."!mark_push"(0, -1, 0, $P10)
+    lt $I11, 0, rx280_fail
+    inc rx280_pos
+    set_addr $I10, rxcap_283_fail
+    ($I12, $I11) = rx280_cur."!mark_peek"($I10)
+    rx280_cur."!cursor_pos"($I11)
+    ($P10) = rx280_cur."!cursor_start"()
+    $P10."!cursor_pass"(rx280_pos, "")
+    rx280_cur."!mark_push"(0, -1, 0, $P10)
     $P10."!cursor_names"("sym")
-    goto rxcap_276_done
-  rxcap_276_fail:
-    goto rx273_fail
-  rxcap_276_done:
+    goto rxcap_283_done
+  rxcap_283_fail:
+    goto rx280_fail
+  rxcap_283_done:
   # rx pass
-    rx273_cur."!cursor_pass"(rx273_pos, "backslash:sym<w>")
-    rx273_cur."!cursor_debug"("PASS  ", "backslash:sym<w>", " at pos=", rx273_pos)
-    .return (rx273_cur)
-  rx273_fail:
-    (rx273_rep, rx273_pos, $I10, $P10) = rx273_cur."!mark_fail"(0)
-    lt rx273_pos, -1, rx273_done
-    eq rx273_pos, -1, rx273_fail
+    rx280_cur."!cursor_pass"(rx280_pos, "backslash:sym<w>")
+    rx280_cur."!cursor_debug"("PASS  ", "backslash:sym<w>", " at pos=", rx280_pos)
+    .return (rx280_cur)
+  rx280_fail:
+    (rx280_rep, rx280_pos, $I10, $P10) = rx280_cur."!mark_fail"(0)
+    lt rx280_pos, -1, rx280_done
+    eq rx280_pos, -1, rx280_fail
     jump $I10
-  rx273_done:
-    rx273_cur."!cursor_fail"()
-    rx273_cur."!cursor_debug"("FAIL  ", "backslash:sym<w>")
-    .return (rx273_cur)
+  rx280_done:
+    rx280_cur."!cursor_fail"()
+    rx280_cur."!cursor_debug"("FAIL  ", "backslash:sym<w>")
+    .return (rx280_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<w>"  :subid("90_1256279193.78309") :method
-.annotate "line", 105
-    new $P275, "ResizablePMCArray"
-    push $P275, "N"
-    push $P275, "W"
-    push $P275, "S"
-    push $P275, "D"
-    push $P275, "n"
-    push $P275, "w"
-    push $P275, "s"
-    push $P275, "d"
-    .return ($P275)
+.sub "!PREFIX__backslash:sym<w>"  :subid("92_1256533470.86421") :method
+.annotate "line", 109
+    new $P282, "ResizablePMCArray"
+    push $P282, "N"
+    push $P282, "W"
+    push $P282, "S"
+    push $P282, "D"
+    push $P282, "n"
+    push $P282, "w"
+    push $P282, "s"
+    push $P282, "d"
+    .return ($P282)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<b>"  :subid("91_1256279193.78309") :method :outer("10_1256279193.78309")
-.annotate "line", 106
-    .local string rx278_tgt
-    .local int rx278_pos
-    .local int rx278_off
-    .local int rx278_eos
-    .local int rx278_rep
-    .local pmc rx278_cur
-    (rx278_cur, rx278_pos, rx278_tgt, $I10) = self."!cursor_start"()
-    rx278_cur."!cursor_debug"("START ", "backslash:sym<b>")
-    .lex unicode:"$\x{a2}", rx278_cur
-    length rx278_eos, rx278_tgt
-    set rx278_off, 0
-    lt $I10, 2, rx278_start
-    sub rx278_off, $I10, 1
-    substr rx278_tgt, rx278_tgt, rx278_off
-  rx278_start:
+.sub "backslash:sym<b>"  :subid("93_1256533470.86421") :method :outer("10_1256533470.86421")
+.annotate "line", 110
+    .local string rx285_tgt
+    .local int rx285_pos
+    .local int rx285_off
+    .local int rx285_eos
+    .local int rx285_rep
+    .local pmc rx285_cur
+    (rx285_cur, rx285_pos, rx285_tgt, $I10) = self."!cursor_start"()
+    rx285_cur."!cursor_debug"("START ", "backslash:sym<b>")
+    .lex unicode:"$\x{a2}", rx285_cur
+    length rx285_eos, rx285_tgt
+    set rx285_off, 0
+    lt $I10, 2, rx285_start
+    sub rx285_off, $I10, 1
+    substr rx285_tgt, rx285_tgt, rx285_off
+  rx285_start:
   # rx subcapture "sym"
-    set_addr $I10, rxcap_281_fail
-    rx278_cur."!mark_push"(0, rx278_pos, $I10)
+    set_addr $I10, rxcap_288_fail
+    rx285_cur."!mark_push"(0, rx285_pos, $I10)
   # rx enumcharlist negate=0 
-    ge rx278_pos, rx278_eos, rx278_fail
-    sub $I10, rx278_pos, rx278_off
-    substr $S10, rx278_tgt, $I10, 1
+    ge rx285_pos, rx285_eos, rx285_fail
+    sub $I10, rx285_pos, rx285_off
+    substr $S10, rx285_tgt, $I10, 1
     index $I11, "bB", $S10
-    lt $I11, 0, rx278_fail
-    inc rx278_pos
-    set_addr $I10, rxcap_281_fail
-    ($I12, $I11) = rx278_cur."!mark_peek"($I10)
-    rx278_cur."!cursor_pos"($I11)
-    ($P10) = rx278_cur."!cursor_start"()
-    $P10."!cursor_pass"(rx278_pos, "")
-    rx278_cur."!mark_push"(0, -1, 0, $P10)
+    lt $I11, 0, rx285_fail
+    inc rx285_pos
+    set_addr $I10, rxcap_288_fail
+    ($I12, $I11) = rx285_cur."!mark_peek"($I10)
+    rx285_cur."!cursor_pos"($I11)
+    ($P10) = rx285_cur."!cursor_start"()
+    $P10."!cursor_pass"(rx285_pos, "")
+    rx285_cur."!mark_push"(0, -1, 0, $P10)
     $P10."!cursor_names"("sym")
-    goto rxcap_281_done
-  rxcap_281_fail:
-    goto rx278_fail
-  rxcap_281_done:
+    goto rxcap_288_done
+  rxcap_288_fail:
+    goto rx285_fail
+  rxcap_288_done:
   # rx pass
-    rx278_cur."!cursor_pass"(rx278_pos, "backslash:sym<b>")
-    rx278_cur."!cursor_debug"("PASS  ", "backslash:sym<b>", " at pos=", rx278_pos)
-    .return (rx278_cur)
-  rx278_fail:
-    (rx278_rep, rx278_pos, $I10, $P10) = rx278_cur."!mark_fail"(0)
-    lt rx278_pos, -1, rx278_done
-    eq rx278_pos, -1, rx278_fail
+    rx285_cur."!cursor_pass"(rx285_pos, "backslash:sym<b>")
+    rx285_cur."!cursor_debug"("PASS  ", "backslash:sym<b>", " at pos=", rx285_pos)
+    .return (rx285_cur)
+  rx285_fail:
+    (rx285_rep, rx285_pos, $I10, $P10) = rx285_cur."!mark_fail"(0)
+    lt rx285_pos, -1, rx285_done
+    eq rx285_pos, -1, rx285_fail
     jump $I10
-  rx278_done:
-    rx278_cur."!cursor_fail"()
-    rx278_cur."!cursor_debug"("FAIL  ", "backslash:sym<b>")
-    .return (rx278_cur)
+  rx285_done:
+    rx285_cur."!cursor_fail"()
+    rx285_cur."!cursor_debug"("FAIL  ", "backslash:sym<b>")
+    .return (rx285_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<b>"  :subid("92_1256279193.78309") :method
-.annotate "line", 106
-    new $P280, "ResizablePMCArray"
-    push $P280, "B"
-    push $P280, "b"
-    .return ($P280)
+.sub "!PREFIX__backslash:sym<b>"  :subid("94_1256533470.86421") :method
+.annotate "line", 110
+    new $P287, "ResizablePMCArray"
+    push $P287, "B"
+    push $P287, "b"
+    .return ($P287)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<e>"  :subid("93_1256279193.78309") :method :outer("10_1256279193.78309")
-.annotate "line", 107
-    .local string rx283_tgt
-    .local int rx283_pos
-    .local int rx283_off
-    .local int rx283_eos
-    .local int rx283_rep
-    .local pmc rx283_cur
-    (rx283_cur, rx283_pos, rx283_tgt, $I10) = self."!cursor_start"()
-    rx283_cur."!cursor_debug"("START ", "backslash:sym<e>")
-    .lex unicode:"$\x{a2}", rx283_cur
-    length rx283_eos, rx283_tgt
-    set rx283_off, 0
-    lt $I10, 2, rx283_start
-    sub rx283_off, $I10, 1
-    substr rx283_tgt, rx283_tgt, rx283_off
-  rx283_start:
+.sub "backslash:sym<e>"  :subid("95_1256533470.86421") :method :outer("10_1256533470.86421")
+.annotate "line", 111
+    .local string rx290_tgt
+    .local int rx290_pos
+    .local int rx290_off
+    .local int rx290_eos
+    .local int rx290_rep
+    .local pmc rx290_cur
+    (rx290_cur, rx290_pos, rx290_tgt, $I10) = self."!cursor_start"()
+    rx290_cur."!cursor_debug"("START ", "backslash:sym<e>")
+    .lex unicode:"$\x{a2}", rx290_cur
+    length rx290_eos, rx290_tgt
+    set rx290_off, 0
+    lt $I10, 2, rx290_start
+    sub rx290_off, $I10, 1
+    substr rx290_tgt, rx290_tgt, rx290_off
+  rx290_start:
   # rx subcapture "sym"
-    set_addr $I10, rxcap_286_fail
-    rx283_cur."!mark_push"(0, rx283_pos, $I10)
+    set_addr $I10, rxcap_293_fail
+    rx290_cur."!mark_push"(0, rx290_pos, $I10)
   # rx enumcharlist negate=0 
-    ge rx283_pos, rx283_eos, rx283_fail
-    sub $I10, rx283_pos, rx283_off
-    substr $S10, rx283_tgt, $I10, 1
+    ge rx290_pos, rx290_eos, rx290_fail
+    sub $I10, rx290_pos, rx290_off
+    substr $S10, rx290_tgt, $I10, 1
     index $I11, "eE", $S10
-    lt $I11, 0, rx283_fail
-    inc rx283_pos
-    set_addr $I10, rxcap_286_fail
-    ($I12, $I11) = rx283_cur."!mark_peek"($I10)
-    rx283_cur."!cursor_pos"($I11)
-    ($P10) = rx283_cur."!cursor_start"()
-    $P10."!cursor_pass"(rx283_pos, "")
-    rx283_cur."!mark_push"(0, -1, 0, $P10)
+    lt $I11, 0, rx290_fail
+    inc rx290_pos
+    set_addr $I10, rxcap_293_fail
+    ($I12, $I11) = rx290_cur."!mark_peek"($I10)
+    rx290_cur."!cursor_pos"($I11)
+    ($P10) = rx290_cur."!cursor_start"()
+    $P10."!cursor_pass"(rx290_pos, "")
+    rx290_cur."!mark_push"(0, -1, 0, $P10)
     $P10."!cursor_names"("sym")
-    goto rxcap_286_done
-  rxcap_286_fail:
-    goto rx283_fail
-  rxcap_286_done:
+    goto rxcap_293_done
+  rxcap_293_fail:
+    goto rx290_fail
+  rxcap_293_done:
   # rx pass
-    rx283_cur."!cursor_pass"(rx283_pos, "backslash:sym<e>")
-    rx283_cur."!cursor_debug"("PASS  ", "backslash:sym<e>", " at pos=", rx283_pos)
-    .return (rx283_cur)
-  rx283_fail:
-    (rx283_rep, rx283_pos, $I10, $P10) = rx283_cur."!mark_fail"(0)
-    lt rx283_pos, -1, rx283_done
-    eq rx283_pos, -1, rx283_fail
+    rx290_cur."!cursor_pass"(rx290_pos, "backslash:sym<e>")
+    rx290_cur."!cursor_debug"("PASS  ", "backslash:sym<e>", " at pos=", rx290_pos)
+    .return (rx290_cur)
+  rx290_fail:
+    (rx290_rep, rx290_pos, $I10, $P10) = rx290_cur."!mark_fail"(0)
+    lt rx290_pos, -1, rx290_done
+    eq rx290_pos, -1, rx290_fail
     jump $I10
-  rx283_done:
-    rx283_cur."!cursor_fail"()
-    rx283_cur."!cursor_debug"("FAIL  ", "backslash:sym<e>")
-    .return (rx283_cur)
+  rx290_done:
+    rx290_cur."!cursor_fail"()
+    rx290_cur."!cursor_debug"("FAIL  ", "backslash:sym<e>")
+    .return (rx290_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<e>"  :subid("94_1256279193.78309") :method
-.annotate "line", 107
-    new $P285, "ResizablePMCArray"
-    push $P285, "E"
-    push $P285, "e"
-    .return ($P285)
+.sub "!PREFIX__backslash:sym<e>"  :subid("96_1256533470.86421") :method
+.annotate "line", 111
+    new $P292, "ResizablePMCArray"
+    push $P292, "E"
+    push $P292, "e"
+    .return ($P292)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<f>"  :subid("95_1256279193.78309") :method :outer("10_1256279193.78309")
-.annotate "line", 108
-    .local string rx288_tgt
-    .local int rx288_pos
-    .local int rx288_off
-    .local int rx288_eos
-    .local int rx288_rep
-    .local pmc rx288_cur
-    (rx288_cur, rx288_pos, rx288_tgt, $I10) = self."!cursor_start"()
-    rx288_cur."!cursor_debug"("START ", "backslash:sym<f>")
-    .lex unicode:"$\x{a2}", rx288_cur
-    length rx288_eos, rx288_tgt
-    set rx288_off, 0
-    lt $I10, 2, rx288_start
-    sub rx288_off, $I10, 1
-    substr rx288_tgt, rx288_tgt, rx288_off
-  rx288_start:
+.sub "backslash:sym<f>"  :subid("97_1256533470.86421") :method :outer("10_1256533470.86421")
+.annotate "line", 112
+    .local string rx295_tgt
+    .local int rx295_pos
+    .local int rx295_off
+    .local int rx295_eos
+    .local int rx295_rep
+    .local pmc rx295_cur
+    (rx295_cur, rx295_pos, rx295_tgt, $I10) = self."!cursor_start"()
+    rx295_cur."!cursor_debug"("START ", "backslash:sym<f>")
+    .lex unicode:"$\x{a2}", rx295_cur
+    length rx295_eos, rx295_tgt
+    set rx295_off, 0
+    lt $I10, 2, rx295_start
+    sub rx295_off, $I10, 1
+    substr rx295_tgt, rx295_tgt, rx295_off
+  rx295_start:
   # rx subcapture "sym"
-    set_addr $I10, rxcap_291_fail
-    rx288_cur."!mark_push"(0, rx288_pos, $I10)
+    set_addr $I10, rxcap_298_fail
+    rx295_cur."!mark_push"(0, rx295_pos, $I10)
   # rx enumcharlist negate=0 
-    ge rx288_pos, rx288_eos, rx288_fail
-    sub $I10, rx288_pos, rx288_off
-    substr $S10, rx288_tgt, $I10, 1
+    ge rx295_pos, rx295_eos, rx295_fail
+    sub $I10, rx295_pos, rx295_off
+    substr $S10, rx295_tgt, $I10, 1
     index $I11, "fF", $S10
-    lt $I11, 0, rx288_fail
-    inc rx288_pos
-    set_addr $I10, rxcap_291_fail
-    ($I12, $I11) = rx288_cur."!mark_peek"($I10)
-    rx288_cur."!cursor_pos"($I11)
-    ($P10) = rx288_cur."!cursor_start"()
-    $P10."!cursor_pass"(rx288_pos, "")
-    rx288_cur."!mark_push"(0, -1, 0, $P10)
+    lt $I11, 0, rx295_fail
+    inc rx295_pos
+    set_addr $I10, rxcap_298_fail
+    ($I12, $I11) = rx295_cur."!mark_peek"($I10)
+    rx295_cur."!cursor_pos"($I11)
+    ($P10) = rx295_cur."!cursor_start"()
+    $P10."!cursor_pass"(rx295_pos, "")
+    rx295_cur."!mark_push"(0, -1, 0, $P10)
     $P10."!cursor_names"("sym")
-    goto rxcap_291_done
-  rxcap_291_fail:
-    goto rx288_fail
-  rxcap_291_done:
+    goto rxcap_298_done
+  rxcap_298_fail:
+    goto rx295_fail
+  rxcap_298_done:
   # rx pass
-    rx288_cur."!cursor_pass"(rx288_pos, "backslash:sym<f>")
-    rx288_cur."!cursor_debug"("PASS  ", "backslash:sym<f>", " at pos=", rx288_pos)
-    .return (rx288_cur)
-  rx288_fail:
-    (rx288_rep, rx288_pos, $I10, $P10) = rx288_cur."!mark_fail"(0)
-    lt rx288_pos, -1, rx288_done
-    eq rx288_pos, -1, rx288_fail
+    rx295_cur."!cursor_pass"(rx295_pos, "backslash:sym<f>")
+    rx295_cur."!cursor_debug"("PASS  ", "backslash:sym<f>", " at pos=", rx295_pos)
+    .return (rx295_cur)
+  rx295_fail:
+    (rx295_rep, rx295_pos, $I10, $P10) = rx295_cur."!mark_fail"(0)
+    lt rx295_pos, -1, rx295_done
+    eq rx295_pos, -1, rx295_fail
     jump $I10
-  rx288_done:
-    rx288_cur."!cursor_fail"()
-    rx288_cur."!cursor_debug"("FAIL  ", "backslash:sym<f>")
-    .return (rx288_cur)
+  rx295_done:
+    rx295_cur."!cursor_fail"()
+    rx295_cur."!cursor_debug"("FAIL  ", "backslash:sym<f>")
+    .return (rx295_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<f>"  :subid("96_1256279193.78309") :method
-.annotate "line", 108
-    new $P290, "ResizablePMCArray"
-    push $P290, "F"
-    push $P290, "f"
-    .return ($P290)
+.sub "!PREFIX__backslash:sym<f>"  :subid("98_1256533470.86421") :method
+.annotate "line", 112
+    new $P297, "ResizablePMCArray"
+    push $P297, "F"
+    push $P297, "f"
+    .return ($P297)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<h>"  :subid("97_1256279193.78309") :method :outer("10_1256279193.78309")
-.annotate "line", 109
-    .local string rx293_tgt
-    .local int rx293_pos
-    .local int rx293_off
-    .local int rx293_eos
-    .local int rx293_rep
-    .local pmc rx293_cur
-    (rx293_cur, rx293_pos, rx293_tgt, $I10) = self."!cursor_start"()
-    rx293_cur."!cursor_debug"("START ", "backslash:sym<h>")
-    .lex unicode:"$\x{a2}", rx293_cur
-    length rx293_eos, rx293_tgt
-    set rx293_off, 0
-    lt $I10, 2, rx293_start
-    sub rx293_off, $I10, 1
-    substr rx293_tgt, rx293_tgt, rx293_off
-  rx293_start:
+.sub "backslash:sym<h>"  :subid("99_1256533470.86421") :method :outer("10_1256533470.86421")
+.annotate "line", 113
+    .local string rx300_tgt
+    .local int rx300_pos
+    .local int rx300_off
+    .local int rx300_eos
+    .local int rx300_rep
+    .local pmc rx300_cur
+    (rx300_cur, rx300_pos, rx300_tgt, $I10) = self."!cursor_start"()
+    rx300_cur."!cursor_debug"("START ", "backslash:sym<h>")
+    .lex unicode:"$\x{a2}", rx300_cur
+    length rx300_eos, rx300_tgt
+    set rx300_off, 0
+    lt $I10, 2, rx300_start
+    sub rx300_off, $I10, 1
+    substr rx300_tgt, rx300_tgt, rx300_off
+  rx300_start:
   # rx subcapture "sym"
-    set_addr $I10, rxcap_296_fail
-    rx293_cur."!mark_push"(0, rx293_pos, $I10)
+    set_addr $I10, rxcap_303_fail
+    rx300_cur."!mark_push"(0, rx300_pos, $I10)
   # rx enumcharlist negate=0 
-    ge rx293_pos, rx293_eos, rx293_fail
-    sub $I10, rx293_pos, rx293_off
-    substr $S10, rx293_tgt, $I10, 1
+    ge rx300_pos, rx300_eos, rx300_fail
+    sub $I10, rx300_pos, rx300_off
+    substr $S10, rx300_tgt, $I10, 1
     index $I11, "hH", $S10
-    lt $I11, 0, rx293_fail
-    inc rx293_pos
-    set_addr $I10, rxcap_296_fail
-    ($I12, $I11) = rx293_cur."!mark_peek"($I10)
-    rx293_cur."!cursor_pos"($I11)
-    ($P10) = rx293_cur."!cursor_start"()
-    $P10."!cursor_pass"(rx293_pos, "")
-    rx293_cur."!mark_push"(0, -1, 0, $P10)
+    lt $I11, 0, rx300_fail
+    inc rx300_pos
+    set_addr $I10, rxcap_303_fail
+    ($I12, $I11) = rx300_cur."!mark_peek"($I10)
+    rx300_cur."!cursor_pos"($I11)
+    ($P10) = rx300_cur."!cursor_start"()
+    $P10."!cursor_pass"(rx300_pos, "")
+    rx300_cur."!mark_push"(0, -1, 0, $P10)
     $P10."!cursor_names"("sym")
-    goto rxcap_296_done
-  rxcap_296_fail:
-    goto rx293_fail
-  rxcap_296_done:
+    goto rxcap_303_done
+  rxcap_303_fail:
+    goto rx300_fail
+  rxcap_303_done:
   # rx pass
-    rx293_cur."!cursor_pass"(rx293_pos, "backslash:sym<h>")
-    rx293_cur."!cursor_debug"("PASS  ", "backslash:sym<h>", " at pos=", rx293_pos)
-    .return (rx293_cur)
-  rx293_fail:
-    (rx293_rep, rx293_pos, $I10, $P10) = rx293_cur."!mark_fail"(0)
-    lt rx293_pos, -1, rx293_done
-    eq rx293_pos, -1, rx293_fail
+    rx300_cur."!cursor_pass"(rx300_pos, "backslash:sym<h>")
+    rx300_cur."!cursor_debug"("PASS  ", "backslash:sym<h>", " at pos=", rx300_pos)
+    .return (rx300_cur)
+  rx300_fail:
+    (rx300_rep, rx300_pos, $I10, $P10) = rx300_cur."!mark_fail"(0)
+    lt rx300_pos, -1, rx300_done
+    eq rx300_pos, -1, rx300_fail
     jump $I10
-  rx293_done:
-    rx293_cur."!cursor_fail"()
-    rx293_cur."!cursor_debug"("FAIL  ", "backslash:sym<h>")
-    .return (rx293_cur)
+  rx300_done:
+    rx300_cur."!cursor_fail"()
+    rx300_cur."!cursor_debug"("FAIL  ", "backslash:sym<h>")
+    .return (rx300_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<h>"  :subid("98_1256279193.78309") :method
-.annotate "line", 109
-    new $P295, "ResizablePMCArray"
-    push $P295, "H"
-    push $P295, "h"
-    .return ($P295)
+.sub "!PREFIX__backslash:sym<h>"  :subid("100_1256533470.86421") :method
+.annotate "line", 113
+    new $P302, "ResizablePMCArray"
+    push $P302, "H"
+    push $P302, "h"
+    .return ($P302)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<r>"  :subid("99_1256279193.78309") :method :outer("10_1256279193.78309")
-.annotate "line", 110
-    .local string rx298_tgt
-    .local int rx298_pos
-    .local int rx298_off
-    .local int rx298_eos
-    .local int rx298_rep
-    .local pmc rx298_cur
-    (rx298_cur, rx298_pos, rx298_tgt, $I10) = self."!cursor_start"()
-    rx298_cur."!cursor_debug"("START ", "backslash:sym<r>")
-    .lex unicode:"$\x{a2}", rx298_cur
-    length rx298_eos, rx298_tgt
-    set rx298_off, 0
-    lt $I10, 2, rx298_start
-    sub rx298_off, $I10, 1
-    substr rx298_tgt, rx298_tgt, rx298_off
-  rx298_start:
+.sub "backslash:sym<r>"  :subid("101_1256533470.86421") :method :outer("10_1256533470.86421")
+.annotate "line", 114
+    .local string rx305_tgt
+    .local int rx305_pos
+    .local int rx305_off
+    .local int rx305_eos
+    .local int rx305_rep
+    .local pmc rx305_cur
+    (rx305_cur, rx305_pos, rx305_tgt, $I10) = self."!cursor_start"()
+    rx305_cur."!cursor_debug"("START ", "backslash:sym<r>")
+    .lex unicode:"$\x{a2}", rx305_cur
+    length rx305_eos, rx305_tgt
+    set rx305_off, 0
+    lt $I10, 2, rx305_start
+    sub rx305_off, $I10, 1
+    substr rx305_tgt, rx305_tgt, rx305_off
+  rx305_start:
   # rx subcapture "sym"
-    set_addr $I10, rxcap_301_fail
-    rx298_cur."!mark_push"(0, rx298_pos, $I10)
+    set_addr $I10, rxcap_308_fail
+    rx305_cur."!mark_push"(0, rx305_pos, $I10)
   # rx enumcharlist negate=0 
-    ge rx298_pos, rx298_eos, rx298_fail
-    sub $I10, rx298_pos, rx298_off
-    substr $S10, rx298_tgt, $I10, 1
+    ge rx305_pos, rx305_eos, rx305_fail
+    sub $I10, rx305_pos, rx305_off
+    substr $S10, rx305_tgt, $I10, 1
     index $I11, "rR", $S10
-    lt $I11, 0, rx298_fail
-    inc rx298_pos
-    set_addr $I10, rxcap_301_fail
-    ($I12, $I11) = rx298_cur."!mark_peek"($I10)
-    rx298_cur."!cursor_pos"($I11)
-    ($P10) = rx298_cur."!cursor_start"()
-    $P10."!cursor_pass"(rx298_pos, "")
-    rx298_cur."!mark_push"(0, -1, 0, $P10)
+    lt $I11, 0, rx305_fail
+    inc rx305_pos
+    set_addr $I10, rxcap_308_fail
+    ($I12, $I11) = rx305_cur."!mark_peek"($I10)
+    rx305_cur."!cursor_pos"($I11)
+    ($P10) = rx305_cur."!cursor_start"()
+    $P10."!cursor_pass"(rx305_pos, "")
+    rx305_cur."!mark_push"(0, -1, 0, $P10)
     $P10."!cursor_names"("sym")
-    goto rxcap_301_done
-  rxcap_301_fail:
-    goto rx298_fail
-  rxcap_301_done:
+    goto rxcap_308_done
+  rxcap_308_fail:
+    goto rx305_fail
+  rxcap_308_done:
   # rx pass
-    rx298_cur."!cursor_pass"(rx298_pos, "backslash:sym<r>")
-    rx298_cur."!cursor_debug"("PASS  ", "backslash:sym<r>", " at pos=", rx298_pos)
-    .return (rx298_cur)
-  rx298_fail:
-    (rx298_rep, rx298_pos, $I10, $P10) = rx298_cur."!mark_fail"(0)
-    lt rx298_pos, -1, rx298_done
-    eq rx298_pos, -1, rx298_fail
+    rx305_cur."!cursor_pass"(rx305_pos, "backslash:sym<r>")
+    rx305_cur."!cursor_debug"("PASS  ", "backslash:sym<r>", " at pos=", rx305_pos)
+    .return (rx305_cur)
+  rx305_fail:
+    (rx305_rep, rx305_pos, $I10, $P10) = rx305_cur."!mark_fail"(0)
+    lt rx305_pos, -1, rx305_done
+    eq rx305_pos, -1, rx305_fail
     jump $I10
-  rx298_done:
-    rx298_cur."!cursor_fail"()
-    rx298_cur."!cursor_debug"("FAIL  ", "backslash:sym<r>")
-    .return (rx298_cur)
+  rx305_done:
+    rx305_cur."!cursor_fail"()
+    rx305_cur."!cursor_debug"("FAIL  ", "backslash:sym<r>")
+    .return (rx305_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<r>"  :subid("100_1256279193.78309") :method
-.annotate "line", 110
-    new $P300, "ResizablePMCArray"
-    push $P300, "R"
-    push $P300, "r"
-    .return ($P300)
+.sub "!PREFIX__backslash:sym<r>"  :subid("102_1256533470.86421") :method
+.annotate "line", 114
+    new $P307, "ResizablePMCArray"
+    push $P307, "R"
+    push $P307, "r"
+    .return ($P307)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<t>"  :subid("101_1256279193.78309") :method :outer("10_1256279193.78309")
-.annotate "line", 111
-    .local string rx303_tgt
-    .local int rx303_pos
-    .local int rx303_off
-    .local int rx303_eos
-    .local int rx303_rep
-    .local pmc rx303_cur
-    (rx303_cur, rx303_pos, rx303_tgt, $I10) = self."!cursor_start"()
-    rx303_cur."!cursor_debug"("START ", "backslash:sym<t>")
-    .lex unicode:"$\x{a2}", rx303_cur
-    length rx303_eos, rx303_tgt
-    set rx303_off, 0
-    lt $I10, 2, rx303_start
-    sub rx303_off, $I10, 1
-    substr rx303_tgt, rx303_tgt, rx303_off
-  rx303_start:
+.sub "backslash:sym<t>"  :subid("103_1256533470.86421") :method :outer("10_1256533470.86421")
+.annotate "line", 115
+    .local string rx310_tgt
+    .local int rx310_pos
+    .local int rx310_off
+    .local int rx310_eos
+    .local int rx310_rep
+    .local pmc rx310_cur
+    (rx310_cur, rx310_pos, rx310_tgt, $I10) = self."!cursor_start"()
+    rx310_cur."!cursor_debug"("START ", "backslash:sym<t>")
+    .lex unicode:"$\x{a2}", rx310_cur
+    length rx310_eos, rx310_tgt
+    set rx310_off, 0
+    lt $I10, 2, rx310_start
+    sub rx310_off, $I10, 1
+    substr rx310_tgt, rx310_tgt, rx310_off
+  rx310_start:
   # rx subcapture "sym"
-    set_addr $I10, rxcap_306_fail
-    rx303_cur."!mark_push"(0, rx303_pos, $I10)
+    set_addr $I10, rxcap_313_fail
+    rx310_cur."!mark_push"(0, rx310_pos, $I10)
   # rx enumcharlist negate=0 
-    ge rx303_pos, rx303_eos, rx303_fail
-    sub $I10, rx303_pos, rx303_off
-    substr $S10, rx303_tgt, $I10, 1
+    ge rx310_pos, rx310_eos, rx310_fail
+    sub $I10, rx310_pos, rx310_off
+    substr $S10, rx310_tgt, $I10, 1
     index $I11, "tT", $S10
-    lt $I11, 0, rx303_fail
-    inc rx303_pos
-    set_addr $I10, rxcap_306_fail
-    ($I12, $I11) = rx303_cur."!mark_peek"($I10)
-    rx303_cur."!cursor_pos"($I11)
-    ($P10) = rx303_cur."!cursor_start"()
-    $P10."!cursor_pass"(rx303_pos, "")
-    rx303_cur."!mark_push"(0, -1, 0, $P10)
+    lt $I11, 0, rx310_fail
+    inc rx310_pos
+    set_addr $I10, rxcap_313_fail
+    ($I12, $I11) = rx310_cur."!mark_peek"($I10)
+    rx310_cur."!cursor_pos"($I11)
+    ($P10) = rx310_cur."!cursor_start"()
+    $P10."!cursor_pass"(rx310_pos, "")
+    rx310_cur."!mark_push"(0, -1, 0, $P10)
     $P10."!cursor_names"("sym")
-    goto rxcap_306_done
-  rxcap_306_fail:
-    goto rx303_fail
-  rxcap_306_done:
+    goto rxcap_313_done
+  rxcap_313_fail:
+    goto rx310_fail
+  rxcap_313_done:
   # rx pass
-    rx303_cur."!cursor_pass"(rx303_pos, "backslash:sym<t>")
-    rx303_cur."!cursor_debug"("PASS  ", "backslash:sym<t>", " at pos=", rx303_pos)
-    .return (rx303_cur)
-  rx303_fail:
-    (rx303_rep, rx303_pos, $I10, $P10) = rx303_cur."!mark_fail"(0)
-    lt rx303_pos, -1, rx303_done
-    eq rx303_pos, -1, rx303_fail
+    rx310_cur."!cursor_pass"(rx310_pos, "backslash:sym<t>")
+    rx310_cur."!cursor_debug"("PASS  ", "backslash:sym<t>", " at pos=", rx310_pos)
+    .return (rx310_cur)
+  rx310_fail:
+    (rx310_rep, rx310_pos, $I10, $P10) = rx310_cur."!mark_fail"(0)
+    lt rx310_pos, -1, rx310_done
+    eq rx310_pos, -1, rx310_fail
     jump $I10
-  rx303_done:
-    rx303_cur."!cursor_fail"()
-    rx303_cur."!cursor_debug"("FAIL  ", "backslash:sym<t>")
-    .return (rx303_cur)
+  rx310_done:
+    rx310_cur."!cursor_fail"()
+    rx310_cur."!cursor_debug"("FAIL  ", "backslash:sym<t>")
+    .return (rx310_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<t>"  :subid("102_1256279193.78309") :method
-.annotate "line", 111
-    new $P305, "ResizablePMCArray"
-    push $P305, "T"
-    push $P305, "t"
-    .return ($P305)
+.sub "!PREFIX__backslash:sym<t>"  :subid("104_1256533470.86421") :method
+.annotate "line", 115
+    new $P312, "ResizablePMCArray"
+    push $P312, "T"
+    push $P312, "t"
+    .return ($P312)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<v>"  :subid("103_1256279193.78309") :method :outer("10_1256279193.78309")
-.annotate "line", 112
-    .local string rx308_tgt
-    .local int rx308_pos
-    .local int rx308_off
-    .local int rx308_eos
-    .local int rx308_rep
-    .local pmc rx308_cur
-    (rx308_cur, rx308_pos, rx308_tgt, $I10) = self."!cursor_start"()
-    rx308_cur."!cursor_debug"("START ", "backslash:sym<v>")
-    .lex unicode:"$\x{a2}", rx308_cur
-    length rx308_eos, rx308_tgt
-    set rx308_off, 0
-    lt $I10, 2, rx308_start
-    sub rx308_off, $I10, 1
-    substr rx308_tgt, rx308_tgt, rx308_off
-  rx308_start:
+.sub "backslash:sym<v>"  :subid("105_1256533470.86421") :method :outer("10_1256533470.86421")
+.annotate "line", 116
+    .local string rx315_tgt
+    .local int rx315_pos
+    .local int rx315_off
+    .local int rx315_eos
+    .local int rx315_rep
+    .local pmc rx315_cur
+    (rx315_cur, rx315_pos, rx315_tgt, $I10) = self."!cursor_start"()
+    rx315_cur."!cursor_debug"("START ", "backslash:sym<v>")
+    .lex unicode:"$\x{a2}", rx315_cur
+    length rx315_eos, rx315_tgt
+    set rx315_off, 0
+    lt $I10, 2, rx315_start
+    sub rx315_off, $I10, 1
+    substr rx315_tgt, rx315_tgt, rx315_off
+  rx315_start:
   # rx subcapture "sym"
-    set_addr $I10, rxcap_311_fail
-    rx308_cur."!mark_push"(0, rx308_pos, $I10)
+    set_addr $I10, rxcap_318_fail
+    rx315_cur."!mark_push"(0, rx315_pos, $I10)
   # rx enumcharlist negate=0 
-    ge rx308_pos, rx308_eos, rx308_fail
-    sub $I10, rx308_pos, rx308_off
-    substr $S10, rx308_tgt, $I10, 1
+    ge rx315_pos, rx315_eos, rx315_fail
+    sub $I10, rx315_pos, rx315_off
+    substr $S10, rx315_tgt, $I10, 1
     index $I11, "vV", $S10
-    lt $I11, 0, rx308_fail
-    inc rx308_pos
-    set_addr $I10, rxcap_311_fail
-    ($I12, $I11) = rx308_cur."!mark_peek"($I10)
-    rx308_cur."!cursor_pos"($I11)
-    ($P10) = rx308_cur."!cursor_start"()
-    $P10."!cursor_pass"(rx308_pos, "")
-    rx308_cur."!mark_push"(0, -1, 0, $P10)
+    lt $I11, 0, rx315_fail
+    inc rx315_pos
+    set_addr $I10, rxcap_318_fail
+    ($I12, $I11) = rx315_cur."!mark_peek"($I10)
+    rx315_cur."!cursor_pos"($I11)
+    ($P10) = rx315_cur."!cursor_start"()
+    $P10."!cursor_pass"(rx315_pos, "")
+    rx315_cur."!mark_push"(0, -1, 0, $P10)
     $P10."!cursor_names"("sym")
-    goto rxcap_311_done
-  rxcap_311_fail:
-    goto rx308_fail
-  rxcap_311_done:
+    goto rxcap_318_done
+  rxcap_318_fail:
+    goto rx315_fail
+  rxcap_318_done:
   # rx pass
-    rx308_cur."!cursor_pass"(rx308_pos, "backslash:sym<v>")
-    rx308_cur."!cursor_debug"("PASS  ", "backslash:sym<v>", " at pos=", rx308_pos)
-    .return (rx308_cur)
-  rx308_fail:
-    (rx308_rep, rx308_pos, $I10, $P10) = rx308_cur."!mark_fail"(0)
-    lt rx308_pos, -1, rx308_done
-    eq rx308_pos, -1, rx308_fail
+    rx315_cur."!cursor_pass"(rx315_pos, "backslash:sym<v>")
+    rx315_cur."!cursor_debug"("PASS  ", "backslash:sym<v>", " at pos=", rx315_pos)
+    .return (rx315_cur)
+  rx315_fail:
+    (rx315_rep, rx315_pos, $I10, $P10) = rx315_cur."!mark_fail"(0)
+    lt rx315_pos, -1, rx315_done
+    eq rx315_pos, -1, rx315_fail
     jump $I10
-  rx308_done:
-    rx308_cur."!cursor_fail"()
-    rx308_cur."!cursor_debug"("FAIL  ", "backslash:sym<v>")
-    .return (rx308_cur)
+  rx315_done:
+    rx315_cur."!cursor_fail"()
+    rx315_cur."!cursor_debug"("FAIL  ", "backslash:sym<v>")
+    .return (rx315_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<v>"  :subid("104_1256279193.78309") :method
-.annotate "line", 112
-    new $P310, "ResizablePMCArray"
-    push $P310, "V"
-    push $P310, "v"
-    .return ($P310)
+.sub "!PREFIX__backslash:sym<v>"  :subid("106_1256533470.86421") :method
+.annotate "line", 116
+    new $P317, "ResizablePMCArray"
+    push $P317, "V"
+    push $P317, "v"
+    .return ($P317)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<A>"  :subid("105_1256279193.78309") :method :outer("10_1256279193.78309")
-.annotate "line", 113
-    .local string rx313_tgt
-    .local int rx313_pos
-    .local int rx313_off
-    .local int rx313_eos
-    .local int rx313_rep
-    .local pmc rx313_cur
-    (rx313_cur, rx313_pos, rx313_tgt, $I10) = self."!cursor_start"()
-    rx313_cur."!cursor_debug"("START ", "backslash:sym<A>")
-    .lex unicode:"$\x{a2}", rx313_cur
-    length rx313_eos, rx313_tgt
-    set rx313_off, 0
-    lt $I10, 2, rx313_start
-    sub rx313_off, $I10, 1
-    substr rx313_tgt, rx313_tgt, rx313_off
-  rx313_start:
+.sub "backslash:sym<A>"  :subid("107_1256533470.86421") :method :outer("10_1256533470.86421")
+.annotate "line", 117
+    .local string rx320_tgt
+    .local int rx320_pos
+    .local int rx320_off
+    .local int rx320_eos
+    .local int rx320_rep
+    .local pmc rx320_cur
+    (rx320_cur, rx320_pos, rx320_tgt, $I10) = self."!cursor_start"()
+    rx320_cur."!cursor_debug"("START ", "backslash:sym<A>")
+    .lex unicode:"$\x{a2}", rx320_cur
+    length rx320_eos, rx320_tgt
+    set rx320_off, 0
+    lt $I10, 2, rx320_start
+    sub rx320_off, $I10, 1
+    substr rx320_tgt, rx320_tgt, rx320_off
+  rx320_start:
   # rx literal  "A"
-    add $I11, rx313_pos, 1
-    gt $I11, rx313_eos, rx313_fail
-    sub $I11, rx313_pos, rx313_off
-    substr $S10, rx313_tgt, $I11, 1
-    ne $S10, "A", rx313_fail
-    add rx313_pos, 1
+    add $I11, rx320_pos, 1
+    gt $I11, rx320_eos, rx320_fail
+    sub $I11, rx320_pos, rx320_off
+    substr $S10, rx320_tgt, $I11, 1
+    ne $S10, "A", rx320_fail
+    add rx320_pos, 1
   # rx subrule "obs" subtype=method negate=
-    rx313_cur."!cursor_pos"(rx313_pos)
-    $P10 = rx313_cur."obs"("\\\\A as beginning-of-string matcher;^")
-    unless $P10, rx313_fail
-    rx313_pos = $P10."pos"()
+    rx320_cur."!cursor_pos"(rx320_pos)
+    $P10 = rx320_cur."obs"("\\\\A as beginning-of-string matcher;^")
+    unless $P10, rx320_fail
+    rx320_pos = $P10."pos"()
   # rx pass
-    rx313_cur."!cursor_pass"(rx313_pos, "backslash:sym<A>")
-    rx313_cur."!cursor_debug"("PASS  ", "backslash:sym<A>", " at pos=", rx313_pos)
-    .return (rx313_cur)
-  rx313_fail:
-    (rx313_rep, rx313_pos, $I10, $P10) = rx313_cur."!mark_fail"(0)
-    lt rx313_pos, -1, rx313_done
-    eq rx313_pos, -1, rx313_fail
+    rx320_cur."!cursor_pass"(rx320_pos, "backslash:sym<A>")
+    rx320_cur."!cursor_debug"("PASS  ", "backslash:sym<A>", " at pos=", rx320_pos)
+    .return (rx320_cur)
+  rx320_fail:
+    (rx320_rep, rx320_pos, $I10, $P10) = rx320_cur."!mark_fail"(0)
+    lt rx320_pos, -1, rx320_done
+    eq rx320_pos, -1, rx320_fail
     jump $I10
-  rx313_done:
-    rx313_cur."!cursor_fail"()
-    rx313_cur."!cursor_debug"("FAIL  ", "backslash:sym<A>")
-    .return (rx313_cur)
+  rx320_done:
+    rx320_cur."!cursor_fail"()
+    rx320_cur."!cursor_debug"("FAIL  ", "backslash:sym<A>")
+    .return (rx320_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<A>"  :subid("106_1256279193.78309") :method
-.annotate "line", 113
-    $P315 = self."!PREFIX__!subrule"("obs", "A")
-    new $P316, "ResizablePMCArray"
-    push $P316, $P315
-    .return ($P316)
+.sub "!PREFIX__backslash:sym<A>"  :subid("108_1256533470.86421") :method
+.annotate "line", 117
+    $P322 = self."!PREFIX__!subrule"("obs", "A")
+    new $P323, "ResizablePMCArray"
+    push $P323, $P322
+    .return ($P323)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<z>"  :subid("107_1256279193.78309") :method :outer("10_1256279193.78309")
-.annotate "line", 114
-    .local string rx318_tgt
-    .local int rx318_pos
-    .local int rx318_off
-    .local int rx318_eos
-    .local int rx318_rep
-    .local pmc rx318_cur
-    (rx318_cur, rx318_pos, rx318_tgt, $I10) = self."!cursor_start"()
-    rx318_cur."!cursor_debug"("START ", "backslash:sym<z>")
-    .lex unicode:"$\x{a2}", rx318_cur
-    length rx318_eos, rx318_tgt
-    set rx318_off, 0
-    lt $I10, 2, rx318_start
-    sub rx318_off, $I10, 1
-    substr rx318_tgt, rx318_tgt, rx318_off
-  rx318_start:
+.sub "backslash:sym<z>"  :subid("109_1256533470.86421") :method :outer("10_1256533470.86421")
+.annotate "line", 118
+    .local string rx325_tgt
+    .local int rx325_pos
+    .local int rx325_off
+    .local int rx325_eos
+    .local int rx325_rep
+    .local pmc rx325_cur
+    (rx325_cur, rx325_pos, rx325_tgt, $I10) = self."!cursor_start"()
+    rx325_cur."!cursor_debug"("START ", "backslash:sym<z>")
+    .lex unicode:"$\x{a2}", rx325_cur
+    length rx325_eos, rx325_tgt
+    set rx325_off, 0
+    lt $I10, 2, rx325_start
+    sub rx325_off, $I10, 1
+    substr rx325_tgt, rx325_tgt, rx325_off
+  rx325_start:
   # rx literal  "z"
-    add $I11, rx318_pos, 1
-    gt $I11, rx318_eos, rx318_fail
-    sub $I11, rx318_pos, rx318_off
-    substr $S10, rx318_tgt, $I11, 1
-    ne $S10, "z", rx318_fail
-    add rx318_pos, 1
+    add $I11, rx325_pos, 1
+    gt $I11, rx325_eos, rx325_fail
+    sub $I11, rx325_pos, rx325_off
+    substr $S10, rx325_tgt, $I11, 1
+    ne $S10, "z", rx325_fail
+    add rx325_pos, 1
   # rx subrule "obs" subtype=method negate=
-    rx318_cur."!cursor_pos"(rx318_pos)
-    $P10 = rx318_cur."obs"("\\\\z as end-of-string matcher;$")
-    unless $P10, rx318_fail
-    rx318_pos = $P10."pos"()
+    rx325_cur."!cursor_pos"(rx325_pos)
+    $P10 = rx325_cur."obs"("\\\\z as end-of-string matcher;$")
+    unless $P10, rx325_fail
+    rx325_pos = $P10."pos"()
   # rx pass
-    rx318_cur."!cursor_pass"(rx318_pos, "backslash:sym<z>")
-    rx318_cur."!cursor_debug"("PASS  ", "backslash:sym<z>", " at pos=", rx318_pos)
-    .return (rx318_cur)
-  rx318_fail:
-    (rx318_rep, rx318_pos, $I10, $P10) = rx318_cur."!mark_fail"(0)
-    lt rx318_pos, -1, rx318_done
-    eq rx318_pos, -1, rx318_fail
+    rx325_cur."!cursor_pass"(rx325_pos, "backslash:sym<z>")
+    rx325_cur."!cursor_debug"("PASS  ", "backslash:sym<z>", " at pos=", rx325_pos)
+    .return (rx325_cur)
+  rx325_fail:
+    (rx325_rep, rx325_pos, $I10, $P10) = rx325_cur."!mark_fail"(0)
+    lt rx325_pos, -1, rx325_done
+    eq rx325_pos, -1, rx325_fail
     jump $I10
-  rx318_done:
-    rx318_cur."!cursor_fail"()
-    rx318_cur."!cursor_debug"("FAIL  ", "backslash:sym<z>")
-    .return (rx318_cur)
+  rx325_done:
+    rx325_cur."!cursor_fail"()
+    rx325_cur."!cursor_debug"("FAIL  ", "backslash:sym<z>")
+    .return (rx325_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<z>"  :subid("108_1256279193.78309") :method
-.annotate "line", 114
-    $P320 = self."!PREFIX__!subrule"("obs", "z")
-    new $P321, "ResizablePMCArray"
-    push $P321, $P320
-    .return ($P321)
+.sub "!PREFIX__backslash:sym<z>"  :subid("110_1256533470.86421") :method
+.annotate "line", 118
+    $P327 = self."!PREFIX__!subrule"("obs", "z")
+    new $P328, "ResizablePMCArray"
+    push $P328, $P327
+    .return ($P328)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<Z>"  :subid("109_1256279193.78309") :method :outer("10_1256279193.78309")
-.annotate "line", 115
-    .local string rx323_tgt
-    .local int rx323_pos
-    .local int rx323_off
-    .local int rx323_eos
-    .local int rx323_rep
-    .local pmc rx323_cur
-    (rx323_cur, rx323_pos, rx323_tgt, $I10) = self."!cursor_start"()
-    rx323_cur."!cursor_debug"("START ", "backslash:sym<Z>")
-    .lex unicode:"$\x{a2}", rx323_cur
-    length rx323_eos, rx323_tgt
-    set rx323_off, 0
-    lt $I10, 2, rx323_start
-    sub rx323_off, $I10, 1
-    substr rx323_tgt, rx323_tgt, rx323_off
-  rx323_start:
+.sub "backslash:sym<Z>"  :subid("111_1256533470.86421") :method :outer("10_1256533470.86421")
+.annotate "line", 119
+    .local string rx330_tgt
+    .local int rx330_pos
+    .local int rx330_off
+    .local int rx330_eos
+    .local int rx330_rep
+    .local pmc rx330_cur
+    (rx330_cur, rx330_pos, rx330_tgt, $I10) = self."!cursor_start"()
+    rx330_cur."!cursor_debug"("START ", "backslash:sym<Z>")
+    .lex unicode:"$\x{a2}", rx330_cur
+    length rx330_eos, rx330_tgt
+    set rx330_off, 0
+    lt $I10, 2, rx330_start
+    sub rx330_off, $I10, 1
+    substr rx330_tgt, rx330_tgt, rx330_off
+  rx330_start:
   # rx literal  "Z"
-    add $I11, rx323_pos, 1
-    gt $I11, rx323_eos, rx323_fail
-    sub $I11, rx323_pos, rx323_off
-    substr $S10, rx323_tgt, $I11, 1
-    ne $S10, "Z", rx323_fail
-    add rx323_pos, 1
+    add $I11, rx330_pos, 1
+    gt $I11, rx330_eos, rx330_fail
+    sub $I11, rx330_pos, rx330_off
+    substr $S10, rx330_tgt, $I11, 1
+    ne $S10, "Z", rx330_fail
+    add rx330_pos, 1
   # rx subrule "obs" subtype=method negate=
-    rx323_cur."!cursor_pos"(rx323_pos)
-    $P10 = rx323_cur."obs"("\\\\Z as end-of-string matcher;\\\\n?$")
-    unless $P10, rx323_fail
-    rx323_pos = $P10."pos"()
+    rx330_cur."!cursor_pos"(rx330_pos)
+    $P10 = rx330_cur."obs"("\\\\Z as end-of-string matcher;\\\\n?$")
+    unless $P10, rx330_fail
+    rx330_pos = $P10."pos"()
   # rx pass
-    rx323_cur."!cursor_pass"(rx323_pos, "backslash:sym<Z>")
-    rx323_cur."!cursor_debug"("PASS  ", "backslash:sym<Z>", " at pos=", rx323_pos)
-    .return (rx323_cur)
-  rx323_fail:
-    (rx323_rep, rx323_pos, $I10, $P10) = rx323_cur."!mark_fail"(0)
-    lt rx323_pos, -1, rx323_done
-    eq rx323_pos, -1, rx323_fail
+    rx330_cur."!cursor_pass"(rx330_pos, "backslash:sym<Z>")
+    rx330_cur."!cursor_debug"("PASS  ", "backslash:sym<Z>", " at pos=", rx330_pos)
+    .return (rx330_cur)
+  rx330_fail:
+    (rx330_rep, rx330_pos, $I10, $P10) = rx330_cur."!mark_fail"(0)
+    lt rx330_pos, -1, rx330_done
+    eq rx330_pos, -1, rx330_fail
     jump $I10
-  rx323_done:
-    rx323_cur."!cursor_fail"()
-    rx323_cur."!cursor_debug"("FAIL  ", "backslash:sym<Z>")
-    .return (rx323_cur)
+  rx330_done:
+    rx330_cur."!cursor_fail"()
+    rx330_cur."!cursor_debug"("FAIL  ", "backslash:sym<Z>")
+    .return (rx330_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<Z>"  :subid("110_1256279193.78309") :method
-.annotate "line", 115
-    $P325 = self."!PREFIX__!subrule"("obs", "Z")
-    new $P326, "ResizablePMCArray"
-    push $P326, $P325
-    .return ($P326)
+.sub "!PREFIX__backslash:sym<Z>"  :subid("112_1256533470.86421") :method
+.annotate "line", 119
+    $P332 = self."!PREFIX__!subrule"("obs", "Z")
+    new $P333, "ResizablePMCArray"
+    push $P333, $P332
+    .return ($P333)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<Q>"  :subid("111_1256279193.78309") :method :outer("10_1256279193.78309")
-.annotate "line", 116
-    .local string rx328_tgt
-    .local int rx328_pos
-    .local int rx328_off
-    .local int rx328_eos
-    .local int rx328_rep
-    .local pmc rx328_cur
-    (rx328_cur, rx328_pos, rx328_tgt, $I10) = self."!cursor_start"()
-    rx328_cur."!cursor_debug"("START ", "backslash:sym<Q>")
-    .lex unicode:"$\x{a2}", rx328_cur
-    length rx328_eos, rx328_tgt
-    set rx328_off, 0
-    lt $I10, 2, rx328_start
-    sub rx328_off, $I10, 1
-    substr rx328_tgt, rx328_tgt, rx328_off
-  rx328_start:
+.sub "backslash:sym<Q>"  :subid("113_1256533470.86421") :method :outer("10_1256533470.86421")
+.annotate "line", 120
+    .local string rx335_tgt
+    .local int rx335_pos
+    .local int rx335_off
+    .local int rx335_eos
+    .local int rx335_rep
+    .local pmc rx335_cur
+    (rx335_cur, rx335_pos, rx335_tgt, $I10) = self."!cursor_start"()
+    rx335_cur."!cursor_debug"("START ", "backslash:sym<Q>")
+    .lex unicode:"$\x{a2}", rx335_cur
+    length rx335_eos, rx335_tgt
+    set rx335_off, 0
+    lt $I10, 2, rx335_start
+    sub rx335_off, $I10, 1
+    substr rx335_tgt, rx335_tgt, rx335_off
+  rx335_start:
   # rx literal  "Q"
-    add $I11, rx328_pos, 1
-    gt $I11, rx328_eos, rx328_fail
-    sub $I11, rx328_pos, rx328_off
-    substr $S10, rx328_tgt, $I11, 1
-    ne $S10, "Q", rx328_fail
-    add rx328_pos, 1
+    add $I11, rx335_pos, 1
+    gt $I11, rx335_eos, rx335_fail
+    sub $I11, rx335_pos, rx335_off
+    substr $S10, rx335_tgt, $I11, 1
+    ne $S10, "Q", rx335_fail
+    add rx335_pos, 1
   # rx subrule "obs" subtype=method negate=
-    rx328_cur."!cursor_pos"(rx328_pos)
-    $P10 = rx328_cur."obs"("\\\\Q as quotemeta;quotes or literal variable match")
-    unless $P10, rx328_fail
-    rx328_pos = $P10."pos"()
+    rx335_cur."!cursor_pos"(rx335_pos)
+    $P10 = rx335_cur."obs"("\\\\Q as quotemeta;quotes or literal variable match")
+    unless $P10, rx335_fail
+    rx335_pos = $P10."pos"()
   # rx pass
-    rx328_cur."!cursor_pass"(rx328_pos, "backslash:sym<Q>")
-    rx328_cur."!cursor_debug"("PASS  ", "backslash:sym<Q>", " at pos=", rx328_pos)
-    .return (rx328_cur)
-  rx328_fail:
-    (rx328_rep, rx328_pos, $I10, $P10) = rx328_cur."!mark_fail"(0)
-    lt rx328_pos, -1, rx328_done
-    eq rx328_pos, -1, rx328_fail
+    rx335_cur."!cursor_pass"(rx335_pos, "backslash:sym<Q>")
+    rx335_cur."!cursor_debug"("PASS  ", "backslash:sym<Q>", " at pos=", rx335_pos)
+    .return (rx335_cur)
+  rx335_fail:
+    (rx335_rep, rx335_pos, $I10, $P10) = rx335_cur."!mark_fail"(0)
+    lt rx335_pos, -1, rx335_done
+    eq rx335_pos, -1, rx335_fail
     jump $I10
-  rx328_done:
-    rx328_cur."!cursor_fail"()
-    rx328_cur."!cursor_debug"("FAIL  ", "backslash:sym<Q>")
-    .return (rx328_cur)
+  rx335_done:
+    rx335_cur."!cursor_fail"()
+    rx335_cur."!cursor_debug"("FAIL  ", "backslash:sym<Q>")
+    .return (rx335_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<Q>"  :subid("112_1256279193.78309") :method
-.annotate "line", 116
-    $P330 = self."!PREFIX__!subrule"("obs", "Q")
-    new $P331, "ResizablePMCArray"
-    push $P331, $P330
-    .return ($P331)
+.sub "!PREFIX__backslash:sym<Q>"  :subid("114_1256533470.86421") :method
+.annotate "line", 120
+    $P337 = self."!PREFIX__!subrule"("obs", "Q")
+    new $P338, "ResizablePMCArray"
+    push $P338, $P337
+    .return ($P338)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<misc>"  :subid("113_1256279193.78309") :method :outer("10_1256279193.78309")
-.annotate "line", 117
-    .local string rx333_tgt
-    .local int rx333_pos
-    .local int rx333_off
-    .local int rx333_eos
-    .local int rx333_rep
-    .local pmc rx333_cur
-    (rx333_cur, rx333_pos, rx333_tgt, $I10) = self."!cursor_start"()
-    rx333_cur."!cursor_debug"("START ", "backslash:sym<misc>")
-    .lex unicode:"$\x{a2}", rx333_cur
-    length rx333_eos, rx333_tgt
-    set rx333_off, 0
-    lt $I10, 2, rx333_start
-    sub rx333_off, $I10, 1
-    substr rx333_tgt, rx333_tgt, rx333_off
-  rx333_start:
+.sub "backslash:sym<misc>"  :subid("115_1256533470.86421") :method :outer("10_1256533470.86421")
+.annotate "line", 121
+    .local string rx340_tgt
+    .local int rx340_pos
+    .local int rx340_off
+    .local int rx340_eos
+    .local int rx340_rep
+    .local pmc rx340_cur
+    (rx340_cur, rx340_pos, rx340_tgt, $I10) = self."!cursor_start"()
+    rx340_cur."!cursor_debug"("START ", "backslash:sym<misc>")
+    .lex unicode:"$\x{a2}", rx340_cur
+    length rx340_eos, rx340_tgt
+    set rx340_off, 0
+    lt $I10, 2, rx340_start
+    sub rx340_off, $I10, 1
+    substr rx340_tgt, rx340_tgt, rx340_off
+  rx340_start:
   # rx charclass W
-    ge rx333_pos, rx333_eos, rx333_fail
-    sub $I10, rx333_pos, rx333_off
-    is_cclass $I11, 8192, rx333_tgt, $I10
-    if $I11, rx333_fail
-    inc rx333_pos
+    ge rx340_pos, rx340_eos, rx340_fail
+    sub $I10, rx340_pos, rx340_off
+    is_cclass $I11, 8192, rx340_tgt, $I10
+    if $I11, rx340_fail
+    inc rx340_pos
   # rx pass
-    rx333_cur."!cursor_pass"(rx333_pos, "backslash:sym<misc>")
-    rx333_cur."!cursor_debug"("PASS  ", "backslash:sym<misc>", " at pos=", rx333_pos)
-    .return (rx333_cur)
-  rx333_fail:
-    (rx333_rep, rx333_pos, $I10, $P10) = rx333_cur."!mark_fail"(0)
-    lt rx333_pos, -1, rx333_done
-    eq rx333_pos, -1, rx333_fail
+    rx340_cur."!cursor_pass"(rx340_pos, "backslash:sym<misc>")
+    rx340_cur."!cursor_debug"("PASS  ", "backslash:sym<misc>", " at pos=", rx340_pos)
+    .return (rx340_cur)
+  rx340_fail:
+    (rx340_rep, rx340_pos, $I10, $P10) = rx340_cur."!mark_fail"(0)
+    lt rx340_pos, -1, rx340_done
+    eq rx340_pos, -1, rx340_fail
     jump $I10
-  rx333_done:
-    rx333_cur."!cursor_fail"()
-    rx333_cur."!cursor_debug"("FAIL  ", "backslash:sym<misc>")
-    .return (rx333_cur)
+  rx340_done:
+    rx340_cur."!cursor_fail"()
+    rx340_cur."!cursor_debug"("FAIL  ", "backslash:sym<misc>")
+    .return (rx340_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<misc>"  :subid("114_1256279193.78309") :method
-.annotate "line", 117
-    new $P335, "ResizablePMCArray"
-    push $P335, ""
-    .return ($P335)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Grammar"]
-.sub "assertion"  :subid("115_1256279193.78309") :method
-.annotate "line", 119
-    $P337 = self."!protoregex"("assertion")
-    .return ($P337)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__assertion"  :subid("116_1256279193.78309") :method
-.annotate "line", 119
-    $P339 = self."!PREFIX__!protoregex"("assertion")
-    .return ($P339)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Grammar"]
-.sub "assertion:sym<?>"  :subid("117_1256279193.78309") :method :outer("10_1256279193.78309")
+.sub "!PREFIX__backslash:sym<misc>"  :subid("116_1256533470.86421") :method
 .annotate "line", 121
-    .const 'Sub' $P347 = "119_1256279193.78309" 
-    capture_lex $P347
-    .local string rx341_tgt
-    .local int rx341_pos
-    .local int rx341_off
-    .local int rx341_eos
-    .local int rx341_rep
-    .local pmc rx341_cur
-    (rx341_cur, rx341_pos, rx341_tgt, $I10) = self."!cursor_start"()
-    rx341_cur."!cursor_debug"("START ", "assertion:sym<?>")
-    .lex unicode:"$\x{a2}", rx341_cur
-    length rx341_eos, rx341_tgt
-    set rx341_off, 0
-    lt $I10, 2, rx341_start
-    sub rx341_off, $I10, 1
-    substr rx341_tgt, rx341_tgt, rx341_off
-  rx341_start:
-  # rx literal  "?"
-    add $I11, rx341_pos, 1
-    gt $I11, rx341_eos, rx341_fail
-    sub $I11, rx341_pos, rx341_off
-    substr $S10, rx341_tgt, $I11, 1
-    ne $S10, "?", rx341_fail
-    add rx341_pos, 1
-  alt345_0:
-    set_addr $I10, alt345_1
-    rx341_cur."!mark_push"(0, rx341_pos, $I10)
-  # rx subrule "before" subtype=zerowidth negate=
-    rx341_cur."!cursor_pos"(rx341_pos)
-    .const 'Sub' $P347 = "119_1256279193.78309" 
-    capture_lex $P347
-    $P10 = rx341_cur."before"($P347)
-    unless $P10, rx341_fail
-    goto alt345_end
-  alt345_1:
-  # rx subrule "assertion" subtype=capture negate=
-    rx341_cur."!cursor_pos"(rx341_pos)
-    $P10 = rx341_cur."assertion"()
-    unless $P10, rx341_fail
-    rx341_cur."!mark_push"(0, -1, 0, $P10)
-    $P10."!cursor_names"("assertion")
-    rx341_pos = $P10."pos"()
-  alt345_end:
-  # rx pass
-    rx341_cur."!cursor_pass"(rx341_pos, "assertion:sym<?>")
-    rx341_cur."!cursor_debug"("PASS  ", "assertion:sym<?>", " at pos=", rx341_pos)
-    .return (rx341_cur)
-  rx341_fail:
-    (rx341_rep, rx341_pos, $I10, $P10) = rx341_cur."!mark_fail"(0)
-    lt rx341_pos, -1, rx341_done
-    eq rx341_pos, -1, rx341_fail
-    jump $I10
-  rx341_done:
-    rx341_cur."!cursor_fail"()
-    rx341_cur."!cursor_debug"("FAIL  ", "assertion:sym<?>")
-    .return (rx341_cur)
-    .return ()
+    new $P342, "ResizablePMCArray"
+    push $P342, ""
+    .return ($P342)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__assertion:sym<?>"  :subid("118_1256279193.78309") :method
-.annotate "line", 121
-    $P343 = self."!PREFIX__!subrule"("assertion", "?")
-    new $P344, "ResizablePMCArray"
-    push $P344, $P343
-    push $P344, "?"
+.sub "assertion"  :subid("117_1256533470.86421") :method
+.annotate "line", 123
+    $P344 = self."!protoregex"("assertion")
     .return ($P344)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block346"  :anon :subid("119_1256279193.78309") :method :outer("117_1256279193.78309")
-.annotate "line", 121
+.sub "!PREFIX__assertion"  :subid("118_1256533470.86421") :method
+.annotate "line", 123
+    $P346 = self."!PREFIX__!protoregex"("assertion")
+    .return ($P346)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Grammar"]
+.sub "assertion:sym<?>"  :subid("119_1256533470.86421") :method :outer("10_1256533470.86421")
+.annotate "line", 125
+    .const 'Sub' $P354 = "121_1256533470.86421" 
+    capture_lex $P354
     .local string rx348_tgt
     .local int rx348_pos
     .local int rx348_off
@@ -7345,7 +7428,7 @@ An alternate dump output for a Match object and all of its subcaptures.
     .local int rx348_rep
     .local pmc rx348_cur
     (rx348_cur, rx348_pos, rx348_tgt, $I10) = self."!cursor_start"()
-    rx348_cur."!cursor_debug"("START ", "")
+    rx348_cur."!cursor_debug"("START ", "assertion:sym<?>")
     .lex unicode:"$\x{a2}", rx348_cur
     length rx348_eos, rx348_tgt
     set rx348_off, 0
@@ -7353,25 +7436,35 @@ An alternate dump output for a Match object and all of its subcaptures.
     sub rx348_off, $I10, 1
     substr rx348_tgt, rx348_tgt, rx348_off
   rx348_start:
-    ge rx348_pos, 0, rxscan349_done
-  rxscan349_loop:
-    ($P10) = rx348_cur."from"()
-    inc $P10
-    set rx348_pos, $P10
-    ge rx348_pos, rx348_eos, rxscan349_done
-    set_addr $I10, rxscan349_loop
-    rx348_cur."!mark_push"(0, rx348_pos, $I10)
-  rxscan349_done:
-  # rx literal  ">"
+  # rx literal  "?"
     add $I11, rx348_pos, 1
     gt $I11, rx348_eos, rx348_fail
     sub $I11, rx348_pos, rx348_off
     substr $S10, rx348_tgt, $I11, 1
-    ne $S10, ">", rx348_fail
+    ne $S10, "?", rx348_fail
     add rx348_pos, 1
+  alt352_0:
+    set_addr $I10, alt352_1
+    rx348_cur."!mark_push"(0, rx348_pos, $I10)
+  # rx subrule "before" subtype=zerowidth negate=
+    rx348_cur."!cursor_pos"(rx348_pos)
+    .const 'Sub' $P354 = "121_1256533470.86421" 
+    capture_lex $P354
+    $P10 = rx348_cur."before"($P354)
+    unless $P10, rx348_fail
+    goto alt352_end
+  alt352_1:
+  # rx subrule "assertion" subtype=capture negate=
+    rx348_cur."!cursor_pos"(rx348_pos)
+    $P10 = rx348_cur."assertion"()
+    unless $P10, rx348_fail
+    rx348_cur."!mark_push"(0, -1, 0, $P10)
+    $P10."!cursor_names"("assertion")
+    rx348_pos = $P10."pos"()
+  alt352_end:
   # rx pass
-    rx348_cur."!cursor_pass"(rx348_pos, "")
-    rx348_cur."!cursor_debug"("PASS  ", "", " at pos=", rx348_pos)
+    rx348_cur."!cursor_pass"(rx348_pos, "assertion:sym<?>")
+    rx348_cur."!cursor_debug"("PASS  ", "assertion:sym<?>", " at pos=", rx348_pos)
     .return (rx348_cur)
   rx348_fail:
     (rx348_rep, rx348_pos, $I10, $P10) = rx348_cur."!mark_fail"(0)
@@ -7380,89 +7473,79 @@ An alternate dump output for a Match object and all of its subcaptures.
     jump $I10
   rx348_done:
     rx348_cur."!cursor_fail"()
-    rx348_cur."!cursor_debug"("FAIL  ", "")
+    rx348_cur."!cursor_debug"("FAIL  ", "assertion:sym<?>")
     .return (rx348_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "assertion:sym<!>"  :subid("120_1256279193.78309") :method :outer("10_1256279193.78309")
-.annotate "line", 122
-    .const 'Sub' $P357 = "122_1256279193.78309" 
-    capture_lex $P357
-    .local string rx351_tgt
-    .local int rx351_pos
-    .local int rx351_off
-    .local int rx351_eos
-    .local int rx351_rep
-    .local pmc rx351_cur
-    (rx351_cur, rx351_pos, rx351_tgt, $I10) = self."!cursor_start"()
-    rx351_cur."!cursor_debug"("START ", "assertion:sym<!>")
-    .lex unicode:"$\x{a2}", rx351_cur
-    length rx351_eos, rx351_tgt
-    set rx351_off, 0
-    lt $I10, 2, rx351_start
-    sub rx351_off, $I10, 1
-    substr rx351_tgt, rx351_tgt, rx351_off
-  rx351_start:
-  # rx literal  "!"
-    add $I11, rx351_pos, 1
-    gt $I11, rx351_eos, rx351_fail
-    sub $I11, rx351_pos, rx351_off
-    substr $S10, rx351_tgt, $I11, 1
-    ne $S10, "!", rx351_fail
-    add rx351_pos, 1
-  alt355_0:
-    set_addr $I10, alt355_1
-    rx351_cur."!mark_push"(0, rx351_pos, $I10)
-  # rx subrule "before" subtype=zerowidth negate=
-    rx351_cur."!cursor_pos"(rx351_pos)
-    .const 'Sub' $P357 = "122_1256279193.78309" 
-    capture_lex $P357
-    $P10 = rx351_cur."before"($P357)
-    unless $P10, rx351_fail
-    goto alt355_end
-  alt355_1:
-  # rx subrule "assertion" subtype=capture negate=
-    rx351_cur."!cursor_pos"(rx351_pos)
-    $P10 = rx351_cur."assertion"()
-    unless $P10, rx351_fail
-    rx351_cur."!mark_push"(0, -1, 0, $P10)
-    $P10."!cursor_names"("assertion")
-    rx351_pos = $P10."pos"()
-  alt355_end:
+.sub "!PREFIX__assertion:sym<?>"  :subid("120_1256533470.86421") :method
+.annotate "line", 125
+    $P350 = self."!PREFIX__!subrule"("assertion", "?")
+    new $P351, "ResizablePMCArray"
+    push $P351, $P350
+    push $P351, "?"
+    .return ($P351)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Grammar"]
+.sub "_block353"  :anon :subid("121_1256533470.86421") :method :outer("119_1256533470.86421")
+.annotate "line", 125
+    .local string rx355_tgt
+    .local int rx355_pos
+    .local int rx355_off
+    .local int rx355_eos
+    .local int rx355_rep
+    .local pmc rx355_cur
+    (rx355_cur, rx355_pos, rx355_tgt, $I10) = self."!cursor_start"()
+    rx355_cur."!cursor_debug"("START ", "")
+    .lex unicode:"$\x{a2}", rx355_cur
+    length rx355_eos, rx355_tgt
+    set rx355_off, 0
+    lt $I10, 2, rx355_start
+    sub rx355_off, $I10, 1
+    substr rx355_tgt, rx355_tgt, rx355_off
+  rx355_start:
+    ge rx355_pos, 0, rxscan356_done
+  rxscan356_loop:
+    ($P10) = rx355_cur."from"()
+    inc $P10
+    set rx355_pos, $P10
+    ge rx355_pos, rx355_eos, rxscan356_done
+    set_addr $I10, rxscan356_loop
+    rx355_cur."!mark_push"(0, rx355_pos, $I10)
+  rxscan356_done:
+  # rx literal  ">"
+    add $I11, rx355_pos, 1
+    gt $I11, rx355_eos, rx355_fail
+    sub $I11, rx355_pos, rx355_off
+    substr $S10, rx355_tgt, $I11, 1
+    ne $S10, ">", rx355_fail
+    add rx355_pos, 1
   # rx pass
-    rx351_cur."!cursor_pass"(rx351_pos, "assertion:sym<!>")
-    rx351_cur."!cursor_debug"("PASS  ", "assertion:sym<!>", " at pos=", rx351_pos)
-    .return (rx351_cur)
-  rx351_fail:
-    (rx351_rep, rx351_pos, $I10, $P10) = rx351_cur."!mark_fail"(0)
-    lt rx351_pos, -1, rx351_done
-    eq rx351_pos, -1, rx351_fail
+    rx355_cur."!cursor_pass"(rx355_pos, "")
+    rx355_cur."!cursor_debug"("PASS  ", "", " at pos=", rx355_pos)
+    .return (rx355_cur)
+  rx355_fail:
+    (rx355_rep, rx355_pos, $I10, $P10) = rx355_cur."!mark_fail"(0)
+    lt rx355_pos, -1, rx355_done
+    eq rx355_pos, -1, rx355_fail
     jump $I10
-  rx351_done:
-    rx351_cur."!cursor_fail"()
-    rx351_cur."!cursor_debug"("FAIL  ", "assertion:sym<!>")
-    .return (rx351_cur)
+  rx355_done:
+    rx355_cur."!cursor_fail"()
+    rx355_cur."!cursor_debug"("FAIL  ", "")
+    .return (rx355_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__assertion:sym<!>"  :subid("121_1256279193.78309") :method
-.annotate "line", 122
-    $P353 = self."!PREFIX__!subrule"("assertion", "!")
-    new $P354, "ResizablePMCArray"
-    push $P354, $P353
-    push $P354, "!"
-    .return ($P354)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block356"  :anon :subid("122_1256279193.78309") :method :outer("120_1256279193.78309")
-.annotate "line", 122
+.sub "assertion:sym<!>"  :subid("122_1256533470.86421") :method :outer("10_1256533470.86421")
+.annotate "line", 126
+    .const 'Sub' $P364 = "124_1256533470.86421" 
+    capture_lex $P364
     .local string rx358_tgt
     .local int rx358_pos
     .local int rx358_off
@@ -7470,7 +7553,7 @@ An alternate dump output for a Match object and all of its subcaptures.
     .local int rx358_rep
     .local pmc rx358_cur
     (rx358_cur, rx358_pos, rx358_tgt, $I10) = self."!cursor_start"()
-    rx358_cur."!cursor_debug"("START ", "")
+    rx358_cur."!cursor_debug"("START ", "assertion:sym<!>")
     .lex unicode:"$\x{a2}", rx358_cur
     length rx358_eos, rx358_tgt
     set rx358_off, 0
@@ -7478,25 +7561,35 @@ An alternate dump output for a Match object and all of its subcaptures.
     sub rx358_off, $I10, 1
     substr rx358_tgt, rx358_tgt, rx358_off
   rx358_start:
-    ge rx358_pos, 0, rxscan359_done
-  rxscan359_loop:
-    ($P10) = rx358_cur."from"()
-    inc $P10
-    set rx358_pos, $P10
-    ge rx358_pos, rx358_eos, rxscan359_done
-    set_addr $I10, rxscan359_loop
-    rx358_cur."!mark_push"(0, rx358_pos, $I10)
-  rxscan359_done:
-  # rx literal  ">"
+  # rx literal  "!"
     add $I11, rx358_pos, 1
     gt $I11, rx358_eos, rx358_fail
     sub $I11, rx358_pos, rx358_off
     substr $S10, rx358_tgt, $I11, 1
-    ne $S10, ">", rx358_fail
+    ne $S10, "!", rx358_fail
     add rx358_pos, 1
+  alt362_0:
+    set_addr $I10, alt362_1
+    rx358_cur."!mark_push"(0, rx358_pos, $I10)
+  # rx subrule "before" subtype=zerowidth negate=
+    rx358_cur."!cursor_pos"(rx358_pos)
+    .const 'Sub' $P364 = "124_1256533470.86421" 
+    capture_lex $P364
+    $P10 = rx358_cur."before"($P364)
+    unless $P10, rx358_fail
+    goto alt362_end
+  alt362_1:
+  # rx subrule "assertion" subtype=capture negate=
+    rx358_cur."!cursor_pos"(rx358_pos)
+    $P10 = rx358_cur."assertion"()
+    unless $P10, rx358_fail
+    rx358_cur."!mark_push"(0, -1, 0, $P10)
+    $P10."!cursor_names"("assertion")
+    rx358_pos = $P10."pos"()
+  alt362_end:
   # rx pass
-    rx358_cur."!cursor_pass"(rx358_pos, "")
-    rx358_cur."!cursor_debug"("PASS  ", "", " at pos=", rx358_pos)
+    rx358_cur."!cursor_pass"(rx358_pos, "assertion:sym<!>")
+    rx358_cur."!cursor_debug"("PASS  ", "assertion:sym<!>", " at pos=", rx358_pos)
     .return (rx358_cur)
   rx358_fail:
     (rx358_rep, rx358_pos, $I10, $P10) = rx358_cur."!mark_fail"(0)
@@ -7505,1213 +7598,1197 @@ An alternate dump output for a Match object and all of its subcaptures.
     jump $I10
   rx358_done:
     rx358_cur."!cursor_fail"()
-    rx358_cur."!cursor_debug"("FAIL  ", "")
+    rx358_cur."!cursor_debug"("FAIL  ", "assertion:sym<!>")
     .return (rx358_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "assertion:sym<method>"  :subid("123_1256279193.78309") :method :outer("10_1256279193.78309")
-.annotate "line", 124
-    .local string rx361_tgt
-    .local int rx361_pos
-    .local int rx361_off
-    .local int rx361_eos
-    .local int rx361_rep
-    .local pmc rx361_cur
-    (rx361_cur, rx361_pos, rx361_tgt, $I10) = self."!cursor_start"()
-    rx361_cur."!cursor_debug"("START ", "assertion:sym<method>")
-    .lex unicode:"$\x{a2}", rx361_cur
-    length rx361_eos, rx361_tgt
-    set rx361_off, 0
-    lt $I10, 2, rx361_start
-    sub rx361_off, $I10, 1
-    substr rx361_tgt, rx361_tgt, rx361_off
-  rx361_start:
-.annotate "line", 125
-  # rx literal  "."
-    add $I11, rx361_pos, 1
-    gt $I11, rx361_eos, rx361_fail
-    sub $I11, rx361_pos, rx361_off
-    substr $S10, rx361_tgt, $I11, 1
-    ne $S10, ".", rx361_fail
-    add rx361_pos, 1
-  # rx subrule "assertion" subtype=capture negate=
-    rx361_cur."!cursor_pos"(rx361_pos)
-    $P10 = rx361_cur."assertion"()
-    unless $P10, rx361_fail
-    rx361_cur."!mark_push"(0, -1, 0, $P10)
-    $P10."!cursor_names"("assertion")
-    rx361_pos = $P10."pos"()
-.annotate "line", 124
-  # rx pass
-    rx361_cur."!cursor_pass"(rx361_pos, "assertion:sym<method>")
-    rx361_cur."!cursor_debug"("PASS  ", "assertion:sym<method>", " at pos=", rx361_pos)
-    .return (rx361_cur)
-  rx361_fail:
-    (rx361_rep, rx361_pos, $I10, $P10) = rx361_cur."!mark_fail"(0)
-    lt rx361_pos, -1, rx361_done
-    eq rx361_pos, -1, rx361_fail
-    jump $I10
-  rx361_done:
-    rx361_cur."!cursor_fail"()
-    rx361_cur."!cursor_debug"("FAIL  ", "assertion:sym<method>")
-    .return (rx361_cur)
-    .return ()
+.sub "!PREFIX__assertion:sym<!>"  :subid("123_1256533470.86421") :method
+.annotate "line", 126
+    $P360 = self."!PREFIX__!subrule"("assertion", "!")
+    new $P361, "ResizablePMCArray"
+    push $P361, $P360
+    push $P361, "!"
+    .return ($P361)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__assertion:sym<method>"  :subid("124_1256279193.78309") :method
-.annotate "line", 124
-    $P363 = self."!PREFIX__!subrule"("assertion", ".")
-    new $P364, "ResizablePMCArray"
-    push $P364, $P363
-    .return ($P364)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Grammar"]
-.sub "assertion:sym<name>"  :subid("125_1256279193.78309") :method :outer("10_1256279193.78309")
-.annotate "line", 128
-    .const 'Sub' $P373 = "127_1256279193.78309" 
-    capture_lex $P373
-    .local string rx366_tgt
-    .local int rx366_pos
-    .local int rx366_off
-    .local int rx366_eos
-    .local int rx366_rep
-    .local pmc rx366_cur
-    (rx366_cur, rx366_pos, rx366_tgt, $I10) = self."!cursor_start"()
-    rx366_cur."!cursor_debug"("START ", "assertion:sym<name>")
-    rx366_cur."!cursor_caparray"("nibbler", "arglist", "assertion")
-    .lex unicode:"$\x{a2}", rx366_cur
-    length rx366_eos, rx366_tgt
-    set rx366_off, 0
-    lt $I10, 2, rx366_start
-    sub rx366_off, $I10, 1
-    substr rx366_tgt, rx366_tgt, rx366_off
-  rx366_start:
-.annotate "line", 129
-  # rx subcapture "longname"
-    set_addr $I10, rxcap_369_fail
-    rx366_cur."!mark_push"(0, rx366_pos, $I10)
-  # rx charclass_q w r 1..-1
-    sub $I10, rx366_pos, rx366_off
-    find_not_cclass $I11, 8192, rx366_tgt, $I10, rx366_eos
-    add $I12, $I10, 1
-    lt $I11, $I12, rx366_fail
-    add rx366_pos, rx366_off, $I11
-    set_addr $I10, rxcap_369_fail
-    ($I12, $I11) = rx366_cur."!mark_peek"($I10)
-    rx366_cur."!cursor_pos"($I11)
-    ($P10) = rx366_cur."!cursor_start"()
-    $P10."!cursor_pass"(rx366_pos, "")
-    rx366_cur."!mark_push"(0, -1, 0, $P10)
-    $P10."!cursor_names"("longname")
-    goto rxcap_369_done
-  rxcap_369_fail:
-    goto rx366_fail
-  rxcap_369_done:
-.annotate "line", 136
-  # rx rxquantr370 ** 0..1
-    set_addr $I376, rxquantr370_done
-    rx366_cur."!mark_push"(0, rx366_pos, $I376)
-  rxquantr370_loop:
-  alt371_0:
-.annotate "line", 130
-    set_addr $I10, alt371_1
-    rx366_cur."!mark_push"(0, rx366_pos, $I10)
-.annotate "line", 131
-  # rx subrule "before" subtype=zerowidth negate=
-    rx366_cur."!cursor_pos"(rx366_pos)
-    .const 'Sub' $P373 = "127_1256279193.78309" 
-    capture_lex $P373
-    $P10 = rx366_cur."before"($P373)
-    unless $P10, rx366_fail
-    goto alt371_end
-  alt371_1:
-    set_addr $I10, alt371_2
-    rx366_cur."!mark_push"(0, rx366_pos, $I10)
-.annotate "line", 132
-  # rx literal  "="
-    add $I11, rx366_pos, 1
-    gt $I11, rx366_eos, rx366_fail
-    sub $I11, rx366_pos, rx366_off
-    substr $S10, rx366_tgt, $I11, 1
-    ne $S10, "=", rx366_fail
-    add rx366_pos, 1
-  # rx subrule "assertion" subtype=capture negate=
-    rx366_cur."!cursor_pos"(rx366_pos)
-    $P10 = rx366_cur."assertion"()
-    unless $P10, rx366_fail
-    rx366_cur."!mark_push"(0, -1, 0, $P10)
-    $P10."!cursor_names"("assertion")
-    rx366_pos = $P10."pos"()
-    goto alt371_end
-  alt371_2:
-    set_addr $I10, alt371_3
-    rx366_cur."!mark_push"(0, rx366_pos, $I10)
-.annotate "line", 133
-  # rx literal  ":"
-    add $I11, rx366_pos, 1
-    gt $I11, rx366_eos, rx366_fail
-    sub $I11, rx366_pos, rx366_off
-    substr $S10, rx366_tgt, $I11, 1
-    ne $S10, ":", rx366_fail
-    add rx366_pos, 1
-  # rx subrule "arglist" subtype=capture negate=
-    rx366_cur."!cursor_pos"(rx366_pos)
-    $P10 = rx366_cur."arglist"()
-    unless $P10, rx366_fail
-    rx366_cur."!mark_push"(0, -1, 0, $P10)
-    $P10."!cursor_names"("arglist")
-    rx366_pos = $P10."pos"()
-    goto alt371_end
-  alt371_3:
-    set_addr $I10, alt371_4
-    rx366_cur."!mark_push"(0, rx366_pos, $I10)
-.annotate "line", 134
-  # rx literal  "("
-    add $I11, rx366_pos, 1
-    gt $I11, rx366_eos, rx366_fail
-    sub $I11, rx366_pos, rx366_off
-    substr $S10, rx366_tgt, $I11, 1
-    ne $S10, "(", rx366_fail
-    add rx366_pos, 1
-  # rx subrule "arglist" subtype=capture negate=
-    rx366_cur."!cursor_pos"(rx366_pos)
-    $P10 = rx366_cur."arglist"()
-    unless $P10, rx366_fail
-    rx366_cur."!mark_push"(0, -1, 0, $P10)
-    $P10."!cursor_names"("arglist")
-    rx366_pos = $P10."pos"()
-  # rx literal  ")"
-    add $I11, rx366_pos, 1
-    gt $I11, rx366_eos, rx366_fail
-    sub $I11, rx366_pos, rx366_off
-    substr $S10, rx366_tgt, $I11, 1
-    ne $S10, ")", rx366_fail
-    add rx366_pos, 1
-    goto alt371_end
-  alt371_4:
-.annotate "line", 135
-  # rx subrule "normspace" subtype=method negate=
-    rx366_cur."!cursor_pos"(rx366_pos)
-    $P10 = rx366_cur."normspace"()
-    unless $P10, rx366_fail
-    rx366_pos = $P10."pos"()
-  # rx subrule "nibbler" subtype=capture negate=
-    rx366_cur."!cursor_pos"(rx366_pos)
-    $P10 = rx366_cur."nibbler"()
-    unless $P10, rx366_fail
-    rx366_cur."!mark_push"(0, -1, 0, $P10)
-    $P10."!cursor_names"("nibbler")
-    rx366_pos = $P10."pos"()
-  alt371_end:
-.annotate "line", 136
-    (rx366_rep) = rx366_cur."!mark_commit"($I376)
-  rxquantr370_done:
-.annotate "line", 128
-  # rx pass
-    rx366_cur."!cursor_pass"(rx366_pos, "assertion:sym<name>")
-    rx366_cur."!cursor_debug"("PASS  ", "assertion:sym<name>", " at pos=", rx366_pos)
-    .return (rx366_cur)
-  rx366_fail:
-    (rx366_rep, rx366_pos, $I10, $P10) = rx366_cur."!mark_fail"(0)
-    lt rx366_pos, -1, rx366_done
-    eq rx366_pos, -1, rx366_fail
-    jump $I10
-  rx366_done:
-    rx366_cur."!cursor_fail"()
-    rx366_cur."!cursor_debug"("FAIL  ", "assertion:sym<name>")
-    .return (rx366_cur)
-    .return ()
-.end
-
-
-.namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__assertion:sym<name>"  :subid("126_1256279193.78309") :method
-.annotate "line", 128
-    new $P368, "ResizablePMCArray"
-    push $P368, ""
-    .return ($P368)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block372"  :anon :subid("127_1256279193.78309") :method :outer("125_1256279193.78309")
-.annotate "line", 131
-    .local string rx374_tgt
-    .local int rx374_pos
-    .local int rx374_off
-    .local int rx374_eos
-    .local int rx374_rep
-    .local pmc rx374_cur
-    (rx374_cur, rx374_pos, rx374_tgt, $I10) = self."!cursor_start"()
-    rx374_cur."!cursor_debug"("START ", "")
-    .lex unicode:"$\x{a2}", rx374_cur
-    length rx374_eos, rx374_tgt
-    set rx374_off, 0
-    lt $I10, 2, rx374_start
-    sub rx374_off, $I10, 1
-    substr rx374_tgt, rx374_tgt, rx374_off
-  rx374_start:
-    ge rx374_pos, 0, rxscan375_done
-  rxscan375_loop:
-    ($P10) = rx374_cur."from"()
+.sub "_block363"  :anon :subid("124_1256533470.86421") :method :outer("122_1256533470.86421")
+.annotate "line", 126
+    .local string rx365_tgt
+    .local int rx365_pos
+    .local int rx365_off
+    .local int rx365_eos
+    .local int rx365_rep
+    .local pmc rx365_cur
+    (rx365_cur, rx365_pos, rx365_tgt, $I10) = self."!cursor_start"()
+    rx365_cur."!cursor_debug"("START ", "")
+    .lex unicode:"$\x{a2}", rx365_cur
+    length rx365_eos, rx365_tgt
+    set rx365_off, 0
+    lt $I10, 2, rx365_start
+    sub rx365_off, $I10, 1
+    substr rx365_tgt, rx365_tgt, rx365_off
+  rx365_start:
+    ge rx365_pos, 0, rxscan366_done
+  rxscan366_loop:
+    ($P10) = rx365_cur."from"()
     inc $P10
-    set rx374_pos, $P10
-    ge rx374_pos, rx374_eos, rxscan375_done
-    set_addr $I10, rxscan375_loop
-    rx374_cur."!mark_push"(0, rx374_pos, $I10)
-  rxscan375_done:
+    set rx365_pos, $P10
+    ge rx365_pos, rx365_eos, rxscan366_done
+    set_addr $I10, rxscan366_loop
+    rx365_cur."!mark_push"(0, rx365_pos, $I10)
+  rxscan366_done:
   # rx literal  ">"
-    add $I11, rx374_pos, 1
-    gt $I11, rx374_eos, rx374_fail
-    sub $I11, rx374_pos, rx374_off
-    substr $S10, rx374_tgt, $I11, 1
-    ne $S10, ">", rx374_fail
-    add rx374_pos, 1
+    add $I11, rx365_pos, 1
+    gt $I11, rx365_eos, rx365_fail
+    sub $I11, rx365_pos, rx365_off
+    substr $S10, rx365_tgt, $I11, 1
+    ne $S10, ">", rx365_fail
+    add rx365_pos, 1
   # rx pass
-    rx374_cur."!cursor_pass"(rx374_pos, "")
-    rx374_cur."!cursor_debug"("PASS  ", "", " at pos=", rx374_pos)
-    .return (rx374_cur)
-  rx374_fail:
-    (rx374_rep, rx374_pos, $I10, $P10) = rx374_cur."!mark_fail"(0)
-    lt rx374_pos, -1, rx374_done
-    eq rx374_pos, -1, rx374_fail
+    rx365_cur."!cursor_pass"(rx365_pos, "")
+    rx365_cur."!cursor_debug"("PASS  ", "", " at pos=", rx365_pos)
+    .return (rx365_cur)
+  rx365_fail:
+    (rx365_rep, rx365_pos, $I10, $P10) = rx365_cur."!mark_fail"(0)
+    lt rx365_pos, -1, rx365_done
+    eq rx365_pos, -1, rx365_fail
     jump $I10
-  rx374_done:
-    rx374_cur."!cursor_fail"()
-    rx374_cur."!cursor_debug"("FAIL  ", "")
-    .return (rx374_cur)
+  rx365_done:
+    rx365_cur."!cursor_fail"()
+    rx365_cur."!cursor_debug"("FAIL  ", "")
+    .return (rx365_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "assertion:sym<[>"  :subid("128_1256279193.78309") :method :outer("10_1256279193.78309")
-.annotate "line", 139
-    .const 'Sub' $P382 = "130_1256279193.78309" 
-    capture_lex $P382
-    .local string rx378_tgt
-    .local int rx378_pos
-    .local int rx378_off
-    .local int rx378_eos
-    .local int rx378_rep
-    .local pmc rx378_cur
-    (rx378_cur, rx378_pos, rx378_tgt, $I10) = self."!cursor_start"()
-    rx378_cur."!cursor_debug"("START ", "assertion:sym<[>")
-    rx378_cur."!cursor_caparray"("cclass_elem")
-    .lex unicode:"$\x{a2}", rx378_cur
-    length rx378_eos, rx378_tgt
-    set rx378_off, 0
-    lt $I10, 2, rx378_start
-    sub rx378_off, $I10, 1
-    substr rx378_tgt, rx378_tgt, rx378_off
-  rx378_start:
+.sub "assertion:sym<method>"  :subid("125_1256533470.86421") :method :outer("10_1256533470.86421")
+.annotate "line", 128
+    .local string rx368_tgt
+    .local int rx368_pos
+    .local int rx368_off
+    .local int rx368_eos
+    .local int rx368_rep
+    .local pmc rx368_cur
+    (rx368_cur, rx368_pos, rx368_tgt, $I10) = self."!cursor_start"()
+    rx368_cur."!cursor_debug"("START ", "assertion:sym<method>")
+    .lex unicode:"$\x{a2}", rx368_cur
+    length rx368_eos, rx368_tgt
+    set rx368_off, 0
+    lt $I10, 2, rx368_start
+    sub rx368_off, $I10, 1
+    substr rx368_tgt, rx368_tgt, rx368_off
+  rx368_start:
+.annotate "line", 129
+  # rx literal  "."
+    add $I11, rx368_pos, 1
+    gt $I11, rx368_eos, rx368_fail
+    sub $I11, rx368_pos, rx368_off
+    substr $S10, rx368_tgt, $I11, 1
+    ne $S10, ".", rx368_fail
+    add rx368_pos, 1
+  # rx subrule "assertion" subtype=capture negate=
+    rx368_cur."!cursor_pos"(rx368_pos)
+    $P10 = rx368_cur."assertion"()
+    unless $P10, rx368_fail
+    rx368_cur."!mark_push"(0, -1, 0, $P10)
+    $P10."!cursor_names"("assertion")
+    rx368_pos = $P10."pos"()
+.annotate "line", 128
+  # rx pass
+    rx368_cur."!cursor_pass"(rx368_pos, "assertion:sym<method>")
+    rx368_cur."!cursor_debug"("PASS  ", "assertion:sym<method>", " at pos=", rx368_pos)
+    .return (rx368_cur)
+  rx368_fail:
+    (rx368_rep, rx368_pos, $I10, $P10) = rx368_cur."!mark_fail"(0)
+    lt rx368_pos, -1, rx368_done
+    eq rx368_pos, -1, rx368_fail
+    jump $I10
+  rx368_done:
+    rx368_cur."!cursor_fail"()
+    rx368_cur."!cursor_debug"("FAIL  ", "assertion:sym<method>")
+    .return (rx368_cur)
+    .return ()
+.end
+
+
+.namespace ["Regex";"P6Regex";"Grammar"]
+.sub "!PREFIX__assertion:sym<method>"  :subid("126_1256533470.86421") :method
+.annotate "line", 128
+    $P370 = self."!PREFIX__!subrule"("assertion", ".")
+    new $P371, "ResizablePMCArray"
+    push $P371, $P370
+    .return ($P371)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Grammar"]
+.sub "assertion:sym<name>"  :subid("127_1256533470.86421") :method :outer("10_1256533470.86421")
+.annotate "line", 132
+    .const 'Sub' $P380 = "129_1256533470.86421" 
+    capture_lex $P380
+    .local string rx373_tgt
+    .local int rx373_pos
+    .local int rx373_off
+    .local int rx373_eos
+    .local int rx373_rep
+    .local pmc rx373_cur
+    (rx373_cur, rx373_pos, rx373_tgt, $I10) = self."!cursor_start"()
+    rx373_cur."!cursor_debug"("START ", "assertion:sym<name>")
+    rx373_cur."!cursor_caparray"("nibbler", "arglist", "assertion")
+    .lex unicode:"$\x{a2}", rx373_cur
+    length rx373_eos, rx373_tgt
+    set rx373_off, 0
+    lt $I10, 2, rx373_start
+    sub rx373_off, $I10, 1
+    substr rx373_tgt, rx373_tgt, rx373_off
+  rx373_start:
+.annotate "line", 133
+  # rx subcapture "longname"
+    set_addr $I10, rxcap_376_fail
+    rx373_cur."!mark_push"(0, rx373_pos, $I10)
+  # rx charclass_q w r 1..-1
+    sub $I10, rx373_pos, rx373_off
+    find_not_cclass $I11, 8192, rx373_tgt, $I10, rx373_eos
+    add $I12, $I10, 1
+    lt $I11, $I12, rx373_fail
+    add rx373_pos, rx373_off, $I11
+    set_addr $I10, rxcap_376_fail
+    ($I12, $I11) = rx373_cur."!mark_peek"($I10)
+    rx373_cur."!cursor_pos"($I11)
+    ($P10) = rx373_cur."!cursor_start"()
+    $P10."!cursor_pass"(rx373_pos, "")
+    rx373_cur."!mark_push"(0, -1, 0, $P10)
+    $P10."!cursor_names"("longname")
+    goto rxcap_376_done
+  rxcap_376_fail:
+    goto rx373_fail
+  rxcap_376_done:
+.annotate "line", 140
+  # rx rxquantr377 ** 0..1
+    set_addr $I383, rxquantr377_done
+    rx373_cur."!mark_push"(0, rx373_pos, $I383)
+  rxquantr377_loop:
+  alt378_0:
+.annotate "line", 134
+    set_addr $I10, alt378_1
+    rx373_cur."!mark_push"(0, rx373_pos, $I10)
+.annotate "line", 135
   # rx subrule "before" subtype=zerowidth negate=
-    rx378_cur."!cursor_pos"(rx378_pos)
-    .const 'Sub' $P382 = "130_1256279193.78309" 
-    capture_lex $P382
-    $P10 = rx378_cur."before"($P382)
-    unless $P10, rx378_fail
-  # rx rxquantr386 ** 1..*
-    set_addr $I387, rxquantr386_done
-    rx378_cur."!mark_push"(0, -1, $I387)
-  rxquantr386_loop:
-  # rx subrule "cclass_elem" subtype=capture negate=
-    rx378_cur."!cursor_pos"(rx378_pos)
-    $P10 = rx378_cur."cclass_elem"()
-    unless $P10, rx378_fail
-    rx378_cur."!mark_push"(0, -1, 0, $P10)
-    $P10."!cursor_names"("cclass_elem")
-    rx378_pos = $P10."pos"()
-    (rx378_rep) = rx378_cur."!mark_commit"($I387)
-    rx378_cur."!mark_push"(rx378_rep, rx378_pos, $I387)
-    goto rxquantr386_loop
-  rxquantr386_done:
+    rx373_cur."!cursor_pos"(rx373_pos)
+    .const 'Sub' $P380 = "129_1256533470.86421" 
+    capture_lex $P380
+    $P10 = rx373_cur."before"($P380)
+    unless $P10, rx373_fail
+    goto alt378_end
+  alt378_1:
+    set_addr $I10, alt378_2
+    rx373_cur."!mark_push"(0, rx373_pos, $I10)
+.annotate "line", 136
+  # rx literal  "="
+    add $I11, rx373_pos, 1
+    gt $I11, rx373_eos, rx373_fail
+    sub $I11, rx373_pos, rx373_off
+    substr $S10, rx373_tgt, $I11, 1
+    ne $S10, "=", rx373_fail
+    add rx373_pos, 1
+  # rx subrule "assertion" subtype=capture negate=
+    rx373_cur."!cursor_pos"(rx373_pos)
+    $P10 = rx373_cur."assertion"()
+    unless $P10, rx373_fail
+    rx373_cur."!mark_push"(0, -1, 0, $P10)
+    $P10."!cursor_names"("assertion")
+    rx373_pos = $P10."pos"()
+    goto alt378_end
+  alt378_2:
+    set_addr $I10, alt378_3
+    rx373_cur."!mark_push"(0, rx373_pos, $I10)
+.annotate "line", 137
+  # rx literal  ":"
+    add $I11, rx373_pos, 1
+    gt $I11, rx373_eos, rx373_fail
+    sub $I11, rx373_pos, rx373_off
+    substr $S10, rx373_tgt, $I11, 1
+    ne $S10, ":", rx373_fail
+    add rx373_pos, 1
+  # rx subrule "arglist" subtype=capture negate=
+    rx373_cur."!cursor_pos"(rx373_pos)
+    $P10 = rx373_cur."arglist"()
+    unless $P10, rx373_fail
+    rx373_cur."!mark_push"(0, -1, 0, $P10)
+    $P10."!cursor_names"("arglist")
+    rx373_pos = $P10."pos"()
+    goto alt378_end
+  alt378_3:
+    set_addr $I10, alt378_4
+    rx373_cur."!mark_push"(0, rx373_pos, $I10)
+.annotate "line", 138
+  # rx literal  "("
+    add $I11, rx373_pos, 1
+    gt $I11, rx373_eos, rx373_fail
+    sub $I11, rx373_pos, rx373_off
+    substr $S10, rx373_tgt, $I11, 1
+    ne $S10, "(", rx373_fail
+    add rx373_pos, 1
+  # rx subrule "arglist" subtype=capture negate=
+    rx373_cur."!cursor_pos"(rx373_pos)
+    $P10 = rx373_cur."arglist"()
+    unless $P10, rx373_fail
+    rx373_cur."!mark_push"(0, -1, 0, $P10)
+    $P10."!cursor_names"("arglist")
+    rx373_pos = $P10."pos"()
+  # rx literal  ")"
+    add $I11, rx373_pos, 1
+    gt $I11, rx373_eos, rx373_fail
+    sub $I11, rx373_pos, rx373_off
+    substr $S10, rx373_tgt, $I11, 1
+    ne $S10, ")", rx373_fail
+    add rx373_pos, 1
+    goto alt378_end
+  alt378_4:
+.annotate "line", 139
+  # rx subrule "normspace" subtype=method negate=
+    rx373_cur."!cursor_pos"(rx373_pos)
+    $P10 = rx373_cur."normspace"()
+    unless $P10, rx373_fail
+    rx373_pos = $P10."pos"()
+  # rx subrule "nibbler" subtype=capture negate=
+    rx373_cur."!cursor_pos"(rx373_pos)
+    $P10 = rx373_cur."nibbler"()
+    unless $P10, rx373_fail
+    rx373_cur."!mark_push"(0, -1, 0, $P10)
+    $P10."!cursor_names"("nibbler")
+    rx373_pos = $P10."pos"()
+  alt378_end:
+.annotate "line", 140
+    (rx373_rep) = rx373_cur."!mark_commit"($I383)
+  rxquantr377_done:
+.annotate "line", 132
   # rx pass
-    rx378_cur."!cursor_pass"(rx378_pos, "assertion:sym<[>")
-    rx378_cur."!cursor_debug"("PASS  ", "assertion:sym<[>", " at pos=", rx378_pos)
-    .return (rx378_cur)
-  rx378_fail:
-    (rx378_rep, rx378_pos, $I10, $P10) = rx378_cur."!mark_fail"(0)
-    lt rx378_pos, -1, rx378_done
-    eq rx378_pos, -1, rx378_fail
+    rx373_cur."!cursor_pass"(rx373_pos, "assertion:sym<name>")
+    rx373_cur."!cursor_debug"("PASS  ", "assertion:sym<name>", " at pos=", rx373_pos)
+    .return (rx373_cur)
+  rx373_fail:
+    (rx373_rep, rx373_pos, $I10, $P10) = rx373_cur."!mark_fail"(0)
+    lt rx373_pos, -1, rx373_done
+    eq rx373_pos, -1, rx373_fail
     jump $I10
-  rx378_done:
-    rx378_cur."!cursor_fail"()
-    rx378_cur."!cursor_debug"("FAIL  ", "assertion:sym<[>")
-    .return (rx378_cur)
+  rx373_done:
+    rx373_cur."!cursor_fail"()
+    rx373_cur."!cursor_debug"("FAIL  ", "assertion:sym<name>")
+    .return (rx373_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__assertion:sym<[>"  :subid("129_1256279193.78309") :method
-.annotate "line", 139
-    new $P380, "ResizablePMCArray"
-    push $P380, ""
-    .return ($P380)
+.sub "!PREFIX__assertion:sym<name>"  :subid("128_1256533470.86421") :method
+.annotate "line", 132
+    new $P375, "ResizablePMCArray"
+    push $P375, ""
+    .return ($P375)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block381"  :anon :subid("130_1256279193.78309") :method :outer("128_1256279193.78309")
-.annotate "line", 139
-    .local string rx383_tgt
-    .local int rx383_pos
-    .local int rx383_off
-    .local int rx383_eos
-    .local int rx383_rep
-    .local pmc rx383_cur
-    (rx383_cur, rx383_pos, rx383_tgt, $I10) = self."!cursor_start"()
-    rx383_cur."!cursor_debug"("START ", "")
-    .lex unicode:"$\x{a2}", rx383_cur
-    length rx383_eos, rx383_tgt
-    set rx383_off, 0
-    lt $I10, 2, rx383_start
-    sub rx383_off, $I10, 1
-    substr rx383_tgt, rx383_tgt, rx383_off
-  rx383_start:
-    ge rx383_pos, 0, rxscan384_done
-  rxscan384_loop:
-    ($P10) = rx383_cur."from"()
+.sub "_block379"  :anon :subid("129_1256533470.86421") :method :outer("127_1256533470.86421")
+.annotate "line", 135
+    .local string rx381_tgt
+    .local int rx381_pos
+    .local int rx381_off
+    .local int rx381_eos
+    .local int rx381_rep
+    .local pmc rx381_cur
+    (rx381_cur, rx381_pos, rx381_tgt, $I10) = self."!cursor_start"()
+    rx381_cur."!cursor_debug"("START ", "")
+    .lex unicode:"$\x{a2}", rx381_cur
+    length rx381_eos, rx381_tgt
+    set rx381_off, 0
+    lt $I10, 2, rx381_start
+    sub rx381_off, $I10, 1
+    substr rx381_tgt, rx381_tgt, rx381_off
+  rx381_start:
+    ge rx381_pos, 0, rxscan382_done
+  rxscan382_loop:
+    ($P10) = rx381_cur."from"()
     inc $P10
-    set rx383_pos, $P10
-    ge rx383_pos, rx383_eos, rxscan384_done
-    set_addr $I10, rxscan384_loop
-    rx383_cur."!mark_push"(0, rx383_pos, $I10)
-  rxscan384_done:
-  alt385_0:
-    set_addr $I10, alt385_1
-    rx383_cur."!mark_push"(0, rx383_pos, $I10)
-  # rx literal  "["
-    add $I11, rx383_pos, 1
-    gt $I11, rx383_eos, rx383_fail
-    sub $I11, rx383_pos, rx383_off
-    substr $S10, rx383_tgt, $I11, 1
-    ne $S10, "[", rx383_fail
-    add rx383_pos, 1
-    goto alt385_end
-  alt385_1:
-    set_addr $I10, alt385_2
-    rx383_cur."!mark_push"(0, rx383_pos, $I10)
-  # rx literal  "+"
-    add $I11, rx383_pos, 1
-    gt $I11, rx383_eos, rx383_fail
-    sub $I11, rx383_pos, rx383_off
-    substr $S10, rx383_tgt, $I11, 1
-    ne $S10, "+", rx383_fail
-    add rx383_pos, 1
-    goto alt385_end
-  alt385_2:
-  # rx literal  "-"
-    add $I11, rx383_pos, 1
-    gt $I11, rx383_eos, rx383_fail
-    sub $I11, rx383_pos, rx383_off
-    substr $S10, rx383_tgt, $I11, 1
-    ne $S10, "-", rx383_fail
-    add rx383_pos, 1
-  alt385_end:
+    set rx381_pos, $P10
+    ge rx381_pos, rx381_eos, rxscan382_done
+    set_addr $I10, rxscan382_loop
+    rx381_cur."!mark_push"(0, rx381_pos, $I10)
+  rxscan382_done:
+  # rx literal  ">"
+    add $I11, rx381_pos, 1
+    gt $I11, rx381_eos, rx381_fail
+    sub $I11, rx381_pos, rx381_off
+    substr $S10, rx381_tgt, $I11, 1
+    ne $S10, ">", rx381_fail
+    add rx381_pos, 1
   # rx pass
-    rx383_cur."!cursor_pass"(rx383_pos, "")
-    rx383_cur."!cursor_debug"("PASS  ", "", " at pos=", rx383_pos)
-    .return (rx383_cur)
-  rx383_fail:
-    (rx383_rep, rx383_pos, $I10, $P10) = rx383_cur."!mark_fail"(0)
-    lt rx383_pos, -1, rx383_done
-    eq rx383_pos, -1, rx383_fail
+    rx381_cur."!cursor_pass"(rx381_pos, "")
+    rx381_cur."!cursor_debug"("PASS  ", "", " at pos=", rx381_pos)
+    .return (rx381_cur)
+  rx381_fail:
+    (rx381_rep, rx381_pos, $I10, $P10) = rx381_cur."!mark_fail"(0)
+    lt rx381_pos, -1, rx381_done
+    eq rx381_pos, -1, rx381_fail
     jump $I10
-  rx383_done:
-    rx383_cur."!cursor_fail"()
-    rx383_cur."!cursor_debug"("FAIL  ", "")
-    .return (rx383_cur)
+  rx381_done:
+    rx381_cur."!cursor_fail"()
+    rx381_cur."!cursor_debug"("FAIL  ", "")
+    .return (rx381_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "cclass_elem"  :subid("131_1256279193.78309") :method :outer("10_1256279193.78309")
-.annotate "line", 141
-    .const 'Sub' $P399 = "133_1256279193.78309" 
-    capture_lex $P399
-    .local string rx389_tgt
-    .local int rx389_pos
-    .local int rx389_off
-    .local int rx389_eos
-    .local int rx389_rep
-    .local pmc rx389_cur
-    (rx389_cur, rx389_pos, rx389_tgt, $I10) = self."!cursor_start"()
-    rx389_cur."!cursor_debug"("START ", "cclass_elem")
-    rx389_cur."!cursor_caparray"("charspec")
-    .lex unicode:"$\x{a2}", rx389_cur
-    length rx389_eos, rx389_tgt
-    set rx389_off, 0
-    lt $I10, 2, rx389_start
-    sub rx389_off, $I10, 1
-    substr rx389_tgt, rx389_tgt, rx389_off
-  rx389_start:
-.annotate "line", 142
-  # rx subcapture "sign"
-    set_addr $I10, rxcap_393_fail
-    rx389_cur."!mark_push"(0, rx389_pos, $I10)
+.sub "assertion:sym<[>"  :subid("130_1256533470.86421") :method :outer("10_1256533470.86421")
+.annotate "line", 143
+    .const 'Sub' $P389 = "132_1256533470.86421" 
+    capture_lex $P389
+    .local string rx385_tgt
+    .local int rx385_pos
+    .local int rx385_off
+    .local int rx385_eos
+    .local int rx385_rep
+    .local pmc rx385_cur
+    (rx385_cur, rx385_pos, rx385_tgt, $I10) = self."!cursor_start"()
+    rx385_cur."!cursor_debug"("START ", "assertion:sym<[>")
+    rx385_cur."!cursor_caparray"("cclass_elem")
+    .lex unicode:"$\x{a2}", rx385_cur
+    length rx385_eos, rx385_tgt
+    set rx385_off, 0
+    lt $I10, 2, rx385_start
+    sub rx385_off, $I10, 1
+    substr rx385_tgt, rx385_tgt, rx385_off
+  rx385_start:
+  # rx subrule "before" subtype=zerowidth negate=
+    rx385_cur."!cursor_pos"(rx385_pos)
+    .const 'Sub' $P389 = "132_1256533470.86421" 
+    capture_lex $P389
+    $P10 = rx385_cur."before"($P389)
+    unless $P10, rx385_fail
+  # rx rxquantr393 ** 1..*
+    set_addr $I394, rxquantr393_done
+    rx385_cur."!mark_push"(0, -1, $I394)
+  rxquantr393_loop:
+  # rx subrule "cclass_elem" subtype=capture negate=
+    rx385_cur."!cursor_pos"(rx385_pos)
+    $P10 = rx385_cur."cclass_elem"()
+    unless $P10, rx385_fail
+    rx385_cur."!mark_push"(0, -1, 0, $P10)
+    $P10."!cursor_names"("cclass_elem")
+    rx385_pos = $P10."pos"()
+    (rx385_rep) = rx385_cur."!mark_commit"($I394)
+    rx385_cur."!mark_push"(rx385_rep, rx385_pos, $I394)
+    goto rxquantr393_loop
+  rxquantr393_done:
+  # rx pass
+    rx385_cur."!cursor_pass"(rx385_pos, "assertion:sym<[>")
+    rx385_cur."!cursor_debug"("PASS  ", "assertion:sym<[>", " at pos=", rx385_pos)
+    .return (rx385_cur)
+  rx385_fail:
+    (rx385_rep, rx385_pos, $I10, $P10) = rx385_cur."!mark_fail"(0)
+    lt rx385_pos, -1, rx385_done
+    eq rx385_pos, -1, rx385_fail
+    jump $I10
+  rx385_done:
+    rx385_cur."!cursor_fail"()
+    rx385_cur."!cursor_debug"("FAIL  ", "assertion:sym<[>")
+    .return (rx385_cur)
+    .return ()
+.end
+
+
+.namespace ["Regex";"P6Regex";"Grammar"]
+.sub "!PREFIX__assertion:sym<[>"  :subid("131_1256533470.86421") :method
+.annotate "line", 143
+    new $P387, "ResizablePMCArray"
+    push $P387, ""
+    .return ($P387)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Grammar"]
+.sub "_block388"  :anon :subid("132_1256533470.86421") :method :outer("130_1256533470.86421")
+.annotate "line", 143
+    .local string rx390_tgt
+    .local int rx390_pos
+    .local int rx390_off
+    .local int rx390_eos
+    .local int rx390_rep
+    .local pmc rx390_cur
+    (rx390_cur, rx390_pos, rx390_tgt, $I10) = self."!cursor_start"()
+    rx390_cur."!cursor_debug"("START ", "")
+    .lex unicode:"$\x{a2}", rx390_cur
+    length rx390_eos, rx390_tgt
+    set rx390_off, 0
+    lt $I10, 2, rx390_start
+    sub rx390_off, $I10, 1
+    substr rx390_tgt, rx390_tgt, rx390_off
+  rx390_start:
+    ge rx390_pos, 0, rxscan391_done
+  rxscan391_loop:
+    ($P10) = rx390_cur."from"()
+    inc $P10
+    set rx390_pos, $P10
+    ge rx390_pos, rx390_eos, rxscan391_done
+    set_addr $I10, rxscan391_loop
+    rx390_cur."!mark_push"(0, rx390_pos, $I10)
+  rxscan391_done:
   alt392_0:
     set_addr $I10, alt392_1
-    rx389_cur."!mark_push"(0, rx389_pos, $I10)
-  # rx literal  "+"
-    add $I11, rx389_pos, 1
-    gt $I11, rx389_eos, rx389_fail
-    sub $I11, rx389_pos, rx389_off
-    substr $S10, rx389_tgt, $I11, 1
-    ne $S10, "+", rx389_fail
-    add rx389_pos, 1
+    rx390_cur."!mark_push"(0, rx390_pos, $I10)
+  # rx literal  "["
+    add $I11, rx390_pos, 1
+    gt $I11, rx390_eos, rx390_fail
+    sub $I11, rx390_pos, rx390_off
+    substr $S10, rx390_tgt, $I11, 1
+    ne $S10, "[", rx390_fail
+    add rx390_pos, 1
     goto alt392_end
   alt392_1:
     set_addr $I10, alt392_2
-    rx389_cur."!mark_push"(0, rx389_pos, $I10)
-  # rx literal  "-"
-    add $I11, rx389_pos, 1
-    gt $I11, rx389_eos, rx389_fail
-    sub $I11, rx389_pos, rx389_off
-    substr $S10, rx389_tgt, $I11, 1
-    ne $S10, "-", rx389_fail
-    add rx389_pos, 1
+    rx390_cur."!mark_push"(0, rx390_pos, $I10)
+  # rx literal  "+"
+    add $I11, rx390_pos, 1
+    gt $I11, rx390_eos, rx390_fail
+    sub $I11, rx390_pos, rx390_off
+    substr $S10, rx390_tgt, $I11, 1
+    ne $S10, "+", rx390_fail
+    add rx390_pos, 1
     goto alt392_end
   alt392_2:
+  # rx literal  "-"
+    add $I11, rx390_pos, 1
+    gt $I11, rx390_eos, rx390_fail
+    sub $I11, rx390_pos, rx390_off
+    substr $S10, rx390_tgt, $I11, 1
+    ne $S10, "-", rx390_fail
+    add rx390_pos, 1
   alt392_end:
-    set_addr $I10, rxcap_393_fail
-    ($I12, $I11) = rx389_cur."!mark_peek"($I10)
-    rx389_cur."!cursor_pos"($I11)
-    ($P10) = rx389_cur."!cursor_start"()
-    $P10."!cursor_pass"(rx389_pos, "")
-    rx389_cur."!mark_push"(0, -1, 0, $P10)
-    $P10."!cursor_names"("sign")
-    goto rxcap_393_done
-  rxcap_393_fail:
-    goto rx389_fail
-  rxcap_393_done:
-.annotate "line", 143
-  # rx rxquantr394 ** 0..1
-    set_addr $I395, rxquantr394_done
-    rx389_cur."!mark_push"(0, rx389_pos, $I395)
-  rxquantr394_loop:
-  # rx subrule "normspace" subtype=method negate=
-    rx389_cur."!cursor_pos"(rx389_pos)
-    $P10 = rx389_cur."normspace"()
-    unless $P10, rx389_fail
-    rx389_pos = $P10."pos"()
-    (rx389_rep) = rx389_cur."!mark_commit"($I395)
-  rxquantr394_done:
-  alt396_0:
-.annotate "line", 144
-    set_addr $I10, alt396_1
-    rx389_cur."!mark_push"(0, rx389_pos, $I10)
-.annotate "line", 145
-  # rx literal  "["
-    add $I11, rx389_pos, 1
-    gt $I11, rx389_eos, rx389_fail
-    sub $I11, rx389_pos, rx389_off
-    substr $S10, rx389_tgt, $I11, 1
-    ne $S10, "[", rx389_fail
-    add rx389_pos, 1
-.annotate "line", 148
-  # rx rxquantr397 ** 0..*
-    set_addr $I418, rxquantr397_done
-    rx389_cur."!mark_push"(0, rx389_pos, $I418)
-  rxquantr397_loop:
-.annotate "line", 145
-  # rx subrule $P399 subtype=capture negate=
-    rx389_cur."!cursor_pos"(rx389_pos)
-    .const 'Sub' $P399 = "133_1256279193.78309" 
-    capture_lex $P399
-    $P10 = rx389_cur.$P399()
-    unless $P10, rx389_fail
-    rx389_cur."!mark_push"(0, -1, 0, $P10)
-    $P10."!cursor_names"("charspec")
-    rx389_pos = $P10."pos"()
-.annotate "line", 148
-    (rx389_rep) = rx389_cur."!mark_commit"($I418)
-    rx389_cur."!mark_push"(rx389_rep, rx389_pos, $I418)
-    goto rxquantr397_loop
-  rxquantr397_done:
-.annotate "line", 149
-  # rx charclass_q s r 0..-1
-    sub $I10, rx389_pos, rx389_off
-    find_not_cclass $I11, 32, rx389_tgt, $I10, rx389_eos
-    add rx389_pos, rx389_off, $I11
-  # rx literal  "]"
-    add $I11, rx389_pos, 1
-    gt $I11, rx389_eos, rx389_fail
-    sub $I11, rx389_pos, rx389_off
-    substr $S10, rx389_tgt, $I11, 1
-    ne $S10, "]", rx389_fail
-    add rx389_pos, 1
-.annotate "line", 145
-    goto alt396_end
-  alt396_1:
-.annotate "line", 150
-  # rx subcapture "name"
-    set_addr $I10, rxcap_419_fail
-    rx389_cur."!mark_push"(0, rx389_pos, $I10)
-  # rx charclass_q w r 1..-1
-    sub $I10, rx389_pos, rx389_off
-    find_not_cclass $I11, 8192, rx389_tgt, $I10, rx389_eos
-    add $I12, $I10, 1
-    lt $I11, $I12, rx389_fail
-    add rx389_pos, rx389_off, $I11
-    set_addr $I10, rxcap_419_fail
-    ($I12, $I11) = rx389_cur."!mark_peek"($I10)
-    rx389_cur."!cursor_pos"($I11)
-    ($P10) = rx389_cur."!cursor_start"()
-    $P10."!cursor_pass"(rx389_pos, "")
-    rx389_cur."!mark_push"(0, -1, 0, $P10)
-    $P10."!cursor_names"("name")
-    goto rxcap_419_done
-  rxcap_419_fail:
-    goto rx389_fail
-  rxcap_419_done:
-  alt396_end:
-.annotate "line", 152
-  # rx rxquantr420 ** 0..1
-    set_addr $I421, rxquantr420_done
-    rx389_cur."!mark_push"(0, rx389_pos, $I421)
-  rxquantr420_loop:
-  # rx subrule "normspace" subtype=method negate=
-    rx389_cur."!cursor_pos"(rx389_pos)
-    $P10 = rx389_cur."normspace"()
-    unless $P10, rx389_fail
-    rx389_pos = $P10."pos"()
-    (rx389_rep) = rx389_cur."!mark_commit"($I421)
-  rxquantr420_done:
-.annotate "line", 141
   # rx pass
-    rx389_cur."!cursor_pass"(rx389_pos, "cclass_elem")
-    rx389_cur."!cursor_debug"("PASS  ", "cclass_elem", " at pos=", rx389_pos)
-    .return (rx389_cur)
-  rx389_fail:
-    (rx389_rep, rx389_pos, $I10, $P10) = rx389_cur."!mark_fail"(0)
-    lt rx389_pos, -1, rx389_done
-    eq rx389_pos, -1, rx389_fail
+    rx390_cur."!cursor_pass"(rx390_pos, "")
+    rx390_cur."!cursor_debug"("PASS  ", "", " at pos=", rx390_pos)
+    .return (rx390_cur)
+  rx390_fail:
+    (rx390_rep, rx390_pos, $I10, $P10) = rx390_cur."!mark_fail"(0)
+    lt rx390_pos, -1, rx390_done
+    eq rx390_pos, -1, rx390_fail
     jump $I10
-  rx389_done:
-    rx389_cur."!cursor_fail"()
-    rx389_cur."!cursor_debug"("FAIL  ", "cclass_elem")
-    .return (rx389_cur)
+  rx390_done:
+    rx390_cur."!cursor_fail"()
+    rx390_cur."!cursor_debug"("FAIL  ", "")
+    .return (rx390_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__cclass_elem"  :subid("132_1256279193.78309") :method
-.annotate "line", 141
-    new $P391, "ResizablePMCArray"
-    push $P391, ""
-    push $P391, "-"
-    push $P391, "+"
-    .return ($P391)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block398"  :anon :subid("133_1256279193.78309") :method :outer("131_1256279193.78309")
+.sub "cclass_elem"  :subid("133_1256533470.86421") :method :outer("10_1256533470.86421")
 .annotate "line", 145
-    .const 'Sub' $P414 = "136_1256279193.78309" 
-    capture_lex $P414
-    .const 'Sub' $P409 = "135_1256279193.78309" 
-    capture_lex $P409
-    .const 'Sub' $P405 = "134_1256279193.78309" 
-    capture_lex $P405
-    .local string rx400_tgt
-    .local int rx400_pos
-    .local int rx400_off
-    .local int rx400_eos
-    .local int rx400_rep
-    .local pmc rx400_cur
-    (rx400_cur, rx400_pos, rx400_tgt, $I10) = self."!cursor_start"()
-    rx400_cur."!cursor_debug"("START ", "")
-    rx400_cur."!cursor_caparray"("1")
-    .lex unicode:"$\x{a2}", rx400_cur
-    length rx400_eos, rx400_tgt
-    set rx400_off, 0
-    lt $I10, 2, rx400_start
-    sub rx400_off, $I10, 1
-    substr rx400_tgt, rx400_tgt, rx400_off
-  rx400_start:
-    ge rx400_pos, 0, rxscan401_done
-  rxscan401_loop:
-    ($P10) = rx400_cur."from"()
-    inc $P10
-    set rx400_pos, $P10
-    ge rx400_pos, rx400_eos, rxscan401_done
-    set_addr $I10, rxscan401_loop
-    rx400_cur."!mark_push"(0, rx400_pos, $I10)
-  rxscan401_done:
-  alt402_0:
-    set_addr $I10, alt402_1
-    rx400_cur."!mark_push"(0, rx400_pos, $I10)
+    .const 'Sub' $P406 = "135_1256533470.86421" 
+    capture_lex $P406
+    .local string rx396_tgt
+    .local int rx396_pos
+    .local int rx396_off
+    .local int rx396_eos
+    .local int rx396_rep
+    .local pmc rx396_cur
+    (rx396_cur, rx396_pos, rx396_tgt, $I10) = self."!cursor_start"()
+    rx396_cur."!cursor_debug"("START ", "cclass_elem")
+    rx396_cur."!cursor_caparray"("charspec")
+    .lex unicode:"$\x{a2}", rx396_cur
+    length rx396_eos, rx396_tgt
+    set rx396_off, 0
+    lt $I10, 2, rx396_start
+    sub rx396_off, $I10, 1
+    substr rx396_tgt, rx396_tgt, rx396_off
+  rx396_start:
 .annotate "line", 146
-  # rx charclass_q s r 0..-1
-    sub $I10, rx400_pos, rx400_off
-    find_not_cclass $I11, 32, rx400_tgt, $I10, rx400_eos
-    add rx400_pos, rx400_off, $I11
+  # rx subcapture "sign"
+    set_addr $I10, rxcap_400_fail
+    rx396_cur."!mark_push"(0, rx396_pos, $I10)
+  alt399_0:
+    set_addr $I10, alt399_1
+    rx396_cur."!mark_push"(0, rx396_pos, $I10)
+  # rx literal  "+"
+    add $I11, rx396_pos, 1
+    gt $I11, rx396_eos, rx396_fail
+    sub $I11, rx396_pos, rx396_off
+    substr $S10, rx396_tgt, $I11, 1
+    ne $S10, "+", rx396_fail
+    add rx396_pos, 1
+    goto alt399_end
+  alt399_1:
+    set_addr $I10, alt399_2
+    rx396_cur."!mark_push"(0, rx396_pos, $I10)
   # rx literal  "-"
-    add $I11, rx400_pos, 1
-    gt $I11, rx400_eos, rx400_fail
-    sub $I11, rx400_pos, rx400_off
-    substr $S10, rx400_tgt, $I11, 1
-    ne $S10, "-", rx400_fail
-    add rx400_pos, 1
-  # rx subrule "obs" subtype=method negate=
-    rx400_cur."!cursor_pos"(rx400_pos)
-    $P10 = rx400_cur."obs"("hyphen in enumerated character class;..")
-    unless $P10, rx400_fail
-    rx400_pos = $P10."pos"()
-    goto alt402_end
-  alt402_1:
+    add $I11, rx396_pos, 1
+    gt $I11, rx396_eos, rx396_fail
+    sub $I11, rx396_pos, rx396_off
+    substr $S10, rx396_tgt, $I11, 1
+    ne $S10, "-", rx396_fail
+    add rx396_pos, 1
+    goto alt399_end
+  alt399_2:
+  alt399_end:
+    set_addr $I10, rxcap_400_fail
+    ($I12, $I11) = rx396_cur."!mark_peek"($I10)
+    rx396_cur."!cursor_pos"($I11)
+    ($P10) = rx396_cur."!cursor_start"()
+    $P10."!cursor_pass"(rx396_pos, "")
+    rx396_cur."!mark_push"(0, -1, 0, $P10)
+    $P10."!cursor_names"("sign")
+    goto rxcap_400_done
+  rxcap_400_fail:
+    goto rx396_fail
+  rxcap_400_done:
 .annotate "line", 147
-  # rx charclass_q s r 0..-1
-    sub $I10, rx400_pos, rx400_off
-    find_not_cclass $I11, 32, rx400_tgt, $I10, rx400_eos
-    add rx400_pos, rx400_off, $I11
+  # rx rxquantr401 ** 0..1
+    set_addr $I402, rxquantr401_done
+    rx396_cur."!mark_push"(0, rx396_pos, $I402)
+  rxquantr401_loop:
+  # rx subrule "normspace" subtype=method negate=
+    rx396_cur."!cursor_pos"(rx396_pos)
+    $P10 = rx396_cur."normspace"()
+    unless $P10, rx396_fail
+    rx396_pos = $P10."pos"()
+    (rx396_rep) = rx396_cur."!mark_commit"($I402)
+  rxquantr401_done:
   alt403_0:
+.annotate "line", 148
     set_addr $I10, alt403_1
-    rx400_cur."!mark_push"(0, rx400_pos, $I10)
-  # rx literal  "\\"
-    add $I11, rx400_pos, 1
-    gt $I11, rx400_eos, rx400_fail
-    sub $I11, rx400_pos, rx400_off
-    substr $S10, rx400_tgt, $I11, 1
-    ne $S10, "\\", rx400_fail
-    add rx400_pos, 1
-  # rx subrule $P405 subtype=capture negate=
-    rx400_cur."!cursor_pos"(rx400_pos)
-    .const 'Sub' $P405 = "134_1256279193.78309" 
-    capture_lex $P405
-    $P10 = rx400_cur.$P405()
-    unless $P10, rx400_fail
-    rx400_cur."!mark_push"(0, -1, 0, $P10)
-    $P10."!cursor_names"(0)
-    rx400_pos = $P10."pos"()
+    rx396_cur."!mark_push"(0, rx396_pos, $I10)
+.annotate "line", 149
+  # rx literal  "["
+    add $I11, rx396_pos, 1
+    gt $I11, rx396_eos, rx396_fail
+    sub $I11, rx396_pos, rx396_off
+    substr $S10, rx396_tgt, $I11, 1
+    ne $S10, "[", rx396_fail
+    add rx396_pos, 1
+.annotate "line", 152
+  # rx rxquantr404 ** 0..*
+    set_addr $I425, rxquantr404_done
+    rx396_cur."!mark_push"(0, rx396_pos, $I425)
+  rxquantr404_loop:
+.annotate "line", 149
+  # rx subrule $P406 subtype=capture negate=
+    rx396_cur."!cursor_pos"(rx396_pos)
+    .const 'Sub' $P406 = "135_1256533470.86421" 
+    capture_lex $P406
+    $P10 = rx396_cur.$P406()
+    unless $P10, rx396_fail
+    rx396_cur."!mark_push"(0, -1, 0, $P10)
+    $P10."!cursor_names"("charspec")
+    rx396_pos = $P10."pos"()
+.annotate "line", 152
+    (rx396_rep) = rx396_cur."!mark_commit"($I425)
+    rx396_cur."!mark_push"(rx396_rep, rx396_pos, $I425)
+    goto rxquantr404_loop
+  rxquantr404_done:
+.annotate "line", 153
+  # rx charclass_q s r 0..-1
+    sub $I10, rx396_pos, rx396_off
+    find_not_cclass $I11, 32, rx396_tgt, $I10, rx396_eos
+    add rx396_pos, rx396_off, $I11
+  # rx literal  "]"
+    add $I11, rx396_pos, 1
+    gt $I11, rx396_eos, rx396_fail
+    sub $I11, rx396_pos, rx396_off
+    substr $S10, rx396_tgt, $I11, 1
+    ne $S10, "]", rx396_fail
+    add rx396_pos, 1
+.annotate "line", 149
     goto alt403_end
   alt403_1:
-  # rx subrule $P409 subtype=capture negate=
-    rx400_cur."!cursor_pos"(rx400_pos)
-    .const 'Sub' $P409 = "135_1256279193.78309" 
-    capture_lex $P409
-    $P10 = rx400_cur.$P409()
-    unless $P10, rx400_fail
-    rx400_cur."!mark_push"(0, -1, 0, $P10)
-    $P10."!cursor_names"(0)
-    rx400_pos = $P10."pos"()
+.annotate "line", 154
+  # rx subcapture "name"
+    set_addr $I10, rxcap_426_fail
+    rx396_cur."!mark_push"(0, rx396_pos, $I10)
+  # rx charclass_q w r 1..-1
+    sub $I10, rx396_pos, rx396_off
+    find_not_cclass $I11, 8192, rx396_tgt, $I10, rx396_eos
+    add $I12, $I10, 1
+    lt $I11, $I12, rx396_fail
+    add rx396_pos, rx396_off, $I11
+    set_addr $I10, rxcap_426_fail
+    ($I12, $I11) = rx396_cur."!mark_peek"($I10)
+    rx396_cur."!cursor_pos"($I11)
+    ($P10) = rx396_cur."!cursor_start"()
+    $P10."!cursor_pass"(rx396_pos, "")
+    rx396_cur."!mark_push"(0, -1, 0, $P10)
+    $P10."!cursor_names"("name")
+    goto rxcap_426_done
+  rxcap_426_fail:
+    goto rx396_fail
+  rxcap_426_done:
   alt403_end:
-  # rx rxquantr412 ** 0..1
-    set_addr $I417, rxquantr412_done
-    rx400_cur."!mark_push"(0, rx400_pos, $I417)
-  rxquantr412_loop:
-  # rx charclass_q s r 0..-1
-    sub $I10, rx400_pos, rx400_off
-    find_not_cclass $I11, 32, rx400_tgt, $I10, rx400_eos
-    add rx400_pos, rx400_off, $I11
-  # rx literal  ".."
-    add $I11, rx400_pos, 2
-    gt $I11, rx400_eos, rx400_fail
-    sub $I11, rx400_pos, rx400_off
-    substr $S10, rx400_tgt, $I11, 2
-    ne $S10, "..", rx400_fail
-    add rx400_pos, 2
-  # rx charclass_q s r 0..-1
-    sub $I10, rx400_pos, rx400_off
-    find_not_cclass $I11, 32, rx400_tgt, $I10, rx400_eos
-    add rx400_pos, rx400_off, $I11
-  # rx subrule $P414 subtype=capture negate=
-    rx400_cur."!cursor_pos"(rx400_pos)
-    .const 'Sub' $P414 = "136_1256279193.78309" 
-    capture_lex $P414
-    $P10 = rx400_cur.$P414()
-    unless $P10, rx400_fail
-    rx400_cur."!mark_push"(0, -1, 0, $P10)
-    $P10."!cursor_names"("1")
-    rx400_pos = $P10."pos"()
-    (rx400_rep) = rx400_cur."!mark_commit"($I417)
-  rxquantr412_done:
-  alt402_end:
+.annotate "line", 156
+  # rx rxquantr427 ** 0..1
+    set_addr $I428, rxquantr427_done
+    rx396_cur."!mark_push"(0, rx396_pos, $I428)
+  rxquantr427_loop:
+  # rx subrule "normspace" subtype=method negate=
+    rx396_cur."!cursor_pos"(rx396_pos)
+    $P10 = rx396_cur."normspace"()
+    unless $P10, rx396_fail
+    rx396_pos = $P10."pos"()
+    (rx396_rep) = rx396_cur."!mark_commit"($I428)
+  rxquantr427_done:
 .annotate "line", 145
   # rx pass
-    rx400_cur."!cursor_pass"(rx400_pos, "")
-    rx400_cur."!cursor_debug"("PASS  ", "", " at pos=", rx400_pos)
-    .return (rx400_cur)
-  rx400_fail:
-    (rx400_rep, rx400_pos, $I10, $P10) = rx400_cur."!mark_fail"(0)
-    lt rx400_pos, -1, rx400_done
-    eq rx400_pos, -1, rx400_fail
+    rx396_cur."!cursor_pass"(rx396_pos, "cclass_elem")
+    rx396_cur."!cursor_debug"("PASS  ", "cclass_elem", " at pos=", rx396_pos)
+    .return (rx396_cur)
+  rx396_fail:
+    (rx396_rep, rx396_pos, $I10, $P10) = rx396_cur."!mark_fail"(0)
+    lt rx396_pos, -1, rx396_done
+    eq rx396_pos, -1, rx396_fail
     jump $I10
-  rx400_done:
-    rx400_cur."!cursor_fail"()
-    rx400_cur."!cursor_debug"("FAIL  ", "")
-    .return (rx400_cur)
+  rx396_done:
+    rx396_cur."!cursor_fail"()
+    rx396_cur."!cursor_debug"("FAIL  ", "cclass_elem")
+    .return (rx396_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block404"  :anon :subid("134_1256279193.78309") :method :outer("133_1256279193.78309")
-.annotate "line", 147
-    .local string rx406_tgt
-    .local int rx406_pos
-    .local int rx406_off
-    .local int rx406_eos
-    .local int rx406_rep
-    .local pmc rx406_cur
-    (rx406_cur, rx406_pos, rx406_tgt, $I10) = self."!cursor_start"()
-    rx406_cur."!cursor_debug"("START ", "")
-    .lex unicode:"$\x{a2}", rx406_cur
-    length rx406_eos, rx406_tgt
-    set rx406_off, 0
-    lt $I10, 2, rx406_start
-    sub rx406_off, $I10, 1
-    substr rx406_tgt, rx406_tgt, rx406_off
-  rx406_start:
-    ge rx406_pos, 0, rxscan407_done
-  rxscan407_loop:
-    ($P10) = rx406_cur."from"()
+.sub "!PREFIX__cclass_elem"  :subid("134_1256533470.86421") :method
+.annotate "line", 145
+    new $P398, "ResizablePMCArray"
+    push $P398, ""
+    push $P398, "-"
+    push $P398, "+"
+    .return ($P398)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Grammar"]
+.sub "_block405"  :anon :subid("135_1256533470.86421") :method :outer("133_1256533470.86421")
+.annotate "line", 149
+    .const 'Sub' $P421 = "138_1256533470.86421" 
+    capture_lex $P421
+    .const 'Sub' $P416 = "137_1256533470.86421" 
+    capture_lex $P416
+    .const 'Sub' $P412 = "136_1256533470.86421" 
+    capture_lex $P412
+    .local string rx407_tgt
+    .local int rx407_pos
+    .local int rx407_off
+    .local int rx407_eos
+    .local int rx407_rep
+    .local pmc rx407_cur
+    (rx407_cur, rx407_pos, rx407_tgt, $I10) = self."!cursor_start"()
+    rx407_cur."!cursor_debug"("START ", "")
+    rx407_cur."!cursor_caparray"("1")
+    .lex unicode:"$\x{a2}", rx407_cur
+    length rx407_eos, rx407_tgt
+    set rx407_off, 0
+    lt $I10, 2, rx407_start
+    sub rx407_off, $I10, 1
+    substr rx407_tgt, rx407_tgt, rx407_off
+  rx407_start:
+    ge rx407_pos, 0, rxscan408_done
+  rxscan408_loop:
+    ($P10) = rx407_cur."from"()
     inc $P10
-    set rx406_pos, $P10
-    ge rx406_pos, rx406_eos, rxscan407_done
-    set_addr $I10, rxscan407_loop
-    rx406_cur."!mark_push"(0, rx406_pos, $I10)
-  rxscan407_done:
-  # rx charclass .
-    ge rx406_pos, rx406_eos, rx406_fail
-    inc rx406_pos
+    set rx407_pos, $P10
+    ge rx407_pos, rx407_eos, rxscan408_done
+    set_addr $I10, rxscan408_loop
+    rx407_cur."!mark_push"(0, rx407_pos, $I10)
+  rxscan408_done:
+  alt409_0:
+    set_addr $I10, alt409_1
+    rx407_cur."!mark_push"(0, rx407_pos, $I10)
+.annotate "line", 150
+  # rx charclass_q s r 0..-1
+    sub $I10, rx407_pos, rx407_off
+    find_not_cclass $I11, 32, rx407_tgt, $I10, rx407_eos
+    add rx407_pos, rx407_off, $I11
+  # rx literal  "-"
+    add $I11, rx407_pos, 1
+    gt $I11, rx407_eos, rx407_fail
+    sub $I11, rx407_pos, rx407_off
+    substr $S10, rx407_tgt, $I11, 1
+    ne $S10, "-", rx407_fail
+    add rx407_pos, 1
+  # rx subrule "obs" subtype=method negate=
+    rx407_cur."!cursor_pos"(rx407_pos)
+    $P10 = rx407_cur."obs"("hyphen in enumerated character class;..")
+    unless $P10, rx407_fail
+    rx407_pos = $P10."pos"()
+    goto alt409_end
+  alt409_1:
+.annotate "line", 151
+  # rx charclass_q s r 0..-1
+    sub $I10, rx407_pos, rx407_off
+    find_not_cclass $I11, 32, rx407_tgt, $I10, rx407_eos
+    add rx407_pos, rx407_off, $I11
+  alt410_0:
+    set_addr $I10, alt410_1
+    rx407_cur."!mark_push"(0, rx407_pos, $I10)
+  # rx literal  "\\"
+    add $I11, rx407_pos, 1
+    gt $I11, rx407_eos, rx407_fail
+    sub $I11, rx407_pos, rx407_off
+    substr $S10, rx407_tgt, $I11, 1
+    ne $S10, "\\", rx407_fail
+    add rx407_pos, 1
+  # rx subrule $P412 subtype=capture negate=
+    rx407_cur."!cursor_pos"(rx407_pos)
+    .const 'Sub' $P412 = "136_1256533470.86421" 
+    capture_lex $P412
+    $P10 = rx407_cur.$P412()
+    unless $P10, rx407_fail
+    rx407_cur."!mark_push"(0, -1, 0, $P10)
+    $P10."!cursor_names"(0)
+    rx407_pos = $P10."pos"()
+    goto alt410_end
+  alt410_1:
+  # rx subrule $P416 subtype=capture negate=
+    rx407_cur."!cursor_pos"(rx407_pos)
+    .const 'Sub' $P416 = "137_1256533470.86421" 
+    capture_lex $P416
+    $P10 = rx407_cur.$P416()
+    unless $P10, rx407_fail
+    rx407_cur."!mark_push"(0, -1, 0, $P10)
+    $P10."!cursor_names"(0)
+    rx407_pos = $P10."pos"()
+  alt410_end:
+  # rx rxquantr419 ** 0..1
+    set_addr $I424, rxquantr419_done
+    rx407_cur."!mark_push"(0, rx407_pos, $I424)
+  rxquantr419_loop:
+  # rx charclass_q s r 0..-1
+    sub $I10, rx407_pos, rx407_off
+    find_not_cclass $I11, 32, rx407_tgt, $I10, rx407_eos
+    add rx407_pos, rx407_off, $I11
+  # rx literal  ".."
+    add $I11, rx407_pos, 2
+    gt $I11, rx407_eos, rx407_fail
+    sub $I11, rx407_pos, rx407_off
+    substr $S10, rx407_tgt, $I11, 2
+    ne $S10, "..", rx407_fail
+    add rx407_pos, 2
+  # rx charclass_q s r 0..-1
+    sub $I10, rx407_pos, rx407_off
+    find_not_cclass $I11, 32, rx407_tgt, $I10, rx407_eos
+    add rx407_pos, rx407_off, $I11
+  # rx subrule $P421 subtype=capture negate=
+    rx407_cur."!cursor_pos"(rx407_pos)
+    .const 'Sub' $P421 = "138_1256533470.86421" 
+    capture_lex $P421
+    $P10 = rx407_cur.$P421()
+    unless $P10, rx407_fail
+    rx407_cur."!mark_push"(0, -1, 0, $P10)
+    $P10."!cursor_names"("1")
+    rx407_pos = $P10."pos"()
+    (rx407_rep) = rx407_cur."!mark_commit"($I424)
+  rxquantr419_done:
+  alt409_end:
+.annotate "line", 149
   # rx pass
-    rx406_cur."!cursor_pass"(rx406_pos, "")
-    rx406_cur."!cursor_debug"("PASS  ", "", " at pos=", rx406_pos)
-    .return (rx406_cur)
-  rx406_fail:
-    (rx406_rep, rx406_pos, $I10, $P10) = rx406_cur."!mark_fail"(0)
-    lt rx406_pos, -1, rx406_done
-    eq rx406_pos, -1, rx406_fail
+    rx407_cur."!cursor_pass"(rx407_pos, "")
+    rx407_cur."!cursor_debug"("PASS  ", "", " at pos=", rx407_pos)
+    .return (rx407_cur)
+  rx407_fail:
+    (rx407_rep, rx407_pos, $I10, $P10) = rx407_cur."!mark_fail"(0)
+    lt rx407_pos, -1, rx407_done
+    eq rx407_pos, -1, rx407_fail
     jump $I10
-  rx406_done:
-    rx406_cur."!cursor_fail"()
-    rx406_cur."!cursor_debug"("FAIL  ", "")
-    .return (rx406_cur)
+  rx407_done:
+    rx407_cur."!cursor_fail"()
+    rx407_cur."!cursor_debug"("FAIL  ", "")
+    .return (rx407_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block408"  :anon :subid("135_1256279193.78309") :method :outer("133_1256279193.78309")
-.annotate "line", 147
-    .local string rx410_tgt
-    .local int rx410_pos
-    .local int rx410_off
-    .local int rx410_eos
-    .local int rx410_rep
-    .local pmc rx410_cur
-    (rx410_cur, rx410_pos, rx410_tgt, $I10) = self."!cursor_start"()
-    rx410_cur."!cursor_debug"("START ", "")
-    .lex unicode:"$\x{a2}", rx410_cur
-    length rx410_eos, rx410_tgt
-    set rx410_off, 0
-    lt $I10, 2, rx410_start
-    sub rx410_off, $I10, 1
-    substr rx410_tgt, rx410_tgt, rx410_off
-  rx410_start:
-    ge rx410_pos, 0, rxscan411_done
-  rxscan411_loop:
-    ($P10) = rx410_cur."from"()
+.sub "_block411"  :anon :subid("136_1256533470.86421") :method :outer("135_1256533470.86421")
+.annotate "line", 151
+    .local string rx413_tgt
+    .local int rx413_pos
+    .local int rx413_off
+    .local int rx413_eos
+    .local int rx413_rep
+    .local pmc rx413_cur
+    (rx413_cur, rx413_pos, rx413_tgt, $I10) = self."!cursor_start"()
+    rx413_cur."!cursor_debug"("START ", "")
+    .lex unicode:"$\x{a2}", rx413_cur
+    length rx413_eos, rx413_tgt
+    set rx413_off, 0
+    lt $I10, 2, rx413_start
+    sub rx413_off, $I10, 1
+    substr rx413_tgt, rx413_tgt, rx413_off
+  rx413_start:
+    ge rx413_pos, 0, rxscan414_done
+  rxscan414_loop:
+    ($P10) = rx413_cur."from"()
     inc $P10
-    set rx410_pos, $P10
-    ge rx410_pos, rx410_eos, rxscan411_done
-    set_addr $I10, rxscan411_loop
-    rx410_cur."!mark_push"(0, rx410_pos, $I10)
-  rxscan411_done:
+    set rx413_pos, $P10
+    ge rx413_pos, rx413_eos, rxscan414_done
+    set_addr $I10, rxscan414_loop
+    rx413_cur."!mark_push"(0, rx413_pos, $I10)
+  rxscan414_done:
+  # rx charclass .
+    ge rx413_pos, rx413_eos, rx413_fail
+    inc rx413_pos
+  # rx pass
+    rx413_cur."!cursor_pass"(rx413_pos, "")
+    rx413_cur."!cursor_debug"("PASS  ", "", " at pos=", rx413_pos)
+    .return (rx413_cur)
+  rx413_fail:
+    (rx413_rep, rx413_pos, $I10, $P10) = rx413_cur."!mark_fail"(0)
+    lt rx413_pos, -1, rx413_done
+    eq rx413_pos, -1, rx413_fail
+    jump $I10
+  rx413_done:
+    rx413_cur."!cursor_fail"()
+    rx413_cur."!cursor_debug"("FAIL  ", "")
+    .return (rx413_cur)
+    .return ()
+.end
+
+
+.namespace ["Regex";"P6Regex";"Grammar"]
+.sub "_block415"  :anon :subid("137_1256533470.86421") :method :outer("135_1256533470.86421")
+.annotate "line", 151
+    .local string rx417_tgt
+    .local int rx417_pos
+    .local int rx417_off
+    .local int rx417_eos
+    .local int rx417_rep
+    .local pmc rx417_cur
+    (rx417_cur, rx417_pos, rx417_tgt, $I10) = self."!cursor_start"()
+    rx417_cur."!cursor_debug"("START ", "")
+    .lex unicode:"$\x{a2}", rx417_cur
+    length rx417_eos, rx417_tgt
+    set rx417_off, 0
+    lt $I10, 2, rx417_start
+    sub rx417_off, $I10, 1
+    substr rx417_tgt, rx417_tgt, rx417_off
+  rx417_start:
+    ge rx417_pos, 0, rxscan418_done
+  rxscan418_loop:
+    ($P10) = rx417_cur."from"()
+    inc $P10
+    set rx417_pos, $P10
+    ge rx417_pos, rx417_eos, rxscan418_done
+    set_addr $I10, rxscan418_loop
+    rx417_cur."!mark_push"(0, rx417_pos, $I10)
+  rxscan418_done:
   # rx enumcharlist negate=1 
-    ge rx410_pos, rx410_eos, rx410_fail
-    sub $I10, rx410_pos, rx410_off
-    substr $S10, rx410_tgt, $I10, 1
+    ge rx417_pos, rx417_eos, rx417_fail
+    sub $I10, rx417_pos, rx417_off
+    substr $S10, rx417_tgt, $I10, 1
     index $I11, "]\\", $S10
-    ge $I11, 0, rx410_fail
-    inc rx410_pos
+    ge $I11, 0, rx417_fail
+    inc rx417_pos
   # rx pass
-    rx410_cur."!cursor_pass"(rx410_pos, "")
-    rx410_cur."!cursor_debug"("PASS  ", "", " at pos=", rx410_pos)
-    .return (rx410_cur)
-  rx410_fail:
-    (rx410_rep, rx410_pos, $I10, $P10) = rx410_cur."!mark_fail"(0)
-    lt rx410_pos, -1, rx410_done
-    eq rx410_pos, -1, rx410_fail
+    rx417_cur."!cursor_pass"(rx417_pos, "")
+    rx417_cur."!cursor_debug"("PASS  ", "", " at pos=", rx417_pos)
+    .return (rx417_cur)
+  rx417_fail:
+    (rx417_rep, rx417_pos, $I10, $P10) = rx417_cur."!mark_fail"(0)
+    lt rx417_pos, -1, rx417_done
+    eq rx417_pos, -1, rx417_fail
     jump $I10
-  rx410_done:
-    rx410_cur."!cursor_fail"()
-    rx410_cur."!cursor_debug"("FAIL  ", "")
-    .return (rx410_cur)
+  rx417_done:
+    rx417_cur."!cursor_fail"()
+    rx417_cur."!cursor_debug"("FAIL  ", "")
+    .return (rx417_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block413"  :anon :subid("136_1256279193.78309") :method :outer("133_1256279193.78309")
-.annotate "line", 147
-    .local string rx415_tgt
-    .local int rx415_pos
-    .local int rx415_off
-    .local int rx415_eos
-    .local int rx415_rep
-    .local pmc rx415_cur
-    (rx415_cur, rx415_pos, rx415_tgt, $I10) = self."!cursor_start"()
-    rx415_cur."!cursor_debug"("START ", "")
-    .lex unicode:"$\x{a2}", rx415_cur
-    length rx415_eos, rx415_tgt
-    set rx415_off, 0
-    lt $I10, 2, rx415_start
-    sub rx415_off, $I10, 1
-    substr rx415_tgt, rx415_tgt, rx415_off
-  rx415_start:
-    ge rx415_pos, 0, rxscan416_done
-  rxscan416_loop:
-    ($P10) = rx415_cur."from"()
+.sub "_block420"  :anon :subid("138_1256533470.86421") :method :outer("135_1256533470.86421")
+.annotate "line", 151
+    .local string rx422_tgt
+    .local int rx422_pos
+    .local int rx422_off
+    .local int rx422_eos
+    .local int rx422_rep
+    .local pmc rx422_cur
+    (rx422_cur, rx422_pos, rx422_tgt, $I10) = self."!cursor_start"()
+    rx422_cur."!cursor_debug"("START ", "")
+    .lex unicode:"$\x{a2}", rx422_cur
+    length rx422_eos, rx422_tgt
+    set rx422_off, 0
+    lt $I10, 2, rx422_start
+    sub rx422_off, $I10, 1
+    substr rx422_tgt, rx422_tgt, rx422_off
+  rx422_start:
+    ge rx422_pos, 0, rxscan423_done
+  rxscan423_loop:
+    ($P10) = rx422_cur."from"()
     inc $P10
-    set rx415_pos, $P10
-    ge rx415_pos, rx415_eos, rxscan416_done
-    set_addr $I10, rxscan416_loop
-    rx415_cur."!mark_push"(0, rx415_pos, $I10)
-  rxscan416_done:
+    set rx422_pos, $P10
+    ge rx422_pos, rx422_eos, rxscan423_done
+    set_addr $I10, rxscan423_loop
+    rx422_cur."!mark_push"(0, rx422_pos, $I10)
+  rxscan423_done:
   # rx charclass .
-    ge rx415_pos, rx415_eos, rx415_fail
-    inc rx415_pos
+    ge rx422_pos, rx422_eos, rx422_fail
+    inc rx422_pos
   # rx pass
-    rx415_cur."!cursor_pass"(rx415_pos, "")
-    rx415_cur."!cursor_debug"("PASS  ", "", " at pos=", rx415_pos)
-    .return (rx415_cur)
-  rx415_fail:
-    (rx415_rep, rx415_pos, $I10, $P10) = rx415_cur."!mark_fail"(0)
-    lt rx415_pos, -1, rx415_done
-    eq rx415_pos, -1, rx415_fail
+    rx422_cur."!cursor_pass"(rx422_pos, "")
+    rx422_cur."!cursor_debug"("PASS  ", "", " at pos=", rx422_pos)
+    .return (rx422_cur)
+  rx422_fail:
+    (rx422_rep, rx422_pos, $I10, $P10) = rx422_cur."!mark_fail"(0)
+    lt rx422_pos, -1, rx422_done
+    eq rx422_pos, -1, rx422_fail
     jump $I10
-  rx415_done:
-    rx415_cur."!cursor_fail"()
-    rx415_cur."!cursor_debug"("FAIL  ", "")
-    .return (rx415_cur)
+  rx422_done:
+    rx422_cur."!cursor_fail"()
+    rx422_cur."!cursor_debug"("FAIL  ", "")
+    .return (rx422_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "mod_internal"  :subid("137_1256279193.78309") :method :outer("10_1256279193.78309")
-.annotate "line", 155
-    .const 'Sub' $P430 = "139_1256279193.78309" 
-    capture_lex $P430
-    .local string rx423_tgt
-    .local int rx423_pos
-    .local int rx423_off
-    .local int rx423_eos
-    .local int rx423_rep
-    .local pmc rx423_cur
-    (rx423_cur, rx423_pos, rx423_tgt, $I10) = self."!cursor_start"()
-    rx423_cur."!cursor_debug"("START ", "mod_internal")
-    rx423_cur."!cursor_caparray"("n")
-    .lex unicode:"$\x{a2}", rx423_cur
-    length rx423_eos, rx423_tgt
-    set rx423_off, 0
-    lt $I10, 2, rx423_start
-    sub rx423_off, $I10, 1
-    substr rx423_tgt, rx423_tgt, rx423_off
-  rx423_start:
-  alt427_0:
-.annotate "line", 156
-    set_addr $I10, alt427_1
-    rx423_cur."!mark_push"(0, rx423_pos, $I10)
-.annotate "line", 157
+.sub "mod_internal"  :subid("139_1256533470.86421") :method :outer("10_1256533470.86421")
+.annotate "line", 159
+    .const 'Sub' $P437 = "141_1256533470.86421" 
+    capture_lex $P437
+    .local string rx430_tgt
+    .local int rx430_pos
+    .local int rx430_off
+    .local int rx430_eos
+    .local int rx430_rep
+    .local pmc rx430_cur
+    (rx430_cur, rx430_pos, rx430_tgt, $I10) = self."!cursor_start"()
+    rx430_cur."!cursor_debug"("START ", "mod_internal")
+    rx430_cur."!cursor_caparray"("n")
+    .lex unicode:"$\x{a2}", rx430_cur
+    length rx430_eos, rx430_tgt
+    set rx430_off, 0
+    lt $I10, 2, rx430_start
+    sub rx430_off, $I10, 1
+    substr rx430_tgt, rx430_tgt, rx430_off
+  rx430_start:
+  alt434_0:
+.annotate "line", 160
+    set_addr $I10, alt434_1
+    rx430_cur."!mark_push"(0, rx430_pos, $I10)
+.annotate "line", 161
   # rx literal  ":"
-    add $I11, rx423_pos, 1
-    gt $I11, rx423_eos, rx423_fail
-    sub $I11, rx423_pos, rx423_off
-    substr $S10, rx423_tgt, $I11, 1
-    ne $S10, ":", rx423_fail
-    add rx423_pos, 1
-  # rx rxquantr428 ** 1..1
-    set_addr $I434, rxquantr428_done
-    rx423_cur."!mark_push"(0, -1, $I434)
-  rxquantr428_loop:
-  # rx subrule $P430 subtype=capture negate=
-    rx423_cur."!cursor_pos"(rx423_pos)
-    .const 'Sub' $P430 = "139_1256279193.78309" 
-    capture_lex $P430
-    $P10 = rx423_cur.$P430()
-    unless $P10, rx423_fail
-    rx423_cur."!mark_push"(0, -1, 0, $P10)
-    $P10."!cursor_names"("n")
-    rx423_pos = $P10."pos"()
-    (rx423_rep) = rx423_cur."!mark_commit"($I434)
-  rxquantr428_done:
-  # rx subrule "mod_ident" subtype=capture negate=
-    rx423_cur."!cursor_pos"(rx423_pos)
-    $P10 = rx423_cur."mod_ident"()
-    unless $P10, rx423_fail
-    rx423_cur."!mark_push"(0, -1, 0, $P10)
-    $P10."!cursor_names"("mod_ident")
-    rx423_pos = $P10."pos"()
-  # rxanchor rwb
-    le rx423_pos, 0, rx423_fail
-    sub $I10, rx423_pos, rx423_off
-    is_cclass $I11, 8192, rx423_tgt, $I10
-    if $I11, rx423_fail
-    dec $I10
-    is_cclass $I11, 8192, rx423_tgt, $I10
-    unless $I11, rx423_fail
-    goto alt427_end
-  alt427_1:
-.annotate "line", 158
-  # rx literal  ":"
-    add $I11, rx423_pos, 1
-    gt $I11, rx423_eos, rx423_fail
-    sub $I11, rx423_pos, rx423_off
-    substr $S10, rx423_tgt, $I11, 1
-    ne $S10, ":", rx423_fail
-    add rx423_pos, 1
-  # rx subrule "mod_ident" subtype=capture negate=
-    rx423_cur."!cursor_pos"(rx423_pos)
-    $P10 = rx423_cur."mod_ident"()
-    unless $P10, rx423_fail
-    rx423_cur."!mark_push"(0, -1, 0, $P10)
-    $P10."!cursor_names"("mod_ident")
-    rx423_pos = $P10."pos"()
-  # rx rxquantr435 ** 0..1
-    set_addr $I437, rxquantr435_done
-    rx423_cur."!mark_push"(0, rx423_pos, $I437)
+    add $I11, rx430_pos, 1
+    gt $I11, rx430_eos, rx430_fail
+    sub $I11, rx430_pos, rx430_off
+    substr $S10, rx430_tgt, $I11, 1
+    ne $S10, ":", rx430_fail
+    add rx430_pos, 1
+  # rx rxquantr435 ** 1..1
+    set_addr $I441, rxquantr435_done
+    rx430_cur."!mark_push"(0, -1, $I441)
   rxquantr435_loop:
-  # rx literal  "("
-    add $I11, rx423_pos, 1
-    gt $I11, rx423_eos, rx423_fail
-    sub $I11, rx423_pos, rx423_off
-    substr $S10, rx423_tgt, $I11, 1
-    ne $S10, "(", rx423_fail
-    add rx423_pos, 1
-  # rx subcapture "n"
-    set_addr $I10, rxcap_436_fail
-    rx423_cur."!mark_push"(0, rx423_pos, $I10)
-  # rx charclass_q d r 1..-1
-    sub $I10, rx423_pos, rx423_off
-    find_not_cclass $I11, 8, rx423_tgt, $I10, rx423_eos
-    add $I12, $I10, 1
-    lt $I11, $I12, rx423_fail
-    add rx423_pos, rx423_off, $I11
-    set_addr $I10, rxcap_436_fail
-    ($I12, $I11) = rx423_cur."!mark_peek"($I10)
-    rx423_cur."!cursor_pos"($I11)
-    ($P10) = rx423_cur."!cursor_start"()
-    $P10."!cursor_pass"(rx423_pos, "")
-    rx423_cur."!mark_push"(0, -1, 0, $P10)
+  # rx subrule $P437 subtype=capture negate=
+    rx430_cur."!cursor_pos"(rx430_pos)
+    .const 'Sub' $P437 = "141_1256533470.86421" 
+    capture_lex $P437
+    $P10 = rx430_cur.$P437()
+    unless $P10, rx430_fail
+    rx430_cur."!mark_push"(0, -1, 0, $P10)
     $P10."!cursor_names"("n")
-    goto rxcap_436_done
-  rxcap_436_fail:
-    goto rx423_fail
-  rxcap_436_done:
-  # rx literal  ")"
-    add $I11, rx423_pos, 1
-    gt $I11, rx423_eos, rx423_fail
-    sub $I11, rx423_pos, rx423_off
-    substr $S10, rx423_tgt, $I11, 1
-    ne $S10, ")", rx423_fail
-    add rx423_pos, 1
-    (rx423_rep) = rx423_cur."!mark_commit"($I437)
+    rx430_pos = $P10."pos"()
+    (rx430_rep) = rx430_cur."!mark_commit"($I441)
   rxquantr435_done:
-  alt427_end:
-.annotate "line", 155
-  # rx pass
-    rx423_cur."!cursor_pass"(rx423_pos, "mod_internal")
-    rx423_cur."!cursor_debug"("PASS  ", "mod_internal", " at pos=", rx423_pos)
-    .return (rx423_cur)
-  rx423_fail:
-    (rx423_rep, rx423_pos, $I10, $P10) = rx423_cur."!mark_fail"(0)
-    lt rx423_pos, -1, rx423_done
-    eq rx423_pos, -1, rx423_fail
-    jump $I10
-  rx423_done:
-    rx423_cur."!cursor_fail"()
-    rx423_cur."!cursor_debug"("FAIL  ", "mod_internal")
-    .return (rx423_cur)
-    .return ()
-.end
-
-
-.namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__mod_internal"  :subid("138_1256279193.78309") :method
-.annotate "line", 155
-    $P425 = self."!PREFIX__!subrule"("mod_ident", ":")
-    new $P426, "ResizablePMCArray"
-    push $P426, $P425
-    push $P426, ":"
-    .return ($P426)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block429"  :anon :subid("139_1256279193.78309") :method :outer("137_1256279193.78309")
-.annotate "line", 157
-    .local string rx431_tgt
-    .local int rx431_pos
-    .local int rx431_off
-    .local int rx431_eos
-    .local int rx431_rep
-    .local pmc rx431_cur
-    (rx431_cur, rx431_pos, rx431_tgt, $I10) = self."!cursor_start"()
-    rx431_cur."!cursor_debug"("START ", "")
-    .lex unicode:"$\x{a2}", rx431_cur
-    length rx431_eos, rx431_tgt
-    set rx431_off, 0
-    lt $I10, 2, rx431_start
-    sub rx431_off, $I10, 1
-    substr rx431_tgt, rx431_tgt, rx431_off
-  rx431_start:
-    ge rx431_pos, 0, rxscan432_done
-  rxscan432_loop:
-    ($P10) = rx431_cur."from"()
-    inc $P10
-    set rx431_pos, $P10
-    ge rx431_pos, rx431_eos, rxscan432_done
-    set_addr $I10, rxscan432_loop
-    rx431_cur."!mark_push"(0, rx431_pos, $I10)
-  rxscan432_done:
-  alt433_0:
-    set_addr $I10, alt433_1
-    rx431_cur."!mark_push"(0, rx431_pos, $I10)
-  # rx literal  "!"
-    add $I11, rx431_pos, 1
-    gt $I11, rx431_eos, rx431_fail
-    sub $I11, rx431_pos, rx431_off
-    substr $S10, rx431_tgt, $I11, 1
-    ne $S10, "!", rx431_fail
-    add rx431_pos, 1
-    goto alt433_end
-  alt433_1:
+  # rx subrule "mod_ident" subtype=capture negate=
+    rx430_cur."!cursor_pos"(rx430_pos)
+    $P10 = rx430_cur."mod_ident"()
+    unless $P10, rx430_fail
+    rx430_cur."!mark_push"(0, -1, 0, $P10)
+    $P10."!cursor_names"("mod_ident")
+    rx430_pos = $P10."pos"()
+  # rxanchor rwb
+    le rx430_pos, 0, rx430_fail
+    sub $I10, rx430_pos, rx430_off
+    is_cclass $I11, 8192, rx430_tgt, $I10
+    if $I11, rx430_fail
+    dec $I10
+    is_cclass $I11, 8192, rx430_tgt, $I10
+    unless $I11, rx430_fail
+    goto alt434_end
+  alt434_1:
+.annotate "line", 162
+  # rx literal  ":"
+    add $I11, rx430_pos, 1
+    gt $I11, rx430_eos, rx430_fail
+    sub $I11, rx430_pos, rx430_off
+    substr $S10, rx430_tgt, $I11, 1
+    ne $S10, ":", rx430_fail
+    add rx430_pos, 1
+  # rx subrule "mod_ident" subtype=capture negate=
+    rx430_cur."!cursor_pos"(rx430_pos)
+    $P10 = rx430_cur."mod_ident"()
+    unless $P10, rx430_fail
+    rx430_cur."!mark_push"(0, -1, 0, $P10)
+    $P10."!cursor_names"("mod_ident")
+    rx430_pos = $P10."pos"()
+  # rx rxquantr442 ** 0..1
+    set_addr $I444, rxquantr442_done
+    rx430_cur."!mark_push"(0, rx430_pos, $I444)
+  rxquantr442_loop:
+  # rx literal  "("
+    add $I11, rx430_pos, 1
+    gt $I11, rx430_eos, rx430_fail
+    sub $I11, rx430_pos, rx430_off
+    substr $S10, rx430_tgt, $I11, 1
+    ne $S10, "(", rx430_fail
+    add rx430_pos, 1
+  # rx subcapture "n"
+    set_addr $I10, rxcap_443_fail
+    rx430_cur."!mark_push"(0, rx430_pos, $I10)
   # rx charclass_q d r 1..-1
-    sub $I10, rx431_pos, rx431_off
-    find_not_cclass $I11, 8, rx431_tgt, $I10, rx431_eos
+    sub $I10, rx430_pos, rx430_off
+    find_not_cclass $I11, 8, rx430_tgt, $I10, rx430_eos
     add $I12, $I10, 1
-    lt $I11, $I12, rx431_fail
-    add rx431_pos, rx431_off, $I11
-  alt433_end:
+    lt $I11, $I12, rx430_fail
+    add rx430_pos, rx430_off, $I11
+    set_addr $I10, rxcap_443_fail
+    ($I12, $I11) = rx430_cur."!mark_peek"($I10)
+    rx430_cur."!cursor_pos"($I11)
+    ($P10) = rx430_cur."!cursor_start"()
+    $P10."!cursor_pass"(rx430_pos, "")
+    rx430_cur."!mark_push"(0, -1, 0, $P10)
+    $P10."!cursor_names"("n")
+    goto rxcap_443_done
+  rxcap_443_fail:
+    goto rx430_fail
+  rxcap_443_done:
+  # rx literal  ")"
+    add $I11, rx430_pos, 1
+    gt $I11, rx430_eos, rx430_fail
+    sub $I11, rx430_pos, rx430_off
+    substr $S10, rx430_tgt, $I11, 1
+    ne $S10, ")", rx430_fail
+    add rx430_pos, 1
+    (rx430_rep) = rx430_cur."!mark_commit"($I444)
+  rxquantr442_done:
+  alt434_end:
+.annotate "line", 159
   # rx pass
-    rx431_cur."!cursor_pass"(rx431_pos, "")
-    rx431_cur."!cursor_debug"("PASS  ", "", " at pos=", rx431_pos)
-    .return (rx431_cur)
-  rx431_fail:
-    (rx431_rep, rx431_pos, $I10, $P10) = rx431_cur."!mark_fail"(0)
-    lt rx431_pos, -1, rx431_done
-    eq rx431_pos, -1, rx431_fail
+    rx430_cur."!cursor_pass"(rx430_pos, "mod_internal")
+    rx430_cur."!cursor_debug"("PASS  ", "mod_internal", " at pos=", rx430_pos)
+    .return (rx430_cur)
+  rx430_fail:
+    (rx430_rep, rx430_pos, $I10, $P10) = rx430_cur."!mark_fail"(0)
+    lt rx430_pos, -1, rx430_done
+    eq rx430_pos, -1, rx430_fail
     jump $I10
-  rx431_done:
-    rx431_cur."!cursor_fail"()
-    rx431_cur."!cursor_debug"("FAIL  ", "")
-    .return (rx431_cur)
+  rx430_done:
+    rx430_cur."!cursor_fail"()
+    rx430_cur."!cursor_debug"("FAIL  ", "mod_internal")
+    .return (rx430_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "mod_ident"  :subid("140_1256279193.78309") :method
-.annotate "line", 162
-    $P439 = self."!protoregex"("mod_ident")
-    .return ($P439)
+.sub "!PREFIX__mod_internal"  :subid("140_1256533470.86421") :method
+.annotate "line", 159
+    $P432 = self."!PREFIX__!subrule"("mod_ident", ":")
+    new $P433, "ResizablePMCArray"
+    push $P433, $P432
+    push $P433, ":"
+    .return ($P433)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__mod_ident"  :subid("141_1256279193.78309") :method
-.annotate "line", 162
-    $P441 = self."!PREFIX__!protoregex"("mod_ident")
-    .return ($P441)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Grammar"]
-.sub "mod_ident:sym<ignorecase>"  :subid("142_1256279193.78309") :method :outer("10_1256279193.78309")
-.annotate "line", 163
-    .local string rx443_tgt
-    .local int rx443_pos
-    .local int rx443_off
-    .local int rx443_eos
-    .local int rx443_rep
-    .local pmc rx443_cur
-    (rx443_cur, rx443_pos, rx443_tgt, $I10) = self."!cursor_start"()
-    rx443_cur."!cursor_debug"("START ", "mod_ident:sym<ignorecase>")
-    .lex unicode:"$\x{a2}", rx443_cur
-    length rx443_eos, rx443_tgt
-    set rx443_off, 0
-    lt $I10, 2, rx443_start
-    sub rx443_off, $I10, 1
-    substr rx443_tgt, rx443_tgt, rx443_off
-  rx443_start:
-  # rx subcapture "sym"
-    set_addr $I10, rxcap_446_fail
-    rx443_cur."!mark_push"(0, rx443_pos, $I10)
-  # rx literal  "i"
-    add $I11, rx443_pos, 1
-    gt $I11, rx443_eos, rx443_fail
-    sub $I11, rx443_pos, rx443_off
-    substr $S10, rx443_tgt, $I11, 1
-    ne $S10, "i", rx443_fail
-    add rx443_pos, 1
-    set_addr $I10, rxcap_446_fail
-    ($I12, $I11) = rx443_cur."!mark_peek"($I10)
-    rx443_cur."!cursor_pos"($I11)
-    ($P10) = rx443_cur."!cursor_start"()
-    $P10."!cursor_pass"(rx443_pos, "")
-    rx443_cur."!mark_push"(0, -1, 0, $P10)
-    $P10."!cursor_names"("sym")
-    goto rxcap_446_done
-  rxcap_446_fail:
-    goto rx443_fail
-  rxcap_446_done:
-  # rx rxquantr447 ** 0..1
-    set_addr $I448, rxquantr447_done
-    rx443_cur."!mark_push"(0, rx443_pos, $I448)
-  rxquantr447_loop:
-  # rx literal  "gnorecase"
-    add $I11, rx443_pos, 9
-    gt $I11, rx443_eos, rx443_fail
-    sub $I11, rx443_pos, rx443_off
-    substr $S10, rx443_tgt, $I11, 9
-    ne $S10, "gnorecase", rx443_fail
-    add rx443_pos, 9
-    (rx443_rep) = rx443_cur."!mark_commit"($I448)
-  rxquantr447_done:
+.sub "_block436"  :anon :subid("141_1256533470.86421") :method :outer("139_1256533470.86421")
+.annotate "line", 161
+    .local string rx438_tgt
+    .local int rx438_pos
+    .local int rx438_off
+    .local int rx438_eos
+    .local int rx438_rep
+    .local pmc rx438_cur
+    (rx438_cur, rx438_pos, rx438_tgt, $I10) = self."!cursor_start"()
+    rx438_cur."!cursor_debug"("START ", "")
+    .lex unicode:"$\x{a2}", rx438_cur
+    length rx438_eos, rx438_tgt
+    set rx438_off, 0
+    lt $I10, 2, rx438_start
+    sub rx438_off, $I10, 1
+    substr rx438_tgt, rx438_tgt, rx438_off
+  rx438_start:
+    ge rx438_pos, 0, rxscan439_done
+  rxscan439_loop:
+    ($P10) = rx438_cur."from"()
+    inc $P10
+    set rx438_pos, $P10
+    ge rx438_pos, rx438_eos, rxscan439_done
+    set_addr $I10, rxscan439_loop
+    rx438_cur."!mark_push"(0, rx438_pos, $I10)
+  rxscan439_done:
+  alt440_0:
+    set_addr $I10, alt440_1
+    rx438_cur."!mark_push"(0, rx438_pos, $I10)
+  # rx literal  "!"
+    add $I11, rx438_pos, 1
+    gt $I11, rx438_eos, rx438_fail
+    sub $I11, rx438_pos, rx438_off
+    substr $S10, rx438_tgt, $I11, 1
+    ne $S10, "!", rx438_fail
+    add rx438_pos, 1
+    goto alt440_end
+  alt440_1:
+  # rx charclass_q d r 1..-1
+    sub $I10, rx438_pos, rx438_off
+    find_not_cclass $I11, 8, rx438_tgt, $I10, rx438_eos
+    add $I12, $I10, 1
+    lt $I11, $I12, rx438_fail
+    add rx438_pos, rx438_off, $I11
+  alt440_end:
   # rx pass
-    rx443_cur."!cursor_pass"(rx443_pos, "mod_ident:sym<ignorecase>")
-    rx443_cur."!cursor_debug"("PASS  ", "mod_ident:sym<ignorecase>", " at pos=", rx443_pos)
-    .return (rx443_cur)
-  rx443_fail:
-    (rx443_rep, rx443_pos, $I10, $P10) = rx443_cur."!mark_fail"(0)
-    lt rx443_pos, -1, rx443_done
-    eq rx443_pos, -1, rx443_fail
+    rx438_cur."!cursor_pass"(rx438_pos, "")
+    rx438_cur."!cursor_debug"("PASS  ", "", " at pos=", rx438_pos)
+    .return (rx438_cur)
+  rx438_fail:
+    (rx438_rep, rx438_pos, $I10, $P10) = rx438_cur."!mark_fail"(0)
+    lt rx438_pos, -1, rx438_done
+    eq rx438_pos, -1, rx438_fail
     jump $I10
-  rx443_done:
-    rx443_cur."!cursor_fail"()
-    rx443_cur."!cursor_debug"("FAIL  ", "mod_ident:sym<ignorecase>")
-    .return (rx443_cur)
+  rx438_done:
+    rx438_cur."!cursor_fail"()
+    rx438_cur."!cursor_debug"("FAIL  ", "")
+    .return (rx438_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__mod_ident:sym<ignorecase>"  :subid("143_1256279193.78309") :method
-.annotate "line", 163
-    new $P445, "ResizablePMCArray"
-    push $P445, "i"
-    .return ($P445)
+.sub "mod_ident"  :subid("142_1256533470.86421") :method
+.annotate "line", 166
+    $P446 = self."!protoregex"("mod_ident")
+    .return ($P446)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "mod_ident:sym<ratchet>"  :subid("144_1256279193.78309") :method :outer("10_1256279193.78309")
-.annotate "line", 164
+.sub "!PREFIX__mod_ident"  :subid("143_1256533470.86421") :method
+.annotate "line", 166
+    $P448 = self."!PREFIX__!protoregex"("mod_ident")
+    .return ($P448)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Grammar"]
+.sub "mod_ident:sym<ignorecase>"  :subid("144_1256533470.86421") :method :outer("10_1256533470.86421")
+.annotate "line", 167
     .local string rx450_tgt
     .local int rx450_pos
     .local int rx450_off
@@ -8719,7 +8796,7 @@ An alternate dump output for a Match object and all of its subcaptures.
     .local int rx450_rep
     .local pmc rx450_cur
     (rx450_cur, rx450_pos, rx450_tgt, $I10) = self."!cursor_start"()
-    rx450_cur."!cursor_debug"("START ", "mod_ident:sym<ratchet>")
+    rx450_cur."!cursor_debug"("START ", "mod_ident:sym<ignorecase>")
     .lex unicode:"$\x{a2}", rx450_cur
     length rx450_eos, rx450_tgt
     set rx450_off, 0
@@ -8730,12 +8807,12 @@ An alternate dump output for a Match object and all of its subcaptures.
   # rx subcapture "sym"
     set_addr $I10, rxcap_453_fail
     rx450_cur."!mark_push"(0, rx450_pos, $I10)
-  # rx literal  "r"
+  # rx literal  "i"
     add $I11, rx450_pos, 1
     gt $I11, rx450_eos, rx450_fail
     sub $I11, rx450_pos, rx450_off
     substr $S10, rx450_tgt, $I11, 1
-    ne $S10, "r", rx450_fail
+    ne $S10, "i", rx450_fail
     add rx450_pos, 1
     set_addr $I10, rxcap_453_fail
     ($I12, $I11) = rx450_cur."!mark_peek"($I10)
@@ -8752,18 +8829,18 @@ An alternate dump output for a Match object and all of its subcaptures.
     set_addr $I455, rxquantr454_done
     rx450_cur."!mark_push"(0, rx450_pos, $I455)
   rxquantr454_loop:
-  # rx literal  "atchet"
-    add $I11, rx450_pos, 6
+  # rx literal  "gnorecase"
+    add $I11, rx450_pos, 9
     gt $I11, rx450_eos, rx450_fail
     sub $I11, rx450_pos, rx450_off
-    substr $S10, rx450_tgt, $I11, 6
-    ne $S10, "atchet", rx450_fail
-    add rx450_pos, 6
+    substr $S10, rx450_tgt, $I11, 9
+    ne $S10, "gnorecase", rx450_fail
+    add rx450_pos, 9
     (rx450_rep) = rx450_cur."!mark_commit"($I455)
   rxquantr454_done:
   # rx pass
-    rx450_cur."!cursor_pass"(rx450_pos, "mod_ident:sym<ratchet>")
-    rx450_cur."!cursor_debug"("PASS  ", "mod_ident:sym<ratchet>", " at pos=", rx450_pos)
+    rx450_cur."!cursor_pass"(rx450_pos, "mod_ident:sym<ignorecase>")
+    rx450_cur."!cursor_debug"("PASS  ", "mod_ident:sym<ignorecase>", " at pos=", rx450_pos)
     .return (rx450_cur)
   rx450_fail:
     (rx450_rep, rx450_pos, $I10, $P10) = rx450_cur."!mark_fail"(0)
@@ -8772,24 +8849,24 @@ An alternate dump output for a Match object and all of its subcaptures.
     jump $I10
   rx450_done:
     rx450_cur."!cursor_fail"()
-    rx450_cur."!cursor_debug"("FAIL  ", "mod_ident:sym<ratchet>")
+    rx450_cur."!cursor_debug"("FAIL  ", "mod_ident:sym<ignorecase>")
     .return (rx450_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__mod_ident:sym<ratchet>"  :subid("145_1256279193.78309") :method
-.annotate "line", 164
+.sub "!PREFIX__mod_ident:sym<ignorecase>"  :subid("145_1256533470.86421") :method
+.annotate "line", 167
     new $P452, "ResizablePMCArray"
-    push $P452, "r"
+    push $P452, "i"
     .return ($P452)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "mod_ident:sym<sigspace>"  :subid("146_1256279193.78309") :method :outer("10_1256279193.78309")
-.annotate "line", 165
+.sub "mod_ident:sym<ratchet>"  :subid("146_1256533470.86421") :method :outer("10_1256533470.86421")
+.annotate "line", 168
     .local string rx457_tgt
     .local int rx457_pos
     .local int rx457_off
@@ -8797,7 +8874,7 @@ An alternate dump output for a Match object and all of its subcaptures.
     .local int rx457_rep
     .local pmc rx457_cur
     (rx457_cur, rx457_pos, rx457_tgt, $I10) = self."!cursor_start"()
-    rx457_cur."!cursor_debug"("START ", "mod_ident:sym<sigspace>")
+    rx457_cur."!cursor_debug"("START ", "mod_ident:sym<ratchet>")
     .lex unicode:"$\x{a2}", rx457_cur
     length rx457_eos, rx457_tgt
     set rx457_off, 0
@@ -8808,12 +8885,12 @@ An alternate dump output for a Match object and all of its subcaptures.
   # rx subcapture "sym"
     set_addr $I10, rxcap_460_fail
     rx457_cur."!mark_push"(0, rx457_pos, $I10)
-  # rx literal  "s"
+  # rx literal  "r"
     add $I11, rx457_pos, 1
     gt $I11, rx457_eos, rx457_fail
     sub $I11, rx457_pos, rx457_off
     substr $S10, rx457_tgt, $I11, 1
-    ne $S10, "s", rx457_fail
+    ne $S10, "r", rx457_fail
     add rx457_pos, 1
     set_addr $I10, rxcap_460_fail
     ($I12, $I11) = rx457_cur."!mark_peek"($I10)
@@ -8830,18 +8907,18 @@ An alternate dump output for a Match object and all of its subcaptures.
     set_addr $I462, rxquantr461_done
     rx457_cur."!mark_push"(0, rx457_pos, $I462)
   rxquantr461_loop:
-  # rx literal  "igspace"
-    add $I11, rx457_pos, 7
+  # rx literal  "atchet"
+    add $I11, rx457_pos, 6
     gt $I11, rx457_eos, rx457_fail
     sub $I11, rx457_pos, rx457_off
-    substr $S10, rx457_tgt, $I11, 7
-    ne $S10, "igspace", rx457_fail
-    add rx457_pos, 7
+    substr $S10, rx457_tgt, $I11, 6
+    ne $S10, "atchet", rx457_fail
+    add rx457_pos, 6
     (rx457_rep) = rx457_cur."!mark_commit"($I462)
   rxquantr461_done:
   # rx pass
-    rx457_cur."!cursor_pass"(rx457_pos, "mod_ident:sym<sigspace>")
-    rx457_cur."!cursor_debug"("PASS  ", "mod_ident:sym<sigspace>", " at pos=", rx457_pos)
+    rx457_cur."!cursor_pass"(rx457_pos, "mod_ident:sym<ratchet>")
+    rx457_cur."!cursor_debug"("PASS  ", "mod_ident:sym<ratchet>", " at pos=", rx457_pos)
     .return (rx457_cur)
   rx457_fail:
     (rx457_rep, rx457_pos, $I10, $P10) = rx457_cur."!mark_fail"(0)
@@ -8850,24 +8927,102 @@ An alternate dump output for a Match object and all of its subcaptures.
     jump $I10
   rx457_done:
     rx457_cur."!cursor_fail"()
-    rx457_cur."!cursor_debug"("FAIL  ", "mod_ident:sym<sigspace>")
+    rx457_cur."!cursor_debug"("FAIL  ", "mod_ident:sym<ratchet>")
     .return (rx457_cur)
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__mod_ident:sym<sigspace>"  :subid("147_1256279193.78309") :method
-.annotate "line", 165
+.sub "!PREFIX__mod_ident:sym<ratchet>"  :subid("147_1256533470.86421") :method
+.annotate "line", 168
     new $P459, "ResizablePMCArray"
-    push $P459, "s"
+    push $P459, "r"
     .return ($P459)
 .end
 
-### .include 'src/gen/p6regex-actions.pir'
+
+.namespace ["Regex";"P6Regex";"Grammar"]
+.sub "mod_ident:sym<sigspace>"  :subid("148_1256533470.86421") :method :outer("10_1256533470.86421")
+.annotate "line", 169
+    .local string rx464_tgt
+    .local int rx464_pos
+    .local int rx464_off
+    .local int rx464_eos
+    .local int rx464_rep
+    .local pmc rx464_cur
+    (rx464_cur, rx464_pos, rx464_tgt, $I10) = self."!cursor_start"()
+    rx464_cur."!cursor_debug"("START ", "mod_ident:sym<sigspace>")
+    .lex unicode:"$\x{a2}", rx464_cur
+    length rx464_eos, rx464_tgt
+    set rx464_off, 0
+    lt $I10, 2, rx464_start
+    sub rx464_off, $I10, 1
+    substr rx464_tgt, rx464_tgt, rx464_off
+  rx464_start:
+  # rx subcapture "sym"
+    set_addr $I10, rxcap_467_fail
+    rx464_cur."!mark_push"(0, rx464_pos, $I10)
+  # rx literal  "s"
+    add $I11, rx464_pos, 1
+    gt $I11, rx464_eos, rx464_fail
+    sub $I11, rx464_pos, rx464_off
+    substr $S10, rx464_tgt, $I11, 1
+    ne $S10, "s", rx464_fail
+    add rx464_pos, 1
+    set_addr $I10, rxcap_467_fail
+    ($I12, $I11) = rx464_cur."!mark_peek"($I10)
+    rx464_cur."!cursor_pos"($I11)
+    ($P10) = rx464_cur."!cursor_start"()
+    $P10."!cursor_pass"(rx464_pos, "")
+    rx464_cur."!mark_push"(0, -1, 0, $P10)
+    $P10."!cursor_names"("sym")
+    goto rxcap_467_done
+  rxcap_467_fail:
+    goto rx464_fail
+  rxcap_467_done:
+  # rx rxquantr468 ** 0..1
+    set_addr $I469, rxquantr468_done
+    rx464_cur."!mark_push"(0, rx464_pos, $I469)
+  rxquantr468_loop:
+  # rx literal  "igspace"
+    add $I11, rx464_pos, 7
+    gt $I11, rx464_eos, rx464_fail
+    sub $I11, rx464_pos, rx464_off
+    substr $S10, rx464_tgt, $I11, 7
+    ne $S10, "igspace", rx464_fail
+    add rx464_pos, 7
+    (rx464_rep) = rx464_cur."!mark_commit"($I469)
+  rxquantr468_done:
+  # rx pass
+    rx464_cur."!cursor_pass"(rx464_pos, "mod_ident:sym<sigspace>")
+    rx464_cur."!cursor_debug"("PASS  ", "mod_ident:sym<sigspace>", " at pos=", rx464_pos)
+    .return (rx464_cur)
+  rx464_fail:
+    (rx464_rep, rx464_pos, $I10, $P10) = rx464_cur."!mark_fail"(0)
+    lt rx464_pos, -1, rx464_done
+    eq rx464_pos, -1, rx464_fail
+    jump $I10
+  rx464_done:
+    rx464_cur."!cursor_fail"()
+    rx464_cur."!cursor_debug"("FAIL  ", "mod_ident:sym<sigspace>")
+    .return (rx464_cur)
+    .return ()
+.end
+
+
+.namespace ["Regex";"P6Regex";"Grammar"]
+.sub "!PREFIX__mod_ident:sym<sigspace>"  :subid("149_1256533470.86421") :method
+.annotate "line", 169
+    new $P466, "ResizablePMCArray"
+    push $P466, "s"
+    .return ($P466)
+.end
+
+### .include 'gen/p6regex-actions.pir'
 
 .namespace []
-.sub "_block11"  :anon :subid("10_1256279185.41736")
+.sub "_block11"  :anon :subid("10_1256533476.70438")
 .annotate "line", 4
     get_hll_global $P14, ["Regex";"P6Regex";"Actions"], "_block13" 
 .annotate "line", 1
@@ -8876,103 +9031,105 @@ An alternate dump output for a Match object and all of its subcaptures.
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block13" :init :load :subid("11_1256279185.41736")
+.sub "_block13" :init :load :subid("11_1256533476.70438")
 .annotate "line", 4
-    .const 'Sub' $P1426 = "122_1256279185.41736" 
-    capture_lex $P1426
-    .const 'Sub' $P1385 = "118_1256279185.41736" 
-    capture_lex $P1385
-    .const 'Sub' $P1122 = "100_1256279185.41736" 
-    capture_lex $P1122
-    .const 'Sub' $P1102 = "99_1256279185.41736" 
-    capture_lex $P1102
-    .const 'Sub' $P1075 = "98_1256279185.41736" 
-    capture_lex $P1075
-    .const 'Sub' $P1007 = "92_1256279185.41736" 
-    capture_lex $P1007
-    .const 'Sub' $P938 = "87_1256279185.41736" 
-    capture_lex $P938
-    .const 'Sub' $P854 = "80_1256279185.41736" 
-    capture_lex $P854
-    .const 'Sub' $P842 = "79_1256279185.41736" 
-    capture_lex $P842
-    .const 'Sub' $P814 = "76_1256279185.41736" 
-    capture_lex $P814
-    .const 'Sub' $P792 = "73_1256279185.41736" 
-    capture_lex $P792
-    .const 'Sub' $P779 = "72_1256279185.41736" 
+    .const 'Sub' $P1441 = "123_1256533476.70438" 
+    capture_lex $P1441
+    .const 'Sub' $P1400 = "119_1256533476.70438" 
+    capture_lex $P1400
+    .const 'Sub' $P1137 = "101_1256533476.70438" 
+    capture_lex $P1137
+    .const 'Sub' $P1117 = "100_1256533476.70438" 
+    capture_lex $P1117
+    .const 'Sub' $P1090 = "99_1256533476.70438" 
+    capture_lex $P1090
+    .const 'Sub' $P1022 = "93_1256533476.70438" 
+    capture_lex $P1022
+    .const 'Sub' $P953 = "88_1256533476.70438" 
+    capture_lex $P953
+    .const 'Sub' $P869 = "81_1256533476.70438" 
+    capture_lex $P869
+    .const 'Sub' $P857 = "80_1256533476.70438" 
+    capture_lex $P857
+    .const 'Sub' $P829 = "77_1256533476.70438" 
+    capture_lex $P829
+    .const 'Sub' $P807 = "74_1256533476.70438" 
+    capture_lex $P807
+    .const 'Sub' $P794 = "73_1256533476.70438" 
+    capture_lex $P794
+    .const 'Sub' $P779 = "72_1256533476.70438" 
     capture_lex $P779
-    .const 'Sub' $P764 = "71_1256279185.41736" 
+    .const 'Sub' $P764 = "71_1256533476.70438" 
     capture_lex $P764
-    .const 'Sub' $P749 = "70_1256279185.41736" 
+    .const 'Sub' $P749 = "70_1256533476.70438" 
     capture_lex $P749
-    .const 'Sub' $P734 = "69_1256279185.41736" 
+    .const 'Sub' $P734 = "69_1256533476.70438" 
     capture_lex $P734
-    .const 'Sub' $P719 = "68_1256279185.41736" 
+    .const 'Sub' $P719 = "68_1256533476.70438" 
     capture_lex $P719
-    .const 'Sub' $P704 = "67_1256279185.41736" 
+    .const 'Sub' $P704 = "67_1256533476.70438" 
     capture_lex $P704
-    .const 'Sub' $P689 = "66_1256279185.41736" 
+    .const 'Sub' $P689 = "66_1256533476.70438" 
     capture_lex $P689
-    .const 'Sub' $P674 = "65_1256279185.41736" 
-    capture_lex $P674
-    .const 'Sub' $P652 = "64_1256279185.41736" 
+    .const 'Sub' $P667 = "65_1256533476.70438" 
+    capture_lex $P667
+    .const 'Sub' $P652 = "64_1256533476.70438" 
     capture_lex $P652
-    .const 'Sub' $P581 = "58_1256279185.41736" 
+    .const 'Sub' $P581 = "58_1256533476.70438" 
     capture_lex $P581
-    .const 'Sub' $P561 = "57_1256279185.41736" 
+    .const 'Sub' $P561 = "57_1256533476.70438" 
     capture_lex $P561
-    .const 'Sub' $P539 = "56_1256279185.41736" 
+    .const 'Sub' $P539 = "56_1256533476.70438" 
     capture_lex $P539
-    .const 'Sub' $P529 = "55_1256279185.41736" 
+    .const 'Sub' $P529 = "55_1256533476.70438" 
     capture_lex $P529
-    .const 'Sub' $P519 = "54_1256279185.41736" 
+    .const 'Sub' $P519 = "54_1256533476.70438" 
     capture_lex $P519
-    .const 'Sub' $P509 = "53_1256279185.41736" 
+    .const 'Sub' $P509 = "53_1256533476.70438" 
     capture_lex $P509
-    .const 'Sub' $P498 = "52_1256279185.41736" 
+    .const 'Sub' $P498 = "52_1256533476.70438" 
     capture_lex $P498
-    .const 'Sub' $P487 = "51_1256279185.41736" 
+    .const 'Sub' $P487 = "51_1256533476.70438" 
     capture_lex $P487
-    .const 'Sub' $P476 = "50_1256279185.41736" 
+    .const 'Sub' $P476 = "50_1256533476.70438" 
     capture_lex $P476
-    .const 'Sub' $P465 = "49_1256279185.41736" 
+    .const 'Sub' $P465 = "49_1256533476.70438" 
     capture_lex $P465
-    .const 'Sub' $P454 = "48_1256279185.41736" 
+    .const 'Sub' $P454 = "48_1256533476.70438" 
     capture_lex $P454
-    .const 'Sub' $P443 = "47_1256279185.41736" 
+    .const 'Sub' $P443 = "47_1256533476.70438" 
     capture_lex $P443
-    .const 'Sub' $P432 = "46_1256279185.41736" 
+    .const 'Sub' $P432 = "46_1256533476.70438" 
     capture_lex $P432
-    .const 'Sub' $P421 = "45_1256279185.41736" 
+    .const 'Sub' $P421 = "45_1256533476.70438" 
     capture_lex $P421
-    .const 'Sub' $P406 = "44_1256279185.41736" 
+    .const 'Sub' $P406 = "44_1256533476.70438" 
     capture_lex $P406
-    .const 'Sub' $P390 = "43_1256279185.41736" 
+    .const 'Sub' $P390 = "43_1256533476.70438" 
     capture_lex $P390
-    .const 'Sub' $P380 = "42_1256279185.41736" 
+    .const 'Sub' $P380 = "42_1256533476.70438" 
     capture_lex $P380
-    .const 'Sub' $P363 = "41_1256279185.41736" 
+    .const 'Sub' $P363 = "41_1256533476.70438" 
     capture_lex $P363
-    .const 'Sub' $P303 = "36_1256279185.41736" 
+    .const 'Sub' $P303 = "36_1256533476.70438" 
     capture_lex $P303
-    .const 'Sub' $P287 = "35_1256279185.41736" 
+    .const 'Sub' $P287 = "35_1256533476.70438" 
     capture_lex $P287
-    .const 'Sub' $P273 = "34_1256279185.41736" 
+    .const 'Sub' $P273 = "34_1256533476.70438" 
     capture_lex $P273
-    .const 'Sub' $P259 = "33_1256279185.41736" 
+    .const 'Sub' $P259 = "33_1256533476.70438" 
     capture_lex $P259
-    .const 'Sub' $P225 = "29_1256279185.41736" 
+    .const 'Sub' $P225 = "29_1256533476.70438" 
     capture_lex $P225
-    .const 'Sub' $P168 = "24_1256279185.41736" 
+    .const 'Sub' $P168 = "24_1256533476.70438" 
     capture_lex $P168
-    .const 'Sub' $P107 = "19_1256279185.41736" 
+    .const 'Sub' $P107 = "19_1256533476.70438" 
     capture_lex $P107
-    .const 'Sub' $P49 = "14_1256279185.41736" 
+    .const 'Sub' $P49 = "14_1256533476.70438" 
     capture_lex $P49
-    .const 'Sub' $P35 = "13_1256279185.41736" 
+    .const 'Sub' $P35 = "13_1256533476.70438" 
     capture_lex $P35
-    .const 'Sub' $P17 = "12_1256279185.41736" 
+    .const 'Sub' $P17 = "12_1256533476.70438" 
     capture_lex $P17
 $P15 = get_root_global ["parrot"], "P6metaclass"
     $P15."new_class"("Regex::P6Regex::Actions")
@@ -8982,16 +9139,16 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
         push $P16, $P0
     
     set_global "@MODIFIERS", $P16
-.annotate "line", 513
-    .const 'Sub' $P1426 = "122_1256279185.41736" 
-    capture_lex $P1426
+.annotate "line", 521
+    .const 'Sub' $P1441 = "123_1256533476.70438" 
+    capture_lex $P1441
 .annotate "line", 4
-    .return ($P1426)
+    .return ($P1441)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "arg"  :subid("12_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "arg"  :subid("12_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_20
 .annotate "line", 10
     new $P19, 'ExceptionHandler'
@@ -9004,15 +9161,15 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     find_lex $P21, "$/"
     find_lex $P24, "$/"
     set $P25, $P24["quote"]
-    unless_null $P25, vivify_124
+    unless_null $P25, vivify_125
     new $P25, "Undef"
-  vivify_124:
+  vivify_125:
     if $P25, if_23
     find_lex $P30, "$/"
     set $P31, $P30["val"]
-    unless_null $P31, vivify_125
+    unless_null $P31, vivify_126
     new $P31, "Undef"
-  vivify_125:
+  vivify_126:
     set $N32, $P31
     new $P22, 'Float'
     set $P22, $N32
@@ -9020,13 +9177,13 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
   if_23:
     find_lex $P26, "$/"
     set $P27, $P26["quote"]
-    unless_null $P27, vivify_126
+    unless_null $P27, vivify_127
     new $P27, "Hash"
-  vivify_126:
-    set $P28, $P27["val"]
-    unless_null $P28, vivify_127
-    new $P28, "Undef"
   vivify_127:
+    set $P28, $P27["val"]
+    unless_null $P28, vivify_128
+    new $P28, "Undef"
+  vivify_128:
     set $S29, $P28
     new $P22, 'String'
     set $P22, $S29
@@ -9044,7 +9201,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "TOP"  :subid("13_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "TOP"  :subid("13_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_38
 .annotate "line", 14
     new $P37, 'ExceptionHandler'
@@ -9056,28 +9213,28 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 .annotate "line", 15
     find_lex $P39, "$/"
     set $P40, $P39["nibbler"]
-    unless_null $P40, vivify_128
+    unless_null $P40, vivify_129
     new $P40, "Undef"
-  vivify_128:
+  vivify_129:
     $P41 = $P40."ast"()
     $P42 = "buildsub"($P41)
     .lex "$past", $P42
 .annotate "line", 16
     find_lex $P43, "$past"
-    unless_null $P43, vivify_129
+    unless_null $P43, vivify_130
     new $P43, "Undef"
-  vivify_129:
-    find_lex $P44, "$/"
-    unless_null $P44, vivify_130
-    new $P44, "Undef"
   vivify_130:
+    find_lex $P44, "$/"
+    unless_null $P44, vivify_131
+    new $P44, "Undef"
+  vivify_131:
     $P43."node"($P44)
     find_lex $P45, "$/"
 .annotate "line", 17
     find_lex $P46, "$past"
-    unless_null $P46, vivify_131
+    unless_null $P46, vivify_132
     new $P46, "Undef"
-  vivify_131:
+  vivify_132:
     $P47 = $P45."!make"($P46)
 .annotate "line", 14
     .return ($P47)
@@ -9091,16 +9248,16 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "nibbler"  :subid("14_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "nibbler"  :subid("14_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_52
     .param pmc param_53 :optional
     .param int has_param_53 :opt_flag
 .annotate "line", 20
-    .const 'Sub' $P98 = "18_1256279185.41736" 
+    .const 'Sub' $P98 = "18_1256533476.70438" 
     capture_lex $P98
-    .const 'Sub' $P78 = "16_1256279185.41736" 
+    .const 'Sub' $P78 = "16_1256533476.70438" 
     capture_lex $P78
-    .const 'Sub' $P60 = "15_1256279185.41736" 
+    .const 'Sub' $P60 = "15_1256533476.70438" 
     capture_lex $P60
     new $P51, 'ExceptionHandler'
     set_addr $P51, control_50
@@ -9108,28 +9265,28 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     push_eh $P51
     .lex "self", self
     .lex "$/", param_52
-    if has_param_53, optparam_132
+    if has_param_53, optparam_133
     new $P54, "Undef"
     set param_53, $P54
-  optparam_132:
+  optparam_133:
     .lex "$key", param_53
 .annotate "line", 21
     find_lex $P56, "$key"
-    unless_null $P56, vivify_133
+    unless_null $P56, vivify_134
     new $P56, "Undef"
-  vivify_133:
+  vivify_134:
     set $S57, $P56
     iseq $I58, $S57, "open"
     unless $I58, if_55_end
-    .const 'Sub' $P60 = "15_1256279185.41736" 
+    .const 'Sub' $P60 = "15_1256533476.70438" 
     capture_lex $P60
     $P60()
   if_55_end:
 .annotate "line", 31
     get_global $P68, "@MODIFIERS"
-    unless_null $P68, vivify_138
+    unless_null $P68, vivify_139
     new $P68, "ResizablePMCArray"
-  vivify_138:
+  vivify_139:
     $P68."shift"()
 .annotate "line", 32
     new $P69, "Undef"
@@ -9137,9 +9294,9 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 .annotate "line", 33
     find_lex $P71, "$/"
     set $P72, $P71["termish"]
-    unless_null $P72, vivify_139
+    unless_null $P72, vivify_140
     new $P72, "Undef"
-  vivify_139:
+  vivify_140:
     set $N73, $P72
     new $P74, "Integer"
     assign $P74, 1
@@ -9147,22 +9304,22 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     isgt $I76, $N73, $N75
     if $I76, if_70
 .annotate "line", 39
-    .const 'Sub' $P98 = "18_1256279185.41736" 
+    .const 'Sub' $P98 = "18_1256533476.70438" 
     capture_lex $P98
     $P98()
     goto if_70_end
   if_70:
 .annotate "line", 33
-    .const 'Sub' $P78 = "16_1256279185.41736" 
+    .const 'Sub' $P78 = "16_1256533476.70438" 
     capture_lex $P78
     $P78()
   if_70_end:
     find_lex $P103, "$/"
 .annotate "line", 42
     find_lex $P104, "$past"
-    unless_null $P104, vivify_147
+    unless_null $P104, vivify_148
     new $P104, "Undef"
-  vivify_147:
+  vivify_148:
     $P105 = $P103."!make"($P104)
 .annotate "line", 20
     .return ($P105)
@@ -9176,16 +9333,16 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block59"  :anon :subid("15_1256279185.41736") :outer("14_1256279185.41736")
+.sub "_block59"  :anon :subid("15_1256533476.70438") :outer("14_1256533476.70438")
 .annotate "line", 22
     get_global $P61, "@MODIFIERS"
-    unless_null $P61, vivify_134
+    unless_null $P61, vivify_135
     new $P61, "ResizablePMCArray"
-  vivify_134:
-    set $P62, $P61[0]
-    unless_null $P62, vivify_135
-    new $P62, "Undef"
   vivify_135:
+    set $P62, $P61[0]
+    unless_null $P62, vivify_136
+    new $P62, "Undef"
+  vivify_136:
     .lex "%old", $P62
 .annotate "line", 23
 
@@ -9195,13 +9352,13 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     .lex "%new", $P63
 .annotate "line", 27
     get_global $P64, "@MODIFIERS"
-    unless_null $P64, vivify_136
+    unless_null $P64, vivify_137
     new $P64, "ResizablePMCArray"
-  vivify_136:
-    find_lex $P65, "%new"
-    unless_null $P65, vivify_137
-    new $P65, "Hash"
   vivify_137:
+    find_lex $P65, "%new"
+    unless_null $P65, vivify_138
+    new $P65, "Hash"
+  vivify_138:
     $P64."unshift"($P65)
 .annotate "line", 28
     new $P66, "Exception"
@@ -9216,17 +9373,17 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block97"  :anon :subid("18_1256279185.41736") :outer("14_1256279185.41736")
+.sub "_block97"  :anon :subid("18_1256533476.70438") :outer("14_1256533476.70438")
 .annotate "line", 40
     find_lex $P99, "$/"
     set $P100, $P99["termish"]
-    unless_null $P100, vivify_140
+    unless_null $P100, vivify_141
     new $P100, "ResizablePMCArray"
-  vivify_140:
-    set $P101, $P100[0]
-    unless_null $P101, vivify_141
-    new $P101, "Undef"
   vivify_141:
+    set $P101, $P100[0]
+    unless_null $P101, vivify_142
+    new $P101, "Undef"
+  vivify_142:
     $P102 = $P101."ast"()
     store_lex "$past", $P102
 .annotate "line", 39
@@ -9235,26 +9392,26 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block77"  :anon :subid("16_1256279185.41736") :outer("14_1256279185.41736")
+.sub "_block77"  :anon :subid("16_1256533476.70438") :outer("14_1256533476.70438")
 .annotate "line", 33
-    .const 'Sub' $P88 = "17_1256279185.41736" 
+    .const 'Sub' $P88 = "17_1256533476.70438" 
     capture_lex $P88
 .annotate "line", 34
     get_hll_global $P79, ["PAST"], "Regex"
     find_lex $P80, "$/"
-    unless_null $P80, vivify_142
+    unless_null $P80, vivify_143
     new $P80, "Undef"
-  vivify_142:
+  vivify_143:
     $P81 = $P79."new"("alt" :named("pasttype"), $P80 :named("node"))
     store_lex "$past", $P81
 .annotate "line", 35
     find_lex $P83, "$/"
     set $P84, $P83["termish"]
-    unless_null $P84, vivify_143
+    unless_null $P84, vivify_144
     new $P84, "Undef"
-  vivify_143:
+  vivify_144:
     defined $I85, $P84
-    unless $I85, for_undef_144
+    unless $I85, for_undef_145
     iter $P82, $P84
     new $P95, 'ExceptionHandler'
     set_addr $P95, loop94_handler
@@ -9264,7 +9421,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     unless $P82, loop94_done
     shift $P86, $P82
   loop94_redo:
-    .const 'Sub' $P88 = "17_1256279185.41736" 
+    .const 'Sub' $P88 = "17_1256533476.70438" 
     capture_lex $P88
     $P88($P86)
   loop94_next:
@@ -9277,26 +9434,26 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     eq $P96, 67, loop94_redo
   loop94_done:
     pop_eh 
-  for_undef_144:
+  for_undef_145:
 .annotate "line", 33
     .return ($P82)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block87"  :anon :subid("17_1256279185.41736") :outer("16_1256279185.41736")
+.sub "_block87"  :anon :subid("17_1256533476.70438") :outer("16_1256533476.70438")
     .param pmc param_89
 .annotate "line", 35
     .lex "$_", param_89
 .annotate "line", 36
     find_lex $P90, "$past"
-    unless_null $P90, vivify_145
+    unless_null $P90, vivify_146
     new $P90, "Undef"
-  vivify_145:
-    find_lex $P91, "$_"
-    unless_null $P91, vivify_146
-    new $P91, "Undef"
   vivify_146:
+    find_lex $P91, "$_"
+    unless_null $P91, vivify_147
+    new $P91, "Undef"
+  vivify_147:
     $P92 = $P91."ast"()
     $P93 = $P90."push"($P92)
 .annotate "line", 35
@@ -9305,10 +9462,10 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "termish"  :subid("19_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "termish"  :subid("19_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_110
 .annotate "line", 45
-    .const 'Sub' $P121 = "20_1256279185.41736" 
+    .const 'Sub' $P121 = "20_1256533476.70438" 
     capture_lex $P121
     new $P109, 'ExceptionHandler'
     set_addr $P109, control_108
@@ -9319,9 +9476,9 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 .annotate "line", 46
     get_hll_global $P111, ["PAST"], "Regex"
     find_lex $P112, "$/"
-    unless_null $P112, vivify_148
+    unless_null $P112, vivify_149
     new $P112, "Undef"
-  vivify_148:
+  vivify_149:
     $P113 = $P111."new"("concat" :named("pasttype"), $P112 :named("node"))
     .lex "$past", $P113
 .annotate "line", 47
@@ -9331,11 +9488,11 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 .annotate "line", 48
     find_lex $P116, "$/"
     set $P117, $P116["noun"]
-    unless_null $P117, vivify_149
+    unless_null $P117, vivify_150
     new $P117, "Undef"
-  vivify_149:
+  vivify_150:
     defined $I118, $P117
-    unless $I118, for_undef_150
+    unless $I118, for_undef_151
     iter $P115, $P117
     new $P162, 'ExceptionHandler'
     set_addr $P162, loop161_handler
@@ -9345,7 +9502,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     unless $P115, loop161_done
     shift $P119, $P115
   loop161_redo:
-    .const 'Sub' $P121 = "20_1256279185.41736" 
+    .const 'Sub' $P121 = "20_1256533476.70438" 
     capture_lex $P121
     $P121($P119)
   loop161_next:
@@ -9358,13 +9515,13 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     eq $P163, 67, loop161_redo
   loop161_done:
     pop_eh 
-  for_undef_150:
+  for_undef_151:
     find_lex $P164, "$/"
 .annotate "line", 59
     find_lex $P165, "$past"
-    unless_null $P165, vivify_164
+    unless_null $P165, vivify_165
     new $P165, "Undef"
-  vivify_164:
+  vivify_165:
     $P166 = $P164."!make"($P165)
 .annotate "line", 45
     .return ($P166)
@@ -9378,43 +9535,43 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block120"  :anon :subid("20_1256279185.41736") :outer("19_1256279185.41736")
+.sub "_block120"  :anon :subid("20_1256533476.70438") :outer("19_1256533476.70438")
     .param pmc param_122
 .annotate "line", 48
-    .const 'Sub' $P150 = "23_1256279185.41736" 
+    .const 'Sub' $P150 = "23_1256533476.70438" 
     capture_lex $P150
-    .const 'Sub' $P141 = "22_1256279185.41736" 
+    .const 'Sub' $P141 = "22_1256533476.70438" 
     capture_lex $P141
-    .const 'Sub' $P130 = "21_1256279185.41736" 
+    .const 'Sub' $P130 = "21_1256533476.70438" 
     capture_lex $P130
     .lex "$_", param_122
 .annotate "line", 49
     find_lex $P123, "$_"
-    unless_null $P123, vivify_151
+    unless_null $P123, vivify_152
     new $P123, "Undef"
-  vivify_151:
+  vivify_152:
     $P124 = $P123."ast"()
     .lex "$ast", $P124
 .annotate "line", 50
     find_lex $P127, "$ast"
-    unless_null $P127, vivify_152
+    unless_null $P127, vivify_153
     new $P127, "Undef"
-  vivify_152:
+  vivify_153:
     isfalse $I128, $P127
     if $I128, if_126
 .annotate "line", 51
     find_lex $P136, "$lastlit"
-    unless_null $P136, vivify_153
+    unless_null $P136, vivify_154
     new $P136, "Undef"
-  vivify_153:
+  vivify_154:
     if $P136, if_135
     set $P134, $P136
     goto if_135_end
   if_135:
     find_lex $P137, "$ast"
-    unless_null $P137, vivify_154
+    unless_null $P137, vivify_155
     new $P137, "Undef"
-  vivify_154:
+  vivify_155:
     $S138 = $P137."pasttype"()
     iseq $I139, $S138, "literal"
     new $P134, 'Integer'
@@ -9422,14 +9579,14 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
   if_135_end:
     if $P134, if_133
 .annotate "line", 54
-    .const 'Sub' $P150 = "23_1256279185.41736" 
+    .const 'Sub' $P150 = "23_1256533476.70438" 
     capture_lex $P150
     $P160 = $P150()
     set $P132, $P160
 .annotate "line", 51
     goto if_133_end
   if_133:
-    .const 'Sub' $P141 = "22_1256279185.41736" 
+    .const 'Sub' $P141 = "22_1256533476.70438" 
     capture_lex $P141
     $P148 = $P141()
     set $P132, $P148
@@ -9438,7 +9595,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     set $P125, $P132
     goto if_126_end
   if_126:
-    .const 'Sub' $P130 = "21_1256279185.41736" 
+    .const 'Sub' $P130 = "21_1256533476.70438" 
     capture_lex $P130
     $P131 = $P130()
     set $P125, $P131
@@ -9449,22 +9606,22 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block149"  :anon :subid("23_1256279185.41736") :outer("20_1256279185.41736")
+.sub "_block149"  :anon :subid("23_1256533476.70438") :outer("20_1256533476.70438")
 .annotate "line", 55
     find_lex $P151, "$past"
-    unless_null $P151, vivify_155
+    unless_null $P151, vivify_156
     new $P151, "Undef"
-  vivify_155:
-    find_lex $P152, "$ast"
-    unless_null $P152, vivify_156
-    new $P152, "Undef"
   vivify_156:
+    find_lex $P152, "$ast"
+    unless_null $P152, vivify_157
+    new $P152, "Undef"
+  vivify_157:
     $P151."push"($P152)
 .annotate "line", 56
     find_lex $P155, "$ast"
-    unless_null $P155, vivify_157
+    unless_null $P155, vivify_158
     new $P155, "Undef"
-  vivify_157:
+  vivify_158:
     $S156 = $P155."pasttype"()
     iseq $I157, $S156, "literal"
     if $I157, if_154
@@ -9474,9 +9631,9 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     goto if_154_end
   if_154:
     find_lex $P158, "$ast"
-    unless_null $P158, vivify_158
+    unless_null $P158, vivify_159
     new $P158, "Undef"
-  vivify_158:
+  vivify_159:
     set $P153, $P158
   if_154_end:
     store_lex "$lastlit", $P153
@@ -9486,30 +9643,30 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block140"  :anon :subid("22_1256279185.41736") :outer("20_1256279185.41736")
+.sub "_block140"  :anon :subid("22_1256533476.70438") :outer("20_1256533476.70438")
 .annotate "line", 52
     find_lex $P142, "$lastlit"
-    unless_null $P142, vivify_159
+    unless_null $P142, vivify_160
     new $P142, "ResizablePMCArray"
-  vivify_159:
-    set $P143, $P142[0]
-    unless_null $P143, vivify_160
-    new $P143, "Undef"
   vivify_160:
-    find_lex $P144, "$ast"
-    unless_null $P144, vivify_161
-    new $P144, "ResizablePMCArray"
+    set $P143, $P142[0]
+    unless_null $P143, vivify_161
+    new $P143, "Undef"
   vivify_161:
-    set $P145, $P144[0]
-    unless_null $P145, vivify_162
-    new $P145, "Undef"
+    find_lex $P144, "$ast"
+    unless_null $P144, vivify_162
+    new $P144, "ResizablePMCArray"
   vivify_162:
+    set $P145, $P144[0]
+    unless_null $P145, vivify_163
+    new $P145, "Undef"
+  vivify_163:
     concat $P146, $P143, $P145
     find_lex $P147, "$lastlit"
-    unless_null $P147, vivify_163
+    unless_null $P147, vivify_164
     new $P147, "ResizablePMCArray"
     store_lex "$lastlit", $P147
-  vivify_163:
+  vivify_164:
     set $P147[0], $P146
 .annotate "line", 51
     .return ($P146)
@@ -9517,21 +9674,21 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block129"  :anon :subid("21_1256279185.41736") :outer("20_1256279185.41736")
+.sub "_block129"  :anon :subid("21_1256533476.70438") :outer("20_1256533476.70438")
 .annotate "line", 50
     .return ()
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "quantified_atom"  :subid("24_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "quantified_atom"  :subid("24_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_171
 .annotate "line", 62
-    .const 'Sub' $P218 = "28_1256279185.41736" 
+    .const 'Sub' $P218 = "28_1256533476.70438" 
     capture_lex $P218
-    .const 'Sub' $P199 = "27_1256279185.41736" 
+    .const 'Sub' $P199 = "27_1256533476.70438" 
     capture_lex $P199
-    .const 'Sub' $P179 = "25_1256279185.41736" 
+    .const 'Sub' $P179 = "25_1256533476.70438" 
     capture_lex $P179
     new $P170, 'ExceptionHandler'
     set_addr $P170, control_169
@@ -9542,53 +9699,53 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 .annotate "line", 63
     find_lex $P172, "$/"
     set $P173, $P172["atom"]
-    unless_null $P173, vivify_165
+    unless_null $P173, vivify_166
     new $P173, "Undef"
-  vivify_165:
+  vivify_166:
     $P174 = $P173."ast"()
     .lex "$past", $P174
 .annotate "line", 64
     find_lex $P176, "$/"
     set $P177, $P176["quantifier"]
-    unless_null $P177, vivify_166
+    unless_null $P177, vivify_167
     new $P177, "Undef"
-  vivify_166:
+  vivify_167:
     if $P177, if_175
 .annotate "line", 70
     find_lex $P195, "$/"
     set $P196, $P195["backmod"]
-    unless_null $P196, vivify_167
+    unless_null $P196, vivify_168
     new $P196, "ResizablePMCArray"
-  vivify_167:
-    set $P197, $P196[0]
-    unless_null $P197, vivify_168
-    new $P197, "Undef"
   vivify_168:
+    set $P197, $P196[0]
+    unless_null $P197, vivify_169
+    new $P197, "Undef"
+  vivify_169:
     unless $P197, if_194_end
-    .const 'Sub' $P199 = "27_1256279185.41736" 
+    .const 'Sub' $P199 = "27_1256533476.70438" 
     capture_lex $P199
     $P199()
   if_194_end:
 .annotate "line", 64
     goto if_175_end
   if_175:
-    .const 'Sub' $P179 = "25_1256279185.41736" 
+    .const 'Sub' $P179 = "25_1256533476.70438" 
     capture_lex $P179
     $P179()
   if_175_end:
 .annotate "line", 71
     find_lex $P210, "$past"
-    unless_null $P210, vivify_179
+    unless_null $P210, vivify_180
     new $P210, "Undef"
-  vivify_179:
+  vivify_180:
     if $P210, if_209
     set $P208, $P210
     goto if_209_end
   if_209:
     find_lex $P211, "$past"
-    unless_null $P211, vivify_180
+    unless_null $P211, vivify_181
     new $P211, "Undef"
-  vivify_180:
+  vivify_181:
     $P212 = $P211."backtrack"()
     isfalse $I213, $P212
     new $P208, 'Integer'
@@ -9599,30 +9756,30 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     goto if_207_end
   if_207:
     get_global $P214, "@MODIFIERS"
-    unless_null $P214, vivify_181
+    unless_null $P214, vivify_182
     new $P214, "ResizablePMCArray"
-  vivify_181:
-    set $P215, $P214[0]
-    unless_null $P215, vivify_182
-    new $P215, "Hash"
   vivify_182:
-    set $P216, $P215["r"]
-    unless_null $P216, vivify_183
-    new $P216, "Undef"
+    set $P215, $P214[0]
+    unless_null $P215, vivify_183
+    new $P215, "Hash"
   vivify_183:
+    set $P216, $P215["r"]
+    unless_null $P216, vivify_184
+    new $P216, "Undef"
+  vivify_184:
     set $P206, $P216
   if_207_end:
     unless $P206, if_205_end
-    .const 'Sub' $P218 = "28_1256279185.41736" 
+    .const 'Sub' $P218 = "28_1256533476.70438" 
     capture_lex $P218
     $P218()
   if_205_end:
     find_lex $P221, "$/"
 .annotate "line", 74
     find_lex $P222, "$past"
-    unless_null $P222, vivify_185
+    unless_null $P222, vivify_186
     new $P222, "Undef"
-  vivify_185:
+  vivify_186:
     $P223 = $P221."!make"($P222)
 .annotate "line", 62
     .return ($P223)
@@ -9636,69 +9793,69 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block198"  :anon :subid("27_1256279185.41736") :outer("24_1256279185.41736")
+.sub "_block198"  :anon :subid("27_1256533476.70438") :outer("24_1256533476.70438")
 .annotate "line", 70
     find_lex $P200, "$past"
-    unless_null $P200, vivify_169
+    unless_null $P200, vivify_170
     new $P200, "Undef"
-  vivify_169:
+  vivify_170:
     find_lex $P201, "$/"
     set $P202, $P201["backmod"]
-    unless_null $P202, vivify_170
+    unless_null $P202, vivify_171
     new $P202, "ResizablePMCArray"
-  vivify_170:
-    set $P203, $P202[0]
-    unless_null $P203, vivify_171
-    new $P203, "Undef"
   vivify_171:
+    set $P203, $P202[0]
+    unless_null $P203, vivify_172
+    new $P203, "Undef"
+  vivify_172:
     $P204 = "backmod"($P200, $P203)
     .return ($P204)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block178"  :anon :subid("25_1256279185.41736") :outer("24_1256279185.41736")
+.sub "_block178"  :anon :subid("25_1256533476.70438") :outer("24_1256533476.70438")
 .annotate "line", 64
-    .const 'Sub' $P184 = "26_1256279185.41736" 
+    .const 'Sub' $P184 = "26_1256533476.70438" 
     capture_lex $P184
 .annotate "line", 65
     find_lex $P181, "$past"
-    unless_null $P181, vivify_172
+    unless_null $P181, vivify_173
     new $P181, "Undef"
-  vivify_172:
+  vivify_173:
     isfalse $I182, $P181
     unless $I182, if_180_end
-    .const 'Sub' $P184 = "26_1256279185.41736" 
+    .const 'Sub' $P184 = "26_1256533476.70438" 
     capture_lex $P184
     $P184()
   if_180_end:
 .annotate "line", 66
     find_lex $P187, "$/"
     set $P188, $P187["quantifier"]
-    unless_null $P188, vivify_174
+    unless_null $P188, vivify_175
     new $P188, "ResizablePMCArray"
-  vivify_174:
-    set $P189, $P188[0]
-    unless_null $P189, vivify_175
-    new $P189, "Undef"
   vivify_175:
+    set $P189, $P188[0]
+    unless_null $P189, vivify_176
+    new $P189, "Undef"
+  vivify_176:
     $P190 = $P189."ast"()
     .lex "$qast", $P190
 .annotate "line", 67
     find_lex $P191, "$qast"
-    unless_null $P191, vivify_176
+    unless_null $P191, vivify_177
     new $P191, "Undef"
-  vivify_176:
-    find_lex $P192, "$past"
-    unless_null $P192, vivify_177
-    new $P192, "Undef"
   vivify_177:
+    find_lex $P192, "$past"
+    unless_null $P192, vivify_178
+    new $P192, "Undef"
+  vivify_178:
     $P191."unshift"($P192)
 .annotate "line", 68
     find_lex $P193, "$qast"
-    unless_null $P193, vivify_178
+    unless_null $P193, vivify_179
     new $P193, "Undef"
-  vivify_178:
+  vivify_179:
     store_lex "$past", $P193
 .annotate "line", 64
     .return ($P193)
@@ -9706,24 +9863,24 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block183"  :anon :subid("26_1256279185.41736") :outer("25_1256279185.41736")
+.sub "_block183"  :anon :subid("26_1256533476.70438") :outer("25_1256533476.70438")
 .annotate "line", 65
     find_lex $P185, "$/"
-    unless_null $P185, vivify_173
+    unless_null $P185, vivify_174
     new $P185, "Undef"
-  vivify_173:
+  vivify_174:
     $P186 = $P185."panic"("Can't quantify zero-width atom")
     .return ($P186)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block217"  :anon :subid("28_1256279185.41736") :outer("24_1256279185.41736")
+.sub "_block217"  :anon :subid("28_1256533476.70438") :outer("24_1256533476.70438")
 .annotate "line", 72
     find_lex $P219, "$past"
-    unless_null $P219, vivify_184
+    unless_null $P219, vivify_185
     new $P219, "Undef"
-  vivify_184:
+  vivify_185:
     $P220 = $P219."backtrack"("r")
 .annotate "line", 71
     .return ($P220)
@@ -9731,12 +9888,12 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "atom"  :subid("29_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "atom"  :subid("29_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_228
 .annotate "line", 77
-    .const 'Sub' $P239 = "31_1256279185.41736" 
+    .const 'Sub' $P239 = "31_1256533476.70438" 
     capture_lex $P239
-    .const 'Sub' $P234 = "30_1256279185.41736" 
+    .const 'Sub' $P234 = "30_1256533476.70438" 
     capture_lex $P234
     new $P227, 'ExceptionHandler'
     set_addr $P227, control_226
@@ -9750,27 +9907,27 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 .annotate "line", 79
     find_lex $P231, "$/"
     set $P232, $P231["metachar"]
-    unless_null $P232, vivify_186
+    unless_null $P232, vivify_187
     new $P232, "Undef"
-  vivify_186:
+  vivify_187:
     if $P232, if_230
 .annotate "line", 80
-    .const 'Sub' $P239 = "31_1256279185.41736" 
+    .const 'Sub' $P239 = "31_1256533476.70438" 
     capture_lex $P239
     $P239()
     goto if_230_end
   if_230:
 .annotate "line", 79
-    .const 'Sub' $P234 = "30_1256279185.41736" 
+    .const 'Sub' $P234 = "30_1256533476.70438" 
     capture_lex $P234
     $P234()
   if_230_end:
     find_lex $P255, "$/"
 .annotate "line", 84
     find_lex $P256, "$past"
-    unless_null $P256, vivify_194
+    unless_null $P256, vivify_195
     new $P256, "Undef"
-  vivify_194:
+  vivify_195:
     $P257 = $P255."!make"($P256)
 .annotate "line", 77
     .return ($P257)
@@ -9784,41 +9941,41 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block238"  :anon :subid("31_1256279185.41736") :outer("29_1256279185.41736")
+.sub "_block238"  :anon :subid("31_1256533476.70438") :outer("29_1256533476.70438")
 .annotate "line", 80
-    .const 'Sub' $P251 = "32_1256279185.41736" 
+    .const 'Sub' $P251 = "32_1256533476.70438" 
     capture_lex $P251
 .annotate "line", 81
     get_hll_global $P240, ["PAST"], "Regex"
     find_lex $P241, "$/"
-    unless_null $P241, vivify_187
+    unless_null $P241, vivify_188
     new $P241, "Undef"
-  vivify_187:
+  vivify_188:
     set $S242, $P241
     find_lex $P243, "$/"
-    unless_null $P243, vivify_188
+    unless_null $P243, vivify_189
     new $P243, "Undef"
-  vivify_188:
+  vivify_189:
     $P244 = $P240."new"($S242, "literal" :named("pasttype"), $P243 :named("node"))
     store_lex "$past", $P244
 .annotate "line", 82
     get_global $P247, "@MODIFIERS"
-    unless_null $P247, vivify_189
+    unless_null $P247, vivify_190
     new $P247, "ResizablePMCArray"
-  vivify_189:
-    set $P248, $P247[0]
-    unless_null $P248, vivify_190
-    new $P248, "Hash"
   vivify_190:
-    set $P249, $P248["i"]
-    unless_null $P249, vivify_191
-    new $P249, "Undef"
+    set $P248, $P247[0]
+    unless_null $P248, vivify_191
+    new $P248, "Hash"
   vivify_191:
+    set $P249, $P248["i"]
+    unless_null $P249, vivify_192
+    new $P249, "Undef"
+  vivify_192:
     if $P249, if_246
     set $P245, $P249
     goto if_246_end
   if_246:
-    .const 'Sub' $P251 = "32_1256279185.41736" 
+    .const 'Sub' $P251 = "32_1256533476.70438" 
     capture_lex $P251
     $P254 = $P251()
     set $P245, $P254
@@ -9829,25 +9986,25 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block250"  :anon :subid("32_1256279185.41736") :outer("31_1256279185.41736")
+.sub "_block250"  :anon :subid("32_1256533476.70438") :outer("31_1256533476.70438")
 .annotate "line", 82
     find_lex $P252, "$past"
-    unless_null $P252, vivify_192
+    unless_null $P252, vivify_193
     new $P252, "Undef"
-  vivify_192:
+  vivify_193:
     $P253 = $P252."subtype"("ignorecase")
     .return ($P253)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block233"  :anon :subid("30_1256279185.41736") :outer("29_1256279185.41736")
+.sub "_block233"  :anon :subid("30_1256533476.70438") :outer("29_1256533476.70438")
 .annotate "line", 79
     find_lex $P235, "$/"
     set $P236, $P235["metachar"]
-    unless_null $P236, vivify_193
+    unless_null $P236, vivify_194
     new $P236, "Undef"
-  vivify_193:
+  vivify_194:
     $P237 = $P236."ast"()
     store_lex "$past", $P237
     .return ($P237)
@@ -9855,7 +10012,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "quantifier:sym<*>"  :subid("33_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "quantifier:sym<*>"  :subid("33_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_262
 .annotate "line", 87
     new $P261, 'ExceptionHandler'
@@ -9867,22 +10024,22 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 .annotate "line", 88
     get_hll_global $P263, ["PAST"], "Regex"
     find_lex $P264, "$/"
-    unless_null $P264, vivify_195
+    unless_null $P264, vivify_196
     new $P264, "Undef"
-  vivify_195:
+  vivify_196:
     $P265 = $P263."new"("quant" :named("pasttype"), $P264 :named("node"))
     .lex "$past", $P265
     find_lex $P266, "$/"
 .annotate "line", 89
     find_lex $P267, "$past"
-    unless_null $P267, vivify_196
+    unless_null $P267, vivify_197
     new $P267, "Undef"
-  vivify_196:
+  vivify_197:
     find_lex $P268, "$/"
     set $P269, $P268["backmod"]
-    unless_null $P269, vivify_197
+    unless_null $P269, vivify_198
     new $P269, "Undef"
-  vivify_197:
+  vivify_198:
     $P270 = "backmod"($P267, $P269)
     $P271 = $P266."!make"($P270)
 .annotate "line", 87
@@ -9897,7 +10054,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "quantifier:sym<+>"  :subid("34_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "quantifier:sym<+>"  :subid("34_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_276
 .annotate "line", 92
     new $P275, 'ExceptionHandler'
@@ -9909,22 +10066,22 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 .annotate "line", 93
     get_hll_global $P277, ["PAST"], "Regex"
     find_lex $P278, "$/"
-    unless_null $P278, vivify_198
+    unless_null $P278, vivify_199
     new $P278, "Undef"
-  vivify_198:
+  vivify_199:
     $P279 = $P277."new"("quant" :named("pasttype"), 1 :named("min"), $P278 :named("node"))
     .lex "$past", $P279
     find_lex $P280, "$/"
 .annotate "line", 94
     find_lex $P281, "$past"
-    unless_null $P281, vivify_199
+    unless_null $P281, vivify_200
     new $P281, "Undef"
-  vivify_199:
+  vivify_200:
     find_lex $P282, "$/"
     set $P283, $P282["backmod"]
-    unless_null $P283, vivify_200
+    unless_null $P283, vivify_201
     new $P283, "Undef"
-  vivify_200:
+  vivify_201:
     $P284 = "backmod"($P281, $P283)
     $P285 = $P280."!make"($P284)
 .annotate "line", 92
@@ -9939,7 +10096,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "quantifier:sym<?>"  :subid("35_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "quantifier:sym<?>"  :subid("35_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_290
 .annotate "line", 97
     new $P289, 'ExceptionHandler'
@@ -9951,31 +10108,31 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 .annotate "line", 98
     get_hll_global $P291, ["PAST"], "Regex"
     find_lex $P292, "$/"
-    unless_null $P292, vivify_201
+    unless_null $P292, vivify_202
     new $P292, "Undef"
-  vivify_201:
+  vivify_202:
     $P293 = $P291."new"("quant" :named("pasttype"), 0 :named("min"), 1 :named("max"), $P292 :named("node"))
     .lex "$past", $P293
     find_lex $P294, "$/"
 .annotate "line", 99
     find_lex $P295, "$past"
-    unless_null $P295, vivify_202
+    unless_null $P295, vivify_203
     new $P295, "Undef"
-  vivify_202:
+  vivify_203:
     find_lex $P296, "$/"
     set $P297, $P296["backmod"]
-    unless_null $P297, vivify_203
+    unless_null $P297, vivify_204
     new $P297, "Undef"
-  vivify_203:
+  vivify_204:
     $P298 = "backmod"($P295, $P297)
     $P294."!make"($P298)
 .annotate "line", 98
     find_lex $P299, "$/"
 .annotate "line", 100
     find_lex $P300, "$past"
-    unless_null $P300, vivify_204
+    unless_null $P300, vivify_205
     new $P300, "Undef"
-  vivify_204:
+  vivify_205:
     $P301 = $P299."!make"($P300)
 .annotate "line", 97
     .return ($P301)
@@ -9989,12 +10146,12 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "quantifier:sym<**>"  :subid("36_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "quantifier:sym<**>"  :subid("36_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_306
 .annotate "line", 103
-    .const 'Sub' $P320 = "38_1256279185.41736" 
+    .const 'Sub' $P320 = "38_1256533476.70438" 
     capture_lex $P320
-    .const 'Sub' $P312 = "37_1256279185.41736" 
+    .const 'Sub' $P312 = "37_1256533476.70438" 
     capture_lex $P312
     new $P305, 'ExceptionHandler'
     set_addr $P305, control_304
@@ -10008,32 +10165,32 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 .annotate "line", 105
     find_lex $P309, "$/"
     set $P310, $P309["quantified_atom"]
-    unless_null $P310, vivify_205
+    unless_null $P310, vivify_206
     new $P310, "Undef"
-  vivify_205:
+  vivify_206:
     if $P310, if_308
 .annotate "line", 109
-    .const 'Sub' $P320 = "38_1256279185.41736" 
+    .const 'Sub' $P320 = "38_1256533476.70438" 
     capture_lex $P320
     $P320()
     goto if_308_end
   if_308:
 .annotate "line", 105
-    .const 'Sub' $P312 = "37_1256279185.41736" 
+    .const 'Sub' $P312 = "37_1256533476.70438" 
     capture_lex $P312
     $P312()
   if_308_end:
     find_lex $P356, "$/"
 .annotate "line", 114
     find_lex $P357, "$past"
-    unless_null $P357, vivify_218
+    unless_null $P357, vivify_219
     new $P357, "Undef"
-  vivify_218:
+  vivify_219:
     find_lex $P358, "$/"
     set $P359, $P358["backmod"]
-    unless_null $P359, vivify_219
+    unless_null $P359, vivify_220
     new $P359, "Undef"
-  vivify_219:
+  vivify_220:
     $P360 = "backmod"($P357, $P359)
     $P361 = $P356."!make"($P360)
 .annotate "line", 103
@@ -10048,44 +10205,44 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block319"  :anon :subid("38_1256279185.41736") :outer("36_1256279185.41736")
+.sub "_block319"  :anon :subid("38_1256533476.70438") :outer("36_1256533476.70438")
 .annotate "line", 109
-    .const 'Sub' $P348 = "40_1256279185.41736" 
+    .const 'Sub' $P348 = "40_1256533476.70438" 
     capture_lex $P348
-    .const 'Sub' $P333 = "39_1256279185.41736" 
+    .const 'Sub' $P333 = "39_1256533476.70438" 
     capture_lex $P333
 .annotate "line", 110
     get_hll_global $P321, ["PAST"], "Regex"
     find_lex $P322, "$/"
     set $P323, $P322["min"]
-    unless_null $P323, vivify_206
+    unless_null $P323, vivify_207
     new $P323, "Undef"
-  vivify_206:
+  vivify_207:
     set $N324, $P323
     find_lex $P325, "$/"
-    unless_null $P325, vivify_207
+    unless_null $P325, vivify_208
     new $P325, "Undef"
-  vivify_207:
+  vivify_208:
     $P326 = $P321."new"("quant" :named("pasttype"), $N324 :named("min"), $P325 :named("node"))
     store_lex "$past", $P326
 .annotate "line", 111
     find_lex $P329, "$/"
     set $P330, $P329["max"]
-    unless_null $P330, vivify_208
+    unless_null $P330, vivify_209
     new $P330, "Undef"
-  vivify_208:
+  vivify_209:
     isfalse $I331, $P330
     if $I331, if_328
 .annotate "line", 112
     find_lex $P342, "$/"
     set $P343, $P342["max"]
-    unless_null $P343, vivify_209
+    unless_null $P343, vivify_210
     new $P343, "ResizablePMCArray"
-  vivify_209:
-    set $P344, $P343[0]
-    unless_null $P344, vivify_210
-    new $P344, "Undef"
   vivify_210:
+    set $P344, $P343[0]
+    unless_null $P344, vivify_211
+    new $P344, "Undef"
+  vivify_211:
     set $S345, $P344
     isne $I346, $S345, "*"
     if $I346, if_341
@@ -10093,7 +10250,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     set $P340, $I346
     goto if_341_end
   if_341:
-    .const 'Sub' $P348 = "40_1256279185.41736" 
+    .const 'Sub' $P348 = "40_1256533476.70438" 
     capture_lex $P348
     $P355 = $P348()
     set $P340, $P355
@@ -10102,7 +10259,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     set $P327, $P340
     goto if_328_end
   if_328:
-    .const 'Sub' $P333 = "39_1256279185.41736" 
+    .const 'Sub' $P333 = "39_1256533476.70438" 
     capture_lex $P333
     $P339 = $P333()
     set $P327, $P339
@@ -10113,21 +10270,21 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block347"  :anon :subid("40_1256279185.41736") :outer("38_1256279185.41736")
+.sub "_block347"  :anon :subid("40_1256533476.70438") :outer("38_1256533476.70438")
 .annotate "line", 112
     find_lex $P349, "$past"
-    unless_null $P349, vivify_211
+    unless_null $P349, vivify_212
     new $P349, "Undef"
-  vivify_211:
+  vivify_212:
     find_lex $P350, "$/"
     set $P351, $P350["max"]
-    unless_null $P351, vivify_212
+    unless_null $P351, vivify_213
     new $P351, "ResizablePMCArray"
-  vivify_212:
-    set $P352, $P351[0]
-    unless_null $P352, vivify_213
-    new $P352, "Undef"
   vivify_213:
+    set $P352, $P351[0]
+    unless_null $P352, vivify_214
+    new $P352, "Undef"
+  vivify_214:
     set $N353, $P352
     $P354 = $P349."max"($N353)
     .return ($P354)
@@ -10135,17 +10292,17 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block332"  :anon :subid("39_1256279185.41736") :outer("38_1256279185.41736")
+.sub "_block332"  :anon :subid("39_1256533476.70438") :outer("38_1256533476.70438")
 .annotate "line", 111
     find_lex $P334, "$past"
-    unless_null $P334, vivify_214
+    unless_null $P334, vivify_215
     new $P334, "Undef"
-  vivify_214:
+  vivify_215:
     find_lex $P335, "$/"
     set $P336, $P335["min"]
-    unless_null $P336, vivify_215
+    unless_null $P336, vivify_216
     new $P336, "Undef"
-  vivify_215:
+  vivify_216:
     set $N337, $P336
     $P338 = $P334."max"($N337)
     .return ($P338)
@@ -10153,20 +10310,20 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block311"  :anon :subid("37_1256279185.41736") :outer("36_1256279185.41736")
+.sub "_block311"  :anon :subid("37_1256533476.70438") :outer("36_1256533476.70438")
 .annotate "line", 106
     get_hll_global $P313, ["PAST"], "Regex"
 .annotate "line", 107
     find_lex $P314, "$/"
     set $P315, $P314["quantified_atom"]
-    unless_null $P315, vivify_216
+    unless_null $P315, vivify_217
     new $P315, "Undef"
-  vivify_216:
+  vivify_217:
     $P316 = $P315."ast"()
     find_lex $P317, "$/"
-    unless_null $P317, vivify_217
+    unless_null $P317, vivify_218
     new $P317, "Undef"
-  vivify_217:
+  vivify_218:
     $P318 = $P313."new"("quant" :named("pasttype"), 1 :named("min"), $P316 :named("sep"), $P317 :named("node"))
 .annotate "line", 106
     store_lex "$past", $P318
@@ -10176,7 +10333,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<ws>"  :subid("41_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "metachar:sym<ws>"  :subid("41_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_366
 .annotate "line", 117
     new $P365, 'ExceptionHandler'
@@ -10187,17 +10344,17 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     .lex "$/", param_366
 .annotate "line", 118
     get_global $P369, "@MODIFIERS"
-    unless_null $P369, vivify_220
+    unless_null $P369, vivify_221
     new $P369, "ResizablePMCArray"
-  vivify_220:
-    set $P370, $P369[0]
-    unless_null $P370, vivify_221
-    new $P370, "Hash"
   vivify_221:
-    set $P371, $P370["s"]
-    unless_null $P371, vivify_222
-    new $P371, "Undef"
+    set $P370, $P369[0]
+    unless_null $P370, vivify_222
+    new $P370, "Hash"
   vivify_222:
+    set $P371, $P370["s"]
+    unless_null $P371, vivify_223
+    new $P371, "Undef"
+  vivify_223:
     if $P371, if_368
 .annotate "line", 121
     new $P375, "Integer"
@@ -10210,9 +10367,9 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     get_hll_global $P372, ["PAST"], "Regex"
 .annotate "line", 120
     find_lex $P373, "$/"
-    unless_null $P373, vivify_223
+    unless_null $P373, vivify_224
     new $P373, "Undef"
-  vivify_223:
+  vivify_224:
     $P374 = $P372."new"("ws", "subrule" :named("pasttype"), "method" :named("subtype"), $P373 :named("node"))
 .annotate "line", 119
     set $P367, $P374
@@ -10222,9 +10379,9 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     find_lex $P376, "$/"
 .annotate "line", 122
     find_lex $P377, "$past"
-    unless_null $P377, vivify_224
+    unless_null $P377, vivify_225
     new $P377, "Undef"
-  vivify_224:
+  vivify_225:
     $P378 = $P376."!make"($P377)
 .annotate "line", 117
     .return ($P378)
@@ -10238,7 +10395,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<[ ]>"  :subid("42_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "metachar:sym<[ ]>"  :subid("42_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_383
 .annotate "line", 126
     new $P382, 'ExceptionHandler'
@@ -10251,9 +10408,9 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     find_lex $P384, "$/"
     find_lex $P385, "$/"
     set $P386, $P385["nibbler"]
-    unless_null $P386, vivify_225
+    unless_null $P386, vivify_226
     new $P386, "Undef"
-  vivify_225:
+  vivify_226:
     $P387 = $P386."ast"()
     $P388 = $P384."!make"($P387)
 .annotate "line", 126
@@ -10268,7 +10425,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<( )>"  :subid("43_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "metachar:sym<( )>"  :subid("43_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_393
 .annotate "line", 130
     new $P392, 'ExceptionHandler'
@@ -10280,32 +10437,32 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 .annotate "line", 131
     find_lex $P394, "$/"
     set $P395, $P394["nibbler"]
-    unless_null $P395, vivify_226
+    unless_null $P395, vivify_227
     new $P395, "Undef"
-  vivify_226:
+  vivify_227:
     $P396 = $P395."ast"()
     $P397 = "buildsub"($P396)
     .lex "$subpast", $P397
 .annotate "line", 132
     get_hll_global $P398, ["PAST"], "Regex"
     find_lex $P399, "$subpast"
-    unless_null $P399, vivify_227
+    unless_null $P399, vivify_228
     new $P399, "Undef"
-  vivify_227:
+  vivify_228:
 .annotate "line", 133
     find_lex $P400, "$/"
-    unless_null $P400, vivify_228
+    unless_null $P400, vivify_229
     new $P400, "Undef"
-  vivify_228:
+  vivify_229:
     $P401 = $P398."new"($P399, "subrule" :named("pasttype"), "capture" :named("subtype"), $P400 :named("node"))
 .annotate "line", 132
     .lex "$past", $P401
     find_lex $P402, "$/"
 .annotate "line", 134
     find_lex $P403, "$past"
-    unless_null $P403, vivify_229
+    unless_null $P403, vivify_230
     new $P403, "Undef"
-  vivify_229:
+  vivify_230:
     $P404 = $P402."!make"($P403)
 .annotate "line", 130
     .return ($P404)
@@ -10319,7 +10476,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<'>"  :subid("44_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "metachar:sym<'>"  :subid("44_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_409
 .annotate "line", 137
     new $P408, 'ExceptionHandler'
@@ -10332,26 +10489,26 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     get_hll_global $P410, ["PAST"], "Regex"
     find_lex $P411, "$/"
     set $P412, $P411["quote"]
-    unless_null $P412, vivify_230
+    unless_null $P412, vivify_231
     new $P412, "Hash"
-  vivify_230:
-    set $P413, $P412["val"]
-    unless_null $P413, vivify_231
-    new $P413, "Undef"
   vivify_231:
+    set $P413, $P412["val"]
+    unless_null $P413, vivify_232
+    new $P413, "Undef"
+  vivify_232:
     set $S414, $P413
     find_lex $P415, "$/"
-    unless_null $P415, vivify_232
+    unless_null $P415, vivify_233
     new $P415, "Undef"
-  vivify_232:
+  vivify_233:
     $P416 = $P410."new"($S414, "literal" :named("pasttype"), $P415 :named("node"))
     .lex "$past", $P416
     find_lex $P417, "$/"
 .annotate "line", 139
     find_lex $P418, "$past"
-    unless_null $P418, vivify_233
+    unless_null $P418, vivify_234
     new $P418, "Undef"
-  vivify_233:
+  vivify_234:
     $P419 = $P417."!make"($P418)
 .annotate "line", 137
     .return ($P419)
@@ -10365,7 +10522,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<.>"  :subid("45_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "metachar:sym<.>"  :subid("45_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_424
 .annotate "line", 142
     new $P423, 'ExceptionHandler'
@@ -10377,17 +10534,17 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 .annotate "line", 143
     get_hll_global $P425, ["PAST"], "Regex"
     find_lex $P426, "$/"
-    unless_null $P426, vivify_234
+    unless_null $P426, vivify_235
     new $P426, "Undef"
-  vivify_234:
+  vivify_235:
     $P427 = $P425."new"("charclass" :named("pasttype"), "." :named("subtype"), $P426 :named("node"))
     .lex "$past", $P427
     find_lex $P428, "$/"
 .annotate "line", 144
     find_lex $P429, "$past"
-    unless_null $P429, vivify_235
+    unless_null $P429, vivify_236
     new $P429, "Undef"
-  vivify_235:
+  vivify_236:
     $P430 = $P428."!make"($P429)
 .annotate "line", 142
     .return ($P430)
@@ -10401,7 +10558,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<^>"  :subid("46_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "metachar:sym<^>"  :subid("46_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_435
 .annotate "line", 147
     new $P434, 'ExceptionHandler'
@@ -10413,17 +10570,17 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 .annotate "line", 148
     get_hll_global $P436, ["PAST"], "Regex"
     find_lex $P437, "$/"
-    unless_null $P437, vivify_236
+    unless_null $P437, vivify_237
     new $P437, "Undef"
-  vivify_236:
+  vivify_237:
     $P438 = $P436."new"("anchor" :named("pasttype"), "bos" :named("subtype"), $P437 :named("node"))
     .lex "$past", $P438
     find_lex $P439, "$/"
 .annotate "line", 149
     find_lex $P440, "$past"
-    unless_null $P440, vivify_237
+    unless_null $P440, vivify_238
     new $P440, "Undef"
-  vivify_237:
+  vivify_238:
     $P441 = $P439."!make"($P440)
 .annotate "line", 147
     .return ($P441)
@@ -10437,7 +10594,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<^^>"  :subid("47_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "metachar:sym<^^>"  :subid("47_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_446
 .annotate "line", 152
     new $P445, 'ExceptionHandler'
@@ -10449,17 +10606,17 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 .annotate "line", 153
     get_hll_global $P447, ["PAST"], "Regex"
     find_lex $P448, "$/"
-    unless_null $P448, vivify_238
+    unless_null $P448, vivify_239
     new $P448, "Undef"
-  vivify_238:
+  vivify_239:
     $P449 = $P447."new"("anchor" :named("pasttype"), "bol" :named("subtype"), $P448 :named("node"))
     .lex "$past", $P449
     find_lex $P450, "$/"
 .annotate "line", 154
     find_lex $P451, "$past"
-    unless_null $P451, vivify_239
+    unless_null $P451, vivify_240
     new $P451, "Undef"
-  vivify_239:
+  vivify_240:
     $P452 = $P450."!make"($P451)
 .annotate "line", 152
     .return ($P452)
@@ -10473,7 +10630,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<$>"  :subid("48_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "metachar:sym<$>"  :subid("48_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_457
 .annotate "line", 157
     new $P456, 'ExceptionHandler'
@@ -10485,17 +10642,17 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 .annotate "line", 158
     get_hll_global $P458, ["PAST"], "Regex"
     find_lex $P459, "$/"
-    unless_null $P459, vivify_240
+    unless_null $P459, vivify_241
     new $P459, "Undef"
-  vivify_240:
+  vivify_241:
     $P460 = $P458."new"("anchor" :named("pasttype"), "eos" :named("subtype"), $P459 :named("node"))
     .lex "$past", $P460
     find_lex $P461, "$/"
 .annotate "line", 159
     find_lex $P462, "$past"
-    unless_null $P462, vivify_241
+    unless_null $P462, vivify_242
     new $P462, "Undef"
-  vivify_241:
+  vivify_242:
     $P463 = $P461."!make"($P462)
 .annotate "line", 157
     .return ($P463)
@@ -10509,7 +10666,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<$$>"  :subid("49_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "metachar:sym<$$>"  :subid("49_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_468
 .annotate "line", 162
     new $P467, 'ExceptionHandler'
@@ -10521,17 +10678,17 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 .annotate "line", 163
     get_hll_global $P469, ["PAST"], "Regex"
     find_lex $P470, "$/"
-    unless_null $P470, vivify_242
+    unless_null $P470, vivify_243
     new $P470, "Undef"
-  vivify_242:
+  vivify_243:
     $P471 = $P469."new"("anchor" :named("pasttype"), "eol" :named("subtype"), $P470 :named("node"))
     .lex "$past", $P471
     find_lex $P472, "$/"
 .annotate "line", 164
     find_lex $P473, "$past"
-    unless_null $P473, vivify_243
+    unless_null $P473, vivify_244
     new $P473, "Undef"
-  vivify_243:
+  vivify_244:
     $P474 = $P472."!make"($P473)
 .annotate "line", 162
     .return ($P474)
@@ -10545,7 +10702,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<:::>"  :subid("50_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "metachar:sym<:::>"  :subid("50_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_479
 .annotate "line", 167
     new $P478, 'ExceptionHandler'
@@ -10557,17 +10714,17 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 .annotate "line", 168
     get_hll_global $P480, ["PAST"], "Regex"
     find_lex $P481, "$/"
-    unless_null $P481, vivify_244
+    unless_null $P481, vivify_245
     new $P481, "Undef"
-  vivify_244:
+  vivify_245:
     $P482 = $P480."new"("cut" :named("pasttype"), $P481 :named("node"))
     .lex "$past", $P482
     find_lex $P483, "$/"
 .annotate "line", 169
     find_lex $P484, "$past"
-    unless_null $P484, vivify_245
+    unless_null $P484, vivify_246
     new $P484, "Undef"
-  vivify_245:
+  vivify_246:
     $P485 = $P483."!make"($P484)
 .annotate "line", 167
     .return ($P485)
@@ -10581,7 +10738,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<lwb>"  :subid("51_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "metachar:sym<lwb>"  :subid("51_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_490
 .annotate "line", 172
     new $P489, 'ExceptionHandler'
@@ -10593,17 +10750,17 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 .annotate "line", 173
     get_hll_global $P491, ["PAST"], "Regex"
     find_lex $P492, "$/"
-    unless_null $P492, vivify_246
+    unless_null $P492, vivify_247
     new $P492, "Undef"
-  vivify_246:
+  vivify_247:
     $P493 = $P491."new"("anchor" :named("pasttype"), "lwb" :named("subtype"), $P492 :named("node"))
     .lex "$past", $P493
     find_lex $P494, "$/"
 .annotate "line", 174
     find_lex $P495, "$past"
-    unless_null $P495, vivify_247
+    unless_null $P495, vivify_248
     new $P495, "Undef"
-  vivify_247:
+  vivify_248:
     $P496 = $P494."!make"($P495)
 .annotate "line", 172
     .return ($P496)
@@ -10617,7 +10774,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<rwb>"  :subid("52_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "metachar:sym<rwb>"  :subid("52_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_501
 .annotate "line", 177
     new $P500, 'ExceptionHandler'
@@ -10629,17 +10786,17 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 .annotate "line", 178
     get_hll_global $P502, ["PAST"], "Regex"
     find_lex $P503, "$/"
-    unless_null $P503, vivify_248
+    unless_null $P503, vivify_249
     new $P503, "Undef"
-  vivify_248:
+  vivify_249:
     $P504 = $P502."new"("anchor" :named("pasttype"), "rwb" :named("subtype"), $P503 :named("node"))
     .lex "$past", $P504
     find_lex $P505, "$/"
 .annotate "line", 179
     find_lex $P506, "$past"
-    unless_null $P506, vivify_249
+    unless_null $P506, vivify_250
     new $P506, "Undef"
-  vivify_249:
+  vivify_250:
     $P507 = $P505."!make"($P506)
 .annotate "line", 177
     .return ($P507)
@@ -10653,7 +10810,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<bs>"  :subid("53_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "metachar:sym<bs>"  :subid("53_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_512
 .annotate "line", 182
     new $P511, 'ExceptionHandler'
@@ -10666,9 +10823,9 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     find_lex $P513, "$/"
     find_lex $P514, "$/"
     set $P515, $P514["backslash"]
-    unless_null $P515, vivify_250
+    unless_null $P515, vivify_251
     new $P515, "Undef"
-  vivify_250:
+  vivify_251:
     $P516 = $P515."ast"()
     $P517 = $P513."!make"($P516)
 .annotate "line", 182
@@ -10683,7 +10840,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<mod>"  :subid("54_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "metachar:sym<mod>"  :subid("54_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_522
 .annotate "line", 186
     new $P521, 'ExceptionHandler'
@@ -10696,9 +10853,9 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     find_lex $P523, "$/"
     find_lex $P524, "$/"
     set $P525, $P524["mod_internal"]
-    unless_null $P525, vivify_251
+    unless_null $P525, vivify_252
     new $P525, "Undef"
-  vivify_251:
+  vivify_252:
     $P526 = $P525."ast"()
     $P527 = $P523."!make"($P526)
 .annotate "line", 186
@@ -10713,7 +10870,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<assert>"  :subid("55_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "metachar:sym<assert>"  :subid("55_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_532
 .annotate "line", 190
     new $P531, 'ExceptionHandler'
@@ -10726,9 +10883,9 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     find_lex $P533, "$/"
     find_lex $P534, "$/"
     set $P535, $P534["assertion"]
-    unless_null $P535, vivify_252
+    unless_null $P535, vivify_253
     new $P535, "Undef"
-  vivify_252:
+  vivify_253:
     $P536 = $P535."ast"()
     $P537 = $P533."!make"($P536)
 .annotate "line", 190
@@ -10743,7 +10900,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<~>"  :subid("56_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "metachar:sym<~>"  :subid("56_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_542
 .annotate "line", 194
     new $P541, 'ExceptionHandler'
@@ -10758,26 +10915,26 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 .annotate "line", 196
     find_lex $P545, "$/"
     set $P546, $P545["EXPR"]
-    unless_null $P546, vivify_253
+    unless_null $P546, vivify_254
     new $P546, "Undef"
-  vivify_253:
+  vivify_254:
     $P547 = $P546."ast"()
 .annotate "line", 197
     get_hll_global $P548, ["PAST"], "Regex"
 .annotate "line", 198
     find_lex $P549, "$/"
     set $P550, $P549["GOAL"]
-    unless_null $P550, vivify_254
+    unless_null $P550, vivify_255
     new $P550, "Undef"
-  vivify_254:
+  vivify_255:
     $P551 = $P550."ast"()
 .annotate "line", 199
     get_hll_global $P552, ["PAST"], "Regex"
     find_lex $P553, "$/"
     set $P554, $P553["GOAL"]
-    unless_null $P554, vivify_255
+    unless_null $P554, vivify_256
     new $P554, "Undef"
-  vivify_255:
+  vivify_256:
     set $S555, $P554
 .annotate "line", 200
     $P556 = $P552."new"("FAILGOAL", $S555, "subrule" :named("pasttype"), "method" :named("subtype"))
@@ -10799,7 +10956,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<{*}>"  :subid("57_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "metachar:sym<{*}>"  :subid("57_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_564
 .annotate "line", 207
     new $P563, 'ExceptionHandler'
@@ -10811,9 +10968,9 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 .annotate "line", 209
     find_lex $P567, "$/"
     set $P568, $P567["key"]
-    unless_null $P568, vivify_256
+    unless_null $P568, vivify_257
     new $P568, "Undef"
-  vivify_256:
+  vivify_257:
     if $P568, if_566
 .annotate "line", 210
     new $P576, "Integer"
@@ -10825,18 +10982,18 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     get_hll_global $P569, ["PAST"], "Regex"
     find_lex $P570, "$/"
     set $P571, $P570["key"]
-    unless_null $P571, vivify_257
+    unless_null $P571, vivify_258
     new $P571, "ResizablePMCArray"
-  vivify_257:
-    set $P572, $P571[0]
-    unless_null $P572, vivify_258
-    new $P572, "Undef"
   vivify_258:
+    set $P572, $P571[0]
+    unless_null $P572, vivify_259
+    new $P572, "Undef"
+  vivify_259:
     set $S573, $P572
     find_lex $P574, "$/"
-    unless_null $P574, vivify_259
+    unless_null $P574, vivify_260
     new $P574, "Undef"
-  vivify_259:
+  vivify_260:
     $P575 = $P569."new"($S573, "reduce" :named("pasttype"), $P574 :named("node"))
     set $P565, $P575
   if_566_end:
@@ -10845,9 +11002,9 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     find_lex $P577, "$/"
 .annotate "line", 211
     find_lex $P578, "$past"
-    unless_null $P578, vivify_260
+    unless_null $P578, vivify_261
     new $P578, "Undef"
-  vivify_260:
+  vivify_261:
     $P579 = $P577."!make"($P578)
 .annotate "line", 207
     .return ($P579)
@@ -10861,12 +11018,12 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<var>"  :subid("58_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "metachar:sym<var>"  :subid("58_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_584
 .annotate "line", 214
-    .const 'Sub' $P643 = "63_1256279185.41736" 
+    .const 'Sub' $P643 = "63_1256533476.70438" 
     capture_lex $P643
-    .const 'Sub' $P600 = "59_1256279185.41736" 
+    .const 'Sub' $P600 = "59_1256533476.70438" 
     capture_lex $P600
     new $P583, 'ExceptionHandler'
     set_addr $P583, control_582
@@ -10880,15 +11037,15 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 .annotate "line", 216
     find_lex $P588, "$/"
     set $P589, $P588["pos"]
-    unless_null $P589, vivify_261
+    unless_null $P589, vivify_262
     new $P589, "Undef"
-  vivify_261:
+  vivify_262:
     if $P589, if_587
     find_lex $P593, "$/"
     set $P594, $P593["name"]
-    unless_null $P594, vivify_262
+    unless_null $P594, vivify_263
     new $P594, "Undef"
-  vivify_262:
+  vivify_263:
     set $S595, $P594
     new $P586, 'String'
     set $P586, $S595
@@ -10896,9 +11053,9 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
   if_587:
     find_lex $P590, "$/"
     set $P591, $P590["pos"]
-    unless_null $P591, vivify_263
+    unless_null $P591, vivify_264
     new $P591, "Undef"
-  vivify_263:
+  vivify_264:
     set $N592, $P591
     new $P586, 'Float'
     set $P586, $N592
@@ -10907,27 +11064,27 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 .annotate "line", 217
     find_lex $P597, "$/"
     set $P598, $P597["quantified_atom"]
-    unless_null $P598, vivify_264
+    unless_null $P598, vivify_265
     new $P598, "Undef"
-  vivify_264:
+  vivify_265:
     if $P598, if_596
 .annotate "line", 227
-    .const 'Sub' $P643 = "63_1256279185.41736" 
+    .const 'Sub' $P643 = "63_1256533476.70438" 
     capture_lex $P643
     $P643()
     goto if_596_end
   if_596:
 .annotate "line", 217
-    .const 'Sub' $P600 = "59_1256279185.41736" 
+    .const 'Sub' $P600 = "59_1256533476.70438" 
     capture_lex $P600
     $P600()
   if_596_end:
     find_lex $P648, "$/"
 .annotate "line", 231
     find_lex $P649, "$past"
-    unless_null $P649, vivify_281
+    unless_null $P649, vivify_282
     new $P649, "Undef"
-  vivify_281:
+  vivify_282:
     $P650 = $P648."!make"($P649)
 .annotate "line", 214
     .return ($P650)
@@ -10941,18 +11098,18 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block642"  :anon :subid("63_1256279185.41736") :outer("58_1256279185.41736")
+.sub "_block642"  :anon :subid("63_1256533476.70438") :outer("58_1256533476.70438")
 .annotate "line", 228
     get_hll_global $P644, ["PAST"], "Regex"
     find_lex $P645, "$name"
-    unless_null $P645, vivify_265
+    unless_null $P645, vivify_266
     new $P645, "Undef"
-  vivify_265:
+  vivify_266:
 .annotate "line", 229
     find_lex $P646, "$/"
-    unless_null $P646, vivify_266
+    unless_null $P646, vivify_267
     new $P646, "Undef"
-  vivify_266:
+  vivify_267:
     $P647 = $P644."new"("!BACKREF", $P645, "subrule" :named("pasttype"), "method" :named("subtype"), $P646 :named("node"))
 .annotate "line", 228
     store_lex "$past", $P647
@@ -10962,31 +11119,31 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block599"  :anon :subid("59_1256279185.41736") :outer("58_1256279185.41736")
+.sub "_block599"  :anon :subid("59_1256533476.70438") :outer("58_1256533476.70438")
 .annotate "line", 217
-    .const 'Sub' $P635 = "62_1256279185.41736" 
+    .const 'Sub' $P635 = "62_1256533476.70438" 
     capture_lex $P635
-    .const 'Sub' $P629 = "61_1256279185.41736" 
+    .const 'Sub' $P629 = "61_1256533476.70438" 
     capture_lex $P629
-    .const 'Sub' $P617 = "60_1256279185.41736" 
+    .const 'Sub' $P617 = "60_1256533476.70438" 
     capture_lex $P617
 .annotate "line", 218
     find_lex $P601, "$/"
     set $P602, $P601["quantified_atom"]
-    unless_null $P602, vivify_267
+    unless_null $P602, vivify_268
     new $P602, "ResizablePMCArray"
-  vivify_267:
-    set $P603, $P602[0]
-    unless_null $P603, vivify_268
-    new $P603, "Undef"
   vivify_268:
+    set $P603, $P602[0]
+    unless_null $P603, vivify_269
+    new $P603, "Undef"
+  vivify_269:
     $P604 = $P603."ast"()
     store_lex "$past", $P604
 .annotate "line", 219
     find_lex $P609, "$past"
-    unless_null $P609, vivify_269
+    unless_null $P609, vivify_270
     new $P609, "Undef"
-  vivify_269:
+  vivify_270:
     $S610 = $P609."pasttype"()
     iseq $I611, $S610, "quant"
     if $I611, if_608
@@ -10995,13 +11152,13 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     goto if_608_end
   if_608:
     find_lex $P612, "$past"
-    unless_null $P612, vivify_270
+    unless_null $P612, vivify_271
     new $P612, "ResizablePMCArray"
-  vivify_270:
-    set $P613, $P612[0]
-    unless_null $P613, vivify_271
-    new $P613, "Undef"
   vivify_271:
+    set $P613, $P612[0]
+    unless_null $P613, vivify_272
+    new $P613, "Undef"
+  vivify_272:
     $S614 = $P613."pasttype"()
     iseq $I615, $S614, "subrule"
     new $P607, 'Integer'
@@ -11010,21 +11167,21 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     if $P607, if_606
 .annotate "line", 222
     find_lex $P625, "$past"
-    unless_null $P625, vivify_272
+    unless_null $P625, vivify_273
     new $P625, "Undef"
-  vivify_272:
+  vivify_273:
     $S626 = $P625."pasttype"()
     iseq $I627, $S626, "subrule"
     if $I627, if_624
 .annotate "line", 223
-    .const 'Sub' $P635 = "62_1256279185.41736" 
+    .const 'Sub' $P635 = "62_1256533476.70438" 
     capture_lex $P635
     $P641 = $P635()
     set $P623, $P641
 .annotate "line", 222
     goto if_624_end
   if_624:
-    .const 'Sub' $P629 = "61_1256279185.41736" 
+    .const 'Sub' $P629 = "61_1256533476.70438" 
     capture_lex $P629
     $P633 = $P629()
     set $P623, $P633
@@ -11033,7 +11190,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     set $P605, $P623
     goto if_606_end
   if_606:
-    .const 'Sub' $P617 = "60_1256279185.41736" 
+    .const 'Sub' $P617 = "60_1256533476.70438" 
     capture_lex $P617
     $P622 = $P617()
     set $P605, $P622
@@ -11044,21 +11201,21 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block634"  :anon :subid("62_1256279185.41736") :outer("59_1256279185.41736")
+.sub "_block634"  :anon :subid("62_1256533476.70438") :outer("59_1256533476.70438")
 .annotate "line", 224
     get_hll_global $P636, ["PAST"], "Regex"
     find_lex $P637, "$past"
-    unless_null $P637, vivify_273
+    unless_null $P637, vivify_274
     new $P637, "Undef"
-  vivify_273:
-    find_lex $P638, "$name"
-    unless_null $P638, vivify_274
-    new $P638, "Undef"
   vivify_274:
-    find_lex $P639, "$/"
-    unless_null $P639, vivify_275
-    new $P639, "Undef"
+    find_lex $P638, "$name"
+    unless_null $P638, vivify_275
+    new $P638, "Undef"
   vivify_275:
+    find_lex $P639, "$/"
+    unless_null $P639, vivify_276
+    new $P639, "Undef"
+  vivify_276:
     $P640 = $P636."new"($P637, $P638 :named("name"), "subcapture" :named("pasttype"), $P639 :named("node"))
     store_lex "$past", $P640
 .annotate "line", 223
@@ -11067,36 +11224,36 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block628"  :anon :subid("61_1256279185.41736") :outer("59_1256279185.41736")
+.sub "_block628"  :anon :subid("61_1256533476.70438") :outer("59_1256533476.70438")
 .annotate "line", 222
     find_lex $P630, "$past"
-    unless_null $P630, vivify_276
+    unless_null $P630, vivify_277
     new $P630, "Undef"
-  vivify_276:
-    find_lex $P631, "$name"
-    unless_null $P631, vivify_277
-    new $P631, "Undef"
   vivify_277:
+    find_lex $P631, "$name"
+    unless_null $P631, vivify_278
+    new $P631, "Undef"
+  vivify_278:
     $P632 = "subrule_alias"($P630, $P631)
     .return ($P632)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block616"  :anon :subid("60_1256279185.41736") :outer("59_1256279185.41736")
+.sub "_block616"  :anon :subid("60_1256533476.70438") :outer("59_1256533476.70438")
 .annotate "line", 220
     find_lex $P618, "$past"
-    unless_null $P618, vivify_278
+    unless_null $P618, vivify_279
     new $P618, "ResizablePMCArray"
-  vivify_278:
-    set $P619, $P618[0]
-    unless_null $P619, vivify_279
-    new $P619, "Undef"
   vivify_279:
-    find_lex $P620, "$name"
-    unless_null $P620, vivify_280
-    new $P620, "Undef"
+    set $P619, $P618[0]
+    unless_null $P619, vivify_280
+    new $P619, "Undef"
   vivify_280:
+    find_lex $P620, "$name"
+    unless_null $P620, vivify_281
+    new $P620, "Undef"
+  vivify_281:
     $P621 = "subrule_alias"($P619, $P620)
 .annotate "line", 219
     .return ($P621)
@@ -11104,7 +11261,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "backslash:sym<w>"  :subid("64_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "metachar:sym<PIR>"  :subid("64_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_655
 .annotate "line", 234
     new $P654, 'ExceptionHandler'
@@ -11114,96 +11271,92 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     .lex "self", self
     .lex "$/", param_655
 .annotate "line", 235
-    find_lex $P658, "$/"
-    set $P659, $P658["sym"]
-    unless_null $P659, vivify_282
-    new $P659, "Undef"
-  vivify_282:
-    set $S660, $P659
-    iseq $I661, $S660, "n"
-    if $I661, if_657
-    find_lex $P663, "$/"
-    set $P664, $P663["sym"]
-    unless_null $P664, vivify_283
-    new $P664, "Undef"
-  vivify_283:
-    set $S665, $P664
-    new $P656, 'String'
-    set $P656, $S665
-    goto if_657_end
-  if_657:
-    new $P662, "String"
-    assign $P662, "nl"
-    set $P656, $P662
-  if_657_end:
-    .lex "$subtype", $P656
+    find_lex $P656, "$/"
+    get_hll_global $P657, ["PAST"], "Regex"
 .annotate "line", 236
-    get_hll_global $P666, ["PAST"], "Regex"
-    find_lex $P667, "$subtype"
-    unless_null $P667, vivify_284
-    new $P667, "Undef"
-  vivify_284:
-    find_lex $P668, "$/"
-    unless_null $P668, vivify_285
-    new $P668, "Undef"
-  vivify_285:
-    $P669 = $P666."new"("charclass" :named("pasttype"), $P667 :named("subtype"), $P668 :named("node"))
-    .lex "$past", $P669
-    find_lex $P670, "$/"
+    get_hll_global $P658, ["PAST"], "Op"
+    find_lex $P659, "$/"
+    set $P660, $P659["pir"]
+    unless_null $P660, vivify_283
+    new $P660, "Undef"
+  vivify_283:
+    set $S661, $P660
+    $P662 = $P658."new"($S661 :named("inline"), "inline" :named("pasttype"))
 .annotate "line", 237
-    find_lex $P671, "$past"
-    unless_null $P671, vivify_286
-    new $P671, "Undef"
-  vivify_286:
-    $P672 = $P670."!make"($P671)
+    find_lex $P663, "$/"
+    unless_null $P663, vivify_284
+    new $P663, "Undef"
+  vivify_284:
+    $P664 = $P657."new"($P662, "pastnode" :named("pasttype"), $P663 :named("node"))
+.annotate "line", 235
+    $P665 = $P656."!make"($P664)
 .annotate "line", 234
-    .return ($P672)
+    .return ($P665)
   control_653:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P673, exception, "payload"
-    .return ($P673)
+    getattribute $P666, exception, "payload"
+    .return ($P666)
     rethrow exception
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "backslash:sym<b>"  :subid("65_1256279185.41736") :method :outer("11_1256279185.41736")
-    .param pmc param_677
-.annotate "line", 240
-    new $P676, 'ExceptionHandler'
-    set_addr $P676, control_675
-    $P676."handle_types"(58)
-    push_eh $P676
-    .lex "self", self
-    .lex "$/", param_677
-.annotate "line", 241
-    get_hll_global $P678, ["PAST"], "Regex"
+.sub "backslash:sym<w>"  :subid("65_1256533476.70438") :method :outer("11_1256533476.70438")
+    .param pmc param_670
 .annotate "line", 242
-    find_lex $P679, "$/"
-    set $P680, $P679["sym"]
-    unless_null $P680, vivify_287
-    new $P680, "Undef"
+    new $P669, 'ExceptionHandler'
+    set_addr $P669, control_668
+    $P669."handle_types"(58)
+    push_eh $P669
+    .lex "self", self
+    .lex "$/", param_670
+.annotate "line", 243
+    find_lex $P673, "$/"
+    set $P674, $P673["sym"]
+    unless_null $P674, vivify_285
+    new $P674, "Undef"
+  vivify_285:
+    set $S675, $P674
+    iseq $I676, $S675, "n"
+    if $I676, if_672
+    find_lex $P678, "$/"
+    set $P679, $P678["sym"]
+    unless_null $P679, vivify_286
+    new $P679, "Undef"
+  vivify_286:
+    set $S680, $P679
+    new $P671, 'String'
+    set $P671, $S680
+    goto if_672_end
+  if_672:
+    new $P677, "String"
+    assign $P677, "nl"
+    set $P671, $P677
+  if_672_end:
+    .lex "$subtype", $P671
+.annotate "line", 244
+    get_hll_global $P681, ["PAST"], "Regex"
+    find_lex $P682, "$subtype"
+    unless_null $P682, vivify_287
+    new $P682, "Undef"
   vivify_287:
-    set $S681, $P680
-    iseq $I682, $S681, "B"
     find_lex $P683, "$/"
     unless_null $P683, vivify_288
     new $P683, "Undef"
   vivify_288:
-    $P684 = $P678."new"("\b", "enumcharlist" :named("pasttype"), $I682 :named("negate"), $P683 :named("node"))
-.annotate "line", 241
+    $P684 = $P681."new"("charclass" :named("pasttype"), $P682 :named("subtype"), $P683 :named("node"))
     .lex "$past", $P684
     find_lex $P685, "$/"
-.annotate "line", 243
+.annotate "line", 245
     find_lex $P686, "$past"
     unless_null $P686, vivify_289
     new $P686, "Undef"
   vivify_289:
     $P687 = $P685."!make"($P686)
-.annotate "line", 240
+.annotate "line", 242
     .return ($P687)
-  control_675:
+  control_668:
     .local pmc exception 
     .get_results (exception) 
     getattribute $P688, exception, "payload"
@@ -11213,40 +11366,40 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "backslash:sym<e>"  :subid("66_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "backslash:sym<b>"  :subid("66_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_692
-.annotate "line", 246
+.annotate "line", 248
     new $P691, 'ExceptionHandler'
     set_addr $P691, control_690
     $P691."handle_types"(58)
     push_eh $P691
     .lex "self", self
     .lex "$/", param_692
-.annotate "line", 247
+.annotate "line", 249
     get_hll_global $P693, ["PAST"], "Regex"
-.annotate "line", 248
+.annotate "line", 250
     find_lex $P694, "$/"
     set $P695, $P694["sym"]
     unless_null $P695, vivify_290
     new $P695, "Undef"
   vivify_290:
     set $S696, $P695
-    iseq $I697, $S696, "E"
+    iseq $I697, $S696, "B"
     find_lex $P698, "$/"
     unless_null $P698, vivify_291
     new $P698, "Undef"
   vivify_291:
-    $P699 = $P693."new"("\e", "enumcharlist" :named("pasttype"), $I697 :named("negate"), $P698 :named("node"))
-.annotate "line", 247
+    $P699 = $P693."new"("\b", "enumcharlist" :named("pasttype"), $I697 :named("negate"), $P698 :named("node"))
+.annotate "line", 249
     .lex "$past", $P699
     find_lex $P700, "$/"
-.annotate "line", 249
+.annotate "line", 251
     find_lex $P701, "$past"
     unless_null $P701, vivify_292
     new $P701, "Undef"
   vivify_292:
     $P702 = $P700."!make"($P701)
-.annotate "line", 246
+.annotate "line", 248
     .return ($P702)
   control_690:
     .local pmc exception 
@@ -11258,40 +11411,40 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "backslash:sym<f>"  :subid("67_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "backslash:sym<e>"  :subid("67_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_707
-.annotate "line", 252
+.annotate "line", 254
     new $P706, 'ExceptionHandler'
     set_addr $P706, control_705
     $P706."handle_types"(58)
     push_eh $P706
     .lex "self", self
     .lex "$/", param_707
-.annotate "line", 253
+.annotate "line", 255
     get_hll_global $P708, ["PAST"], "Regex"
-.annotate "line", 254
+.annotate "line", 256
     find_lex $P709, "$/"
     set $P710, $P709["sym"]
     unless_null $P710, vivify_293
     new $P710, "Undef"
   vivify_293:
     set $S711, $P710
-    iseq $I712, $S711, "F"
+    iseq $I712, $S711, "E"
     find_lex $P713, "$/"
     unless_null $P713, vivify_294
     new $P713, "Undef"
   vivify_294:
-    $P714 = $P708."new"("\f", "enumcharlist" :named("pasttype"), $I712 :named("negate"), $P713 :named("node"))
-.annotate "line", 253
+    $P714 = $P708."new"("\e", "enumcharlist" :named("pasttype"), $I712 :named("negate"), $P713 :named("node"))
+.annotate "line", 255
     .lex "$past", $P714
     find_lex $P715, "$/"
-.annotate "line", 255
+.annotate "line", 257
     find_lex $P716, "$past"
     unless_null $P716, vivify_295
     new $P716, "Undef"
   vivify_295:
     $P717 = $P715."!make"($P716)
-.annotate "line", 252
+.annotate "line", 254
     .return ($P717)
   control_705:
     .local pmc exception 
@@ -11303,40 +11456,40 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "backslash:sym<h>"  :subid("68_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "backslash:sym<f>"  :subid("68_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_722
-.annotate "line", 258
+.annotate "line", 260
     new $P721, 'ExceptionHandler'
     set_addr $P721, control_720
     $P721."handle_types"(58)
     push_eh $P721
     .lex "self", self
     .lex "$/", param_722
-.annotate "line", 259
+.annotate "line", 261
     get_hll_global $P723, ["PAST"], "Regex"
-.annotate "line", 260
+.annotate "line", 262
     find_lex $P724, "$/"
     set $P725, $P724["sym"]
     unless_null $P725, vivify_296
     new $P725, "Undef"
   vivify_296:
     set $S726, $P725
-    iseq $I727, $S726, "H"
+    iseq $I727, $S726, "F"
     find_lex $P728, "$/"
     unless_null $P728, vivify_297
     new $P728, "Undef"
   vivify_297:
-    $P729 = $P723."new"(unicode:"\t \x{a0}\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000", "enumcharlist" :named("pasttype"), $I727 :named("negate"), $P728 :named("node"))
-.annotate "line", 259
+    $P729 = $P723."new"("\f", "enumcharlist" :named("pasttype"), $I727 :named("negate"), $P728 :named("node"))
+.annotate "line", 261
     .lex "$past", $P729
     find_lex $P730, "$/"
-.annotate "line", 261
+.annotate "line", 263
     find_lex $P731, "$past"
     unless_null $P731, vivify_298
     new $P731, "Undef"
   vivify_298:
     $P732 = $P730."!make"($P731)
-.annotate "line", 258
+.annotate "line", 260
     .return ($P732)
   control_720:
     .local pmc exception 
@@ -11348,40 +11501,40 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "backslash:sym<r>"  :subid("69_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "backslash:sym<h>"  :subid("69_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_737
-.annotate "line", 264
+.annotate "line", 266
     new $P736, 'ExceptionHandler'
     set_addr $P736, control_735
     $P736."handle_types"(58)
     push_eh $P736
     .lex "self", self
     .lex "$/", param_737
-.annotate "line", 265
+.annotate "line", 267
     get_hll_global $P738, ["PAST"], "Regex"
-.annotate "line", 266
+.annotate "line", 268
     find_lex $P739, "$/"
     set $P740, $P739["sym"]
     unless_null $P740, vivify_299
     new $P740, "Undef"
   vivify_299:
     set $S741, $P740
-    iseq $I742, $S741, "R"
+    iseq $I742, $S741, "H"
     find_lex $P743, "$/"
     unless_null $P743, vivify_300
     new $P743, "Undef"
   vivify_300:
-    $P744 = $P738."new"("\r", "enumcharlist" :named("pasttype"), $I742 :named("negate"), $P743 :named("node"))
-.annotate "line", 265
+    $P744 = $P738."new"(unicode:"\t \x{a0}\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000", "enumcharlist" :named("pasttype"), $I742 :named("negate"), $P743 :named("node"))
+.annotate "line", 267
     .lex "$past", $P744
     find_lex $P745, "$/"
-.annotate "line", 267
+.annotate "line", 269
     find_lex $P746, "$past"
     unless_null $P746, vivify_301
     new $P746, "Undef"
   vivify_301:
     $P747 = $P745."!make"($P746)
-.annotate "line", 264
+.annotate "line", 266
     .return ($P747)
   control_735:
     .local pmc exception 
@@ -11393,40 +11546,40 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "backslash:sym<t>"  :subid("70_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "backslash:sym<r>"  :subid("70_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_752
-.annotate "line", 270
+.annotate "line", 272
     new $P751, 'ExceptionHandler'
     set_addr $P751, control_750
     $P751."handle_types"(58)
     push_eh $P751
     .lex "self", self
     .lex "$/", param_752
-.annotate "line", 271
+.annotate "line", 273
     get_hll_global $P753, ["PAST"], "Regex"
-.annotate "line", 272
+.annotate "line", 274
     find_lex $P754, "$/"
     set $P755, $P754["sym"]
     unless_null $P755, vivify_302
     new $P755, "Undef"
   vivify_302:
     set $S756, $P755
-    iseq $I757, $S756, "T"
+    iseq $I757, $S756, "R"
     find_lex $P758, "$/"
     unless_null $P758, vivify_303
     new $P758, "Undef"
   vivify_303:
-    $P759 = $P753."new"("\t", "enumcharlist" :named("pasttype"), $I757 :named("negate"), $P758 :named("node"))
-.annotate "line", 271
+    $P759 = $P753."new"("\r", "enumcharlist" :named("pasttype"), $I757 :named("negate"), $P758 :named("node"))
+.annotate "line", 273
     .lex "$past", $P759
     find_lex $P760, "$/"
-.annotate "line", 273
+.annotate "line", 275
     find_lex $P761, "$past"
     unless_null $P761, vivify_304
     new $P761, "Undef"
   vivify_304:
     $P762 = $P760."!make"($P761)
-.annotate "line", 270
+.annotate "line", 272
     .return ($P762)
   control_750:
     .local pmc exception 
@@ -11438,40 +11591,40 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "backslash:sym<v>"  :subid("71_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "backslash:sym<t>"  :subid("71_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_767
-.annotate "line", 276
+.annotate "line", 278
     new $P766, 'ExceptionHandler'
     set_addr $P766, control_765
     $P766."handle_types"(58)
     push_eh $P766
     .lex "self", self
     .lex "$/", param_767
-.annotate "line", 277
+.annotate "line", 279
     get_hll_global $P768, ["PAST"], "Regex"
-.annotate "line", 278
+.annotate "line", 280
     find_lex $P769, "$/"
     set $P770, $P769["sym"]
     unless_null $P770, vivify_305
     new $P770, "Undef"
   vivify_305:
     set $S771, $P770
-    iseq $I772, $S771, "V"
+    iseq $I772, $S771, "T"
     find_lex $P773, "$/"
     unless_null $P773, vivify_306
     new $P773, "Undef"
   vivify_306:
-    $P774 = $P768."new"(unicode:"\n\x{b}\f\r\x{85}\u2028\u2029", "enumcharlist" :named("pasttype"), $I772 :named("negate"), $P773 :named("node"))
-.annotate "line", 277
+    $P774 = $P768."new"("\t", "enumcharlist" :named("pasttype"), $I772 :named("negate"), $P773 :named("node"))
+.annotate "line", 279
     .lex "$past", $P774
     find_lex $P775, "$/"
-.annotate "line", 279
+.annotate "line", 281
     find_lex $P776, "$past"
     unless_null $P776, vivify_307
     new $P776, "Undef"
   vivify_307:
     $P777 = $P775."!make"($P776)
-.annotate "line", 276
+.annotate "line", 278
     .return ($P777)
   control_765:
     .local pmc exception 
@@ -11483,511 +11636,556 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "backslash:sym<misc>"  :subid("72_1256279185.41736") :method :outer("11_1256279185.41736")
+.sub "backslash:sym<v>"  :subid("72_1256533476.70438") :method :outer("11_1256533476.70438")
     .param pmc param_782
-.annotate "line", 283
+.annotate "line", 284
     new $P781, 'ExceptionHandler'
     set_addr $P781, control_780
     $P781."handle_types"(58)
     push_eh $P781
     .lex "self", self
     .lex "$/", param_782
-.annotate "line", 284
-    get_hll_global $P783, ["PAST"], "Regex"
-    find_lex $P784, "$/"
-    unless_null $P784, vivify_308
-    new $P784, "Undef"
-  vivify_308:
-    set $S785, $P784
-    find_lex $P786, "$/"
-    unless_null $P786, vivify_309
-    new $P786, "Undef"
-  vivify_309:
-    $P787 = $P783."new"($S785, "literal" :named("pasttype"), $P786 :named("node"))
-    .lex "$past", $P787
-    find_lex $P788, "$/"
 .annotate "line", 285
-    find_lex $P789, "$past"
-    unless_null $P789, vivify_310
-    new $P789, "Undef"
+    get_hll_global $P783, ["PAST"], "Regex"
+.annotate "line", 286
+    find_lex $P784, "$/"
+    set $P785, $P784["sym"]
+    unless_null $P785, vivify_308
+    new $P785, "Undef"
+  vivify_308:
+    set $S786, $P785
+    iseq $I787, $S786, "V"
+    find_lex $P788, "$/"
+    unless_null $P788, vivify_309
+    new $P788, "Undef"
+  vivify_309:
+    $P789 = $P783."new"(unicode:"\n\x{b}\f\r\x{85}\u2028\u2029", "enumcharlist" :named("pasttype"), $I787 :named("negate"), $P788 :named("node"))
+.annotate "line", 285
+    .lex "$past", $P789
+    find_lex $P790, "$/"
+.annotate "line", 287
+    find_lex $P791, "$past"
+    unless_null $P791, vivify_310
+    new $P791, "Undef"
   vivify_310:
-    $P790 = $P788."!make"($P789)
-.annotate "line", 283
-    .return ($P790)
+    $P792 = $P790."!make"($P791)
+.annotate "line", 284
+    .return ($P792)
   control_780:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P791, exception, "payload"
-    .return ($P791)
+    getattribute $P793, exception, "payload"
+    .return ($P793)
     rethrow exception
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "assertion:sym<?>"  :subid("73_1256279185.41736") :method :outer("11_1256279185.41736")
-    .param pmc param_795
-.annotate "line", 289
-    .const 'Sub' $P808 = "75_1256279185.41736" 
-    capture_lex $P808
-    .const 'Sub' $P801 = "74_1256279185.41736" 
-    capture_lex $P801
-    new $P794, 'ExceptionHandler'
-    set_addr $P794, control_793
-    $P794."handle_types"(58)
-    push_eh $P794
-    .lex "self", self
-    .lex "$/", param_795
-.annotate "line", 290
-    new $P796, "Undef"
-    .lex "$past", $P796
+.sub "backslash:sym<misc>"  :subid("73_1256533476.70438") :method :outer("11_1256533476.70438")
+    .param pmc param_797
 .annotate "line", 291
-    find_lex $P798, "$/"
-    set $P799, $P798["assertion"]
+    new $P796, 'ExceptionHandler'
+    set_addr $P796, control_795
+    $P796."handle_types"(58)
+    push_eh $P796
+    .lex "self", self
+    .lex "$/", param_797
+.annotate "line", 292
+    get_hll_global $P798, ["PAST"], "Regex"
+    find_lex $P799, "$/"
     unless_null $P799, vivify_311
     new $P799, "Undef"
   vivify_311:
-    if $P799, if_797
-.annotate "line", 295
-    .const 'Sub' $P808 = "75_1256279185.41736" 
-    capture_lex $P808
-    $P808()
-    goto if_797_end
-  if_797:
+    set $S800, $P799
+    find_lex $P801, "$/"
+    unless_null $P801, vivify_312
+    new $P801, "Undef"
+  vivify_312:
+    $P802 = $P798."new"($S800, "literal" :named("pasttype"), $P801 :named("node"))
+    .lex "$past", $P802
+    find_lex $P803, "$/"
+.annotate "line", 293
+    find_lex $P804, "$past"
+    unless_null $P804, vivify_313
+    new $P804, "Undef"
+  vivify_313:
+    $P805 = $P803."!make"($P804)
 .annotate "line", 291
-    .const 'Sub' $P801 = "74_1256279185.41736" 
-    capture_lex $P801
-    $P801()
-  if_797_end:
-    find_lex $P810, "$/"
-.annotate "line", 296
-    find_lex $P811, "$past"
-    unless_null $P811, vivify_314
-    new $P811, "Undef"
-  vivify_314:
-    $P812 = $P810."!make"($P811)
-.annotate "line", 289
-    .return ($P812)
-  control_793:
+    .return ($P805)
+  control_795:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P813, exception, "payload"
-    .return ($P813)
+    getattribute $P806, exception, "payload"
+    .return ($P806)
     rethrow exception
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block807"  :anon :subid("75_1256279185.41736") :outer("73_1256279185.41736")
-.annotate "line", 295
-    new $P809, "Integer"
-    assign $P809, 0
-    store_lex "$past", $P809
-    .return ($P809)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block800"  :anon :subid("74_1256279185.41736") :outer("73_1256279185.41736")
-.annotate "line", 292
-    find_lex $P802, "$/"
-    set $P803, $P802["assertion"]
-    unless_null $P803, vivify_312
-    new $P803, "Undef"
-  vivify_312:
-    $P804 = $P803."ast"()
-    store_lex "$past", $P804
-.annotate "line", 293
-    find_lex $P805, "$past"
-    unless_null $P805, vivify_313
-    new $P805, "Undef"
-  vivify_313:
-    $P806 = $P805."subtype"("zerowidth")
-.annotate "line", 291
-    .return ($P806)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "assertion:sym<!>"  :subid("76_1256279185.41736") :method :outer("11_1256279185.41736")
-    .param pmc param_817
-.annotate "line", 299
-    .const 'Sub' $P834 = "78_1256279185.41736" 
-    capture_lex $P834
-    .const 'Sub' $P823 = "77_1256279185.41736" 
+.sub "assertion:sym<?>"  :subid("74_1256533476.70438") :method :outer("11_1256533476.70438")
+    .param pmc param_810
+.annotate "line", 297
+    .const 'Sub' $P823 = "76_1256533476.70438" 
     capture_lex $P823
-    new $P816, 'ExceptionHandler'
-    set_addr $P816, control_815
-    $P816."handle_types"(58)
-    push_eh $P816
+    .const 'Sub' $P816 = "75_1256533476.70438" 
+    capture_lex $P816
+    new $P809, 'ExceptionHandler'
+    set_addr $P809, control_808
+    $P809."handle_types"(58)
+    push_eh $P809
     .lex "self", self
-    .lex "$/", param_817
-.annotate "line", 300
-    new $P818, "Undef"
-    .lex "$past", $P818
-.annotate "line", 301
-    find_lex $P820, "$/"
-    set $P821, $P820["assertion"]
-    unless_null $P821, vivify_315
-    new $P821, "Undef"
-  vivify_315:
-    if $P821, if_819
-.annotate "line", 306
-    .const 'Sub' $P834 = "78_1256279185.41736" 
-    capture_lex $P834
-    $P834()
-    goto if_819_end
-  if_819:
-.annotate "line", 301
-    .const 'Sub' $P823 = "77_1256279185.41736" 
+    .lex "$/", param_810
+.annotate "line", 298
+    new $P811, "Undef"
+    .lex "$past", $P811
+.annotate "line", 299
+    find_lex $P813, "$/"
+    set $P814, $P813["assertion"]
+    unless_null $P814, vivify_314
+    new $P814, "Undef"
+  vivify_314:
+    if $P814, if_812
+.annotate "line", 303
+    .const 'Sub' $P823 = "76_1256533476.70438" 
     capture_lex $P823
     $P823()
-  if_819_end:
-    find_lex $P838, "$/"
-.annotate "line", 309
-    find_lex $P839, "$past"
-    unless_null $P839, vivify_321
-    new $P839, "Undef"
-  vivify_321:
-    $P840 = $P838."!make"($P839)
+    goto if_812_end
+  if_812:
 .annotate "line", 299
-    .return ($P840)
-  control_815:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P841, exception, "payload"
-    .return ($P841)
-    rethrow exception
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block833"  :anon :subid("78_1256279185.41736") :outer("76_1256279185.41736")
-.annotate "line", 307
-    get_hll_global $P835, ["PAST"], "Regex"
-    find_lex $P836, "$/"
-    unless_null $P836, vivify_316
-    new $P836, "Undef"
-  vivify_316:
-    $P837 = $P835."new"("anchor" :named("pasttype"), "fail" :named("subtype"), $P836 :named("node"))
-    store_lex "$past", $P837
-.annotate "line", 306
-    .return ($P837)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block822"  :anon :subid("77_1256279185.41736") :outer("76_1256279185.41736")
-.annotate "line", 302
-    find_lex $P824, "$/"
-    set $P825, $P824["assertion"]
-    unless_null $P825, vivify_317
-    new $P825, "Undef"
-  vivify_317:
-    $P826 = $P825."ast"()
-    store_lex "$past", $P826
-.annotate "line", 303
-    find_lex $P827, "$past"
-    unless_null $P827, vivify_318
-    new $P827, "Undef"
-  vivify_318:
-    find_lex $P828, "$past"
-    unless_null $P828, vivify_319
-    new $P828, "Undef"
-  vivify_319:
-    $P829 = $P828."negate"()
-    isfalse $I830, $P829
-    $P827."negate"($I830)
+    .const 'Sub' $P816 = "75_1256533476.70438" 
+    capture_lex $P816
+    $P816()
+  if_812_end:
+    find_lex $P825, "$/"
 .annotate "line", 304
-    find_lex $P831, "$past"
-    unless_null $P831, vivify_320
-    new $P831, "Undef"
-  vivify_320:
-    $P832 = $P831."subtype"("zerowidth")
+    find_lex $P826, "$past"
+    unless_null $P826, vivify_317
+    new $P826, "Undef"
+  vivify_317:
+    $P827 = $P825."!make"($P826)
+.annotate "line", 297
+    .return ($P827)
+  control_808:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P828, exception, "payload"
+    .return ($P828)
+    rethrow exception
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block822"  :anon :subid("76_1256533476.70438") :outer("74_1256533476.70438")
+.annotate "line", 303
+    new $P824, "Integer"
+    assign $P824, 0
+    store_lex "$past", $P824
+    .return ($P824)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block815"  :anon :subid("75_1256533476.70438") :outer("74_1256533476.70438")
+.annotate "line", 300
+    find_lex $P817, "$/"
+    set $P818, $P817["assertion"]
+    unless_null $P818, vivify_315
+    new $P818, "Undef"
+  vivify_315:
+    $P819 = $P818."ast"()
+    store_lex "$past", $P819
 .annotate "line", 301
-    .return ($P832)
+    find_lex $P820, "$past"
+    unless_null $P820, vivify_316
+    new $P820, "Undef"
+  vivify_316:
+    $P821 = $P820."subtype"("zerowidth")
+.annotate "line", 299
+    .return ($P821)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "assertion:sym<method>"  :subid("79_1256279185.41736") :method :outer("11_1256279185.41736")
-    .param pmc param_845
-.annotate "line", 312
-    new $P844, 'ExceptionHandler'
-    set_addr $P844, control_843
-    $P844."handle_types"(58)
-    push_eh $P844
+.sub "assertion:sym<!>"  :subid("77_1256533476.70438") :method :outer("11_1256533476.70438")
+    .param pmc param_832
+.annotate "line", 307
+    .const 'Sub' $P849 = "79_1256533476.70438" 
+    capture_lex $P849
+    .const 'Sub' $P838 = "78_1256533476.70438" 
+    capture_lex $P838
+    new $P831, 'ExceptionHandler'
+    set_addr $P831, control_830
+    $P831."handle_types"(58)
+    push_eh $P831
     .lex "self", self
-    .lex "$/", param_845
-.annotate "line", 313
-    find_lex $P846, "$/"
-    set $P847, $P846["assertion"]
-    unless_null $P847, vivify_322
-    new $P847, "Undef"
-  vivify_322:
-    $P848 = $P847."ast"()
-    .lex "$past", $P848
+    .lex "$/", param_832
+.annotate "line", 308
+    new $P833, "Undef"
+    .lex "$past", $P833
+.annotate "line", 309
+    find_lex $P835, "$/"
+    set $P836, $P835["assertion"]
+    unless_null $P836, vivify_318
+    new $P836, "Undef"
+  vivify_318:
+    if $P836, if_834
 .annotate "line", 314
-    find_lex $P849, "$past"
-    unless_null $P849, vivify_323
-    new $P849, "Undef"
-  vivify_323:
-    $P849."subtype"("method")
-    find_lex $P850, "$/"
-.annotate "line", 315
-    find_lex $P851, "$past"
-    unless_null $P851, vivify_324
-    new $P851, "Undef"
+    .const 'Sub' $P849 = "79_1256533476.70438" 
+    capture_lex $P849
+    $P849()
+    goto if_834_end
+  if_834:
+.annotate "line", 309
+    .const 'Sub' $P838 = "78_1256533476.70438" 
+    capture_lex $P838
+    $P838()
+  if_834_end:
+    find_lex $P853, "$/"
+.annotate "line", 317
+    find_lex $P854, "$past"
+    unless_null $P854, vivify_324
+    new $P854, "Undef"
   vivify_324:
-    $P852 = $P850."!make"($P851)
-.annotate "line", 312
+    $P855 = $P853."!make"($P854)
+.annotate "line", 307
+    .return ($P855)
+  control_830:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P856, exception, "payload"
+    .return ($P856)
+    rethrow exception
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block848"  :anon :subid("79_1256533476.70438") :outer("77_1256533476.70438")
+.annotate "line", 315
+    get_hll_global $P850, ["PAST"], "Regex"
+    find_lex $P851, "$/"
+    unless_null $P851, vivify_319
+    new $P851, "Undef"
+  vivify_319:
+    $P852 = $P850."new"("anchor" :named("pasttype"), "fail" :named("subtype"), $P851 :named("node"))
+    store_lex "$past", $P852
+.annotate "line", 314
     .return ($P852)
-  control_843:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P853, exception, "payload"
-    .return ($P853)
-    rethrow exception
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "assertion:sym<name>"  :subid("80_1256279185.41736") :method :outer("11_1256279185.41736")
-    .param pmc param_857
-.annotate "line", 318
-    .const 'Sub' $P890 = "83_1256279185.41736" 
-    capture_lex $P890
-    .const 'Sub' $P880 = "82_1256279185.41736" 
-    capture_lex $P880
-    .const 'Sub' $P867 = "81_1256279185.41736" 
-    capture_lex $P867
-    new $P856, 'ExceptionHandler'
-    set_addr $P856, control_855
-    $P856."handle_types"(58)
-    push_eh $P856
-    .lex "self", self
-    .lex "$/", param_857
-.annotate "line", 319
-    find_lex $P858, "$/"
-    set $P859, $P858["longname"]
-    unless_null $P859, vivify_325
-    new $P859, "Undef"
-  vivify_325:
-    set $S860, $P859
-    new $P861, 'String'
-    set $P861, $S860
-    .lex "$name", $P861
+.sub "_block837"  :anon :subid("78_1256533476.70438") :outer("77_1256533476.70438")
+.annotate "line", 310
+    find_lex $P839, "$/"
+    set $P840, $P839["assertion"]
+    unless_null $P840, vivify_320
+    new $P840, "Undef"
+  vivify_320:
+    $P841 = $P840."ast"()
+    store_lex "$past", $P841
+.annotate "line", 311
+    find_lex $P842, "$past"
+    unless_null $P842, vivify_321
+    new $P842, "Undef"
+  vivify_321:
+    find_lex $P843, "$past"
+    unless_null $P843, vivify_322
+    new $P843, "Undef"
+  vivify_322:
+    $P844 = $P843."negate"()
+    isfalse $I845, $P844
+    $P842."negate"($I845)
+.annotate "line", 312
+    find_lex $P846, "$past"
+    unless_null $P846, vivify_323
+    new $P846, "Undef"
+  vivify_323:
+    $P847 = $P846."subtype"("zerowidth")
+.annotate "line", 309
+    .return ($P847)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "assertion:sym<method>"  :subid("80_1256533476.70438") :method :outer("11_1256533476.70438")
+    .param pmc param_860
 .annotate "line", 320
+    new $P859, 'ExceptionHandler'
+    set_addr $P859, control_858
+    $P859."handle_types"(58)
+    push_eh $P859
+    .lex "self", self
+    .lex "$/", param_860
+.annotate "line", 321
+    find_lex $P861, "$/"
+    set $P862, $P861["assertion"]
+    unless_null $P862, vivify_325
     new $P862, "Undef"
-    .lex "$past", $P862
-.annotate "line", 321
-    find_lex $P864, "$/"
-    set $P865, $P864["assertion"]
-    unless_null $P865, vivify_326
-    new $P865, "Undef"
+  vivify_325:
+    $P863 = $P862."ast"()
+    .lex "$past", $P863
+.annotate "line", 322
+    find_lex $P864, "$past"
+    unless_null $P864, vivify_326
+    new $P864, "Undef"
   vivify_326:
-    if $P865, if_863
-.annotate "line", 325
-    find_lex $P876, "$name"
-    unless_null $P876, vivify_327
-    new $P876, "Undef"
+    $P864."subtype"("method")
+    find_lex $P865, "$/"
+.annotate "line", 323
+    find_lex $P866, "$past"
+    unless_null $P866, vivify_327
+    new $P866, "Undef"
   vivify_327:
-    set $S877, $P876
-    iseq $I878, $S877, "sym"
-    if $I878, if_875
-.annotate "line", 340
-    .const 'Sub' $P890 = "83_1256279185.41736" 
-    capture_lex $P890
-    $P890()
-    goto if_875_end
-  if_875:
-.annotate "line", 325
-    .const 'Sub' $P880 = "82_1256279185.41736" 
-    capture_lex $P880
-    $P880()
-  if_875_end:
-.annotate "line", 321
-    goto if_863_end
-  if_863:
-    .const 'Sub' $P867 = "81_1256279185.41736" 
-    capture_lex $P867
-    $P867()
-  if_863_end:
-    find_lex $P934, "$/"
-.annotate "line", 352
-    find_lex $P935, "$past"
-    unless_null $P935, vivify_349
-    new $P935, "Undef"
-  vivify_349:
-    $P936 = $P934."!make"($P935)
-.annotate "line", 318
-    .return ($P936)
-  control_855:
+    $P867 = $P865."!make"($P866)
+.annotate "line", 320
+    .return ($P867)
+  control_858:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P937, exception, "payload"
-    .return ($P937)
+    getattribute $P868, exception, "payload"
+    .return ($P868)
     rethrow exception
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block889"  :anon :subid("83_1256279185.41736") :outer("80_1256279185.41736")
-.annotate "line", 340
-    .const 'Sub' $P915 = "85_1256279185.41736" 
-    capture_lex $P915
-    .const 'Sub' $P901 = "84_1256279185.41736" 
-    capture_lex $P901
-.annotate "line", 341
-    get_hll_global $P891, ["PAST"], "Regex"
-    find_lex $P892, "$name"
-    unless_null $P892, vivify_328
-    new $P892, "Undef"
+.sub "assertion:sym<name>"  :subid("81_1256533476.70438") :method :outer("11_1256533476.70438")
+    .param pmc param_872
+.annotate "line", 326
+    .const 'Sub' $P905 = "84_1256533476.70438" 
+    capture_lex $P905
+    .const 'Sub' $P895 = "83_1256533476.70438" 
+    capture_lex $P895
+    .const 'Sub' $P882 = "82_1256533476.70438" 
+    capture_lex $P882
+    new $P871, 'ExceptionHandler'
+    set_addr $P871, control_870
+    $P871."handle_types"(58)
+    push_eh $P871
+    .lex "self", self
+    .lex "$/", param_872
+.annotate "line", 327
+    find_lex $P873, "$/"
+    set $P874, $P873["longname"]
+    unless_null $P874, vivify_328
+    new $P874, "Undef"
   vivify_328:
-    find_lex $P893, "$name"
-    unless_null $P893, vivify_329
-    new $P893, "Undef"
+    set $S875, $P874
+    new $P876, 'String'
+    set $P876, $S875
+    .lex "$name", $P876
+.annotate "line", 328
+    new $P877, "Undef"
+    .lex "$past", $P877
+.annotate "line", 329
+    find_lex $P879, "$/"
+    set $P880, $P879["assertion"]
+    unless_null $P880, vivify_329
+    new $P880, "Undef"
   vivify_329:
-.annotate "line", 342
-    find_lex $P894, "$/"
-    unless_null $P894, vivify_330
-    new $P894, "Undef"
+    if $P880, if_878
+.annotate "line", 333
+    find_lex $P891, "$name"
+    unless_null $P891, vivify_330
+    new $P891, "Undef"
   vivify_330:
-    $P895 = $P891."new"($P892, $P893 :named("name"), "subrule" :named("pasttype"), "capture" :named("subtype"), $P894 :named("node"))
-.annotate "line", 341
-    store_lex "$past", $P895
-.annotate "line", 343
-    find_lex $P898, "$/"
-    set $P899, $P898["nibbler"]
-    unless_null $P899, vivify_331
-    new $P899, "Undef"
-  vivify_331:
-    if $P899, if_897
-    find_lex $P912, "$/"
-    set $P913, $P912["arglist"]
-    unless_null $P913, vivify_332
-    new $P913, "Undef"
-  vivify_332:
-    if $P913, if_911
-    set $P910, $P913
-    goto if_911_end
-  if_911:
-.annotate "line", 346
-    .const 'Sub' $P915 = "85_1256279185.41736" 
-    capture_lex $P915
-    $P933 = $P915()
-    set $P910, $P933
-  if_911_end:
-.annotate "line", 343
-    set $P896, $P910
-    goto if_897_end
-  if_897:
-    .const 'Sub' $P901 = "84_1256279185.41736" 
-    capture_lex $P901
-    $P909 = $P901()
-    set $P896, $P909
-  if_897_end:
-.annotate "line", 340
-    .return ($P896)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block914"  :anon :subid("85_1256279185.41736") :outer("83_1256279185.41736")
-.annotate "line", 346
-    .const 'Sub' $P924 = "86_1256279185.41736" 
-    capture_lex $P924
-.annotate "line", 347
-    find_lex $P917, "$/"
-    set $P918, $P917["arglist"]
-    unless_null $P918, vivify_333
-    new $P918, "ResizablePMCArray"
-  vivify_333:
-    set $P919, $P918[0]
-    unless_null $P919, vivify_334
-    new $P919, "Hash"
-  vivify_334:
-    set $P920, $P919["arg"]
-    unless_null $P920, vivify_335
-    new $P920, "Undef"
-  vivify_335:
-    defined $I921, $P920
-    unless $I921, for_undef_336
-    iter $P916, $P920
-    new $P931, 'ExceptionHandler'
-    set_addr $P931, loop930_handler
-    $P931."handle_types"(65, 67, 66)
-    push_eh $P931
-  loop930_test:
-    unless $P916, loop930_done
-    shift $P922, $P916
-  loop930_redo:
-    .const 'Sub' $P924 = "86_1256279185.41736" 
-    capture_lex $P924
-    $P924($P922)
-  loop930_next:
-    goto loop930_test
-  loop930_handler:
+    set $S892, $P891
+    iseq $I893, $S892, "sym"
+    if $I893, if_890
+.annotate "line", 348
+    .const 'Sub' $P905 = "84_1256533476.70438" 
+    capture_lex $P905
+    $P905()
+    goto if_890_end
+  if_890:
+.annotate "line", 333
+    .const 'Sub' $P895 = "83_1256533476.70438" 
+    capture_lex $P895
+    $P895()
+  if_890_end:
+.annotate "line", 329
+    goto if_878_end
+  if_878:
+    .const 'Sub' $P882 = "82_1256533476.70438" 
+    capture_lex $P882
+    $P882()
+  if_878_end:
+    find_lex $P949, "$/"
+.annotate "line", 360
+    find_lex $P950, "$past"
+    unless_null $P950, vivify_352
+    new $P950, "Undef"
+  vivify_352:
+    $P951 = $P949."!make"($P950)
+.annotate "line", 326
+    .return ($P951)
+  control_870:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P932, exception, 'type'
-    eq $P932, 65, loop930_next
-    eq $P932, 67, loop930_redo
-  loop930_done:
-    pop_eh 
-  for_undef_336:
-.annotate "line", 346
-    .return ($P916)
+    getattribute $P952, exception, "payload"
+    .return ($P952)
+    rethrow exception
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block923"  :anon :subid("86_1256279185.41736") :outer("85_1256279185.41736")
-    .param pmc param_925
-.annotate "line", 347
-    .lex "$_", param_925
+.sub "_block904"  :anon :subid("84_1256533476.70438") :outer("81_1256533476.70438")
 .annotate "line", 348
-    find_lex $P926, "$past"
-    unless_null $P926, vivify_337
-    new $P926, "Undef"
+    .const 'Sub' $P930 = "86_1256533476.70438" 
+    capture_lex $P930
+    .const 'Sub' $P916 = "85_1256533476.70438" 
+    capture_lex $P916
+.annotate "line", 349
+    get_hll_global $P906, ["PAST"], "Regex"
+    find_lex $P907, "$name"
+    unless_null $P907, vivify_331
+    new $P907, "Undef"
+  vivify_331:
+    find_lex $P908, "$name"
+    unless_null $P908, vivify_332
+    new $P908, "Undef"
+  vivify_332:
+.annotate "line", 350
+    find_lex $P909, "$/"
+    unless_null $P909, vivify_333
+    new $P909, "Undef"
+  vivify_333:
+    $P910 = $P906."new"($P907, $P908 :named("name"), "subrule" :named("pasttype"), "capture" :named("subtype"), $P909 :named("node"))
+.annotate "line", 349
+    store_lex "$past", $P910
+.annotate "line", 351
+    find_lex $P913, "$/"
+    set $P914, $P913["nibbler"]
+    unless_null $P914, vivify_334
+    new $P914, "Undef"
+  vivify_334:
+    if $P914, if_912
+    find_lex $P927, "$/"
+    set $P928, $P927["arglist"]
+    unless_null $P928, vivify_335
+    new $P928, "Undef"
+  vivify_335:
+    if $P928, if_926
+    set $P925, $P928
+    goto if_926_end
+  if_926:
+.annotate "line", 354
+    .const 'Sub' $P930 = "86_1256533476.70438" 
+    capture_lex $P930
+    $P948 = $P930()
+    set $P925, $P948
+  if_926_end:
+.annotate "line", 351
+    set $P911, $P925
+    goto if_912_end
+  if_912:
+    .const 'Sub' $P916 = "85_1256533476.70438" 
+    capture_lex $P916
+    $P924 = $P916()
+    set $P911, $P924
+  if_912_end:
+.annotate "line", 348
+    .return ($P911)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block929"  :anon :subid("86_1256533476.70438") :outer("84_1256533476.70438")
+.annotate "line", 354
+    .const 'Sub' $P939 = "87_1256533476.70438" 
+    capture_lex $P939
+.annotate "line", 355
+    find_lex $P932, "$/"
+    set $P933, $P932["arglist"]
+    unless_null $P933, vivify_336
+    new $P933, "ResizablePMCArray"
+  vivify_336:
+    set $P934, $P933[0]
+    unless_null $P934, vivify_337
+    new $P934, "Hash"
   vivify_337:
-    find_lex $P927, "$_"
-    unless_null $P927, vivify_338
-    new $P927, "Undef"
+    set $P935, $P934["arg"]
+    unless_null $P935, vivify_338
+    new $P935, "Undef"
   vivify_338:
-    $P928 = $P927."ast"()
-    $P929 = $P926."push"($P928)
-.annotate "line", 347
-    .return ($P929)
+    defined $I936, $P935
+    unless $I936, for_undef_339
+    iter $P931, $P935
+    new $P946, 'ExceptionHandler'
+    set_addr $P946, loop945_handler
+    $P946."handle_types"(65, 67, 66)
+    push_eh $P946
+  loop945_test:
+    unless $P931, loop945_done
+    shift $P937, $P931
+  loop945_redo:
+    .const 'Sub' $P939 = "87_1256533476.70438" 
+    capture_lex $P939
+    $P939($P937)
+  loop945_next:
+    goto loop945_test
+  loop945_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P947, exception, 'type'
+    eq $P947, 65, loop945_next
+    eq $P947, 67, loop945_redo
+  loop945_done:
+    pop_eh 
+  for_undef_339:
+.annotate "line", 354
+    .return ($P931)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block900"  :anon :subid("84_1256279185.41736") :outer("83_1256279185.41736")
-.annotate "line", 344
-    find_lex $P902, "$past"
-    unless_null $P902, vivify_339
-    new $P902, "Undef"
-  vivify_339:
-    find_lex $P903, "$/"
-    set $P904, $P903["nibbler"]
-    unless_null $P904, vivify_340
-    new $P904, "ResizablePMCArray"
+.sub "_block938"  :anon :subid("87_1256533476.70438") :outer("86_1256533476.70438")
+    .param pmc param_940
+.annotate "line", 355
+    .lex "$_", param_940
+.annotate "line", 356
+    find_lex $P941, "$past"
+    unless_null $P941, vivify_340
+    new $P941, "Undef"
   vivify_340:
-    set $P905, $P904[0]
-    unless_null $P905, vivify_341
-    new $P905, "Undef"
+    find_lex $P942, "$_"
+    unless_null $P942, vivify_341
+    new $P942, "Undef"
   vivify_341:
-    $P906 = $P905."ast"()
-    $P907 = "buildsub"($P906)
-    $P908 = $P902."push"($P907)
-.annotate "line", 343
-    .return ($P908)
+    $P943 = $P942."ast"()
+    $P944 = $P941."push"($P943)
+.annotate "line", 355
+    .return ($P944)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block879"  :anon :subid("82_1256279185.41736") :outer("80_1256279185.41736")
-.annotate "line", 326
+.sub "_block915"  :anon :subid("85_1256533476.70438") :outer("84_1256533476.70438")
+.annotate "line", 352
+    find_lex $P917, "$past"
+    unless_null $P917, vivify_342
+    new $P917, "Undef"
+  vivify_342:
+    find_lex $P918, "$/"
+    set $P919, $P918["nibbler"]
+    unless_null $P919, vivify_343
+    new $P919, "ResizablePMCArray"
+  vivify_343:
+    set $P920, $P919[0]
+    unless_null $P920, vivify_344
+    new $P920, "Undef"
+  vivify_344:
+    $P921 = $P920."ast"()
+    $P922 = "buildsub"($P921)
+    $P923 = $P917."push"($P922)
+.annotate "line", 351
+    .return ($P923)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block894"  :anon :subid("83_1256533476.70438") :outer("81_1256533476.70438")
+.annotate "line", 334
 
             $P0 = get_global '$REGEXNAME'
             $S0 = $P0
@@ -11995,527 +12193,527 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
             add $I0, 5
             $S0 = substr $S0, $I0
             chopn $S0, 1
-            $P881 = box $S0
+            $P896 = box $S0
         
-    .lex "$regexsym", $P881
-.annotate "line", 335
-    get_hll_global $P882, ["PAST"], "Regex"
-.annotate "line", 336
-    get_hll_global $P883, ["PAST"], "Regex"
-    find_lex $P884, "$regexsym"
-    unless_null $P884, vivify_342
-    new $P884, "Undef"
-  vivify_342:
-    $P885 = $P883."new"($P884, "literal" :named("pasttype"))
-.annotate "line", 337
-    find_lex $P886, "$name"
-    unless_null $P886, vivify_343
-    new $P886, "Undef"
-  vivify_343:
-    find_lex $P887, "$/"
-    unless_null $P887, vivify_344
-    new $P887, "Undef"
-  vivify_344:
-    $P888 = $P882."new"($P885, $P886 :named("name"), "subcapture" :named("pasttype"), $P887 :named("node"))
-.annotate "line", 335
-    store_lex "$past", $P888
-.annotate "line", 325
-    .return ($P888)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block866"  :anon :subid("81_1256279185.41736") :outer("80_1256279185.41736")
-.annotate "line", 322
-    find_lex $P868, "$/"
-    set $P869, $P868["assertion"]
-    unless_null $P869, vivify_345
-    new $P869, "ResizablePMCArray"
+    .lex "$regexsym", $P896
+.annotate "line", 343
+    get_hll_global $P897, ["PAST"], "Regex"
+.annotate "line", 344
+    get_hll_global $P898, ["PAST"], "Regex"
+    find_lex $P899, "$regexsym"
+    unless_null $P899, vivify_345
+    new $P899, "Undef"
   vivify_345:
-    set $P870, $P869[0]
-    unless_null $P870, vivify_346
-    new $P870, "Undef"
+    $P900 = $P898."new"($P899, "literal" :named("pasttype"))
+.annotate "line", 345
+    find_lex $P901, "$name"
+    unless_null $P901, vivify_346
+    new $P901, "Undef"
   vivify_346:
-    $P871 = $P870."ast"()
-    store_lex "$past", $P871
-.annotate "line", 323
-    find_lex $P872, "$past"
-    unless_null $P872, vivify_347
-    new $P872, "Undef"
+    find_lex $P902, "$/"
+    unless_null $P902, vivify_347
+    new $P902, "Undef"
   vivify_347:
-    find_lex $P873, "$name"
-    unless_null $P873, vivify_348
-    new $P873, "Undef"
-  vivify_348:
-    $P874 = "subrule_alias"($P872, $P873)
-.annotate "line", 321
-    .return ($P874)
+    $P903 = $P897."new"($P900, $P901 :named("name"), "subcapture" :named("pasttype"), $P902 :named("node"))
+.annotate "line", 343
+    store_lex "$past", $P903
+.annotate "line", 333
+    .return ($P903)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "assertion:sym<[>"  :subid("87_1256279185.41736") :method :outer("11_1256279185.41736")
-    .param pmc param_941
-.annotate "line", 355
-    .const 'Sub' $P974 = "89_1256279185.41736" 
-    capture_lex $P974
-    .const 'Sub' $P956 = "88_1256279185.41736" 
-    capture_lex $P956
-    new $P940, 'ExceptionHandler'
-    set_addr $P940, control_939
-    $P940."handle_types"(58)
-    push_eh $P940
-    .lex "self", self
-    .lex "$/", param_941
-.annotate "line", 356
-    find_lex $P942, "$/"
-    set $P943, $P942["cclass_elem"]
-    unless_null $P943, vivify_350
-    new $P943, "Undef"
+.sub "_block881"  :anon :subid("82_1256533476.70438") :outer("81_1256533476.70438")
+.annotate "line", 330
+    find_lex $P883, "$/"
+    set $P884, $P883["assertion"]
+    unless_null $P884, vivify_348
+    new $P884, "ResizablePMCArray"
+  vivify_348:
+    set $P885, $P884[0]
+    unless_null $P885, vivify_349
+    new $P885, "Undef"
+  vivify_349:
+    $P886 = $P885."ast"()
+    store_lex "$past", $P886
+.annotate "line", 331
+    find_lex $P887, "$past"
+    unless_null $P887, vivify_350
+    new $P887, "Undef"
   vivify_350:
-    .lex "$clist", $P943
-.annotate "line", 357
-    find_lex $P944, "$clist"
-    unless_null $P944, vivify_351
-    new $P944, "ResizablePMCArray"
+    find_lex $P888, "$name"
+    unless_null $P888, vivify_351
+    new $P888, "Undef"
   vivify_351:
-    set $P945, $P944[0]
-    unless_null $P945, vivify_352
-    new $P945, "Undef"
-  vivify_352:
-    $P946 = $P945."ast"()
-    .lex "$past", $P946
-.annotate "line", 358
-    find_lex $P950, "$past"
-    unless_null $P950, vivify_353
-    new $P950, "Undef"
+    $P889 = "subrule_alias"($P887, $P888)
+.annotate "line", 329
+    .return ($P889)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "assertion:sym<[>"  :subid("88_1256533476.70438") :method :outer("11_1256533476.70438")
+    .param pmc param_956
+.annotate "line", 363
+    .const 'Sub' $P989 = "90_1256533476.70438" 
+    capture_lex $P989
+    .const 'Sub' $P971 = "89_1256533476.70438" 
+    capture_lex $P971
+    new $P955, 'ExceptionHandler'
+    set_addr $P955, control_954
+    $P955."handle_types"(58)
+    push_eh $P955
+    .lex "self", self
+    .lex "$/", param_956
+.annotate "line", 364
+    find_lex $P957, "$/"
+    set $P958, $P957["cclass_elem"]
+    unless_null $P958, vivify_353
+    new $P958, "Undef"
   vivify_353:
-    $P951 = $P950."negate"()
-    if $P951, if_949
-    set $P948, $P951
-    goto if_949_end
-  if_949:
-    find_lex $P952, "$past"
-    unless_null $P952, vivify_354
-    new $P952, "Undef"
+    .lex "$clist", $P958
+.annotate "line", 365
+    find_lex $P959, "$clist"
+    unless_null $P959, vivify_354
+    new $P959, "ResizablePMCArray"
   vivify_354:
-    $S953 = $P952."pasttype"()
-    iseq $I954, $S953, "subrule"
-    new $P948, 'Integer'
-    set $P948, $I954
-  if_949_end:
-    unless $P948, if_947_end
-    .const 'Sub' $P956 = "88_1256279185.41736" 
-    capture_lex $P956
-    $P956()
-  if_947_end:
+    set $P960, $P959[0]
+    unless_null $P960, vivify_355
+    new $P960, "Undef"
+  vivify_355:
+    $P961 = $P960."ast"()
+    .lex "$past", $P961
 .annotate "line", 366
-    new $P964, "Integer"
-    assign $P964, 1
-    .lex "$i", $P964
-.annotate "line", 367
-    find_lex $P965, "$clist"
-    unless_null $P965, vivify_358
+    find_lex $P965, "$past"
+    unless_null $P965, vivify_356
     new $P965, "Undef"
-  vivify_358:
-    set $N966, $P965
-    new $P967, 'Float'
-    set $P967, $N966
-    .lex "$n", $P967
-.annotate "line", 368
-    new $P1001, 'ExceptionHandler'
-    set_addr $P1001, loop1000_handler
-    $P1001."handle_types"(65, 67, 66)
-    push_eh $P1001
-  loop1000_test:
-    find_lex $P968, "$i"
-    unless_null $P968, vivify_359
-    new $P968, "Undef"
-  vivify_359:
-    set $N969, $P968
-    find_lex $P970, "$n"
-    unless_null $P970, vivify_360
-    new $P970, "Undef"
-  vivify_360:
-    set $N971, $P970
-    islt $I972, $N969, $N971
-    unless $I972, loop1000_done
-  loop1000_redo:
-    .const 'Sub' $P974 = "89_1256279185.41736" 
-    capture_lex $P974
-    $P974()
-  loop1000_next:
-    goto loop1000_test
-  loop1000_handler:
+  vivify_356:
+    $P966 = $P965."negate"()
+    if $P966, if_964
+    set $P963, $P966
+    goto if_964_end
+  if_964:
+    find_lex $P967, "$past"
+    unless_null $P967, vivify_357
+    new $P967, "Undef"
+  vivify_357:
+    $S968 = $P967."pasttype"()
+    iseq $I969, $S968, "subrule"
+    new $P963, 'Integer'
+    set $P963, $I969
+  if_964_end:
+    unless $P963, if_962_end
+    .const 'Sub' $P971 = "89_1256533476.70438" 
+    capture_lex $P971
+    $P971()
+  if_962_end:
+.annotate "line", 374
+    new $P979, "Integer"
+    assign $P979, 1
+    .lex "$i", $P979
+.annotate "line", 375
+    find_lex $P980, "$clist"
+    unless_null $P980, vivify_361
+    new $P980, "Undef"
+  vivify_361:
+    set $N981, $P980
+    new $P982, 'Float'
+    set $P982, $N981
+    .lex "$n", $P982
+.annotate "line", 376
+    new $P1016, 'ExceptionHandler'
+    set_addr $P1016, loop1015_handler
+    $P1016."handle_types"(65, 67, 66)
+    push_eh $P1016
+  loop1015_test:
+    find_lex $P983, "$i"
+    unless_null $P983, vivify_362
+    new $P983, "Undef"
+  vivify_362:
+    set $N984, $P983
+    find_lex $P985, "$n"
+    unless_null $P985, vivify_363
+    new $P985, "Undef"
+  vivify_363:
+    set $N986, $P985
+    islt $I987, $N984, $N986
+    unless $I987, loop1015_done
+  loop1015_redo:
+    .const 'Sub' $P989 = "90_1256533476.70438" 
+    capture_lex $P989
+    $P989()
+  loop1015_next:
+    goto loop1015_test
+  loop1015_handler:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P1002, exception, 'type'
-    eq $P1002, 65, loop1000_next
-    eq $P1002, 67, loop1000_redo
-  loop1000_done:
+    getattribute $P1017, exception, 'type'
+    eq $P1017, 65, loop1015_next
+    eq $P1017, 67, loop1015_redo
+  loop1015_done:
     pop_eh 
-    find_lex $P1003, "$/"
-.annotate "line", 379
-    find_lex $P1004, "$past"
-    unless_null $P1004, vivify_373
-    new $P1004, "Undef"
-  vivify_373:
-    $P1005 = $P1003."!make"($P1004)
-.annotate "line", 355
-    .return ($P1005)
-  control_939:
+    find_lex $P1018, "$/"
+.annotate "line", 387
+    find_lex $P1019, "$past"
+    unless_null $P1019, vivify_376
+    new $P1019, "Undef"
+  vivify_376:
+    $P1020 = $P1018."!make"($P1019)
+.annotate "line", 363
+    .return ($P1020)
+  control_954:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P1006, exception, "payload"
-    .return ($P1006)
+    getattribute $P1021, exception, "payload"
+    .return ($P1021)
     rethrow exception
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block955"  :anon :subid("88_1256279185.41736") :outer("87_1256279185.41736")
-.annotate "line", 359
-    find_lex $P957, "$past"
-    unless_null $P957, vivify_355
-    new $P957, "Undef"
-  vivify_355:
-    $P957."subtype"("zerowidth")
-.annotate "line", 360
-    get_hll_global $P958, ["PAST"], "Regex"
-.annotate "line", 361
-    find_lex $P959, "$past"
-    unless_null $P959, vivify_356
-    new $P959, "Undef"
-  vivify_356:
-.annotate "line", 362
-    get_hll_global $P960, ["PAST"], "Regex"
-    $P961 = $P960."new"("charclass" :named("pasttype"), "." :named("subtype"))
-.annotate "line", 363
-    find_lex $P962, "$/"
-    unless_null $P962, vivify_357
-    new $P962, "Undef"
-  vivify_357:
-    $P963 = $P958."new"($P959, $P961, $P962 :named("node"))
-.annotate "line", 360
-    store_lex "$past", $P963
-.annotate "line", 358
-    .return ($P963)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block973"  :anon :subid("89_1256279185.41736") :outer("87_1256279185.41736")
+.sub "_block970"  :anon :subid("89_1256533476.70438") :outer("88_1256533476.70438")
+.annotate "line", 367
+    find_lex $P972, "$past"
+    unless_null $P972, vivify_358
+    new $P972, "Undef"
+  vivify_358:
+    $P972."subtype"("zerowidth")
 .annotate "line", 368
-    .const 'Sub' $P992 = "91_1256279185.41736" 
-    capture_lex $P992
-    .const 'Sub' $P984 = "90_1256279185.41736" 
-    capture_lex $P984
+    get_hll_global $P973, ["PAST"], "Regex"
 .annotate "line", 369
-    find_lex $P975, "$i"
-    unless_null $P975, vivify_361
-    new $P975, "Undef"
-  vivify_361:
-    set $I976, $P975
-    find_lex $P977, "$clist"
-    unless_null $P977, vivify_362
-    new $P977, "ResizablePMCArray"
-  vivify_362:
-    set $P978, $P977[$I976]
-    unless_null $P978, vivify_363
-    new $P978, "Undef"
-  vivify_363:
-    $P979 = $P978."ast"()
-    .lex "$ast", $P979
+    find_lex $P974, "$past"
+    unless_null $P974, vivify_359
+    new $P974, "Undef"
+  vivify_359:
 .annotate "line", 370
-    find_lex $P981, "$ast"
-    unless_null $P981, vivify_364
-    new $P981, "Undef"
-  vivify_364:
-    $P982 = $P981."negate"()
-    if $P982, if_980
-.annotate "line", 374
-    .const 'Sub' $P992 = "91_1256279185.41736" 
-    capture_lex $P992
-    $P992()
-    goto if_980_end
-  if_980:
-.annotate "line", 370
-    .const 'Sub' $P984 = "90_1256279185.41736" 
-    capture_lex $P984
-    $P984()
-  if_980_end:
-.annotate "line", 377
-    find_lex $P998, "$i"
-    unless_null $P998, vivify_372
-    new $P998, "Undef"
-  vivify_372:
-    add $P999, $P998, 1
-    store_lex "$i", $P999
+    get_hll_global $P975, ["PAST"], "Regex"
+    $P976 = $P975."new"("charclass" :named("pasttype"), "." :named("subtype"))
+.annotate "line", 371
+    find_lex $P977, "$/"
+    unless_null $P977, vivify_360
+    new $P977, "Undef"
+  vivify_360:
+    $P978 = $P973."new"($P974, $P976, $P977 :named("node"))
 .annotate "line", 368
-    .return ($P999)
+    store_lex "$past", $P978
+.annotate "line", 366
+    .return ($P978)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block991"  :anon :subid("91_1256279185.41736") :outer("89_1256279185.41736")
-.annotate "line", 375
-    get_hll_global $P993, ["PAST"], "Regex"
-    find_lex $P994, "$past"
-    unless_null $P994, vivify_365
-    new $P994, "Undef"
+.sub "_block988"  :anon :subid("90_1256533476.70438") :outer("88_1256533476.70438")
+.annotate "line", 376
+    .const 'Sub' $P1007 = "92_1256533476.70438" 
+    capture_lex $P1007
+    .const 'Sub' $P999 = "91_1256533476.70438" 
+    capture_lex $P999
+.annotate "line", 377
+    find_lex $P990, "$i"
+    unless_null $P990, vivify_364
+    new $P990, "Undef"
+  vivify_364:
+    set $I991, $P990
+    find_lex $P992, "$clist"
+    unless_null $P992, vivify_365
+    new $P992, "ResizablePMCArray"
   vivify_365:
-    find_lex $P995, "$ast"
-    unless_null $P995, vivify_366
-    new $P995, "Undef"
+    set $P993, $P992[$I991]
+    unless_null $P993, vivify_366
+    new $P993, "Undef"
   vivify_366:
-    find_lex $P996, "$/"
+    $P994 = $P993."ast"()
+    .lex "$ast", $P994
+.annotate "line", 378
+    find_lex $P996, "$ast"
     unless_null $P996, vivify_367
     new $P996, "Undef"
   vivify_367:
-    $P997 = $P993."new"($P994, $P995, "alt" :named("pasttype"), $P996 :named("node"))
-    store_lex "$past", $P997
-.annotate "line", 374
-    .return ($P997)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block983"  :anon :subid("90_1256279185.41736") :outer("89_1256279185.41736")
-.annotate "line", 371
-    find_lex $P985, "$ast"
-    unless_null $P985, vivify_368
-    new $P985, "Undef"
-  vivify_368:
-    $P985."subtype"("zerowidth")
-.annotate "line", 372
-    get_hll_global $P986, ["PAST"], "Regex"
-    find_lex $P987, "$ast"
-    unless_null $P987, vivify_369
-    new $P987, "Undef"
-  vivify_369:
-    find_lex $P988, "$past"
-    unless_null $P988, vivify_370
-    new $P988, "Undef"
-  vivify_370:
-    find_lex $P989, "$/"
-    unless_null $P989, vivify_371
-    new $P989, "Undef"
-  vivify_371:
-    $P990 = $P986."new"($P987, $P988, "concat" :named("pasttype"), $P989 :named("node"))
-    store_lex "$past", $P990
-.annotate "line", 370
-    .return ($P990)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "cclass_elem"  :subid("92_1256279185.41736") :method :outer("11_1256279185.41736")
-    .param pmc param_1010
+    $P997 = $P996."negate"()
+    if $P997, if_995
 .annotate "line", 382
-    .const 'Sub' $P1027 = "94_1256279185.41736" 
-    capture_lex $P1027
-    .const 'Sub' $P1017 = "93_1256279185.41736" 
-    capture_lex $P1017
-    new $P1009, 'ExceptionHandler'
-    set_addr $P1009, control_1008
-    $P1009."handle_types"(58)
-    push_eh $P1009
-    .lex "self", self
-    .lex "$/", param_1010
+    .const 'Sub' $P1007 = "92_1256533476.70438" 
+    capture_lex $P1007
+    $P1007()
+    goto if_995_end
+  if_995:
+.annotate "line", 378
+    .const 'Sub' $P999 = "91_1256533476.70438" 
+    capture_lex $P999
+    $P999()
+  if_995_end:
+.annotate "line", 385
+    find_lex $P1013, "$i"
+    unless_null $P1013, vivify_375
+    new $P1013, "Undef"
+  vivify_375:
+    add $P1014, $P1013, 1
+    store_lex "$i", $P1014
+.annotate "line", 376
+    .return ($P1014)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block1006"  :anon :subid("92_1256533476.70438") :outer("90_1256533476.70438")
 .annotate "line", 383
-    new $P1011, "String"
-    assign $P1011, ""
-    .lex "$str", $P1011
-.annotate "line", 384
-    new $P1012, "Undef"
-    .lex "$past", $P1012
-.annotate "line", 385
-    find_lex $P1014, "$/"
-    set $P1015, $P1014["name"]
-    unless_null $P1015, vivify_374
-    new $P1015, "Undef"
-  vivify_374:
-    if $P1015, if_1013
-.annotate "line", 388
-    .const 'Sub' $P1027 = "94_1256279185.41736" 
-    capture_lex $P1027
-    $P1027()
-    goto if_1013_end
-  if_1013:
-.annotate "line", 385
-    .const 'Sub' $P1017 = "93_1256279185.41736" 
-    capture_lex $P1017
-    $P1017()
-  if_1013_end:
-.annotate "line", 416
-    find_lex $P1066, "$past"
-    unless_null $P1066, vivify_394
-    new $P1066, "Undef"
-  vivify_394:
-    find_lex $P1067, "$/"
-    set $P1068, $P1067["sign"]
-    unless_null $P1068, vivify_395
-    new $P1068, "Undef"
-  vivify_395:
-    set $S1069, $P1068
-    iseq $I1070, $S1069, "-"
-    $P1066."negate"($I1070)
-    find_lex $P1071, "$/"
-.annotate "line", 417
-    find_lex $P1072, "$past"
-    unless_null $P1072, vivify_396
-    new $P1072, "Undef"
-  vivify_396:
-    $P1073 = $P1071."!make"($P1072)
+    get_hll_global $P1008, ["PAST"], "Regex"
+    find_lex $P1009, "$past"
+    unless_null $P1009, vivify_368
+    new $P1009, "Undef"
+  vivify_368:
+    find_lex $P1010, "$ast"
+    unless_null $P1010, vivify_369
+    new $P1010, "Undef"
+  vivify_369:
+    find_lex $P1011, "$/"
+    unless_null $P1011, vivify_370
+    new $P1011, "Undef"
+  vivify_370:
+    $P1012 = $P1008."new"($P1009, $P1010, "alt" :named("pasttype"), $P1011 :named("node"))
+    store_lex "$past", $P1012
 .annotate "line", 382
-    .return ($P1073)
-  control_1008:
+    .return ($P1012)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block998"  :anon :subid("91_1256533476.70438") :outer("90_1256533476.70438")
+.annotate "line", 379
+    find_lex $P1000, "$ast"
+    unless_null $P1000, vivify_371
+    new $P1000, "Undef"
+  vivify_371:
+    $P1000."subtype"("zerowidth")
+.annotate "line", 380
+    get_hll_global $P1001, ["PAST"], "Regex"
+    find_lex $P1002, "$ast"
+    unless_null $P1002, vivify_372
+    new $P1002, "Undef"
+  vivify_372:
+    find_lex $P1003, "$past"
+    unless_null $P1003, vivify_373
+    new $P1003, "Undef"
+  vivify_373:
+    find_lex $P1004, "$/"
+    unless_null $P1004, vivify_374
+    new $P1004, "Undef"
+  vivify_374:
+    $P1005 = $P1001."new"($P1002, $P1003, "concat" :named("pasttype"), $P1004 :named("node"))
+    store_lex "$past", $P1005
+.annotate "line", 378
+    .return ($P1005)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "cclass_elem"  :subid("93_1256533476.70438") :method :outer("11_1256533476.70438")
+    .param pmc param_1025
+.annotate "line", 390
+    .const 'Sub' $P1042 = "95_1256533476.70438" 
+    capture_lex $P1042
+    .const 'Sub' $P1032 = "94_1256533476.70438" 
+    capture_lex $P1032
+    new $P1024, 'ExceptionHandler'
+    set_addr $P1024, control_1023
+    $P1024."handle_types"(58)
+    push_eh $P1024
+    .lex "self", self
+    .lex "$/", param_1025
+.annotate "line", 391
+    new $P1026, "String"
+    assign $P1026, ""
+    .lex "$str", $P1026
+.annotate "line", 392
+    new $P1027, "Undef"
+    .lex "$past", $P1027
+.annotate "line", 393
+    find_lex $P1029, "$/"
+    set $P1030, $P1029["name"]
+    unless_null $P1030, vivify_377
+    new $P1030, "Undef"
+  vivify_377:
+    if $P1030, if_1028
+.annotate "line", 396
+    .const 'Sub' $P1042 = "95_1256533476.70438" 
+    capture_lex $P1042
+    $P1042()
+    goto if_1028_end
+  if_1028:
+.annotate "line", 393
+    .const 'Sub' $P1032 = "94_1256533476.70438" 
+    capture_lex $P1032
+    $P1032()
+  if_1028_end:
+.annotate "line", 424
+    find_lex $P1081, "$past"
+    unless_null $P1081, vivify_397
+    new $P1081, "Undef"
+  vivify_397:
+    find_lex $P1082, "$/"
+    set $P1083, $P1082["sign"]
+    unless_null $P1083, vivify_398
+    new $P1083, "Undef"
+  vivify_398:
+    set $S1084, $P1083
+    iseq $I1085, $S1084, "-"
+    $P1081."negate"($I1085)
+    find_lex $P1086, "$/"
+.annotate "line", 425
+    find_lex $P1087, "$past"
+    unless_null $P1087, vivify_399
+    new $P1087, "Undef"
+  vivify_399:
+    $P1088 = $P1086."!make"($P1087)
+.annotate "line", 390
+    .return ($P1088)
+  control_1023:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P1074, exception, "payload"
-    .return ($P1074)
+    getattribute $P1089, exception, "payload"
+    .return ($P1089)
     rethrow exception
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1026"  :anon :subid("94_1256279185.41736") :outer("92_1256279185.41736")
-.annotate "line", 388
-    .const 'Sub' $P1034 = "95_1256279185.41736" 
-    capture_lex $P1034
-.annotate "line", 389
-    find_lex $P1029, "$/"
-    set $P1030, $P1029["charspec"]
-    unless_null $P1030, vivify_375
-    new $P1030, "Undef"
-  vivify_375:
-    defined $I1031, $P1030
-    unless $I1031, for_undef_376
-    iter $P1028, $P1030
-    new $P1060, 'ExceptionHandler'
-    set_addr $P1060, loop1059_handler
-    $P1060."handle_types"(65, 67, 66)
-    push_eh $P1060
-  loop1059_test:
-    unless $P1028, loop1059_done
-    shift $P1032, $P1028
-  loop1059_redo:
-    .const 'Sub' $P1034 = "95_1256279185.41736" 
-    capture_lex $P1034
-    $P1034($P1032)
-  loop1059_next:
-    goto loop1059_test
-  loop1059_handler:
+.sub "_block1041"  :anon :subid("95_1256533476.70438") :outer("93_1256533476.70438")
+.annotate "line", 396
+    .const 'Sub' $P1049 = "96_1256533476.70438" 
+    capture_lex $P1049
+.annotate "line", 397
+    find_lex $P1044, "$/"
+    set $P1045, $P1044["charspec"]
+    unless_null $P1045, vivify_378
+    new $P1045, "Undef"
+  vivify_378:
+    defined $I1046, $P1045
+    unless $I1046, for_undef_379
+    iter $P1043, $P1045
+    new $P1075, 'ExceptionHandler'
+    set_addr $P1075, loop1074_handler
+    $P1075."handle_types"(65, 67, 66)
+    push_eh $P1075
+  loop1074_test:
+    unless $P1043, loop1074_done
+    shift $P1047, $P1043
+  loop1074_redo:
+    .const 'Sub' $P1049 = "96_1256533476.70438" 
+    capture_lex $P1049
+    $P1049($P1047)
+  loop1074_next:
+    goto loop1074_test
+  loop1074_handler:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P1061, exception, 'type'
-    eq $P1061, 65, loop1059_next
-    eq $P1061, 67, loop1059_redo
-  loop1059_done:
+    getattribute $P1076, exception, 'type'
+    eq $P1076, 65, loop1074_next
+    eq $P1076, 67, loop1074_redo
+  loop1074_done:
     pop_eh 
-  for_undef_376:
-.annotate "line", 414
-    get_hll_global $P1062, ["PAST"], "Regex"
-    find_lex $P1063, "$str"
-    unless_null $P1063, vivify_389
-    new $P1063, "Undef"
-  vivify_389:
-    find_lex $P1064, "$/"
-    unless_null $P1064, vivify_390
-    new $P1064, "Undef"
-  vivify_390:
-    $P1065 = $P1062."new"($P1063, "enumcharlist" :named("pasttype"), $P1064 :named("node"))
-    store_lex "$past", $P1065
-.annotate "line", 388
-    .return ($P1065)
+  for_undef_379:
+.annotate "line", 422
+    get_hll_global $P1077, ["PAST"], "Regex"
+    find_lex $P1078, "$str"
+    unless_null $P1078, vivify_392
+    new $P1078, "Undef"
+  vivify_392:
+    find_lex $P1079, "$/"
+    unless_null $P1079, vivify_393
+    new $P1079, "Undef"
+  vivify_393:
+    $P1080 = $P1077."new"($P1078, "enumcharlist" :named("pasttype"), $P1079 :named("node"))
+    store_lex "$past", $P1080
+.annotate "line", 396
+    .return ($P1080)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1033"  :anon :subid("95_1256279185.41736") :outer("94_1256279185.41736")
-    .param pmc param_1035
-.annotate "line", 389
-    .const 'Sub' $P1053 = "97_1256279185.41736" 
-    capture_lex $P1053
-    .const 'Sub' $P1041 = "96_1256279185.41736" 
-    capture_lex $P1041
-    .lex "$_", param_1035
-.annotate "line", 390
-    find_lex $P1038, "$_"
-    unless_null $P1038, vivify_377
-    new $P1038, "ResizablePMCArray"
-  vivify_377:
-    set $P1039, $P1038[1]
-    unless_null $P1039, vivify_378
-    new $P1039, "Undef"
-  vivify_378:
-    if $P1039, if_1037
-.annotate "line", 412
-    .const 'Sub' $P1053 = "97_1256279185.41736" 
-    capture_lex $P1053
-    $P1058 = $P1053()
-    set $P1036, $P1058
-.annotate "line", 390
-    goto if_1037_end
-  if_1037:
-    .const 'Sub' $P1041 = "96_1256279185.41736" 
-    capture_lex $P1041
-    $P1051 = $P1041()
-    set $P1036, $P1051
-  if_1037_end:
-.annotate "line", 389
-    .return ($P1036)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1052"  :anon :subid("97_1256279185.41736") :outer("95_1256279185.41736")
-.annotate "line", 412
-    find_lex $P1054, "$str"
-    unless_null $P1054, vivify_379
-    new $P1054, "Undef"
-  vivify_379:
-    find_lex $P1055, "$_"
-    unless_null $P1055, vivify_380
-    new $P1055, "ResizablePMCArray"
+.sub "_block1048"  :anon :subid("96_1256533476.70438") :outer("95_1256533476.70438")
+    .param pmc param_1050
+.annotate "line", 397
+    .const 'Sub' $P1068 = "98_1256533476.70438" 
+    capture_lex $P1068
+    .const 'Sub' $P1056 = "97_1256533476.70438" 
+    capture_lex $P1056
+    .lex "$_", param_1050
+.annotate "line", 398
+    find_lex $P1053, "$_"
+    unless_null $P1053, vivify_380
+    new $P1053, "ResizablePMCArray"
   vivify_380:
-    set $P1056, $P1055[0]
-    unless_null $P1056, vivify_381
-    new $P1056, "Undef"
+    set $P1054, $P1053[1]
+    unless_null $P1054, vivify_381
+    new $P1054, "Undef"
   vivify_381:
-    concat $P1057, $P1054, $P1056
-    store_lex "$str", $P1057
-    .return ($P1057)
+    if $P1054, if_1052
+.annotate "line", 420
+    .const 'Sub' $P1068 = "98_1256533476.70438" 
+    capture_lex $P1068
+    $P1073 = $P1068()
+    set $P1051, $P1073
+.annotate "line", 398
+    goto if_1052_end
+  if_1052:
+    .const 'Sub' $P1056 = "97_1256533476.70438" 
+    capture_lex $P1056
+    $P1066 = $P1056()
+    set $P1051, $P1066
+  if_1052_end:
+.annotate "line", 397
+    .return ($P1051)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1040"  :anon :subid("96_1256279185.41736") :outer("95_1256279185.41736")
-.annotate "line", 391
-    find_lex $P1042, "$_"
-    unless_null $P1042, vivify_382
-    new $P1042, "ResizablePMCArray"
+.sub "_block1067"  :anon :subid("98_1256533476.70438") :outer("96_1256533476.70438")
+.annotate "line", 420
+    find_lex $P1069, "$str"
+    unless_null $P1069, vivify_382
+    new $P1069, "Undef"
   vivify_382:
-    set $P1043, $P1042[0]
-    unless_null $P1043, vivify_383
-    new $P1043, "Undef"
+    find_lex $P1070, "$_"
+    unless_null $P1070, vivify_383
+    new $P1070, "ResizablePMCArray"
   vivify_383:
-    .lex "$a", $P1043
-.annotate "line", 392
-    find_lex $P1044, "$_"
-    unless_null $P1044, vivify_384
-    new $P1044, "ResizablePMCArray"
+    set $P1071, $P1070[0]
+    unless_null $P1071, vivify_384
+    new $P1071, "Undef"
   vivify_384:
-    set $P1045, $P1044[1]
-    unless_null $P1045, vivify_385
-    new $P1045, "ResizablePMCArray"
+    concat $P1072, $P1069, $P1071
+    store_lex "$str", $P1072
+    .return ($P1072)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block1055"  :anon :subid("97_1256533476.70438") :outer("96_1256533476.70438")
+.annotate "line", 399
+    find_lex $P1057, "$_"
+    unless_null $P1057, vivify_385
+    new $P1057, "ResizablePMCArray"
   vivify_385:
-    set $P1046, $P1045[0]
-    unless_null $P1046, vivify_386
-    new $P1046, "Undef"
+    set $P1058, $P1057[0]
+    unless_null $P1058, vivify_386
+    new $P1058, "Undef"
   vivify_386:
-    .lex "$b", $P1046
-.annotate "line", 393
+    .lex "$a", $P1058
+.annotate "line", 400
+    find_lex $P1059, "$_"
+    unless_null $P1059, vivify_387
+    new $P1059, "ResizablePMCArray"
+  vivify_387:
+    set $P1060, $P1059[1]
+    unless_null $P1060, vivify_388
+    new $P1060, "ResizablePMCArray"
+  vivify_388:
+    set $P1061, $P1060[0]
+    unless_null $P1061, vivify_389
+    new $P1061, "Undef"
+  vivify_389:
+    .lex "$b", $P1061
+.annotate "line", 401
 
                              $P0 = find_lex '$a'
                              $S0 = $P0
@@ -12531,1464 +12729,1418 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
                              inc $I0
                              goto cclass_loop
                            cclass_done:
-                             $P1047 = box $S2
+                             $P1062 = box $S2
                          
-    .lex "$c", $P1047
-.annotate "line", 410
-    find_lex $P1048, "$str"
-    unless_null $P1048, vivify_387
-    new $P1048, "Undef"
-  vivify_387:
-    find_lex $P1049, "$c"
-    unless_null $P1049, vivify_388
-    new $P1049, "Undef"
-  vivify_388:
-    concat $P1050, $P1048, $P1049
-    store_lex "$str", $P1050
-.annotate "line", 390
-    .return ($P1050)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1016"  :anon :subid("93_1256279185.41736") :outer("92_1256279185.41736")
-.annotate "line", 386
-    find_lex $P1018, "$/"
-    set $P1019, $P1018["name"]
-    unless_null $P1019, vivify_391
-    new $P1019, "Undef"
+    .lex "$c", $P1062
+.annotate "line", 418
+    find_lex $P1063, "$str"
+    unless_null $P1063, vivify_390
+    new $P1063, "Undef"
+  vivify_390:
+    find_lex $P1064, "$c"
+    unless_null $P1064, vivify_391
+    new $P1064, "Undef"
   vivify_391:
-    set $S1020, $P1019
-    new $P1021, 'String'
-    set $P1021, $S1020
-    .lex "$name", $P1021
-.annotate "line", 387
-    get_hll_global $P1022, ["PAST"], "Regex"
-    find_lex $P1023, "$name"
-    unless_null $P1023, vivify_392
-    new $P1023, "Undef"
-  vivify_392:
-    find_lex $P1024, "$/"
-    unless_null $P1024, vivify_393
-    new $P1024, "Undef"
-  vivify_393:
-    $P1025 = $P1022."new"($P1023, "subrule" :named("pasttype"), "method" :named("subtype"), $P1024 :named("node"))
-    store_lex "$past", $P1025
-.annotate "line", 385
-    .return ($P1025)
+    concat $P1065, $P1063, $P1064
+    store_lex "$str", $P1065
+.annotate "line", 398
+    .return ($P1065)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "mod_internal"  :subid("98_1256279185.41736") :method :outer("11_1256279185.41736")
-    .param pmc param_1078
-.annotate "line", 420
-    new $P1077, 'ExceptionHandler'
-    set_addr $P1077, control_1076
-    $P1077."handle_types"(58)
-    push_eh $P1077
-    .lex "self", self
-    .lex "$/", param_1078
-.annotate "line", 421
-    get_global $P1079, "@MODIFIERS"
-    unless_null $P1079, vivify_397
-    new $P1079, "ResizablePMCArray"
-  vivify_397:
-    set $P1080, $P1079[0]
-    unless_null $P1080, vivify_398
-    new $P1080, "Undef"
-  vivify_398:
-    .lex "%mods", $P1080
-.annotate "line", 422
-    find_lex $P1083, "$/"
-    set $P1084, $P1083["n"]
-    unless_null $P1084, vivify_399
-    new $P1084, "ResizablePMCArray"
-  vivify_399:
-    set $P1085, $P1084[0]
-    unless_null $P1085, vivify_400
-    new $P1085, "Undef"
-  vivify_400:
-    set $S1086, $P1085
-    isgt $I1087, $S1086, ""
-    if $I1087, if_1082
-    new $P1092, "Integer"
-    assign $P1092, 1
-    set $P1081, $P1092
-    goto if_1082_end
-  if_1082:
-    find_lex $P1088, "$/"
-    set $P1089, $P1088["n"]
-    unless_null $P1089, vivify_401
-    new $P1089, "ResizablePMCArray"
-  vivify_401:
-    set $P1090, $P1089[0]
-    unless_null $P1090, vivify_402
-    new $P1090, "Undef"
-  vivify_402:
-    set $N1091, $P1090
-    new $P1081, 'Float'
-    set $P1081, $N1091
-  if_1082_end:
-    .lex "$n", $P1081
-.annotate "line", 423
-    find_lex $P1093, "$n"
-    unless_null $P1093, vivify_403
-    new $P1093, "Undef"
-  vivify_403:
-    find_lex $P1094, "$/"
-    set $P1095, $P1094["mod_ident"]
-    unless_null $P1095, vivify_404
-    new $P1095, "Hash"
-  vivify_404:
-    set $P1096, $P1095["sym"]
-    unless_null $P1096, vivify_405
-    new $P1096, "Undef"
-  vivify_405:
-    set $S1097, $P1096
-    find_lex $P1098, "%mods"
-    unless_null $P1098, vivify_406
-    new $P1098, "Hash"
-    store_lex "%mods", $P1098
-  vivify_406:
-    set $P1098[$S1097], $P1093
-    find_lex $P1099, "$/"
-.annotate "line", 424
-    $P1100 = $P1099."!make"(0)
-.annotate "line", 420
-    .return ($P1100)
-  control_1076:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1101, exception, "payload"
-    .return ($P1101)
-    rethrow exception
+.sub "_block1031"  :anon :subid("94_1256533476.70438") :outer("93_1256533476.70438")
+.annotate "line", 394
+    find_lex $P1033, "$/"
+    set $P1034, $P1033["name"]
+    unless_null $P1034, vivify_394
+    new $P1034, "Undef"
+  vivify_394:
+    set $S1035, $P1034
+    new $P1036, 'String'
+    set $P1036, $S1035
+    .lex "$name", $P1036
+.annotate "line", 395
+    get_hll_global $P1037, ["PAST"], "Regex"
+    find_lex $P1038, "$name"
+    unless_null $P1038, vivify_395
+    new $P1038, "Undef"
+  vivify_395:
+    find_lex $P1039, "$/"
+    unless_null $P1039, vivify_396
+    new $P1039, "Undef"
+  vivify_396:
+    $P1040 = $P1037."new"($P1038, "subrule" :named("pasttype"), "method" :named("subtype"), $P1039 :named("node"))
+    store_lex "$past", $P1040
+.annotate "line", 393
+    .return ($P1040)
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "buildsub"  :subid("99_1256279185.41736") :outer("11_1256279185.41736")
-    .param pmc param_1105
-.annotate "line", 427
-    new $P1104, 'ExceptionHandler'
-    set_addr $P1104, control_1103
-    $P1104."handle_types"(58)
-    push_eh $P1104
-    .lex "$rpast", param_1105
+.sub "mod_internal"  :subid("99_1256533476.70438") :method :outer("11_1256533476.70438")
+    .param pmc param_1093
 .annotate "line", 428
-    find_lex $P1106, "$rpast"
-    unless_null $P1106, vivify_407
-    new $P1106, "Undef"
-  vivify_407:
-    $P1107 = "capnames"($P1106, 0)
-    .lex "%capnames", $P1107
+    new $P1092, 'ExceptionHandler'
+    set_addr $P1092, control_1091
+    $P1092."handle_types"(58)
+    push_eh $P1092
+    .lex "self", self
+    .lex "$/", param_1093
 .annotate "line", 429
-    new $P1108, "Integer"
-    assign $P1108, 0
-    find_lex $P1109, "%capnames"
-    unless_null $P1109, vivify_408
-    new $P1109, "Hash"
-    store_lex "%capnames", $P1109
-  vivify_408:
-    set $P1109[""], $P1108
+    get_global $P1094, "@MODIFIERS"
+    unless_null $P1094, vivify_400
+    new $P1094, "ResizablePMCArray"
+  vivify_400:
+    set $P1095, $P1094[0]
+    unless_null $P1095, vivify_401
+    new $P1095, "Undef"
+  vivify_401:
+    .lex "%mods", $P1095
 .annotate "line", 430
-    get_hll_global $P1110, ["PAST"], "Regex"
+    find_lex $P1098, "$/"
+    set $P1099, $P1098["n"]
+    unless_null $P1099, vivify_402
+    new $P1099, "ResizablePMCArray"
+  vivify_402:
+    set $P1100, $P1099[0]
+    unless_null $P1100, vivify_403
+    new $P1100, "Undef"
+  vivify_403:
+    set $S1101, $P1100
+    isgt $I1102, $S1101, ""
+    if $I1102, if_1097
+    new $P1107, "Integer"
+    assign $P1107, 1
+    set $P1096, $P1107
+    goto if_1097_end
+  if_1097:
+    find_lex $P1103, "$/"
+    set $P1104, $P1103["n"]
+    unless_null $P1104, vivify_404
+    new $P1104, "ResizablePMCArray"
+  vivify_404:
+    set $P1105, $P1104[0]
+    unless_null $P1105, vivify_405
+    new $P1105, "Undef"
+  vivify_405:
+    set $N1106, $P1105
+    new $P1096, 'Float'
+    set $P1096, $N1106
+  if_1097_end:
+    .lex "$n", $P1096
 .annotate "line", 431
-    get_hll_global $P1111, ["PAST"], "Regex"
-    $P1112 = $P1111."new"("scan" :named("pasttype"))
-.annotate "line", 432
-    find_lex $P1113, "$rpast"
+    find_lex $P1108, "$n"
+    unless_null $P1108, vivify_406
+    new $P1108, "Undef"
+  vivify_406:
+    find_lex $P1109, "$/"
+    set $P1110, $P1109["mod_ident"]
+    unless_null $P1110, vivify_407
+    new $P1110, "Hash"
+  vivify_407:
+    set $P1111, $P1110["sym"]
+    unless_null $P1111, vivify_408
+    new $P1111, "Undef"
+  vivify_408:
+    set $S1112, $P1111
+    find_lex $P1113, "%mods"
     unless_null $P1113, vivify_409
-    new $P1113, "Undef"
+    new $P1113, "Hash"
+    store_lex "%mods", $P1113
   vivify_409:
-.annotate "line", 433
-    get_hll_global $P1114, ["PAST"], "Regex"
-    $P1115 = $P1114."new"("pass" :named("pasttype"))
-.annotate "line", 435
-    find_lex $P1116, "%capnames"
-    unless_null $P1116, vivify_410
-    new $P1116, "Hash"
-  vivify_410:
-    $P1117 = $P1110."new"($P1112, $P1113, $P1115, "concat" :named("pasttype"), $P1116 :named("capnames"))
-.annotate "line", 430
-    store_lex "$rpast", $P1117
-.annotate "line", 437
-    get_hll_global $P1118, ["PAST"], "Block"
-    find_lex $P1119, "$rpast"
-    unless_null $P1119, vivify_411
-    new $P1119, "Undef"
-  vivify_411:
-    $P1120 = $P1118."new"($P1119, "method" :named("blocktype"))
-.annotate "line", 427
-    .return ($P1120)
-  control_1103:
+    set $P1113[$S1112], $P1108
+    find_lex $P1114, "$/"
+.annotate "line", 432
+    $P1115 = $P1114."!make"(0)
+.annotate "line", 428
+    .return ($P1115)
+  control_1091:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P1121, exception, "payload"
-    .return ($P1121)
+    getattribute $P1116, exception, "payload"
+    .return ($P1116)
     rethrow exception
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "capnames"  :subid("100_1256279185.41736") :outer("11_1256279185.41736")
-    .param pmc param_1125
-    .param pmc param_1126
+.sub "buildsub"  :subid("100_1256533476.70438") :outer("11_1256533476.70438")
+    .param pmc param_1120
+.annotate "line", 435
+    new $P1119, 'ExceptionHandler'
+    set_addr $P1119, control_1118
+    $P1119."handle_types"(58)
+    push_eh $P1119
+    .lex "$rpast", param_1120
+.annotate "line", 436
+    find_lex $P1121, "$rpast"
+    unless_null $P1121, vivify_410
+    new $P1121, "Undef"
+  vivify_410:
+    $P1122 = "capnames"($P1121, 0)
+    .lex "%capnames", $P1122
+.annotate "line", 437
+    new $P1123, "Integer"
+    assign $P1123, 0
+    find_lex $P1124, "%capnames"
+    unless_null $P1124, vivify_411
+    new $P1124, "Hash"
+    store_lex "%capnames", $P1124
+  vivify_411:
+    set $P1124[""], $P1123
+.annotate "line", 438
+    get_hll_global $P1125, ["PAST"], "Regex"
+.annotate "line", 439
+    get_hll_global $P1126, ["PAST"], "Regex"
+    $P1127 = $P1126."new"("scan" :named("pasttype"))
 .annotate "line", 440
-    .const 'Sub' $P1361 = "116_1256279185.41736" 
-    capture_lex $P1361
-    .const 'Sub' $P1297 = "112_1256279185.41736" 
-    capture_lex $P1297
-    .const 'Sub' $P1250 = "108_1256279185.41736" 
-    capture_lex $P1250
-    .const 'Sub' $P1202 = "105_1256279185.41736" 
-    capture_lex $P1202
-    .const 'Sub' $P1135 = "101_1256279185.41736" 
-    capture_lex $P1135
-    new $P1124, 'ExceptionHandler'
-    set_addr $P1124, control_1123
-    $P1124."handle_types"(58)
-    push_eh $P1124
-    .lex "$ast", param_1125
-    .lex "$count", param_1126
-.annotate "line", 441
-    new $P1127, "Hash"
-    .lex "%capnames", $P1127
-.annotate "line", 442
-    find_lex $P1128, "$ast"
+    find_lex $P1128, "$rpast"
     unless_null $P1128, vivify_412
     new $P1128, "Undef"
   vivify_412:
-    $P1129 = $P1128."pasttype"()
-    .lex "$pasttype", $P1129
+.annotate "line", 441
+    get_hll_global $P1129, ["PAST"], "Regex"
+    $P1130 = $P1129."new"("pass" :named("pasttype"))
 .annotate "line", 443
-    find_lex $P1131, "$pasttype"
+    find_lex $P1131, "%capnames"
     unless_null $P1131, vivify_413
-    new $P1131, "Undef"
+    new $P1131, "Hash"
   vivify_413:
-    set $S1132, $P1131
-    iseq $I1133, $S1132, "alt"
-    if $I1133, if_1130
-.annotate "line", 456
-    find_lex $P1198, "$pasttype"
-    unless_null $P1198, vivify_414
-    new $P1198, "Undef"
+    $P1132 = $P1125."new"($P1127, $P1128, $P1130, "concat" :named("pasttype"), $P1131 :named("capnames"))
+.annotate "line", 438
+    store_lex "$rpast", $P1132
+.annotate "line", 445
+    get_hll_global $P1133, ["PAST"], "Block"
+    find_lex $P1134, "$rpast"
+    unless_null $P1134, vivify_414
+    new $P1134, "Undef"
   vivify_414:
-    set $S1199, $P1198
-    iseq $I1200, $S1199, "concat"
-    if $I1200, if_1197
-.annotate "line", 465
-    find_lex $P1243, "$pasttype"
-    unless_null $P1243, vivify_415
-    new $P1243, "Undef"
-  vivify_415:
-    set $S1244, $P1243
-    iseq $I1245, $S1244, "subrule"
-    if $I1245, if_1242
-    new $P1241, 'Integer'
-    set $P1241, $I1245
-    goto if_1242_end
-  if_1242:
-    find_lex $P1246, "$ast"
-    unless_null $P1246, vivify_416
-    new $P1246, "Undef"
-  vivify_416:
-    $S1247 = $P1246."subtype"()
-    iseq $I1248, $S1247, "capture"
-    new $P1241, 'Integer'
-    set $P1241, $I1248
-  if_1242_end:
-    if $P1241, if_1240
-.annotate "line", 478
-    find_lex $P1293, "$pasttype"
-    unless_null $P1293, vivify_417
-    new $P1293, "Undef"
-  vivify_417:
-    set $S1294, $P1293
-    iseq $I1295, $S1294, "subcapture"
-    if $I1295, if_1292
-.annotate "line", 495
-    find_lex $P1357, "$pasttype"
-    unless_null $P1357, vivify_418
-    new $P1357, "Undef"
-  vivify_418:
-    set $S1358, $P1357
-    iseq $I1359, $S1358, "quant"
-    unless $I1359, if_1356_end
-    .const 'Sub' $P1361 = "116_1256279185.41736" 
-    capture_lex $P1361
-    $P1361()
-  if_1356_end:
-.annotate "line", 443
-    goto if_1292_end
-  if_1292:
-.annotate "line", 478
-    .const 'Sub' $P1297 = "112_1256279185.41736" 
-    capture_lex $P1297
-    $P1297()
-  if_1292_end:
-.annotate "line", 443
-    goto if_1240_end
-  if_1240:
-.annotate "line", 465
-    .const 'Sub' $P1250 = "108_1256279185.41736" 
-    capture_lex $P1250
-    $P1250()
-  if_1240_end:
-.annotate "line", 443
-    goto if_1197_end
-  if_1197:
-.annotate "line", 456
-    .const 'Sub' $P1202 = "105_1256279185.41736" 
-    capture_lex $P1202
-    $P1202()
-  if_1197_end:
-.annotate "line", 443
-    goto if_1130_end
-  if_1130:
-    .const 'Sub' $P1135 = "101_1256279185.41736" 
-    capture_lex $P1135
-    $P1135()
-  if_1130_end:
-.annotate "line", 502
-    find_lex $P1381, "$count"
-    unless_null $P1381, vivify_500
-    new $P1381, "Undef"
-  vivify_500:
-    find_lex $P1382, "%capnames"
-    unless_null $P1382, vivify_501
-    new $P1382, "Hash"
-    store_lex "%capnames", $P1382
-  vivify_501:
-    set $P1382[""], $P1381
-.annotate "line", 503
-    find_lex $P1383, "%capnames"
-    unless_null $P1383, vivify_502
-    new $P1383, "Hash"
-  vivify_502:
-.annotate "line", 440
-    .return ($P1383)
-  control_1123:
+    $P1135 = $P1133."new"($P1134, "method" :named("blocktype"))
+.annotate "line", 435
+    .return ($P1135)
+  control_1118:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P1384, exception, "payload"
-    .return ($P1384)
+    getattribute $P1136, exception, "payload"
+    .return ($P1136)
     rethrow exception
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1360"  :anon :subid("116_1256279185.41736") :outer("100_1256279185.41736")
-.annotate "line", 495
-    .const 'Sub' $P1371 = "117_1256279185.41736" 
-    capture_lex $P1371
-.annotate "line", 496
-    find_lex $P1362, "$ast"
-    unless_null $P1362, vivify_419
-    new $P1362, "ResizablePMCArray"
-  vivify_419:
-    set $P1363, $P1362[0]
-    unless_null $P1363, vivify_420
-    new $P1363, "Undef"
-  vivify_420:
-    find_lex $P1364, "$count"
-    unless_null $P1364, vivify_421
-    new $P1364, "Undef"
-  vivify_421:
-    $P1365 = "capnames"($P1363, $P1364)
-    .lex "%astcap", $P1365
-.annotate "line", 497
-    find_lex $P1367, "%astcap"
-    unless_null $P1367, vivify_422
-    new $P1367, "Hash"
-  vivify_422:
-    defined $I1368, $P1367
-    unless $I1368, for_undef_423
-    iter $P1366, $P1367
-    new $P1377, 'ExceptionHandler'
-    set_addr $P1377, loop1376_handler
-    $P1377."handle_types"(65, 67, 66)
-    push_eh $P1377
-  loop1376_test:
-    unless $P1366, loop1376_done
-    shift $P1369, $P1366
-  loop1376_redo:
-    .const 'Sub' $P1371 = "117_1256279185.41736" 
-    capture_lex $P1371
-    $P1371($P1369)
-  loop1376_next:
-    goto loop1376_test
-  loop1376_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1378, exception, 'type'
-    eq $P1378, 65, loop1376_next
-    eq $P1378, 67, loop1376_redo
-  loop1376_done:
-    pop_eh 
-  for_undef_423:
-.annotate "line", 500
-    find_lex $P1379, "%astcap"
-    unless_null $P1379, vivify_426
-    new $P1379, "Hash"
-  vivify_426:
-    set $P1380, $P1379[""]
-    unless_null $P1380, vivify_427
-    new $P1380, "Undef"
-  vivify_427:
-    store_lex "$count", $P1380
-.annotate "line", 495
-    .return ($P1380)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1370"  :anon :subid("117_1256279185.41736") :outer("116_1256279185.41736")
-    .param pmc param_1372
-.annotate "line", 497
-    .lex "$_", param_1372
-.annotate "line", 498
-    new $P1373, "Integer"
-    assign $P1373, 2
-    find_lex $P1374, "$_"
-    unless_null $P1374, vivify_424
-    new $P1374, "Undef"
-  vivify_424:
-    find_lex $P1375, "%capnames"
-    unless_null $P1375, vivify_425
-    new $P1375, "Hash"
-    store_lex "%capnames", $P1375
-  vivify_425:
-    set $P1375[$P1374], $P1373
-.annotate "line", 497
-    .return ($P1373)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1296"  :anon :subid("112_1256279185.41736") :outer("100_1256279185.41736")
-.annotate "line", 478
-    .const 'Sub' $P1338 = "115_1256279185.41736" 
-    capture_lex $P1338
-    .const 'Sub' $P1306 = "113_1256279185.41736" 
-    capture_lex $P1306
-.annotate "line", 479
-    find_lex $P1298, "$ast"
-    unless_null $P1298, vivify_428
-    new $P1298, "Undef"
-  vivify_428:
-    $P1299 = $P1298."name"()
-    .lex "$name", $P1299
-.annotate "line", 480
-
-            $P0 = find_lex '$name'
-            $S0 = $P0
-            $P1300 = split '=', $S0
-        
-    .lex "@names", $P1300
-.annotate "line", 485
-    find_lex $P1302, "@names"
-    unless_null $P1302, vivify_429
-    new $P1302, "ResizablePMCArray"
-  vivify_429:
-    defined $I1303, $P1302
-    unless $I1303, for_undef_430
-    iter $P1301, $P1302
-    new $P1327, 'ExceptionHandler'
-    set_addr $P1327, loop1326_handler
-    $P1327."handle_types"(65, 67, 66)
-    push_eh $P1327
-  loop1326_test:
-    unless $P1301, loop1326_done
-    shift $P1304, $P1301
-  loop1326_redo:
-    .const 'Sub' $P1306 = "113_1256279185.41736" 
-    capture_lex $P1306
-    $P1306($P1304)
-  loop1326_next:
-    goto loop1326_test
-  loop1326_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1328, exception, 'type'
-    eq $P1328, 65, loop1326_next
-    eq $P1328, 67, loop1326_redo
-  loop1326_done:
-    pop_eh 
-  for_undef_430:
-.annotate "line", 489
-    find_lex $P1329, "$ast"
-    unless_null $P1329, vivify_436
-    new $P1329, "ResizablePMCArray"
-  vivify_436:
-    set $P1330, $P1329[0]
-    unless_null $P1330, vivify_437
-    new $P1330, "Undef"
-  vivify_437:
-    find_lex $P1331, "$count"
-    unless_null $P1331, vivify_438
-    new $P1331, "Undef"
-  vivify_438:
-    $P1332 = "capnames"($P1330, $P1331)
-    .lex "%x", $P1332
-.annotate "line", 490
-    find_lex $P1334, "%x"
-    unless_null $P1334, vivify_439
-    new $P1334, "Hash"
-  vivify_439:
-    defined $I1335, $P1334
-    unless $I1335, for_undef_440
-    iter $P1333, $P1334
-    new $P1352, 'ExceptionHandler'
-    set_addr $P1352, loop1351_handler
-    $P1352."handle_types"(65, 67, 66)
-    push_eh $P1352
-  loop1351_test:
-    unless $P1333, loop1351_done
-    shift $P1336, $P1333
-  loop1351_redo:
-    .const 'Sub' $P1338 = "115_1256279185.41736" 
-    capture_lex $P1338
-    $P1338($P1336)
-  loop1351_next:
-    goto loop1351_test
-  loop1351_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1353, exception, 'type'
-    eq $P1353, 65, loop1351_next
-    eq $P1353, 67, loop1351_redo
-  loop1351_done:
-    pop_eh 
-  for_undef_440:
-.annotate "line", 493
-    find_lex $P1354, "%x"
-    unless_null $P1354, vivify_449
-    new $P1354, "Hash"
-  vivify_449:
-    set $P1355, $P1354[""]
-    unless_null $P1355, vivify_450
-    new $P1355, "Undef"
-  vivify_450:
-    store_lex "$count", $P1355
-.annotate "line", 478
-    .return ($P1355)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1305"  :anon :subid("113_1256279185.41736") :outer("112_1256279185.41736")
-    .param pmc param_1307
-.annotate "line", 485
-    .const 'Sub' $P1320 = "114_1256279185.41736" 
-    capture_lex $P1320
-    .lex "$_", param_1307
-.annotate "line", 486
-    find_lex $P1311, "$_"
-    unless_null $P1311, vivify_431
-    new $P1311, "Undef"
-  vivify_431:
-    set $S1312, $P1311
-    iseq $I1313, $S1312, "0"
-    unless $I1313, unless_1310
-    new $P1309, 'Integer'
-    set $P1309, $I1313
-    goto unless_1310_end
-  unless_1310:
-    find_lex $P1314, "$_"
-    unless_null $P1314, vivify_432
-    new $P1314, "Undef"
-  vivify_432:
-    set $N1315, $P1314
-    new $P1316, "Integer"
-    assign $P1316, 0
-    set $N1317, $P1316
-    isgt $I1318, $N1315, $N1317
-    new $P1309, 'Integer'
-    set $P1309, $I1318
-  unless_1310_end:
-    unless $P1309, if_1308_end
-    .const 'Sub' $P1320 = "114_1256279185.41736" 
-    capture_lex $P1320
-    $P1320()
-  if_1308_end:
-.annotate "line", 487
-    new $P1323, "Integer"
-    assign $P1323, 1
-    find_lex $P1324, "$_"
-    unless_null $P1324, vivify_434
-    new $P1324, "Undef"
-  vivify_434:
-    find_lex $P1325, "%capnames"
-    unless_null $P1325, vivify_435
-    new $P1325, "Hash"
-    store_lex "%capnames", $P1325
-  vivify_435:
-    set $P1325[$P1324], $P1323
-.annotate "line", 485
-    .return ($P1323)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1319"  :anon :subid("114_1256279185.41736") :outer("113_1256279185.41736")
-.annotate "line", 486
-    find_lex $P1321, "$_"
-    unless_null $P1321, vivify_433
-    new $P1321, "Undef"
-  vivify_433:
-    add $P1322, $P1321, 1
-    store_lex "$count", $P1322
-    .return ($P1322)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1337"  :anon :subid("115_1256279185.41736") :outer("112_1256279185.41736")
-    .param pmc param_1339
-.annotate "line", 490
-    .lex "$_", param_1339
-.annotate "line", 491
-    find_lex $P1340, "$_"
-    unless_null $P1340, vivify_441
-    new $P1340, "Undef"
-  vivify_441:
-    find_lex $P1341, "%capnames"
-    unless_null $P1341, vivify_442
-    new $P1341, "Hash"
-  vivify_442:
-    set $P1342, $P1341[$P1340]
-    unless_null $P1342, vivify_443
-    new $P1342, "Undef"
-  vivify_443:
-    set $N1343, $P1342
-    new $P1344, 'Float'
-    set $P1344, $N1343
-    find_lex $P1345, "$_"
-    unless_null $P1345, vivify_444
-    new $P1345, "Undef"
-  vivify_444:
-    find_lex $P1346, "%x"
-    unless_null $P1346, vivify_445
-    new $P1346, "Hash"
-  vivify_445:
-    set $P1347, $P1346[$P1345]
-    unless_null $P1347, vivify_446
-    new $P1347, "Undef"
-  vivify_446:
-    add $P1348, $P1344, $P1347
-    find_lex $P1349, "$_"
-    unless_null $P1349, vivify_447
-    new $P1349, "Undef"
-  vivify_447:
-    find_lex $P1350, "%capnames"
-    unless_null $P1350, vivify_448
-    new $P1350, "Hash"
-    store_lex "%capnames", $P1350
-  vivify_448:
-    set $P1350[$P1349], $P1348
-.annotate "line", 490
-    .return ($P1348)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1249"  :anon :subid("108_1256279185.41736") :outer("100_1256279185.41736")
-.annotate "line", 465
-    .const 'Sub' $P1269 = "110_1256279185.41736" 
-    capture_lex $P1269
-    .const 'Sub' $P1258 = "109_1256279185.41736" 
-    capture_lex $P1258
-.annotate "line", 466
-    find_lex $P1251, "$ast"
-    unless_null $P1251, vivify_451
-    new $P1251, "Undef"
-  vivify_451:
-    $P1252 = $P1251."name"()
-    .lex "$name", $P1252
-.annotate "line", 467
-    find_lex $P1254, "$name"
-    unless_null $P1254, vivify_452
-    new $P1254, "Undef"
-  vivify_452:
-    set $S1255, $P1254
-    iseq $I1256, $S1255, ""
-    unless $I1256, if_1253_end
-    .const 'Sub' $P1258 = "109_1256279185.41736" 
-    capture_lex $P1258
-    $P1258()
-  if_1253_end:
-.annotate "line", 468
-
-            $P0 = find_lex '$name'
-            $S0 = $P0
-            $P1263 = split '=', $S0
-        
-    .lex "@names", $P1263
-.annotate "line", 473
-    find_lex $P1265, "@names"
-    unless_null $P1265, vivify_456
-    new $P1265, "ResizablePMCArray"
-  vivify_456:
-    defined $I1266, $P1265
-    unless $I1266, for_undef_457
-    iter $P1264, $P1265
-    new $P1290, 'ExceptionHandler'
-    set_addr $P1290, loop1289_handler
-    $P1290."handle_types"(65, 67, 66)
-    push_eh $P1290
-  loop1289_test:
-    unless $P1264, loop1289_done
-    shift $P1267, $P1264
-  loop1289_redo:
-    .const 'Sub' $P1269 = "110_1256279185.41736" 
-    capture_lex $P1269
-    $P1269($P1267)
-  loop1289_next:
-    goto loop1289_test
-  loop1289_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1291, exception, 'type'
-    eq $P1291, 65, loop1289_next
-    eq $P1291, 67, loop1289_redo
-  loop1289_done:
-    pop_eh 
-  for_undef_457:
-.annotate "line", 465
-    .return ($P1264)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1257"  :anon :subid("109_1256279185.41736") :outer("108_1256279185.41736")
-.annotate "line", 467
-    find_lex $P1259, "$count"
-    unless_null $P1259, vivify_453
-    new $P1259, "Undef"
-  vivify_453:
-    store_lex "$name", $P1259
-    find_lex $P1260, "$ast"
-    unless_null $P1260, vivify_454
-    new $P1260, "Undef"
-  vivify_454:
-    find_lex $P1261, "$name"
-    unless_null $P1261, vivify_455
-    new $P1261, "Undef"
-  vivify_455:
-    $P1262 = $P1260."name"($P1261)
-    .return ($P1262)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1268"  :anon :subid("110_1256279185.41736") :outer("108_1256279185.41736")
-    .param pmc param_1270
-.annotate "line", 473
-    .const 'Sub' $P1283 = "111_1256279185.41736" 
-    capture_lex $P1283
-    .lex "$_", param_1270
-.annotate "line", 474
-    find_lex $P1274, "$_"
-    unless_null $P1274, vivify_458
-    new $P1274, "Undef"
-  vivify_458:
-    set $S1275, $P1274
-    iseq $I1276, $S1275, "0"
-    unless $I1276, unless_1273
-    new $P1272, 'Integer'
-    set $P1272, $I1276
-    goto unless_1273_end
-  unless_1273:
-    find_lex $P1277, "$_"
-    unless_null $P1277, vivify_459
-    new $P1277, "Undef"
-  vivify_459:
-    set $N1278, $P1277
-    new $P1279, "Integer"
-    assign $P1279, 0
-    set $N1280, $P1279
-    isgt $I1281, $N1278, $N1280
-    new $P1272, 'Integer'
-    set $P1272, $I1281
-  unless_1273_end:
-    unless $P1272, if_1271_end
-    .const 'Sub' $P1283 = "111_1256279185.41736" 
-    capture_lex $P1283
-    $P1283()
-  if_1271_end:
-.annotate "line", 475
-    new $P1286, "Integer"
-    assign $P1286, 1
-    find_lex $P1287, "$_"
-    unless_null $P1287, vivify_461
-    new $P1287, "Undef"
-  vivify_461:
-    find_lex $P1288, "%capnames"
-    unless_null $P1288, vivify_462
-    new $P1288, "Hash"
-    store_lex "%capnames", $P1288
-  vivify_462:
-    set $P1288[$P1287], $P1286
-.annotate "line", 473
-    .return ($P1286)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1282"  :anon :subid("111_1256279185.41736") :outer("110_1256279185.41736")
-.annotate "line", 474
-    find_lex $P1284, "$_"
-    unless_null $P1284, vivify_460
-    new $P1284, "Undef"
-  vivify_460:
-    add $P1285, $P1284, 1
-    store_lex "$count", $P1285
-    .return ($P1285)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1201"  :anon :subid("105_1256279185.41736") :outer("100_1256279185.41736")
-.annotate "line", 456
-    .const 'Sub' $P1209 = "106_1256279185.41736" 
-    capture_lex $P1209
-.annotate "line", 457
-    find_lex $P1204, "$ast"
-    unless_null $P1204, vivify_463
-    new $P1204, "Undef"
-  vivify_463:
-    $P1205 = $P1204."list"()
-    defined $I1206, $P1205
-    unless $I1206, for_undef_464
-    iter $P1203, $P1205
-    new $P1238, 'ExceptionHandler'
-    set_addr $P1238, loop1237_handler
-    $P1238."handle_types"(65, 67, 66)
-    push_eh $P1238
-  loop1237_test:
-    unless $P1203, loop1237_done
-    shift $P1207, $P1203
-  loop1237_redo:
-    .const 'Sub' $P1209 = "106_1256279185.41736" 
-    capture_lex $P1209
-    $P1209($P1207)
-  loop1237_next:
-    goto loop1237_test
-  loop1237_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1239, exception, 'type'
-    eq $P1239, 65, loop1237_next
-    eq $P1239, 67, loop1237_redo
-  loop1237_done:
-    pop_eh 
-  for_undef_464:
-.annotate "line", 456
-    .return ($P1203)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1208"  :anon :subid("106_1256279185.41736") :outer("105_1256279185.41736")
-    .param pmc param_1210
-.annotate "line", 457
-    .const 'Sub' $P1219 = "107_1256279185.41736" 
-    capture_lex $P1219
-    .lex "$_", param_1210
-.annotate "line", 458
-    find_lex $P1211, "$_"
-    unless_null $P1211, vivify_465
-    new $P1211, "Undef"
-  vivify_465:
-    find_lex $P1212, "$count"
-    unless_null $P1212, vivify_466
-    new $P1212, "Undef"
-  vivify_466:
-    $P1213 = "capnames"($P1211, $P1212)
-    .lex "%x", $P1213
-.annotate "line", 459
-    find_lex $P1215, "%x"
-    unless_null $P1215, vivify_467
-    new $P1215, "Hash"
-  vivify_467:
-    defined $I1216, $P1215
-    unless $I1216, for_undef_468
-    iter $P1214, $P1215
-    new $P1233, 'ExceptionHandler'
-    set_addr $P1233, loop1232_handler
-    $P1233."handle_types"(65, 67, 66)
-    push_eh $P1233
-  loop1232_test:
-    unless $P1214, loop1232_done
-    shift $P1217, $P1214
-  loop1232_redo:
-    .const 'Sub' $P1219 = "107_1256279185.41736" 
-    capture_lex $P1219
-    $P1219($P1217)
-  loop1232_next:
-    goto loop1232_test
-  loop1232_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1234, exception, 'type'
-    eq $P1234, 65, loop1232_next
-    eq $P1234, 67, loop1232_redo
-  loop1232_done:
-    pop_eh 
-  for_undef_468:
-.annotate "line", 462
-    find_lex $P1235, "%x"
-    unless_null $P1235, vivify_477
-    new $P1235, "Hash"
-  vivify_477:
-    set $P1236, $P1235[""]
-    unless_null $P1236, vivify_478
-    new $P1236, "Undef"
-  vivify_478:
-    store_lex "$count", $P1236
-.annotate "line", 457
-    .return ($P1236)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1218"  :anon :subid("107_1256279185.41736") :outer("106_1256279185.41736")
-    .param pmc param_1220
-.annotate "line", 459
-    .lex "$_", param_1220
-.annotate "line", 460
-    find_lex $P1221, "$_"
-    unless_null $P1221, vivify_469
-    new $P1221, "Undef"
-  vivify_469:
-    find_lex $P1222, "%capnames"
-    unless_null $P1222, vivify_470
-    new $P1222, "Hash"
-  vivify_470:
-    set $P1223, $P1222[$P1221]
-    unless_null $P1223, vivify_471
-    new $P1223, "Undef"
-  vivify_471:
-    set $N1224, $P1223
-    new $P1225, 'Float'
-    set $P1225, $N1224
-    find_lex $P1226, "$_"
-    unless_null $P1226, vivify_472
-    new $P1226, "Undef"
-  vivify_472:
-    find_lex $P1227, "%x"
-    unless_null $P1227, vivify_473
-    new $P1227, "Hash"
-  vivify_473:
-    set $P1228, $P1227[$P1226]
-    unless_null $P1228, vivify_474
-    new $P1228, "Undef"
-  vivify_474:
-    add $P1229, $P1225, $P1228
-    find_lex $P1230, "$_"
-    unless_null $P1230, vivify_475
-    new $P1230, "Undef"
-  vivify_475:
-    find_lex $P1231, "%capnames"
-    unless_null $P1231, vivify_476
-    new $P1231, "Hash"
-    store_lex "%capnames", $P1231
-  vivify_476:
-    set $P1231[$P1230], $P1229
-.annotate "line", 459
-    .return ($P1229)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1134"  :anon :subid("101_1256279185.41736") :outer("100_1256279185.41736")
-.annotate "line", 443
-    .const 'Sub' $P1143 = "102_1256279185.41736" 
-    capture_lex $P1143
-.annotate "line", 444
-    find_lex $P1136, "$count"
-    unless_null $P1136, vivify_479
-    new $P1136, "Undef"
-  vivify_479:
-    .lex "$max", $P1136
-.annotate "line", 445
-    find_lex $P1138, "$ast"
-    unless_null $P1138, vivify_480
-    new $P1138, "Undef"
-  vivify_480:
-    $P1139 = $P1138."list"()
-    defined $I1140, $P1139
-    unless $I1140, for_undef_481
-    iter $P1137, $P1139
-    new $P1194, 'ExceptionHandler'
-    set_addr $P1194, loop1193_handler
-    $P1194."handle_types"(65, 67, 66)
-    push_eh $P1194
-  loop1193_test:
-    unless $P1137, loop1193_done
-    shift $P1141, $P1137
-  loop1193_redo:
-    .const 'Sub' $P1143 = "102_1256279185.41736" 
-    capture_lex $P1143
-    $P1143($P1141)
-  loop1193_next:
-    goto loop1193_test
-  loop1193_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1195, exception, 'type'
-    eq $P1195, 65, loop1193_next
-    eq $P1195, 67, loop1193_redo
-  loop1193_done:
-    pop_eh 
-  for_undef_481:
-.annotate "line", 454
-    find_lex $P1196, "$max"
-    unless_null $P1196, vivify_499
-    new $P1196, "Undef"
-  vivify_499:
-    store_lex "$count", $P1196
-.annotate "line", 443
-    .return ($P1196)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1142"  :anon :subid("102_1256279185.41736") :outer("101_1256279185.41736")
-    .param pmc param_1144
-.annotate "line", 445
-    .const 'Sub' $P1189 = "104_1256279185.41736" 
-    capture_lex $P1189
-    .const 'Sub' $P1153 = "103_1256279185.41736" 
-    capture_lex $P1153
-    .lex "$_", param_1144
-.annotate "line", 446
-    find_lex $P1145, "$_"
-    unless_null $P1145, vivify_482
-    new $P1145, "Undef"
-  vivify_482:
-    find_lex $P1146, "$count"
-    unless_null $P1146, vivify_483
-    new $P1146, "Undef"
-  vivify_483:
-    $P1147 = "capnames"($P1145, $P1146)
-    .lex "%x", $P1147
-.annotate "line", 447
-    find_lex $P1149, "%x"
-    unless_null $P1149, vivify_484
-    new $P1149, "Hash"
-  vivify_484:
-    defined $I1150, $P1149
-    unless $I1150, for_undef_485
-    iter $P1148, $P1149
-    new $P1178, 'ExceptionHandler'
-    set_addr $P1178, loop1177_handler
-    $P1178."handle_types"(65, 67, 66)
-    push_eh $P1178
-  loop1177_test:
-    unless $P1148, loop1177_done
-    shift $P1151, $P1148
-  loop1177_redo:
-    .const 'Sub' $P1153 = "103_1256279185.41736" 
-    capture_lex $P1153
-    $P1153($P1151)
-  loop1177_next:
-    goto loop1177_test
-  loop1177_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1179, exception, 'type'
-    eq $P1179, 65, loop1177_next
-    eq $P1179, 67, loop1177_redo
-  loop1177_done:
-    pop_eh 
-  for_undef_485:
-.annotate "line", 452
-    find_lex $P1182, "%x"
-    unless_null $P1182, vivify_494
-    new $P1182, "Hash"
-  vivify_494:
-    set $P1183, $P1182[""]
-    unless_null $P1183, vivify_495
-    new $P1183, "Undef"
-  vivify_495:
-    set $N1184, $P1183
-    find_lex $P1185, "$max"
-    unless_null $P1185, vivify_496
-    new $P1185, "Undef"
-  vivify_496:
-    set $N1186, $P1185
-    isgt $I1187, $N1184, $N1186
-    if $I1187, if_1181
-    new $P1180, 'Integer'
-    set $P1180, $I1187
-    goto if_1181_end
-  if_1181:
-    .const 'Sub' $P1189 = "104_1256279185.41736" 
-    capture_lex $P1189
-    $P1192 = $P1189()
-    set $P1180, $P1192
-  if_1181_end:
-.annotate "line", 445
-    .return ($P1180)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1152"  :anon :subid("103_1256279185.41736") :outer("102_1256279185.41736")
-    .param pmc param_1154
-.annotate "line", 447
-    .lex "$_", param_1154
+.sub "capnames"  :subid("101_1256533476.70438") :outer("11_1256533476.70438")
+    .param pmc param_1140
+    .param pmc param_1141
 .annotate "line", 448
-    find_lex $P1159, "$_"
-    unless_null $P1159, vivify_486
-    new $P1159, "Undef"
-  vivify_486:
-    find_lex $P1160, "%capnames"
-    unless_null $P1160, vivify_487
-    new $P1160, "Hash"
-  vivify_487:
-    set $P1161, $P1160[$P1159]
-    unless_null $P1161, vivify_488
-    new $P1161, "Undef"
-  vivify_488:
-    set $N1162, $P1161
-    new $P1163, "Integer"
-    assign $P1163, 2
-    set $N1164, $P1163
-    islt $I1165, $N1162, $N1164
-    if $I1165, if_1158
-    new $P1157, 'Integer'
-    set $P1157, $I1165
-    goto if_1158_end
-  if_1158:
-    find_lex $P1166, "$_"
-    unless_null $P1166, vivify_489
-    new $P1166, "Undef"
-  vivify_489:
-    find_lex $P1167, "%x"
-    unless_null $P1167, vivify_490
-    new $P1167, "Hash"
-  vivify_490:
-    set $P1168, $P1167[$P1166]
-    unless_null $P1168, vivify_491
-    new $P1168, "Undef"
-  vivify_491:
-    set $N1169, $P1168
-    new $P1170, "Integer"
-    assign $P1170, 1
-    set $N1171, $P1170
-    iseq $I1172, $N1169, $N1171
-    new $P1157, 'Integer'
-    set $P1157, $I1172
-  if_1158_end:
-    if $P1157, if_1156
-.annotate "line", 450
-    new $P1174, "Integer"
-    assign $P1174, 2
-    set $P1155, $P1174
-.annotate "line", 448
-    goto if_1156_end
-  if_1156:
+    .const 'Sub' $P1376 = "117_1256533476.70438" 
+    capture_lex $P1376
+    .const 'Sub' $P1312 = "113_1256533476.70438" 
+    capture_lex $P1312
+    .const 'Sub' $P1265 = "109_1256533476.70438" 
+    capture_lex $P1265
+    .const 'Sub' $P1217 = "106_1256533476.70438" 
+    capture_lex $P1217
+    .const 'Sub' $P1150 = "102_1256533476.70438" 
+    capture_lex $P1150
+    new $P1139, 'ExceptionHandler'
+    set_addr $P1139, control_1138
+    $P1139."handle_types"(58)
+    push_eh $P1139
+    .lex "$ast", param_1140
+    .lex "$count", param_1141
 .annotate "line", 449
-    new $P1173, "Integer"
-    assign $P1173, 1
-    set $P1155, $P1173
-  if_1156_end:
-.annotate "line", 448
-    find_lex $P1175, "$_"
-    unless_null $P1175, vivify_492
-    new $P1175, "Undef"
-  vivify_492:
-    find_lex $P1176, "%capnames"
-    unless_null $P1176, vivify_493
-    new $P1176, "Hash"
-    store_lex "%capnames", $P1176
-  vivify_493:
-    set $P1176[$P1175], $P1155
-.annotate "line", 447
-    .return ($P1155)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1188"  :anon :subid("104_1256279185.41736") :outer("102_1256279185.41736")
-.annotate "line", 452
-    find_lex $P1190, "%x"
-    unless_null $P1190, vivify_497
-    new $P1190, "Hash"
-  vivify_497:
-    set $P1191, $P1190[""]
-    unless_null $P1191, vivify_498
-    new $P1191, "Undef"
-  vivify_498:
-    store_lex "$max", $P1191
-    .return ($P1191)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "backmod"  :subid("118_1256279185.41736") :outer("11_1256279185.41736")
-    .param pmc param_1388
-    .param pmc param_1389
-.annotate "line", 506
-    .const 'Sub' $P1421 = "121_1256279185.41736" 
-    capture_lex $P1421
-    .const 'Sub' $P1408 = "120_1256279185.41736" 
-    capture_lex $P1408
-    .const 'Sub' $P1395 = "119_1256279185.41736" 
-    capture_lex $P1395
-    new $P1387, 'ExceptionHandler'
-    set_addr $P1387, control_1386
-    $P1387."handle_types"(58)
-    push_eh $P1387
-    .lex "$ast", param_1388
-    .lex "$backmod", param_1389
-.annotate "line", 507
-    find_lex $P1391, "$backmod"
-    unless_null $P1391, vivify_503
-    new $P1391, "Undef"
-  vivify_503:
-    set $S1392, $P1391
-    iseq $I1393, $S1392, ":"
-    if $I1393, if_1390
-.annotate "line", 508
-    find_lex $P1401, "$backmod"
-    unless_null $P1401, vivify_504
-    new $P1401, "Undef"
-  vivify_504:
-    set $S1402, $P1401
-    iseq $I1403, $S1402, ":?"
-    unless $I1403, unless_1400
-    new $P1399, 'Integer'
-    set $P1399, $I1403
-    goto unless_1400_end
-  unless_1400:
-    find_lex $P1404, "$backmod"
-    unless_null $P1404, vivify_505
-    new $P1404, "Undef"
-  vivify_505:
-    set $S1405, $P1404
-    iseq $I1406, $S1405, "?"
-    new $P1399, 'Integer'
-    set $P1399, $I1406
-  unless_1400_end:
-    if $P1399, if_1398
-.annotate "line", 509
-    find_lex $P1414, "$backmod"
-    unless_null $P1414, vivify_506
-    new $P1414, "Undef"
-  vivify_506:
-    set $S1415, $P1414
-    iseq $I1416, $S1415, ":!"
-    unless $I1416, unless_1413
-    new $P1412, 'Integer'
-    set $P1412, $I1416
-    goto unless_1413_end
-  unless_1413:
-    find_lex $P1417, "$backmod"
-    unless_null $P1417, vivify_507
-    new $P1417, "Undef"
-  vivify_507:
-    set $S1418, $P1417
-    iseq $I1419, $S1418, "!"
-    new $P1412, 'Integer'
-    set $P1412, $I1419
-  unless_1413_end:
-    unless $P1412, if_1411_end
-    .const 'Sub' $P1421 = "121_1256279185.41736" 
-    capture_lex $P1421
-    $P1421()
-  if_1411_end:
-.annotate "line", 507
-    goto if_1398_end
-  if_1398:
-.annotate "line", 508
-    .const 'Sub' $P1408 = "120_1256279185.41736" 
-    capture_lex $P1408
-    $P1408()
-  if_1398_end:
-.annotate "line", 507
-    goto if_1390_end
-  if_1390:
-    .const 'Sub' $P1395 = "119_1256279185.41736" 
-    capture_lex $P1395
-    $P1395()
-  if_1390_end:
+    new $P1142, "Hash"
+    .lex "%capnames", $P1142
+.annotate "line", 450
+    find_lex $P1143, "$ast"
+    unless_null $P1143, vivify_415
+    new $P1143, "Undef"
+  vivify_415:
+    $P1144 = $P1143."pasttype"()
+    .lex "$pasttype", $P1144
+.annotate "line", 451
+    find_lex $P1146, "$pasttype"
+    unless_null $P1146, vivify_416
+    new $P1146, "Undef"
+  vivify_416:
+    set $S1147, $P1146
+    iseq $I1148, $S1147, "alt"
+    if $I1148, if_1145
+.annotate "line", 464
+    find_lex $P1213, "$pasttype"
+    unless_null $P1213, vivify_417
+    new $P1213, "Undef"
+  vivify_417:
+    set $S1214, $P1213
+    iseq $I1215, $S1214, "concat"
+    if $I1215, if_1212
+.annotate "line", 473
+    find_lex $P1258, "$pasttype"
+    unless_null $P1258, vivify_418
+    new $P1258, "Undef"
+  vivify_418:
+    set $S1259, $P1258
+    iseq $I1260, $S1259, "subrule"
+    if $I1260, if_1257
+    new $P1256, 'Integer'
+    set $P1256, $I1260
+    goto if_1257_end
+  if_1257:
+    find_lex $P1261, "$ast"
+    unless_null $P1261, vivify_419
+    new $P1261, "Undef"
+  vivify_419:
+    $S1262 = $P1261."subtype"()
+    iseq $I1263, $S1262, "capture"
+    new $P1256, 'Integer'
+    set $P1256, $I1263
+  if_1257_end:
+    if $P1256, if_1255
+.annotate "line", 486
+    find_lex $P1308, "$pasttype"
+    unless_null $P1308, vivify_420
+    new $P1308, "Undef"
+  vivify_420:
+    set $S1309, $P1308
+    iseq $I1310, $S1309, "subcapture"
+    if $I1310, if_1307
+.annotate "line", 503
+    find_lex $P1372, "$pasttype"
+    unless_null $P1372, vivify_421
+    new $P1372, "Undef"
+  vivify_421:
+    set $S1373, $P1372
+    iseq $I1374, $S1373, "quant"
+    unless $I1374, if_1371_end
+    .const 'Sub' $P1376 = "117_1256533476.70438" 
+    capture_lex $P1376
+    $P1376()
+  if_1371_end:
+.annotate "line", 451
+    goto if_1307_end
+  if_1307:
+.annotate "line", 486
+    .const 'Sub' $P1312 = "113_1256533476.70438" 
+    capture_lex $P1312
+    $P1312()
+  if_1307_end:
+.annotate "line", 451
+    goto if_1255_end
+  if_1255:
+.annotate "line", 473
+    .const 'Sub' $P1265 = "109_1256533476.70438" 
+    capture_lex $P1265
+    $P1265()
+  if_1255_end:
+.annotate "line", 451
+    goto if_1212_end
+  if_1212:
+.annotate "line", 464
+    .const 'Sub' $P1217 = "106_1256533476.70438" 
+    capture_lex $P1217
+    $P1217()
+  if_1212_end:
+.annotate "line", 451
+    goto if_1145_end
+  if_1145:
+    .const 'Sub' $P1150 = "102_1256533476.70438" 
+    capture_lex $P1150
+    $P1150()
+  if_1145_end:
 .annotate "line", 510
-    find_lex $P1424, "$ast"
-    unless_null $P1424, vivify_511
-    new $P1424, "Undef"
-  vivify_511:
-.annotate "line", 506
-    .return ($P1424)
-  control_1386:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1425, exception, "payload"
-    .return ($P1425)
-    rethrow exception
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1420"  :anon :subid("121_1256279185.41736") :outer("118_1256279185.41736")
-.annotate "line", 509
-    find_lex $P1422, "$ast"
-    unless_null $P1422, vivify_508
-    new $P1422, "Undef"
-  vivify_508:
-    $P1423 = $P1422."backtrack"("g")
-    .return ($P1423)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1407"  :anon :subid("120_1256279185.41736") :outer("118_1256279185.41736")
-.annotate "line", 508
-    find_lex $P1409, "$ast"
-    unless_null $P1409, vivify_509
-    new $P1409, "Undef"
-  vivify_509:
-    $P1410 = $P1409."backtrack"("f")
-    .return ($P1410)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1394"  :anon :subid("119_1256279185.41736") :outer("118_1256279185.41736")
-.annotate "line", 507
-    find_lex $P1396, "$ast"
-    unless_null $P1396, vivify_510
+    find_lex $P1396, "$count"
+    unless_null $P1396, vivify_503
     new $P1396, "Undef"
-  vivify_510:
-    $P1397 = $P1396."backtrack"("r")
-    .return ($P1397)
-.end
-
-
-.namespace ["Regex";"P6Regex";"Actions"]
-.sub "subrule_alias"  :subid("122_1256279185.41736") :outer("11_1256279185.41736")
-    .param pmc param_1429
-    .param pmc param_1430
-.annotate "line", 513
-    .const 'Sub' $P1435 = "123_1256279185.41736" 
-    capture_lex $P1435
-    new $P1428, 'ExceptionHandler'
-    set_addr $P1428, control_1427
-    $P1428."handle_types"(58)
-    push_eh $P1428
-    .lex "$past", param_1429
-    .lex "$name", param_1430
-.annotate "line", 514
-    find_lex $P1432, "$past"
-    unless_null $P1432, vivify_512
-    new $P1432, "Hash"
-  vivify_512:
-    set $P1433, $P1432["aliased"]
-    unless_null $P1433, vivify_513
-    new $P1433, "Undef"
-  vivify_513:
-    unless $P1433, if_1431_end
-    .const 'Sub' $P1435 = "123_1256279185.41736" 
-    capture_lex $P1435
-    $P1435()
-  if_1431_end:
-.annotate "line", 515
-    find_lex $P1441, "$past"
-    unless_null $P1441, vivify_516
-    new $P1441, "Undef"
-  vivify_516:
-    find_lex $P1442, "$name"
-    unless_null $P1442, vivify_517
-    new $P1442, "Undef"
-  vivify_517:
-    $P1441."name"($P1442)
-.annotate "line", 516
-    new $P1443, "Integer"
-    assign $P1443, 1
-    find_lex $P1444, "$past"
-    unless_null $P1444, vivify_518
-    new $P1444, "Hash"
-    store_lex "$past", $P1444
-  vivify_518:
-    set $P1444["aliased"], $P1443
-.annotate "line", 513
-    .return ($P1443)
-  control_1427:
+  vivify_503:
+    find_lex $P1397, "%capnames"
+    unless_null $P1397, vivify_504
+    new $P1397, "Hash"
+    store_lex "%capnames", $P1397
+  vivify_504:
+    set $P1397[""], $P1396
+.annotate "line", 511
+    find_lex $P1398, "%capnames"
+    unless_null $P1398, vivify_505
+    new $P1398, "Hash"
+  vivify_505:
+.annotate "line", 448
+    .return ($P1398)
+  control_1138:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P1445, exception, "payload"
-    .return ($P1445)
+    getattribute $P1399, exception, "payload"
+    .return ($P1399)
     rethrow exception
 .end
 
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1434"  :anon :subid("123_1256279185.41736") :outer("122_1256279185.41736")
+.sub "_block1375"  :anon :subid("117_1256533476.70438") :outer("101_1256533476.70438")
+.annotate "line", 503
+    .const 'Sub' $P1386 = "118_1256533476.70438" 
+    capture_lex $P1386
+.annotate "line", 504
+    find_lex $P1377, "$ast"
+    unless_null $P1377, vivify_422
+    new $P1377, "ResizablePMCArray"
+  vivify_422:
+    set $P1378, $P1377[0]
+    unless_null $P1378, vivify_423
+    new $P1378, "Undef"
+  vivify_423:
+    find_lex $P1379, "$count"
+    unless_null $P1379, vivify_424
+    new $P1379, "Undef"
+  vivify_424:
+    $P1380 = "capnames"($P1378, $P1379)
+    .lex "%astcap", $P1380
+.annotate "line", 505
+    find_lex $P1382, "%astcap"
+    unless_null $P1382, vivify_425
+    new $P1382, "Hash"
+  vivify_425:
+    defined $I1383, $P1382
+    unless $I1383, for_undef_426
+    iter $P1381, $P1382
+    new $P1392, 'ExceptionHandler'
+    set_addr $P1392, loop1391_handler
+    $P1392."handle_types"(65, 67, 66)
+    push_eh $P1392
+  loop1391_test:
+    unless $P1381, loop1391_done
+    shift $P1384, $P1381
+  loop1391_redo:
+    .const 'Sub' $P1386 = "118_1256533476.70438" 
+    capture_lex $P1386
+    $P1386($P1384)
+  loop1391_next:
+    goto loop1391_test
+  loop1391_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1393, exception, 'type'
+    eq $P1393, 65, loop1391_next
+    eq $P1393, 67, loop1391_redo
+  loop1391_done:
+    pop_eh 
+  for_undef_426:
+.annotate "line", 508
+    find_lex $P1394, "%astcap"
+    unless_null $P1394, vivify_429
+    new $P1394, "Hash"
+  vivify_429:
+    set $P1395, $P1394[""]
+    unless_null $P1395, vivify_430
+    new $P1395, "Undef"
+  vivify_430:
+    store_lex "$count", $P1395
+.annotate "line", 503
+    .return ($P1395)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block1385"  :anon :subid("118_1256533476.70438") :outer("117_1256533476.70438")
+    .param pmc param_1387
+.annotate "line", 505
+    .lex "$_", param_1387
+.annotate "line", 506
+    new $P1388, "Integer"
+    assign $P1388, 2
+    find_lex $P1389, "$_"
+    unless_null $P1389, vivify_427
+    new $P1389, "Undef"
+  vivify_427:
+    find_lex $P1390, "%capnames"
+    unless_null $P1390, vivify_428
+    new $P1390, "Hash"
+    store_lex "%capnames", $P1390
+  vivify_428:
+    set $P1390[$P1389], $P1388
+.annotate "line", 505
+    .return ($P1388)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block1311"  :anon :subid("113_1256533476.70438") :outer("101_1256533476.70438")
+.annotate "line", 486
+    .const 'Sub' $P1353 = "116_1256533476.70438" 
+    capture_lex $P1353
+    .const 'Sub' $P1321 = "114_1256533476.70438" 
+    capture_lex $P1321
+.annotate "line", 487
+    find_lex $P1313, "$ast"
+    unless_null $P1313, vivify_431
+    new $P1313, "Undef"
+  vivify_431:
+    $P1314 = $P1313."name"()
+    .lex "$name", $P1314
+.annotate "line", 488
+
+            $P0 = find_lex '$name'
+            $S0 = $P0
+            $P1315 = split '=', $S0
+        
+    .lex "@names", $P1315
+.annotate "line", 493
+    find_lex $P1317, "@names"
+    unless_null $P1317, vivify_432
+    new $P1317, "ResizablePMCArray"
+  vivify_432:
+    defined $I1318, $P1317
+    unless $I1318, for_undef_433
+    iter $P1316, $P1317
+    new $P1342, 'ExceptionHandler'
+    set_addr $P1342, loop1341_handler
+    $P1342."handle_types"(65, 67, 66)
+    push_eh $P1342
+  loop1341_test:
+    unless $P1316, loop1341_done
+    shift $P1319, $P1316
+  loop1341_redo:
+    .const 'Sub' $P1321 = "114_1256533476.70438" 
+    capture_lex $P1321
+    $P1321($P1319)
+  loop1341_next:
+    goto loop1341_test
+  loop1341_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1343, exception, 'type'
+    eq $P1343, 65, loop1341_next
+    eq $P1343, 67, loop1341_redo
+  loop1341_done:
+    pop_eh 
+  for_undef_433:
+.annotate "line", 497
+    find_lex $P1344, "$ast"
+    unless_null $P1344, vivify_439
+    new $P1344, "ResizablePMCArray"
+  vivify_439:
+    set $P1345, $P1344[0]
+    unless_null $P1345, vivify_440
+    new $P1345, "Undef"
+  vivify_440:
+    find_lex $P1346, "$count"
+    unless_null $P1346, vivify_441
+    new $P1346, "Undef"
+  vivify_441:
+    $P1347 = "capnames"($P1345, $P1346)
+    .lex "%x", $P1347
+.annotate "line", 498
+    find_lex $P1349, "%x"
+    unless_null $P1349, vivify_442
+    new $P1349, "Hash"
+  vivify_442:
+    defined $I1350, $P1349
+    unless $I1350, for_undef_443
+    iter $P1348, $P1349
+    new $P1367, 'ExceptionHandler'
+    set_addr $P1367, loop1366_handler
+    $P1367."handle_types"(65, 67, 66)
+    push_eh $P1367
+  loop1366_test:
+    unless $P1348, loop1366_done
+    shift $P1351, $P1348
+  loop1366_redo:
+    .const 'Sub' $P1353 = "116_1256533476.70438" 
+    capture_lex $P1353
+    $P1353($P1351)
+  loop1366_next:
+    goto loop1366_test
+  loop1366_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1368, exception, 'type'
+    eq $P1368, 65, loop1366_next
+    eq $P1368, 67, loop1366_redo
+  loop1366_done:
+    pop_eh 
+  for_undef_443:
+.annotate "line", 501
+    find_lex $P1369, "%x"
+    unless_null $P1369, vivify_452
+    new $P1369, "Hash"
+  vivify_452:
+    set $P1370, $P1369[""]
+    unless_null $P1370, vivify_453
+    new $P1370, "Undef"
+  vivify_453:
+    store_lex "$count", $P1370
+.annotate "line", 486
+    .return ($P1370)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block1320"  :anon :subid("114_1256533476.70438") :outer("113_1256533476.70438")
+    .param pmc param_1322
+.annotate "line", 493
+    .const 'Sub' $P1335 = "115_1256533476.70438" 
+    capture_lex $P1335
+    .lex "$_", param_1322
+.annotate "line", 494
+    find_lex $P1326, "$_"
+    unless_null $P1326, vivify_434
+    new $P1326, "Undef"
+  vivify_434:
+    set $S1327, $P1326
+    iseq $I1328, $S1327, "0"
+    unless $I1328, unless_1325
+    new $P1324, 'Integer'
+    set $P1324, $I1328
+    goto unless_1325_end
+  unless_1325:
+    find_lex $P1329, "$_"
+    unless_null $P1329, vivify_435
+    new $P1329, "Undef"
+  vivify_435:
+    set $N1330, $P1329
+    new $P1331, "Integer"
+    assign $P1331, 0
+    set $N1332, $P1331
+    isgt $I1333, $N1330, $N1332
+    new $P1324, 'Integer'
+    set $P1324, $I1333
+  unless_1325_end:
+    unless $P1324, if_1323_end
+    .const 'Sub' $P1335 = "115_1256533476.70438" 
+    capture_lex $P1335
+    $P1335()
+  if_1323_end:
+.annotate "line", 495
+    new $P1338, "Integer"
+    assign $P1338, 1
+    find_lex $P1339, "$_"
+    unless_null $P1339, vivify_437
+    new $P1339, "Undef"
+  vivify_437:
+    find_lex $P1340, "%capnames"
+    unless_null $P1340, vivify_438
+    new $P1340, "Hash"
+    store_lex "%capnames", $P1340
+  vivify_438:
+    set $P1340[$P1339], $P1338
+.annotate "line", 493
+    .return ($P1338)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block1334"  :anon :subid("115_1256533476.70438") :outer("114_1256533476.70438")
+.annotate "line", 494
+    find_lex $P1336, "$_"
+    unless_null $P1336, vivify_436
+    new $P1336, "Undef"
+  vivify_436:
+    add $P1337, $P1336, 1
+    store_lex "$count", $P1337
+    .return ($P1337)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block1352"  :anon :subid("116_1256533476.70438") :outer("113_1256533476.70438")
+    .param pmc param_1354
+.annotate "line", 498
+    .lex "$_", param_1354
+.annotate "line", 499
+    find_lex $P1355, "$_"
+    unless_null $P1355, vivify_444
+    new $P1355, "Undef"
+  vivify_444:
+    find_lex $P1356, "%capnames"
+    unless_null $P1356, vivify_445
+    new $P1356, "Hash"
+  vivify_445:
+    set $P1357, $P1356[$P1355]
+    unless_null $P1357, vivify_446
+    new $P1357, "Undef"
+  vivify_446:
+    set $N1358, $P1357
+    new $P1359, 'Float'
+    set $P1359, $N1358
+    find_lex $P1360, "$_"
+    unless_null $P1360, vivify_447
+    new $P1360, "Undef"
+  vivify_447:
+    find_lex $P1361, "%x"
+    unless_null $P1361, vivify_448
+    new $P1361, "Hash"
+  vivify_448:
+    set $P1362, $P1361[$P1360]
+    unless_null $P1362, vivify_449
+    new $P1362, "Undef"
+  vivify_449:
+    add $P1363, $P1359, $P1362
+    find_lex $P1364, "$_"
+    unless_null $P1364, vivify_450
+    new $P1364, "Undef"
+  vivify_450:
+    find_lex $P1365, "%capnames"
+    unless_null $P1365, vivify_451
+    new $P1365, "Hash"
+    store_lex "%capnames", $P1365
+  vivify_451:
+    set $P1365[$P1364], $P1363
+.annotate "line", 498
+    .return ($P1363)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block1264"  :anon :subid("109_1256533476.70438") :outer("101_1256533476.70438")
+.annotate "line", 473
+    .const 'Sub' $P1284 = "111_1256533476.70438" 
+    capture_lex $P1284
+    .const 'Sub' $P1273 = "110_1256533476.70438" 
+    capture_lex $P1273
+.annotate "line", 474
+    find_lex $P1266, "$ast"
+    unless_null $P1266, vivify_454
+    new $P1266, "Undef"
+  vivify_454:
+    $P1267 = $P1266."name"()
+    .lex "$name", $P1267
+.annotate "line", 475
+    find_lex $P1269, "$name"
+    unless_null $P1269, vivify_455
+    new $P1269, "Undef"
+  vivify_455:
+    set $S1270, $P1269
+    iseq $I1271, $S1270, ""
+    unless $I1271, if_1268_end
+    .const 'Sub' $P1273 = "110_1256533476.70438" 
+    capture_lex $P1273
+    $P1273()
+  if_1268_end:
+.annotate "line", 476
+
+            $P0 = find_lex '$name'
+            $S0 = $P0
+            $P1278 = split '=', $S0
+        
+    .lex "@names", $P1278
+.annotate "line", 481
+    find_lex $P1280, "@names"
+    unless_null $P1280, vivify_459
+    new $P1280, "ResizablePMCArray"
+  vivify_459:
+    defined $I1281, $P1280
+    unless $I1281, for_undef_460
+    iter $P1279, $P1280
+    new $P1305, 'ExceptionHandler'
+    set_addr $P1305, loop1304_handler
+    $P1305."handle_types"(65, 67, 66)
+    push_eh $P1305
+  loop1304_test:
+    unless $P1279, loop1304_done
+    shift $P1282, $P1279
+  loop1304_redo:
+    .const 'Sub' $P1284 = "111_1256533476.70438" 
+    capture_lex $P1284
+    $P1284($P1282)
+  loop1304_next:
+    goto loop1304_test
+  loop1304_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1306, exception, 'type'
+    eq $P1306, 65, loop1304_next
+    eq $P1306, 67, loop1304_redo
+  loop1304_done:
+    pop_eh 
+  for_undef_460:
+.annotate "line", 473
+    .return ($P1279)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block1272"  :anon :subid("110_1256533476.70438") :outer("109_1256533476.70438")
+.annotate "line", 475
+    find_lex $P1274, "$count"
+    unless_null $P1274, vivify_456
+    new $P1274, "Undef"
+  vivify_456:
+    store_lex "$name", $P1274
+    find_lex $P1275, "$ast"
+    unless_null $P1275, vivify_457
+    new $P1275, "Undef"
+  vivify_457:
+    find_lex $P1276, "$name"
+    unless_null $P1276, vivify_458
+    new $P1276, "Undef"
+  vivify_458:
+    $P1277 = $P1275."name"($P1276)
+    .return ($P1277)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block1283"  :anon :subid("111_1256533476.70438") :outer("109_1256533476.70438")
+    .param pmc param_1285
+.annotate "line", 481
+    .const 'Sub' $P1298 = "112_1256533476.70438" 
+    capture_lex $P1298
+    .lex "$_", param_1285
+.annotate "line", 482
+    find_lex $P1289, "$_"
+    unless_null $P1289, vivify_461
+    new $P1289, "Undef"
+  vivify_461:
+    set $S1290, $P1289
+    iseq $I1291, $S1290, "0"
+    unless $I1291, unless_1288
+    new $P1287, 'Integer'
+    set $P1287, $I1291
+    goto unless_1288_end
+  unless_1288:
+    find_lex $P1292, "$_"
+    unless_null $P1292, vivify_462
+    new $P1292, "Undef"
+  vivify_462:
+    set $N1293, $P1292
+    new $P1294, "Integer"
+    assign $P1294, 0
+    set $N1295, $P1294
+    isgt $I1296, $N1293, $N1295
+    new $P1287, 'Integer'
+    set $P1287, $I1296
+  unless_1288_end:
+    unless $P1287, if_1286_end
+    .const 'Sub' $P1298 = "112_1256533476.70438" 
+    capture_lex $P1298
+    $P1298()
+  if_1286_end:
+.annotate "line", 483
+    new $P1301, "Integer"
+    assign $P1301, 1
+    find_lex $P1302, "$_"
+    unless_null $P1302, vivify_464
+    new $P1302, "Undef"
+  vivify_464:
+    find_lex $P1303, "%capnames"
+    unless_null $P1303, vivify_465
+    new $P1303, "Hash"
+    store_lex "%capnames", $P1303
+  vivify_465:
+    set $P1303[$P1302], $P1301
+.annotate "line", 481
+    .return ($P1301)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block1297"  :anon :subid("112_1256533476.70438") :outer("111_1256533476.70438")
+.annotate "line", 482
+    find_lex $P1299, "$_"
+    unless_null $P1299, vivify_463
+    new $P1299, "Undef"
+  vivify_463:
+    add $P1300, $P1299, 1
+    store_lex "$count", $P1300
+    .return ($P1300)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block1216"  :anon :subid("106_1256533476.70438") :outer("101_1256533476.70438")
+.annotate "line", 464
+    .const 'Sub' $P1224 = "107_1256533476.70438" 
+    capture_lex $P1224
+.annotate "line", 465
+    find_lex $P1219, "$ast"
+    unless_null $P1219, vivify_466
+    new $P1219, "Undef"
+  vivify_466:
+    $P1220 = $P1219."list"()
+    defined $I1221, $P1220
+    unless $I1221, for_undef_467
+    iter $P1218, $P1220
+    new $P1253, 'ExceptionHandler'
+    set_addr $P1253, loop1252_handler
+    $P1253."handle_types"(65, 67, 66)
+    push_eh $P1253
+  loop1252_test:
+    unless $P1218, loop1252_done
+    shift $P1222, $P1218
+  loop1252_redo:
+    .const 'Sub' $P1224 = "107_1256533476.70438" 
+    capture_lex $P1224
+    $P1224($P1222)
+  loop1252_next:
+    goto loop1252_test
+  loop1252_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1254, exception, 'type'
+    eq $P1254, 65, loop1252_next
+    eq $P1254, 67, loop1252_redo
+  loop1252_done:
+    pop_eh 
+  for_undef_467:
+.annotate "line", 464
+    .return ($P1218)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block1223"  :anon :subid("107_1256533476.70438") :outer("106_1256533476.70438")
+    .param pmc param_1225
+.annotate "line", 465
+    .const 'Sub' $P1234 = "108_1256533476.70438" 
+    capture_lex $P1234
+    .lex "$_", param_1225
+.annotate "line", 466
+    find_lex $P1226, "$_"
+    unless_null $P1226, vivify_468
+    new $P1226, "Undef"
+  vivify_468:
+    find_lex $P1227, "$count"
+    unless_null $P1227, vivify_469
+    new $P1227, "Undef"
+  vivify_469:
+    $P1228 = "capnames"($P1226, $P1227)
+    .lex "%x", $P1228
+.annotate "line", 467
+    find_lex $P1230, "%x"
+    unless_null $P1230, vivify_470
+    new $P1230, "Hash"
+  vivify_470:
+    defined $I1231, $P1230
+    unless $I1231, for_undef_471
+    iter $P1229, $P1230
+    new $P1248, 'ExceptionHandler'
+    set_addr $P1248, loop1247_handler
+    $P1248."handle_types"(65, 67, 66)
+    push_eh $P1248
+  loop1247_test:
+    unless $P1229, loop1247_done
+    shift $P1232, $P1229
+  loop1247_redo:
+    .const 'Sub' $P1234 = "108_1256533476.70438" 
+    capture_lex $P1234
+    $P1234($P1232)
+  loop1247_next:
+    goto loop1247_test
+  loop1247_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1249, exception, 'type'
+    eq $P1249, 65, loop1247_next
+    eq $P1249, 67, loop1247_redo
+  loop1247_done:
+    pop_eh 
+  for_undef_471:
+.annotate "line", 470
+    find_lex $P1250, "%x"
+    unless_null $P1250, vivify_480
+    new $P1250, "Hash"
+  vivify_480:
+    set $P1251, $P1250[""]
+    unless_null $P1251, vivify_481
+    new $P1251, "Undef"
+  vivify_481:
+    store_lex "$count", $P1251
+.annotate "line", 465
+    .return ($P1251)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block1233"  :anon :subid("108_1256533476.70438") :outer("107_1256533476.70438")
+    .param pmc param_1235
+.annotate "line", 467
+    .lex "$_", param_1235
+.annotate "line", 468
+    find_lex $P1236, "$_"
+    unless_null $P1236, vivify_472
+    new $P1236, "Undef"
+  vivify_472:
+    find_lex $P1237, "%capnames"
+    unless_null $P1237, vivify_473
+    new $P1237, "Hash"
+  vivify_473:
+    set $P1238, $P1237[$P1236]
+    unless_null $P1238, vivify_474
+    new $P1238, "Undef"
+  vivify_474:
+    set $N1239, $P1238
+    new $P1240, 'Float'
+    set $P1240, $N1239
+    find_lex $P1241, "$_"
+    unless_null $P1241, vivify_475
+    new $P1241, "Undef"
+  vivify_475:
+    find_lex $P1242, "%x"
+    unless_null $P1242, vivify_476
+    new $P1242, "Hash"
+  vivify_476:
+    set $P1243, $P1242[$P1241]
+    unless_null $P1243, vivify_477
+    new $P1243, "Undef"
+  vivify_477:
+    add $P1244, $P1240, $P1243
+    find_lex $P1245, "$_"
+    unless_null $P1245, vivify_478
+    new $P1245, "Undef"
+  vivify_478:
+    find_lex $P1246, "%capnames"
+    unless_null $P1246, vivify_479
+    new $P1246, "Hash"
+    store_lex "%capnames", $P1246
+  vivify_479:
+    set $P1246[$P1245], $P1244
+.annotate "line", 467
+    .return ($P1244)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block1149"  :anon :subid("102_1256533476.70438") :outer("101_1256533476.70438")
+.annotate "line", 451
+    .const 'Sub' $P1158 = "103_1256533476.70438" 
+    capture_lex $P1158
+.annotate "line", 452
+    find_lex $P1151, "$count"
+    unless_null $P1151, vivify_482
+    new $P1151, "Undef"
+  vivify_482:
+    .lex "$max", $P1151
+.annotate "line", 453
+    find_lex $P1153, "$ast"
+    unless_null $P1153, vivify_483
+    new $P1153, "Undef"
+  vivify_483:
+    $P1154 = $P1153."list"()
+    defined $I1155, $P1154
+    unless $I1155, for_undef_484
+    iter $P1152, $P1154
+    new $P1209, 'ExceptionHandler'
+    set_addr $P1209, loop1208_handler
+    $P1209."handle_types"(65, 67, 66)
+    push_eh $P1209
+  loop1208_test:
+    unless $P1152, loop1208_done
+    shift $P1156, $P1152
+  loop1208_redo:
+    .const 'Sub' $P1158 = "103_1256533476.70438" 
+    capture_lex $P1158
+    $P1158($P1156)
+  loop1208_next:
+    goto loop1208_test
+  loop1208_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1210, exception, 'type'
+    eq $P1210, 65, loop1208_next
+    eq $P1210, 67, loop1208_redo
+  loop1208_done:
+    pop_eh 
+  for_undef_484:
+.annotate "line", 462
+    find_lex $P1211, "$max"
+    unless_null $P1211, vivify_502
+    new $P1211, "Undef"
+  vivify_502:
+    store_lex "$count", $P1211
+.annotate "line", 451
+    .return ($P1211)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block1157"  :anon :subid("103_1256533476.70438") :outer("102_1256533476.70438")
+    .param pmc param_1159
+.annotate "line", 453
+    .const 'Sub' $P1204 = "105_1256533476.70438" 
+    capture_lex $P1204
+    .const 'Sub' $P1168 = "104_1256533476.70438" 
+    capture_lex $P1168
+    .lex "$_", param_1159
+.annotate "line", 454
+    find_lex $P1160, "$_"
+    unless_null $P1160, vivify_485
+    new $P1160, "Undef"
+  vivify_485:
+    find_lex $P1161, "$count"
+    unless_null $P1161, vivify_486
+    new $P1161, "Undef"
+  vivify_486:
+    $P1162 = "capnames"($P1160, $P1161)
+    .lex "%x", $P1162
+.annotate "line", 455
+    find_lex $P1164, "%x"
+    unless_null $P1164, vivify_487
+    new $P1164, "Hash"
+  vivify_487:
+    defined $I1165, $P1164
+    unless $I1165, for_undef_488
+    iter $P1163, $P1164
+    new $P1193, 'ExceptionHandler'
+    set_addr $P1193, loop1192_handler
+    $P1193."handle_types"(65, 67, 66)
+    push_eh $P1193
+  loop1192_test:
+    unless $P1163, loop1192_done
+    shift $P1166, $P1163
+  loop1192_redo:
+    .const 'Sub' $P1168 = "104_1256533476.70438" 
+    capture_lex $P1168
+    $P1168($P1166)
+  loop1192_next:
+    goto loop1192_test
+  loop1192_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1194, exception, 'type'
+    eq $P1194, 65, loop1192_next
+    eq $P1194, 67, loop1192_redo
+  loop1192_done:
+    pop_eh 
+  for_undef_488:
+.annotate "line", 460
+    find_lex $P1197, "%x"
+    unless_null $P1197, vivify_497
+    new $P1197, "Hash"
+  vivify_497:
+    set $P1198, $P1197[""]
+    unless_null $P1198, vivify_498
+    new $P1198, "Undef"
+  vivify_498:
+    set $N1199, $P1198
+    find_lex $P1200, "$max"
+    unless_null $P1200, vivify_499
+    new $P1200, "Undef"
+  vivify_499:
+    set $N1201, $P1200
+    isgt $I1202, $N1199, $N1201
+    if $I1202, if_1196
+    new $P1195, 'Integer'
+    set $P1195, $I1202
+    goto if_1196_end
+  if_1196:
+    .const 'Sub' $P1204 = "105_1256533476.70438" 
+    capture_lex $P1204
+    $P1207 = $P1204()
+    set $P1195, $P1207
+  if_1196_end:
+.annotate "line", 453
+    .return ($P1195)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block1167"  :anon :subid("104_1256533476.70438") :outer("103_1256533476.70438")
+    .param pmc param_1169
+.annotate "line", 455
+    .lex "$_", param_1169
+.annotate "line", 456
+    find_lex $P1174, "$_"
+    unless_null $P1174, vivify_489
+    new $P1174, "Undef"
+  vivify_489:
+    find_lex $P1175, "%capnames"
+    unless_null $P1175, vivify_490
+    new $P1175, "Hash"
+  vivify_490:
+    set $P1176, $P1175[$P1174]
+    unless_null $P1176, vivify_491
+    new $P1176, "Undef"
+  vivify_491:
+    set $N1177, $P1176
+    new $P1178, "Integer"
+    assign $P1178, 2
+    set $N1179, $P1178
+    islt $I1180, $N1177, $N1179
+    if $I1180, if_1173
+    new $P1172, 'Integer'
+    set $P1172, $I1180
+    goto if_1173_end
+  if_1173:
+    find_lex $P1181, "$_"
+    unless_null $P1181, vivify_492
+    new $P1181, "Undef"
+  vivify_492:
+    find_lex $P1182, "%x"
+    unless_null $P1182, vivify_493
+    new $P1182, "Hash"
+  vivify_493:
+    set $P1183, $P1182[$P1181]
+    unless_null $P1183, vivify_494
+    new $P1183, "Undef"
+  vivify_494:
+    set $N1184, $P1183
+    new $P1185, "Integer"
+    assign $P1185, 1
+    set $N1186, $P1185
+    iseq $I1187, $N1184, $N1186
+    new $P1172, 'Integer'
+    set $P1172, $I1187
+  if_1173_end:
+    if $P1172, if_1171
+.annotate "line", 458
+    new $P1189, "Integer"
+    assign $P1189, 2
+    set $P1170, $P1189
+.annotate "line", 456
+    goto if_1171_end
+  if_1171:
+.annotate "line", 457
+    new $P1188, "Integer"
+    assign $P1188, 1
+    set $P1170, $P1188
+  if_1171_end:
+.annotate "line", 456
+    find_lex $P1190, "$_"
+    unless_null $P1190, vivify_495
+    new $P1190, "Undef"
+  vivify_495:
+    find_lex $P1191, "%capnames"
+    unless_null $P1191, vivify_496
+    new $P1191, "Hash"
+    store_lex "%capnames", $P1191
+  vivify_496:
+    set $P1191[$P1190], $P1170
+.annotate "line", 455
+    .return ($P1170)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block1203"  :anon :subid("105_1256533476.70438") :outer("103_1256533476.70438")
+.annotate "line", 460
+    find_lex $P1205, "%x"
+    unless_null $P1205, vivify_500
+    new $P1205, "Hash"
+  vivify_500:
+    set $P1206, $P1205[""]
+    unless_null $P1206, vivify_501
+    new $P1206, "Undef"
+  vivify_501:
+    store_lex "$max", $P1206
+    .return ($P1206)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "backmod"  :subid("119_1256533476.70438") :outer("11_1256533476.70438")
+    .param pmc param_1403
+    .param pmc param_1404
 .annotate "line", 514
-    find_lex $P1436, "$name"
-    unless_null $P1436, vivify_514
-    new $P1436, "Undef"
+    .const 'Sub' $P1436 = "122_1256533476.70438" 
+    capture_lex $P1436
+    .const 'Sub' $P1423 = "121_1256533476.70438" 
+    capture_lex $P1423
+    .const 'Sub' $P1410 = "120_1256533476.70438" 
+    capture_lex $P1410
+    new $P1402, 'ExceptionHandler'
+    set_addr $P1402, control_1401
+    $P1402."handle_types"(58)
+    push_eh $P1402
+    .lex "$ast", param_1403
+    .lex "$backmod", param_1404
+.annotate "line", 515
+    find_lex $P1406, "$backmod"
+    unless_null $P1406, vivify_506
+    new $P1406, "Undef"
+  vivify_506:
+    set $S1407, $P1406
+    iseq $I1408, $S1407, ":"
+    if $I1408, if_1405
+.annotate "line", 516
+    find_lex $P1416, "$backmod"
+    unless_null $P1416, vivify_507
+    new $P1416, "Undef"
+  vivify_507:
+    set $S1417, $P1416
+    iseq $I1418, $S1417, ":?"
+    unless $I1418, unless_1415
+    new $P1414, 'Integer'
+    set $P1414, $I1418
+    goto unless_1415_end
+  unless_1415:
+    find_lex $P1419, "$backmod"
+    unless_null $P1419, vivify_508
+    new $P1419, "Undef"
+  vivify_508:
+    set $S1420, $P1419
+    iseq $I1421, $S1420, "?"
+    new $P1414, 'Integer'
+    set $P1414, $I1421
+  unless_1415_end:
+    if $P1414, if_1413
+.annotate "line", 517
+    find_lex $P1429, "$backmod"
+    unless_null $P1429, vivify_509
+    new $P1429, "Undef"
+  vivify_509:
+    set $S1430, $P1429
+    iseq $I1431, $S1430, ":!"
+    unless $I1431, unless_1428
+    new $P1427, 'Integer'
+    set $P1427, $I1431
+    goto unless_1428_end
+  unless_1428:
+    find_lex $P1432, "$backmod"
+    unless_null $P1432, vivify_510
+    new $P1432, "Undef"
+  vivify_510:
+    set $S1433, $P1432
+    iseq $I1434, $S1433, "!"
+    new $P1427, 'Integer'
+    set $P1427, $I1434
+  unless_1428_end:
+    unless $P1427, if_1426_end
+    .const 'Sub' $P1436 = "122_1256533476.70438" 
+    capture_lex $P1436
+    $P1436()
+  if_1426_end:
+.annotate "line", 515
+    goto if_1413_end
+  if_1413:
+.annotate "line", 516
+    .const 'Sub' $P1423 = "121_1256533476.70438" 
+    capture_lex $P1423
+    $P1423()
+  if_1413_end:
+.annotate "line", 515
+    goto if_1405_end
+  if_1405:
+    .const 'Sub' $P1410 = "120_1256533476.70438" 
+    capture_lex $P1410
+    $P1410()
+  if_1405_end:
+.annotate "line", 518
+    find_lex $P1439, "$ast"
+    unless_null $P1439, vivify_514
+    new $P1439, "Undef"
   vivify_514:
-    concat $P1437, $P1436, "="
-    find_lex $P1438, "$past"
-    unless_null $P1438, vivify_515
-    new $P1438, "Undef"
-  vivify_515:
-    $S1439 = $P1438."name"()
-    concat $P1440, $P1437, $S1439
-    store_lex "$name", $P1440
+.annotate "line", 514
+    .return ($P1439)
+  control_1401:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1440, exception, "payload"
     .return ($P1440)
+    rethrow exception
 .end
 
-### .include 'src/cheats/p6regex-grammar.pir'
-.namespace ['Regex';'P6Regex';'Grammar']
 
-.sub 'panic' :method
-    .param pmc args            :slurpy
-
-    .local int pos
-    .local pmc target
-    $I0 = isa self, ['Regex';'Cursor']
-    if $I0 goto cursor_pos
-    pos = self.'to'()
-    target = self.'orig'()
-    goto have_pos
-  cursor_pos:
-    pos = self.'pos'()
-    target = getattribute self, '$!target'
-  have_pos:
-
-    $I1 = target.'lineof'(pos)
-    push args, ' at line '
-    push args, $I1
-
-    $S0 = target
-    $S0 = substr $S0, pos, 10
-    $S0 = escape $S0
-    push args, ', near "'
-    push args, $S0
-    push args, '"'
-
-    .local string message
-    message = join '', args
-
-    die message
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block1435"  :anon :subid("122_1256533476.70438") :outer("119_1256533476.70438")
+.annotate "line", 517
+    find_lex $P1437, "$ast"
+    unless_null $P1437, vivify_511
+    new $P1437, "Undef"
+  vivify_511:
+    $P1438 = $P1437."backtrack"("g")
+    .return ($P1438)
 .end
 
-.sub 'obs' :method
-    .param string oldstr
-    .param pmc options         :slurpy :named
 
-    .local string newstr
-    $P0 = split ';', oldstr
-    oldstr = $P0[0]
-    newstr = $P0[1]
-
-    self.'panic'('Obsolete use of ', oldstr, '; please use ', newstr, ' instead')
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block1422"  :anon :subid("121_1256533476.70438") :outer("119_1256533476.70438")
+.annotate "line", 516
+    find_lex $P1424, "$ast"
+    unless_null $P1424, vivify_512
+    new $P1424, "Undef"
+  vivify_512:
+    $P1425 = $P1424."backtrack"("f")
+    .return ($P1425)
 .end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block1409"  :anon :subid("120_1256533476.70438") :outer("119_1256533476.70438")
+.annotate "line", 515
+    find_lex $P1411, "$ast"
+    unless_null $P1411, vivify_513
+    new $P1411, "Undef"
+  vivify_513:
+    $P1412 = $P1411."backtrack"("r")
+    .return ($P1412)
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "subrule_alias"  :subid("123_1256533476.70438") :outer("11_1256533476.70438")
+    .param pmc param_1444
+    .param pmc param_1445
+.annotate "line", 521
+    .const 'Sub' $P1450 = "124_1256533476.70438" 
+    capture_lex $P1450
+    new $P1443, 'ExceptionHandler'
+    set_addr $P1443, control_1442
+    $P1443."handle_types"(58)
+    push_eh $P1443
+    .lex "$past", param_1444
+    .lex "$name", param_1445
+.annotate "line", 522
+    find_lex $P1447, "$past"
+    unless_null $P1447, vivify_515
+    new $P1447, "Hash"
+  vivify_515:
+    set $P1448, $P1447["aliased"]
+    unless_null $P1448, vivify_516
+    new $P1448, "Undef"
+  vivify_516:
+    unless $P1448, if_1446_end
+    .const 'Sub' $P1450 = "124_1256533476.70438" 
+    capture_lex $P1450
+    $P1450()
+  if_1446_end:
+.annotate "line", 523
+    find_lex $P1456, "$past"
+    unless_null $P1456, vivify_519
+    new $P1456, "Undef"
+  vivify_519:
+    find_lex $P1457, "$name"
+    unless_null $P1457, vivify_520
+    new $P1457, "Undef"
+  vivify_520:
+    $P1456."name"($P1457)
+.annotate "line", 524
+    new $P1458, "Integer"
+    assign $P1458, 1
+    find_lex $P1459, "$past"
+    unless_null $P1459, vivify_521
+    new $P1459, "Hash"
+    store_lex "$past", $P1459
+  vivify_521:
+    set $P1459["aliased"], $P1458
+.annotate "line", 521
+    .return ($P1458)
+  control_1442:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1460, exception, "payload"
+    .return ($P1460)
+    rethrow exception
+.end
+
+
+.namespace ["Regex";"P6Regex";"Actions"]
+.sub "_block1449"  :anon :subid("124_1256533476.70438") :outer("123_1256533476.70438")
+.annotate "line", 522
+    find_lex $P1451, "$name"
+    unless_null $P1451, vivify_517
+    new $P1451, "Undef"
+  vivify_517:
+    concat $P1452, $P1451, "="
+    find_lex $P1453, "$past"
+    unless_null $P1453, vivify_518
+    new $P1453, "Undef"
+  vivify_518:
+    $S1454 = $P1453."name"()
+    concat $P1455, $P1452, $S1454
+    store_lex "$name", $P1455
+    .return ($P1455)
+.end
+
 
 .namespace ['Regex';'P6Regex';'Compiler']
 
