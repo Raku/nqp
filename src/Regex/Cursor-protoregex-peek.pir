@@ -158,34 +158,43 @@ create a new one and return it.
     tokrx  = new ['Hash']
 
     # The prototable has already collected all of the names of
-    # protoregex methods into C<prototable>.  We set up a loop
-    # to find all of the method names that begin with "name:sym<".
+    # protoregex methods as keys in C<prototable>.  First
+    # get a list of all of the methods that begin with "name:sym<".
     .local string mprefix
     .local int mlen
     mprefix = concat name, ':sym<'
     mlen   = length mprefix
-
-    .local pmc method_it, method, sorttok
-    .local string method_name
+    .local pmc methodlist, proto_it
+    methodlist = new ['ResizableStringArray']
+    proto_it = iter prototable
+  proto_loop:
+    unless proto_it goto proto_done
+    .local string methodname
+    methodname = shift proto_it
+    $S0 = substr methodname, 0, mlen
+    if $S0 != mprefix goto proto_loop
+    push methodlist, methodname
+    goto proto_loop
+  proto_done:
+  
+    # Now, walk through all of the methods, building the
+    # tokrx and toklen tables as we go.
+    .local pmc sorttok
     sorttok = new ['ResizablePMCArray']
-    method_it = iter prototable
   method_loop:
-    unless method_it goto method_done
-    method_name = shift method_it
-    $S0 = substr method_name, 0, mlen
-    if $S0 != mprefix goto method_loop
+    unless methodlist goto method_done
+    methodname = shift methodlist
 
-    # Okay, we've found a method name intended for this protoregex.
     # Look up the method itself.
     .local pmc rx
-    rx = find_method self, method_name
+    rx = find_method self, methodname
 
     # Now find the prefix tokens for the method; calling the
     # method name with a !PREFIX__ prefix should return us a list
     # of valid token prefixes.  If no such method exists, then
     # our token prefix is a null string.
     .local pmc tokens, tokens_it
-    $S0 = concat '!PREFIX__', method_name
+    $S0 = concat '!PREFIX__', methodname
     $I0 = can self, $S0
     unless $I0 goto method_peek_none
     tokens = self.$S0()
