@@ -20,7 +20,7 @@ method EXPR($/, $key?) {
     }
     if $key eq 'POSTFIX' { $past.unshift($/[0].ast); }
     else {
-        for $/.list { $past.push($_.ast); }
+        for $/.list { if $_.ast { $past.push($_.ast); } }
     }
     make $past;
 }
