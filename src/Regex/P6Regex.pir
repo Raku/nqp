@@ -19,11 +19,10 @@ Regex::P6Regex - Parser/compiler for Perl 6 regexes
 .include 'src/Regex/Cursor-protoregex-peek.pir'
 .include 'src/Regex/Match.pir'
 .include 'src/Regex/Dumper.pir'
-# .include 'src/cheats/regex-cursor-protoregex.pir'
 
-.include 'src/gen/p6regex-grammar.pir'
-.include 'src/gen/p6regex-actions.pir'
 .include 'src/cheats/p6regex-grammar.pir'
+.include 'gen/p6regex-grammar.pir'
+.include 'gen/p6regex-actions.pir'
 
 .namespace ['Regex';'P6Regex';'Compiler']
 

@@ -14,8 +14,8 @@ Regex::P6Grammar - scaffolding compiler for NQP / Perl 6 grammars
     load_bytecode 'P6Regex.pbc'
 .end
 
-.include 'src/gen/p6grammar-grammar.pir'
-.include 'src/gen/p6grammar-actions.pir'
+.include 'gen/p6grammar-grammar.pir'
+.include 'gen/p6grammar-actions.pir'
 
 .namespace ['Regex';'P6Grammar';'Compiler']
 
