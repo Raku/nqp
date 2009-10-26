@@ -10,7 +10,7 @@ grammar Regex::P6Grammar::Grammar is Regex::P6Regex::Grammar;
 
     token longname {
         [
-        | <.ident> [ ':sym<' <-[>]>* '>' ]?
+        | <ident> [ ':sym<' $<sym>=[<-[>]>*] '>' | ':sym«' $<sym>=[<-[»]>*] '»' ]?
         ]
     }
 

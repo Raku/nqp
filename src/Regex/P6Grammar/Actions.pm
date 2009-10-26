@@ -10,6 +10,11 @@ method TOP($/) {
 }
 
 
+method longname($/) {
+    if $<sym> { make ~$<ident> ~ ':sym<' ~ ~$<sym>[0] ~ '>'; }
+}
+
+
 method grammar_stmt($/) {
     my @ns := Regex::P6Grammar::Compiler.parse_name( ~$<name> );
     my $past := PAST::Block.new( :namespace(@ns), :node($/) );
@@ -31,7 +36,7 @@ method regex_stmt($/, $key?) {
     my @MODIFIERS := Q:PIR { 
         %r = get_hll_global ['Regex';'P6Regex';'Actions'], '@MODIFIERS'
     };
-    my $name := ~$<longname>;
+    my $name := ~$<longname>.ast;
     if $key eq 'open' {
         my %h;
         if $<sym> eq 'token' { %h<r> := 1; }
