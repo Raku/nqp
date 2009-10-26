@@ -17,20 +17,20 @@ Regex::P6Grammar - scaffolding compiler for NQP / Perl 6 grammars
 ### .include 'gen/p6grammar-grammar.pir'
 
 .namespace ["Regex";"P6Grammar";"Grammar"]
-.sub "_block11"  :subid("10_1256533478.94202")
+.sub "_block11"  :subid("10_1256575584.96964")
 .annotate "line", 0
-    .const 'Sub' $P50 = "19_1256533478.94202" 
+    .const 'Sub' $P50 = "19_1256575584.96964" 
     capture_lex $P50
-    .const 'Sub' $P36 = "17_1256533478.94202" 
+    .const 'Sub' $P36 = "17_1256575584.96964" 
     capture_lex $P36
-    .const 'Sub' $P27 = "15_1256533478.94202" 
+    .const 'Sub' $P27 = "15_1256575584.96964" 
     capture_lex $P27
-    .const 'Sub' $P21 = "13_1256533478.94202" 
+    .const 'Sub' $P21 = "13_1256575584.96964" 
     capture_lex $P21
-    .const 'Sub' $P13 = "11_1256533478.94202" 
+    .const 'Sub' $P13 = "11_1256575584.96964" 
     capture_lex $P13
 .annotate "line", 19
-    .const 'Sub' $P50 = "19_1256533478.94202" 
+    .const 'Sub' $P50 = "19_1256575584.96964" 
     capture_lex $P50
 .annotate "line", 1
     .return ($P50)
@@ -38,7 +38,7 @@ Regex::P6Grammar - scaffolding compiler for NQP / Perl 6 grammars
 
 
 .namespace ["Regex";"P6Grammar";"Grammar"]
-.sub "" :load :init :subid("post21") :outer("10_1256533478.94202")
+.sub "" :load :init :subid("post21") :outer("10_1256575584.96964")
 .annotate "line", 0
     get_hll_global $P12, ["Regex";"P6Grammar";"Grammar"], "_block11" 
     .local pmc block
@@ -50,7 +50,7 @@ Regex::P6Grammar - scaffolding compiler for NQP / Perl 6 grammars
 
 
 .namespace ["Regex";"P6Grammar";"Grammar"]
-.sub "TOP"  :subid("11_1256533478.94202") :method :outer("10_1256533478.94202")
+.sub "TOP"  :subid("11_1256575584.96964") :method :outer("10_1256575584.96964")
 .annotate "line", 3
     .local string rx14_tgt
     .local int rx14_pos
@@ -125,7 +125,7 @@ Regex::P6Grammar - scaffolding compiler for NQP / Perl 6 grammars
 
 
 .namespace ["Regex";"P6Grammar";"Grammar"]
-.sub "!PREFIX__TOP"  :subid("12_1256533478.94202") :method
+.sub "!PREFIX__TOP"  :subid("12_1256575584.96964") :method
 .annotate "line", 3
     $P16 = self."!PREFIX__!subrule"("grammar_stmt", "")
     new $P17, "ResizablePMCArray"
@@ -135,7 +135,7 @@ Regex::P6Grammar - scaffolding compiler for NQP / Perl 6 grammars
 
 
 .namespace ["Regex";"P6Grammar";"Grammar"]
-.sub "name"  :subid("13_1256533478.94202") :method :outer("10_1256533478.94202")
+.sub "name"  :subid("13_1256575584.96964") :method :outer("10_1256575584.96964")
 .annotate "line", 9
     .local string rx22_tgt
     .local int rx22_pos
@@ -190,7 +190,7 @@ Regex::P6Grammar - scaffolding compiler for NQP / Perl 6 grammars
 
 
 .namespace ["Regex";"P6Grammar";"Grammar"]
-.sub "!PREFIX__name"  :subid("14_1256533478.94202") :method
+.sub "!PREFIX__name"  :subid("14_1256575584.96964") :method
 .annotate "line", 9
     new $P24, "ResizablePMCArray"
     push $P24, ""
@@ -199,7 +199,7 @@ Regex::P6Grammar - scaffolding compiler for NQP / Perl 6 grammars
 
 
 .namespace ["Regex";"P6Grammar";"Grammar"]
-.sub "longname"  :subid("15_1256533478.94202") :method :outer("10_1256533478.94202")
+.sub "longname"  :subid("15_1256575584.96964") :method :outer("10_1256575584.96964")
 .annotate "line", 11
     .local string rx28_tgt
     .local int rx28_pos
@@ -276,7 +276,7 @@ Regex::P6Grammar - scaffolding compiler for NQP / Perl 6 grammars
 
 
 .namespace ["Regex";"P6Grammar";"Grammar"]
-.sub "!PREFIX__longname"  :subid("16_1256533478.94202") :method
+.sub "!PREFIX__longname"  :subid("16_1256575584.96964") :method
 .annotate "line", 11
     $P30 = self."!PREFIX__!subrule"("ident", "")
     new $P31, "ResizablePMCArray"
@@ -286,7 +286,7 @@ Regex::P6Grammar - scaffolding compiler for NQP / Perl 6 grammars
 
 
 .namespace ["Regex";"P6Grammar";"Grammar"]
-.sub "grammar_stmt"  :subid("17_1256533478.94202") :method :outer("10_1256533478.94202")
+.sub "grammar_stmt"  :subid("17_1256575584.96964") :method :outer("10_1256575584.96964")
 .annotate "line", 17
     .local string rx37_tgt
     .local int rx37_pos
@@ -403,7 +403,7 @@ Regex::P6Grammar - scaffolding compiler for NQP / Perl 6 grammars
 
 
 .namespace ["Regex";"P6Grammar";"Grammar"]
-.sub "!PREFIX__grammar_stmt"  :subid("18_1256533478.94202") :method
+.sub "!PREFIX__grammar_stmt"  :subid("18_1256575584.96964") :method
 .annotate "line", 17
     new $P39, "ResizablePMCArray"
     push $P39, ""
@@ -412,7 +412,7 @@ Regex::P6Grammar - scaffolding compiler for NQP / Perl 6 grammars
 
 
 .namespace ["Regex";"P6Grammar";"Grammar"]
-.sub "regex_stmt"  :subid("19_1256533478.94202") :method :outer("10_1256533478.94202")
+.sub "regex_stmt"  :subid("19_1256575584.96964") :method :outer("10_1256575584.96964")
 .annotate "line", 19
     .local string rx51_tgt
     .local int rx51_pos
@@ -687,7 +687,7 @@ Regex::P6Grammar - scaffolding compiler for NQP / Perl 6 grammars
 
 
 .namespace ["Regex";"P6Grammar";"Grammar"]
-.sub "!PREFIX__regex_stmt"  :subid("20_1256533478.94202") :method
+.sub "!PREFIX__regex_stmt"  :subid("20_1256575584.96964") :method
 .annotate "line", 19
     new $P53, "ResizablePMCArray"
     push $P53, ""
@@ -697,7 +697,7 @@ Regex::P6Grammar - scaffolding compiler for NQP / Perl 6 grammars
 ### .include 'gen/p6grammar-actions.pir'
 
 .namespace []
-.sub "_block11"  :anon :subid("10_1256533479.7394")
+.sub "_block11"  :anon :subid("10_1256575585.77264")
 .annotate "line", 3
     get_hll_global $P14, ["Regex";"P6Grammar";"Actions"], "_block13" 
 .annotate "line", 1
@@ -706,18 +706,18 @@ Regex::P6Grammar - scaffolding compiler for NQP / Perl 6 grammars
 
 
 .namespace ["Regex";"P6Grammar";"Actions"]
-.sub "_block13" :init :load :subid("11_1256533479.7394")
+.sub "_block13" :init :load :subid("11_1256575585.77264")
 .annotate "line", 3
-    .const 'Sub' $P83 = "15_1256533479.7394" 
+    .const 'Sub' $P83 = "15_1256575585.77264" 
     capture_lex $P83
-    .const 'Sub' $P44 = "14_1256533479.7394" 
+    .const 'Sub' $P44 = "14_1256575585.77264" 
     capture_lex $P44
-    .const 'Sub' $P16 = "12_1256533479.7394" 
+    .const 'Sub' $P16 = "12_1256575585.77264" 
     capture_lex $P16
 $P15 = get_root_global ["parrot"], "P6metaclass"
     $P15."new_class"("Regex::P6Grammar::Actions", "Regex::P6Regex::Actions" :named("parent"))
 .annotate "line", 30
-    .const 'Sub' $P83 = "15_1256533479.7394" 
+    .const 'Sub' $P83 = "15_1256575585.77264" 
     capture_lex $P83
 .annotate "line", 3
     .return ($P83)
@@ -725,10 +725,10 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Grammar";"Actions"]
-.sub "TOP"  :subid("12_1256533479.7394") :method :outer("11_1256533479.7394")
+.sub "TOP"  :subid("12_1256575585.77264") :method :outer("11_1256575585.77264")
     .param pmc param_19
 .annotate "line", 3
-    .const 'Sub' $P29 = "13_1256533479.7394" 
+    .const 'Sub' $P29 = "13_1256575585.77264" 
     capture_lex $P29
     new $P18, 'ExceptionHandler'
     set_addr $P18, control_17
@@ -761,7 +761,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     unless $P23, loop35_done
     shift $P27, $P23
   loop35_redo:
-    .const 'Sub' $P29 = "13_1256533479.7394" 
+    .const 'Sub' $P29 = "13_1256575585.77264" 
     capture_lex $P29
     $P29($P27)
   loop35_next:
@@ -804,7 +804,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Grammar";"Actions"]
-.sub "_block28"  :anon :subid("13_1256533479.7394") :outer("12_1256533479.7394")
+.sub "_block28"  :anon :subid("13_1256575585.77264") :outer("12_1256575585.77264")
     .param pmc param_30
 .annotate "line", 5
     .lex "$_", param_30
@@ -825,7 +825,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Grammar";"Actions"]
-.sub "grammar_stmt"  :subid("14_1256533479.7394") :method :outer("11_1256533479.7394")
+.sub "grammar_stmt"  :subid("14_1256575585.77264") :method :outer("11_1256575585.77264")
     .param pmc param_47
 .annotate "line", 13
     new $P46, 'ExceptionHandler'
@@ -939,16 +939,16 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Grammar";"Actions"]
-.sub "regex_stmt"  :subid("15_1256533479.7394") :method :outer("11_1256533479.7394")
+.sub "regex_stmt"  :subid("15_1256575585.77264") :method :outer("11_1256575585.77264")
     .param pmc param_86
     .param pmc param_87 :optional
     .param int has_param_87 :opt_flag
 .annotate "line", 30
-    .const 'Sub' $P154 = "20_1256533479.7394" 
+    .const 'Sub' $P154 = "20_1256575585.77264" 
     capture_lex $P154
-    .const 'Sub' $P130 = "19_1256533479.7394" 
+    .const 'Sub' $P130 = "19_1256575585.77264" 
     capture_lex $P130
-    .const 'Sub' $P99 = "16_1256533479.7394" 
+    .const 'Sub' $P99 = "16_1256575585.77264" 
     capture_lex $P99
     new $P85, 'ExceptionHandler'
     set_addr $P85, control_84
@@ -984,7 +984,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     set $S96, $P95
     iseq $I97, $S96, "open"
     unless $I97, if_94_end
-    .const 'Sub' $P99 = "16_1256533479.7394" 
+    .const 'Sub' $P99 = "16_1256575585.77264" 
     capture_lex $P99
     $P99()
   if_94_end:
@@ -999,13 +999,13 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
   vivify_51:
     if $P128, if_126
 .annotate "line", 74
-    .const 'Sub' $P154 = "20_1256533479.7394" 
+    .const 'Sub' $P154 = "20_1256575585.77264" 
     capture_lex $P154
     $P154()
     goto if_126_end
   if_126:
 .annotate "line", 47
-    .const 'Sub' $P130 = "19_1256533479.7394" 
+    .const 'Sub' $P130 = "19_1256575585.77264" 
     capture_lex $P130
     $P130()
   if_126_end:
@@ -1028,11 +1028,11 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Grammar";"Actions"]
-.sub "_block98"  :anon :subid("16_1256533479.7394") :outer("15_1256533479.7394")
+.sub "_block98"  :anon :subid("16_1256575585.77264") :outer("15_1256575585.77264")
 .annotate "line", 35
-    .const 'Sub' $P116 = "18_1256533479.7394" 
+    .const 'Sub' $P116 = "18_1256575585.77264" 
     capture_lex $P116
-    .const 'Sub' $P107 = "17_1256533479.7394" 
+    .const 'Sub' $P107 = "17_1256575585.77264" 
     capture_lex $P107
 .annotate "line", 36
     new $P100, "Hash"
@@ -1046,7 +1046,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     set $S104, $P103
     iseq $I105, $S104, "token"
     unless $I105, if_101_end
-    .const 'Sub' $P107 = "17_1256533479.7394" 
+    .const 'Sub' $P107 = "17_1256575585.77264" 
     capture_lex $P107
     $P107()
   if_101_end:
@@ -1059,7 +1059,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
     set $S113, $P112
     iseq $I114, $S113, "rule"
     unless $I114, if_110_end
-    .const 'Sub' $P116 = "18_1256533479.7394" 
+    .const 'Sub' $P116 = "18_1256575585.77264" 
     capture_lex $P116
     $P116()
   if_110_end:
@@ -1091,7 +1091,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Grammar";"Actions"]
-.sub "_block106"  :anon :subid("17_1256533479.7394") :outer("16_1256533479.7394")
+.sub "_block106"  :anon :subid("17_1256575585.77264") :outer("16_1256575585.77264")
 .annotate "line", 37
     new $P108, "Integer"
     assign $P108, 1
@@ -1106,7 +1106,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Grammar";"Actions"]
-.sub "_block115"  :anon :subid("18_1256533479.7394") :outer("16_1256533479.7394")
+.sub "_block115"  :anon :subid("18_1256575585.77264") :outer("16_1256575585.77264")
 .annotate "line", 38
     new $P117, "Integer"
     assign $P117, 1
@@ -1129,7 +1129,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Grammar";"Actions"]
-.sub "_block153"  :anon :subid("20_1256533479.7394") :outer("15_1256533479.7394")
+.sub "_block153"  :anon :subid("20_1256575585.77264") :outer("15_1256575585.77264")
 .annotate "line", 75
     find_lex $P155, "$/"
     set $P156, $P155["nibbler"]
@@ -1203,7 +1203,7 @@ $P15 = get_root_global ["parrot"], "P6metaclass"
 
 
 .namespace ["Regex";"P6Grammar";"Actions"]
-.sub "_block129"  :anon :subid("19_1256533479.7394") :outer("15_1256533479.7394")
+.sub "_block129"  :anon :subid("19_1256575585.77264") :outer("15_1256575585.77264")
 .annotate "line", 49
     get_hll_global $P131, ["PAST"], "Stmts"
 .annotate "line", 50
