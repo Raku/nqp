@@ -105,6 +105,16 @@ method statement_control:sym<repeat>($/) {
     make $past;
 }
 
+method statement_control:sym<for>($/) {
+    my $past := $<xblock>.ast;
+    $past.pasttype('for');
+    my $block := $past[1];
+    $block[0].push( PAST::Var.new( :name('$_'), :scope('parameter') ) );
+    $block.symbol('$_', :scope('lexical') );
+    $block.arity(1);
+    make $past;
+}
+
 ## Terms
 
 method noun:sym<variable>($/) { make $<variable>.ast; }

@@ -82,6 +82,11 @@ token statement_control:sym<repeat> {
     ]
 }
 
+token statement_control:sym<for> {
+    <sym> :s
+    <xblock>
+}
+
 ## Terms
 
 token noun:sym<variable>           { <variable> }
