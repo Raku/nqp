@@ -160,8 +160,10 @@ token postcircumfix:sym<[ ]> {
     <O('%methodop')>
 }
 
-token prefix:sym<-->  { <sym>  <O('%autoincrement')> }
-token postfix:sym<++> { <sym>  <O('%autoincrement')> }
+token prefix:sym<++>  { <sym>  <O('%autoincrement, :pirop<inc>')> }
+token prefix:sym<-->  { <sym>  <O('%autoincrement, :pirop<dec>')> }
+token postfix:sym<++> { <sym>  <O('%autoincrement')> }   # see Actions.pm
+token postfix:sym<--> { <sym>  <O('%autoincrement')> }   # see Actions.pm
 
 token infix:sym<**>   { <sym>  <O('%exponentiation, :pirop<pow>')> }
 

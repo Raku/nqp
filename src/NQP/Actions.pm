@@ -227,3 +227,15 @@ NQP::Grammar.O(':prec<f=>, :assoc<list>',  '%list_infix');
 method nulltermish($/) {
     make $<noun> ?? $<noun>.ast !! 0;
 }
+
+method postfix:sym<++>($/) {
+    make PAST::Op.new( :name('postfix:<++>'),
+                       :inline('    clone %r, %0', '    inc %0'),
+                       :pasttype('inline') );
+}
+
+method postfix:sym<-->($/) {
+    make PAST::Op.new( :name('postfix:<-->'),
+                       :inline('    clone %r, %0', '    dec %0'),
+                       :pasttype('inline') );
+}
