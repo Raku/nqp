@@ -171,7 +171,7 @@ token circumfix:sym<{ }> { <?[{]> <pblock> }
 ## Operators
 
 token nulltermish { 
-    | <OPER=noun=noun> 
+    | <OPER=noun=termish> 
     | <?>
 }
 
