@@ -18,7 +18,7 @@ method statementlist($/) {
         for $<statement> { 
             my $ast := $_.ast;
             if $ast.isa(PAST::Block) && !$ast.blocktype {
-                $ast.blocktype('immediate');
+                $ast := block_immediate($ast);
             }
             $past.push( $ast ); 
         }
@@ -35,9 +35,7 @@ method statement($/) {
 }
 
 method xblock($/) {
-    my $pblock := $<pblock>.ast;
-    $pblock.blocktype('immediate');
-    make PAST::Op.new( $<EXPR>.ast, $pblock, :pasttype('if'), :node($/) );
+    make PAST::Op.new( $<EXPR>.ast, $<pblock>.ast, :pasttype('if'), :node($/) );
 }
 
 method pblock($/) {
@@ -61,30 +59,28 @@ method newpad($/) {
 
 method statement_control:sym<if>($/) {
     my $count := +$<xblock> - 1;
-    my $past := $<xblock>[$count].ast;
+    my $past := xblock_immediate( $<xblock>[$count].ast );
     if $<else> {
-        my $else := $<else>[0].ast;
-        $else.blocktype('immediate');
-        $past.push($else);
+        $past.push( block_immediate( $<else>[0].ast ) );
     }
     # build if/then/elsif structure
     while $count > 0 {
         $count--;
         my $else := $past;
-        $past := $<xblock>[$count].ast;
+        $past := xblock_immediate( $<xblock>[$count].ast );
         $past.push($else);
     }
     make $past;
 }
 
 method statement_control:sym<unless>($/) {
-    my $past := $<xblock>.ast;
+    my $past := xblock_immediate( $<xblock>.ast );
     $past.pasttype('unless');
     make $past;
 }
 
 method statement_control:sym<while>($/) {
-    my $past := $<xblock>.ast;
+    my $past := xblock_immediate( $<xblock>.ast );
     $past.pasttype(~$<sym>);
     make $past;
 }
@@ -93,13 +89,11 @@ method statement_control:sym<repeat>($/) {
     my $pasttype := 'repeat_' ~ ~$<wu>;
     my $past;
     if $<xblock> { 
-        $past := $<xblock>.ast;
+        $past := xblock_immediate( $<xblock>.ast );
         $past.pasttype($pasttype);
     }
     else {
-        $past := $<pblock>.ast;
-        $past.blocktype('immediate');
-        $past := PAST::Op.new( $<EXPR>.ast, $past, 
+        $past := PAST::Op.new( $<EXPR>.ast, block_immediate( $<pblock>.ast ),
                                :pasttype($pasttype), :node($/) );
     }
     make $past;
@@ -112,6 +106,7 @@ method statement_control:sym<for>($/) {
     $block[0].push( PAST::Var.new( :name('$_'), :scope('parameter') ) );
     $block.symbol('$_', :scope('lexical') );
     $block.arity(1);
+    $block.blocktype('immediate');
     make $past;
 }
 
@@ -331,6 +326,21 @@ method postfix:sym<-->($/) {
     make PAST::Op.new( :name('postfix:<-->'),
                        :inline('    clone %r, %0', '    dec %0'),
                        :pasttype('inline') );
+}
+
+sub xblock_immediate($xblock) {
+    $xblock[1] := block_immediate($xblock[1]);
+    $xblock;
+}
+
+sub block_immediate($block) {
+    $block.blocktype('immediate');
+    unless $block.symtable() {
+        my $stmts := PAST::Stmts.new( :node($block) );
+        for $block.list { $stmts.push($_); }
+        $block := $stmts;
+    }
+    $block;
 }
 
 sub sigiltype($sigil) {
