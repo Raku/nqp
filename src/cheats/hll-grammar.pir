@@ -208,6 +208,7 @@ of the match.
     target = getattribute self, '$!target'
 
     $I1 = target.'lineof'(pos)
+    inc $I1
     push args, ' at line '
     push args, $I1
 
