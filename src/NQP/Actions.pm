@@ -255,6 +255,11 @@ method quote:sym<dblq>($/) { make $<quote_EXPR>.ast; }
 method quote:sym<qq>($/)   { make $<quote_EXPR>.ast; }
 method quote:sym<q>($/)    { make $<quote_EXPR>.ast; }
 method quote:sym<Q>($/)    { make $<quote_EXPR>.ast; }
+method quote:sym<Q:PIR>($/) {
+    make PAST::Op.new( :inline( $<quote_EXPR>.ast.value ),
+                       :pasttype('inline'),
+                       :node($/) );
+}
 
 ## Operators
 
