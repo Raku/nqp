@@ -180,6 +180,16 @@ token postcircumfix:sym<[ ]> {
     <O('%methodop')>
 }
 
+token postcircumfix:sym<{ }> {
+    '{' <EXPR> '}'
+    <O('%methodop')>
+}
+
+token postcircumfix:sym<ang> {
+    <?[<]> <quote_EXPR: ':q'>
+    <O('%methodop')>
+}
+
 token prefix:sym<++>  { <sym>  <O('%autoincrement, :pirop<inc>')> }
 token prefix:sym<-->  { <sym>  <O('%autoincrement, :pirop<dec>')> }
 token postfix:sym<++> { <sym>  <O('%autoincrement')> }   # see Actions.pm

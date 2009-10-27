@@ -155,7 +155,10 @@ method variable_declarator($/) {
     }
     $past.scope('lexical');
     $past.isdecl(1);
-    $past.viviself('Undef');
+    my $sigil := $<variable><sigil>;
+    $past.viviself( $sigil eq '%' 
+                    ?? 'Hash'
+                    !! ($sigil eq '@' ?? 'ResizablePMCArray' !! 'Undef') );
     @BLOCK[0].symbol( $name, :scope('lexical') );
     make $past;
 }
@@ -222,7 +225,21 @@ method circumfix:sym<ang>($/) { make $<quote_EXPR>.ast; }
 method circumfix:sym<{ }>($/) { make $<pblock>.ast; }
 
 method postcircumfix:sym<[ ]>($/) {
-    make PAST::Var.new( $<EXPR>.ast , :scope('keyed_int') );
+    make PAST::Var.new( $<EXPR>.ast , :scope('keyed_int'),
+                        :viviself('Undef'),
+                        :vivibase('ResizablePMCArray') );
+}
+
+method postcircumfix:sym<{ }>($/) {
+    make PAST::Var.new( $<EXPR>.ast , :scope('keyed'),
+                        :viviself('Undef'),
+                        :vivibase('Hash') );
+}
+
+method postcircumfix:sym<ang>($/) {
+    make PAST::Var.new( $<quote_EXPR>.ast, :scope('keyed'),
+                        :viviself('Undef'),
+                        :vivibase('Hash') );
 }
 
 method value($/) {
