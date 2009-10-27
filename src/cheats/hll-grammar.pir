@@ -424,6 +424,13 @@ An operator precedence parser.
 =cut
 
 .sub 'EXPR' :method
+    .param string preclim      :optional
+    .param int has_preclim     :opt_flag
+
+    if has_preclim goto have_preclim
+    preclim = ''
+  have_preclim:
+
     .const 'Sub' reduce = 'EXPR_reduce'
     .local string termish
     termish = 'termish'
@@ -520,6 +527,7 @@ An operator precedence parser.
     .local string inprec, inassoc, opprec
     inprec = inO['prec']
     unless inprec goto err_inprec
+    if inprec <= preclim goto term_done
     inassoc = inO['assoc']
 
   reduce_loop:
@@ -591,6 +599,10 @@ An operator precedence parser.
     left = pop termstack
     op[0] = left
     op[1] = right
+    $S0 = opO['reducecheck']
+    unless $S0 goto op_infix_1
+    self.$S0(op)
+  op_infix_1:
     self.'!reduce'('EXPR', 'INFIX', op)
     goto done
 

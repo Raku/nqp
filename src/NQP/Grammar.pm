@@ -1,6 +1,8 @@
 grammar NQP::Grammar is HLL::Grammar;
 
-token TOP { <comp_unit> }
+token TOP { 
+    <comp_unit> 
+}
 
 token comp_unit { 
     <.newpad>
@@ -218,6 +220,14 @@ token infix:sym<&&>   { <sym>  <O('%tight_and, :pasttype<if>')> }
 
 token infix:sym<||>   { <sym>  <O('%tight_or, :pasttype<unless>')> }
 token infix:sym<//>   { <sym>  <O('%tight_or, :pasttype<def_or>')> }
+
+token infix:sym<?? !!> { 
+    '??'
+    <.ws>
+    <EXPR('i=')>
+    '!!'
+    <O('%conditional, :reducecheck<ternary>, :pasttype<if>')> 
+}
 
 token infix:sym<:=>   { <sym>  <O('%assignment, :pasttype<bind>')> }
 token infix:sym<::=>  { <sym>  <O('%assignment, :pasttype<bind>')> }

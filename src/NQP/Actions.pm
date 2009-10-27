@@ -252,6 +252,7 @@ NQP::Grammar.O(':prec<r=>, :assoc<list>',  '%concatenation');
 NQP::Grammar.O(':prec<m=>, :assoc<left>',  '%relational');
 NQP::Grammar.O(':prec<l=>, :assoc<left>',  '%tight_and');
 NQP::Grammar.O(':prec<k=>, :assoc<left>',  '%tight_or');
+NQP::Grammar.O(':prec<j=>, :assoc<right>', '%conditional');
 NQP::Grammar.O(':prec<i=>, :assoc<right>', '%assignment');
 NQP::Grammar.O(':prec<g=>, :assoc<list>, :nextterm<nulltermish>',  '%comma');
 NQP::Grammar.O(':prec<f=>, :assoc<list>',  '%list_infix');
