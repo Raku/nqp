@@ -160,9 +160,7 @@ method variable_declarator($/) {
     $past.scope('lexical');
     $past.isdecl(1);
     my $sigil := $<variable><sigil>;
-    $past.viviself( $sigil eq '%' 
-                    ?? 'Hash'
-                    !! ($sigil eq '@' ?? 'ResizablePMCArray' !! 'Undef') );
+    $past.viviself( sigiltype($sigil) );
     @BLOCK[0].symbol( $name, :scope('lexical') );
     make $past;
 }
@@ -190,13 +188,48 @@ method signature($/) {
     for $<parameter> { $BLOCKINIT.push($_.ast); }
 }
 
-method parameter($/) { make $<param_var>.ast; }
+method parameter($/) { 
+    my $quant := $<quant>;
+    my $past;
+    if $<named_param> {
+        $past := $<named_param>.ast;
+        if $quant ne '!' { 
+            $past.viviself( sigiltype($<named_param><param_var><sigil>) );
+        }
+    }
+    else {
+        $past := $<param_var>.ast;
+        if $quant eq '*' {
+            $past.slurpy(1);
+            $past.named( $<param_var><sigil> eq '%' );
+        }
+        elsif $quant eq '?' {
+            $past.viviself( sigiltype($<param_var><sigil>) );
+        }
+    }
+    if $<default_value> { 
+        if $quant eq '*' { 
+            $/.CURSOR.panic("Can't put default on slurpy parameter");
+        }
+        if $quant eq '!' { 
+            $/.CURSOR.panic("Can't put default on required parameter");
+        }
+        $past.viviself( $<default_value>[0]<EXPR>.ast ); 
+    }
+    make $past; 
+}
 
 method param_var($/) {
-    my $past := $<variable>.ast;
-    $past.isdecl(1);
-    $past.scope('parameter');
-    @BLOCK[0].symbol($past.name, :scope('lexical') );
+    my $name := ~$/;
+    my $past :=  PAST::Var.new( :name($name), :scope('parameter'), 
+                                :isdecl(1), :node($/) );
+    @BLOCK[0].symbol($name, :scope('lexical') );
+    make $past;
+}
+
+method named_param($/) {
+    my $past := $<param_var>.ast;
+    $past.named( ~$<param_var><name> );
     make $past;
 }
 
@@ -298,4 +331,10 @@ method postfix:sym<-->($/) {
     make PAST::Op.new( :name('postfix:<-->'),
                        :inline('    clone %r, %0', '    dec %0'),
                        :pasttype('inline') );
+}
+
+sub sigiltype($sigil) {
+    $sigil eq '%' 
+    ?? 'Hash' 
+    !! ($sigil eq '@' ?? 'ResizablePMCArray' !! 'Undef');
 }

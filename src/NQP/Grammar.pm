@@ -132,9 +132,24 @@ rule routine_def {
 
 token signature { [ [<.ws><parameter><.ws>] ** ',' ]? }
 
-token parameter { <param_var> }
+token parameter { 
+    [
+    | $<quant>=['*'] <param_var>
+    | [ <param_var> | <named_param> ] $<quant>=['?'|'!'|<?>]
+    ]
+    <default_value>?
+}
 
-token param_var { <variable> }
+token param_var { 
+    <sigil> <twigil>?
+    [ <name=ident> | $<name>=[<[/!]>] ]
+}
+
+token named_param {
+    ':' <param_var>
+}
+
+rule default_value { '=' <EXPR('i=')> }
 
 proto token term { <...> }
 
