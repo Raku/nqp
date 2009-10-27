@@ -115,6 +115,10 @@ method statement_control:sym<for>($/) {
     make $past;
 }
 
+method statement_control:sym<return>($/) {
+    make PAST::Op.new( $<EXPR>.ast, :pasttype('return'), :node($/) );
+}
+
 ## Terms
 
 method noun:sym<variable>($/) { make $<variable>.ast; }
@@ -168,6 +172,7 @@ method routine_declarator:sym<sub>($/) { make $<routine_def>.ast; }
 method routine_def($/) {
     my $past := $<blockoid>.ast;
     $past.blocktype('declaration');
+    $past.control('return_pir');
     if $<deflongname> {
         my $name := ~$<deflongname>[0];
         $past.name($name);

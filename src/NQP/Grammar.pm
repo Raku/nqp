@@ -89,6 +89,11 @@ token statement_control:sym<for> {
     <xblock>
 }
 
+token statement_control:sym<return> {
+    <sym> :s 
+    [ <EXPR> || <.panic: 'return requires an expression argument'> ]
+}
+
 ## Terms
 
 token noun:sym<variable>           { <variable> }
