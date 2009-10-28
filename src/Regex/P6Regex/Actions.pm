@@ -1,11 +1,15 @@
 class Regex::P6Regex::Actions;
 
 ## this will eventually be handled using contextuals
-our @MODIFIERS := Q:PIR { 
+our @MODIFIERS;
+
+sub INIT() {
+    @MODIFIERS := Q:PIR { 
         %r = new ['ResizablePMCArray'] 
         $P0 = new ['Hash']
         push %r, $P0
     };
+}
 
 method arg($/) {
     make $<quote> ?? ~$<quote><val> !! +$<val>;
