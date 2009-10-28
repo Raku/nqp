@@ -114,6 +114,16 @@ method statement_control:sym<return>($/) {
     make PAST::Op.new( $<EXPR>.ast, :pasttype('return'), :node($/) );
 }
 
+method statement_control:sym<make>($/) {
+    make PAST::Op.new(
+             PAST::Var.new( :name('$/'), :scope('contextual') ),
+             $<EXPR>.ast,
+             :pasttype('callmethod'),
+             :name('!make'),
+             :node($/)
+    );
+}
+
 ## Terms
 
 method noun:sym<colonpair>($/)          { make $<colonpair>.ast; }
@@ -132,7 +142,7 @@ method colonpair($/) {
 
 method variable($/) {
     my $past := PAST::Var.new( :name(~$/) );
-    if $<twigil>[0] eq '*' { 
+    if $<twigil> && $<twigil>[0] eq '*' { 
         $past.scope('contextual'); 
         $past.viviself(
             PAST::Op.new( 'Contextual ' ~ ~$/ ~ ' not found', :pirop('die') )

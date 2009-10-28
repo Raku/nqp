@@ -104,6 +104,11 @@ token statement_control:sym<return> {
     [ <EXPR> || <.panic: 'return requires an expression argument'> ]
 }
 
+token statement_control:sym<make> {
+    <sym> :s 
+    [ <EXPR> || <.panic: 'make requires an expression argument'> ]
+}
+
 ## Terms
 
 token noun:sym<colonpair>          { <colonpair> }
@@ -121,7 +126,8 @@ token colonpair {
 }
 
 token variable {
-    <sigil> <twigil>? <desigilname=ident>
+    | <sigil> <twigil>? <desigilname=ident>
+    | $<sigil>=['$'] $<desigilname>=[<[/_!]>]
 }
 
 token sigil { <[$@%&]> }
