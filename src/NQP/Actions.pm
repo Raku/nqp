@@ -121,7 +121,14 @@ method noun:sym<scope_declarator>($/) { make $<scope_declarator>.ast; }
 method noun:sym<routine_declarator>($/) { make $<routine_declarator>.ast; }
 
 method variable($/) {
-    make PAST::Var.new( :name(~$/) );
+    my $past := PAST::Var.new( :name(~$/) );
+    if $<twigil>[0] eq '*' { 
+        $past.scope('contextual'); 
+        $past.viviself(
+            PAST::Op.new( 'Contextual ' ~ ~$/ ~ ' not found', :pirop('die') )
+        );
+    }
+    make $past;
 }
 
 method scope_declarator:sym<my>($/) { make $<scoped>.ast; }
