@@ -20,7 +20,7 @@ grammar HLL::Grammar;
     token term:sym<circumfix> { <circumfix> }
 
     token infixish { <OPER=infix=infix> }
-    token prefixish { <OPER=prefix=prefix> }
+    token prefixish { <OPER=prefix=prefix> <.ws> }
     token postfixish { 
         | <OPER=postfix=postfix> 
         | <OPER=postcircumfix=postcircumfix>

@@ -280,12 +280,12 @@ token nulltermish {
 }
 
 token postcircumfix:sym<[ ]> { 
-    '[' <EXPR> ']' 
+    '[' <.ws> <EXPR> ']' 
     <O('%methodop')>
 }
 
 token postcircumfix:sym<{ }> {
-    '{' <EXPR> '}'
+    '{' <.ws> <EXPR> '}'
     <O('%methodop')>
 }
 
