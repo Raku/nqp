@@ -67,6 +67,12 @@ NQP_SOURCES = \
   src/NQP/Actions.pm \
   src/NQP/Compiler.pir \
 
+STAGE0_SOURCES = \
+  src/stage0/P6Regex-s0.pir \
+  src/stage0/P6Grammar-s0.pir \
+  src/stage0/HLLGrammar-s0.pir \
+  src/stage0/NQP-s0.pir
+
 STAGE0 = src/stage0
 STAGE1 = src/stage1
 STAGE2 = src/stage2
@@ -79,12 +85,16 @@ P6GRAMMAR_PBC   = P6Grammar.pbc
 P6GRAMMAR_G     = gen/p6grammar-grammar.pir
 P6GRAMMAR_A     = gen/p6grammar-actions.pir
 
-STAGE0_PBCS     = $(STAGE0)/$(P6REGEX_PBC) $(STAGE0)/$(P6GRAMMAR_PBC)
-STAGE1_PBCS     = $(STAGE1)/$(P6REGEX_PBC) $(STAGE1)/$(P6GRAMMAR_PBC)
-
 HLLGRAMMAR_PBC  = HLLGrammar.pbc
 
-NQP             = nqp$(EXE)
+NQP_PBC         = NQP.pbc
+NQP_G           = gen/nqp-grammar.pir
+NQP_A           = gen/nqp-actions.pir
+NQP_EXE         = nqp$(EXE)
+
+STAGE0_PBCS     = $(STAGE0)/$(P6REGEX_PBC) $(STAGE0)/$(P6GRAMMAR_PBC) $(STAGE0)/$(HLLGRAMMAR_PBC) $(STAGE0)/$(NQP_PBC)
+STAGE1_PBCS     = $(STAGE1)/$(P6REGEX_PBC) $(STAGE1)/$(P6GRAMMAR_PBC)
+
 
 CLEANUPS = \
   *.manifest \
@@ -112,13 +122,13 @@ stage0: $(STAGE0)
 stage1: $(STAGE1)
 stage2: $(STAGE2)
 
-$(STAGE0): $(STAGE0)/$(P6REGEX_PBC) $(STAGE0)/$(P6GRAMMAR_PBC)
+$(STAGE0): $(STAGE0_PBCS)
 
-$(STAGE0)/$(P6REGEX_PBC): src/stage0/P6Regex-s0.pir
-	$(PARROT) -o $(STAGE0)/$(P6REGEX_PBC) src/stage0/P6Regex-s0.pir
-
-$(STAGE0)/$(P6GRAMMAR_PBC): $(STAGE0)/$(P6REGEX_PBC) src/stage0/P6Grammar-s0.pir
-	$(PARROT) -o $(STAGE0)/$(P6GRAMMAR_PBC) src/stage0/P6Grammar-s0.pir
+$(STAGE0_PBCS): $(STAGE0_SOURCES)
+	$(PARROT) -o $(STAGE0)/$(P6REGEX_PBC)    src/stage0/P6Regex-s0.pir
+	$(PARROT) -o $(STAGE0)/$(P6GRAMMAR_PBC)  src/stage0/P6Grammar-s0.pir
+	$(PARROT) -o $(STAGE0)/$(HLLGRAMMAR_PBC) src/stage0/HLLGrammar-s0.pir
+	$(PARROT) -o $(STAGE0)/$(NQP_PBC)        src/stage0/NQP-s0.pir
 
 $(STAGE1): $(STAGE1)/$(P6REGEX_PBC) $(STAGE1)/$(P6GRAMMAR_PBC)
 
@@ -175,7 +185,6 @@ $(STAGE2)/$(P6GRAMMAR_PBC): $(STAGE1_PBCS) $(P6GRAMMAR_SOURCES)
 $(P6REGEX_PBC) $(P6GRAMMAR_PBC): $(STAGE2)/$(P6REGEX_PBC) $(STAGE2)/$(P6GRAMMAR_PBC)
 	$(CP) $(STAGE2)/$(P6REGEX_PBC) $(P6REGEX_PBC)
 	$(CP) $(STAGE2)/$(P6GRAMMAR_PBC) $(P6GRAMMAR_PBC)
-
 	
 P6Regex$(EXE): $(P6REGEX_PBC) $(PBC_TO_EXE)
 	$(PBC_TO_EXE) $(P6REGEX_PBC)
@@ -190,7 +199,7 @@ $(HLLGRAMMAR_PBC): $(P6GRAMMAR_PBC) $(P6REGEX_PBC) $(HLLGRAMMAR_SOURCES)
 	    src/HLL/Actions.pm >src/gen/hll-actions.pir
 	$(PARROT) -o HLLGrammar.pbc src/cheats/hll-grammar.pir
 
-$(NQP): $(HLLGRAMMAR_PBC) $(P6GRAMMAR_PBC) $(PARROT_NQP) $(PBC_TO_EXE) $(NQP_SOURCES)
+$(NQP_EXE): $(HLLGRAMMAR_PBC) $(P6GRAMMAR_PBC) $(PARROT_NQP) $(PBC_TO_EXE) $(NQP_SOURCES)
 	$(PARROT) $(P6GRAMMAR_PBC) --target=pir \
 	    src/NQP/Grammar.pm >src/gen/nqp-grammar.pir
 	$(PARROT_NQP) --target=pir \
@@ -198,10 +207,10 @@ $(NQP): $(HLLGRAMMAR_PBC) $(P6GRAMMAR_PBC) $(PARROT_NQP) $(PBC_TO_EXE) $(NQP_SOU
 	$(PARROT) -o nqp.pbc src/NQP/Compiler.pir
 	$(PBC_TO_EXE) nqp.pbc
 
-nqp-self: $(NQP)
-	./$(NQP) --target=pir --output=src/gen/nqp-grammar.pir \
+nqp-self: $(NQP_EXE)
+	./$(NQP_EXE) --target=pir --output=src/gen/nqp-grammar.pir \
 	    src/NQP/Grammar.pm
-	./$(NQP) --target=pir --output=src/gen/nqp-actions.pir \
+	./$(NQP_EXE) --target=pir --output=src/gen/nqp-actions.pir \
 	    src/NQP/Actions.pm
 	$(PARROT) -o nqp-self.pbc src/NQP/Compiler.pir
 	$(PBC_TO_EXE) nqp-self.pbc
