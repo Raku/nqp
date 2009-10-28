@@ -201,6 +201,8 @@ $(NQP): $(HLLGRAMMAR_PBC) $(P6GRAMMAR_PBC) $(PARROT_NQP) $(PBC_TO_EXE) $(NQP_SOU
 nqp-self: $(NQP)
 	./$(NQP) --target=pir --output=src/gen/nqp-grammar.pir \
 	    src/NQP/Grammar.pm
+	./$(NQP) --target=pir --output=src/gen/nqp-actions.pir \
+	    src/NQP/Actions.pm
 	$(PARROT) -o nqp-self.pbc src/NQP/Compiler.pir
 	$(PBC_TO_EXE) nqp-self.pbc
 
