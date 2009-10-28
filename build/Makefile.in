@@ -239,8 +239,8 @@ p6regex-test: $(P6REGEX_PBC)
 p6regex-test-loud: $(P6REGEX_PBC)
 	prove -r -v --exec $(PARROT) t/p6regex
 
-nqp-test: $(NQP)
-	prove -r --exec ./$(NQP) t/nqp
+nqp-test: $(NQP_EXE)
+	prove -r --exec ./$(NQP_EXE) t/nqp
 
 ## cleaning
 clean:
