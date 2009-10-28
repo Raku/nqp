@@ -84,6 +84,8 @@ STAGE1_PBCS     = $(STAGE1)/$(P6REGEX_PBC) $(STAGE1)/$(P6GRAMMAR_PBC)
 
 HLLGRAMMAR_PBC  = HLLGrammar.pbc
 
+NQP             = nqp$(EXE)
+
 CLEANUPS = \
   *.manifest \
   *.pdb \
@@ -188,13 +190,19 @@ $(HLLGRAMMAR_PBC): $(P6GRAMMAR_PBC) $(P6REGEX_PBC) $(HLLGRAMMAR_SOURCES)
 	    src/HLL/Actions.pm >src/gen/hll-actions.pir
 	$(PARROT) -o HLLGrammar.pbc src/cheats/hll-grammar.pir
 
-nqp$(EXE): $(HLLGRAMMAR_PBC) $(P6GRAMMAR_PBC) $(PARROT_NQP) $(PBC_TO_EXE) $(NQP_SOURCES)
+$(NQP): $(HLLGRAMMAR_PBC) $(P6GRAMMAR_PBC) $(PARROT_NQP) $(PBC_TO_EXE) $(NQP_SOURCES)
 	$(PARROT) $(P6GRAMMAR_PBC) --target=pir \
 	    src/NQP/Grammar.pm >src/gen/nqp-grammar.pir
 	$(PARROT_NQP) --target=pir \
 	    src/NQP/Actions.pm >src/gen/nqp-actions.pir
 	$(PARROT) -o nqp.pbc src/NQP/Compiler.pir
 	$(PBC_TO_EXE) nqp.pbc
+
+nqp-self: $(NQP)
+	./$(NQP) --target=pir --output=src/gen/nqp-grammar.pir \
+	    src/NQP/Grammar.pm
+	$(PARROT) -o nqp-self.pbc src/NQP/Compiler.pir
+	$(PBC_TO_EXE) nqp-self.pbc
 
 
 bootstrap: p6grammar
@@ -218,8 +226,8 @@ p6regex-test: $(P6REGEX_PBC)
 p6regex-test-loud: $(P6REGEX_PBC)
 	prove -r -v --exec $(PARROT) t/p6regex
 
-nqp-test: nqp$(EXE)
-	prove -r --exec ./nqp$(EXE) t/nqp
+nqp-test: $(NQP)
+	prove -r --exec ./$(NQP) t/nqp
 
 ## cleaning
 clean:
