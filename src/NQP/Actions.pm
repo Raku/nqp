@@ -174,10 +174,10 @@ method package_declarator:sym<class>($/) {
             :name('new_class'),
             :pasttype('callmethod')
         );
-    if $<package_def><parent> {
-        $classinit.push( PAST::Val.new( 
-                             :value( ~$<package_def><parent>[0] ),
-                             :named('parent') ) );
+    my $parent := ~$<package_def><parent>[0]
+                  || ($<sym> eq 'grammar' ?? 'Regex::Cursor' !! '');
+    if $parent {
+        $classinit.push( PAST::Val.new( :value($parent), :named('parent') ) );
     }
     @BLOCK[0].loadinit.push($classinit);
     make $<package_def>.ast;
@@ -317,6 +317,33 @@ method regex_declarator($/, $key?) {
             set_hll_global ['Regex';'P6Regex';'Actions'], '$REGEXNAME', $P0
         };
         return 0;
+    }
+    elsif $<proto> {
+        $past :=
+            PAST::Stmts.new(
+                PAST::Block.new( :name($name),
+                    PAST::Op.new(
+                        PAST::Var.new( :name('self'), :scope('register') ),
+                        $name,
+                        :name('!protoregex'),
+                        :pasttype('callmethod'),
+                    ),
+                    :blocktype('method'),
+                    :lexical(0),
+                    :node($/)
+                ),
+                PAST::Block.new( :name('!PREFIX__' ~ $name),
+                    PAST::Op.new(
+                        PAST::Var.new( :name('self'), :scope('register') ),
+                        $name,
+                        :name('!PREFIX__!protoregex'),
+                        :pasttype('callmethod'),
+                    ),
+                    :blocktype('method'),
+                    :lexical(0),
+                    :node($/)
+                )
+            );
     }
     else {
         my $rpast := $<p6regex_nibbler>.ast;

@@ -16,6 +16,10 @@ token deflongname {
     [ ':sym<' $<sym>=[<-[>]>*] '>' | ':sym«' $<sym>=[<-[»]>*] '»' ]?
 }
 
+token ENDSTMT {
+    [ \h* $$ <.ws> <?MARKER('endstmt')> ]?
+}
+
 ## Top-level rules
 
 token comp_unit { 
@@ -57,7 +61,7 @@ token pblock {
 token blockoid {
     <.finishpad>
     '{' ~ '}' <statementlist>
-    [ \h* $$ <.ws> <?MARKER('endstmt')> ]?
+    <.ENDSTMT>
 }
 
 token newpad { <?> }
@@ -142,7 +146,7 @@ token twigil { <[*]> }
 
 proto token package_declarator { <...> }
 token package_declarator:sym<module> { <sym> <package_def> }
-token package_declarator:sym<class>  { <sym> <package_def> }
+token package_declarator:sym<class>  { $<sym>=[class|grammar] <package_def> }
 
 rule package_def { 
     <name> 
@@ -200,11 +204,14 @@ rule default_value { '=' <EXPR('i=')> }
 
 rule regex_declarator {
     [
+    | $<proto>=[proto] [regex|token|rule] 
+      <deflongname> 
+      '{' '<...>' '}'<.ENDSTMT>
     | $<sym>=[regex|token|rule]
       <deflongname>
       <.newpad>
       {*} #= open
-      '{'<p6regex_nibbler>'}'
+      '{'<p6regex_nibbler>'}'<.ENDSTMT>
     ]
 }
 
@@ -291,8 +298,10 @@ token postfix:sym<.>  { <dotty> <O('%methodop')> }
 
 token prefix:sym<++>  { <sym>  <O('%autoincrement, :pirop<inc>')> }
 token prefix:sym<-->  { <sym>  <O('%autoincrement, :pirop<dec>')> }
-token postfix:sym<++> { <sym>  <O('%autoincrement')> }   # see Actions.pm
-token postfix:sym<--> { <sym>  <O('%autoincrement')> }   # see Actions.pm
+
+# see Actions.pm for postfix:<++> and postfix:<-->
+token postfix:sym<++> { <sym>  <O('%autoincrement')> }
+token postfix:sym<--> { <sym>  <O('%autoincrement')> }
 
 token infix:sym<**>   { <sym>  <O('%exponentiation, :pirop<pow>')> }
 
