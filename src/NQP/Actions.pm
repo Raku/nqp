@@ -116,9 +116,18 @@ method statement_control:sym<return>($/) {
 
 ## Terms
 
+method noun:sym<colonpair>($/) { make $<colonpair>.ast; }
 method noun:sym<variable>($/) { make $<variable>.ast; }
 method noun:sym<scope_declarator>($/) { make $<scope_declarator>.ast; }
 method noun:sym<routine_declarator>($/) { make $<routine_declarator>.ast; }
+
+method colonpair($/) {
+    my $past := $<circumfix> 
+                ?? $<circumfix>[0].ast 
+                !! PAST::Val.new( :value( !$<not> ) );
+    $past.named( ~$<identifier> );
+    make $past;
+}
 
 method variable($/) {
     my $past := PAST::Var.new( :name(~$/) );

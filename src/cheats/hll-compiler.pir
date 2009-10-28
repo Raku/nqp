@@ -20,7 +20,7 @@
 
     null parseactions
     $S0 = options['target']
-#    if $S0 == 'parse' goto have_parseactions
+    if $S0 == 'parse' goto have_parseactions
     parseactions = self.'parseactions'()
   have_parseactions:
 

@@ -4,6 +4,13 @@ token TOP {
     <comp_unit> 
 }
 
+## Lexer stuff
+
+token identifier { <ident> }
+
+
+## Top-level rules
+
 token comp_unit { 
     <.newpad>
     <statementlist> 
@@ -96,9 +103,18 @@ token statement_control:sym<return> {
 
 ## Terms
 
+token noun:sym<colonpair>          { <colonpair> }
 token noun:sym<variable>           { <variable> }
 token noun:sym<scope_declarator>   { <scope_declarator> }
 token noun:sym<routine_declarator> { <routine_declarator> }
+
+token colonpair {
+    ':' 
+    [ 
+    | $<not>='!' <identifier>
+    | <identifier> <circumfix>?
+    ]
+}
 
 token variable {
     <sigil> <twigil>? <desigilname=ident>
@@ -154,7 +170,7 @@ rule default_value { '=' <EXPR('i=')> }
 proto token term { <...> }
 
 token term:sym<identifier> {
-    <identifier=ident> <args>
+    <identifier> <args>
 }
 
 token args {
