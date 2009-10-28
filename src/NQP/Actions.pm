@@ -441,7 +441,7 @@ method term:sym<name>($/) {
     make $past;
 }
 
-method term:sym<PIR::op>($/) {
+method term:sym<pir::op>($/) {
     my $past := $<args> ?? $<args>[0].ast !! PAST::Op.new( :node($/) );
     my $pirop := ~$<op>;
     $pirop := Q:PIR {
