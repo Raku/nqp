@@ -4,9 +4,12 @@ token TOP {
     <comp_unit> 
 }
 
+
 ## Lexer stuff
 
 token identifier { <ident> }
+
+token name { <identifier> ** '::' }
 
 
 ## Top-level rules
@@ -105,6 +108,7 @@ token statement_control:sym<return> {
 
 token noun:sym<colonpair>          { <colonpair> }
 token noun:sym<variable>           { <variable> }
+token noun:sym<package_declarator> { <package_declarator> }
 token noun:sym<scope_declarator>   { <scope_declarator> }
 token noun:sym<routine_declarator> { <routine_declarator> }
 
@@ -123,6 +127,19 @@ token variable {
 token sigil { <[$@%&]> }
 
 token twigil { <[*]> }
+
+proto token package_declarator { <...> }
+token package_declarator:sym<module> { <sym> <package_def> }
+
+rule package_def { 
+    <name> 
+    [ 'is' <parent=name> ]? 
+    [ 
+    || ';' <comp_unit>
+    ||  <pblock>
+    || <.panic: 'Malformed package declaration'>
+    ]
+}
 
 proto token scope_declarator { <...> }
 token scope_declarator:sym<my>  { <sym> <scoped> }
@@ -170,7 +187,11 @@ rule default_value { '=' <EXPR('i=')> }
 proto token term { <...> }
 
 token term:sym<identifier> {
-    <identifier> <args>
+    <identifier> <?[(]> <args>
+}
+
+token term:sym<name> {
+    <name> <args>?
 }
 
 token args {

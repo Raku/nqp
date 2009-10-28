@@ -116,9 +116,10 @@ method statement_control:sym<return>($/) {
 
 ## Terms
 
-method noun:sym<colonpair>($/) { make $<colonpair>.ast; }
-method noun:sym<variable>($/) { make $<variable>.ast; }
-method noun:sym<scope_declarator>($/) { make $<scope_declarator>.ast; }
+method noun:sym<colonpair>($/)          { make $<colonpair>.ast; }
+method noun:sym<variable>($/)           { make $<variable>.ast; }
+method noun:sym<package_declarator>($/) { make $<package_declarator>.ast; }
+method noun:sym<scope_declarator>($/)   { make $<scope_declarator>.ast; }
 method noun:sym<routine_declarator>($/) { make $<routine_declarator>.ast; }
 
 method colonpair($/) {
@@ -137,6 +138,15 @@ method variable($/) {
             PAST::Op.new( 'Contextual ' ~ ~$/ ~ ' not found', :pirop('die') )
         );
     }
+    make $past;
+}
+
+method package_declarator:sym<module>($/) { make $<package_def>.ast; }
+
+method package_def($/) {
+    my $past := $<pblock> ?? $<pblock>.ast !! $<comp_unit>.ast;
+    $past.namespace( $<name><identifier> );
+    $past.blocktype('immediate');
     make $past;
 }
 
@@ -249,6 +259,24 @@ method term:sym<identifier>($/) {
     $past.name(~$<identifier>);
     make $past;
 }
+
+method term:sym<name>($/) {
+    my $ns := $<name><identifier>;
+    $ns := Q:PIR { 
+               $P0 = find_lex '$ns'
+               %r = clone $P0
+           };
+    my $name := $ns.pop;
+    my $var := 
+        PAST::Var.new( :name(~$name), :namespace($ns), :scope('package') );
+    my $past := $var;
+    if $<args> {
+        $past := $<args>[0].ast;
+        $past.unshift($var);
+    }
+    make $past;
+}
+    
 
 method args($/) { make $<arglist>.ast; }
 
