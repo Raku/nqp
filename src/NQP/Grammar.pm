@@ -11,6 +11,10 @@ token identifier { <ident> }
 
 token name { <identifier> ** '::' }
 
+token deflongname { 
+    <identifier> 
+    [ ':sym<' $<sym>=[<-[>]>*] '>' | ':sym«' $<sym>=[<-[»]>*] '»' ]?
+}
 
 ## Top-level rules
 
@@ -165,7 +169,7 @@ token routine_declarator:sym<sub>    { <sym> <routine_def> }
 token routine_declarator:sym<method> { <sym> <routine_def> }
 
 rule routine_def {
-    <deflongname=ident>?
+    <deflongname>?
     <.newpad>
     [ '(' <signature> ')'
         || <.panic: 'Routine declaration requires a signature'> ]

@@ -4,6 +4,10 @@ our @BLOCK := Q:PIR { %r = new ['ResizablePMCArray'] };
 
 method TOP($/) { make $<comp_unit>.ast; }
 
+method deflongname($/) {
+    if $<sym> { make ~$<identifier> ~ ':sym<' ~ ~$<sym>[0] ~ '>'; }
+}
+
 method comp_unit($/) {
     my $past := $<statementlist>.ast;
     my $BLOCK := @BLOCK.shift;
@@ -236,7 +240,7 @@ method routine_def($/) {
     $past.blocktype('declaration');
     $past.control('return_pir');
     if $<deflongname> {
-        my $name := ~$<deflongname>[0];
+        my $name := ~$<deflongname>[0].ast;
         $past.name($name);
         $past := PAST::Var.new( :name($name), :isdecl(1), :viviself($past),
                      :scope('lexical') );
