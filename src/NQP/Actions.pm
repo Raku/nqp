@@ -141,12 +141,19 @@ method colonpair($/) {
 }
 
 method variable($/) {
-    my $past := PAST::Var.new( :name(~$/) );
-    if $<twigil> && $<twigil>[0] eq '*' { 
-        $past.scope('contextual'); 
-        $past.viviself(
-            PAST::Op.new( 'Contextual ' ~ ~$/ ~ ' not found', :pirop('die') )
-        );
+    my $past;
+    if $<postcircumfix> {
+        $past := $<postcircumfix>.ast;
+        $past.unshift( PAST::Var.new( :name('$/') ) );
+    }
+    else {
+        $past := PAST::Var.new( :name(~$/) );
+        if $<twigil> && $<twigil>[0] eq '*' { 
+            $past.scope('contextual'); 
+            $past.viviself( PAST::Op.new( 'Contextual ' ~ ~$/ ~ ' not found', 
+                                          :pirop('die') )
+            );
+        }
     }
     make $past;
 }

@@ -127,6 +127,7 @@ token colonpair {
 
 token variable {
     | <sigil> <twigil>? <desigilname=ident>
+    | <sigil> <?[<[]> <postcircumfix>
     | $<sigil>=['$'] $<desigilname>=[<[/_!]>]
 }
 
