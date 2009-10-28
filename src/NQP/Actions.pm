@@ -286,6 +286,12 @@ method dotty($/) {
     make $past;
 }
 
+## Terms
+
+method term:sym<self>($/) {
+    make PAST::Var.new( :name('self') );
+}
+
 method term:sym<identifier>($/) {
     my $past := $<args>.ast;
     $past.name(~$<identifier>);

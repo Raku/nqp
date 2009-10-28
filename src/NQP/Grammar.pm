@@ -197,6 +197,8 @@ token dotty {
 
 proto token term { <...> }
 
+token term:sym<self> { <sym> » }
+
 token term:sym<identifier> {
     <identifier> <?[(]> <args>
 }
