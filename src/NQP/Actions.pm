@@ -135,6 +135,7 @@ method noun:sym<variable>($/)           { make $<variable>.ast; }
 method noun:sym<package_declarator>($/) { make $<package_declarator>.ast; }
 method noun:sym<scope_declarator>($/)   { make $<scope_declarator>.ast; }
 method noun:sym<routine_declarator>($/) { make $<routine_declarator>.ast; }
+method noun:sym<regex_declarator>($/)   { make $<regex_declarator>.ast; }
 
 method colonpair($/) {
     my $past := $<circumfix> 
@@ -299,6 +300,43 @@ method named_param($/) {
     $past.named( ~$<param_var><name> );
     make $past;
 }
+
+method regex_declarator($/, $key?) {
+    my @MODIFIERS := Q:PIR {
+        %r = get_hll_global ['Regex';'P6Regex';'Actions'], '@MODIFIERS'
+    };
+    my $name := ~$<deflongname>.ast;
+    my $past;
+    if $key eq 'open' {
+        my %h;
+        if $<sym> eq 'token' { %h<r> := 1; }
+        if $<sym> eq 'rule'  { %h<r> := 1;  %h<s> := 1; }
+        @MODIFIERS.unshift(%h);
+        Q:PIR {
+            $P0 = find_lex '$name'
+            set_hll_global ['Regex';'P6Regex';'Actions'], '$REGEXNAME', $P0
+        };
+        return 0;
+    }
+    else {
+        my $rpast := $<p6regex_nibbler>.ast;
+        my %capnames := Regex::P6Regex::Actions::capnames($rpast, 0);
+        %capnames{''} := 0;
+        $rpast := PAST::Regex.new(
+                     $rpast,
+                     PAST::Regex.new( :pasttype('pass') ),
+                     :pasttype('concat'),
+                     :capnames(%capnames)
+        );
+        $past := @BLOCK.shift;
+        $past.blocktype('method');
+        $past.name($name);
+        $past.push($rpast);
+        @MODIFIERS.shift;
+    }
+    make $past;
+}
+
 
 method dotty($/) {
     my $past := $<args> ?? $<args>[0].ast !! PAST::Op.new( :node($/) );

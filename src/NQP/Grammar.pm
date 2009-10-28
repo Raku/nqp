@@ -120,6 +120,7 @@ token noun:sym<variable>           { <variable> }
 token noun:sym<package_declarator> { <package_declarator> }
 token noun:sym<scope_declarator>   { <scope_declarator> }
 token noun:sym<routine_declarator> { <routine_declarator> }
+token noun:sym<regex_declarator>   { <regex_declarator> }
 
 token colonpair {
     ':' 
@@ -196,6 +197,16 @@ token named_param {
 }
 
 rule default_value { '=' <EXPR('i=')> }
+
+rule regex_declarator {
+    [
+    | $<sym>=[regex|token|rule]
+      <deflongname>
+      <.newpad>
+      {*} #= open
+      '{'<p6regex_nibbler>'}'
+    ]
+}
 
 token dotty {
     '.' <identifier>

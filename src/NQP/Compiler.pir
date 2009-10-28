@@ -11,6 +11,7 @@ NQP::Compiler - NQP compiler
 .sub '' :anon :load :init
     load_bytecode 'PCT.pbc'
     load_bytecode 'HLLGrammar.pbc'
+    load_bytecode 'P6Regex.pbc'
 .end
 
 .include 'src/gen/nqp-grammar.pir'

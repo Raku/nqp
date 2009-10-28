@@ -60,3 +60,14 @@
     match[1] = $P1
     match[2] = $P0
 .end
+
+
+.sub 'p6regex_nibbler' :method
+    .local pmc regexproto, cur, pos
+    regexproto = get_hll_global ['Regex';'P6Regex'], 'Grammar'
+    (cur, pos) = self.'!cursor_start'(regexproto)
+    cur.'!cursor_pos'(pos)
+    $P0 = get_hll_global ['Regex';'P6Regex'], 'Actions'
+    setattribute cur, '$!action', $P0
+    .tailcall cur.'nibbler'()
+.end
