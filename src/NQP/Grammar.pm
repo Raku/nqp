@@ -61,7 +61,7 @@ token pblock {
 token blockoid {
     <.finishpad>
     '{' ~ '}' <statementlist>
-    <.ENDSTMT>
+    <?ENDSTMT>
 }
 
 token newpad { <?> }
@@ -206,12 +206,12 @@ rule regex_declarator {
     [
     | $<proto>=[proto] [regex|token|rule] 
       <deflongname> 
-      '{' '<...>' '}'<.ENDSTMT>
+      '{' '<...>' '}'<?ENDSTMT>
     | $<sym>=[regex|token|rule]
       <deflongname>
       <.newpad>
       {*} #= open
-      '{'<p6regex_nibbler>'}'<.ENDSTMT>
+      '{'<p6regex_nibbler>'}'<?ENDSTMT>
     ]
 }
 
