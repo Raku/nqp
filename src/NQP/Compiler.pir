@@ -14,8 +14,8 @@ NQP::Compiler - NQP compiler
     load_bytecode 'P6Regex.pbc'
 .end
 
-.include 'src/gen/nqp-grammar.pir'
-.include 'src/gen/nqp-actions.pir'
+.include 'gen/nqp-grammar.pir'
+.include 'gen/nqp-actions.pir'
 .include 'src/cheats/nqp-builtins.pir'
 
 .namespace ['NQP';'Compiler']

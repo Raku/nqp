@@ -25,8 +25,8 @@ src/cheats/hll-grammar.pir -- Additional HLL::Grammar methods
 .end
 
 
-.include 'src/gen/hll-grammar.pir'
-.include 'src/gen/hll-actions.pir'
+.include 'gen/hllgrammar-grammar.pir'
+.include 'gen/hllgrammar-actions.pir'
 
 .namespace ['HLL';'Grammar']
 
