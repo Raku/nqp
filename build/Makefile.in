@@ -214,6 +214,8 @@ bootstrap: p6grammar
 bootstrap-files: $(STAGE2)/$(P6REGEX_PBC) $(STAGE2)/$(P6GRAMMAR_PBC)
 	$(PERL) build/gen_bootstrap.pl src/Regex/P6Regex.pir >src/stage0/P6Regex-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/Regex/P6Grammar.pir >src/stage0/P6Grammar-s0.pir
+	$(PERL) build/gen_bootstrap.pl src/cheats/hll-grammar.pir >src/stage0/HLLGrammar-s0.pir
+	$(PERL) build/gen_bootstrap.pl src/NQP/Compiler.pir >src/stage0/NQP-s0.pir
 	
 
 ## testing
