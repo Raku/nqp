@@ -142,6 +142,24 @@ method variable($/) {
 }
 
 method package_declarator:sym<module>($/) { make $<package_def>.ast; }
+method package_declarator:sym<class>($/) {
+    my $classinit :=
+        PAST::Op.new(
+            PAST::Op.new( 
+                :inline( '    %r = get_root_global ["parrot"], "P6metaclass"')
+            ),
+            ~$<package_def><name>,
+            :name('new_class'),
+            :pasttype('callmethod')
+        );
+    if $<package_def><parent> {
+        $classinit.push( PAST::Val.new( 
+                             :value( ~$<package_def><parent>[0] ),
+                             :named('parent') ) );
+    }
+    @BLOCK[0].loadinit.push($classinit);
+    make $<package_def>.ast;
+}
 
 method package_def($/) {
     my $past := $<pblock> ?? $<pblock>.ast !! $<comp_unit>.ast;
@@ -187,6 +205,14 @@ method variable_declarator($/) {
 }
 
 method routine_declarator:sym<sub>($/) { make $<routine_def>.ast; }
+method routine_declarator:sym<method>($/) {
+    my $past := $<routine_def>.ast;
+    if $past.isa(PAST::Var) { $past := $past.viviself(); }
+    $past.blocktype('method');
+    $past[0].unshift( PAST::Op.new( :inline('    .lex "self", self') ) );
+    $past.symbol('self', :scope('lexical') );
+    make $past;
+}
 
 method routine_def($/) {
     my $past := $<blockoid>.ast;
@@ -195,7 +221,6 @@ method routine_def($/) {
     if $<deflongname> {
         my $name := ~$<deflongname>[0];
         $past.name($name);
-        $past.nsentry('');
         $past := PAST::Var.new( :name($name), :isdecl(1), :viviself($past),
                      :scope('lexical') );
         $past<XXXroutine> := 1;
@@ -251,6 +276,13 @@ method param_var($/) {
 method named_param($/) {
     my $past := $<param_var>.ast;
     $past.named( ~$<param_var><name> );
+    make $past;
+}
+
+method dotty($/) {
+    my $past := $<args> ?? $<args>[0].ast !! PAST::Op.new( :node($/) );
+    $past.name( ~$<identifier> );
+    $past.pasttype('callmethod');
     make $past;
 }
 
@@ -359,6 +391,8 @@ NQP::Grammar.O(':prec<f=>, :assoc<list>',  '%list_infix');
 method nulltermish($/) {
     make $<noun> ?? $<noun>.ast !! 0;
 }
+
+method postfix:sym<.>($/) { make $<dotty>.ast; }
 
 method postfix:sym<++>($/) {
     make PAST::Op.new( :name('postfix:<++>'),

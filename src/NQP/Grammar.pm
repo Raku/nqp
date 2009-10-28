@@ -130,6 +130,7 @@ token twigil { <[*]> }
 
 proto token package_declarator { <...> }
 token package_declarator:sym<module> { <sym> <package_def> }
+token package_declarator:sym<class>  { <sym> <package_def> }
 
 rule package_def { 
     <name> 
@@ -153,7 +154,8 @@ rule scoped {
 token variable_declarator { <variable> }
 
 proto token routine_declarator { <...> }
-token routine_declarator:sym<sub> { <sym> <routine_def> }
+token routine_declarator:sym<sub>    { <sym> <routine_def> }
+token routine_declarator:sym<method> { <sym> <routine_def> }
 
 rule routine_def {
     <deflongname=ident>?
@@ -184,6 +186,15 @@ token named_param {
 
 rule default_value { '=' <EXPR('i=')> }
 
+token dotty {
+    '.' <identifier>
+    [ 
+    | <?[(]> <args>
+    | ':' \s <args=arglist>
+    ]?
+}
+    
+
 proto token term { <...> }
 
 token term:sym<identifier> {
@@ -201,7 +212,7 @@ token args {
 token arglist {
     <.ws> 
     [ 
-    | <EXPR>
+    | <EXPR('f=')>
     | <?>
     ]
 }
@@ -247,6 +258,8 @@ token postcircumfix:sym<ang> {
     <?[<]> <quote_EXPR: ':q'>
     <O('%methodop')>
 }
+
+token postfix:sym<.>  { <dotty> <O('%methodop')> }
 
 token prefix:sym<++>  { <sym>  <O('%autoincrement, :pirop<inc>')> }
 token prefix:sym<-->  { <sym>  <O('%autoincrement, :pirop<dec>')> }
