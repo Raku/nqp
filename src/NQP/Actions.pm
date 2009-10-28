@@ -170,12 +170,12 @@ method statement_control:sym<make>($/) {
 
 ## Terms
 
-method noun:sym<colonpair>($/)          { make $<colonpair>.ast; }
-method noun:sym<variable>($/)           { make $<variable>.ast; }
-method noun:sym<package_declarator>($/) { make $<package_declarator>.ast; }
-method noun:sym<scope_declarator>($/)   { make $<scope_declarator>.ast; }
-method noun:sym<routine_declarator>($/) { make $<routine_declarator>.ast; }
-method noun:sym<regex_declarator>($/)   { make $<regex_declarator>.ast; }
+method term:sym<colonpair>($/)          { make $<colonpair>.ast; }
+method term:sym<variable>($/)           { make $<variable>.ast; }
+method term:sym<package_declarator>($/) { make $<package_declarator>.ast; }
+method term:sym<scope_declarator>($/)   { make $<scope_declarator>.ast; }
+method term:sym<routine_declarator>($/) { make $<routine_declarator>.ast; }
+method term:sym<regex_declarator>($/)   { make $<regex_declarator>.ast; }
 
 method colonpair($/) {
     my $past := $<circumfix> 
@@ -519,7 +519,7 @@ method quote:sym<Q:PIR>($/) {
 ## Operators
 
 method nulltermish($/) {
-    make $<noun> ?? $<noun>.ast !! 0;
+    make $<term> ?? $<term>.ast !! 0;
 }
 
 method postfix:sym<.>($/) { make $<dotty>.ast; }

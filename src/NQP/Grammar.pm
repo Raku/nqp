@@ -119,12 +119,12 @@ token statement_control:sym<make> {
 
 ## Terms
 
-token noun:sym<colonpair>          { <colonpair> }
-token noun:sym<variable>           { <variable> }
-token noun:sym<package_declarator> { <package_declarator> }
-token noun:sym<scope_declarator>   { <scope_declarator> }
-token noun:sym<routine_declarator> { <routine_declarator> }
-token noun:sym<regex_declarator>   { <regex_declarator> }
+token term:sym<colonpair>          { <colonpair> }
+token term:sym<variable>           { <variable> }
+token term:sym<package_declarator> { <package_declarator> }
+token term:sym<scope_declarator>   { <scope_declarator> }
+token term:sym<routine_declarator> { <routine_declarator> }
+token term:sym<regex_declarator>   { <regex_declarator> }
 
 token colonpair {
     ':' 
@@ -275,7 +275,7 @@ token circumfix:sym<{ }> { <?[{]> <pblock> }
 ## Operators
 
 token nulltermish { 
-    | <OPER=noun=termish> 
+    | <OPER=term=termish> 
     | <?>
 }
 

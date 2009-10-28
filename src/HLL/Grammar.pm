@@ -6,11 +6,10 @@ grammar HLL::Grammar;
 
     token termish {
         <prefixish>*
-        <noun>
+        <term>
         <postfixish>*
     }
 
-    proto token noun { <...> }
     proto token term { <...> }
     proto token infix { <...> }
     proto token prefix { <...> }
@@ -18,8 +17,7 @@ grammar HLL::Grammar;
     proto token circumfix { <...> }
     proto token postcircumfix { <...> }
 
-    token noun:sym<term> { <term> }
-    token noun:sym<circumfix> { <circumfix> }
+    token term:sym<circumfix> { <circumfix> }
 
     token infixish { <OPER=infix=infix> }
     token prefixish { <OPER=prefix=prefix> }
