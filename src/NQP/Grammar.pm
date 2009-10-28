@@ -218,6 +218,10 @@ token term:sym<name> {
     <name> <args>?
 }
 
+token term:sym<PIR::op> {
+    'PIR::' $<op>=[\w+] <args>?
+}
+
 token args {
     | '(' <arglist> ')'
 }

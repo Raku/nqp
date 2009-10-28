@@ -335,7 +335,21 @@ method term:sym<name>($/) {
     }
     make $past;
 }
-    
+
+method term:sym<PIR::op>($/) {
+    my $past := $<args> ?? $<args>[0].ast !! PAST::Op.new( :node($/) );
+    my $pirop := ~$<op>;
+    $pirop := Q:PIR {
+        $P0 = find_lex '$pirop'
+        $S0 = $P0
+        $P0 = split '__', $S0
+        $S0 = join ' ', $P0
+        %r = box $S0
+    };
+    $past.pirop($pirop);
+    $past.pasttype('pirop');
+    make $past;
+}
 
 method args($/) { make $<arglist>.ast; }
 
