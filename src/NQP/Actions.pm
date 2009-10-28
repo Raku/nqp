@@ -21,6 +21,26 @@ sub INIT() {
     NQP::Grammar.O(':prec<f=>, :assoc<list>',  '%list_infix');
 }
 
+sub xblock_immediate($xblock) {
+    $xblock[1] := block_immediate($xblock[1]);
+    $xblock;
+}
+
+sub block_immediate($block) {
+    $block.blocktype('immediate');
+    unless $block.symtable() {
+        my $stmts := PAST::Stmts.new( :node($block) );
+        for $block.list { $stmts.push($_); }
+        $block := $stmts;
+    }
+    $block;
+}
+
+sub sigiltype($sigil) {
+    $sigil eq '%' 
+    ?? 'Hash' 
+    !! ($sigil eq '@' ?? 'ResizablePMCArray' !! 'Undef');
+}
 
 method TOP($/) { make $<comp_unit>.ast; }
 
@@ -516,23 +536,3 @@ method postfix:sym<-->($/) {
                        :pasttype('inline') );
 }
 
-sub xblock_immediate($xblock) {
-    $xblock[1] := block_immediate($xblock[1]);
-    $xblock;
-}
-
-sub block_immediate($block) {
-    $block.blocktype('immediate');
-    unless $block.symtable() {
-        my $stmts := PAST::Stmts.new( :node($block) );
-        for $block.list { $stmts.push($_); }
-        $block := $stmts;
-    }
-    $block;
-}
-
-sub sigiltype($sigil) {
-    $sigil eq '%' 
-    ?? 'Hash' 
-    !! ($sigil eq '@' ?? 'ResizablePMCArray' !! 'Undef');
-}
