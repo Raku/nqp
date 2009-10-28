@@ -67,7 +67,11 @@ system @config_command;
 print "\nBuilding Parrot ...\n";
 my %config = read_parrot_config();
 my $make = $config{'make'} or exit(1);
-system($make, 'install-dev');
+my @make_opts;
+if ($ENV{GNU_MAKE_JOBS}) {
+    push @make_opts, '-j', $ENV{GNU_MAKE_JOBS}
+}
+system($make, 'install-dev', @make_opts);
 
 sub read_parrot_config {
     my %config = ();
