@@ -94,8 +94,6 @@ P6GRAMMAR_PBC   = P6Grammar.pbc
 P6GRAMMAR_G     = gen/p6grammar-grammar.pir
 P6GRAMMAR_A     = gen/p6grammar-actions.pir
 
-HLLGRAMMAR_PBC  = HLLGrammar.pbc
-
 NQP_PBC         = nqp.pbc
 NQP_G           = gen/nqp-grammar.pir
 NQP_A           = gen/nqp-actions.pir
@@ -115,7 +113,6 @@ CLEANUPS = \
   P6Regex$(EXE) \
   $(P6GRAMMAR_PBC) \
   P6Grammar$(EXE) \
-  $(HLLGRAMMAR_PBC) \
   nqp.pbc \
   nqp$(EXE) \
   *.c\
