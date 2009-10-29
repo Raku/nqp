@@ -371,4 +371,16 @@ grammar NQP::Regex is Regex::P6Regex::Grammar {
     token metachar:sym<:my> { 
         ':' <?before 'my'> <statement=LANG('MAIN', 'statement')> <.ws> ';' 
     }
+
+    token metachar:sym<{ }> {
+        <?[{]> <codeblock>
+    }
+
+    token assertion:sym<{ }> {
+        <?[{]> <codeblock>
+    }
+
+    token codeblock {
+        <block=LANG('MAIN','pblock')>
+    }
 }

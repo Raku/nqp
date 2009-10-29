@@ -369,6 +369,8 @@ method regex_declarator($/, $key?) {
             $P0 = find_lex '$name'
             set_hll_global ['Regex';'P6Regex';'Actions'], '$REGEXNAME', $P0
         };
+        @BLOCK[0].symbol('$¢', :scope('lexical'));
+        @BLOCK[0].symbol('$/', :scope('lexical'));
         return 0;
     }
     elsif $<proto> {
@@ -557,4 +559,29 @@ class NQP::RegexActions is Regex::P6Regex::Actions {
         make PAST::Regex.new( $past, :pasttype('pastnode') );
     }
 
+    method metachar:sym<{ }>($/) { make $<codeblock>.ast; }
+
+    method assertion:sym<{ }>($/) { make $<codeblock>.ast; }
+
+    method codeblock($/) {
+        my $block := $<block>.ast;
+        $block.blocktype('immediate');
+        my $past := 
+            PAST::Regex.new(
+                PAST::Stmts.new(
+                    PAST::Op.new(
+                        PAST::Var.new( :name('$/') ),
+                        PAST::Op.new(
+                            PAST::Var.new( :name('$¢') ),
+                            :name('MATCH'),
+                            :pasttype('callmethod')
+                        ),
+                        :pasttype('bind')
+                    ),
+                    $block
+                ),
+                :pasttype('pastnode')
+            );
+        make $past;
+    }
 }

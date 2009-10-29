@@ -127,6 +127,8 @@ Return the POST representation of the regex AST rooted by C<node>.
   caparray_skip:
 
     ops.'push_pirop'('.lex', 'unicode:"$\x{a2}"', cur)
+    ops.'push_pirop'('.local pmc', 'match')
+    ops.'push_pirop'('.lex', '"$/"', 'match')
     ops.'push_pirop'('length', eos, tgt, 'result'=>eos)
 
     # On Parrot, indexing into variable-width encoded strings 
@@ -735,8 +737,25 @@ second child of this node.
 
 .sub 'pastnode' :method :multi(_, ['PAST';'Regex'])
     .param pmc node
-    $P0 = node[0]
-    .tailcall self.'as_post'($P0)
+    .local pmc cur, pos, fail, ops
+    (cur, pos, fail) = self.'!rxregs'('cur pos fail')
+    ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
+
+    .local pmc cpast, cpost
+    cpast = node[0]
+    cpost = self.'as_post'(cpast, 'rtype'=>'P')
+
+    self.'!cursorop'(ops, '!cursor_pos', 0, pos)
+    ops.'push'(cpost)
+
+    .local pmc subtype, negate, testop
+    subtype = node.'subtype'()
+    if subtype != 'zerowidth' goto done
+    negate = node.'negate'()
+    testop = self.'??!!'(negate, 'if', 'unless')
+    ops.'push_pirop'(testop, cpost, fail)
+  done:
+    .return (ops)
 .end
 
 
