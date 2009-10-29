@@ -4,9 +4,10 @@ Makefile
 .*.swp
 *.c
 *.o
+Regex.pbc
+HLL.pbc
 P6Regex
 P6Regex.pbc
-HLLGrammar.pbc
 nqp
 nqp.pbc
 src/gen/*.pir
