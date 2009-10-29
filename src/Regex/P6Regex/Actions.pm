@@ -1,4 +1,4 @@
-class Regex::P6Regex::Actions;
+class Regex::P6Regex::Actions is HLL::Actions;
 
 ## this will eventually be handled using contextuals
 our @MODIFIERS;
@@ -286,11 +286,20 @@ method backslash:sym<t>($/) {
 }
 
 method backslash:sym<v>($/) {
-    my $past := PAST::Regex.new( "\x[0a,0b,0c,0d,85,2028,2029]", :pasttype('enumcharlist'),
+    my $past := PAST::Regex.new( "\x[0a,0b,0c,0d,85,2028,2029]", 
+                    :pasttype('enumcharlist'),
                     :negate($<sym> eq 'V'), :node($/) );
     make $past;
 }
 
+method backslash:sym<x>($/) {
+    my $hexlit := 
+        HLL::Actions::ints_to_string( $<hexint> || $<hexints><hexint> );
+    make $<sym> eq 'X'
+         ?? PAST::Regex.new( $hexlit, :pasttype('enumcharlist'),
+                              :negate(1), :node($/) )
+         !! PAST::Regex.new( $hexlit, :pasttype('literal'), :node($/) );
+}
 
 method backslash:sym<misc>($/) {
     my $past := PAST::Regex.new( ~$/ , :pasttype('literal'), :node($/) );

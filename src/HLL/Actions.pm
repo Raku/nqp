@@ -1,6 +1,6 @@
 class HLL::Actions;
 
-sub string_to_int($src, $base) {
+our sub string_to_int($src, $base) {
     Q:PIR {
         .local pmc src
         .local string src_s
@@ -34,7 +34,7 @@ sub string_to_int($src, $base) {
     };
 }
 
-sub ints_to_string($ints) {
+our sub ints_to_string($ints) {
     Q:PIR {
         .local string result
         result = ''
@@ -58,7 +58,7 @@ sub ints_to_string($ints) {
     };
 }
 
-sub isaPAST($x) {
+our sub isaPAST($x) {
     Q:PIR {
         $P0 = find_lex '$x'
         $I0 = isa $P0, ['PAST';'Node']

@@ -119,6 +119,7 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar;
     token backslash:sym<r> { $<sym>=[<[rR]>] }
     token backslash:sym<t> { $<sym>=[<[tT]>] }
     token backslash:sym<v> { $<sym>=[<[vV]>] }
+    token backslash:sym<x> { $<sym>=[<[xX]>] [ <hexint> | '[' <hexints> ']' ] }
     token backslash:sym<A> { 'A' <.obs: '\\A as beginning-of-string matcher', '^'> }
     token backslash:sym<z> { 'z' <.obs: '\\z as end-of-string matcher', '$'> }
     token backslash:sym<Z> { 'Z' <.obs: '\\Z as end-of-string matcher', '\\n?$'> }
