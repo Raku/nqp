@@ -1,4 +1,9 @@
-grammar Regex::P6Regex::Grammar;
+grammar Regex::P6Regex::Grammar is HLL::Grammar;
+
+    method obs ($old, $new, $when = 'in Perl 6') {
+        self.panic('Obsolete use of ' ~ ~$old ~ ';' 
+                   ~ ~$when ~ ' please use ' ~ ~$new ~ 'instead');
+    }
 
     token ws { [ \s+ | '#' \N* ]* }
 
@@ -114,10 +119,10 @@ grammar Regex::P6Regex::Grammar;
     token backslash:sym<r> { $<sym>=[<[rR]>] }
     token backslash:sym<t> { $<sym>=[<[tT]>] }
     token backslash:sym<v> { $<sym>=[<[vV]>] }
-    token backslash:sym<A> { 'A' <.obs: '\\A as beginning-of-string matcher;^'> }
-    token backslash:sym<z> { 'z' <.obs: '\\z as end-of-string matcher;$'> }
-    token backslash:sym<Z> { 'Z' <.obs: '\\Z as end-of-string matcher;\\n?$'> }
-    token backslash:sym<Q> { 'Q' <.obs: '\\Q as quotemeta;quotes or literal variable match'> }
+    token backslash:sym<A> { 'A' <.obs: '\\A as beginning-of-string matcher', '^'> }
+    token backslash:sym<z> { 'z' <.obs: '\\z as end-of-string matcher', '$'> }
+    token backslash:sym<Z> { 'Z' <.obs: '\\Z as end-of-string matcher', '\\n?$'> }
+    token backslash:sym<Q> { 'Q' <.obs: '\\Q as quotemeta', 'quotes or literal variable match'> }
     token backslash:sym<misc> { \W }
 
     proto token assertion { <...> }
@@ -147,7 +152,7 @@ grammar Regex::P6Regex::Grammar;
         <.normspace>?
         [
         | '[' $<charspec>=(
-                  | \s* '-' <.obs: 'hyphen in enumerated character class;..'>
+                  | \s* '-' <.obs: 'hyphen in enumerated character class','..'>
                   | \s* [ \\ (.) | (<-[\]\\]>) ] [ \s* '..' \s* (.) ]?
               )*
           \s* ']'

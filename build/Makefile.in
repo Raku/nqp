@@ -58,7 +58,6 @@ P6REGEX_SOURCES = \
   src/Regex/P6Regex.pir \
   src/Regex/P6Regex/Grammar.pm \
   src/Regex/P6Regex/Actions.pm \
-  src/cheats/p6regex-grammar.pir \
 
 HLLGRAMMAR_SOURCES = \
   src/HLL/Grammar.pm \
