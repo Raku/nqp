@@ -549,3 +549,12 @@ method postfix:sym<-->($/) {
                        :pasttype('inline') );
 }
 
+
+class NQP::RegexActions is Regex::P6Regex::Actions {
+
+    method metachar:sym<:my>($/) {
+        my $past := $<statement>.ast;
+        make PAST::Regex.new( $past, :pasttype('pastnode') );
+    }
+
+}

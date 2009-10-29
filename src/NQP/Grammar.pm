@@ -3,8 +3,10 @@ grammar NQP::Grammar is HLL::Grammar;
 
 method TOP() {
     my %*LANG;
-    %*LANG<Regex>         := Regex::P6Regex::Grammar;
-    %*LANG<Regex-actions> := Regex::P6Regex::Actions;
+    %*LANG<Regex>         := NQP::Regex;
+    %*LANG<Regex-actions> := NQP::RegexActions;
+    %*LANG<MAIN>          := NQP::Grammar;
+    %*LANG<MAIN-actions>  := NQP::Actions;
     self.comp_unit;
 }
 
@@ -363,3 +365,10 @@ token infix:sym<:=>   { <sym>  <O('%assignment, :pasttype<bind>')> }
 token infix:sym<::=>  { <sym>  <O('%assignment, :pasttype<bind>')> }
 
 token infix:sym<,>    { <sym>  <O('%comma, :pasttype<list>')> }
+
+
+grammar NQP::Regex is Regex::P6Regex::Grammar {
+    token metachar:sym<:my> { 
+        ':' <?before 'my'> <statement=LANG('MAIN', 'statement')> <.ws> ';' 
+    }
+}
