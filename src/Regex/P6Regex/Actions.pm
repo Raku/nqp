@@ -292,6 +292,15 @@ method backslash:sym<v>($/) {
     make $past;
 }
 
+method backslash:sym<o>($/) {
+    my $octlit := 
+        HLL::Actions::ints_to_string( $<octint> || $<octints><octint> );
+    make $<sym> eq 'O'
+         ?? PAST::Regex.new( $octlit, :pasttype('enumcharlist'),
+                              :negate(1), :node($/) )
+         !! PAST::Regex.new( $octlit, :pasttype('literal'), :node($/) );
+}
+
 method backslash:sym<x>($/) {
     my $hexlit := 
         HLL::Actions::ints_to_string( $<hexint> || $<hexints><hexint> );
