@@ -117,6 +117,13 @@ token statement_control:sym<make> {
     [ <EXPR> || <.panic: 'make requires an expression argument'> ]
 }
 
+proto token statement_prefix { <...> }
+token statement_prefix:sym<INIT> { <sym> <blorst> }
+
+token blorst {
+    \s <.ws> [ <pblock> | <statement> ]
+}
+
 ## Terms
 
 token term:sym<colonpair>          { <colonpair> }
@@ -125,6 +132,7 @@ token term:sym<package_declarator> { <package_declarator> }
 token term:sym<scope_declarator>   { <scope_declarator> }
 token term:sym<routine_declarator> { <routine_declarator> }
 token term:sym<regex_declarator>   { <regex_declarator> }
+token term:sym<statement_prefix>   { <statement_prefix> }
 
 token colonpair {
     ':' 
@@ -153,7 +161,7 @@ rule package_def {
     [ 'is' <parent=name> ]? 
     [ 
     || ';' <comp_unit>
-    ||  <pblock>
+    || <?[{]> <pblock>
     || <.panic: 'Malformed package declaration'>
     ]
 }

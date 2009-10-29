@@ -168,6 +168,17 @@ method statement_control:sym<make>($/) {
     );
 }
 
+method statement_prefix:sym<INIT>($/) {
+    @BLOCK[0].loadinit.push($<blorst>.ast);
+    make PAST::Stmts.new(:node($/));
+}
+
+method blorst($/) {
+    make $<pblock>
+         ?? block_immediate($<pblock>.ast)
+         !! $<statement>.ast;
+}
+
 ## Terms
 
 method term:sym<colonpair>($/)          { make $<colonpair>.ast; }
@@ -176,6 +187,7 @@ method term:sym<package_declarator>($/) { make $<package_declarator>.ast; }
 method term:sym<scope_declarator>($/)   { make $<scope_declarator>.ast; }
 method term:sym<routine_declarator>($/) { make $<routine_declarator>.ast; }
 method term:sym<regex_declarator>($/)   { make $<regex_declarator>.ast; }
+method term:sym<statement_prefix>($/)   { make $<statement_prefix>.ast; }
 
 method colonpair($/) {
     my $past := $<circumfix> 
@@ -260,6 +272,7 @@ method variable_declarator($/) {
     }
     $past.scope('lexical');
     $past.isdecl(1);
+    $past.lvalue(1);
     my $sigil := $<variable><sigil>;
     $past.viviself( sigiltype($sigil) );
     @BLOCK[0].symbol( $name, :scope('lexical') );
