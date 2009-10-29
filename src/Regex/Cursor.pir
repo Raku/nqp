@@ -22,7 +22,7 @@ grammars.
     load_bytecode 'P6object.pbc'
     .local pmc p6meta
     p6meta = new 'P6metaclass'
-    $P0 = p6meta.'new_class'('Regex::Cursor', 'attr'=>'$!target $!from $!pos $!match $!action $!names $!debug $!type @!bstack @!cstack @!caparray')
+    $P0 = p6meta.'new_class'('Regex::Cursor', 'attr'=>'$!target $!from $!pos $!match $!names $!debug $!type @!bstack @!cstack @!caparray')
     $P0 = box 0
     set_global '$!generation', $P0
     $P0 = new ['Boolean']
@@ -162,11 +162,14 @@ If C<regex> is omitted, then use the C<TOP> rule for the grammar.
     .param pmc target
     .param pmc regex           :optional
     .param int has_regex       :opt_flag
+    .param pmc action          :named('action') :optional
     .param pmc options         :slurpy :named
 
     if has_regex goto regex_done
     regex = find_method self, 'TOP'
   regex_done:
+
+    .lex '$*ACTION', action
 
     .local pmc cur, match
     cur = self.'!cursor_init'(target, options :flat :named)
@@ -213,7 +216,6 @@ Create a new cursor for matching C<target>.
 .sub '!cursor_init' :method
     .param string target
     .param int from            :named('from') :optional
-    .param pmc action          :named('action') :optional
 
     .local pmc parrotclass, cur
     $P0 = self.'HOW'()
@@ -229,7 +231,6 @@ Create a new cursor for matching C<target>.
     $P0 = box from
     setattribute cur, '$!pos', $P0
 
-    setattribute cur, '$!action', action
     .return (cur)
 .end
 
@@ -253,7 +254,7 @@ provided, then the new cursor has the same type as lang.
     parrotclass = getattribute $P0, 'parrotclass'
     cur = new parrotclass
 
-    .local pmc from, pos, target, action, debug, type
+    .local pmc from, pos, target, debug, type
 
     from = getattribute self, '$!pos'
     setattribute cur, '$!from', from
@@ -261,8 +262,6 @@ provided, then the new cursor has the same type as lang.
 
     target = getattribute self, '$!target'
     setattribute cur, '$!target', target
-    action = getattribute self, '$!action'
-    setattribute cur, '$!action', action
     debug = getattribute self, '$!debug'
     setattribute cur, '$!debug', debug
 
@@ -586,7 +585,7 @@ Perform any action associated with the current regex match.
     .param pmc match           :optional
     .param int has_match       :opt_flag
     .local pmc action
-    action = getattribute self, '$!action'
+    action = find_dynamic_lex '$*ACTION'
     if null action goto action_done
     $I0 = can action, name
     unless $I0 goto action_done
