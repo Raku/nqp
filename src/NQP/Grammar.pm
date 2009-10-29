@@ -218,6 +218,7 @@ rule regex_declarator {
     | $<sym>=[regex|token|rule]
       <deflongname>
       <.newpad>
+      [ '(' <signature> ')' ]?
       {*} #= open
       '{'<p6regex_nibbler>'}'<?ENDSTMT>
     ]
