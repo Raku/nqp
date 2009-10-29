@@ -399,7 +399,7 @@ method regex_declarator($/, $key?) {
             );
     }
     else {
-        my $rpast := $<p6regex_nibbler>.ast;
+        my $rpast := $<p6regex>.ast;
         my %capnames := Regex::P6Regex::Actions::capnames($rpast, 0);
         %capnames{''} := 0;
         $rpast := PAST::Regex.new(

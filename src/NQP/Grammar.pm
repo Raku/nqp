@@ -1,9 +1,12 @@
 grammar NQP::Grammar is HLL::Grammar;
 
-token TOP { 
-    <comp_unit> 
-}
 
+method TOP() {
+    my %*LANG;
+    %*LANG<Regex>         := Regex::P6Regex::Grammar;
+    %*LANG<Regex-actions> := Regex::P6Regex::Actions;
+    self.comp_unit;
+}
 
 ## Lexer stuff
 
@@ -220,7 +223,7 @@ rule regex_declarator {
       <.newpad>
       [ '(' <signature> ')' ]?
       {*} #= open
-      '{'<p6regex_nibbler>'}'<?ENDSTMT>
+      '{'<p6regex=LANG('Regex','nibbler')>'}'<?ENDSTMT>
     ]
 }
 

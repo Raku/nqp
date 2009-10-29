@@ -62,13 +62,3 @@
 .end
 
 
-.sub 'p6regex_nibbler' :method
-    .local pmc regexproto, cur, pos
-    regexproto = get_hll_global ['Regex';'P6Regex'], 'Grammar'
-    (cur, pos) = self.'!cursor_start'(regexproto)
-    cur.'!cursor_pos'(pos)
-    $P0 = get_hll_global ['Regex';'P6Regex'], 'Actions'
-    .lex '$*ACTION', $P0
-    $P1 = cur.'nibbler'()      # XXX can't use .tailcall here or we lose the lexical
-    .return ($P1)
-.end

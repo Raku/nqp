@@ -686,6 +686,26 @@ An operator precedence parser.
 .end
 
 
+.sub 'LANG' :method
+    .param string lang
+    .param string regex
+
+    .local pmc langhash, cur, pos
+    langhash = find_dynamic_lex '%*LANG'
+    $P0 = langhash[lang]
+    (cur, pos) = self.'!cursor_start'($P0)
+    cur.'!cursor_pos'(pos)
+
+    $S0 = concat lang, '-actions'
+    $P0 = langhash[$S0]
+    .lex '$*ACTION', $P0
+
+    # XXX can't use tailcall here or we lose $*ACTION
+    $P1 = cur.regex()
+    .return ($P1)
+.end
+
+
 =cut
 
 # Local Variables:
