@@ -36,21 +36,22 @@ PARROT_PERL_LIB  = $(PARROT_TOOLS_DIR)/lib
 
 NQP_LANG_DIR     = $(PARROT_LIB_DIR)/languages/nqp
 
-P6REGEX_SOURCES = \
-  src/Regex/P6Regex.pir \
-  src/Regex/P6Regex/Grammar.pm \
-  src/Regex/P6Regex/Actions.pm \
-  src/cheats/p6regex-grammar.pir \
-  src/cheats/hll-compiler.pir \
-  src/cheats/regex-cursor-protoregex.pir \
-  src/PAST/Regex.pir \
-  src/PAST/Compiler-Regex.pir \
+REGEX_SOURCES = \
   src/Regex/constants.pir \
   src/Regex/Cursor.pir \
   src/Regex/Cursor-builtins.pir \
   src/Regex/Cursor-protoregex-peek.pir \
   src/Regex/Match.pir \
   src/Regex/Dumper.pir \
+  src/PAST/Regex.pir \
+  src/PAST/Compiler-Regex.pir \
+
+P6REGEX_SOURCES = \
+  src/Regex/P6Regex.pir \
+  src/Regex/P6Regex/Grammar.pm \
+  src/Regex/P6Regex/Actions.pm \
+  src/cheats/p6regex-grammar.pir \
+  src/cheats/hll-compiler.pir \
 
 P6GRAMMAR_SOURCES = \
   src/Regex/P6Grammar.pir \
@@ -76,6 +77,8 @@ STAGE0_SOURCES = \
 STAGE0 = src/stage0
 STAGE1 = src/stage1
 STAGE2 = src/stage2
+
+REGEX_PBC       = Regex.pbc
 
 P6REGEX_PBC     = P6Regex.pbc
 P6REGEX_G       = gen/p6regex-grammar.pir
@@ -124,9 +127,12 @@ stage0: $(STAGE0)
 stage1: $(STAGE1)
 stage2: $(STAGE2)
 
+$(REGEX_PBC): $(REGEX_SOURCES)
+	$(PARROT) -o $(REGEX_PBC) $(REGEX_SOURCES)
+
 $(STAGE0): $(STAGE0_PBCS)
 
-$(STAGE0_PBCS): $(STAGE0_SOURCES)
+$(STAGE0_PBCS): $(STAGE0_SOURCES) $(REGEX_PBC)
 	$(PARROT) -o $(STAGE0)/$(P6REGEX_PBC)    src/stage0/P6Regex-s0.pir
 	$(PARROT) -o $(STAGE0)/$(HLLGRAMMAR_PBC) src/stage0/HLLGrammar-s0.pir
 	$(PARROT) -o $(STAGE0)/$(NQP_PBC)        src/stage0/NQP-s0.pir
