@@ -9,8 +9,6 @@ NQP::Compiler - NQP compiler
 =cut
 
 .sub '' :anon :load :init
-    load_bytecode 'PCT.pbc'
-    load_bytecode 'HLLGrammar.pbc'
     load_bytecode 'P6Regex.pbc'
 .end
 

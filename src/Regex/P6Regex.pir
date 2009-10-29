@@ -9,25 +9,17 @@ Regex::P6Regex - Parser/compiler for Perl 6 regexes
 
 =cut
 
-.include 'src/cheats/hll-compiler.pir'
+.sub '' :anon :load :init
+    load_bytecode 'HLL.pbc'
+.end
 
-# these will eventually move to Regex.pir
-.include 'src/PAST/Regex.pir'
-.include 'src/PAST/Compiler-Regex.pir'
-.include 'src/Regex/Cursor.pir'
-.include 'src/Regex/Cursor-builtins.pir'
-.include 'src/Regex/Cursor-protoregex-peek.pir'
-.include 'src/Regex/Match.pir'
-.include 'src/Regex/Dumper.pir'
-
-.include 'src/cheats/p6regex-grammar.pir'
 .include 'gen/p6regex-grammar.pir'
 .include 'gen/p6regex-actions.pir'
+.include 'src/cheats/p6regex-grammar.pir'
 
 .namespace ['Regex';'P6Regex';'Compiler']
 
 .sub '' :anon :load :init
-    load_bytecode 'PCT.pbc'
     .local pmc p6meta, p6regex
     p6meta = get_hll_global 'P6metaclass'
     p6regex = p6meta.'new_class'('Regex::P6Regex::Compiler', 'parent'=>'HLL::Compiler')

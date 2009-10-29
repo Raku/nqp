@@ -37,6 +37,7 @@ PARROT_PERL_LIB  = $(PARROT_TOOLS_DIR)/lib
 NQP_LANG_DIR     = $(PARROT_LIB_DIR)/languages/nqp
 
 REGEX_SOURCES = \
+  src/Regex.pir \
   src/Regex/constants.pir \
   src/Regex/Cursor.pir \
   src/Regex/Cursor-builtins.pir \
@@ -46,17 +47,18 @@ REGEX_SOURCES = \
   src/PAST/Regex.pir \
   src/PAST/Compiler-Regex.pir \
 
+HLL_SOURCES = \
+  src/HLL.pir \
+  src/cheats/hll-compiler.pir \
+  src/cheats/hll-grammar.pir \
+  src/HLL/Grammar.pm \
+  src/HLL/Actions.pm \
+
 P6REGEX_SOURCES = \
   src/Regex/P6Regex.pir \
   src/Regex/P6Regex/Grammar.pm \
   src/Regex/P6Regex/Actions.pm \
   src/cheats/p6regex-grammar.pir \
-  src/cheats/hll-compiler.pir \
-
-P6GRAMMAR_SOURCES = \
-  src/Regex/P6Grammar.pir \
-  src/Regex/P6Grammar/Grammar.pm \
-  src/Regex/P6Grammar/Actions.pm \
 
 HLLGRAMMAR_SOURCES = \
   src/HLL/Grammar.pm \
@@ -80,6 +82,10 @@ STAGE2 = src/stage2
 
 REGEX_PBC       = Regex.pbc
 
+HLL_PBC         = HLL.pbc
+HLLGRAMMAR_G    = gen/hllgrammar-grammar.pir
+HLLGRAMMAR_A    = gen/hllgrammar-actions.pir
+
 P6REGEX_PBC     = P6Regex.pbc
 P6REGEX_G       = gen/p6regex-grammar.pir
 P6REGEX_A       = gen/p6regex-actions.pir
@@ -89,8 +95,6 @@ P6GRAMMAR_G     = gen/p6grammar-grammar.pir
 P6GRAMMAR_A     = gen/p6grammar-actions.pir
 
 HLLGRAMMAR_PBC  = HLLGrammar.pbc
-HLLGRAMMAR_G    = gen/hllgrammar-grammar.pir
-HLLGRAMMAR_A    = gen/hllgrammar-actions.pir
 
 NQP_PBC         = nqp.pbc
 NQP_G           = gen/nqp-grammar.pir
@@ -98,9 +102,9 @@ NQP_A           = gen/nqp-actions.pir
 NQP_EXE         = nqp$(EXE)
 
 STAGE0_PBCS     = $(STAGE0)/$(HLLGRAMMAR_PBC) $(STAGE0)/$(P6REGEX_PBC) $(STAGE0)/$(NQP_PBC)
-STAGE1_PBCS     = $(STAGE1)/$(HLLGRAMMAR_PBC) $(STAGE1)/$(P6REGEX_PBC) $(STAGE1)/$(NQP_PBC)
-STAGE2_PBCS     = $(STAGE2)/$(HLLGRAMMAR_PBC) $(STAGE2)/$(P6REGEX_PBC) $(STAGE2)/$(NQP_PBC)
-ALL_PBCS        = $(P6REGEX_PBC) $(HLLGRAMMAR_PBC) $(NQP_PBC)
+STAGE1_PBCS     = $(STAGE1)/$(HLL_PBC) $(STAGE1)/$(P6REGEX_PBC) $(STAGE1)/$(NQP_PBC)
+STAGE2_PBCS     = $(STAGE2)/$(HLL_PBC) $(STAGE2)/$(P6REGEX_PBC) $(STAGE2)/$(NQP_PBC)
+ALL_PBCS        = $(HLL_PBC) $(P6REGEX_PBC) $(NQP_PBC)
 
 CLEANUPS = \
   *.manifest \
@@ -132,14 +136,14 @@ $(REGEX_PBC): $(REGEX_SOURCES)
 
 $(STAGE0): $(STAGE0_PBCS)
 
-$(STAGE0_PBCS): $(STAGE0_SOURCES) $(REGEX_PBC)
+$(STAGE0_PBCS): $(STAGE0_SOURCES)
 	$(PARROT) -o $(STAGE0)/$(P6REGEX_PBC)    src/stage0/P6Regex-s0.pir
 	$(PARROT) -o $(STAGE0)/$(HLLGRAMMAR_PBC) src/stage0/HLLGrammar-s0.pir
 	$(PARROT) -o $(STAGE0)/$(NQP_PBC)        src/stage0/NQP-s0.pir
 
 $(STAGE1): $(STAGE1_PBCS)
 
-$(STAGE1)/$(HLLGRAMMAR_PBC): $(STAGE0_PBCS) $(HLLGRAMMAR_SOURCES)
+$(STAGE1)/$(HLL_PBC): $(STAGE0_PBCS) $(REGEX_PBC) $(HLL_SOURCES)
 	$(MKPATH) $(STAGE1)/gen
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE1)/$(HLLGRAMMAR_G) \
@@ -147,10 +151,10 @@ $(STAGE1)/$(HLLGRAMMAR_PBC): $(STAGE0_PBCS) $(HLLGRAMMAR_SOURCES)
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE1)/$(HLLGRAMMAR_A) \
 	    src/HLL/Actions.pm
-	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(HLLGRAMMAR_PBC) \
-	    src/cheats/hll-grammar.pir
+	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(HLL_PBC) \
+	    src/HLL.pir
 
-$(STAGE1)/$(P6REGEX_PBC): $(STAGE0_PBCS) $(P6REGEX_SOURCES)
+$(STAGE1)/$(P6REGEX_PBC): $(STAGE0_PBCS) $(REGEX_PBC) $(P6REGEX_SOURCES)
 	$(MKPATH) $(STAGE1)/gen
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE1)/$(P6REGEX_G) \
@@ -161,7 +165,7 @@ $(STAGE1)/$(P6REGEX_PBC): $(STAGE0_PBCS) $(P6REGEX_SOURCES)
 	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(P6REGEX_PBC) \
 	    src/Regex/P6Regex.pir
 
-$(STAGE1)/$(NQP_PBC): $(STAGE0_PBCS) $(NQP_SOURCES)
+$(STAGE1)/$(NQP_PBC): $(STAGE0_PBCS) $(REGEX_PBC) $(NQP_SOURCES)
 	$(MKPATH) $(STAGE1)/gen
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE1)/$(NQP_G) \
@@ -174,7 +178,7 @@ $(STAGE1)/$(NQP_PBC): $(STAGE0_PBCS) $(NQP_SOURCES)
 
 $(STAGE2): $(STAGE2_PBCS)
 
-$(STAGE2)/$(HLLGRAMMAR_PBC): $(STAGE1_PBCS) $(HLLGRAMMAR_SOURCES)
+$(STAGE2)/$(HLL_PBC): $(STAGE1_PBCS) $(REGEX_PBC) $(HLL_SOURCES)
 	$(MKPATH) $(STAGE2)/gen
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(HLLGRAMMAR_G) \
@@ -182,10 +186,10 @@ $(STAGE2)/$(HLLGRAMMAR_PBC): $(STAGE1_PBCS) $(HLLGRAMMAR_SOURCES)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(HLLGRAMMAR_A) \
 	    src/HLL/Actions.pm
-	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(HLLGRAMMAR_PBC) \
-	    src/cheats/hll-grammar.pir
+	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(HLL_PBC) \
+	    src/HLL.pir
 
-$(STAGE2)/$(P6REGEX_PBC): $(STAGE1_PBCS) $(P6REGEX_SOURCES)
+$(STAGE2)/$(P6REGEX_PBC): $(STAGE1_PBCS) $(REGEX_PBC) $(P6REGEX_SOURCES)
 	$(MKPATH) $(STAGE2)/gen
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(P6REGEX_G) \
@@ -196,7 +200,7 @@ $(STAGE2)/$(P6REGEX_PBC): $(STAGE1_PBCS) $(P6REGEX_SOURCES)
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(P6REGEX_PBC) \
 	    src/Regex/P6Regex.pir
 
-$(STAGE2)/$(NQP_PBC): $(STAGE1_PBCS) $(NQP_SOURCES)
+$(STAGE2)/$(NQP_PBC): $(STAGE1_PBCS) $(REGEX_PBC) $(NQP_SOURCES)
 	$(MKPATH) $(STAGE2)/gen
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(NQP_G) \
@@ -207,8 +211,8 @@ $(STAGE2)/$(NQP_PBC): $(STAGE1_PBCS) $(NQP_SOURCES)
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(NQP_PBC) \
 	    src/NQP/Compiler.pir
 
-$(ALL_PBCS): $(STAGE2_PBCS)
-	$(CP) $(STAGE2)/$(HLLGRAMMAR_PBC) .
+$(ALL_PBCS): $(REGEX_PBC) $(STAGE2_PBCS)
+	$(CP) $(STAGE2)/$(HLL_PBC) .
 	$(CP) $(STAGE2)/$(P6REGEX_PBC) .
 	$(CP) $(STAGE2)/$(NQP_PBC) .
 
@@ -216,7 +220,7 @@ $(NQP_EXE): $(NQP_PBC)
 	$(PBC_TO_EXE) $(NQP_PBC)
 
 bootstrap-files: $(STAGE2_PBCS)
-	$(PERL) build/gen_bootstrap.pl src/cheats/hll-grammar.pir >src/stage0/HLLGrammar-s0.pir
+	$(PERL) build/gen_bootstrap.pl src/HLL.pir >src/stage0/HLL-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/Regex/P6Regex.pir >src/stage0/P6Regex-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/NQP/Compiler.pir >src/stage0/NQP-s0.pir
 	
