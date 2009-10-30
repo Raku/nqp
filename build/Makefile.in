@@ -125,6 +125,13 @@ CLEANUPS = \
 
 all: $(NQP_EXE)
 
+install: all
+	$(MKPATH)                     $(DESTDIR)$(NQP_LANG_DIR)
+	$(CP)     nqp.pbc             $(DESTDIR)$(NQP_LANG_DIR)
+	$(MKPATH)                     $(DESTDIR)$(PARROT_BIN_DIR)
+	$(CP)     $(NQP_EXE)          $(DESTDIR)$(PARROT_BIN_DIR)
+	$(CHMOD)  755                 $(DESTDIR)$(PARROT_BIN_DIR)/$(NQP_EXE)
+
 stage0: $(STAGE0)
 stage1: $(STAGE1)
 stage2: $(STAGE2)
