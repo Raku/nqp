@@ -130,7 +130,7 @@ install: all
 	$(MKPATH)              $(DESTDIR)$(NQP_LANG_DIR)
 	$(CP)  nqp.pbc         $(DESTDIR)$(NQP_LANG_DIR)/nqprx.pbc
 	$(CP)  $(P6REGEX_PBC)  $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(P6REGEX_PBC)
-	$(CP)  $(REGEX_PBC)    $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(P6REGEX_PBC)
+	$(CP)  $(REGEX_PBC)    $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(REGEX_PBC)
 	$(CP)  $(HLL_PBC)      $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(HLL_PBC)
 	$(MKPATH)              $(DESTDIR)$(PARROT_BIN_DIR)
 	$(CP)  $(NQP_EXE)      $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
