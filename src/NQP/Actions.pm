@@ -2,7 +2,7 @@ class NQP::Actions is HLL::Actions;
 
 our @BLOCK;
 
-sub INIT() {
+INIT {
     our @BLOCK := Q:PIR { %r = new ['ResizablePMCArray'] };
 }
 
