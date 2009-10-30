@@ -24,7 +24,9 @@
     parseactions = self.'parseactions'()
   have_parseactions:
 
-    match = parsegrammar.'parse'(source, 'from'=>0, 'action'=>parseactions)
+    .local int rxtrace
+    rxtrace = options['parsetrace']
+    match = parsegrammar.'parse'(source, 'from'=>0, 'action'=>parseactions, 'rxtrace'=>rxtrace)
     unless match goto err_parsefail
     .return (match)
 

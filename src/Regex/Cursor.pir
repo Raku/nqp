@@ -163,6 +163,7 @@ If C<regex> is omitted, then use the C<TOP> rule for the grammar.
     .param pmc regex           :optional
     .param int has_regex       :opt_flag
     .param pmc action          :named('action') :optional
+    .param int rxtrace         :named('rxtrace') :optional
     .param pmc options         :slurpy :named
 
     if has_regex goto regex_done
@@ -173,6 +174,9 @@ If C<regex> is omitted, then use the C<TOP> rule for the grammar.
 
     .local pmc cur, match
     cur = self.'!cursor_init'(target, options :flat :named)
+    unless rxtrace goto rxtrace_done
+    cur.'DEBUG'()
+  rxtrace_done:
     cur = cur.regex()
     match = cur.'MATCH'()
     .return (match)
