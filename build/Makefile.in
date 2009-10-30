@@ -9,6 +9,7 @@ PARROT_VERSION     = @versiondir@
 PARROT_INCLUDE_DIR = @includedir@$(PARROT_VERSION)
 PARROT_LIB_DIR     = @libdir@$(PARROT_VERSION)
 PARROT_SRC_DIR     = @srcdir@$(PARROT_VERSION)
+PARROT_LIBRARY_DIR = $(PARROT_LIB_DIR)/library
 HAS_ICU            = @has_icu@
 
 CC            = @cc@
@@ -126,14 +127,14 @@ CLEANUPS = \
 all: $(NQP_EXE)
 
 install: all
-	$(MKPATH)                     $(DESTDIR)$(NQP_LANG_DIR)
-	$(CP)     nqp.pbc             $(DESTDIR)$(NQP_LANG_DIR)/nqprx.pbc
-    $(CP)     $(P6REGEX_PBC)      $(DESTDIR)$(PARROT_LIB_DIR)/library/$(P6REGEX_PBC)
-    $(CP)     $(REGEX_PBC)        $(DESTDIR)$(PARROT_LIB_DIR)/library/$(REGEX_PBC)
-    $(CP)     $(HLL_PBC)          $(DESTDIR)$(PARROT_LIB_DIR)/library/$(HLL_PBC)
-	$(MKPATH)                     $(DESTDIR)$(PARROT_BIN_DIR)
-	$(CP)     $(NQP_EXE)          $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
-	$(CHMOD)  755                 $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
+	$(MKPATH)              $(DESTDIR)$(NQP_LANG_DIR)
+	$(CP)  nqp.pbc         $(DESTDIR)$(NQP_LANG_DIR)/nqprx.pbc
+	$(CP)  $(P6REGEX_PBC)  $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(P6REGEX_PBC)
+	$(CP)  $(REGEX_PBC)    $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(P6REGEX_PBC)
+	$(CP)  $(HLL_PBC)      $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(HLL_PBC)
+	$(MKPATH)              $(DESTDIR)$(PARROT_BIN_DIR)
+	$(CP)  $(NQP_EXE)      $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
+	$(CHMOD)  755          $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
 
 stage0: $(STAGE0)
 stage1: $(STAGE1)
