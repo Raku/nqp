@@ -132,8 +132,8 @@ install: all
     $(CP)     $(REGEX_PBC)        $(DESTDIR)$(PARROT_LIB_DIR)/library/$(REGEX_PBC)
     $(CP)     $(HLL_PBC)          $(DESTDIR)$(PARROT_LIB_DIR)/library/$(HLL_PBC)
 	$(MKPATH)                     $(DESTDIR)$(PARROT_BIN_DIR)
-	$(CP)     $(NQP_EXE)          $(DESTDIR)$(PARROT_BIN_DIR)/nqprx$(EXE)
-	$(CHMOD)  755                 $(DESTDIR)$(PARROT_BIN_DIR)/nqprx$(EXE)
+	$(CP)     $(NQP_EXE)          $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
+	$(CHMOD)  755                 $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
 
 stage0: $(STAGE0)
 stage1: $(STAGE1)
