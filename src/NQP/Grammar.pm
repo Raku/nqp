@@ -298,6 +298,24 @@ token circumfix:sym<{ }> { <?[{]> <pblock> }
 
 ## Operators
 
+INIT {
+    NQP::Grammar.O(':prec<y=>, :assoc<unary>', '%methodop');
+    NQP::Grammar.O(':prec<x=>, :assoc<unary>', '%autoincrement');
+    NQP::Grammar.O(':prec<w=>, :assoc<left>',  '%exponentiation');
+    NQP::Grammar.O(':prec<v=>, :assoc<unary>', '%symbolic_unary');
+    NQP::Grammar.O(':prec<u=>, :assoc<left>',  '%multiplicative');
+    NQP::Grammar.O(':prec<t=>, :assoc<left>',  '%additive');
+    NQP::Grammar.O(':prec<r=>, :assoc<left>',  '%concatenation');
+    NQP::Grammar.O(':prec<m=>, :assoc<left>',  '%relational');
+    NQP::Grammar.O(':prec<l=>, :assoc<left>',  '%tight_and');
+    NQP::Grammar.O(':prec<k=>, :assoc<left>',  '%tight_or');
+    NQP::Grammar.O(':prec<j=>, :assoc<right>', '%conditional');
+    NQP::Grammar.O(':prec<i=>, :assoc<right>', '%assignment');
+    NQP::Grammar.O(':prec<g=>, :assoc<list>, :nextterm<nulltermish>',  '%comma');
+    NQP::Grammar.O(':prec<f=>, :assoc<list>',  '%list_infix');
+}
+
+
 token nulltermish { 
     | <OPER=term=termish> 
     | <?>
