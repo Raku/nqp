@@ -14,3 +14,18 @@ runtime libraries.
 
 For details about the current status and how to use what's here,
 see F<STATUS>.
+
+Differences from previous version of NQP
+----------------------------------------
+
+* Sub declarations are now lexical ("my") by default, use
+  "our sub xyz() { ... }" if you want package-scoped subroutines.
+
+* The  PIR q<...>;  construct is gone.  Use Q:PIR or pir::opcode(...)
+  instead.
+
+* The mainline code of modules is no longer tagged as ":load :init"
+  by default.  Use  INIT { ... }  for any code that you want to be
+  run automatically at startup.
+
+
