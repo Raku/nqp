@@ -127,10 +127,13 @@ all: $(NQP_EXE)
 
 install: all
 	$(MKPATH)                     $(DESTDIR)$(NQP_LANG_DIR)
-	$(CP)     nqp.pbc             $(DESTDIR)$(NQP_LANG_DIR)
+	$(CP)     nqp.pbc             $(DESTDIR)$(NQP_LANG_DIR)/nqprx.pbc
+    $(CP)     $(P6REGEX_PBC)      $(DESTDIR)$(PARROT_LIB_DIR)/library/$(P6REGEX_PBC)
+    $(CP)     $(REGEX_PBC)        $(DESTDIR)$(PARROT_LIB_DIR)/library/$(REGEX_PBC)
+    $(CP)     $(HLL_PBC)          $(DESTDIR)$(PARROT_LIB_DIR)/library/$(HLL_PBC)
 	$(MKPATH)                     $(DESTDIR)$(PARROT_BIN_DIR)
-	$(CP)     $(NQP_EXE)          $(DESTDIR)$(PARROT_BIN_DIR)
-	$(CHMOD)  755                 $(DESTDIR)$(PARROT_BIN_DIR)/$(NQP_EXE)
+	$(CP)     $(NQP_EXE)          $(DESTDIR)$(PARROT_BIN_DIR)/nqprx$(EXE)
+	$(CHMOD)  755                 $(DESTDIR)$(PARROT_BIN_DIR)/nqprx$(EXE)
 
 stage0: $(STAGE0)
 stage1: $(STAGE1)
