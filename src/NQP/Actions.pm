@@ -205,11 +205,15 @@ method variable($/) {
     }
     else {
         $past := PAST::Var.new( :name(~$/) );
-        if $<twigil> && $<twigil>[0] eq '*' { 
+        if $<twigil>[0] eq '*' { 
             $past.scope('contextual'); 
             $past.viviself( PAST::Op.new( 'Contextual ' ~ ~$/ ~ ' not found', 
                                           :pirop('die') )
             );
+        }
+        elsif $<twigil>[0] eq '!' {
+            $past.scope('attribute');
+            $past.viviself( sigiltype( $<sigil> ) );
         }
     }
     make $past;
@@ -217,6 +221,7 @@ method variable($/) {
 
 method package_declarator:sym<module>($/) { make $<package_def>.ast; }
 method package_declarator:sym<class>($/) {
+    my $past := $<package_def>.ast;
     my $classinit :=
         PAST::Op.new(
             PAST::Op.new( 
@@ -231,8 +236,11 @@ method package_declarator:sym<class>($/) {
     if $parent {
         $classinit.push( PAST::Val.new( :value($parent), :named('parent') ) );
     }
+    if $past<attributes> {
+        $classinit.push( $past<attributes> );
+    }
     @BLOCK[0].loadinit.push($classinit);
-    make $<package_def>.ast;
+    make $past;
 }
 
 method package_def($/) {
@@ -244,6 +252,7 @@ method package_def($/) {
 
 method scope_declarator:sym<my>($/)  { make $<scoped>.ast; }
 method scope_declarator:sym<our>($/) { make $<scoped>.ast; }
+method scope_declarator:sym<has>($/) { make $<scoped>.ast; }
 
 method scoped($/) {
     make $<routine_declarator>
@@ -256,15 +265,26 @@ method variable_declarator($/) {
     my $sigil := $<variable><sigil>;
     my $name := $past.name;
     my $BLOCK := @BLOCK[0];
-    my $scope := $*SCOPE eq 'our' ?? 'package' !! 'lexical';
     if $BLOCK.symbol($name) {
         $/.CURSOR.panic("Redeclaration of symbol ", $name);
     }
-    my $decl := PAST::Var.new( :name($name), :scope($scope), :isdecl(1), 
-                               :lvalue(1), :viviself( sigiltype($sigil) ), 
-                               :node($/) );
-    $BLOCK.symbol($name, :scope($scope) );
-    $BLOCK[0].push($decl);
+    if $*SCOPE eq 'has' {
+        $BLOCK.symbol($name, :scope('attribute') );
+        unless $BLOCK<attributes> {
+            $BLOCK<attributes> := 
+                PAST::Op.new( :pasttype('list'), :named('attr') );
+        }
+        $BLOCK<attributes>.push( $name );
+        $past := PAST::Stmts.new();
+    }
+    else { 
+        my $scope := $*SCOPE eq 'our' ?? 'package' !! 'lexical';
+        my $decl := PAST::Var.new( :name($name), :scope($scope), :isdecl(1), 
+                                   :lvalue(1), :viviself( sigiltype($sigil) ), 
+                                   :node($/) );
+        $BLOCK.symbol($name, :scope($scope) );
+        $BLOCK[0].push($decl);
+    }
     make $past;
 }
 

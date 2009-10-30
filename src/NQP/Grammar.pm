@@ -156,7 +156,7 @@ token variable {
 
 token sigil { <[$@%&]> }
 
-token twigil { <[*]> }
+token twigil { <[*!]> }
 
 proto token package_declarator { <...> }
 token package_declarator:sym<module> { <sym> <package_def> }
@@ -175,6 +175,7 @@ rule package_def {
 proto token scope_declarator { <...> }
 token scope_declarator:sym<my>  { <sym> <scoped('my')> }
 token scope_declarator:sym<our> { <sym> <scoped('our')> }
+token scope_declarator:sym<has> { <sym> <scoped('has')> }
 
 rule scoped($*SCOPE) {
     | <variable_declarator>
