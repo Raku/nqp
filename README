@@ -28,4 +28,5 @@ Differences from previous version of NQP
   by default.  Use  INIT { ... }  for any code that you want to be
   run automatically at startup.
 
-
+* Cuddled else's are no longer valid Perl 6, 'else' requires a
+  space after it.
