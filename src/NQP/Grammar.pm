@@ -7,6 +7,7 @@ method TOP() {
     %*LANG<Regex-actions> := NQP::RegexActions;
     %*LANG<MAIN>          := NQP::Grammar;
     %*LANG<MAIN-actions>  := NQP::Actions;
+    my $*SCOPE := '';
     self.comp_unit;
 }
 
@@ -172,10 +173,10 @@ rule package_def {
 }
 
 proto token scope_declarator { <...> }
-token scope_declarator:sym<my>  { <sym> <scoped> }
-token scope_declarator:sym<our> { <sym> <scoped> }
+token scope_declarator:sym<my>  { <sym> <scoped('my')> }
+token scope_declarator:sym<our> { <sym> <scoped('our')> }
 
-rule scoped {
+rule scoped($*SCOPE) {
     | <variable_declarator>
     | <routine_declarator>
 }
@@ -184,9 +185,17 @@ token variable_declarator { <variable> }
 
 proto token routine_declarator { <...> }
 token routine_declarator:sym<sub>    { <sym> <routine_def> }
-token routine_declarator:sym<method> { <sym> <routine_def> }
+token routine_declarator:sym<method> { <sym> <method_def> }
 
 rule routine_def {
+    <deflongname>?
+    <.newpad>
+    [ '(' <signature> ')'
+        || <.panic: 'Routine declaration requires a signature'> ]
+    <blockoid>
+}
+
+rule method_def {
     <deflongname>?
     <.newpad>
     [ '(' <signature> ')'

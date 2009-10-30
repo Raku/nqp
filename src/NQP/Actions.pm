@@ -242,21 +242,8 @@ method package_def($/) {
     make $past;
 }
 
-method scope_declarator:sym<my>($/) { make $<scoped>.ast; }
-method scope_declarator:sym<our>($/) {
-    my $past := $<scoped>.ast;
-    @BLOCK[0].symbol( $past.name, :scope('package') );
-    $past.scope('package');
-
-    # If we're modifying the scope of a block, then eliminate the
-    # variable assignment and just return the (named) block itself.
-    if $past<XXXroutine> {
-        $past := $past.viviself;
-        $past.nsentry($past.name);
-    }
-
-    make $past;
-}
+method scope_declarator:sym<my>($/)  { make $<scoped>.ast; }
+method scope_declarator:sym<our>($/) { make $<scoped>.ast; }
 
 method scoped($/) {
     make $<routine_declarator>
@@ -266,28 +253,23 @@ method scoped($/) {
 
 method variable_declarator($/) {
     my $past := $<variable>.ast;
+    my $sigil := $<variable><sigil>;
     my $name := $past.name;
-    if @BLOCK[0].symbol($name) {
+    my $BLOCK := @BLOCK[0];
+    my $scope := $*SCOPE eq 'our' ?? 'package' !! 'lexical';
+    if $BLOCK.symbol($name) {
         $/.CURSOR.panic("Redeclaration of symbol ", $name);
     }
-    $past.scope('lexical');
-    $past.isdecl(1);
-    $past.lvalue(1);
-    my $sigil := $<variable><sigil>;
-    $past.viviself( sigiltype($sigil) );
-    @BLOCK[0].symbol( $name, :scope('lexical') );
+    my $decl := PAST::Var.new( :name($name), :scope($scope), :isdecl(1), 
+                               :lvalue(1), :viviself( sigiltype($sigil) ), 
+                               :node($/) );
+    $BLOCK.symbol($name, :scope($scope) );
+    $BLOCK[0].push($decl);
     make $past;
 }
 
 method routine_declarator:sym<sub>($/) { make $<routine_def>.ast; }
-method routine_declarator:sym<method>($/) {
-    my $past := $<routine_def>.ast;
-    if $past.isa(PAST::Var) { $past := $past.viviself(); }
-    $past.blocktype('method');
-    $past[0].unshift( PAST::Op.new( :inline('    .lex "self", self') ) );
-    $past.symbol('self', :scope('lexical') );
-    make $past;
-}
+method routine_declarator:sym<method>($/) { make $<method_def>.ast; }
 
 method routine_def($/) {
     my $past := $<blockoid>.ast;
@@ -296,13 +278,30 @@ method routine_def($/) {
     if $<deflongname> {
         my $name := ~$<deflongname>[0].ast;
         $past.name($name);
-        $past := PAST::Var.new( :name($name), :isdecl(1), :viviself($past),
-                     :scope('lexical') );
-        $past<XXXroutine> := 1;
-        @BLOCK[0].symbol( $name, :scope('lexical') );
+        if $*SCOPE ne 'our' {
+            @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1), 
+                                  :viviself($past), :scope('lexical') ) );
+            @BLOCK[0].symbol($name, :scope('lexical') );
+            $past := PAST::Var.new( :name($name) );
+        }
     }
     make $past;
 }
+
+
+method method_def($/) {
+    my $past := $<blockoid>.ast;
+    $past.blocktype('method');
+    $past.control('return_pir');
+    $past[0].unshift( PAST::Op.new( :inline('    .lex "self", self') ) );
+    $past.symbol('self', :scope('lexical') );
+    if $<deflongname> {
+        my $name := ~$<deflongname>[0].ast;
+        $past.name($name);
+    }
+    make $past;
+}
+
 
 method signature($/) {
     my $BLOCKINIT := @BLOCK[0][0];
