@@ -397,6 +397,9 @@ token infix:sym<?? !!> {
     <O('%conditional, :reducecheck<ternary>, :pasttype<if>')> 
 }
 
+token infix:sym<=>    { 
+    <sym> <.panic: 'Assignment ("=") not supported in NQP, use ":=" instead'>
+}
 token infix:sym<:=>   { <sym>  <O('%assignment, :pasttype<bind>')> }
 token infix:sym<::=>  { <sym>  <O('%assignment, :pasttype<bind>')> }
 
