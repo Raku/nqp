@@ -498,6 +498,15 @@ method circumfix:sym<ang>($/) { make $<quote_EXPR>.ast; }
 
 method circumfix:sym<{ }>($/) { make $<pblock>.ast; }
 
+method circumfix:sym<sigil>($/) {
+    my $name := ~$<sigil> eq '@' ?? 'list' !!
+                ~$<sigil> eq '%' ?? 'hash' !!
+                                    'item';
+    make PAST::Op.new( :pasttype('callmethod'), :name($name), $<semilist>.ast );
+}
+
+method semilist($/) { make $<statement>.ast }
+
 method postcircumfix:sym<[ ]>($/) {
     make PAST::Var.new( $<EXPR>.ast , :scope('keyed_int'),
                         :viviself('Undef'),

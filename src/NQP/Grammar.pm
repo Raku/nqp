@@ -295,6 +295,9 @@ token quote:sym<Q:PIR> { 'Q:PIR' <.ws> <quote_EXPR> }
 token circumfix:sym<( )> { '(' <.ws> <EXPR> ')' }
 token circumfix:sym<ang> { <?[<]>  <quote_EXPR: ':q', ':w'>  }
 token circumfix:sym<{ }> { <?[{]> <pblock> }
+token circumfix:sym<sigil> { <sigil> '(' ~ ')' <semilist> }
+
+rule semilist { <statement> }
 
 ## Operators
 
