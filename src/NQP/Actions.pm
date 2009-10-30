@@ -525,6 +525,10 @@ method postcircumfix:sym<ang>($/) {
                         :vivibase('Hash') );
 }
 
+method postcircumfix:sym<( )>($/) {
+    make $<arglist>.ast;
+}
+
 method value($/) {
     my $past := $<quote>
                 ?? $<quote>.ast

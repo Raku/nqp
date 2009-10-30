@@ -339,6 +339,11 @@ token postcircumfix:sym<ang> {
     <O('%methodop')>
 }
 
+token postcircumfix:sym<( )> { 
+    '(' <.ws> <arglist> ')' 
+    <O('%methodop')>
+}
+
 token postfix:sym<.>  { <dotty> <O('%methodop')> }
 
 token prefix:sym<++>  { <sym>  <O('%autoincrement, :pirop<inc>')> }
