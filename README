@@ -30,3 +30,5 @@ Differences from previous version of NQP
 
 * Cuddled else's are no longer valid Perl 6, 'else' requires a
   space after it.
+
+* Double-quoted strings now interpolate $-variables.
