@@ -4,7 +4,7 @@
 .namespace ['HLL';'Compiler']
 
 .sub '' :anon :init :load
-    load_bytecode 'PCT.pbc'
+    load_bytecode 'PCT/HLLCompiler.pbc'
     .local pmc p6meta
     p6meta = get_hll_global 'P6metaclass'
     p6meta.'new_class'('HLL::Compiler', 'parent'=>'PCT::HLLCompiler')

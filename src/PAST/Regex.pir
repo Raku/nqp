@@ -14,7 +14,7 @@ for regular expressions.
 .namespace ['PAST';'Regex']
 
 .sub '' :init :load
-    load_bytecode 'PCT.pbc'
+    load_bytecode 'PCT/PAST.pbc'
     .local pmc p6meta
     p6meta = get_hll_global 'P6metaclass'
     p6meta.'new_class'('PAST::Regex', 'parent'=>'PAST::Node')
