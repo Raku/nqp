@@ -81,7 +81,7 @@ method EXPR($/, $key?) {
                 $S0 = downcase $S0
                 %r = box $S0
             } ~ ':<' ~ $<OPER><sym> ~ '>';
-            $past.name($name);
+            $past.name('&' ~ $name);
         }
     }
     if $key eq 'POSTFIX' { $past.unshift($/[0].ast); }

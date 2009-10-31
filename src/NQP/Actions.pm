@@ -481,7 +481,7 @@ method arglist($/) {
     my $past := PAST::Op.new( :pasttype('call'), :node($/) );
     if $<EXPR> {
         my $expr := $<EXPR>.ast;
-        if $expr.name eq 'infix:<,>' && !$expr.named {
+        if $expr.name eq '&infix:<,>' && !$expr.named {
             for $expr.list { $past.push($_); }
         }
         else { $past.push($expr); }
