@@ -548,6 +548,8 @@ method quote:sym<Q:PIR>($/) {
                        :node($/) );
 }
 
+method quote_escape:sym<$>($/) { make $<variable>.ast; }
+
 ## Operators
 
 method nulltermish($/) {
