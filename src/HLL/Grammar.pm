@@ -34,8 +34,8 @@ grammar HLL::Grammar;
     token quote_atom {
         <!stopper>
         [
-        | <escape>
-        | [ <-escape-stopper> ]+
+        | <quote_escape>
+        | [ <-quote_escape-stopper> ]+
         ]
     }
 
@@ -56,23 +56,23 @@ grammar HLL::Grammar;
         ]
     }
 
-    proto token escape { <...> }
-    token escape:sym<backslash> { \\ \\ <?quotemod_check('q')> }
-    token escape:sym<stopper>   { \\ <?quotemod_check('q')> <stopper> }
+    proto token quote_escape { <...> }
+    token quote_escape:sym<backslash> { \\ \\ <?quotemod_check('q')> }
+    token quote_escape:sym<stopper>   { \\ <?quotemod_check('q')> <stopper> }
 
-    token escape:sym<bs>  { \\ b <?quotemod_check('b')> }
-    token escape:sym<nl>  { \\ n <?quotemod_check('b')> }
-    token escape:sym<cr>  { \\ r <?quotemod_check('b')> }
-    token escape:sym<tab> { \\ t <?quotemod_check('b')> }
-    token escape:sym<hex> { 
+    token quote_escape:sym<bs>  { \\ b <?quotemod_check('b')> }
+    token quote_escape:sym<nl>  { \\ n <?quotemod_check('b')> }
+    token quote_escape:sym<cr>  { \\ r <?quotemod_check('b')> }
+    token quote_escape:sym<tab> { \\ t <?quotemod_check('b')> }
+    token quote_escape:sym<hex> { 
         \\ x <?quotemod_check('b')> 
         [ <hexint> | '[' <hexints> ']' ] 
     }
-    token escape:sym<oct> { 
+    token quote_escape:sym<oct> { 
         \\ o <?quotemod_check('b')> 
         [ <octint> | '[' <octints> ']' ] 
     }
-    token escape:sym<chr> { \\ c <?quotemod_check('b')> <charspec> }
+    token quote_escape:sym<chr> { \\ c <?quotemod_check('b')> <charspec> }
 
     token charname {
         || <integer>

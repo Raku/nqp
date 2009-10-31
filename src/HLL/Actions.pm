@@ -163,22 +163,22 @@ method quote_delimited($/) {
 }
 
 method quote_atom($/) {
-    make $<escape> ?? $<escape>.ast !! ~$/;
+    make $<quote_escape> ?? $<quote_escape>.ast !! ~$/;
 }
 
-method escape:sym<backslash>($/) { make "\\"; }
-method escape:sym<stopper>($/) { make ~$<stopper> }
+method quote_escape:sym<backslash>($/) { make "\\"; }
+method quote_escape:sym<stopper>($/) { make ~$<stopper> }
     
-method escape:sym<bs>($/)  { make "\b"; }
-method escape:sym<nl>($/)  { make "\n"; }
-method escape:sym<cr>($/)  { make "\r"; }
-method escape:sym<tab>($/) { make "\t"; }
+method quote_escape:sym<bs>($/)  { make "\b"; }
+method quote_escape:sym<nl>($/)  { make "\n"; }
+method quote_escape:sym<cr>($/)  { make "\r"; }
+method quote_escape:sym<tab>($/) { make "\t"; }
 
-method escape:sym<hex>($/) {
+method quote_escape:sym<hex>($/) {
     make ints_to_string( $<hexint> ?? $<hexint> !! $<hexints><hexint> );
 }
 
-method escape:sym<oct>($/) {
+method quote_escape:sym<oct>($/) {
     make ints_to_string( $<octint> ?? $<octint> !! $<octints><octint> );
 }
 
