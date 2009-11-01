@@ -404,7 +404,6 @@ position C<pos>.
     $I0 = find_cclass .CCLASS_WHITESPACE, words, pos, eos
     $I1 = $I0 - pos
     $S0 = substr words, pos, $I1
-    say $S0
     push result, $S0
     pos = $I0
     goto split_loop
