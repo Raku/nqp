@@ -68,7 +68,7 @@ our sub isaPAST($x) {
 
 method EXPR($/, $key?) {
     unless $key { return 0; }
-    my $past := $<OPER>.peek_ast;
+    my $past := $/.peek_ast // $<OPER>.peek_ast;
     unless $past { 
         $past := PAST::Op.new( :node($/) );
         if $<OPER><O><pasttype> { $past.pasttype( ~$<OPER><O><pasttype> ); }
@@ -121,7 +121,7 @@ method quote_EXPR($/) {
     my $past := $<quote_delimited>.ast;
     if HLL::Grammar::quotemod_check($/, 'w') {
         if isaPAST($past) { 
-            $/.panic("Can't form :w list from non-constant strings (yet)");
+            $/.CURSOR.panic("Can't form :w list from non-constant strings (yet)");
         }
         else {
             my @words := HLL::Grammar::split_words($/, $past);
