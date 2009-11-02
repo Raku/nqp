@@ -15,6 +15,12 @@ method arg($/) {
     make $<quote> ?? ~$<quote><val> !! +$<val>;
 }
 
+method arglist($/) {
+    my $past := PAST::Op.new( :pasttype('list') );
+    for $<arg> { $past.push( $_.ast ); }
+    make $past;
+}
+
 method TOP($/) {
     my $past := buildsub( $<nibbler>.ast );
     $past.node($/);
@@ -374,9 +380,7 @@ method assertion:sym<name>($/) {
             $past.push( buildsub($<nibbler>[0].ast) );
         }
         elsif $<arglist> {
-            for $<arglist>[0]<arg> {
-                $past.push( $_.ast );
-            }
+            for $<arglist>[0].ast.list { $past.push( $_ ); }
         }
     }
     make $past;

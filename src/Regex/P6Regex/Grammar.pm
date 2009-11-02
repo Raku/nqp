@@ -18,7 +18,7 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar;
         ]
     }
 
-    rule arglist { <arg> [ ',' <arg> ]* }
+    rule arglist { <arg> [ ',' <arg>]* }
 
     token TOP {
         <nibbler>
