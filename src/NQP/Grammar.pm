@@ -421,6 +421,18 @@ grammar NQP::Regex is Regex::P6Regex::Grammar {
         <?[{]> <codeblock>
     }
 
+    token assertion:sym<name> {
+        $<longname>=[\w+]
+            [
+            | <?before '>'>
+            | '=' <assertion>
+            | ':' <arglist>
+            | '(' <arglist=LANG('MAIN','arglist')> ')'
+            | <.normspace> <nibbler>
+            ]?
+    }
+
+
     token codeblock {
         <block=LANG('MAIN','pblock')>
     }
