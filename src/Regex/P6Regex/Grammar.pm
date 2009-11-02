@@ -14,7 +14,7 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar;
     token arg { 
         [
         | <quote>
-        | $<value>=[\d+]
+        | $<val>=[\d+]
         ]
     }
 
