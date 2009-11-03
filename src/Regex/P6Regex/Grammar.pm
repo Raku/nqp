@@ -74,8 +74,8 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar;
     token metachar:sym<^^> { <sym> }
     token metachar:sym<$> { <sym> }
     token metachar:sym<$$> { <sym> }
-    token metachar:sym<:::> { <sym> }
-    token metachar:sym<::> { <sym> }
+    token metachar:sym<:::> { <sym> <.panic: '::: not yet implemented'> }
+    token metachar:sym<::> { <sym> <.panic: ':: not yet implemented'> }
     token metachar:sym<lwb> { $<sym>=['<<'|'«'] }
     token metachar:sym<rwb> { $<sym>=['>>'|'»'] }
     token metachar:sym<bs> { \\ <backslash> }
