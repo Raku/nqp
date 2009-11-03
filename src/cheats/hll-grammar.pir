@@ -692,9 +692,9 @@ An operator precedence parser.
 
     $S0 = concat lang, '-actions'
     $P0 = langhash[$S0]
-    .lex '$*ACTION', $P0
+    .lex '$*ACTIONS', $P0
 
-    # XXX can't use tailcall here or we lose $*ACTION
+    # XXX can't use tailcall here or we lose $*ACTIONS
     $P1 = cur.regex()
     .return ($P1)
 .end
