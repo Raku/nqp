@@ -136,9 +136,11 @@ method statement_control:sym<for>($/) {
     my $past := $<xblock>.ast;
     $past.pasttype('for');
     my $block := $past[1];
-    $block[0].push( PAST::Var.new( :name('$_'), :scope('parameter') ) );
-    $block.symbol('$_', :scope('lexical') );
-    $block.arity(1);
+    unless $block.arity {
+        $block[0].push( PAST::Var.new( :name('$_'), :scope('parameter') ) );
+        $block.symbol('$_', :scope('lexical') );
+        $block.arity(1);
+    }
     $block.blocktype('immediate');
     make $past;
 }
@@ -345,6 +347,7 @@ method parameter($/) {
         }
         $past.viviself( $<default_value>[0]<EXPR>.ast ); 
     }
+    if $past.viviself { @BLOCK[0].arity( +@BLOCK[0].arity + 1 ); }
     make $past; 
 }
 
