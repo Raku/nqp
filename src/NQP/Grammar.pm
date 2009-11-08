@@ -94,7 +94,13 @@ token xblock {
 }
 
 token pblock {
-    <?[{]> 
+    [ <?[{]> || <.panic: 'Missing block'> ]
+    <.newpad>
+    <blockoid>
+}
+
+token block {
+    [ <?[{]> || <.panic: 'Missing block'> ]
     <.newpad>
     <blockoid>
 }
@@ -162,7 +168,7 @@ proto token statement_prefix { <...> }
 token statement_prefix:sym<INIT> { <sym> <blorst> }
 
 token blorst {
-    \s <.ws> [ <pblock> | <statement> ]
+    \s <.ws> [ <?[{]> <block> | <statement> ]
 }
 
 ## Terms

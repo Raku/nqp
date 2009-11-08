@@ -71,6 +71,10 @@ method pblock($/) {
     make $<blockoid>.ast;
 }
 
+method block($/) {
+    make $<blockoid>.ast;
+}
+
 method blockoid($/) {
     my $past := $<statementlist>.ast;
     my $BLOCK := @BLOCK.shift;
@@ -159,8 +163,8 @@ method statement_prefix:sym<INIT>($/) {
 }
 
 method blorst($/) {
-    make $<pblock>
-         ?? block_immediate($<pblock>.ast)
+    make $<block>
+         ?? block_immediate($<block>.ast)
          !! $<statement>.ast;
 }
 
