@@ -15,6 +15,36 @@
     .param pmc source
     .param pmc options         :slurpy :named
 
+    .local string tcode
+    tcode = options['transcode']
+    unless tcode goto transcode_done
+    .local pmc tcode_it
+    $P0 = split ' ', tcode
+    tcode_it = iter $P0
+  tcode_loop:
+    unless tcode_it goto transcode_done
+    tcode = shift tcode_it
+    push_eh tcode_enc
+    $I0 = find_charset tcode
+    $S0 = source
+    $S0 = trans_charset $S0, $I0
+    assign source, $S0
+    pop_eh
+    goto transcode_done
+  tcode_enc:
+    pop_eh
+    push_eh tcode_fail
+    $I0 = find_encoding tcode
+    $S0 = source
+    $S0 = trans_encoding $S0, $I0
+    assign source, $S0
+    pop_eh
+    goto transcode_done
+  tcode_fail:
+    pop_eh
+    goto tcode_loop
+  transcode_done:
+
     .local pmc parsegrammar, parseactions, match
     parsegrammar = self.'parsegrammar'()
 
@@ -34,3 +64,14 @@
     self.'panic'('Unable to parse source')
     .return (match)
 .end
+
+
+.sub 'pir' :method
+    .param pmc source
+    .param pmc adverbs         :slurpy :named
+
+    $P0 = compreg 'POST'
+    $S0 = $P0.'to_pir'(source, adverbs :flat :named)
+    .return ($S0)
+.end
+ 
