@@ -233,7 +233,7 @@ method package_declarator:sym<class>($/) {
 }
 
 method package_def($/) {
-    my $past := $<pblock> ?? $<pblock>.ast !! $<comp_unit>.ast;
+    my $past := $<block> ?? $<block>.ast !! $<comp_unit>.ast;
     $past.namespace( $<name><identifier> );
     $past.blocktype('immediate');
     make $past;

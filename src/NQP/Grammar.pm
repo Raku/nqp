@@ -208,7 +208,7 @@ rule package_def {
     [ 'is' <parent=name> ]? 
     [ 
     || ';' <comp_unit>
-    || <?[{]> <pblock>
+    || <?[{]> <block>
     || <.panic: 'Malformed package declaration'>
     ]
 }
