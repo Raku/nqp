@@ -553,6 +553,11 @@ method quote:sym<Q:PIR>($/) {
 }
 
 method quote_escape:sym<$>($/) { make $<variable>.ast; }
+method quote_escape:sym<{ }>($/) {
+    make PAST::Op.new( 
+        :pirop('set S*'), block_immediate($<block>.ast), :node($/) 
+    );
+}
 
 ## Operators
 
