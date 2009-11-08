@@ -14,6 +14,6 @@ my $num := 5;
 
 ok( "xxx {3+$num} zzz" eq 'xxx 8 zzz', "basic closure interpolation" );
 
-ok( qq{xxx {3+$num} zzz} eq 'xxx 8 zzz', "basic qq{} closure interpolation" );
+ok( qq{xxx {3+$num} zzz} eq 'xxx 8 zzz', 'basic qq{} closure interpolation' );
 
 
