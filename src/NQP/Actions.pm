@@ -179,6 +179,7 @@ method term:sym<scope_declarator>($/)   { make $<scope_declarator>.ast; }
 method term:sym<routine_declarator>($/) { make $<routine_declarator>.ast; }
 method term:sym<regex_declarator>($/)   { make $<regex_declarator>.ast; }
 method term:sym<statement_prefix>($/)   { make $<statement_prefix>.ast; }
+method term:sym<lambda>($/)             { make $<pblock>.ast; }
 
 method colonpair($/) {
     my $past := $<circumfix> 
@@ -347,7 +348,7 @@ method parameter($/) {
         }
         $past.viviself( $<default_value>[0]<EXPR>.ast ); 
     }
-    if $past.viviself { @BLOCK[0].arity( +@BLOCK[0].arity + 1 ); }
+    unless $past.viviself { @BLOCK[0].arity( +@BLOCK[0].arity + 1 ); }
     make $past; 
 }
 
