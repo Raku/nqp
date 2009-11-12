@@ -507,12 +507,17 @@ method circumfix:sym<( )>($/) {
 }
 
 method circumfix:sym<[ ]>($/) {
-    my $past := $<EXPR>
-                ?? $<EXPR>[0].ast
-                !! PAST::Op.new( :pasttype('list') );
-    if !$past.isa(PAST::Op) || $past.pasttype ne 'list' {
-       $past := PAST::Op.new( $past, :pasttype('list') );
+    my $past;
+    if $<EXPR> {
+        $past := $<EXPR>[0].ast;
+        if $past.name ne '&infix:<,>' {
+            $past := PAST::Op.new( $past, :pasttype('list') );
+        }
     }
+    else {
+        $past := PAST::Op.new( :pasttype('list') );
+    }
+    $past.name('&circumfix:<[ ]>');
     make $past;
 }
 
