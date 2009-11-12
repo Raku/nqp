@@ -29,7 +29,7 @@ four_five('ok 4 # passed in 1 arg');
 }
 
 {
-    sub six ( ) {
+    our sub six ( ) {
         say("ok 6 # def in inner scope, called from outer scope");
     }
 }
