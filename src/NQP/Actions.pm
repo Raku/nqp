@@ -500,11 +500,29 @@ method arglist($/) {
 
 method term:sym<value>($/) { make $<value>.ast; }
 
-method circumfix:sym<( )>($/) { make $<EXPR>.ast; }
+method circumfix:sym<( )>($/) { 
+    make $<EXPR> 
+         ?? $<EXPR>[0].ast 
+         !! PAST::Op.new( :pasttype('list'), :node($/) );
+}
+
+method circumfix:sym<[ ]>($/) {
+    my $past := $<EXPR>
+                ?? $<EXPR>[0].ast
+                !! PAST::Op.new( :pasttype('list') );
+    if !$past.isa(PAST::Op) || $past.pasttype ne 'list' {
+       $past := PAST::Op.new( $past, :pasttype('list') );
+    }
+    make $past;
+}
 
 method circumfix:sym<ang>($/) { make $<quote_EXPR>.ast; }
 
-method circumfix:sym<{ }>($/) { make $<pblock>.ast; }
+method circumfix:sym<{ }>($/) { 
+    make +$<pblock><blockoid><statementlist><statement> > 0
+         ?? $<pblock>.ast
+         !! PAST::Op.new( :inline('    %r = new ["Hash"]'), :node($/) ); 
+}
 
 method circumfix:sym<sigil>($/) {
     my $name := ~$<sigil> eq '@' ?? 'list' !!
