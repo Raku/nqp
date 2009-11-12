@@ -417,6 +417,7 @@ token prefix:sym<~>   { <sym>  <O('%symbolic_unary, :pirop<set S*>')> }
 token prefix:sym<->   { <sym>  <![>]> <O('%symbolic_unary, :pirop<neg>')> }
 token prefix:sym<?>   { <sym>  <O('%symbolic_unary, :pirop<istrue>')> }
 token prefix:sym<!>   { <sym>  <O('%symbolic_unary, :pirop<isfalse>')> }
+token prefix:sym<|>   { <sym>  <O('%symbolic_unary')> }
 
 token infix:sym<*>    { <sym>  <O('%multiplicative, :pirop<mul>')> }
 token infix:sym</>    { <sym>  <O('%multiplicative, :pirop<div>')> }

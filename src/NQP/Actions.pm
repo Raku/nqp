@@ -494,6 +494,15 @@ method arglist($/) {
         }
         else { $past.push($expr); }
     }
+    my $i := 0;
+    my $n := +$past.list;
+    while $i < $n {
+        if $past[$i].name eq '&prefix:<|>' {
+            $past[$i] := $past[$i][0];
+            $past[$i].flat(1);
+        }
+        $i++;
+    }
     make $past;
 }
 
