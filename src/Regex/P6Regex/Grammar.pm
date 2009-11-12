@@ -1,7 +1,7 @@
 grammar Regex::P6Regex::Grammar is HLL::Grammar;
 
     method obs ($old, $new, $when = 'in Perl 6') {
-        self.panic('Obsolete use of ' ~ ~$old ~ ';' 
+        self.panic('Obsolete use of ' ~ ~$old ~ ';'
                    ~ ~$when ~ ' please use ' ~ ~$new ~ 'instead');
     }
 
@@ -11,7 +11,7 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar;
 
     token quote { \' $<val>=[<-[']>*] \' }
 
-    token arg { 
+    token arg {
         [
         | <quote>
         | $<val>=[\d+]
@@ -28,8 +28,8 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar;
     token nibbler {
         {*} #= open
         [ <.ws> ['||'|'|'|'&&'|'&'] ]?
-        <termish> 
-        [ ['||'|'|'] 
+        <termish>
+        [ ['||'|'|']
           [ <termish> || <.panic: 'Null pattern not allowed'> ]
         ]*
     }
@@ -54,7 +54,7 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar;
     token quantifier:sym<*> { <sym> <backmod> }
     token quantifier:sym<+> { <sym> <backmod> }
     token quantifier:sym<?> { <sym> <backmod> }
-    token quantifier:sym<**> { 
+    token quantifier:sym<**> {
         <sym> \s* <backmod> \s*
         [
         || $<min>=[\d+] [ '..' $<max>=[\d+|'*'] ]?
@@ -82,24 +82,24 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar;
     token metachar:sym<mod> { <mod_internal> }
 
     ## we cheat here, really should be regex_infix:sym<~>
-    token metachar:sym<~> { 
-        <sym> 
-        <.ws> <GOAL=quantified_atom> 
+    token metachar:sym<~> {
+        <sym>
+        <.ws> <GOAL=quantified_atom>
         <.ws> <EXPR=quantified_atom>
     }
 
-    token metachar:sym<{*}> { 
-        <sym> 
+    token metachar:sym<{*}> {
+        <sym>
         [ \h* '#= ' \h* $<key>=[\S+ [\h+ \S+]*] ]?
     }
-    token metachar:sym<assert> { 
-        '<' <assertion> 
+    token metachar:sym<assert> {
+        '<' <assertion>
         [ '>' || <.panic: 'regex assertion not terminated by angle bracket'> ]
     }
 
     token metachar:sym<var> {
-        [ 
-        | '$<' $<name>=[<-[>]>+] '>' 
+        [
+        | '$<' $<name>=[<-[>]>+] '>'
         | '$' $<pos>=[\d+]
         ]
 
@@ -134,7 +134,7 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar;
     token assertion:sym<!> { '!' [ <?before '>' > | <assertion> ] }
 
     token assertion:sym<method> {
-        '.' <assertion> 
+        '.' <assertion>
     }
 
     token assertion:sym<name> {
@@ -164,9 +164,9 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar;
         <.normspace>?
     }
 
-    token mod_internal { 
+    token mod_internal {
         [
-        | ':' $<n>=('!' | \d+)**1  <mod_ident> » 
+        | ':' $<n>=('!' | \d+)**1  <mod_ident> »
         | ':' <mod_ident> [ '(' $<n>=[\d+] ')' ]?
         ]
     }

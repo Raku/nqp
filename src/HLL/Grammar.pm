@@ -21,8 +21,8 @@ grammar HLL::Grammar;
 
     token infixish { <OPER=infix=infix> }
     token prefixish { <OPER=prefix=prefix> <.ws> }
-    token postfixish { 
-        | <OPER=postfix=postfix> 
+    token postfixish {
+        | <OPER=postfix=postfix>
         | <OPER=postcircumfix=postcircumfix>
     }
 
@@ -72,19 +72,19 @@ grammar HLL::Grammar;
     token quote_escape:sym<nl>  { \\ n <?quotemod_check('b')> }
     token quote_escape:sym<cr>  { \\ r <?quotemod_check('b')> }
     token quote_escape:sym<tab> { \\ t <?quotemod_check('b')> }
-    token quote_escape:sym<hex> { 
-        \\ x <?quotemod_check('b')> 
-        [ <hexint> | '[' <hexints> ']' ] 
+    token quote_escape:sym<hex> {
+        \\ x <?quotemod_check('b')>
+        [ <hexint> | '[' <hexints> ']' ]
     }
-    token quote_escape:sym<oct> { 
-        \\ o <?quotemod_check('b')> 
-        [ <octint> | '[' <octints> ']' ] 
+    token quote_escape:sym<oct> {
+        \\ o <?quotemod_check('b')>
+        [ <octint> | '[' <octints> ']' ]
     }
     token quote_escape:sym<chr> { \\ c <?quotemod_check('b')> <charspec> }
 
     token charname {
         || <integer>
-        || <[a..z A..Z]> <-[ \] , # ]>*? <[a..z A..Z ) ]> 
+        || <[a..z A..Z]> <-[ \] , # ]>*? <[a..z A..Z ) ]>
            <?before \s* <[ \] , # ]> >
     }
     token charnames { [<.ws><charname><.ws>] ** ',' }

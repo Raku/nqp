@@ -15,9 +15,9 @@ sub foo() { $*VAR }
 
     ok(bar() eq 'abc', 'called subroutine sees caller $*VAR');
 
-    
 
-    { 
+
+    {
         my $*VAR := 'def';
         ok( $*VAR eq 'def', 'basic nested contextual works');
         ok( foo() eq 'def', 'called subroutine sees caller $*VAR');

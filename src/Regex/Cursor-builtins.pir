@@ -135,11 +135,11 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
 .sub 'upper' :method
     .tailcall '!cclass'(self, 'upper', .CCLASS_UPPERCASE)
 .end
-    
+
 .sub 'lower' :method
     .tailcall '!cclass'(self, 'lower', .CCLASS_LOWERCASE)
 .end
-    
+
 .sub 'digit' :method
     .tailcall '!cclass'(self, 'digit', .CCLASS_NUMERIC)
 .end
@@ -159,7 +159,7 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
 .sub 'cntrl' :method
     .tailcall '!cclass'(self, 'cntrl', .CCLASS_CONTROL)
 .end
-    
+
 .sub 'punct' :method
     .tailcall '!cclass'(self, 'punct', .CCLASS_PUNCTUATION)
 .end
@@ -211,7 +211,7 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     setattribute self, '$!debug', arg
     .return (1)
 .end
-    
+
 =head1 AUTHORS
 
 Patrick Michaud <pmichaud@pobox.com> is the author and maintainer.

@@ -6,7 +6,7 @@ PAST::Compiler-Regex - Compiler for PAST::Regex nodes
 
 =head1 DESCRIPTION
 
-PAST::Compiler-Regex implements the transformations to convert 
+PAST::Compiler-Regex implements the transformations to convert
 PAST::Regex nodes into POST.  It's still a part of PAST::Compiler;
 we've separated out the regex-specific transformations here for
 better code management and debugging.
@@ -121,7 +121,7 @@ Return the POST representation of the regex AST rooted by C<node>.
     concat $S0, tgt
     concat $S0, ', $I10)'
     ops.'push_pirop'('callmethod', '"!cursor_start"', 'self', 'result'=>$S0)
-    self.'!cursorop'(ops, '!cursor_debug', 0, '"START "', regexname_esc) 
+    self.'!cursorop'(ops, '!cursor_debug', 0, '"START "', regexname_esc)
     unless caparray goto caparray_skip
     self.'!cursorop'(ops, '!cursor_caparray', 0, caparray :flat)
   caparray_skip:
@@ -131,16 +131,16 @@ Return the POST representation of the regex AST rooted by C<node>.
     ops.'push_pirop'('.lex', '"$/"', 'match')
     ops.'push_pirop'('length', eos, tgt, 'result'=>eos)
 
-    # On Parrot, indexing into variable-width encoded strings 
+    # On Parrot, indexing into variable-width encoded strings
     # (such as utf8) becomes much more expensive as we move
     # farther away from the beginning of the string (via calls
-    # to utf8_skip_forward).  For regexes that are starting a match 
+    # to utf8_skip_forward).  For regexes that are starting a match
     # at a position other than the beginning of the string (e.g.,
     # a subrule call), we can save a lot of useless scanning work
-    # in utf8_skip_forward by removing the first C<off = from-1> 
+    # in utf8_skip_forward by removing the first C<off = from-1>
     # characters from the target and then performing all indexed
     # operations on the resulting target relative to C<off>.
-    
+
     ops.'push_pirop'('set', off, 0)
     ops.'push_pirop'('lt', '$I10', 2, startlabel)
     ops.'push_pirop'('sub', off, '$I10', 1, 'result'=>off)
@@ -206,7 +206,7 @@ are passed to the function as input arguments.
   done:
     .return (ops)
 .end
-    
+
 
 =item !rxregs(keystr)
 
@@ -576,7 +576,7 @@ standard quantifier code will handle it.
     null ops
     .return (ops)
 .end
-    
+
 
 =item concat(PAST::Regex node)
 
@@ -649,7 +649,7 @@ character list.
     zerowidth = iseq subtype, 'zerowidth'
 
     ops.'push_pirop'('inline', negate, subtype, 'inline'=>'  # rx enumcharlist negate=%0 %1')
-   
+
     ops.'push_pirop'('ge', pos, eos, fail)
     ops.'push_pirop'('sub', '$I10', pos, off)
     ops.'push_pirop'('substr', '$S10', tgt, '$I10', 1)
@@ -660,7 +660,7 @@ character list.
   skip_zero_2:
     .return (ops)
 .end
-    
+
 
 =item literal(PAST::Regex node)
 
@@ -1017,7 +1017,7 @@ Perform a subcapture (capture of a portion of a regex).
     $P0 = node.'name'()
     name = self.'as_post'($P0, 'rtype'=>'*')
 
-    .local string rxname 
+    .local string rxname
     rxname = self.'unique'('rxcap_')
 
     .local pmc caplabel, donelabel
@@ -1110,7 +1110,7 @@ Helper method to create a new POST node of C<type>.
 
 =item ??!!(test, trueval, falseval)
 
-Helper method to perform ternary operation -- returns C<trueval> 
+Helper method to perform ternary operation -- returns C<trueval>
 if C<test> is true, C<falseval> otherwise.
 
 =cut
@@ -1125,7 +1125,7 @@ if C<test> is true, C<falseval> otherwise.
   true:
     .return (trueval)
 .end
-    
+
 
 =back
 

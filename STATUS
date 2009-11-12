@@ -1,4 +1,4 @@
-2009-10-09:  
+2009-10-09:
 
 At the moment, nqp-rx is configured to build an executable called
 "p6regex", which is a Perl 6 regular expression compiler for Parrot.

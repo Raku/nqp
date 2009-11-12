@@ -69,7 +69,7 @@ our sub isaPAST($x) {
 method EXPR($/, $key?) {
     unless $key { return 0; }
     my $past := $/.peek_ast // $<OPER>.peek_ast;
-    unless $past { 
+    unless $past {
         $past := PAST::Op.new( :node($/) );
         if $<OPER><O><pasttype> { $past.pasttype( ~$<OPER><O><pasttype> ); }
         elsif $<OPER><O><pirop>    { $past.pirop( ~$<OPER><O><pirop> ); }
@@ -98,11 +98,11 @@ method termish($/) {
 method term:sym<circumfix>($/) { make $<circumfix>.ast }
 
 method integer($/) {
-    make $<decint> 
+    make $<decint>
          ?? string_to_int( $<decint>, 10)
-         !! ( $<hexint> 
+         !! ( $<hexint>
               ?? $<hexint>.ast
-              !! ( $<octint> 
+              !! ( $<octint>
                    ?? $<octint>.ast
                    !! string_to_int( $<binint>, 2)
                  )
@@ -122,7 +122,7 @@ method octint($/) {
 method quote_EXPR($/) {
     my $past := $<quote_delimited>.ast;
     if HLL::Grammar::quotemod_check($/, 'w') {
-        if isaPAST($past) { 
+        if isaPAST($past) {
             $/.CURSOR.panic("Can't form :w list from non-constant strings (yet)");
         }
         else {
@@ -170,7 +170,7 @@ method quote_atom($/) {
 
 method quote_escape:sym<backslash>($/) { make "\\"; }
 method quote_escape:sym<stopper>($/) { make ~$<stopper> }
-    
+
 method quote_escape:sym<bs>($/)  { make "\b"; }
 method quote_escape:sym<nl>($/)  { make "\n"; }
 method quote_escape:sym<cr>($/)  { make "\r"; }

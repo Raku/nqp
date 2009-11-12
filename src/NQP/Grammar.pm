@@ -17,8 +17,8 @@ token identifier { <ident> }
 
 token name { <identifier> ** '::' }
 
-token deflongname { 
-    <identifier> 
+token deflongname {
+    <identifier>
     [ ':sym<' $<sym>=[<-[>]>*] '>' | ':sym«' $<sym>=[<-[»]>*] '»' ]?
 }
 
@@ -26,8 +26,8 @@ token ENDSTMT {
     [ \h* $$ <.ws> <?MARKER('endstmt')> ]?
 }
 
-token ws { 
-    ||  <?MARKED('ws')> 
+token ws {
+    ||  <?MARKED('ws')>
     ||  <!ww>
         [ \s+
         | '#' \N*
@@ -37,7 +37,7 @@ token ws {
 }
 
 token pod_comment {
-    ^^ \h* '=' 
+    ^^ \h* '='
     [
     | 'begin' \h+ 'END' >>
         [ .*? \n '=' 'end' \h+ 'END' » \N* || .* ]
@@ -46,27 +46,27 @@ token pod_comment {
         ||  .*? \n '=' 'end' \h+ $<identifier> » \N*
         ||  <.panic: '=begin without matching =end'>
         ]
-    | 'begin' » \h* 
+    | 'begin' » \h*
         [ $$ || '#' || <.panic: 'Unrecognized token after =begin'> ]
-        [ 
+        [
         || .*? \n \h* '=' 'end' » \N*
-        || <.panic: '=begin without matching =end'> 
+        || <.panic: '=begin without matching =end'>
         ]
-    | 
-        [ <?before .*? ^^ '=cut' » > 
+    |
+        [ <?before .*? ^^ '=cut' » >
           <.panic: 'Obsolete pod format, please use =begin/=end instead'> ]?
         [ <alpha> || \s || <.panic: 'Illegal pod directive'> ]
         \N*
     ]
 }
-    
+
 
 ## Top-level rules
 
-token comp_unit { 
+token comp_unit {
     <.newpad>
-    <statementlist> 
-    [ $ || <.panic: 'Confused'> ] 
+    <statementlist>
+    [ $ || <.panic: 'Confused'> ]
 }
 
 rule statementlist {
@@ -98,7 +98,7 @@ token pblock {
         <.newpad>
         <signature>
         <blockoid>
-    | <?[{]> 
+    | <?[{]>
         <.newpad>
         <blockoid>
     | <.panic: 'Missing block'>
@@ -150,9 +150,9 @@ token statement_control:sym<while> {
 
 token statement_control:sym<repeat> {
     <sym> :s
-    [ 
+    [
     | $<wu>=[while|until]\s <xblock>
-    | <pblock> $<wu>=[while|until]\s <EXPR> 
+    | <pblock> $<wu>=[while|until]\s <EXPR>
     ]
 }
 
@@ -162,12 +162,12 @@ token statement_control:sym<for> {
 }
 
 token statement_control:sym<return> {
-    <sym> :s 
+    <sym> :s
     [ <EXPR> || <.panic: 'return requires an expression argument'> ]
 }
 
 token statement_control:sym<make> {
-    <sym> :s 
+    <sym> :s
     [ <EXPR> || <.panic: 'make requires an expression argument'> ]
 }
 
@@ -190,8 +190,8 @@ token term:sym<statement_prefix>   { <statement_prefix> }
 token term:sym<lambda>             { <?lambda> <pblock> }
 
 token colonpair {
-    ':' 
-    [ 
+    ':'
+    [
     | $<not>='!' <identifier>
     | <identifier> <circumfix>?
     ]
@@ -211,10 +211,10 @@ proto token package_declarator { <...> }
 token package_declarator:sym<module> { <sym> <package_def> }
 token package_declarator:sym<class>  { $<sym>=[class|grammar] <package_def> }
 
-rule package_def { 
-    <name> 
-    [ 'is' <parent=name> ]? 
-    [ 
+rule package_def {
+    <name>
+    [ 'is' <parent=name> ]?
+    [
     || ';' <comp_unit>
     || <?[{]> <block>
     || <.panic: 'Malformed package declaration'>
@@ -255,7 +255,7 @@ rule method_def {
 
 token signature { [ [<.ws><parameter><.ws>] ** ',' ]? }
 
-token parameter { 
+token parameter {
     [
     | $<quant>=['*'] <param_var>
     | [ <param_var> | <named_param> ] $<quant>=['?'|'!'|<?>]
@@ -263,7 +263,7 @@ token parameter {
     <default_value>?
 }
 
-token param_var { 
+token param_var {
     <sigil> <twigil>?
     [ <name=ident> | $<name>=[<[/!]>] ]
 }
@@ -276,8 +276,8 @@ rule default_value { '=' <EXPR('i=')> }
 
 rule regex_declarator {
     [
-    | $<proto>=[proto] [regex|token|rule] 
-      <deflongname> 
+    | $<proto>=[proto] [regex|token|rule]
+      <deflongname>
       '{' '<...>' '}'<?ENDSTMT>
     | $<sym>=[regex|token|rule]
       <deflongname>
@@ -290,12 +290,12 @@ rule regex_declarator {
 
 token dotty {
     '.' <identifier>
-    [ 
+    [
     | <?[(]> <args>
     | ':' \s <args=arglist>
     ]?
 }
-    
+
 
 proto token term { <...> }
 
@@ -318,8 +318,8 @@ token args {
 }
 
 token arglist {
-    <.ws> 
-    [ 
+    <.ws>
+    [
     | <EXPR('f=')>
     | <?>
     ]
@@ -373,16 +373,16 @@ INIT {
 }
 
 
-token nulltermish { 
-    | <OPER=term=termish> 
+token nulltermish {
+    | <OPER=term=termish>
     | <?>
 }
 
 token infixish { <!infixstopper> <OPER=infix=infix> }
 token infixstopper { <?lambda> }
 
-token postcircumfix:sym<[ ]> { 
-    '[' <.ws> <EXPR> ']' 
+token postcircumfix:sym<[ ]> {
+    '[' <.ws> <EXPR> ']'
     <O('%methodop')>
 }
 
@@ -396,8 +396,8 @@ token postcircumfix:sym<ang> {
     <O('%methodop')>
 }
 
-token postcircumfix:sym<( )> { 
-    '(' <.ws> <arglist> ')' 
+token postcircumfix:sym<( )> {
+    '(' <.ws> <arglist> ')'
     <O('%methodop')>
 }
 
@@ -447,15 +447,15 @@ token infix:sym<&&>   { <sym>  <O('%tight_and, :pasttype<if>')> }
 token infix:sym<||>   { <sym>  <O('%tight_or, :pasttype<unless>')> }
 token infix:sym<//>   { <sym>  <O('%tight_or, :pasttype<def_or>')> }
 
-token infix:sym<?? !!> { 
+token infix:sym<?? !!> {
     '??'
     <.ws>
     <EXPR('i=')>
     '!!'
-    <O('%conditional, :reducecheck<ternary>, :pasttype<if>')> 
+    <O('%conditional, :reducecheck<ternary>, :pasttype<if>')>
 }
 
-token infix:sym<=>    { 
+token infix:sym<=>    {
     <sym> <.panic: 'Assignment ("=") not supported in NQP, use ":=" instead'>
 }
 token infix:sym<:=>   { <sym>  <O('%assignment, :pasttype<bind>')> }
@@ -465,8 +465,8 @@ token infix:sym<,>    { <sym>  <O('%comma, :pasttype<list>')> }
 
 
 grammar NQP::Regex is Regex::P6Regex::Grammar {
-    token metachar:sym<:my> { 
-        ':' <?before 'my'> <statement=LANG('MAIN', 'statement')> <.ws> ';' 
+    token metachar:sym<:my> {
+        ':' <?before 'my'> <statement=LANG('MAIN', 'statement')> <.ws> ';'
     }
 
     token metachar:sym<{ }> {

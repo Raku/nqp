@@ -9,7 +9,7 @@
     p6meta = get_hll_global 'P6metaclass'
     p6meta.'new_class'('HLL::Compiler', 'parent'=>'PCT::HLLCompiler')
 .end
-   
+
 
 .sub 'parse' :method
     .param pmc source
@@ -74,4 +74,4 @@
     $S0 = $P0.'to_pir'(source, adverbs :flat :named)
     .return ($S0)
 .end
- 
+

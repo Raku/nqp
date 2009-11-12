@@ -182,7 +182,7 @@ Returns the string value of the match
     $S0 = self.'Str'()
     .return ($S0)
 .end
-    
+
 
 =item !make(obj)
 
@@ -195,7 +195,7 @@ Set the "ast object" for the invocant.
     setattribute self, '$!ast', obj
     .return (obj)
 .end
-    
+
 
 =back
 

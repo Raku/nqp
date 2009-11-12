@@ -8,13 +8,13 @@ class Foo {
     method uno() {
         self.foo();
     };
-    
+
     method des() {
         if 1 {
             self.foo();
         }
     };
-    
+
     method tres($a) {
         if 1 {
             self.foo();

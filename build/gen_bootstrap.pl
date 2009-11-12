@@ -16,16 +16,16 @@ sub make_bootstrap {
     open my $fh, '<', $filename or die "Unable to read $filename\n";
 
     while (<$fh>) {
-        if (m{^\.include '(src/[^']*)'}) { 
+        if (m{^\.include '(src/[^']*)'}) {
             print "### $_";
-            make_bootstrap($1); 
+            make_bootstrap($1);
         }
         elsif (m{^\.include '(gen/[^']*)'}) {
             print "### $_";
-            make_bootstrap("src/stage2/$1"); 
+            make_bootstrap("src/stage2/$1");
         }
         else { print; }
     }
 }
-        
+
 

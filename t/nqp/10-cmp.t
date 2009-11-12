@@ -82,7 +82,7 @@ unless @a =:= @b {
     print("not ");
 }
 say("ok 17 # container equality, named arrays");
-  
+
 my $x := 'foo';
 my $y := $x;
 my $z := 'foo';

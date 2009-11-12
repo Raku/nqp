@@ -160,9 +160,9 @@ C< :!pair >, and C<< :pair<strval> >>.
     value = box $S0
     pos = lpos + 1
   have_value:
-    # Done processing the pair, store it in the hash. 
+    # Done processing the pair, store it in the hash.
     hash[name] = value
-    goto spec_loop 
+    goto spec_loop
   spec_done:
     # Done processing the spec string, cache the hash for later.
     ohash[spec] = hash
@@ -180,7 +180,7 @@ C< :!pair >, and C<< :pair<strval> >>.
   save_hash:
     ohash[save] = hash
     .return (self)
-   
+
   err_lookup:
     self.'panic'('Unknown operator precedence specification "', lookup, '"')
 .end
@@ -258,7 +258,7 @@ position C<pos>.
     inc $I0
     stop = substr brackets, $I0, 1
 
-    # see if the opening bracket is repeated 
+    # see if the opening bracket is repeated
     .local int len
     len = 0
   bracket_loop:
@@ -291,7 +291,7 @@ position C<pos>.
     quotemod = new ['Hash']
 
     true = box 1
-    
+
 
   args_loop:
     unless args goto args_done
@@ -321,7 +321,7 @@ position C<pos>.
     (cur, pos, target) = self.'!cursor_start'()
 
     .local pmc start, stop
-    (start, stop) = self.'peek_delimiters'(target, pos) 
+    (start, stop) = self.'peek_delimiters'(target, pos)
 
     .lex '$*QUOTE_START', start
     .lex '$*QUOTE_STOP', stop
@@ -654,7 +654,7 @@ An operator precedence parser.
     markhash = new ['Hash']
     set_global '%!MARKHASH', markhash
   have_markhash:
-    markhash[markname] = pos 
+    markhash[markname] = pos
     self.'!cursor_debug'('PASS  MARKER')
     .return (1)
 .end

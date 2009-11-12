@@ -8,7 +8,7 @@ our $foo;
 
 ok($foo == 2, 'after second INIT block');
 
-INIT { 
+INIT {
     our $foo;
     ok($foo == 0, 'first INIT');
     $foo := 1;

@@ -44,7 +44,7 @@ Perform a match for protoregex C<name>.
     self.'!cursor_debug'('        token1="', $S1, '", token="', $S0, '"')
 
     # Create a hash to keep track of the methods we've already called,
-    # so that we don't end up calling it twice.  
+    # so that we don't end up calling it twice.
     .local pmc mcalled
     mcalled = new ['Hash']
 
@@ -98,7 +98,7 @@ Perform a match for protoregex C<name>.
 
 =item !protoregex_generation()
 
-Reset the C<$!generation> flag to indicate that protoregexes 
+Reset the C<$!generation> flag to indicate that protoregexes
 need to be recalculated (because new protoregexes have been
 added).
 
@@ -176,7 +176,7 @@ create a new one and return it.
     push methodlist, methodname
     goto proto_loop
   proto_done:
-  
+
     # Now, walk through all of the methods, building the
     # tokrx and toklen tables as we go.
     .local pmc sorttok
@@ -223,7 +223,7 @@ create a new one and return it.
   token_item:
     tkey = $P0
 
-    # If we've already processed this token for this rule, 
+    # If we've already processed this token for this rule,
     # don't enter it twice into tokrx.
     $I0 = exists seentok[tkey]
     if $I0 goto tokens_loop
@@ -331,7 +331,7 @@ recreating it on future calls.
     setprop parrotclass, '%!prototable', prototable
     .return (prototable)
 .end
-    
+
 
 =item !PREFIX__!protoregex(name)
 

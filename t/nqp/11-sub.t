@@ -73,4 +73,4 @@ say("ok 10 # subroutines that operate on args do not affect the original arg out
 sub eleven ($arg) {
     say("ok 11 # parameter with a trailing comma");
 }
-eleven( 'dummy', ); 
+eleven( 'dummy', );

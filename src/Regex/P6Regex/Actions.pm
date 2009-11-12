@@ -4,8 +4,8 @@ class Regex::P6Regex::Actions is HLL::Actions;
 our @MODIFIERS;
 
 sub INIT() {
-    @MODIFIERS := Q:PIR { 
-        %r = new ['ResizablePMCArray'] 
+    @MODIFIERS := Q:PIR {
+        %r = new ['ResizablePMCArray']
         $P0 = new ['Hash']
         push %r, $P0
     };
@@ -42,8 +42,8 @@ method nibbler($/, $key?) {
     my $past;
     if +$<termish> > 1 {
         $past := PAST::Regex.new( :pasttype('alt'), :node($/) );
-        for $<termish> { 
-            $past.push($_.ast); 
+        for $<termish> {
+            $past.push($_.ast);
         }
     }
     else {
@@ -124,12 +124,12 @@ method quantifier:sym<**>($/) {
     make backmod($past, $<backmod>);
 }
 
-method metachar:sym<ws>($/) { 
+method metachar:sym<ws>($/) {
     my $past := @MODIFIERS[0]<s>
-                ?? PAST::Regex.new( 'ws', :pasttype('subrule'), 
+                ?? PAST::Regex.new( 'ws', :pasttype('subrule'),
                                     :subtype('method'), :node($/) )
                 !! 0;
-    make $past; 
+    make $past;
 }
 
 
@@ -204,9 +204,9 @@ method metachar:sym<assert>($/) {
 method metachar:sym<~>($/) {
     make PAST::Regex.new(
         $<EXPR>.ast,
-        PAST::Regex.new( 
+        PAST::Regex.new(
             $<GOAL>.ast,
-            PAST::Regex.new( 'FAILGOAL', ~$<GOAL>, :pasttype('subrule'), 
+            PAST::Regex.new( 'FAILGOAL', ~$<GOAL>, :pasttype('subrule'),
                              :subtype('method') ),
             :pasttype('alt')
         ),
@@ -244,10 +244,10 @@ method metachar:sym<var>($/) {
 method metachar:sym<PIR>($/) {
     make PAST::Regex.new(
              PAST::Op.new( :inline(~$<pir>), :pasttype('inline'), ),
-             :pasttype('pastnode'), :node($/) 
+             :pasttype('pastnode'), :node($/)
          );
 }
-            
+
 
 method backslash:sym<w>($/) {
     my $subtype := ~$<sym> eq 'n' ?? 'nl' !! ~$<sym>;
@@ -268,7 +268,7 @@ method backslash:sym<e>($/) {
 }
 
 method backslash:sym<f>($/) {
-    my $past := PAST::Regex.new( "\f", :pasttype('enumcharlist'), 
+    my $past := PAST::Regex.new( "\f", :pasttype('enumcharlist'),
                     :negate($<sym> eq 'F'), :node($/) );
     make $past;
 }
@@ -280,26 +280,26 @@ method backslash:sym<h>($/) {
 }
 
 method backslash:sym<r>($/) {
-    my $past := PAST::Regex.new( "\r", :pasttype('enumcharlist'), 
+    my $past := PAST::Regex.new( "\r", :pasttype('enumcharlist'),
                     :negate($<sym> eq 'R'), :node($/) );
     make $past;
 }
 
 method backslash:sym<t>($/) {
-    my $past := PAST::Regex.new( "\t", :pasttype('enumcharlist'), 
+    my $past := PAST::Regex.new( "\t", :pasttype('enumcharlist'),
                     :negate($<sym> eq 'T'), :node($/) );
     make $past;
 }
 
 method backslash:sym<v>($/) {
-    my $past := PAST::Regex.new( "\x[0a,0b,0c,0d,85,2028,2029]", 
+    my $past := PAST::Regex.new( "\x[0a,0b,0c,0d,85,2028,2029]",
                     :pasttype('enumcharlist'),
                     :negate($<sym> eq 'V'), :node($/) );
     make $past;
 }
 
 method backslash:sym<o>($/) {
-    my $octlit := 
+    my $octlit :=
         HLL::Actions::ints_to_string( $<octint> || $<octints><octint> );
     make $<sym> eq 'O'
          ?? PAST::Regex.new( $octlit, :pasttype('enumcharlist'),
@@ -308,7 +308,7 @@ method backslash:sym<o>($/) {
 }
 
 method backslash:sym<x>($/) {
-    my $hexlit := 
+    my $hexlit :=
         HLL::Actions::ints_to_string( $<hexint> || $<hexints><hexint> );
     make $<sym> eq 'X'
          ?? PAST::Regex.new( $hexlit, :pasttype('enumcharlist'),
@@ -339,7 +339,7 @@ method assertion:sym<!>($/) {
         $past.negate( !$past.negate );
         $past.subtype('zerowidth');
     }
-    else { 
+    else {
         $past := PAST::Regex.new( :pasttype('anchor'), :subtype('fail'), :node($/) );
     }
     make $past;
@@ -368,9 +368,9 @@ method assertion:sym<name>($/) {
             chopn $S0, 1
             %r = box $S0
         };
-        $past := PAST::Regex.new( 
+        $past := PAST::Regex.new(
             PAST::Regex.new( $regexsym, :pasttype('literal') ),
-            :name($name), :pasttype('subcapture'), :node($/) 
+            :name($name), :pasttype('subcapture'), :node($/)
         );
     }
     else {
@@ -391,9 +391,9 @@ method assertion:sym<[>($/) {
     my $past := $clist[0].ast;
     if $past.negate && $past.pasttype eq 'subrule' {
         $past.subtype('zerowidth');
-        $past := PAST::Regex.new( 
-                     $past, 
-                     PAST::Regex.new( :pasttype('charclass'), :subtype('.') ), 
+        $past := PAST::Regex.new(
+                     $past,
+                     PAST::Regex.new( :pasttype('charclass'), :subtype('.') ),
                      :node($/)
                  );
     }
@@ -412,7 +412,7 @@ method assertion:sym<[>($/) {
     }
     make $past;
 }
-    
+
 method cclass_elem($/) {
     my $str := '';
     my $past;
@@ -441,7 +441,7 @@ method cclass_elem($/) {
                            cclass_done:
                              %r = box $S2
                          };
-                $str := $str ~ $c;            
+                $str := $str ~ $c;
             }
             else { $str := $str ~ $_[0]; }
         }
@@ -466,7 +466,7 @@ sub buildsub($rpast) {
         $rpast,
         PAST::Regex.new( :pasttype('pass') ),
         :pasttype('concat'),
-        :capnames(%capnames) 
+        :capnames(%capnames)
     );
     PAST::Block.new( $rpast, :blocktype('method'));
 }

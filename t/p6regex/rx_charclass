@@ -73,9 +73,9 @@
 # todo :pugs<feature> :pge<feature>
 (ab)"x$0"		abxab		y	literal match with interpolation
 '?'			ab<?		y	literal match with question mark
-'<'			ab<?		y	literal match with lt 
+'<'			ab<?		y	literal match with lt
 '<?'			ab<?		y	literal match with lt and question mark
-'<?'			ab<x?		n	non-matching literal match 
+'<?'			ab<x?		n	non-matching literal match
 <[A..Z0..9]>		abcdef		n	two enumerated ranges
 <[A..Z0..9]>		abcDef		y	two enumerated ranges
 

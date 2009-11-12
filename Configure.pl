@@ -57,8 +57,8 @@ MAIN: {
     my %config = read_parrot_config(@parrot_config_exe);
 
     my $parrot_errors = '';
-    if (!%config) { 
-        $parrot_errors .= "Unable to locate parrot_config\n"; 
+    if (!%config) {
+        $parrot_errors .= "Unable to locate parrot_config\n";
     }
     elsif ($reqsvn > $config{'revision'} &&
             ($reqpar eq '' || version_int($reqpar) > version_int($config{'VERSION'}))) {
@@ -87,9 +87,9 @@ END
     {
         no warnings;
         print "Cleaning up ...\n";
-        if (open my $CLEAN, '-|', "$make clean") { 
+        if (open my $CLEAN, '-|', "$make clean") {
             my @slurp = <$CLEAN>;
-            close $CLEAN; 
+            close $CLEAN;
         }
     }
 

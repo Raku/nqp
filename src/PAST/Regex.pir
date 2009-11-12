@@ -7,7 +7,7 @@ PAST::Regex - Regex nodes for PAST
 =head1 DESCRIPTION
 
 This file implements the various abstract syntax tree nodes
-for regular expressions.  
+for regular expressions.
 
 =cut
 
@@ -179,7 +179,7 @@ at this node.
     lpast = self[0]
     $I0 = isa lpast, ['String']
     unless $I0 goto done
-    
+
     .local string subtype
     subtype = self.'subtype'()
     if subtype == 'ignorecase' goto done

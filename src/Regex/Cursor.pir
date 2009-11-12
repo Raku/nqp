@@ -524,7 +524,7 @@ values of repetition count, cursor position, and mark (address).
 =item !mark_commit(mark)
 
 Like C<!mark_fail> above this backtracks the cursor to C<mark>
-(releasing any intermediate marks), but preserves the current 
+(releasing any intermediate marks), but preserves the current
 capture states.
 
 =cut

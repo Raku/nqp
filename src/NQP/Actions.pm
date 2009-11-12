@@ -22,8 +22,8 @@ sub block_immediate($block) {
 }
 
 sub sigiltype($sigil) {
-    $sigil eq '%' 
-    ?? 'Hash' 
+    $sigil eq '%'
+    ?? 'Hash'
     !! ($sigil eq '@' ?? 'ResizablePMCArray' !! 'Undef');
 }
 
@@ -44,18 +44,18 @@ method comp_unit($/) {
 method statementlist($/) {
     my $past := PAST::Stmts.new( :node($/) );
     if $<statement> {
-        for $<statement> { 
+        for $<statement> {
             my $ast := $_.ast;
             if $ast.isa(PAST::Block) && !$ast.blocktype {
                 $ast := block_immediate($ast);
             }
-            $past.push( $ast ); 
+            $past.push( $ast );
         }
     }
     make $past;
 }
 
-method statement($/) { 
+method statement($/) {
     my $past;
     if $<EXPR> { $past := $<EXPR>.ast; }
     elsif $<statement_control> { $past := $<statement_control>.ast; }
@@ -121,7 +121,7 @@ method statement_control:sym<while>($/) {
 method statement_control:sym<repeat>($/) {
     my $pasttype := 'repeat_' ~ ~$<wu>;
     my $past;
-    if $<xblock> { 
+    if $<xblock> {
         $past := xblock_immediate( $<xblock>.ast );
         $past.pasttype($pasttype);
     }
@@ -182,8 +182,8 @@ method term:sym<statement_prefix>($/)   { make $<statement_prefix>.ast; }
 method term:sym<lambda>($/)             { make $<pblock>.ast; }
 
 method colonpair($/) {
-    my $past := $<circumfix> 
-                ?? $<circumfix>[0].ast 
+    my $past := $<circumfix>
+                ?? $<circumfix>[0].ast
                 !! PAST::Val.new( :value( !$<not> ) );
     $past.named( ~$<identifier> );
     make $past;
@@ -197,9 +197,9 @@ method variable($/) {
     }
     else {
         $past := PAST::Var.new( :name(~$/) );
-        if $<twigil>[0] eq '*' { 
-            $past.scope('contextual'); 
-            $past.viviself( PAST::Op.new( 'Contextual ' ~ ~$/ ~ ' not found', 
+        if $<twigil>[0] eq '*' {
+            $past.scope('contextual');
+            $past.viviself( PAST::Op.new( 'Contextual ' ~ ~$/ ~ ' not found',
                                           :pirop('die') )
             );
         }
@@ -216,7 +216,7 @@ method package_declarator:sym<class>($/) {
     my $past := $<package_def>.ast;
     my $classinit :=
         PAST::Op.new(
-            PAST::Op.new( 
+            PAST::Op.new(
                 :inline( '    %r = get_root_global ["parrot"], "P6metaclass"')
             ),
             ~$<package_def><name>,
@@ -263,16 +263,16 @@ method variable_declarator($/) {
     if $*SCOPE eq 'has' {
         $BLOCK.symbol($name, :scope('attribute') );
         unless $BLOCK<attributes> {
-            $BLOCK<attributes> := 
+            $BLOCK<attributes> :=
                 PAST::Op.new( :pasttype('list'), :named('attr') );
         }
         $BLOCK<attributes>.push( $name );
         $past := PAST::Stmts.new();
     }
-    else { 
+    else {
         my $scope := $*SCOPE eq 'our' ?? 'package' !! 'lexical';
-        my $decl := PAST::Var.new( :name($name), :scope($scope), :isdecl(1), 
-                                   :lvalue(1), :viviself( sigiltype($sigil) ), 
+        my $decl := PAST::Var.new( :name($name), :scope($scope), :isdecl(1),
+                                   :lvalue(1), :viviself( sigiltype($sigil) ),
                                    :node($/) );
         $BLOCK.symbol($name, :scope($scope) );
         $BLOCK[0].push($decl);
@@ -291,7 +291,7 @@ method routine_def($/) {
         my $name := ~$<deflongname>[0].ast;
         $past.name($name);
         if $*SCOPE ne 'our' {
-            @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1), 
+            @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1),
                                   :viviself($past), :scope('lexical') ) );
             @BLOCK[0].symbol($name, :scope('lexical') );
             $past := PAST::Var.new( :name($name) );
@@ -320,12 +320,12 @@ method signature($/) {
     for $<parameter> { $BLOCKINIT.push($_.ast); }
 }
 
-method parameter($/) { 
+method parameter($/) {
     my $quant := $<quant>;
     my $past;
     if $<named_param> {
         $past := $<named_param>.ast;
-        if $quant ne '!' { 
+        if $quant ne '!' {
             $past.viviself( sigiltype($<named_param><param_var><sigil>) );
         }
     }
@@ -339,22 +339,22 @@ method parameter($/) {
             $past.viviself( sigiltype($<param_var><sigil>) );
         }
     }
-    if $<default_value> { 
-        if $quant eq '*' { 
+    if $<default_value> {
+        if $quant eq '*' {
             $/.CURSOR.panic("Can't put default on slurpy parameter");
         }
-        if $quant eq '!' { 
+        if $quant eq '!' {
             $/.CURSOR.panic("Can't put default on required parameter");
         }
-        $past.viviself( $<default_value>[0]<EXPR>.ast ); 
+        $past.viviself( $<default_value>[0]<EXPR>.ast );
     }
     unless $past.viviself { @BLOCK[0].arity( +@BLOCK[0].arity + 1 ); }
-    make $past; 
+    make $past;
 }
 
 method param_var($/) {
     my $name := ~$/;
-    my $past :=  PAST::Var.new( :name($name), :scope('parameter'), 
+    my $past :=  PAST::Var.new( :name($name), :scope('parameter'),
                                 :isdecl(1), :node($/) );
     @BLOCK[0].symbol($name, :scope('lexical') );
     make $past;
@@ -453,12 +453,12 @@ method term:sym<identifier>($/) {
 
 method term:sym<name>($/) {
     my $ns := $<name><identifier>;
-    $ns := Q:PIR { 
+    $ns := Q:PIR {
                $P0 = find_lex '$ns'
                %r = clone $P0
            };
     my $name := $ns.pop;
-    my $var := 
+    my $var :=
         PAST::Var.new( :name(~$name), :namespace($ns), :scope('package') );
     my $past := $var;
     if $<args> {
@@ -509,9 +509,9 @@ method arglist($/) {
 
 method term:sym<value>($/) { make $<value>.ast; }
 
-method circumfix:sym<( )>($/) { 
-    make $<EXPR> 
-         ?? $<EXPR>[0].ast 
+method circumfix:sym<( )>($/) {
+    make $<EXPR>
+         ?? $<EXPR>[0].ast
          !! PAST::Op.new( :pasttype('list'), :node($/) );
 }
 
@@ -532,10 +532,10 @@ method circumfix:sym<[ ]>($/) {
 
 method circumfix:sym<ang>($/) { make $<quote_EXPR>.ast; }
 
-method circumfix:sym<{ }>($/) { 
+method circumfix:sym<{ }>($/) {
     make +$<pblock><blockoid><statementlist><statement> > 0
          ?? $<pblock>.ast
-         !! PAST::Op.new( :inline('    %r = new ["Hash"]'), :node($/) ); 
+         !! PAST::Op.new( :inline('    %r = new ["Hash"]'), :node($/) );
 }
 
 method circumfix:sym<sigil>($/) {
@@ -572,10 +572,10 @@ method postcircumfix:sym<( )>($/) {
 method value($/) {
     my $past := $<quote>
                 ?? $<quote>.ast
-                !! PAST::Val.new( 
+                !! PAST::Val.new(
                        :value($<dec_number>
                               ?? $<dec_number>.ast
-                              !! $<integer>.ast) 
+                              !! $<integer>.ast)
                    );
     make $past;
 }
@@ -593,8 +593,8 @@ method quote:sym<Q:PIR>($/) {
 
 method quote_escape:sym<$>($/) { make $<variable>.ast; }
 method quote_escape:sym<{ }>($/) {
-    make PAST::Op.new( 
-        :pirop('set S*'), block_immediate($<block>.ast), :node($/) 
+    make PAST::Op.new(
+        :pirop('set S*'), block_immediate($<block>.ast), :node($/)
     );
 }
 
@@ -633,7 +633,7 @@ class NQP::RegexActions is Regex::P6Regex::Actions {
     method codeblock($/) {
         my $block := $<block>.ast;
         $block.blocktype('immediate');
-        my $past := 
+        my $past :=
             PAST::Regex.new(
                 PAST::Stmts.new(
                     PAST::Op.new(

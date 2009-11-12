@@ -36,7 +36,7 @@ Once you have a copy of NQP, build it as follows:
     $ perl Configure.pl --gen-parrot
     $ make
 
-This will create a "nqp" or "nqp.exe" executable in the 
+This will create a "nqp" or "nqp.exe" executable in the
 current (nqp-rx) directory.  Programs can then be run from
 the build directory using a command like:
 
@@ -46,9 +46,9 @@ The C<--gen-parrot> option above tells Configure.pl to automatically
 download and build the most appropriate version of Parrot into a
 local "parrot/" subdirectory, install that Parrot into the
 "parrot_install/" subdirectory, and use that for building NQP.
-It's okay to use the C<--gen-parrot> option on later invocations 
-of Configure.pl; the configure system will re-build Parrot only 
-if a newer version is needed for whatever version of Rakudo you're 
+It's okay to use the C<--gen-parrot> option on later invocations
+of Configure.pl; the configure system will re-build Parrot only
+if a newer version is needed for whatever version of Rakudo you're
 working with.
 
 You can use C<--parrot-config=/path/to/parrot_config> instead

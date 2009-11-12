@@ -16,7 +16,7 @@
 .sub 'say'
     .param pmc list            :slurpy
     .tailcall 'print'(list :flat, "\n")
-.end  
+.end
 
 .sub 'ok'
     .param pmc    condition
