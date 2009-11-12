@@ -56,6 +56,14 @@ grammar HLL::Grammar;
         ]
     }
 
+    token dec_number {
+        | $<coeff>=[     '.' \d+ ] <escale>?
+        | $<coeff>=[ \d+ '.' \d+ ] <escale>?
+        | $<coeff>=[ \d+         ] <escale>
+    }
+
+    token escale { <[Ee]> <[+\-]>? \d+ }
+
     proto token quote_escape { <...> }
     token quote_escape:sym<backslash> { \\ \\ <?quotemod_check('q')> }
     token quote_escape:sym<stopper>   { \\ <?quotemod_check('q')> <stopper> }

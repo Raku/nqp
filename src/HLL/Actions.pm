@@ -109,6 +109,8 @@ method integer($/) {
             );
 }
 
+method dec_number($/) { make +$/; }
+
 method hexint($/) {
     make string_to_int( $/, 16 );
 }

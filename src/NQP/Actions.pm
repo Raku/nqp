@@ -558,10 +558,13 @@ method postcircumfix:sym<( )>($/) {
 method value($/) {
     my $past := $<quote>
                 ?? $<quote>.ast
-                !! PAST::Val.new( :value($<integer>.ast) );
+                !! PAST::Val.new( 
+                       :value($<dec_number>
+                              ?? $<dec_number>.ast
+                              !! $<integer>.ast) 
+                   );
     make $past;
 }
-
 
 method quote:sym<apos>($/) { make $<quote_EXPR>.ast; }
 method quote:sym<dblq>($/) { make $<quote_EXPR>.ast; }

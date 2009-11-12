@@ -329,8 +329,9 @@ token arglist {
 token term:sym<value> { <value> }
 
 token value {
-    | <integer>
+    | <dec_number>
     | <quote>
+    | <integer>
 }
 
 proto token quote { <...> }
