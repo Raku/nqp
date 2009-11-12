@@ -78,7 +78,10 @@ token statement {
     <!before <[\])}]> | $ >
     [
     | <statement_control>
-    | <EXPR>
+    | <EXPR> <.ws>
+        [
+        | <statement_mod_cond>
+        ]?
     ]
 }
 
@@ -177,6 +180,13 @@ token statement_prefix:sym<INIT> { <sym> <blorst> }
 token blorst {
     \s <.ws> [ <?[{]> <block> | <statement> ]
 }
+
+## Statement modifiers
+
+proto token statement_mod_cond { <...> }
+
+token statement_mod_cond:sym<if>     { <sym> :s <mod_expr=EXPR> }
+token statement_mod_cond:sym<unless> { <sym> :s <mod_expr=EXPR> }
 
 ## Terms
 

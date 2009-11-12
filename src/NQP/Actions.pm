@@ -55,9 +55,14 @@ method statementlist($/) {
     make $past;
 }
 
-method statement($/) {
+method statement($/, $key?) {
     my $past;
-    if $<EXPR> { $past := $<EXPR>.ast; }
+    if $<EXPR> {
+        my $mc := $<statement_mod_cond>[0];
+        $past := $mc
+              ?? PAST::Op.new($mc.ast, $<EXPR>.ast, :pasttype(~$mc<sym>), :node($/) )
+              !! $<EXPR>.ast;
+    }
     elsif $<statement_control> { $past := $<statement_control>.ast; }
     else { $past := 0; }
     make $past;
@@ -169,6 +174,12 @@ method blorst($/) {
          ?? block_immediate($<block>.ast)
          !! $<statement>.ast;
 }
+
+# Statement modifiers
+
+method statement_mod_cond:sym<if>($/)     { make $<mod_expr>.ast; }
+method statement_mod_cond:sym<unless>($/) { make $<mod_expr>.ast; }
+
 
 ## Terms
 
