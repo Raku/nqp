@@ -699,6 +699,7 @@ An operator precedence parser.
     .return ($P1)
 .end
 
+=back
 
 =cut
 

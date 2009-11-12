@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-    Regex::Cursor-protoregex-peek - simple protoregex implementation
+Regex::Cursor-protoregex-peek - simple protoregex implementation
 
 =head1 DESCRIPTION
 
@@ -421,3 +421,10 @@ tokrx hash.
 =back
 
 =cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:
+

@@ -9,6 +9,8 @@ PAST::Regex - Regex nodes for PAST
 This file implements the various abstract syntax tree nodes
 for regular expressions.
 
+=over 4
+
 =cut
 
 .namespace ['PAST';'Regex']
@@ -275,7 +277,6 @@ at this node.
 .end
 
 =back
-
 
 =head1 AUTHOR
 

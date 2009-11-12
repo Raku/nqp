@@ -206,6 +206,7 @@ Return the cursor's from position.
     .return ($P0)
 .end
 
+=back
 
 =head2 Private methods
 
@@ -667,6 +668,7 @@ Match the backreference given by C<name>.
     .return (0)
 .end
 
+=back
 
 =head1 AUTHORS
 
