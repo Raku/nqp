@@ -518,7 +518,6 @@ An operator precedence parser.
     termish = 'termish'
   have_termish:
 
-    unless opstack goto reduce_done
     .local string inprec, inassoc, opprec
     inprec = inO['prec']
     unless inprec goto err_inprec
