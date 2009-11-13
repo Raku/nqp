@@ -384,11 +384,11 @@ INIT {
 
 
 token nulltermish {
-    | <OPER=term=termish>
+    | $<OPER>=$<term>=<termish>
     | <?>
 }
 
-token infixish { <!infixstopper> <OPER=infix=infix> }
+token infixish { <!infixstopper> $<OPER>=$<infix>=<infix> }
 token infixstopper { <?lambda> }
 
 token postcircumfix:sym<[ ]> {
