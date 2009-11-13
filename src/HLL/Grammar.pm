@@ -19,11 +19,11 @@ grammar HLL::Grammar;
 
     token term:sym<circumfix> { <circumfix> }
 
-    token infixish { $<OPER>=$<infix>=<infix> }
-    token prefixish { $<OPER>=$<prefix>=<prefix> <.ws> }
+    token infixish { $<OPER>=$<infix>=<.infix> }
+    token prefixish { $<OPER>=$<prefix>=<.prefix> <.ws> }
     token postfixish {
-        | $<OPER>=$<postfix>=<postfix>
-        | $<OPER>=$<postcircumfix>=<postcircumfix>
+        | $<OPER>=$<postfix>=<.postfix>
+        | $<OPER>=$<postcircumfix>=<.postcircumfix>
     }
 
     # token quote_EXPR is in src/cheats/hll-grammar.pir

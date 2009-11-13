@@ -137,7 +137,7 @@ token statement_control:sym<if> {
     <sym> :s
     <xblock>
     [ 'elsif'\s <xblock> ]*
-    [ 'else'\s $<else>=<pblock> ]?
+    [ 'else'\s $<else>=<.pblock> ]?
 }
 
 token statement_control:sym<unless> {
@@ -185,8 +185,8 @@ token blorst {
 
 proto token statement_mod_cond { <...> }
 
-token statement_mod_cond:sym<if>     { <sym> :s $<mod_expr>=<EXPR> }
-token statement_mod_cond:sym<unless> { <sym> :s $<mod_expr>=<EXPR> }
+token statement_mod_cond:sym<if>     { <sym> :s $<mod_expr>=<.EXPR> }
+token statement_mod_cond:sym<unless> { <sym> :s $<mod_expr>=<.EXPR> }
 
 ## Terms
 
@@ -208,7 +208,7 @@ token colonpair {
 }
 
 token variable {
-    | <sigil> <twigil>? $<desigilname>=<ident>
+    | <sigil> <twigil>? $<desigilname>=<.ident>
     | <sigil> <?[<[]> <postcircumfix>
     | $<sigil>=['$'] $<desigilname>=[<[/_!]>]
 }
@@ -223,7 +223,7 @@ token package_declarator:sym<class>  { $<sym>=[class|grammar] <package_def> }
 
 rule package_def {
     <name>
-    [ 'is' $<parent>=<name> ]?
+    [ 'is' $<parent>=<.name> ]?
     [
     || ';' <comp_unit>
     || <?[{]> <block>
@@ -275,7 +275,7 @@ token parameter {
 
 token param_var {
     <sigil> <twigil>?
-    [ $<name>=<ident> | $<name>=[<[/!]>] ]
+    [ $<name>=<.ident> | $<name>=[<[/!]>] ]
 }
 
 token named_param {
@@ -294,7 +294,7 @@ rule regex_declarator {
       <.newpad>
       [ '(' <signature> ')' ]?
       {*} #= open
-      '{'$<p6regex>=<LANG('Regex','nibbler')>'}'<?ENDSTMT>
+      '{'$<p6regex>=<.LANG('Regex','nibbler')>'}'<?ENDSTMT>
     ]
 }
 
@@ -302,7 +302,7 @@ token dotty {
     '.' <identifier>
     [
     | <?[(]> <args>
-    | ':' \s $<args>=<arglist>
+    | ':' \s $<args>=<.arglist>
     ]?
 }
 
@@ -384,11 +384,11 @@ INIT {
 
 
 token nulltermish {
-    | $<OPER>=$<term>=<termish>
+    | $<OPER>=$<term>=<.termish>
     | <?>
 }
 
-token infixish { <!infixstopper> $<OPER>=$<infix>=<infix> }
+token infixish { <!infixstopper> $<OPER>=$<infix>=<.infix> }
 token infixstopper { <?lambda> }
 
 token postcircumfix:sym<[ ]> {
@@ -476,7 +476,7 @@ token infix:sym<,>    { <sym>  <O('%comma, :pasttype<list>')> }
 
 grammar NQP::Regex is Regex::P6Regex::Grammar {
     token metachar:sym<:my> {
-        ':' <?before 'my'> $<statement>=<LANG('MAIN', 'statement')> <.ws> ';'
+        ':' <?before 'my'> $<statement>=<.LANG('MAIN', 'statement')> <.ws> ';'
     }
 
     token metachar:sym<{ }> {
@@ -493,13 +493,13 @@ grammar NQP::Regex is Regex::P6Regex::Grammar {
             | <?before '>'>
             | '=' <assertion>
             | ':' <arglist>
-            | '(' $<arglist>=<LANG('MAIN','arglist')> ')'
+            | '(' $<arglist>=<.LANG('MAIN','arglist')> ')'
             | <.normspace> <nibbler>
             ]?
     }
 
 
     token codeblock {
-        $<block>=<LANG('MAIN','pblock')>
+        $<block>=<.LANG('MAIN','pblock')>
     }
 }
