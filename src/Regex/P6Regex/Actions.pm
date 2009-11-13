@@ -348,6 +348,7 @@ method assertion:sym<!>($/) {
 method assertion:sym<method>($/) {
     my $past := $<assertion>.ast;
     $past.subtype('method');
+    $past.name('');
     make $past;
 }
 
