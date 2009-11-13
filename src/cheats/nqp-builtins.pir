@@ -50,15 +50,3 @@
 .end
 
 
-.namespace ['NQP';'Grammar']
-
-.sub 'ternary' :method
-    .param pmc match
-    $P0 = match[1]
-    $P1 = match['infix']
-    $P1 = $P1['EXPR']
-    match[1] = $P1
-    match[2] = $P0
-.end
-
-

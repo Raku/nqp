@@ -641,6 +641,16 @@ An operator precedence parser.
 .end
 
 
+.sub 'ternary' :method
+    .param pmc match
+    $P0 = match[1]
+    $P1 = match['infix']
+    $P1 = $P1['EXPR']
+    match[1] = $P1
+    match[2] = $P0
+.end
+
+
 .sub 'MARKER' :method
     .param pmc markname
 
