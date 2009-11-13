@@ -35,7 +35,7 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar;
     }
 
     token termish {
-        <noun=quantified_atom>+
+        $<noun>=<quantified_atom>+
     }
 
     token quantified_atom {
@@ -84,8 +84,8 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar;
     ## we cheat here, really should be regex_infix:sym<~>
     token metachar:sym<~> {
         <sym>
-        <.ws> <GOAL=quantified_atom>
-        <.ws> <EXPR=quantified_atom>
+        <.ws> $<GOAL>=<quantified_atom>
+        <.ws> $<EXPR>=<quantified_atom>
     }
 
     token metachar:sym<{*}> {
