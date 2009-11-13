@@ -80,7 +80,8 @@ token statement {
     | <statement_control>
     | <EXPR> <.ws>
         [
-        | <statement_mod_cond>
+        | <statement_mod_cond> <statement_mod_loop>?
+        | <statement_mod_loop>
         ]?
     ]
 }
@@ -185,8 +186,13 @@ token blorst {
 
 proto token statement_mod_cond { <...> }
 
-token statement_mod_cond:sym<if>     { <sym> :s <mod_expr=EXPR> }
-token statement_mod_cond:sym<unless> { <sym> :s <mod_expr=EXPR> }
+token statement_mod_cond:sym<if>     { <sym> :s <cond=EXPR> }
+token statement_mod_cond:sym<unless> { <sym> :s <cond=EXPR> }
+
+proto token statement_mod_loop { <...> }
+
+token statement_mod_loop:sym<while>     { <sym> :s <cond=EXPR> }
+token statement_mod_loop:sym<until>     { <sym> :s <cond=EXPR> }
 
 ## Terms
 
