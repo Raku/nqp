@@ -165,10 +165,10 @@ token statement_control:sym<for> {
     <xblock>
 }
 
-token statement_control:sym<return> {
-    <sym> :s
-    [ <EXPR> || <.panic: 'return requires an expression argument'> ]
-}
+#token statement_control:sym<return> {
+#    <sym> :s
+#    [ <EXPR> || <.panic: 'return requires an expression argument'> ]
+#}
 
 token statement_control:sym<make> {
     <sym> :s
@@ -386,6 +386,7 @@ INIT {
     NQP::Grammar.O(':prec<i=>, :assoc<right>', '%assignment');
     NQP::Grammar.O(':prec<g=>, :assoc<list>, :nextterm<nulltermish>',  '%comma');
     NQP::Grammar.O(':prec<f=>, :assoc<list>',  '%list_infix');
+    NQP::Grammar.O(':prec<e=>, :assoc<unary>', '%list_prefix');
 }
 
 
@@ -478,6 +479,8 @@ token infix:sym<:=>   { <sym>  <O('%assignment, :pasttype<bind>')> }
 token infix:sym<::=>  { <sym>  <O('%assignment, :pasttype<bind>')> }
 
 token infix:sym<,>    { <sym>  <O('%comma, :pasttype<list>')> }
+
+token prefix:sym<return> { <sym> \s <O('%list_prefix, :pasttype<return>')> }
 
 
 grammar NQP::Regex is Regex::P6Regex::Grammar {
