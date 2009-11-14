@@ -169,11 +169,11 @@ token statement_control:sym<for> {
 #    <sym> :s
 #    [ <EXPR> || <.panic: 'return requires an expression argument'> ]
 #}
-
-token statement_control:sym<make> {
-    <sym> :s
-    [ <EXPR> || <.panic: 'make requires an expression argument'> ]
-}
+#
+#token statement_control:sym<make> {
+#    <sym> :s
+#    [ <EXPR> || <.panic: 'make requires an expression argument'> ]
+#}
 
 proto token statement_prefix { <...> }
 token statement_prefix:sym<INIT> { <sym> <blorst> }
@@ -481,6 +481,7 @@ token infix:sym<::=>  { <sym>  <O('%assignment, :pasttype<bind>')> }
 token infix:sym<,>    { <sym>  <O('%comma, :pasttype<list>')> }
 
 token prefix:sym<return> { <sym> \s <O('%list_prefix, :pasttype<return>')> }
+token prefix:sym<make>   { <sym> \s <O('%list_prefix')> }
 
 
 grammar NQP::Regex is Regex::P6Regex::Grammar {

@@ -639,6 +639,15 @@ method postfix:sym<-->($/) {
                        :pasttype('inline') );
 }
 
+method prefix:sym<make>($/) {
+    make PAST::Op.new(
+             PAST::Var.new( :name('$/'), :scope('contextual') ),
+             :pasttype('callmethod'),
+             :name('!make'),
+             :node($/)
+    );
+}
+
 
 class NQP::RegexActions is Regex::P6Regex::Actions {
 
