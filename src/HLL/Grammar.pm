@@ -39,20 +39,26 @@ grammar HLL::Grammar;
         ]
     }
 
-    token hexint { [<[ 0..9 a..f A..F ]>+] ** '_' }
+    token decint  { [\d+] ** '_' }
+    token hexints { [<.ws><decint><.ws>] ** ',' }
+
+    token hexint  { [<[ 0..9 a..f A..F ]>+] ** '_' }
     token hexints { [<.ws><hexint><.ws>] ** ',' }
 
-    token octint { [<[ 0..7 ]>+] ** '_' }
+    token octint  { [<[ 0..7 ]>+] ** '_' }
     token octints { [<.ws><octint><.ws>] ** ',' }
+
+    token binint  { [<[ 0..7 ]>+] ** '_' }
+    token binints { [<.ws><binint><.ws>] ** ',' }
 
     token integer {
         [
-        | 0 [ b $<binint>=[[<[01]>+] ** '_']
-            | o <octint>
-            | x <hexint>
-            | d $<decint>=[[\d+] ** '_']
+        | 0 [ b <VALUE=binint>
+            | o <VALUE=octint>
+            | x <VALUE=hexint>
+            | d <VALUE=decint>
             ]
-        | $<decint>=[\d+ [_\d+]*]
+        | <VALUE=decint>
         ]
     }
 

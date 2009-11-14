@@ -97,27 +97,14 @@ method termish($/) {
 
 method term:sym<circumfix>($/) { make $<circumfix>.ast }
 
-method integer($/) {
-    make $<decint>
-         ?? string_to_int( $<decint>, 10)
-         !! ( $<hexint>
-              ?? $<hexint>.ast
-              !! ( $<octint>
-                   ?? $<octint>.ast
-                   !! string_to_int( $<binint>, 2)
-                 )
-            );
-}
+method integer($/) { make $<VALUE>.ast; }
 
 method dec_number($/) { make +$/; }
 
-method hexint($/) {
-    make string_to_int( $/, 16 );
-}
-
-method octint($/) {
-    make string_to_int( $/, 8 );
-}
+method decint($/) { make string_to_int( $/, 10); }
+method hexint($/) { make string_to_int( $/, 16); }
+method octint($/) { make string_to_int( $/, 8 ); }
+method binint($/) { make string_to_int( $/, 2 ); }
 
 method quote_EXPR($/) {
     my $past := $<quote_delimited>.ast;
