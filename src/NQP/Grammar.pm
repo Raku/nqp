@@ -165,16 +165,6 @@ token statement_control:sym<for> {
     <xblock>
 }
 
-#token statement_control:sym<return> {
-#    <sym> :s
-#    [ <EXPR> || <.panic: 'return requires an expression argument'> ]
-#}
-#
-#token statement_control:sym<make> {
-#    <sym> :s
-#    [ <EXPR> || <.panic: 'make requires an expression argument'> ]
-#}
-
 proto token statement_prefix { <...> }
 token statement_prefix:sym<INIT> { <sym> <blorst> }
 
