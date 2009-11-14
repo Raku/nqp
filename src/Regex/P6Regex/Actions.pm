@@ -546,8 +546,7 @@ sub backmod($ast, $backmod) {
 }
 
 sub subrule_alias($past, $name) {
-    if $past<aliased> { $name := $name ~ '=' ~ $past.name; }
-    $past.name($name);
+    if $past.name gt '' { $past.name( $name ~ '=' ~ $past.name ); }
+    else { $past.name($name); }
     $past.subtype('capture');
-    $past<aliased> := 1;
 }
