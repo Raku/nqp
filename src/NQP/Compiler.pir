@@ -39,8 +39,6 @@ NQP::Compiler - NQP compiler
     exit 0
 .end
 
-=cut
-
 # Local Variables:
 #   mode: pir
 #   fill-column: 100
