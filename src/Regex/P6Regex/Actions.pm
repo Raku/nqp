@@ -12,7 +12,7 @@ sub INIT() {
 }
 
 method arg($/) {
-    make $<quote> ?? ~$<quote><val> !! +$<val>;
+    make $<quote_EXPR> ?? $<quote_EXPR>.ast !! +$<val>;
 }
 
 method arglist($/) {

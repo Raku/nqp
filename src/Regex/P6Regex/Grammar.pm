@@ -9,11 +9,10 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar;
 
     token normspace { <?before \s | '#' > <.ws> }
 
-    token quote { \' $<val>=[<-[']>*] \' }
-
     token arg {
         [
-        | <quote>
+        | <?[']> <quote_EXPR: ':q'>
+        | <?["]> <quote_EXPR: ':qq'>
         | $<val>=[\d+]
         ]
     }
