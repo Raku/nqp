@@ -533,7 +533,7 @@ An operator precedence parser.
     opprec = $P0['prec']
     unless opprec > inprec goto reduce_gt_done
     capture_lex reduce
-    self.reduce()
+    self.reduce(termstack, opstack)
     goto reduce_loop
   reduce_gt_done:
 
@@ -542,7 +542,7 @@ An operator precedence parser.
     unless inassoc == 'left' goto reduce_done
     # left associative, reduce immediately
     capture_lex reduce
-    self.reduce()
+    self.reduce(termstack, opstack)
   reduce_done:
 
     push opstack, infix        # The Shift
@@ -553,7 +553,7 @@ An operator precedence parser.
   opstack_loop:
     unless opstack goto opstack_done
     capture_lex reduce
-    self.reduce()
+    self.reduce(termstack, opstack)
     goto opstack_loop
   opstack_done:
 
@@ -576,10 +576,9 @@ An operator precedence parser.
 .end
 
 
-.sub 'EXPR_reduce' :method :anon :outer('EXPR')
-    .local pmc termstack, opstack
-    termstack = find_lex '@termstack'
-    opstack = find_lex '@opstack'
+.sub 'EXPR_reduce' :method :anon
+    .param pmc termstack
+    .param pmc opstack
 
     .local pmc op, opOPER, opO
     .local string opassoc
