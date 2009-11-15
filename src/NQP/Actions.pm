@@ -404,7 +404,7 @@ method regex_declarator($/, $key?) {
                         PAST::Var.new( :name('self'), :scope('register') ),
                         $name,
                         :name('!protoregex'),
-                        :pasttype('callmethod'),
+                        :pasttype('callmethod')
                     ),
                     :blocktype('method'),
                     :lexical(0),
@@ -415,7 +415,7 @@ method regex_declarator($/, $key?) {
                         PAST::Var.new( :name('self'), :scope('register') ),
                         $name,
                         :name('!PREFIX__!protoregex'),
-                        :pasttype('callmethod'),
+                        :pasttype('callmethod')
                     ),
                     :blocktype('method'),
                     :lexical(0),

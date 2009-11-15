@@ -256,7 +256,7 @@ method metachar:sym<var>($/) {
 
 method metachar:sym<PIR>($/) {
     make PAST::Regex.new(
-             PAST::Op.new( :inline(~$<pir>), :pasttype('inline'), ),
+             PAST::Op.new( :inline(~$<pir>), :pasttype('inline') ),
              :pasttype('pastnode'), :node($/)
          );
 }

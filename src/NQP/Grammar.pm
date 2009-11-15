@@ -382,7 +382,7 @@ INIT {
 
 token nulltermish {
     | <OPER=term=.termish>
-    | <?>
+    | <.panic: 'Use of nullterm'>
 }
 
 token infixish { <!infixstopper> <OPER=infix> }
