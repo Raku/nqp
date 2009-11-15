@@ -149,7 +149,16 @@ method metachar:sym<( )>($/) {
 }
 
 method metachar:sym<'>($/) {
-    my $past := PAST::Regex.new( ~$<quote><val>, :pasttype('literal'), :node($/) );
+    my $quote := $<quote_EXPR>.ast;
+    if PAST::Val.ACCEPTS($quote) { $quote := $quote.value; }
+    my $past := PAST::Regex.new( $quote, :pasttype('literal'), :node($/) );
+    make $past;
+}
+
+method metachar:sym<">($/) {
+    my $quote := $<quote_EXPR>.ast;
+    if PAST::Val.ACCEPTS($quote) { $quote := $quote.value; }
+    my $past := PAST::Regex.new( $quote, :pasttype('literal'), :node($/) );
     make $past;
 }
 
