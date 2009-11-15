@@ -58,13 +58,6 @@ our sub ints_to_string($ints) {
     };
 }
 
-our sub isaPAST($x) {
-    Q:PIR {
-        $P0 = find_lex '$x'
-        $I0 = isa $P0, ['PAST';'Node']
-        %r = box $I0
-    }
-}
 
 method EXPR($/, $key?) {
     unless $key { return 0; }
@@ -109,7 +102,7 @@ method binint($/) { make string_to_int( $/, 2 ); }
 method quote_EXPR($/) {
     my $past := $<quote_delimited>.ast;
     if HLL::Grammar::quotemod_check($/, 'w') {
-        if isaPAST($past) {
+        if PAST::Node.ACCEPTS($past) {
             $/.CURSOR.panic("Can't form :w list from non-constant strings (yet)");
         }
         else {
@@ -120,7 +113,7 @@ method quote_EXPR($/) {
             }
         }
     }
-    if !isaPAST($past) {
+    if !PAST::Node.ACCEPTS($past) {
         $past := PAST::Val.new( :value(~$past) );
     }
     make $past;
@@ -131,7 +124,7 @@ method quote_delimited($/) {
     my $lastlit := '';
     for $<quote_atom> {
         my $ast := $_.ast;
-        if !isaPAST($ast) {
+        if !PAST::Node.ACCEPTS($ast) {
             $lastlit := $lastlit ~ $ast;
         }
         elsif $ast.isa(PAST::Val) {
