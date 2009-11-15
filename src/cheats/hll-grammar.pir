@@ -427,8 +427,8 @@ An operator precedence parser.
   have_preclim:
 
     .const 'Sub' reduce = 'EXPR_reduce'
-    .local string termish
-    termish = 'termish'
+    .local string termishrx
+    termishrx = 'termish'
 
     .local pmc opstack, termstack
     opstack = new ['ResizablePMCArray']
@@ -440,15 +440,14 @@ An operator precedence parser.
     (here, pos) = self.'!cursor_start'()
 
   term_loop:
-    here = here.termish()
+    here = here.termishrx()
     unless here goto fail
-    .local pmc term
-    term = here.'MATCH'()
-    push termstack, term
+    .local pmc termish
+    termish = here.'MATCH'()
 
     # interleave any prefix/postfix we might have found
     .local pmc termOPER, prefixish, postfixish
-    termOPER = term
+    termOPER = termish
   termOPER_loop:
     $I0 = exists termOPER['OPER']
     unless $I0 goto termOPER_done
@@ -492,7 +491,7 @@ An operator precedence parser.
     push opstack, $P0
     goto prefix_loop
   prefix_done:
-    delete term['prefixish']
+    delete termish['prefixish']
 
   postfix_loop:
     if null postfixish goto postfix_done
@@ -501,7 +500,9 @@ An operator precedence parser.
     push opstack, $P0
     goto postfix_loop
   postfix_done:
-    delete term['postfixish']
+    delete termish['postfixish']
+
+    push termstack, termish
 
     # Now see if we can fetch an infix operator
     .local pmc infixcur, infix
@@ -513,10 +514,10 @@ An operator precedence parser.
     .local pmc inO
     $P0 = infix['OPER']
     inO = $P0['O']
-    termish = inO['nextterm']
-    if termish goto have_termish
-    termish = 'termish'
-  have_termish:
+    termishrx = inO['nextterm']
+    if termishrx goto have_termishrx
+    termishrx = 'termish'
+  have_termishrx:
 
     .local string inprec, inassoc, opprec
     inprec = inO['prec']
@@ -557,6 +558,7 @@ An operator precedence parser.
   opstack_done:
 
   expr_done:
+    .local pmc term
     term = pop termstack
     pos = here.'pos'()
     here = self.'!cursor_start'()
