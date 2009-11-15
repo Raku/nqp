@@ -57,13 +57,17 @@ method termish($/) {
     my $lastlit := 0;
     for $<noun> {
         my $ast := $_.ast;
-        if !$ast { }
-        elsif $lastlit && $ast.pasttype eq 'literal' {
-            $lastlit[0] := $lastlit[0] ~ $ast[0];
-        }
-        else {
-            $past.push($ast);
-            $lastlit := $ast.pasttype eq 'literal' ?? $ast !! 0;
+        if $ast {
+            if $lastlit && $ast.pasttype eq 'literal'
+                    && !PAST::Node.ACCEPTS($ast[0]) {
+                $lastlit[0] := $lastlit[0] ~ $ast[0];
+            }
+            else {
+                $past.push($ast);
+                $lastlit := $ast.pasttype eq 'literal' 
+                            && !PAST::Node.ACCEPTS($ast[0])
+                            ?? $ast !! 0;
+            }
         }
     }
     make $past;
