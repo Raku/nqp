@@ -84,11 +84,11 @@ method EXPR($/, $key?) {
     make $past;
 }
 
-method termish($/) {
-    make $<term>.ast;
-}
-
 method term:sym<circumfix>($/) { make $<circumfix>.ast }
+
+method termish($/) { make $<term>.ast; }
+method nullterm($/) { make 0; }
+method nullterm_alt($/) { make $<term>.ast; }
 
 method integer($/) { make $<VALUE>.ast; }
 

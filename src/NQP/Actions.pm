@@ -611,10 +611,6 @@ method quote_escape:sym<{ }>($/) {
 
 ## Operators
 
-method nulltermish($/) {
-    make $<term> ?? $<term>.ast !! 0;
-}
-
 method postfix:sym<.>($/) { make $<dotty>.ast; }
 
 method postfix:sym<++>($/) {

@@ -26,6 +26,12 @@ grammar HLL::Grammar;
         | <OPER=postcircumfix>
     }
 
+    token nullterm { <?> }
+    token nullterm_alt { <term=.nullterm> }
+
+    # Return <termish> if it matches, <nullterm_alt> otherwise.
+    method nulltermish() { self.termish || self.nullterm_alt }
+
     # token quote_EXPR is in src/cheats/hll-grammar.pir
     token quote_delimited {
         <starter> <quote_atom>* <stopper>

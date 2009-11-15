@@ -502,7 +502,8 @@ An operator precedence parser.
   postfix_done:
     delete termish['postfixish']
 
-    push termstack, termish
+    $P0 = termish['term']
+    push termstack, $P0
 
     # Now see if we can fetch an infix operator
     .local pmc infixcur, infix
