@@ -16,6 +16,11 @@
         PPS: This file is encoded in UTF-8
 
 ----------
+N: Jonathan Scott Duff
+U: perlpilot
+D: Perl 6 (Rakudo Perl) developer
+E: duff@pobox.com
+
 N: Patrick R. Michaud
 U: pmichaud
 D: Perl 6 (Rakudo Perl) lead developer, pumpking
