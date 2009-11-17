@@ -218,8 +218,15 @@ method variable($/) {
         }
         if $<twigil>[0] eq '*' {
             $past.scope('contextual');
-            $past.viviself( PAST::Op.new( 'Contextual ' ~ ~$/ ~ ' not found',
-                                          :pirop('die') )
+            $past.viviself( 
+                PAST::Var.new( 
+                    :scope('package'), :namespace(''), 
+                    :name( ~$<sigil> ~ $<desigilname> ),
+                    :viviself( 
+                        PAST::Op.new( 'Contextual ' ~ ~$/ ~ ' not found',
+                                      :pirop('die') )
+                    )
+                )
             );
         }
         elsif $<twigil>[0] eq '!' {
