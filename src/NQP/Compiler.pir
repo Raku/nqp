@@ -21,7 +21,7 @@ NQP::Compiler - NQP compiler
 .sub '' :anon :load :init
     .local pmc p6meta, nqpproto
     p6meta = get_hll_global 'P6metaclass'
-    nqpproto = p6meta.'new_class'('Regex::P6Grammar::Compiler', 'parent'=>'HLL::Compiler')
+    nqpproto = p6meta.'new_class'('NQP::Compiler', 'parent'=>'HLL::Compiler')
     nqpproto.'language'('NQP-rx')
     $P0 = get_hll_global ['NQP'], 'Grammar'
     nqpproto.'parsegrammar'($P0)

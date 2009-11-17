@@ -207,7 +207,15 @@ method variable($/) {
         $past.unshift( PAST::Var.new( :name('$/') ) );
     }
     else {
-        $past := PAST::Var.new( :name(~$/) );
+        my @name := NQP::Compiler.parse_name(~$/);
+        $past := PAST::Var.new( :name(~@name.pop) );
+        if (@name) {
+            if @name[0] eq 'GLOBAL' { @name.shift; }
+            $past.namespace(@name);
+            $past.scope('package');
+            $past.viviself( sigiltype( $<sigil> ) );
+            $past.lvalue(1);
+        }
         if $<twigil>[0] eq '*' {
             $past.scope('contextual');
             $past.viviself( PAST::Op.new( 'Contextual ' ~ ~$/ ~ ' not found',
