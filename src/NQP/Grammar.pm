@@ -147,25 +147,25 @@ token terminator:sym<}> { <?[}]> }
 proto token statement_control { <...> }
 
 token statement_control:sym<if> {
-    <sym> :s
+    <sym> \s :s
     <xblock>
     [ 'elsif'\s <xblock> ]*
     [ 'else'\s <else=.pblock> ]?
 }
 
 token statement_control:sym<unless> {
-    <sym> :s
+    <sym> \s :s
     <xblock>
     [ <!before 'else'> || <.panic: 'unless does not take "else", please rewrite using "if"'> ]
 }
 
 token statement_control:sym<while> {
-    $<sym>=[while|until] :s
+    $<sym>=[while|until] \s :s
     <xblock>
 }
 
 token statement_control:sym<repeat> {
-    <sym> :s
+    <sym> \s :s
     [
     | $<wu>=[while|until]\s <xblock>
     | <pblock> $<wu>=[while|until]\s <EXPR>
@@ -173,7 +173,7 @@ token statement_control:sym<repeat> {
 }
 
 token statement_control:sym<for> {
-    <sym> :s
+    <sym> \s :s
     <xblock>
 }
 
