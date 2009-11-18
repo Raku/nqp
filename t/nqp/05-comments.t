@@ -2,7 +2,7 @@
 
 # check comments
 
-say('1..2');
+say('1..4');
 
 #Comment preceding
 say("ok 1");
