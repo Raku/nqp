@@ -23,7 +23,10 @@ token deflongname {
 }
 
 token ENDSTMT {
-    [ \h* $$ <.ws> <?MARKER('endstmt')> ]?
+    [ 
+    | \h* $$ <.ws> <?MARKER('endstmt')>
+    | <.unv>? $$ <.ws> <?MARKER('endstmt')>
+    ]?
 }
 
 token ws {
@@ -34,6 +37,15 @@ token ws {
         | ^^ <.pod_comment>
         ]*
         <?MARKER('ws')>
+}
+
+token unv {
+    # :dba('horizontal whitespace')
+    [
+    | ^^ <?before \h* '=' [ \w | '\\'] > <.pod_comment>
+    | \h* '#' \N*
+    | \h+
+    ]
 }
 
 token pod_comment {
