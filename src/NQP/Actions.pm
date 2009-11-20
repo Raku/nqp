@@ -478,14 +478,11 @@ method term:sym<identifier>($/) {
 }
 
 method term:sym<name>($/) {
-    my $ns := $<name><identifier>;
-    $ns := Q:PIR {
-               $P0 = find_lex '$ns'
-               %r = clone $P0
-           };
-    my $name := $ns.pop;
+    my @ns := pir::clone__PP($<name><identifier>);
+    my $name := @ns.pop;
+    @ns.shift if @ns && @ns[0] eq 'GLOBAL';
     my $var :=
-        PAST::Var.new( :name(~$name), :namespace($ns), :scope('package') );
+        PAST::Var.new( :name(~$name), :namespace(@ns), :scope('package') );
     my $past := $var;
     if $<args> {
         $past := $<args>[0].ast;

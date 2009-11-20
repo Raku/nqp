@@ -2,7 +2,7 @@
 
 # Accessing package variables directly
 
-plan(4);
+plan(5);
 
 our $var;
 
@@ -10,6 +10,8 @@ $GLOBAL::var := 1;
 $ABC::def := 2;
 @XYZ::ghi[0] := 3;
 $GLOBAL::context := 4;
+GLOBAL::mysub := { ok(5, 'bare GLOBAL works'); };
+
 
 ok( $var == 1, '$GLOBAL::var works');
 
@@ -25,3 +27,6 @@ module XYZ {
 }
 
 ok( $*context == 4, 'contextual in GLOBAL works');
+
+mysub();
+
