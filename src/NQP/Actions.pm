@@ -230,6 +230,7 @@ method variable($/) {
             );
         }
         elsif $<twigil>[0] eq '!' {
+            $past.push(PAST::Var.new( :name('self') ));
             $past.scope('attribute');
             $past.viviself( sigiltype( $<sigil> ) );
         }
