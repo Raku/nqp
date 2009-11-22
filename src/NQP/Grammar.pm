@@ -307,7 +307,12 @@ rule regex_declarator {
 }
 
 token dotty {
-    '.' <identifier>
+    '.' 
+    [ <longname=identifier>
+    | <?['"]> <quote> 
+        [ <?[(]> || <.panic: "Quoted method name requires parenthesized arguments"> ]
+    ]
+
     [
     | <?[(]> <args>
     | ':' \s <args=.arglist>

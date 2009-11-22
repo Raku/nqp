@@ -2,7 +2,7 @@
 
 # method ops (just method calls for now)
 
-plan(3);
+plan(4);
 
 class Foo {
   method blarg() {
@@ -10,6 +10,9 @@ class Foo {
   }
   method blargless() {
     'ok 3 # argument-less method calls work'
+  }
+  method blast() {
+    'ok 4 # string method calls work'
   }
 }
 
@@ -28,3 +31,5 @@ my $foo := Foo.new();
 say($foo.blarg());
 say(blarg());
 say($foo.blargless);
+my $t := 'st';
+say($foo."bla$t"());

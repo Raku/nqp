@@ -461,7 +461,7 @@ method regex_declarator($/, $key?) {
 
 method dotty($/) {
     my $past := $<args> ?? $<args>[0].ast !! PAST::Op.new( :node($/) );
-    $past.name( ~$<identifier> );
+    $past.name( $<quote> ?? $<quote>.ast !! ~$<longname> );
     $past.pasttype('callmethod');
     make $past;
 }
