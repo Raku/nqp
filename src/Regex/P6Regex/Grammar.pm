@@ -2,7 +2,7 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar;
 
     method obs ($old, $new, $when = 'in Perl 6') {
         self.panic('Obsolete use of ' ~ ~$old ~ ';'
-                   ~ ~$when ~ ' please use ' ~ ~$new ~ 'instead');
+                   ~ ~$when ~ ' please use ' ~ ~$new ~ ' instead');
     }
 
     token ws { [ \s+ | '#' \N* ]* }
