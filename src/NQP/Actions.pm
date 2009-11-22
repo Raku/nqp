@@ -440,19 +440,9 @@ method regex_declarator($/, $key?) {
             );
     }
     else {
-        my $rpast := $<p6regex>.ast;
-        my %capnames := Regex::P6Regex::Actions::capnames($rpast, 0);
-        %capnames{''} := 0;
-        $rpast := PAST::Regex.new(
-                     $rpast,
-                     PAST::Regex.new( :pasttype('pass') ),
-                     :pasttype('concat'),
-                     :capnames(%capnames)
-        );
-        $past := @BLOCK.shift;
-        $past.blocktype('method');
+        $past := 
+             Regex::P6Regex::Actions::buildsub($<p6regex>.ast, @BLOCK.shift);
         $past.name($name);
-        $past.push($rpast);
         @MODIFIERS.shift;
     }
     make $past;

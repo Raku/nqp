@@ -472,7 +472,7 @@ method mod_internal($/) {
     make 0;
 }
 
-sub buildsub($rpast) {
+sub buildsub($rpast, $block = PAST::Block.new() ) {
     my %capnames := capnames($rpast, 0);
     %capnames{''} := 0;
     $rpast := PAST::Regex.new(
@@ -482,7 +482,9 @@ sub buildsub($rpast) {
         :pasttype('concat'),
         :capnames(%capnames)
     );
-    PAST::Block.new( $rpast, :blocktype('method'));
+    $block.push($rpast);
+    $block.blocktype('method');
+    $block;
 }
 
 sub capnames($ast, $count) {
