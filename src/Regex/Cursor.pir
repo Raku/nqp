@@ -225,7 +225,7 @@ Create a new cursor for matching C<target>.
 
 .sub '!cursor_init' :method
     .param string target
-    .param int from            :named('from') :optional
+    .param int pos             :named('p') :optional
 
     .local pmc parrotclass, cur
     $P0 = self.'HOW'()
@@ -236,9 +236,9 @@ Create a new cursor for matching C<target>.
     $P0 = target
     setattribute cur, '$!target', $P0
 
-    $P0 = box from
+    $P0 = box pos
     setattribute cur, '$!from', $P0
-    $P0 = box from
+    $P0 = box pos
     setattribute cur, '$!pos', $P0
 
     .return (cur)

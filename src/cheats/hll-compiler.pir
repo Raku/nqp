@@ -56,7 +56,7 @@
 
     .local int rxtrace
     rxtrace = options['parsetrace']
-    match = parsegrammar.'parse'(source, 'from'=>0, 'actions'=>parseactions, 'rxtrace'=>rxtrace)
+    match = parsegrammar.'parse'(source, 'p'=>0, 'actions'=>parseactions, 'rxtrace'=>rxtrace)
     unless match goto err_parsefail
     .return (match)
 
