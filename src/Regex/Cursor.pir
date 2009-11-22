@@ -226,6 +226,9 @@ Create a new cursor for matching C<target>.
 .sub '!cursor_init' :method
     .param string target
     .param int pos             :named('p') :optional
+    .param int has_pos         :opt_flag
+    .param int cont            :named('c') :optional
+    .param int has_cont        :opt_flag
 
     .local pmc parrotclass, cur
     $P0 = self.'HOW'()
@@ -236,10 +239,18 @@ Create a new cursor for matching C<target>.
     $P0 = target
     setattribute cur, '$!target', $P0
 
+    if has_cont goto cursor_cont
     $P0 = box pos
     setattribute cur, '$!from', $P0
     $P0 = box pos
     setattribute cur, '$!pos', $P0
+    goto cursor_done
+  cursor_cont:
+    $P0 = box CURSOR_FAIL
+    setattribute cur, '$!from', $P0
+    $P0 = box cont
+    setattribute cur, '$!pos', $P0
+  cursor_done:
 
     .return (cur)
 .end
@@ -275,7 +286,7 @@ provided, then the new cursor has the same type as lang.
     debug = getattribute self, '$!debug'
     setattribute cur, '$!debug', debug
 
-    .return (cur, from, target, from)
+    .return (cur, from, target)
 .end
 
 

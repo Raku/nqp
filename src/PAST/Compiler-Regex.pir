@@ -119,7 +119,7 @@ Return the POST representation of the regex AST rooted by C<node>.
     concat $S0, pos
     concat $S0, ', '
     concat $S0, tgt
-    concat $S0, ', $I10)'
+    concat $S0, ')'
     ops.'push_pirop'('callmethod', '"!cursor_start"', 'self', 'result'=>$S0)
     self.'!cursorop'(ops, '!cursor_debug', 0, '"START "', regexname_esc)
     unless caparray goto caparray_skip
@@ -142,8 +142,8 @@ Return the POST representation of the regex AST rooted by C<node>.
     # operations on the resulting target relative to C<off>.
 
     ops.'push_pirop'('set', off, 0)
-    ops.'push_pirop'('lt', '$I10', 2, startlabel)
-    ops.'push_pirop'('sub', off, '$I10', 1, 'result'=>off)
+    ops.'push_pirop'('lt', pos, 2, startlabel)
+    ops.'push_pirop'('sub', off, pos, 1, 'result'=>off)
     ops.'push_pirop'('substr', tgt, tgt, off, 'result'=>tgt)
     ops.'push'(startlabel)
 
@@ -988,19 +988,24 @@ Code for initial regex scan.
     .local pmc cur, pos, eos, ops
     (cur, pos, eos) = self.'!rxregs'('cur pos eos')
     ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
-    .local pmc looplabel, donelabel
+    .local pmc looplabel, scanlabel, donelabel
     $S0 = self.'unique'('rxscan')
     $S1 = concat $S0, '_loop'
     looplabel = self.'post_new'('Label', 'result'=>$S1)
+    $S1 = concat $S0, '_scan'
+    scanlabel = self.'post_new'('Label', 'result'=>$S1)
     $S1 = concat $S0, '_done'
     donelabel = self.'post_new'('Label', 'result'=>$S1)
 
-    ops.'push_pirop'('ge', pos, 0, donelabel)
+    ops.'push_pirop'('callmethod', "'from'", 'self', 'result'=>'$I10')
+    ops.'push_pirop'('ne', '$I10', CURSOR_FAIL, donelabel)
+    ops.'push_pirop'('goto', scanlabel)
     ops.'push'(looplabel)
     self.'!cursorop'(ops, 'from', 1, '$P10')
     ops.'push_pirop'('inc', '$P10')
     ops.'push_pirop'('set', pos, '$P10')
     ops.'push_pirop'('ge', pos, eos, donelabel)
+    ops.'push'(scanlabel)
     ops.'push_pirop'('set_addr', '$I10', looplabel)
     self.'!cursorop'(ops, '!mark_push', 0, 0, pos, '$I10')
     ops.'push'(donelabel)
