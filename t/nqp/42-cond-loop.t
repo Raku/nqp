@@ -33,8 +33,8 @@ ok( $s == 5 && $a == 10, 'false unless + while');
 
 $a := 0; $s := 0;
 $s := 5 if $a > 0 until $a++ > 9;
-ok( $s == 5 && $a == 11, 'true unless + until');
+ok( $s == 5 && $a == 11, 'true if + until');
 
 $a := 0; $s := 0;
 $s := 5 if $a < 0 until $a++ > 9;
-ok( $s == 0 && $a == 11, 'false unless + until');
+ok( $s == 0 && $a == 11, 'false if + until');
