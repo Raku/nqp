@@ -54,7 +54,7 @@ grammar HLL::Grammar;
     token octint  { [<[ 0..7 ]>+] ** '_' }
     token octints { [<.ws><octint><.ws>] ** ',' }
 
-    token binint  { [<[ 0..7 ]>+] ** '_' }
+    token binint  { [<[ 0..1 ]>+] ** '_' }
     token binints { [<.ws><binint><.ws>] ** ',' }
 
     token integer {
