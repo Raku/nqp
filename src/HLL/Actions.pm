@@ -21,7 +21,7 @@ our sub string_to_int($src, $base) {
         digitval = index "00112233445566778899AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz", char
         if digitval < 0 goto err_base
         digitval >>= 1
-        if digitval > base goto err_base
+        if digitval >= base goto err_base
         result *= base
         result += digitval
       str_next:
