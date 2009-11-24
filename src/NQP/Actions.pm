@@ -167,6 +167,27 @@ method statement_prefix:sym<INIT>($/) {
     make PAST::Stmts.new(:node($/));
 }
 
+method statement_prefix:sym<try>($/) {
+    my $past := $<blorst>.ast;
+    if $past.WHAT ne 'PAST::Block()' {
+        $past := PAST::Block.new($past, :blocktype('immediate'), :node($/));
+    }
+    my $default := PAST::Control.new(
+        :handle_types_except('CONTROL'),
+        PAST::Stmts.new(
+            PAST::Op.new( :pasttype('bind'),
+                PAST::Var.new( :scope('keyed'),
+                    PAST::Var.new( :scope('register'), :name('exception')),
+                    'handled'
+                ),
+                1
+            )
+        )
+    );
+    $past.handlers([$default]);
+    make $past;
+}
+
 method blorst($/) {
     make $<block>
          ?? block_immediate($<block>.ast)

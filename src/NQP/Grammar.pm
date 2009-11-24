@@ -180,6 +180,11 @@ token statement_control:sym<for> {
 proto token statement_prefix { <...> }
 token statement_prefix:sym<INIT> { <sym> <blorst> }
 
+token statement_prefix:sym<try> {
+    <sym>
+    <blorst>
+}
+
 token blorst {
     \s <.ws> [ <?[{]> <block> | <statement> ]
 }
