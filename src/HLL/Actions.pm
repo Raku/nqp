@@ -79,7 +79,7 @@ method EXPR($/, $key?) {
     }
     if $key eq 'POSTFIX' { $past.unshift($/[0].ast); }
     else {
-        for $/.list { if $_.ast { $past.push($_.ast); } }
+        for $/.list { if pir::defined__IP($_.ast) { $past.push($_.ast); } }
     }
     make $past;
 }
@@ -87,7 +87,7 @@ method EXPR($/, $key?) {
 method term:sym<circumfix>($/) { make $<circumfix>.ast }
 
 method termish($/) { make $<term>.ast; }
-method nullterm($/) { make 0; }
+method nullterm($/) { make Q:PIR { %r = new ['Undef'] }; }
 method nullterm_alt($/) { make $<term>.ast; }
 
 method integer($/) { make $<VALUE>.ast; }
