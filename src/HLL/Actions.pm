@@ -61,7 +61,7 @@ our sub ints_to_string($ints) {
 
 method EXPR($/, $key?) {
     unless $key { return 0; }
-    my $past := $/.peek_ast // $<OPER>.peek_ast;
+    my $past := $/.ast // $<OPER>.ast;
     unless $past {
         $past := PAST::Op.new( :node($/) );
         if $<OPER><O><pasttype> { $past.pasttype( ~$<OPER><O><pasttype> ); }

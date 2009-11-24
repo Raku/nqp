@@ -30,7 +30,7 @@ sub sigiltype($sigil) {
 method TOP($/) { make $<comp_unit>.ast; }
 
 method deflongname($/) {
-    if $<sym> { make ~$<identifier> ~ ':sym<' ~ ~$<sym>[0] ~ '>'; }
+    make $<sym> ?? ~$<identifier> ~ ':sym<' ~ ~$<sym>[0] ~ '>' !! ~$/;
 }
 
 method comp_unit($/) {
