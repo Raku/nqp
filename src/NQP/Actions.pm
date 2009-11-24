@@ -584,14 +584,13 @@ method postcircumfix:sym<( )>($/) {
 }
 
 method value($/) {
-    my $past := $<quote>
-                ?? $<quote>.ast
-                !! PAST::Val.new(
-                       :value($<dec_number>
-                              ?? $<dec_number>.ast
-                              !! $<integer>.ast)
-                   );
-    make $past;
+    make $<quote> ?? $<quote>.ast !! $<number>.ast;
+}
+
+method number($/) {
+    my $value := $<dec_number> ?? $<dec_number>.ast !! $<integer>.ast;
+    if ~$<sign> eq '-' { $value := -$value; }
+    make PAST::Val.new( :value($value) );
 }
 
 method quote:sym<apos>($/) { make $<quote_EXPR>.ast; }

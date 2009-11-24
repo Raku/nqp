@@ -352,9 +352,13 @@ token arglist {
 token term:sym<value> { <value> }
 
 token value {
-    | <dec_number>
     | <quote>
-    | <integer>
+    | <number>
+}
+
+token number {
+    $<sign>=[<[+\-]>?]
+    [ <dec_number> | <integer> ]
 }
 
 proto token quote { <...> }
@@ -433,7 +437,7 @@ token infix:sym<**>   { <sym>  <O('%exponentiation, :pirop<pow>')> }
 
 token prefix:sym<+>   { <sym>  <O('%symbolic_unary, :pirop<set N*>')> }
 token prefix:sym<~>   { <sym>  <O('%symbolic_unary, :pirop<set S*>')> }
-token prefix:sym<->   { <sym>  <![>]> <O('%symbolic_unary, :pirop<neg>')> }
+token prefix:sym<->   { <sym>  <![>]> <!number> <O('%symbolic_unary, :pirop<neg>')> }
 token prefix:sym<?>   { <sym>  <O('%symbolic_unary, :pirop<istrue>')> }
 token prefix:sym<!>   { <sym>  <O('%symbolic_unary, :pirop<isfalse>')> }
 token prefix:sym<|>   { <sym>  <O('%symbolic_unary')> }
