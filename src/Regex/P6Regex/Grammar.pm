@@ -56,8 +56,15 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar;
     token quantifier:sym<**> {
         <sym> \s* <backmod> \s*
         [
-        || $<min>=[\d+] [ '..' $<max>=[\d+|'*'] ]?
-        || <quantified_atom>
+        ||  $<min>=[\d+] 
+            [   '..' 
+                $<max>=[ 
+                       || \d+ 
+                       || '*' 
+                       || <.panic: "Only integers or '*' allowed as range quantifier endpoint"> 
+                       ] 
+            ]?
+        ||  <quantified_atom>
         ]
     }
 
