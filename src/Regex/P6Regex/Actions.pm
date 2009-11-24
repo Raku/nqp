@@ -482,10 +482,8 @@ sub buildsub($rpast, $block = PAST::Block.new() ) {
         :pasttype('concat'),
         :capnames(%capnames)
     );
-    unless $block.symbol('$¢') {
-        $block.push( PAST::Var.new( :name<$¢>, :scope<lexical>, :isdecl ) );
-        $block.symbol('$¢', :scope<lexical> );
-    }
+    unless $block.symbol('$¢') { $block.symbol('$¢', :scope<lexical>); }
+    unless $block.symbol('$/') { $block.symbol('$/', :scope<lexical>); }
     $block.push($rpast);
     $block.blocktype('method');
     $block;
