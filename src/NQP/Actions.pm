@@ -13,7 +13,7 @@ sub xblock_immediate($xblock) {
 
 sub block_immediate($block) {
     $block.blocktype('immediate');
-    unless $block.symtable() {
+    unless $block.symtable() || $block.handlers() {
         my $stmts := PAST::Stmts.new( :node($block) );
         for $block.list { $stmts.push($_); }
         $block := $stmts;
@@ -162,6 +162,57 @@ method statement_control:sym<return>($/) {
     make PAST::Op.new( $<EXPR>.ast, :pasttype('return'), :node($/) );
 }
 
+method statement_control:sym<CATCH>($/) {
+    my $block := $<block>.ast;
+    push_block_handler($/, $block);
+    @BLOCK[0].handlers()[0].handle_types_except('CONTROL');
+    make PAST::Stmts.new(:node($/));
+}
+
+method statement_control:sym<CONTROL>($/) {
+    my $block := $<block>.ast;
+    push_block_handler($/, $block);
+    @BLOCK[0].handlers()[0].handle_types('CONTROL');
+    make PAST::Stmts.new(:node($/));
+}
+
+sub push_block_handler($/, $block) {
+    unless @BLOCK[0].handlers() {
+        @BLOCK[0].handlers([]);
+    }
+    unless $block.arity {
+        $block.unshift(
+            PAST::Op.new( :pasttype('bind'),
+                PAST::Var.new( :scope('lexical'), :name('$!'), :isdecl(1) ),
+                PAST::Var.new( :scope('lexical'), :name('$_')),
+            ),
+        );
+        $block.unshift( PAST::Var.new( :name('$_'), :scope('parameter') ) );
+        $block.symbol('$_', :scope('lexical') );
+        $block.symbol('$!', :scope('lexical') );
+        $block.arity(1);
+    }
+    $block.blocktype('declaration');
+    @BLOCK[0].handlers.unshift(
+        PAST::Control.new(
+            :node($/),
+            PAST::Stmts.new(
+                PAST::Op.new( :pasttype('call'),
+                    $block,
+                    PAST::Var.new( :scope('register'), :name('exception')),
+                ),
+                PAST::Op.new( :pasttype('bind'),
+                    PAST::Var.new( :scope('keyed'),
+                        PAST::Var.new( :scope('register'), :name('exception')),
+                        'handled'
+                    ),
+                    1
+                )
+            ),
+        )
+    );
+}
+
 method statement_prefix:sym<INIT>($/) {
     @BLOCK[0].loadinit.push($<blorst>.ast);
     make PAST::Stmts.new(:node($/));
@@ -172,19 +223,21 @@ method statement_prefix:sym<try>($/) {
     if $past.WHAT ne 'PAST::Block()' {
         $past := PAST::Block.new($past, :blocktype('immediate'), :node($/));
     }
-    my $default := PAST::Control.new(
-        :handle_types_except('CONTROL'),
-        PAST::Stmts.new(
-            PAST::Op.new( :pasttype('bind'),
-                PAST::Var.new( :scope('keyed'),
-                    PAST::Var.new( :scope('register'), :name('exception')),
-                    'handled'
-                ),
-                1
-            )
-        )
-    );
-    $past.handlers([$default]);
+    unless $past.handlers() {
+        $past.handlers([PAST::Control.new(
+                :handle_types_except('CONTROL'),
+                PAST::Stmts.new(
+                    PAST::Op.new( :pasttype('bind'),
+                        PAST::Var.new( :scope('keyed'),
+                            PAST::Var.new( :scope('register'), :name('exception')),
+                            'handled'
+                        ),
+                        1
+                    )
+                )
+            )]
+        );
+    }
     make $past;
 }
 
