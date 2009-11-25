@@ -67,3 +67,11 @@ $ok := 1;
 }
 
 ok($ok == 16, "resuming from resumable exceptions works");
+
+$ok := 0;
+{
+    CATCH { $ok := -1; }
+    CONTROL { $ok := 1; }
+    return 5;
+}
+ok($ok == 1, "CONTROL blocks catch control exceptions");

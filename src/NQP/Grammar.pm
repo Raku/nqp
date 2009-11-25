@@ -182,6 +182,11 @@ token statement_control:sym<CATCH> {
     <block>
 }
 
+token statement_control:sym<CONTROL> {
+    <sym> \s :s
+    <block>
+}
+
 proto token statement_prefix { <...> }
 token statement_prefix:sym<INIT> { <sym> <blorst> }
 

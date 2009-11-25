@@ -163,10 +163,23 @@ method statement_control:sym<return>($/) {
 }
 
 method statement_control:sym<CATCH>($/) {
+    my $block := $<block>.ast;
+    push_block_handler($/, $block);
+    @BLOCK[0].handlers()[0].handle_types_except('CONTROL');
+    make PAST::Stmts.new(:node($/));
+}
+
+method statement_control:sym<CONTROL>($/) {
+    my $block := $<block>.ast;
+    push_block_handler($/, $block);
+    @BLOCK[0].handlers()[0].handle_types('CONTROL');
+    make PAST::Stmts.new(:node($/));
+}
+
+sub push_block_handler($/, $block) {
     unless @BLOCK[0].handlers() {
         @BLOCK[0].handlers([]);
     }
-    my $block := $<block>.ast;
     unless $block.arity {
         $block.unshift(
             PAST::Op.new( :pasttype('bind'),
@@ -182,7 +195,6 @@ method statement_control:sym<CATCH>($/) {
     $block.blocktype('declaration');
     @BLOCK[0].handlers.unshift(
         PAST::Control.new(
-            :handle_types_except('CONTROL'),
             :node($/),
             PAST::Stmts.new(
                 PAST::Op.new( :pasttype('call'),
@@ -199,7 +211,6 @@ method statement_control:sym<CATCH>($/) {
             ),
         )
     );
-    make PAST::Stmts.new(:node($/));
 }
 
 method statement_prefix:sym<INIT>($/) {
