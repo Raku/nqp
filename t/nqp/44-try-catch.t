@@ -2,7 +2,7 @@
 
 # Tests for try and catch
 
-plan(7);
+plan(8);
 
 sub oops($msg = "oops!") { # throw an exception
     my $ex := Q:PIR { %r = new ['Exception'] };
