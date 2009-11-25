@@ -177,6 +177,11 @@ token statement_control:sym<for> {
     <xblock>
 }
 
+token statement_control:sym<CATCH> {
+    <sym> \s :s
+    <block>
+}
+
 proto token statement_prefix { <...> }
 token statement_prefix:sym<INIT> { <sym> <blorst> }
 
