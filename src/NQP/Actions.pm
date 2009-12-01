@@ -60,15 +60,12 @@ method statement($/, $key?) {
     if $<EXPR> {
         my $mc := $<statement_mod_cond>[0];
         my $ml := $<statement_mod_loop>[0];
+        $past := $<EXPR>.ast;
         if $mc {
-            $past := PAST::Op.new($mc<cond>.ast, $<EXPR>.ast, :pasttype(~$mc<sym>), :node($/) );
-            if $ml {
-                $past := PAST::Op.new($ml<cond>.ast, $past, :pasttype(~$ml<sym>), :node($/) );
-            }
-        } elsif $ml {
-            $past := PAST::Op.new($ml<cond>.ast, $<EXPR>.ast, :pasttype(~$ml<sym>), :node($/) );
-        } else {
-            $past := $<EXPR>.ast;
+            $past := PAST::Op.new($mc<cond>.ast, $past, :pasttype(~$mc<sym>), :node($/) );
+        }
+        if $ml {
+            $past := PAST::Op.new($ml<cond>.ast, $past, :pasttype(~$ml<sym>), :node($/) );
         }
     }
     elsif $<statement_control> { $past := $<statement_control>.ast; }
