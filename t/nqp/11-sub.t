@@ -2,7 +2,7 @@
 
 # check subs
 
-say('1..11');
+say('1..12');
 
 sub one ( ) {
     say("ok 1 # sub def and call");
@@ -74,3 +74,11 @@ sub eleven ($arg) {
     say("ok 11 # parameter with a trailing comma");
 }
 eleven( 'dummy', );
+
+sub &twelve() {
+    say("ok 12 # subroutine name with leading &");
+}
+
+&twelve();
+
+

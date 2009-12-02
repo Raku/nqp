@@ -271,7 +271,7 @@ token routine_declarator:sym<sub>    { <sym> <routine_def> }
 token routine_declarator:sym<method> { <sym> <method_def> }
 
 rule routine_def {
-    <deflongname>?
+    [ $<sigil>=['&'?]<deflongname> ]?
     <.newpad>
     [ '(' <signature> ')'
         || <.panic: 'Routine declaration requires a signature'> ]

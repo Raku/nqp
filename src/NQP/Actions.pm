@@ -389,7 +389,7 @@ method routine_def($/) {
     $past.blocktype('declaration');
     $past.control('return_pir');
     if $<deflongname> {
-        my $name := ~$<deflongname>[0].ast;
+        my $name := ~$<sigil>[0] ~ $<deflongname>[0].ast;
         $past.name($name);
         if $*SCOPE ne 'our' {
             @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1),
