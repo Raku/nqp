@@ -18,8 +18,7 @@ token identifier { <ident> }
 token name { <identifier> ** '::' }
 
 token deflongname {
-    <identifier>
-    [ ':sym<' $<sym>=[<-[>]>*] '>' | ':sym«' $<sym>=[<-[»]>*] '»' ]?
+    <identifier> <colonpair>?
 }
 
 token ENDSTMT {
@@ -391,6 +390,7 @@ token quote_escape:sym<{ }> { <?[{]> <?quotemod_check('c')> <block> }
 token circumfix:sym<( )> { '(' <.ws> <EXPR>? ')' }
 token circumfix:sym<[ ]> { '[' <.ws> <EXPR>? ']' }
 token circumfix:sym<ang> { <?[<]>  <quote_EXPR: ':q', ':w'>  }
+token circumfix:sym<« »> { <?[«]>  <quote_EXPR: ':qq', ':w'>  }
 token circumfix:sym<{ }> { <?[{]> <pblock> }
 token circumfix:sym<sigil> { <sigil> '(' ~ ')' <semilist> }
 

@@ -30,7 +30,17 @@ sub sigiltype($sigil) {
 method TOP($/) { make $<comp_unit>.ast; }
 
 method deflongname($/) {
-    make $<sym> ?? ~$<identifier> ~ ':sym<' ~ ~$<sym>[0] ~ '>' !! ~$/;
+    make $<colonpair>
+         ?? ~$<identifier> ~ ':' ~ $<colonpair>[0].ast.named 
+                ~ '<' ~ colonpair_str($<colonpair>[0].ast) ~ '>'
+         !! ~$/;
+    # make $<sym> ?? ~$<identifier> ~ ':sym<' ~ ~$<sym>[0] ~ '>' !! ~$/;
+}
+
+sub colonpair_str($ast) {
+    PAST::Op.ACCEPTS($ast)
+    ?? pir::join(' ', $ast.list)
+    !! $ast.value;
 }
 
 method comp_unit($/) {
@@ -619,6 +629,7 @@ method circumfix:sym<[ ]>($/) {
 }
 
 method circumfix:sym<ang>($/) { make $<quote_EXPR>.ast; }
+method circumfix:sym<« »>($/) { make $<quote_EXPR>.ast; }
 
 method circumfix:sym<{ }>($/) {
     make +$<pblock><blockoid><statementlist><statement> > 0
