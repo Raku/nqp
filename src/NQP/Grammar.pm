@@ -227,6 +227,7 @@ token colonpair {
     [
     | $<not>='!' <identifier>
     | <identifier> <circumfix>?
+    | <circumfix>
     ]
 }
 
