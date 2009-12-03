@@ -480,6 +480,7 @@ token infix:sym«ge»   { <sym>  <O('%relational, :pirop<isge ISs>')> }
 token infix:sym«lt»   { <sym>  <O('%relational, :pirop<islt ISs>')> }
 token infix:sym«gt»   { <sym>  <O('%relational, :pirop<isgt ISs>')> }
 token infix:sym«=:=»  { <sym>  <O('%relational, :pirop<issame>')> }
+token infix:sym<~~>   { <sym>  <O('%relational, :reducecheck<smartmatch>')> }
 
 token infix:sym<&&>   { <sym>  <O('%tight_and, :pasttype<if>')> }
 
@@ -504,6 +505,11 @@ token infix:sym<,>    { <sym>  <O('%comma, :pasttype<list>')> }
 
 token prefix:sym<return> { <sym> \s <O('%list_prefix, :pasttype<return>')> }
 token prefix:sym<make>   { <sym> \s <O('%list_prefix')> }
+
+method smartmatch($/) {
+    # swap rhs into invocant position
+    my $t := $/[0]; $/[0] := $/[1]; $/[1] := $t;
+}
 
 
 grammar NQP::Regex is Regex::P6Regex::Grammar {

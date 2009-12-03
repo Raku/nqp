@@ -718,6 +718,10 @@ method prefix:sym<make>($/) {
     );
 }
 
+method infix:sym<~~>($/) {
+    make PAST::Op.new( :pasttype<callmethod>, :name<ACCEPTS>, :node($/) );
+}
+
 
 class NQP::RegexActions is Regex::P6Regex::Actions {
 
