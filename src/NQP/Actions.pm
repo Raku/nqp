@@ -56,6 +56,7 @@ method statementlist($/) {
     if $<statement> {
         for $<statement> {
             my $ast := $_.ast;
+            $ast := $ast<sink> if pir::defined($ast<sink>);
             if $ast.isa(PAST::Block) && !$ast.blocktype {
                 $ast := block_immediate($ast);
             }
@@ -521,9 +522,17 @@ method regex_declarator($/, $key?) {
             );
     }
     else {
+        my $regex := 
+            Regex::P6Regex::Actions::buildsub($<p6regex>.ast, @BLOCK.shift);
+        $regex.name($name);
         $past := 
-             Regex::P6Regex::Actions::buildsub($<p6regex>.ast, @BLOCK.shift);
-        $past.name($name);
+            PAST::Op.new(
+                :pasttype<callmethod>, :name<new>,
+                PAST::Var.new( :name('Regex'), :namespace(['Regex']), :scope<package> ),
+                $regex
+            );
+        # In sink context, we don't need the Regex::Regex object.
+        $past<sink> := $regex;
         @MODIFIERS.shift;
     }
     make $past;
