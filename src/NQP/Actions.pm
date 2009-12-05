@@ -481,20 +481,7 @@ method regex_declarator($/, $key?) {
     };
     my $name := ~$<deflongname>.ast;
     my $past;
-    if $key eq 'open' {
-        my %h;
-        if $<sym> eq 'token' { %h<r> := 1; }
-        if $<sym> eq 'rule'  { %h<r> := 1;  %h<s> := 1; }
-        @MODIFIERS.unshift(%h);
-        Q:PIR {
-            $P0 = find_lex '$name'
-            set_hll_global ['Regex';'P6Regex';'Actions'], '$REGEXNAME', $P0
-        };
-        @BLOCK[0].symbol('$¢', :scope('lexical'));
-        @BLOCK[0].symbol('$/', :scope('lexical'));
-        return 0;
-    }
-    elsif $<proto> {
+    if $<proto> {
         $past :=
             PAST::Stmts.new(
                 PAST::Block.new( :name($name),
@@ -520,6 +507,19 @@ method regex_declarator($/, $key?) {
                     :node($/)
                 )
             );
+    }
+    elsif $key eq 'open' {
+        my %h;
+        if $<sym> eq 'token' { %h<r> := 1; }
+        if $<sym> eq 'rule'  { %h<r> := 1;  %h<s> := 1; }
+        @MODIFIERS.unshift(%h);
+        Q:PIR {
+            $P0 = find_lex '$name'
+            set_hll_global ['Regex';'P6Regex';'Actions'], '$REGEXNAME', $P0
+        };
+        @BLOCK[0].symbol('$¢', :scope('lexical'));
+        @BLOCK[0].symbol('$/', :scope('lexical'));
+        return 0;
     }
     else {
         my $regex := 
