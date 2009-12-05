@@ -528,7 +528,7 @@ method regex_declarator($/, $key?) {
         $past := 
             PAST::Op.new(
                 :pasttype<callmethod>, :name<new>,
-                PAST::Var.new( :name('Regex'), :namespace(['Regex']), :scope<package> ),
+                PAST::Var.new( :name('Method'), :namespace(['Regex']), :scope<package> ),
                 $regex
             );
         # In sink context, we don't need the Regex::Regex object.
