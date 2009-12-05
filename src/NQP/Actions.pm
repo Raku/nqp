@@ -695,6 +695,29 @@ method quote:sym<Q:PIR>($/) {
                        :node($/) );
 }
 
+method quote:sym</ />($/, $key?) {
+    if $key eq 'open' {
+        Q:PIR {
+            null $P0
+            set_hll_global ['Regex';'P6Regex';'Actions'], '$REGEXNAME', $P0
+        };
+        @BLOCK[0].symbol('$¢', :scope('lexical'));
+        @BLOCK[0].symbol('$/', :scope('lexical'));
+        return 0;
+    }
+    my $regex := 
+        Regex::P6Regex::Actions::buildsub($<p6regex>.ast, @BLOCK.shift);
+    my $past := 
+        PAST::Op.new(
+            :pasttype<callmethod>, :name<new>,
+            PAST::Var.new( :name('Regex'), :namespace(['Regex']), :scope<package> ),
+            $regex
+        );
+    # In sink context, we don't need the Regex::Regex object.
+    $past<sink> := $regex;
+    make $past;
+}
+
 method quote_escape:sym<$>($/) { make $<variable>.ast; }
 method quote_escape:sym<{ }>($/) {
     make PAST::Op.new(
