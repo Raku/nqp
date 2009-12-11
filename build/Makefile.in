@@ -55,6 +55,7 @@ HLL_SOURCES = \
   src/cheats/hll-grammar.pir \
   src/HLL/Grammar.pm \
   src/HLL/Actions.pm \
+  src/HLL/Compiler.pm \
 
 P6REGEX_SOURCES = \
   src/Regex/P6Regex.pir \
@@ -86,6 +87,8 @@ REGEX_PBC       = Regex.pbc
 HLL_PBC         = HLL.pbc
 HLLGRAMMAR_G    = gen/hllgrammar-grammar.pir
 HLLGRAMMAR_A    = gen/hllgrammar-actions.pir
+
+HLLCOMPILER_PIR = gen/hllcompiler.pir
 
 P6REGEX_PBC     = P6Regex.pbc
 P6REGEX_G       = gen/p6regex-grammar.pir
@@ -162,6 +165,9 @@ $(STAGE1)/$(HLL_PBC): $(STAGE0_PBCS) $(HLL_SOURCES)
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE1)/$(HLLGRAMMAR_A) \
 	    src/HLL/Actions.pm
+	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
+	    --target=pir --output=$(STAGE1)/$(HLLCOMPILER_PIR) \
+	    src/HLL/Compiler.pm
 	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(HLL_PBC) \
 	    src/HLL.pir
 
@@ -197,6 +203,9 @@ $(STAGE2)/$(HLL_PBC): $(STAGE1_PBCS) $(HLL_SOURCES)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(HLLGRAMMAR_A) \
 	    src/HLL/Actions.pm
+	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
+	    --target=pir --output=$(STAGE2)/$(HLLCOMPILER_PIR) \
+	    src/HLL/Compiler.pm
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(HLL_PBC) \
 	    src/HLL.pir
 
