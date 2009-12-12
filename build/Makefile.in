@@ -248,15 +248,15 @@ bootstrap-files: $(STAGE2_PBCS)
 
 ## testing
 
-test: nqp-test
+test: core-test
 
-test-loud: nqp-test-loud p6regex-test-loud
+test-loud: core-test-loud p6regex-test-loud
 
-nqp-test: $(NQP_EXE)
-	prove -r --exec ./$(NQP_EXE) t/nqp
+core-test: $(NQP_EXE)
+	prove -r --exec ./$(NQP_EXE) t/nqp t/hll
 
-nqp-test-loud: $(NQP_EXE)
-	prove -r -v --exec ./$(NQP_EXE) t/nqp
+core-test-loud: $(NQP_EXE)
+	prove -r -v --exec ./$(NQP_EXE) t/nqp t/hll
 
 p6regex-test: $(P6REGEX_PBC)
 	prove -r --exec $(PARROT) t/p6regex
