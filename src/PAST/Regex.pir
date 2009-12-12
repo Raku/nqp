@@ -286,7 +286,7 @@ Perl 6 compilers mailing lists.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2009, Patrick R. Michaud.
+Copyright (C) 2009, The Perl Foundation.
 
 =cut
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2009, Patrick R. Michaud
+# Copyright (C) 2009, The Perl Foundation.
 
 =head1 NAME
 
