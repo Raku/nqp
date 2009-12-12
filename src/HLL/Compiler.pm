@@ -66,4 +66,20 @@ class HLL::Compiler is PCT::HLLCompiler {
         self.get_module($name);
     }
 
+    method import($target, %exports) {
+        for %exports {
+            my $type := $_.key;
+            my %items := $_.value;
+            if pir::can(self, "import_$type") {
+                for %items { self."import_$type"($target, $_.key, $_.value); }
+            }
+            elsif pir::can($target, "add_$type") {
+                for %items { $target."add_$type"($_.key, $_.value); }
+            }
+            else {
+                for %items { $target{~$_.key} := $_.value; }
+            }
+        }
+    }
+
 }
