@@ -18,18 +18,20 @@ class HLL::Compiler is PCT::HLLCompiler {
     }
         
     method get_exports($module, :$tagset, *@symbols) {
-        # convert a module name to a namespace, if needed
-        if (!pir::isa($module, 'NameSpace')) {
+        # convert a module name to something hash-like, if needed
+        if (!pir::does($module, 'hash')) {
             $module := self.get_module($module);
         }
 
-        # read symbols from 'ALL' if there are any, 'DEFAULT'
         $tagset := $tagset // (@symbols ?? 'ALL' !! 'DEFAULT');
         my %exports;
-        my %source := $module{'EXPORT'}{$tagset} // {};
+        my %source := $module{'EXPORT'}{~$tagset};
+        if !pir::defined(%source) {
+            %source := $tagset eq 'ALL' ?? $module !! {};
+        }
         if @symbols {
             for @symbols {
-                my $value := %source{$_};
+                my $value := %source{~$_};
                 %exports{value_type($value)}{$_} := $value;
             }
         }
