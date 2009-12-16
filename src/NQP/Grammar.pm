@@ -212,6 +212,7 @@ token statement_mod_loop:sym<until>     { <sym> :s <cond=.EXPR> }
 
 ## Terms
 
+token term:sym<fatarrow>           { <fatarrow> }
 token term:sym<colonpair>          { <colonpair> }
 token term:sym<variable>           { <variable> }
 token term:sym<package_declarator> { <package_declarator> }
@@ -220,6 +221,10 @@ token term:sym<routine_declarator> { <routine_declarator> }
 token term:sym<regex_declarator>   { <regex_declarator> }
 token term:sym<statement_prefix>   { <statement_prefix> }
 token term:sym<lambda>             { <?lambda> <pblock> }
+
+token fatarrow {
+    <key=.identifier> \h* '=>' <.ws> <val=.EXPR('i=')>
+}
 
 token colonpair {
     ':'
