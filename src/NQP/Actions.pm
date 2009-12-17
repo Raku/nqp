@@ -265,6 +265,7 @@ method statement_mod_loop:sym<until>($/)  { make $<cond>.ast; }
 
 ## Terms
 
+method term:sym<fatarrow>($/)           { make $<fatarrow>.ast; }
 method term:sym<colonpair>($/)          { make $<colonpair>.ast; }
 method term:sym<variable>($/)           { make $<variable>.ast; }
 method term:sym<package_declarator>($/) { make $<package_declarator>.ast; }
@@ -273,6 +274,12 @@ method term:sym<routine_declarator>($/) { make $<routine_declarator>.ast; }
 method term:sym<regex_declarator>($/)   { make $<regex_declarator>.ast; }
 method term:sym<statement_prefix>($/)   { make $<statement_prefix>.ast; }
 method term:sym<lambda>($/)             { make $<pblock>.ast; }
+
+method fatarrow($/) {
+    my $past := $<val>.ast;
+    $past.named( $<key>.Str );
+    make $past;
+}
 
 method colonpair($/) {
     my $past := $<circumfix>
