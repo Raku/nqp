@@ -2,7 +2,7 @@
 
 # test protoregexes in grammars
 
-plan(6);
+plan(7);
 
 grammar ABC {
 
@@ -28,5 +28,9 @@ ok( ?$/ ,           'successfully matched grammar' );
 
 $/ := ABC.parse('xxx');
 ok( !$/ ,           'successfully failed protoregex match' );
+
+$/ := ABC.parse('xxx', :rule<symbols>);
+ok( !$/ ,           'successfully failed protoregex match' );
+
 
 
