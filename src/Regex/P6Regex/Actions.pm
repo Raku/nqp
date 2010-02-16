@@ -329,6 +329,10 @@ method backslash:sym<x>($/) {
          !! PAST::Regex.new( $hexlit, :pasttype('literal'), :node($/) );
 }
 
+method backslash:sym<c>($/) {
+    make PAST::Regex.new( $<charspec>.ast, :pasttype('literal'), :node($/) );
+}
+
 method backslash:sym<misc>($/) {
     my $past := PAST::Regex.new( ~$/ , :pasttype('literal'), :node($/) );
     make $past;
