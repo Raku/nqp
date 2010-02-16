@@ -169,7 +169,11 @@ method quote_escape:sym<chr>($/) {
 }
 
 method charname($/) {
-    make pir::chr($<integer>.ast);
+    my $codepoint := $<integer>
+                     ?? $<integer>.ast
+                     !!  Q:PIR { %r = new ['CodeString'] }.charname_to_ord( ~$/ );
+    pir::die("Unrecognized character name $/") if $codepoint < 0;
+    make pir::chr($codepoint);
 }
 
 method charnames($/) {
