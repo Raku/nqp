@@ -164,3 +164,10 @@ method quote_escape:sym<oct>($/) {
     make ints_to_string( $<octint> ?? $<octint> !! $<octints><octint> );
 }
 
+method quote_escape:sym<chr>($/) {
+    make $<charspec>.ast;
+}
+
+method charspec($/) {
+    make pir::chr(string_to_int( $/, 10 ));
+}
