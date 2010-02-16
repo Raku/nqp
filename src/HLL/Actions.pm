@@ -172,7 +172,7 @@ method charname($/) {
     my $codepoint := $<integer>
                      ?? $<integer>.ast
                      !!  Q:PIR { %r = new ['CodeString'] }.charname_to_ord( ~$/ );
-    pir::die("Unrecognized character name $/") if $codepoint < 0;
+    $/.CURSOR.panic("Unrecognized character name $/") if $codepoint < 0;
     make pir::chr($codepoint);
 }
 
