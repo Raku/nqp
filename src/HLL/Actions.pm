@@ -168,6 +168,16 @@ method quote_escape:sym<chr>($/) {
     make $<charspec>.ast;
 }
 
+method charname($/) {
+    make pir::chr($<integer>.ast);
+}
+
+method charnames($/) {
+    my $str := '';
+    for $<charname> { $str := $str ~ $_.ast; }
+    make $str;
+}
+
 method charspec($/) {
-    make pir::chr(string_to_int( $/, 10 ));
+    make $<charnames> ?? $<charnames>.ast !! pir::chr(string_to_int( $/, 10 ));
 }
