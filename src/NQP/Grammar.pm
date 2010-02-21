@@ -316,7 +316,10 @@ rule regex_declarator {
     [
     | $<proto>=[proto] [regex|token|rule]
       <deflongname>
-      '{' '<...>' '}'<?ENDSTMT>
+      [ 
+      || '{' '<...>' '}'<?ENDSTMT>
+      || <.panic: "Proto regex body must be <...>">
+      ]
     | $<sym>=[regex|token|rule]
       <deflongname>
       <.newpad>
