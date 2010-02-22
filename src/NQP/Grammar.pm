@@ -91,8 +91,9 @@ token statement {
     | <statement_control>
     | <EXPR> <.ws>
         [
-        | <statement_mod_cond> <statement_mod_loop>?
-        | <statement_mod_loop>
+        || <?MARKED('endstmt')>
+        || <statement_mod_cond> <statement_mod_loop>?
+        || <statement_mod_loop>
         ]?
     ]
 }
