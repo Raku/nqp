@@ -21,11 +21,14 @@ sub block_immediate($block) {
     $block;
 }
 
-sub sigiltype($sigil) {
+sub vivitype($sigil) {
     $sigil eq '%'
-    ?? 'Hash'
-    !! ($sigil eq '@' ?? 'ResizablePMCArray' !! 'Undef');
+    ?? PAST::Op.new(:inline("    %r = root_new ['parrot';'Hash']"))
+    !! ($sigil eq '@'
+        ?? PAST::Op.new(:inline("    %r = root_new ['parrot';'ResizablePMCArray']"))
+        !! 'Undef');
 }
+
 
 method TOP($/) { make $<comp_unit>.ast; }
 
@@ -302,7 +305,7 @@ method variable($/) {
             if @name[0] eq 'GLOBAL' { @name.shift; }
             $past.namespace(@name);
             $past.scope('package');
-            $past.viviself( sigiltype( $<sigil> ) );
+            $past.viviself( vivitype( $<sigil> ) );
             $past.lvalue(1);
         }
         if $<twigil>[0] eq '*' {
@@ -321,7 +324,7 @@ method variable($/) {
         elsif $<twigil>[0] eq '!' {
             $past.push(PAST::Var.new( :name('self') ));
             $past.scope('attribute');
-            $past.viviself( sigiltype( $<sigil> ) );
+            $past.viviself( vivitype( $<sigil> ) );
         }
     }
     make $past;
@@ -388,7 +391,7 @@ method variable_declarator($/) {
     else {
         my $scope := $*SCOPE eq 'our' ?? 'package' !! 'lexical';
         my $decl := PAST::Var.new( :name($name), :scope($scope), :isdecl(1),
-                                   :lvalue(1), :viviself( sigiltype($sigil) ),
+                                   :lvalue(1), :viviself( vivitype($sigil) ),
                                    :node($/) );
         $BLOCK.symbol($name, :scope($scope) );
         $BLOCK[0].push($decl);
@@ -442,7 +445,7 @@ method parameter($/) {
     if $<named_param> {
         $past := $<named_param>.ast;
         if $quant ne '!' {
-            $past.viviself( sigiltype($<named_param><param_var><sigil>) );
+            $past.viviself( vivitype($<named_param><param_var><sigil>) );
         }
     }
     else {
@@ -452,7 +455,7 @@ method parameter($/) {
             $past.named( $<param_var><sigil> eq '%' );
         }
         elsif $quant eq '?' {
-            $past.viviself( sigiltype($<param_var><sigil>) );
+            $past.viviself( vivitype($<param_var><sigil>) );
         }
     }
     if $<default_value> {
@@ -647,7 +650,7 @@ method circumfix:sym<« »>($/) { make $<quote_EXPR>.ast; }
 method circumfix:sym<{ }>($/) {
     make +$<pblock><blockoid><statementlist><statement> > 0
          ?? $<pblock>.ast
-         !! PAST::Op.new( :inline('    %r = new ["Hash"]'), :node($/) );
+         !! vivitype('%');
 }
 
 method circumfix:sym<sigil>($/) {
@@ -662,19 +665,19 @@ method semilist($/) { make $<statement>.ast }
 method postcircumfix:sym<[ ]>($/) {
     make PAST::Var.new( $<EXPR>.ast , :scope('keyed_int'),
                         :viviself('Undef'),
-                        :vivibase('ResizablePMCArray') );
+                        :vivibase(vivitype('@')) );
 }
 
 method postcircumfix:sym<{ }>($/) {
     make PAST::Var.new( $<EXPR>.ast , :scope('keyed'),
                         :viviself('Undef'),
-                        :vivibase('Hash') );
+                        :vivibase(vivitype('%')) );
 }
 
 method postcircumfix:sym<ang>($/) {
     make PAST::Var.new( $<quote_EXPR>.ast, :scope('keyed'),
                         :viviself('Undef'),
-                        :vivibase('Hash') );
+                        :vivibase(vivitype('%')) );
 }
 
 method postcircumfix:sym<( )>($/) {
