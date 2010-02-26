@@ -111,6 +111,9 @@ method quote_EXPR($/) {
                 $past := PAST::Op.new( :pasttype('list'), :node($/) );
                 for @words { $past.push($_); }
             }
+            else {
+                $past := ~@words[0];
+            }
         }
     }
     if !PAST::Node.ACCEPTS($past) {

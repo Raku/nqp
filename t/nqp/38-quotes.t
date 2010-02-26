@@ -2,7 +2,7 @@
 
 # interpolating quotes
 
-plan(4);
+plan(6);
 
 my $abc := 'abc';
 
@@ -16,4 +16,6 @@ ok( "xxx {3+$num} zzz" eq 'xxx 8 zzz', "basic closure interpolation" );
 
 ok( qq{xxx {3+$num} zzz} eq 'xxx 8 zzz', 'basic qq{} closure interpolation' );
 
+ok( < a > eq 'a', 'spaces around individual element stripped');
 
+ok( +< a b > == 2, 'angle quotes correctly produce list');
