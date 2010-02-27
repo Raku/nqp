@@ -46,7 +46,7 @@ grammar HLL::Grammar;
     }
 
     token decint  { [\d+] ** '_' }
-    token hexints { [<.ws><decint><.ws>] ** ',' }
+    token decints { [<.ws><decint><.ws>] ** ',' }
 
     token hexint  { [<[ 0..9 a..f A..F ]>+] ** '_' }
     token hexints { [<.ws><hexint><.ws>] ** ',' }
