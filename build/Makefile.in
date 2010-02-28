@@ -78,6 +78,9 @@ STAGE0_SOURCES = \
   src/stage0/P6Regex-s0.pir \
   src/stage0/NQP-s0.pir
 
+SETTINGS_SOURCES = \
+  src/settings/Array.pm
+
 STAGE0 = src/stage0
 STAGE1 = src/stage1
 STAGE2 = src/stage2
@@ -102,6 +105,10 @@ NQP_PBC         = nqp.pbc
 NQP_G           = gen/nqp-grammar.pir
 NQP_A           = gen/nqp-actions.pir
 NQP_EXE         = nqp$(EXE)
+
+SETTINGS_PBC	= nqp-settings.pbc
+SETTINGS_GEN	= src/gen/settings.pm
+SETTINGS_PIR	= src/gen/settings.pir
 
 STAGE0_PBCS     = $(STAGE0)/$(HLL_PBC) $(STAGE0)/$(P6REGEX_PBC) $(STAGE0)/$(NQP_PBC) $(STAGE0)/$(REGEX_PBC)
 STAGE1_PBCS     = $(STAGE1)/$(HLL_PBC) $(STAGE1)/$(P6REGEX_PBC) $(STAGE1)/$(NQP_PBC) $(REGEX_PBC)
@@ -128,7 +135,7 @@ CLEANUPS = \
   src/stage2/*.pbc \
   src/gen/*.pir \
 
-all: $(NQP_EXE)
+all: $(NQP_EXE) $(SETTINGS_PBC)
 
 install: all
 	$(MKPATH)              $(DESTDIR)$(NQP_LANG_DIR)
@@ -136,6 +143,7 @@ install: all
 	$(CP)  $(P6REGEX_PBC)  $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(P6REGEX_PBC)
 	$(CP)  $(REGEX_PBC)    $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(REGEX_PBC)
 	$(CP)  $(HLL_PBC)      $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(HLL_PBC)
+	$(CP)  $(SETTINGS_PBC) $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(SETTINGS_PBC)
 	$(MKPATH)              $(DESTDIR)$(PARROT_BIN_DIR)
 	$(CP)  $(NQP_EXE)      $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
 	$(CHMOD)  755          $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
@@ -238,6 +246,16 @@ $(ALL_PBCS): $(REGEX_PBC) $(STAGE2_PBCS)
 
 $(NQP_EXE): $(NQP_PBC)
 	$(PBC_TO_EXE) $(NQP_PBC)
+
+$(SETTINGS_GEN): $(SETTINGS_SOURCES)
+	$(PERL) build/gen_settings.pl $(SETTINGS_SOURCES) > $(SETTINGS_GEN)
+
+$(SETTINGS_PIR): $(SETTINGS_GEN) $(NQP_PBC)
+	$(PARROT) $(NQP_PBC) --target=pir -o $(SETTINGS_PIR) $(SETTINGS_GEN)
+
+$(SETTINGS_PBC): $(SETTINGS_PIR)
+	$(PARROT) -o $(SETTINGS_PBC) $(SETTINGS_PIR)
+
 
 bootstrap-files: $(STAGE2_PBCS)
 	$(PERL) build/gen_bootstrap.pl src/Regex.pir >src/stage0/Regex-s0.pir
