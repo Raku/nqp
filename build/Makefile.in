@@ -79,7 +79,8 @@ STAGE0_SOURCES = \
   src/stage0/NQP-s0.pir
 
 SETTINGS_SOURCES = \
-  src/settings/Array.pm
+  src/settings/Array.pm \
+  src/settings/Hash.pm
 
 STAGE0 = src/stage0
 STAGE1 = src/stage1
