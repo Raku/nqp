@@ -122,6 +122,7 @@ CLEANUPS = \
   $(REGEX_PBC) \
   $(HLL_PBC) \
   $(P6REGEX_PBC) \
+  $(SETTINGS_PBC) \
   P6Regex$(EXE) \
   $(P6GRAMMAR_PBC) \
   P6Grammar$(EXE) \
@@ -135,6 +136,7 @@ CLEANUPS = \
   src/stage2/gen/* \
   src/stage2/*.pbc \
   src/gen/*.pir \
+  src/gen/*.pm
 
 all: $(NQP_EXE) $(SETTINGS_PBC)
 
