@@ -26,6 +26,22 @@ Return a C<@reversed> copy of the C<@array>.
         @reversed;
     }
 
+=begin
+
+=item $string := @array.join($join_string)
+
+Join C<@array> using C<$join_string>
+
+=end
+
+    method join ($join_string) {
+        return Q:PIR{
+            $P0 = find_lex '$join_string'
+            $S0 = $P0
+            $S1 = join $S0, self
+            %r  = box $S1
+        }
+    }
 
 =begin
 
@@ -34,5 +50,7 @@ Return a C<@reversed> copy of the C<@array>.
 =end
 
 }
+
+sub join($join_string, *@list) { @list.join($join_string) }
 
 # vim: ft=perl6
