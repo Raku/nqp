@@ -100,4 +100,14 @@ when iterating over key and value simultaneously:
 
 }
 
+=begin
+
+=item %hash := hash(:key1(value1), :key2(value2), ...)
+
+Coerce a list of pairs into a hash.
+
+=end
+
+sub hash (*%h) { return %h }
+
 # vim: ft=perl6

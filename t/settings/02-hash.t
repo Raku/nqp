@@ -2,10 +2,7 @@
 
 pir::load_bytecode('nqp-settings.pbc');
 
-my %hash;
-%hash<foo> := 1;
-%hash<bar> := 2;
-%hash<baz> := 42;
+my %hash := hash( foo => 1, bar => 2, baz => 42);
 
 say('1..17');
 
@@ -21,11 +18,7 @@ for @keys.sort -> $key {
     say($expected == $key ?? 'ok' !! 'nok');
 }
 
-my %expected;
-%expected<foo> := 1;
-%expected<bar> := 2;
-%expected<baz> := 42;
-
+my %expected := hash( foo => 1, bar => 2, baz => 42);
 my %values;
 
 for %hash.kv -> $k, $v {
