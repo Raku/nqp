@@ -5,11 +5,10 @@ pir::load_bytecode('nqp-settings.pbc');
 my @array := <0 1 2>;
 my @reversed := @array.reverse();
 
-say('1..3');
+plan(3);
 
-my $check := @reversed[0] == 2 ?? 'ok' !! 'nok';
-say("$check\n");
-$check := @reversed[1] == 1 ?? 'ok' !! 'nok';
-say("$check\n");
-$check := @reversed[0] == 2 ?? 'ok' !! 'nok';
-say("$check\n");
+ok( @reversed[0] == 2, 'First element correct');
+ok( @reversed[1] == 1, 'Second element correct');
+ok( @reversed[2] == 0, 'Third element correct');
+
+# vim: ft=perl6
