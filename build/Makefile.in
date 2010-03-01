@@ -269,7 +269,7 @@ bootstrap-files: $(STAGE2_PBCS)
 
 test: core-test
 
-test-loud: core-test-loud p6regex-test-loud
+test-loud: core-test-loud p6regex-test-loud settings-test-loud
 
 core-test: $(NQP_EXE)
 	prove -r --exec ./$(NQP_EXE) t/nqp t/hll
@@ -282,6 +282,12 @@ p6regex-test: $(P6REGEX_PBC)
 
 p6regex-test-loud: $(P6REGEX_PBC)
 	prove -r -v --exec $(PARROT) t/p6regex
+
+settings-test: $(SETTINGS_PBC) $(NQP_EXE)
+	prove -r --exec ./$(NQP_EXE) t/settings
+
+settings-test-loud: $(SETTINGS_PBC) $(NQP_EXE)
+	prove -r -v --exec ./$(NQP_EXE) t/settings
 
 ## cleaning
 
