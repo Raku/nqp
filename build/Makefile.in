@@ -80,7 +80,8 @@ STAGE0_SOURCES = \
 
 SETTINGS_SOURCES = \
   src/settings/Array.pm \
-  src/settings/Hash.pm
+  src/settings/Hash.pm \
+  src/settings/IO.pm
 
 STAGE0 = src/stage0
 STAGE1 = src/stage1
