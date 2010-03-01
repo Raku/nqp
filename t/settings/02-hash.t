@@ -1,40 +1,40 @@
 #! nqp
 
-pir::load_bytecode('nqp-settings.pbc');
+pir::load_bytecode('nqp-settings.pbc' );
 
-my %hash := hash( foo => 1, bar => 2, baz => 42);
+my %hash := hash( foo => 1, bar => 2, baz => 42 );
 
-say('1..17');
+plan(17 );
 
-say(%hash.exists('foo') ?? "ok 1" !! "nok 2");
-say(%hash.exists('bang') ?? "nok 2" !! "ok 2");
+ok( %hash.exists('foo'), 'Key exists');
+ok( !(%hash.exists('bang')), "Key doesn't exists");
 
 my @keys := %hash.keys;
-say(+@keys == 3 ?? 'ok 3' !! 'nok 3');
+ok(+@keys == 3, "Got 3 keys total" );
 
 my @sorted := <bar baz foo>;
 for @keys.sort -> $key {
     my $expected := @sorted.shift;
-    say($expected == $key ?? 'ok' !! 'nok');
+    ok( $expected == $key, "Key is correct" );
 }
 
-my %expected := hash( foo => 1, bar => 2, baz => 42);
+my %expected := hash( foo => 1, bar => 2, baz => 42 );
 my %values;
 
 for %hash.kv -> $k, $v {
-    say(%expected.exists($k) ?? 'ok' !! 'nok');
-    say(%expected{$k} == $v  ?? 'ok' !! 'nok');
+    ok( %expected.exists($k), "Key exists" );
+    ok( %expected{$k} == $v,  "Value correct" );
     %expected.delete($k);
     %values{$v} := 1
 }
 
-say(+%expected.keys == 0 ?? 'ok' !! 'nok');
+ok( +%expected.keys == 0, "All keys processed" );
 
 for %hash.values -> $v {
-    say(%values.exists($v) ?? 'ok' !! 'nok');
+    ok( %values.exists($v), "Value correct" );
     %values.delete($v);
 }
 
-say(+%values.keys == 0 ?? 'ok' !! 'nok');
+ok( +%values.keys == 0, "All values processed" );
 
 # vim: ft=perl6
