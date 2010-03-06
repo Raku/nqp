@@ -80,6 +80,7 @@ STAGE0_SOURCES = \
 
 SETTINGS_SOURCES = \
   src/settings/Array.pm \
+  src/settings/Functions.pm \
   src/settings/Hash.pm \
   src/settings/String.pm \
   src/settings/IO.pm
