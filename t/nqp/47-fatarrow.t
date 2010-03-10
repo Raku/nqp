@@ -2,7 +2,7 @@
 
 # fat arrow
 
-plan(3);
+plan(4);
 
 sub hash(*%a) { %a }
 
@@ -15,4 +15,7 @@ ok(%a<alpha> == 1, "first arg is 1");
 ok(%a<beta> eq 'blah', "second arg is 'blah'");
 
 my %b := hash( 'foo' => 'bar');
-ok(%b<foo> eq 'bar', "%b<foo> eq 'bar'");
+ok(%b<foo> eq 'bar', "single quoted string on the LHS of =>");
+
+my %c := hash( "foo" => 'bar');
+ok(%c<foo> eq 'bar', "double quoted string on the LHS of =>");

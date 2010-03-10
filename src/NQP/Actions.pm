@@ -269,7 +269,6 @@ method statement_mod_loop:sym<until>($/)  { make $<cond>.ast; }
 ## Terms
 
 method term:sym<fatarrow>($/)           { make $<fatarrow>.ast; }
-method term:sym<fatarrow2>($/)          { make $<fatarrow2>.ast; }
 method term:sym<colonpair>($/)          { make $<colonpair>.ast; }
 method term:sym<variable>($/)           { make $<variable>.ast; }
 method term:sym<package_declarator>($/) { make $<package_declarator>.ast; }
@@ -281,13 +280,8 @@ method term:sym<lambda>($/)             { make $<pblock>.ast; }
 
 method fatarrow($/) {
     my $past := $<val>.ast;
-    $past.named( $<key>.Str );
-    make $past;
-}
-
-method fatarrow2($/) {
-    my $past := $<val>.ast;
-    $past.named( $<key>.ast );
+    my $name := ?$<quote> ?? $<key>.ast !! $<key>.Str;
+    $past.named( $name );
     make $past;
 }
 
