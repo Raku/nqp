@@ -280,8 +280,7 @@ method term:sym<lambda>($/)             { make $<pblock>.ast; }
 
 method fatarrow($/) {
     my $past := $<val>.ast;
-    my $name := ?$<quote> ?? $<key>.ast !! $<key>.Str;
-    $past.named( $name );
+    $past.named( $<key>.Str );
     make $past;
 }
 

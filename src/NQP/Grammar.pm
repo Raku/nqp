@@ -224,9 +224,7 @@ token term:sym<statement_prefix>   { <statement_prefix> }
 token term:sym<lambda>             { <?lambda> <pblock> }
 
 token fatarrow {
-    | <key=.identifier> \h* '=>' <.ws> <val=.EXPR('i=')>
-    | $<quote>=<?[']> <key=.quote_EXPR: ':q'> \h* '=>' <.ws> <val=.EXPR('i=')>
-    | $<quote>=<?["]> <key=.quote_EXPR: ':qq'> \h* '=>' <.ws> <val=.EXPR('i=')>
+    <key=.identifier> \h* '=>' <.ws> <val=.EXPR('i=')>
 }
 
 token colonpair {
