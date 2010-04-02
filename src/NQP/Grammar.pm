@@ -63,10 +63,14 @@ token pod_comment {
         || .*? \n \h* '=' 'end' » \N*
         || <.panic: '=begin without matching =end'>
         ]
+    | <identifier>
+        .*? ^^ <?before \h* [ 
+            '='
+            [ 'cut' »
+              <.panic: 'Obsolete pod format, please use =begin/=end instead'> ]?
+          | \n ]>
     |
-        [ <?before .*? ^^ '=cut' » >
-          <.panic: 'Obsolete pod format, please use =begin/=end instead'> ]?
-        [ <alpha> || \s || <.panic: 'Illegal pod directive'> ]
+        [ \s || <.panic: 'Illegal pod directive'> ]
         \N*
     ]
 }
