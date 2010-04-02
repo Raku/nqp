@@ -275,13 +275,13 @@ method backslash:sym<b>($/) {
 }
 
 method backslash:sym<e>($/) {
-    my $past := PAST::Regex.new( "\e", :pasttype('enumcharlist'),
+    my $past := PAST::Regex.new( "\c[27]", :pasttype('enumcharlist'),
                     :negate($<sym> eq 'E'), :node($/) );
     make $past;
 }
 
 method backslash:sym<f>($/) {
-    my $past := PAST::Regex.new( "\f", :pasttype('enumcharlist'),
+    my $past := PAST::Regex.new( "\c[12]", :pasttype('enumcharlist'),
                     :negate($<sym> eq 'F'), :node($/) );
     make $past;
 }
