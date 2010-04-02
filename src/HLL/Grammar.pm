@@ -93,6 +93,17 @@ grammar HLL::Grammar;
         [ <octint> | '[' <octints> ']' ]
     }
     token quote_escape:sym<chr> { \\ c <?quotemod_check('b')> <charspec> }
+    token quote_escape:sym<misc> {
+        {} \\
+        [
+        || <?quotemod_check('b')>
+             [
+             | $<textqq>=(\W)
+             | $<x>=[\w] { $/.CURSOR.panic("Unrecognized backslash sequence: '\\" ~ $<x>.Str ~ "'") } 
+             ]
+        || $<textq>=[.]
+        ]
+    }
 
     token charname {
         || <integer>
@@ -102,7 +113,7 @@ grammar HLL::Grammar;
     token charnames { [<.ws><charname><.ws>] ** ',' }
     token charspec {
         [
-        | '[' <charnames> ']'
+        | '[' <charnames> ']' 
         | \d+ [ _ \d+]*
         | <[ ?..Z ]>
         | <.panic: 'Unrecognized \\c character'>

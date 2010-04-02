@@ -171,6 +171,10 @@ method quote_escape:sym<chr>($/) {
     make $<charspec>.ast;
 }
 
+method quote_escape:sym<misc>($/) {
+    make $<textq> ?? '\\' ~ $<textq>.Str !! $<textqq>.Str;
+}
+
 method charname($/) {
     my $codepoint := $<integer>
                      ?? $<integer>.ast
