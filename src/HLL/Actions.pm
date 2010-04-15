@@ -101,7 +101,7 @@ method binint($/) { make string_to_int( $/, 2 ); }
 
 method quote_EXPR($/) {
     my $past := $<quote_delimited>.ast;
-    if HLL::Grammar::quotemod_check($/, 'w') {
+    if $/.CURSOR.quotemod_check('w') {
         if PAST::Node.ACCEPTS($past) {
             $/.CURSOR.panic("Can't form :w list from non-constant strings (yet)");
         }
