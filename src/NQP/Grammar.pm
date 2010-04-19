@@ -406,6 +406,7 @@ token quote:sym</ />  {
 
 token quote_escape:sym<$>   { <?[$]> <?quotemod_check('s')> <variable> }
 token quote_escape:sym<{ }> { <?[{]> <?quotemod_check('c')> <block> }
+token quote_escape:sym<esc> { \\ e <?quotemod_check('b')> }
 
 token circumfix:sym<( )> { '(' <.ws> <EXPR>? ')' }
 token circumfix:sym<[ ]> { '[' <.ws> <EXPR>? ']' }

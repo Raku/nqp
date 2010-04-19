@@ -734,6 +734,7 @@ method quote_escape:sym<{ }>($/) {
         :pirop('set S*'), block_immediate($<block>.ast), :node($/)
     );
 }
+method quote_escape:sym<esc>($/) { make "\c[27]"; }
 
 ## Operators
 
