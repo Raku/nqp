@@ -85,7 +85,6 @@ grammar HLL::Grammar;
     token quote_escape:sym<cr>  { \\ r <?quotemod_check('b')> }
     token quote_escape:sym<tab> { \\ t <?quotemod_check('b')> }
     token quote_escape:sym<ff>  { \\ f <?quotemod_check('b')> }
-    token quote_escape:sym<esc> { \\ e <?quotemod_check('b')> }
     token quote_escape:sym<hex> {
         \\ x <?quotemod_check('b')>
         [ <hexint> | '[' <hexints> ']' ]
