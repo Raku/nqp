@@ -391,7 +391,7 @@ position C<pos>.
 .end
 
 
-.sub 'split_words' :method
+.sub 'split_words' :method :nsentry
     .param string words
     .local int pos, eos
     .local pmc result
