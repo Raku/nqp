@@ -383,7 +383,7 @@ method assertion:sym<name>($/) {
             $I0 = index $S0, ':sym<'
             add $I0, 5
             $S0 = substr $S0, $I0
-            $S0 = chopn $S0, 1
+            chopn $S0, 1
             %r = box $S0
         };
         $past := PAST::Regex.new(

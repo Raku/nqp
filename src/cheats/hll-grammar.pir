@@ -337,7 +337,7 @@ position C<pos>.
 .end
 
 
-.sub 'quotemod_check' :method :nsentry
+.sub 'quotemod_check' :method
     .param string mod
 
     $P0 = find_dynamic_lex '%*QUOTEMOD'
