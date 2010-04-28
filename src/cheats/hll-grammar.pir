@@ -337,7 +337,7 @@ position C<pos>.
 .end
 
 
-.sub 'quotemod_check' :method
+.sub 'quotemod_check' :method :nsentry
     .param string mod
 
     $P0 = find_dynamic_lex '%*QUOTEMOD'
@@ -391,7 +391,7 @@ position C<pos>.
 .end
 
 
-.sub 'split_words' :method
+.sub 'split_words' :method :nsentry
     .param string words
     .local int pos, eos
     .local pmc result
