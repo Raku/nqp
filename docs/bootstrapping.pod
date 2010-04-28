@@ -37,7 +37,7 @@ Commit the bootstrap files
 
 Copy the I<stage0> files over to parrot:
 
-    cp src/stage0/*.pir $PARROT_SRC/ext/nqp/src/stage0
+    cp src/stage0/*.pir $PARROT_SRC/ext/nqp-rx/src/stage0
 
 =item *
 
