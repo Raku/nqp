@@ -82,4 +82,65 @@ class HLL::Compiler is PCT::HLLCompiler {
         }
     }
 
+    method interactive(*%adverbs) {
+        my $target := pir::downcase(%adverbs<target>);
+
+        pir::printerr__vS(self.commandline_banner);
+
+        my $stdin := pir::getstdin__P();
+        my $encoding := ~%adverbs<encoding>;
+        if $encoding && $encoding ne 'fixed_8' {
+            $stdin.encoding($encoding);
+        }
+
+        while 1 {
+            last unless $stdin;
+
+            my $prompt := self.commandline_prompt // '> ';
+            my $code := $stdin.readline_interactive(~$prompt);
+
+            last if pir::isnull($code);
+
+            if $code {
+                $code := $code ~ "\n";
+                my $output;
+                {
+                    $output := self.eval($code, |%adverbs);
+                    CATCH {
+                        pir::print($! ~ "\n");
+                        next;
+                    }
+                };
+                next if pir::isnull($output);
+
+                if $target {
+                    if $target eq 'pir' {
+                        say($output);
+                    } else {
+                        self.dumper($output, $target, |%adverbs);
+                    }
+                }
+            }
+        }
+    }
+
+    method eval($code, *@args, *%adverbs) {
+        my $output; my $outer;
+        $output := self.compile($code, |%adverbs);
+
+        if !pir::isa($output, 'String')
+                && %adverbs<target> eq '' {
+            $outer := %adverbs<outer_ctx>;
+
+            unless pir::isnull($outer) {
+                $output[0].set_outer($outer<current_sub>);
+            }
+
+            pir::trace(%adverbs<trace>);
+            $output := $output[0]();
+            pir::trace(0);
+        }
+
+        $output;
+    }
 }
