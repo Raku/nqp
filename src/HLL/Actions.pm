@@ -183,7 +183,7 @@ method quote_escape:sym<misc>($/) {
 method charname($/) {
     my $codepoint := $<integer>
                      ?? $<integer>.ast
-                     !!  Q:PIR { %r = new ['CodeString'] }.charname_to_ord( ~$/ );
+                     !! pir::find_codepoint__Is( ~$/ );
     $/.CURSOR.panic("Unrecognized character name $/") if $codepoint < 0;
     make pir::chr($codepoint);
 }
