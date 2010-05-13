@@ -526,9 +526,9 @@ token infix:sym<,>    { <sym>  <O('%comma, :pasttype<list>')> }
 
 token prefix:sym<return> { <sym> \s <O('%list_prefix, :pasttype<return>')> }
 token prefix:sym<make>   { <sym> \s <O('%list_prefix')> }
-token term:sym<last>   { <sym> \s <O('%list_prefix')> }
-token term:sym<next>   { <sym> \s <O('%list_prefix')> }
-token term:sym<redo>   { <sym> \s <O('%list_prefix')> }
+token term:sym<last>     { <sym> }
+token term:sym<next>     { <sym> }
+token term:sym<redo>     { <sym> }
 
 method smartmatch($/) {
     # swap rhs into invocant position
