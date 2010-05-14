@@ -11,9 +11,9 @@ methods typical of Perl 6 hashes.
 
 module Hash {
 
-    =begin item delete($key)
+    =begin item delete
     Delete C<$key> from the hash.
-    =end
+    =end item
 
     method delete($key) {
         Q:PIR {
@@ -23,7 +23,7 @@ module Hash {
     }
 
 
-    =begin item exists($key)
+    =begin item exists
     Returns true if C<$key> exists in the hash.
     =end item
 
@@ -34,6 +34,40 @@ module Hash {
             %r  = box $I0
         }
     }
+
+
+    =begin item keys
+    Returns a list of all of the keys in the hash.
+    =end item
+
+    method keys () {
+        my @keys;
+        for self { @keys.push($_.key); }
+        @keys;
+    }
+
+
+    =begin item kv
+    Return a list of key, value, key, value, ...
+    =end item
+
+    method kv () {
+        my @kv;
+        for self { @kv.push($_.key); @kv.push($_.value); }
+        @kv;
+    }
+
+
+    =begin item values
+    Returns a list of all of the values in the hash.
+    =end item
+
+    method values () {
+        my @values;
+        for self { @values.push($_.value); }
+        @values;
+    }
+
 }
 
 
