@@ -60,9 +60,7 @@ method statementlist($/) {
         for $<statement> {
             my $ast := $_.ast;
             $ast := $ast<sink> if pir::defined($ast<sink>);
-            if $ast.isa(PAST::Block) && !$ast.blocktype {
-                $ast := block_immediate($ast);
-            }
+            if $ast<bareblock> { $ast := block_immediate($ast); }
             $past.push( $ast );
         }
     }
@@ -104,6 +102,7 @@ method blockoid($/) {
     my $BLOCK := @BLOCK.shift;
     $BLOCK.push($past);
     $BLOCK.node($/);
+    $BLOCK.closure(1);
     make $BLOCK;
 }
 
@@ -652,9 +651,11 @@ method circumfix:sym<ang>($/) { make $<quote_EXPR>.ast; }
 method circumfix:sym<« »>($/) { make $<quote_EXPR>.ast; }
 
 method circumfix:sym<{ }>($/) {
-    make +$<pblock><blockoid><statementlist><statement> > 0
-         ?? $<pblock>.ast
-         !! vivitype('%');
+    my $past := +$<pblock><blockoid><statementlist><statement> > 0
+                ?? $<pblock>.ast
+                !! vivitype('%');
+    $past<bareblock> := 1;
+    make $past;
 }
 
 method circumfix:sym<sigil>($/) {
