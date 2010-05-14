@@ -31,9 +31,10 @@ token ENDSTMT {
 token ws {
     ||  <?MARKED('ws')>
     ||  <!ww>
-        [ \s+
+        [ \v+
         | '#' \N*
         | ^^ <.pod_comment>
+        | \h+
         ]*
         <?MARKER('ws')>
 }
@@ -51,10 +52,10 @@ token pod_comment {
     ^^ \h* '='
     [
     | 'begin' \h+ 'END' >>
-        [ .*? \n '=' 'end' \h+ 'END' » \N* || .* ]
+        [ .*? \n \h* '=' 'end' \h+ 'END' » \N* || .* ]
     | 'begin' \h+ <identifier>
         [
-        ||  .*? \n '=' 'end' \h+ $<identifier> » \N*
+        ||  .*? \n \h* '=' 'end' \h+ $<identifier> » \N*
         ||  <.panic: '=begin without matching =end'>
         ]
     | 'begin' » \h*

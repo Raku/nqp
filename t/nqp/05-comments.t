@@ -2,7 +2,7 @@
 
 # check comments
 
-say('1..7');
+say('1..8');
 
 #Comment preceding
 say("ok 1");
@@ -46,3 +46,12 @@ say("ok 6");
 =comment
 
 say("ok 7");
+
+    =begin comment indented pod
+    this is indented pod
+    say("not ok 8");
+    =end comment
+
+    say("ok 8");
+
+
