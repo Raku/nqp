@@ -72,6 +72,16 @@ NQP_SOURCES = \
   src/NQP/Actions.pm \
   src/NQP/Compiler.pir \
 
+SETTING_SOURCES = \
+  src/setting/ResizablePMCArray.pm \
+  src/setting/Hash.pm \
+  src/setting/Regex.pm \
+  src/setting/IO.pm \
+
+SETTING_PM  = src/gen/nqp-setting.pm
+SETTING_PIR = src/gen/nqp-setting.pir
+SETTING_PBC = nqp-setting.pbc
+
 STAGE0_SOURCES = \
   src/stage0/Regex-s0.pir \
   src/stage0/HLL-s0.pir \
@@ -128,7 +138,7 @@ CLEANUPS = \
   src/stage2/*.pbc \
   src/gen/*.pir \
 
-all: $(NQP_EXE)
+all: $(NQP_EXE) $(SETTING_PBC)
 
 install: all
 	$(MKPATH)              $(DESTDIR)$(NQP_LANG_DIR)
@@ -239,6 +249,14 @@ $(ALL_PBCS): $(REGEX_PBC) $(STAGE2_PBCS)
 $(NQP_EXE): $(NQP_PBC)
 	$(PBC_TO_EXE) $(NQP_PBC)
 
+$(SETTING_PM): $(SETTING_SOURCES)
+	$(PERL) build/gen_setting.pl $(SETTING_SOURCES) > $(SETTING_PM)
+$(SETTING_PIR): $(SETTING_PM) $(NQP_PBC)
+	$(PARROT) $(NQP_PBC) --target=pir -o $(SETTING_PIR) $(SETTING_PM)
+$(SETTING_PBC): $(SETTING_PIR)
+	$(PARROT) -o $(SETTING_PBC) $(SETTING_PIR)
+
+
 bootstrap-files: $(STAGE2_PBCS)
 	$(PERL) build/gen_bootstrap.pl src/Regex.pir >src/stage0/Regex-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/HLL.pir >src/stage0/HLL-s0.pir
@@ -248,9 +266,9 @@ bootstrap-files: $(STAGE2_PBCS)
 
 ## testing
 
-test: core-test
+test: core-test setting-test
 
-test-loud: core-test-loud p6regex-test-loud
+test-loud: core-test-loud setting-test-loud p6regex-test-loud
 
 core-test: $(NQP_EXE)
 	prove -r --exec ./$(NQP_EXE) t/nqp t/hll
@@ -263,6 +281,12 @@ p6regex-test: $(P6REGEX_PBC)
 
 p6regex-test-loud: $(P6REGEX_PBC)
 	prove -r -v --exec $(PARROT) t/p6regex
+
+setting-test: $(NQP_EXE)
+	prove -r --exec ./$(NQP_EXE) t/setting
+
+setting-test-loud: $(NQP_EXE)
+	prove -r -v --exec ./$(NQP_EXE) t/setting
 
 ## cleaning
 

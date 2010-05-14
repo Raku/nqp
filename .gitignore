@@ -11,5 +11,6 @@ P6Regex.pbc
 nqp
 nqp.pbc
 src/gen/*.pir
+src/gen/*.pm
 src/stage1
 src/stage2
