@@ -307,6 +307,7 @@ rule method_def {
 token signature { [ [<.ws><parameter><.ws>] ** ',' ]? }
 
 token parameter {
+    [ <typename> <.ws> ]*                   # <type_constraint>
     [
     | $<quant>=['*'] <param_var>
     | [ <param_var> | <named_param> ] $<quant>=['?'|'!'|<?>]
