@@ -28,8 +28,6 @@ Regex::P6Regex - Parser/compiler for Perl 6 regexes
     p6regex.'parsegrammar'($P0)
     $P0 = get_hll_global ['Regex';'P6Regex'], 'Actions'
     p6regex.'parseactions'($P0)
-    $P0 = get_hll_global ['Regex';'P6Regex';'Actions'], 'INIT'
-    $P0()
 .end
 
 

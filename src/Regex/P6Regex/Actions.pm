@@ -3,7 +3,7 @@ class Regex::P6Regex::Actions is HLL::Actions;
 ## this will eventually be handled using contextuals
 our @MODIFIERS;
 
-sub INIT() {
+INIT {
     @MODIFIERS := Q:PIR {
         %r = new ['ResizablePMCArray']
         $P0 = new ['Hash']
