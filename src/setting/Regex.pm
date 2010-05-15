@@ -38,21 +38,21 @@ sub subst ($text, $regex, $repl, :$global?) {
                            !! [ $text ~~ $regex ];
     my $is_code := pir::isa($repl, 'Sub');
     my $offset  := 0;
-    my @pieces;
+    my $result  := pir::new__Ps('StringBuilder');
 
     for @matches -> $match {
         my $repl_string := $is_code ?? $repl($match) !! $repl;
-        @pieces.push( pir::substr($text, $offset, $match.from - $offset))
+        pir::push($result, pir::substr($text, $offset, $match.from - $offset))
             if $match.from > $offset;
-        @pieces.push($repl_string);
+        pir::push($result, $repl_string);
         $offset := $match.to;
     }
 
     my $chars := pir::length($text);
-    @pieces.push(pir::substr($text, $offset, $chars))
+    pir::push($result, pir::substr($text, $offset, $chars))
         if $chars > $offset;
 
-    @pieces.join('');
+    ~$result;
 }
 
 # vim: ft=perl6
