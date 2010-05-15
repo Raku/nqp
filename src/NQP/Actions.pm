@@ -365,6 +365,10 @@ method scope_declarator:sym<our>($/) { make $<scoped>.ast; }
 method scope_declarator:sym<has>($/) { make $<scoped>.ast; }
 
 method scoped($/) {
+    make $<declarator>.ast;
+}
+
+method declarator($/) {
     make $<routine_declarator>
          ?? $<routine_declarator>.ast
          !! $<variable_declarator>.ast;

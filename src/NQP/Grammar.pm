@@ -271,6 +271,13 @@ token scope_declarator:sym<our> { <sym> <scoped('our')> }
 token scope_declarator:sym<has> { <sym> <scoped('has')> }
 
 rule scoped($*SCOPE) {
+    | <declarator>
+    | <typename>+ <declarator>       # eventually <multi_declarator>
+}
+
+token typename { <name> }
+
+token declarator {
     | <variable_declarator>
     | <routine_declarator>
 }
