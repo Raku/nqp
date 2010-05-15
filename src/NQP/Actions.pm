@@ -47,11 +47,26 @@ sub colonpair_str($ast) {
 }
 
 method comp_unit($/) {
-    my $past := $<statementlist>.ast;
-    my $BLOCK := @BLOCK.shift;
-    $BLOCK.push($past);
-    $BLOCK.node($/);
-    make $BLOCK;
+    my $mainline := $<statementlist>.ast;
+    my $unit     := @BLOCK.shift;
+
+    # We force a return here, because we have other
+    # :load/:init blocks to execute that we don't want
+    # to include as part of the mainline.
+    $unit.push(
+        PAST::Op.new( :pirop<return>, $mainline )
+    );
+
+    # If this code is loaded via load_bytecode, we want the unit mainline 
+    # to be executed after all other loadinits have taken place.
+    $unit.push(
+        PAST::Block.new(
+            :pirflags(':load'), :lexical(0), :namespace(''),
+            PAST::Op.new( :pasttype<call>, PAST::Val.new( :value($unit) ) )
+        )
+    );
+    $unit.node($/);
+    make $unit;
 }
 
 method statementlist($/) {
