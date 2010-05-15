@@ -12,7 +12,7 @@ given, then return an array of all non-overlapping matches.
 =end item
 
 sub match ($text, $regex, :$global?) {
-    my $match := $text ~~ regex;
+    my $match := $text ~~ $regex;
     if $global {
         my @matches;
         while $match {
