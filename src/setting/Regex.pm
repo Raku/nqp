@@ -41,10 +41,9 @@ sub subst ($text, $regex, $repl, :$global?) {
     my $result  := pir::new__Ps('StringBuilder');
 
     for @matches -> $match {
-        my $repl_string := $is_code ?? $repl($match) !! $repl;
         pir::push($result, pir::substr($text, $offset, $match.from - $offset))
             if $match.from > $offset;
-        pir::push($result, $repl_string);
+        pir::push($result, $is_code ?? $repl($match) !! $repl);
         $offset := $match.to;
     }
 
