@@ -10,7 +10,7 @@ IO Methods and Functions
 Returns the contents of C<$filename> as a single string.
 =end
 
-sub slurp ($filename) {
+our sub slurp ($filename) {
     my $handle := pir::open__Pss($file, 'r');
     my $contents := $handle.readall;
     pir::close($handle);
@@ -22,7 +22,7 @@ sub slurp ($filename) {
 Write the string value of C<$contents> to C<$filename>.
 =end item
 
-sub spew($filename, $contents) {
+our sub spew($filename, $contents) {
     my $handle := pir::open__Pss($filename, 'w');
     $handle.print($contents);
     pir::close($handle);

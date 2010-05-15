@@ -75,6 +75,6 @@ module Hash {
 Construct a hash from named arguments.
 =end item
 
-sub hash(*%h) { %h }
+our sub hash(*%h) { %h }
 
 # vim: ft=perl6

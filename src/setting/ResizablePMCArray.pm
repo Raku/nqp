@@ -44,8 +44,8 @@ module ResizablePMCArray {
 }
 
 
-sub join ($separator, *@values) { @values.join($separator); }
-sub map (&code, *@values) { @values.map(&code); }
-sub list (*@values) { @values; }
+our sub join ($separator, *@values) { @values.join($separator); }
+our sub map (&code, *@values) { @values.map(&code); }
+our sub list (*@values) { @values; }
 
 # vim: ft=perl6
