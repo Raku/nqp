@@ -47,11 +47,26 @@ sub colonpair_str($ast) {
 }
 
 method comp_unit($/) {
-    my $past := $<statementlist>.ast;
-    my $BLOCK := @BLOCK.shift;
-    $BLOCK.push($past);
-    $BLOCK.node($/);
-    make $BLOCK;
+    my $mainline := $<statementlist>.ast;
+    my $unit     := @BLOCK.shift;
+
+    # We force a return here, because we have other
+    # :load/:init blocks to execute that we don't want
+    # to include as part of the mainline.
+    $unit.push(
+        PAST::Op.new( :pirop<return>, $mainline )
+    );
+
+    # If this code is loaded via load_bytecode, we want the unit mainline 
+    # to be executed after all other loadinits have taken place.
+    $unit.push(
+        PAST::Block.new(
+            :pirflags(':load'), :lexical(0), :namespace(''),
+            PAST::Op.new( :pasttype<call>, PAST::Val.new( :value($unit) ) )
+        )
+    );
+    $unit.node($/);
+    make $unit;
 }
 
 method statementlist($/) {
@@ -60,9 +75,7 @@ method statementlist($/) {
         for $<statement> {
             my $ast := $_.ast;
             $ast := $ast<sink> if pir::defined($ast<sink>);
-            if $ast.isa(PAST::Block) && !$ast.blocktype {
-                $ast := block_immediate($ast);
-            }
+            if $ast<bareblock> { $ast := block_immediate($ast); }
             $past.push( $ast );
         }
     }
@@ -104,6 +117,7 @@ method blockoid($/) {
     my $BLOCK := @BLOCK.shift;
     $BLOCK.push($past);
     $BLOCK.node($/);
+    $BLOCK.closure(1);
     make $BLOCK;
 }
 
@@ -280,8 +294,7 @@ method term:sym<lambda>($/)             { make $<pblock>.ast; }
 
 method fatarrow($/) {
     my $past := $<val>.ast;
-    my $name := ?$<quote> ?? $<key>.ast !! $<key>.Str;
-    $past.named( $name );
+    $past.named( $<key>.Str );
     make $past;
 }
 
@@ -367,6 +380,10 @@ method scope_declarator:sym<our>($/) { make $<scoped>.ast; }
 method scope_declarator:sym<has>($/) { make $<scoped>.ast; }
 
 method scoped($/) {
+    make $<declarator>.ast;
+}
+
+method declarator($/) {
     make $<routine_declarator>
          ?? $<routine_declarator>.ast
          !! $<variable_declarator>.ast;
@@ -615,6 +632,10 @@ method arglist($/) {
         if $past[$i].name eq '&prefix:<|>' {
             $past[$i] := $past[$i][0];
             $past[$i].flat(1);
+            if $past[$i].isa(PAST::Val)
+                && pir::substr($past[$i].name, 0, 1) eq '%' {
+                    $past[$i].named(1);
+            }
         }
         $i++;
     }
@@ -649,9 +670,11 @@ method circumfix:sym<ang>($/) { make $<quote_EXPR>.ast; }
 method circumfix:sym<« »>($/) { make $<quote_EXPR>.ast; }
 
 method circumfix:sym<{ }>($/) {
-    make +$<pblock><blockoid><statementlist><statement> > 0
-         ?? $<pblock>.ast
-         !! vivitype('%');
+    my $past := +$<pblock><blockoid><statementlist><statement> > 0
+                ?? $<pblock>.ast
+                !! vivitype('%');
+    $past<bareblock> := 1;
+    make $past;
 }
 
 method circumfix:sym<sigil>($/) {
@@ -735,6 +758,7 @@ method quote_escape:sym<{ }>($/) {
         :pirop('set S*'), block_immediate($<block>.ast), :node($/)
     );
 }
+method quote_escape:sym<esc>($/) { make "\c[27]"; }
 
 ## Operators
 
@@ -761,6 +785,23 @@ method prefix:sym<make>($/) {
     );
 }
 
+sub control($/, $id) {
+    make PAST::Op.new(
+        :node($/),
+        :pasttype('inline'),
+        :inline(
+            '.include "except_types.pasm"',
+            '    %r = new "Exception"',
+            '    %r["type"] = ' ~ $id,
+            '    throw %r'
+        )
+    )
+}
+
+method term:sym<next>($/) { control($/, '.CONTROL_LOOP_NEXT') }
+method term:sym<last>($/) { control($/, '.CONTROL_LOOP_LAST') }
+method term:sym<redo>($/) { control($/, '.CONTROL_LOOP_REDO') }
+
 method infix:sym<~~>($/) {
     make PAST::Op.new( :pasttype<callmethod>, :name<ACCEPTS>, :node($/) );
 }
@@ -773,29 +814,71 @@ class NQP::RegexActions is Regex::P6Regex::Actions {
         make PAST::Regex.new( $past, :pasttype('pastnode') );
     }
 
-    method metachar:sym<{ }>($/) { make $<codeblock>.ast; }
+    method metachar:sym<var>($/) {
+        my $past;
+        my $name := $<pos> ?? +$<pos> !! ~$<name>;
+        if $<quantified_atom> {
+            if $<var> {
+                $/.CURSOR.panic('"$var = " syntax not yet supported in regexes');
+            }
+            $past := $<quantified_atom>[0].ast;
+            if $past.pasttype eq 'quant' && $past[0].pasttype eq 'subrule' {
+                Regex::P6Regex::Actions::subrule_alias($past[0], $name);
+            }
+            elsif $past.pasttype eq 'subrule' { Regex::P6Regex::Actions::subrule_alias($past, $name); }
+            else {
+                $past := PAST::Regex.new( $past, :name($name), :pasttype('subcapture'), :node($/) );
+            }
+        }
+        else {
+            if $<var> {
+                my @MODIFIERS := Q:PIR {
+                    %r = get_hll_global ['Regex';'P6Regex';'Actions'], '@MODIFIERS'
+                };
+                my $subtype := @MODIFIERS[0]<i> ?? 'interp_literal_i' !! 'interp_literal';
+                $past := PAST::Regex.new( $<var>.ast, :pasttype('pastnode'),
+                                          :subtype($subtype), :node($/) );
+            } else {
+                $past := PAST::Regex.new( '!BACKREF', $name, :pasttype('subrule'),
+                                          :subtype('method'), :node($/) );
+            }
+        }
+        make $past;
+    }
 
-    method assertion:sym<{ }>($/) { make $<codeblock>.ast; }
+    method assertion:sym<var>($/) {
+        make PAST::Regex.new( $<var>.ast, :pasttype('pastnode'),
+                              :subtype('interp_regex'), :node($/) );
+    }
+
+
+    method metachar:sym<{ }>($/) { 
+        make PAST::Regex.new(:node($/), :pasttype('pastnode'), $<codeblock>.ast); 
+    }
+
+    method assertion:sym<{ }>($/) { 
+        make PAST::Regex.new( :node($/), :pasttype('pastnode'), :subtype('interp_regex'),
+                              $<codeblock>.ast );
+    }
 
     method codeblock($/) {
         my $block := $<block>.ast;
         $block.blocktype('immediate');
-        my $past :=
-            PAST::Regex.new(
-                PAST::Stmts.new(
-                    PAST::Op.new(
-                        PAST::Var.new( :name('$/') ),
-                        PAST::Op.new(
-                            PAST::Var.new( :name('$¢') ),
-                            :name('MATCH'),
-                            :pasttype('callmethod')
-                        ),
-                        :pasttype('bind')
-                    ),
-                    $block
+        make bindmatch($block);
+    }
+
+    sub bindmatch($past) {
+        PAST::Stmts.new(
+            PAST::Op.new(
+                PAST::Var.new( :name('$/') ),
+                PAST::Op.new(
+                    PAST::Var.new( :name('$¢') ),
+                    :name('MATCH'),
+                    :pasttype('callmethod')
                 ),
-                :pasttype('pastnode')
-            );
-        make $past;
+                :pasttype('bind')
+            ),
+            $past,
+        );
     }
 }

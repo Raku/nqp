@@ -31,9 +31,10 @@ token ENDSTMT {
 token ws {
     ||  <?MARKED('ws')>
     ||  <!ww>
-        [ \s+
+        [ \v+
         | '#' \N*
         | ^^ <.pod_comment>
+        | \h+
         ]*
         <?MARKER('ws')>
 }
@@ -51,10 +52,10 @@ token pod_comment {
     ^^ \h* '='
     [
     | 'begin' \h+ 'END' >>
-        [ .*? \n '=' 'end' \h+ 'END' » \N* || .* ]
+        [ .*? \n \h* '=' 'end' \h+ 'END' » \N* || .* ]
     | 'begin' \h+ <identifier>
         [
-        ||  .*? \n '=' 'end' \h+ $<identifier> » \N*
+        ||  .*? \n \h* '=' 'end' \h+ $<identifier> » \N*
         ||  <.panic: '=begin without matching =end'>
         ]
     | 'begin' » \h*
@@ -63,10 +64,14 @@ token pod_comment {
         || .*? \n \h* '=' 'end' » \N*
         || <.panic: '=begin without matching =end'>
         ]
+    | <identifier>
+        .*? ^^ <?before \h* [ 
+            '='
+            [ 'cut' »
+              <.panic: 'Obsolete pod format, please use =begin/=end instead'> ]?
+          | \n ]>
     |
-        [ <?before .*? ^^ '=cut' » >
-          <.panic: 'Obsolete pod format, please use =begin/=end instead'> ]?
-        [ <alpha> || \s || <.panic: 'Illegal pod directive'> ]
+        [ \s || <.panic: 'Illegal pod directive'> ]
         \N*
     ]
 }
@@ -224,9 +229,7 @@ token term:sym<statement_prefix>   { <statement_prefix> }
 token term:sym<lambda>             { <?lambda> <pblock> }
 
 token fatarrow {
-    | <key=.identifier> \h* '=>' <.ws> <val=.EXPR('i=')>
-    | $<quote>=<?[']> <key=.quote_EXPR: ':q'> \h* '=>' <.ws> <val=.EXPR('i=')>
-    | $<quote>=<?["]> <key=.quote_EXPR: ':qq'> \h* '=>' <.ws> <val=.EXPR('i=')>
+    <key=.identifier> \h* '=>' <.ws> <val=.EXPR('i=')>
 }
 
 token colonpair {
@@ -268,6 +271,13 @@ token scope_declarator:sym<our> { <sym> <scoped('our')> }
 token scope_declarator:sym<has> { <sym> <scoped('has')> }
 
 rule scoped($*SCOPE) {
+    | <declarator>
+    | <typename>+ <declarator>       # eventually <multi_declarator>
+}
+
+token typename { <name> }
+
+token declarator {
     | <variable_declarator>
     | <routine_declarator>
 }
@@ -297,6 +307,7 @@ rule method_def {
 token signature { [ [<.ws><parameter><.ws>] ** ',' ]? }
 
 token parameter {
+    [ <typename> <.ws> ]*                   # <type_constraint>
     [
     | $<quant>=['*'] <param_var>
     | [ <param_var> | <named_param> ] $<quant>=['?'|'!'|<?>]
@@ -390,9 +401,9 @@ token number {
 proto token quote { <...> }
 token quote:sym<apos> { <?[']>            <quote_EXPR: ':q'>  }
 token quote:sym<dblq> { <?["]>            <quote_EXPR: ':qq'> }
-token quote:sym<q>    { 'q'  <![(]> <.ws> <quote_EXPR: ':q'>  }
-token quote:sym<qq>   { 'qq' <![(]> <.ws> <quote_EXPR: ':qq'> }
-token quote:sym<Q>    { 'Q'  <![(]> <.ws> <quote_EXPR> }
+token quote:sym<q>    { 'q'  >> <![(]> <.ws> <quote_EXPR: ':q'>  }
+token quote:sym<qq>   { 'qq' >> <![(]> <.ws> <quote_EXPR: ':qq'> }
+token quote:sym<Q>    { 'Q'  >>  <![(]> <.ws> <quote_EXPR> }
 token quote:sym<Q:PIR> { 'Q:PIR' <.ws> <quote_EXPR> }
 token quote:sym</ />  {
     '/'
@@ -404,6 +415,7 @@ token quote:sym</ />  {
 
 token quote_escape:sym<$>   { <?[$]> <?quotemod_check('s')> <variable> }
 token quote_escape:sym<{ }> { <?[{]> <?quotemod_check('c')> <block> }
+token quote_escape:sym<esc> { \\ e <?quotemod_check('b')> }
 
 token circumfix:sym<( )> { '(' <.ws> <EXPR>? ')' }
 token circumfix:sym<[ ]> { '[' <.ws> <EXPR>? ']' }
@@ -523,6 +535,9 @@ token infix:sym<,>    { <sym>  <O('%comma, :pasttype<list>')> }
 
 token prefix:sym<return> { <sym> \s <O('%list_prefix, :pasttype<return>')> }
 token prefix:sym<make>   { <sym> \s <O('%list_prefix')> }
+token term:sym<last>     { <sym> }
+token term:sym<next>     { <sym> }
+token term:sym<redo>     { <sym> }
 
 method smartmatch($/) {
     # swap rhs into invocant position
@@ -533,6 +548,26 @@ method smartmatch($/) {
 grammar NQP::Regex is Regex::P6Regex::Grammar {
     token metachar:sym<:my> {
         ':' <?before 'my'> <statement=.LANG('MAIN', 'statement')> <.ws> ';'
+    }
+
+    token metachar:sym<$> {
+        <sym> <!before \w>
+    }
+
+    token metachar:sym<var> {
+        [
+        | '$<' $<name>=[<-[>]>+] '>'
+        | '$' $<pos>=[\d+]
+        | <?before <[$@]> \w> <var=.LANG('MAIN', 'variable')>
+        | <?before '%' \w> <.panic: "Use of hash variable in patterns is reserved">
+        ]
+ 
+        [ <.ws> '=' <.ws> <quantified_atom> ]?
+    }
+
+    token assertion:sym<var> {
+        | <?before <[$@]> \w> <var=.LANG('MAIN', 'variable')>
+        | <?before '%' \w> <.panic: "Use of hash variable in patterns is reserved">
     }
 
     token metachar:sym<{ }> {

@@ -38,6 +38,34 @@ grammars.
 
 =over 4
 
+=item new_match()
+
+A method that creates an empty Match object, by default of type
+C<Regex::Match>. This method can be overridden for generating HLL-specific
+Match objects.
+
+=cut
+
+.sub 'new_match' :method
+    .local pmc match
+    match = new ['Regex';'Match']
+    .return (match)
+.end
+
+=item new_array()
+
+A method that creates an empty array object, by default of type
+C<ResizablePMCArray>. This method can be overridden for generating HLL-specific
+arrays for usage within Match objects.
+
+=cut
+
+.sub 'new_array' :method
+    .local pmc arr
+    arr = new ['ResizablePMCArray']
+    .return (arr)
+.end
+
 =item MATCH()
 
 Return this cursor's current Match object, generating a new one
@@ -55,7 +83,7 @@ for the Cursor if one hasn't been created yet.
 
     # First, create a Match object and bind it
   match_make:
-    match = new ['Regex';'Match']
+    match = self.'new_match'()
     setattribute self, '$!match', match
     setattribute match, '$!cursor', self
     .local pmc target, from, to
@@ -78,7 +106,7 @@ for the Cursor if one hasn't been created yet.
     .local pmc arr
     .local int keyint
     subname = shift caparray_it
-    arr = new ['ResizablePMCArray']
+    arr = self.'new_array'()
     caphash[subname] = arr
     keyint = is_cclass .CCLASS_NUMERIC, subname, 0
     if keyint goto caparray_int
@@ -275,7 +303,7 @@ provided, then the new cursor has the same type as lang.
     parrotclass = getattribute $P0, 'parrotclass'
     cur = new parrotclass
 
-    .local pmc from, pos, target, debug
+    .local pmc from, target, debug
 
     from = getattribute self, '$!pos'
     setattribute cur, '$!from', from
@@ -671,6 +699,82 @@ Match the backreference given by C<name>.
     .return (cur)
 .end
 
+=item !process_pastnode_results_for_interpolation
+
+Used by the pastnode PAST::Regex type to prepare the results of the evaluation for interpolation.
+
+Takes two arguments:
+
+=over 4
+
+=item The node results
+
+=item The subtype of the PAST::Regex node, which is one of:
+
+=over 4
+
+=item interp_regex
+
+String values should be compiled into regexes and then interpolated.
+
+=item interp_literal
+
+String values should be treated as literals.
+
+=item interp_literal_i
+
+String values should be treated as literals and matched case-insensitively.
+
+=back
+
+=back
+
+Returns a RPA containing the elements to be interpolated
+
+=cut
+
+.sub '!process_pastnode_results_for_interpolation' :method
+    .param pmc node
+    .param string subtype
+
+    .local pmc it, result, compiler, context
+    .local string codestr
+
+    result = new ['ResizablePMCArray']
+    $S0 = typeof node
+    if $S0 == 'ResizablePMCArray' goto array
+    $P1 = node
+    it = box 0
+    goto not_array
+  array:
+    it = iter node
+  loop:
+    unless it, loop_done
+    $P1 = shift it
+  not_array:
+    if subtype != 'interp_regex' goto literal 
+    # Don't need to compile it if it's already a Sub
+    $I0 = isa $P1, ['Sub']
+    if $I0 goto literal
+    codestr = $P1
+    $P1 = split '/', codestr
+    codestr = join '\\/', $P1
+    codestr = concat '/', codestr
+    codestr = concat codestr, '/'
+    compiler = compreg 'NQP-rx'
+    $P2 = getinterp
+    context = $P2['context';0]
+    $P2 = compiler.'compile'(codestr, 'outer_ctx'=>context)
+    $P1 = $P2[0]
+    $P2 = getattribute context, 'current_sub'
+    $P1.'set_outer'($P2)
+    $P1 = $P1()
+  literal:
+    push result, $P1
+    goto loop
+  loop_done:
+    .return (result)
+.end
 
 =back
 

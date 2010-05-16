@@ -744,31 +744,121 @@ second child of this node.
 
 =item 'pastnode'(PAST::Regex node)
 
+Evaluates the supplied PAST node and does various things with the result, based on subtype.
+
+Subtype can be any of:
+
+=over 4
+
+=item zerowidth
+
+Only test for truthiness and fail or not.  No interpolation.
+
+=item interp_regex
+
+String values should be compiled into regexes and then interpolated.
+
+=item interp_literal
+
+String values should be treated as literals.
+
+=item interp_literal_i
+
+String values should be treated as literals and matched case-insensitively.
+
+=item <nothing>
+
+Don't interpolate anything, just execute the PAST code
+
+=back
+
 =cut
 
-.sub 'pastnode' :method :multi(_, ['PAST';'Regex'])
+.sub 'pastnode' :method :multi(_, ['PAST'; 'Regex'])
     .param pmc node
-    .local pmc cur, pos, fail, ops
-    (cur, pos, fail) = self.'!rxregs'('cur pos fail')
+    .local pmc cur, pos, fail, ops, eos, off, tgt
+    (cur, pos, eos, off, tgt, fail) = self.'!rxregs'('cur pos eos off tgt fail')
     ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
+ 
+    .local pmc zerowidth, negate, testop, subtype
+    subtype = node.'subtype'()
 
+    ops.'push_pirop'('inline', subtype, negate, 'inline'=>'  # rx pastnode subtype=%1 negate=%2')
     .local pmc cpast, cpost
     cpast = node[0]
     cpost = self.'as_post'(cpast, 'rtype'=>'P')
-
+ 
     self.'!cursorop'(ops, '!cursor_pos', 0, pos)
     ops.'push'(cpost)
 
-    .local pmc subtype, negate, testop
-    subtype = node.'subtype'()
-    if subtype != 'zerowidth' goto done
+    # If this is just a zerowidth assertion, we don't actually interpolate anything.  Just evaluate
+    # and fail or not. 
+    if subtype == 'zerowidth' goto zerowidth_test
+
+    # Retain backwards compatibility with old pastnode semantics
+    unless subtype goto done
+
+    .local string prefix
+    prefix = self.'unique'('pastnode_')
+    .local pmc precompiled_label, done_label, loop_label, iterator_reg, label_reg
+    $S0 =  concat prefix, '_precompiled'
+    precompiled_label = self.'post_new'('Label', 'result'=>$S0)
+    $S0 =  concat prefix, '_done'
+    done_label = self.'post_new'('Label', 'result'=>$S0)
+    $S0 =  concat prefix, '_loop'
+    loop_label = self.'post_new'('Label', 'result'=>$S0)
+    iterator_reg = self.'uniquereg'("P")
+    label_reg = self.'uniquereg'("I")
+
+    $S10 = subtype
+    $S10 = concat '"', $S10
+    $S10 = concat $S10, '"'
+    self.'!cursorop'(ops, '!process_pastnode_results_for_interpolation', 1, '$P10', cpost, $S10)
+
+    ops.'push_pirop'('iter', iterator_reg, '$P10')
+    ops.'push_pirop'('set_addr', label_reg, loop_label)
+    ops.'push'(loop_label)
+    ops.'push_pirop'('unless', iterator_reg, fail)
+    ops.'push_pirop'('shift', '$P10', iterator_reg)
+    self.'!cursorop'(ops, '!mark_push', 0, 0, pos, label_reg)
+
+    # Check if it's already a compiled Regex, and call it as a method if so
+    ops.'push_pirop'('isa', '$I10', '$P10', "['Sub']")
+    ops.'push_pirop'('if', '$I10', precompiled_label)
+
+    # Otherwise, treat it as a literal
+    ops.'push_pirop'('set', '$S10', '$P10')
+    ops.'push_pirop'('length', '$I10', '$S10')
+    ops.'push_pirop'('add', '$I11', pos, '$I10')
+    ops.'push_pirop'('gt', '$I11', eos, fail)
+    ops.'push_pirop'('sub', '$I11', pos, off)
+    ops.'push_pirop'('substr', '$S11', tgt, '$I11', '$I10')
+    ne subtype, 'interp_literal_i', dont_downcase
+    ops.'push_pirop'('downcase', '$S10', '$S10')
+    ops.'push_pirop'('downcase', '$S11', '$S11')
+  dont_downcase:
+    ops.'push_pirop'('ne', '$S11', '$S10', fail)
+    ops.'push_pirop'('add', pos, '$I10')
+    ops.'push_pirop'('goto', done_label)
+
+    ops.'push'(precompiled_label)
+    ops.'push_pirop'('callmethod', '$P10', cur, 'result'=>'$P10')
+    ops.'push_pirop'('unless', '$P10', fail)
+    self.'!cursorop'(ops, '!mark_push', 0, 0, CURSOR_FAIL, 0, '$P10')
+    ops.'push_pirop'('callmethod', '"pos"', '$P10', 'result'=>pos)
+    
+    ops.'push'(done_label)
+
+    goto done
+
+  zerowidth_test:
     negate = node.'negate'()
     testop = self.'??!!'(negate, 'if', 'unless')
     ops.'push_pirop'(testop, cpost, fail)
   done:
     .return (ops)
-.end
 
+.end
 
 =item pass(PAST::Regex node)
 
