@@ -137,6 +137,7 @@ CLEANUPS = \
   src/stage2/gen/* \
   src/stage2/*.pbc \
   src/gen/*.pir \
+  src/gen/*.nqp \
 
 all: $(NQP_EXE) $(SETTING_PBC)
 
