@@ -78,7 +78,7 @@ SETTING_SOURCES = \
   src/setting/Regex.pm \
   src/setting/IO.pm \
 
-SETTING_PM  = src/gen/nqp-setting.pm
+SETTING_NQP = src/gen/nqp-setting.nqp
 SETTING_PIR = src/gen/nqp-setting.pir
 SETTING_PBC = nqp-setting.pbc
 
@@ -249,20 +249,20 @@ $(ALL_PBCS): $(REGEX_PBC) $(STAGE2_PBCS)
 $(NQP_EXE): $(NQP_PBC)
 	$(PBC_TO_EXE) $(NQP_PBC)
 
-$(SETTING_PM): $(SETTING_SOURCES)
-	$(PERL) build/gen_setting.pl $(SETTING_SOURCES) > $(SETTING_PM)
-$(SETTING_PIR): $(SETTING_PM) $(NQP_PBC)
-	$(PARROT) $(NQP_PBC) --target=pir -o $(SETTING_PIR) $(SETTING_PM)
+$(SETTING_NQP): $(SETTING_SOURCES)
+	$(PERL) build/gen_setting.pl $(SETTING_SOURCES) > $(SETTING_NQP)
+$(SETTING_PIR): $(SETTING_NQP) $(NQP_PBC)
+	$(PARROT) $(NQP_PBC) --target=pir -o $(SETTING_PIR) $(SETTING_NQP)
 $(SETTING_PBC): $(SETTING_PIR)
 	$(PARROT) -o $(SETTING_PBC) $(SETTING_PIR)
 
 
-bootstrap-files: $(STAGE2_PBCS) $(SETTING_PM)
+bootstrap-files: $(STAGE2_PBCS) $(SETTING_NQP)
 	$(PERL) build/gen_bootstrap.pl src/Regex.pir >src/stage0/Regex-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/HLL.pir >src/stage0/HLL-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/Regex/P6Regex.pir >src/stage0/P6Regex-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/NQP/Compiler.pir >src/stage0/NQP-s0.pir
-	$(PERL) build/gen_bootstrap.pl $(SETTING_PM) >src/stage0/nqp-setting.pm
+	$(PERL) build/gen_bootstrap.pl $(SETTING_NQP) >src/stage0/nqp-setting.nqp
 	
 
 ## testing
