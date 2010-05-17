@@ -468,7 +468,7 @@ method signature($/) {
         my @params;
         @params.push('_') if $*METHODTYPE eq "Method";
         for $BLOCKINIT.list {
-            @params.push($_.multitype);
+            @params.push($_.multitype // '_');
         }
         @BLOCK[0].multi(@params);
     }
