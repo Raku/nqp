@@ -7,8 +7,9 @@ method TOP() {
     %*LANG<Regex-actions> := NQP::RegexActions;
     %*LANG<MAIN>          := NQP::Grammar;
     %*LANG<MAIN-actions>  := NQP::Actions;
-    my $*SCOPE     := '';
-    my $*MULTINESS := '';
+    my $*SCOPE      := '';
+    my $*MULTINESS  := '';
+    my $*METHODTYPE := '';
     self.comp_unit;
 }
 
@@ -299,6 +300,7 @@ rule routine_def {
 }
 
 rule method_def {
+    :my $*METHODTYPE := 'Method';
     <deflongname>?
     <.newpad>
     [ '(' <signature> ')'

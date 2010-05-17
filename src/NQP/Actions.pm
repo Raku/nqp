@@ -465,13 +465,13 @@ method signature($/) {
     
     # Generate :multi pragma
     if $*MULTINESS eq "multi" {
-        my $BLOCK     := @BLOCK[0];
+        my $BLOCK  := @BLOCK[0];
         my @params;
+        @params.push('_') if $*METHODTYPE eq "Method";
         for $BLOCKINIT.list {
             @params.push(convert_multitype($_<multitype>));
         }
-        my $signature := ":multi(" ~ pir::join(",", @params) ~ ")";
-        @BLOCK[0].pirflags($signature);
+        $BLOCK.pirflags(":multi(" ~ pir::join(",", @params) ~ ")");
     }
 }
 
