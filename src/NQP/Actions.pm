@@ -460,7 +460,36 @@ method method_def($/) {
 
 method signature($/) {
     my $BLOCKINIT := @BLOCK[0][0];
+
     for $<parameter> { $BLOCKINIT.push($_.ast); }
+    
+    # Generate :multi pragma
+    if $*MULTINESS eq "multi" {
+        my $BLOCK     := @BLOCK[0];
+        my @params;
+        for $BLOCKINIT.list {
+            @params.push(convert_multitype($_<multitype>));
+        }
+        my $signature := ":multi(" ~ pir::join(",", @params) ~ ")";
+        @BLOCK[0].pirflags($signature);
+    }
+}
+
+sub convert_multitype($type) {
+    my $multitype;
+    if !pir::defined($type) || !$type {
+        $multitype := '_';
+    }
+    else {
+        # Convert Foo::Bar into key representation ['Foo';'Bar']
+        $multitype := pir::new__Ps('StringBuilder');
+        my @parts;
+        for pir::split__Pss('::', $type) {
+            @parts.push("'" ~ $_ ~ "'");
+        }
+        $multitype := '[' ~ pir::join(';', @parts) ~ ']';
+    }
+    $multitype;
 }
 
 method parameter($/) {
@@ -492,6 +521,12 @@ method parameter($/) {
         $past.viviself( $<default_value>[0]<EXPR>.ast );
     }
     unless $past.viviself { @BLOCK[0].arity( +@BLOCK[0].arity + 1 ); }
+
+    # We don't have support for multitype in PAST::Var (yet)
+    if $<typename> {
+        $past<multitype> := ~$<typename>[0];
+    }
+
     make $past;
 }
 
