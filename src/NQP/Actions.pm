@@ -380,7 +380,9 @@ method scope_declarator:sym<our>($/) { make $<scoped>.ast; }
 method scope_declarator:sym<has>($/) { make $<scoped>.ast; }
 
 method scoped($/) {
-    make $<declarator>.ast;
+    make $<declarator>
+         ?? $<declarator>.ast
+         !! $<multi_declarator>.ast;
 }
 
 method declarator($/) {
@@ -388,6 +390,10 @@ method declarator($/) {
          ?? $<routine_declarator>.ast
          !! $<variable_declarator>.ast;
 }
+
+method multi_declarator:sym<multi>($/) { make $<declarator> ?? $<declarator>.ast !! $<routine_def>.ast }
+method multi_declarator:sym<null>($/)  { make $<declarator>.ast }
+
 
 method variable_declarator($/) {
     my $past := $<variable>.ast;

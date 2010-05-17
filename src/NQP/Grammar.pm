@@ -7,7 +7,8 @@ method TOP() {
     %*LANG<Regex-actions> := NQP::RegexActions;
     %*LANG<MAIN>          := NQP::Grammar;
     %*LANG<MAIN-actions>  := NQP::Actions;
-    my $*SCOPE := '';
+    my $*SCOPE     := '';
+    my $*MULTINESS := '';
     self.comp_unit;
 }
 
@@ -224,6 +225,7 @@ token term:sym<variable>           { <variable> }
 token term:sym<package_declarator> { <package_declarator> }
 token term:sym<scope_declarator>   { <scope_declarator> }
 token term:sym<routine_declarator> { <routine_declarator> }
+token term:sym<multi_declarator>   { <?before 'multi'|'proto'|'only'> <multi_declarator> }
 token term:sym<regex_declarator>   { <regex_declarator> }
 token term:sym<statement_prefix>   { <statement_prefix> }
 token term:sym<lambda>             { <?lambda> <pblock> }
@@ -272,7 +274,7 @@ token scope_declarator:sym<has> { <sym> <scoped('has')> }
 
 rule scoped($*SCOPE) {
     | <declarator>
-    | <typename>+ <declarator>       # eventually <multi_declarator>
+    | <multi_declarator>
 }
 
 token typename { <name> }
@@ -302,6 +304,16 @@ rule method_def {
     [ '(' <signature> ')'
         || <.panic: 'Routine declaration requires a signature'> ]
     <blockoid>
+}
+
+proto token multi_declarator { <...> }
+token multi_declarator:sym<multi> {
+    <sym> :my $*MULTINESS := 'multi';
+    <.ws> [ <declarator> || <routine_def> || <.panic: 'Malformed multi'> ]
+}
+token multi_declarator:sym<null> {
+    :my $*MULTINESS := '';
+    <declarator>
 }
 
 token signature { [ [<.ws><parameter><.ws>] ** ',' ]? }
