@@ -506,7 +506,9 @@ method parameter($/) {
 
     # We don't have support for multitype in PAST::Var (yet)
     if $<typename> {
-        $past.multitype($<typename><identifier>);
+        my @multitype;
+        for $<typename>[0]<name><identifier> { @multitype.push(~$_); }
+        $past.multitype(@multitype);
     }
 
     make $past;
