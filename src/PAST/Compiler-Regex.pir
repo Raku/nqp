@@ -823,7 +823,13 @@ Don't interpolate anything, just execute the PAST code
     self.'!cursorop'(ops, '!mark_push', 0, 0, pos, label_reg)
 
     # Check if it's already a compiled Regex, and call it as a method if so
+    ops.'push_pirop'('typeof', '$P11', '$P10')
     ops.'push_pirop'('isa', '$I10', '$P10', "['Sub']")
+    ops.'push_pirop'('if', '$I10', precompiled_label)
+
+    # XXX This is rakudo's Regex class.  I'm not sure why the above test doesn't catch it, but
+    # need to figure it out so NQP doesn't have rakudo knowledge :(
+    ops.'push_pirop'('isa', '$I10', '$P10', "['Regex']")
     ops.'push_pirop'('if', '$I10', precompiled_label)
 
     # Otherwise, treat it as a literal
