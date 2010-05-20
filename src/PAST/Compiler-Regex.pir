@@ -823,7 +823,6 @@ Don't interpolate anything, just execute the PAST code
     self.'!cursorop'(ops, '!mark_push', 0, 0, pos, label_reg)
 
     # Check if it's already a compiled Regex, and call it as a method if so
-    ops.'push_pirop'('typeof', '$P11', '$P10')
     ops.'push_pirop'('isa', '$I10', '$P10', "['Sub']")
     ops.'push_pirop'('if', '$I10', precompiled_label)
 
