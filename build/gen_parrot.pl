@@ -75,7 +75,7 @@ system($make, 'install-dev', @make_opts);
 
 sub read_parrot_config {
     my %config = ();
-    if (open my $CFG, "config_lib.pasm") {
+    if (open my $CFG, "config_lib.pir") {
         while (<$CFG>) {
             if (/P0\["(.*?)"], "(.*?)"/) { $config{$1} = $2 }
         }

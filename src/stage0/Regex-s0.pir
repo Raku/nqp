@@ -58,6 +58,34 @@ grammars.
 
 =over 4
 
+=item new_match()
+
+A method that creates an empty Match object, by default of type
+C<Regex::Match>. This method can be overridden for generating HLL-specific
+Match objects.
+
+=cut
+
+.sub 'new_match' :method
+    .local pmc match
+    match = new ['Regex';'Match']
+    .return (match)
+.end
+
+=item new_array()
+
+A method that creates an empty array object, by default of type
+C<ResizablePMCArray>. This method can be overridden for generating HLL-specific
+arrays for usage within Match objects.
+
+=cut
+
+.sub 'new_array' :method
+    .local pmc arr
+    arr = new ['ResizablePMCArray']
+    .return (arr)
+.end
+
 =item MATCH()
 
 Return this cursor's current Match object, generating a new one
@@ -75,7 +103,7 @@ for the Cursor if one hasn't been created yet.
 
     # First, create a Match object and bind it
   match_make:
-    match = new ['Regex';'Match']
+    match = self.'new_match'()
     setattribute self, '$!match', match
     setattribute match, '$!cursor', self
     .local pmc target, from, to
@@ -98,7 +126,7 @@ for the Cursor if one hasn't been created yet.
     .local pmc arr
     .local int keyint
     subname = shift caparray_it
-    arr = new ['ResizablePMCArray']
+    arr = self.'new_array'()
     caphash[subname] = arr
     keyint = is_cclass .CCLASS_NUMERIC, subname, 0
     if keyint goto caparray_int
@@ -295,7 +323,7 @@ provided, then the new cursor has the same type as lang.
     parrotclass = getattribute $P0, 'parrotclass'
     cur = new parrotclass
 
-    .local pmc from, pos, target, debug
+    .local pmc from, target, debug
 
     from = getattribute self, '$!pos'
     setattribute cur, '$!from', from
@@ -1036,7 +1064,7 @@ Perform a match for protoregex C<name>.
   cand_done:
   token_next:
     unless token > '' goto fail
-    chopn token, 1
+    token = chopn token, 1
     goto token_loop
 
   done:

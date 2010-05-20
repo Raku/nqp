@@ -13,7 +13,7 @@ PARROT_LIBRARY_DIR = $(PARROT_LIB_DIR)/library
 HAS_ICU            = @has_icu@
 
 CC            = @cc@
-CFLAGS        = @ccflags@ @cc_shared@ @cc_debug@ @ccwarn@ @cc_hasjit@ @cg_flag@ @gc_flag@
+CFLAGS        = @ccflags@ @cc_shared@ @cc_debug@ @ccwarn@ @cc_hasjit@ @gc_flag@
 EXE           = @exe@
 LD            = @ld@
 LDFLAGS       = @ldflags@ @ld_debug@
@@ -72,6 +72,16 @@ NQP_SOURCES = \
   src/NQP/Actions.pm \
   src/NQP/Compiler.pir \
 
+SETTING_SOURCES = \
+  src/setting/ResizablePMCArray.pm \
+  src/setting/Hash.pm \
+  src/setting/Regex.pm \
+  src/setting/IO.pm \
+
+SETTING_NQP = src/gen/nqp-setting.nqp
+SETTING_PIR = src/gen/nqp-setting.pir
+SETTING_PBC = nqp-setting.pbc
+
 STAGE0_SOURCES = \
   src/stage0/Regex-s0.pir \
   src/stage0/HLL-s0.pir \
@@ -127,8 +137,9 @@ CLEANUPS = \
   src/stage2/gen/* \
   src/stage2/*.pbc \
   src/gen/*.pir \
+  src/gen/*.nqp \
 
-all: $(NQP_EXE)
+all: $(NQP_EXE) $(SETTING_PBC)
 
 install: all
 	$(MKPATH)              $(DESTDIR)$(NQP_LANG_DIR)
@@ -239,18 +250,27 @@ $(ALL_PBCS): $(REGEX_PBC) $(STAGE2_PBCS)
 $(NQP_EXE): $(NQP_PBC)
 	$(PBC_TO_EXE) $(NQP_PBC)
 
-bootstrap-files: $(STAGE2_PBCS)
+$(SETTING_NQP): $(SETTING_SOURCES)
+	$(PERL) build/gen_setting.pl $(SETTING_SOURCES) > $(SETTING_NQP)
+$(SETTING_PIR): $(SETTING_NQP) $(NQP_PBC)
+	$(PARROT) $(NQP_PBC) --target=pir -o $(SETTING_PIR) $(SETTING_NQP)
+$(SETTING_PBC): $(SETTING_PIR)
+	$(PARROT) -o $(SETTING_PBC) $(SETTING_PIR)
+
+
+bootstrap-files: $(STAGE2_PBCS) $(SETTING_NQP)
 	$(PERL) build/gen_bootstrap.pl src/Regex.pir >src/stage0/Regex-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/HLL.pir >src/stage0/HLL-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/Regex/P6Regex.pir >src/stage0/P6Regex-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/NQP/Compiler.pir >src/stage0/NQP-s0.pir
+	$(PERL) build/gen_bootstrap.pl $(SETTING_NQP) >src/stage0/nqp-setting.nqp
 	
 
 ## testing
 
-test: core-test
+test: all core-test setting-test
 
-test-loud: core-test-loud p6regex-test-loud
+test-loud: all core-test-loud setting-test-loud p6regex-test-loud
 
 core-test: $(NQP_EXE)
 	prove -r --exec ./$(NQP_EXE) t/nqp t/hll
@@ -263,6 +283,12 @@ p6regex-test: $(P6REGEX_PBC)
 
 p6regex-test-loud: $(P6REGEX_PBC)
 	prove -r -v --exec $(PARROT) t/p6regex
+
+setting-test: $(NQP_EXE) $(SETTING_PBC)
+	prove -r --exec ./$(NQP_EXE) t/setting
+
+setting-test-loud: $(NQP_EXE) $(SETTING_PBC)
+	prove -r -v --exec ./$(NQP_EXE) t/setting
 
 ## cleaning
 

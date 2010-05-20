@@ -3,7 +3,7 @@ class Regex::P6Regex::Actions is HLL::Actions;
 ## this will eventually be handled using contextuals
 our @MODIFIERS;
 
-sub INIT() {
+INIT {
     @MODIFIERS := Q:PIR {
         %r = new ['ResizablePMCArray']
         $P0 = new ['Hash']
@@ -275,13 +275,13 @@ method backslash:sym<b>($/) {
 }
 
 method backslash:sym<e>($/) {
-    my $past := PAST::Regex.new( "\e", :pasttype('enumcharlist'),
+    my $past := PAST::Regex.new( "\c[27]", :pasttype('enumcharlist'),
                     :negate($<sym> eq 'E'), :node($/) );
     make $past;
 }
 
 method backslash:sym<f>($/) {
-    my $past := PAST::Regex.new( "\f", :pasttype('enumcharlist'),
+    my $past := PAST::Regex.new( "\c[12]", :pasttype('enumcharlist'),
                     :negate($<sym> eq 'F'), :node($/) );
     make $past;
 }
@@ -383,7 +383,7 @@ method assertion:sym<name>($/) {
             $I0 = index $S0, ':sym<'
             add $I0, 5
             $S0 = substr $S0, $I0
-            chopn $S0, 1
+            $S0 = chopn $S0, 1
             %r = box $S0
         };
         $past := PAST::Regex.new(

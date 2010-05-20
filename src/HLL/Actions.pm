@@ -101,7 +101,7 @@ method binint($/) { make string_to_int( $/, 2 ); }
 
 method quote_EXPR($/) {
     my $past := $<quote_delimited>.ast;
-    if HLL::Grammar::quotemod_check($/, 'w') {
+    if $/.CURSOR.quotemod_check('w') {
         if PAST::Node.ACCEPTS($past) {
             $/.CURSOR.panic("Can't form :w list from non-constant strings (yet)");
         }
@@ -158,6 +158,7 @@ method quote_escape:sym<bs>($/)  { make "\b"; }
 method quote_escape:sym<nl>($/)  { make "\n"; }
 method quote_escape:sym<cr>($/)  { make "\r"; }
 method quote_escape:sym<tab>($/) { make "\t"; }
+method quote_escape:sym<ff>($/)  { make "\c[12]"; }
 
 method quote_escape:sym<hex>($/) {
     make ints_to_string( $<hexint> ?? $<hexint> !! $<hexints><hexint> );
@@ -171,10 +172,18 @@ method quote_escape:sym<chr>($/) {
     make $<charspec>.ast;
 }
 
+method quote_escape:sym<0>($/) {
+    make "\c[0]";
+}
+
+method quote_escape:sym<misc>($/) {
+    make $<textq> ?? '\\' ~ $<textq>.Str !! $<textqq>.Str;
+}
+
 method charname($/) {
     my $codepoint := $<integer>
                      ?? $<integer>.ast
-                     !!  Q:PIR { %r = new ['CodeString'] }.charname_to_ord( ~$/ );
+                     !! pir::find_codepoint__Is( ~$/ );
     $/.CURSOR.panic("Unrecognized character name $/") if $codepoint < 0;
     make pir::chr($codepoint);
 }

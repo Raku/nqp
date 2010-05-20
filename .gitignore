@@ -10,6 +10,8 @@ P6Regex
 P6Regex.pbc
 nqp
 nqp.pbc
+nqp-setting.pbc
 src/gen/*.pir
+src/gen/*.nqp
 src/stage1
 src/stage2

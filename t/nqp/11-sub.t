@@ -2,7 +2,7 @@
 
 # check subs
 
-say('1..12');
+say('1..13');
 
 sub one ( ) {
     say("ok 1 # sub def and call");
@@ -81,4 +81,7 @@ sub &twelve() {
 
 &twelve();
 
+# test that a sub can start with Q
 
+sub Qstuff() { 13 };
+say('ok ', Qstuff());
