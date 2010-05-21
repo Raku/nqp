@@ -129,19 +129,18 @@ class HLL::Compiler is PCT::HLLCompiler {
     }
 
     method eval($code, *@args, *%adverbs) {
-        my $output; my $outer;
+        my $output;
         $output := self.compile($code, |%adverbs);
 
         if !pir::isa($output, 'String')
                 && %adverbs<target> eq '' {
-            $outer := %adverbs<outer_ctx>;
-
-            unless pir::isnull($outer) {
-                $output[0].set_outer($outer<current_sub>);
+            my $outer_ctx := %adverbs<outer_ctx>;
+            if pir::defined($outer_ctx) {
+                $output[0].set_outer($outer_ctx<current_sub>);
             }
 
             pir::trace(%adverbs<trace>);
-            $output := $output[0]();
+            $output := $output();
             pir::trace(0);
         }
 
