@@ -140,7 +140,7 @@ class HLL::Compiler is PCT::HLLCompiler {
             }
 
             pir::trace(%adverbs<trace>);
-            $output := $output();
+            $output := $output(|@args);
             pir::trace(0);
         }
 
