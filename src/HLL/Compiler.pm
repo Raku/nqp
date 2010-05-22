@@ -82,4 +82,72 @@ class HLL::Compiler is PCT::HLLCompiler {
         }
     }
 
+    method autoprint($value) {
+        pir::say(~$value) 
+            unless pir::tell__IP(pir::getstdout__P()) > $*AUTOPRINTPOS;
+    }
+
+    method interactive(*%adverbs) {
+        my $target := pir::downcase(%adverbs<target>);
+
+        pir::printerr__vS(self.commandline_banner);
+
+        my $stdin    := pir::getstdin__P();
+        my $encoding := ~%adverbs<encoding>;
+        if $encoding && $encoding ne 'fixed_8' {
+            $stdin.encoding($encoding);
+        }
+
+        while 1 {
+            last unless $stdin;
+
+            my $prompt := self.commandline_prompt // '> ';
+            my $code := $stdin.readline_interactive(~$prompt);
+
+            last if pir::isnull($code);
+
+            # Set the current position of stdout for autoprinting control
+            my $*AUTOPRINTPOS := pir::tell__IP(pir::getstdout__P());
+
+            if $code {
+                $code := $code ~ "\n";
+                my $output;
+                {
+                    $output := self.eval($code, |%adverbs);
+                    CATCH {
+                        pir::print($! ~ "\n");
+                        next;
+                    }
+                };
+                next if pir::isnull($output);
+
+                if !$target {
+                    self.autoprint($output);
+                } elsif $target eq 'pir' {
+                   pir::say($output);
+                } else {
+                   self.dumper($output, $target, |%adverbs);
+                }
+            }
+        }
+    }
+
+    method eval($code, *@args, *%adverbs) {
+        my $output;
+        $output := self.compile($code, |%adverbs);
+
+        if !pir::isa($output, 'String')
+                && %adverbs<target> eq '' {
+            my $outer_ctx := %adverbs<outer_ctx>;
+            if pir::defined($outer_ctx) {
+                $output[0].set_outer($outer_ctx<current_sub>);
+            }
+
+            pir::trace(%adverbs<trace>);
+            $output := $output(|@args);
+            pir::trace(0);
+        }
+
+        $output;
+    }
 }
