@@ -7,6 +7,9 @@ my @foo := [ "b+", "c+" ];
 
 ok("ab+d" ~~ /a $b d/,     'plain scalar interpolates as literal 1');
 ok(!("abbbbbd" ~~ /a $b d/), 'plain scalar interpolates as literal 2');
+
+=begin END
+
 ok("ab+d" ~~ /a @foo d/,     'plain array interpolates as alternations of literals 1');
 ok("ac+d" ~~ /a @foo d/,     'plain array interpolates as alternations of literals 2');
 ok(!("abbbbbd" ~~ /a @foo d/), 'plain array interpolates as alternations of literals 3');

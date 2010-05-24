@@ -554,6 +554,10 @@ grammar NQP::Regex is Regex::P6Regex::Grammar {
         <?[{]> <codeblock>
     }
 
+    token metachar:sym<nqpvar> {
+        <?[$]> <var=.LANG('MAIN', 'variable')>
+    }
+
     token assertion:sym<{ }> {
         <?[{]> <codeblock>
     }

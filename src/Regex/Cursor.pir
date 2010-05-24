@@ -696,6 +696,47 @@ Match the backreference given by C<name>.
 .end
 
 
+=item !INTERPOLATE(var [, convert])
+
+Perform regex interpolation on C<var>.  If C<var> is a
+regex (sub), it is used directly, otherwise it is used
+for a string literal match.  If C<var> is an array,
+then all of the elements of C<var> are considered,
+and the longest match is returned.
+
+=cut
+
+.sub '!INTERPOLATE' :method
+    .param pmc var
+
+    $I0 = does var, 'array'
+    if $I0 goto var_array
+
+    $I0 = does var, ['Sub']
+    if $I0 goto var_sub
+
+  var_string:
+    .local pmc cur
+    .local int pos
+    .local string tgt
+    (cur, pos, tgt) = self.'!cursor_start'()
+    $S0 = var
+    $I0 = length $S0
+    $S1 = substr tgt, pos, $I0
+    if $S0 != $S1 goto string_fail
+    pos += $I0
+  string_pass:
+    cur.'!cursor_pass'(pos, '')
+  string_fail:
+    .return (cur)
+
+  var_sub:
+    cur = var(self)
+    .return (cur)
+
+  var_array:
+.end
+
 =back
 
 =head2 Vtable functions
