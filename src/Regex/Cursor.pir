@@ -129,16 +129,12 @@ for the Cursor if one hasn't been created yet.
     unless cstack_it goto cstack_done
     .local pmc subcur, submatch, names
     subcur = shift cstack_it
+    $I0 = isa subcur, ['Regex';'Cursor']
+    unless $I0 goto cstack_loop
     # If the subcursor isn't bound with a name, skip it
     names = getattribute subcur, '$!names'
     if null names goto cstack_loop
-    $I0 = isa subcur, ['Regex';'Cursor']
-    unless $I0 goto cstack_1
     submatch = subcur.'MATCH'()
-    goto cstack_2
-  cstack_1:
-    submatch = subcur
-  cstack_2:
     # See if we have multiple binds
     .local pmc names_it
     subname = names
