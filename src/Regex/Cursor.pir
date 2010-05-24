@@ -760,7 +760,7 @@ and the longest match is returned.
   array_sub:
     $P0 = elem(self)
     unless $P0 goto array_loop
-    $I0 = $P0.'to'()
+    $I0 = $P0.'pos'()
     $I0 -= pos
     if $I0 <= maxlen goto array_loop
     maxlen = $I0

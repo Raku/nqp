@@ -23,12 +23,12 @@ ok(("abccd" ~~ / @ltm /) eq 'bc', 'array finds longest match 4');
 ok(!("ab+d"  ~~ /a <$b> d/), 'scalar assertion interpolates as regex 1');
 ok("abbbbbd" ~~ /a <$b> d/, 'scalar assertion interpolates as regex 2');
 
-=begin END
-
 ok(!("ab+d" ~~ /a <@foo> d/),   'array assertion interpolates as alternations of regexen 1');
 ok(!("ac+d" ~~ /a <@foo> d/),   'array assertion interpolates as alternations of regexen 2');
 ok("abbbbbd" ~~ /a <@foo> d/, 'array assertion interpolates as alternations of regexen 3');
 ok("acccccd" ~~ /a <@foo> d/, 'array assertion interpolates as alternations of regexen 4');
+
+=begin END
 
 ok(!("ab+d" ~~ /a <{ "b+" }> d/), 'code assersion interpolates as regex 1');
 ok("abbbbd" ~~ /a <{ "b+" }> d/, 'code assersion interpolates as regex 2');
