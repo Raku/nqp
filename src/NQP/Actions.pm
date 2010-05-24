@@ -814,14 +814,20 @@ class NQP::RegexActions is Regex::P6Regex::Actions {
         make PAST::Regex.new( $past, :pasttype('pastnode') );
     }
 
-    method metachar:sym<{ }>($/) { make $<codeblock>.ast; }
+    method metachar:sym<{ }>($/) { 
+        make PAST::Regex.new( $<codeblock>.ast, 
+                              :pasttype<pastnode>, :node($/) );
+    }
 
     method metachar:sym<nqpvar>($/) {
         make PAST::Regex.new( '!INTERPOLATE', $<var>.ast, 
                               :pasttype<subrule>, :subtype<method>, :node($/));
     }
 
-    method assertion:sym<{ }>($/) { make $<codeblock>.ast; }
+    method assertion:sym<{ }>($/) { 
+        make PAST::Regex.new( $<codeblock>.ast, 
+                              :pasttype<pastnode>, :node($/) );
+    }
 
     method assertion:sym<var>($/) {
         make PAST::Regex.new( '!INTERPOLATE_REGEX', $<var>.ast, 
@@ -832,20 +838,17 @@ class NQP::RegexActions is Regex::P6Regex::Actions {
         my $block := $<block>.ast;
         $block.blocktype('immediate');
         my $past :=
-            PAST::Regex.new(
-                PAST::Stmts.new(
+            PAST::Stmts.new(
+                PAST::Op.new(
+                    PAST::Var.new( :name('$/') ),
                     PAST::Op.new(
-                        PAST::Var.new( :name('$/') ),
-                        PAST::Op.new(
-                            PAST::Var.new( :name('$¢') ),
-                            :name('MATCH'),
-                            :pasttype('callmethod')
-                        ),
-                        :pasttype('bind')
+                        PAST::Var.new( :name('$¢') ),
+                        :name('MATCH'),
+                        :pasttype('callmethod')
                     ),
-                    $block
+                    :pasttype('bind')
                 ),
-                :pasttype('pastnode')
+                $block
             );
         make $past;
     }
