@@ -817,11 +817,16 @@ class NQP::RegexActions is Regex::P6Regex::Actions {
     method metachar:sym<{ }>($/) { make $<codeblock>.ast; }
 
     method metachar:sym<nqpvar>($/) {
-        make PAST::Regex.new( '!INTERPOLATE', $<var>.ast, :pasttype<subrule>,
-                              :subtype<method>, :node($/) );
+        make PAST::Regex.new( '!INTERPOLATE', $<var>.ast, 
+                              :pasttype<subrule>, :subtype<method>, :node($/));
     }
 
     method assertion:sym<{ }>($/) { make $<codeblock>.ast; }
+
+    method assertion:sym<var>($/) {
+        make PAST::Regex.new( '!INTERPOLATE_REGEX', $<var>.ast, 
+                              :pasttype<subrule>, :subtype<method>, :node($/));
+    }
 
     method codeblock($/) {
         my $block := $<block>.ast;

@@ -717,7 +717,9 @@ and the longest match is returned.
     if $I0 goto var_array
 
   var_scalar:
-    $I0 = does var, ['Sub']
+    $I0 = isa var, ['Sub']
+    if $I0 goto var_sub
+    $I0 = isa var, ['Eval']
     if $I0 goto var_sub
 
   var_string:
@@ -745,7 +747,7 @@ and the longest match is returned.
   array_loop:
     unless var_it goto array_done
     elem = shift var_it
-    $I0 = does elem, ['Sub']
+    $I0 = isa elem, ['Sub']
     if $I0 goto array_sub
   array_string:
     $S0 = elem
@@ -770,6 +772,47 @@ and the longest match is returned.
   array_fail:
     .return (cur)
 .end
+
+
+=item !INTERPOLATE_REGEX(var)
+
+Same as C<!INTERPOLATE> above, except that any non-regex values
+are first compiled to regexes prior to being matched.  
+
+=cut
+
+.sub '!INTERPOLATE_REGEX' :method
+    .param pmc var
+
+    $I0 = isa var, ['Sub']
+    if $I0 goto done
+
+    .local pmc p6regex
+    p6regex = compreg 'Regex::P6Regex'
+
+    $I0 = does var, 'array'
+    if $I0 goto var_array
+    var = p6regex.'compile'(var)
+    goto done
+
+  var_array:
+    .local pmc var_it, elem
+    var_it = iter var
+    var = new ['ResizablePMCArray']
+  var_loop:
+    unless var_it goto done
+    elem = shift var_it
+    $I0 = isa elem, ['Sub']
+    if $I0 goto var_next
+    elem = p6regex.'compile'(elem)
+  var_next:
+    push var, elem
+    goto var_loop
+
+  done:
+    .tailcall self.'!INTERPOLATE'(var)
+.end
+    
 
 =back
 

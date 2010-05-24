@@ -13,18 +13,18 @@ ok("ac+d" ~~ /a @foo d/,     'plain array interpolates as alternations of litera
 ok(!("abbbbbd" ~~ /a @foo d/), 'plain array interpolates as alternations of literals 3');
 ok(!("acccccd" ~~ /a @foo d/), 'plain array interpolates as alternations of literals 4');
 
-@foo := [ "b", "bb", "bbc", "bc" ];
+my @ltm := [ "b", "bb", "bbc", "bc" ];
 
-ok(("abd" ~~ / @foo /) eq 'b', 'array finds longest match 1');
-ok(("abbd" ~~ / @foo /) eq 'bb', 'array finds longest match 2');
-ok(("abbcd" ~~ / @foo /) eq 'bbc', 'array finds longest match 3');
-ok(("abccd" ~~ / @foo /) eq 'bc', 'array finds longest match 4');
-
-
-=begin END
+ok(("abd" ~~ / @ltm /) eq 'b', 'array finds longest match 1');
+ok(("abbd" ~~ / @ltm /) eq 'bb', 'array finds longest match 2');
+ok(("abbcd" ~~ / @ltm /) eq 'bbc', 'array finds longest match 3');
+ok(("abccd" ~~ / @ltm /) eq 'bc', 'array finds longest match 4');
 
 ok(!("ab+d"  ~~ /a <$b> d/), 'scalar assertion interpolates as regex 1');
 ok("abbbbbd" ~~ /a <$b> d/, 'scalar assertion interpolates as regex 2');
+
+=begin END
+
 ok(!("ab+d" ~~ /a <@foo> d/),   'array assertion interpolates as alternations of regexen 1');
 ok(!("ac+d" ~~ /a <@foo> d/),   'array assertion interpolates as alternations of regexen 2');
 ok("abbbbbd" ~~ /a <@foo> d/, 'array assertion interpolates as alternations of regexen 3');
