@@ -709,16 +709,18 @@ and the longest match is returned.
 .sub '!INTERPOLATE' :method
     .param pmc var
 
+    .local pmc cur
+    .local int pos
+    .local string tgt
+
     $I0 = does var, 'array'
     if $I0 goto var_array
 
+  var_scalar:
     $I0 = does var, ['Sub']
     if $I0 goto var_sub
 
   var_string:
-    .local pmc cur
-    .local int pos
-    .local string tgt
     (cur, pos, tgt) = self.'!cursor_start'()
     $S0 = var
     $I0 = length $S0
@@ -735,6 +737,38 @@ and the longest match is returned.
     .return (cur)
 
   var_array:
+    (cur, pos, tgt) = self.'!cursor_start'()
+    .local pmc var_it, elem
+    .local int maxlen
+    var_it = iter var
+    maxlen = -1
+  array_loop:
+    unless var_it goto array_done
+    elem = shift var_it
+    $I0 = does elem, ['Sub']
+    if $I0 goto array_sub
+  array_string:
+    $S0 = elem
+    $I0 = length $S0
+    if $I0 <= maxlen goto array_loop
+    $S1 = substr tgt, pos, $I0
+    if $S0 != $S1 goto array_loop
+    maxlen = $I0
+    goto array_loop
+  array_sub:
+    $P0 = elem(self)
+    unless $P0 goto array_loop
+    $I0 = $P0.'to'()
+    $I0 -= pos
+    if $I0 <= maxlen goto array_loop
+    maxlen = $I0
+    goto array_loop
+  array_done:
+    if maxlen < 0 goto array_fail
+    $I0 = pos + maxlen
+    cur.'!cursor_pass'($I0, '')
+  array_fail:
+    .return (cur)
 .end
 
 =back

@@ -555,7 +555,7 @@ grammar NQP::Regex is Regex::P6Regex::Grammar {
     }
 
     token metachar:sym<nqpvar> {
-        <?[$]> <var=.LANG('MAIN', 'variable')>
+        <?[$@]> <var=.LANG('MAIN', 'variable')>
     }
 
     token assertion:sym<{ }> {
