@@ -1,6 +1,6 @@
 #! nqp
 
-plan(32);
+plan(33);
 
 my $b := "b+";
 my @foo := [ "b+", "c+" ];
@@ -56,3 +56,6 @@ ok(!("abcd" ~~ /a { "bc" } d/), "Plain closure doesn't interpolate 2");
 
 ok("ad" ~~ /a <?{ 1 }> d/, 'Zero-width assertions still work 1');
 ok(!("ad" ~~ /a <!{ 1 }> d/), 'Zero-width assertions still work 2');
+
+ok("test.h" ~~ /.h$/, 'Do not parse $/ as variable interpolation');
+
