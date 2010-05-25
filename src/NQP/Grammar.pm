@@ -558,9 +558,9 @@ grammar NQP::Regex is Regex::P6Regex::Grammar {
         <?[$@]> <var=.LANG('MAIN', 'variable')>
     }
 
-    # token assertion:sym<{ }> {
-    #     <?[{]> <codeblock>
-    # }
+    token assertion:sym<{ }> {
+        <?[{]> <codeblock>
+    }
 
     token assertion:sym<?{ }> {
         $<zw>=[ <[?!]> <?before '{'> ] <codeblock>
