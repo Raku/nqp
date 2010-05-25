@@ -829,6 +829,12 @@ class NQP::RegexActions is Regex::P6Regex::Actions {
                               :pasttype<pastnode>, :node($/) );
     }
 
+    method assertion:sym<?{ }>($/) { 
+        make PAST::Regex.new( $<codeblock>.ast, 
+                              :subtype<zerowidth>, :negate( $<zw> eq '!' ),
+                              :pasttype<pastnode>, :node($/) );
+    }
+
     method assertion:sym<var>($/) {
         make PAST::Regex.new( '!INTERPOLATE_REGEX', $<var>.ast, 
                               :pasttype<subrule>, :subtype<method>, :node($/));
