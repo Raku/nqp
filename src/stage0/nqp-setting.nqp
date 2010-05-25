@@ -182,10 +182,12 @@ our sub subst ($text, $regex, $repl, :$global?) {
     my $result  := pir::new__Ps('StringBuilder');
 
     for @matches -> $match {
-        pir::push($result, pir::substr($text, $offset, $match.from - $offset))
-            if $match.from > $offset;
-        pir::push($result, $is_code ?? $repl($match) !! $repl);
-        $offset := $match.to;
+        if $match {
+            pir::push($result, pir::substr($text, $offset, $match.from - $offset))
+                if $match.from > $offset;
+            pir::push($result, $is_code ?? $repl($match) !! $repl);
+            $offset := $match.to;
+        }
     }
 
     my $chars := pir::length($text);
