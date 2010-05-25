@@ -81,6 +81,7 @@ token pod_comment {
 
 token comp_unit {
     <.newpad>
+    <.outerctx>
     <statementlist>
     [ $ || <.panic: 'Confused'> ]
 }
@@ -140,6 +141,7 @@ token blockoid {
 }
 
 token newpad { <?> }
+token outerctx { <?> }
 token finishpad { <?> }
 
 proto token terminator { <...> }

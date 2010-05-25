@@ -140,7 +140,7 @@ class HLL::Compiler is PCT::HLLCompiler {
                 && %adverbs<target> eq '' {
             my $outer_ctx := %adverbs<outer_ctx>;
             if pir::defined($outer_ctx) {
-                $output[0].set_outer($outer_ctx<current_sub>);
+                $output[0].set_outer(pir::getattribute__PPs($outer_ctx, 'current_sub'));
             }
 
             pir::trace(%adverbs<trace>);

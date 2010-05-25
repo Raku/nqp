@@ -126,6 +126,11 @@ method newpad($/) {
     @BLOCK.unshift( PAST::Block.new( PAST::Stmts.new() ) );
 }
 
+method outerctx($/) {
+    our @BLOCK;
+    self.SET_BLOCK_OUTER_CTX(@BLOCK[0]);
+}
+
 ## Statement control
 
 method statement_control:sym<if>($/) {
