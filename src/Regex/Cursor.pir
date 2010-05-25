@@ -717,9 +717,7 @@ and the longest match is returned.
     if $I0 goto var_array
 
   var_scalar:
-    $I0 = isa var, ['Sub']
-    if $I0 goto var_sub
-    $I0 = isa var, ['Eval']
+    $I0 = does var, 'invokable'
     if $I0 goto var_sub
 
   var_string:
@@ -747,7 +745,7 @@ and the longest match is returned.
   array_loop:
     unless var_it goto array_done
     elem = shift var_it
-    $I0 = isa elem, ['Sub']
+    $I0 = does elem, 'invokable'
     if $I0 goto array_sub
   array_string:
     $S0 = elem
@@ -784,7 +782,7 @@ are first compiled to regexes prior to being matched.
 .sub '!INTERPOLATE_REGEX' :method
     .param pmc var
 
-    $I0 = isa var, ['Sub']
+    $I0 = does var, 'invokable'
     if $I0 goto done
 
     .local pmc p6regex
@@ -802,7 +800,7 @@ are first compiled to regexes prior to being matched.
   var_loop:
     unless var_it goto done
     elem = shift var_it
-    $I0 = isa elem, ['Sub']
+    $I0 = does elem, 'invokable'
     if $I0 goto var_next
     elem = p6regex.'compile'(elem)
   var_next:
