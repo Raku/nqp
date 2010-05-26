@@ -59,6 +59,20 @@ our sub ints_to_string($ints) {
 }
 
 
+method CTXSAVE() {
+    PAST::Op.new(
+        :inline(
+            '    $P0 = find_dynamic_lex "$*CTXSAVE"',
+            '    if null $P0 goto ctxsave_done',
+            '    $I0 = can $P0, "ctxsave"',
+            '    unless $I0 goto ctxsave_done',
+            '    $P0."ctxsave"()',
+            '  ctxsave_done:'
+        )
+    );
+}
+
+
 method SET_BLOCK_OUTER_CTX($block) {
     my $outer_ctx := %*COMPILING<%?OPTIONS><outer_ctx>;
     if pir::defined($outer_ctx) {
