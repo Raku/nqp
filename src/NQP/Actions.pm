@@ -50,6 +50,10 @@ method comp_unit($/) {
     my $mainline := $<statementlist>.ast;
     my $unit     := @BLOCK.shift;
 
+    # If our caller wants to know the mainline ctx, provide it here.
+    # (CTXSAVE is inherited from HLL::Actions.)
+    $unit.push( self.CTXSAVE() );
+
     # We force a return here, because we have other
     # :load/:init blocks to execute that we don't want
     # to include as part of the mainline.

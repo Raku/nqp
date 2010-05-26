@@ -108,17 +108,26 @@ class HLL::Compiler is PCT::HLLCompiler {
 
             # Set the current position of stdout for autoprinting control
             my $*AUTOPRINTPOS := pir::tell__IP(pir::getstdout__P());
+            our $interactive_ctx;
+            our %interactive_pad;
+            my $*CTXSAVE := self;
+            my $*MAIN_CTX;
 
             if $code {
                 $code := $code ~ "\n";
                 my $output;
                 {
-                    $output := self.eval($code, |%adverbs);
+                    $output := self.eval($code, :outer_ctx($interactive_ctx), |%adverbs);
                     CATCH {
                         pir::print(~$! ~ "\n");
                         next;
                     }
                 };
+                if pir::defined($*MAIN_CTX) {
+                    for $*MAIN_CTX.lexpad_full() {
+                        %interactive_pad{$_.key} := $_.value;
+                    }
+                }
                 next if pir::isnull($output);
 
                 if !$target {
@@ -140,7 +149,7 @@ class HLL::Compiler is PCT::HLLCompiler {
                 && %adverbs<target> eq '' {
             my $outer_ctx := %adverbs<outer_ctx>;
             if pir::defined($outer_ctx) {
-                $output[0].set_outer(pir::getattribute__PPs($outer_ctx, 'current_sub'));
+                $output[0].set_outer_ctx($outer_ctx);
             }
 
             pir::trace(%adverbs<trace>);
@@ -149,5 +158,14 @@ class HLL::Compiler is PCT::HLLCompiler {
         }
 
         $output;
+    }
+
+    method ctxsave() {
+        $*MAIN_CTX :=
+            Q:PIR {
+                $P0 = getinterp
+                %r = $P0['context';1]
+            };
+        $*CTXSAVE := 0;
     }
 }
