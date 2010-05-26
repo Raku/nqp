@@ -7,6 +7,7 @@
   context_loop:
     if null ctx goto context_done
     lexpad = getattribute ctx, 'lex_pad'
+    if null lexpad goto lexpad_done
     lexpad_it = iter lexpad
   lexpad_loop:
     unless lexpad_it goto lexpad_done
