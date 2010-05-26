@@ -115,7 +115,7 @@ class HLL::Compiler is PCT::HLLCompiler {
                 {
                     $output := self.eval($code, |%adverbs);
                     CATCH {
-                        pir::print($! ~ "\n");
+                        pir::print(~$! ~ "\n");
                         next;
                     }
                 };
