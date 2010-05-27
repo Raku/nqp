@@ -429,13 +429,15 @@ Log a debug message.
     orig = getattribute self, '$!target'
     line = orig.'lineof'(from)
     inc line
-    printerr from
-    printerr '/'
-    printerr line
-    printerr ': '
+    $P0 = getinterp
+    $P1 = $P0.'stdhandle'(2)
+    print $P1, from
+    print $P1, '/'
+    print $P1, line
+    print $P1, ': '
     $S0 = join '', args
-    printerr $S0
-    printerr "\n"
+    print $P1, $S0
+    print $P1, "\n"
   done:
     .return (self)
 .end

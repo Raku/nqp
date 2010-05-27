@@ -7278,8 +7278,9 @@ An operator precedence parser.
     .lex "self", self
     .lex "$value", param_286
 .annotate 'line', 87
-    getstdout $P289
-    tell $I290, $P289
+    $P0 = getinterp
+    $P289 = $P0.'stdhandle'(1)
+    $I290 = $P289.'tell'()
     set $N291, $I290
     find_dynamic_lex $P292, "$*AUTOPRINTPOS"
     unless_null $P292, vivify_56
@@ -7348,9 +7349,12 @@ An operator precedence parser.
 .annotate 'line', 93
     find_lex $P310, "self"
     $S311 = $P310."commandline_banner"()
-    printerr $S311
+    $P0 = getinterp
+    $P1 = $P0.'stdhandle'(2)
+    print $P1, $S311
 .annotate 'line', 95
-    getstdin $P312
+    $P0 = getinterp
+    $P312 = $P0.'stdhandle'(0)
     store_lex "$stdin", $P312
 .annotate 'line', 96
     find_lex $P313, "%adverbs"
@@ -7465,8 +7469,9 @@ An operator precedence parser.
     throw $P348
   if_345_end:
 .annotate 'line', 110
-    getstdout $P349
-    tell $I350, $P349
+    $P0 = getinterp
+    $P349 = $P0.'stdhandle'(1)
+    $I350 = $P349.'tell'()
     new $P351, 'Integer'
     set $P351, $I350
     store_lex "$*AUTOPRINTPOS", $P351
