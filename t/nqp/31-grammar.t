@@ -2,7 +2,7 @@
 
 # Test grammars and regexes
 
-plan(3);
+plan(4);
 
 grammar ABC {
     token TOP { ok ' ' <integer> }
@@ -11,6 +11,8 @@ grammar ABC {
 
 my $match := ABC.parse('not ok');
 ok( !$match, 'parse method works on negative match');
+
+ok( $match.chars == 0, 'failed match has 0 .chars');
 
 $match := ABC.parse('ok 123');
 ok( ?$match, 'parse method works on positive match');
