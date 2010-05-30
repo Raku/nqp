@@ -76,7 +76,7 @@ method termish($/) {
 method quantified_atom($/) {
     my $past := $<atom>.ast;
     if $<quantifier> {
-        if !$past { $/.CURSOR.panic("Can't quantify zero-width atom"); }
+        if !$past { $/.CURSOR.panic("Quantifier follows nothing"); }
         my $qast := $<quantifier>[0].ast;
         $qast.unshift($past);
         $past := $qast;
