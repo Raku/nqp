@@ -116,9 +116,10 @@ method quantifier:sym<?>($/) {
 
 method quantifier:sym<**>($/) {
     my $past;
+    my $ws := $<normspace> && @MODIFIERS[0]<s>;
     if $<quantified_atom> {
         my $ast := $<quantified_atom>.ast;
-        if $<normspace> && @MODIFIERS[0]<s> {
+        if $ws {
             $ast := PAST::Regex.new( 
                         :pasttype('concat'),
                         PAST::Regex.new( 'ws', :pasttype('subrule'), 
@@ -135,6 +136,9 @@ method quantifier:sym<**>($/) {
         $past := PAST::Regex.new( :pasttype('quant'), :min(+$<min>), :node($/) );
         if ! $<max> { $past.max(+$<min>); }
         elsif $<max>[0] ne '*' { $past.max(+$<max>[0]); }
+        if $ws { $past.sep( PAST::Regex.new( 'ws', :pasttype('subrule'),
+                                             :subtype('method') ) );
+        }
     }
     make backmod($past, $<backmod>);
 }
