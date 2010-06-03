@@ -463,6 +463,7 @@ method method_def($/) {
         my $name := ~$<deflongname>[0].ast;
         $past.name($name);
     }
+    if $*MULTINESS eq 'multi' { $past.multi().unshift('_'); }
     make $past;
 }
 
@@ -475,7 +476,6 @@ method signature($/) {
     # Generate :multi pragma
     if $*MULTINESS eq "multi" {
         my @params;
-        @params.push('_') if $*METHODTYPE eq "Method";
         for $BLOCKINIT.list {
             @params.push($_.multitype // '_');
         }

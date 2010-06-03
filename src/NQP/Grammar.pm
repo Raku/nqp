@@ -9,7 +9,6 @@ method TOP() {
     %*LANG<MAIN-actions>  := NQP::Actions;
     my $*SCOPE      := '';
     my $*MULTINESS  := '';
-    my $*METHODTYPE := '';
     self.comp_unit;
 }
 
@@ -302,7 +301,6 @@ rule routine_def {
 }
 
 rule method_def {
-    :my $*METHODTYPE := 'Method';
     <deflongname>?
     <.newpad>
     [ '(' <signature> ')'
