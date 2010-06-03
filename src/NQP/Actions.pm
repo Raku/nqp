@@ -389,7 +389,9 @@ method scope_declarator:sym<our>($/) { make $<scoped>.ast; }
 method scope_declarator:sym<has>($/) { make $<scoped>.ast; }
 
 method scoped($/) {
-    make $<declarator>.ast;
+    make $<declarator>
+         ?? $<declarator>.ast
+         !! $<multi_declarator>.ast;
 }
 
 method declarator($/) {
@@ -397,6 +399,10 @@ method declarator($/) {
          ?? $<routine_declarator>.ast
          !! $<variable_declarator>.ast;
 }
+
+method multi_declarator:sym<multi>($/) { make $<declarator> ?? $<declarator>.ast !! $<routine_def>.ast }
+method multi_declarator:sym<null>($/)  { make $<declarator>.ast }
+
 
 method variable_declarator($/) {
     my $past := $<variable>.ast;
@@ -463,7 +469,18 @@ method method_def($/) {
 
 method signature($/) {
     my $BLOCKINIT := @BLOCK[0][0];
+
     for $<parameter> { $BLOCKINIT.push($_.ast); }
+    
+    # Generate :multi pragma
+    if $*MULTINESS eq "multi" {
+        my @params;
+        @params.push('_') if $*METHODTYPE eq "Method";
+        for $BLOCKINIT.list {
+            @params.push($_.multitype // '_');
+        }
+        @BLOCK[0].multi(@params);
+    }
 }
 
 method parameter($/) {
@@ -495,6 +512,14 @@ method parameter($/) {
         $past.viviself( $<default_value>[0]<EXPR>.ast );
     }
     unless $past.viviself { @BLOCK[0].arity( +@BLOCK[0].arity + 1 ); }
+
+    # We don't have support for multitype in PAST::Var (yet)
+    if $<typename> {
+        my @multitype;
+        for $<typename>[0]<name><identifier> { @multitype.push(~$_); }
+        $past.multitype(@multitype);
+    }
+
     make $past;
 }
 
