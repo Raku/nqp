@@ -54,7 +54,7 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar;
     token quantifier:sym<+> { <sym> <backmod> }
     token quantifier:sym<?> { <sym> <backmod> }
     token quantifier:sym<**> {
-        <sym> \s* <backmod> \s*
+        <sym> <normspace>? <backmod> <normspace>?
         [
         ||  $<min>=[\d+] 
             [   '..' 
