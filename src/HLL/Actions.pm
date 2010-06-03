@@ -186,6 +186,7 @@ method quote_escape:sym<nl>($/)  { make "\n"; }
 method quote_escape:sym<cr>($/)  { make "\r"; }
 method quote_escape:sym<tab>($/) { make "\t"; }
 method quote_escape:sym<ff>($/)  { make "\c[12]"; }
+method quote_escape:sym<esc>($/) { make "\c[27]"; }
 
 method quote_escape:sym<hex>($/) {
     make ints_to_string( $<hexint> ?? $<hexint> !! $<hexints><hexint> );
