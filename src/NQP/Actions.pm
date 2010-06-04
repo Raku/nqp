@@ -845,7 +845,8 @@ class NQP::RegexActions is Regex::P6Regex::Actions {
 
     method metachar:sym<:my>($/) {
         my $past := $<statement>.ast;
-        make PAST::Regex.new( $past, :pasttype('pastnode') );
+        make PAST::Regex.new( $past, :pasttype('pastnode'),
+                              :subtype('declarative'), :node($/) );
     }
 
     method metachar:sym<{ }>($/) { 

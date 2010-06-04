@@ -310,7 +310,8 @@ rule method_def {
 
 proto token multi_declarator { <...> }
 token multi_declarator:sym<multi> {
-    <sym> :my $*MULTINESS := 'multi';
+    :my $*MULTINESS := 'multi';
+    <sym>
     <.ws> [ <declarator> || <routine_def> || <.panic: 'Malformed multi'> ]
 }
 token multi_declarator:sym<null> {

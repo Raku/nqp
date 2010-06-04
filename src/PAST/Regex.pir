@@ -244,6 +244,22 @@ at this node.
     .tailcall head.'prefix'(prefix, tail :flat)
 .end
 
+.sub 'prefix_pastnode' :method
+    .param string prefix
+    .param pmc tail
+
+    unless tail goto pastnode_none
+    .local string subtype
+    subtype = self.'subtype'()
+    if subtype != 'declarative' goto pastnode_none
+
+    .local pmc head
+    head = shift tail
+    .tailcall head.'prefix'(prefix, tail :flat)
+
+  pastnode_none:
+    .return (prefix)
+.end
 
 .sub 'prefix_subcapture' :method
     .param string prefix
@@ -257,7 +273,7 @@ at this node.
     .param pmc tail
 
     .local pmc name, negate, subtype
-    name = self.'name'()
+    name = self[0]
     negate = self.'negate'()
     subtype = self.'subtype'()
     $I0 = does name, 'string'
