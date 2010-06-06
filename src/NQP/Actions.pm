@@ -824,7 +824,7 @@ sub control($/, $type) {
         :node($/),
         :pirop('die__vii'),
         0,
-        PAST::Val.new( :value($type), :returns<!except_severity> )
+        PAST::Val.new( :value($type), :returns<!except_types> )
     );
 }
 
