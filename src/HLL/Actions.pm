@@ -134,7 +134,7 @@ method quote_EXPR($/) {
         }
         else {
             my @words := HLL::Grammar::split_words($/, $past);
-            if +@words > 1 {
+            if +@words != 1 {
                 $past := PAST::Op.new( :pasttype('list'), :node($/) );
                 for @words { $past.push($_); }
             }

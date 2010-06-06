@@ -2,7 +2,7 @@
 
 # interpolating quotes
 
-plan(6);
+plan(7);
 
 my $abc := 'abc';
 
@@ -19,3 +19,5 @@ ok( qq{xxx {3+$num} zzz} eq 'xxx 8 zzz', 'basic qq{} closure interpolation' );
 ok( < a > eq 'a', 'spaces around individual element stripped');
 
 ok( +< a b > == 2, 'angle quotes correctly produce list');
+
+ok( pir::does(< >, 'array'), 'empty angle quotes correctly produce list');
