@@ -40,7 +40,7 @@ Return the POST representation of the regex AST rooted by C<node>.
     .lex '$*REG', reghash
 
     .local pmc regexname, regexname_esc
-    $P0 = get_global '@?BLOCK'
+    $P0 = find_dynamic_lex '@*BLOCKPAST'
     $P1 = $P0[0]
     $S0 = $P1.'name'()
     regexname = box $S0
