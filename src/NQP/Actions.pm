@@ -616,7 +616,7 @@ method term:sym<self>($/) {
 
 method term:sym<identifier>($/) {
     my $past := $<args>.ast;
-    $past.name(~$<identifier>);
+    $past.name(~$<deflongname>);
     make $past;
 }
 

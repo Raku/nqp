@@ -377,7 +377,7 @@ proto token term { <...> }
 token term:sym<self> { <sym> » }
 
 token term:sym<identifier> {
-    <identifier> <?[(]> <args>
+    <deflongname> <?[(]> <args>
 }
 
 token term:sym<name> {

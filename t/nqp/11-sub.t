@@ -2,7 +2,7 @@
 
 # check subs
 
-say('1..13');
+say('1..14');
 
 sub one ( ) {
     say("ok 1 # sub def and call");
@@ -85,3 +85,6 @@ sub &twelve() {
 
 sub Qstuff() { 13 };
 say('ok ', Qstuff());
+
+sub term:sym<self>() { 14 }
+say('ok ', term:sym<self>());
