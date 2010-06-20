@@ -2,7 +2,7 @@
 
 # method ops (just method calls for now)
 
-plan(4);
+plan(5);
 
 class Foo {
   method blarg() {
@@ -13,6 +13,10 @@ class Foo {
   }
   method blast() {
     'ok 4 # string method calls work'
+  }
+
+  method foo:bar<baz>() {
+    'ok 5 # colonpair named method call work'
   }
 }
 
@@ -33,3 +37,4 @@ say(blarg());
 say($foo.blargless);
 my $t := 'st';
 say($foo."bla$t"());
+say($foo.foo:bar<baz>());

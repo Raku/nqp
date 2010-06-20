@@ -360,7 +360,7 @@ rule regex_declarator {
 
 token dotty {
     '.' 
-    [ <longname=identifier>
+    [ <longname=deflongname>
     | <?['"]> <quote> 
         [ <?[(]> || <.panic: "Quoted method name requires parenthesized arguments"> ]
     ]
