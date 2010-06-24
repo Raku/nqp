@@ -52,6 +52,8 @@ Description of the test.
 
 =cut
 
+.loadlib 'io_ops'
+
 .const string TESTS = 'no_plan'
 
 .sub main :main

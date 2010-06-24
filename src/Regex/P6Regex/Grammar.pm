@@ -9,6 +9,8 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar;
 
     token normspace { <?before \s | '#' > <.ws> }
 
+    token identifier { <.ident> [ <[\-']> <.ident> ]* }
+
     token arg {
         [
         | <?[']> <quote_EXPR: ':q'>
@@ -145,7 +147,7 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar;
     }
 
     token assertion:sym<name> {
-        $<longname>=[\w+]
+        <longname=.identifier>
             [
             | <?before '>'>
             | '=' <assertion>
