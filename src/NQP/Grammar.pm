@@ -506,9 +506,12 @@ token prefix:sym<|>   { <sym>  <O('%symbolic_unary')> }
 token infix:sym<*>    { <sym>  <O('%multiplicative, :pirop<mul>')> }
 token infix:sym</>    { <sym>  <O('%multiplicative, :pirop<div>')> }
 token infix:sym<%>    { <sym>  <O('%multiplicative, :pirop<mod>')> }
+token infix:sym<+&>   { <sym>  <O('%multiplicative, :pirop<band III>')> }
 
 token infix:sym<+>    { <sym>  <O('%additive, :pirop<add>')> }
 token infix:sym<->    { <sym>  <O('%additive, :pirop<sub>')> }
+token infix:sym<+|>   { <sym>  <O('%additive, :pirop<bor III>')> }
+token infix:sym<+^>   { <sym>  <O('%additive, :pirop<bxor III>')> }
 
 token infix:sym<~>    { <sym>  <O('%concatenation , :pirop<concat>')> }
 

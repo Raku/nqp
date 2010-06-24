@@ -2,7 +2,7 @@
 
 # checking basic operands and circumfix:( )
 
-plan(29);
+plan(32);
 
 ##Additive operators
 ok(      1+2  == 3, 'Checking addition 1+2');
@@ -45,4 +45,9 @@ ok( ?(2 >  1) );
 ok( !(2 >  3) );
 ok( ?(2 >= 1) );
 ok( !(2 >= 3) );
+
+#Bitwise operators
+ok( (1 +| 3) == 3, 'Checking 1 +| 3' );
+ok( (3 +& 2) == 2, 'Checking 3 +& 2' );
+ok( (3 +^ 3) == 0, 'Checking 3 +^ 3' );
 
