@@ -14,7 +14,7 @@ method TOP() {
 
 ## Lexer stuff
 
-token identifier { <ident> }
+token identifier { <.ident> [ <[\-']> <.ident> ]* }
 
 token name { <identifier> ** '::' }
 
@@ -582,7 +582,7 @@ grammar NQP::Regex is Regex::P6Regex::Grammar {
     }
 
     token assertion:sym<name> {
-        $<longname>=[\w+]
+        <longname=.identifier>
             [
             | <?before '>'>
             | '=' <assertion>
