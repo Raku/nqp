@@ -96,7 +96,17 @@ method statement($/, $key?) {
             $past := PAST::Op.new($mc<cond>.ast, $past, :pasttype(~$mc<sym>), :node($/) );
         }
         if $ml {
-            $past := PAST::Op.new($ml<cond>.ast, $past, :pasttype(~$ml<sym>), :node($/) );
+            if ~$ml<sym> eq 'for' {
+                $past := PAST::Block.new( :blocktype('immediate'),
+                    PAST::Var.new( :name('$_'), :scope('parameter'), :isdecl(1) ),
+                    $past);
+                $past.symbol('$_', :scope('lexical') );
+                $past.arity(1);
+                $past := PAST::Op.new($ml<cond>.ast, $past, :pasttype(~$ml<sym>), :node($/) );
+            }
+            else {
+                $past := PAST::Op.new($ml<cond>.ast, $past, :pasttype(~$ml<sym>), :node($/) );
+            }
         }
     }
     elsif $<statement_control> { $past := $<statement_control>.ast; }

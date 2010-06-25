@@ -2,7 +2,7 @@
 
 # combination of conditional modifier and loop modifier
 
-plan(10);
+plan(11);
 
 my $a; my $s;
 
@@ -42,4 +42,8 @@ ok( $s == 0 && $a == 11, 'false if + until');
 # Ensure that close curly can end a statement
 { ok(1, "correct parse"); $a := 10; }
 while $a == 10 { ok($a == 10, 'while still works'); $a++; }
+
+$a := 1;
+$a := $a * $_ for <1 2 3>;
+ok( $a == 6 , 'for');
 
