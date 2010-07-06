@@ -255,9 +255,9 @@ method metachar:sym<var>($/) {
     if $<quantified_atom> {
         $past := $<quantified_atom>[0].ast;
         if $past.pasttype eq 'quant' && $past[0].pasttype eq 'subrule' {
-            subrule_alias($past[0], $name);
+            self.subrule_alias($past[0], $name);
         }
-        elsif $past.pasttype eq 'subrule' { subrule_alias($past, $name); }
+        elsif $past.pasttype eq 'subrule' { self.subrule_alias($past, $name); }
         else {
             $past := PAST::Regex.new( $past, :name($name), :pasttype('subcapture'), :node($/) );
         }
@@ -389,7 +389,7 @@ method assertion:sym<name>($/) {
     my $past;
     if $<assertion> {
         $past := $<assertion>[0].ast;
-        subrule_alias($past, $name);
+        self.subrule_alias($past, $name);
     }
     elsif $name eq 'sym' {
         my $regexsym := Q:PIR {
@@ -581,7 +581,7 @@ sub backmod($ast, $backmod) {
     $ast;
 }
 
-sub subrule_alias($past, $name) {
+method subrule_alias($past, $name) {
     if $past.name gt '' { $past.name( $name ~ '=' ~ $past.name ); }
     else { $past.name($name); }
     $past.subtype('capture');
