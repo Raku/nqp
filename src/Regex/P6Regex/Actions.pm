@@ -407,14 +407,7 @@ method assertion:sym<name>($/) {
         );
     }
     else {
-        $past := PAST::Regex.new( $name, :name($name),
-                                  :pasttype('subrule'), :subtype('capture'), :node($/) );
-        if $<nibbler> {
-            $past.push( buildsub($<nibbler>[0].ast) );
-        }
-        elsif $<arglist> {
-            for $<arglist>[0].ast.list { $past.push( $_ ); }
-        }
+        $past := self.named_assertion($/);
     }
     make $past;
 }
@@ -585,4 +578,17 @@ method subrule_alias($past, $name) {
     if $past.name gt '' { $past.name( $name ~ '=' ~ $past.name ); }
     else { $past.name($name); }
     $past.subtype('capture');
+}
+
+method named_assertion($/) {
+    my $name := ~$<longname>;
+    my $past := PAST::Regex.new( $name, :name($name),
+                                :pasttype('subrule'), :subtype('capture'), :node($/) );
+    if $<nibbler> {
+        $past.push( buildsub($<nibbler>[0].ast) );
+    }
+    elsif $<arglist> {
+        for $<arglist>[0].ast.list { $past.push( $_ ); }
+    }
+    $past;
 }
