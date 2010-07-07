@@ -98,6 +98,7 @@ class HLL::Compiler is PCT::HLLCompiler {
             $stdin.encoding($encoding);
         }
 
+        my $save_ctx;
         while 1 {
             last unless $stdin;
 
@@ -108,8 +109,6 @@ class HLL::Compiler is PCT::HLLCompiler {
 
             # Set the current position of stdout for autoprinting control
             my $*AUTOPRINTPOS := (pir::getinterp__P()).stdhandle(1).tell();
-            our $interactive_ctx;
-            our %interactive_pad;
             my $*CTXSAVE := self;
             my $*MAIN_CTX;
 
@@ -117,16 +116,19 @@ class HLL::Compiler is PCT::HLLCompiler {
                 $code := $code ~ "\n";
                 my $output;
                 {
-                    $output := self.eval($code, :outer_ctx($interactive_ctx), |%adverbs);
+                    $output := self.eval($code, :outer_ctx($save_ctx), |%adverbs);
                     CATCH {
                         pir::print(~$! ~ "\n");
                         next;
                     }
                 };
                 if pir::defined($*MAIN_CTX) {
+                    our $interactive_ctx;
+                    our %interactive_pad;
                     for $*MAIN_CTX.lexpad_full() {
                         %interactive_pad{$_.key} := $_.value;
                     }
+                    $save_ctx := $interactive_ctx;
                 }
                 next if pir::isnull($output);
 
