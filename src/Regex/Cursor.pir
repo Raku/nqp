@@ -226,6 +226,7 @@ Return the next match from a successful Cursor.
     goto cur_done
   cur_fail:
     cur = self.'!cursor_start'()
+    cur.'!cursor_fail'()
   cur_done:
     match = cur.'MATCH'()
     .return (match)
@@ -337,14 +338,16 @@ provided, then the new cursor has the same type as lang.
     .return (cur, from, target, 0)
 
   cursor_restart:
-    .local pmc cstack, bstack
+    .local pmc pos, cstack, bstack
     from   = getattribute self, '$!from'
     target = getattribute self, '$!target'
     debug  = getattribute self, '$!debug'
     cstack = getattribute self, '@!cstack'
     bstack = getattribute self, '@!bstack'
+    pos    = box CURSOR_FAIL
 
     setattribute cur, '$!from', from
+    setattribute cur, '$!pos', pos 
     setattribute cur, '$!target', target
     setattribute cur, '$!debug', debug
     if null cstack goto cstack_done
