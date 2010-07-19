@@ -972,6 +972,8 @@ second child of this node.
   frugal_2a:
     unless needrep goto frugal_3
     ops.'push_pirop'('set', ireg, rep)
+    unless max > 1 goto frugal_3
+    ops.'push_pirop'('ge', rep, max, fail)
   frugal_3:
     ops.'push'(cpost)
     unless needrep goto frugal_4
@@ -980,12 +982,10 @@ second child of this node.
     unless min > 1 goto frugal_5
     ops.'push_pirop'('lt', rep, min, q1label)
   frugal_5:
-    unless max > 1 goto frugal_6
-    ops.'push_pirop'('ge', rep, max, q2label)
   frugal_6:
     unless max != 1 goto frugal_7
     ops.'push_pirop'('set_addr', '$I10', q1label)
-    self.'!cursorop'(ops, '!mark_push', 0, ireg, pos, '$I10')
+    self.'!cursorop'(ops, '!mark_push', 0, rep, pos, '$I10')
   frugal_7:
     ops.'push'(q2label)
     .return (ops)
