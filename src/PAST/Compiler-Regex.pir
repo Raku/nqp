@@ -1101,8 +1101,9 @@ Perform a subrule call.
     negate = node.'negate'()
     testop = self.'??!!'(negate, 'if', 'unless')
 
-    .local pmc subtype
+    .local pmc subtype, backtrack
     subtype = node.'subtype'()
+    backtrack = node.'backtrack'()
 
     ops.'push_pirop'('inline', subpost, subtype, negate, 'inline'=>"  # rx subrule %0 subtype=%1 negate=%2")
 
@@ -1111,8 +1112,27 @@ Perform a subrule call.
     ops.'push_pirop'('callmethod', subpost, cur, posargs :flat, namedargs :flat, 'result'=>'$P10')
     ops.'push_pirop'(testop, '$P10', fail)
     if subtype == 'zerowidth' goto done
+    if backtrack != 'r' goto subrule_backtrack
     if subtype == 'method' goto subrule_pos
     self.'!cursorop'(ops, '!mark_push', 0, 0, CURSOR_FAIL, 0, '$P10')
+    goto subrule_named
+  subrule_backtrack:
+    .local string rxname
+    .local pmc backlabel, passlabel
+    rxname = self.'unique'('rxsubrule')
+    $S0 = concat rxname, '_back'
+    backlabel = self.'post_new'('Label', 'result'=>$S0)
+    $S0 = concat rxname, '_pass'
+    passlabel = self.'post_new'('Label', 'result'=>$S0)
+    ops.'push_pirop'('goto', passlabel)
+    ops.'push'(backlabel)
+    ops.'push_pirop'('callmethod', '"!cursor_next"', '$P10', 'result'=>'$P10')
+    ops.'push_pirop'(testop, '$P10', fail)
+    ops.'push'(passlabel)
+    ops.'push_pirop'('set_addr', '$I10', backlabel)
+    self.'!cursorop'(ops, '!mark_push', 0, 0, pos, '$I10', '$P10')
+    if subtype == 'method' goto subrule_pos
+  subrule_named:
     ops.'push'(name)
     ops.'push_pirop'('callmethod', '"!cursor_names"', '$P10', name)
   subrule_pos:

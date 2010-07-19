@@ -219,15 +219,8 @@ Return the next match from a successful Cursor.
 =cut
 
 .sub 'next' :method
-    .local pmc regex, cur, match
-    regex = getattribute self, '&!regex'
-    if null regex goto cur_fail
-    cur = self.regex()
-    goto cur_done
-  cur_fail:
-    cur = self.'!cursor_start'()
-    cur.'!cursor_fail'()
-  cur_done:
+    .local pmc cur, match
+    cur = self.'!cursor_next'()
     match = cur.'MATCH'()
     .return (match)
 .end
@@ -406,7 +399,7 @@ with a "real" Match object when requested.
 
 =item !cursor_backtrack()
 
-Configure this cursor for backtracking via .next.
+Configure this cursor for backtracking via C<!cursor_next>.
 
 =cut
 
@@ -414,6 +407,25 @@ Configure this cursor for backtracking via .next.
     $P0 = getinterp
     $P1 = $P0['sub';1]
     setattribute self, '&!regex', $P1
+.end
+
+
+=item !cursor_next()
+
+Continue a regex match from where the current cursor left off.
+
+=cut
+
+.sub '!cursor_next' :method
+    .local pmc regex, cur
+    regex = getattribute self, '&!regex'
+    if null regex goto fail
+    cur = self.regex()
+    .return (cur)
+  fail:
+    cur = self.'!cursor_start'()
+    cur.'!cursor_fail'()
+    .return (cur)
 .end
 
 
