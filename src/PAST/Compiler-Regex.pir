@@ -121,7 +121,6 @@ Return the POST representation of the regex AST rooted by C<node>.
     concat $S0, tgt
     concat $S0, ')'
     ops.'push_pirop'('callmethod', '"!cursor_start"', 'self', 'result'=>$S0)
-    self.'!cursorop'(ops, '!cursor_debug', 0, '"START "', regexname_esc)
     unless caparray goto caparray_skip
     self.'!cursorop'(ops, '!cursor_caparray', 0, caparray :flat)
   caparray_skip:
@@ -147,6 +146,7 @@ Return the POST representation of the regex AST rooted by C<node>.
     ops.'push_pirop'('sub', off, pos, 1, 'result'=>off)
     ops.'push_pirop'('substr', tgt, tgt, off, 'result'=>tgt)
     ops.'push'(startlabel)
+    self.'!cursorop'(ops, '!cursor_debug', 0, '"START "', regexname_esc)
 
     $P0 = self.'post_regex'(node)
     ops.'push'($P0)
@@ -789,6 +789,13 @@ second child of this node.
     ops.'push_pirop'('inline', 'inline'=>'  # rx pass')
     self.'!cursorop'(ops, '!cursor_pass', 0, pos, regexname)
     self.'!cursorop'(ops, '!cursor_debug', 0, '"PASS  "', regexname, '" at pos="', pos)
+
+    .local string backtrack
+    backtrack = node.'backtrack'()
+    if backtrack == 'r' goto backtrack_done
+    self.'!cursorop'(ops, '!cursor_backtrack', 0)
+  backtrack_done:
+
     ops.'push_pirop'('return', cur)
     .return (ops)
 .end

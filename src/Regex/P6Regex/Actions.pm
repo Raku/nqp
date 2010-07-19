@@ -490,7 +490,8 @@ sub buildsub($rpast, $block = PAST::Block.new() ) {
     $rpast := PAST::Regex.new(
         PAST::Regex.new( :pasttype('scan') ),
         $rpast,
-        PAST::Regex.new( :pasttype('pass') ),
+        PAST::Regex.new( :pasttype('pass'),
+                         :backtrack(@MODIFIERS[0]<r> ?? 'r' !! 'g') ),
         :pasttype('concat'),
         :capnames(%capnames)
     );

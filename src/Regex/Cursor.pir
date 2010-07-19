@@ -22,7 +22,7 @@ grammars.
     load_bytecode 'P6object.pbc'
     .local pmc p6meta
     p6meta = new 'P6metaclass'
-    $P0 = p6meta.'new_class'('Regex::Cursor', 'attr'=>'$!target $!from $!pos $!match $!names $!debug @!bstack @!cstack @!caparray')
+    $P0 = p6meta.'new_class'('Regex::Cursor', 'attr'=>'$!target $!from $!pos $!match $!names $!debug @!bstack @!cstack @!caparray &!regex')
     $P0 = box 0
     set_global '$!generation', $P0
     $P0 = new ['Boolean']
@@ -353,6 +353,19 @@ with a "real" Match object when requested.
     self.'!reduce'(name)
   done:
     .return (self)
+.end
+
+
+=item !cursor_backtrack()
+
+Configure this cursor for backtracking via .next.
+
+=cut
+
+.sub '!cursor_backtrack' :method
+    $P0 = getinterp
+    $P1 = $P0['sub';1]
+    setattribute self, '&!regex', $P1
 .end
 
 
