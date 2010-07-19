@@ -63,13 +63,15 @@ Return the POST representation of the regex AST rooted by C<node>.
     goto iter_loop
   iter_done:
 
-    .local pmc startlabel, donelabel, faillabel
+    .local pmc startlabel, donelabel, faillabel, restartlabel
     $S0 = concat prefix, 'start'
     startlabel = self.'post_new'('Label', 'result'=>$S0)
     $S0 = concat prefix, 'done'
     donelabel = self.'post_new'('Label', 'result'=>$S0)
     $S0 = concat prefix, 'fail'
     faillabel = self.'post_new'('Label', 'result'=>$S0)
+    $S0 = concat prefix, 'restart'
+    restartlabel = self.'post_new'('Label', 'result'=>$S0)
     reghash['fail'] = faillabel
 
     # If capnames is available, it's a hash where each key is the
@@ -119,7 +121,7 @@ Return the POST representation of the regex AST rooted by C<node>.
     concat $S0, pos
     concat $S0, ', '
     concat $S0, tgt
-    concat $S0, ')'
+    concat $S0, ', $I10)'
     ops.'push_pirop'('callmethod', '"!cursor_start"', 'self', 'result'=>$S0)
     unless caparray goto caparray_skip
     self.'!cursorop'(ops, '!cursor_caparray', 0, caparray :flat)
@@ -146,10 +148,13 @@ Return the POST representation of the regex AST rooted by C<node>.
     ops.'push_pirop'('sub', off, pos, 1, 'result'=>off)
     ops.'push_pirop'('substr', tgt, tgt, off, 'result'=>tgt)
     ops.'push'(startlabel)
+    ops.'push_pirop'('eq', '$I10', 1, restartlabel)
     self.'!cursorop'(ops, '!cursor_debug', 0, '"START "', regexname_esc)
 
     $P0 = self.'post_regex'(node)
     ops.'push'($P0)
+    ops.'push'(restartlabel)
+    self.'!cursorop'(ops, '!cursor_debug', 0, '"NEXT "', regexname_esc)
     ops.'push'(faillabel)
     self.'!cursorop'(ops, '!mark_fail', 4, rep, pos, '$I10', '$P10', 0)
     ops.'push_pirop'('lt', pos, CURSOR_FAIL, donelabel)

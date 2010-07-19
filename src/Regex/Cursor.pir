@@ -212,6 +212,26 @@ If C<regex> is omitted, then use the C<TOP> rule for the grammar.
 .end
 
 
+=item next()
+
+Return the next match from a successful Cursor.
+
+=cut
+
+.sub 'next' :method
+    .local pmc regex, cur, match
+    regex = getattribute self, '&!regex'
+    if null regex goto cur_fail
+    cur = self.regex()
+    goto cur_done
+  cur_fail:
+    cur = self.'!cursor_start'()
+  cur_done:
+    match = cur.'MATCH'()
+    .return (match)
+.end
+
+
 =item pos()
 
 Return the cursor's current position.
@@ -299,6 +319,10 @@ provided, then the new cursor has the same type as lang.
     parrotclass = getattribute $P0, 'parrotclass'
     cur = new parrotclass
 
+    .local pmc regex
+    regex = getattribute self, '&!regex'
+    unless null regex goto cursor_restart
+
     .local pmc from, target, debug
 
     from = getattribute self, '$!pos'
@@ -310,7 +334,28 @@ provided, then the new cursor has the same type as lang.
     debug = getattribute self, '$!debug'
     setattribute cur, '$!debug', debug
 
-    .return (cur, from, target)
+    .return (cur, from, target, 0)
+
+  cursor_restart:
+    .local pmc cstack, bstack
+    from   = getattribute self, '$!from'
+    target = getattribute self, '$!target'
+    debug  = getattribute self, '$!debug'
+    cstack = getattribute self, '@!cstack'
+    bstack = getattribute self, '@!bstack'
+
+    setattribute cur, '$!from', from
+    setattribute cur, '$!target', target
+    setattribute cur, '$!debug', debug
+    if null cstack goto cstack_done
+    cstack = clone cstack
+    setattribute cur, '@!cstack', cstack
+  cstack_done:
+    if null bstack goto bstack_done
+    bstack = clone bstack
+    setattribute cur, '@!bstack', bstack
+  bstack_done:
+    .return (cur, from, target, 1)
 .end
 
 
