@@ -872,8 +872,8 @@ second child of this node.
     .local pmc cur, pos, rep, fail
     (cur, pos, rep, fail) = self.'!rxregs'('cur pos rep fail')
 
-    .local string qname
-    .local pmc ops, q1label, q2label, btreg, cpost
+    .local string qname, btreg
+    .local pmc ops, q1label, q2label, cpost
     $S0 = concat 'rxquant', backtrack
     qname = self.'unique'($S0)
     ops = self.'post_new'('Ops', 'node'=>node)
@@ -904,8 +904,7 @@ second child of this node.
   if backtrack == 'f' goto frugal
 
   greedy:
-    btreg = self.'uniquereg'('I')
-    ops.'push_pirop'('set_addr', btreg, q2label)
+    btreg = '$I10'
     .local int needmark
     .local string peekcut
     needmark = needrep
@@ -916,14 +915,17 @@ second child of this node.
   greedy_1:
     if min == 0 goto greedy_2
     unless needmark goto greedy_loop
+    ops.'push_pirop'('set_addr', btreg, q2label)
     self.'!cursorop'(ops, '!mark_push', 0, 0, CURSOR_FAIL, btreg)
     goto greedy_loop
   greedy_2:
+    ops.'push_pirop'('set_addr', btreg, q2label)
     self.'!cursorop'(ops, '!mark_push', 0, 0, pos, btreg)
   greedy_loop:
     ops.'push'(q1label)
     ops.'push'(cpost)
     unless needmark goto greedy_3
+    ops.'push_pirop'('set_addr', btreg, q2label)
     self.'!cursorop'(ops, peekcut, 1, rep, btreg)
     unless needrep goto greedy_3
     ops.'push_pirop'('inc', rep)
@@ -932,6 +934,7 @@ second child of this node.
     ops.'push_pirop'('ge', rep, max, q2label)
   greedy_4:
     unless max != 1 goto greedy_5
+    ops.'push_pirop'('set_addr', btreg, q2label)
     self.'!cursorop'(ops, '!mark_push', 0, rep, pos, btreg)
     if null seppost goto greedy_4a
     ops.'push'(seppost)
