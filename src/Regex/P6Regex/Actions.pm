@@ -408,6 +408,12 @@ method assertion:sym<name>($/) {
     }
     else {
         $past := self.named_assertion($/);
+        if $<nibbler> {
+            $past.push( buildsub($<nibbler>[0].ast) );
+        }
+        elsif $<arglist> {
+            for $<arglist>[0].ast.list { $past.push( $_ ); }
+        }
     }
     make $past;
 }
@@ -585,11 +591,5 @@ method named_assertion($/) {
     my $name := ~$<longname>;
     my $past := PAST::Regex.new( $name, :name($name),
                                 :pasttype('subrule'), :subtype('capture'), :node($/) );
-    if $<nibbler> {
-        $past.push( buildsub($<nibbler>[0].ast) );
-    }
-    elsif $<arglist> {
-        for $<arglist>[0].ast.list { $past.push( $_ ); }
-    }
     $past;
 }
