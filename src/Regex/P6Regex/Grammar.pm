@@ -164,7 +164,7 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar;
         <.normspace>?
         [
         | '[' $<charspec>=(
-                  | \s* '-' <.obs: 'hyphen in enumerated character class','..'>
+                  | \s* '-' <.obs: '- as character range','..'>
                   | \s* [ \\ (.) | (<-[\]\\]>) ] [ \s* '..' \s* (.) ]?
               )*
           \s* ']'
