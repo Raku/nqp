@@ -24,7 +24,7 @@
 <-[b..d]>		bbccdd		n	negated character range
 # todo :pge<reversed character range>
 <-[d..b]>		bbccdd		/parse error/	illegal character range
-<[-]>			ab-def		/Obsolete/	unescaped hyphen
+<[-]>			ab-def		/Unsupported/	unescaped hyphen
 <[\-]>			ab-def		y	escaped hyphen
 <[\-]>			abcdef		n	escaped hyphen
 <-[\-]>			---x--		y	negated escaped hyphen
