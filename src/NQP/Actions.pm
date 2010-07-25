@@ -466,6 +466,9 @@ method routine_def($/) {
 method method_def($/) {
     my $past := $<blockoid>.ast;
     $past.blocktype('method');
+    if $*SCOPE eq 'our' {
+        $past.pirflags(':nsentry');
+    }
     $past.control('return_pir');
     $past[0].unshift( PAST::Op.new( :inline('    .lex "self", self') ) );
     $past.symbol('self', :scope('lexical') );
