@@ -30,10 +30,7 @@ method TOP($/) {
 method nibbler($/, $key?) {
     if $key eq 'open' {
         my %old := @MODIFIERS[0];
-        my %new := Q:PIR {
-                       $P0 = find_lex '%old'
-                       %r = clone $P0
-                   };
+        my %new := pir::clone__pp(%old);
         @MODIFIERS.unshift(%new);
         return 1;
     }
@@ -167,6 +164,7 @@ method metachar:sym<'>($/) {
     my $quote := $<quote_EXPR>.ast;
     if PAST::Val.ACCEPTS($quote) { $quote := $quote.value; }
     my $past := PAST::Regex.new( $quote, :pasttype('literal'), :node($/) );
+    if @MODIFIERS[0]<i> { $past.subtype('ignorecase'); }
     make $past;
 }
 
@@ -174,6 +172,7 @@ method metachar:sym<">($/) {
     my $quote := $<quote_EXPR>.ast;
     if PAST::Val.ACCEPTS($quote) { $quote := $quote.value; }
     my $past := PAST::Regex.new( $quote, :pasttype('literal'), :node($/) );
+    if @MODIFIERS[0]<i> { $past.subtype('ignorecase'); }
     make $past;
 }
 
