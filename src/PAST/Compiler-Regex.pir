@@ -540,8 +540,10 @@ standard quantifier code will handle it.
     .param string backtrack
     .param int min
     .param int max
+    .param pmc sep
 
     if backtrack != 'r' goto pessimistic
+    if sep goto pessimistic
 
     .local string subtype
     .local int cclass, negate
@@ -846,7 +848,9 @@ second child of this node.
     backtrack = 'g'
   have_backtrack:
 
+     .local pmc sep
      .local int min, max
+     sep = node.'sep'()
      min = node.'min'()
      $P0 = node.'max'()
      max = $P0
@@ -864,7 +868,7 @@ second child of this node.
      $S0 = concat $S0, '_q'
      $I0 = can self, $S0
      unless $I0 goto optimize_done
-     $P0 = self.$S0(cpast, backtrack, min, max)
+     $P0 = self.$S0(cpast, backtrack, min, max, sep)
      if null $P0 goto optimize_done
      .return ($P0)
   optimize_done:

@@ -187,3 +187,4 @@ a**:!2..4		baaabbb		y	three "a" characters (explicit greed)
 :sigspace ^[\w+] ** \, $	foo, bar ,baz	y	** under :sigspace
 :sigspace ^[\w+]** \, $	foo, bar ,baz	n	** under :sigspace w/o ws
 :sigspace ^[\w+]** \, $	foo,bar,baz	y	** under :sigspace w/o ws
+:ratchet ^ \w ** \, $	a,b,c,d		y	** under :ratchet w charclass
