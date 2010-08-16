@@ -738,11 +738,16 @@ second child of this node.
     # compute string to be matched and fail if mismatch
     ops.'push_pirop'('sub', '$I11', pos, off)
     ops.'push_pirop'('substr', '$S10', tgt, '$I11', litlen)
-    unless ignorecase goto literal_test
+    if ignorecase goto literal_ignorecase
+    ops.'push_pirop'('substr', '$S10', tgt, '$I11', litlen)
+    ops.'push_pirop'('ne', '$S10', lpost, fail)
+    goto literal_pass
+  literal_ignorecase:
+    ops.'push_pirop'('substr', '$S10', tgt, '$I11', litlen)
     ops.'push_pirop'('downcase', '$S10', '$S10')
-  literal_test:
     ops.'push_pirop'('ne', '$S10', lpost, fail)
 
+  literal_pass:
     # increase position by literal length and move on
     ops.'push_pirop'('add', pos, litlen)
   done:
