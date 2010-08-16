@@ -17,11 +17,20 @@ Perform a match for protoregex C<name>.
 .sub '!protoregex' :method
     .param string name
 
+    .local pmc debug
+    debug = getattribute self, '$!debug'
+    if null debug goto have_debug
+    if debug goto have_debug
+    null debug
+  have_debug:
+
     .local pmc tokrx, toklen
     (tokrx, toklen) = self.'!protoregex_tokrx'(name)
   have_tokrx:
 
+    if null debug goto debug_skip_1
     self.'!cursor_debug'('PROTO ', name)
+  debug_skip_1:
 
     # If there are no entries at all for this protoregex, we fail outright.
     unless tokrx goto fail
@@ -39,9 +48,12 @@ Perform a match for protoregex C<name>.
     token1 = substr target, pos, 1
     $I0 = toklen[token1]
     token = substr target, pos, $I0
+
+    if null debug goto debug_skip_2
     $S0 = escape token
     $S1 = escape token1
     self.'!cursor_debug'('        token1="', $S1, '", token="', $S0, '"')
+  debug_skip_2:
 
     # Create a hash to keep track of the methods we've already called,
     # so that we don't end up calling it twice.
@@ -87,11 +99,17 @@ Perform a match for protoregex C<name>.
 
   done:
     pos = result.'pos'()
+
+    if null debug goto debug_skip_3
     self.'!cursor_debug'('PASS  ', name, ' at pos=', pos)
+  debug_skip_3:
+
     .return (result)
 
   fail:
+    if null debug goto debug_skip_4
     self.'!cursor_debug'('FAIL  ', name)
+  debug_skip_4:
     unless null result goto fail_1
     result = self.'!cursor_start'()
     result.'!cursor_fail'()
