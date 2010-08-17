@@ -50,7 +50,7 @@ Return the POST representation of the regex AST rooted by C<node>.
     .local string prefix, rname, rtype
     prefix = self.'unique'('rx')
     concat prefix, '_'
-    $P0 = split ' ', 'tgt string pos int off int eos int rep int cur pmc'
+    $P0 = split ' ', 'tgt string pos int off int eos int rep int cur pmc debug pmc'
     $P1 = iter $P0
   iter_loop:
     unless $P1 goto iter_done
@@ -94,8 +94,8 @@ Return the POST representation of the regex AST rooted by C<node>.
     goto capnames_loop
   capnames_done:
 
-    .local string cur, rep, pos, tgt, off, eos
-    (cur, rep, pos, tgt, off, eos) = self.'!rxregs'('cur rep pos tgt off eos')
+    .local string cur, rep, pos, tgt, off, eos, debug
+    (cur, rep, pos, tgt, off, eos, debug) = self.'!rxregs'('cur rep pos tgt off eos debug')
 
     unless regexname goto peek_done
     .local pmc tpast, token, tpost
@@ -127,6 +127,7 @@ Return the POST representation of the regex AST rooted by C<node>.
     self.'!cursorop'(ops, '!cursor_caparray', 0, caparray :flat)
   caparray_skip:
 
+    ops.'push_pirop'('getattribute', debug, cur, '"$!debug"')
     ops.'push_pirop'('.lex', 'unicode:"$\x{a2}"', cur)
     ops.'push_pirop'('.local pmc', 'match')
     ops.'push_pirop'('.lex', '"$/"', 'match')
@@ -186,6 +187,13 @@ are passed to the function as input arguments.
     .param int retelems
     .param pmc args            :slurpy
 
+    $S0 = concat '!cursorop_', func
+    $I0 = can self, $S0
+    unless $I0 goto cursorop_default
+    $P0 = self.$S0(ops, func, retelems, args :flat)
+    unless null $P0 goto done
+
+  cursorop_default:
     if retelems < 1 goto result_done
     .local pmc retargs
     retargs = new ['ResizableStringArray']
@@ -210,6 +218,23 @@ are passed to the function as input arguments.
     if retelems < 1 goto done
     $P0.'result'(result)
   done:
+    .return (ops)
+.end
+
+.sub '!cursorop_!cursor_debug' :method
+    .param pmc ops
+    .param string func
+    .param int retelems
+    .param pmc args            :slurpy
+
+    .local pmc cur, debug, debuglabel
+    $P99 = get_hll_global ['POST'], 'Label'
+    debuglabel = $P99.'new'('name'=>'debug_')
+    (cur, debug) = self.'!rxregs'('cur debug')
+    ops.'push_pirop'('if_null', debug, debuglabel)
+    $S0 = self.'escape'(func)
+    ops.'push_pirop'('callmethod', $S0, cur, args :flat)
+    ops.'push'(debuglabel)
     .return (ops)
 .end
 
