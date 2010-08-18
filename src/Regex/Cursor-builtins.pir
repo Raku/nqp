@@ -65,6 +65,11 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     .local int pos, eos
     .local string tgt
     (cur, pos, tgt) = self.'!cursor_start'()
+    .local pmc debug
+    debug = getattribute cur, '$!debug'
+    if null debug goto debug_1
+    cur.'!cursor_debug'('START', 'ww')
+  debug_1:
     if pos == 0 goto fail
     eos = length tgt
     if pos == eos goto fail
@@ -75,7 +80,13 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     unless $I0 goto fail
   pass:
     cur.'!cursor_pass'(pos, 'ww')
+    if null debug goto done
+    cur.'!cursor_debug'('PASS', 'ww')
+    goto done
   fail:
+    if null debug goto done
+    cur.'!cursor_debug'('FAIL', 'ww')
+  done:
     .return (cur)
 .end
 
