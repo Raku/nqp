@@ -422,6 +422,13 @@ An operator precedence parser.
     .param string preclim      :optional
     .param int has_preclim     :opt_flag
 
+    .local pmc here, pos, debug
+    (here, pos) = self.'!cursor_start'()
+    debug = getattribute here, '$!debug'
+    if null debug goto debug_1
+    here.'!cursor_debug'('START', 'EXPR')
+  debug_1:
+
     if has_preclim goto have_preclim
     preclim = ''
   have_preclim:
@@ -435,9 +442,6 @@ An operator precedence parser.
     .lex '@opstack', opstack
     termstack = new ['ResizablePMCArray']
     .lex '@termstack', termstack
-
-    .local pmc here, from, pos
-    (here, pos) = self.'!cursor_start'()
 
   term_loop:
     here = here.termishrx()
@@ -566,7 +570,14 @@ An operator precedence parser.
     setattribute here, '$!pos', pos
     setattribute here, '$!match', term
     here.'!reduce'('EXPR')
+    if null debug goto done
+    here.'!cursor_debug'('PASS', 'EXPR')
+    goto done
+
   fail:
+    if null debug goto done
+    here.'!cursor_debug'('FAIL', 'EXPR')
+  done:
     .return (here)
 
   err_internal:
