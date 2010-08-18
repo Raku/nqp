@@ -286,6 +286,16 @@ position C<pos>.
 .sub 'quote_EXPR' :method
     .param pmc args            :slurpy
 
+    .local pmc cur, debug
+    .local string target
+    .local int pos
+
+    (cur, pos, target) = self.'!cursor_start'()
+    debug = getattribute cur, '$!debug'
+    if null debug goto debug_1
+    cur.'!cursor_debug'('START', 'quote_EXPR')
+  debug_1:
+
     .local pmc quotemod, true
     .lex '%*QUOTEMOD', quotemod
     quotemod = new ['Hash']
@@ -314,11 +324,6 @@ position C<pos>.
     goto args_loop
   args_done:
 
-    .local pmc cur
-    .local string target
-    .local int pos
-
-    (cur, pos, target) = self.'!cursor_start'()
 
     .local pmc start, stop
     (start, stop) = self.'peek_delimiters'(target, pos)
@@ -332,7 +337,13 @@ position C<pos>.
     $P10.'!cursor_names'('quote_delimited')
     pos = $P10.'pos'()
     cur.'!cursor_pass'(pos, 'quote_EXPR')
+    if null debug goto done
+    cur.'!cursor_debug'('PASS', 'quote_EXPR')
+    goto done
   fail:
+    if null debug goto done
+    cur.'!cursor_debug'('FAIL', 'quote_EXPR')
+  done:
     .return (cur)
 .end
 
