@@ -1,0 +1,55 @@
+#! perl
+
+my $laststamp = 0;
+my @callstack;
+my @calltime;
+my %stats;
+
+while (<>) {
+    my ($eventstamp, $loc, $event, $routine) = split ' ', $_;
+    next unless ($event =~ /START|PROTO|PASS|FAIL/);
+    $routine = '<anon>'  if ($routine eq '' || $routine eq 'at');
+    my $elapsed = $eventstamp - $laststamp;
+    $laststamp = $eventstamp;
+    if (@callstack) { $calltime[-1] += $elapsed; }
+    if ($event eq 'START' || $event eq 'PROTO') {
+        $stats{$routine}{'callcount'}++;
+        push @callstack, $routine;
+        push @calltime, 0;
+        next;
+    }
+    if ($callstack[-1] ne $routine) {
+        die "malformed trace: $routine vs @callstack";
+    }
+    else { pop @callstack; }
+    if ($event eq 'PASS') { 
+        $stats{$routine}{'passcount'}++;
+        $stats{$routine}{'passtime'} += pop @calltime; 
+    }
+    if ($event eq 'FAIL') { 
+        $stats{$routine}{'failcount'}++;
+        $stats{$routine}{'failtime'} += pop @calltime; 
+    }
+}
+
+foreach my $r (keys %stats) { 
+    $stats{$r}{'calltime'} = $stats{$r}{'passtime'} + $stats{$r}{'failtime'};
+    foreach (qw( callcount calltime passcount passtime failcount failtime )) {
+        $stats{'TOTAL'}{$_} += $stats{$r}{$_};
+    }
+}
+
+my @keys = sort { $stats{$b}{'calltime'} <=> $stats{$a}{'calltime'} }
+                keys %stats;
+
+print "                                               All          Passing        Failing    \n";
+print "Regex                                     Calls   Time   Calls   Time   Calls   Time  \n";
+print "--------------------------------------------------------------------------------------\n";
+
+foreach my $r (@keys) {
+    printf "%-40s: %5d %8.4f %5d %8.4f %5d %8.4f\n",
+        $r,
+        $stats{$r}{'callcount'}, $stats{$r}{'calltime'},
+        $stats{$r}{'passcount'}, $stats{$r}{'passtime'},
+        $stats{$r}{'failcount'}, $stats{$r}{'failtime'};
+}
