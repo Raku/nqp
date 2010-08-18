@@ -473,22 +473,27 @@ Log a debug message.
 =cut
 
 .sub '!cursor_debug' :method
+    .param string tag
     .param pmc args            :slurpy
     $P0 = getattribute self, '$!debug'
     if null $P0 goto done
     unless $P0 goto done
-    .local pmc from, pos, orig
-    .local int line
+    .local pmc fmt, from, pos, orig, line
+    fmt = new ['ResizablePMCArray']
     from = getattribute self, '$!from'
     orig = getattribute self, '$!target'
     line = orig.'lineof'(from)
-    inc line
+
     $P0 = getinterp
     $P1 = $P0.'stdhandle'(2)
-    print $P1, from
-    print $P1, '/'
-    print $P1, line
-    print $P1, ': '
+
+    $N0 = time
+    push fmt, $N0
+    push fmt, from
+    push fmt, line
+    push fmt, tag
+    $S0 = sprintf "%.6f %d/%d %-8s ", fmt
+    print $P1, $S0
     $S0 = join '', args
     print $P1, $S0
     print $P1, "\n"

@@ -657,7 +657,7 @@ An operator precedence parser.
 
     .local pmc pos
     pos = self.'pos'()
-    self.'!cursor_debug'('START MARKER name=', markname, ', pos=', pos)
+    self.'!cursor_debug'('START', 'MARKER name=', markname, ', pos=', pos)
 
     .local pmc markhash
     markhash = get_global '%!MARKHASH'
@@ -666,7 +666,7 @@ An operator precedence parser.
     set_global '%!MARKHASH', markhash
   have_markhash:
     markhash[markname] = pos
-    self.'!cursor_debug'('PASS  MARKER')
+    self.'!cursor_debug'('PASS', 'MARKER')
     .return (1)
 .end
 
@@ -674,7 +674,7 @@ An operator precedence parser.
 .sub 'MARKED' :method
     .param pmc markname
 
-    self.'!cursor_debug'('START MARKED name=', markname)
+    self.'!cursor_debug'('START','MARKED name=', markname)
 
     .local pmc markhash
     markhash = get_global '%!MARKHASH'
@@ -683,10 +683,10 @@ An operator precedence parser.
     if null $P0 goto fail
     $P1 = self.'pos'()
     unless $P0 == $P1 goto fail
-    self.'!cursor_debug'('PASS  MARKED')
+    self.'!cursor_debug'('PASS','MARKED')
     .return (1)
   fail:
-    self.'!cursor_debug'('FAIL  MARKED')
+    self.'!cursor_debug'('FAIL','MARKED')
     .return (0)
 .end
 

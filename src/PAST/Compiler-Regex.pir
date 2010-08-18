@@ -150,12 +150,12 @@ Return the POST representation of the regex AST rooted by C<node>.
     ops.'push_pirop'('substr', tgt, tgt, off, 'result'=>tgt)
     ops.'push'(startlabel)
     ops.'push_pirop'('eq', '$I10', 1, restartlabel)
-    self.'!cursorop'(ops, '!cursor_debug', 0, '"START "', regexname_esc)
+    self.'!cursorop'(ops, '!cursor_debug', 0, '"START"', regexname_esc)
 
     $P0 = self.'post_regex'(node)
     ops.'push'($P0)
     ops.'push'(restartlabel)
-    self.'!cursorop'(ops, '!cursor_debug', 0, '"NEXT "', regexname_esc)
+    self.'!cursorop'(ops, '!cursor_debug', 0, '"NEXT"', regexname_esc)
     ops.'push'(faillabel)
     self.'!cursorop'(ops, '!mark_fail', 4, rep, pos, '$I10', '$P10', 0)
     ops.'push_pirop'('lt', pos, CURSOR_FAIL, donelabel)
@@ -163,7 +163,7 @@ Return the POST representation of the regex AST rooted by C<node>.
     ops.'push_pirop'('jump', '$I10')
     ops.'push'(donelabel)
     self.'!cursorop'(ops, '!cursor_fail', 0)
-    self.'!cursorop'(ops, '!cursor_debug', 0, '"FAIL  "', regexname_esc)
+    self.'!cursorop'(ops, '!cursor_debug', 0, '"FAIL"', regexname_esc)
     ops.'push_pirop'('return', cur)
     .return (ops)
 .end
@@ -831,7 +831,7 @@ second child of this node.
 
     ops.'push_pirop'('inline', 'inline'=>'  # rx pass')
     self.'!cursorop'(ops, '!cursor_pass', 0, pos, regexname)
-    self.'!cursorop'(ops, '!cursor_debug', 0, '"PASS  "', regexname, '" at pos="', pos)
+    self.'!cursorop'(ops, '!cursor_debug', 0, '"PASS"', regexname, '" at pos="', pos)
 
     .local string backtrack
     backtrack = node.'backtrack'()
