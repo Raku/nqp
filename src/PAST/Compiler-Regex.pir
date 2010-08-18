@@ -694,6 +694,69 @@ character list.
     .return (ops)
 .end
 
+.sub 'enumcharlist_q' :method :multi(_, ['PAST';'Regex'])
+    .param pmc node
+    .param string backtrack
+    .param int min
+    .param int max
+    .param pmc sep
+
+    if backtrack != 'r' goto pessimistic
+    if sep goto pessimistic
+
+    .local pmc cur, tgt, pos, off, eos, fail, rep, ops
+    (cur, tgt, pos, off, eos, fail, rep) = self.'!rxregs'('cur tgt pos off eos fail rep')
+    ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
+
+    .local string charlist
+    charlist = node[0]
+    charlist = self.'escape'(charlist)
+    .local pmc negate, testop
+    negate = node.'negate'()
+    testop = self.'??!!'(negate, 'ge', 'lt')
+    .local string subtype
+    subtype = node.'subtype'()
+    if subtype == 'zerowidth' goto pessimistic
+
+    .local pmc looplabel, donelabel
+    .local string name
+    name = self.'unique'('rxenumcharlistq')
+    $S1 = concat name, '_loop'
+    looplabel = self.'post_new'('Label', 'result'=>$S1)
+    $S1 = concat name, '_done'
+    donelabel = self.'post_new'('Label', 'result'=>$S1)
+
+    ops.'push_pirop'('inline', negate, subtype, backtrack, min, max, 'inline'=>'  # rx enumcharlist_q negate=%0 %1 %2 %3..%4')
+    ops.'push_pirop'('sub', '$I10', pos, off)
+    ops.'push_pirop'('set', rep, 0)
+    ops.'push_pirop'('sub', '$I12', eos, pos)
+    unless max > 0 goto max1_done
+    ops.'push_pirop'('le', '$I12', max, looplabel)
+    ops.'push_pirop'('set', '$I12', max)
+  max1_done:
+    ops.'push'(looplabel)
+    ops.'push_pirop'('le', '$I12', 0, donelabel)
+    ops.'push_pirop'('substr', '$S10', tgt, '$I10', 1)
+    ops.'push_pirop'('index', '$I11', charlist, '$S10')
+    ops.'push_pirop'(testop, '$I11', 0, donelabel)
+    ops.'push_pirop'('inc', rep)
+    if max == 1 goto max2_done
+    ops.'push_pirop'('inc', '$I10')
+    ops.'push_pirop'('dec', '$I12')
+    ops.'push_pirop'('goto', looplabel)
+  max2_done:
+    ops.'push'(donelabel)
+    unless min > 0 goto min2_done
+    ops.'push_pirop'('lt', rep, min, fail)
+  min2_done:
+    ops.'push_pirop'('add', pos, pos, rep)
+    .return (ops)
+
+  pessimistic:
+    null ops
+    .return (ops)
+.end
+
 
 =item literal(PAST::Regex node)
 
