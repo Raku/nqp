@@ -56,4 +56,34 @@ our sub subst ($text, $regex, $repl, :$global?) {
     ~$result;
 }
 
+=begin item split
+Splits C<$text> on occurences of C<$regex>
+=end item
+
+our sub split ($regex, $text) {
+    my $pos := 0;
+    my @result;
+    my $looking := 1;
+    while $looking {
+        my $match :=
+            Regex::Cursor.parse($text, :rule($regex), :c($pos)) ;
+
+        if ?$match {
+            my $from := $match.from();
+            my $to := $match.to();
+            my $prefix := pir::substr__sPii($text, $pos, $from-$pos);
+            pir::push__vPP(@result, $prefix);
+            $pos := $match.to();
+        } else {
+            my $len := pir::length($text);
+            if $pos < $len {
+                pir::push__vPP(@result, pir::substr__ssi($text, $pos) );
+            }
+            $looking := 0;
+        }
+    }
+    return @result;
+}
+
+
 # vim: ft=perl6
