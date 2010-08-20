@@ -638,6 +638,70 @@ Handle a concatenation of regexes.
 .end
 
 
+=item conj(PAST::Regex node)
+
+=cut
+
+.sub 'conj' :method :multi(_, ['PAST';'Regex'])
+    .param pmc node
+
+    .local pmc cur, pos, fail
+    (cur, pos, fail) = self.'!rxregs'('cur pos fail')
+
+    .local string name
+    name = self.'unique'('conj')
+    concat name, '_'
+
+    .local pmc ops, iter
+    ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
+    iter = node.'iterator'()
+    unless iter goto done
+
+    .local pmc clabel
+    $S0 = concat name, 'mark'
+    clabel = self.'post_new'('Label', 'result'=>$S0)
+
+    .local int acount
+    .local pmc alabel, apast, apost
+    acount = 0
+    $S0 = acount
+    $S0 = concat name, $S0
+    alabel = self.'post_new'('Label', 'result'=>$S0)
+
+    ops.'push_pirop'('inline', name, 'inline'=>'  # rx %0')
+    ops.'push_pirop'('set_addr', '$I10', clabel)
+    self.'!cursorop'(ops, '!mark_push', 0, pos, CURSOR_FAIL, '$I10')
+    ops.'push_pirop'('goto', alabel)
+    ops.'push'(clabel)
+    ops.'push_pirop'('goto', fail)
+    ops.'push'(alabel)
+    apast = shift iter
+    apost = self.'post_regex'(apast, cur)
+    ops.'push'(apost)
+    ops.'push_pirop'('set_addr', '$I10', clabel)
+    self.'!cursorop'(ops, '!mark_peek', 1, '$I11', '$I10')
+    self.'!cursorop'(ops, '!mark_push', 0, '$I11', pos, '$I10')
+
+  iter_loop:
+    inc acount
+    $S0 = acount
+    $S0 = concat name, $S0
+    alabel = self.'post_new'('Label', 'result'=>$S0)
+    ops.'push'(alabel)
+    ops.'push_pirop'('set', pos, '$I11')
+    apast = shift iter
+    apost = self.'post_regex'(apast, cur)
+    ops.'push'(apost)
+    ops.'push_pirop'('set_addr', '$I10', clabel)
+    self.'!cursorop'(ops, '!mark_peek', 2, '$I11', '$I12', '$I10')
+    ops.'push_pirop'('ne', pos, '$I12', fail)
+    if iter goto iter_loop
+  iter_done:
+  done:
+    .return (ops)
+.end
+
+
 =item cut(PAST::Regex node)
 
 Generate POST for the cut-group and cut-rule operators.
