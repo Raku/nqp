@@ -37,8 +37,22 @@ method nibbler($/, $key?) {
 
     @MODIFIERS.shift;
     my $past;
-    if +$<termish> > 1 {
+    if +$<termconj> > 1 {
         $past := PAST::Regex.new( :pasttype('alt'), :node($/) );
+        for $<termconj> {
+            $past.push($_.ast);
+        }
+    }
+    else {
+        $past := $<termconj>[0].ast;
+    }
+    make $past;
+}
+
+method termconj($/) {
+    my $past;
+    if +$<termish> > 1 {
+        $past := PAST::Regex.new( :pasttype('conj'), :node($/) );
         for $<termish> {
             $past.push($_.ast);
         }

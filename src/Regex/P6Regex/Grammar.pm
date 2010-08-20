@@ -29,8 +29,15 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar;
     token nibbler {
         {*} #= open
         [ <.ws> ['||'|'|'|'&&'|'&'] ]?
-        <termish>
+        <termconj>
         [ ['||'|'|']
+          [ <termconj> || <.panic: 'Null pattern not allowed'> ]
+        ]*
+    }
+
+    token termconj {
+        <termish>
+        [ ['&&'|'&']
           [ <termish> || <.panic: 'Null pattern not allowed'> ]
         ]*
     }
