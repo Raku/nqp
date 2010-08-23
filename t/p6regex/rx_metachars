@@ -82,8 +82,10 @@ $$ \n			\n		y	line beginnings and endings ($$)
 ^ [ <[a..d]>+ | <[c..e]>+ ] $	bcd		y	alternation (|)
 b|			bcd		/Null pattern/	alternation (|) - null right arg illegal
 |b			bcd		y	alternation (|) - null left arg ignored
+# todo :pge<feature>
 |			bcd		/Null pattern/	alternation (|) - null both args illegal
 \|			|		y	alternation (|) - literal must be escaped
+# todo :pge<feature>
 |			|		/Null pattern/	alternation (|) - literal must be escaped
 # todo :pugs<feature>
 <[a..d]> && <[b..e]>	c		y	conjunction (&&)
@@ -98,13 +100,20 @@ b|			bcd		/Null pattern/	alternation (|) - null right arg illegal
 <[a..c]>+ && <[b..e]>+	bcd		y	conjunction (&&)
 # todo :pugs<feature>
 <[a..d]>+ && <[c..e]>+	bcd		y	conjunction (&&)
+# todo :pge<&-conjunciton>
 b&			bcd		/rule error/	conjunction (&) - null right arg illegal
+# todo :pge<&-conjunciton>
 &b			bcd		/rule error/	conjunction (&) - null left arg illegal
+# todo :pge<&-conjunciton>
 &			bcd		/rule error/	conjunction (&) - null both args illegal
 \&			&		y	conjunction (&) - literal must be escaped
+# todo :pge<&-conjunciton>
 &			&		/rule error/	conjunction (&) - literal must be escaped
 # todo :pge<leading |>
 a&|b			a&|b		/rule error/	alternation and conjunction (&|) - parse error
+# todo :pge<&-conjunciton>
+&			&		/rule error/	conjunction (&) - literal must be escaped
+# todo :pge<&-conjunciton>
 a|&b			a|&b		/rule error/	alternation and conjunction (|&) - parse error
 |d|b			abc		y	leading alternation ignored
  |d|b			abc		y	leading alternation ignored
@@ -112,18 +121,30 @@ a|&b			a|&b		/rule error/	alternation and conjunction (|&) - parse error
  | d | b		abc		y	leading alternation ignored
 # todo :pugs<feature> :pge<feature>
  b |  | d		abc		n	null pattern invalid
-\pabc			pabc		/Unsupported/	retired metachars (\p)
-\p{InConsonant}		a		/Unsupported/	retired metachars (\p)
-\Pabc			Pabc		/Unsupported/	retired metachars (\P)
-\P{InConsonant}		a		/Unsupported/	retired metachars (\P)
-\Labc\E			LabcE		/Unsupported/	retired metachars (\L...\E)
-\LABC\E			abc		/Unsupported/	retired metachars (\L...\E)
-\Uabc\E			UabcE		/Unsupported/	retired metachars (\U...\E)
-\Uabc\E			ABC		/Unsupported/	retired metachars (\U...\E)
-\Qabc\E			QabcE		/Unsupported/	retired metachars (\Q...\E)
-\Qabc d?\E		abc d		/Unsupported/	retired metachars (\Q...\E)
-\Gabc			Gabc		/Unsupported/	retired metachars (\G)
-\1abc			1abc		/Unsupported/	retired metachars (\1)
+# todo :pge<error messages>
+\pabc			pabc		/Obsolete|Unrecognized/	retired metachars (\p)
+# todo :pge<error messages>
+\p{InConsonant}		a		/Obsolete|Unrecognized/	retired metachars (\p)
+# todo :pge<error messages>
+\Pabc			Pabc		/Obsolete|Unrecognized/	retired metachars (\P)
+# todo :pge<error messages>
+\P{InConsonant}		a		/Obsolete|Unrecognized/	retired metachars (\P)
+# todo :pge<error messages>
+\Labc\E			LabcE		/Obsolete|Unrecognized/	retired metachars (\L...\E)
+# todo :pge<error messages>
+\LABC\E			abc		/Obsolete|Unrecognized/	retired metachars (\L...\E)
+# todo :pge<error messages>
+\Uabc\E			UabcE		/Obsolete|Unrecognized/	retired metachars (\U...\E)
+# todo :pge<error messages>
+\Uabc\E			ABC		/Obsolete|Unrecognized/	retired metachars (\U...\E)
+# todo :pge<error messages>
+\Qabc\E			QabcE		/Obsolete|Unrecognized/	retired metachars (\Q...\E)
+# todo :pge<error messages>
+\Qabc d?\E		abc d		/Obsolete|Unrecognized/	retired metachars (\Q...\E)
+# todo :pge<error messages>
+\Gabc			Gabc		/Obsolete|Unrecognized/	retired metachars (\G)
+# todo :pge<error messages>
+\1abc			1abc		/Obsolete|Unrecognized/	retired metachars (\1)
 # todo :pugs<feature>
 ^ \s+ $			\x0009\x0020\x00a0\x000a\x000b\x000c\x000d\x0085	y	0-255 whitespace (\s)
 # todo :pugs<feature>
@@ -217,17 +238,27 @@ c \c[ 33, 33] d		abc!!def	y	hex (\c[])
 c \c[ 33 , 33 ] d	abc!!def	y	hex (\c[])
 a \c[33]+ f		abcdef		n	hex (\c[])
 b \c[33] c		abc!def		n	hex (\c[])
+# todo :pge<\C33>
 \C33			a		y	not hex (\C)
+# todo :pge<\C33>
 a \C33 c		abc		y	not hex (\C)
 \C33			''		n	not hex (\C)
+# todo :pge<\C33>
 c \C33 d		abc!def		n	not hex (\C)
+# todo :pge<\C33>
 c \C33+ d		abc!!def	n	not hex (\C)
+# todo :pge<\C33>
 a \C33+ f		abcdef		y	not hex (\C)
+# todo :pge<\C33>
 \C[33]			a		y	not hex (\C[])
+# todo :pge<\C33>
 a \C[33] c		abc		y	not hex (\C[])
 \C[33]			''		n	not hex (\C[])
+# todo :pge<\C33>
 c \C[33] d		abc!def		n	not hex (\C[])
+# todo :pge<\C33>
 c \C[33]+ d		abc!!def	n	not hex (\C[])
+# todo :pge<\C33>
 a \C[33]+ f		abcdef		y	not hex (\C[])
 c \o041 d		abc!def		y	octal (\o)
 c \o41+ d		abc!!def	y	octal (\o)

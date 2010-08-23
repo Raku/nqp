@@ -126,24 +126,27 @@ foo '-'? bar			foo - bar	n	basic non-match
 # todo :pugs<feature>
 :s foo '-'? bar			foo-bar		y	basic ws match \s* \s*
 :s foo '-'? bar			foobar		n	basic ws non-match
+# todo :pge<feature>
 :s()foo '-'? bar		foo - bar	n	basic ws match
 # todo :pugs<feature> :pge<feature>
 :s[]foo '-'? bar		foo - bar	y	basic ws match
 # todo :pugs<feature>
 :s<?wb>foo '-'? bar		foo - bar	y	basic ws match with boundary modifier separation
-# todo :pugs<feature>
+# todo :pge<::>
 :s::foo '-'? bar			foo - bar	y	basic ws match with backtrack no-op modifier separation
+# todo :pge<::>
 :s::(\w+) ':=' (\S+)		dog := spot	/mob 0: <dog @ 0>/	sigspace and capture together
+# todo :pge<::>
 :s::(\w+) ':=' (\S+)		dog := spot	/mob 1: <spot @ 7>/	sigspace and capture together
 # todo :pugs<feature> :pge<feature>
 :perl5 \A.*? bcd\Q$\E..\z	a bcd$ef	y	perl5 syntax (:perl5)
-# todo :pugs<feature>
+# todo :pge<:x modifier>
 :x(6) \d			123456		y	repetition (:x)
-# todo :pugs<feature>
+# todo :pge<:x modifier>
 :x(3) \d			123456		y	repetition (:x)
-# todo :pugs<feature>
+# todo :pge<:x modifier>
 :x(0) \d			123456		y	repetition (:x)
-# todo :pugs<feature>
+# todo :pge<:nth modifier>
 :nth(3) a \d			a1a2a3		y	nth occurance (:nth)
 # todo :pge<feature>
 :nth(4) a \d			a1a2a3		n	nth occurance (:nth)
