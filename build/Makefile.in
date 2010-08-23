@@ -269,7 +269,7 @@ bootstrap-files: $(STAGE2_PBCS) $(SETTING_NQP)
 
 ## testing
 
-test: all core-test setting-test
+test: all core-test setting-test p6regex-test
 
 test-loud: all core-test-loud setting-test-loud p6regex-test-loud
 
