@@ -140,18 +140,6 @@ foo '-'? bar			foo - bar	n	basic non-match
 :s::(\w+) ':=' (\S+)		dog := spot	/mob 1: <spot @ 7>/	sigspace and capture together
 # todo :pugs<feature> :pge<feature>
 :perl5 \A.*? bcd\Q$\E..\z	a bcd$ef	y	perl5 syntax (:perl5)
-# todo :pge<:x modifier>
-:x(6) \d			123456		y	repetition (:x)
-# todo :pge<:x modifier>
-:x(3) \d			123456		y	repetition (:x)
-# todo :pge<:x modifier>
-:x(0) \d			123456		y	repetition (:x)
-# todo :pge<:nth modifier>
-:nth(3) a \d			a1a2a3		y	nth occurance (:nth)
-# todo :pge<feature>
-:nth(4) a \d			a1a2a3		n	nth occurance (:nth)
-# todo :pge<feature>
-:nth(0) a \d			a1a2a3		n	nth occurance (:nth)
 :s^[\d+ ]* abc			11 12 13 abc	y	<?ws> before closing bracket
 
 ## vim: noexpandtab tabstop=4 shiftwidth=4
