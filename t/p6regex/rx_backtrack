@@ -1,6 +1,6 @@
 ##   Backtracking control tests
 a* a			bazaar		y	control
-# todo :pge<adverbs before backtrack(?)>
+# todo :pge<backtracking>
 a*:a			bazaar		/:a/	basic
 a*: a			bazaar		n	basic
 ^[a|b]*  aba		abbabbababba	y	control
@@ -8,23 +8,28 @@ a*: a			bazaar		n	basic
 \d+:			123abc		y	cut on character class shortcut
 \d+:			abc		n	cut on character class shortcut
 [ if    not | ify ]	verify		y	control
+# todo :pge<::>
 [ if :: not | ify ]	verify		n	inside a group
+# todo :pge<::>
   if :: not | ify	verify		n	the default all group
-# todo :pugs<feature>
 [ if :  not | ify ]	verify		y	simple backtrack still works
-# todo :pugs<feature>
+# todo :pge<::>
 [ if :: not | ify ] | verify	verify	y	rule continues
 [ when     ever ] | whence	whence	y	full backtrack failure
+# todo :pge<::>
 [ when ::: ever ] | whence	whence	n	full backtrack failure
-# todo :pugs<feature>
+# todo :pge<::>
 ab::cd | gh::ij		xyabghij	y	group cut at top
+# todo :pge<::>
 ab:::cd | gh:::ij	xyabghij	n	rule cut at top
-# todo :pugs<feature>
+# todo :pge<::>
 [ab::cd | gh::ij]	xyabghij	y	group cut in group
+# todo :pge<::>
 [ab:::cd | gh:::ij]	xyabghij	n	rule cut in group
+# todo :pge<:>
 [ ab | abc ]: de	xyzabcde	n	no backtrack into group
 ( ab | abc ): de	xyzabcde	n	no backtrack into subpattern
-# todo :pugs<feature>
+# todo :pge<:>
 [ when <commit> ever ] | whence	whence	n	full backtrack failure
 
 :ratchet a* a		bazaar		n	ratchet modifier
