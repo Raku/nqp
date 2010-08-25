@@ -72,12 +72,12 @@ our sub split ($regex, $text) {
             my $from := $match.from();
             my $to := $match.to();
             my $prefix := pir::substr__sPii($text, $pos, $from-$pos);
-            pir::push__vPP(@result, $prefix);
+            @result.push($prefix);
             $pos := $match.to();
         } else {
             my $len := pir::length($text);
             if $pos < $len {
-                pir::push__vPP(@result, pir::substr__ssi($text, $pos) );
+                @result.push(pir::substr__ssi($text, $pos) );
             }
             $looking := 0;
         }
