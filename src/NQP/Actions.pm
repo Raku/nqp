@@ -490,7 +490,8 @@ method signature($/) {
     if $*MULTINESS eq "multi" {
         my @params;
         for $BLOCKINIT.list {
-            @params.push($_.multitype // '_') unless $_<skip_multi>;
+            @params.push($_.multitype // '_') 
+                unless $_.slurpy || $_.named || $_.viviself;
         }
         @BLOCK[0].multi(@params);
     }
@@ -504,18 +505,15 @@ method parameter($/) {
         if $quant ne '!' {
             $past.viviself( vivitype($<named_param><param_var><sigil>) );
         }
-        $past<skip_multi> := 1;
     }
     else {
         $past := $<param_var>.ast;
         if $quant eq '*' {
             $past.slurpy(1);
             $past.named( $<param_var><sigil> eq '%' );
-            $past<skip_multi> := 1;
         }
         elsif $quant eq '?' {
             $past.viviself( vivitype($<param_var><sigil>) );
-            $past<skip_multi> := 1;
         }
     }
     if $<default_value> {
