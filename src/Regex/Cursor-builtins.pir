@@ -119,11 +119,23 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     .local int pos
     .local string tgt
     (cur, pos, tgt) = self.'!cursor_start'()
+    .local pmc debug
+    debug = getattribute cur, '$!debug'
+    if null debug goto debug_1
+    cur.'!cursor_debug'('START', name)
+  debug_1:
     $I0 = is_cclass cclass, tgt, pos
     unless $I0 goto fail
     inc pos
+  pass:
     cur.'!cursor_pass'(pos, name)
+    if null debug goto done
+    cur.'!cursor_debug'('PASS', name)
+    goto done
   fail:
+    if null debug goto done
+    cur.'!cursor_debug'('FAIL', name)
+  done:
     .return (cur)
 .end
 
