@@ -145,6 +145,7 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar;
     token backslash:sym<z> { 'z' <.obs: '\\z as end-of-string matcher', '$'> }
     token backslash:sym<Z> { 'Z' <.obs: '\\Z as end-of-string matcher', '\\n?$'> }
     token backslash:sym<Q> { 'Q' <.obs: '\\Q as quotemeta', 'quotes or literal variable match'> }
+    token backslash:sym<unrec> { {} \w <.panic: 'Unrecognized backslash sequence'> }
     token backslash:sym<misc> { \W }
 
     proto token assertion { <...> }
