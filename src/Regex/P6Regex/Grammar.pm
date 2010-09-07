@@ -96,6 +96,9 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar;
     token metachar:sym<rwb> { $<sym>=['>>'|'»'] }
     token metachar:sym<bs> { \\ <backslash> }
     token metachar:sym<mod> { <mod_internal> }
+    token metachar:sym<quantifier> {
+        <quantifier> <.panic: 'Quantifier quantifies nothing'>
+    }
 
     ## we cheat here, really should be regex_infix:sym<~>
     token metachar:sym<~> {
