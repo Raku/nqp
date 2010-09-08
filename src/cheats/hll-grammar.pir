@@ -541,6 +541,11 @@ An operator precedence parser.
     if inprec <= preclim goto term_done
     inassoc = inO['assoc']
 
+    $P0 = inO['sub']
+    if null $P0 goto subprec_done
+    inO['prec'] = $P0
+  subprec_done:
+
   reduce_loop:
     unless opstack goto reduce_done
     $P0 = opstack[-1]
