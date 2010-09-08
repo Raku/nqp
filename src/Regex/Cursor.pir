@@ -274,8 +274,7 @@ Create a new cursor for matching C<target>.
     parrotclass = getattribute $P0, 'parrotclass'
     cur = new parrotclass
 
-    $P0 = new ['CodeString']
-    $P0 = target
+    $P0 = box target
     setattribute cur, '$!target', $P0
 
     if has_cont goto cursor_cont
