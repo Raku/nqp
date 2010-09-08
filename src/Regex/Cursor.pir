@@ -482,7 +482,8 @@ Log a debug message.
     fmt = new ['ResizablePMCArray']
     from = getattribute self, '$!from'
     orig = getattribute self, '$!target'
-    line = orig.'lineof'(from)
+    $P0 = get_hll_global ['HLL'], 'Compiler'
+    line = $P0.'lineof'(orig, from, 'cache'=>1)
 
     $P0 = getinterp
     $P1 = $P0.'stdhandle'(2)

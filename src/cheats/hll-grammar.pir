@@ -202,7 +202,8 @@ of the match.
     pos = self.'pos'()
     target = getattribute self, '$!target'
 
-    $I1 = target.'lineof'(pos)
+    $P0 = get_hll_global ['HLL'], 'Compiler'
+    $I1 = $P0.'lineof'(target, pos)
     inc $I1
     push args, ' at line '
     push args, $I1
