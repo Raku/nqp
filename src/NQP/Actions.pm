@@ -482,7 +482,11 @@ method method_def($/) {
         $past.name($name);
     }
     if $*MULTINESS eq 'multi' { $past.multi().unshift('_'); }
+    $past<block_past> := $past;
     make $past;
+    if $<trait> {
+        for $<trait> { $_.ast()($/); }
+    }
 }
 
 

@@ -307,6 +307,7 @@ rule method_def {
     <.newpad>
     [ '(' <signature> ')'
         || <.panic: 'Routine declaration requires a signature'> ]
+    <trait>*
     <blockoid>
 }
 
