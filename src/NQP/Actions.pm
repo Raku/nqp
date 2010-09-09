@@ -446,9 +446,10 @@ method routine_declarator:sym<sub>($/) { make $<routine_def>.ast; }
 method routine_declarator:sym<method>($/) { make $<method_def>.ast; }
 
 method routine_def($/) {
-    my $past := $<blockoid>.ast;
-    $past.blocktype('declaration');
-    $past.control('return_pir');
+    my $block := $<blockoid>.ast;
+    $block.blocktype('declaration');
+    $block.control('return_pir');
+    my $past := $block;
     if $<deflongname> {
         my $name := ~$<sigil>[0] ~ $<deflongname>[0].ast;
         $past.name($name);
@@ -459,7 +460,11 @@ method routine_def($/) {
             $past := PAST::Var.new( :name($name) );
         }
     }
+    $past<block_past> := $block;
     make $past;
+    if $<trait> {
+        for $<trait> { $_.ast()($/); }
+    }
 }
 
 
@@ -549,6 +554,22 @@ method named_param($/) {
     my $past := $<param_var>.ast;
     $past.named( ~$<param_var><name> );
     make $past;
+}
+
+method trait($/) {
+    make $<trait_mod>.ast;
+}
+
+method trait_mod:sym<is>($/) {
+    my $cpast := $<circumfix>[0].ast;
+    if $<longname> eq 'pirflags' {
+        $/.CURSOR.panic("Trait 'pirflags' requires constant scalar argument")
+            unless $cpast ~~ PAST::Val;
+        make -> $match { $match.ast<block_past>.pirflags($cpast.value); };
+    }
+    else {
+        $/.CURSOR.panic("Trait '$<longname>' not implemented");
+    }
 }
 
 method regex_declarator($/, $key?) {

@@ -298,6 +298,7 @@ rule routine_def {
     <.newpad>
     [ '(' <signature> ')'
         || <.panic: 'Routine declaration requires a signature'> ]
+    <trait>*
     <blockoid>
 }
 
@@ -341,6 +342,11 @@ token named_param {
 }
 
 rule default_value { '=' <EXPR('i=')> }
+
+rule trait { <trait_mod> }
+
+proto token trait_mod { <...> }
+token trait_mod:sym<is> { <sym>:s <longname=.deflongname><circumfix>? }
 
 rule regex_declarator {
     [
