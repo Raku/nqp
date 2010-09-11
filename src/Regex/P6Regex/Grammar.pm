@@ -62,6 +62,9 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar;
     token quantifier:sym<*> { <sym> <backmod> }
     token quantifier:sym<+> { <sym> <backmod> }
     token quantifier:sym<?> { <sym> <backmod> }
+    token quantifier:sym<{N,M}> { {} '{' (\d+) (','?) (\d*) '}'
+        <.obs: '{N,M} as general quantifier', '** N..M (or ** N..*)'>
+    }
     token quantifier:sym<**> {
         <sym> <normspace>? <backmod> <normspace>?
         [
