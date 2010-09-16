@@ -34,8 +34,17 @@ PARROT_NQP       = $(PARROT_BIN_DIR)/parrot_nqp$(EXE)
 PBC_TO_EXE       = $(PARROT_BIN_DIR)/pbc_to_exe$(EXE)
 PARROT_TOOLS_DIR = $(PARROT_LIB_DIR)/tools
 PARROT_PERL_LIB  = $(PARROT_TOOLS_DIR)/lib
+OPS2C            = $(PARROT_BIN_DIR)/ops2c$(EXE)
+PMC2C            = $(PERL) $(PARROT_TOOLS_DIR)/build/pmc2c.pl
+PMC2C_INCLUDES   = --include src/pmc --include $(PARROT_SRC_DIR) --include $(PARROT_SRC_DIR)/pmc
+CINCLUDES        = -I$(PARROT_INCLUDE_DIR) -I$(PARROT_INCLUDE_DIR)/pmc
+LINKARGS         = $(LDFLAGS) $(LD_LOAD_FLAGS) $(LIBPARROT) @libs@ @icu_shared@
 
+# nqp directories
 NQP_LANG_DIR     = $(PARROT_LIB_DIR)/languages/nqp
+DYNEXT_DIR       = dynext
+PMC_DIR          = src/pmc
+OPS_DIR          = src/ops
 
 REGEX_SOURCES = \
   src/Regex.pir \
@@ -119,6 +128,18 @@ STAGE1_PBCS     = $(STAGE1)/$(HLL_PBC) $(STAGE1)/$(P6REGEX_PBC) $(STAGE1)/$(NQP_
 STAGE2_PBCS     = $(STAGE2)/$(HLL_PBC) $(STAGE2)/$(P6REGEX_PBC) $(STAGE2)/$(NQP_PBC) $(REGEX_PBC)
 ALL_PBCS        = $(HLL_PBC) $(P6REGEX_PBC) $(NQP_PBC)
 
+GROUP           = nqp_group
+OPS             = nqp_ops
+DYNEXT_TARGET   = $(DYNEXT_DIR)/$(GROUP)$(LOAD_EXT)
+DYNPMC          = $(PMC_DIR)/$(GROUP)$(LOAD_EXT)
+DYNOPS          = $(OPS_DIR)/$(OPS)$(LOAD_EXT)
+
+PMC_SOURCES     = \
+  $(PMC_DIR)/stable.pmc $(PMC_DIR)/rakudoobject.pmc \
+  $(PMC_DIR)/repr.pmc
+
+OPS_SOURCE      = nqp.ops
+
 CLEANUPS = \
   *.manifest \
   *.pdb \
@@ -139,6 +160,22 @@ CLEANUPS = \
   src/stage2/*.pbc \
   src/gen/*.pir \
   src/gen/*.nqp \
+  $(PMC_DIR)/pmc_*.h \
+  $(PMC_DIR)/*.c \
+  $(PMC_DIR)/*.dump \
+  $(PMC_DIR)/*$(O) \
+  $(PMC_DIR)/*$(LOAD_EXT) \
+  $(PMC_DIR)/*.exp \
+  $(PMC_DIR)/*.ilk \
+  $(PMC_DIR)/*.manifest \
+  $(PMC_DIR)/*.pdb \
+  $(PMC_DIR)/*.lib \
+  $(PMC_DIR)/objectref.pmc \
+  $(OPS_DIR)/*.h \
+  $(OPS_DIR)/*.c \
+  $(OPS_DIR)/*$(O) \
+  $(OPS_DIR)/*$(LOAD_EXT) \
+  $(DYNEXT_DIR)/*$(LOAD_EXT) \
 
 all: $(NQP_EXE) $(SETTING_PBC)
 
@@ -248,7 +285,7 @@ $(ALL_PBCS): $(REGEX_PBC) $(STAGE2_PBCS)
 	$(CP) $(STAGE2)/$(P6REGEX_PBC) .
 	$(CP) $(STAGE2)/$(NQP_PBC) .
 
-$(NQP_EXE): $(NQP_PBC)
+$(NQP_EXE): $(NQP_PBC) $(DYNEXT_TARGET)
 	$(PBC_TO_EXE) $(NQP_PBC)
 
 $(SETTING_NQP): $(SETTING_SOURCES)
@@ -258,6 +295,23 @@ $(SETTING_PIR): $(SETTING_NQP) $(NQP_PBC)
 $(SETTING_PBC): $(SETTING_PIR)
 	$(PARROT) -o $(SETTING_PBC) $(SETTING_PIR)
 
+$(DYNEXT_TARGET): $(DYNPMC) $(DYNOPS)
+	$(CP) $(DYNPMC) $(DYNOPS) $(DYNEXT_DIR)
+	$(CHMOD) 755 $(DYNEXT_TARGET)
+	$(CHMOD) 755 $(DYNEXT_DIR)/$(OPS)$(LOAD_EXT)
+
+$(DYNPMC): $(PMC_SOURCES)
+	$(PMC2C) --no-lines --dump $(PMC2C_INCLUDES) $(PMC_SOURCES)
+	$(PMC2C) --no-lines --c $(PMC2C_INCLUDES) $(PMC_SOURCES)
+	$(PMC2C) --no-lines --library $(GROUP) --c $(PMC_SOURCES)
+	$(CC) -c @cc_o_out@$(GROUP)$(O) -I$(PMC_DIR) $(CINCLUDES) $(CFLAGS) $(GROUP).c
+	cd $(PMC_DIR) && $(CC) -c $(CINCLUDES) $(CFLAGS) *.c
+	$(LD) @ld_out@$(DYNPMC) $(GROUP)$(O) src/pmc/*$(O) $(LINKARGS)
+
+$(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS_SOURCE) src/binder/bind.h $(DYNPMC)
+	cd $(OPS_DIR) && $(OPS2C) C --dynamic $(OPS_SOURCE)
+	cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(OPS)$(O) $(CINCLUDES) $(CFLAGS) $(OPS).c
+	cd $(OPS_DIR) && $(LD) @ld_out@$(OPS)$(LOAD_EXT) $(OPS)$(O) $(LINKARGS)
 
 bootstrap-files: $(STAGE2_PBCS) $(SETTING_NQP)
 	$(PERL) build/gen_bootstrap.pl src/Regex.pir >src/stage0/Regex-s0.pir
