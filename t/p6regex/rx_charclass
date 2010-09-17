@@ -80,4 +80,6 @@
 <[A..Z0..9]>		abcdef		n	two enumerated ranges
 <[A..Z0..9]>		abcDef		y	two enumerated ranges
 
+abc <![d]>		abc		y	negated charclass at end of string (issue #9)
+
 ## vim: noexpandtab tabstop=4 shiftwidth=4
