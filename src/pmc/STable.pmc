@@ -1,0 +1,70 @@
+/* This file contains a PMC that represents an S-Table. S-Tables (short for
+ * Shared Table) contains the commonalities shared between a (HOW, REPR)
+ * pairing (for example, (HOW for the class Dog, P6Opaque). An STable is
+ * fairly dumb semantically and the PMC is really just a "holder" and makes
+ * sure we mark things as needed in GC. */
+
+#include "../metamodel/stable.h"
+
+/* This is a source of type cache IDs (see notes below about them). 
+ * The lowest one is 4. This is to make the lower two bits available for
+ * defined/undefined flags for the multi dispatch cache, which is the
+ * main reason these IDs exist at all. */
+static INTVAL TypeCacheIDSource = 0;
+static INTVAL get_next_type_cache_id() {
+    /* XXX The C# original is doing:
+     *     return Interlocked.Add(ref TypeCacheIDSource, 4);
+     * But we don't yet have an abstraction layer for an atomic addition
+     * so this is not yet threadsafe. */
+    TypeCacheIDSource += 4;
+    return TypeCacheIDSource;
+}
+
+pmclass STable manual_attrs dynpmc group rakudoobject {
+    /* Initializes the STable's type cache ID; and sets the HOW to
+     * the supplied object. Leaves the rest to be filled out. Also
+     * flags PMC as needing custom mark and destroy. */
+    VTABLE void init_pmc(PMC *HOW) {
+        /* Put underlying struct in place. */
+        STable *st = mem_allocate_zeroed_typed(STable);
+        st->type_cache_id = get_next_type_cache_id();
+        st->HOW = HOW;
+        PMC_data(SELF) = st;
+
+        /* We need to mark our stuff, and free it at the end. */
+        PObj_custom_mark_SET(SELF);
+        PObj_custom_destroy_SET(SELF);
+    }
+
+    /* This marks the various things that we reference. */
+    VTABLE void mark() {
+        STable *st = (STable *)PMC_data(SELF);
+        INTVAL i;
+
+        /* Mark REPR, HOW and WHAT. */
+        if (!PMC_IS_NULL(st->REPR))
+            Parrot_gc_mark_PMC_alive(interp, st->REPR);
+        if (!PMC_IS_NULL(st->HOW))
+            Parrot_gc_mark_PMC_alive(interp, st->HOW);
+        if (!PMC_IS_NULL(st->WHAT))
+            Parrot_gc_mark_PMC_alive(interp, st->WHAT);
+
+        /* Mark the v-table cache. */
+        for (i = 0; i < st->vtable_length; i++) {
+            PMC *entry = st->vtable[i];
+            if (!PMC_IS_NULL(entry))
+                Parrot_gc_mark_PMC_alive(interp, entry);
+        }
+    }
+
+    VTABLE void destroy() {
+        /* If a v-table was allocated, free that. */
+        STable *st = (STable *)PMC_data(SELF);
+        if (st->vtable)
+            mem_sys_free(st->vtable);
+        
+        /* Free the underlying struct. */
+        mem_sys_free(PMC_data(SELF));
+        PMC_data(SELF) = NULL;
+    }
+}
