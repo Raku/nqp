@@ -103,11 +103,24 @@ typedef struct {
     void (*gc_mark) (PARROT_INTERP, PMC *self, PMC *Object);
 } REPRCommonalities;
 
+/* Hint value to indicate the absence of an attribute lookup or method
+ * dispatch hint. */
+#define NO_HINT -1
+
 /* Various handy macros for getting at important stuff. */
-#define STABLE_PMC(o)  (((RakudoObjectCommonalities *)PMC_data(o))->stable)
-#define STABLE(o)      ((STable *)PMC_data(STABLE_PMC(o)))
-#define REPR_PMC(o)    (STABLE(o)->REPR)
-#define REPR(o)        ((REPRCommonalities *)PMC_data(REPR_PMC(o)))
-#define REPR_STRUCT(p) ((REPRCommonalities *)PMC_data(p))
+#define STABLE_PMC(o)    (((RakudoObjectCommonalities *)PMC_data(o))->stable)
+#define STABLE(o)        ((STable *)PMC_data(STABLE_PMC(o)))
+#define STABLE_STRUCT(p) ((STable *)PMC_data(p))
+#define REPR_PMC(o)      (STABLE(o)->REPR)
+#define REPR(o)          ((REPRCommonalities *)PMC_data(REPR_PMC(o)))
+#define REPR_STRUCT(p)   ((REPRCommonalities *)PMC_data(p))
+
+/* Object model initialization. */
+void RakudoObject_initialize(PARROT_INTERP);
+
+/* Some utility functions. */
+PMC * wrap_repr(PARROT_INTERP, void *REPR);
+PMC * wrap_object(PARROT_INTERP, void *obj);
+PMC * create_stable(PARROT_INTERP, PMC *REPR, PMC *HOW);
 
 #endif
