@@ -3,6 +3,7 @@
 #include "parrot/extend.h"
 #include "rakudoobject.h"
 #include "repr_registry.h"
+#include "knowhow_bootstrapper.h"
 
 /* Cached type IDs. */
 static INTVAL stable_id = 0;
@@ -18,6 +19,9 @@ void RakudoObject_initialize(PARROT_INTERP) {
 
     /* Build representations and initializes the representation registry. */
     REPR_initialize_registry(interp);
+
+    /* Bootstrap the KnowHOW. */
+    RakudoObject_bootstrap_knowhow(interp);
 }
 
 /* Takes a representation and wraps it up in a REPR PMC. */
