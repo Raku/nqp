@@ -1,5 +1,12 @@
+/* This is an implementation of a representation registry. It keeps track of
+ * all of the available representations, and is responsible for building them
+ * at startup. */
+
+#define PARROT_IN_EXTENSION
 #include "parrot/parrot.h"
+#include "parrot/extend.h"
 #include "rakudoobject.h"
+#include "reprs/KnowHOWREPR.h"
 
 /* An array of representations. */
 static PMC *repr_registry       = NULL;
@@ -26,7 +33,8 @@ void REPR_initialize_registry(PARROT_INTERP) {
     Parrot_pmc_gc_register(interp, repr_name_to_id_map);
 
     /* Add all representations. */
-    /* XXX Write some. :-) */
+    register_repr(interp, Parrot_str_new_constant(interp, "KnowHOWREPR"), 
+        KnowHOWREPR_initialize(interp));
 }
 
 /* Get a representation's ID from its name. Note that the IDs may change so
