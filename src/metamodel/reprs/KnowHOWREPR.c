@@ -112,7 +112,7 @@ static STRING * get_str(PARROT_INTERP, PMC *self, PMC *obj) {
 }
 
 /* This Parrot-specific addition to the API is used to mark an object. */
-void gc_mark(PARROT_INTERP, PMC *self, PMC *obj) {
+static void gc_mark(PARROT_INTERP, PMC *self, PMC *obj) {
     KnowHOWREPRInstance *instance = (KnowHOWREPRInstance *)PMC_data(obj);
     if (!PMC_IS_NULL(instance->common.stable))
         Parrot_gc_mark_PMC_alive(interp, instance->common.stable);
@@ -120,6 +120,12 @@ void gc_mark(PARROT_INTERP, PMC *self, PMC *obj) {
         Parrot_gc_mark_PMC_alive(interp, instance->methods);
     if (!PMC_IS_NULL(instance->attributes))
         Parrot_gc_mark_PMC_alive(interp, instance->attributes);
+}
+
+/* This Parrot-specific addition to the API is used to free an object. */
+static void gc_free(PARROT_INTERP, PMC *self, PMC *obj) {
+    mem_sys_free(PMC_data(obj));
+    PMC_data(obj) = NULL;
 }
 
 /* Initializes the KnowHOWREPR representation. */
@@ -144,6 +150,7 @@ PMC * KnowHOWREPR_initialize(PARROT_INTERP) {
     repr->set_str = set_str;
     repr->get_str = get_str;
     repr->gc_mark = gc_mark;
+    repr->gc_free = gc_free;
 
     /* Wrap it in a PMC. */
     return wrap_repr(interp, repr);

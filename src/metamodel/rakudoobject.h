@@ -101,6 +101,9 @@ typedef struct {
 
     /* This Parrot-specific addition to the API is used to mark an object. */
     void (*gc_mark) (PARROT_INTERP, PMC *self, PMC *Object);
+
+    /* This Parrot-specific addition to the API is used to free an object. */
+    void (*gc_free) (PARROT_INTERP, PMC *self, PMC *Object);
 } REPRCommonalities;
 
 /* Hint value to indicate the absence of an attribute lookup or method
