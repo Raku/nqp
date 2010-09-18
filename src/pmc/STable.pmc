@@ -20,7 +20,7 @@ static INTVAL get_next_type_cache_id() {
     return TypeCacheIDSource;
 }
 
-pmclass STable manual_attrs dynpmc group rakudoobject {
+pmclass STable manual_attrs dynpmc group nqp {
     /* Initializes the STable's type cache ID; and sets the HOW to
      * the supplied object. Leaves the rest to be filled out. Also
      * flags PMC as needing custom mark and destroy. */

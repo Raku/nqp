@@ -1,0 +1,33 @@
+/* A RakudoObject PMC is what actually represents an object so far as
+ * the actual end user is concerned. While STable and REPR exist as
+ * PMCs, they are not designed to ever really leak into user space.
+ * This, on the other hand, is. In fact, pretty much everything that
+ * the user ever touches will be an instance of this PMC.
+ *
+ * This PMC itself, however, doesn't actually contain much logic at
+ * all. Mostly, it maps the Parrot world view to the Perl 6 object
+ * model one. Actual object semantics are provided by the intersection
+ * of the REPR and the HOW, both of which are pointed at by the STable.
+ * The only thing that you can be sure of if you have a RakudoObject
+ * PMC is that:
+ *     PMC_data(SELF)[0]
+ * Will give you the address of an STable PMC. Thus everything in here
+ * should work with little more than this assumption.
+ *
+ * Note that this PMC is also never created directly. Instead, only a
+ * REPR can create it, and in doing so it will set the data pointer to
+ * point to something that can store the attributes etc and that has its
+ * first element being a pointer to the STable. Thus even GC marking is
+ * delegated to the REPR, since only it knows how a given object is laid
+ * out (since that depends on the representation).
+ */
+pmclass RakudoObject manual_attrs dynpmc group nqp {
+    /* Initialization simply marks the PMC as needing custom
+     * mark and destroy. */
+    VTABLE void init() {
+        PObj_custom_mark_SET(SELF);
+        PObj_custom_destroy_SET(SELF);
+    }
+
+    /* XXX Needs custom mark and destroy implementing. */
+}
