@@ -139,7 +139,8 @@ PMC_SOURCES     = $(PMC_DIR)/stable.pmc $(PMC_DIR)/rakudoobject.pmc \
 
 OPS_SOURCE      = nqp.ops
 
-METAMODEL_SOURCE = src/metamodel/rakudoobject.h
+METAMODEL_SOURCE = src/metamodel/rakudoobject.h src/metamodel/repr_registry.h \
+                   src/metamodel/repr_registry.c
 
 CLEANUPS = \
   *.manifest \
@@ -313,7 +314,8 @@ $(DYNPMC): $(PMC_SOURCES) $(METAMODEL_SOURCE)
 $(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS_SOURCE) $(DYNPMC)
 	cd $(OPS_DIR) && $(OPS2C) C --dynamic $(OPS_SOURCE)
 	cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(OPS)$(O) $(CINCLUDES) $(CFLAGS) $(OPS).c
-	cd $(OPS_DIR) && $(LD) @ld_out@$(OPS)$(LOAD_EXT) $(OPS)$(O) $(LINKARGS)
+    cd src/metamodel && $(CC) -c @cc_o_out@repr_registry$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) repr_registry.c
+	cd $(OPS_DIR) && $(LD) @ld_out@$(OPS)$(LOAD_EXT) $(OPS)$(O) ../metamodel/repr_registry$(O) $(LINKARGS)
 
 bootstrap-files: $(STAGE2_PBCS) $(SETTING_NQP)
 	$(PERL) build/gen_bootstrap.pl src/Regex.pir >src/stage0/Regex-s0.pir
