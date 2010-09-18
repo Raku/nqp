@@ -7,6 +7,7 @@ BEGIN_OPS_PREAMBLE
 
 /* 6modely includes. */
 #include "../metamodel/rakudoobject.h"
+#include "../metamodel/repr_registry.h"
 
 /* Cached type IDs. */
 static INTVAL stable_id = 0;
@@ -25,10 +26,13 @@ Does various setup tasks for the benefit of the other dynops.
 
 */
 inline op nqp_dynop_setup() :base_core {
-    /* Look up some type IDs. */
+    /* Look up and cache some type IDs. */
     stable_id = pmc_type(interp, Parrot_str_new(interp, "STable", 0));
     repr_id   = pmc_type(interp, Parrot_str_new(interp, "REPR", 0));
     ro_id     = pmc_type(interp, Parrot_str_new(interp, "RakudoObject", 0));
+
+    /* Build representations and initializes the representation registry. */
+    REPR_initialize_registry(interp);
 }
 
 /*
