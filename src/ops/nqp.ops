@@ -6,6 +6,7 @@ BEGIN_OPS_PREAMBLE
 #include "parrot/dynext.h"
 
 /* 6modely includes. */
+#include "../metamodel/rakudoobject.h"
 
 /* Cached type IDs. */
 static INTVAL stable_id = 0;
@@ -23,9 +24,43 @@ Does various setup tasks for the benefit of the other dynops.
 =cut
 
 */
-inline op nqp_dynop_setup() {
+inline op nqp_dynop_setup() :base_core {
     /* Look up some type IDs. */
     stable_id = pmc_type(interp, Parrot_str_new(interp, "STable", 0));
     repr_id   = pmc_type(interp, Parrot_str_new(interp, "REPR", 0));
     ro_id     = pmc_type(interp, Parrot_str_new(interp, "RakudoObject", 0));
+}
+
+/*
+
+=item get_how()
+
+Gets the HOW for a Rakudo Object.
+
+=cut
+
+*/
+inline op get_how(out PMC, in PMC) :base_core {
+    if ($2->vtable->base_type == ro_id)
+        $1 = STABLE($2)->HOW;
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use get_how on a RakudoObject");
+}
+
+/*
+
+=item get_what()
+
+Gets the WHAT for a Rakudo Object.
+
+=cut
+
+*/
+inline op get_what(out PMC, in PMC) :base_core {
+    if ($2->vtable->base_type == ro_id)
+        $1 = STABLE($2)->WHAT;
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use get_how on a RakudoObject");
 }
