@@ -21,6 +21,9 @@
  * delegated to the REPR, since only it knows how a given object is laid
  * out (since that depends on the representation).
  */
+
+#include "../metamodel/rakudoobject.h"
+
 pmclass RakudoObject manual_attrs dynpmc group nqp {
     /* Initialization simply marks the PMC as needing custom
      * mark and destroy. */
@@ -29,5 +32,13 @@ pmclass RakudoObject manual_attrs dynpmc group nqp {
         PObj_custom_destroy_SET(SELF);
     }
 
-    /* XXX Needs custom mark and destroy implementing. */
+    VTABLE void mark() {
+        /* Delegate to the representation. */
+        REPR(SELF)->gc_mark(interp, REPR_PMC(SELF), SELF);
+    }
+
+    VTABLE void destroy() {
+        /* Delegate to the representation. */
+        REPR(SELF)->gc_free(interp, REPR_PMC(SELF), SELF);
+    }
 }
