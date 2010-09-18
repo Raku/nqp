@@ -25,13 +25,6 @@
 #include "../metamodel/rakudoobject.h"
 
 pmclass RakudoObject manual_attrs dynpmc group nqp {
-    /* Initialization simply marks the PMC as needing custom
-     * mark and destroy. */
-    VTABLE void init() {
-        PObj_custom_mark_SET(SELF);
-        PObj_custom_destroy_SET(SELF);
-    }
-
     VTABLE void mark() {
         /* Delegate to the representation. */
         REPR(SELF)->gc_mark(interp, REPR_PMC(SELF), SELF);

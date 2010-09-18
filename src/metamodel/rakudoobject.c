@@ -34,6 +34,8 @@ PMC * wrap_repr(PARROT_INTERP, void *REPR) {
 /* Takes an object and wraps it in a RakudoObject PMC. */
 PMC * wrap_object(PARROT_INTERP, void *obj) {
     PMC *obj_pmc = pmc_new_noinit(interp, ro_id);
+    PObj_custom_mark_SET(obj_pmc);
+    PObj_custom_destroy_SET(obj_pmc);
     PMC_data(obj_pmc) = obj;
     return obj_pmc;
 }
