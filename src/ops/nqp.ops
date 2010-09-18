@@ -62,5 +62,39 @@ inline op get_what(out PMC, in PMC) :base_core {
         $1 = STABLE($2)->WHAT;
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Can only use get_how on a RakudoObject");
+            "Can only use get_what on a RakudoObject");
+}
+
+/*
+
+=item repr_instance_of()
+
+Instantiates a new RakudoObject based on the given WHAT.
+
+=cut
+
+*/
+inline op repr_instance_of(out PMC, in PMC) :base_core {
+    if ($2->vtable->base_type == ro_id)
+        $1 = REPR($2)->instance_of(interp, REPR_PMC($2), $2);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_instance_of on a RakudoObject");
+}
+
+/*
+
+=item repr_defined()
+
+Checks the REPRs idea of definedness.
+
+=cut
+
+*/
+inline op repr_defined(out INT, in PMC) :base_core {
+    if ($2->vtable->base_type == ro_id)
+        $1 = REPR($2)->defined(interp, REPR_PMC($2), $2);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_defined on a RakudoObject");
 }
