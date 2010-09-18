@@ -31,8 +31,8 @@ inline op nqp_dynop_setup() :base_core {
     repr_id   = pmc_type(interp, Parrot_str_new(interp, "REPR", 0));
     ro_id     = pmc_type(interp, Parrot_str_new(interp, "RakudoObject", 0));
 
-    /* Build representations and initializes the representation registry. */
-    REPR_initialize_registry(interp);
+    /* Initialize the object model. */
+    RakudoObject_initialize(interp);
 }
 
 /*
