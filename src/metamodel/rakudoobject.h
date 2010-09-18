@@ -23,6 +23,9 @@ typedef struct {
     /* The type-object. */
     PMC *WHAT;
 
+    /* The method finder. */
+    PMC * (*find_method) (PARROT_INTERP, PMC *obj, STRING *name, INTVAL hint);
+
     /* The computed v-table for static dispatch. */
     PMC **vtable;
 
