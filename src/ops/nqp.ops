@@ -1,0 +1,31 @@
+BEGIN_OPS_PREAMBLE
+
+/* Parroty includes. */
+#include "parrot/parrot.h"
+#include "parrot/extend.h"
+#include "parrot/dynext.h"
+
+/* 6modely includes. */
+
+/* Cached type IDs. */
+static INTVAL stable_id = 0;
+static INTVAL repr_id   = 0;
+static INTVAL ro_id     = 0;
+
+END_OPS_PREAMBLE
+
+/*
+
+=item nqp_dynop_setup()
+
+Does various setup tasks for the benefit of the other dynops.
+
+=cut
+
+*/
+inline op nqp_dynop_setup() {
+    /* Look up some type IDs. */
+    stable_id = pmc_type(interp, Parrot_str_new(interp, "STable", 0));
+    repr_id   = pmc_type(interp, Parrot_str_new(interp, "REPR", 0));
+    ro_id     = pmc_type(interp, Parrot_str_new(interp, "RakudoObject", 0));
+}
