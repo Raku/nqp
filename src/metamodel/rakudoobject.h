@@ -104,9 +104,10 @@ typedef struct {
 } REPRCommonalities;
 
 /* Various handy macros for getting at important stuff. */
-#define STABLE_PMC(o) (((RakudoObjectCommonalities *)PMC_data(o))->stable)
-#define STABLE(o)     ((STable *)PMC_data(STABLE_PMC(o)))
-#define REPR_PMC(o)   (STABLE(o)->REPR)
-#define REPR(o)       ((REPRCommonalities *)PMC_data(REPR_PMC(o)))
+#define STABLE_PMC(o)  (((RakudoObjectCommonalities *)PMC_data(o))->stable)
+#define STABLE(o)      ((STable *)PMC_data(STABLE_PMC(o)))
+#define REPR_PMC(o)    (STABLE(o)->REPR)
+#define REPR(o)        ((REPRCommonalities *)PMC_data(REPR_PMC(o)))
+#define REPR_STRUCT(p) ((REPRCommonalities *)PMC_data(p))
 
 #endif

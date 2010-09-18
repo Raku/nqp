@@ -37,7 +37,7 @@ inline op nqp_dynop_setup() :base_core {
 
 /*
 
-=item get_how()
+=item get_how(obj)
 
 Gets the HOW for a Rakudo Object.
 
@@ -54,7 +54,7 @@ inline op get_how(out PMC, in PMC) :base_core {
 
 /*
 
-=item get_what()
+=item get_what(obj)
 
 Gets the WHAT for a Rakudo Object.
 
@@ -67,6 +67,21 @@ inline op get_what(out PMC, in PMC) :base_core {
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use get_what on a RakudoObject");
+}
+
+/*
+
+=item repr_type_object_for(how, repr_name)
+
+Creates a type object associated with the given HOW and of the given
+representation.
+
+=cut
+
+*/
+inline op repr_type_object_for(out PMC, in PMC, in STR) :base_core {
+    PMC *REPR = REPR_get_by_name(interp, $3);
+    $1 = REPR_STRUCT(REPR)->type_object_for(interp, REPR, $2);
 }
 
 /*
