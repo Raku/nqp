@@ -68,6 +68,13 @@ static void find_method(PARROT_INTERP, PMC *nci) {
     Parrot_pcc_build_call_from_c_args(interp, capture, "P", method);
 }
 
+/* Composes the meta-object. */
+static void compose(PARROT_INTERP, PMC *nci) {
+    PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    PMC    *obj     = VTABLE_get_pmc_keyed_int(interp, capture, 1);
+    Parrot_pcc_build_call_from_c_args(interp, capture, "P", obj);
+}
+
 /* Wraps up a C function as a raw NCI method. */
 static PMC * wrap_c(PARROT_INTERP, void *func) {
     PMC * const wrapped = Parrot_pmc_new(interp, enum_class_NCI);
@@ -118,6 +125,9 @@ void RakudoObject_bootstrap_knowhow(PARROT_INTERP) {
     VTABLE_set_pmc_keyed_str(interp, knowhow_how->methods,
         Parrot_str_new_constant(interp, "add_method"),
         wrap_c(interp, F2DPTR(add_method)));
+    VTABLE_set_pmc_keyed_str(interp, knowhow_how->methods,
+        Parrot_str_new_constant(interp, "compose"),
+        wrap_c(interp, F2DPTR(compose)));
 
     /* Set this built up HOW as the KnowHOW's HOW. */
     STABLE(knowhow_pmc)->HOW = knowhow_how_pmc;
