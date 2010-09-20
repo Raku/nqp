@@ -7,6 +7,19 @@ method TOP() {
     %*LANG<Regex-actions> := NQP::RegexActions;
     %*LANG<MAIN>          := NQP::Grammar;
     %*LANG<MAIN-actions>  := NQP::Actions;
+
+    # Package declarator to meta-package mapping.
+    my %*HOW;
+    %*HOW<knowhow> := 'KnowHOW';
+    %*HOW<class> := 'NQPClassHOW';
+    %*HOW<grammar> := 'NQPGrammarHOW';
+    %*HOW<role> := 'NQPRoleHOW';
+
+    # What attribute class to use with what HOW, plus a default.
+    my $*DEFAULT-METAATTR := 'NQPAttribute';
+    my %*HOW-METAATTR;
+    %*HOW-METAATTR<knowhow> := 'KnowHOWAttribute';
+
     my $*SCOPE      := '';
     my $*MULTINESS  := '';
     self.comp_unit;
@@ -258,10 +271,30 @@ token twigil { <[*!?]> }
 
 proto token package_declarator { <...> }
 token package_declarator:sym<module> { <sym> <package_def> }
-token package_declarator:sym<class>  { $<sym>=[class|grammar] <package_def> }
+token package_declarator:sym<knowhow> {
+    :my $*PACKAGE-SETUP := PAST::Stmts.new();
+    :my $*PKGDECL := 'knowhow';
+    <sym> <package_def>
+}
+token package_declarator:sym<class> {
+    :my $*PACKAGE-SETUP := PAST::Stmts.new();
+    :my $*PKGDECL := 'class';
+    <sym> <package_def>
+}
+token package_declarator:sym<grammar> {
+    :my $*PACKAGE-SETUP := PAST::Stmts.new();
+    :my $*PKGDECL := 'grammar';
+    <sym> <package_def>
+}
+token package_declarator:sym<role> {
+    :my $*PACKAGE-SETUP := PAST::Stmts.new();
+    :my $*PKGDECL := 'role';
+    <sym> <package_def>
+}
 
 rule package_def {
     <name>
+    [ 'is' 'repr(' <repr=.quote_EXPR> ')' ]?
     [ 'is' <parent=.name> ]?
     [
     || ';' <comp_unit>
