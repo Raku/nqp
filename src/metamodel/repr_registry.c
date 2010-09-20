@@ -7,6 +7,7 @@
 #include "parrot/extend.h"
 #include "rakudoobject.h"
 #include "reprs/KnowHOWREPR.h"
+#include "reprs/P6opaque.h"
 
 /* An array of representations. */
 static PMC *repr_registry       = NULL;
@@ -35,6 +36,8 @@ void REPR_initialize_registry(PARROT_INTERP) {
     /* Add all representations. */
     register_repr(interp, Parrot_str_new_constant(interp, "KnowHOWREPR"), 
         KnowHOWREPR_initialize(interp));
+    register_repr(interp, Parrot_str_new_constant(interp, "P6opaque"), 
+        P6opaque_initialize(interp));
 }
 
 /* Get a representation's ID from its name. Note that the IDs may change so

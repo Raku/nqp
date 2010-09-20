@@ -142,10 +142,12 @@ OPS_SOURCE      = nqp.ops
 METAMODEL_SOURCE = src/metamodel/rakudoobject.h src/metamodel/rakudoobject.c \
                    src/metamodel/repr_registry.h src/metamodel/repr_registry.c \
                    src/metamodel/knowhow_bootstrapper.h src/metamodel/knowhow_bootstrapper.c \
-                   src/metamodel/reprs/KnowHOWREPR.h src/metamodel/reprs/KnowHOWREPR.c
+                   src/metamodel/reprs/KnowHOWREPR.h src/metamodel/reprs/KnowHOWREPR.c \
+                   src/metamodel/reprs/P6opaque.h src/metamodel/reprs/P6opaque.c
 
 METAMODEL_OBJS   = ../metamodel/rakudoobject$(O) ../metamodel/repr_registry$(O) \
-                   ../metamodel/knowhow_bootstrapper$(O) ../metamodel/reprs/KnowHOWREPR$(O)
+                   ../metamodel/knowhow_bootstrapper$(O) ../metamodel/reprs/KnowHOWREPR$(O) \
+                   ../metamodel/reprs/P6opaque$(O)
 
 CLEANUPS = \
   *.manifest \
@@ -323,6 +325,7 @@ $(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS_SOURCE) $(DYNPMC)
     cd src/metamodel && $(CC) -c @cc_o_out@repr_registry$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) repr_registry.c
     cd src/metamodel && $(CC) -c @cc_o_out@knowhow_bootstrapper$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) knowhow_bootstrapper.c
     cd src/metamodel/reprs && $(CC) -c @cc_o_out@KnowHOWREPR$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) KnowHOWREPR.c
+    cd src/metamodel/reprs && $(CC) -c @cc_o_out@P6opaque$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6opaque.c
 	cd $(OPS_DIR) && $(LD) @ld_out@$(OPS)$(LOAD_EXT) $(OPS)$(O) $(METAMODEL_OBJS) $(LINKARGS)
 
 bootstrap-files: $(STAGE2_PBCS) $(SETTING_NQP)
