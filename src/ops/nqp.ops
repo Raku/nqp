@@ -9,6 +9,10 @@ BEGIN_OPS_PREAMBLE
 #include "../metamodel/rakudoobject.h"
 #include "../metamodel/repr_registry.h"
 
+/* Did we do the dynop setup yet?
+ * XXX Relies on this happening once in a single thread at startup. */
+static INTVAL initialized = 0;
+
 /* Cached type IDs. */
 static INTVAL stable_id = 0;
 static INTVAL repr_id   = 0;
@@ -26,13 +30,17 @@ Does various setup tasks for the benefit of the other dynops.
 
 */
 inline op nqp_dynop_setup() :base_core {
-    /* Look up and cache some type IDs. */
-    stable_id = pmc_type(interp, Parrot_str_new(interp, "STable", 0));
-    repr_id   = pmc_type(interp, Parrot_str_new(interp, "REPR", 0));
-    ro_id     = pmc_type(interp, Parrot_str_new(interp, "RakudoObject", 0));
+    if (!initialized) {
+        initialized = 1;
 
-    /* Initialize the object model. */
-    RakudoObject_initialize(interp);
+        /* Look up and cache some type IDs. */
+        stable_id = pmc_type(interp, Parrot_str_new(interp, "STable", 0));
+        repr_id   = pmc_type(interp, Parrot_str_new(interp, "REPR", 0));
+        ro_id     = pmc_type(interp, Parrot_str_new(interp, "RakudoObject", 0));
+
+        /* Initialize the object model. */
+        RakudoObject_initialize(interp);
+    }
 }
 
 /*
