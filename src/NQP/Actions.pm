@@ -54,6 +54,10 @@ method comp_unit($/) {
     # (CTXSAVE is inherited from HLL::Actions.)
     $unit.push( self.CTXSAVE() );
 
+    # Need to load the nqp-rx dynops/dympmcs.
+    $unit.loadlibs('nqp_group', 'nqp_ops');
+    $unit.unshift(PAST::Op.new( :pirop('nqp_dynop_setup v') ));
+
     # We force a return here, because we have other
     # :load/:init blocks to execute that we don't want
     # to include as part of the mainline.
