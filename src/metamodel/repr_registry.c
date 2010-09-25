@@ -8,6 +8,9 @@
 #include "rakudoobject.h"
 #include "reprs/KnowHOWREPR.h"
 #include "reprs/P6opaque.h"
+#include "reprs/P6int.h"
+#include "reprs/P6num.h"
+#include "reprs/P6str.h"
 
 /* An array of representations. */
 static PMC *repr_registry       = NULL;
@@ -38,6 +41,12 @@ void REPR_initialize_registry(PARROT_INTERP) {
         KnowHOWREPR_initialize(interp));
     register_repr(interp, Parrot_str_new_constant(interp, "P6opaque"), 
         P6opaque_initialize(interp));
+    register_repr(interp, Parrot_str_new_constant(interp, "P6int"), 
+        P6int_initialize(interp));
+    register_repr(interp, Parrot_str_new_constant(interp, "P6num"), 
+        P6num_initialize(interp));
+    register_repr(interp, Parrot_str_new_constant(interp, "P6str"), 
+        P6str_initialize(interp));
 }
 
 /* Get a representation's ID from its name. Note that the IDs may change so
