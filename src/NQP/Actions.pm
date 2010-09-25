@@ -413,9 +413,9 @@ sub package($/) {
     # Run this at loadinit time.
     @BLOCK[0].loadinit.push(PAST::Block.new( :blocktype('immediate'), $*PACKAGE-SETUP ));
 
-    # Set up lexical for this to live in.
-    @BLOCK[0][0].unshift(PAST::Var.new( :name($name), :scope('lexical'), :isdecl(1) ));
-    @BLOCK[0].symbol($name, :scope('lexical'));
+    # Set up variable for this to live in.
+    @BLOCK[0][0].unshift(PAST::Var.new( :name($name), :scope('package'), :isdecl(1) ));
+    @BLOCK[0].symbol($name, :scope('package'));
 
     # Just evaluate anything else in the package in-line.
     my $past := $<package_def>.ast;
@@ -529,21 +529,53 @@ method routine_def($/) {
 
 
 method method_def($/) {
-    my $past := $<blockoid>.ast;
-    $past.blocktype('method');
-    if $*SCOPE eq 'our' {
-        $past.pirflags(':nsentry');
+    if $*PACKAGE-SETUP {
+        # Set up block including adding self (invocant) parameter.
+        my $past := $<blockoid>.ast;
+        $past.control('return_pir');
+        $past[0].unshift( PAST::Var.new( :name('self'), :scope('parameter') ) );
+        $past.symbol('self', :scope('lexical') );
+        
+        # Install it where it should go (methods table / namespace).
+        if $<deflongname> {
+            my $name := ~$<deflongname>[0].ast;
+            $past.name($name);
+            $*PACKAGE-SETUP.push(PAST::Op.new(
+                :pasttype('callmethod'), :name($*MULTINESS eq 'multi' ?? 'add_multi_method' !! 'add_method'),
+                PAST::Op.new(
+                    # XXX Should be nqpop at some point.
+                    :pirop('get_how PP'),
+                    PAST::Var.new( :name('type_obj'), :scope('register') )
+                ),
+                PAST::Var.new( :name('type_obj'), :scope('register') ),
+                PAST::Val.new( :value($name) ),
+                PAST::Val.new( :value($past) )
+            ));
+        }
+        if $*SCOPE eq 'our' {
+            $past.pirflags(':nsentry');
+        }
+
+        $past<block_past> := $past;
+        make $past;
     }
-    $past.control('return_pir');
-    $past[0].unshift( PAST::Op.new( :inline('    .lex "self", self') ) );
-    $past.symbol('self', :scope('lexical') );
-    if $<deflongname> {
-        my $name := ~$<deflongname>[0].ast;
-        $past.name($name);
+    else {
+        my $past := $<blockoid>.ast;
+        $past.blocktype('method');
+        if $*SCOPE eq 'our' {
+            $past.pirflags(':nsentry');
+        }
+        $past.control('return_pir');
+        $past[0].unshift( PAST::Op.new( :inline('    .lex "self", self') ) );
+        $past.symbol('self', :scope('lexical') );
+        if $<deflongname> {
+            my $name := ~$<deflongname>[0].ast;
+            $past.name($name);
+        }
+        if $*MULTINESS eq 'multi' { $past.multi().unshift('_'); }
+        $past<block_past> := $past;
+        make $past;
     }
-    if $*MULTINESS eq 'multi' { $past.multi().unshift('_'); }
-    $past<block_past> := $past;
-    make $past;
     if $<trait> {
         for $<trait> { $_.ast()($/); }
     }

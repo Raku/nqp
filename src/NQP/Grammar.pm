@@ -22,6 +22,7 @@ method TOP() {
 
     my $*SCOPE      := '';
     my $*MULTINESS  := '';
+    my $*PACKAGE-SETUP;
     self.comp_unit;
 }
 
@@ -277,12 +278,10 @@ token package_declarator:sym<knowhow> {
     <sym> <package_def>
 }
 token package_declarator:sym<class> {
-    :my $*PACKAGE-SETUP := PAST::Stmts.new();
     :my $*PKGDECL := 'class';
     <sym> <package_def>
 }
 token package_declarator:sym<grammar> {
-    :my $*PACKAGE-SETUP := PAST::Stmts.new();
     :my $*PKGDECL := 'grammar';
     <sym> <package_def>
 }
