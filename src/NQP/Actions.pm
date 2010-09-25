@@ -403,7 +403,8 @@ sub package($/) {
     $*PACKAGE-SETUP.push(PAST::Op.new(
         :pasttype('callmethod'), :name('compose'),
         PAST::Op.new(
-            :pasttype('nqpop'), :name('get_how'),
+            # XXX nqpop get_how
+            :pirop('get_how PP'),
             PAST::Var.new( :name('type_obj'), :scope('register') )
         ),
         PAST::Var.new( :name('type_obj'), :scope('register') )
