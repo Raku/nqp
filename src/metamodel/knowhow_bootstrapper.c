@@ -77,7 +77,7 @@ static void compose(PARROT_INTERP, PMC *nci) {
 
 /* Wraps up a C function as a raw NCI method. */
 static PMC * wrap_c(PARROT_INTERP, void *func) {
-    PMC * const wrapped = Parrot_pmc_new(interp, enum_class_NCI);
+    PMC * const wrapped = Parrot_pmc_new(interp, enum_class_NativePCCMethod);
     VTABLE_set_pointer_keyed_str(interp, wrapped, Parrot_str_new_constant(interp, "->"), func);
     return wrapped;
 }
