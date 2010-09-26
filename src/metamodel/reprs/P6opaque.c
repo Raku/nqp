@@ -12,10 +12,116 @@
  * forward declare a bunch of other stuff). */
 static PMC * repr_instance(PARROT_INTERP);
 
+/* How do we go from type-object to a hash value? For now, we make an integer
+ * that is the address of the STable struct, which not being subject to GC will
+ * never move, and is unique per type object too. */
+#define CLASS_KEY(c) ((INTVAL)PMC_data(STABLE_PMC(c)))
+
+/* Helper to make a :local introspection call. */
+static PMC * introspection_call(PARROT_INTERP, PMC *WHAT, PMC *HOW, STRING *name) {
+    /* Look up method. */
+    PMC *meth = VTABLE_find_method(interp, HOW, name);
+
+    /* Set up call capture. */
+    PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
+    VTABLE_push_pmc(interp, cappy, HOW);
+    VTABLE_push_pmc(interp, cappy, WHAT);
+    VTABLE_set_integer_keyed_str(interp, cappy, Parrot_str_new_constant(interp, "local"), 1);
+
+    /* Call. */
+    Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
+
+    /* Grab result. */
+    cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
+    return VTABLE_get_pmc_keyed_int(interp, cappy, 0);
+}
+
+/* Helper to make an accessor call. */
+static PMC * accessor_call(PARROT_INTERP, PMC *obj, STRING *name) {
+    /* Look up method. */
+    PMC *meth = VTABLE_find_method(interp, obj, name);
+
+    /* Set up call capture. */
+    PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
+    VTABLE_push_pmc(interp, cappy, obj);
+
+    /* Call. */
+    Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
+
+    /* Grab result. */
+    cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
+    return VTABLE_get_pmc_keyed_int(interp, cappy, 0);
+}
+
 /* This computes the slot mapping for a type; that is, for single inheritance
  * classes it works out an allocation in an array for storing the attributes. */
-static void compute_slot_mapping(PARROT_INTERP, PMC *WHAT) {
-    /* XXX TODO. */
+static void compute_slot_mapping(PARROT_INTERP, PMC *WHAT, REPRP6opaque *repr) {
+    PMC    *HOW            = STABLE(WHAT)->HOW;
+    PMC    *current_class  = WHAT;
+    INTVAL  current_slot   = 0;
+    STRING *attributes_str = Parrot_str_new_constant(interp, "attributes");
+    STRING *parents_str    = Parrot_str_new_constant(interp, "parents");
+    STRING *name_str       = Parrot_str_new_constant(interp, "name");
+
+    /* Allocate slot mapping table. */
+    repr->slot_mapping = pmc_new(interp, enum_class_Hash);
+
+    /* Walk through the parents list. */
+    while (!PMC_IS_NULL(current_class))
+    {
+        PMC    *parents;
+        INTVAL  num_parents;
+
+        /* Get attributes and iterate over them. */
+        PMC *attributes = introspection_call(interp, WHAT, HOW, attributes_str);
+        PMC *attr_iter  = VTABLE_get_iter(interp, attributes);
+        while (VTABLE_get_bool(interp, attr_iter)) {
+            /* Get attribute. */
+            PMC *attr = VTABLE_shift_pmc(interp, attr_iter);
+
+            /* Get its name. */
+            PMC    *name_pmc = accessor_call(interp, attr, name_str);
+            STRING *name     = VTABLE_get_string(interp, name_pmc);
+
+            /* Allocate a slot. */
+            INTVAL key = CLASS_KEY(current_class);
+            if (!VTABLE_exists_keyed_int(interp, repr->slot_mapping, key))
+                VTABLE_set_pmc_keyed_int(interp, repr->slot_mapping, key,
+                        pmc_new(interp, enum_class_Hash));
+            VTABLE_set_integer_keyed_str(interp,
+                VTABLE_get_pmc_keyed_int(interp, repr->slot_mapping, key),
+                name, current_slot);
+            current_slot++;
+        }
+
+        /* Find the next parent(s). */
+        parents = introspection_call(interp, WHAT, HOW, parents_str);
+
+        // Check how many parents we have.
+        num_parents = VTABLE_elements(interp, parents);
+        if (num_parents == 0)
+        {
+            /* We're done. \o/ */
+            repr->num_slots = current_slot;
+            break;
+        }
+        else if (num_parents > 1)
+        {
+            /* Multiple inheritnace, so we can't compute this hierarchy. */
+            repr->slot_mapping = pmc_new(interp, enum_class_Hash);
+            return;
+        }
+        else
+        {
+            /* Just one. Get next parent and work through its attributes. */
+            current_class = VTABLE_get_pmc_keyed_int(interp, parents, 0);
+        }
+    }
+    printf("Computed slot mapping; %d slots\n", repr->num_slots);
 }
 
 /* Creates a new type object of this representation, and associates it with
@@ -45,7 +151,7 @@ static PMC * instance_of(PARROT_INTERP, PMC *self, PMC *WHAT) {
     /* Compute slot mapping if we've not already done so. */
     REPRP6opaque *repr = P6O_REPR_STRUCT(self);
     if (!repr->slot_mapping)
-        compute_slot_mapping(interp, WHAT);
+        compute_slot_mapping(interp, WHAT, repr);
 
     /* Allocate and set up object instance. */
     obj = mem_allocate_zeroed_typed(P6opaqueInstance);
@@ -190,7 +296,7 @@ static PMC * repr_instance(PARROT_INTERP) {
     repr->common.get_str = get_str;
     repr->common.gc_mark = gc_mark;
     repr->common.gc_free = gc_free;
-    repr->slot_mapping = PMCNULL;
+    repr->slot_mapping = NULL;
     repr->num_slots = 0;
 
     /* Wrap it in a PMC. */
