@@ -383,11 +383,15 @@ sub package($/) {
             PAST::Var.new( :name('type_obj'), :scope('register'), :isdecl(1) ),
             PAST::Op.new(
                 :pasttype('callmethod'), :name('new_type'),
-                PAST::Var.new( :name(%*HOW{~$<sym>}), :scope('package') )
+                PAST::Var.new( :name(%*HOW{~$<sym>}), :namespace(''), :scope('package') )
             )
         ),
         PAST::Op.new( :pasttype('bind'),
-            PAST::Var.new( :name($name) ),
+            PAST::Var.new( :name($name), :namespace(''), :scope('package') ),
+            PAST::Var.new( :name('type_obj'), :scope('register') )
+        ),
+        PAST::Op.new( :pasttype('bind'),
+            PAST::Var.new( :name('$?CLASS') ),
             PAST::Var.new( :name('type_obj'), :scope('register') )
         )
         # XXX name
@@ -410,15 +414,19 @@ sub package($/) {
         PAST::Var.new( :name('type_obj'), :scope('register') )
     ));
     
-    # Run this at loadinit time.
-    @BLOCK[0].loadinit.push(PAST::Block.new( :blocktype('immediate'), $*PACKAGE-SETUP ));
-
-    # Set up variable for this to live in.
+    # Set up slot for the type object to live in.
     @BLOCK[0][0].unshift(PAST::Var.new( :name($name), :scope('package'), :isdecl(1) ));
     @BLOCK[0].symbol($name, :scope('package'));
 
-    # Just evaluate anything else in the package in-line.
+    # Evaluate anything else in the package in-line; also give it a $?CLASS
+    # lexical. XXX Due to Parrot static lexpad fail, it's currently package scoped.
     my $past := $<package_def>.ast;
+    $past.unshift(PAST::Var.new( :name('$?CLASS'), :scope('package'), :isdecl(1) ));
+    $past.symbol('$?CLASS', :scope('package'));
+
+    # Attach the class code to run at loadinit time.
+    $past.loadinit.push(PAST::Block.new( :blocktype('immediate'), $*PACKAGE-SETUP ));
+
     return $past;
 }
 
