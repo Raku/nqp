@@ -492,11 +492,31 @@ method variable_declarator($/) {
     }
     if $*SCOPE eq 'has' {
         $BLOCK.symbol($name, :scope('attribute') );
-        unless $BLOCK<attributes> {
-            $BLOCK<attributes> :=
-                PAST::Op.new( :pasttype('list'), :named('attr') );
+        if $*PACKAGE-SETUP {
+            # Create and add a meta-attribute.
+            my $meta-attr-type := %*HOW-METAATTR{$*PKGDECL} || $*DEFAULT-METAATTR;
+            $*PACKAGE-SETUP.push(PAST::Op.new(
+                :pasttype('callmethod'), :name('add_attribute'),
+                PAST::Op.new(
+                    :pirop('get_how PP'),
+                    PAST::Var.new( :name('type_obj'), :scope('register') )
+                ),
+                PAST::Var.new( :name('type_obj'), :scope('register') ),
+                PAST::Op.new(
+                    :pasttype('callmethod'), :name('new'),
+                    PAST::Var.new( :name($meta-attr-type), :namespace(''), :scope('package') ),
+                    PAST::Val.new( :value($name), :named('name') )
+                )
+            ));
         }
-        $BLOCK<attributes>.push( $name );
+        else {
+            # XXX Old way, will go away once all package types are ported.
+            unless $BLOCK<attributes> {
+                $BLOCK<attributes> :=
+                    PAST::Op.new( :pasttype('list'), :named('attr') );
+            }
+            $BLOCK<attributes>.push( $name );
+        }
         $past := PAST::Stmts.new();
     }
     else {
