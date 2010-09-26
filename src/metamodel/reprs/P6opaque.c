@@ -121,7 +121,7 @@ static void compute_slot_mapping(PARROT_INTERP, PMC *WHAT, REPRP6opaque *repr) {
             current_class = VTABLE_get_pmc_keyed_int(interp, parents, 0);
         }
     }
-    printf("Computed slot mapping; %d slots\n", repr->num_slots);
+    /*printf("Computed slot mapping; %d slots\n", repr->num_slots);*/
 }
 
 /* Creates a new type object of this representation, and associates it with
