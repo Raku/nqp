@@ -362,6 +362,11 @@ method variable($/) {
             $past.push(PAST::Var.new( :name('self') ));
             $past.scope('attribute');
             $past.viviself( vivitype( $<sigil> ) );
+            if $*PACKAGE-SETUP {
+                # Also need to push the class handle.
+                # XXX Once we fully switch to new meta-model, always do this.
+                $past.push(PAST::Var.new( :name('$?CLASS') ));
+            }
         }
     }
     make $past;
