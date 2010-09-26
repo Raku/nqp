@@ -51,6 +51,19 @@ static void add_method(PARROT_INTERP, PMC *nci) {
     Parrot_pcc_build_call_from_c_args(interp, capture, "P", method);
 }
 
+/* Adds an attribute meta-object to the list. */
+static void add_attribute(PARROT_INTERP, PMC *nci) {
+    /* Get attributes list out of meta-object. */
+    PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
+    PMC    *attrs   = ((KnowHOWREPRInstance *)PMC_data(self))->attributes;
+
+    /* Add meta-attribute to it. */
+    PMC *meta_attr = VTABLE_get_pmc_keyed_int(interp, capture, 2);
+    VTABLE_push_pmc(interp, attrs, meta_attr);
+    Parrot_pcc_build_call_from_c_args(interp, capture, "P", meta_attr);
+}
+
 /* Finds a method. */
 static void find_method(PARROT_INTERP, PMC *nci) {
     /* Get methods table out of meta-object and look up method. */
@@ -125,6 +138,9 @@ void RakudoObject_bootstrap_knowhow(PARROT_INTERP) {
     VTABLE_set_pmc_keyed_str(interp, knowhow_how->methods,
         Parrot_str_new_constant(interp, "add_method"),
         wrap_c(interp, F2DPTR(add_method)));
+    VTABLE_set_pmc_keyed_str(interp, knowhow_how->methods,
+        Parrot_str_new_constant(interp, "add_attribute"),
+        wrap_c(interp, F2DPTR(add_attribute)));
     VTABLE_set_pmc_keyed_str(interp, knowhow_how->methods,
         Parrot_str_new_constant(interp, "compose"),
         wrap_c(interp, F2DPTR(compose)));
