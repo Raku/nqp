@@ -171,26 +171,61 @@ static INTVAL defined(PARROT_INTERP, PMC *self, PMC *obj) {
 
 /* Gets the current value for an attribute. */
 static PMC * get_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name) {
+    P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
+    REPRP6opaque     *repr     = P6O_REPR_STRUCT(self);
+
+    /* Try the slot allocation first. */
+    if (repr->slot_mapping) {
+        PMC *class_mapping = VTABLE_get_pmc_keyed_int(interp,
+                repr->slot_mapping, CLASS_KEY(class_handle));
+        if (!PMC_IS_NULL(class_mapping)) {
+            if (VTABLE_exists_keyed_str(interp, class_mapping, name))
+            {
+                INTVAL position = VTABLE_get_integer_keyed_str(interp, class_mapping, name);
+                return instance->slots[position];
+            }
+        }
+    }
+    
+    /* Fall back to the spill storage. */
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6opaque attributes NYI");
+            "P6opaque attributes NYFI");
 }
 
 /* Gets the current value for an attribute, obtained using the given hint.*/
 static PMC * get_attribute_with_hint(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6opaque attributes NYI");
+            "P6opaque attributes NYFI");
 }
 
 /* Binds the given value to the specified attribute. */
 static void bind_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, PMC *value) {
+    P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
+    REPRP6opaque     *repr     = P6O_REPR_STRUCT(self);
+
+    /* Try the slot allocation first. */
+    if (repr->slot_mapping) {
+        PMC *class_mapping = VTABLE_get_pmc_keyed_int(interp,
+                repr->slot_mapping, CLASS_KEY(class_handle));
+        if (!PMC_IS_NULL(class_mapping)) {
+            if (VTABLE_exists_keyed_str(interp, class_mapping, name))
+            {
+                INTVAL position = VTABLE_get_integer_keyed_str(interp, class_mapping, name);
+                instance->slots[position] = value;
+                return;
+            }
+        }
+    }
+
+    /* Fall back to the spill storage. */
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6opaque attributes NYI");
+            "P6opaque attributes NYFI");
 }
 
 /* Binds the given value to the specified attribute, using the given hint. */
 static void bind_attribute_with_hint(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6opaque attributes NYI");
+            "P6opaque attributes NYFI");
 }
 
 /* Gets the hint for the given attribute ID. */
