@@ -125,3 +125,111 @@ inline op repr_defined(out INT, in PMC) :base_core {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_defined on a RakudoObject");
 }
+
+/*
+
+=item repr_unbox_str()
+
+Tries to unbox a native string using the REPR API.
+
+=cut
+
+*/
+inline op repr_unbox_str(out STR, in PMC) :base_core {
+    if ($2->vtable->base_type == ro_id)
+        $1 = REPR($2)->get_str(interp, REPR_PMC($2), $2);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_unbox_str on a RakudoObject");
+}
+
+/*
+
+=item repr_unbox_int()
+
+Tries to unbox a native integer using the REPR API.
+
+=cut
+
+*/
+inline op repr_unbox_int(out INT, in PMC) :base_core {
+    if ($2->vtable->base_type == ro_id)
+        $1 = REPR($2)->get_int(interp, REPR_PMC($2), $2);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_unbox_int on a RakudoObject");
+}
+
+/*
+
+=item repr_unbox_num()
+
+Tries to unbox a native floating pint number using the REPR API.
+
+=cut
+
+*/
+inline op repr_unbox_num(out NUM, in PMC) :base_core {
+    if ($2->vtable->base_type == ro_id)
+        $1 = REPR($2)->get_num(interp, REPR_PMC($2), $2);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_unbox_num on a RakudoObject");
+}
+
+/*
+
+=item repr_box_str()
+
+Box a native string to an instance of the specified type.
+
+=cut
+
+*/
+inline op repr_box_str(out PMC, in STR, in PMC) :base_core {
+    if ($3->vtable->base_type == ro_id) {
+        $1 = REPR($3)->instance_of(interp, REPR_PMC($3), $3);
+        REPR($1)->set_str(interp, REPR_PMC($1), $1, $2);
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_box_str with a RakudoObject as the box target");
+}
+
+/*
+
+=item repr_box_int()
+
+Box a native int to an instance of the specified type.
+
+=cut
+
+*/
+inline op repr_box_int(out PMC, in INT, in PMC) :base_core {
+    if ($3->vtable->base_type == ro_id) {
+        $1 = REPR($3)->instance_of(interp, REPR_PMC($3), $3);
+        REPR($1)->set_int(interp, REPR_PMC($1), $1, $2);
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_box_int with a RakudoObject as the box target");
+}
+
+/*
+
+=item repr_box_num()
+
+Box a native floating point number to an instance of the specified type.
+
+=cut
+
+*/
+inline op repr_box_num(out PMC, in NUM, in PMC) :base_core {
+    if ($3->vtable->base_type == ro_id) {
+        $1 = REPR($3)->instance_of(interp, REPR_PMC($3), $3);
+        REPR($1)->set_num(interp, REPR_PMC($1), $1, $2);
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_box_num with a RakudoObject as the box target");
+}
