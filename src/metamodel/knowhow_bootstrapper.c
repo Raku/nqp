@@ -88,6 +88,30 @@ static void compose(PARROT_INTERP, PMC *nci) {
     Parrot_pcc_build_call_from_c_args(interp, capture, "P", obj);
 }
 
+/* Introspects the parents. Since a KnowHOW doesn't support inheritance,
+ * just hand back an empty list. */
+static void parents(PARROT_INTERP, PMC *nci) {
+    PMC *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    PMC *empty   = pmc_new(interp, enum_class_FixedPMCArray);
+    Parrot_pcc_build_call_from_c_args(interp, capture, "P", empty);
+}
+
+/* Introspects the attributes. For now just hand back real list. */
+static void attributes(PARROT_INTERP, PMC *nci) {
+    PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
+    PMC    *attrs   = ((KnowHOWREPRInstance *)PMC_data(self))->attributes;
+    Parrot_pcc_build_call_from_c_args(interp, capture, "P", attrs);
+}
+
+/* Introspects the methods. For now just hand back real method table. */
+static void methods(PARROT_INTERP, PMC *nci) {
+    PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
+    PMC    *meths   = ((KnowHOWREPRInstance *)PMC_data(self))->methods;
+    Parrot_pcc_build_call_from_c_args(interp, capture, "P", meths);
+}
+
 /* Wraps up a C function as a raw NCI method. */
 static PMC * wrap_c(PARROT_INTERP, void *func) {
     PMC * const wrapped = Parrot_pmc_new(interp, enum_class_NativePCCMethod);
@@ -144,6 +168,15 @@ void RakudoObject_bootstrap_knowhow(PARROT_INTERP) {
     VTABLE_set_pmc_keyed_str(interp, knowhow_how->methods,
         Parrot_str_new_constant(interp, "compose"),
         wrap_c(interp, F2DPTR(compose)));
+    VTABLE_set_pmc_keyed_str(interp, knowhow_how->methods,
+        Parrot_str_new_constant(interp, "parents"),
+        wrap_c(interp, F2DPTR(parents)));
+    VTABLE_set_pmc_keyed_str(interp, knowhow_how->methods,
+        Parrot_str_new_constant(interp, "attributes"),
+        wrap_c(interp, F2DPTR(attributes)));
+    VTABLE_set_pmc_keyed_str(interp, knowhow_how->methods,
+        Parrot_str_new_constant(interp, "methods"),
+        wrap_c(interp, F2DPTR(methods)));
 
     /* Set this built up HOW as the KnowHOW's HOW. */
     STABLE(knowhow_pmc)->HOW = knowhow_how_pmc;
