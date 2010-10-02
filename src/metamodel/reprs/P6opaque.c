@@ -157,7 +157,7 @@ static PMC * instance_of(PARROT_INTERP, PMC *self, PMC *WHAT) {
     obj = mem_allocate_zeroed_typed(P6opaqueInstance);
     obj->common.stable = STABLE_PMC(WHAT);
     obj->slots         = mem_sys_allocate_zeroed(sizeof(PMC *) *
-        repr->num_slots == 0 ? 1 : repr->num_slots);
+        (repr->num_slots == 0 ? 1 : repr->num_slots));
     
     return wrap_object(interp, obj);
 }
