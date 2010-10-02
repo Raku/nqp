@@ -379,7 +379,8 @@ method package_declarator:sym<grammar>($/) { make old_package($/) }
 method package_declarator:sym<role>($/)    { make package($/); }
 
 sub package($/) {
-    my $name := ~$<package_def><name>;
+    my @ns := pir::clone__PP($<package_def><name><identifier>);
+    my $name := ~@ns.pop;
     
     # Prefix the class initialization with initial setup. Also install it
     # in the symbol table right away.
@@ -392,7 +393,7 @@ sub package($/) {
             )
         ),
         PAST::Op.new( :pasttype('bind'),
-            PAST::Var.new( :name($name), :namespace(''), :scope('package') ),
+            PAST::Var.new( :name($name), :namespace(@ns), :scope('package') ),
             PAST::Var.new( :name('type_obj'), :scope('register') )
         ),
         PAST::Op.new( :pasttype('bind'),
@@ -410,8 +411,8 @@ sub package($/) {
     # Add call to add_parent if we have one.
     # XXX Doesn't handle lexical classes yet.
     if $<package_def><parent> {
-        my @ns := pir::clone__PP($<package_def><parent>);
-        my $name := @ns.pop;
+        my @ns := pir::clone__PP($<package_def><parent><identifier>);
+        my $name := ~@ns.pop;
         $*PACKAGE-SETUP.push(PAST::Op.new(
             :pasttype('callmethod'), :name('add_parent'),
             PAST::Op.new(
@@ -436,8 +437,7 @@ sub package($/) {
     ));
     
     # Set up slot for the type object to live in.
-    @BLOCK[0][0].unshift(PAST::Var.new( :name($name), :scope('package'), :isdecl(1) ));
-    @BLOCK[0].symbol($name, :scope('package'));
+    @BLOCK[0][0].unshift(PAST::Var.new( :name($name), :namespace(@ns), :scope('package'), :isdecl(1) ));
 
     # Evaluate anything else in the package in-line; also give it a $?CLASS
     # lexical. XXX Due to Parrot static lexpad fail, it's currently package scoped.
