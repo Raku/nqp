@@ -767,8 +767,21 @@ method regex_declarator($/, $key?) {
 
 method dotty($/) {
     my $past := $<args> ?? $<args>[0].ast !! PAST::Op.new( :node($/) );
-    $past.name( $<quote> ?? $<quote>.ast !! ~$<longname> );
-    $past.pasttype('callmethod');
+    if $<quote> {
+        $past.name($<quote>.ast);
+        $past.pasttype('callmethod');
+    }
+    elsif $<longname> eq 'HOW' {
+        $past.pirop('get_how PP');
+        $past.pasttype('pirop');
+    }
+    elsif $<longname> eq 'WHAT' {
+        $past.pirop('get_what PP');
+    }
+    else {
+        $past.name(~$<longname>);
+        $past.pasttype('callmethod');
+    }
     make $past;
 }
 
