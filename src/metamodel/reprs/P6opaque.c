@@ -60,7 +60,6 @@ static PMC * accessor_call(PARROT_INTERP, PMC *obj, STRING *name) {
 /* This computes the slot mapping for a type; that is, for single inheritance
  * classes it works out an allocation in an array for storing the attributes. */
 static void compute_slot_mapping(PARROT_INTERP, PMC *WHAT, REPRP6opaque *repr) {
-    PMC    *HOW            = STABLE(WHAT)->HOW;
     PMC    *current_class  = WHAT;
     INTVAL  current_slot   = 0;
     STRING *attributes_str = Parrot_str_new_constant(interp, "attributes");
@@ -77,7 +76,8 @@ static void compute_slot_mapping(PARROT_INTERP, PMC *WHAT, REPRP6opaque *repr) {
         INTVAL  num_parents;
 
         /* Get attributes and iterate over them. */
-        PMC *attributes = introspection_call(interp, WHAT, HOW, attributes_str);
+        PMC *HOW        = STABLE(current_class)->HOW;
+        PMC *attributes = introspection_call(interp, current_class, HOW, attributes_str);
         PMC *attr_iter  = VTABLE_get_iter(interp, attributes);
         while (VTABLE_get_bool(interp, attr_iter)) {
             /* Get attribute. */
@@ -99,7 +99,7 @@ static void compute_slot_mapping(PARROT_INTERP, PMC *WHAT, REPRP6opaque *repr) {
         }
 
         /* Find the next parent(s). */
-        parents = introspection_call(interp, WHAT, HOW, parents_str);
+        parents = introspection_call(interp, current_class, HOW, parents_str);
 
         // Check how many parents we have.
         num_parents = VTABLE_elements(interp, parents);
