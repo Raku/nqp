@@ -400,12 +400,28 @@ sub package($/) {
             PAST::Var.new( :name('type_obj'), :scope('register') )
         )
         # XXX name
-        # XXX is parent
     ));
     if $<package_def><repr> {
         my $repr_name := $<package_def><repr>[0].ast;
         $repr_name.named('repr');
         $*PACKAGE-SETUP[0][0][1].push($repr_name);
+    }
+
+    # Add call to add_parent if we have one.
+    # XXX Doesn't handle lexical classes yet.
+    if $<package_def><parent> {
+        my @ns := pir::clone__PP($<package_def><parent>);
+        my $name := @ns.pop;
+        $*PACKAGE-SETUP.push(PAST::Op.new(
+            :pasttype('callmethod'), :name('add_parent'),
+            PAST::Op.new(
+                # XXX nqpop get_how
+                :pirop('get_how PP'),
+                PAST::Var.new( :name('type_obj'), :scope('register') )
+            ),
+            PAST::Var.new( :name('type_obj'), :scope('register') ),
+            PAST::Var.new( :name(~$name), :namespace(@ns), :scope('package') )
+        ));
     }
 
     # Postfix it with a call to compose.
