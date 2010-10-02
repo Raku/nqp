@@ -1,8 +1,20 @@
+#include "../metamodel/rakudoobject.h"
+
 /* A representation is responsible for object layout. Representations
  * all fill out a REPR struct and maybe have one of their own with some
  * extra bits of information in it. This PMC is simply a wrapper around
  * a REPR for the purposes of GC, etc. It's up to the REPR to set the
  * PMC up as it wishes. */
 pmclass REPR manual_attrs dynpmc group nqp {
-    /* XXX Needs custom mark/destroy implementing. */
+    VTABLE void mark() {
+        REPRCommonalities *repr = REPR_STRUCT(SELF);
+        if (repr->gc_mark_repr)
+            repr->gc_mark_repr(interp, SELF);
+    }
+
+    VTABLE void destroy() {
+        REPRCommonalities *repr = REPR_STRUCT(SELF);
+        if (repr->gc_free_repr)
+            repr->gc_free_repr(interp, SELF);
+    }
 }

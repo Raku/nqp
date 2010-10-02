@@ -31,6 +31,8 @@ void RakudoObject_initialize(PARROT_INTERP) {
 /* Takes a representation and wraps it up in a REPR PMC. */
 PMC * wrap_repr(PARROT_INTERP, void *REPR) {
     PMC *repr_pmc = pmc_new_noinit(interp, repr_id);
+    PObj_custom_mark_SET(repr_pmc);
+    PObj_custom_destroy_SET(repr_pmc);
     PMC_data(repr_pmc) = REPR;
     return repr_pmc;
 }

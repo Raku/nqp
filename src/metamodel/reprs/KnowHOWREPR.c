@@ -151,6 +151,8 @@ PMC * KnowHOWREPR_initialize(PARROT_INTERP) {
     repr->get_str = get_str;
     repr->gc_mark = gc_mark;
     repr->gc_free = gc_free;
+    repr->gc_mark_repr = NULL;
+    repr->gc_free_repr = NULL;
 
     /* Wrap it in a PMC. */
     return wrap_repr(interp, repr);

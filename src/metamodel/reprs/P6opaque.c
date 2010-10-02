@@ -308,6 +308,19 @@ static void gc_free(PARROT_INTERP, PMC *self, PMC *obj) {
     PMC_data(obj) = NULL;
 }
 
+/* This Parrot-specific addition to the API is used to mark a repr instance. */
+static void gc_mark_repr(PARROT_INTERP, PMC *self) {
+    REPRP6opaque *repr = P6O_REPR_STRUCT(self);
+    if (!PMC_IS_NULL(repr->slot_mapping))
+        Parrot_gc_mark_PMC_alive(interp, repr->slot_mapping);
+}
+
+/* This Parrot-specific addition to the API is used to free a repr instance. */
+static void gc_free_repr(PARROT_INTERP, PMC *self) {
+    mem_sys_free(PMC_data(self));
+    PMC_data(self) = NULL;
+}
+
 /* Sets up an instance of this representation with function pointers in place
  * and no allocated slot storage. */
 static PMC * repr_instance(PARROT_INTERP) {
@@ -332,6 +345,8 @@ static PMC * repr_instance(PARROT_INTERP) {
     repr->common.get_str = get_str;
     repr->common.gc_mark = gc_mark;
     repr->common.gc_free = gc_free;
+    repr->common.gc_mark_repr = gc_mark_repr;
+    repr->common.gc_free_repr = gc_free_repr;
     repr->slot_mapping = NULL;
     repr->num_slots = 0;
 
