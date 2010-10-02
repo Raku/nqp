@@ -156,7 +156,7 @@ static PMC * instance_of(PARROT_INTERP, PMC *self, PMC *WHAT) {
     /* Allocate and set up object instance. */
     obj = mem_allocate_zeroed_typed(P6opaqueInstance);
     obj->common.stable = STABLE_PMC(WHAT);
-    obj->slots         = mem_sys_allocate(sizeof(PMC *) *
+    obj->slots         = mem_sys_allocate_zeroed(sizeof(PMC *) *
         repr->num_slots == 0 ? 1 : repr->num_slots);
     
     return wrap_object(interp, obj);
@@ -181,8 +181,9 @@ static PMC * get_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle
         if (!PMC_IS_NULL(class_mapping)) {
             if (VTABLE_exists_keyed_str(interp, class_mapping, name))
             {
-                INTVAL position = VTABLE_get_integer_keyed_str(interp, class_mapping, name);
-                return instance->slots[position];
+                INTVAL  position = VTABLE_get_integer_keyed_str(interp, class_mapping, name);
+                PMC    *result = instance->slots[position];
+                return result ? result : PMCNULL;
             }
         }
     }
