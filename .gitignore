@@ -4,6 +4,7 @@ Makefile
 .*.swp
 *.o
 *.RES
+*.res
 *.ilk
 *.obj
 *.rc
@@ -30,5 +31,6 @@ nqp.pbc
 nqp-setting.pbc
 src/gen/*.pir
 src/gen/*.nqp
+src/gen/*.pm
 src/stage1
 src/stage2
