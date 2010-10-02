@@ -8,11 +8,18 @@ NQP::Compiler - NQP compiler
 
 =cut
 
+# Initialize meta-model.
+.loadlib "nqp_group"
+.loadlib "nqp_ops"
+.sub '' :anon :load :init
+    nqp_dynop_setup
+.end
+.include 'gen/nqp-how.pir'
+
 .sub '' :anon :load :init
     load_bytecode 'P6Regex.pbc'
 .end
 
-.include 'gen/nqp-how.pir'
 .include 'gen/nqp-grammar.pir'
 .include 'gen/nqp-actions.pir'
 .include 'src/cheats/nqp-builtins.pir'
