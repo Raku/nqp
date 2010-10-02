@@ -59,7 +59,7 @@ knowhow NQPClassHOW {
         if %!attributes{$name} {
             pir::die("This class already has an attribute named " ~ $name);
         }
-        %!attributes.add($name, $meta_attr);
+        %!attributes{$name} := $meta_attr;
     }
 
     method add_parent($obj, $parent) {
