@@ -37,19 +37,19 @@ knowhow NQPClassHOW {
 
     # Creates a new instance of this meta-class.
     method new() {
-        nqp::instance_of(self)
+        pir::repr_instance_of__PP(self)
     }
 
     # Create a new meta-class instance, and then a new type object
     # to go with it, and return that.
-    method new_type(:$repr) {
+    method new_type(:$repr = 'P6opaque') {
         my $metaclass := self.new();
-        nqp::type_object_for($repr, $metaclass);
+        pir::repr_type_object_for__PPS($metaclass, $repr);
     }
 
     method add_method($obj, $name, $code_obj) {
         if %!methods{$name} {
-            die("This class already has a method named " ~ $name);
+            pir::die("This class already has a method named " ~ $name);
         }
         %!methods{$name} := $code_obj;
     }
@@ -57,21 +57,33 @@ knowhow NQPClassHOW {
     method add_attribute($obj, $meta_attr) {
         my $name := $meta_attr.name;
         if %!attributes{$name} {
-            die("This class already has an attribute named " ~ $name);
+            pir::die("This class already has an attribute named " ~ $name);
         }
         %!attributes.add($name, $meta_attr);
     }
 
     method add_parent($obj, $parent) {
         if $!composed {
-            die("NQPClassHOW does not support adding parents after being composed.");
+            pir::die("NQPClassHOW does not support adding parents after being composed.");
         }
-        # XXX Duplicate parent check.
+        if self.isa($parent) {
+            pir::die("Can not add the same parent class twice");
+        }
         @!parents.push($parent);
     }
 
     method compose($obj) {
-        # XXX NYI
+        # XXX roles...
+
+        # Some things we only do if we weren't already composed once, like building
+        # the MRO.
+        unless $!composed {
+            my @mro;
+            @mro.push($obj); # XXX Needs doing properly.
+            @!mro := @mro; 
+            $!composed := 1;
+        }
+
         $obj
     }
 
@@ -138,10 +150,24 @@ knowhow NQPClassHOW {
         for @!mro {
             my %meths := $obj.HOW.method_table($obj);
             my $can := %meths{$name};
-            if nqp::defined($can) {
+            if pir::defined($can) {
                 return $can;
             }
         }
         return 0;
+    }
+
+    ##
+    ## Dispatchy
+    ##
+    method find_method($obj, $name) {
+        for @!mro {
+            my %meths := $_.HOW.method_table($obj);
+            my $found := %meths{$name};
+            if pir::defined($found) {
+                return $found;
+            }
+        }
+        pir::die("Could not find method " ~ $name);
     }
 }
