@@ -84,15 +84,15 @@ class HLL::Compiler is PCT::HLLCompiler {
 
     method autoprint($value) {
         pir::say(~$value) 
-            unless (pir::getinterp__P()).stdhandle(1).tell() > $*AUTOPRINTPOS;
+            unless (pir::getinterp__P()).stdout_handle().tell() > $*AUTOPRINTPOS;
     }
 
     method interactive(*%adverbs) {
         my $target := pir::downcase(%adverbs<target>);
 
-        pir::print__vPS( pir::getinterp__P().stdhandle(2), self.commandline_banner );
+        pir::print__vPS( pir::getinterp__P().stderr_handle(), self.commandline_banner );
 
-        my $stdin    := pir::getinterp__P().stdhandle(0);
+        my $stdin    := pir::getinterp__P().stdin_handle();
         my $encoding := ~%adverbs<encoding>;
         if $encoding && $encoding ne 'fixed_8' {
             $stdin.encoding($encoding);
@@ -108,7 +108,7 @@ class HLL::Compiler is PCT::HLLCompiler {
             last if pir::isnull($code);
 
             # Set the current position of stdout for autoprinting control
-            my $*AUTOPRINTPOS := (pir::getinterp__P()).stdhandle(1).tell();
+            my $*AUTOPRINTPOS := (pir::getinterp__P()).stdout_handle().tell();
             my $*CTXSAVE := self;
             my $*MAIN_CTX;
 
