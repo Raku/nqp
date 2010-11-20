@@ -255,7 +255,7 @@ $(HOW_COMBINED): $(HOW_SOURCES)
 
 $(STAGE1)/$(NQP_PBC): $(STAGE0_PBCS) $(NQP_SOURCES) $(HOW_COMBINED)
 	$(MKPATH) $(STAGE1)/gen
-    $(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
+	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE1)/$(NQP_HOW) \
 	    $(HOW_COMBINED)
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
@@ -296,7 +296,7 @@ $(STAGE2)/$(P6REGEX_PBC): $(STAGE1_PBCS) $(P6REGEX_SOURCES)
 
 $(STAGE2)/$(NQP_PBC): $(STAGE1_PBCS) $(NQP_SOURCES) $(HOW_COMBINED)
 	$(MKPATH) $(STAGE2)/gen
-    $(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
+	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(NQP_HOW) \
 	    $(HOW_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
