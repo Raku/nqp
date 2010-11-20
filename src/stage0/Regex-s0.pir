@@ -505,7 +505,7 @@ Log a debug message.
     line = $P0.'lineof'(orig, from, 'cache'=>1)
 
     $P0 = getinterp
-    $P1 = $P0.'stdhandle'(2)
+    $P1 = $P0.'stderr_handle'()
 
     $N0 = time
     push fmt, $N0
@@ -3248,7 +3248,9 @@ character list.
 
     ops.'push_pirop'('inline', negate, subtype, 'inline'=>'  # rx enumcharlist negate=%0 %1')
 
+    if zerowidth goto skip_zero_1 
     ops.'push_pirop'('ge', pos, eos, fail)
+  skip_zero_1:
     ops.'push_pirop'('sub', '$I10', pos, off)
     ops.'push_pirop'('substr', '$S10', tgt, '$I10', 1)
     ops.'push_pirop'('index', '$I11', charlist, '$S10')
