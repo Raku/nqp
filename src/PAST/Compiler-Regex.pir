@@ -49,7 +49,7 @@ Return the POST representation of the regex AST rooted by C<node>.
 
     .local string prefix, rname, rtype
     prefix = self.'unique'('rx')
-    concat prefix, '_'
+    prefix = concat prefix, '_'
     $P0 = split ' ', 'tgt string pos int off int eos int rep int cur pmc debug pmc'
     $P1 = iter $P0
   iter_loop:
@@ -117,11 +117,11 @@ Return the POST representation of the regex AST rooted by C<node>.
   peek_done:
 
     $S0 = concat '(', cur
-    concat $S0, ', '
-    concat $S0, pos
-    concat $S0, ', '
-    concat $S0, tgt
-    concat $S0, ', $I10)'
+    $S0 = concat $S0, ', '
+    $S0 = concat $S0, pos
+    $S0 = concat $S0, ', '
+    $S0 = concat $S0, tgt
+    $S0 = concat $S0, ', $I10)'
     ops.'push_pirop'('callmethod', '"!cursor_start"', 'self', 'result'=>$S0)
     unless caparray goto caparray_skip
     self.'!cursorop'(ops, '!cursor_caparray', 0, caparray :flat)
@@ -208,7 +208,7 @@ are passed to the function as input arguments.
     .local string result
     result = join ', ', retargs
     result = concat '(', result
-    concat result, ')'
+    result = concat result, ')'
   result_done:
 
     .local pmc cur
@@ -320,7 +320,7 @@ given, then "concat" is assumed.
 
     .local string name
     name = self.'unique'('alt')
-    concat name, '_'
+    name = concat name, '_'
 
     .local pmc ops, iter
     ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
@@ -399,7 +399,7 @@ Match various anchor points, including ^, ^^, $, $$.
 
     .local pmc donelabel
     $S0 = self.'unique'('rxanchor')
-    concat $S0, '_done'
+    $S0 = concat $S0, '_done'
     donelabel = self.'post_new'('Label', 'result'=>$S0)
 
     if subtype == 'bol' goto anchor_bol
@@ -650,7 +650,7 @@ Handle a concatenation of regexes.
 
     .local string name
     name = self.'unique'('conj')
-    concat name, '_'
+    name = concat name, '_'
 
     .local pmc ops, iter
     ops = self.'post_new'('Ops', 'node'=>node, 'result'=>cur)
