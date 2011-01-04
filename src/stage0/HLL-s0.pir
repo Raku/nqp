@@ -5775,7 +5775,7 @@ An operator precedence parser.
         $P0 = shift ints_it
         $I0 = $P0.'ast'()
         $S0 = chr $I0
-        concat result, $S0
+        result = concat result, $S0
         goto ints_loop
       ints_1:
         $I0 = ints.'ast'()
