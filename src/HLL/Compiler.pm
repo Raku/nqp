@@ -1,14 +1,23 @@
 INIT {
-    pir::load_bytecode('PCT/HLLCompiler.pbc');
+    pir::load_bytecode('Parrot/Exception.pbc');
 }
 
-
+# This incorporates both the code that used to be in PCT::HLLCompiler as well
+# as various additional things that initially appeared in the nqp-rx HLL::Compiler.
+# Conversion of it all the NQP is a work in progress; for now, many methods are
+# simply NQP wrappers around inline PIR.
 class HLL::Compiler {
-
-    has $!language;
+    has @!stages;
     has $!parsegrammar;
     has $!parseactions;
+    has $!astgrammar;
+    has $!commandline_banner;
+    has $!commandline_prompt;
     has @!cmdoptions;
+    has $!usage;
+    has $!version;
+    has $!compiler_progname;
+    has $!language;
 
     INIT {
         HLL::Compiler.language('parrot');
