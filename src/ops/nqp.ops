@@ -152,6 +152,71 @@ inline op type_check(out INT, in PMC, in PMC) :base_core {
 
 /*
 
+=item publish_type_check_cache(WHAT, type_list)
+
+Publishes a type check cache, to be stored in the S-Table.
+
+=cut
+
+*/
+inline op publish_type_check_cache(in PMC, in PMC) :base_core {
+    if ($1->vtable->base_type == ro_id) {
+        STable *target_st = STABLE($1);
+        INTVAL items      = VTABLE_elements(interp, $2);
+        if (items > 0) {
+            PMC    **cache    = mem_sys_allocate(sizeof(PMC *) * items);
+            INTVAL i;
+            for (i = 0; i < items; i++)
+                cache[i] = VTABLE_get_pmc_keyed_int(interp, $2, i);
+            target_st->type_check_cache = cache;
+            target_st->type_check_cache_length = items;
+        }
+        else {
+            target_st->type_check_cache = NULL;
+            target_st->type_check_cache_length = 0;
+        }
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "First argument to publish_type_check_cache must be a RakudoObject");
+    }
+}
+
+
+/*
+
+=item publish_method_cache(WHAT, method_cache_hash)
+
+Publishes a method dispatch cache - essentially, a set of name to code object
+mappings.
+
+=cut
+
+*/
+inline op publish_method_cache(in PMC, in PMC) :base_core {
+    if ($1->vtable->base_type == ro_id) {
+        /* We copy the cache items to a Parrot hash to avoid making
+         * calls into the language's own hash implementation every
+         * time, which may be far more costly. */
+        STable *target_st = STABLE($1);
+        PMC    *cache     = pmc_new(interp, enum_class_Hash);
+        PMC    *iter      = VTABLE_get_iter(interp, $2);
+        while (VTABLE_get_bool(interp, iter)) {
+            STRING *name = VTABLE_shift_string(interp, iter);
+            PMC    *meth = VTABLE_get_pmc_keyed_str(interp, $2, name);
+            VTABLE_set_pmc_keyed_str(interp, cache, name, meth);
+        }
+        target_st->method_cache = cache;
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "First argument to publish_method_cache must be a RakudoObject");
+    }
+}
+
+
+/*
+
 =item repr_unbox_str()
 
 Tries to unbox a native string using the REPR API.
