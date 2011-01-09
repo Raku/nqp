@@ -20,31 +20,20 @@ class HLL::Compiler {
     has $!language;
 
     method BUILD() {
+        # Default stages.
         @!stages     := pir::split(' ', 'parse past post pir evalpmc');
+        
+        # Command options and usage.
         @!cmdoptions := pir::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v stagestats');
-        Q:PIR{
+        $!usage := "This compiler is based on HLL::Compler.\n\nOptions:\n";
+        for @!cmdoptions {
+            $!usage := $!usage ~ "    $_\n";
+        }
+        
+        # Version.
+        $!version := Q:PIR {
             .include 'iglobals.pasm'
             .include 'cclass.pasm'
-
-            $P1 = box <<'            USAGE'
-  This compiler is based on HLL::Compiler.
-
-  Options:
-            USAGE
-
-            .local pmc it
-            $P0 = getattribute self, '@!cmdoptions'
-            it = iter $P0
-          options_loop:
-            unless it goto options_end
-            $P3  = shift it
-            $P1 .= "    "
-            $P1 .= $P3
-            $P1 .= "\n"
-            goto options_loop
-          options_end:
-            setattribute self, '$!usage', $P1
-
             $S0  = '???'
             push_eh _handler
             $P0 = getinterp
@@ -52,24 +41,23 @@ class HLL::Compiler {
             $S0  = $P0['revision']   # also $I0 = P0['installed'] could be used
           _handler:
             pop_eh
-            $P2  = box 'This compiler is built with the Parrot Compiler Toolkit, parrot '
+            %r  = box 'This compiler is built with the Parrot Compiler Toolkit, parrot '
             if $S0 goto _revision_lab
-            $P2 .= 'version '
+            %r .= 'version '
             $S0 = $P0['VERSION']
             goto _is_version
           _revision_lab:
-            $P2 .= 'revision '
+            %r .= 'revision '
           _is_version:
-            $P2 .= $S0
-            $P2 .= '.'
-            setattribute self, '$!version', $P2
+            %r .= $S0
+            %r .= '.'
         };
     }
     
     my sub value_type($value) {
         pir::isa($value, 'NameSpace') 
-        ?? 'namespace'
-        !! (pir::isa($value, 'Sub') ?? 'sub' !! 'var')
+            ?? 'namespace'
+            !! (pir::isa($value, 'Sub') ?? 'sub' !! 'var')
     }
         
     method get_exports($module, :$tagset, *@symbols) {
@@ -282,9 +270,10 @@ class HLL::Compiler {
     method command_line(@args, *%adverbs) {
         Q:PIR {
             .include 'except_severity.pasm'
-            .local pmc args, adverbs
+            .local pmc args, adverbs, self
             args = find_lex '@args'
             adverbs = find_lex '%adverbs'
+            self = find_lex 'self'
 
             ## this bizarre piece of code causes the compiler to
             ## immediately abort if it looks like it's being run
@@ -430,10 +419,11 @@ class HLL::Compiler {
 
     method evalfiles(@files, *@args, *%adverbs) {
         Q:PIR {
-            .local pmc files, args, adverbs
+            .local pmc files, args, adverbs, self
             files = find_lex '@files'
             args = find_lex '@args'
             adverbs = find_lex '%adverbs'
+            self = find_lex 'self'
 
             unless null adverbs goto have_adverbs
             adverbs = new 'Hash'
@@ -484,9 +474,10 @@ class HLL::Compiler {
 
     method compile($source, *%adverbs) {
         Q:PIR {
-            .local pmc source, adverbs
+            .local pmc source, adverbs, self
             source = find_lex '$source'
             adverbs = find_lex '%adverbs'
+            self = find_lex 'self'
 
             .local pmc compiling, options
             compiling = new ['Hash']
@@ -541,9 +532,10 @@ class HLL::Compiler {
 
     method past($source, *%adverbs) {
         Q:PIR {
-            .local pmc source, adverbs
+            .local pmc source, adverbs, self
             source = find_lex '$source'
             adverbs = find_lex '%adverbs'
+            self = find_lex 'self'
 
           compile_astgrammar:
             .local pmc astgrammar_name
@@ -579,34 +571,16 @@ class HLL::Compiler {
     }
 
     method post($source, *%adverbs) {
-        Q:PIR {
-            .local pmc source, adverbs
-            source = find_lex '$source'
-            adverbs = find_lex '%adverbs'
-            $P0 = compreg 'PAST'
-            .tailcall $P0.'to_post'(source, adverbs :flat :named)
-        };
+        pir::compreg__Ps('PAST').to_post($source, |%adverbs)
     }
 
     method pir($source, *%adverbs) {
-        Q:PIR {
-            .local pmc source, adverbs
-            source = find_lex '$source'
-            adverbs = find_lex '%adverbs'
-            $P0 = compreg 'POST'
-            .tailcall $P0.'to_pir'(source, adverbs :flat :named)
-        };
+        pir::compreg__Ps('POST').to_pir($source, |%adverbs)
     }
 
     method evalpmc($source, *%adverbs) {
-        Q:PIR {
-            .local pmc source, adverbs
-            source = find_lex '$source'
-            adverbs = find_lex '%adverbs'
-            $P0 = compreg 'PIR'
-            $P1 = $P0(source)
-            .return($P1)
-        }
+        my $compiler := pir::compreg__Ps('PIR');
+        $compiler($source)
     }
 
     method dumper($obj, $name, *%options) {
@@ -634,39 +608,27 @@ class HLL::Compiler {
     }
 
     method removestage($stagename) {
-        Q:PIR {
-            .local string stagename
-            $P0 = find_lex '$stagename'
-            stagename = $P0
-
-            .local pmc stages, it, newstages
-            stages = getattribute self, '@!stages'
-            newstages = new 'ResizableStringArray'
-
-            it = iter stages
-          iter_loop:
-            unless it goto iter_end
-            .local pmc current
-            current = shift it
-            if current == stagename goto iter_loop
-              push newstages, current
-            goto iter_loop
-          iter_end:
-            setattribute self, '@!stages', newstages
-        };
+        my @new_stages := pir::new('ResizableStringArray');
+        for @!stages {
+            if $_ ne $stagename {
+                @new_stages.push($_);
+            }
+        }
+        @!stages := @new_stages;
     }
 
     method addstage($stagename, *%adverbs) {
         Q:PIR {
             .local string stagename
-            .local pmc adverbs
+            .local pmc adverbs, self
             $P0 = find_lex '$stagename'
             stagename = $P0
             adverbs = find_lex '%adverbs'
+            self = find_lex 'self'
 
             .local string position, target
             .local pmc stages
-            stages = getattribute self, '@!stages'
+            stages = self.'stages'()
 
             $I0 = exists adverbs['before']
             unless $I0 goto next_test
@@ -703,7 +665,7 @@ class HLL::Compiler {
 
             goto iter_loop
           iter_end:
-            setattribute self, '@!stages', newstages
+            self.'stages'(newstages)
             goto done
 
           simple_insert:
