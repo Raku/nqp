@@ -50,16 +50,6 @@
 .end
 
 
-.sub 'pir' :method
-    .param pmc source
-    .param pmc adverbs         :slurpy :named
-
-    $P0 = compreg 'POST'
-    $S0 = $P0.'to_pir'(source, adverbs :flat :named)
-    .return ($S0)
-.end
-
-
 .sub 'parse_name' :method
     .param string name
 

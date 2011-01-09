@@ -632,6 +632,97 @@ class HLL::Compiler {
         }
     }
 
+    method usage($name?) {
+        if $name {
+            say($name);
+        }
+        pir::say($!usage);
+        pir::exit__vi(0);
+    }
+
+    method version() {
+        pir::say($!version);
+        pir::exit__vi(0);
+    }
+
+    method removestage($stagename) {
+        Q:PIR {
+            .local string stagename
+            $P0 = find_lex '$stagename'
+            stagename = $P0
+
+            .local pmc stages, it, newstages
+            stages = getattribute self, '@!stages'
+            newstages = new 'ResizableStringArray'
+
+            it = iter stages
+          iter_loop:
+            unless it goto iter_end
+            .local pmc current
+            current = shift it
+            if current == stagename goto iter_loop
+              push newstages, current
+            goto iter_loop
+          iter_end:
+            setattribute self, '@!stages', newstages
+        };
+    }
+
+    method addstage($stagename, *%adverbs) {
+        Q:PIR {
+            .local string stagename
+            .local pmc adverbs
+            $P0 = find_lex '$stagename'
+            stagename = $P0
+            adverbs = find_lex '%adverbs'
+
+            .local string position, target
+            .local pmc stages
+            stages = getattribute self, '@!stages'
+
+            $I0 = exists adverbs['before']
+            unless $I0 goto next_test
+              position = 'before'
+              target = adverbs['before']
+            goto positional_insert
+
+          next_test:
+            $I0 = exists adverbs['after']
+            unless $I0 goto simple_insert
+              position = 'after'
+              target = adverbs['after']
+
+          positional_insert:
+            .local pmc it, newstages
+            newstages = new 'ResizableStringArray'
+
+            it = iter stages
+          iter_loop:
+            unless it goto iter_end
+            .local pmc current
+            current = shift it
+            unless current == target goto no_insert_before
+              unless position == 'before' goto no_insert_before
+                push newstages, stagename
+            no_insert_before:
+
+            push newstages, current
+
+            unless current == target goto no_insert_after
+              unless position == 'after' goto no_insert_after
+                push newstages, stagename
+            no_insert_after:
+
+            goto iter_loop
+          iter_end:
+            setattribute self, '@!stages', newstages
+            goto done
+
+          simple_insert:
+            push stages, stagename
+          done:
+        };
+    }
 }
 
 # Set up compiler for "Parrot" language.
