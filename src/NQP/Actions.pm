@@ -268,7 +268,7 @@ method statement_prefix:sym<INIT>($/) {
 
 method statement_prefix:sym<try>($/) {
     my $past := $<blorst>.ast;
-    if $past.WHAT ne 'PAST::Block()' {
+    unless $past ~~ PAST::Block {
         $past := PAST::Block.new($past, :blocktype('immediate'), :node($/));
     }
     unless $past.handlers() {
