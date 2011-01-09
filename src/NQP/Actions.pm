@@ -412,7 +412,7 @@ sub package($/) {
     # Add call to add_parent if we have one.
     # XXX Doesn't handle lexical classes yet.
     if $<package_def><parent> {
-        my @ns := pir::clone__PP($<package_def><parent><identifier>);
+        my @ns := pir::clone__PP($<package_def><parent>[0]<identifier>);
         my $name := ~@ns.pop;
         $*PACKAGE-SETUP.push(PAST::Op.new(
             :pasttype('callmethod'), :name('add_parent'),
