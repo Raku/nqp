@@ -11,8 +11,10 @@ module ABC {
 ABC::EXPORT::DEFAULT::alpha := ABC::alpha;
 $ABC::EXPORT::DEFAULT::gamma := $ABC::gamma;
 
-my $module := HLL::Compiler.get_module('ABC');
-my %exports := HLL::Compiler.get_exports($module);
+my $parrot-comp := pir::compreg__Ps('parrot');
+
+my $module := $parrot-comp.get_module('ABC');
+my %exports := $parrot-comp.get_exports($module);
 HLL::Compiler.import(pir::get_namespace__P, %exports);
 
 ok( alpha() eq 'alpha', "imported 'alpha' sub into current namespace" );

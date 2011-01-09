@@ -2,7 +2,7 @@
 
 plan(2);
 
-ok( HLL::Compiler.language eq 'parrot', 'HLL::Compiler reports parrot');
+ok( pir::compreg__Ps('parrot') ~~ HLL::Compiler, 'compreg for Parrot returns a HLL::Compiler' );
 
-ok( pir::compreg__Ps('parrot') =:= HLL::Compiler, 'compreg "parrot"' );
+ok( pir::compreg__Ps('parrot').language eq 'parrot', '.language gives "parrot"' );
 
