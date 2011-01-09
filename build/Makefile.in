@@ -71,6 +71,7 @@ P6REGEX_SOURCES = \
   src/Regex/P6Regex.pir \
   src/Regex/P6Regex/Grammar.pm \
   src/Regex/P6Regex/Actions.pm \
+  src/Regex/P6Regex/Compiler.pm \
 
 HLLGRAMMAR_SOURCES = \
   src/HLL/Grammar.pm \
@@ -80,6 +81,7 @@ HLLGRAMMAR_SOURCES = \
 NQP_SOURCES = \
   src/NQP/Grammar.pm \
   src/NQP/Actions.pm \
+  src/NQP/Compiler.pm \
   src/NQP/Compiler.pir \
 
 SETTING_SOURCES = \
@@ -113,6 +115,7 @@ HLLCOMPILER_PIR = gen/hllcompiler.pir
 P6REGEX_PBC     = P6Regex.pbc
 P6REGEX_G       = gen/p6regex-grammar.pir
 P6REGEX_A       = gen/p6regex-actions.pir
+P6REGEX_C       = gen/p6regex-compiler.pir
 
 P6GRAMMAR_PBC   = P6Grammar.pbc
 P6GRAMMAR_G     = gen/p6grammar-grammar.pir
@@ -122,6 +125,7 @@ NQP_PBC         = nqp.pbc
 NQP_HOW         = gen/nqp-how.pir
 NQP_G           = gen/nqp-grammar.pir
 NQP_A           = gen/nqp-actions.pir
+NQP_C           = gen/nqp-compiler.pir
 NQP_EXE         = nqp$(EXE)
 
 STAGE0_PBCS     = $(STAGE0)/$(HLL_PBC) $(STAGE0)/$(P6REGEX_PBC) $(STAGE0)/$(NQP_PBC) $(STAGE0)/$(REGEX_PBC)
@@ -247,6 +251,9 @@ $(STAGE1)/$(P6REGEX_PBC): $(STAGE0_PBCS) $(P6REGEX_SOURCES)
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE1)/$(P6REGEX_A) \
 	    src/Regex/P6Regex/Actions.pm
+	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
+	    --target=pir --output=$(STAGE1)/$(P6REGEX_C) \
+	    src/Regex/P6Regex/Compiler.pm
 	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(P6REGEX_PBC) \
 	    src/Regex/P6Regex.pir
 
@@ -264,6 +271,9 @@ $(STAGE1)/$(NQP_PBC): $(STAGE0_PBCS) $(NQP_SOURCES) $(HOW_COMBINED)
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE1)/$(NQP_A) \
 	    src/NQP/Actions.pm
+	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
+	    --target=pir --output=$(STAGE1)/$(NQP_C) \
+	    src/NQP/Compiler.pm
 	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(NQP_PBC) \
 	    src/NQP/Compiler.pir
 
@@ -291,6 +301,9 @@ $(STAGE2)/$(P6REGEX_PBC): $(STAGE1_PBCS) $(P6REGEX_SOURCES)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(P6REGEX_A) \
 	    src/Regex/P6Regex/Actions.pm
+	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
+	    --target=pir --output=$(STAGE2)/$(P6REGEX_C) \
+	    src/Regex/P6Regex/Compiler.pm
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(P6REGEX_PBC) \
 	    src/Regex/P6Regex.pir
 
@@ -305,6 +318,9 @@ $(STAGE2)/$(NQP_PBC): $(STAGE1_PBCS) $(NQP_SOURCES) $(HOW_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(NQP_A) \
 	    src/NQP/Actions.pm
+	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
+	    --target=pir --output=$(STAGE2)/$(NQP_C) \
+	    src/NQP/Compiler.pm
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(NQP_PBC) \
 	    src/NQP/Compiler.pir
 

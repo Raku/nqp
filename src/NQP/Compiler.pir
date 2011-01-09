@@ -22,22 +22,21 @@ NQP::Compiler - NQP compiler
 
 .include 'gen/nqp-grammar.pir'
 .include 'gen/nqp-actions.pir'
+.include 'gen/nqp-compiler.pir'
 .include 'src/cheats/nqp-builtins.pir'
 
 .namespace ['NQP';'Compiler']
 
 .sub '' :anon :load :init
-    .local pmc p6meta, nqpproto, nqpcomp
-    p6meta = get_hll_global 'P6metaclass'
-    nqpproto = p6meta.'new_class'('NQP::Compiler', 'parent'=>'HLL::Compiler')
+    .local pmc nqpproto, nqpcomp
+    nqpproto = get_hll_global ['NQP'], 'Compiler'
     nqpcomp = nqpproto.'new'()
-    nqpcomp.'BUILD'() # XXX
     nqpcomp.'language'('NQP-rx')
     $P0 = get_hll_global ['NQP'], 'Grammar'
     nqpcomp.'parsegrammar'($P0)
     $P0 = get_hll_global ['NQP'], 'Actions'
     nqpcomp.'parseactions'($P0)
-    $P0 = getattribute nqpcomp, '@!cmdoptions'
+    $P0 = nqpcomp.'commandline_options'()
     push $P0, 'parsetrace'
 .end
 

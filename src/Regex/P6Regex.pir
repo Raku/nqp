@@ -15,15 +15,14 @@ Regex::P6Regex - Parser/compiler for Perl 6 regexes
 
 .include 'gen/p6regex-grammar.pir'
 .include 'gen/p6regex-actions.pir'
+.include 'gen/p6regex-compiler.pir'
 
 .namespace ['Regex';'P6Regex';'Compiler']
 
 .sub '' :anon :load :init
-    .local pmc p6meta, p6regexproto, p6regex
-    p6meta = get_hll_global 'P6metaclass'
-    p6regexproto = p6meta.'new_class'('Regex::P6Regex::Compiler', 'parent'=>'HLL::Compiler')
+    .local pmc p6regexproto, p6regex
+    p6regexproto = get_hll_global ['Regex'; 'P6Regex'], 'Compiler'
     p6regex = p6regexproto.'new'()
-    p6regex.'BUILD'()
     p6regex.'language'('Regex::P6Regex')
     $P0 = get_hll_global ['Regex';'P6Regex'], 'Grammar'
     p6regex.'parsegrammar'($P0)

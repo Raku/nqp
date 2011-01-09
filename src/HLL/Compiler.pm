@@ -6,7 +6,7 @@ INIT {
 # as various additional things that initially appeared in the nqp-rx HLL::Compiler.
 # Conversion of it all the NQP is a work in progress; for now, many methods are
 # simply NQP wrappers around inline PIR.
-class HLL::Compiler {
+class_6m HLL::Compiler {
     has @!stages;
     has $!parsegrammar;
     has $!parseactions;
@@ -18,6 +18,13 @@ class HLL::Compiler {
     has $!version;
     has $!compiler_progname;
     has $!language;
+
+    # XXX HACK!!! Need a Mu. :-)
+    method new() {
+        my $obj := pir::repr_instance_of__PP(self);
+        $obj.BUILD();
+        $obj
+    }
 
     method BUILD() {
         # Default stages.
@@ -266,6 +273,13 @@ class HLL::Compiler {
         }
         $!compiler_progname;
     }
+    
+    method commandline_options(@value?) {
+        if +@value {
+            @!cmdoptions := @value;
+        }
+        @!cmdoptions;
+    }    
 
     method command_line(@args, *%adverbs) {
         Q:PIR {
@@ -530,6 +544,55 @@ class HLL::Compiler {
         };
     }
 
+    method parse($source, *%adverbs) {
+        Q:PIR {
+            .local pmc source, options, self
+            source = find_lex '$source'
+            options = find_lex '%adverbs'
+            self = find_lex 'self'
+
+            .local string tcode
+            tcode = options['transcode']
+            unless tcode goto transcode_done
+            .local pmc tcode_it
+            $P0 = split ' ', tcode
+            tcode_it = iter $P0
+          tcode_loop:
+            unless tcode_it goto transcode_done
+            tcode = shift tcode_it
+            push_eh tcode_fail
+            $I0 = find_encoding tcode
+            $S0 = source
+            $S0 = trans_encoding $S0, $I0
+            assign source, $S0
+            pop_eh
+            goto transcode_done
+          tcode_fail:
+            pop_eh
+            goto tcode_loop
+          transcode_done:
+
+            .local pmc parsegrammar, parseactions, match
+            parsegrammar = self.'parsegrammar'()
+
+            null parseactions
+            $S0 = options['target']
+            if $S0 == 'parse' goto have_parseactions
+            parseactions = self.'parseactions'()
+          have_parseactions:
+
+            .local int rxtrace
+            rxtrace = options['parsetrace']
+            match = parsegrammar.'parse'(source, 'p'=>0, 'actions'=>parseactions, 'rxtrace'=>rxtrace)
+            unless match goto err_parsefail
+            .return (match)
+
+          err_parsefail:
+            self.'panic'('Unable to parse source')
+            .return (match)
+        };
+    }
+
     method past($source, *%adverbs) {
         Q:PIR {
             .local pmc source, adverbs, self
@@ -673,11 +736,112 @@ class HLL::Compiler {
           done:
         };
     }
+
+    method parse_name($name) {
+        Q:PIR {
+            .local string name
+            $P0 = find_lex '$name'
+            name = $P0
+
+            # split name on ::
+            .local pmc ns
+            ns = split '::', name
+
+            # move any leading sigil to the last item
+            .local string sigil
+            $S0 = ns[0]
+            sigil = substr $S0, 0, 1
+            $I0 = index '$@%&', sigil
+            if $I0 < 0 goto sigil_done
+            $S0 = replace $S0, 0, 1, ''
+            ns[0] = $S0
+            $S0 = ns[-1]
+            $S0 = concat sigil, $S0
+            ns[-1] = $S0
+          sigil_done:
+
+            # remove any empty items from the list
+            .local pmc ns_it
+            ns_it = iter ns
+            ns = new ['ResizablePMCArray']
+          ns_loop:
+            unless ns_it goto ns_done
+            $S0 = shift ns_it
+            unless $S0 > '' goto ns_loop
+            push ns, $S0
+            goto ns_loop
+          ns_done:
+
+            # return the result
+            .return (ns)
+        };
+    }
+
+    method lineof($target, $pos, :$cache) {
+        Q:PIR {
+            .local pmc target, linepos
+            .local int pos, cache
+            target = find_lex '$target'
+            $P0 = find_lex '$pos'
+            pos = $P0
+            $P0 = find_lex '$cache'
+            cache = $P0
+
+            .include 'cclass.pasm'
+
+            # If we've previously cached C<linepos> for target, we use it.
+            unless cache goto linepos_build
+            linepos = getprop '!linepos', target
+            unless null linepos goto linepos_done
+
+            # calculate a new linepos array.
+          linepos_build:
+            linepos = new ['ResizableIntegerArray']
+            unless cache goto linepos_build_1
+            setprop target, '!linepos', linepos
+          linepos_build_1:
+            .local string s
+            .local int jpos, eos
+            s = target
+            eos = length s
+            jpos = 0
+            # Search for all of the newline markers in C<target>.  When we
+            # find one, mark the ending offset of the line in C<linepos>.
+          linepos_loop:
+            jpos = find_cclass .CCLASS_NEWLINE, s, jpos, eos
+            unless jpos < eos goto linepos_done
+            $I0 = ord s, jpos
+            inc jpos
+            push linepos, jpos
+            # Treat \r\n as a single logical newline.
+            if $I0 != 13 goto linepos_loop
+            $I0 = ord s, jpos
+            if $I0 != 10 goto linepos_loop
+            inc jpos
+            goto linepos_loop
+          linepos_done:
+
+            # We have C<linepos>, so now we search the array for the largest
+            # element that is not greater than C<pos>.  The index of that
+            # element is the line number to be returned.
+            # (Potential optimization: use a binary search.)
+            .local int line, count
+            count = elements linepos
+            line = 0
+          line_loop:
+            if line >= count goto line_done
+            $I0 = linepos[line]
+            if $I0 > pos goto line_done
+            inc line
+            goto line_loop
+          line_done:
+            .return (line)
+        };
+    }
 }
 
 # Set up compiler for "Parrot" language.
-INIT {
-    my $pl := HLL::Compiler.new();
-    $pl.BUILD();
-    $pl.language('parrot');
-}
+#INIT {
+#    my $pl := HLL::Compiler.new();
+#    $pl.language('parrot');
+#}
