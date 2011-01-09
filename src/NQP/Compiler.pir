@@ -35,7 +35,7 @@ NQP::Compiler - NQP compiler
     nqpproto.'parsegrammar'($P0)
     $P0 = get_hll_global ['NQP'], 'Actions'
     nqpproto.'parseactions'($P0)
-    $P0 = getattribute nqpproto, '@cmdoptions'
+    $P0 = getattribute nqpproto, '@!cmdoptions'
     push $P0, 'parsetrace'
 .end
 

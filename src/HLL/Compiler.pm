@@ -3,9 +3,12 @@ INIT {
 }
 
 
-class HLL::Compiler is PCT::HLLCompiler {
+class HLL::Compiler {
 
     has $!language;
+    has $!parsegrammar;
+    has $!parseactions;
+    has @!cmdoptions;
 
     INIT {
         HLL::Compiler.language('parrot');
@@ -170,4 +173,19 @@ class HLL::Compiler is PCT::HLLCompiler {
             };
         $*CTXSAVE := 0;
     }
+    
+    method parsegrammar($value?) {
+        if pir::defined($value) {
+            $!parsegrammar := $value;
+        }
+        $!parsegrammar;
+    }
+
+    method parseactions($value?) {
+        if pir::defined($value) {
+            $!parseactions := $value;
+        }
+        $!parseactions;
+    }
+
 }
