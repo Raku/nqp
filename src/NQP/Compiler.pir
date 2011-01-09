@@ -27,15 +27,17 @@ NQP::Compiler - NQP compiler
 .namespace ['NQP';'Compiler']
 
 .sub '' :anon :load :init
-    .local pmc p6meta, nqpproto
+    .local pmc p6meta, nqpproto, nqpcomp
     p6meta = get_hll_global 'P6metaclass'
     nqpproto = p6meta.'new_class'('NQP::Compiler', 'parent'=>'HLL::Compiler')
-    nqpproto.'language'('NQP-rx')
+    nqpcomp = nqpproto.'new'()
+    nqpcomp.'BUILD'() # XXX
+    nqpcomp.'language'('NQP-rx')
     $P0 = get_hll_global ['NQP'], 'Grammar'
-    nqpproto.'parsegrammar'($P0)
+    nqpcomp.'parsegrammar'($P0)
     $P0 = get_hll_global ['NQP'], 'Actions'
-    nqpproto.'parseactions'($P0)
-    $P0 = getattribute nqpproto, '@!cmdoptions'
+    nqpcomp.'parseactions'($P0)
+    $P0 = getattribute nqpcomp, '@!cmdoptions'
     push $P0, 'parsetrace'
 .end
 

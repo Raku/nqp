@@ -19,8 +19,56 @@ class HLL::Compiler {
     has $!compiler_progname;
     has $!language;
 
-    INIT {
-        HLL::Compiler.language('parrot');
+    # XXX WTF was this for? Sets an attribute on a type object?
+    #INIT {
+    #    HLL::Compiler.language('parrot');
+    #}
+
+    method BUILD() {
+        @!stages     := pir::split(' ', 'parse past post pir evalpmc');
+        @!cmdoptions := pir::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v stagestats');
+        Q:PIR{
+            .include 'iglobals.pasm'
+            .include 'cclass.pasm'
+
+            $P1 = box <<'            USAGE'
+  This compiler is based on HLL::Compiler.
+
+  Options:
+            USAGE
+
+            .local pmc it
+            $P0 = getattribute self, '@!cmdoptions'
+            it = iter $P0
+          options_loop:
+            unless it goto options_end
+            $P3  = shift it
+            $P1 .= "    "
+            $P1 .= $P3
+            $P1 .= "\n"
+            goto options_loop
+          options_end:
+            setattribute self, '$!usage', $P1
+
+            $S0  = '???'
+            push_eh _handler
+            $P0 = getinterp
+            $P0 = $P0[.IGLOBALS_CONFIG_HASH]
+            $S0  = $P0['revision']   # also $I0 = P0['installed'] could be used
+          _handler:
+            pop_eh
+            $P2  = box 'This compiler is built with the Parrot Compiler Toolkit, parrot '
+            if $S0 goto _revision_lab
+            $P2 .= 'version '
+            $S0 = $P0['VERSION']
+            goto _is_version
+          _revision_lab:
+            $P2 .= 'revision '
+          _is_version:
+            $P2 .= $S0
+            $P2 .= '.'
+            setattribute self, '$!version', $P2
+        };
     }
     
     my sub value_type($value) {
