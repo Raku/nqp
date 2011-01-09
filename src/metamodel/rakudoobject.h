@@ -26,11 +26,22 @@ typedef struct {
     /* The method finder. */
     PMC * (*find_method) (PARROT_INTERP, PMC *obj, STRING *name, INTVAL hint);
 
+    /* By-name method dispatch cache. */
+    PMC *method_cache;
+
     /* The computed v-table for static dispatch. */
     PMC **vtable;
 
     /* The length of the v-table. */
     INTVAL vtable_length;
+
+    /* Array of type objects. If this is set, then it is expected to contain
+     * the type objects of all types that this type is equivalent to (e.g.
+     * all the things it isa and all the things it does). */
+    PMC **type_check_cache;
+
+    /* The length of the type check cache. */
+    INTVAL type_check_cache_length;
 
     /* An ID solely for use in caches that last a VM instance. Thus it
      * should never, ever be serialized and you should NEVER make a

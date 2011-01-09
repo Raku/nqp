@@ -51,10 +51,19 @@ PMC * wrap_object(PARROT_INTERP, void *obj) {
 static PMC * default_find_method(PARROT_INTERP, PMC *obj, STRING *name, INTVAL hint) {
     /* See if we can find it by hint. */
     STable *st = STABLE(obj);
-    if (hint != NO_HINT && st->vtable && hint < st->vtable_length) {
+    PMC *cached_method;
+    if (st->vtable && hint != NO_HINT && hint < st->vtable_length) {
         /* Yes, just grab it from the v-table. */
         return st->vtable[hint];
     }
+
+    /* Try the by-name method cache, if the HOW published one. */
+    else if (st->method_cache && !PMC_IS_NULL(cached_method =
+            VTABLE_get_pmc_keyed_str(interp, st->method_cache, name))) {
+        return cached_method;
+    }
+
+    /* Otherwise delegate to the HOW. */
     else
     {
         /* Find the finder - the find_method method. */
@@ -63,6 +72,7 @@ static PMC * default_find_method(PARROT_INTERP, PMC *obj, STRING *name, INTVAL h
         PMC *meth = STABLE(HOW)->find_method(interp, HOW, find_method_str, NO_HINT);
         
         /* Call it to get the method to call. */
+        /* XXX Really want a way to do this without creating a nested runloop. */
         PMC *result;
         Parrot_ext_call(interp, meth, "PiPS->P", HOW, obj, name, &result);
         return result;
