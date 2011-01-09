@@ -35,6 +35,9 @@ typedef struct {
     /* The length of the v-table. */
     INTVAL vtable_length;
 
+    /* The type checker. */
+    INTVAL (*type_check) (PARROT_INTERP, PMC *obj, PMC *checkee);
+
     /* Array of type objects. If this is set, then it is expected to contain
      * the type objects of all types that this type is equivalent to (e.g.
      * all the things it isa and all the things it does). */

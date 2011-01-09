@@ -10,8 +10,9 @@ static INTVAL stable_id = 0;
 static INTVAL repr_id   = 0;
 static INTVAL ro_id     = 0;
 
-/* Cached find_method string. */
+/* Cached strings. */
 static STRING *find_method_str = NULL;
+static STRING *type_check_str = NULL;
 
 /* Initializes the RakudoObject object model. */
 void RakudoObject_initialize(PARROT_INTERP) {
@@ -20,6 +21,7 @@ void RakudoObject_initialize(PARROT_INTERP) {
     repr_id         = pmc_type(interp, Parrot_str_new(interp, "REPR", 0));
     ro_id           = pmc_type(interp, Parrot_str_new(interp, "RakudoObject", 0));
     find_method_str = Parrot_str_new_constant(interp, "find_method");
+    type_check_str  = Parrot_str_new_constant(interp, "type_check");
 
     /* Build representations and initializes the representation registry. */
     REPR_initialize_registry(interp);
@@ -79,10 +81,36 @@ static PMC * default_find_method(PARROT_INTERP, PMC *obj, STRING *name, INTVAL h
     }
 }
 
+/* This is the default type checking implementation. Note: it may also
+ * be the only one we end up with since the HOW is the authority here.
+ * So we may end up not calling this through the S-Table in the end. */
+static INTVAL default_type_check (PARROT_INTERP, PMC *obj, PMC *checkee) {
+    STable *st = STABLE(obj);
+    if (st->type_check_cache) {
+        /* We have the cache, so just look for the type object we
+         * want to be in there. */
+        INTVAL i;
+        for (i = 0; i < st->type_check_cache_length; i++)
+            if (st->type_check_cache[i] == checkee)
+                return 1;
+        return 0;
+    }
+    else
+    {
+        /* Find .^type_check and call it. */
+        PMC *HOW = st->HOW;
+        PMC *meth = STABLE(HOW)->find_method(interp, HOW, type_check_str, NO_HINT);
+        PMC *result;
+        Parrot_ext_call(interp, meth, "PiPP->P", HOW, obj, checkee, &result);
+        return VTABLE_get_bool(interp, result);
+    }
+}
+
 /* Creates an STable that references the given REPR and HOW. */
 PMC * create_stable(PARROT_INTERP, PMC *REPR, PMC *HOW) {
     PMC *st_pmc = pmc_new_init(interp, stable_id, HOW);
     STABLE_STRUCT(st_pmc)->REPR = REPR;
     STABLE_STRUCT(st_pmc)->find_method = default_find_method;
+    STABLE_STRUCT(st_pmc)->type_check = default_type_check;
     return st_pmc;
 }

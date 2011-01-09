@@ -126,6 +126,30 @@ inline op repr_defined(out INT, in PMC) :base_core {
             "Can only use repr_defined on a RakudoObject");
 }
 
+
+/*
+
+=item type_check(obj, wanted_type)
+
+Checks if the given object's type accepts the checked type, using the
+type check cache if one was published. Note, assumes that $3 is a type
+object. If you're not sure that's what you have, call C<get_what> to
+make sure.
+
+=cut
+
+*/
+inline op type_check(out INT, in PMC, in PMC) :base_core {
+    if ($2->vtable->base_type == ro_id && $3->vtable->base_type == ro_id) {
+        $1 = STABLE($2)->type_check(interp, $2, $3);
+    }    
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use type_check on two RakudoObjects");
+    }
+}
+
+
 /*
 
 =item repr_unbox_str()
