@@ -839,9 +839,3 @@ class_6m HLL::Compiler {
         };
     }
 }
-
-# Set up compiler for "Parrot" language.
-#INIT {
-#    my $pl := HLL::Compiler.new();
-#    $pl.language('parrot');
-#}

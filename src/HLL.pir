@@ -24,6 +24,12 @@ and HLL::Grammar.
 .include 'gen/hllgrammar-actions.pir'
 .include 'gen/hllcompiler.pir'
 
+.sub '' :anon :load :init
+    $P0 = get_hll_global ['HLL'], 'Compiler'
+    $P0 = $P0.'new'()
+    $P0.'language'('parrot')
+.end
+
 =back
 
 =head1 AUTHOR
