@@ -19,11 +19,6 @@ class HLL::Compiler {
     has $!compiler_progname;
     has $!language;
 
-    # XXX WTF was this for? Sets an attribute on a type object?
-    #INIT {
-    #    HLL::Compiler.language('parrot');
-    #}
-
     method BUILD() {
         @!stages     := pir::split(' ', 'parse past post pir evalpmc');
         @!cmdoptions := pir::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v stagestats');
@@ -236,29 +231,29 @@ class HLL::Compiler {
     }
 
     method stages(@value?) {
-        if pir::defined(@value) {
+        if +@value {
             @!stages := @value;
         }
         @!stages;
     }
     
-    method parsegrammar($value?) {
-        if pir::defined($value) {
-            $!parsegrammar := $value;
+    method parsegrammar(*@value) {
+        if +@value {
+            $!parsegrammar := @value[0];
         }
         $!parsegrammar;
     }
 
-    method parseactions($value?) {
-        if pir::defined($value) {
-            $!parseactions := $value;
+    method parseactions(*@value) {
+        if +@value {
+            $!parseactions := @value[0];
         }
         $!parseactions;
     }
     
-    method astgrammar($value?) {
-        if pir::defined($value) {
-            $!astgrammar := $value;
+    method astgrammar(*@value) {
+        if +@value {
+            $!astgrammar := @value[0];
         }
         $!astgrammar;
     }
@@ -556,121 +551,6 @@ class HLL::Compiler {
         };
     }
 
-    method parse($source, *%adverbs) {
-        Q:PIR {
-            .local pmc source, adverbs, parsegrammar, top
-            source = find_lex '$source'
-            adverbs = find_lex '%adverbs'
-
-            .local string tcode
-            tcode = adverbs['transcode']
-            unless tcode goto transcode_done
-            .local pmc tcode_it
-            $P0 = split ' ', tcode
-            tcode_it = iter $P0
-          tcode_loop:
-            unless tcode_it goto transcode_done
-            tcode = shift tcode_it
-            push_eh tcode_fail
-            $I0 = find_encoding tcode
-            $S0 = source
-            $S0 = trans_encoding $S0, $I0
-            assign source, $S0
-            pop_eh
-            goto transcode_done
-          tcode_fail:
-            pop_eh
-            goto tcode_loop
-          transcode_done:
-
-            .local string target
-            target = adverbs['target']
-            target = downcase target
-
-            parsegrammar = self.'parsegrammar'()
-            $I0 = can parsegrammar, 'TOP'
-            unless $I0 goto parsegrammar_string
-            top = find_method parsegrammar, 'TOP'
-            goto have_top
-          parsegrammar_string:
-            $S0 = typeof parsegrammar
-            eq $S0, 'NameSpace', parsegrammar_ns
-            $P0 = self.'parse_name'(parsegrammar)
-            $S0 = pop $P0
-            $P1 = get_hll_global $P0, $S0
-            $I0 = can $P1, 'TOP'
-            unless $I0 goto parsegrammar_ns_string
-            top = find_method $P1, 'TOP'
-            goto have_top
-          parsegrammar_ns_string:
-            $P0 = self.'parse_name'(parsegrammar)
-            top = get_hll_global $P0, 'TOP'
-            unless null top goto have_top
-            goto err_notop
-          parsegrammar_ns:
-            top = parsegrammar['TOP']
-            unless null top goto have_top
-          err_notop:
-            self.'panic'('Cannot find TOP regex in ', parsegrammar)
-          have_top:
-            .local pmc parseactions, action
-            null action
-            if target == 'parse' goto have_action
-            parseactions = self.'parseactions'()
-            $I0 = isa parseactions, ['Undef']
-            if $I0 goto have_action
-            ##  if parseactions is a protoobject, use it directly
-            $I0 = isa parseactions, 'P6protoobject'
-            if $I0 goto action_exact
-            ##  if parseactions is a Class or array, make action directly from that
-            $I0 = isa parseactions, 'Class'
-            if $I0 goto action_make
-            $I0 = isa parseactions, 'NameSpace'
-            if $I0 goto action_namespace
-            $I0 = does parseactions, 'array'
-            if $I0 goto action_make
-            ##  if parseactions is not a String, use it directly.
-            $I0 = isa parseactions, 'String'
-            if $I0 goto action_string
-          action_exact:
-            action = parseactions
-            goto have_action
-          action_namespace:
-            $P0 = get_class parseactions
-            action = new $P0
-            goto have_action
-          action_string:
-            ##  Try the string itself, if that fails try splitting on '::'
-            $P0 = get_class parseactions
-            unless null $P0 goto action_make
-            $S0 = parseactions
-            parseactions = split '::', $S0
-            push_eh err_bad_parseactions
-            $P0 = get_class parseactions
-            if null $P0 goto err_bad_parseactions
-            pop_eh
-          action_make:
-            action = new parseactions
-          have_action:
-            .local pmc match
-            match = top(source, 'grammar' => parsegrammar, 'action' => action)
-            unless match goto err_failedparse
-            .return (match)
-
-          err_no_parsegrammar:
-            self.'panic'('Missing parsegrammar in compiler')
-            .return ()
-          err_failedparse:
-            self.'panic'('Failed to parse source')
-            .return ()
-          err_bad_parseactions:
-            pop_eh
-            $P0 = self.'parseactions'()
-            self.'panic'('Unable to find action grammar ', $P0)
-            .return ()
-        };
-    }
-
     method past($source, *%adverbs) {
         Q:PIR {
             .local pmc source, adverbs
@@ -752,4 +632,11 @@ class HLL::Compiler {
         }
     }
 
+}
+
+# Set up compiler for "Parrot" language.
+INIT {
+    my $pl := HLL::Compiler.new();
+    $pl.BUILD();
+    $pl.language('parrot');
 }
