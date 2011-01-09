@@ -415,29 +415,17 @@ class HLL::Compiler {
     }
 
     method process_args(@args) {
-        Q:PIR {
-            load_bytecode 'Getopt/Obj.pbc'
+        # First argument is the program name.
+        self.compiler_progname(@args.shift);
 
-            .local pmc args
-            args = find_lex '@args'
-            .local string arg0
-            arg0 = shift args
-            self.'compiler_progname'(arg0)
-
-            .local pmc getopts
-            getopts = new ['Getopt';'Obj']
-            getopts.'notOptStop'(1)
-            $P0 = getattribute self, '@!cmdoptions'
-            .local pmc it
-            it = iter $P0
-          getopts_loop:
-            unless it goto getopts_end
-            $S0 = shift it
-            push getopts, $S0
-            goto getopts_loop
-          getopts_end:
-            .tailcall getopts.'get_options'(args)
-        };
+        # Use Getopt::Obj to proccess the rest.
+        pir::load_bytecode('Getopt/Obj.pbc');
+        my $getopts := Q:PIR { %r = new ['Getopt';'Obj'] };
+        $getopts.notOptStop(1);
+        for @!cmdoptions {
+            pir::push__vPs($getopts, $_)
+        }
+        $getopts.get_options(@args);
     }
 
     method evalfiles(@files, *@args, *%adverbs) {
