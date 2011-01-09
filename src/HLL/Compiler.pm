@@ -741,4 +741,15 @@ class HLL::Compiler {
         }
     }
 
+    method dumper($obj, $name, *%options) {
+        if %options<dumper> {
+            pir::load_bytecode('PCT/Dumper.pbc');
+            my $dumper := PCT::Dumper{pir::downcase__SS(%options<dumper>)};
+            $dumper($obj, $name)
+        }
+        else {
+            _dumper($obj, $name)
+        }
+    }
+
 }
