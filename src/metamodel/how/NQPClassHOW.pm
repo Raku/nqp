@@ -257,6 +257,6 @@ knowhow NQPClassHOW {
                 return $found;
             }
         }
-        pir::die("Could not find method " ~ $name);
+        pir::null__P()
     }
 }
