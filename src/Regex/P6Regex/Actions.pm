@@ -1,4 +1,4 @@
-class Regex::P6Regex::Actions is HLL::Actions;
+class_6m Regex::P6Regex::Actions is HLL::Actions;
 
 ## this will eventually be handled using contextuals
 our @MODIFIERS;
