@@ -36,14 +36,20 @@ knowhow NQPClassHOW {
     ##
 
     # Creates a new instance of this meta-class.
-    method new() {
-        pir::repr_instance_of__PP(self)
+    method new(:$name) {
+        my $obj := pir::repr_instance_of__PP(self);
+        $obj.BUILD(:name($name));
+        $obj
+    }
+
+    method BUILD(:$name) {
+        $!name := $name;
     }
 
     # Create a new meta-class instance, and then a new type object
     # to go with it, and return that.
-    method new_type(:$repr = 'P6opaque') {
-        my $metaclass := self.new();
+    method new_type(:$name = '<anon>', :$repr = 'P6opaque') {
+        my $metaclass := self.new(:name($name));
         pir::repr_type_object_for__PPS($metaclass, $repr);
     }
 
@@ -198,6 +204,10 @@ knowhow NQPClassHOW {
 
     method method_table($obj) {
         %!methods
+    }
+
+    method name($obj) {
+        $!name
     }
 
     method attributes($obj, :$local!) {

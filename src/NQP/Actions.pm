@@ -390,7 +390,8 @@ sub package($/) {
             PAST::Var.new( :name('type_obj'), :scope('register'), :isdecl(1) ),
             PAST::Op.new(
                 :pasttype('callmethod'), :name('new_type'),
-                PAST::Var.new( :name(%*HOW{~$<sym>}), :namespace(''), :scope('package') )
+                PAST::Var.new( :name(%*HOW{~$<sym>}), :namespace(''), :scope('package') ),
+                PAST::Val.new( :value($name), :named('name') )
             )
         ),
         PAST::Op.new( :pasttype('bind'),
