@@ -96,6 +96,10 @@ knowhow NQPClassHOW {
             $!composed := 1;
         }
 
+        # Publish type and XXX method caches.
+        self.publish_type_cache($obj);
+        #self.publish_method_cache($obj);
+
         $obj
     }
 
@@ -186,6 +190,11 @@ knowhow NQPClassHOW {
         @result := c3_merge(@merge_list);
         @result.unshift($accepted);
         return @result;
+    }
+
+    method publish_type_cache($obj) {
+        # XXX TODO: when we have roles, need these here too.
+        pir::publish_type_check_cache($obj, @!mro)
     }
 
     ##
