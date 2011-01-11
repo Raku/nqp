@@ -159,7 +159,7 @@ METAMODEL_OBJS   = ../metamodel/rakudoobject$(O) ../metamodel/repr_registry$(O) 
                    ../metamodel/reprs/P6str$(O) ../metamodel/reprs/P6num$(O)
 
 HOW_SOURCES  = src/metamodel/how/KnowHOWAttribute.pm src/metamodel/how/NQPClassHOW.pm \
-               src/metamodel/how/NQPAttribute.pm
+               src/metamodel/how/NQPAttribute.pm src/metamodel/how/NQPMu.pm
 HOW_COMBINED = src/gen/how.pm
 
 
