@@ -279,6 +279,7 @@ token package_declarator:sym<knowhow> {
     <sym> <package_def>
 }
 token package_declarator:sym<class> {
+    :my $*PACKAGE-SETUP := PAST::Stmts.new();
     :my $*PKGDECL := 'class';
     <sym> <package_def>
 }

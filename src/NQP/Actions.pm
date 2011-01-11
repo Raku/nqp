@@ -374,7 +374,7 @@ method variable($/) {
 
 method package_declarator:sym<module>($/)  { make $<package_def>.ast; }
 method package_declarator:sym<knowhow>($/) { make package($/); }
-method package_declarator:sym<class>($/)   { make old_package($/) }
+method package_declarator:sym<class>($/)   { make package($/) }
 method package_declarator:sym<class_6m>($/) { make package($/) }
 method package_declarator:sym<grammar>($/) { make old_package($/) }
 method package_declarator:sym<role>($/)    { make package($/); }
