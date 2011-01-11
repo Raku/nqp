@@ -1,4 +1,4 @@
-class_6m HLL::Actions;
+class HLL::Actions;
 
 our sub string_to_int($src, $base) {
     Q:PIR {

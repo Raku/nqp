@@ -1,4 +1,4 @@
-class_6m NQP::Actions is HLL::Actions;
+class NQP::Actions is HLL::Actions;
 
 our @BLOCK;
 
@@ -1032,7 +1032,7 @@ method infix:sym<~~>($/) {
 }
 
 
-class_6m NQP::RegexActions is Regex::P6Regex::Actions {
+class NQP::RegexActions is Regex::P6Regex::Actions {
 
     method metachar:sym<:my>($/) {
         my $past := $<statement>.ast;

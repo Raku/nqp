@@ -6,7 +6,7 @@ INIT {
 # as various additional things that initially appeared in the nqp-rx HLL::Compiler.
 # Conversion of it all the NQP is a work in progress; for now, many methods are
 # simply NQP wrappers around inline PIR.
-class_6m HLL::Compiler {
+class HLL::Compiler {
     has @!stages;
     has $!parsegrammar;
     has $!parseactions;
