@@ -12,7 +12,6 @@ method TOP() {
     my %*HOW;
     %*HOW<knowhow> := 'KnowHOW';
     %*HOW<class> := 'NQPClassHOW';
-    %*HOW<class_6m> := 'NQPClassHOW';
     %*HOW<grammar> := 'NQPGrammarHOW';
     %*HOW<role> := 'NQPRoleHOW';
 
@@ -279,11 +278,6 @@ token package_declarator:sym<knowhow> {
     <sym> <package_def>
 }
 token package_declarator:sym<class> {
-    :my $*PACKAGE-SETUP := PAST::Stmts.new();
-    :my $*PKGDECL := 'class';
-    <sym> <package_def>
-}
-token package_declarator:sym<class_6m> {
     :my $*PACKAGE-SETUP := PAST::Stmts.new();
     :my $*PKGDECL := 'class';
     <sym> <package_def>
