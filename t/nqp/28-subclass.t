@@ -30,5 +30,5 @@ $xyz.bar();
 my $xyzhow := $xyz.HOW;
 if $xyzhow.isa($xyz, ABC) { say('ok 4') }
 if $xyzhow.isa($xyz, XYZ) { say('ok 5') }
-say( $xyzhow.isa($abc, XYZ) ?? 'not ok 6' !! 'ok 6' );
+say( $abc.HOW.isa($abc, XYZ) ?? 'not ok 6' !! 'ok 6' );
 
