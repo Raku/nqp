@@ -579,58 +579,62 @@ method routine_def($/) {
 
 
 method method_def($/) {
-    if $*PACKAGE-SETUP {
-        # Set up block including adding self (invocant) parameter.
-        my $past := $<blockoid>.ast;
-        $past.control('return_pir');
-        $past[0].unshift( PAST::Var.new( :name('self'), :scope('parameter') ) );
-        $past.symbol('self', :scope('lexical') );
-        
-        # Install it where it should go (methods table / namespace).
-        if $<deflongname> {
-            my $name := ~$<deflongname>[0].ast;
-            $past.name($name);
-            $*PACKAGE-SETUP.push(PAST::Op.new(
-                :pasttype('callmethod'), :name($*MULTINESS eq 'multi' ?? 'add_multi_method' !! 'add_method'),
-                PAST::Op.new(
-                    # XXX Should be nqpop at some point.
-                    :pirop('get_how PP'),
-                    PAST::Var.new( :name('type_obj'), :scope('register') )
-                ),
-                PAST::Var.new( :name('type_obj'), :scope('register') ),
-                PAST::Val.new( :value($name) ),
-                PAST::Val.new( :value($past) )
-            ));
-        }
-        if $*SCOPE eq 'our' {
-            $past.pirflags(':nsentry');
-        }
+    # XXX Remove this when grammar switches over to using 6model.
+    unless $*PACKAGE-SETUP {
+        return OLD_method_def($/);
+    }
 
-        $past<block_past> := $past;
-        make $past;
+    # Set up block including adding self (invocant) parameter.
+    my $past := $<blockoid>.ast;
+    $past.control('return_pir');
+    $past[0].unshift( PAST::Var.new( :name('self'), :scope('parameter') ) );
+    $past.symbol('self', :scope('lexical') );
+    
+    # Install it where it should go (methods table / namespace).
+    if $<deflongname> {
+        my $name := ~$<deflongname>[0].ast;
+        $past.name($name);
+        $*PACKAGE-SETUP.push(PAST::Op.new(
+            :pasttype('callmethod'), :name($*MULTINESS eq 'multi' ?? 'add_multi_method' !! 'add_method'),
+            PAST::Op.new(
+                # XXX Should be nqpop at some point.
+                :pirop('get_how PP'),
+                PAST::Var.new( :name('type_obj'), :scope('register') )
+            ),
+            PAST::Var.new( :name('type_obj'), :scope('register') ),
+            PAST::Val.new( :value($name) ),
+            PAST::Val.new( :value($past) )
+        ));
     }
-    else {
-        my $past := $<blockoid>.ast;
-        $past.blocktype('method');
-        if $*SCOPE eq 'our' {
-            $past.pirflags(':nsentry');
-        }
-        $past.control('return_pir');
-        $past[0].unshift( PAST::Op.new( :inline('    .lex "self", self') ) );
-        $past.symbol('self', :scope('lexical') );
-        if $<deflongname> {
-            my $name := ~$<deflongname>[0].ast;
-            $past.name($name);
-        }
-        if $*MULTINESS eq 'multi' { $past.multi().unshift('_'); }
-        $past<block_past> := $past;
-        make $past;
+    if $*SCOPE eq 'our' {
+        $past.pirflags(':nsentry');
     }
+
+    $past<block_past> := $past;
+    make $past;
+}
+
+# XXX Toss this when grammar moves over to 6model.
+sub OLD_method_def($/) {
+    my $past := $<blockoid>.ast;
+    $past.blocktype('method');
+    if $*SCOPE eq 'our' {
+        $past.pirflags(':nsentry');
+    }
+    $past.control('return_pir');
+    $past[0].unshift( PAST::Op.new( :inline('    .lex "self", self') ) );
+    $past.symbol('self', :scope('lexical') );
+    if $<deflongname> {
+        my $name := ~$<deflongname>[0].ast;
+        $past.name($name);
+    }
+    if $*MULTINESS eq 'multi' { $past.multi().unshift('_'); }
+    $past<block_past> := $past;
     if $<trait> {
         for $<trait> { $_.ast()($/); }
     }
+    make $past;
 }
-
 
 method signature($/) {
     my $BLOCKINIT := @BLOCK[0][0];
