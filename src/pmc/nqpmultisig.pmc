@@ -1,0 +1,16 @@
+pmclass NQPMultiSig auto_attrs dynpmc group nqp {
+    ATTR PMC *types;
+    ATTR PMC *definedness_constraints;
+
+    VTABLE void init() {
+        PObj_custom_mark_SET(SELF);
+    }
+
+    VTABLE void mark() {
+        PMC *types, *definednesses;
+        GETATTR_NQPMultiSig_types(interp, SELF, types);
+        GETATTR_NQPMultiSig_types(interp, SELF, definednesses);
+        Parrot_gc_mark_PMC_alive(interp, types);
+        Parrot_gc_mark_PMC_alive(interp, definednesses);
+    }
+}
