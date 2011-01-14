@@ -8,6 +8,7 @@ BEGIN_OPS_PREAMBLE
 /* 6modely includes. */
 #include "../metamodel/rakudoobject.h"
 #include "../metamodel/repr_registry.h"
+#include "../pmc/pmc_dispatchersub.h"
 
 /* Did we do the dynop setup yet?
  * XXX Relies on this happening once in a single thread at startup. */
@@ -17,6 +18,7 @@ static INTVAL initialized = 0;
 static INTVAL stable_id = 0;
 static INTVAL repr_id   = 0;
 static INTVAL ro_id     = 0;
+static INTVAL disp_id   = 0;
 
 END_OPS_PREAMBLE
 
@@ -37,6 +39,7 @@ inline op nqp_dynop_setup() :base_core {
         stable_id = pmc_type(interp, Parrot_str_new(interp, "STable", 0));
         repr_id   = pmc_type(interp, Parrot_str_new(interp, "REPR", 0));
         ro_id     = pmc_type(interp, Parrot_str_new(interp, "RakudoObject", 0));
+        disp_id   = pmc_type(interp, Parrot_str_new(interp, "Dispatcher", 0));
 
         /* Initialize the object model. */
         RakudoObject_initialize(interp);
@@ -321,4 +324,114 @@ inline op repr_box_num(out PMC, in NUM, in PMC) :base_core {
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_box_num with a RakudoObject as the box target");
+}
+
+/*
+
+=item multi_dispatch_over_lexical_candidates()
+
+Entry point to multi-dispatch over the current dispatchee list.
+
+=cut
+
+*/
+inline op multi_dispatch_over_lexical_candidates(out PMC) :base_core {
+    PMC *cur_ctx = CURRENT_CONTEXT(interp);
+    while (!PMC_IS_NULL(cur_ctx)) {
+        Parrot_Context *ctx_struct = CONTEXT_STRUCT(cur_ctx);
+        if (ctx_struct->current_sub->vtable->base_type == disp_id) {
+            /* Found a dispatcher.
+             * XXX TODO: Obtain candidate and dispatch to it. */
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "multi_dispatch_over_lexical_candidates NYI!");
+        }
+        cur_ctx = ctx_struct->outer_ctx;
+    }
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "multi_dispatch_over_lexical_candidates was unable to find a candidate list");
+}
+
+/*
+
+=item set_dispatchees()
+
+Sets the dispatchees of the code object in $1, which must be a DispatcherSub,
+to the array in $2.
+
+=cut
+
+*/
+inline op set_dispatchees(in PMC, in PMC) :base_core {
+    if ($1->vtable->base_type == disp_id)
+        PARROT_DISPATCHERSUB($1)->dispatchees = $2;
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use set_dispatchees if first operand is a DispatcherSub.");
+}
+
+/*
+
+=item create_dispatch_and_add_candidates()
+
+Creates an instantiation of the dispatch routine (or proto, which may
+serve as one) supplied and augments it with the provided candidates.
+It relies on being passed the instantiation of the dispatcher from the
+last outer scope that had an instantiation, and we thus take its
+candidates.
+
+$1 will be set to the new, augmented dispatch routine. $2 is the proto
+or instantiation of it to clone. $3 is an array of candidates to add.
+
+=cut
+
+*/
+inline op create_dispatch_and_add_candidates(out PMC, in PMC, in PMC) :base_core {
+    /* Ensure we have a dispatcher. */
+    if ($2->vtable->base_type == disp_id) {
+        /* Copy it (which makes an "instance") and add new candidates. */
+        PMC *  copy   = VTABLE_clone(interp, $2);
+        INTVAL i      = 0;
+        INTVAL to_add = VTABLE_elements(interp, $3);
+        PARROT_DISPATCHERSUB(copy)->dispatchees = VTABLE_clone(interp,
+                PARROT_DISPATCHERSUB($2)->dispatchees);
+        for (i = 0; i < to_add; i++)
+            VTABLE_push_pmc(interp, PARROT_DISPATCHERSUB(copy)->dispatchees,
+                    VTABLE_get_pmc_keyed_int(interp, $3, i));
+        $1 = copy;
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use create_dispatch_and_add_candidates if first operand is a DispatcherSub.");
+}
+
+/*
+
+=item push_dispatchee()
+
+Adds a single new code object to the end of a dispatcher's dispatchee list.
+
+=cut
+
+*/
+inline op push_dispatchee(in PMC, in PMC) :base_core {
+    if ($1->vtable->base_type == disp_id)
+        VTABLE_push_pmc(interp, PARROT_DISPATCHERSUB($1)->dispatchees, $2);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use push_dispatchee if first operand is a DispatcherSub.");
+}
+
+/*
+
+=item is_dispatcher()
+
+Checks if a routine is considered a dispatcher (that is, if it has a
+list of dispatchees).
+
+=cut
+
+*/
+inline op is_dispatcher(out INT, in PMC) :base_core {
+    $1 = $2->vtable->base_type == disp_id && 
+            !PMC_IS_NULL(PARROT_DISPATCHERSUB($2)->dispatchees);
 }
