@@ -601,8 +601,7 @@ method method_def($/) {
     unless $past<signature_has_invocant> {
         $past[0].unshift(PAST::Var.new(
             :name('self'), :scope('parameter'),
-            # XXX Damm. How the hell to do this on Parrot... :/
-            #:multitype(PAST::Var.new( :name('$?CLASS') ))
+            :multitype(PAST::Var.new( :name('$?CLASS'), :scope('package') ))
         ));
     }
     $past.symbol('self', :scope('lexical') );
@@ -614,7 +613,7 @@ method method_def($/) {
         $past.name($name);
 
         # If it's a proto, we'll mark it as such by giving it an empty candidate
-        # list.
+        # list. Also need to set sub PMC type to DispatcherSub.
         my $to_add := $*MULTINESS ne 'proto' ??
             PAST::Val.new( :value($past) ) !!
             PAST::Op.new(
@@ -623,6 +622,12 @@ method method_def($/) {
                 PAST::Op.new( :pasttype('list') )
             );
         if $*MULTINESS eq 'proto' { $past.pirflags(':instanceof("DispatcherSub")'); }
+        
+        # If it is a multi, we need to build a type signature object for
+        # the multi-dispatcher to use.
+        if $*MULTINESS eq 'multi' { attach_multi_signature($past); }
+
+        # Insert it into the namespace.
         $*PACKAGE-SETUP.push(PAST::Op.new(
             :pasttype('callmethod'), :name($*MULTINESS eq 'multi' ?? 'add_multi_method' !! 'add_method'),
             PAST::Op.new(
@@ -679,20 +684,37 @@ sub only_star_block() {
     $past
 }
 
+sub attach_multi_signature($routine) {
+    # Use set_sub_multisig op to set up a multi sig. Note that we stick
+    # it in the same slot Parrot multis use for their multi signature,
+    # this is just a bit more complex than what Parrot needs.
+    my $types := PAST::Op.new( :pasttype('list') );
+    my $definednesses := PAST::Op.new( :pasttype('list') );
+    for @($routine[0]) {
+        if $_ ~~ PAST::Var && $_.scope eq 'parameter' {
+            $types.push($_.multitype // PAST::Op.new( :pirop('null P') ));
+            $definednesses.push($_<definedness> eq 'D' ?? 1 !!
+                                $_<definedness> eq 'U' ?? 2 !! 0);
+        }
+    }
+    $routine.loadinit.push(PAST::Op.new( :pirop('set_sub_multisig vPPP'),
+        PAST::Var.new( :name('block'), :scope('register') ),
+        $types,
+        $definednesses));
+}
+
 method signature($/) {
     my $BLOCKINIT := @BLOCK[0][0];
-
-    for $<parameter> { $BLOCKINIT.push($_.ast); }
-    
-    # Generate :multi pragma
-    if $*MULTINESS eq "multi" {
-        my @params;
-        for $BLOCKINIT.list {
-            @params.push($_.multitype // '_') 
-                unless $_.slurpy || $_.named || $_.viviself;
-        }
-        @BLOCK[0].multi(@params);
+    if $<invocant> {
+        my $inv := $<invocant>[0].ast;
+        $BLOCKINIT.push($inv);
+        $BLOCKINIT.push(PAST::Var.new(
+            :name('self'), :scope('lexical'), :isdecl(1),
+            :viviself(PAST::Var.new( :scope('lexical'), :name($inv.name) ))
+        ));
+        @BLOCK[0]<signature_has_invocant> := 1
     }
+    for $<parameter> { $BLOCKINIT.push($_.ast); }
 }
 
 method parameter($/) {
@@ -725,11 +747,15 @@ method parameter($/) {
     }
     unless $past.viviself { @BLOCK[0].arity( +@BLOCK[0].arity + 1 ); }
 
-    # We don't have support for multitype in PAST::Var (yet)
+    # Note: this is hijacking multitype a bit here comapred to what it was
+    # originally used for (a textual name). But it's ignored 
     if $<typename> {
-        my @multitype;
-        for $<typename>[0]<name><identifier> { @multitype.push(~$_); }
-        $past.multitype(@multitype);
+        $past.multitype($<typename>[0].ast);
+    }
+
+    # Set definedness flag (XXX want a better way to do this).
+    if $<definedness> {
+        $past<definedness> := ~$<definedness>[0];
     }
 
     make $past;
@@ -747,6 +773,15 @@ method named_param($/) {
     my $past := $<param_var>.ast;
     $past.named( ~$<param_var><name> );
     make $past;
+}
+
+method typename($/) {
+    my @name := HLL::Compiler.parse_name(~$/);
+    make PAST::Var.new(
+        :name(@name.pop),
+        :namespace(@name),
+        :scope('package')
+    );
 }
 
 method trait($/) {
