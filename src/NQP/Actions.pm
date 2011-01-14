@@ -501,6 +501,7 @@ method declarator($/) {
 }
 
 method multi_declarator:sym<multi>($/) { make $<declarator> ?? $<declarator>.ast !! $<routine_def>.ast }
+method multi_declarator:sym<proto>($/) { make $<declarator> ?? $<declarator>.ast !! $<routine_def>.ast }
 method multi_declarator:sym<null>($/)  { make $<declarator>.ast }
 
 
@@ -584,16 +585,44 @@ method method_def($/) {
         return OLD_method_def($/);
     }
 
-    # Set up block including adding self (invocant) parameter.
-    my $past := $<blockoid>.ast;
-    $past.control('return_pir');
-    $past[0].unshift( PAST::Var.new( :name('self'), :scope('parameter') ) );
+    # If it's just got * as a body, make a multi-dispatch enterer.
+    # Otherwise, build method block PAST.
+    my $past;
+    if $<onlystar> {
+        $past := only_star_block();
+    }
+    else {
+        $past := $<blockoid>.ast;
+        $past.blocktype('declaration');
+        $past.control('return_pir');
+    }
+
+    # Always need an invocant.
+    unless $past<signature_has_invocant> {
+        $past[0].unshift(PAST::Var.new(
+            :name('self'), :scope('parameter'),
+            # XXX Damm. How the hell to do this on Parrot... :/
+            #:multitype(PAST::Var.new( :name('$?CLASS') ))
+        ));
+    }
     $past.symbol('self', :scope('lexical') );
     
     # Install it where it should go (methods table / namespace).
     if $<deflongname> {
+        # Set name.
         my $name := ~$<deflongname>[0].ast;
         $past.name($name);
+
+        # If it's a proto, we'll mark it as such by giving it an empty candidate
+        # list.
+        my $to_add := $*MULTINESS ne 'proto' ??
+            PAST::Val.new( :value($past) ) !!
+            PAST::Op.new(
+                :pirop('set_dispatchees 0PP'),
+                PAST::Val.new( :value($past) ),
+                PAST::Op.new( :pasttype('list') )
+            );
+        if $*MULTINESS eq 'proto' { $past.pirflags(':instanceof("DispatcherSub")'); }
         $*PACKAGE-SETUP.push(PAST::Op.new(
             :pasttype('callmethod'), :name($*MULTINESS eq 'multi' ?? 'add_multi_method' !! 'add_method'),
             PAST::Op.new(
@@ -603,14 +632,19 @@ method method_def($/) {
             ),
             PAST::Var.new( :name('type_obj'), :scope('register') ),
             PAST::Val.new( :value($name) ),
-            PAST::Val.new( :value($past) )
+            $to_add
         ));
     }
     if $*SCOPE eq 'our' {
         $past.pirflags(':nsentry');
     }
 
+    # Apply traits.
     $past<block_past> := $past;
+    if $<trait> {
+        for $<trait> { $_.ast()($/); }
+    }
+
     make $past;
 }
 
@@ -634,6 +668,15 @@ sub OLD_method_def($/) {
         for $<trait> { $_.ast()($/); }
     }
     make $past;
+}
+
+sub only_star_block() {
+    my $past := @BLOCK.shift;
+    $past.closure(1);
+    $past.push(PAST::Op.new(
+        :pirop('multi_dispatch_over_lexical_candidates P')
+    ));
+    $past
 }
 
 method signature($/) {
@@ -849,7 +892,7 @@ method term:sym<pir::op>($/) {
 
 method term:sym<onlystar>($/) {
     make PAST::Op.new(
-        :pasttype('pirop'), :name('multi_dispatch_over_lexical_candidates P')
+        :pirop('multi_dispatch_over_lexical_candidates P')
     );
 }
 
@@ -880,6 +923,7 @@ method arglist($/) {
     make $past;
 }
 
+method term:sym<multi_declarator>($/) { make $<multi_declarator>.ast; }
 
 method term:sym<value>($/) { make $<value>.ast; }
 
