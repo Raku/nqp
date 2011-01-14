@@ -9,6 +9,8 @@ BEGIN_OPS_PREAMBLE
 #include "../metamodel/rakudoobject.h"
 #include "../metamodel/repr_registry.h"
 #include "../pmc/pmc_dispatchersub.h"
+#include "../pmc/pmc_nqpmultisig.h"
+#include "pmc_sub.h"
 
 /* Did we do the dynop setup yet?
  * XXX Relies on this happening once in a single thread at startup. */
@@ -19,6 +21,7 @@ static INTVAL stable_id = 0;
 static INTVAL repr_id   = 0;
 static INTVAL ro_id     = 0;
 static INTVAL disp_id   = 0;
+static INTVAL ms_id     = 0;
 
 END_OPS_PREAMBLE
 
@@ -40,6 +43,7 @@ inline op nqp_dynop_setup() :base_core {
         repr_id   = pmc_type(interp, Parrot_str_new(interp, "REPR", 0));
         ro_id     = pmc_type(interp, Parrot_str_new(interp, "RakudoObject", 0));
         disp_id   = pmc_type(interp, Parrot_str_new(interp, "DispatcherSub", 0));
+        ms_id     = pmc_type(interp, Parrot_str_new(interp, "NQPMultiSig", 0));
 
         /* Initialize the object model. */
         RakudoObject_initialize(interp);
@@ -434,4 +438,26 @@ list of dispatchees).
 inline op is_dispatcher(out INT, in PMC) :base_core {
     $1 = $2->vtable->base_type == disp_id && 
             !PMC_IS_NULL(PARROT_DISPATCHERSUB($2)->dispatchees);
+}
+
+/*
+
+=item set_sub_multisig()
+
+Sets a sub's multi_signature. $1 is the sub, $2 is an array of type objects
+and $3 is is an array of definedness constraint descriptors.
+
+=cut
+
+*/
+inline op set_sub_multisig(in PMC, in PMC, in PMC) :base_core {
+    if ($1->vtable->base_type == enum_class_Sub) {
+        PMC *sig = Parrot_pmc_new(interp, ms_id);
+        SETATTR_NQPMultiSig_types(interp, sig, $2);
+        SETATTR_NQPMultiSig_types(interp, sig, $3);
+        SETATTR_Sub_multi_signature(interp, $1, sig);
+    }    
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use set_sub_multisig if first operand is a Sub.");
 }
