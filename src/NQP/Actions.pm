@@ -843,6 +843,12 @@ method term:sym<pir::op>($/) {
     make $past;
 }
 
+method term:sym<onlystar>($/) {
+    make PAST::Op.new(
+        :pasttype('pirop'), :name('multi_dispatch_over_lexical_candidates P')
+    );
+}
+
 method args($/) { make $<arglist>.ast; }
 
 method arglist($/) {
