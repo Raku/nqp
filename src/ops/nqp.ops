@@ -39,7 +39,7 @@ inline op nqp_dynop_setup() :base_core {
         stable_id = pmc_type(interp, Parrot_str_new(interp, "STable", 0));
         repr_id   = pmc_type(interp, Parrot_str_new(interp, "REPR", 0));
         ro_id     = pmc_type(interp, Parrot_str_new(interp, "RakudoObject", 0));
-        disp_id   = pmc_type(interp, Parrot_str_new(interp, "Dispatcher", 0));
+        disp_id   = pmc_type(interp, Parrot_str_new(interp, "DispatcherSub", 0));
 
         /* Initialize the object model. */
         RakudoObject_initialize(interp);
