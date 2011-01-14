@@ -20,8 +20,9 @@ method TOP() {
     my %*HOW-METAATTR;
     %*HOW-METAATTR<knowhow> := 'KnowHOWAttribute';
 
-    my $*SCOPE      := '';
-    my $*MULTINESS  := '';
+    my $*SCOPE       := '';
+    my $*MULTINESS   := '';
+    my $*INVOCANT_OK := 0;
     my $*PACKAGE-SETUP;
     self.comp_unit;
 }
@@ -242,7 +243,11 @@ token term:sym<variable>           { <variable> }
 token term:sym<package_declarator> { <package_declarator> }
 token term:sym<scope_declarator>   { <scope_declarator> }
 token term:sym<routine_declarator> { <routine_declarator> }
-token term:sym<multi_declarator>   { <?before 'multi'|'proto'|'only'> <multi_declarator> }
+token term:sym<multi_declarator>   {
+    <?before 'multi'|'proto'|'only'>
+    <!before 'proto' <.ws> ['regex'|'token'|'rule']>
+    <multi_declarator>
+}
 token term:sym<regex_declarator>   { <regex_declarator> }
 token term:sym<statement_prefix>   { <statement_prefix> }
 token term:sym<lambda>             { <?lambda> <pblock> }
@@ -332,16 +337,31 @@ rule routine_def {
     [ '(' <signature> ')'
         || <.panic: 'Routine declaration requires a signature'> ]
     <trait>*
-    <blockoid>
+    [
+    | <onlystar>
+    | <blockoid>
+    ]
 }
 
 rule method_def {
+    :my $*INVOCANT_OK := 1;
     <deflongname>?
     <.newpad>
     [ '(' <signature> ')'
         || <.panic: 'Routine declaration requires a signature'> ]
+    { $*INVOCANT_OK := 0; }
     <trait>*
-    <blockoid>
+    [
+    | <onlystar>
+    | <blockoid>
+    ]
+}
+
+token onlystar {
+    <?{ $*MULTINESS eq 'proto' }>
+    '{' <.ws> '*' <.ws> '}'
+    <?ENDSTMT>
+    <.finishpad>
 }
 
 proto token multi_declarator { <...> }
@@ -350,15 +370,23 @@ token multi_declarator:sym<multi> {
     <sym>
     <.ws> [ <declarator> || <routine_def> || <.panic: 'Malformed multi'> ]
 }
+token multi_declarator:sym<proto> {
+    :my $*MULTINESS := 'proto';
+    <sym>
+    <.ws> [ <declarator> || <routine_def> || <.panic: 'Malformed proto'> ]
+}
 token multi_declarator:sym<null> {
     :my $*MULTINESS := '';
     <declarator>
 }
 
-token signature { [ [<.ws><parameter><.ws>] ** ',' ]? }
+token signature {
+    [ <?{ $*INVOCANT_OK }> <.ws><invocant=.parameter><.ws> ':' ]?
+    [ [<.ws><parameter><.ws>] ** ',' ]?
+}
 
 token parameter {
-    [ <typename> <.ws> ]*                   # <type_constraint>
+    [ <typename> [ ':' $<definedness>=<[_DU]> ]? <.ws> ]*      # <type_constraint>
     [
     | $<quant>=['*'] <param_var>
     | [ <param_var> | <named_param> ] $<quant>=['?'|'!'|<?>]
@@ -427,6 +455,11 @@ token term:sym<name> {
 
 token term:sym<pir::op> {
     'pir::' $<op>=[\w+] <args>?
+}
+
+token term:sym<onlystar> {
+    '{*}' <?ENDSTMT>
+    [ <?{ $*MULTINESS eq 'proto' }> || <.panic: '{*} may only appear in proto'> ]
 }
 
 token args {
