@@ -110,11 +110,67 @@ knowhow NQPClassHOW {
             $!composed := 1;
         }
 
+        # Incorporate any new multi candidates (needs MRO built).
+        self.incorporate_multi_candidates($obj);
+
         # Publish type and XXX method caches.
         self.publish_type_cache($obj);
         #self.publish_method_cache($obj);
 
         $obj
+    }
+
+    method incorporate_multi_candidates($obj) {
+        my $num_todo := +@!multi_methods_to_incorporate;
+        my $i := 0;
+        while $i != $num_todo {
+            # Get method name and code.
+            my $name := @!multi_methods_to_incorporate[$i]<name>;
+            my $code := @!multi_methods_to_incorporate[$i]<code>;
+
+            # Do we have anything in the methods table already in
+            # this class?
+            my $dispatcher := %!methods{$name};
+            if pir::defined($dispatcher) {
+                # Yes. Only or dispatcher, though? If only, error. If
+                # dispatcher, simply add new dispatchee.
+                if pir::is_dispatcher__IP($dispatcher) {
+                    pir::push_dispatchee__0PP($dispatcher, $code);
+                }
+                else {
+                    pir::die("Cannot have a multi candidate for $name when an only method is also in the class");
+                }
+            }
+            else {
+                # Go hunting in the MRO for a proto.
+                my $j := 1;
+                my $found := 0;
+                while $j != +@!mro && !$found {
+                    my $parent := @!mro[$j];
+                    my %meths := $parent.HOW.method_table($parent);
+                    my $dispatcher := %meths{$name};
+                    if pir::defined($dispatcher) {
+                        # Found a possible - make sure it's a dispatcher, not
+                        # an only.
+                        if pir::is_dispatcher__IP($dispatcher) {
+                            # Clone it and install it in our method table.
+                            my @new_dispatchees;
+                            @new_dispatchees[0] := $code;
+                            %!methods{$name} := pir::create_dispatch_and_add_candidates__PPP($dispatcher, @new_dispatchees);
+                            $found := 1;
+                        }
+                        else {
+                            pir::die("Could not find a proto for multi $name (it may exist, but an only is hiding it if so)");
+                        }
+                    }
+                    $j := $j + 1;
+                }
+                unless $found {
+                    pir::die("Could not find a proto for multi $name, and proto generation is NYI");
+                }
+            }
+            $i := $i + 1;
+        }
     }
 
     # Computes C3 MRO.
