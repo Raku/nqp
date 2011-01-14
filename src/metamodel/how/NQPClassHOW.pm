@@ -15,6 +15,7 @@ knowhow NQPClassHOW {
     # Attributes, methods, parents and roles directly added.
     has %!attributes;
     has %!methods;
+    has @!multi_methods_to_incorporate;
     has @!parents;
     has @!roles;
 
@@ -58,6 +59,19 @@ knowhow NQPClassHOW {
             pir::die("This class already has a method named " ~ $name);
         }
         %!methods{$name} := $code_obj;
+    }
+
+    method add_multi_method($obj, $name, $code_obj) {
+        # We can't incorporate these right away as we don't know all
+        # parents yet, maybe, which influences whether we even can
+        # have multis, need to generate a proto or worreva. So just
+        # queue them up in a todo list and we handle it at class
+        # composition time.
+        my %todo;
+        %todo<name> := $name;
+        %todo<code> := $code_obj;
+        @!multi_methods_to_incorporate[+@!multi_methods_to_incorporate] := %todo;
+        $code_obj;
     }
 
     method add_attribute($obj, $meta_attr) {
