@@ -360,9 +360,8 @@ inline op multi_dispatch_over_lexical_candidates(out PMC) :base_core {
                 $1 = VTABLE_get_pmc_keyed_int(interp, result, 0);
             }
             else {
-                /* XXX Awesomeize this error! */
                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                        "Multiple dispatch failed");
+                        "Multiple dispatcher returned a null candidate.");
             }
             done = 1;
             break;
