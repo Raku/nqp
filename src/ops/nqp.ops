@@ -473,7 +473,7 @@ inline op set_sub_multisig(in PMC, in PMC, in PMC) :base_core {
     if ($1->vtable->base_type == enum_class_Sub) {
         PMC *sig = Parrot_pmc_new(interp, ms_id);
         SETATTR_NQPMultiSig_types(interp, sig, $2);
-        SETATTR_NQPMultiSig_types(interp, sig, $3);
+        SETATTR_NQPMultiSig_definedness_constraints(interp, sig, $3);
         SETATTR_Sub_multi_signature(interp, $1, sig);
     }    
     else
