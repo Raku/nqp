@@ -7,8 +7,8 @@ class NQPMu {
         self.CREATE()
     }
 
-    # XXX This should have siggy (self:U: $topic) and be multi.
-    method ACCEPTS($topic) {
+    proto method ACCEPTS($topic) { * }
+    multi method ACCEPTS(NQPMu:U $self: $topic) {
         pir::type_check__IPP($topic, self.WHAT)
     }
 }
