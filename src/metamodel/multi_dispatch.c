@@ -39,6 +39,11 @@ typedef struct candidate_graph_node {
 /* Cached type ID for RakudoObject. */
 static INTVAL ro_id = 0;
 
+/* Definedness constraints. */
+#define DEFINED_ONLY    1
+#define UNDEFINED_ONLY  2
+
+
 /* Compares two types to see if the first is narrower than the second. */
 static INTVAL is_narrower_type(PARROT_INTERP, PMC *a, PMC *b) {
     /* If one of the types is null, then we know that's automatically
@@ -292,9 +297,20 @@ PMC *nqp_multi_dispatch(PARROT_INTERP, PMC *dispatcher, PMC *capture) {
             PMC * const param_type = param->vtable->base_type == ro_id ?
                     STABLE(param)->WHAT : PMCNULL;
             PMC * const type_obj = (*cur_candidate)->types[i];
+            INTVAL const definedness = (*cur_candidate)->definednesses[i];
             if (param_type != type_obj && !is_narrower_type(interp, param_type, type_obj)) {
                 type_mismatch = 1;
                 break;
+            }
+            if (definedness) {
+                /* Have a constraint on the definedness. */
+                INTVAL defined = param->vtable->base_type == ro_id ?
+                        REPR(param)->defined(interp, REPR_PMC(param), param) :
+                        VTABLE_defined(interp, param);
+                if (!defined && definedness == DEFINED_ONLY || defined && definedness == UNDEFINED_ONLY) {
+                    type_mismatch = 1;
+                    break;
+                }
             }
         }
 
