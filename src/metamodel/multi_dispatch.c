@@ -36,6 +36,9 @@ typedef struct candidate_graph_node {
 /* Special value we set arity to when we have a slurpy. */
 #define SLURPY_ARITY 1 << 30
 
+/* Cached type ID for RakudoObject. */
+static INTVAL ro_id = 0;
+
 /* Compares two types to see if the first is narrower than the second. */
 static INTVAL is_narrower_type(PARROT_INTERP, PMC *a, PMC *b) {
     /* If one of the types is null, then we know that's automatically
@@ -248,6 +251,10 @@ PMC *nqp_multi_dispatch(PARROT_INTERP, PMC *dispatcher, PMC *capture) {
     candidate_info** candidates    = sort_candidates(interp, dispatchees);
     candidate_info** cur_candidate = candidates;
 
+    /* Ensure we know what is a Rakudo object and what is not. */
+    if (!ro_id)
+        ro_id = pmc_type(interp, Parrot_str_new(interp, "RakudoObject", 0));
+
     /* Iterate over the candidates and collect best ones; terminate
      * when we see two nulls (may break out earlier). */
     while (1) {
@@ -282,9 +289,10 @@ PMC *nqp_multi_dispatch(PARROT_INTERP, PMC *dispatcher, PMC *capture) {
 
         for (i = 0; i < type_check_count; i++) {
             PMC * const param = VTABLE_get_pmc_keyed_int(interp, capture, i);
+            PMC * const param_type = param->vtable->base_type == ro_id ?
+                    STABLE(param)->WHAT : PMCNULL;
             PMC * const type_obj = (*cur_candidate)->types[i];
-            /* XXX TODO: Type check! */
-            if (0) {
+            if (param_type != type_obj && !is_narrower_type(interp, param_type, type_obj)) {
                 type_mismatch = 1;
                 break;
             }
