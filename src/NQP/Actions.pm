@@ -557,25 +557,125 @@ method routine_declarator:sym<sub>($/) { make $<routine_def>.ast; }
 method routine_declarator:sym<method>($/) { make $<method_def>.ast; }
 
 method routine_def($/) {
-    my $block := $<blockoid>.ast;
-    $block.blocktype('declaration');
-    $block.control('return_pir');
-    my $past := $block;
+    # If it's just got * as a body, make a multi-dispatch enterer.
+    # Otherwise, need to build a sub.
+    my $past;
+    if $<onlystar> {
+        $past := only_star_block();
+    }
+    else {
+        $past := $<blockoid>.ast;
+        $past.blocktype('declaration');
+        $past.control('return_pir');
+    }
+    my $block := $past;
+
     if $<deflongname> {
         my $name := ~$<sigil>[0] ~ $<deflongname>[0].ast;
         $past.name($name);
-        if $*SCOPE ne 'our' {
-            @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1),
-                                  :viviself($past), :scope('lexical') ) );
-            @BLOCK[0].symbol($name, :scope('lexical') );
+        if $*SCOPE eq '' || $*SCOPE eq 'my' || $*SCOPE eq 'our' {
+            if $*MULTINESS eq 'multi' {
+                # Does the current block have a candidate holder in place?
+                if $*SCOPE eq 'our' { pir::die('our-scoped multis not yet implemented') }
+                my $cholder;
+                my %sym := @BLOCK[0].symbol($name);
+                if %sym<cholder> {
+                    $cholder := %sym<cholder>;
+                }
+                
+                # Otherwise, no candidate holder, so add one.
+                else {
+                    # Check we have a proto in scope.
+                    if %sym<proto> {
+                        # WTF, a proto is in this scope, but didn't set up a
+                        # candidate holder?!
+                        $/.CURSOR.panic('Internal Error: Current scope has a proto, but no candidate list holder was set up. (This should never happen.)');
+                    }
+                    my $found_proto;
+                    for @BLOCK {
+                        my %sym := $_.symbol($name);
+                        if %sym<proto> || %sym<cholder> {
+                            $found_proto := 1;
+                        }
+                        elsif %sym {
+                            $/.CURSOR.panic("Cannot declare a multi when an only is already in scope.");
+                        }
+                    }
+
+                    # If we didn't find a proto, error for now.
+                    unless $found_proto {
+                        $/.CURSOR.panic("Sorry, no proto sub in scope, and auto-generation of protos is not yet implemented.");
+                    }
+
+                    # Set up dispatch routine in this scope.
+                    $cholder := PAST::Op.new( :pasttype('list') );
+                    my $dispatch_setup := PAST::Op.new(
+                        :pirop('create_dispatch_and_add_candidates PPP'),
+                        PAST::Var.new( :name($name), :scope('outer') ),
+                        $cholder
+                    );
+                    @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1),
+                                      :viviself($dispatch_setup), :scope('lexical') ) );
+                    @BLOCK[0].symbol($name, :scope('lexical'), :cholder($cholder) );
+                }
+
+                # Add this candidate to the holder.
+                $cholder.push($past);
+
+                # Build a type signature object for the multi-dispatcher to use.
+                attach_multi_signature($past);
+            }
+            elsif $*MULTINESS eq 'proto' {
+                # Create a candidate list holder for the dispatchees
+                # this proto will work over, and install them along
+                # with the proto.
+                if $*SCOPE eq 'our' { pir::die('our-scoped protos not yet implemented') }
+                my $cholder := PAST::Op.new( :pasttype('list') );
+                @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1),
+                                      :viviself($past), :scope('lexical') ) );
+                @BLOCK[0][0].push(PAST::Op.new(
+                    :pirop('set_dispatchees 0PP'),
+                    PAST::Var.new( :name($name) ),
+                    $cholder
+                ));
+                @BLOCK[0].symbol($name, :scope('lexical'), :proto(1), :cholder($cholder) );
+
+                # Need it to be a DispatcherSub.
+                $past.pirflags(':instanceof("DispatcherSub")');
+            }
+            else {
+                @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1),
+                                      :viviself($past), :scope('lexical') ) );
+                @BLOCK[0].symbol($name, :scope('lexical') );
+                if $*SCOPE eq 'our' {
+                    # Need to install it at loadinit time but also re-bind
+                    # it per invocation.
+                    @BLOCK[0][0].push(PAST::Op.new(
+                        :pasttype('bind'),
+                        PAST::Var.new( :name($name), :scope('package') ),
+                        PAST::Var.new( :name($name), :scope('lexical') )
+                    ));
+                    @BLOCK[0].loadinit.push(PAST::Op.new(
+                        :pasttype('bind'),
+                        PAST::Var.new( :name($name), :scope('package') ),
+                        PAST::Val.new( :value($past) )
+                    ));
+                }
+            }
             $past := PAST::Var.new( :name($name) );
         }
+        else {
+            $/.CURSOR.panic("$*SCOPE scoped routines are not supported yet");
+        }
     }
+
+    # Apply traits.
     $past<block_past> := $block;
-    make $past;
     if $<trait> {
         for $<trait> { $_.ast()($/); }
     }
+
+    make $past;
 }
 
 
