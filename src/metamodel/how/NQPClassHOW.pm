@@ -113,9 +113,9 @@ knowhow NQPClassHOW {
         # Incorporate any new multi candidates (needs MRO built).
         self.incorporate_multi_candidates($obj);
 
-        # Publish type and XXX method caches.
+        # Publish type and method caches.
         self.publish_type_cache($obj);
-        #self.publish_method_cache($obj);
+        self.publish_method_cache($obj);
 
         $obj
     }
@@ -265,6 +265,21 @@ knowhow NQPClassHOW {
     method publish_type_cache($obj) {
         # XXX TODO: when we have roles, need these here too.
         pir::publish_type_check_cache($obj, @!mro)
+    }
+
+    method publish_method_cache($obj) {
+        # Walk MRO and add methods to cache, unless another method
+        # lower in the class hierarchy "shadowed" it.
+        my %cache;
+        for @!mro {
+            my %methods := $_.HOW.method_table($_);
+            for %methods {
+                unless %methods{$_.key} {
+                    %methods{$_.key} := $_.value;
+                }
+            }
+        }
+        pir::publish_method_cache($obj, %cache)
     }
 
     ##
