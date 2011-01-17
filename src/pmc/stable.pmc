@@ -46,6 +46,8 @@ pmclass STable manual_attrs dynpmc group nqp {
             Parrot_gc_mark_PMC_alive(interp, st->HOW);
         if (!PMC_IS_NULL(st->WHAT))
             Parrot_gc_mark_PMC_alive(interp, st->WHAT);
+        if (!PMC_IS_NULL(st->method_cache))
+            Parrot_gc_mark_PMC_alive(interp, st->method_cache);
 
         /* Mark the v-table cache. */
         for (i = 0; i < st->vtable_length; i++) {
