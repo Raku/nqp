@@ -36,6 +36,11 @@ U: perlpilot
 D: Perl 6 (Rakudo Perl) developer
 E: duff@pobox.com
 
+N: Jonathan Worthington
+U: jnthn
+D: Replacing object model with 6model, new multi-dispatcher
+E: jnthn@jnthn.net
+
 N: Patrick R. Michaud
 U: pmichaud
 D: Perl 6 (Rakudo Perl) lead developer, pumpking
