@@ -4,6 +4,8 @@
 #ifndef RAKUDOOBJECT_H_GUARD
 #define RAKUDOOBJECT_H_GUARD
 
+#include "storage_spec.h"
+
 /* The commonalities shared between all Rakudo objects, no matter what the
  * REPR is. This struct should be placed as the first thing in the object
  * struct used by all representations. */
@@ -127,6 +129,9 @@ typedef struct {
 
     /* This Parrot-specific addition to the API is used to free a REPR instance. */
     void (*gc_free_repr) (PARROT_INTERP, PMC *self);
+
+    /* Gets the storage specification for this representation. */
+    storage_spec (*get_storage_spec) (PARROT_INTERP, PMC *self);
 } REPRCommonalities;
 
 /* Hint value to indicate the absence of an attribute lookup or method
