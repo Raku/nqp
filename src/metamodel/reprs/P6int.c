@@ -121,6 +121,15 @@ static void gc_free(PARROT_INTERP, PMC *self, PMC *obj) {
     PMC_data(obj) = NULL;
 }
 
+/* Gets the storage specification for this representation. */
+static storage_spec get_storage_spec(PARROT_INTERP, PMC *self) {
+    storage_spec spec;
+    spec.inlineable = STORAGE_SPEC_INLINED;
+    spec.bits = sizeof(INTVAL) * 8;
+    spec.boxed_primitive = STORAGE_SPEC_BP_INT;
+    return spec;
+}
+
 /* Initializes the P6int representation. */
 PMC * P6int_initialize(PARROT_INTERP) {
     REPRCommonalities *repr;
@@ -146,6 +155,7 @@ PMC * P6int_initialize(PARROT_INTERP) {
     repr->gc_free = gc_free;
     repr->gc_mark_repr = NULL;
     repr->gc_free_repr = NULL;
+    repr->get_storage_spec = get_storage_spec;
 
     /* Wrap it in a PMC. */
     return wrap_repr(interp, repr);

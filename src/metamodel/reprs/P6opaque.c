@@ -464,6 +464,14 @@ static void gc_free_repr(PARROT_INTERP, PMC *self) {
     PMC_data(self) = NULL;
 }
 
+/* Gets the storage specification for this representation. */
+static storage_spec get_storage_spec(PARROT_INTERP, PMC *self) {
+    storage_spec spec;
+    spec.inlineable = STORAGE_SPEC_REFERENCE;
+    spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
+    return spec;
+}
+
 /* Sets up an instance of this representation with function pointers in place
  * and no allocated slot storage. */
 static PMC * repr_instance(PARROT_INTERP) {
@@ -490,6 +498,7 @@ static PMC * repr_instance(PARROT_INTERP) {
     repr->common.gc_free = gc_free;
     repr->common.gc_mark_repr = gc_mark_repr;
     repr->common.gc_free_repr = gc_free_repr;
+    repr->common.get_storage_spec = get_storage_spec;
 
     /* Wrap it in a PMC. */
     return wrap_repr(interp, repr);

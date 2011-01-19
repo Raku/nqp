@@ -9,7 +9,7 @@
  * the object. */
 typedef struct {
     /* 0 if this is to be referenced, anything else otherwise. */
-    INTVAL inline;
+    INTVAL inlineable;
 
     /* For things that want to be inlined, the number of bits of
      * storage they need. Ignored otherwise. */

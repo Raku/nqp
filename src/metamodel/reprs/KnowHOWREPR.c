@@ -128,6 +128,14 @@ static void gc_free(PARROT_INTERP, PMC *self, PMC *obj) {
     PMC_data(obj) = NULL;
 }
 
+/* Gets the storage specification for this representation. */
+static storage_spec get_storage_spec(PARROT_INTERP, PMC *self) {
+    storage_spec spec;
+    spec.inlineable = STORAGE_SPEC_REFERENCE;
+    spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
+    return spec;
+}
+
 /* Initializes the KnowHOWREPR representation. */
 PMC * KnowHOWREPR_initialize(PARROT_INTERP) {
     REPRCommonalities *repr;
@@ -153,6 +161,7 @@ PMC * KnowHOWREPR_initialize(PARROT_INTERP) {
     repr->gc_free = gc_free;
     repr->gc_mark_repr = NULL;
     repr->gc_free_repr = NULL;
+    repr->get_storage_spec = get_storage_spec;
 
     /* Wrap it in a PMC. */
     return wrap_repr(interp, repr);
