@@ -1,24 +1,22 @@
 #ifndef P6OPAQUE_H_GUARD
 #define P6OPAQUE_H_GUARD
 
-/* This is how an instance with the P6opaque representation looks. The slots
- * is an array where we'll store most attributes, so we can look them up by
- * index. There's also an unallocated spill-over store for any attributes that
- * are added through augment, or in MI cases (e.g. it's lazily allocated on
- * demand). */
+/* This is how an instance with the P6opaque representation starts. However, what
+ * follows on from this depends on the declaration. For object attributes, it will
+ * be a pointer size and point to another RakudoObject. For native integers and
+ * numbers, it will be the appropriate sized piece of memory to store them
+ * right there in the object. Note that P6opaque does not do packed storage, so
+ * an int2 gets as much space as an int. */
 typedef struct {
     /* The commonalities all objects have. */
     RakudoObjectCommonalities common;
-
-    /* Attribute slot storage. */
-    PMC **slots;
 
     /* Spill (for MI, dynamically added attributes, etc.) Normally null. */
     PMC *spill;
 } P6opaqueInstance;
 
 /* A P6opaque REPR instance carries around both a slot mapping with it.
- * XXX We waste some memory here in that we're storing the REPR pointer
+ * We waste some memory here in that we're storing the REPR pointer
  * table per "instantiation" of the REPR. It's per type rather than per
  * instance, so not so bad, but with another level of indirection we
  * could probably do a bit better. OTOH, it'd be another level of
@@ -27,11 +25,36 @@ typedef struct {
     /* The commonalities shared by all representations. */
     REPRCommonalities common;
 
-    /* A slot mapping table. */
-    PMC *slot_mapping;
+    /* The memory allocation size for an object instance. Includes space
+     * for the Shared Table pointer, spill hash and then for storing the
+     * actual, pre-declared attributes. Note, this is in bytes. */
+    INTVAL allocation_size;
 
-    /* The number of slots we have. */
-    INTVAL num_slots;
+    /* The number of attributes we have allocated slots for. Does not include
+     * any in the spill hash. */
+    INTVAL num_attributes;
+
+    /* Maps attribute position numbers to the byte offset in the object. */
+    INTVAL *attribute_offsets;
+
+    /* If we can unbox to a native integer, this is the offset to find it. */
+    INTVAL unbox_int_offset;
+
+    /* If we can unbox to a native number, this is the offset to find it. */
+    INTVAL unbox_num_offset;
+
+    /* If we can unbox to a native string, this is the offset to find it. */
+    INTVAL unbox_str_offset;
+
+    /* A table mapping attribute names to indexes (which can then be looked
+     * up in the offset table). */
+    PMC *name_to_index_mapping;
+
+    /* Offsets into the object that are elligible for PMC GC marking. */
+    INTVAL *gc_pmc_mark_offsets;
+
+    /* Offsets into the object that are elligible for string GC marking. */
+    INTVAL *gc_str_mark_offsets;
 } REPRP6opaque;
 
 /* Handy macro for getting the struct out. */
