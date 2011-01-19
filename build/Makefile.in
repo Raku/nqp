@@ -153,7 +153,8 @@ METAMODEL_SOURCE = src/metamodel/rakudoobject.h src/metamodel/rakudoobject.c \
                    src/metamodel/reprs/P6int.h src/metamodel/reprs/P6int.c \
                    src/metamodel/reprs/P6str.h src/metamodel/reprs/P6str.c \
                    src/metamodel/reprs/P6num.h src/metamodel/reprs/P6num.c \
-                   src/metamodel/multi_dispatch.h src/metamodel/multi_dispatch.c
+                   src/metamodel/multi_dispatch.h src/metamodel/multi_dispatch.c \
+                   src/metamodel/storage_spec.h
 
 METAMODEL_OBJS   = ../metamodel/rakudoobject$(O) ../metamodel/repr_registry$(O) \
                    ../metamodel/knowhow_bootstrapper$(O) ../metamodel/reprs/KnowHOWREPR$(O) \
