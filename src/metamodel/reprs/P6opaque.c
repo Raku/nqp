@@ -17,14 +17,18 @@ static PMC * repr_instance(PARROT_INTERP);
  * never move, and is unique per type object too. */
 #define CLASS_KEY(c) ((INTVAL)PMC_data(STABLE_PMC(c)))
 
-/* Helper to make a :local introspection call. */
+/* Helper to make an introspection call, possibly with :local. */
 static PMC * introspection_call(PARROT_INTERP, PMC *WHAT, PMC *HOW, STRING *name) {
-    /* Look up method. */
+    PMC *old_ctx, *cappy;
+    
+    /* Look up method; if there is none hand back a null. */
     PMC *meth = VTABLE_find_method(interp, HOW, name);
+    if (PMC_IS_NULL(meth))
+        return meth;
 
     /* Set up call capture. */
-    PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
-    PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
+    old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
     VTABLE_push_pmc(interp, cappy, HOW);
     VTABLE_push_pmc(interp, cappy, WHAT);
     VTABLE_set_integer_keyed_str(interp, cappy, Parrot_str_new_constant(interp, "local"), 1);
@@ -40,12 +44,16 @@ static PMC * introspection_call(PARROT_INTERP, PMC *WHAT, PMC *HOW, STRING *name
 
 /* Helper to make an accessor call. */
 static PMC * accessor_call(PARROT_INTERP, PMC *obj, STRING *name) {
-    /* Look up method. */
+    PMC *old_ctx, *cappy;
+    
+    /* Look up method; if there is none hand back a null. */
     PMC *meth = VTABLE_find_method(interp, obj, name);
+    if (PMC_IS_NULL(meth))
+        return meth;
 
     /* Set up call capture. */
-    PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
-    PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
+    old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
     VTABLE_push_pmc(interp, cappy, obj);
 
     /* Call. */
@@ -136,6 +144,9 @@ static PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, PMC *flat_lis
  * notable limitation is that in the case of multiple inheritance, the box
  * and unbox support breaks. */
 static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, REPRP6opaque *repr) {
+    STRING *type_str       = Parrot_str_new_constant(interp, "type");
+    STRING *box_target_str = Parrot_str_new_constant(interp, "box_target");
+    
     /* Create flat list that we'll analyze to determine allocation info. */
     PMC *flat_list = pmc_new(interp, enum_class_ResizablePMCArray);
 
@@ -170,12 +181,60 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, REPRP6opaque *
         /* Go over the attributes and arrange their allocation. */
         for (i = 0; i < num_attrs; i++) {
             PMC *attr = VTABLE_get_pmc_keyed_int(interp, flat_list, i);
-            /* XXX TODO: Here's where we'll deal with the native stuff. For
-             * now it's always an object attr, though. */
+
+            /* Fetch its type and box target flag, if available. */
+            PMC *type       = accessor_call(interp, attr, type_str);
+            PMC *box_target = accessor_call(interp, attr, box_target_str);
+
+            /* Work out what unboxed type it is, if any. Default to a boxed. */
+            INTVAL unboxed_type = STORAGE_SPEC_BP_NONE;
+            INTVAL bits         = sizeof(PMC *) * 8;
+            if (!PMC_IS_NULL(type)) {
+                /* Get the storage spec of the type and see what it wants. */
+                storage_spec spec = REPR(type)->get_storage_spec(interp, REPR_PMC(type));
+                if (spec.inlineable == STORAGE_SPEC_INLINED) {
+                    /* Yes, it's something we'll inline. */
+                    unboxed_type = spec.boxed_primitive;
+                    bits = spec.bits;
+
+                    /* Is it a target for box/unbox operations? */
+                    if (VTABLE_get_bool(interp, box_target)) {
+                        switch (unboxed_type) {
+                        case STORAGE_SPEC_BP_INT:
+                            if (repr->unbox_int_offset)
+                                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                                        "Duplicate box_target for native int");
+                            repr->unbox_int_offset = cur_size;
+                            break;
+                        case STORAGE_SPEC_BP_NUM:
+                            if (repr->unbox_num_offset)
+                                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                                        "Duplicate box_target for native num");
+                            repr->unbox_num_offset = cur_size;
+                            break;
+                        case STORAGE_SPEC_BP_STR:
+                            if (repr->unbox_str_offset)
+                                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                                        "Duplicate box_target for native str");
+                            repr->unbox_str_offset = cur_size;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            /* Do allocation. */
             repr->attribute_offsets[i] = cur_size;
-            repr->gc_pmc_mark_offsets[cur_pmc_attr] = cur_size;
-            cur_size += sizeof(PMC *);
-            cur_pmc_attr++;
+            if (unboxed_type == STORAGE_SPEC_BP_NONE) {
+                repr->gc_pmc_mark_offsets[cur_pmc_attr] = cur_size;
+                cur_pmc_attr++;
+            }
+            if (unboxed_type == STORAGE_SPEC_BP_STR) {
+                repr->gc_str_mark_offsets[cur_str_attr] = cur_size;
+                cur_str_attr++;
+            }
+            /* XXX TODO Alignment! Important when we get int1, int8, etc. */
+            cur_size += bits / 8;
         }
 
         /* Finally, put computed allocation size in place. */
