@@ -72,10 +72,6 @@ static void find_method(PARROT_INTERP, PMC *nci) {
     PMC    *methods = ((KnowHOWREPRInstance *)PMC_data(self))->methods;
     STRING *name    = VTABLE_get_string_keyed_int(interp, capture, 2);
     PMC    *method  = VTABLE_get_pmc_keyed_str(interp, methods, name);
-    if (PMC_IS_NULL(method))
-        /* XXX Awesomeize. */
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Could not find method '%Ss'", name);
 
     /* Put into capture to act as return value. */
     Parrot_pcc_build_call_from_c_args(interp, capture, "P", method);
