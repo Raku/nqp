@@ -88,7 +88,109 @@ for the Cursor if one hasn't been created yet.
 
 =end
 
-    # XXX TODO: This one will be tricky...
+    method MATCH() {
+        my $match := $!match;
+        if pir::isnull__IP($match) || pir::issame__IPP($match, $TRUE) {
+            # XXX Some of this must change when Regex::Match becomes a 6model
+            # object.
+            $!match := $match := self.new_match();
+            Q:PIR {
+                .local pmc rc_class, self, match
+                rc_class = get_global '$?CLASS'
+                self = find_lex 'self'
+                match = find_lex '$match'
+
+                # First, create a Match object and bind it
+                setattribute match, '$!cursor', self
+                .local pmc target, from, to
+                target = getattribute self, rc_class, '$!target'
+                setattribute match, '$!target', target
+                from = getattribute self, rc_class, '$!from'
+                setattribute match, '$!from', from
+                to = getattribute self, rc_class, '$!pos'
+                setattribute match, '$!to', to
+
+                # Create any arrayed subcaptures.
+                .local pmc caparray, caparray_it, caphash
+                caparray = getattribute self, rc_class, '@!caparray'
+                if null caparray goto caparray_done
+                caparray_it = iter caparray
+                caphash = new ['Hash']
+              caparray_loop:
+                unless caparray_it goto caparray_done
+                .local string subname
+                .local pmc arr
+                .local int keyint
+                subname = shift caparray_it
+                arr = self.'new_array'()
+                caphash[subname] = arr
+                keyint = is_cclass .CCLASS_NUMERIC, subname, 0
+                if keyint goto caparray_int
+                match[subname] = arr
+                goto caparray_loop
+              caparray_int:
+                $I0 = subname
+                match[$I0] = arr
+                goto caparray_loop
+              caparray_done:
+
+                # If it's not a successful match, or if there are
+                # no saved subcursors, we're done.
+                if to < from goto match_done
+                .local pmc cstack, cstack_it
+                cstack = getattribute self, rc_class, '@!cstack'
+                if null cstack goto cstack_done
+                unless cstack goto cstack_done
+                cstack_it = iter cstack
+              cstack_loop:
+                unless cstack_it goto cstack_done
+                .local pmc subcur, submatch, names
+                subcur = shift cstack_it
+                $I0 = type_check subcur, rc_class
+                unless $I0 goto cstack_loop
+                # If the subcursor isn't bound with a name, skip it
+                names = getattribute subcur, rc_class, '$!names'
+                if null names goto cstack_loop
+                submatch = subcur.'MATCH'()
+                # See if we have multiple binds
+                .local pmc names_it
+                subname = names
+                names_it = get_global '$!FALSE'
+                $I0 = index subname, '='
+                if $I0 < 0 goto cstack_subname
+                names_it = split '=', subname
+              cstack_subname_loop:
+                subname = shift names_it
+              cstack_subname:
+                keyint = is_cclass .CCLASS_NUMERIC, subname, 0
+                if null caparray goto cstack_bind
+                $I0 = exists caphash[subname]
+                unless $I0 goto cstack_bind
+                if keyint goto cstack_array_int
+                $P0 = match[subname]
+                push $P0, submatch
+                goto cstack_bind_done
+              cstack_array_int:
+                $I0 = subname
+                $P0 = match[$I0]
+                push $P0, submatch
+                goto cstack_bind_done
+              cstack_bind:
+                if keyint goto cstack_bind_int
+                match[subname] = submatch
+                goto cstack_bind_done
+              cstack_bind_int:
+                $I0 = subname
+                match[$I0] = submatch
+              cstack_bind_done:
+                if names_it goto cstack_subname_loop
+                goto cstack_loop
+              cstack_done:
+              match_done:
+            };
+        }
+        $match
+    }
 
 =begin
 
@@ -168,10 +270,5 @@ Return the cursor's from position.
 
 =end
 
-    XXX TODO: Lots to port here!
-
-
-
-
-
+    # XXX More to do here
 }
