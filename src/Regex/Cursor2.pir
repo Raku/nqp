@@ -143,6 +143,8 @@ grammars.
     how.'add_method'(type_obj, '!PREFIX__!subrule', $P15)
     .const 'Sub' $P16 = 'Regex_Cursor_meth_DUMP_TOKRX'
     how.'add_method'(type_obj, 'DUMP_TOKRX', $P16)
+    .const 'Sub' $P17 = 'Regex_Cursor2_meth_Bool'
+    how.'add_method'(type_obj, 'Bool', $P17)
 
     # Add attributes.
     .local pmc NQPAttribute, attr
@@ -155,7 +157,7 @@ grammars.
     how."add_attribute"(type_obj, attr)
     attr = NQPAttribute."new"("$!match" :named("name"))
     how."add_attribute"(type_obj, attr)
-    attr = NQPAttribute."new"("$!name" :named("name"))
+    attr = NQPAttribute."new"("$!names" :named("name"))
     how."add_attribute"(type_obj, attr)
     attr = NQPAttribute."new"("$!debug" :named("name"))
     how."add_attribute"(type_obj, attr)
@@ -1072,7 +1074,7 @@ are first compiled to regexes prior to being matched.
 
 =cut
 
-.sub '' :vtable('get_bool') :method
+.sub 'Bool' :vtable('get_bool') :method :subid('Regex_Cursor2_meth_Bool')
     .local pmc match,  cur_class
     cur_class = get_global '$?CLASS'
     match = getattribute self, cur_class, '$!match'

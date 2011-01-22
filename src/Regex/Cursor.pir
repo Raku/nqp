@@ -909,7 +909,7 @@ are first compiled to regexes prior to being matched.
 
 =cut
 
-.sub '' :vtable('get_bool') :method
+.sub 'Bool' :vtable('get_bool') :method
     .local pmc match
     match = getattribute self, '$!match'
     if null match goto false
