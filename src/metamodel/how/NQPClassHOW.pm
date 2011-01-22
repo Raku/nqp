@@ -286,8 +286,8 @@ knowhow NQPClassHOW {
     ## Introspecty
     ##
 
-    method parents($obj, :$local!) {
-        @!parents
+    method parents($obj, :$local) {
+        $local ?? @!parents !! @!mro
     }
 
     method roles($obj, :$local!) {
