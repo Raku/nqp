@@ -127,7 +127,7 @@ Return the POST representation of the regex AST rooted by C<node>.
     self.'!cursorop'(ops, '!cursor_caparray', 0, caparray :flat)
   caparray_skip:
 
-    ops.'push_pirop'('getattribute', debug, cur, '"$!debug"')
+    #ops.'push_pirop'('getattribute', debug, cur, '"$!debug"')
     ops.'push_pirop'('.lex', 'unicode:"$\x{a2}"', cur)
     ops.'push_pirop'('.local pmc', 'match')
     ops.'push_pirop'('.lex', '"$/"', 'match')
