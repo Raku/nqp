@@ -691,7 +691,7 @@ the address of a label to branch to when backtracking occurs.)
     goto bstack_done
   bstack_new:
     bstack = new ['ResizableIntegerArray']
-    setattribute self, '@!bstack', bstack
+    setattribute self, cur_class, '@!bstack', bstack
   bstack_done:
 
     # If a new subcursor is being pushed, then save it in cstack
