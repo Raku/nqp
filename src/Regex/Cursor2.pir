@@ -374,7 +374,9 @@ Return the cursor's current position.
 =cut
 
 .sub 'pos' :method :subid('Regex_Cursor2_meth_pos')
-    $P0 = getattribute self, '$!pos'
+    .local pmc cur_class
+    cur_class = get_global '$?CLASS'
+    $P0 = getattribute self, cur_class, '$!pos'
     .return ($P0)
 .end
 
@@ -386,7 +388,9 @@ Return the cursor's from position.
 =cut
 
 .sub 'from' :method :subid('Regex_Cursor2_meth_from')
-    $P0 = getattribute self, '$!from'
+    .local pmc cur_class
+    cur_class = get_global '$?CLASS'
+    $P0 = getattribute self, cur_class, '$!from'
     .return ($P0)
 .end
 
@@ -546,9 +550,11 @@ Configure this cursor for backtracking via C<!cursor_next>.
 =cut
 
 .sub '!cursor_backtrack' :method :subid('Regex_Cursor2_meth_!cursor_backtrack')
+    .local pmc cur_class
+    cur_class = get_global '$?CLASS'
     $P0 = getinterp
     $P1 = $P0['sub';1]
-    setattribute self, '&!regex', $P1
+    setattribute self, cur_class, '&!regex', $P1
 .end
 
 
@@ -559,8 +565,9 @@ Continue a regex match from where the current cursor left off.
 =cut
 
 .sub '!cursor_next' :method :subid('Regex_Cursor2_meth_!cursor_next')
-    .local pmc regex, cur
-    regex = getattribute self, '&!regex'
+    .local pmc regex, cur, cur_class
+    cur_class = get_global '$?CLASS'
+    regex = getattribute self, cur_class, '&!regex'
     if null regex goto fail
     cur = self.regex()
     .return (cur)
@@ -579,7 +586,9 @@ Set the list of subcaptures that produce arrays to C<caparray>.
 
 .sub '!cursor_caparray' :method :subid('Regex_Cursor2_meth_!cursor_caparray')
     .param pmc caparray        :slurpy
-    setattribute self, '@!caparray', caparray
+    .local pmc cur_class
+    cur_class = get_global '$?CLASS'
+    setattribute self, cur_class, '@!caparray', caparray
 .end
 
 
@@ -591,7 +600,9 @@ Set the Cursor's name (for binding) to C<names>.
 
 .sub '!cursor_names' :method :subid('Regex_Cursor2_meth_!cursor_names')
     .param pmc names
-    setattribute self, '$!names', names
+    .local pmc cur_class
+    cur_class = get_global '$?CLASS'
+    setattribute self, cur_class, '$!names', names
 .end
 
 
@@ -603,7 +614,9 @@ Set the cursor's position to C<pos>.
 
 .sub '!cursor_pos' :method :subid('Regex_Cursor2_meth_!cursor_pos')
     .param pmc pos
-    setattribute self, '$!pos', pos
+    .local pmc cur_class
+    cur_class = get_global '$?CLASS'
+    setattribute self, cur_class, '$!pos', pos
 .end
 
 
@@ -616,13 +629,15 @@ Log a debug message.
 .sub '!cursor_debug' :method :subid('Regex_Cursor2_meth_!cursor_debug')
     .param string tag
     .param pmc args            :slurpy
-    $P0 = getattribute self, '$!debug'
+    .local pmc cur_class
+    cur_class = get_global '$?CLASS'
+    $P0 = getattribute self, cur_class, '$!debug'
     if null $P0 goto done
     unless $P0 goto done
     .local pmc fmt, from, pos, orig, line
     fmt = new ['ResizablePMCArray']
-    from = getattribute self, '$!from'
-    orig = getattribute self, '$!target'
+    from = getattribute self, cur_class, '$!from'
+    orig = getattribute self, cur_class, '$!target'
     $P0 = get_hll_global ['HLL'], 'Compiler'
     line = $P0.'lineof'(orig, from, 'cache'=>1)
 
@@ -665,8 +680,9 @@ the address of a label to branch to when backtracking occurs.)
 
     # Initialize bstack if needed, and set cptr to be the cstack
     # size requested by the top frame.
-    .local pmc bstack
-    bstack = getattribute self, '@!bstack'
+    .local pmc bstack, cur_class
+    cur_class = get_global '$?CLASS'
+    bstack = getattribute self, cur_class, '@!bstack'
     if null bstack goto bstack_new
     unless bstack goto bstack_done
     $I0 = elements bstack
@@ -684,12 +700,12 @@ the address of a label to branch to when backtracking occurs.)
     # match state.
     unless has_subcur goto subcur_done
     null $P0
-    setattribute self, '$!match', $P0
+    setattribute self, cur_class, '$!match', $P0
     .local pmc cstack
-    cstack = getattribute self, '@!cstack'
+    cstack = getattribute self, cur_class, '@!cstack'
     unless null cstack goto have_cstack
     cstack = new ['ResizablePMCArray']
-    setattribute self, '@!cstack', cstack
+    setattribute self, cur_class, '@!cstack', cstack
   have_cstack:
     cstack[cptr] = subcur
     inc cptr
@@ -713,8 +729,9 @@ If C<mark> is zero, return information about the latest frame.
 .sub '!mark_peek' :method :subid('Regex_Cursor2_meth_!mark_peek')
     .param int tomark
 
-    .local pmc bstack
-    bstack = getattribute self, '@!bstack'
+    .local pmc bstack, cur_class
+    cur_class = get_global '$?CLASS'
+    bstack = getattribute self, cur_class, '@!bstack'
     if null bstack goto no_mark
     unless bstack goto no_mark
 
@@ -754,6 +771,9 @@ values of repetition count, cursor position, and mark (address).
 .sub '!mark_fail' :method :subid('Regex_Cursor2_meth_!mark_fail')
     .param int mark
 
+    .local pmc cur_class
+    cur_class = get_global '$?CLASS'
+
     # Get the frame information for C<mark>.
     .local int rep, pos, mark, bptr, cptr
     .local pmc bstack
@@ -761,7 +781,7 @@ values of repetition count, cursor position, and mark (address).
 
     # clear any existing Match object
     null $P0
-    setattribute self, '$!match', $P0
+    setattribute self, cur_class, '$!match', $P0
 
     .local pmc subcur
     null subcur
@@ -772,7 +792,7 @@ values of repetition count, cursor position, and mark (address).
     # If there's a subcursor associated with this mark, return it.
     unless cptr > 0 goto cstack_done
     .local pmc cstack
-    cstack = getattribute self, '@!cstack'
+    cstack = getattribute self, cur_class, '@!cstack'
     dec cptr
     subcur = cstack[cptr]
     # Set the cstack to the size requested by the soon-to-be-top mark frame.
@@ -886,8 +906,9 @@ Match the backreference given by C<name>.
     (cur, pos, tgt) = self.'!cursor_start'()
 
     # search the cursor cstack for the latest occurrence of C<name>
-    .local pmc cstack
-    cstack = getattribute self, '@!cstack'
+    .local pmc cstack, cur_class
+    cur_class = get_global '$?CLASS'
+    cstack = getattribute self, cur_class, '@!cstack'
     if null cstack goto pass
     .local int cstack_it
     cstack_it = elements cstack
@@ -896,7 +917,7 @@ Match the backreference given by C<name>.
     unless cstack_it >= 0 goto pass
     .local pmc subcur
     subcur = cstack[cstack_it]
-    $P0 = getattribute subcur, '$!names'
+    $P0 = getattribute subcur, cur_class, '$!names'
     if null $P0 goto cstack_loop
     $S0 = $P0
     if name != $S0 goto cstack_loop
@@ -1052,8 +1073,9 @@ are first compiled to regexes prior to being matched.
 =cut
 
 .sub '' :vtable('get_bool') :method
-    .local pmc match
-    match = getattribute self, '$!match'
+    .local pmc match,  cur_class
+    cur_class = get_global '$?CLASS'
+    match = getattribute self, cur_class, '$!match'
     if null match goto false
     $I0 = istrue match
     .return ($I0)
