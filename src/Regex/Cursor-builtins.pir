@@ -66,7 +66,7 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     .local string tgt
     (cur, pos, tgt) = self.'!cursor_start'()
     .local pmc debug
-    debug = getattribute cur, '$!debug'
+    #debug = getattribute cur, '$!debug'
     if null debug goto debug_1
     cur.'!cursor_debug'('START', 'ww')
   debug_1:
@@ -120,7 +120,7 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     .local string tgt
     (cur, pos, tgt) = self.'!cursor_start'()
     .local pmc debug
-    debug = getattribute cur, '$!debug'
+    #debug = getattribute cur, '$!debug'
     if null debug goto debug_1
     cur.'!cursor_debug'('START', name)
   debug_1:
@@ -145,7 +145,7 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     .local string tgt
     (cur, pos, tgt) = self.'!cursor_start'()
     .local pmc debug
-    debug = getattribute cur, '$!debug'
+    #debug = getattribute cur, '$!debug'
     if null debug goto debug_1
     cur.'!cursor_debug'('START', 'alpha')
   debug_1:
