@@ -345,6 +345,7 @@ rule routine_def {
 
 rule method_def {
     :my $*INVOCANT_OK := 1;
+    $<private>=['!'?]
     <deflongname>?
     <.newpad>
     [ '(' <signature> ')'

@@ -709,7 +709,7 @@ method method_def($/) {
     # Install it where it should go (methods table / namespace).
     if $<deflongname> {
         # Set name.
-        my $name := ~$<deflongname>[0].ast;
+        my $name := ~$<private> ~ ~$<deflongname>[0].ast;
         $past.name($name);
 
         # If it's a proto, we'll mark it as such by giving it an empty candidate
