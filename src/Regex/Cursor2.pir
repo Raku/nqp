@@ -213,8 +213,9 @@ for the Cursor if one hasn't been created yet.
 =cut
 
 .sub 'MATCH' :method :subid('Regex_Cursor2_meth_MATCH')
-    .local pmc match
-    match = getattribute self, '$!match'
+    .local pmc cur_class, match
+    cur_class = get_global '$?CLASS'
+    match = getattribute self, cur_class, '$!match'
     if null match goto match_make
     $P0 = get_global '$!TRUE'
     $I0 = issame match, $P0
@@ -223,19 +224,19 @@ for the Cursor if one hasn't been created yet.
     # First, create a Match object and bind it
   match_make:
     match = self.'new_match'()
-    setattribute self, '$!match', match
+    setattribute self, cur_class, '$!match', match
     setattribute match, '$!cursor', self
     .local pmc target, from, to
-    target = getattribute self, '$!target'
+    target = getattribute self, cur_class, '$!target'
     setattribute match, '$!target', target
-    from = getattribute self, '$!from'
+    from = getattribute self, cur_class, '$!from'
     setattribute match, '$!from', from
-    to = getattribute self, '$!pos'
+    to = getattribute self, cur_class, '$!pos'
     setattribute match, '$!to', to
 
     # Create any arrayed subcaptures.
     .local pmc caparray, caparray_it, caphash
-    caparray = getattribute self, '@!caparray'
+    caparray = getattribute self, cur_class, '@!caparray'
     if null caparray goto caparray_done
     caparray_it = iter caparray
     caphash = new ['Hash']
@@ -261,7 +262,7 @@ for the Cursor if one hasn't been created yet.
     # no saved subcursors, we're done.
     if to < from goto match_done
     .local pmc cstack, cstack_it
-    cstack = getattribute self, '@!cstack'
+    cstack = getattribute self, cur_class, '@!cstack'
     if null cstack goto cstack_done
     unless cstack goto cstack_done
     cstack_it = iter cstack
@@ -269,10 +270,10 @@ for the Cursor if one hasn't been created yet.
     unless cstack_it goto cstack_done
     .local pmc subcur, submatch, names
     subcur = shift cstack_it
-    $I0 = isa subcur, ['Regex';'Cursor']
+    $I0 = type_check subcur, cur_class
     unless $I0 goto cstack_loop
     # If the subcursor isn't bound with a name, skip it
-    names = getattribute subcur, '$!names'
+    names = getattribute subcur, cur_class, '$!names'
     if null names goto cstack_loop
     submatch = subcur.'MATCH'()
     # See if we have multiple binds
@@ -408,25 +409,24 @@ Create a new cursor for matching C<target>.
     .param int cont            :named('c') :optional
     .param int has_cont        :opt_flag
 
-    .local pmc parrotclass, cur
-    $P0 = self.'HOW'()
-    parrotclass = getattribute $P0, 'parrotclass'
-    cur = new parrotclass
+    .local pmc cur_class, cur
+    cur_class = get_global '$?CLASS'
+    cur = repr_instance_of self
 
     $P0 = box target
-    setattribute cur, '$!target', $P0
+    setattribute cur, cur_class, '$!target', $P0
 
     if has_cont goto cursor_cont
     $P0 = box pos
-    setattribute cur, '$!from', $P0
+    setattribute cur, cur_class, '$!from', $P0
     $P0 = box pos
-    setattribute cur, '$!pos', $P0
+    setattribute cur, cur_class, '$!pos', $P0
     goto cursor_done
   cursor_cont:
     $P0 = box CURSOR_FAIL
-    setattribute cur, '$!from', $P0
+    setattribute cur, cur_class, '$!from', $P0
     $P0 = box cont
-    setattribute cur, '$!pos', $P0
+    setattribute cur, cur_class, '$!pos', $P0
   cursor_done:
 
     .return (cur)
@@ -447,48 +447,47 @@ provided, then the new cursor has the same type as lang.
     lang = self
   have_lang:
 
-    .local pmc parrotclass, cur
-    $P0 = lang.'HOW'()
-    parrotclass = getattribute $P0, 'parrotclass'
-    cur = new parrotclass
+    .local pmc cur_class, cur
+    cur_class = get_global '$?CLASS'
+    cur = repr_instance_of self
 
     .local pmc regex
-    regex = getattribute self, '&!regex'
+    regex = getattribute self, cur_class, '&!regex'
     unless null regex goto cursor_restart
 
     .local pmc from, target, debug
 
-    from = getattribute self, '$!pos'
-    setattribute cur, '$!from', from
-    setattribute cur, '$!pos', from
+    from = getattribute self, cur_class, '$!pos'
+    setattribute cur, cur_class, '$!from', from
+    setattribute cur, cur_class, '$!pos', from
 
-    target = getattribute self, '$!target'
-    setattribute cur, '$!target', target
-    debug = getattribute self, '$!debug'
-    setattribute cur, '$!debug', debug
+    target = getattribute self, cur_class, '$!target'
+    setattribute cur, cur_class, '$!target', target
+    debug = getattribute self, cur_class, '$!debug'
+    setattribute cur, cur_class, '$!debug', debug
 
     .return (cur, from, target, 0)
 
   cursor_restart:
     .local pmc pos, cstack, bstack
-    from   = getattribute self, '$!from'
-    target = getattribute self, '$!target'
-    debug  = getattribute self, '$!debug'
-    cstack = getattribute self, '@!cstack'
-    bstack = getattribute self, '@!bstack'
+    from   = getattribute self, cur_class, '$!from'
+    target = getattribute self, cur_class, '$!target'
+    debug  = getattribute self, cur_class, '$!debug'
+    cstack = getattribute self, cur_class, '@!cstack'
+    bstack = getattribute self, cur_class, '@!bstack'
     pos    = box CURSOR_FAIL
 
-    setattribute cur, '$!from', from
-    setattribute cur, '$!pos', pos 
-    setattribute cur, '$!target', target
-    setattribute cur, '$!debug', debug
+    setattribute cur, cur_class, '$!from', from
+    setattribute cur, cur_class, '$!pos', pos 
+    setattribute cur, cur_class, '$!target', target
+    setattribute cur, cur_class, '$!debug', debug
     if null cstack goto cstack_done
     cstack = clone cstack
-    setattribute cur, '@!cstack', cstack
+    setattribute cur, cur_class, '@!cstack', cstack
   cstack_done:
     if null bstack goto bstack_done
     bstack = clone bstack
-    setattribute cur, '@!bstack', bstack
+    setattribute cur, cur_class, '@!bstack', bstack
   bstack_done:
     .return (cur, from, target, 1)
 .end
@@ -501,13 +500,14 @@ Permanently fail this cursor.
 =cut
 
 .sub '!cursor_fail' :method :subid('Regex_Cursor2_meth_!cursor_fail')
-    .local pmc pos
+    .local pmc cur_class, pos
+    cur_class = get_global '$?CLASS'
     pos = box CURSOR_FAIL_RULE
-    setattribute self, '$!pos', pos
+    setattribute self, cur_class, '$!pos', pos
     null $P0
-    setattribute self, '$!match', $P0
-    setattribute self, '@!bstack', $P0
-    setattribute self, '@!cstack', $P0
+    setattribute self, cur_class, '$!match', $P0
+    setattribute self, cur_class, '@!bstack', $P0
+    setattribute self, cur_class, '@!cstack', $P0
 .end
 
 
@@ -525,10 +525,13 @@ with a "real" Match object when requested.
     .param pmc pos
     .param string name
 
-    setattribute self, '$!pos', pos
+    .local pmc cur_class
+    cur_class = get_global '$?CLASS'
+
+    setattribute self, cur_class, '$!pos', pos
     .local pmc match
     match = get_global '$!TRUE'
-    setattribute self, '$!match', match
+    setattribute self, cur_class, '$!match', match
     unless name goto done
     self.'!reduce'(name)
   done:
