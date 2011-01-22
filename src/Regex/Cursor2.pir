@@ -129,19 +129,19 @@ grammars.
     how.'add_method'(type_obj, 'FAILGOAL', $P27)
     .const 'Sub' $P28 = 'Regex_Cursor_meth_DEBUG'
     how.'add_method'(type_obj, 'DEBUG', $P28)
-    .const 'Sub' $P10 = 'Regex_Cursor_meth_!protoregex'
+    .const 'Sub' $P10 = 'Regex_Cursor2_meth_!protoregex'
     how.'add_method'(type_obj, '!protoregex', $P10)
-    .const 'Sub' $P11 = 'Regex_Cursor_meth_!protoregex_generation'
+    .const 'Sub' $P11 = 'Regex_Cursor2_meth_!protoregex_generation'
     how.'add_method'(type_obj, '!protoregex_generation', $P11)
-    .const 'Sub' $P12 = 'Regex_Cursor_meth_!protoregex_tokrx'
+    .const 'Sub' $P12 = 'Regex_Cursor2_meth_!protoregex_tokrx'
     how.'add_method'(type_obj, '!protoregex_tokrx', $P12)
-    .const 'Sub' $P13 = 'Regex_Cursor_meth_!protoregex_gen_table'
+    .const 'Sub' $P13 = 'Regex_Cursor2_meth_!protoregex_gen_table'
     how.'add_method'(type_obj, '!protoregex_gen_table', $P13)
-    .const 'Sub' $P14 = 'Regex_Cursor_meth_!PREFIX__!protoregex'
+    .const 'Sub' $P14 = 'Regex_Cursor2_meth_!PREFIX__!protoregex'
     how.'add_method'(type_obj, '!PREFIX__!protoregex', $P14)
-    .const 'Sub' $P15 = 'Regex_Cursor_meth_!PREFIX__!subrule'
+    .const 'Sub' $P15 = 'Regex_Cursor2_meth_!PREFIX__!subrule'
     how.'add_method'(type_obj, '!PREFIX__!subrule', $P15)
-    .const 'Sub' $P16 = 'Regex_Cursor_meth_DUMP_TOKRX'
+    .const 'Sub' $P16 = 'Regex_Cursor2_meth_DUMP_TOKRX'
     how.'add_method'(type_obj, 'DUMP_TOKRX', $P16)
     .const 'Sub' $P17 = 'Regex_Cursor2_meth_Bool'
     how.'add_method'(type_obj, 'Bool', $P17)
