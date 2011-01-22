@@ -50,6 +50,7 @@ REGEX_SOURCES = \
   src/Regex.pir \
   src/Regex/constants.pir \
   src/Regex/Cursor.pir \
+  src/Regex/Cursor2.pir \
   src/Regex/Cursor-builtins.pir \
   src/Regex/Cursor-protoregex-peek.pir \
   src/Regex/Match.pir \
