@@ -11,7 +11,7 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
 
 .namespace ['Regex';'Cursor']
 
-.sub 'before' :method
+.sub 'before' :method :subid('Regex_Cursor_meth_before')
     .param pmc regex           :optional
     .local pmc cur
     .local int pos
@@ -25,7 +25,7 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
 .end
 
 
-.sub 'ident' :method
+.sub 'ident' :method :subid('Regex_Cursor_meth_ident')
     .local pmc cur
     .local int pos, eos
     .local string tgt
@@ -42,7 +42,7 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     .return (cur)
 .end
 
-.sub 'wb' :method
+.sub 'wb' :method :subid('Regex_Cursor_meth_wb')
     .local pmc cur
     .local int pos, eos
     .local string tgt
@@ -60,7 +60,7 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     .return (cur)
 .end
 
-.sub 'ww' :method
+.sub 'ww' :method :subid('Regex_Cursor_meth_ww')
     .local pmc cur
     .local int pos, eos
     .local string tgt
@@ -90,7 +90,7 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     .return (cur)
 .end
 
-.sub 'ws' :method
+.sub 'ws' :method :subid('Regex_Cursor_meth_ws')
     .local pmc cur
     .local int pos, eos
     .local string tgt
@@ -139,7 +139,7 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     .return (cur)
 .end
 
-.sub 'alpha' :method
+.sub 'alpha' :method :subid('Regex_Cursor_meth_alpha')
     .local pmc cur
     .local int pos
     .local string tgt
@@ -170,51 +170,51 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     .return (cur)
 .end
 
-.sub 'upper' :method
+.sub 'upper' :method :subid('Regex_Cursor_meth_upper')
     .tailcall '!cclass'(self, 'upper', .CCLASS_UPPERCASE)
 .end
 
-.sub 'lower' :method
+.sub 'lower' :method :subid('Regex_Cursor_meth_lower')
     .tailcall '!cclass'(self, 'lower', .CCLASS_LOWERCASE)
 .end
 
-.sub 'digit' :method
+.sub 'digit' :method :subid('Regex_Cursor_meth_digit')
     .tailcall '!cclass'(self, 'digit', .CCLASS_NUMERIC)
 .end
 
-.sub 'xdigit' :method
+.sub 'xdigit' :method :subid('Regex_Cursor_meth_xdigit')
     .tailcall '!cclass'(self, 'xdigit', .CCLASS_HEXADECIMAL)
 .end
 
-.sub 'print' :method
+.sub 'print' :method :subid('Regex_Cursor_meth_print')
     .tailcall '!cclass'(self, 'print', .CCLASS_PRINTING)
 .end
 
-.sub 'graph' :method
+.sub 'graph' :method :subid('Regex_Cursor_meth_graph')
     .tailcall '!cclass'(self, 'graph', .CCLASS_GRAPHICAL)
 .end
 
-.sub 'cntrl' :method
+.sub 'cntrl' :method :subid('Regex_Cursor_meth_cntrl')
     .tailcall '!cclass'(self, 'cntrl', .CCLASS_CONTROL)
 .end
 
-.sub 'punct' :method
+.sub 'punct' :method :subid('Regex_Cursor_meth_punct')
     .tailcall '!cclass'(self, 'punct', .CCLASS_PUNCTUATION)
 .end
 
-.sub 'alnum' :method
+.sub 'alnum' :method :subid('Regex_Cursor_meth_alnum')
     .tailcall '!cclass'(self, 'alnum', .CCLASS_ALPHANUMERIC)
 .end
 
-.sub 'space' :method
+.sub 'space' :method :subid('Regex_Cursor_meth_space')
     .tailcall '!cclass'(self, 'space', .CCLASS_WHITESPACE)
 .end
 
-.sub 'blank' :method
+.sub 'blank' :method :subid('Regex_Cursor_meth_blank')
     .tailcall '!cclass'(self, 'blank', .CCLASS_BLANK)
 .end
 
-.sub 'FAILGOAL' :method
+.sub 'FAILGOAL' :method :subid('Regex_Cursor_meth_FAILGOAL')
     .param string goal
     .local string dba
     $P0 = getinterp
@@ -237,7 +237,7 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     die message
 .end
 
-.sub 'DEBUG' :method
+.sub 'DEBUG' :method :subid('Regex_Cursor_meth_DEBUG')
     .param pmc arg             :optional
     .param int has_arg         :opt_flag
 

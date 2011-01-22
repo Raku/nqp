@@ -46,7 +46,7 @@ Match objects.
 
 =cut
 
-.sub 'new_match' :method
+.sub 'new_match' :method :subid('Regex_Cursor_meth_new_match')
     .local pmc match
     match = new ['Regex';'Match']
     .return (match)
@@ -60,7 +60,7 @@ arrays for usage within Match objects.
 
 =cut
 
-.sub 'new_array' :method
+.sub 'new_array' :method :subid('Regex_Cursor_meth_new_array')
     .local pmc arr
     arr = new ['ResizablePMCArray']
     .return (arr)
@@ -73,7 +73,7 @@ for the Cursor if one hasn't been created yet.
 
 =cut
 
-.sub 'MATCH' :method
+.sub 'MATCH' :method :subid('Regex_Cursor_meth_MATCH')
     .local pmc match
     match = getattribute self, '$!match'
     if null match goto match_make
@@ -183,7 +183,7 @@ If C<regex> is omitted, then use the C<TOP> rule for the grammar.
 
 =cut
 
-.sub 'parse' :method
+.sub 'parse' :method :subid('Regex_Cursor_meth_parse')
     .param pmc target
     .param pmc regex           :named('rule') :optional
     .param int has_regex       :opt_flag
@@ -219,7 +219,7 @@ Return the next match from a successful Cursor.
 
 =cut
 
-.sub 'next' :method
+.sub 'next' :method :subid('Regex_Cursor_meth_next')
     .local pmc cur, match
     cur = self.'!cursor_next'()
     match = cur.'MATCH'()
@@ -233,7 +233,7 @@ Return the cursor's current position.
 
 =cut
 
-.sub 'pos' :method
+.sub 'pos' :method :subid('Regex_Cursor_meth_pos')
     $P0 = getattribute self, '$!pos'
     .return ($P0)
 .end
@@ -245,7 +245,7 @@ Return the cursor's from position.
 
 =cut
 
-.sub 'from' :method
+.sub 'from' :method :subid('Regex_Cursor_meth_from')
     $P0 = getattribute self, '$!from'
     .return ($P0)
 .end
@@ -262,7 +262,7 @@ Create a new cursor for matching C<target>.
 
 =cut
 
-.sub '!cursor_init' :method
+.sub '!cursor_init' :method :subid('Regex_Cursor_meth_!cursor_init')
     .param string target
     .param int pos             :named('p') :optional
     .param int has_pos         :opt_flag
@@ -300,7 +300,7 @@ provided, then the new cursor has the same type as lang.
 
 =cut
 
-.sub '!cursor_start' :method
+.sub '!cursor_start' :method :subid('Regex_Cursor_meth_!cursor_start')
     .param pmc lang            :optional
     .param int has_lang        :opt_flag
 
@@ -361,7 +361,7 @@ Permanently fail this cursor.
 
 =cut
 
-.sub '!cursor_fail' :method
+.sub '!cursor_fail' :method :subid('Regex_Cursor_meth_!cursor_fail')
     .local pmc pos
     pos = box CURSOR_FAIL_RULE
     setattribute self, '$!pos', pos
@@ -382,7 +382,7 @@ with a "real" Match object when requested.
 
 =cut
 
-.sub '!cursor_pass' :method
+.sub '!cursor_pass' :method :subid('Regex_Cursor_meth_!cursor_pass')
     .param pmc pos
     .param string name
 
@@ -403,7 +403,7 @@ Configure this cursor for backtracking via C<!cursor_next>.
 
 =cut
 
-.sub '!cursor_backtrack' :method
+.sub '!cursor_backtrack' :method :subid('Regex_Cursor_meth_!cursor_backtrack')
     $P0 = getinterp
     $P1 = $P0['sub';1]
     setattribute self, '&!regex', $P1
@@ -416,7 +416,7 @@ Continue a regex match from where the current cursor left off.
 
 =cut
 
-.sub '!cursor_next' :method
+.sub '!cursor_next' :method :subid('Regex_Cursor_meth_!cursor_next')
     .local pmc regex, cur
     regex = getattribute self, '&!regex'
     if null regex goto fail
@@ -435,7 +435,7 @@ Set the list of subcaptures that produce arrays to C<caparray>.
 
 =cut
 
-.sub '!cursor_caparray' :method
+.sub '!cursor_caparray' :method :subid('Regex_Cursor_meth_!cursor_caparray')
     .param pmc caparray        :slurpy
     setattribute self, '@!caparray', caparray
 .end
@@ -447,7 +447,7 @@ Set the Cursor's name (for binding) to C<names>.
 
 =cut
 
-.sub '!cursor_names' :method
+.sub '!cursor_names' :method :subid('Regex_Cursor_meth_!cursor_names')
     .param pmc names
     setattribute self, '$!names', names
 .end
@@ -459,7 +459,7 @@ Set the cursor's position to C<pos>.
 
 =cut
 
-.sub '!cursor_pos' :method
+.sub '!cursor_pos' :method :subid('Regex_Cursor_meth_!cursor_pos')
     .param pmc pos
     setattribute self, '$!pos', pos
 .end
@@ -471,7 +471,7 @@ Log a debug message.
 
 =cut
 
-.sub '!cursor_debug' :method
+.sub '!cursor_debug' :method :subid('Regex_Cursor_meth_!cursor_debug')
     .param string tag
     .param pmc args            :slurpy
     $P0 = getattribute self, '$!debug'
@@ -510,7 +510,7 @@ the address of a label to branch to when backtracking occurs.)
 
 =cut
 
-.sub '!mark_push' :method
+.sub '!mark_push' :method :subid('Regex_Cursor_meth_!mark_push')
     .param int rep
     .param int pos
     .param int mark
@@ -568,7 +568,7 @@ If C<mark> is zero, return information about the latest frame.
 
 =cut
 
-.sub '!mark_peek' :method
+.sub '!mark_peek' :method :subid('Regex_Cursor_meth_!mark_peek')
     .param int tomark
 
     .local pmc bstack
@@ -609,7 +609,7 @@ values of repetition count, cursor position, and mark (address).
 
 =cut
 
-.sub '!mark_fail' :method
+.sub '!mark_fail' :method :subid('Regex_Cursor_meth_!mark_fail')
     .param int mark
 
     # Get the frame information for C<mark>.
@@ -659,7 +659,7 @@ capture states.
 
 =cut
 
-.sub '!mark_commit' :method
+.sub '!mark_commit' :method :subid('Regex_Cursor_meth_!mark_commit')
     .param int mark
 
     # find mark
@@ -706,7 +706,7 @@ Perform any action associated with the current regex match.
 
 =cut
 
-.sub '!reduce' :method
+.sub '!reduce' :method :subid('Regex_Cursor_meth_!reduce')
     .param string name
     .param string key          :optional
     .param int has_key         :opt_flag
@@ -736,7 +736,7 @@ Match the backreference given by C<name>.
 
 =cut
 
-.sub '!BACKREF' :method
+.sub '!BACKREF' :method :subid('Regex_Cursor_meth_!BACKREF')
     .param string name
     .local pmc cur
     .local int pos, eos
@@ -787,7 +787,7 @@ and the longest match is returned.
 
 =cut
 
-.sub '!INTERPOLATE' :method
+.sub '!INTERPOLATE' :method :subid('Regex_Cursor_meth_!INTERPOLATE')
     .param pmc var
 
     .local pmc cur
@@ -866,7 +866,7 @@ are first compiled to regexes prior to being matched.
 
 =cut
 
-.sub '!INTERPOLATE_REGEX' :method
+.sub '!INTERPOLATE_REGEX' :method :subid('Regex_Cursor_meth_!INTERPOLATE_REGEX')
     .param pmc var
 
     $I0 = does var, 'invokable'
