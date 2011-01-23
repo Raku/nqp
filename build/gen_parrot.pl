@@ -35,7 +35,8 @@ close $REQ;
 
 {
     no warnings;
-    if (open my $REV, '-|', "parrot_install${slash}bin${slash}parrot_config git_describe") {
+    my $parrot_bin_folder = "parrot_install${slash}bin";
+    if (-e $parrot_bin_folder && open my $REV, '-|', "$parrot_bin_folder${slash}parrot_config git_describe") {
         my $revision = <$REV>;
         close $REV;
         $revision =~ s/\s.*//s;
