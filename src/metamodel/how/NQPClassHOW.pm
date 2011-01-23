@@ -274,8 +274,8 @@ knowhow NQPClassHOW {
         for @!mro {
             my %methods := $_.HOW.method_table($_);
             for %methods {
-                unless %methods{$_.key} {
-                    %methods{$_.key} := $_.value;
+                unless %cache{$_.key} {
+                    %cache{$_.key} := $_.value;
                 }
             }
         }
