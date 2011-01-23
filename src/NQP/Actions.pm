@@ -262,8 +262,9 @@ sub push_block_handler($/, $block) {
 }
 
 method statement_prefix:sym<INIT>($/) {
-    @BLOCK[0].loadinit.push($<blorst>.ast);
-    make PAST::Stmts.new(:node($/));
+    my $init_block := PAST::Block.new(:blocktype('immediate'));
+    $init_block.loadinit.push($<blorst>.ast);
+    make $init_block;
 }
 
 method statement_prefix:sym<try>($/) {
@@ -375,7 +376,7 @@ method variable($/) {
 method package_declarator:sym<module>($/)  { make $<package_def>.ast; }
 method package_declarator:sym<knowhow>($/) { make package($/); }
 method package_declarator:sym<class>($/)   { make package($/) }
-method package_declarator:sym<grammar>($/) { make old_package($/) }
+method package_declarator:sym<grammar>($/) { make package($/) }
 method package_declarator:sym<role>($/)    { make package($/); }
 
 sub package($/) {
@@ -401,7 +402,6 @@ sub package($/) {
             PAST::Var.new( :name('$?CLASS') ),
             PAST::Var.new( :name('type_obj'), :scope('register') )
         )
-        # XXX name
     ));
     if $<package_def><repr> {
         my $repr_name := $<package_def><repr>[0].ast;
@@ -423,6 +423,18 @@ sub package($/) {
             ),
             PAST::Var.new( :name('type_obj'), :scope('register') ),
             PAST::Var.new( :name(~$name), :namespace(@ns), :scope('package') )
+        ));
+    }
+    elsif ~$<sym> eq 'grammar' {
+        $*PACKAGE-SETUP.push(PAST::Op.new(
+            :pasttype('callmethod'), :name('add_parent'),
+            PAST::Op.new(
+                # XXX nqpop get_how
+                :pirop('get_how PP'),
+                PAST::Var.new( :name('type_obj'), :scope('register') )
+            ),
+            PAST::Var.new( :name('type_obj'), :scope('register') ),
+            PAST::Var.new( :name('Cursor2'), :namespace('Regex'), :scope('package') )
         ));
     }
 
@@ -450,31 +462,6 @@ sub package($/) {
     $past.loadinit.push(PAST::Block.new( :blocktype('immediate'), $*PACKAGE-SETUP ));
 
     return $past;
-}
-
-# XXX Left here so we can keep old-style classes and grammars working while
-# playing with KnowHOW etc.
-sub old_package($/) {
-    my $past := $<package_def>.ast;
-    my $classinit :=
-        PAST::Op.new(
-            PAST::Op.new(
-                :inline( '    %r = get_root_global ["parrot"], "P6metaclass"')
-            ),
-            ~$<package_def><name>,
-            :name('new_class'),
-            :pasttype('callmethod')
-        );
-    my $parent := ~$<package_def><parent>[0]
-                  || ($<sym> eq 'grammar' ?? 'Regex::Cursor' !! '');
-    if $parent {
-        $classinit.push( PAST::Val.new( :value($parent), :named('parent') ) );
-    }
-    if $past<attributes> {
-        $classinit.push( $past<attributes> );
-    }
-    @BLOCK[0].loadinit.push($classinit);
-    make $past;
 }
 
 method package_def($/) {
@@ -680,11 +667,6 @@ method routine_def($/) {
 
 
 method method_def($/) {
-    # XXX Remove this when grammar switches over to using 6model.
-    unless $*PACKAGE-SETUP {
-        return OLD_method_def($/);
-    }
-
     # If it's just got * as a body, make a multi-dispatch enterer.
     # Otherwise, build method block PAST.
     my $past;
@@ -727,7 +709,7 @@ method method_def($/) {
         # the multi-dispatcher to use.
         if $*MULTINESS eq 'multi' { attach_multi_signature($past); }
 
-        # Insert it into the namespace.
+        # Insert it into the method table.
         $*PACKAGE-SETUP.push(PAST::Op.new(
             :pasttype('callmethod'), :name($*MULTINESS eq 'multi' ?? 'add_multi_method' !! 'add_method'),
             PAST::Op.new(
@@ -750,28 +732,6 @@ method method_def($/) {
         for $<trait> { $_.ast()($/); }
     }
 
-    make $past;
-}
-
-# XXX Toss this when grammar moves over to 6model.
-sub OLD_method_def($/) {
-    my $past := $<blockoid>.ast;
-    $past.blocktype('method');
-    if $*SCOPE eq 'our' {
-        $past.pirflags(':nsentry');
-    }
-    $past.control('return_pir');
-    $past[0].unshift( PAST::Op.new( :inline('    .lex "self", self') ) );
-    $past.symbol('self', :scope('lexical') );
-    if $<deflongname> {
-        my $name := ~$<deflongname>[0].ast;
-        $past.name($name);
-    }
-    if $*MULTINESS eq 'multi' { $past.multi().unshift('_'); }
-    $past<block_past> := $past;
-    if $<trait> {
-        for $<trait> { $_.ast()($/); }
-    }
     make $past;
 }
 
@@ -911,27 +871,39 @@ method regex_declarator($/, $key?) {
             PAST::Stmts.new(
                 PAST::Block.new( :name($name),
                     PAST::Op.new(
-                        PAST::Var.new( :name('self'), :scope('register') ),
+                        PAST::Var.new( :name('self'), :scope('parameter') ),
                         $name,
                         :name('!protoregex'),
                         :pasttype('callmethod')
                     ),
-                    :blocktype('method'),
+                    :blocktype('declaration'),
                     :lexical(0),
                     :node($/)
                 ),
                 PAST::Block.new( :name('!PREFIX__' ~ $name),
                     PAST::Op.new(
-                        PAST::Var.new( :name('self'), :scope('register') ),
+                        PAST::Var.new( :name('self'), :scope('parameter') ),
                         $name,
                         :name('!PREFIX__!protoregex'),
                         :pasttype('callmethod')
                     ),
-                    :blocktype('method'),
+                    :blocktype('declaration'),
                     :lexical(0),
                     :node($/)
                 )
             );
+            for @($past) {
+                $*PACKAGE-SETUP.push(PAST::Op.new(
+                    :pasttype('callmethod'), :name('add_method'),
+                    PAST::Op.new(
+                        :pirop('get_how PP'),
+                        PAST::Var.new( :name('type_obj'), :scope('register') )
+                    ),
+                    PAST::Var.new( :name('type_obj'), :scope('register') ),
+                    PAST::Val.new( :value($_.name()) ),
+                    PAST::Val.new( :value($_) )
+                ));
+            }
     }
     elsif $key eq 'open' {
         my %h;
@@ -956,6 +928,26 @@ method regex_declarator($/, $key?) {
                 PAST::Var.new( :name('Method'), :namespace(['Regex']), :scope<package> ),
                 $regex
             );
+        $*PACKAGE-SETUP.push(PAST::Op.new(
+            :pasttype('callmethod'), :name('add_method'),
+            PAST::Op.new(
+                :pirop('get_how PP'),
+                PAST::Var.new( :name('type_obj'), :scope('register') )
+            ),
+            PAST::Var.new( :name('type_obj'), :scope('register') ),
+            PAST::Val.new( :value($name) ),
+            PAST::Val.new( :value($regex) )
+        ));
+        $*PACKAGE-SETUP.push(PAST::Op.new(
+            :pasttype('callmethod'), :name('add_method'),
+            PAST::Op.new(
+                :pirop('get_how PP'),
+                PAST::Var.new( :name('type_obj'), :scope('register') )
+            ),
+            PAST::Var.new( :name('type_obj'), :scope('register') ),
+            PAST::Val.new( :value('!PREFIX__' ~ $name) ),
+            PAST::Var.new( :name('!PREFIX__' ~ $name), :scope('package') )
+        ));
         # In sink context, we don't need the Regex::Regex object.
         $past<sink> := $regex;
         @MODIFIERS.shift;

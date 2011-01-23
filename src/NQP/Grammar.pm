@@ -12,7 +12,7 @@ method TOP() {
     my %*HOW;
     %*HOW<knowhow> := 'KnowHOW';
     %*HOW<class> := 'NQPClassHOW';
-    %*HOW<grammar> := 'NQPGrammarHOW';
+    %*HOW<grammar> := 'NQPClassHOW';
     %*HOW<role> := 'NQPRoleHOW';
 
     # What attribute class to use with what HOW, plus a default.
@@ -288,6 +288,7 @@ token package_declarator:sym<class> {
     <sym> <package_def>
 }
 token package_declarator:sym<grammar> {
+    :my $*PACKAGE-SETUP := PAST::Stmts.new();
     :my $*PKGDECL := 'grammar';
     <sym> <package_def>
 }
