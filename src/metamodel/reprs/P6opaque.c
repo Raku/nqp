@@ -355,7 +355,8 @@ static PMC * instance_of(PARROT_INTERP, PMC *self, PMC *WHAT) {
         compute_allocation_strategy(interp, WHAT, repr);
 
     /* Allocate and set up object instance. */
-    obj = mem_sys_allocate_zeroed(repr->allocation_size);
+    obj = Parrot_gc_allocate_fixed_size_storage(interp, repr->allocation_size);
+    memset(obj, 0, repr->allocation_size);
     obj->common.stable = STABLE_PMC(WHAT);
 
     /* The spill slot gets set to PMCNULL; it not being (C) NULL is what
@@ -525,7 +526,8 @@ static void gc_mark(PARROT_INTERP, PMC *self, PMC *obj) {
 
 /* This Parrot-specific addition to the API is used to free an object. */
 static void gc_free(PARROT_INTERP, PMC *self, PMC *obj) {
-    mem_sys_free(PMC_data(obj));
+    REPRP6opaque *repr = P6O_REPR_STRUCT(self);
+    Parrot_gc_free_fixed_size_storage(interp, repr->allocation_size, PMC_data(obj));
     PMC_data(obj) = NULL;
 }
 
