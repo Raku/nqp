@@ -165,10 +165,11 @@ C< :!pair >, and C<< :pair<strval> >>.
 =end
     method O($spec, $save?) {
         Q:PIR {
-            .local pmc self
+            .local pmc self, cur_class
             .local string spec, save
             .local int has_save
             self = find_lex 'self'
+            cur_class = get_hll_global ['Regex'], 'Cursor2'
             $P0 = find_lex '$spec'
             spec = $P0
             has_save = 0
@@ -284,7 +285,7 @@ C< :!pair >, and C<< :pair<strval> >>.
             if has_save goto save_hash
             ($P0, $I0) = self.'!cursor_start'()
             $P0.'!cursor_pass'($I0, '')
-            setattribute $P0, '$!match', hash
+            setattribute $P0, cur_class, '$!match', hash
             .return ($P0)
 
             # save the hash under a new entry
@@ -321,6 +322,263 @@ of the match.
 
 
 
+=begin
+
+=item EXPR(...)
+
+An operator precedence parser.
+
+=end
+
+    method EXPR($preclim = '') {
+        Q:PIR {
+            .local pmc self, cur_class
+            self = find_lex 'self'
+            cur_class = get_hll_global ['Regex'], 'Cursor2'
+
+            .local string preclim
+            $P0 = find_lex '$preclim'
+            preclim = $P0
+            
+            .local pmc here, pos, debug
+            (here, pos) = self.'!cursor_start'()
+            debug = getattribute here, cur_class, '$!debug'
+            if null debug goto debug_1
+            here.'!cursor_debug'('START', 'EXPR')
+          debug_1:
+
+            .const 'Sub' reduce = 'EXPR_reduce'
+            .local string termishrx
+            termishrx = 'termish'
+
+            .local pmc opstack, termstack
+            opstack = new ['ResizablePMCArray']
+            .lex '@opstack', opstack
+            termstack = new ['ResizablePMCArray']
+            .lex '@termstack', termstack
+
+          term_loop:
+            here = here.termishrx()
+            unless here goto fail
+            .local pmc termish
+            termish = here.'MATCH'()
+
+            # interleave any prefix/postfix we might have found
+            .local pmc termOPER, prefixish, postfixish
+            termOPER = termish
+          termOPER_loop:
+            $I0 = exists termOPER['OPER']
+            unless $I0 goto termOPER_done
+            termOPER = termOPER['OPER']
+            goto termOPER_loop
+          termOPER_done:
+            prefixish = termOPER['prefixish']
+            postfixish = termOPER['postfixish']
+            if null prefixish goto prefix_done
+
+          prepostfix_loop:
+            unless prefixish goto prepostfix_done
+            unless postfixish goto prepostfix_done
+            .local pmc preO, postO
+            .local string preprec, postprec
+            $P0 = prefixish[0]
+            $P0 = $P0['OPER']
+            preO = $P0['O']
+            preprec = preO['prec']
+            $P0 = postfixish[-1]
+            $P0 = $P0['OPER']
+            postO = $P0['O']
+            postprec = postO['prec']
+            if postprec < preprec goto post_shift
+            if postprec > preprec goto pre_shift
+            $S0 = postO['uassoc']
+            if $S0 == 'right' goto pre_shift
+          post_shift:
+            $P0 = pop postfixish
+            push opstack, $P0
+            goto prepostfix_loop
+          pre_shift:
+            $P0 = shift prefixish
+            push opstack, $P0
+            goto prepostfix_loop
+          prepostfix_done:
+
+          prefix_loop:
+            unless prefixish goto prefix_done
+            $P0 = shift prefixish
+            push opstack, $P0
+            goto prefix_loop
+          prefix_done:
+            delete termish['prefixish']
+
+          postfix_loop:
+            if null postfixish goto postfix_done
+            unless postfixish goto postfix_done
+            $P0 = pop postfixish
+            push opstack, $P0
+            goto postfix_loop
+          postfix_done:
+            delete termish['postfixish']
+
+            $P0 = termish['term']
+            push termstack, $P0
+
+            # Now see if we can fetch an infix operator
+            .local pmc infixcur, infix
+            here = here.'ws'()
+            infixcur = here.'infixish'()
+            unless infixcur goto term_done
+            infix = infixcur.'MATCH'()
+
+            .local pmc inO
+            $P0 = infix['OPER']
+            inO = $P0['O']
+            termishrx = inO['nextterm']
+            if termishrx goto have_termishrx
+            termishrx = 'termish'
+          have_termishrx:
+
+            .local string inprec, inassoc, opprec
+            inprec = inO['prec']
+            unless inprec goto err_inprec
+            if inprec <= preclim goto term_done
+            inassoc = inO['assoc']
+
+            $P0 = inO['sub']
+            if null $P0 goto subprec_done
+            inO['prec'] = $P0
+          subprec_done:
+
+          reduce_loop:
+            unless opstack goto reduce_done
+            $P0 = opstack[-1]
+            $P0 = $P0['OPER']
+            $P0 = $P0['O']
+            opprec = $P0['prec']
+            unless opprec > inprec goto reduce_gt_done
+            capture_lex reduce
+            self.reduce(termstack, opstack)
+            goto reduce_loop
+          reduce_gt_done:
+
+            unless opprec == inprec goto reduce_done
+            # equal precedence, use associativity to decide
+            unless inassoc == 'left' goto reduce_done
+            # left associative, reduce immediately
+            capture_lex reduce
+            self.reduce(termstack, opstack)
+          reduce_done:
+
+            push opstack, infix        # The Shift
+            here = infixcur.'ws'()
+            goto term_loop
+          term_done:
+
+          opstack_loop:
+            unless opstack goto opstack_done
+            capture_lex reduce
+            self.reduce(termstack, opstack)
+            goto opstack_loop
+          opstack_done:
+
+          expr_done:
+            .local pmc term
+            term = pop termstack
+            pos = here.'pos'()
+            here = self.'!cursor_start'()
+            setattribute here, cur_class, '$!pos', pos
+            setattribute here, cur_class, '$!match', term
+            here.'!reduce'('EXPR')
+            if null debug goto done
+            here.'!cursor_debug'('PASS', 'EXPR')
+            goto done
+
+          fail:
+            if null debug goto done
+            here.'!cursor_debug'('FAIL', 'EXPR')
+          done:
+            .return (here)
+
+          err_internal:
+            $I0 = termstack
+            here.'panic'('Internal operator parser error, @termstack == ', $I0)
+          err_inprec:
+            infixcur.'panic'('Missing infixish operator precedence')
+        };
+    }
+
+    method EXPR_reduce($termstack, $opstack) {
+        Q:PIR {
+            .local pmc self, termstack, opstack
+            self = find_lex 'self'
+            termstack = find_lex '$termstack'
+            opstack = find_lex '$opstack'
+
+            .local pmc op, opOPER, opO
+            .local string opassoc
+            op = pop opstack
+            opOPER = op['OPER']
+            opO = opOPER['O']
+            opassoc = opO['assoc']
+            if opassoc == 'unary' goto op_unary
+            if opassoc == 'list' goto op_list
+          op_infix:
+            .local pmc right, left
+            right = pop termstack
+            left = pop termstack
+            op[0] = left
+            op[1] = right
+            $S0 = opO['reducecheck']
+            unless $S0 goto op_infix_1
+            self.$S0(op)
+          op_infix_1:
+            self.'!reduce'('EXPR', 'INFIX', op)
+            goto done
+
+          op_unary:
+            .local pmc arg, afrom, ofrom
+            arg = pop termstack
+            op[0] = arg
+            afrom = arg.'from'()
+            ofrom = op.'from'()
+            if afrom < ofrom goto op_postfix
+          op_prefix:
+            self.'!reduce'('EXPR', 'PREFIX', op)
+            goto done
+          op_postfix:
+            self.'!reduce'('EXPR', 'POSTFIX', op)
+            goto done
+
+          op_list:
+            .local string sym
+            sym = opOPER['sym']
+            arg = pop termstack
+            unshift op, arg
+          op_sym_loop:
+            unless opstack goto op_sym_done
+            $P0 = opstack[-1]
+            $P0 = $P0['OPER']
+            $S0 = $P0['sym']
+            if sym != $S0 goto op_sym_done
+            arg = pop termstack
+            unshift op, arg
+            $P0 = pop opstack
+            goto op_sym_loop
+          op_sym_done:
+            arg = pop termstack
+            unshift op, arg
+            self.'!reduce'('EXPR', 'LIST', op)
+            goto done
+
+          done:
+            push termstack, op
+        };
+    }
+
+    method ternary($match) {
+        $match[2] := $match[1];
+        $match[1] := $match{'infix'}{'EXPR'};
+    }
 
     method MARKER($markname) {
         my $pos := self.pos();
