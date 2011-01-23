@@ -710,17 +710,19 @@ method method_def($/) {
         if $*MULTINESS eq 'multi' { attach_multi_signature($past); }
 
         # Insert it into the method table.
-        $*PACKAGE-SETUP.push(PAST::Op.new(
-            :pasttype('callmethod'), :name($*MULTINESS eq 'multi' ?? 'add_multi_method' !! 'add_method'),
-            PAST::Op.new(
-                # XXX Should be nqpop at some point.
-                :pirop('get_how PP'),
-                PAST::Var.new( :name('type_obj'), :scope('register') )
-            ),
-            PAST::Var.new( :name('type_obj'), :scope('register') ),
-            PAST::Val.new( :value($name) ),
-            $to_add
-        ));
+        if pir::defined($*PACKAGE-SETUP) {
+            $*PACKAGE-SETUP.push(PAST::Op.new(
+                :pasttype('callmethod'), :name($*MULTINESS eq 'multi' ?? 'add_multi_method' !! 'add_method'),
+                PAST::Op.new(
+                    # XXX Should be nqpop at some point.
+                    :pirop('get_how PP'),
+                    PAST::Var.new( :name('type_obj'), :scope('register') )
+                ),
+                PAST::Var.new( :name('type_obj'), :scope('register') ),
+                PAST::Val.new( :value($name) ),
+                $to_add
+            ));
+        }
     }
     if $*SCOPE eq 'our' {
         $past.pirflags(':nsentry');
@@ -928,26 +930,28 @@ method regex_declarator($/, $key?) {
                 PAST::Var.new( :name('Method'), :namespace(['Regex']), :scope<package> ),
                 $regex
             );
-        $*PACKAGE-SETUP.push(PAST::Op.new(
-            :pasttype('callmethod'), :name('add_method'),
-            PAST::Op.new(
-                :pirop('get_how PP'),
-                PAST::Var.new( :name('type_obj'), :scope('register') )
-            ),
-            PAST::Var.new( :name('type_obj'), :scope('register') ),
-            PAST::Val.new( :value($name) ),
-            PAST::Val.new( :value($regex) )
-        ));
-        $*PACKAGE-SETUP.push(PAST::Op.new(
-            :pasttype('callmethod'), :name('add_method'),
-            PAST::Op.new(
-                :pirop('get_how PP'),
-                PAST::Var.new( :name('type_obj'), :scope('register') )
-            ),
-            PAST::Var.new( :name('type_obj'), :scope('register') ),
-            PAST::Val.new( :value('!PREFIX__' ~ $name) ),
-            PAST::Var.new( :name('!PREFIX__' ~ $name), :scope('package') )
-        ));
+        if pir::defined($*PACKAGE-SETUP) {
+            $*PACKAGE-SETUP.push(PAST::Op.new(
+                :pasttype('callmethod'), :name('add_method'),
+                PAST::Op.new(
+                    :pirop('get_how PP'),
+                    PAST::Var.new( :name('type_obj'), :scope('register') )
+                ),
+                PAST::Var.new( :name('type_obj'), :scope('register') ),
+                PAST::Val.new( :value($name) ),
+                PAST::Val.new( :value($regex) )
+            ));
+            $*PACKAGE-SETUP.push(PAST::Op.new(
+                :pasttype('callmethod'), :name('add_method'),
+                PAST::Op.new(
+                    :pirop('get_how PP'),
+                    PAST::Var.new( :name('type_obj'), :scope('register') )
+                ),
+                PAST::Var.new( :name('type_obj'), :scope('register') ),
+                PAST::Val.new( :value('!PREFIX__' ~ $name) ),
+                PAST::Var.new( :name('!PREFIX__' ~ $name), :scope('package') )
+            ));
+        }
         # In sink context, we don't need the Regex::Regex object.
         $past<sink> := $regex;
         @MODIFIERS.shift;
