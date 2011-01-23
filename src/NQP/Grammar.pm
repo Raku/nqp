@@ -11,9 +11,9 @@ method TOP() {
     # Package declarator to meta-package mapping.
     my %*HOW;
     %*HOW<knowhow> := 'KnowHOW';
-    %*HOW<class> := 'NQPClassHOW';
+    %*HOW<class>   := 'NQPClassHOW';
     %*HOW<grammar> := 'NQPClassHOW';
-    %*HOW<role> := 'NQPRoleHOW';
+    %*HOW<role>    := 'NQPRoleHOW';
 
     # What attribute class to use with what HOW, plus a default.
     my $*DEFAULT-METAATTR := 'NQPAttribute';
@@ -23,6 +23,7 @@ method TOP() {
     my $*SCOPE       := '';
     my $*MULTINESS   := '';
     my $*INVOCANT_OK := 0;
+    my $*RETURN_USED := 0;
     my $*PACKAGE-SETUP;
     self.comp_unit;
 }
@@ -333,6 +334,7 @@ token routine_declarator:sym<sub>    { <sym> <routine_def> }
 token routine_declarator:sym<method> { <sym> <method_def> }
 
 rule routine_def {
+    :my $*RETURN_USED := 0;
     [ $<sigil>=['&'?]<deflongname> ]?
     <.newpad>
     [ '(' <signature> ')'
@@ -345,6 +347,7 @@ rule routine_def {
 }
 
 rule method_def {
+    :my $*RETURN_USED := 0;
     :my $*INVOCANT_OK := 1;
     $<private>=['!'?]
     <deflongname>?
@@ -627,7 +630,7 @@ token infix:sym<::=>  { <sym>  <O('%assignment, :pasttype<bind>')> }
 
 token infix:sym<,>    { <sym>  <O('%comma, :pasttype<list>')> }
 
-token prefix:sym<return> { <sym> \s <O('%list_prefix, :pasttype<return>')> }
+token prefix:sym<return> { <sym> \s <O('%list_prefix, :pasttype<return>')> { $*RETURN_USED := 1 } }
 token prefix:sym<make>   { <sym> \s <O('%list_prefix')> }
 token term:sym<last>     { <sym> }
 token term:sym<next>     { <sym> }

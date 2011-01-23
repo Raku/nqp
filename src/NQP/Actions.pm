@@ -206,10 +206,6 @@ method statement_control:sym<for>($/) {
     make $past;
 }
 
-method statement_control:sym<return>($/) {
-    make PAST::Op.new( $<EXPR>.ast, :pasttype('return'), :node($/) );
-}
-
 method statement_control:sym<CATCH>($/) {
     my $block := $<block>.ast;
     push_block_handler($/, $block);
@@ -553,7 +549,9 @@ method routine_def($/) {
     else {
         $past := $<blockoid>.ast;
         $past.blocktype('declaration');
-        $past.control('return_pir');
+        if $*RETURN_USED {
+            $past.control('return_pir');
+        }
     }
     my $block := $past;
 
@@ -676,7 +674,9 @@ method method_def($/) {
     else {
         $past := $<blockoid>.ast;
         $past.blocktype('declaration');
-        $past.control('return_pir');
+        if $*RETURN_USED {
+            $past.control('return_pir');
+        }
     }
 
     # Always need an invocant.
