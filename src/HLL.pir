@@ -17,10 +17,12 @@ and HLL::Grammar.
     load_bytecode 'Regex.pbc'
 .end
 
+.include 'cclass.pasm'
+.include 'src/Regex/constants.pir'
 .include 'src/cheats/hll-compiler.pir'
-.include 'src/cheats/hll-grammar.pir'
 .include 'src/cheats/parrot-callcontext.pir'
 .include 'gen/hllgrammar-grammar.pir'
+.include 'src/cheats/hll-grammar.pir'
 .include 'gen/hllgrammar-actions.pir'
 .include 'gen/hllcompiler.pir'
 
