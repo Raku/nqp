@@ -72,13 +72,17 @@ static PMC * accessor_call(PARROT_INTERP, PMC *obj, STRING *name) {
  * everything will be looked up in spill. Otherwise returns a
  * populated name to index mapping. Note index is not related to the
  * storage position. */
-static PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, PMC *flat_list) {
-    PMC    *result         = pmc_new(interp, enum_class_Hash);
+static P6opaqueNameMap* index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, PMC *flat_list) {
+    PMC    *class_list     = pmc_new(interp, enum_class_ResizablePMCArray);
+    PMC    *attr_map_list  = pmc_new(interp, enum_class_ResizablePMCArray);
     PMC    *current_class  = WHAT;
     INTVAL  current_slot   = 0;
     STRING *attributes_str = Parrot_str_new_constant(interp, "attributes");
     STRING *parents_str    = Parrot_str_new_constant(interp, "parents");
     STRING *name_str       = Parrot_str_new_constant(interp, "name");
+    INTVAL i, num_classes;
+
+    P6opaqueNameMap *result = NULL;
 
     /* Walk through the parents list. */
     while (!PMC_IS_NULL(current_class))
@@ -89,6 +93,7 @@ static PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, PMC *flat_lis
         /* Get attributes and iterate over them. */
         PMC *HOW        = STABLE(current_class)->HOW;
         PMC *attributes = introspection_call(interp, current_class, HOW, attributes_str);
+        PMC *attr_map   = PMCNULL;
         PMC *attr_iter  = VTABLE_get_iter(interp, attributes);
         while (VTABLE_get_bool(interp, attr_iter)) {
             /* Get attribute. */
@@ -99,18 +104,19 @@ static PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, PMC *flat_lis
             STRING *name     = VTABLE_get_string(interp, name_pmc);
 
             /* Allocate a slot. */
-            INTVAL key = CLASS_KEY(current_class);
-            if (!VTABLE_exists_keyed_int(interp, result, key))
-                VTABLE_set_pmc_keyed_int(interp, result, key,
-                        pmc_new(interp, enum_class_Hash));
-            VTABLE_set_integer_keyed_str(interp,
-                VTABLE_get_pmc_keyed_int(interp, result, key),
-                name, current_slot);
+            if (PMC_IS_NULL(attr_map))
+                attr_map = pmc_new(interp, enum_class_Hash);
+            VTABLE_set_pmc_keyed_str(interp, attr_map, name,
+                Parrot_pmc_new_init_int(interp, enum_class_Integer, current_slot));
             current_slot++;
 
-            /* Push it onto the flat list. */
+            /* Push attr onto the flat list. */
             VTABLE_push_pmc(interp, flat_list, attr);
         }
+
+        /* Add to class list and map list. */
+        VTABLE_push_pmc(interp, class_list, current_class);
+        VTABLE_push_pmc(interp, attr_map_list, attr_map);
 
         /* Find the next parent(s). */
         parents = introspection_call(interp, current_class, HOW, parents_str);
@@ -125,13 +131,21 @@ static PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, PMC *flat_lis
         else if (num_parents > 1)
         {
             /* Multiple inheritnace, so we can't compute this hierarchy. */
-            return pmc_new(interp, enum_class_Hash);
+            return mem_sys_allocate_zeroed(sizeof(P6opaqueNameMap));
         }
         else
         {
             /* Just one. Get next parent and work through its attributes. */
             current_class = VTABLE_get_pmc_keyed_int(interp, parents, 0);
         }
+    }
+
+    /* We can now form the name map. */
+    num_classes = VTABLE_elements(interp, class_list);
+    result = mem_sys_allocate_zeroed(sizeof(P6opaqueNameMap) * (1 + num_classes));
+    for (i = 0; i < num_classes; i++) {
+        result[i].class_key = VTABLE_get_pmc_keyed_int(interp, class_list, i);
+        result[i].name_map  = VTABLE_get_pmc_keyed_int(interp, attr_map_list, i);
     }
 
     return result;
@@ -156,7 +170,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, REPRP6opaque *
     /* If we have no attributes in the index mapping, then our allocation stratergy
      * is that everything goes into the spill hash. The size to allocate is just
      * two pointers - a shared table pointer and one for the spill hash. */
-    if (VTABLE_elements(interp, repr->name_to_index_mapping) == 0) {
+    if (repr->name_to_index_mapping[0].class_key == NULL) {
         repr->allocation_size = sizeof(RakudoObjectCommonalities) + sizeof(PMC *);
     }
 
@@ -290,6 +304,24 @@ static void set_pmc_at_offset(void *data, INTVAL offset, PMC *value) {
     *((PMC **)location) = value;
 }
 
+/* Helper for finding a slot number. */
+static INTVAL try_get_slot(PARROT_INTERP, REPRP6opaque *repr, PMC *class_key, STRING *name) {
+    INTVAL slot = -1;
+    if (repr->name_to_index_mapping) {
+        P6opaqueNameMap *cur_map_entry = repr->name_to_index_mapping;
+        while (cur_map_entry->class_key != NULL) {
+            if (cur_map_entry->class_key == class_key) {
+                PMC *slot_pmc = VTABLE_get_pmc_keyed_str(interp, cur_map_entry->name_map, name);
+                if (!PMC_IS_NULL(slot_pmc))
+                    slot = VTABLE_get_integer(interp, slot_pmc);
+                break;
+            }
+            cur_map_entry++;
+        }
+    }
+    return slot;
+}
+
 /* Creates a new type object of this representation, and associates it with
  * the given HOW. */
 static PMC * type_object_for(PARROT_INTERP, PMC *self, PMC *HOW) {
@@ -344,6 +376,7 @@ static INTVAL defined(PARROT_INTERP, PMC *self, PMC *obj) {
 static PMC * get_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name) {
     P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
     REPRP6opaque     *repr     = P6O_REPR_STRUCT(self);
+    INTVAL            slot;
 
     /* Ensure it is a defined object. */
     if (!instance->spill)
@@ -351,17 +384,10 @@ static PMC * get_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle
                 "Cannot access attributes in a type object");
 
     /* Try the slot allocation first. */
-    if (repr->name_to_index_mapping) {
-        PMC *class_mapping = VTABLE_get_pmc_keyed_int(interp,
-                repr->name_to_index_mapping, CLASS_KEY(class_handle));
-        if (!PMC_IS_NULL(class_mapping)) {
-            if (VTABLE_exists_keyed_str(interp, class_mapping, name))
-            {
-                INTVAL  position = VTABLE_get_integer_keyed_str(interp, class_mapping, name);
-                PMC    *result   = get_pmc_at_offset(instance, repr->attribute_offsets[position]);
-                return result ? result : PMCNULL;
-            }
-        }
+    slot = try_get_slot(interp, repr, class_handle, name);
+    if (slot >= 0) {
+        PMC    *result   = get_pmc_at_offset(instance, repr->attribute_offsets[slot]);
+        return result ? result : PMCNULL;
     }
     
     /* Fall back to the spill storage. */
@@ -379,6 +405,7 @@ static PMC * get_attribute_with_hint(PARROT_INTERP, PMC *self, PMC *obj, PMC *cl
 static void bind_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, PMC *value) {
     P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
     REPRP6opaque     *repr     = P6O_REPR_STRUCT(self);
+    INTVAL            slot;
 
     /* Ensure it is a defined object. */
     if (!instance->spill)
@@ -386,17 +413,10 @@ static void bind_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle
                 "Cannot access attributes in a type object");
 
     /* Try the slot allocation first. */
-    if (repr->name_to_index_mapping) {
-        PMC *class_mapping = VTABLE_get_pmc_keyed_int(interp,
-                repr->name_to_index_mapping, CLASS_KEY(class_handle));
-        if (!PMC_IS_NULL(class_mapping)) {
-            if (VTABLE_exists_keyed_str(interp, class_mapping, name))
-            {
-                INTVAL position = VTABLE_get_integer_keyed_str(interp, class_mapping, name);
-                set_pmc_at_offset(instance, repr->attribute_offsets[position], value);
-                return;
-            }
-        }
+    slot = try_get_slot(interp, repr, class_handle, name);
+    if (slot >= 0) {
+        set_pmc_at_offset(instance, repr->attribute_offsets[slot], value);
+        return;
     }
 
     /* Fall back to the spill storage. */
@@ -501,7 +521,6 @@ static void gc_mark(PARROT_INTERP, PMC *self, PMC *obj) {
             }
         }
     }
-
 }
 
 /* This Parrot-specific addition to the API is used to free an object. */
@@ -513,12 +532,20 @@ static void gc_free(PARROT_INTERP, PMC *self, PMC *obj) {
 /* This Parrot-specific addition to the API is used to mark a repr instance. */
 static void gc_mark_repr(PARROT_INTERP, PMC *self) {
     REPRP6opaque *repr = P6O_REPR_STRUCT(self);
-    if (!PMC_IS_NULL(repr->name_to_index_mapping))
-        Parrot_gc_mark_PMC_alive(interp, repr->name_to_index_mapping);
+    if (repr->name_to_index_mapping) {
+        P6opaqueNameMap *cur_map_entry = repr->name_to_index_mapping;
+        while (cur_map_entry->class_key != NULL) {
+            Parrot_gc_mark_PMC_alive(interp, cur_map_entry->name_map);
+            cur_map_entry++;
+        }
+    }
 }
 
 /* This Parrot-specific addition to the API is used to free a repr instance. */
 static void gc_free_repr(PARROT_INTERP, PMC *self) {
+    REPRP6opaque *repr = P6O_REPR_STRUCT(self);
+    if (repr->name_to_index_mapping)
+        mem_sys_free(repr->name_to_index_mapping);
     mem_sys_free(PMC_data(self));
     PMC_data(self) = NULL;
 }

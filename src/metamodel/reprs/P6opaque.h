@@ -15,6 +15,12 @@ typedef struct {
     PMC *spill;
 } P6opaqueInstance;
 
+/* This is used in the name to class mapping. */
+typedef struct {
+    PMC *class_key;
+    PMC *name_map;
+} P6opaqueNameMap;
+
 /* A P6opaque REPR instance carries around both a slot mapping with it.
  * We waste some memory here in that we're storing the REPR pointer
  * table per "instantiation" of the REPR. It's per type rather than per
@@ -47,8 +53,8 @@ typedef struct {
     INTVAL unbox_str_offset;
 
     /* A table mapping attribute names to indexes (which can then be looked
-     * up in the offset table). */
-    PMC *name_to_index_mapping;
+     * up in the offset table). Uses a final null entry as a sentinel. */
+    P6opaqueNameMap *name_to_index_mapping;
 
     /* Offsets into the object that are elligible for PMC GC marking. */
     INTVAL *gc_pmc_mark_offsets;
