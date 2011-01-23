@@ -311,7 +311,7 @@ of the match.
 
     method panic(*@args) {
         my $pos := self.pos();
-        my $target := pir::getattribute__PPPs(self, Regex::Cursor, '$!target');
+        my $target := pir::getattribute__PPPs(self, Regex::Cursor2, '$!target');
         @args.push(' at line ');
         @args.push(HLL::Compiler.lineof($target, $pos) + 1);
         @args.push(', near "');
@@ -321,6 +321,219 @@ of the match.
     }
 
 
+=begin
+
+=item peek_delimiters(target, pos)
+
+Return the start/stop delimiter pair based on peeking at C<target>
+position C<pos>.
+
+=end
+
+    method peek_delimiters($target, $pos) {
+        Q:PIR {
+            .local pmc self
+            self = find_lex 'self'
+            .local string target
+            $P0 = find_lex '$target'
+            target = $P0
+            .local int pos
+            $P0 = find_lex '$pos'
+            pos = $P0
+
+            .local string brackets, start, stop
+            $P0 = get_global '$!brackets'
+            brackets = $P0
+
+            # peek at the next character
+            start = substr target, pos, 1
+            # colon and word characters aren't valid delimiters
+            if start == ':' goto err_colon_delim
+            $I0 = is_cclass .CCLASS_WORD, start, 0
+            if $I0 goto err_word_delim
+            $I0 = is_cclass .CCLASS_WHITESPACE, start, 0
+            if $I0 goto err_ws_delim
+
+            # assume stop delim is same as start, for the moment
+            stop = start
+
+            # see if we have an opener or closer
+            $I0 = index brackets, start
+            if $I0 < 0 goto bracket_end
+            # if it's a closing bracket, that's an error also
+            $I1 = $I0 % 2
+            if $I1 goto err_close
+            # it's an opener, so get the closing bracket
+            inc $I0
+            stop = substr brackets, $I0, 1
+
+            # see if the opening bracket is repeated
+            .local int len
+            len = 0
+          bracket_loop:
+            inc pos
+            inc len
+            $S0 = substr target, pos, 1
+            if $S0 == start goto bracket_loop
+            if len == 1 goto bracket_end
+            start = repeat start, len
+            stop = repeat stop, len
+          bracket_end:
+            .return (start, stop, pos)
+
+          err_colon_delim:
+            self.'panic'('Colons may not be used to delimit quoting constructs')
+          err_word_delim:
+            self.'panic'('Alphanumeric character is not allowed as a delimiter')
+          err_ws_delim:
+            self.'panic'('Whitespace character is not allowed as a delimiter')
+          err_close:
+            self.'panic'('Use of a closing delimiter for an opener is reserved')
+        };
+    }
+
+    method quote_EXPR(*@args) {
+        Q:PIR {
+            .local pmc self, cur_class, args
+            self = find_lex 'self'
+            cur_class = get_hll_global ['Regex'], 'Cursor2'
+            args = find_lex '@args'
+
+            .local pmc cur, debug
+            .local string target
+            .local int pos
+
+            (cur, pos, target) = self.'!cursor_start'()
+            debug = getattribute cur, cur_class, '$!debug'
+            if null debug goto debug_1
+            cur.'!cursor_debug'('START', 'quote_EXPR')
+          debug_1:
+
+            .local pmc quotemod, true
+            .lex '%*QUOTEMOD', quotemod
+            quotemod = new ['Hash']
+
+            true = box 1
+
+
+          args_loop:
+            unless args goto args_done
+            .local string mod
+            mod = shift args
+            mod = substr mod, 1
+            quotemod[mod] = true
+            if mod == 'qq' goto opt_qq
+            if mod == 'b' goto opt_b
+            goto args_loop
+          opt_qq:
+            quotemod['s'] = true
+            quotemod['a'] = true
+            quotemod['h'] = true
+            quotemod['f'] = true
+            quotemod['c'] = true
+            quotemod['b'] = true
+          opt_b:
+            quotemod['q'] = true
+            goto args_loop
+          args_done:
+
+
+            .local pmc start, stop
+            (start, stop) = self.'peek_delimiters'(target, pos)
+
+            .lex '$*QUOTE_START', start
+            .lex '$*QUOTE_STOP', stop
+
+            $P10 = cur.'quote_delimited'()
+            unless $P10 goto fail
+            cur.'!mark_push'(0, CURSOR_FAIL, 0, $P10)
+            $P10.'!cursor_names'('quote_delimited')
+            pos = $P10.'pos'()
+            cur.'!cursor_pass'(pos, 'quote_EXPR')
+            if null debug goto done
+            cur.'!cursor_debug'('PASS', 'quote_EXPR')
+            goto done
+          fail:
+            if null debug goto done
+            cur.'!cursor_debug'('FAIL', 'quote_EXPR')
+          done:
+            .return (cur)
+        };
+    }
+
+    our method quotemod_check($mod) {
+        %*QUOTEMOD{$mod}
+    }
+
+    method starter() {
+        Q:PIR {
+            .local pmc self, cur
+            .local string target, start
+            .local int pos
+            self = find_lex 'self'
+
+            (cur, pos, target) = self.'!cursor_start'()
+
+            $P0 = find_dynamic_lex '$*QUOTE_START'
+            if null $P0 goto fail
+            start = $P0
+
+            $I0 = length start
+            $S0 = substr target, pos, $I0
+            unless $S0 == start goto fail
+            pos += $I0
+            cur.'!cursor_pass'(pos, 'starter')
+          fail:
+            .return (cur)
+        };
+    }
+
+    method stopper() {
+        Q:PIR {
+            .local pmc self, cur
+            .local string target, stop
+            .local int pos
+            self = find_lex 'self'
+
+            (cur, pos, target) = self.'!cursor_start'()
+
+            $P0 = find_dynamic_lex '$*QUOTE_STOP'
+            if null $P0 goto fail
+            stop = $P0
+
+            $I0 = length stop
+            $S0 = substr target, pos, $I0
+            unless $S0 == stop goto fail
+            pos += $I0
+            cur.'!cursor_pass'(pos, 'stopper')
+          fail:
+            .return (cur)
+        };
+    }
+
+    our method split_words($words) {
+        Q:PIR {
+            .local string words
+            $P0 = find_lex '$words'
+            words = $P0
+            .local int pos, eos
+            .local pmc result
+            pos = 0
+            eos = length words
+            result = new ['ResizablePMCArray']
+          split_loop:
+            pos = find_not_cclass .CCLASS_WHITESPACE, words, pos, eos
+            unless pos < eos goto split_done
+            $I0 = find_cclass .CCLASS_WHITESPACE, words, pos, eos
+            $I1 = $I0 - pos
+            $S0 = substr words, pos, $I1
+            push result, $S0
+            pos = $I0
+            goto split_loop
+          split_done:
+            .return (result)
+        };
+    }
 
 =begin
 
