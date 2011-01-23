@@ -830,7 +830,7 @@ An operator precedence parser.
 
     method LANG($lang, $regex) {
         my $lang_cursor := %*LANG{$lang};
-        my %*ACTIONS    := %*LANG{$lang ~ '-actions'};
+        my $*ACTIONS    := %*LANG{$lang ~ '-actions'};
         my $cur := Q:PIR {
             .local pmc self
             .local int pos
