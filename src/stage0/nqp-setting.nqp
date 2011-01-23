@@ -92,8 +92,9 @@ module Hash {
 
     method delete($key) {
         Q:PIR {
+            $P0 = find_lex 'self'
             $P1 = find_lex '$key'
-            delete self[$P1]
+            delete $P0[$P1]
         }
     }
 
@@ -104,8 +105,9 @@ module Hash {
 
     method exists($key) {
         Q:PIR {
+            $P0 = find_lex 'self'
             $P1 = find_lex '$key'
-            $I0 = exists self[$P1]
+            $I0 = exists $P0[$P1]
             %r  = box $I0
         }
     }
