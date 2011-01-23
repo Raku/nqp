@@ -455,7 +455,7 @@ provided, then the new cursor has the same type as lang.
 
     .local pmc cur_class, cur
     cur_class = get_global '$?CLASS'
-    cur = repr_instance_of self
+    cur = repr_instance_of lang
 
     .local pmc regex
     regex = getattribute self, cur_class, '&!regex'
