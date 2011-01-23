@@ -310,11 +310,63 @@ of the match.
 
     method panic(*@args) {
         my $pos := self.pos();
-        my $target := self.target();
+        my $target := pir::getattribute__PPPs(self, Regex::Cursor, '$!target');
         @args.push(' at line ');
         @args.push(HLL::Compiler.lineof($target, $pos) + 1);
         @args.push(', near "');
         @args.push(pir::escape__SS(pir::substr($target, $pos, 10)));
         @args.push('"');
         pir::die(pir::join('', @args))
+    }
+
+
+
+
+    method MARKER($markname) {
+        my $pos := self.pos();
+        self.'!cursor_debug'('START', 'MARKER name=', $markname, ', pos=', $pos);
+        my %markhash := Q:PIR {
+            %r = get_global '%!MARKHASH'
+            unless null %r goto have_markhash
+            %r = new ['Hash']
+            set_global '%!MARKHASH', %r
+          have_markhash:
+        };
+        %markhash{$markname} := $pos;
+        self.'!cursor_debug'('PASS', 'MARKER');
+        1;
+    }
+    
+    method MARKED($markname) {
+        self.'!cursor_debug'('START', 'MARKED name=', $markname);
+        Q:PIR {
+            .local pmc self, markname, markhash
+            self = find_lex 'self'
+            markname = find_lex '$markname'
+            markhash = get_global '%!MARKHASH'
+            if null markhash goto fail
+            $P0 = markhash[markname]
+            if null $P0 goto fail
+            $P1 = self.'pos'()
+            unless $P0 == $P1 goto fail
+            self.'!cursor_debug'('PASS','MARKED')
+            .return (1)
+          fail:
+            self.'!cursor_debug'('FAIL','MARKED')
+            .return (0)
+        };
+    }
+
+    method LANG($lang, $regex) {
+        my $lang_cursor := %*LANG{$lang};
+        my %*ACTIONS    := %*LANG{$lang ~ '-actions'};
+        my $cur := Q:PIR {
+            .local pmc self
+            .local int pos
+            self = find_lex 'self'
+            $P0 = find_lex '$lang_cursor'
+            (%r, pos) = self.'!cursor_start'($P0)
+            %r.'!cursor_pos'(pos)
+        };
+        $cur."$regex"();
     }
