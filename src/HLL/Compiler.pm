@@ -31,7 +31,7 @@ class HLL::Compiler {
         @!stages     := pir::split(' ', 'parse past post pir evalpmc');
         
         # Command options and usage.
-        @!cmdoptions := pir::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v stagestats');
+        @!cmdoptions := pir::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v stagestats ll-backtrace');
         $!usage := "This compiler is based on HLL::Compler.\n\nOptions:\n";
         for @!cmdoptions {
             $!usage := $!usage ~ "    $_\n";
@@ -330,9 +330,11 @@ class HLL::Compiler {
             $I0 = adverbs['version']
             if $I0 goto version
 
-            .local int can_backtrace
+            .local int can_backtrace, ll_backtrace
             can_backtrace = can self, 'backtrace'
             unless can_backtrace goto no_push_eh
+            ll_backtrace = adverbs['ll-backtrace']
+            if ll_backtrace goto no_push_eh
             push_eh uncaught_exception
           no_push_eh:
 
