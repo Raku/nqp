@@ -16,7 +16,7 @@ Perform a match for protoregex C<name>.
 
 =cut
 
-.sub '!protoregex' :method :subid('Regex_Cursor2_meth_!protoregex')
+.sub '!protoregex' :method :subid('Regex_Cursor_meth_!protoregex')
     .param string name
 
     .local pmc cur_class
@@ -131,7 +131,7 @@ added).
 
 =cut
 
-.sub '!protoregex_generation' :method :subid('Regex_Cursor2_meth_!protoregex_generation')
+.sub '!protoregex_generation' :method :subid('Regex_Cursor_meth_!protoregex_generation')
     $P0 = get_global '$!generation'
     # don't change this to 'inc' -- we want to ensure new PMC
     $P1 = add $P0, 1
@@ -148,7 +148,7 @@ create a new one and return it.
 
 =cut
 
-.sub '!protoregex_tokrx' :method :subid('Regex_Cursor2_meth_!protoregex_tokrx')
+.sub '!protoregex_tokrx' :method :subid('Regex_Cursor_meth_!protoregex_tokrx')
     .param string name
 
     .local pmc generation
@@ -333,7 +333,7 @@ recreating it on future calls.
 
 =cut
 
-.sub '!protoregex_gen_table' :method :subid('Regex_Cursor2_meth_!protoregex_gen_table')
+.sub '!protoregex_gen_table' :method :subid('Regex_Cursor_meth_!protoregex_gen_table')
     .param pmc type_obj
 
     .local pmc how
@@ -373,7 +373,7 @@ tokrx hash.
 
 =cut
 
-.sub '!PREFIX__!protoregex' :method :subid('Regex_Cursor2_meth_!PREFIX__!protoregex')
+.sub '!PREFIX__!protoregex' :method :subid('Regex_Cursor_meth_!PREFIX__!protoregex')
     .param string name
 
     .local pmc tokrx
@@ -396,7 +396,7 @@ tokrx hash.
 .end
 
 
-.sub '!PREFIX__!subrule' :method :subid('Regex_Cursor2_meth_!PREFIX__!subrule')
+.sub '!PREFIX__!subrule' :method :subid('Regex_Cursor_meth_!PREFIX__!subrule')
     .param string name
     .param string prefix
 
@@ -449,7 +449,7 @@ tokrx hash.
 .end
 
 
-.sub 'DUMP_TOKRX' :method :subid('Regex_Cursor2_meth_DUMP_TOKRX')
+.sub 'DUMP_TOKRX' :method :subid('Regex_Cursor_meth_DUMP_TOKRX')
     .param string name
 
     .local pmc tokrx

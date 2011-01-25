@@ -42,55 +42,55 @@ grammars.
     set_global "$?CLASS", type_obj
 
     # Add all methods.
-    .const 'Sub' $P10 = 'Regex_Cursor2_meth_new_match'
+    .const 'Sub' $P10 = 'Regex_Cursor_meth_new_match'
     how.'add_method'(type_obj, 'new_match', $P10)
-    .const 'Sub' $P11 = 'Regex_Cursor2_meth_new_array'
+    .const 'Sub' $P11 = 'Regex_Cursor_meth_new_array'
     how.'add_method'(type_obj, 'new_array', $P11)
-    .const 'Sub' $P12 = 'Regex_Cursor2_meth_MATCH'
+    .const 'Sub' $P12 = 'Regex_Cursor_meth_MATCH'
     how.'add_method'(type_obj, 'MATCH', $P12)
-    .const 'Sub' $P13 = 'Regex_Cursor2_meth_parse'
+    .const 'Sub' $P13 = 'Regex_Cursor_meth_parse'
     how.'add_method'(type_obj, 'parse', $P13)
-    .const 'Sub' $P14 = 'Regex_Cursor2_meth_next'
+    .const 'Sub' $P14 = 'Regex_Cursor_meth_next'
     how.'add_method'(type_obj, 'next', $P14)
-    .const 'Sub' $P15 = 'Regex_Cursor2_meth_pos'
+    .const 'Sub' $P15 = 'Regex_Cursor_meth_pos'
     how.'add_method'(type_obj, 'pos', $P15)
-    .const 'Sub' $P16 = 'Regex_Cursor2_meth_from'
+    .const 'Sub' $P16 = 'Regex_Cursor_meth_from'
     how.'add_method'(type_obj, 'from', $P16)
-    .const 'Sub' $P17 = 'Regex_Cursor2_meth_!cursor_init'
+    .const 'Sub' $P17 = 'Regex_Cursor_meth_!cursor_init'
     how.'add_method'(type_obj, '!cursor_init', $P17)
-    .const 'Sub' $P18 = 'Regex_Cursor2_meth_!cursor_start'
+    .const 'Sub' $P18 = 'Regex_Cursor_meth_!cursor_start'
     how.'add_method'(type_obj, '!cursor_start', $P18)
-    .const 'Sub' $P19 = 'Regex_Cursor2_meth_!cursor_fail'
+    .const 'Sub' $P19 = 'Regex_Cursor_meth_!cursor_fail'
     how.'add_method'(type_obj, '!cursor_fail', $P19)
-    .const 'Sub' $P20 = 'Regex_Cursor2_meth_!cursor_pass'
+    .const 'Sub' $P20 = 'Regex_Cursor_meth_!cursor_pass'
     how.'add_method'(type_obj, '!cursor_pass', $P20)
-    .const 'Sub' $P21 = 'Regex_Cursor2_meth_!cursor_backtrack'
+    .const 'Sub' $P21 = 'Regex_Cursor_meth_!cursor_backtrack'
     how.'add_method'(type_obj, '!cursor_backtrack', $P21)
-    .const 'Sub' $P22 = 'Regex_Cursor2_meth_!cursor_next'
+    .const 'Sub' $P22 = 'Regex_Cursor_meth_!cursor_next'
     how.'add_method'(type_obj, '!cursor_next', $P22)
-    .const 'Sub' $P23 = 'Regex_Cursor2_meth_!cursor_caparray'
+    .const 'Sub' $P23 = 'Regex_Cursor_meth_!cursor_caparray'
     how.'add_method'(type_obj, '!cursor_caparray', $P23)
-    .const 'Sub' $P24 = 'Regex_Cursor2_meth_!cursor_names'
+    .const 'Sub' $P24 = 'Regex_Cursor_meth_!cursor_names'
     how.'add_method'(type_obj, '!cursor_names', $P24)
-    .const 'Sub' $P25 = 'Regex_Cursor2_meth_!cursor_pos'
+    .const 'Sub' $P25 = 'Regex_Cursor_meth_!cursor_pos'
     how.'add_method'(type_obj, '!cursor_pos', $P25)
-    .const 'Sub' $P26 = 'Regex_Cursor2_meth_!cursor_debug'
+    .const 'Sub' $P26 = 'Regex_Cursor_meth_!cursor_debug'
     how.'add_method'(type_obj, '!cursor_debug', $P26)
-    .const 'Sub' $P27 = 'Regex_Cursor2_meth_!mark_push'
+    .const 'Sub' $P27 = 'Regex_Cursor_meth_!mark_push'
     how.'add_method'(type_obj, '!mark_push', $P27)
-    .const 'Sub' $P28 = 'Regex_Cursor2_meth_!mark_peek'
+    .const 'Sub' $P28 = 'Regex_Cursor_meth_!mark_peek'
     how.'add_method'(type_obj, '!mark_peek', $P28)
-    .const 'Sub' $P29 = 'Regex_Cursor2_meth_!mark_fail'
+    .const 'Sub' $P29 = 'Regex_Cursor_meth_!mark_fail'
     how.'add_method'(type_obj, '!mark_fail', $P29)
-    .const 'Sub' $P30 = 'Regex_Cursor2_meth_!mark_commit'
+    .const 'Sub' $P30 = 'Regex_Cursor_meth_!mark_commit'
     how.'add_method'(type_obj, '!mark_commit', $P30)
-    .const 'Sub' $P31 = 'Regex_Cursor2_meth_!reduce'
+    .const 'Sub' $P31 = 'Regex_Cursor_meth_!reduce'
     how.'add_method'(type_obj, '!reduce', $P31)
-    .const 'Sub' $P32 = 'Regex_Cursor2_meth_!BACKREF'
+    .const 'Sub' $P32 = 'Regex_Cursor_meth_!BACKREF'
     how.'add_method'(type_obj, '!BACKREF', $P32)
-    .const 'Sub' $P33 = 'Regex_Cursor2_meth_!INTERPOLATE'
+    .const 'Sub' $P33 = 'Regex_Cursor_meth_!INTERPOLATE'
     how.'add_method'(type_obj, '!INTERPOLATE', $P33)
-    .const 'Sub' $P34 = 'Regex_Cursor2_meth_!INTERPOLATE_REGEX'
+    .const 'Sub' $P34 = 'Regex_Cursor_meth_!INTERPOLATE_REGEX'
     how.'add_method'(type_obj, '!INTERPOLATE_REGEX', $P34)
     .const 'Sub' $P10 = 'Regex_Cursor_meth_before'
     how.'add_method'(type_obj, 'before', $P10)
@@ -130,21 +130,21 @@ grammars.
     how.'add_method'(type_obj, 'FAILGOAL', $P27)
     .const 'Sub' $P28 = 'Regex_Cursor_meth_DEBUG'
     how.'add_method'(type_obj, 'DEBUG', $P28)
-    .const 'Sub' $P10 = 'Regex_Cursor2_meth_!protoregex'
+    .const 'Sub' $P10 = 'Regex_Cursor_meth_!protoregex'
     how.'add_method'(type_obj, '!protoregex', $P10)
-    .const 'Sub' $P11 = 'Regex_Cursor2_meth_!protoregex_generation'
+    .const 'Sub' $P11 = 'Regex_Cursor_meth_!protoregex_generation'
     how.'add_method'(type_obj, '!protoregex_generation', $P11)
-    .const 'Sub' $P12 = 'Regex_Cursor2_meth_!protoregex_tokrx'
+    .const 'Sub' $P12 = 'Regex_Cursor_meth_!protoregex_tokrx'
     how.'add_method'(type_obj, '!protoregex_tokrx', $P12)
-    .const 'Sub' $P13 = 'Regex_Cursor2_meth_!protoregex_gen_table'
+    .const 'Sub' $P13 = 'Regex_Cursor_meth_!protoregex_gen_table'
     how.'add_method'(type_obj, '!protoregex_gen_table', $P13)
-    .const 'Sub' $P14 = 'Regex_Cursor2_meth_!PREFIX__!protoregex'
+    .const 'Sub' $P14 = 'Regex_Cursor_meth_!PREFIX__!protoregex'
     how.'add_method'(type_obj, '!PREFIX__!protoregex', $P14)
-    .const 'Sub' $P15 = 'Regex_Cursor2_meth_!PREFIX__!subrule'
+    .const 'Sub' $P15 = 'Regex_Cursor_meth_!PREFIX__!subrule'
     how.'add_method'(type_obj, '!PREFIX__!subrule', $P15)
-    .const 'Sub' $P16 = 'Regex_Cursor2_meth_DUMP_TOKRX'
+    .const 'Sub' $P16 = 'Regex_Cursor_meth_DUMP_TOKRX'
     how.'add_method'(type_obj, 'DUMP_TOKRX', $P16)
-    .const 'Sub' $P17 = 'Regex_Cursor2_meth_Bool'
+    .const 'Sub' $P17 = 'Regex_Cursor_meth_Bool'
     how.'add_method'(type_obj, 'Bool', $P17)
 
     # Add attributes.
@@ -188,7 +188,7 @@ Match objects.
 
 =cut
 
-.sub 'new_match' :method :subid('Regex_Cursor2_meth_new_match')
+.sub 'new_match' :method :subid('Regex_Cursor_meth_new_match')
     .local pmc match
     match = new ['Regex';'Match']
     .return (match)
@@ -202,7 +202,7 @@ arrays for usage within Match objects.
 
 =cut
 
-.sub 'new_array' :method :subid('Regex_Cursor2_meth_new_array')
+.sub 'new_array' :method :subid('Regex_Cursor_meth_new_array')
     .local pmc arr
     arr = new ['ResizablePMCArray']
     .return (arr)
@@ -215,7 +215,7 @@ for the Cursor if one hasn't been created yet.
 
 =cut
 
-.sub 'MATCH' :method :subid('Regex_Cursor2_meth_MATCH')
+.sub 'MATCH' :method :subid('Regex_Cursor_meth_MATCH')
     .local pmc cur_class, match
     cur_class = get_global '$?CLASS'
     match = getattribute self, cur_class, '$!match'
@@ -326,7 +326,7 @@ If C<regex> is omitted, then use the C<TOP> rule for the grammar.
 
 =cut
 
-.sub 'parse' :method :subid('Regex_Cursor2_meth_parse')
+.sub 'parse' :method :subid('Regex_Cursor_meth_parse')
     .param pmc target
     .param pmc regex           :named('rule') :optional
     .param int has_regex       :opt_flag
@@ -362,7 +362,7 @@ Return the next match from a successful Cursor.
 
 =cut
 
-.sub 'next' :method :subid('Regex_Cursor2_meth_next')
+.sub 'next' :method :subid('Regex_Cursor_meth_next')
     .local pmc cur, match
     cur = self.'!cursor_next'()
     match = cur.'MATCH'()
@@ -376,7 +376,7 @@ Return the cursor's current position.
 
 =cut
 
-.sub 'pos' :method :subid('Regex_Cursor2_meth_pos')
+.sub 'pos' :method :subid('Regex_Cursor_meth_pos')
     .local pmc cur_class
     cur_class = get_global '$?CLASS'
     $P0 = getattribute self, cur_class, '$!pos'
@@ -390,7 +390,7 @@ Return the cursor's from position.
 
 =cut
 
-.sub 'from' :method :subid('Regex_Cursor2_meth_from')
+.sub 'from' :method :subid('Regex_Cursor_meth_from')
     .local pmc cur_class
     cur_class = get_global '$?CLASS'
     $P0 = getattribute self, cur_class, '$!from'
@@ -409,7 +409,7 @@ Create a new cursor for matching C<target>.
 
 =cut
 
-.sub '!cursor_init' :method :subid('Regex_Cursor2_meth_!cursor_init')
+.sub '!cursor_init' :method :subid('Regex_Cursor_meth_!cursor_init')
     .param string target
     .param int pos             :named('p') :optional
     .param int has_pos         :opt_flag
@@ -446,7 +446,7 @@ provided, then the new cursor has the same type as lang.
 
 =cut
 
-.sub '!cursor_start' :method :subid('Regex_Cursor2_meth_!cursor_start')
+.sub '!cursor_start' :method :subid('Regex_Cursor_meth_!cursor_start')
     .param pmc lang            :optional
     .param int has_lang        :opt_flag
 
@@ -506,7 +506,7 @@ Permanently fail this cursor.
 
 =cut
 
-.sub '!cursor_fail' :method :subid('Regex_Cursor2_meth_!cursor_fail')
+.sub '!cursor_fail' :method :subid('Regex_Cursor_meth_!cursor_fail')
     .local pmc cur_class, pos
     cur_class = get_global '$?CLASS'
     pos = box CURSOR_FAIL_RULE
@@ -528,7 +528,7 @@ with a "real" Match object when requested.
 
 =cut
 
-.sub '!cursor_pass' :method :subid('Regex_Cursor2_meth_!cursor_pass')
+.sub '!cursor_pass' :method :subid('Regex_Cursor_meth_!cursor_pass')
     .param pmc pos
     .param string name
 
@@ -552,7 +552,7 @@ Configure this cursor for backtracking via C<!cursor_next>.
 
 =cut
 
-.sub '!cursor_backtrack' :method :subid('Regex_Cursor2_meth_!cursor_backtrack')
+.sub '!cursor_backtrack' :method :subid('Regex_Cursor_meth_!cursor_backtrack')
     .local pmc cur_class
     cur_class = get_global '$?CLASS'
     $P0 = getinterp
@@ -567,7 +567,7 @@ Continue a regex match from where the current cursor left off.
 
 =cut
 
-.sub '!cursor_next' :method :subid('Regex_Cursor2_meth_!cursor_next')
+.sub '!cursor_next' :method :subid('Regex_Cursor_meth_!cursor_next')
     .local pmc regex, cur, cur_class
     cur_class = get_global '$?CLASS'
     regex = getattribute self, cur_class, '&!regex'
@@ -587,7 +587,7 @@ Set the list of subcaptures that produce arrays to C<caparray>.
 
 =cut
 
-.sub '!cursor_caparray' :method :subid('Regex_Cursor2_meth_!cursor_caparray')
+.sub '!cursor_caparray' :method :subid('Regex_Cursor_meth_!cursor_caparray')
     .param pmc caparray        :slurpy
     .local pmc cur_class
     cur_class = get_global '$?CLASS'
@@ -601,7 +601,7 @@ Set the Cursor's name (for binding) to C<names>.
 
 =cut
 
-.sub '!cursor_names' :method :subid('Regex_Cursor2_meth_!cursor_names')
+.sub '!cursor_names' :method :subid('Regex_Cursor_meth_!cursor_names')
     .param pmc names
     .local pmc cur_class
     cur_class = get_global '$?CLASS'
@@ -615,7 +615,7 @@ Set the cursor's position to C<pos>.
 
 =cut
 
-.sub '!cursor_pos' :method :subid('Regex_Cursor2_meth_!cursor_pos')
+.sub '!cursor_pos' :method :subid('Regex_Cursor_meth_!cursor_pos')
     .param pmc pos
     .local pmc cur_class
     cur_class = get_global '$?CLASS'
@@ -629,7 +629,7 @@ Log a debug message.
 
 =cut
 
-.sub '!cursor_debug' :method :subid('Regex_Cursor2_meth_!cursor_debug')
+.sub '!cursor_debug' :method :subid('Regex_Cursor_meth_!cursor_debug')
     .param string tag
     .param pmc args            :slurpy
     .local pmc cur_class
@@ -670,7 +670,7 @@ the address of a label to branch to when backtracking occurs.)
 
 =cut
 
-.sub '!mark_push' :method :subid('Regex_Cursor2_meth_!mark_push')
+.sub '!mark_push' :method :subid('Regex_Cursor_meth_!mark_push')
     .param int rep
     .param int pos
     .param int mark
@@ -729,7 +729,7 @@ If C<mark> is zero, return information about the latest frame.
 
 =cut
 
-.sub '!mark_peek' :method :subid('Regex_Cursor2_meth_!mark_peek')
+.sub '!mark_peek' :method :subid('Regex_Cursor_meth_!mark_peek')
     .param int tomark
 
     .local pmc bstack, cur_class
@@ -771,7 +771,7 @@ values of repetition count, cursor position, and mark (address).
 
 =cut
 
-.sub '!mark_fail' :method :subid('Regex_Cursor2_meth_!mark_fail')
+.sub '!mark_fail' :method :subid('Regex_Cursor_meth_!mark_fail')
     .param int mark
 
     .local pmc cur_class
@@ -824,7 +824,7 @@ capture states.
 
 =cut
 
-.sub '!mark_commit' :method :subid('Regex_Cursor2_meth_!mark_commit')
+.sub '!mark_commit' :method :subid('Regex_Cursor_meth_!mark_commit')
     .param int mark
 
     # find mark
@@ -871,7 +871,7 @@ Perform any action associated with the current regex match.
 
 =cut
 
-.sub '!reduce' :method :subid('Regex_Cursor2_meth_!reduce')
+.sub '!reduce' :method :subid('Regex_Cursor_meth_!reduce')
     .param string name
     .param string key          :optional
     .param int has_key         :opt_flag
@@ -901,7 +901,7 @@ Match the backreference given by C<name>.
 
 =cut
 
-.sub '!BACKREF' :method :subid('Regex_Cursor2_meth_!BACKREF')
+.sub '!BACKREF' :method :subid('Regex_Cursor_meth_!BACKREF')
     .param string name
     .local pmc cur
     .local int pos, eos
@@ -953,7 +953,7 @@ and the longest match is returned.
 
 =cut
 
-.sub '!INTERPOLATE' :method :subid('Regex_Cursor2_meth_!INTERPOLATE')
+.sub '!INTERPOLATE' :method :subid('Regex_Cursor_meth_!INTERPOLATE')
     .param pmc var
 
     .local pmc cur
@@ -1032,7 +1032,7 @@ are first compiled to regexes prior to being matched.
 
 =cut
 
-.sub '!INTERPOLATE_REGEX' :method :subid('Regex_Cursor2_meth_!INTERPOLATE_REGEX')
+.sub '!INTERPOLATE_REGEX' :method :subid('Regex_Cursor_meth_!INTERPOLATE_REGEX')
     .param pmc var
 
     $I0 = does var, 'invokable'
@@ -1075,7 +1075,7 @@ are first compiled to regexes prior to being matched.
 
 =cut
 
-.sub 'Bool' :vtable('get_bool') :method :subid('Regex_Cursor2_meth_Bool')
+.sub 'Bool' :vtable('get_bool') :method :subid('Regex_Cursor_meth_Bool')
     .local pmc match,  cur_class
     cur_class = get_global '$?CLASS'
     match = getattribute self, cur_class, '$!match'
