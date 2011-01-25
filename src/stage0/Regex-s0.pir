@@ -10,770 +10,7 @@ This file brings together the various Regex modules needed for Regex.pbc .
 
 =cut
 
-### .include 'src/Regex/Cursor-builtins.pir'
-# Copyright (C) 2009, The Perl Foundation.
-# $Id$
-
-=head1 NAME
-
-Regex::Cursor-builtins - builtin regexes for Cursor objects
-
-=cut
-
-.include 'cclass.pasm'
-
-.namespace ['Regex';'Cursor']
-
-.sub 'before' :method :subid('Regex_Cursor_meth_before')
-    .param pmc regex           :optional
-    .local pmc cur
-    .local int pos
-    (cur, pos) = self.'!cursor_start'()
-    if null regex goto fail
-    $P0 = cur.regex()
-    unless $P0 goto fail
-    cur.'!cursor_pass'(pos, 'before')
-  fail:
-    .return (cur)
-.end
-
-
-.sub 'ident' :method :subid('Regex_Cursor_meth_ident')
-    .local pmc cur
-    .local int pos, eos
-    .local string tgt
-    (cur, pos, tgt) = self.'!cursor_start'()
-    eos = length tgt
-    $S0 = substr tgt, pos, 1
-    if $S0 == '_' goto ident_1
-    $I0 = is_cclass .CCLASS_ALPHABETIC, tgt, pos
-    unless $I0 goto fail
-  ident_1:
-    pos = find_not_cclass .CCLASS_WORD, tgt, pos, eos
-    cur.'!cursor_pass'(pos, 'ident')
-  fail:
-    .return (cur)
-.end
-
-.sub 'wb' :method :subid('Regex_Cursor_meth_wb')
-    .local pmc cur
-    .local int pos, eos
-    .local string tgt
-    (cur, pos, tgt) = self.'!cursor_start'()
-    if pos == 0 goto pass
-    eos = length tgt
-    if pos == eos goto pass
-    $I0 = pos - 1
-    $I1 = is_cclass .CCLASS_WORD, tgt, $I0
-    $I2 = is_cclass .CCLASS_WORD, tgt, pos
-    if $I1 == $I2 goto fail
-  pass:
-    cur.'!cursor_pass'(pos, 'wb')
-  fail:
-    .return (cur)
-.end
-
-.sub 'ww' :method :subid('Regex_Cursor_meth_ww')
-    .local pmc cur
-    .local int pos, eos
-    .local string tgt
-    (cur, pos, tgt) = self.'!cursor_start'()
-    .local pmc debug
-    #debug = getattribute cur, '$!debug'
-    if null debug goto debug_1
-    cur.'!cursor_debug'('START', 'ww')
-  debug_1:
-    if pos == 0 goto fail
-    eos = length tgt
-    if pos == eos goto fail
-    $I0 = is_cclass .CCLASS_WORD, tgt, pos
-    unless $I0 goto fail
-    $I1 = pos - 1
-    $I0 = is_cclass .CCLASS_WORD, tgt, $I1
-    unless $I0 goto fail
-  pass:
-    cur.'!cursor_pass'(pos, 'ww')
-    if null debug goto done
-    cur.'!cursor_debug'('PASS', 'ww')
-    goto done
-  fail:
-    if null debug goto done
-    cur.'!cursor_debug'('FAIL', 'ww')
-  done:
-    .return (cur)
-.end
-
-.sub 'ws' :method :subid('Regex_Cursor_meth_ws')
-    .local pmc cur
-    .local int pos, eos
-    .local string tgt
-    (cur, pos, tgt) = self.'!cursor_start'()
-    eos = length tgt
-    if pos >= eos goto pass
-    if pos == 0 goto ws_scan
-    $I0 = is_cclass .CCLASS_WORD, tgt, pos
-    unless $I0 goto ws_scan
-    $I1 = pos - 1
-    $I0 = is_cclass .CCLASS_WORD, tgt, $I1
-    if $I0 goto fail
-  ws_scan:
-    pos = find_not_cclass .CCLASS_WHITESPACE, tgt, pos, eos
-  pass:
-    cur.'!cursor_pass'(pos, 'ws')
-  fail:
-    .return (cur)
-.end
-
-.sub '!cclass' :anon
-    .param pmc self
-    .param string name
-    .param int cclass
-    .local pmc cur
-    .local int pos
-    .local string tgt
-    (cur, pos, tgt) = self.'!cursor_start'()
-    .local pmc debug
-    #debug = getattribute cur, '$!debug'
-    if null debug goto debug_1
-    cur.'!cursor_debug'('START', name)
-  debug_1:
-    $I0 = is_cclass cclass, tgt, pos
-    unless $I0 goto fail
-    inc pos
-  pass:
-    cur.'!cursor_pass'(pos, name)
-    if null debug goto done
-    cur.'!cursor_debug'('PASS', name)
-    goto done
-  fail:
-    if null debug goto done
-    cur.'!cursor_debug'('FAIL', name)
-  done:
-    .return (cur)
-.end
-
-.sub 'alpha' :method :subid('Regex_Cursor_meth_alpha')
-    .local pmc cur
-    .local int pos
-    .local string tgt
-    (cur, pos, tgt) = self.'!cursor_start'()
-    .local pmc debug
-    #debug = getattribute cur, '$!debug'
-    if null debug goto debug_1
-    cur.'!cursor_debug'('START', 'alpha')
-  debug_1:
-    $I0 = is_cclass .CCLASS_ALPHABETIC, tgt, pos
-    if $I0 goto pass
-
-    $I0 = length tgt
-    if pos >= $I0 goto fail
-
-    $S0 = substr tgt, pos, 1
-    if $S0 != '_' goto fail
-  pass:
-    inc pos
-    cur.'!cursor_pass'(pos, 'alpha')
-    if null debug goto done
-    cur.'!cursor_debug'('PASS', 'alpha')
-    goto done
-  fail:
-    if null debug goto done
-    cur.'!cursor_debug'('FAIL', 'alpha')
-  done:
-    .return (cur)
-.end
-
-.sub 'upper' :method :subid('Regex_Cursor_meth_upper')
-    .tailcall '!cclass'(self, 'upper', .CCLASS_UPPERCASE)
-.end
-
-.sub 'lower' :method :subid('Regex_Cursor_meth_lower')
-    .tailcall '!cclass'(self, 'lower', .CCLASS_LOWERCASE)
-.end
-
-.sub 'digit' :method :subid('Regex_Cursor_meth_digit')
-    .tailcall '!cclass'(self, 'digit', .CCLASS_NUMERIC)
-.end
-
-.sub 'xdigit' :method :subid('Regex_Cursor_meth_xdigit')
-    .tailcall '!cclass'(self, 'xdigit', .CCLASS_HEXADECIMAL)
-.end
-
-.sub 'print' :method :subid('Regex_Cursor_meth_print')
-    .tailcall '!cclass'(self, 'print', .CCLASS_PRINTING)
-.end
-
-.sub 'graph' :method :subid('Regex_Cursor_meth_graph')
-    .tailcall '!cclass'(self, 'graph', .CCLASS_GRAPHICAL)
-.end
-
-.sub 'cntrl' :method :subid('Regex_Cursor_meth_cntrl')
-    .tailcall '!cclass'(self, 'cntrl', .CCLASS_CONTROL)
-.end
-
-.sub 'punct' :method :subid('Regex_Cursor_meth_punct')
-    .tailcall '!cclass'(self, 'punct', .CCLASS_PUNCTUATION)
-.end
-
-.sub 'alnum' :method :subid('Regex_Cursor_meth_alnum')
-    .tailcall '!cclass'(self, 'alnum', .CCLASS_ALPHANUMERIC)
-.end
-
-.sub 'space' :method :subid('Regex_Cursor_meth_space')
-    .tailcall '!cclass'(self, 'space', .CCLASS_WHITESPACE)
-.end
-
-.sub 'blank' :method :subid('Regex_Cursor_meth_blank')
-    .tailcall '!cclass'(self, 'blank', .CCLASS_BLANK)
-.end
-
-.sub 'FAILGOAL' :method :subid('Regex_Cursor_meth_FAILGOAL')
-    .param string goal
-    .local string dba
-    $P0 = getinterp
-    $P0 = $P0['sub';1]
-    dba = $P0
-  have_dba:
-    .local string message
-    message = concat "Unable to parse ", dba
-    message .= ", couldn't find final "
-    message .= goal
-    message .= ' at line '
-    $P0 = getattribute self, '$!target'
-    $P1 = get_hll_global ['HLL'], 'Compiler'
-    $I0 = self.'pos'()
-    $I0 = $P1.'lineof'($P0, $I0)
-    inc $I0
-    $S0 = $I0
-    message .= $S0
-  have_line:
-    die message
-.end
-
-.sub 'DEBUG' :method :subid('Regex_Cursor_meth_DEBUG')
-    .param pmc arg             :optional
-    .param int has_arg         :opt_flag
-
-    if has_arg goto have_arg
-    arg = get_global '$!TRUE'
-  have_arg:
-
-    setattribute self, '$!debug', arg
-    .return (1)
-.end
-
-=head1 AUTHORS
-
-Patrick Michaud <pmichaud@pobox.com> is the author and maintainer.
-
-=cut
-
-# Local Variables:
-#   mode: pir
-#   fill-column: 100
-# End:
-# vim: expandtab shiftwidth=4 ft=pir:
-### .include 'src/Regex/Match.pir'
-# Copyright (C) 2009, The Perl Foundation.
-# $Id$
-
-=head1 NAME
-
-Regex::Match - Regex Match objects
-
-=head1 DESCRIPTION
-
-This file implements Match objects for the regex engine.
-
-=cut
-
-.namespace ['Regex';'Match']
-
-.sub '' :anon :load :init
-    load_bytecode 'P6object.pbc'
-    .local pmc p6meta
-    p6meta = new 'P6metaclass'
-    $P0 = p6meta.'new_class'('Regex::Match', 'parent'=>'Capture', 'attr'=>'$!cursor $!target $!from $!to $!ast')
-    .return ()
-.end
-
-=head2 Methods
-
-=over 4
-
-=item CURSOR()
-
-Returns the Cursor associated with this match object.
-
-=cut
-
-.sub 'CURSOR' :method
-    $P0 = getattribute self, '$!cursor'
-    .return ($P0)
-.end
-
-=item from()
-
-Returns the offset in the target string of the beginning of the match.
-
-=cut
-
-.sub 'from' :method
-    $P0 = getattribute self, '$!from'
-    .return ($P0)
-.end
-
-
-=item to()
-
-Returns the offset in the target string of the end of the match.
-
-=cut
-
-.sub 'to' :method
-    $P0 = getattribute self, '$!to'
-    .return ($P0)
-.end
-
-
-=item chars()
-
-Returns C<.to() - .from()>
-
-=cut
-
-.sub 'chars' :method
-    $I0 = self.'to'()
-    $I1 = self.'from'()
-    $I2 = $I0 - $I1
-    if $I2 >= 0 goto done
-    .return (0)
-  done:
-    .return ($I2)
-.end
-
-
-=item orig()
-
-Return the original item that was matched against.
-
-=cut
-
-.sub 'orig' :method
-    $P0 = getattribute self, '$!target'
-    .return ($P0)
-.end
-
-
-=item Str()
-
-Returns the portion of the target corresponding to this match.
-
-=cut
-
-.sub 'Str' :method
-    $S0 = self.'orig'()
-    $I0 = self.'from'()
-    $I1 = self.'to'()
-    $I1 -= $I0
-    $S1 = substr $S0, $I0, $I1
-    .return ($S1)
-.end
-
-
-=item ast()
-
-Returns the "abstract object" for the Match; if no abstract object
-has been set then returns C<Str> above.
-
-=cut
-
-.sub 'ast' :method
-    .local pmc ast
-    ast = getattribute self, '$!ast'
-    unless null ast goto have_ast
-    ast = new ['Undef']
-    setattribute self, '$!ast', ast
-  have_ast:
-    .return (ast)
-.end
-
-=back
-
-=head2 Vtable functions
-
-=over 4
-
-=item get_bool()
-
-Returns 1 (true) if this is the result of a successful match,
-otherwise returns 0 (false).
-
-=cut
-
-.sub '' :vtable('get_bool') :method
-    $P0 = getattribute self, '$!from'
-    $P1 = getattribute self, '$!to'
-    $I0 = isge $P1, $P0
-    .return ($I0)
-.end
-
-
-=item get_integer()
-
-Returns the integer value of the matched text.
-
-=cut
-
-.sub '' :vtable('get_integer') :method
-    $I0 = self.'Str'()
-    .return ($I0)
-.end
-
-
-=item get_number()
-
-Returns the numeric value of this match
-
-=cut
-
-.sub '' :vtable('get_number') :method
-    $N0 = self.'Str'()
-    .return ($N0)
-.end
-
-
-=item get_string()
-
-Returns the string value of the match
-
-=cut
-
-.sub '' :vtable('get_string') :method
-    $S0 = self.'Str'()
-    .return ($S0)
-.end
-
-
-=item !make(obj)
-
-Set the "ast object" for the invocant.
-
-=cut
-
-.sub '!make' :method
-    .param pmc obj
-    setattribute self, '$!ast', obj
-    .return (obj)
-.end
-
-
-=back
-
-=head1 AUTHORS
-
-Patrick Michaud <pmichaud@pobox.com> is the author and maintainer.
-
-=cut
-
-# Local Variables:
-#   mode: pir
-#   fill-column: 100
-# End:
-# vim: expandtab shiftwidth=4 ft=pir:
-### .include 'src/Regex/Method.pir'
-# Copyright (C) 2009, The Perl Foundation.
-# $Id$
-
-=head1 NAME
-
-Regex::Regex, Regex::Method - Regex subs
-
-=head1 DESCRIPTION
-
-This file implements the Regex::Method and Regex::Regex types, used as 
-containers for Regex subs that need .ACCEPTS and other regex attributes.
-
-=cut
-
-.namespace ['Regex';'Method']
-
-.sub '' :anon :load :init
-    load_bytecode 'P6object.pbc'
-    .local pmc p6meta, mproto, rproto
-    p6meta = new 'P6metaclass'
-    mproto = p6meta.'new_class'('Regex::Method', 'parent'=>'parrot;Sub')
-    rproto = p6meta.'new_class'('Regex::Regex', 'parent'=>mproto)
-.end
-
-=head2 Methods
-
-=over 4
-
-=item new(sub)
-
-Create a new Regex::Regex object from C<sub>.
-
-=cut
-
-.sub 'new' :method
-    .param pmc parrotsub
-    $P0 = self.'WHO'()
-    $P0 = new $P0
-    assign $P0, parrotsub
-    .return ($P0)
-.end
-
-
-=item ACCEPTS(target)
-
-Perform a match against target, return the result.
-
-=cut
-
-.sub 'ACCEPTS' :method
-    .param pmc target
-
-    .local pmc curproto, match
-    curproto = get_hll_global ['Regex'], 'Cursor'
-    match = curproto.'parse'(target, 'rule'=>self)
-    .return (match)
-.end
-
-.namespace ['Regex';'Regex']
-
-.sub 'ACCEPTS' :method
-    .param pmc target
-
-    .local pmc curproto, match
-    curproto = get_hll_global ['Regex'], 'Cursor'
-    match = curproto.'parse'(target, 'rule'=>self, 'c'=>0)
-    .return (match)
-.end
-
-
-=back
-
-=head1 AUTHORS
-
-Patrick Michaud <pmichaud@pobox.com> is the author and maintainer.
-
-=cut
-
-# Local Variables:
-#   mode: pir
-#   fill-column: 100
-# End:
-# vim: expandtab shiftwidth=4 ft=pir:
-### .include 'src/Regex/Dumper.pir'
-# Copyright (C) 2005-2009, Parrot Foundation.
-# Copyright (C) 2009, The Perl Foundation.
-# $Id$
-
-=head1 TITLE
-
-Regex::Dumper - various methods for displaying Match structures
-
-=head2 C<Regex::Match> Methods
-
-=over 4
-
-=item C<__dump(PMC dumper, STR label)>
-
-This method enables Data::Dumper to work on Regex::Match objects.
-
-=cut
-
-.namespace ['Regex';'Match']
-
-.sub "__dump" :method
-    .param pmc dumper
-    .param string label
-    .local string indent, subindent
-    .local pmc it, val
-    .local string key
-    .local pmc hash, array
-    .local int hascapts
-
-    (subindent, indent) = dumper."newIndent"()
-    print "=> "
-    $S0 = self
-    dumper."genericString"("", $S0)
-    print " @ "
-    $I0 = self.'from'()
-    print $I0
-    hascapts = 0
-    hash = self.'hash'()
-    if_null hash, dump_array
-    it = iter hash
-  dump_hash_1:
-    unless it goto dump_array
-    if hascapts goto dump_hash_2
-    print " {"
-    hascapts = 1
-  dump_hash_2:
-    print "\n"
-    print subindent
-    key = shift it
-    val = hash[key]
-    print "<"
-    print key
-    print "> => "
-    dumper."dump"(label, val)
-    goto dump_hash_1
-  dump_array:
-    array = self.'list'()
-    if_null array, dump_end
-    $I1 = elements array
-    $I0 = 0
-  dump_array_1:
-    if $I0 >= $I1 goto dump_end
-    if hascapts goto dump_array_2
-    print " {"
-    hascapts = 1
-  dump_array_2:
-    print "\n"
-    print subindent
-    val = array[$I0]
-    print "["
-    print $I0
-    print "] => "
-    dumper."dump"(label, val)
-    inc $I0
-    goto dump_array_1
-  dump_end:
-    unless hascapts goto end
-    print "\n"
-    print indent
-    print "}"
-  end:
-    dumper."deleteIndent"()
-.end
-
-
-=item C<dump_str()>
-
-An alternate dump output for a Match object and all of its subcaptures.
-
-=cut
-
-.sub "dump_str" :method
-    .param string prefix       :optional           # name of match variable
-    .param int has_prefix      :opt_flag
-    .param string b1           :optional           # bracket open
-    .param int has_b1          :opt_flag
-    .param string b2           :optional           # bracket close
-    .param int has_b2          :opt_flag
-
-    .local pmc capt
-    .local int spi, spc
-    .local pmc it
-    .local string prefix1, prefix2
-    .local pmc jmpstack
-    jmpstack = new 'ResizableIntegerArray'
-
-    if has_b2 goto start
-    b2 = "]"
-    if has_b1 goto start
-    b1 = "["
-  start:
-    .local string out
-    out = concat prefix, ':'
-    unless self goto subpats
-    out .= ' <'
-    $S0 = self
-    out .= $S0
-    out .= ' @ '
-    $S0 = self.'from'()
-    out .= $S0
-    out .= '> '
-
-  subpats:
-    $I0 = self
-    $S0 = $I0
-    out .= $S0
-    out .= "\n"
-    capt = self.'list'()
-    if_null capt, subrules
-    spi = 0
-    spc = elements capt
-  subpats_1:
-    unless spi < spc goto subrules
-    prefix1 = concat prefix, b1
-    $S0 = spi
-    prefix1 = concat prefix1, $S0
-    prefix1 = concat prefix1, b2
-    $I0 = defined capt[spi]
-    unless $I0 goto subpats_2
-    $P0 = capt[spi]
-    local_branch jmpstack, dumper
-  subpats_2:
-    inc spi
-    goto subpats_1
-
-  subrules:
-    capt = self.'hash'()
-    if_null capt, end
-    it = iter capt
-  subrules_1:
-    unless it goto end
-    $S0 = shift it
-    prefix1 = concat prefix, '<'
-    prefix1 = concat prefix1, $S0
-    prefix1 = concat prefix1, ">"
-    $I0 = defined capt[$S0]
-    unless $I0 goto subrules_1
-    $P0 = capt[$S0]
-    local_branch jmpstack, dumper
-    goto subrules_1
-
-  dumper:
-    $I0 = isa $P0, ['Regex';'Match']
-    unless $I0 goto dumper_0
-    $S0 = $P0.'dump_str'(prefix1, b1, b2)
-    out .= $S0
-    local_return jmpstack
-  dumper_0:
-    $I0 = does $P0, 'array'
-    unless $I0 goto dumper_3
-    $I0 = 0
-    $I1 = elements $P0
-  dumper_1:
-    if $I0 >= $I1 goto dumper_2
-    $P1 = $P0[$I0]
-    prefix2 = concat prefix1, b1
-    $S0 = $I0
-    prefix2 = concat prefix2, $S0
-    prefix2 = concat prefix2, b2
-    $S0 = $P1.'dump_str'(prefix2, b1, b2)
-    out .= $S0
-    inc $I0
-    goto dumper_1
-  dumper_2:
-    local_return jmpstack
-  dumper_3:
-    out .= prefix1
-    out .= ': '
-    $S0 = $P0
-    out .= $S0
-    out .= "\n"
-    local_return jmpstack
-
-  end:
-    .return (out)
-.end
-
-
-=back
-
-=cut
-
-# Local Variables:
-#   mode: pir
-#   fill-column: 100
-# End:
-# vim: expandtab shiftwidth=4 ft=pir:
-### .include 'src/Regex/Cursor2.pir'
+### .include 'src/Regex/Cursor.pir'
 # Copyright (C) 2009, The Perl Foundation.
 # $Id$
 
@@ -821,7 +58,6 @@ grammars.
     type_obj = NQPClassHOW."new_type"("Cursor" :named("name"))
     how = get_how type_obj
     set_hll_global ["Regex"], "Cursor", type_obj
-    set_hll_global ["Regex"], "Cursor2", type_obj
     set_global "$?CLASS", type_obj
 
     # Add all methods.
@@ -1882,7 +1118,270 @@ Patrick Michaud <pmichaud@pobox.com> is the author and maintainer.
 #   fill-column: 100
 # End:
 # vim: expandtab shiftwidth=4 ft=pir:
-### .include 'src/Regex/Cursor2-protoregex-peek.pir'
+### .include 'src/Regex/Cursor-builtins.pir'
+# Copyright (C) 2009, The Perl Foundation.
+# $Id$
+
+=head1 NAME
+
+Regex::Cursor-builtins - builtin regexes for Cursor objects
+
+=cut
+
+.include 'cclass.pasm'
+
+.namespace ['Regex';'Cursor']
+
+.sub 'before' :method :subid('Regex_Cursor_meth_before')
+    .param pmc regex           :optional
+    .local pmc cur
+    .local int pos
+    (cur, pos) = self.'!cursor_start'()
+    if null regex goto fail
+    $P0 = cur.regex()
+    unless $P0 goto fail
+    cur.'!cursor_pass'(pos, 'before')
+  fail:
+    .return (cur)
+.end
+
+
+.sub 'ident' :method :subid('Regex_Cursor_meth_ident')
+    .local pmc cur
+    .local int pos, eos
+    .local string tgt
+    (cur, pos, tgt) = self.'!cursor_start'()
+    eos = length tgt
+    $S0 = substr tgt, pos, 1
+    if $S0 == '_' goto ident_1
+    $I0 = is_cclass .CCLASS_ALPHABETIC, tgt, pos
+    unless $I0 goto fail
+  ident_1:
+    pos = find_not_cclass .CCLASS_WORD, tgt, pos, eos
+    cur.'!cursor_pass'(pos, 'ident')
+  fail:
+    .return (cur)
+.end
+
+.sub 'wb' :method :subid('Regex_Cursor_meth_wb')
+    .local pmc cur
+    .local int pos, eos
+    .local string tgt
+    (cur, pos, tgt) = self.'!cursor_start'()
+    if pos == 0 goto pass
+    eos = length tgt
+    if pos == eos goto pass
+    $I0 = pos - 1
+    $I1 = is_cclass .CCLASS_WORD, tgt, $I0
+    $I2 = is_cclass .CCLASS_WORD, tgt, pos
+    if $I1 == $I2 goto fail
+  pass:
+    cur.'!cursor_pass'(pos, 'wb')
+  fail:
+    .return (cur)
+.end
+
+.sub 'ww' :method :subid('Regex_Cursor_meth_ww')
+    .local pmc cur
+    .local int pos, eos
+    .local string tgt
+    (cur, pos, tgt) = self.'!cursor_start'()
+    .local pmc debug
+    #debug = getattribute cur, '$!debug'
+    if null debug goto debug_1
+    cur.'!cursor_debug'('START', 'ww')
+  debug_1:
+    if pos == 0 goto fail
+    eos = length tgt
+    if pos == eos goto fail
+    $I0 = is_cclass .CCLASS_WORD, tgt, pos
+    unless $I0 goto fail
+    $I1 = pos - 1
+    $I0 = is_cclass .CCLASS_WORD, tgt, $I1
+    unless $I0 goto fail
+  pass:
+    cur.'!cursor_pass'(pos, 'ww')
+    if null debug goto done
+    cur.'!cursor_debug'('PASS', 'ww')
+    goto done
+  fail:
+    if null debug goto done
+    cur.'!cursor_debug'('FAIL', 'ww')
+  done:
+    .return (cur)
+.end
+
+.sub 'ws' :method :subid('Regex_Cursor_meth_ws')
+    .local pmc cur
+    .local int pos, eos
+    .local string tgt
+    (cur, pos, tgt) = self.'!cursor_start'()
+    eos = length tgt
+    if pos >= eos goto pass
+    if pos == 0 goto ws_scan
+    $I0 = is_cclass .CCLASS_WORD, tgt, pos
+    unless $I0 goto ws_scan
+    $I1 = pos - 1
+    $I0 = is_cclass .CCLASS_WORD, tgt, $I1
+    if $I0 goto fail
+  ws_scan:
+    pos = find_not_cclass .CCLASS_WHITESPACE, tgt, pos, eos
+  pass:
+    cur.'!cursor_pass'(pos, 'ws')
+  fail:
+    .return (cur)
+.end
+
+.sub '!cclass' :anon
+    .param pmc self
+    .param string name
+    .param int cclass
+    .local pmc cur
+    .local int pos
+    .local string tgt
+    (cur, pos, tgt) = self.'!cursor_start'()
+    .local pmc debug
+    #debug = getattribute cur, '$!debug'
+    if null debug goto debug_1
+    cur.'!cursor_debug'('START', name)
+  debug_1:
+    $I0 = is_cclass cclass, tgt, pos
+    unless $I0 goto fail
+    inc pos
+  pass:
+    cur.'!cursor_pass'(pos, name)
+    if null debug goto done
+    cur.'!cursor_debug'('PASS', name)
+    goto done
+  fail:
+    if null debug goto done
+    cur.'!cursor_debug'('FAIL', name)
+  done:
+    .return (cur)
+.end
+
+.sub 'alpha' :method :subid('Regex_Cursor_meth_alpha')
+    .local pmc cur
+    .local int pos
+    .local string tgt
+    (cur, pos, tgt) = self.'!cursor_start'()
+    .local pmc debug
+    #debug = getattribute cur, '$!debug'
+    if null debug goto debug_1
+    cur.'!cursor_debug'('START', 'alpha')
+  debug_1:
+    $I0 = is_cclass .CCLASS_ALPHABETIC, tgt, pos
+    if $I0 goto pass
+
+    $I0 = length tgt
+    if pos >= $I0 goto fail
+
+    $S0 = substr tgt, pos, 1
+    if $S0 != '_' goto fail
+  pass:
+    inc pos
+    cur.'!cursor_pass'(pos, 'alpha')
+    if null debug goto done
+    cur.'!cursor_debug'('PASS', 'alpha')
+    goto done
+  fail:
+    if null debug goto done
+    cur.'!cursor_debug'('FAIL', 'alpha')
+  done:
+    .return (cur)
+.end
+
+.sub 'upper' :method :subid('Regex_Cursor_meth_upper')
+    .tailcall '!cclass'(self, 'upper', .CCLASS_UPPERCASE)
+.end
+
+.sub 'lower' :method :subid('Regex_Cursor_meth_lower')
+    .tailcall '!cclass'(self, 'lower', .CCLASS_LOWERCASE)
+.end
+
+.sub 'digit' :method :subid('Regex_Cursor_meth_digit')
+    .tailcall '!cclass'(self, 'digit', .CCLASS_NUMERIC)
+.end
+
+.sub 'xdigit' :method :subid('Regex_Cursor_meth_xdigit')
+    .tailcall '!cclass'(self, 'xdigit', .CCLASS_HEXADECIMAL)
+.end
+
+.sub 'print' :method :subid('Regex_Cursor_meth_print')
+    .tailcall '!cclass'(self, 'print', .CCLASS_PRINTING)
+.end
+
+.sub 'graph' :method :subid('Regex_Cursor_meth_graph')
+    .tailcall '!cclass'(self, 'graph', .CCLASS_GRAPHICAL)
+.end
+
+.sub 'cntrl' :method :subid('Regex_Cursor_meth_cntrl')
+    .tailcall '!cclass'(self, 'cntrl', .CCLASS_CONTROL)
+.end
+
+.sub 'punct' :method :subid('Regex_Cursor_meth_punct')
+    .tailcall '!cclass'(self, 'punct', .CCLASS_PUNCTUATION)
+.end
+
+.sub 'alnum' :method :subid('Regex_Cursor_meth_alnum')
+    .tailcall '!cclass'(self, 'alnum', .CCLASS_ALPHANUMERIC)
+.end
+
+.sub 'space' :method :subid('Regex_Cursor_meth_space')
+    .tailcall '!cclass'(self, 'space', .CCLASS_WHITESPACE)
+.end
+
+.sub 'blank' :method :subid('Regex_Cursor_meth_blank')
+    .tailcall '!cclass'(self, 'blank', .CCLASS_BLANK)
+.end
+
+.sub 'FAILGOAL' :method :subid('Regex_Cursor_meth_FAILGOAL')
+    .param string goal
+    .local string dba
+    $P0 = getinterp
+    $P0 = $P0['sub';1]
+    dba = $P0
+  have_dba:
+    .local string message
+    message = concat "Unable to parse ", dba
+    message .= ", couldn't find final "
+    message .= goal
+    message .= ' at line '
+    $P0 = getattribute self, '$!target'
+    $P1 = get_hll_global ['HLL'], 'Compiler'
+    $I0 = self.'pos'()
+    $I0 = $P1.'lineof'($P0, $I0)
+    inc $I0
+    $S0 = $I0
+    message .= $S0
+  have_line:
+    die message
+.end
+
+.sub 'DEBUG' :method :subid('Regex_Cursor_meth_DEBUG')
+    .param pmc arg             :optional
+    .param int has_arg         :opt_flag
+
+    if has_arg goto have_arg
+    arg = get_global '$!TRUE'
+  have_arg:
+
+    setattribute self, '$!debug', arg
+    .return (1)
+.end
+
+=head1 AUTHORS
+
+Patrick Michaud <pmichaud@pobox.com> is the author and maintainer.
+
+=cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:
+### .include 'src/Regex/Cursor-protoregex-peek.pir'
 # Copyright (C) 2009, The Perl Foundation.
 
 =head1 NAME
@@ -2353,6 +1852,506 @@ tokrx hash.
 # End:
 # vim: expandtab shiftwidth=4 ft=pir:
 
+### .include 'src/Regex/Match.pir'
+# Copyright (C) 2009, The Perl Foundation.
+# $Id$
+
+=head1 NAME
+
+Regex::Match - Regex Match objects
+
+=head1 DESCRIPTION
+
+This file implements Match objects for the regex engine.
+
+=cut
+
+.namespace ['Regex';'Match']
+
+.sub '' :anon :load :init
+    load_bytecode 'P6object.pbc'
+    .local pmc p6meta
+    p6meta = new 'P6metaclass'
+    $P0 = p6meta.'new_class'('Regex::Match', 'parent'=>'Capture', 'attr'=>'$!cursor $!target $!from $!to $!ast')
+    .return ()
+.end
+
+=head2 Methods
+
+=over 4
+
+=item CURSOR()
+
+Returns the Cursor associated with this match object.
+
+=cut
+
+.sub 'CURSOR' :method
+    $P0 = getattribute self, '$!cursor'
+    .return ($P0)
+.end
+
+=item from()
+
+Returns the offset in the target string of the beginning of the match.
+
+=cut
+
+.sub 'from' :method
+    $P0 = getattribute self, '$!from'
+    .return ($P0)
+.end
+
+
+=item to()
+
+Returns the offset in the target string of the end of the match.
+
+=cut
+
+.sub 'to' :method
+    $P0 = getattribute self, '$!to'
+    .return ($P0)
+.end
+
+
+=item chars()
+
+Returns C<.to() - .from()>
+
+=cut
+
+.sub 'chars' :method
+    $I0 = self.'to'()
+    $I1 = self.'from'()
+    $I2 = $I0 - $I1
+    if $I2 >= 0 goto done
+    .return (0)
+  done:
+    .return ($I2)
+.end
+
+
+=item orig()
+
+Return the original item that was matched against.
+
+=cut
+
+.sub 'orig' :method
+    $P0 = getattribute self, '$!target'
+    .return ($P0)
+.end
+
+
+=item Str()
+
+Returns the portion of the target corresponding to this match.
+
+=cut
+
+.sub 'Str' :method
+    $S0 = self.'orig'()
+    $I0 = self.'from'()
+    $I1 = self.'to'()
+    $I1 -= $I0
+    $S1 = substr $S0, $I0, $I1
+    .return ($S1)
+.end
+
+
+=item ast()
+
+Returns the "abstract object" for the Match; if no abstract object
+has been set then returns C<Str> above.
+
+=cut
+
+.sub 'ast' :method
+    .local pmc ast
+    ast = getattribute self, '$!ast'
+    unless null ast goto have_ast
+    ast = new ['Undef']
+    setattribute self, '$!ast', ast
+  have_ast:
+    .return (ast)
+.end
+
+=back
+
+=head2 Vtable functions
+
+=over 4
+
+=item get_bool()
+
+Returns 1 (true) if this is the result of a successful match,
+otherwise returns 0 (false).
+
+=cut
+
+.sub '' :vtable('get_bool') :method
+    $P0 = getattribute self, '$!from'
+    $P1 = getattribute self, '$!to'
+    $I0 = isge $P1, $P0
+    .return ($I0)
+.end
+
+
+=item get_integer()
+
+Returns the integer value of the matched text.
+
+=cut
+
+.sub '' :vtable('get_integer') :method
+    $I0 = self.'Str'()
+    .return ($I0)
+.end
+
+
+=item get_number()
+
+Returns the numeric value of this match
+
+=cut
+
+.sub '' :vtable('get_number') :method
+    $N0 = self.'Str'()
+    .return ($N0)
+.end
+
+
+=item get_string()
+
+Returns the string value of the match
+
+=cut
+
+.sub '' :vtable('get_string') :method
+    $S0 = self.'Str'()
+    .return ($S0)
+.end
+
+
+=item !make(obj)
+
+Set the "ast object" for the invocant.
+
+=cut
+
+.sub '!make' :method
+    .param pmc obj
+    setattribute self, '$!ast', obj
+    .return (obj)
+.end
+
+
+=back
+
+=head1 AUTHORS
+
+Patrick Michaud <pmichaud@pobox.com> is the author and maintainer.
+
+=cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:
+### .include 'src/Regex/Method.pir'
+# Copyright (C) 2009, The Perl Foundation.
+# $Id$
+
+=head1 NAME
+
+Regex::Regex, Regex::Method - Regex subs
+
+=head1 DESCRIPTION
+
+This file implements the Regex::Method and Regex::Regex types, used as 
+containers for Regex subs that need .ACCEPTS and other regex attributes.
+
+=cut
+
+.namespace ['Regex';'Method']
+
+.sub '' :anon :load :init
+    load_bytecode 'P6object.pbc'
+    .local pmc p6meta, mproto, rproto
+    p6meta = new 'P6metaclass'
+    mproto = p6meta.'new_class'('Regex::Method', 'parent'=>'parrot;Sub')
+    rproto = p6meta.'new_class'('Regex::Regex', 'parent'=>mproto)
+.end
+
+=head2 Methods
+
+=over 4
+
+=item new(sub)
+
+Create a new Regex::Regex object from C<sub>.
+
+=cut
+
+.sub 'new' :method
+    .param pmc parrotsub
+    $P0 = self.'WHO'()
+    $P0 = new $P0
+    assign $P0, parrotsub
+    .return ($P0)
+.end
+
+
+=item ACCEPTS(target)
+
+Perform a match against target, return the result.
+
+=cut
+
+.sub 'ACCEPTS' :method
+    .param pmc target
+
+    .local pmc curproto, match
+    curproto = get_hll_global ['Regex'], 'Cursor'
+    match = curproto.'parse'(target, 'rule'=>self)
+    .return (match)
+.end
+
+.namespace ['Regex';'Regex']
+
+.sub 'ACCEPTS' :method
+    .param pmc target
+
+    .local pmc curproto, match
+    curproto = get_hll_global ['Regex'], 'Cursor'
+    match = curproto.'parse'(target, 'rule'=>self, 'c'=>0)
+    .return (match)
+.end
+
+
+=back
+
+=head1 AUTHORS
+
+Patrick Michaud <pmichaud@pobox.com> is the author and maintainer.
+
+=cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:
+### .include 'src/Regex/Dumper.pir'
+# Copyright (C) 2005-2009, Parrot Foundation.
+# Copyright (C) 2009, The Perl Foundation.
+# $Id$
+
+=head1 TITLE
+
+Regex::Dumper - various methods for displaying Match structures
+
+=head2 C<Regex::Match> Methods
+
+=over 4
+
+=item C<__dump(PMC dumper, STR label)>
+
+This method enables Data::Dumper to work on Regex::Match objects.
+
+=cut
+
+.namespace ['Regex';'Match']
+
+.sub "__dump" :method
+    .param pmc dumper
+    .param string label
+    .local string indent, subindent
+    .local pmc it, val
+    .local string key
+    .local pmc hash, array
+    .local int hascapts
+
+    (subindent, indent) = dumper."newIndent"()
+    print "=> "
+    $S0 = self
+    dumper."genericString"("", $S0)
+    print " @ "
+    $I0 = self.'from'()
+    print $I0
+    hascapts = 0
+    hash = self.'hash'()
+    if_null hash, dump_array
+    it = iter hash
+  dump_hash_1:
+    unless it goto dump_array
+    if hascapts goto dump_hash_2
+    print " {"
+    hascapts = 1
+  dump_hash_2:
+    print "\n"
+    print subindent
+    key = shift it
+    val = hash[key]
+    print "<"
+    print key
+    print "> => "
+    dumper."dump"(label, val)
+    goto dump_hash_1
+  dump_array:
+    array = self.'list'()
+    if_null array, dump_end
+    $I1 = elements array
+    $I0 = 0
+  dump_array_1:
+    if $I0 >= $I1 goto dump_end
+    if hascapts goto dump_array_2
+    print " {"
+    hascapts = 1
+  dump_array_2:
+    print "\n"
+    print subindent
+    val = array[$I0]
+    print "["
+    print $I0
+    print "] => "
+    dumper."dump"(label, val)
+    inc $I0
+    goto dump_array_1
+  dump_end:
+    unless hascapts goto end
+    print "\n"
+    print indent
+    print "}"
+  end:
+    dumper."deleteIndent"()
+.end
+
+
+=item C<dump_str()>
+
+An alternate dump output for a Match object and all of its subcaptures.
+
+=cut
+
+.sub "dump_str" :method
+    .param string prefix       :optional           # name of match variable
+    .param int has_prefix      :opt_flag
+    .param string b1           :optional           # bracket open
+    .param int has_b1          :opt_flag
+    .param string b2           :optional           # bracket close
+    .param int has_b2          :opt_flag
+
+    .local pmc capt
+    .local int spi, spc
+    .local pmc it
+    .local string prefix1, prefix2
+    .local pmc jmpstack
+    jmpstack = new 'ResizableIntegerArray'
+
+    if has_b2 goto start
+    b2 = "]"
+    if has_b1 goto start
+    b1 = "["
+  start:
+    .local string out
+    out = concat prefix, ':'
+    unless self goto subpats
+    out .= ' <'
+    $S0 = self
+    out .= $S0
+    out .= ' @ '
+    $S0 = self.'from'()
+    out .= $S0
+    out .= '> '
+
+  subpats:
+    $I0 = self
+    $S0 = $I0
+    out .= $S0
+    out .= "\n"
+    capt = self.'list'()
+    if_null capt, subrules
+    spi = 0
+    spc = elements capt
+  subpats_1:
+    unless spi < spc goto subrules
+    prefix1 = concat prefix, b1
+    $S0 = spi
+    prefix1 = concat prefix1, $S0
+    prefix1 = concat prefix1, b2
+    $I0 = defined capt[spi]
+    unless $I0 goto subpats_2
+    $P0 = capt[spi]
+    local_branch jmpstack, dumper
+  subpats_2:
+    inc spi
+    goto subpats_1
+
+  subrules:
+    capt = self.'hash'()
+    if_null capt, end
+    it = iter capt
+  subrules_1:
+    unless it goto end
+    $S0 = shift it
+    prefix1 = concat prefix, '<'
+    prefix1 = concat prefix1, $S0
+    prefix1 = concat prefix1, ">"
+    $I0 = defined capt[$S0]
+    unless $I0 goto subrules_1
+    $P0 = capt[$S0]
+    local_branch jmpstack, dumper
+    goto subrules_1
+
+  dumper:
+    $I0 = isa $P0, ['Regex';'Match']
+    unless $I0 goto dumper_0
+    $S0 = $P0.'dump_str'(prefix1, b1, b2)
+    out .= $S0
+    local_return jmpstack
+  dumper_0:
+    $I0 = does $P0, 'array'
+    unless $I0 goto dumper_3
+    $I0 = 0
+    $I1 = elements $P0
+  dumper_1:
+    if $I0 >= $I1 goto dumper_2
+    $P1 = $P0[$I0]
+    prefix2 = concat prefix1, b1
+    $S0 = $I0
+    prefix2 = concat prefix2, $S0
+    prefix2 = concat prefix2, b2
+    $S0 = $P1.'dump_str'(prefix2, b1, b2)
+    out .= $S0
+    inc $I0
+    goto dumper_1
+  dumper_2:
+    local_return jmpstack
+  dumper_3:
+    out .= prefix1
+    out .= ': '
+    $S0 = $P0
+    out .= $S0
+    out .= "\n"
+    local_return jmpstack
+
+  end:
+    .return (out)
+.end
+
+
+=back
+
+=cut
+
+# Local Variables:
+#   mode: pir
+#   fill-column: 100
+# End:
+# vim: expandtab shiftwidth=4 ft=pir:
 
 ### .include 'src/PAST/Regex.pir'
 # $Id: Regex.pir 41578 2009-09-30 14:45:23Z pmichaud $
