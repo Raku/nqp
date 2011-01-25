@@ -8,7 +8,7 @@ Regex::Cursor-protoregex-peek - simple protoregex implementation
 
 =over 4
 
-.namespace ['Regex';'Cursor2']
+.namespace ['Regex';'Cursor']
 
 =item !protoregex(name)
 
