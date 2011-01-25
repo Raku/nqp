@@ -359,11 +359,7 @@ method variable($/) {
             $past.push(PAST::Var.new( :name('self') ));
             $past.scope('attribute');
             $past.viviself( vivitype( $<sigil> ) );
-            if $*PACKAGE-SETUP {
-                # Also need to push the class handle.
-                # XXX Once we fully switch to new meta-model, always do this.
-                $past.push(PAST::Var.new( :name('$?CLASS') ));
-            }
+            $past.push(PAST::Var.new( :name('$?CLASS') ));
         }
     }
     make $past;
@@ -498,37 +494,28 @@ method variable_declarator($/) {
         $/.CURSOR.panic("Redeclaration of symbol ", $name);
     }
     if $*SCOPE eq 'has' {
+        # Create and add a meta-attribute.
+        my $meta-attr-type := %*HOW-METAATTR{$*PKGDECL} || $*DEFAULT-METAATTR;
+        $*PACKAGE-SETUP.push(PAST::Op.new(
+            :pasttype('callmethod'), :name('add_attribute'),
+            PAST::Op.new(
+                :pirop('get_how PP'),
+                PAST::Var.new( :name('type_obj'), :scope('register') )
+            ),
+            PAST::Var.new( :name('type_obj'), :scope('register') ),
+            (my $meta_args := PAST::Op.new(
+                :pasttype('callmethod'), :name('new'),
+                PAST::Var.new( :name($meta-attr-type), :namespace(''), :scope('package') ),
+                PAST::Val.new( :value($name), :named('name') )
+            ))
+        ));
+        if $<typename> {
+            my $type := $<typename>[0].ast;
+            $type.named('type');
+            $meta_args.push($type);
+        }
+
         $BLOCK.symbol($name, :scope('attribute') );
-        if $*PACKAGE-SETUP {
-            # Create and add a meta-attribute.
-            my $meta-attr-type := %*HOW-METAATTR{$*PKGDECL} || $*DEFAULT-METAATTR;
-            $*PACKAGE-SETUP.push(PAST::Op.new(
-                :pasttype('callmethod'), :name('add_attribute'),
-                PAST::Op.new(
-                    :pirop('get_how PP'),
-                    PAST::Var.new( :name('type_obj'), :scope('register') )
-                ),
-                PAST::Var.new( :name('type_obj'), :scope('register') ),
-                (my $meta_args := PAST::Op.new(
-                    :pasttype('callmethod'), :name('new'),
-                    PAST::Var.new( :name($meta-attr-type), :namespace(''), :scope('package') ),
-                    PAST::Val.new( :value($name), :named('name') )
-                ))
-            ));
-            if $<typename> {
-                my $type := $<typename>[0].ast;
-                $type.named('type');
-                $meta_args.push($type);
-            }
-        }
-        else {
-            # XXX Old way, will go away once all package types are ported.
-            unless $BLOCK<attributes> {
-                $BLOCK<attributes> :=
-                    PAST::Op.new( :pasttype('list'), :named('attr') );
-            }
-            $BLOCK<attributes>.push( $name );
-        }
         $past := PAST::Stmts.new();
     }
     else {
