@@ -12,7 +12,6 @@ This file brings together the various Regex modules needed for Regex.pbc .
 
 .include 'src/Regex/Cursor.pir'
 .include 'src/Regex/Cursor-builtins.pir'
-.include 'src/Regex/Cursor-protoregex-peek.pir'
 .include 'src/Regex/Match.pir'
 .include 'src/Regex/Method.pir'
 .include 'src/Regex/Dumper.pir'
