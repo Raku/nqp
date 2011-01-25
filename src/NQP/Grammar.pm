@@ -14,6 +14,7 @@ method TOP() {
     %*HOW<class>   := 'NQPClassHOW';
     %*HOW<grammar> := 'NQPClassHOW';
     %*HOW<role>    := 'NQPRoleHOW';
+    %*HOW<native>  := 'NQPNativeHOW';
 
     # What attribute class to use with what HOW, plus a default.
     my $*DEFAULT-METAATTR := 'NQPAttribute';
@@ -296,6 +297,11 @@ token package_declarator:sym<grammar> {
 token package_declarator:sym<role> {
     :my $*PACKAGE-SETUP := PAST::Stmts.new();
     :my $*PKGDECL := 'role';
+    <sym> <package_def>
+}
+token package_declarator:sym<native> {
+    :my $*PACKAGE-SETUP := PAST::Stmts.new();
+    :my $*PKGDECL := 'native';
     <sym> <package_def>
 }
 

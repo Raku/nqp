@@ -1,0 +1,38 @@
+knowhow NQPNativeHOW {
+    has $!name;
+    has $!composed;
+
+    method new(:$name) {
+        my $obj := pir::repr_instance_of__PP(self);
+        $obj.BUILD(:name($name));
+        $obj
+    }
+
+    method BUILD(:$name) {
+        $!name := $name;
+    }
+
+    # Create a new meta-class instance, and then a new type object
+    # to go with it, and return that.
+    # XXX Should check that this is an inlineable REPR.
+    method new_type(:$name = '<anon>', :$repr!) {
+        my $metaclass := self.new(:name($name));
+        pir::repr_type_object_for__PPS($metaclass, $repr);
+    }
+
+    method add_method($obj, $name, $code_obj) {
+        pir::die("Native types may not have methods (must be boxed to call method)");
+    }
+
+    method add_multi_method($obj, $name, $code_obj) {
+        pir::die("Native types may not have methods (must be boxed to call method)");
+    }
+
+    method add_attribute($obj, $meta_attr) {
+        pir::die("Native types may not have attributes");
+    }
+
+    method compose($obj) {
+        $!composed := 1;
+    }
+}

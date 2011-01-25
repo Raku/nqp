@@ -374,6 +374,7 @@ method package_declarator:sym<knowhow>($/) { make package($/); }
 method package_declarator:sym<class>($/)   { make package($/) }
 method package_declarator:sym<grammar>($/) { make package($/) }
 method package_declarator:sym<role>($/)    { make package($/); }
+method package_declarator:sym<native>($/)  { make package($/); }
 
 sub package($/) {
     my @ns := pir::clone__PP($<package_def><name><identifier>);
