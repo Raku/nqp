@@ -19,6 +19,20 @@ grammars.
 .include 'cclass.pasm'
 .include 'src/Regex/constants.pir'
 
+.namespace ['Regex';'Cursor']
+
+.sub '' :anon :load :init
+    # Set up some constants/generation tracking.
+    $P0 = box 0
+    set_global '$!generation', $P0
+    $P0 = new ['Boolean']
+    assign $P0, 0
+    set_global '$!FALSE', $P0
+    $P0 = new ['Boolean']
+    assign $P0, 1
+    set_global '$!TRUE', $P0
+.end
+
 .namespace ['Regex';'Cursor2']
 
 .sub '' :anon :load :init
