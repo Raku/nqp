@@ -333,7 +333,7 @@ token declarator {
     | <routine_declarator>
 }
 
-token variable_declarator { <variable> }
+rule variable_declarator { <typename>? <variable> }
 
 proto token routine_declarator { <...> }
 token routine_declarator:sym<sub>    { <sym> <routine_def> }

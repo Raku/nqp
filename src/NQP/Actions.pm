@@ -509,12 +509,17 @@ method variable_declarator($/) {
                     PAST::Var.new( :name('type_obj'), :scope('register') )
                 ),
                 PAST::Var.new( :name('type_obj'), :scope('register') ),
-                PAST::Op.new(
+                (my $meta_args := PAST::Op.new(
                     :pasttype('callmethod'), :name('new'),
                     PAST::Var.new( :name($meta-attr-type), :namespace(''), :scope('package') ),
                     PAST::Val.new( :value($name), :named('name') )
-                )
+                ))
             ));
+            if $<typename> {
+                my $type := $<typename>[0].ast;
+                $type.named('type');
+                $meta_args.push($type);
+            }
         }
         else {
             # XXX Old way, will go away once all package types are ported.
