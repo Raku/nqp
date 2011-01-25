@@ -49,9 +49,9 @@ OPS_DIR          = src/ops
 REGEX_SOURCES = \
   src/Regex.pir \
   src/Regex/constants.pir \
-  src/Regex/Cursor2.pir \
+  src/Regex/Cursor.pir \
   src/Regex/Cursor-builtins.pir \
-  src/Regex/Cursor2-protoregex-peek.pir \
+  src/Regex/Cursor-protoregex-peek.pir \
   src/Regex/Match.pir \
   src/Regex/Method.pir \
   src/Regex/Dumper.pir \
