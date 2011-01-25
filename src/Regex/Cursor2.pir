@@ -51,6 +51,7 @@ grammars.
     get_hll_global NQPClassHOW, "NQPClassHOW"
     type_obj = NQPClassHOW."new_type"("Cursor" :named("name"))
     how = get_how type_obj
+    set_hll_global ["Regex"], "Cursor", type_obj
     set_hll_global ["Regex"], "Cursor2", type_obj
     set_global "$?CLASS", type_obj
 
