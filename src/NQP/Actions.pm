@@ -430,7 +430,7 @@ sub package($/) {
                 PAST::Var.new( :name('type_obj'), :scope('register') )
             ),
             PAST::Var.new( :name('type_obj'), :scope('register') ),
-            PAST::Var.new( :name('Cursor2'), :namespace('Regex'), :scope('package') )
+            PAST::Var.new( :name('Cursor'), :namespace('Regex'), :scope('package') )
         ));
     }
 

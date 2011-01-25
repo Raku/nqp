@@ -169,7 +169,7 @@ C< :!pair >, and C<< :pair<strval> >>.
             .local string spec, save
             .local int has_save
             self = find_lex 'self'
-            cur_class = get_hll_global ['Regex'], 'Cursor2'
+            cur_class = get_hll_global ['Regex'], 'Cursor'
             $P0 = find_lex '$spec'
             spec = $P0
             has_save = 0
@@ -311,7 +311,7 @@ of the match.
 
     method panic(*@args) {
         my $pos := self.pos();
-        my $target := pir::getattribute__PPPs(self, Regex::Cursor2, '$!target');
+        my $target := pir::getattribute__PPPs(self, Regex::Cursor, '$!target');
         @args.push(' at line ');
         @args.push(HLL::Compiler.lineof($target, $pos) + 1);
         @args.push(', near "');
@@ -396,7 +396,7 @@ position C<pos>.
         Q:PIR {
             .local pmc self, cur_class, args
             self = find_lex 'self'
-            cur_class = get_hll_global ['Regex'], 'Cursor2'
+            cur_class = get_hll_global ['Regex'], 'Cursor'
             args = find_lex '@args'
 
             .local pmc cur, debug
@@ -547,7 +547,7 @@ An operator precedence parser.
         Q:PIR {
             .local pmc self, cur_class
             self = find_lex 'self'
-            cur_class = get_hll_global ['Regex'], 'Cursor2'
+            cur_class = get_hll_global ['Regex'], 'Cursor'
 
             .local string preclim
             $P0 = find_lex '$preclim'

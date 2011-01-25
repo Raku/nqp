@@ -62,7 +62,7 @@ Perform a match against target, return the result.
     .param pmc target
 
     .local pmc curproto, match
-    curproto = get_hll_global ['Regex'], 'Cursor2'
+    curproto = get_hll_global ['Regex'], 'Cursor'
     match = curproto.'parse'(target, 'rule'=>self, 'c'=>0)
     .return (match)
 .end
