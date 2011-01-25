@@ -35,4 +35,8 @@ knowhow NQPNativeHOW {
     method compose($obj) {
         $!composed := 1;
     }
+
+    method name($obj) {
+        $!name
+    }
 }
