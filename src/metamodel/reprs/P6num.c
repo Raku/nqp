@@ -40,25 +40,13 @@ static INTVAL defined(PARROT_INTERP, PMC *self, PMC *obj) {
 }
 
 /* Gets the current value for an attribute. */
-static PMC * get_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6num does not support attribute storage");
-}
-
-/* Gets the current value for an attribute, obtained using the given hint.*/
-static PMC * get_attribute_with_hint(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
+static PMC * get_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6num does not support attribute storage");
 }
 
 /* Binds the given value to the specified attribute. */
-static void bind_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, PMC *value) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6num does not support attribute storage");
-}
-
-/* Binds the given value to the specified attribute, using the given hint. */
-static void bind_attribute_with_hint(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
+static void bind_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6num does not support attribute storage");
 }
@@ -141,9 +129,7 @@ PMC * P6num_initialize(PARROT_INTERP) {
     repr->instance_of = instance_of;
     repr->defined = defined;
     repr->get_attribute = get_attribute;
-    repr->get_attribute_with_hint = get_attribute_with_hint;
     repr->bind_attribute = bind_attribute;
-    repr->bind_attribute_with_hint = bind_attribute_with_hint;
     repr->hint_for = hint_for;
     repr->set_int = set_int;
     repr->get_int = get_int;

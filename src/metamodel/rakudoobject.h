@@ -77,19 +77,29 @@ typedef struct {
      * view of the representation). */
     INTVAL (*defined) (PARROT_INTERP, PMC *self, PMC *Obj);
 
-    /* Gets the current value for an attribute. */
-    PMC * (*get_attribute) (PARROT_INTERP, PMC *self, PMC *Object, PMC *ClassHandle, STRING *Name);
+    /* Gets the current value for an object attribute. */
+    PMC * (*get_attribute) (PARROT_INTERP, PMC *self, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint);
 
-    /* Gets the current value for an attribute, obtained using the
-     * given hint.*/
-    PMC * (*get_attribute_with_hint) (PARROT_INTERP, PMC *self, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint);
+    /* Gets the current value for a native int attribute. */
+    INTVAL (*get_attribute_int) (PARROT_INTERP, PMC *self, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint);
 
-    /* Binds the given value to the specified attribute. */
-    void (*bind_attribute) (PARROT_INTERP, PMC *self, PMC *Object, PMC *ClassHandle, STRING *Name, PMC *Value);
+    /* Gets the current value for a native num attribute. */
+    FLOATVAL (*get_attribute_num) (PARROT_INTERP, PMC *self, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint);
 
-    /* Binds the given value to the specified attribute, using the
-     * given hint. */
-    void (*bind_attribute_with_hint) (PARROT_INTERP, PMC *self, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint, PMC *Value);
+    /* Gets the current value for a native str attribute. */
+    STRING * (*get_attribute_str) (PARROT_INTERP, PMC *self, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint);
+
+    /* Binds the given object value to the specified attribute. */
+    void (*bind_attribute) (PARROT_INTERP, PMC *self, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint, PMC *Value);
+
+    /* Binds the given int value to the specified attribute. */
+    void (*bind_attribute_int) (PARROT_INTERP, PMC *self, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint, INTVAL Value);
+
+    /* Binds the given num value to the specified attribute. */
+    void (*bind_attribute_num) (PARROT_INTERP, PMC *self, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint, FLOATVAL Value);
+
+    /* Binds the given str value to the specified attribute. */
+    void (*bind_attribute_str) (PARROT_INTERP, PMC *self, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint, STRING *Value);
 
     /* Gets the hint for the given attribute ID. */
     INTVAL (*hint_for) (PARROT_INTERP, PMC *self, PMC *ClassHandle, STRING *Name);

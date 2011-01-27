@@ -40,11 +40,11 @@ pmclass RakudoObject manual_attrs dynpmc group nqp {
     }
 
     VTABLE PMC* get_attr_keyed(PMC *class_handle, STRING *name) {
-        return REPR(SELF)->get_attribute(interp, REPR_PMC(SELF), SELF, class_handle, name);
+        return REPR(SELF)->get_attribute(interp, REPR_PMC(SELF), SELF, class_handle, name, NO_HINT);
     }
 
     VTABLE void set_attr_keyed(PMC *class_handle, STRING *name, PMC* value) {
-        REPR(SELF)->bind_attribute(interp, REPR_PMC(SELF), SELF, class_handle, name, value);
+        REPR(SELF)->bind_attribute(interp, REPR_PMC(SELF), SELF, class_handle, name, NO_HINT, value);
     }
 
     VTABLE INTVAL get_bool() {

@@ -374,7 +374,7 @@ static INTVAL defined(PARROT_INTERP, PMC *self, PMC *obj) {
 }
 
 /* Gets the current value for an attribute. */
-static PMC * get_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name) {
+static PMC * get_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
     P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
     REPRP6opaque     *repr     = P6O_REPR_STRUCT(self);
     INTVAL            slot;
@@ -396,14 +396,8 @@ static PMC * get_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle
             "P6opaque attributes NYFI");
 }
 
-/* Gets the current value for an attribute, obtained using the given hint.*/
-static PMC * get_attribute_with_hint(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6opaque attributes NYFI");
-}
-
 /* Binds the given value to the specified attribute. */
-static void bind_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, PMC *value) {
+static void bind_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
     P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
     REPRP6opaque     *repr     = P6O_REPR_STRUCT(self);
     INTVAL            slot;
@@ -421,12 +415,6 @@ static void bind_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle
     }
 
     /* Fall back to the spill storage. */
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6opaque attributes NYFI");
-}
-
-/* Binds the given value to the specified attribute, using the given hint. */
-static void bind_attribute_with_hint(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6opaque attributes NYFI");
 }
@@ -572,9 +560,7 @@ static PMC * repr_instance(PARROT_INTERP) {
     repr->common.instance_of = instance_of;
     repr->common.defined = defined;
     repr->common.get_attribute = get_attribute;
-    repr->common.get_attribute_with_hint = get_attribute_with_hint;
     repr->common.bind_attribute = bind_attribute;
-    repr->common.bind_attribute_with_hint = bind_attribute_with_hint;
     repr->common.hint_for = hint_for;
     repr->common.set_int = set_int;
     repr->common.get_int = get_int;
