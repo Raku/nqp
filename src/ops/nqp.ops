@@ -134,6 +134,113 @@ inline op repr_defined(out INT, in PMC) :base_core {
             "Can only use repr_defined on a RakudoObject");
 }
 
+/*
+
+=item repr_get_attr_int()
+
+Gets the specified int attribute. Note that the attribute must be stored as
+a native int - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_get_attr_int(out INT, in PMC, in PMC, in STR) :base_core {
+    if ($2->vtable->base_type == ro_id)
+        $1 = REPR($2)->get_attribute_int(interp, REPR_PMC($2), $2, $3, $4, NO_HINT);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_get_attr_int on a RakudoObject");
+}
+
+/*
+
+=item repr_get_attr_num()
+
+Gets the specified num attribute. Note that the attribute must be stored as
+a native num - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_get_attr_int(out NUM, in PMC, in PMC, in STR) :base_core {
+    if ($2->vtable->base_type == ro_id)
+        $1 = REPR($2)->get_attribute_num(interp, REPR_PMC($2), $2, $3, $4, NO_HINT);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_get_attr_num on a RakudoObject");
+}
+
+/*
+
+=item repr_get_attr_str()
+
+Gets the specified str attribute. Note that the attribute must be stored as
+a native str - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_get_attr_str(out STR, in PMC, in PMC, in STR) :base_core {
+    if ($2->vtable->base_type == ro_id)
+        $1 = REPR($2)->get_attribute_str(interp, REPR_PMC($2), $2, $3, $4, NO_HINT);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_get_attr_str on a RakudoObject");
+}
+
+/*
+
+=item repr_bind_attr_int()
+
+Binds the specified int attribute. Note that the attribute must be stored as
+a native int - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_bind_attr_int(in PMC, in PMC, in STR, in INT) :base_core {
+    if ($1->vtable->base_type == ro_id)
+        REPR($1)->bind_attribute_int(interp, REPR_PMC($1), $1, $2, $3, NO_HINT, $4);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_bind_attr_int on a RakudoObject");
+}
+
+/*
+
+=item repr_bind_attr_num()
+
+Binds the specified num attribute. Note that the attribute must be stored as
+a native num - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_bind_attr_num(in PMC, in PMC, in STR, in NUM) :base_core {
+    if ($1->vtable->base_type == ro_id)
+        REPR($1)->bind_attribute_num(interp, REPR_PMC($1), $1, $2, $3, NO_HINT, $4);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_bind_attr_num on a RakudoObject");
+}
+
+/*
+
+=item repr_bind_attr_str()
+
+Binds the specified str attribute. Note that the attribute must be stored as
+a native str - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_bind_attr_num(in PMC, in PMC, in STR, in STR) :base_core {
+    if ($1->vtable->base_type == ro_id)
+        REPR($1)->bind_attribute_str(interp, REPR_PMC($1), $1, $2, $3, NO_HINT, $4);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_bind_attr_str on a RakudoObject");
+}
 
 /*
 
