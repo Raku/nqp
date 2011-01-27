@@ -395,6 +395,65 @@ static PMC * get_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6opaque attributes NYFI");
 }
+static INTVAL get_attribute_int(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
+    P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
+    REPRP6opaque     *repr     = P6O_REPR_STRUCT(self);
+    INTVAL            slot;
+
+    /* Ensure it is a defined object. */
+    if (!instance->spill)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot access attributes in a type object");
+
+    /* Try the slot allocation first. */
+    slot = try_get_slot(interp, repr, class_handle, name);
+    if (slot >= 0)
+        return get_int_at_offset(instance, repr->attribute_offsets[slot]);
+    
+    /* Fall back to the spill storage. */
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "P6opaque attributes NYFI");
+}
+static FLOATVAL get_attribute_num(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
+    P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
+    REPRP6opaque     *repr     = P6O_REPR_STRUCT(self);
+    INTVAL            slot;
+
+    /* Ensure it is a defined object. */
+    if (!instance->spill)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot access attributes in a type object");
+
+    /* Try the slot allocation first. */
+    slot = try_get_slot(interp, repr, class_handle, name);
+    if (slot >= 0)
+        return get_num_at_offset(instance, repr->attribute_offsets[slot]);
+    
+    /* Fall back to the spill storage. */
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "P6opaque attributes NYFI");
+}
+static STRING * get_attribute_str(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
+    P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
+    REPRP6opaque     *repr     = P6O_REPR_STRUCT(self);
+    INTVAL            slot;
+
+    /* Ensure it is a defined object. */
+    if (!instance->spill)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot access attributes in a type object");
+
+    /* Try the slot allocation first. */
+    slot = try_get_slot(interp, repr, class_handle, name);
+    if (slot >= 0) {
+        STRING *result = get_str_at_offset(instance, repr->attribute_offsets[slot]);
+        return result ? result : STRINGNULL;
+    }
+    
+    /* Fall back to the spill storage. */
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "P6opaque attributes NYFI");
+}
 
 /* Binds the given value to the specified attribute. */
 static void bind_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
@@ -411,6 +470,69 @@ static void bind_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle
     slot = try_get_slot(interp, repr, class_handle, name);
     if (slot >= 0) {
         set_pmc_at_offset(instance, repr->attribute_offsets[slot], value);
+        return;
+    }
+
+    /* Fall back to the spill storage. */
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "P6opaque attributes NYFI");
+}
+static void bind_attribute_int(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, INTVAL value) {
+    P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
+    REPRP6opaque     *repr     = P6O_REPR_STRUCT(self);
+    INTVAL            slot;
+
+    /* Ensure it is a defined object. */
+    if (!instance->spill)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot access attributes in a type object");
+
+    /* Try the slot allocation first. */
+    slot = try_get_slot(interp, repr, class_handle, name);
+    if (slot >= 0) {
+        set_int_at_offset(instance, repr->attribute_offsets[slot], value);
+        return;
+    }
+
+    /* Fall back to the spill storage. */
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "P6opaque attributes NYFI");
+}
+static void bind_attribute_num(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, FLOATVAL value) {
+    P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
+    REPRP6opaque     *repr     = P6O_REPR_STRUCT(self);
+    INTVAL            slot;
+
+    /* Ensure it is a defined object. */
+    if (!instance->spill)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot access attributes in a type object");
+
+    /* Try the slot allocation first. */
+    slot = try_get_slot(interp, repr, class_handle, name);
+    if (slot >= 0) {
+        set_num_at_offset(instance, repr->attribute_offsets[slot], value);
+        return;
+    }
+
+    /* Fall back to the spill storage. */
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "P6opaque attributes NYFI");
+}
+static void bind_attribute_str(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, STRING *value) {
+    P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
+    REPRP6opaque     *repr     = P6O_REPR_STRUCT(self);
+    INTVAL            slot;
+
+    /* Ensure it is a defined object. */
+    if (!instance->spill)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot access attributes in a type object");
+
+    /* Try the slot allocation first. */
+    slot = try_get_slot(interp, repr, class_handle, name);
+    if (slot >= 0) {
+        set_str_at_offset(instance, repr->attribute_offsets[slot], value);
         return;
     }
 
@@ -560,7 +682,13 @@ static PMC * repr_instance(PARROT_INTERP) {
     repr->common.instance_of = instance_of;
     repr->common.defined = defined;
     repr->common.get_attribute = get_attribute;
+    repr->common.get_attribute_int = get_attribute_int;
+    repr->common.get_attribute_num = get_attribute_num;
+    repr->common.get_attribute_str = get_attribute_str;
     repr->common.bind_attribute = bind_attribute;
+    repr->common.bind_attribute_int = bind_attribute_int;
+    repr->common.bind_attribute_num = bind_attribute_num;
+    repr->common.bind_attribute_str = bind_attribute_str;
     repr->common.hint_for = hint_for;
     repr->common.set_int = set_int;
     repr->common.get_int = get_int;

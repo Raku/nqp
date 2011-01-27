@@ -39,16 +39,42 @@ static INTVAL defined(PARROT_INTERP, PMC *self, PMC *obj) {
     return 1;
 }
 
+/* Helper to die because this type doesn't support attributes. */
+static void die_no_attrs(PARROT_INTERP) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "P6str representation does not support attribute storage");
+}
+
 /* Gets the current value for an attribute. */
 static PMC * get_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6str does not support attribute storage");
+    die_no_attrs(interp);
+    return PMCNULL;
+}
+static INTVAL get_attribute_int(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
+    die_no_attrs(interp);
+    return 0;
+}
+static FLOATVAL get_attribute_num(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
+    die_no_attrs(interp);
+    return 0.0;
+}
+static STRING * get_attribute_str(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
+    die_no_attrs(interp);
+    return NULL;
 }
 
 /* Binds the given value to the specified attribute. */
 static void bind_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6str does not support attribute storage");
+    die_no_attrs(interp);
+}
+static void bind_attribute_int(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, INTVAL value) {
+    die_no_attrs(interp);
+}
+static void bind_attribute_num(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, FLOATVAL value) {
+    die_no_attrs(interp);
+}
+static void bind_attribute_str(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, STRING *value) {
+    die_no_attrs(interp);
 }
 
 /* Gets the hint for the given attribute ID. */
@@ -129,7 +155,13 @@ PMC * P6str_initialize(PARROT_INTERP) {
     repr->instance_of = instance_of;
     repr->defined = defined;
     repr->get_attribute = get_attribute;
+    repr->get_attribute_int = get_attribute_int;
+    repr->get_attribute_num = get_attribute_num;
+    repr->get_attribute_str = get_attribute_str;
     repr->bind_attribute = bind_attribute;
+    repr->bind_attribute_int = bind_attribute_int;
+    repr->bind_attribute_num = bind_attribute_num;
+    repr->bind_attribute_str = bind_attribute_str;
     repr->hint_for = hint_for;
     repr->set_int = set_int;
     repr->get_int = get_int;
