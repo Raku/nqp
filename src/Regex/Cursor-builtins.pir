@@ -226,7 +226,8 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     message .= ", couldn't find final "
     message .= goal
     message .= ' at line '
-    $P0 = getattribute self, '$!target'
+    $P0 = get_hll_global ['Regex'], 'Cursor'
+    $P0 = getattribute self, $P0, '$!target'
     $P1 = get_hll_global ['HLL'], 'Compiler'
     $I0 = self.'pos'()
     $I0 = $P1.'lineof'($P0, $I0)
