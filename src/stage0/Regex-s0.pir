@@ -111,6 +111,8 @@ grammars.
     how.'add_method'(type_obj, '!INTERPOLATE', $P33)
     .const 'Sub' $P34 = 'Regex_Cursor_meth_!INTERPOLATE_REGEX'
     how.'add_method'(type_obj, '!INTERPOLATE_REGEX', $P34)
+    .const 'Sub' $P35 = 'Regex_Cursor_meth_!cursor_from'
+    how.'add_method'(type_obj, '!cursor_from', $P35)
     .const 'Sub' $P10 = 'Regex_Cursor_meth_before'
     how.'add_method'(type_obj, 'before', $P10)
     .const 'Sub' $P11 = 'Regex_Cursor_meth_ident'
@@ -167,13 +169,14 @@ grammars.
     how.'add_method'(type_obj, 'Bool', $P17)
 
     # Add attributes.
-    .local pmc NQPAttribute, attr
+    .local pmc NQPAttribute, int_type, attr
     NQPAttribute = get_hll_global "NQPAttribute"
+    int_type = get_hll_global "int"
     attr = NQPAttribute."new"("$!target" :named("name"))
     how."add_attribute"(type_obj, attr)
-    attr = NQPAttribute."new"("$!from" :named("name"))
+    attr = NQPAttribute."new"("$!from" :named("name"), int_type :named('type'))
     how."add_attribute"(type_obj, attr)
-    attr = NQPAttribute."new"("$!pos" :named("name"))
+    attr = NQPAttribute."new"("$!pos" :named("name"), int_type :named('type'))
     how."add_attribute"(type_obj, attr)
     attr = NQPAttribute."new"("$!match" :named("name"))
     how."add_attribute"(type_obj, attr)
@@ -251,9 +254,11 @@ for the Cursor if one hasn't been created yet.
     .local pmc target, from, to
     target = getattribute self, cur_class, '$!target'
     setattribute match, '$!target', target
-    from = getattribute self, cur_class, '$!from'
+    $I0 = repr_get_attr_int self, cur_class, '$!from'
+    from = box $I0
     setattribute match, '$!from', from
-    to = getattribute self, cur_class, '$!pos'
+    $I0 = repr_get_attr_int self, cur_class, '$!pos'
+    to = box $I0
     setattribute match, '$!to', to
 
     # Create any arrayed subcaptures.
@@ -398,8 +403,8 @@ Return the cursor's current position.
 .sub 'pos' :method :subid('Regex_Cursor_meth_pos')
     .local pmc cur_class
     cur_class = get_global '$?CLASS'
-    $P0 = getattribute self, cur_class, '$!pos'
-    .return ($P0)
+    $I0 = repr_get_attr_int self, cur_class, '$!pos'
+    .return ($I0)
 .end
 
 
@@ -412,8 +417,8 @@ Return the cursor's from position.
 .sub 'from' :method :subid('Regex_Cursor_meth_from')
     .local pmc cur_class
     cur_class = get_global '$?CLASS'
-    $P0 = getattribute self, cur_class, '$!from'
-    .return ($P0)
+    $I0 = repr_get_attr_int self, cur_class, '$!from'
+    .return ($I0)
 .end
 
 =back
@@ -443,16 +448,12 @@ Create a new cursor for matching C<target>.
     setattribute cur, cur_class, '$!target', $P0
 
     if has_cont goto cursor_cont
-    $P0 = box pos
-    setattribute cur, cur_class, '$!from', $P0
-    $P0 = box pos
-    setattribute cur, cur_class, '$!pos', $P0
+    repr_bind_attr_int cur, cur_class, '$!from', pos
+    repr_bind_attr_int cur, cur_class, '$!pos', pos
     goto cursor_done
   cursor_cont:
-    $P0 = box CURSOR_FAIL
-    setattribute cur, cur_class, '$!from', $P0
-    $P0 = box cont
-    setattribute cur, cur_class, '$!pos', $P0
+    repr_bind_attr_int cur, cur_class, '$!from', CURSOR_FAIL
+    repr_bind_attr_int cur, cur_class, '$!pos', cont
   cursor_done:
 
     .return (cur)
@@ -481,11 +482,12 @@ provided, then the new cursor has the same type as lang.
     regex = getattribute self, cur_class, '&!regex'
     unless null regex goto cursor_restart
 
-    .local pmc from, target, debug
+    .local pmc target, debug
+    .local int from
 
-    from = getattribute self, cur_class, '$!pos'
-    setattribute cur, cur_class, '$!from', from
-    setattribute cur, cur_class, '$!pos', from
+    from = repr_get_attr_int self, cur_class, '$!pos'
+    repr_bind_attr_int cur, cur_class, '$!from', from
+    repr_bind_attr_int cur, cur_class, '$!pos', from
 
     target = getattribute self, cur_class, '$!target'
     setattribute cur, cur_class, '$!target', target
@@ -495,16 +497,17 @@ provided, then the new cursor has the same type as lang.
     .return (cur, from, target, 0)
 
   cursor_restart:
-    .local pmc pos, cstack, bstack
-    from   = getattribute self, cur_class, '$!from'
+    .local pmc cstack, bstack
+    .local int pos
+    from   = repr_get_attr_int self, cur_class, '$!from'
     target = getattribute self, cur_class, '$!target'
     debug  = getattribute self, cur_class, '$!debug'
     cstack = getattribute self, cur_class, '@!cstack'
     bstack = getattribute self, cur_class, '@!bstack'
-    pos    = box CURSOR_FAIL
+    pos    = CURSOR_FAIL
 
-    setattribute cur, cur_class, '$!from', from
-    setattribute cur, cur_class, '$!pos', pos 
+    repr_bind_attr_int cur, cur_class, '$!from', from
+    repr_bind_attr_int cur, cur_class, '$!pos', pos 
     setattribute cur, cur_class, '$!target', target
     setattribute cur, cur_class, '$!debug', debug
     if null cstack goto cstack_done
@@ -526,10 +529,9 @@ Permanently fail this cursor.
 =cut
 
 .sub '!cursor_fail' :method :subid('Regex_Cursor_meth_!cursor_fail')
-    .local pmc cur_class, pos
+    .local pmc cur_class
     cur_class = get_global '$?CLASS'
-    pos = box CURSOR_FAIL_RULE
-    setattribute self, cur_class, '$!pos', pos
+    repr_bind_attr_int self, cur_class, '$!pos', CURSOR_FAIL_RULE
     null $P0
     setattribute self, cur_class, '$!match', $P0
     setattribute self, cur_class, '@!bstack', $P0
@@ -548,13 +550,13 @@ with a "real" Match object when requested.
 =cut
 
 .sub '!cursor_pass' :method :subid('Regex_Cursor_meth_!cursor_pass')
-    .param pmc pos
+    .param int pos
     .param string name
 
     .local pmc cur_class
     cur_class = get_global '$?CLASS'
 
-    setattribute self, cur_class, '$!pos', pos
+    repr_bind_attr_int self, cur_class, '$!pos', pos
     .local pmc match
     match = get_global '$!TRUE'
     setattribute self, cur_class, '$!match', match
@@ -635,10 +637,24 @@ Set the cursor's position to C<pos>.
 =cut
 
 .sub '!cursor_pos' :method :subid('Regex_Cursor_meth_!cursor_pos')
-    .param pmc pos
+    .param int pos
     .local pmc cur_class
     cur_class = get_global '$?CLASS'
-    setattribute self, cur_class, '$!pos', pos
+    repr_bind_attr_int self, cur_class, '$!pos', pos
+.end
+
+
+=item !cursor_from(pos)
+
+Set the cursor's from to C<from>.
+
+=cut
+
+.sub '!cursor_from' :method :subid('Regex_Cursor_meth_!cursor_from')
+    .param int from
+    .local pmc cur_class
+    cur_class = get_global '$?CLASS'
+    repr_bind_attr_int self, cur_class, '$!from', from
 .end
 
 
@@ -656,9 +672,10 @@ Log a debug message.
     $P0 = getattribute self, cur_class, '$!debug'
     if null $P0 goto done
     unless $P0 goto done
-    .local pmc fmt, from, pos, orig, line
+    .local pmc fmt, orig, line
+    .local int from
     fmt = new ['ResizablePMCArray']
-    from = getattribute self, cur_class, '$!from'
+    from = repr_get_attr_int self, cur_class, '$!from'
     orig = getattribute self, cur_class, '$!target'
     $P0 = get_hll_global ['HLL'], 'Compiler'
     line = $P0.'lineof'(orig, from, 'cache'=>1)
@@ -1347,7 +1364,8 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     message .= ", couldn't find final "
     message .= goal
     message .= ' at line '
-    $P0 = getattribute self, '$!target'
+    $P0 = get_hll_global ['Regex'], 'Cursor'
+    $P0 = getattribute self, $P0, '$!target'
     $P1 = get_hll_global ['HLL'], 'Compiler'
     $I0 = self.'pos'()
     $I0 = $P1.'lineof'($P0, $I0)
@@ -1428,8 +1446,7 @@ Perform a match for protoregex C<name>.
     .local pmc target
     .local int pos
     target = getattribute self, cur_class, '$!target'
-    $P1 = getattribute self, cur_class, '$!pos'
-    pos = $P1
+    pos = repr_get_attr_int self, cur_class, '$!pos'
 
     # Use the character at the current match position to determine
     # the longest possible token we could encounter at this point.
@@ -3864,9 +3881,9 @@ Code for initial regex scan.
     ops.'push_pirop'('ne', '$I10', CURSOR_FAIL, donelabel)
     ops.'push_pirop'('goto', scanlabel)
     ops.'push'(looplabel)
-    self.'!cursorop'(ops, 'from', 1, '$P10')
-    ops.'push_pirop'('inc', '$P10')
-    ops.'push_pirop'('set', pos, '$P10')
+    self.'!cursorop'(ops, 'from', 1, pos)
+    ops.'push_pirop'('inc', pos)
+    self.'!cursorop'(ops, '!cursor_from', 0, pos)
     ops.'push_pirop'('ge', pos, eos, donelabel)
     ops.'push'(scanlabel)
     ops.'push_pirop'('set_addr', '$I10', looplabel)
