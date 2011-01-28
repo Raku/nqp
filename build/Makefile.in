@@ -217,6 +217,8 @@ install: all
 	$(MKPATH)              $(DESTDIR)$(PARROT_BIN_DIR)
 	$(CP)  $(NQP_EXE)      $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
 	$(CHMOD)  755          $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
+	$(MKPATH)                     $(DESTDIR)$(PARROT_LIB_DIR)/dynext
+	$(CP)     $(DYNPMC) $(DYNOPS) $(DESTDIR)$(PARROT_LIB_DIR)/dynext
 
 stage0: $(STAGE0)
 stage1: $(STAGE1)
