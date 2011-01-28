@@ -44,8 +44,7 @@ Perform a match for protoregex C<name>.
     .local pmc target
     .local int pos
     target = getattribute self, cur_class, '$!target'
-    $P1 = getattribute self, cur_class, '$!pos'
-    pos = $P1
+    pos = repr_get_attr_int self, cur_class, '$!pos'
 
     # Use the character at the current match position to determine
     # the longest possible token we could encounter at this point.

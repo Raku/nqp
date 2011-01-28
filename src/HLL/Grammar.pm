@@ -553,7 +553,8 @@ An operator precedence parser.
             $P0 = find_lex '$preclim'
             preclim = $P0
             
-            .local pmc here, pos, debug
+            .local pmc here, debug
+            .local int pos
             (here, pos) = self.'!cursor_start'()
             debug = getattribute here, cur_class, '$!debug'
             if null debug goto debug_1
@@ -699,7 +700,7 @@ An operator precedence parser.
             term = pop termstack
             pos = here.'pos'()
             here = self.'!cursor_start'()
-            setattribute here, cur_class, '$!pos', pos
+            repr_bind_attr_int here, cur_class, '$!pos', pos
             setattribute here, cur_class, '$!match', term
             here.'!reduce'('EXPR')
             if null debug goto done
