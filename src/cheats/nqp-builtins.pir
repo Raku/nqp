@@ -34,7 +34,11 @@
         print description
   no_description:
     print "\n"
+
+    unless condition goto not_ok
     .return (1)
+  not_ok:
+    .return (0)
 .end
 
 .sub 'plan'
