@@ -13,6 +13,7 @@ knowhow NQPParametricRoleHOW {
     # Attributes and methods.
     has %!attributes;
     has %!methods;
+    has @!multi_methods_to_incorporate;
 
     # Have we been composed?
     has $!composed;
@@ -46,6 +47,37 @@ knowhow NQPParametricRoleHOW {
         pir::repr_type_object_for__PPS($metarole, $repr);
     }
 
+    method add_method($obj, $name, $code_obj) {
+        if %!methods{$name} {
+            pir::die("This role already has a method named " ~ $name);
+        }
+        %!methods{$name} := $code_obj;
+    }
+
+    method add_multi_method($obj, $name, $code_obj) {
+        my %todo;
+        %todo<name> := $name;
+        %todo<code> := $code_obj;
+        @!multi_methods_to_incorporate[+@!multi_methods_to_incorporate] := %todo;
+        $code_obj;
+    }
+
+    method add_attribute($obj, $meta_attr) {
+        my $name := $meta_attr.name;
+        if %!attributes{$name} {
+            pir::die("This role already has an attribute named " ~ $name);
+        }
+        %!attributes{$name} := $meta_attr;
+    }
+
+    method add_parent($obj, $parent) {
+        pir::die("A role cannot inherit from a class")
+    }
+
+    method add_role($obj, $role) {
+        pir::die("Roles doing roles is not yet implemented in NQP")
+    }
+
     # Compose the role. Beyond this point, no changes are allowed.
     method compose($obj) {
         $!composed := 1;
@@ -70,10 +102,23 @@ knowhow NQPParametricRoleHOW {
         $!body_block(|@pos_args, |%named_args);
 
         # Construct a new concrete role.
-        my $irole := NQPConcreteRoleHOW.new_type(:name($!name));
+        my $irole := NQPConcreteRoleHOW.new_type(:name($!name), :instance_of($obj));
 
-        # XXX Much comes here
-        
+        # Copy attributes. (Nothing to reify in NQP as we don't currently
+        # have parametric types that may end up in the signature.)
+        for %!attributes {
+            $irole.HOW.add_attribute($irole, $_.value);
+        }
+
+        # Capture methods in the correct lexical context. Don't need to
+        # do any signature reification in NQP; no type parameters.
+        for %!methods {
+            $irole.HOW.add_method($irole, $_.key, pir::clone($_.value));
+        }
+        for @!multi_methods_to_incorporate {
+            $irole.HOW.add_multi_method($irole, $_<name>, pir::clone($_<code>));
+        }
+
         # Compose and return produced role.
         $irole.HOW.compose($irole);
         return $irole;
