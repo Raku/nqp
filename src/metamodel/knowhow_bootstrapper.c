@@ -11,6 +11,8 @@
 
 /* Cached string constants. */
 static STRING *repr_str     = NULL;
+static STRING *name_str     = NULL;
+static STRING *empty_str    = NULL;
 static STRING *p6opaque_str = NULL;
 
 /* Creates a new type with this HOW as its meta-object. */
@@ -31,6 +33,12 @@ static void new_type(PARROT_INTERP, PMC *nci) {
     PMC *repr_to_use = REPR_get_by_name(interp, repr_name);
     PMC *type_object = REPR_STRUCT(repr_to_use)->type_object_for(interp, repr_to_use, HOW);
     
+    /* See if we were given a name; put it into the meta-object if so. */
+    STRING *name = VTABLE_exists_keyed_str(interp, capture, name_str) ?
+        VTABLE_get_string_keyed_str(interp, capture, name_str) :
+        empty_str;
+    ((KnowHOWREPRInstance *)PMC_data(HOW))->name = name;
+
     /* Put it into capture to act as return value. */
     Parrot_pcc_build_call_from_c_args(interp, capture, "P", type_object);
 }
@@ -108,6 +116,14 @@ static void methods(PARROT_INTERP, PMC *nci) {
     Parrot_pcc_build_call_from_c_args(interp, capture, "P", meths);
 }
 
+/* Introspects the name. */
+static void name(PARROT_INTERP, PMC *nci) {
+    PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
+    STRING *name    = ((KnowHOWREPRInstance *)PMC_data(self))->name;
+    Parrot_pcc_build_call_from_c_args(interp, capture, "S", name);
+}
+
 /* Wraps up a C function as a raw NCI method. */
 static PMC * wrap_c(PARROT_INTERP, void *func) {
     PMC * const wrapped = Parrot_pmc_new(interp, enum_class_NativePCCMethod);
@@ -173,18 +189,26 @@ void RakudoObject_bootstrap_knowhow(PARROT_INTERP) {
     VTABLE_set_pmc_keyed_str(interp, knowhow_how->methods,
         Parrot_str_new_constant(interp, "methods"),
         wrap_c(interp, F2DPTR(methods)));
+    VTABLE_set_pmc_keyed_str(interp, knowhow_how->methods,
+        Parrot_str_new_constant(interp, "name"),
+        wrap_c(interp, F2DPTR(name)));
+
+    /* Set name KnowHOW for the KnowHOW's HOW. */
+    knowhow_how->name = Parrot_str_new_constant(interp, "KnowHOW");
 
     /* Set this built up HOW as the KnowHOW's HOW. */
     STABLE(knowhow_pmc)->HOW = knowhow_how_pmc;
 
     /* Set up some string constants that the methods here use. */
     repr_str     = Parrot_str_new_constant(interp, "repr");
+    name_str     = Parrot_str_new_constant(interp, "name");
+    empty_str    = Parrot_str_new_constant(interp, "");
     p6opaque_str = Parrot_str_new_constant(interp, "P6opaque");
 
     /* Install KnowHOW into the root Parrot namespace, since that's where NQP
      * lives.
      * XXX We'll likely want to change this in the future. */
     Parrot_ns_set_global(interp, Parrot_get_ctx_HLL_namespace(interp),
-        Parrot_str_new_constant(interp, "KnowHOW"),
+        knowhow_how->name,
         knowhow_pmc);
 }

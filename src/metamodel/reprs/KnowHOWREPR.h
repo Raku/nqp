@@ -11,6 +11,9 @@ typedef struct {
 
     /* Array of attribute meta-objects. */
     PMC *attributes;
+
+    /* Name of the object. */
+    STRING *name;
 } KnowHOWREPRInstance;
 
 /* Initializes the KnowHOW REPR. */
