@@ -11,6 +11,7 @@ method TOP() {
     # Package declarator to meta-package mapping.
     my %*HOW;
     %*HOW<knowhow> := KnowHOW;
+    %*HOW<module>  := NQPModuleHOW;
     %*HOW<class>   := NQPClassHOW;
     %*HOW<grammar> := NQPClassHOW;
     %*HOW<role>    := NQPParametricRoleHOW;
@@ -278,7 +279,11 @@ token sigil { <[$@%&]> }
 token twigil { <[*!?]> }
 
 proto token package_declarator { <...> }
-token package_declarator:sym<module> { <sym> <package_def> }
+token package_declarator:sym<module> {
+    :my $*PACKAGE-SETUP := PAST::Stmts.new();
+    :my $*PKGDECL := 'module';
+    <sym> <package_def> 
+}
 token package_declarator:sym<knowhow> {
     :my $*PACKAGE-SETUP := PAST::Stmts.new();
     :my $*PKGDECL := 'knowhow';

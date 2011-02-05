@@ -365,20 +365,31 @@ method variable($/) {
     make $past;
 }
 
-method package_declarator:sym<module>($/)  { make $<package_def>.ast; }
-method package_declarator:sym<knowhow>($/) { make package($/); }
-method package_declarator:sym<class>($/)   { make package($/) }
-method package_declarator:sym<grammar>($/) { make package($/) }
-method package_declarator:sym<role>($/)    { make package($/); }
-method package_declarator:sym<native>($/)  { make package($/); }
+method package_declarator:sym<module>($/)  { make $<package_def>.ast }
+method package_declarator:sym<knowhow>($/) { make $<package_def>.ast }
+method package_declarator:sym<class>($/)   { make $<package_def>.ast }
+method package_declarator:sym<grammar>($/) { make $<package_def>.ast }
+method package_declarator:sym<role>($/)    { make $<package_def>.ast }
+method package_declarator:sym<native>($/)  { make $<package_def>.ast }
 
-sub package($/) {
-    my @ns := pir::clone__PP($<package_def><name><identifier>);
+method package_def($/) {
+    # Get name and meta-object.
+    my @ns := pir::clone__PP($<name><identifier>);
     my $name := ~@ns.pop;
+    my $how := %*HOW{$*PKGDECL};
+
+    # Get the body code.
+    my $past := $<block> ?? $<block>.ast !! $<comp_unit>.ast;
+    $past.namespace( $<name><identifier> );
+    $past.blocktype('immediate');
+
+    # Evaluate anything else in the package in-line; also give it a $?CLASS
+    # lexical. XXX Due to Parrot static lexpad fail, it's currently package scoped.
+    $past.unshift(PAST::Var.new( :name('$?CLASS'), :scope('package'), :isdecl(1) ));
+    $past.symbol('$?CLASS', :scope('package'));
     
     # Prefix the class initialization with initial setup. Also install it
     # in the symbol table right away.
-    my $how := %*HOW{~$<sym>};
     $*PACKAGE-SETUP.unshift(PAST::Stmts.new(
         PAST::Op.new( :pasttype('bind'),
             PAST::Var.new( :name('type_obj'), :scope('register'), :isdecl(1) ),
@@ -397,16 +408,16 @@ sub package($/) {
             PAST::Var.new( :name('type_obj'), :scope('register') )
         )
     ));
-    if $<package_def><repr> {
-        my $repr_name := $<package_def><repr>[0].ast;
+    if $<repr> {
+        my $repr_name := $<repr>[0].ast;
         $repr_name.named('repr');
         $*PACKAGE-SETUP[0][0][1].push($repr_name);
     }
 
     # Add call to add_parent if we have one.
     # XXX Doesn't handle lexical classes yet.
-    if $<package_def><parent> {
-        my @ns := pir::clone__PP($<package_def><parent>[0]<identifier>);
+    if $<parent> {
+        my @ns := pir::clone__PP($<parent>[0]<identifier>);
         my $name := ~@ns.pop;
         $*PACKAGE-SETUP.push(PAST::Op.new(
             :pasttype('callmethod'), :name('add_parent'),
@@ -419,7 +430,7 @@ sub package($/) {
             PAST::Var.new( :name(~$name), :namespace(@ns), :scope('package') )
         ));
     }
-    elsif ~$<sym> eq 'grammar' {
+    elsif $*PKGDECL eq 'grammar' {
         $*PACKAGE-SETUP.push(PAST::Op.new(
             :pasttype('callmethod'), :name('add_parent'),
             PAST::Op.new(
@@ -446,22 +457,9 @@ sub package($/) {
     # Set up slot for the type object to live in.
     @BLOCK[0][0].unshift(PAST::Var.new( :name($name), :namespace(@ns), :scope('package'), :isdecl(1) ));
 
-    # Evaluate anything else in the package in-line; also give it a $?CLASS
-    # lexical. XXX Due to Parrot static lexpad fail, it's currently package scoped.
-    my $past := $<package_def>.ast;
-    $past.unshift(PAST::Var.new( :name('$?CLASS'), :scope('package'), :isdecl(1) ));
-    $past.symbol('$?CLASS', :scope('package'));
-
     # Attach the class code to run at loadinit time.
     $past.loadinit.push(PAST::Block.new( :blocktype('immediate'), $*PACKAGE-SETUP ));
 
-    return $past;
-}
-
-method package_def($/) {
-    my $past := $<block> ?? $<block>.ast !! $<comp_unit>.ast;
-    $past.namespace( $<name><identifier> );
-    $past.blocktype('immediate');
     make $past;
 }
 
