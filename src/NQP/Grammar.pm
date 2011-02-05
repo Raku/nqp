@@ -10,11 +10,11 @@ method TOP() {
 
     # Package declarator to meta-package mapping.
     my %*HOW;
-    %*HOW<knowhow> := 'KnowHOW';
-    %*HOW<class>   := 'NQPClassHOW';
-    %*HOW<grammar> := 'NQPClassHOW';
-    %*HOW<role>    := 'NQPRoleHOW';
-    %*HOW<native>  := 'NQPNativeHOW';
+    %*HOW<knowhow> := KnowHOW;
+    %*HOW<class>   := NQPClassHOW;
+    %*HOW<grammar> := NQPClassHOW;
+    %*HOW<role>    := NQPParametricRoleHOW;
+    %*HOW<native>  := NQPNativeHOW;
 
     # What attribute class to use with what HOW, plus a default.
     my $*DEFAULT-METAATTR := 'NQPAttribute';

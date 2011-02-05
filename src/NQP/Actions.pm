@@ -378,12 +378,13 @@ sub package($/) {
     
     # Prefix the class initialization with initial setup. Also install it
     # in the symbol table right away.
+    my $how := %*HOW{~$<sym>};
     $*PACKAGE-SETUP.unshift(PAST::Stmts.new(
         PAST::Op.new( :pasttype('bind'),
             PAST::Var.new( :name('type_obj'), :scope('register'), :isdecl(1) ),
             PAST::Op.new(
                 :pasttype('callmethod'), :name('new_type'),
-                PAST::Var.new( :name(%*HOW{~$<sym>}), :namespace(''), :scope('package') ),
+                PAST::Var.new( :name($how.HOW.name($how)), :namespace(''), :scope('package') ),
                 PAST::Val.new( :value($name), :named('name') )
             )
         ),
