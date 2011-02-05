@@ -381,12 +381,6 @@ method package_def($/) {
     # Get the body code.
     my $past := $<block> ?? $<block>.ast !! $<comp_unit>.ast;
     $past.namespace( $<name><identifier> );
-    $past.blocktype('immediate');
-
-    # Evaluate anything else in the package in-line; also give it a $?CLASS
-    # lexical. XXX Due to Parrot static lexpad fail, it's currently package scoped.
-    $past.unshift(PAST::Var.new( :name('$?CLASS'), :scope('package'), :isdecl(1) ));
-    $past.symbol('$?CLASS', :scope('package'));
     
     # Prefix the class initialization with initial setup. Also install it
     # in the symbol table right away.
@@ -408,10 +402,29 @@ method package_def($/) {
             PAST::Var.new( :name('type_obj'), :scope('register') )
         )
     ));
+
+    # Pass along a custom REPR if one is selected.
     if $<repr> {
         my $repr_name := $<repr>[0].ast;
         $repr_name.named('repr');
         $*PACKAGE-SETUP[0][0][1].push($repr_name);
+    }
+
+    # Evaluate everything in the package in-line unless this is a generic
+    # type in which case it needs delayed evaluation. Normally, $?CLASS is
+    # a lexical that is set (XXX currently package-scoped as Parrot does not
+    # do static lexpads) but for generic types it becomes a parameter. Also
+    # for parametric types, pass along the role body block.
+    if pir::can($how, 'parametric') && $how.parametric($how) {
+        $past.blocktype('declaration');
+        $past.unshift(PAST::Var.new( :name('$?CLASS'), :scope('parameter') ));
+        $past.symbol('$?CLASS', :scope('lexical'));
+        $*PACKAGE-SETUP[0][0][1].push(PAST::Val.new( :value($past), :named('body_block') ));
+    }
+    else {
+        $past.blocktype('immediate');
+        $past.unshift(PAST::Var.new( :name('$?CLASS'), :scope('package'), :isdecl(1) ));
+        $past.symbol('$?CLASS', :scope('package'));
     }
 
     # Add call to add_parent if we have one.
@@ -441,6 +454,24 @@ method package_def($/) {
             PAST::Var.new( :name('type_obj'), :scope('register') ),
             PAST::Var.new( :name('Cursor'), :namespace('Regex'), :scope('package') )
         ));
+    }
+
+    # Add any done roles.
+    if $<role> {
+        for $<role> {
+            my @ns := pir::clone__PP($_<identifier>);
+            my $name := ~@ns.pop;
+            $*PACKAGE-SETUP.push(PAST::Op.new(
+                :pasttype('callmethod'), :name('add_role'),
+                PAST::Op.new(
+                    # XXX nqpop get_how
+                    :pirop('get_how PP'),
+                    PAST::Var.new( :name('type_obj'), :scope('register') )
+                ),
+                PAST::Var.new( :name('type_obj'), :scope('register') ),
+                PAST::Var.new( :name(~$name), :namespace(@ns), :scope('package') )
+            ));
+        }
     }
 
     # Postfix it with a call to compose.
@@ -675,7 +706,7 @@ method method_def($/) {
     unless $past<signature_has_invocant> {
         $past[0].unshift(PAST::Var.new(
             :name('self'), :scope('parameter'),
-            :multitype(PAST::Var.new( :name('$?CLASS'), :scope('package') ))
+            :multitype(PAST::Var.new( :name('$?CLASS') ))
         ));
     }
     $past.symbol('self', :scope('lexical') );

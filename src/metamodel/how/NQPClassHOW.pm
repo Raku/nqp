@@ -94,8 +94,26 @@ knowhow NQPClassHOW {
         @!parents[+@!parents] := $parent;
     }
 
+    method add_role($obj, $role) {
+        for @!roles {
+            if $_ =:= $role {
+                pir::die("The role " ~ $role ~ " has already been added.");
+            }
+        }
+        @!roles[+@!roles] := $role;
+    }
+
     method compose($obj) {
-        # XXX roles...
+        # Incorporate roles. First, instantiate them with the type object
+        # for this type (so their $?CLASS is correct).
+        my @instantiated_roles;
+        for @!roles {
+            my $ins := $_.HOW.instantiate($_, $obj);
+            @instantiated_roles.push($ins);
+            @!done[+@!done] := $_;
+            @!done[+@!done] := $ins;
+        }
+        # XXX TODO: Actually compose.
 
         # If we have no parents and we're not called NQPMu then add NQPMu as
         # our parent.
@@ -263,8 +281,10 @@ knowhow NQPClassHOW {
     }
 
     method publish_type_cache($obj) {
-        # XXX TODO: when we have roles, need these here too.
-        pir::publish_type_check_cache($obj, @!mro)
+        my @tc;
+        for @!mro { @tc.push($_); }
+        for @!done { @tc.push($_); }
+        pir::publish_type_check_cache($obj, @tc)
     }
 
     method publish_method_cache($obj) {

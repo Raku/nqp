@@ -314,6 +314,7 @@ rule package_def {
     <name>
     [ 'is' 'repr(' <repr=.quote_EXPR> ')' ]?
     [ 'is' <parent=.name> ]?
+    [ 'does' <role=.name> ]*
     [
     || ';' <comp_unit>
     || <?[{]> <block>

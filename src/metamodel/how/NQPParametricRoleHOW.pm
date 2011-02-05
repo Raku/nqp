@@ -67,7 +67,7 @@ knowhow NQPParametricRoleHOW {
     method instantiate($obj, *@pos_args, *%named_args) {
         # Run the body block to capture the arguments into the correct
         # type argument context.
-        $!body_block();
+        $!body_block(|@pos_args, |%named_args);
 
         # Construct a new concrete role.
         my $irole := NQPConcreteRoleHOW.new_type(:name($!name));
