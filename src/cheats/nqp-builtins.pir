@@ -41,6 +41,18 @@
     .return (0)
 .end
 
+.sub 'skip'
+    .param string desc
+
+    print 'ok '
+    $P0 = get_global "$test_counter"
+    $P0 += 1
+    print $P0
+    print " # SKIP "
+    print desc
+    print "\n"
+.end
+
 .sub 'plan'
     .param int quantity
     print "1.."

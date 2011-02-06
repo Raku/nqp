@@ -5,14 +5,14 @@
 
 plan(14);
 
-say("ok 1 # SKIP");
+skip('boxing');
 #ok(3 ~~ Integer, "smartmatch of Integer works");
-say("ok 2 # SKIP");
+skip('boxing');
 #ok(!(4.5 ~~ Integer), "negative smartmatch of Integer works");
 
-say("ok 3 # SKIP");
+skip('boxing');
 #ok(<a b c> ~~ ResizablePMCArray, "smartmatch of RPA works");
-say("ok 4 # SKIP");
+skip('boxing');
 #ok(!(3 ~~ ResizablePMCArray), "negative smartmatch of RPA works");
 
 my $match := 'cde' ~~ regex abc { c(.)e };
