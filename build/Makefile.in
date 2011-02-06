@@ -83,6 +83,7 @@ NQP_SOURCES = \
   src/NQP/Actions.pm \
   src/NQP/Compiler.pm \
   src/NQP/Compiler.pir \
+  src/cheats/nqp-builtins.pir \
 
 SETTING_SOURCES = \
   src/setting/ResizablePMCArray.pm \
