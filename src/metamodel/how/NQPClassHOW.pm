@@ -105,15 +105,18 @@ knowhow NQPClassHOW {
 
     method compose($obj) {
         # Incorporate roles. First, instantiate them with the type object
-        # for this type (so their $?CLASS is correct).
-        my @instantiated_roles;
-        for @!roles {
-            my $ins := $_.HOW.instantiate($_, $obj);
-            @instantiated_roles.push($ins);
-            @!done[+@!done] := $_;
-            @!done[+@!done] := $ins;
+        # for this type (so their $?CLASS is correct). Then delegate to
+        # the composer.
+        if @!roles {
+            my @instantiated_roles;
+            for @!roles {
+                my $ins := $_.HOW.instantiate($_, $obj);
+                @instantiated_roles.push($ins);
+                @!done[+@!done] := $_;
+                @!done[+@!done] := $ins;
+            }
+            RoleToClassApplier.apply($obj, @instantiated_roles);
         }
-        # XXX TODO: Actually compose.
 
         # If we have no parents and we're not called NQPMu then add NQPMu as
         # our parent.

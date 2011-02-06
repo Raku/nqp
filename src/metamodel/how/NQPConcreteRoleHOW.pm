@@ -15,6 +15,7 @@ knowhow NQPConcreteRoleHOW {
     has %!attributes;
     has %!methods;
     has @!multi_methods_to_incorporate;
+    has @!collisions;
 
     # Have we been composed?
     has $!composed;
@@ -74,6 +75,10 @@ knowhow NQPConcreteRoleHOW {
         pir::die("Roles doing roles is not yet implemented in NQP")
     }
 
+    method add_collision($obj, $colliding_name) {
+        @!collisions[+@!collisions] := $colliding_name;
+    }
+
     # Compose the role. Beyond this point, no changes are allowed.
     method compose($obj) {
         $!composed := 1;
@@ -85,7 +90,7 @@ knowhow NQPConcreteRoleHOW {
     ## Introspecty
     ##
 
-    method methods($obj, :$local!) {
+    method methods($obj) {
         my @meths;
         for %!methods {
             @meths.push($_.value);
@@ -97,11 +102,15 @@ knowhow NQPConcreteRoleHOW {
         %!methods
     }
 
+    method collisions($obj) {
+        @!collisions
+    }
+
     method name($obj) {
         $!name
     }
 
-    method attributes($obj, :$local!) {
+    method attributes($obj) {
         my @attrs;
         for %!attributes {
             @attrs.push($_.value);
