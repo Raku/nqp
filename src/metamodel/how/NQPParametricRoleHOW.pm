@@ -15,6 +15,9 @@ knowhow NQPParametricRoleHOW {
     has %!methods;
     has @!multi_methods_to_incorporate;
 
+    # Other roles that this one does.
+    has @!roles;
+
     # Have we been composed?
     has $!composed;
 
@@ -75,7 +78,7 @@ knowhow NQPParametricRoleHOW {
     }
 
     method add_role($obj, $role) {
-        pir::die("Roles doing roles is not yet implemented in NQP")
+        @!roles[+@!roles] := $role;
     }
 
     # Compose the role. Beyond this point, no changes are allowed.
@@ -94,12 +97,12 @@ knowhow NQPParametricRoleHOW {
         1
     }
 
-    # This instantiates the role with arguments and builds a concrete
+    # This instantiates the role for the given class and builds a concrete
     # role.
-    method instantiate($obj, *@pos_args, *%named_args) {
+    method instantiate($obj, $class_arg) {
         # Run the body block to capture the arguments into the correct
         # type argument context.
-        $!body_block(|@pos_args, |%named_args);
+        $!body_block($class_arg);
 
         # Construct a new concrete role.
         my $irole := NQPConcreteRoleHOW.new_type(:name($!name), :instance_of($obj));
@@ -117,6 +120,12 @@ knowhow NQPParametricRoleHOW {
         }
         for @!multi_methods_to_incorporate {
             $irole.HOW.add_multi_method($irole, $_<name>, pir::clone($_<code>));
+        }
+
+        # Copy roles, instantiating them as we go.
+        for @!roles {
+            my $instantiated := $irole.HOW.instantiate($irole, $class_arg);
+            $irole.HOW.add_role($irole, $instantiated);
         }
 
         # Compose and return produced role.
@@ -151,5 +160,9 @@ knowhow NQPParametricRoleHOW {
             @attrs.push($_.value);
         }
         @attrs
+    }
+
+    method roles($obj) {
+        @!roles
     }
 }

@@ -17,6 +17,12 @@ knowhow NQPConcreteRoleHOW {
     has @!multi_methods_to_incorporate;
     has @!collisions;
 
+    # Other roles that this one does.
+    has @!roles;
+
+    # All composed in roles.
+    has @!done;
+
     # Have we been composed?
     has $!composed;
 
@@ -68,11 +74,11 @@ knowhow NQPConcreteRoleHOW {
     }
 
     method add_parent($obj, $parent) {
-        pir::die("A role cannot inherit from a class")
+        pir::die("A role cannot inherit from a class in NQP")
     }
 
     method add_role($obj, $role) {
-        pir::die("Roles doing roles is not yet implemented in NQP")
+        @!roles[+@!roles] := $role;
     }
 
     method add_collision($obj, $colliding_name) {
@@ -81,6 +87,17 @@ knowhow NQPConcreteRoleHOW {
 
     # Compose the role. Beyond this point, no changes are allowed.
     method compose($obj) {
+        # Incorporate roles. They're already instantiated. We need to
+        # add to done list their instantiation source.
+        if @!roles {
+            for @!roles {
+                @!done[+@!done] := $_;
+                @!done[+@!done] := $_.HOW.instance_of($_);
+            }
+            RoleToRoleApplier.apply($obj, @!roles);
+        }
+
+        # Mark composed.
         $!composed := 1;
         $obj
     }
@@ -116,5 +133,13 @@ knowhow NQPConcreteRoleHOW {
             @attrs.push($_.value);
         }
         @attrs
+    }
+
+    method roles($obj) {
+        @!roles
+    }
+
+    method instance_of($obj) {
+        $!instance_of
     }
 }
