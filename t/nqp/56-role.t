@@ -1,4 +1,4 @@
-plan(10);
+plan(13);
 
 role R1 {
     has $!a;
@@ -33,3 +33,8 @@ class C3 does R3 does R4 { method c() { 'resolved' } }
 ok(C3.a() == 1);
 ok(C3.b() == 2);
 ok(C3.c() eq 'resolved');
+
+ok(!C3.HOW.does(C3, R1));
+ok(C3.HOW.does(C3, R3));
+ok(C3.HOW.does(C3, R4));
+
