@@ -581,7 +581,8 @@ inline op set_sub_multisig(in PMC, in PMC, in PMC) :base_core {
         SETATTR_NQPMultiSig_types(interp, sig, $2);
         SETATTR_NQPMultiSig_definedness_constraints(interp, sig, $3);
         SETATTR_Sub_multi_signature(interp, $1, sig);
-    }    
+        PARROT_GC_WRITE_BARRIER(interp, $1);
+    }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use set_sub_multisig if first operand is a Sub.");
