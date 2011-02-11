@@ -351,8 +351,10 @@ static PMC * instance_of(PARROT_INTERP, PMC *self, PMC *WHAT) {
 
     /* Compute allocation strategy if we've not already done so. */
     REPRP6opaque *repr = P6O_REPR_STRUCT(self);
-    if (!repr->allocation_size)
+    if (!repr->allocation_size) {
         compute_allocation_strategy(interp, WHAT, repr);
+        PARROT_GC_WRITE_BARRIER(interp, self);
+    }
 
     /* Allocate and set up object instance. */
     obj = Parrot_gc_allocate_fixed_size_storage(interp, repr->allocation_size);
