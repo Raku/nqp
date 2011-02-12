@@ -1,8 +1,8 @@
 #! nqp
 
 class ABC {
-    method () is pirflags<:vtable('get_number')> { 123.0 }
-    method () is pirflags<:vtable('get_string')> { 'abc' }
+    method () is parrot_vtable('get_number') { 123.0 }
+    method () is parrot_vtable('get_string') { 'abc' }
 }
 
 plan(2);
