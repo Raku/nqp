@@ -53,6 +53,10 @@ typedef struct {
      * type directory based upon this ID. Otherwise you'll create memory
      * leaks for anonymous types, and other such screwups. */
     INTVAL type_cache_id;
+
+    /* Parrot-specific set of v-table to method mappings, for overriding
+     * of Parrot v-table functions. */
+    PMC **parrot_vtable_mapping;
 } STable;
 
 /* A representation is what controls the layout of an object and storage of

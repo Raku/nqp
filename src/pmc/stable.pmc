@@ -55,6 +55,12 @@ pmclass STable manual_attrs dynpmc group nqp {
             if (!PMC_IS_NULL(entry))
                 Parrot_gc_mark_PMC_alive(interp, entry);
         }
+
+        /* If we have one, mark the Parrot v-table mapping. */
+        if (st->parrot_vtable_mapping)
+            for (i = PARROT_VTABLE_LOW; i < NUM_VTABLE_FUNCTIONS; i++)
+                if (!PMC_IS_NULL(st->parrot_vtable_mapping[i]))
+                    Parrot_gc_mark_PMC_alive(interp, st->parrot_vtable_mapping[i]);
     }
 
     VTABLE void destroy() {
