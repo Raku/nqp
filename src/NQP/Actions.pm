@@ -751,13 +751,12 @@ method method_def($/) {
         $past.pirflags(':nsentry');
     }
 
-    # Apply traits.
+    # Install AST node in match object, then apply traits.
+    make $past;
     $past<block_past> := $past;
     if $<trait> {
         for $<trait> { $_.ast()($/); }
     }
-
-    make $past;
 }
 
 sub only_star_block() {
@@ -875,10 +874,28 @@ method trait($/) {
 
 method trait_mod:sym<is>($/) {
     my $cpast := $<circumfix>[0].ast;
-    if $<longname> eq 'pirflags' {
-        $/.CURSOR.panic("Trait 'pirflags' requires constant scalar argument")
+    if $<longname> eq 'parrot_vtable' {
+        # XXX This should be in Parrot-specific module and need a pragma.
+        $/.CURSOR.panic("Trait 'parrot_vtable' requires constant scalar argument")
             unless $cpast ~~ PAST::Val;
-        make -> $match { $match.ast<block_past>.pirflags($cpast.value); };
+        make -> $match {
+            my $meth := $match.ast<block_past>;
+            if pir::defined($*PACKAGE-SETUP) {
+                $*PACKAGE-SETUP.push(PAST::Op.new(
+                    :pasttype('callmethod'), :name('add_parrot_vtable_mapping'),
+                    PAST::Op.new(
+                        # XXX Should be nqpop at some point.
+                        :pirop('get_how PP'),
+                        PAST::Var.new( :name('type_obj'), :scope('register') )
+                    ),
+                    PAST::Var.new( :name('type_obj'), :scope('register') ),
+                    $cpast, $meth
+                ));
+            }
+        };
+    }
+    elsif $<longname> eq 'pirflags' {
+        $/.CURSOR.panic("Trait 'pirflags' no longer supported; use 'is vtable'");
     }
     else {
         $/.CURSOR.panic("Trait '$<longname>' not implemented");
