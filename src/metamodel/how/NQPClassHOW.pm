@@ -32,6 +32,9 @@ knowhow NQPClassHOW {
     # Full list of roles that we do.
     has @!done;
 
+    # Parrot-specific vtable mapping hash. Maps vtable name to method.
+    has %!parrot_vtable_mapping;
+
     ##
     ## Declarative.
     ##
@@ -103,6 +106,15 @@ knowhow NQPClassHOW {
         @!roles[+@!roles] := $role;
     }
 
+    method add_parrot_vtable_mapping($obj, $name, $meth) {
+        if pir::defined(%!parrot_vtable_mapping{$name}) {
+            pir::die("Class '" ~ $!name ~
+                "' already has a Parrot v-table override for '" ~
+                $name ~ "'");
+        }
+        %!parrot_vtable_mapping{$name} := $meth;
+    }
+
     method compose($obj) {
         # Incorporate roles. First, instantiate them with the type object
         # for this type (so their $?CLASS is correct). Then delegate to
@@ -137,6 +149,11 @@ knowhow NQPClassHOW {
         # Publish type and method caches.
         self.publish_type_cache($obj);
         self.publish_method_cache($obj);
+
+        # Install Parrot v-table mapping.
+        if +%!parrot_vtable_mapping {
+            pir::stable_publish_vtable_mapping__vPP($obj, %!parrot_vtable_mapping);
+        }
 
         $obj
     }
