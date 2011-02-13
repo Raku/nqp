@@ -661,60 +661,35 @@ class HLL::Compiler {
     }
 
     method addstage($stagename, *%adverbs) {
-        Q:PIR {
-            .local string stagename
-            .local pmc adverbs, self
-            $P0 = find_lex '$stagename'
-            stagename = $P0
-            adverbs = find_lex '%adverbs'
-            self = find_lex 'self'
-
-            .local string position, target
-            .local pmc stages
-            stages = self.'stages'()
-
-            $I0 = exists adverbs['before']
-            unless $I0 goto next_test
-              position = 'before'
-              target = adverbs['before']
-            goto positional_insert
-
-          next_test:
-            $I0 = exists adverbs['after']
-            unless $I0 goto simple_insert
-              position = 'after'
-              target = adverbs['after']
-
-          positional_insert:
-            .local pmc it, newstages
-            newstages = new 'ResizableStringArray'
-
-            it = iter stages
-          iter_loop:
-            unless it goto iter_end
-            .local pmc current
-            current = shift it
-            unless current == target goto no_insert_before
-              unless position == 'before' goto no_insert_before
-                push newstages, stagename
-            no_insert_before:
-
-            push newstages, current
-
-            unless current == target goto no_insert_after
-              unless position == 'after' goto no_insert_after
-                push newstages, stagename
-            no_insert_after:
-
-            goto iter_loop
-          iter_end:
-            self.'stages'(newstages)
-            goto done
-
-          simple_insert:
-            push stages, stagename
-          done:
-        };
+        my $position;
+        my $where;
+        if %adverbs<before> {
+            $where    := %adverbs<before>;
+            $position := 'before';
+        } elsif %adverbs<after> {
+            $where    := %adverbs<after>;
+            $position := 'after';
+        } else {
+            my @new-stages := pir::clone(self.stages);
+            pir::push(@new-stages, $stagename);
+            self.stages(@new-stages);
+            return 1;
+        }
+        my @new-stages := pir::new('ResizableStringArray');
+        for self.stages {
+            if $_ eq $where {
+                if $position eq 'before' {
+                    pir::push(@new-stages, $stagename);
+                    pir::push(@new-stages, $_);
+                } else {
+                    pir::push(@new-stages, $_);
+                    pir::push(@new-stages, $stagename);
+                }
+            } else {
+                pir::push(@new-stages, $_)
+            }
+        }
+        self.stages(@new-stages);
     }
 
     method parse_name($name) {
