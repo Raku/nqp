@@ -1,3 +1,93 @@
+=begin
+
+=head1 NAME
+
+HLL::CommandLine - command line parsing tools
+
+=head1 SYNOPSIS
+
+    my $parser := HLL::CommandLine::Parser.new([
+        'verbose',
+        'target=s',
+        'e=s'
+    ]);
+
+    # treat the first non-option argument as the program name,
+    # and everything after that as arguments to the program
+    $parser.stop-after-first-arg;
+
+    # -e "program" also treats everything after it as arguments
+    # to the program:
+    $paser.add-stopper('-e');
+
+    my $results := $parser.parse(@*ARGS);
+    my %options := $parser.options;
+    my @args    := $pasre.arguments; # remaining arguments from @*ARGS
+
+=head1 DESCRIPTION
+
+HLL::CommandLine::Parser stores a specification of command line options and
+other behavior, and uses that to parse an array of command line directives.
+
+It classifies the directives as I<options> (usually of the form C<-f> or
+C<--foo>) and I<arguments> (ie. non-options). The result of a C<.parse(RPA)>
+call is an C<HLL::CommandLine::Result> object (or an exception thrown),
+which makes the options and arguments available via the methods C<options>
+and C<arguments>.
+
+=head1 HLL::CommandLine::Parser
+
+=head2 new(Array)
+
+The C<.new> method and constructor expects an array with option specifications.
+Such a specification is the name of an option, optionally followed by the
+C<=> equals sign and a single character describing the kind of value it expects.
+Missing value specification or C<b> stand for C<bool>, ie the option does not
+expect a value. C<s> stands for a string value.
+(Optional values are not yet supported).
+
+=head2 add-stopper(String)
+
+Adds a stopper. A stopper is a special value that, when encountered in the
+command line arguments, terminates the processing, and classifies the rest
+of the strings as arguments, independently of their form. C<--> is a
+pre-defined stopper. If an option is used a stopper, that option itself is
+still processed.
+
+Examples:
+
+    yourprogram -a --bar b -- c --foo
+    # options:   a = 1, bar = 1
+    # arguments: b, c, --foo
+
+    # with stopper -e, and -e expecting a value:
+    yourprogram -a -e foo --bar baz
+    # options:   -a = 1, -e = foo
+    # arguments: --bar, baz
+
+=head2 parse(Array)
+
+Parses the array as command line strings, and returns a
+C<HLL::CommandLine::Result> object (or thrown an exception on error).
+
+=head1 HLL::CommandLine::Result
+
+An object of this type holds the options and arguments from a successful
+command line parse.
+
+=head2 options
+
+Returns a hash of options
+
+=head2 arguments
+
+Return an array of arguments.
+
+=end
+
+=cut
+
+
 class HLL::CommandLine::Result {
     has @!arguments;
     has %!options;
