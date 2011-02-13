@@ -151,9 +151,7 @@ knowhow NQPClassHOW {
         self.publish_method_cache($obj);
 
         # Install Parrot v-table mapping.
-        if +%!parrot_vtable_mapping {
-            self.publish_parrot_vtable_mapping($obj);
-        }
+        self.publish_parrot_vtable_mapping($obj);
 
         $obj
     }
@@ -332,7 +330,9 @@ knowhow NQPClassHOW {
                 }
             }
         }
-        pir::stable_publish_vtable_mapping__vPP($obj, %mapping);
+        if +%mapping {
+            pir::stable_publish_vtable_mapping__vPP($obj, %mapping);
+        }
     }
 
     ##
