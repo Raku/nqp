@@ -292,6 +292,7 @@ class HLL::Compiler {
             ## this bizarre piece of code causes the compiler to
             ## immediately abort if it looks like it's being run
             ## from Perl's Test::Harness.  (Test::Harness versions 2.64
+            ## from October 2006
             ## and earlier have a hardwired commandline option that is
             ## always passed to an initial run of the interpreter binary,
             ## whether you want it or not.)  We expect to remove this
@@ -433,59 +434,37 @@ class HLL::Compiler {
         $getopts.get_options(@args);
     }
 
-    method evalfiles(@files, *@args, *%adverbs) {
-        Q:PIR {
-            .local pmc files, args, adverbs, self
-            files = find_lex '@files'
-            args = find_lex '@args'
-            adverbs = find_lex '%adverbs'
-            self = find_lex 'self'
+    method evalfiles($files, *@args, *%adverbs) {
+        my $target := pir::downcase(%adverbs<target>);
+        my $encoding := %adverbs<encoding>;
+        my @files := pir::does($files, 'array') ?? $files !! [$files];
+        my @codes;
+        for @files {
+            my $in-handle := pir::new('FileHandle');
+            my $err := 0;
+            pir::say("File: '$_'");
+            try {
+                # the PIR version checked for utf8 specifically...
+                # dunno why it was this way, and why it doesn't work in nqp
+#                $in-handle.encoding($encoding) unless $encoding eq 'utf8';
+                $in-handle.encoding($encoding);
+                pir::push(@codes, $in-handle.readall($_));
+                $in-handle.close;
+                CATCH {
+                    $err := "Cannot read from file '$_'";
+                }
+            }
+            pir::die($err) if $err;
+            my $code := pir::join('', @codes);
+#            my $?FILES := pir::join(' ', @files);
+            my $r := self.eval($code, |@args, |%adverbs);
+            if $target eq '' || $target eq 'pir' {
+                return $r;
+            } else {
+                return self.dumper($r, $target, |%adverbs);
 
-            unless null adverbs goto have_adverbs
-            adverbs = new 'Hash'
-          have_adverbs:
-            .local string target
-            target = adverbs['target']
-            target = downcase target
-            .local string encoding
-            encoding = adverbs['encoding']
-            $I0 = does files, 'array'
-            if $I0 goto have_files_array
-            $P0 = new 'ResizablePMCArray'
-            push $P0, files
-            files = $P0
-          have_files_array:
-            .local string code
-            code = ''
-            .local pmc it
-            it = iter files
-          iter_loop:
-            unless it goto iter_end
-            .local string iname
-            .local pmc ifh
-            iname = shift it
-            ifh = new 'FileHandle'
-            unless encoding == 'utf8' goto iter_loop_1
-            ifh.'encoding'(encoding)
-          iter_loop_1:
-            $S0 = ifh.'readall'(iname)
-            code = concat code, $S0
-            ifh.'close'()
-            goto iter_loop
-          iter_end:
-            $S0 = join ' ', files
-            $P1 = box $S0
-            .lex '$?FILES', $P1
-            $P0 = self.'eval'(code, args :flat, adverbs :flat :named)
-            if target == '' goto end
-            if target == 'pir' goto end
-            self.'dumper'($P0, target, adverbs :flat :named)
-          end:
-            .return ($P0)
-
-          err_infile:
-            .tailcall self.'panic'('Error: file cannot be read: ', iname)
-        };
+            }
+        }
     }
 
     method compile($source, *%adverbs) {
