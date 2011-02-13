@@ -587,3 +587,51 @@ inline op set_sub_multisig(in PMC, in PMC, in PMC) :base_core {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use set_sub_multisig if first operand is a Sub.");
 }
+
+/*
+
+=item publish_vtable_mapping()
+
+Publishes a Parrot v-table mapping, which will be hung off the s-table.
+It's stored as an array, so lookups will be speedy.
+
+=cut
+
+*/
+inline op stable_publish_vtable_mapping(in PMC, in PMC) :base_core {
+    if ($1->vtable->base_type == ro_id) {
+        INTVAL i;
+
+        /* Get s-table and iterator over the mapping. */
+        STable *st = STABLE($1);
+        PMC    *it = VTABLE_get_iter(interp, $2);
+
+        /* Toss any exist mapping array; allocate new one. */
+        if (st->parrot_vtable_mapping)
+            mem_sys_free(st->parrot_vtable_mapping);
+        st->parrot_vtable_mapping = mem_allocate_n_zeroed_typed(NUM_VTABLE_FUNCTIONS, PMC *);
+
+        /* Go through the various mapped names and insert them into the
+         * mapping table. */
+        while (VTABLE_get_bool(interp, it)) {
+            STRING *name   = VTABLE_shift_string(interp, it);
+            char   *c_name = Parrot_str_to_cstring(interp, name);
+            PMC    *meth   = VTABLE_get_pmc_keyed_str(interp, $2, name);
+            INTVAL  idx    = -1;
+            for (i = PARROT_VTABLE_LOW; i < NUM_VTABLE_FUNCTIONS; i++) {
+                if (strcmp(Parrot_vtable_slot_names[i], c_name) == 0) {
+                    idx = i;
+                    break;
+                }
+            }
+            if (idx >= 0)
+                st->parrot_vtable_mapping[idx] = meth;
+            else
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "No such Parrot v-table '%Ss'", name);
+        }
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use stable_publish_vtable_mapping with a RakudoObject");
+}
