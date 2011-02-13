@@ -442,7 +442,6 @@ class HLL::Compiler {
         for @files {
             my $in-handle := pir::new('FileHandle');
             my $err := 0;
-            pir::say("File: '$_'");
             try {
                 # the PIR version checked for utf8 specifically...
                 # dunno why it was this way, and why it doesn't work in nqp
