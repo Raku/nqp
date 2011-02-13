@@ -152,7 +152,7 @@ knowhow NQPClassHOW {
 
         # Install Parrot v-table mapping.
         if +%!parrot_vtable_mapping {
-            pir::stable_publish_vtable_mapping__vPP($obj, %!parrot_vtable_mapping);
+            self.publish_parrot_vtable_mapping($obj);
         }
 
         $obj
@@ -322,6 +322,19 @@ knowhow NQPClassHOW {
         pir::publish_method_cache($obj, %cache)
     }
 
+    method publish_parrot_vtable_mapping($obj) {
+        my %mapping;
+        for @!mro {
+            my %map := $_.HOW.parrot_vtable_mappings($_, :local(1));
+            for %map {
+                unless %mapping{$_.key} {
+                    %mapping{$_.key} := $_.value;
+                }
+            }
+        }
+        pir::stable_publish_vtable_mapping__vPP($obj, %mapping);
+    }
+
     ##
     ## Introspecty
     ##
@@ -356,6 +369,10 @@ knowhow NQPClassHOW {
             @attrs.push($_.value);
         }
         @attrs
+    }
+
+    method parrot_vtable_mappings($obj, :$local!) {
+        %!parrot_vtable_mapping
     }
 
     ##
