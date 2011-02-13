@@ -147,6 +147,7 @@ grammars.
     how.'add_method'(type_obj, 'DUMP_TOKRX', $P16)
     .const 'Sub' $P17 = 'Regex_Cursor_meth_Bool'
     how.'add_method'(type_obj, 'Bool', $P17)
+    how.'add_parrot_vtable_mapping'(type_obj, 'get_bool', $P17)
 
     # Add attributes.
     .local pmc NQPAttribute, int_type, attr
