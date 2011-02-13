@@ -57,6 +57,7 @@ Description of the test.
 .const string TESTS = 'no_plan'
 
 .sub main :main
+    load_bytecode 'nqp.pbc'
     load_bytecode 'Test/Builder.pbc'
     load_bytecode 'P6Regex.pbc'
     load_bytecode 'String/Utils.pbc'
