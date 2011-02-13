@@ -1,0 +1,55 @@
+#! nqp
+
+plan(18);
+
+my $x := HLL::CommandLine::Parser.new(['a', 'b', 'e=s', 'target=s', 'verbose']);
+my $r := $x.parse(['-a', 'b']);
+
+ok($r.isa(HLL::CommandLine::Result), 'got the right object type back');
+ok($r.arguments()[0] eq 'b', '"b" got classified as argument')
+    || say("# arguments: '", pir::join('|', $r.arguments()), "'");
+ok($r.options(){'a'} == 1, '-a is an option');
+
+
+$r := $x.parse(['-ab']);
+
+ok($r.options(){'a'} == 1, '-ab counts as -a (clustering)');
+ok($r.options(){'b'} == 1, '-ab counts as -b (clustering)');
+
+$r := $x.parse(['-e', 'foo bar', 'x']);
+
+ok($r.options(){'e'} eq 'foo bar', 'short options + value');
+ok(+$r.arguments == 1, 'one argument remaining');
+
+$r := $x.parse(['--verbose', '--target=foo']);
+ok($r.options{'verbose'} == 1,    'long option without value');
+ok($r.options{'target'} eq 'foo', 'long option with value supplied via =');
+
+$r := $x.parse(['--target', 'foo', 'bar']);
+ok($r.options{'target'} eq 'foo', 'long option with value as separate argument');
+ok(+$r.arguments == 1, '...on remaining argument');
+ok($r.arguments[0] eq 'bar', '...and  it is the right one');
+
+$r := $x.parse(['a', '--', 'b', '--target', 'c']);
+ok(+$r.arguments == 4, 'got 4 arguments, -- does not count');
+ok(pir::join(',',$r.arguments) eq 'a,b,--target,c', '... and the right arguments');
+
+$x.add-stopper('-e');
+
+$r := $x.parse(['-e', 'foo', '--target', 'bar']);
+ok(+$r.arguments == 2,
+    'if -e is stopper, everything after its value is an argument');
+ok($r.options{'e'} eq 'foo', '... and -e still got the right value');
+
+$x.add-stopper('stopper');
+$r := $x.parse(['stopper', '--verbose']);
+ok(+$r.arguments == 1, 'non-option stopper worked');
+
+$x.stop-after-first-arg;
+
+$r := $x.parse(['-a', 'script.pl', '--verbose']);
+ok(pir::join(',', $r.arguments) eq 'script.pl,--verbose',
+    'stop-after-first-arg');
+
+# TODO: tests for long options as stoppers
+

@@ -25,6 +25,7 @@ and HLL::Grammar.
 .include 'src/cheats/hll-grammar.pir'
 .include 'gen/hllgrammar-actions.pir'
 .include 'gen/hllcompiler.pir'
+.include 'gen/hllcommandline.pir'
 
 .sub '' :anon :load :init
     $P0 = get_hll_global ['HLL'], 'Compiler'
