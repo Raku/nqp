@@ -450,7 +450,7 @@ class HLL::Compiler {
                 pir::push(@codes, $in-handle.readall($_));
                 $in-handle.close;
                 CATCH {
-                    $err := "Cannot read from file '$_'";
+                    $err := "Error while reading from file: $_";
                 }
             }
             pir::die($err) if $err;
