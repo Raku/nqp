@@ -30,7 +30,7 @@
     $P0 += 1
     print $P0
     unless has_desc goto no_description
-        print " # "
+        print " - "
         print description
   no_description:
     print "\n"
