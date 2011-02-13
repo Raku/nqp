@@ -282,26 +282,24 @@ class HLL::Compiler {
     }    
 
     method command_line(@args, *%adverbs) {
+        ## this bizarre piece of code causes the compiler to
+        ## immediately abort if it looks like it's being run
+        ## from Perl's Test::Harness.  (Test::Harness versions 2.64
+        ## from October 2006
+        ## and earlier have a hardwired commandline option that is
+        ## always passed to an initial run of the interpreter binary,
+        ## whether you want it or not.)  We expect to remove this
+        ## check eventually (or make it a lot smarter than it is here).
+        if pir::index(@args[2], '@INC') >= 0 {
+            pir::exit(0);
+        }
+        my $program-name := @args[0];
         Q:PIR {
             .include 'except_severity.pasm'
             .local pmc args, adverbs, self
             args = find_lex '@args'
             adverbs = find_lex '%adverbs'
             self = find_lex 'self'
-
-            ## this bizarre piece of code causes the compiler to
-            ## immediately abort if it looks like it's being run
-            ## from Perl's Test::Harness.  (Test::Harness versions 2.64
-            ## from October 2006
-            ## and earlier have a hardwired commandline option that is
-            ## always passed to an initial run of the interpreter binary,
-            ## whether you want it or not.)  We expect to remove this
-            ## check eventually (or make it a lot smarter than it is here).
-            $S0 = args[2]
-            $I0 = index $S0, '@INC'
-            if $I0 < 0 goto not_harness
-            exit 0
-          not_harness:
 
             load_bytecode 'dumper.pbc'
             load_bytecode 'PGE/Dumper.pbc'
