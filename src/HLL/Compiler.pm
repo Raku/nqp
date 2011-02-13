@@ -427,7 +427,16 @@ class HLL::Compiler {
         my $p := HLL::CommandLine::Parser.new(@!cmdoptions);
         $p.add-stopper('-e');
         $p.stop-after-first-arg;
-        $p.parse(@args);
+        my $res;
+        try {
+            $res := $p.parse(@args);
+            CATCH {
+                pir::say($_);
+                self.usage;
+                pir::exit(1);
+            }
+        }
+        $res;
     }
 
     method evalfiles($files, *@args, *%adverbs) {
