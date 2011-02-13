@@ -1,6 +1,6 @@
 #! nqp
 
-plan(25);
+plan(27);
 
 my $x := HLL::CommandLine::Parser.new(['a', 'b', 'e=s', 'target=s', 'verbose']);
 my $r := $x.parse(['-a', 'b']);
@@ -53,8 +53,10 @@ ok(pir::join(',', $r.arguments) eq 'script.pl,--verbose',
 
 # TODO: tests for long options as stoppers
 
-$x := HLL::CommandLine::Parser.new(['a|b', 'l|long', 'w|with-arg=s']);
+$x := HLL::CommandLine::Parser.new(['a|b', 'l|long',
+            'w|with-arg=s', 'other|o=s']);
 $r := $x.parse(['-a', '-b', '-l', '--long', '-w', 'v1',
+                '--other=v3', '-o', 'v4',
                 '--with-arg', 'v2', 'arg1', 'arg2']);
 
 ok(pir::join(',', $r.arguments) eq 'arg1,arg2',
@@ -67,3 +69,6 @@ ok($r.options{'long'} == 1, 'short+long alias (right)');
 
 ok($r.options{'w'} eq 'v1', 'short+long alias with value (left)');
 ok($r.options{'with-arg'} eq 'v2', 'short+long alias  with value(right)');
+
+ok($r.options<o> eq 'v4', 'long|short alias (short)');
+ok($r.options<other> eq 'v3', 'long|short alias (short)');
