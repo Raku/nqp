@@ -322,7 +322,7 @@ inline op publish_method_cache(in PMC, in PMC) :base_core {
             VTABLE_set_pmc_keyed_str(interp, cache, name, meth);
         }
         target_st->method_cache = cache;
-        PARROT_GC_WRITE_BARRIER(interp, $1);
+        PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC($1));
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
