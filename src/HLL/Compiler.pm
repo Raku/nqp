@@ -311,8 +311,10 @@ class HLL::Compiler {
             arg0 = args[0]
 
             ##   perform option processing of command-line args
-            .local pmc opts
-            opts = self.'process_args'(args)
+            .local pmc parse_res, opts
+            parse_res = self.'process_args'(args)
+            opts = parse_res.'options'()
+            args = parse_res.'arguments'()
 
             ##   merge command-line args with defaults passed in from caller
             .local pmc it
@@ -424,14 +426,10 @@ class HLL::Compiler {
         # First argument is the program name.
         self.compiler_progname(@args.shift);
 
-        # Use Getopt::Obj to proccess the rest.
-        pir::load_bytecode('Getopt/Obj.pbc');
-        my $getopts := Q:PIR { %r = new ['Getopt';'Obj'] };
-        $getopts.notOptStop(1);
-        for @!cmdoptions {
-            pir::push__vPs($getopts, $_)
-        }
-        $getopts.get_options(@args);
+        my $p := HLL::CommandLine::Parser.new(@!cmdoptions);
+        $p.add-stopper('-e');
+        $p.stop-after-first-arg;
+        $p.parse(@args);
     }
 
     method evalfiles($files, *@args, *%adverbs) {
