@@ -148,18 +148,25 @@ class HLL::CommandLine::Parser {
         %!stopper{$x} := 1;
     }
 
+    method split-option-aliases($s) {
+        pir::split('|', $s);
+
+    }
+
     method add-spec($s) {
         my $i := pir::index($s, '=');
         my $type;
-        my $option;
+        my @options;
         if $i < 0 {
-            $type   := 'b';
-            $option := $s;
+            $type    := 'b';
+            @options := self.split-option-aliases($s);
         } else {
-            $type   := pir::substr($s, $i + 1);
-            $option := pir::substr($s, 0, $i);
+            $type    := pir::substr($s, $i + 1);
+            @options := self.split-option-aliases(pir::substr($s, 0, $i));
         }
-        %!options{$option} := $type;
+        for @options {
+            %!options{$_} := $type;
+        }
     }
 
 
