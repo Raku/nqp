@@ -138,28 +138,30 @@ class HLL::CommandLine::Parser {
     }
 
     method BUILD(:@specs) {
-        @!specs := @specs;
         %!stopper{'--'} := 1;
         $!stop-after-first-arg := 0;
-        self.init();
+        for @specs {
+            self.add-spec($_);
+        }
     }
     method add-stopper($x) {
         %!stopper{$x} := 1;
     }
 
-    method init() {
-        for @!specs {
-            my $i := pir::index($_, '=');
-            my $type;
-            if $i < 0 {
-                $type := 'b';
-            } else {
-                $type := pir::substr($_, $i + 1);
-                $_    := pir::substr($_, 0, $i);
-            }
-            %!options{$_} := $type;
+    method add-spec($s) {
+        my $i := pir::index($s, '=');
+        my $type;
+        my $option;
+        if $i < 0 {
+            $type   := 'b';
+            $option := $s;
+        } else {
+            $type   := pir::substr($s, $i + 1);
+            $option := pir::substr($s, 0, $i);
         }
+        %!options{$option} := $type;
     }
+
 
     method is-option($x) {
         return 0 if $x eq '-' || $x eq '--';
