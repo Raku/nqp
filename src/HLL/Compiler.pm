@@ -293,43 +293,28 @@ class HLL::Compiler {
         if pir::index(@args[2], '@INC') >= 0 {
             pir::exit(0);
         }
+
         my $program-name := @args[0];
+        my $res  := self.process_args(@args);
+        my %opts := $res.options;
+        my @a    := $res.arguments;
+
+        for %opts -> $k {
+            %adverbs{$k} := %opts{$k};
+        }
+        self.usage($program-name) if %adverbs<help>;
+        self.version              if %adverbs<version>;
+
         Q:PIR {
             .include 'except_severity.pasm'
             .local pmc args, adverbs, self
-            args = find_lex '@args'
+            args = find_lex '@a'
             adverbs = find_lex '%adverbs'
             self = find_lex 'self'
 
             load_bytecode 'dumper.pbc'
             load_bytecode 'PGE/Dumper.pbc'
 
-            ##  get the name of the program
-            .local string arg0
-            arg0 = args[0]
-
-            ##   perform option processing of command-line args
-            .local pmc parse_res, opts
-            parse_res = self.'process_args'(args)
-            opts = parse_res.'options'()
-            args = parse_res.'arguments'()
-
-            ##   merge command-line args with defaults passed in from caller
-            .local pmc it
-            it = iter opts
-          mergeopts_loop:
-            unless it goto mergeopts_end
-            $S0 = shift it
-            $P0 = opts[$S0]
-            adverbs[$S0] = $P0
-            goto mergeopts_loop
-          mergeopts_end:
-
-            $I0 = adverbs['help']
-            if $I0 goto usage
-
-            $I0 = adverbs['version']
-            if $I0 goto version
 
             .local int can_backtrace, ll_backtrace
             can_backtrace = can self, 'backtrace'
@@ -388,12 +373,6 @@ class HLL::Compiler {
 
           err_output:
             .tailcall self.'panic'('Error: file cannot be written: ', output)
-          usage:
-            self.'usage'(arg0)
-            goto end
-          version:
-            self.'version'()
-            goto end
 
             # If we get an uncaught exception in the program and the HLL provides
             # a backtrace method, we end up here. We pass it the exception object
