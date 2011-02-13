@@ -45,7 +45,7 @@ class HLL::Compiler {
             push_eh _handler
             $P0 = getinterp
             $P0 = $P0[.IGLOBALS_CONFIG_HASH]
-            $S0  = $P0['revision']   # also $I0 = P0['installed'] could be used
+            $S0  = $P0['git_describe']   # also $I0 = P0['installed'] could be used
           _handler:
             pop_eh
             %r  = box 'This compiler is built with the Parrot Compiler Toolkit, parrot '
