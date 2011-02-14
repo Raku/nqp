@@ -10,4 +10,14 @@ pmclass DispatcherSub extends Sub auto_attrs dynpmc group nqp {
         GETATTR_DispatcherSub_dispatchees(interp, SELF, dispatchees);
         Parrot_gc_mark_PMC_alive(INTERP, dispatchees);
     }
+
+    VTABLE PMC * clone() {
+        PMC *dispatchees, *dispatch_cache;
+        PMC *cloned = SUPER();
+        GETATTR_DispatcherSub_dispatchees(interp, SELF, dispatchees);
+        SETATTR_DispatcherSub_dispatchees(interp, cloned, dispatchees);
+        GETATTR_DispatcherSub_dispatch_cache(interp, SELF, dispatch_cache);
+        SETATTR_DispatcherSub_dispatch_cache(interp, cloned, dispatch_cache);
+        return cloned;
+    }
 }
