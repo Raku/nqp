@@ -7,7 +7,7 @@ class NQPMu {
         self.CREATE()
     }
 
-    proto method Str() { * }
+    proto method Str() is parrot_vtable('get_string') { * }
     multi method Str(Mu:U $self:) {
         self.HOW.name(self) ~ '()'
     }
