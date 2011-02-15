@@ -17,12 +17,15 @@ This file implements Match objects for the regex engine.
 .namespace ['Regex';'Match']
 
 .sub '' :anon :load :init
-    .local pmc type_obj, how, NQPClassHOW
+    .local pmc type_obj, how, NQPClassHOW, capture
     get_hll_global NQPClassHOW, "NQPClassHOW"
     type_obj = NQPClassHOW."new_type"("Match" :named("name"))
     how = get_how type_obj
     set_hll_global ["Regex"], "Match", type_obj
     set_global "$?CLASS", type_obj
+
+    capture = get_hll_global "NQPCapture"
+    how.'add_parent'(type_obj, capture)
 
     # Add all methods.
     .const 'Sub' $P10 = 'Regex_Match_meth_CURSOR'
