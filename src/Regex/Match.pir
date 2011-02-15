@@ -113,8 +113,7 @@ Returns the offset in the target string of the beginning of the match.
     .local pmc cur_class
     cur_class = get_global '$?CLASS'
     $I0 = repr_get_attr_int self, cur_class, '$!from'
-    $P0 = $I0
-    .return ($P0)
+    .return ($I0)
 .end
 
 
@@ -128,8 +127,7 @@ Returns the offset in the target string of the end of the match.
     .local pmc cur_class
     cur_class = get_global '$?CLASS'
     $I0 = repr_get_attr_int self, cur_class, '$!to'
-    $P0 = $I0
-    .return ($P0)
+    .return ($I0)
 .end
 
 
