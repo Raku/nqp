@@ -68,11 +68,11 @@ This file implements Match objects for the regex engine.
     NQPAttribute = get_hll_global "NQPAttribute"
     int_type = get_hll_global "int"
 
-    attr = NQPAttribute.'new'('$!from' :named('name'))
-    how.'add_attribute'(type_obj, attr, int_type :named('type'))
+    attr = NQPAttribute.'new'('$!from' :named('name'), int_type :named('type'))
+    how.'add_attribute'(type_obj, attr)
 
-    attr = NQPAttribute.'new'('$!to' :named('name'))
-    how.'add_attribute'(type_obj, attr, int_type :named('type'))
+    attr = NQPAttribute.'new'('$!to' :named('name'), int_type :named('type'))
+    how.'add_attribute'(type_obj, attr)
 
     attr = NQPAttribute.'new'('$!target')
     how.'add_attribute'(type_obj, attr)
