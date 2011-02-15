@@ -192,8 +192,9 @@ Match objects.
 =cut
 
 .sub 'new_match' :method :subid('Regex_Cursor_meth_new_match')
-    .local pmc match
-    match = new ['Regex';'Match']
+    .local pmc match_class, match
+    match_class = get_hll_global ["Regex"], "Match"
+    match = match_class.'new'()
     .return (match)
 .end
 
