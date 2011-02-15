@@ -102,7 +102,9 @@ Returns the Cursor associated with this match object.
 =cut
 
 .sub 'CURSOR' :method :subid('Regex_Match_meth_CURSOR')
-    $P0 = getattribute self, '$!cursor'
+    .local pmc cur_class
+    cur_class = get_global '$?CLASS'
+    $P0 = getattribute self, cur_class, '$!cursor'
     .return ($P0)
 .end
 
@@ -158,7 +160,9 @@ Return the original item that was matched against.
 =cut
 
 .sub 'orig' :method :subid('Regex_Match_meth_orig')
-    $P0 = getattribute self, '$!target'
+    .local pmc cur_class
+    cur_class = get_global '$?CLASS'
+    $P0 = getattribute self, cur_class, '$!target'
     .return ($P0)
 .end
 
@@ -187,12 +191,13 @@ has been set then returns C<Str> above.
 =cut
 
 .sub 'ast' :method :subid('Regex_Match_meth_ast')
-    .local pmc ast
-    ast = getattribute self, '$!ast'
+    .local pmc cur_class, ast
+    cur_class = get_global '$?CLASS'
+    ast = getattribute self, cur_class, '$!ast'
     unless null ast goto have_ast
     # XXX should probably be NQPMu or so
     ast = new ['Undef']
-    setattribute self, '$!ast', ast
+    setattribute self, cur_class, '$!ast', ast
   have_ast:
     .return (ast)
 .end
@@ -252,7 +257,9 @@ Set the "ast object" for the invocant.
 
 .sub '!make' :method :subid('Regex_Match_meth_!make')
     .param pmc obj
-    setattribute self, '$!ast', obj
+    .local pmc cur_class
+    cur_class = get_global '$?CLASS'
+    setattribute self, cur_class, '$!ast', obj
     .return (obj)
 .end
 
