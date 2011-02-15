@@ -234,15 +234,14 @@ for the Cursor if one hasn't been created yet.
     match = self.'new_match'()
     setattribute self, cur_class, '$!match', match
     setattribute match, match_class, '$!cursor', self
-    .local pmc target, from, to
+    .local pmc target
+    .local int from, to
     target = getattribute self, cur_class, '$!target'
     setattribute match, match_class, '$!target', target
-    $I0 = repr_get_attr_int self, cur_class, '$!from'
-    from = box $I0
-    repr_bind_attr_int match, match_class, '$!from', $I0
-    $I0 = repr_get_attr_int self, cur_class, '$!pos'
-    to = box $I0
-    repr_bind_attr_int match, match_class, '$!to', $I0
+    from = repr_get_attr_int self, cur_class, '$!from'
+    repr_bind_attr_int match, match_class, '$!from', from
+    to = repr_get_attr_int self, cur_class, '$!pos'
+    repr_bind_attr_int match, match_class, '$!to', to
 
     # Create any arrayed subcaptures.
     .local pmc caparray, caparray_it, caphash
