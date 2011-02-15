@@ -220,8 +220,9 @@ for the Cursor if one hasn't been created yet.
 =cut
 
 .sub 'MATCH' :method :subid('Regex_Cursor_meth_MATCH')
-    .local pmc cur_class, match
+    .local pmc cur_class, match, match_class
     cur_class = get_global '$?CLASS'
+    match_class = get_hll_global ["Regex"], "Match"
     match = getattribute self, cur_class, '$!match'
     if null match goto match_make
     $P0 = get_global '$!TRUE'
@@ -232,16 +233,16 @@ for the Cursor if one hasn't been created yet.
   match_make:
     match = self.'new_match'()
     setattribute self, cur_class, '$!match', match
-    setattribute match, '$!cursor', self
+    setattribute match, match_class, '$!cursor', self
     .local pmc target, from, to
     target = getattribute self, cur_class, '$!target'
-    setattribute match, '$!target', target
+    setattribute match, match_class, '$!target', target
     $I0 = repr_get_attr_int self, cur_class, '$!from'
     from = box $I0
-    setattribute match, '$!from', from
+    repr_bind_attr_int match, match_class, '$!from', $I0
     $I0 = repr_get_attr_int self, cur_class, '$!pos'
     to = box $I0
-    setattribute match, '$!to', to
+    repr_bind_attr_int match, match_class, '$!to', $I0
 
     # Create any arrayed subcaptures.
     .local pmc caparray, caparray_it, caphash
