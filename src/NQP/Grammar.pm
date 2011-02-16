@@ -433,7 +433,8 @@ rule regex_declarator {
       <deflongname>
       [ 
       || '{' '<...>' '}'<?ENDSTMT>
-      || <.panic: "Proto regex body must be <...>">
+      || '{' '<*>' '}'<?ENDSTMT>
+      || <.panic: "Proto regex body must be <*> (or <...>, which is deprecated)">
       ]
     | $<sym>=[regex|token|rule]
       <deflongname>
