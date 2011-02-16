@@ -3,8 +3,31 @@ class NQPMu {
         pir::repr_instance_of__PP(self)
     }
 
-    method new() {
-        self.CREATE()
+
+    method bless(NQPMu:U $self: *%attributes) {
+        my $instance := self.CREATE();
+        $instance.BUILDALL(|%attributes);
+        $instance
+    }
+
+    method BUILDALL(NQPMu:D $self: *%attributes) {
+        for $self.HOW.parents($self) -> $class {
+            $self.BUILD_MAGIC($class, |%attributes);
+        }
+    }
+
+    method BUILD_MAGIC(NQPMu:D $self: $type, *%attributes) {
+        for $type.HOW.attributes($type, :local) {
+            my $name := $_.name;
+            my $shortname := pir::substr($name, 2);
+            if pir::exists(%attributes, $shortname) {
+                pir::setattribute__vPPsP($self, $type, $name, %attributes{$shortname});
+            }
+        }
+    }
+
+    method new(*%attributes) {
+        self.bless(|%attributes);
     }
 
     proto method Str() is parrot_vtable('get_string') { * }
