@@ -57,4 +57,11 @@ class NQPCapture is NQPMu {
     method ($key, $value) is parrot_vtable('set_pmc_keyed_int') {
         @!array[$key] := $value
     }
+
+    method ($key) is parrot_vtable('exists_keyed_str') {
+        pir::exists(%!hash, $key);
+    }
+    method ($key) is parrot_vtable('exists_keyed_int') {
+        pir::exists(@!array, $key);
+    }
 }
