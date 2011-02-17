@@ -26,6 +26,7 @@ and HLL::Grammar.
 .include 'gen/hllgrammar-actions.pir'
 .include 'gen/hllcompiler.pir'
 .include 'gen/hllcommandline.pir'
+.include 'gen/hllserializationcontextbuilder.pir'
 
 .sub '' :anon :load :init
     $P0 = get_hll_global ['HLL'], 'Compiler'

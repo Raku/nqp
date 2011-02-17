@@ -67,6 +67,7 @@ HLL_SOURCES = \
   src/HLL/Actions.pm \
   src/HLL/Compiler.pm \
   src/HLL/CommandLine.pm \
+  src/HLL/SerializationContextBuilder.pm \
 
 P6REGEX_SOURCES = \
   src/Regex/P6Regex.pir \
@@ -114,6 +115,7 @@ HLLGRAMMAR_A    = gen/hllgrammar-actions.pir
 
 HLLCOMPILER_PIR = gen/hllcompiler.pir
 HLLCOMMANDLINE_PIR = gen/hllcommandline.pir
+HLLSERIALIZATIONCONTEXTBUILDER_PIR = gen/hllserializationcontextbuilder.pir
 
 P6REGEX_PBC     = P6Regex.pbc
 P6REGEX_G       = gen/p6regex-grammar.pir
@@ -257,6 +259,9 @@ $(STAGE1)/$(HLL_PBC): $(STAGE0_PBCS) $(HLL_SOURCES)
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE1)/$(HLLCOMMANDLINE_PIR) \
 	    src/HLL/CommandLine.pm
+	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
+	    --target=pir --output=$(STAGE1)/$(HLLSERIALIZATIONCONTEXTBUILDER_PIR) \
+	    src/HLL/SerializationContextBuilder.pm
 	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(HLL_PBC) \
 	    src/HLL.pir
 
@@ -310,6 +315,9 @@ $(STAGE2)/$(HLL_PBC): $(STAGE1_PBCS) $(HLL_SOURCES)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(HLLCOMMANDLINE_PIR) \
 	    src/HLL/CommandLine.pm
+	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
+	    --target=pir --output=$(STAGE2)/$(HLLSERIALIZATIONCONTEXTBUILDER_PIR) \
+	    src/HLL/SerializationContextBuilder.pm
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(HLL_PBC) \
 	    src/HLL.pir
 
