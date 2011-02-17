@@ -639,7 +639,10 @@ static void gc_mark(PARROT_INTERP, PMC *self, PMC *obj) {
 /* This Parrot-specific addition to the API is used to free an object. */
 static void gc_free(PARROT_INTERP, PMC *self, PMC *obj) {
     REPRP6opaque *repr = P6O_REPR_STRUCT(self);
-    Parrot_gc_free_fixed_size_storage(interp, repr->allocation_size, PMC_data(obj));
+	if (repr->allocation_size)
+		Parrot_gc_free_fixed_size_storage(interp, repr->allocation_size, PMC_data(obj));
+	else
+		mem_sys_free(PMC_data(obj));
     PMC_data(obj) = NULL;
 }
 
