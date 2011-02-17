@@ -311,8 +311,26 @@ token package_declarator:sym<native> {
 }
 
 rule package_def {
+    :my $*PKGMETA;     # The meta-object for this package.
+    :my %*ATTR-CHECK;  # Attribute names we must confirm exist.
+    
     <name>
     [ 'is' 'repr(' <repr=.quote_EXPR> ')' ]?
+    
+    {
+        # Construct meta-object for this package.
+        my $mo := %*HOW{$*PKGDECL};
+        my %args;
+        %args<name> := ~$<name>;
+        if $<repr> {
+            %args<repr> := ~$<repr>[0];
+        }
+        if pir::can($mo, 'parametric') && $mo.parametric($mo) {
+            %args<body_block> := -> $c { };
+        }
+        $*PKGMETA := $mo.new_type(|%args);
+    }
+    
     [ 'is' <parent=.name> ]?
     [ 'does' <role=.name> ]*
     [
