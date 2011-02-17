@@ -67,4 +67,14 @@ class NQPCapture is NQPMu {
     method ($key) is parrot_vtable('exists_keyed_int') {
         pir::exists(@!array, $key);
     }
+
+    method ($key) is parrot_vtable('delete_keyed') {
+        pir::delete(%!hash, $key);
+    }
+    method ($key) is parrot_vtable('delete_keyed_str') {
+        pir::delete(%!hash, $key);
+    }
+    method ($key) is parrot_vtable('delete_keyed_int') {
+        pir::delete(@!array, $key);
+    }
 }
