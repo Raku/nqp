@@ -49,12 +49,19 @@ sub colonpair_str($ast) {
 method comp_unit($/) {
     my $mainline := $<statementlist>.ast;
     my $unit     := @BLOCK.shift;
+    
+    # Unit needs to have a load-init holding the deserialization or
+    # fixup code for this compilation unit.
+    # XXX Apart from ENOTYET, because we still violate the "can't
+    # declare a meta-object in the same compilation unit as it
+    # gets used" rule
+    #$unit.loadinit().push($*SC.to_past());
 
     # If our caller wants to know the mainline ctx, provide it here.
     # (CTXSAVE is inherited from HLL::Actions.)
     $unit.push( self.CTXSAVE() );
 
-    # Need to load the nqp-rx dynops/dympmcs.
+    # Need to load the NQP dynops/dympmcs.
     $unit.loadlibs('nqp_group', 'nqp_ops');
     $unit.unshift(PAST::Op.new( :pirop('nqp_dynop_setup v') ));
 

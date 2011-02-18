@@ -47,8 +47,21 @@ class HLL::Compiler::SerializationContextBuilder {
         pir::get_addr__IP($obj)
     }
     
-    # The event stream that builds them.
+    # The event stream that builds or fixes up objects.
     has @!event_stream;
+    
+    # XXX Fix BUILD...
+    method new() {
+        my $obj := self.CREATE();
+        $obj.BUILD();
+        $obj
+    }
+    
+    method BUILD() {
+        @!root_objects := pir::new('ResizablePMCArray');
+        %!addr_to_slot := pir::new('Hash');
+        @!event_stream := pir::new('ResizablePMCArray');
+    }
     
     # Gets the slot for a given object. Dies if it is not in the context.
     method slot_for_object($obj) {
@@ -70,7 +83,7 @@ class HLL::Compiler::SerializationContextBuilder {
     
     # Utility sub to wrap PAST with slot setting.
     sub set_slot_past($slot, $past_to_set) {
-        return PAST::Op.new( :pirop('nqp_set_sc_object vPP'), $slot, $past_to_set );
+        return PAST::Op.new( :pirop('nqp_set_sc_object viP'), $slot, $past_to_set );
     }
     
     # Adds an object to the root set, along with a mapping.
@@ -79,6 +92,12 @@ class HLL::Compiler::SerializationContextBuilder {
         @!root_objects[$idx] := $obj;
         %!addr_to_slot{addr($obj)} := $idx;
         $idx
+    }
+    
+    method add_event(:$deserialize_past, :$fixup_past) {
+        @!event_stream.push(HLL::Compiler::SerializationContextBuilder::Event.new(
+            :deserialize_past($deserialize_past), :fixup_past($fixup_past)
+        ));
     }
     
     # Creates a meta-object for a package, adds it to the root objects and
@@ -93,7 +112,7 @@ class HLL::Compiler::SerializationContextBuilder {
         
         # Add an event. There's no fixup to do, just a type object to create
         # on deserialization.
-        my @how_ns := pir::split('::', $mo.HOW.HOW.name($mo.HOW));
+        my @how_ns := pir::split('::', $how.HOW.name($how));
         my $how_name := @how_ns.pop();
         my $setup_call := PAST::Op.new(
             :pasttype('callmethod'), :name('new_type'),
@@ -126,6 +145,13 @@ class HLL::Compiler::SerializationContextBuilder {
     
     # Composes the package, and stores an event for this action.
     method pkg_compose($obj) {
+        my $slot_past := get_slot_past_for_object($obj);
+        self.add_event(:deserialize_past(PAST::Op.new(
+            :pasttype('callmethod'), :name('compose'),
+            PAST::Op.new( :pirop('get_how PP'), $slot_past ),
+            $slot_past
+        )));
+        $obj
     }
     
     # Gets the root object graph for the serialization context, which can
@@ -137,6 +163,12 @@ class HLL::Compiler::SerializationContextBuilder {
     # Generates a series of PAST operations that will build this context if
     # it doesn't exist, and fix it up if it already does.
     method to_past() {
+        # XXX For now we always deserialize, just to get things working.
+        my $ds := PAST::Stmts.new();
+        for @!event_stream {
+            $ds.push($_.deserialize_past());
+        }
+        $ds
     }
 }
 

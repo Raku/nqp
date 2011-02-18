@@ -29,8 +29,10 @@ static void setup_sc_stores(PARROT_INTERP) {
 PMC * SC_get_sc_object(PARROT_INTERP, INTVAL idx) {
     /* Locate the SC root list for this bytecode segment. */
     INTVAL addr = (INTVAL)interp->code;
-    INTVAL scs  = VTABLE_elements(interp, sc_index_lookup);
-    INTVAL i;
+    INTVAL scs, i;
+    if (!sc_index_lookup)
+        setup_sc_stores(interp);
+    scs = VTABLE_elements(interp, sc_index_lookup);
     for (i = 0; i < scs; i++) {
         if (VTABLE_get_integer_keyed_int(interp, sc_index_lookup, i) == addr) {
             /* Found it; grab object we're looking for. */
@@ -48,9 +50,11 @@ PMC * SC_get_sc_object(PARROT_INTERP, INTVAL idx) {
 void SC_set_sc_object(PARROT_INTERP, INTVAL idx, PMC *object) {
     /* Locate the SC root list for this bytecode segment. */
     INTVAL addr    = (INTVAL)interp->code;
-    INTVAL scs     = VTABLE_elements(interp, sc_index_lookup);
     PMC *  sc_root = PMCNULL;
-    INTVAL i;
+    INTVAL scs, i;
+    if (!sc_index_lookup)
+        setup_sc_stores(interp);
+    scs = VTABLE_elements(interp, sc_index_lookup);
     for (i = 0; i < scs; i++) {
         if (VTABLE_get_integer_keyed_int(interp, sc_index_lookup, i) == addr) {
             sc_root = VTABLE_get_pmc_keyed_int(interp, sc_root_objects, i);

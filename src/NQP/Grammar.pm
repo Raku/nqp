@@ -2,6 +2,7 @@ grammar NQP::Grammar is HLL::Grammar;
 
 
 method TOP() {
+    # Language braids.
     my %*LANG;
     %*LANG<Regex>         := NQP::Regex;
     %*LANG<Regex-actions> := NQP::RegexActions;
@@ -21,6 +22,11 @@ method TOP() {
     my $*DEFAULT-METAATTR := 'NQPAttribute';
     my %*HOW-METAATTR;
     %*HOW-METAATTR<knowhow> := 'KnowHOWAttribute';
+    
+    # Serialization context builder - keeps track of objects that
+    # cross the compile-time/run-time boundary that are associated
+    # with this compilation unit.
+    my $*SC := HLL::Compiler::SerializationContextBuilder.new();
 
     my $*SCOPE       := '';
     my $*MULTINESS   := '';
@@ -318,17 +324,14 @@ rule package_def {
     [ 'is' 'repr(' <repr=.quote_EXPR> ')' ]?
     
     {
-        # Construct meta-object for this package.
-        my $mo := %*HOW{$*PKGDECL};
+        # Construct meta-object for this package, adding it to the
+        # serialization context for this compilation unit.
         my %args;
         %args<name> := ~$<name>;
         if $<repr> {
             %args<repr> := ~$<repr>[0];
         }
-        if pir::can($mo, 'parametric') && $mo.parametric($mo) {
-            %args<body_block> := -> $c { };
-        }
-        $*PKGMETA := $mo.new_type(|%args);
+        $*PKGMETA := $*SC.pkg_create_mo(%*HOW{$*PKGDECL}, |%args);
     }
     
     [ 'is' <parent=.name> ]?
