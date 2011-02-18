@@ -22,6 +22,9 @@
 # Note that deserialization and installation aren't the same thing; the first
 # step sees us producing an array of objects, while the second is about putting
 # them in places the HLL can find them.
+#
+# It may be that this approach will also carry almost directly over to nqpclr
+# and nqpjvm.
 
 class HLL::Compiler::SerializationContextBuilder::Event {
     # The PAST that we emit to perform the action if in deserialization mode.
@@ -61,6 +64,8 @@ class HLL::Compiler::SerializationContextBuilder {
     # for doing installations in the package or lexpad, or when the object is
     # a constant and we're using the SC as a constants table).
     method get_slot_past($obj) {
+        my $slot := self.slot_for($obj);
+        return PAST::Op.new( :pirop('nqp_get_sc_object Pi'), $slot );
     }
     
     # Creates a meta-object for a package, adds it to the root objects and
