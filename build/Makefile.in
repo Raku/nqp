@@ -159,13 +159,14 @@ METAMODEL_SOURCE = src/metamodel/rakudoobject.h src/metamodel/rakudoobject.c \
                    src/metamodel/reprs/P6str.h src/metamodel/reprs/P6str.c \
                    src/metamodel/reprs/P6num.h src/metamodel/reprs/P6num.c \
                    src/metamodel/multi_dispatch.h src/metamodel/multi_dispatch.c \
-                   src/metamodel/storage_spec.h
+                   src/metamodel/storage_spec.h src/metamodel/serialization_context.c \
+                   src/metamodel/serialization_context.h
 
 METAMODEL_OBJS   = ../metamodel/rakudoobject$(O) ../metamodel/repr_registry$(O) \
                    ../metamodel/knowhow_bootstrapper$(O) ../metamodel/reprs/KnowHOWREPR$(O) \
                    ../metamodel/reprs/P6opaque$(O) ../metamodel/reprs/P6int$(O) \
                    ../metamodel/reprs/P6str$(O) ../metamodel/reprs/P6num$(O) \
-                   ../metamodel/multi_dispatch$(O)
+                   ../metamodel/multi_dispatch$(O) ../metamodel/serialization_context$(O)
 
 HOW_SOURCES  = src/metamodel/how/KnowHOWAttribute.pm src/metamodel/how/NQPClassHOW.pm \
                src/metamodel/how/NQPNativeHOW.pm src/metamodel/how/NQPAttribute.pm \
@@ -393,6 +394,7 @@ $(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS_SOURCE) $(DYNPMC)
 	cd src/metamodel/reprs && $(CC) -c @cc_o_out@P6str$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6str.c
 	cd src/metamodel/reprs && $(CC) -c @cc_o_out@P6num$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6num.c
 	cd src/metamodel && $(CC) -c @cc_o_out@multi_dispatch$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) multi_dispatch.c
+	cd src/metamodel && $(CC) -c @cc_o_out@serialization_context$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) serialization_context.c
 	cd $(OPS_DIR) && $(LD) @ld_out@$(OPS)$(LOAD_EXT) $(OPS)$(O) $(METAMODEL_OBJS) $(LINKARGS)
 
 bootstrap-files: $(STAGE2_PBCS) $(SETTING_NQP)

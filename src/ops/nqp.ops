@@ -11,6 +11,7 @@ BEGIN_OPS_PREAMBLE
 #include "../pmc/pmc_dispatchersub.h"
 #include "../pmc/pmc_nqpmultisig.h"
 #include "../metamodel/multi_dispatch.h"
+#include "../metamodel/serialization_context.h"
 #include "pmc_sub.h"
 
 /* Did we do the dynop setup yet?
@@ -635,4 +636,30 @@ inline op stable_publish_vtable_mapping(in PMC, in PMC) :base_core {
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use stable_publish_vtable_mapping with a RakudoObject");
+}
+
+/*
+
+=item nqp_get_sc_object()
+
+Fetches an object from the current segment's serialization context.
+
+=cut
+
+*/
+inline op nqp_get_sc_object(out PMC, in INT) :base_core {
+    $1 = SC_get_sc_object(interp, $2);
+}
+
+/*
+
+=item nqp_set_sc_object()
+
+Stores an object in the current segment's serialization context.
+
+=cut
+
+*/
+inline op nqp_set_sc_object(in INT, in PMC) :base_core {
+    SC_set_sc_object(interp, $1, $2);
 }
