@@ -169,11 +169,11 @@ HOW_SOURCES  = src/metamodel/how/KnowHOWAttribute.pm src/metamodel/how/NQPClassH
                src/metamodel/how/NQPNativeHOW.pm src/metamodel/how/NQPAttribute.pm \
                src/metamodel/how/NQPConcreteRoleHOW.pm src/metamodel/how/NQPParametricRoleHOW.pm \
                src/metamodel/how/RoleToClassApplier.pm src/metamodel/how/RoleToRoleApplier.pm \
-               src/metamodel/how/NQPModuleHOW.pm src/metamodel/how/NQPMu.pm \
-               src/metamodel/how/NativeTypes.pm
+               src/metamodel/how/NQPModuleHOW.pm src/core/NativeTypes.pm src/core/NQPMu.pm
 
 HOW_COMBINED = src/gen/how.pm
 
+CORE_SOURCES = src/core/NativeTypes.pm src/core/NQPMu.pm
 
 CLEANUPS = \
   *.manifest \
