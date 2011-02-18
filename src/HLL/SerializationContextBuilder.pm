@@ -51,7 +51,7 @@ class HLL::Compiler::SerializationContextBuilder {
     has @!event_stream;
     
     # Gets the slot for a given object. Dies if it is not in the context.
-    method slot_for($obj) {
+    method slot_for_object($obj) {
         my $slot := %!addr_to_slot{addr($obj)};
         unless pir::defined($slot) {
             pir::die('slot_for called on object no in context');
@@ -63,14 +63,53 @@ class HLL::Compiler::SerializationContextBuilder {
     # is useful when building code that needs to grab a pre-built object (e.g.
     # for doing installations in the package or lexpad, or when the object is
     # a constant and we're using the SC as a constants table).
-    method get_slot_past($obj) {
-        my $slot := self.slot_for($obj);
+    method get_slot_past_for_object($obj) {
+        my $slot := self.slot_for_object($obj);
         return PAST::Op.new( :pirop('nqp_get_sc_object Pi'), $slot );
+    }
+    
+    # Utility sub to wrap PAST with slot setting.
+    sub set_slot_past($slot, $past_to_set) {
+        return PAST::Op.new( :pirop('nqp_set_sc_object vPP'), $slot, $past_to_set );
+    }
+    
+    # Adds an object to the root set, along with a mapping.
+    method add_object($obj) {
+        my $idx := +@!root_objects;
+        @!root_objects[$idx] := $obj;
+        %!addr_to_slot{addr($obj)} := $idx;
+        $idx
     }
     
     # Creates a meta-object for a package, adds it to the root objects and
     # stores an event for the action. Returns the created object.
     method pkg_create_mo($how, :$name, :$repr) {
+        # Create the meta-object and add to root objects.
+        my %args;
+        if pir::defined($name) { %args<name> := $name; }
+        if pir::defined($repr) { %args<repr> := $repr; }
+        my $mo := $how.new_type(|%args);
+        my $slot := self.add_object($mo);
+        
+        # Add an event. There's no fixup to do, just a type object to create
+        # on deserialization.
+        my @how_ns := pir::split('::', $mo.HOW.HOW.name($mo.HOW));
+        my $how_name := @how_ns.pop();
+        my $setup_call := PAST::Op.new(
+            :pasttype('callmethod'), :name('new_type'),
+            # XXX Scoping issues here...but let's make something work first.
+            PAST::Var.new( :name($how_name), :namespace(@how_ns), :scope('package') )
+        );
+        if pir::defined($name) {
+            $setup_call.push(PAST::Val.new( :value($name), :named('name') ));
+        }
+        if pir::defined($repr) {
+            $setup_call.push(PAST::Val.new( :value($repr), :named('repr') ));
+        }
+        self.add_event(:deserialize_past(set_slot_past($slot, $setup_call)));
+        
+        # Result is just the object.
+        return $mo;
     }
     
     # Adds a method to the meta-object, and stores an event for the action.
