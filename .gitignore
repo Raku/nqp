@@ -15,6 +15,7 @@ Makefile
 *.pdb
 *.dump
 *.exe
+*.suo
 src/ops/*.h
 src/ops/*.c
 src/pmc/pmc_*.h
@@ -28,9 +29,10 @@ nqp.c
 nqp_group.c
 nqp_group.h
 nqp.pbc
-nqp-setting.pbc
+CORE.setting.pbc
 src/gen/*.pir
 src/gen/*.nqp
 src/gen/*.pm
+src/gen/*.setting
 src/stage1
 src/stage2
