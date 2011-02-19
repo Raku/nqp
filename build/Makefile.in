@@ -86,16 +86,6 @@ NQP_SOURCES = \
   src/NQP/Compiler.pir \
   src/cheats/nqp-builtins.pir \
 
-SETTING_SOURCES = \
-  src/setting/ResizablePMCArray.pm \
-  src/setting/Hash.pm \
-  src/setting/Regex.pm \
-  src/setting/IO.pm \
-
-SETTING_NQP = src/gen/nqp-setting.nqp
-SETTING_PIR = src/gen/nqp-setting.pir
-SETTING_PBC = nqp-setting.pbc
-
 STAGE0_SOURCES = \
   src/stage0/Regex-s0.pir \
   src/stage0/HLL-s0.pir \
@@ -173,7 +163,13 @@ HOW_SOURCES  = src/metamodel/how/KnowHOWAttribute.pm src/metamodel/how/NQPClassH
 
 HOW_COMBINED = src/gen/how.pm
 
-CORE_SOURCES = src/core/NativeTypes.pm src/core/NQPMu.pm
+CORE_SETTING_SOURCES = src/core/NativeTypes.pm src/core/NQPMu.pm src/core/IO.pm \
+                       src/core/Regex.pm
+
+CORE_SETTING_NQP = src/gen/CORE.setting
+CORE_SETTING_PIR = src/gen/CORE.setting.pir
+CORE_SETTING_PBC = CORE.setting.pbc
+
 
 CLEANUPS = \
   *.manifest \
@@ -212,7 +208,7 @@ CLEANUPS = \
   $(OPS_DIR)/*$(LOAD_EXT) \
   $(DYNEXT_DIR)/*$(LOAD_EXT) \
 
-all: $(NQP_EXE) $(SETTING_PBC)
+all: $(NQP_EXE) $(CORE_SETTING_PBC)
 
 install: all
 	$(MKPATH)              $(DESTDIR)$(NQP_LANG_DIR)
@@ -352,12 +348,12 @@ $(ALL_PBCS): $(REGEX_PBC) $(STAGE2_PBCS)
 $(NQP_EXE): $(NQP_PBC)
 	$(PBC_TO_EXE) $(NQP_PBC)
 
-$(SETTING_NQP): $(SETTING_SOURCES)
-	$(PERL) build/gen_setting.pl $(SETTING_SOURCES) > $(SETTING_NQP)
-$(SETTING_PIR): $(SETTING_NQP) $(NQP_PBC)
-	$(PARROT) $(NQP_PBC) --target=pir --output=$(SETTING_PIR) $(SETTING_NQP)
-$(SETTING_PBC): $(SETTING_PIR)
-	$(PARROT) -o $(SETTING_PBC) $(SETTING_PIR)
+$(CORE_SETTING_NQP): $(CORE_SETTING_SOURCES)
+	$(PERL) build/gen_setting.pl $(CORE_SETTING_SOURCES) > $(CORE_SETTING_NQP)
+$(CORE_SETTING_PIR): $(CORE_SETTING_NQP) $(NQP_PBC)
+	$(PARROT) $(NQP_PBC) --target=pir --output=$(CORE_SETTING_PIR) $(CORE_SETTING_NQP)
+$(CORE_SETTING_PBC): $(CORE_SETTING_PIR)
+	$(PARROT) -o $(CORE_SETTING_PBC) $(CORE_SETTING_PIR)
 
 $(DYNEXT_TARGET): $(DYNPMC) $(DYNOPS)
 	$(CP) $(DYNPMC) $(DYNEXT_DIR)
@@ -387,12 +383,12 @@ $(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS_SOURCE) $(DYNPMC)
 	cd src/metamodel && $(CC) -c @cc_o_out@multi_dispatch$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) multi_dispatch.c
 	cd $(OPS_DIR) && $(LD) @ld_out@$(OPS)$(LOAD_EXT) $(OPS)$(O) $(METAMODEL_OBJS) $(LINKARGS)
 
-bootstrap-files: $(STAGE2_PBCS) $(SETTING_NQP)
+bootstrap-files: $(STAGE2_PBCS) $(CORE_SETTING_NQP)
 	$(PERL) build/gen_bootstrap.pl src/Regex.pir >src/stage0/Regex-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/HLL.pir >src/stage0/HLL-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/Regex/P6Regex.pir >src/stage0/P6Regex-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/NQP/Compiler.pir >src/stage0/NQP-s0.pir
-	$(PERL) build/gen_bootstrap.pl $(SETTING_NQP) >src/stage0/nqp-setting.nqp
+	$(PERL) build/gen_bootstrap.pl $(CORE_SETTING_NQP) >src/stage0/CORE.setting
 	
 
 ## testing

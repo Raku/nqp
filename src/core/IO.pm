@@ -1,5 +1,3 @@
-#! nqp
-
 =begin
 
 IO Methods and Functions
@@ -30,7 +28,7 @@ sub close($handle) {
 Returns the contents of C<$filename> as a single string.
 =end item
 
-our sub slurp ($filename) {
+sub slurp ($filename) {
     my $handle := open($filename, :r);
     my $contents := $handle.readall;
     $handle.close();
@@ -42,7 +40,7 @@ our sub slurp ($filename) {
 Write the string value of C<$contents> to C<$filename>.
 =end item
 
-our sub spew($filename, $contents) {
+sub spew($filename, $contents) {
     my $handle := pir::new__Ps('FileHandle');
     $handle.open($filename, 'w');
     $handle.print($contents);
