@@ -451,16 +451,13 @@ class HLL::Compiler {
     }
 
     method compile($source, *%adverbs) {
+        my %*COMPILING<%?OPTIONS> := %adverbs;
+
         Q:PIR {
             .local pmc source, adverbs, self
             source = find_lex '$source'
             adverbs = find_lex '%adverbs'
             self = find_lex 'self'
-
-            .local pmc compiling, options
-            compiling = new ['Hash']
-            .lex '%*COMPILING', compiling
-            compiling['%?OPTIONS'] = adverbs
 
             .local string target
             target = adverbs['target']
