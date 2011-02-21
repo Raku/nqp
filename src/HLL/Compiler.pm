@@ -453,56 +453,20 @@ class HLL::Compiler {
     method compile($source, *%adverbs) {
         my %*COMPILING<%?OPTIONS> := %adverbs;
 
-        Q:PIR {
-            .local pmc source, adverbs, self
-            source = find_lex '$source'
-            adverbs = find_lex '%adverbs'
-            self = find_lex 'self'
-
-            .local string target
-            target = adverbs['target']
-            target = downcase target
-
-            .local int stagestats
-            stagestats = adverbs['stagestats']
-
-            .local pmc stages, result, it
-            result = source
-            stages = self.'stages'()
-            it = iter stages
-            if stagestats goto stagestats_loop
-
-          iter_loop:
-            unless it goto have_result
-            .local string stagename
-            stagename = shift it
-            result = self.stagename(result, adverbs :flat :named)
-            if target == stagename goto have_result
-            goto iter_loop
-
-          stagestats_loop:
-            unless it goto have_result
-            stagename = shift it
-            $N0 = time
-            result = self.stagename(result, adverbs :flat :named)
-            $N1 = time
-            $N2 = $N1 - $N0
-            $P0 = getinterp
-            $P1 = $P0.'stderr_handle'()
-            $P1.'print'("Stage '")
-            $P1.'print'(stagename)
-            $P1.'print'("': ")
-            $P2 = new ['ResizablePMCArray']
-            push $P2, $N2
-            $S0 = sprintf "%.3f", $P2
-            $P1.'print'($S0)
-            $P1.'print'(" sec\n")
-            if target == stagename goto have_result
-            goto stagestats_loop
-
-          have_result:
-            .return (result)
-        };
+        my $target := pir::downcase(%adverbs<target>);
+        my $result := $source;
+        my $stderr := pir::getinterp().stderr_handle;
+        for self.stages() {
+            my $timestamp := pir::time__N();
+            $result := self."$_"($result, |%adverbs);
+            my $diff := pir::time__N() - $timestamp;
+            if %adverbs<stagestats> {
+                # TODO: plug in sprintf with %.3f
+                $stderr.print__N("Stage $_: $diff\n");
+            }
+            last if $_ eq $target;
+        }
+        return $result;
     }
 
     method parse($source, *%adverbs) {
