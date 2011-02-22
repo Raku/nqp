@@ -638,43 +638,23 @@ class HLL::Compiler {
     }
 
     method parse_name($name) {
-        Q:PIR {
-            .local string name
-            $P0 = find_lex '$name'
-            name = $P0
+        my @ns    := pir::split('::', $name);
+        my $sigil := pir::substr(@ns[0], 0, 1);
 
-            # split name on ::
-            .local pmc ns
-            ns = split '::', name
+        # move any leading sigil to the last item
+        my $idx   := pir::index('$@%&', $sigil);
+        if $idx >= 0 {
+            @ns[0]  := pir::substr(@ns[0], 1);
+            @ns[-1] := $sigil ~ @ns[-1];
+        }
 
-            # move any leading sigil to the last item
-            .local string sigil
-            $S0 = ns[0]
-            sigil = substr $S0, 0, 1
-            $I0 = index '$@%&', sigil
-            if $I0 < 0 goto sigil_done
-            $S0 = replace $S0, 0, 1, ''
-            ns[0] = $S0
-            $S0 = ns[-1]
-            $S0 = concat sigil, $S0
-            ns[-1] = $S0
-          sigil_done:
-
-            # remove any empty items from the list
-            .local pmc ns_it
-            ns_it = iter ns
-            ns = new ['ResizablePMCArray']
-          ns_loop:
-            unless ns_it goto ns_done
-            $S0 = shift ns_it
-            unless $S0 > '' goto ns_loop
-            push ns, $S0
-            goto ns_loop
-          ns_done:
-
-            # return the result
-            .return (ns)
-        };
+        # remove any empty items from the list
+        # maybe replace with a grep() once we have the setting for sure
+        my @actual_ns;
+        for @ns {
+            pir::push(@actual_ns, $_) unless $_ eq '';
+        }
+        @actual_ns;
     }
 
     method lineof($target, $pos, :$cache) {
