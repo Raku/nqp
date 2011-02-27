@@ -38,6 +38,7 @@ NQP::Compiler - NQP compiler
     nqpcomp.'parseactions'($P0)
     $P0 = nqpcomp.'commandline_options'()
     push $P0, 'parsetrace'
+    push $P0, 'setting=s'
 .end
 
 .sub 'main' :main
