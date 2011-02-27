@@ -4,7 +4,7 @@
 .loadlib "nqp_ops"
 
 .namespace []
-.sub "_block11"  :anon :subid("10_1298839301.843")
+.sub "_block11"  :anon :subid("10_1298845591.109")
 .annotate 'line', 0
     get_hll_global $P226, ["NQPMu"], "_block225" 
     capture_lex $P226
@@ -14,17 +14,17 @@
     capture_lex $P208
     get_hll_global $P199, ["int"], "_block198" 
     capture_lex $P199
-    .const 'Sub' $P111 = "17_1298839301.843" 
+    .const 'Sub' $P111 = "17_1298845591.109" 
     capture_lex $P111
-    .const 'Sub' $P78 = "15_1298839301.843" 
+    .const 'Sub' $P78 = "15_1298845591.109" 
     capture_lex $P78
-    .const 'Sub' $P66 = "14_1298839301.843" 
+    .const 'Sub' $P66 = "14_1298845591.109" 
     capture_lex $P66
-    .const 'Sub' $P55 = "13_1298839301.843" 
+    .const 'Sub' $P55 = "13_1298845591.109" 
     capture_lex $P55
-    .const 'Sub' $P50 = "12_1298839301.843" 
+    .const 'Sub' $P50 = "12_1298845591.109" 
     capture_lex $P50
-    .const 'Sub' $P17 = "11_1298839301.843" 
+    .const 'Sub' $P17 = "11_1298845591.109" 
     capture_lex $P17
 .annotate 'line', 1
     nqp_dynop_setup 
@@ -33,27 +33,27 @@
     get_hll_global $P15, "num"
     get_hll_global $P16, "int"
 .annotate 'line', 73
-    .const 'Sub' $P17 = "11_1298839301.843" 
+    .const 'Sub' $P17 = "11_1298845591.109" 
     newclosure $P49, $P17
     .lex "open", $P49
 .annotate 'line', 85
-    .const 'Sub' $P50 = "12_1298839301.843" 
+    .const 'Sub' $P50 = "12_1298845591.109" 
     newclosure $P54, $P50
     .lex "close", $P54
 .annotate 'line', 93
-    .const 'Sub' $P55 = "13_1298839301.843" 
+    .const 'Sub' $P55 = "13_1298845591.109" 
     newclosure $P65, $P55
     .lex "slurp", $P65
 .annotate 'line', 105
-    .const 'Sub' $P66 = "14_1298839301.843" 
+    .const 'Sub' $P66 = "14_1298845591.109" 
     newclosure $P77, $P66
     .lex "spew", $P77
 .annotate 'line', 126
-    .const 'Sub' $P78 = "15_1298839301.843" 
+    .const 'Sub' $P78 = "15_1298845591.109" 
     newclosure $P110, $P78
     .lex "match", $P110
 .annotate 'line', 148
-    .const 'Sub' $P111 = "17_1298839301.843" 
+    .const 'Sub' $P111 = "17_1298845591.109" 
     newclosure $P197, $P111
     .lex "subst", $P197
 .annotate 'line', 1
@@ -95,13 +95,13 @@
   vivify_58:
 .annotate 'line', 1
     .return ($P386)
-    .const 'Sub' $P388 = "39_1298839301.843" 
+    .const 'Sub' $P388 = "39_1298845591.109" 
     .return ($P388)
 .end
 
 
 .namespace []
-.sub "open"  :subid("11_1298839301.843") :outer("10_1298839301.843")
+.sub "open"  :subid("11_1298845591.109") :outer("10_1298845591.109")
     .param pmc param_18
     .param pmc param_19 :optional :named("r")
     .param int has_param_19 :opt_flag
@@ -190,7 +190,7 @@
 
 
 .namespace []
-.sub "close"  :subid("12_1298839301.843") :outer("10_1298839301.843")
+.sub "close"  :subid("12_1298845591.109") :outer("10_1298845591.109")
     .param pmc param_51
 .annotate 'line', 85
     .lex "$handle", param_51
@@ -203,7 +203,7 @@
 
 
 .namespace []
-.sub "slurp"  :subid("13_1298839301.843") :outer("10_1298839301.843")
+.sub "slurp"  :subid("13_1298845591.109") :outer("10_1298845591.109")
     .param pmc param_56
 .annotate 'line', 93
     .lex "$filename", param_56
@@ -231,7 +231,7 @@
 
 
 .namespace []
-.sub "spew"  :subid("14_1298839301.843") :outer("10_1298839301.843")
+.sub "spew"  :subid("14_1298845591.109") :outer("10_1298845591.109")
     .param pmc param_67
     .param pmc param_68
 .annotate 'line', 105
@@ -259,13 +259,13 @@
 
 
 .namespace []
-.sub "match"  :subid("15_1298839301.843") :outer("10_1298839301.843")
+.sub "match"  :subid("15_1298845591.109") :outer("10_1298845591.109")
     .param pmc param_79
     .param pmc param_80
     .param pmc param_81 :optional :named("global")
     .param int has_param_81 :opt_flag
 .annotate 'line', 126
-    .const 'Sub' $P91 = "16_1298839301.843" 
+    .const 'Sub' $P91 = "16_1298845591.109" 
     capture_lex $P91
     .lex "$text", param_79
     .lex "$regex", param_80
@@ -290,7 +290,7 @@
 .annotate 'line', 128
     goto if_88_end
   if_88:
-    .const 'Sub' $P91 = "16_1298839301.843" 
+    .const 'Sub' $P91 = "16_1298845591.109" 
     capture_lex $P91
     $P108 = $P91()
     set $P87, $P108
@@ -302,7 +302,7 @@
 
 .namespace []
 .include "except_types.pasm"
-.sub "_block90"  :anon :subid("16_1298839301.843") :outer("15_1298839301.843")
+.sub "_block90"  :anon :subid("16_1298845591.109") :outer("15_1298845591.109")
 .annotate 'line', 129
     $P92 = root_new ['parrot';'ResizablePMCArray']
     .lex "@matches", $P92
@@ -349,14 +349,14 @@
 
 .namespace []
 .include "except_types.pasm"
-.sub "subst"  :subid("17_1298839301.843") :outer("10_1298839301.843")
+.sub "subst"  :subid("17_1298845591.109") :outer("10_1298845591.109")
     .param pmc param_112
     .param pmc param_113
     .param pmc param_114
     .param pmc param_115 :optional :named("global")
     .param int has_param_115 :opt_flag
 .annotate 'line', 148
-    .const 'Sub' $P142 = "18_1298839301.843" 
+    .const 'Sub' $P142 = "18_1298845591.109" 
     capture_lex $P142
     .lex "$text", param_112
     .lex "$regex", param_113
@@ -426,7 +426,7 @@
     unless $P137, loop174_done
     shift $P140, $P137
   loop174_redo:
-    .const 'Sub' $P142 = "18_1298839301.843" 
+    .const 'Sub' $P142 = "18_1298845591.109" 
     capture_lex $P142
     $P142($P140)
   loop174_next:
@@ -474,7 +474,7 @@
 
 
 .namespace []
-.sub "_block141"  :anon :subid("18_1298839301.843") :outer("17_1298839301.843")
+.sub "_block141"  :anon :subid("18_1298845591.109") :outer("17_1298845591.109")
     .param pmc param_143
 .annotate 'line', 155
     .lex "$match", param_143
@@ -532,9 +532,9 @@
 
 
 .namespace ["int"]
-.sub "_block198"  :subid("19_1298839301.843") :outer("10_1298839301.843")
+.sub "_block198"  :subid("19_1298845591.109") :outer("10_1298845591.109")
 .annotate 'line', 7
-    .const 'Sub' $P202 = "20_1298839301.843" 
+    .const 'Sub' $P202 = "20_1298845591.109" 
     capture_lex $P202
     get_global $P200, "$?CLASS"
     .return ()
@@ -542,19 +542,19 @@
 
 
 .namespace ["int"]
-.sub "" :load :init :subid("post47") :outer("19_1298839301.843")
+.sub "" :load :init :subid("post47") :outer("19_1298845591.109")
 .annotate 'line', 7
     get_hll_global $P199, ["int"], "_block198" 
     .local pmc block
     set block, $P199
-    .const 'Sub' $P202 = "20_1298839301.843" 
+    .const 'Sub' $P202 = "20_1298845591.109" 
     capture_lex $P202
     $P202()
 .end
 
 
 .namespace ["int"]
-.sub "_block201"  :anon :subid("20_1298839301.843") :outer("19_1298839301.843")
+.sub "_block201"  :anon :subid("20_1298845591.109") :outer("19_1298845591.109")
 .annotate 'line', 7
     get_hll_global $P203, "NQPNativeHOW"
     $P204 = $P203."new_type"("int" :named("name"), "P6int" :named("repr"))
@@ -569,9 +569,9 @@
 
 
 .namespace ["num"]
-.sub "_block207"  :subid("21_1298839301.843") :outer("10_1298839301.843")
+.sub "_block207"  :subid("21_1298845591.109") :outer("10_1298845591.109")
 .annotate 'line', 9
-    .const 'Sub' $P211 = "22_1298839301.843" 
+    .const 'Sub' $P211 = "22_1298845591.109" 
     capture_lex $P211
     get_global $P209, "$?CLASS"
     .return ()
@@ -579,19 +579,19 @@
 
 
 .namespace ["num"]
-.sub "" :load :init :subid("post48") :outer("21_1298839301.843")
+.sub "" :load :init :subid("post48") :outer("21_1298845591.109")
 .annotate 'line', 9
     get_hll_global $P208, ["num"], "_block207" 
     .local pmc block
     set block, $P208
-    .const 'Sub' $P211 = "22_1298839301.843" 
+    .const 'Sub' $P211 = "22_1298845591.109" 
     capture_lex $P211
     $P211()
 .end
 
 
 .namespace ["num"]
-.sub "_block210"  :anon :subid("22_1298839301.843") :outer("21_1298839301.843")
+.sub "_block210"  :anon :subid("22_1298845591.109") :outer("21_1298845591.109")
 .annotate 'line', 9
     get_hll_global $P212, "NQPNativeHOW"
     $P213 = $P212."new_type"("num" :named("name"), "P6num" :named("repr"))
@@ -606,9 +606,9 @@
 
 
 .namespace ["str"]
-.sub "_block216"  :subid("23_1298839301.843") :outer("10_1298839301.843")
+.sub "_block216"  :subid("23_1298845591.109") :outer("10_1298845591.109")
 .annotate 'line', 11
-    .const 'Sub' $P220 = "24_1298839301.843" 
+    .const 'Sub' $P220 = "24_1298845591.109" 
     capture_lex $P220
     get_global $P218, "$?CLASS"
     .return ()
@@ -616,19 +616,19 @@
 
 
 .namespace ["str"]
-.sub "" :load :init :subid("post49") :outer("23_1298839301.843")
+.sub "" :load :init :subid("post49") :outer("23_1298845591.109")
 .annotate 'line', 11
     get_hll_global $P217, ["str"], "_block216" 
     .local pmc block
     set block, $P217
-    .const 'Sub' $P220 = "24_1298839301.843" 
+    .const 'Sub' $P220 = "24_1298845591.109" 
     capture_lex $P220
     $P220()
 .end
 
 
 .namespace ["str"]
-.sub "_block219"  :anon :subid("24_1298839301.843") :outer("23_1298839301.843")
+.sub "_block219"  :anon :subid("24_1298845591.109") :outer("23_1298845591.109")
 .annotate 'line', 11
     get_hll_global $P221, "NQPNativeHOW"
     $P222 = $P221."new_type"("str" :named("name"), "P6str" :named("repr"))
@@ -643,33 +643,33 @@
 
 
 .namespace ["NQPMu"]
-.sub "_block225"  :subid("25_1298839301.843") :outer("10_1298839301.843")
+.sub "_block225"  :subid("25_1298845591.109") :outer("10_1298845591.109")
 .annotate 'line', 14
-    .const 'Sub' $P347 = "38_1298839301.843" 
+    .const 'Sub' $P347 = "38_1298845591.109" 
     capture_lex $P347
-    .const 'Sub' $P337 = "37_1298839301.843" 
+    .const 'Sub' $P337 = "37_1298845591.109" 
     capture_lex $P337
-    .const 'Sub' $P325 = "36_1298839301.843" 
+    .const 'Sub' $P325 = "36_1298845591.109" 
     capture_lex $P325
-    .const 'Sub' $P321 = "35_1298839301.843" 
+    .const 'Sub' $P321 = "35_1298845591.109" 
     capture_lex $P321
-    .const 'Sub' $P310 = "34_1298839301.843" 
+    .const 'Sub' $P310 = "34_1298845591.109" 
     capture_lex $P310
-    .const 'Sub' $P307 = "33_1298839301.843" 
+    .const 'Sub' $P307 = "33_1298845591.109" 
     capture_lex $P307
-    .const 'Sub' $P301 = "32_1298839301.843" 
+    .const 'Sub' $P301 = "32_1298845591.109" 
     capture_lex $P301
-    .const 'Sub' $P263 = "30_1298839301.843" 
+    .const 'Sub' $P263 = "30_1298845591.109" 
     capture_lex $P263
-    .const 'Sub' $P242 = "28_1298839301.843" 
+    .const 'Sub' $P242 = "28_1298845591.109" 
     capture_lex $P242
-    .const 'Sub' $P232 = "27_1298839301.843" 
+    .const 'Sub' $P232 = "27_1298845591.109" 
     capture_lex $P232
-    .const 'Sub' $P228 = "26_1298839301.843" 
+    .const 'Sub' $P228 = "26_1298845591.109" 
     capture_lex $P228
     get_global $P227, "$?CLASS"
 .annotate 'line', 56
-    .const 'Sub' $P337 = "37_1298839301.843" 
+    .const 'Sub' $P337 = "37_1298845591.109" 
     newclosure $P345, $P337
 .annotate 'line', 14
     .return ($P345)
@@ -677,21 +677,21 @@
 
 
 .namespace ["NQPMu"]
-.sub "" :load :init :subid("post50") :outer("25_1298839301.843")
+.sub "" :load :init :subid("post50") :outer("25_1298845591.109")
 .annotate 'line', 14
     get_hll_global $P226, ["NQPMu"], "_block225" 
     .local pmc block
     set block, $P226
-    .const 'Sub' $P347 = "38_1298839301.843" 
+    .const 'Sub' $P347 = "38_1298845591.109" 
     capture_lex $P347
     $P347()
 .end
 
 
 .namespace ["NQPMu"]
-.sub "_block346"  :anon :subid("38_1298839301.843") :outer("25_1298839301.843")
+.sub "_block346"  :anon :subid("38_1298845591.109") :outer("25_1298845591.109")
 .annotate 'line', 14
-    .const 'Sub' $P364 = "33_1298839301.843" 
+    .const 'Sub' $P364 = "33_1298845591.109" 
     capture_lex $P364
     get_hll_global $P348, "NQPClassHOW"
     $P349 = $P348."new_type"("NQPMu" :named("name"))
@@ -700,42 +700,42 @@
     set_hll_global "NQPMu", type_obj
     set_global "$?CLASS", type_obj
     get_how $P350, type_obj
-    .const 'Sub' $P351 = "26_1298839301.843" 
+    .const 'Sub' $P351 = "26_1298845591.109" 
     $P350."add_method"(type_obj, "CREATE", $P351)
     get_how $P352, type_obj
-    .const 'Sub' $P353 = "27_1298839301.843" 
+    .const 'Sub' $P353 = "27_1298845591.109" 
     $P352."add_method"(type_obj, "bless", $P353)
     get_how $P354, type_obj
-    .const 'Sub' $P355 = "28_1298839301.843" 
+    .const 'Sub' $P355 = "28_1298845591.109" 
     $P354."add_method"(type_obj, "BUILDALL", $P355)
     get_how $P356, type_obj
-    .const 'Sub' $P357 = "30_1298839301.843" 
+    .const 'Sub' $P357 = "30_1298845591.109" 
     $P356."add_method"(type_obj, "BUILD_MAGIC", $P357)
     get_how $P358, type_obj
-    .const 'Sub' $P359 = "32_1298839301.843" 
+    .const 'Sub' $P359 = "32_1298845591.109" 
     $P358."add_method"(type_obj, "new", $P359)
     get_how $P360, type_obj
-    .const 'Sub' $P361 = "33_1298839301.843" 
+    .const 'Sub' $P361 = "33_1298845591.109" 
     new $P362, "ResizablePMCArray"
     set_dispatchees $P361, $P362
     $P360."add_method"(type_obj, "Str", $P361)
     get_how $P363, type_obj
-    .const 'Sub' $P364 = "33_1298839301.843" 
+    .const 'Sub' $P364 = "33_1298845591.109" 
     newclosure $P367, $P364
     $P363."add_parrot_vtable_mapping"(type_obj, "get_string", $P367)
     get_how $P368, type_obj
-    .const 'Sub' $P369 = "34_1298839301.843" 
+    .const 'Sub' $P369 = "34_1298845591.109" 
     $P368."add_multi_method"(type_obj, "Str", $P369)
     get_how $P370, type_obj
-    .const 'Sub' $P371 = "35_1298839301.843" 
+    .const 'Sub' $P371 = "35_1298845591.109" 
     new $P372, "ResizablePMCArray"
     set_dispatchees $P371, $P372
     $P370."add_method"(type_obj, "ACCEPTS", $P371)
     get_how $P373, type_obj
-    .const 'Sub' $P374 = "36_1298839301.843" 
+    .const 'Sub' $P374 = "36_1298845591.109" 
     $P373."add_multi_method"(type_obj, "ACCEPTS", $P374)
     get_how $P375, type_obj
-    .const 'Sub' $P376 = "37_1298839301.843" 
+    .const 'Sub' $P376 = "37_1298845591.109" 
     $P375."add_method"(type_obj, "isa", $P376)
     get_how $P377, type_obj
     $P378 = $P377."compose"(type_obj)
@@ -744,7 +744,7 @@
 
 
 .namespace ["NQPMu"]
-.sub "Str" :instanceof("DispatcherSub") :subid("33_1298839301.843") :outer("38_1298839301.843")
+.sub "Str" :instanceof("DispatcherSub") :subid("33_1298845591.109") :outer("38_1298845591.109")
     .param pmc param_365
 .annotate 'line', 14
     .lex "self", param_365
@@ -754,7 +754,7 @@
 
 
 .namespace ["NQPMu"]
-.sub "CREATE"  :subid("26_1298839301.843") :outer("25_1298839301.843")
+.sub "CREATE"  :subid("26_1298845591.109") :outer("25_1298845591.109")
     .param pmc param_229
 .annotate 'line', 15
     .lex "self", param_229
@@ -767,7 +767,7 @@
 
 
 .namespace ["NQPMu"]
-.sub "bless"  :subid("27_1298839301.843") :outer("25_1298839301.843")
+.sub "bless"  :subid("27_1298845591.109") :outer("25_1298845591.109")
     .param pmc param_233
     .param pmc param_235 :slurpy :named
 .annotate 'line', 20
@@ -793,11 +793,11 @@
 
 .namespace ["NQPMu"]
 .include "except_types.pasm"
-.sub "BUILDALL"  :subid("28_1298839301.843") :outer("25_1298839301.843")
+.sub "BUILDALL"  :subid("28_1298845591.109") :outer("25_1298845591.109")
     .param pmc param_243
     .param pmc param_245 :slurpy :named
 .annotate 'line', 26
-    .const 'Sub' $P254 = "29_1298839301.843" 
+    .const 'Sub' $P254 = "29_1298845591.109" 
     capture_lex $P254
     .lex "$self", param_243
     find_lex $P244, "$self"
@@ -819,7 +819,7 @@
     unless $P246, loop260_done
     shift $P252, $P246
   loop260_redo:
-    .const 'Sub' $P254 = "29_1298839301.843" 
+    .const 'Sub' $P254 = "29_1298845591.109" 
     capture_lex $P254
     $P254($P252)
   loop260_next:
@@ -839,7 +839,7 @@
 
 
 .namespace ["NQPMu"]
-.sub "_block253"  :anon :subid("29_1298839301.843") :outer("28_1298839301.843")
+.sub "_block253"  :anon :subid("29_1298845591.109") :outer("28_1298845591.109")
     .param pmc param_255
 .annotate 'line', 27
     .lex "$class", param_255
@@ -855,12 +855,12 @@
 
 .namespace ["NQPMu"]
 .include "except_types.pasm"
-.sub "BUILD_MAGIC"  :subid("30_1298839301.843") :outer("25_1298839301.843")
+.sub "BUILD_MAGIC"  :subid("30_1298845591.109") :outer("25_1298845591.109")
     .param pmc param_264
     .param pmc param_266
     .param pmc param_267 :slurpy :named
 .annotate 'line', 32
-    .const 'Sub' $P276 = "31_1298839301.843" 
+    .const 'Sub' $P276 = "31_1298845591.109" 
     capture_lex $P276
     .lex "$self", param_264
     find_lex $P265, "$self"
@@ -883,7 +883,7 @@
     unless $P268, loop298_done
     shift $P274, $P268
   loop298_redo:
-    .const 'Sub' $P276 = "31_1298839301.843" 
+    .const 'Sub' $P276 = "31_1298845591.109" 
     capture_lex $P276
     $P276($P274)
   loop298_next:
@@ -903,7 +903,7 @@
 
 
 .namespace ["NQPMu"]
-.sub "_block275"  :anon :subid("31_1298839301.843") :outer("30_1298839301.843")
+.sub "_block275"  :anon :subid("31_1298845591.109") :outer("30_1298845591.109")
     .param pmc param_279
 .annotate 'line', 34
     new $P277, "Undef"
@@ -954,7 +954,7 @@
 
 
 .namespace ["NQPMu"]
-.sub "new"  :subid("32_1298839301.843") :outer("25_1298839301.843")
+.sub "new"  :subid("32_1298845591.109") :outer("25_1298845591.109")
     .param pmc param_302
     .param pmc param_303 :slurpy :named
 .annotate 'line', 42
@@ -970,7 +970,7 @@
 
 
 .namespace ["NQPMu"]
-.sub "Str" :instanceof("DispatcherSub") :subid("33_1298839301.843") :outer("25_1298839301.843")
+.sub "Str" :instanceof("DispatcherSub") :subid("33_1298845591.109") :outer("25_1298845591.109")
     .param pmc param_308
 .annotate 'line', 42
     .lex "self", param_308
@@ -980,7 +980,7 @@
 
 
 .namespace ["NQPMu"]
-.sub "Str"  :subid("34_1298839301.843") :outer("25_1298839301.843")
+.sub "Str"  :subid("34_1298845591.109") :outer("25_1298845591.109")
     .param pmc param_311
 .annotate 'line', 47
     .lex "$self", param_311
@@ -998,9 +998,9 @@
 
 
 .namespace ["NQPMu"]
-.sub "" :load :init :subid("post55") :outer("34_1298839301.843")
+.sub "" :load :init :subid("post55") :outer("34_1298845591.109")
 .annotate 'line', 47
-    .const 'Sub' $P310 = "34_1298839301.843" 
+    .const 'Sub' $P310 = "34_1298845591.109" 
     .local pmc block
     set block, $P310
     get_hll_global $P318, "Mu"
@@ -1013,7 +1013,7 @@
 
 
 .namespace ["NQPMu"]
-.sub "ACCEPTS" :instanceof("DispatcherSub") :subid("35_1298839301.843") :outer("25_1298839301.843")
+.sub "ACCEPTS" :instanceof("DispatcherSub") :subid("35_1298845591.109") :outer("25_1298845591.109")
     .param pmc param_322
     .param pmc param_323
 .annotate 'line', 47
@@ -1027,7 +1027,7 @@
 
 
 .namespace ["NQPMu"]
-.sub "ACCEPTS"  :subid("36_1298839301.843") :outer("25_1298839301.843")
+.sub "ACCEPTS"  :subid("36_1298845591.109") :outer("25_1298845591.109")
     .param pmc param_326
     .param pmc param_328
 .annotate 'line', 52
@@ -1046,9 +1046,9 @@
 
 
 .namespace ["NQPMu"]
-.sub "" :load :init :subid("post56") :outer("36_1298839301.843")
+.sub "" :load :init :subid("post56") :outer("36_1298845591.109")
 .annotate 'line', 52
-    .const 'Sub' $P325 = "36_1298839301.843" 
+    .const 'Sub' $P325 = "36_1298845591.109" 
     .local pmc block
     set block, $P325
     get_hll_global $P333, "NQPMu"
@@ -1064,7 +1064,7 @@
 
 
 .namespace ["NQPMu"]
-.sub "isa"  :subid("37_1298839301.843") :outer("25_1298839301.843")
+.sub "isa"  :subid("37_1298845591.109") :outer("25_1298845591.109")
     .param pmc param_338
     .param pmc param_339
 .annotate 'line', 56
@@ -1082,9 +1082,9 @@
 
 
 .namespace []
-.sub "_block387" :load :anon :subid("39_1298839301.843")
+.sub "_block387" :load :anon :subid("39_1298845591.109")
 .annotate 'line', 1
-    .const 'Sub' $P389 = "10_1298839301.843" 
+    .const 'Sub' $P389 = "10_1298845591.109" 
     $P390 = $P389()
     .return ($P390)
 .end
