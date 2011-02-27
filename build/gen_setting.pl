@@ -24,4 +24,4 @@ foreach my $file (@files) {
     print $x;
 }
 
-print "\n\n{YOU_ARE_HERE}\n\n# vim: set ft=perl6 nomodifiable :\n";
+print "\n1;\n{YOU_ARE_HERE}\n\n# vim: set ft=perl6 nomodifiable :\n";
