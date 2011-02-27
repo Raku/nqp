@@ -155,13 +155,17 @@ token block {
 
 token blockoid {
     <.finishpad>
-    '{' ~ '}' <statementlist>
+    [
+    | '{YOU_ARE_HERE}' <you_are_here>
+    | '{' ~ '}' <statementlist>
+    ]
     <?ENDSTMT>
 }
 
 token newpad { <?> }
 token outerctx { <?> }
 token finishpad { <?> }
+token you_are_here { <?> }
 
 proto token terminator { <...> }
 

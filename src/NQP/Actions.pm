@@ -131,12 +131,17 @@ method block($/) {
 }
 
 method blockoid($/) {
-    my $past := $<statementlist>.ast;
-    my $BLOCK := @BLOCK.shift;
-    $BLOCK.push($past);
-    $BLOCK.node($/);
-    $BLOCK.closure(1);
-    make $BLOCK;
+    if $<statementlist> {
+        my $past := $<statementlist>.ast;
+        my $BLOCK := @BLOCK.shift;
+        $BLOCK.push($past);
+        $BLOCK.node($/);
+        $BLOCK.closure(1);
+        make $BLOCK;
+    }
+    else {
+        make $<you_are_here>.ast;
+    }
 }
 
 method newpad($/) {
@@ -147,6 +152,10 @@ method newpad($/) {
 method outerctx($/) {
     our @BLOCK;
     self.SET_BLOCK_OUTER_CTX(@BLOCK[0]);
+}
+
+method you_are_here($/) {
+    make self.CTXSAVE();
 }
 
 ## Statement control
