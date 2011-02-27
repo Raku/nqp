@@ -87,8 +87,8 @@ NQP_SOURCES = \
   src/cheats/nqp-builtins.pir \
 
 CORE_SETTING_SOURCES = \
-  src/core/NativeTypes.pm \
-  src/core/NQPMu.pm \
+#  src/core/NativeTypes.pm \ # XXX Should be here when removed from metamodel
+#  src/core/NQPMu.pm \       # XXX Should be here when removed from metamodel
   src/core/IO.pm \
   src/core/Regex.pm \
 
@@ -171,7 +171,7 @@ HOW_SOURCES  = src/metamodel/how/KnowHOWAttribute.pm src/metamodel/how/NQPClassH
                src/metamodel/how/NQPNativeHOW.pm src/metamodel/how/NQPAttribute.pm \
                src/metamodel/how/NQPConcreteRoleHOW.pm src/metamodel/how/NQPParametricRoleHOW.pm \
                src/metamodel/how/RoleToClassApplier.pm src/metamodel/how/RoleToRoleApplier.pm \
-               src/metamodel/how/NQPModuleHOW.pm src/core/NativeTypes.pm src/core/NQPMu.pm
+               src/metamodel/how/NQPModuleHOW.pm src/core/NQPMu.pm src/core/NativeTypes.pm
 
 HOW_COMBINED = src/gen/how.pm
 
@@ -195,6 +195,7 @@ CLEANUPS = \
   src/stage2/*.pbc \
   src/gen/*.pir \
   src/gen/*.nqp \
+  src/gen/*.pm \
   $(PMC_DIR)/pmc_*.h \
   $(PMC_DIR)/*.c \
   $(PMC_DIR)/*.dump \
