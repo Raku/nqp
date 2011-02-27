@@ -158,6 +158,11 @@ method newpad($/) {
 
 method outerctx($/) {
     our @BLOCK;
+    unless pir::defined(%*COMPILING<%?OPTIONS><outer_ctx>) {
+        # We haven't got a specified outer context already, so load a
+        # setting. XXX Won't work for pre-compiled case yet.
+        pir::compreg__Ps('NQP-rx').load_setting(%*COMPILING<%?OPTIONS><setting> // 'NQPCORE');
+    }
     self.SET_BLOCK_OUTER_CTX(@BLOCK[0]);
 }
 
