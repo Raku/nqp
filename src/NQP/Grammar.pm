@@ -99,6 +99,7 @@ token pod_comment {
 ## Top-level rules
 
 token comp_unit {
+    :my $*HAS_YOU_ARE_HERE := 0;
     <.newpad>
     <.outerctx>
     <statementlist>
@@ -156,8 +157,8 @@ token block {
 token blockoid {
     <.finishpad>
     [
-    | '{YOU_ARE_HERE}' <you_are_here>
-    | '{' ~ '}' <statementlist>
+    || '{YOU_ARE_HERE}' <you_are_here>
+    || '{' ~ '}' <statementlist>
     ]
     <?ENDSTMT>
 }

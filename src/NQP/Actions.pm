@@ -51,8 +51,11 @@ method comp_unit($/) {
     my $unit     := @BLOCK.shift;
 
     # If our caller wants to know the mainline ctx, provide it here.
-    # (CTXSAVE is inherited from HLL::Actions.)
-    $unit.push( self.CTXSAVE() );
+    # (CTXSAVE is inherited from HLL::Actions.) Don't do this when
+    # there was an explicit {YOU_ARE_HERE}.
+    unless $*HAS_YOU_ARE_HERE {
+        $unit.push( self.CTXSAVE() );
+    }
 
     # Need to load the nqp-rx dynops/dympmcs.
     $unit.loadlibs('nqp_group', 'nqp_ops');
@@ -131,15 +134,19 @@ method block($/) {
 }
 
 method blockoid($/) {
+    my $BLOCK := @BLOCK.shift;
     if $<statementlist> {
         my $past := $<statementlist>.ast;
-        my $BLOCK := @BLOCK.shift;
         $BLOCK.push($past);
         $BLOCK.node($/);
         $BLOCK.closure(1);
         make $BLOCK;
     }
     else {
+        if $*HAS_YOU_ARE_HERE {
+            $/.CURSOR.panic('{YOU_ARE_HERE} may only appear once in a setting');
+        }
+        $*HAS_YOU_ARE_HERE := 1;
         make $<you_are_here>.ast;
     }
 }
@@ -1132,11 +1139,17 @@ method circumfix:sym<ang>($/) { make $<quote_EXPR>.ast; }
 method circumfix:sym<« »>($/) { make $<quote_EXPR>.ast; }
 
 method circumfix:sym<{ }>($/) {
-    my $past := +$<pblock><blockoid><statementlist><statement> > 0
-                ?? $<pblock>.ast
-                !! vivitype('%');
-    $past<bareblock> := 1;
-    make $past;
+    if +$<pblock><blockoid><statementlist><statement> > 0 {
+        my $past := $<pblock>.ast;
+        $past<bareblock> := 1;
+        make $past;
+    }
+    elsif $<pblock><blockoid><you_are_here> {
+        make $<pblock>.ast;
+    }
+    else {
+        make vivitype('%');
+    }
 }
 
 method circumfix:sym<sigil>($/) {
