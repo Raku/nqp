@@ -4,7 +4,13 @@
  * that get set into each created lexpad by default. It will also
  * enable indexed lookups and, some day, may also allow for native
  * values to be stored too. */
-pmclass NQPLexInfo provides hash auto_attrs dynpmc group nqp {
+pmclass NQPLexInfo
+    provides hash
+    auto_attrs
+    dynpmc group nqp
+    hll nqp
+    maps LexInfo
+{
     /* Hash mapping a name to the register that always holds its
      * value. */
     ATTR PMC *name_to_register_map;

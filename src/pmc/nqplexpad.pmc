@@ -1,6 +1,12 @@
 #include "pmc_nqplexinfo.h"
 
-pmclass NQPLexPad provides hash no_ro auto_attrs dynpmc group nqp {
+pmclass NQPLexPad
+    provides hash
+    auto_attrs
+    dynpmc group nqp
+    hll nqp
+    maps LexPad
+{
     ATTR PMC *lexinfo;
     ATTR PMC *ctx;
 
