@@ -40,7 +40,7 @@ NQP::Compiler - NQP compiler
     .local pmc nqpproto, nqpcomp
     nqpproto = get_hll_global ['NQP'], 'Compiler'
     nqpcomp = nqpproto.'new'()
-    nqpcomp.'language'('NQP-rx')
+    nqpcomp.'language'('nqp')
     $P0 = get_hll_global ['NQP'], 'Grammar'
     nqpcomp.'parsegrammar'($P0)
     $P0 = get_hll_global ['NQP'], 'Actions'
@@ -53,7 +53,7 @@ NQP::Compiler - NQP compiler
 .sub 'main' :main
     .param pmc args_str
 
-    $P0 = compreg 'NQP-rx'
+    $P0 = compreg 'nqp'
     $P1 = $P0.'command_line'(args_str, 'encoding'=>'utf8', 'transcode'=>'ascii iso-8859-1')
     exit 0
 .end
