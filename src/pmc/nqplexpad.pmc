@@ -56,6 +56,25 @@ Return the LexInfo PMC, if any or a Null PMC.
     }
 
     VTABLE void set_pointer(void *ctx) {
+        /* Check if we need to put any static values in place. */
+        PMC *info, *static_slots_cache;
+        GET_ATTR_lexinfo(INTERP, SELF, info);
+        GETATTR_NQPLexInfo_static_slots_cache(INTERP, info, static_slots_cache);
+        if (!PMC_IS_NULL(static_slots_cache)) {
+            /* Yes, we have some. Grab values too, then iterate. */
+            PMC *static_values_cache;
+            INTVAL num_statics = VTABLE_elements(interp, static_slots_cache);
+            INTVAL i;
+            GETATTR_NQPLexInfo_static_values_cache(INTERP, info, static_values_cache);
+            for (i = 0; i < num_statics; i++) {
+                INTVAL  slot  = VTABLE_get_integer_keyed_int(interp, static_slots_cache, i);
+                PMC    *value = VTABLE_get_pmc_keyed_int(interp, static_values_cache, i);
+                CTX_REG_PMC((PMC *)ctx, slot) = value;
+            }
+            PARROT_GC_WRITE_BARRIER(INTERP, (PMC *)ctx);
+        }
+        
+        /* Stash the context pointer. */
         SET_ATTR_ctx(INTERP, SELF, (PMC *)ctx);
     }
 
