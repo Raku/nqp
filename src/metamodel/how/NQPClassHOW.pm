@@ -146,6 +146,9 @@ knowhow NQPClassHOW {
         # Incorporate any new multi candidates (needs MRO built).
         self.incorporate_multi_candidates($obj);
 
+        # Compose attributes.
+        for self.attributes($obj, :local<0> ) { $_.compose($obj) }
+
         # Publish type and method caches.
         self.publish_type_cache($obj);
         self.publish_method_cache($obj);

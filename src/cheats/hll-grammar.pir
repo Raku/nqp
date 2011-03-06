@@ -10,9 +10,6 @@ src/cheats/hll-grammar.pir -- Additional HLL::Grammar methods
 
 =cut
 
-.include 'cclass.pasm'
-.include 'src/Regex/constants.pir'
-
 .namespace ['HLL';'Grammar']
 
 .sub '' :load :init

@@ -451,61 +451,22 @@ class HLL::Compiler {
     }
 
     method compile($source, *%adverbs) {
-        Q:PIR {
-            .local pmc source, adverbs, self
-            source = find_lex '$source'
-            adverbs = find_lex '%adverbs'
-            self = find_lex 'self'
+        my %*COMPILING<%?OPTIONS> := %adverbs;
 
-            .local pmc compiling, options
-            compiling = new ['Hash']
-            .lex '%*COMPILING', compiling
-            compiling['%?OPTIONS'] = adverbs
-
-            .local string target
-            target = adverbs['target']
-            target = downcase target
-
-            .local int stagestats
-            stagestats = adverbs['stagestats']
-
-            .local pmc stages, result, it
-            result = source
-            stages = self.'stages'()
-            it = iter stages
-            if stagestats goto stagestats_loop
-
-          iter_loop:
-            unless it goto have_result
-            .local string stagename
-            stagename = shift it
-            result = self.stagename(result, adverbs :flat :named)
-            if target == stagename goto have_result
-            goto iter_loop
-
-          stagestats_loop:
-            unless it goto have_result
-            stagename = shift it
-            $N0 = time
-            result = self.stagename(result, adverbs :flat :named)
-            $N1 = time
-            $N2 = $N1 - $N0
-            $P0 = getinterp
-            $P1 = $P0.'stderr_handle'()
-            $P1.'print'("Stage '")
-            $P1.'print'(stagename)
-            $P1.'print'("': ")
-            $P2 = new ['ResizablePMCArray']
-            push $P2, $N2
-            $S0 = sprintf "%.3f", $P2
-            $P1.'print'($S0)
-            $P1.'print'(" sec\n")
-            if target == stagename goto have_result
-            goto stagestats_loop
-
-          have_result:
-            .return (result)
-        };
+        my $target := pir::downcase(%adverbs<target>);
+        my $result := $source;
+        my $stderr := pir::getinterp().stderr_handle;
+        for self.stages() {
+            my $timestamp := pir::time__N();
+            $result := self."$_"($result, |%adverbs);
+            my $diff := pir::time__N() - $timestamp;
+            if %adverbs<stagestats> {
+                # TODO: plug in sprintf with %.3f
+                $stderr.print__N("Stage $_: $diff\n");
+            }
+            last if $_ eq $target;
+        }
+        return $result;
     }
 
     method parse($source, *%adverbs) {
@@ -677,43 +638,23 @@ class HLL::Compiler {
     }
 
     method parse_name($name) {
-        Q:PIR {
-            .local string name
-            $P0 = find_lex '$name'
-            name = $P0
+        my @ns    := pir::split('::', $name);
+        my $sigil := pir::substr(@ns[0], 0, 1);
 
-            # split name on ::
-            .local pmc ns
-            ns = split '::', name
+        # move any leading sigil to the last item
+        my $idx   := pir::index('$@%&', $sigil);
+        if $idx >= 0 {
+            @ns[0]  := pir::substr(@ns[0], 1);
+            @ns[-1] := $sigil ~ @ns[-1];
+        }
 
-            # move any leading sigil to the last item
-            .local string sigil
-            $S0 = ns[0]
-            sigil = substr $S0, 0, 1
-            $I0 = index '$@%&', sigil
-            if $I0 < 0 goto sigil_done
-            $S0 = replace $S0, 0, 1, ''
-            ns[0] = $S0
-            $S0 = ns[-1]
-            $S0 = concat sigil, $S0
-            ns[-1] = $S0
-          sigil_done:
-
-            # remove any empty items from the list
-            .local pmc ns_it
-            ns_it = iter ns
-            ns = new ['ResizablePMCArray']
-          ns_loop:
-            unless ns_it goto ns_done
-            $S0 = shift ns_it
-            unless $S0 > '' goto ns_loop
-            push ns, $S0
-            goto ns_loop
-          ns_done:
-
-            # return the result
-            .return (ns)
-        };
+        # remove any empty items from the list
+        # maybe replace with a grep() once we have the setting for sure
+        my @actual_ns;
+        for @ns {
+            pir::push(@actual_ns, $_) unless $_ eq '';
+        }
+        @actual_ns;
     }
 
     method lineof($target, $pos, :$cache) {
