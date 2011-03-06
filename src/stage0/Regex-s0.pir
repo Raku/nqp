@@ -10,6 +10,8 @@ This file brings together the various Regex modules needed for Regex.pbc .
 
 =cut
 
+.HLL 'nqp'
+
 ### .include 'src/Regex/Cursor.pir'
 # Copyright (C) 2009, The Perl Foundation.
 # $Id$
@@ -1890,7 +1892,8 @@ This file implements Match objects for the regex engine.
     load_bytecode 'P6object.pbc'
     .local pmc p6meta
     p6meta = new 'P6metaclass'
-    $P0 = p6meta.'new_class'('Regex::Match', 'parent'=>'Capture', 'attr'=>'$!cursor $!target $!from $!to $!ast')
+    $P1 = get_root_global ['parrot'], 'Capture'
+    $P0 = p6meta.'new_class'('Regex::Match', 'parent'=>$P1, 'attr'=>'$!cursor $!target $!from $!to $!ast')
     .return ()
 .end
 
@@ -2370,6 +2373,8 @@ An alternate dump output for a Match object and all of its subcaptures.
 #   fill-column: 100
 # End:
 # vim: expandtab shiftwidth=4 ft=pir:
+
+.HLL 'parrot'
 
 ### .include 'src/PAST/Regex.pir'
 # $Id: Regex.pir 41578 2009-09-30 14:45:23Z pmichaud $

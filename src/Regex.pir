@@ -10,12 +10,16 @@ This file brings together the various Regex modules needed for Regex.pbc .
 
 =cut
 
+.HLL 'nqp'
+
 .include 'src/Regex/Cursor.pir'
 .include 'src/Regex/Cursor-builtins.pir'
 .include 'src/Regex/Cursor-protoregex-peek.pir'
 .include 'src/Regex/Match.pir'
 .include 'src/Regex/Method.pir'
 .include 'src/Regex/Dumper.pir'
+
+.HLL 'parrot'
 
 .include 'src/PAST/Regex.pir'
 .include 'src/PAST/Compiler-Regex.pir'
