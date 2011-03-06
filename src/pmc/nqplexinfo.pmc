@@ -43,6 +43,19 @@ pmclass NQPLexInfo provides hash auto_attrs dynpmc group nqp {
         PObj_custom_mark_SET(SELF);
     }
     
+    VTABLE void mark() {
+        PMC *name_to_register_map, *static_values;
+        PMC *static_slots_cache, *static_values_cache;
+        GET_ATTR_name_to_register_map(INTERP, SELF, name_to_register_map);
+        Parrot_gc_mark_PMC_alive(INTERP, name_to_register_map);
+        GET_ATTR_static_values(INTERP, SELF, static_values);
+        Parrot_gc_mark_PMC_alive(INTERP, static_values);
+        GET_ATTR_static_slots_cache(INTERP, SELF, static_slots_cache);
+        Parrot_gc_mark_PMC_alive(INTERP, static_slots_cache);
+        GET_ATTR_static_values_cache(INTERP, SELF, static_values_cache);
+        Parrot_gc_mark_PMC_alive(INTERP, static_values_cache);
+    }
+    
     VTABLE INTVAL get_integer_keyed_str(STRING *key) {
         PMC *name_to_register_map;
         GET_ATTR_name_to_register_map(INTERP, SELF, name_to_register_map);
@@ -59,6 +72,22 @@ pmclass NQPLexInfo provides hash auto_attrs dynpmc group nqp {
         PMC *name_to_register_map;
         GET_ATTR_name_to_register_map(INTERP, SELF, name_to_register_map);
         VTABLE_set_integer_keyed_str(interp, name_to_register_map, key, value);
+    }
+    
+    VTABLE void visit(PMC *info) {
+        VISIT_PMC_ATTR(INTERP, info, SELF, NQPLexInfo, name_to_register_map);
+        VISIT_PMC_ATTR(INTERP, info, SELF, NQPLexInfo, static_values);
+        VISIT_PMC_ATTR(INTERP, info, SELF, NQPLexInfo, static_slots_cache);
+        VISIT_PMC_ATTR(INTERP, info, SELF, NQPLexInfo, static_values_cache);
+        SUPER(info);
+    }
+
+    VTABLE void freeze(PMC *info) {
+        SUPER(info);
+    }
+    
+    VTABLE void thaw(PMC *info) {
+        SUPER(info);
     }
 
 /*
