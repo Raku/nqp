@@ -11,7 +11,7 @@ module ABC {
 &ABC::EXPORT::DEFAULT::alpha := &ABC::alpha;
 $ABC::EXPORT::DEFAULT::gamma := $ABC::gamma;
 
-my $parrot-comp := pir::compreg__Ps('parrot');
+my $parrot-comp := pir::compreg__Ps('nqp');
 
 my $module := $parrot-comp.get_module('ABC');
 my %exports := $parrot-comp.get_exports($module);
