@@ -77,6 +77,10 @@ method comp_unit($/) {
         )
     );
     $unit.node($/);
+    
+    # Set HLL.
+    $unit.hll('nqp');
+    
     make $unit;
 }
 

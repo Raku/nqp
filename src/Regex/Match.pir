@@ -17,7 +17,8 @@ This file implements Match objects for the regex engine.
     load_bytecode 'P6object.pbc'
     .local pmc p6meta
     p6meta = new 'P6metaclass'
-    $P0 = p6meta.'new_class'('Regex::Match', 'parent'=>'Capture', 'attr'=>'$!cursor $!target $!from $!to $!ast')
+    $P1 = get_root_global ['parrot'], 'Capture'
+    $P0 = p6meta.'new_class'('Regex::Match', 'parent'=>$P1, 'attr'=>'$!cursor $!target $!from $!to $!ast')
     .return ()
 .end
 

@@ -8,6 +8,8 @@ NQP::Compiler - NQP compiler
 
 =cut
 
+.HLL 'nqp'
+
 # Initialize meta-model.
 .loadlib "nqp_group"
 .loadlib "nqp_ops"
@@ -18,6 +20,13 @@ NQP::Compiler - NQP compiler
 
 .sub '' :anon :load :init
     load_bytecode 'P6Regex.pbc'
+    
+    ## Bring in PAST and PCT
+    .local pmc hllns, parrotns, imports
+    hllns = get_hll_namespace
+    parrotns = get_root_namespace ['parrot']
+    imports = split ' ', 'PAST PCT'
+    parrotns.'export_to'(hllns, imports)
 .end
 
 .include 'gen/nqp-grammar.pir'

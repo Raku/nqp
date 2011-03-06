@@ -9,6 +9,8 @@ Regex::P6Regex - Parser/compiler for Perl 6 regexes
 
 =cut
 
+.HLL 'nqp'
+
 .sub '' :anon :load :init
     load_bytecode 'HLL.pbc'
 .end
