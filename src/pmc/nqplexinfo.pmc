@@ -82,18 +82,13 @@ pmclass NQPLexInfo
     
     VTABLE void visit(PMC *info) {
         VISIT_PMC_ATTR(INTERP, info, SELF, NQPLexInfo, name_to_register_map);
-        VISIT_PMC_ATTR(INTERP, info, SELF, NQPLexInfo, static_values);
-        VISIT_PMC_ATTR(INTERP, info, SELF, NQPLexInfo, static_slots_cache);
-        VISIT_PMC_ATTR(INTERP, info, SELF, NQPLexInfo, static_values_cache);
-        SUPER(info);
-    }
-
-    VTABLE void freeze(PMC *info) {
         SUPER(info);
     }
     
-    VTABLE void thaw(PMC *info) {
-        SUPER(info);
+    VTABLE PMC *get_iter() {
+        PMC *name_to_register_map;
+        GET_ATTR_name_to_register_map(INTERP, SELF, name_to_register_map);
+        return VTABLE_get_iter(interp, name_to_register_map);
     }
 
 /*
