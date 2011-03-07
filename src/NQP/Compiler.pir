@@ -15,6 +15,12 @@ NQP::Compiler - NQP compiler
 .loadlib "nqp_ops"
 .sub '' :anon :load :init
     nqp_dynop_setup
+
+    .local pmc interp, lexpad, nqplexpad
+    interp = getinterp
+    lexpad = get_class 'LexPad'
+    nqplexpad = get_class 'NQPLexPad'
+    interp.'hll_map'(lexpad, nqplexpad)
 .end
 .include 'gen/nqp-how.pir'
 
