@@ -59,6 +59,12 @@ method comp_unit($/) {
 
     # Need to load the nqp-rx dynops/dympmcs.
     $unit.loadlibs('nqp_group', 'nqp_ops');
+    $unit.unshift(PAST::Op.new(
+        :pasttype('callmethod'), :name('hll_map'),
+        PAST::Op.new( :pirop('getinterp P') ),
+        PAST::Op.new( :pirop('get_class Ps'), 'LexPad' ),
+        PAST::Op.new( :pirop('get_class Ps'), 'NQPLexPad' )
+    ));
     $unit.unshift(PAST::Op.new( :pirop('nqp_dynop_setup v') ));
 
     # We force a return here, because we have other
