@@ -69,7 +69,6 @@ method comp_unit($/) {
         PAST::Op.new( :pirop('get_class Ps'), 'LexPad' ),
         PAST::Op.new( :pirop('get_class Ps'), 'NQPLexPad' )
     ));
-    $unit.unshift(PAST::Op.new( :pirop('nqp_dynop_setup v') ));
 
     # We force a return here, because we have other
     # :load/:init blocks to execute that we don't want
@@ -174,8 +173,8 @@ method outerctx($/) {
     our @BLOCK;
     unless pir::defined(%*COMPILING<%?OPTIONS><outer_ctx>) {
         # We haven't got a specified outer context already, so load a
-        # setting. XXX Won't work for pre-compiled case yet.
-        pir::compreg__Ps('nqp').load_setting(%*COMPILING<%?OPTIONS><setting> // 'NQPCORE');
+        # setting.
+        $*SC.load_setting(%*COMPILING<%?OPTIONS><setting> // 'NQPCORE');
     }
     self.SET_BLOCK_OUTER_CTX(@BLOCK[0]);
 }

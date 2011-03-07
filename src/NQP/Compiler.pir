@@ -21,6 +21,8 @@ NQP::Compiler - NQP compiler
     lexpad = get_class 'LexPad'
     nqplexpad = get_class 'NQPLexPad'
     interp.'hll_map'(lexpad, nqplexpad)
+    
+    load_bytecode 'SettingManager.pbc'
 .end
 .include 'gen/nqp-how.pir'
 

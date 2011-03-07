@@ -97,11 +97,40 @@ class HLL::Compiler::SerializationContextBuilder {
         %!addr_to_slot{addr($obj)} := $idx;
         $idx
     }
-    
+
+    # Add an event that may have an action to deserialize or fix up.
     method add_event(:$deserialize_past, :$fixup_past) {
         @!event_stream.push(HLL::Compiler::SerializationContextBuilder::Event.new(
             :deserialize_past($deserialize_past), :fixup_past($fixup_past)
         ));
+    }
+    
+    # Loads the setting and emits code 
+    method load_setting($setting_name) {
+        # Do nothing for the NULL setting.
+        if $setting_name ne 'NULL' {    
+            # Load it immediately, so the compile time info is available.
+            # Once it's loaded, set it as the outer context of the code
+            # being compiled.
+            %*COMPILING<%?OPTIONS><outer_ctx> := HLL::SettingManager.load_setting($setting_name);
+            
+            # Do load for pre-compiled situation.
+            my $load_past := PAST::Stmts.new(
+                PAST::Op.new(
+                    :pirop('load_bytecode vs'), 'SettingManager.pbc'
+                ),
+                PAST::Op.new(
+                    :pasttype('callmethod'), :name('set_outer_ctx'),
+                       PAST::Var.new( :name('block'), :scope('register') ),
+                       PAST::Op.new(
+                           :pasttype('callmethod'), :name('load_setting'),
+                           PAST::Var.new( :name('SettingManager'), :namespace('HLL'), :scope('package') ),
+                           $setting_name
+                       )
+                )
+            );
+            self.add_event(:deserialize_past($load_past));
+        }
     }
     
     # Creates a meta-object for a package, adds it to the root objects and
@@ -180,6 +209,7 @@ class HLL::Compiler::SerializationContextBuilder {
                 PAST::Op.new( :pirop('nqp_get_sc Ps'), $!handle )
             ),
             PAST::Stmts.new(
+                PAST::Op.new( :pirop('nqp_dynop_setup v') ),
                 PAST::Op.new( :pirop('nqp_create_sc Ps'), $!handle ),
                 $des
             ),
@@ -187,10 +217,6 @@ class HLL::Compiler::SerializationContextBuilder {
         );
     }
 }
-
-
-
-
 
 
 

@@ -107,6 +107,8 @@ STAGE0 = src/stage0
 STAGE1 = src/stage1
 STAGE2 = src/stage2
 
+SETTING_MANAGER_PBC = SettingManager.pbc
+
 REGEX_PBC       = Regex.pbc
 
 HLL_PBC         = HLL.pbc
@@ -137,9 +139,9 @@ CORE_SETTING_PBC = NQPCORE.setting.pbc
 CORE_SETTING_PIR = gen/NQPCORE.setting.pir
 
 STAGE0_PBCS     = $(STAGE0)/$(HLL_PBC) $(STAGE0)/$(P6REGEX_PBC) $(STAGE0)/$(NQP_PBC) $(STAGE0)/$(REGEX_PBC) $(STAGE0)/$(CORE_SETTING_PBC)
-STAGE1_PBCS     = $(STAGE1)/$(HLL_PBC) $(STAGE1)/$(P6REGEX_PBC) $(STAGE1)/$(NQP_PBC) $(REGEX_PBC) $(STAGE1)/$(CORE_SETTING_PBC)
-STAGE2_PBCS     = $(STAGE2)/$(HLL_PBC) $(STAGE2)/$(P6REGEX_PBC) $(STAGE2)/$(NQP_PBC) $(REGEX_PBC) $(STAGE2)/$(CORE_SETTING_PBC)
-ALL_PBCS        = $(HLL_PBC) $(P6REGEX_PBC) $(NQP_PBC) $(CORE_SETTING_PBC)
+STAGE1_PBCS     = $(STAGE1)/$(HLL_PBC) $(STAGE1)/$(P6REGEX_PBC) $(STAGE1)/$(NQP_PBC) $(REGEX_PBC) $(STAGE1)/$(CORE_SETTING_PBC) $(STAGE1)/$(SETTING_MANAGER_PBC)
+STAGE2_PBCS     = $(STAGE2)/$(HLL_PBC) $(STAGE2)/$(P6REGEX_PBC) $(STAGE2)/$(NQP_PBC) $(REGEX_PBC) $(STAGE2)/$(CORE_SETTING_PBC) $(STAGE2)/$(SETTING_MANAGER_PBC)
+ALL_PBCS        = $(HLL_PBC) $(P6REGEX_PBC) $(NQP_PBC) $(CORE_SETTING_PBC) $(SETTING_MANAGER_PBC)
 
 GROUP           = nqp_group
 OPS             = nqp_ops
@@ -251,6 +253,13 @@ $(STAGE0_PBCS): $(DYNEXT_TARGET) $(STAGE0_SOURCES)
 
 $(STAGE1): $(STAGE1_PBCS)
 
+$(STAGE1)/$(SETTING_MANAGER_PBC): $(STAGE0_PBCS) src/HLL/SettingManager.pm
+	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
+	    --target=pir --output=$(STAGE1)/gen/setting_manager.pir \
+	    --setting=NULL src/HLL/SettingManager.pm
+	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(SETTING_MANAGER_PBC) \
+	    $(STAGE1)/gen/setting_manager.pir
+
 $(STAGE1)/$(HLL_PBC): $(STAGE0_PBCS) $(HLL_SOURCES)
 	$(MKPATH) $(STAGE1)/gen
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
@@ -315,6 +324,13 @@ $(STAGE1)/$(CORE_SETTING_PBC): $(STAGE0_PBCS) $(CORE_SETTING_SOURCES)
 
 $(STAGE2): $(STAGE2_PBCS)
 
+$(STAGE2)/$(SETTING_MANAGER_PBC): $(STAGE1_PBCS) src/HLL/SettingManager.pm
+	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
+	    --target=pir --output=$(STAGE2)/gen/setting_manager.pir \
+	    --setting=NULL src/HLL/SettingManager.pm
+	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(SETTING_MANAGER_PBC) \
+	    $(STAGE2)/gen/setting_manager.pir
+
 $(STAGE2)/$(HLL_PBC): $(STAGE1_PBCS) $(HLL_SOURCES)
 	$(MKPATH) $(STAGE2)/gen
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
@@ -375,7 +391,8 @@ $(STAGE2)/$(CORE_SETTING_PBC): $(STAGE1_PBCS) $(CORE_SETTING_SOURCES)
 	$(PARROT) -o $(STAGE2)/$(CORE_SETTING_PBC) $(STAGE2)/$(CORE_SETTING_PIR)
 
 $(ALL_PBCS): $(REGEX_PBC) $(STAGE2_PBCS)
-	$(CP) $(STAGE2)/$(HLL_PBC) .
+    $(CP) $(STAGE2)/$(SETTING_MANAGER_PBC) .
+    $(CP) $(STAGE2)/$(HLL_PBC) .
 	$(CP) $(STAGE2)/$(P6REGEX_PBC) .
 	$(CP) $(STAGE2)/$(NQP_PBC) .
     $(CP) $(STAGE2)/$(CORE_SETTING_PBC) .
