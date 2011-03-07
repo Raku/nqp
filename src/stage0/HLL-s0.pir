@@ -15,6 +15,11 @@ and HLL::Grammar.
 
 .HLL 'nqp'
 
+.loadlib "nqp_group"
+
+.loadlib "nqp_ops"
+
+
 .sub '' :anon :load :init
     load_bytecode 'Regex.pbc'
 .end
@@ -80,10 +85,6 @@ and HLL::Grammar.
 ### .include 'gen/hllgrammar-grammar.pir'
 
 .HLL "nqp"
-
-.loadlib "nqp_group"
-
-.loadlib "nqp_ops"
 
 .namespace []
 .sub "_block11"  :anon :subid("10_1299450562.384")
