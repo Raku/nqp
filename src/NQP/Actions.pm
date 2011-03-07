@@ -52,10 +52,7 @@ method comp_unit($/) {
     
     # Unit needs to have a load-init holding the deserialization or
     # fixup code for this compilation unit.
-    # XXX Apart from ENOTYET, because we still violate the "can't
-    # declare a meta-object in the same compilation unit as it
-    # gets used" rule
-    #$unit.loadinit().push($*SC.to_past());
+    $unit.loadinit().push($*SC.to_past());
 
     # If our caller wants to know the mainline ctx, provide it here.
     # (CTXSAVE is inherited from HLL::Actions.) Don't do this when

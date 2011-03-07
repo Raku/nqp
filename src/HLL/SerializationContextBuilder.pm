@@ -120,7 +120,7 @@ class HLL::Compiler::SerializationContextBuilder {
         my $how_name := @how_ns.pop();
         my $setup_call := PAST::Op.new(
             :pasttype('callmethod'), :name('new_type'),
-            # XXX Scoping issues here...but let's make something work first.
+            # XXX Should be an SC cross-reference
             PAST::Var.new( :name($how_name), :namespace(@how_ns), :scope('package') )
         );
         if pir::defined($name) {
@@ -129,7 +129,8 @@ class HLL::Compiler::SerializationContextBuilder {
         if pir::defined($repr) {
             $setup_call.push(PAST::Val.new( :value($repr), :named('repr') ));
         }
-        self.add_event(:deserialize_past(self.set_slot_past($slot, $setup_call)));
+        # XXX Not quite ready to really do this yet...
+        #self.add_event(:deserialize_past(self.set_slot_past($slot, $setup_call)));
         
         # Result is just the object.
         return $mo;
@@ -166,12 +167,24 @@ class HLL::Compiler::SerializationContextBuilder {
     # Generates a series of PAST operations that will build this context if
     # it doesn't exist, and fix it up if it already does.
     method to_past() {
-        # XXX For now we always deserialize, just to get things working.
-        my $ds := PAST::Stmts.new();
+        my $des := PAST::Stmts.new();
+        my $fix := PAST::Stmts.new();
         for @!event_stream {
-            $ds.push($_.deserialize_past());
+            $des.push($_.deserialize_past()) if pir::defined($_.deserialize_past());
+            $fix.push($_.fixup_past()) if pir::defined($_.fixup_past());
         }
-        $ds
+        make PAST::Op.new(
+            :pasttype('if'),
+            PAST::Op.new(
+                :pirop('isnull IP'),
+                PAST::Op.new( :pirop('nqp_get_sc Ps'), $!handle )
+            ),
+            PAST::Stmts.new(
+                PAST::Op.new( :pirop('nqp_create_sc Ps'), $!handle ),
+                $des
+            ),
+            $fix
+        );
     }
 }
 
