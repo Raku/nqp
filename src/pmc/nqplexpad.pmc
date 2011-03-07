@@ -72,21 +72,24 @@ Return the LexInfo PMC, if any or a Null PMC.
 
     VTABLE void set_pointer(void *ctx) {
         /* Check if we need to put any static values in place. */
-        PMC *info, *static_slots_cache;
+        PMC *info;
         GET_ATTR_lexinfo(INTERP, SELF, info);
-        GETATTR_NQPLexInfo_static_slots_cache(INTERP, info, static_slots_cache);
-        if (!PMC_IS_NULL(static_slots_cache)) {
-            /* Yes, we have some. Grab values too, then iterate. */
-            PMC *static_values_cache;
-            INTVAL num_statics = VTABLE_elements(interp, static_slots_cache);
-            INTVAL i;
-            GETATTR_NQPLexInfo_static_values_cache(INTERP, info, static_values_cache);
-            for (i = 0; i < num_statics; i++) {
-                INTVAL  slot  = VTABLE_get_integer_keyed_int(interp, static_slots_cache, i);
-                PMC    *value = VTABLE_get_pmc_keyed_int(interp, static_values_cache, i);
-                CTX_REG_PMC((PMC *)ctx, slot) = value;
+        if (info->vtable->base_type != enum_class_LexInfo) {
+            PMC *static_slots_cache;
+            GETATTR_NQPLexInfo_static_slots_cache(INTERP, info, static_slots_cache);
+            if (!PMC_IS_NULL(static_slots_cache)) {
+                /* Yes, we have some. Grab values too, then iterate. */
+                PMC *static_values_cache;
+                INTVAL num_statics = VTABLE_elements(interp, static_slots_cache);
+                INTVAL i;
+                GETATTR_NQPLexInfo_static_values_cache(INTERP, info, static_values_cache);
+                for (i = 0; i < num_statics; i++) {
+                    INTVAL  slot  = VTABLE_get_integer_keyed_int(interp, static_slots_cache, i);
+                    PMC    *value = VTABLE_get_pmc_keyed_int(interp, static_values_cache, i);
+                    CTX_REG_PMC((PMC *)ctx, slot) = value;
+                }
+                PARROT_GC_WRITE_BARRIER(INTERP, (PMC *)ctx);
             }
-            PARROT_GC_WRITE_BARRIER(INTERP, (PMC *)ctx);
         }
         
         /* Stash the context pointer. */
@@ -94,19 +97,22 @@ Return the LexInfo PMC, if any or a Null PMC.
     }
 
     VTABLE INTVAL elements() {
-        PMC *info, *name_map;
+        PMC *info;
         GET_ATTR_lexinfo(INTERP, SELF, info);
-        GETATTR_NQPLexInfo_name_to_register_map(INTERP, info, name_map);
-        return Parrot_hash_size(INTERP,
-                (Hash *)VTABLE_get_pointer(INTERP, name_map));
+        return VTABLE_elements(interp, info);
     }
 
     VTABLE INTVAL exists_keyed_str(STRING *name) {
         PMC *info, *name_map;
         const Hash *hash;
         GET_ATTR_lexinfo(INTERP, SELF, info);
-        GETATTR_NQPLexInfo_name_to_register_map(INTERP, info, name_map);
-        hash = (const Hash *)VTABLE_get_pointer(INTERP, name_map);
+        if (info->vtable->base_type != enum_class_LexInfo) {
+            GETATTR_NQPLexInfo_name_to_register_map(INTERP, info, name_map);
+            hash = (const Hash *)VTABLE_get_pointer(INTERP, name_map);
+        }
+        else {
+            hash = (const Hash *)VTABLE_get_pointer(INTERP, info);
+        }
 
         return hash->entries
             ? (Parrot_hash_get_bucket(INTERP, hash, name) != 0)
@@ -125,8 +131,13 @@ Return the LexInfo PMC, if any or a Null PMC.
         HashBucket *b;
 
         GET_ATTR_lexinfo(INTERP, SELF, info);
-        GETATTR_NQPLexInfo_name_to_register_map(INTERP, info, name_map);
-        hash = (const Hash *)VTABLE_get_pointer(INTERP, name_map);
+        if (info->vtable->base_type != enum_class_LexInfo) {
+            GETATTR_NQPLexInfo_name_to_register_map(INTERP, info, name_map);
+            hash = (const Hash *)VTABLE_get_pointer(INTERP, name_map);
+        }
+        else {
+            hash = (const Hash *)VTABLE_get_pointer(INTERP, info);
+        }
 
         if (!hash->entries)
             return PMCNULL;
@@ -152,10 +163,15 @@ Return the LexInfo PMC, if any or a Null PMC.
         HashBucket       * b;
 
         GET_ATTR_lexinfo(INTERP, SELF, info);
-        GETATTR_NQPLexInfo_name_to_register_map(INTERP, info, name_map);
-        hash = (const Hash *)VTABLE_get_pointer(INTERP, name_map);
+        if (info->vtable->base_type != enum_class_LexInfo) {
+            GETATTR_NQPLexInfo_name_to_register_map(INTERP, info, name_map);
+            hash = (const Hash *)VTABLE_get_pointer(INTERP, name_map);
+        }
+        else {
+            hash = (const Hash *)VTABLE_get_pointer(INTERP, info);
+        }
+        
         b    = Parrot_hash_get_bucket(INTERP, hash, name);
-
         if (!b)
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LEX_NOT_FOUND,
                 "Lexical '%Ss' not found", name);

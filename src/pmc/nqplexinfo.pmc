@@ -58,6 +58,12 @@ pmclass NQPLexInfo
         Parrot_gc_mark_PMC_alive(INTERP, static_values_cache);
     }
     
+    VTABLE INTVAL elements() {
+        PMC *name_to_register_map;
+        GET_ATTR_name_to_register_map(INTERP, SELF, name_to_register_map);
+        return VTABLE_elements(interp, name_to_register_map);
+    }
+    
     VTABLE INTVAL get_integer_keyed_str(STRING *key) {
         PMC *name_to_register_map;
         GET_ATTR_name_to_register_map(INTERP, SELF, name_to_register_map);
