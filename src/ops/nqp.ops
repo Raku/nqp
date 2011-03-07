@@ -642,24 +642,67 @@ inline op stable_publish_vtable_mapping(in PMC, in PMC) :base_core {
 
 =item nqp_get_sc_object()
 
-Fetches an object from the current segment's serialization context.
+Fetches an object from the serialization context keyed by handle and index.
 
 =cut
 
 */
-inline op nqp_get_sc_object(out PMC, in INT) :base_core {
-    $1 = SC_get_sc_object(interp, $2);
+inline op nqp_get_sc_object(out PMC, in STR, in INT) :base_core {
+    PMC *sc = SC_get_sc(interp, $2);
+    if (!PMC_IS_NULL(sc))
+        $1 = VTABLE_get_pmc_keyed_int(interp, sc, $3);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Cannot fetch object from non-existance serialization context %Ss",
+            $2);
+}
+
+/*
+
+=item nqp_get_sc()
+
+Gets the serialization context with the specified handle. Returns
+NULL if it does not exist.
+
+=cut
+
+*/
+inline op nqp_get_sc(out PMC, in STR) {
+    $1 = SC_get_sc(interp, $2);
+}
+
+/*
+
+=item nqp_create_sc()
+
+Creates a serialization context with the specified handle, adds it
+to the registry and returns it.
+
+=cut
+
+*/
+inline op nqp_create_sc(out PMC, in STR) {
+    $1 = pmc_new(interp, pmc_type(interp,
+        Parrot_str_new(interp, "SerializationContext", 0)));
+    VTABLE_set_string_native(interp, $1, $2);
+    SC_set_sc(interp, $2, $1);
 }
 
 /*
 
 =item nqp_set_sc_object()
 
-Stores an object in the current segment's serialization context.
+Stores an object in the serialization context keyed by handle and index.
 
 =cut
 
 */
-inline op nqp_set_sc_object(in INT, in PMC) :base_core {
-    SC_set_sc_object(interp, $1, $2);
+inline op nqp_set_sc_object(in STR, in INT, in PMC) :base_core {
+    PMC *sc = SC_get_sc(interp, $1);
+    if (!PMC_IS_NULL(sc))
+        VTABLE_set_pmc_keyed_int(interp, sc, $2, $3);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Cannot fetch object from non-existance serialization context %Ss",
+            $1);
 }

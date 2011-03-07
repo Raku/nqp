@@ -26,7 +26,9 @@ method TOP() {
     # Serialization context builder - keeps track of objects that
     # cross the compile-time/run-time boundary that are associated
     # with this compilation unit.
-    my $*SC := HLL::Compiler::SerializationContextBuilder.new();
+    my $*SC := HLL::Compiler::SerializationContextBuilder.new(
+        # XXX Need to hash the source, or something.
+        :handle(~pir::time__N()));
 
     my $*SCOPE       := '';
     my $*MULTINESS   := '';

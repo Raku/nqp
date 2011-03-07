@@ -37,10 +37,13 @@ class HLL::Compiler::SerializationContextBuilder::Event {
 }
 
 class HLL::Compiler::SerializationContextBuilder {
-    # The objects that live in or should be built by this context.
-    has @!root_objects;
+    # The serialization context that we're building.
+    has $!sc;
     
-    # Address => slot mapping, we we can quickly look up existing objects
+    # The handle for the context.
+    has $!handle;
+    
+    # Address => slot mapping, so we can quickly look up existing objects
     # in the context.
     has %!addr_to_slot;
     sub addr($obj) {
@@ -51,14 +54,15 @@ class HLL::Compiler::SerializationContextBuilder {
     has @!event_stream;
     
     # XXX Fix BUILD...
-    method new() {
+    method new(:$handle!) {
         my $obj := self.CREATE();
-        $obj.BUILD();
+        $obj.BUILD(:handle($handle));
         $obj
     }
     
-    method BUILD() {
-        @!root_objects := pir::new('ResizablePMCArray');
+    method BUILD(:$handle) {
+        $!sc := pir::nqp_create_sc__PS($handle);
+        $!handle := $handle;
         %!addr_to_slot := pir::new('Hash');
         @!event_stream := pir::new('ResizablePMCArray');
     }
@@ -78,18 +82,18 @@ class HLL::Compiler::SerializationContextBuilder {
     # a constant and we're using the SC as a constants table).
     method get_slot_past_for_object($obj) {
         my $slot := self.slot_for_object($obj);
-        return PAST::Op.new( :pirop('nqp_get_sc_object Pi'), $slot );
+        return PAST::Op.new( :pirop('nqp_get_sc_object Psi'), $!handle, $slot );
     }
     
     # Utility sub to wrap PAST with slot setting.
-    sub set_slot_past($slot, $past_to_set) {
-        return PAST::Op.new( :pirop('nqp_set_sc_object viP'), $slot, $past_to_set );
+    method set_slot_past($slot, $past_to_set) {
+        return PAST::Op.new( :pirop('nqp_set_sc_object vsiP'), $!handle, $slot, $past_to_set );
     }
     
     # Adds an object to the root set, along with a mapping.
     method add_object($obj) {
-        my $idx := +@!root_objects;
-        @!root_objects[$idx] := $obj;
+        my $idx := $!sc.elems();
+        $!sc[$idx] := $obj;
         %!addr_to_slot{addr($obj)} := $idx;
         $idx
     }
@@ -125,7 +129,7 @@ class HLL::Compiler::SerializationContextBuilder {
         if pir::defined($repr) {
             $setup_call.push(PAST::Val.new( :value($repr), :named('repr') ));
         }
-        self.add_event(:deserialize_past(set_slot_past($slot, $setup_call)));
+        self.add_event(:deserialize_past(self.set_slot_past($slot, $setup_call)));
         
         # Result is just the object.
         return $mo;
@@ -154,10 +158,9 @@ class HLL::Compiler::SerializationContextBuilder {
         $obj
     }
     
-    # Gets the root object graph for the serialization context, which can
-    # be attached to the compiled output.
-    method root_objects() {
-        @!root_objects
+    # Gets the built serialization context.
+    method sc() {
+        @!sc
     }
     
     # Generates a series of PAST operations that will build this context if

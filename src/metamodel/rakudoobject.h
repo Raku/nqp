@@ -156,6 +156,7 @@ typedef struct {
 /* Various handy macros for getting at important stuff. */
 #define STABLE_PMC(o)    (((RakudoObjectCommonalities *)PMC_data(o))->stable)
 #define STABLE(o)        ((STable *)PMC_data(STABLE_PMC(o)))
+#define SC_PMC(o)        (((RakudoObjectCommonalities *)PMC_data(o))->sc)
 #define STABLE_STRUCT(p) ((STable *)PMC_data(p))
 #define REPR_PMC(o)      (STABLE(o)->REPR)
 #define REPR(o)          ((REPRCommonalities *)PMC_data(REPR_PMC(o)))
