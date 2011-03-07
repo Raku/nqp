@@ -10,7 +10,8 @@
  * REPR is. This struct should be placed as the first thing in the object
  * struct used by all representations. */
 typedef struct {
-    PMC *stable;
+    PMC *stable;  /* The shared table. */
+    PMC *sc;      /* Serialization context. */
 } RakudoObjectCommonalities;
 
 /* S-Tables (short for Shared Table) contains the commonalities shared between

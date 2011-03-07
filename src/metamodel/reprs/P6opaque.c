@@ -594,9 +594,11 @@ static STRING * get_str(PARROT_INTERP, PMC *self, PMC *obj) {
 static void gc_mark(PARROT_INTERP, PMC *self, PMC *obj) {
     P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
     
-    /* Mark STable. */
+    /* Mark STable and SC. */
     if (!PMC_IS_NULL(instance->common.stable))
         Parrot_gc_mark_PMC_alive(interp, instance->common.stable);
+    if (!PMC_IS_NULL(instance->common.sc))
+        Parrot_gc_mark_PMC_alive(interp, instance->common.sc);
 
     /* If there's spill storage, mark that. */
     if (!PMC_IS_NULL(instance->spill))

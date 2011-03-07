@@ -130,6 +130,8 @@ static void gc_mark(PARROT_INTERP, PMC *self, PMC *obj) {
     KnowHOWREPRInstance *instance = (KnowHOWREPRInstance *)PMC_data(obj);
     if (!PMC_IS_NULL(instance->common.stable))
         Parrot_gc_mark_PMC_alive(interp, instance->common.stable);
+    if (!PMC_IS_NULL(instance->common.sc))
+        Parrot_gc_mark_PMC_alive(interp, instance->common.sc);
     if (!PMC_IS_NULL(instance->methods))
         Parrot_gc_mark_PMC_alive(interp, instance->methods);
     if (!PMC_IS_NULL(instance->attributes))

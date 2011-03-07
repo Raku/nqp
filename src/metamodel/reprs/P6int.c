@@ -127,6 +127,8 @@ static void gc_mark(PARROT_INTERP, PMC *self, PMC *obj) {
     P6intInstance *instance = (P6intInstance *)PMC_data(obj);
     if (!PMC_IS_NULL(instance->common.stable))
         Parrot_gc_mark_PMC_alive(interp, instance->common.stable);
+    if (!PMC_IS_NULL(instance->common.sc))
+        Parrot_gc_mark_PMC_alive(interp, instance->common.sc);
 }
 
 /* This Parrot-specific addition to the API is used to free an object. */

@@ -127,6 +127,8 @@ static void gc_mark(PARROT_INTERP, PMC *self, PMC *obj) {
     P6strInstance *instance = (P6strInstance *)PMC_data(obj);
     if (!PMC_IS_NULL(instance->common.stable))
         Parrot_gc_mark_PMC_alive(interp, instance->common.stable);
+    if (!PMC_IS_NULL(instance->common.sc))
+        Parrot_gc_mark_PMC_alive(interp, instance->common.sc);
     if (!STRING_IS_NULL(instance->value))
         Parrot_gc_mark_STRING_alive(interp, instance->value);
 }
