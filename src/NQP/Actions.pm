@@ -58,11 +58,20 @@ method comp_unit($/) {
     #$unit.loadinit().push($*SC.to_past());
 
     # If our caller wants to know the mainline ctx, provide it here.
-    # (CTXSAVE is inherited from HLL::Actions.)
-    $unit.push( self.CTXSAVE() );
+    # (CTXSAVE is inherited from HLL::Actions.) Don't do this when
+    # there was an explicit {YOU_ARE_HERE}.
+    unless $*HAS_YOU_ARE_HERE {
+        $unit.push( self.CTXSAVE() );
+    }
 
     # Need to load the NQP dynops/dympmcs.
     $unit.loadlibs('nqp_group', 'nqp_ops');
+    $unit.unshift(PAST::Op.new(
+        :pasttype('callmethod'), :name('hll_map'),
+        PAST::Op.new( :pirop('getinterp P') ),
+        PAST::Op.new( :pirop('get_class Ps'), 'LexPad' ),
+        PAST::Op.new( :pirop('get_class Ps'), 'NQPLexPad' )
+    ));
     $unit.unshift(PAST::Op.new( :pirop('nqp_dynop_setup v') ));
 
     # We force a return here, because we have other
@@ -81,6 +90,10 @@ method comp_unit($/) {
         )
     );
     $unit.node($/);
+    
+    # Set HLL.
+    $unit.hll('nqp');
+    
     make $unit;
 }
 
@@ -138,12 +151,21 @@ method block($/) {
 }
 
 method blockoid($/) {
-    my $past := $<statementlist>.ast;
     my $BLOCK := @BLOCK.shift;
-    $BLOCK.push($past);
-    $BLOCK.node($/);
-    $BLOCK.closure(1);
-    make $BLOCK;
+    if $<statementlist> {
+        my $past := $<statementlist>.ast;
+        $BLOCK.push($past);
+        $BLOCK.node($/);
+        $BLOCK.closure(1);
+        make $BLOCK;
+    }
+    else {
+        if $*HAS_YOU_ARE_HERE {
+            $/.CURSOR.panic('{YOU_ARE_HERE} may only appear once in a setting');
+        }
+        $*HAS_YOU_ARE_HERE := 1;
+        make $<you_are_here>.ast;
+    }
 }
 
 method newpad($/) {
@@ -153,7 +175,16 @@ method newpad($/) {
 
 method outerctx($/) {
     our @BLOCK;
+    unless pir::defined(%*COMPILING<%?OPTIONS><outer_ctx>) {
+        # We haven't got a specified outer context already, so load a
+        # setting. XXX Won't work for pre-compiled case yet.
+        pir::compreg__Ps('nqp').load_setting(%*COMPILING<%?OPTIONS><setting> // 'NQPCORE');
+    }
     self.SET_BLOCK_OUTER_CTX(@BLOCK[0]);
+}
+
+method you_are_here($/) {
+    make self.CTXSAVE();
 }
 
 ## Statement control
@@ -1130,11 +1161,17 @@ method circumfix:sym<ang>($/) { make $<quote_EXPR>.ast; }
 method circumfix:sym<« »>($/) { make $<quote_EXPR>.ast; }
 
 method circumfix:sym<{ }>($/) {
-    my $past := +$<pblock><blockoid><statementlist><statement> > 0
-                ?? $<pblock>.ast
-                !! vivitype('%');
-    $past<bareblock> := 1;
-    make $past;
+    if +$<pblock><blockoid><statementlist><statement> > 0 {
+        my $past := $<pblock>.ast;
+        $past<bareblock> := 1;
+        make $past;
+    }
+    elsif $<pblock><blockoid><you_are_here> {
+        make $<pblock>.ast;
+    }
+    else {
+        make vivitype('%');
+    }
 }
 
 method circumfix:sym<sigil>($/) {

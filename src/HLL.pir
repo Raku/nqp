@@ -13,6 +13,10 @@ and HLL::Grammar.
 
 =cut
 
+.HLL 'nqp'
+.loadlib "nqp_group"
+.loadlib "nqp_ops"
+
 .sub '' :anon :load :init
     load_bytecode 'Regex.pbc'
 .end
