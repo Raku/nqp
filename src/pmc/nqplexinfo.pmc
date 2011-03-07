@@ -27,10 +27,6 @@ pmclass NQPLexInfo
     /* Matching PMC array of the values to pre-init with; built from
     * the static_values hash. */
     ATTR PMC *static_values_cache;
-    
-    void class_init() {
-        INTERP->vtables[entry]->flags |= VTABLE_IS_CONST_PMC_FLAG;
-    }
 
     VTABLE void init() {
         SELF.init_pmc(PMCNULL);
@@ -83,6 +79,11 @@ pmclass NQPLexInfo
     VTABLE void visit(PMC *info) {
         VISIT_PMC_ATTR(INTERP, info, SELF, NQPLexInfo, name_to_register_map);
         SUPER(info);
+    }
+    
+    VTABLE void thaw(PMC *info) {
+        /* Need custom mark. */
+        PObj_custom_mark_SET(SELF);
     }
     
     VTABLE PMC *get_iter() {

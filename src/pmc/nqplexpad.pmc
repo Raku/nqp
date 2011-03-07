@@ -59,6 +59,15 @@ Return the LexInfo PMC, if any or a Null PMC.
 */
     VTABLE void init_pmc(PMC *lexinfo) {
         SET_ATTR_lexinfo(INTERP, SELF, lexinfo);
+        PObj_custom_mark_SET(SELF);
+    }
+    
+    VTABLE void mark() {
+        PMC *lexinfo, *ctx;
+        GET_ATTR_lexinfo(INTERP, SELF, lexinfo);
+        GET_ATTR_ctx(INTERP, SELF, ctx);
+        Parrot_gc_mark_PMC_alive(INTERP, lexinfo);
+        Parrot_gc_mark_PMC_alive(INTERP, ctx);
     }
 
     VTABLE void set_pointer(void *ctx) {
