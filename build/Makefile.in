@@ -100,6 +100,7 @@ STAGE0_SOURCES = \
   src/stage0/Regex-s0.pir \
   src/stage0/HLL-s0.pir \
   src/stage0/P6Regex-s0.pir \
+  src/stage0/NQPMO-s0.pir \
   src/stage0/NQP-s0.pir \
   src/stage0/NQPCORE.setting-s0.pir \
 
@@ -249,6 +250,7 @@ $(STAGE0_PBCS): $(DYNEXT_TARGET) $(STAGE0_SOURCES)
 	$(PARROT) -o $(STAGE0)/$(REGEX_PBC)        src/stage0/Regex-s0.pir
 	$(PARROT) -o $(STAGE0)/$(HLL_PBC)          src/stage0/HLL-s0.pir
 	$(PARROT) -o $(STAGE0)/$(P6REGEX_PBC)      src/stage0/P6Regex-s0.pir
+    $(PARROT) -o $(STAGE0)/$(NQP_MO_PBC)       src/stage0/NQPMO-s0.pir
 	$(PARROT) -o $(STAGE0)/$(NQP_PBC)          src/stage0/NQP-s0.pir
 	$(PARROT) -o $(STAGE0)/$(CORE_SETTING_PBC) src/stage0/NQPCORE.setting-s0.pir
 	$(PARROT) -o $(STAGE0)/$(SETTING_MANAGER_PBC) src/stage0/SettingManager-s0.pir
@@ -447,7 +449,8 @@ bootstrap-files: $(STAGE2_PBCS) src/stage2/$(CORE_SETTING_NQP)
 	$(PERL) build/gen_bootstrap.pl src/Regex/P6Regex.pir >src/stage0/P6Regex-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/NQP/Compiler.pir >src/stage0/NQP-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/stage2/$(CORE_SETTING_PIR) >src/stage0/NQPCORE.setting-s0.pir
-    $(PERL) build/gen_bootstrap.pl src/stage2/gen/setting_manager.pir >src/stage0/SettingManager-s0.pir
+	$(PERL) build/gen_bootstrap.pl src/stage2/$(NQP_MO_PIR) >src/stage0/NQPMO-s0.pir
+	$(PERL) build/gen_bootstrap.pl src/stage2/gen/setting_manager.pir >src/stage0/SettingManager-s0.pir
 
 
 ## testing
