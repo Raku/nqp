@@ -249,7 +249,7 @@ $(STAGE0_PBCS): $(DYNEXT_TARGET) $(STAGE0_SOURCES)
 	$(PARROT) -o $(STAGE0)/$(REGEX_PBC)        src/stage0/Regex-s0.pir
 	$(PARROT) -o $(STAGE0)/$(HLL_PBC)          src/stage0/HLL-s0.pir
 	$(PARROT) -o $(STAGE0)/$(P6REGEX_PBC)      src/stage0/P6Regex-s0.pir
-    $(PARROT) -o $(STAGE0)/$(NQP_MO_PBC)       src/stage0/NQPMO-s0.pir
+	$(PARROT) -o $(STAGE0)/$(NQP_MO_PBC)       src/stage0/NQPMO-s0.pir
 	$(PARROT) -o $(STAGE0)/$(NQP_PBC)          src/stage0/NQP-s0.pir
 	$(PARROT) -o $(STAGE0)/$(CORE_SETTING_PBC) src/stage0/NQPCORE.setting-s0.pir
 	$(PARROT) -o $(STAGE0)/$(SETTING_MANAGER_PBC) src/stage0/SettingManager-s0.pir
@@ -299,7 +299,7 @@ $(STAGE1)/$(P6REGEX_PBC): $(STAGE0_PBCS) $(P6REGEX_SOURCES)
 
 $(STAGE1)/$(NQP_MO_PBC): $(STAGE0_PBCS) $(NQP_MO_SOURCES)
 	$(MKPATH) $(STAGE1)/gen
-    $(PERL) build/gen_how_pm.pl $(NQP_MO_SOURCES) > $(STAGE1)/$(NQP_MO_COMBINED)
+	$(PERL) build/gen_how_pm.pl $(NQP_MO_SOURCES) > $(STAGE1)/$(NQP_MO_COMBINED)
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE1)/$(NQP_MO_PIR) \
 	    --setting=NULL $(STAGE1)/$(NQP_MO_COMBINED)
@@ -373,7 +373,7 @@ $(STAGE2)/$(P6REGEX_PBC): $(STAGE1_PBCS) $(P6REGEX_SOURCES)
 
 $(STAGE2)/$(NQP_MO_PBC): $(STAGE1_PBCS) $(NQP_MO_SOURCES)
 	$(MKPATH) $(STAGE2)/gen
-    $(PERL) build/gen_how_pm.pl $(NQP_MO_SOURCES) > $(STAGE2)/$(NQP_MO_COMBINED)
+	$(PERL) build/gen_how_pm.pl $(NQP_MO_SOURCES) > $(STAGE2)/$(NQP_MO_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(NQP_MO_PIR) \
 	    --setting=NULL $(STAGE2)/$(NQP_MO_COMBINED)
@@ -407,9 +407,9 @@ $(ALL_PBCS): $(REGEX_PBC) $(STAGE2_PBCS)
 	$(CP) $(STAGE2)/$(HLL_PBC) .
 	$(CP) $(STAGE2)/$(P6REGEX_PBC) .
 	$(CP) $(STAGE2)/$(NQP_PBC) .
-    $(CP) $(STAGE2)/$(NQP_MO_PBC) .
+	$(CP) $(STAGE2)/$(NQP_MO_PBC) .
 	$(CP) $(STAGE2)/$(CORE_SETTING_PBC) .
-
+		
 $(NQP_EXE): $(NQP_PBC)
 	$(PBC_TO_EXE) $(NQP_PBC)
 
