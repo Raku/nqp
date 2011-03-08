@@ -132,8 +132,8 @@ knowhow NQPClassHOW {
 
         # If we have no parents and we're not called NQPMu then add NQPMu as
         # our parent.
-        if +@!parents == 0 && $!name ne 'NQPMu' {
-            self.add_parent($obj, NQPMu)
+        if +@!parents == 0 && $!name ne 'NQPMu2' {
+            self.add_parent($obj, NQPMu2)
         }
 
         # Some things we only do if we weren't already composed once, like building

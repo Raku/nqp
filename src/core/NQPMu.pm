@@ -1,4 +1,4 @@
-class NQPMu {
+class NQPMu2 {
     method CREATE() {
         pir::repr_instance_of__PP(self)
     }

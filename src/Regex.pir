@@ -12,6 +12,12 @@ This file brings together the various Regex modules needed for Regex.pbc .
 
 .HLL 'nqp'
 
+.sub '' :load :init
+    load_bytecode 'SettingManager.pbc'
+    $P0 = get_hll_global ['HLL'], 'SettingManager'
+    $P0.'load_setting'('NQPCORE')
+.end
+
 .include 'src/Regex/Cursor.pir'
 .include 'src/Regex/Cursor-builtins.pir'
 .include 'src/Regex/Cursor-protoregex-peek.pir'

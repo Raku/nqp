@@ -87,10 +87,9 @@ NQP_SOURCES = \
   src/NQP/Compiler.pir \
   src/cheats/nqp-builtins.pir \
 
-# XXX Should be at the start of CORE_SETTING_SOURCES when removed from metamodel
-#  src/core/NativeTypes.pm \
-#  src/core/NQPMu.pm \ 
 CORE_SETTING_SOURCES = \
+  src/core/NativeTypes.pm \
+  src/core/NQPMu.pm \
   src/core/IO.pm \
   src/core/Regex.pm \
 
@@ -139,7 +138,7 @@ NQP_MO_SOURCES = src/metamodel/how/KnowHOWAttribute.pm src/metamodel/how/NQPClas
                  src/metamodel/how/NQPNativeHOW.pm src/metamodel/how/NQPAttribute.pm \
                  src/metamodel/how/NQPConcreteRoleHOW.pm src/metamodel/how/NQPParametricRoleHOW.pm \
                  src/metamodel/how/RoleToClassApplier.pm src/metamodel/how/RoleToRoleApplier.pm \
-                 src/metamodel/how/NQPModuleHOW.pm src/core/NQPMu.pm src/core/NativeTypes.pm
+                 src/metamodel/how/NQPModuleHOW.pm
 
 NQP_MO_PBC      = nqpmo.pbc
 NQP_MO_PIR      = gen/nqp-mo.pir
