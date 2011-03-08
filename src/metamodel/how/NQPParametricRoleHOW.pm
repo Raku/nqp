@@ -32,22 +32,25 @@ knowhow NQPParametricRoleHOW {
     ##
 
     # Creates a new instance of this meta-class.
-    method new(:$name!, :$body_block!) {
+    method new(:$name!) {
         my $obj := pir::repr_instance_of__PP(self);
-        $obj.BUILD(:name($name), :body_block($body_block));
+        $obj.BUILD(:name($name));
         $obj
     }
 
-    method BUILD(:$name!, :$body_block!) {
+    method BUILD(:$name!) {
         $!name := $name;
-        $!body_block := $body_block;
     }
 
     # Create a new meta-class instance, and then a new type object
     # to go with it, and return that.
-    method new_type(:$body_block!, :$name = '<anon>', :$repr = 'P6opaque') {
-        my $metarole := self.new(:name($name), :body_block($body_block));
+    method new_type(:$name = '<anon>', :$repr = 'P6opaque') {
+        my $metarole := self.new(:name($name));
         pir::repr_type_object_for__PPS($metarole, $repr);
+    }
+    
+    method set_body_block($obj, $body_block) {
+        $!body_block := $body_block;
     }
 
     method add_method($obj, $name, $code_obj) {

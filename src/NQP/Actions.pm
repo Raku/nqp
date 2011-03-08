@@ -442,7 +442,16 @@ method package_def($/) {
         $past.blocktype('declaration');
         $past.unshift(PAST::Var.new( :name('$?CLASS'), :scope('parameter') ));
         $past.symbol('$?CLASS', :scope('lexical'));
-        $*PACKAGE-SETUP[0][0][1].push(PAST::Val.new( :value($past), :named('body_block') ));
+        $*PACKAGE-SETUP.push(PAST::Op.new(
+            :pasttype('callmethod'), :name('set_body_block'),
+            PAST::Op.new(
+                # XXX nqpop get_how
+                :pirop('get_how PP'),
+                PAST::Var.new( :name('type_obj'), :scope('register') )
+            ),
+            PAST::Var.new( :name('type_obj'), :scope('register') ),
+            PAST::Val.new( :value($past) )
+        ));
     }
     else {
         $past.blocktype('immediate');
