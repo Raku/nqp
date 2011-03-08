@@ -706,3 +706,38 @@ inline op nqp_set_sc_object(in STR, in INT, in PMC) :base_core {
             "Cannot fetch object from non-existance serialization context %Ss",
             $1);
 }
+
+/*
+
+=item nqp_set_sc_for_object()
+
+Sets an object's serialization context.
+
+=cut
+
+*/
+inline op nqp_set_sc_for_object(in PMC, in PMC) :base_core {
+    if ($1->vtable->base_type == ro_id)
+        SC_PMC($1) = $2;
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use nqp_set_sc_for_object with a RakudoObject");
+}
+
+/*
+
+=item nqp_get_sc_for_object()
+
+Gets an object's serialization context. Returns NULL if there
+is none.
+
+=cut
+
+*/
+inline op nqp_get_sc_for_object(out PMC, in PMC) :base_core {
+    if ($2->vtable->base_type == ro_id)
+        $1 = SC_PMC($2);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use nqp_get_sc_for_object with a RakudoObject");
+}
