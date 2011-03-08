@@ -421,11 +421,7 @@ method package_def($/) {
     $*PACKAGE-SETUP.unshift(PAST::Stmts.new(
         PAST::Op.new( :pasttype('bind'),
             PAST::Var.new( :name('type_obj'), :scope('register'), :isdecl(1) ),
-            PAST::Op.new(
-                :pasttype('callmethod'), :name('new_type'),
-                PAST::Var.new( :name($how.HOW.name($how)), :namespace(''), :scope('package') ),
-                PAST::Val.new( :value($name), :named('name') )
-            )
+            $*SC.get_slot_past_for_object($*PKGMETA)
         ),
         PAST::Op.new( :pasttype('bind'),
             PAST::Var.new( :name($name), :namespace(@ns), :scope('package') ),
@@ -436,13 +432,6 @@ method package_def($/) {
             PAST::Var.new( :name('type_obj'), :scope('register') )
         )
     ));
-
-    # Pass along a custom REPR if one is selected.
-    if $<repr> {
-        my $repr_name := $<repr>[0].ast;
-        $repr_name.named('repr');
-        $*PACKAGE-SETUP[0][0][1].push($repr_name);
-    }
 
     # Evaluate everything in the package in-line unless this is a generic
     # type in which case it needs delayed evaluation. Normally, $?CLASS is

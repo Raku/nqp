@@ -71,7 +71,7 @@ class HLL::Compiler::SerializationContextBuilder {
     method slot_for_object($obj) {
         my $slot := %!addr_to_slot{addr($obj)};
         unless pir::defined($slot) {
-            pir::die('slot_for called on object no in context');
+            pir::die('slot_for_object called on object not in context');
         }
         $slot
     }
@@ -87,11 +87,23 @@ class HLL::Compiler::SerializationContextBuilder {
     
     # Utility sub to wrap PAST with slot setting.
     method set_slot_past($slot, $past_to_set) {
-        return PAST::Op.new( :pirop('nqp_set_sc_object vsiP'), $!handle, $slot, $past_to_set );
+        return PAST::Op.new( :pirop('nqp_set_sc_object vsiP'),
+            $!handle, $slot, $past_to_set);
+    }
+    
+    # Used when deserializing. Makes sure the object being
+    # deserialized has the current SC set.
+    method set_cur_sc($to_wrap) {
+        PAST::Op.new(
+            :pirop('nqp_set_sc_for_object__0PP'),
+            $to_wrap,
+            PAST::Var.new( :name('cur_sc'), :scope('register') )
+        )
     }
     
     # Adds an object to the root set, along with a mapping.
     method add_object($obj) {
+        pir::nqp_set_sc_for_object__vPP($obj, $!sc);
         my $idx := $!sc.elems();
         $!sc[$idx] := $obj;
         %!addr_to_slot{addr($obj)} := $idx;
@@ -158,8 +170,8 @@ class HLL::Compiler::SerializationContextBuilder {
         if pir::defined($repr) {
             $setup_call.push(PAST::Val.new( :value($repr), :named('repr') ));
         }
-        # XXX Not quite ready to really do this yet...
-        #self.add_event(:deserialize_past(self.set_slot_past($slot, $setup_call)));
+        self.add_event(:deserialize_past(
+            self.set_slot_past($slot, self.set_cur_sc($setup_call))));
         
         # Result is just the object.
         return $mo;
@@ -211,7 +223,11 @@ class HLL::Compiler::SerializationContextBuilder {
             PAST::Stmts.new(
                 PAST::Op.new( :pirop('nqp_dynop_setup v') ),
                 PAST::Op.new( :pirop('load_bytecode vs'), 'nqpmo.pbc' ),
-                PAST::Op.new( :pirop('nqp_create_sc Ps'), $!handle ),
+                PAST::Op.new(
+                    :pasttype('bind'),
+                    PAST::Var.new( :name('cur_sc'), :scope('register'), :isdecl(1) ),
+                    PAST::Op.new( :pirop('nqp_create_sc Ps'), $!handle )
+                ),
                 $des
             ),
             $fix
