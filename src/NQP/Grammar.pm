@@ -336,7 +336,7 @@ rule package_def {
         my %args;
         %args<name> := ~$<name>;
         if $<repr> {
-            %args<repr> := ~$<repr>[0];
+            %args<repr> := ~$<repr>[0]<quote_delimited><quote_atom>[0];
         }
         $*PKGMETA := $*SC.pkg_create_mo(%*HOW{$*PKGDECL}, |%args);
     }
