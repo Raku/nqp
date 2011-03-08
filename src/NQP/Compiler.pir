@@ -23,8 +23,8 @@ NQP::Compiler - NQP compiler
     interp.'hll_map'(lexpad, nqplexpad)
     
     load_bytecode 'SettingManager.pbc'
+    load_bytecode 'nqpmo.pbc'
 .end
-.include 'gen/nqp-how.pir'
 
 .sub '' :anon :load :init
     load_bytecode 'P6Regex.pbc'

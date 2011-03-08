@@ -29,6 +29,7 @@ nqp.c
 nqp_group.c
 nqp_group.h
 nqp.pbc
+nqpmo.pbc
 NQPCORE.setting.pbc
 SettingManager.pbc
 src/gen/*.pir

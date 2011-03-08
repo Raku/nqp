@@ -210,6 +210,7 @@ class HLL::Compiler::SerializationContextBuilder {
             ),
             PAST::Stmts.new(
                 PAST::Op.new( :pirop('nqp_dynop_setup v') ),
+                PAST::Op.new( :pirop('load_bytecode vs'), 'nqpmo.pbc' ),
                 PAST::Op.new( :pirop('nqp_create_sc Ps'), $!handle ),
                 $des
             ),

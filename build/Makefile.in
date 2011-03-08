@@ -129,18 +129,27 @@ P6GRAMMAR_G     = gen/p6grammar-grammar.pir
 P6GRAMMAR_A     = gen/p6grammar-actions.pir
 
 NQP_PBC         = nqp.pbc
-NQP_HOW         = gen/nqp-how.pir
 NQP_G           = gen/nqp-grammar.pir
 NQP_A           = gen/nqp-actions.pir
 NQP_C           = gen/nqp-compiler.pir
 NQP_EXE         = nqp$(EXE)
 
+NQP_MO_SOURCES = src/metamodel/how/KnowHOWAttribute.pm src/metamodel/how/NQPClassHOW.pm \
+                 src/metamodel/how/NQPNativeHOW.pm src/metamodel/how/NQPAttribute.pm \
+                 src/metamodel/how/NQPConcreteRoleHOW.pm src/metamodel/how/NQPParametricRoleHOW.pm \
+                 src/metamodel/how/RoleToClassApplier.pm src/metamodel/how/RoleToRoleApplier.pm \
+                 src/metamodel/how/NQPModuleHOW.pm src/core/NQPMu.pm src/core/NativeTypes.pm
+
+NQP_MO_PBC      = nqpmo.pbc
+NQP_MO_PIR      = gen/nqp-mo.pir
+NQP_MO_COMBINED = gen/nqp-mo.pm
+
 CORE_SETTING_PBC = NQPCORE.setting.pbc
 CORE_SETTING_PIR = gen/NQPCORE.setting.pir
 
 STAGE0_PBCS     = $(STAGE0)/$(HLL_PBC) $(STAGE0)/$(P6REGEX_PBC) $(STAGE0)/$(NQP_PBC) $(STAGE0)/$(REGEX_PBC) $(STAGE0)/$(CORE_SETTING_PBC) $(STAGE0)/$(SETTING_MANAGER_PBC)
-STAGE1_PBCS     = $(STAGE1)/$(HLL_PBC) $(STAGE1)/$(P6REGEX_PBC) $(STAGE1)/$(NQP_PBC) $(REGEX_PBC) $(STAGE1)/$(CORE_SETTING_PBC) $(STAGE1)/$(SETTING_MANAGER_PBC)
-STAGE2_PBCS     = $(STAGE2)/$(HLL_PBC) $(STAGE2)/$(P6REGEX_PBC) $(STAGE2)/$(NQP_PBC) $(REGEX_PBC) $(STAGE2)/$(CORE_SETTING_PBC) $(STAGE2)/$(SETTING_MANAGER_PBC)
+STAGE1_PBCS     = $(STAGE1)/$(HLL_PBC) $(STAGE1)/$(P6REGEX_PBC) $(STAGE1)/$(NQP_PBC) $(REGEX_PBC) $(STAGE1)/$(CORE_SETTING_PBC) $(STAGE1)/$(SETTING_MANAGER_PBC) $(STAGE1)/$(NQP_MO_PBC)
+STAGE2_PBCS     = $(STAGE2)/$(HLL_PBC) $(STAGE2)/$(P6REGEX_PBC) $(STAGE2)/$(NQP_PBC) $(REGEX_PBC) $(STAGE2)/$(CORE_SETTING_PBC) $(STAGE2)/$(SETTING_MANAGER_PBC) $(STAGE2)/$(NQP_MO_PBC)
 ALL_PBCS        = $(HLL_PBC) $(P6REGEX_PBC) $(NQP_PBC) $(CORE_SETTING_PBC) $(SETTING_MANAGER_PBC)
 
 GROUP           = nqp_group
@@ -173,14 +182,6 @@ METAMODEL_OBJS   = ../metamodel/rakudoobject$(O) ../metamodel/repr_registry$(O) 
                    ../metamodel/reprs/P6opaque$(O) ../metamodel/reprs/P6int$(O) \
                    ../metamodel/reprs/P6str$(O) ../metamodel/reprs/P6num$(O) \
                    ../metamodel/multi_dispatch$(O) ../metamodel/serialization_context$(O)
-
-HOW_SOURCES  = src/metamodel/how/KnowHOWAttribute.pm src/metamodel/how/NQPClassHOW.pm \
-               src/metamodel/how/NQPNativeHOW.pm src/metamodel/how/NQPAttribute.pm \
-               src/metamodel/how/NQPConcreteRoleHOW.pm src/metamodel/how/NQPParametricRoleHOW.pm \
-               src/metamodel/how/RoleToClassApplier.pm src/metamodel/how/RoleToRoleApplier.pm \
-               src/metamodel/how/NQPModuleHOW.pm src/core/NQPMu.pm src/core/NativeTypes.pm
-
-HOW_COMBINED = src/gen/how.pm
 
 CLEANUPS = \
   *.manifest \
@@ -295,14 +296,17 @@ $(STAGE1)/$(P6REGEX_PBC): $(STAGE0_PBCS) $(P6REGEX_SOURCES)
 	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(P6REGEX_PBC) \
 	    src/Regex/P6Regex.pir
 
-$(HOW_COMBINED): $(HOW_SOURCES)
-	$(PERL) build/gen_how_pm.pl $(HOW_SOURCES) > $(HOW_COMBINED)
-
-$(STAGE1)/$(NQP_PBC): $(STAGE0_PBCS) $(NQP_SOURCES) $(HOW_COMBINED)
+$(STAGE1)/$(NQP_MO_PBC): $(STAGE0_PBCS) $(NQP_MO_SOURCES)
 	$(MKPATH) $(STAGE1)/gen
+    $(PERL) build/gen_how_pm.pl $(NQP_MO_SOURCES) > $(STAGE1)/$(NQP_MO_COMBINED)
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE1)/$(NQP_HOW) \
-	    $(HOW_COMBINED)
+	    --target=pir --output=$(STAGE1)/$(NQP_MO_PIR) \
+	    --setting=NULL $(STAGE1)/$(NQP_MO_COMBINED)
+	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(NQP_MO_PBC) \
+	    $(STAGE1)/$(NQP_MO_PIR)
+
+$(STAGE1)/$(NQP_PBC): $(STAGE0_PBCS) $(NQP_SOURCES)
+	$(MKPATH) $(STAGE1)/gen
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE1)/$(NQP_G) \
 	    src/NQP/Grammar.pm
@@ -366,11 +370,17 @@ $(STAGE2)/$(P6REGEX_PBC): $(STAGE1_PBCS) $(P6REGEX_SOURCES)
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(P6REGEX_PBC) \
 	    src/Regex/P6Regex.pir
 
-$(STAGE2)/$(NQP_PBC): $(STAGE1_PBCS) $(NQP_SOURCES) $(HOW_COMBINED)
+$(STAGE2)/$(NQP_MO_PBC): $(STAGE1_PBCS) $(NQP_MO_SOURCES)
 	$(MKPATH) $(STAGE2)/gen
+    $(PERL) build/gen_how_pm.pl $(NQP_MO_SOURCES) > $(STAGE2)/$(NQP_MO_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE2)/$(NQP_HOW) \
-	    $(HOW_COMBINED)
+	    --target=pir --output=$(STAGE2)/$(NQP_MO_PIR) \
+	    --setting=NULL $(STAGE2)/$(NQP_MO_COMBINED)
+	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(NQP_MO_PBC) \
+	    $(STAGE2)/$(NQP_MO_PIR)
+
+$(STAGE2)/$(NQP_PBC): $(STAGE1_PBCS) $(NQP_SOURCES)
+	$(MKPATH) $(STAGE2)/gen
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(NQP_G) \
 	    src/NQP/Grammar.pm
@@ -396,6 +406,7 @@ $(ALL_PBCS): $(REGEX_PBC) $(STAGE2_PBCS)
 	$(CP) $(STAGE2)/$(HLL_PBC) .
 	$(CP) $(STAGE2)/$(P6REGEX_PBC) .
 	$(CP) $(STAGE2)/$(NQP_PBC) .
+    $(CP) $(STAGE2)/$(NQP_MO_PBC) .
 	$(CP) $(STAGE2)/$(CORE_SETTING_PBC) .
 
 $(NQP_EXE): $(NQP_PBC)
