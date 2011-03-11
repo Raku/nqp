@@ -1065,17 +1065,35 @@ method term:sym<identifier>($/) {
 }
 
 method term:sym<name>($/) {
-    my @ns := pir::clone__PP($<name><identifier>);
-    my $name := @ns.pop;
-    @ns.shift if @ns && @ns[0] eq 'GLOBAL';
-    my $var :=
-        PAST::Var.new( :name(~$name), :namespace(@ns), :scope('package') );
+    # See if it's a lexical symbol (known in any outer scope).
+    my $var;
+    if is_lexical(~$<name>) {
+        $var := PAST::Var.new( :name(~$<name>), :scope('lexical') );
+    }
+    else {
+        my @ns := pir::clone__PP($<name><identifier>);
+        my $name := @ns.pop;
+        @ns.shift if @ns && @ns[0] eq 'GLOBAL';
+        $var := PAST::Var.new( :name(~$name), :namespace(@ns), :scope('package') );
+    }
+    
+    # If it's a call, add the arguments.
     my $past := $var;
     if $<args> {
         $past := $<args>[0].ast;
         $past.unshift($var);
     }
     make $past;
+}
+
+sub is_lexical($name) {
+    for @BLOCK {
+        my %sym := $_.symbol($name);
+        if +%sym {
+            return 1;
+        }
+    }
+    0;
 }
 
 method term:sym<pir::op>($/) {
