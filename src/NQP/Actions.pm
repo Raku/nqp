@@ -414,7 +414,6 @@ method package_def($/) {
 
     # Get the body code.
     my $past := $<block> ?? $<block>.ast !! $<comp_unit>.ast;
-    $past.namespace( $<name><identifier> );
     
     # Prefix the class initialization with initial setup. Also install it
     # in the symbol table right away.
@@ -424,14 +423,22 @@ method package_def($/) {
             $*SC.get_slot_past_for_object($*PKGMETA)
         ),
         PAST::Op.new( :pasttype('bind'),
-            PAST::Var.new( :name($name), :namespace(@ns), :scope('package') ),
-            PAST::Var.new( :name('type_obj'), :scope('register') )
-        ),
-        PAST::Op.new( :pasttype('bind'),
             PAST::Var.new( :name('$?CLASS') ),
             PAST::Var.new( :name('type_obj'), :scope('register') )
         )
     ));
+    
+    # Install it in the package or lexpad as needed.
+    if $*SCOPE eq 'our' || $*SCOPE eq '' {
+        $past.namespace( $<name><identifier> );
+        $*PACKAGE-SETUP[0].push(PAST::Op.new( :pasttype('bind'),
+            PAST::Var.new( :name($name), :namespace(@ns), :scope('package') ),
+            PAST::Var.new( :name('type_obj'), :scope('register') )
+        ));
+    }
+    else {
+        $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
+    }
 
     # Evaluate everything in the package in-line unless this is a generic
     # type in which case it needs delayed evaluation. Normally, $?CLASS is
@@ -531,9 +538,9 @@ method scope_declarator:sym<our>($/) { make $<scoped>.ast; }
 method scope_declarator:sym<has>($/) { make $<scoped>.ast; }
 
 method scoped($/) {
-    make $<declarator>
-         ?? $<declarator>.ast
-         !! $<multi_declarator>.ast;
+    make $<declarator>       ?? $<declarator>.ast !!
+         $<multi_declarator> ?? $<multi_declarator>.ast !!
+                                $<package_declarator>.ast;
 }
 
 method declarator($/) {

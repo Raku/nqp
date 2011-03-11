@@ -358,6 +358,7 @@ token scope_declarator:sym<has> { <sym> <scoped('has')> }
 rule scoped($*SCOPE) {
     | <declarator>
     | <multi_declarator>
+    | <package_declarator>
 }
 
 token typename { <name> }
