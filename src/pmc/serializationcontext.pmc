@@ -64,4 +64,19 @@ pmclass SerializationContext auto_attrs dynpmc group nqp {
         GETATTR_SerializationContext_handle(interp, SELF, handle);
         RETURN (STRING* handle);
     }
+    
+    METHOD INTVAL slot_index_for(PMC *obj) {
+        /* This is kinda stupid, but it'll do for now. */
+        PMC    *root_objects;
+        INTVAL  i, count;
+        GETATTR_SerializationContext_root_objects(interp, SELF, root_objects);
+        count = VTABLE_elements(interp, root_objects);
+        for (i = 0; i < count; i++) {
+            if (VTABLE_get_pmc_keyed_int(interp, root_objects, i) == obj) {
+                RETURN (INTVAL i);
+            }
+        }
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Object does not exist in serialization context");
+    }
 }
