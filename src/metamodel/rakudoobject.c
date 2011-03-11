@@ -4,11 +4,13 @@
 #include "rakudoobject.h"
 #include "repr_registry.h"
 #include "knowhow_bootstrapper.h"
+#include "serialization_context.h"
 
 /* Cached type IDs. */
 static INTVAL stable_id = 0;
 static INTVAL repr_id   = 0;
 static INTVAL ro_id     = 0;
+static INTVAL sc_id     = 0;
 
 /* Cached strings. */
 static STRING *find_method_str = NULL;
@@ -16,18 +18,28 @@ static STRING *type_check_str = NULL;
 
 /* Initializes the RakudoObject object model. */
 void RakudoObject_initialize(PARROT_INTERP) {
+    PMC    *initial_sc;
+    STRING *initial_sc_name;
+    
     /* Look up and cache some type IDs and strings. */
     stable_id       = pmc_type(interp, Parrot_str_new(interp, "STable", 0));
     repr_id         = pmc_type(interp, Parrot_str_new(interp, "REPR", 0));
     ro_id           = pmc_type(interp, Parrot_str_new(interp, "RakudoObject", 0));
+    sc_id           = pmc_type(interp, Parrot_str_new(interp, "SerializationContext", 0));
     find_method_str = Parrot_str_new_constant(interp, "find_method");
     type_check_str  = Parrot_str_new_constant(interp, "type_check");
 
+    /* Create initial core serialization context. */
+    initial_sc = pmc_new(interp, sc_id);
+    initial_sc_name = Parrot_str_new(interp, "__6MODEL_CORE__", 0);
+    VTABLE_set_string_native(interp, initial_sc, initial_sc_name);
+    SC_set_sc(interp, initial_sc_name, initial_sc);
+    
     /* Build representations and initializes the representation registry. */
     REPR_initialize_registry(interp);
 
     /* Bootstrap the KnowHOW. */
-    RakudoObject_bootstrap_knowhow(interp);
+    RakudoObject_bootstrap_knowhow(interp, initial_sc);
 }
 
 /* Takes a representation and wraps it up in a REPR PMC. */
