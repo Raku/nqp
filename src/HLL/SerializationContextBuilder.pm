@@ -209,20 +209,33 @@ class HLL::Compiler::SerializationContextBuilder {
     }
     
     # Adds a parent or role to the meta-object, and stores an event for
-    # the action. If the parent or is in this context, it will be referenced
-    # directly. Otherwise, it will be looked up using the supplied PAST.
-    method pkg_add_parent_or_role($obj, $meta_method_name, $to_add, $to_add_past) {
+    # the action.
+    method pkg_add_parent_or_role($obj, $meta_method_name, $to_add) {
+        # Do the actual addition on the meta-object immediately.
+        $obj.HOW."$meta_method_name"($obj, $to_add);
+        
+        # Emit code to add it when deserializing.
+        my $slot_past := get_slot_past_for_object($obj);
+        self.add_event(:deserialize_past(PAST::Op.new(
+            :pasttype('callmethod'), :name($meta_method_name),
+            PAST::Op.new( :pirop('get_how PP'), $slot_past ),
+            $slot_past,
+            self.get_object_sc_ref_past($to_add)
+        )));
     }
     
     # Composes the package, and stores an event for this action.
     method pkg_compose($obj) {
+        # Compose.
+        $obj.HOW.compose($obj);
+        
+        # Emit code to do the composition when deserializing.
         my $slot_past := get_slot_past_for_object($obj);
         self.add_event(:deserialize_past(PAST::Op.new(
             :pasttype('callmethod'), :name('compose'),
             PAST::Op.new( :pirop('get_how PP'), $slot_past ),
             $slot_past
         )));
-        $obj
     }
     
     # Gets the built serialization context.
