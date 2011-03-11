@@ -117,6 +117,30 @@ class HLL::Compiler::SerializationContextBuilder {
         ));
     }
     
+    # Gets PAST for referencing an object in a serialization context,
+    # either the one being built or another one.
+    method get_object_sc_ref_past($obj) {
+        # Get the object's serialization context; we're stuck if it
+        # has none.
+        my $sc := pir::nqp_get_sc_for_object__PP($obj);
+        if pir::isnull__IP($sc) {
+            pir::die("Object of type '" ~ $obj.HOW.name($obj) ~
+                "' cannot be referenced without having been " ~
+                "assigned a serialization context");
+        }
+        
+        # If it's this context, dead easy. Otherwise, need to build a
+        # cross-reference.
+        if $sc =:= $!sc {
+            self.get_slot_past_for_object($obj);
+        }
+        else {
+            PAST::Op.new( :pirop('nqp_get_sc_object Psi'),
+                $sc.handle, $sc.slot_index_for($obj)
+            )
+        }
+    }
+    
     # Loads the setting and emits code 
     method load_setting($setting_name) {
         # Do nothing for the NULL setting.
@@ -161,8 +185,9 @@ class HLL::Compiler::SerializationContextBuilder {
         my $how_name := @how_ns.pop();
         my $setup_call := PAST::Op.new(
             :pasttype('callmethod'), :name('new_type'),
-            # XXX Should be an SC cross-reference
             PAST::Var.new( :name($how_name), :namespace(@how_ns), :scope('package') )
+            # XXX Not ready to do this quite yet...
+            # self.get_object_sc_ref_past($how)
         );
         if pir::defined($name) {
             $setup_call.push(PAST::Val.new( :value($name), :named('name') ));
