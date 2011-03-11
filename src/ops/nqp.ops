@@ -703,7 +703,7 @@ inline op nqp_set_sc_object(in STR, in INT, in PMC) :base_core {
         VTABLE_set_pmc_keyed_int(interp, sc, $2, $3);
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Cannot fetch object from non-existance serialization context %Ss",
+            "Cannot fetch object from non-existant serialization context %Ss",
             $1);
 }
 
