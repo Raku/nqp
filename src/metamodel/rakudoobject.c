@@ -119,6 +119,7 @@ static INTVAL default_type_check (PARROT_INTERP, PMC *obj, PMC *checkee) {
 PMC * create_stable(PARROT_INTERP, PMC *REPR, PMC *HOW) {
     PMC *st_pmc = pmc_new_init(interp, stable_id, HOW);
     STABLE_STRUCT(st_pmc)->REPR = REPR;
+    STABLE_STRUCT(st_pmc)->WHO = PMCNULL;
     STABLE_STRUCT(st_pmc)->find_method = default_find_method;
     STABLE_STRUCT(st_pmc)->type_check = default_type_check;
     return st_pmc;

@@ -1040,10 +1040,12 @@ method dotty($/) {
     }
     elsif $<longname> eq 'HOW' {
         $past.pirop('get_how PP');
-        $past.pasttype('pirop');
     }
     elsif $<longname> eq 'WHAT' {
         $past.pirop('get_what PP');
+    }
+    elsif $<longname> eq 'WHO' {
+        $past.pirop('get_who PP');
     }
     else {
         $past.name(~$<longname>);
