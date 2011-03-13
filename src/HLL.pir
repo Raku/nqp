@@ -19,6 +19,13 @@ and HLL::Grammar.
 
 .sub '' :anon :load :init
     load_bytecode 'Regex.pbc'
+    
+    ## Bring in PAST and PCT
+    .local pmc hllns, parrotns, imports
+    hllns = get_hll_namespace
+    parrotns = get_root_namespace ['parrot']
+    imports = split ' ', 'PAST PCT'
+    parrotns.'export_to'(hllns, imports)
 .end
 
 .include 'cclass.pasm'

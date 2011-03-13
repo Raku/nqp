@@ -26,17 +26,6 @@ NQP::Compiler - NQP compiler
     load_bytecode 'nqpmo.pbc'
 .end
 
-.sub '' :anon :load :init
-    load_bytecode 'P6Regex.pbc'
-    
-    ## Bring in PAST and PCT
-    .local pmc hllns, parrotns, imports
-    hllns = get_hll_namespace
-    parrotns = get_root_namespace ['parrot']
-    imports = split ' ', 'PAST PCT'
-    parrotns.'export_to'(hllns, imports)
-.end
-
 .include 'gen/nqp-grammar.pir'
 .include 'gen/nqp-actions.pir'
 .include 'gen/nqp-compiler.pir'
