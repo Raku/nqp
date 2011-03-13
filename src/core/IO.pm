@@ -47,4 +47,15 @@ sub spew($filename, $contents) {
     $handle.close();
 }
 
+sub print(*@args) {
+    for @args {
+        pir::print($_);
+    }
+    1;
+}
+
+sub say(*@args) {
+    print(|@args, "\n");
+}
+
 # vim: ft=perl6

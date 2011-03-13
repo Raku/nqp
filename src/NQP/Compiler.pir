@@ -40,7 +40,6 @@ NQP::Compiler - NQP compiler
 .include 'gen/nqp-grammar.pir'
 .include 'gen/nqp-actions.pir'
 .include 'gen/nqp-compiler.pir'
-.include 'src/cheats/nqp-builtins.pir'
 
 .namespace ['NQP';'Compiler']
 

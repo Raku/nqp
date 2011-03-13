@@ -85,13 +85,13 @@ NQP_SOURCES = \
   src/NQP/Actions.pm \
   src/NQP/Compiler.pm \
   src/NQP/Compiler.pir \
-  src/cheats/nqp-builtins.pir \
 
 CORE_SETTING_SOURCES = \
   src/core/NativeTypes.pm \
   src/core/NQPMu.pm \
   src/core/IO.pm \
   src/core/Regex.pm \
+  src/core/testing.pm \
 
 CORE_SETTING_NQP = NQPCORE.setting
   
