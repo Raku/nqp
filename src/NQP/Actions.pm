@@ -66,8 +66,10 @@ class NQP::Actions is HLL::Actions {
         
         # If we have a MAIN sub, call it at end of mainline.
         if $*MAIN_SUB {
+            $unit.unshift(PAST::Var.new( :scope('parameter'), :name('@ARGS'), :slurpy(1) ));
             $mainline.push(PAST::Op.new(
-                :pasttype('call'), PAST::Val.new( :value($*MAIN_SUB) )
+                :pasttype('call'), PAST::Val.new( :value($*MAIN_SUB) ),
+                PAST::Var.new( :scope('lexical'), :name('@ARGS'), :flat(1) )
             ));
         }
 
