@@ -169,6 +169,22 @@ class HLL::Compiler::SerializationContextBuilder {
         }
     }
     
+    # Loads a module immediately, and also makes sure we load it
+    # during the deserialization.
+    method load_module($module_name) {
+        # Immediate loading.
+        my $*LOAD_UNIT;
+        my $path := pir::join('/', pir::split('::', $module_name)) ~ '.pbc';
+        pir::load_bytecode($path);
+        
+        # Make sure we do the loading during deserialization.
+        self.add_event(:deserialize_past(
+            PAST::Op.new( :pirop('load_bytecode vs'), $path )));
+        
+        # Return UNIT of the loaded module.
+        $*LOAD_UNIT
+    }
+    
     # Installs a symbol into the package. Does so immediately, and
     # makes sure this happens on deserialization also.
     method install_package_symbol(@sym, $obj) {

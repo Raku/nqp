@@ -185,6 +185,11 @@ method you_are_here($/) {
 
 ## Statement control
 
+method statement_control:sym<use>($/) {
+    $*SC.load_module(~$<name>);
+    make PAST::Stmts.new();
+}
+
 method statement_control:sym<if>($/) {
     my $count := +$<xblock> - 1;
     my $past := xblock_immediate( $<xblock>[$count].ast );

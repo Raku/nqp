@@ -185,6 +185,10 @@ token terminator:sym<}> { <?[}]> }
 
 proto token statement_control { <...> }
 
+token statement_control:sym<use> {
+    <sym> \s :s <name>
+}
+
 token statement_control:sym<if> {
     <sym> \s :s
     <xblock>
