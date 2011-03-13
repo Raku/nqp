@@ -69,6 +69,13 @@ class NQP::Actions is HLL::Actions {
             PAST::Op.new( :pirop('get_class Ps'), 'LexPad' ),
             PAST::Op.new( :pirop('get_class Ps'), 'NQPLexPad' )
         ));
+        
+        # If we have a MAIN sub, call it at end of mainline.
+        if $*MAIN_SUB {
+            $mainline.push(PAST::Op.new(
+                :pasttype('call'), PAST::Val.new( :value($*MAIN_SUB) )
+            ));
+        }
 
         # We force a return here, because we have other
         # :load/:init blocks to execute that we don't want
@@ -711,6 +718,11 @@ class NQP::Actions is HLL::Actions {
             }
             else {
                 $/.CURSOR.panic("$*SCOPE scoped routines are not supported yet");
+            }
+            
+            # Is it the MAIN sub?
+            if $name eq 'MAIN' && $*MULTINESS ne 'multi' {
+                $*MAIN_SUB := $block;
             }
         }
 

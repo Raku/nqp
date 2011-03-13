@@ -108,6 +108,7 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token comp_unit {
         :my $*HAS_YOU_ARE_HERE := 0;
+        :my $*MAIN_SUB;
         <.newpad>
         <.outerctx>
         <statementlist>
