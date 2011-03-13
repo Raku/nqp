@@ -25,6 +25,9 @@ typedef struct {
 
     /* The type-object. */
     PMC *WHAT;
+    
+    /* The underlying package stash. */
+    PMC *WHO;
 
     /* The method finder. */
     PMC * (*find_method) (PARROT_INTERP, PMC *obj, STRING *name, INTVAL hint);

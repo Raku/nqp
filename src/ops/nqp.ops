@@ -88,6 +88,40 @@ inline op get_what(out PMC, in PMC) :base_core {
 
 /*
 
+=item get_who(obj)
+
+Gets the WHO for a Rakudo Object.
+
+=cut
+
+*/
+inline op get_who(out PMC, in PMC) :base_core {
+    if ($2->vtable->base_type == ro_id)
+        $1 = STABLE($2)->WHO;
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use get_who on a RakudoObject");
+}
+
+/*
+
+=item set_who(obj)
+
+Sets the WHO for a Rakudo Object.
+
+=cut
+
+*/
+inline op set_who(in PMC, in PMC) :base_core {
+    if ($1->vtable->base_type == ro_id)
+        STABLE($1)->WHO = $2;
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use set_who on a RakudoObject");
+}
+
+/*
+
 =item repr_type_object_for(how, repr_name)
 
 Creates a type object associated with the given HOW and of the given
