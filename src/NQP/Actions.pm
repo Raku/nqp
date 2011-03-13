@@ -415,8 +415,16 @@ method package_def($/) {
     # Get the body code.
     my $past := $<block> ?? $<block>.ast !! $<comp_unit>.ast;
     
-    # Prefix the class initialization with initial setup. Also install it
-    # in the symbol table right away.
+    # Install it in the package or lexpad as needed.
+    if $*SCOPE eq 'our' || $*SCOPE eq '' {
+        $past.namespace( $<name><identifier> );
+        $*SC.install_package_symbol($<name><identifier>, $*PKGMETA);
+    }
+    else {
+        $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
+    }
+    
+    # Prefix the class initialization with initial setup.
     $*PACKAGE-SETUP.unshift(PAST::Stmts.new(
         PAST::Op.new( :pasttype('bind'),
             PAST::Var.new( :name('type_obj'), :scope('register'), :isdecl(1) ),
@@ -427,18 +435,6 @@ method package_def($/) {
             PAST::Var.new( :name('type_obj'), :scope('register') )
         )
     ));
-    
-    # Install it in the package or lexpad as needed.
-    if $*SCOPE eq 'our' || $*SCOPE eq '' {
-        $past.namespace( $<name><identifier> );
-        $*PACKAGE-SETUP[0].push(PAST::Op.new( :pasttype('bind'),
-            PAST::Var.new( :name($name), :namespace(@ns), :scope('package') ),
-            PAST::Var.new( :name('type_obj'), :scope('register') )
-        ));
-    }
-    else {
-        $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
-    }
 
     # Evaluate everything in the package in-line unless this is a generic
     # type in which case it needs delayed evaluation. Normally, $?CLASS is
@@ -523,9 +519,6 @@ method package_def($/) {
         ),
         PAST::Var.new( :name('type_obj'), :scope('register') )
     ));
-    
-    # Set up slot for the type object to live in.
-    @BLOCK[0][0].unshift(PAST::Var.new( :name($name), :namespace(@ns), :scope('package'), :isdecl(1) ));
 
     # Attach the class code to run at loadinit time.
     $past.loadinit.push(PAST::Block.new( :blocktype('immediate'), $*PACKAGE-SETUP ));

@@ -169,6 +169,30 @@ class HLL::Compiler::SerializationContextBuilder {
         }
     }
     
+    # Installs a symbol into the package. Does so immediately, and
+    # makes sure this happens on deserialization also.
+    method install_package_symbol(@sym, $obj) {
+        @sym := pir::clone__PP(@sym);
+        my $name := ~@sym.pop();
+        
+        # XXX Eventually, we'll want to do immediate installation.
+        #pir::get_hll_namespace__PP(@sym).add_var($name, $obj);
+        #pir::say('# installed ' ~ pir::join('::', @sym) ~ "::" ~ $name);
+        
+        # Deserialization installation. XXX And fixup for now too.
+        self.add_event(:deserialize_past(
+            PAST::Op.new(
+                :pasttype('bind'),
+                PAST::Var.new( :name($name), :namespace(@sym), :scope('package') ),
+                self.get_slot_past_for_object($obj)
+            )),
+            :fixup_past(PAST::Op.new(
+                :pasttype('bind'),
+                PAST::Var.new( :name($name), :namespace(@sym), :scope('package') ),
+                self.get_slot_past_for_object($obj)
+            )));
+    }
+    
     # Creates a meta-object for a package, adds it to the root objects and
     # stores an event for the action. Returns the created object.
     method pkg_create_mo($how, :$name, :$repr) {
