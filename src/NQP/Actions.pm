@@ -63,12 +63,6 @@ class NQP::Actions is HLL::Actions {
 
         # Need to load the NQP dynops/dympmcs.
         $unit.loadlibs('nqp_group', 'nqp_ops');
-        $unit.unshift(PAST::Op.new(
-            :pasttype('callmethod'), :name('hll_map'),
-            PAST::Op.new( :pirop('getinterp P') ),
-            PAST::Op.new( :pirop('get_class Ps'), 'LexPad' ),
-            PAST::Op.new( :pirop('get_class Ps'), 'NQPLexPad' )
-        ));
         
         # If we have a MAIN sub, call it at end of mainline.
         if $*MAIN_SUB {

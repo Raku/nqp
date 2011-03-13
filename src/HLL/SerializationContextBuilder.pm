@@ -300,6 +300,12 @@ class HLL::Compiler::SerializationContextBuilder {
             ),
             PAST::Stmts.new(
                 PAST::Op.new( :pirop('nqp_dynop_setup v') ),
+                PAST::Op.new(
+                    :pasttype('callmethod'), :name('hll_map'),
+                    PAST::Op.new( :pirop('getinterp P') ),
+                    PAST::Op.new( :pirop('get_class Ps'), 'LexPad' ),
+                    PAST::Op.new( :pirop('get_class Ps'), 'NQPLexPad' )
+                ),
                 PAST::Op.new( :pirop('load_bytecode vs'), 'nqpmo.pbc' ),
                 PAST::Op.new(
                     :pasttype('bind'),
