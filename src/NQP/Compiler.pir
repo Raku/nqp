@@ -8,24 +8,6 @@ NQP::Compiler - NQP compiler
 
 =cut
 
-.HLL 'nqp'
-
-# Initialize meta-model.
-.loadlib "nqp_group"
-.loadlib "nqp_ops"
-.sub '' :anon :load :init
-    nqp_dynop_setup
-
-    .local pmc interp, lexpad, nqplexpad
-    interp = getinterp
-    lexpad = get_class 'LexPad'
-    nqplexpad = get_class 'NQPLexPad'
-    interp.'hll_map'(lexpad, nqplexpad)
-    
-    load_bytecode 'SettingManager.pbc'
-    load_bytecode 'nqpmo.pbc'
-.end
-
 .include 'gen/nqp-grammar.pir'
 .include 'gen/nqp-actions.pir'
 .include 'gen/nqp-compiler.pir'
