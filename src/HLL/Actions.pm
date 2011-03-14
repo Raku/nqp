@@ -114,7 +114,7 @@ method EXPR($/, $key?) {
 method term:sym<circumfix>($/) { make $<circumfix>.ast }
 
 method termish($/) { make $<term>.ast; }
-method nullterm($/) { make Q:PIR { %r = new ['Undef'] }; }
+method nullterm($/) { make pir::new('Undef') }
 method nullterm_alt($/) { make $<term>.ast; }
 
 method integer($/) { make $<VALUE>.ast; }
