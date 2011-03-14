@@ -6,7 +6,7 @@
 .loadlib "nqp_ops"
 
 .namespace []
-.sub "_block11"  :anon :subid("10_1300062011.635")
+.sub "_block11"  :anon :subid("10_1300090373.19914")
 .annotate 'line', 0
     get_hll_global $P14, ["HLL";"SettingManager"], "_block13" 
     capture_lex $P14
@@ -21,7 +21,7 @@
     capture_lex $P14
     $P70 = $P14()
     .return ($P70)
-    .const 'Sub' $P72 = "16_1300062011.635" 
+    .const 'Sub' $P72 = "16_1300090373.19914" 
     .return ($P72)
 .end
 
@@ -29,15 +29,15 @@
 .HLL "nqp"
 
 .namespace []
-.sub "" :load :init :subid("post17") :outer("10_1300062011.635")
+.sub "" :load :init :subid("post17") :outer("10_1300090373.19914")
 .annotate 'line', 0
-    .const 'Sub' $P12 = "10_1300062011.635" 
+    .const 'Sub' $P12 = "10_1300090373.19914" 
     .local pmc block
     set block, $P12
-    nqp_get_sc $P76, "1300062011.547"
+    nqp_get_sc $P76, "1300090373.06041"
     isnull $I77, $P76
     if $I77, if_75
-    nqp_get_sc_object $P85, "1300062011.547", 0
+    nqp_get_sc_object $P85, "1300090373.06041", 0
     set_hll_global ["HLL"], "SettingManager", $P85
     goto if_75_end
   if_75:
@@ -47,14 +47,14 @@
     get_class $P80, "NQPLexPad"
     $P78."hll_map"($P79, $P80)
     load_bytecode "nqpmo.pbc"
-    nqp_create_sc $P81, "1300062011.547"
+    nqp_create_sc $P81, "1300090373.06041"
     .local pmc cur_sc
     set cur_sc, $P81
     get_hll_global $P82, "KnowHOW"
     $P83 = $P82."new_type"("HLL::SettingManager" :named("name"))
     nqp_set_sc_for_object $P83, cur_sc
-    nqp_set_sc_object "1300062011.547", 0, $P83
-    nqp_get_sc_object $P84, "1300062011.547", 0
+    nqp_set_sc_object "1300090373.06041", 0, $P83
+    nqp_get_sc_object $P84, "1300090373.06041", 0
     set_hll_global ["HLL"], "SettingManager", $P84
   if_75_end:
 .end
@@ -63,13 +63,13 @@
 .HLL "nqp"
 
 .namespace ["HLL";"SettingManager"]
-.sub "_block13"  :subid("11_1300062011.635") :outer("10_1300062011.635")
+.sub "_block13"  :subid("11_1300090373.19914") :outer("10_1300090373.19914")
 .annotate 'line', 1
-    .const 'Sub' $P62 = "15_1300062011.635" 
+    .const 'Sub' $P62 = "15_1300090373.19914" 
     capture_lex $P62
-    .const 'Sub' $P22 = "13_1300062011.635" 
+    .const 'Sub' $P22 = "13_1300090373.19914" 
     capture_lex $P22
-    .const 'Sub' $P18 = "12_1300062011.635" 
+    .const 'Sub' $P18 = "12_1300090373.19914" 
     capture_lex $P18
     get_global $P15, "$?CLASS"
 .annotate 'line', 2
@@ -78,7 +78,7 @@
 .annotate 'line', 1
     find_lex $P17, "%settings_loaded"
 .annotate 'line', 13
-    .const 'Sub' $P22 = "13_1300062011.635" 
+    .const 'Sub' $P22 = "13_1300090373.19914" 
     newclosure $P60, $P22
 .annotate 'line', 1
     .return ($P60)
@@ -88,12 +88,12 @@
 .HLL "nqp"
 
 .namespace ["HLL";"SettingManager"]
-.sub "" :load :init :subid("post18") :outer("11_1300062011.635")
+.sub "" :load :init :subid("post18") :outer("11_1300090373.19914")
 .annotate 'line', 1
     get_hll_global $P14, ["HLL";"SettingManager"], "_block13" 
     .local pmc block
     set block, $P14
-    .const 'Sub' $P62 = "15_1300062011.635" 
+    .const 'Sub' $P62 = "15_1300090373.19914" 
     capture_lex $P62
     $P62()
 .end
@@ -102,17 +102,17 @@
 .HLL "nqp"
 
 .namespace ["HLL";"SettingManager"]
-.sub "_block61"  :anon :subid("15_1300062011.635") :outer("11_1300062011.635")
+.sub "_block61"  :anon :subid("15_1300090373.19914") :outer("11_1300090373.19914")
 .annotate 'line', 1
-    nqp_get_sc_object $P63, "1300062011.547", 0
+    nqp_get_sc_object $P63, "1300090373.06041", 0
     .local pmc type_obj
     set type_obj, $P63
     set_global "$?CLASS", type_obj
     get_how $P64, type_obj
-    .const 'Sub' $P65 = "12_1300062011.635" 
+    .const 'Sub' $P65 = "12_1300090373.19914" 
     $P64."add_method"(type_obj, "ctxsave", $P65)
     get_how $P66, type_obj
-    .const 'Sub' $P67 = "13_1300062011.635" 
+    .const 'Sub' $P67 = "13_1300090373.19914" 
     $P66."add_method"(type_obj, "load_setting", $P67)
     get_how $P68, type_obj
     $P69 = $P68."compose"(type_obj)
@@ -123,7 +123,7 @@
 .HLL "nqp"
 
 .namespace ["HLL";"SettingManager"]
-.sub "ctxsave"  :subid("12_1300062011.635") :outer("11_1300062011.635")
+.sub "ctxsave"  :subid("12_1300090373.19914") :outer("11_1300090373.19914")
     .param pmc param_19
 .annotate 'line', 4
     .lex "self", param_19
@@ -146,11 +146,11 @@
 
 .namespace ["HLL";"SettingManager"]
 .include "except_types.pasm"
-.sub "load_setting"  :subid("13_1300062011.635") :outer("11_1300062011.635")
+.sub "load_setting"  :subid("13_1300090373.19914") :outer("11_1300090373.19914")
     .param pmc param_25
     .param pmc param_26
 .annotate 'line', 13
-    .const 'Sub' $P37 = "14_1300062011.635" 
+    .const 'Sub' $P37 = "14_1300090373.19914" 
     capture_lex $P37
     new $P24, ['ExceptionHandler'], .CONTROL_RETURN
     set_label $P24, control_23
@@ -174,7 +174,7 @@
   vivify_20:
     defined $I35, $P34
     if $I35, unless_31_end
-    .const 'Sub' $P37 = "14_1300062011.635" 
+    .const 'Sub' $P37 = "14_1300090373.19914" 
     capture_lex $P37
     $P37()
   unless_31_end:
@@ -206,7 +206,7 @@
 .HLL "nqp"
 
 .namespace ["HLL";"SettingManager"]
-.sub "_block36"  :anon :subid("14_1300062011.635") :outer("13_1300062011.635")
+.sub "_block36"  :anon :subid("14_1300090373.19914") :outer("13_1300090373.19914")
 .annotate 'line', 17
     new $P38, "Undef"
     .lex "$*CTXSAVE", $P38
@@ -269,9 +269,9 @@
 .HLL "nqp"
 
 .namespace []
-.sub "_block71" :load :anon :subid("16_1300062011.635")
+.sub "_block71" :load :anon :subid("16_1300090373.19914")
 .annotate 'line', 1
-    .const 'Sub' $P73 = "10_1300062011.635" 
+    .const 'Sub' $P73 = "10_1300090373.19914" 
     $P74 = $P73()
     .return ($P74)
 .end
