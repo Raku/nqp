@@ -20,27 +20,15 @@ our sub string_to_int($src, $base) {
 }
 
 our sub ints_to_string($ints) {
-    Q:PIR {
-        .local string result
-        result = ''
-        .local pmc ints, ints_it
-        ints = find_lex '$ints'
-        $I0 = does ints, 'array'
-        unless $I0 goto ints_1
-        ints_it = iter ints
-      ints_loop:
-        unless ints_it goto ints_done
-        $P0 = shift ints_it
-        $I0 = $P0.'ast'()
-        $S0 = chr $I0
-        result = concat result, $S0
-        goto ints_loop
-      ints_1:
-        $I0 = ints.'ast'()
-        result = chr $I0
-      ints_done:
-        %r = box result
-    };
+    if pir::does($ints, 'array') {
+        my $result := '';
+        for $ints {
+            $result := $result ~ pir::chr($_.ast);
+        }
+        $result;
+    } else {
+        pir::chr($ints.ast);
+    }
 }
 
 
