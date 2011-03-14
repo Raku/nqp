@@ -84,7 +84,6 @@ NQP_SOURCES = \
   src/NQP/Grammar.pm \
   src/NQP/Actions.pm \
   src/NQP/Compiler.pm \
-  src/NQP/Compiler.pir \
 
 CORE_SETTING_SOURCES = \
   src/core/NativeTypes.pm \
@@ -128,11 +127,10 @@ P6GRAMMAR_PBC   = P6Grammar.pbc
 P6GRAMMAR_G     = gen/p6grammar-grammar.pir
 P6GRAMMAR_A     = gen/p6grammar-actions.pir
 
-NQP_PBC         = nqp.pbc
-NQP_G           = gen/nqp-grammar.pir
-NQP_A           = gen/nqp-actions.pir
-NQP_C           = gen/nqp-compiler.pir
-NQP_EXE         = nqp$(EXE)
+NQP_COMBINED     = gen/NQP.pm
+NQP_COMBINED_PIR = gen/NQP.pir
+NQP_PBC          = nqp.pbc
+NQP_EXE          = nqp$(EXE)
 
 NQP_MO_SOURCES = src/metamodel/how/KnowHOWAttribute.pm src/metamodel/how/NQPClassHOW.pm \
                  src/metamodel/how/NQPNativeHOW.pm src/metamodel/how/NQPAttribute.pm \
@@ -316,17 +314,12 @@ $(STAGE1)/$(P6REGEX_PBC): $(STAGE0_PBCS) $(STAGE1)/$(CORE_SETTING_PBC) $(P6REGEX
 
 $(STAGE1)/$(NQP_PBC): $(STAGE0_PBCS) $(STAGE1)/$(CORE_SETTING_PBC) $(NQP_SOURCES)
 	$(MKPATH) $(STAGE1)/gen
+	$(PERL) build/gen_how_pm.pl $(NQP_SOURCES) > $(STAGE1)/$(NQP_COMBINED)
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE1)/$(NQP_G) \
-	    src/NQP/Grammar.pm
-	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE1)/$(NQP_A) \
-	    src/NQP/Actions.pm
-	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE1)/$(NQP_C) \
-	    src/NQP/Compiler.pm
+	    --target=pir --output=$(STAGE1)/$(NQP_COMBINED_PIR) \
+	    $(STAGE1)/$(NQP_COMBINED)
 	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(NQP_PBC) \
-	    src/NQP/Compiler.pir
+	    $(STAGE1)/$(NQP_COMBINED_PIR)
 
 $(STAGE2): $(STAGE2_PBCS)
 
@@ -388,19 +381,14 @@ $(STAGE2)/$(P6REGEX_PBC): $(STAGE1_PBCS) $(STAGE2)/$(CORE_SETTING_PBC) $(P6REGEX
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(P6REGEX_PBC) \
 	    src/Regex/P6Regex.pir
 
-$(STAGE2)/$(NQP_PBC): $(STAGE1_PBCS) $(STAGE2)/$(CORE_SETTING_PBC) $(NQP_SOURCES)
-	$(MKPATH) $(STAGE2)/gen
+$(STAGE2)/$(NQP_PBC): $(STAGE0_PBCS) $(STAGE1)/$(CORE_SETTING_PBC) $(NQP_SOURCES)
+	$(MKPATH) $(STAGE1)/gen
+	$(PERL) build/gen_how_pm.pl $(NQP_SOURCES) > $(STAGE2)/$(NQP_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE2)/$(NQP_G) \
-	    src/NQP/Grammar.pm
-	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE2)/$(NQP_A) \
-	    src/NQP/Actions.pm
-	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE2)/$(NQP_C) \
-	    src/NQP/Compiler.pm
+	    --target=pir --output=$(STAGE2)/$(NQP_COMBINED_PIR) \
+	    $(STAGE2)/$(NQP_COMBINED)
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(NQP_PBC) \
-	    src/NQP/Compiler.pir
+	    $(STAGE2)/$(NQP_COMBINED_PIR)
 
 $(ALL_PBCS): $(REGEX_PBC) $(STAGE2_PBCS)
 	$(CP) $(STAGE2)/$(SETTING_MANAGER_PBC) .
@@ -446,7 +434,7 @@ bootstrap-files: $(STAGE2_PBCS) src/stage2/$(CORE_SETTING_NQP)
 	$(PERL) build/gen_bootstrap.pl src/Regex.pir >src/stage0/Regex-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/HLL.pir >src/stage0/HLL-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/Regex/P6Regex.pir >src/stage0/P6Regex-s0.pir
-	$(PERL) build/gen_bootstrap.pl src/NQP/Compiler.pir >src/stage0/NQP-s0.pir
+	$(PERL) build/gen_bootstrap.pl src/stage2/$(NQP_COMBINED_PIR) >src/stage0/NQP-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/stage2/$(CORE_SETTING_PIR) >src/stage0/NQPCORE.setting-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/stage2/$(NQP_MO_PIR) >src/stage0/NQPMO-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/stage2/gen/setting_manager.pir >src/stage0/SettingManager-s0.pir
