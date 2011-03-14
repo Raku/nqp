@@ -1,6 +1,6 @@
 use HLL;
 
-grammar Regex::P6Regex::Grammar is HLL::Grammar;
+grammar Regex::P6Regex::Grammar is HLL::Grammar {
 
     method obs ($old, $new, $when = 'in Perl 6') {
         self.panic('Unsupported use of ' ~ ~$old ~ ';'
@@ -200,3 +200,4 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar;
     token mod_ident:sym<ignorecase> { $<sym>=[i] 'gnorecase'? }
     token mod_ident:sym<ratchet>    { $<sym>=[r] 'atchet'? }
     token mod_ident:sym<sigspace>   { $<sym>=[s] 'igspace'? }
+}
