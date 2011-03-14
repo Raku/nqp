@@ -68,12 +68,7 @@ method EXPR($/, $key?) {
         elsif $<OPER><O><pirop>    { $past.pirop( ~$<OPER><O><pirop> ); }
         unless $past.name {
             if $key eq 'LIST' { $key := 'infix'; }
-            my $name := Q:PIR {
-                $P0 = find_lex '$key'
-                $S0 = $P0
-                $S0 = downcase $S0
-                %r = box $S0
-            } ~ ':<' ~ $<OPER><sym> ~ '>';
+            my $name := pir::downcase($key) ~ ':<' ~ $<OPER><sym> ~ '>';
             $past.name('&' ~ $name);
         }
     }
