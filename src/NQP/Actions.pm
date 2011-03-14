@@ -64,12 +64,17 @@ class NQP::Actions is HLL::Actions {
         # Need to load the NQP dynops/dympmcs.
         $unit.loadlibs('nqp_group', 'nqp_ops');
         
-        # If we have a MAIN sub, call it at end of mainline.
+        # If we have a MAIN sub, call it at end of mainline. Note, only do
+        # it if there were any args given (so this was invoked as main).
         if $*MAIN_SUB {
             $unit.unshift(PAST::Var.new( :scope('parameter'), :name('@ARGS'), :slurpy(1) ));
             $mainline.push(PAST::Op.new(
-                :pasttype('call'), PAST::Val.new( :value($*MAIN_SUB) ),
-                PAST::Var.new( :scope('lexical'), :name('@ARGS'), :flat(1) )
+                :pasttype('if'),
+                PAST::Var.new( :scope('lexical'), :name('@ARGS') ),
+                PAST::Op.new(
+                    :pasttype('call'), PAST::Val.new( :value($*MAIN_SUB) ),
+                    PAST::Var.new( :scope('lexical'), :name('@ARGS'), :flat(1) )
+                )
             ));
         }
 
