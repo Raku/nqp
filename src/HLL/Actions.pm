@@ -1,37 +1,22 @@
 class HLL::Actions;
 
 our sub string_to_int($src, $base) {
-    Q:PIR {
-        .local pmc src
-        .local string src_s
-        src = find_lex '$src'
-        src_s = src
-        .local int base, pos, eos, result
-        $P0 = find_lex '$base'
-        base = $P0
-        pos = 0
-        eos = length src_s
-        result = 0
-      str_loop:
-        unless pos < eos goto str_done
-        .local string char
-        char = substr src_s, pos, 1
-        if char == '_' goto str_next
-        .local int digitval
-        digitval = index "00112233445566778899AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz", char
-        if digitval < 0 goto err_base
-        digitval >>= 1
-        if digitval >= base goto err_base
-        result *= base
-        result += digitval
-      str_next:
-        inc pos
-        goto str_loop
-      err_base:
-	src.'panic'('Invalid radix conversion of "', char, '"')
-      str_done:
-        %r = box result
-    };
+    my $len := pir::length($src);
+    my $i   := 0;
+    my $result := 0;
+
+    while $i < $len {
+        my $char := pir::substr($src, $i, 1);
+        next if $char eq '_';
+        my $digitval := pir::index("00112233445566778899AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz", $char);
+        $digitval := pir::set__ip($digitval / 2);
+        if $digitval < 0 || $digitval >= $base {
+            $src.panic("Invalid radix conversion of character '$char'");
+        }
+        $result := $base * $result + $digitval,
+        $i := $i + 1;
+    }
+    $result;
 }
 
 our sub ints_to_string($ints) {
