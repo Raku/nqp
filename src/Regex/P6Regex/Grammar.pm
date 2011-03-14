@@ -1,3 +1,5 @@
+use HLL;
+
 grammar Regex::P6Regex::Grammar is HLL::Grammar;
 
     method obs ($old, $new, $when = 'in Perl 6') {
