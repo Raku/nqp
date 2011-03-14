@@ -70,7 +70,6 @@ HLL_SOURCES = \
   src/HLL/SerializationContextBuilder.pm \
 
 P6REGEX_SOURCES = \
-  src/Regex/P6Regex.pir \
   src/Regex/P6Regex/Grammar.pm \
   src/Regex/P6Regex/Actions.pm \
   src/Regex/P6Regex/Compiler.pm \
@@ -310,7 +309,8 @@ $(STAGE1)/$(P6REGEX_PBC): $(STAGE0_PBCS) $(STAGE1)/$(CORE_SETTING_PBC) $(P6REGEX
 	    --target=pir --output=$(STAGE1)/$(P6REGEX_C) \
 	    src/Regex/P6Regex/Compiler.pm
 	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(P6REGEX_PBC) \
-	    src/Regex/P6Regex.pir
+           $(STAGE1)/$(P6REGEX_C)
+
 
 $(STAGE1)/$(NQP_PBC): $(STAGE0_PBCS) $(STAGE1)/$(CORE_SETTING_PBC) $(NQP_SOURCES)
 	$(MKPATH) $(STAGE1)/gen
@@ -379,7 +379,8 @@ $(STAGE2)/$(P6REGEX_PBC): $(STAGE1_PBCS) $(STAGE2)/$(CORE_SETTING_PBC) $(P6REGEX
 	    --target=pir --output=$(STAGE2)/$(P6REGEX_C) \
 	    src/Regex/P6Regex/Compiler.pm
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(P6REGEX_PBC) \
-	    src/Regex/P6Regex.pir
+        $(STAGE2)/$(P6REGEX_C)
+
 
 $(STAGE2)/$(NQP_PBC): $(STAGE0_PBCS) $(STAGE1)/$(CORE_SETTING_PBC) $(NQP_SOURCES)
 	$(MKPATH) $(STAGE1)/gen
@@ -433,7 +434,6 @@ $(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS_SOURCE) $(DYNPMC)
 bootstrap-files: $(STAGE2_PBCS) src/stage2/$(CORE_SETTING_NQP)
 	$(PERL) build/gen_bootstrap.pl src/Regex.pir >src/stage0/Regex-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/HLL.pir >src/stage0/HLL-s0.pir
-	$(PERL) build/gen_bootstrap.pl src/Regex/P6Regex.pir >src/stage0/P6Regex-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/stage2/$(NQP_COMBINED_PIR) >src/stage0/NQP-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/stage2/$(CORE_SETTING_PIR) >src/stage0/NQPCORE.setting-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/stage2/$(NQP_MO_PIR) >src/stage0/NQPMO-s0.pir
