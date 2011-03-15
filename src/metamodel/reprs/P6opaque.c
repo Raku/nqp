@@ -182,15 +182,16 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, REPRP6opaque *
         
         /* Get number of attributes and set up various counters. */
         INTVAL num_attrs    = VTABLE_elements(interp, flat_list);
+        INTVAL info_alloc   = num_attrs == 0 ? 1 : num_attrs;
         INTVAL cur_pmc_attr = 0;
         INTVAL cur_str_attr = 0;
         INTVAL i;
 
         /* Allocate offset array and GC mark info arrays. */
         repr->num_attributes      = num_attrs;
-        repr->attribute_offsets   = mem_sys_allocate(num_attrs * sizeof(INTVAL));
-        repr->gc_pmc_mark_offsets = mem_sys_allocate_zeroed(num_attrs * sizeof(INTVAL));
-        repr->gc_str_mark_offsets = mem_sys_allocate_zeroed(num_attrs * sizeof(INTVAL));
+        repr->attribute_offsets   = mem_sys_allocate(info_alloc * sizeof(INTVAL));
+        repr->gc_pmc_mark_offsets = mem_sys_allocate_zeroed(info_alloc * sizeof(INTVAL));
+        repr->gc_str_mark_offsets = mem_sys_allocate_zeroed(info_alloc * sizeof(INTVAL));
 
         /* Go over the attributes and arrange their allocation. */
         for (i = 0; i < num_attrs; i++) {
