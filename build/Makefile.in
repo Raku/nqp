@@ -57,10 +57,10 @@ REGEX_SOURCES = \
   src/Regex/Dumper.pir \
   src/PAST/Regex.pir \
   src/PAST/Compiler-Regex.pir \
+  src/cheats/parrot-callcontext.pir \
 
 HLL_SOURCES = \
   src/HLL.pir \
-  src/cheats/parrot-callcontext.pir \
   src/HLL/Grammar.pm \
   src/HLL/Actions.pm \
   src/HLL/Compiler.pm \
