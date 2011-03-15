@@ -30,18 +30,12 @@ and HLL::Grammar.
 
 .include 'cclass.pasm'
 .include 'src/Regex/constants.pir'
-.include 'src/cheats/parrot-callcontext.pir'
 .include 'gen/hllgrammar-grammar.pir'
 .include 'gen/hllgrammar-actions.pir'
 .include 'gen/hllcompiler.pir'
 .include 'gen/hllcommandline.pir'
 .include 'gen/hllserializationcontextbuilder.pir'
-
-.sub '' :anon :load :init
-    $P0 = get_hll_global ['HLL'], 'Compiler'
-    $P0 = $P0.'new'()
-    $P0.'language'('parrot')
-.end
+.include 'src/cheats/parrot-callcontext.pir'
 
 =back
 

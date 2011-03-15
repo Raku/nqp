@@ -739,3 +739,6 @@ class HLL::Compiler {
         };
     }
 }
+
+my $compiler := HLL::Compiler.new();
+$compiler.language('parrot');
