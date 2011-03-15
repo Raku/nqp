@@ -30,7 +30,6 @@ and HLL::Grammar.
 
 .include 'cclass.pasm'
 .include 'src/Regex/constants.pir'
-.include 'src/cheats/hll-compiler.pir'
 .include 'src/cheats/parrot-callcontext.pir'
 .include 'gen/hllgrammar-grammar.pir'
 .include 'gen/hllgrammar-actions.pir'
