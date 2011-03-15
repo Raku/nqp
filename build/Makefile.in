@@ -60,7 +60,6 @@ REGEX_SOURCES = \
   src/cheats/parrot-callcontext.pir \
 
 HLL_SOURCES = \
-  src/HLL.pir \
   src/HLL/Grammar.pm \
   src/HLL/Actions.pm \
   src/HLL/Compiler.pm \
@@ -71,11 +70,6 @@ P6REGEX_SOURCES = \
   src/Regex/P6Regex/Grammar.pm \
   src/Regex/P6Regex/Actions.pm \
   src/Regex/P6Regex/Compiler.pm \
-
-HLLGRAMMAR_SOURCES = \
-  src/HLL/Grammar.pm \
-  src/HLL/Actions.pm \
-  src/cheats/hll-grammar.pir \
 
 NQP_SOURCES = \
   src/NQP/Grammar.pm \
@@ -107,13 +101,9 @@ SETTING_MANAGER_PBC = SettingManager.pbc
 
 REGEX_PBC       = Regex.pbc
 
-HLL_PBC         = HLL.pbc
-HLLGRAMMAR_G    = gen/hllgrammar-grammar.pir
-HLLGRAMMAR_A    = gen/hllgrammar-actions.pir
-
-HLLCOMPILER_PIR    = gen/hllcompiler.pir
-HLLCOMMANDLINE_PIR = gen/hllcommandline.pir
-HLLSERIALIZATIONCONTEXTBUILDER_PIR = gen/hllserializationcontextbuilder.pir
+HLL_PBC          = HLL.pbc
+HLL_COMBINED     = gen/HLL.pm
+HLL_COMBINED_PIR = gen/HLL.pir
 
 P6REGEX_PBC          = P6Regex.pbc
 P6REGEX_COMBINED     = gen/P6Regex.pm
@@ -270,23 +260,12 @@ $(STAGE1)/$(SETTING_MANAGER_PBC): $(STAGE0_PBCS) src/HLL/SettingManager.pm
 
 $(STAGE1)/$(HLL_PBC): $(STAGE0_PBCS) $(STAGE1)/$(CORE_SETTING_PBC) $(HLL_SOURCES)
 	$(MKPATH) $(STAGE1)/gen
+	$(PERL) build/gen_how_pm.pl $(HLL_SOURCES) > $(STAGE1)/$(HLL_COMBINED)
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE1)/$(HLLGRAMMAR_G) \
-	    src/HLL/Grammar.pm
-	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE1)/$(HLLGRAMMAR_A) \
-	    src/HLL/Actions.pm
-	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE1)/$(HLLCOMPILER_PIR) \
-	    src/HLL/Compiler.pm
-	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE1)/$(HLLCOMMANDLINE_PIR) \
-	    src/HLL/CommandLine.pm
-	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE1)/$(HLLSERIALIZATIONCONTEXTBUILDER_PIR) \
-	    src/HLL/SerializationContextBuilder.pm
+	    --target=pir --output=$(STAGE1)/$(HLL_COMBINED_PIR) \
+	    $(STAGE1)/$(HLL_COMBINED)
 	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(HLL_PBC) \
-	    src/HLL.pir
+	    $(STAGE1)/$(HLL_COMBINED_PIR)
 
 $(STAGE1)/$(P6REGEX_PBC): $(STAGE0_PBCS) $(STAGE1)/$(CORE_SETTING_PBC) $(P6REGEX_SOURCES)
 	$(MKPATH) $(STAGE1)/gen
@@ -334,23 +313,12 @@ $(STAGE2)/$(SETTING_MANAGER_PBC): $(STAGE1_PBCS) src/HLL/SettingManager.pm
 
 $(STAGE2)/$(HLL_PBC): $(STAGE1_PBCS) $(STAGE2)/$(CORE_SETTING_PBC) $(HLL_SOURCES)
 	$(MKPATH) $(STAGE2)/gen
+	$(PERL) build/gen_how_pm.pl $(HLL_SOURCES) > $(STAGE2)/$(HLL_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE2)/$(HLLGRAMMAR_G) \
-	    src/HLL/Grammar.pm
-	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE2)/$(HLLGRAMMAR_A) \
-	    src/HLL/Actions.pm
-	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE2)/$(HLLCOMPILER_PIR) \
-	    src/HLL/Compiler.pm
-	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE2)/$(HLLCOMMANDLINE_PIR) \
-	    src/HLL/CommandLine.pm
-	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE2)/$(HLLSERIALIZATIONCONTEXTBUILDER_PIR) \
-	    src/HLL/SerializationContextBuilder.pm
+	    --target=pir --output=$(STAGE2)/$(HLL_COMBINED_PIR) \
+	    $(STAGE2)/$(HLL_COMBINED)
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(HLL_PBC) \
-	    src/HLL.pir
+	    $(STAGE2)/$(HLL_COMBINED_PIR)
 
 $(STAGE2)/$(P6REGEX_PBC): $(STAGE1_PBCS) $(STAGE2)/$(CORE_SETTING_PBC) $(P6REGEX_SOURCES)
 	$(MKPATH) $(STAGE2)/gen
@@ -412,7 +380,7 @@ $(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS_SOURCE) $(DYNPMC)
 
 bootstrap-files: $(STAGE2_PBCS) src/stage2/$(CORE_SETTING_NQP)
 	$(PERL) build/gen_bootstrap.pl src/Regex.pir >src/stage0/Regex-s0.pir
-	$(PERL) build/gen_bootstrap.pl src/HLL.pir >src/stage0/HLL-s0.pir
+	$(PERL) build/gen_bootstrap.pl src/stage2/$(HLL_COMBINED_PIR) >src/stage0/HLL-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/stage2/$(NQP_COMBINED_PIR) >src/stage0/NQP-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/stage2/$(CORE_SETTING_PIR) >src/stage0/NQPCORE.setting-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/stage2/$(P6REGEX_COMBINED_PIR) >src/stage0/P6Regex-s0.pir
