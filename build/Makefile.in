@@ -61,7 +61,6 @@ REGEX_SOURCES = \
 HLL_SOURCES = \
   src/HLL.pir \
   src/cheats/hll-compiler.pir \
-  src/cheats/hll-grammar.pir \
   src/cheats/parrot-callcontext.pir \
   src/HLL/Grammar.pm \
   src/HLL/Actions.pm \

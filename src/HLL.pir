@@ -33,7 +33,6 @@ and HLL::Grammar.
 .include 'src/cheats/hll-compiler.pir'
 .include 'src/cheats/parrot-callcontext.pir'
 .include 'gen/hllgrammar-grammar.pir'
-.include 'src/cheats/hll-grammar.pir'
 .include 'gen/hllgrammar-actions.pir'
 .include 'gen/hllcompiler.pir'
 .include 'gen/hllcommandline.pir'
