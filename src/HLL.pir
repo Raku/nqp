@@ -13,12 +13,6 @@ and HLL::Grammar.
 
 =cut
 
-.HLL 'nqp'
-.loadlib "nqp_group"
-.loadlib "nqp_ops"
-
-.include 'cclass.pasm'
-.include 'src/Regex/constants.pir'
 .include 'gen/hllgrammar-grammar.pir'
 .include 'gen/hllgrammar-actions.pir'
 .include 'gen/hllcompiler.pir'

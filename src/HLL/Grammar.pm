@@ -168,6 +168,8 @@ C< :!pair >, and C<< :pair<strval> >>.
 =end
     method O($spec, $save?) {
         Q:PIR {
+            .include 'cclass.pasm'
+            
             .local pmc self, cur_class
             .local string spec, save
             .local int has_save
@@ -397,6 +399,8 @@ position C<pos>.
 
     method quote_EXPR(*@args) {
         Q:PIR {
+            .include 'src/Regex/constants.pir'
+            
             .local pmc self, cur_class, args
             self = find_lex 'self'
             cur_class = get_hll_global ['Regex'], 'Cursor'
