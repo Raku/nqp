@@ -24,7 +24,6 @@ and HLL::Grammar.
 .include 'gen/hllcompiler.pir'
 .include 'gen/hllcommandline.pir'
 .include 'gen/hllserializationcontextbuilder.pir'
-.include 'src/cheats/parrot-callcontext.pir'
 
 =back
 

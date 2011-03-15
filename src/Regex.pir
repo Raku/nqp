@@ -29,6 +29,7 @@ This file brings together the various Regex modules needed for Regex.pbc .
 
 .include 'src/PAST/Regex.pir'
 .include 'src/PAST/Compiler-Regex.pir'
+.include 'src/cheats/parrot-callcontext.pir'
 
 .HLL 'nqp'
 
