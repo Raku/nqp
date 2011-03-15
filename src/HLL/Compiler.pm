@@ -30,11 +30,11 @@ class HLL::Compiler {
     our %interactive_pad;
     INIT {
         # Set the context.
-        $HLL::Compiler::interactive_ctx := pir::getinterp__P(){'context'};
+        $interactive_ctx := pir::getinterp__P(){'context'};
         
         # Set the pad, but transform it to a Hash first.
         my %pad_contents;
-        %HLL::Compiler::interactive_pad := pir::copy__0PP(
+        %interactive_pad := pir::copy__0PP(
             pir::getattribute__PPs($interactive_ctx, 'lex_pad'),
             %pad_contents);
     }
