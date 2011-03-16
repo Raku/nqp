@@ -19,6 +19,26 @@ class HLL::Compiler {
     has $!compiler_progname;
     has $!language;
 
+    # This INIT serves as a cumulative "outer context" for code
+    # executed in HLL::Compiler's interactive REPL.  It's invoked
+    # exactly once upon load/init to obtain a context, and its
+    # default LexPad is replaced with a Hash that we can use to
+    # cumulatively store outer context information.  Both the
+    # context and hash are then made available via package
+    # variables.
+    our $interactive_ctx;
+    our %interactive_pad;
+    INIT {
+        # Set the context.
+        $interactive_ctx := pir::getinterp__P(){'context'};
+        
+        # Set the pad, but transform it to a Hash first.
+        my %pad_contents;
+        %interactive_pad := pir::copy__0PP(
+            pir::getattribute__PPs($interactive_ctx, 'lex_pad'),
+            %pad_contents);
+    }
+
     # XXX HACK!!! Need a Mu. :-)
     method new() {
         my $obj := pir::repr_instance_of__PP(self);
@@ -719,3 +739,6 @@ class HLL::Compiler {
         };
     }
 }
+
+my $compiler := HLL::Compiler.new();
+$compiler.language('parrot');

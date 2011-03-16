@@ -29,6 +29,18 @@ This file brings together the various Regex modules needed for Regex.pbc .
 
 .include 'src/PAST/Regex.pir'
 .include 'src/PAST/Compiler-Regex.pir'
+.include 'src/cheats/parrot-callcontext.pir'
+
+.HLL 'nqp'
+
+.sub '' :anon :load :init
+    ## Import PAST and PCT to the HLL.
+    .local pmc hllns, parrotns, imports
+    hllns = get_hll_namespace
+    parrotns = get_root_namespace ['parrot']
+    imports = split ' ', 'PAST PCT'
+    parrotns.'export_to'(hllns, imports)
+.end
 
 =head1 AUTHOR
 
