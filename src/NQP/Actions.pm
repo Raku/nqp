@@ -433,6 +433,12 @@ class NQP::Actions is HLL::Actions {
             $past.namespace( $<name><identifier> );
             $*SC.install_package_symbol($<name><identifier>, $*PKGMETA);
         }
+        elsif $*SCOPE eq 'my' {
+            if +$<name><identifier> != 1 {
+                $<name>.CURSOR.panic("A my scoped package cannot have a multi-part name yet");
+            }
+            $*SC.install_lexical_symbol(@BLOCK[0], $<name><identifier>[0], $*PKGMETA);
+        }
         else {
             $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
         }
