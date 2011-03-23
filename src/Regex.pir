@@ -34,11 +34,14 @@ This file brings together the various Regex modules needed for Regex.pbc .
 .HLL 'nqp'
 
 .sub '' :anon :load :init
+    # Also want the dumper.
+    load_bytecode 'dumper.pbc'
+    
     ## Import PAST and PCT to the HLL.
     .local pmc hllns, parrotns, imports
     hllns = get_hll_namespace
     parrotns = get_root_namespace ['parrot']
-    imports = split ' ', 'PAST PCT'
+    imports = split ' ', 'PAST PCT _dumper'
     parrotns.'export_to'(hllns, imports)
 .end
 
