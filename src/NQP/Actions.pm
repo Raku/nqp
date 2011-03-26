@@ -448,10 +448,6 @@ class NQP::Actions is HLL::Actions {
             PAST::Op.new( :pasttype('bind'),
                 PAST::Var.new( :name('type_obj'), :scope('register'), :isdecl(1) ),
                 $*SC.get_slot_past_for_object($*PKGMETA)
-            ),
-            PAST::Op.new( :pasttype('bind'),
-                PAST::Var.new( :name('$?CLASS') ),
-                PAST::Var.new( :name('type_obj'), :scope('register') )
             )
         ));
 
@@ -477,8 +473,7 @@ class NQP::Actions is HLL::Actions {
         }
         else {
             $past.blocktype('immediate');
-            $past.unshift(PAST::Var.new( :name('$?CLASS'), :scope('package'), :isdecl(1) ));
-            $past.symbol('$?CLASS', :scope('package'));
+            $*SC.install_lexical_symbol($past, '$?CLASS', $*PKGMETA);
         }
 
         # Add call to add_parent if we have one.
