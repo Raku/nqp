@@ -1,8 +1,6 @@
 # This is a first cut at a ClassHOW for NQP. It doesn't support all the stuff
-# that Perl 6 needs, but it should - when the missing bits are filled out and
-# it's debugged and made to compile/work - be sufficient for NQP. Supports
-# methods, attributes, role composition, inheritance (single and multiple)
-# and introspection.
+# that Perl 6 needs, but it's sufficient for NQP. Supports methods, attributes,
+# role composition, inheritance (single and multiple) and introspection.
 
 knowhow NQPClassHOW {
     ##
