@@ -11,11 +11,21 @@ This file brings together the various Regex modules needed for Regex.pbc .
 =cut
 
 .HLL 'nqp'
+.loadlib "nqp_group"
+.loadlib "nqp_ops"
 
 .sub '' :load :init
+    # Create a serialization context for this compilation unit.
+    .local pmc sc
+    sc = nqp_create_sc "__REGEX_CORE_SC__"
+    
+    # Load setting.
     load_bytecode 'SettingManager.pbc'
     $P0 = get_hll_global ['HLL'], 'SettingManager'
-    $P0.'load_setting'('NQPCORE')
+    say "# loading setting"
+    $P1 = $P0.'load_setting'('NQPCORE')
+    $P1 = getattribute $P1, 'lex_pad'
+    set_hll_global 'SETTING', $P1
 .end
 
 .include 'src/Regex/Cursor.pir'

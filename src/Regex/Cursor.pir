@@ -13,9 +13,6 @@ grammars.
 
 =cut
 
-.loadlib "nqp_group"
-.loadlib "nqp_ops"
-
 .include 'cclass.pasm'
 .include 'src/Regex/constants.pir'
 
@@ -150,9 +147,10 @@ grammars.
     how.'add_parrot_vtable_mapping'(type_obj, 'get_bool', $P17)
 
     # Add attributes.
-    .local pmc NQPAttribute, int_type, attr
+    .local pmc NQPAttribute, SETTING, int_type, attr
     NQPAttribute = get_hll_global "NQPAttribute"
-    int_type = get_hll_global "int"
+    SETTING = get_hll_global "SETTING"
+    int_type = SETTING["int"]
     attr = NQPAttribute."new"("$!target" :named("name"))
     how."add_attribute"(type_obj, attr)
     attr = NQPAttribute."new"("$!from" :named("name"), int_type :named('type'))
