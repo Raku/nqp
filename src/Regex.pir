@@ -22,7 +22,6 @@ This file brings together the various Regex modules needed for Regex.pbc .
     # Load setting.
     load_bytecode 'SettingManager.pbc'
     $P0 = get_hll_global ['HLL'], 'SettingManager'
-    say "# loading setting"
     $P1 = $P0.'load_setting'('NQPCORE')
     $P1 = getattribute $P1, 'lex_pad'
     set_hll_global 'SETTING', $P1
