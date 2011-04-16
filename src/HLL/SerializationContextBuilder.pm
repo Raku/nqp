@@ -173,7 +173,8 @@ class HLL::Compiler::SerializationContextBuilder {
     # during the deserialization.
     method load_module($module_name) {
         # Immediate loading.
-        my $*LOAD_UNIT;
+        my $*MAIN_CTX;
+		my $*CTXSAVE := HLL::Compiler;
         my $path := pir::join('/', pir::split('::', $module_name)) ~ '.pbc';
         pir::load_bytecode($path);
         
@@ -182,7 +183,7 @@ class HLL::Compiler::SerializationContextBuilder {
             PAST::Op.new( :pirop('load_bytecode vs'), $path )));
         
         # Return UNIT of the loaded module.
-        $*LOAD_UNIT
+        $*MAIN_CTX
     }
     
     # Installs a symbol into the package. Does so immediately, and
