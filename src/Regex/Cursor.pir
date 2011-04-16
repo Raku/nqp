@@ -18,7 +18,7 @@ grammars.
 
 .namespace ['Regex';'Cursor']
 
-.sub '' :anon :load :init
+.sub '' :anon :load :init :outer('Regex_Outer') :subid('Cursor_Load')
     # Set up some constants/generation tracking.
     $P0 = box 0
     set_global '$!generation', $P0
@@ -147,10 +147,9 @@ grammars.
     how.'add_parrot_vtable_mapping'(type_obj, 'get_bool', $P17)
 
     # Add attributes.
-    .local pmc NQPAttribute, SETTING, int_type, attr
+    .local pmc NQPAttribute, int_type, attr
     NQPAttribute = get_hll_global "NQPAttribute"
-    SETTING = get_hll_global "SETTING"
-    int_type = SETTING["int"]
+    int_type = find_lex "int"
     attr = NQPAttribute."new"("$!target" :named("name"))
     how."add_attribute"(type_obj, attr)
     attr = NQPAttribute."new"("$!from" :named("name"), int_type :named('type'))
