@@ -1,18 +1,18 @@
-/* This file contains various structure definitions for the NQP/Rakudo object
+/* This file contains various structure definitions for the 6model object
  * meta-model implementation. */
 
-#ifndef RAKUDOOBJECT_H_GUARD
-#define RAKUDOOBJECT_H_GUARD
+#ifndef SIXMODELOBJECT_H_GUARD
+#define SIXMODELOBJECT_H_GUARD
 
 #include "storage_spec.h"
 
-/* The commonalities shared between all Rakudo objects, no matter what the
+/* The commonalities shared between all 6model objects, no matter what the
  * REPR is. This struct should be placed as the first thing in the object
  * struct used by all representations. */
 typedef struct {
     PMC *stable;  /* The shared table. */
     PMC *sc;      /* Serialization context. */
-} RakudoObjectCommonalities;
+} SixModelObjectCommonalities;
 
 /* S-Tables (short for Shared Table) contains the commonalities shared between
  * a (HOW, REPR) pairing (for example, (HOW for the class Dog, P6Opaque). */
@@ -157,16 +157,16 @@ typedef struct {
 #define NO_HINT -1
 
 /* Various handy macros for getting at important stuff. */
-#define STABLE_PMC(o)    (((RakudoObjectCommonalities *)PMC_data(o))->stable)
+#define STABLE_PMC(o)    (((SixModelObjectCommonalities *)PMC_data(o))->stable)
 #define STABLE(o)        ((STable *)PMC_data(STABLE_PMC(o)))
-#define SC_PMC(o)        (((RakudoObjectCommonalities *)PMC_data(o))->sc)
+#define SC_PMC(o)        (((SixModelObjectCommonalities *)PMC_data(o))->sc)
 #define STABLE_STRUCT(p) ((STable *)PMC_data(p))
 #define REPR_PMC(o)      (STABLE(o)->REPR)
 #define REPR(o)          ((REPRCommonalities *)PMC_data(REPR_PMC(o)))
 #define REPR_STRUCT(p)   ((REPRCommonalities *)PMC_data(p))
 
 /* Object model initialization. */
-PMC * RakudoObject_initialize(PARROT_INTERP);
+PMC * SixModelObject_initialize(PARROT_INTERP);
 
 /* Some utility functions. */
 PMC * wrap_repr(PARROT_INTERP, void *REPR);

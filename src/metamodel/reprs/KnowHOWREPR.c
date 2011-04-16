@@ -5,7 +5,7 @@
 #define PARROT_IN_EXTENSION
 #include "parrot/parrot.h"
 #include "parrot/extend.h"
-#include "../rakudoobject.h"
+#include "../sixmodelobject.h"
 #include "KnowHOWREPR.h"
 
 /* Creates a new type object of this representation, and associates it with

@@ -1,7 +1,7 @@
 #define PARROT_IN_EXTENSION
 #include "parrot/parrot.h"
 #include "parrot/extend.h"
-#include "rakudoobject.h"
+#include "sixmodelobject.h"
 #include "repr_registry.h"
 #include "knowhow_bootstrapper.h"
 #include "serialization_context.h"
@@ -9,22 +9,22 @@
 /* Cached type IDs. */
 static INTVAL stable_id = 0;
 static INTVAL repr_id   = 0;
-static INTVAL ro_id     = 0;
+static INTVAL smo_id    = 0;
 static INTVAL sc_id     = 0;
 
 /* Cached strings. */
 static STRING *find_method_str = NULL;
 static STRING *type_check_str = NULL;
 
-/* Initializes the RakudoObject object model. */
-PMC * RakudoObject_initialize(PARROT_INTERP) {
+/* Initializes 6model and produces the KnowHOW core meta-object. */
+PMC * SixModelObject_initialize(PARROT_INTERP) {
     PMC    *initial_sc;
     STRING *initial_sc_name;
     
     /* Look up and cache some type IDs and strings. */
     stable_id       = pmc_type(interp, Parrot_str_new(interp, "STable", 0));
     repr_id         = pmc_type(interp, Parrot_str_new(interp, "REPR", 0));
-    ro_id           = pmc_type(interp, Parrot_str_new(interp, "RakudoObject", 0));
+    smo_id          = pmc_type(interp, Parrot_str_new(interp, "RakudoObject", 0));
     sc_id           = pmc_type(interp, Parrot_str_new(interp, "SerializationContext", 0));
     find_method_str = Parrot_str_new_constant(interp, "find_method");
     type_check_str  = Parrot_str_new_constant(interp, "type_check");
@@ -39,7 +39,7 @@ PMC * RakudoObject_initialize(PARROT_INTERP) {
     REPR_initialize_registry(interp);
 
     /* Bootstrap the KnowHOW and return it. */
-    return RakudoObject_bootstrap_knowhow(interp, initial_sc);
+    return SixModelObject_bootstrap_knowhow(interp, initial_sc);
 }
 
 /* Takes a representation and wraps it up in a REPR PMC. */
@@ -51,9 +51,9 @@ PMC * wrap_repr(PARROT_INTERP, void *REPR) {
     return repr_pmc;
 }
 
-/* Takes an object and wraps it in a RakudoObject PMC. */
+/* Takes an object and wraps it in a SixModelObject PMC. */
 PMC * wrap_object(PARROT_INTERP, void *obj) {
-    PMC *obj_pmc = pmc_new_noinit(interp, ro_id);
+    PMC *obj_pmc = pmc_new_noinit(interp, smo_id);
     PObj_custom_mark_SET(obj_pmc);
     PObj_custom_destroy_SET(obj_pmc);
     PMC_data(obj_pmc) = obj;

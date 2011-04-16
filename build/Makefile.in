@@ -145,7 +145,7 @@ PMC_SOURCES     = $(PMC_DIR)/stable.pmc $(PMC_DIR)/rakudoobject.pmc \
 
 OPS_SOURCE      = nqp.ops
 
-METAMODEL_SOURCE = src/metamodel/rakudoobject.h src/metamodel/rakudoobject.c \
+METAMODEL_SOURCE = src/metamodel/sixmodelobject.h src/metamodel/sixmodelobject.c \
                    src/metamodel/repr_registry.h src/metamodel/repr_registry.c \
                    src/metamodel/knowhow_bootstrapper.h src/metamodel/knowhow_bootstrapper.c \
                    src/metamodel/reprs/KnowHOWREPR.h src/metamodel/reprs/KnowHOWREPR.c \
@@ -158,7 +158,7 @@ METAMODEL_SOURCE = src/metamodel/rakudoobject.h src/metamodel/rakudoobject.c \
                    src/metamodel/storage_spec.h src/metamodel/serialization_context.c \
                    src/metamodel/serialization_context.h
 
-METAMODEL_OBJS   = ../metamodel/rakudoobject$(O) ../metamodel/repr_registry$(O) \
+METAMODEL_OBJS   = ../metamodel/sixmodelobject$(O) ../metamodel/repr_registry$(O) \
                    ../metamodel/knowhow_bootstrapper$(O) ../metamodel/reprs/KnowHOWREPR$(O) \
                    ../metamodel/reprs/P6opaque$(O) ../metamodel/reprs/P6int$(O) \
                    ../metamodel/reprs/P6str$(O) ../metamodel/reprs/P6num$(O) \
@@ -368,7 +368,7 @@ $(DYNPMC): $(PMC_SOURCES) $(METAMODEL_SOURCE)
 $(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS_SOURCE) $(DYNPMC)
 	cd $(OPS_DIR) && $(OPS2C) C --dynamic $(OPS_SOURCE)
 	cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(OPS)$(O) $(CINCLUDES) $(CFLAGS) $(OPS).c
-	cd src/metamodel && $(CC) -c @cc_o_out@rakudoobject$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) rakudoobject.c
+	cd src/metamodel && $(CC) -c @cc_o_out@sixmodelobject$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) sixmodelobject.c
 	cd src/metamodel && $(CC) -c @cc_o_out@repr_registry$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) repr_registry.c
 	cd src/metamodel && $(CC) -c @cc_o_out@knowhow_bootstrapper$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) knowhow_bootstrapper.c
 	cd src/metamodel/reprs && $(CC) -c @cc_o_out@KnowHOWREPR$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) KnowHOWREPR.c

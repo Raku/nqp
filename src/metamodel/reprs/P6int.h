@@ -4,7 +4,7 @@
 /* This is how an instance with the P6int representation looks. */
 typedef struct {
     /* The commonalities all objects have. */
-    RakudoObjectCommonalities common;
+    SixModelObjectCommonalities common;
 
     /* Integer storage slot. */
     INTVAL value;

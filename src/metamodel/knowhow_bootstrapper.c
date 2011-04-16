@@ -5,7 +5,7 @@
 #define PARROT_IN_EXTENSION
 #include "parrot/parrot.h"
 #include "parrot/extend.h"
-#include "rakudoobject.h"
+#include "sixmodelobject.h"
 #include "repr_registry.h"
 #include "reprs/KnowHOWREPR.h"
 
@@ -146,7 +146,7 @@ static PMC * bottom_find_method(PARROT_INTERP, PMC *obj, STRING *name, INTVAL hi
  * so it's a tad loopy. Basically, we create a KnowHOW type object. We then
  * create an instance from that and add a bunch of methods to it. Returns the
  * bootstrapped object. */
-PMC * RakudoObject_bootstrap_knowhow(PARROT_INTERP, PMC *sc) {
+PMC * SixModelObject_bootstrap_knowhow(PARROT_INTERP, PMC *sc) {
     /* Create our KnowHOW type object. Note we don't have a HOW just yet, so
      * pass in null. */
     PMC *REPR        = REPR_get_by_name(interp, Parrot_str_new_constant(interp, "KnowHOWREPR"));

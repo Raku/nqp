@@ -5,7 +5,7 @@
 #define PARROT_IN_EXTENSION
 #include "parrot/parrot.h"
 #include "parrot/extend.h"
-#include "rakudoobject.h"
+#include "sixmodelobject.h"
 #include "reprs/KnowHOWREPR.h"
 #include "reprs/P6opaque.h"
 #include "reprs/P6int.h"

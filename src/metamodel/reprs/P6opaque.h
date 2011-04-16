@@ -9,7 +9,7 @@
  * an int2 gets as much space as an int. */
 typedef struct {
     /* The commonalities all objects have. */
-    RakudoObjectCommonalities common;
+    SixModelObjectCommonalities common;
 
     /* Spill (for MI, dynamically added attributes, etc.) Normally null. */
     PMC *spill;

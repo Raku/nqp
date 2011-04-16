@@ -1,7 +1,7 @@
 #define PARROT_IN_EXTENSION
 #include "parrot/parrot.h"
 #include "parrot/extend.h"
-#include "rakudoobject.h"
+#include "sixmodelobject.h"
 #include "../pmc/pmc_dispatchersub.h"
 #include "../pmc/pmc_nqpmultisig.h"
 #include "pmc_sub.h"

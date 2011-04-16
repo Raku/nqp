@@ -4,7 +4,7 @@
 /* This is how an instance with the P6num representation looks. */
 typedef struct {
     /* The commonalities all objects have. */
-    RakudoObjectCommonalities common;
+    SixModelObjectCommonalities common;
 
     /* Floating point storage slot. */
     FLOATVAL value;

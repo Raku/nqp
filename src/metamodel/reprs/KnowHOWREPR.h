@@ -4,7 +4,7 @@
 /* This is how an instance with the KnowHOWREPR representation looks. */
 typedef struct {
     /* The commonalities all objects have. */
-    RakudoObjectCommonalities common;
+    SixModelObjectCommonalities common;
 
     /* Methods table; a hash. */
     PMC *methods;

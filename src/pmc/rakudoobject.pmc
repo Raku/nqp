@@ -1,4 +1,4 @@
-/* A RakudoObject PMC is what actually represents an object so far as
+/* A SixModelObject PMC is what actually represents an object so far as
  * the actual end user is concerned. While STable and REPR exist as
  * PMCs, they are not designed to ever really leak into user space.
  * This, on the other hand, is. In fact, pretty much everything that
@@ -8,7 +8,7 @@
  * all. Mostly, it maps the Parrot world view to the Perl 6 object
  * model one. Actual object semantics are provided by the intersection
  * of the REPR and the HOW, both of which are pointed at by the STable.
- * The only thing that you can be sure of if you have a RakudoObject
+ * The only thing that you can be sure of if you have a SixModelObject
  * PMC is that:
  *     PMC_data(SELF)[0]
  * Will give you the address of an STable PMC. Thus everything in here
@@ -22,7 +22,7 @@
  * out (since that depends on the representation).
  */
 
-#include "../metamodel/rakudoobject.h"
+#include "../metamodel/sixmodelobject.h"
 
 pmclass RakudoObject manual_attrs dynpmc group nqp {
     /* ********************************************** *

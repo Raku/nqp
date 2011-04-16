@@ -3,7 +3,7 @@
 
 typedef struct {
     /* The commonalities all objects have. */
-    RakudoObjectCommonalities common;
+    SixModelObjectCommonalities common;
 
     /* Storage slot (hash). Note in the future we could have a Parrot
      * Hash data structure right here and make every object 1 GC-able. */

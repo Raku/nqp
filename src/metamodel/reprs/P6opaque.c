@@ -5,7 +5,7 @@
 #define PARROT_IN_EXTENSION
 #include "parrot/parrot.h"
 #include "parrot/extend.h"
-#include "../rakudoobject.h"
+#include "../sixmodelobject.h"
 #include "P6opaque.h"
 
 /* Forward declaration of repr_instance ('cus if we don't, we have to
@@ -171,14 +171,14 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, REPRP6opaque *
      * is that everything goes into the spill hash. The size to allocate is just
      * two pointers - a shared table pointer and one for the spill hash. */
     if (repr->name_to_index_mapping[0].class_key == NULL) {
-        repr->allocation_size = sizeof(RakudoObjectCommonalities) + sizeof(PMC *);
+        repr->allocation_size = sizeof(SixModelObjectCommonalities) + sizeof(PMC *);
     }
 
     /* Otherwise, we need to compute the allocation strategy.  */
     else {
         /* Initial size is for commonalities (e.g. shared table pointer) and
          * spill hash space. */
-        INTVAL cur_size = sizeof(RakudoObjectCommonalities) + sizeof(PMC *);
+        INTVAL cur_size = sizeof(SixModelObjectCommonalities) + sizeof(PMC *);
         
         /* Get number of attributes and set up various counters. */
         INTVAL num_attrs    = VTABLE_elements(interp, flat_list);
