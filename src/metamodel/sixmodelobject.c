@@ -24,7 +24,7 @@ PMC * SixModelObject_initialize(PARROT_INTERP) {
     /* Look up and cache some type IDs and strings. */
     stable_id       = pmc_type(interp, Parrot_str_new(interp, "STable", 0));
     repr_id         = pmc_type(interp, Parrot_str_new(interp, "REPR", 0));
-    smo_id          = pmc_type(interp, Parrot_str_new(interp, "RakudoObject", 0));
+    smo_id          = pmc_type(interp, Parrot_str_new(interp, "SixModelObject", 0));
     sc_id           = pmc_type(interp, Parrot_str_new(interp, "SerializationContext", 0));
     find_method_str = Parrot_str_new_constant(interp, "find_method");
     type_check_str  = Parrot_str_new_constant(interp, "type_check");

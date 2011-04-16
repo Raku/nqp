@@ -24,7 +24,7 @@
 
 #include "../metamodel/sixmodelobject.h"
 
-pmclass RakudoObject manual_attrs dynpmc group nqp {
+pmclass SixModelObject manual_attrs dynpmc group nqp {
     /* ********************************************** *
      * These methods are mapped to 6model primitives. *
      * ********************************************** */

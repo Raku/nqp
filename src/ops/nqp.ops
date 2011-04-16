@@ -46,7 +46,7 @@ inline op nqp_dynop_setup() :base_core {
         /* Look up and cache some type IDs. */
         stable_id = pmc_type(interp, Parrot_str_new(interp, "STable", 0));
         repr_id   = pmc_type(interp, Parrot_str_new(interp, "REPR", 0));
-        smo_id    = pmc_type(interp, Parrot_str_new(interp, "RakudoObject", 0));
+        smo_id    = pmc_type(interp, Parrot_str_new(interp, "SixModelObject", 0));
         disp_id   = pmc_type(interp, Parrot_str_new(interp, "DispatcherSub", 0));
         ms_id     = pmc_type(interp, Parrot_str_new(interp, "NQPMultiSig", 0));
 

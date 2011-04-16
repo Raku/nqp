@@ -36,8 +36,8 @@ typedef struct candidate_graph_node {
 /* Special value we set arity to when we have a slurpy. */
 #define SLURPY_ARITY 1 << 30
 
-/* Cached type ID for RakudoObject. */
-static INTVAL ro_id = 0;
+/* Cached type ID for 6model Object. */
+static INTVAL smo_id = 0;
 
 /* Definedness constraints. */
 #define DEFINED_ONLY    1
@@ -256,9 +256,9 @@ PMC *nqp_multi_dispatch(PARROT_INTERP, PMC *dispatcher, PMC *capture) {
     candidate_info** candidates    = sort_candidates(interp, dispatchees);
     candidate_info** cur_candidate = candidates;
 
-    /* Ensure we know what is a Rakudo object and what is not. */
-    if (!ro_id)
-        ro_id = pmc_type(interp, Parrot_str_new(interp, "RakudoObject", 0));
+    /* Ensure we know what is a 6model object and what is not. */
+    if (!smo_id)
+        smo_id = pmc_type(interp, Parrot_str_new(interp, "SixModelObject", 0));
 
     /* Iterate over the candidates and collect best ones; terminate
      * when we see two nulls (may break out earlier). */
@@ -294,7 +294,7 @@ PMC *nqp_multi_dispatch(PARROT_INTERP, PMC *dispatcher, PMC *capture) {
 
         for (i = 0; i < type_check_count; i++) {
             PMC * const param = VTABLE_get_pmc_keyed_int(interp, capture, i);
-            PMC * const param_type = param->vtable->base_type == ro_id ?
+            PMC * const param_type = param->vtable->base_type == smo_id ?
                     STABLE(param)->WHAT : PMCNULL;
             PMC * const type_obj = (*cur_candidate)->types[i];
             INTVAL const definedness = (*cur_candidate)->definednesses[i];
@@ -304,7 +304,7 @@ PMC *nqp_multi_dispatch(PARROT_INTERP, PMC *dispatcher, PMC *capture) {
             }
             if (definedness) {
                 /* Have a constraint on the definedness. */
-                INTVAL defined = param->vtable->base_type == ro_id ?
+                INTVAL defined = param->vtable->base_type == smo_id ?
                         REPR(param)->defined(interp, REPR_PMC(param), param) :
                         VTABLE_defined(interp, param);
                 if (!defined && definedness == DEFINED_ONLY || defined && definedness == UNDEFINED_ONLY) {

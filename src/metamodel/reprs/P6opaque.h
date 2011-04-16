@@ -3,7 +3,7 @@
 
 /* This is how an instance with the P6opaque representation starts. However, what
  * follows on from this depends on the declaration. For object attributes, it will
- * be a pointer size and point to another RakudoObject. For native integers and
+ * be a pointer size and point to another 6model Object. For native integers and
  * numbers, it will be the appropriate sized piece of memory to store them
  * right there in the object. Note that P6opaque does not do packed storage, so
  * an int2 gets as much space as an int. */

@@ -138,7 +138,7 @@ DYNEXT_TARGET   = $(DYNEXT_DIR)/$(GROUP)$(LOAD_EXT)
 DYNPMC          = $(PMC_DIR)/$(GROUP)$(LOAD_EXT)
 DYNOPS          = $(OPS_DIR)/$(OPS)$(LOAD_EXT)
 
-PMC_SOURCES     = $(PMC_DIR)/stable.pmc $(PMC_DIR)/rakudoobject.pmc \
+PMC_SOURCES     = $(PMC_DIR)/stable.pmc $(PMC_DIR)/sixmodelobject.pmc \
                   $(PMC_DIR)/repr.pmc $(PMC_DIR)/dispatchersub.pmc \
                   $(PMC_DIR)/nqpmultisig.pmc $(PMC_DIR)/nqplexinfo.pmc \
                   $(PMC_DIR)/nqplexpad.pmc $(PMC_DIR)/serializationcontext.pmc 
