@@ -17,7 +17,7 @@ static STRING *find_method_str = NULL;
 static STRING *type_check_str = NULL;
 
 /* Initializes the RakudoObject object model. */
-void RakudoObject_initialize(PARROT_INTERP) {
+PMC * RakudoObject_initialize(PARROT_INTERP) {
     PMC    *initial_sc;
     STRING *initial_sc_name;
     
@@ -38,8 +38,8 @@ void RakudoObject_initialize(PARROT_INTERP) {
     /* Build representations and initializes the representation registry. */
     REPR_initialize_registry(interp);
 
-    /* Bootstrap the KnowHOW. */
-    RakudoObject_bootstrap_knowhow(interp, initial_sc);
+    /* Bootstrap the KnowHOW and return it. */
+    return RakudoObject_bootstrap_knowhow(interp, initial_sc);
 }
 
 /* Takes a representation and wraps it up in a REPR PMC. */

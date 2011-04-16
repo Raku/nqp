@@ -144,8 +144,9 @@ static PMC * bottom_find_method(PARROT_INTERP, PMC *obj, STRING *name, INTVAL hi
 
 /* Bootstraps the KnowHOW. This is were things "bottom out" in the meta-model
  * so it's a tad loopy. Basically, we create a KnowHOW type object. We then
- * create an instance from that and add a bunch of methods to it. */
-void RakudoObject_bootstrap_knowhow(PARROT_INTERP, PMC *sc) {
+ * create an instance from that and add a bunch of methods to it. Returns the
+ * bootstrapped object. */
+PMC * RakudoObject_bootstrap_knowhow(PARROT_INTERP, PMC *sc) {
     /* Create our KnowHOW type object. Note we don't have a HOW just yet, so
      * pass in null. */
     PMC *REPR        = REPR_get_by_name(interp, Parrot_str_new_constant(interp, "KnowHOWREPR"));
@@ -212,10 +213,5 @@ void RakudoObject_bootstrap_knowhow(PARROT_INTERP, PMC *sc) {
     VTABLE_set_pmc_keyed_int(interp, sc, 1, knowhow_how_pmc);
     SC_PMC(knowhow_how_pmc) = sc;
 
-    /* Install KnowHOW into the root HLL namespace, since that's where NQP
-     * lives.
-     * XXX We'll likely want to change this in the future. */
-    Parrot_ns_set_global(interp, Parrot_get_ctx_HLL_namespace(interp),
-        knowhow_how->name,
-        knowhow_pmc);
+    return knowhow_pmc;
 }

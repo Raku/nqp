@@ -25,6 +25,9 @@ static INTVAL ro_id     = 0;
 static INTVAL disp_id   = 0;
 static INTVAL ms_id     = 0;
 
+/* Built-in HOWs (meta-objects). */
+static PMC *KnowHOW = NULL;
+
 END_OPS_PREAMBLE
 
 /*
@@ -48,9 +51,31 @@ inline op nqp_dynop_setup() :base_core {
         ms_id     = pmc_type(interp, Parrot_str_new(interp, "NQPMultiSig", 0));
 
         /* Initialize the object model. */
-        RakudoObject_initialize(interp);
+        KnowHOW = RakudoObject_initialize(interp);
+        /* XXX Kill this once everything uses get_knowhow. */
+        Parrot_ns_set_global(interp, Parrot_get_ctx_HLL_namespace(interp),
+            Parrot_str_new(interp, "KnowHOW", 0), KnowHOW);
     }
 }
+
+
+/*
+
+=item get_knowhow()
+
+Returns the 6model core meta-object, KnowHOW.
+
+=cut
+
+*/
+inline op get_knowhow(out PMC) :base_core {
+    if (KnowHOW)
+        $1 = KnowHOW;
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "6model not yet initialized; cannot use get_knowhow");
+}
+
 
 /*
 

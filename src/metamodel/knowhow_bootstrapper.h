@@ -1,1 +1,1 @@
-void RakudoObject_bootstrap_knowhow(PARROT_INTERP, PMC *sc);
+PMC * RakudoObject_bootstrap_knowhow(PARROT_INTERP, PMC *sc);
