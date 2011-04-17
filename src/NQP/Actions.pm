@@ -186,6 +186,16 @@ class NQP::Actions is HLL::Actions {
         }
         self.SET_BLOCK_OUTER_CTX(@BLOCK[0]);
     }
+    
+    method GLOBALish($/) {
+        # Create GLOBALish.
+        # XXX Uses KnowHOW for now, just for the .WHO.
+        # Want something lighter really.
+        our @BLOCK;
+        $*PACKAGE := $*SC.pkg_create_mo(KnowHOW, :name('GLOBALish'));
+        $*PACKAGE.HOW.compose($*PACKAGE);
+        $*SC.install_lexical_symbol(@BLOCK[0], 'GLOBALish', $*PACKAGE);
+    }
 
     method you_are_here($/) {
         make self.CTXSAVE();
@@ -431,13 +441,13 @@ class NQP::Actions is HLL::Actions {
         # Install it in the package or lexpad as needed.
         if $*SCOPE eq 'our' || $*SCOPE eq '' {
             $past.namespace( $<name><identifier> );
-            $*SC.install_package_symbol($<name><identifier>, $*PKGMETA);
+            $*SC.install_package_symbol($<name><identifier>, $*PACKAGE);
         }
         elsif $*SCOPE eq 'my' {
             if +$<name><identifier> != 1 {
                 $<name>.CURSOR.panic("A my scoped package cannot have a multi-part name yet");
             }
-            $*SC.install_lexical_symbol(@BLOCK[0], $<name><identifier>[0], $*PKGMETA);
+            $*SC.install_lexical_symbol(@BLOCK[0], $<name><identifier>[0], $*PACKAGE);
         }
         else {
             $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
@@ -447,7 +457,7 @@ class NQP::Actions is HLL::Actions {
         $*PACKAGE-SETUP.unshift(PAST::Stmts.new(
             PAST::Op.new( :pasttype('bind'),
                 PAST::Var.new( :name('type_obj'), :scope('register'), :isdecl(1) ),
-                $*SC.get_slot_past_for_object($*PKGMETA)
+                $*SC.get_slot_past_for_object($*PACKAGE)
             )
         ));
 
@@ -470,10 +480,13 @@ class NQP::Actions is HLL::Actions {
                 PAST::Var.new( :name('type_obj'), :scope('register') ),
                 PAST::Val.new( :value($past) )
             ));
+            $*SC.install_lexical_symbol($past, '$?PACKAGE', $*PACKAGE);
+            $*SC.install_lexical_symbol($past, '$?ROLE', $*PACKAGE);
         }
         else {
             $past.blocktype('immediate');
-            $*SC.install_lexical_symbol($past, '$?CLASS', $*PKGMETA);
+            $*SC.install_lexical_symbol($past, '$?PACKAGE', $*PACKAGE);
+            $*SC.install_lexical_symbol($past, '$?CLASS', $*PACKAGE);
         }
 
         # Add call to add_parent if we have one.

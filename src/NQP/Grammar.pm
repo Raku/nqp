@@ -111,6 +111,10 @@ grammar NQP::Grammar is HLL::Grammar {
         :my $*MAIN_SUB;
         <.newpad>
         <.outerctx>
+        
+        :my $*PACKAGE;
+        <.GLOBALish>
+        
         <statementlist>
         [ $ || <.panic: 'Confused'> ]
     }
@@ -174,6 +178,7 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token newpad { <?> }
     token outerctx { <?> }
+    token GLOBALish { <?> }
     token finishpad { <?> }
     token you_are_here { <?> }
 
@@ -329,7 +334,7 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     rule package_def {
-        :my $*PKGMETA;     # The meta-object for this package.
+        :my $*PACKAGE;     # The type object for this package.
         :my %*ATTR-CHECK;  # Attribute names we must confirm exist.
         
         <name>
@@ -343,7 +348,7 @@ grammar NQP::Grammar is HLL::Grammar {
             if $<repr> {
                 %args<repr> := ~$<repr>[0]<quote_delimited><quote_atom>[0];
             }
-            $*PKGMETA := $*SC.pkg_create_mo(%*HOW{$*PKGDECL}, |%args);
+            $*PACKAGE := $*SC.pkg_create_mo(%*HOW{$*PKGDECL}, |%args);
         }
         
         [ 'is' <parent=.name> ]?
