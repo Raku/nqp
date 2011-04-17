@@ -17,7 +17,9 @@ knowhow NQPNativeHOW {
     # XXX Should check that this is an inlineable REPR.
     method new_type(:$name = '<anon>', :$repr!) {
         my $metaclass := self.new(:name($name));
-        pir::repr_type_object_for__PPS($metaclass, $repr);
+        pir::set_who__0PP(
+            pir::repr_type_object_for__PPS($metaclass, $repr),
+            {});
     }
 
     method add_method($obj, $name, $code_obj) {

@@ -16,7 +16,9 @@ knowhow NQPModuleHOW {
     # to go with it, and return that.
     method new_type(:$name = '<anon>', :$repr = 'P6opaque') {
         my $metaclass := self.new(:name($name));
-        pir::repr_type_object_for__PPS($metaclass, $repr);
+        pir::set_who__0PP(
+            pir::repr_type_object_for__PPS($metaclass, $repr),
+            {});
     }
 
     method add_method($obj, $name, $code_obj) {
