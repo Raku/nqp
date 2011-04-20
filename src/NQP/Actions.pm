@@ -1,10 +1,6 @@
 class NQP::Actions is HLL::Actions {
 
-    our @BLOCK;
-
-    INIT {
-        our @BLOCK := Q:PIR { %r = new ['ResizablePMCArray'] };
-    }
+    our @BLOCK := Q:PIR { %r = new ['ResizablePMCArray'] };
 
     sub xblock_immediate($xblock) {
         $xblock[1] := block_immediate($xblock[1]);
@@ -173,12 +169,10 @@ class NQP::Actions is HLL::Actions {
     }
 
     method newpad($/) {
-        our @BLOCK;
         @BLOCK.unshift( PAST::Block.new( PAST::Stmts.new() ) );
     }
 
     method outerctx($/) {
-        our @BLOCK;
         unless pir::defined(%*COMPILING<%?OPTIONS><outer_ctx>) {
             # We haven't got a specified outer context already, so load a
             # setting.
@@ -191,7 +185,6 @@ class NQP::Actions is HLL::Actions {
         # Create GLOBALish.
         # XXX Uses KnowHOW for now, just for the .WHO.
         # Want something lighter really.
-        our @BLOCK;
         $*PACKAGE := $*SC.pkg_create_mo(KnowHOW, :name('GLOBALish'));
         $*PACKAGE.HOW.compose($*PACKAGE);
         $*SC.install_lexical_symbol(@BLOCK[0], 'GLOBALish', $*PACKAGE);
@@ -391,32 +384,44 @@ class NQP::Actions is HLL::Actions {
         }
         else {
             my @name := NQP::Compiler.parse_name(~$/);
-            $past := PAST::Var.new( :name(~@name.pop) );
-            if (@name) {
-                if @name[0] eq 'GLOBAL' { @name.shift; }
-                $past.namespace(@name);
-                $past.scope('package');
+            if +@name > 1 {
+                if $<twigil> {
+                    $/.CURSOR.panic("Twigil not allowed on multi-part name");
+                }
+                $past := lexical_package_lookup(@name, $/);
                 $past.viviself( vivitype( $<sigil> ) );
-                $past.lvalue(1);
             }
-            if $<twigil>[0] eq '*' {
-                $past.scope('contextual');
-                $past.viviself( 
-                    PAST::Var.new( 
-                        :scope('package'), :namespace(''), 
-                        :name( ~$<sigil> ~ $<desigilname> ),
-                        :viviself( 
-                            PAST::Op.new( 'Contextual ' ~ ~$/ ~ ' not found',
-                                          :pirop('die') )
+            elsif $<twigil>[0] eq '*' {
+                $past := PAST::Var.new(
+                    :name(~@name.pop), :scope('contextual'),
+                    :viviself(
+                        PAST::Var.new( 
+                            :scope('package'), :namespace(''), 
+                            :name( ~$<sigil> ~ $<desigilname> ),
+                            :viviself( 
+                                PAST::Op.new( 'Contextual ' ~ ~$/ ~ ' not found',
+                                              :pirop('die') )
+                            )
                         )
                     )
                 );
             }
             elsif $<twigil>[0] eq '!' {
-                $past.push(PAST::Var.new( :name('self') ));
-                $past.scope('attribute');
+                $past := PAST::Var.new(
+                    :name(~@name.pop), :scope('attribute'),
+                    :viviself( vivitype( $<sigil> ) ),
+                    PAST::Var.new( :name('self') ),
+                    PAST::Var.new( :name('$?CLASS') )
+                );
+            }
+            elsif is_package(~@name[0]) {
+                $past := lexical_package_lookup(@name, $/);
                 $past.viviself( vivitype( $<sigil> ) );
-                $past.push(PAST::Var.new( :name('$?CLASS') ));
+            }
+            else {
+                $past := PAST::Var.new(
+                    :name(~@name.pop), :viviself( vivitype( $<sigil> ) )
+                );
             }
         }
         make $past;
@@ -579,7 +584,7 @@ class NQP::Actions is HLL::Actions {
         my $sigil := $<variable><sigil>;
         my $name := $past.name;
         my $BLOCK := @BLOCK[0];
-        if $BLOCK.symbol($name) {
+        if $name && $BLOCK.symbol($name) {
             $/.CURSOR.panic("Redeclaration of symbol ", $name);
         }
         if $*SCOPE eq 'has' {
@@ -607,13 +612,18 @@ class NQP::Actions is HLL::Actions {
             $BLOCK.symbol($name, :scope('attribute') );
             $past := PAST::Stmts.new();
         }
+        elsif $*SCOPE eq 'our' {
+            $past := lexical_package_lookup([$name], $/);
+            $past.viviself( vivitype($sigil) );
+            $BLOCK.symbol($name, :scope('package') );
+        }
         else {
-            my $scope := $*SCOPE eq 'our' ?? 'package' !! 'lexical';
-            my $decl := PAST::Var.new( :name($name), :scope($scope), :isdecl(1),
-                                       :lvalue(1), :viviself( vivitype($sigil) ),
-                                       :node($/) );
-            $BLOCK.symbol($name, :scope($scope) );
-            $BLOCK[0].push($decl);
+            $BLOCK[0].push(PAST::Var.new(
+                :name($name), :scope('lexical'), :isdecl(1),
+                :lvalue(1), :viviself( vivitype($sigil) ),
+                :node($/)
+            ));
+            $BLOCK.symbol($name, :scope('lexical') );
         }
         make $past;
     }
@@ -967,9 +977,7 @@ class NQP::Actions is HLL::Actions {
     }
 
     method regex_declarator($/, $key?) {
-        my @MODIFIERS := Q:PIR {
-            %r = get_hll_global ['Regex';'P6Regex';'Actions'], '@MODIFIERS'
-        };
+        my @MODIFIERS := @Regex::P6Regex::Actions::MODIFIERS;
         my $name := ~$<deflongname>.ast;
         my $past;
         if $<proto> {
@@ -1016,10 +1024,7 @@ class NQP::Actions is HLL::Actions {
             if $<sym> eq 'token' { %h<r> := 1; }
             if $<sym> eq 'rule'  { %h<r> := 1;  %h<s> := 1; }
             @MODIFIERS.unshift(%h);
-            Q:PIR {
-                $P0 = find_lex '$name'
-                set_hll_global ['Regex';'P6Regex';'Actions'], '$REGEXNAME', $P0
-            };
+            $Regex::P6Regex::Actions::REGEXNAME := $name;
             @BLOCK[0].symbol('$¢', :scope('lexical'));
             @BLOCK[0].symbol('$/', :scope('lexical'));
             return 0;
@@ -1118,16 +1123,6 @@ class NQP::Actions is HLL::Actions {
             $past.unshift($var);
         }
         make $past;
-    }
-
-    sub is_lexical($name) {
-        for @BLOCK {
-            my %sym := $_.symbol($name);
-            if +%sym {
-                return 1;
-            }
-        }
-        0;
     }
 
     method term:sym<pir::op>($/) {
@@ -1274,10 +1269,7 @@ class NQP::Actions is HLL::Actions {
 
     method quote:sym</ />($/, $key?) {
         if $key eq 'open' {
-            Q:PIR {
-                null $P0
-                set_hll_global ['Regex';'P6Regex';'Actions'], '$REGEXNAME', $P0
-            };
+            $Regex::P6Regex::Actions::REGEXNAME := pir::null__P();
             @BLOCK[0].symbol('$¢', :scope('lexical'));
             @BLOCK[0].symbol('$/', :scope('lexical'));
             return 0;
@@ -1343,6 +1335,79 @@ class NQP::Actions is HLL::Actions {
 
     method infix:sym<~~>($/) {
         make PAST::Op.new( :pasttype<callmethod>, :name<ACCEPTS>, :node($/) );
+    }
+    
+    # Takes a multi-part name that we know is in a package and generates
+    # PAST to look it up using NQP package semantics.
+    sub lexical_package_lookup(@name, $/) {
+        # Catch empty names and die helpfully.
+        if +@name == 0 { $/.CURSOR.panic("Cannot compile empty name"); }
+        
+        # If there's no explicit qualification, then look it up in the
+        # current package.
+        if +@name == 1 {
+            return PAST::Var.new(
+                :scope('keyed'), :node($/),
+                PAST::Op.new(
+                    :pirop('get_who PP'),
+                    PAST::Var.new( :name('$?PACKAGE'), :scope('lexical') )
+                ),
+                ~@name[0]);
+        }
+        
+        # Otherwise, see if the first part of the name is lexically
+        # known. If not, then we need to look up GLOBAL too.
+        my $lookup;
+        if is_lexical(@name[0]) {
+            $lookup := PAST::Var.new( :name(@name.shift()), :scope('lexical') );
+            for @name {
+                $lookup := PAST::Var.new(
+                    :scope('keyed'),
+                    PAST::Op.new( :pirop('get_who PP'), $lookup ),
+                    ~$_);
+            }
+        }
+        else {
+            # XXX Would really want this and then chase the symbol
+            # like above. But not quite ready yet. Can only do the
+            # final lookup via the .WHO.
+            #$lookup := PAST::Var.new( :name('GLOBAL'), :namespace([]), :scope('package') );
+            my $name := @name.pop();
+            $lookup := PAST::Var.new(
+                :scope('keyed'),
+                PAST::Op.new(
+                    :pirop('get_who PP'),
+                    PAST::Var.new( :name(@name.pop), :namespace(@name), :scope('package') )
+                ),
+                ~$name);
+        }
+        
+        $lookup.node($/);
+        return $lookup;
+    }
+    
+    # Checks if the given name is known anywhere in the lexpad
+    # and with lexical scope.
+    sub is_lexical($name) {
+        is_scope($name, 'lexical')
+    }
+    
+    # Checks if the given name is known anywhere in the lexpad
+    # and with package scope.
+    sub is_package($name) {
+        is_scope($name, 'package')
+    }
+    
+    # Checks if a given name is known in the lexpad anywhere
+    # with the specified scope.
+    sub is_scope($name, $wanted_scope) {
+        for @BLOCK {
+            my %sym := $_.symbol($name);
+            if +%sym {
+                return %sym<scope> eq $wanted_scope;
+            }
+        }
+        0;
     }
 }
 
