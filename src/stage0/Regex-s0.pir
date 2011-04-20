@@ -2823,9 +2823,8 @@ Return the POST representation of the regex AST rooted by C<node>.
   token_done:
     $S0 = regexname
     $S0 = concat '!PREFIX__', $S0
-    $S1 = escape $S0
     $P99 = get_hll_global ['PAST'], 'Block'
-    tpast = $P99.'new'(tpast, 'name'=>$S0, 'nsentry'=>$S1, 'lexical'=>0, 'blocktype'=>'method')
+    tpast = $P99.'new'(tpast, 'name'=>$S0, 'nsentry'=>$S0, 'lexical'=>0, 'blocktype'=>'method')
     tpost = self.'as_post'(tpast, 'rtype'=>'v')
     ops.'push'(tpost)
   peek_done:
