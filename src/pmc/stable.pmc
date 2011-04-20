@@ -39,13 +39,15 @@ pmclass STable manual_attrs dynpmc group nqp {
         STable *st = (STable *)PMC_data(SELF);
         INTVAL i;
 
-        /* Mark REPR, HOW and WHAT. */
+        /* Mark REPR, HOW, WHO and WHAT. */
         if (!PMC_IS_NULL(st->REPR))
             Parrot_gc_mark_PMC_alive(interp, st->REPR);
         if (!PMC_IS_NULL(st->HOW))
             Parrot_gc_mark_PMC_alive(interp, st->HOW);
         if (!PMC_IS_NULL(st->WHAT))
             Parrot_gc_mark_PMC_alive(interp, st->WHAT);
+        if (!PMC_IS_NULL(st->WHO))
+            Parrot_gc_mark_PMC_alive(interp, st->WHO);
         if (!PMC_IS_NULL(st->method_cache))
             Parrot_gc_mark_PMC_alive(interp, st->method_cache);
 
