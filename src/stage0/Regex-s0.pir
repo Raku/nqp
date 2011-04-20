@@ -14,7 +14,26 @@ This file brings together the various Regex modules needed for Regex.pbc .
 .loadlib "nqp_group"
 .loadlib "nqp_ops"
 
-.sub '' :load :init
+# This is the outer scope of the module.
+.sub '' :subid('Regex_Outer')
+    # Save this as the main context.
+	$P0 = find_dynamic_lex "$*CTXSAVE"
+    if null $P0 goto ctxsave_done
+    $I0 = can $P0, "ctxsave"
+    unless $I0 goto ctxsave_done
+    $P0."ctxsave"()
+  ctxsave_done:
+
+    # Set up our UNIT::GLOBAL.
+    # XXX $P1 = ...
+    .lex 'GLOBALish', $P1
+
+    # Capture inner blocks.
+    .const 'Sub' $P2 = 'Cursor_Load'
+    capture_lex $P2
+.end
+
+.sub '' :load :init :outer('Regex_Outer')
     # Create a serialization context for this compilation unit.
     .local pmc sc
     sc = nqp_create_sc "__REGEX_CORE_SC__"
@@ -23,8 +42,11 @@ This file brings together the various Regex modules needed for Regex.pbc .
     load_bytecode 'SettingManager.pbc'
     $P0 = get_hll_global ['HLL'], 'SettingManager'
     $P1 = $P0.'load_setting'('NQPCORE')
-    $P1 = getattribute $P1, 'lex_pad'
-    set_hll_global 'SETTING', $P1
+	
+    # Set it as the outer of the module's main block, then run that.
+    .const 'Sub' $P2 = 'Regex_Outer'
+    $P2.'set_outer_ctx'($P1)
+    $P2()
 .end
 
 ### .include 'src/Regex/Cursor.pir'
@@ -55,7 +77,7 @@ grammars.
 
 .namespace ['Regex';'Cursor']
 
-.sub '' :anon :load :init
+.sub '' :anon :load :init :outer('Regex_Outer') :subid('Cursor_Load')
     # Set up some constants/generation tracking.
     $P0 = box 0
     set_global '$!generation', $P0
@@ -184,10 +206,9 @@ grammars.
     how.'add_parrot_vtable_mapping'(type_obj, 'get_bool', $P17)
 
     # Add attributes.
-    .local pmc NQPAttribute, SETTING, int_type, attr
+    .local pmc NQPAttribute, int_type, attr
     NQPAttribute = get_hll_global "NQPAttribute"
-    SETTING = get_hll_global "SETTING"
-    int_type = SETTING["int"]
+    int_type = find_lex "int"
     attr = NQPAttribute."new"("$!target" :named("name"))
     how."add_attribute"(type_obj, attr)
     attr = NQPAttribute."new"("$!from" :named("name"), int_type :named('type'))
@@ -4130,7 +4151,7 @@ Patrick Michaud <pmichaud@pobox.com> is the author and maintainer.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2009, The Perl Foundation.
+Copyright (C) 2009-2011, The Perl Foundation.
 
 =cut
 
