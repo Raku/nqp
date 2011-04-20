@@ -2,6 +2,7 @@ class Regex::P6Regex::Actions is HLL::Actions {
 
     ## this will eventually be handled using contextuals
     our @MODIFIERS;
+    our $REGEXNAME;
 
     INIT {
         @MODIFIERS := Q:PIR {
@@ -405,8 +406,9 @@ class Regex::P6Regex::Actions is HLL::Actions {
             self.subrule_alias($past, $name);
         }
         elsif $name eq 'sym' {
+            my $rxname := $REGEXNAME;
             my $regexsym := Q:PIR {
-                $P0 = get_global '$REGEXNAME'
+                $P0 = find_lex '$rxname'
                 $S0 = $P0
                 $I0 = index $S0, ':sym<'
                 add $I0, 5
