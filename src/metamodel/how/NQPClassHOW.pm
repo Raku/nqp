@@ -61,6 +61,9 @@ knowhow NQPClassHOW {
         if %!methods{$name} {
             pir::die("This class already has a method named " ~ $name);
         }
+        if pir::isnull__IP($code_obj) || pir::isa__IPs($code_obj, 'Undef') {
+            pir::die("Cannot add a null method '$name' to class '$!name'");
+        }
         %!methods{$name} := $code_obj;
     }
 
