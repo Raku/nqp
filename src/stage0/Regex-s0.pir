@@ -44,7 +44,7 @@ This file brings together the various Regex modules needed for Regex.pbc .
     
     # Load setting.
     load_bytecode 'SettingManager.pbc'
-    $P0 = get_hll_global ['HLL'], 'SettingManager'
+    $P0 = get_hll_global 'ModuleLoader'
     $P1 = $P0.'load_setting'('NQPCORE')
 	
     # Set it as the outer of the module's main block, then run that.
