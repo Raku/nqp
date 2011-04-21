@@ -28,14 +28,23 @@ grammars.
     $P0 = new ['Boolean']
     assign $P0, 1
     set_global '$!TRUE', $P0
+    
+    # Create Regex outer package.
+    .local pmc Regex, RegexWHO
+    $P0 = get_knowhow
+    Regex = $P0."new_type"("name"=>"Regex")
+    RegexWHO = get_who Regex
 
     # Build meta-object and store it in the namespace.
     .local pmc type_obj, how, NQPClassHOW
     get_hll_global NQPClassHOW, "NQPClassHOW"
     type_obj = NQPClassHOW."new_type"("Cursor" :named("name"))
-    how = get_how type_obj
-    set_hll_global ["Regex"], "Cursor", type_obj
+    RegexWHO["Cursor"] = type_obj
     set_global "$?CLASS", type_obj
+    how = get_how type_obj
+    
+    # XXXNS Old namespace handling installation, during migration to new.
+    set_hll_global ["Regex"], "Cursor", type_obj
 
     # Add all methods.
     .const 'Sub' $P10 = 'Regex_Cursor_meth_new_match'

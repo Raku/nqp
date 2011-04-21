@@ -24,8 +24,12 @@ This file brings together the various Regex modules needed for Regex.pbc .
     $P0."ctxsave"()
   ctxsave_done:
 
-    # Set up our UNIT::GLOBAL.
-    # XXX $P1 = ...
+    # Set up our UNIT::GLOBALish.
+    .local pmc KnowHOW, how
+    KnowHOW = get_knowhow
+    $P1 = KnowHOW."new_type"("name"=>"GLOBALish")
+    how = get_how $P1
+    how."compose"($P1)
     .lex 'GLOBALish', $P1
 
     # Capture inner blocks.
