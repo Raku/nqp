@@ -52,7 +52,7 @@ class HLL::Actions {
             @ns.shift;
             $block.namespace(@ns);
             for $outer_ctx.lexpad_full {
-                $block.symbol($_.key, :scope<lexical>);
+                $block.symbol($_.key, :scope<lexical>, :value($_.value));
             }
         }
     }
