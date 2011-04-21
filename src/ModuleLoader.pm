@@ -35,10 +35,3 @@ knowhow ModuleLoader {
         return %settings_loaded{$setting_name};
     }
 }
-
-# XXX For backwards compat while renaming to the above.
-knowhow HLL::SettingManager {
-    method load_setting($setting_name) {
-        ModuleLoader.load_setting($setting_name);
-    }
-}
