@@ -12,6 +12,7 @@ sub MAIN(@ARGS) {
     my @clo := $nqpcomp.commandline_options();
     @clo.push('parsetrace');
     @clo.push('setting=s');
+    @clo.push('setting-path=s');
     
     # Enter the compiler.
     $nqpcomp.command_line(@ARGS, :encoding('utf8'), :transcode('ascii iso-8859-1'));

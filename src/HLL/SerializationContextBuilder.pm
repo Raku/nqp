@@ -148,10 +148,12 @@ class HLL::Compiler::SerializationContextBuilder {
             # Load it immediately, so the compile time info is available.
             # Once it's loaded, set it as the outer context of the code
             # being compiled.
-            %*COMPILING<%?OPTIONS><outer_ctx> := HLL::SettingManager.load_setting($setting_name);
+            my $path := %*COMPILING<%?OPTIONS><setting-path>;
+            %*COMPILING<%?OPTIONS><outer_ctx> := HLL::SettingManager.load_setting(
+                $path ?? "$path/$setting_name" !! $setting_name);
             
             # Do load for pre-compiled situation.
-            my $load_past := PAST::Stmts.new(
+            self.add_event(:deserialize_past(PAST::Stmts.new(
                 PAST::Op.new(
                     :pirop('load_bytecode vs'), 'SettingManager.pbc'
                 ),
@@ -164,8 +166,7 @@ class HLL::Compiler::SerializationContextBuilder {
                            $setting_name
                        )
                 )
-            );
-            self.add_event(:deserialize_past($load_past));
+            )));
         }
     }
     
