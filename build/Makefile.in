@@ -97,7 +97,6 @@ STAGE0 = src/stage0
 STAGE1 = src/stage1
 STAGE2 = src/stage2
 
-SETTING_MANAGER_PBC = SettingManager.pbc
 MODULE_LOADER_PBC = ModuleLoader.pbc
 
 REGEX_PBC       = Regex.pbc
@@ -233,8 +232,7 @@ $(STAGE0_PBCS): $(DYNEXT_TARGET) $(STAGE0_SOURCES)
 	$(PARROT) -o $(STAGE0)/$(NQP_MO_PBC)       src/stage0/NQPMO-s0.pir
 	$(PARROT) -o $(STAGE0)/$(NQP_PBC)          src/stage0/NQP-s0.pir
 	$(PARROT) -o $(STAGE0)/$(CORE_SETTING_PBC) src/stage0/NQPCORE.setting-s0.pir
-	$(PARROT) -o $(STAGE0)/$(SETTING_MANAGER_PBC) src/stage0/SettingManager-s0.pir
-    $(PARROT) -o $(STAGE0)/$(MODULE_LOADER_PBC) src/stage0/SettingManager-s0.pir
+    $(PARROT) -o $(STAGE0)/$(MODULE_LOADER_PBC) src/stage0/ModuleLoader-s0.pir
 
 $(STAGE1): $(STAGE1_PBCS)
 
@@ -259,8 +257,6 @@ $(STAGE1)/$(MODULE_LOADER_PBC): $(STAGE0_PBCS) src/ModuleLoader.pm
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE1)/gen/module_loader.pir \
 	    --setting=NULL src/ModuleLoader.pm
-	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(SETTING_MANAGER_PBC) \
-	    $(STAGE1)/gen/module_loader.pir
 	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(MODULE_LOADER_PBC) \
 	    $(STAGE1)/gen/module_loader.pir
 
@@ -314,8 +310,6 @@ $(STAGE2)/$(MODULE_LOADER_PBC): $(STAGE1_PBCS) src/ModuleLoader.pm
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/gen/module_loader.pir \
 	    --setting=NULL src/ModuleLoader.pm
-	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(SETTING_MANAGER_PBC) \
-	    $(STAGE2)/gen/module_loader.pir
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(MODULE_LOADER_PBC) \
 	    $(STAGE2)/gen/module_loader.pir
 
@@ -347,7 +341,6 @@ $(STAGE2)/$(NQP_PBC): $(STAGE0_PBCS) $(STAGE1)/$(CORE_SETTING_PBC) $(NQP_SOURCES
 	    $(STAGE2)/$(NQP_COMBINED_PIR)
 
 $(ALL_PBCS): $(REGEX_PBC) $(STAGE2_PBCS)
-	$(CP) $(STAGE2)/$(SETTING_MANAGER_PBC) .
 	$(CP) $(STAGE2)/$(MODULE_LOADER_PBC) .
 	$(CP) $(STAGE2)/$(HLL_PBC) .
 	$(CP) $(STAGE2)/$(P6REGEX_PBC) .
@@ -395,7 +388,7 @@ bootstrap-files: $(STAGE2_PBCS) src/stage2/$(CORE_SETTING_NQP)
 	$(PERL) build/gen_bootstrap.pl src/stage2/$(CORE_SETTING_PIR) >src/stage0/NQPCORE.setting-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/stage2/$(P6REGEX_COMBINED_PIR) >src/stage0/P6Regex-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/stage2/$(NQP_MO_PIR) >src/stage0/NQPMO-s0.pir
-	$(PERL) build/gen_bootstrap.pl src/stage2/gen/module_loader.pir >src/stage0/SettingManager-s0.pir
+	$(PERL) build/gen_bootstrap.pl src/stage2/gen/module_loader.pir >src/stage0/ModuleLoader-s0.pir
 
 
 ## testing

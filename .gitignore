@@ -31,7 +31,7 @@ nqp_group.h
 nqp.pbc
 nqpmo.pbc
 NQPCORE.setting.pbc
-SettingManager.pbc
+ModuleLoader.pbc
 src/gen/*.pir
 src/gen/*.nqp
 src/gen/*.pm

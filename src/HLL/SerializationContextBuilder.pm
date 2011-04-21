@@ -155,7 +155,7 @@ class HLL::Compiler::SerializationContextBuilder {
             # Do load for pre-compiled situation.
             self.add_event(:deserialize_past(PAST::Stmts.new(
                 PAST::Op.new(
-                    :pirop('load_bytecode vs'), 'SettingManager.pbc'
+                    :pirop('load_bytecode vs'), 'ModuleLoader.pbc'
                 ),
                 PAST::Op.new(
                     :pasttype('callmethod'), :name('set_outer_ctx'),
@@ -179,7 +179,7 @@ class HLL::Compiler::SerializationContextBuilder {
         # Make sure we do the loading during deserialization.
         self.add_event(:deserialize_past(PAST::Stmts.new(
             PAST::Op.new(
-                :pirop('load_bytecode vs'), 'SettingManager.pbc'
+                :pirop('load_bytecode vs'), 'ModuleLoader.pbc'
             ),
             PAST::Op.new(
                :pasttype('callmethod'), :name('load_module'),

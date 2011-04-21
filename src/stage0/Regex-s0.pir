@@ -43,7 +43,7 @@ This file brings together the various Regex modules needed for Regex.pbc .
     sc = nqp_create_sc "__REGEX_CORE_SC__"
     
     # Load setting.
-    load_bytecode 'SettingManager.pbc'
+    load_bytecode 'ModuleLoader.pbc'
     $P0 = get_hll_global 'ModuleLoader'
     $P1 = $P0.'load_setting'('NQPCORE')
 	
