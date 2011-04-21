@@ -1,6 +1,6 @@
 class NQP::Actions is HLL::Actions {
 
-    our @BLOCK := Q:PIR { %r = new ['ResizablePMCArray'] };
+    our @BLOCK := [];
 
     sub xblock_immediate($xblock) {
         $xblock[1] := block_immediate($xblock[1]);
@@ -1128,13 +1128,7 @@ class NQP::Actions is HLL::Actions {
     method term:sym<pir::op>($/) {
         my $past := $<args> ?? $<args>[0].ast !! PAST::Op.new( :node($/) );
         my $pirop := ~$<op>;
-        $pirop := Q:PIR {
-            $P0 = find_lex '$pirop'
-            $S0 = $P0
-            $P0 = split '__', $S0
-            $S0 = join ' ', $P0
-            %r = box $S0
-        };
+        $pirop := pir::join(' ', pir::split('__', $pirop));
         $past.pirop($pirop);
         $past.pasttype('pirop');
         make $past;
