@@ -309,9 +309,8 @@ class NQP::Actions is HLL::Actions {
     }
 
     method statement_prefix:sym<INIT>($/) {
-        my $init_block := PAST::Block.new(:blocktype('immediate'));
-        $init_block.loadinit.push($<blorst>.ast);
-        make $init_block;
+        @BLOCK[0].push($<blorst>.ast);
+        make PAST::Stmts.new();
     }
 
     method statement_prefix:sym<try>($/) {
@@ -614,6 +613,10 @@ class NQP::Actions is HLL::Actions {
             $past := PAST::Stmts.new();
         }
         elsif $*SCOPE eq 'our' {
+            # Depending on if this was already considered our scoped,
+            # we may or may not have got a node in $var that's set up
+            # right already. We build it here just to be sure.
+            $name := ~$<variable>;
             $past := lexical_package_lookup([$name], $/);
             $past.viviself( vivitype($sigil) );
             $BLOCK.symbol($name, :scope('package') );
