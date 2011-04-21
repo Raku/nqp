@@ -49,6 +49,16 @@ class NQP::Actions is HLL::Actions {
         # Unit needs to have a load-init holding the deserialization or
         # fixup code for this compilation unit.
         $unit.loadinit().push($*SC.to_past());
+        
+        # We'll install our view of GLOBAL as the main one; any other
+        # compilation unit that is using this one will then replace it
+        # with its view later. (This is likely wrong in full-blown Perl 6,
+        # but may well do for NQP.)
+        $unit.loadinit().push(PAST::Op.new(
+            :pasttype('bind'),
+            PAST::Var.new( :name('GLOBAL'), :namespace([]), :scope('package') ),
+            $*SC.get_slot_past_for_object($*PACKAGE)
+        ));
 
         # If our caller wants to know the mainline ctx, provide it here.
         # (CTXSAVE is inherited from HLL::Actions.) Don't do this when
