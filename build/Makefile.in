@@ -318,7 +318,7 @@ $(STAGE2)/$(HLL_PBC): $(STAGE1_PBCS) $(STAGE2)/$(CORE_SETTING_PBC) $(HLL_SOURCES
 	$(PERL) build/gen_how_pm.pl $(HLL_SOURCES) > $(STAGE2)/$(HLL_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(HLL_COMBINED_PIR) \
-	    $(STAGE2)/$(HLL_COMBINED)
+	    --setting-path=$(STAGE2) $(STAGE2)/$(HLL_COMBINED)
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(HLL_PBC) \
 	    $(STAGE2)/$(HLL_COMBINED_PIR)
 
@@ -327,7 +327,7 @@ $(STAGE2)/$(P6REGEX_PBC): $(STAGE1_PBCS) $(STAGE2)/$(CORE_SETTING_PBC) $(P6REGEX
 	$(PERL) build/gen_how_pm.pl $(P6REGEX_SOURCES) > $(STAGE2)/$(P6REGEX_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(P6REGEX_COMBINED_PIR) \
-	    $(STAGE2)/$(P6REGEX_COMBINED)
+	    --setting-path=$(STAGE2) $(STAGE2)/$(P6REGEX_COMBINED)
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(P6REGEX_PBC) \
 	    $(STAGE2)/$(P6REGEX_COMBINED_PIR)
 
@@ -336,7 +336,7 @@ $(STAGE2)/$(NQP_PBC): $(STAGE0_PBCS) $(STAGE1)/$(CORE_SETTING_PBC) $(NQP_SOURCES
 	$(PERL) build/gen_how_pm.pl $(NQP_SOURCES) > $(STAGE2)/$(NQP_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(NQP_COMBINED_PIR) \
-	    $(STAGE2)/$(NQP_COMBINED)
+	    --setting-path=$(STAGE2) $(STAGE2)/$(NQP_COMBINED)
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(NQP_PBC) \
 	    $(STAGE2)/$(NQP_COMBINED_PIR)
 
