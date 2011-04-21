@@ -22,7 +22,7 @@
  * out (since that depends on the representation).
  */
 
-#include "../metamodel/sixmodelobject.h"
+#include "../6model/sixmodelobject.h"
 
 pmclass SixModelObject manual_attrs dynpmc group nqp {
     /* ********************************************** *

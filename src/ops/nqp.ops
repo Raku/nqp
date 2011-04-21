@@ -6,12 +6,12 @@ BEGIN_OPS_PREAMBLE
 #include "parrot/dynext.h"
 
 /* 6modely includes. */
-#include "../metamodel/sixmodelobject.h"
-#include "../metamodel/repr_registry.h"
+#include "../6model/sixmodelobject.h"
+#include "../6model/repr_registry.h"
 #include "../pmc/pmc_dispatchersub.h"
 #include "../pmc/pmc_nqpmultisig.h"
-#include "../metamodel/multi_dispatch.h"
-#include "../metamodel/serialization_context.h"
+#include "../6model/multi_dispatch.h"
+#include "../6model/serialization_context.h"
 #include "pmc_sub.h"
 
 /* Did we do the dynop setup yet?

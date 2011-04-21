@@ -114,11 +114,11 @@ NQP_COMBINED_PIR = gen/NQP.pir
 NQP_PBC          = nqp.pbc
 NQP_EXE          = nqp$(EXE)
 
-NQP_MO_SOURCES = src/metamodel/how/KnowHOWAttribute.pm src/metamodel/how/NQPClassHOW.pm \
-                 src/metamodel/how/NQPNativeHOW.pm src/metamodel/how/NQPAttribute.pm \
-                 src/metamodel/how/NQPConcreteRoleHOW.pm src/metamodel/how/NQPParametricRoleHOW.pm \
-                 src/metamodel/how/RoleToClassApplier.pm src/metamodel/how/RoleToRoleApplier.pm \
-                 src/metamodel/how/NQPModuleHOW.pm
+NQP_MO_SOURCES = src/how/KnowHOWAttribute.pm src/how/NQPClassHOW.pm \
+                 src/how/NQPNativeHOW.pm src/how/NQPAttribute.pm \
+                 src/how/NQPConcreteRoleHOW.pm src/how/NQPParametricRoleHOW.pm \
+                 src/how/RoleToClassApplier.pm src/how/RoleToRoleApplier.pm \
+                 src/how/NQPModuleHOW.pm
 
 NQP_MO_PBC      = nqpmo.pbc
 NQP_MO_PIR      = gen/nqp-mo.pir
@@ -145,25 +145,25 @@ PMC_SOURCES     = $(PMC_DIR)/stable.pmc $(PMC_DIR)/sixmodelobject.pmc \
 
 OPS_SOURCE      = nqp.ops
 
-METAMODEL_SOURCE = src/metamodel/sixmodelobject.h src/metamodel/sixmodelobject.c \
-                   src/metamodel/repr_registry.h src/metamodel/repr_registry.c \
-                   src/metamodel/knowhow_bootstrapper.h src/metamodel/knowhow_bootstrapper.c \
-                   src/metamodel/reprs/KnowHOWREPR.h src/metamodel/reprs/KnowHOWREPR.c \
-                   src/metamodel/reprs/P6opaque.h src/metamodel/reprs/P6opaque.c \
-                   src/metamodel/reprs/P6int.h src/metamodel/reprs/P6int.c \
-                   src/metamodel/reprs/P6str.h src/metamodel/reprs/P6str.c \
-                   src/metamodel/reprs/P6num.h src/metamodel/reprs/P6num.c \
-                   src/metamodel/reprs/HashAttrStore.h src/metamodel/reprs/HashAttrStore.c \
-                   src/metamodel/multi_dispatch.h src/metamodel/multi_dispatch.c \
-                   src/metamodel/storage_spec.h src/metamodel/serialization_context.c \
-                   src/metamodel/serialization_context.h
+METAMODEL_SOURCE = src/6model/sixmodelobject.h src/6model/sixmodelobject.c \
+                   src/6model/repr_registry.h src/6model/repr_registry.c \
+                   src/6model/knowhow_bootstrapper.h src/6model/knowhow_bootstrapper.c \
+                   src/6model/reprs/KnowHOWREPR.h src/6model/reprs/KnowHOWREPR.c \
+                   src/6model/reprs/P6opaque.h src/6model/reprs/P6opaque.c \
+                   src/6model/reprs/P6int.h src/6model/reprs/P6int.c \
+                   src/6model/reprs/P6str.h src/6model/reprs/P6str.c \
+                   src/6model/reprs/P6num.h src/6model/reprs/P6num.c \
+                   src/6model/reprs/HashAttrStore.h src/6model/reprs/HashAttrStore.c \
+                   src/6model/multi_dispatch.h src/6model/multi_dispatch.c \
+                   src/6model/storage_spec.h src/6model/serialization_context.c \
+                   src/6model/serialization_context.h
 
-METAMODEL_OBJS   = ../metamodel/sixmodelobject$(O) ../metamodel/repr_registry$(O) \
-                   ../metamodel/knowhow_bootstrapper$(O) ../metamodel/reprs/KnowHOWREPR$(O) \
-                   ../metamodel/reprs/P6opaque$(O) ../metamodel/reprs/P6int$(O) \
-                   ../metamodel/reprs/P6str$(O) ../metamodel/reprs/P6num$(O) \
-                   ../metamodel/reprs/HashAttrStore$(O) ../metamodel/multi_dispatch$(O) \
-                   ../metamodel/serialization_context$(O)
+METAMODEL_OBJS   = ../6model/sixmodelobject$(O) ../6model/repr_registry$(O) \
+                   ../6model/knowhow_bootstrapper$(O) ../6model/reprs/KnowHOWREPR$(O) \
+                   ../6model/reprs/P6opaque$(O) ../6model/reprs/P6int$(O) \
+                   ../6model/reprs/P6str$(O) ../6model/reprs/P6num$(O) \
+                   ../6model/reprs/HashAttrStore$(O) ../6model/multi_dispatch$(O) \
+                   ../6model/serialization_context$(O)
 
 CLEANUPS = \
   *.manifest \
@@ -368,17 +368,17 @@ $(DYNPMC): $(PMC_SOURCES) $(METAMODEL_SOURCE)
 $(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS_SOURCE) $(DYNPMC)
 	cd $(OPS_DIR) && $(OPS2C) C --dynamic $(OPS_SOURCE)
 	cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(OPS)$(O) $(CINCLUDES) $(CFLAGS) $(OPS).c
-	cd src/metamodel && $(CC) -c @cc_o_out@sixmodelobject$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) sixmodelobject.c
-	cd src/metamodel && $(CC) -c @cc_o_out@repr_registry$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) repr_registry.c
-	cd src/metamodel && $(CC) -c @cc_o_out@knowhow_bootstrapper$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) knowhow_bootstrapper.c
-	cd src/metamodel/reprs && $(CC) -c @cc_o_out@KnowHOWREPR$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) KnowHOWREPR.c
-	cd src/metamodel/reprs && $(CC) -c @cc_o_out@P6opaque$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6opaque.c
-	cd src/metamodel/reprs && $(CC) -c @cc_o_out@P6int$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6int.c
-	cd src/metamodel/reprs && $(CC) -c @cc_o_out@P6str$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6str.c
-	cd src/metamodel/reprs && $(CC) -c @cc_o_out@P6num$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6num.c
-	cd src/metamodel/reprs && $(CC) -c @cc_o_out@HashAttrStore$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) HashAttrStore.c
-	cd src/metamodel && $(CC) -c @cc_o_out@multi_dispatch$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) multi_dispatch.c
-	cd src/metamodel && $(CC) -c @cc_o_out@serialization_context$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) serialization_context.c
+	cd src/6model && $(CC) -c @cc_o_out@sixmodelobject$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) sixmodelobject.c
+	cd src/6model && $(CC) -c @cc_o_out@repr_registry$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) repr_registry.c
+	cd src/6model && $(CC) -c @cc_o_out@knowhow_bootstrapper$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) knowhow_bootstrapper.c
+	cd src/6model/reprs && $(CC) -c @cc_o_out@KnowHOWREPR$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) KnowHOWREPR.c
+	cd src/6model/reprs && $(CC) -c @cc_o_out@P6opaque$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6opaque.c
+	cd src/6model/reprs && $(CC) -c @cc_o_out@P6int$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6int.c
+	cd src/6model/reprs && $(CC) -c @cc_o_out@P6str$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6str.c
+	cd src/6model/reprs && $(CC) -c @cc_o_out@P6num$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6num.c
+	cd src/6model/reprs && $(CC) -c @cc_o_out@HashAttrStore$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) HashAttrStore.c
+	cd src/6model && $(CC) -c @cc_o_out@multi_dispatch$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) multi_dispatch.c
+	cd src/6model && $(CC) -c @cc_o_out@serialization_context$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) serialization_context.c
 	cd $(OPS_DIR) && $(LD) @ld_out@$(OPS)$(LOAD_EXT) $(OPS)$(O) $(METAMODEL_OBJS) $(LINKARGS)
 
 bootstrap-files: $(STAGE2_PBCS) src/stage2/$(CORE_SETTING_NQP)
