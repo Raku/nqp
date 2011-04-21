@@ -253,12 +253,12 @@ $(STAGE1)/$(CORE_SETTING_PBC): $(STAGE0_PBCS) $(STAGE1)/$(NQP_MO_PBC) $(CORE_SET
 	    --setting=NULL $(STAGE1)/$(CORE_SETTING_NQP)
 	$(PARROT) -o $(STAGE1)/$(CORE_SETTING_PBC) $(STAGE1)/$(CORE_SETTING_PIR)
 
-$(STAGE1)/$(SETTING_MANAGER_PBC): $(STAGE0_PBCS) src/HLL/SettingManager.pm
+$(STAGE1)/$(SETTING_MANAGER_PBC): $(STAGE0_PBCS) src/ModuleLoader.pm
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE1)/gen/setting_manager.pir \
-	    --setting=NULL src/HLL/SettingManager.pm
+	    --target=pir --output=$(STAGE1)/gen/module_loader.pir \
+	    --setting=NULL src/ModuleLoader.pm
 	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(SETTING_MANAGER_PBC) \
-	    $(STAGE1)/gen/setting_manager.pir
+	    $(STAGE1)/gen/module_loader.pir
 
 $(STAGE1)/$(HLL_PBC): $(STAGE0_PBCS) $(STAGE1)/$(CORE_SETTING_PBC) $(HLL_SOURCES)
 	$(MKPATH) $(STAGE1)/gen
@@ -306,12 +306,12 @@ $(STAGE2)/$(CORE_SETTING_PBC): $(STAGE1_PBCS) $(STAGE2)/$(NQP_MO_PBC) $(CORE_SET
 	    --setting=NULL $(STAGE2)/$(CORE_SETTING_NQP)
 	$(PARROT) -o $(STAGE2)/$(CORE_SETTING_PBC) $(STAGE2)/$(CORE_SETTING_PIR)
 
-$(STAGE2)/$(SETTING_MANAGER_PBC): $(STAGE1_PBCS) src/HLL/SettingManager.pm
+$(STAGE2)/$(SETTING_MANAGER_PBC): $(STAGE1_PBCS) src/ModuleLoader.pm
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE2)/gen/setting_manager.pir \
-	    --setting=NULL src/HLL/SettingManager.pm
+	    --target=pir --output=$(STAGE2)/gen/module_loader.pir \
+	    --setting=NULL src/ModuleLoader.pm
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(SETTING_MANAGER_PBC) \
-	    $(STAGE2)/gen/setting_manager.pir
+	    $(STAGE2)/gen/module_loader.pir
 
 $(STAGE2)/$(HLL_PBC): $(STAGE1_PBCS) $(STAGE2)/$(CORE_SETTING_PBC) $(HLL_SOURCES)
 	$(MKPATH) $(STAGE2)/gen
@@ -388,7 +388,7 @@ bootstrap-files: $(STAGE2_PBCS) src/stage2/$(CORE_SETTING_NQP)
 	$(PERL) build/gen_bootstrap.pl src/stage2/$(CORE_SETTING_PIR) >src/stage0/NQPCORE.setting-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/stage2/$(P6REGEX_COMBINED_PIR) >src/stage0/P6Regex-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/stage2/$(NQP_MO_PIR) >src/stage0/NQPMO-s0.pir
-	$(PERL) build/gen_bootstrap.pl src/stage2/gen/setting_manager.pir >src/stage0/SettingManager-s0.pir
+	$(PERL) build/gen_bootstrap.pl src/stage2/gen/module_loader.pir >src/stage0/SettingManager-s0.pir
 
 
 ## testing
