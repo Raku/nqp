@@ -47,7 +47,6 @@ knowhow NQPClassHOW {
 
     method BUILD(:$name) {
         $!name := $name;
-        $!default_parent := NQPMu; # XXX Temporary workaround
     }
 
     # Create a new meta-class instance, and then a new type object
