@@ -56,29 +56,14 @@ class HLL::Compiler {
         for @!cmdoptions {
             $!usage := $!usage ~ "    $_\n";
         }
-        
-        # Version.
-        $!version := Q:PIR {
+        my $config_hash_idx := Q:PIR {
             .include 'iglobals.pasm'
-            .include 'cclass.pasm'
-            $S0  = '???'
-            push_eh _handler
-            $P0 = getinterp
-            $P0 = $P0[.IGLOBALS_CONFIG_HASH]
-            $S0  = $P0['git_describe']   # also $I0 = P0['installed'] could be used
-          _handler:
-            pop_eh
-            %r  = box 'This compiler is built with the Parrot Compiler Toolkit, parrot '
-            if $S0 goto _revision_lab
-            %r .= 'version '
-            $S0 = $P0['VERSION']
-            goto _is_version
-          _revision_lab:
-            %r .= 'revision '
-          _is_version:
-            %r .= $S0
-            %r .= '.'
+            %r = box .IGLOBALS_CONFIG_HASH
         };
+        my %config   := pir::getinterp()[$config_hash_idx];
+        my $version  := %config<VERSION>;
+        my $revision := %config<git_describe> // '(unknown)';
+        $!version    := "This compiler is built with NQP, parrot $version, revision $revision";
     }
     
     my sub value_type($value) {
