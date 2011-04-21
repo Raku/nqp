@@ -179,6 +179,11 @@ grammars.
     how."add_attribute"(type_obj, attr)
     attr = NQPAttribute."new"("&!regex" :named("name"))
     how."add_attribute"(type_obj, attr)
+    
+    # Set default parent.
+    .local pmc NQPMu
+    NQPMu = get_hll_global "NQPMu"
+    how."set_default_parent"(type_obj, NQPMu)
 
     # Compose meta-object.
     how."compose"(type_obj)
