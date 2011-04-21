@@ -149,7 +149,7 @@ class HLL::Compiler::SerializationContextBuilder {
             # Once it's loaded, set it as the outer context of the code
             # being compiled.
             my $path := %*COMPILING<%?OPTIONS><setting-path>;
-            %*COMPILING<%?OPTIONS><outer_ctx> := HLL::SettingManager.load_setting(
+            %*COMPILING<%?OPTIONS><outer_ctx> := ModuleLoader.load_setting(
                 $path ?? "$path/$setting_name" !! $setting_name);
             
             # Do load for pre-compiled situation.
@@ -162,7 +162,7 @@ class HLL::Compiler::SerializationContextBuilder {
                        PAST::Var.new( :name('block'), :scope('register') ),
                        PAST::Op.new(
                            :pasttype('callmethod'), :name('load_setting'),
-                           PAST::Var.new( :name('SettingManager'), :namespace('HLL'), :scope('package') ),
+                           PAST::Var.new( :name('ModuleLoader'), :namespace([]), :scope('package') ),
                            $setting_name
                        )
                 )
@@ -174,17 +174,18 @@ class HLL::Compiler::SerializationContextBuilder {
     # during the deserialization.
     method load_module($module_name) {
         # Immediate loading.
-        my $*MAIN_CTX;
-		my $*CTXSAVE := HLL::Compiler;
-        my $path := pir::join('/', pir::split('::', $module_name)) ~ '.pbc';
-        pir::load_bytecode($path);
+        ModuleLoader.load_module($module_name);
         
         # Make sure we do the loading during deserialization.
-        self.add_event(:deserialize_past(
-            PAST::Op.new( :pirop('load_bytecode vs'), $path )));
-        
-        # Return UNIT of the loaded module.
-        $*MAIN_CTX
+        self.add_event(:deserialize_past(PAST::Stmts.new(
+            PAST::Op.new(
+                :pirop('load_bytecode vs'), 'SettingManager.pbc'
+            ),
+            PAST::Op.new(
+               :pasttype('callmethod'), :name('load_module'),
+               PAST::Var.new( :name('ModuleLoader'), :namespace([]), :scope('package') ),
+               $module_name
+            ))));
     }
     
     # Installs a symbol into the package. Does so immediately, and

@@ -1,4 +1,4 @@
-knowhow HLL::SettingManager {
+knowhow ModuleLoader {
     my %settings_loaded;
     
     method ctxsave() {
@@ -8,6 +8,15 @@ knowhow HLL::SettingManager {
                 %r = $P0['context';1]
             };
         $*CTXSAVE := 0;
+    }
+    
+    method load_module($module_name) {
+        # XXX Implement the various bits of GLOBAL merging of the loaded
+        # module. For now we just make sure we capture the mainline, though.
+        my $*CTXSAVE := self;
+        my $*MAIN_CTX;
+        my $path := pir::join('/', pir::split('::', $module_name)) ~ '.pbc';
+        pir::load_bytecode($path);
     }
     
     method load_setting($setting_name) {
@@ -24,5 +33,12 @@ knowhow HLL::SettingManager {
             }
         }
         return %settings_loaded{$setting_name};
+    }
+}
+
+# XXX For backwards compat while renaming to the above.
+knowhow HLL::SettingManager {
+    method load_setting($setting_name) {
+        ModuleLoader.load_setting($setting_name);
     }
 }
