@@ -16,6 +16,7 @@ knowhow NQPClassHOW {
     has @!multi_methods_to_incorporate;
     has @!parents;
     has @!roles;
+    has $!default_parent;
 
     # Vtable and mapping of method names to slots.
     has @!vtable;
@@ -46,6 +47,7 @@ knowhow NQPClassHOW {
 
     method BUILD(:$name) {
         $!name := $name;
+        $!default_parent := NQPMu; # XXX Temporary workaround
     }
 
     # Create a new meta-class instance, and then a new type object
@@ -99,6 +101,10 @@ knowhow NQPClassHOW {
         }
         @!parents[+@!parents] := $parent;
     }
+    
+    method set_default_parent($obj, $parent) {
+        $!default_parent := $parent;
+    }
 
     method add_role($obj, $role) {
         for @!roles {
@@ -133,10 +139,10 @@ knowhow NQPClassHOW {
             RoleToClassApplier.apply($obj, @instantiated_roles);
         }
 
-        # If we have no parents and we're not called NQPMu then add NQPMu as
-        # our parent.
+        # If we have no parents and we're not called NQPMu then add the
+        # default parent.
         if +@!parents == 0 && $!name ne 'NQPMu' {
-            self.add_parent($obj, NQPMu)
+            self.add_parent($obj, $!default_parent)
         }
 
         # Some things we only do if we weren't already composed once, like building
