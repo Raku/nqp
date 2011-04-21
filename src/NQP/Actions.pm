@@ -523,7 +523,7 @@ class NQP::Actions is HLL::Actions {
                 PAST::Var.new( :name('type_obj'), :scope('register') ),
                 ($*PKGDECL eq 'grammar' ??
                     PAST::Var.new( :name('Cursor'), :namespace('Regex'), :scope('package') ) !!
-                    PAST::Var.new( :name('NQPMu'), :namespace([]), :scope('package') ))
+                    $*SC.get_object_sc_ref_past(find_lex('NQPMu')))
             ));
         }
 
@@ -1408,6 +1408,17 @@ class NQP::Actions is HLL::Actions {
             }
         }
         0;
+    }
+    
+    # Finds a lexical that has a known value at compile time.
+    sub find_lex($name) {
+        for @BLOCK {
+            my %sym := $_.symbol($name);
+            if +%sym {
+                return %sym<value>;
+            }
+        }
+        pir::die("Could not find lexical '$name'");
     }
 }
 
