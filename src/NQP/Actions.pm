@@ -1373,12 +1373,11 @@ class NQP::Actions is HLL::Actions {
         elsif is_lexical(@name[0]) {
             my $path := PAST::Var.new( :name(@name.shift()), :scope('lexical') );
             for @name {
-                $path := PAST::Var.new(
-                    :scope('keyed'),
-                    PAST::Op.new( :pirop('get_who PP'), $path ),
-                    ~$_);
+                $path := PAST::Op.new(
+                    :pirop('nqp_get_package_through_who PPs'),
+                    $path, ~$_);
             }
-            $lookup.unshift($path);
+            $lookup.unshift(PAST::Op.new(:pirop('get_who PP'), $path));
         }
         else {
             # XXX Would really want this and then chase the symbol
