@@ -511,16 +511,19 @@ class NQP::Actions is HLL::Actions {
                 PAST::Var.new( :name(~$name), :namespace(@ns), :scope('package') )
             ));
         }
-        elsif $*PKGDECL eq 'grammar' {
+        elsif pir::can($how, 'set_default_parent') {
+            # Set default parent.
             $*PACKAGE-SETUP.push(PAST::Op.new(
-                :pasttype('callmethod'), :name('add_parent'),
+                :pasttype('callmethod'), :name('set_default_parent'),
                 PAST::Op.new(
                     # XXX nqpop get_how
                     :pirop('get_how PP'),
                     PAST::Var.new( :name('type_obj'), :scope('register') )
                 ),
                 PAST::Var.new( :name('type_obj'), :scope('register') ),
-                PAST::Var.new( :name('Cursor'), :namespace('Regex'), :scope('package') )
+                ($*PKGDECL eq 'grammar' ??
+                    PAST::Var.new( :name('Cursor'), :namespace('Regex'), :scope('package') ) !!
+                    PAST::Var.new( :name('NQPMu'), :namespace([]), :scope('package') ))
             ));
         }
 
