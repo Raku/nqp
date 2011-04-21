@@ -1354,46 +1354,43 @@ class NQP::Actions is HLL::Actions {
         # Catch empty names and die helpfully.
         if +@name == 0 { $/.CURSOR.panic("Cannot compile empty name"); }
         
+        # The final lookup will always be just a keyed access to a
+        # symbol table.
+        my $final_name := @name.pop();
+        my $lookup := PAST::Var.new( :scope('keyed'), ~$final_name);
+        
         # If there's no explicit qualification, then look it up in the
         # current package.
-        if +@name == 1 {
-            return PAST::Var.new(
-                :scope('keyed'), :node($/),
-                PAST::Op.new(
-                    :pirop('get_who PP'),
-                    PAST::Var.new( :name('$?PACKAGE'), :scope('lexical') )
-                ),
-                ~@name[0]);
+        if +@name == 0 {
+            $lookup.unshift(PAST::Op.new(
+                :pirop('get_who PP'),
+                PAST::Var.new( :name('$?PACKAGE'), :scope('lexical') )
+            ));
         }
         
         # Otherwise, see if the first part of the name is lexically
-        # known. If not, then we need to look up GLOBAL too.
-        my $lookup;
-        if is_lexical(@name[0]) {
-            $lookup := PAST::Var.new( :name(@name.shift()), :scope('lexical') );
+        # known.
+        elsif is_lexical(@name[0]) {
+            my $path := PAST::Var.new( :name(@name.shift()), :scope('lexical') );
             for @name {
-                $lookup := PAST::Var.new(
+                $path := PAST::Var.new(
                     :scope('keyed'),
-                    PAST::Op.new( :pirop('get_who PP'), $lookup ),
+                    PAST::Op.new( :pirop('get_who PP'), $path ),
                     ~$_);
             }
+            $lookup.unshift($path);
         }
         else {
             # XXX Would really want this and then chase the symbol
             # like above. But not quite ready yet. Can only do the
             # final lookup via the .WHO.
             #$lookup := PAST::Var.new( :name('GLOBAL'), :namespace([]), :scope('package') );
-            my $name := @name.pop();
-            $lookup := PAST::Var.new(
-                :scope('keyed'),
-                PAST::Op.new(
-                    :pirop('get_who PP'),
-                    PAST::Var.new( :name(@name.pop), :namespace(@name), :scope('package') )
-                ),
-                ~$name);
+            $lookup.unshift(PAST::Op.new(
+                :pirop('get_who PP'),
+                PAST::Var.new( :name(@name.pop), :namespace(@name), :scope('package') )
+            ));
         }
         
-        $lookup.node($/);
         return $lookup;
     }
     
