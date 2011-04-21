@@ -1,8 +1,7 @@
-class NQPMu {
+my class NQPMu {
     method CREATE() {
         pir::repr_instance_of__PP(self)
     }
-
 
     method bless(NQPMu:U $self: *%attributes) {
         my $instance := self.CREATE();
@@ -43,5 +42,4 @@ class NQPMu {
     method isa($type) {
         self.HOW.isa(self, $type)
     }
-
 }
