@@ -304,31 +304,37 @@ grammar NQP::Grammar is HLL::Grammar {
 
     proto token package_declarator { <...> }
     token package_declarator:sym<module> {
+        :my $*OUTERPACKAGE := $*PACKAGE;
         :my $*PACKAGE-SETUP := PAST::Stmts.new();
         :my $*PKGDECL := 'module';
         <sym> <package_def> 
     }
     token package_declarator:sym<knowhow> {
+        :my $*OUTERPACKAGE := $*PACKAGE;
         :my $*PACKAGE-SETUP := PAST::Stmts.new();
         :my $*PKGDECL := 'knowhow';
         <sym> <package_def>
     }
     token package_declarator:sym<class> {
+        :my $*OUTERPACKAGE := $*PACKAGE;
         :my $*PACKAGE-SETUP := PAST::Stmts.new();
         :my $*PKGDECL := 'class';
         <sym> <package_def>
     }
     token package_declarator:sym<grammar> {
+        :my $*OUTERPACKAGE := $*PACKAGE;
         :my $*PACKAGE-SETUP := PAST::Stmts.new();
         :my $*PKGDECL := 'grammar';
         <sym> <package_def>
     }
     token package_declarator:sym<role> {
+        :my $*OUTERPACKAGE := $*PACKAGE;
         :my $*PACKAGE-SETUP := PAST::Stmts.new();
         :my $*PKGDECL := 'role';
         <sym> <package_def>
     }
     token package_declarator:sym<native> {
+        :my $*OUTERPACKAGE := $*PACKAGE;
         :my $*PACKAGE-SETUP := PAST::Stmts.new();
         :my $*PKGDECL := 'native';
         <sym> <package_def>

@@ -456,10 +456,10 @@ class NQP::Actions is HLL::Actions {
         # Get the body code.
         my $past := $<block> ?? $<block>.ast !! $<comp_unit>.ast;
         
-        # Install it in the package or lexpad as needed.
+        # Install it in the current package or current lexpad as needed.
         if $*SCOPE eq 'our' || $*SCOPE eq '' {
             $past.namespace( $<name><identifier> );
-            $*SC.install_package_symbol($<name><identifier>, $*PACKAGE);
+            $*SC.install_package_symbol($*OUTERPACKAGE, $<name><identifier>, $*PACKAGE);
         }
         elsif $*SCOPE eq 'my' {
             if +$<name><identifier> != 1 {

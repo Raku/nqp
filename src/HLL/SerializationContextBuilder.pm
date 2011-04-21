@@ -188,15 +188,33 @@ class HLL::Compiler::SerializationContextBuilder {
     
     # Installs a symbol into the package. Does so immediately, and
     # makes sure this happens on deserialization also.
-    method install_package_symbol(@sym, $obj) {
+    method install_package_symbol($package, @sym, $obj) {
         @sym := pir::clone__PP(@sym);
         my $name := ~@sym.pop();
         
-        # XXX Eventually, we'll want to do immediate installation.
-        #pir::get_hll_namespace__PP(@sym).add_var($name, $obj);
-        #pir::say('# installed ' ~ pir::join('::', @sym) ~ "::" ~ $name);
+        # Install symbol immediately.
+        my $target := $package;
+        for @sym {
+            $target := pir::nqp_get_package_through_who__PPs($target, $_);
+        }
+        ($target.WHO){$name} := $obj;
         
-        # Deserialization installation. XXX And fixup for now too.
+        # Add deserialization installation of the symbol.
+        my $path := self.get_slot_past_for_object($package);
+        for @sym {
+            $path := PAST::Op.new(:pirop('nqp_get_package_through_who PPs'), $path, ~$_);
+        }
+        self.add_event(:deserialize_past(PAST::Op.new(
+            :pasttype('bind'),
+            PAST::Var.new(
+                :scope('keyed'),
+                PAST::Op.new( :pirop('get_who PP'), $path ),
+                $name
+            ),
+            self.get_slot_past_for_object($obj)
+        )));
+        
+        # XXX Need legacy namespace installation too, during migration.
         self.add_event(:deserialize_past(
             PAST::Op.new(
                 :pasttype('bind'),
