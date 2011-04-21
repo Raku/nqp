@@ -455,20 +455,8 @@ class NQP::Actions is HLL::Actions {
 
         # Get the body code.
         my $past := $<block> ?? $<block>.ast !! $<comp_unit>.ast;
-        
-        # Install it in the current package or current lexpad as needed.
         if $*SCOPE eq 'our' || $*SCOPE eq '' {
             $past.namespace( $<name><identifier> );
-            $*SC.install_package_symbol($*OUTERPACKAGE, $<name><identifier>, $*PACKAGE);
-        }
-        elsif $*SCOPE eq 'my' {
-            if +$<name><identifier> != 1 {
-                $<name>.CURSOR.panic("A my scoped package cannot have a multi-part name yet");
-            }
-            $*SC.install_lexical_symbol(@BLOCK[0], $<name><identifier>[0], $*PACKAGE);
-        }
-        else {
-            $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
         }
         
         # Prefix the class initialization with initial setup.
@@ -1131,6 +1119,8 @@ class NQP::Actions is HLL::Actions {
             my $name := @ns.pop;
             @ns.shift if @ns && @ns[0] eq 'GLOBAL';
             $var := PAST::Var.new( :name(~$name), :namespace(@ns), :scope('package') );
+            # XXX Not quite ready for this yet.
+            #$var := lexical_package_lookup(@ns, $/);
         }
         
         # If it's a call, add the arguments.

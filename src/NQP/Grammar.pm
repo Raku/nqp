@@ -356,6 +356,23 @@ grammar NQP::Grammar is HLL::Grammar {
                 %args<repr> := ~$<repr>[0]<quote_delimited><quote_atom>[0];
             }
             $*PACKAGE := $*SC.pkg_create_mo(%*HOW{$*PKGDECL}, |%args);
+            
+            # Install it in the current package or current lexpad as needed.
+            if $*SCOPE eq 'our' || $*SCOPE eq '' {
+                $*SC.install_package_symbol($*OUTERPACKAGE, $<name><identifier>, $*PACKAGE);
+                if +$<name><identifier> == 1 {
+                    $*SC.install_lexical_symbol(@NQP::Actions::BLOCK[0], $<name><identifier>[0], $*PACKAGE);
+                }
+            }
+            elsif $*SCOPE eq 'my' {
+                if +$<name><identifier> != 1 {
+                    $<name>.CURSOR.panic("A my scoped package cannot have a multi-part name yet");
+                }
+                $*SC.install_lexical_symbol(@NQP::Actions::BLOCK[0], $<name><identifier>[0], $*PACKAGE);
+            }
+            else {
+                $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
+            }
         }
         
         [ 'is' <parent=.name> ]?
