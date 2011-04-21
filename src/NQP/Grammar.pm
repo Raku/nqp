@@ -113,6 +113,7 @@ grammar NQP::Grammar is HLL::Grammar {
         <.outerctx>
         
         :my $*PACKAGE;
+        :my $*GLOBALish;
         <.GLOBALish>
         
         <statementlist>
