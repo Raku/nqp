@@ -188,6 +188,7 @@ class NQP::Actions is HLL::Actions {
         $*PACKAGE := $*SC.pkg_create_mo(KnowHOW, :name('GLOBALish'));
         $*PACKAGE.HOW.compose($*PACKAGE);
         $*SC.install_lexical_symbol(@BLOCK[0], 'GLOBALish', $*PACKAGE);
+        $*SC.install_lexical_symbol(@BLOCK[0], '$?PACKAGE', $*PACKAGE);
     }
 
     method you_are_here($/) {
