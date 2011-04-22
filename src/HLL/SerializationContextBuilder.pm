@@ -359,7 +359,6 @@ class HLL::Compiler::SerializationContextBuilder {
                     PAST::Op.new( :pirop('get_class Ps'), 'LexPad' ),
                     PAST::Op.new( :pirop('get_class Ps'), 'NQPLexPad' )
                 ),
-                PAST::Op.new( :pirop('load_bytecode vs'), 'nqpmo.pbc' ),
                 PAST::Op.new(
                     :pasttype('bind'),
                     PAST::Var.new( :name('cur_sc'), :scope('register'), :isdecl(1) ),
