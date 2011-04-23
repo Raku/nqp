@@ -55,6 +55,9 @@ knowhow ModuleLoader {
             if !%known_symbols{$sym} {
                 ($target.WHO){$sym} := $_.value;
             }
+            elsif ($target.WHO){$sym} =:= $_.value {
+                # No problemo; a symbol can't conflict with itself.
+            }
             else {
                 pir::die("Merging GLOBAL symbols failed: duplicate definition of symbol $sym");
             }
