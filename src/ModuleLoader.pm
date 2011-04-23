@@ -10,9 +10,8 @@ knowhow ModuleLoader {
         $*CTXSAVE := 0;
     }
     
-    method load_module($module_name) {
-        # XXX Implement the various bits of GLOBAL merging of the loaded
-        # module. For now we just make sure we capture the mainline, though.
+    method load_module($module_name, $cur_GLOBALish?) {
+        # Load the module and capture its mainline.
         my $*CTXSAVE := self;
         my $*MAIN_CTX;
         my $path := pir::join('/', pir::split('::', $module_name)) ~ '.pbc';

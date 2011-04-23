@@ -172,9 +172,9 @@ class HLL::Compiler::SerializationContextBuilder {
     
     # Loads a module immediately, and also makes sure we load it
     # during the deserialization.
-    method load_module($module_name) {
+    method load_module($module_name, $cur_GLOBALish) {
         # Immediate loading.
-        ModuleLoader.load_module($module_name);
+        ModuleLoader.load_module($module_name, $cur_GLOBALish);
         
         # Make sure we do the loading during deserialization.
         self.add_event(:deserialize_past(PAST::Stmts.new(
@@ -184,7 +184,8 @@ class HLL::Compiler::SerializationContextBuilder {
             PAST::Op.new(
                :pasttype('callmethod'), :name('load_module'),
                PAST::Var.new( :name('ModuleLoader'), :namespace([]), :scope('package') ),
-               $module_name
+               $module_name,
+               self.get_slot_past_for_object($cur_GLOBALish)
             ))));
     }
     

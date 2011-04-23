@@ -211,7 +211,7 @@ class NQP::Actions is HLL::Actions {
     ## Statement control
 
     method statement_control:sym<use>($/) {
-        $*SC.load_module(~$<name>);
+        $*SC.load_module(~$<name>, $*GLOBALish);
         make PAST::Stmts.new();
     }
 
