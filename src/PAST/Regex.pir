@@ -16,6 +16,7 @@ for regular expressions.
 .namespace ['PAST';'Regex']
 
 .sub '' :init :load
+    load_bytecode 'P6object.pbc'
     load_bytecode 'PCT/PAST.pbc'
     .local pmc p6meta
     p6meta = get_hll_global 'P6metaclass'

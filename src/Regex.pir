@@ -37,6 +37,8 @@ This file brings together the various Regex modules needed for Regex.pbc .
     capture_lex $P2
     .const 'Sub' $P3 = 'Match_Load'
     capture_lex $P3
+    .const 'Sub' $P4 = 'Method_Load'
+    capture_lex $P4
 .end
 
 .sub '' :load :init :outer('Regex_Outer')
