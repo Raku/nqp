@@ -28,7 +28,7 @@ This file implements Match objects for the regex engine.
     .local pmc type_obj, how, NQPClassHOW
     get_hll_global NQPClassHOW, "NQPClassHOW"
     type_obj = NQPClassHOW."new_type"("Match" :named("name"))
-    RegexWHO["MATCH"] = type_obj
+    RegexWHO["Match"] = type_obj
     set_global "$?CLASS", type_obj
     how = get_how type_obj
     
