@@ -1,3 +1,6 @@
+# This adds to a Parrot PMC, so need to switch to that HLL for this
+# file.
+.HLL 'parrot'
 .namespace ['CallContext']
 .sub 'lexpad_full' :method
     .local pmc ctx, lexall, lexpad, lexpad_it
@@ -23,4 +26,4 @@
   context_done:
     .return (lexall)
 .end
-
+.HLL 'nqp'

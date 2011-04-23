@@ -13,15 +13,12 @@ grammars.
 
 =cut
 
-.loadlib "nqp_group"
-.loadlib "nqp_ops"
-
 .include 'cclass.pasm'
 .include 'src/Regex/constants.pir'
 
 .namespace ['Regex';'Cursor']
 
-.sub '' :anon :load :init
+.sub '' :anon :load :init :outer('Regex_Outer') :subid('Cursor_Load')
     # Set up some constants/generation tracking.
     $P0 = box 0
     set_global '$!generation', $P0
@@ -31,14 +28,23 @@ grammars.
     $P0 = new ['Boolean']
     assign $P0, 1
     set_global '$!TRUE', $P0
+    
+    # Create Regex outer package.
+    .local pmc Regex, RegexWHO
+    $P0 = get_knowhow
+    Regex = $P0."new_type"("name"=>"Regex")
+    RegexWHO = get_who Regex
 
     # Build meta-object and store it in the namespace.
     .local pmc type_obj, how, NQPClassHOW
     get_hll_global NQPClassHOW, "NQPClassHOW"
     type_obj = NQPClassHOW."new_type"("Cursor" :named("name"))
-    how = get_how type_obj
-    set_hll_global ["Regex"], "Cursor", type_obj
+    RegexWHO["Cursor"] = type_obj
     set_global "$?CLASS", type_obj
+    how = get_how type_obj
+    
+    # XXXNS Old namespace handling installation, during migration to new.
+    set_hll_global ["Regex"], "Cursor", type_obj
 
     # Add all methods.
     .const 'Sub' $P10 = 'Regex_Cursor_meth_new_match'
@@ -152,7 +158,7 @@ grammars.
     # Add attributes.
     .local pmc NQPAttribute, int_type, attr
     NQPAttribute = get_hll_global "NQPAttribute"
-    int_type = get_hll_global "int"
+    int_type = find_lex "int"
     attr = NQPAttribute."new"("$!target" :named("name"))
     how."add_attribute"(type_obj, attr)
     attr = NQPAttribute."new"("$!from" :named("name"), int_type :named('type'))
@@ -173,6 +179,11 @@ grammars.
     how."add_attribute"(type_obj, attr)
     attr = NQPAttribute."new"("&!regex" :named("name"))
     how."add_attribute"(type_obj, attr)
+    
+    # Set default parent.
+    .local pmc NQPMu
+    NQPMu = find_lex "NQPMu"
+    how."set_default_parent"(type_obj, NQPMu)
 
     # Compose meta-object.
     how."compose"(type_obj)

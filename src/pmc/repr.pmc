@@ -1,4 +1,4 @@
-#include "../metamodel/rakudoobject.h"
+#include "../6model/sixmodelobject.h"
 
 /* A representation is responsible for object layout. Representations
  * all fill out a REPR struct and maybe have one of their own with some

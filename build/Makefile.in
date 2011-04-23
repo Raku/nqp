@@ -1,4 +1,4 @@
-# Copyright (C) 2006-2009, The Perl Foundation.
+# Copyright (C) 2006-2011, The Perl Foundation.
 # $Id$
 
 PARROT_ARGS      =
@@ -57,84 +57,80 @@ REGEX_SOURCES = \
   src/Regex/Dumper.pir \
   src/PAST/Regex.pir \
   src/PAST/Compiler-Regex.pir \
+  src/cheats/parrot-callcontext.pir \
 
 HLL_SOURCES = \
-  src/HLL.pir \
-  src/cheats/hll-compiler.pir \
-  src/cheats/hll-grammar.pir \
-  src/cheats/parrot-callcontext.pir \
   src/HLL/Grammar.pm \
   src/HLL/Actions.pm \
   src/HLL/Compiler.pm \
   src/HLL/CommandLine.pm \
+  src/HLL/SerializationContextBuilder.pm \
 
 P6REGEX_SOURCES = \
-  src/Regex/P6Regex.pir \
   src/Regex/P6Regex/Grammar.pm \
   src/Regex/P6Regex/Actions.pm \
   src/Regex/P6Regex/Compiler.pm \
-
-HLLGRAMMAR_SOURCES = \
-  src/HLL/Grammar.pm \
-  src/HLL/Actions.pm \
-  src/cheats/hll-grammar.pir \
 
 NQP_SOURCES = \
   src/NQP/Grammar.pm \
   src/NQP/Actions.pm \
   src/NQP/Compiler.pm \
-  src/NQP/Compiler.pir \
-  src/cheats/nqp-builtins.pir \
 
-SETTING_SOURCES = \
-  src/setting/ResizablePMCArray.pm \
-  src/setting/Hash.pm \
-  src/setting/Regex.pm \
-  src/setting/IO.pm \
+CORE_SETTING_SOURCES = \
+  src/core/NativeTypes.pm \
+  src/core/NQPMu.pm \
+  src/core/IO.pm \
+  src/core/Regex.pm \
+  src/core/testing.pm \
 
-SETTING_NQP = src/gen/nqp-setting.nqp
-SETTING_PIR = src/gen/nqp-setting.pir
-SETTING_PBC = nqp-setting.pbc
-
+CORE_SETTING_NQP = NQPCORE.setting
+  
 STAGE0_SOURCES = \
   src/stage0/Regex-s0.pir \
   src/stage0/HLL-s0.pir \
   src/stage0/P6Regex-s0.pir \
-  src/stage0/NQP-s0.pir
+  src/stage0/NQPMO-s0.pir \
+  src/stage0/NQP-s0.pir \
+  src/stage0/NQPCORE.setting-s0.pir \
 
 STAGE0 = src/stage0
 STAGE1 = src/stage1
 STAGE2 = src/stage2
 
+MODULE_LOADER_PBC = ModuleLoader.pbc
+
 REGEX_PBC       = Regex.pbc
 
-HLL_PBC         = HLL.pbc
-HLLGRAMMAR_G    = gen/hllgrammar-grammar.pir
-HLLGRAMMAR_A    = gen/hllgrammar-actions.pir
+HLL_PBC          = HLL.pbc
+HLL_COMBINED     = gen/HLL.pm
+HLL_COMBINED_PIR = gen/HLL.pir
 
-HLLCOMPILER_PIR = gen/hllcompiler.pir
-HLLCOMMANDLINE_PIR = gen/hllcommandline.pir
+P6REGEX_PBC          = P6Regex.pbc
+P6REGEX_COMBINED     = gen/P6Regex.pm
+P6REGEX_COMBINED_PIR = gen/P6Regex.pir
 
-P6REGEX_PBC     = P6Regex.pbc
-P6REGEX_G       = gen/p6regex-grammar.pir
-P6REGEX_A       = gen/p6regex-actions.pir
-P6REGEX_C       = gen/p6regex-compiler.pir
+NQP_COMBINED     = gen/NQP.pm
+NQP_COMBINED_PIR = gen/NQP.pir
+NQP_PBC          = nqp.pbc
+NQP_EXE          = nqp$(EXE)
 
-P6GRAMMAR_PBC   = P6Grammar.pbc
-P6GRAMMAR_G     = gen/p6grammar-grammar.pir
-P6GRAMMAR_A     = gen/p6grammar-actions.pir
+NQP_MO_SOURCES = src/how/KnowHOWAttribute.pm src/how/NQPClassHOW.pm \
+                 src/how/NQPNativeHOW.pm src/how/NQPAttribute.pm \
+                 src/how/NQPConcreteRoleHOW.pm src/how/NQPParametricRoleHOW.pm \
+                 src/how/RoleToClassApplier.pm src/how/RoleToRoleApplier.pm \
+                 src/how/NQPModuleHOW.pm
 
-NQP_PBC         = nqp.pbc
-NQP_HOW         = gen/nqp-how.pir
-NQP_G           = gen/nqp-grammar.pir
-NQP_A           = gen/nqp-actions.pir
-NQP_C           = gen/nqp-compiler.pir
-NQP_EXE         = nqp$(EXE)
+NQP_MO_PBC      = nqpmo.pbc
+NQP_MO_PIR      = gen/nqp-mo.pir
+NQP_MO_COMBINED = gen/nqp-mo.pm
 
-STAGE0_PBCS     = $(STAGE0)/$(HLL_PBC) $(STAGE0)/$(P6REGEX_PBC) $(STAGE0)/$(NQP_PBC) $(STAGE0)/$(REGEX_PBC)
-STAGE1_PBCS     = $(STAGE1)/$(HLL_PBC) $(STAGE1)/$(P6REGEX_PBC) $(STAGE1)/$(NQP_PBC) $(REGEX_PBC)
-STAGE2_PBCS     = $(STAGE2)/$(HLL_PBC) $(STAGE2)/$(P6REGEX_PBC) $(STAGE2)/$(NQP_PBC) $(REGEX_PBC)
-ALL_PBCS        = $(HLL_PBC) $(P6REGEX_PBC) $(NQP_PBC)
+CORE_SETTING_PBC = NQPCORE.setting.pbc
+CORE_SETTING_PIR = gen/NQPCORE.setting.pir
+
+STAGE0_PBCS     = $(STAGE0)/$(HLL_PBC) $(STAGE0)/$(P6REGEX_PBC) $(STAGE0)/$(NQP_PBC) $(STAGE0)/$(REGEX_PBC) $(STAGE0)/$(CORE_SETTING_PBC) $(STAGE0)/$(MODULE_LOADER_PBC)
+STAGE1_PBCS     = $(STAGE1)/$(HLL_PBC) $(STAGE1)/$(P6REGEX_PBC) $(STAGE1)/$(NQP_PBC) $(STAGE1)/$(REGEX_PBC) $(STAGE1)/$(CORE_SETTING_PBC) $(STAGE1)/$(MODULE_LOADER_PBC) $(STAGE1)/$(NQP_MO_PBC)
+STAGE2_PBCS     = $(STAGE2)/$(HLL_PBC) $(STAGE2)/$(P6REGEX_PBC) $(STAGE2)/$(NQP_PBC) $(STAGE2)/$(REGEX_PBC) $(STAGE2)/$(CORE_SETTING_PBC) $(STAGE2)/$(MODULE_LOADER_PBC) $(STAGE2)/$(NQP_MO_PBC)
+ALL_PBCS        = $(HLL_PBC) $(P6REGEX_PBC) $(NQP_PBC) $(CORE_SETTING_PBC) $(MODULE_LOADER_PBC) $(REGEX_PBC)
 
 GROUP           = nqp_group
 OPS             = nqp_ops
@@ -142,38 +138,32 @@ DYNEXT_TARGET   = $(DYNEXT_DIR)/$(GROUP)$(LOAD_EXT)
 DYNPMC          = $(PMC_DIR)/$(GROUP)$(LOAD_EXT)
 DYNOPS          = $(OPS_DIR)/$(OPS)$(LOAD_EXT)
 
-PMC_SOURCES     = $(PMC_DIR)/stable.pmc $(PMC_DIR)/rakudoobject.pmc \
+PMC_SOURCES     = $(PMC_DIR)/stable.pmc $(PMC_DIR)/sixmodelobject.pmc \
                   $(PMC_DIR)/repr.pmc $(PMC_DIR)/dispatchersub.pmc \
-                  $(PMC_DIR)/nqpmultisig.pmc
+                  $(PMC_DIR)/nqpmultisig.pmc $(PMC_DIR)/nqplexinfo.pmc \
+                  $(PMC_DIR)/nqplexpad.pmc $(PMC_DIR)/serializationcontext.pmc 
 
 OPS_SOURCE      = nqp.ops
 
-METAMODEL_SOURCE = src/metamodel/rakudoobject.h src/metamodel/rakudoobject.c \
-                   src/metamodel/repr_registry.h src/metamodel/repr_registry.c \
-                   src/metamodel/knowhow_bootstrapper.h src/metamodel/knowhow_bootstrapper.c \
-                   src/metamodel/reprs/KnowHOWREPR.h src/metamodel/reprs/KnowHOWREPR.c \
-                   src/metamodel/reprs/P6opaque.h src/metamodel/reprs/P6opaque.c \
-                   src/metamodel/reprs/P6int.h src/metamodel/reprs/P6int.c \
-                   src/metamodel/reprs/P6str.h src/metamodel/reprs/P6str.c \
-                   src/metamodel/reprs/P6num.h src/metamodel/reprs/P6num.c \
-                   src/metamodel/multi_dispatch.h src/metamodel/multi_dispatch.c \
-                   src/metamodel/storage_spec.h
+METAMODEL_SOURCE = src/6model/sixmodelobject.h src/6model/sixmodelobject.c \
+                   src/6model/repr_registry.h src/6model/repr_registry.c \
+                   src/6model/knowhow_bootstrapper.h src/6model/knowhow_bootstrapper.c \
+                   src/6model/reprs/KnowHOWREPR.h src/6model/reprs/KnowHOWREPR.c \
+                   src/6model/reprs/P6opaque.h src/6model/reprs/P6opaque.c \
+                   src/6model/reprs/P6int.h src/6model/reprs/P6int.c \
+                   src/6model/reprs/P6str.h src/6model/reprs/P6str.c \
+                   src/6model/reprs/P6num.h src/6model/reprs/P6num.c \
+                   src/6model/reprs/HashAttrStore.h src/6model/reprs/HashAttrStore.c \
+                   src/6model/multi_dispatch.h src/6model/multi_dispatch.c \
+                   src/6model/storage_spec.h src/6model/serialization_context.c \
+                   src/6model/serialization_context.h
 
-METAMODEL_OBJS   = ../metamodel/rakudoobject$(O) ../metamodel/repr_registry$(O) \
-                   ../metamodel/knowhow_bootstrapper$(O) ../metamodel/reprs/KnowHOWREPR$(O) \
-                   ../metamodel/reprs/P6opaque$(O) ../metamodel/reprs/P6int$(O) \
-                   ../metamodel/reprs/P6str$(O) ../metamodel/reprs/P6num$(O) \
-                   ../metamodel/multi_dispatch$(O)
-
-HOW_SOURCES  = src/metamodel/how/KnowHOWAttribute.pm src/metamodel/how/NQPClassHOW.pm \
-               src/metamodel/how/NQPNativeHOW.pm src/metamodel/how/NQPAttribute.pm \
-               src/metamodel/how/NQPConcreteRoleHOW.pm src/metamodel/how/NQPParametricRoleHOW.pm \
-               src/metamodel/how/RoleToClassApplier.pm src/metamodel/how/RoleToRoleApplier.pm \
-               src/metamodel/how/NQPModuleHOW.pm src/metamodel/how/NQPMu.pm \
-               src/metamodel/how/NativeTypes.pm
-
-HOW_COMBINED = src/gen/how.pm
-
+METAMODEL_OBJS   = ../6model/sixmodelobject$(O) ../6model/repr_registry$(O) \
+                   ../6model/knowhow_bootstrapper$(O) ../6model/reprs/KnowHOWREPR$(O) \
+                   ../6model/reprs/P6opaque$(O) ../6model/reprs/P6int$(O) \
+                   ../6model/reprs/P6str$(O) ../6model/reprs/P6num$(O) \
+                   ../6model/reprs/HashAttrStore$(O) ../6model/multi_dispatch$(O) \
+                   ../6model/serialization_context$(O)
 
 CLEANUPS = \
   *.manifest \
@@ -182,8 +172,6 @@ CLEANUPS = \
   $(HLL_PBC) \
   $(P6REGEX_PBC) \
   P6Regex$(EXE) \
-  $(P6GRAMMAR_PBC) \
-  P6Grammar$(EXE) \
   nqp.pbc \
   nqp$(EXE) \
   *.c\
@@ -195,6 +183,7 @@ CLEANUPS = \
   src/stage2/*.pbc \
   src/gen/*.pir \
   src/gen/*.nqp \
+  src/gen/*.pm \
   $(PMC_DIR)/pmc_*.h \
   $(PMC_DIR)/*.c \
   $(PMC_DIR)/*.dump \
@@ -212,14 +201,15 @@ CLEANUPS = \
   $(OPS_DIR)/*$(LOAD_EXT) \
   $(DYNEXT_DIR)/*$(LOAD_EXT) \
 
-all: $(NQP_EXE) $(SETTING_PBC)
+all: $(NQP_EXE)
 
 install: all
-	$(MKPATH)              $(DESTDIR)$(NQP_LANG_DIR)
-	$(CP)  nqp.pbc         $(DESTDIR)$(NQP_LANG_DIR)/nqprx.pbc
+	$(MKPATH)               $(DESTDIR)$(NQP_LANG_DIR)
+	$(CP)  nqp.pbc          $(DESTDIR)$(NQP_LANG_DIR)/nqprx.pbc
 	$(CP)  $(P6REGEX_PBC)  $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(P6REGEX_PBC)
 	$(CP)  $(REGEX_PBC)    $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(REGEX_PBC)
 	$(CP)  $(HLL_PBC)      $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(HLL_PBC)
+	$(CP)  $(CORE_SETTING_PBC) $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(CORE_SETTING_PBC)
 	$(MKPATH)              $(DESTDIR)$(PARROT_BIN_DIR)
 	$(CP)  $(NQP_EXE)      $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
 	$(CHMOD)  755          $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
@@ -230,134 +220,140 @@ stage0: $(STAGE0)
 stage1: $(STAGE1)
 stage2: $(STAGE2)
 
-$(REGEX_PBC): $(DYNEXT_TARGET) $(REGEX_SOURCES)
-	$(PARROT) -o $(REGEX_PBC) $(REGEX_SOURCES)
-
 $(STAGE0): $(STAGE0_PBCS)
 
 $(STAGE0_PBCS): $(DYNEXT_TARGET) $(STAGE0_SOURCES)
-	$(PARROT) -o $(STAGE0)/$(REGEX_PBC)    src/stage0/Regex-s0.pir
-	$(PARROT) -o $(STAGE0)/$(HLL_PBC)      src/stage0/HLL-s0.pir
-	$(PARROT) -o $(STAGE0)/$(P6REGEX_PBC)  src/stage0/P6Regex-s0.pir
-	$(PARROT) -o $(STAGE0)/$(NQP_PBC)      src/stage0/NQP-s0.pir
+	$(PARROT) -o $(STAGE0)/$(REGEX_PBC)        src/stage0/Regex-s0.pir
+	$(PARROT) -o $(STAGE0)/$(HLL_PBC)          src/stage0/HLL-s0.pir
+	$(PARROT) -o $(STAGE0)/$(P6REGEX_PBC)      src/stage0/P6Regex-s0.pir
+	$(PARROT) -o $(STAGE0)/$(NQP_MO_PBC)       src/stage0/NQPMO-s0.pir
+	$(PARROT) -o $(STAGE0)/$(NQP_PBC)          src/stage0/NQP-s0.pir
+	$(PARROT) -o $(STAGE0)/$(CORE_SETTING_PBC) src/stage0/NQPCORE.setting-s0.pir
+	$(PARROT) -o $(STAGE0)/$(MODULE_LOADER_PBC) src/stage0/ModuleLoader-s0.pir
 
 $(STAGE1): $(STAGE1_PBCS)
 
-$(STAGE1)/$(HLL_PBC): $(STAGE0_PBCS) $(HLL_SOURCES)
+$(STAGE1)/$(NQP_MO_PBC): $(STAGE0_PBCS) $(NQP_MO_SOURCES)
 	$(MKPATH) $(STAGE1)/gen
+	$(PERL) build/gen_how_pm.pl $(NQP_MO_SOURCES) > $(STAGE1)/$(NQP_MO_COMBINED)
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE1)/$(HLLGRAMMAR_G) \
-	    src/HLL/Grammar.pm
+	    --target=pir --output=$(STAGE1)/$(NQP_MO_PIR) \
+	    --setting=NULL $(STAGE1)/$(NQP_MO_COMBINED)
+	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(NQP_MO_PBC) \
+	    $(STAGE1)/$(NQP_MO_PIR)
+
+$(STAGE1)/$(MODULE_LOADER_PBC): $(STAGE0_PBCS) src/ModuleLoader.pm
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE1)/$(HLLGRAMMAR_A) \
-	    src/HLL/Actions.pm
+	    --target=pir --output=$(STAGE1)/gen/module_loader.pir \
+	    --setting=NULL src/ModuleLoader.pm
+	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(MODULE_LOADER_PBC) \
+	    $(STAGE1)/gen/module_loader.pir
+
+$(STAGE1)/$(CORE_SETTING_PBC): $(STAGE0_PBCS) $(STAGE1)/$(NQP_MO_PBC) $(STAGE1)/$(MODULE_LOADER_PBC) $(CORE_SETTING_SOURCES)
+	$(MKPATH) $(STAGE1)/gen
+	$(PERL) build/gen_setting.pl $(CORE_SETTING_SOURCES) > $(STAGE1)/$(CORE_SETTING_NQP)
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE1)/$(HLLCOMPILER_PIR) \
-	    src/HLL/Compiler.pm
+	    --target=pir --output=$(STAGE1)/$(CORE_SETTING_PIR) \
+	    --setting=NULL $(STAGE1)/$(CORE_SETTING_NQP)
+	$(PARROT) -o $(STAGE1)/$(CORE_SETTING_PBC) $(STAGE1)/$(CORE_SETTING_PIR)
+        
+$(STAGE1)/$(REGEX_PBC): $(DYNEXT_TARGET) $(REGEX_SOURCES) $(STAGE1)/$(CORE_SETTING_PBC)
+	$(PARROT) -o $(STAGE1)/$(REGEX_PBC) $(REGEX_SOURCES)
+
+$(STAGE1)/$(HLL_PBC): $(STAGE0_PBCS) $(STAGE1)/$(REGEX_PBC) $(STAGE1)/$(CORE_SETTING_PBC) $(HLL_SOURCES)
+	$(MKPATH) $(STAGE1)/gen
+	$(PERL) build/gen_how_pm.pl $(HLL_SOURCES) > $(STAGE1)/$(HLL_COMBINED)
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE1)/$(HLLCOMMANDLINE_PIR) \
-	    src/HLL/CommandLine.pm
+	    --target=pir --output=$(STAGE1)/$(HLL_COMBINED_PIR) \
+	    --setting-path=$(STAGE1) $(STAGE1)/$(HLL_COMBINED)
 	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(HLL_PBC) \
-	    src/HLL.pir
+	    $(STAGE1)/$(HLL_COMBINED_PIR)
 
-$(STAGE1)/$(P6REGEX_PBC): $(STAGE0_PBCS) $(P6REGEX_SOURCES)
+$(STAGE1)/$(P6REGEX_PBC): $(STAGE0_PBCS) $(STAGE1)/$(HLL_PBC) $(STAGE1)/$(CORE_SETTING_PBC) $(P6REGEX_SOURCES)
 	$(MKPATH) $(STAGE1)/gen
+	$(PERL) build/gen_how_pm.pl $(P6REGEX_SOURCES) > $(STAGE1)/$(P6REGEX_COMBINED)
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE1)/$(P6REGEX_G) \
-	    src/Regex/P6Regex/Grammar.pm
-	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE1)/$(P6REGEX_A) \
-	    src/Regex/P6Regex/Actions.pm
-	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE1)/$(P6REGEX_C) \
-	    src/Regex/P6Regex/Compiler.pm
+	    --target=pir --output=$(STAGE1)/$(P6REGEX_COMBINED_PIR) \
+	    --setting-path=$(STAGE1) $(STAGE1)/$(P6REGEX_COMBINED)
 	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(P6REGEX_PBC) \
-	    src/Regex/P6Regex.pir
+	    $(STAGE1)/$(P6REGEX_COMBINED_PIR)
 
-$(HOW_COMBINED): $(HOW_SOURCES)
-	$(PERL) build/gen_how_pm.pl $(HOW_SOURCES) > $(HOW_COMBINED)
-
-$(STAGE1)/$(NQP_PBC): $(STAGE0_PBCS) $(NQP_SOURCES) $(HOW_COMBINED)
+$(STAGE1)/$(NQP_PBC): $(STAGE0_PBCS) $(STAGE1)/$(P6REGEX_PBC) $(STAGE1)/$(CORE_SETTING_PBC) $(NQP_SOURCES)
 	$(MKPATH) $(STAGE1)/gen
+	$(PERL) build/gen_how_pm.pl $(NQP_SOURCES) > $(STAGE1)/$(NQP_COMBINED)
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE1)/$(NQP_HOW) \
-	    $(HOW_COMBINED)
-	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE1)/$(NQP_G) \
-	    src/NQP/Grammar.pm
-	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE1)/$(NQP_A) \
-	    src/NQP/Actions.pm
-	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE1)/$(NQP_C) \
-	    src/NQP/Compiler.pm
+	    --target=pir --output=$(STAGE1)/$(NQP_COMBINED_PIR) \
+	    --setting-path=$(STAGE1) $(STAGE1)/$(NQP_COMBINED)
 	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(NQP_PBC) \
-	    src/NQP/Compiler.pir
+	    $(STAGE1)/$(NQP_COMBINED_PIR)
 
 $(STAGE2): $(STAGE2_PBCS)
 
-$(STAGE2)/$(HLL_PBC): $(STAGE1_PBCS) $(HLL_SOURCES)
+$(STAGE2)/$(NQP_MO_PBC): $(STAGE1_PBCS) $(NQP_MO_SOURCES)
 	$(MKPATH) $(STAGE2)/gen
+	$(PERL) build/gen_how_pm.pl $(NQP_MO_SOURCES) > $(STAGE2)/$(NQP_MO_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE2)/$(HLLGRAMMAR_G) \
-	    src/HLL/Grammar.pm
+	    --target=pir --output=$(STAGE2)/$(NQP_MO_PIR) \
+	    --setting=NULL $(STAGE2)/$(NQP_MO_COMBINED)
+	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(NQP_MO_PBC) \
+	    $(STAGE2)/$(NQP_MO_PIR)
+
+$(STAGE2)/$(MODULE_LOADER_PBC): $(STAGE1_PBCS) src/ModuleLoader.pm
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE2)/$(HLLGRAMMAR_A) \
-	    src/HLL/Actions.pm
+	    --target=pir --output=$(STAGE2)/gen/module_loader.pir \
+	    --setting=NULL src/ModuleLoader.pm
+	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(MODULE_LOADER_PBC) \
+	    $(STAGE2)/gen/module_loader.pir
+        
+$(STAGE2)/$(CORE_SETTING_PBC): $(STAGE1_PBCS) $(STAGE2)/$(NQP_MO_PBC) $(STAGE2)/$(MODULE_LOADER_PBC) $(CORE_SETTING_SOURCES)
+	$(MKPATH) $(STAGE2)/gen
+	$(PERL) build/gen_setting.pl $(CORE_SETTING_SOURCES) > $(STAGE2)/$(CORE_SETTING_NQP)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE2)/$(HLLCOMPILER_PIR) \
-	    src/HLL/Compiler.pm
+	    --target=pir --output=$(STAGE2)/$(CORE_SETTING_PIR) \
+	    --setting=NULL $(STAGE2)/$(CORE_SETTING_NQP)
+	$(PARROT) -o $(STAGE2)/$(CORE_SETTING_PBC) $(STAGE2)/$(CORE_SETTING_PIR)
+    
+$(STAGE2)/$(REGEX_PBC): $(DYNEXT_TARGET) $(REGEX_SOURCES) $(STAGE2)/$(CORE_SETTING_PBC)
+	$(PARROT) -o $(STAGE2)/$(REGEX_PBC) $(REGEX_SOURCES)
+
+$(STAGE2)/$(HLL_PBC): $(STAGE1_PBCS) $(STAGE2)/$(REGEX_PBC) $(STAGE2)/$(CORE_SETTING_PBC) $(HLL_SOURCES)
+	$(MKPATH) $(STAGE2)/gen
+	$(PERL) build/gen_how_pm.pl $(HLL_SOURCES) > $(STAGE2)/$(HLL_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE2)/$(HLLCOMMANDLINE_PIR) \
-	    src/HLL/CommandLine.pm
+	    --target=pir --output=$(STAGE2)/$(HLL_COMBINED_PIR) \
+	    --setting-path=$(STAGE2) $(STAGE2)/$(HLL_COMBINED)
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(HLL_PBC) \
-	    src/HLL.pir
+	    $(STAGE2)/$(HLL_COMBINED_PIR)
 
-$(STAGE2)/$(P6REGEX_PBC): $(STAGE1_PBCS) $(P6REGEX_SOURCES)
+$(STAGE2)/$(P6REGEX_PBC): $(STAGE1_PBCS) $(STAGE2)/$(HLL_PBC) $(P6REGEX_SOURCES)
 	$(MKPATH) $(STAGE2)/gen
+	$(PERL) build/gen_how_pm.pl $(P6REGEX_SOURCES) > $(STAGE2)/$(P6REGEX_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE2)/$(P6REGEX_G) \
-	    src/Regex/P6Regex/Grammar.pm
-	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE2)/$(P6REGEX_A) \
-	    src/Regex/P6Regex/Actions.pm
-	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE2)/$(P6REGEX_C) \
-	    src/Regex/P6Regex/Compiler.pm
+	    --target=pir --output=$(STAGE2)/$(P6REGEX_COMBINED_PIR) \
+	    --setting-path=$(STAGE2) $(STAGE2)/$(P6REGEX_COMBINED)
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(P6REGEX_PBC) \
-	    src/Regex/P6Regex.pir
+	    $(STAGE2)/$(P6REGEX_COMBINED_PIR)
 
-$(STAGE2)/$(NQP_PBC): $(STAGE1_PBCS) $(NQP_SOURCES) $(HOW_COMBINED)
-	$(MKPATH) $(STAGE2)/gen
+$(STAGE2)/$(NQP_PBC): $(STAGE0_PBCS) $(STAGE2)/$(P6REGEX_PBC) $(NQP_SOURCES)
+	$(MKPATH) $(STAGE1)/gen
+	$(PERL) build/gen_how_pm.pl $(NQP_SOURCES) > $(STAGE2)/$(NQP_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE2)/$(NQP_HOW) \
-	    $(HOW_COMBINED)
-	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE2)/$(NQP_G) \
-	    src/NQP/Grammar.pm
-	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE2)/$(NQP_A) \
-	    src/NQP/Actions.pm
-	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE2)/$(NQP_C) \
-	    src/NQP/Compiler.pm
+	    --target=pir --output=$(STAGE2)/$(NQP_COMBINED_PIR) \
+	    --setting-path=$(STAGE2) $(STAGE2)/$(NQP_COMBINED)
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(NQP_PBC) \
-	    src/NQP/Compiler.pir
+	    $(STAGE2)/$(NQP_COMBINED_PIR)
 
-$(ALL_PBCS): $(REGEX_PBC) $(STAGE2_PBCS)
+$(ALL_PBCS): $(STAGE2_PBCS)
+	$(CP) $(STAGE2)/$(NQP_MO_PBC) .
+	$(CP) $(STAGE2)/$(MODULE_LOADER_PBC) .
+	$(CP) $(STAGE2)/$(CORE_SETTING_PBC) .
+	$(CP) $(STAGE2)/$(REGEX_PBC) .
 	$(CP) $(STAGE2)/$(HLL_PBC) .
 	$(CP) $(STAGE2)/$(P6REGEX_PBC) .
 	$(CP) $(STAGE2)/$(NQP_PBC) .
 
 $(NQP_EXE): $(NQP_PBC)
 	$(PBC_TO_EXE) $(NQP_PBC)
-
-$(SETTING_NQP): $(SETTING_SOURCES)
-	$(PERL) build/gen_setting.pl $(SETTING_SOURCES) > $(SETTING_NQP)
-$(SETTING_PIR): $(SETTING_NQP) $(NQP_PBC)
-	$(PARROT) $(NQP_PBC) --target=pir --output=$(SETTING_PIR) $(SETTING_NQP)
-$(SETTING_PBC): $(SETTING_PIR)
-	$(PARROT) -o $(SETTING_PBC) $(SETTING_PIR)
 
 $(DYNEXT_TARGET): $(DYNPMC) $(DYNOPS)
 	$(CP) $(DYNPMC) $(DYNEXT_DIR)
@@ -376,24 +372,28 @@ $(DYNPMC): $(PMC_SOURCES) $(METAMODEL_SOURCE)
 $(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS_SOURCE) $(DYNPMC)
 	cd $(OPS_DIR) && $(OPS2C) C --dynamic $(OPS_SOURCE)
 	cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(OPS)$(O) $(CINCLUDES) $(CFLAGS) $(OPS).c
-	cd src/metamodel && $(CC) -c @cc_o_out@rakudoobject$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) rakudoobject.c
-	cd src/metamodel && $(CC) -c @cc_o_out@repr_registry$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) repr_registry.c
-	cd src/metamodel && $(CC) -c @cc_o_out@knowhow_bootstrapper$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) knowhow_bootstrapper.c
-	cd src/metamodel/reprs && $(CC) -c @cc_o_out@KnowHOWREPR$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) KnowHOWREPR.c
-	cd src/metamodel/reprs && $(CC) -c @cc_o_out@P6opaque$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6opaque.c
-	cd src/metamodel/reprs && $(CC) -c @cc_o_out@P6int$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6int.c
-	cd src/metamodel/reprs && $(CC) -c @cc_o_out@P6str$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6str.c
-	cd src/metamodel/reprs && $(CC) -c @cc_o_out@P6num$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6num.c
-	cd src/metamodel && $(CC) -c @cc_o_out@multi_dispatch$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) multi_dispatch.c
+	cd src/6model && $(CC) -c @cc_o_out@sixmodelobject$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) sixmodelobject.c
+	cd src/6model && $(CC) -c @cc_o_out@repr_registry$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) repr_registry.c
+	cd src/6model && $(CC) -c @cc_o_out@knowhow_bootstrapper$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) knowhow_bootstrapper.c
+	cd src/6model/reprs && $(CC) -c @cc_o_out@KnowHOWREPR$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) KnowHOWREPR.c
+	cd src/6model/reprs && $(CC) -c @cc_o_out@P6opaque$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6opaque.c
+	cd src/6model/reprs && $(CC) -c @cc_o_out@P6int$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6int.c
+	cd src/6model/reprs && $(CC) -c @cc_o_out@P6str$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6str.c
+	cd src/6model/reprs && $(CC) -c @cc_o_out@P6num$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6num.c
+	cd src/6model/reprs && $(CC) -c @cc_o_out@HashAttrStore$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) HashAttrStore.c
+	cd src/6model && $(CC) -c @cc_o_out@multi_dispatch$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) multi_dispatch.c
+	cd src/6model && $(CC) -c @cc_o_out@serialization_context$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) serialization_context.c
 	cd $(OPS_DIR) && $(LD) @ld_out@$(OPS)$(LOAD_EXT) $(OPS)$(O) $(METAMODEL_OBJS) $(LINKARGS)
 
-bootstrap-files: $(STAGE2_PBCS) $(SETTING_NQP)
+bootstrap-files: $(STAGE2_PBCS) src/stage2/$(CORE_SETTING_NQP)
 	$(PERL) build/gen_bootstrap.pl src/Regex.pir >src/stage0/Regex-s0.pir
-	$(PERL) build/gen_bootstrap.pl src/HLL.pir >src/stage0/HLL-s0.pir
-	$(PERL) build/gen_bootstrap.pl src/Regex/P6Regex.pir >src/stage0/P6Regex-s0.pir
-	$(PERL) build/gen_bootstrap.pl src/NQP/Compiler.pir >src/stage0/NQP-s0.pir
-	$(PERL) build/gen_bootstrap.pl $(SETTING_NQP) >src/stage0/nqp-setting.nqp
-	
+	$(PERL) build/gen_bootstrap.pl src/stage2/$(HLL_COMBINED_PIR) >src/stage0/HLL-s0.pir
+	$(PERL) build/gen_bootstrap.pl src/stage2/$(NQP_COMBINED_PIR) >src/stage0/NQP-s0.pir
+	$(PERL) build/gen_bootstrap.pl src/stage2/$(CORE_SETTING_PIR) >src/stage0/NQPCORE.setting-s0.pir
+	$(PERL) build/gen_bootstrap.pl src/stage2/$(P6REGEX_COMBINED_PIR) >src/stage0/P6Regex-s0.pir
+	$(PERL) build/gen_bootstrap.pl src/stage2/$(NQP_MO_PIR) >src/stage0/NQPMO-s0.pir
+	$(PERL) build/gen_bootstrap.pl src/stage2/gen/module_loader.pir >src/stage0/ModuleLoader-s0.pir
+
 
 ## testing
 

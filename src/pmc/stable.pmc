@@ -2,7 +2,7 @@
  * dumb semantically and the PMC is really just a "holder" and makes sure we
  * mark things as needed in GC. */
 
-#include "../metamodel/rakudoobject.h"
+#include "../6model/sixmodelobject.h"
 
 /* This is a source of type cache IDs (see notes below about them). 
  * The lowest one is 4. This is to make the lower two bits available for
@@ -39,13 +39,15 @@ pmclass STable manual_attrs dynpmc group nqp {
         STable *st = (STable *)PMC_data(SELF);
         INTVAL i;
 
-        /* Mark REPR, HOW and WHAT. */
+        /* Mark REPR, HOW, WHO and WHAT. */
         if (!PMC_IS_NULL(st->REPR))
             Parrot_gc_mark_PMC_alive(interp, st->REPR);
         if (!PMC_IS_NULL(st->HOW))
             Parrot_gc_mark_PMC_alive(interp, st->HOW);
         if (!PMC_IS_NULL(st->WHAT))
             Parrot_gc_mark_PMC_alive(interp, st->WHAT);
+        if (!PMC_IS_NULL(st->WHO))
+            Parrot_gc_mark_PMC_alive(interp, st->WHO);
         if (!PMC_IS_NULL(st->method_cache))
             Parrot_gc_mark_PMC_alive(interp, st->method_cache);
 

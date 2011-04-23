@@ -19,6 +19,26 @@ class HLL::Compiler {
     has $!compiler_progname;
     has $!language;
 
+    # This INIT serves as a cumulative "outer context" for code
+    # executed in HLL::Compiler's interactive REPL.  It's invoked
+    # exactly once upon load/init to obtain a context, and its
+    # default LexPad is replaced with a Hash that we can use to
+    # cumulatively store outer context information.  Both the
+    # context and hash are then made available via package
+    # variables.
+    our $interactive_ctx;
+    our %interactive_pad;
+    INIT {
+        # Set the context.
+        $interactive_ctx := pir::getinterp__P(){'context'};
+        
+        # Set the pad, but transform it to a Hash first.
+        my %pad_contents;
+        %interactive_pad := pir::copy__0PP(
+            pir::getattribute__PPs($interactive_ctx, 'lex_pad'),
+            %pad_contents);
+    }
+
     # XXX HACK!!! Need a Mu. :-)
     method new() {
         my $obj := pir::repr_instance_of__PP(self);
@@ -36,29 +56,14 @@ class HLL::Compiler {
         for @!cmdoptions {
             $!usage := $!usage ~ "    $_\n";
         }
-        
-        # Version.
-        $!version := Q:PIR {
+        my $config_hash_idx := Q:PIR {
             .include 'iglobals.pasm'
-            .include 'cclass.pasm'
-            $S0  = '???'
-            push_eh _handler
-            $P0 = getinterp
-            $P0 = $P0[.IGLOBALS_CONFIG_HASH]
-            $S0  = $P0['git_describe']   # also $I0 = P0['installed'] could be used
-          _handler:
-            pop_eh
-            %r  = box 'This compiler is built with the Parrot Compiler Toolkit, parrot '
-            if $S0 goto _revision_lab
-            %r .= 'version '
-            $S0 = $P0['VERSION']
-            goto _is_version
-          _revision_lab:
-            %r .= 'revision '
-          _is_version:
-            %r .= $S0
-            %r .= '.'
+            %r = box .IGLOBALS_CONFIG_HASH
         };
+        my %config   := pir::getinterp()[$config_hash_idx];
+        my $version  := %config<VERSION>;
+        my $revision := %config<git_describe> // '(unknown)';
+        $!version    := "This compiler is built with NQP, parrot $version, revision $revision";
     }
     
     my sub value_type($value) {
@@ -451,61 +456,22 @@ class HLL::Compiler {
     }
 
     method compile($source, *%adverbs) {
-        Q:PIR {
-            .local pmc source, adverbs, self
-            source = find_lex '$source'
-            adverbs = find_lex '%adverbs'
-            self = find_lex 'self'
+        my %*COMPILING<%?OPTIONS> := %adverbs;
 
-            .local pmc compiling, options
-            compiling = new ['Hash']
-            .lex '%*COMPILING', compiling
-            compiling['%?OPTIONS'] = adverbs
-
-            .local string target
-            target = adverbs['target']
-            target = downcase target
-
-            .local int stagestats
-            stagestats = adverbs['stagestats']
-
-            .local pmc stages, result, it
-            result = source
-            stages = self.'stages'()
-            it = iter stages
-            if stagestats goto stagestats_loop
-
-          iter_loop:
-            unless it goto have_result
-            .local string stagename
-            stagename = shift it
-            result = self.stagename(result, adverbs :flat :named)
-            if target == stagename goto have_result
-            goto iter_loop
-
-          stagestats_loop:
-            unless it goto have_result
-            stagename = shift it
-            $N0 = time
-            result = self.stagename(result, adverbs :flat :named)
-            $N1 = time
-            $N2 = $N1 - $N0
-            $P0 = getinterp
-            $P1 = $P0.'stderr_handle'()
-            $P1.'print'("Stage '")
-            $P1.'print'(stagename)
-            $P1.'print'("': ")
-            $P2 = new ['ResizablePMCArray']
-            push $P2, $N2
-            $S0 = sprintf "%.3f", $P2
-            $P1.'print'($S0)
-            $P1.'print'(" sec\n")
-            if target == stagename goto have_result
-            goto stagestats_loop
-
-          have_result:
-            .return (result)
-        };
+        my $target := pir::downcase(%adverbs<target>);
+        my $result := $source;
+        my $stderr := pir::getinterp().stderr_handle;
+        for self.stages() {
+            my $timestamp := pir::time__N();
+            $result := self."$_"($result, |%adverbs);
+            my $diff := pir::time__N() - $timestamp;
+            if %adverbs<stagestats> {
+                # TODO: plug in sprintf with %.3f
+                $stderr.print__N("Stage $_: $diff\n");
+            }
+            last if $_ eq $target;
+        }
+        return $result;
     }
 
     method parse($source, *%adverbs) {
@@ -677,43 +643,23 @@ class HLL::Compiler {
     }
 
     method parse_name($name) {
-        Q:PIR {
-            .local string name
-            $P0 = find_lex '$name'
-            name = $P0
+        my @ns    := pir::split('::', $name);
+        my $sigil := pir::substr(@ns[0], 0, 1);
 
-            # split name on ::
-            .local pmc ns
-            ns = split '::', name
+        # move any leading sigil to the last item
+        my $idx   := pir::index('$@%&', $sigil);
+        if $idx >= 0 {
+            @ns[0]  := pir::substr(@ns[0], 1);
+            @ns[-1] := $sigil ~ @ns[-1];
+        }
 
-            # move any leading sigil to the last item
-            .local string sigil
-            $S0 = ns[0]
-            sigil = substr $S0, 0, 1
-            $I0 = index '$@%&', sigil
-            if $I0 < 0 goto sigil_done
-            $S0 = replace $S0, 0, 1, ''
-            ns[0] = $S0
-            $S0 = ns[-1]
-            $S0 = concat sigil, $S0
-            ns[-1] = $S0
-          sigil_done:
-
-            # remove any empty items from the list
-            .local pmc ns_it
-            ns_it = iter ns
-            ns = new ['ResizablePMCArray']
-          ns_loop:
-            unless ns_it goto ns_done
-            $S0 = shift ns_it
-            unless $S0 > '' goto ns_loop
-            push ns, $S0
-            goto ns_loop
-          ns_done:
-
-            # return the result
-            .return (ns)
-        };
+        # remove any empty items from the list
+        # maybe replace with a grep() once we have the setting for sure
+        my @actual_ns;
+        for @ns {
+            pir::push(@actual_ns, $_) unless $_ eq '';
+        }
+        @actual_ns;
     }
 
     method lineof($target, $pos, :$cache) {
@@ -778,3 +724,6 @@ class HLL::Compiler {
         };
     }
 }
+
+my $compiler := HLL::Compiler.new();
+$compiler.language('parrot');

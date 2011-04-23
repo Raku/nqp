@@ -10,6 +10,49 @@ This file brings together the various Regex modules needed for Regex.pbc .
 
 =cut
 
+.HLL 'nqp'
+.loadlib "nqp_group"
+.loadlib "nqp_ops"
+
+# This is the outer scope of the module.
+.sub '' :subid('Regex_Outer')
+    # Save this as the main context.
+	$P0 = find_dynamic_lex "$*CTXSAVE"
+    if null $P0 goto ctxsave_done
+    $I0 = can $P0, "ctxsave"
+    unless $I0 goto ctxsave_done
+    $P0."ctxsave"()
+  ctxsave_done:
+
+    # Set up our UNIT::GLOBALish.
+    .local pmc KnowHOW, how
+    KnowHOW = get_knowhow
+    $P1 = KnowHOW."new_type"("name"=>"GLOBALish")
+    how = get_how $P1
+    how."compose"($P1)
+    .lex 'GLOBALish', $P1
+
+    # Capture inner blocks.
+    .const 'Sub' $P2 = 'Cursor_Load'
+    capture_lex $P2
+.end
+
+.sub '' :load :init :outer('Regex_Outer')
+    # Create a serialization context for this compilation unit.
+    .local pmc sc
+    sc = nqp_create_sc "__REGEX_CORE_SC__"
+    
+    # Load setting.
+    load_bytecode 'ModuleLoader.pbc'
+    $P0 = get_hll_global 'ModuleLoader'
+    $P1 = $P0.'load_setting'('NQPCORE')
+	
+    # Set it as the outer of the module's main block, then run that.
+    .const 'Sub' $P2 = 'Regex_Outer'
+    $P2.'set_outer_ctx'($P1)
+    $P2()
+.end
+
 ### .include 'src/Regex/Cursor.pir'
 # Copyright (C) 2009, The Perl Foundation.
 # $Id$
@@ -26,9 +69,6 @@ grammars.
 
 =cut
 
-.loadlib "nqp_group"
-.loadlib "nqp_ops"
-
 .include 'cclass.pasm'
 ### .include 'src/Regex/constants.pir'
 .const int CURSOR_FAIL = -1
@@ -41,7 +81,7 @@ grammars.
 
 .namespace ['Regex';'Cursor']
 
-.sub '' :anon :load :init
+.sub '' :anon :load :init :outer('Regex_Outer') :subid('Cursor_Load')
     # Set up some constants/generation tracking.
     $P0 = box 0
     set_global '$!generation', $P0
@@ -51,14 +91,23 @@ grammars.
     $P0 = new ['Boolean']
     assign $P0, 1
     set_global '$!TRUE', $P0
+    
+    # Create Regex outer package.
+    .local pmc Regex, RegexWHO
+    $P0 = get_knowhow
+    Regex = $P0."new_type"("name"=>"Regex")
+    RegexWHO = get_who Regex
 
     # Build meta-object and store it in the namespace.
     .local pmc type_obj, how, NQPClassHOW
     get_hll_global NQPClassHOW, "NQPClassHOW"
     type_obj = NQPClassHOW."new_type"("Cursor" :named("name"))
-    how = get_how type_obj
-    set_hll_global ["Regex"], "Cursor", type_obj
+    RegexWHO["Cursor"] = type_obj
     set_global "$?CLASS", type_obj
+    how = get_how type_obj
+    
+    # XXXNS Old namespace handling installation, during migration to new.
+    set_hll_global ["Regex"], "Cursor", type_obj
 
     # Add all methods.
     .const 'Sub' $P10 = 'Regex_Cursor_meth_new_match'
@@ -172,7 +221,7 @@ grammars.
     # Add attributes.
     .local pmc NQPAttribute, int_type, attr
     NQPAttribute = get_hll_global "NQPAttribute"
-    int_type = get_hll_global "int"
+    int_type = find_lex "int"
     attr = NQPAttribute."new"("$!target" :named("name"))
     how."add_attribute"(type_obj, attr)
     attr = NQPAttribute."new"("$!from" :named("name"), int_type :named('type'))
@@ -193,6 +242,11 @@ grammars.
     how."add_attribute"(type_obj, attr)
     attr = NQPAttribute."new"("&!regex" :named("name"))
     how."add_attribute"(type_obj, attr)
+    
+    # Set default parent.
+    .local pmc NQPMu
+    NQPMu = find_lex "NQPMu"
+    how."set_default_parent"(type_obj, NQPMu)
 
     # Compose meta-object.
     how."compose"(type_obj)
@@ -1890,7 +1944,8 @@ This file implements Match objects for the regex engine.
     load_bytecode 'P6object.pbc'
     .local pmc p6meta
     p6meta = new 'P6metaclass'
-    $P0 = p6meta.'new_class'('Regex::Match', 'parent'=>'Capture', 'attr'=>'$!cursor $!target $!from $!to $!ast')
+    $P1 = get_root_global ['parrot'], 'Capture'
+    $P0 = p6meta.'new_class'('Regex::Match', 'parent'=>$P1, 'attr'=>'$!cursor $!target $!from $!to $!ast')
     .return ()
 .end
 
@@ -2371,6 +2426,8 @@ An alternate dump output for a Match object and all of its subcaptures.
 # End:
 # vim: expandtab shiftwidth=4 ft=pir:
 
+.HLL 'parrot'
+
 ### .include 'src/PAST/Regex.pir'
 # $Id: Regex.pir 41578 2009-09-30 14:45:23Z pmichaud $
 
@@ -2805,9 +2862,8 @@ Return the POST representation of the regex AST rooted by C<node>.
   token_done:
     $S0 = regexname
     $S0 = concat '!PREFIX__', $S0
-    $S1 = escape $S0
     $P99 = get_hll_global ['PAST'], 'Block'
-    tpast = $P99.'new'(tpast, 'name'=>$S0, 'nsentry'=>$S1, 'lexical'=>0, 'blocktype'=>'method')
+    tpast = $P99.'new'(tpast, 'name'=>$S0, 'nsentry'=>$S0, 'lexical'=>0, 'blocktype'=>'method')
     tpost = self.'as_post'(tpast, 'rtype'=>'v')
     ops.'push'(tpost)
   peek_done:
@@ -4062,6 +4118,50 @@ Copyright (C) 2009, The Perl Foundation.
 # End:
 # vim: expandtab shiftwidth=4 ft=pir:
 
+### .include 'src/cheats/parrot-callcontext.pir'
+# This adds to a Parrot PMC, so need to switch to that HLL for this
+# file.
+.HLL 'parrot'
+.namespace ['CallContext']
+.sub 'lexpad_full' :method
+    .local pmc ctx, lexall, lexpad, lexpad_it
+    ctx = self
+    lexall = root_new ['parrot';'Hash']
+
+  context_loop:
+    if null ctx goto context_done
+    lexpad = getattribute ctx, 'lex_pad'
+    if null lexpad goto lexpad_done
+    lexpad_it = iter lexpad
+  lexpad_loop:
+    unless lexpad_it goto lexpad_done
+    $S0 = shift lexpad_it
+    $I0 = exists lexall[$S0]
+    if $I0 goto lexpad_loop
+    $P0 = lexpad[$S0]
+    lexall[$S0] = $P0
+    goto lexpad_loop
+  lexpad_done:
+    ctx = getattribute ctx, 'outer_ctx'
+    goto context_loop
+  context_done:
+    .return (lexall)
+.end
+.HLL 'nqp'
+
+.HLL 'nqp'
+
+.sub '' :anon :load :init
+    # Also want the dumper.
+    load_bytecode 'dumper.pbc'
+    
+    ## Import PAST and PCT to the HLL.
+    .local pmc hllns, parrotns, imports
+    hllns = get_hll_namespace
+    parrotns = get_root_namespace ['parrot']
+    imports = split ' ', 'PAST PCT _dumper'
+    parrotns.'export_to'(hllns, imports)
+.end
 
 =head1 AUTHOR
 
@@ -4069,7 +4169,7 @@ Patrick Michaud <pmichaud@pobox.com> is the author and maintainer.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2009, The Perl Foundation.
+Copyright (C) 2009-2011, The Perl Foundation.
 
 =cut
 
