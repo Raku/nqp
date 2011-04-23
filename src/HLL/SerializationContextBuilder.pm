@@ -309,7 +309,7 @@ class HLL::Compiler::SerializationContextBuilder {
         $obj.HOW."$meta_method_name"($obj, $to_add);
         
         # Emit code to add it when deserializing.
-        my $slot_past := get_slot_past_for_object($obj);
+        my $slot_past := self.get_slot_past_for_object($obj);
         self.add_event(:deserialize_past(PAST::Op.new(
             :pasttype('callmethod'), :name($meta_method_name),
             PAST::Op.new( :pirop('get_how PP'), $slot_past ),
