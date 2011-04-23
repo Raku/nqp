@@ -6,9 +6,9 @@
 .loadlib "nqp_ops"
 
 .namespace []
-.sub "_block11"  :anon :subid("10_1303430326.792")
+.sub "_block11"  :anon :subid("10_1303576200.736")
 .annotate 'line', 0
-    .const 'Sub' $P17 = "11_1303430326.792" 
+    .const 'Sub' $P17 = "11_1303576200.736" 
     capture_lex $P17
 .annotate 'line', 1
     .lex "GLOBALish", $P13
@@ -20,140 +20,140 @@
     unless $I0 goto ctxsave_done
     $P0."ctxsave"()
   ctxsave_done:
-    .const 'Sub' $P17 = "11_1303430326.792" 
+    .const 'Sub' $P17 = "11_1303576200.736" 
     capture_lex $P17
-    $P92 = $P17()
-    .return ($P92)
-    .const 'Sub' $P94 = "17_1303430326.792" 
+    $P94 = $P17()
     .return ($P94)
+    .const 'Sub' $P96 = "17_1303576200.736" 
+    .return ($P96)
 .end
 
 
 .HLL "nqp"
 
 .namespace []
-.sub "" :load :init :subid("post18") :outer("10_1303430326.792")
+.sub "" :load :init :subid("post18") :outer("10_1303576200.736")
 .annotate 'line', 0
-    .const 'Sub' $P12 = "10_1303430326.792" 
+    .const 'Sub' $P12 = "10_1303576200.736" 
     .local pmc block
     set block, $P12
-    nqp_get_sc $P98, "1303430326.677"
-    isnull $I99, $P98
-    if $I99, if_97
-    .const 'Sub' $P137 = "10_1303430326.792" 
-    $P138 = $P137."get_lexinfo"()
-    nqp_get_sc_object $P139, "1303430326.677", 0
-    $P138."set_static_lexpad_value"("GLOBALish", $P139)
-    .const 'Sub' $P140 = "10_1303430326.792" 
-    $P141 = $P140."get_lexinfo"()
-    $P141."finish_static_lexpad"()
-    .const 'Sub' $P142 = "10_1303430326.792" 
+    nqp_get_sc $P100, "1303576200.623"
+    isnull $I101, $P100
+    if $I101, if_99
+    .const 'Sub' $P139 = "10_1303576200.736" 
+    $P140 = $P139."get_lexinfo"()
+    nqp_get_sc_object $P141, "1303576200.623", 0
+    $P140."set_static_lexpad_value"("GLOBALish", $P141)
+    .const 'Sub' $P142 = "10_1303576200.736" 
     $P143 = $P142."get_lexinfo"()
-    nqp_get_sc_object $P144, "1303430326.677", 0
-    $P143."set_static_lexpad_value"("$?PACKAGE", $P144)
-    .const 'Sub' $P145 = "10_1303430326.792" 
-    $P146 = $P145."get_lexinfo"()
-    $P146."finish_static_lexpad"()
-    nqp_get_sc_object $P147, "1303430326.677", 1
-    set_hll_global "ModuleLoader", $P147
-    .const 'Sub' $P148 = "10_1303430326.792" 
-    $P149 = $P148."get_lexinfo"()
-    nqp_get_sc_object $P150, "1303430326.677", 1
-    $P149."set_static_lexpad_value"("ModuleLoader", $P150)
-    .const 'Sub' $P151 = "10_1303430326.792" 
-    $P152 = $P151."get_lexinfo"()
-    $P152."finish_static_lexpad"()
-    .const 'Sub' $P153 = "11_1303430326.792" 
+    $P143."finish_static_lexpad"()
+    .const 'Sub' $P144 = "10_1303576200.736" 
+    $P145 = $P144."get_lexinfo"()
+    nqp_get_sc_object $P146, "1303576200.623", 0
+    $P145."set_static_lexpad_value"("$?PACKAGE", $P146)
+    .const 'Sub' $P147 = "10_1303576200.736" 
+    $P148 = $P147."get_lexinfo"()
+    $P148."finish_static_lexpad"()
+    nqp_get_sc_object $P149, "1303576200.623", 1
+    set_hll_global "ModuleLoader", $P149
+    .const 'Sub' $P150 = "10_1303576200.736" 
+    $P151 = $P150."get_lexinfo"()
+    nqp_get_sc_object $P152, "1303576200.623", 1
+    $P151."set_static_lexpad_value"("ModuleLoader", $P152)
+    .const 'Sub' $P153 = "10_1303576200.736" 
     $P154 = $P153."get_lexinfo"()
-    nqp_get_sc_object $P155, "1303430326.677", 1
-    $P154."set_static_lexpad_value"("$?PACKAGE", $P155)
-    .const 'Sub' $P156 = "11_1303430326.792" 
-    $P157 = $P156."get_lexinfo"()
-    $P157."finish_static_lexpad"()
-    .const 'Sub' $P158 = "11_1303430326.792" 
+    $P154."finish_static_lexpad"()
+    .const 'Sub' $P155 = "11_1303576200.736" 
+    $P156 = $P155."get_lexinfo"()
+    nqp_get_sc_object $P157, "1303576200.623", 1
+    $P156."set_static_lexpad_value"("$?PACKAGE", $P157)
+    .const 'Sub' $P158 = "11_1303576200.736" 
     $P159 = $P158."get_lexinfo"()
-    nqp_get_sc_object $P160, "1303430326.677", 1
-    $P159."set_static_lexpad_value"("$?CLASS", $P160)
-    .const 'Sub' $P161 = "11_1303430326.792" 
-    $P162 = $P161."get_lexinfo"()
-    $P162."finish_static_lexpad"()
-    goto if_97_end
-  if_97:
+    $P159."finish_static_lexpad"()
+    .const 'Sub' $P160 = "11_1303576200.736" 
+    $P161 = $P160."get_lexinfo"()
+    nqp_get_sc_object $P162, "1303576200.623", 1
+    $P161."set_static_lexpad_value"("$?CLASS", $P162)
+    .const 'Sub' $P163 = "11_1303576200.736" 
+    $P164 = $P163."get_lexinfo"()
+    $P164."finish_static_lexpad"()
+    goto if_99_end
+  if_99:
     nqp_dynop_setup 
-    getinterp $P100
-    get_class $P101, "LexPad"
-    get_class $P102, "NQPLexPad"
-    $P100."hll_map"($P101, $P102)
-    nqp_create_sc $P103, "1303430326.677"
+    getinterp $P102
+    get_class $P103, "LexPad"
+    get_class $P104, "NQPLexPad"
+    $P102."hll_map"($P103, $P104)
+    nqp_create_sc $P105, "1303576200.623"
     .local pmc cur_sc
-    set cur_sc, $P103
-    get_hll_global $P104, "KnowHOW"
-    $P105 = $P104."new_type"("GLOBALish" :named("name"))
-    nqp_set_sc_for_object $P105, cur_sc
-    nqp_set_sc_object "1303430326.677", 0, $P105
-    .const 'Sub' $P106 = "10_1303430326.792" 
-    $P107 = $P106."get_lexinfo"()
-    nqp_get_sc_object $P108, "1303430326.677", 0
-    $P107."set_static_lexpad_value"("GLOBALish", $P108)
-    .const 'Sub' $P109 = "10_1303430326.792" 
-    $P110 = $P109."get_lexinfo"()
-    $P110."finish_static_lexpad"()
-    .const 'Sub' $P111 = "10_1303430326.792" 
+    set cur_sc, $P105
+    get_hll_global $P106, "KnowHOW"
+    $P107 = $P106."new_type"("GLOBALish" :named("name"))
+    nqp_set_sc_for_object $P107, cur_sc
+    nqp_set_sc_object "1303576200.623", 0, $P107
+    .const 'Sub' $P108 = "10_1303576200.736" 
+    $P109 = $P108."get_lexinfo"()
+    nqp_get_sc_object $P110, "1303576200.623", 0
+    $P109."set_static_lexpad_value"("GLOBALish", $P110)
+    .const 'Sub' $P111 = "10_1303576200.736" 
     $P112 = $P111."get_lexinfo"()
-    nqp_get_sc_object $P113, "1303430326.677", 0
-    $P112."set_static_lexpad_value"("$?PACKAGE", $P113)
-    .const 'Sub' $P114 = "10_1303430326.792" 
-    $P115 = $P114."get_lexinfo"()
-    $P115."finish_static_lexpad"()
-    get_hll_global $P116, "KnowHOW"
-    $P117 = $P116."new_type"("ModuleLoader" :named("name"))
-    nqp_set_sc_for_object $P117, cur_sc
-    nqp_set_sc_object "1303430326.677", 1, $P117
-    nqp_get_sc_object $P118, "1303430326.677", 1
-    nqp_get_sc_object $P119, "1303430326.677", 0
-    get_who $P120, $P119
-    set $P120["ModuleLoader"], $P118
-    nqp_get_sc_object $P121, "1303430326.677", 1
-    set_hll_global "ModuleLoader", $P121
-    .const 'Sub' $P122 = "10_1303430326.792" 
-    $P123 = $P122."get_lexinfo"()
-    nqp_get_sc_object $P124, "1303430326.677", 1
-    $P123."set_static_lexpad_value"("ModuleLoader", $P124)
-    .const 'Sub' $P125 = "10_1303430326.792" 
-    $P126 = $P125."get_lexinfo"()
-    $P126."finish_static_lexpad"()
-    .const 'Sub' $P127 = "11_1303430326.792" 
+    $P112."finish_static_lexpad"()
+    .const 'Sub' $P113 = "10_1303576200.736" 
+    $P114 = $P113."get_lexinfo"()
+    nqp_get_sc_object $P115, "1303576200.623", 0
+    $P114."set_static_lexpad_value"("$?PACKAGE", $P115)
+    .const 'Sub' $P116 = "10_1303576200.736" 
+    $P117 = $P116."get_lexinfo"()
+    $P117."finish_static_lexpad"()
+    get_hll_global $P118, "KnowHOW"
+    $P119 = $P118."new_type"("ModuleLoader" :named("name"))
+    nqp_set_sc_for_object $P119, cur_sc
+    nqp_set_sc_object "1303576200.623", 1, $P119
+    nqp_get_sc_object $P120, "1303576200.623", 1
+    nqp_get_sc_object $P121, "1303576200.623", 0
+    get_who $P122, $P121
+    set $P122["ModuleLoader"], $P120
+    nqp_get_sc_object $P123, "1303576200.623", 1
+    set_hll_global "ModuleLoader", $P123
+    .const 'Sub' $P124 = "10_1303576200.736" 
+    $P125 = $P124."get_lexinfo"()
+    nqp_get_sc_object $P126, "1303576200.623", 1
+    $P125."set_static_lexpad_value"("ModuleLoader", $P126)
+    .const 'Sub' $P127 = "10_1303576200.736" 
     $P128 = $P127."get_lexinfo"()
-    nqp_get_sc_object $P129, "1303430326.677", 1
-    $P128."set_static_lexpad_value"("$?PACKAGE", $P129)
-    .const 'Sub' $P130 = "11_1303430326.792" 
-    $P131 = $P130."get_lexinfo"()
-    $P131."finish_static_lexpad"()
-    .const 'Sub' $P132 = "11_1303430326.792" 
+    $P128."finish_static_lexpad"()
+    .const 'Sub' $P129 = "11_1303576200.736" 
+    $P130 = $P129."get_lexinfo"()
+    nqp_get_sc_object $P131, "1303576200.623", 1
+    $P130."set_static_lexpad_value"("$?PACKAGE", $P131)
+    .const 'Sub' $P132 = "11_1303576200.736" 
     $P133 = $P132."get_lexinfo"()
-    nqp_get_sc_object $P134, "1303430326.677", 1
-    $P133."set_static_lexpad_value"("$?CLASS", $P134)
-    .const 'Sub' $P135 = "11_1303430326.792" 
-    $P136 = $P135."get_lexinfo"()
-    $P136."finish_static_lexpad"()
-  if_97_end:
-    nqp_get_sc_object $P163, "1303430326.677", 0
-    set_hll_global "GLOBAL", $P163
+    $P133."finish_static_lexpad"()
+    .const 'Sub' $P134 = "11_1303576200.736" 
+    $P135 = $P134."get_lexinfo"()
+    nqp_get_sc_object $P136, "1303576200.623", 1
+    $P135."set_static_lexpad_value"("$?CLASS", $P136)
+    .const 'Sub' $P137 = "11_1303576200.736" 
+    $P138 = $P137."get_lexinfo"()
+    $P138."finish_static_lexpad"()
+  if_99_end:
+    nqp_get_sc_object $P165, "1303576200.623", 0
+    set_hll_global "GLOBAL", $P165
 .end
 
 
 .HLL "nqp"
 
 .namespace ["ModuleLoader"]
-.sub "_block16"  :subid("11_1303430326.792") :outer("10_1303430326.792")
+.sub "_block16"  :subid("11_1303576200.736") :outer("10_1303576200.736")
 .annotate 'line', 1
-    .const 'Sub' $P82 = "16_1303430326.792" 
-    capture_lex $P82
-    .const 'Sub' $P42 = "14_1303430326.792" 
-    capture_lex $P42
-    .const 'Sub' $P26 = "13_1303430326.792" 
+    .const 'Sub' $P84 = "16_1303576200.736" 
+    capture_lex $P84
+    .const 'Sub' $P44 = "14_1303576200.736" 
+    capture_lex $P44
+    .const 'Sub' $P26 = "13_1303576200.736" 
     capture_lex $P26
-    .const 'Sub' $P22 = "12_1303430326.792" 
+    .const 'Sub' $P22 = "12_1303576200.736" 
     capture_lex $P22
 .annotate 'line', 2
     $P18 = root_new ['parrot';'Hash']
@@ -165,55 +165,55 @@
     unless_null $P21, vivify_20
     $P21 = root_new ['parrot';'Hash']
   vivify_20:
-.annotate 'line', 22
-    .const 'Sub' $P42 = "14_1303430326.792" 
-    newclosure $P80, $P42
+.annotate 'line', 21
+    .const 'Sub' $P44 = "14_1303576200.736" 
+    newclosure $P82, $P44
 .annotate 'line', 1
-    .return ($P80)
+    .return ($P82)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["ModuleLoader"]
-.sub "" :load :init :subid("post19") :outer("11_1303430326.792")
+.sub "" :load :init :subid("post19") :outer("11_1303576200.736")
 .annotate 'line', 1
-    .const 'Sub' $P17 = "11_1303430326.792" 
+    .const 'Sub' $P17 = "11_1303576200.736" 
     .local pmc block
     set block, $P17
-    .const 'Sub' $P82 = "16_1303430326.792" 
-    capture_lex $P82
-    $P82()
+    .const 'Sub' $P84 = "16_1303576200.736" 
+    capture_lex $P84
+    $P84()
 .end
 
 
 .HLL "nqp"
 
 .namespace ["ModuleLoader"]
-.sub "_block81"  :anon :subid("16_1303430326.792") :outer("11_1303430326.792")
+.sub "_block83"  :anon :subid("16_1303576200.736") :outer("11_1303576200.736")
 .annotate 'line', 1
-    nqp_get_sc_object $P83, "1303430326.677", 1
+    nqp_get_sc_object $P85, "1303576200.623", 1
     .local pmc type_obj
-    set type_obj, $P83
-    get_how $P84, type_obj
-    .const 'Sub' $P85 = "12_1303430326.792" 
-    $P84."add_method"(type_obj, "ctxsave", $P85)
+    set type_obj, $P85
     get_how $P86, type_obj
-    .const 'Sub' $P87 = "13_1303430326.792" 
-    $P86."add_method"(type_obj, "load_module", $P87)
+    .const 'Sub' $P87 = "12_1303576200.736" 
+    $P86."add_method"(type_obj, "ctxsave", $P87)
     get_how $P88, type_obj
-    .const 'Sub' $P89 = "14_1303430326.792" 
-    $P88."add_method"(type_obj, "load_setting", $P89)
+    .const 'Sub' $P89 = "13_1303576200.736" 
+    $P88."add_method"(type_obj, "load_module", $P89)
     get_how $P90, type_obj
-    $P91 = $P90."compose"(type_obj)
-    .return ($P91)
+    .const 'Sub' $P91 = "14_1303576200.736" 
+    $P90."add_method"(type_obj, "load_setting", $P91)
+    get_how $P92, type_obj
+    $P93 = $P92."compose"(type_obj)
+    .return ($P93)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["ModuleLoader"]
-.sub "ctxsave"  :subid("12_1303430326.792") :outer("11_1303430326.792")
+.sub "ctxsave"  :subid("12_1303576200.736") :outer("11_1303576200.736")
     .param pmc param_23
 .annotate 'line', 4
     .lex "self", param_23
@@ -235,50 +235,57 @@
 .HLL "nqp"
 
 .namespace ["ModuleLoader"]
-.sub "load_module"  :subid("13_1303430326.792") :outer("11_1303430326.792")
+.sub "load_module"  :subid("13_1303576200.736") :outer("11_1303576200.736")
     .param pmc param_27
     .param pmc param_28
+    .param pmc param_29 :optional
+    .param int has_param_29 :opt_flag
 .annotate 'line', 13
     .lex "self", param_27
     .lex "$module_name", param_28
-.annotate 'line', 16
-    new $P29, "Undef"
-    .lex "$*CTXSAVE", $P29
-.annotate 'line', 17
+    if has_param_29, optparam_21
     new $P30, "Undef"
-    .lex "$*MAIN_CTX", $P30
-.annotate 'line', 18
+    set param_29, $P30
+  optparam_21:
+    .lex "$cur_GLOBALish", param_29
+.annotate 'line', 15
     new $P31, "Undef"
-    .lex "$path", $P31
+    .lex "$*CTXSAVE", $P31
 .annotate 'line', 16
-    find_lex $P32, "self"
-    store_lex "$*CTXSAVE", $P32
-    find_lex $P33, "$*MAIN_CTX"
-    unless_null $P33, vivify_21
-    get_hll_global $P33, "$MAIN_CTX"
-    unless_null $P33, vivify_22
+    new $P32, "Undef"
+    .lex "$*MAIN_CTX", $P32
+.annotate 'line', 17
+    new $P33, "Undef"
+    .lex "$path", $P33
+.annotate 'line', 15
+    find_lex $P34, "self"
+    store_lex "$*CTXSAVE", $P34
+    find_lex $P35, "$*MAIN_CTX"
+    unless_null $P35, vivify_22
+    get_hll_global $P35, "$MAIN_CTX"
+    unless_null $P35, vivify_23
     die "Contextual $*MAIN_CTX not found"
-  vivify_22:
-  vivify_21:
-.annotate 'line', 18
-    find_lex $P34, "$module_name"
-    unless_null $P34, vivify_23
-    new $P34, "Undef"
   vivify_23:
-    set $S35, $P34
-    split $P36, "::", $S35
-    join $S37, "/", $P36
-    new $P38, 'String'
-    set $P38, $S37
-    concat $P39, $P38, ".pbc"
-    store_lex "$path", $P39
-.annotate 'line', 19
-    find_lex $P40, "$path"
-    unless_null $P40, vivify_24
-    new $P40, "Undef"
+  vivify_22:
+.annotate 'line', 17
+    find_lex $P36, "$module_name"
+    unless_null $P36, vivify_24
+    new $P36, "Undef"
   vivify_24:
-    set $S41, $P40
-    load_bytecode $S41
+    set $S37, $P36
+    split $P38, "::", $S37
+    join $S39, "/", $P38
+    new $P40, 'String'
+    set $P40, $S39
+    concat $P41, $P40, ".pbc"
+    store_lex "$path", $P41
+.annotate 'line', 18
+    find_lex $P42, "$path"
+    unless_null $P42, vivify_25
+    new $P42, "Undef"
+  vivify_25:
+    set $S43, $P42
+    load_bytecode $S43
 .annotate 'line', 13
     .return ()
 .end
@@ -288,151 +295,151 @@
 
 .namespace ["ModuleLoader"]
 .include "except_types.pasm"
-.sub "load_setting"  :subid("14_1303430326.792") :outer("11_1303430326.792")
-    .param pmc param_45
-    .param pmc param_46
+.sub "load_setting"  :subid("14_1303576200.736") :outer("11_1303576200.736")
+    .param pmc param_47
+    .param pmc param_48
+.annotate 'line', 21
+    .const 'Sub' $P59 = "15_1303576200.736" 
+    capture_lex $P59
+    new $P46, ['ExceptionHandler'], .CONTROL_RETURN
+    set_label $P46, control_45
+    push_eh $P46
+    .lex "self", param_47
+    .lex "$setting_name", param_48
 .annotate 'line', 22
-    .const 'Sub' $P57 = "15_1303430326.792" 
-    capture_lex $P57
-    new $P44, ['ExceptionHandler'], .CONTROL_RETURN
-    set_label $P44, control_43
-    push_eh $P44
-    .lex "self", param_45
-    .lex "$setting_name", param_46
-.annotate 'line', 23
-    find_lex $P48, "$setting_name"
-    unless_null $P48, vivify_25
-    new $P48, "Undef"
-  vivify_25:
-    set $S49, $P48
-    isne $I50, $S49, "NULL"
-    unless $I50, if_47_end
-.annotate 'line', 25
-    find_lex $P52, "$setting_name"
-    unless_null $P52, vivify_26
-    new $P52, "Undef"
+    find_lex $P50, "$setting_name"
+    unless_null $P50, vivify_26
+    new $P50, "Undef"
   vivify_26:
-    find_lex $P53, "%settings_loaded"
-    unless_null $P53, vivify_27
-    $P53 = root_new ['parrot';'Hash']
-  vivify_27:
-    set $P54, $P53[$P52]
-    unless_null $P54, vivify_28
+    set $S51, $P50
+    isne $I52, $S51, "NULL"
+    unless $I52, if_49_end
+.annotate 'line', 24
+    find_lex $P54, "$setting_name"
+    unless_null $P54, vivify_27
     new $P54, "Undef"
+  vivify_27:
+    find_lex $P55, "%settings_loaded"
+    unless_null $P55, vivify_28
+    $P55 = root_new ['parrot';'Hash']
   vivify_28:
-    defined $I55, $P54
-    if $I55, unless_51_end
-    .const 'Sub' $P57 = "15_1303430326.792" 
-    capture_lex $P57
-    $P57()
-  unless_51_end:
-  if_47_end:
-.annotate 'line', 35
-    new $P75, "Exception"
-    set $P75['type'], .CONTROL_RETURN
-    find_lex $P76, "$setting_name"
-    unless_null $P76, vivify_39
-    new $P76, "Undef"
-  vivify_39:
-    find_lex $P77, "%settings_loaded"
-    unless_null $P77, vivify_40
-    $P77 = root_new ['parrot';'Hash']
-  vivify_40:
-    set $P78, $P77[$P76]
-    unless_null $P78, vivify_41
+    set $P56, $P55[$P54]
+    unless_null $P56, vivify_29
+    new $P56, "Undef"
+  vivify_29:
+    defined $I57, $P56
+    if $I57, unless_53_end
+    .const 'Sub' $P59 = "15_1303576200.736" 
+    capture_lex $P59
+    $P59()
+  unless_53_end:
+  if_49_end:
+.annotate 'line', 34
+    new $P77, "Exception"
+    set $P77['type'], .CONTROL_RETURN
+    find_lex $P78, "$setting_name"
+    unless_null $P78, vivify_40
     new $P78, "Undef"
+  vivify_40:
+    find_lex $P79, "%settings_loaded"
+    unless_null $P79, vivify_41
+    $P79 = root_new ['parrot';'Hash']
   vivify_41:
-    setattribute $P75, 'payload', $P78
-    throw $P75
-.annotate 'line', 22
+    set $P80, $P79[$P78]
+    unless_null $P80, vivify_42
+    new $P80, "Undef"
+  vivify_42:
+    setattribute $P77, 'payload', $P80
+    throw $P77
+.annotate 'line', 21
     .return ()
-  control_43:
+  control_45:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P79, exception, "payload"
-    .return ($P79)
+    getattribute $P81, exception, "payload"
+    .return ($P81)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["ModuleLoader"]
-.sub "_block56"  :anon :subid("15_1303430326.792") :outer("14_1303430326.792")
-.annotate 'line', 26
-    new $P58, "Undef"
-    .lex "$*CTXSAVE", $P58
-.annotate 'line', 27
-    new $P59, "Undef"
-    .lex "$*MAIN_CTX", $P59
-.annotate 'line', 26
-    find_lex $P60, "self"
-    store_lex "$*CTXSAVE", $P60
-    find_lex $P61, "$*MAIN_CTX"
-    unless_null $P61, vivify_29
-    get_hll_global $P61, "$MAIN_CTX"
-    unless_null $P61, vivify_30
-    die "Contextual $*MAIN_CTX not found"
-  vivify_30:
-  vivify_29:
-.annotate 'line', 28
-    find_lex $P62, "$setting_name"
-    unless_null $P62, vivify_31
-    new $P62, "Undef"
-  vivify_31:
-    concat $P63, $P62, ".setting.pbc"
-    set $S64, $P63
-    load_bytecode $S64
-.annotate 'line', 29
-    find_lex $P66, "$*MAIN_CTX"
-    unless_null $P66, vivify_32
-    get_hll_global $P66, "$MAIN_CTX"
-    unless_null $P66, vivify_33
-    die "Contextual $*MAIN_CTX not found"
-  vivify_33:
-  vivify_32:
-    defined $I67, $P66
-    if $I67, unless_65_end
-.annotate 'line', 30
-    new $P68, 'String'
-    set $P68, "Unable to load setting "
-    find_lex $P69, "$setting_name"
-    unless_null $P69, vivify_34
-    new $P69, "Undef"
-  vivify_34:
-    concat $P70, $P68, $P69
-    concat $P71, $P70, "; maybe it is missing a YOU_ARE_HERE?"
-    die $P71
-  unless_65_end:
-.annotate 'line', 32
-    find_lex $P72, "$*MAIN_CTX"
-    unless_null $P72, vivify_35
-    get_hll_global $P72, "$MAIN_CTX"
-    unless_null $P72, vivify_36
-    die "Contextual $*MAIN_CTX not found"
-  vivify_36:
-  vivify_35:
-    find_lex $P73, "$setting_name"
-    unless_null $P73, vivify_37
-    new $P73, "Undef"
-  vivify_37:
-    find_lex $P74, "%settings_loaded"
-    unless_null $P74, vivify_38
-    $P74 = root_new ['parrot';'Hash']
-    store_lex "%settings_loaded", $P74
-  vivify_38:
-    set $P74[$P73], $P72
+.sub "_block58"  :anon :subid("15_1303576200.736") :outer("14_1303576200.736")
 .annotate 'line', 25
-    .return ($P72)
+    new $P60, "Undef"
+    .lex "$*CTXSAVE", $P60
+.annotate 'line', 26
+    new $P61, "Undef"
+    .lex "$*MAIN_CTX", $P61
+.annotate 'line', 25
+    find_lex $P62, "self"
+    store_lex "$*CTXSAVE", $P62
+    find_lex $P63, "$*MAIN_CTX"
+    unless_null $P63, vivify_30
+    get_hll_global $P63, "$MAIN_CTX"
+    unless_null $P63, vivify_31
+    die "Contextual $*MAIN_CTX not found"
+  vivify_31:
+  vivify_30:
+.annotate 'line', 27
+    find_lex $P64, "$setting_name"
+    unless_null $P64, vivify_32
+    new $P64, "Undef"
+  vivify_32:
+    concat $P65, $P64, ".setting.pbc"
+    set $S66, $P65
+    load_bytecode $S66
+.annotate 'line', 28
+    find_lex $P68, "$*MAIN_CTX"
+    unless_null $P68, vivify_33
+    get_hll_global $P68, "$MAIN_CTX"
+    unless_null $P68, vivify_34
+    die "Contextual $*MAIN_CTX not found"
+  vivify_34:
+  vivify_33:
+    defined $I69, $P68
+    if $I69, unless_67_end
+.annotate 'line', 29
+    new $P70, 'String'
+    set $P70, "Unable to load setting "
+    find_lex $P71, "$setting_name"
+    unless_null $P71, vivify_35
+    new $P71, "Undef"
+  vivify_35:
+    concat $P72, $P70, $P71
+    concat $P73, $P72, "; maybe it is missing a YOU_ARE_HERE?"
+    die $P73
+  unless_67_end:
+.annotate 'line', 31
+    find_lex $P74, "$*MAIN_CTX"
+    unless_null $P74, vivify_36
+    get_hll_global $P74, "$MAIN_CTX"
+    unless_null $P74, vivify_37
+    die "Contextual $*MAIN_CTX not found"
+  vivify_37:
+  vivify_36:
+    find_lex $P75, "$setting_name"
+    unless_null $P75, vivify_38
+    new $P75, "Undef"
+  vivify_38:
+    find_lex $P76, "%settings_loaded"
+    unless_null $P76, vivify_39
+    $P76 = root_new ['parrot';'Hash']
+    store_lex "%settings_loaded", $P76
+  vivify_39:
+    set $P76[$P75], $P74
+.annotate 'line', 24
+    .return ($P74)
 .end
 
 
 .HLL "nqp"
 
 .namespace []
-.sub "_block93" :load :anon :subid("17_1303430326.792")
+.sub "_block95" :load :anon :subid("17_1303576200.736")
 .annotate 'line', 1
-    .const 'Sub' $P95 = "10_1303430326.792" 
-    $P96 = $P95()
-    .return ($P96)
+    .const 'Sub' $P97 = "10_1303576200.736" 
+    $P98 = $P97()
+    .return ($P98)
 .end
 
