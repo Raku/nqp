@@ -52,4 +52,12 @@ my class NQPCapture {
     method ($key) is parrot_vtable('delete_keyed_int') {
         pir::delete(@!array, $key);
     }
+    
+    method ($value) is parrot_vtable('unshift_pmc') {
+        pir::unshift(@!array, $value);
+    }
+    
+    method ($value) is parrot_vtable('push_pmc') {
+        pir::unshift(@!array, $value);
+    }
 }
