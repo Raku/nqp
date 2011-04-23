@@ -174,7 +174,8 @@ class HLL::Compiler::SerializationContextBuilder {
     # during the deserialization.
     method load_module($module_name, $cur_GLOBALish) {
         # Immediate loading.
-        ModuleLoader.load_module($module_name, $cur_GLOBALish);
+        ModuleLoader.load_module($module_name, $cur_GLOBALish,
+            :prefix(%*COMPILING<%?OPTIONS><module-path>));
         
         # Make sure we do the loading during deserialization.
         self.add_event(:deserialize_past(PAST::Stmts.new(

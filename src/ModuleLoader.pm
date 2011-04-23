@@ -11,12 +11,15 @@ knowhow ModuleLoader {
         $*CTXSAVE := 0;
     }
     
-    method load_module($module_name, $cur_GLOBALish) {
+    method load_module($module_name, $cur_GLOBALish, :$prefix) {
         # If we didn't already do so, load the module and capture
         # its mainline. Otherwise, we already loaded it so go on
         # with what we already have.
         my $module_ctx;
         my $path := pir::join('/', pir::split('::', $module_name)) ~ '.pbc';
+        if $prefix {
+            $path := "$prefix/$path";
+        }
         if pir::defined(%modules_loaded{$path}) {
             $module_ctx := %modules_loaded{$path};
         }
