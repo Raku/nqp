@@ -18,13 +18,13 @@ my class NQPCapture {
     method hash() { %!hash }
 
     method ($key) is parrot_vtable('get_pmc_keyed_str') {
-        %!hash{$key}
+        pir::exists(%!hash, $key) ?? %!hash{$key} !! pir::null__P()
     }
     method ($key) is parrot_vtable('get_pmc_keyed') {
-        %!hash{$key}
+        pir::exists(%!hash, $key) ?? %!hash{$key} !! pir::null__P()
     }
     method ($key) is parrot_vtable('get_pmc_keyed_int') {
-        @!array[$key]
+        pir::exists(@!array, $key) ?? @!array[$key] !! pir::null__P()
     }
 
     method ($key, $value) is parrot_vtable('set_pmc_keyed_str') {
