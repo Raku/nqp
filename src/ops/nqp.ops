@@ -670,7 +670,7 @@ inline op stable_publish_vtable_mapping(in PMC, in PMC) :base_core {
         /* Toss any exist mapping array; allocate new one. */
         if (st->parrot_vtable_mapping)
             mem_sys_free(st->parrot_vtable_mapping);
-        st->parrot_vtable_mapping = mem_allocate_n_zeroed_typed(NUM_VTABLE_FUNCTIONS, PMC *);
+        st->parrot_vtable_mapping = mem_allocate_n_zeroed_typed(NUM_VTABLE_FUNCTIONS + PARROT_VTABLE_LOW, PMC *);
 
         /* Go through the various mapped names and insert them into the
          * mapping table. */
@@ -679,7 +679,7 @@ inline op stable_publish_vtable_mapping(in PMC, in PMC) :base_core {
             char   *c_name = Parrot_str_to_cstring(interp, name);
             PMC    *meth   = VTABLE_get_pmc_keyed_str(interp, $2, name);
             INTVAL  idx    = -1;
-            for (i = PARROT_VTABLE_LOW; i < NUM_VTABLE_FUNCTIONS; i++) {
+            for (i = PARROT_VTABLE_LOW; i < NUM_VTABLE_FUNCTIONS + PARROT_VTABLE_LOW; i++) {
                 if (strcmp(Parrot_vtable_slot_names[i], c_name) == 0) {
                     idx = i;
                     break;
