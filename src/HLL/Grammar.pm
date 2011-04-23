@@ -751,8 +751,8 @@ An operator precedence parser.
             op[0] = left
             op[1] = right
             $P0 = opO['reducecheck']
+            if null $P0 goto op_infix_1
             $S0 = $P0
-            unless $S0 goto op_infix_1
             self.$S0(op)
           op_infix_1:
             self.'!reduce'('EXPR', 'INFIX', op)
