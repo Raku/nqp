@@ -740,7 +740,8 @@ An operator precedence parser.
             op = pop opstack
             opOPER = op['OPER']
             opO = opOPER['O']
-            opassoc = opO['assoc']
+            $P0 = opO['assoc']
+            opassoc = $P0
             if opassoc == 'unary' goto op_unary
             if opassoc == 'list' goto op_list
           op_infix:
@@ -749,7 +750,8 @@ An operator precedence parser.
             left = pop termstack
             op[0] = left
             op[1] = right
-            $S0 = opO['reducecheck']
+            $P0 = opO['reducecheck']
+            $S0 = $P0
             unless $S0 goto op_infix_1
             self.$S0(op)
           op_infix_1:
@@ -772,14 +774,16 @@ An operator precedence parser.
 
           op_list:
             .local string sym
-            sym = opOPER['sym']
+            $P0 = opOPER['sym']
+            sym = $P0
             arg = pop termstack
             unshift op, arg
           op_sym_loop:
             unless opstack goto op_sym_done
             $P0 = opstack[-1]
             $P0 = $P0['OPER']
-            $S0 = $P0['sym']
+            $P0 = $P0['sym']
+            $S0 = $P0
             if sym != $S0 goto op_sym_done
             arg = pop termstack
             unshift op, arg
