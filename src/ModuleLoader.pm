@@ -1,4 +1,5 @@
 knowhow ModuleLoader {
+    my %modules_loaded;
     my %settings_loaded;
     
     method ctxsave() {
@@ -11,16 +12,25 @@ knowhow ModuleLoader {
     }
     
     method load_module($module_name, $cur_GLOBALish) {
-        # Load the module and capture its mainline.
-        my $*CTXSAVE := self;
-        my $*MAIN_CTX;
+        # If we didn't already do so, load the module and capture
+        # its mainline. Otherwise, we already loaded it so go on
+        # with what we already have.
+        my $module_ctx;
         my $path := pir::join('/', pir::split('::', $module_name)) ~ '.pbc';
-        pir::load_bytecode($path);
+        if pir::defined(%modules_loaded{$path}) {
+            $module_ctx := %modules_loaded{$path};
+        }
+        else {
+            my $*CTXSAVE := self;
+            my $*MAIN_CTX;
+            pir::load_bytecode($path);
+            %modules_loaded{$path} := $module_ctx := $*MAIN_CTX;
+        }
 
         # Provided we have a mainline and a GLOBALish in it,
         # do the merge.
-        if pir::defined($*MAIN_CTX) {
-            my $UNIT := pir::getattribute__PPs($*MAIN_CTX, 'lex_pad');
+        if pir::defined($module_ctx) {
+            my $UNIT := pir::getattribute__PPs($module_ctx, 'lex_pad');
             unless pir::isnull($UNIT<GLOBALish>) {
                 merge_globals($cur_GLOBALish, $UNIT<GLOBALish>);
             }
