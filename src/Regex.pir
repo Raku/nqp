@@ -35,6 +35,8 @@ This file brings together the various Regex modules needed for Regex.pbc .
     # Capture inner blocks.
     .const 'Sub' $P2 = 'Cursor_Load'
     capture_lex $P2
+    .const 'Sub' $P3 = 'Match_Load'
+    capture_lex $P3
 .end
 
 .sub '' :load :init :outer('Regex_Outer')

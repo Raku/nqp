@@ -29,10 +29,13 @@ grammars.
     assign $P0, 1
     set_global '$!TRUE', $P0
     
-    # Create Regex outer package.
-    .local pmc Regex, RegexWHO
+    # Create Regex outer package and put it in GLOBALish.
+    .local pmc GLOBALish, GLOBALishWHO, Regex, RegexWHO
+    GLOBALish = find_lex "GLOBALish"
+    GLOBALishWHO = get_who GLOBALish
     $P0 = get_knowhow
     Regex = $P0."new_type"("name"=>"Regex")
+    GLOBALishWHO["Regex"] = Regex
     RegexWHO = get_who Regex
 
     # Build meta-object and store it in the namespace.

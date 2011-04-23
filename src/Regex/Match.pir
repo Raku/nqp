@@ -1,4 +1,4 @@
-# Copyright (C) 2009, The Perl Foundation.
+# Copyright (C) 2009-2011, The Perl Foundation.
 # $Id$
 
 =head1 NAME
@@ -16,15 +16,28 @@ This file implements Match objects for the regex engine.
 
 .namespace ['Regex';'Match']
 
-.sub '' :anon :load :init
-    .local pmc type_obj, how, NQPClassHOW, capture
+.sub '' :anon :load :init :outer('Regex_Outer') :subid('Match_Load')
+    # Get Regex package we'll install into.
+    .local pmc GLOBALish, GLOBALishWHO, Regex, RegexWHO
+    GLOBALish = find_lex "GLOBALish"
+    GLOBALishWHO = get_who GLOBALish
+    Regex = GLOBALishWHO["Regex"]
+    RegexWHO = get_who Regex
+
+    # Build meta-object and store it in the namespace.
+    .local pmc type_obj, how, NQPClassHOW
     get_hll_global NQPClassHOW, "NQPClassHOW"
     type_obj = NQPClassHOW."new_type"("Match" :named("name"))
-    how = get_how type_obj
-    set_hll_global ["Regex"], "Match", type_obj
+    RegexWHO["MATCH"] = type_obj
     set_global "$?CLASS", type_obj
+    how = get_how type_obj
+    
+    # XXXNS Old namespace handling installation, during migration to new.
+    set_hll_global ["Regex"], "Match", type_obj
 
-    capture = get_hll_global "NQPCapture"
+    # Add capture as parent.
+    .local pmc capture
+    capture = find_lex "NQPCapture"
     how.'add_parent'(type_obj, capture)
 
     # Add all methods.
@@ -69,7 +82,7 @@ This file implements Match objects for the regex engine.
     # Add attributes.
     .local pmc NQPAttribute, int_type, attr
     NQPAttribute = get_hll_global "NQPAttribute"
-    int_type = get_hll_global "int"
+    int_type = find_lex "int"
 
     attr = NQPAttribute.'new'('$!from' :named('name'), int_type :named('type'))
     how.'add_attribute'(type_obj, attr)
@@ -85,7 +98,7 @@ This file implements Match objects for the regex engine.
 
     attr = NQPAttribute.'new'('$!ast')
     how.'add_attribute'(type_obj, attr)
-
+    
     how.'compose'(type_obj)
 
     .return ()
