@@ -119,8 +119,9 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     .local int pos
     .local string tgt
     (cur, pos, tgt) = self.'!cursor_start'()
-    .local pmc debug
-    #debug = getattribute cur, '$!debug'
+    .local pmc debug, cur_class
+    cur_class = get_global '$?CLASS'
+    debug = getattribute cur, cur_class, '$!debug'
     if null debug goto debug_1
     cur.'!cursor_debug'('START', name)
   debug_1:
@@ -144,8 +145,9 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     .local int pos
     .local string tgt
     (cur, pos, tgt) = self.'!cursor_start'()
-    .local pmc debug
-    #debug = getattribute cur, '$!debug'
+    .local pmc debug, cur_class
+    cur_class = get_global '$?CLASS'
+    debug = getattribute cur, cur_class, '$!debug'
     if null debug goto debug_1
     cur.'!cursor_debug'('START', 'alpha')
   debug_1:
@@ -246,7 +248,9 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     arg = get_global '$!TRUE'
   have_arg:
 
-    setattribute self, '$!debug', arg
+    .local pmc cur_class
+    cur_class = get_global '$?CLASS'
+    setattribute self, cur_class, '$!debug', arg
     .return (1)
 .end
 
