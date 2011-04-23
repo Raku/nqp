@@ -228,11 +228,11 @@ otherwise returns 0 (false).
 
 =cut
 
-.sub 'Bool' :vtable('get_bool') :method :subid('Regex_Match_meth_Bool')
+.sub 'Bool' :method :subid('Regex_Match_meth_Bool')
     .local pmc cur_class
     cur_class = get_global '$?CLASS'
     $I0 = repr_get_attr_int self, cur_class, '$!from'
-    $I0 = repr_get_attr_int self, cur_class, '$!to'
+    $I1 = repr_get_attr_int self, cur_class, '$!to'
     $I2 = isge $I1, $I0
     .return ($I2)
 .end
@@ -244,7 +244,7 @@ Returns the integer value of the matched text.
 
 =cut
 
-.sub 'Int' :vtable('get_integer') :method :subid('Regex_Match_meth_Int')
+.sub 'Int' :method :subid('Regex_Match_meth_Int')
     $I0 = self.'Str'()
     .return ($I0)
 .end
@@ -256,7 +256,7 @@ Returns the numeric value of this match
 
 =cut
 
-.sub 'Num' :vtable('get_number') :method :subid('Regex_Match_meth_Num')
+.sub 'Num' :method :subid('Regex_Match_meth_Num')
     $N0 = self.'Str'()
     .return ($N0)
 .end
