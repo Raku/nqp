@@ -523,7 +523,7 @@ class NQP::Actions is HLL::Actions {
                 PAST::Var.new( :name('type_obj'), :scope('register') ),
                 ($*PKGDECL eq 'grammar' ??
                     PAST::Var.new( :name('Cursor'), :namespace('Regex'), :scope('package') ) !!
-                    $*SC.get_object_sc_ref_past(find_lex('NQPMu')))
+                    $*SC.get_object_sc_ref_past(find_sym(['NQPMu'], $/)))
             ));
         }
 
@@ -1410,15 +1410,63 @@ class NQP::Actions is HLL::Actions {
         0;
     }
     
-    # Finds a lexical that has a known value at compile time.
-    sub find_lex($name) {
-        for @BLOCK {
-            my %sym := $_.symbol($name);
-            if +%sym {
-                return %sym<value>;
+    # Finds a symbol that has a known value at compile time from the
+    # perspective of the current scope. Checks for lexicals, then if
+    # that fails tries package lookup.
+    sub find_sym(@name, $/) {
+        # Make sure it's not an empty name.
+        unless +@name { $/.CURSOR.panic("Cannot look up empty name"); }
+        
+        # If it's a single-part name, look through the lexical
+        # scopes.
+        if +@name == 1 {
+            my $final_name := @name[0];
+            for @BLOCK {
+                my %sym := $_.symbol($final_name);
+                if +%sym {
+                    if pir::exists(%sym, 'value') {
+                        return %sym<value>;
+                    }
+                    else {
+                        pir::die("No compile-time value for $final_name");
+                    }
+                }
             }
         }
-        pir::die("Could not find lexical '$name'");
+        
+        # If it's a multi-part name, see if the containing package
+        # is a lexical somewhere. Otherwise we fall back to looking
+        # in GLOBALish.
+        my $result := $*GLOBALish;
+        if +@name >= 2 {
+            my $first := @name[0];
+            for @BLOCK {
+                my %sym := $_.symbol($first);
+                if +%sym {
+                    if pir::exists(%sym, 'value') {
+                        $result := %sym<value>;
+                        @name.shift();
+                        last;
+                    }
+                    else {
+                        pir::die("No compile-time value for $first");
+                    }                    
+                }
+            }
+        }
+        
+        # Try to chase down the parts of the name.
+        for @name {
+            if pir::exists($result.WHO, ~$_) {
+                $result := ($result.WHO){$_};
+            }
+            else {
+                pir::die("Could not locate compile-time value for symbol " ~
+                    pir::join('::', @name));
+            }
+        }
+        
+        $result;
     }
 }
 
