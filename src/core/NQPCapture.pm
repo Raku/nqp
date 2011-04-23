@@ -12,6 +12,10 @@ my class NQPCapture {
         @!array := pir::new('ResizablePMCArray');
         %!hash := pir::new('Hash');
     }
+    
+    method list() { @!array }
+    
+    method hash() { %!hash }
 
     method ($key) is parrot_vtable('get_pmc_keyed_str') {
         %!hash{$key}
