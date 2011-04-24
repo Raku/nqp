@@ -35,8 +35,18 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     }
 
     VTABLE void destroy() {
-        /* Delegate to the representation. */
-        REPR(SELF)->gc_free(interp, REPR_PMC(SELF), SELF);
+        /* Delegate to the representation. 
+         * XXX There's a really nasty problem here. Since the GC provides no
+         * promises about ordering, the s-table may get collected before the
+         * last object pointing to it (a situation that arises when we have
+         * anonymous types). That means the REPR - which knows how to free
+         * the object - may be unreachable by the time we get here. Oops.
+         * For now, just leak the type object memory. The current REPR
+         * factoring is less than ideal in other ways too.
+         */
+        STable *st = STABLE(SELF);
+        if (st)
+            REPR(SELF)->gc_free(interp, REPR_PMC(SELF), SELF);
     }
 
     VTABLE PMC * find_method(STRING *name) {
