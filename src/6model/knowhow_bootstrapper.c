@@ -38,9 +38,11 @@ static void new_type(PARROT_INTERP, PMC *nci) {
         VTABLE_get_string_keyed_str(interp, capture, name_str) :
         empty_str;
     ((KnowHOWREPRInstance *)PMC_data(HOW))->name = name;
+    PARROT_GC_WRITE_BARRIER(interp, HOW);
     
     /* Set .WHO to an empty hash. */
     STABLE(type_object)->WHO = pmc_new(interp, enum_class_Hash);
+    PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC(type_object));
 
     /* Put it into capture to act as return value. */
     Parrot_pcc_build_call_from_c_args(interp, capture, "P", type_object);
