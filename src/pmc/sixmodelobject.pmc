@@ -45,8 +45,11 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
          * factoring is less than ideal in other ways too.
          */
         STable *st = STABLE(SELF);
-        if (st)
-            REPR(SELF)->gc_free(interp, REPR_PMC(SELF), SELF);
+        if (st) {
+            REPRCommonalities *repr = REPR(_self);
+            if (repr)
+                repr->gc_free(interp, REPR_PMC(_self), _self);
+        }
     }
 
     VTABLE PMC * find_method(STRING *name) {
