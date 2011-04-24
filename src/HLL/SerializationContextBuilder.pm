@@ -264,6 +264,21 @@ class HLL::Compiler::SerializationContextBuilder {
         self.add_event(:deserialize_past($fixup), :fixup_past($fixup));
     }
     
+    # Adds a fixup to install a specified PAST::Block in a package under the
+    # specified name.
+    method install_package_routine($package, $name, $past_block) {
+        my $fixup := PAST::Op.new(
+            :pasttype('bind'),
+            PAST::Var.new(
+                :scope('keyed'),
+                PAST::Op.new( :pirop('get_who PP'), self.get_slot_past_for_object($package) ),
+                ~$name
+            ),
+            PAST::Val.new( :value($past_block) )
+        );
+        self.add_event(:deserialize_past($fixup), :fixup_past($fixup));
+    }
+    
     # Creates a meta-object for a package, adds it to the root objects and
     # stores an event for the action. Returns the created object.
     method pkg_create_mo($how, :$name, :$repr) {

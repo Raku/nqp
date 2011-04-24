@@ -735,6 +735,14 @@ class NQP::Actions is HLL::Actions {
                     if $*SCOPE eq 'our' {
                         # Need to install it at loadinit time but also re-bind
                         # it per invocation.
+                        $*SC.install_package_routine($*PACKAGE, $name, $past);
+                        @BLOCK[0][0].push(PAST::Op.new(
+                            :pasttype('bind'),
+                            lexical_package_lookup([$name], $/),
+                            PAST::Var.new( :name($name), :scope('lexical') )
+                        ));
+                        
+                        # XXX Legacy namespace handling.
                         @BLOCK[0][0].push(PAST::Op.new(
                             :pasttype('bind'),
                             PAST::Var.new( :name($name), :scope('package') ),
@@ -745,6 +753,7 @@ class NQP::Actions is HLL::Actions {
                             PAST::Var.new( :name($name), :scope('package') ),
                             PAST::Val.new( :value($past) )
                         ));
+                        
                     }
                 }
                 $past := PAST::Var.new( :name($name) );
@@ -828,9 +837,12 @@ class NQP::Actions is HLL::Actions {
                     $to_add
                 ));
             }
-        }
-        if $*SCOPE eq 'our' {
-            $past.pirflags(':nsentry');
+            
+            if $*SCOPE eq 'our' {
+                $*SC.install_package_routine($*PACKAGE, $name, $past);
+                # XXX Legacy namespace installation
+                $past.pirflags(':nsentry');
+            }
         }
 
         # Install AST node in match object, then apply traits.
