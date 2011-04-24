@@ -19,8 +19,9 @@ static PMC * type_object_for(PARROT_INTERP, PMC *self, PMC *HOW) {
     STable *st  = STABLE_STRUCT(st_pmc);
 
     /* Create type object and point it back at the STable. */
-    st->WHAT = wrap_object(interp, obj);
     obj->common.stable = st_pmc;
+    st->WHAT = wrap_object(interp, obj);
+    PARROT_GC_WRITE_BARRIER(interp, st_pmc);
 
     return st->WHAT;
 }

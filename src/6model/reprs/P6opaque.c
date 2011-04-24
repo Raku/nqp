@@ -340,8 +340,9 @@ static PMC * type_object_for(PARROT_INTERP, PMC *self, PMC *HOW) {
      * do *not* populate the spill pointer at all, we leave it null. A
      * non-null value (even PMCNULL) is what indicates we have a defined
      * object. Yes, I know, it's sick. */
-    st->WHAT = wrap_object(interp, obj);
     obj->common.stable = st_pmc;
+    st->WHAT = wrap_object(interp, obj);
+    PARROT_GC_WRITE_BARRIER(interp, st_pmc);
 
     return st->WHAT;
 }
