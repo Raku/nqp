@@ -138,8 +138,10 @@ Sets the WHO for a 6model Object.
 
 */
 inline op set_who(in PMC, in PMC) :base_core {
-    if ($1->vtable->base_type == smo_id)
+    if ($1->vtable->base_type == smo_id) {
         STABLE($1)->WHO = $2;
+        PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC($1));
+    }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use set_who on a SixModelObject");
@@ -350,6 +352,7 @@ inline op publish_type_check_cache(in PMC, in PMC) :base_core {
             target_st->type_check_cache = NULL;
             target_st->type_check_cache_length = 0;
         }
+        PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC($1));
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -552,8 +555,10 @@ to the array in $2.
 
 */
 inline op set_dispatchees(in PMC, in PMC) :base_core {
-    if ($1->vtable->base_type == disp_id)
+    if ($1->vtable->base_type == disp_id) {
         PARROT_DISPATCHERSUB($1)->dispatchees = $2;
+        PARROT_GC_WRITE_BARRIER(interp, $1);
+    }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use set_dispatchees if first operand is a DispatcherSub.");
