@@ -21,6 +21,7 @@ src/ops/*.c
 src/pmc/pmc_*.h
 src/pmc/*.c
 Regex.pbc
+PASTRegex.pbc
 HLL.pbc
 P6Regex
 P6Regex.pbc

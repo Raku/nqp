@@ -64,16 +64,9 @@ This file brings together the various Regex modules needed for Regex.pbc .
 .include 'src/Regex/Method.pir'
 .include 'src/Regex/Dumper.pir'
 
-.HLL 'parrot'
-
-.include 'src/PAST/Regex.pir'
-.include 'src/PAST/Compiler-Regex.pir'
-.include 'src/cheats/parrot-callcontext.pir'
-
-.HLL 'nqp'
-
 .sub '' :anon :load :init
-    # Also want the dumper.
+    # Also want regex PAST and the dumper.
+    load_bytecode 'PASTRegex.pbc'
     load_bytecode 'dumper.pbc'
     
     ## Import PAST and PCT to the HLL.

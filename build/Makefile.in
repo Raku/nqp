@@ -55,10 +55,13 @@ REGEX_SOURCES = \
   src/Regex/Match.pir \
   src/Regex/Method.pir \
   src/Regex/Dumper.pir \
+
+PAST_SOURCES = \
+  src/PASTRegex.pir \
   src/PAST/Regex.pir \
   src/PAST/Compiler-Regex.pir \
   src/cheats/parrot-callcontext.pir \
-
+  
 HLL_SOURCES = \
   src/HLL/Grammar.pm \
   src/HLL/Actions.pm \
@@ -101,6 +104,8 @@ STAGE2 = src/stage2
 MODULE_LOADER_PBC = ModuleLoader.pbc
 
 REGEX_PBC       = Regex.pbc
+
+PAST_PBC        = PASTRegex.pbc
 
 HLL_PBC          = HLL.pbc
 HLL_COMBINED     = gen/HLL.pm
@@ -170,6 +175,7 @@ CLEANUPS = \
   *.manifest \
   *.pdb \
   $(REGEX_PBC) \
+  $(PAST_PBC) \
   $(HLL_PBC) \
   $(P6REGEX_PBC) \
   P6Regex$(EXE) \
@@ -221,6 +227,9 @@ stage0: $(STAGE0)
 stage1: $(STAGE1)
 stage2: $(STAGE2)
 
+$(PAST_PBC): $(PAST_SOURCES)
+	$(PARROT) -o $(PAST_PBC) $(PAST_SOURCES)
+
 $(STAGE0): $(STAGE0_PBCS)
 
 $(STAGE0_PBCS): $(DYNEXT_TARGET) $(STAGE0_SOURCES)
@@ -258,7 +267,7 @@ $(STAGE1)/$(CORE_SETTING_PBC): $(STAGE0_PBCS) $(STAGE1)/$(NQP_MO_PBC) $(STAGE1)/
 	    --setting=NULL $(STAGE1)/$(CORE_SETTING_NQP)
 	$(PARROT) -o $(STAGE1)/$(CORE_SETTING_PBC) $(STAGE1)/$(CORE_SETTING_PIR)
         
-$(STAGE1)/$(REGEX_PBC): $(DYNEXT_TARGET) $(REGEX_SOURCES) $(STAGE1)/$(CORE_SETTING_PBC)
+$(STAGE1)/$(REGEX_PBC): $(DYNEXT_TARGET) $(PAST_PBC) $(REGEX_SOURCES) $(STAGE1)/$(CORE_SETTING_PBC)
 	$(PARROT) -o $(STAGE1)/$(REGEX_PBC) $(REGEX_SOURCES)
 
 $(STAGE1)/$(HLL_PBC): $(STAGE0_PBCS) $(STAGE1)/$(REGEX_PBC) $(STAGE1)/$(CORE_SETTING_PBC) $(HLL_SOURCES)
@@ -314,7 +323,7 @@ $(STAGE2)/$(CORE_SETTING_PBC): $(STAGE1_PBCS) $(STAGE2)/$(NQP_MO_PBC) $(STAGE2)/
 	    --setting=NULL $(STAGE2)/$(CORE_SETTING_NQP)
 	$(PARROT) -o $(STAGE2)/$(CORE_SETTING_PBC) $(STAGE2)/$(CORE_SETTING_PIR)
     
-$(STAGE2)/$(REGEX_PBC): $(DYNEXT_TARGET) $(REGEX_SOURCES) $(STAGE2)/$(CORE_SETTING_PBC)
+$(STAGE2)/$(REGEX_PBC): $(DYNEXT_TARGET) $(PAST_PBC) $(REGEX_SOURCES) $(STAGE2)/$(CORE_SETTING_PBC)
 	$(PARROT) -o $(STAGE2)/$(REGEX_PBC) $(REGEX_SOURCES)
 
 $(STAGE2)/$(HLL_PBC): $(STAGE1_PBCS) $(STAGE2)/$(REGEX_PBC) $(STAGE2)/$(CORE_SETTING_PBC) $(HLL_SOURCES)
@@ -388,6 +397,7 @@ $(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS_SOURCE) $(DYNPMC)
 
 bootstrap-files: $(STAGE2_PBCS) src/stage2/$(CORE_SETTING_NQP)
 	$(PERL) build/gen_bootstrap.pl src/Regex.pir >src/stage0/Regex-s0.pir
+    $(PERL) build/gen_bootstrap.pl src/PASTRegex.pir >src/stage0/PASTRegex-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/stage2/$(HLL_COMBINED_PIR) >src/stage0/HLL-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/stage2/$(NQP_COMBINED_PIR) >src/stage0/NQP-s0.pir
 	$(PERL) build/gen_bootstrap.pl src/stage2/$(CORE_SETTING_PIR) >src/stage0/NQPCORE.setting-s0.pir
