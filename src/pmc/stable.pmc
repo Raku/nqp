@@ -68,8 +68,16 @@ pmclass STable manual_attrs dynpmc group nqp {
     VTABLE void destroy() {
         /* If a v-table was allocated, free that. */
         STable *st = (STable *)PMC_data(SELF);
-        if (st->vtable)
+        if (st->vtable) {
             mem_sys_free(st->vtable);
+            st->vtable = NULL;
+        }
+        
+        /* If a Parrot v-table mapping was installed, free that. */
+        if (st->parrot_vtable_mapping) {
+            mem_sys_free(st->parrot_vtable_mapping);
+            st->parrot_vtable_mapping = NULL;
+        }
         
         /* Free the underlying struct. */
         mem_sys_free(PMC_data(SELF));

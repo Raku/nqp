@@ -783,8 +783,10 @@ Sets an object's serialization context.
 
 */
 inline op nqp_set_sc_for_object(in PMC, in PMC) :base_core {
-    if ($1->vtable->base_type == smo_id)
+    if ($1->vtable->base_type == smo_id) {
         SC_PMC($1) = $2;
+        PARROT_GC_WRITE_BARRIER(interp, $1);
+    }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use nqp_set_sc_for_object with a SixModelObject");
