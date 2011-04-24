@@ -691,6 +691,8 @@ inline op stable_publish_vtable_mapping(in PMC, in PMC) :base_core {
                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                     "No such Parrot v-table '%Ss'", name);
         }
+        
+        PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC($1));
     }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
