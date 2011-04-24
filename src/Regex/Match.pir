@@ -78,7 +78,6 @@ This file implements Match objects for the regex engine.
     .const 'Sub' $P20 = 'Regex_Match_meth_!make'
     how.'add_method'(type_obj, '!make', $P20)
 
-
     # Add attributes.
     .local pmc NQPAttribute, int_type, attr
     NQPAttribute = get_hll_global "NQPAttribute"
@@ -101,7 +100,37 @@ This file implements Match objects for the regex engine.
     
     how.'compose'(type_obj)
 
+    .const 'Sub' $P0 = 'Regex_Match_Body'
+    $P0(type_obj)
+    
     .return ()
+.end
+
+.sub '' :subid('Regex_Match_Body') :outer('Regex_Outer')
+    .param pmc type_obj
+    .lex '$?CLASS', type_obj
+    .const 'Sub' $P1 = 'Regex_Match_meth_CURSOR'
+    capture_lex $P1
+    .const 'Sub' $P1 = 'Regex_Match_meth_from'
+    capture_lex $P1
+    .const 'Sub' $P1 = 'Regex_Match_meth_to'
+    capture_lex $P1
+    .const 'Sub' $P1 = 'Regex_Match_meth_chars'
+    capture_lex $P1
+    .const 'Sub' $P1 = 'Regex_Match_meth_orig'
+    capture_lex $P1
+    .const 'Sub' $P1 = 'Regex_Match_meth_Str'
+    capture_lex $P1
+    .const 'Sub' $P1 = 'Regex_Match_meth_ast'
+    capture_lex $P1
+    .const 'Sub' $P1 = 'Regex_Match_meth_Bool'
+    capture_lex $P1
+    .const 'Sub' $P1 = 'Regex_Match_meth_Int'
+    capture_lex $P1
+    .const 'Sub' $P1 = 'Regex_Match_meth_Num'
+    capture_lex $P1
+    .const 'Sub' $P1 = 'Regex_Match_meth_!make'
+    capture_lex $P1
 .end
 
 =head2 Methods
@@ -114,9 +143,9 @@ Returns the Cursor associated with this match object.
 
 =cut
 
-.sub 'CURSOR' :method :subid('Regex_Match_meth_CURSOR')
+.sub 'CURSOR' :method :subid('Regex_Match_meth_CURSOR') :outer('Regex_Match_Body')
     .local pmc cur_class
-    cur_class = get_global '$?CLASS'
+    cur_class = find_lex '$?CLASS'
     $P0 = getattribute self, cur_class, '$!cursor'
     .return ($P0)
 .end
@@ -127,9 +156,9 @@ Returns the offset in the target string of the beginning of the match.
 
 =cut
 
-.sub 'from' :method :subid('Regex_Match_meth_from')
+.sub 'from' :method :subid('Regex_Match_meth_from') :outer('Regex_Match_Body')
     .local pmc cur_class
-    cur_class = get_global '$?CLASS'
+    cur_class = find_lex '$?CLASS'
     $I0 = repr_get_attr_int self, cur_class, '$!from'
     .return ($I0)
 .end
@@ -141,9 +170,9 @@ Returns the offset in the target string of the end of the match.
 
 =cut
 
-.sub 'to' :method :subid('Regex_Match_meth_to')
+.sub 'to' :method :subid('Regex_Match_meth_to') :outer('Regex_Match_Body')
     .local pmc cur_class
-    cur_class = get_global '$?CLASS'
+    cur_class = find_lex '$?CLASS'
     $I0 = repr_get_attr_int self, cur_class, '$!to'
     .return ($I0)
 .end
@@ -155,7 +184,7 @@ Returns C<.to() - .from()>
 
 =cut
 
-.sub 'chars' :method :subid('Regex_Match_meth_chars')
+.sub 'chars' :method :subid('Regex_Match_meth_chars') :outer('Regex_Match_Body')
     $I0 = self.'to'()
     $I1 = self.'from'()
     $I2 = $I0 - $I1
@@ -172,9 +201,9 @@ Return the original item that was matched against.
 
 =cut
 
-.sub 'orig' :method :subid('Regex_Match_meth_orig')
+.sub 'orig' :method :subid('Regex_Match_meth_orig') :outer('Regex_Match_Body')
     .local pmc cur_class
-    cur_class = get_global '$?CLASS'
+    cur_class = find_lex '$?CLASS'
     $P0 = getattribute self, cur_class, '$!target'
     .return ($P0)
 .end
@@ -186,7 +215,7 @@ Returns the portion of the target corresponding to this match.
 
 =cut
 
-.sub 'Str' :method :subid('Regex_Match_meth_Str') :vtable('get_string')
+.sub 'Str' :method :subid('Regex_Match_meth_Str') :vtable('get_string') :outer('Regex_Match_Body')
     $S0 = self.'orig'()
     $I0 = self.'from'()
     $I1 = self.'to'()
@@ -203,9 +232,9 @@ has been set then returns C<Str> above.
 
 =cut
 
-.sub 'ast' :method :subid('Regex_Match_meth_ast')
+.sub 'ast' :method :subid('Regex_Match_meth_ast') :outer('Regex_Match_Body')
     .local pmc cur_class, ast
-    cur_class = get_global '$?CLASS'
+    cur_class = find_lex '$?CLASS'
     ast = getattribute self, cur_class, '$!ast'
     unless null ast goto have_ast
     # XXX should probably be NQPMu or so
@@ -228,9 +257,9 @@ otherwise returns 0 (false).
 
 =cut
 
-.sub 'Bool' :method :subid('Regex_Match_meth_Bool')
+.sub 'Bool' :method :subid('Regex_Match_meth_Bool') :outer('Regex_Match_Body')
     .local pmc cur_class
-    cur_class = get_global '$?CLASS'
+    cur_class = find_lex '$?CLASS'
     $I0 = repr_get_attr_int self, cur_class, '$!from'
     $I1 = repr_get_attr_int self, cur_class, '$!to'
     $I2 = isge $I1, $I0
@@ -244,7 +273,7 @@ Returns the integer value of the matched text.
 
 =cut
 
-.sub 'Int' :method :subid('Regex_Match_meth_Int')
+.sub 'Int' :method :subid('Regex_Match_meth_Int') :outer('Regex_Match_Body')
     $I0 = self.'Str'()
     .return ($I0)
 .end
@@ -256,7 +285,7 @@ Returns the numeric value of this match
 
 =cut
 
-.sub 'Num' :method :subid('Regex_Match_meth_Num')
+.sub 'Num' :method :subid('Regex_Match_meth_Num') :outer('Regex_Match_Body')
     $N0 = self.'Str'()
     .return ($N0)
 .end
@@ -268,10 +297,10 @@ Set the "ast object" for the invocant.
 
 =cut
 
-.sub '!make' :method :subid('Regex_Match_meth_!make')
+.sub '!make' :method :subid('Regex_Match_meth_!make') :outer('Regex_Match_Body')
     .param pmc obj
     .local pmc cur_class
-    cur_class = get_global '$?CLASS'
+    cur_class = find_lex '$?CLASS'
     setattribute self, cur_class, '$!ast', obj
     .return (obj)
 .end

@@ -16,11 +16,11 @@ Perform a match for protoregex C<name>.
 
 =cut
 
-.sub '!protoregex' :method :subid('Regex_Cursor_meth_!protoregex')
+.sub '!protoregex' :method :subid('Regex_Cursor_meth_!protoregex') :outer('Regex_Cursor_Body')
     .param string name
 
     .local pmc cur_class
-    cur_class = get_global '$?CLASS'
+    cur_class = find_lex '$?CLASS'
 
     .local pmc debug
     debug = getattribute self, cur_class, '$!debug'
@@ -130,7 +130,7 @@ added).
 
 =cut
 
-.sub '!protoregex_generation' :method :subid('Regex_Cursor_meth_!protoregex_generation')
+.sub '!protoregex_generation' :method :subid('Regex_Cursor_meth_!protoregex_generation') :outer('Regex_Cursor_Body')
     $P0 = get_global '$!generation'
     # don't change this to 'inc' -- we want to ensure new PMC
     $P1 = add $P0, 1
@@ -147,7 +147,7 @@ create a new one and return it.
 
 =cut
 
-.sub '!protoregex_tokrx' :method :subid('Regex_Cursor_meth_!protoregex_tokrx')
+.sub '!protoregex_tokrx' :method :subid('Regex_Cursor_meth_!protoregex_tokrx') :outer('Regex_Cursor_Body')
     .param string name
 
     .local pmc generation
@@ -332,7 +332,7 @@ recreating it on future calls.
 
 =cut
 
-.sub '!protoregex_gen_table' :method :subid('Regex_Cursor_meth_!protoregex_gen_table')
+.sub '!protoregex_gen_table' :method :subid('Regex_Cursor_meth_!protoregex_gen_table') :outer('Regex_Cursor_Body')
     .param pmc type_obj
 
     .local pmc how
@@ -372,7 +372,7 @@ tokrx hash.
 
 =cut
 
-.sub '!PREFIX__!protoregex' :method :subid('Regex_Cursor_meth_!PREFIX__!protoregex')
+.sub '!PREFIX__!protoregex' :method :subid('Regex_Cursor_meth_!PREFIX__!protoregex') :outer('Regex_Cursor_Body')
     .param string name
 
     .local pmc tokrx
@@ -395,7 +395,7 @@ tokrx hash.
 .end
 
 
-.sub '!PREFIX__!subrule' :method :subid('Regex_Cursor_meth_!PREFIX__!subrule')
+.sub '!PREFIX__!subrule' :method :subid('Regex_Cursor_meth_!PREFIX__!subrule') :outer('Regex_Cursor_Body')
     .param string name
     .param string prefix
 
@@ -448,7 +448,7 @@ tokrx hash.
 .end
 
 
-.sub 'DUMP_TOKRX' :method :subid('Regex_Cursor_meth_DUMP_TOKRX')
+.sub 'DUMP_TOKRX' :method :subid('Regex_Cursor_meth_DUMP_TOKRX') :outer('Regex_Cursor_Body')
     .param string name
 
     .local pmc tokrx

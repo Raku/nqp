@@ -11,7 +11,7 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
 
 .namespace ['Regex';'Cursor']
 
-.sub 'before' :method :subid('Regex_Cursor_meth_before')
+.sub 'before' :method :subid('Regex_Cursor_meth_before') :outer('Regex_Cursor_Body')
     .param pmc regex           :optional
     .local pmc cur
     .local int pos
@@ -25,7 +25,7 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
 .end
 
 
-.sub 'ident' :method :subid('Regex_Cursor_meth_ident')
+.sub 'ident' :method :subid('Regex_Cursor_meth_ident') :outer('Regex_Cursor_Body')
     .local pmc cur
     .local int pos, eos
     .local string tgt
@@ -60,7 +60,7 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     .return (cur)
 .end
 
-.sub 'ww' :method :subid('Regex_Cursor_meth_ww')
+.sub 'ww' :method :subid('Regex_Cursor_meth_ww') :outer('Regex_Cursor_Body')
     .local pmc cur
     .local int pos, eos
     .local string tgt
@@ -90,7 +90,7 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     .return (cur)
 .end
 
-.sub 'ws' :method :subid('Regex_Cursor_meth_ws')
+.sub 'ws' :method :subid('Regex_Cursor_meth_ws') :outer('Regex_Cursor_Body')
     .local pmc cur
     .local int pos, eos
     .local string tgt
@@ -120,7 +120,7 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     .local string tgt
     (cur, pos, tgt) = self.'!cursor_start'()
     .local pmc debug, cur_class
-    cur_class = get_global '$?CLASS'
+    cur_class = find_lex '$?CLASS'
     debug = getattribute cur, cur_class, '$!debug'
     if null debug goto debug_1
     cur.'!cursor_debug'('START', name)
@@ -140,13 +140,13 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     .return (cur)
 .end
 
-.sub 'alpha' :method :subid('Regex_Cursor_meth_alpha')
+.sub 'alpha' :method :subid('Regex_Cursor_meth_alpha') :outer('Regex_Cursor_Body')
     .local pmc cur
     .local int pos
     .local string tgt
     (cur, pos, tgt) = self.'!cursor_start'()
     .local pmc debug, cur_class
-    cur_class = get_global '$?CLASS'
+    cur_class = find_lex '$?CLASS'
     debug = getattribute cur, cur_class, '$!debug'
     if null debug goto debug_1
     cur.'!cursor_debug'('START', 'alpha')
@@ -216,7 +216,7 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     .tailcall '!cclass'(self, 'blank', .CCLASS_BLANK)
 .end
 
-.sub 'FAILGOAL' :method :subid('Regex_Cursor_meth_FAILGOAL')
+.sub 'FAILGOAL' :method :subid('Regex_Cursor_meth_FAILGOAL') :outer('Regex_Cursor_Body')
     .param string goal
     .local string dba
     $P0 = getinterp
@@ -240,7 +240,7 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     die message
 .end
 
-.sub 'DEBUG' :method :subid('Regex_Cursor_meth_DEBUG')
+.sub 'DEBUG' :method :subid('Regex_Cursor_meth_DEBUG') :outer('Regex_Cursor_Body')
     .param pmc arg             :optional
     .param int has_arg         :opt_flag
 
@@ -249,7 +249,7 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
   have_arg:
 
     .local pmc cur_class
-    cur_class = get_global '$?CLASS'
+    cur_class = find_lex '$?CLASS'
     setattribute self, cur_class, '$!debug', arg
     .return (1)
 .end
