@@ -510,7 +510,7 @@ class NQP::Actions is HLL::Actions {
             $*SC.install_lexical_symbol($past, '$?CLASS', $*PACKAGE);
         }
 
-        # Add parent, if we have one.
+        # Add parent, if we have one; otherwise set default.
         if $<parent> {
             my $parent;
             my $parent_found;
@@ -526,19 +526,9 @@ class NQP::Actions is HLL::Actions {
             }
         }
         elsif pir::can($how, 'set_default_parent') {
-            # Set default parent.
-            $*PACKAGE-SETUP.push(PAST::Op.new(
-                :pasttype('callmethod'), :name('set_default_parent'),
-                PAST::Op.new(
-                    # XXX nqpop get_how
-                    :pirop('get_how PP'),
-                    PAST::Var.new( :name('type_obj'), :scope('register') )
-                ),
-                PAST::Var.new( :name('type_obj'), :scope('register') ),
-                ($*PKGDECL eq 'grammar' ??
-                    PAST::Var.new( :name('Cursor'), :namespace('Regex'), :scope('package') ) !!
-                    $*SC.get_object_sc_ref_past(find_sym(['NQPMu'], $/)))
-            ));
+            my $default := $*PKGDECL eq 'grammar' ?? ['Regex', 'Cursor'] !! ['NQPMu'];
+            $*SC.pkg_add_parent_or_role($*PACKAGE, "set_default_parent",
+                find_sym($default, $/));
         }
 
         # Add any done roles.
