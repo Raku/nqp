@@ -304,9 +304,7 @@ class HLL::Compiler::SerializationContextBuilder {
         my $how_name := @how_ns.pop();
         my $setup_call := PAST::Op.new(
             :pasttype('callmethod'), :name('new_type'),
-            PAST::Var.new( :name($how_name), :namespace(@how_ns), :scope('package') )
-            # XXX Not ready to do this quite yet...
-            # self.get_object_sc_ref_past($how)
+            self.get_object_sc_ref_past($how)
         );
         if pir::defined($name) {
             $setup_call.push(PAST::Val.new( :value($name), :named('name') ));
