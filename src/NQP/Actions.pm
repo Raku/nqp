@@ -425,18 +425,14 @@ class NQP::Actions is HLL::Actions {
                 $past.viviself( vivitype( $<sigil> ) );
             }
             elsif $<twigil>[0] eq '*' {
+                my $global_fallback := lexical_package_lookup(['GLOBAL',  ~$<sigil> ~ $<desigilname>], $/);
+                $global_fallback.viviself(PAST::Op.new(
+                    'Contextual ' ~ ~$/ ~ ' not found',
+                    :pirop('die')
+                ));
                 $past := PAST::Var.new(
                     :name(~@name.pop), :scope('contextual'),
-                    :viviself(
-                        PAST::Var.new( 
-                            :scope('package'), :namespace(''), 
-                            :name( ~$<sigil> ~ $<desigilname> ),
-                            :viviself( 
-                                PAST::Op.new( 'Contextual ' ~ ~$/ ~ ' not found',
-                                              :pirop('die') )
-                            )
-                        )
-                    )
+                    :viviself($global_fallback)
                 );
             }
             elsif $<twigil>[0] eq '!' {
@@ -1398,11 +1394,15 @@ class NQP::Actions is HLL::Actions {
         }
         
         # Otherwise, see if the first part of the name is lexically
-        # known. If not, it's in GLOBAL.
+        # known. If not, it's in GLOBAL. Also, if first part is GLOBAL
+        # then strip it off.
         else {
             my $path := is_lexical(@name[0]) ??
                 PAST::Var.new( :name(@name.shift()), :scope('lexical') ) !!
                 PAST::Var.new( :name('GLOBAL'), :namespace([]), :scope('package') );
+            if @name[0] eq 'GLOBAL' {
+                @name.shift();
+            }
             for @name {
                 $path := PAST::Op.new(
                     :pirop('nqp_get_package_through_who PPs'),
