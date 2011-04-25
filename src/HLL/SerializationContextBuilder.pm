@@ -142,6 +142,12 @@ class HLL::Compiler::SerializationContextBuilder {
         }
     }
     
+    # XXX We need to load the module loader to load modules, which means we
+    # can't just use ...; it, which means we can't get the ModuleLoader symbol
+    # merged into anywhere...anyway, we chop the circularity by finding it
+    # through a Parrot namespace for now.
+    my $loader := pir::get_hll_global__Ps('ModuleLoader');
+    
     # Loads the setting and emits code 
     method load_setting($setting_name) {
         # Do nothing for the NULL setting.
@@ -150,7 +156,7 @@ class HLL::Compiler::SerializationContextBuilder {
             # Once it's loaded, set it as the outer context of the code
             # being compiled.
             my $path := %*COMPILING<%?OPTIONS><setting-path>;
-            my $setting := %*COMPILING<%?OPTIONS><outer_ctx> := ModuleLoader.load_setting(
+            my $setting := %*COMPILING<%?OPTIONS><outer_ctx> := $loader.load_setting(
                 $path ?? "$path/$setting_name" !! $setting_name);
             
             # Do load for pre-compiled situation.
@@ -177,7 +183,7 @@ class HLL::Compiler::SerializationContextBuilder {
     # during the deserialization.
     method load_module($module_name, $cur_GLOBALish) {
         # Immediate loading.
-        my $module := ModuleLoader.load_module($module_name, $cur_GLOBALish,
+        my $module := $loader.load_module($module_name, $cur_GLOBALish,
             :prefix(%*COMPILING<%?OPTIONS><module-path>));
         
         # Make sure we do the loading during deserialization.
