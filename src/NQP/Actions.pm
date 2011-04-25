@@ -510,21 +510,20 @@ class NQP::Actions is HLL::Actions {
             $*SC.install_lexical_symbol($past, '$?CLASS', $*PACKAGE);
         }
 
-        # Add call to add_parent if we have one.
-        # XXX Doesn't handle lexical classes yet.
+        # Add parent, if we have one.
         if $<parent> {
-            my @ns := pir::clone__PP($<parent>[0]<identifier>);
-            my $name := ~@ns.pop;
-            $*PACKAGE-SETUP.push(PAST::Op.new(
-                :pasttype('callmethod'), :name('add_parent'),
-                PAST::Op.new(
-                    # XXX nqpop get_how
-                    :pirop('get_how PP'),
-                    PAST::Var.new( :name('type_obj'), :scope('register') )
-                ),
-                PAST::Var.new( :name('type_obj'), :scope('register') ),
-                PAST::Var.new( :name(~$name), :namespace(@ns), :scope('package') )
-            ));
+            my $parent;
+            my $parent_found;
+            try {
+                $parent := find_sym(pir::clone__PP($<parent>[0]<identifier>), $/);
+                $parent_found := 1;
+            }
+            if $parent_found {
+                $*SC.pkg_add_parent_or_role($*PACKAGE, "add_parent", $parent);
+            }
+            else {
+                $/.CURSOR.panic("Could not find parent class '" ~ ~$<parent>[0] ~ "'");
+            }
         }
         elsif pir::can($how, 'set_default_parent') {
             # Set default parent.
