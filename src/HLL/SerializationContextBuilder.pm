@@ -155,9 +155,8 @@ class HLL::Compiler::SerializationContextBuilder {
             # Load it immediately, so the compile time info is available.
             # Once it's loaded, set it as the outer context of the code
             # being compiled.
-            my $path := %*COMPILING<%?OPTIONS><setting-path>;
-            my $setting := %*COMPILING<%?OPTIONS><outer_ctx> := $loader.load_setting(
-                $path ?? "$path/$setting_name" !! $setting_name);
+            my $setting := %*COMPILING<%?OPTIONS><outer_ctx>
+                        := $loader.load_setting($setting_name);
             
             # Do load for pre-compiled situation.
             self.add_event(:deserialize_past(PAST::Stmts.new(
@@ -183,8 +182,7 @@ class HLL::Compiler::SerializationContextBuilder {
     # during the deserialization.
     method load_module($module_name, $cur_GLOBALish) {
         # Immediate loading.
-        my $module := $loader.load_module($module_name, $cur_GLOBALish,
-            :prefix(%*COMPILING<%?OPTIONS><module-path>));
+        my $module := $loader.load_module($module_name, $cur_GLOBALish);
         
         # Make sure we do the loading during deserialization.
         self.add_event(:deserialize_past(PAST::Stmts.new(

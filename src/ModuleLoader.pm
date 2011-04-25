@@ -11,14 +11,17 @@ knowhow ModuleLoader {
         $*CTXSAVE := 0;
     }
     
-    method load_module($module_name, $cur_GLOBALish, :$prefix) {
+    method load_module($module_name, $cur_GLOBALish) {
         # If we didn't already do so, load the module and capture
         # its mainline. Otherwise, we already loaded it so go on
         # with what we already have.
         my $module_ctx;
         my $path := pir::join('/', pir::split('::', $module_name)) ~ '.pbc';
-        if $prefix {
-            $path := "$prefix/$path";
+        try {
+            my $prefix := %*COMPILING<%?OPTIONS><module-path>;
+            if $prefix {
+                $path := "$prefix/$path";
+            }
         }
         if pir::defined(%modules_loaded{$path}) {
             $module_ctx := %modules_loaded{$path};
@@ -72,21 +75,34 @@ knowhow ModuleLoader {
     }
     
     method load_setting($setting_name) {
+        my $setting;
+        
         if $setting_name ne 'NULL' {
+            # Add path prefix and .setting suffix.
+            my $path := "$setting_name.setting.pbc";
+            try {
+                my $prefix := %*COMPILING<%?OPTIONS><setting-path>;
+                if $prefix {
+                    $path := "$prefix/$path";
+                }
+            }
+        
             # Unless we already did so, load the setting.
-            unless pir::defined(%settings_loaded{$setting_name}) {
+            unless pir::defined(%settings_loaded{$path}) {
                 my $*CTXSAVE := self;
                 my $*MAIN_CTX;
                 my $preserve_global := pir::get_hll_global__Ps('GLOBAL');
-                pir::load_bytecode("$setting_name.setting.pbc");
+                pir::load_bytecode($path);
                 pir::set_hll_global__vsP('GLOBAL', $preserve_global);
                 unless pir::defined($*MAIN_CTX) {
                     pir::die("Unable to load setting $setting_name; maybe it is missing a YOU_ARE_HERE?");
                 }
-                %settings_loaded{$setting_name} := $*MAIN_CTX;
+                %settings_loaded{$path} := $*MAIN_CTX;
             }
+            
+            $setting := %settings_loaded{$path};
         }
         
-        return %settings_loaded{$setting_name};
+        return $setting;
     }
 }
