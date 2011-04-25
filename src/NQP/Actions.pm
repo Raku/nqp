@@ -534,18 +534,18 @@ class NQP::Actions is HLL::Actions {
         # Add any done roles.
         if $<role> {
             for $<role> {
-                my @ns := pir::clone__PP($_<identifier>);
-                my $name := ~@ns.pop;
-                $*PACKAGE-SETUP.push(PAST::Op.new(
-                    :pasttype('callmethod'), :name('add_role'),
-                    PAST::Op.new(
-                        # XXX nqpop get_how
-                        :pirop('get_how PP'),
-                        PAST::Var.new( :name('type_obj'), :scope('register') )
-                    ),
-                    PAST::Var.new( :name('type_obj'), :scope('register') ),
-                    PAST::Var.new( :name(~$name), :namespace(@ns), :scope('package') )
-                ));
+                my $role;
+                my $role_found;
+                try {
+                    $role := find_sym(pir::clone__PP($_<identifier>), $/);
+                    $role_found := 1;
+                }
+                if $role_found {
+                    $*SC.pkg_add_parent_or_role($*PACKAGE, "add_role", $role);
+                }
+                else {
+                    $/.CURSOR.panic("Could not find role '" ~ ~$_ ~ "'");
+                }
             }
         }
 
