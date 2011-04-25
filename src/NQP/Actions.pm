@@ -195,7 +195,7 @@ class NQP::Actions is HLL::Actions {
         # Create GLOBALish - the current GLOBAL view, created cleanly
         # for each compilation unit so we get separate compilation.
         # XXX Uses KnowHOW for now; want something lighter really.
-        $*GLOBALish := $*SC.pkg_create_mo(KnowHOW, :name('GLOBALish'));
+        $*GLOBALish := $*SC.pkg_create_mo(%*HOW<knowhow>, :name('GLOBALish'));
         $*GLOBALish.HOW.compose($*GLOBALish);
         $*SC.install_lexical_symbol(@BLOCK[0], 'GLOBALish', $*GLOBALish);
         
