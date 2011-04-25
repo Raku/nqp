@@ -1148,11 +1148,7 @@ class NQP::Actions is HLL::Actions {
         }
         else {
             my @ns := pir::clone__PP($<name><identifier>);
-            my $name := @ns.pop;
-            @ns.shift if @ns && @ns[0] eq 'GLOBAL';
-            $var := PAST::Var.new( :name(~$name), :namespace(@ns), :scope('package') );
-            # XXX Not quite ready for this yet.
-            #$var := lexical_package_lookup(@ns, $/);
+            $var := lexical_package_lookup(@ns, $/);
         }
         
         # If it's a call, add the arguments.
@@ -1382,11 +1378,19 @@ class NQP::Actions is HLL::Actions {
         my $lookup := PAST::Var.new( :scope('keyed'), ~$final_name);
         
         # If there's no explicit qualification, then look it up in the
-        # current package.
+        # current package, and fall back to looking in GLOBAL.
         if +@name == 0 {
             $lookup.unshift(PAST::Op.new(
                 :pirop('get_who PP'),
                 PAST::Var.new( :name('$?PACKAGE'), :scope('lexical') )
+            ));
+            $lookup.viviself(PAST::Var.new(
+                :scope('keyed'),
+                PAST::Op.new(
+                    :pirop('get_who PP'),
+                    PAST::Var.new( :name('GLOBAL'), :namespace([]), :scope('package') )
+                ),
+                ~$final_name
             ));
         }
         
