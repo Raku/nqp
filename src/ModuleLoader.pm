@@ -26,7 +26,9 @@ knowhow ModuleLoader {
         else {
             my $*CTXSAVE := self;
             my $*MAIN_CTX;
+            my $preserve_global := pir::get_hll_global__Ps('GLOBAL');
             pir::load_bytecode($path);
+            pir::set_hll_global__vsP('GLOBAL', $preserve_global);
             %modules_loaded{$path} := $module_ctx := $*MAIN_CTX;
         }
 
@@ -75,7 +77,9 @@ knowhow ModuleLoader {
             unless pir::defined(%settings_loaded{$setting_name}) {
                 my $*CTXSAVE := self;
                 my $*MAIN_CTX;
+                my $preserve_global := pir::get_hll_global__Ps('GLOBAL');
                 pir::load_bytecode("$setting_name.setting.pbc");
+                pir::set_hll_global__vsP('GLOBAL', $preserve_global);
                 unless pir::defined($*MAIN_CTX) {
                     pir::die("Unable to load setting $setting_name; maybe it is missing a YOU_ARE_HERE?");
                 }
