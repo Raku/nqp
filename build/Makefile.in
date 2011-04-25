@@ -124,7 +124,7 @@ NQP_MO_SOURCES = src/how/KnowHOWAttribute.pm src/how/NQPClassHOW.pm \
                  src/how/NQPNativeHOW.pm src/how/NQPAttribute.pm \
                  src/how/NQPConcreteRoleHOW.pm src/how/NQPParametricRoleHOW.pm \
                  src/how/RoleToClassApplier.pm src/how/RoleToRoleApplier.pm \
-                 src/how/NQPModuleHOW.pm
+                 src/how/NQPModuleHOW.pm src/how/EXPORTHOW.pm \
 
 NQP_MO_PBC      = nqpmo.pbc
 NQP_MO_PIR      = gen/nqp-mo.pir

@@ -9,14 +9,13 @@ grammar NQP::Grammar is HLL::Grammar {
         %*LANG<MAIN>          := NQP::Grammar;
         %*LANG<MAIN-actions>  := NQP::Actions;
 
-        # Package declarator to meta-package mapping.
+        # Package declarator to meta-package mapping. Note that there is
+        # one universal KnowHOW from the 6model core, so we do not need to
+        # worry about locating the "correct one" from the point of view of
+        # the code we're compiling. The other packages will get set up after
+        # the loading of the meta-objects.
         my %*HOW;
         %*HOW<knowhow> := KnowHOW;
-        %*HOW<module>  := NQPModuleHOW;
-        %*HOW<class>   := NQPClassHOW;
-        %*HOW<grammar> := NQPClassHOW;
-        %*HOW<role>    := NQPParametricRoleHOW;
-        %*HOW<native>  := NQPNativeHOW;
 
         # What attribute class to use with what HOW, plus a default.
         my $*DEFAULT-METAATTR := 'NQPAttribute';

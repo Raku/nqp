@@ -150,7 +150,7 @@ class HLL::Compiler::SerializationContextBuilder {
             # Once it's loaded, set it as the outer context of the code
             # being compiled.
             my $path := %*COMPILING<%?OPTIONS><setting-path>;
-            %*COMPILING<%?OPTIONS><outer_ctx> := ModuleLoader.load_setting(
+            my $setting := %*COMPILING<%?OPTIONS><outer_ctx> := ModuleLoader.load_setting(
                 $path ?? "$path/$setting_name" !! $setting_name);
             
             # Do load for pre-compiled situation.
@@ -168,6 +168,8 @@ class HLL::Compiler::SerializationContextBuilder {
                        )
                 )
             )));
+            
+            return pir::getattribute__PPs($setting, 'lex_pad');
         }
     }
     
@@ -175,7 +177,7 @@ class HLL::Compiler::SerializationContextBuilder {
     # during the deserialization.
     method load_module($module_name, $cur_GLOBALish) {
         # Immediate loading.
-        ModuleLoader.load_module($module_name, $cur_GLOBALish,
+        my $module := ModuleLoader.load_module($module_name, $cur_GLOBALish,
             :prefix(%*COMPILING<%?OPTIONS><module-path>));
         
         # Make sure we do the loading during deserialization.
@@ -189,6 +191,8 @@ class HLL::Compiler::SerializationContextBuilder {
                $module_name,
                self.get_slot_past_for_object($cur_GLOBALish)
             ))));
+            
+        return pir::getattribute__PPs($module, 'lex_pad');
     }
     
     # Installs a symbol into the package. Does so immediately, and

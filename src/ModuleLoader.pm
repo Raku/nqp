@@ -30,14 +30,16 @@ knowhow ModuleLoader {
             %modules_loaded{$path} := $module_ctx := $*MAIN_CTX;
         }
 
-        # Provided we have a mainline and a GLOBALish in it,
-        # do the merge.
+        # Provided we have a mainline...
         if pir::defined($module_ctx) {
+            # Merge any globals.
             my $UNIT := pir::getattribute__PPs($module_ctx, 'lex_pad');
             unless pir::isnull($UNIT<GLOBALish>) {
                 merge_globals($cur_GLOBALish, $UNIT<GLOBALish>);
             }
         }
+
+        return $module_ctx;
     }
     
     # XXX This is a really dumb and minimalistic GLOBAL merger.
@@ -80,6 +82,7 @@ knowhow ModuleLoader {
                 %settings_loaded{$setting_name} := $*MAIN_CTX;
             }
         }
+        
         return %settings_loaded{$setting_name};
     }
 }

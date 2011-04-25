@@ -186,9 +186,23 @@ class NQP::Actions is HLL::Actions {
         unless pir::defined(%*COMPILING<%?OPTIONS><outer_ctx>) {
             # We haven't got a specified outer context already, so load a
             # setting.
-            $*SC.load_setting(%*COMPILING<%?OPTIONS><setting> // 'NQPCORE');
+            my $SETTING := $*SC.load_setting(%*COMPILING<%?OPTIONS><setting> // 'NQPCORE');
+            
+            # If it exports HOWs, grab them.
+            unless %*COMPILING<%?OPTIONS><setting> eq 'NULL' {
+                import_HOW_exports($SETTING);
+            }
         }
         self.SET_BLOCK_OUTER_CTX(@BLOCK[0]);
+    }
+    
+    sub import_HOW_exports($UNIT) {    
+        # See if we've exported any HOWs.
+        if pir::exists($UNIT, 'EXPORTHOW') {
+            for $UNIT<EXPORTHOW>.WHO {
+                %*HOW{$_.key} := $_.value;
+            }
+        }
     }
     
     method GLOBALish($/) {
@@ -211,7 +225,10 @@ class NQP::Actions is HLL::Actions {
     ## Statement control
 
     method statement_control:sym<use>($/) {
-        $*SC.load_module(~$<name>, $*GLOBALish);
+        my $module := $*SC.load_module(~$<name>, $*GLOBALish);
+        if pir::defined($module) {
+            import_HOW_exports($module);
+        }
         make PAST::Stmts.new();
     }
 
