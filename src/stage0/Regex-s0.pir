@@ -39,6 +39,8 @@ This file brings together the various Regex modules needed for Regex.pbc .
     capture_lex $P3
     .const 'Sub' $P4 = 'Method_Load'
     capture_lex $P4
+    .const 'Sub' $P5 = 'Imports'
+    capture_lex $P5
 .end
 
 .sub '' :load :init :outer('Regex_Outer')
@@ -2401,6 +2403,9 @@ containers for Regex subs that need .ACCEPTS and other regex attributes.
     method_how.'add_method'(method_type_obj, 'new', $P1)
     .const 'Sub' $P2 = 'Regex_Method_ACCEPTS'
     method_how.'add_method'(method_type_obj, 'ACCEPTS', $P2)
+    .const 'Sub' $P2 = 'Regex_Method_Str'
+    method_how.'add_method'(method_type_obj, 'Str', $P2)
+    method_how.'add_parrot_vtable_mapping'(method_type_obj, 'get_string', $P2)
     .const 'Sub' $P3 = 'Regex_Method_invoke'
     method_how.'add_parrot_vtable_mapping'(method_type_obj, 'invoke', $P3)
     
@@ -2455,6 +2460,18 @@ Create a new Regex::Regex object from C<sub>.
     code = getattribute self, cur_class, '$!code'
     $P0 = code(pos_args :flat, named_args :flat :named)
     .return ($P0)
+.end
+
+=item (vtable invoke override)
+
+=cut
+
+.sub '' :method :subid('Regex_Method_Str')
+    .local pmc cur_class, code
+    cur_class = get_global '$?CLASS'
+    code = getattribute self, cur_class, '$!code'
+    $S0 = code
+    .return ($S0)
 .end
 
 =item ACCEPTS(target)
@@ -2706,16 +2723,42 @@ An alternate dump output for a Match object and all of its subcaptures.
 # End:
 # vim: expandtab shiftwidth=4 ft=pir:
 
-.sub '' :anon :load :init
+.sub '' :anon :load :init :outer('Regex_Outer') :subid('Imports')
     # Also want regex PAST and the dumper.
     load_bytecode 'PASTRegex.pbc'
     load_bytecode 'dumper.pbc'
     
-    ## Import PAST and PCT to the HLL.
-    .local pmc hllns, parrotns, imports
-    hllns = get_hll_namespace
+    ## Import PAST and _dumper to the HLL.
+    .local pmc parrotns, pastns, GLOBALish, GLOBALishWHO, KnowHOW, how, PAST, PASTWHO
     parrotns = get_root_namespace ['parrot']
-    imports = split ' ', 'PAST PCT _dumper'
+    pastns = parrotns['PAST']
+    GLOBALish = find_lex "GLOBALish"
+    GLOBALishWHO = get_who GLOBALish
+    
+    KnowHOW = get_knowhow
+    PAST = KnowHOW."new_type"("name"=>"PAST")
+    how = get_how PAST
+    how."compose"(PAST)
+    GLOBALishWHO["PAST"] = PAST
+    PASTWHO = get_who PAST
+    
+    $P0 = iter pastns
+  it_loop:
+    unless $P0 goto it_loop_end
+    $S0 = shift $P0
+    $P1 = pastns[$S0]
+    $P1 = $P1[1]
+    PASTWHO[$S0] = $P1
+    goto it_loop
+  it_loop_end:
+    
+    $P0 = parrotns['_dumper']
+    GLOBALishWHO['_dumper'] = $P0
+    
+    ## XXX Legacy namespace import.
+    .local pmc hllns, imports
+    hllns = get_hll_namespace
+    imports = split ' ', 'PAST _dumper'
     parrotns.'export_to'(hllns, imports)
 .end
 
