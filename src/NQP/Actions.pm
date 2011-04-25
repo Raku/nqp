@@ -484,8 +484,7 @@ class NQP::Actions is HLL::Actions {
 
         # Evaluate everything in the package in-line unless this is a generic
         # type in which case it needs delayed evaluation. Normally, $?CLASS is
-        # a lexical that is set (XXX currently package-scoped as Parrot does not
-        # do static lexpads) but for generic types it becomes a parameter. Also
+        # a fixed lexical, but for generic types it becomes a parameter. Also
         # for parametric types, pass along the role body block.
         if pir::can($how, 'parametric') && $how.parametric($how) {
             $past.blocktype('declaration');
@@ -745,19 +744,6 @@ class NQP::Actions is HLL::Actions {
                             lexical_package_lookup([$name], $/),
                             PAST::Var.new( :name($name), :scope('lexical') )
                         ));
-                        
-                        # XXX Legacy namespace handling.
-                        @BLOCK[0][0].push(PAST::Op.new(
-                            :pasttype('bind'),
-                            PAST::Var.new( :name($name), :scope('package') ),
-                            PAST::Var.new( :name($name), :scope('lexical') )
-                        ));
-                        @BLOCK[0].loadinit.push(PAST::Op.new(
-                            :pasttype('bind'),
-                            PAST::Var.new( :name($name), :scope('package') ),
-                            PAST::Val.new( :value($past) )
-                        ));
-                        
                     }
                 }
                 $past := PAST::Var.new( :name($name) );
@@ -844,8 +830,6 @@ class NQP::Actions is HLL::Actions {
             
             if $*SCOPE eq 'our' {
                 $*SC.install_package_routine($*PACKAGE, $name, $past);
-                # XXX Legacy namespace installation
-                $past.pirflags(':nsentry');
             }
         }
 
