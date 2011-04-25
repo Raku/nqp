@@ -2,6 +2,8 @@
 
 plan(27);
 
+use HLL;
+
 my $x := HLL::CommandLine::Parser.new(['a', 'b', 'e=s', 'target=s', 'verbose']);
 my $r := $x.parse(['-a', 'b']);
 
