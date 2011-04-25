@@ -124,7 +124,7 @@ class HLL::Compiler::SerializationContextBuilder {
         # Get the object's serialization context; we're stuck if it
         # has none.
         my $sc := pir::nqp_get_sc_for_object__PP($obj);
-        if pir::isnull__IP($sc) {
+        unless pir::defined($sc) {
             pir::die("Object of type '" ~ $obj.HOW.name($obj) ~
                 "' cannot be referenced without having been " ~
                 "assigned a serialization context");
