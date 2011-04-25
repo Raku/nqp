@@ -49,6 +49,9 @@ containers for Regex subs that need .ACCEPTS and other regex attributes.
     method_how.'add_method'(method_type_obj, 'new', $P1)
     .const 'Sub' $P2 = 'Regex_Method_ACCEPTS'
     method_how.'add_method'(method_type_obj, 'ACCEPTS', $P2)
+    .const 'Sub' $P2 = 'Regex_Method_Str'
+    method_how.'add_method'(method_type_obj, 'Str', $P2)
+    method_how.'add_parrot_vtable_mapping'(method_type_obj, 'get_string', $P2)
     .const 'Sub' $P3 = 'Regex_Method_invoke'
     method_how.'add_parrot_vtable_mapping'(method_type_obj, 'invoke', $P3)
     
@@ -103,6 +106,18 @@ Create a new Regex::Regex object from C<sub>.
     code = getattribute self, cur_class, '$!code'
     $P0 = code(pos_args :flat, named_args :flat :named)
     .return ($P0)
+.end
+
+=item (vtable invoke override)
+
+=cut
+
+.sub '' :method :subid('Regex_Method_Str')
+    .local pmc cur_class, code
+    cur_class = get_global '$?CLASS'
+    code = getattribute self, cur_class, '$!code'
+    $S0 = code
+    .return ($S0)
 .end
 
 =item ACCEPTS(target)
