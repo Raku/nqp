@@ -178,6 +178,10 @@ CLEANUPS = \
   $(PAST_PBC) \
   $(HLL_PBC) \
   $(P6REGEX_PBC) \
+  $(PAST_PBC) \
+  $(NQP_MO_PBC) \
+  $(CORE_SETTING_PBC) \
+  $(MODULE_LOADER_PBC) \
   P6Regex$(EXE) \
   nqp.pbc \
   nqp$(EXE) \
