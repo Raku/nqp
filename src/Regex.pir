@@ -39,6 +39,8 @@ This file brings together the various Regex modules needed for Regex.pbc .
     capture_lex $P3
     .const 'Sub' $P4 = 'Method_Load'
     capture_lex $P4
+    .const 'Sub' $P5 = 'Imports'
+    capture_lex $P5
 .end
 
 .sub '' :load :init :outer('Regex_Outer')
@@ -64,16 +66,42 @@ This file brings together the various Regex modules needed for Regex.pbc .
 .include 'src/Regex/Method.pir'
 .include 'src/Regex/Dumper.pir'
 
-.sub '' :anon :load :init
+.sub '' :anon :load :init :outer('Regex_Outer') :subid('Imports')
     # Also want regex PAST and the dumper.
     load_bytecode 'PASTRegex.pbc'
     load_bytecode 'dumper.pbc'
     
-    ## Import PAST and PCT to the HLL.
-    .local pmc hllns, parrotns, imports
-    hllns = get_hll_namespace
+    ## Import PAST and _dumper to the HLL.
+    .local pmc parrotns, pastns, GLOBALish, GLOBALishWHO, KnowHOW, how, PAST, PASTWHO
     parrotns = get_root_namespace ['parrot']
-    imports = split ' ', 'PAST PCT _dumper'
+    pastns = parrotns['PAST']
+    GLOBALish = find_lex "GLOBALish"
+    GLOBALishWHO = get_who GLOBALish
+    
+    KnowHOW = get_knowhow
+    PAST = KnowHOW."new_type"("name"=>"PAST")
+    how = get_how PAST
+    how."compose"(PAST)
+    GLOBALishWHO["PAST"] = PAST
+    PASTWHO = get_who PAST
+    
+    $P0 = iter pastns
+  it_loop:
+    unless $P0 goto it_loop_end
+    $S0 = shift $P0
+    $P1 = pastns[$S0]
+    $P1 = $P1[1]
+    PASTWHO[$S0] = $P1
+    goto it_loop
+  it_loop_end:
+    
+    $P0 = parrotns['_dumper']
+    GLOBALishWHO['_dumper'] = $P0
+    
+    ## XXX Legacy namespace import.
+    .local pmc hllns, imports
+    hllns = get_hll_namespace
+    imports = split ' ', 'PAST _dumper'
     parrotns.'export_to'(hllns, imports)
 .end
 
