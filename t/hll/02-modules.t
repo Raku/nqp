@@ -1,17 +1,17 @@
 #! nqp
 
-plan(4);
+say("1..0 skip design changes, need re-work");
 
-my $parrot-comp := pir::compreg__Ps('parrot');
-
-my $comp := $parrot-comp.get_module('HLL::Compiler');
-ok($comp =:= $parrot-comp.WHO, "correctly retrieved namespace");
-
-my $crow := $parrot-comp.load_module('Crow');
-ok( pir::isa(Crow::help, 'Sub'), "successfully loaded Crow::help");
-ok( $crow =:= pir::get_hll_namespace__PP(['Crow']), "Crow ns correct");
-
-my $getopt := $parrot-comp.load_module('Getopt::Obj');
-ok( $getopt =:= pir::get_hll_namespace__PP(['Getopt','Obj']), "Getopt::Obj ns");
-
-
+# plan(4);
+#
+#my $parrot-comp := pir::compreg__Ps('parrot');#
+#
+#my $comp := $parrot-comp.get_module('HLL::Compiler');
+#ok($comp =:= $parrot-comp.WHO, "correctly retrieved namespace");#
+#
+#my $crow := $parrot-comp.load_module('Crow');
+#ok( pir::isa(Crow::help, 'Sub'), "successfully loaded Crow::help");
+#ok( $crow =:= pir::get_hll_namespace__PP(['Crow']), "Crow ns correct");
+#
+#my $getopt := $parrot-comp.load_module('Getopt::Obj');
+#ok( $getopt =:= pir::get_hll_namespace__PP(['Getopt','Obj']), "Getopt::Obj ns");
