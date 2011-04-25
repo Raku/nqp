@@ -505,7 +505,7 @@ class Regex::P6Regex::Actions is HLL::Actions {
         make 0;
     }
 
-    sub buildsub($rpast, $block = PAST::Block.new() ) {
+    our sub buildsub($rpast, $block = PAST::Block.new() ) {
         my %capnames := capnames($rpast, 0);
         %capnames{''} := 0;
         $rpast := PAST::Regex.new(
