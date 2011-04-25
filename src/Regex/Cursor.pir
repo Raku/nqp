@@ -1092,7 +1092,7 @@ and the longest match is returned.
     if $I0 goto var_array
 
   var_scalar:
-    $I0 = does var, 'invokable'
+    $I0 = is_invokable var
     if $I0 goto var_sub
 
   var_string:
@@ -1124,7 +1124,7 @@ and the longest match is returned.
   array_loop:
     unless var_it goto array_done
     elem = shift var_it
-    $I0 = does elem, 'invokable'
+    $I0 = is_invokable elem
     if $I0 goto array_sub
   array_string:
     $S0 = elem
@@ -1163,7 +1163,7 @@ are first compiled to regexes prior to being matched.
 .sub '!INTERPOLATE_REGEX' :method :subid('Regex_Cursor_meth_!INTERPOLATE_REGEX') :outer('Regex_Cursor_Body')
     .param pmc var
 
-    $I0 = does var, 'invokable'
+    $I0 = is_invokable var
     if $I0 goto done
 
     .local pmc p6regex
@@ -1181,7 +1181,7 @@ are first compiled to regexes prior to being matched.
   var_loop:
     unless var_it goto done
     elem = shift var_it
-    $I0 = does elem, 'invokable'
+    $I0 = is_invokable elem
     if $I0 goto var_next
     elem = p6regex.'compile'(elem)
   var_next:

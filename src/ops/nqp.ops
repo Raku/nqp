@@ -851,3 +851,23 @@ inline op nqp_get_package_through_who(out PMC, in PMC, in STR) :base_core {
             "Can only use nqp_get_package_through_who with a SixModelObject");
     }
 }
+
+/*
+
+=item is_invokable
+
+Checks if we have something that overrides the Parrot invoke v-table or
+is not a 6model object must is otherwise marked invokable.
+
+=cut
+
+*/
+inline op is_invokable(out INT, in PMC) :base_core {
+    if ($2->vtable->base_type == smo_id) {
+        PMC **vt = STABLE($2)->parrot_vtable_mapping;
+        $1 = vt && !PMC_IS_NULL(vt[PARROT_VTABLE_SLOT_INVOKE]);
+    }
+    else {
+        $1 = VTABLE_does(interp, $2, Parrot_str_new(interp, "invokable", 0));
+    }
+}
