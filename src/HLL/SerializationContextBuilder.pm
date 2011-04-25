@@ -26,17 +26,18 @@
 # It may be that this approach will also carry almost directly over to nqpclr
 # and nqpjvm.
 
-class HLL::Compiler::SerializationContextBuilder::Event {
-    # The PAST that we emit to perform the action if in deserialization mode.
-    has $!deserialize_past;
-    method deserialize_past() { $!deserialize_past }
-    
-    # The PAST that we emit to do any fixups if we are in compile-n-run mode.
-    has $!fixup_past;
-    method fixup_past() { $!fixup_past }
-}
-
 class HLL::Compiler::SerializationContextBuilder {
+    # Represents an event that we need to handle when fixing up or deserializing.
+    my class Event {
+        # The PAST that we emit to perform the action if in deserialization mode.
+        has $!deserialize_past;
+        method deserialize_past() { $!deserialize_past }
+        
+        # The PAST that we emit to do any fixups if we are in compile-n-run mode.
+        has $!fixup_past;
+        method fixup_past() { $!fixup_past }
+    }
+
     # The serialization context that we're building.
     has $!sc;
     
@@ -112,7 +113,7 @@ class HLL::Compiler::SerializationContextBuilder {
 
     # Add an event that may have an action to deserialize or fix up.
     method add_event(:$deserialize_past, :$fixup_past) {
-        @!event_stream.push(HLL::Compiler::SerializationContextBuilder::Event.new(
+        @!event_stream.push(Event.new(
             :deserialize_past($deserialize_past), :fixup_past($fixup_past)
         ));
     }
