@@ -106,11 +106,12 @@ grammar NQP::Grammar is HLL::Grammar {
         :my $*HAS_YOU_ARE_HERE := 0;
         :my $*MAIN_SUB;
         <.newpad>
-        <.outerctx>
         
         :my $*PACKAGE;
         :my $*GLOBALish;
         <.GLOBALish>
+        
+        <.outerctx>
         
         <statementlist>
         [ $ || <.panic: 'Confused'> ]

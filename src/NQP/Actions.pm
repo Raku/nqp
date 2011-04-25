@@ -188,9 +188,12 @@ class NQP::Actions is HLL::Actions {
             # setting.
             my $SETTING := $*SC.load_setting(%*COMPILING<%?OPTIONS><setting> // 'NQPCORE');
             
-            # If it exports HOWs, grab them.
+            # If it exports HOWs, grab them. Also, if we're loading the
+            # setting, also by default load Regex library (we can't load
+            # this in the setting as Regex depends on the setting).
             unless %*COMPILING<%?OPTIONS><setting> eq 'NULL' {
                 import_HOW_exports($SETTING);
+                $*SC.load_module('Regex', $*GLOBALish);
             }
         }
         self.SET_BLOCK_OUTER_CTX(@BLOCK[0]);
