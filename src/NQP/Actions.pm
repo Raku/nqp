@@ -52,8 +52,7 @@ class NQP::Actions is HLL::Actions {
         
         # We'll install our view of GLOBAL as the main one; any other
         # compilation unit that is using this one will then replace it
-        # with its view later. (This is likely wrong in full-blown Perl 6,
-        # but may well do for NQP.)
+        # with its view later (or be in a position to restore it).
         $unit.loadinit().push(PAST::Op.new(
             :pasttype('bind'),
             PAST::Var.new( :name('GLOBAL'), :namespace([]), :scope('package') ),
@@ -971,11 +970,7 @@ class NQP::Actions is HLL::Actions {
 
     method typename($/) {
         my @name := HLL::Compiler.parse_name(~$/);
-        make PAST::Var.new(
-            :name(@name.pop),
-            :namespace(@name),
-            :scope('package')
-        );
+        make lexical_package_lookup(@name, $/);
     }
 
     method trait($/) {
