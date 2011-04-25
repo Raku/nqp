@@ -52,9 +52,6 @@ inline op nqp_dynop_setup() :base_core {
 
         /* Initialize the object model. */
         KnowHOW = SixModelObject_initialize(interp);
-        /* XXX Kill this once everything uses get_knowhow. */
-        Parrot_ns_set_global(interp, Parrot_hll_get_ctx_HLL_namespace(interp),
-            Parrot_str_new(interp, "KnowHOW", 0), KnowHOW);
     }
 }
 
