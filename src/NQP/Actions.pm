@@ -1374,25 +1374,17 @@ class NQP::Actions is HLL::Actions {
         }
         
         # Otherwise, see if the first part of the name is lexically
-        # known.
-        elsif is_lexical(@name[0]) {
-            my $path := PAST::Var.new( :name(@name.shift()), :scope('lexical') );
+        # known. If not, it's in GLOBAL.
+        else {
+            my $path := is_lexical(@name[0]) ??
+                PAST::Var.new( :name(@name.shift()), :scope('lexical') ) !!
+                PAST::Var.new( :name('GLOBAL'), :namespace([]), :scope('package') );
             for @name {
                 $path := PAST::Op.new(
                     :pirop('nqp_get_package_through_who PPs'),
                     $path, ~$_);
             }
             $lookup.unshift(PAST::Op.new(:pirop('get_who PP'), $path));
-        }
-        else {
-            # XXX Would really want this and then chase the symbol
-            # like above. But not quite ready yet. Can only do the
-            # final lookup via the .WHO.
-            #$lookup := PAST::Var.new( :name('GLOBAL'), :namespace([]), :scope('package') );
-            $lookup.unshift(PAST::Op.new(
-                :pirop('get_who PP'),
-                PAST::Var.new( :name(@name.pop), :namespace(@name), :scope('package') )
-            ));
         }
         
         return $lookup;
