@@ -389,7 +389,7 @@ class HLL::Compiler::SerializationContextBuilder {
     
     # Gets the built serialization context.
     method sc() {
-        @!sc
+        $!sc
     }
     
     # Generates a series of PAST operations that will build this context if
