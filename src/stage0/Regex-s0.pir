@@ -115,6 +115,11 @@ grammars.
     set_global "$?CLASS", type_obj
     how = get_how type_obj
     
+    # Add to serialization context.
+    $P0 = nqp_get_sc "__REGEX_CORE_SC__"
+    nqp_set_sc_object "__REGEX_CORE_SC__", 0, type_obj
+    nqp_set_sc_for_object type_obj, $P0
+    
     # XXXNS Old namespace handling installation, during migration to new.
     set_hll_global ["Regex"], "Cursor", type_obj
 
@@ -1156,7 +1161,7 @@ and the longest match is returned.
     if $I0 goto var_array
 
   var_scalar:
-    $I0 = does var, 'invokable'
+    $I0 = is_invokable var
     if $I0 goto var_sub
 
   var_string:
@@ -1188,7 +1193,7 @@ and the longest match is returned.
   array_loop:
     unless var_it goto array_done
     elem = shift var_it
-    $I0 = does elem, 'invokable'
+    $I0 = is_invokable elem
     if $I0 goto array_sub
   array_string:
     $S0 = elem
@@ -1227,7 +1232,7 @@ are first compiled to regexes prior to being matched.
 .sub '!INTERPOLATE_REGEX' :method :subid('Regex_Cursor_meth_!INTERPOLATE_REGEX') :outer('Regex_Cursor_Body')
     .param pmc var
 
-    $I0 = does var, 'invokable'
+    $I0 = is_invokable var
     if $I0 goto done
 
     .local pmc p6regex
@@ -1245,7 +1250,7 @@ are first compiled to regexes prior to being matched.
   var_loop:
     unless var_it goto done
     elem = shift var_it
-    $I0 = does elem, 'invokable'
+    $I0 = is_invokable elem
     if $I0 goto var_next
     elem = p6regex.'compile'(elem)
   var_next:
@@ -1522,9 +1527,13 @@ Regex::Cursor-builtins - builtin regexes for Cursor objects
     message .= ", couldn't find final "
     message .= goal
     message .= ' at line '
-    $P0 = get_hll_global ['Regex'], 'Cursor'
+    $P0 = find_lex '$?CLASS'
     $P0 = getattribute self, $P0, '$!target'
-    $P1 = get_hll_global ['HLL'], 'Compiler'
+    $P1 = get_hll_global 'GLOBAL'
+    $P1 = get_who $P1
+    $P1 = $P1["HLL"]
+    $P1 = get_who $P1
+    $P1 = $P1["Compiler"]
     $I0 = self.'pos'()
     $I0 = $P1.'lineof'($P0, $I0)
     inc $I0
