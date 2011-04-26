@@ -107,7 +107,7 @@ knowhow NQPConcreteRoleHOW {
     ## Introspecty
     ##
 
-    method methods($obj) {
+    method methods($obj, :$local) {
         my @meths;
         for %!methods {
             @meths.push($_.value);
@@ -127,7 +127,7 @@ knowhow NQPConcreteRoleHOW {
         $!name
     }
 
-    method attributes($obj) {
+    method attributes($obj, :$local) {
         my @attrs;
         for %!attributes {
             @attrs.push($_.value);
