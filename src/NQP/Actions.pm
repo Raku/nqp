@@ -596,26 +596,47 @@ class NQP::Actions is HLL::Actions {
         }
         if $*SCOPE eq 'has' {
             # Create and add a meta-attribute.
-            my $meta-attr-type := %*HOW-METAATTR{$*PKGDECL} || $*DEFAULT-METAATTR;
-            $*PACKAGE-SETUP.push(PAST::Op.new(
-                :pasttype('callmethod'), :name('add_attribute'),
-                PAST::Op.new(
-                    :pirop('get_how PP'),
-                    PAST::Var.new( :name('type_obj'), :scope('register') )
-                ),
-                PAST::Var.new( :name('type_obj'), :scope('register') ),
-                (my $meta_args := PAST::Op.new(
-                    :pasttype('callmethod'), :name('new'),
-                    PAST::Var.new( :name($meta-attr-type), :namespace(''), :scope('package') ),
-                    PAST::Val.new( :value($name), :named('name') )
-                ))
-            ));
-            if $<typename> {
-                my $type := $<typename>[0].ast;
-                $type.named('type');
-                $meta_args.push($type);
+            if $*PKGDECL ne 'knowhow' {
+                # Locate the type of meta-attribute we need.
+                unless pir::exists(%*HOW, $*PKGDECL ~ '-attr') {
+                    $/.CURSOR.panic("$*PKGDECL packages do not support attributes");
+                }
+                
+                # Set up arguments for meta-attribute instantiation.
+                my %lit_args;
+                my %obj_args;
+                %lit_args<name> := $name;
+                if $<typename> {
+                    %obj_args<type> := find_sym(~$<typename>[0], $/);
+                }
+                
+                # Add it.
+                $*SC.pkg_add_attribute($*PACKAGE, %*HOW{$*PKGDECL ~ '-attr'},
+                    %lit_args, %obj_args);
             }
-
+            else {
+                # XXX Still need to do it this way for KnowHOW...
+                my $meta-attr-type := 'KnowHOWAttribute';
+                $*PACKAGE-SETUP.push(PAST::Op.new(
+                    :pasttype('callmethod'), :name('add_attribute'),
+                    PAST::Op.new(
+                        :pirop('get_how PP'),
+                        PAST::Var.new( :name('type_obj'), :scope('register') )
+                    ),
+                    PAST::Var.new( :name('type_obj'), :scope('register') ),
+                    (my $meta_args := PAST::Op.new(
+                        :pasttype('callmethod'), :name('new'),
+                        PAST::Var.new( :name($meta-attr-type), :namespace(''), :scope('package') ),
+                        PAST::Val.new( :value($name), :named('name') )
+                    ))
+                ));
+                if $<typename> {
+                    my $type := $<typename>[0].ast;
+                    $type.named('type');
+                    $meta_args.push($type);
+                }
+            }
+            
             $BLOCK.symbol($name, :scope('attribute') );
             $past := PAST::Stmts.new();
         }
