@@ -6,11 +6,14 @@ use nqpmo;
 # for any program using it. OTOH, there's not a good way to factor
 # this just yet.)
 my module EXPORTHOW {
-    ($?PACKAGE.WHO)<module>  := NQPModuleHOW;
-    ($?PACKAGE.WHO)<class>   := NQPClassHOW;
-    ($?PACKAGE.WHO)<grammar> := NQPClassHOW;
-    ($?PACKAGE.WHO)<role>    := NQPParametricRoleHOW;
-    ($?PACKAGE.WHO)<native>  := NQPNativeHOW;
+    ($?PACKAGE.WHO)<module>       := NQPModuleHOW;
+    ($?PACKAGE.WHO)<class>        := NQPClassHOW;
+    ($?PACKAGE.WHO)<class-attr>   := NQPAttribute;
+    ($?PACKAGE.WHO)<grammar>      := NQPClassHOW;
+    ($?PACKAGE.WHO)<grammar-attr> := NQPAttribute;
+    ($?PACKAGE.WHO)<role>         := NQPParametricRoleHOW;
+    ($?PACKAGE.WHO)<role-attr>    := NQPAttribute;
+    ($?PACKAGE.WHO)<native>       := NQPNativeHOW;
 }
 
 my native int is repr('P6int') { }
