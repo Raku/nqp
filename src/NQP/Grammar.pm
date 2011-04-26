@@ -98,6 +98,8 @@ grammar NQP::Grammar is HLL::Grammar {
     ## Top-level rules
 
     token comp_unit {
+        :my $*IN_DECL := '';
+
         :my $*HAS_YOU_ARE_HERE := 0;
         :my $*MAIN_SUB;
         <.newpad>
@@ -394,7 +396,12 @@ grammar NQP::Grammar is HLL::Grammar {
         | <routine_declarator>
     }
 
-    rule variable_declarator { <typename>? <variable> }
+    rule variable_declarator {
+        <typename>?
+        :my $*IN_DECL := 'variable';
+        <variable>
+        { $*IN_DECL := 0; }
+    }
 
     proto token routine_declarator { <...> }
     token routine_declarator:sym<sub>    { <sym> <routine_def> }

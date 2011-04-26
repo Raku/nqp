@@ -435,12 +435,32 @@ class NQP::Actions is HLL::Actions {
                 );
             }
             elsif $<twigil>[0] eq '!' {
+                # Construct PAST.
+                my $name := ~@name.pop;
                 $past := PAST::Var.new(
-                    :name(~@name.pop), :scope('attribute'),
+                    :name($name), :scope('attribute'),
                     :viviself( vivitype( $<sigil> ) ),
                     PAST::Var.new( :name('self') ),
                     PAST::Var.new( :name('$?CLASS') )
                 );
+                
+                # Make sure the attribute exists.
+                # XXX Can't check for knowhow yet.
+                unless $*IN_DECL || $*PKGDECL eq 'knowhow' {
+                    my $attr;
+                    for $*PACKAGE.HOW.attributes($*PACKAGE, :local(1)) {
+                        if $_.name eq $name {
+                            $attr := $_;
+                            last;
+                        }
+                    }
+                    if pir::defined($attr) {
+                        $past.type($attr.type);
+                    }
+                    else {
+                        $/.CURSOR.panic("Attribute '$name' not declared");
+                    }
+                }
             }
             elsif is_package(~@name[0]) {
                 $past := lexical_package_lookup(@name, $/);
