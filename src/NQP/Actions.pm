@@ -607,7 +607,7 @@ class NQP::Actions is HLL::Actions {
                 my %obj_args;
                 %lit_args<name> := $name;
                 if $<typename> {
-                    %obj_args<type> := find_sym(~$<typename>[0], $/);
+                    %obj_args<type> := find_sym([~$<typename>[0]], $/);
                 }
                 
                 # Add it.
