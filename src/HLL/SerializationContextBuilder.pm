@@ -356,7 +356,7 @@ class HLL::Compiler::SerializationContextBuilder {
     # Adds a method to the meta-object, and stores an event for the action.
     # Note that methods are always subject to fixing up since the actual
     # compiled code isn't available until compilation is complete.
-    method pkg_add_method($obj, $meta_method_name, $name, $method_past) {
+    method pkg_add_method($obj, $meta_method_name, $name, $method_past, $is_dispatcher) {
         # See if we already have our compile-time dummy. If not,
         # create it.
         my $dummy;
@@ -364,7 +364,16 @@ class HLL::Compiler::SerializationContextBuilder {
             $dummy := $method_past<compile_time_dummy>;
         }
         else {
-            $dummy := pir::clone__PP($stub_code);
+            # What we create depends on whether it's a dispatcher or not.
+            # If it is a dispatcher, set the PMC type it uses and then use
+            # that for the dummy.
+            if $is_dispatcher {
+                $method_past.pirflags(':instanceof("DispatcherSub")');
+                $dummy := pir::assign__0PP(pir::new__Ps('DispatcherSub'), $stub_code);
+            }
+            else {
+                $dummy := pir::clone__PP($stub_code);
+            }
             pir::assign__vPS($dummy, $name);
             self.add_code($dummy);
             $method_past<compile_time_dummy> := $dummy;

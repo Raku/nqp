@@ -814,17 +814,14 @@ class NQP::Actions is HLL::Actions {
             my $name := ~$<private> ~ ~$<deflongname>[0].ast;
             $past.name($name);
 
-            # If it's a proto, we'll mark it as such setting the sub PMC
-            # type to DispatcherSub.
-            if $*MULTINESS eq 'proto' { $past.pirflags(':instanceof("DispatcherSub")'); }
-            
             # If it is a multi, we need to build a type signature object for
             # the multi-dispatcher to use.
             if $*MULTINESS eq 'multi' { attach_multi_signature($past); }
 
             # Insert it into the method table.
             my $meta_meth := $*MULTINESS eq 'multi' ?? 'add_multi_method' !! 'add_method';
-            $*SC.pkg_add_method($*PACKAGE, $meta_meth, $name, $past);
+            my $is_dispatcher := $*MULTINESS eq 'proto';
+            $*SC.pkg_add_method($*PACKAGE, $meta_meth, $name, $past, $is_dispatcher);
             
             # Install it in the package also if needed.
             if $*SCOPE eq 'our' {
