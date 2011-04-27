@@ -109,7 +109,9 @@ grammars.
 
     # Build meta-object and store it in the namespace.
     .local pmc type_obj, how, NQPClassHOW
-    get_hll_global NQPClassHOW, "NQPClassHOW"
+    $P0 = find_lex "EXPORTHOW"
+    $P0 = get_who $P0
+    NQPClassHOW = $P0["class"]
     type_obj = NQPClassHOW."new_type"("Cursor" :named("name"))
     RegexWHO["Cursor"] = type_obj
     set_global "$?CLASS", type_obj
@@ -119,9 +121,6 @@ grammars.
     $P0 = nqp_get_sc "__REGEX_CORE_SC__"
     nqp_set_sc_object "__REGEX_CORE_SC__", 0, type_obj
     nqp_set_sc_for_object type_obj, $P0
-    
-    # XXXNS Old namespace handling installation, during migration to new.
-    set_hll_global ["Regex"], "Cursor", type_obj
 
     # Add all methods.
     .const 'Sub' $P10 = 'Regex_Cursor_meth_new_match'
@@ -234,7 +233,9 @@ grammars.
 
     # Add attributes.
     .local pmc NQPAttribute, int_type, attr
-    NQPAttribute = get_hll_global "NQPAttribute"
+    $P0 = find_lex "EXPORTHOW"
+    $P0 = get_who $P0
+    NQPAttribute = $P0["class-attr"]
     int_type = find_lex "int"
     attr = NQPAttribute."new"("$!target" :named("name"))
     how."add_attribute"(type_obj, attr)
@@ -2067,10 +2068,11 @@ This file implements Match objects for the regex engine.
 
     # Build meta-object and store it in the namespace.
     .local pmc type_obj, how, NQPClassHOW
-    get_hll_global NQPClassHOW, "NQPClassHOW"
+    $P0 = find_lex "EXPORTHOW"
+    $P0 = get_who $P0
+    NQPClassHOW = $P0["class"]
     type_obj = NQPClassHOW."new_type"("Match" :named("name"))
     RegexWHO["Match"] = type_obj
-    set_global "$?CLASS", type_obj
     how = get_how type_obj
     
     # XXXNS Old namespace handling installation, during migration to new.
@@ -2121,7 +2123,9 @@ This file implements Match objects for the regex engine.
 
     # Add attributes.
     .local pmc NQPAttribute, int_type, attr
-    NQPAttribute = get_hll_global "NQPAttribute"
+    $P0 = find_lex "EXPORTHOW"
+    $P0 = get_who $P0
+    NQPAttribute = $P0["class-attr"]
     int_type = find_lex "int"
 
     attr = NQPAttribute.'new'('$!from' :named('name'), int_type :named('type'))
@@ -2387,15 +2391,14 @@ containers for Regex subs that need .ACCEPTS and other regex attributes.
 
     # Build Regex::Method meta-object and store it in the namespace.
     .local pmc method_type_obj, method_how, NQPClassHOW
-    get_hll_global NQPClassHOW, "NQPClassHOW"
+    $P0 = find_lex "EXPORTHOW"
+    $P0 = get_who $P0
+    NQPClassHOW = $P0["class"]
     method_type_obj = NQPClassHOW."new_type"("Method" :named("name"))
     RegexWHO["Method"] = method_type_obj
     set_global "$?CLASS", method_type_obj
     method_how = get_how method_type_obj
-    
-    # XXXNS Old namespace handling installation, during migration to new.
-    set_hll_global ["Regex"], "Method", method_type_obj
-    
+
     # Set default parent.
     .local pmc def_parent
     def_parent = find_lex "NQPMu"
@@ -2403,7 +2406,9 @@ containers for Regex subs that need .ACCEPTS and other regex attributes.
     
     # Add attribute.
     .local pmc NQPAttribute, attr
-    NQPAttribute = get_hll_global "NQPAttribute"
+    $P0 = find_lex "EXPORTHOW"
+    $P0 = get_who $P0
+    NQPAttribute = $P0["class-attr"]
     attr = NQPAttribute.'new'('$!code' :named('name'))
     method_how.'add_attribute'(method_type_obj, attr)
     
@@ -2493,7 +2498,11 @@ Perform a match against target, return the result.
     .param pmc target
 
     .local pmc curproto, match
-    curproto = get_hll_global ['Regex'], 'Cursor'
+    curproto = get_hll_global 'GLOBAL'
+    curproto = get_who curproto
+    curproto = curproto["Regex"]
+    curproto = get_who curproto
+    curproto = curproto["Cursor"]
     match = curproto.'parse'(target, 'rule'=>self)
     .return (match)
 .end
@@ -2504,7 +2513,11 @@ Perform a match against target, return the result.
     .param pmc target
 
     .local pmc curproto, match
-    curproto = get_hll_global ['Regex'], 'Cursor'
+    curproto = get_hll_global 'GLOBAL'
+    curproto = get_who curproto
+    curproto = curproto["Regex"]
+    curproto = get_who curproto
+    curproto = curproto["Cursor"]
     match = curproto.'parse'(target, 'rule'=>self, 'c'=>0)
     .return (match)
 .end
