@@ -438,7 +438,7 @@ class NQP::Actions is HLL::Actions {
                 # Construct PAST.
                 my $name := ~@name.pop;
                 $past := PAST::Var.new(
-                    :name($name), :scope('attribute'),
+                    :name($name), :scope('attribute_6model'),
                     :viviself( vivitype( $<sigil> ) ),
                     PAST::Var.new( :name('self') ),
                     PAST::Var.new( :name('$?CLASS') )
@@ -656,8 +656,7 @@ class NQP::Actions is HLL::Actions {
                     $meta_args.push($type);
                 }
             }
-            
-            $BLOCK.symbol($name, :scope('attribute') );
+
             $past := PAST::Stmts.new();
         }
         elsif $*SCOPE eq 'our' {
