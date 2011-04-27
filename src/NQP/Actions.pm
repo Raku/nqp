@@ -1056,7 +1056,7 @@ class NQP::Actions is HLL::Actions {
             $past := 
                 PAST::Op.new(
                     :pasttype<callmethod>, :name<new>,
-                    PAST::Var.new( :name('Method'), :namespace(['Regex']), :scope<package> ),
+                    lexical_package_lookup(['Regex', 'Method'], $/),
                     $regex
                 );
             if pir::defined($*PACKAGE-SETUP) {
@@ -1291,7 +1291,7 @@ class NQP::Actions is HLL::Actions {
         my $past := 
             PAST::Op.new(
                 :pasttype<callmethod>, :name<new>,
-                PAST::Var.new( :name('Regex'), :namespace(['Regex']), :scope<package> ),
+                lexical_package_lookup(['Regex', 'Regex'], $/),
                 $regex
             );
         # In sink context, we don't need the Regex::Regex object.
