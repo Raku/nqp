@@ -31,7 +31,6 @@ This file implements Match objects for the regex engine.
     NQPClassHOW = $P0["class"]
     type_obj = NQPClassHOW."new_type"("Match" :named("name"))
     RegexWHO["Match"] = type_obj
-    set_global "$?CLASS", type_obj
     how = get_how type_obj
     
     # XXXNS Old namespace handling installation, during migration to new.

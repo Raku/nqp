@@ -52,9 +52,6 @@ grammars.
     $P0 = nqp_get_sc "__REGEX_CORE_SC__"
     nqp_set_sc_object "__REGEX_CORE_SC__", 0, type_obj
     nqp_set_sc_for_object type_obj, $P0
-    
-    # XXXNS Old namespace handling installation, during migration to new.
-    set_hll_global ["Regex"], "Cursor", type_obj
 
     # Add all methods.
     .const 'Sub' $P10 = 'Regex_Cursor_meth_new_match'

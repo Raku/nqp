@@ -31,10 +31,7 @@ containers for Regex subs that need .ACCEPTS and other regex attributes.
     RegexWHO["Method"] = method_type_obj
     set_global "$?CLASS", method_type_obj
     method_how = get_how method_type_obj
-    
-    # XXXNS Old namespace handling installation, during migration to new.
-    set_hll_global ["Regex"], "Method", method_type_obj
-    
+
     # Set default parent.
     .local pmc def_parent
     def_parent = find_lex "NQPMu"
@@ -134,7 +131,11 @@ Perform a match against target, return the result.
     .param pmc target
 
     .local pmc curproto, match
-    curproto = get_hll_global ['Regex'], 'Cursor'
+    curproto = get_hll_global 'GLOBAL'
+    curproto = get_who curproto
+    curproto = curproto["Regex"]
+    curproto = get_who curproto
+    curproto = curproto["Cursor"]
     match = curproto.'parse'(target, 'rule'=>self)
     .return (match)
 .end
@@ -145,7 +146,11 @@ Perform a match against target, return the result.
     .param pmc target
 
     .local pmc curproto, match
-    curproto = get_hll_global ['Regex'], 'Cursor'
+    curproto = get_hll_global 'GLOBAL'
+    curproto = get_who curproto
+    curproto = curproto["Regex"]
+    curproto = get_who curproto
+    curproto = curproto["Cursor"]
     match = curproto.'parse'(target, 'rule'=>self, 'c'=>0)
     .return (match)
 .end
