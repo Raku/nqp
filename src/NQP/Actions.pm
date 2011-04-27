@@ -814,15 +814,8 @@ class NQP::Actions is HLL::Actions {
             my $name := ~$<private> ~ ~$<deflongname>[0].ast;
             $past.name($name);
 
-            # If it's a proto, we'll mark it as such by giving it an empty candidate
-            # list. Also need to set sub PMC type to DispatcherSub.
-            my $to_add := $*MULTINESS ne 'proto' ??
-                PAST::Val.new( :value($past) ) !!
-                PAST::Op.new(
-                    :pirop('set_dispatchees 0PP'),
-                    PAST::Val.new( :value($past) ),
-                    PAST::Op.new( :pasttype('list') )
-                );
+            # If it's a proto, we'll mark it as such setting the sub PMC
+            # type to DispatcherSub.
             if $*MULTINESS eq 'proto' { $past.pirflags(':instanceof("DispatcherSub")'); }
             
             # If it is a multi, we need to build a type signature object for
@@ -840,7 +833,7 @@ class NQP::Actions is HLL::Actions {
                     ),
                     PAST::Var.new( :name('type_obj'), :scope('register') ),
                     PAST::Val.new( :value($name) ),
-                    $to_add
+                    PAST::Val.new( :value($past) )
                 ));
             }
             
