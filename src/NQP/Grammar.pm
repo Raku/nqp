@@ -10,9 +10,11 @@ grammar NQP::Grammar is HLL::Grammar {
         %*LANG<MAIN-actions>  := NQP::Actions;
 
         # Package declarator to meta-package mapping. Note that there is
-        # one universal KnowHOW from the 6model core.
+        # one universal KnowHOW from the 6model core, and an attribute
+        # meta-object to go with it.
         my %*HOW;
-        %*HOW<knowhow> := pir::get_knowhow__P();
+        %*HOW<knowhow>      := pir::get_knowhow__P();
+        %*HOW<knowhow-attr> := pir::get_knowhow_attribute__P();
         
         # Serialization context builder - keeps track of objects that
         # cross the compile-time/run-time boundary that are associated

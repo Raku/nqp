@@ -445,8 +445,7 @@ class NQP::Actions is HLL::Actions {
                 );
                 
                 # Make sure the attribute exists.
-                # XXX Can't check for knowhow yet.
-                unless $*IN_DECL || $*PKGDECL eq 'knowhow' {
+                unless $*IN_DECL {
                     my $attr;
                     for $*PACKAGE.HOW.attributes($*PACKAGE, :local(1)) {
                         if $_.name eq $name {
@@ -455,7 +454,9 @@ class NQP::Actions is HLL::Actions {
                         }
                     }
                     if pir::defined($attr) {
-                        $past.type($attr.type);
+                        if pir::can($attr, 'type') {
+                            $past.type($attr.type);
+                        }
                     }
                     else {
                         $/.CURSOR.panic("Attribute '$name' not declared");
@@ -615,47 +616,22 @@ class NQP::Actions is HLL::Actions {
             $/.CURSOR.panic("Redeclaration of symbol ", $name);
         }
         if $*SCOPE eq 'has' {
-            # Create and add a meta-attribute.
-            if $*PKGDECL ne 'knowhow' {
-                # Locate the type of meta-attribute we need.
-                unless pir::exists(%*HOW, $*PKGDECL ~ '-attr') {
-                    $/.CURSOR.panic("$*PKGDECL packages do not support attributes");
-                }
-                
-                # Set up arguments for meta-attribute instantiation.
-                my %lit_args;
-                my %obj_args;
-                %lit_args<name> := $name;
-                if $<typename> {
-                    %obj_args<type> := find_sym([~$<typename>[0]], $/);
-                }
-                
-                # Add it.
-                $*SC.pkg_add_attribute($*PACKAGE, %*HOW{$*PKGDECL ~ '-attr'},
-                    %lit_args, %obj_args);
+            # Locate the type of meta-attribute we need.
+            unless pir::exists(%*HOW, $*PKGDECL ~ '-attr') {
+                $/.CURSOR.panic("$*PKGDECL packages do not support attributes");
             }
-            else {
-                # XXX Still need to do it this way for KnowHOW...
-                my $meta-attr-type := 'KnowHOWAttribute';
-                $*PACKAGE-SETUP.push(PAST::Op.new(
-                    :pasttype('callmethod'), :name('add_attribute'),
-                    PAST::Op.new(
-                        :pirop('get_how PP'),
-                        PAST::Var.new( :name('type_obj'), :scope('register') )
-                    ),
-                    PAST::Var.new( :name('type_obj'), :scope('register') ),
-                    (my $meta_args := PAST::Op.new(
-                        :pasttype('callmethod'), :name('new'),
-                        PAST::Var.new( :name($meta-attr-type), :namespace(''), :scope('package') ),
-                        PAST::Val.new( :value($name), :named('name') )
-                    ))
-                ));
-                if $<typename> {
-                    my $type := $<typename>[0].ast;
-                    $type.named('type');
-                    $meta_args.push($type);
-                }
+            
+            # Set up arguments for meta-attribute instantiation.
+            my %lit_args;
+            my %obj_args;
+            %lit_args<name> := $name;
+            if $<typename> {
+                %obj_args<type> := find_sym([~$<typename>[0]], $/);
             }
+            
+            # Add it.
+            $*SC.pkg_add_attribute($*PACKAGE, %*HOW{$*PKGDECL ~ '-attr'},
+                %lit_args, %obj_args);
 
             $past := PAST::Stmts.new();
         }
