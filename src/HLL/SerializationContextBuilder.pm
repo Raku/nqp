@@ -226,19 +226,6 @@ class HLL::Compiler::SerializationContextBuilder {
             ),
             self.get_slot_past_for_object($obj)
         )));
-        
-        # XXX Need legacy namespace installation too, during migration.
-        self.add_event(:deserialize_past(
-            PAST::Op.new(
-                :pasttype('bind'),
-                PAST::Var.new( :name($name), :namespace(@sym), :scope('package') ),
-                self.get_slot_past_for_object($obj)
-            )),
-            :fixup_past(PAST::Op.new(
-                :pasttype('bind'),
-                PAST::Var.new( :name($name), :namespace(@sym), :scope('package') ),
-                self.get_slot_past_for_object($obj)
-            )));
     }
     
     # Installs a lexical symbol. Takes a PAST::Block object, name and
