@@ -337,11 +337,29 @@ class HLL::Compiler::SerializationContextBuilder {
             $create_call
         )));
     }
-    
+
     # Adds a method to the meta-object, and stores an event for the action.
     # Note that methods are always subject to fixing up since the actual
     # compiled code isn't available until compilation is complete.
     method pkg_add_method($obj, $meta_method_name, $name, $method_past) {
+        # Deserializing is easy - just the straight meta-method call.
+        # Rest is more complex...
+        my $slot_past := self.get_slot_past_for_object($obj);
+        self.add_event(:deserialize_past(PAST::Op.new(
+            :pasttype('callmethod'), :name($meta_method_name),
+            PAST::Op.new( :pirop('get_how PP'), $slot_past ),
+            $slot_past,
+            $name,
+            PAST::Val.new( :value($method_past) )
+        )),
+        # TODO...
+        :fixup_past(PAST::Op.new(
+            :pasttype('callmethod'), :name($meta_method_name),
+            PAST::Op.new( :pirop('get_how PP'), $slot_past ),
+            $slot_past,
+            $name,
+            PAST::Val.new( :value($method_past) )
+        )));
     }
     
     # Adds a parent or role to the meta-object, and stores an event for

@@ -823,20 +823,10 @@ class NQP::Actions is HLL::Actions {
             if $*MULTINESS eq 'multi' { attach_multi_signature($past); }
 
             # Insert it into the method table.
-            if pir::defined($*PACKAGE-SETUP) {
-                $*PACKAGE-SETUP.push(PAST::Op.new(
-                    :pasttype('callmethod'), :name($*MULTINESS eq 'multi' ?? 'add_multi_method' !! 'add_method'),
-                    PAST::Op.new(
-                        # XXX Should be nqpop at some point.
-                        :pirop('get_how PP'),
-                        PAST::Var.new( :name('type_obj'), :scope('register') )
-                    ),
-                    PAST::Var.new( :name('type_obj'), :scope('register') ),
-                    PAST::Val.new( :value($name) ),
-                    PAST::Val.new( :value($past) )
-                ));
-            }
+            my $meta_meth := $*MULTINESS eq 'multi' ?? 'add_multi_method' !! 'add_method';
+            $*SC.pkg_add_method($*PACKAGE, $meta_meth, $name, $past);
             
+            # Install it in the package also if needed.
             if $*SCOPE eq 'our' {
                 $*SC.install_package_routine($*PACKAGE, $name, $past);
             }
