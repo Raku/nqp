@@ -1007,16 +1007,7 @@ class NQP::Actions is HLL::Actions {
                     )
                 );
                 for @($past) {
-                    $*PACKAGE-SETUP.push(PAST::Op.new(
-                        :pasttype('callmethod'), :name('add_method'),
-                        PAST::Op.new(
-                            :pirop('get_how PP'),
-                            PAST::Var.new( :name('type_obj'), :scope('register') )
-                        ),
-                        PAST::Var.new( :name('type_obj'), :scope('register') ),
-                        PAST::Val.new( :value($_.name()) ),
-                        PAST::Val.new( :value($_) )
-                    ));
+                    $*SC.pkg_add_method($*PACKAGE, 'add_method', $_.name(), $_, 0);
                 }
         }
         elsif $key eq 'open' {
@@ -1040,16 +1031,11 @@ class NQP::Actions is HLL::Actions {
                     $regex
                 );
             if pir::defined($*PACKAGE-SETUP) {
-                $*PACKAGE-SETUP.push(PAST::Op.new(
-                    :pasttype('callmethod'), :name('add_method'),
-                    PAST::Op.new(
-                        :pirop('get_how PP'),
-                        PAST::Var.new( :name('type_obj'), :scope('register') )
-                    ),
-                    PAST::Var.new( :name('type_obj'), :scope('register') ),
-                    PAST::Val.new( :value($name) ),
-                    PAST::Val.new( :value($regex) )
-                ));
+                $*SC.pkg_add_method($*PACKAGE, 'add_method', $name, $regex, 0);
+                # XXX This is really nasty - PAST::Compiler generates a prefix
+                # producing method. However, the meta-object would already be
+                # composed by then. Need to resolve this to finish compile-time
+                # meta-objects stuff...
                 $*PACKAGE-SETUP.push(PAST::Op.new(
                     :pasttype('callmethod'), :name('add_method'),
                     PAST::Op.new(
