@@ -110,6 +110,14 @@ class HLL::Compiler::SerializationContextBuilder {
         %!addr_to_slot{addr($obj)} := $idx;
         $idx
     }
+    
+    # Adds a code ref to the root set, along with a mapping.
+    method add_code($obj) {
+        my $idx := $!sc.elems();
+        $!sc[$idx] := $obj;
+        %!addr_to_slot{addr($obj)} := $idx;
+        $idx
+    }
 
     # Add an event that may have an action to deserialize or fix up.
     method add_event(:$deserialize_past, :$fixup_past) {
@@ -337,29 +345,51 @@ class HLL::Compiler::SerializationContextBuilder {
             $create_call
         )));
     }
-
+    # For methods, we need a "stub" that we'll clone and use for the
+    # compile-time representation. It'll really just complain that it
+    # does that code hasn't been compiled yet. (Need something more
+    # complex to handle roles, but one step at a time...)
+    my $stub_code := sub (*@args, *%named) {
+        pir::die("Cannot run code that has not yet been compiled.");
+    };
+    
     # Adds a method to the meta-object, and stores an event for the action.
     # Note that methods are always subject to fixing up since the actual
     # compiled code isn't available until compilation is complete.
     method pkg_add_method($obj, $meta_method_name, $name, $method_past) {
-        # Deserializing is easy - just the straight meta-method call.
-        # Rest is more complex...
+        # See if we already have our compile-time dummy. If not,
+        # create it.
+        my $dummy;
+        if pir::defined($method_past<compile_time_dummy>) {
+            $dummy := $method_past<compile_time_dummy>;
+        }
+        else {
+            $dummy := pir::clone__PP($stub_code);
+            pir::assign__vPS($dummy, $name);
+            self.add_code($dummy);
+            $method_past<compile_time_dummy> := $dummy;
+        }
+        
+        # Add it to the compile time meta-object.
+        $obj.HOW."$meta_method_name"($obj, $name, $dummy);
+        
+        # For fixup, need to copy the method body we actually compiled
+        # onto the one that went into the SC. Deserializing is easier -
+        # just the straight meta-method call.
         my $slot_past := self.get_slot_past_for_object($obj);
-        self.add_event(:deserialize_past(PAST::Op.new(
-            :pasttype('callmethod'), :name($meta_method_name),
-            PAST::Op.new( :pirop('get_how PP'), $slot_past ),
-            $slot_past,
-            $name,
-            PAST::Val.new( :value($method_past) )
-        )),
-        # TODO...
-        :fixup_past(PAST::Op.new(
-            :pasttype('callmethod'), :name($meta_method_name),
-            PAST::Op.new( :pirop('get_how PP'), $slot_past ),
-            $slot_past,
-            $name,
-            PAST::Val.new( :value($method_past) )
-        )));
+        self.add_event(
+            :deserialize_past(PAST::Op.new(
+                :pasttype('callmethod'), :name($meta_method_name),
+                PAST::Op.new( :pirop('get_how PP'), $slot_past ),
+                $slot_past,
+                $name,
+                PAST::Val.new( :value($method_past) )
+            )),
+            :fixup_past(PAST::Op.new(
+                :pirop('copy vPP'),
+                self.get_slot_past_for_object($dummy),
+                PAST::Val.new( :value($method_past) )
+            )));
     }
     
     # Adds a parent or role to the meta-object, and stores an event for
