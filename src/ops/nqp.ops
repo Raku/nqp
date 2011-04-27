@@ -868,3 +868,23 @@ inline op is_invokable(out INT, in PMC) :base_core {
         $1 = VTABLE_does(interp, $2, Parrot_str_new(interp, "invokable", 0));
     }
 }
+
+/*
+
+=item repr_get_primitive_type_spec
+
+If the representation represents a primitive type that we can store access
+unboxed, this will return what sort of primitive type it is.
+
+=cut
+
+*/
+inline op repr_get_primitive_type_spec(out INT, in PMC) :base_core {
+    if ($2->vtable->base_type == smo_id) {
+        storage_spec ss = REPR($2)->get_storage_spec(interp, REPR_PMC($2));
+        $1 = ss.inlineable ? ss.boxed_primitive : STORAGE_SPEC_BP_NONE;
+    }
+    else {
+        $1 = STORAGE_SPEC_BP_NONE;
+    }
+}
