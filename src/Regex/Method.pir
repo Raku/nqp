@@ -24,7 +24,9 @@ containers for Regex subs that need .ACCEPTS and other regex attributes.
 
     # Build Regex::Method meta-object and store it in the namespace.
     .local pmc method_type_obj, method_how, NQPClassHOW
-    get_hll_global NQPClassHOW, "NQPClassHOW"
+    $P0 = find_lex "EXPORTHOW"
+    $P0 = get_who $P0
+    NQPClassHOW = $P0["class"]
     method_type_obj = NQPClassHOW."new_type"("Method" :named("name"))
     RegexWHO["Method"] = method_type_obj
     set_global "$?CLASS", method_type_obj
@@ -40,7 +42,9 @@ containers for Regex subs that need .ACCEPTS and other regex attributes.
     
     # Add attribute.
     .local pmc NQPAttribute, attr
-    NQPAttribute = get_hll_global "NQPAttribute"
+    $P0 = find_lex "EXPORTHOW"
+    $P0 = get_who $P0
+    NQPAttribute = $P0["class-attr"]
     attr = NQPAttribute.'new'('$!code' :named('name'))
     method_how.'add_attribute'(method_type_obj, attr)
     

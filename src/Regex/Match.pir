@@ -26,7 +26,9 @@ This file implements Match objects for the regex engine.
 
     # Build meta-object and store it in the namespace.
     .local pmc type_obj, how, NQPClassHOW
-    get_hll_global NQPClassHOW, "NQPClassHOW"
+    $P0 = find_lex "EXPORTHOW"
+    $P0 = get_who $P0
+    NQPClassHOW = $P0["class"]
     type_obj = NQPClassHOW."new_type"("Match" :named("name"))
     RegexWHO["Match"] = type_obj
     set_global "$?CLASS", type_obj
@@ -80,7 +82,9 @@ This file implements Match objects for the regex engine.
 
     # Add attributes.
     .local pmc NQPAttribute, int_type, attr
-    NQPAttribute = get_hll_global "NQPAttribute"
+    $P0 = find_lex "EXPORTHOW"
+    $P0 = get_who $P0
+    NQPAttribute = $P0["class-attr"]
     int_type = find_lex "int"
 
     attr = NQPAttribute.'new'('$!from' :named('name'), int_type :named('type'))

@@ -40,7 +40,9 @@ grammars.
 
     # Build meta-object and store it in the namespace.
     .local pmc type_obj, how, NQPClassHOW
-    get_hll_global NQPClassHOW, "NQPClassHOW"
+    $P0 = find_lex "EXPORTHOW"
+    $P0 = get_who $P0
+    NQPClassHOW = $P0["class"]
     type_obj = NQPClassHOW."new_type"("Cursor" :named("name"))
     RegexWHO["Cursor"] = type_obj
     set_global "$?CLASS", type_obj
@@ -165,7 +167,9 @@ grammars.
 
     # Add attributes.
     .local pmc NQPAttribute, int_type, attr
-    NQPAttribute = get_hll_global "NQPAttribute"
+    $P0 = find_lex "EXPORTHOW"
+    $P0 = get_who $P0
+    NQPAttribute = $P0["class-attr"]
     int_type = find_lex "int"
     attr = NQPAttribute."new"("$!target" :named("name"))
     how."add_attribute"(type_obj, attr)
