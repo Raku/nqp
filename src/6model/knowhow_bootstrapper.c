@@ -220,3 +220,80 @@ PMC * SixModelObject_bootstrap_knowhow(PARROT_INTERP, PMC *sc) {
 
     return knowhow_pmc;
 }
+
+/* Attribute new method. */
+static void attr_new(PARROT_INTERP, PMC *nci) {
+    PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    PMC    *type    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
+    STRING *name    = VTABLE_get_string_keyed_str(interp, capture, name_str);
+    PMC    *self    = REPR(type)->instance_of(interp, REPR_PMC(type), type);
+    REPR(self)->set_str(interp, REPR_PMC(self), self, name);
+    Parrot_pcc_build_call_from_c_args(interp, capture, "P", self);
+}
+
+/* Attribute name introspection. */
+static void attr_name(PARROT_INTERP, PMC *nci) {
+    PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
+    STRING *name    = REPR(self)->get_str(interp, REPR_PMC(self), self);
+    Parrot_pcc_build_call_from_c_args(interp, capture, "S", name);
+}
+
+/* Sets up a very simple attribute meta-object. Just supports having a
+ * name, and even uses the P6str representation to store it, so that's
+ * really all that it supports. */
+PMC * SixModelObject_setup_knowhow_attribute(PARROT_INTERP, PMC *sc, PMC *knowhow) {
+    PMC *old_ctx, *cappy, *meth, *knowhow_attr, *how;
+    
+    /* Create a new KnowHOWAttribute type using P6str repr.. */
+    meth = STABLE(knowhow)->find_method(interp, knowhow,
+        Parrot_str_new_constant(interp, "new_type"), NO_HINT);
+    old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
+    VTABLE_push_pmc(interp, cappy, knowhow);
+    VTABLE_set_string_keyed_str(interp, cappy, name_str,
+        Parrot_str_new_constant(interp, "KnowHOWAttribute"));
+    VTABLE_set_string_keyed_str(interp, cappy, repr_str,
+        Parrot_str_new_constant(interp, "P6str"));
+    Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
+    cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
+    knowhow_attr = VTABLE_get_pmc_keyed_int(interp, cappy, 0);
+    how = STABLE(knowhow_attr)->HOW;
+    
+    /* Add new method. */
+    meth = STABLE(how)->find_method(interp, how,
+        Parrot_str_new_constant(interp, "add_method"), NO_HINT);
+    cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
+    VTABLE_push_pmc(interp, cappy, how);
+    VTABLE_push_pmc(interp, cappy, knowhow_attr);
+    VTABLE_push_string(interp, cappy, Parrot_str_new_constant(interp, "new"));
+    VTABLE_push_pmc(interp, cappy, wrap_c(interp, F2DPTR(attr_new)));
+    Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
+    Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
+    
+    /* Add name method. */
+    cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
+    VTABLE_push_pmc(interp, cappy, how);
+    VTABLE_push_pmc(interp, cappy, knowhow_attr);
+    VTABLE_push_string(interp, cappy, name_str);
+    VTABLE_push_pmc(interp, cappy, wrap_c(interp, F2DPTR(attr_name)));
+    Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
+    Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
+    
+    /* Compose. */
+    meth = STABLE(knowhow)->find_method(interp, how,
+        Parrot_str_new_constant(interp, "compose"), NO_HINT);
+    cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
+    VTABLE_push_pmc(interp, cappy, how);
+    VTABLE_push_pmc(interp, cappy, knowhow_attr);
+    Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
+    Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
+    
+    /* Associate the created object with the intial core serialization
+     * context. */
+    VTABLE_set_pmc_keyed_int(interp, sc, 2, knowhow_attr);
+    SC_PMC(knowhow_attr) = sc;
+    
+    return knowhow_attr;
+}

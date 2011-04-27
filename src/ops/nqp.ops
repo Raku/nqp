@@ -25,8 +25,9 @@ static INTVAL smo_id    = 0;
 static INTVAL disp_id   = 0;
 static INTVAL ms_id     = 0;
 
-/* Built-in HOWs (meta-objects). */
+/* Built-in meta-objects. */
 static PMC *KnowHOW = NULL;
+static PMC *KnowHOWAttribute = NULL;
 
 END_OPS_PREAMBLE
 
@@ -51,7 +52,7 @@ inline op nqp_dynop_setup() :base_core {
         ms_id     = pmc_type(interp, Parrot_str_new(interp, "NQPMultiSig", 0));
 
         /* Initialize the object model. */
-        KnowHOW = SixModelObject_initialize(interp);
+        SixModelObject_initialize(interp, &KnowHOW, &KnowHOWAttribute);
     }
 }
 
@@ -71,6 +72,24 @@ inline op get_knowhow(out PMC) :base_core {
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "6model not yet initialized; cannot use get_knowhow");
+}
+
+
+/*
+
+=item get_knowhow_attribute()
+
+Returns the 6model core meta-attribute, KnowHOWAttribute.
+
+=cut
+
+*/
+inline op get_knowhow_attribute(out PMC) :base_core {
+    if (KnowHOWAttribute)
+        $1 = KnowHOWAttribute;
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "6model not yet initialized; cannot use get_knowhow_attribute");
 }
 
 

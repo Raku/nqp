@@ -17,7 +17,7 @@ static STRING *find_method_str = NULL;
 static STRING *type_check_str = NULL;
 
 /* Initializes 6model and produces the KnowHOW core meta-object. */
-PMC * SixModelObject_initialize(PARROT_INTERP) {
+void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attribute) {
     PMC    *initial_sc;
     STRING *initial_sc_name;
     
@@ -38,8 +38,11 @@ PMC * SixModelObject_initialize(PARROT_INTERP) {
     /* Build representations and initializes the representation registry. */
     REPR_initialize_registry(interp);
 
-    /* Bootstrap the KnowHOW and return it. */
-    return SixModelObject_bootstrap_knowhow(interp, initial_sc);
+    /* Bootstrap the KnowHOW. */
+    *knowhow = SixModelObject_bootstrap_knowhow(interp, initial_sc);
+    
+    /* Set up the simple KnowHOWAttribute. */
+    *knowhow_attribute = SixModelObject_setup_knowhow_attribute(interp, initial_sc, *knowhow);
 }
 
 /* Takes a representation and wraps it up in a REPR PMC. */

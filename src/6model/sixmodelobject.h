@@ -166,7 +166,7 @@ typedef struct {
 #define REPR_STRUCT(p)   ((REPRCommonalities *)PMC_data(p))
 
 /* Object model initialization. */
-PMC * SixModelObject_initialize(PARROT_INTERP);
+void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attribute);
 
 /* Some utility functions. */
 PMC * wrap_repr(PARROT_INTERP, void *REPR);
