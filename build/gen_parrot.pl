@@ -57,7 +57,9 @@ if (-d 'parrot') {
            ."the 'parrot' directory, and then re-run the command that caused\n"
            ."this error message\n";
     }
+    chdir('parrot') || die "Can't chdir to 'parrot': $!";
     system_or_die(qw(git fetch));
+    chdir('..') ||  die "Can't chdir back to rakudo ('..'): $!";
 } else {
     system_or_die(qw(git clone git://github.com/parrot/parrot.git parrot));
 }
