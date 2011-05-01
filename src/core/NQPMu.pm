@@ -30,7 +30,7 @@ my class NQPMu {
     }
 
     proto method Str() is parrot_vtable('get_string') { * }
-    multi method Str(Mu:U $self:) {
+    multi method Str(NQPMu:U $self:) {
         self.HOW.name(self) ~ '()'
     }
 
