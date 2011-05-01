@@ -87,6 +87,19 @@ for regular expressions.
 .end
 
 
+=item prefix_list()
+
+Gets the list of prefixes, as a single return value list.
+
+=cut
+
+.sub 'prefix_list' :method
+    .local pmc prefixes
+    (prefixes :slurpy) = self.'prefix'('')
+    .return (prefixes)
+.end
+
+
 =item prefix()
 
 Returns the prefixes associated with the regex tree rooted

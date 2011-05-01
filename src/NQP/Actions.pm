@@ -1024,31 +1024,31 @@ class NQP::Actions is HLL::Actions {
             my $regex := 
                 Regex::P6Regex::Actions::buildsub($<p6regex>.ast, @BLOCK.shift);
             $regex.name($name);
-            $past := 
-                PAST::Op.new(
-                    :pasttype<callmethod>, :name<new>,
-                    lexical_package_lookup(['Regex', 'Method'], $/),
-                    $regex
-                );
+            my $prefix_meth;
+            
             if pir::defined($*PACKAGE-SETUP) {
+                # Add the actual method.
                 $*SC.pkg_add_method($*PACKAGE, 'add_method', $name, $regex, 0);
-                # XXX This is really nasty - PAST::Compiler generates a prefix
-                # producing method. However, the meta-object would already be
-                # composed by then. Need to resolve this to finish compile-time
-                # meta-objects stuff...
-                $*PACKAGE-SETUP.push(PAST::Op.new(
-                    :pasttype('callmethod'), :name('add_method'),
-                    PAST::Op.new(
-                        :pirop('get_how PP'),
-                        PAST::Var.new( :name('type_obj'), :scope('register') )
-                    ),
-                    PAST::Var.new( :name('type_obj'), :scope('register') ),
-                    PAST::Val.new( :value('!PREFIX__' ~ $name) ),
-                    PAST::Var.new( :name('!PREFIX__' ~ $name), :scope('package') )
-                ));
+                
+                # Produce the prefixes method and add it.
+                my @prefixes := $<p6regex>.ast.prefix_list();
+                $prefix_meth := PAST::Block.new(
+                    :name('!PREFIX__' ~ $name), :blocktype('method'),
+                    PAST::Op.new( :pasttype('list'), |@prefixes )
+                );
+                $*SC.pkg_add_method($*PACKAGE, 'add_method', $prefix_meth.name,
+                    $prefix_meth, 0);
             }
+            
             # In sink context, we don't need the Regex::Regex object.
-            $past<sink> := $regex;
+            $past := PAST::Op.new(
+                :pasttype<callmethod>, :name<new>,
+                lexical_package_lookup(['Regex', 'Method'], $/),
+                $regex
+            );
+            $past<sink> := $prefix_meth ??
+                PAST::Stmts.new( $regex, $prefix_meth ) !!
+                $regex;
             @MODIFIERS.shift;
         }
         make $past;
