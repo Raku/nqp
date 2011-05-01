@@ -345,6 +345,7 @@ class HLL::Compiler::SerializationContextBuilder {
             $create_call
         )));
     }
+    
     # For methods, we need a "stub" that we'll clone and use for the
     # compile-time representation. It'll really just complain that it
     # does that code hasn't been compiled yet. (Need something more
@@ -399,6 +400,23 @@ class HLL::Compiler::SerializationContextBuilder {
                 self.get_slot_past_for_object($dummy),
                 PAST::Val.new( :value($method_past) )
             )));
+    }
+    
+    # Associates a signature with a routine.
+    method set_routine_signature($routine, $types, $definednesses) {
+        # Fixup code depends on if we have the routine in the SC for
+        # fixing up. Deserialization always goes on the blockref.
+        my $fixup := PAST::Op.new( :pirop('set_sub_multisig vPPP'), $types, $definednesses );
+        if pir::defined($routine<compile_time_dummy>) {
+            $fixup.unshift(self.get_slot_past_for_object($routine<compile_time_dummy>));
+        }
+        else {
+            $fixup.unshift(PAST::Val.new( :value($routine) ));
+        }
+        my $des := PAST::Op.new( :pirop('set_sub_multisig vPPP'),
+            PAST::Val.new( :value($routine) ), $types, $definednesses
+        );
+        self.add_event(:deserialize_past($des), :fixup_past($fixup));
     }
     
     # Adds a parent or role to the meta-object, and stores an event for

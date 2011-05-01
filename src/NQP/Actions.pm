@@ -803,7 +803,7 @@ class NQP::Actions is HLL::Actions {
         unless $past<signature_has_invocant> {
             $past[0].unshift(PAST::Var.new(
                 :name('self'), :scope('parameter'),
-                :multitype(PAST::Var.new( :name('$?CLASS') ))
+                :multitype($*SC.get_object_sc_ref_past($*PACKAGE))
             ));
         }
         $past.symbol('self', :scope('lexical') );
@@ -859,10 +859,7 @@ class NQP::Actions is HLL::Actions {
                                     $_<definedness> eq 'U' ?? 2 !! 0);
             }
         }
-        $routine.loadinit.push(PAST::Op.new( :pirop('set_sub_multisig vPPP'),
-            PAST::Var.new( :name('block'), :scope('register') ),
-            $types,
-            $definednesses));
+        $*SC.set_routine_signature($routine, $types, $definednesses);
     }
 
     method signature($/) {
