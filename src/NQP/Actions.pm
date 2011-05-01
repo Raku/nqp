@@ -69,19 +69,30 @@ class NQP::Actions is HLL::Actions {
         # Need to load the NQP dynops/dympmcs.
         $unit.loadlibs('nqp_group', 'nqp_ops');
         
-        # If we have a MAIN sub, call it at end of mainline. Note, only do
-        # it if there were any args given (so this was invoked as main).
+        # Detect if we're the main unit by if we were given any args. If so,
+        # register the mainline as a module (so trying to use ourself in the
+        # program will not explode). If we have a MAIN sub, call it at end of
+        # mainline.
+        $unit.unshift(PAST::Var.new( :scope('parameter'), :name('@ARGS'), :slurpy(1) ));
+        my $main_tasks := PAST::Stmts.new(
+            PAST::Op.new( :pirop('load_bytecode vs'), 'ModuleLoader.pbc' ),
+            PAST::Op.new(
+                :pasttype('callmethod'), :name('set_mainline_module'),
+                PAST::Var.new( :name('ModuleLoader'), :namespace([]), :scope('package') ),
+                PAST::Var.new( :scope('keyed'), PAST::Op.new( :pirop('getinterp P') ), 'context' )
+            )
+        );
         if $*MAIN_SUB {
-            $unit.unshift(PAST::Var.new( :scope('parameter'), :name('@ARGS'), :slurpy(1) ));
-            $mainline.push(PAST::Op.new(
-                :pasttype('if'),
-                PAST::Var.new( :scope('lexical'), :name('@ARGS') ),
-                PAST::Op.new(
-                    :pasttype('call'), PAST::Val.new( :value($*MAIN_SUB) ),
-                    PAST::Var.new( :scope('lexical'), :name('@ARGS'), :flat(1) )
-                )
+            $main_tasks.push(PAST::Op.new(
+                :pasttype('call'), PAST::Val.new( :value($*MAIN_SUB) ),
+                PAST::Var.new( :scope('lexical'), :name('@ARGS'), :flat(1) )
             ));
         }
+        $mainline.push(PAST::Op.new(
+            :pasttype('if'),
+            PAST::Var.new( :scope('lexical'), :name('@ARGS') ),
+            $main_tasks
+        ));
 
         # We force a return here, because we have other
         # :load/:init blocks to execute that we don't want
