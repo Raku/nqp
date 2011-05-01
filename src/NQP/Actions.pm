@@ -494,14 +494,6 @@ class NQP::Actions is HLL::Actions {
         if $*SCOPE eq 'our' || $*SCOPE eq '' {
             $past.namespace( $<name><identifier> );
         }
-        
-        # Prefix the class initialization with initial setup.
-        $*PACKAGE-SETUP.unshift(PAST::Stmts.new(
-            PAST::Op.new( :pasttype('bind'),
-                PAST::Var.new( :name('type_obj'), :scope('register'), :isdecl(1) ),
-                $*SC.get_slot_past_for_object($*PACKAGE)
-            )
-        ));
 
         # Evaluate everything in the package in-line unless this is a generic
         # type in which case it needs delayed evaluation. Normally, $?CLASS is
@@ -562,9 +554,6 @@ class NQP::Actions is HLL::Actions {
 
         # Finally, compose.
         $*SC.pkg_compose($*PACKAGE);
-
-        # Attach the class code to run at loadinit time.
-        $past.loadinit.push(PAST::Block.new( :blocktype('immediate'), $*PACKAGE-SETUP ));
 
         make $past;
     }
