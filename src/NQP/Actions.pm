@@ -958,25 +958,17 @@ class NQP::Actions is HLL::Actions {
     }
 
     method trait_mod:sym<is>($/) {
-        my $cpast := $<circumfix>[0].ast;
         if $<longname> eq 'parrot_vtable' {
             # XXX This should be in Parrot-specific module and need a pragma.
+            my $cpast := $<circumfix>[0].ast;
             $/.CURSOR.panic("Trait 'parrot_vtable' requires constant scalar argument")
                 unless $cpast ~~ PAST::Val;
+            my $name := $cpast.value;
+            my $package := $*PACKAGE;
+            my $is_dispatcher := $*SCOPE eq 'proto';
             make -> $match {
-                my $meth := $match.ast<block_past>;
-                if pir::defined($*PACKAGE-SETUP) {
-                    $*PACKAGE-SETUP.push(PAST::Op.new(
-                        :pasttype('callmethod'), :name('add_parrot_vtable_mapping'),
-                        PAST::Op.new(
-                            # XXX Should be nqpop at some point.
-                            :pirop('get_how PP'),
-                            PAST::Var.new( :name('type_obj'), :scope('register') )
-                        ),
-                        PAST::Var.new( :name('type_obj'), :scope('register') ),
-                        $cpast, $meth
-                    ));
-                }
+                $*SC.pkg_add_method($package, 'add_parrot_vtable_mapping', $name, 
+                    $match.ast<block_past>, $is_dispatcher);
             };
         }
         elsif $<longname> eq 'pirflags' {
