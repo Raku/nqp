@@ -1026,7 +1026,7 @@ class NQP::Actions is HLL::Actions {
             $regex.name($name);
             my $prefix_meth;
             
-            if pir::defined($*PACKAGE-SETUP) {
+            if $*PKGDECL && pir::can($*PACKAGE.HOW, 'add_method') {
                 # Add the actual method.
                 $*SC.pkg_add_method($*PACKAGE, 'add_method', $name, $regex, 0);
                 

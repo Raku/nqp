@@ -25,6 +25,7 @@ grammar NQP::Grammar is HLL::Grammar {
 
         my $*SCOPE       := '';
         my $*MULTINESS   := '';
+        my $*PKGDECL     := '';
         my $*INVOCANT_OK := 0;
         my $*RETURN_USED := 0;
         my $*PACKAGE-SETUP;
