@@ -560,16 +560,8 @@ class NQP::Actions is HLL::Actions {
             }
         }
 
-        # Postfix it with a call to compose.
-        $*PACKAGE-SETUP.push(PAST::Op.new(
-            :pasttype('callmethod'), :name('compose'),
-            PAST::Op.new(
-                # XXX nqpop get_how
-                :pirop('get_how PP'),
-                PAST::Var.new( :name('type_obj'), :scope('register') )
-            ),
-            PAST::Var.new( :name('type_obj'), :scope('register') )
-        ));
+        # Finally, compose.
+        $*SC.pkg_compose($*PACKAGE);
 
         # Attach the class code to run at loadinit time.
         $past.loadinit.push(PAST::Block.new( :blocktype('immediate'), $*PACKAGE-SETUP ));
