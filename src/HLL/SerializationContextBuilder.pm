@@ -419,6 +419,23 @@ class HLL::Compiler::SerializationContextBuilder {
         self.add_event(:deserialize_past($des), :fixup_past($fixup));
     }
     
+    # This handles associating the role body with a role declaration.
+    # XXX Very tricky to work out the fixup for this... :-/
+    method pkg_set_body_block($obj, $body_past) {
+        # XXX Create compile-time stub.
+        
+        # XXX Fixup...
+        
+        # Emit code to set the body block when deserializing.
+        my $slot_past := self.get_slot_past_for_object($obj);
+        self.add_event(:deserialize_past(PAST::Op.new(
+            :pasttype('callmethod'), :name('set_body_block'),
+            PAST::Op.new( :pirop('get_how PP'), $slot_past ),
+            $slot_past,
+            PAST::Val.new( :value($body_past) )
+        )));
+    }
+    
     # Adds a parent or role to the meta-object, and stores an event for
     # the action.
     method pkg_add_parent_or_role($obj, $meta_method_name, $to_add) {
