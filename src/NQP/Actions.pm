@@ -938,8 +938,19 @@ class NQP::Actions is HLL::Actions {
     }
 
     method typename($/) {
+        # Try to locate the symbol. We'll emit a lookup via the SC so
+        # the scope we emit code to do the symbol lookup in won't matter,
+        # and so we can complain about non-existent type names.
         my @name := HLL::Compiler.parse_name(~$/);
-        make lexical_package_lookup(@name, $/);
+        my $found := 0;
+        try {
+            my $sym := find_sym(@name, $/);
+            make $*SC.get_object_sc_ref_past($sym);
+            $found := 1;
+        }
+        unless $found {
+            $/.CURSOR.panic("Use of undeclared type '" ~ ~$/ ~ "'");
+        }
     }
 
     method trait($/) {
@@ -1386,6 +1397,16 @@ class NQP::Actions is HLL::Actions {
             }
         }
         0;
+    }
+    
+    # Checks if the symbol is known.
+    method known_sym($/, @name) {
+        my $known := 0;
+        try {
+            find_sym(@name, $/);
+            $known := 1;
+        }
+        $known
     }
     
     # Finds a symbol that has a known value at compile time from the

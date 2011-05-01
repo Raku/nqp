@@ -391,7 +391,10 @@ grammar NQP::Grammar is HLL::Grammar {
         | <package_declarator>
     }
 
-    token typename { <name> }
+    token typename {
+        <name>
+        <?{ $*ACTIONS.known_sym($/, $<name><identifier>) }>
+    }
 
     token declarator {
         | <variable_declarator>
