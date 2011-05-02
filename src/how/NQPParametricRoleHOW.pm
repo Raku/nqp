@@ -118,13 +118,12 @@ knowhow NQPParametricRoleHOW {
             $irole.HOW.add_attribute($irole, $_.value);
         }
 
-        # Capture methods in the correct lexical context. Don't need to
-        # do any signature reification in NQP; no type parameters.
+        # Capture methods in the correct lexical context.
         for %!methods {
-            $irole.HOW.add_method($irole, $_.key, pir::clone($_.value));
+            $irole.HOW.add_method($irole, $_.key, reify_method($_.value));
         }
         for @!multi_methods_to_incorporate {
-            $irole.HOW.add_multi_method($irole, $_<name>, pir::clone($_<code>));
+            $irole.HOW.add_multi_method($irole, $_<name>, reify_method($_<code>));
         }
 
         # Copy roles, instantiating them as we go.
@@ -137,7 +136,13 @@ knowhow NQPParametricRoleHOW {
         $irole.HOW.compose($irole);
         return $irole;
     }
-
+    
+    # Methods may have a reification callback that we should invoke to
+    # do the reification. Otherwise, it's just a clone.
+    sub reify_method($meth) {
+        my $callback := pir::getprop__PsP('REIFY_CALLBACK', $meth);
+        pir::defined($callback) ?? $callback($meth) !! pir::clone($meth)
+    }
 
     ##
     ## Introspecty

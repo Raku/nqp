@@ -358,8 +358,7 @@ class HLL::Compiler::SerializationContextBuilder {
     # Note that methods are always subject to fixing up since the actual
     # compiled code isn't available until compilation is complete.
     method pkg_add_method($obj, $meta_method_name, $name, $method_past, $is_dispatcher) {
-        # See if we already have our compile-time dummy. If not,
-        # create it.
+        # See if we already have our compile-time dummy. If not, create it.
         my $dummy;
         if pir::defined($method_past<compile_time_dummy>) {
             $dummy := $method_past<compile_time_dummy>;
@@ -379,6 +378,9 @@ class HLL::Compiler::SerializationContextBuilder {
             self.add_code($dummy);
             $method_past<compile_time_dummy> := $dummy;
         }
+        
+        # Attach PAST as a property to the dummy.
+        pir::setprop__vPsP($dummy, 'PAST', $method_past);
         
         # Add it to the compile time meta-object.
         $obj.HOW."$meta_method_name"($obj, $name, $dummy);
@@ -425,9 +427,15 @@ class HLL::Compiler::SerializationContextBuilder {
         # need to run it with the parameters that were used at compile
         # time. We rely on those being in the SC. The "dummy" body block
         # we supply will simply capture those and append to the body
-        # invoke PAST.
+        # invoke PAST. That's the "easy" part. The harder part is that
+        # it also sets up the fixups for all the reified (cloned) methods.
+        # Note that the fact we back-reference it always to the original
+        # method, which in fact was just captured by running the block for
+        # each role setup, means we get the timing right in order to end
+        # up with methods capturing the correct type argument.
         my $fixups := PAST::Stmts.new();
         my $dummy := sub (*@type_args) {
+            # Set up call to invoke body block with the type arguments.
             my $invoke_body := PAST::Op.new(
                 :pasttype('call'),
                 PAST::Val.new( :value($body_past) )
@@ -436,6 +444,25 @@ class HLL::Compiler::SerializationContextBuilder {
                 $invoke_body.push(self.get_slot_past_for_object($_));
             }
             $fixups.push($invoke_body);
+            
+            # Set a reification callback on all the dummy methods.
+            for $obj.HOW.methods($obj, :local(1)) {
+                pir::setprop__vPsP($_, 'REIFY_CALLBACK', sub ($meth) {
+                    # Make a clone and add it to the SC.
+                    my $clone := pir::clone($meth);
+                    self.add_code($clone);
+                    
+                    # Add fixup for the cloned code.
+                    $fixups.push(PAST::Op.new(
+                        :pirop('copy vPP'),
+                        self.get_slot_past_for_object($clone),
+                        PAST::Val.new( :value(pir::getprop__PsP('PAST', $meth)) )
+                    ));
+                    
+                    # Result is the cloned method that will be fixed up.
+                    $clone
+                });
+            }
         };
         
         # Pass the dummy along as the role body block.
