@@ -385,7 +385,7 @@ class HLL::Compiler::SerializationContextBuilder {
         # Add it to the compile time meta-object.
         $obj.HOW."$meta_method_name"($obj, $name, $dummy);
         
-        # For fixup, need to copy the method body we actually compiled
+        # For fixup, need to assign the method body we actually compiled
         # onto the one that went into the SC. Deserializing is easier -
         # just the straight meta-method call.
         my $slot_past := self.get_slot_past_for_object($obj);
@@ -398,7 +398,7 @@ class HLL::Compiler::SerializationContextBuilder {
                 PAST::Val.new( :value($method_past) )
             )),
             :fixup_past(PAST::Op.new(
-                :pirop('copy vPP'),
+                :pirop('assign vPP'),
                 self.get_slot_past_for_object($dummy),
                 PAST::Val.new( :value($method_past) )
             )));
@@ -454,7 +454,7 @@ class HLL::Compiler::SerializationContextBuilder {
                     
                     # Add fixup for the cloned code.
                     $fixups.push(PAST::Op.new(
-                        :pirop('copy vPP'),
+                        :pirop('assign vPP'),
                         self.get_slot_past_for_object($clone),
                         PAST::Val.new( :value(pir::getprop__PsP('PAST', $meth)) )
                     ));

@@ -30,7 +30,7 @@ pmclass DispatcherSub extends Sub auto_attrs dynpmc group nqp {
     
     VTABLE void assign_pmc(PMC *other) {
         /* It's OK to assign another DispatcherSub or alternatively to
-         * assign a Parrot Sub (our immediate parent); */
+         * assign a Parrot Sub (our immediate parent). */
         if (other->vtable->base_type == SELF->vtable->base_type ||
             other->vtable->base_type == enum_class_Sub) {
             Parrot_Sub_attributes *my_sub;
