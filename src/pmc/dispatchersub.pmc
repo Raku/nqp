@@ -5,6 +5,12 @@ pmclass DispatcherSub extends Sub auto_attrs dynpmc group nqp {
     ATTR PMC *dispatchees;     /* Used if this code object is a dispatcher. */
     ATTR PMC *dispatch_cache;  /* Holds a (multi-)dispatch cache if needed. */
     
+    VTABLE void init() {
+        SUPER();
+        SETATTR_DispatcherSub_dispatchees(interp, SELF, PMCNULL);
+        SETATTR_DispatcherSub_dispatch_cache(interp, SELF, PMCNULL);
+    }
+    
     VTABLE void mark() {
         PMC *dispatchees;
         SUPER();
