@@ -420,20 +420,37 @@ class HLL::Compiler::SerializationContextBuilder {
     }
     
     # This handles associating the role body with a role declaration.
-    # XXX Very tricky to work out the fixup for this... :-/
     method pkg_set_body_block($obj, $body_past) {
-        # XXX Create compile-time stub.
+        # In fixup, we'll actually run the real body block, but we
+        # need to run it with the parameters that were used at compile
+        # time. We rely on those being in the SC. The "dummy" body block
+        # we supply will simply capture those and append to the body
+        # invoke PAST.
+        my $fixups := PAST::Stmts.new();
+        my $dummy := sub (*@type_args) {
+            my $invoke_body := PAST::Op.new(
+                :pasttype('call'),
+                PAST::Val.new( :value($body_past) )
+            );
+            for @type_args {
+                $invoke_body.push(self.get_slot_past_for_object($_));
+            }
+            $fixups.push($invoke_body);
+        };
         
-        # XXX Fixup...
+        # Pass the dummy along as the role body block.
+        $obj.HOW.set_body_block($obj, $dummy);
         
-        # Emit code to set the body block when deserializing.
+        # In deserialization, easy - just do the meta-object call.
         my $slot_past := self.get_slot_past_for_object($obj);
-        self.add_event(:deserialize_past(PAST::Op.new(
+        my $des := PAST::Op.new(
             :pasttype('callmethod'), :name('set_body_block'),
             PAST::Op.new( :pirop('get_how PP'), $slot_past ),
             $slot_past,
             PAST::Val.new( :value($body_past) )
-        )));
+        );
+        
+        self.add_event(:deserialize_past($des), :fixup_past($fixups));
     }
     
     # Adds a parent or role to the meta-object, and stores an event for
