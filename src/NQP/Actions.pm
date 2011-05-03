@@ -505,14 +505,6 @@ class NQP::Actions is HLL::Actions {
         if $*SCOPE eq 'our' || $*SCOPE eq '' {
             $past.namespace( $<name><identifier> );
         }
-        
-        # Prefix the class initialization with initial setup.
-        $*PACKAGE-SETUP.unshift(PAST::Stmts.new(
-            PAST::Op.new( :pasttype('bind'),
-                PAST::Var.new( :name('type_obj'), :scope('register'), :isdecl(1) ),
-                $*SC.get_slot_past_for_object($*PACKAGE)
-            )
-        ));
 
         # Evaluate everything in the package in-line unless this is a generic
         # type in which case it needs delayed evaluation. Normally, $?CLASS is
@@ -522,16 +514,7 @@ class NQP::Actions is HLL::Actions {
             $past.blocktype('declaration');
             $past.unshift(PAST::Var.new( :name('$?CLASS'), :scope('parameter') ));
             $past.symbol('$?CLASS', :scope('lexical'));
-            $*PACKAGE-SETUP.push(PAST::Op.new(
-                :pasttype('callmethod'), :name('set_body_block'),
-                PAST::Op.new(
-                    # XXX nqpop get_how
-                    :pirop('get_how PP'),
-                    PAST::Var.new( :name('type_obj'), :scope('register') )
-                ),
-                PAST::Var.new( :name('type_obj'), :scope('register') ),
-                PAST::Val.new( :value($past) )
-            ));
+            $*SC.pkg_set_body_block($*PACKAGE, $past);
             $*SC.install_lexical_symbol($past, '$?PACKAGE', $*PACKAGE);
             $*SC.install_lexical_symbol($past, '$?ROLE', $*PACKAGE);
         }
@@ -580,19 +563,8 @@ class NQP::Actions is HLL::Actions {
             }
         }
 
-        # Postfix it with a call to compose.
-        $*PACKAGE-SETUP.push(PAST::Op.new(
-            :pasttype('callmethod'), :name('compose'),
-            PAST::Op.new(
-                # XXX nqpop get_how
-                :pirop('get_how PP'),
-                PAST::Var.new( :name('type_obj'), :scope('register') )
-            ),
-            PAST::Var.new( :name('type_obj'), :scope('register') )
-        ));
-
-        # Attach the class code to run at loadinit time.
-        $past.loadinit.push(PAST::Block.new( :blocktype('immediate'), $*PACKAGE-SETUP ));
+        # Finally, compose.
+        $*SC.pkg_compose($*PACKAGE);
 
         make $past;
     }
@@ -814,7 +786,7 @@ class NQP::Actions is HLL::Actions {
         unless $past<signature_has_invocant> {
             $past[0].unshift(PAST::Var.new(
                 :name('self'), :scope('parameter'),
-                :multitype(PAST::Var.new( :name('$?CLASS') ))
+                :multitype($*SC.get_object_sc_ref_past($*PACKAGE))
             ));
         }
         $past.symbol('self', :scope('lexical') );
@@ -825,36 +797,16 @@ class NQP::Actions is HLL::Actions {
             my $name := ~$<private> ~ ~$<deflongname>[0].ast;
             $past.name($name);
 
-            # If it's a proto, we'll mark it as such by giving it an empty candidate
-            # list. Also need to set sub PMC type to DispatcherSub.
-            my $to_add := $*MULTINESS ne 'proto' ??
-                PAST::Val.new( :value($past) ) !!
-                PAST::Op.new(
-                    :pirop('set_dispatchees 0PP'),
-                    PAST::Val.new( :value($past) ),
-                    PAST::Op.new( :pasttype('list') )
-                );
-            if $*MULTINESS eq 'proto' { $past.pirflags(':instanceof("DispatcherSub")'); }
-            
             # If it is a multi, we need to build a type signature object for
             # the multi-dispatcher to use.
             if $*MULTINESS eq 'multi' { attach_multi_signature($past); }
 
             # Insert it into the method table.
-            if pir::defined($*PACKAGE-SETUP) {
-                $*PACKAGE-SETUP.push(PAST::Op.new(
-                    :pasttype('callmethod'), :name($*MULTINESS eq 'multi' ?? 'add_multi_method' !! 'add_method'),
-                    PAST::Op.new(
-                        # XXX Should be nqpop at some point.
-                        :pirop('get_how PP'),
-                        PAST::Var.new( :name('type_obj'), :scope('register') )
-                    ),
-                    PAST::Var.new( :name('type_obj'), :scope('register') ),
-                    PAST::Val.new( :value($name) ),
-                    $to_add
-                ));
-            }
+            my $meta_meth := $*MULTINESS eq 'multi' ?? 'add_multi_method' !! 'add_method';
+            my $is_dispatcher := $*MULTINESS eq 'proto';
+            $*SC.pkg_add_method($*PACKAGE, $meta_meth, $name, $past, $is_dispatcher);
             
+            # Install it in the package also if needed.
             if $*SCOPE eq 'our' {
                 $*SC.install_package_routine($*PACKAGE, $name, $past);
             }
@@ -890,10 +842,7 @@ class NQP::Actions is HLL::Actions {
                                     $_<definedness> eq 'U' ?? 2 !! 0);
             }
         }
-        $routine.loadinit.push(PAST::Op.new( :pirop('set_sub_multisig vPPP'),
-            PAST::Var.new( :name('block'), :scope('register') ),
-            $types,
-            $definednesses));
+        $*SC.set_routine_signature($routine, $types, $definednesses);
     }
 
     method signature($/) {
@@ -969,8 +918,19 @@ class NQP::Actions is HLL::Actions {
     }
 
     method typename($/) {
+        # Try to locate the symbol. We'll emit a lookup via the SC so
+        # the scope we emit code to do the symbol lookup in won't matter,
+        # and so we can complain about non-existent type names.
         my @name := HLL::Compiler.parse_name(~$/);
-        make lexical_package_lookup(@name, $/);
+        my $found := 0;
+        try {
+            my $sym := find_sym(@name, $/);
+            make $*SC.get_object_sc_ref_past($sym);
+            $found := 1;
+        }
+        unless $found {
+            $/.CURSOR.panic("Use of undeclared type '" ~ ~$/ ~ "'");
+        }
     }
 
     method trait($/) {
@@ -978,25 +938,17 @@ class NQP::Actions is HLL::Actions {
     }
 
     method trait_mod:sym<is>($/) {
-        my $cpast := $<circumfix>[0].ast;
         if $<longname> eq 'parrot_vtable' {
             # XXX This should be in Parrot-specific module and need a pragma.
+            my $cpast := $<circumfix>[0].ast;
             $/.CURSOR.panic("Trait 'parrot_vtable' requires constant scalar argument")
                 unless $cpast ~~ PAST::Val;
+            my $name := $cpast.value;
+            my $package := $*PACKAGE;
+            my $is_dispatcher := $*SCOPE eq 'proto';
             make -> $match {
-                my $meth := $match.ast<block_past>;
-                if pir::defined($*PACKAGE-SETUP) {
-                    $*PACKAGE-SETUP.push(PAST::Op.new(
-                        :pasttype('callmethod'), :name('add_parrot_vtable_mapping'),
-                        PAST::Op.new(
-                            # XXX Should be nqpop at some point.
-                            :pirop('get_how PP'),
-                            PAST::Var.new( :name('type_obj'), :scope('register') )
-                        ),
-                        PAST::Var.new( :name('type_obj'), :scope('register') ),
-                        $cpast, $meth
-                    ));
-                }
+                $*SC.pkg_add_method($package, 'add_parrot_vtable_mapping', $name, 
+                    $match.ast<block_past>, $is_dispatcher);
             };
         }
         elsif $<longname> eq 'pirflags' {
@@ -1038,16 +990,7 @@ class NQP::Actions is HLL::Actions {
                     )
                 );
                 for @($past) {
-                    $*PACKAGE-SETUP.push(PAST::Op.new(
-                        :pasttype('callmethod'), :name('add_method'),
-                        PAST::Op.new(
-                            :pirop('get_how PP'),
-                            PAST::Var.new( :name('type_obj'), :scope('register') )
-                        ),
-                        PAST::Var.new( :name('type_obj'), :scope('register') ),
-                        PAST::Val.new( :value($_.name()) ),
-                        PAST::Val.new( :value($_) )
-                    ));
+                    $*SC.pkg_add_method($*PACKAGE, 'add_method', $_.name(), $_, 0);
                 }
         }
         elsif $key eq 'open' {
@@ -1064,36 +1007,31 @@ class NQP::Actions is HLL::Actions {
             my $regex := 
                 Regex::P6Regex::Actions::buildsub($<p6regex>.ast, @BLOCK.shift);
             $regex.name($name);
-            $past := 
-                PAST::Op.new(
-                    :pasttype<callmethod>, :name<new>,
-                    lexical_package_lookup(['Regex', 'Method'], $/),
-                    $regex
+            my $prefix_meth;
+            
+            if $*PKGDECL && pir::can($*PACKAGE.HOW, 'add_method') {
+                # Add the actual method.
+                $*SC.pkg_add_method($*PACKAGE, 'add_method', $name, $regex, 0);
+                
+                # Produce the prefixes method and add it.
+                my @prefixes := $<p6regex>.ast.prefix_list();
+                $prefix_meth := PAST::Block.new(
+                    :name('!PREFIX__' ~ $name), :blocktype('method'),
+                    PAST::Op.new( :pasttype('list'), |@prefixes )
                 );
-            if pir::defined($*PACKAGE-SETUP) {
-                $*PACKAGE-SETUP.push(PAST::Op.new(
-                    :pasttype('callmethod'), :name('add_method'),
-                    PAST::Op.new(
-                        :pirop('get_how PP'),
-                        PAST::Var.new( :name('type_obj'), :scope('register') )
-                    ),
-                    PAST::Var.new( :name('type_obj'), :scope('register') ),
-                    PAST::Val.new( :value($name) ),
-                    PAST::Val.new( :value($regex) )
-                ));
-                $*PACKAGE-SETUP.push(PAST::Op.new(
-                    :pasttype('callmethod'), :name('add_method'),
-                    PAST::Op.new(
-                        :pirop('get_how PP'),
-                        PAST::Var.new( :name('type_obj'), :scope('register') )
-                    ),
-                    PAST::Var.new( :name('type_obj'), :scope('register') ),
-                    PAST::Val.new( :value('!PREFIX__' ~ $name) ),
-                    PAST::Var.new( :name('!PREFIX__' ~ $name), :scope('package') )
-                ));
+                $*SC.pkg_add_method($*PACKAGE, 'add_method', $prefix_meth.name,
+                    $prefix_meth, 0);
             }
+            
             # In sink context, we don't need the Regex::Regex object.
-            $past<sink> := $regex;
+            $past := PAST::Op.new(
+                :pasttype<callmethod>, :name<new>,
+                lexical_package_lookup(['Regex', 'Method'], $/),
+                $regex
+            );
+            $past<sink> := $prefix_meth ??
+                PAST::Stmts.new( $regex, $prefix_meth ) !!
+                $regex;
             @MODIFIERS.shift;
         }
         make $past;
@@ -1431,6 +1369,16 @@ class NQP::Actions is HLL::Actions {
             }
         }
         0;
+    }
+    
+    # Checks if the symbol is known.
+    method known_sym($/, @name) {
+        my $known := 0;
+        try {
+            find_sym(@name, $/);
+            $known := 1;
+        }
+        $known
     }
     
     # Finds a symbol that has a known value at compile time from the

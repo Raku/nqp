@@ -110,6 +110,14 @@ class HLL::Compiler::SerializationContextBuilder {
         %!addr_to_slot{addr($obj)} := $idx;
         $idx
     }
+    
+    # Adds a code ref to the root set, along with a mapping.
+    method add_code($obj) {
+        my $idx := $!sc.elems();
+        $!sc[$idx] := $obj;
+        %!addr_to_slot{addr($obj)} := $idx;
+        $idx
+    }
 
     # Add an event that may have an action to deserialize or fix up.
     method add_event(:$deserialize_past, :$fixup_past) {
@@ -338,10 +346,151 @@ class HLL::Compiler::SerializationContextBuilder {
         )));
     }
     
+    # For methods, we need a "stub" that we'll clone and use for the
+    # compile-time representation. It'll really just complain that it
+    # does that code hasn't been compiled yet. (Need something more
+    # complex to handle roles, but one step at a time...)
+    my $stub_code := sub (*@args, *%named) {
+        pir::die("Cannot run code that has not yet been compiled.");
+    };
+    
     # Adds a method to the meta-object, and stores an event for the action.
     # Note that methods are always subject to fixing up since the actual
     # compiled code isn't available until compilation is complete.
-    method pkg_add_method($obj, $meta_method_name, $name, $method_past) {
+    method pkg_add_method($obj, $meta_method_name, $name, $method_past, $is_dispatcher) {
+        # See if we already have our compile-time dummy. If not, create it.
+        my $fixups := PAST::Stmts.new();
+        my $dummy;
+        if pir::defined($method_past<compile_time_dummy>) {
+            $dummy := $method_past<compile_time_dummy>;
+        }
+        else {
+            # What we create depends on whether it's a dispatcher or not.
+            # If it is a dispatcher, set the PMC type it uses and then use
+            # that for the dummy.
+            if $is_dispatcher {
+                $method_past.pirflags(':instanceof("DispatcherSub")');
+                $dummy := pir::assign__0PP(pir::new__Ps('DispatcherSub'), $stub_code);
+                
+                # The dispatcher will get cloned if more candidates are added in
+                # a subclass; this makes sure that we fix up the clone also.
+                pir::setprop__vPsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone) {
+                    self.add_code($clone);
+                    $fixups.push(PAST::Op.new(
+                        :pirop('assign vPP'),
+                        self.get_slot_past_for_object($clone),
+                        PAST::Val.new( :value(pir::getprop__PsP('PAST', $orig)) )
+                    ));
+                });
+            }
+            else {
+                $dummy := pir::clone__PP($stub_code);
+            }
+            pir::assign__vPS($dummy, $name);
+            self.add_code($dummy);
+            $method_past<compile_time_dummy> := $dummy;
+        }
+        
+        # Attach PAST as a property to the dummy.
+        pir::setprop__vPsP($dummy, 'PAST', $method_past);
+        
+        # Add it to the compile time meta-object.
+        $obj.HOW."$meta_method_name"($obj, $name, $dummy);
+        
+        # For fixup, need to assign the method body we actually compiled
+        # onto the one that went into the SC. Deserializing is easier -
+        # just the straight meta-method call.
+        $fixups.push(PAST::Op.new(
+            :pirop('assign vPP'),
+            self.get_slot_past_for_object($dummy),
+            PAST::Val.new( :value($method_past) )
+        ));
+        my $slot_past := self.get_slot_past_for_object($obj);
+        self.add_event(
+            :deserialize_past(PAST::Op.new(
+                :pasttype('callmethod'), :name($meta_method_name),
+                PAST::Op.new( :pirop('get_how PP'), $slot_past ),
+                $slot_past,
+                $name,
+                PAST::Val.new( :value($method_past) )
+            )),
+            :fixup_past($fixups));
+    }
+    
+    # Associates a signature with a routine.
+    method set_routine_signature($routine, $types, $definednesses) {
+        # Fixup code depends on if we have the routine in the SC for
+        # fixing up. Deserialization always goes on the blockref.
+        my $fixup := PAST::Op.new( :pirop('set_sub_multisig vPPP'), $types, $definednesses );
+        if pir::defined($routine<compile_time_dummy>) {
+            $fixup.unshift(self.get_slot_past_for_object($routine<compile_time_dummy>));
+        }
+        else {
+            $fixup.unshift(PAST::Val.new( :value($routine) ));
+        }
+        my $des := PAST::Op.new( :pirop('set_sub_multisig vPPP'),
+            PAST::Val.new( :value($routine) ), $types, $definednesses
+        );
+        self.add_event(:deserialize_past($des), :fixup_past($fixup));
+    }
+    
+    # This handles associating the role body with a role declaration.
+    method pkg_set_body_block($obj, $body_past) {
+        # In fixup, we'll actually run the real body block, but we
+        # need to run it with the parameters that were used at compile
+        # time. We rely on those being in the SC. The "dummy" body block
+        # we supply will simply capture those and append to the body
+        # invoke PAST. That's the "easy" part. The harder part is that
+        # it also sets up the fixups for all the reified (cloned) methods.
+        # Note that the fact we back-reference it always to the original
+        # method, which in fact was just captured by running the block for
+        # each role setup, means we get the timing right in order to end
+        # up with methods capturing the correct type argument.
+        my $fixups := PAST::Stmts.new();
+        my $dummy := sub (*@type_args) {
+            # Set up call to invoke body block with the type arguments.
+            my $invoke_body := PAST::Op.new(
+                :pasttype('call'),
+                PAST::Val.new( :value($body_past) )
+            );
+            for @type_args {
+                $invoke_body.push(self.get_slot_past_for_object($_));
+            }
+            $fixups.push($invoke_body);
+            
+            # Set a reification callback on all the dummy methods.
+            for $obj.HOW.methods($obj, :local(1)) {
+                pir::setprop__vPsP($_, 'REIFY_CALLBACK', sub ($meth) {
+                    # Make a clone and add it to the SC.
+                    my $clone := pir::clone($meth);
+                    self.add_code($clone);
+                    
+                    # Add fixup for the cloned code.
+                    $fixups.push(PAST::Op.new(
+                        :pirop('assign vPP'),
+                        self.get_slot_past_for_object($clone),
+                        PAST::Val.new( :value(pir::getprop__PsP('PAST', $meth)) )
+                    ));
+                    
+                    # Result is the cloned method that will be fixed up.
+                    $clone
+                });
+            }
+        };
+        
+        # Pass the dummy along as the role body block.
+        $obj.HOW.set_body_block($obj, $dummy);
+        
+        # In deserialization, easy - just do the meta-object call.
+        my $slot_past := self.get_slot_past_for_object($obj);
+        my $des := PAST::Op.new(
+            :pasttype('callmethod'), :name('set_body_block'),
+            PAST::Op.new( :pirop('get_how PP'), $slot_past ),
+            $slot_past,
+            PAST::Val.new( :value($body_past) )
+        );
+        
+        self.add_event(:deserialize_past($des), :fixup_past($fixups));
     }
     
     # Adds a parent or role to the meta-object, and stores an event for
@@ -366,7 +515,7 @@ class HLL::Compiler::SerializationContextBuilder {
         $obj.HOW.compose($obj);
         
         # Emit code to do the composition when deserializing.
-        my $slot_past := get_slot_past_for_object($obj);
+        my $slot_past := self.get_slot_past_for_object($obj);
         self.add_event(:deserialize_past(PAST::Op.new(
             :pasttype('callmethod'), :name('compose'),
             PAST::Op.new( :pirop('get_how PP'), $slot_past ),

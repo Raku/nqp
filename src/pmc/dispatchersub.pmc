@@ -1,9 +1,16 @@
 /* This extends the Parrot Sub PMC to add various pieces needed for
  * multiple dispatch. */
+#include "pmc_sub.h"
 pmclass DispatcherSub extends Sub auto_attrs dynpmc group nqp {
     ATTR PMC *dispatchees;     /* Used if this code object is a dispatcher. */
     ATTR PMC *dispatch_cache;  /* Holds a (multi-)dispatch cache if needed. */
-
+    
+    VTABLE void init() {
+        SUPER();
+        SETATTR_DispatcherSub_dispatchees(interp, SELF, PMCNULL);
+        SETATTR_DispatcherSub_dispatch_cache(interp, SELF, PMCNULL);
+    }
+    
     VTABLE void mark() {
         PMC *dispatchees;
         SUPER();
@@ -19,5 +26,25 @@ pmclass DispatcherSub extends Sub auto_attrs dynpmc group nqp {
         GETATTR_DispatcherSub_dispatch_cache(interp, SELF, dispatch_cache);
         SETATTR_DispatcherSub_dispatch_cache(interp, cloned, dispatch_cache);
         return cloned;
+    }
+    
+    VTABLE void assign_pmc(PMC *other) {
+        /* It's OK to assign another DispatcherSub or alternatively to
+         * assign a Parrot Sub (our immediate parent). */
+        if (other->vtable->base_type == SELF->vtable->base_type ||
+            other->vtable->base_type == enum_class_Sub) {
+            Parrot_Sub_attributes *my_sub;
+            Parrot_Sub_attributes *other_sub;
+
+            PMC_get_sub(INTERP, SELF, my_sub);
+            PMC_get_sub(INTERP, other, other_sub);
+
+            /* copy the sub struct */
+            memmove(my_sub, other_sub, sizeof (Parrot_Sub_attributes));
+        }
+        else
+            Parrot_ex_throw_from_c_args(INTERP, NULL,
+                EXCEPTION_INVALID_OPERATION,
+                "Can't assign a non-Sub type to a Sub");
     }
 }

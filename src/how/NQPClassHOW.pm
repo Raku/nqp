@@ -203,7 +203,12 @@ knowhow NQPClassHOW {
                             # Clone it and install it in our method table.
                             my @new_dispatchees;
                             @new_dispatchees[0] := $code;
-                            %!methods{$name} := pir::create_dispatch_and_add_candidates__PPP($dispatcher, @new_dispatchees);
+                            my $new_disp := pir::create_dispatch_and_add_candidates__PPP($dispatcher, @new_dispatchees);
+                            my $clone_callback := pir::getprop__PsP('CLONE_CALLBACK', $dispatcher);
+                            if pir::defined($clone_callback) {
+                                $clone_callback($dispatcher, $new_disp);
+                            }
+                            %!methods{$name} := $new_disp;
                             $found := 1;
                         }
                         else {

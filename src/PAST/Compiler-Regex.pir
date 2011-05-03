@@ -97,25 +97,6 @@ Return the POST representation of the regex AST rooted by C<node>.
     .local string cur, rep, pos, tgt, off, eos, debug
     (cur, rep, pos, tgt, off, eos, debug) = self.'!rxregs'('cur rep pos tgt off eos debug')
 
-    unless regexname goto peek_done
-    .local pmc tpast, token, tpost
-    $P99 = get_hll_global ['PAST'], 'Op'
-    tpast = $P99.'new'( 'pasttype'=>'list', 'node'=>node )
-    (token :slurpy) = node.'prefix'('')
-  token_loop:
-    unless token goto token_done
-    $P0 = shift token
-    push tpast, $P0
-    goto token_loop
-  token_done:
-    $S0 = regexname
-    $S0 = concat '!PREFIX__', $S0
-    $P99 = get_hll_global ['PAST'], 'Block'
-    tpast = $P99.'new'(tpast, 'name'=>$S0, 'nsentry'=>$S0, 'lexical'=>0, 'blocktype'=>'method')
-    tpost = self.'as_post'(tpast, 'rtype'=>'v')
-    ops.'push'(tpost)
-  peek_done:
-
     $S0 = concat '(', cur
     $S0 = concat $S0, ', '
     $S0 = concat $S0, pos
