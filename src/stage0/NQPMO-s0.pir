@@ -6,38 +6,40 @@
 .loadlib "nqp_ops"
 
 .namespace []
-.sub "_block11"  :anon :subid("10_1304456120.214")
+.sub "_block11"  :anon :subid("10_1304459371.883")
+    .param pmc param_13 :slurpy
 .annotate 'line', 0
-    .const 'Sub' $P2352 = "165_1304456120.214" 
-    capture_lex $P2352
-    .const 'Sub' $P2289 = "156_1304456120.214" 
-    capture_lex $P2289
-    .const 'Sub' $P2105 = "142_1304456120.214" 
-    capture_lex $P2105
-    .const 'Sub' $P2043 = "133_1304456120.214" 
-    capture_lex $P2043
-    .const 'Sub' $P1039 = "77_1304456120.214" 
-    capture_lex $P1039
-    .const 'Sub' $P721 = "52_1304456120.214" 
-    capture_lex $P721
-    .const 'Sub' $P508 = "42_1304456120.214" 
-    capture_lex $P508
-    .const 'Sub' $P248 = "21_1304456120.214" 
-    capture_lex $P248
-    .const 'Sub' $P25 = "11_1304456120.214" 
-    capture_lex $P25
+    .const 'Sub' $P2353 = "165_1304459371.883" 
+    capture_lex $P2353
+    .const 'Sub' $P2290 = "156_1304459371.883" 
+    capture_lex $P2290
+    .const 'Sub' $P2106 = "142_1304459371.883" 
+    capture_lex $P2106
+    .const 'Sub' $P2044 = "133_1304459371.883" 
+    capture_lex $P2044
+    .const 'Sub' $P1040 = "77_1304459371.883" 
+    capture_lex $P1040
+    .const 'Sub' $P722 = "52_1304459371.883" 
+    capture_lex $P722
+    .const 'Sub' $P509 = "42_1304459371.883" 
+    capture_lex $P509
+    .const 'Sub' $P249 = "21_1304459371.883" 
+    capture_lex $P249
+    .const 'Sub' $P26 = "11_1304459371.883" 
+    capture_lex $P26
 .annotate 'line', 1
-    .lex "GLOBALish", $P13
-    .lex "$?PACKAGE", $P14
-    .lex "RoleToRoleApplier", $P15
-    .lex "NQPConcreteRoleHOW", $P16
-    .lex "RoleToClassApplier", $P17
-    .lex "NQPParametricRoleHOW", $P18
-    .lex "NQPClassHOW", $P19
-    .lex "NQPNativeHOW", $P20
-    .lex "NQPAttribute", $P21
-    .lex "NQPModuleHOW", $P22
-    .lex "EXPORTHOW", $P23
+    .lex "@ARGS", param_13
+    .lex "GLOBALish", $P14
+    .lex "$?PACKAGE", $P15
+    .lex "RoleToRoleApplier", $P16
+    .lex "NQPConcreteRoleHOW", $P17
+    .lex "RoleToClassApplier", $P18
+    .lex "NQPParametricRoleHOW", $P19
+    .lex "NQPClassHOW", $P20
+    .lex "NQPNativeHOW", $P21
+    .lex "NQPAttribute", $P22
+    .lex "NQPModuleHOW", $P23
+    .lex "EXPORTHOW", $P24
     $P0 = find_dynamic_lex "$*CTXSAVE"
     if null $P0 goto ctxsave_done
     $I0 = can $P0, "ctxsave"
@@ -45,1498 +47,1709 @@
     $P0."ctxsave"()
   ctxsave_done:
 .annotate 'line', 7
-    .const 'Sub' $P25 = "11_1304456120.214" 
-    capture_lex $P25
-    $P25()
+    .const 'Sub' $P26 = "11_1304459371.883" 
+    capture_lex $P26
+    $P26()
 .annotate 'line', 99
-    .const 'Sub' $P248 = "21_1304456120.214" 
-    capture_lex $P248
-    $P248()
+    .const 'Sub' $P249 = "21_1304459371.883" 
+    capture_lex $P249
+    $P249()
 .annotate 'line', 244
-    .const 'Sub' $P508 = "42_1304456120.214" 
-    capture_lex $P508
-    $P508()
+    .const 'Sub' $P509 = "42_1304459371.883" 
+    capture_lex $P509
+    $P509()
 .annotate 'line', 320
-    .const 'Sub' $P721 = "52_1304456120.214" 
-    capture_lex $P721
-    $P721()
+    .const 'Sub' $P722 = "52_1304459371.883" 
+    capture_lex $P722
+    $P722()
 .annotate 'line', 500
-    .const 'Sub' $P1039 = "77_1304456120.214" 
-    capture_lex $P1039
-    $P1039()
+    .const 'Sub' $P1040 = "77_1304459371.883" 
+    capture_lex $P1040
+    $P1040()
 .annotate 'line', 943
-    .const 'Sub' $P2043 = "133_1304456120.214" 
-    capture_lex $P2043
-    $P2043()
+    .const 'Sub' $P2044 = "133_1304459371.883" 
+    capture_lex $P2044
+    $P2044()
 .annotate 'line', 989
-    .const 'Sub' $P2105 = "142_1304456120.214" 
-    capture_lex $P2105
-    $P2105()
+    .const 'Sub' $P2106 = "142_1304459371.883" 
+    capture_lex $P2106
+    $P2106()
 .annotate 'line', 1060
-    .const 'Sub' $P2289 = "156_1304456120.214" 
-    capture_lex $P2289
-    $P2289()
+    .const 'Sub' $P2290 = "156_1304459371.883" 
+    capture_lex $P2290
+    $P2290()
 .annotate 'line', 1109
-    .const 'Sub' $P2352 = "165_1304456120.214" 
-    capture_lex $P2352
-    $P2379 = $P2352()
+    .const 'Sub' $P2353 = "165_1304459371.883" 
+    capture_lex $P2353
+    $P2353()
+    find_lex $P2382, "@ARGS"
+    if $P2382, if_2381
+    set $P2380, $P2382
+    goto if_2381_end
+  if_2381:
+    load_bytecode "ModuleLoader.pbc"
+    get_hll_global $P2383, "ModuleLoader"
+    getinterp $P2384
+    set $P2385, $P2384["context"]
+    $P2386 = $P2383."set_mainline_module"($P2385)
+    set $P2380, $P2386
+  if_2381_end:
 .annotate 'line', 1
-    .return ($P2379)
-    .const 'Sub' $P2381 = "166_1304456120.214" 
-    .return ($P2381)
+    .return ($P2380)
+    .const 'Sub' $P2388 = "166_1304459371.883" 
+    .return ($P2388)
 .end
 
 
 .HLL "nqp"
 
 .namespace []
-.sub "" :load :init :subid("post167") :outer("10_1304456120.214")
+.sub "" :load :init :subid("post167") :outer("10_1304459371.883")
 .annotate 'line', 0
-    .const 'Sub' $P12 = "10_1304456120.214" 
+    .const 'Sub' $P12 = "10_1304459371.883" 
     .local pmc block
     set block, $P12
-    nqp_get_sc $P2385, "1304456116.562"
-    isnull $I2386, $P2385
-    if $I2386, if_2384
-    .const 'Sub' $P3127 = "10_1304456120.214" 
-    $P3128 = $P3127."get_lexinfo"()
-    nqp_get_sc_object $P3129, "1304456116.562", 0
-    $P3128."set_static_lexpad_value"("GLOBALish", $P3129)
-    .const 'Sub' $P3130 = "10_1304456120.214" 
-    $P3131 = $P3130."get_lexinfo"()
-    $P3131."finish_static_lexpad"()
-    .const 'Sub' $P3132 = "10_1304456120.214" 
-    $P3133 = $P3132."get_lexinfo"()
-    nqp_get_sc_object $P3134, "1304456116.562", 0
-    $P3133."set_static_lexpad_value"("$?PACKAGE", $P3134)
-    .const 'Sub' $P3135 = "10_1304456120.214" 
-    $P3136 = $P3135."get_lexinfo"()
-    $P3136."finish_static_lexpad"()
-    .const 'Sub' $P3137 = "10_1304456120.214" 
+    nqp_get_sc $P2392, "1304459368.206"
+    isnull $I2393, $P2392
+    if $I2393, if_2391
+    .const 'Sub' $P3134 = "10_1304459371.883" 
+    $P3135 = $P3134."get_lexinfo"()
+    nqp_get_sc_object $P3136, "1304459368.206", 0
+    $P3135."set_static_lexpad_value"("GLOBALish", $P3136)
+    .const 'Sub' $P3137 = "10_1304459371.883" 
     $P3138 = $P3137."get_lexinfo"()
-    nqp_get_sc_object $P3139, "1304456116.562", 1
-    $P3138."set_static_lexpad_value"("RoleToRoleApplier", $P3139)
-    .const 'Sub' $P3140 = "10_1304456120.214" 
-    $P3141 = $P3140."get_lexinfo"()
-    $P3141."finish_static_lexpad"()
-    nqp_get_sc_object $P3142, "1304456116.562", 2
-    .const 'Sub' $P3143 = "12_1304456120.214" 
-    assign $P3142, $P3143
-    .const 'Sub' $P3144 = "11_1304456120.214" 
+    $P3138."finish_static_lexpad"()
+    .const 'Sub' $P3139 = "10_1304459371.883" 
+    $P3140 = $P3139."get_lexinfo"()
+    nqp_get_sc_object $P3141, "1304459368.206", 0
+    $P3140."set_static_lexpad_value"("$?PACKAGE", $P3141)
+    .const 'Sub' $P3142 = "10_1304459371.883" 
+    $P3143 = $P3142."get_lexinfo"()
+    $P3143."finish_static_lexpad"()
+    .const 'Sub' $P3144 = "10_1304459371.883" 
     $P3145 = $P3144."get_lexinfo"()
-    nqp_get_sc_object $P3146, "1304456116.562", 1
-    $P3145."set_static_lexpad_value"("$?PACKAGE", $P3146)
-    .const 'Sub' $P3147 = "11_1304456120.214" 
+    nqp_get_sc_object $P3146, "1304459368.206", 1
+    $P3145."set_static_lexpad_value"("RoleToRoleApplier", $P3146)
+    .const 'Sub' $P3147 = "10_1304459371.883" 
     $P3148 = $P3147."get_lexinfo"()
     $P3148."finish_static_lexpad"()
-    .const 'Sub' $P3149 = "11_1304456120.214" 
-    $P3150 = $P3149."get_lexinfo"()
-    nqp_get_sc_object $P3151, "1304456116.562", 1
-    $P3150."set_static_lexpad_value"("$?CLASS", $P3151)
-    .const 'Sub' $P3152 = "11_1304456120.214" 
-    $P3153 = $P3152."get_lexinfo"()
-    $P3153."finish_static_lexpad"()
-    .const 'Sub' $P3154 = "10_1304456120.214" 
+    nqp_get_sc_object $P3149, "1304459368.206", 2
+    .const 'Sub' $P3150 = "12_1304459371.883" 
+    assign $P3149, $P3150
+    .const 'Sub' $P3151 = "11_1304459371.883" 
+    $P3152 = $P3151."get_lexinfo"()
+    nqp_get_sc_object $P3153, "1304459368.206", 1
+    $P3152."set_static_lexpad_value"("$?PACKAGE", $P3153)
+    .const 'Sub' $P3154 = "11_1304459371.883" 
     $P3155 = $P3154."get_lexinfo"()
-    nqp_get_sc_object $P3156, "1304456116.562", 3
-    $P3155."set_static_lexpad_value"("NQPConcreteRoleHOW", $P3156)
-    .const 'Sub' $P3157 = "10_1304456120.214" 
-    $P3158 = $P3157."get_lexinfo"()
-    $P3158."finish_static_lexpad"()
-    nqp_get_sc_object $P3159, "1304456116.562", 4
-    .const 'Sub' $P3160 = "22_1304456120.214" 
-    assign $P3159, $P3160
-    nqp_get_sc_object $P3161, "1304456116.562", 5
-    .const 'Sub' $P3162 = "23_1304456120.214" 
-    assign $P3161, $P3162
-    nqp_get_sc_object $P3163, "1304456116.562", 6
-    .const 'Sub' $P3164 = "24_1304456120.214" 
-    assign $P3163, $P3164
-    nqp_get_sc_object $P3165, "1304456116.562", 7
-    .const 'Sub' $P3166 = "25_1304456120.214" 
-    assign $P3165, $P3166
-    nqp_get_sc_object $P3167, "1304456116.562", 8
-    .const 'Sub' $P3168 = "26_1304456120.214" 
-    assign $P3167, $P3168
-    nqp_get_sc_object $P3169, "1304456116.562", 9
-    .const 'Sub' $P3170 = "27_1304456120.214" 
-    assign $P3169, $P3170
-    nqp_get_sc_object $P3171, "1304456116.562", 10
-    .const 'Sub' $P3172 = "28_1304456120.214" 
-    assign $P3171, $P3172
-    nqp_get_sc_object $P3173, "1304456116.562", 11
-    .const 'Sub' $P3174 = "29_1304456120.214" 
-    assign $P3173, $P3174
-    nqp_get_sc_object $P3175, "1304456116.562", 12
-    .const 'Sub' $P3176 = "30_1304456120.214" 
-    assign $P3175, $P3176
-    nqp_get_sc_object $P3177, "1304456116.562", 13
-    .const 'Sub' $P3178 = "31_1304456120.214" 
-    assign $P3177, $P3178
-    nqp_get_sc_object $P3179, "1304456116.562", 14
-    .const 'Sub' $P3180 = "33_1304456120.214" 
-    assign $P3179, $P3180
-    nqp_get_sc_object $P3181, "1304456116.562", 15
-    .const 'Sub' $P3182 = "35_1304456120.214" 
-    assign $P3181, $P3182
-    nqp_get_sc_object $P3183, "1304456116.562", 16
-    .const 'Sub' $P3184 = "36_1304456120.214" 
-    assign $P3183, $P3184
-    nqp_get_sc_object $P3185, "1304456116.562", 17
-    .const 'Sub' $P3186 = "37_1304456120.214" 
-    assign $P3185, $P3186
-    nqp_get_sc_object $P3187, "1304456116.562", 18
-    .const 'Sub' $P3188 = "38_1304456120.214" 
-    assign $P3187, $P3188
-    nqp_get_sc_object $P3189, "1304456116.562", 19
-    .const 'Sub' $P3190 = "40_1304456120.214" 
-    assign $P3189, $P3190
-    nqp_get_sc_object $P3191, "1304456116.562", 20
-    .const 'Sub' $P3192 = "41_1304456120.214" 
-    assign $P3191, $P3192
-    .const 'Sub' $P3193 = "21_1304456120.214" 
-    $P3194 = $P3193."get_lexinfo"()
-    nqp_get_sc_object $P3195, "1304456116.562", 3
-    $P3194."set_static_lexpad_value"("$?PACKAGE", $P3195)
-    .const 'Sub' $P3196 = "21_1304456120.214" 
-    $P3197 = $P3196."get_lexinfo"()
-    $P3197."finish_static_lexpad"()
-    .const 'Sub' $P3198 = "21_1304456120.214" 
-    $P3199 = $P3198."get_lexinfo"()
-    nqp_get_sc_object $P3200, "1304456116.562", 3
-    $P3199."set_static_lexpad_value"("$?CLASS", $P3200)
-    .const 'Sub' $P3201 = "21_1304456120.214" 
-    $P3202 = $P3201."get_lexinfo"()
-    $P3202."finish_static_lexpad"()
-    .const 'Sub' $P3203 = "10_1304456120.214" 
+    $P3155."finish_static_lexpad"()
+    .const 'Sub' $P3156 = "11_1304459371.883" 
+    $P3157 = $P3156."get_lexinfo"()
+    nqp_get_sc_object $P3158, "1304459368.206", 1
+    $P3157."set_static_lexpad_value"("$?CLASS", $P3158)
+    .const 'Sub' $P3159 = "11_1304459371.883" 
+    $P3160 = $P3159."get_lexinfo"()
+    $P3160."finish_static_lexpad"()
+    .const 'Sub' $P3161 = "10_1304459371.883" 
+    $P3162 = $P3161."get_lexinfo"()
+    nqp_get_sc_object $P3163, "1304459368.206", 3
+    $P3162."set_static_lexpad_value"("NQPConcreteRoleHOW", $P3163)
+    .const 'Sub' $P3164 = "10_1304459371.883" 
+    $P3165 = $P3164."get_lexinfo"()
+    $P3165."finish_static_lexpad"()
+    nqp_get_sc_object $P3166, "1304459368.206", 4
+    .const 'Sub' $P3167 = "22_1304459371.883" 
+    assign $P3166, $P3167
+    nqp_get_sc_object $P3168, "1304459368.206", 5
+    .const 'Sub' $P3169 = "23_1304459371.883" 
+    assign $P3168, $P3169
+    nqp_get_sc_object $P3170, "1304459368.206", 6
+    .const 'Sub' $P3171 = "24_1304459371.883" 
+    assign $P3170, $P3171
+    nqp_get_sc_object $P3172, "1304459368.206", 7
+    .const 'Sub' $P3173 = "25_1304459371.883" 
+    assign $P3172, $P3173
+    nqp_get_sc_object $P3174, "1304459368.206", 8
+    .const 'Sub' $P3175 = "26_1304459371.883" 
+    assign $P3174, $P3175
+    nqp_get_sc_object $P3176, "1304459368.206", 9
+    .const 'Sub' $P3177 = "27_1304459371.883" 
+    assign $P3176, $P3177
+    nqp_get_sc_object $P3178, "1304459368.206", 10
+    .const 'Sub' $P3179 = "28_1304459371.883" 
+    assign $P3178, $P3179
+    nqp_get_sc_object $P3180, "1304459368.206", 11
+    .const 'Sub' $P3181 = "29_1304459371.883" 
+    assign $P3180, $P3181
+    nqp_get_sc_object $P3182, "1304459368.206", 12
+    .const 'Sub' $P3183 = "30_1304459371.883" 
+    assign $P3182, $P3183
+    nqp_get_sc_object $P3184, "1304459368.206", 13
+    .const 'Sub' $P3185 = "31_1304459371.883" 
+    assign $P3184, $P3185
+    nqp_get_sc_object $P3186, "1304459368.206", 14
+    .const 'Sub' $P3187 = "33_1304459371.883" 
+    assign $P3186, $P3187
+    nqp_get_sc_object $P3188, "1304459368.206", 15
+    .const 'Sub' $P3189 = "35_1304459371.883" 
+    assign $P3188, $P3189
+    nqp_get_sc_object $P3190, "1304459368.206", 16
+    .const 'Sub' $P3191 = "36_1304459371.883" 
+    assign $P3190, $P3191
+    nqp_get_sc_object $P3192, "1304459368.206", 17
+    .const 'Sub' $P3193 = "37_1304459371.883" 
+    assign $P3192, $P3193
+    nqp_get_sc_object $P3194, "1304459368.206", 18
+    .const 'Sub' $P3195 = "38_1304459371.883" 
+    assign $P3194, $P3195
+    nqp_get_sc_object $P3196, "1304459368.206", 19
+    .const 'Sub' $P3197 = "40_1304459371.883" 
+    assign $P3196, $P3197
+    nqp_get_sc_object $P3198, "1304459368.206", 20
+    .const 'Sub' $P3199 = "41_1304459371.883" 
+    assign $P3198, $P3199
+    .const 'Sub' $P3200 = "21_1304459371.883" 
+    $P3201 = $P3200."get_lexinfo"()
+    nqp_get_sc_object $P3202, "1304459368.206", 3
+    $P3201."set_static_lexpad_value"("$?PACKAGE", $P3202)
+    .const 'Sub' $P3203 = "21_1304459371.883" 
     $P3204 = $P3203."get_lexinfo"()
-    nqp_get_sc_object $P3205, "1304456116.562", 21
-    $P3204."set_static_lexpad_value"("RoleToClassApplier", $P3205)
-    .const 'Sub' $P3206 = "10_1304456120.214" 
-    $P3207 = $P3206."get_lexinfo"()
-    $P3207."finish_static_lexpad"()
-    nqp_get_sc_object $P3208, "1304456116.562", 22
-    .const 'Sub' $P3209 = "47_1304456120.214" 
-    assign $P3208, $P3209
-    .const 'Sub' $P3210 = "42_1304456120.214" 
+    $P3204."finish_static_lexpad"()
+    .const 'Sub' $P3205 = "21_1304459371.883" 
+    $P3206 = $P3205."get_lexinfo"()
+    nqp_get_sc_object $P3207, "1304459368.206", 3
+    $P3206."set_static_lexpad_value"("$?CLASS", $P3207)
+    .const 'Sub' $P3208 = "21_1304459371.883" 
+    $P3209 = $P3208."get_lexinfo"()
+    $P3209."finish_static_lexpad"()
+    .const 'Sub' $P3210 = "10_1304459371.883" 
     $P3211 = $P3210."get_lexinfo"()
-    nqp_get_sc_object $P3212, "1304456116.562", 21
-    $P3211."set_static_lexpad_value"("$?PACKAGE", $P3212)
-    .const 'Sub' $P3213 = "42_1304456120.214" 
+    nqp_get_sc_object $P3212, "1304459368.206", 21
+    $P3211."set_static_lexpad_value"("RoleToClassApplier", $P3212)
+    .const 'Sub' $P3213 = "10_1304459371.883" 
     $P3214 = $P3213."get_lexinfo"()
     $P3214."finish_static_lexpad"()
-    .const 'Sub' $P3215 = "42_1304456120.214" 
-    $P3216 = $P3215."get_lexinfo"()
-    nqp_get_sc_object $P3217, "1304456116.562", 21
-    $P3216."set_static_lexpad_value"("$?CLASS", $P3217)
-    .const 'Sub' $P3218 = "42_1304456120.214" 
-    $P3219 = $P3218."get_lexinfo"()
-    $P3219."finish_static_lexpad"()
-    .const 'Sub' $P3220 = "10_1304456120.214" 
+    nqp_get_sc_object $P3215, "1304459368.206", 22
+    .const 'Sub' $P3216 = "47_1304459371.883" 
+    assign $P3215, $P3216
+    .const 'Sub' $P3217 = "42_1304459371.883" 
+    $P3218 = $P3217."get_lexinfo"()
+    nqp_get_sc_object $P3219, "1304459368.206", 21
+    $P3218."set_static_lexpad_value"("$?PACKAGE", $P3219)
+    .const 'Sub' $P3220 = "42_1304459371.883" 
     $P3221 = $P3220."get_lexinfo"()
-    nqp_get_sc_object $P3222, "1304456116.562", 23
-    $P3221."set_static_lexpad_value"("NQPParametricRoleHOW", $P3222)
-    .const 'Sub' $P3223 = "10_1304456120.214" 
-    $P3224 = $P3223."get_lexinfo"()
-    $P3224."finish_static_lexpad"()
-    nqp_get_sc_object $P3225, "1304456116.562", 24
-    .const 'Sub' $P3226 = "54_1304456120.214" 
-    assign $P3225, $P3226
-    nqp_get_sc_object $P3227, "1304456116.562", 25
-    .const 'Sub' $P3228 = "55_1304456120.214" 
-    assign $P3227, $P3228
-    nqp_get_sc_object $P3229, "1304456116.562", 26
-    .const 'Sub' $P3230 = "56_1304456120.214" 
-    assign $P3229, $P3230
-    nqp_get_sc_object $P3231, "1304456116.562", 27
-    .const 'Sub' $P3232 = "57_1304456120.214" 
-    assign $P3231, $P3232
-    nqp_get_sc_object $P3233, "1304456116.562", 28
-    .const 'Sub' $P3234 = "58_1304456120.214" 
-    assign $P3233, $P3234
-    nqp_get_sc_object $P3235, "1304456116.562", 29
-    .const 'Sub' $P3236 = "59_1304456120.214" 
-    assign $P3235, $P3236
-    nqp_get_sc_object $P3237, "1304456116.562", 30
-    .const 'Sub' $P3238 = "60_1304456120.214" 
-    assign $P3237, $P3238
-    nqp_get_sc_object $P3239, "1304456116.562", 31
-    .const 'Sub' $P3240 = "61_1304456120.214" 
-    assign $P3239, $P3240
-    nqp_get_sc_object $P3241, "1304456116.562", 32
-    .const 'Sub' $P3242 = "62_1304456120.214" 
-    assign $P3241, $P3242
-    nqp_get_sc_object $P3243, "1304456116.562", 33
-    .const 'Sub' $P3244 = "63_1304456120.214" 
-    assign $P3243, $P3244
-    nqp_get_sc_object $P3245, "1304456116.562", 34
-    .const 'Sub' $P3246 = "64_1304456120.214" 
-    assign $P3245, $P3246
-    nqp_get_sc_object $P3247, "1304456116.562", 35
-    .const 'Sub' $P3248 = "65_1304456120.214" 
-    assign $P3247, $P3248
-    nqp_get_sc_object $P3249, "1304456116.562", 36
-    .const 'Sub' $P3250 = "70_1304456120.214" 
-    assign $P3249, $P3250
-    nqp_get_sc_object $P3251, "1304456116.562", 37
-    .const 'Sub' $P3252 = "72_1304456120.214" 
-    assign $P3251, $P3252
-    nqp_get_sc_object $P3253, "1304456116.562", 38
-    .const 'Sub' $P3254 = "73_1304456120.214" 
-    assign $P3253, $P3254
-    nqp_get_sc_object $P3255, "1304456116.562", 39
-    .const 'Sub' $P3256 = "74_1304456120.214" 
-    assign $P3255, $P3256
-    nqp_get_sc_object $P3257, "1304456116.562", 40
-    .const 'Sub' $P3258 = "76_1304456120.214" 
-    assign $P3257, $P3258
-    .const 'Sub' $P3259 = "52_1304456120.214" 
-    $P3260 = $P3259."get_lexinfo"()
-    nqp_get_sc_object $P3261, "1304456116.562", 23
-    $P3260."set_static_lexpad_value"("$?PACKAGE", $P3261)
-    .const 'Sub' $P3262 = "52_1304456120.214" 
-    $P3263 = $P3262."get_lexinfo"()
-    $P3263."finish_static_lexpad"()
-    .const 'Sub' $P3264 = "52_1304456120.214" 
-    $P3265 = $P3264."get_lexinfo"()
-    nqp_get_sc_object $P3266, "1304456116.562", 23
-    $P3265."set_static_lexpad_value"("$?CLASS", $P3266)
-    .const 'Sub' $P3267 = "52_1304456120.214" 
-    $P3268 = $P3267."get_lexinfo"()
-    $P3268."finish_static_lexpad"()
-    .const 'Sub' $P3269 = "10_1304456120.214" 
+    $P3221."finish_static_lexpad"()
+    .const 'Sub' $P3222 = "42_1304459371.883" 
+    $P3223 = $P3222."get_lexinfo"()
+    nqp_get_sc_object $P3224, "1304459368.206", 21
+    $P3223."set_static_lexpad_value"("$?CLASS", $P3224)
+    .const 'Sub' $P3225 = "42_1304459371.883" 
+    $P3226 = $P3225."get_lexinfo"()
+    $P3226."finish_static_lexpad"()
+    .const 'Sub' $P3227 = "10_1304459371.883" 
+    $P3228 = $P3227."get_lexinfo"()
+    nqp_get_sc_object $P3229, "1304459368.206", 23
+    $P3228."set_static_lexpad_value"("NQPParametricRoleHOW", $P3229)
+    .const 'Sub' $P3230 = "10_1304459371.883" 
+    $P3231 = $P3230."get_lexinfo"()
+    $P3231."finish_static_lexpad"()
+    nqp_get_sc_object $P3232, "1304459368.206", 24
+    .const 'Sub' $P3233 = "54_1304459371.883" 
+    assign $P3232, $P3233
+    nqp_get_sc_object $P3234, "1304459368.206", 25
+    .const 'Sub' $P3235 = "55_1304459371.883" 
+    assign $P3234, $P3235
+    nqp_get_sc_object $P3236, "1304459368.206", 26
+    .const 'Sub' $P3237 = "56_1304459371.883" 
+    assign $P3236, $P3237
+    nqp_get_sc_object $P3238, "1304459368.206", 27
+    .const 'Sub' $P3239 = "57_1304459371.883" 
+    assign $P3238, $P3239
+    nqp_get_sc_object $P3240, "1304459368.206", 28
+    .const 'Sub' $P3241 = "58_1304459371.883" 
+    assign $P3240, $P3241
+    nqp_get_sc_object $P3242, "1304459368.206", 29
+    .const 'Sub' $P3243 = "59_1304459371.883" 
+    assign $P3242, $P3243
+    nqp_get_sc_object $P3244, "1304459368.206", 30
+    .const 'Sub' $P3245 = "60_1304459371.883" 
+    assign $P3244, $P3245
+    nqp_get_sc_object $P3246, "1304459368.206", 31
+    .const 'Sub' $P3247 = "61_1304459371.883" 
+    assign $P3246, $P3247
+    nqp_get_sc_object $P3248, "1304459368.206", 32
+    .const 'Sub' $P3249 = "62_1304459371.883" 
+    assign $P3248, $P3249
+    nqp_get_sc_object $P3250, "1304459368.206", 33
+    .const 'Sub' $P3251 = "63_1304459371.883" 
+    assign $P3250, $P3251
+    nqp_get_sc_object $P3252, "1304459368.206", 34
+    .const 'Sub' $P3253 = "64_1304459371.883" 
+    assign $P3252, $P3253
+    nqp_get_sc_object $P3254, "1304459368.206", 35
+    .const 'Sub' $P3255 = "65_1304459371.883" 
+    assign $P3254, $P3255
+    nqp_get_sc_object $P3256, "1304459368.206", 36
+    .const 'Sub' $P3257 = "70_1304459371.883" 
+    assign $P3256, $P3257
+    nqp_get_sc_object $P3258, "1304459368.206", 37
+    .const 'Sub' $P3259 = "72_1304459371.883" 
+    assign $P3258, $P3259
+    nqp_get_sc_object $P3260, "1304459368.206", 38
+    .const 'Sub' $P3261 = "73_1304459371.883" 
+    assign $P3260, $P3261
+    nqp_get_sc_object $P3262, "1304459368.206", 39
+    .const 'Sub' $P3263 = "74_1304459371.883" 
+    assign $P3262, $P3263
+    nqp_get_sc_object $P3264, "1304459368.206", 40
+    .const 'Sub' $P3265 = "76_1304459371.883" 
+    assign $P3264, $P3265
+    .const 'Sub' $P3266 = "52_1304459371.883" 
+    $P3267 = $P3266."get_lexinfo"()
+    nqp_get_sc_object $P3268, "1304459368.206", 23
+    $P3267."set_static_lexpad_value"("$?PACKAGE", $P3268)
+    .const 'Sub' $P3269 = "52_1304459371.883" 
     $P3270 = $P3269."get_lexinfo"()
-    nqp_get_sc_object $P3271, "1304456116.562", 41
-    $P3270."set_static_lexpad_value"("NQPClassHOW", $P3271)
-    .const 'Sub' $P3272 = "10_1304456120.214" 
-    $P3273 = $P3272."get_lexinfo"()
-    $P3273."finish_static_lexpad"()
-    nqp_get_sc_object $P3274, "1304456116.562", 42
-    .const 'Sub' $P3275 = "88_1304456120.214" 
-    assign $P3274, $P3275
-    nqp_get_sc_object $P3276, "1304456116.562", 43
-    .const 'Sub' $P3277 = "89_1304456120.214" 
-    assign $P3276, $P3277
-    nqp_get_sc_object $P3278, "1304456116.562", 44
-    .const 'Sub' $P3279 = "90_1304456120.214" 
-    assign $P3278, $P3279
-    nqp_get_sc_object $P3280, "1304456116.562", 45
-    .const 'Sub' $P3281 = "91_1304456120.214" 
-    assign $P3280, $P3281
-    nqp_get_sc_object $P3282, "1304456116.562", 46
-    .const 'Sub' $P3283 = "92_1304456120.214" 
-    assign $P3282, $P3283
-    nqp_get_sc_object $P3284, "1304456116.562", 47
-    .const 'Sub' $P3285 = "93_1304456120.214" 
-    assign $P3284, $P3285
-    nqp_get_sc_object $P3286, "1304456116.562", 48
-    .const 'Sub' $P3287 = "94_1304456120.214" 
-    assign $P3286, $P3287
-    nqp_get_sc_object $P3288, "1304456116.562", 49
-    .const 'Sub' $P3289 = "96_1304456120.214" 
-    assign $P3288, $P3289
-    nqp_get_sc_object $P3290, "1304456116.562", 50
-    .const 'Sub' $P3291 = "97_1304456120.214" 
-    assign $P3290, $P3291
-    nqp_get_sc_object $P3292, "1304456116.562", 51
-    .const 'Sub' $P3293 = "99_1304456120.214" 
-    assign $P3292, $P3293
-    nqp_get_sc_object $P3294, "1304456116.562", 52
-    .const 'Sub' $P3295 = "100_1304456120.214" 
-    assign $P3294, $P3295
-    nqp_get_sc_object $P3296, "1304456116.562", 53
-    .const 'Sub' $P3297 = "104_1304456120.214" 
-    assign $P3296, $P3297
-    nqp_get_sc_object $P3298, "1304456116.562", 54
-    .const 'Sub' $P3299 = "109_1304456120.214" 
-    assign $P3298, $P3299
-    nqp_get_sc_object $P3300, "1304456116.562", 55
-    .const 'Sub' $P3301 = "112_1304456120.214" 
-    assign $P3300, $P3301
-    nqp_get_sc_object $P3302, "1304456116.562", 56
-    .const 'Sub' $P3303 = "115_1304456120.214" 
-    assign $P3302, $P3303
-    nqp_get_sc_object $P3304, "1304456116.562", 57
-    .const 'Sub' $P3305 = "118_1304456120.214" 
-    assign $P3304, $P3305
-    nqp_get_sc_object $P3306, "1304456116.562", 58
-    .const 'Sub' $P3307 = "119_1304456120.214" 
-    assign $P3306, $P3307
-    nqp_get_sc_object $P3308, "1304456116.562", 59
-    .const 'Sub' $P3309 = "120_1304456120.214" 
-    assign $P3308, $P3309
-    nqp_get_sc_object $P3310, "1304456116.562", 60
-    .const 'Sub' $P3311 = "122_1304456120.214" 
-    assign $P3310, $P3311
-    nqp_get_sc_object $P3312, "1304456116.562", 61
-    .const 'Sub' $P3313 = "123_1304456120.214" 
-    assign $P3312, $P3313
-    nqp_get_sc_object $P3314, "1304456116.562", 62
-    .const 'Sub' $P3315 = "124_1304456120.214" 
-    assign $P3314, $P3315
-    nqp_get_sc_object $P3316, "1304456116.562", 63
-    .const 'Sub' $P3317 = "126_1304456120.214" 
-    assign $P3316, $P3317
-    nqp_get_sc_object $P3318, "1304456116.562", 64
-    .const 'Sub' $P3319 = "127_1304456120.214" 
-    assign $P3318, $P3319
-    nqp_get_sc_object $P3320, "1304456116.562", 65
-    .const 'Sub' $P3321 = "128_1304456120.214" 
-    assign $P3320, $P3321
-    nqp_get_sc_object $P3322, "1304456116.562", 66
-    .const 'Sub' $P3323 = "129_1304456120.214" 
-    assign $P3322, $P3323
-    nqp_get_sc_object $P3324, "1304456116.562", 67
-    .const 'Sub' $P3325 = "131_1304456120.214" 
-    assign $P3324, $P3325
-    .const 'Sub' $P3326 = "77_1304456120.214" 
-    $P3327 = $P3326."get_lexinfo"()
-    nqp_get_sc_object $P3328, "1304456116.562", 41
-    $P3327."set_static_lexpad_value"("$?PACKAGE", $P3328)
-    .const 'Sub' $P3329 = "77_1304456120.214" 
-    $P3330 = $P3329."get_lexinfo"()
-    $P3330."finish_static_lexpad"()
-    .const 'Sub' $P3331 = "77_1304456120.214" 
-    $P3332 = $P3331."get_lexinfo"()
-    nqp_get_sc_object $P3333, "1304456116.562", 41
-    $P3332."set_static_lexpad_value"("$?CLASS", $P3333)
-    .const 'Sub' $P3334 = "77_1304456120.214" 
-    $P3335 = $P3334."get_lexinfo"()
-    $P3335."finish_static_lexpad"()
-    .const 'Sub' $P3336 = "10_1304456120.214" 
+    $P3270."finish_static_lexpad"()
+    .const 'Sub' $P3271 = "52_1304459371.883" 
+    $P3272 = $P3271."get_lexinfo"()
+    nqp_get_sc_object $P3273, "1304459368.206", 23
+    $P3272."set_static_lexpad_value"("$?CLASS", $P3273)
+    .const 'Sub' $P3274 = "52_1304459371.883" 
+    $P3275 = $P3274."get_lexinfo"()
+    $P3275."finish_static_lexpad"()
+    .const 'Sub' $P3276 = "10_1304459371.883" 
+    $P3277 = $P3276."get_lexinfo"()
+    nqp_get_sc_object $P3278, "1304459368.206", 41
+    $P3277."set_static_lexpad_value"("NQPClassHOW", $P3278)
+    .const 'Sub' $P3279 = "10_1304459371.883" 
+    $P3280 = $P3279."get_lexinfo"()
+    $P3280."finish_static_lexpad"()
+    nqp_get_sc_object $P3281, "1304459368.206", 42
+    .const 'Sub' $P3282 = "88_1304459371.883" 
+    assign $P3281, $P3282
+    nqp_get_sc_object $P3283, "1304459368.206", 43
+    .const 'Sub' $P3284 = "89_1304459371.883" 
+    assign $P3283, $P3284
+    nqp_get_sc_object $P3285, "1304459368.206", 44
+    .const 'Sub' $P3286 = "90_1304459371.883" 
+    assign $P3285, $P3286
+    nqp_get_sc_object $P3287, "1304459368.206", 45
+    .const 'Sub' $P3288 = "91_1304459371.883" 
+    assign $P3287, $P3288
+    nqp_get_sc_object $P3289, "1304459368.206", 46
+    .const 'Sub' $P3290 = "92_1304459371.883" 
+    assign $P3289, $P3290
+    nqp_get_sc_object $P3291, "1304459368.206", 47
+    .const 'Sub' $P3292 = "93_1304459371.883" 
+    assign $P3291, $P3292
+    nqp_get_sc_object $P3293, "1304459368.206", 48
+    .const 'Sub' $P3294 = "94_1304459371.883" 
+    assign $P3293, $P3294
+    nqp_get_sc_object $P3295, "1304459368.206", 49
+    .const 'Sub' $P3296 = "96_1304459371.883" 
+    assign $P3295, $P3296
+    nqp_get_sc_object $P3297, "1304459368.206", 50
+    .const 'Sub' $P3298 = "97_1304459371.883" 
+    assign $P3297, $P3298
+    nqp_get_sc_object $P3299, "1304459368.206", 51
+    .const 'Sub' $P3300 = "99_1304459371.883" 
+    assign $P3299, $P3300
+    nqp_get_sc_object $P3301, "1304459368.206", 52
+    .const 'Sub' $P3302 = "100_1304459371.883" 
+    assign $P3301, $P3302
+    nqp_get_sc_object $P3303, "1304459368.206", 53
+    .const 'Sub' $P3304 = "104_1304459371.883" 
+    assign $P3303, $P3304
+    nqp_get_sc_object $P3305, "1304459368.206", 54
+    .const 'Sub' $P3306 = "109_1304459371.883" 
+    assign $P3305, $P3306
+    nqp_get_sc_object $P3307, "1304459368.206", 55
+    .const 'Sub' $P3308 = "112_1304459371.883" 
+    assign $P3307, $P3308
+    nqp_get_sc_object $P3309, "1304459368.206", 56
+    .const 'Sub' $P3310 = "115_1304459371.883" 
+    assign $P3309, $P3310
+    nqp_get_sc_object $P3311, "1304459368.206", 57
+    .const 'Sub' $P3312 = "118_1304459371.883" 
+    assign $P3311, $P3312
+    nqp_get_sc_object $P3313, "1304459368.206", 58
+    .const 'Sub' $P3314 = "119_1304459371.883" 
+    assign $P3313, $P3314
+    nqp_get_sc_object $P3315, "1304459368.206", 59
+    .const 'Sub' $P3316 = "120_1304459371.883" 
+    assign $P3315, $P3316
+    nqp_get_sc_object $P3317, "1304459368.206", 60
+    .const 'Sub' $P3318 = "122_1304459371.883" 
+    assign $P3317, $P3318
+    nqp_get_sc_object $P3319, "1304459368.206", 61
+    .const 'Sub' $P3320 = "123_1304459371.883" 
+    assign $P3319, $P3320
+    nqp_get_sc_object $P3321, "1304459368.206", 62
+    .const 'Sub' $P3322 = "124_1304459371.883" 
+    assign $P3321, $P3322
+    nqp_get_sc_object $P3323, "1304459368.206", 63
+    .const 'Sub' $P3324 = "126_1304459371.883" 
+    assign $P3323, $P3324
+    nqp_get_sc_object $P3325, "1304459368.206", 64
+    .const 'Sub' $P3326 = "127_1304459371.883" 
+    assign $P3325, $P3326
+    nqp_get_sc_object $P3327, "1304459368.206", 65
+    .const 'Sub' $P3328 = "128_1304459371.883" 
+    assign $P3327, $P3328
+    nqp_get_sc_object $P3329, "1304459368.206", 66
+    .const 'Sub' $P3330 = "129_1304459371.883" 
+    assign $P3329, $P3330
+    nqp_get_sc_object $P3331, "1304459368.206", 67
+    .const 'Sub' $P3332 = "131_1304459371.883" 
+    assign $P3331, $P3332
+    .const 'Sub' $P3333 = "77_1304459371.883" 
+    $P3334 = $P3333."get_lexinfo"()
+    nqp_get_sc_object $P3335, "1304459368.206", 41
+    $P3334."set_static_lexpad_value"("$?PACKAGE", $P3335)
+    .const 'Sub' $P3336 = "77_1304459371.883" 
     $P3337 = $P3336."get_lexinfo"()
-    nqp_get_sc_object $P3338, "1304456116.562", 68
-    $P3337."set_static_lexpad_value"("NQPNativeHOW", $P3338)
-    .const 'Sub' $P3339 = "10_1304456120.214" 
-    $P3340 = $P3339."get_lexinfo"()
-    $P3340."finish_static_lexpad"()
-    nqp_get_sc_object $P3341, "1304456116.562", 69
-    .const 'Sub' $P3342 = "134_1304456120.214" 
-    assign $P3341, $P3342
-    nqp_get_sc_object $P3343, "1304456116.562", 70
-    .const 'Sub' $P3344 = "135_1304456120.214" 
-    assign $P3343, $P3344
-    nqp_get_sc_object $P3345, "1304456116.562", 71
-    .const 'Sub' $P3346 = "136_1304456120.214" 
-    assign $P3345, $P3346
-    nqp_get_sc_object $P3347, "1304456116.562", 72
-    .const 'Sub' $P3348 = "137_1304456120.214" 
-    assign $P3347, $P3348
-    nqp_get_sc_object $P3349, "1304456116.562", 73
-    .const 'Sub' $P3350 = "138_1304456120.214" 
-    assign $P3349, $P3350
-    nqp_get_sc_object $P3351, "1304456116.562", 74
-    .const 'Sub' $P3352 = "139_1304456120.214" 
-    assign $P3351, $P3352
-    nqp_get_sc_object $P3353, "1304456116.562", 75
-    .const 'Sub' $P3354 = "140_1304456120.214" 
-    assign $P3353, $P3354
-    nqp_get_sc_object $P3355, "1304456116.562", 76
-    .const 'Sub' $P3356 = "141_1304456120.214" 
-    assign $P3355, $P3356
-    .const 'Sub' $P3357 = "133_1304456120.214" 
-    $P3358 = $P3357."get_lexinfo"()
-    nqp_get_sc_object $P3359, "1304456116.562", 68
-    $P3358."set_static_lexpad_value"("$?PACKAGE", $P3359)
-    .const 'Sub' $P3360 = "133_1304456120.214" 
-    $P3361 = $P3360."get_lexinfo"()
-    $P3361."finish_static_lexpad"()
-    .const 'Sub' $P3362 = "133_1304456120.214" 
-    $P3363 = $P3362."get_lexinfo"()
-    nqp_get_sc_object $P3364, "1304456116.562", 68
-    $P3363."set_static_lexpad_value"("$?CLASS", $P3364)
-    .const 'Sub' $P3365 = "133_1304456120.214" 
-    $P3366 = $P3365."get_lexinfo"()
-    $P3366."finish_static_lexpad"()
-    .const 'Sub' $P3367 = "10_1304456120.214" 
+    $P3337."finish_static_lexpad"()
+    .const 'Sub' $P3338 = "77_1304459371.883" 
+    $P3339 = $P3338."get_lexinfo"()
+    nqp_get_sc_object $P3340, "1304459368.206", 41
+    $P3339."set_static_lexpad_value"("$?CLASS", $P3340)
+    .const 'Sub' $P3341 = "77_1304459371.883" 
+    $P3342 = $P3341."get_lexinfo"()
+    $P3342."finish_static_lexpad"()
+    .const 'Sub' $P3343 = "10_1304459371.883" 
+    $P3344 = $P3343."get_lexinfo"()
+    nqp_get_sc_object $P3345, "1304459368.206", 68
+    $P3344."set_static_lexpad_value"("NQPNativeHOW", $P3345)
+    .const 'Sub' $P3346 = "10_1304459371.883" 
+    $P3347 = $P3346."get_lexinfo"()
+    $P3347."finish_static_lexpad"()
+    nqp_get_sc_object $P3348, "1304459368.206", 69
+    .const 'Sub' $P3349 = "134_1304459371.883" 
+    assign $P3348, $P3349
+    nqp_get_sc_object $P3350, "1304459368.206", 70
+    .const 'Sub' $P3351 = "135_1304459371.883" 
+    assign $P3350, $P3351
+    nqp_get_sc_object $P3352, "1304459368.206", 71
+    .const 'Sub' $P3353 = "136_1304459371.883" 
+    assign $P3352, $P3353
+    nqp_get_sc_object $P3354, "1304459368.206", 72
+    .const 'Sub' $P3355 = "137_1304459371.883" 
+    assign $P3354, $P3355
+    nqp_get_sc_object $P3356, "1304459368.206", 73
+    .const 'Sub' $P3357 = "138_1304459371.883" 
+    assign $P3356, $P3357
+    nqp_get_sc_object $P3358, "1304459368.206", 74
+    .const 'Sub' $P3359 = "139_1304459371.883" 
+    assign $P3358, $P3359
+    nqp_get_sc_object $P3360, "1304459368.206", 75
+    .const 'Sub' $P3361 = "140_1304459371.883" 
+    assign $P3360, $P3361
+    nqp_get_sc_object $P3362, "1304459368.206", 76
+    .const 'Sub' $P3363 = "141_1304459371.883" 
+    assign $P3362, $P3363
+    .const 'Sub' $P3364 = "133_1304459371.883" 
+    $P3365 = $P3364."get_lexinfo"()
+    nqp_get_sc_object $P3366, "1304459368.206", 68
+    $P3365."set_static_lexpad_value"("$?PACKAGE", $P3366)
+    .const 'Sub' $P3367 = "133_1304459371.883" 
     $P3368 = $P3367."get_lexinfo"()
-    nqp_get_sc_object $P3369, "1304456116.562", 77
-    $P3368."set_static_lexpad_value"("NQPAttribute", $P3369)
-    .const 'Sub' $P3370 = "10_1304456120.214" 
-    $P3371 = $P3370."get_lexinfo"()
-    $P3371."finish_static_lexpad"()
-    nqp_get_sc_object $P3372, "1304456116.562", 78
-    .const 'Sub' $P3373 = "145_1304456120.214" 
-    assign $P3372, $P3373
-    nqp_get_sc_object $P3374, "1304456116.562", 79
-    .const 'Sub' $P3375 = "146_1304456120.214" 
-    assign $P3374, $P3375
-    nqp_get_sc_object $P3376, "1304456116.562", 80
-    .const 'Sub' $P3377 = "147_1304456120.214" 
-    assign $P3376, $P3377
-    nqp_get_sc_object $P3378, "1304456116.562", 81
-    .const 'Sub' $P3379 = "148_1304456120.214" 
-    assign $P3378, $P3379
-    nqp_get_sc_object $P3380, "1304456116.562", 82
-    .const 'Sub' $P3381 = "149_1304456120.214" 
-    assign $P3380, $P3381
-    nqp_get_sc_object $P3382, "1304456116.562", 83
-    .const 'Sub' $P3383 = "150_1304456120.214" 
-    assign $P3382, $P3383
-    nqp_get_sc_object $P3384, "1304456116.562", 84
-    .const 'Sub' $P3385 = "155_1304456120.214" 
-    assign $P3384, $P3385
-    .const 'Sub' $P3386 = "142_1304456120.214" 
-    $P3387 = $P3386."get_lexinfo"()
-    nqp_get_sc_object $P3388, "1304456116.562", 77
-    $P3387."set_static_lexpad_value"("$?PACKAGE", $P3388)
-    .const 'Sub' $P3389 = "142_1304456120.214" 
-    $P3390 = $P3389."get_lexinfo"()
-    $P3390."finish_static_lexpad"()
-    .const 'Sub' $P3391 = "142_1304456120.214" 
-    $P3392 = $P3391."get_lexinfo"()
-    nqp_get_sc_object $P3393, "1304456116.562", 77
-    $P3392."set_static_lexpad_value"("$?CLASS", $P3393)
-    .const 'Sub' $P3394 = "142_1304456120.214" 
-    $P3395 = $P3394."get_lexinfo"()
-    $P3395."finish_static_lexpad"()
-    .const 'Sub' $P3396 = "10_1304456120.214" 
+    $P3368."finish_static_lexpad"()
+    .const 'Sub' $P3369 = "133_1304459371.883" 
+    $P3370 = $P3369."get_lexinfo"()
+    nqp_get_sc_object $P3371, "1304459368.206", 68
+    $P3370."set_static_lexpad_value"("$?CLASS", $P3371)
+    .const 'Sub' $P3372 = "133_1304459371.883" 
+    $P3373 = $P3372."get_lexinfo"()
+    $P3373."finish_static_lexpad"()
+    .const 'Sub' $P3374 = "10_1304459371.883" 
+    $P3375 = $P3374."get_lexinfo"()
+    nqp_get_sc_object $P3376, "1304459368.206", 77
+    $P3375."set_static_lexpad_value"("NQPAttribute", $P3376)
+    .const 'Sub' $P3377 = "10_1304459371.883" 
+    $P3378 = $P3377."get_lexinfo"()
+    $P3378."finish_static_lexpad"()
+    nqp_get_sc_object $P3379, "1304459368.206", 78
+    .const 'Sub' $P3380 = "145_1304459371.883" 
+    assign $P3379, $P3380
+    nqp_get_sc_object $P3381, "1304459368.206", 79
+    .const 'Sub' $P3382 = "146_1304459371.883" 
+    assign $P3381, $P3382
+    nqp_get_sc_object $P3383, "1304459368.206", 80
+    .const 'Sub' $P3384 = "147_1304459371.883" 
+    assign $P3383, $P3384
+    nqp_get_sc_object $P3385, "1304459368.206", 81
+    .const 'Sub' $P3386 = "148_1304459371.883" 
+    assign $P3385, $P3386
+    nqp_get_sc_object $P3387, "1304459368.206", 82
+    .const 'Sub' $P3388 = "149_1304459371.883" 
+    assign $P3387, $P3388
+    nqp_get_sc_object $P3389, "1304459368.206", 83
+    .const 'Sub' $P3390 = "150_1304459371.883" 
+    assign $P3389, $P3390
+    nqp_get_sc_object $P3391, "1304459368.206", 84
+    .const 'Sub' $P3392 = "155_1304459371.883" 
+    assign $P3391, $P3392
+    .const 'Sub' $P3393 = "142_1304459371.883" 
+    $P3394 = $P3393."get_lexinfo"()
+    nqp_get_sc_object $P3395, "1304459368.206", 77
+    $P3394."set_static_lexpad_value"("$?PACKAGE", $P3395)
+    .const 'Sub' $P3396 = "142_1304459371.883" 
     $P3397 = $P3396."get_lexinfo"()
-    nqp_get_sc_object $P3398, "1304456116.562", 85
-    $P3397."set_static_lexpad_value"("NQPModuleHOW", $P3398)
-    .const 'Sub' $P3399 = "10_1304456120.214" 
-    $P3400 = $P3399."get_lexinfo"()
-    $P3400."finish_static_lexpad"()
-    nqp_get_sc_object $P3401, "1304456116.562", 86
-    .const 'Sub' $P3402 = "157_1304456120.214" 
-    assign $P3401, $P3402
-    nqp_get_sc_object $P3403, "1304456116.562", 87
-    .const 'Sub' $P3404 = "158_1304456120.214" 
-    assign $P3403, $P3404
-    nqp_get_sc_object $P3405, "1304456116.562", 88
-    .const 'Sub' $P3406 = "159_1304456120.214" 
-    assign $P3405, $P3406
-    nqp_get_sc_object $P3407, "1304456116.562", 89
-    .const 'Sub' $P3408 = "160_1304456120.214" 
-    assign $P3407, $P3408
-    nqp_get_sc_object $P3409, "1304456116.562", 90
-    .const 'Sub' $P3410 = "161_1304456120.214" 
-    assign $P3409, $P3410
-    nqp_get_sc_object $P3411, "1304456116.562", 91
-    .const 'Sub' $P3412 = "162_1304456120.214" 
-    assign $P3411, $P3412
-    nqp_get_sc_object $P3413, "1304456116.562", 92
-    .const 'Sub' $P3414 = "163_1304456120.214" 
-    assign $P3413, $P3414
-    nqp_get_sc_object $P3415, "1304456116.562", 93
-    .const 'Sub' $P3416 = "164_1304456120.214" 
-    assign $P3415, $P3416
-    .const 'Sub' $P3417 = "156_1304456120.214" 
-    $P3418 = $P3417."get_lexinfo"()
-    nqp_get_sc_object $P3419, "1304456116.562", 85
-    $P3418."set_static_lexpad_value"("$?PACKAGE", $P3419)
-    .const 'Sub' $P3420 = "156_1304456120.214" 
-    $P3421 = $P3420."get_lexinfo"()
-    $P3421."finish_static_lexpad"()
-    .const 'Sub' $P3422 = "156_1304456120.214" 
-    $P3423 = $P3422."get_lexinfo"()
-    nqp_get_sc_object $P3424, "1304456116.562", 85
-    $P3423."set_static_lexpad_value"("$?CLASS", $P3424)
-    .const 'Sub' $P3425 = "156_1304456120.214" 
-    $P3426 = $P3425."get_lexinfo"()
-    $P3426."finish_static_lexpad"()
-    .const 'Sub' $P3427 = "10_1304456120.214" 
+    $P3397."finish_static_lexpad"()
+    .const 'Sub' $P3398 = "142_1304459371.883" 
+    $P3399 = $P3398."get_lexinfo"()
+    nqp_get_sc_object $P3400, "1304459368.206", 77
+    $P3399."set_static_lexpad_value"("$?CLASS", $P3400)
+    .const 'Sub' $P3401 = "142_1304459371.883" 
+    $P3402 = $P3401."get_lexinfo"()
+    $P3402."finish_static_lexpad"()
+    .const 'Sub' $P3403 = "10_1304459371.883" 
+    $P3404 = $P3403."get_lexinfo"()
+    nqp_get_sc_object $P3405, "1304459368.206", 85
+    $P3404."set_static_lexpad_value"("NQPModuleHOW", $P3405)
+    .const 'Sub' $P3406 = "10_1304459371.883" 
+    $P3407 = $P3406."get_lexinfo"()
+    $P3407."finish_static_lexpad"()
+    nqp_get_sc_object $P3408, "1304459368.206", 86
+    .const 'Sub' $P3409 = "157_1304459371.883" 
+    assign $P3408, $P3409
+    nqp_get_sc_object $P3410, "1304459368.206", 87
+    .const 'Sub' $P3411 = "158_1304459371.883" 
+    assign $P3410, $P3411
+    nqp_get_sc_object $P3412, "1304459368.206", 88
+    .const 'Sub' $P3413 = "159_1304459371.883" 
+    assign $P3412, $P3413
+    nqp_get_sc_object $P3414, "1304459368.206", 89
+    .const 'Sub' $P3415 = "160_1304459371.883" 
+    assign $P3414, $P3415
+    nqp_get_sc_object $P3416, "1304459368.206", 90
+    .const 'Sub' $P3417 = "161_1304459371.883" 
+    assign $P3416, $P3417
+    nqp_get_sc_object $P3418, "1304459368.206", 91
+    .const 'Sub' $P3419 = "162_1304459371.883" 
+    assign $P3418, $P3419
+    nqp_get_sc_object $P3420, "1304459368.206", 92
+    .const 'Sub' $P3421 = "163_1304459371.883" 
+    assign $P3420, $P3421
+    nqp_get_sc_object $P3422, "1304459368.206", 93
+    .const 'Sub' $P3423 = "164_1304459371.883" 
+    assign $P3422, $P3423
+    .const 'Sub' $P3424 = "156_1304459371.883" 
+    $P3425 = $P3424."get_lexinfo"()
+    nqp_get_sc_object $P3426, "1304459368.206", 85
+    $P3425."set_static_lexpad_value"("$?PACKAGE", $P3426)
+    .const 'Sub' $P3427 = "156_1304459371.883" 
     $P3428 = $P3427."get_lexinfo"()
-    nqp_get_sc_object $P3429, "1304456116.562", 94
-    $P3428."set_static_lexpad_value"("EXPORTHOW", $P3429)
-    .const 'Sub' $P3430 = "10_1304456120.214" 
-    $P3431 = $P3430."get_lexinfo"()
-    $P3431."finish_static_lexpad"()
-    .const 'Sub' $P3432 = "165_1304456120.214" 
+    $P3428."finish_static_lexpad"()
+    .const 'Sub' $P3429 = "156_1304459371.883" 
+    $P3430 = $P3429."get_lexinfo"()
+    nqp_get_sc_object $P3431, "1304459368.206", 85
+    $P3430."set_static_lexpad_value"("$?CLASS", $P3431)
+    .const 'Sub' $P3432 = "156_1304459371.883" 
     $P3433 = $P3432."get_lexinfo"()
-    nqp_get_sc_object $P3434, "1304456116.562", 94
-    $P3433."set_static_lexpad_value"("$?PACKAGE", $P3434)
-    .const 'Sub' $P3435 = "165_1304456120.214" 
-    $P3436 = $P3435."get_lexinfo"()
-    $P3436."finish_static_lexpad"()
-    .const 'Sub' $P3437 = "165_1304456120.214" 
+    $P3433."finish_static_lexpad"()
+    .const 'Sub' $P3434 = "10_1304459371.883" 
+    $P3435 = $P3434."get_lexinfo"()
+    nqp_get_sc_object $P3436, "1304459368.206", 94
+    $P3435."set_static_lexpad_value"("EXPORTHOW", $P3436)
+    .const 'Sub' $P3437 = "10_1304459371.883" 
     $P3438 = $P3437."get_lexinfo"()
-    nqp_get_sc_object $P3439, "1304456116.562", 94
-    $P3438."set_static_lexpad_value"("$?CLASS", $P3439)
-    .const 'Sub' $P3440 = "165_1304456120.214" 
-    $P3441 = $P3440."get_lexinfo"()
-    $P3441."finish_static_lexpad"()
-    goto if_2384_end
-  if_2384:
+    $P3438."finish_static_lexpad"()
+    .const 'Sub' $P3439 = "165_1304459371.883" 
+    $P3440 = $P3439."get_lexinfo"()
+    nqp_get_sc_object $P3441, "1304459368.206", 94
+    $P3440."set_static_lexpad_value"("$?PACKAGE", $P3441)
+    .const 'Sub' $P3442 = "165_1304459371.883" 
+    $P3443 = $P3442."get_lexinfo"()
+    $P3443."finish_static_lexpad"()
+    .const 'Sub' $P3444 = "165_1304459371.883" 
+    $P3445 = $P3444."get_lexinfo"()
+    nqp_get_sc_object $P3446, "1304459368.206", 94
+    $P3445."set_static_lexpad_value"("$?CLASS", $P3446)
+    .const 'Sub' $P3447 = "165_1304459371.883" 
+    $P3448 = $P3447."get_lexinfo"()
+    $P3448."finish_static_lexpad"()
+    goto if_2391_end
+  if_2391:
     nqp_dynop_setup 
-    getinterp $P2387
-    get_class $P2388, "LexPad"
-    get_class $P2389, "NQPLexPad"
-    $P2387."hll_map"($P2388, $P2389)
-    nqp_create_sc $P2390, "1304456116.562"
+    getinterp $P2394
+    get_class $P2395, "LexPad"
+    get_class $P2396, "NQPLexPad"
+    $P2394."hll_map"($P2395, $P2396)
+    nqp_create_sc $P2397, "1304459368.206"
     .local pmc cur_sc
-    set cur_sc, $P2390
-    nqp_get_sc_object $P2391, "__6MODEL_CORE__", 0
-    $P2392 = $P2391."new_type"("GLOBALish" :named("name"))
-    nqp_set_sc_for_object $P2392, cur_sc
-    nqp_set_sc_object "1304456116.562", 0, $P2392
-    .const 'Sub' $P2393 = "10_1304456120.214" 
-    $P2394 = $P2393."get_lexinfo"()
-    nqp_get_sc_object $P2395, "1304456116.562", 0
-    $P2394."set_static_lexpad_value"("GLOBALish", $P2395)
-    .const 'Sub' $P2396 = "10_1304456120.214" 
-    $P2397 = $P2396."get_lexinfo"()
-    $P2397."finish_static_lexpad"()
-    .const 'Sub' $P2398 = "10_1304456120.214" 
-    $P2399 = $P2398."get_lexinfo"()
-    nqp_get_sc_object $P2400, "1304456116.562", 0
-    $P2399."set_static_lexpad_value"("$?PACKAGE", $P2400)
-    .const 'Sub' $P2401 = "10_1304456120.214" 
-    $P2402 = $P2401."get_lexinfo"()
-    $P2402."finish_static_lexpad"()
-    nqp_get_sc_object $P2403, "__6MODEL_CORE__", 0
-    $P2404 = $P2403."new_type"("RoleToRoleApplier" :named("name"))
-    nqp_set_sc_for_object $P2404, cur_sc
-    nqp_set_sc_object "1304456116.562", 1, $P2404
-    nqp_get_sc_object $P2405, "1304456116.562", 1
-    nqp_get_sc_object $P2406, "1304456116.562", 0
-    get_who $P2407, $P2406
-    set $P2407["RoleToRoleApplier"], $P2405
-    .const 'Sub' $P2408 = "10_1304456120.214" 
+    set cur_sc, $P2397
+    nqp_get_sc_object $P2398, "__6MODEL_CORE__", 0
+    $P2399 = $P2398."new_type"("GLOBALish" :named("name"))
+    nqp_set_sc_for_object $P2399, cur_sc
+    nqp_set_sc_object "1304459368.206", 0, $P2399
+    .const 'Sub' $P2400 = "10_1304459371.883" 
+    $P2401 = $P2400."get_lexinfo"()
+    nqp_get_sc_object $P2402, "1304459368.206", 0
+    $P2401."set_static_lexpad_value"("GLOBALish", $P2402)
+    .const 'Sub' $P2403 = "10_1304459371.883" 
+    $P2404 = $P2403."get_lexinfo"()
+    $P2404."finish_static_lexpad"()
+    .const 'Sub' $P2405 = "10_1304459371.883" 
+    $P2406 = $P2405."get_lexinfo"()
+    nqp_get_sc_object $P2407, "1304459368.206", 0
+    $P2406."set_static_lexpad_value"("$?PACKAGE", $P2407)
+    .const 'Sub' $P2408 = "10_1304459371.883" 
     $P2409 = $P2408."get_lexinfo"()
-    nqp_get_sc_object $P2410, "1304456116.562", 1
-    $P2409."set_static_lexpad_value"("RoleToRoleApplier", $P2410)
-    .const 'Sub' $P2411 = "10_1304456120.214" 
-    $P2412 = $P2411."get_lexinfo"()
-    $P2412."finish_static_lexpad"()
-    nqp_get_sc_object $P2413, "1304456116.562", 1
-    get_how $P2414, $P2413
-    nqp_get_sc_object $P2415, "1304456116.562", 1
-    .const 'Sub' $P2416 = "12_1304456120.214" 
-    $P2414."add_method"($P2415, "apply", $P2416)
-    .const 'Sub' $P2417 = "11_1304456120.214" 
-    $P2418 = $P2417."get_lexinfo"()
-    nqp_get_sc_object $P2419, "1304456116.562", 1
-    $P2418."set_static_lexpad_value"("$?PACKAGE", $P2419)
-    .const 'Sub' $P2420 = "11_1304456120.214" 
-    $P2421 = $P2420."get_lexinfo"()
-    $P2421."finish_static_lexpad"()
-    .const 'Sub' $P2422 = "11_1304456120.214" 
-    $P2423 = $P2422."get_lexinfo"()
-    nqp_get_sc_object $P2424, "1304456116.562", 1
-    $P2423."set_static_lexpad_value"("$?CLASS", $P2424)
-    .const 'Sub' $P2425 = "11_1304456120.214" 
-    $P2426 = $P2425."get_lexinfo"()
-    $P2426."finish_static_lexpad"()
-    nqp_get_sc_object $P2427, "1304456116.562", 1
-    get_how $P2428, $P2427
-    nqp_get_sc_object $P2429, "1304456116.562", 1
-    $P2428."compose"($P2429)
-    nqp_get_sc_object $P2430, "__6MODEL_CORE__", 0
-    $P2431 = $P2430."new_type"("NQPConcreteRoleHOW" :named("name"))
-    nqp_set_sc_for_object $P2431, cur_sc
-    nqp_set_sc_object "1304456116.562", 3, $P2431
-    nqp_get_sc_object $P2432, "1304456116.562", 3
-    nqp_get_sc_object $P2433, "1304456116.562", 0
-    get_who $P2434, $P2433
-    set $P2434["NQPConcreteRoleHOW"], $P2432
-    .const 'Sub' $P2435 = "10_1304456120.214" 
-    $P2436 = $P2435."get_lexinfo"()
-    nqp_get_sc_object $P2437, "1304456116.562", 3
-    $P2436."set_static_lexpad_value"("NQPConcreteRoleHOW", $P2437)
-    .const 'Sub' $P2438 = "10_1304456120.214" 
-    $P2439 = $P2438."get_lexinfo"()
-    $P2439."finish_static_lexpad"()
-    nqp_get_sc_object $P2440, "1304456116.562", 3
-    get_how $P2441, $P2440
-    nqp_get_sc_object $P2442, "1304456116.562", 3
-    nqp_get_sc_object $P2443, "__6MODEL_CORE__", 2
-    $P2444 = $P2443."new"("$!name" :named("name"))
-    $P2441."add_attribute"($P2442, $P2444)
-    nqp_get_sc_object $P2445, "1304456116.562", 3
-    get_how $P2446, $P2445
-    nqp_get_sc_object $P2447, "1304456116.562", 3
-    nqp_get_sc_object $P2448, "__6MODEL_CORE__", 2
-    $P2449 = $P2448."new"("$!instance_of" :named("name"))
-    $P2446."add_attribute"($P2447, $P2449)
-    nqp_get_sc_object $P2450, "1304456116.562", 3
-    get_how $P2451, $P2450
-    nqp_get_sc_object $P2452, "1304456116.562", 3
-    nqp_get_sc_object $P2453, "__6MODEL_CORE__", 2
-    $P2454 = $P2453."new"("%!attributes" :named("name"))
-    $P2451."add_attribute"($P2452, $P2454)
-    nqp_get_sc_object $P2455, "1304456116.562", 3
-    get_how $P2456, $P2455
-    nqp_get_sc_object $P2457, "1304456116.562", 3
-    nqp_get_sc_object $P2458, "__6MODEL_CORE__", 2
-    $P2459 = $P2458."new"("%!methods" :named("name"))
-    $P2456."add_attribute"($P2457, $P2459)
-    nqp_get_sc_object $P2460, "1304456116.562", 3
-    get_how $P2461, $P2460
-    nqp_get_sc_object $P2462, "1304456116.562", 3
-    nqp_get_sc_object $P2463, "__6MODEL_CORE__", 2
-    $P2464 = $P2463."new"("@!multi_methods_to_incorporate" :named("name"))
-    $P2461."add_attribute"($P2462, $P2464)
-    nqp_get_sc_object $P2465, "1304456116.562", 3
-    get_how $P2466, $P2465
-    nqp_get_sc_object $P2467, "1304456116.562", 3
-    nqp_get_sc_object $P2468, "__6MODEL_CORE__", 2
-    $P2469 = $P2468."new"("@!collisions" :named("name"))
-    $P2466."add_attribute"($P2467, $P2469)
-    nqp_get_sc_object $P2470, "1304456116.562", 3
-    get_how $P2471, $P2470
-    nqp_get_sc_object $P2472, "1304456116.562", 3
-    nqp_get_sc_object $P2473, "__6MODEL_CORE__", 2
-    $P2474 = $P2473."new"("@!roles" :named("name"))
-    $P2471."add_attribute"($P2472, $P2474)
-    nqp_get_sc_object $P2475, "1304456116.562", 3
-    get_how $P2476, $P2475
-    nqp_get_sc_object $P2477, "1304456116.562", 3
-    nqp_get_sc_object $P2478, "__6MODEL_CORE__", 2
-    $P2479 = $P2478."new"("@!done" :named("name"))
-    $P2476."add_attribute"($P2477, $P2479)
-    nqp_get_sc_object $P2480, "1304456116.562", 3
-    get_how $P2481, $P2480
-    nqp_get_sc_object $P2482, "1304456116.562", 3
-    nqp_get_sc_object $P2483, "__6MODEL_CORE__", 2
-    $P2484 = $P2483."new"("$!composed" :named("name"))
-    $P2481."add_attribute"($P2482, $P2484)
-    nqp_get_sc_object $P2485, "1304456116.562", 3
-    get_how $P2486, $P2485
-    nqp_get_sc_object $P2487, "1304456116.562", 3
-    .const 'Sub' $P2488 = "22_1304456120.214" 
-    $P2486."add_method"($P2487, "new", $P2488)
-    nqp_get_sc_object $P2489, "1304456116.562", 3
-    get_how $P2490, $P2489
-    nqp_get_sc_object $P2491, "1304456116.562", 3
-    .const 'Sub' $P2492 = "23_1304456120.214" 
-    $P2490."add_method"($P2491, "BUILD", $P2492)
-    nqp_get_sc_object $P2493, "1304456116.562", 3
-    get_how $P2494, $P2493
-    nqp_get_sc_object $P2495, "1304456116.562", 3
-    .const 'Sub' $P2496 = "24_1304456120.214" 
-    $P2494."add_method"($P2495, "new_type", $P2496)
-    nqp_get_sc_object $P2497, "1304456116.562", 3
-    get_how $P2498, $P2497
-    nqp_get_sc_object $P2499, "1304456116.562", 3
-    .const 'Sub' $P2500 = "25_1304456120.214" 
-    $P2498."add_method"($P2499, "add_method", $P2500)
-    nqp_get_sc_object $P2501, "1304456116.562", 3
-    get_how $P2502, $P2501
-    nqp_get_sc_object $P2503, "1304456116.562", 3
-    .const 'Sub' $P2504 = "26_1304456120.214" 
-    $P2502."add_method"($P2503, "add_multi_method", $P2504)
-    nqp_get_sc_object $P2505, "1304456116.562", 3
-    get_how $P2506, $P2505
-    nqp_get_sc_object $P2507, "1304456116.562", 3
-    .const 'Sub' $P2508 = "27_1304456120.214" 
-    $P2506."add_method"($P2507, "add_attribute", $P2508)
-    nqp_get_sc_object $P2509, "1304456116.562", 3
-    get_how $P2510, $P2509
-    nqp_get_sc_object $P2511, "1304456116.562", 3
-    .const 'Sub' $P2512 = "28_1304456120.214" 
-    $P2510."add_method"($P2511, "add_parent", $P2512)
-    nqp_get_sc_object $P2513, "1304456116.562", 3
-    get_how $P2514, $P2513
-    nqp_get_sc_object $P2515, "1304456116.562", 3
-    .const 'Sub' $P2516 = "29_1304456120.214" 
-    $P2514."add_method"($P2515, "add_role", $P2516)
-    nqp_get_sc_object $P2517, "1304456116.562", 3
-    get_how $P2518, $P2517
-    nqp_get_sc_object $P2519, "1304456116.562", 3
-    .const 'Sub' $P2520 = "30_1304456120.214" 
-    $P2518."add_method"($P2519, "add_collision", $P2520)
-    nqp_get_sc_object $P2521, "1304456116.562", 3
-    get_how $P2522, $P2521
-    nqp_get_sc_object $P2523, "1304456116.562", 3
-    .const 'Sub' $P2524 = "31_1304456120.214" 
-    $P2522."add_method"($P2523, "compose", $P2524)
-    nqp_get_sc_object $P2525, "1304456116.562", 3
-    get_how $P2526, $P2525
-    nqp_get_sc_object $P2527, "1304456116.562", 3
-    .const 'Sub' $P2528 = "33_1304456120.214" 
-    $P2526."add_method"($P2527, "methods", $P2528)
-    nqp_get_sc_object $P2529, "1304456116.562", 3
-    get_how $P2530, $P2529
-    nqp_get_sc_object $P2531, "1304456116.562", 3
-    .const 'Sub' $P2532 = "35_1304456120.214" 
-    $P2530."add_method"($P2531, "method_table", $P2532)
-    nqp_get_sc_object $P2533, "1304456116.562", 3
-    get_how $P2534, $P2533
-    nqp_get_sc_object $P2535, "1304456116.562", 3
-    .const 'Sub' $P2536 = "36_1304456120.214" 
-    $P2534."add_method"($P2535, "collisions", $P2536)
-    nqp_get_sc_object $P2537, "1304456116.562", 3
-    get_how $P2538, $P2537
-    nqp_get_sc_object $P2539, "1304456116.562", 3
-    .const 'Sub' $P2540 = "37_1304456120.214" 
-    $P2538."add_method"($P2539, "name", $P2540)
-    nqp_get_sc_object $P2541, "1304456116.562", 3
-    get_how $P2542, $P2541
-    nqp_get_sc_object $P2543, "1304456116.562", 3
-    .const 'Sub' $P2544 = "38_1304456120.214" 
-    $P2542."add_method"($P2543, "attributes", $P2544)
-    nqp_get_sc_object $P2545, "1304456116.562", 3
-    get_how $P2546, $P2545
-    nqp_get_sc_object $P2547, "1304456116.562", 3
-    .const 'Sub' $P2548 = "40_1304456120.214" 
-    $P2546."add_method"($P2547, "roles", $P2548)
-    nqp_get_sc_object $P2549, "1304456116.562", 3
-    get_how $P2550, $P2549
-    nqp_get_sc_object $P2551, "1304456116.562", 3
-    .const 'Sub' $P2552 = "41_1304456120.214" 
-    $P2550."add_method"($P2551, "instance_of", $P2552)
-    .const 'Sub' $P2553 = "21_1304456120.214" 
-    $P2554 = $P2553."get_lexinfo"()
-    nqp_get_sc_object $P2555, "1304456116.562", 3
-    $P2554."set_static_lexpad_value"("$?PACKAGE", $P2555)
-    .const 'Sub' $P2556 = "21_1304456120.214" 
-    $P2557 = $P2556."get_lexinfo"()
-    $P2557."finish_static_lexpad"()
-    .const 'Sub' $P2558 = "21_1304456120.214" 
-    $P2559 = $P2558."get_lexinfo"()
-    nqp_get_sc_object $P2560, "1304456116.562", 3
-    $P2559."set_static_lexpad_value"("$?CLASS", $P2560)
-    .const 'Sub' $P2561 = "21_1304456120.214" 
-    $P2562 = $P2561."get_lexinfo"()
-    $P2562."finish_static_lexpad"()
-    nqp_get_sc_object $P2563, "1304456116.562", 3
-    get_how $P2564, $P2563
-    nqp_get_sc_object $P2565, "1304456116.562", 3
-    $P2564."compose"($P2565)
-    nqp_get_sc_object $P2566, "__6MODEL_CORE__", 0
-    $P2567 = $P2566."new_type"("RoleToClassApplier" :named("name"))
-    nqp_set_sc_for_object $P2567, cur_sc
-    nqp_set_sc_object "1304456116.562", 21, $P2567
-    nqp_get_sc_object $P2568, "1304456116.562", 21
-    nqp_get_sc_object $P2569, "1304456116.562", 0
-    get_who $P2570, $P2569
-    set $P2570["RoleToClassApplier"], $P2568
-    .const 'Sub' $P2571 = "10_1304456120.214" 
-    $P2572 = $P2571."get_lexinfo"()
-    nqp_get_sc_object $P2573, "1304456116.562", 21
-    $P2572."set_static_lexpad_value"("RoleToClassApplier", $P2573)
-    .const 'Sub' $P2574 = "10_1304456120.214" 
-    $P2575 = $P2574."get_lexinfo"()
-    $P2575."finish_static_lexpad"()
-    nqp_get_sc_object $P2576, "1304456116.562", 21
-    get_how $P2577, $P2576
-    nqp_get_sc_object $P2578, "1304456116.562", 21
-    .const 'Sub' $P2579 = "47_1304456120.214" 
-    $P2577."add_method"($P2578, "apply", $P2579)
-    .const 'Sub' $P2580 = "42_1304456120.214" 
-    $P2581 = $P2580."get_lexinfo"()
-    nqp_get_sc_object $P2582, "1304456116.562", 21
-    $P2581."set_static_lexpad_value"("$?PACKAGE", $P2582)
-    .const 'Sub' $P2583 = "42_1304456120.214" 
-    $P2584 = $P2583."get_lexinfo"()
-    $P2584."finish_static_lexpad"()
-    .const 'Sub' $P2585 = "42_1304456120.214" 
-    $P2586 = $P2585."get_lexinfo"()
-    nqp_get_sc_object $P2587, "1304456116.562", 21
-    $P2586."set_static_lexpad_value"("$?CLASS", $P2587)
-    .const 'Sub' $P2588 = "42_1304456120.214" 
-    $P2589 = $P2588."get_lexinfo"()
-    $P2589."finish_static_lexpad"()
-    nqp_get_sc_object $P2590, "1304456116.562", 21
-    get_how $P2591, $P2590
-    nqp_get_sc_object $P2592, "1304456116.562", 21
-    $P2591."compose"($P2592)
-    nqp_get_sc_object $P2593, "__6MODEL_CORE__", 0
-    $P2594 = $P2593."new_type"("NQPParametricRoleHOW" :named("name"))
-    nqp_set_sc_for_object $P2594, cur_sc
-    nqp_set_sc_object "1304456116.562", 23, $P2594
-    nqp_get_sc_object $P2595, "1304456116.562", 23
-    nqp_get_sc_object $P2596, "1304456116.562", 0
-    get_who $P2597, $P2596
-    set $P2597["NQPParametricRoleHOW"], $P2595
-    .const 'Sub' $P2598 = "10_1304456120.214" 
-    $P2599 = $P2598."get_lexinfo"()
-    nqp_get_sc_object $P2600, "1304456116.562", 23
-    $P2599."set_static_lexpad_value"("NQPParametricRoleHOW", $P2600)
-    .const 'Sub' $P2601 = "10_1304456120.214" 
-    $P2602 = $P2601."get_lexinfo"()
-    $P2602."finish_static_lexpad"()
-    nqp_get_sc_object $P2603, "1304456116.562", 23
-    get_how $P2604, $P2603
-    nqp_get_sc_object $P2605, "1304456116.562", 23
-    nqp_get_sc_object $P2606, "__6MODEL_CORE__", 2
-    $P2607 = $P2606."new"("$!name" :named("name"))
-    $P2604."add_attribute"($P2605, $P2607)
-    nqp_get_sc_object $P2608, "1304456116.562", 23
-    get_how $P2609, $P2608
-    nqp_get_sc_object $P2610, "1304456116.562", 23
-    nqp_get_sc_object $P2611, "__6MODEL_CORE__", 2
-    $P2612 = $P2611."new"("%!attributes" :named("name"))
-    $P2609."add_attribute"($P2610, $P2612)
-    nqp_get_sc_object $P2613, "1304456116.562", 23
-    get_how $P2614, $P2613
-    nqp_get_sc_object $P2615, "1304456116.562", 23
-    nqp_get_sc_object $P2616, "__6MODEL_CORE__", 2
-    $P2617 = $P2616."new"("%!methods" :named("name"))
-    $P2614."add_attribute"($P2615, $P2617)
-    nqp_get_sc_object $P2618, "1304456116.562", 23
-    get_how $P2619, $P2618
-    nqp_get_sc_object $P2620, "1304456116.562", 23
-    nqp_get_sc_object $P2621, "__6MODEL_CORE__", 2
-    $P2622 = $P2621."new"("@!multi_methods_to_incorporate" :named("name"))
-    $P2619."add_attribute"($P2620, $P2622)
-    nqp_get_sc_object $P2623, "1304456116.562", 23
-    get_how $P2624, $P2623
-    nqp_get_sc_object $P2625, "1304456116.562", 23
-    nqp_get_sc_object $P2626, "__6MODEL_CORE__", 2
-    $P2627 = $P2626."new"("@!roles" :named("name"))
-    $P2624."add_attribute"($P2625, $P2627)
-    nqp_get_sc_object $P2628, "1304456116.562", 23
-    get_how $P2629, $P2628
-    nqp_get_sc_object $P2630, "1304456116.562", 23
-    nqp_get_sc_object $P2631, "__6MODEL_CORE__", 2
-    $P2632 = $P2631."new"("$!composed" :named("name"))
-    $P2629."add_attribute"($P2630, $P2632)
-    nqp_get_sc_object $P2633, "1304456116.562", 23
-    get_how $P2634, $P2633
-    nqp_get_sc_object $P2635, "1304456116.562", 23
-    nqp_get_sc_object $P2636, "__6MODEL_CORE__", 2
-    $P2637 = $P2636."new"("$!body_block" :named("name"))
-    $P2634."add_attribute"($P2635, $P2637)
-    nqp_get_sc_object $P2638, "1304456116.562", 23
-    get_how $P2639, $P2638
-    nqp_get_sc_object $P2640, "1304456116.562", 23
-    .const 'Sub' $P2641 = "54_1304456120.214" 
-    $P2639."add_method"($P2640, "new", $P2641)
-    nqp_get_sc_object $P2642, "1304456116.562", 23
-    get_how $P2643, $P2642
-    nqp_get_sc_object $P2644, "1304456116.562", 23
-    .const 'Sub' $P2645 = "55_1304456120.214" 
-    $P2643."add_method"($P2644, "BUILD", $P2645)
-    nqp_get_sc_object $P2646, "1304456116.562", 23
-    get_how $P2647, $P2646
-    nqp_get_sc_object $P2648, "1304456116.562", 23
-    .const 'Sub' $P2649 = "56_1304456120.214" 
-    $P2647."add_method"($P2648, "new_type", $P2649)
-    nqp_get_sc_object $P2650, "1304456116.562", 23
-    get_how $P2651, $P2650
-    nqp_get_sc_object $P2652, "1304456116.562", 23
-    .const 'Sub' $P2653 = "57_1304456120.214" 
-    $P2651."add_method"($P2652, "set_body_block", $P2653)
-    nqp_get_sc_object $P2654, "1304456116.562", 23
-    get_how $P2655, $P2654
-    nqp_get_sc_object $P2656, "1304456116.562", 23
-    .const 'Sub' $P2657 = "58_1304456120.214" 
-    $P2655."add_method"($P2656, "add_method", $P2657)
-    nqp_get_sc_object $P2658, "1304456116.562", 23
-    get_how $P2659, $P2658
-    nqp_get_sc_object $P2660, "1304456116.562", 23
-    .const 'Sub' $P2661 = "59_1304456120.214" 
-    $P2659."add_method"($P2660, "add_multi_method", $P2661)
-    nqp_get_sc_object $P2662, "1304456116.562", 23
-    get_how $P2663, $P2662
-    nqp_get_sc_object $P2664, "1304456116.562", 23
-    .const 'Sub' $P2665 = "60_1304456120.214" 
-    $P2663."add_method"($P2664, "add_attribute", $P2665)
-    nqp_get_sc_object $P2666, "1304456116.562", 23
-    get_how $P2667, $P2666
-    nqp_get_sc_object $P2668, "1304456116.562", 23
-    .const 'Sub' $P2669 = "61_1304456120.214" 
-    $P2667."add_method"($P2668, "add_parent", $P2669)
-    nqp_get_sc_object $P2670, "1304456116.562", 23
-    get_how $P2671, $P2670
-    nqp_get_sc_object $P2672, "1304456116.562", 23
-    .const 'Sub' $P2673 = "62_1304456120.214" 
-    $P2671."add_method"($P2672, "add_role", $P2673)
-    nqp_get_sc_object $P2674, "1304456116.562", 23
-    get_how $P2675, $P2674
-    nqp_get_sc_object $P2676, "1304456116.562", 23
-    .const 'Sub' $P2677 = "63_1304456120.214" 
-    $P2675."add_method"($P2676, "compose", $P2677)
-    nqp_get_sc_object $P2678, "1304456116.562", 23
-    get_how $P2679, $P2678
-    nqp_get_sc_object $P2680, "1304456116.562", 23
-    .const 'Sub' $P2681 = "64_1304456120.214" 
-    $P2679."add_method"($P2680, "parametric", $P2681)
-    nqp_get_sc_object $P2682, "1304456116.562", 23
-    get_how $P2683, $P2682
-    nqp_get_sc_object $P2684, "1304456116.562", 23
-    .const 'Sub' $P2685 = "65_1304456120.214" 
-    $P2683."add_method"($P2684, "instantiate", $P2685)
-    nqp_get_sc_object $P2686, "1304456116.562", 23
-    get_how $P2687, $P2686
-    nqp_get_sc_object $P2688, "1304456116.562", 23
-    .const 'Sub' $P2689 = "70_1304456120.214" 
-    $P2687."add_method"($P2688, "methods", $P2689)
-    nqp_get_sc_object $P2690, "1304456116.562", 23
-    get_how $P2691, $P2690
-    nqp_get_sc_object $P2692, "1304456116.562", 23
-    .const 'Sub' $P2693 = "72_1304456120.214" 
-    $P2691."add_method"($P2692, "method_table", $P2693)
-    nqp_get_sc_object $P2694, "1304456116.562", 23
-    get_how $P2695, $P2694
-    nqp_get_sc_object $P2696, "1304456116.562", 23
-    .const 'Sub' $P2697 = "73_1304456120.214" 
-    $P2695."add_method"($P2696, "name", $P2697)
-    nqp_get_sc_object $P2698, "1304456116.562", 23
-    get_how $P2699, $P2698
-    nqp_get_sc_object $P2700, "1304456116.562", 23
-    .const 'Sub' $P2701 = "74_1304456120.214" 
-    $P2699."add_method"($P2700, "attributes", $P2701)
-    nqp_get_sc_object $P2702, "1304456116.562", 23
-    get_how $P2703, $P2702
-    nqp_get_sc_object $P2704, "1304456116.562", 23
-    .const 'Sub' $P2705 = "76_1304456120.214" 
-    $P2703."add_method"($P2704, "roles", $P2705)
-    .const 'Sub' $P2706 = "52_1304456120.214" 
-    $P2707 = $P2706."get_lexinfo"()
-    nqp_get_sc_object $P2708, "1304456116.562", 23
-    $P2707."set_static_lexpad_value"("$?PACKAGE", $P2708)
-    .const 'Sub' $P2709 = "52_1304456120.214" 
-    $P2710 = $P2709."get_lexinfo"()
-    $P2710."finish_static_lexpad"()
-    .const 'Sub' $P2711 = "52_1304456120.214" 
-    $P2712 = $P2711."get_lexinfo"()
-    nqp_get_sc_object $P2713, "1304456116.562", 23
-    $P2712."set_static_lexpad_value"("$?CLASS", $P2713)
-    .const 'Sub' $P2714 = "52_1304456120.214" 
-    $P2715 = $P2714."get_lexinfo"()
-    $P2715."finish_static_lexpad"()
-    nqp_get_sc_object $P2716, "1304456116.562", 23
-    get_how $P2717, $P2716
-    nqp_get_sc_object $P2718, "1304456116.562", 23
-    $P2717."compose"($P2718)
-    nqp_get_sc_object $P2719, "__6MODEL_CORE__", 0
-    $P2720 = $P2719."new_type"("NQPClassHOW" :named("name"))
-    nqp_set_sc_for_object $P2720, cur_sc
-    nqp_set_sc_object "1304456116.562", 41, $P2720
-    nqp_get_sc_object $P2721, "1304456116.562", 41
-    nqp_get_sc_object $P2722, "1304456116.562", 0
-    get_who $P2723, $P2722
-    set $P2723["NQPClassHOW"], $P2721
-    .const 'Sub' $P2724 = "10_1304456120.214" 
-    $P2725 = $P2724."get_lexinfo"()
-    nqp_get_sc_object $P2726, "1304456116.562", 41
-    $P2725."set_static_lexpad_value"("NQPClassHOW", $P2726)
-    .const 'Sub' $P2727 = "10_1304456120.214" 
-    $P2728 = $P2727."get_lexinfo"()
-    $P2728."finish_static_lexpad"()
-    nqp_get_sc_object $P2729, "1304456116.562", 41
-    get_how $P2730, $P2729
-    nqp_get_sc_object $P2731, "1304456116.562", 41
-    nqp_get_sc_object $P2732, "__6MODEL_CORE__", 2
-    $P2733 = $P2732."new"("$!name" :named("name"))
-    $P2730."add_attribute"($P2731, $P2733)
-    nqp_get_sc_object $P2734, "1304456116.562", 41
-    get_how $P2735, $P2734
-    nqp_get_sc_object $P2736, "1304456116.562", 41
-    nqp_get_sc_object $P2737, "__6MODEL_CORE__", 2
-    $P2738 = $P2737."new"("%!attributes" :named("name"))
-    $P2735."add_attribute"($P2736, $P2738)
-    nqp_get_sc_object $P2739, "1304456116.562", 41
-    get_how $P2740, $P2739
-    nqp_get_sc_object $P2741, "1304456116.562", 41
-    nqp_get_sc_object $P2742, "__6MODEL_CORE__", 2
-    $P2743 = $P2742."new"("%!methods" :named("name"))
-    $P2740."add_attribute"($P2741, $P2743)
-    nqp_get_sc_object $P2744, "1304456116.562", 41
-    get_how $P2745, $P2744
-    nqp_get_sc_object $P2746, "1304456116.562", 41
-    nqp_get_sc_object $P2747, "__6MODEL_CORE__", 2
-    $P2748 = $P2747."new"("@!multi_methods_to_incorporate" :named("name"))
-    $P2745."add_attribute"($P2746, $P2748)
-    nqp_get_sc_object $P2749, "1304456116.562", 41
-    get_how $P2750, $P2749
-    nqp_get_sc_object $P2751, "1304456116.562", 41
-    nqp_get_sc_object $P2752, "__6MODEL_CORE__", 2
-    $P2753 = $P2752."new"("@!parents" :named("name"))
-    $P2750."add_attribute"($P2751, $P2753)
-    nqp_get_sc_object $P2754, "1304456116.562", 41
-    get_how $P2755, $P2754
-    nqp_get_sc_object $P2756, "1304456116.562", 41
-    nqp_get_sc_object $P2757, "__6MODEL_CORE__", 2
-    $P2758 = $P2757."new"("@!roles" :named("name"))
-    $P2755."add_attribute"($P2756, $P2758)
-    nqp_get_sc_object $P2759, "1304456116.562", 41
-    get_how $P2760, $P2759
-    nqp_get_sc_object $P2761, "1304456116.562", 41
-    nqp_get_sc_object $P2762, "__6MODEL_CORE__", 2
-    $P2763 = $P2762."new"("$!default_parent" :named("name"))
-    $P2760."add_attribute"($P2761, $P2763)
-    nqp_get_sc_object $P2764, "1304456116.562", 41
-    get_how $P2765, $P2764
-    nqp_get_sc_object $P2766, "1304456116.562", 41
-    nqp_get_sc_object $P2767, "__6MODEL_CORE__", 2
-    $P2768 = $P2767."new"("@!vtable" :named("name"))
-    $P2765."add_attribute"($P2766, $P2768)
-    nqp_get_sc_object $P2769, "1304456116.562", 41
-    get_how $P2770, $P2769
-    nqp_get_sc_object $P2771, "1304456116.562", 41
-    nqp_get_sc_object $P2772, "__6MODEL_CORE__", 2
-    $P2773 = $P2772."new"("%!method-vtable-slots" :named("name"))
-    $P2770."add_attribute"($P2771, $P2773)
-    nqp_get_sc_object $P2774, "1304456116.562", 41
-    get_how $P2775, $P2774
-    nqp_get_sc_object $P2776, "1304456116.562", 41
-    nqp_get_sc_object $P2777, "__6MODEL_CORE__", 2
-    $P2778 = $P2777."new"("$!composed" :named("name"))
-    $P2775."add_attribute"($P2776, $P2778)
-    nqp_get_sc_object $P2779, "1304456116.562", 41
-    get_how $P2780, $P2779
-    nqp_get_sc_object $P2781, "1304456116.562", 41
-    nqp_get_sc_object $P2782, "__6MODEL_CORE__", 2
-    $P2783 = $P2782."new"("@!mro" :named("name"))
-    $P2780."add_attribute"($P2781, $P2783)
-    nqp_get_sc_object $P2784, "1304456116.562", 41
-    get_how $P2785, $P2784
-    nqp_get_sc_object $P2786, "1304456116.562", 41
-    nqp_get_sc_object $P2787, "__6MODEL_CORE__", 2
-    $P2788 = $P2787."new"("@!done" :named("name"))
-    $P2785."add_attribute"($P2786, $P2788)
-    nqp_get_sc_object $P2789, "1304456116.562", 41
-    get_how $P2790, $P2789
-    nqp_get_sc_object $P2791, "1304456116.562", 41
-    nqp_get_sc_object $P2792, "__6MODEL_CORE__", 2
-    $P2793 = $P2792."new"("%!parrot_vtable_mapping" :named("name"))
-    $P2790."add_attribute"($P2791, $P2793)
-    nqp_get_sc_object $P2794, "1304456116.562", 41
-    get_how $P2795, $P2794
-    nqp_get_sc_object $P2796, "1304456116.562", 41
-    .const 'Sub' $P2797 = "88_1304456120.214" 
-    $P2795."add_method"($P2796, "new", $P2797)
-    nqp_get_sc_object $P2798, "1304456116.562", 41
-    get_how $P2799, $P2798
-    nqp_get_sc_object $P2800, "1304456116.562", 41
-    .const 'Sub' $P2801 = "89_1304456120.214" 
-    $P2799."add_method"($P2800, "BUILD", $P2801)
-    nqp_get_sc_object $P2802, "1304456116.562", 41
-    get_how $P2803, $P2802
-    nqp_get_sc_object $P2804, "1304456116.562", 41
-    .const 'Sub' $P2805 = "90_1304456120.214" 
-    $P2803."add_method"($P2804, "new_type", $P2805)
-    nqp_get_sc_object $P2806, "1304456116.562", 41
-    get_how $P2807, $P2806
-    nqp_get_sc_object $P2808, "1304456116.562", 41
-    .const 'Sub' $P2809 = "91_1304456120.214" 
-    $P2807."add_method"($P2808, "add_method", $P2809)
-    nqp_get_sc_object $P2810, "1304456116.562", 41
-    get_how $P2811, $P2810
-    nqp_get_sc_object $P2812, "1304456116.562", 41
-    .const 'Sub' $P2813 = "92_1304456120.214" 
-    $P2811."add_method"($P2812, "add_multi_method", $P2813)
-    nqp_get_sc_object $P2814, "1304456116.562", 41
-    get_how $P2815, $P2814
-    nqp_get_sc_object $P2816, "1304456116.562", 41
-    .const 'Sub' $P2817 = "93_1304456120.214" 
-    $P2815."add_method"($P2816, "add_attribute", $P2817)
-    nqp_get_sc_object $P2818, "1304456116.562", 41
-    get_how $P2819, $P2818
-    nqp_get_sc_object $P2820, "1304456116.562", 41
-    .const 'Sub' $P2821 = "94_1304456120.214" 
-    $P2819."add_method"($P2820, "add_parent", $P2821)
-    nqp_get_sc_object $P2822, "1304456116.562", 41
-    get_how $P2823, $P2822
-    nqp_get_sc_object $P2824, "1304456116.562", 41
-    .const 'Sub' $P2825 = "96_1304456120.214" 
-    $P2823."add_method"($P2824, "set_default_parent", $P2825)
-    nqp_get_sc_object $P2826, "1304456116.562", 41
-    get_how $P2827, $P2826
-    nqp_get_sc_object $P2828, "1304456116.562", 41
-    .const 'Sub' $P2829 = "97_1304456120.214" 
-    $P2827."add_method"($P2828, "add_role", $P2829)
-    nqp_get_sc_object $P2830, "1304456116.562", 41
-    get_how $P2831, $P2830
-    nqp_get_sc_object $P2832, "1304456116.562", 41
-    .const 'Sub' $P2833 = "99_1304456120.214" 
-    $P2831."add_method"($P2832, "add_parrot_vtable_mapping", $P2833)
-    nqp_get_sc_object $P2834, "1304456116.562", 41
-    get_how $P2835, $P2834
-    nqp_get_sc_object $P2836, "1304456116.562", 41
-    .const 'Sub' $P2837 = "100_1304456120.214" 
-    $P2835."add_method"($P2836, "compose", $P2837)
-    nqp_get_sc_object $P2838, "1304456116.562", 41
-    get_how $P2839, $P2838
-    nqp_get_sc_object $P2840, "1304456116.562", 41
-    .const 'Sub' $P2841 = "104_1304456120.214" 
-    $P2839."add_method"($P2840, "incorporate_multi_candidates", $P2841)
-    nqp_get_sc_object $P2842, "1304456116.562", 41
-    get_how $P2843, $P2842
-    nqp_get_sc_object $P2844, "1304456116.562", 41
-    .const 'Sub' $P2845 = "109_1304456120.214" 
-    $P2843."add_method"($P2844, "publish_type_cache", $P2845)
-    nqp_get_sc_object $P2846, "1304456116.562", 41
-    get_how $P2847, $P2846
-    nqp_get_sc_object $P2848, "1304456116.562", 41
-    .const 'Sub' $P2849 = "112_1304456120.214" 
-    $P2847."add_method"($P2848, "publish_method_cache", $P2849)
-    nqp_get_sc_object $P2850, "1304456116.562", 41
-    get_how $P2851, $P2850
-    nqp_get_sc_object $P2852, "1304456116.562", 41
-    .const 'Sub' $P2853 = "115_1304456120.214" 
-    $P2851."add_method"($P2852, "publish_parrot_vtable_mapping", $P2853)
-    nqp_get_sc_object $P2854, "1304456116.562", 41
-    get_how $P2855, $P2854
-    nqp_get_sc_object $P2856, "1304456116.562", 41
-    .const 'Sub' $P2857 = "118_1304456120.214" 
-    $P2855."add_method"($P2856, "parents", $P2857)
-    nqp_get_sc_object $P2858, "1304456116.562", 41
-    get_how $P2859, $P2858
-    nqp_get_sc_object $P2860, "1304456116.562", 41
-    .const 'Sub' $P2861 = "119_1304456120.214" 
-    $P2859."add_method"($P2860, "roles", $P2861)
-    nqp_get_sc_object $P2862, "1304456116.562", 41
-    get_how $P2863, $P2862
-    nqp_get_sc_object $P2864, "1304456116.562", 41
-    .const 'Sub' $P2865 = "120_1304456120.214" 
-    $P2863."add_method"($P2864, "methods", $P2865)
-    nqp_get_sc_object $P2866, "1304456116.562", 41
-    get_how $P2867, $P2866
-    nqp_get_sc_object $P2868, "1304456116.562", 41
-    .const 'Sub' $P2869 = "122_1304456120.214" 
-    $P2867."add_method"($P2868, "method_table", $P2869)
-    nqp_get_sc_object $P2870, "1304456116.562", 41
-    get_how $P2871, $P2870
-    nqp_get_sc_object $P2872, "1304456116.562", 41
-    .const 'Sub' $P2873 = "123_1304456120.214" 
-    $P2871."add_method"($P2872, "name", $P2873)
-    nqp_get_sc_object $P2874, "1304456116.562", 41
-    get_how $P2875, $P2874
-    nqp_get_sc_object $P2876, "1304456116.562", 41
-    .const 'Sub' $P2877 = "124_1304456120.214" 
-    $P2875."add_method"($P2876, "attributes", $P2877)
-    nqp_get_sc_object $P2878, "1304456116.562", 41
-    get_how $P2879, $P2878
-    nqp_get_sc_object $P2880, "1304456116.562", 41
-    .const 'Sub' $P2881 = "126_1304456120.214" 
-    $P2879."add_method"($P2880, "parrot_vtable_mappings", $P2881)
-    nqp_get_sc_object $P2882, "1304456116.562", 41
-    get_how $P2883, $P2882
-    nqp_get_sc_object $P2884, "1304456116.562", 41
-    .const 'Sub' $P2885 = "127_1304456120.214" 
-    $P2883."add_method"($P2884, "isa", $P2885)
-    nqp_get_sc_object $P2886, "1304456116.562", 41
-    get_how $P2887, $P2886
-    nqp_get_sc_object $P2888, "1304456116.562", 41
-    .const 'Sub' $P2889 = "128_1304456120.214" 
-    $P2887."add_method"($P2888, "does", $P2889)
-    nqp_get_sc_object $P2890, "1304456116.562", 41
-    get_how $P2891, $P2890
-    nqp_get_sc_object $P2892, "1304456116.562", 41
-    .const 'Sub' $P2893 = "129_1304456120.214" 
-    $P2891."add_method"($P2892, "can", $P2893)
-    nqp_get_sc_object $P2894, "1304456116.562", 41
-    get_how $P2895, $P2894
-    nqp_get_sc_object $P2896, "1304456116.562", 41
-    .const 'Sub' $P2897 = "131_1304456120.214" 
-    $P2895."add_method"($P2896, "find_method", $P2897)
-    .const 'Sub' $P2898 = "77_1304456120.214" 
-    $P2899 = $P2898."get_lexinfo"()
-    nqp_get_sc_object $P2900, "1304456116.562", 41
-    $P2899."set_static_lexpad_value"("$?PACKAGE", $P2900)
-    .const 'Sub' $P2901 = "77_1304456120.214" 
-    $P2902 = $P2901."get_lexinfo"()
-    $P2902."finish_static_lexpad"()
-    .const 'Sub' $P2903 = "77_1304456120.214" 
-    $P2904 = $P2903."get_lexinfo"()
-    nqp_get_sc_object $P2905, "1304456116.562", 41
-    $P2904."set_static_lexpad_value"("$?CLASS", $P2905)
-    .const 'Sub' $P2906 = "77_1304456120.214" 
-    $P2907 = $P2906."get_lexinfo"()
-    $P2907."finish_static_lexpad"()
-    nqp_get_sc_object $P2908, "1304456116.562", 41
-    get_how $P2909, $P2908
-    nqp_get_sc_object $P2910, "1304456116.562", 41
-    $P2909."compose"($P2910)
-    nqp_get_sc_object $P2911, "__6MODEL_CORE__", 0
-    $P2912 = $P2911."new_type"("NQPNativeHOW" :named("name"))
-    nqp_set_sc_for_object $P2912, cur_sc
-    nqp_set_sc_object "1304456116.562", 68, $P2912
-    nqp_get_sc_object $P2913, "1304456116.562", 68
-    nqp_get_sc_object $P2914, "1304456116.562", 0
-    get_who $P2915, $P2914
-    set $P2915["NQPNativeHOW"], $P2913
-    .const 'Sub' $P2916 = "10_1304456120.214" 
-    $P2917 = $P2916."get_lexinfo"()
-    nqp_get_sc_object $P2918, "1304456116.562", 68
-    $P2917."set_static_lexpad_value"("NQPNativeHOW", $P2918)
-    .const 'Sub' $P2919 = "10_1304456120.214" 
-    $P2920 = $P2919."get_lexinfo"()
-    $P2920."finish_static_lexpad"()
-    nqp_get_sc_object $P2921, "1304456116.562", 68
-    get_how $P2922, $P2921
-    nqp_get_sc_object $P2923, "1304456116.562", 68
-    nqp_get_sc_object $P2924, "__6MODEL_CORE__", 2
-    $P2925 = $P2924."new"("$!name" :named("name"))
-    $P2922."add_attribute"($P2923, $P2925)
-    nqp_get_sc_object $P2926, "1304456116.562", 68
-    get_how $P2927, $P2926
-    nqp_get_sc_object $P2928, "1304456116.562", 68
-    nqp_get_sc_object $P2929, "__6MODEL_CORE__", 2
-    $P2930 = $P2929."new"("$!composed" :named("name"))
-    $P2927."add_attribute"($P2928, $P2930)
-    nqp_get_sc_object $P2931, "1304456116.562", 68
-    get_how $P2932, $P2931
-    nqp_get_sc_object $P2933, "1304456116.562", 68
-    .const 'Sub' $P2934 = "134_1304456120.214" 
-    $P2932."add_method"($P2933, "new", $P2934)
-    nqp_get_sc_object $P2935, "1304456116.562", 68
-    get_how $P2936, $P2935
-    nqp_get_sc_object $P2937, "1304456116.562", 68
-    .const 'Sub' $P2938 = "135_1304456120.214" 
-    $P2936."add_method"($P2937, "BUILD", $P2938)
-    nqp_get_sc_object $P2939, "1304456116.562", 68
-    get_how $P2940, $P2939
-    nqp_get_sc_object $P2941, "1304456116.562", 68
-    .const 'Sub' $P2942 = "136_1304456120.214" 
-    $P2940."add_method"($P2941, "new_type", $P2942)
-    nqp_get_sc_object $P2943, "1304456116.562", 68
-    get_how $P2944, $P2943
-    nqp_get_sc_object $P2945, "1304456116.562", 68
-    .const 'Sub' $P2946 = "137_1304456120.214" 
-    $P2944."add_method"($P2945, "add_method", $P2946)
-    nqp_get_sc_object $P2947, "1304456116.562", 68
-    get_how $P2948, $P2947
-    nqp_get_sc_object $P2949, "1304456116.562", 68
-    .const 'Sub' $P2950 = "138_1304456120.214" 
-    $P2948."add_method"($P2949, "add_multi_method", $P2950)
-    nqp_get_sc_object $P2951, "1304456116.562", 68
-    get_how $P2952, $P2951
-    nqp_get_sc_object $P2953, "1304456116.562", 68
-    .const 'Sub' $P2954 = "139_1304456120.214" 
-    $P2952."add_method"($P2953, "add_attribute", $P2954)
-    nqp_get_sc_object $P2955, "1304456116.562", 68
-    get_how $P2956, $P2955
-    nqp_get_sc_object $P2957, "1304456116.562", 68
-    .const 'Sub' $P2958 = "140_1304456120.214" 
-    $P2956."add_method"($P2957, "compose", $P2958)
-    nqp_get_sc_object $P2959, "1304456116.562", 68
-    get_how $P2960, $P2959
-    nqp_get_sc_object $P2961, "1304456116.562", 68
-    .const 'Sub' $P2962 = "141_1304456120.214" 
-    $P2960."add_method"($P2961, "name", $P2962)
-    .const 'Sub' $P2963 = "133_1304456120.214" 
-    $P2964 = $P2963."get_lexinfo"()
-    nqp_get_sc_object $P2965, "1304456116.562", 68
-    $P2964."set_static_lexpad_value"("$?PACKAGE", $P2965)
-    .const 'Sub' $P2966 = "133_1304456120.214" 
-    $P2967 = $P2966."get_lexinfo"()
-    $P2967."finish_static_lexpad"()
-    .const 'Sub' $P2968 = "133_1304456120.214" 
-    $P2969 = $P2968."get_lexinfo"()
-    nqp_get_sc_object $P2970, "1304456116.562", 68
-    $P2969."set_static_lexpad_value"("$?CLASS", $P2970)
-    .const 'Sub' $P2971 = "133_1304456120.214" 
-    $P2972 = $P2971."get_lexinfo"()
-    $P2972."finish_static_lexpad"()
-    nqp_get_sc_object $P2973, "1304456116.562", 68
-    get_how $P2974, $P2973
-    nqp_get_sc_object $P2975, "1304456116.562", 68
-    $P2974."compose"($P2975)
-    nqp_get_sc_object $P2976, "__6MODEL_CORE__", 0
-    $P2977 = $P2976."new_type"("NQPAttribute" :named("name"))
-    nqp_set_sc_for_object $P2977, cur_sc
-    nqp_set_sc_object "1304456116.562", 77, $P2977
-    nqp_get_sc_object $P2978, "1304456116.562", 77
-    nqp_get_sc_object $P2979, "1304456116.562", 0
-    get_who $P2980, $P2979
-    set $P2980["NQPAttribute"], $P2978
-    .const 'Sub' $P2981 = "10_1304456120.214" 
-    $P2982 = $P2981."get_lexinfo"()
-    nqp_get_sc_object $P2983, "1304456116.562", 77
-    $P2982."set_static_lexpad_value"("NQPAttribute", $P2983)
-    .const 'Sub' $P2984 = "10_1304456120.214" 
-    $P2985 = $P2984."get_lexinfo"()
-    $P2985."finish_static_lexpad"()
-    nqp_get_sc_object $P2986, "1304456116.562", 77
-    get_how $P2987, $P2986
-    nqp_get_sc_object $P2988, "1304456116.562", 77
-    nqp_get_sc_object $P2989, "__6MODEL_CORE__", 2
-    $P2990 = $P2989."new"("$!name" :named("name"))
-    $P2987."add_attribute"($P2988, $P2990)
-    nqp_get_sc_object $P2991, "1304456116.562", 77
-    get_how $P2992, $P2991
-    nqp_get_sc_object $P2993, "1304456116.562", 77
-    nqp_get_sc_object $P2994, "__6MODEL_CORE__", 2
-    $P2995 = $P2994."new"("$!type" :named("name"))
-    $P2992."add_attribute"($P2993, $P2995)
-    nqp_get_sc_object $P2996, "1304456116.562", 77
-    get_how $P2997, $P2996
-    nqp_get_sc_object $P2998, "1304456116.562", 77
-    nqp_get_sc_object $P2999, "__6MODEL_CORE__", 2
-    $P3000 = $P2999."new"("$!box_target" :named("name"))
-    $P2997."add_attribute"($P2998, $P3000)
-    nqp_get_sc_object $P3001, "1304456116.562", 77
-    get_how $P3002, $P3001
-    nqp_get_sc_object $P3003, "1304456116.562", 77
-    .const 'Sub' $P3004 = "145_1304456120.214" 
-    $P3002."add_method"($P3003, "new", $P3004)
-    nqp_get_sc_object $P3005, "1304456116.562", 77
-    get_how $P3006, $P3005
-    nqp_get_sc_object $P3007, "1304456116.562", 77
-    .const 'Sub' $P3008 = "146_1304456120.214" 
-    $P3006."add_method"($P3007, "BUILD", $P3008)
-    nqp_get_sc_object $P3009, "1304456116.562", 77
-    get_how $P3010, $P3009
-    nqp_get_sc_object $P3011, "1304456116.562", 77
-    .const 'Sub' $P3012 = "147_1304456120.214" 
-    $P3010."add_method"($P3011, "name", $P3012)
-    nqp_get_sc_object $P3013, "1304456116.562", 77
-    get_how $P3014, $P3013
-    nqp_get_sc_object $P3015, "1304456116.562", 77
-    .const 'Sub' $P3016 = "148_1304456120.214" 
-    $P3014."add_method"($P3015, "type", $P3016)
-    nqp_get_sc_object $P3017, "1304456116.562", 77
-    get_how $P3018, $P3017
-    nqp_get_sc_object $P3019, "1304456116.562", 77
-    .const 'Sub' $P3020 = "149_1304456120.214" 
-    $P3018."add_method"($P3019, "box_target", $P3020)
-    nqp_get_sc_object $P3021, "1304456116.562", 77
-    get_how $P3022, $P3021
-    nqp_get_sc_object $P3023, "1304456116.562", 77
-    .const 'Sub' $P3024 = "150_1304456120.214" 
-    $P3022."add_method"($P3023, "compose", $P3024)
-    nqp_get_sc_object $P3025, "1304456116.562", 77
-    get_how $P3026, $P3025
-    nqp_get_sc_object $P3027, "1304456116.562", 77
-    .const 'Sub' $P3028 = "155_1304456120.214" 
-    $P3026."add_method"($P3027, "has_mutator", $P3028)
-    .const 'Sub' $P3029 = "142_1304456120.214" 
-    $P3030 = $P3029."get_lexinfo"()
-    nqp_get_sc_object $P3031, "1304456116.562", 77
-    $P3030."set_static_lexpad_value"("$?PACKAGE", $P3031)
-    .const 'Sub' $P3032 = "142_1304456120.214" 
-    $P3033 = $P3032."get_lexinfo"()
-    $P3033."finish_static_lexpad"()
-    .const 'Sub' $P3034 = "142_1304456120.214" 
-    $P3035 = $P3034."get_lexinfo"()
-    nqp_get_sc_object $P3036, "1304456116.562", 77
-    $P3035."set_static_lexpad_value"("$?CLASS", $P3036)
-    .const 'Sub' $P3037 = "142_1304456120.214" 
-    $P3038 = $P3037."get_lexinfo"()
-    $P3038."finish_static_lexpad"()
-    nqp_get_sc_object $P3039, "1304456116.562", 77
-    get_how $P3040, $P3039
-    nqp_get_sc_object $P3041, "1304456116.562", 77
-    $P3040."compose"($P3041)
-    nqp_get_sc_object $P3042, "__6MODEL_CORE__", 0
-    $P3043 = $P3042."new_type"("NQPModuleHOW" :named("name"))
-    nqp_set_sc_for_object $P3043, cur_sc
-    nqp_set_sc_object "1304456116.562", 85, $P3043
-    nqp_get_sc_object $P3044, "1304456116.562", 85
-    nqp_get_sc_object $P3045, "1304456116.562", 0
-    get_who $P3046, $P3045
-    set $P3046["NQPModuleHOW"], $P3044
-    .const 'Sub' $P3047 = "10_1304456120.214" 
-    $P3048 = $P3047."get_lexinfo"()
-    nqp_get_sc_object $P3049, "1304456116.562", 85
-    $P3048."set_static_lexpad_value"("NQPModuleHOW", $P3049)
-    .const 'Sub' $P3050 = "10_1304456120.214" 
-    $P3051 = $P3050."get_lexinfo"()
-    $P3051."finish_static_lexpad"()
-    nqp_get_sc_object $P3052, "1304456116.562", 85
-    get_how $P3053, $P3052
-    nqp_get_sc_object $P3054, "1304456116.562", 85
-    nqp_get_sc_object $P3055, "__6MODEL_CORE__", 2
-    $P3056 = $P3055."new"("$!name" :named("name"))
-    $P3053."add_attribute"($P3054, $P3056)
-    nqp_get_sc_object $P3057, "1304456116.562", 85
-    get_how $P3058, $P3057
-    nqp_get_sc_object $P3059, "1304456116.562", 85
-    nqp_get_sc_object $P3060, "__6MODEL_CORE__", 2
-    $P3061 = $P3060."new"("$!composed" :named("name"))
-    $P3058."add_attribute"($P3059, $P3061)
-    nqp_get_sc_object $P3062, "1304456116.562", 85
-    get_how $P3063, $P3062
-    nqp_get_sc_object $P3064, "1304456116.562", 85
-    .const 'Sub' $P3065 = "157_1304456120.214" 
-    $P3063."add_method"($P3064, "new", $P3065)
-    nqp_get_sc_object $P3066, "1304456116.562", 85
-    get_how $P3067, $P3066
-    nqp_get_sc_object $P3068, "1304456116.562", 85
-    .const 'Sub' $P3069 = "158_1304456120.214" 
-    $P3067."add_method"($P3068, "BUILD", $P3069)
-    nqp_get_sc_object $P3070, "1304456116.562", 85
-    get_how $P3071, $P3070
-    nqp_get_sc_object $P3072, "1304456116.562", 85
-    .const 'Sub' $P3073 = "159_1304456120.214" 
-    $P3071."add_method"($P3072, "new_type", $P3073)
-    nqp_get_sc_object $P3074, "1304456116.562", 85
-    get_how $P3075, $P3074
-    nqp_get_sc_object $P3076, "1304456116.562", 85
-    .const 'Sub' $P3077 = "160_1304456120.214" 
-    $P3075."add_method"($P3076, "add_method", $P3077)
-    nqp_get_sc_object $P3078, "1304456116.562", 85
-    get_how $P3079, $P3078
-    nqp_get_sc_object $P3080, "1304456116.562", 85
-    .const 'Sub' $P3081 = "161_1304456120.214" 
-    $P3079."add_method"($P3080, "add_multi_method", $P3081)
-    nqp_get_sc_object $P3082, "1304456116.562", 85
-    get_how $P3083, $P3082
-    nqp_get_sc_object $P3084, "1304456116.562", 85
-    .const 'Sub' $P3085 = "162_1304456120.214" 
-    $P3083."add_method"($P3084, "add_attribute", $P3085)
-    nqp_get_sc_object $P3086, "1304456116.562", 85
-    get_how $P3087, $P3086
-    nqp_get_sc_object $P3088, "1304456116.562", 85
-    .const 'Sub' $P3089 = "163_1304456120.214" 
-    $P3087."add_method"($P3088, "compose", $P3089)
-    nqp_get_sc_object $P3090, "1304456116.562", 85
-    get_how $P3091, $P3090
-    nqp_get_sc_object $P3092, "1304456116.562", 85
-    .const 'Sub' $P3093 = "164_1304456120.214" 
-    $P3091."add_method"($P3092, "name", $P3093)
-    .const 'Sub' $P3094 = "156_1304456120.214" 
-    $P3095 = $P3094."get_lexinfo"()
-    nqp_get_sc_object $P3096, "1304456116.562", 85
-    $P3095."set_static_lexpad_value"("$?PACKAGE", $P3096)
-    .const 'Sub' $P3097 = "156_1304456120.214" 
-    $P3098 = $P3097."get_lexinfo"()
-    $P3098."finish_static_lexpad"()
-    .const 'Sub' $P3099 = "156_1304456120.214" 
-    $P3100 = $P3099."get_lexinfo"()
-    nqp_get_sc_object $P3101, "1304456116.562", 85
-    $P3100."set_static_lexpad_value"("$?CLASS", $P3101)
-    .const 'Sub' $P3102 = "156_1304456120.214" 
-    $P3103 = $P3102."get_lexinfo"()
-    $P3103."finish_static_lexpad"()
-    nqp_get_sc_object $P3104, "1304456116.562", 85
-    get_how $P3105, $P3104
-    nqp_get_sc_object $P3106, "1304456116.562", 85
-    $P3105."compose"($P3106)
-    nqp_get_sc_object $P3107, "__6MODEL_CORE__", 0
-    $P3108 = $P3107."new_type"("EXPORTHOW" :named("name"))
-    nqp_set_sc_for_object $P3108, cur_sc
-    nqp_set_sc_object "1304456116.562", 94, $P3108
-    .const 'Sub' $P3109 = "10_1304456120.214" 
+    $P2409."finish_static_lexpad"()
+    nqp_get_sc_object $P2410, "__6MODEL_CORE__", 0
+    $P2411 = $P2410."new_type"("RoleToRoleApplier" :named("name"))
+    nqp_set_sc_for_object $P2411, cur_sc
+    nqp_set_sc_object "1304459368.206", 1, $P2411
+    nqp_get_sc_object $P2412, "1304459368.206", 1
+    nqp_get_sc_object $P2413, "1304459368.206", 0
+    get_who $P2414, $P2413
+    set $P2414["RoleToRoleApplier"], $P2412
+    .const 'Sub' $P2415 = "10_1304459371.883" 
+    $P2416 = $P2415."get_lexinfo"()
+    nqp_get_sc_object $P2417, "1304459368.206", 1
+    $P2416."set_static_lexpad_value"("RoleToRoleApplier", $P2417)
+    .const 'Sub' $P2418 = "10_1304459371.883" 
+    $P2419 = $P2418."get_lexinfo"()
+    $P2419."finish_static_lexpad"()
+    nqp_get_sc_object $P2420, "1304459368.206", 1
+    get_how $P2421, $P2420
+    nqp_get_sc_object $P2422, "1304459368.206", 1
+    .const 'Sub' $P2423 = "12_1304459371.883" 
+    $P2421."add_method"($P2422, "apply", $P2423)
+    .const 'Sub' $P2424 = "11_1304459371.883" 
+    $P2425 = $P2424."get_lexinfo"()
+    nqp_get_sc_object $P2426, "1304459368.206", 1
+    $P2425."set_static_lexpad_value"("$?PACKAGE", $P2426)
+    .const 'Sub' $P2427 = "11_1304459371.883" 
+    $P2428 = $P2427."get_lexinfo"()
+    $P2428."finish_static_lexpad"()
+    .const 'Sub' $P2429 = "11_1304459371.883" 
+    $P2430 = $P2429."get_lexinfo"()
+    nqp_get_sc_object $P2431, "1304459368.206", 1
+    $P2430."set_static_lexpad_value"("$?CLASS", $P2431)
+    .const 'Sub' $P2432 = "11_1304459371.883" 
+    $P2433 = $P2432."get_lexinfo"()
+    $P2433."finish_static_lexpad"()
+    nqp_get_sc_object $P2434, "1304459368.206", 1
+    get_how $P2435, $P2434
+    nqp_get_sc_object $P2436, "1304459368.206", 1
+    $P2435."compose"($P2436)
+    nqp_get_sc_object $P2437, "__6MODEL_CORE__", 0
+    $P2438 = $P2437."new_type"("NQPConcreteRoleHOW" :named("name"))
+    nqp_set_sc_for_object $P2438, cur_sc
+    nqp_set_sc_object "1304459368.206", 3, $P2438
+    nqp_get_sc_object $P2439, "1304459368.206", 3
+    nqp_get_sc_object $P2440, "1304459368.206", 0
+    get_who $P2441, $P2440
+    set $P2441["NQPConcreteRoleHOW"], $P2439
+    .const 'Sub' $P2442 = "10_1304459371.883" 
+    $P2443 = $P2442."get_lexinfo"()
+    nqp_get_sc_object $P2444, "1304459368.206", 3
+    $P2443."set_static_lexpad_value"("NQPConcreteRoleHOW", $P2444)
+    .const 'Sub' $P2445 = "10_1304459371.883" 
+    $P2446 = $P2445."get_lexinfo"()
+    $P2446."finish_static_lexpad"()
+    nqp_get_sc_object $P2447, "1304459368.206", 3
+    get_how $P2448, $P2447
+    nqp_get_sc_object $P2449, "1304459368.206", 3
+    nqp_get_sc_object $P2450, "__6MODEL_CORE__", 2
+    $P2451 = $P2450."new"("$!name" :named("name"))
+    $P2448."add_attribute"($P2449, $P2451)
+    nqp_get_sc_object $P2452, "1304459368.206", 3
+    get_how $P2453, $P2452
+    nqp_get_sc_object $P2454, "1304459368.206", 3
+    nqp_get_sc_object $P2455, "__6MODEL_CORE__", 2
+    $P2456 = $P2455."new"("$!instance_of" :named("name"))
+    $P2453."add_attribute"($P2454, $P2456)
+    nqp_get_sc_object $P2457, "1304459368.206", 3
+    get_how $P2458, $P2457
+    nqp_get_sc_object $P2459, "1304459368.206", 3
+    nqp_get_sc_object $P2460, "__6MODEL_CORE__", 2
+    $P2461 = $P2460."new"("%!attributes" :named("name"))
+    $P2458."add_attribute"($P2459, $P2461)
+    nqp_get_sc_object $P2462, "1304459368.206", 3
+    get_how $P2463, $P2462
+    nqp_get_sc_object $P2464, "1304459368.206", 3
+    nqp_get_sc_object $P2465, "__6MODEL_CORE__", 2
+    $P2466 = $P2465."new"("%!methods" :named("name"))
+    $P2463."add_attribute"($P2464, $P2466)
+    nqp_get_sc_object $P2467, "1304459368.206", 3
+    get_how $P2468, $P2467
+    nqp_get_sc_object $P2469, "1304459368.206", 3
+    nqp_get_sc_object $P2470, "__6MODEL_CORE__", 2
+    $P2471 = $P2470."new"("@!multi_methods_to_incorporate" :named("name"))
+    $P2468."add_attribute"($P2469, $P2471)
+    nqp_get_sc_object $P2472, "1304459368.206", 3
+    get_how $P2473, $P2472
+    nqp_get_sc_object $P2474, "1304459368.206", 3
+    nqp_get_sc_object $P2475, "__6MODEL_CORE__", 2
+    $P2476 = $P2475."new"("@!collisions" :named("name"))
+    $P2473."add_attribute"($P2474, $P2476)
+    nqp_get_sc_object $P2477, "1304459368.206", 3
+    get_how $P2478, $P2477
+    nqp_get_sc_object $P2479, "1304459368.206", 3
+    nqp_get_sc_object $P2480, "__6MODEL_CORE__", 2
+    $P2481 = $P2480."new"("@!roles" :named("name"))
+    $P2478."add_attribute"($P2479, $P2481)
+    nqp_get_sc_object $P2482, "1304459368.206", 3
+    get_how $P2483, $P2482
+    nqp_get_sc_object $P2484, "1304459368.206", 3
+    nqp_get_sc_object $P2485, "__6MODEL_CORE__", 2
+    $P2486 = $P2485."new"("@!done" :named("name"))
+    $P2483."add_attribute"($P2484, $P2486)
+    nqp_get_sc_object $P2487, "1304459368.206", 3
+    get_how $P2488, $P2487
+    nqp_get_sc_object $P2489, "1304459368.206", 3
+    nqp_get_sc_object $P2490, "__6MODEL_CORE__", 2
+    $P2491 = $P2490."new"("$!composed" :named("name"))
+    $P2488."add_attribute"($P2489, $P2491)
+    nqp_get_sc_object $P2492, "1304459368.206", 3
+    get_how $P2493, $P2492
+    nqp_get_sc_object $P2494, "1304459368.206", 3
+    .const 'Sub' $P2495 = "22_1304459371.883" 
+    $P2493."add_method"($P2494, "new", $P2495)
+    nqp_get_sc_object $P2496, "1304459368.206", 3
+    get_how $P2497, $P2496
+    nqp_get_sc_object $P2498, "1304459368.206", 3
+    .const 'Sub' $P2499 = "23_1304459371.883" 
+    $P2497."add_method"($P2498, "BUILD", $P2499)
+    nqp_get_sc_object $P2500, "1304459368.206", 3
+    get_how $P2501, $P2500
+    nqp_get_sc_object $P2502, "1304459368.206", 3
+    .const 'Sub' $P2503 = "24_1304459371.883" 
+    $P2501."add_method"($P2502, "new_type", $P2503)
+    nqp_get_sc_object $P2504, "1304459368.206", 3
+    get_how $P2505, $P2504
+    nqp_get_sc_object $P2506, "1304459368.206", 3
+    .const 'Sub' $P2507 = "25_1304459371.883" 
+    $P2505."add_method"($P2506, "add_method", $P2507)
+    nqp_get_sc_object $P2508, "1304459368.206", 3
+    get_how $P2509, $P2508
+    nqp_get_sc_object $P2510, "1304459368.206", 3
+    .const 'Sub' $P2511 = "26_1304459371.883" 
+    $P2509."add_method"($P2510, "add_multi_method", $P2511)
+    nqp_get_sc_object $P2512, "1304459368.206", 3
+    get_how $P2513, $P2512
+    nqp_get_sc_object $P2514, "1304459368.206", 3
+    .const 'Sub' $P2515 = "27_1304459371.883" 
+    $P2513."add_method"($P2514, "add_attribute", $P2515)
+    nqp_get_sc_object $P2516, "1304459368.206", 3
+    get_how $P2517, $P2516
+    nqp_get_sc_object $P2518, "1304459368.206", 3
+    .const 'Sub' $P2519 = "28_1304459371.883" 
+    $P2517."add_method"($P2518, "add_parent", $P2519)
+    nqp_get_sc_object $P2520, "1304459368.206", 3
+    get_how $P2521, $P2520
+    nqp_get_sc_object $P2522, "1304459368.206", 3
+    .const 'Sub' $P2523 = "29_1304459371.883" 
+    $P2521."add_method"($P2522, "add_role", $P2523)
+    nqp_get_sc_object $P2524, "1304459368.206", 3
+    get_how $P2525, $P2524
+    nqp_get_sc_object $P2526, "1304459368.206", 3
+    .const 'Sub' $P2527 = "30_1304459371.883" 
+    $P2525."add_method"($P2526, "add_collision", $P2527)
+    nqp_get_sc_object $P2528, "1304459368.206", 3
+    get_how $P2529, $P2528
+    nqp_get_sc_object $P2530, "1304459368.206", 3
+    .const 'Sub' $P2531 = "31_1304459371.883" 
+    $P2529."add_method"($P2530, "compose", $P2531)
+    nqp_get_sc_object $P2532, "1304459368.206", 3
+    get_how $P2533, $P2532
+    nqp_get_sc_object $P2534, "1304459368.206", 3
+    .const 'Sub' $P2535 = "33_1304459371.883" 
+    $P2533."add_method"($P2534, "methods", $P2535)
+    nqp_get_sc_object $P2536, "1304459368.206", 3
+    get_how $P2537, $P2536
+    nqp_get_sc_object $P2538, "1304459368.206", 3
+    .const 'Sub' $P2539 = "35_1304459371.883" 
+    $P2537."add_method"($P2538, "method_table", $P2539)
+    nqp_get_sc_object $P2540, "1304459368.206", 3
+    get_how $P2541, $P2540
+    nqp_get_sc_object $P2542, "1304459368.206", 3
+    .const 'Sub' $P2543 = "36_1304459371.883" 
+    $P2541."add_method"($P2542, "collisions", $P2543)
+    nqp_get_sc_object $P2544, "1304459368.206", 3
+    get_how $P2545, $P2544
+    nqp_get_sc_object $P2546, "1304459368.206", 3
+    .const 'Sub' $P2547 = "37_1304459371.883" 
+    $P2545."add_method"($P2546, "name", $P2547)
+    nqp_get_sc_object $P2548, "1304459368.206", 3
+    get_how $P2549, $P2548
+    nqp_get_sc_object $P2550, "1304459368.206", 3
+    .const 'Sub' $P2551 = "38_1304459371.883" 
+    $P2549."add_method"($P2550, "attributes", $P2551)
+    nqp_get_sc_object $P2552, "1304459368.206", 3
+    get_how $P2553, $P2552
+    nqp_get_sc_object $P2554, "1304459368.206", 3
+    .const 'Sub' $P2555 = "40_1304459371.883" 
+    $P2553."add_method"($P2554, "roles", $P2555)
+    nqp_get_sc_object $P2556, "1304459368.206", 3
+    get_how $P2557, $P2556
+    nqp_get_sc_object $P2558, "1304459368.206", 3
+    .const 'Sub' $P2559 = "41_1304459371.883" 
+    $P2557."add_method"($P2558, "instance_of", $P2559)
+    .const 'Sub' $P2560 = "21_1304459371.883" 
+    $P2561 = $P2560."get_lexinfo"()
+    nqp_get_sc_object $P2562, "1304459368.206", 3
+    $P2561."set_static_lexpad_value"("$?PACKAGE", $P2562)
+    .const 'Sub' $P2563 = "21_1304459371.883" 
+    $P2564 = $P2563."get_lexinfo"()
+    $P2564."finish_static_lexpad"()
+    .const 'Sub' $P2565 = "21_1304459371.883" 
+    $P2566 = $P2565."get_lexinfo"()
+    nqp_get_sc_object $P2567, "1304459368.206", 3
+    $P2566."set_static_lexpad_value"("$?CLASS", $P2567)
+    .const 'Sub' $P2568 = "21_1304459371.883" 
+    $P2569 = $P2568."get_lexinfo"()
+    $P2569."finish_static_lexpad"()
+    nqp_get_sc_object $P2570, "1304459368.206", 3
+    get_how $P2571, $P2570
+    nqp_get_sc_object $P2572, "1304459368.206", 3
+    $P2571."compose"($P2572)
+    nqp_get_sc_object $P2573, "__6MODEL_CORE__", 0
+    $P2574 = $P2573."new_type"("RoleToClassApplier" :named("name"))
+    nqp_set_sc_for_object $P2574, cur_sc
+    nqp_set_sc_object "1304459368.206", 21, $P2574
+    nqp_get_sc_object $P2575, "1304459368.206", 21
+    nqp_get_sc_object $P2576, "1304459368.206", 0
+    get_who $P2577, $P2576
+    set $P2577["RoleToClassApplier"], $P2575
+    .const 'Sub' $P2578 = "10_1304459371.883" 
+    $P2579 = $P2578."get_lexinfo"()
+    nqp_get_sc_object $P2580, "1304459368.206", 21
+    $P2579."set_static_lexpad_value"("RoleToClassApplier", $P2580)
+    .const 'Sub' $P2581 = "10_1304459371.883" 
+    $P2582 = $P2581."get_lexinfo"()
+    $P2582."finish_static_lexpad"()
+    nqp_get_sc_object $P2583, "1304459368.206", 21
+    get_how $P2584, $P2583
+    nqp_get_sc_object $P2585, "1304459368.206", 21
+    .const 'Sub' $P2586 = "47_1304459371.883" 
+    $P2584."add_method"($P2585, "apply", $P2586)
+    .const 'Sub' $P2587 = "42_1304459371.883" 
+    $P2588 = $P2587."get_lexinfo"()
+    nqp_get_sc_object $P2589, "1304459368.206", 21
+    $P2588."set_static_lexpad_value"("$?PACKAGE", $P2589)
+    .const 'Sub' $P2590 = "42_1304459371.883" 
+    $P2591 = $P2590."get_lexinfo"()
+    $P2591."finish_static_lexpad"()
+    .const 'Sub' $P2592 = "42_1304459371.883" 
+    $P2593 = $P2592."get_lexinfo"()
+    nqp_get_sc_object $P2594, "1304459368.206", 21
+    $P2593."set_static_lexpad_value"("$?CLASS", $P2594)
+    .const 'Sub' $P2595 = "42_1304459371.883" 
+    $P2596 = $P2595."get_lexinfo"()
+    $P2596."finish_static_lexpad"()
+    nqp_get_sc_object $P2597, "1304459368.206", 21
+    get_how $P2598, $P2597
+    nqp_get_sc_object $P2599, "1304459368.206", 21
+    $P2598."compose"($P2599)
+    nqp_get_sc_object $P2600, "__6MODEL_CORE__", 0
+    $P2601 = $P2600."new_type"("NQPParametricRoleHOW" :named("name"))
+    nqp_set_sc_for_object $P2601, cur_sc
+    nqp_set_sc_object "1304459368.206", 23, $P2601
+    nqp_get_sc_object $P2602, "1304459368.206", 23
+    nqp_get_sc_object $P2603, "1304459368.206", 0
+    get_who $P2604, $P2603
+    set $P2604["NQPParametricRoleHOW"], $P2602
+    .const 'Sub' $P2605 = "10_1304459371.883" 
+    $P2606 = $P2605."get_lexinfo"()
+    nqp_get_sc_object $P2607, "1304459368.206", 23
+    $P2606."set_static_lexpad_value"("NQPParametricRoleHOW", $P2607)
+    .const 'Sub' $P2608 = "10_1304459371.883" 
+    $P2609 = $P2608."get_lexinfo"()
+    $P2609."finish_static_lexpad"()
+    nqp_get_sc_object $P2610, "1304459368.206", 23
+    get_how $P2611, $P2610
+    nqp_get_sc_object $P2612, "1304459368.206", 23
+    nqp_get_sc_object $P2613, "__6MODEL_CORE__", 2
+    $P2614 = $P2613."new"("$!name" :named("name"))
+    $P2611."add_attribute"($P2612, $P2614)
+    nqp_get_sc_object $P2615, "1304459368.206", 23
+    get_how $P2616, $P2615
+    nqp_get_sc_object $P2617, "1304459368.206", 23
+    nqp_get_sc_object $P2618, "__6MODEL_CORE__", 2
+    $P2619 = $P2618."new"("%!attributes" :named("name"))
+    $P2616."add_attribute"($P2617, $P2619)
+    nqp_get_sc_object $P2620, "1304459368.206", 23
+    get_how $P2621, $P2620
+    nqp_get_sc_object $P2622, "1304459368.206", 23
+    nqp_get_sc_object $P2623, "__6MODEL_CORE__", 2
+    $P2624 = $P2623."new"("%!methods" :named("name"))
+    $P2621."add_attribute"($P2622, $P2624)
+    nqp_get_sc_object $P2625, "1304459368.206", 23
+    get_how $P2626, $P2625
+    nqp_get_sc_object $P2627, "1304459368.206", 23
+    nqp_get_sc_object $P2628, "__6MODEL_CORE__", 2
+    $P2629 = $P2628."new"("@!multi_methods_to_incorporate" :named("name"))
+    $P2626."add_attribute"($P2627, $P2629)
+    nqp_get_sc_object $P2630, "1304459368.206", 23
+    get_how $P2631, $P2630
+    nqp_get_sc_object $P2632, "1304459368.206", 23
+    nqp_get_sc_object $P2633, "__6MODEL_CORE__", 2
+    $P2634 = $P2633."new"("@!roles" :named("name"))
+    $P2631."add_attribute"($P2632, $P2634)
+    nqp_get_sc_object $P2635, "1304459368.206", 23
+    get_how $P2636, $P2635
+    nqp_get_sc_object $P2637, "1304459368.206", 23
+    nqp_get_sc_object $P2638, "__6MODEL_CORE__", 2
+    $P2639 = $P2638."new"("$!composed" :named("name"))
+    $P2636."add_attribute"($P2637, $P2639)
+    nqp_get_sc_object $P2640, "1304459368.206", 23
+    get_how $P2641, $P2640
+    nqp_get_sc_object $P2642, "1304459368.206", 23
+    nqp_get_sc_object $P2643, "__6MODEL_CORE__", 2
+    $P2644 = $P2643."new"("$!body_block" :named("name"))
+    $P2641."add_attribute"($P2642, $P2644)
+    nqp_get_sc_object $P2645, "1304459368.206", 23
+    get_how $P2646, $P2645
+    nqp_get_sc_object $P2647, "1304459368.206", 23
+    .const 'Sub' $P2648 = "54_1304459371.883" 
+    $P2646."add_method"($P2647, "new", $P2648)
+    nqp_get_sc_object $P2649, "1304459368.206", 23
+    get_how $P2650, $P2649
+    nqp_get_sc_object $P2651, "1304459368.206", 23
+    .const 'Sub' $P2652 = "55_1304459371.883" 
+    $P2650."add_method"($P2651, "BUILD", $P2652)
+    nqp_get_sc_object $P2653, "1304459368.206", 23
+    get_how $P2654, $P2653
+    nqp_get_sc_object $P2655, "1304459368.206", 23
+    .const 'Sub' $P2656 = "56_1304459371.883" 
+    $P2654."add_method"($P2655, "new_type", $P2656)
+    nqp_get_sc_object $P2657, "1304459368.206", 23
+    get_how $P2658, $P2657
+    nqp_get_sc_object $P2659, "1304459368.206", 23
+    .const 'Sub' $P2660 = "57_1304459371.883" 
+    $P2658."add_method"($P2659, "set_body_block", $P2660)
+    nqp_get_sc_object $P2661, "1304459368.206", 23
+    get_how $P2662, $P2661
+    nqp_get_sc_object $P2663, "1304459368.206", 23
+    .const 'Sub' $P2664 = "58_1304459371.883" 
+    $P2662."add_method"($P2663, "add_method", $P2664)
+    nqp_get_sc_object $P2665, "1304459368.206", 23
+    get_how $P2666, $P2665
+    nqp_get_sc_object $P2667, "1304459368.206", 23
+    .const 'Sub' $P2668 = "59_1304459371.883" 
+    $P2666."add_method"($P2667, "add_multi_method", $P2668)
+    nqp_get_sc_object $P2669, "1304459368.206", 23
+    get_how $P2670, $P2669
+    nqp_get_sc_object $P2671, "1304459368.206", 23
+    .const 'Sub' $P2672 = "60_1304459371.883" 
+    $P2670."add_method"($P2671, "add_attribute", $P2672)
+    nqp_get_sc_object $P2673, "1304459368.206", 23
+    get_how $P2674, $P2673
+    nqp_get_sc_object $P2675, "1304459368.206", 23
+    .const 'Sub' $P2676 = "61_1304459371.883" 
+    $P2674."add_method"($P2675, "add_parent", $P2676)
+    nqp_get_sc_object $P2677, "1304459368.206", 23
+    get_how $P2678, $P2677
+    nqp_get_sc_object $P2679, "1304459368.206", 23
+    .const 'Sub' $P2680 = "62_1304459371.883" 
+    $P2678."add_method"($P2679, "add_role", $P2680)
+    nqp_get_sc_object $P2681, "1304459368.206", 23
+    get_how $P2682, $P2681
+    nqp_get_sc_object $P2683, "1304459368.206", 23
+    .const 'Sub' $P2684 = "63_1304459371.883" 
+    $P2682."add_method"($P2683, "compose", $P2684)
+    nqp_get_sc_object $P2685, "1304459368.206", 23
+    get_how $P2686, $P2685
+    nqp_get_sc_object $P2687, "1304459368.206", 23
+    .const 'Sub' $P2688 = "64_1304459371.883" 
+    $P2686."add_method"($P2687, "parametric", $P2688)
+    nqp_get_sc_object $P2689, "1304459368.206", 23
+    get_how $P2690, $P2689
+    nqp_get_sc_object $P2691, "1304459368.206", 23
+    .const 'Sub' $P2692 = "65_1304459371.883" 
+    $P2690."add_method"($P2691, "instantiate", $P2692)
+    nqp_get_sc_object $P2693, "1304459368.206", 23
+    get_how $P2694, $P2693
+    nqp_get_sc_object $P2695, "1304459368.206", 23
+    .const 'Sub' $P2696 = "70_1304459371.883" 
+    $P2694."add_method"($P2695, "methods", $P2696)
+    nqp_get_sc_object $P2697, "1304459368.206", 23
+    get_how $P2698, $P2697
+    nqp_get_sc_object $P2699, "1304459368.206", 23
+    .const 'Sub' $P2700 = "72_1304459371.883" 
+    $P2698."add_method"($P2699, "method_table", $P2700)
+    nqp_get_sc_object $P2701, "1304459368.206", 23
+    get_how $P2702, $P2701
+    nqp_get_sc_object $P2703, "1304459368.206", 23
+    .const 'Sub' $P2704 = "73_1304459371.883" 
+    $P2702."add_method"($P2703, "name", $P2704)
+    nqp_get_sc_object $P2705, "1304459368.206", 23
+    get_how $P2706, $P2705
+    nqp_get_sc_object $P2707, "1304459368.206", 23
+    .const 'Sub' $P2708 = "74_1304459371.883" 
+    $P2706."add_method"($P2707, "attributes", $P2708)
+    nqp_get_sc_object $P2709, "1304459368.206", 23
+    get_how $P2710, $P2709
+    nqp_get_sc_object $P2711, "1304459368.206", 23
+    .const 'Sub' $P2712 = "76_1304459371.883" 
+    $P2710."add_method"($P2711, "roles", $P2712)
+    .const 'Sub' $P2713 = "52_1304459371.883" 
+    $P2714 = $P2713."get_lexinfo"()
+    nqp_get_sc_object $P2715, "1304459368.206", 23
+    $P2714."set_static_lexpad_value"("$?PACKAGE", $P2715)
+    .const 'Sub' $P2716 = "52_1304459371.883" 
+    $P2717 = $P2716."get_lexinfo"()
+    $P2717."finish_static_lexpad"()
+    .const 'Sub' $P2718 = "52_1304459371.883" 
+    $P2719 = $P2718."get_lexinfo"()
+    nqp_get_sc_object $P2720, "1304459368.206", 23
+    $P2719."set_static_lexpad_value"("$?CLASS", $P2720)
+    .const 'Sub' $P2721 = "52_1304459371.883" 
+    $P2722 = $P2721."get_lexinfo"()
+    $P2722."finish_static_lexpad"()
+    nqp_get_sc_object $P2723, "1304459368.206", 23
+    get_how $P2724, $P2723
+    nqp_get_sc_object $P2725, "1304459368.206", 23
+    $P2724."compose"($P2725)
+    nqp_get_sc_object $P2726, "__6MODEL_CORE__", 0
+    $P2727 = $P2726."new_type"("NQPClassHOW" :named("name"))
+    nqp_set_sc_for_object $P2727, cur_sc
+    nqp_set_sc_object "1304459368.206", 41, $P2727
+    nqp_get_sc_object $P2728, "1304459368.206", 41
+    nqp_get_sc_object $P2729, "1304459368.206", 0
+    get_who $P2730, $P2729
+    set $P2730["NQPClassHOW"], $P2728
+    .const 'Sub' $P2731 = "10_1304459371.883" 
+    $P2732 = $P2731."get_lexinfo"()
+    nqp_get_sc_object $P2733, "1304459368.206", 41
+    $P2732."set_static_lexpad_value"("NQPClassHOW", $P2733)
+    .const 'Sub' $P2734 = "10_1304459371.883" 
+    $P2735 = $P2734."get_lexinfo"()
+    $P2735."finish_static_lexpad"()
+    nqp_get_sc_object $P2736, "1304459368.206", 41
+    get_how $P2737, $P2736
+    nqp_get_sc_object $P2738, "1304459368.206", 41
+    nqp_get_sc_object $P2739, "__6MODEL_CORE__", 2
+    $P2740 = $P2739."new"("$!name" :named("name"))
+    $P2737."add_attribute"($P2738, $P2740)
+    nqp_get_sc_object $P2741, "1304459368.206", 41
+    get_how $P2742, $P2741
+    nqp_get_sc_object $P2743, "1304459368.206", 41
+    nqp_get_sc_object $P2744, "__6MODEL_CORE__", 2
+    $P2745 = $P2744."new"("%!attributes" :named("name"))
+    $P2742."add_attribute"($P2743, $P2745)
+    nqp_get_sc_object $P2746, "1304459368.206", 41
+    get_how $P2747, $P2746
+    nqp_get_sc_object $P2748, "1304459368.206", 41
+    nqp_get_sc_object $P2749, "__6MODEL_CORE__", 2
+    $P2750 = $P2749."new"("%!methods" :named("name"))
+    $P2747."add_attribute"($P2748, $P2750)
+    nqp_get_sc_object $P2751, "1304459368.206", 41
+    get_how $P2752, $P2751
+    nqp_get_sc_object $P2753, "1304459368.206", 41
+    nqp_get_sc_object $P2754, "__6MODEL_CORE__", 2
+    $P2755 = $P2754."new"("@!multi_methods_to_incorporate" :named("name"))
+    $P2752."add_attribute"($P2753, $P2755)
+    nqp_get_sc_object $P2756, "1304459368.206", 41
+    get_how $P2757, $P2756
+    nqp_get_sc_object $P2758, "1304459368.206", 41
+    nqp_get_sc_object $P2759, "__6MODEL_CORE__", 2
+    $P2760 = $P2759."new"("@!parents" :named("name"))
+    $P2757."add_attribute"($P2758, $P2760)
+    nqp_get_sc_object $P2761, "1304459368.206", 41
+    get_how $P2762, $P2761
+    nqp_get_sc_object $P2763, "1304459368.206", 41
+    nqp_get_sc_object $P2764, "__6MODEL_CORE__", 2
+    $P2765 = $P2764."new"("@!roles" :named("name"))
+    $P2762."add_attribute"($P2763, $P2765)
+    nqp_get_sc_object $P2766, "1304459368.206", 41
+    get_how $P2767, $P2766
+    nqp_get_sc_object $P2768, "1304459368.206", 41
+    nqp_get_sc_object $P2769, "__6MODEL_CORE__", 2
+    $P2770 = $P2769."new"("$!default_parent" :named("name"))
+    $P2767."add_attribute"($P2768, $P2770)
+    nqp_get_sc_object $P2771, "1304459368.206", 41
+    get_how $P2772, $P2771
+    nqp_get_sc_object $P2773, "1304459368.206", 41
+    nqp_get_sc_object $P2774, "__6MODEL_CORE__", 2
+    $P2775 = $P2774."new"("@!vtable" :named("name"))
+    $P2772."add_attribute"($P2773, $P2775)
+    nqp_get_sc_object $P2776, "1304459368.206", 41
+    get_how $P2777, $P2776
+    nqp_get_sc_object $P2778, "1304459368.206", 41
+    nqp_get_sc_object $P2779, "__6MODEL_CORE__", 2
+    $P2780 = $P2779."new"("%!method-vtable-slots" :named("name"))
+    $P2777."add_attribute"($P2778, $P2780)
+    nqp_get_sc_object $P2781, "1304459368.206", 41
+    get_how $P2782, $P2781
+    nqp_get_sc_object $P2783, "1304459368.206", 41
+    nqp_get_sc_object $P2784, "__6MODEL_CORE__", 2
+    $P2785 = $P2784."new"("$!composed" :named("name"))
+    $P2782."add_attribute"($P2783, $P2785)
+    nqp_get_sc_object $P2786, "1304459368.206", 41
+    get_how $P2787, $P2786
+    nqp_get_sc_object $P2788, "1304459368.206", 41
+    nqp_get_sc_object $P2789, "__6MODEL_CORE__", 2
+    $P2790 = $P2789."new"("@!mro" :named("name"))
+    $P2787."add_attribute"($P2788, $P2790)
+    nqp_get_sc_object $P2791, "1304459368.206", 41
+    get_how $P2792, $P2791
+    nqp_get_sc_object $P2793, "1304459368.206", 41
+    nqp_get_sc_object $P2794, "__6MODEL_CORE__", 2
+    $P2795 = $P2794."new"("@!done" :named("name"))
+    $P2792."add_attribute"($P2793, $P2795)
+    nqp_get_sc_object $P2796, "1304459368.206", 41
+    get_how $P2797, $P2796
+    nqp_get_sc_object $P2798, "1304459368.206", 41
+    nqp_get_sc_object $P2799, "__6MODEL_CORE__", 2
+    $P2800 = $P2799."new"("%!parrot_vtable_mapping" :named("name"))
+    $P2797."add_attribute"($P2798, $P2800)
+    nqp_get_sc_object $P2801, "1304459368.206", 41
+    get_how $P2802, $P2801
+    nqp_get_sc_object $P2803, "1304459368.206", 41
+    .const 'Sub' $P2804 = "88_1304459371.883" 
+    $P2802."add_method"($P2803, "new", $P2804)
+    nqp_get_sc_object $P2805, "1304459368.206", 41
+    get_how $P2806, $P2805
+    nqp_get_sc_object $P2807, "1304459368.206", 41
+    .const 'Sub' $P2808 = "89_1304459371.883" 
+    $P2806."add_method"($P2807, "BUILD", $P2808)
+    nqp_get_sc_object $P2809, "1304459368.206", 41
+    get_how $P2810, $P2809
+    nqp_get_sc_object $P2811, "1304459368.206", 41
+    .const 'Sub' $P2812 = "90_1304459371.883" 
+    $P2810."add_method"($P2811, "new_type", $P2812)
+    nqp_get_sc_object $P2813, "1304459368.206", 41
+    get_how $P2814, $P2813
+    nqp_get_sc_object $P2815, "1304459368.206", 41
+    .const 'Sub' $P2816 = "91_1304459371.883" 
+    $P2814."add_method"($P2815, "add_method", $P2816)
+    nqp_get_sc_object $P2817, "1304459368.206", 41
+    get_how $P2818, $P2817
+    nqp_get_sc_object $P2819, "1304459368.206", 41
+    .const 'Sub' $P2820 = "92_1304459371.883" 
+    $P2818."add_method"($P2819, "add_multi_method", $P2820)
+    nqp_get_sc_object $P2821, "1304459368.206", 41
+    get_how $P2822, $P2821
+    nqp_get_sc_object $P2823, "1304459368.206", 41
+    .const 'Sub' $P2824 = "93_1304459371.883" 
+    $P2822."add_method"($P2823, "add_attribute", $P2824)
+    nqp_get_sc_object $P2825, "1304459368.206", 41
+    get_how $P2826, $P2825
+    nqp_get_sc_object $P2827, "1304459368.206", 41
+    .const 'Sub' $P2828 = "94_1304459371.883" 
+    $P2826."add_method"($P2827, "add_parent", $P2828)
+    nqp_get_sc_object $P2829, "1304459368.206", 41
+    get_how $P2830, $P2829
+    nqp_get_sc_object $P2831, "1304459368.206", 41
+    .const 'Sub' $P2832 = "96_1304459371.883" 
+    $P2830."add_method"($P2831, "set_default_parent", $P2832)
+    nqp_get_sc_object $P2833, "1304459368.206", 41
+    get_how $P2834, $P2833
+    nqp_get_sc_object $P2835, "1304459368.206", 41
+    .const 'Sub' $P2836 = "97_1304459371.883" 
+    $P2834."add_method"($P2835, "add_role", $P2836)
+    nqp_get_sc_object $P2837, "1304459368.206", 41
+    get_how $P2838, $P2837
+    nqp_get_sc_object $P2839, "1304459368.206", 41
+    .const 'Sub' $P2840 = "99_1304459371.883" 
+    $P2838."add_method"($P2839, "add_parrot_vtable_mapping", $P2840)
+    nqp_get_sc_object $P2841, "1304459368.206", 41
+    get_how $P2842, $P2841
+    nqp_get_sc_object $P2843, "1304459368.206", 41
+    .const 'Sub' $P2844 = "100_1304459371.883" 
+    $P2842."add_method"($P2843, "compose", $P2844)
+    nqp_get_sc_object $P2845, "1304459368.206", 41
+    get_how $P2846, $P2845
+    nqp_get_sc_object $P2847, "1304459368.206", 41
+    .const 'Sub' $P2848 = "104_1304459371.883" 
+    $P2846."add_method"($P2847, "incorporate_multi_candidates", $P2848)
+    nqp_get_sc_object $P2849, "1304459368.206", 41
+    get_how $P2850, $P2849
+    nqp_get_sc_object $P2851, "1304459368.206", 41
+    .const 'Sub' $P2852 = "109_1304459371.883" 
+    $P2850."add_method"($P2851, "publish_type_cache", $P2852)
+    nqp_get_sc_object $P2853, "1304459368.206", 41
+    get_how $P2854, $P2853
+    nqp_get_sc_object $P2855, "1304459368.206", 41
+    .const 'Sub' $P2856 = "112_1304459371.883" 
+    $P2854."add_method"($P2855, "publish_method_cache", $P2856)
+    nqp_get_sc_object $P2857, "1304459368.206", 41
+    get_how $P2858, $P2857
+    nqp_get_sc_object $P2859, "1304459368.206", 41
+    .const 'Sub' $P2860 = "115_1304459371.883" 
+    $P2858."add_method"($P2859, "publish_parrot_vtable_mapping", $P2860)
+    nqp_get_sc_object $P2861, "1304459368.206", 41
+    get_how $P2862, $P2861
+    nqp_get_sc_object $P2863, "1304459368.206", 41
+    .const 'Sub' $P2864 = "118_1304459371.883" 
+    $P2862."add_method"($P2863, "parents", $P2864)
+    nqp_get_sc_object $P2865, "1304459368.206", 41
+    get_how $P2866, $P2865
+    nqp_get_sc_object $P2867, "1304459368.206", 41
+    .const 'Sub' $P2868 = "119_1304459371.883" 
+    $P2866."add_method"($P2867, "roles", $P2868)
+    nqp_get_sc_object $P2869, "1304459368.206", 41
+    get_how $P2870, $P2869
+    nqp_get_sc_object $P2871, "1304459368.206", 41
+    .const 'Sub' $P2872 = "120_1304459371.883" 
+    $P2870."add_method"($P2871, "methods", $P2872)
+    nqp_get_sc_object $P2873, "1304459368.206", 41
+    get_how $P2874, $P2873
+    nqp_get_sc_object $P2875, "1304459368.206", 41
+    .const 'Sub' $P2876 = "122_1304459371.883" 
+    $P2874."add_method"($P2875, "method_table", $P2876)
+    nqp_get_sc_object $P2877, "1304459368.206", 41
+    get_how $P2878, $P2877
+    nqp_get_sc_object $P2879, "1304459368.206", 41
+    .const 'Sub' $P2880 = "123_1304459371.883" 
+    $P2878."add_method"($P2879, "name", $P2880)
+    nqp_get_sc_object $P2881, "1304459368.206", 41
+    get_how $P2882, $P2881
+    nqp_get_sc_object $P2883, "1304459368.206", 41
+    .const 'Sub' $P2884 = "124_1304459371.883" 
+    $P2882."add_method"($P2883, "attributes", $P2884)
+    nqp_get_sc_object $P2885, "1304459368.206", 41
+    get_how $P2886, $P2885
+    nqp_get_sc_object $P2887, "1304459368.206", 41
+    .const 'Sub' $P2888 = "126_1304459371.883" 
+    $P2886."add_method"($P2887, "parrot_vtable_mappings", $P2888)
+    nqp_get_sc_object $P2889, "1304459368.206", 41
+    get_how $P2890, $P2889
+    nqp_get_sc_object $P2891, "1304459368.206", 41
+    .const 'Sub' $P2892 = "127_1304459371.883" 
+    $P2890."add_method"($P2891, "isa", $P2892)
+    nqp_get_sc_object $P2893, "1304459368.206", 41
+    get_how $P2894, $P2893
+    nqp_get_sc_object $P2895, "1304459368.206", 41
+    .const 'Sub' $P2896 = "128_1304459371.883" 
+    $P2894."add_method"($P2895, "does", $P2896)
+    nqp_get_sc_object $P2897, "1304459368.206", 41
+    get_how $P2898, $P2897
+    nqp_get_sc_object $P2899, "1304459368.206", 41
+    .const 'Sub' $P2900 = "129_1304459371.883" 
+    $P2898."add_method"($P2899, "can", $P2900)
+    nqp_get_sc_object $P2901, "1304459368.206", 41
+    get_how $P2902, $P2901
+    nqp_get_sc_object $P2903, "1304459368.206", 41
+    .const 'Sub' $P2904 = "131_1304459371.883" 
+    $P2902."add_method"($P2903, "find_method", $P2904)
+    .const 'Sub' $P2905 = "77_1304459371.883" 
+    $P2906 = $P2905."get_lexinfo"()
+    nqp_get_sc_object $P2907, "1304459368.206", 41
+    $P2906."set_static_lexpad_value"("$?PACKAGE", $P2907)
+    .const 'Sub' $P2908 = "77_1304459371.883" 
+    $P2909 = $P2908."get_lexinfo"()
+    $P2909."finish_static_lexpad"()
+    .const 'Sub' $P2910 = "77_1304459371.883" 
+    $P2911 = $P2910."get_lexinfo"()
+    nqp_get_sc_object $P2912, "1304459368.206", 41
+    $P2911."set_static_lexpad_value"("$?CLASS", $P2912)
+    .const 'Sub' $P2913 = "77_1304459371.883" 
+    $P2914 = $P2913."get_lexinfo"()
+    $P2914."finish_static_lexpad"()
+    nqp_get_sc_object $P2915, "1304459368.206", 41
+    get_how $P2916, $P2915
+    nqp_get_sc_object $P2917, "1304459368.206", 41
+    $P2916."compose"($P2917)
+    nqp_get_sc_object $P2918, "__6MODEL_CORE__", 0
+    $P2919 = $P2918."new_type"("NQPNativeHOW" :named("name"))
+    nqp_set_sc_for_object $P2919, cur_sc
+    nqp_set_sc_object "1304459368.206", 68, $P2919
+    nqp_get_sc_object $P2920, "1304459368.206", 68
+    nqp_get_sc_object $P2921, "1304459368.206", 0
+    get_who $P2922, $P2921
+    set $P2922["NQPNativeHOW"], $P2920
+    .const 'Sub' $P2923 = "10_1304459371.883" 
+    $P2924 = $P2923."get_lexinfo"()
+    nqp_get_sc_object $P2925, "1304459368.206", 68
+    $P2924."set_static_lexpad_value"("NQPNativeHOW", $P2925)
+    .const 'Sub' $P2926 = "10_1304459371.883" 
+    $P2927 = $P2926."get_lexinfo"()
+    $P2927."finish_static_lexpad"()
+    nqp_get_sc_object $P2928, "1304459368.206", 68
+    get_how $P2929, $P2928
+    nqp_get_sc_object $P2930, "1304459368.206", 68
+    nqp_get_sc_object $P2931, "__6MODEL_CORE__", 2
+    $P2932 = $P2931."new"("$!name" :named("name"))
+    $P2929."add_attribute"($P2930, $P2932)
+    nqp_get_sc_object $P2933, "1304459368.206", 68
+    get_how $P2934, $P2933
+    nqp_get_sc_object $P2935, "1304459368.206", 68
+    nqp_get_sc_object $P2936, "__6MODEL_CORE__", 2
+    $P2937 = $P2936."new"("$!composed" :named("name"))
+    $P2934."add_attribute"($P2935, $P2937)
+    nqp_get_sc_object $P2938, "1304459368.206", 68
+    get_how $P2939, $P2938
+    nqp_get_sc_object $P2940, "1304459368.206", 68
+    .const 'Sub' $P2941 = "134_1304459371.883" 
+    $P2939."add_method"($P2940, "new", $P2941)
+    nqp_get_sc_object $P2942, "1304459368.206", 68
+    get_how $P2943, $P2942
+    nqp_get_sc_object $P2944, "1304459368.206", 68
+    .const 'Sub' $P2945 = "135_1304459371.883" 
+    $P2943."add_method"($P2944, "BUILD", $P2945)
+    nqp_get_sc_object $P2946, "1304459368.206", 68
+    get_how $P2947, $P2946
+    nqp_get_sc_object $P2948, "1304459368.206", 68
+    .const 'Sub' $P2949 = "136_1304459371.883" 
+    $P2947."add_method"($P2948, "new_type", $P2949)
+    nqp_get_sc_object $P2950, "1304459368.206", 68
+    get_how $P2951, $P2950
+    nqp_get_sc_object $P2952, "1304459368.206", 68
+    .const 'Sub' $P2953 = "137_1304459371.883" 
+    $P2951."add_method"($P2952, "add_method", $P2953)
+    nqp_get_sc_object $P2954, "1304459368.206", 68
+    get_how $P2955, $P2954
+    nqp_get_sc_object $P2956, "1304459368.206", 68
+    .const 'Sub' $P2957 = "138_1304459371.883" 
+    $P2955."add_method"($P2956, "add_multi_method", $P2957)
+    nqp_get_sc_object $P2958, "1304459368.206", 68
+    get_how $P2959, $P2958
+    nqp_get_sc_object $P2960, "1304459368.206", 68
+    .const 'Sub' $P2961 = "139_1304459371.883" 
+    $P2959."add_method"($P2960, "add_attribute", $P2961)
+    nqp_get_sc_object $P2962, "1304459368.206", 68
+    get_how $P2963, $P2962
+    nqp_get_sc_object $P2964, "1304459368.206", 68
+    .const 'Sub' $P2965 = "140_1304459371.883" 
+    $P2963."add_method"($P2964, "compose", $P2965)
+    nqp_get_sc_object $P2966, "1304459368.206", 68
+    get_how $P2967, $P2966
+    nqp_get_sc_object $P2968, "1304459368.206", 68
+    .const 'Sub' $P2969 = "141_1304459371.883" 
+    $P2967."add_method"($P2968, "name", $P2969)
+    .const 'Sub' $P2970 = "133_1304459371.883" 
+    $P2971 = $P2970."get_lexinfo"()
+    nqp_get_sc_object $P2972, "1304459368.206", 68
+    $P2971."set_static_lexpad_value"("$?PACKAGE", $P2972)
+    .const 'Sub' $P2973 = "133_1304459371.883" 
+    $P2974 = $P2973."get_lexinfo"()
+    $P2974."finish_static_lexpad"()
+    .const 'Sub' $P2975 = "133_1304459371.883" 
+    $P2976 = $P2975."get_lexinfo"()
+    nqp_get_sc_object $P2977, "1304459368.206", 68
+    $P2976."set_static_lexpad_value"("$?CLASS", $P2977)
+    .const 'Sub' $P2978 = "133_1304459371.883" 
+    $P2979 = $P2978."get_lexinfo"()
+    $P2979."finish_static_lexpad"()
+    nqp_get_sc_object $P2980, "1304459368.206", 68
+    get_how $P2981, $P2980
+    nqp_get_sc_object $P2982, "1304459368.206", 68
+    $P2981."compose"($P2982)
+    nqp_get_sc_object $P2983, "__6MODEL_CORE__", 0
+    $P2984 = $P2983."new_type"("NQPAttribute" :named("name"))
+    nqp_set_sc_for_object $P2984, cur_sc
+    nqp_set_sc_object "1304459368.206", 77, $P2984
+    nqp_get_sc_object $P2985, "1304459368.206", 77
+    nqp_get_sc_object $P2986, "1304459368.206", 0
+    get_who $P2987, $P2986
+    set $P2987["NQPAttribute"], $P2985
+    .const 'Sub' $P2988 = "10_1304459371.883" 
+    $P2989 = $P2988."get_lexinfo"()
+    nqp_get_sc_object $P2990, "1304459368.206", 77
+    $P2989."set_static_lexpad_value"("NQPAttribute", $P2990)
+    .const 'Sub' $P2991 = "10_1304459371.883" 
+    $P2992 = $P2991."get_lexinfo"()
+    $P2992."finish_static_lexpad"()
+    nqp_get_sc_object $P2993, "1304459368.206", 77
+    get_how $P2994, $P2993
+    nqp_get_sc_object $P2995, "1304459368.206", 77
+    nqp_get_sc_object $P2996, "__6MODEL_CORE__", 2
+    $P2997 = $P2996."new"("$!name" :named("name"))
+    $P2994."add_attribute"($P2995, $P2997)
+    nqp_get_sc_object $P2998, "1304459368.206", 77
+    get_how $P2999, $P2998
+    nqp_get_sc_object $P3000, "1304459368.206", 77
+    nqp_get_sc_object $P3001, "__6MODEL_CORE__", 2
+    $P3002 = $P3001."new"("$!type" :named("name"))
+    $P2999."add_attribute"($P3000, $P3002)
+    nqp_get_sc_object $P3003, "1304459368.206", 77
+    get_how $P3004, $P3003
+    nqp_get_sc_object $P3005, "1304459368.206", 77
+    nqp_get_sc_object $P3006, "__6MODEL_CORE__", 2
+    $P3007 = $P3006."new"("$!box_target" :named("name"))
+    $P3004."add_attribute"($P3005, $P3007)
+    nqp_get_sc_object $P3008, "1304459368.206", 77
+    get_how $P3009, $P3008
+    nqp_get_sc_object $P3010, "1304459368.206", 77
+    .const 'Sub' $P3011 = "145_1304459371.883" 
+    $P3009."add_method"($P3010, "new", $P3011)
+    nqp_get_sc_object $P3012, "1304459368.206", 77
+    get_how $P3013, $P3012
+    nqp_get_sc_object $P3014, "1304459368.206", 77
+    .const 'Sub' $P3015 = "146_1304459371.883" 
+    $P3013."add_method"($P3014, "BUILD", $P3015)
+    nqp_get_sc_object $P3016, "1304459368.206", 77
+    get_how $P3017, $P3016
+    nqp_get_sc_object $P3018, "1304459368.206", 77
+    .const 'Sub' $P3019 = "147_1304459371.883" 
+    $P3017."add_method"($P3018, "name", $P3019)
+    nqp_get_sc_object $P3020, "1304459368.206", 77
+    get_how $P3021, $P3020
+    nqp_get_sc_object $P3022, "1304459368.206", 77
+    .const 'Sub' $P3023 = "148_1304459371.883" 
+    $P3021."add_method"($P3022, "type", $P3023)
+    nqp_get_sc_object $P3024, "1304459368.206", 77
+    get_how $P3025, $P3024
+    nqp_get_sc_object $P3026, "1304459368.206", 77
+    .const 'Sub' $P3027 = "149_1304459371.883" 
+    $P3025."add_method"($P3026, "box_target", $P3027)
+    nqp_get_sc_object $P3028, "1304459368.206", 77
+    get_how $P3029, $P3028
+    nqp_get_sc_object $P3030, "1304459368.206", 77
+    .const 'Sub' $P3031 = "150_1304459371.883" 
+    $P3029."add_method"($P3030, "compose", $P3031)
+    nqp_get_sc_object $P3032, "1304459368.206", 77
+    get_how $P3033, $P3032
+    nqp_get_sc_object $P3034, "1304459368.206", 77
+    .const 'Sub' $P3035 = "155_1304459371.883" 
+    $P3033."add_method"($P3034, "has_mutator", $P3035)
+    .const 'Sub' $P3036 = "142_1304459371.883" 
+    $P3037 = $P3036."get_lexinfo"()
+    nqp_get_sc_object $P3038, "1304459368.206", 77
+    $P3037."set_static_lexpad_value"("$?PACKAGE", $P3038)
+    .const 'Sub' $P3039 = "142_1304459371.883" 
+    $P3040 = $P3039."get_lexinfo"()
+    $P3040."finish_static_lexpad"()
+    .const 'Sub' $P3041 = "142_1304459371.883" 
+    $P3042 = $P3041."get_lexinfo"()
+    nqp_get_sc_object $P3043, "1304459368.206", 77
+    $P3042."set_static_lexpad_value"("$?CLASS", $P3043)
+    .const 'Sub' $P3044 = "142_1304459371.883" 
+    $P3045 = $P3044."get_lexinfo"()
+    $P3045."finish_static_lexpad"()
+    nqp_get_sc_object $P3046, "1304459368.206", 77
+    get_how $P3047, $P3046
+    nqp_get_sc_object $P3048, "1304459368.206", 77
+    $P3047."compose"($P3048)
+    nqp_get_sc_object $P3049, "__6MODEL_CORE__", 0
+    $P3050 = $P3049."new_type"("NQPModuleHOW" :named("name"))
+    nqp_set_sc_for_object $P3050, cur_sc
+    nqp_set_sc_object "1304459368.206", 85, $P3050
+    nqp_get_sc_object $P3051, "1304459368.206", 85
+    nqp_get_sc_object $P3052, "1304459368.206", 0
+    get_who $P3053, $P3052
+    set $P3053["NQPModuleHOW"], $P3051
+    .const 'Sub' $P3054 = "10_1304459371.883" 
+    $P3055 = $P3054."get_lexinfo"()
+    nqp_get_sc_object $P3056, "1304459368.206", 85
+    $P3055."set_static_lexpad_value"("NQPModuleHOW", $P3056)
+    .const 'Sub' $P3057 = "10_1304459371.883" 
+    $P3058 = $P3057."get_lexinfo"()
+    $P3058."finish_static_lexpad"()
+    nqp_get_sc_object $P3059, "1304459368.206", 85
+    get_how $P3060, $P3059
+    nqp_get_sc_object $P3061, "1304459368.206", 85
+    nqp_get_sc_object $P3062, "__6MODEL_CORE__", 2
+    $P3063 = $P3062."new"("$!name" :named("name"))
+    $P3060."add_attribute"($P3061, $P3063)
+    nqp_get_sc_object $P3064, "1304459368.206", 85
+    get_how $P3065, $P3064
+    nqp_get_sc_object $P3066, "1304459368.206", 85
+    nqp_get_sc_object $P3067, "__6MODEL_CORE__", 2
+    $P3068 = $P3067."new"("$!composed" :named("name"))
+    $P3065."add_attribute"($P3066, $P3068)
+    nqp_get_sc_object $P3069, "1304459368.206", 85
+    get_how $P3070, $P3069
+    nqp_get_sc_object $P3071, "1304459368.206", 85
+    .const 'Sub' $P3072 = "157_1304459371.883" 
+    $P3070."add_method"($P3071, "new", $P3072)
+    nqp_get_sc_object $P3073, "1304459368.206", 85
+    get_how $P3074, $P3073
+    nqp_get_sc_object $P3075, "1304459368.206", 85
+    .const 'Sub' $P3076 = "158_1304459371.883" 
+    $P3074."add_method"($P3075, "BUILD", $P3076)
+    nqp_get_sc_object $P3077, "1304459368.206", 85
+    get_how $P3078, $P3077
+    nqp_get_sc_object $P3079, "1304459368.206", 85
+    .const 'Sub' $P3080 = "159_1304459371.883" 
+    $P3078."add_method"($P3079, "new_type", $P3080)
+    nqp_get_sc_object $P3081, "1304459368.206", 85
+    get_how $P3082, $P3081
+    nqp_get_sc_object $P3083, "1304459368.206", 85
+    .const 'Sub' $P3084 = "160_1304459371.883" 
+    $P3082."add_method"($P3083, "add_method", $P3084)
+    nqp_get_sc_object $P3085, "1304459368.206", 85
+    get_how $P3086, $P3085
+    nqp_get_sc_object $P3087, "1304459368.206", 85
+    .const 'Sub' $P3088 = "161_1304459371.883" 
+    $P3086."add_method"($P3087, "add_multi_method", $P3088)
+    nqp_get_sc_object $P3089, "1304459368.206", 85
+    get_how $P3090, $P3089
+    nqp_get_sc_object $P3091, "1304459368.206", 85
+    .const 'Sub' $P3092 = "162_1304459371.883" 
+    $P3090."add_method"($P3091, "add_attribute", $P3092)
+    nqp_get_sc_object $P3093, "1304459368.206", 85
+    get_how $P3094, $P3093
+    nqp_get_sc_object $P3095, "1304459368.206", 85
+    .const 'Sub' $P3096 = "163_1304459371.883" 
+    $P3094."add_method"($P3095, "compose", $P3096)
+    nqp_get_sc_object $P3097, "1304459368.206", 85
+    get_how $P3098, $P3097
+    nqp_get_sc_object $P3099, "1304459368.206", 85
+    .const 'Sub' $P3100 = "164_1304459371.883" 
+    $P3098."add_method"($P3099, "name", $P3100)
+    .const 'Sub' $P3101 = "156_1304459371.883" 
+    $P3102 = $P3101."get_lexinfo"()
+    nqp_get_sc_object $P3103, "1304459368.206", 85
+    $P3102."set_static_lexpad_value"("$?PACKAGE", $P3103)
+    .const 'Sub' $P3104 = "156_1304459371.883" 
+    $P3105 = $P3104."get_lexinfo"()
+    $P3105."finish_static_lexpad"()
+    .const 'Sub' $P3106 = "156_1304459371.883" 
+    $P3107 = $P3106."get_lexinfo"()
+    nqp_get_sc_object $P3108, "1304459368.206", 85
+    $P3107."set_static_lexpad_value"("$?CLASS", $P3108)
+    .const 'Sub' $P3109 = "156_1304459371.883" 
     $P3110 = $P3109."get_lexinfo"()
-    nqp_get_sc_object $P3111, "1304456116.562", 94
-    $P3110."set_static_lexpad_value"("EXPORTHOW", $P3111)
-    .const 'Sub' $P3112 = "10_1304456120.214" 
-    $P3113 = $P3112."get_lexinfo"()
-    $P3113."finish_static_lexpad"()
-    .const 'Sub' $P3114 = "165_1304456120.214" 
-    $P3115 = $P3114."get_lexinfo"()
-    nqp_get_sc_object $P3116, "1304456116.562", 94
-    $P3115."set_static_lexpad_value"("$?PACKAGE", $P3116)
-    .const 'Sub' $P3117 = "165_1304456120.214" 
-    $P3118 = $P3117."get_lexinfo"()
-    $P3118."finish_static_lexpad"()
-    .const 'Sub' $P3119 = "165_1304456120.214" 
+    $P3110."finish_static_lexpad"()
+    nqp_get_sc_object $P3111, "1304459368.206", 85
+    get_how $P3112, $P3111
+    nqp_get_sc_object $P3113, "1304459368.206", 85
+    $P3112."compose"($P3113)
+    nqp_get_sc_object $P3114, "__6MODEL_CORE__", 0
+    $P3115 = $P3114."new_type"("EXPORTHOW" :named("name"))
+    nqp_set_sc_for_object $P3115, cur_sc
+    nqp_set_sc_object "1304459368.206", 94, $P3115
+    .const 'Sub' $P3116 = "10_1304459371.883" 
+    $P3117 = $P3116."get_lexinfo"()
+    nqp_get_sc_object $P3118, "1304459368.206", 94
+    $P3117."set_static_lexpad_value"("EXPORTHOW", $P3118)
+    .const 'Sub' $P3119 = "10_1304459371.883" 
     $P3120 = $P3119."get_lexinfo"()
-    nqp_get_sc_object $P3121, "1304456116.562", 94
-    $P3120."set_static_lexpad_value"("$?CLASS", $P3121)
-    .const 'Sub' $P3122 = "165_1304456120.214" 
-    $P3123 = $P3122."get_lexinfo"()
-    $P3123."finish_static_lexpad"()
-    nqp_get_sc_object $P3124, "1304456116.562", 94
-    get_how $P3125, $P3124
-    nqp_get_sc_object $P3126, "1304456116.562", 94
-    $P3125."compose"($P3126)
-  if_2384_end:
-    nqp_get_sc_object $P3442, "1304456116.562", 0
-    set_hll_global "GLOBAL", $P3442
+    $P3120."finish_static_lexpad"()
+    .const 'Sub' $P3121 = "165_1304459371.883" 
+    $P3122 = $P3121."get_lexinfo"()
+    nqp_get_sc_object $P3123, "1304459368.206", 94
+    $P3122."set_static_lexpad_value"("$?PACKAGE", $P3123)
+    .const 'Sub' $P3124 = "165_1304459371.883" 
+    $P3125 = $P3124."get_lexinfo"()
+    $P3125."finish_static_lexpad"()
+    .const 'Sub' $P3126 = "165_1304459371.883" 
+    $P3127 = $P3126."get_lexinfo"()
+    nqp_get_sc_object $P3128, "1304459368.206", 94
+    $P3127."set_static_lexpad_value"("$?CLASS", $P3128)
+    .const 'Sub' $P3129 = "165_1304459371.883" 
+    $P3130 = $P3129."get_lexinfo"()
+    $P3130."finish_static_lexpad"()
+    nqp_get_sc_object $P3131, "1304459368.206", 94
+    get_how $P3132, $P3131
+    nqp_get_sc_object $P3133, "1304459368.206", 94
+    $P3132."compose"($P3133)
+  if_2391_end:
+    nqp_get_sc_object $P3449, "1304459368.206", 0
+    set_hll_global "GLOBAL", $P3449
 .end
 
 
 .HLL "nqp"
 
 .namespace ["RoleToRoleApplier"]
-.sub "_block24"  :subid("11_1304456120.214") :outer("10_1304456120.214")
+.sub "_block25"  :subid("11_1304459371.883") :outer("10_1304459371.883")
 .annotate 'line', 7
-    .const 'Sub' $P28 = "12_1304456120.214" 
-    capture_lex $P28
-    .lex "$?PACKAGE", $P26
-    .lex "$?CLASS", $P27
+    .const 'Sub' $P29 = "12_1304459371.883" 
+    capture_lex $P29
+    .lex "$?PACKAGE", $P27
+    .lex "$?CLASS", $P28
 .annotate 'line', 8
-    .const 'Sub' $P28 = "12_1304456120.214" 
-    newclosure $P246, $P28
+    .const 'Sub' $P29 = "12_1304459371.883" 
+    newclosure $P247, $P29
 .annotate 'line', 7
+    .return ($P247)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["RoleToRoleApplier"]
+.include "except_types.pasm"
+.sub "apply"  :subid("12_1304459371.883") :outer("11_1304459371.883")
+    .param pmc param_32
+    .param pmc param_33
+    .param pmc param_34
+.annotate 'line', 8
+    .const 'Sub' $P174 = "18_1304459371.883" 
+    capture_lex $P174
+    .const 'Sub' $P132 = "17_1304459371.883" 
+    capture_lex $P132
+    .const 'Sub' $P118 = "16_1304459371.883" 
+    capture_lex $P118
+    .const 'Sub' $P45 = "13_1304459371.883" 
+    capture_lex $P45
+    new $P31, ['ExceptionHandler'], .CONTROL_RETURN
+    set_label $P31, control_30
+    push_eh $P31
+    .lex "self", param_32
+    .lex "$target", param_33
+    .lex "@roles", param_34
+.annotate 'line', 10
+    $P35 = root_new ['parrot';'Hash']
+    .lex "%meth_info", $P35
+.annotate 'line', 36
+    $P36 = root_new ['parrot';'Hash']
+    .lex "%target_meth_info", $P36
+.annotate 'line', 37
+    $P37 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@target_meths", $P37
+.annotate 'line', 62
+    $P38 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@all_roles", $P38
+.annotate 'line', 8
+    find_lex $P39, "%meth_info"
+    unless_null $P39, vivify_168
+    $P39 = root_new ['parrot';'Hash']
+  vivify_168:
+.annotate 'line', 11
+    find_lex $P41, "@roles"
+    unless_null $P41, vivify_169
+    $P41 = root_new ['parrot';'ResizablePMCArray']
+  vivify_169:
+    defined $I42, $P41
+    unless $I42, for_undef_170
+    iter $P40, $P41
+    new $P106, 'ExceptionHandler'
+    set_label $P106, loop105_handler
+    $P106."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P106
+  loop105_test:
+    unless $P40, loop105_done
+    shift $P43, $P40
+  loop105_redo:
+    .const 'Sub' $P45 = "13_1304459371.883" 
+    capture_lex $P45
+    $P45($P43)
+  loop105_next:
+    goto loop105_test
+  loop105_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P107, exception, 'type'
+    eq $P107, .CONTROL_LOOP_NEXT, loop105_next
+    eq $P107, .CONTROL_LOOP_REDO, loop105_redo
+  loop105_done:
+    pop_eh 
+  for_undef_170:
+    find_lex $P108, "%target_meth_info"
+    unless_null $P108, vivify_194
+    $P108 = root_new ['parrot';'Hash']
+  vivify_194:
+.annotate 'line', 37
+    find_lex $P109, "$target"
+    unless_null $P109, vivify_195
+    new $P109, "Undef"
+  vivify_195:
+    get_how $P110, $P109
+    find_lex $P111, "$target"
+    unless_null $P111, vivify_196
+    new $P111, "Undef"
+  vivify_196:
+    $P112 = $P110."methods"($P111)
+    store_lex "@target_meths", $P112
+.annotate 'line', 38
+    find_lex $P114, "@target_meths"
+    unless_null $P114, vivify_197
+    $P114 = root_new ['parrot';'ResizablePMCArray']
+  vivify_197:
+    defined $I115, $P114
+    unless $I115, for_undef_198
+    iter $P113, $P114
+    new $P125, 'ExceptionHandler'
+    set_label $P125, loop124_handler
+    $P125."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P125
+  loop124_test:
+    unless $P113, loop124_done
+    shift $P116, $P113
+  loop124_redo:
+    .const 'Sub' $P118 = "16_1304459371.883" 
+    capture_lex $P118
+    $P118($P116)
+  loop124_next:
+    goto loop124_test
+  loop124_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P126, exception, 'type'
+    eq $P126, .CONTROL_LOOP_NEXT, loop124_next
+    eq $P126, .CONTROL_LOOP_REDO, loop124_redo
+  loop124_done:
+    pop_eh 
+  for_undef_198:
+.annotate 'line', 43
+    find_lex $P128, "%meth_info"
+    unless_null $P128, vivify_202
+    $P128 = root_new ['parrot';'Hash']
+  vivify_202:
+    defined $I129, $P128
+    unless $I129, for_undef_203
+    iter $P127, $P128
+    new $P166, 'ExceptionHandler'
+    set_label $P166, loop165_handler
+    $P166."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P166
+  loop165_test:
+    unless $P127, loop165_done
+    shift $P130, $P127
+  loop165_redo:
+    .const 'Sub' $P132 = "17_1304459371.883" 
+    capture_lex $P132
+    $P132($P130)
+  loop165_next:
+    goto loop165_test
+  loop165_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P167, exception, 'type'
+    eq $P167, .CONTROL_LOOP_NEXT, loop165_next
+    eq $P167, .CONTROL_LOOP_REDO, loop165_redo
+  loop165_done:
+    pop_eh 
+  for_undef_203:
+    find_lex $P168, "@all_roles"
+    unless_null $P168, vivify_220
+    $P168 = root_new ['parrot';'ResizablePMCArray']
+  vivify_220:
+.annotate 'line', 63
+    find_lex $P170, "@roles"
+    unless_null $P170, vivify_221
+    $P170 = root_new ['parrot';'ResizablePMCArray']
+  vivify_221:
+    defined $I171, $P170
+    unless $I171, for_undef_222
+    iter $P169, $P170
+    new $P242, 'ExceptionHandler'
+    set_label $P242, loop241_handler
+    $P242."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P242
+  loop241_test:
+    unless $P169, loop241_done
+    shift $P172, $P169
+  loop241_redo:
+    .const 'Sub' $P174 = "18_1304459371.883" 
+    capture_lex $P174
+    $P174($P172)
+  loop241_next:
+    goto loop241_test
+  loop241_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P243, exception, 'type'
+    eq $P243, .CONTROL_LOOP_NEXT, loop241_next
+    eq $P243, .CONTROL_LOOP_REDO, loop241_redo
+  loop241_done:
+    pop_eh 
+  for_undef_222:
+.annotate 'line', 92
+    new $P244, "Exception"
+    set $P244['type'], .CONTROL_RETURN
+    find_lex $P245, "@all_roles"
+    unless_null $P245, vivify_244
+    $P245 = root_new ['parrot';'ResizablePMCArray']
+  vivify_244:
+    setattribute $P244, 'payload', $P245
+    throw $P244
+.annotate 'line', 8
+    .return ()
+  control_30:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P246, exception, "payload"
     .return ($P246)
 .end
 
@@ -1545,257 +1758,58 @@
 
 .namespace ["RoleToRoleApplier"]
 .include "except_types.pasm"
-.sub "apply"  :subid("12_1304456120.214") :outer("11_1304456120.214")
-    .param pmc param_31
-    .param pmc param_32
-    .param pmc param_33
-.annotate 'line', 8
-    .const 'Sub' $P173 = "18_1304456120.214" 
-    capture_lex $P173
-    .const 'Sub' $P131 = "17_1304456120.214" 
-    capture_lex $P131
-    .const 'Sub' $P117 = "16_1304456120.214" 
-    capture_lex $P117
-    .const 'Sub' $P44 = "13_1304456120.214" 
-    capture_lex $P44
-    new $P30, ['ExceptionHandler'], .CONTROL_RETURN
-    set_label $P30, control_29
-    push_eh $P30
-    .lex "self", param_31
-    .lex "$target", param_32
-    .lex "@roles", param_33
-.annotate 'line', 10
-    $P34 = root_new ['parrot';'Hash']
-    .lex "%meth_info", $P34
-.annotate 'line', 36
-    $P35 = root_new ['parrot';'Hash']
-    .lex "%target_meth_info", $P35
-.annotate 'line', 37
-    $P36 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@target_meths", $P36
-.annotate 'line', 62
-    $P37 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@all_roles", $P37
-.annotate 'line', 8
-    find_lex $P38, "%meth_info"
-    unless_null $P38, vivify_168
-    $P38 = root_new ['parrot';'Hash']
-  vivify_168:
+.sub "_block44"  :anon :subid("13_1304459371.883") :outer("12_1304459371.883")
+    .param pmc param_47
 .annotate 'line', 11
-    find_lex $P40, "@roles"
-    unless_null $P40, vivify_169
-    $P40 = root_new ['parrot';'ResizablePMCArray']
-  vivify_169:
-    defined $I41, $P40
-    unless $I41, for_undef_170
-    iter $P39, $P40
-    new $P105, 'ExceptionHandler'
-    set_label $P105, loop104_handler
-    $P105."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P105
-  loop104_test:
-    unless $P39, loop104_done
-    shift $P42, $P39
-  loop104_redo:
-    .const 'Sub' $P44 = "13_1304456120.214" 
-    capture_lex $P44
-    $P44($P42)
-  loop104_next:
-    goto loop104_test
-  loop104_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P106, exception, 'type'
-    eq $P106, .CONTROL_LOOP_NEXT, loop104_next
-    eq $P106, .CONTROL_LOOP_REDO, loop104_redo
-  loop104_done:
-    pop_eh 
-  for_undef_170:
-    find_lex $P107, "%target_meth_info"
-    unless_null $P107, vivify_194
-    $P107 = root_new ['parrot';'Hash']
-  vivify_194:
-.annotate 'line', 37
-    find_lex $P108, "$target"
-    unless_null $P108, vivify_195
-    new $P108, "Undef"
-  vivify_195:
-    get_how $P109, $P108
-    find_lex $P110, "$target"
-    unless_null $P110, vivify_196
-    new $P110, "Undef"
-  vivify_196:
-    $P111 = $P109."methods"($P110)
-    store_lex "@target_meths", $P111
-.annotate 'line', 38
-    find_lex $P113, "@target_meths"
-    unless_null $P113, vivify_197
-    $P113 = root_new ['parrot';'ResizablePMCArray']
-  vivify_197:
-    defined $I114, $P113
-    unless $I114, for_undef_198
-    iter $P112, $P113
-    new $P124, 'ExceptionHandler'
-    set_label $P124, loop123_handler
-    $P124."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P124
-  loop123_test:
-    unless $P112, loop123_done
-    shift $P115, $P112
-  loop123_redo:
-    .const 'Sub' $P117 = "16_1304456120.214" 
-    capture_lex $P117
-    $P117($P115)
-  loop123_next:
-    goto loop123_test
-  loop123_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P125, exception, 'type'
-    eq $P125, .CONTROL_LOOP_NEXT, loop123_next
-    eq $P125, .CONTROL_LOOP_REDO, loop123_redo
-  loop123_done:
-    pop_eh 
-  for_undef_198:
-.annotate 'line', 43
-    find_lex $P127, "%meth_info"
-    unless_null $P127, vivify_202
-    $P127 = root_new ['parrot';'Hash']
-  vivify_202:
-    defined $I128, $P127
-    unless $I128, for_undef_203
-    iter $P126, $P127
-    new $P165, 'ExceptionHandler'
-    set_label $P165, loop164_handler
-    $P165."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P165
-  loop164_test:
-    unless $P126, loop164_done
-    shift $P129, $P126
-  loop164_redo:
-    .const 'Sub' $P131 = "17_1304456120.214" 
-    capture_lex $P131
-    $P131($P129)
-  loop164_next:
-    goto loop164_test
-  loop164_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P166, exception, 'type'
-    eq $P166, .CONTROL_LOOP_NEXT, loop164_next
-    eq $P166, .CONTROL_LOOP_REDO, loop164_redo
-  loop164_done:
-    pop_eh 
-  for_undef_203:
-    find_lex $P167, "@all_roles"
-    unless_null $P167, vivify_220
-    $P167 = root_new ['parrot';'ResizablePMCArray']
-  vivify_220:
-.annotate 'line', 63
-    find_lex $P169, "@roles"
-    unless_null $P169, vivify_221
-    $P169 = root_new ['parrot';'ResizablePMCArray']
-  vivify_221:
-    defined $I170, $P169
-    unless $I170, for_undef_222
-    iter $P168, $P169
-    new $P241, 'ExceptionHandler'
-    set_label $P241, loop240_handler
-    $P241."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P241
-  loop240_test:
-    unless $P168, loop240_done
-    shift $P171, $P168
-  loop240_redo:
-    .const 'Sub' $P173 = "18_1304456120.214" 
-    capture_lex $P173
-    $P173($P171)
-  loop240_next:
-    goto loop240_test
-  loop240_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P242, exception, 'type'
-    eq $P242, .CONTROL_LOOP_NEXT, loop240_next
-    eq $P242, .CONTROL_LOOP_REDO, loop240_redo
-  loop240_done:
-    pop_eh 
-  for_undef_222:
-.annotate 'line', 92
-    new $P243, "Exception"
-    set $P243['type'], .CONTROL_RETURN
-    find_lex $P244, "@all_roles"
-    unless_null $P244, vivify_244
-    $P244 = root_new ['parrot';'ResizablePMCArray']
-  vivify_244:
-    setattribute $P243, 'payload', $P244
-    throw $P243
-.annotate 'line', 8
-    .return ()
-  control_29:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P245, exception, "payload"
-    .return ($P245)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["RoleToRoleApplier"]
-.include "except_types.pasm"
-.sub "_block43"  :anon :subid("13_1304456120.214") :outer("12_1304456120.214")
-    .param pmc param_46
-.annotate 'line', 11
-    .const 'Sub' $P56 = "14_1304456120.214" 
-    capture_lex $P56
+    .const 'Sub' $P57 = "14_1304459371.883" 
+    capture_lex $P57
 .annotate 'line', 12
-    $P45 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@methods", $P45
-    .lex "$_", param_46
-    find_lex $P47, "$_"
-    unless_null $P47, vivify_171
-    new $P47, "Undef"
+    $P46 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@methods", $P46
+    .lex "$_", param_47
+    find_lex $P48, "$_"
+    unless_null $P48, vivify_171
+    new $P48, "Undef"
   vivify_171:
-    get_how $P48, $P47
-    find_lex $P49, "$_"
-    unless_null $P49, vivify_172
-    new $P49, "Undef"
+    get_how $P49, $P48
+    find_lex $P50, "$_"
+    unless_null $P50, vivify_172
+    new $P50, "Undef"
   vivify_172:
-    $P50 = $P48."methods"($P49)
-    store_lex "@methods", $P50
+    $P51 = $P49."methods"($P50)
+    store_lex "@methods", $P51
 .annotate 'line', 13
-    find_lex $P52, "@methods"
-    unless_null $P52, vivify_173
-    $P52 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P53, "@methods"
+    unless_null $P53, vivify_173
+    $P53 = root_new ['parrot';'ResizablePMCArray']
   vivify_173:
-    defined $I53, $P52
-    unless $I53, for_undef_174
-    iter $P51, $P52
-    new $P102, 'ExceptionHandler'
-    set_label $P102, loop101_handler
-    $P102."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P102
-  loop101_test:
-    unless $P51, loop101_done
-    shift $P54, $P51
-  loop101_redo:
-    .const 'Sub' $P56 = "14_1304456120.214" 
-    capture_lex $P56
-    $P56($P54)
-  loop101_next:
-    goto loop101_test
-  loop101_handler:
+    defined $I54, $P53
+    unless $I54, for_undef_174
+    iter $P52, $P53
+    new $P103, 'ExceptionHandler'
+    set_label $P103, loop102_handler
+    $P103."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P103
+  loop102_test:
+    unless $P52, loop102_done
+    shift $P55, $P52
+  loop102_redo:
+    .const 'Sub' $P57 = "14_1304459371.883" 
+    capture_lex $P57
+    $P57($P55)
+  loop102_next:
+    goto loop102_test
+  loop102_handler:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P103, exception, 'type'
-    eq $P103, .CONTROL_LOOP_NEXT, loop101_next
-    eq $P103, .CONTROL_LOOP_REDO, loop101_redo
-  loop101_done:
+    getattribute $P104, exception, 'type'
+    eq $P104, .CONTROL_LOOP_NEXT, loop102_next
+    eq $P104, .CONTROL_LOOP_REDO, loop102_redo
+  loop102_done:
     pop_eh 
   for_undef_174:
 .annotate 'line', 11
-    .return ($P51)
+    .return ($P52)
 .end
 
 
@@ -1803,327 +1817,327 @@
 
 .namespace ["RoleToRoleApplier"]
 .include "except_types.pasm"
-.sub "_block55"  :anon :subid("14_1304456120.214") :outer("13_1304456120.214")
-    .param pmc param_61
+.sub "_block56"  :anon :subid("14_1304459371.883") :outer("13_1304459371.883")
+    .param pmc param_62
 .annotate 'line', 13
-    .const 'Sub' $P84 = "15_1304456120.214" 
-    capture_lex $P84
+    .const 'Sub' $P85 = "15_1304459371.883" 
+    capture_lex $P85
 .annotate 'line', 14
-    new $P57, "Undef"
-    .lex "$name", $P57
-.annotate 'line', 15
     new $P58, "Undef"
-    .lex "$meth", $P58
-.annotate 'line', 16
-    $P59 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@meth_list", $P59
-.annotate 'line', 23
-    new $P60, "Undef"
-    .lex "$found", $P60
-    .lex "$_", param_61
-.annotate 'line', 14
-    find_lex $P62, "$_"
-    unless_null $P62, vivify_175
-    new $P62, "Undef"
-  vivify_175:
-    set $S63, $P62
-    new $P64, 'String'
-    set $P64, $S63
-    store_lex "$name", $P64
+    .lex "$name", $P58
 .annotate 'line', 15
-    find_lex $P65, "$_"
-    unless_null $P65, vivify_176
-    new $P65, "Undef"
+    new $P59, "Undef"
+    .lex "$meth", $P59
+.annotate 'line', 16
+    $P60 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@meth_list", $P60
+.annotate 'line', 23
+    new $P61, "Undef"
+    .lex "$found", $P61
+    .lex "$_", param_62
+.annotate 'line', 14
+    find_lex $P63, "$_"
+    unless_null $P63, vivify_175
+    new $P63, "Undef"
+  vivify_175:
+    set $S64, $P63
+    new $P65, 'String'
+    set $P65, $S64
+    store_lex "$name", $P65
+.annotate 'line', 15
+    find_lex $P66, "$_"
+    unless_null $P66, vivify_176
+    new $P66, "Undef"
   vivify_176:
-    store_lex "$meth", $P65
-    find_lex $P66, "@meth_list"
-    unless_null $P66, vivify_177
-    $P66 = root_new ['parrot';'ResizablePMCArray']
+    store_lex "$meth", $P66
+    find_lex $P67, "@meth_list"
+    unless_null $P67, vivify_177
+    $P67 = root_new ['parrot';'ResizablePMCArray']
   vivify_177:
 .annotate 'line', 17
-    find_lex $P68, "$name"
-    unless_null $P68, vivify_178
-    new $P68, "Undef"
+    find_lex $P69, "$name"
+    unless_null $P69, vivify_178
+    new $P69, "Undef"
   vivify_178:
-    find_lex $P69, "%meth_info"
-    unless_null $P69, vivify_179
-    $P69 = root_new ['parrot';'Hash']
+    find_lex $P70, "%meth_info"
+    unless_null $P70, vivify_179
+    $P70 = root_new ['parrot';'Hash']
   vivify_179:
-    set $P70, $P69[$P68]
-    unless_null $P70, vivify_180
-    new $P70, "Undef"
+    set $P71, $P70[$P69]
+    unless_null $P71, vivify_180
+    new $P71, "Undef"
   vivify_180:
-    defined $I71, $P70
-    if $I71, if_67
+    defined $I72, $P71
+    if $I72, if_68
 .annotate 'line', 21
-    find_lex $P75, "@meth_list"
-    unless_null $P75, vivify_181
-    $P75 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P76, "@meth_list"
+    unless_null $P76, vivify_181
+    $P76 = root_new ['parrot';'ResizablePMCArray']
   vivify_181:
-    find_lex $P76, "$name"
-    unless_null $P76, vivify_182
-    new $P76, "Undef"
+    find_lex $P77, "$name"
+    unless_null $P77, vivify_182
+    new $P77, "Undef"
   vivify_182:
-    find_lex $P77, "%meth_info"
-    unless_null $P77, vivify_183
-    $P77 = root_new ['parrot';'Hash']
-    store_lex "%meth_info", $P77
+    find_lex $P78, "%meth_info"
+    unless_null $P78, vivify_183
+    $P78 = root_new ['parrot';'Hash']
+    store_lex "%meth_info", $P78
   vivify_183:
-    set $P77[$P76], $P75
+    set $P78[$P77], $P76
 .annotate 'line', 20
-    goto if_67_end
-  if_67:
+    goto if_68_end
+  if_68:
 .annotate 'line', 18
-    find_lex $P72, "$name"
-    unless_null $P72, vivify_184
-    new $P72, "Undef"
+    find_lex $P73, "$name"
+    unless_null $P73, vivify_184
+    new $P73, "Undef"
   vivify_184:
-    find_lex $P73, "%meth_info"
-    unless_null $P73, vivify_185
-    $P73 = root_new ['parrot';'Hash']
+    find_lex $P74, "%meth_info"
+    unless_null $P74, vivify_185
+    $P74 = root_new ['parrot';'Hash']
   vivify_185:
-    set $P74, $P73[$P72]
-    unless_null $P74, vivify_186
-    new $P74, "Undef"
+    set $P75, $P74[$P73]
+    unless_null $P75, vivify_186
+    new $P75, "Undef"
   vivify_186:
-    store_lex "@meth_list", $P74
-  if_67_end:
+    store_lex "@meth_list", $P75
+  if_68_end:
 .annotate 'line', 23
-    new $P78, "Integer"
-    assign $P78, 0
-    store_lex "$found", $P78
+    new $P79, "Integer"
+    assign $P79, 0
+    store_lex "$found", $P79
 .annotate 'line', 24
-    find_lex $P80, "@meth_list"
-    unless_null $P80, vivify_187
-    $P80 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P81, "@meth_list"
+    unless_null $P81, vivify_187
+    $P81 = root_new ['parrot';'ResizablePMCArray']
   vivify_187:
-    defined $I81, $P80
-    unless $I81, for_undef_188
-    iter $P79, $P80
-    new $P93, 'ExceptionHandler'
-    set_label $P93, loop92_handler
-    $P93."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P93
-  loop92_test:
-    unless $P79, loop92_done
-    shift $P82, $P79
-  loop92_redo:
-    .const 'Sub' $P84 = "15_1304456120.214" 
-    capture_lex $P84
-    $P84($P82)
-  loop92_next:
-    goto loop92_test
-  loop92_handler:
+    defined $I82, $P81
+    unless $I82, for_undef_188
+    iter $P80, $P81
+    new $P94, 'ExceptionHandler'
+    set_label $P94, loop93_handler
+    $P94."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P94
+  loop93_test:
+    unless $P80, loop93_done
+    shift $P83, $P80
+  loop93_redo:
+    .const 'Sub' $P85 = "15_1304459371.883" 
+    capture_lex $P85
+    $P85($P83)
+  loop93_next:
+    goto loop93_test
+  loop93_handler:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P94, exception, 'type'
-    eq $P94, .CONTROL_LOOP_NEXT, loop92_next
-    eq $P94, .CONTROL_LOOP_REDO, loop92_redo
-  loop92_done:
+    getattribute $P95, exception, 'type'
+    eq $P95, .CONTROL_LOOP_NEXT, loop93_next
+    eq $P95, .CONTROL_LOOP_REDO, loop93_redo
+  loop93_done:
     pop_eh 
   for_undef_188:
 .annotate 'line', 29
-    find_lex $P97, "$found"
-    unless_null $P97, vivify_191
-    new $P97, "Undef"
+    find_lex $P98, "$found"
+    unless_null $P98, vivify_191
+    new $P98, "Undef"
   vivify_191:
-    unless $P97, unless_96
-    set $P95, $P97
-    goto unless_96_end
-  unless_96:
+    unless $P98, unless_97
+    set $P96, $P98
+    goto unless_97_end
+  unless_97:
 .annotate 'line', 30
-    find_lex $P98, "@meth_list"
-    unless_null $P98, vivify_192
-    $P98 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P99, "@meth_list"
+    unless_null $P99, vivify_192
+    $P99 = root_new ['parrot';'ResizablePMCArray']
   vivify_192:
-    find_lex $P99, "$meth"
-    unless_null $P99, vivify_193
-    new $P99, "Undef"
+    find_lex $P100, "$meth"
+    unless_null $P100, vivify_193
+    new $P100, "Undef"
   vivify_193:
-    $P100 = $P98."push"($P99)
+    $P101 = $P99."push"($P100)
 .annotate 'line', 29
-    set $P95, $P100
-  unless_96_end:
+    set $P96, $P101
+  unless_97_end:
 .annotate 'line', 13
-    .return ($P95)
+    .return ($P96)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["RoleToRoleApplier"]
-.sub "_block83"  :anon :subid("15_1304456120.214") :outer("14_1304456120.214")
-    .param pmc param_85
+.sub "_block84"  :anon :subid("15_1304459371.883") :outer("14_1304459371.883")
+    .param pmc param_86
 .annotate 'line', 24
-    .lex "$_", param_85
+    .lex "$_", param_86
 .annotate 'line', 25
-    find_lex $P88, "$meth"
-    unless_null $P88, vivify_189
-    new $P88, "Undef"
-  vivify_189:
-    find_lex $P89, "$_"
-    unless_null $P89, vivify_190
+    find_lex $P89, "$meth"
+    unless_null $P89, vivify_189
     new $P89, "Undef"
+  vivify_189:
+    find_lex $P90, "$_"
+    unless_null $P90, vivify_190
+    new $P90, "Undef"
   vivify_190:
-    issame $I90, $P88, $P89
-    if $I90, if_87
-    new $P86, 'Integer'
-    set $P86, $I90
-    goto if_87_end
-  if_87:
+    issame $I91, $P89, $P90
+    if $I91, if_88
+    new $P87, 'Integer'
+    set $P87, $I91
+    goto if_88_end
+  if_88:
 .annotate 'line', 26
-    new $P91, "Integer"
-    assign $P91, 1
-    store_lex "$found", $P91
+    new $P92, "Integer"
+    assign $P92, 1
+    store_lex "$found", $P92
 .annotate 'line', 25
-    set $P86, $P91
-  if_87_end:
+    set $P87, $P92
+  if_88_end:
 .annotate 'line', 24
-    .return ($P86)
+    .return ($P87)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["RoleToRoleApplier"]
-.sub "_block116"  :anon :subid("16_1304456120.214") :outer("12_1304456120.214")
-    .param pmc param_118
+.sub "_block117"  :anon :subid("16_1304459371.883") :outer("12_1304459371.883")
+    .param pmc param_119
 .annotate 'line', 38
-    .lex "$_", param_118
+    .lex "$_", param_119
 .annotate 'line', 39
-    find_lex $P119, "$_"
-    unless_null $P119, vivify_199
-    new $P119, "Undef"
-  vivify_199:
     find_lex $P120, "$_"
-    unless_null $P120, vivify_200
+    unless_null $P120, vivify_199
     new $P120, "Undef"
+  vivify_199:
+    find_lex $P121, "$_"
+    unless_null $P121, vivify_200
+    new $P121, "Undef"
   vivify_200:
-    set $S121, $P120
-    find_lex $P122, "%target_meth_info"
-    unless_null $P122, vivify_201
-    $P122 = root_new ['parrot';'Hash']
-    store_lex "%target_meth_info", $P122
+    set $S122, $P121
+    find_lex $P123, "%target_meth_info"
+    unless_null $P123, vivify_201
+    $P123 = root_new ['parrot';'Hash']
+    store_lex "%target_meth_info", $P123
   vivify_201:
-    set $P122[$S121], $P119
+    set $P123[$S122], $P120
 .annotate 'line', 38
-    .return ($P119)
+    .return ($P120)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["RoleToRoleApplier"]
-.sub "_block130"  :anon :subid("17_1304456120.214") :outer("12_1304456120.214")
-    .param pmc param_134
+.sub "_block131"  :anon :subid("17_1304459371.883") :outer("12_1304459371.883")
+    .param pmc param_135
 .annotate 'line', 44
-    new $P132, "Undef"
-    .lex "$name", $P132
+    new $P133, "Undef"
+    .lex "$name", $P133
 .annotate 'line', 45
-    $P133 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@add_meths", $P133
-    .lex "$_", param_134
+    $P134 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@add_meths", $P134
+    .lex "$_", param_135
 .annotate 'line', 44
-    find_lex $P135, "$_"
-    unless_null $P135, vivify_204
-    new $P135, "Undef"
+    find_lex $P136, "$_"
+    unless_null $P136, vivify_204
+    new $P136, "Undef"
   vivify_204:
-    set $S136, $P135
-    new $P137, 'String'
-    set $P137, $S136
-    store_lex "$name", $P137
+    set $S137, $P136
+    new $P138, 'String'
+    set $P138, $S137
+    store_lex "$name", $P138
 .annotate 'line', 45
-    find_lex $P138, "$name"
-    unless_null $P138, vivify_205
-    new $P138, "Undef"
+    find_lex $P139, "$name"
+    unless_null $P139, vivify_205
+    new $P139, "Undef"
   vivify_205:
-    find_lex $P139, "%meth_info"
-    unless_null $P139, vivify_206
-    $P139 = root_new ['parrot';'Hash']
+    find_lex $P140, "%meth_info"
+    unless_null $P140, vivify_206
+    $P140 = root_new ['parrot';'Hash']
   vivify_206:
-    set $P140, $P139[$P138]
-    unless_null $P140, vivify_207
-    new $P140, "Undef"
+    set $P141, $P140[$P139]
+    unless_null $P141, vivify_207
+    new $P141, "Undef"
   vivify_207:
-    store_lex "@add_meths", $P140
+    store_lex "@add_meths", $P141
 .annotate 'line', 49
-    find_lex $P143, "$name"
-    unless_null $P143, vivify_208
-    new $P143, "Undef"
+    find_lex $P144, "$name"
+    unless_null $P144, vivify_208
+    new $P144, "Undef"
   vivify_208:
-    find_lex $P144, "%target_meth_info"
-    unless_null $P144, vivify_209
-    $P144 = root_new ['parrot';'Hash']
+    find_lex $P145, "%target_meth_info"
+    unless_null $P145, vivify_209
+    $P145 = root_new ['parrot';'Hash']
   vivify_209:
-    set $P145, $P144[$P143]
-    unless_null $P145, vivify_210
-    new $P145, "Undef"
+    set $P146, $P145[$P144]
+    unless_null $P146, vivify_210
+    new $P146, "Undef"
   vivify_210:
-    defined $I146, $P145
-    unless $I146, unless_142
-    new $P141, 'Integer'
-    set $P141, $I146
-    goto unless_142_end
-  unless_142:
+    defined $I147, $P146
+    unless $I147, unless_143
+    new $P142, 'Integer'
+    set $P142, $I147
+    goto unless_143_end
+  unless_143:
 .annotate 'line', 51
-    find_lex $P149, "@add_meths"
-    unless_null $P149, vivify_211
-    $P149 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P150, "@add_meths"
+    unless_null $P150, vivify_211
+    $P150 = root_new ['parrot';'ResizablePMCArray']
   vivify_211:
-    set $N150, $P149
-    iseq $I151, $N150, 1.0
-    if $I151, if_148
+    set $N151, $P150
+    iseq $I152, $N151, 1.0
+    if $I152, if_149
 .annotate 'line', 56
-    find_lex $P159, "$target"
-    unless_null $P159, vivify_212
-    new $P159, "Undef"
+    find_lex $P160, "$target"
+    unless_null $P160, vivify_212
+    new $P160, "Undef"
   vivify_212:
-    get_how $P160, $P159
-    find_lex $P161, "$target"
-    unless_null $P161, vivify_213
-    new $P161, "Undef"
-  vivify_213:
-    find_lex $P162, "$name"
-    unless_null $P162, vivify_214
+    get_how $P161, $P160
+    find_lex $P162, "$target"
+    unless_null $P162, vivify_213
     new $P162, "Undef"
+  vivify_213:
+    find_lex $P163, "$name"
+    unless_null $P163, vivify_214
+    new $P163, "Undef"
   vivify_214:
-    $P163 = $P160."add_collision"($P161, $P162)
+    $P164 = $P161."add_collision"($P162, $P163)
 .annotate 'line', 54
-    set $P147, $P163
+    set $P148, $P164
 .annotate 'line', 51
-    goto if_148_end
-  if_148:
+    goto if_149_end
+  if_149:
 .annotate 'line', 52
-    find_lex $P152, "$target"
-    unless_null $P152, vivify_215
-    new $P152, "Undef"
+    find_lex $P153, "$target"
+    unless_null $P153, vivify_215
+    new $P153, "Undef"
   vivify_215:
-    get_how $P153, $P152
-    find_lex $P154, "$target"
-    unless_null $P154, vivify_216
-    new $P154, "Undef"
-  vivify_216:
-    find_lex $P155, "$name"
-    unless_null $P155, vivify_217
+    get_how $P154, $P153
+    find_lex $P155, "$target"
+    unless_null $P155, vivify_216
     new $P155, "Undef"
+  vivify_216:
+    find_lex $P156, "$name"
+    unless_null $P156, vivify_217
+    new $P156, "Undef"
   vivify_217:
-    find_lex $P156, "@add_meths"
-    unless_null $P156, vivify_218
-    $P156 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P157, "@add_meths"
+    unless_null $P157, vivify_218
+    $P157 = root_new ['parrot';'ResizablePMCArray']
   vivify_218:
-    set $P157, $P156[0]
-    unless_null $P157, vivify_219
-    new $P157, "Undef"
+    set $P158, $P157[0]
+    unless_null $P158, vivify_219
+    new $P158, "Undef"
   vivify_219:
-    $P158 = $P153."add_method"($P154, $P155, $P157)
+    $P159 = $P154."add_method"($P155, $P156, $P158)
 .annotate 'line', 51
-    set $P147, $P158
-  if_148_end:
+    set $P148, $P159
+  if_149_end:
 .annotate 'line', 49
-    set $P141, $P147
-  unless_142_end:
+    set $P142, $P148
+  unless_143_end:
 .annotate 'line', 43
-    .return ($P141)
+    .return ($P142)
 .end
 
 
@@ -2131,78 +2145,78 @@
 
 .namespace ["RoleToRoleApplier"]
 .include "except_types.pasm"
-.sub "_block172"  :anon :subid("18_1304456120.214") :outer("12_1304456120.214")
-    .param pmc param_176
+.sub "_block173"  :anon :subid("18_1304459371.883") :outer("12_1304459371.883")
+    .param pmc param_177
 .annotate 'line', 63
-    .const 'Sub' $P187 = "19_1304456120.214" 
-    capture_lex $P187
+    .const 'Sub' $P188 = "19_1304459371.883" 
+    capture_lex $P188
 .annotate 'line', 64
-    new $P174, "Undef"
-    .lex "$how", $P174
+    new $P175, "Undef"
+    .lex "$how", $P175
 .annotate 'line', 67
-    $P175 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@attributes", $P175
-    .lex "$_", param_176
+    $P176 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@attributes", $P176
+    .lex "$_", param_177
 .annotate 'line', 64
-    find_lex $P177, "$_"
-    unless_null $P177, vivify_223
-    new $P177, "Undef"
+    find_lex $P178, "$_"
+    unless_null $P178, vivify_223
+    new $P178, "Undef"
   vivify_223:
-    get_how $P178, $P177
-    store_lex "$how", $P178
+    get_how $P179, $P178
+    store_lex "$how", $P179
 .annotate 'line', 67
-    find_lex $P179, "$how"
-    unless_null $P179, vivify_224
-    new $P179, "Undef"
-  vivify_224:
-    find_lex $P180, "$_"
-    unless_null $P180, vivify_225
+    find_lex $P180, "$how"
+    unless_null $P180, vivify_224
     new $P180, "Undef"
+  vivify_224:
+    find_lex $P181, "$_"
+    unless_null $P181, vivify_225
+    new $P181, "Undef"
   vivify_225:
-    $P181 = $P179."attributes"($P180)
-    store_lex "@attributes", $P181
+    $P182 = $P180."attributes"($P181)
+    store_lex "@attributes", $P182
 .annotate 'line', 68
-    find_lex $P183, "@attributes"
-    unless_null $P183, vivify_226
-    $P183 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P184, "@attributes"
+    unless_null $P184, vivify_226
+    $P184 = root_new ['parrot';'ResizablePMCArray']
   vivify_226:
-    defined $I184, $P183
-    unless $I184, for_undef_227
-    iter $P182, $P183
-    new $P235, 'ExceptionHandler'
-    set_label $P235, loop234_handler
-    $P235."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P235
-  loop234_test:
-    unless $P182, loop234_done
-    shift $P185, $P182
-  loop234_redo:
-    .const 'Sub' $P187 = "19_1304456120.214" 
-    capture_lex $P187
-    $P187($P185)
-  loop234_next:
-    goto loop234_test
-  loop234_handler:
+    defined $I185, $P184
+    unless $I185, for_undef_227
+    iter $P183, $P184
+    new $P236, 'ExceptionHandler'
+    set_label $P236, loop235_handler
+    $P236."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P236
+  loop235_test:
+    unless $P183, loop235_done
+    shift $P186, $P183
+  loop235_redo:
+    .const 'Sub' $P188 = "19_1304459371.883" 
+    capture_lex $P188
+    $P188($P186)
+  loop235_next:
+    goto loop235_test
+  loop235_handler:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P236, exception, 'type'
-    eq $P236, .CONTROL_LOOP_NEXT, loop234_next
-    eq $P236, .CONTROL_LOOP_REDO, loop234_redo
-  loop234_done:
+    getattribute $P237, exception, 'type'
+    eq $P237, .CONTROL_LOOP_NEXT, loop235_next
+    eq $P237, .CONTROL_LOOP_REDO, loop235_redo
+  loop235_done:
     pop_eh 
   for_undef_227:
 .annotate 'line', 89
-    find_lex $P237, "@all_roles"
-    unless_null $P237, vivify_242
-    $P237 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P238, "@all_roles"
+    unless_null $P238, vivify_242
+    $P238 = root_new ['parrot';'ResizablePMCArray']
   vivify_242:
-    find_lex $P238, "$_"
-    unless_null $P238, vivify_243
-    new $P238, "Undef"
+    find_lex $P239, "$_"
+    unless_null $P239, vivify_243
+    new $P239, "Undef"
   vivify_243:
-    $P239 = $P237."push"($P238)
+    $P240 = $P238."push"($P239)
 .annotate 'line', 63
-    .return ($P239)
+    .return ($P240)
 .end
 
 
@@ -2210,558 +2224,558 @@
 
 .namespace ["RoleToRoleApplier"]
 .include "except_types.pasm"
-.sub "_block186"  :anon :subid("19_1304456120.214") :outer("18_1304456120.214")
-    .param pmc param_191
+.sub "_block187"  :anon :subid("19_1304459371.883") :outer("18_1304459371.883")
+    .param pmc param_192
 .annotate 'line', 68
-    .const 'Sub' $P203 = "20_1304456120.214" 
-    capture_lex $P203
+    .const 'Sub' $P204 = "20_1304459371.883" 
+    capture_lex $P204
 .annotate 'line', 69
-    new $P188, "Undef"
-    .lex "$add_attr", $P188
-.annotate 'line', 70
     new $P189, "Undef"
-    .lex "$skip", $P189
-.annotate 'line', 71
-    $P190 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@cur_attrs", $P190
-    .lex "$_", param_191
-.annotate 'line', 69
-    find_lex $P192, "$_"
-    unless_null $P192, vivify_228
-    new $P192, "Undef"
-  vivify_228:
-    store_lex "$add_attr", $P192
+    .lex "$add_attr", $P189
 .annotate 'line', 70
-    new $P193, "Integer"
-    assign $P193, 0
-    store_lex "$skip", $P193
+    new $P190, "Undef"
+    .lex "$skip", $P190
 .annotate 'line', 71
-    find_lex $P194, "$target"
-    unless_null $P194, vivify_229
-    new $P194, "Undef"
+    $P191 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@cur_attrs", $P191
+    .lex "$_", param_192
+.annotate 'line', 69
+    find_lex $P193, "$_"
+    unless_null $P193, vivify_228
+    new $P193, "Undef"
+  vivify_228:
+    store_lex "$add_attr", $P193
+.annotate 'line', 70
+    new $P194, "Integer"
+    assign $P194, 0
+    store_lex "$skip", $P194
+.annotate 'line', 71
+    find_lex $P195, "$target"
+    unless_null $P195, vivify_229
+    new $P195, "Undef"
   vivify_229:
-    get_how $P195, $P194
-    find_lex $P196, "$target"
-    unless_null $P196, vivify_230
-    new $P196, "Undef"
+    get_how $P196, $P195
+    find_lex $P197, "$target"
+    unless_null $P197, vivify_230
+    new $P197, "Undef"
   vivify_230:
-    $P197 = $P195."attributes"($P196)
-    store_lex "@cur_attrs", $P197
+    $P198 = $P196."attributes"($P197)
+    store_lex "@cur_attrs", $P198
 .annotate 'line', 72
-    find_lex $P199, "@cur_attrs"
-    unless_null $P199, vivify_231
-    $P199 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P200, "@cur_attrs"
+    unless_null $P200, vivify_231
+    $P200 = root_new ['parrot';'ResizablePMCArray']
   vivify_231:
-    defined $I200, $P199
-    unless $I200, for_undef_232
-    iter $P198, $P199
-    new $P224, 'ExceptionHandler'
-    set_label $P224, loop223_handler
-    $P224."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P224
-  loop223_test:
-    unless $P198, loop223_done
-    shift $P201, $P198
-  loop223_redo:
-    .const 'Sub' $P203 = "20_1304456120.214" 
-    capture_lex $P203
-    $P203($P201)
-  loop223_next:
-    goto loop223_test
-  loop223_handler:
+    defined $I201, $P200
+    unless $I201, for_undef_232
+    iter $P199, $P200
+    new $P225, 'ExceptionHandler'
+    set_label $P225, loop224_handler
+    $P225."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P225
+  loop224_test:
+    unless $P199, loop224_done
+    shift $P202, $P199
+  loop224_redo:
+    .const 'Sub' $P204 = "20_1304459371.883" 
+    capture_lex $P204
+    $P204($P202)
+  loop224_next:
+    goto loop224_test
+  loop224_handler:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P225, exception, 'type'
-    eq $P225, .CONTROL_LOOP_NEXT, loop223_next
-    eq $P225, .CONTROL_LOOP_REDO, loop223_redo
-  loop223_done:
+    getattribute $P226, exception, 'type'
+    eq $P226, .CONTROL_LOOP_NEXT, loop224_next
+    eq $P226, .CONTROL_LOOP_REDO, loop224_redo
+  loop224_done:
     pop_eh 
   for_undef_232:
 .annotate 'line', 82
-    find_lex $P228, "$skip"
-    unless_null $P228, vivify_238
-    new $P228, "Undef"
-  vivify_238:
-    unless $P228, unless_227
-    set $P226, $P228
-    goto unless_227_end
-  unless_227:
-.annotate 'line', 83
-    find_lex $P229, "$target"
-    unless_null $P229, vivify_239
+    find_lex $P229, "$skip"
+    unless_null $P229, vivify_238
     new $P229, "Undef"
+  vivify_238:
+    unless $P229, unless_228
+    set $P227, $P229
+    goto unless_228_end
+  unless_228:
+.annotate 'line', 83
+    find_lex $P230, "$target"
+    unless_null $P230, vivify_239
+    new $P230, "Undef"
   vivify_239:
-    get_how $P230, $P229
-    find_lex $P231, "$target"
-    unless_null $P231, vivify_240
-    new $P231, "Undef"
-  vivify_240:
-    find_lex $P232, "$add_attr"
-    unless_null $P232, vivify_241
+    get_how $P231, $P230
+    find_lex $P232, "$target"
+    unless_null $P232, vivify_240
     new $P232, "Undef"
+  vivify_240:
+    find_lex $P233, "$add_attr"
+    unless_null $P233, vivify_241
+    new $P233, "Undef"
   vivify_241:
-    $P233 = $P230."add_attribute"($P231, $P232)
+    $P234 = $P231."add_attribute"($P232, $P233)
 .annotate 'line', 82
-    set $P226, $P233
-  unless_227_end:
+    set $P227, $P234
+  unless_228_end:
 .annotate 'line', 68
-    .return ($P226)
+    .return ($P227)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["RoleToRoleApplier"]
-.sub "_block202"  :anon :subid("20_1304456120.214") :outer("19_1304456120.214")
-    .param pmc param_204
+.sub "_block203"  :anon :subid("20_1304459371.883") :outer("19_1304459371.883")
+    .param pmc param_205
 .annotate 'line', 72
-    .lex "$_", param_204
+    .lex "$_", param_205
 .annotate 'line', 73
-    find_lex $P207, "$_"
-    unless_null $P207, vivify_233
-    new $P207, "Undef"
-  vivify_233:
-    find_lex $P208, "$add_attr"
-    unless_null $P208, vivify_234
+    find_lex $P208, "$_"
+    unless_null $P208, vivify_233
     new $P208, "Undef"
+  vivify_233:
+    find_lex $P209, "$add_attr"
+    unless_null $P209, vivify_234
+    new $P209, "Undef"
   vivify_234:
-    issame $I209, $P207, $P208
-    if $I209, if_206
+    issame $I210, $P208, $P209
+    if $I210, if_207
 .annotate 'line', 77
-    find_lex $P213, "$_"
-    unless_null $P213, vivify_235
-    new $P213, "Undef"
+    find_lex $P214, "$_"
+    unless_null $P214, vivify_235
+    new $P214, "Undef"
   vivify_235:
-    $S214 = $P213."name"()
-    find_lex $P215, "$add_attr"
-    unless_null $P215, vivify_236
-    new $P215, "Undef"
+    $S215 = $P214."name"()
+    find_lex $P216, "$add_attr"
+    unless_null $P216, vivify_236
+    new $P216, "Undef"
   vivify_236:
-    $S216 = $P215."name"()
-    iseq $I217, $S214, $S216
-    if $I217, if_212
-    new $P211, 'Integer'
-    set $P211, $I217
-    goto if_212_end
-  if_212:
+    $S217 = $P216."name"()
+    iseq $I218, $S215, $S217
+    if $I218, if_213
+    new $P212, 'Integer'
+    set $P212, $I218
+    goto if_213_end
+  if_213:
 .annotate 'line', 78
-    new $P218, "String"
-    assign $P218, "Attribute '"
-    find_lex $P219, "$_"
-    unless_null $P219, vivify_237
-    new $P219, "Undef"
+    new $P219, "String"
+    assign $P219, "Attribute '"
+    find_lex $P220, "$_"
+    unless_null $P220, vivify_237
+    new $P220, "Undef"
   vivify_237:
-    $S220 = $P219."name"()
-    concat $P221, $P218, $S220
-    concat $P222, $P221, "' conflicts in role composition"
-    die $P222
-  if_212_end:
+    $S221 = $P220."name"()
+    concat $P222, $P219, $S221
+    concat $P223, $P222, "' conflicts in role composition"
+    die $P223
+  if_213_end:
 .annotate 'line', 76
-    set $P205, $P211
+    set $P206, $P212
 .annotate 'line', 73
-    goto if_206_end
-  if_206:
+    goto if_207_end
+  if_207:
 .annotate 'line', 74
-    new $P210, "Integer"
-    assign $P210, 1
-    store_lex "$skip", $P210
+    new $P211, "Integer"
+    assign $P211, 1
+    store_lex "$skip", $P211
 .annotate 'line', 73
-    set $P205, $P210
-  if_206_end:
+    set $P206, $P211
+  if_207_end:
 .annotate 'line', 72
-    .return ($P205)
+    .return ($P206)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPConcreteRoleHOW"]
-.sub "_block247"  :subid("21_1304456120.214") :outer("10_1304456120.214")
+.sub "_block248"  :subid("21_1304459371.883") :outer("10_1304459371.883")
 .annotate 'line', 99
-    .const 'Sub' $P500 = "41_1304456120.214" 
-    capture_lex $P500
-    .const 'Sub' $P494 = "40_1304456120.214" 
-    capture_lex $P494
-    .const 'Sub' $P470 = "38_1304456120.214" 
-    capture_lex $P470
-    .const 'Sub' $P464 = "37_1304456120.214" 
-    capture_lex $P464
-    .const 'Sub' $P458 = "36_1304456120.214" 
-    capture_lex $P458
-    .const 'Sub' $P452 = "35_1304456120.214" 
-    capture_lex $P452
-    .const 'Sub' $P428 = "33_1304456120.214" 
-    capture_lex $P428
-    .const 'Sub' $P379 = "31_1304456120.214" 
-    capture_lex $P379
-    .const 'Sub' $P366 = "30_1304456120.214" 
-    capture_lex $P366
-    .const 'Sub' $P353 = "29_1304456120.214" 
-    capture_lex $P353
-    .const 'Sub' $P349 = "28_1304456120.214" 
-    capture_lex $P349
-    .const 'Sub' $P328 = "27_1304456120.214" 
-    capture_lex $P328
-    .const 'Sub' $P307 = "26_1304456120.214" 
-    capture_lex $P307
-    .const 'Sub' $P288 = "25_1304456120.214" 
-    capture_lex $P288
-    .const 'Sub' $P272 = "24_1304456120.214" 
-    capture_lex $P272
-    .const 'Sub' $P262 = "23_1304456120.214" 
-    capture_lex $P262
-    .const 'Sub' $P251 = "22_1304456120.214" 
-    capture_lex $P251
-    .lex "$?PACKAGE", $P249
-    .lex "$?CLASS", $P250
+    .const 'Sub' $P501 = "41_1304459371.883" 
+    capture_lex $P501
+    .const 'Sub' $P495 = "40_1304459371.883" 
+    capture_lex $P495
+    .const 'Sub' $P471 = "38_1304459371.883" 
+    capture_lex $P471
+    .const 'Sub' $P465 = "37_1304459371.883" 
+    capture_lex $P465
+    .const 'Sub' $P459 = "36_1304459371.883" 
+    capture_lex $P459
+    .const 'Sub' $P453 = "35_1304459371.883" 
+    capture_lex $P453
+    .const 'Sub' $P429 = "33_1304459371.883" 
+    capture_lex $P429
+    .const 'Sub' $P380 = "31_1304459371.883" 
+    capture_lex $P380
+    .const 'Sub' $P367 = "30_1304459371.883" 
+    capture_lex $P367
+    .const 'Sub' $P354 = "29_1304459371.883" 
+    capture_lex $P354
+    .const 'Sub' $P350 = "28_1304459371.883" 
+    capture_lex $P350
+    .const 'Sub' $P329 = "27_1304459371.883" 
+    capture_lex $P329
+    .const 'Sub' $P308 = "26_1304459371.883" 
+    capture_lex $P308
+    .const 'Sub' $P289 = "25_1304459371.883" 
+    capture_lex $P289
+    .const 'Sub' $P273 = "24_1304459371.883" 
+    capture_lex $P273
+    .const 'Sub' $P263 = "23_1304459371.883" 
+    capture_lex $P263
+    .const 'Sub' $P252 = "22_1304459371.883" 
+    capture_lex $P252
+    .lex "$?PACKAGE", $P250
+    .lex "$?CLASS", $P251
 .annotate 'line', 238
-    .const 'Sub' $P500 = "41_1304456120.214" 
-    newclosure $P506, $P500
+    .const 'Sub' $P501 = "41_1304459371.883" 
+    newclosure $P507, $P501
 .annotate 'line', 99
-    .return ($P506)
+    .return ($P507)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPConcreteRoleHOW"]
-.sub "new"  :subid("22_1304456120.214") :outer("21_1304456120.214")
-    .param pmc param_252
-    .param pmc param_253 :named("name")
-    .param pmc param_254 :named("instance_of")
+.sub "new"  :subid("22_1304459371.883") :outer("21_1304459371.883")
+    .param pmc param_253
+    .param pmc param_254 :named("name")
+    .param pmc param_255 :named("instance_of")
 .annotate 'line', 131
-    .lex "self", param_252
-    .lex "$name", param_253
-    .lex "$instance_of", param_254
+    .lex "self", param_253
+    .lex "$name", param_254
+    .lex "$instance_of", param_255
 .annotate 'line', 132
-    new $P255, "Undef"
-    .lex "$obj", $P255
-    find_lex $P256, "self"
-    repr_instance_of $P257, $P256
-    store_lex "$obj", $P257
+    new $P256, "Undef"
+    .lex "$obj", $P256
+    find_lex $P257, "self"
+    repr_instance_of $P258, $P257
+    store_lex "$obj", $P258
 .annotate 'line', 133
-    find_lex $P258, "$obj"
-    unless_null $P258, vivify_245
-    new $P258, "Undef"
-  vivify_245:
-    find_lex $P259, "$name"
-    unless_null $P259, vivify_246
+    find_lex $P259, "$obj"
+    unless_null $P259, vivify_245
     new $P259, "Undef"
-  vivify_246:
-    find_lex $P260, "$instance_of"
-    unless_null $P260, vivify_247
+  vivify_245:
+    find_lex $P260, "$name"
+    unless_null $P260, vivify_246
     new $P260, "Undef"
-  vivify_247:
-    $P258."BUILD"($P259 :named("name"), $P260 :named("instance_of"))
-    find_lex $P261, "$obj"
-    unless_null $P261, vivify_248
+  vivify_246:
+    find_lex $P261, "$instance_of"
+    unless_null $P261, vivify_247
     new $P261, "Undef"
+  vivify_247:
+    $P259."BUILD"($P260 :named("name"), $P261 :named("instance_of"))
+    find_lex $P262, "$obj"
+    unless_null $P262, vivify_248
+    new $P262, "Undef"
   vivify_248:
 .annotate 'line', 131
-    .return ($P261)
+    .return ($P262)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPConcreteRoleHOW"]
-.sub "BUILD"  :subid("23_1304456120.214") :outer("21_1304456120.214")
-    .param pmc param_263
-    .param pmc param_264 :named("name")
-    .param pmc param_265 :named("instance_of")
+.sub "BUILD"  :subid("23_1304459371.883") :outer("21_1304459371.883")
+    .param pmc param_264
+    .param pmc param_265 :named("name")
+    .param pmc param_266 :named("instance_of")
 .annotate 'line', 137
-    .lex "self", param_263
-    .lex "$name", param_264
-    .lex "$instance_of", param_265
+    .lex "self", param_264
+    .lex "$name", param_265
+    .lex "$instance_of", param_266
 .annotate 'line', 138
-    find_lex $P266, "$name"
-    unless_null $P266, vivify_249
-    new $P266, "Undef"
+    find_lex $P267, "$name"
+    unless_null $P267, vivify_249
+    new $P267, "Undef"
   vivify_249:
-    find_lex $P267, "self"
-    find_lex $P268, "$?CLASS"
-    setattribute $P267, $P268, "$!name", $P266
+    find_lex $P268, "self"
+    find_lex $P269, "$?CLASS"
+    setattribute $P268, $P269, "$!name", $P267
 .annotate 'line', 139
-    find_lex $P269, "$instance_of"
-    unless_null $P269, vivify_250
-    new $P269, "Undef"
+    find_lex $P270, "$instance_of"
+    unless_null $P270, vivify_250
+    new $P270, "Undef"
   vivify_250:
-    find_lex $P270, "self"
-    find_lex $P271, "$?CLASS"
-    setattribute $P270, $P271, "$!instance_of", $P269
+    find_lex $P271, "self"
+    find_lex $P272, "$?CLASS"
+    setattribute $P271, $P272, "$!instance_of", $P270
 .annotate 'line', 137
-    .return ($P269)
+    .return ($P270)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPConcreteRoleHOW"]
-.sub "new_type"  :subid("24_1304456120.214") :outer("21_1304456120.214")
-    .param pmc param_273
-    .param pmc param_278 :named("instance_of")
-    .param pmc param_274 :optional :named("name")
-    .param int has_param_274 :opt_flag
-    .param pmc param_276 :optional :named("repr")
-    .param int has_param_276 :opt_flag
+.sub "new_type"  :subid("24_1304459371.883") :outer("21_1304459371.883")
+    .param pmc param_274
+    .param pmc param_279 :named("instance_of")
+    .param pmc param_275 :optional :named("name")
+    .param int has_param_275 :opt_flag
+    .param pmc param_277 :optional :named("repr")
+    .param int has_param_277 :opt_flag
 .annotate 'line', 144
-    .lex "self", param_273
-    if has_param_274, optparam_251
-    new $P275, "String"
-    assign $P275, "<anon>"
-    set param_274, $P275
+    .lex "self", param_274
+    if has_param_275, optparam_251
+    new $P276, "String"
+    assign $P276, "<anon>"
+    set param_275, $P276
   optparam_251:
-    .lex "$name", param_274
-    if has_param_276, optparam_252
-    new $P277, "String"
-    assign $P277, "P6opaque"
-    set param_276, $P277
+    .lex "$name", param_275
+    if has_param_277, optparam_252
+    new $P278, "String"
+    assign $P278, "P6opaque"
+    set param_277, $P278
   optparam_252:
-    .lex "$repr", param_276
-    .lex "$instance_of", param_278
+    .lex "$repr", param_277
+    .lex "$instance_of", param_279
 .annotate 'line', 145
-    new $P279, "Undef"
-    .lex "$metarole", $P279
-    find_lex $P280, "self"
-    find_lex $P281, "$name"
-    unless_null $P281, vivify_253
-    new $P281, "Undef"
-  vivify_253:
-    find_lex $P282, "$instance_of"
-    unless_null $P282, vivify_254
+    new $P280, "Undef"
+    .lex "$metarole", $P280
+    find_lex $P281, "self"
+    find_lex $P282, "$name"
+    unless_null $P282, vivify_253
     new $P282, "Undef"
+  vivify_253:
+    find_lex $P283, "$instance_of"
+    unless_null $P283, vivify_254
+    new $P283, "Undef"
   vivify_254:
-    $P283 = $P280."new"($P281 :named("name"), $P282 :named("instance_of"))
-    store_lex "$metarole", $P283
+    $P284 = $P281."new"($P282 :named("name"), $P283 :named("instance_of"))
+    store_lex "$metarole", $P284
 .annotate 'line', 146
-    find_lex $P284, "$metarole"
-    unless_null $P284, vivify_255
-    new $P284, "Undef"
-  vivify_255:
-    find_lex $P285, "$repr"
-    unless_null $P285, vivify_256
+    find_lex $P285, "$metarole"
+    unless_null $P285, vivify_255
     new $P285, "Undef"
+  vivify_255:
+    find_lex $P286, "$repr"
+    unless_null $P286, vivify_256
+    new $P286, "Undef"
   vivify_256:
-    set $S286, $P285
-    repr_type_object_for $P287, $P284, $S286
+    set $S287, $P286
+    repr_type_object_for $P288, $P285, $S287
 .annotate 'line', 144
-    .return ($P287)
+    .return ($P288)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPConcreteRoleHOW"]
-.sub "add_method"  :subid("25_1304456120.214") :outer("21_1304456120.214")
-    .param pmc param_289
+.sub "add_method"  :subid("25_1304459371.883") :outer("21_1304459371.883")
     .param pmc param_290
     .param pmc param_291
     .param pmc param_292
+    .param pmc param_293
 .annotate 'line', 149
-    .lex "self", param_289
-    .lex "$obj", param_290
-    .lex "$name", param_291
-    .lex "$code_obj", param_292
+    .lex "self", param_290
+    .lex "$obj", param_291
+    .lex "$name", param_292
+    .lex "$code_obj", param_293
 .annotate 'line', 150
-    find_lex $P294, "$name"
-    unless_null $P294, vivify_257
-    new $P294, "Undef"
+    find_lex $P295, "$name"
+    unless_null $P295, vivify_257
+    new $P295, "Undef"
   vivify_257:
-    find_lex $P295, "self"
-    find_lex $P296, "$?CLASS"
-    getattribute $P297, $P295, $P296, "%!methods"
-    unless_null $P297, vivify_258
-    $P297 = root_new ['parrot';'Hash']
+    find_lex $P296, "self"
+    find_lex $P297, "$?CLASS"
+    getattribute $P298, $P296, $P297, "%!methods"
+    unless_null $P298, vivify_258
+    $P298 = root_new ['parrot';'Hash']
   vivify_258:
-    set $P298, $P297[$P294]
-    unless_null $P298, vivify_259
-    new $P298, "Undef"
+    set $P299, $P298[$P295]
+    unless_null $P299, vivify_259
+    new $P299, "Undef"
   vivify_259:
-    unless $P298, if_293_end
+    unless $P299, if_294_end
 .annotate 'line', 151
-    new $P299, "String"
-    assign $P299, "This role already has a method named "
-    find_lex $P300, "$name"
-    unless_null $P300, vivify_260
-    new $P300, "Undef"
+    new $P300, "String"
+    assign $P300, "This role already has a method named "
+    find_lex $P301, "$name"
+    unless_null $P301, vivify_260
+    new $P301, "Undef"
   vivify_260:
-    concat $P301, $P299, $P300
-    die $P301
-  if_293_end:
+    concat $P302, $P300, $P301
+    die $P302
+  if_294_end:
 .annotate 'line', 153
-    find_lex $P302, "$code_obj"
-    unless_null $P302, vivify_261
-    new $P302, "Undef"
-  vivify_261:
-    find_lex $P303, "$name"
-    unless_null $P303, vivify_262
+    find_lex $P303, "$code_obj"
+    unless_null $P303, vivify_261
     new $P303, "Undef"
+  vivify_261:
+    find_lex $P304, "$name"
+    unless_null $P304, vivify_262
+    new $P304, "Undef"
   vivify_262:
-    find_lex $P304, "self"
-    find_lex $P305, "$?CLASS"
-    getattribute $P306, $P304, $P305, "%!methods"
-    unless_null $P306, vivify_263
-    $P306 = root_new ['parrot';'Hash']
-    setattribute $P304, $P305, "%!methods", $P306
+    find_lex $P305, "self"
+    find_lex $P306, "$?CLASS"
+    getattribute $P307, $P305, $P306, "%!methods"
+    unless_null $P307, vivify_263
+    $P307 = root_new ['parrot';'Hash']
+    setattribute $P305, $P306, "%!methods", $P307
   vivify_263:
-    set $P306[$P303], $P302
+    set $P307[$P304], $P303
 .annotate 'line', 149
-    .return ($P302)
+    .return ($P303)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPConcreteRoleHOW"]
-.sub "add_multi_method"  :subid("26_1304456120.214") :outer("21_1304456120.214")
-    .param pmc param_308
+.sub "add_multi_method"  :subid("26_1304459371.883") :outer("21_1304459371.883")
     .param pmc param_309
     .param pmc param_310
     .param pmc param_311
+    .param pmc param_312
 .annotate 'line', 156
-    .lex "self", param_308
-    .lex "$obj", param_309
-    .lex "$name", param_310
-    .lex "$code_obj", param_311
+    .lex "self", param_309
+    .lex "$obj", param_310
+    .lex "$name", param_311
+    .lex "$code_obj", param_312
 .annotate 'line', 157
-    $P312 = root_new ['parrot';'Hash']
-    .lex "%todo", $P312
-.annotate 'line', 156
-    find_lex $P313, "%todo"
-    unless_null $P313, vivify_264
     $P313 = root_new ['parrot';'Hash']
+    .lex "%todo", $P313
+.annotate 'line', 156
+    find_lex $P314, "%todo"
+    unless_null $P314, vivify_264
+    $P314 = root_new ['parrot';'Hash']
   vivify_264:
 .annotate 'line', 158
-    find_lex $P314, "$name"
-    unless_null $P314, vivify_265
-    new $P314, "Undef"
+    find_lex $P315, "$name"
+    unless_null $P315, vivify_265
+    new $P315, "Undef"
   vivify_265:
-    find_lex $P315, "%todo"
-    unless_null $P315, vivify_266
-    $P315 = root_new ['parrot';'Hash']
-    store_lex "%todo", $P315
+    find_lex $P316, "%todo"
+    unless_null $P316, vivify_266
+    $P316 = root_new ['parrot';'Hash']
+    store_lex "%todo", $P316
   vivify_266:
-    set $P315["name"], $P314
+    set $P316["name"], $P315
 .annotate 'line', 159
-    find_lex $P316, "$code_obj"
-    unless_null $P316, vivify_267
-    new $P316, "Undef"
+    find_lex $P317, "$code_obj"
+    unless_null $P317, vivify_267
+    new $P317, "Undef"
   vivify_267:
-    find_lex $P317, "%todo"
-    unless_null $P317, vivify_268
-    $P317 = root_new ['parrot';'Hash']
-    store_lex "%todo", $P317
-  vivify_268:
-    set $P317["code"], $P316
-.annotate 'line', 160
     find_lex $P318, "%todo"
-    unless_null $P318, vivify_269
+    unless_null $P318, vivify_268
     $P318 = root_new ['parrot';'Hash']
+    store_lex "%todo", $P318
+  vivify_268:
+    set $P318["code"], $P317
+.annotate 'line', 160
+    find_lex $P319, "%todo"
+    unless_null $P319, vivify_269
+    $P319 = root_new ['parrot';'Hash']
   vivify_269:
-    find_lex $P319, "self"
-    find_lex $P320, "$?CLASS"
-    getattribute $P321, $P319, $P320, "@!multi_methods_to_incorporate"
-    unless_null $P321, vivify_270
-    $P321 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P320, "self"
+    find_lex $P321, "$?CLASS"
+    getattribute $P322, $P320, $P321, "@!multi_methods_to_incorporate"
+    unless_null $P322, vivify_270
+    $P322 = root_new ['parrot';'ResizablePMCArray']
   vivify_270:
-    set $N322, $P321
-    set $I323, $N322
-    find_lex $P324, "self"
-    find_lex $P325, "$?CLASS"
-    getattribute $P326, $P324, $P325, "@!multi_methods_to_incorporate"
-    unless_null $P326, vivify_271
-    $P326 = root_new ['parrot';'ResizablePMCArray']
-    setattribute $P324, $P325, "@!multi_methods_to_incorporate", $P326
+    set $N323, $P322
+    set $I324, $N323
+    find_lex $P325, "self"
+    find_lex $P326, "$?CLASS"
+    getattribute $P327, $P325, $P326, "@!multi_methods_to_incorporate"
+    unless_null $P327, vivify_271
+    $P327 = root_new ['parrot';'ResizablePMCArray']
+    setattribute $P325, $P326, "@!multi_methods_to_incorporate", $P327
   vivify_271:
-    set $P326[$I323], $P318
-    find_lex $P327, "$code_obj"
-    unless_null $P327, vivify_272
-    new $P327, "Undef"
+    set $P327[$I324], $P319
+    find_lex $P328, "$code_obj"
+    unless_null $P328, vivify_272
+    new $P328, "Undef"
   vivify_272:
 .annotate 'line', 156
-    .return ($P327)
+    .return ($P328)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPConcreteRoleHOW"]
-.sub "add_attribute"  :subid("27_1304456120.214") :outer("21_1304456120.214")
-    .param pmc param_329
+.sub "add_attribute"  :subid("27_1304459371.883") :outer("21_1304459371.883")
     .param pmc param_330
     .param pmc param_331
+    .param pmc param_332
 .annotate 'line', 164
-    .lex "self", param_329
-    .lex "$obj", param_330
-    .lex "$meta_attr", param_331
+    .lex "self", param_330
+    .lex "$obj", param_331
+    .lex "$meta_attr", param_332
 .annotate 'line', 165
-    new $P332, "Undef"
-    .lex "$name", $P332
-    find_lex $P333, "$meta_attr"
-    unless_null $P333, vivify_273
     new $P333, "Undef"
+    .lex "$name", $P333
+    find_lex $P334, "$meta_attr"
+    unless_null $P334, vivify_273
+    new $P334, "Undef"
   vivify_273:
-    $P334 = $P333."name"()
-    store_lex "$name", $P334
+    $P335 = $P334."name"()
+    store_lex "$name", $P335
 .annotate 'line', 166
-    find_lex $P336, "$name"
-    unless_null $P336, vivify_274
-    new $P336, "Undef"
+    find_lex $P337, "$name"
+    unless_null $P337, vivify_274
+    new $P337, "Undef"
   vivify_274:
-    find_lex $P337, "self"
-    find_lex $P338, "$?CLASS"
-    getattribute $P339, $P337, $P338, "%!attributes"
-    unless_null $P339, vivify_275
-    $P339 = root_new ['parrot';'Hash']
+    find_lex $P338, "self"
+    find_lex $P339, "$?CLASS"
+    getattribute $P340, $P338, $P339, "%!attributes"
+    unless_null $P340, vivify_275
+    $P340 = root_new ['parrot';'Hash']
   vivify_275:
-    set $P340, $P339[$P336]
-    unless_null $P340, vivify_276
-    new $P340, "Undef"
+    set $P341, $P340[$P337]
+    unless_null $P341, vivify_276
+    new $P341, "Undef"
   vivify_276:
-    unless $P340, if_335_end
+    unless $P341, if_336_end
 .annotate 'line', 167
-    new $P341, "String"
-    assign $P341, "This role already has an attribute named "
-    find_lex $P342, "$name"
-    unless_null $P342, vivify_277
-    new $P342, "Undef"
+    new $P342, "String"
+    assign $P342, "This role already has an attribute named "
+    find_lex $P343, "$name"
+    unless_null $P343, vivify_277
+    new $P343, "Undef"
   vivify_277:
-    concat $P343, $P341, $P342
-    die $P343
-  if_335_end:
+    concat $P344, $P342, $P343
+    die $P344
+  if_336_end:
 .annotate 'line', 169
-    find_lex $P344, "$meta_attr"
-    unless_null $P344, vivify_278
-    new $P344, "Undef"
-  vivify_278:
-    find_lex $P345, "$name"
-    unless_null $P345, vivify_279
+    find_lex $P345, "$meta_attr"
+    unless_null $P345, vivify_278
     new $P345, "Undef"
+  vivify_278:
+    find_lex $P346, "$name"
+    unless_null $P346, vivify_279
+    new $P346, "Undef"
   vivify_279:
-    find_lex $P346, "self"
-    find_lex $P347, "$?CLASS"
-    getattribute $P348, $P346, $P347, "%!attributes"
-    unless_null $P348, vivify_280
-    $P348 = root_new ['parrot';'Hash']
-    setattribute $P346, $P347, "%!attributes", $P348
+    find_lex $P347, "self"
+    find_lex $P348, "$?CLASS"
+    getattribute $P349, $P347, $P348, "%!attributes"
+    unless_null $P349, vivify_280
+    $P349 = root_new ['parrot';'Hash']
+    setattribute $P347, $P348, "%!attributes", $P349
   vivify_280:
-    set $P348[$P345], $P344
+    set $P349[$P346], $P345
 .annotate 'line', 164
-    .return ($P344)
+    .return ($P345)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPConcreteRoleHOW"]
-.sub "add_parent"  :subid("28_1304456120.214") :outer("21_1304456120.214")
-    .param pmc param_350
+.sub "add_parent"  :subid("28_1304459371.883") :outer("21_1304459371.883")
     .param pmc param_351
     .param pmc param_352
+    .param pmc param_353
 .annotate 'line', 172
-    .lex "self", param_350
-    .lex "$obj", param_351
-    .lex "$parent", param_352
+    .lex "self", param_351
+    .lex "$obj", param_352
+    .lex "$parent", param_353
 .annotate 'line', 173
     die "A role cannot inherit from a class in NQP"
 .annotate 'line', 172
@@ -2772,74 +2786,74 @@
 .HLL "nqp"
 
 .namespace ["NQPConcreteRoleHOW"]
-.sub "add_role"  :subid("29_1304456120.214") :outer("21_1304456120.214")
-    .param pmc param_354
+.sub "add_role"  :subid("29_1304459371.883") :outer("21_1304459371.883")
     .param pmc param_355
     .param pmc param_356
+    .param pmc param_357
 .annotate 'line', 176
-    .lex "self", param_354
-    .lex "$obj", param_355
-    .lex "$role", param_356
+    .lex "self", param_355
+    .lex "$obj", param_356
+    .lex "$role", param_357
 .annotate 'line', 177
-    find_lex $P357, "$role"
-    unless_null $P357, vivify_281
-    new $P357, "Undef"
+    find_lex $P358, "$role"
+    unless_null $P358, vivify_281
+    new $P358, "Undef"
   vivify_281:
-    find_lex $P358, "self"
-    find_lex $P359, "$?CLASS"
-    getattribute $P360, $P358, $P359, "@!roles"
-    unless_null $P360, vivify_282
-    $P360 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P359, "self"
+    find_lex $P360, "$?CLASS"
+    getattribute $P361, $P359, $P360, "@!roles"
+    unless_null $P361, vivify_282
+    $P361 = root_new ['parrot';'ResizablePMCArray']
   vivify_282:
-    set $N361, $P360
-    set $I362, $N361
-    find_lex $P363, "self"
-    find_lex $P364, "$?CLASS"
-    getattribute $P365, $P363, $P364, "@!roles"
-    unless_null $P365, vivify_283
-    $P365 = root_new ['parrot';'ResizablePMCArray']
-    setattribute $P363, $P364, "@!roles", $P365
+    set $N362, $P361
+    set $I363, $N362
+    find_lex $P364, "self"
+    find_lex $P365, "$?CLASS"
+    getattribute $P366, $P364, $P365, "@!roles"
+    unless_null $P366, vivify_283
+    $P366 = root_new ['parrot';'ResizablePMCArray']
+    setattribute $P364, $P365, "@!roles", $P366
   vivify_283:
-    set $P365[$I362], $P357
+    set $P366[$I363], $P358
 .annotate 'line', 176
-    .return ($P357)
+    .return ($P358)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPConcreteRoleHOW"]
-.sub "add_collision"  :subid("30_1304456120.214") :outer("21_1304456120.214")
-    .param pmc param_367
+.sub "add_collision"  :subid("30_1304459371.883") :outer("21_1304459371.883")
     .param pmc param_368
     .param pmc param_369
+    .param pmc param_370
 .annotate 'line', 180
-    .lex "self", param_367
-    .lex "$obj", param_368
-    .lex "$colliding_name", param_369
+    .lex "self", param_368
+    .lex "$obj", param_369
+    .lex "$colliding_name", param_370
 .annotate 'line', 181
-    find_lex $P370, "$colliding_name"
-    unless_null $P370, vivify_284
-    new $P370, "Undef"
+    find_lex $P371, "$colliding_name"
+    unless_null $P371, vivify_284
+    new $P371, "Undef"
   vivify_284:
-    find_lex $P371, "self"
-    find_lex $P372, "$?CLASS"
-    getattribute $P373, $P371, $P372, "@!collisions"
-    unless_null $P373, vivify_285
-    $P373 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P372, "self"
+    find_lex $P373, "$?CLASS"
+    getattribute $P374, $P372, $P373, "@!collisions"
+    unless_null $P374, vivify_285
+    $P374 = root_new ['parrot';'ResizablePMCArray']
   vivify_285:
-    set $N374, $P373
-    set $I375, $N374
-    find_lex $P376, "self"
-    find_lex $P377, "$?CLASS"
-    getattribute $P378, $P376, $P377, "@!collisions"
-    unless_null $P378, vivify_286
-    $P378 = root_new ['parrot';'ResizablePMCArray']
-    setattribute $P376, $P377, "@!collisions", $P378
+    set $N375, $P374
+    set $I376, $N375
+    find_lex $P377, "self"
+    find_lex $P378, "$?CLASS"
+    getattribute $P379, $P377, $P378, "@!collisions"
+    unless_null $P379, vivify_286
+    $P379 = root_new ['parrot';'ResizablePMCArray']
+    setattribute $P377, $P378, "@!collisions", $P379
   vivify_286:
-    set $P378[$I375], $P370
+    set $P379[$I376], $P371
 .annotate 'line', 180
-    .return ($P370)
+    .return ($P371)
 .end
 
 
@@ -2847,140 +2861,140 @@
 
 .namespace ["NQPConcreteRoleHOW"]
 .include "except_types.pasm"
-.sub "compose"  :subid("31_1304456120.214") :outer("21_1304456120.214")
-    .param pmc param_380
+.sub "compose"  :subid("31_1304459371.883") :outer("21_1304459371.883")
     .param pmc param_381
+    .param pmc param_382
 .annotate 'line', 185
-    .const 'Sub' $P393 = "32_1304456120.214" 
-    capture_lex $P393
-    .lex "self", param_380
-    .lex "$obj", param_381
+    .const 'Sub' $P394 = "32_1304459371.883" 
+    capture_lex $P394
+    .lex "self", param_381
+    .lex "$obj", param_382
 .annotate 'line', 188
-    find_lex $P383, "self"
-    find_lex $P384, "$?CLASS"
-    getattribute $P385, $P383, $P384, "@!roles"
-    unless_null $P385, vivify_287
-    $P385 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P384, "self"
+    find_lex $P385, "$?CLASS"
+    getattribute $P386, $P384, $P385, "@!roles"
+    unless_null $P386, vivify_287
+    $P386 = root_new ['parrot';'ResizablePMCArray']
   vivify_287:
-    unless $P385, if_382_end
+    unless $P386, if_383_end
 .annotate 'line', 189
-    find_lex $P387, "self"
-    find_lex $P388, "$?CLASS"
-    getattribute $P389, $P387, $P388, "@!roles"
-    unless_null $P389, vivify_288
-    $P389 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P388, "self"
+    find_lex $P389, "$?CLASS"
+    getattribute $P390, $P388, $P389, "@!roles"
+    unless_null $P390, vivify_288
+    $P390 = root_new ['parrot';'ResizablePMCArray']
   vivify_288:
-    defined $I390, $P389
-    unless $I390, for_undef_289
-    iter $P386, $P389
-    new $P417, 'ExceptionHandler'
-    set_label $P417, loop416_handler
-    $P417."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P417
-  loop416_test:
-    unless $P386, loop416_done
-    shift $P391, $P386
-  loop416_redo:
-    .const 'Sub' $P393 = "32_1304456120.214" 
-    capture_lex $P393
-    $P393($P391)
-  loop416_next:
-    goto loop416_test
-  loop416_handler:
+    defined $I391, $P390
+    unless $I391, for_undef_289
+    iter $P387, $P390
+    new $P418, 'ExceptionHandler'
+    set_label $P418, loop417_handler
+    $P418."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P418
+  loop417_test:
+    unless $P387, loop417_done
+    shift $P392, $P387
+  loop417_redo:
+    .const 'Sub' $P394 = "32_1304459371.883" 
+    capture_lex $P394
+    $P394($P392)
+  loop417_next:
+    goto loop417_test
+  loop417_handler:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P418, exception, 'type'
-    eq $P418, .CONTROL_LOOP_NEXT, loop416_next
-    eq $P418, .CONTROL_LOOP_REDO, loop416_redo
-  loop416_done:
+    getattribute $P419, exception, 'type'
+    eq $P419, .CONTROL_LOOP_NEXT, loop417_next
+    eq $P419, .CONTROL_LOOP_REDO, loop417_redo
+  loop417_done:
     pop_eh 
   for_undef_289:
 .annotate 'line', 193
-    find_lex $P419, "RoleToRoleApplier"
-    find_lex $P420, "$obj"
-    unless_null $P420, vivify_297
-    new $P420, "Undef"
+    find_lex $P420, "RoleToRoleApplier"
+    find_lex $P421, "$obj"
+    unless_null $P421, vivify_297
+    new $P421, "Undef"
   vivify_297:
-    find_lex $P421, "self"
-    find_lex $P422, "$?CLASS"
-    getattribute $P423, $P421, $P422, "@!roles"
-    unless_null $P423, vivify_298
-    $P423 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P422, "self"
+    find_lex $P423, "$?CLASS"
+    getattribute $P424, $P422, $P423, "@!roles"
+    unless_null $P424, vivify_298
+    $P424 = root_new ['parrot';'ResizablePMCArray']
   vivify_298:
-    $P419."apply"($P420, $P423)
-  if_382_end:
+    $P420."apply"($P421, $P424)
+  if_383_end:
 .annotate 'line', 197
-    new $P424, "Integer"
-    assign $P424, 1
-    find_lex $P425, "self"
-    find_lex $P426, "$?CLASS"
-    setattribute $P425, $P426, "$!composed", $P424
-    find_lex $P427, "$obj"
-    unless_null $P427, vivify_299
-    new $P427, "Undef"
+    new $P425, "Integer"
+    assign $P425, 1
+    find_lex $P426, "self"
+    find_lex $P427, "$?CLASS"
+    setattribute $P426, $P427, "$!composed", $P425
+    find_lex $P428, "$obj"
+    unless_null $P428, vivify_299
+    new $P428, "Undef"
   vivify_299:
 .annotate 'line', 185
-    .return ($P427)
+    .return ($P428)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPConcreteRoleHOW"]
-.sub "_block392"  :anon :subid("32_1304456120.214") :outer("31_1304456120.214")
-    .param pmc param_394
+.sub "_block393"  :anon :subid("32_1304459371.883") :outer("31_1304459371.883")
+    .param pmc param_395
 .annotate 'line', 189
-    .lex "$_", param_394
+    .lex "$_", param_395
 .annotate 'line', 190
-    find_lex $P395, "$_"
-    unless_null $P395, vivify_290
-    new $P395, "Undef"
+    find_lex $P396, "$_"
+    unless_null $P396, vivify_290
+    new $P396, "Undef"
   vivify_290:
-    find_lex $P396, "self"
-    find_lex $P397, "$?CLASS"
-    getattribute $P398, $P396, $P397, "@!done"
-    unless_null $P398, vivify_291
-    $P398 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P397, "self"
+    find_lex $P398, "$?CLASS"
+    getattribute $P399, $P397, $P398, "@!done"
+    unless_null $P399, vivify_291
+    $P399 = root_new ['parrot';'ResizablePMCArray']
   vivify_291:
-    set $N399, $P398
-    set $I400, $N399
-    find_lex $P401, "self"
-    find_lex $P402, "$?CLASS"
-    getattribute $P403, $P401, $P402, "@!done"
-    unless_null $P403, vivify_292
-    $P403 = root_new ['parrot';'ResizablePMCArray']
-    setattribute $P401, $P402, "@!done", $P403
+    set $N400, $P399
+    set $I401, $N400
+    find_lex $P402, "self"
+    find_lex $P403, "$?CLASS"
+    getattribute $P404, $P402, $P403, "@!done"
+    unless_null $P404, vivify_292
+    $P404 = root_new ['parrot';'ResizablePMCArray']
+    setattribute $P402, $P403, "@!done", $P404
   vivify_292:
-    set $P403[$I400], $P395
+    set $P404[$I401], $P396
 .annotate 'line', 191
-    find_lex $P404, "$_"
-    unless_null $P404, vivify_293
-    new $P404, "Undef"
+    find_lex $P405, "$_"
+    unless_null $P405, vivify_293
+    new $P405, "Undef"
   vivify_293:
-    get_how $P405, $P404
-    find_lex $P406, "$_"
-    unless_null $P406, vivify_294
-    new $P406, "Undef"
+    get_how $P406, $P405
+    find_lex $P407, "$_"
+    unless_null $P407, vivify_294
+    new $P407, "Undef"
   vivify_294:
-    $P407 = $P405."instance_of"($P406)
-    find_lex $P408, "self"
-    find_lex $P409, "$?CLASS"
-    getattribute $P410, $P408, $P409, "@!done"
-    unless_null $P410, vivify_295
-    $P410 = root_new ['parrot';'ResizablePMCArray']
+    $P408 = $P406."instance_of"($P407)
+    find_lex $P409, "self"
+    find_lex $P410, "$?CLASS"
+    getattribute $P411, $P409, $P410, "@!done"
+    unless_null $P411, vivify_295
+    $P411 = root_new ['parrot';'ResizablePMCArray']
   vivify_295:
-    set $N411, $P410
-    set $I412, $N411
-    find_lex $P413, "self"
-    find_lex $P414, "$?CLASS"
-    getattribute $P415, $P413, $P414, "@!done"
-    unless_null $P415, vivify_296
-    $P415 = root_new ['parrot';'ResizablePMCArray']
-    setattribute $P413, $P414, "@!done", $P415
+    set $N412, $P411
+    set $I413, $N412
+    find_lex $P414, "self"
+    find_lex $P415, "$?CLASS"
+    getattribute $P416, $P414, $P415, "@!done"
+    unless_null $P416, vivify_296
+    $P416 = root_new ['parrot';'ResizablePMCArray']
+    setattribute $P414, $P415, "@!done", $P416
   vivify_296:
-    set $P415[$I412], $P407
+    set $P416[$I413], $P408
 .annotate 'line', 189
-    .return ($P407)
+    .return ($P408)
 .end
 
 
@@ -2988,147 +3002,147 @@
 
 .namespace ["NQPConcreteRoleHOW"]
 .include "except_types.pasm"
-.sub "methods"  :subid("33_1304456120.214") :outer("21_1304456120.214")
-    .param pmc param_429
+.sub "methods"  :subid("33_1304459371.883") :outer("21_1304459371.883")
     .param pmc param_430
-    .param pmc param_431 :optional :named("local")
-    .param int has_param_431 :opt_flag
+    .param pmc param_431
+    .param pmc param_432 :optional :named("local")
+    .param int has_param_432 :opt_flag
 .annotate 'line', 206
-    .const 'Sub' $P442 = "34_1304456120.214" 
-    capture_lex $P442
-    .lex "self", param_429
-    .lex "$obj", param_430
-    if has_param_431, optparam_300
-    new $P432, "Undef"
-    set param_431, $P432
+    .const 'Sub' $P443 = "34_1304459371.883" 
+    capture_lex $P443
+    .lex "self", param_430
+    .lex "$obj", param_431
+    if has_param_432, optparam_300
+    new $P433, "Undef"
+    set param_432, $P433
   optparam_300:
-    .lex "$local", param_431
+    .lex "$local", param_432
 .annotate 'line', 207
-    $P433 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@meths", $P433
-.annotate 'line', 206
-    find_lex $P434, "@meths"
-    unless_null $P434, vivify_301
     $P434 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@meths", $P434
+.annotate 'line', 206
+    find_lex $P435, "@meths"
+    unless_null $P435, vivify_301
+    $P435 = root_new ['parrot';'ResizablePMCArray']
   vivify_301:
 .annotate 'line', 208
-    find_lex $P436, "self"
-    find_lex $P437, "$?CLASS"
-    getattribute $P438, $P436, $P437, "%!methods"
-    unless_null $P438, vivify_302
-    $P438 = root_new ['parrot';'Hash']
+    find_lex $P437, "self"
+    find_lex $P438, "$?CLASS"
+    getattribute $P439, $P437, $P438, "%!methods"
+    unless_null $P439, vivify_302
+    $P439 = root_new ['parrot';'Hash']
   vivify_302:
-    defined $I439, $P438
-    unless $I439, for_undef_303
-    iter $P435, $P438
-    new $P449, 'ExceptionHandler'
-    set_label $P449, loop448_handler
-    $P449."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P449
-  loop448_test:
-    unless $P435, loop448_done
-    shift $P440, $P435
-  loop448_redo:
-    .const 'Sub' $P442 = "34_1304456120.214" 
-    capture_lex $P442
-    $P442($P440)
-  loop448_next:
-    goto loop448_test
-  loop448_handler:
+    defined $I440, $P439
+    unless $I440, for_undef_303
+    iter $P436, $P439
+    new $P450, 'ExceptionHandler'
+    set_label $P450, loop449_handler
+    $P450."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P450
+  loop449_test:
+    unless $P436, loop449_done
+    shift $P441, $P436
+  loop449_redo:
+    .const 'Sub' $P443 = "34_1304459371.883" 
+    capture_lex $P443
+    $P443($P441)
+  loop449_next:
+    goto loop449_test
+  loop449_handler:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P450, exception, 'type'
-    eq $P450, .CONTROL_LOOP_NEXT, loop448_next
-    eq $P450, .CONTROL_LOOP_REDO, loop448_redo
-  loop448_done:
+    getattribute $P451, exception, 'type'
+    eq $P451, .CONTROL_LOOP_NEXT, loop449_next
+    eq $P451, .CONTROL_LOOP_REDO, loop449_redo
+  loop449_done:
     pop_eh 
   for_undef_303:
-    find_lex $P451, "@meths"
-    unless_null $P451, vivify_306
-    $P451 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P452, "@meths"
+    unless_null $P452, vivify_306
+    $P452 = root_new ['parrot';'ResizablePMCArray']
   vivify_306:
 .annotate 'line', 206
-    .return ($P451)
+    .return ($P452)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPConcreteRoleHOW"]
-.sub "_block441"  :anon :subid("34_1304456120.214") :outer("33_1304456120.214")
-    .param pmc param_443
+.sub "_block442"  :anon :subid("34_1304459371.883") :outer("33_1304459371.883")
+    .param pmc param_444
 .annotate 'line', 208
-    .lex "$_", param_443
+    .lex "$_", param_444
 .annotate 'line', 209
-    find_lex $P444, "@meths"
-    unless_null $P444, vivify_304
-    $P444 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P445, "@meths"
+    unless_null $P445, vivify_304
+    $P445 = root_new ['parrot';'ResizablePMCArray']
   vivify_304:
-    find_lex $P445, "$_"
-    unless_null $P445, vivify_305
-    new $P445, "Undef"
+    find_lex $P446, "$_"
+    unless_null $P446, vivify_305
+    new $P446, "Undef"
   vivify_305:
-    $P446 = $P445."value"()
-    $P447 = $P444."push"($P446)
+    $P447 = $P446."value"()
+    $P448 = $P445."push"($P447)
 .annotate 'line', 208
-    .return ($P447)
+    .return ($P448)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPConcreteRoleHOW"]
-.sub "method_table"  :subid("35_1304456120.214") :outer("21_1304456120.214")
-    .param pmc param_453
+.sub "method_table"  :subid("35_1304459371.883") :outer("21_1304459371.883")
     .param pmc param_454
+    .param pmc param_455
 .annotate 'line', 214
-    .lex "self", param_453
-    .lex "$obj", param_454
-    find_lex $P455, "self"
-    find_lex $P456, "$?CLASS"
-    getattribute $P457, $P455, $P456, "%!methods"
-    unless_null $P457, vivify_307
-    $P457 = root_new ['parrot';'Hash']
+    .lex "self", param_454
+    .lex "$obj", param_455
+    find_lex $P456, "self"
+    find_lex $P457, "$?CLASS"
+    getattribute $P458, $P456, $P457, "%!methods"
+    unless_null $P458, vivify_307
+    $P458 = root_new ['parrot';'Hash']
   vivify_307:
-    .return ($P457)
+    .return ($P458)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPConcreteRoleHOW"]
-.sub "collisions"  :subid("36_1304456120.214") :outer("21_1304456120.214")
-    .param pmc param_459
+.sub "collisions"  :subid("36_1304459371.883") :outer("21_1304459371.883")
     .param pmc param_460
+    .param pmc param_461
 .annotate 'line', 218
-    .lex "self", param_459
-    .lex "$obj", param_460
-    find_lex $P461, "self"
-    find_lex $P462, "$?CLASS"
-    getattribute $P463, $P461, $P462, "@!collisions"
-    unless_null $P463, vivify_308
-    $P463 = root_new ['parrot';'ResizablePMCArray']
+    .lex "self", param_460
+    .lex "$obj", param_461
+    find_lex $P462, "self"
+    find_lex $P463, "$?CLASS"
+    getattribute $P464, $P462, $P463, "@!collisions"
+    unless_null $P464, vivify_308
+    $P464 = root_new ['parrot';'ResizablePMCArray']
   vivify_308:
-    .return ($P463)
+    .return ($P464)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPConcreteRoleHOW"]
-.sub "name"  :subid("37_1304456120.214") :outer("21_1304456120.214")
-    .param pmc param_465
+.sub "name"  :subid("37_1304459371.883") :outer("21_1304459371.883")
     .param pmc param_466
+    .param pmc param_467
 .annotate 'line', 222
-    .lex "self", param_465
-    .lex "$obj", param_466
-    find_lex $P467, "self"
-    find_lex $P468, "$?CLASS"
-    getattribute $P469, $P467, $P468, "$!name"
-    unless_null $P469, vivify_309
-    new $P469, "Undef"
+    .lex "self", param_466
+    .lex "$obj", param_467
+    find_lex $P468, "self"
+    find_lex $P469, "$?CLASS"
+    getattribute $P470, $P468, $P469, "$!name"
+    unless_null $P470, vivify_309
+    new $P470, "Undef"
   vivify_309:
-    .return ($P469)
+    .return ($P470)
 .end
 
 
@@ -3136,160 +3150,160 @@
 
 .namespace ["NQPConcreteRoleHOW"]
 .include "except_types.pasm"
-.sub "attributes"  :subid("38_1304456120.214") :outer("21_1304456120.214")
-    .param pmc param_471
+.sub "attributes"  :subid("38_1304459371.883") :outer("21_1304459371.883")
     .param pmc param_472
-    .param pmc param_473 :optional :named("local")
-    .param int has_param_473 :opt_flag
+    .param pmc param_473
+    .param pmc param_474 :optional :named("local")
+    .param int has_param_474 :opt_flag
 .annotate 'line', 226
-    .const 'Sub' $P484 = "39_1304456120.214" 
-    capture_lex $P484
-    .lex "self", param_471
-    .lex "$obj", param_472
-    if has_param_473, optparam_310
-    new $P474, "Undef"
-    set param_473, $P474
+    .const 'Sub' $P485 = "39_1304459371.883" 
+    capture_lex $P485
+    .lex "self", param_472
+    .lex "$obj", param_473
+    if has_param_474, optparam_310
+    new $P475, "Undef"
+    set param_474, $P475
   optparam_310:
-    .lex "$local", param_473
+    .lex "$local", param_474
 .annotate 'line', 227
-    $P475 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@attrs", $P475
-.annotate 'line', 226
-    find_lex $P476, "@attrs"
-    unless_null $P476, vivify_311
     $P476 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@attrs", $P476
+.annotate 'line', 226
+    find_lex $P477, "@attrs"
+    unless_null $P477, vivify_311
+    $P477 = root_new ['parrot';'ResizablePMCArray']
   vivify_311:
 .annotate 'line', 228
-    find_lex $P478, "self"
-    find_lex $P479, "$?CLASS"
-    getattribute $P480, $P478, $P479, "%!attributes"
-    unless_null $P480, vivify_312
-    $P480 = root_new ['parrot';'Hash']
+    find_lex $P479, "self"
+    find_lex $P480, "$?CLASS"
+    getattribute $P481, $P479, $P480, "%!attributes"
+    unless_null $P481, vivify_312
+    $P481 = root_new ['parrot';'Hash']
   vivify_312:
-    defined $I481, $P480
-    unless $I481, for_undef_313
-    iter $P477, $P480
-    new $P491, 'ExceptionHandler'
-    set_label $P491, loop490_handler
-    $P491."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P491
-  loop490_test:
-    unless $P477, loop490_done
-    shift $P482, $P477
-  loop490_redo:
-    .const 'Sub' $P484 = "39_1304456120.214" 
-    capture_lex $P484
-    $P484($P482)
-  loop490_next:
-    goto loop490_test
-  loop490_handler:
+    defined $I482, $P481
+    unless $I482, for_undef_313
+    iter $P478, $P481
+    new $P492, 'ExceptionHandler'
+    set_label $P492, loop491_handler
+    $P492."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P492
+  loop491_test:
+    unless $P478, loop491_done
+    shift $P483, $P478
+  loop491_redo:
+    .const 'Sub' $P485 = "39_1304459371.883" 
+    capture_lex $P485
+    $P485($P483)
+  loop491_next:
+    goto loop491_test
+  loop491_handler:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P492, exception, 'type'
-    eq $P492, .CONTROL_LOOP_NEXT, loop490_next
-    eq $P492, .CONTROL_LOOP_REDO, loop490_redo
-  loop490_done:
+    getattribute $P493, exception, 'type'
+    eq $P493, .CONTROL_LOOP_NEXT, loop491_next
+    eq $P493, .CONTROL_LOOP_REDO, loop491_redo
+  loop491_done:
     pop_eh 
   for_undef_313:
-    find_lex $P493, "@attrs"
-    unless_null $P493, vivify_316
-    $P493 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P494, "@attrs"
+    unless_null $P494, vivify_316
+    $P494 = root_new ['parrot';'ResizablePMCArray']
   vivify_316:
 .annotate 'line', 226
-    .return ($P493)
+    .return ($P494)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPConcreteRoleHOW"]
-.sub "_block483"  :anon :subid("39_1304456120.214") :outer("38_1304456120.214")
-    .param pmc param_485
+.sub "_block484"  :anon :subid("39_1304459371.883") :outer("38_1304459371.883")
+    .param pmc param_486
 .annotate 'line', 228
-    .lex "$_", param_485
+    .lex "$_", param_486
 .annotate 'line', 229
-    find_lex $P486, "@attrs"
-    unless_null $P486, vivify_314
-    $P486 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P487, "@attrs"
+    unless_null $P487, vivify_314
+    $P487 = root_new ['parrot';'ResizablePMCArray']
   vivify_314:
-    find_lex $P487, "$_"
-    unless_null $P487, vivify_315
-    new $P487, "Undef"
+    find_lex $P488, "$_"
+    unless_null $P488, vivify_315
+    new $P488, "Undef"
   vivify_315:
-    $P488 = $P487."value"()
-    $P489 = $P486."push"($P488)
+    $P489 = $P488."value"()
+    $P490 = $P487."push"($P489)
 .annotate 'line', 228
-    .return ($P489)
+    .return ($P490)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPConcreteRoleHOW"]
-.sub "roles"  :subid("40_1304456120.214") :outer("21_1304456120.214")
-    .param pmc param_495
+.sub "roles"  :subid("40_1304459371.883") :outer("21_1304459371.883")
     .param pmc param_496
+    .param pmc param_497
 .annotate 'line', 234
-    .lex "self", param_495
-    .lex "$obj", param_496
-    find_lex $P497, "self"
-    find_lex $P498, "$?CLASS"
-    getattribute $P499, $P497, $P498, "@!roles"
-    unless_null $P499, vivify_317
-    $P499 = root_new ['parrot';'ResizablePMCArray']
+    .lex "self", param_496
+    .lex "$obj", param_497
+    find_lex $P498, "self"
+    find_lex $P499, "$?CLASS"
+    getattribute $P500, $P498, $P499, "@!roles"
+    unless_null $P500, vivify_317
+    $P500 = root_new ['parrot';'ResizablePMCArray']
   vivify_317:
-    .return ($P499)
+    .return ($P500)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPConcreteRoleHOW"]
-.sub "instance_of"  :subid("41_1304456120.214") :outer("21_1304456120.214")
-    .param pmc param_501
+.sub "instance_of"  :subid("41_1304459371.883") :outer("21_1304459371.883")
     .param pmc param_502
+    .param pmc param_503
 .annotate 'line', 238
-    .lex "self", param_501
-    .lex "$obj", param_502
-    find_lex $P503, "self"
-    find_lex $P504, "$?CLASS"
-    getattribute $P505, $P503, $P504, "$!instance_of"
-    unless_null $P505, vivify_318
-    new $P505, "Undef"
+    .lex "self", param_502
+    .lex "$obj", param_503
+    find_lex $P504, "self"
+    find_lex $P505, "$?CLASS"
+    getattribute $P506, $P504, $P505, "$!instance_of"
+    unless_null $P506, vivify_318
+    new $P506, "Undef"
   vivify_318:
-    .return ($P505)
+    .return ($P506)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["RoleToClassApplier"]
-.sub "_block507"  :subid("42_1304456120.214") :outer("10_1304456120.214")
+.sub "_block508"  :subid("42_1304459371.883") :outer("10_1304459371.883")
 .annotate 'line', 244
-    .const 'Sub' $P581 = "47_1304456120.214" 
-    capture_lex $P581
-    .const 'Sub' $P544 = "45_1304456120.214" 
-    capture_lex $P544
-    .const 'Sub' $P509 = "43_1304456120.214" 
-    capture_lex $P509
+    .const 'Sub' $P582 = "47_1304459371.883" 
+    capture_lex $P582
+    .const 'Sub' $P545 = "45_1304459371.883" 
+    capture_lex $P545
+    .const 'Sub' $P510 = "43_1304459371.883" 
+    capture_lex $P510
 .annotate 'line', 246
-    .const 'Sub' $P509 = "43_1304456120.214" 
-    newclosure $P543, $P509
-    .lex "has_method", $P543
+    .const 'Sub' $P510 = "43_1304459371.883" 
+    newclosure $P544, $P510
+    .lex "has_method", $P544
 .annotate 'line', 254
-    .const 'Sub' $P544 = "45_1304456120.214" 
-    newclosure $P576, $P544
-    .lex "has_attribute", $P576
+    .const 'Sub' $P545 = "45_1304459371.883" 
+    newclosure $P577, $P545
+    .lex "has_attribute", $P577
 .annotate 'line', 244
-    .lex "$?PACKAGE", $P577
-    .lex "$?CLASS", $P578
-    find_lex $P579, "has_method"
-    find_lex $P580, "has_attribute"
+    .lex "$?PACKAGE", $P578
+    .lex "$?CLASS", $P579
+    find_lex $P580, "has_method"
+    find_lex $P581, "has_attribute"
 .annotate 'line', 262
-    .const 'Sub' $P581 = "47_1304456120.214" 
-    newclosure $P719, $P581
+    .const 'Sub' $P582 = "47_1304459371.883" 
+    newclosure $P720, $P582
 .annotate 'line', 244
-    .return ($P719)
+    .return ($P720)
 .end
 
 
@@ -3297,81 +3311,81 @@
 
 .namespace ["RoleToClassApplier"]
 .include "except_types.pasm"
-.sub "has_method"  :subid("43_1304456120.214") :outer("42_1304456120.214")
-    .param pmc param_512
+.sub "has_method"  :subid("43_1304459371.883") :outer("42_1304459371.883")
     .param pmc param_513
     .param pmc param_514
+    .param pmc param_515
 .annotate 'line', 246
-    .const 'Sub' $P526 = "44_1304456120.214" 
-    capture_lex $P526
-    new $P511, ['ExceptionHandler'], .CONTROL_RETURN
-    set_label $P511, control_510
-    push_eh $P511
-    .lex "$target", param_512
-    .lex "$name", param_513
-    .lex "$local", param_514
+    .const 'Sub' $P527 = "44_1304459371.883" 
+    capture_lex $P527
+    new $P512, ['ExceptionHandler'], .CONTROL_RETURN
+    set_label $P512, control_511
+    push_eh $P512
+    .lex "$target", param_513
+    .lex "$name", param_514
+    .lex "$local", param_515
 .annotate 'line', 247
-    $P515 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@methods", $P515
-    find_lex $P516, "$target"
-    unless_null $P516, vivify_319
-    new $P516, "Undef"
+    $P516 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@methods", $P516
+    find_lex $P517, "$target"
+    unless_null $P517, vivify_319
+    new $P517, "Undef"
   vivify_319:
-    get_how $P517, $P516
-    find_lex $P518, "$target"
-    unless_null $P518, vivify_320
-    new $P518, "Undef"
-  vivify_320:
-    find_lex $P519, "$local"
-    unless_null $P519, vivify_321
+    get_how $P518, $P517
+    find_lex $P519, "$target"
+    unless_null $P519, vivify_320
     new $P519, "Undef"
+  vivify_320:
+    find_lex $P520, "$local"
+    unless_null $P520, vivify_321
+    new $P520, "Undef"
   vivify_321:
-    $P520 = $P517."methods"($P518, $P519 :named("local"))
-    store_lex "@methods", $P520
+    $P521 = $P518."methods"($P519, $P520 :named("local"))
+    store_lex "@methods", $P521
 .annotate 'line', 248
-    find_lex $P522, "@methods"
-    unless_null $P522, vivify_322
-    $P522 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P523, "@methods"
+    unless_null $P523, vivify_322
+    $P523 = root_new ['parrot';'ResizablePMCArray']
   vivify_322:
-    defined $I523, $P522
-    unless $I523, for_undef_323
-    iter $P521, $P522
-    new $P538, 'ExceptionHandler'
-    set_label $P538, loop537_handler
-    $P538."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P538
-  loop537_test:
-    unless $P521, loop537_done
-    shift $P524, $P521
-  loop537_redo:
-    .const 'Sub' $P526 = "44_1304456120.214" 
-    capture_lex $P526
-    $P526($P524)
-  loop537_next:
-    goto loop537_test
-  loop537_handler:
+    defined $I524, $P523
+    unless $I524, for_undef_323
+    iter $P522, $P523
+    new $P539, 'ExceptionHandler'
+    set_label $P539, loop538_handler
+    $P539."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P539
+  loop538_test:
+    unless $P522, loop538_done
+    shift $P525, $P522
+  loop538_redo:
+    .const 'Sub' $P527 = "44_1304459371.883" 
+    capture_lex $P527
+    $P527($P525)
+  loop538_next:
+    goto loop538_test
+  loop538_handler:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P539, exception, 'type'
-    eq $P539, .CONTROL_LOOP_NEXT, loop537_next
-    eq $P539, .CONTROL_LOOP_REDO, loop537_redo
-  loop537_done:
+    getattribute $P540, exception, 'type'
+    eq $P540, .CONTROL_LOOP_NEXT, loop538_next
+    eq $P540, .CONTROL_LOOP_REDO, loop538_redo
+  loop538_done:
     pop_eh 
   for_undef_323:
 .annotate 'line', 251
-    new $P540, "Exception"
-    set $P540['type'], .CONTROL_RETURN
-    new $P541, "Integer"
-    assign $P541, 0
-    setattribute $P540, 'payload', $P541
-    throw $P540
+    new $P541, "Exception"
+    set $P541['type'], .CONTROL_RETURN
+    new $P542, "Integer"
+    assign $P542, 0
+    setattribute $P541, 'payload', $P542
+    throw $P541
 .annotate 'line', 246
     .return ()
-  control_510:
+  control_511:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P542, exception, "payload"
-    .return ($P542)
+    getattribute $P543, exception, "payload"
+    .return ($P543)
 .end
 
 
@@ -3379,36 +3393,36 @@
 
 .namespace ["RoleToClassApplier"]
 .include "except_types.pasm"
-.sub "_block525"  :anon :subid("44_1304456120.214") :outer("43_1304456120.214")
-    .param pmc param_527
+.sub "_block526"  :anon :subid("44_1304459371.883") :outer("43_1304459371.883")
+    .param pmc param_528
 .annotate 'line', 248
-    .lex "$_", param_527
+    .lex "$_", param_528
 .annotate 'line', 249
-    find_lex $P530, "$_"
-    unless_null $P530, vivify_324
-    new $P530, "Undef"
+    find_lex $P531, "$_"
+    unless_null $P531, vivify_324
+    new $P531, "Undef"
   vivify_324:
-    set $S531, $P530
-    find_lex $P532, "$name"
-    unless_null $P532, vivify_325
-    new $P532, "Undef"
+    set $S532, $P531
+    find_lex $P533, "$name"
+    unless_null $P533, vivify_325
+    new $P533, "Undef"
   vivify_325:
-    set $S533, $P532
-    iseq $I534, $S531, $S533
-    if $I534, if_529
-    new $P528, 'Integer'
-    set $P528, $I534
-    goto if_529_end
-  if_529:
-    new $P535, "Exception"
-    set $P535['type'], .CONTROL_RETURN
-    new $P536, "Integer"
-    assign $P536, 1
-    setattribute $P535, 'payload', $P536
-    throw $P535
-  if_529_end:
+    set $S534, $P533
+    iseq $I535, $S532, $S534
+    if $I535, if_530
+    new $P529, 'Integer'
+    set $P529, $I535
+    goto if_530_end
+  if_530:
+    new $P536, "Exception"
+    set $P536['type'], .CONTROL_RETURN
+    new $P537, "Integer"
+    assign $P537, 1
+    setattribute $P536, 'payload', $P537
+    throw $P536
+  if_530_end:
 .annotate 'line', 248
-    .return ($P528)
+    .return ($P529)
 .end
 
 
@@ -3416,75 +3430,75 @@
 
 .namespace ["RoleToClassApplier"]
 .include "except_types.pasm"
-.sub "has_attribute"  :subid("45_1304456120.214") :outer("42_1304456120.214")
-    .param pmc param_547
+.sub "has_attribute"  :subid("45_1304459371.883") :outer("42_1304459371.883")
     .param pmc param_548
+    .param pmc param_549
 .annotate 'line', 254
-    .const 'Sub' $P559 = "46_1304456120.214" 
-    capture_lex $P559
-    new $P546, ['ExceptionHandler'], .CONTROL_RETURN
-    set_label $P546, control_545
-    push_eh $P546
-    .lex "$target", param_547
-    .lex "$name", param_548
+    .const 'Sub' $P560 = "46_1304459371.883" 
+    capture_lex $P560
+    new $P547, ['ExceptionHandler'], .CONTROL_RETURN
+    set_label $P547, control_546
+    push_eh $P547
+    .lex "$target", param_548
+    .lex "$name", param_549
 .annotate 'line', 255
-    $P549 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@attributes", $P549
-    find_lex $P550, "$target"
-    unless_null $P550, vivify_326
-    new $P550, "Undef"
+    $P550 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@attributes", $P550
+    find_lex $P551, "$target"
+    unless_null $P551, vivify_326
+    new $P551, "Undef"
   vivify_326:
-    get_how $P551, $P550
-    find_lex $P552, "$target"
-    unless_null $P552, vivify_327
-    new $P552, "Undef"
+    get_how $P552, $P551
+    find_lex $P553, "$target"
+    unless_null $P553, vivify_327
+    new $P553, "Undef"
   vivify_327:
-    $P553 = $P551."attributes"($P552, 1 :named("local"))
-    store_lex "@attributes", $P553
+    $P554 = $P552."attributes"($P553, 1 :named("local"))
+    store_lex "@attributes", $P554
 .annotate 'line', 256
-    find_lex $P555, "@attributes"
-    unless_null $P555, vivify_328
-    $P555 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P556, "@attributes"
+    unless_null $P556, vivify_328
+    $P556 = root_new ['parrot';'ResizablePMCArray']
   vivify_328:
-    defined $I556, $P555
-    unless $I556, for_undef_329
-    iter $P554, $P555
-    new $P571, 'ExceptionHandler'
-    set_label $P571, loop570_handler
-    $P571."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P571
-  loop570_test:
-    unless $P554, loop570_done
-    shift $P557, $P554
-  loop570_redo:
-    .const 'Sub' $P559 = "46_1304456120.214" 
-    capture_lex $P559
-    $P559($P557)
-  loop570_next:
-    goto loop570_test
-  loop570_handler:
+    defined $I557, $P556
+    unless $I557, for_undef_329
+    iter $P555, $P556
+    new $P572, 'ExceptionHandler'
+    set_label $P572, loop571_handler
+    $P572."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P572
+  loop571_test:
+    unless $P555, loop571_done
+    shift $P558, $P555
+  loop571_redo:
+    .const 'Sub' $P560 = "46_1304459371.883" 
+    capture_lex $P560
+    $P560($P558)
+  loop571_next:
+    goto loop571_test
+  loop571_handler:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P572, exception, 'type'
-    eq $P572, .CONTROL_LOOP_NEXT, loop570_next
-    eq $P572, .CONTROL_LOOP_REDO, loop570_redo
-  loop570_done:
+    getattribute $P573, exception, 'type'
+    eq $P573, .CONTROL_LOOP_NEXT, loop571_next
+    eq $P573, .CONTROL_LOOP_REDO, loop571_redo
+  loop571_done:
     pop_eh 
   for_undef_329:
 .annotate 'line', 259
-    new $P573, "Exception"
-    set $P573['type'], .CONTROL_RETURN
-    new $P574, "Integer"
-    assign $P574, 0
-    setattribute $P573, 'payload', $P574
-    throw $P573
+    new $P574, "Exception"
+    set $P574['type'], .CONTROL_RETURN
+    new $P575, "Integer"
+    assign $P575, 0
+    setattribute $P574, 'payload', $P575
+    throw $P574
 .annotate 'line', 254
     .return ()
-  control_545:
+  control_546:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P575, exception, "payload"
-    .return ($P575)
+    getattribute $P576, exception, "payload"
+    .return ($P576)
 .end
 
 
@@ -3492,36 +3506,36 @@
 
 .namespace ["RoleToClassApplier"]
 .include "except_types.pasm"
-.sub "_block558"  :anon :subid("46_1304456120.214") :outer("45_1304456120.214")
-    .param pmc param_560
+.sub "_block559"  :anon :subid("46_1304459371.883") :outer("45_1304459371.883")
+    .param pmc param_561
 .annotate 'line', 256
-    .lex "$_", param_560
+    .lex "$_", param_561
 .annotate 'line', 257
-    find_lex $P563, "$_"
-    unless_null $P563, vivify_330
-    new $P563, "Undef"
+    find_lex $P564, "$_"
+    unless_null $P564, vivify_330
+    new $P564, "Undef"
   vivify_330:
-    $S564 = $P563."name"()
-    find_lex $P565, "$name"
-    unless_null $P565, vivify_331
-    new $P565, "Undef"
+    $S565 = $P564."name"()
+    find_lex $P566, "$name"
+    unless_null $P566, vivify_331
+    new $P566, "Undef"
   vivify_331:
-    set $S566, $P565
-    iseq $I567, $S564, $S566
-    if $I567, if_562
-    new $P561, 'Integer'
-    set $P561, $I567
-    goto if_562_end
-  if_562:
-    new $P568, "Exception"
-    set $P568['type'], .CONTROL_RETURN
-    new $P569, "Integer"
-    assign $P569, 1
-    setattribute $P568, 'payload', $P569
-    throw $P568
-  if_562_end:
+    set $S567, $P566
+    iseq $I568, $S565, $S567
+    if $I568, if_563
+    new $P562, 'Integer'
+    set $P562, $I568
+    goto if_563_end
+  if_563:
+    new $P569, "Exception"
+    set $P569['type'], .CONTROL_RETURN
+    new $P570, "Integer"
+    assign $P570, 1
+    setattribute $P569, 'payload', $P570
+    throw $P569
+  if_563_end:
 .annotate 'line', 256
-    .return ($P561)
+    .return ($P562)
 .end
 
 
@@ -3529,925 +3543,925 @@
 
 .namespace ["RoleToClassApplier"]
 .include "except_types.pasm"
-.sub "apply"  :subid("47_1304456120.214") :outer("42_1304456120.214")
-    .param pmc param_582
+.sub "apply"  :subid("47_1304459371.883") :outer("42_1304459371.883")
     .param pmc param_583
     .param pmc param_584
+    .param pmc param_585
 .annotate 'line', 262
-    .const 'Sub' $P690 = "51_1304456120.214" 
-    capture_lex $P690
-    .const 'Sub' $P664 = "50_1304456120.214" 
-    capture_lex $P664
-    .const 'Sub' $P635 = "49_1304456120.214" 
-    capture_lex $P635
-    .const 'Sub' $P615 = "48_1304456120.214" 
-    capture_lex $P615
-    .lex "self", param_582
-    .lex "$target", param_583
-    .lex "@roles", param_584
+    .const 'Sub' $P691 = "51_1304459371.883" 
+    capture_lex $P691
+    .const 'Sub' $P665 = "50_1304459371.883" 
+    capture_lex $P665
+    .const 'Sub' $P636 = "49_1304459371.883" 
+    capture_lex $P636
+    .const 'Sub' $P616 = "48_1304459371.883" 
+    capture_lex $P616
+    .lex "self", param_583
+    .lex "$target", param_584
+    .lex "@roles", param_585
 .annotate 'line', 265
-    new $P585, "Undef"
-    .lex "$to_compose", $P585
-.annotate 'line', 266
     new $P586, "Undef"
-    .lex "$to_compose_meta", $P586
+    .lex "$to_compose", $P586
+.annotate 'line', 266
+    new $P587, "Undef"
+    .lex "$to_compose_meta", $P587
 .annotate 'line', 281
-    $P587 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@collisions", $P587
-.annotate 'line', 290
     $P588 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@methods", $P588
-.annotate 'line', 298
+    .lex "@collisions", $P588
+.annotate 'line', 290
     $P589 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@attributes", $P589
-.annotate 'line', 310
+    .lex "@methods", $P589
+.annotate 'line', 298
     $P590 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@done", $P590
+    .lex "@attributes", $P590
+.annotate 'line', 310
+    $P591 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@done", $P591
 .annotate 'line', 262
-    find_lex $P591, "$to_compose"
-    unless_null $P591, vivify_332
-    new $P591, "Undef"
-  vivify_332:
-    find_lex $P592, "$to_compose_meta"
-    unless_null $P592, vivify_333
+    find_lex $P592, "$to_compose"
+    unless_null $P592, vivify_332
     new $P592, "Undef"
+  vivify_332:
+    find_lex $P593, "$to_compose_meta"
+    unless_null $P593, vivify_333
+    new $P593, "Undef"
   vivify_333:
 .annotate 'line', 267
-    find_lex $P594, "@roles"
-    unless_null $P594, vivify_334
-    $P594 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P595, "@roles"
+    unless_null $P595, vivify_334
+    $P595 = root_new ['parrot';'ResizablePMCArray']
   vivify_334:
-    set $N595, $P594
-    iseq $I596, $N595, 1.0
-    if $I596, if_593
+    set $N596, $P595
+    iseq $I597, $N596, 1.0
+    if $I597, if_594
 .annotate 'line', 272
-    find_lex $P601, "NQPConcreteRoleHOW"
-    find_lex $P602, "$?PACKAGE"
-    get_who $P603, $P602
-    set $P606, $P603["NQPMu"]
-    unless_null $P606, vivify_335
-    get_hll_global $P604, "GLOBAL"
-    get_who $P605, $P604
-    set $P606, $P605["NQPMu"]
+    find_lex $P602, "NQPConcreteRoleHOW"
+    find_lex $P603, "$?PACKAGE"
+    get_who $P604, $P603
+    set $P607, $P604["NQPMu"]
+    unless_null $P607, vivify_335
+    get_hll_global $P605, "GLOBAL"
+    get_who $P606, $P605
+    set $P607, $P606["NQPMu"]
   vivify_335:
-    $P607 = $P601."new_type"($P606 :named("instance_of"))
-    store_lex "$to_compose", $P607
+    $P608 = $P602."new_type"($P607 :named("instance_of"))
+    store_lex "$to_compose", $P608
 .annotate 'line', 273
-    find_lex $P608, "$to_compose"
-    unless_null $P608, vivify_336
-    new $P608, "Undef"
+    find_lex $P609, "$to_compose"
+    unless_null $P609, vivify_336
+    new $P609, "Undef"
   vivify_336:
-    get_how $P609, $P608
-    store_lex "$to_compose_meta", $P609
+    get_how $P610, $P609
+    store_lex "$to_compose_meta", $P610
 .annotate 'line', 274
-    find_lex $P611, "@roles"
-    unless_null $P611, vivify_337
-    $P611 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P612, "@roles"
+    unless_null $P612, vivify_337
+    $P612 = root_new ['parrot';'ResizablePMCArray']
   vivify_337:
-    defined $I612, $P611
-    unless $I612, for_undef_338
-    iter $P610, $P611
-    new $P622, 'ExceptionHandler'
-    set_label $P622, loop621_handler
-    $P622."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P622
-  loop621_test:
-    unless $P610, loop621_done
-    shift $P613, $P610
-  loop621_redo:
-    .const 'Sub' $P615 = "48_1304456120.214" 
-    capture_lex $P615
-    $P615($P613)
-  loop621_next:
-    goto loop621_test
-  loop621_handler:
+    defined $I613, $P612
+    unless $I613, for_undef_338
+    iter $P611, $P612
+    new $P623, 'ExceptionHandler'
+    set_label $P623, loop622_handler
+    $P623."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P623
+  loop622_test:
+    unless $P611, loop622_done
+    shift $P614, $P611
+  loop622_redo:
+    .const 'Sub' $P616 = "48_1304459371.883" 
+    capture_lex $P616
+    $P616($P614)
+  loop622_next:
+    goto loop622_test
+  loop622_handler:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P623, exception, 'type'
-    eq $P623, .CONTROL_LOOP_NEXT, loop621_next
-    eq $P623, .CONTROL_LOOP_REDO, loop621_redo
-  loop621_done:
+    getattribute $P624, exception, 'type'
+    eq $P624, .CONTROL_LOOP_NEXT, loop622_next
+    eq $P624, .CONTROL_LOOP_REDO, loop622_redo
+  loop622_done:
     pop_eh 
   for_undef_338:
 .annotate 'line', 277
-    find_lex $P624, "$to_compose_meta"
-    unless_null $P624, vivify_342
-    new $P624, "Undef"
-  vivify_342:
-    find_lex $P625, "$to_compose"
-    unless_null $P625, vivify_343
+    find_lex $P625, "$to_compose_meta"
+    unless_null $P625, vivify_342
     new $P625, "Undef"
+  vivify_342:
+    find_lex $P626, "$to_compose"
+    unless_null $P626, vivify_343
+    new $P626, "Undef"
   vivify_343:
-    $P626 = $P624."compose"($P625)
-    store_lex "$to_compose", $P626
+    $P627 = $P625."compose"($P626)
+    store_lex "$to_compose", $P627
 .annotate 'line', 271
-    goto if_593_end
-  if_593:
+    goto if_594_end
+  if_594:
 .annotate 'line', 268
-    find_lex $P597, "@roles"
-    unless_null $P597, vivify_344
-    $P597 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P598, "@roles"
+    unless_null $P598, vivify_344
+    $P598 = root_new ['parrot';'ResizablePMCArray']
   vivify_344:
-    set $P598, $P597[0]
-    unless_null $P598, vivify_345
-    new $P598, "Undef"
-  vivify_345:
-    store_lex "$to_compose", $P598
-.annotate 'line', 269
-    find_lex $P599, "$to_compose"
-    unless_null $P599, vivify_346
+    set $P599, $P598[0]
+    unless_null $P599, vivify_345
     new $P599, "Undef"
+  vivify_345:
+    store_lex "$to_compose", $P599
+.annotate 'line', 269
+    find_lex $P600, "$to_compose"
+    unless_null $P600, vivify_346
+    new $P600, "Undef"
   vivify_346:
-    get_how $P600, $P599
-    store_lex "$to_compose_meta", $P600
-  if_593_end:
+    get_how $P601, $P600
+    store_lex "$to_compose_meta", $P601
+  if_594_end:
 .annotate 'line', 281
-    find_lex $P627, "$to_compose_meta"
-    unless_null $P627, vivify_347
-    new $P627, "Undef"
-  vivify_347:
-    find_lex $P628, "$to_compose"
-    unless_null $P628, vivify_348
+    find_lex $P628, "$to_compose_meta"
+    unless_null $P628, vivify_347
     new $P628, "Undef"
+  vivify_347:
+    find_lex $P629, "$to_compose"
+    unless_null $P629, vivify_348
+    new $P629, "Undef"
   vivify_348:
-    $P629 = $P627."collisions"($P628)
-    store_lex "@collisions", $P629
+    $P630 = $P628."collisions"($P629)
+    store_lex "@collisions", $P630
 .annotate 'line', 282
-    find_lex $P631, "@collisions"
-    unless_null $P631, vivify_349
-    $P631 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P632, "@collisions"
+    unless_null $P632, vivify_349
+    $P632 = root_new ['parrot';'ResizablePMCArray']
   vivify_349:
-    defined $I632, $P631
-    unless $I632, for_undef_350
-    iter $P630, $P631
-    new $P654, 'ExceptionHandler'
-    set_label $P654, loop653_handler
-    $P654."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P654
-  loop653_test:
-    unless $P630, loop653_done
-    shift $P633, $P630
-  loop653_redo:
-    .const 'Sub' $P635 = "49_1304456120.214" 
-    capture_lex $P635
-    $P635($P633)
-  loop653_next:
-    goto loop653_test
-  loop653_handler:
+    defined $I633, $P632
+    unless $I633, for_undef_350
+    iter $P631, $P632
+    new $P655, 'ExceptionHandler'
+    set_label $P655, loop654_handler
+    $P655."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P655
+  loop654_test:
+    unless $P631, loop654_done
+    shift $P634, $P631
+  loop654_redo:
+    .const 'Sub' $P636 = "49_1304459371.883" 
+    capture_lex $P636
+    $P636($P634)
+  loop654_next:
+    goto loop654_test
+  loop654_handler:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P655, exception, 'type'
-    eq $P655, .CONTROL_LOOP_NEXT, loop653_next
-    eq $P655, .CONTROL_LOOP_REDO, loop653_redo
-  loop653_done:
+    getattribute $P656, exception, 'type'
+    eq $P656, .CONTROL_LOOP_NEXT, loop654_next
+    eq $P656, .CONTROL_LOOP_REDO, loop654_redo
+  loop654_done:
     pop_eh 
   for_undef_350:
 .annotate 'line', 290
-    find_lex $P656, "$to_compose_meta"
-    unless_null $P656, vivify_356
-    new $P656, "Undef"
-  vivify_356:
-    find_lex $P657, "$to_compose"
-    unless_null $P657, vivify_357
+    find_lex $P657, "$to_compose_meta"
+    unless_null $P657, vivify_356
     new $P657, "Undef"
+  vivify_356:
+    find_lex $P658, "$to_compose"
+    unless_null $P658, vivify_357
+    new $P658, "Undef"
   vivify_357:
-    $P658 = $P656."methods"($P657)
-    store_lex "@methods", $P658
+    $P659 = $P657."methods"($P658)
+    store_lex "@methods", $P659
 .annotate 'line', 291
-    find_lex $P660, "@methods"
-    unless_null $P660, vivify_358
-    $P660 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P661, "@methods"
+    unless_null $P661, vivify_358
+    $P661 = root_new ['parrot';'ResizablePMCArray']
   vivify_358:
-    defined $I661, $P660
-    unless $I661, for_undef_359
-    iter $P659, $P660
-    new $P680, 'ExceptionHandler'
-    set_label $P680, loop679_handler
-    $P680."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P680
-  loop679_test:
-    unless $P659, loop679_done
-    shift $P662, $P659
-  loop679_redo:
-    .const 'Sub' $P664 = "50_1304456120.214" 
-    capture_lex $P664
-    $P664($P662)
-  loop679_next:
-    goto loop679_test
-  loop679_handler:
+    defined $I662, $P661
+    unless $I662, for_undef_359
+    iter $P660, $P661
+    new $P681, 'ExceptionHandler'
+    set_label $P681, loop680_handler
+    $P681."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P681
+  loop680_test:
+    unless $P660, loop680_done
+    shift $P663, $P660
+  loop680_redo:
+    .const 'Sub' $P665 = "50_1304459371.883" 
+    capture_lex $P665
+    $P665($P663)
+  loop680_next:
+    goto loop680_test
+  loop680_handler:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P681, exception, 'type'
-    eq $P681, .CONTROL_LOOP_NEXT, loop679_next
-    eq $P681, .CONTROL_LOOP_REDO, loop679_redo
-  loop679_done:
+    getattribute $P682, exception, 'type'
+    eq $P682, .CONTROL_LOOP_NEXT, loop680_next
+    eq $P682, .CONTROL_LOOP_REDO, loop680_redo
+  loop680_done:
     pop_eh 
   for_undef_359:
 .annotate 'line', 298
-    find_lex $P682, "$to_compose_meta"
-    unless_null $P682, vivify_366
-    new $P682, "Undef"
-  vivify_366:
-    find_lex $P683, "$to_compose"
-    unless_null $P683, vivify_367
+    find_lex $P683, "$to_compose_meta"
+    unless_null $P683, vivify_366
     new $P683, "Undef"
+  vivify_366:
+    find_lex $P684, "$to_compose"
+    unless_null $P684, vivify_367
+    new $P684, "Undef"
   vivify_367:
-    $P684 = $P682."attributes"($P683)
-    store_lex "@attributes", $P684
+    $P685 = $P683."attributes"($P684)
+    store_lex "@attributes", $P685
 .annotate 'line', 299
-    find_lex $P686, "@attributes"
-    unless_null $P686, vivify_368
-    $P686 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P687, "@attributes"
+    unless_null $P687, vivify_368
+    $P687 = root_new ['parrot';'ResizablePMCArray']
   vivify_368:
-    defined $I687, $P686
-    unless $I687, for_undef_369
-    iter $P685, $P686
-    new $P714, 'ExceptionHandler'
-    set_label $P714, loop713_handler
-    $P714."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P714
-  loop713_test:
-    unless $P685, loop713_done
-    shift $P688, $P685
-  loop713_redo:
-    .const 'Sub' $P690 = "51_1304456120.214" 
-    capture_lex $P690
-    $P690($P688)
-  loop713_next:
-    goto loop713_test
-  loop713_handler:
+    defined $I688, $P687
+    unless $I688, for_undef_369
+    iter $P686, $P687
+    new $P715, 'ExceptionHandler'
+    set_label $P715, loop714_handler
+    $P715."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P715
+  loop714_test:
+    unless $P686, loop714_done
+    shift $P689, $P686
+  loop714_redo:
+    .const 'Sub' $P691 = "51_1304459371.883" 
+    capture_lex $P691
+    $P691($P689)
+  loop714_next:
+    goto loop714_test
+  loop714_handler:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P715, exception, 'type'
-    eq $P715, .CONTROL_LOOP_NEXT, loop713_next
-    eq $P715, .CONTROL_LOOP_REDO, loop713_redo
-  loop713_done:
+    getattribute $P716, exception, 'type'
+    eq $P716, .CONTROL_LOOP_NEXT, loop714_next
+    eq $P716, .CONTROL_LOOP_REDO, loop714_redo
+  loop714_done:
     pop_eh 
   for_undef_369:
-    find_lex $P716, "@done"
-    unless_null $P716, vivify_378
-    $P716 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P717, "@done"
+    unless_null $P717, vivify_378
+    $P717 = root_new ['parrot';'ResizablePMCArray']
   vivify_378:
 .annotate 'line', 311
-    find_lex $P717, "$to_compose"
-    unless_null $P717, vivify_379
-    new $P717, "Undef"
+    find_lex $P718, "$to_compose"
+    unless_null $P718, vivify_379
+    new $P718, "Undef"
   vivify_379:
-    find_lex $P718, "@done"
-    unless_null $P718, vivify_380
-    $P718 = root_new ['parrot';'ResizablePMCArray']
-    store_lex "@done", $P718
+    find_lex $P719, "@done"
+    unless_null $P719, vivify_380
+    $P719 = root_new ['parrot';'ResizablePMCArray']
+    store_lex "@done", $P719
   vivify_380:
-    set $P718[0], $P717
+    set $P719[0], $P718
 .annotate 'line', 262
-    .return ($P717)
+    .return ($P718)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["RoleToClassApplier"]
-.sub "_block614"  :anon :subid("48_1304456120.214") :outer("47_1304456120.214")
-    .param pmc param_616
+.sub "_block615"  :anon :subid("48_1304459371.883") :outer("47_1304459371.883")
+    .param pmc param_617
 .annotate 'line', 274
-    .lex "$_", param_616
+    .lex "$_", param_617
 .annotate 'line', 275
-    find_lex $P617, "$to_compose_meta"
-    unless_null $P617, vivify_339
-    new $P617, "Undef"
-  vivify_339:
-    find_lex $P618, "$to_compose"
-    unless_null $P618, vivify_340
+    find_lex $P618, "$to_compose_meta"
+    unless_null $P618, vivify_339
     new $P618, "Undef"
-  vivify_340:
-    find_lex $P619, "$_"
-    unless_null $P619, vivify_341
+  vivify_339:
+    find_lex $P619, "$to_compose"
+    unless_null $P619, vivify_340
     new $P619, "Undef"
+  vivify_340:
+    find_lex $P620, "$_"
+    unless_null $P620, vivify_341
+    new $P620, "Undef"
   vivify_341:
-    $P620 = $P617."add_role"($P618, $P619)
+    $P621 = $P618."add_role"($P619, $P620)
 .annotate 'line', 274
-    .return ($P620)
+    .return ($P621)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["RoleToClassApplier"]
-.sub "_block634"  :anon :subid("49_1304456120.214") :outer("47_1304456120.214")
-    .param pmc param_636
+.sub "_block635"  :anon :subid("49_1304459371.883") :outer("47_1304459371.883")
+    .param pmc param_637
 .annotate 'line', 282
-    .lex "$_", param_636
+    .lex "$_", param_637
 .annotate 'line', 283
-    find_lex $P639, "$target"
-    unless_null $P639, vivify_351
-    new $P639, "Undef"
-  vivify_351:
-    find_lex $P640, "$_"
-    unless_null $P640, vivify_352
+    find_lex $P640, "$target"
+    unless_null $P640, vivify_351
     new $P640, "Undef"
+  vivify_351:
+    find_lex $P641, "$_"
+    unless_null $P641, vivify_352
+    new $P641, "Undef"
   vivify_352:
-    set $S641, $P640
-    $P642 = "has_method"($P639, $S641, 1)
-    unless $P642, unless_638
-    set $P637, $P642
-    goto unless_638_end
-  unless_638:
+    set $S642, $P641
+    $P643 = "has_method"($P640, $S642, 1)
+    unless $P643, unless_639
+    set $P638, $P643
+    goto unless_639_end
+  unless_639:
 .annotate 'line', 284
-    new $P643, 'String'
-    set $P643, "Method '"
-    find_lex $P644, "$_"
-    unless_null $P644, vivify_353
-    new $P644, "Undef"
+    new $P644, 'String'
+    set $P644, "Method '"
+    find_lex $P645, "$_"
+    unless_null $P645, vivify_353
+    new $P645, "Undef"
   vivify_353:
-    concat $P645, $P643, $P644
-    concat $P646, $P645, "' collides and a resolution must be provided by the class '"
+    concat $P646, $P644, $P645
+    concat $P647, $P646, "' collides and a resolution must be provided by the class '"
 .annotate 'line', 285
-    find_lex $P647, "$target"
-    unless_null $P647, vivify_354
-    new $P647, "Undef"
+    find_lex $P648, "$target"
+    unless_null $P648, vivify_354
+    new $P648, "Undef"
   vivify_354:
-    get_how $P648, $P647
-    find_lex $P649, "$target"
-    unless_null $P649, vivify_355
-    new $P649, "Undef"
+    get_how $P649, $P648
+    find_lex $P650, "$target"
+    unless_null $P650, vivify_355
+    new $P650, "Undef"
   vivify_355:
-    $S650 = $P648."name"($P649)
-    concat $P651, $P646, $S650
+    $S651 = $P649."name"($P650)
+    concat $P652, $P647, $S651
 .annotate 'line', 284
-    concat $P652, $P651, "'"
+    concat $P653, $P652, "'"
 .annotate 'line', 285
-    die $P652
-  unless_638_end:
+    die $P653
+  unless_639_end:
 .annotate 'line', 282
-    .return ($P637)
+    .return ($P638)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["RoleToClassApplier"]
-.sub "_block663"  :anon :subid("50_1304456120.214") :outer("47_1304456120.214")
-    .param pmc param_665
+.sub "_block664"  :anon :subid("50_1304459371.883") :outer("47_1304459371.883")
+    .param pmc param_666
 .annotate 'line', 291
-    .lex "$_", param_665
+    .lex "$_", param_666
 .annotate 'line', 292
-    find_lex $P668, "$target"
-    unless_null $P668, vivify_360
-    new $P668, "Undef"
-  vivify_360:
-    find_lex $P669, "$_"
-    unless_null $P669, vivify_361
+    find_lex $P669, "$target"
+    unless_null $P669, vivify_360
     new $P669, "Undef"
+  vivify_360:
+    find_lex $P670, "$_"
+    unless_null $P670, vivify_361
+    new $P670, "Undef"
   vivify_361:
-    set $S670, $P669
-    $P671 = "has_method"($P668, $S670, 0)
-    unless $P671, unless_667
-    set $P666, $P671
-    goto unless_667_end
-  unless_667:
+    set $S671, $P670
+    $P672 = "has_method"($P669, $S671, 0)
+    unless $P672, unless_668
+    set $P667, $P672
+    goto unless_668_end
+  unless_668:
 .annotate 'line', 293
-    find_lex $P672, "$target"
-    unless_null $P672, vivify_362
-    new $P672, "Undef"
+    find_lex $P673, "$target"
+    unless_null $P673, vivify_362
+    new $P673, "Undef"
   vivify_362:
-    get_how $P673, $P672
-    find_lex $P674, "$target"
-    unless_null $P674, vivify_363
-    new $P674, "Undef"
-  vivify_363:
-    find_lex $P675, "$_"
-    unless_null $P675, vivify_364
+    get_how $P674, $P673
+    find_lex $P675, "$target"
+    unless_null $P675, vivify_363
     new $P675, "Undef"
+  vivify_363:
+    find_lex $P676, "$_"
+    unless_null $P676, vivify_364
+    new $P676, "Undef"
   vivify_364:
-    set $S676, $P675
-    find_lex $P677, "$_"
-    unless_null $P677, vivify_365
-    new $P677, "Undef"
+    set $S677, $P676
+    find_lex $P678, "$_"
+    unless_null $P678, vivify_365
+    new $P678, "Undef"
   vivify_365:
-    $P678 = $P673."add_method"($P674, $S676, $P677)
+    $P679 = $P674."add_method"($P675, $S677, $P678)
 .annotate 'line', 292
-    set $P666, $P678
-  unless_667_end:
+    set $P667, $P679
+  unless_668_end:
 .annotate 'line', 291
-    .return ($P666)
+    .return ($P667)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["RoleToClassApplier"]
-.sub "_block689"  :anon :subid("51_1304456120.214") :outer("47_1304456120.214")
-    .param pmc param_691
+.sub "_block690"  :anon :subid("51_1304459371.883") :outer("47_1304459371.883")
+    .param pmc param_692
 .annotate 'line', 299
-    .lex "$_", param_691
+    .lex "$_", param_692
 .annotate 'line', 300
-    find_lex $P693, "$target"
-    unless_null $P693, vivify_370
-    new $P693, "Undef"
-  vivify_370:
-    find_lex $P694, "$_"
-    unless_null $P694, vivify_371
+    find_lex $P694, "$target"
+    unless_null $P694, vivify_370
     new $P694, "Undef"
+  vivify_370:
+    find_lex $P695, "$_"
+    unless_null $P695, vivify_371
+    new $P695, "Undef"
   vivify_371:
-    $P695 = $P694."name"()
-    $P696 = "has_attribute"($P693, $P695)
-    unless $P696, if_692_end
+    $P696 = $P695."name"()
+    $P697 = "has_attribute"($P694, $P696)
+    unless $P697, if_693_end
 .annotate 'line', 301
-    new $P697, "String"
-    assign $P697, "Attribute '"
-    find_lex $P698, "$_"
-    unless_null $P698, vivify_372
-    new $P698, "Undef"
+    new $P698, "String"
+    assign $P698, "Attribute '"
+    find_lex $P699, "$_"
+    unless_null $P699, vivify_372
+    new $P699, "Undef"
   vivify_372:
-    $S699 = $P698."name"()
-    concat $P700, $P697, $S699
-    concat $P701, $P700, "' already exists in the class '"
+    $S700 = $P699."name"()
+    concat $P701, $P698, $S700
+    concat $P702, $P701, "' already exists in the class '"
 .annotate 'line', 302
-    find_lex $P702, "$target"
-    unless_null $P702, vivify_373
-    new $P702, "Undef"
+    find_lex $P703, "$target"
+    unless_null $P703, vivify_373
+    new $P703, "Undef"
   vivify_373:
-    get_how $P703, $P702
-    find_lex $P704, "$target"
-    unless_null $P704, vivify_374
-    new $P704, "Undef"
+    get_how $P704, $P703
+    find_lex $P705, "$target"
+    unless_null $P705, vivify_374
+    new $P705, "Undef"
   vivify_374:
-    $S705 = $P703."name"($P704)
-    concat $P706, $P701, $S705
+    $S706 = $P704."name"($P705)
+    concat $P707, $P702, $S706
 .annotate 'line', 301
-    concat $P707, $P706, "', but a role also wishes to compose it"
+    concat $P708, $P707, "', but a role also wishes to compose it"
 .annotate 'line', 302
-    die $P707
-  if_692_end:
+    die $P708
+  if_693_end:
 .annotate 'line', 304
-    find_lex $P708, "$target"
-    unless_null $P708, vivify_375
-    new $P708, "Undef"
+    find_lex $P709, "$target"
+    unless_null $P709, vivify_375
+    new $P709, "Undef"
   vivify_375:
-    get_how $P709, $P708
-    find_lex $P710, "$target"
-    unless_null $P710, vivify_376
-    new $P710, "Undef"
-  vivify_376:
-    find_lex $P711, "$_"
-    unless_null $P711, vivify_377
+    get_how $P710, $P709
+    find_lex $P711, "$target"
+    unless_null $P711, vivify_376
     new $P711, "Undef"
+  vivify_376:
+    find_lex $P712, "$_"
+    unless_null $P712, vivify_377
+    new $P712, "Undef"
   vivify_377:
-    $P712 = $P709."add_attribute"($P710, $P711)
+    $P713 = $P710."add_attribute"($P711, $P712)
 .annotate 'line', 299
-    .return ($P712)
+    .return ($P713)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPParametricRoleHOW"]
-.sub "_block720"  :subid("52_1304456120.214") :outer("10_1304456120.214")
+.sub "_block721"  :subid("52_1304459371.883") :outer("10_1304459371.883")
 .annotate 'line', 320
-    .const 'Sub' $P1031 = "76_1304456120.214" 
-    capture_lex $P1031
-    .const 'Sub' $P1007 = "74_1304456120.214" 
-    capture_lex $P1007
-    .const 'Sub' $P1001 = "73_1304456120.214" 
-    capture_lex $P1001
-    .const 'Sub' $P995 = "72_1304456120.214" 
-    capture_lex $P995
-    .const 'Sub' $P971 = "70_1304456120.214" 
-    capture_lex $P971
-    .const 'Sub' $P864 = "65_1304456120.214" 
-    capture_lex $P864
-    .const 'Sub' $P861 = "64_1304456120.214" 
-    capture_lex $P861
-    .const 'Sub' $P854 = "63_1304456120.214" 
-    capture_lex $P854
-    .const 'Sub' $P841 = "62_1304456120.214" 
-    capture_lex $P841
-    .const 'Sub' $P837 = "61_1304456120.214" 
-    capture_lex $P837
-    .const 'Sub' $P816 = "60_1304456120.214" 
-    capture_lex $P816
-    .const 'Sub' $P795 = "59_1304456120.214" 
-    capture_lex $P795
-    .const 'Sub' $P776 = "58_1304456120.214" 
-    capture_lex $P776
-    .const 'Sub' $P769 = "57_1304456120.214" 
-    capture_lex $P769
-    .const 'Sub' $P754 = "56_1304456120.214" 
-    capture_lex $P754
-    .const 'Sub' $P748 = "55_1304456120.214" 
-    capture_lex $P748
-    .const 'Sub' $P739 = "54_1304456120.214" 
-    capture_lex $P739
-    .const 'Sub' $P722 = "53_1304456120.214" 
-    capture_lex $P722
+    .const 'Sub' $P1032 = "76_1304459371.883" 
+    capture_lex $P1032
+    .const 'Sub' $P1008 = "74_1304459371.883" 
+    capture_lex $P1008
+    .const 'Sub' $P1002 = "73_1304459371.883" 
+    capture_lex $P1002
+    .const 'Sub' $P996 = "72_1304459371.883" 
+    capture_lex $P996
+    .const 'Sub' $P972 = "70_1304459371.883" 
+    capture_lex $P972
+    .const 'Sub' $P865 = "65_1304459371.883" 
+    capture_lex $P865
+    .const 'Sub' $P862 = "64_1304459371.883" 
+    capture_lex $P862
+    .const 'Sub' $P855 = "63_1304459371.883" 
+    capture_lex $P855
+    .const 'Sub' $P842 = "62_1304459371.883" 
+    capture_lex $P842
+    .const 'Sub' $P838 = "61_1304459371.883" 
+    capture_lex $P838
+    .const 'Sub' $P817 = "60_1304459371.883" 
+    capture_lex $P817
+    .const 'Sub' $P796 = "59_1304459371.883" 
+    capture_lex $P796
+    .const 'Sub' $P777 = "58_1304459371.883" 
+    capture_lex $P777
+    .const 'Sub' $P770 = "57_1304459371.883" 
+    capture_lex $P770
+    .const 'Sub' $P755 = "56_1304459371.883" 
+    capture_lex $P755
+    .const 'Sub' $P749 = "55_1304459371.883" 
+    capture_lex $P749
+    .const 'Sub' $P740 = "54_1304459371.883" 
+    capture_lex $P740
+    .const 'Sub' $P723 = "53_1304459371.883" 
+    capture_lex $P723
 .annotate 'line', 457
-    .const 'Sub' $P722 = "53_1304456120.214" 
-    newclosure $P736, $P722
-    .lex "reify_method", $P736
+    .const 'Sub' $P723 = "53_1304459371.883" 
+    newclosure $P737, $P723
+    .lex "reify_method", $P737
 .annotate 'line', 320
-    .lex "$?PACKAGE", $P737
-    .lex "$?CLASS", $P738
+    .lex "$?PACKAGE", $P738
+    .lex "$?CLASS", $P739
 .annotate 'line', 422
-    find_lex $P970, "reify_method"
+    find_lex $P971, "reify_method"
 .annotate 'line', 490
-    .const 'Sub' $P1031 = "76_1304456120.214" 
-    newclosure $P1037, $P1031
+    .const 'Sub' $P1032 = "76_1304459371.883" 
+    newclosure $P1038, $P1032
 .annotate 'line', 320
-    .return ($P1037)
+    .return ($P1038)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPParametricRoleHOW"]
-.sub "reify_method"  :subid("53_1304456120.214") :outer("52_1304456120.214")
-    .param pmc param_723
+.sub "reify_method"  :subid("53_1304459371.883") :outer("52_1304459371.883")
+    .param pmc param_724
 .annotate 'line', 457
-    .lex "$meth", param_723
+    .lex "$meth", param_724
 .annotate 'line', 458
-    new $P724, "Undef"
-    .lex "$callback", $P724
-    find_lex $P725, "$meth"
-    unless_null $P725, vivify_381
     new $P725, "Undef"
+    .lex "$callback", $P725
+    find_lex $P726, "$meth"
+    unless_null $P726, vivify_381
+    new $P726, "Undef"
   vivify_381:
-    getprop $P726, "REIFY_CALLBACK", $P725
-    store_lex "$callback", $P726
+    getprop $P727, "REIFY_CALLBACK", $P726
+    store_lex "$callback", $P727
 .annotate 'line', 459
-    find_lex $P729, "$callback"
-    unless_null $P729, vivify_382
-    new $P729, "Undef"
+    find_lex $P730, "$callback"
+    unless_null $P730, vivify_382
+    new $P730, "Undef"
   vivify_382:
-    defined $I730, $P729
-    if $I730, if_728
-    find_lex $P734, "$meth"
-    unless_null $P734, vivify_383
-    new $P734, "Undef"
+    defined $I731, $P730
+    if $I731, if_729
+    find_lex $P735, "$meth"
+    unless_null $P735, vivify_383
+    new $P735, "Undef"
   vivify_383:
-    clone $P735, $P734
-    set $P727, $P735
-    goto if_728_end
-  if_728:
-    find_lex $P731, "$callback"
-    unless_null $P731, vivify_384
-    new $P731, "Undef"
-  vivify_384:
-    find_lex $P732, "$meth"
-    unless_null $P732, vivify_385
+    clone $P736, $P735
+    set $P728, $P736
+    goto if_729_end
+  if_729:
+    find_lex $P732, "$callback"
+    unless_null $P732, vivify_384
     new $P732, "Undef"
+  vivify_384:
+    find_lex $P733, "$meth"
+    unless_null $P733, vivify_385
+    new $P733, "Undef"
   vivify_385:
-    $P733 = $P731($P732)
-    set $P727, $P733
-  if_728_end:
+    $P734 = $P732($P733)
+    set $P728, $P734
+  if_729_end:
 .annotate 'line', 457
-    .return ($P727)
+    .return ($P728)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPParametricRoleHOW"]
-.sub "new"  :subid("54_1304456120.214") :outer("52_1304456120.214")
-    .param pmc param_740
-    .param pmc param_741 :named("name")
+.sub "new"  :subid("54_1304459371.883") :outer("52_1304459371.883")
+    .param pmc param_741
+    .param pmc param_742 :named("name")
 .annotate 'line', 350
-    .lex "self", param_740
-    .lex "$name", param_741
+    .lex "self", param_741
+    .lex "$name", param_742
 .annotate 'line', 351
-    new $P742, "Undef"
-    .lex "$obj", $P742
-    find_lex $P743, "self"
-    repr_instance_of $P744, $P743
-    store_lex "$obj", $P744
+    new $P743, "Undef"
+    .lex "$obj", $P743
+    find_lex $P744, "self"
+    repr_instance_of $P745, $P744
+    store_lex "$obj", $P745
 .annotate 'line', 352
-    find_lex $P745, "$obj"
-    unless_null $P745, vivify_386
-    new $P745, "Undef"
-  vivify_386:
-    find_lex $P746, "$name"
-    unless_null $P746, vivify_387
+    find_lex $P746, "$obj"
+    unless_null $P746, vivify_386
     new $P746, "Undef"
-  vivify_387:
-    $P745."BUILD"($P746 :named("name"))
-    find_lex $P747, "$obj"
-    unless_null $P747, vivify_388
+  vivify_386:
+    find_lex $P747, "$name"
+    unless_null $P747, vivify_387
     new $P747, "Undef"
+  vivify_387:
+    $P746."BUILD"($P747 :named("name"))
+    find_lex $P748, "$obj"
+    unless_null $P748, vivify_388
+    new $P748, "Undef"
   vivify_388:
 .annotate 'line', 350
-    .return ($P747)
+    .return ($P748)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPParametricRoleHOW"]
-.sub "BUILD"  :subid("55_1304456120.214") :outer("52_1304456120.214")
-    .param pmc param_749
-    .param pmc param_750 :named("name")
+.sub "BUILD"  :subid("55_1304459371.883") :outer("52_1304459371.883")
+    .param pmc param_750
+    .param pmc param_751 :named("name")
 .annotate 'line', 356
-    .lex "self", param_749
-    .lex "$name", param_750
+    .lex "self", param_750
+    .lex "$name", param_751
 .annotate 'line', 357
-    find_lex $P751, "$name"
-    unless_null $P751, vivify_389
-    new $P751, "Undef"
+    find_lex $P752, "$name"
+    unless_null $P752, vivify_389
+    new $P752, "Undef"
   vivify_389:
-    find_lex $P752, "self"
-    find_lex $P753, "$?CLASS"
-    setattribute $P752, $P753, "$!name", $P751
+    find_lex $P753, "self"
+    find_lex $P754, "$?CLASS"
+    setattribute $P753, $P754, "$!name", $P752
 .annotate 'line', 356
-    .return ($P751)
+    .return ($P752)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPParametricRoleHOW"]
-.sub "new_type"  :subid("56_1304456120.214") :outer("52_1304456120.214")
-    .param pmc param_755
-    .param pmc param_756 :optional :named("name")
-    .param int has_param_756 :opt_flag
-    .param pmc param_758 :optional :named("repr")
-    .param int has_param_758 :opt_flag
+.sub "new_type"  :subid("56_1304459371.883") :outer("52_1304459371.883")
+    .param pmc param_756
+    .param pmc param_757 :optional :named("name")
+    .param int has_param_757 :opt_flag
+    .param pmc param_759 :optional :named("repr")
+    .param int has_param_759 :opt_flag
 .annotate 'line', 362
-    .lex "self", param_755
-    if has_param_756, optparam_390
-    new $P757, "String"
-    assign $P757, "<anon>"
-    set param_756, $P757
+    .lex "self", param_756
+    if has_param_757, optparam_390
+    new $P758, "String"
+    assign $P758, "<anon>"
+    set param_757, $P758
   optparam_390:
-    .lex "$name", param_756
-    if has_param_758, optparam_391
-    new $P759, "String"
-    assign $P759, "P6opaque"
-    set param_758, $P759
+    .lex "$name", param_757
+    if has_param_759, optparam_391
+    new $P760, "String"
+    assign $P760, "P6opaque"
+    set param_759, $P760
   optparam_391:
-    .lex "$repr", param_758
+    .lex "$repr", param_759
 .annotate 'line', 363
-    new $P760, "Undef"
-    .lex "$metarole", $P760
-    find_lex $P761, "self"
-    find_lex $P762, "$name"
-    unless_null $P762, vivify_392
-    new $P762, "Undef"
+    new $P761, "Undef"
+    .lex "$metarole", $P761
+    find_lex $P762, "self"
+    find_lex $P763, "$name"
+    unless_null $P763, vivify_392
+    new $P763, "Undef"
   vivify_392:
-    $P763 = $P761."new"($P762 :named("name"))
-    store_lex "$metarole", $P763
+    $P764 = $P762."new"($P763 :named("name"))
+    store_lex "$metarole", $P764
 .annotate 'line', 365
-    find_lex $P764, "$metarole"
-    unless_null $P764, vivify_393
-    new $P764, "Undef"
-  vivify_393:
-    find_lex $P765, "$repr"
-    unless_null $P765, vivify_394
+    find_lex $P765, "$metarole"
+    unless_null $P765, vivify_393
     new $P765, "Undef"
+  vivify_393:
+    find_lex $P766, "$repr"
+    unless_null $P766, vivify_394
+    new $P766, "Undef"
   vivify_394:
-    set $S766, $P765
-    repr_type_object_for $P767, $P764, $S766
-    $P768 = root_new ['parrot';'Hash']
-    set_who $P767, $P768
+    set $S767, $P766
+    repr_type_object_for $P768, $P765, $S767
+    $P769 = root_new ['parrot';'Hash']
+    set_who $P768, $P769
 .annotate 'line', 362
-    .return ($P767)
+    .return ($P768)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPParametricRoleHOW"]
-.sub "set_body_block"  :subid("57_1304456120.214") :outer("52_1304456120.214")
-    .param pmc param_770
+.sub "set_body_block"  :subid("57_1304459371.883") :outer("52_1304459371.883")
     .param pmc param_771
     .param pmc param_772
+    .param pmc param_773
 .annotate 'line', 369
-    .lex "self", param_770
-    .lex "$obj", param_771
-    .lex "$body_block", param_772
+    .lex "self", param_771
+    .lex "$obj", param_772
+    .lex "$body_block", param_773
 .annotate 'line', 370
-    find_lex $P773, "$body_block"
-    unless_null $P773, vivify_395
-    new $P773, "Undef"
+    find_lex $P774, "$body_block"
+    unless_null $P774, vivify_395
+    new $P774, "Undef"
   vivify_395:
-    find_lex $P774, "self"
-    find_lex $P775, "$?CLASS"
-    setattribute $P774, $P775, "$!body_block", $P773
+    find_lex $P775, "self"
+    find_lex $P776, "$?CLASS"
+    setattribute $P775, $P776, "$!body_block", $P774
 .annotate 'line', 369
-    .return ($P773)
+    .return ($P774)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPParametricRoleHOW"]
-.sub "add_method"  :subid("58_1304456120.214") :outer("52_1304456120.214")
-    .param pmc param_777
+.sub "add_method"  :subid("58_1304459371.883") :outer("52_1304459371.883")
     .param pmc param_778
     .param pmc param_779
     .param pmc param_780
+    .param pmc param_781
 .annotate 'line', 373
-    .lex "self", param_777
-    .lex "$obj", param_778
-    .lex "$name", param_779
-    .lex "$code_obj", param_780
+    .lex "self", param_778
+    .lex "$obj", param_779
+    .lex "$name", param_780
+    .lex "$code_obj", param_781
 .annotate 'line', 374
-    find_lex $P782, "$name"
-    unless_null $P782, vivify_396
-    new $P782, "Undef"
+    find_lex $P783, "$name"
+    unless_null $P783, vivify_396
+    new $P783, "Undef"
   vivify_396:
-    find_lex $P783, "self"
-    find_lex $P784, "$?CLASS"
-    getattribute $P785, $P783, $P784, "%!methods"
-    unless_null $P785, vivify_397
-    $P785 = root_new ['parrot';'Hash']
+    find_lex $P784, "self"
+    find_lex $P785, "$?CLASS"
+    getattribute $P786, $P784, $P785, "%!methods"
+    unless_null $P786, vivify_397
+    $P786 = root_new ['parrot';'Hash']
   vivify_397:
-    set $P786, $P785[$P782]
-    unless_null $P786, vivify_398
-    new $P786, "Undef"
+    set $P787, $P786[$P783]
+    unless_null $P787, vivify_398
+    new $P787, "Undef"
   vivify_398:
-    unless $P786, if_781_end
+    unless $P787, if_782_end
 .annotate 'line', 375
-    new $P787, "String"
-    assign $P787, "This role already has a method named "
-    find_lex $P788, "$name"
-    unless_null $P788, vivify_399
-    new $P788, "Undef"
+    new $P788, "String"
+    assign $P788, "This role already has a method named "
+    find_lex $P789, "$name"
+    unless_null $P789, vivify_399
+    new $P789, "Undef"
   vivify_399:
-    concat $P789, $P787, $P788
-    die $P789
-  if_781_end:
+    concat $P790, $P788, $P789
+    die $P790
+  if_782_end:
 .annotate 'line', 377
-    find_lex $P790, "$code_obj"
-    unless_null $P790, vivify_400
-    new $P790, "Undef"
-  vivify_400:
-    find_lex $P791, "$name"
-    unless_null $P791, vivify_401
+    find_lex $P791, "$code_obj"
+    unless_null $P791, vivify_400
     new $P791, "Undef"
+  vivify_400:
+    find_lex $P792, "$name"
+    unless_null $P792, vivify_401
+    new $P792, "Undef"
   vivify_401:
-    find_lex $P792, "self"
-    find_lex $P793, "$?CLASS"
-    getattribute $P794, $P792, $P793, "%!methods"
-    unless_null $P794, vivify_402
-    $P794 = root_new ['parrot';'Hash']
-    setattribute $P792, $P793, "%!methods", $P794
+    find_lex $P793, "self"
+    find_lex $P794, "$?CLASS"
+    getattribute $P795, $P793, $P794, "%!methods"
+    unless_null $P795, vivify_402
+    $P795 = root_new ['parrot';'Hash']
+    setattribute $P793, $P794, "%!methods", $P795
   vivify_402:
-    set $P794[$P791], $P790
+    set $P795[$P792], $P791
 .annotate 'line', 373
-    .return ($P790)
+    .return ($P791)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPParametricRoleHOW"]
-.sub "add_multi_method"  :subid("59_1304456120.214") :outer("52_1304456120.214")
-    .param pmc param_796
+.sub "add_multi_method"  :subid("59_1304459371.883") :outer("52_1304459371.883")
     .param pmc param_797
     .param pmc param_798
     .param pmc param_799
+    .param pmc param_800
 .annotate 'line', 380
-    .lex "self", param_796
-    .lex "$obj", param_797
-    .lex "$name", param_798
-    .lex "$code_obj", param_799
+    .lex "self", param_797
+    .lex "$obj", param_798
+    .lex "$name", param_799
+    .lex "$code_obj", param_800
 .annotate 'line', 381
-    $P800 = root_new ['parrot';'Hash']
-    .lex "%todo", $P800
-.annotate 'line', 380
-    find_lex $P801, "%todo"
-    unless_null $P801, vivify_403
     $P801 = root_new ['parrot';'Hash']
+    .lex "%todo", $P801
+.annotate 'line', 380
+    find_lex $P802, "%todo"
+    unless_null $P802, vivify_403
+    $P802 = root_new ['parrot';'Hash']
   vivify_403:
 .annotate 'line', 382
-    find_lex $P802, "$name"
-    unless_null $P802, vivify_404
-    new $P802, "Undef"
+    find_lex $P803, "$name"
+    unless_null $P803, vivify_404
+    new $P803, "Undef"
   vivify_404:
-    find_lex $P803, "%todo"
-    unless_null $P803, vivify_405
-    $P803 = root_new ['parrot';'Hash']
-    store_lex "%todo", $P803
+    find_lex $P804, "%todo"
+    unless_null $P804, vivify_405
+    $P804 = root_new ['parrot';'Hash']
+    store_lex "%todo", $P804
   vivify_405:
-    set $P803["name"], $P802
+    set $P804["name"], $P803
 .annotate 'line', 383
-    find_lex $P804, "$code_obj"
-    unless_null $P804, vivify_406
-    new $P804, "Undef"
+    find_lex $P805, "$code_obj"
+    unless_null $P805, vivify_406
+    new $P805, "Undef"
   vivify_406:
-    find_lex $P805, "%todo"
-    unless_null $P805, vivify_407
-    $P805 = root_new ['parrot';'Hash']
-    store_lex "%todo", $P805
-  vivify_407:
-    set $P805["code"], $P804
-.annotate 'line', 384
     find_lex $P806, "%todo"
-    unless_null $P806, vivify_408
+    unless_null $P806, vivify_407
     $P806 = root_new ['parrot';'Hash']
+    store_lex "%todo", $P806
+  vivify_407:
+    set $P806["code"], $P805
+.annotate 'line', 384
+    find_lex $P807, "%todo"
+    unless_null $P807, vivify_408
+    $P807 = root_new ['parrot';'Hash']
   vivify_408:
-    find_lex $P807, "self"
-    find_lex $P808, "$?CLASS"
-    getattribute $P809, $P807, $P808, "@!multi_methods_to_incorporate"
-    unless_null $P809, vivify_409
-    $P809 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P808, "self"
+    find_lex $P809, "$?CLASS"
+    getattribute $P810, $P808, $P809, "@!multi_methods_to_incorporate"
+    unless_null $P810, vivify_409
+    $P810 = root_new ['parrot';'ResizablePMCArray']
   vivify_409:
-    set $N810, $P809
-    set $I811, $N810
-    find_lex $P812, "self"
-    find_lex $P813, "$?CLASS"
-    getattribute $P814, $P812, $P813, "@!multi_methods_to_incorporate"
-    unless_null $P814, vivify_410
-    $P814 = root_new ['parrot';'ResizablePMCArray']
-    setattribute $P812, $P813, "@!multi_methods_to_incorporate", $P814
+    set $N811, $P810
+    set $I812, $N811
+    find_lex $P813, "self"
+    find_lex $P814, "$?CLASS"
+    getattribute $P815, $P813, $P814, "@!multi_methods_to_incorporate"
+    unless_null $P815, vivify_410
+    $P815 = root_new ['parrot';'ResizablePMCArray']
+    setattribute $P813, $P814, "@!multi_methods_to_incorporate", $P815
   vivify_410:
-    set $P814[$I811], $P806
-    find_lex $P815, "$code_obj"
-    unless_null $P815, vivify_411
-    new $P815, "Undef"
+    set $P815[$I812], $P807
+    find_lex $P816, "$code_obj"
+    unless_null $P816, vivify_411
+    new $P816, "Undef"
   vivify_411:
 .annotate 'line', 380
-    .return ($P815)
+    .return ($P816)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPParametricRoleHOW"]
-.sub "add_attribute"  :subid("60_1304456120.214") :outer("52_1304456120.214")
-    .param pmc param_817
+.sub "add_attribute"  :subid("60_1304459371.883") :outer("52_1304459371.883")
     .param pmc param_818
     .param pmc param_819
+    .param pmc param_820
 .annotate 'line', 388
-    .lex "self", param_817
-    .lex "$obj", param_818
-    .lex "$meta_attr", param_819
+    .lex "self", param_818
+    .lex "$obj", param_819
+    .lex "$meta_attr", param_820
 .annotate 'line', 389
-    new $P820, "Undef"
-    .lex "$name", $P820
-    find_lex $P821, "$meta_attr"
-    unless_null $P821, vivify_412
     new $P821, "Undef"
+    .lex "$name", $P821
+    find_lex $P822, "$meta_attr"
+    unless_null $P822, vivify_412
+    new $P822, "Undef"
   vivify_412:
-    $P822 = $P821."name"()
-    store_lex "$name", $P822
+    $P823 = $P822."name"()
+    store_lex "$name", $P823
 .annotate 'line', 390
-    find_lex $P824, "$name"
-    unless_null $P824, vivify_413
-    new $P824, "Undef"
+    find_lex $P825, "$name"
+    unless_null $P825, vivify_413
+    new $P825, "Undef"
   vivify_413:
-    find_lex $P825, "self"
-    find_lex $P826, "$?CLASS"
-    getattribute $P827, $P825, $P826, "%!attributes"
-    unless_null $P827, vivify_414
-    $P827 = root_new ['parrot';'Hash']
+    find_lex $P826, "self"
+    find_lex $P827, "$?CLASS"
+    getattribute $P828, $P826, $P827, "%!attributes"
+    unless_null $P828, vivify_414
+    $P828 = root_new ['parrot';'Hash']
   vivify_414:
-    set $P828, $P827[$P824]
-    unless_null $P828, vivify_415
-    new $P828, "Undef"
+    set $P829, $P828[$P825]
+    unless_null $P829, vivify_415
+    new $P829, "Undef"
   vivify_415:
-    unless $P828, if_823_end
+    unless $P829, if_824_end
 .annotate 'line', 391
-    new $P829, "String"
-    assign $P829, "This role already has an attribute named "
-    find_lex $P830, "$name"
-    unless_null $P830, vivify_416
-    new $P830, "Undef"
+    new $P830, "String"
+    assign $P830, "This role already has an attribute named "
+    find_lex $P831, "$name"
+    unless_null $P831, vivify_416
+    new $P831, "Undef"
   vivify_416:
-    concat $P831, $P829, $P830
-    die $P831
-  if_823_end:
+    concat $P832, $P830, $P831
+    die $P832
+  if_824_end:
 .annotate 'line', 393
-    find_lex $P832, "$meta_attr"
-    unless_null $P832, vivify_417
-    new $P832, "Undef"
-  vivify_417:
-    find_lex $P833, "$name"
-    unless_null $P833, vivify_418
+    find_lex $P833, "$meta_attr"
+    unless_null $P833, vivify_417
     new $P833, "Undef"
+  vivify_417:
+    find_lex $P834, "$name"
+    unless_null $P834, vivify_418
+    new $P834, "Undef"
   vivify_418:
-    find_lex $P834, "self"
-    find_lex $P835, "$?CLASS"
-    getattribute $P836, $P834, $P835, "%!attributes"
-    unless_null $P836, vivify_419
-    $P836 = root_new ['parrot';'Hash']
-    setattribute $P834, $P835, "%!attributes", $P836
+    find_lex $P835, "self"
+    find_lex $P836, "$?CLASS"
+    getattribute $P837, $P835, $P836, "%!attributes"
+    unless_null $P837, vivify_419
+    $P837 = root_new ['parrot';'Hash']
+    setattribute $P835, $P836, "%!attributes", $P837
   vivify_419:
-    set $P836[$P833], $P832
+    set $P837[$P834], $P833
 .annotate 'line', 388
-    .return ($P832)
+    .return ($P833)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPParametricRoleHOW"]
-.sub "add_parent"  :subid("61_1304456120.214") :outer("52_1304456120.214")
-    .param pmc param_838
+.sub "add_parent"  :subid("61_1304459371.883") :outer("52_1304459371.883")
     .param pmc param_839
     .param pmc param_840
+    .param pmc param_841
 .annotate 'line', 396
-    .lex "self", param_838
-    .lex "$obj", param_839
-    .lex "$parent", param_840
+    .lex "self", param_839
+    .lex "$obj", param_840
+    .lex "$parent", param_841
 .annotate 'line', 397
     die "A role cannot inherit from a class"
 .annotate 'line', 396
@@ -4458,73 +4472,73 @@
 .HLL "nqp"
 
 .namespace ["NQPParametricRoleHOW"]
-.sub "add_role"  :subid("62_1304456120.214") :outer("52_1304456120.214")
-    .param pmc param_842
+.sub "add_role"  :subid("62_1304459371.883") :outer("52_1304459371.883")
     .param pmc param_843
     .param pmc param_844
+    .param pmc param_845
 .annotate 'line', 400
-    .lex "self", param_842
-    .lex "$obj", param_843
-    .lex "$role", param_844
+    .lex "self", param_843
+    .lex "$obj", param_844
+    .lex "$role", param_845
 .annotate 'line', 401
-    find_lex $P845, "$role"
-    unless_null $P845, vivify_420
-    new $P845, "Undef"
+    find_lex $P846, "$role"
+    unless_null $P846, vivify_420
+    new $P846, "Undef"
   vivify_420:
-    find_lex $P846, "self"
-    find_lex $P847, "$?CLASS"
-    getattribute $P848, $P846, $P847, "@!roles"
-    unless_null $P848, vivify_421
-    $P848 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P847, "self"
+    find_lex $P848, "$?CLASS"
+    getattribute $P849, $P847, $P848, "@!roles"
+    unless_null $P849, vivify_421
+    $P849 = root_new ['parrot';'ResizablePMCArray']
   vivify_421:
-    set $N849, $P848
-    set $I850, $N849
-    find_lex $P851, "self"
-    find_lex $P852, "$?CLASS"
-    getattribute $P853, $P851, $P852, "@!roles"
-    unless_null $P853, vivify_422
-    $P853 = root_new ['parrot';'ResizablePMCArray']
-    setattribute $P851, $P852, "@!roles", $P853
+    set $N850, $P849
+    set $I851, $N850
+    find_lex $P852, "self"
+    find_lex $P853, "$?CLASS"
+    getattribute $P854, $P852, $P853, "@!roles"
+    unless_null $P854, vivify_422
+    $P854 = root_new ['parrot';'ResizablePMCArray']
+    setattribute $P852, $P853, "@!roles", $P854
   vivify_422:
-    set $P853[$I850], $P845
+    set $P854[$I851], $P846
 .annotate 'line', 400
-    .return ($P845)
+    .return ($P846)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPParametricRoleHOW"]
-.sub "compose"  :subid("63_1304456120.214") :outer("52_1304456120.214")
-    .param pmc param_855
+.sub "compose"  :subid("63_1304459371.883") :outer("52_1304459371.883")
     .param pmc param_856
+    .param pmc param_857
 .annotate 'line', 405
-    .lex "self", param_855
-    .lex "$obj", param_856
+    .lex "self", param_856
+    .lex "$obj", param_857
 .annotate 'line', 406
-    new $P857, "Integer"
-    assign $P857, 1
-    find_lex $P858, "self"
-    find_lex $P859, "$?CLASS"
-    setattribute $P858, $P859, "$!composed", $P857
-    find_lex $P860, "$obj"
-    unless_null $P860, vivify_423
-    new $P860, "Undef"
+    new $P858, "Integer"
+    assign $P858, 1
+    find_lex $P859, "self"
+    find_lex $P860, "$?CLASS"
+    setattribute $P859, $P860, "$!composed", $P858
+    find_lex $P861, "$obj"
+    unless_null $P861, vivify_423
+    new $P861, "Undef"
   vivify_423:
 .annotate 'line', 405
-    .return ($P860)
+    .return ($P861)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPParametricRoleHOW"]
-.sub "parametric"  :subid("64_1304456120.214") :outer("52_1304456120.214")
-    .param pmc param_862
+.sub "parametric"  :subid("64_1304459371.883") :outer("52_1304459371.883")
     .param pmc param_863
+    .param pmc param_864
 .annotate 'line', 416
-    .lex "self", param_862
-    .lex "$obj", param_863
+    .lex "self", param_863
+    .lex "$obj", param_864
     .return (1)
 .end
 
@@ -4533,355 +4547,355 @@
 
 .namespace ["NQPParametricRoleHOW"]
 .include "except_types.pasm"
-.sub "instantiate"  :subid("65_1304456120.214") :outer("52_1304456120.214")
-    .param pmc param_867
+.sub "instantiate"  :subid("65_1304459371.883") :outer("52_1304459371.883")
     .param pmc param_868
     .param pmc param_869
+    .param pmc param_870
 .annotate 'line', 422
-    .const 'Sub' $P948 = "69_1304456120.214" 
-    capture_lex $P948
-    .const 'Sub' $P927 = "68_1304456120.214" 
-    capture_lex $P927
-    .const 'Sub' $P906 = "67_1304456120.214" 
-    capture_lex $P906
-    .const 'Sub' $P888 = "66_1304456120.214" 
-    capture_lex $P888
-    new $P866, ['ExceptionHandler'], .CONTROL_RETURN
-    set_label $P866, control_865
-    push_eh $P866
-    .lex "self", param_867
-    .lex "$obj", param_868
-    .lex "$class_arg", param_869
+    .const 'Sub' $P949 = "69_1304459371.883" 
+    capture_lex $P949
+    .const 'Sub' $P928 = "68_1304459371.883" 
+    capture_lex $P928
+    .const 'Sub' $P907 = "67_1304459371.883" 
+    capture_lex $P907
+    .const 'Sub' $P889 = "66_1304459371.883" 
+    capture_lex $P889
+    new $P867, ['ExceptionHandler'], .CONTROL_RETURN
+    set_label $P867, control_866
+    push_eh $P867
+    .lex "self", param_868
+    .lex "$obj", param_869
+    .lex "$class_arg", param_870
 .annotate 'line', 428
-    new $P870, "Undef"
-    .lex "$irole", $P870
+    new $P871, "Undef"
+    .lex "$irole", $P871
 .annotate 'line', 425
-    find_lex $P871, "self"
-    find_lex $P872, "$?CLASS"
-    getattribute $P873, $P871, $P872, "$!body_block"
-    unless_null $P873, vivify_424
-    new $P873, "Undef"
-  vivify_424:
-    find_lex $P874, "$class_arg"
-    unless_null $P874, vivify_425
+    find_lex $P872, "self"
+    find_lex $P873, "$?CLASS"
+    getattribute $P874, $P872, $P873, "$!body_block"
+    unless_null $P874, vivify_424
     new $P874, "Undef"
+  vivify_424:
+    find_lex $P875, "$class_arg"
+    unless_null $P875, vivify_425
+    new $P875, "Undef"
   vivify_425:
-    $P873($P874)
+    $P874($P875)
 .annotate 'line', 428
-    find_lex $P875, "NQPConcreteRoleHOW"
-    find_lex $P876, "self"
-    find_lex $P877, "$?CLASS"
-    getattribute $P878, $P876, $P877, "$!name"
-    unless_null $P878, vivify_426
-    new $P878, "Undef"
-  vivify_426:
-    find_lex $P879, "$obj"
-    unless_null $P879, vivify_427
+    find_lex $P876, "NQPConcreteRoleHOW"
+    find_lex $P877, "self"
+    find_lex $P878, "$?CLASS"
+    getattribute $P879, $P877, $P878, "$!name"
+    unless_null $P879, vivify_426
     new $P879, "Undef"
+  vivify_426:
+    find_lex $P880, "$obj"
+    unless_null $P880, vivify_427
+    new $P880, "Undef"
   vivify_427:
-    $P880 = $P875."new_type"($P878 :named("name"), $P879 :named("instance_of"))
-    store_lex "$irole", $P880
+    $P881 = $P876."new_type"($P879 :named("name"), $P880 :named("instance_of"))
+    store_lex "$irole", $P881
 .annotate 'line', 432
-    find_lex $P882, "self"
-    find_lex $P883, "$?CLASS"
-    getattribute $P884, $P882, $P883, "%!attributes"
-    unless_null $P884, vivify_428
-    $P884 = root_new ['parrot';'Hash']
+    find_lex $P883, "self"
+    find_lex $P884, "$?CLASS"
+    getattribute $P885, $P883, $P884, "%!attributes"
+    unless_null $P885, vivify_428
+    $P885 = root_new ['parrot';'Hash']
   vivify_428:
-    defined $I885, $P884
-    unless $I885, for_undef_429
-    iter $P881, $P884
-    new $P897, 'ExceptionHandler'
-    set_label $P897, loop896_handler
-    $P897."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P897
-  loop896_test:
-    unless $P881, loop896_done
-    shift $P886, $P881
-  loop896_redo:
-    .const 'Sub' $P888 = "66_1304456120.214" 
-    capture_lex $P888
-    $P888($P886)
-  loop896_next:
-    goto loop896_test
-  loop896_handler:
+    defined $I886, $P885
+    unless $I886, for_undef_429
+    iter $P882, $P885
+    new $P898, 'ExceptionHandler'
+    set_label $P898, loop897_handler
+    $P898."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P898
+  loop897_test:
+    unless $P882, loop897_done
+    shift $P887, $P882
+  loop897_redo:
+    .const 'Sub' $P889 = "66_1304459371.883" 
+    capture_lex $P889
+    $P889($P887)
+  loop897_next:
+    goto loop897_test
+  loop897_handler:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P898, exception, 'type'
-    eq $P898, .CONTROL_LOOP_NEXT, loop896_next
-    eq $P898, .CONTROL_LOOP_REDO, loop896_redo
-  loop896_done:
+    getattribute $P899, exception, 'type'
+    eq $P899, .CONTROL_LOOP_NEXT, loop897_next
+    eq $P899, .CONTROL_LOOP_REDO, loop897_redo
+  loop897_done:
     pop_eh 
   for_undef_429:
 .annotate 'line', 437
-    find_lex $P900, "self"
-    find_lex $P901, "$?CLASS"
-    getattribute $P902, $P900, $P901, "%!methods"
-    unless_null $P902, vivify_433
-    $P902 = root_new ['parrot';'Hash']
+    find_lex $P901, "self"
+    find_lex $P902, "$?CLASS"
+    getattribute $P903, $P901, $P902, "%!methods"
+    unless_null $P903, vivify_433
+    $P903 = root_new ['parrot';'Hash']
   vivify_433:
-    defined $I903, $P902
-    unless $I903, for_undef_434
-    iter $P899, $P902
-    new $P918, 'ExceptionHandler'
-    set_label $P918, loop917_handler
-    $P918."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P918
-  loop917_test:
-    unless $P899, loop917_done
-    shift $P904, $P899
-  loop917_redo:
-    .const 'Sub' $P906 = "67_1304456120.214" 
-    capture_lex $P906
-    $P906($P904)
-  loop917_next:
-    goto loop917_test
-  loop917_handler:
+    defined $I904, $P903
+    unless $I904, for_undef_434
+    iter $P900, $P903
+    new $P919, 'ExceptionHandler'
+    set_label $P919, loop918_handler
+    $P919."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P919
+  loop918_test:
+    unless $P900, loop918_done
+    shift $P905, $P900
+  loop918_redo:
+    .const 'Sub' $P907 = "67_1304459371.883" 
+    capture_lex $P907
+    $P907($P905)
+  loop918_next:
+    goto loop918_test
+  loop918_handler:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P919, exception, 'type'
-    eq $P919, .CONTROL_LOOP_NEXT, loop917_next
-    eq $P919, .CONTROL_LOOP_REDO, loop917_redo
-  loop917_done:
+    getattribute $P920, exception, 'type'
+    eq $P920, .CONTROL_LOOP_NEXT, loop918_next
+    eq $P920, .CONTROL_LOOP_REDO, loop918_redo
+  loop918_done:
     pop_eh 
   for_undef_434:
 .annotate 'line', 440
-    find_lex $P921, "self"
-    find_lex $P922, "$?CLASS"
-    getattribute $P923, $P921, $P922, "@!multi_methods_to_incorporate"
-    unless_null $P923, vivify_439
-    $P923 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P922, "self"
+    find_lex $P923, "$?CLASS"
+    getattribute $P924, $P922, $P923, "@!multi_methods_to_incorporate"
+    unless_null $P924, vivify_439
+    $P924 = root_new ['parrot';'ResizablePMCArray']
   vivify_439:
-    defined $I924, $P923
-    unless $I924, for_undef_440
-    iter $P920, $P923
-    new $P939, 'ExceptionHandler'
-    set_label $P939, loop938_handler
-    $P939."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P939
-  loop938_test:
-    unless $P920, loop938_done
-    shift $P925, $P920
-  loop938_redo:
-    .const 'Sub' $P927 = "68_1304456120.214" 
-    capture_lex $P927
-    $P927($P925)
-  loop938_next:
-    goto loop938_test
-  loop938_handler:
+    defined $I925, $P924
+    unless $I925, for_undef_440
+    iter $P921, $P924
+    new $P940, 'ExceptionHandler'
+    set_label $P940, loop939_handler
+    $P940."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P940
+  loop939_test:
+    unless $P921, loop939_done
+    shift $P926, $P921
+  loop939_redo:
+    .const 'Sub' $P928 = "68_1304459371.883" 
+    capture_lex $P928
+    $P928($P926)
+  loop939_next:
+    goto loop939_test
+  loop939_handler:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P940, exception, 'type'
-    eq $P940, .CONTROL_LOOP_NEXT, loop938_next
-    eq $P940, .CONTROL_LOOP_REDO, loop938_redo
-  loop938_done:
+    getattribute $P941, exception, 'type'
+    eq $P941, .CONTROL_LOOP_NEXT, loop939_next
+    eq $P941, .CONTROL_LOOP_REDO, loop939_redo
+  loop939_done:
     pop_eh 
   for_undef_440:
 .annotate 'line', 445
-    find_lex $P942, "self"
-    find_lex $P943, "$?CLASS"
-    getattribute $P944, $P942, $P943, "@!roles"
-    unless_null $P944, vivify_447
-    $P944 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P943, "self"
+    find_lex $P944, "$?CLASS"
+    getattribute $P945, $P943, $P944, "@!roles"
+    unless_null $P945, vivify_447
+    $P945 = root_new ['parrot';'ResizablePMCArray']
   vivify_447:
-    defined $I945, $P944
-    unless $I945, for_undef_448
-    iter $P941, $P944
-    new $P962, 'ExceptionHandler'
-    set_label $P962, loop961_handler
-    $P962."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P962
-  loop961_test:
-    unless $P941, loop961_done
-    shift $P946, $P941
-  loop961_redo:
-    .const 'Sub' $P948 = "69_1304456120.214" 
-    capture_lex $P948
-    $P948($P946)
-  loop961_next:
-    goto loop961_test
-  loop961_handler:
+    defined $I946, $P945
+    unless $I946, for_undef_448
+    iter $P942, $P945
+    new $P963, 'ExceptionHandler'
+    set_label $P963, loop962_handler
+    $P963."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P963
+  loop962_test:
+    unless $P942, loop962_done
+    shift $P947, $P942
+  loop962_redo:
+    .const 'Sub' $P949 = "69_1304459371.883" 
+    capture_lex $P949
+    $P949($P947)
+  loop962_next:
+    goto loop962_test
+  loop962_handler:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P963, exception, 'type'
-    eq $P963, .CONTROL_LOOP_NEXT, loop961_next
-    eq $P963, .CONTROL_LOOP_REDO, loop961_redo
-  loop961_done:
+    getattribute $P964, exception, 'type'
+    eq $P964, .CONTROL_LOOP_NEXT, loop962_next
+    eq $P964, .CONTROL_LOOP_REDO, loop962_redo
+  loop962_done:
     pop_eh 
   for_undef_448:
 .annotate 'line', 451
-    find_lex $P964, "$irole"
-    unless_null $P964, vivify_455
-    new $P964, "Undef"
+    find_lex $P965, "$irole"
+    unless_null $P965, vivify_455
+    new $P965, "Undef"
   vivify_455:
-    get_how $P965, $P964
-    find_lex $P966, "$irole"
-    unless_null $P966, vivify_456
-    new $P966, "Undef"
+    get_how $P966, $P965
+    find_lex $P967, "$irole"
+    unless_null $P967, vivify_456
+    new $P967, "Undef"
   vivify_456:
-    $P965."compose"($P966)
+    $P966."compose"($P967)
 .annotate 'line', 452
-    new $P967, "Exception"
-    set $P967['type'], .CONTROL_RETURN
-    find_lex $P968, "$irole"
-    unless_null $P968, vivify_457
-    new $P968, "Undef"
+    new $P968, "Exception"
+    set $P968['type'], .CONTROL_RETURN
+    find_lex $P969, "$irole"
+    unless_null $P969, vivify_457
+    new $P969, "Undef"
   vivify_457:
-    setattribute $P967, 'payload', $P968
-    throw $P967
+    setattribute $P968, 'payload', $P969
+    throw $P968
 .annotate 'line', 422
     .return ()
-  control_865:
+  control_866:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P969, exception, "payload"
-    .return ($P969)
+    getattribute $P970, exception, "payload"
+    .return ($P970)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPParametricRoleHOW"]
-.sub "_block887"  :anon :subid("66_1304456120.214") :outer("65_1304456120.214")
-    .param pmc param_889
+.sub "_block888"  :anon :subid("66_1304459371.883") :outer("65_1304459371.883")
+    .param pmc param_890
 .annotate 'line', 432
-    .lex "$_", param_889
+    .lex "$_", param_890
 .annotate 'line', 433
-    find_lex $P890, "$irole"
-    unless_null $P890, vivify_430
-    new $P890, "Undef"
+    find_lex $P891, "$irole"
+    unless_null $P891, vivify_430
+    new $P891, "Undef"
   vivify_430:
-    get_how $P891, $P890
-    find_lex $P892, "$irole"
-    unless_null $P892, vivify_431
-    new $P892, "Undef"
-  vivify_431:
-    find_lex $P893, "$_"
-    unless_null $P893, vivify_432
+    get_how $P892, $P891
+    find_lex $P893, "$irole"
+    unless_null $P893, vivify_431
     new $P893, "Undef"
+  vivify_431:
+    find_lex $P894, "$_"
+    unless_null $P894, vivify_432
+    new $P894, "Undef"
   vivify_432:
-    $P894 = $P893."value"()
-    $P895 = $P891."add_attribute"($P892, $P894)
+    $P895 = $P894."value"()
+    $P896 = $P892."add_attribute"($P893, $P895)
 .annotate 'line', 432
-    .return ($P895)
+    .return ($P896)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPParametricRoleHOW"]
-.sub "_block905"  :anon :subid("67_1304456120.214") :outer("65_1304456120.214")
-    .param pmc param_907
+.sub "_block906"  :anon :subid("67_1304459371.883") :outer("65_1304459371.883")
+    .param pmc param_908
 .annotate 'line', 437
-    .lex "$_", param_907
+    .lex "$_", param_908
 .annotate 'line', 438
-    find_lex $P908, "$irole"
-    unless_null $P908, vivify_435
-    new $P908, "Undef"
+    find_lex $P909, "$irole"
+    unless_null $P909, vivify_435
+    new $P909, "Undef"
   vivify_435:
-    get_how $P909, $P908
-    find_lex $P910, "$irole"
-    unless_null $P910, vivify_436
-    new $P910, "Undef"
-  vivify_436:
-    find_lex $P911, "$_"
-    unless_null $P911, vivify_437
+    get_how $P910, $P909
+    find_lex $P911, "$irole"
+    unless_null $P911, vivify_436
     new $P911, "Undef"
+  vivify_436:
+    find_lex $P912, "$_"
+    unless_null $P912, vivify_437
+    new $P912, "Undef"
   vivify_437:
-    $P912 = $P911."key"()
-    find_lex $P913, "$_"
-    unless_null $P913, vivify_438
-    new $P913, "Undef"
+    $P913 = $P912."key"()
+    find_lex $P914, "$_"
+    unless_null $P914, vivify_438
+    new $P914, "Undef"
   vivify_438:
-    $P914 = $P913."value"()
-    $P915 = "reify_method"($P914)
-    $P916 = $P909."add_method"($P910, $P912, $P915)
+    $P915 = $P914."value"()
+    $P916 = "reify_method"($P915)
+    $P917 = $P910."add_method"($P911, $P913, $P916)
 .annotate 'line', 437
-    .return ($P916)
+    .return ($P917)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPParametricRoleHOW"]
-.sub "_block926"  :anon :subid("68_1304456120.214") :outer("65_1304456120.214")
-    .param pmc param_928
+.sub "_block927"  :anon :subid("68_1304459371.883") :outer("65_1304459371.883")
+    .param pmc param_929
 .annotate 'line', 440
-    .lex "$_", param_928
+    .lex "$_", param_929
 .annotate 'line', 441
-    find_lex $P929, "$irole"
-    unless_null $P929, vivify_441
-    new $P929, "Undef"
+    find_lex $P930, "$irole"
+    unless_null $P930, vivify_441
+    new $P930, "Undef"
   vivify_441:
-    get_how $P930, $P929
-    find_lex $P931, "$irole"
-    unless_null $P931, vivify_442
-    new $P931, "Undef"
+    get_how $P931, $P930
+    find_lex $P932, "$irole"
+    unless_null $P932, vivify_442
+    new $P932, "Undef"
   vivify_442:
-    find_lex $P932, "$_"
-    unless_null $P932, vivify_443
-    $P932 = root_new ['parrot';'Hash']
+    find_lex $P933, "$_"
+    unless_null $P933, vivify_443
+    $P933 = root_new ['parrot';'Hash']
   vivify_443:
-    set $P933, $P932["name"]
-    unless_null $P933, vivify_444
-    new $P933, "Undef"
+    set $P934, $P933["name"]
+    unless_null $P934, vivify_444
+    new $P934, "Undef"
   vivify_444:
-    find_lex $P934, "$_"
-    unless_null $P934, vivify_445
-    $P934 = root_new ['parrot';'Hash']
+    find_lex $P935, "$_"
+    unless_null $P935, vivify_445
+    $P935 = root_new ['parrot';'Hash']
   vivify_445:
-    set $P935, $P934["code"]
-    unless_null $P935, vivify_446
-    new $P935, "Undef"
+    set $P936, $P935["code"]
+    unless_null $P936, vivify_446
+    new $P936, "Undef"
   vivify_446:
-    $P936 = "reify_method"($P935)
-    $P937 = $P930."add_multi_method"($P931, $P933, $P936)
+    $P937 = "reify_method"($P936)
+    $P938 = $P931."add_multi_method"($P932, $P934, $P937)
 .annotate 'line', 440
-    .return ($P937)
+    .return ($P938)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPParametricRoleHOW"]
-.sub "_block947"  :anon :subid("69_1304456120.214") :outer("65_1304456120.214")
-    .param pmc param_950
+.sub "_block948"  :anon :subid("69_1304459371.883") :outer("65_1304459371.883")
+    .param pmc param_951
 .annotate 'line', 446
-    new $P949, "Undef"
-    .lex "$instantiated", $P949
-    .lex "$_", param_950
-    find_lex $P951, "$irole"
-    unless_null $P951, vivify_449
-    new $P951, "Undef"
+    new $P950, "Undef"
+    .lex "$instantiated", $P950
+    .lex "$_", param_951
+    find_lex $P952, "$irole"
+    unless_null $P952, vivify_449
+    new $P952, "Undef"
   vivify_449:
-    get_how $P952, $P951
-    find_lex $P953, "$irole"
-    unless_null $P953, vivify_450
-    new $P953, "Undef"
-  vivify_450:
-    find_lex $P954, "$class_arg"
-    unless_null $P954, vivify_451
+    get_how $P953, $P952
+    find_lex $P954, "$irole"
+    unless_null $P954, vivify_450
     new $P954, "Undef"
+  vivify_450:
+    find_lex $P955, "$class_arg"
+    unless_null $P955, vivify_451
+    new $P955, "Undef"
   vivify_451:
-    $P955 = $P952."instantiate"($P953, $P954)
-    store_lex "$instantiated", $P955
+    $P956 = $P953."instantiate"($P954, $P955)
+    store_lex "$instantiated", $P956
 .annotate 'line', 447
-    find_lex $P956, "$irole"
-    unless_null $P956, vivify_452
-    new $P956, "Undef"
+    find_lex $P957, "$irole"
+    unless_null $P957, vivify_452
+    new $P957, "Undef"
   vivify_452:
-    get_how $P957, $P956
-    find_lex $P958, "$irole"
-    unless_null $P958, vivify_453
-    new $P958, "Undef"
-  vivify_453:
-    find_lex $P959, "$instantiated"
-    unless_null $P959, vivify_454
+    get_how $P958, $P957
+    find_lex $P959, "$irole"
+    unless_null $P959, vivify_453
     new $P959, "Undef"
+  vivify_453:
+    find_lex $P960, "$instantiated"
+    unless_null $P960, vivify_454
+    new $P960, "Undef"
   vivify_454:
-    $P960 = $P957."add_role"($P958, $P959)
+    $P961 = $P958."add_role"($P959, $P960)
 .annotate 'line', 445
-    .return ($P960)
+    .return ($P961)
 .end
 
 
@@ -4889,128 +4903,128 @@
 
 .namespace ["NQPParametricRoleHOW"]
 .include "except_types.pasm"
-.sub "methods"  :subid("70_1304456120.214") :outer("52_1304456120.214")
-    .param pmc param_972
+.sub "methods"  :subid("70_1304459371.883") :outer("52_1304459371.883")
     .param pmc param_973
-    .param pmc param_974 :optional :named("local")
-    .param int has_param_974 :opt_flag
+    .param pmc param_974
+    .param pmc param_975 :optional :named("local")
+    .param int has_param_975 :opt_flag
 .annotate 'line', 466
-    .const 'Sub' $P985 = "71_1304456120.214" 
-    capture_lex $P985
-    .lex "self", param_972
-    .lex "$obj", param_973
-    if has_param_974, optparam_458
-    new $P975, "Undef"
-    set param_974, $P975
+    .const 'Sub' $P986 = "71_1304459371.883" 
+    capture_lex $P986
+    .lex "self", param_973
+    .lex "$obj", param_974
+    if has_param_975, optparam_458
+    new $P976, "Undef"
+    set param_975, $P976
   optparam_458:
-    .lex "$local", param_974
+    .lex "$local", param_975
 .annotate 'line', 467
-    $P976 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@meths", $P976
-.annotate 'line', 466
-    find_lex $P977, "@meths"
-    unless_null $P977, vivify_459
     $P977 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@meths", $P977
+.annotate 'line', 466
+    find_lex $P978, "@meths"
+    unless_null $P978, vivify_459
+    $P978 = root_new ['parrot';'ResizablePMCArray']
   vivify_459:
 .annotate 'line', 468
-    find_lex $P979, "self"
-    find_lex $P980, "$?CLASS"
-    getattribute $P981, $P979, $P980, "%!methods"
-    unless_null $P981, vivify_460
-    $P981 = root_new ['parrot';'Hash']
+    find_lex $P980, "self"
+    find_lex $P981, "$?CLASS"
+    getattribute $P982, $P980, $P981, "%!methods"
+    unless_null $P982, vivify_460
+    $P982 = root_new ['parrot';'Hash']
   vivify_460:
-    defined $I982, $P981
-    unless $I982, for_undef_461
-    iter $P978, $P981
-    new $P992, 'ExceptionHandler'
-    set_label $P992, loop991_handler
-    $P992."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P992
-  loop991_test:
-    unless $P978, loop991_done
-    shift $P983, $P978
-  loop991_redo:
-    .const 'Sub' $P985 = "71_1304456120.214" 
-    capture_lex $P985
-    $P985($P983)
-  loop991_next:
-    goto loop991_test
-  loop991_handler:
+    defined $I983, $P982
+    unless $I983, for_undef_461
+    iter $P979, $P982
+    new $P993, 'ExceptionHandler'
+    set_label $P993, loop992_handler
+    $P993."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P993
+  loop992_test:
+    unless $P979, loop992_done
+    shift $P984, $P979
+  loop992_redo:
+    .const 'Sub' $P986 = "71_1304459371.883" 
+    capture_lex $P986
+    $P986($P984)
+  loop992_next:
+    goto loop992_test
+  loop992_handler:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P993, exception, 'type'
-    eq $P993, .CONTROL_LOOP_NEXT, loop991_next
-    eq $P993, .CONTROL_LOOP_REDO, loop991_redo
-  loop991_done:
+    getattribute $P994, exception, 'type'
+    eq $P994, .CONTROL_LOOP_NEXT, loop992_next
+    eq $P994, .CONTROL_LOOP_REDO, loop992_redo
+  loop992_done:
     pop_eh 
   for_undef_461:
-    find_lex $P994, "@meths"
-    unless_null $P994, vivify_464
-    $P994 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P995, "@meths"
+    unless_null $P995, vivify_464
+    $P995 = root_new ['parrot';'ResizablePMCArray']
   vivify_464:
 .annotate 'line', 466
-    .return ($P994)
+    .return ($P995)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPParametricRoleHOW"]
-.sub "_block984"  :anon :subid("71_1304456120.214") :outer("70_1304456120.214")
-    .param pmc param_986
+.sub "_block985"  :anon :subid("71_1304459371.883") :outer("70_1304459371.883")
+    .param pmc param_987
 .annotate 'line', 468
-    .lex "$_", param_986
+    .lex "$_", param_987
 .annotate 'line', 469
-    find_lex $P987, "@meths"
-    unless_null $P987, vivify_462
-    $P987 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P988, "@meths"
+    unless_null $P988, vivify_462
+    $P988 = root_new ['parrot';'ResizablePMCArray']
   vivify_462:
-    find_lex $P988, "$_"
-    unless_null $P988, vivify_463
-    new $P988, "Undef"
+    find_lex $P989, "$_"
+    unless_null $P989, vivify_463
+    new $P989, "Undef"
   vivify_463:
-    $P989 = $P988."value"()
-    $P990 = $P987."push"($P989)
+    $P990 = $P989."value"()
+    $P991 = $P988."push"($P990)
 .annotate 'line', 468
-    .return ($P990)
+    .return ($P991)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPParametricRoleHOW"]
-.sub "method_table"  :subid("72_1304456120.214") :outer("52_1304456120.214")
-    .param pmc param_996
+.sub "method_table"  :subid("72_1304459371.883") :outer("52_1304459371.883")
     .param pmc param_997
+    .param pmc param_998
 .annotate 'line', 474
-    .lex "self", param_996
-    .lex "$obj", param_997
-    find_lex $P998, "self"
-    find_lex $P999, "$?CLASS"
-    getattribute $P1000, $P998, $P999, "%!methods"
-    unless_null $P1000, vivify_465
-    $P1000 = root_new ['parrot';'Hash']
+    .lex "self", param_997
+    .lex "$obj", param_998
+    find_lex $P999, "self"
+    find_lex $P1000, "$?CLASS"
+    getattribute $P1001, $P999, $P1000, "%!methods"
+    unless_null $P1001, vivify_465
+    $P1001 = root_new ['parrot';'Hash']
   vivify_465:
-    .return ($P1000)
+    .return ($P1001)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPParametricRoleHOW"]
-.sub "name"  :subid("73_1304456120.214") :outer("52_1304456120.214")
-    .param pmc param_1002
+.sub "name"  :subid("73_1304459371.883") :outer("52_1304459371.883")
     .param pmc param_1003
+    .param pmc param_1004
 .annotate 'line', 478
-    .lex "self", param_1002
-    .lex "$obj", param_1003
-    find_lex $P1004, "self"
-    find_lex $P1005, "$?CLASS"
-    getattribute $P1006, $P1004, $P1005, "$!name"
-    unless_null $P1006, vivify_466
-    new $P1006, "Undef"
+    .lex "self", param_1003
+    .lex "$obj", param_1004
+    find_lex $P1005, "self"
+    find_lex $P1006, "$?CLASS"
+    getattribute $P1007, $P1005, $P1006, "$!name"
+    unless_null $P1007, vivify_466
+    new $P1007, "Undef"
   vivify_466:
-    .return ($P1006)
+    .return ($P1007)
 .end
 
 
@@ -5018,191 +5032,3617 @@
 
 .namespace ["NQPParametricRoleHOW"]
 .include "except_types.pasm"
-.sub "attributes"  :subid("74_1304456120.214") :outer("52_1304456120.214")
-    .param pmc param_1008
+.sub "attributes"  :subid("74_1304459371.883") :outer("52_1304459371.883")
     .param pmc param_1009
-    .param pmc param_1010 :optional :named("local")
-    .param int has_param_1010 :opt_flag
+    .param pmc param_1010
+    .param pmc param_1011 :optional :named("local")
+    .param int has_param_1011 :opt_flag
 .annotate 'line', 482
-    .const 'Sub' $P1021 = "75_1304456120.214" 
-    capture_lex $P1021
-    .lex "self", param_1008
-    .lex "$obj", param_1009
-    if has_param_1010, optparam_467
-    new $P1011, "Undef"
-    set param_1010, $P1011
+    .const 'Sub' $P1022 = "75_1304459371.883" 
+    capture_lex $P1022
+    .lex "self", param_1009
+    .lex "$obj", param_1010
+    if has_param_1011, optparam_467
+    new $P1012, "Undef"
+    set param_1011, $P1012
   optparam_467:
-    .lex "$local", param_1010
+    .lex "$local", param_1011
 .annotate 'line', 483
-    $P1012 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@attrs", $P1012
-.annotate 'line', 482
-    find_lex $P1013, "@attrs"
-    unless_null $P1013, vivify_468
     $P1013 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@attrs", $P1013
+.annotate 'line', 482
+    find_lex $P1014, "@attrs"
+    unless_null $P1014, vivify_468
+    $P1014 = root_new ['parrot';'ResizablePMCArray']
   vivify_468:
 .annotate 'line', 484
-    find_lex $P1015, "self"
-    find_lex $P1016, "$?CLASS"
-    getattribute $P1017, $P1015, $P1016, "%!attributes"
-    unless_null $P1017, vivify_469
-    $P1017 = root_new ['parrot';'Hash']
+    find_lex $P1016, "self"
+    find_lex $P1017, "$?CLASS"
+    getattribute $P1018, $P1016, $P1017, "%!attributes"
+    unless_null $P1018, vivify_469
+    $P1018 = root_new ['parrot';'Hash']
   vivify_469:
-    defined $I1018, $P1017
-    unless $I1018, for_undef_470
-    iter $P1014, $P1017
-    new $P1028, 'ExceptionHandler'
-    set_label $P1028, loop1027_handler
-    $P1028."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P1028
-  loop1027_test:
-    unless $P1014, loop1027_done
-    shift $P1019, $P1014
-  loop1027_redo:
-    .const 'Sub' $P1021 = "75_1304456120.214" 
-    capture_lex $P1021
-    $P1021($P1019)
-  loop1027_next:
-    goto loop1027_test
-  loop1027_handler:
+    defined $I1019, $P1018
+    unless $I1019, for_undef_470
+    iter $P1015, $P1018
+    new $P1029, 'ExceptionHandler'
+    set_label $P1029, loop1028_handler
+    $P1029."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P1029
+  loop1028_test:
+    unless $P1015, loop1028_done
+    shift $P1020, $P1015
+  loop1028_redo:
+    .const 'Sub' $P1022 = "75_1304459371.883" 
+    capture_lex $P1022
+    $P1022($P1020)
+  loop1028_next:
+    goto loop1028_test
+  loop1028_handler:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P1029, exception, 'type'
-    eq $P1029, .CONTROL_LOOP_NEXT, loop1027_next
-    eq $P1029, .CONTROL_LOOP_REDO, loop1027_redo
-  loop1027_done:
+    getattribute $P1030, exception, 'type'
+    eq $P1030, .CONTROL_LOOP_NEXT, loop1028_next
+    eq $P1030, .CONTROL_LOOP_REDO, loop1028_redo
+  loop1028_done:
     pop_eh 
   for_undef_470:
-    find_lex $P1030, "@attrs"
-    unless_null $P1030, vivify_473
-    $P1030 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P1031, "@attrs"
+    unless_null $P1031, vivify_473
+    $P1031 = root_new ['parrot';'ResizablePMCArray']
   vivify_473:
 .annotate 'line', 482
-    .return ($P1030)
+    .return ($P1031)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPParametricRoleHOW"]
-.sub "_block1020"  :anon :subid("75_1304456120.214") :outer("74_1304456120.214")
-    .param pmc param_1022
+.sub "_block1021"  :anon :subid("75_1304459371.883") :outer("74_1304459371.883")
+    .param pmc param_1023
 .annotate 'line', 484
-    .lex "$_", param_1022
+    .lex "$_", param_1023
 .annotate 'line', 485
-    find_lex $P1023, "@attrs"
-    unless_null $P1023, vivify_471
-    $P1023 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P1024, "@attrs"
+    unless_null $P1024, vivify_471
+    $P1024 = root_new ['parrot';'ResizablePMCArray']
   vivify_471:
-    find_lex $P1024, "$_"
-    unless_null $P1024, vivify_472
-    new $P1024, "Undef"
+    find_lex $P1025, "$_"
+    unless_null $P1025, vivify_472
+    new $P1025, "Undef"
   vivify_472:
-    $P1025 = $P1024."value"()
-    $P1026 = $P1023."push"($P1025)
+    $P1026 = $P1025."value"()
+    $P1027 = $P1024."push"($P1026)
 .annotate 'line', 484
-    .return ($P1026)
+    .return ($P1027)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPParametricRoleHOW"]
-.sub "roles"  :subid("76_1304456120.214") :outer("52_1304456120.214")
-    .param pmc param_1032
+.sub "roles"  :subid("76_1304459371.883") :outer("52_1304459371.883")
     .param pmc param_1033
+    .param pmc param_1034
 .annotate 'line', 490
-    .lex "self", param_1032
-    .lex "$obj", param_1033
-    find_lex $P1034, "self"
-    find_lex $P1035, "$?CLASS"
-    getattribute $P1036, $P1034, $P1035, "@!roles"
-    unless_null $P1036, vivify_474
-    $P1036 = root_new ['parrot';'ResizablePMCArray']
+    .lex "self", param_1033
+    .lex "$obj", param_1034
+    find_lex $P1035, "self"
+    find_lex $P1036, "$?CLASS"
+    getattribute $P1037, $P1035, $P1036, "@!roles"
+    unless_null $P1037, vivify_474
+    $P1037 = root_new ['parrot';'ResizablePMCArray']
   vivify_474:
-    .return ($P1036)
+    .return ($P1037)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPClassHOW"]
-.sub "_block1038"  :subid("77_1304456120.214") :outer("10_1304456120.214")
+.sub "_block1039"  :subid("77_1304459371.883") :outer("10_1304459371.883")
 .annotate 'line', 500
-    .const 'Sub' $P2006 = "131_1304456120.214" 
-    capture_lex $P2006
-    .const 'Sub' $P1970 = "129_1304456120.214" 
-    capture_lex $P1970
-    .const 'Sub' $P1936 = "128_1304456120.214" 
-    capture_lex $P1936
-    .const 'Sub' $P1899 = "127_1304456120.214" 
-    capture_lex $P1899
-    .const 'Sub' $P1892 = "126_1304456120.214" 
-    capture_lex $P1892
-    .const 'Sub' $P1869 = "124_1304456120.214" 
-    capture_lex $P1869
-    .const 'Sub' $P1863 = "123_1304456120.214" 
-    capture_lex $P1863
-    .const 'Sub' $P1857 = "122_1304456120.214" 
-    capture_lex $P1857
-    .const 'Sub' $P1834 = "120_1304456120.214" 
-    capture_lex $P1834
-    .const 'Sub' $P1827 = "119_1304456120.214" 
-    capture_lex $P1827
-    .const 'Sub' $P1813 = "118_1304456120.214" 
-    capture_lex $P1813
-    .const 'Sub' $P1764 = "115_1304456120.214" 
-    capture_lex $P1764
-    .const 'Sub' $P1719 = "112_1304456120.214" 
-    capture_lex $P1719
-    .const 'Sub' $P1682 = "109_1304456120.214" 
-    capture_lex $P1682
-    .const 'Sub' $P1541 = "104_1304456120.214" 
-    capture_lex $P1541
-    .const 'Sub' $P1435 = "100_1304456120.214" 
-    capture_lex $P1435
-    .const 'Sub' $P1409 = "99_1304456120.214" 
-    capture_lex $P1409
-    .const 'Sub' $P1375 = "97_1304456120.214" 
-    capture_lex $P1375
-    .const 'Sub' $P1368 = "96_1304456120.214" 
-    capture_lex $P1368
-    .const 'Sub' $P1330 = "94_1304456120.214" 
-    capture_lex $P1330
-    .const 'Sub' $P1309 = "93_1304456120.214" 
-    capture_lex $P1309
-    .const 'Sub' $P1288 = "92_1304456120.214" 
-    capture_lex $P1288
-    .const 'Sub' $P1253 = "91_1304456120.214" 
-    capture_lex $P1253
-    .const 'Sub' $P1238 = "90_1304456120.214" 
-    capture_lex $P1238
-    .const 'Sub' $P1231 = "89_1304456120.214" 
-    capture_lex $P1231
-    .const 'Sub' $P1221 = "88_1304456120.214" 
-    capture_lex $P1221
-    .const 'Sub' $P1082 = "81_1304456120.214" 
-    capture_lex $P1082
-    .const 'Sub' $P1040 = "78_1304456120.214" 
-    capture_lex $P1040
+    .const 'Sub' $P2007 = "131_1304459371.883" 
+    capture_lex $P2007
+    .const 'Sub' $P1971 = "129_1304459371.883" 
+    capture_lex $P1971
+    .const 'Sub' $P1937 = "128_1304459371.883" 
+    capture_lex $P1937
+    .const 'Sub' $P1900 = "127_1304459371.883" 
+    capture_lex $P1900
+    .const 'Sub' $P1893 = "126_1304459371.883" 
+    capture_lex $P1893
+    .const 'Sub' $P1870 = "124_1304459371.883" 
+    capture_lex $P1870
+    .const 'Sub' $P1864 = "123_1304459371.883" 
+    capture_lex $P1864
+    .const 'Sub' $P1858 = "122_1304459371.883" 
+    capture_lex $P1858
+    .const 'Sub' $P1835 = "120_1304459371.883" 
+    capture_lex $P1835
+    .const 'Sub' $P1828 = "119_1304459371.883" 
+    capture_lex $P1828
+    .const 'Sub' $P1814 = "118_1304459371.883" 
+    capture_lex $P1814
+    .const 'Sub' $P1765 = "115_1304459371.883" 
+    capture_lex $P1765
+    .const 'Sub' $P1720 = "112_1304459371.883" 
+    capture_lex $P1720
+    .const 'Sub' $P1683 = "109_1304459371.883" 
+    capture_lex $P1683
+    .const 'Sub' $P1542 = "104_1304459371.883" 
+    capture_lex $P1542
+    .const 'Sub' $P1436 = "100_1304459371.883" 
+    capture_lex $P1436
+    .const 'Sub' $P1410 = "99_1304459371.883" 
+    capture_lex $P1410
+    .const 'Sub' $P1376 = "97_1304459371.883" 
+    capture_lex $P1376
+    .const 'Sub' $P1369 = "96_1304459371.883" 
+    capture_lex $P1369
+    .const 'Sub' $P1331 = "94_1304459371.883" 
+    capture_lex $P1331
+    .const 'Sub' $P1310 = "93_1304459371.883" 
+    capture_lex $P1310
+    .const 'Sub' $P1289 = "92_1304459371.883" 
+    capture_lex $P1289
+    .const 'Sub' $P1254 = "91_1304459371.883" 
+    capture_lex $P1254
+    .const 'Sub' $P1239 = "90_1304459371.883" 
+    capture_lex $P1239
+    .const 'Sub' $P1232 = "89_1304459371.883" 
+    capture_lex $P1232
+    .const 'Sub' $P1222 = "88_1304459371.883" 
+    capture_lex $P1222
+    .const 'Sub' $P1083 = "81_1304459371.883" 
+    capture_lex $P1083
+    .const 'Sub' $P1041 = "78_1304459371.883" 
+    capture_lex $P1041
 .annotate 'line', 724
-    .const 'Sub' $P1040 = "78_1304456120.214" 
-    newclosure $P1081, $P1040
-    .lex "compute_c3_mro", $P1081
+    .const 'Sub' $P1041 = "78_1304459371.883" 
+    newclosure $P1082, $P1041
+    .lex "compute_c3_mro", $P1082
 .annotate 'line', 746
-    .const 'Sub' $P1082 = "81_1304456120.214" 
-    newclosure $P1218, $P1082
-    .lex "c3_merge", $P1218
+    .const 'Sub' $P1083 = "81_1304459371.883" 
+    newclosure $P1219, $P1083
+    .lex "c3_merge", $P1219
 .annotate 'line', 500
-    .lex "$?PACKAGE", $P1219
-    .lex "$?CLASS", $P1220
+    .lex "$?PACKAGE", $P1220
+    .lex "$?CLASS", $P1221
 .annotate 'line', 665
-    find_lex $P1680, "compute_c3_mro"
-    find_lex $P1681, "c3_merge"
+    find_lex $P1681, "compute_c3_mro"
+    find_lex $P1682, "c3_merge"
 .annotate 'line', 930
-    .const 'Sub' $P2006 = "131_1304456120.214" 
-    newclosure $P2041, $P2006
+    .const 'Sub' $P2007 = "131_1304459371.883" 
+    newclosure $P2042, $P2007
 .annotate 'line', 500
+    .return ($P2042)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "compute_c3_mro"  :subid("78_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1044
+.annotate 'line', 724
+    .const 'Sub' $P1056 = "79_1304459371.883" 
+    capture_lex $P1056
+    new $P1043, ['ExceptionHandler'], .CONTROL_RETURN
+    set_label $P1043, control_1042
+    push_eh $P1043
+    .lex "$class", param_1044
+.annotate 'line', 725
+    $P1045 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@immediate_parents", $P1045
+.annotate 'line', 728
+    $P1046 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@result", $P1046
+.annotate 'line', 725
+    find_lex $P1047, "$class"
+    unless_null $P1047, vivify_475
+    new $P1047, "Undef"
+  vivify_475:
+    get_how $P1048, $P1047
+    find_lex $P1049, "$class"
+    unless_null $P1049, vivify_476
+    new $P1049, "Undef"
+  vivify_476:
+    $P1050 = $P1048."parents"($P1049, 1 :named("local"))
+    store_lex "@immediate_parents", $P1050
+    find_lex $P1051, "@result"
+    unless_null $P1051, vivify_477
+    $P1051 = root_new ['parrot';'ResizablePMCArray']
+  vivify_477:
+.annotate 'line', 729
+    find_lex $P1053, "@immediate_parents"
+    unless_null $P1053, vivify_478
+    $P1053 = root_new ['parrot';'ResizablePMCArray']
+  vivify_478:
+    set $N1054, $P1053
+    unless $N1054, if_1052_end
+    .const 'Sub' $P1056 = "79_1304459371.883" 
+    capture_lex $P1056
+    $P1056()
+  if_1052_end:
+.annotate 'line', 741
+    find_lex $P1077, "@result"
+    unless_null $P1077, vivify_487
+    $P1077 = root_new ['parrot';'ResizablePMCArray']
+  vivify_487:
+    find_lex $P1078, "$class"
+    unless_null $P1078, vivify_488
+    new $P1078, "Undef"
+  vivify_488:
+    $P1077."unshift"($P1078)
+.annotate 'line', 742
+    new $P1079, "Exception"
+    set $P1079['type'], .CONTROL_RETURN
+    find_lex $P1080, "@result"
+    unless_null $P1080, vivify_489
+    $P1080 = root_new ['parrot';'ResizablePMCArray']
+  vivify_489:
+    setattribute $P1079, 'payload', $P1080
+    throw $P1079
+.annotate 'line', 724
+    .return ()
+  control_1042:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1081, exception, "payload"
+    .return ($P1081)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "_block1055"  :anon :subid("79_1304459371.883") :outer("78_1304459371.883")
+.annotate 'line', 729
+    .const 'Sub' $P1064 = "80_1304459371.883" 
+    capture_lex $P1064
+.annotate 'line', 732
+    $P1057 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@merge_list", $P1057
+.annotate 'line', 729
+    find_lex $P1058, "@merge_list"
+    unless_null $P1058, vivify_479
+    $P1058 = root_new ['parrot';'ResizablePMCArray']
+  vivify_479:
+.annotate 'line', 733
+    find_lex $P1060, "@immediate_parents"
+    unless_null $P1060, vivify_480
+    $P1060 = root_new ['parrot';'ResizablePMCArray']
+  vivify_480:
+    defined $I1061, $P1060
+    unless $I1061, for_undef_481
+    iter $P1059, $P1060
+    new $P1071, 'ExceptionHandler'
+    set_label $P1071, loop1070_handler
+    $P1071."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P1071
+  loop1070_test:
+    unless $P1059, loop1070_done
+    shift $P1062, $P1059
+  loop1070_redo:
+    .const 'Sub' $P1064 = "80_1304459371.883" 
+    capture_lex $P1064
+    $P1064($P1062)
+  loop1070_next:
+    goto loop1070_test
+  loop1070_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1072, exception, 'type'
+    eq $P1072, .CONTROL_LOOP_NEXT, loop1070_next
+    eq $P1072, .CONTROL_LOOP_REDO, loop1070_redo
+  loop1070_done:
+    pop_eh 
+  for_undef_481:
+.annotate 'line', 736
+    find_lex $P1073, "@merge_list"
+    unless_null $P1073, vivify_484
+    $P1073 = root_new ['parrot';'ResizablePMCArray']
+  vivify_484:
+    find_lex $P1074, "@immediate_parents"
+    unless_null $P1074, vivify_485
+    $P1074 = root_new ['parrot';'ResizablePMCArray']
+  vivify_485:
+    $P1073."push"($P1074)
+.annotate 'line', 737
+    find_lex $P1075, "@merge_list"
+    unless_null $P1075, vivify_486
+    $P1075 = root_new ['parrot';'ResizablePMCArray']
+  vivify_486:
+    $P1076 = "c3_merge"($P1075)
+    store_lex "@result", $P1076
+.annotate 'line', 729
+    .return ($P1076)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "_block1063"  :anon :subid("80_1304459371.883") :outer("79_1304459371.883")
+    .param pmc param_1065
+.annotate 'line', 733
+    .lex "$_", param_1065
+.annotate 'line', 734
+    find_lex $P1066, "@merge_list"
+    unless_null $P1066, vivify_482
+    $P1066 = root_new ['parrot';'ResizablePMCArray']
+  vivify_482:
+    find_lex $P1067, "$_"
+    unless_null $P1067, vivify_483
+    new $P1067, "Undef"
+  vivify_483:
+    $P1068 = "compute_c3_mro"($P1067)
+    $P1069 = $P1066."push"($P1068)
+.annotate 'line', 733
+    .return ($P1069)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "c3_merge"  :subid("81_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1086
+.annotate 'line', 746
+    .const 'Sub' $P1179 = "86_1304459371.883" 
+    capture_lex $P1179
+    .const 'Sub' $P1101 = "82_1304459371.883" 
+    capture_lex $P1101
+    new $P1085, ['ExceptionHandler'], .CONTROL_RETURN
+    set_label $P1085, control_1084
+    push_eh $P1085
+    .lex "@merge_list", param_1086
+.annotate 'line', 747
+    $P1087 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@result", $P1087
+.annotate 'line', 748
+    new $P1088, "Undef"
+    .lex "$accepted", $P1088
+.annotate 'line', 749
+    new $P1089, "Undef"
+    .lex "$something_accepted", $P1089
+.annotate 'line', 750
+    new $P1090, "Undef"
+    .lex "$cand_count", $P1090
+.annotate 'line', 793
+    new $P1091, "Undef"
+    .lex "$i", $P1091
+.annotate 'line', 746
+    find_lex $P1092, "@result"
+    unless_null $P1092, vivify_490
+    $P1092 = root_new ['parrot';'ResizablePMCArray']
+  vivify_490:
+    find_lex $P1093, "$accepted"
+    unless_null $P1093, vivify_491
+    new $P1093, "Undef"
+  vivify_491:
+.annotate 'line', 749
+    new $P1094, "Integer"
+    assign $P1094, 0
+    store_lex "$something_accepted", $P1094
+.annotate 'line', 750
+    new $P1095, "Integer"
+    assign $P1095, 0
+    store_lex "$cand_count", $P1095
+.annotate 'line', 753
+    find_lex $P1097, "@merge_list"
+    unless_null $P1097, vivify_492
+    $P1097 = root_new ['parrot';'ResizablePMCArray']
+  vivify_492:
+    defined $I1098, $P1097
+    unless $I1098, for_undef_493
+    iter $P1096, $P1097
+    new $P1162, 'ExceptionHandler'
+    set_label $P1162, loop1161_handler
+    $P1162."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P1162
+  loop1161_test:
+    unless $P1096, loop1161_done
+    shift $P1099, $P1096
+  loop1161_redo:
+    .const 'Sub' $P1101 = "82_1304459371.883" 
+    capture_lex $P1101
+    $P1101($P1099)
+  loop1161_next:
+    goto loop1161_test
+  loop1161_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1163, exception, 'type'
+    eq $P1163, .CONTROL_LOOP_NEXT, loop1161_next
+    eq $P1163, .CONTROL_LOOP_REDO, loop1161_redo
+  loop1161_done:
+    pop_eh 
+  for_undef_493:
+.annotate 'line', 783
+    find_lex $P1165, "$cand_count"
+    unless_null $P1165, vivify_512
+    new $P1165, "Undef"
+  vivify_512:
+    set $N1166, $P1165
+    iseq $I1167, $N1166, 0.0
+    unless $I1167, if_1164_end
+.annotate 'line', 784
+    new $P1168, "Exception"
+    set $P1168['type'], .CONTROL_RETURN
+    find_lex $P1169, "@result"
+    unless_null $P1169, vivify_513
+    $P1169 = root_new ['parrot';'ResizablePMCArray']
+  vivify_513:
+    setattribute $P1168, 'payload', $P1169
+    throw $P1168
+  if_1164_end:
+.annotate 'line', 788
+    find_lex $P1171, "$something_accepted"
+    unless_null $P1171, vivify_514
+    new $P1171, "Undef"
+  vivify_514:
+    if $P1171, unless_1170_end
+.annotate 'line', 789
+    die "Could not build C3 linearization: ambiguous hierarchy"
+  unless_1170_end:
+.annotate 'line', 793
+    new $P1172, "Integer"
+    assign $P1172, 0
+    store_lex "$i", $P1172
+.annotate 'line', 794
+    new $P1210, 'ExceptionHandler'
+    set_label $P1210, loop1209_handler
+    $P1210."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P1210
+  loop1209_test:
+    find_lex $P1173, "$i"
+    unless_null $P1173, vivify_515
+    new $P1173, "Undef"
+  vivify_515:
+    set $N1174, $P1173
+    find_lex $P1175, "@merge_list"
+    unless_null $P1175, vivify_516
+    $P1175 = root_new ['parrot';'ResizablePMCArray']
+  vivify_516:
+    set $N1176, $P1175
+    islt $I1177, $N1174, $N1176
+    unless $I1177, loop1209_done
+  loop1209_redo:
+    .const 'Sub' $P1179 = "86_1304459371.883" 
+    capture_lex $P1179
+    $P1179()
+  loop1209_next:
+    goto loop1209_test
+  loop1209_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1211, exception, 'type'
+    eq $P1211, .CONTROL_LOOP_NEXT, loop1209_next
+    eq $P1211, .CONTROL_LOOP_REDO, loop1209_redo
+  loop1209_done:
+    pop_eh 
+.annotate 'line', 807
+    find_lex $P1212, "@merge_list"
+    unless_null $P1212, vivify_530
+    $P1212 = root_new ['parrot';'ResizablePMCArray']
+  vivify_530:
+    $P1213 = "c3_merge"($P1212)
+    store_lex "@result", $P1213
+.annotate 'line', 808
+    find_lex $P1214, "@result"
+    unless_null $P1214, vivify_531
+    $P1214 = root_new ['parrot';'ResizablePMCArray']
+  vivify_531:
+    find_lex $P1215, "$accepted"
+    unless_null $P1215, vivify_532
+    new $P1215, "Undef"
+  vivify_532:
+    $P1214."unshift"($P1215)
+.annotate 'line', 809
+    new $P1216, "Exception"
+    set $P1216['type'], .CONTROL_RETURN
+    find_lex $P1217, "@result"
+    unless_null $P1217, vivify_533
+    $P1217 = root_new ['parrot';'ResizablePMCArray']
+  vivify_533:
+    setattribute $P1216, 'payload', $P1217
+    throw $P1216
+.annotate 'line', 746
+    .return ()
+  control_1084:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1218, exception, "payload"
+    .return ($P1218)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "_block1100"  :anon :subid("82_1304459371.883") :outer("81_1304459371.883")
+    .param pmc param_1103
+.annotate 'line', 753
+    .const 'Sub' $P1110 = "83_1304459371.883" 
+    capture_lex $P1110
+.annotate 'line', 754
+    $P1102 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@cand_list", $P1102
+    .lex "$_", param_1103
+    find_lex $P1104, "$_"
+    unless_null $P1104, vivify_494
+    new $P1104, "Undef"
+  vivify_494:
+    store_lex "@cand_list", $P1104
+.annotate 'line', 755
+    find_lex $P1107, "@cand_list"
+    unless_null $P1107, vivify_495
+    $P1107 = root_new ['parrot';'ResizablePMCArray']
+  vivify_495:
+    set $N1108, $P1107
+    if $N1108, if_1106
+    new $P1105, 'Float'
+    set $P1105, $N1108
+    goto if_1106_end
+  if_1106:
+    .const 'Sub' $P1110 = "83_1304459371.883" 
+    capture_lex $P1110
+    $P1160 = $P1110()
+    set $P1105, $P1160
+  if_1106_end:
+.annotate 'line', 753
+    .return ($P1105)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "_block1109"  :anon :subid("83_1304459371.883") :outer("82_1304459371.883")
+.annotate 'line', 755
+    .const 'Sub' $P1123 = "84_1304459371.883" 
+    capture_lex $P1123
+.annotate 'line', 756
+    new $P1111, "Undef"
+    .lex "$rejected", $P1111
+.annotate 'line', 757
+    new $P1112, "Undef"
+    .lex "$cand_class", $P1112
+.annotate 'line', 756
+    new $P1113, "Integer"
+    assign $P1113, 0
+    store_lex "$rejected", $P1113
+.annotate 'line', 757
+    find_lex $P1114, "@cand_list"
+    unless_null $P1114, vivify_496
+    $P1114 = root_new ['parrot';'ResizablePMCArray']
+  vivify_496:
+    set $P1115, $P1114[0]
+    unless_null $P1115, vivify_497
+    new $P1115, "Undef"
+  vivify_497:
+    store_lex "$cand_class", $P1115
+.annotate 'line', 758
+    find_lex $P1116, "$cand_count"
+    unless_null $P1116, vivify_498
+    new $P1116, "Undef"
+  vivify_498:
+    add $P1117, $P1116, 1
+    store_lex "$cand_count", $P1117
+.annotate 'line', 759
+    find_lex $P1119, "@merge_list"
+    unless_null $P1119, vivify_499
+    $P1119 = root_new ['parrot';'ResizablePMCArray']
+  vivify_499:
+    defined $I1120, $P1119
+    unless $I1120, for_undef_500
+    iter $P1118, $P1119
+    new $P1158, 'ExceptionHandler'
+    set_label $P1158, loop1157_handler
+    $P1158."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P1158
+  loop1157_test:
+    unless $P1118, loop1157_done
+    shift $P1121, $P1118
+  loop1157_redo:
+    .const 'Sub' $P1123 = "84_1304459371.883" 
+    capture_lex $P1123
+    $P1123($P1121)
+  loop1157_next:
+    goto loop1157_test
+  loop1157_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1159, exception, 'type'
+    eq $P1159, .CONTROL_LOOP_NEXT, loop1157_next
+    eq $P1159, .CONTROL_LOOP_REDO, loop1157_redo
+  loop1157_done:
+    pop_eh 
+  for_undef_500:
+.annotate 'line', 755
+    .return ($P1118)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "_block1122"  :anon :subid("84_1304459371.883") :outer("83_1304459371.883")
+    .param pmc param_1124
+.annotate 'line', 759
+    .const 'Sub' $P1130 = "85_1304459371.883" 
+    capture_lex $P1130
+    .lex "$_", param_1124
+.annotate 'line', 761
+    find_lex $P1126, "$_"
+    unless_null $P1126, vivify_501
+    new $P1126, "Undef"
+  vivify_501:
+    find_lex $P1127, "@cand_list"
+    unless_null $P1127, vivify_502
+    $P1127 = root_new ['parrot';'ResizablePMCArray']
+  vivify_502:
+    issame $I1128, $P1126, $P1127
+    if $I1128, unless_1125_end
+    .const 'Sub' $P1130 = "85_1304459371.883" 
+    capture_lex $P1130
+    $P1130()
+  unless_1125_end:
+.annotate 'line', 773
+    find_lex $P1153, "$rejected"
+    unless_null $P1153, vivify_510
+    new $P1153, "Undef"
+  vivify_510:
+    unless $P1153, unless_1152
+    set $P1151, $P1153
+    goto unless_1152_end
+  unless_1152:
+.annotate 'line', 774
+    find_lex $P1154, "$cand_class"
+    unless_null $P1154, vivify_511
+    new $P1154, "Undef"
+  vivify_511:
+    store_lex "$accepted", $P1154
+.annotate 'line', 775
+    new $P1155, "Integer"
+    assign $P1155, 1
+    store_lex "$something_accepted", $P1155
+.annotate 'line', 776
+    set $I1156, .CONTROL_LOOP_LAST
+    die 0, $I1156
+  unless_1152_end:
+.annotate 'line', 759
+    .return ($P1151)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "_block1129"  :anon :subid("85_1304459371.883") :outer("84_1304459371.883")
+.annotate 'line', 763
+    new $P1131, "Undef"
+    .lex "$cur_pos", $P1131
+    new $P1132, "Integer"
+    assign $P1132, 1
+    store_lex "$cur_pos", $P1132
+.annotate 'line', 764
+    new $P1149, 'ExceptionHandler'
+    set_label $P1149, loop1148_handler
+    $P1149."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P1149
+  loop1148_test:
+    find_lex $P1133, "$cur_pos"
+    unless_null $P1133, vivify_503
+    new $P1133, "Undef"
+  vivify_503:
+    set $N1134, $P1133
+    find_lex $P1135, "$_"
+    unless_null $P1135, vivify_504
+    new $P1135, "Undef"
+  vivify_504:
+    set $N1136, $P1135
+    isle $I1137, $N1134, $N1136
+    unless $I1137, loop1148_done
+  loop1148_redo:
+.annotate 'line', 765
+    find_lex $P1139, "$cur_pos"
+    unless_null $P1139, vivify_505
+    new $P1139, "Undef"
+  vivify_505:
+    set $I1140, $P1139
+    find_lex $P1141, "$_"
+    unless_null $P1141, vivify_506
+    $P1141 = root_new ['parrot';'ResizablePMCArray']
+  vivify_506:
+    set $P1142, $P1141[$I1140]
+    unless_null $P1142, vivify_507
+    new $P1142, "Undef"
+  vivify_507:
+    find_lex $P1143, "$cand_class"
+    unless_null $P1143, vivify_508
+    new $P1143, "Undef"
+  vivify_508:
+    issame $I1144, $P1142, $P1143
+    unless $I1144, if_1138_end
+.annotate 'line', 766
+    new $P1145, "Integer"
+    assign $P1145, 1
+    store_lex "$rejected", $P1145
+  if_1138_end:
+.annotate 'line', 768
+    find_lex $P1146, "$cur_pos"
+    unless_null $P1146, vivify_509
+    new $P1146, "Undef"
+  vivify_509:
+    add $P1147, $P1146, 1
+    store_lex "$cur_pos", $P1147
+  loop1148_next:
+.annotate 'line', 764
+    goto loop1148_test
+  loop1148_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1150, exception, 'type'
+    eq $P1150, .CONTROL_LOOP_NEXT, loop1148_next
+    eq $P1150, .CONTROL_LOOP_REDO, loop1148_redo
+  loop1148_done:
+    pop_eh 
+.annotate 'line', 761
+    .return ($I1137)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "_block1178"  :anon :subid("86_1304459371.883") :outer("81_1304459371.883")
+.annotate 'line', 794
+    .const 'Sub' $P1190 = "87_1304459371.883" 
+    capture_lex $P1190
+.annotate 'line', 795
+    $P1180 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@new_list", $P1180
+.annotate 'line', 794
+    find_lex $P1181, "@new_list"
+    unless_null $P1181, vivify_517
+    $P1181 = root_new ['parrot';'ResizablePMCArray']
+  vivify_517:
+.annotate 'line', 796
+    find_lex $P1183, "$i"
+    unless_null $P1183, vivify_518
+    new $P1183, "Undef"
+  vivify_518:
+    set $I1184, $P1183
+    find_lex $P1185, "@merge_list"
+    unless_null $P1185, vivify_519
+    $P1185 = root_new ['parrot';'ResizablePMCArray']
+  vivify_519:
+    set $P1186, $P1185[$I1184]
+    unless_null $P1186, vivify_520
+    new $P1186, "Undef"
+  vivify_520:
+    defined $I1187, $P1186
+    unless $I1187, for_undef_521
+    iter $P1182, $P1186
+    new $P1201, 'ExceptionHandler'
+    set_label $P1201, loop1200_handler
+    $P1201."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P1201
+  loop1200_test:
+    unless $P1182, loop1200_done
+    shift $P1188, $P1182
+  loop1200_redo:
+    .const 'Sub' $P1190 = "87_1304459371.883" 
+    capture_lex $P1190
+    $P1190($P1188)
+  loop1200_next:
+    goto loop1200_test
+  loop1200_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1202, exception, 'type'
+    eq $P1202, .CONTROL_LOOP_NEXT, loop1200_next
+    eq $P1202, .CONTROL_LOOP_REDO, loop1200_redo
+  loop1200_done:
+    pop_eh 
+  for_undef_521:
+.annotate 'line', 801
+    find_lex $P1203, "@new_list"
+    unless_null $P1203, vivify_526
+    $P1203 = root_new ['parrot';'ResizablePMCArray']
+  vivify_526:
+    find_lex $P1204, "$i"
+    unless_null $P1204, vivify_527
+    new $P1204, "Undef"
+  vivify_527:
+    set $I1205, $P1204
+    find_lex $P1206, "@merge_list"
+    unless_null $P1206, vivify_528
+    $P1206 = root_new ['parrot';'ResizablePMCArray']
+    store_lex "@merge_list", $P1206
+  vivify_528:
+    set $P1206[$I1205], $P1203
+.annotate 'line', 802
+    find_lex $P1207, "$i"
+    unless_null $P1207, vivify_529
+    new $P1207, "Undef"
+  vivify_529:
+    add $P1208, $P1207, 1
+    store_lex "$i", $P1208
+.annotate 'line', 794
+    .return ($P1208)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "_block1189"  :anon :subid("87_1304459371.883") :outer("86_1304459371.883")
+    .param pmc param_1191
+.annotate 'line', 796
+    .lex "$_", param_1191
+.annotate 'line', 797
+    find_lex $P1194, "$_"
+    unless_null $P1194, vivify_522
+    new $P1194, "Undef"
+  vivify_522:
+    find_lex $P1195, "$accepted"
+    unless_null $P1195, vivify_523
+    new $P1195, "Undef"
+  vivify_523:
+    issame $I1196, $P1194, $P1195
+    unless $I1196, unless_1193
+    new $P1192, 'Integer'
+    set $P1192, $I1196
+    goto unless_1193_end
+  unless_1193:
+.annotate 'line', 798
+    find_lex $P1197, "@new_list"
+    unless_null $P1197, vivify_524
+    $P1197 = root_new ['parrot';'ResizablePMCArray']
+  vivify_524:
+    find_lex $P1198, "$_"
+    unless_null $P1198, vivify_525
+    new $P1198, "Undef"
+  vivify_525:
+    $P1199 = $P1197."push"($P1198)
+.annotate 'line', 797
+    set $P1192, $P1199
+  unless_1193_end:
+.annotate 'line', 796
+    .return ($P1192)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "new"  :subid("88_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1223
+    .param pmc param_1224 :optional :named("name")
+    .param int has_param_1224 :opt_flag
+.annotate 'line', 537
+    .lex "self", param_1223
+    if has_param_1224, optparam_534
+    new $P1225, "Undef"
+    set param_1224, $P1225
+  optparam_534:
+    .lex "$name", param_1224
+.annotate 'line', 538
+    new $P1226, "Undef"
+    .lex "$obj", $P1226
+    find_lex $P1227, "self"
+    repr_instance_of $P1228, $P1227
+    store_lex "$obj", $P1228
+.annotate 'line', 539
+    find_lex $P1229, "$obj"
+    unless_null $P1229, vivify_535
+    new $P1229, "Undef"
+  vivify_535:
+    find_lex $P1230, "$name"
+    unless_null $P1230, vivify_536
+    new $P1230, "Undef"
+  vivify_536:
+    $P1229."BUILD"($P1230 :named("name"))
+    find_lex $P1231, "$obj"
+    unless_null $P1231, vivify_537
+    new $P1231, "Undef"
+  vivify_537:
+.annotate 'line', 537
+    .return ($P1231)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "BUILD"  :subid("89_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1233
+    .param pmc param_1234 :optional :named("name")
+    .param int has_param_1234 :opt_flag
+.annotate 'line', 543
+    .lex "self", param_1233
+    if has_param_1234, optparam_538
+    new $P1235, "Undef"
+    set param_1234, $P1235
+  optparam_538:
+    .lex "$name", param_1234
+.annotate 'line', 544
+    find_lex $P1236, "$name"
+    unless_null $P1236, vivify_539
+    new $P1236, "Undef"
+  vivify_539:
+    find_lex $P1237, "self"
+    find_lex $P1238, "$?CLASS"
+    setattribute $P1237, $P1238, "$!name", $P1236
+.annotate 'line', 543
+    .return ($P1236)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "new_type"  :subid("90_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1240
+    .param pmc param_1241 :optional :named("name")
+    .param int has_param_1241 :opt_flag
+    .param pmc param_1243 :optional :named("repr")
+    .param int has_param_1243 :opt_flag
+.annotate 'line', 549
+    .lex "self", param_1240
+    if has_param_1241, optparam_540
+    new $P1242, "String"
+    assign $P1242, "<anon>"
+    set param_1241, $P1242
+  optparam_540:
+    .lex "$name", param_1241
+    if has_param_1243, optparam_541
+    new $P1244, "String"
+    assign $P1244, "P6opaque"
+    set param_1243, $P1244
+  optparam_541:
+    .lex "$repr", param_1243
+.annotate 'line', 550
+    new $P1245, "Undef"
+    .lex "$metaclass", $P1245
+    find_lex $P1246, "self"
+    find_lex $P1247, "$name"
+    unless_null $P1247, vivify_542
+    new $P1247, "Undef"
+  vivify_542:
+    $P1248 = $P1246."new"($P1247 :named("name"))
+    store_lex "$metaclass", $P1248
+.annotate 'line', 552
+    find_lex $P1249, "$metaclass"
+    unless_null $P1249, vivify_543
+    new $P1249, "Undef"
+  vivify_543:
+    find_lex $P1250, "$repr"
+    unless_null $P1250, vivify_544
+    new $P1250, "Undef"
+  vivify_544:
+    set $S1251, $P1250
+    repr_type_object_for $P1252, $P1249, $S1251
+    $P1253 = root_new ['parrot';'Hash']
+    set_who $P1252, $P1253
+.annotate 'line', 549
+    .return ($P1252)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "add_method"  :subid("91_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1255
+    .param pmc param_1256
+    .param pmc param_1257
+    .param pmc param_1258
+.annotate 'line', 556
+    .lex "self", param_1255
+    .lex "$obj", param_1256
+    .lex "$name", param_1257
+    .lex "$code_obj", param_1258
+.annotate 'line', 557
+    find_lex $P1260, "$name"
+    unless_null $P1260, vivify_545
+    new $P1260, "Undef"
+  vivify_545:
+    find_lex $P1261, "self"
+    find_lex $P1262, "$?CLASS"
+    getattribute $P1263, $P1261, $P1262, "%!methods"
+    unless_null $P1263, vivify_546
+    $P1263 = root_new ['parrot';'Hash']
+  vivify_546:
+    set $P1264, $P1263[$P1260]
+    unless_null $P1264, vivify_547
+    new $P1264, "Undef"
+  vivify_547:
+    unless $P1264, if_1259_end
+.annotate 'line', 558
+    new $P1265, "String"
+    assign $P1265, "This class already has a method named "
+    find_lex $P1266, "$name"
+    unless_null $P1266, vivify_548
+    new $P1266, "Undef"
+  vivify_548:
+    concat $P1267, $P1265, $P1266
+    die $P1267
+  if_1259_end:
+.annotate 'line', 560
+    find_lex $P1271, "$code_obj"
+    unless_null $P1271, vivify_549
+    new $P1271, "Undef"
+  vivify_549:
+    isnull $I1272, $P1271
+    unless $I1272, unless_1270
+    new $P1269, 'Integer'
+    set $P1269, $I1272
+    goto unless_1270_end
+  unless_1270:
+    find_lex $P1273, "$code_obj"
+    unless_null $P1273, vivify_550
+    new $P1273, "Undef"
+  vivify_550:
+    isa $I1274, $P1273, "Undef"
+    new $P1269, 'Integer'
+    set $P1269, $I1274
+  unless_1270_end:
+    unless $P1269, if_1268_end
+.annotate 'line', 561
+    new $P1275, 'String'
+    set $P1275, "Cannot add a null method '"
+    find_lex $P1276, "$name"
+    unless_null $P1276, vivify_551
+    new $P1276, "Undef"
+  vivify_551:
+    concat $P1277, $P1275, $P1276
+    concat $P1278, $P1277, "' to class '"
+    find_lex $P1279, "self"
+    find_lex $P1280, "$?CLASS"
+    getattribute $P1281, $P1279, $P1280, "$!name"
+    unless_null $P1281, vivify_552
+    new $P1281, "Undef"
+  vivify_552:
+    concat $P1282, $P1278, $P1281
+    concat $P1283, $P1282, "'"
+    die $P1283
+  if_1268_end:
+.annotate 'line', 563
+    find_lex $P1284, "$code_obj"
+    unless_null $P1284, vivify_553
+    new $P1284, "Undef"
+  vivify_553:
+    find_lex $P1285, "$name"
+    unless_null $P1285, vivify_554
+    new $P1285, "Undef"
+  vivify_554:
+    find_lex $P1286, "self"
+    find_lex $P1287, "$?CLASS"
+    getattribute $P1288, $P1286, $P1287, "%!methods"
+    unless_null $P1288, vivify_555
+    $P1288 = root_new ['parrot';'Hash']
+    setattribute $P1286, $P1287, "%!methods", $P1288
+  vivify_555:
+    set $P1288[$P1285], $P1284
+.annotate 'line', 556
+    .return ($P1284)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "add_multi_method"  :subid("92_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1290
+    .param pmc param_1291
+    .param pmc param_1292
+    .param pmc param_1293
+.annotate 'line', 566
+    .lex "self", param_1290
+    .lex "$obj", param_1291
+    .lex "$name", param_1292
+    .lex "$code_obj", param_1293
+.annotate 'line', 572
+    $P1294 = root_new ['parrot';'Hash']
+    .lex "%todo", $P1294
+.annotate 'line', 566
+    find_lex $P1295, "%todo"
+    unless_null $P1295, vivify_556
+    $P1295 = root_new ['parrot';'Hash']
+  vivify_556:
+.annotate 'line', 573
+    find_lex $P1296, "$name"
+    unless_null $P1296, vivify_557
+    new $P1296, "Undef"
+  vivify_557:
+    find_lex $P1297, "%todo"
+    unless_null $P1297, vivify_558
+    $P1297 = root_new ['parrot';'Hash']
+    store_lex "%todo", $P1297
+  vivify_558:
+    set $P1297["name"], $P1296
+.annotate 'line', 574
+    find_lex $P1298, "$code_obj"
+    unless_null $P1298, vivify_559
+    new $P1298, "Undef"
+  vivify_559:
+    find_lex $P1299, "%todo"
+    unless_null $P1299, vivify_560
+    $P1299 = root_new ['parrot';'Hash']
+    store_lex "%todo", $P1299
+  vivify_560:
+    set $P1299["code"], $P1298
+.annotate 'line', 575
+    find_lex $P1300, "%todo"
+    unless_null $P1300, vivify_561
+    $P1300 = root_new ['parrot';'Hash']
+  vivify_561:
+    find_lex $P1301, "self"
+    find_lex $P1302, "$?CLASS"
+    getattribute $P1303, $P1301, $P1302, "@!multi_methods_to_incorporate"
+    unless_null $P1303, vivify_562
+    $P1303 = root_new ['parrot';'ResizablePMCArray']
+  vivify_562:
+    set $N1304, $P1303
+    set $I1305, $N1304
+    find_lex $P1306, "self"
+    find_lex $P1307, "$?CLASS"
+    getattribute $P1308, $P1306, $P1307, "@!multi_methods_to_incorporate"
+    unless_null $P1308, vivify_563
+    $P1308 = root_new ['parrot';'ResizablePMCArray']
+    setattribute $P1306, $P1307, "@!multi_methods_to_incorporate", $P1308
+  vivify_563:
+    set $P1308[$I1305], $P1300
+    find_lex $P1309, "$code_obj"
+    unless_null $P1309, vivify_564
+    new $P1309, "Undef"
+  vivify_564:
+.annotate 'line', 566
+    .return ($P1309)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "add_attribute"  :subid("93_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1311
+    .param pmc param_1312
+    .param pmc param_1313
+.annotate 'line', 579
+    .lex "self", param_1311
+    .lex "$obj", param_1312
+    .lex "$meta_attr", param_1313
+.annotate 'line', 580
+    new $P1314, "Undef"
+    .lex "$name", $P1314
+    find_lex $P1315, "$meta_attr"
+    unless_null $P1315, vivify_565
+    new $P1315, "Undef"
+  vivify_565:
+    $P1316 = $P1315."name"()
+    store_lex "$name", $P1316
+.annotate 'line', 581
+    find_lex $P1318, "$name"
+    unless_null $P1318, vivify_566
+    new $P1318, "Undef"
+  vivify_566:
+    find_lex $P1319, "self"
+    find_lex $P1320, "$?CLASS"
+    getattribute $P1321, $P1319, $P1320, "%!attributes"
+    unless_null $P1321, vivify_567
+    $P1321 = root_new ['parrot';'Hash']
+  vivify_567:
+    set $P1322, $P1321[$P1318]
+    unless_null $P1322, vivify_568
+    new $P1322, "Undef"
+  vivify_568:
+    unless $P1322, if_1317_end
+.annotate 'line', 582
+    new $P1323, "String"
+    assign $P1323, "This class already has an attribute named "
+    find_lex $P1324, "$name"
+    unless_null $P1324, vivify_569
+    new $P1324, "Undef"
+  vivify_569:
+    concat $P1325, $P1323, $P1324
+    die $P1325
+  if_1317_end:
+.annotate 'line', 584
+    find_lex $P1326, "$meta_attr"
+    unless_null $P1326, vivify_570
+    new $P1326, "Undef"
+  vivify_570:
+    find_lex $P1327, "$name"
+    unless_null $P1327, vivify_571
+    new $P1327, "Undef"
+  vivify_571:
+    find_lex $P1328, "self"
+    find_lex $P1329, "$?CLASS"
+    getattribute $P1330, $P1328, $P1329, "%!attributes"
+    unless_null $P1330, vivify_572
+    $P1330 = root_new ['parrot';'Hash']
+    setattribute $P1328, $P1329, "%!attributes", $P1330
+  vivify_572:
+    set $P1330[$P1327], $P1326
+.annotate 'line', 579
+    .return ($P1326)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "add_parent"  :subid("94_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1332
+    .param pmc param_1333
+    .param pmc param_1334
+.annotate 'line', 587
+    .const 'Sub' $P1346 = "95_1304459371.883" 
+    capture_lex $P1346
+    .lex "self", param_1332
+    .lex "$obj", param_1333
+    .lex "$parent", param_1334
+.annotate 'line', 588
+    find_lex $P1336, "self"
+    find_lex $P1337, "$?CLASS"
+    getattribute $P1338, $P1336, $P1337, "$!composed"
+    unless_null $P1338, vivify_573
+    new $P1338, "Undef"
+  vivify_573:
+    unless $P1338, if_1335_end
+.annotate 'line', 589
+    die "NQPClassHOW does not support adding parents after being composed."
+  if_1335_end:
+.annotate 'line', 591
+    find_lex $P1340, "self"
+    find_lex $P1341, "$?CLASS"
+    getattribute $P1342, $P1340, $P1341, "@!parents"
+    unless_null $P1342, vivify_574
+    $P1342 = root_new ['parrot';'ResizablePMCArray']
+  vivify_574:
+    defined $I1343, $P1342
+    unless $I1343, for_undef_575
+    iter $P1339, $P1342
+    new $P1358, 'ExceptionHandler'
+    set_label $P1358, loop1357_handler
+    $P1358."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P1358
+  loop1357_test:
+    unless $P1339, loop1357_done
+    shift $P1344, $P1339
+  loop1357_redo:
+    .const 'Sub' $P1346 = "95_1304459371.883" 
+    capture_lex $P1346
+    $P1346($P1344)
+  loop1357_next:
+    goto loop1357_test
+  loop1357_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1359, exception, 'type'
+    eq $P1359, .CONTROL_LOOP_NEXT, loop1357_next
+    eq $P1359, .CONTROL_LOOP_REDO, loop1357_redo
+  loop1357_done:
+    pop_eh 
+  for_undef_575:
+.annotate 'line', 596
+    find_lex $P1360, "$parent"
+    unless_null $P1360, vivify_579
+    new $P1360, "Undef"
+  vivify_579:
+    find_lex $P1361, "self"
+    find_lex $P1362, "$?CLASS"
+    getattribute $P1363, $P1361, $P1362, "@!parents"
+    unless_null $P1363, vivify_580
+    $P1363 = root_new ['parrot';'ResizablePMCArray']
+  vivify_580:
+    set $N1364, $P1363
+    set $I1365, $N1364
+    find_lex $P1366, "self"
+    find_lex $P1367, "$?CLASS"
+    getattribute $P1368, $P1366, $P1367, "@!parents"
+    unless_null $P1368, vivify_581
+    $P1368 = root_new ['parrot';'ResizablePMCArray']
+    setattribute $P1366, $P1367, "@!parents", $P1368
+  vivify_581:
+    set $P1368[$I1365], $P1360
+.annotate 'line', 587
+    .return ($P1360)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "_block1345"  :anon :subid("95_1304459371.883") :outer("94_1304459371.883")
+    .param pmc param_1347
+.annotate 'line', 591
+    .lex "$_", param_1347
+.annotate 'line', 592
+    find_lex $P1350, "$_"
+    unless_null $P1350, vivify_576
+    new $P1350, "Undef"
+  vivify_576:
+    find_lex $P1351, "$parent"
+    unless_null $P1351, vivify_577
+    new $P1351, "Undef"
+  vivify_577:
+    issame $I1352, $P1350, $P1351
+    if $I1352, if_1349
+    new $P1348, 'Integer'
+    set $P1348, $I1352
+    goto if_1349_end
+  if_1349:
+.annotate 'line', 593
+    new $P1353, "String"
+    assign $P1353, "Already have "
+    find_lex $P1354, "$parent"
+    unless_null $P1354, vivify_578
+    new $P1354, "Undef"
+  vivify_578:
+    concat $P1355, $P1353, $P1354
+    concat $P1356, $P1355, " as a parent class."
+    die $P1356
+  if_1349_end:
+.annotate 'line', 591
+    .return ($P1348)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "set_default_parent"  :subid("96_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1370
+    .param pmc param_1371
+    .param pmc param_1372
+.annotate 'line', 599
+    .lex "self", param_1370
+    .lex "$obj", param_1371
+    .lex "$parent", param_1372
+.annotate 'line', 600
+    find_lex $P1373, "$parent"
+    unless_null $P1373, vivify_582
+    new $P1373, "Undef"
+  vivify_582:
+    find_lex $P1374, "self"
+    find_lex $P1375, "$?CLASS"
+    setattribute $P1374, $P1375, "$!default_parent", $P1373
+.annotate 'line', 599
+    .return ($P1373)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "add_role"  :subid("97_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1377
+    .param pmc param_1378
+    .param pmc param_1379
+.annotate 'line', 603
+    .const 'Sub' $P1387 = "98_1304459371.883" 
+    capture_lex $P1387
+    .lex "self", param_1377
+    .lex "$obj", param_1378
+    .lex "$role", param_1379
+.annotate 'line', 604
+    find_lex $P1381, "self"
+    find_lex $P1382, "$?CLASS"
+    getattribute $P1383, $P1381, $P1382, "@!roles"
+    unless_null $P1383, vivify_583
+    $P1383 = root_new ['parrot';'ResizablePMCArray']
+  vivify_583:
+    defined $I1384, $P1383
+    unless $I1384, for_undef_584
+    iter $P1380, $P1383
+    new $P1399, 'ExceptionHandler'
+    set_label $P1399, loop1398_handler
+    $P1399."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P1399
+  loop1398_test:
+    unless $P1380, loop1398_done
+    shift $P1385, $P1380
+  loop1398_redo:
+    .const 'Sub' $P1387 = "98_1304459371.883" 
+    capture_lex $P1387
+    $P1387($P1385)
+  loop1398_next:
+    goto loop1398_test
+  loop1398_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1400, exception, 'type'
+    eq $P1400, .CONTROL_LOOP_NEXT, loop1398_next
+    eq $P1400, .CONTROL_LOOP_REDO, loop1398_redo
+  loop1398_done:
+    pop_eh 
+  for_undef_584:
+.annotate 'line', 609
+    find_lex $P1401, "$role"
+    unless_null $P1401, vivify_588
+    new $P1401, "Undef"
+  vivify_588:
+    find_lex $P1402, "self"
+    find_lex $P1403, "$?CLASS"
+    getattribute $P1404, $P1402, $P1403, "@!roles"
+    unless_null $P1404, vivify_589
+    $P1404 = root_new ['parrot';'ResizablePMCArray']
+  vivify_589:
+    set $N1405, $P1404
+    set $I1406, $N1405
+    find_lex $P1407, "self"
+    find_lex $P1408, "$?CLASS"
+    getattribute $P1409, $P1407, $P1408, "@!roles"
+    unless_null $P1409, vivify_590
+    $P1409 = root_new ['parrot';'ResizablePMCArray']
+    setattribute $P1407, $P1408, "@!roles", $P1409
+  vivify_590:
+    set $P1409[$I1406], $P1401
+.annotate 'line', 603
+    .return ($P1401)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "_block1386"  :anon :subid("98_1304459371.883") :outer("97_1304459371.883")
+    .param pmc param_1388
+.annotate 'line', 604
+    .lex "$_", param_1388
+.annotate 'line', 605
+    find_lex $P1391, "$_"
+    unless_null $P1391, vivify_585
+    new $P1391, "Undef"
+  vivify_585:
+    find_lex $P1392, "$role"
+    unless_null $P1392, vivify_586
+    new $P1392, "Undef"
+  vivify_586:
+    issame $I1393, $P1391, $P1392
+    if $I1393, if_1390
+    new $P1389, 'Integer'
+    set $P1389, $I1393
+    goto if_1390_end
+  if_1390:
+.annotate 'line', 606
+    new $P1394, "String"
+    assign $P1394, "The role "
+    find_lex $P1395, "$role"
+    unless_null $P1395, vivify_587
+    new $P1395, "Undef"
+  vivify_587:
+    concat $P1396, $P1394, $P1395
+    concat $P1397, $P1396, " has already been added."
+    die $P1397
+  if_1390_end:
+.annotate 'line', 604
+    .return ($P1389)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "add_parrot_vtable_mapping"  :subid("99_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1411
+    .param pmc param_1412
+    .param pmc param_1413
+    .param pmc param_1414
+.annotate 'line', 612
+    .lex "self", param_1411
+    .lex "$obj", param_1412
+    .lex "$name", param_1413
+    .lex "$meth", param_1414
+.annotate 'line', 613
+    find_lex $P1416, "$name"
+    unless_null $P1416, vivify_591
+    new $P1416, "Undef"
+  vivify_591:
+    find_lex $P1417, "self"
+    find_lex $P1418, "$?CLASS"
+    getattribute $P1419, $P1417, $P1418, "%!parrot_vtable_mapping"
+    unless_null $P1419, vivify_592
+    $P1419 = root_new ['parrot';'Hash']
+  vivify_592:
+    set $P1420, $P1419[$P1416]
+    unless_null $P1420, vivify_593
+    new $P1420, "Undef"
+  vivify_593:
+    defined $I1421, $P1420
+    unless $I1421, if_1415_end
+.annotate 'line', 614
+    new $P1422, "String"
+    assign $P1422, "Class '"
+    find_lex $P1423, "self"
+    find_lex $P1424, "$?CLASS"
+    getattribute $P1425, $P1423, $P1424, "$!name"
+    unless_null $P1425, vivify_594
+    new $P1425, "Undef"
+  vivify_594:
+    concat $P1426, $P1422, $P1425
+    concat $P1427, $P1426, "' already has a Parrot v-table override for '"
+    find_lex $P1428, "$name"
+    unless_null $P1428, vivify_595
+    new $P1428, "Undef"
+  vivify_595:
+    concat $P1429, $P1427, $P1428
+.annotate 'line', 615
+    concat $P1430, $P1429, "'"
+.annotate 'line', 616
+    die $P1430
+  if_1415_end:
+.annotate 'line', 618
+    find_lex $P1431, "$meth"
+    unless_null $P1431, vivify_596
+    new $P1431, "Undef"
+  vivify_596:
+    find_lex $P1432, "$name"
+    unless_null $P1432, vivify_597
+    new $P1432, "Undef"
+  vivify_597:
+    find_lex $P1433, "self"
+    find_lex $P1434, "$?CLASS"
+    getattribute $P1435, $P1433, $P1434, "%!parrot_vtable_mapping"
+    unless_null $P1435, vivify_598
+    $P1435 = root_new ['parrot';'Hash']
+    setattribute $P1433, $P1434, "%!parrot_vtable_mapping", $P1435
+  vivify_598:
+    set $P1435[$P1432], $P1431
+.annotate 'line', 612
+    .return ($P1431)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "compose"  :subid("100_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1437
+    .param pmc param_1438
+.annotate 'line', 621
+    .const 'Sub' $P1527 = "103_1304459371.883" 
+    capture_lex $P1527
+    .const 'Sub' $P1444 = "101_1304459371.883" 
+    capture_lex $P1444
+    .lex "self", param_1437
+    .lex "$obj", param_1438
+.annotate 'line', 625
+    find_lex $P1440, "self"
+    find_lex $P1441, "$?CLASS"
+    getattribute $P1442, $P1440, $P1441, "@!roles"
+    unless_null $P1442, vivify_599
+    $P1442 = root_new ['parrot';'ResizablePMCArray']
+  vivify_599:
+    unless $P1442, if_1439_end
+    .const 'Sub' $P1444 = "101_1304459371.883" 
+    capture_lex $P1444
+    $P1444()
+  if_1439_end:
+.annotate 'line', 638
+    find_lex $P1492, "self"
+    find_lex $P1493, "$?CLASS"
+    getattribute $P1494, $P1492, $P1493, "@!parents"
+    unless_null $P1494, vivify_616
+    $P1494 = root_new ['parrot';'ResizablePMCArray']
+  vivify_616:
+    set $N1495, $P1494
+    iseq $I1496, $N1495, 0.0
+    if $I1496, if_1491
+    new $P1490, 'Integer'
+    set $P1490, $I1496
+    goto if_1491_end
+  if_1491:
+    find_lex $P1497, "self"
+    find_lex $P1498, "$?CLASS"
+    getattribute $P1499, $P1497, $P1498, "$!name"
+    unless_null $P1499, vivify_617
+    new $P1499, "Undef"
+  vivify_617:
+    set $S1500, $P1499
+    isne $I1501, $S1500, "NQPMu"
+    new $P1490, 'Integer'
+    set $P1490, $I1501
+  if_1491_end:
+    unless $P1490, if_1489_end
+.annotate 'line', 639
+    find_lex $P1502, "self"
+    find_lex $P1503, "$obj"
+    unless_null $P1503, vivify_618
+    new $P1503, "Undef"
+  vivify_618:
+    find_lex $P1504, "self"
+    find_lex $P1505, "$?CLASS"
+    getattribute $P1506, $P1504, $P1505, "$!default_parent"
+    unless_null $P1506, vivify_619
+    new $P1506, "Undef"
+  vivify_619:
+    $P1502."add_parent"($P1503, $P1506)
+  if_1489_end:
+.annotate 'line', 644
+    find_lex $P1508, "self"
+    find_lex $P1509, "$?CLASS"
+    getattribute $P1510, $P1508, $P1509, "$!composed"
+    unless_null $P1510, vivify_620
+    new $P1510, "Undef"
+  vivify_620:
+    if $P1510, unless_1507_end
+.annotate 'line', 645
+    find_lex $P1511, "$obj"
+    unless_null $P1511, vivify_621
+    new $P1511, "Undef"
+  vivify_621:
+    $P1512 = "compute_c3_mro"($P1511)
+    find_lex $P1513, "self"
+    find_lex $P1514, "$?CLASS"
+    setattribute $P1513, $P1514, "@!mro", $P1512
+.annotate 'line', 646
+    new $P1515, "Integer"
+    assign $P1515, 1
+    find_lex $P1516, "self"
+    find_lex $P1517, "$?CLASS"
+    setattribute $P1516, $P1517, "$!composed", $P1515
+  unless_1507_end:
+.annotate 'line', 650
+    find_lex $P1518, "self"
+    find_lex $P1519, "$obj"
+    unless_null $P1519, vivify_622
+    new $P1519, "Undef"
+  vivify_622:
+    $P1518."incorporate_multi_candidates"($P1519)
+.annotate 'line', 653
+    find_lex $P1521, "self"
+    find_lex $P1522, "$obj"
+    unless_null $P1522, vivify_623
+    new $P1522, "Undef"
+  vivify_623:
+    $P1523 = $P1521."attributes"($P1522, "0" :named("local"))
+    defined $I1524, $P1523
+    unless $I1524, for_undef_624
+    iter $P1520, $P1523
+    new $P1533, 'ExceptionHandler'
+    set_label $P1533, loop1532_handler
+    $P1533."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P1533
+  loop1532_test:
+    unless $P1520, loop1532_done
+    shift $P1525, $P1520
+  loop1532_redo:
+    .const 'Sub' $P1527 = "103_1304459371.883" 
+    capture_lex $P1527
+    $P1527($P1525)
+  loop1532_next:
+    goto loop1532_test
+  loop1532_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1534, exception, 'type'
+    eq $P1534, .CONTROL_LOOP_NEXT, loop1532_next
+    eq $P1534, .CONTROL_LOOP_REDO, loop1532_redo
+  loop1532_done:
+    pop_eh 
+  for_undef_624:
+.annotate 'line', 656
+    find_lex $P1535, "self"
+    find_lex $P1536, "$obj"
+    unless_null $P1536, vivify_627
+    new $P1536, "Undef"
+  vivify_627:
+    $P1535."publish_type_cache"($P1536)
+.annotate 'line', 657
+    find_lex $P1537, "self"
+    find_lex $P1538, "$obj"
+    unless_null $P1538, vivify_628
+    new $P1538, "Undef"
+  vivify_628:
+    $P1537."publish_method_cache"($P1538)
+.annotate 'line', 660
+    find_lex $P1539, "self"
+    find_lex $P1540, "$obj"
+    unless_null $P1540, vivify_629
+    new $P1540, "Undef"
+  vivify_629:
+    $P1539."publish_parrot_vtable_mapping"($P1540)
+    find_lex $P1541, "$obj"
+    unless_null $P1541, vivify_630
+    new $P1541, "Undef"
+  vivify_630:
+.annotate 'line', 621
+    .return ($P1541)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "_block1443"  :anon :subid("101_1304459371.883") :outer("100_1304459371.883")
+.annotate 'line', 625
+    .const 'Sub' $P1454 = "102_1304459371.883" 
+    capture_lex $P1454
+.annotate 'line', 626
+    $P1445 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@instantiated_roles", $P1445
+.annotate 'line', 625
+    find_lex $P1446, "@instantiated_roles"
+    unless_null $P1446, vivify_600
+    $P1446 = root_new ['parrot';'ResizablePMCArray']
+  vivify_600:
+.annotate 'line', 627
+    find_lex $P1448, "self"
+    find_lex $P1449, "$?CLASS"
+    getattribute $P1450, $P1448, $P1449, "@!roles"
+    unless_null $P1450, vivify_601
+    $P1450 = root_new ['parrot';'ResizablePMCArray']
+  vivify_601:
+    defined $I1451, $P1450
+    unless $I1451, for_undef_602
+    iter $P1447, $P1450
+    new $P1483, 'ExceptionHandler'
+    set_label $P1483, loop1482_handler
+    $P1483."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P1483
+  loop1482_test:
+    unless $P1447, loop1482_done
+    shift $P1452, $P1447
+  loop1482_redo:
+    .const 'Sub' $P1454 = "102_1304459371.883" 
+    capture_lex $P1454
+    $P1454($P1452)
+  loop1482_next:
+    goto loop1482_test
+  loop1482_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1484, exception, 'type'
+    eq $P1484, .CONTROL_LOOP_NEXT, loop1482_next
+    eq $P1484, .CONTROL_LOOP_REDO, loop1482_redo
+  loop1482_done:
+    pop_eh 
+  for_undef_602:
+.annotate 'line', 633
+    find_lex $P1485, "RoleToClassApplier"
+    find_lex $P1486, "$obj"
+    unless_null $P1486, vivify_614
+    new $P1486, "Undef"
+  vivify_614:
+    find_lex $P1487, "@instantiated_roles"
+    unless_null $P1487, vivify_615
+    $P1487 = root_new ['parrot';'ResizablePMCArray']
+  vivify_615:
+    $P1488 = $P1485."apply"($P1486, $P1487)
+.annotate 'line', 625
+    .return ($P1488)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "_block1453"  :anon :subid("102_1304459371.883") :outer("101_1304459371.883")
+    .param pmc param_1456
+.annotate 'line', 628
+    new $P1455, "Undef"
+    .lex "$ins", $P1455
+    .lex "$_", param_1456
+    find_lex $P1457, "$_"
+    unless_null $P1457, vivify_603
+    new $P1457, "Undef"
+  vivify_603:
+    get_how $P1458, $P1457
+    find_lex $P1459, "$_"
+    unless_null $P1459, vivify_604
+    new $P1459, "Undef"
+  vivify_604:
+    find_lex $P1460, "$obj"
+    unless_null $P1460, vivify_605
+    new $P1460, "Undef"
+  vivify_605:
+    $P1461 = $P1458."instantiate"($P1459, $P1460)
+    store_lex "$ins", $P1461
+.annotate 'line', 629
+    find_lex $P1462, "@instantiated_roles"
+    unless_null $P1462, vivify_606
+    $P1462 = root_new ['parrot';'ResizablePMCArray']
+  vivify_606:
+    find_lex $P1463, "$ins"
+    unless_null $P1463, vivify_607
+    new $P1463, "Undef"
+  vivify_607:
+    $P1462."push"($P1463)
+.annotate 'line', 630
+    find_lex $P1464, "$_"
+    unless_null $P1464, vivify_608
+    new $P1464, "Undef"
+  vivify_608:
+    find_lex $P1465, "self"
+    find_lex $P1466, "$?CLASS"
+    getattribute $P1467, $P1465, $P1466, "@!done"
+    unless_null $P1467, vivify_609
+    $P1467 = root_new ['parrot';'ResizablePMCArray']
+  vivify_609:
+    set $N1468, $P1467
+    set $I1469, $N1468
+    find_lex $P1470, "self"
+    find_lex $P1471, "$?CLASS"
+    getattribute $P1472, $P1470, $P1471, "@!done"
+    unless_null $P1472, vivify_610
+    $P1472 = root_new ['parrot';'ResizablePMCArray']
+    setattribute $P1470, $P1471, "@!done", $P1472
+  vivify_610:
+    set $P1472[$I1469], $P1464
+.annotate 'line', 631
+    find_lex $P1473, "$ins"
+    unless_null $P1473, vivify_611
+    new $P1473, "Undef"
+  vivify_611:
+    find_lex $P1474, "self"
+    find_lex $P1475, "$?CLASS"
+    getattribute $P1476, $P1474, $P1475, "@!done"
+    unless_null $P1476, vivify_612
+    $P1476 = root_new ['parrot';'ResizablePMCArray']
+  vivify_612:
+    set $N1477, $P1476
+    set $I1478, $N1477
+    find_lex $P1479, "self"
+    find_lex $P1480, "$?CLASS"
+    getattribute $P1481, $P1479, $P1480, "@!done"
+    unless_null $P1481, vivify_613
+    $P1481 = root_new ['parrot';'ResizablePMCArray']
+    setattribute $P1479, $P1480, "@!done", $P1481
+  vivify_613:
+    set $P1481[$I1478], $P1473
+.annotate 'line', 627
+    .return ($P1473)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "_block1526"  :anon :subid("103_1304459371.883") :outer("100_1304459371.883")
+    .param pmc param_1528
+.annotate 'line', 653
+    .lex "$_", param_1528
+    find_lex $P1529, "$_"
+    unless_null $P1529, vivify_625
+    new $P1529, "Undef"
+  vivify_625:
+    find_lex $P1530, "$obj"
+    unless_null $P1530, vivify_626
+    new $P1530, "Undef"
+  vivify_626:
+    $P1531 = $P1529."compose"($P1530)
+    .return ($P1531)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "incorporate_multi_candidates"  :subid("104_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1543
+    .param pmc param_1544
+.annotate 'line', 665
+    .const 'Sub' $P1559 = "105_1304459371.883" 
+    capture_lex $P1559
+    .lex "self", param_1543
+    .lex "$obj", param_1544
+.annotate 'line', 666
+    new $P1545, "Undef"
+    .lex "$num_todo", $P1545
+.annotate 'line', 667
+    new $P1546, "Undef"
+    .lex "$i", $P1546
+.annotate 'line', 666
+    find_lex $P1547, "self"
+    find_lex $P1548, "$?CLASS"
+    getattribute $P1549, $P1547, $P1548, "@!multi_methods_to_incorporate"
+    unless_null $P1549, vivify_631
+    $P1549 = root_new ['parrot';'ResizablePMCArray']
+  vivify_631:
+    set $N1550, $P1549
+    new $P1551, 'Float'
+    set $P1551, $N1550
+    store_lex "$num_todo", $P1551
+.annotate 'line', 667
+    new $P1552, "Integer"
+    assign $P1552, 0
+    store_lex "$i", $P1552
+.annotate 'line', 668
+    new $P1679, 'ExceptionHandler'
+    set_label $P1679, loop1678_handler
+    $P1679."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P1679
+  loop1678_test:
+    find_lex $P1553, "$i"
+    unless_null $P1553, vivify_632
+    new $P1553, "Undef"
+  vivify_632:
+    set $N1554, $P1553
+    find_lex $P1555, "$num_todo"
+    unless_null $P1555, vivify_633
+    new $P1555, "Undef"
+  vivify_633:
+    set $N1556, $P1555
+    isne $I1557, $N1554, $N1556
+    unless $I1557, loop1678_done
+  loop1678_redo:
+    .const 'Sub' $P1559 = "105_1304459371.883" 
+    capture_lex $P1559
+    $P1559()
+  loop1678_next:
+    goto loop1678_test
+  loop1678_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1680, exception, 'type'
+    eq $P1680, .CONTROL_LOOP_NEXT, loop1678_next
+    eq $P1680, .CONTROL_LOOP_REDO, loop1678_redo
+  loop1678_done:
+    pop_eh 
+.annotate 'line', 665
+    .return ($I1557)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "_block1558"  :anon :subid("105_1304459371.883") :outer("104_1304459371.883")
+.annotate 'line', 668
+    .const 'Sub' $P1595 = "106_1304459371.883" 
+    capture_lex $P1595
+.annotate 'line', 670
+    new $P1560, "Undef"
+    .lex "$name", $P1560
+.annotate 'line', 671
+    new $P1561, "Undef"
+    .lex "$code", $P1561
+.annotate 'line', 675
+    new $P1562, "Undef"
+    .lex "$dispatcher", $P1562
+.annotate 'line', 670
+    find_lex $P1563, "$i"
+    unless_null $P1563, vivify_634
+    new $P1563, "Undef"
+  vivify_634:
+    set $I1564, $P1563
+    find_lex $P1565, "self"
+    find_lex $P1566, "$?CLASS"
+    getattribute $P1567, $P1565, $P1566, "@!multi_methods_to_incorporate"
+    unless_null $P1567, vivify_635
+    $P1567 = root_new ['parrot';'ResizablePMCArray']
+  vivify_635:
+    set $P1568, $P1567[$I1564]
+    unless_null $P1568, vivify_636
+    $P1568 = root_new ['parrot';'Hash']
+  vivify_636:
+    set $P1569, $P1568["name"]
+    unless_null $P1569, vivify_637
+    new $P1569, "Undef"
+  vivify_637:
+    store_lex "$name", $P1569
+.annotate 'line', 671
+    find_lex $P1570, "$i"
+    unless_null $P1570, vivify_638
+    new $P1570, "Undef"
+  vivify_638:
+    set $I1571, $P1570
+    find_lex $P1572, "self"
+    find_lex $P1573, "$?CLASS"
+    getattribute $P1574, $P1572, $P1573, "@!multi_methods_to_incorporate"
+    unless_null $P1574, vivify_639
+    $P1574 = root_new ['parrot';'ResizablePMCArray']
+  vivify_639:
+    set $P1575, $P1574[$I1571]
+    unless_null $P1575, vivify_640
+    $P1575 = root_new ['parrot';'Hash']
+  vivify_640:
+    set $P1576, $P1575["code"]
+    unless_null $P1576, vivify_641
+    new $P1576, "Undef"
+  vivify_641:
+    store_lex "$code", $P1576
+.annotate 'line', 675
+    find_lex $P1577, "$name"
+    unless_null $P1577, vivify_642
+    new $P1577, "Undef"
+  vivify_642:
+    find_lex $P1578, "self"
+    find_lex $P1579, "$?CLASS"
+    getattribute $P1580, $P1578, $P1579, "%!methods"
+    unless_null $P1580, vivify_643
+    $P1580 = root_new ['parrot';'Hash']
+  vivify_643:
+    set $P1581, $P1580[$P1577]
+    unless_null $P1581, vivify_644
+    new $P1581, "Undef"
+  vivify_644:
+    store_lex "$dispatcher", $P1581
+.annotate 'line', 676
+    find_lex $P1583, "$dispatcher"
+    unless_null $P1583, vivify_645
+    new $P1583, "Undef"
+  vivify_645:
+    defined $I1584, $P1583
+    if $I1584, if_1582
+.annotate 'line', 686
+    .const 'Sub' $P1595 = "106_1304459371.883" 
+    capture_lex $P1595
+    $P1595()
+    goto if_1582_end
+  if_1582:
+.annotate 'line', 679
+    find_lex $P1586, "$dispatcher"
+    unless_null $P1586, vivify_676
+    new $P1586, "Undef"
+  vivify_676:
+    is_dispatcher $I1587, $P1586
+    if $I1587, if_1585
+.annotate 'line', 683
+    new $P1590, 'String'
+    set $P1590, "Cannot have a multi candidate for "
+    find_lex $P1591, "$name"
+    unless_null $P1591, vivify_677
+    new $P1591, "Undef"
+  vivify_677:
+    concat $P1592, $P1590, $P1591
+    concat $P1593, $P1592, " when an only method is also in the class"
+    die $P1593
+.annotate 'line', 682
+    goto if_1585_end
+  if_1585:
+.annotate 'line', 680
+    find_lex $P1588, "$dispatcher"
+    unless_null $P1588, vivify_678
+    new $P1588, "Undef"
+  vivify_678:
+    find_lex $P1589, "$code"
+    unless_null $P1589, vivify_679
+    new $P1589, "Undef"
+  vivify_679:
+    push_dispatchee $P1588, $P1589
+  if_1585_end:
+  if_1582_end:
+.annotate 'line', 719
+    find_lex $P1676, "$i"
+    unless_null $P1676, vivify_680
+    new $P1676, "Undef"
+  vivify_680:
+    add $P1677, $P1676, 1
+    store_lex "$i", $P1677
+.annotate 'line', 668
+    .return ($P1677)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "_block1594"  :anon :subid("106_1304459371.883") :outer("105_1304459371.883")
+.annotate 'line', 686
+    .const 'Sub' $P1612 = "107_1304459371.883" 
+    capture_lex $P1612
+.annotate 'line', 688
+    new $P1596, "Undef"
+    .lex "$j", $P1596
+.annotate 'line', 689
+    new $P1597, "Undef"
+    .lex "$found", $P1597
+.annotate 'line', 688
+    new $P1598, "Integer"
+    assign $P1598, 1
+    store_lex "$j", $P1598
+.annotate 'line', 689
+    new $P1599, "Integer"
+    assign $P1599, 0
+    store_lex "$found", $P1599
+.annotate 'line', 690
+    new $P1667, 'ExceptionHandler'
+    set_label $P1667, loop1666_handler
+    $P1667."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P1667
+  loop1666_test:
+    find_lex $P1602, "$j"
+    unless_null $P1602, vivify_646
+    new $P1602, "Undef"
+  vivify_646:
+    set $N1603, $P1602
+    find_lex $P1604, "self"
+    find_lex $P1605, "$?CLASS"
+    getattribute $P1606, $P1604, $P1605, "@!mro"
+    unless_null $P1606, vivify_647
+    $P1606 = root_new ['parrot';'ResizablePMCArray']
+  vivify_647:
+    set $N1607, $P1606
+    isne $I1608, $N1603, $N1607
+    if $I1608, if_1601
+    new $P1600, 'Integer'
+    set $P1600, $I1608
+    goto if_1601_end
+  if_1601:
+    find_lex $P1609, "$found"
+    unless_null $P1609, vivify_648
+    new $P1609, "Undef"
+  vivify_648:
+    isfalse $I1610, $P1609
+    new $P1600, 'Integer'
+    set $P1600, $I1610
+  if_1601_end:
+    unless $P1600, loop1666_done
+  loop1666_redo:
+    .const 'Sub' $P1612 = "107_1304459371.883" 
+    capture_lex $P1612
+    $P1612()
+  loop1666_next:
+    goto loop1666_test
+  loop1666_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1668, exception, 'type'
+    eq $P1668, .CONTROL_LOOP_NEXT, loop1666_next
+    eq $P1668, .CONTROL_LOOP_REDO, loop1666_redo
+  loop1666_done:
+    pop_eh 
+.annotate 'line', 715
+    find_lex $P1671, "$found"
+    unless_null $P1671, vivify_674
+    new $P1671, "Undef"
+  vivify_674:
+    unless $P1671, unless_1670
+    set $P1669, $P1671
+    goto unless_1670_end
+  unless_1670:
+.annotate 'line', 716
+    new $P1672, 'String'
+    set $P1672, "Could not find a proto for multi "
+    find_lex $P1673, "$name"
+    unless_null $P1673, vivify_675
+    new $P1673, "Undef"
+  vivify_675:
+    concat $P1674, $P1672, $P1673
+    concat $P1675, $P1674, ", and proto generation is NYI"
+    die $P1675
+  unless_1670_end:
+.annotate 'line', 686
+    .return ($P1669)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "_block1611"  :anon :subid("107_1304459371.883") :outer("106_1304459371.883")
+.annotate 'line', 690
+    .const 'Sub' $P1636 = "108_1304459371.883" 
+    capture_lex $P1636
+.annotate 'line', 691
+    new $P1613, "Undef"
+    .lex "$parent", $P1613
+.annotate 'line', 692
+    $P1614 = root_new ['parrot';'Hash']
+    .lex "%meths", $P1614
+.annotate 'line', 693
+    new $P1615, "Undef"
+    .lex "$dispatcher", $P1615
+.annotate 'line', 691
+    find_lex $P1616, "$j"
+    unless_null $P1616, vivify_649
+    new $P1616, "Undef"
+  vivify_649:
+    set $I1617, $P1616
+    find_lex $P1618, "self"
+    find_lex $P1619, "$?CLASS"
+    getattribute $P1620, $P1618, $P1619, "@!mro"
+    unless_null $P1620, vivify_650
+    $P1620 = root_new ['parrot';'ResizablePMCArray']
+  vivify_650:
+    set $P1621, $P1620[$I1617]
+    unless_null $P1621, vivify_651
+    new $P1621, "Undef"
+  vivify_651:
+    store_lex "$parent", $P1621
+.annotate 'line', 692
+    find_lex $P1622, "$parent"
+    unless_null $P1622, vivify_652
+    new $P1622, "Undef"
+  vivify_652:
+    get_how $P1623, $P1622
+    find_lex $P1624, "$parent"
+    unless_null $P1624, vivify_653
+    new $P1624, "Undef"
+  vivify_653:
+    $P1625 = $P1623."method_table"($P1624)
+    store_lex "%meths", $P1625
+.annotate 'line', 693
+    find_lex $P1626, "$name"
+    unless_null $P1626, vivify_654
+    new $P1626, "Undef"
+  vivify_654:
+    find_lex $P1627, "%meths"
+    unless_null $P1627, vivify_655
+    $P1627 = root_new ['parrot';'Hash']
+  vivify_655:
+    set $P1628, $P1627[$P1626]
+    unless_null $P1628, vivify_656
+    new $P1628, "Undef"
+  vivify_656:
+    store_lex "$dispatcher", $P1628
+.annotate 'line', 694
+    find_lex $P1630, "$dispatcher"
+    unless_null $P1630, vivify_657
+    new $P1630, "Undef"
+  vivify_657:
+    defined $I1631, $P1630
+    unless $I1631, if_1629_end
+.annotate 'line', 697
+    find_lex $P1633, "$dispatcher"
+    unless_null $P1633, vivify_658
+    new $P1633, "Undef"
+  vivify_658:
+    is_dispatcher $I1634, $P1633
+    if $I1634, if_1632
+.annotate 'line', 710
+    new $P1660, 'String'
+    set $P1660, "Could not find a proto for multi "
+    find_lex $P1661, "$name"
+    unless_null $P1661, vivify_659
+    new $P1661, "Undef"
+  vivify_659:
+    concat $P1662, $P1660, $P1661
+    concat $P1663, $P1662, " (it may exist, but an only is hiding it if so)"
+    die $P1663
+.annotate 'line', 709
+    goto if_1632_end
+  if_1632:
+.annotate 'line', 697
+    .const 'Sub' $P1636 = "108_1304459371.883" 
+    capture_lex $P1636
+    $P1636()
+  if_1632_end:
+  if_1629_end:
+.annotate 'line', 713
+    find_lex $P1664, "$j"
+    unless_null $P1664, vivify_673
+    new $P1664, "Undef"
+  vivify_673:
+    add $P1665, $P1664, 1
+    store_lex "$j", $P1665
+.annotate 'line', 690
+    .return ($P1665)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "_block1635"  :anon :subid("108_1304459371.883") :outer("107_1304459371.883")
+.annotate 'line', 699
+    $P1637 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@new_dispatchees", $P1637
+.annotate 'line', 701
+    new $P1638, "Undef"
+    .lex "$new_disp", $P1638
+.annotate 'line', 702
+    new $P1639, "Undef"
+    .lex "$clone_callback", $P1639
+.annotate 'line', 697
+    find_lex $P1640, "@new_dispatchees"
+    unless_null $P1640, vivify_660
+    $P1640 = root_new ['parrot';'ResizablePMCArray']
+  vivify_660:
+.annotate 'line', 700
+    find_lex $P1641, "$code"
+    unless_null $P1641, vivify_661
+    new $P1641, "Undef"
+  vivify_661:
+    find_lex $P1642, "@new_dispatchees"
+    unless_null $P1642, vivify_662
+    $P1642 = root_new ['parrot';'ResizablePMCArray']
+    store_lex "@new_dispatchees", $P1642
+  vivify_662:
+    set $P1642[0], $P1641
+.annotate 'line', 701
+    find_lex $P1643, "$dispatcher"
+    unless_null $P1643, vivify_663
+    new $P1643, "Undef"
+  vivify_663:
+    find_lex $P1644, "@new_dispatchees"
+    unless_null $P1644, vivify_664
+    $P1644 = root_new ['parrot';'ResizablePMCArray']
+  vivify_664:
+    create_dispatch_and_add_candidates $P1645, $P1643, $P1644
+    store_lex "$new_disp", $P1645
+.annotate 'line', 702
+    find_lex $P1646, "$dispatcher"
+    unless_null $P1646, vivify_665
+    new $P1646, "Undef"
+  vivify_665:
+    getprop $P1647, "CLONE_CALLBACK", $P1646
+    store_lex "$clone_callback", $P1647
+.annotate 'line', 703
+    find_lex $P1649, "$clone_callback"
+    unless_null $P1649, vivify_666
+    new $P1649, "Undef"
+  vivify_666:
+    defined $I1650, $P1649
+    unless $I1650, if_1648_end
+.annotate 'line', 704
+    find_lex $P1651, "$clone_callback"
+    unless_null $P1651, vivify_667
+    new $P1651, "Undef"
+  vivify_667:
+    find_lex $P1652, "$dispatcher"
+    unless_null $P1652, vivify_668
+    new $P1652, "Undef"
+  vivify_668:
+    find_lex $P1653, "$new_disp"
+    unless_null $P1653, vivify_669
+    new $P1653, "Undef"
+  vivify_669:
+    $P1651($P1652, $P1653)
+  if_1648_end:
+.annotate 'line', 706
+    find_lex $P1654, "$new_disp"
+    unless_null $P1654, vivify_670
+    new $P1654, "Undef"
+  vivify_670:
+    find_lex $P1655, "$name"
+    unless_null $P1655, vivify_671
+    new $P1655, "Undef"
+  vivify_671:
+    find_lex $P1656, "self"
+    find_lex $P1657, "$?CLASS"
+    getattribute $P1658, $P1656, $P1657, "%!methods"
+    unless_null $P1658, vivify_672
+    $P1658 = root_new ['parrot';'Hash']
+    setattribute $P1656, $P1657, "%!methods", $P1658
+  vivify_672:
+    set $P1658[$P1655], $P1654
+.annotate 'line', 707
+    new $P1659, "Integer"
+    assign $P1659, 1
+    store_lex "$found", $P1659
+.annotate 'line', 697
+    .return ($P1659)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "publish_type_cache"  :subid("109_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1684
+    .param pmc param_1685
+.annotate 'line', 812
+    .const 'Sub' $P1710 = "111_1304459371.883" 
+    capture_lex $P1710
+    .const 'Sub' $P1695 = "110_1304459371.883" 
+    capture_lex $P1695
+    .lex "self", param_1684
+    .lex "$obj", param_1685
+.annotate 'line', 813
+    $P1686 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@tc", $P1686
+.annotate 'line', 812
+    find_lex $P1687, "@tc"
+    unless_null $P1687, vivify_681
+    $P1687 = root_new ['parrot';'ResizablePMCArray']
+  vivify_681:
+.annotate 'line', 814
+    find_lex $P1689, "self"
+    find_lex $P1690, "$?CLASS"
+    getattribute $P1691, $P1689, $P1690, "@!mro"
+    unless_null $P1691, vivify_682
+    $P1691 = root_new ['parrot';'ResizablePMCArray']
+  vivify_682:
+    defined $I1692, $P1691
+    unless $I1692, for_undef_683
+    iter $P1688, $P1691
+    new $P1701, 'ExceptionHandler'
+    set_label $P1701, loop1700_handler
+    $P1701."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P1701
+  loop1700_test:
+    unless $P1688, loop1700_done
+    shift $P1693, $P1688
+  loop1700_redo:
+    .const 'Sub' $P1695 = "110_1304459371.883" 
+    capture_lex $P1695
+    $P1695($P1693)
+  loop1700_next:
+    goto loop1700_test
+  loop1700_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1702, exception, 'type'
+    eq $P1702, .CONTROL_LOOP_NEXT, loop1700_next
+    eq $P1702, .CONTROL_LOOP_REDO, loop1700_redo
+  loop1700_done:
+    pop_eh 
+  for_undef_683:
+.annotate 'line', 815
+    find_lex $P1704, "self"
+    find_lex $P1705, "$?CLASS"
+    getattribute $P1706, $P1704, $P1705, "@!done"
+    unless_null $P1706, vivify_686
+    $P1706 = root_new ['parrot';'ResizablePMCArray']
+  vivify_686:
+    defined $I1707, $P1706
+    unless $I1707, for_undef_687
+    iter $P1703, $P1706
+    new $P1716, 'ExceptionHandler'
+    set_label $P1716, loop1715_handler
+    $P1716."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P1716
+  loop1715_test:
+    unless $P1703, loop1715_done
+    shift $P1708, $P1703
+  loop1715_redo:
+    .const 'Sub' $P1710 = "111_1304459371.883" 
+    capture_lex $P1710
+    $P1710($P1708)
+  loop1715_next:
+    goto loop1715_test
+  loop1715_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1717, exception, 'type'
+    eq $P1717, .CONTROL_LOOP_NEXT, loop1715_next
+    eq $P1717, .CONTROL_LOOP_REDO, loop1715_redo
+  loop1715_done:
+    pop_eh 
+  for_undef_687:
+.annotate 'line', 816
+    find_lex $P1718, "$obj"
+    unless_null $P1718, vivify_690
+    new $P1718, "Undef"
+  vivify_690:
+    find_lex $P1719, "@tc"
+    unless_null $P1719, vivify_691
+    $P1719 = root_new ['parrot';'ResizablePMCArray']
+  vivify_691:
+    publish_type_check_cache $P1718, $P1719
+.annotate 'line', 812
+    .return ()
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "_block1694"  :anon :subid("110_1304459371.883") :outer("109_1304459371.883")
+    .param pmc param_1696
+.annotate 'line', 814
+    .lex "$_", param_1696
+    find_lex $P1697, "@tc"
+    unless_null $P1697, vivify_684
+    $P1697 = root_new ['parrot';'ResizablePMCArray']
+  vivify_684:
+    find_lex $P1698, "$_"
+    unless_null $P1698, vivify_685
+    new $P1698, "Undef"
+  vivify_685:
+    $P1699 = $P1697."push"($P1698)
+    .return ($P1699)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "_block1709"  :anon :subid("111_1304459371.883") :outer("109_1304459371.883")
+    .param pmc param_1711
+.annotate 'line', 815
+    .lex "$_", param_1711
+    find_lex $P1712, "@tc"
+    unless_null $P1712, vivify_688
+    $P1712 = root_new ['parrot';'ResizablePMCArray']
+  vivify_688:
+    find_lex $P1713, "$_"
+    unless_null $P1713, vivify_689
+    new $P1713, "Undef"
+  vivify_689:
+    $P1714 = $P1712."push"($P1713)
+    .return ($P1714)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "publish_method_cache"  :subid("112_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1721
+    .param pmc param_1722
+.annotate 'line', 819
+    .const 'Sub' $P1732 = "113_1304459371.883" 
+    capture_lex $P1732
+    .lex "self", param_1721
+    .lex "$obj", param_1722
+.annotate 'line', 822
+    $P1723 = root_new ['parrot';'Hash']
+    .lex "%cache", $P1723
+.annotate 'line', 819
+    find_lex $P1724, "%cache"
+    unless_null $P1724, vivify_692
+    $P1724 = root_new ['parrot';'Hash']
+  vivify_692:
+.annotate 'line', 823
+    find_lex $P1726, "self"
+    find_lex $P1727, "$?CLASS"
+    getattribute $P1728, $P1726, $P1727, "@!mro"
+    unless_null $P1728, vivify_693
+    $P1728 = root_new ['parrot';'ResizablePMCArray']
+  vivify_693:
+    defined $I1729, $P1728
+    unless $I1729, for_undef_694
+    iter $P1725, $P1728
+    new $P1761, 'ExceptionHandler'
+    set_label $P1761, loop1760_handler
+    $P1761."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P1761
+  loop1760_test:
+    unless $P1725, loop1760_done
+    shift $P1730, $P1725
+  loop1760_redo:
+    .const 'Sub' $P1732 = "113_1304459371.883" 
+    capture_lex $P1732
+    $P1732($P1730)
+  loop1760_next:
+    goto loop1760_test
+  loop1760_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1762, exception, 'type'
+    eq $P1762, .CONTROL_LOOP_NEXT, loop1760_next
+    eq $P1762, .CONTROL_LOOP_REDO, loop1760_redo
+  loop1760_done:
+    pop_eh 
+  for_undef_694:
+.annotate 'line', 831
+    find_lex $P1763, "$obj"
+    unless_null $P1763, vivify_705
+    new $P1763, "Undef"
+  vivify_705:
+    find_lex $P1764, "%cache"
+    unless_null $P1764, vivify_706
+    $P1764 = root_new ['parrot';'Hash']
+  vivify_706:
+    publish_method_cache $P1763, $P1764
+.annotate 'line', 819
+    .return ()
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "_block1731"  :anon :subid("113_1304459371.883") :outer("112_1304459371.883")
+    .param pmc param_1734
+.annotate 'line', 823
+    .const 'Sub' $P1744 = "114_1304459371.883" 
+    capture_lex $P1744
+.annotate 'line', 824
+    $P1733 = root_new ['parrot';'Hash']
+    .lex "%methods", $P1733
+    .lex "$_", param_1734
+    find_lex $P1735, "$_"
+    unless_null $P1735, vivify_695
+    new $P1735, "Undef"
+  vivify_695:
+    get_how $P1736, $P1735
+    find_lex $P1737, "$_"
+    unless_null $P1737, vivify_696
+    new $P1737, "Undef"
+  vivify_696:
+    $P1738 = $P1736."method_table"($P1737)
+    store_lex "%methods", $P1738
+.annotate 'line', 825
+    find_lex $P1740, "%methods"
+    unless_null $P1740, vivify_697
+    $P1740 = root_new ['parrot';'Hash']
+  vivify_697:
+    defined $I1741, $P1740
+    unless $I1741, for_undef_698
+    iter $P1739, $P1740
+    new $P1758, 'ExceptionHandler'
+    set_label $P1758, loop1757_handler
+    $P1758."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P1758
+  loop1757_test:
+    unless $P1739, loop1757_done
+    shift $P1742, $P1739
+  loop1757_redo:
+    .const 'Sub' $P1744 = "114_1304459371.883" 
+    capture_lex $P1744
+    $P1744($P1742)
+  loop1757_next:
+    goto loop1757_test
+  loop1757_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1759, exception, 'type'
+    eq $P1759, .CONTROL_LOOP_NEXT, loop1757_next
+    eq $P1759, .CONTROL_LOOP_REDO, loop1757_redo
+  loop1757_done:
+    pop_eh 
+  for_undef_698:
+.annotate 'line', 823
+    .return ($P1739)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "_block1743"  :anon :subid("114_1304459371.883") :outer("113_1304459371.883")
+    .param pmc param_1745
+.annotate 'line', 825
+    .lex "$_", param_1745
+.annotate 'line', 826
+    find_lex $P1748, "$_"
+    unless_null $P1748, vivify_699
+    new $P1748, "Undef"
+  vivify_699:
+    $P1749 = $P1748."key"()
+    find_lex $P1750, "%cache"
+    unless_null $P1750, vivify_700
+    $P1750 = root_new ['parrot';'Hash']
+  vivify_700:
+    set $P1751, $P1750[$P1749]
+    unless_null $P1751, vivify_701
+    new $P1751, "Undef"
+  vivify_701:
+    unless $P1751, unless_1747
+    set $P1746, $P1751
+    goto unless_1747_end
+  unless_1747:
+.annotate 'line', 827
+    find_lex $P1752, "$_"
+    unless_null $P1752, vivify_702
+    new $P1752, "Undef"
+  vivify_702:
+    $P1753 = $P1752."value"()
+    find_lex $P1754, "$_"
+    unless_null $P1754, vivify_703
+    new $P1754, "Undef"
+  vivify_703:
+    $P1755 = $P1754."key"()
+    find_lex $P1756, "%cache"
+    unless_null $P1756, vivify_704
+    $P1756 = root_new ['parrot';'Hash']
+    store_lex "%cache", $P1756
+  vivify_704:
+    set $P1756[$P1755], $P1753
+.annotate 'line', 826
+    set $P1746, $P1753
+  unless_1747_end:
+.annotate 'line', 825
+    .return ($P1746)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "publish_parrot_vtable_mapping"  :subid("115_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1766
+    .param pmc param_1767
+.annotate 'line', 834
+    .const 'Sub' $P1777 = "116_1304459371.883" 
+    capture_lex $P1777
+    .lex "self", param_1766
+    .lex "$obj", param_1767
+.annotate 'line', 835
+    $P1768 = root_new ['parrot';'Hash']
+    .lex "%mapping", $P1768
+.annotate 'line', 834
+    find_lex $P1769, "%mapping"
+    unless_null $P1769, vivify_707
+    $P1769 = root_new ['parrot';'Hash']
+  vivify_707:
+.annotate 'line', 836
+    find_lex $P1771, "self"
+    find_lex $P1772, "$?CLASS"
+    getattribute $P1773, $P1771, $P1772, "@!mro"
+    unless_null $P1773, vivify_708
+    $P1773 = root_new ['parrot';'ResizablePMCArray']
+  vivify_708:
+    defined $I1774, $P1773
+    unless $I1774, for_undef_709
+    iter $P1770, $P1773
+    new $P1806, 'ExceptionHandler'
+    set_label $P1806, loop1805_handler
+    $P1806."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P1806
+  loop1805_test:
+    unless $P1770, loop1805_done
+    shift $P1775, $P1770
+  loop1805_redo:
+    .const 'Sub' $P1777 = "116_1304459371.883" 
+    capture_lex $P1777
+    $P1777($P1775)
+  loop1805_next:
+    goto loop1805_test
+  loop1805_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1807, exception, 'type'
+    eq $P1807, .CONTROL_LOOP_NEXT, loop1805_next
+    eq $P1807, .CONTROL_LOOP_REDO, loop1805_redo
+  loop1805_done:
+    pop_eh 
+  for_undef_709:
+.annotate 'line', 844
+    find_lex $P1810, "%mapping"
+    unless_null $P1810, vivify_720
+    $P1810 = root_new ['parrot';'Hash']
+  vivify_720:
+    set $N1811, $P1810
+    if $N1811, if_1809
+    new $P1808, 'Float'
+    set $P1808, $N1811
+    goto if_1809_end
+  if_1809:
+.annotate 'line', 845
+    find_lex $P1812, "$obj"
+    unless_null $P1812, vivify_721
+    new $P1812, "Undef"
+  vivify_721:
+    find_lex $P1813, "%mapping"
+    unless_null $P1813, vivify_722
+    $P1813 = root_new ['parrot';'Hash']
+  vivify_722:
+    stable_publish_vtable_mapping $P1812, $P1813
+  if_1809_end:
+.annotate 'line', 834
+    .return ($P1808)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "_block1776"  :anon :subid("116_1304459371.883") :outer("115_1304459371.883")
+    .param pmc param_1779
+.annotate 'line', 836
+    .const 'Sub' $P1789 = "117_1304459371.883" 
+    capture_lex $P1789
+.annotate 'line', 837
+    $P1778 = root_new ['parrot';'Hash']
+    .lex "%map", $P1778
+    .lex "$_", param_1779
+    find_lex $P1780, "$_"
+    unless_null $P1780, vivify_710
+    new $P1780, "Undef"
+  vivify_710:
+    get_how $P1781, $P1780
+    find_lex $P1782, "$_"
+    unless_null $P1782, vivify_711
+    new $P1782, "Undef"
+  vivify_711:
+    $P1783 = $P1781."parrot_vtable_mappings"($P1782, 1 :named("local"))
+    store_lex "%map", $P1783
+.annotate 'line', 838
+    find_lex $P1785, "%map"
+    unless_null $P1785, vivify_712
+    $P1785 = root_new ['parrot';'Hash']
+  vivify_712:
+    defined $I1786, $P1785
+    unless $I1786, for_undef_713
+    iter $P1784, $P1785
+    new $P1803, 'ExceptionHandler'
+    set_label $P1803, loop1802_handler
+    $P1803."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P1803
+  loop1802_test:
+    unless $P1784, loop1802_done
+    shift $P1787, $P1784
+  loop1802_redo:
+    .const 'Sub' $P1789 = "117_1304459371.883" 
+    capture_lex $P1789
+    $P1789($P1787)
+  loop1802_next:
+    goto loop1802_test
+  loop1802_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1804, exception, 'type'
+    eq $P1804, .CONTROL_LOOP_NEXT, loop1802_next
+    eq $P1804, .CONTROL_LOOP_REDO, loop1802_redo
+  loop1802_done:
+    pop_eh 
+  for_undef_713:
+.annotate 'line', 836
+    .return ($P1784)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "_block1788"  :anon :subid("117_1304459371.883") :outer("116_1304459371.883")
+    .param pmc param_1790
+.annotate 'line', 838
+    .lex "$_", param_1790
+.annotate 'line', 839
+    find_lex $P1793, "$_"
+    unless_null $P1793, vivify_714
+    new $P1793, "Undef"
+  vivify_714:
+    $P1794 = $P1793."key"()
+    find_lex $P1795, "%mapping"
+    unless_null $P1795, vivify_715
+    $P1795 = root_new ['parrot';'Hash']
+  vivify_715:
+    set $P1796, $P1795[$P1794]
+    unless_null $P1796, vivify_716
+    new $P1796, "Undef"
+  vivify_716:
+    unless $P1796, unless_1792
+    set $P1791, $P1796
+    goto unless_1792_end
+  unless_1792:
+.annotate 'line', 840
+    find_lex $P1797, "$_"
+    unless_null $P1797, vivify_717
+    new $P1797, "Undef"
+  vivify_717:
+    $P1798 = $P1797."value"()
+    find_lex $P1799, "$_"
+    unless_null $P1799, vivify_718
+    new $P1799, "Undef"
+  vivify_718:
+    $P1800 = $P1799."key"()
+    find_lex $P1801, "%mapping"
+    unless_null $P1801, vivify_719
+    $P1801 = root_new ['parrot';'Hash']
+    store_lex "%mapping", $P1801
+  vivify_719:
+    set $P1801[$P1800], $P1798
+.annotate 'line', 839
+    set $P1791, $P1798
+  unless_1792_end:
+.annotate 'line', 838
+    .return ($P1791)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "parents"  :subid("118_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1815
+    .param pmc param_1816
+    .param pmc param_1817 :optional :named("local")
+    .param int has_param_1817 :opt_flag
+.annotate 'line', 853
+    .lex "self", param_1815
+    .lex "$obj", param_1816
+    if has_param_1817, optparam_723
+    new $P1818, "Undef"
+    set param_1817, $P1818
+  optparam_723:
+    .lex "$local", param_1817
+.annotate 'line', 854
+    find_lex $P1821, "$local"
+    unless_null $P1821, vivify_724
+    new $P1821, "Undef"
+  vivify_724:
+    if $P1821, if_1820
+    find_lex $P1825, "self"
+    find_lex $P1826, "$?CLASS"
+    getattribute $P1827, $P1825, $P1826, "@!mro"
+    unless_null $P1827, vivify_725
+    $P1827 = root_new ['parrot';'ResizablePMCArray']
+  vivify_725:
+    set $P1819, $P1827
+    goto if_1820_end
+  if_1820:
+    find_lex $P1822, "self"
+    find_lex $P1823, "$?CLASS"
+    getattribute $P1824, $P1822, $P1823, "@!parents"
+    unless_null $P1824, vivify_726
+    $P1824 = root_new ['parrot';'ResizablePMCArray']
+  vivify_726:
+    set $P1819, $P1824
+  if_1820_end:
+.annotate 'line', 853
+    .return ($P1819)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "roles"  :subid("119_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1829
+    .param pmc param_1830
+    .param pmc param_1831 :named("local")
+.annotate 'line', 857
+    .lex "self", param_1829
+    .lex "$obj", param_1830
+    .lex "$local", param_1831
+    find_lex $P1832, "self"
+    find_lex $P1833, "$?CLASS"
+    getattribute $P1834, $P1832, $P1833, "@!roles"
+    unless_null $P1834, vivify_727
+    $P1834 = root_new ['parrot';'ResizablePMCArray']
+  vivify_727:
+    .return ($P1834)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "methods"  :subid("120_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1836
+    .param pmc param_1837
+    .param pmc param_1838 :named("local")
+.annotate 'line', 861
+    .const 'Sub' $P1848 = "121_1304459371.883" 
+    capture_lex $P1848
+    .lex "self", param_1836
+    .lex "$obj", param_1837
+    .lex "$local", param_1838
+.annotate 'line', 862
+    $P1839 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@meths", $P1839
+.annotate 'line', 861
+    find_lex $P1840, "@meths"
+    unless_null $P1840, vivify_728
+    $P1840 = root_new ['parrot';'ResizablePMCArray']
+  vivify_728:
+.annotate 'line', 863
+    find_lex $P1842, "self"
+    find_lex $P1843, "$?CLASS"
+    getattribute $P1844, $P1842, $P1843, "%!methods"
+    unless_null $P1844, vivify_729
+    $P1844 = root_new ['parrot';'Hash']
+  vivify_729:
+    defined $I1845, $P1844
+    unless $I1845, for_undef_730
+    iter $P1841, $P1844
+    new $P1855, 'ExceptionHandler'
+    set_label $P1855, loop1854_handler
+    $P1855."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P1855
+  loop1854_test:
+    unless $P1841, loop1854_done
+    shift $P1846, $P1841
+  loop1854_redo:
+    .const 'Sub' $P1848 = "121_1304459371.883" 
+    capture_lex $P1848
+    $P1848($P1846)
+  loop1854_next:
+    goto loop1854_test
+  loop1854_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1856, exception, 'type'
+    eq $P1856, .CONTROL_LOOP_NEXT, loop1854_next
+    eq $P1856, .CONTROL_LOOP_REDO, loop1854_redo
+  loop1854_done:
+    pop_eh 
+  for_undef_730:
+    find_lex $P1857, "@meths"
+    unless_null $P1857, vivify_733
+    $P1857 = root_new ['parrot';'ResizablePMCArray']
+  vivify_733:
+.annotate 'line', 861
+    .return ($P1857)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "_block1847"  :anon :subid("121_1304459371.883") :outer("120_1304459371.883")
+    .param pmc param_1849
+.annotate 'line', 863
+    .lex "$_", param_1849
+.annotate 'line', 864
+    find_lex $P1850, "@meths"
+    unless_null $P1850, vivify_731
+    $P1850 = root_new ['parrot';'ResizablePMCArray']
+  vivify_731:
+    find_lex $P1851, "$_"
+    unless_null $P1851, vivify_732
+    new $P1851, "Undef"
+  vivify_732:
+    $P1852 = $P1851."value"()
+    $P1853 = $P1850."push"($P1852)
+.annotate 'line', 863
+    .return ($P1853)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "method_table"  :subid("122_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1859
+    .param pmc param_1860
+.annotate 'line', 869
+    .lex "self", param_1859
+    .lex "$obj", param_1860
+    find_lex $P1861, "self"
+    find_lex $P1862, "$?CLASS"
+    getattribute $P1863, $P1861, $P1862, "%!methods"
+    unless_null $P1863, vivify_734
+    $P1863 = root_new ['parrot';'Hash']
+  vivify_734:
+    .return ($P1863)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "name"  :subid("123_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1865
+    .param pmc param_1866
+.annotate 'line', 873
+    .lex "self", param_1865
+    .lex "$obj", param_1866
+    find_lex $P1867, "self"
+    find_lex $P1868, "$?CLASS"
+    getattribute $P1869, $P1867, $P1868, "$!name"
+    unless_null $P1869, vivify_735
+    new $P1869, "Undef"
+  vivify_735:
+    .return ($P1869)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "attributes"  :subid("124_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1871
+    .param pmc param_1872
+    .param pmc param_1873 :named("local")
+.annotate 'line', 877
+    .const 'Sub' $P1883 = "125_1304459371.883" 
+    capture_lex $P1883
+    .lex "self", param_1871
+    .lex "$obj", param_1872
+    .lex "$local", param_1873
+.annotate 'line', 878
+    $P1874 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@attrs", $P1874
+.annotate 'line', 877
+    find_lex $P1875, "@attrs"
+    unless_null $P1875, vivify_736
+    $P1875 = root_new ['parrot';'ResizablePMCArray']
+  vivify_736:
+.annotate 'line', 879
+    find_lex $P1877, "self"
+    find_lex $P1878, "$?CLASS"
+    getattribute $P1879, $P1877, $P1878, "%!attributes"
+    unless_null $P1879, vivify_737
+    $P1879 = root_new ['parrot';'Hash']
+  vivify_737:
+    defined $I1880, $P1879
+    unless $I1880, for_undef_738
+    iter $P1876, $P1879
+    new $P1890, 'ExceptionHandler'
+    set_label $P1890, loop1889_handler
+    $P1890."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P1890
+  loop1889_test:
+    unless $P1876, loop1889_done
+    shift $P1881, $P1876
+  loop1889_redo:
+    .const 'Sub' $P1883 = "125_1304459371.883" 
+    capture_lex $P1883
+    $P1883($P1881)
+  loop1889_next:
+    goto loop1889_test
+  loop1889_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1891, exception, 'type'
+    eq $P1891, .CONTROL_LOOP_NEXT, loop1889_next
+    eq $P1891, .CONTROL_LOOP_REDO, loop1889_redo
+  loop1889_done:
+    pop_eh 
+  for_undef_738:
+    find_lex $P1892, "@attrs"
+    unless_null $P1892, vivify_741
+    $P1892 = root_new ['parrot';'ResizablePMCArray']
+  vivify_741:
+.annotate 'line', 877
+    .return ($P1892)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "_block1882"  :anon :subid("125_1304459371.883") :outer("124_1304459371.883")
+    .param pmc param_1884
+.annotate 'line', 879
+    .lex "$_", param_1884
+.annotate 'line', 880
+    find_lex $P1885, "@attrs"
+    unless_null $P1885, vivify_739
+    $P1885 = root_new ['parrot';'ResizablePMCArray']
+  vivify_739:
+    find_lex $P1886, "$_"
+    unless_null $P1886, vivify_740
+    new $P1886, "Undef"
+  vivify_740:
+    $P1887 = $P1886."value"()
+    $P1888 = $P1885."push"($P1887)
+.annotate 'line', 879
+    .return ($P1888)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.sub "parrot_vtable_mappings"  :subid("126_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1894
+    .param pmc param_1895
+    .param pmc param_1896 :named("local")
+.annotate 'line', 885
+    .lex "self", param_1894
+    .lex "$obj", param_1895
+    .lex "$local", param_1896
+    find_lex $P1897, "self"
+    find_lex $P1898, "$?CLASS"
+    getattribute $P1899, $P1897, $P1898, "%!parrot_vtable_mapping"
+    unless_null $P1899, vivify_742
+    $P1899 = root_new ['parrot';'Hash']
+  vivify_742:
+    .return ($P1899)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "isa"  :subid("127_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1903
+    .param pmc param_1904
+    .param pmc param_1905
+.annotate 'line', 893
+    new $P1902, ['ExceptionHandler'], .CONTROL_RETURN
+    set_label $P1902, control_1901
+    push_eh $P1902
+    .lex "self", param_1903
+    .lex "$obj", param_1904
+    .lex "$check", param_1905
+.annotate 'line', 894
+    new $P1906, "Undef"
+    .lex "$check-class", $P1906
+.annotate 'line', 895
+    new $P1907, "Undef"
+    .lex "$i", $P1907
+.annotate 'line', 894
+    find_lex $P1908, "$check"
+    unless_null $P1908, vivify_743
+    new $P1908, "Undef"
+  vivify_743:
+    get_what $P1909, $P1908
+    store_lex "$check-class", $P1909
+.annotate 'line', 895
+    find_lex $P1910, "self"
+    find_lex $P1911, "$?CLASS"
+    getattribute $P1912, $P1910, $P1911, "@!mro"
+    unless_null $P1912, vivify_744
+    $P1912 = root_new ['parrot';'ResizablePMCArray']
+  vivify_744:
+    set $N1913, $P1912
+    new $P1914, 'Float'
+    set $P1914, $N1913
+    store_lex "$i", $P1914
+.annotate 'line', 896
+    new $P1932, 'ExceptionHandler'
+    set_label $P1932, loop1931_handler
+    $P1932."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P1932
+  loop1931_test:
+    find_lex $P1915, "$i"
+    unless_null $P1915, vivify_745
+    new $P1915, "Undef"
+  vivify_745:
+    set $N1916, $P1915
+    isgt $I1917, $N1916, 0.0
+    unless $I1917, loop1931_done
+  loop1931_redo:
+.annotate 'line', 897
+    find_lex $P1918, "$i"
+    unless_null $P1918, vivify_746
+    new $P1918, "Undef"
+  vivify_746:
+    sub $P1919, $P1918, 1
+    store_lex "$i", $P1919
+.annotate 'line', 898
+    find_lex $P1921, "$i"
+    unless_null $P1921, vivify_747
+    new $P1921, "Undef"
+  vivify_747:
+    set $I1922, $P1921
+    find_lex $P1923, "self"
+    find_lex $P1924, "$?CLASS"
+    getattribute $P1925, $P1923, $P1924, "@!mro"
+    unless_null $P1925, vivify_748
+    $P1925 = root_new ['parrot';'ResizablePMCArray']
+  vivify_748:
+    set $P1926, $P1925[$I1922]
+    unless_null $P1926, vivify_749
+    new $P1926, "Undef"
+  vivify_749:
+    find_lex $P1927, "$check-class"
+    unless_null $P1927, vivify_750
+    new $P1927, "Undef"
+  vivify_750:
+    issame $I1928, $P1926, $P1927
+    unless $I1928, if_1920_end
+.annotate 'line', 899
+    new $P1929, "Exception"
+    set $P1929['type'], .CONTROL_RETURN
+    new $P1930, "Integer"
+    assign $P1930, 1
+    setattribute $P1929, 'payload', $P1930
+    throw $P1929
+  if_1920_end:
+  loop1931_next:
+.annotate 'line', 896
+    goto loop1931_test
+  loop1931_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1933, exception, 'type'
+    eq $P1933, .CONTROL_LOOP_NEXT, loop1931_next
+    eq $P1933, .CONTROL_LOOP_REDO, loop1931_redo
+  loop1931_done:
+    pop_eh 
+.annotate 'line', 902
+    new $P1934, "Exception"
+    set $P1934['type'], .CONTROL_RETURN
+    new $P1935, "Integer"
+    assign $P1935, 0
+    setattribute $P1934, 'payload', $P1935
+    throw $P1934
+.annotate 'line', 893
+    .return ()
+  control_1901:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1936, exception, "payload"
+    .return ($P1936)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "does"  :subid("128_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1940
+    .param pmc param_1941
+    .param pmc param_1942
+.annotate 'line', 905
+    new $P1939, ['ExceptionHandler'], .CONTROL_RETURN
+    set_label $P1939, control_1938
+    push_eh $P1939
+    .lex "self", param_1940
+    .lex "$obj", param_1941
+    .lex "$check", param_1942
+.annotate 'line', 906
+    new $P1943, "Undef"
+    .lex "$i", $P1943
+    find_lex $P1944, "self"
+    find_lex $P1945, "$?CLASS"
+    getattribute $P1946, $P1944, $P1945, "@!done"
+    unless_null $P1946, vivify_751
+    $P1946 = root_new ['parrot';'ResizablePMCArray']
+  vivify_751:
+    set $N1947, $P1946
+    new $P1948, 'Float'
+    set $P1948, $N1947
+    store_lex "$i", $P1948
+.annotate 'line', 907
+    new $P1966, 'ExceptionHandler'
+    set_label $P1966, loop1965_handler
+    $P1966."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P1966
+  loop1965_test:
+    find_lex $P1949, "$i"
+    unless_null $P1949, vivify_752
+    new $P1949, "Undef"
+  vivify_752:
+    set $N1950, $P1949
+    isgt $I1951, $N1950, 0.0
+    unless $I1951, loop1965_done
+  loop1965_redo:
+.annotate 'line', 908
+    find_lex $P1952, "$i"
+    unless_null $P1952, vivify_753
+    new $P1952, "Undef"
+  vivify_753:
+    sub $P1953, $P1952, 1
+    store_lex "$i", $P1953
+.annotate 'line', 909
+    find_lex $P1955, "$i"
+    unless_null $P1955, vivify_754
+    new $P1955, "Undef"
+  vivify_754:
+    set $I1956, $P1955
+    find_lex $P1957, "self"
+    find_lex $P1958, "$?CLASS"
+    getattribute $P1959, $P1957, $P1958, "@!done"
+    unless_null $P1959, vivify_755
+    $P1959 = root_new ['parrot';'ResizablePMCArray']
+  vivify_755:
+    set $P1960, $P1959[$I1956]
+    unless_null $P1960, vivify_756
+    new $P1960, "Undef"
+  vivify_756:
+    find_lex $P1961, "$check"
+    unless_null $P1961, vivify_757
+    new $P1961, "Undef"
+  vivify_757:
+    issame $I1962, $P1960, $P1961
+    unless $I1962, if_1954_end
+.annotate 'line', 910
+    new $P1963, "Exception"
+    set $P1963['type'], .CONTROL_RETURN
+    new $P1964, "Integer"
+    assign $P1964, 1
+    setattribute $P1963, 'payload', $P1964
+    throw $P1963
+  if_1954_end:
+  loop1965_next:
+.annotate 'line', 907
+    goto loop1965_test
+  loop1965_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1967, exception, 'type'
+    eq $P1967, .CONTROL_LOOP_NEXT, loop1965_next
+    eq $P1967, .CONTROL_LOOP_REDO, loop1965_redo
+  loop1965_done:
+    pop_eh 
+.annotate 'line', 913
+    new $P1968, "Exception"
+    set $P1968['type'], .CONTROL_RETURN
+    new $P1969, "Integer"
+    assign $P1969, 0
+    setattribute $P1968, 'payload', $P1969
+    throw $P1968
+.annotate 'line', 905
+    .return ()
+  control_1938:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P1970, exception, "payload"
+    .return ($P1970)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "can"  :subid("129_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_1974
+    .param pmc param_1975
+    .param pmc param_1976
+.annotate 'line', 916
+    .const 'Sub' $P1984 = "130_1304459371.883" 
+    capture_lex $P1984
+    new $P1973, ['ExceptionHandler'], .CONTROL_RETURN
+    set_label $P1973, control_1972
+    push_eh $P1973
+    .lex "self", param_1974
+    .lex "$obj", param_1975
+    .lex "$name", param_1976
+.annotate 'line', 917
+    find_lex $P1978, "self"
+    find_lex $P1979, "$?CLASS"
+    getattribute $P1980, $P1978, $P1979, "@!mro"
+    unless_null $P1980, vivify_758
+    $P1980 = root_new ['parrot';'ResizablePMCArray']
+  vivify_758:
+    defined $I1981, $P1980
+    unless $I1981, for_undef_759
+    iter $P1977, $P1980
+    new $P2002, 'ExceptionHandler'
+    set_label $P2002, loop2001_handler
+    $P2002."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P2002
+  loop2001_test:
+    unless $P1977, loop2001_done
+    shift $P1982, $P1977
+  loop2001_redo:
+    .const 'Sub' $P1984 = "130_1304459371.883" 
+    capture_lex $P1984
+    $P1984($P1982)
+  loop2001_next:
+    goto loop2001_test
+  loop2001_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P2003, exception, 'type'
+    eq $P2003, .CONTROL_LOOP_NEXT, loop2001_next
+    eq $P2003, .CONTROL_LOOP_REDO, loop2001_redo
+  loop2001_done:
+    pop_eh 
+  for_undef_759:
+.annotate 'line', 924
+    new $P2004, "Exception"
+    set $P2004['type'], .CONTROL_RETURN
+    new $P2005, "Integer"
+    assign $P2005, 0
+    setattribute $P2004, 'payload', $P2005
+    throw $P2004
+.annotate 'line', 916
+    .return ()
+  control_1972:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P2006, exception, "payload"
+    .return ($P2006)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "_block1983"  :anon :subid("130_1304459371.883") :outer("129_1304459371.883")
+    .param pmc param_1987
+.annotate 'line', 918
+    $P1985 = root_new ['parrot';'Hash']
+    .lex "%meths", $P1985
+.annotate 'line', 919
+    new $P1986, "Undef"
+    .lex "$can", $P1986
+    .lex "$_", param_1987
+.annotate 'line', 918
+    find_lex $P1988, "$_"
+    unless_null $P1988, vivify_760
+    new $P1988, "Undef"
+  vivify_760:
+    get_how $P1989, $P1988
+    find_lex $P1990, "$obj"
+    unless_null $P1990, vivify_761
+    new $P1990, "Undef"
+  vivify_761:
+    $P1991 = $P1989."method_table"($P1990)
+    store_lex "%meths", $P1991
+.annotate 'line', 919
+    find_lex $P1992, "$name"
+    unless_null $P1992, vivify_762
+    new $P1992, "Undef"
+  vivify_762:
+    find_lex $P1993, "%meths"
+    unless_null $P1993, vivify_763
+    $P1993 = root_new ['parrot';'Hash']
+  vivify_763:
+    set $P1994, $P1993[$P1992]
+    unless_null $P1994, vivify_764
+    new $P1994, "Undef"
+  vivify_764:
+    store_lex "$can", $P1994
+.annotate 'line', 920
+    find_lex $P1997, "$can"
+    unless_null $P1997, vivify_765
+    new $P1997, "Undef"
+  vivify_765:
+    defined $I1998, $P1997
+    if $I1998, if_1996
+    new $P1995, 'Integer'
+    set $P1995, $I1998
+    goto if_1996_end
+  if_1996:
+.annotate 'line', 921
+    new $P1999, "Exception"
+    set $P1999['type'], .CONTROL_RETURN
+    find_lex $P2000, "$can"
+    unless_null $P2000, vivify_766
+    new $P2000, "Undef"
+  vivify_766:
+    setattribute $P1999, 'payload', $P2000
+    throw $P1999
+  if_1996_end:
+.annotate 'line', 917
+    .return ($P1995)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["NQPClassHOW"]
+.include "except_types.pasm"
+.sub "find_method"  :subid("131_1304459371.883") :outer("77_1304459371.883")
+    .param pmc param_2010
+    .param pmc param_2011
+    .param pmc param_2012
+.annotate 'line', 930
+    .const 'Sub' $P2020 = "132_1304459371.883" 
+    capture_lex $P2020
+    new $P2009, ['ExceptionHandler'], .CONTROL_RETURN
+    set_label $P2009, control_2008
+    push_eh $P2009
+    .lex "self", param_2010
+    .lex "$obj", param_2011
+    .lex "$name", param_2012
+.annotate 'line', 931
+    find_lex $P2014, "self"
+    find_lex $P2015, "$?CLASS"
+    getattribute $P2016, $P2014, $P2015, "@!mro"
+    unless_null $P2016, vivify_767
+    $P2016 = root_new ['parrot';'ResizablePMCArray']
+  vivify_767:
+    defined $I2017, $P2016
+    unless $I2017, for_undef_768
+    iter $P2013, $P2016
+    new $P2038, 'ExceptionHandler'
+    set_label $P2038, loop2037_handler
+    $P2038."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P2038
+  loop2037_test:
+    unless $P2013, loop2037_done
+    shift $P2018, $P2013
+  loop2037_redo:
+    .const 'Sub' $P2020 = "132_1304459371.883" 
+    capture_lex $P2020
+    $P2020($P2018)
+  loop2037_next:
+    goto loop2037_test
+  loop2037_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P2039, exception, 'type'
+    eq $P2039, .CONTROL_LOOP_NEXT, loop2037_next
+    eq $P2039, .CONTROL_LOOP_REDO, loop2037_redo
+  loop2037_done:
+    pop_eh 
+  for_undef_768:
+.annotate 'line', 938
+    null $P2040
+.annotate 'line', 930
+    .return ($P2040)
+  control_2008:
+    .local pmc exception 
+    .get_results (exception) 
+    getattribute $P2041, exception, "payload"
     .return ($P2041)
 .end
 
@@ -5211,3648 +8651,222 @@
 
 .namespace ["NQPClassHOW"]
 .include "except_types.pasm"
-.sub "compute_c3_mro"  :subid("78_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1043
-.annotate 'line', 724
-    .const 'Sub' $P1055 = "79_1304456120.214" 
-    capture_lex $P1055
-    new $P1042, ['ExceptionHandler'], .CONTROL_RETURN
-    set_label $P1042, control_1041
-    push_eh $P1042
-    .lex "$class", param_1043
-.annotate 'line', 725
-    $P1044 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@immediate_parents", $P1044
-.annotate 'line', 728
-    $P1045 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@result", $P1045
-.annotate 'line', 725
-    find_lex $P1046, "$class"
-    unless_null $P1046, vivify_475
-    new $P1046, "Undef"
-  vivify_475:
-    get_how $P1047, $P1046
-    find_lex $P1048, "$class"
-    unless_null $P1048, vivify_476
-    new $P1048, "Undef"
-  vivify_476:
-    $P1049 = $P1047."parents"($P1048, 1 :named("local"))
-    store_lex "@immediate_parents", $P1049
-    find_lex $P1050, "@result"
-    unless_null $P1050, vivify_477
-    $P1050 = root_new ['parrot';'ResizablePMCArray']
-  vivify_477:
-.annotate 'line', 729
-    find_lex $P1052, "@immediate_parents"
-    unless_null $P1052, vivify_478
-    $P1052 = root_new ['parrot';'ResizablePMCArray']
-  vivify_478:
-    set $N1053, $P1052
-    unless $N1053, if_1051_end
-    .const 'Sub' $P1055 = "79_1304456120.214" 
-    capture_lex $P1055
-    $P1055()
-  if_1051_end:
-.annotate 'line', 741
-    find_lex $P1076, "@result"
-    unless_null $P1076, vivify_487
-    $P1076 = root_new ['parrot';'ResizablePMCArray']
-  vivify_487:
-    find_lex $P1077, "$class"
-    unless_null $P1077, vivify_488
-    new $P1077, "Undef"
-  vivify_488:
-    $P1076."unshift"($P1077)
-.annotate 'line', 742
-    new $P1078, "Exception"
-    set $P1078['type'], .CONTROL_RETURN
-    find_lex $P1079, "@result"
-    unless_null $P1079, vivify_489
-    $P1079 = root_new ['parrot';'ResizablePMCArray']
-  vivify_489:
-    setattribute $P1078, 'payload', $P1079
-    throw $P1078
-.annotate 'line', 724
-    .return ()
-  control_1041:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1080, exception, "payload"
-    .return ($P1080)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "_block1054"  :anon :subid("79_1304456120.214") :outer("78_1304456120.214")
-.annotate 'line', 729
-    .const 'Sub' $P1063 = "80_1304456120.214" 
-    capture_lex $P1063
-.annotate 'line', 732
-    $P1056 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@merge_list", $P1056
-.annotate 'line', 729
-    find_lex $P1057, "@merge_list"
-    unless_null $P1057, vivify_479
-    $P1057 = root_new ['parrot';'ResizablePMCArray']
-  vivify_479:
-.annotate 'line', 733
-    find_lex $P1059, "@immediate_parents"
-    unless_null $P1059, vivify_480
-    $P1059 = root_new ['parrot';'ResizablePMCArray']
-  vivify_480:
-    defined $I1060, $P1059
-    unless $I1060, for_undef_481
-    iter $P1058, $P1059
-    new $P1070, 'ExceptionHandler'
-    set_label $P1070, loop1069_handler
-    $P1070."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P1070
-  loop1069_test:
-    unless $P1058, loop1069_done
-    shift $P1061, $P1058
-  loop1069_redo:
-    .const 'Sub' $P1063 = "80_1304456120.214" 
-    capture_lex $P1063
-    $P1063($P1061)
-  loop1069_next:
-    goto loop1069_test
-  loop1069_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1071, exception, 'type'
-    eq $P1071, .CONTROL_LOOP_NEXT, loop1069_next
-    eq $P1071, .CONTROL_LOOP_REDO, loop1069_redo
-  loop1069_done:
-    pop_eh 
-  for_undef_481:
-.annotate 'line', 736
-    find_lex $P1072, "@merge_list"
-    unless_null $P1072, vivify_484
-    $P1072 = root_new ['parrot';'ResizablePMCArray']
-  vivify_484:
-    find_lex $P1073, "@immediate_parents"
-    unless_null $P1073, vivify_485
-    $P1073 = root_new ['parrot';'ResizablePMCArray']
-  vivify_485:
-    $P1072."push"($P1073)
-.annotate 'line', 737
-    find_lex $P1074, "@merge_list"
-    unless_null $P1074, vivify_486
-    $P1074 = root_new ['parrot';'ResizablePMCArray']
-  vivify_486:
-    $P1075 = "c3_merge"($P1074)
-    store_lex "@result", $P1075
-.annotate 'line', 729
-    .return ($P1075)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "_block1062"  :anon :subid("80_1304456120.214") :outer("79_1304456120.214")
-    .param pmc param_1064
-.annotate 'line', 733
-    .lex "$_", param_1064
-.annotate 'line', 734
-    find_lex $P1065, "@merge_list"
-    unless_null $P1065, vivify_482
-    $P1065 = root_new ['parrot';'ResizablePMCArray']
-  vivify_482:
-    find_lex $P1066, "$_"
-    unless_null $P1066, vivify_483
-    new $P1066, "Undef"
-  vivify_483:
-    $P1067 = "compute_c3_mro"($P1066)
-    $P1068 = $P1065."push"($P1067)
-.annotate 'line', 733
-    .return ($P1068)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "c3_merge"  :subid("81_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1085
-.annotate 'line', 746
-    .const 'Sub' $P1178 = "86_1304456120.214" 
-    capture_lex $P1178
-    .const 'Sub' $P1100 = "82_1304456120.214" 
-    capture_lex $P1100
-    new $P1084, ['ExceptionHandler'], .CONTROL_RETURN
-    set_label $P1084, control_1083
-    push_eh $P1084
-    .lex "@merge_list", param_1085
-.annotate 'line', 747
-    $P1086 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@result", $P1086
-.annotate 'line', 748
-    new $P1087, "Undef"
-    .lex "$accepted", $P1087
-.annotate 'line', 749
-    new $P1088, "Undef"
-    .lex "$something_accepted", $P1088
-.annotate 'line', 750
-    new $P1089, "Undef"
-    .lex "$cand_count", $P1089
-.annotate 'line', 793
-    new $P1090, "Undef"
-    .lex "$i", $P1090
-.annotate 'line', 746
-    find_lex $P1091, "@result"
-    unless_null $P1091, vivify_490
-    $P1091 = root_new ['parrot';'ResizablePMCArray']
-  vivify_490:
-    find_lex $P1092, "$accepted"
-    unless_null $P1092, vivify_491
-    new $P1092, "Undef"
-  vivify_491:
-.annotate 'line', 749
-    new $P1093, "Integer"
-    assign $P1093, 0
-    store_lex "$something_accepted", $P1093
-.annotate 'line', 750
-    new $P1094, "Integer"
-    assign $P1094, 0
-    store_lex "$cand_count", $P1094
-.annotate 'line', 753
-    find_lex $P1096, "@merge_list"
-    unless_null $P1096, vivify_492
-    $P1096 = root_new ['parrot';'ResizablePMCArray']
-  vivify_492:
-    defined $I1097, $P1096
-    unless $I1097, for_undef_493
-    iter $P1095, $P1096
-    new $P1161, 'ExceptionHandler'
-    set_label $P1161, loop1160_handler
-    $P1161."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P1161
-  loop1160_test:
-    unless $P1095, loop1160_done
-    shift $P1098, $P1095
-  loop1160_redo:
-    .const 'Sub' $P1100 = "82_1304456120.214" 
-    capture_lex $P1100
-    $P1100($P1098)
-  loop1160_next:
-    goto loop1160_test
-  loop1160_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1162, exception, 'type'
-    eq $P1162, .CONTROL_LOOP_NEXT, loop1160_next
-    eq $P1162, .CONTROL_LOOP_REDO, loop1160_redo
-  loop1160_done:
-    pop_eh 
-  for_undef_493:
-.annotate 'line', 783
-    find_lex $P1164, "$cand_count"
-    unless_null $P1164, vivify_512
-    new $P1164, "Undef"
-  vivify_512:
-    set $N1165, $P1164
-    iseq $I1166, $N1165, 0.0
-    unless $I1166, if_1163_end
-.annotate 'line', 784
-    new $P1167, "Exception"
-    set $P1167['type'], .CONTROL_RETURN
-    find_lex $P1168, "@result"
-    unless_null $P1168, vivify_513
-    $P1168 = root_new ['parrot';'ResizablePMCArray']
-  vivify_513:
-    setattribute $P1167, 'payload', $P1168
-    throw $P1167
-  if_1163_end:
-.annotate 'line', 788
-    find_lex $P1170, "$something_accepted"
-    unless_null $P1170, vivify_514
-    new $P1170, "Undef"
-  vivify_514:
-    if $P1170, unless_1169_end
-.annotate 'line', 789
-    die "Could not build C3 linearization: ambiguous hierarchy"
-  unless_1169_end:
-.annotate 'line', 793
-    new $P1171, "Integer"
-    assign $P1171, 0
-    store_lex "$i", $P1171
-.annotate 'line', 794
-    new $P1209, 'ExceptionHandler'
-    set_label $P1209, loop1208_handler
-    $P1209."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P1209
-  loop1208_test:
-    find_lex $P1172, "$i"
-    unless_null $P1172, vivify_515
-    new $P1172, "Undef"
-  vivify_515:
-    set $N1173, $P1172
-    find_lex $P1174, "@merge_list"
-    unless_null $P1174, vivify_516
-    $P1174 = root_new ['parrot';'ResizablePMCArray']
-  vivify_516:
-    set $N1175, $P1174
-    islt $I1176, $N1173, $N1175
-    unless $I1176, loop1208_done
-  loop1208_redo:
-    .const 'Sub' $P1178 = "86_1304456120.214" 
-    capture_lex $P1178
-    $P1178()
-  loop1208_next:
-    goto loop1208_test
-  loop1208_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1210, exception, 'type'
-    eq $P1210, .CONTROL_LOOP_NEXT, loop1208_next
-    eq $P1210, .CONTROL_LOOP_REDO, loop1208_redo
-  loop1208_done:
-    pop_eh 
-.annotate 'line', 807
-    find_lex $P1211, "@merge_list"
-    unless_null $P1211, vivify_530
-    $P1211 = root_new ['parrot';'ResizablePMCArray']
-  vivify_530:
-    $P1212 = "c3_merge"($P1211)
-    store_lex "@result", $P1212
-.annotate 'line', 808
-    find_lex $P1213, "@result"
-    unless_null $P1213, vivify_531
-    $P1213 = root_new ['parrot';'ResizablePMCArray']
-  vivify_531:
-    find_lex $P1214, "$accepted"
-    unless_null $P1214, vivify_532
-    new $P1214, "Undef"
-  vivify_532:
-    $P1213."unshift"($P1214)
-.annotate 'line', 809
-    new $P1215, "Exception"
-    set $P1215['type'], .CONTROL_RETURN
-    find_lex $P1216, "@result"
-    unless_null $P1216, vivify_533
-    $P1216 = root_new ['parrot';'ResizablePMCArray']
-  vivify_533:
-    setattribute $P1215, 'payload', $P1216
-    throw $P1215
-.annotate 'line', 746
-    .return ()
-  control_1083:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1217, exception, "payload"
-    .return ($P1217)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "_block1099"  :anon :subid("82_1304456120.214") :outer("81_1304456120.214")
-    .param pmc param_1102
-.annotate 'line', 753
-    .const 'Sub' $P1109 = "83_1304456120.214" 
-    capture_lex $P1109
-.annotate 'line', 754
-    $P1101 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@cand_list", $P1101
-    .lex "$_", param_1102
-    find_lex $P1103, "$_"
-    unless_null $P1103, vivify_494
-    new $P1103, "Undef"
-  vivify_494:
-    store_lex "@cand_list", $P1103
-.annotate 'line', 755
-    find_lex $P1106, "@cand_list"
-    unless_null $P1106, vivify_495
-    $P1106 = root_new ['parrot';'ResizablePMCArray']
-  vivify_495:
-    set $N1107, $P1106
-    if $N1107, if_1105
-    new $P1104, 'Float'
-    set $P1104, $N1107
-    goto if_1105_end
-  if_1105:
-    .const 'Sub' $P1109 = "83_1304456120.214" 
-    capture_lex $P1109
-    $P1159 = $P1109()
-    set $P1104, $P1159
-  if_1105_end:
-.annotate 'line', 753
-    .return ($P1104)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "_block1108"  :anon :subid("83_1304456120.214") :outer("82_1304456120.214")
-.annotate 'line', 755
-    .const 'Sub' $P1122 = "84_1304456120.214" 
-    capture_lex $P1122
-.annotate 'line', 756
-    new $P1110, "Undef"
-    .lex "$rejected", $P1110
-.annotate 'line', 757
-    new $P1111, "Undef"
-    .lex "$cand_class", $P1111
-.annotate 'line', 756
-    new $P1112, "Integer"
-    assign $P1112, 0
-    store_lex "$rejected", $P1112
-.annotate 'line', 757
-    find_lex $P1113, "@cand_list"
-    unless_null $P1113, vivify_496
-    $P1113 = root_new ['parrot';'ResizablePMCArray']
-  vivify_496:
-    set $P1114, $P1113[0]
-    unless_null $P1114, vivify_497
-    new $P1114, "Undef"
-  vivify_497:
-    store_lex "$cand_class", $P1114
-.annotate 'line', 758
-    find_lex $P1115, "$cand_count"
-    unless_null $P1115, vivify_498
-    new $P1115, "Undef"
-  vivify_498:
-    add $P1116, $P1115, 1
-    store_lex "$cand_count", $P1116
-.annotate 'line', 759
-    find_lex $P1118, "@merge_list"
-    unless_null $P1118, vivify_499
-    $P1118 = root_new ['parrot';'ResizablePMCArray']
-  vivify_499:
-    defined $I1119, $P1118
-    unless $I1119, for_undef_500
-    iter $P1117, $P1118
-    new $P1157, 'ExceptionHandler'
-    set_label $P1157, loop1156_handler
-    $P1157."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P1157
-  loop1156_test:
-    unless $P1117, loop1156_done
-    shift $P1120, $P1117
-  loop1156_redo:
-    .const 'Sub' $P1122 = "84_1304456120.214" 
-    capture_lex $P1122
-    $P1122($P1120)
-  loop1156_next:
-    goto loop1156_test
-  loop1156_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1158, exception, 'type'
-    eq $P1158, .CONTROL_LOOP_NEXT, loop1156_next
-    eq $P1158, .CONTROL_LOOP_REDO, loop1156_redo
-  loop1156_done:
-    pop_eh 
-  for_undef_500:
-.annotate 'line', 755
-    .return ($P1117)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "_block1121"  :anon :subid("84_1304456120.214") :outer("83_1304456120.214")
-    .param pmc param_1123
-.annotate 'line', 759
-    .const 'Sub' $P1129 = "85_1304456120.214" 
-    capture_lex $P1129
-    .lex "$_", param_1123
-.annotate 'line', 761
-    find_lex $P1125, "$_"
-    unless_null $P1125, vivify_501
-    new $P1125, "Undef"
-  vivify_501:
-    find_lex $P1126, "@cand_list"
-    unless_null $P1126, vivify_502
-    $P1126 = root_new ['parrot';'ResizablePMCArray']
-  vivify_502:
-    issame $I1127, $P1125, $P1126
-    if $I1127, unless_1124_end
-    .const 'Sub' $P1129 = "85_1304456120.214" 
-    capture_lex $P1129
-    $P1129()
-  unless_1124_end:
-.annotate 'line', 773
-    find_lex $P1152, "$rejected"
-    unless_null $P1152, vivify_510
-    new $P1152, "Undef"
-  vivify_510:
-    unless $P1152, unless_1151
-    set $P1150, $P1152
-    goto unless_1151_end
-  unless_1151:
-.annotate 'line', 774
-    find_lex $P1153, "$cand_class"
-    unless_null $P1153, vivify_511
-    new $P1153, "Undef"
-  vivify_511:
-    store_lex "$accepted", $P1153
-.annotate 'line', 775
-    new $P1154, "Integer"
-    assign $P1154, 1
-    store_lex "$something_accepted", $P1154
-.annotate 'line', 776
-    set $I1155, .CONTROL_LOOP_LAST
-    die 0, $I1155
-  unless_1151_end:
-.annotate 'line', 759
-    .return ($P1150)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "_block1128"  :anon :subid("85_1304456120.214") :outer("84_1304456120.214")
-.annotate 'line', 763
-    new $P1130, "Undef"
-    .lex "$cur_pos", $P1130
-    new $P1131, "Integer"
-    assign $P1131, 1
-    store_lex "$cur_pos", $P1131
-.annotate 'line', 764
-    new $P1148, 'ExceptionHandler'
-    set_label $P1148, loop1147_handler
-    $P1148."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P1148
-  loop1147_test:
-    find_lex $P1132, "$cur_pos"
-    unless_null $P1132, vivify_503
-    new $P1132, "Undef"
-  vivify_503:
-    set $N1133, $P1132
-    find_lex $P1134, "$_"
-    unless_null $P1134, vivify_504
-    new $P1134, "Undef"
-  vivify_504:
-    set $N1135, $P1134
-    isle $I1136, $N1133, $N1135
-    unless $I1136, loop1147_done
-  loop1147_redo:
-.annotate 'line', 765
-    find_lex $P1138, "$cur_pos"
-    unless_null $P1138, vivify_505
-    new $P1138, "Undef"
-  vivify_505:
-    set $I1139, $P1138
-    find_lex $P1140, "$_"
-    unless_null $P1140, vivify_506
-    $P1140 = root_new ['parrot';'ResizablePMCArray']
-  vivify_506:
-    set $P1141, $P1140[$I1139]
-    unless_null $P1141, vivify_507
-    new $P1141, "Undef"
-  vivify_507:
-    find_lex $P1142, "$cand_class"
-    unless_null $P1142, vivify_508
-    new $P1142, "Undef"
-  vivify_508:
-    issame $I1143, $P1141, $P1142
-    unless $I1143, if_1137_end
-.annotate 'line', 766
-    new $P1144, "Integer"
-    assign $P1144, 1
-    store_lex "$rejected", $P1144
-  if_1137_end:
-.annotate 'line', 768
-    find_lex $P1145, "$cur_pos"
-    unless_null $P1145, vivify_509
-    new $P1145, "Undef"
-  vivify_509:
-    add $P1146, $P1145, 1
-    store_lex "$cur_pos", $P1146
-  loop1147_next:
-.annotate 'line', 764
-    goto loop1147_test
-  loop1147_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1149, exception, 'type'
-    eq $P1149, .CONTROL_LOOP_NEXT, loop1147_next
-    eq $P1149, .CONTROL_LOOP_REDO, loop1147_redo
-  loop1147_done:
-    pop_eh 
-.annotate 'line', 761
-    .return ($I1136)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "_block1177"  :anon :subid("86_1304456120.214") :outer("81_1304456120.214")
-.annotate 'line', 794
-    .const 'Sub' $P1189 = "87_1304456120.214" 
-    capture_lex $P1189
-.annotate 'line', 795
-    $P1179 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@new_list", $P1179
-.annotate 'line', 794
-    find_lex $P1180, "@new_list"
-    unless_null $P1180, vivify_517
-    $P1180 = root_new ['parrot';'ResizablePMCArray']
-  vivify_517:
-.annotate 'line', 796
-    find_lex $P1182, "$i"
-    unless_null $P1182, vivify_518
-    new $P1182, "Undef"
-  vivify_518:
-    set $I1183, $P1182
-    find_lex $P1184, "@merge_list"
-    unless_null $P1184, vivify_519
-    $P1184 = root_new ['parrot';'ResizablePMCArray']
-  vivify_519:
-    set $P1185, $P1184[$I1183]
-    unless_null $P1185, vivify_520
-    new $P1185, "Undef"
-  vivify_520:
-    defined $I1186, $P1185
-    unless $I1186, for_undef_521
-    iter $P1181, $P1185
-    new $P1200, 'ExceptionHandler'
-    set_label $P1200, loop1199_handler
-    $P1200."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P1200
-  loop1199_test:
-    unless $P1181, loop1199_done
-    shift $P1187, $P1181
-  loop1199_redo:
-    .const 'Sub' $P1189 = "87_1304456120.214" 
-    capture_lex $P1189
-    $P1189($P1187)
-  loop1199_next:
-    goto loop1199_test
-  loop1199_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1201, exception, 'type'
-    eq $P1201, .CONTROL_LOOP_NEXT, loop1199_next
-    eq $P1201, .CONTROL_LOOP_REDO, loop1199_redo
-  loop1199_done:
-    pop_eh 
-  for_undef_521:
-.annotate 'line', 801
-    find_lex $P1202, "@new_list"
-    unless_null $P1202, vivify_526
-    $P1202 = root_new ['parrot';'ResizablePMCArray']
-  vivify_526:
-    find_lex $P1203, "$i"
-    unless_null $P1203, vivify_527
-    new $P1203, "Undef"
-  vivify_527:
-    set $I1204, $P1203
-    find_lex $P1205, "@merge_list"
-    unless_null $P1205, vivify_528
-    $P1205 = root_new ['parrot';'ResizablePMCArray']
-    store_lex "@merge_list", $P1205
-  vivify_528:
-    set $P1205[$I1204], $P1202
-.annotate 'line', 802
-    find_lex $P1206, "$i"
-    unless_null $P1206, vivify_529
-    new $P1206, "Undef"
-  vivify_529:
-    add $P1207, $P1206, 1
-    store_lex "$i", $P1207
-.annotate 'line', 794
-    .return ($P1207)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "_block1188"  :anon :subid("87_1304456120.214") :outer("86_1304456120.214")
-    .param pmc param_1190
-.annotate 'line', 796
-    .lex "$_", param_1190
-.annotate 'line', 797
-    find_lex $P1193, "$_"
-    unless_null $P1193, vivify_522
-    new $P1193, "Undef"
-  vivify_522:
-    find_lex $P1194, "$accepted"
-    unless_null $P1194, vivify_523
-    new $P1194, "Undef"
-  vivify_523:
-    issame $I1195, $P1193, $P1194
-    unless $I1195, unless_1192
-    new $P1191, 'Integer'
-    set $P1191, $I1195
-    goto unless_1192_end
-  unless_1192:
-.annotate 'line', 798
-    find_lex $P1196, "@new_list"
-    unless_null $P1196, vivify_524
-    $P1196 = root_new ['parrot';'ResizablePMCArray']
-  vivify_524:
-    find_lex $P1197, "$_"
-    unless_null $P1197, vivify_525
-    new $P1197, "Undef"
-  vivify_525:
-    $P1198 = $P1196."push"($P1197)
-.annotate 'line', 797
-    set $P1191, $P1198
-  unless_1192_end:
-.annotate 'line', 796
-    .return ($P1191)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "new"  :subid("88_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1222
-    .param pmc param_1223 :optional :named("name")
-    .param int has_param_1223 :opt_flag
-.annotate 'line', 537
-    .lex "self", param_1222
-    if has_param_1223, optparam_534
-    new $P1224, "Undef"
-    set param_1223, $P1224
-  optparam_534:
-    .lex "$name", param_1223
-.annotate 'line', 538
-    new $P1225, "Undef"
-    .lex "$obj", $P1225
-    find_lex $P1226, "self"
-    repr_instance_of $P1227, $P1226
-    store_lex "$obj", $P1227
-.annotate 'line', 539
-    find_lex $P1228, "$obj"
-    unless_null $P1228, vivify_535
-    new $P1228, "Undef"
-  vivify_535:
-    find_lex $P1229, "$name"
-    unless_null $P1229, vivify_536
-    new $P1229, "Undef"
-  vivify_536:
-    $P1228."BUILD"($P1229 :named("name"))
-    find_lex $P1230, "$obj"
-    unless_null $P1230, vivify_537
-    new $P1230, "Undef"
-  vivify_537:
-.annotate 'line', 537
-    .return ($P1230)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "BUILD"  :subid("89_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1232
-    .param pmc param_1233 :optional :named("name")
-    .param int has_param_1233 :opt_flag
-.annotate 'line', 543
-    .lex "self", param_1232
-    if has_param_1233, optparam_538
-    new $P1234, "Undef"
-    set param_1233, $P1234
-  optparam_538:
-    .lex "$name", param_1233
-.annotate 'line', 544
-    find_lex $P1235, "$name"
-    unless_null $P1235, vivify_539
-    new $P1235, "Undef"
-  vivify_539:
-    find_lex $P1236, "self"
-    find_lex $P1237, "$?CLASS"
-    setattribute $P1236, $P1237, "$!name", $P1235
-.annotate 'line', 543
-    .return ($P1235)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "new_type"  :subid("90_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1239
-    .param pmc param_1240 :optional :named("name")
-    .param int has_param_1240 :opt_flag
-    .param pmc param_1242 :optional :named("repr")
-    .param int has_param_1242 :opt_flag
-.annotate 'line', 549
-    .lex "self", param_1239
-    if has_param_1240, optparam_540
-    new $P1241, "String"
-    assign $P1241, "<anon>"
-    set param_1240, $P1241
-  optparam_540:
-    .lex "$name", param_1240
-    if has_param_1242, optparam_541
-    new $P1243, "String"
-    assign $P1243, "P6opaque"
-    set param_1242, $P1243
-  optparam_541:
-    .lex "$repr", param_1242
-.annotate 'line', 550
-    new $P1244, "Undef"
-    .lex "$metaclass", $P1244
-    find_lex $P1245, "self"
-    find_lex $P1246, "$name"
-    unless_null $P1246, vivify_542
-    new $P1246, "Undef"
-  vivify_542:
-    $P1247 = $P1245."new"($P1246 :named("name"))
-    store_lex "$metaclass", $P1247
-.annotate 'line', 552
-    find_lex $P1248, "$metaclass"
-    unless_null $P1248, vivify_543
-    new $P1248, "Undef"
-  vivify_543:
-    find_lex $P1249, "$repr"
-    unless_null $P1249, vivify_544
-    new $P1249, "Undef"
-  vivify_544:
-    set $S1250, $P1249
-    repr_type_object_for $P1251, $P1248, $S1250
-    $P1252 = root_new ['parrot';'Hash']
-    set_who $P1251, $P1252
-.annotate 'line', 549
-    .return ($P1251)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "add_method"  :subid("91_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1254
-    .param pmc param_1255
-    .param pmc param_1256
-    .param pmc param_1257
-.annotate 'line', 556
-    .lex "self", param_1254
-    .lex "$obj", param_1255
-    .lex "$name", param_1256
-    .lex "$code_obj", param_1257
-.annotate 'line', 557
-    find_lex $P1259, "$name"
-    unless_null $P1259, vivify_545
-    new $P1259, "Undef"
-  vivify_545:
-    find_lex $P1260, "self"
-    find_lex $P1261, "$?CLASS"
-    getattribute $P1262, $P1260, $P1261, "%!methods"
-    unless_null $P1262, vivify_546
-    $P1262 = root_new ['parrot';'Hash']
-  vivify_546:
-    set $P1263, $P1262[$P1259]
-    unless_null $P1263, vivify_547
-    new $P1263, "Undef"
-  vivify_547:
-    unless $P1263, if_1258_end
-.annotate 'line', 558
-    new $P1264, "String"
-    assign $P1264, "This class already has a method named "
-    find_lex $P1265, "$name"
-    unless_null $P1265, vivify_548
-    new $P1265, "Undef"
-  vivify_548:
-    concat $P1266, $P1264, $P1265
-    die $P1266
-  if_1258_end:
-.annotate 'line', 560
-    find_lex $P1270, "$code_obj"
-    unless_null $P1270, vivify_549
-    new $P1270, "Undef"
-  vivify_549:
-    isnull $I1271, $P1270
-    unless $I1271, unless_1269
-    new $P1268, 'Integer'
-    set $P1268, $I1271
-    goto unless_1269_end
-  unless_1269:
-    find_lex $P1272, "$code_obj"
-    unless_null $P1272, vivify_550
-    new $P1272, "Undef"
-  vivify_550:
-    isa $I1273, $P1272, "Undef"
-    new $P1268, 'Integer'
-    set $P1268, $I1273
-  unless_1269_end:
-    unless $P1268, if_1267_end
-.annotate 'line', 561
-    new $P1274, 'String'
-    set $P1274, "Cannot add a null method '"
-    find_lex $P1275, "$name"
-    unless_null $P1275, vivify_551
-    new $P1275, "Undef"
-  vivify_551:
-    concat $P1276, $P1274, $P1275
-    concat $P1277, $P1276, "' to class '"
-    find_lex $P1278, "self"
-    find_lex $P1279, "$?CLASS"
-    getattribute $P1280, $P1278, $P1279, "$!name"
-    unless_null $P1280, vivify_552
-    new $P1280, "Undef"
-  vivify_552:
-    concat $P1281, $P1277, $P1280
-    concat $P1282, $P1281, "'"
-    die $P1282
-  if_1267_end:
-.annotate 'line', 563
-    find_lex $P1283, "$code_obj"
-    unless_null $P1283, vivify_553
-    new $P1283, "Undef"
-  vivify_553:
-    find_lex $P1284, "$name"
-    unless_null $P1284, vivify_554
-    new $P1284, "Undef"
-  vivify_554:
-    find_lex $P1285, "self"
-    find_lex $P1286, "$?CLASS"
-    getattribute $P1287, $P1285, $P1286, "%!methods"
-    unless_null $P1287, vivify_555
-    $P1287 = root_new ['parrot';'Hash']
-    setattribute $P1285, $P1286, "%!methods", $P1287
-  vivify_555:
-    set $P1287[$P1284], $P1283
-.annotate 'line', 556
-    .return ($P1283)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "add_multi_method"  :subid("92_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1289
-    .param pmc param_1290
-    .param pmc param_1291
-    .param pmc param_1292
-.annotate 'line', 566
-    .lex "self", param_1289
-    .lex "$obj", param_1290
-    .lex "$name", param_1291
-    .lex "$code_obj", param_1292
-.annotate 'line', 572
-    $P1293 = root_new ['parrot';'Hash']
-    .lex "%todo", $P1293
-.annotate 'line', 566
-    find_lex $P1294, "%todo"
-    unless_null $P1294, vivify_556
-    $P1294 = root_new ['parrot';'Hash']
-  vivify_556:
-.annotate 'line', 573
-    find_lex $P1295, "$name"
-    unless_null $P1295, vivify_557
-    new $P1295, "Undef"
-  vivify_557:
-    find_lex $P1296, "%todo"
-    unless_null $P1296, vivify_558
-    $P1296 = root_new ['parrot';'Hash']
-    store_lex "%todo", $P1296
-  vivify_558:
-    set $P1296["name"], $P1295
-.annotate 'line', 574
-    find_lex $P1297, "$code_obj"
-    unless_null $P1297, vivify_559
-    new $P1297, "Undef"
-  vivify_559:
-    find_lex $P1298, "%todo"
-    unless_null $P1298, vivify_560
-    $P1298 = root_new ['parrot';'Hash']
-    store_lex "%todo", $P1298
-  vivify_560:
-    set $P1298["code"], $P1297
-.annotate 'line', 575
-    find_lex $P1299, "%todo"
-    unless_null $P1299, vivify_561
-    $P1299 = root_new ['parrot';'Hash']
-  vivify_561:
-    find_lex $P1300, "self"
-    find_lex $P1301, "$?CLASS"
-    getattribute $P1302, $P1300, $P1301, "@!multi_methods_to_incorporate"
-    unless_null $P1302, vivify_562
-    $P1302 = root_new ['parrot';'ResizablePMCArray']
-  vivify_562:
-    set $N1303, $P1302
-    set $I1304, $N1303
-    find_lex $P1305, "self"
-    find_lex $P1306, "$?CLASS"
-    getattribute $P1307, $P1305, $P1306, "@!multi_methods_to_incorporate"
-    unless_null $P1307, vivify_563
-    $P1307 = root_new ['parrot';'ResizablePMCArray']
-    setattribute $P1305, $P1306, "@!multi_methods_to_incorporate", $P1307
-  vivify_563:
-    set $P1307[$I1304], $P1299
-    find_lex $P1308, "$code_obj"
-    unless_null $P1308, vivify_564
-    new $P1308, "Undef"
-  vivify_564:
-.annotate 'line', 566
-    .return ($P1308)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "add_attribute"  :subid("93_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1310
-    .param pmc param_1311
-    .param pmc param_1312
-.annotate 'line', 579
-    .lex "self", param_1310
-    .lex "$obj", param_1311
-    .lex "$meta_attr", param_1312
-.annotate 'line', 580
-    new $P1313, "Undef"
-    .lex "$name", $P1313
-    find_lex $P1314, "$meta_attr"
-    unless_null $P1314, vivify_565
-    new $P1314, "Undef"
-  vivify_565:
-    $P1315 = $P1314."name"()
-    store_lex "$name", $P1315
-.annotate 'line', 581
-    find_lex $P1317, "$name"
-    unless_null $P1317, vivify_566
-    new $P1317, "Undef"
-  vivify_566:
-    find_lex $P1318, "self"
-    find_lex $P1319, "$?CLASS"
-    getattribute $P1320, $P1318, $P1319, "%!attributes"
-    unless_null $P1320, vivify_567
-    $P1320 = root_new ['parrot';'Hash']
-  vivify_567:
-    set $P1321, $P1320[$P1317]
-    unless_null $P1321, vivify_568
-    new $P1321, "Undef"
-  vivify_568:
-    unless $P1321, if_1316_end
-.annotate 'line', 582
-    new $P1322, "String"
-    assign $P1322, "This class already has an attribute named "
-    find_lex $P1323, "$name"
-    unless_null $P1323, vivify_569
-    new $P1323, "Undef"
-  vivify_569:
-    concat $P1324, $P1322, $P1323
-    die $P1324
-  if_1316_end:
-.annotate 'line', 584
-    find_lex $P1325, "$meta_attr"
-    unless_null $P1325, vivify_570
-    new $P1325, "Undef"
-  vivify_570:
-    find_lex $P1326, "$name"
-    unless_null $P1326, vivify_571
-    new $P1326, "Undef"
-  vivify_571:
-    find_lex $P1327, "self"
-    find_lex $P1328, "$?CLASS"
-    getattribute $P1329, $P1327, $P1328, "%!attributes"
-    unless_null $P1329, vivify_572
-    $P1329 = root_new ['parrot';'Hash']
-    setattribute $P1327, $P1328, "%!attributes", $P1329
-  vivify_572:
-    set $P1329[$P1326], $P1325
-.annotate 'line', 579
-    .return ($P1325)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "add_parent"  :subid("94_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1331
-    .param pmc param_1332
-    .param pmc param_1333
-.annotate 'line', 587
-    .const 'Sub' $P1345 = "95_1304456120.214" 
-    capture_lex $P1345
-    .lex "self", param_1331
-    .lex "$obj", param_1332
-    .lex "$parent", param_1333
-.annotate 'line', 588
-    find_lex $P1335, "self"
-    find_lex $P1336, "$?CLASS"
-    getattribute $P1337, $P1335, $P1336, "$!composed"
-    unless_null $P1337, vivify_573
-    new $P1337, "Undef"
-  vivify_573:
-    unless $P1337, if_1334_end
-.annotate 'line', 589
-    die "NQPClassHOW does not support adding parents after being composed."
-  if_1334_end:
-.annotate 'line', 591
-    find_lex $P1339, "self"
-    find_lex $P1340, "$?CLASS"
-    getattribute $P1341, $P1339, $P1340, "@!parents"
-    unless_null $P1341, vivify_574
-    $P1341 = root_new ['parrot';'ResizablePMCArray']
-  vivify_574:
-    defined $I1342, $P1341
-    unless $I1342, for_undef_575
-    iter $P1338, $P1341
-    new $P1357, 'ExceptionHandler'
-    set_label $P1357, loop1356_handler
-    $P1357."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P1357
-  loop1356_test:
-    unless $P1338, loop1356_done
-    shift $P1343, $P1338
-  loop1356_redo:
-    .const 'Sub' $P1345 = "95_1304456120.214" 
-    capture_lex $P1345
-    $P1345($P1343)
-  loop1356_next:
-    goto loop1356_test
-  loop1356_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1358, exception, 'type'
-    eq $P1358, .CONTROL_LOOP_NEXT, loop1356_next
-    eq $P1358, .CONTROL_LOOP_REDO, loop1356_redo
-  loop1356_done:
-    pop_eh 
-  for_undef_575:
-.annotate 'line', 596
-    find_lex $P1359, "$parent"
-    unless_null $P1359, vivify_579
-    new $P1359, "Undef"
-  vivify_579:
-    find_lex $P1360, "self"
-    find_lex $P1361, "$?CLASS"
-    getattribute $P1362, $P1360, $P1361, "@!parents"
-    unless_null $P1362, vivify_580
-    $P1362 = root_new ['parrot';'ResizablePMCArray']
-  vivify_580:
-    set $N1363, $P1362
-    set $I1364, $N1363
-    find_lex $P1365, "self"
-    find_lex $P1366, "$?CLASS"
-    getattribute $P1367, $P1365, $P1366, "@!parents"
-    unless_null $P1367, vivify_581
-    $P1367 = root_new ['parrot';'ResizablePMCArray']
-    setattribute $P1365, $P1366, "@!parents", $P1367
-  vivify_581:
-    set $P1367[$I1364], $P1359
-.annotate 'line', 587
-    .return ($P1359)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "_block1344"  :anon :subid("95_1304456120.214") :outer("94_1304456120.214")
-    .param pmc param_1346
-.annotate 'line', 591
-    .lex "$_", param_1346
-.annotate 'line', 592
-    find_lex $P1349, "$_"
-    unless_null $P1349, vivify_576
-    new $P1349, "Undef"
-  vivify_576:
-    find_lex $P1350, "$parent"
-    unless_null $P1350, vivify_577
-    new $P1350, "Undef"
-  vivify_577:
-    issame $I1351, $P1349, $P1350
-    if $I1351, if_1348
-    new $P1347, 'Integer'
-    set $P1347, $I1351
-    goto if_1348_end
-  if_1348:
-.annotate 'line', 593
-    new $P1352, "String"
-    assign $P1352, "Already have "
-    find_lex $P1353, "$parent"
-    unless_null $P1353, vivify_578
-    new $P1353, "Undef"
-  vivify_578:
-    concat $P1354, $P1352, $P1353
-    concat $P1355, $P1354, " as a parent class."
-    die $P1355
-  if_1348_end:
-.annotate 'line', 591
-    .return ($P1347)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "set_default_parent"  :subid("96_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1369
-    .param pmc param_1370
-    .param pmc param_1371
-.annotate 'line', 599
-    .lex "self", param_1369
-    .lex "$obj", param_1370
-    .lex "$parent", param_1371
-.annotate 'line', 600
-    find_lex $P1372, "$parent"
-    unless_null $P1372, vivify_582
-    new $P1372, "Undef"
-  vivify_582:
-    find_lex $P1373, "self"
-    find_lex $P1374, "$?CLASS"
-    setattribute $P1373, $P1374, "$!default_parent", $P1372
-.annotate 'line', 599
-    .return ($P1372)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "add_role"  :subid("97_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1376
-    .param pmc param_1377
-    .param pmc param_1378
-.annotate 'line', 603
-    .const 'Sub' $P1386 = "98_1304456120.214" 
-    capture_lex $P1386
-    .lex "self", param_1376
-    .lex "$obj", param_1377
-    .lex "$role", param_1378
-.annotate 'line', 604
-    find_lex $P1380, "self"
-    find_lex $P1381, "$?CLASS"
-    getattribute $P1382, $P1380, $P1381, "@!roles"
-    unless_null $P1382, vivify_583
-    $P1382 = root_new ['parrot';'ResizablePMCArray']
-  vivify_583:
-    defined $I1383, $P1382
-    unless $I1383, for_undef_584
-    iter $P1379, $P1382
-    new $P1398, 'ExceptionHandler'
-    set_label $P1398, loop1397_handler
-    $P1398."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P1398
-  loop1397_test:
-    unless $P1379, loop1397_done
-    shift $P1384, $P1379
-  loop1397_redo:
-    .const 'Sub' $P1386 = "98_1304456120.214" 
-    capture_lex $P1386
-    $P1386($P1384)
-  loop1397_next:
-    goto loop1397_test
-  loop1397_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1399, exception, 'type'
-    eq $P1399, .CONTROL_LOOP_NEXT, loop1397_next
-    eq $P1399, .CONTROL_LOOP_REDO, loop1397_redo
-  loop1397_done:
-    pop_eh 
-  for_undef_584:
-.annotate 'line', 609
-    find_lex $P1400, "$role"
-    unless_null $P1400, vivify_588
-    new $P1400, "Undef"
-  vivify_588:
-    find_lex $P1401, "self"
-    find_lex $P1402, "$?CLASS"
-    getattribute $P1403, $P1401, $P1402, "@!roles"
-    unless_null $P1403, vivify_589
-    $P1403 = root_new ['parrot';'ResizablePMCArray']
-  vivify_589:
-    set $N1404, $P1403
-    set $I1405, $N1404
-    find_lex $P1406, "self"
-    find_lex $P1407, "$?CLASS"
-    getattribute $P1408, $P1406, $P1407, "@!roles"
-    unless_null $P1408, vivify_590
-    $P1408 = root_new ['parrot';'ResizablePMCArray']
-    setattribute $P1406, $P1407, "@!roles", $P1408
-  vivify_590:
-    set $P1408[$I1405], $P1400
-.annotate 'line', 603
-    .return ($P1400)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "_block1385"  :anon :subid("98_1304456120.214") :outer("97_1304456120.214")
-    .param pmc param_1387
-.annotate 'line', 604
-    .lex "$_", param_1387
-.annotate 'line', 605
-    find_lex $P1390, "$_"
-    unless_null $P1390, vivify_585
-    new $P1390, "Undef"
-  vivify_585:
-    find_lex $P1391, "$role"
-    unless_null $P1391, vivify_586
-    new $P1391, "Undef"
-  vivify_586:
-    issame $I1392, $P1390, $P1391
-    if $I1392, if_1389
-    new $P1388, 'Integer'
-    set $P1388, $I1392
-    goto if_1389_end
-  if_1389:
-.annotate 'line', 606
-    new $P1393, "String"
-    assign $P1393, "The role "
-    find_lex $P1394, "$role"
-    unless_null $P1394, vivify_587
-    new $P1394, "Undef"
-  vivify_587:
-    concat $P1395, $P1393, $P1394
-    concat $P1396, $P1395, " has already been added."
-    die $P1396
-  if_1389_end:
-.annotate 'line', 604
-    .return ($P1388)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "add_parrot_vtable_mapping"  :subid("99_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1410
-    .param pmc param_1411
-    .param pmc param_1412
-    .param pmc param_1413
-.annotate 'line', 612
-    .lex "self", param_1410
-    .lex "$obj", param_1411
-    .lex "$name", param_1412
-    .lex "$meth", param_1413
-.annotate 'line', 613
-    find_lex $P1415, "$name"
-    unless_null $P1415, vivify_591
-    new $P1415, "Undef"
-  vivify_591:
-    find_lex $P1416, "self"
-    find_lex $P1417, "$?CLASS"
-    getattribute $P1418, $P1416, $P1417, "%!parrot_vtable_mapping"
-    unless_null $P1418, vivify_592
-    $P1418 = root_new ['parrot';'Hash']
-  vivify_592:
-    set $P1419, $P1418[$P1415]
-    unless_null $P1419, vivify_593
-    new $P1419, "Undef"
-  vivify_593:
-    defined $I1420, $P1419
-    unless $I1420, if_1414_end
-.annotate 'line', 614
-    new $P1421, "String"
-    assign $P1421, "Class '"
-    find_lex $P1422, "self"
-    find_lex $P1423, "$?CLASS"
-    getattribute $P1424, $P1422, $P1423, "$!name"
-    unless_null $P1424, vivify_594
-    new $P1424, "Undef"
-  vivify_594:
-    concat $P1425, $P1421, $P1424
-    concat $P1426, $P1425, "' already has a Parrot v-table override for '"
-    find_lex $P1427, "$name"
-    unless_null $P1427, vivify_595
-    new $P1427, "Undef"
-  vivify_595:
-    concat $P1428, $P1426, $P1427
-.annotate 'line', 615
-    concat $P1429, $P1428, "'"
-.annotate 'line', 616
-    die $P1429
-  if_1414_end:
-.annotate 'line', 618
-    find_lex $P1430, "$meth"
-    unless_null $P1430, vivify_596
-    new $P1430, "Undef"
-  vivify_596:
-    find_lex $P1431, "$name"
-    unless_null $P1431, vivify_597
-    new $P1431, "Undef"
-  vivify_597:
-    find_lex $P1432, "self"
-    find_lex $P1433, "$?CLASS"
-    getattribute $P1434, $P1432, $P1433, "%!parrot_vtable_mapping"
-    unless_null $P1434, vivify_598
-    $P1434 = root_new ['parrot';'Hash']
-    setattribute $P1432, $P1433, "%!parrot_vtable_mapping", $P1434
-  vivify_598:
-    set $P1434[$P1431], $P1430
-.annotate 'line', 612
-    .return ($P1430)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "compose"  :subid("100_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1436
-    .param pmc param_1437
-.annotate 'line', 621
-    .const 'Sub' $P1526 = "103_1304456120.214" 
-    capture_lex $P1526
-    .const 'Sub' $P1443 = "101_1304456120.214" 
-    capture_lex $P1443
-    .lex "self", param_1436
-    .lex "$obj", param_1437
-.annotate 'line', 625
-    find_lex $P1439, "self"
-    find_lex $P1440, "$?CLASS"
-    getattribute $P1441, $P1439, $P1440, "@!roles"
-    unless_null $P1441, vivify_599
-    $P1441 = root_new ['parrot';'ResizablePMCArray']
-  vivify_599:
-    unless $P1441, if_1438_end
-    .const 'Sub' $P1443 = "101_1304456120.214" 
-    capture_lex $P1443
-    $P1443()
-  if_1438_end:
-.annotate 'line', 638
-    find_lex $P1491, "self"
-    find_lex $P1492, "$?CLASS"
-    getattribute $P1493, $P1491, $P1492, "@!parents"
-    unless_null $P1493, vivify_616
-    $P1493 = root_new ['parrot';'ResizablePMCArray']
-  vivify_616:
-    set $N1494, $P1493
-    iseq $I1495, $N1494, 0.0
-    if $I1495, if_1490
-    new $P1489, 'Integer'
-    set $P1489, $I1495
-    goto if_1490_end
-  if_1490:
-    find_lex $P1496, "self"
-    find_lex $P1497, "$?CLASS"
-    getattribute $P1498, $P1496, $P1497, "$!name"
-    unless_null $P1498, vivify_617
-    new $P1498, "Undef"
-  vivify_617:
-    set $S1499, $P1498
-    isne $I1500, $S1499, "NQPMu"
-    new $P1489, 'Integer'
-    set $P1489, $I1500
-  if_1490_end:
-    unless $P1489, if_1488_end
-.annotate 'line', 639
-    find_lex $P1501, "self"
-    find_lex $P1502, "$obj"
-    unless_null $P1502, vivify_618
-    new $P1502, "Undef"
-  vivify_618:
-    find_lex $P1503, "self"
-    find_lex $P1504, "$?CLASS"
-    getattribute $P1505, $P1503, $P1504, "$!default_parent"
-    unless_null $P1505, vivify_619
-    new $P1505, "Undef"
-  vivify_619:
-    $P1501."add_parent"($P1502, $P1505)
-  if_1488_end:
-.annotate 'line', 644
-    find_lex $P1507, "self"
-    find_lex $P1508, "$?CLASS"
-    getattribute $P1509, $P1507, $P1508, "$!composed"
-    unless_null $P1509, vivify_620
-    new $P1509, "Undef"
-  vivify_620:
-    if $P1509, unless_1506_end
-.annotate 'line', 645
-    find_lex $P1510, "$obj"
-    unless_null $P1510, vivify_621
-    new $P1510, "Undef"
-  vivify_621:
-    $P1511 = "compute_c3_mro"($P1510)
-    find_lex $P1512, "self"
-    find_lex $P1513, "$?CLASS"
-    setattribute $P1512, $P1513, "@!mro", $P1511
-.annotate 'line', 646
-    new $P1514, "Integer"
-    assign $P1514, 1
-    find_lex $P1515, "self"
-    find_lex $P1516, "$?CLASS"
-    setattribute $P1515, $P1516, "$!composed", $P1514
-  unless_1506_end:
-.annotate 'line', 650
-    find_lex $P1517, "self"
-    find_lex $P1518, "$obj"
-    unless_null $P1518, vivify_622
-    new $P1518, "Undef"
-  vivify_622:
-    $P1517."incorporate_multi_candidates"($P1518)
-.annotate 'line', 653
-    find_lex $P1520, "self"
-    find_lex $P1521, "$obj"
-    unless_null $P1521, vivify_623
-    new $P1521, "Undef"
-  vivify_623:
-    $P1522 = $P1520."attributes"($P1521, "0" :named("local"))
-    defined $I1523, $P1522
-    unless $I1523, for_undef_624
-    iter $P1519, $P1522
-    new $P1532, 'ExceptionHandler'
-    set_label $P1532, loop1531_handler
-    $P1532."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P1532
-  loop1531_test:
-    unless $P1519, loop1531_done
-    shift $P1524, $P1519
-  loop1531_redo:
-    .const 'Sub' $P1526 = "103_1304456120.214" 
-    capture_lex $P1526
-    $P1526($P1524)
-  loop1531_next:
-    goto loop1531_test
-  loop1531_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1533, exception, 'type'
-    eq $P1533, .CONTROL_LOOP_NEXT, loop1531_next
-    eq $P1533, .CONTROL_LOOP_REDO, loop1531_redo
-  loop1531_done:
-    pop_eh 
-  for_undef_624:
-.annotate 'line', 656
-    find_lex $P1534, "self"
-    find_lex $P1535, "$obj"
-    unless_null $P1535, vivify_627
-    new $P1535, "Undef"
-  vivify_627:
-    $P1534."publish_type_cache"($P1535)
-.annotate 'line', 657
-    find_lex $P1536, "self"
-    find_lex $P1537, "$obj"
-    unless_null $P1537, vivify_628
-    new $P1537, "Undef"
-  vivify_628:
-    $P1536."publish_method_cache"($P1537)
-.annotate 'line', 660
-    find_lex $P1538, "self"
-    find_lex $P1539, "$obj"
-    unless_null $P1539, vivify_629
-    new $P1539, "Undef"
-  vivify_629:
-    $P1538."publish_parrot_vtable_mapping"($P1539)
-    find_lex $P1540, "$obj"
-    unless_null $P1540, vivify_630
-    new $P1540, "Undef"
-  vivify_630:
-.annotate 'line', 621
-    .return ($P1540)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "_block1442"  :anon :subid("101_1304456120.214") :outer("100_1304456120.214")
-.annotate 'line', 625
-    .const 'Sub' $P1453 = "102_1304456120.214" 
-    capture_lex $P1453
-.annotate 'line', 626
-    $P1444 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@instantiated_roles", $P1444
-.annotate 'line', 625
-    find_lex $P1445, "@instantiated_roles"
-    unless_null $P1445, vivify_600
-    $P1445 = root_new ['parrot';'ResizablePMCArray']
-  vivify_600:
-.annotate 'line', 627
-    find_lex $P1447, "self"
-    find_lex $P1448, "$?CLASS"
-    getattribute $P1449, $P1447, $P1448, "@!roles"
-    unless_null $P1449, vivify_601
-    $P1449 = root_new ['parrot';'ResizablePMCArray']
-  vivify_601:
-    defined $I1450, $P1449
-    unless $I1450, for_undef_602
-    iter $P1446, $P1449
-    new $P1482, 'ExceptionHandler'
-    set_label $P1482, loop1481_handler
-    $P1482."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P1482
-  loop1481_test:
-    unless $P1446, loop1481_done
-    shift $P1451, $P1446
-  loop1481_redo:
-    .const 'Sub' $P1453 = "102_1304456120.214" 
-    capture_lex $P1453
-    $P1453($P1451)
-  loop1481_next:
-    goto loop1481_test
-  loop1481_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1483, exception, 'type'
-    eq $P1483, .CONTROL_LOOP_NEXT, loop1481_next
-    eq $P1483, .CONTROL_LOOP_REDO, loop1481_redo
-  loop1481_done:
-    pop_eh 
-  for_undef_602:
-.annotate 'line', 633
-    find_lex $P1484, "RoleToClassApplier"
-    find_lex $P1485, "$obj"
-    unless_null $P1485, vivify_614
-    new $P1485, "Undef"
-  vivify_614:
-    find_lex $P1486, "@instantiated_roles"
-    unless_null $P1486, vivify_615
-    $P1486 = root_new ['parrot';'ResizablePMCArray']
-  vivify_615:
-    $P1487 = $P1484."apply"($P1485, $P1486)
-.annotate 'line', 625
-    .return ($P1487)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "_block1452"  :anon :subid("102_1304456120.214") :outer("101_1304456120.214")
-    .param pmc param_1455
-.annotate 'line', 628
-    new $P1454, "Undef"
-    .lex "$ins", $P1454
-    .lex "$_", param_1455
-    find_lex $P1456, "$_"
-    unless_null $P1456, vivify_603
-    new $P1456, "Undef"
-  vivify_603:
-    get_how $P1457, $P1456
-    find_lex $P1458, "$_"
-    unless_null $P1458, vivify_604
-    new $P1458, "Undef"
-  vivify_604:
-    find_lex $P1459, "$obj"
-    unless_null $P1459, vivify_605
-    new $P1459, "Undef"
-  vivify_605:
-    $P1460 = $P1457."instantiate"($P1458, $P1459)
-    store_lex "$ins", $P1460
-.annotate 'line', 629
-    find_lex $P1461, "@instantiated_roles"
-    unless_null $P1461, vivify_606
-    $P1461 = root_new ['parrot';'ResizablePMCArray']
-  vivify_606:
-    find_lex $P1462, "$ins"
-    unless_null $P1462, vivify_607
-    new $P1462, "Undef"
-  vivify_607:
-    $P1461."push"($P1462)
-.annotate 'line', 630
-    find_lex $P1463, "$_"
-    unless_null $P1463, vivify_608
-    new $P1463, "Undef"
-  vivify_608:
-    find_lex $P1464, "self"
-    find_lex $P1465, "$?CLASS"
-    getattribute $P1466, $P1464, $P1465, "@!done"
-    unless_null $P1466, vivify_609
-    $P1466 = root_new ['parrot';'ResizablePMCArray']
-  vivify_609:
-    set $N1467, $P1466
-    set $I1468, $N1467
-    find_lex $P1469, "self"
-    find_lex $P1470, "$?CLASS"
-    getattribute $P1471, $P1469, $P1470, "@!done"
-    unless_null $P1471, vivify_610
-    $P1471 = root_new ['parrot';'ResizablePMCArray']
-    setattribute $P1469, $P1470, "@!done", $P1471
-  vivify_610:
-    set $P1471[$I1468], $P1463
-.annotate 'line', 631
-    find_lex $P1472, "$ins"
-    unless_null $P1472, vivify_611
-    new $P1472, "Undef"
-  vivify_611:
-    find_lex $P1473, "self"
-    find_lex $P1474, "$?CLASS"
-    getattribute $P1475, $P1473, $P1474, "@!done"
-    unless_null $P1475, vivify_612
-    $P1475 = root_new ['parrot';'ResizablePMCArray']
-  vivify_612:
-    set $N1476, $P1475
-    set $I1477, $N1476
-    find_lex $P1478, "self"
-    find_lex $P1479, "$?CLASS"
-    getattribute $P1480, $P1478, $P1479, "@!done"
-    unless_null $P1480, vivify_613
-    $P1480 = root_new ['parrot';'ResizablePMCArray']
-    setattribute $P1478, $P1479, "@!done", $P1480
-  vivify_613:
-    set $P1480[$I1477], $P1472
-.annotate 'line', 627
-    .return ($P1472)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "_block1525"  :anon :subid("103_1304456120.214") :outer("100_1304456120.214")
-    .param pmc param_1527
-.annotate 'line', 653
-    .lex "$_", param_1527
-    find_lex $P1528, "$_"
-    unless_null $P1528, vivify_625
-    new $P1528, "Undef"
-  vivify_625:
-    find_lex $P1529, "$obj"
-    unless_null $P1529, vivify_626
-    new $P1529, "Undef"
-  vivify_626:
-    $P1530 = $P1528."compose"($P1529)
-    .return ($P1530)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "incorporate_multi_candidates"  :subid("104_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1542
-    .param pmc param_1543
-.annotate 'line', 665
-    .const 'Sub' $P1558 = "105_1304456120.214" 
-    capture_lex $P1558
-    .lex "self", param_1542
-    .lex "$obj", param_1543
-.annotate 'line', 666
-    new $P1544, "Undef"
-    .lex "$num_todo", $P1544
-.annotate 'line', 667
-    new $P1545, "Undef"
-    .lex "$i", $P1545
-.annotate 'line', 666
-    find_lex $P1546, "self"
-    find_lex $P1547, "$?CLASS"
-    getattribute $P1548, $P1546, $P1547, "@!multi_methods_to_incorporate"
-    unless_null $P1548, vivify_631
-    $P1548 = root_new ['parrot';'ResizablePMCArray']
-  vivify_631:
-    set $N1549, $P1548
-    new $P1550, 'Float'
-    set $P1550, $N1549
-    store_lex "$num_todo", $P1550
-.annotate 'line', 667
-    new $P1551, "Integer"
-    assign $P1551, 0
-    store_lex "$i", $P1551
-.annotate 'line', 668
-    new $P1678, 'ExceptionHandler'
-    set_label $P1678, loop1677_handler
-    $P1678."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P1678
-  loop1677_test:
-    find_lex $P1552, "$i"
-    unless_null $P1552, vivify_632
-    new $P1552, "Undef"
-  vivify_632:
-    set $N1553, $P1552
-    find_lex $P1554, "$num_todo"
-    unless_null $P1554, vivify_633
-    new $P1554, "Undef"
-  vivify_633:
-    set $N1555, $P1554
-    isne $I1556, $N1553, $N1555
-    unless $I1556, loop1677_done
-  loop1677_redo:
-    .const 'Sub' $P1558 = "105_1304456120.214" 
-    capture_lex $P1558
-    $P1558()
-  loop1677_next:
-    goto loop1677_test
-  loop1677_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1679, exception, 'type'
-    eq $P1679, .CONTROL_LOOP_NEXT, loop1677_next
-    eq $P1679, .CONTROL_LOOP_REDO, loop1677_redo
-  loop1677_done:
-    pop_eh 
-.annotate 'line', 665
-    .return ($I1556)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "_block1557"  :anon :subid("105_1304456120.214") :outer("104_1304456120.214")
-.annotate 'line', 668
-    .const 'Sub' $P1594 = "106_1304456120.214" 
-    capture_lex $P1594
-.annotate 'line', 670
-    new $P1559, "Undef"
-    .lex "$name", $P1559
-.annotate 'line', 671
-    new $P1560, "Undef"
-    .lex "$code", $P1560
-.annotate 'line', 675
-    new $P1561, "Undef"
-    .lex "$dispatcher", $P1561
-.annotate 'line', 670
-    find_lex $P1562, "$i"
-    unless_null $P1562, vivify_634
-    new $P1562, "Undef"
-  vivify_634:
-    set $I1563, $P1562
-    find_lex $P1564, "self"
-    find_lex $P1565, "$?CLASS"
-    getattribute $P1566, $P1564, $P1565, "@!multi_methods_to_incorporate"
-    unless_null $P1566, vivify_635
-    $P1566 = root_new ['parrot';'ResizablePMCArray']
-  vivify_635:
-    set $P1567, $P1566[$I1563]
-    unless_null $P1567, vivify_636
-    $P1567 = root_new ['parrot';'Hash']
-  vivify_636:
-    set $P1568, $P1567["name"]
-    unless_null $P1568, vivify_637
-    new $P1568, "Undef"
-  vivify_637:
-    store_lex "$name", $P1568
-.annotate 'line', 671
-    find_lex $P1569, "$i"
-    unless_null $P1569, vivify_638
-    new $P1569, "Undef"
-  vivify_638:
-    set $I1570, $P1569
-    find_lex $P1571, "self"
-    find_lex $P1572, "$?CLASS"
-    getattribute $P1573, $P1571, $P1572, "@!multi_methods_to_incorporate"
-    unless_null $P1573, vivify_639
-    $P1573 = root_new ['parrot';'ResizablePMCArray']
-  vivify_639:
-    set $P1574, $P1573[$I1570]
-    unless_null $P1574, vivify_640
-    $P1574 = root_new ['parrot';'Hash']
-  vivify_640:
-    set $P1575, $P1574["code"]
-    unless_null $P1575, vivify_641
-    new $P1575, "Undef"
-  vivify_641:
-    store_lex "$code", $P1575
-.annotate 'line', 675
-    find_lex $P1576, "$name"
-    unless_null $P1576, vivify_642
-    new $P1576, "Undef"
-  vivify_642:
-    find_lex $P1577, "self"
-    find_lex $P1578, "$?CLASS"
-    getattribute $P1579, $P1577, $P1578, "%!methods"
-    unless_null $P1579, vivify_643
-    $P1579 = root_new ['parrot';'Hash']
-  vivify_643:
-    set $P1580, $P1579[$P1576]
-    unless_null $P1580, vivify_644
-    new $P1580, "Undef"
-  vivify_644:
-    store_lex "$dispatcher", $P1580
-.annotate 'line', 676
-    find_lex $P1582, "$dispatcher"
-    unless_null $P1582, vivify_645
-    new $P1582, "Undef"
-  vivify_645:
-    defined $I1583, $P1582
-    if $I1583, if_1581
-.annotate 'line', 686
-    .const 'Sub' $P1594 = "106_1304456120.214" 
-    capture_lex $P1594
-    $P1594()
-    goto if_1581_end
-  if_1581:
-.annotate 'line', 679
-    find_lex $P1585, "$dispatcher"
-    unless_null $P1585, vivify_676
-    new $P1585, "Undef"
-  vivify_676:
-    is_dispatcher $I1586, $P1585
-    if $I1586, if_1584
-.annotate 'line', 683
-    new $P1589, 'String'
-    set $P1589, "Cannot have a multi candidate for "
-    find_lex $P1590, "$name"
-    unless_null $P1590, vivify_677
-    new $P1590, "Undef"
-  vivify_677:
-    concat $P1591, $P1589, $P1590
-    concat $P1592, $P1591, " when an only method is also in the class"
-    die $P1592
-.annotate 'line', 682
-    goto if_1584_end
-  if_1584:
-.annotate 'line', 680
-    find_lex $P1587, "$dispatcher"
-    unless_null $P1587, vivify_678
-    new $P1587, "Undef"
-  vivify_678:
-    find_lex $P1588, "$code"
-    unless_null $P1588, vivify_679
-    new $P1588, "Undef"
-  vivify_679:
-    push_dispatchee $P1587, $P1588
-  if_1584_end:
-  if_1581_end:
-.annotate 'line', 719
-    find_lex $P1675, "$i"
-    unless_null $P1675, vivify_680
-    new $P1675, "Undef"
-  vivify_680:
-    add $P1676, $P1675, 1
-    store_lex "$i", $P1676
-.annotate 'line', 668
-    .return ($P1676)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "_block1593"  :anon :subid("106_1304456120.214") :outer("105_1304456120.214")
-.annotate 'line', 686
-    .const 'Sub' $P1611 = "107_1304456120.214" 
-    capture_lex $P1611
-.annotate 'line', 688
-    new $P1595, "Undef"
-    .lex "$j", $P1595
-.annotate 'line', 689
-    new $P1596, "Undef"
-    .lex "$found", $P1596
-.annotate 'line', 688
-    new $P1597, "Integer"
-    assign $P1597, 1
-    store_lex "$j", $P1597
-.annotate 'line', 689
-    new $P1598, "Integer"
-    assign $P1598, 0
-    store_lex "$found", $P1598
-.annotate 'line', 690
-    new $P1666, 'ExceptionHandler'
-    set_label $P1666, loop1665_handler
-    $P1666."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P1666
-  loop1665_test:
-    find_lex $P1601, "$j"
-    unless_null $P1601, vivify_646
-    new $P1601, "Undef"
-  vivify_646:
-    set $N1602, $P1601
-    find_lex $P1603, "self"
-    find_lex $P1604, "$?CLASS"
-    getattribute $P1605, $P1603, $P1604, "@!mro"
-    unless_null $P1605, vivify_647
-    $P1605 = root_new ['parrot';'ResizablePMCArray']
-  vivify_647:
-    set $N1606, $P1605
-    isne $I1607, $N1602, $N1606
-    if $I1607, if_1600
-    new $P1599, 'Integer'
-    set $P1599, $I1607
-    goto if_1600_end
-  if_1600:
-    find_lex $P1608, "$found"
-    unless_null $P1608, vivify_648
-    new $P1608, "Undef"
-  vivify_648:
-    isfalse $I1609, $P1608
-    new $P1599, 'Integer'
-    set $P1599, $I1609
-  if_1600_end:
-    unless $P1599, loop1665_done
-  loop1665_redo:
-    .const 'Sub' $P1611 = "107_1304456120.214" 
-    capture_lex $P1611
-    $P1611()
-  loop1665_next:
-    goto loop1665_test
-  loop1665_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1667, exception, 'type'
-    eq $P1667, .CONTROL_LOOP_NEXT, loop1665_next
-    eq $P1667, .CONTROL_LOOP_REDO, loop1665_redo
-  loop1665_done:
-    pop_eh 
-.annotate 'line', 715
-    find_lex $P1670, "$found"
-    unless_null $P1670, vivify_674
-    new $P1670, "Undef"
-  vivify_674:
-    unless $P1670, unless_1669
-    set $P1668, $P1670
-    goto unless_1669_end
-  unless_1669:
-.annotate 'line', 716
-    new $P1671, 'String'
-    set $P1671, "Could not find a proto for multi "
-    find_lex $P1672, "$name"
-    unless_null $P1672, vivify_675
-    new $P1672, "Undef"
-  vivify_675:
-    concat $P1673, $P1671, $P1672
-    concat $P1674, $P1673, ", and proto generation is NYI"
-    die $P1674
-  unless_1669_end:
-.annotate 'line', 686
-    .return ($P1668)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "_block1610"  :anon :subid("107_1304456120.214") :outer("106_1304456120.214")
-.annotate 'line', 690
-    .const 'Sub' $P1635 = "108_1304456120.214" 
-    capture_lex $P1635
-.annotate 'line', 691
-    new $P1612, "Undef"
-    .lex "$parent", $P1612
-.annotate 'line', 692
-    $P1613 = root_new ['parrot';'Hash']
-    .lex "%meths", $P1613
-.annotate 'line', 693
-    new $P1614, "Undef"
-    .lex "$dispatcher", $P1614
-.annotate 'line', 691
-    find_lex $P1615, "$j"
-    unless_null $P1615, vivify_649
-    new $P1615, "Undef"
-  vivify_649:
-    set $I1616, $P1615
-    find_lex $P1617, "self"
-    find_lex $P1618, "$?CLASS"
-    getattribute $P1619, $P1617, $P1618, "@!mro"
-    unless_null $P1619, vivify_650
-    $P1619 = root_new ['parrot';'ResizablePMCArray']
-  vivify_650:
-    set $P1620, $P1619[$I1616]
-    unless_null $P1620, vivify_651
-    new $P1620, "Undef"
-  vivify_651:
-    store_lex "$parent", $P1620
-.annotate 'line', 692
-    find_lex $P1621, "$parent"
-    unless_null $P1621, vivify_652
-    new $P1621, "Undef"
-  vivify_652:
-    get_how $P1622, $P1621
-    find_lex $P1623, "$parent"
-    unless_null $P1623, vivify_653
-    new $P1623, "Undef"
-  vivify_653:
-    $P1624 = $P1622."method_table"($P1623)
-    store_lex "%meths", $P1624
-.annotate 'line', 693
-    find_lex $P1625, "$name"
-    unless_null $P1625, vivify_654
-    new $P1625, "Undef"
-  vivify_654:
-    find_lex $P1626, "%meths"
-    unless_null $P1626, vivify_655
-    $P1626 = root_new ['parrot';'Hash']
-  vivify_655:
-    set $P1627, $P1626[$P1625]
-    unless_null $P1627, vivify_656
-    new $P1627, "Undef"
-  vivify_656:
-    store_lex "$dispatcher", $P1627
-.annotate 'line', 694
-    find_lex $P1629, "$dispatcher"
-    unless_null $P1629, vivify_657
-    new $P1629, "Undef"
-  vivify_657:
-    defined $I1630, $P1629
-    unless $I1630, if_1628_end
-.annotate 'line', 697
-    find_lex $P1632, "$dispatcher"
-    unless_null $P1632, vivify_658
-    new $P1632, "Undef"
-  vivify_658:
-    is_dispatcher $I1633, $P1632
-    if $I1633, if_1631
-.annotate 'line', 710
-    new $P1659, 'String'
-    set $P1659, "Could not find a proto for multi "
-    find_lex $P1660, "$name"
-    unless_null $P1660, vivify_659
-    new $P1660, "Undef"
-  vivify_659:
-    concat $P1661, $P1659, $P1660
-    concat $P1662, $P1661, " (it may exist, but an only is hiding it if so)"
-    die $P1662
-.annotate 'line', 709
-    goto if_1631_end
-  if_1631:
-.annotate 'line', 697
-    .const 'Sub' $P1635 = "108_1304456120.214" 
-    capture_lex $P1635
-    $P1635()
-  if_1631_end:
-  if_1628_end:
-.annotate 'line', 713
-    find_lex $P1663, "$j"
-    unless_null $P1663, vivify_673
-    new $P1663, "Undef"
-  vivify_673:
-    add $P1664, $P1663, 1
-    store_lex "$j", $P1664
-.annotate 'line', 690
-    .return ($P1664)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "_block1634"  :anon :subid("108_1304456120.214") :outer("107_1304456120.214")
-.annotate 'line', 699
-    $P1636 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@new_dispatchees", $P1636
-.annotate 'line', 701
-    new $P1637, "Undef"
-    .lex "$new_disp", $P1637
-.annotate 'line', 702
-    new $P1638, "Undef"
-    .lex "$clone_callback", $P1638
-.annotate 'line', 697
-    find_lex $P1639, "@new_dispatchees"
-    unless_null $P1639, vivify_660
-    $P1639 = root_new ['parrot';'ResizablePMCArray']
-  vivify_660:
-.annotate 'line', 700
-    find_lex $P1640, "$code"
-    unless_null $P1640, vivify_661
-    new $P1640, "Undef"
-  vivify_661:
-    find_lex $P1641, "@new_dispatchees"
-    unless_null $P1641, vivify_662
-    $P1641 = root_new ['parrot';'ResizablePMCArray']
-    store_lex "@new_dispatchees", $P1641
-  vivify_662:
-    set $P1641[0], $P1640
-.annotate 'line', 701
-    find_lex $P1642, "$dispatcher"
-    unless_null $P1642, vivify_663
-    new $P1642, "Undef"
-  vivify_663:
-    find_lex $P1643, "@new_dispatchees"
-    unless_null $P1643, vivify_664
-    $P1643 = root_new ['parrot';'ResizablePMCArray']
-  vivify_664:
-    create_dispatch_and_add_candidates $P1644, $P1642, $P1643
-    store_lex "$new_disp", $P1644
-.annotate 'line', 702
-    find_lex $P1645, "$dispatcher"
-    unless_null $P1645, vivify_665
-    new $P1645, "Undef"
-  vivify_665:
-    getprop $P1646, "CLONE_CALLBACK", $P1645
-    store_lex "$clone_callback", $P1646
-.annotate 'line', 703
-    find_lex $P1648, "$clone_callback"
-    unless_null $P1648, vivify_666
-    new $P1648, "Undef"
-  vivify_666:
-    defined $I1649, $P1648
-    unless $I1649, if_1647_end
-.annotate 'line', 704
-    find_lex $P1650, "$clone_callback"
-    unless_null $P1650, vivify_667
-    new $P1650, "Undef"
-  vivify_667:
-    find_lex $P1651, "$dispatcher"
-    unless_null $P1651, vivify_668
-    new $P1651, "Undef"
-  vivify_668:
-    find_lex $P1652, "$new_disp"
-    unless_null $P1652, vivify_669
-    new $P1652, "Undef"
-  vivify_669:
-    $P1650($P1651, $P1652)
-  if_1647_end:
-.annotate 'line', 706
-    find_lex $P1653, "$new_disp"
-    unless_null $P1653, vivify_670
-    new $P1653, "Undef"
-  vivify_670:
-    find_lex $P1654, "$name"
-    unless_null $P1654, vivify_671
-    new $P1654, "Undef"
-  vivify_671:
-    find_lex $P1655, "self"
-    find_lex $P1656, "$?CLASS"
-    getattribute $P1657, $P1655, $P1656, "%!methods"
-    unless_null $P1657, vivify_672
-    $P1657 = root_new ['parrot';'Hash']
-    setattribute $P1655, $P1656, "%!methods", $P1657
-  vivify_672:
-    set $P1657[$P1654], $P1653
-.annotate 'line', 707
-    new $P1658, "Integer"
-    assign $P1658, 1
-    store_lex "$found", $P1658
-.annotate 'line', 697
-    .return ($P1658)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "publish_type_cache"  :subid("109_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1683
-    .param pmc param_1684
-.annotate 'line', 812
-    .const 'Sub' $P1709 = "111_1304456120.214" 
-    capture_lex $P1709
-    .const 'Sub' $P1694 = "110_1304456120.214" 
-    capture_lex $P1694
-    .lex "self", param_1683
-    .lex "$obj", param_1684
-.annotate 'line', 813
-    $P1685 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@tc", $P1685
-.annotate 'line', 812
-    find_lex $P1686, "@tc"
-    unless_null $P1686, vivify_681
-    $P1686 = root_new ['parrot';'ResizablePMCArray']
-  vivify_681:
-.annotate 'line', 814
-    find_lex $P1688, "self"
-    find_lex $P1689, "$?CLASS"
-    getattribute $P1690, $P1688, $P1689, "@!mro"
-    unless_null $P1690, vivify_682
-    $P1690 = root_new ['parrot';'ResizablePMCArray']
-  vivify_682:
-    defined $I1691, $P1690
-    unless $I1691, for_undef_683
-    iter $P1687, $P1690
-    new $P1700, 'ExceptionHandler'
-    set_label $P1700, loop1699_handler
-    $P1700."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P1700
-  loop1699_test:
-    unless $P1687, loop1699_done
-    shift $P1692, $P1687
-  loop1699_redo:
-    .const 'Sub' $P1694 = "110_1304456120.214" 
-    capture_lex $P1694
-    $P1694($P1692)
-  loop1699_next:
-    goto loop1699_test
-  loop1699_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1701, exception, 'type'
-    eq $P1701, .CONTROL_LOOP_NEXT, loop1699_next
-    eq $P1701, .CONTROL_LOOP_REDO, loop1699_redo
-  loop1699_done:
-    pop_eh 
-  for_undef_683:
-.annotate 'line', 815
-    find_lex $P1703, "self"
-    find_lex $P1704, "$?CLASS"
-    getattribute $P1705, $P1703, $P1704, "@!done"
-    unless_null $P1705, vivify_686
-    $P1705 = root_new ['parrot';'ResizablePMCArray']
-  vivify_686:
-    defined $I1706, $P1705
-    unless $I1706, for_undef_687
-    iter $P1702, $P1705
-    new $P1715, 'ExceptionHandler'
-    set_label $P1715, loop1714_handler
-    $P1715."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P1715
-  loop1714_test:
-    unless $P1702, loop1714_done
-    shift $P1707, $P1702
-  loop1714_redo:
-    .const 'Sub' $P1709 = "111_1304456120.214" 
-    capture_lex $P1709
-    $P1709($P1707)
-  loop1714_next:
-    goto loop1714_test
-  loop1714_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1716, exception, 'type'
-    eq $P1716, .CONTROL_LOOP_NEXT, loop1714_next
-    eq $P1716, .CONTROL_LOOP_REDO, loop1714_redo
-  loop1714_done:
-    pop_eh 
-  for_undef_687:
-.annotate 'line', 816
-    find_lex $P1717, "$obj"
-    unless_null $P1717, vivify_690
-    new $P1717, "Undef"
-  vivify_690:
-    find_lex $P1718, "@tc"
-    unless_null $P1718, vivify_691
-    $P1718 = root_new ['parrot';'ResizablePMCArray']
-  vivify_691:
-    publish_type_check_cache $P1717, $P1718
-.annotate 'line', 812
-    .return ()
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "_block1693"  :anon :subid("110_1304456120.214") :outer("109_1304456120.214")
-    .param pmc param_1695
-.annotate 'line', 814
-    .lex "$_", param_1695
-    find_lex $P1696, "@tc"
-    unless_null $P1696, vivify_684
-    $P1696 = root_new ['parrot';'ResizablePMCArray']
-  vivify_684:
-    find_lex $P1697, "$_"
-    unless_null $P1697, vivify_685
-    new $P1697, "Undef"
-  vivify_685:
-    $P1698 = $P1696."push"($P1697)
-    .return ($P1698)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "_block1708"  :anon :subid("111_1304456120.214") :outer("109_1304456120.214")
-    .param pmc param_1710
-.annotate 'line', 815
-    .lex "$_", param_1710
-    find_lex $P1711, "@tc"
-    unless_null $P1711, vivify_688
-    $P1711 = root_new ['parrot';'ResizablePMCArray']
-  vivify_688:
-    find_lex $P1712, "$_"
-    unless_null $P1712, vivify_689
-    new $P1712, "Undef"
-  vivify_689:
-    $P1713 = $P1711."push"($P1712)
-    .return ($P1713)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "publish_method_cache"  :subid("112_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1720
-    .param pmc param_1721
-.annotate 'line', 819
-    .const 'Sub' $P1731 = "113_1304456120.214" 
-    capture_lex $P1731
-    .lex "self", param_1720
-    .lex "$obj", param_1721
-.annotate 'line', 822
-    $P1722 = root_new ['parrot';'Hash']
-    .lex "%cache", $P1722
-.annotate 'line', 819
-    find_lex $P1723, "%cache"
-    unless_null $P1723, vivify_692
-    $P1723 = root_new ['parrot';'Hash']
-  vivify_692:
-.annotate 'line', 823
-    find_lex $P1725, "self"
-    find_lex $P1726, "$?CLASS"
-    getattribute $P1727, $P1725, $P1726, "@!mro"
-    unless_null $P1727, vivify_693
-    $P1727 = root_new ['parrot';'ResizablePMCArray']
-  vivify_693:
-    defined $I1728, $P1727
-    unless $I1728, for_undef_694
-    iter $P1724, $P1727
-    new $P1760, 'ExceptionHandler'
-    set_label $P1760, loop1759_handler
-    $P1760."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P1760
-  loop1759_test:
-    unless $P1724, loop1759_done
-    shift $P1729, $P1724
-  loop1759_redo:
-    .const 'Sub' $P1731 = "113_1304456120.214" 
-    capture_lex $P1731
-    $P1731($P1729)
-  loop1759_next:
-    goto loop1759_test
-  loop1759_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1761, exception, 'type'
-    eq $P1761, .CONTROL_LOOP_NEXT, loop1759_next
-    eq $P1761, .CONTROL_LOOP_REDO, loop1759_redo
-  loop1759_done:
-    pop_eh 
-  for_undef_694:
-.annotate 'line', 831
-    find_lex $P1762, "$obj"
-    unless_null $P1762, vivify_705
-    new $P1762, "Undef"
-  vivify_705:
-    find_lex $P1763, "%cache"
-    unless_null $P1763, vivify_706
-    $P1763 = root_new ['parrot';'Hash']
-  vivify_706:
-    publish_method_cache $P1762, $P1763
-.annotate 'line', 819
-    .return ()
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "_block1730"  :anon :subid("113_1304456120.214") :outer("112_1304456120.214")
-    .param pmc param_1733
-.annotate 'line', 823
-    .const 'Sub' $P1743 = "114_1304456120.214" 
-    capture_lex $P1743
-.annotate 'line', 824
-    $P1732 = root_new ['parrot';'Hash']
-    .lex "%methods", $P1732
-    .lex "$_", param_1733
-    find_lex $P1734, "$_"
-    unless_null $P1734, vivify_695
-    new $P1734, "Undef"
-  vivify_695:
-    get_how $P1735, $P1734
-    find_lex $P1736, "$_"
-    unless_null $P1736, vivify_696
-    new $P1736, "Undef"
-  vivify_696:
-    $P1737 = $P1735."method_table"($P1736)
-    store_lex "%methods", $P1737
-.annotate 'line', 825
-    find_lex $P1739, "%methods"
-    unless_null $P1739, vivify_697
-    $P1739 = root_new ['parrot';'Hash']
-  vivify_697:
-    defined $I1740, $P1739
-    unless $I1740, for_undef_698
-    iter $P1738, $P1739
-    new $P1757, 'ExceptionHandler'
-    set_label $P1757, loop1756_handler
-    $P1757."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P1757
-  loop1756_test:
-    unless $P1738, loop1756_done
-    shift $P1741, $P1738
-  loop1756_redo:
-    .const 'Sub' $P1743 = "114_1304456120.214" 
-    capture_lex $P1743
-    $P1743($P1741)
-  loop1756_next:
-    goto loop1756_test
-  loop1756_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1758, exception, 'type'
-    eq $P1758, .CONTROL_LOOP_NEXT, loop1756_next
-    eq $P1758, .CONTROL_LOOP_REDO, loop1756_redo
-  loop1756_done:
-    pop_eh 
-  for_undef_698:
-.annotate 'line', 823
-    .return ($P1738)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "_block1742"  :anon :subid("114_1304456120.214") :outer("113_1304456120.214")
-    .param pmc param_1744
-.annotate 'line', 825
-    .lex "$_", param_1744
-.annotate 'line', 826
-    find_lex $P1747, "$_"
-    unless_null $P1747, vivify_699
-    new $P1747, "Undef"
-  vivify_699:
-    $P1748 = $P1747."key"()
-    find_lex $P1749, "%cache"
-    unless_null $P1749, vivify_700
-    $P1749 = root_new ['parrot';'Hash']
-  vivify_700:
-    set $P1750, $P1749[$P1748]
-    unless_null $P1750, vivify_701
-    new $P1750, "Undef"
-  vivify_701:
-    unless $P1750, unless_1746
-    set $P1745, $P1750
-    goto unless_1746_end
-  unless_1746:
-.annotate 'line', 827
-    find_lex $P1751, "$_"
-    unless_null $P1751, vivify_702
-    new $P1751, "Undef"
-  vivify_702:
-    $P1752 = $P1751."value"()
-    find_lex $P1753, "$_"
-    unless_null $P1753, vivify_703
-    new $P1753, "Undef"
-  vivify_703:
-    $P1754 = $P1753."key"()
-    find_lex $P1755, "%cache"
-    unless_null $P1755, vivify_704
-    $P1755 = root_new ['parrot';'Hash']
-    store_lex "%cache", $P1755
-  vivify_704:
-    set $P1755[$P1754], $P1752
-.annotate 'line', 826
-    set $P1745, $P1752
-  unless_1746_end:
-.annotate 'line', 825
-    .return ($P1745)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "publish_parrot_vtable_mapping"  :subid("115_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1765
-    .param pmc param_1766
-.annotate 'line', 834
-    .const 'Sub' $P1776 = "116_1304456120.214" 
-    capture_lex $P1776
-    .lex "self", param_1765
-    .lex "$obj", param_1766
-.annotate 'line', 835
-    $P1767 = root_new ['parrot';'Hash']
-    .lex "%mapping", $P1767
-.annotate 'line', 834
-    find_lex $P1768, "%mapping"
-    unless_null $P1768, vivify_707
-    $P1768 = root_new ['parrot';'Hash']
-  vivify_707:
-.annotate 'line', 836
-    find_lex $P1770, "self"
-    find_lex $P1771, "$?CLASS"
-    getattribute $P1772, $P1770, $P1771, "@!mro"
-    unless_null $P1772, vivify_708
-    $P1772 = root_new ['parrot';'ResizablePMCArray']
-  vivify_708:
-    defined $I1773, $P1772
-    unless $I1773, for_undef_709
-    iter $P1769, $P1772
-    new $P1805, 'ExceptionHandler'
-    set_label $P1805, loop1804_handler
-    $P1805."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P1805
-  loop1804_test:
-    unless $P1769, loop1804_done
-    shift $P1774, $P1769
-  loop1804_redo:
-    .const 'Sub' $P1776 = "116_1304456120.214" 
-    capture_lex $P1776
-    $P1776($P1774)
-  loop1804_next:
-    goto loop1804_test
-  loop1804_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1806, exception, 'type'
-    eq $P1806, .CONTROL_LOOP_NEXT, loop1804_next
-    eq $P1806, .CONTROL_LOOP_REDO, loop1804_redo
-  loop1804_done:
-    pop_eh 
-  for_undef_709:
-.annotate 'line', 844
-    find_lex $P1809, "%mapping"
-    unless_null $P1809, vivify_720
-    $P1809 = root_new ['parrot';'Hash']
-  vivify_720:
-    set $N1810, $P1809
-    if $N1810, if_1808
-    new $P1807, 'Float'
-    set $P1807, $N1810
-    goto if_1808_end
-  if_1808:
-.annotate 'line', 845
-    find_lex $P1811, "$obj"
-    unless_null $P1811, vivify_721
-    new $P1811, "Undef"
-  vivify_721:
-    find_lex $P1812, "%mapping"
-    unless_null $P1812, vivify_722
-    $P1812 = root_new ['parrot';'Hash']
-  vivify_722:
-    stable_publish_vtable_mapping $P1811, $P1812
-  if_1808_end:
-.annotate 'line', 834
-    .return ($P1807)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "_block1775"  :anon :subid("116_1304456120.214") :outer("115_1304456120.214")
-    .param pmc param_1778
-.annotate 'line', 836
-    .const 'Sub' $P1788 = "117_1304456120.214" 
-    capture_lex $P1788
-.annotate 'line', 837
-    $P1777 = root_new ['parrot';'Hash']
-    .lex "%map", $P1777
-    .lex "$_", param_1778
-    find_lex $P1779, "$_"
-    unless_null $P1779, vivify_710
-    new $P1779, "Undef"
-  vivify_710:
-    get_how $P1780, $P1779
-    find_lex $P1781, "$_"
-    unless_null $P1781, vivify_711
-    new $P1781, "Undef"
-  vivify_711:
-    $P1782 = $P1780."parrot_vtable_mappings"($P1781, 1 :named("local"))
-    store_lex "%map", $P1782
-.annotate 'line', 838
-    find_lex $P1784, "%map"
-    unless_null $P1784, vivify_712
-    $P1784 = root_new ['parrot';'Hash']
-  vivify_712:
-    defined $I1785, $P1784
-    unless $I1785, for_undef_713
-    iter $P1783, $P1784
-    new $P1802, 'ExceptionHandler'
-    set_label $P1802, loop1801_handler
-    $P1802."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P1802
-  loop1801_test:
-    unless $P1783, loop1801_done
-    shift $P1786, $P1783
-  loop1801_redo:
-    .const 'Sub' $P1788 = "117_1304456120.214" 
-    capture_lex $P1788
-    $P1788($P1786)
-  loop1801_next:
-    goto loop1801_test
-  loop1801_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1803, exception, 'type'
-    eq $P1803, .CONTROL_LOOP_NEXT, loop1801_next
-    eq $P1803, .CONTROL_LOOP_REDO, loop1801_redo
-  loop1801_done:
-    pop_eh 
-  for_undef_713:
-.annotate 'line', 836
-    .return ($P1783)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "_block1787"  :anon :subid("117_1304456120.214") :outer("116_1304456120.214")
-    .param pmc param_1789
-.annotate 'line', 838
-    .lex "$_", param_1789
-.annotate 'line', 839
-    find_lex $P1792, "$_"
-    unless_null $P1792, vivify_714
-    new $P1792, "Undef"
-  vivify_714:
-    $P1793 = $P1792."key"()
-    find_lex $P1794, "%mapping"
-    unless_null $P1794, vivify_715
-    $P1794 = root_new ['parrot';'Hash']
-  vivify_715:
-    set $P1795, $P1794[$P1793]
-    unless_null $P1795, vivify_716
-    new $P1795, "Undef"
-  vivify_716:
-    unless $P1795, unless_1791
-    set $P1790, $P1795
-    goto unless_1791_end
-  unless_1791:
-.annotate 'line', 840
-    find_lex $P1796, "$_"
-    unless_null $P1796, vivify_717
-    new $P1796, "Undef"
-  vivify_717:
-    $P1797 = $P1796."value"()
-    find_lex $P1798, "$_"
-    unless_null $P1798, vivify_718
-    new $P1798, "Undef"
-  vivify_718:
-    $P1799 = $P1798."key"()
-    find_lex $P1800, "%mapping"
-    unless_null $P1800, vivify_719
-    $P1800 = root_new ['parrot';'Hash']
-    store_lex "%mapping", $P1800
-  vivify_719:
-    set $P1800[$P1799], $P1797
-.annotate 'line', 839
-    set $P1790, $P1797
-  unless_1791_end:
-.annotate 'line', 838
-    .return ($P1790)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "parents"  :subid("118_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1814
-    .param pmc param_1815
-    .param pmc param_1816 :optional :named("local")
-    .param int has_param_1816 :opt_flag
-.annotate 'line', 853
-    .lex "self", param_1814
-    .lex "$obj", param_1815
-    if has_param_1816, optparam_723
-    new $P1817, "Undef"
-    set param_1816, $P1817
-  optparam_723:
-    .lex "$local", param_1816
-.annotate 'line', 854
-    find_lex $P1820, "$local"
-    unless_null $P1820, vivify_724
-    new $P1820, "Undef"
-  vivify_724:
-    if $P1820, if_1819
-    find_lex $P1824, "self"
-    find_lex $P1825, "$?CLASS"
-    getattribute $P1826, $P1824, $P1825, "@!mro"
-    unless_null $P1826, vivify_725
-    $P1826 = root_new ['parrot';'ResizablePMCArray']
-  vivify_725:
-    set $P1818, $P1826
-    goto if_1819_end
-  if_1819:
-    find_lex $P1821, "self"
-    find_lex $P1822, "$?CLASS"
-    getattribute $P1823, $P1821, $P1822, "@!parents"
-    unless_null $P1823, vivify_726
-    $P1823 = root_new ['parrot';'ResizablePMCArray']
-  vivify_726:
-    set $P1818, $P1823
-  if_1819_end:
-.annotate 'line', 853
-    .return ($P1818)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "roles"  :subid("119_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1828
-    .param pmc param_1829
-    .param pmc param_1830 :named("local")
-.annotate 'line', 857
-    .lex "self", param_1828
-    .lex "$obj", param_1829
-    .lex "$local", param_1830
-    find_lex $P1831, "self"
-    find_lex $P1832, "$?CLASS"
-    getattribute $P1833, $P1831, $P1832, "@!roles"
-    unless_null $P1833, vivify_727
-    $P1833 = root_new ['parrot';'ResizablePMCArray']
-  vivify_727:
-    .return ($P1833)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "methods"  :subid("120_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1835
-    .param pmc param_1836
-    .param pmc param_1837 :named("local")
-.annotate 'line', 861
-    .const 'Sub' $P1847 = "121_1304456120.214" 
-    capture_lex $P1847
-    .lex "self", param_1835
-    .lex "$obj", param_1836
-    .lex "$local", param_1837
-.annotate 'line', 862
-    $P1838 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@meths", $P1838
-.annotate 'line', 861
-    find_lex $P1839, "@meths"
-    unless_null $P1839, vivify_728
-    $P1839 = root_new ['parrot';'ResizablePMCArray']
-  vivify_728:
-.annotate 'line', 863
-    find_lex $P1841, "self"
-    find_lex $P1842, "$?CLASS"
-    getattribute $P1843, $P1841, $P1842, "%!methods"
-    unless_null $P1843, vivify_729
-    $P1843 = root_new ['parrot';'Hash']
-  vivify_729:
-    defined $I1844, $P1843
-    unless $I1844, for_undef_730
-    iter $P1840, $P1843
-    new $P1854, 'ExceptionHandler'
-    set_label $P1854, loop1853_handler
-    $P1854."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P1854
-  loop1853_test:
-    unless $P1840, loop1853_done
-    shift $P1845, $P1840
-  loop1853_redo:
-    .const 'Sub' $P1847 = "121_1304456120.214" 
-    capture_lex $P1847
-    $P1847($P1845)
-  loop1853_next:
-    goto loop1853_test
-  loop1853_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1855, exception, 'type'
-    eq $P1855, .CONTROL_LOOP_NEXT, loop1853_next
-    eq $P1855, .CONTROL_LOOP_REDO, loop1853_redo
-  loop1853_done:
-    pop_eh 
-  for_undef_730:
-    find_lex $P1856, "@meths"
-    unless_null $P1856, vivify_733
-    $P1856 = root_new ['parrot';'ResizablePMCArray']
-  vivify_733:
-.annotate 'line', 861
-    .return ($P1856)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "_block1846"  :anon :subid("121_1304456120.214") :outer("120_1304456120.214")
-    .param pmc param_1848
-.annotate 'line', 863
-    .lex "$_", param_1848
-.annotate 'line', 864
-    find_lex $P1849, "@meths"
-    unless_null $P1849, vivify_731
-    $P1849 = root_new ['parrot';'ResizablePMCArray']
-  vivify_731:
-    find_lex $P1850, "$_"
-    unless_null $P1850, vivify_732
-    new $P1850, "Undef"
-  vivify_732:
-    $P1851 = $P1850."value"()
-    $P1852 = $P1849."push"($P1851)
-.annotate 'line', 863
-    .return ($P1852)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "method_table"  :subid("122_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1858
-    .param pmc param_1859
-.annotate 'line', 869
-    .lex "self", param_1858
-    .lex "$obj", param_1859
-    find_lex $P1860, "self"
-    find_lex $P1861, "$?CLASS"
-    getattribute $P1862, $P1860, $P1861, "%!methods"
-    unless_null $P1862, vivify_734
-    $P1862 = root_new ['parrot';'Hash']
-  vivify_734:
-    .return ($P1862)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "name"  :subid("123_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1864
-    .param pmc param_1865
-.annotate 'line', 873
-    .lex "self", param_1864
-    .lex "$obj", param_1865
-    find_lex $P1866, "self"
-    find_lex $P1867, "$?CLASS"
-    getattribute $P1868, $P1866, $P1867, "$!name"
-    unless_null $P1868, vivify_735
-    new $P1868, "Undef"
-  vivify_735:
-    .return ($P1868)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "attributes"  :subid("124_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1870
-    .param pmc param_1871
-    .param pmc param_1872 :named("local")
-.annotate 'line', 877
-    .const 'Sub' $P1882 = "125_1304456120.214" 
-    capture_lex $P1882
-    .lex "self", param_1870
-    .lex "$obj", param_1871
-    .lex "$local", param_1872
-.annotate 'line', 878
-    $P1873 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@attrs", $P1873
-.annotate 'line', 877
-    find_lex $P1874, "@attrs"
-    unless_null $P1874, vivify_736
-    $P1874 = root_new ['parrot';'ResizablePMCArray']
-  vivify_736:
-.annotate 'line', 879
-    find_lex $P1876, "self"
-    find_lex $P1877, "$?CLASS"
-    getattribute $P1878, $P1876, $P1877, "%!attributes"
-    unless_null $P1878, vivify_737
-    $P1878 = root_new ['parrot';'Hash']
-  vivify_737:
-    defined $I1879, $P1878
-    unless $I1879, for_undef_738
-    iter $P1875, $P1878
-    new $P1889, 'ExceptionHandler'
-    set_label $P1889, loop1888_handler
-    $P1889."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P1889
-  loop1888_test:
-    unless $P1875, loop1888_done
-    shift $P1880, $P1875
-  loop1888_redo:
-    .const 'Sub' $P1882 = "125_1304456120.214" 
-    capture_lex $P1882
-    $P1882($P1880)
-  loop1888_next:
-    goto loop1888_test
-  loop1888_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1890, exception, 'type'
-    eq $P1890, .CONTROL_LOOP_NEXT, loop1888_next
-    eq $P1890, .CONTROL_LOOP_REDO, loop1888_redo
-  loop1888_done:
-    pop_eh 
-  for_undef_738:
-    find_lex $P1891, "@attrs"
-    unless_null $P1891, vivify_741
-    $P1891 = root_new ['parrot';'ResizablePMCArray']
-  vivify_741:
-.annotate 'line', 877
-    .return ($P1891)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "_block1881"  :anon :subid("125_1304456120.214") :outer("124_1304456120.214")
-    .param pmc param_1883
-.annotate 'line', 879
-    .lex "$_", param_1883
-.annotate 'line', 880
-    find_lex $P1884, "@attrs"
-    unless_null $P1884, vivify_739
-    $P1884 = root_new ['parrot';'ResizablePMCArray']
-  vivify_739:
-    find_lex $P1885, "$_"
-    unless_null $P1885, vivify_740
-    new $P1885, "Undef"
-  vivify_740:
-    $P1886 = $P1885."value"()
-    $P1887 = $P1884."push"($P1886)
-.annotate 'line', 879
-    .return ($P1887)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.sub "parrot_vtable_mappings"  :subid("126_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1893
-    .param pmc param_1894
-    .param pmc param_1895 :named("local")
-.annotate 'line', 885
-    .lex "self", param_1893
-    .lex "$obj", param_1894
-    .lex "$local", param_1895
-    find_lex $P1896, "self"
-    find_lex $P1897, "$?CLASS"
-    getattribute $P1898, $P1896, $P1897, "%!parrot_vtable_mapping"
-    unless_null $P1898, vivify_742
-    $P1898 = root_new ['parrot';'Hash']
-  vivify_742:
-    .return ($P1898)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "isa"  :subid("127_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1902
-    .param pmc param_1903
-    .param pmc param_1904
-.annotate 'line', 893
-    new $P1901, ['ExceptionHandler'], .CONTROL_RETURN
-    set_label $P1901, control_1900
-    push_eh $P1901
-    .lex "self", param_1902
-    .lex "$obj", param_1903
-    .lex "$check", param_1904
-.annotate 'line', 894
-    new $P1905, "Undef"
-    .lex "$check-class", $P1905
-.annotate 'line', 895
-    new $P1906, "Undef"
-    .lex "$i", $P1906
-.annotate 'line', 894
-    find_lex $P1907, "$check"
-    unless_null $P1907, vivify_743
-    new $P1907, "Undef"
-  vivify_743:
-    get_what $P1908, $P1907
-    store_lex "$check-class", $P1908
-.annotate 'line', 895
-    find_lex $P1909, "self"
-    find_lex $P1910, "$?CLASS"
-    getattribute $P1911, $P1909, $P1910, "@!mro"
-    unless_null $P1911, vivify_744
-    $P1911 = root_new ['parrot';'ResizablePMCArray']
-  vivify_744:
-    set $N1912, $P1911
-    new $P1913, 'Float'
-    set $P1913, $N1912
-    store_lex "$i", $P1913
-.annotate 'line', 896
-    new $P1931, 'ExceptionHandler'
-    set_label $P1931, loop1930_handler
-    $P1931."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P1931
-  loop1930_test:
-    find_lex $P1914, "$i"
-    unless_null $P1914, vivify_745
-    new $P1914, "Undef"
-  vivify_745:
-    set $N1915, $P1914
-    isgt $I1916, $N1915, 0.0
-    unless $I1916, loop1930_done
-  loop1930_redo:
-.annotate 'line', 897
-    find_lex $P1917, "$i"
-    unless_null $P1917, vivify_746
-    new $P1917, "Undef"
-  vivify_746:
-    sub $P1918, $P1917, 1
-    store_lex "$i", $P1918
-.annotate 'line', 898
-    find_lex $P1920, "$i"
-    unless_null $P1920, vivify_747
-    new $P1920, "Undef"
-  vivify_747:
-    set $I1921, $P1920
-    find_lex $P1922, "self"
-    find_lex $P1923, "$?CLASS"
-    getattribute $P1924, $P1922, $P1923, "@!mro"
-    unless_null $P1924, vivify_748
-    $P1924 = root_new ['parrot';'ResizablePMCArray']
-  vivify_748:
-    set $P1925, $P1924[$I1921]
-    unless_null $P1925, vivify_749
-    new $P1925, "Undef"
-  vivify_749:
-    find_lex $P1926, "$check-class"
-    unless_null $P1926, vivify_750
-    new $P1926, "Undef"
-  vivify_750:
-    issame $I1927, $P1925, $P1926
-    unless $I1927, if_1919_end
-.annotate 'line', 899
-    new $P1928, "Exception"
-    set $P1928['type'], .CONTROL_RETURN
-    new $P1929, "Integer"
-    assign $P1929, 1
-    setattribute $P1928, 'payload', $P1929
-    throw $P1928
-  if_1919_end:
-  loop1930_next:
-.annotate 'line', 896
-    goto loop1930_test
-  loop1930_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1932, exception, 'type'
-    eq $P1932, .CONTROL_LOOP_NEXT, loop1930_next
-    eq $P1932, .CONTROL_LOOP_REDO, loop1930_redo
-  loop1930_done:
-    pop_eh 
-.annotate 'line', 902
-    new $P1933, "Exception"
-    set $P1933['type'], .CONTROL_RETURN
-    new $P1934, "Integer"
-    assign $P1934, 0
-    setattribute $P1933, 'payload', $P1934
-    throw $P1933
-.annotate 'line', 893
-    .return ()
-  control_1900:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1935, exception, "payload"
-    .return ($P1935)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "does"  :subid("128_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1939
-    .param pmc param_1940
-    .param pmc param_1941
-.annotate 'line', 905
-    new $P1938, ['ExceptionHandler'], .CONTROL_RETURN
-    set_label $P1938, control_1937
-    push_eh $P1938
-    .lex "self", param_1939
-    .lex "$obj", param_1940
-    .lex "$check", param_1941
-.annotate 'line', 906
-    new $P1942, "Undef"
-    .lex "$i", $P1942
-    find_lex $P1943, "self"
-    find_lex $P1944, "$?CLASS"
-    getattribute $P1945, $P1943, $P1944, "@!done"
-    unless_null $P1945, vivify_751
-    $P1945 = root_new ['parrot';'ResizablePMCArray']
-  vivify_751:
-    set $N1946, $P1945
-    new $P1947, 'Float'
-    set $P1947, $N1946
-    store_lex "$i", $P1947
-.annotate 'line', 907
-    new $P1965, 'ExceptionHandler'
-    set_label $P1965, loop1964_handler
-    $P1965."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P1965
-  loop1964_test:
-    find_lex $P1948, "$i"
-    unless_null $P1948, vivify_752
-    new $P1948, "Undef"
-  vivify_752:
-    set $N1949, $P1948
-    isgt $I1950, $N1949, 0.0
-    unless $I1950, loop1964_done
-  loop1964_redo:
-.annotate 'line', 908
-    find_lex $P1951, "$i"
-    unless_null $P1951, vivify_753
-    new $P1951, "Undef"
-  vivify_753:
-    sub $P1952, $P1951, 1
-    store_lex "$i", $P1952
-.annotate 'line', 909
-    find_lex $P1954, "$i"
-    unless_null $P1954, vivify_754
-    new $P1954, "Undef"
-  vivify_754:
-    set $I1955, $P1954
-    find_lex $P1956, "self"
-    find_lex $P1957, "$?CLASS"
-    getattribute $P1958, $P1956, $P1957, "@!done"
-    unless_null $P1958, vivify_755
-    $P1958 = root_new ['parrot';'ResizablePMCArray']
-  vivify_755:
-    set $P1959, $P1958[$I1955]
-    unless_null $P1959, vivify_756
-    new $P1959, "Undef"
-  vivify_756:
-    find_lex $P1960, "$check"
-    unless_null $P1960, vivify_757
-    new $P1960, "Undef"
-  vivify_757:
-    issame $I1961, $P1959, $P1960
-    unless $I1961, if_1953_end
-.annotate 'line', 910
-    new $P1962, "Exception"
-    set $P1962['type'], .CONTROL_RETURN
-    new $P1963, "Integer"
-    assign $P1963, 1
-    setattribute $P1962, 'payload', $P1963
-    throw $P1962
-  if_1953_end:
-  loop1964_next:
-.annotate 'line', 907
-    goto loop1964_test
-  loop1964_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1966, exception, 'type'
-    eq $P1966, .CONTROL_LOOP_NEXT, loop1964_next
-    eq $P1966, .CONTROL_LOOP_REDO, loop1964_redo
-  loop1964_done:
-    pop_eh 
-.annotate 'line', 913
-    new $P1967, "Exception"
-    set $P1967['type'], .CONTROL_RETURN
-    new $P1968, "Integer"
-    assign $P1968, 0
-    setattribute $P1967, 'payload', $P1968
-    throw $P1967
-.annotate 'line', 905
-    .return ()
-  control_1937:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P1969, exception, "payload"
-    .return ($P1969)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "can"  :subid("129_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_1973
-    .param pmc param_1974
-    .param pmc param_1975
-.annotate 'line', 916
-    .const 'Sub' $P1983 = "130_1304456120.214" 
-    capture_lex $P1983
-    new $P1972, ['ExceptionHandler'], .CONTROL_RETURN
-    set_label $P1972, control_1971
-    push_eh $P1972
-    .lex "self", param_1973
-    .lex "$obj", param_1974
-    .lex "$name", param_1975
-.annotate 'line', 917
-    find_lex $P1977, "self"
-    find_lex $P1978, "$?CLASS"
-    getattribute $P1979, $P1977, $P1978, "@!mro"
-    unless_null $P1979, vivify_758
-    $P1979 = root_new ['parrot';'ResizablePMCArray']
-  vivify_758:
-    defined $I1980, $P1979
-    unless $I1980, for_undef_759
-    iter $P1976, $P1979
-    new $P2001, 'ExceptionHandler'
-    set_label $P2001, loop2000_handler
-    $P2001."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P2001
-  loop2000_test:
-    unless $P1976, loop2000_done
-    shift $P1981, $P1976
-  loop2000_redo:
-    .const 'Sub' $P1983 = "130_1304456120.214" 
-    capture_lex $P1983
-    $P1983($P1981)
-  loop2000_next:
-    goto loop2000_test
-  loop2000_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P2002, exception, 'type'
-    eq $P2002, .CONTROL_LOOP_NEXT, loop2000_next
-    eq $P2002, .CONTROL_LOOP_REDO, loop2000_redo
-  loop2000_done:
-    pop_eh 
-  for_undef_759:
-.annotate 'line', 924
-    new $P2003, "Exception"
-    set $P2003['type'], .CONTROL_RETURN
-    new $P2004, "Integer"
-    assign $P2004, 0
-    setattribute $P2003, 'payload', $P2004
-    throw $P2003
-.annotate 'line', 916
-    .return ()
-  control_1971:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P2005, exception, "payload"
-    .return ($P2005)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "_block1982"  :anon :subid("130_1304456120.214") :outer("129_1304456120.214")
-    .param pmc param_1986
-.annotate 'line', 918
-    $P1984 = root_new ['parrot';'Hash']
-    .lex "%meths", $P1984
-.annotate 'line', 919
-    new $P1985, "Undef"
-    .lex "$can", $P1985
-    .lex "$_", param_1986
-.annotate 'line', 918
-    find_lex $P1987, "$_"
-    unless_null $P1987, vivify_760
-    new $P1987, "Undef"
-  vivify_760:
-    get_how $P1988, $P1987
-    find_lex $P1989, "$obj"
-    unless_null $P1989, vivify_761
-    new $P1989, "Undef"
-  vivify_761:
-    $P1990 = $P1988."method_table"($P1989)
-    store_lex "%meths", $P1990
-.annotate 'line', 919
-    find_lex $P1991, "$name"
-    unless_null $P1991, vivify_762
-    new $P1991, "Undef"
-  vivify_762:
-    find_lex $P1992, "%meths"
-    unless_null $P1992, vivify_763
-    $P1992 = root_new ['parrot';'Hash']
-  vivify_763:
-    set $P1993, $P1992[$P1991]
-    unless_null $P1993, vivify_764
-    new $P1993, "Undef"
-  vivify_764:
-    store_lex "$can", $P1993
-.annotate 'line', 920
-    find_lex $P1996, "$can"
-    unless_null $P1996, vivify_765
-    new $P1996, "Undef"
-  vivify_765:
-    defined $I1997, $P1996
-    if $I1997, if_1995
-    new $P1994, 'Integer'
-    set $P1994, $I1997
-    goto if_1995_end
-  if_1995:
-.annotate 'line', 921
-    new $P1998, "Exception"
-    set $P1998['type'], .CONTROL_RETURN
-    find_lex $P1999, "$can"
-    unless_null $P1999, vivify_766
-    new $P1999, "Undef"
-  vivify_766:
-    setattribute $P1998, 'payload', $P1999
-    throw $P1998
-  if_1995_end:
-.annotate 'line', 917
-    .return ($P1994)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "find_method"  :subid("131_1304456120.214") :outer("77_1304456120.214")
-    .param pmc param_2009
-    .param pmc param_2010
-    .param pmc param_2011
-.annotate 'line', 930
-    .const 'Sub' $P2019 = "132_1304456120.214" 
-    capture_lex $P2019
-    new $P2008, ['ExceptionHandler'], .CONTROL_RETURN
-    set_label $P2008, control_2007
-    push_eh $P2008
-    .lex "self", param_2009
-    .lex "$obj", param_2010
-    .lex "$name", param_2011
-.annotate 'line', 931
-    find_lex $P2013, "self"
-    find_lex $P2014, "$?CLASS"
-    getattribute $P2015, $P2013, $P2014, "@!mro"
-    unless_null $P2015, vivify_767
-    $P2015 = root_new ['parrot';'ResizablePMCArray']
-  vivify_767:
-    defined $I2016, $P2015
-    unless $I2016, for_undef_768
-    iter $P2012, $P2015
-    new $P2037, 'ExceptionHandler'
-    set_label $P2037, loop2036_handler
-    $P2037."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P2037
-  loop2036_test:
-    unless $P2012, loop2036_done
-    shift $P2017, $P2012
-  loop2036_redo:
-    .const 'Sub' $P2019 = "132_1304456120.214" 
-    capture_lex $P2019
-    $P2019($P2017)
-  loop2036_next:
-    goto loop2036_test
-  loop2036_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P2038, exception, 'type'
-    eq $P2038, .CONTROL_LOOP_NEXT, loop2036_next
-    eq $P2038, .CONTROL_LOOP_REDO, loop2036_redo
-  loop2036_done:
-    pop_eh 
-  for_undef_768:
-.annotate 'line', 938
-    null $P2039
-.annotate 'line', 930
-    .return ($P2039)
-  control_2007:
-    .local pmc exception 
-    .get_results (exception) 
-    getattribute $P2040, exception, "payload"
-    .return ($P2040)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["NQPClassHOW"]
-.include "except_types.pasm"
-.sub "_block2018"  :anon :subid("132_1304456120.214") :outer("131_1304456120.214")
-    .param pmc param_2022
+.sub "_block2019"  :anon :subid("132_1304459371.883") :outer("131_1304459371.883")
+    .param pmc param_2023
 .annotate 'line', 932
-    $P2020 = root_new ['parrot';'Hash']
-    .lex "%meths", $P2020
+    $P2021 = root_new ['parrot';'Hash']
+    .lex "%meths", $P2021
 .annotate 'line', 933
-    new $P2021, "Undef"
-    .lex "$found", $P2021
-    .lex "$_", param_2022
+    new $P2022, "Undef"
+    .lex "$found", $P2022
+    .lex "$_", param_2023
 .annotate 'line', 932
-    find_lex $P2023, "$_"
-    unless_null $P2023, vivify_769
-    new $P2023, "Undef"
+    find_lex $P2024, "$_"
+    unless_null $P2024, vivify_769
+    new $P2024, "Undef"
   vivify_769:
-    get_how $P2024, $P2023
-    find_lex $P2025, "$obj"
-    unless_null $P2025, vivify_770
-    new $P2025, "Undef"
+    get_how $P2025, $P2024
+    find_lex $P2026, "$obj"
+    unless_null $P2026, vivify_770
+    new $P2026, "Undef"
   vivify_770:
-    $P2026 = $P2024."method_table"($P2025)
-    store_lex "%meths", $P2026
+    $P2027 = $P2025."method_table"($P2026)
+    store_lex "%meths", $P2027
 .annotate 'line', 933
-    find_lex $P2027, "$name"
-    unless_null $P2027, vivify_771
-    new $P2027, "Undef"
+    find_lex $P2028, "$name"
+    unless_null $P2028, vivify_771
+    new $P2028, "Undef"
   vivify_771:
-    find_lex $P2028, "%meths"
-    unless_null $P2028, vivify_772
-    $P2028 = root_new ['parrot';'Hash']
+    find_lex $P2029, "%meths"
+    unless_null $P2029, vivify_772
+    $P2029 = root_new ['parrot';'Hash']
   vivify_772:
-    set $P2029, $P2028[$P2027]
-    unless_null $P2029, vivify_773
-    new $P2029, "Undef"
+    set $P2030, $P2029[$P2028]
+    unless_null $P2030, vivify_773
+    new $P2030, "Undef"
   vivify_773:
-    store_lex "$found", $P2029
+    store_lex "$found", $P2030
 .annotate 'line', 934
-    find_lex $P2032, "$found"
-    unless_null $P2032, vivify_774
-    new $P2032, "Undef"
+    find_lex $P2033, "$found"
+    unless_null $P2033, vivify_774
+    new $P2033, "Undef"
   vivify_774:
-    defined $I2033, $P2032
-    if $I2033, if_2031
-    new $P2030, 'Integer'
-    set $P2030, $I2033
-    goto if_2031_end
-  if_2031:
+    defined $I2034, $P2033
+    if $I2034, if_2032
+    new $P2031, 'Integer'
+    set $P2031, $I2034
+    goto if_2032_end
+  if_2032:
 .annotate 'line', 935
-    new $P2034, "Exception"
-    set $P2034['type'], .CONTROL_RETURN
-    find_lex $P2035, "$found"
-    unless_null $P2035, vivify_775
-    new $P2035, "Undef"
+    new $P2035, "Exception"
+    set $P2035['type'], .CONTROL_RETURN
+    find_lex $P2036, "$found"
+    unless_null $P2036, vivify_775
+    new $P2036, "Undef"
   vivify_775:
-    setattribute $P2034, 'payload', $P2035
-    throw $P2034
-  if_2031_end:
+    setattribute $P2035, 'payload', $P2036
+    throw $P2035
+  if_2032_end:
 .annotate 'line', 931
-    .return ($P2030)
+    .return ($P2031)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPNativeHOW"]
-.sub "_block2042"  :subid("133_1304456120.214") :outer("10_1304456120.214")
+.sub "_block2043"  :subid("133_1304459371.883") :outer("10_1304459371.883")
 .annotate 'line', 943
-    .const 'Sub' $P2097 = "141_1304456120.214" 
-    capture_lex $P2097
-    .const 'Sub' $P2091 = "140_1304456120.214" 
-    capture_lex $P2091
-    .const 'Sub' $P2087 = "139_1304456120.214" 
-    capture_lex $P2087
-    .const 'Sub' $P2082 = "138_1304456120.214" 
-    capture_lex $P2082
-    .const 'Sub' $P2077 = "137_1304456120.214" 
-    capture_lex $P2077
-    .const 'Sub' $P2063 = "136_1304456120.214" 
-    capture_lex $P2063
-    .const 'Sub' $P2056 = "135_1304456120.214" 
-    capture_lex $P2056
-    .const 'Sub' $P2046 = "134_1304456120.214" 
-    capture_lex $P2046
-    .lex "$?PACKAGE", $P2044
-    .lex "$?CLASS", $P2045
+    .const 'Sub' $P2098 = "141_1304459371.883" 
+    capture_lex $P2098
+    .const 'Sub' $P2092 = "140_1304459371.883" 
+    capture_lex $P2092
+    .const 'Sub' $P2088 = "139_1304459371.883" 
+    capture_lex $P2088
+    .const 'Sub' $P2083 = "138_1304459371.883" 
+    capture_lex $P2083
+    .const 'Sub' $P2078 = "137_1304459371.883" 
+    capture_lex $P2078
+    .const 'Sub' $P2064 = "136_1304459371.883" 
+    capture_lex $P2064
+    .const 'Sub' $P2057 = "135_1304459371.883" 
+    capture_lex $P2057
+    .const 'Sub' $P2047 = "134_1304459371.883" 
+    capture_lex $P2047
+    .lex "$?PACKAGE", $P2045
+    .lex "$?CLASS", $P2046
 .annotate 'line', 983
-    .const 'Sub' $P2097 = "141_1304456120.214" 
-    newclosure $P2103, $P2097
+    .const 'Sub' $P2098 = "141_1304459371.883" 
+    newclosure $P2104, $P2098
 .annotate 'line', 943
-    .return ($P2103)
+    .return ($P2104)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPNativeHOW"]
-.sub "new"  :subid("134_1304456120.214") :outer("133_1304456120.214")
-    .param pmc param_2047
-    .param pmc param_2048 :optional :named("name")
-    .param int has_param_2048 :opt_flag
+.sub "new"  :subid("134_1304459371.883") :outer("133_1304459371.883")
+    .param pmc param_2048
+    .param pmc param_2049 :optional :named("name")
+    .param int has_param_2049 :opt_flag
 .annotate 'line', 947
-    .lex "self", param_2047
-    if has_param_2048, optparam_776
-    new $P2049, "Undef"
-    set param_2048, $P2049
-  optparam_776:
-    .lex "$name", param_2048
-.annotate 'line', 948
+    .lex "self", param_2048
+    if has_param_2049, optparam_776
     new $P2050, "Undef"
-    .lex "$obj", $P2050
-    find_lex $P2051, "self"
-    repr_instance_of $P2052, $P2051
-    store_lex "$obj", $P2052
+    set param_2049, $P2050
+  optparam_776:
+    .lex "$name", param_2049
+.annotate 'line', 948
+    new $P2051, "Undef"
+    .lex "$obj", $P2051
+    find_lex $P2052, "self"
+    repr_instance_of $P2053, $P2052
+    store_lex "$obj", $P2053
 .annotate 'line', 949
-    find_lex $P2053, "$obj"
-    unless_null $P2053, vivify_777
-    new $P2053, "Undef"
-  vivify_777:
-    find_lex $P2054, "$name"
-    unless_null $P2054, vivify_778
+    find_lex $P2054, "$obj"
+    unless_null $P2054, vivify_777
     new $P2054, "Undef"
-  vivify_778:
-    $P2053."BUILD"($P2054 :named("name"))
-    find_lex $P2055, "$obj"
-    unless_null $P2055, vivify_779
+  vivify_777:
+    find_lex $P2055, "$name"
+    unless_null $P2055, vivify_778
     new $P2055, "Undef"
+  vivify_778:
+    $P2054."BUILD"($P2055 :named("name"))
+    find_lex $P2056, "$obj"
+    unless_null $P2056, vivify_779
+    new $P2056, "Undef"
   vivify_779:
 .annotate 'line', 947
-    .return ($P2055)
+    .return ($P2056)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPNativeHOW"]
-.sub "BUILD"  :subid("135_1304456120.214") :outer("133_1304456120.214")
-    .param pmc param_2057
-    .param pmc param_2058 :optional :named("name")
-    .param int has_param_2058 :opt_flag
+.sub "BUILD"  :subid("135_1304459371.883") :outer("133_1304459371.883")
+    .param pmc param_2058
+    .param pmc param_2059 :optional :named("name")
+    .param int has_param_2059 :opt_flag
 .annotate 'line', 953
-    .lex "self", param_2057
-    if has_param_2058, optparam_780
-    new $P2059, "Undef"
-    set param_2058, $P2059
-  optparam_780:
-    .lex "$name", param_2058
-.annotate 'line', 954
-    find_lex $P2060, "$name"
-    unless_null $P2060, vivify_781
+    .lex "self", param_2058
+    if has_param_2059, optparam_780
     new $P2060, "Undef"
+    set param_2059, $P2060
+  optparam_780:
+    .lex "$name", param_2059
+.annotate 'line', 954
+    find_lex $P2061, "$name"
+    unless_null $P2061, vivify_781
+    new $P2061, "Undef"
   vivify_781:
-    find_lex $P2061, "self"
-    find_lex $P2062, "$?CLASS"
-    setattribute $P2061, $P2062, "$!name", $P2060
+    find_lex $P2062, "self"
+    find_lex $P2063, "$?CLASS"
+    setattribute $P2062, $P2063, "$!name", $P2061
 .annotate 'line', 953
-    .return ($P2060)
+    .return ($P2061)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPNativeHOW"]
-.sub "new_type"  :subid("136_1304456120.214") :outer("133_1304456120.214")
-    .param pmc param_2064
-    .param pmc param_2067 :named("repr")
-    .param pmc param_2065 :optional :named("name")
-    .param int has_param_2065 :opt_flag
+.sub "new_type"  :subid("136_1304459371.883") :outer("133_1304459371.883")
+    .param pmc param_2065
+    .param pmc param_2068 :named("repr")
+    .param pmc param_2066 :optional :named("name")
+    .param int has_param_2066 :opt_flag
 .annotate 'line', 960
-    .lex "self", param_2064
-    if has_param_2065, optparam_782
-    new $P2066, "String"
-    assign $P2066, "<anon>"
-    set param_2065, $P2066
+    .lex "self", param_2065
+    if has_param_2066, optparam_782
+    new $P2067, "String"
+    assign $P2067, "<anon>"
+    set param_2066, $P2067
   optparam_782:
-    .lex "$name", param_2065
-    .lex "$repr", param_2067
+    .lex "$name", param_2066
+    .lex "$repr", param_2068
 .annotate 'line', 961
-    new $P2068, "Undef"
-    .lex "$metaclass", $P2068
-    find_lex $P2069, "self"
-    find_lex $P2070, "$name"
-    unless_null $P2070, vivify_783
-    new $P2070, "Undef"
+    new $P2069, "Undef"
+    .lex "$metaclass", $P2069
+    find_lex $P2070, "self"
+    find_lex $P2071, "$name"
+    unless_null $P2071, vivify_783
+    new $P2071, "Undef"
   vivify_783:
-    $P2071 = $P2069."new"($P2070 :named("name"))
-    store_lex "$metaclass", $P2071
+    $P2072 = $P2070."new"($P2071 :named("name"))
+    store_lex "$metaclass", $P2072
 .annotate 'line', 963
-    find_lex $P2072, "$metaclass"
-    unless_null $P2072, vivify_784
-    new $P2072, "Undef"
-  vivify_784:
-    find_lex $P2073, "$repr"
-    unless_null $P2073, vivify_785
+    find_lex $P2073, "$metaclass"
+    unless_null $P2073, vivify_784
     new $P2073, "Undef"
+  vivify_784:
+    find_lex $P2074, "$repr"
+    unless_null $P2074, vivify_785
+    new $P2074, "Undef"
   vivify_785:
-    set $S2074, $P2073
-    repr_type_object_for $P2075, $P2072, $S2074
-    $P2076 = root_new ['parrot';'Hash']
-    set_who $P2075, $P2076
+    set $S2075, $P2074
+    repr_type_object_for $P2076, $P2073, $S2075
+    $P2077 = root_new ['parrot';'Hash']
+    set_who $P2076, $P2077
 .annotate 'line', 960
-    .return ($P2075)
+    .return ($P2076)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPNativeHOW"]
-.sub "add_method"  :subid("137_1304456120.214") :outer("133_1304456120.214")
-    .param pmc param_2078
+.sub "add_method"  :subid("137_1304459371.883") :outer("133_1304459371.883")
     .param pmc param_2079
     .param pmc param_2080
     .param pmc param_2081
+    .param pmc param_2082
 .annotate 'line', 967
-    .lex "self", param_2078
-    .lex "$obj", param_2079
-    .lex "$name", param_2080
-    .lex "$code_obj", param_2081
+    .lex "self", param_2079
+    .lex "$obj", param_2080
+    .lex "$name", param_2081
+    .lex "$code_obj", param_2082
 .annotate 'line', 968
     die "Native types may not have methods (must be boxed to call method)"
 .annotate 'line', 967
@@ -8863,16 +8877,16 @@
 .HLL "nqp"
 
 .namespace ["NQPNativeHOW"]
-.sub "add_multi_method"  :subid("138_1304456120.214") :outer("133_1304456120.214")
-    .param pmc param_2083
+.sub "add_multi_method"  :subid("138_1304459371.883") :outer("133_1304459371.883")
     .param pmc param_2084
     .param pmc param_2085
     .param pmc param_2086
+    .param pmc param_2087
 .annotate 'line', 971
-    .lex "self", param_2083
-    .lex "$obj", param_2084
-    .lex "$name", param_2085
-    .lex "$code_obj", param_2086
+    .lex "self", param_2084
+    .lex "$obj", param_2085
+    .lex "$name", param_2086
+    .lex "$code_obj", param_2087
 .annotate 'line', 972
     die "Native types may not have methods (must be boxed to call method)"
 .annotate 'line', 971
@@ -8883,14 +8897,14 @@
 .HLL "nqp"
 
 .namespace ["NQPNativeHOW"]
-.sub "add_attribute"  :subid("139_1304456120.214") :outer("133_1304456120.214")
-    .param pmc param_2088
+.sub "add_attribute"  :subid("139_1304459371.883") :outer("133_1304459371.883")
     .param pmc param_2089
     .param pmc param_2090
+    .param pmc param_2091
 .annotate 'line', 975
-    .lex "self", param_2088
-    .lex "$obj", param_2089
-    .lex "$meta_attr", param_2090
+    .lex "self", param_2089
+    .lex "$obj", param_2090
+    .lex "$meta_attr", param_2091
 .annotate 'line', 976
     die "Native types may not have attributes"
 .annotate 'line', 975
@@ -8901,74 +8915,74 @@
 .HLL "nqp"
 
 .namespace ["NQPNativeHOW"]
-.sub "compose"  :subid("140_1304456120.214") :outer("133_1304456120.214")
-    .param pmc param_2092
+.sub "compose"  :subid("140_1304459371.883") :outer("133_1304459371.883")
     .param pmc param_2093
+    .param pmc param_2094
 .annotate 'line', 979
-    .lex "self", param_2092
-    .lex "$obj", param_2093
+    .lex "self", param_2093
+    .lex "$obj", param_2094
 .annotate 'line', 980
-    new $P2094, "Integer"
-    assign $P2094, 1
-    find_lex $P2095, "self"
-    find_lex $P2096, "$?CLASS"
-    setattribute $P2095, $P2096, "$!composed", $P2094
+    new $P2095, "Integer"
+    assign $P2095, 1
+    find_lex $P2096, "self"
+    find_lex $P2097, "$?CLASS"
+    setattribute $P2096, $P2097, "$!composed", $P2095
 .annotate 'line', 979
-    .return ($P2094)
+    .return ($P2095)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPNativeHOW"]
-.sub "name"  :subid("141_1304456120.214") :outer("133_1304456120.214")
-    .param pmc param_2098
+.sub "name"  :subid("141_1304459371.883") :outer("133_1304459371.883")
     .param pmc param_2099
+    .param pmc param_2100
 .annotate 'line', 983
-    .lex "self", param_2098
-    .lex "$obj", param_2099
-    find_lex $P2100, "self"
-    find_lex $P2101, "$?CLASS"
-    getattribute $P2102, $P2100, $P2101, "$!name"
-    unless_null $P2102, vivify_786
-    new $P2102, "Undef"
+    .lex "self", param_2099
+    .lex "$obj", param_2100
+    find_lex $P2101, "self"
+    find_lex $P2102, "$?CLASS"
+    getattribute $P2103, $P2101, $P2102, "$!name"
+    unless_null $P2103, vivify_786
+    new $P2103, "Undef"
   vivify_786:
-    .return ($P2102)
+    .return ($P2103)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPAttribute"]
-.sub "_block2104"  :subid("142_1304456120.214") :outer("10_1304456120.214")
+.sub "_block2105"  :subid("142_1304459371.883") :outer("10_1304459371.883")
 .annotate 'line', 989
-    .const 'Sub' $P2279 = "155_1304456120.214" 
-    capture_lex $P2279
-    .const 'Sub' $P2198 = "150_1304456120.214" 
-    capture_lex $P2198
-    .const 'Sub' $P2189 = "149_1304456120.214" 
-    capture_lex $P2189
-    .const 'Sub' $P2180 = "148_1304456120.214" 
-    capture_lex $P2180
-    .const 'Sub' $P2175 = "147_1304456120.214" 
-    capture_lex $P2175
-    .const 'Sub' $P2158 = "146_1304456120.214" 
-    capture_lex $P2158
-    .const 'Sub' $P2143 = "145_1304456120.214" 
-    capture_lex $P2143
-    .const 'Sub' $P2106 = "143_1304456120.214" 
-    capture_lex $P2106
+    .const 'Sub' $P2280 = "155_1304459371.883" 
+    capture_lex $P2280
+    .const 'Sub' $P2199 = "150_1304459371.883" 
+    capture_lex $P2199
+    .const 'Sub' $P2190 = "149_1304459371.883" 
+    capture_lex $P2190
+    .const 'Sub' $P2181 = "148_1304459371.883" 
+    capture_lex $P2181
+    .const 'Sub' $P2176 = "147_1304459371.883" 
+    capture_lex $P2176
+    .const 'Sub' $P2159 = "146_1304459371.883" 
+    capture_lex $P2159
+    .const 'Sub' $P2144 = "145_1304459371.883" 
+    capture_lex $P2144
+    .const 'Sub' $P2107 = "143_1304459371.883" 
+    capture_lex $P2107
 .annotate 'line', 1049
-    .const 'Sub' $P2106 = "143_1304456120.214" 
-    newclosure $P2140, $P2106
-    .lex "has_method", $P2140
+    .const 'Sub' $P2107 = "143_1304459371.883" 
+    newclosure $P2141, $P2107
+    .lex "has_method", $P2141
 .annotate 'line', 989
-    .lex "$?PACKAGE", $P2141
-    .lex "$?CLASS", $P2142
+    .lex "$?PACKAGE", $P2142
+    .lex "$?CLASS", $P2143
 .annotate 'line', 1045
-    find_lex $P2287, "has_method"
+    find_lex $P2288, "has_method"
 .annotate 'line', 989
-    .return ($P2287)
+    .return ($P2288)
 .end
 
 
@@ -8976,81 +8990,81 @@
 
 .namespace ["NQPAttribute"]
 .include "except_types.pasm"
-.sub "has_method"  :subid("143_1304456120.214") :outer("142_1304456120.214")
-    .param pmc param_2109
+.sub "has_method"  :subid("143_1304459371.883") :outer("142_1304459371.883")
     .param pmc param_2110
     .param pmc param_2111
+    .param pmc param_2112
 .annotate 'line', 1049
-    .const 'Sub' $P2123 = "144_1304456120.214" 
-    capture_lex $P2123
-    new $P2108, ['ExceptionHandler'], .CONTROL_RETURN
-    set_label $P2108, control_2107
-    push_eh $P2108
-    .lex "$target", param_2109
-    .lex "$name", param_2110
-    .lex "$local", param_2111
+    .const 'Sub' $P2124 = "144_1304459371.883" 
+    capture_lex $P2124
+    new $P2109, ['ExceptionHandler'], .CONTROL_RETURN
+    set_label $P2109, control_2108
+    push_eh $P2109
+    .lex "$target", param_2110
+    .lex "$name", param_2111
+    .lex "$local", param_2112
 .annotate 'line', 1050
-    $P2112 = root_new ['parrot';'ResizablePMCArray']
-    .lex "@methods", $P2112
-    find_lex $P2113, "$target"
-    unless_null $P2113, vivify_787
-    new $P2113, "Undef"
+    $P2113 = root_new ['parrot';'ResizablePMCArray']
+    .lex "@methods", $P2113
+    find_lex $P2114, "$target"
+    unless_null $P2114, vivify_787
+    new $P2114, "Undef"
   vivify_787:
-    get_how $P2114, $P2113
-    find_lex $P2115, "$target"
-    unless_null $P2115, vivify_788
-    new $P2115, "Undef"
-  vivify_788:
-    find_lex $P2116, "$local"
-    unless_null $P2116, vivify_789
+    get_how $P2115, $P2114
+    find_lex $P2116, "$target"
+    unless_null $P2116, vivify_788
     new $P2116, "Undef"
+  vivify_788:
+    find_lex $P2117, "$local"
+    unless_null $P2117, vivify_789
+    new $P2117, "Undef"
   vivify_789:
-    $P2117 = $P2114."methods"($P2115, $P2116 :named("local"))
-    store_lex "@methods", $P2117
+    $P2118 = $P2115."methods"($P2116, $P2117 :named("local"))
+    store_lex "@methods", $P2118
 .annotate 'line', 1051
-    find_lex $P2119, "@methods"
-    unless_null $P2119, vivify_790
-    $P2119 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P2120, "@methods"
+    unless_null $P2120, vivify_790
+    $P2120 = root_new ['parrot';'ResizablePMCArray']
   vivify_790:
-    defined $I2120, $P2119
-    unless $I2120, for_undef_791
-    iter $P2118, $P2119
-    new $P2135, 'ExceptionHandler'
-    set_label $P2135, loop2134_handler
-    $P2135."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
-    push_eh $P2135
-  loop2134_test:
-    unless $P2118, loop2134_done
-    shift $P2121, $P2118
-  loop2134_redo:
-    .const 'Sub' $P2123 = "144_1304456120.214" 
-    capture_lex $P2123
-    $P2123($P2121)
-  loop2134_next:
-    goto loop2134_test
-  loop2134_handler:
+    defined $I2121, $P2120
+    unless $I2121, for_undef_791
+    iter $P2119, $P2120
+    new $P2136, 'ExceptionHandler'
+    set_label $P2136, loop2135_handler
+    $P2136."handle_types"(.CONTROL_LOOP_NEXT, .CONTROL_LOOP_REDO, .CONTROL_LOOP_LAST)
+    push_eh $P2136
+  loop2135_test:
+    unless $P2119, loop2135_done
+    shift $P2122, $P2119
+  loop2135_redo:
+    .const 'Sub' $P2124 = "144_1304459371.883" 
+    capture_lex $P2124
+    $P2124($P2122)
+  loop2135_next:
+    goto loop2135_test
+  loop2135_handler:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P2136, exception, 'type'
-    eq $P2136, .CONTROL_LOOP_NEXT, loop2134_next
-    eq $P2136, .CONTROL_LOOP_REDO, loop2134_redo
-  loop2134_done:
+    getattribute $P2137, exception, 'type'
+    eq $P2137, .CONTROL_LOOP_NEXT, loop2135_next
+    eq $P2137, .CONTROL_LOOP_REDO, loop2135_redo
+  loop2135_done:
     pop_eh 
   for_undef_791:
 .annotate 'line', 1054
-    new $P2137, "Exception"
-    set $P2137['type'], .CONTROL_RETURN
-    new $P2138, "Integer"
-    assign $P2138, 0
-    setattribute $P2137, 'payload', $P2138
-    throw $P2137
+    new $P2138, "Exception"
+    set $P2138['type'], .CONTROL_RETURN
+    new $P2139, "Integer"
+    assign $P2139, 0
+    setattribute $P2138, 'payload', $P2139
+    throw $P2138
 .annotate 'line', 1049
     .return ()
-  control_2107:
+  control_2108:
     .local pmc exception 
     .get_results (exception) 
-    getattribute $P2139, exception, "payload"
-    .return ($P2139)
+    getattribute $P2140, exception, "payload"
+    .return ($P2140)
 .end
 
 
@@ -9058,654 +9072,654 @@
 
 .namespace ["NQPAttribute"]
 .include "except_types.pasm"
-.sub "_block2122"  :anon :subid("144_1304456120.214") :outer("143_1304456120.214")
-    .param pmc param_2124
+.sub "_block2123"  :anon :subid("144_1304459371.883") :outer("143_1304459371.883")
+    .param pmc param_2125
 .annotate 'line', 1051
-    .lex "$_", param_2124
+    .lex "$_", param_2125
 .annotate 'line', 1052
-    find_lex $P2127, "$_"
-    unless_null $P2127, vivify_792
-    new $P2127, "Undef"
+    find_lex $P2128, "$_"
+    unless_null $P2128, vivify_792
+    new $P2128, "Undef"
   vivify_792:
-    set $S2128, $P2127
-    find_lex $P2129, "$name"
-    unless_null $P2129, vivify_793
-    new $P2129, "Undef"
+    set $S2129, $P2128
+    find_lex $P2130, "$name"
+    unless_null $P2130, vivify_793
+    new $P2130, "Undef"
   vivify_793:
-    set $S2130, $P2129
-    iseq $I2131, $S2128, $S2130
-    if $I2131, if_2126
-    new $P2125, 'Integer'
-    set $P2125, $I2131
-    goto if_2126_end
-  if_2126:
-    new $P2132, "Exception"
-    set $P2132['type'], .CONTROL_RETURN
-    new $P2133, "Integer"
-    assign $P2133, 1
-    setattribute $P2132, 'payload', $P2133
-    throw $P2132
-  if_2126_end:
+    set $S2131, $P2130
+    iseq $I2132, $S2129, $S2131
+    if $I2132, if_2127
+    new $P2126, 'Integer'
+    set $P2126, $I2132
+    goto if_2127_end
+  if_2127:
+    new $P2133, "Exception"
+    set $P2133['type'], .CONTROL_RETURN
+    new $P2134, "Integer"
+    assign $P2134, 1
+    setattribute $P2133, 'payload', $P2134
+    throw $P2133
+  if_2127_end:
 .annotate 'line', 1051
-    .return ($P2125)
+    .return ($P2126)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPAttribute"]
-.sub "new"  :subid("145_1304456120.214") :outer("142_1304456120.214")
-    .param pmc param_2144
-    .param pmc param_2145 :named("name")
-    .param pmc param_2146 :optional :named("type")
-    .param int has_param_2146 :opt_flag
-    .param pmc param_2148 :optional :named("box_target")
-    .param int has_param_2148 :opt_flag
+.sub "new"  :subid("145_1304459371.883") :outer("142_1304459371.883")
+    .param pmc param_2145
+    .param pmc param_2146 :named("name")
+    .param pmc param_2147 :optional :named("type")
+    .param int has_param_2147 :opt_flag
+    .param pmc param_2149 :optional :named("box_target")
+    .param int has_param_2149 :opt_flag
 .annotate 'line', 994
-    .lex "self", param_2144
-    .lex "$name", param_2145
-    if has_param_2146, optparam_794
-    new $P2147, "Undef"
-    set param_2146, $P2147
+    .lex "self", param_2145
+    .lex "$name", param_2146
+    if has_param_2147, optparam_794
+    new $P2148, "Undef"
+    set param_2147, $P2148
   optparam_794:
-    .lex "$type", param_2146
-    if has_param_2148, optparam_795
-    new $P2149, "Undef"
-    set param_2148, $P2149
-  optparam_795:
-    .lex "$box_target", param_2148
-.annotate 'line', 995
+    .lex "$type", param_2147
+    if has_param_2149, optparam_795
     new $P2150, "Undef"
-    .lex "$attr", $P2150
-    find_lex $P2151, "self"
-    repr_instance_of $P2152, $P2151
-    store_lex "$attr", $P2152
+    set param_2149, $P2150
+  optparam_795:
+    .lex "$box_target", param_2149
+.annotate 'line', 995
+    new $P2151, "Undef"
+    .lex "$attr", $P2151
+    find_lex $P2152, "self"
+    repr_instance_of $P2153, $P2152
+    store_lex "$attr", $P2153
 .annotate 'line', 996
-    find_lex $P2153, "$attr"
-    unless_null $P2153, vivify_796
-    new $P2153, "Undef"
-  vivify_796:
-    find_lex $P2154, "$name"
-    unless_null $P2154, vivify_797
+    find_lex $P2154, "$attr"
+    unless_null $P2154, vivify_796
     new $P2154, "Undef"
-  vivify_797:
-    find_lex $P2155, "$type"
-    unless_null $P2155, vivify_798
+  vivify_796:
+    find_lex $P2155, "$name"
+    unless_null $P2155, vivify_797
     new $P2155, "Undef"
-  vivify_798:
-    find_lex $P2156, "$box_target"
-    unless_null $P2156, vivify_799
+  vivify_797:
+    find_lex $P2156, "$type"
+    unless_null $P2156, vivify_798
     new $P2156, "Undef"
-  vivify_799:
-    $P2153."BUILD"($P2154 :named("name"), $P2155 :named("type"), $P2156 :named("box_target"))
-    find_lex $P2157, "$attr"
-    unless_null $P2157, vivify_800
+  vivify_798:
+    find_lex $P2157, "$box_target"
+    unless_null $P2157, vivify_799
     new $P2157, "Undef"
+  vivify_799:
+    $P2154."BUILD"($P2155 :named("name"), $P2156 :named("type"), $P2157 :named("box_target"))
+    find_lex $P2158, "$attr"
+    unless_null $P2158, vivify_800
+    new $P2158, "Undef"
   vivify_800:
 .annotate 'line', 994
-    .return ($P2157)
+    .return ($P2158)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPAttribute"]
-.sub "BUILD"  :subid("146_1304456120.214") :outer("142_1304456120.214")
-    .param pmc param_2159
-    .param pmc param_2160 :optional :named("name")
-    .param int has_param_2160 :opt_flag
-    .param pmc param_2162 :optional :named("type")
-    .param int has_param_2162 :opt_flag
-    .param pmc param_2164 :optional :named("box_target")
-    .param int has_param_2164 :opt_flag
+.sub "BUILD"  :subid("146_1304459371.883") :outer("142_1304459371.883")
+    .param pmc param_2160
+    .param pmc param_2161 :optional :named("name")
+    .param int has_param_2161 :opt_flag
+    .param pmc param_2163 :optional :named("type")
+    .param int has_param_2163 :opt_flag
+    .param pmc param_2165 :optional :named("box_target")
+    .param int has_param_2165 :opt_flag
 .annotate 'line', 1000
-    .lex "self", param_2159
-    if has_param_2160, optparam_801
-    new $P2161, "Undef"
-    set param_2160, $P2161
+    .lex "self", param_2160
+    if has_param_2161, optparam_801
+    new $P2162, "Undef"
+    set param_2161, $P2162
   optparam_801:
-    .lex "$name", param_2160
-    if has_param_2162, optparam_802
-    new $P2163, "Undef"
-    set param_2162, $P2163
+    .lex "$name", param_2161
+    if has_param_2163, optparam_802
+    new $P2164, "Undef"
+    set param_2163, $P2164
   optparam_802:
-    .lex "$type", param_2162
-    if has_param_2164, optparam_803
-    new $P2165, "Undef"
-    set param_2164, $P2165
-  optparam_803:
-    .lex "$box_target", param_2164
-.annotate 'line', 1001
-    find_lex $P2166, "$name"
-    unless_null $P2166, vivify_804
+    .lex "$type", param_2163
+    if has_param_2165, optparam_803
     new $P2166, "Undef"
+    set param_2165, $P2166
+  optparam_803:
+    .lex "$box_target", param_2165
+.annotate 'line', 1001
+    find_lex $P2167, "$name"
+    unless_null $P2167, vivify_804
+    new $P2167, "Undef"
   vivify_804:
-    find_lex $P2167, "self"
-    find_lex $P2168, "$?CLASS"
-    setattribute $P2167, $P2168, "$!name", $P2166
+    find_lex $P2168, "self"
+    find_lex $P2169, "$?CLASS"
+    setattribute $P2168, $P2169, "$!name", $P2167
 .annotate 'line', 1002
-    find_lex $P2169, "$type"
-    unless_null $P2169, vivify_805
-    new $P2169, "Undef"
+    find_lex $P2170, "$type"
+    unless_null $P2170, vivify_805
+    new $P2170, "Undef"
   vivify_805:
-    find_lex $P2170, "self"
-    find_lex $P2171, "$?CLASS"
-    setattribute $P2170, $P2171, "$!type", $P2169
+    find_lex $P2171, "self"
+    find_lex $P2172, "$?CLASS"
+    setattribute $P2171, $P2172, "$!type", $P2170
 .annotate 'line', 1003
-    find_lex $P2172, "$box_target"
-    unless_null $P2172, vivify_806
-    new $P2172, "Undef"
+    find_lex $P2173, "$box_target"
+    unless_null $P2173, vivify_806
+    new $P2173, "Undef"
   vivify_806:
-    find_lex $P2173, "self"
-    find_lex $P2174, "$?CLASS"
-    setattribute $P2173, $P2174, "$!box_target", $P2172
+    find_lex $P2174, "self"
+    find_lex $P2175, "$?CLASS"
+    setattribute $P2174, $P2175, "$!box_target", $P2173
 .annotate 'line', 1000
-    .return ($P2172)
+    .return ($P2173)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPAttribute"]
-.sub "name"  :subid("147_1304456120.214") :outer("142_1304456120.214")
-    .param pmc param_2176
+.sub "name"  :subid("147_1304459371.883") :outer("142_1304459371.883")
+    .param pmc param_2177
 .annotate 'line', 1006
-    .lex "self", param_2176
-    find_lex $P2177, "self"
-    find_lex $P2178, "$?CLASS"
-    getattribute $P2179, $P2177, $P2178, "$!name"
-    unless_null $P2179, vivify_807
-    new $P2179, "Undef"
+    .lex "self", param_2177
+    find_lex $P2178, "self"
+    find_lex $P2179, "$?CLASS"
+    getattribute $P2180, $P2178, $P2179, "$!name"
+    unless_null $P2180, vivify_807
+    new $P2180, "Undef"
   vivify_807:
-    .return ($P2179)
+    .return ($P2180)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPAttribute"]
-.sub "type"  :subid("148_1304456120.214") :outer("142_1304456120.214")
-    .param pmc param_2181
+.sub "type"  :subid("148_1304459371.883") :outer("142_1304459371.883")
+    .param pmc param_2182
 .annotate 'line', 1010
-    .lex "self", param_2181
+    .lex "self", param_2182
 .annotate 'line', 1011
-    find_lex $P2183, "self"
-    find_lex $P2184, "$?CLASS"
-    getattribute $P2185, $P2183, $P2184, "$!type"
-    unless_null $P2185, vivify_808
-    new $P2185, "Undef"
+    find_lex $P2184, "self"
+    find_lex $P2185, "$?CLASS"
+    getattribute $P2186, $P2184, $P2185, "$!type"
+    unless_null $P2186, vivify_808
+    new $P2186, "Undef"
   vivify_808:
-    set $P2182, $P2185
-    defined $I2187, $P2182
-    if $I2187, default_2186
-    null $P2188
-    set $P2182, $P2188
-  default_2186:
+    set $P2183, $P2186
+    defined $I2188, $P2183
+    if $I2188, default_2187
+    null $P2189
+    set $P2183, $P2189
+  default_2187:
 .annotate 'line', 1010
-    .return ($P2182)
+    .return ($P2183)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPAttribute"]
-.sub "box_target"  :subid("149_1304456120.214") :outer("142_1304456120.214")
-    .param pmc param_2190
+.sub "box_target"  :subid("149_1304459371.883") :outer("142_1304459371.883")
+    .param pmc param_2191
 .annotate 'line', 1014
-    .lex "self", param_2190
+    .lex "self", param_2191
 .annotate 'line', 1015
-    find_lex $P2193, "self"
-    find_lex $P2194, "$?CLASS"
-    getattribute $P2195, $P2193, $P2194, "$!box_target"
-    unless_null $P2195, vivify_809
-    new $P2195, "Undef"
+    find_lex $P2194, "self"
+    find_lex $P2195, "$?CLASS"
+    getattribute $P2196, $P2194, $P2195, "$!box_target"
+    unless_null $P2196, vivify_809
+    new $P2196, "Undef"
   vivify_809:
-    if $P2195, if_2192
+    if $P2196, if_2193
+    new $P2198, "Integer"
+    assign $P2198, 0
+    set $P2192, $P2198
+    goto if_2193_end
+  if_2193:
     new $P2197, "Integer"
-    assign $P2197, 0
-    set $P2191, $P2197
-    goto if_2192_end
-  if_2192:
-    new $P2196, "Integer"
-    assign $P2196, 1
-    set $P2191, $P2196
-  if_2192_end:
+    assign $P2197, 1
+    set $P2192, $P2197
+  if_2193_end:
 .annotate 'line', 1014
-    .return ($P2191)
+    .return ($P2192)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPAttribute"]
-.sub "compose"  :subid("150_1304456120.214") :outer("142_1304456120.214")
-    .param pmc param_2199
+.sub "compose"  :subid("150_1304459371.883") :outer("142_1304459371.883")
     .param pmc param_2200
+    .param pmc param_2201
 .annotate 'line', 1018
-    .const 'Sub' $P2252 = "153_1304456120.214" 
-    capture_lex $P2252
-    .const 'Sub' $P2212 = "151_1304456120.214" 
-    capture_lex $P2212
-    .lex "self", param_2199
-    .lex "$obj", param_2200
+    .const 'Sub' $P2253 = "153_1304459371.883" 
+    capture_lex $P2253
+    .const 'Sub' $P2213 = "151_1304459371.883" 
+    capture_lex $P2213
+    .lex "self", param_2200
+    .lex "$obj", param_2201
 .annotate 'line', 1019
-    new $P2201, "Undef"
-    .lex "$long_name", $P2201
-    find_lex $P2202, "self"
-    find_lex $P2203, "$?CLASS"
-    getattribute $P2204, $P2202, $P2203, "$!name"
-    unless_null $P2204, vivify_810
-    new $P2204, "Undef"
+    new $P2202, "Undef"
+    .lex "$long_name", $P2202
+    find_lex $P2203, "self"
+    find_lex $P2204, "$?CLASS"
+    getattribute $P2205, $P2203, $P2204, "$!name"
+    unless_null $P2205, vivify_810
+    new $P2205, "Undef"
   vivify_810:
-    set $S2205, $P2204
-    new $P2206, 'String'
-    set $P2206, $S2205
-    store_lex "$long_name", $P2206
+    set $S2206, $P2205
+    new $P2207, 'String'
+    set $P2207, $S2206
+    store_lex "$long_name", $P2207
 .annotate 'line', 1020
-    find_lex $P2209, "self"
-    $P2210 = $P2209."has_mutator"()
-    if $P2210, if_2208
+    find_lex $P2210, "self"
+    $P2211 = $P2210."has_mutator"()
+    if $P2211, if_2209
 .annotate 'line', 1032
-    .const 'Sub' $P2252 = "153_1304456120.214" 
-    capture_lex $P2252
-    $P2278 = $P2252()
-    set $P2207, $P2278
+    .const 'Sub' $P2253 = "153_1304459371.883" 
+    capture_lex $P2253
+    $P2279 = $P2253()
+    set $P2208, $P2279
 .annotate 'line', 1020
-    goto if_2208_end
-  if_2208:
-    .const 'Sub' $P2212 = "151_1304456120.214" 
-    capture_lex $P2212
-    $P2250 = $P2212()
-    set $P2207, $P2250
-  if_2208_end:
+    goto if_2209_end
+  if_2209:
+    .const 'Sub' $P2213 = "151_1304459371.883" 
+    capture_lex $P2213
+    $P2251 = $P2213()
+    set $P2208, $P2251
+  if_2209_end:
 .annotate 'line', 1018
-    .return ($P2207)
+    .return ($P2208)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPAttribute"]
-.sub "_block2251"  :anon :subid("153_1304456120.214") :outer("150_1304456120.214")
+.sub "_block2252"  :anon :subid("153_1304459371.883") :outer("150_1304459371.883")
 .annotate 'line', 1032
-    .const 'Sub' $P2268 = "154_1304456120.214" 
-    capture_lex $P2268
+    .const 'Sub' $P2269 = "154_1304459371.883" 
+    capture_lex $P2269
 .annotate 'line', 1033
-    new $P2253, "Undef"
-    .lex "$method", $P2253
-    find_lex $P2254, "$long_name"
-    unless_null $P2254, vivify_811
     new $P2254, "Undef"
+    .lex "$method", $P2254
+    find_lex $P2255, "$long_name"
+    unless_null $P2255, vivify_811
+    new $P2255, "Undef"
   vivify_811:
-    set $S2255, $P2254
-    substr $S2256, $S2255, 2
-    new $P2257, 'String'
-    set $P2257, $S2256
-    store_lex "$method", $P2257
+    set $S2256, $P2255
+    substr $S2257, $S2256, 2
+    new $P2258, 'String'
+    set $P2258, $S2257
+    store_lex "$method", $P2258
 .annotate 'line', 1034
-    find_lex $P2260, "$obj"
-    unless_null $P2260, vivify_812
-    new $P2260, "Undef"
-  vivify_812:
-    find_lex $P2261, "$method"
-    unless_null $P2261, vivify_813
+    find_lex $P2261, "$obj"
+    unless_null $P2261, vivify_812
     new $P2261, "Undef"
+  vivify_812:
+    find_lex $P2262, "$method"
+    unless_null $P2262, vivify_813
+    new $P2262, "Undef"
   vivify_813:
-    $P2262 = "has_method"($P2260, $P2261, 0)
-    unless $P2262, unless_2259
-    set $P2258, $P2262
-    goto unless_2259_end
-  unless_2259:
+    $P2263 = "has_method"($P2261, $P2262, 0)
+    unless $P2263, unless_2260
+    set $P2259, $P2263
+    goto unless_2260_end
+  unless_2260:
 .annotate 'line', 1035
-    find_lex $P2263, "$obj"
-    unless_null $P2263, vivify_814
-    new $P2263, "Undef"
+    find_lex $P2264, "$obj"
+    unless_null $P2264, vivify_814
+    new $P2264, "Undef"
   vivify_814:
-    get_how $P2264, $P2263
-    find_lex $P2265, "$obj"
-    unless_null $P2265, vivify_815
-    new $P2265, "Undef"
-  vivify_815:
-    find_lex $P2266, "$method"
-    unless_null $P2266, vivify_816
+    get_how $P2265, $P2264
+    find_lex $P2266, "$obj"
+    unless_null $P2266, vivify_815
     new $P2266, "Undef"
+  vivify_815:
+    find_lex $P2267, "$method"
+    unless_null $P2267, vivify_816
+    new $P2267, "Undef"
   vivify_816:
 .annotate 'line', 1036
-    .const 'Sub' $P2268 = "154_1304456120.214" 
-    newclosure $P2276, $P2268
-    $P2277 = $P2264."add_method"($P2265, $P2266, $P2276)
+    .const 'Sub' $P2269 = "154_1304459371.883" 
+    newclosure $P2277, $P2269
+    $P2278 = $P2265."add_method"($P2266, $P2267, $P2277)
 .annotate 'line', 1034
-    set $P2258, $P2277
-  unless_2259_end:
+    set $P2259, $P2278
+  unless_2260_end:
 .annotate 'line', 1032
-    .return ($P2258)
+    .return ($P2259)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPAttribute"]
-.sub "_block2267"  :anon :subid("154_1304456120.214") :outer("153_1304456120.214")
-    .param pmc param_2269
+.sub "_block2268"  :anon :subid("154_1304459371.883") :outer("153_1304459371.883")
+    .param pmc param_2270
 .annotate 'line', 1036
-    .lex "self", param_2269
+    .lex "self", param_2270
 .annotate 'line', 1037
-    find_lex $P2270, "self"
-    find_lex $P2271, "$obj"
-    unless_null $P2271, vivify_817
-    new $P2271, "Undef"
+    find_lex $P2271, "self"
+    find_lex $P2272, "$obj"
+    unless_null $P2272, vivify_817
+    new $P2272, "Undef"
   vivify_817:
-    get_what $P2272, $P2271
-    find_lex $P2273, "$long_name"
-    unless_null $P2273, vivify_818
-    new $P2273, "Undef"
+    get_what $P2273, $P2272
+    find_lex $P2274, "$long_name"
+    unless_null $P2274, vivify_818
+    new $P2274, "Undef"
   vivify_818:
-    set $S2274, $P2273
-    getattribute $P2275, $P2270, $P2272, $S2274
+    set $S2275, $P2274
+    getattribute $P2276, $P2271, $P2273, $S2275
 .annotate 'line', 1036
-    .return ($P2275)
+    .return ($P2276)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPAttribute"]
-.sub "_block2211"  :anon :subid("151_1304456120.214") :outer("150_1304456120.214")
+.sub "_block2212"  :anon :subid("151_1304459371.883") :outer("150_1304459371.883")
 .annotate 'line', 1020
-    .const 'Sub' $P2229 = "152_1304456120.214" 
-    capture_lex $P2229
+    .const 'Sub' $P2230 = "152_1304459371.883" 
+    capture_lex $P2230
 .annotate 'line', 1021
-    new $P2213, "Undef"
-    .lex "$method", $P2213
-    find_lex $P2214, "$long_name"
-    unless_null $P2214, vivify_819
     new $P2214, "Undef"
+    .lex "$method", $P2214
+    find_lex $P2215, "$long_name"
+    unless_null $P2215, vivify_819
+    new $P2215, "Undef"
   vivify_819:
-    set $S2215, $P2214
-    substr $S2216, $S2215, 1
-    new $P2217, 'String'
-    set $P2217, $S2216
-    store_lex "$method", $P2217
+    set $S2216, $P2215
+    substr $S2217, $S2216, 1
+    new $P2218, 'String'
+    set $P2218, $S2217
+    store_lex "$method", $P2218
 .annotate 'line', 1022
-    find_lex $P2220, "$obj"
-    unless_null $P2220, vivify_820
-    new $P2220, "Undef"
-  vivify_820:
-    find_lex $P2221, "$method"
-    unless_null $P2221, vivify_821
+    find_lex $P2221, "$obj"
+    unless_null $P2221, vivify_820
     new $P2221, "Undef"
+  vivify_820:
+    find_lex $P2222, "$method"
+    unless_null $P2222, vivify_821
+    new $P2222, "Undef"
   vivify_821:
-    $P2222 = "has_method"($P2220, $P2221, 0)
-    unless $P2222, unless_2219
-    set $P2218, $P2222
-    goto unless_2219_end
-  unless_2219:
+    $P2223 = "has_method"($P2221, $P2222, 0)
+    unless $P2223, unless_2220
+    set $P2219, $P2223
+    goto unless_2220_end
+  unless_2220:
 .annotate 'line', 1023
-    find_lex $P2223, "$obj"
-    unless_null $P2223, vivify_822
-    new $P2223, "Undef"
+    find_lex $P2224, "$obj"
+    unless_null $P2224, vivify_822
+    new $P2224, "Undef"
   vivify_822:
-    get_how $P2224, $P2223
-    find_lex $P2225, "$obj"
-    unless_null $P2225, vivify_823
-    new $P2225, "Undef"
+    get_how $P2225, $P2224
+    find_lex $P2226, "$obj"
+    unless_null $P2226, vivify_823
+    new $P2226, "Undef"
   vivify_823:
-    get_what $P2226, $P2225
-    find_lex $P2227, "$method"
-    unless_null $P2227, vivify_824
-    new $P2227, "Undef"
+    get_what $P2227, $P2226
+    find_lex $P2228, "$method"
+    unless_null $P2228, vivify_824
+    new $P2228, "Undef"
   vivify_824:
-    .const 'Sub' $P2229 = "152_1304456120.214" 
-    newclosure $P2248, $P2229
-    $P2249 = $P2224."add_method"($P2226, $P2227, $P2248)
+    .const 'Sub' $P2230 = "152_1304459371.883" 
+    newclosure $P2249, $P2230
+    $P2250 = $P2225."add_method"($P2227, $P2228, $P2249)
 .annotate 'line', 1022
-    set $P2218, $P2249
-  unless_2219_end:
+    set $P2219, $P2250
+  unless_2220_end:
 .annotate 'line', 1020
-    .return ($P2218)
+    .return ($P2219)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPAttribute"]
-.sub "_block2228"  :anon :subid("152_1304456120.214") :outer("151_1304456120.214")
-    .param pmc param_2230
-    .param pmc param_2231 :optional
-    .param int has_param_2231 :opt_flag
+.sub "_block2229"  :anon :subid("152_1304459371.883") :outer("151_1304459371.883")
+    .param pmc param_2231
+    .param pmc param_2232 :optional
+    .param int has_param_2232 :opt_flag
 .annotate 'line', 1023
-    .lex "self", param_2230
-    if has_param_2231, optparam_825
-    new $P2232, "Undef"
-    set param_2231, $P2232
+    .lex "self", param_2231
+    if has_param_2232, optparam_825
+    new $P2233, "Undef"
+    set param_2232, $P2233
   optparam_825:
-    .lex "$value", param_2231
+    .lex "$value", param_2232
 .annotate 'line', 1025
-    find_lex $P2234, "$value"
-    unless_null $P2234, vivify_826
-    new $P2234, "Undef"
+    find_lex $P2235, "$value"
+    unless_null $P2235, vivify_826
+    new $P2235, "Undef"
   vivify_826:
-    defined $I2235, $P2234
-    unless $I2235, if_2233_end
+    defined $I2236, $P2235
+    unless $I2236, if_2234_end
 .annotate 'line', 1024
-    find_lex $P2236, "self"
-    find_lex $P2237, "$obj"
-    unless_null $P2237, vivify_827
-    new $P2237, "Undef"
+    find_lex $P2237, "self"
+    find_lex $P2238, "$obj"
+    unless_null $P2238, vivify_827
+    new $P2238, "Undef"
   vivify_827:
-    get_what $P2238, $P2237
-    find_lex $P2239, "$long_name"
-    unless_null $P2239, vivify_828
-    new $P2239, "Undef"
+    get_what $P2239, $P2238
+    find_lex $P2240, "$long_name"
+    unless_null $P2240, vivify_828
+    new $P2240, "Undef"
   vivify_828:
-    set $S2240, $P2239
-    find_lex $P2241, "$value"
-    unless_null $P2241, vivify_829
-    new $P2241, "Undef"
+    set $S2241, $P2240
+    find_lex $P2242, "$value"
+    unless_null $P2242, vivify_829
+    new $P2242, "Undef"
   vivify_829:
-    setattribute $P2236, $P2238, $S2240, $P2241
-  if_2233_end:
+    setattribute $P2237, $P2239, $S2241, $P2242
+  if_2234_end:
 .annotate 'line', 1027
-    find_lex $P2242, "self"
-    find_lex $P2243, "$obj"
-    unless_null $P2243, vivify_830
-    new $P2243, "Undef"
+    find_lex $P2243, "self"
+    find_lex $P2244, "$obj"
+    unless_null $P2244, vivify_830
+    new $P2244, "Undef"
   vivify_830:
-    get_what $P2244, $P2243
-    find_lex $P2245, "$long_name"
-    unless_null $P2245, vivify_831
-    new $P2245, "Undef"
+    get_what $P2245, $P2244
+    find_lex $P2246, "$long_name"
+    unless_null $P2246, vivify_831
+    new $P2246, "Undef"
   vivify_831:
-    set $S2246, $P2245
-    getattribute $P2247, $P2242, $P2244, $S2246
+    set $S2247, $P2246
+    getattribute $P2248, $P2243, $P2245, $S2247
 .annotate 'line', 1023
-    .return ($P2247)
+    .return ($P2248)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPAttribute"]
-.sub "has_mutator"  :subid("155_1304456120.214") :outer("142_1304456120.214")
-    .param pmc param_2280
+.sub "has_mutator"  :subid("155_1304459371.883") :outer("142_1304459371.883")
+    .param pmc param_2281
 .annotate 'line', 1045
-    .lex "self", param_2280
+    .lex "self", param_2281
 .annotate 'line', 1046
-    find_lex $P2281, "self"
-    find_lex $P2282, "$?CLASS"
-    getattribute $P2283, $P2281, $P2282, "$!name"
-    unless_null $P2283, vivify_832
-    new $P2283, "Undef"
+    find_lex $P2282, "self"
+    find_lex $P2283, "$?CLASS"
+    getattribute $P2284, $P2282, $P2283, "$!name"
+    unless_null $P2284, vivify_832
+    new $P2284, "Undef"
   vivify_832:
-    set $S2284, $P2283
-    substr $S2285, $S2284, 1, 1
-    isne $I2286, $S2285, "!"
+    set $S2285, $P2284
+    substr $S2286, $S2285, 1, 1
+    isne $I2287, $S2286, "!"
 .annotate 'line', 1045
-    .return ($I2286)
+    .return ($I2287)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPModuleHOW"]
-.sub "_block2288"  :subid("156_1304456120.214") :outer("10_1304456120.214")
+.sub "_block2289"  :subid("156_1304459371.883") :outer("10_1304459371.883")
 .annotate 'line', 1060
-    .const 'Sub' $P2344 = "164_1304456120.214" 
-    capture_lex $P2344
-    .const 'Sub' $P2338 = "163_1304456120.214" 
-    capture_lex $P2338
-    .const 'Sub' $P2334 = "162_1304456120.214" 
-    capture_lex $P2334
-    .const 'Sub' $P2329 = "161_1304456120.214" 
-    capture_lex $P2329
-    .const 'Sub' $P2324 = "160_1304456120.214" 
-    capture_lex $P2324
-    .const 'Sub' $P2309 = "159_1304456120.214" 
-    capture_lex $P2309
-    .const 'Sub' $P2302 = "158_1304456120.214" 
-    capture_lex $P2302
-    .const 'Sub' $P2292 = "157_1304456120.214" 
-    capture_lex $P2292
-    .lex "$?PACKAGE", $P2290
-    .lex "$?CLASS", $P2291
+    .const 'Sub' $P2345 = "164_1304459371.883" 
+    capture_lex $P2345
+    .const 'Sub' $P2339 = "163_1304459371.883" 
+    capture_lex $P2339
+    .const 'Sub' $P2335 = "162_1304459371.883" 
+    capture_lex $P2335
+    .const 'Sub' $P2330 = "161_1304459371.883" 
+    capture_lex $P2330
+    .const 'Sub' $P2325 = "160_1304459371.883" 
+    capture_lex $P2325
+    .const 'Sub' $P2310 = "159_1304459371.883" 
+    capture_lex $P2310
+    .const 'Sub' $P2303 = "158_1304459371.883" 
+    capture_lex $P2303
+    .const 'Sub' $P2293 = "157_1304459371.883" 
+    capture_lex $P2293
+    .lex "$?PACKAGE", $P2291
+    .lex "$?CLASS", $P2292
 .annotate 'line', 1101
-    .const 'Sub' $P2344 = "164_1304456120.214" 
-    newclosure $P2350, $P2344
+    .const 'Sub' $P2345 = "164_1304459371.883" 
+    newclosure $P2351, $P2345
 .annotate 'line', 1060
-    .return ($P2350)
+    .return ($P2351)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPModuleHOW"]
-.sub "new"  :subid("157_1304456120.214") :outer("156_1304456120.214")
-    .param pmc param_2293
-    .param pmc param_2294 :optional :named("name")
-    .param int has_param_2294 :opt_flag
+.sub "new"  :subid("157_1304459371.883") :outer("156_1304459371.883")
+    .param pmc param_2294
+    .param pmc param_2295 :optional :named("name")
+    .param int has_param_2295 :opt_flag
 .annotate 'line', 1064
-    .lex "self", param_2293
-    if has_param_2294, optparam_833
-    new $P2295, "Undef"
-    set param_2294, $P2295
-  optparam_833:
-    .lex "$name", param_2294
-.annotate 'line', 1065
+    .lex "self", param_2294
+    if has_param_2295, optparam_833
     new $P2296, "Undef"
-    .lex "$obj", $P2296
-    find_lex $P2297, "self"
-    repr_instance_of $P2298, $P2297
-    store_lex "$obj", $P2298
+    set param_2295, $P2296
+  optparam_833:
+    .lex "$name", param_2295
+.annotate 'line', 1065
+    new $P2297, "Undef"
+    .lex "$obj", $P2297
+    find_lex $P2298, "self"
+    repr_instance_of $P2299, $P2298
+    store_lex "$obj", $P2299
 .annotate 'line', 1066
-    find_lex $P2299, "$obj"
-    unless_null $P2299, vivify_834
-    new $P2299, "Undef"
-  vivify_834:
-    find_lex $P2300, "$name"
-    unless_null $P2300, vivify_835
+    find_lex $P2300, "$obj"
+    unless_null $P2300, vivify_834
     new $P2300, "Undef"
-  vivify_835:
-    $P2299."BUILD"($P2300 :named("name"))
-    find_lex $P2301, "$obj"
-    unless_null $P2301, vivify_836
+  vivify_834:
+    find_lex $P2301, "$name"
+    unless_null $P2301, vivify_835
     new $P2301, "Undef"
+  vivify_835:
+    $P2300."BUILD"($P2301 :named("name"))
+    find_lex $P2302, "$obj"
+    unless_null $P2302, vivify_836
+    new $P2302, "Undef"
   vivify_836:
 .annotate 'line', 1064
-    .return ($P2301)
+    .return ($P2302)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPModuleHOW"]
-.sub "BUILD"  :subid("158_1304456120.214") :outer("156_1304456120.214")
-    .param pmc param_2303
-    .param pmc param_2304 :optional :named("name")
-    .param int has_param_2304 :opt_flag
+.sub "BUILD"  :subid("158_1304459371.883") :outer("156_1304459371.883")
+    .param pmc param_2304
+    .param pmc param_2305 :optional :named("name")
+    .param int has_param_2305 :opt_flag
 .annotate 'line', 1070
-    .lex "self", param_2303
-    if has_param_2304, optparam_837
-    new $P2305, "Undef"
-    set param_2304, $P2305
-  optparam_837:
-    .lex "$name", param_2304
-.annotate 'line', 1071
-    find_lex $P2306, "$name"
-    unless_null $P2306, vivify_838
+    .lex "self", param_2304
+    if has_param_2305, optparam_837
     new $P2306, "Undef"
+    set param_2305, $P2306
+  optparam_837:
+    .lex "$name", param_2305
+.annotate 'line', 1071
+    find_lex $P2307, "$name"
+    unless_null $P2307, vivify_838
+    new $P2307, "Undef"
   vivify_838:
-    find_lex $P2307, "self"
-    find_lex $P2308, "$?CLASS"
-    setattribute $P2307, $P2308, "$!name", $P2306
+    find_lex $P2308, "self"
+    find_lex $P2309, "$?CLASS"
+    setattribute $P2308, $P2309, "$!name", $P2307
 .annotate 'line', 1070
-    .return ($P2306)
+    .return ($P2307)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPModuleHOW"]
-.sub "new_type"  :subid("159_1304456120.214") :outer("156_1304456120.214")
-    .param pmc param_2310
-    .param pmc param_2311 :optional :named("name")
-    .param int has_param_2311 :opt_flag
-    .param pmc param_2313 :optional :named("repr")
-    .param int has_param_2313 :opt_flag
+.sub "new_type"  :subid("159_1304459371.883") :outer("156_1304459371.883")
+    .param pmc param_2311
+    .param pmc param_2312 :optional :named("name")
+    .param int has_param_2312 :opt_flag
+    .param pmc param_2314 :optional :named("repr")
+    .param int has_param_2314 :opt_flag
 .annotate 'line', 1076
-    .lex "self", param_2310
-    if has_param_2311, optparam_839
-    new $P2312, "String"
-    assign $P2312, "<anon>"
-    set param_2311, $P2312
+    .lex "self", param_2311
+    if has_param_2312, optparam_839
+    new $P2313, "String"
+    assign $P2313, "<anon>"
+    set param_2312, $P2313
   optparam_839:
-    .lex "$name", param_2311
-    if has_param_2313, optparam_840
-    new $P2314, "String"
-    assign $P2314, "P6opaque"
-    set param_2313, $P2314
+    .lex "$name", param_2312
+    if has_param_2314, optparam_840
+    new $P2315, "String"
+    assign $P2315, "P6opaque"
+    set param_2314, $P2315
   optparam_840:
-    .lex "$repr", param_2313
+    .lex "$repr", param_2314
 .annotate 'line', 1077
-    new $P2315, "Undef"
-    .lex "$metaclass", $P2315
-    find_lex $P2316, "self"
-    find_lex $P2317, "$name"
-    unless_null $P2317, vivify_841
-    new $P2317, "Undef"
+    new $P2316, "Undef"
+    .lex "$metaclass", $P2316
+    find_lex $P2317, "self"
+    find_lex $P2318, "$name"
+    unless_null $P2318, vivify_841
+    new $P2318, "Undef"
   vivify_841:
-    $P2318 = $P2316."new"($P2317 :named("name"))
-    store_lex "$metaclass", $P2318
+    $P2319 = $P2317."new"($P2318 :named("name"))
+    store_lex "$metaclass", $P2319
 .annotate 'line', 1079
-    find_lex $P2319, "$metaclass"
-    unless_null $P2319, vivify_842
-    new $P2319, "Undef"
-  vivify_842:
-    find_lex $P2320, "$repr"
-    unless_null $P2320, vivify_843
+    find_lex $P2320, "$metaclass"
+    unless_null $P2320, vivify_842
     new $P2320, "Undef"
+  vivify_842:
+    find_lex $P2321, "$repr"
+    unless_null $P2321, vivify_843
+    new $P2321, "Undef"
   vivify_843:
-    set $S2321, $P2320
-    repr_type_object_for $P2322, $P2319, $S2321
-    $P2323 = root_new ['parrot';'Hash']
-    set_who $P2322, $P2323
+    set $S2322, $P2321
+    repr_type_object_for $P2323, $P2320, $S2322
+    $P2324 = root_new ['parrot';'Hash']
+    set_who $P2323, $P2324
 .annotate 'line', 1076
-    .return ($P2322)
+    .return ($P2323)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPModuleHOW"]
-.sub "add_method"  :subid("160_1304456120.214") :outer("156_1304456120.214")
-    .param pmc param_2325
+.sub "add_method"  :subid("160_1304459371.883") :outer("156_1304459371.883")
     .param pmc param_2326
     .param pmc param_2327
     .param pmc param_2328
+    .param pmc param_2329
 .annotate 'line', 1083
-    .lex "self", param_2325
-    .lex "$obj", param_2326
-    .lex "$name", param_2327
-    .lex "$code_obj", param_2328
+    .lex "self", param_2326
+    .lex "$obj", param_2327
+    .lex "$name", param_2328
+    .lex "$code_obj", param_2329
     .return ()
 .end
 
@@ -9713,16 +9727,16 @@
 .HLL "nqp"
 
 .namespace ["NQPModuleHOW"]
-.sub "add_multi_method"  :subid("161_1304456120.214") :outer("156_1304456120.214")
-    .param pmc param_2330
+.sub "add_multi_method"  :subid("161_1304459371.883") :outer("156_1304459371.883")
     .param pmc param_2331
     .param pmc param_2332
     .param pmc param_2333
+    .param pmc param_2334
 .annotate 'line', 1089
-    .lex "self", param_2330
-    .lex "$obj", param_2331
-    .lex "$name", param_2332
-    .lex "$code_obj", param_2333
+    .lex "self", param_2331
+    .lex "$obj", param_2332
+    .lex "$name", param_2333
+    .lex "$code_obj", param_2334
 .annotate 'line', 1090
     die "Modules may not have methods"
 .annotate 'line', 1089
@@ -9733,14 +9747,14 @@
 .HLL "nqp"
 
 .namespace ["NQPModuleHOW"]
-.sub "add_attribute"  :subid("162_1304456120.214") :outer("156_1304456120.214")
-    .param pmc param_2335
+.sub "add_attribute"  :subid("162_1304459371.883") :outer("156_1304459371.883")
     .param pmc param_2336
     .param pmc param_2337
+    .param pmc param_2338
 .annotate 'line', 1093
-    .lex "self", param_2335
-    .lex "$obj", param_2336
-    .lex "$meta_attr", param_2337
+    .lex "self", param_2336
+    .lex "$obj", param_2337
+    .lex "$meta_attr", param_2338
 .annotate 'line', 1094
     die "Modules may not have attributes"
 .annotate 'line', 1093
@@ -9751,133 +9765,133 @@
 .HLL "nqp"
 
 .namespace ["NQPModuleHOW"]
-.sub "compose"  :subid("163_1304456120.214") :outer("156_1304456120.214")
-    .param pmc param_2339
+.sub "compose"  :subid("163_1304459371.883") :outer("156_1304459371.883")
     .param pmc param_2340
+    .param pmc param_2341
 .annotate 'line', 1097
-    .lex "self", param_2339
-    .lex "$obj", param_2340
+    .lex "self", param_2340
+    .lex "$obj", param_2341
 .annotate 'line', 1098
-    new $P2341, "Integer"
-    assign $P2341, 1
-    find_lex $P2342, "self"
-    find_lex $P2343, "$?CLASS"
-    setattribute $P2342, $P2343, "$!composed", $P2341
+    new $P2342, "Integer"
+    assign $P2342, 1
+    find_lex $P2343, "self"
+    find_lex $P2344, "$?CLASS"
+    setattribute $P2343, $P2344, "$!composed", $P2342
 .annotate 'line', 1097
-    .return ($P2341)
+    .return ($P2342)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["NQPModuleHOW"]
-.sub "name"  :subid("164_1304456120.214") :outer("156_1304456120.214")
-    .param pmc param_2345
+.sub "name"  :subid("164_1304459371.883") :outer("156_1304459371.883")
     .param pmc param_2346
+    .param pmc param_2347
 .annotate 'line', 1101
-    .lex "self", param_2345
-    .lex "$obj", param_2346
-    find_lex $P2347, "self"
-    find_lex $P2348, "$?CLASS"
-    getattribute $P2349, $P2347, $P2348, "$!name"
-    unless_null $P2349, vivify_844
-    new $P2349, "Undef"
+    .lex "self", param_2346
+    .lex "$obj", param_2347
+    find_lex $P2348, "self"
+    find_lex $P2349, "$?CLASS"
+    getattribute $P2350, $P2348, $P2349, "$!name"
+    unless_null $P2350, vivify_844
+    new $P2350, "Undef"
   vivify_844:
-    .return ($P2349)
+    .return ($P2350)
 .end
 
 
 .HLL "nqp"
 
 .namespace []
-.sub "_block2351"  :anon :subid("165_1304456120.214") :outer("10_1304456120.214")
+.sub "_block2352"  :anon :subid("165_1304459371.883") :outer("10_1304459371.883")
 .annotate 'line', 1109
-    .lex "$?PACKAGE", $P2353
-    .lex "$?CLASS", $P2354
+    .lex "$?PACKAGE", $P2354
+    .lex "$?CLASS", $P2355
 .annotate 'line', 1110
-    find_lex $P2355, "NQPModuleHOW"
-    find_lex $P2356, "$?PACKAGE"
-    unless_null $P2356, vivify_845
-    new $P2356, "Undef"
-    store_lex "$?PACKAGE", $P2356
+    find_lex $P2356, "NQPModuleHOW"
+    find_lex $P2357, "$?PACKAGE"
+    unless_null $P2357, vivify_845
+    new $P2357, "Undef"
+    store_lex "$?PACKAGE", $P2357
   vivify_845:
-    get_who $P2357, $P2356
-    set $P2357["module"], $P2355
+    get_who $P2358, $P2357
+    set $P2358["module"], $P2356
 .annotate 'line', 1111
-    find_lex $P2358, "NQPClassHOW"
-    find_lex $P2359, "$?PACKAGE"
-    unless_null $P2359, vivify_846
-    new $P2359, "Undef"
-    store_lex "$?PACKAGE", $P2359
+    find_lex $P2359, "NQPClassHOW"
+    find_lex $P2360, "$?PACKAGE"
+    unless_null $P2360, vivify_846
+    new $P2360, "Undef"
+    store_lex "$?PACKAGE", $P2360
   vivify_846:
-    get_who $P2360, $P2359
-    set $P2360["class"], $P2358
+    get_who $P2361, $P2360
+    set $P2361["class"], $P2359
 .annotate 'line', 1112
-    find_lex $P2361, "NQPAttribute"
-    find_lex $P2362, "$?PACKAGE"
-    unless_null $P2362, vivify_847
-    new $P2362, "Undef"
-    store_lex "$?PACKAGE", $P2362
+    find_lex $P2362, "NQPAttribute"
+    find_lex $P2363, "$?PACKAGE"
+    unless_null $P2363, vivify_847
+    new $P2363, "Undef"
+    store_lex "$?PACKAGE", $P2363
   vivify_847:
-    get_who $P2363, $P2362
-    set $P2363["class-attr"], $P2361
+    get_who $P2364, $P2363
+    set $P2364["class-attr"], $P2362
 .annotate 'line', 1113
-    find_lex $P2364, "NQPClassHOW"
-    find_lex $P2365, "$?PACKAGE"
-    unless_null $P2365, vivify_848
-    new $P2365, "Undef"
-    store_lex "$?PACKAGE", $P2365
+    find_lex $P2365, "NQPClassHOW"
+    find_lex $P2366, "$?PACKAGE"
+    unless_null $P2366, vivify_848
+    new $P2366, "Undef"
+    store_lex "$?PACKAGE", $P2366
   vivify_848:
-    get_who $P2366, $P2365
-    set $P2366["grammar"], $P2364
+    get_who $P2367, $P2366
+    set $P2367["grammar"], $P2365
 .annotate 'line', 1114
-    find_lex $P2367, "NQPAttribute"
-    find_lex $P2368, "$?PACKAGE"
-    unless_null $P2368, vivify_849
-    new $P2368, "Undef"
-    store_lex "$?PACKAGE", $P2368
+    find_lex $P2368, "NQPAttribute"
+    find_lex $P2369, "$?PACKAGE"
+    unless_null $P2369, vivify_849
+    new $P2369, "Undef"
+    store_lex "$?PACKAGE", $P2369
   vivify_849:
-    get_who $P2369, $P2368
-    set $P2369["grammar-attr"], $P2367
+    get_who $P2370, $P2369
+    set $P2370["grammar-attr"], $P2368
 .annotate 'line', 1115
-    find_lex $P2370, "NQPParametricRoleHOW"
-    find_lex $P2371, "$?PACKAGE"
-    unless_null $P2371, vivify_850
-    new $P2371, "Undef"
-    store_lex "$?PACKAGE", $P2371
+    find_lex $P2371, "NQPParametricRoleHOW"
+    find_lex $P2372, "$?PACKAGE"
+    unless_null $P2372, vivify_850
+    new $P2372, "Undef"
+    store_lex "$?PACKAGE", $P2372
   vivify_850:
-    get_who $P2372, $P2371
-    set $P2372["role"], $P2370
+    get_who $P2373, $P2372
+    set $P2373["role"], $P2371
 .annotate 'line', 1116
-    find_lex $P2373, "NQPAttribute"
-    find_lex $P2374, "$?PACKAGE"
-    unless_null $P2374, vivify_851
-    new $P2374, "Undef"
-    store_lex "$?PACKAGE", $P2374
+    find_lex $P2374, "NQPAttribute"
+    find_lex $P2375, "$?PACKAGE"
+    unless_null $P2375, vivify_851
+    new $P2375, "Undef"
+    store_lex "$?PACKAGE", $P2375
   vivify_851:
-    get_who $P2375, $P2374
-    set $P2375["role-attr"], $P2373
+    get_who $P2376, $P2375
+    set $P2376["role-attr"], $P2374
 .annotate 'line', 1117
-    find_lex $P2376, "NQPNativeHOW"
-    find_lex $P2377, "$?PACKAGE"
-    unless_null $P2377, vivify_852
-    new $P2377, "Undef"
-    store_lex "$?PACKAGE", $P2377
+    find_lex $P2377, "NQPNativeHOW"
+    find_lex $P2378, "$?PACKAGE"
+    unless_null $P2378, vivify_852
+    new $P2378, "Undef"
+    store_lex "$?PACKAGE", $P2378
   vivify_852:
-    get_who $P2378, $P2377
-    set $P2378["native"], $P2376
+    get_who $P2379, $P2378
+    set $P2379["native"], $P2377
 .annotate 'line', 1109
-    .return ($P2376)
+    .return ($P2377)
 .end
 
 
 .HLL "nqp"
 
 .namespace []
-.sub "_block2380" :load :anon :subid("166_1304456120.214")
+.sub "_block2387" :load :anon :subid("166_1304459371.883")
 .annotate 'line', 1
-    .const 'Sub' $P2382 = "10_1304456120.214" 
-    $P2383 = $P2382()
-    .return ($P2383)
+    .const 'Sub' $P2389 = "10_1304459371.883" 
+    $P2390 = $P2389()
+    .return ($P2390)
 .end
 
