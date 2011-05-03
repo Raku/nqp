@@ -795,11 +795,11 @@
     load_bytecode "ModuleLoader.pbc"
     get_hll_global $P2476, "ModuleLoader"
     nqp_get_sc_object $P2477, "1304456135.999", 0
-    $P2476."load_module"("Regex", $P2477)
+    $P2476."load_module"("NQPRegex", $P2477)
     load_bytecode "ModuleLoader.pbc"
     get_hll_global $P2478, "ModuleLoader"
     nqp_get_sc_object $P2479, "1304456135.999", 0
-    $P2478."load_module"("HLL", $P2479)
+    $P2478."load_module"("NQPHLL", $P2479)
     nqp_get_sc_object $P2480, "1304456116.562", 41
     $P2481 = $P2480."new_type"("Regex::P6Regex::Grammar" :named("name"))
     nqp_set_sc_for_object $P2481, cur_sc

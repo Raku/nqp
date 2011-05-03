@@ -1,6 +1,6 @@
 #! nqp
 
-use HLL;
+use NQPHLL;
 
 plan(2);
 

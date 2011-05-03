@@ -1,4 +1,4 @@
-use HLL;
+use NQPHLL;
 
 grammar Regex::P6Regex::Grammar is HLL::Grammar {
 

@@ -203,7 +203,7 @@ class NQP::Actions is HLL::Actions {
             # this in the setting as Regex depends on the setting).
             unless %*COMPILING<%?OPTIONS><setting> eq 'NULL' {
                 import_HOW_exports($SETTING);
-                $*SC.load_module('Regex', $*GLOBALish);
+                $*SC.load_module('NQPRegex', $*GLOBALish);
             }
         }
         self.SET_BLOCK_OUTER_CTX(@BLOCK[0]);

@@ -104,17 +104,17 @@ STAGE2 = src/stage2
 
 MODULE_LOADER_PBC = ModuleLoader.pbc
 
-REGEX_PBC       = Regex.pbc
+REGEX_PBC       = NQPRegex.pbc
 
 PAST_PBC        = PASTRegex.pbc
 
-HLL_PBC          = HLL.pbc
-HLL_COMBINED     = gen/HLL.pm
-HLL_COMBINED_PIR = gen/HLL.pir
+HLL_PBC          = NQPHLL.pbc
+HLL_COMBINED     = gen/NQPHLL.pm
+HLL_COMBINED_PIR = gen/NQPHLL.pir
 
-P6REGEX_PBC          = P6Regex.pbc
-P6REGEX_COMBINED     = gen/P6Regex.pm
-P6REGEX_COMBINED_PIR = gen/P6Regex.pir
+P6REGEX_PBC          = NQPP6Regex.pbc
+P6REGEX_COMBINED     = gen/NQPP6Regex.pm
+P6REGEX_COMBINED_PIR = gen/NQPP6Regex.pir
 
 NQP_COMBINED     = gen/NQP.pm
 NQP_COMBINED_PIR = gen/NQP.pir

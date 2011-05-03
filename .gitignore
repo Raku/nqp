@@ -20,11 +20,11 @@ src/ops/*.h
 src/ops/*.c
 src/pmc/pmc_*.h
 src/pmc/*.c
-Regex.pbc
+NQPRegex.pbc
 PASTRegex.pbc
-HLL.pbc
+NQPHLL.pbc
 P6Regex
-P6Regex.pbc
+NQPP6Regex.pbc
 nqp
 nqp.c
 nqp_group.c

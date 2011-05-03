@@ -1677,11 +1677,11 @@
     load_bytecode "ModuleLoader.pbc"
     get_hll_global $P6164, "ModuleLoader"
     nqp_get_sc_object $P6165, "1304456142.948", 0
-    $P6164."load_module"("Regex", $P6165)
+    $P6164."load_module"("NQPRegex", $P6165)
     load_bytecode "ModuleLoader.pbc"
     get_hll_global $P6166, "ModuleLoader"
     nqp_get_sc_object $P6167, "1304456142.948", 0
-    $P6166."load_module"("P6Regex", $P6167)
+    $P6166."load_module"("NQPP6Regex", $P6167)
     nqp_get_sc_object $P6168, "1304456116.562", 41
     $P6169 = $P6168."new_type"("NQP::Grammar" :named("name"))
     nqp_set_sc_for_object $P6169, cur_sc
@@ -31677,7 +31677,7 @@
     die "Contextual $*GLOBALish not found"
   vivify_1741:
   vivify_1740:
-    $P2994 = $P2990."load_module"("Regex", $P2993)
+    $P2994 = $P2990."load_module"("NQPRegex", $P2993)
 .annotate 'line', 960
     set $P2978, $P2994
   unless_2979_end:

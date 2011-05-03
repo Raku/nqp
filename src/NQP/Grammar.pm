@@ -1,4 +1,4 @@
-use P6Regex;
+use NQPP6Regex;
 
 grammar NQP::Grammar is HLL::Grammar {
     method TOP() {
