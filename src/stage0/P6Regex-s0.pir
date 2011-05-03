@@ -6,16 +6,16 @@
 .loadlib "nqp_ops"
 
 .namespace []
-.sub "_block11"  :anon :subid("10_1304284968.543")
+.sub "_block11"  :anon :subid("10_1304456140.832")
     .param pmc param_13 :slurpy
 .annotate 'line', 0
-    .const 'Sub' $P2422 = "256_1304284968.543" 
+    .const 'Sub' $P2422 = "256_1304456140.832" 
     capture_lex $P2422
-    .const 'Sub' $P637 = "174_1304284968.543" 
+    .const 'Sub' $P637 = "174_1304456140.832" 
     capture_lex $P637
-    .const 'Sub' $P24 = "12_1304284968.543" 
+    .const 'Sub' $P24 = "12_1304456140.832" 
     capture_lex $P24
-    .const 'Sub' $P17 = "11_1304284968.543" 
+    .const 'Sub' $P17 = "11_1304456140.832" 
     capture_lex $P17
 .annotate 'line', 1
     .lex "@ARGS", param_13
@@ -25,7 +25,7 @@
     new $P16, "Undef"
     .lex "$p6regex", $P16
 .annotate 'line', 833
-    .const 'Sub' $P17 = "11_1304284968.543" 
+    .const 'Sub' $P17 = "11_1304456140.832" 
     newclosure $P22, $P17
     .lex "MAIN", $P22
 .annotate 'line', 1
@@ -36,15 +36,15 @@
     $P0."ctxsave"()
   ctxsave_done:
 .annotate 'line', 9
-    .const 'Sub' $P24 = "12_1304284968.543" 
+    .const 'Sub' $P24 = "12_1304456140.832" 
     capture_lex $P24
     $P24()
 .annotate 'line', 212
-    .const 'Sub' $P637 = "174_1304284968.543" 
+    .const 'Sub' $P637 = "174_1304456140.832" 
     capture_lex $P637
     $P637()
 .annotate 'line', 825
-    .const 'Sub' $P2422 = "256_1304284968.543" 
+    .const 'Sub' $P2422 = "256_1304456140.832" 
     capture_lex $P2422
     $P2422()
 .annotate 'line', 828
@@ -89,14 +89,14 @@
     set $P2445, $P2447
     goto if_2446_end
   if_2446:
-    .const 'Sub' $P2448 = "11_1304284968.543" 
+    .const 'Sub' $P2448 = "11_1304456140.832" 
     find_lex $P2449, "@ARGS"
     $P2450 = $P2448($P2449 :flat)
     set $P2445, $P2450
   if_2446_end:
 .annotate 'line', 1
     .return ($P2445)
-    .const 'Sub' $P2452 = "257_1304284968.543" 
+    .const 'Sub' $P2452 = "257_1304456140.832" 
     .return ($P2452)
 .end
 
@@ -104,660 +104,660 @@
 .HLL "nqp"
 
 .namespace []
-.sub "" :load :init :subid("post258") :outer("10_1304284968.543")
+.sub "" :load :init :subid("post258") :outer("10_1304456140.832")
 .annotate 'line', 0
-    .const 'Sub' $P12 = "10_1304284968.543" 
+    .const 'Sub' $P12 = "10_1304456140.832" 
     .local pmc block
     set block, $P12
-    nqp_get_sc $P2456, "1304284963.737"
+    nqp_get_sc $P2456, "1304456135.999"
     isnull $I2457, $P2456
     if $I2457, if_2455
-    .const 'Sub' $P3339 = "10_1304284968.543" 
+    .const 'Sub' $P3339 = "10_1304456140.832" 
     $P3340 = $P3339."get_lexinfo"()
-    nqp_get_sc_object $P3341, "1304284963.737", 0
+    nqp_get_sc_object $P3341, "1304456135.999", 0
     $P3340."set_static_lexpad_value"("GLOBALish", $P3341)
-    .const 'Sub' $P3342 = "10_1304284968.543" 
+    .const 'Sub' $P3342 = "10_1304456140.832" 
     $P3343 = $P3342."get_lexinfo"()
     $P3343."finish_static_lexpad"()
-    .const 'Sub' $P3344 = "10_1304284968.543" 
+    .const 'Sub' $P3344 = "10_1304456140.832" 
     $P3345 = $P3344."get_lexinfo"()
-    nqp_get_sc_object $P3346, "1304284963.737", 0
+    nqp_get_sc_object $P3346, "1304456135.999", 0
     $P3345."set_static_lexpad_value"("$?PACKAGE", $P3346)
-    .const 'Sub' $P3347 = "10_1304284968.543" 
+    .const 'Sub' $P3347 = "10_1304456140.832" 
     $P3348 = $P3347."get_lexinfo"()
     $P3348."finish_static_lexpad"()
-    nqp_get_sc_object $P3349, "1304284963.737", 2
-    .const 'Sub' $P3350 = "13_1304284968.543" 
-    copy $P3349, $P3350
-    nqp_get_sc_object $P3351, "1304284963.737", 3
-    .const 'Sub' $P3352 = "14_1304284968.543" 
-    copy $P3351, $P3352
-    nqp_get_sc_object $P3353, "1304284963.737", 4
-    .const 'Sub' $P3354 = "15_1304284968.543" 
-    copy $P3353, $P3354
-    nqp_get_sc_object $P3355, "1304284963.737", 5
-    .const 'Sub' $P3356 = "16_1304284968.543" 
-    copy $P3355, $P3356
-    nqp_get_sc_object $P3357, "1304284963.737", 6
-    .const 'Sub' $P3358 = "18_1304284968.543" 
-    copy $P3357, $P3358
-    nqp_get_sc_object $P3359, "1304284963.737", 7
-    .const 'Sub' $P3360 = "19_1304284968.543" 
-    copy $P3359, $P3360
-    nqp_get_sc_object $P3361, "1304284963.737", 8
-    .const 'Sub' $P3362 = "20_1304284968.543" 
-    copy $P3361, $P3362
-    nqp_get_sc_object $P3363, "1304284963.737", 9
-    .const 'Sub' $P3364 = "21_1304284968.543" 
-    copy $P3363, $P3364
-    nqp_get_sc_object $P3365, "1304284963.737", 10
-    .const 'Sub' $P3366 = "22_1304284968.543" 
-    copy $P3365, $P3366
-    nqp_get_sc_object $P3367, "1304284963.737", 11
-    .const 'Sub' $P3368 = "23_1304284968.543" 
-    copy $P3367, $P3368
-    nqp_get_sc_object $P3369, "1304284963.737", 12
-    .const 'Sub' $P3370 = "24_1304284968.543" 
-    copy $P3369, $P3370
-    nqp_get_sc_object $P3371, "1304284963.737", 13
-    .const 'Sub' $P3372 = "25_1304284968.543" 
-    copy $P3371, $P3372
-    nqp_get_sc_object $P3373, "1304284963.737", 14
-    .const 'Sub' $P3374 = "26_1304284968.543" 
-    copy $P3373, $P3374
-    nqp_get_sc_object $P3375, "1304284963.737", 15
-    .const 'Sub' $P3376 = "27_1304284968.543" 
-    copy $P3375, $P3376
-    nqp_get_sc_object $P3377, "1304284963.737", 16
-    .const 'Sub' $P3378 = "28_1304284968.543" 
-    copy $P3377, $P3378
-    nqp_get_sc_object $P3379, "1304284963.737", 17
-    .const 'Sub' $P3380 = "29_1304284968.543" 
-    copy $P3379, $P3380
-    nqp_get_sc_object $P3381, "1304284963.737", 18
-    .const 'Sub' $P3382 = "30_1304284968.543" 
-    copy $P3381, $P3382
-    nqp_get_sc_object $P3383, "1304284963.737", 19
-    .const 'Sub' $P3384 = "31_1304284968.543" 
-    copy $P3383, $P3384
-    nqp_get_sc_object $P3385, "1304284963.737", 20
-    .const 'Sub' $P3386 = "32_1304284968.543" 
-    copy $P3385, $P3386
-    nqp_get_sc_object $P3387, "1304284963.737", 21
-    .const 'Sub' $P3388 = "33_1304284968.543" 
-    copy $P3387, $P3388
-    nqp_get_sc_object $P3389, "1304284963.737", 22
-    .const 'Sub' $P3390 = "35_1304284968.543" 
-    copy $P3389, $P3390
-    nqp_get_sc_object $P3391, "1304284963.737", 23
-    .const 'Sub' $P3392 = "36_1304284968.543" 
-    copy $P3391, $P3392
-    nqp_get_sc_object $P3393, "1304284963.737", 24
-    .const 'Sub' $P3394 = "38_1304284968.543" 
-    copy $P3393, $P3394
-    nqp_get_sc_object $P3395, "1304284963.737", 25
-    .const 'Sub' $P3396 = "39_1304284968.543" 
-    copy $P3395, $P3396
-    nqp_get_sc_object $P3397, "1304284963.737", 26
-    .const 'Sub' $P3398 = "40_1304284968.543" 
-    copy $P3397, $P3398
-    nqp_get_sc_object $P3399, "1304284963.737", 27
-    .const 'Sub' $P3400 = "41_1304284968.543" 
-    copy $P3399, $P3400
-    nqp_get_sc_object $P3401, "1304284963.737", 28
-    .const 'Sub' $P3402 = "42_1304284968.543" 
-    copy $P3401, $P3402
-    nqp_get_sc_object $P3403, "1304284963.737", 29
-    .const 'Sub' $P3404 = "43_1304284968.543" 
-    copy $P3403, $P3404
-    nqp_get_sc_object $P3405, "1304284963.737", 30
-    .const 'Sub' $P3406 = "44_1304284968.543" 
-    copy $P3405, $P3406
-    nqp_get_sc_object $P3407, "1304284963.737", 31
-    .const 'Sub' $P3408 = "45_1304284968.543" 
-    copy $P3407, $P3408
-    nqp_get_sc_object $P3409, "1304284963.737", 32
-    .const 'Sub' $P3410 = "46_1304284968.543" 
-    copy $P3409, $P3410
-    nqp_get_sc_object $P3411, "1304284963.737", 33
-    .const 'Sub' $P3412 = "47_1304284968.543" 
-    copy $P3411, $P3412
-    nqp_get_sc_object $P3413, "1304284963.737", 34
-    .const 'Sub' $P3414 = "52_1304284968.543" 
-    copy $P3413, $P3414
-    nqp_get_sc_object $P3415, "1304284963.737", 35
-    .const 'Sub' $P3416 = "53_1304284968.543" 
-    copy $P3415, $P3416
-    nqp_get_sc_object $P3417, "1304284963.737", 36
-    .const 'Sub' $P3418 = "54_1304284968.543" 
-    copy $P3417, $P3418
-    nqp_get_sc_object $P3419, "1304284963.737", 37
-    .const 'Sub' $P3420 = "55_1304284968.543" 
-    copy $P3419, $P3420
-    nqp_get_sc_object $P3421, "1304284963.737", 38
-    .const 'Sub' $P3422 = "57_1304284968.543" 
-    copy $P3421, $P3422
-    nqp_get_sc_object $P3423, "1304284963.737", 39
-    .const 'Sub' $P3424 = "58_1304284968.543" 
-    copy $P3423, $P3424
-    nqp_get_sc_object $P3425, "1304284963.737", 40
-    .const 'Sub' $P3426 = "59_1304284968.543" 
-    copy $P3425, $P3426
-    nqp_get_sc_object $P3427, "1304284963.737", 41
-    .const 'Sub' $P3428 = "60_1304284968.543" 
-    copy $P3427, $P3428
-    nqp_get_sc_object $P3429, "1304284963.737", 42
-    .const 'Sub' $P3430 = "61_1304284968.543" 
-    copy $P3429, $P3430
-    nqp_get_sc_object $P3431, "1304284963.737", 43
-    .const 'Sub' $P3432 = "62_1304284968.543" 
-    copy $P3431, $P3432
-    nqp_get_sc_object $P3433, "1304284963.737", 44
-    .const 'Sub' $P3434 = "63_1304284968.543" 
-    copy $P3433, $P3434
-    nqp_get_sc_object $P3435, "1304284963.737", 45
-    .const 'Sub' $P3436 = "64_1304284968.543" 
-    copy $P3435, $P3436
-    nqp_get_sc_object $P3437, "1304284963.737", 46
-    .const 'Sub' $P3438 = "65_1304284968.543" 
-    copy $P3437, $P3438
-    nqp_get_sc_object $P3439, "1304284963.737", 47
-    .const 'Sub' $P3440 = "66_1304284968.543" 
-    copy $P3439, $P3440
-    nqp_get_sc_object $P3441, "1304284963.737", 48
-    .const 'Sub' $P3442 = "67_1304284968.543" 
-    copy $P3441, $P3442
-    nqp_get_sc_object $P3443, "1304284963.737", 49
-    .const 'Sub' $P3444 = "68_1304284968.543" 
-    copy $P3443, $P3444
-    nqp_get_sc_object $P3445, "1304284963.737", 50
-    .const 'Sub' $P3446 = "69_1304284968.543" 
-    copy $P3445, $P3446
-    nqp_get_sc_object $P3447, "1304284963.737", 51
-    .const 'Sub' $P3448 = "70_1304284968.543" 
-    copy $P3447, $P3448
-    nqp_get_sc_object $P3449, "1304284963.737", 52
-    .const 'Sub' $P3450 = "71_1304284968.543" 
-    copy $P3449, $P3450
-    nqp_get_sc_object $P3451, "1304284963.737", 53
-    .const 'Sub' $P3452 = "72_1304284968.543" 
-    copy $P3451, $P3452
-    nqp_get_sc_object $P3453, "1304284963.737", 54
-    .const 'Sub' $P3454 = "73_1304284968.543" 
-    copy $P3453, $P3454
-    nqp_get_sc_object $P3455, "1304284963.737", 55
-    .const 'Sub' $P3456 = "74_1304284968.543" 
-    copy $P3455, $P3456
-    nqp_get_sc_object $P3457, "1304284963.737", 56
-    .const 'Sub' $P3458 = "75_1304284968.543" 
-    copy $P3457, $P3458
-    nqp_get_sc_object $P3459, "1304284963.737", 57
-    .const 'Sub' $P3460 = "76_1304284968.543" 
-    copy $P3459, $P3460
-    nqp_get_sc_object $P3461, "1304284963.737", 58
-    .const 'Sub' $P3462 = "77_1304284968.543" 
-    copy $P3461, $P3462
-    nqp_get_sc_object $P3463, "1304284963.737", 59
-    .const 'Sub' $P3464 = "78_1304284968.543" 
-    copy $P3463, $P3464
-    nqp_get_sc_object $P3465, "1304284963.737", 60
-    .const 'Sub' $P3466 = "79_1304284968.543" 
-    copy $P3465, $P3466
-    nqp_get_sc_object $P3467, "1304284963.737", 61
-    .const 'Sub' $P3468 = "80_1304284968.543" 
-    copy $P3467, $P3468
-    nqp_get_sc_object $P3469, "1304284963.737", 62
-    .const 'Sub' $P3470 = "81_1304284968.543" 
-    copy $P3469, $P3470
-    nqp_get_sc_object $P3471, "1304284963.737", 63
-    .const 'Sub' $P3472 = "82_1304284968.543" 
-    copy $P3471, $P3472
-    nqp_get_sc_object $P3473, "1304284963.737", 64
-    .const 'Sub' $P3474 = "83_1304284968.543" 
-    copy $P3473, $P3474
-    nqp_get_sc_object $P3475, "1304284963.737", 65
-    .const 'Sub' $P3476 = "84_1304284968.543" 
-    copy $P3475, $P3476
-    nqp_get_sc_object $P3477, "1304284963.737", 66
-    .const 'Sub' $P3478 = "85_1304284968.543" 
-    copy $P3477, $P3478
-    nqp_get_sc_object $P3479, "1304284963.737", 67
-    .const 'Sub' $P3480 = "86_1304284968.543" 
-    copy $P3479, $P3480
-    nqp_get_sc_object $P3481, "1304284963.737", 68
-    .const 'Sub' $P3482 = "87_1304284968.543" 
-    copy $P3481, $P3482
-    nqp_get_sc_object $P3483, "1304284963.737", 69
-    .const 'Sub' $P3484 = "88_1304284968.543" 
-    copy $P3483, $P3484
-    nqp_get_sc_object $P3485, "1304284963.737", 70
-    .const 'Sub' $P3486 = "89_1304284968.543" 
-    copy $P3485, $P3486
-    nqp_get_sc_object $P3487, "1304284963.737", 71
-    .const 'Sub' $P3488 = "90_1304284968.543" 
-    copy $P3487, $P3488
-    nqp_get_sc_object $P3489, "1304284963.737", 72
-    .const 'Sub' $P3490 = "91_1304284968.543" 
-    copy $P3489, $P3490
-    nqp_get_sc_object $P3491, "1304284963.737", 73
-    .const 'Sub' $P3492 = "92_1304284968.543" 
-    copy $P3491, $P3492
-    nqp_get_sc_object $P3493, "1304284963.737", 74
-    .const 'Sub' $P3494 = "93_1304284968.543" 
-    copy $P3493, $P3494
-    nqp_get_sc_object $P3495, "1304284963.737", 75
-    .const 'Sub' $P3496 = "94_1304284968.543" 
-    copy $P3495, $P3496
-    nqp_get_sc_object $P3497, "1304284963.737", 76
-    .const 'Sub' $P3498 = "95_1304284968.543" 
-    copy $P3497, $P3498
-    nqp_get_sc_object $P3499, "1304284963.737", 77
-    .const 'Sub' $P3500 = "96_1304284968.543" 
-    copy $P3499, $P3500
-    nqp_get_sc_object $P3501, "1304284963.737", 78
-    .const 'Sub' $P3502 = "97_1304284968.543" 
-    copy $P3501, $P3502
-    nqp_get_sc_object $P3503, "1304284963.737", 79
-    .const 'Sub' $P3504 = "98_1304284968.543" 
-    copy $P3503, $P3504
-    nqp_get_sc_object $P3505, "1304284963.737", 80
-    .const 'Sub' $P3506 = "99_1304284968.543" 
-    copy $P3505, $P3506
-    nqp_get_sc_object $P3507, "1304284963.737", 81
-    .const 'Sub' $P3508 = "100_1304284968.543" 
-    copy $P3507, $P3508
-    nqp_get_sc_object $P3509, "1304284963.737", 82
-    .const 'Sub' $P3510 = "101_1304284968.543" 
-    copy $P3509, $P3510
-    nqp_get_sc_object $P3511, "1304284963.737", 83
-    .const 'Sub' $P3512 = "102_1304284968.543" 
-    copy $P3511, $P3512
-    nqp_get_sc_object $P3513, "1304284963.737", 84
-    .const 'Sub' $P3514 = "103_1304284968.543" 
-    copy $P3513, $P3514
-    nqp_get_sc_object $P3515, "1304284963.737", 85
-    .const 'Sub' $P3516 = "104_1304284968.543" 
-    copy $P3515, $P3516
-    nqp_get_sc_object $P3517, "1304284963.737", 86
-    .const 'Sub' $P3518 = "105_1304284968.543" 
-    copy $P3517, $P3518
-    nqp_get_sc_object $P3519, "1304284963.737", 87
-    .const 'Sub' $P3520 = "106_1304284968.543" 
-    copy $P3519, $P3520
-    nqp_get_sc_object $P3521, "1304284963.737", 88
-    .const 'Sub' $P3522 = "107_1304284968.543" 
-    copy $P3521, $P3522
-    nqp_get_sc_object $P3523, "1304284963.737", 89
-    .const 'Sub' $P3524 = "108_1304284968.543" 
-    copy $P3523, $P3524
-    nqp_get_sc_object $P3525, "1304284963.737", 90
-    .const 'Sub' $P3526 = "109_1304284968.543" 
-    copy $P3525, $P3526
-    nqp_get_sc_object $P3527, "1304284963.737", 91
-    .const 'Sub' $P3528 = "110_1304284968.543" 
-    copy $P3527, $P3528
-    nqp_get_sc_object $P3529, "1304284963.737", 92
-    .const 'Sub' $P3530 = "111_1304284968.543" 
-    copy $P3529, $P3530
-    nqp_get_sc_object $P3531, "1304284963.737", 93
-    .const 'Sub' $P3532 = "112_1304284968.543" 
-    copy $P3531, $P3532
-    nqp_get_sc_object $P3533, "1304284963.737", 94
-    .const 'Sub' $P3534 = "113_1304284968.543" 
-    copy $P3533, $P3534
-    nqp_get_sc_object $P3535, "1304284963.737", 95
-    .const 'Sub' $P3536 = "114_1304284968.543" 
-    copy $P3535, $P3536
-    nqp_get_sc_object $P3537, "1304284963.737", 96
-    .const 'Sub' $P3538 = "115_1304284968.543" 
-    copy $P3537, $P3538
-    nqp_get_sc_object $P3539, "1304284963.737", 97
-    .const 'Sub' $P3540 = "116_1304284968.543" 
-    copy $P3539, $P3540
-    nqp_get_sc_object $P3541, "1304284963.737", 98
-    .const 'Sub' $P3542 = "117_1304284968.543" 
-    copy $P3541, $P3542
-    nqp_get_sc_object $P3543, "1304284963.737", 99
-    .const 'Sub' $P3544 = "118_1304284968.543" 
-    copy $P3543, $P3544
-    nqp_get_sc_object $P3545, "1304284963.737", 100
-    .const 'Sub' $P3546 = "119_1304284968.543" 
-    copy $P3545, $P3546
-    nqp_get_sc_object $P3547, "1304284963.737", 101
-    .const 'Sub' $P3548 = "120_1304284968.543" 
-    copy $P3547, $P3548
-    nqp_get_sc_object $P3549, "1304284963.737", 102
-    .const 'Sub' $P3550 = "121_1304284968.543" 
-    copy $P3549, $P3550
-    nqp_get_sc_object $P3551, "1304284963.737", 103
-    .const 'Sub' $P3552 = "122_1304284968.543" 
-    copy $P3551, $P3552
-    nqp_get_sc_object $P3553, "1304284963.737", 104
-    .const 'Sub' $P3554 = "123_1304284968.543" 
-    copy $P3553, $P3554
-    nqp_get_sc_object $P3555, "1304284963.737", 105
-    .const 'Sub' $P3556 = "124_1304284968.543" 
-    copy $P3555, $P3556
-    nqp_get_sc_object $P3557, "1304284963.737", 106
-    .const 'Sub' $P3558 = "125_1304284968.543" 
-    copy $P3557, $P3558
-    nqp_get_sc_object $P3559, "1304284963.737", 107
-    .const 'Sub' $P3560 = "126_1304284968.543" 
-    copy $P3559, $P3560
-    nqp_get_sc_object $P3561, "1304284963.737", 108
-    .const 'Sub' $P3562 = "127_1304284968.543" 
-    copy $P3561, $P3562
-    nqp_get_sc_object $P3563, "1304284963.737", 109
-    .const 'Sub' $P3564 = "128_1304284968.543" 
-    copy $P3563, $P3564
-    nqp_get_sc_object $P3565, "1304284963.737", 110
-    .const 'Sub' $P3566 = "129_1304284968.543" 
-    copy $P3565, $P3566
-    nqp_get_sc_object $P3567, "1304284963.737", 111
-    .const 'Sub' $P3568 = "130_1304284968.543" 
-    copy $P3567, $P3568
-    nqp_get_sc_object $P3569, "1304284963.737", 112
-    .const 'Sub' $P3570 = "131_1304284968.543" 
-    copy $P3569, $P3570
-    nqp_get_sc_object $P3571, "1304284963.737", 113
-    .const 'Sub' $P3572 = "132_1304284968.543" 
-    copy $P3571, $P3572
-    nqp_get_sc_object $P3573, "1304284963.737", 114
-    .const 'Sub' $P3574 = "133_1304284968.543" 
-    copy $P3573, $P3574
-    nqp_get_sc_object $P3575, "1304284963.737", 115
-    .const 'Sub' $P3576 = "134_1304284968.543" 
-    copy $P3575, $P3576
-    nqp_get_sc_object $P3577, "1304284963.737", 116
-    .const 'Sub' $P3578 = "135_1304284968.543" 
-    copy $P3577, $P3578
-    nqp_get_sc_object $P3579, "1304284963.737", 117
-    .const 'Sub' $P3580 = "136_1304284968.543" 
-    copy $P3579, $P3580
-    nqp_get_sc_object $P3581, "1304284963.737", 118
-    .const 'Sub' $P3582 = "138_1304284968.543" 
-    copy $P3581, $P3582
-    nqp_get_sc_object $P3583, "1304284963.737", 119
-    .const 'Sub' $P3584 = "139_1304284968.543" 
-    copy $P3583, $P3584
-    nqp_get_sc_object $P3585, "1304284963.737", 120
-    .const 'Sub' $P3586 = "140_1304284968.543" 
-    copy $P3585, $P3586
-    nqp_get_sc_object $P3587, "1304284963.737", 121
-    .const 'Sub' $P3588 = "141_1304284968.543" 
-    copy $P3587, $P3588
-    nqp_get_sc_object $P3589, "1304284963.737", 122
-    .const 'Sub' $P3590 = "142_1304284968.543" 
-    copy $P3589, $P3590
-    nqp_get_sc_object $P3591, "1304284963.737", 123
-    .const 'Sub' $P3592 = "143_1304284968.543" 
-    copy $P3591, $P3592
-    nqp_get_sc_object $P3593, "1304284963.737", 124
-    .const 'Sub' $P3594 = "145_1304284968.543" 
-    copy $P3593, $P3594
-    nqp_get_sc_object $P3595, "1304284963.737", 125
-    .const 'Sub' $P3596 = "146_1304284968.543" 
-    copy $P3595, $P3596
-    nqp_get_sc_object $P3597, "1304284963.737", 126
-    .const 'Sub' $P3598 = "148_1304284968.543" 
-    copy $P3597, $P3598
-    nqp_get_sc_object $P3599, "1304284963.737", 127
-    .const 'Sub' $P3600 = "149_1304284968.543" 
-    copy $P3599, $P3600
-    nqp_get_sc_object $P3601, "1304284963.737", 128
-    .const 'Sub' $P3602 = "150_1304284968.543" 
-    copy $P3601, $P3602
-    nqp_get_sc_object $P3603, "1304284963.737", 129
-    .const 'Sub' $P3604 = "151_1304284968.543" 
-    copy $P3603, $P3604
-    nqp_get_sc_object $P3605, "1304284963.737", 130
-    .const 'Sub' $P3606 = "153_1304284968.543" 
-    copy $P3605, $P3606
-    nqp_get_sc_object $P3607, "1304284963.737", 131
-    .const 'Sub' $P3608 = "154_1304284968.543" 
-    copy $P3607, $P3608
-    nqp_get_sc_object $P3609, "1304284963.737", 132
-    .const 'Sub' $P3610 = "156_1304284968.543" 
-    copy $P3609, $P3610
-    nqp_get_sc_object $P3611, "1304284963.737", 133
-    .const 'Sub' $P3612 = "157_1304284968.543" 
-    copy $P3611, $P3612
-    nqp_get_sc_object $P3613, "1304284963.737", 134
-    .const 'Sub' $P3614 = "162_1304284968.543" 
-    copy $P3613, $P3614
-    nqp_get_sc_object $P3615, "1304284963.737", 135
-    .const 'Sub' $P3616 = "163_1304284968.543" 
-    copy $P3615, $P3616
-    nqp_get_sc_object $P3617, "1304284963.737", 136
-    .const 'Sub' $P3618 = "165_1304284968.543" 
-    copy $P3617, $P3618
-    nqp_get_sc_object $P3619, "1304284963.737", 137
-    .const 'Sub' $P3620 = "166_1304284968.543" 
-    copy $P3619, $P3620
-    nqp_get_sc_object $P3621, "1304284963.737", 138
-    .const 'Sub' $P3622 = "167_1304284968.543" 
-    copy $P3621, $P3622
-    nqp_get_sc_object $P3623, "1304284963.737", 139
-    .const 'Sub' $P3624 = "168_1304284968.543" 
-    copy $P3623, $P3624
-    nqp_get_sc_object $P3625, "1304284963.737", 140
-    .const 'Sub' $P3626 = "169_1304284968.543" 
-    copy $P3625, $P3626
-    nqp_get_sc_object $P3627, "1304284963.737", 141
-    .const 'Sub' $P3628 = "170_1304284968.543" 
-    copy $P3627, $P3628
-    nqp_get_sc_object $P3629, "1304284963.737", 142
-    .const 'Sub' $P3630 = "171_1304284968.543" 
-    copy $P3629, $P3630
-    nqp_get_sc_object $P3631, "1304284963.737", 143
-    .const 'Sub' $P3632 = "172_1304284968.543" 
-    copy $P3631, $P3632
-    nqp_get_sc_object $P3633, "1304284963.737", 144
-    .const 'Sub' $P3634 = "173_1304284968.543" 
-    copy $P3633, $P3634
-    .const 'Sub' $P3635 = "12_1304284968.543" 
+    nqp_get_sc_object $P3349, "1304456135.999", 2
+    .const 'Sub' $P3350 = "13_1304456140.832" 
+    assign $P3349, $P3350
+    nqp_get_sc_object $P3351, "1304456135.999", 3
+    .const 'Sub' $P3352 = "14_1304456140.832" 
+    assign $P3351, $P3352
+    nqp_get_sc_object $P3353, "1304456135.999", 4
+    .const 'Sub' $P3354 = "15_1304456140.832" 
+    assign $P3353, $P3354
+    nqp_get_sc_object $P3355, "1304456135.999", 5
+    .const 'Sub' $P3356 = "16_1304456140.832" 
+    assign $P3355, $P3356
+    nqp_get_sc_object $P3357, "1304456135.999", 6
+    .const 'Sub' $P3358 = "18_1304456140.832" 
+    assign $P3357, $P3358
+    nqp_get_sc_object $P3359, "1304456135.999", 7
+    .const 'Sub' $P3360 = "19_1304456140.832" 
+    assign $P3359, $P3360
+    nqp_get_sc_object $P3361, "1304456135.999", 8
+    .const 'Sub' $P3362 = "20_1304456140.832" 
+    assign $P3361, $P3362
+    nqp_get_sc_object $P3363, "1304456135.999", 9
+    .const 'Sub' $P3364 = "21_1304456140.832" 
+    assign $P3363, $P3364
+    nqp_get_sc_object $P3365, "1304456135.999", 10
+    .const 'Sub' $P3366 = "22_1304456140.832" 
+    assign $P3365, $P3366
+    nqp_get_sc_object $P3367, "1304456135.999", 11
+    .const 'Sub' $P3368 = "23_1304456140.832" 
+    assign $P3367, $P3368
+    nqp_get_sc_object $P3369, "1304456135.999", 12
+    .const 'Sub' $P3370 = "24_1304456140.832" 
+    assign $P3369, $P3370
+    nqp_get_sc_object $P3371, "1304456135.999", 13
+    .const 'Sub' $P3372 = "25_1304456140.832" 
+    assign $P3371, $P3372
+    nqp_get_sc_object $P3373, "1304456135.999", 14
+    .const 'Sub' $P3374 = "26_1304456140.832" 
+    assign $P3373, $P3374
+    nqp_get_sc_object $P3375, "1304456135.999", 15
+    .const 'Sub' $P3376 = "27_1304456140.832" 
+    assign $P3375, $P3376
+    nqp_get_sc_object $P3377, "1304456135.999", 16
+    .const 'Sub' $P3378 = "28_1304456140.832" 
+    assign $P3377, $P3378
+    nqp_get_sc_object $P3379, "1304456135.999", 17
+    .const 'Sub' $P3380 = "29_1304456140.832" 
+    assign $P3379, $P3380
+    nqp_get_sc_object $P3381, "1304456135.999", 18
+    .const 'Sub' $P3382 = "30_1304456140.832" 
+    assign $P3381, $P3382
+    nqp_get_sc_object $P3383, "1304456135.999", 19
+    .const 'Sub' $P3384 = "31_1304456140.832" 
+    assign $P3383, $P3384
+    nqp_get_sc_object $P3385, "1304456135.999", 20
+    .const 'Sub' $P3386 = "32_1304456140.832" 
+    assign $P3385, $P3386
+    nqp_get_sc_object $P3387, "1304456135.999", 21
+    .const 'Sub' $P3388 = "33_1304456140.832" 
+    assign $P3387, $P3388
+    nqp_get_sc_object $P3389, "1304456135.999", 22
+    .const 'Sub' $P3390 = "35_1304456140.832" 
+    assign $P3389, $P3390
+    nqp_get_sc_object $P3391, "1304456135.999", 23
+    .const 'Sub' $P3392 = "36_1304456140.832" 
+    assign $P3391, $P3392
+    nqp_get_sc_object $P3393, "1304456135.999", 24
+    .const 'Sub' $P3394 = "38_1304456140.832" 
+    assign $P3393, $P3394
+    nqp_get_sc_object $P3395, "1304456135.999", 25
+    .const 'Sub' $P3396 = "39_1304456140.832" 
+    assign $P3395, $P3396
+    nqp_get_sc_object $P3397, "1304456135.999", 26
+    .const 'Sub' $P3398 = "40_1304456140.832" 
+    assign $P3397, $P3398
+    nqp_get_sc_object $P3399, "1304456135.999", 27
+    .const 'Sub' $P3400 = "41_1304456140.832" 
+    assign $P3399, $P3400
+    nqp_get_sc_object $P3401, "1304456135.999", 28
+    .const 'Sub' $P3402 = "42_1304456140.832" 
+    assign $P3401, $P3402
+    nqp_get_sc_object $P3403, "1304456135.999", 29
+    .const 'Sub' $P3404 = "43_1304456140.832" 
+    assign $P3403, $P3404
+    nqp_get_sc_object $P3405, "1304456135.999", 30
+    .const 'Sub' $P3406 = "44_1304456140.832" 
+    assign $P3405, $P3406
+    nqp_get_sc_object $P3407, "1304456135.999", 31
+    .const 'Sub' $P3408 = "45_1304456140.832" 
+    assign $P3407, $P3408
+    nqp_get_sc_object $P3409, "1304456135.999", 32
+    .const 'Sub' $P3410 = "46_1304456140.832" 
+    assign $P3409, $P3410
+    nqp_get_sc_object $P3411, "1304456135.999", 33
+    .const 'Sub' $P3412 = "47_1304456140.832" 
+    assign $P3411, $P3412
+    nqp_get_sc_object $P3413, "1304456135.999", 34
+    .const 'Sub' $P3414 = "52_1304456140.832" 
+    assign $P3413, $P3414
+    nqp_get_sc_object $P3415, "1304456135.999", 35
+    .const 'Sub' $P3416 = "53_1304456140.832" 
+    assign $P3415, $P3416
+    nqp_get_sc_object $P3417, "1304456135.999", 36
+    .const 'Sub' $P3418 = "54_1304456140.832" 
+    assign $P3417, $P3418
+    nqp_get_sc_object $P3419, "1304456135.999", 37
+    .const 'Sub' $P3420 = "55_1304456140.832" 
+    assign $P3419, $P3420
+    nqp_get_sc_object $P3421, "1304456135.999", 38
+    .const 'Sub' $P3422 = "57_1304456140.832" 
+    assign $P3421, $P3422
+    nqp_get_sc_object $P3423, "1304456135.999", 39
+    .const 'Sub' $P3424 = "58_1304456140.832" 
+    assign $P3423, $P3424
+    nqp_get_sc_object $P3425, "1304456135.999", 40
+    .const 'Sub' $P3426 = "59_1304456140.832" 
+    assign $P3425, $P3426
+    nqp_get_sc_object $P3427, "1304456135.999", 41
+    .const 'Sub' $P3428 = "60_1304456140.832" 
+    assign $P3427, $P3428
+    nqp_get_sc_object $P3429, "1304456135.999", 42
+    .const 'Sub' $P3430 = "61_1304456140.832" 
+    assign $P3429, $P3430
+    nqp_get_sc_object $P3431, "1304456135.999", 43
+    .const 'Sub' $P3432 = "62_1304456140.832" 
+    assign $P3431, $P3432
+    nqp_get_sc_object $P3433, "1304456135.999", 44
+    .const 'Sub' $P3434 = "63_1304456140.832" 
+    assign $P3433, $P3434
+    nqp_get_sc_object $P3435, "1304456135.999", 45
+    .const 'Sub' $P3436 = "64_1304456140.832" 
+    assign $P3435, $P3436
+    nqp_get_sc_object $P3437, "1304456135.999", 46
+    .const 'Sub' $P3438 = "65_1304456140.832" 
+    assign $P3437, $P3438
+    nqp_get_sc_object $P3439, "1304456135.999", 47
+    .const 'Sub' $P3440 = "66_1304456140.832" 
+    assign $P3439, $P3440
+    nqp_get_sc_object $P3441, "1304456135.999", 48
+    .const 'Sub' $P3442 = "67_1304456140.832" 
+    assign $P3441, $P3442
+    nqp_get_sc_object $P3443, "1304456135.999", 49
+    .const 'Sub' $P3444 = "68_1304456140.832" 
+    assign $P3443, $P3444
+    nqp_get_sc_object $P3445, "1304456135.999", 50
+    .const 'Sub' $P3446 = "69_1304456140.832" 
+    assign $P3445, $P3446
+    nqp_get_sc_object $P3447, "1304456135.999", 51
+    .const 'Sub' $P3448 = "70_1304456140.832" 
+    assign $P3447, $P3448
+    nqp_get_sc_object $P3449, "1304456135.999", 52
+    .const 'Sub' $P3450 = "71_1304456140.832" 
+    assign $P3449, $P3450
+    nqp_get_sc_object $P3451, "1304456135.999", 53
+    .const 'Sub' $P3452 = "72_1304456140.832" 
+    assign $P3451, $P3452
+    nqp_get_sc_object $P3453, "1304456135.999", 54
+    .const 'Sub' $P3454 = "73_1304456140.832" 
+    assign $P3453, $P3454
+    nqp_get_sc_object $P3455, "1304456135.999", 55
+    .const 'Sub' $P3456 = "74_1304456140.832" 
+    assign $P3455, $P3456
+    nqp_get_sc_object $P3457, "1304456135.999", 56
+    .const 'Sub' $P3458 = "75_1304456140.832" 
+    assign $P3457, $P3458
+    nqp_get_sc_object $P3459, "1304456135.999", 57
+    .const 'Sub' $P3460 = "76_1304456140.832" 
+    assign $P3459, $P3460
+    nqp_get_sc_object $P3461, "1304456135.999", 58
+    .const 'Sub' $P3462 = "77_1304456140.832" 
+    assign $P3461, $P3462
+    nqp_get_sc_object $P3463, "1304456135.999", 59
+    .const 'Sub' $P3464 = "78_1304456140.832" 
+    assign $P3463, $P3464
+    nqp_get_sc_object $P3465, "1304456135.999", 60
+    .const 'Sub' $P3466 = "79_1304456140.832" 
+    assign $P3465, $P3466
+    nqp_get_sc_object $P3467, "1304456135.999", 61
+    .const 'Sub' $P3468 = "80_1304456140.832" 
+    assign $P3467, $P3468
+    nqp_get_sc_object $P3469, "1304456135.999", 62
+    .const 'Sub' $P3470 = "81_1304456140.832" 
+    assign $P3469, $P3470
+    nqp_get_sc_object $P3471, "1304456135.999", 63
+    .const 'Sub' $P3472 = "82_1304456140.832" 
+    assign $P3471, $P3472
+    nqp_get_sc_object $P3473, "1304456135.999", 64
+    .const 'Sub' $P3474 = "83_1304456140.832" 
+    assign $P3473, $P3474
+    nqp_get_sc_object $P3475, "1304456135.999", 65
+    .const 'Sub' $P3476 = "84_1304456140.832" 
+    assign $P3475, $P3476
+    nqp_get_sc_object $P3477, "1304456135.999", 66
+    .const 'Sub' $P3478 = "85_1304456140.832" 
+    assign $P3477, $P3478
+    nqp_get_sc_object $P3479, "1304456135.999", 67
+    .const 'Sub' $P3480 = "86_1304456140.832" 
+    assign $P3479, $P3480
+    nqp_get_sc_object $P3481, "1304456135.999", 68
+    .const 'Sub' $P3482 = "87_1304456140.832" 
+    assign $P3481, $P3482
+    nqp_get_sc_object $P3483, "1304456135.999", 69
+    .const 'Sub' $P3484 = "88_1304456140.832" 
+    assign $P3483, $P3484
+    nqp_get_sc_object $P3485, "1304456135.999", 70
+    .const 'Sub' $P3486 = "89_1304456140.832" 
+    assign $P3485, $P3486
+    nqp_get_sc_object $P3487, "1304456135.999", 71
+    .const 'Sub' $P3488 = "90_1304456140.832" 
+    assign $P3487, $P3488
+    nqp_get_sc_object $P3489, "1304456135.999", 72
+    .const 'Sub' $P3490 = "91_1304456140.832" 
+    assign $P3489, $P3490
+    nqp_get_sc_object $P3491, "1304456135.999", 73
+    .const 'Sub' $P3492 = "92_1304456140.832" 
+    assign $P3491, $P3492
+    nqp_get_sc_object $P3493, "1304456135.999", 74
+    .const 'Sub' $P3494 = "93_1304456140.832" 
+    assign $P3493, $P3494
+    nqp_get_sc_object $P3495, "1304456135.999", 75
+    .const 'Sub' $P3496 = "94_1304456140.832" 
+    assign $P3495, $P3496
+    nqp_get_sc_object $P3497, "1304456135.999", 76
+    .const 'Sub' $P3498 = "95_1304456140.832" 
+    assign $P3497, $P3498
+    nqp_get_sc_object $P3499, "1304456135.999", 77
+    .const 'Sub' $P3500 = "96_1304456140.832" 
+    assign $P3499, $P3500
+    nqp_get_sc_object $P3501, "1304456135.999", 78
+    .const 'Sub' $P3502 = "97_1304456140.832" 
+    assign $P3501, $P3502
+    nqp_get_sc_object $P3503, "1304456135.999", 79
+    .const 'Sub' $P3504 = "98_1304456140.832" 
+    assign $P3503, $P3504
+    nqp_get_sc_object $P3505, "1304456135.999", 80
+    .const 'Sub' $P3506 = "99_1304456140.832" 
+    assign $P3505, $P3506
+    nqp_get_sc_object $P3507, "1304456135.999", 81
+    .const 'Sub' $P3508 = "100_1304456140.832" 
+    assign $P3507, $P3508
+    nqp_get_sc_object $P3509, "1304456135.999", 82
+    .const 'Sub' $P3510 = "101_1304456140.832" 
+    assign $P3509, $P3510
+    nqp_get_sc_object $P3511, "1304456135.999", 83
+    .const 'Sub' $P3512 = "102_1304456140.832" 
+    assign $P3511, $P3512
+    nqp_get_sc_object $P3513, "1304456135.999", 84
+    .const 'Sub' $P3514 = "103_1304456140.832" 
+    assign $P3513, $P3514
+    nqp_get_sc_object $P3515, "1304456135.999", 85
+    .const 'Sub' $P3516 = "104_1304456140.832" 
+    assign $P3515, $P3516
+    nqp_get_sc_object $P3517, "1304456135.999", 86
+    .const 'Sub' $P3518 = "105_1304456140.832" 
+    assign $P3517, $P3518
+    nqp_get_sc_object $P3519, "1304456135.999", 87
+    .const 'Sub' $P3520 = "106_1304456140.832" 
+    assign $P3519, $P3520
+    nqp_get_sc_object $P3521, "1304456135.999", 88
+    .const 'Sub' $P3522 = "107_1304456140.832" 
+    assign $P3521, $P3522
+    nqp_get_sc_object $P3523, "1304456135.999", 89
+    .const 'Sub' $P3524 = "108_1304456140.832" 
+    assign $P3523, $P3524
+    nqp_get_sc_object $P3525, "1304456135.999", 90
+    .const 'Sub' $P3526 = "109_1304456140.832" 
+    assign $P3525, $P3526
+    nqp_get_sc_object $P3527, "1304456135.999", 91
+    .const 'Sub' $P3528 = "110_1304456140.832" 
+    assign $P3527, $P3528
+    nqp_get_sc_object $P3529, "1304456135.999", 92
+    .const 'Sub' $P3530 = "111_1304456140.832" 
+    assign $P3529, $P3530
+    nqp_get_sc_object $P3531, "1304456135.999", 93
+    .const 'Sub' $P3532 = "112_1304456140.832" 
+    assign $P3531, $P3532
+    nqp_get_sc_object $P3533, "1304456135.999", 94
+    .const 'Sub' $P3534 = "113_1304456140.832" 
+    assign $P3533, $P3534
+    nqp_get_sc_object $P3535, "1304456135.999", 95
+    .const 'Sub' $P3536 = "114_1304456140.832" 
+    assign $P3535, $P3536
+    nqp_get_sc_object $P3537, "1304456135.999", 96
+    .const 'Sub' $P3538 = "115_1304456140.832" 
+    assign $P3537, $P3538
+    nqp_get_sc_object $P3539, "1304456135.999", 97
+    .const 'Sub' $P3540 = "116_1304456140.832" 
+    assign $P3539, $P3540
+    nqp_get_sc_object $P3541, "1304456135.999", 98
+    .const 'Sub' $P3542 = "117_1304456140.832" 
+    assign $P3541, $P3542
+    nqp_get_sc_object $P3543, "1304456135.999", 99
+    .const 'Sub' $P3544 = "118_1304456140.832" 
+    assign $P3543, $P3544
+    nqp_get_sc_object $P3545, "1304456135.999", 100
+    .const 'Sub' $P3546 = "119_1304456140.832" 
+    assign $P3545, $P3546
+    nqp_get_sc_object $P3547, "1304456135.999", 101
+    .const 'Sub' $P3548 = "120_1304456140.832" 
+    assign $P3547, $P3548
+    nqp_get_sc_object $P3549, "1304456135.999", 102
+    .const 'Sub' $P3550 = "121_1304456140.832" 
+    assign $P3549, $P3550
+    nqp_get_sc_object $P3551, "1304456135.999", 103
+    .const 'Sub' $P3552 = "122_1304456140.832" 
+    assign $P3551, $P3552
+    nqp_get_sc_object $P3553, "1304456135.999", 104
+    .const 'Sub' $P3554 = "123_1304456140.832" 
+    assign $P3553, $P3554
+    nqp_get_sc_object $P3555, "1304456135.999", 105
+    .const 'Sub' $P3556 = "124_1304456140.832" 
+    assign $P3555, $P3556
+    nqp_get_sc_object $P3557, "1304456135.999", 106
+    .const 'Sub' $P3558 = "125_1304456140.832" 
+    assign $P3557, $P3558
+    nqp_get_sc_object $P3559, "1304456135.999", 107
+    .const 'Sub' $P3560 = "126_1304456140.832" 
+    assign $P3559, $P3560
+    nqp_get_sc_object $P3561, "1304456135.999", 108
+    .const 'Sub' $P3562 = "127_1304456140.832" 
+    assign $P3561, $P3562
+    nqp_get_sc_object $P3563, "1304456135.999", 109
+    .const 'Sub' $P3564 = "128_1304456140.832" 
+    assign $P3563, $P3564
+    nqp_get_sc_object $P3565, "1304456135.999", 110
+    .const 'Sub' $P3566 = "129_1304456140.832" 
+    assign $P3565, $P3566
+    nqp_get_sc_object $P3567, "1304456135.999", 111
+    .const 'Sub' $P3568 = "130_1304456140.832" 
+    assign $P3567, $P3568
+    nqp_get_sc_object $P3569, "1304456135.999", 112
+    .const 'Sub' $P3570 = "131_1304456140.832" 
+    assign $P3569, $P3570
+    nqp_get_sc_object $P3571, "1304456135.999", 113
+    .const 'Sub' $P3572 = "132_1304456140.832" 
+    assign $P3571, $P3572
+    nqp_get_sc_object $P3573, "1304456135.999", 114
+    .const 'Sub' $P3574 = "133_1304456140.832" 
+    assign $P3573, $P3574
+    nqp_get_sc_object $P3575, "1304456135.999", 115
+    .const 'Sub' $P3576 = "134_1304456140.832" 
+    assign $P3575, $P3576
+    nqp_get_sc_object $P3577, "1304456135.999", 116
+    .const 'Sub' $P3578 = "135_1304456140.832" 
+    assign $P3577, $P3578
+    nqp_get_sc_object $P3579, "1304456135.999", 117
+    .const 'Sub' $P3580 = "136_1304456140.832" 
+    assign $P3579, $P3580
+    nqp_get_sc_object $P3581, "1304456135.999", 118
+    .const 'Sub' $P3582 = "138_1304456140.832" 
+    assign $P3581, $P3582
+    nqp_get_sc_object $P3583, "1304456135.999", 119
+    .const 'Sub' $P3584 = "139_1304456140.832" 
+    assign $P3583, $P3584
+    nqp_get_sc_object $P3585, "1304456135.999", 120
+    .const 'Sub' $P3586 = "140_1304456140.832" 
+    assign $P3585, $P3586
+    nqp_get_sc_object $P3587, "1304456135.999", 121
+    .const 'Sub' $P3588 = "141_1304456140.832" 
+    assign $P3587, $P3588
+    nqp_get_sc_object $P3589, "1304456135.999", 122
+    .const 'Sub' $P3590 = "142_1304456140.832" 
+    assign $P3589, $P3590
+    nqp_get_sc_object $P3591, "1304456135.999", 123
+    .const 'Sub' $P3592 = "143_1304456140.832" 
+    assign $P3591, $P3592
+    nqp_get_sc_object $P3593, "1304456135.999", 124
+    .const 'Sub' $P3594 = "145_1304456140.832" 
+    assign $P3593, $P3594
+    nqp_get_sc_object $P3595, "1304456135.999", 125
+    .const 'Sub' $P3596 = "146_1304456140.832" 
+    assign $P3595, $P3596
+    nqp_get_sc_object $P3597, "1304456135.999", 126
+    .const 'Sub' $P3598 = "148_1304456140.832" 
+    assign $P3597, $P3598
+    nqp_get_sc_object $P3599, "1304456135.999", 127
+    .const 'Sub' $P3600 = "149_1304456140.832" 
+    assign $P3599, $P3600
+    nqp_get_sc_object $P3601, "1304456135.999", 128
+    .const 'Sub' $P3602 = "150_1304456140.832" 
+    assign $P3601, $P3602
+    nqp_get_sc_object $P3603, "1304456135.999", 129
+    .const 'Sub' $P3604 = "151_1304456140.832" 
+    assign $P3603, $P3604
+    nqp_get_sc_object $P3605, "1304456135.999", 130
+    .const 'Sub' $P3606 = "153_1304456140.832" 
+    assign $P3605, $P3606
+    nqp_get_sc_object $P3607, "1304456135.999", 131
+    .const 'Sub' $P3608 = "154_1304456140.832" 
+    assign $P3607, $P3608
+    nqp_get_sc_object $P3609, "1304456135.999", 132
+    .const 'Sub' $P3610 = "156_1304456140.832" 
+    assign $P3609, $P3610
+    nqp_get_sc_object $P3611, "1304456135.999", 133
+    .const 'Sub' $P3612 = "157_1304456140.832" 
+    assign $P3611, $P3612
+    nqp_get_sc_object $P3613, "1304456135.999", 134
+    .const 'Sub' $P3614 = "162_1304456140.832" 
+    assign $P3613, $P3614
+    nqp_get_sc_object $P3615, "1304456135.999", 135
+    .const 'Sub' $P3616 = "163_1304456140.832" 
+    assign $P3615, $P3616
+    nqp_get_sc_object $P3617, "1304456135.999", 136
+    .const 'Sub' $P3618 = "165_1304456140.832" 
+    assign $P3617, $P3618
+    nqp_get_sc_object $P3619, "1304456135.999", 137
+    .const 'Sub' $P3620 = "166_1304456140.832" 
+    assign $P3619, $P3620
+    nqp_get_sc_object $P3621, "1304456135.999", 138
+    .const 'Sub' $P3622 = "167_1304456140.832" 
+    assign $P3621, $P3622
+    nqp_get_sc_object $P3623, "1304456135.999", 139
+    .const 'Sub' $P3624 = "168_1304456140.832" 
+    assign $P3623, $P3624
+    nqp_get_sc_object $P3625, "1304456135.999", 140
+    .const 'Sub' $P3626 = "169_1304456140.832" 
+    assign $P3625, $P3626
+    nqp_get_sc_object $P3627, "1304456135.999", 141
+    .const 'Sub' $P3628 = "170_1304456140.832" 
+    assign $P3627, $P3628
+    nqp_get_sc_object $P3629, "1304456135.999", 142
+    .const 'Sub' $P3630 = "171_1304456140.832" 
+    assign $P3629, $P3630
+    nqp_get_sc_object $P3631, "1304456135.999", 143
+    .const 'Sub' $P3632 = "172_1304456140.832" 
+    assign $P3631, $P3632
+    nqp_get_sc_object $P3633, "1304456135.999", 144
+    .const 'Sub' $P3634 = "173_1304456140.832" 
+    assign $P3633, $P3634
+    .const 'Sub' $P3635 = "12_1304456140.832" 
     $P3636 = $P3635."get_lexinfo"()
-    nqp_get_sc_object $P3637, "1304284963.737", 1
+    nqp_get_sc_object $P3637, "1304456135.999", 1
     $P3636."set_static_lexpad_value"("$?PACKAGE", $P3637)
-    .const 'Sub' $P3638 = "12_1304284968.543" 
+    .const 'Sub' $P3638 = "12_1304456140.832" 
     $P3639 = $P3638."get_lexinfo"()
     $P3639."finish_static_lexpad"()
-    .const 'Sub' $P3640 = "12_1304284968.543" 
+    .const 'Sub' $P3640 = "12_1304456140.832" 
     $P3641 = $P3640."get_lexinfo"()
-    nqp_get_sc_object $P3642, "1304284963.737", 1
+    nqp_get_sc_object $P3642, "1304456135.999", 1
     $P3641."set_static_lexpad_value"("$?CLASS", $P3642)
-    .const 'Sub' $P3643 = "12_1304284968.543" 
+    .const 'Sub' $P3643 = "12_1304456140.832" 
     $P3644 = $P3643."get_lexinfo"()
     $P3644."finish_static_lexpad"()
-    nqp_get_sc_object $P3645, "1304284963.737", 146
-    .const 'Sub' $P3646 = "190_1304284968.543" 
-    copy $P3645, $P3646
-    nqp_get_sc_object $P3647, "1304284963.737", 147
-    .const 'Sub' $P3648 = "191_1304284968.543" 
-    copy $P3647, $P3648
-    nqp_get_sc_object $P3649, "1304284963.737", 148
-    .const 'Sub' $P3650 = "193_1304284968.543" 
-    copy $P3649, $P3650
-    nqp_get_sc_object $P3651, "1304284963.737", 149
-    .const 'Sub' $P3652 = "194_1304284968.543" 
-    copy $P3651, $P3652
-    nqp_get_sc_object $P3653, "1304284963.737", 150
-    .const 'Sub' $P3654 = "197_1304284968.543" 
-    copy $P3653, $P3654
-    nqp_get_sc_object $P3655, "1304284963.737", 151
-    .const 'Sub' $P3656 = "199_1304284968.543" 
-    copy $P3655, $P3656
-    nqp_get_sc_object $P3657, "1304284963.737", 152
-    .const 'Sub' $P3658 = "201_1304284968.543" 
-    copy $P3657, $P3658
-    nqp_get_sc_object $P3659, "1304284963.737", 153
-    .const 'Sub' $P3660 = "203_1304284968.543" 
-    copy $P3659, $P3660
-    nqp_get_sc_object $P3661, "1304284963.737", 154
-    .const 'Sub' $P3662 = "204_1304284968.543" 
-    copy $P3661, $P3662
-    nqp_get_sc_object $P3663, "1304284963.737", 155
-    .const 'Sub' $P3664 = "205_1304284968.543" 
-    copy $P3663, $P3664
-    nqp_get_sc_object $P3665, "1304284963.737", 156
-    .const 'Sub' $P3666 = "206_1304284968.543" 
-    copy $P3665, $P3666
-    nqp_get_sc_object $P3667, "1304284963.737", 157
-    .const 'Sub' $P3668 = "207_1304284968.543" 
-    copy $P3667, $P3668
-    nqp_get_sc_object $P3669, "1304284963.737", 158
-    .const 'Sub' $P3670 = "209_1304284968.543" 
-    copy $P3669, $P3670
-    nqp_get_sc_object $P3671, "1304284963.737", 159
-    .const 'Sub' $P3672 = "210_1304284968.543" 
-    copy $P3671, $P3672
-    nqp_get_sc_object $P3673, "1304284963.737", 160
-    .const 'Sub' $P3674 = "211_1304284968.543" 
-    copy $P3673, $P3674
-    nqp_get_sc_object $P3675, "1304284963.737", 161
-    .const 'Sub' $P3676 = "212_1304284968.543" 
-    copy $P3675, $P3676
-    nqp_get_sc_object $P3677, "1304284963.737", 162
-    .const 'Sub' $P3678 = "213_1304284968.543" 
-    copy $P3677, $P3678
-    nqp_get_sc_object $P3679, "1304284963.737", 163
-    .const 'Sub' $P3680 = "214_1304284968.543" 
-    copy $P3679, $P3680
-    nqp_get_sc_object $P3681, "1304284963.737", 164
-    .const 'Sub' $P3682 = "215_1304284968.543" 
-    copy $P3681, $P3682
-    nqp_get_sc_object $P3683, "1304284963.737", 165
-    .const 'Sub' $P3684 = "216_1304284968.543" 
-    copy $P3683, $P3684
-    nqp_get_sc_object $P3685, "1304284963.737", 166
-    .const 'Sub' $P3686 = "217_1304284968.543" 
-    copy $P3685, $P3686
-    nqp_get_sc_object $P3687, "1304284963.737", 167
-    .const 'Sub' $P3688 = "218_1304284968.543" 
-    copy $P3687, $P3688
-    nqp_get_sc_object $P3689, "1304284963.737", 168
-    .const 'Sub' $P3690 = "219_1304284968.543" 
-    copy $P3689, $P3690
-    nqp_get_sc_object $P3691, "1304284963.737", 169
-    .const 'Sub' $P3692 = "220_1304284968.543" 
-    copy $P3691, $P3692
-    nqp_get_sc_object $P3693, "1304284963.737", 170
-    .const 'Sub' $P3694 = "221_1304284968.543" 
-    copy $P3693, $P3694
-    nqp_get_sc_object $P3695, "1304284963.737", 171
-    .const 'Sub' $P3696 = "222_1304284968.543" 
-    copy $P3695, $P3696
-    nqp_get_sc_object $P3697, "1304284963.737", 172
-    .const 'Sub' $P3698 = "223_1304284968.543" 
-    copy $P3697, $P3698
-    nqp_get_sc_object $P3699, "1304284963.737", 173
-    .const 'Sub' $P3700 = "224_1304284968.543" 
-    copy $P3699, $P3700
-    nqp_get_sc_object $P3701, "1304284963.737", 174
-    .const 'Sub' $P3702 = "225_1304284968.543" 
-    copy $P3701, $P3702
-    nqp_get_sc_object $P3703, "1304284963.737", 175
-    .const 'Sub' $P3704 = "226_1304284968.543" 
-    copy $P3703, $P3704
-    nqp_get_sc_object $P3705, "1304284963.737", 176
-    .const 'Sub' $P3706 = "227_1304284968.543" 
-    copy $P3705, $P3706
-    nqp_get_sc_object $P3707, "1304284963.737", 177
-    .const 'Sub' $P3708 = "228_1304284968.543" 
-    copy $P3707, $P3708
-    nqp_get_sc_object $P3709, "1304284963.737", 178
-    .const 'Sub' $P3710 = "229_1304284968.543" 
-    copy $P3709, $P3710
-    nqp_get_sc_object $P3711, "1304284963.737", 179
-    .const 'Sub' $P3712 = "230_1304284968.543" 
-    copy $P3711, $P3712
-    nqp_get_sc_object $P3713, "1304284963.737", 180
-    .const 'Sub' $P3714 = "231_1304284968.543" 
-    copy $P3713, $P3714
-    nqp_get_sc_object $P3715, "1304284963.737", 181
-    .const 'Sub' $P3716 = "232_1304284968.543" 
-    copy $P3715, $P3716
-    nqp_get_sc_object $P3717, "1304284963.737", 182
-    .const 'Sub' $P3718 = "233_1304284968.543" 
-    copy $P3717, $P3718
-    nqp_get_sc_object $P3719, "1304284963.737", 183
-    .const 'Sub' $P3720 = "234_1304284968.543" 
-    copy $P3719, $P3720
-    nqp_get_sc_object $P3721, "1304284963.737", 184
-    .const 'Sub' $P3722 = "235_1304284968.543" 
-    copy $P3721, $P3722
-    nqp_get_sc_object $P3723, "1304284963.737", 185
-    .const 'Sub' $P3724 = "236_1304284968.543" 
-    copy $P3723, $P3724
-    nqp_get_sc_object $P3725, "1304284963.737", 186
-    .const 'Sub' $P3726 = "237_1304284968.543" 
-    copy $P3725, $P3726
-    nqp_get_sc_object $P3727, "1304284963.737", 187
-    .const 'Sub' $P3728 = "238_1304284968.543" 
-    copy $P3727, $P3728
-    nqp_get_sc_object $P3729, "1304284963.737", 188
-    .const 'Sub' $P3730 = "239_1304284968.543" 
-    copy $P3729, $P3730
-    nqp_get_sc_object $P3731, "1304284963.737", 189
-    .const 'Sub' $P3732 = "240_1304284968.543" 
-    copy $P3731, $P3732
-    nqp_get_sc_object $P3733, "1304284963.737", 190
-    .const 'Sub' $P3734 = "241_1304284968.543" 
-    copy $P3733, $P3734
-    nqp_get_sc_object $P3735, "1304284963.737", 191
-    .const 'Sub' $P3736 = "242_1304284968.543" 
-    copy $P3735, $P3736
-    nqp_get_sc_object $P3737, "1304284963.737", 192
-    .const 'Sub' $P3738 = "243_1304284968.543" 
-    copy $P3737, $P3738
-    nqp_get_sc_object $P3739, "1304284963.737", 193
-    .const 'Sub' $P3740 = "244_1304284968.543" 
-    copy $P3739, $P3740
-    nqp_get_sc_object $P3741, "1304284963.737", 194
-    .const 'Sub' $P3742 = "247_1304284968.543" 
-    copy $P3741, $P3742
-    nqp_get_sc_object $P3743, "1304284963.737", 195
-    .const 'Sub' $P3744 = "249_1304284968.543" 
-    copy $P3743, $P3744
-    nqp_get_sc_object $P3745, "1304284963.737", 196
-    .const 'Sub' $P3746 = "253_1304284968.543" 
-    copy $P3745, $P3746
-    .const 'Sub' $P3747 = "175_1304284968.543" 
-    nqp_get_sc_object $P3748, "1304284963.737", 145
+    nqp_get_sc_object $P3645, "1304456135.999", 146
+    .const 'Sub' $P3646 = "190_1304456140.832" 
+    assign $P3645, $P3646
+    nqp_get_sc_object $P3647, "1304456135.999", 147
+    .const 'Sub' $P3648 = "191_1304456140.832" 
+    assign $P3647, $P3648
+    nqp_get_sc_object $P3649, "1304456135.999", 148
+    .const 'Sub' $P3650 = "193_1304456140.832" 
+    assign $P3649, $P3650
+    nqp_get_sc_object $P3651, "1304456135.999", 149
+    .const 'Sub' $P3652 = "194_1304456140.832" 
+    assign $P3651, $P3652
+    nqp_get_sc_object $P3653, "1304456135.999", 150
+    .const 'Sub' $P3654 = "197_1304456140.832" 
+    assign $P3653, $P3654
+    nqp_get_sc_object $P3655, "1304456135.999", 151
+    .const 'Sub' $P3656 = "199_1304456140.832" 
+    assign $P3655, $P3656
+    nqp_get_sc_object $P3657, "1304456135.999", 152
+    .const 'Sub' $P3658 = "201_1304456140.832" 
+    assign $P3657, $P3658
+    nqp_get_sc_object $P3659, "1304456135.999", 153
+    .const 'Sub' $P3660 = "203_1304456140.832" 
+    assign $P3659, $P3660
+    nqp_get_sc_object $P3661, "1304456135.999", 154
+    .const 'Sub' $P3662 = "204_1304456140.832" 
+    assign $P3661, $P3662
+    nqp_get_sc_object $P3663, "1304456135.999", 155
+    .const 'Sub' $P3664 = "205_1304456140.832" 
+    assign $P3663, $P3664
+    nqp_get_sc_object $P3665, "1304456135.999", 156
+    .const 'Sub' $P3666 = "206_1304456140.832" 
+    assign $P3665, $P3666
+    nqp_get_sc_object $P3667, "1304456135.999", 157
+    .const 'Sub' $P3668 = "207_1304456140.832" 
+    assign $P3667, $P3668
+    nqp_get_sc_object $P3669, "1304456135.999", 158
+    .const 'Sub' $P3670 = "209_1304456140.832" 
+    assign $P3669, $P3670
+    nqp_get_sc_object $P3671, "1304456135.999", 159
+    .const 'Sub' $P3672 = "210_1304456140.832" 
+    assign $P3671, $P3672
+    nqp_get_sc_object $P3673, "1304456135.999", 160
+    .const 'Sub' $P3674 = "211_1304456140.832" 
+    assign $P3673, $P3674
+    nqp_get_sc_object $P3675, "1304456135.999", 161
+    .const 'Sub' $P3676 = "212_1304456140.832" 
+    assign $P3675, $P3676
+    nqp_get_sc_object $P3677, "1304456135.999", 162
+    .const 'Sub' $P3678 = "213_1304456140.832" 
+    assign $P3677, $P3678
+    nqp_get_sc_object $P3679, "1304456135.999", 163
+    .const 'Sub' $P3680 = "214_1304456140.832" 
+    assign $P3679, $P3680
+    nqp_get_sc_object $P3681, "1304456135.999", 164
+    .const 'Sub' $P3682 = "215_1304456140.832" 
+    assign $P3681, $P3682
+    nqp_get_sc_object $P3683, "1304456135.999", 165
+    .const 'Sub' $P3684 = "216_1304456140.832" 
+    assign $P3683, $P3684
+    nqp_get_sc_object $P3685, "1304456135.999", 166
+    .const 'Sub' $P3686 = "217_1304456140.832" 
+    assign $P3685, $P3686
+    nqp_get_sc_object $P3687, "1304456135.999", 167
+    .const 'Sub' $P3688 = "218_1304456140.832" 
+    assign $P3687, $P3688
+    nqp_get_sc_object $P3689, "1304456135.999", 168
+    .const 'Sub' $P3690 = "219_1304456140.832" 
+    assign $P3689, $P3690
+    nqp_get_sc_object $P3691, "1304456135.999", 169
+    .const 'Sub' $P3692 = "220_1304456140.832" 
+    assign $P3691, $P3692
+    nqp_get_sc_object $P3693, "1304456135.999", 170
+    .const 'Sub' $P3694 = "221_1304456140.832" 
+    assign $P3693, $P3694
+    nqp_get_sc_object $P3695, "1304456135.999", 171
+    .const 'Sub' $P3696 = "222_1304456140.832" 
+    assign $P3695, $P3696
+    nqp_get_sc_object $P3697, "1304456135.999", 172
+    .const 'Sub' $P3698 = "223_1304456140.832" 
+    assign $P3697, $P3698
+    nqp_get_sc_object $P3699, "1304456135.999", 173
+    .const 'Sub' $P3700 = "224_1304456140.832" 
+    assign $P3699, $P3700
+    nqp_get_sc_object $P3701, "1304456135.999", 174
+    .const 'Sub' $P3702 = "225_1304456140.832" 
+    assign $P3701, $P3702
+    nqp_get_sc_object $P3703, "1304456135.999", 175
+    .const 'Sub' $P3704 = "226_1304456140.832" 
+    assign $P3703, $P3704
+    nqp_get_sc_object $P3705, "1304456135.999", 176
+    .const 'Sub' $P3706 = "227_1304456140.832" 
+    assign $P3705, $P3706
+    nqp_get_sc_object $P3707, "1304456135.999", 177
+    .const 'Sub' $P3708 = "228_1304456140.832" 
+    assign $P3707, $P3708
+    nqp_get_sc_object $P3709, "1304456135.999", 178
+    .const 'Sub' $P3710 = "229_1304456140.832" 
+    assign $P3709, $P3710
+    nqp_get_sc_object $P3711, "1304456135.999", 179
+    .const 'Sub' $P3712 = "230_1304456140.832" 
+    assign $P3711, $P3712
+    nqp_get_sc_object $P3713, "1304456135.999", 180
+    .const 'Sub' $P3714 = "231_1304456140.832" 
+    assign $P3713, $P3714
+    nqp_get_sc_object $P3715, "1304456135.999", 181
+    .const 'Sub' $P3716 = "232_1304456140.832" 
+    assign $P3715, $P3716
+    nqp_get_sc_object $P3717, "1304456135.999", 182
+    .const 'Sub' $P3718 = "233_1304456140.832" 
+    assign $P3717, $P3718
+    nqp_get_sc_object $P3719, "1304456135.999", 183
+    .const 'Sub' $P3720 = "234_1304456140.832" 
+    assign $P3719, $P3720
+    nqp_get_sc_object $P3721, "1304456135.999", 184
+    .const 'Sub' $P3722 = "235_1304456140.832" 
+    assign $P3721, $P3722
+    nqp_get_sc_object $P3723, "1304456135.999", 185
+    .const 'Sub' $P3724 = "236_1304456140.832" 
+    assign $P3723, $P3724
+    nqp_get_sc_object $P3725, "1304456135.999", 186
+    .const 'Sub' $P3726 = "237_1304456140.832" 
+    assign $P3725, $P3726
+    nqp_get_sc_object $P3727, "1304456135.999", 187
+    .const 'Sub' $P3728 = "238_1304456140.832" 
+    assign $P3727, $P3728
+    nqp_get_sc_object $P3729, "1304456135.999", 188
+    .const 'Sub' $P3730 = "239_1304456140.832" 
+    assign $P3729, $P3730
+    nqp_get_sc_object $P3731, "1304456135.999", 189
+    .const 'Sub' $P3732 = "240_1304456140.832" 
+    assign $P3731, $P3732
+    nqp_get_sc_object $P3733, "1304456135.999", 190
+    .const 'Sub' $P3734 = "241_1304456140.832" 
+    assign $P3733, $P3734
+    nqp_get_sc_object $P3735, "1304456135.999", 191
+    .const 'Sub' $P3736 = "242_1304456140.832" 
+    assign $P3735, $P3736
+    nqp_get_sc_object $P3737, "1304456135.999", 192
+    .const 'Sub' $P3738 = "243_1304456140.832" 
+    assign $P3737, $P3738
+    nqp_get_sc_object $P3739, "1304456135.999", 193
+    .const 'Sub' $P3740 = "244_1304456140.832" 
+    assign $P3739, $P3740
+    nqp_get_sc_object $P3741, "1304456135.999", 194
+    .const 'Sub' $P3742 = "247_1304456140.832" 
+    assign $P3741, $P3742
+    nqp_get_sc_object $P3743, "1304456135.999", 195
+    .const 'Sub' $P3744 = "249_1304456140.832" 
+    assign $P3743, $P3744
+    nqp_get_sc_object $P3745, "1304456135.999", 196
+    .const 'Sub' $P3746 = "253_1304456140.832" 
+    assign $P3745, $P3746
+    .const 'Sub' $P3747 = "175_1304456140.832" 
+    nqp_get_sc_object $P3748, "1304456135.999", 145
     get_who $P3749, $P3748
     set $P3749["buildsub"], $P3747
-    nqp_get_sc_object $P3750, "1304284963.737", 197
-    .const 'Sub' $P3751 = "254_1304284968.543" 
-    copy $P3750, $P3751
-    nqp_get_sc_object $P3752, "1304284963.737", 198
-    .const 'Sub' $P3753 = "255_1304284968.543" 
-    copy $P3752, $P3753
-    .const 'Sub' $P3754 = "174_1304284968.543" 
+    nqp_get_sc_object $P3750, "1304456135.999", 197
+    .const 'Sub' $P3751 = "254_1304456140.832" 
+    assign $P3750, $P3751
+    nqp_get_sc_object $P3752, "1304456135.999", 198
+    .const 'Sub' $P3753 = "255_1304456140.832" 
+    assign $P3752, $P3753
+    .const 'Sub' $P3754 = "174_1304456140.832" 
     $P3755 = $P3754."get_lexinfo"()
-    nqp_get_sc_object $P3756, "1304284963.737", 145
+    nqp_get_sc_object $P3756, "1304456135.999", 145
     $P3755."set_static_lexpad_value"("$?PACKAGE", $P3756)
-    .const 'Sub' $P3757 = "174_1304284968.543" 
+    .const 'Sub' $P3757 = "174_1304456140.832" 
     $P3758 = $P3757."get_lexinfo"()
     $P3758."finish_static_lexpad"()
-    .const 'Sub' $P3759 = "174_1304284968.543" 
+    .const 'Sub' $P3759 = "174_1304456140.832" 
     $P3760 = $P3759."get_lexinfo"()
-    nqp_get_sc_object $P3761, "1304284963.737", 145
+    nqp_get_sc_object $P3761, "1304456135.999", 145
     $P3760."set_static_lexpad_value"("$?CLASS", $P3761)
-    .const 'Sub' $P3762 = "174_1304284968.543" 
+    .const 'Sub' $P3762 = "174_1304456140.832" 
     $P3763 = $P3762."get_lexinfo"()
     $P3763."finish_static_lexpad"()
-    .const 'Sub' $P3764 = "256_1304284968.543" 
+    .const 'Sub' $P3764 = "256_1304456140.832" 
     $P3765 = $P3764."get_lexinfo"()
-    nqp_get_sc_object $P3766, "1304284963.737", 199
+    nqp_get_sc_object $P3766, "1304456135.999", 199
     $P3765."set_static_lexpad_value"("$?PACKAGE", $P3766)
-    .const 'Sub' $P3767 = "256_1304284968.543" 
+    .const 'Sub' $P3767 = "256_1304456140.832" 
     $P3768 = $P3767."get_lexinfo"()
     $P3768."finish_static_lexpad"()
-    .const 'Sub' $P3769 = "256_1304284968.543" 
+    .const 'Sub' $P3769 = "256_1304456140.832" 
     $P3770 = $P3769."get_lexinfo"()
-    nqp_get_sc_object $P3771, "1304284963.737", 199
+    nqp_get_sc_object $P3771, "1304456135.999", 199
     $P3770."set_static_lexpad_value"("$?CLASS", $P3771)
-    .const 'Sub' $P3772 = "256_1304284968.543" 
+    .const 'Sub' $P3772 = "256_1304456140.832" 
     $P3773 = $P3772."get_lexinfo"()
     $P3773."finish_static_lexpad"()
     goto if_2455_end
@@ -767,25 +767,25 @@
     get_class $P2459, "LexPad"
     get_class $P2460, "NQPLexPad"
     $P2458."hll_map"($P2459, $P2460)
-    nqp_create_sc $P2461, "1304284963.737"
+    nqp_create_sc $P2461, "1304456135.999"
     .local pmc cur_sc
     set cur_sc, $P2461
     nqp_get_sc_object $P2462, "__6MODEL_CORE__", 0
     $P2463 = $P2462."new_type"("GLOBALish" :named("name"))
     nqp_set_sc_for_object $P2463, cur_sc
-    nqp_set_sc_object "1304284963.737", 0, $P2463
-    .const 'Sub' $P2464 = "10_1304284968.543" 
+    nqp_set_sc_object "1304456135.999", 0, $P2463
+    .const 'Sub' $P2464 = "10_1304456140.832" 
     $P2465 = $P2464."get_lexinfo"()
-    nqp_get_sc_object $P2466, "1304284963.737", 0
+    nqp_get_sc_object $P2466, "1304456135.999", 0
     $P2465."set_static_lexpad_value"("GLOBALish", $P2466)
-    .const 'Sub' $P2467 = "10_1304284968.543" 
+    .const 'Sub' $P2467 = "10_1304456140.832" 
     $P2468 = $P2467."get_lexinfo"()
     $P2468."finish_static_lexpad"()
-    .const 'Sub' $P2469 = "10_1304284968.543" 
+    .const 'Sub' $P2469 = "10_1304456140.832" 
     $P2470 = $P2469."get_lexinfo"()
-    nqp_get_sc_object $P2471, "1304284963.737", 0
+    nqp_get_sc_object $P2471, "1304456135.999", 0
     $P2470."set_static_lexpad_value"("$?PACKAGE", $P2471)
-    .const 'Sub' $P2472 = "10_1304284968.543" 
+    .const 'Sub' $P2472 = "10_1304456140.832" 
     $P2473 = $P2472."get_lexinfo"()
     $P2473."finish_static_lexpad"()
     load_bytecode "ModuleLoader.pbc"
@@ -794,1097 +794,1097 @@
     block."set_outer_ctx"($P2475)
     load_bytecode "ModuleLoader.pbc"
     get_hll_global $P2476, "ModuleLoader"
-    nqp_get_sc_object $P2477, "1304284963.737", 0
+    nqp_get_sc_object $P2477, "1304456135.999", 0
     $P2476."load_module"("Regex", $P2477)
     load_bytecode "ModuleLoader.pbc"
     get_hll_global $P2478, "ModuleLoader"
-    nqp_get_sc_object $P2479, "1304284963.737", 0
+    nqp_get_sc_object $P2479, "1304456135.999", 0
     $P2478."load_module"("HLL", $P2479)
-    nqp_get_sc_object $P2480, "1304284944.723", 41
+    nqp_get_sc_object $P2480, "1304456116.562", 41
     $P2481 = $P2480."new_type"("Regex::P6Regex::Grammar" :named("name"))
     nqp_set_sc_for_object $P2481, cur_sc
-    nqp_set_sc_object "1304284963.737", 1, $P2481
-    nqp_get_sc_object $P2482, "1304284963.737", 1
-    nqp_get_sc_object $P2483, "1304284963.737", 0
+    nqp_set_sc_object "1304456135.999", 1, $P2481
+    nqp_get_sc_object $P2482, "1304456135.999", 1
+    nqp_get_sc_object $P2483, "1304456135.999", 0
     nqp_get_package_through_who $P2484, $P2483, "Regex"
     nqp_get_package_through_who $P2485, $P2484, "P6Regex"
     get_who $P2486, $P2485
     set $P2486["Grammar"], $P2482
-    nqp_get_sc_object $P2487, "1304284963.737", 1
+    nqp_get_sc_object $P2487, "1304456135.999", 1
     get_how $P2488, $P2487
-    nqp_get_sc_object $P2489, "1304284963.737", 1
-    .const 'Sub' $P2490 = "13_1304284968.543" 
+    nqp_get_sc_object $P2489, "1304456135.999", 1
+    .const 'Sub' $P2490 = "13_1304456140.832" 
     $P2488."add_method"($P2489, "obs", $P2490)
-    nqp_get_sc_object $P2491, "1304284963.737", 1
+    nqp_get_sc_object $P2491, "1304456135.999", 1
     get_how $P2492, $P2491
-    nqp_get_sc_object $P2493, "1304284963.737", 1
-    .const 'Sub' $P2494 = "14_1304284968.543" 
+    nqp_get_sc_object $P2493, "1304456135.999", 1
+    .const 'Sub' $P2494 = "14_1304456140.832" 
     $P2492."add_method"($P2493, "ws", $P2494)
-    nqp_get_sc_object $P2495, "1304284963.737", 1
+    nqp_get_sc_object $P2495, "1304456135.999", 1
     get_how $P2496, $P2495
-    nqp_get_sc_object $P2497, "1304284963.737", 1
-    .const 'Sub' $P2498 = "15_1304284968.543" 
+    nqp_get_sc_object $P2497, "1304456135.999", 1
+    .const 'Sub' $P2498 = "15_1304456140.832" 
     $P2496."add_method"($P2497, "!PREFIX__ws", $P2498)
-    nqp_get_sc_object $P2499, "1304284963.737", 1
+    nqp_get_sc_object $P2499, "1304456135.999", 1
     get_how $P2500, $P2499
-    nqp_get_sc_object $P2501, "1304284963.737", 1
-    .const 'Sub' $P2502 = "16_1304284968.543" 
+    nqp_get_sc_object $P2501, "1304456135.999", 1
+    .const 'Sub' $P2502 = "16_1304456140.832" 
     $P2500."add_method"($P2501, "normspace", $P2502)
-    nqp_get_sc_object $P2503, "1304284963.737", 1
+    nqp_get_sc_object $P2503, "1304456135.999", 1
     get_how $P2504, $P2503
-    nqp_get_sc_object $P2505, "1304284963.737", 1
-    .const 'Sub' $P2506 = "18_1304284968.543" 
+    nqp_get_sc_object $P2505, "1304456135.999", 1
+    .const 'Sub' $P2506 = "18_1304456140.832" 
     $P2504."add_method"($P2505, "!PREFIX__normspace", $P2506)
-    nqp_get_sc_object $P2507, "1304284963.737", 1
+    nqp_get_sc_object $P2507, "1304456135.999", 1
     get_how $P2508, $P2507
-    nqp_get_sc_object $P2509, "1304284963.737", 1
-    .const 'Sub' $P2510 = "19_1304284968.543" 
+    nqp_get_sc_object $P2509, "1304456135.999", 1
+    .const 'Sub' $P2510 = "19_1304456140.832" 
     $P2508."add_method"($P2509, "identifier", $P2510)
-    nqp_get_sc_object $P2511, "1304284963.737", 1
+    nqp_get_sc_object $P2511, "1304456135.999", 1
     get_how $P2512, $P2511
-    nqp_get_sc_object $P2513, "1304284963.737", 1
-    .const 'Sub' $P2514 = "20_1304284968.543" 
+    nqp_get_sc_object $P2513, "1304456135.999", 1
+    .const 'Sub' $P2514 = "20_1304456140.832" 
     $P2512."add_method"($P2513, "!PREFIX__identifier", $P2514)
-    nqp_get_sc_object $P2515, "1304284963.737", 1
+    nqp_get_sc_object $P2515, "1304456135.999", 1
     get_how $P2516, $P2515
-    nqp_get_sc_object $P2517, "1304284963.737", 1
-    .const 'Sub' $P2518 = "21_1304284968.543" 
+    nqp_get_sc_object $P2517, "1304456135.999", 1
+    .const 'Sub' $P2518 = "21_1304456140.832" 
     $P2516."add_method"($P2517, "arg", $P2518)
-    nqp_get_sc_object $P2519, "1304284963.737", 1
+    nqp_get_sc_object $P2519, "1304456135.999", 1
     get_how $P2520, $P2519
-    nqp_get_sc_object $P2521, "1304284963.737", 1
-    .const 'Sub' $P2522 = "22_1304284968.543" 
+    nqp_get_sc_object $P2521, "1304456135.999", 1
+    .const 'Sub' $P2522 = "22_1304456140.832" 
     $P2520."add_method"($P2521, "!PREFIX__arg", $P2522)
-    nqp_get_sc_object $P2523, "1304284963.737", 1
+    nqp_get_sc_object $P2523, "1304456135.999", 1
     get_how $P2524, $P2523
-    nqp_get_sc_object $P2525, "1304284963.737", 1
-    .const 'Sub' $P2526 = "23_1304284968.543" 
+    nqp_get_sc_object $P2525, "1304456135.999", 1
+    .const 'Sub' $P2526 = "23_1304456140.832" 
     $P2524."add_method"($P2525, "arglist", $P2526)
-    nqp_get_sc_object $P2527, "1304284963.737", 1
+    nqp_get_sc_object $P2527, "1304456135.999", 1
     get_how $P2528, $P2527
-    nqp_get_sc_object $P2529, "1304284963.737", 1
-    .const 'Sub' $P2530 = "24_1304284968.543" 
+    nqp_get_sc_object $P2529, "1304456135.999", 1
+    .const 'Sub' $P2530 = "24_1304456140.832" 
     $P2528."add_method"($P2529, "!PREFIX__arglist", $P2530)
-    nqp_get_sc_object $P2531, "1304284963.737", 1
+    nqp_get_sc_object $P2531, "1304456135.999", 1
     get_how $P2532, $P2531
-    nqp_get_sc_object $P2533, "1304284963.737", 1
-    .const 'Sub' $P2534 = "25_1304284968.543" 
+    nqp_get_sc_object $P2533, "1304456135.999", 1
+    .const 'Sub' $P2534 = "25_1304456140.832" 
     $P2532."add_method"($P2533, "TOP", $P2534)
-    nqp_get_sc_object $P2535, "1304284963.737", 1
+    nqp_get_sc_object $P2535, "1304456135.999", 1
     get_how $P2536, $P2535
-    nqp_get_sc_object $P2537, "1304284963.737", 1
-    .const 'Sub' $P2538 = "26_1304284968.543" 
+    nqp_get_sc_object $P2537, "1304456135.999", 1
+    .const 'Sub' $P2538 = "26_1304456140.832" 
     $P2536."add_method"($P2537, "!PREFIX__TOP", $P2538)
-    nqp_get_sc_object $P2539, "1304284963.737", 1
+    nqp_get_sc_object $P2539, "1304456135.999", 1
     get_how $P2540, $P2539
-    nqp_get_sc_object $P2541, "1304284963.737", 1
-    .const 'Sub' $P2542 = "27_1304284968.543" 
+    nqp_get_sc_object $P2541, "1304456135.999", 1
+    .const 'Sub' $P2542 = "27_1304456140.832" 
     $P2540."add_method"($P2541, "nibbler", $P2542)
-    nqp_get_sc_object $P2543, "1304284963.737", 1
+    nqp_get_sc_object $P2543, "1304456135.999", 1
     get_how $P2544, $P2543
-    nqp_get_sc_object $P2545, "1304284963.737", 1
-    .const 'Sub' $P2546 = "28_1304284968.543" 
+    nqp_get_sc_object $P2545, "1304456135.999", 1
+    .const 'Sub' $P2546 = "28_1304456140.832" 
     $P2544."add_method"($P2545, "!PREFIX__nibbler", $P2546)
-    nqp_get_sc_object $P2547, "1304284963.737", 1
+    nqp_get_sc_object $P2547, "1304456135.999", 1
     get_how $P2548, $P2547
-    nqp_get_sc_object $P2549, "1304284963.737", 1
-    .const 'Sub' $P2550 = "29_1304284968.543" 
+    nqp_get_sc_object $P2549, "1304456135.999", 1
+    .const 'Sub' $P2550 = "29_1304456140.832" 
     $P2548."add_method"($P2549, "termconj", $P2550)
-    nqp_get_sc_object $P2551, "1304284963.737", 1
+    nqp_get_sc_object $P2551, "1304456135.999", 1
     get_how $P2552, $P2551
-    nqp_get_sc_object $P2553, "1304284963.737", 1
-    .const 'Sub' $P2554 = "30_1304284968.543" 
+    nqp_get_sc_object $P2553, "1304456135.999", 1
+    .const 'Sub' $P2554 = "30_1304456140.832" 
     $P2552."add_method"($P2553, "!PREFIX__termconj", $P2554)
-    nqp_get_sc_object $P2555, "1304284963.737", 1
+    nqp_get_sc_object $P2555, "1304456135.999", 1
     get_how $P2556, $P2555
-    nqp_get_sc_object $P2557, "1304284963.737", 1
-    .const 'Sub' $P2558 = "31_1304284968.543" 
+    nqp_get_sc_object $P2557, "1304456135.999", 1
+    .const 'Sub' $P2558 = "31_1304456140.832" 
     $P2556."add_method"($P2557, "termish", $P2558)
-    nqp_get_sc_object $P2559, "1304284963.737", 1
+    nqp_get_sc_object $P2559, "1304456135.999", 1
     get_how $P2560, $P2559
-    nqp_get_sc_object $P2561, "1304284963.737", 1
-    .const 'Sub' $P2562 = "32_1304284968.543" 
+    nqp_get_sc_object $P2561, "1304456135.999", 1
+    .const 'Sub' $P2562 = "32_1304456140.832" 
     $P2560."add_method"($P2561, "!PREFIX__termish", $P2562)
-    nqp_get_sc_object $P2563, "1304284963.737", 1
+    nqp_get_sc_object $P2563, "1304456135.999", 1
     get_how $P2564, $P2563
-    nqp_get_sc_object $P2565, "1304284963.737", 1
-    .const 'Sub' $P2566 = "33_1304284968.543" 
+    nqp_get_sc_object $P2565, "1304456135.999", 1
+    .const 'Sub' $P2566 = "33_1304456140.832" 
     $P2564."add_method"($P2565, "quantified_atom", $P2566)
-    nqp_get_sc_object $P2567, "1304284963.737", 1
+    nqp_get_sc_object $P2567, "1304456135.999", 1
     get_how $P2568, $P2567
-    nqp_get_sc_object $P2569, "1304284963.737", 1
-    .const 'Sub' $P2570 = "35_1304284968.543" 
+    nqp_get_sc_object $P2569, "1304456135.999", 1
+    .const 'Sub' $P2570 = "35_1304456140.832" 
     $P2568."add_method"($P2569, "!PREFIX__quantified_atom", $P2570)
-    nqp_get_sc_object $P2571, "1304284963.737", 1
+    nqp_get_sc_object $P2571, "1304456135.999", 1
     get_how $P2572, $P2571
-    nqp_get_sc_object $P2573, "1304284963.737", 1
-    .const 'Sub' $P2574 = "36_1304284968.543" 
+    nqp_get_sc_object $P2573, "1304456135.999", 1
+    .const 'Sub' $P2574 = "36_1304456140.832" 
     $P2572."add_method"($P2573, "atom", $P2574)
-    nqp_get_sc_object $P2575, "1304284963.737", 1
+    nqp_get_sc_object $P2575, "1304456135.999", 1
     get_how $P2576, $P2575
-    nqp_get_sc_object $P2577, "1304284963.737", 1
-    .const 'Sub' $P2578 = "38_1304284968.543" 
+    nqp_get_sc_object $P2577, "1304456135.999", 1
+    .const 'Sub' $P2578 = "38_1304456140.832" 
     $P2576."add_method"($P2577, "!PREFIX__atom", $P2578)
-    nqp_get_sc_object $P2579, "1304284963.737", 1
+    nqp_get_sc_object $P2579, "1304456135.999", 1
     get_how $P2580, $P2579
-    nqp_get_sc_object $P2581, "1304284963.737", 1
-    .const 'Sub' $P2582 = "39_1304284968.543" 
+    nqp_get_sc_object $P2581, "1304456135.999", 1
+    .const 'Sub' $P2582 = "39_1304456140.832" 
     $P2580."add_method"($P2581, "quantifier", $P2582)
-    nqp_get_sc_object $P2583, "1304284963.737", 1
+    nqp_get_sc_object $P2583, "1304456135.999", 1
     get_how $P2584, $P2583
-    nqp_get_sc_object $P2585, "1304284963.737", 1
-    .const 'Sub' $P2586 = "40_1304284968.543" 
+    nqp_get_sc_object $P2585, "1304456135.999", 1
+    .const 'Sub' $P2586 = "40_1304456140.832" 
     $P2584."add_method"($P2585, "!PREFIX__quantifier", $P2586)
-    nqp_get_sc_object $P2587, "1304284963.737", 1
+    nqp_get_sc_object $P2587, "1304456135.999", 1
     get_how $P2588, $P2587
-    nqp_get_sc_object $P2589, "1304284963.737", 1
-    .const 'Sub' $P2590 = "41_1304284968.543" 
+    nqp_get_sc_object $P2589, "1304456135.999", 1
+    .const 'Sub' $P2590 = "41_1304456140.832" 
     $P2588."add_method"($P2589, "quantifier:sym<*>", $P2590)
-    nqp_get_sc_object $P2591, "1304284963.737", 1
+    nqp_get_sc_object $P2591, "1304456135.999", 1
     get_how $P2592, $P2591
-    nqp_get_sc_object $P2593, "1304284963.737", 1
-    .const 'Sub' $P2594 = "42_1304284968.543" 
+    nqp_get_sc_object $P2593, "1304456135.999", 1
+    .const 'Sub' $P2594 = "42_1304456140.832" 
     $P2592."add_method"($P2593, "!PREFIX__quantifier:sym<*>", $P2594)
-    nqp_get_sc_object $P2595, "1304284963.737", 1
+    nqp_get_sc_object $P2595, "1304456135.999", 1
     get_how $P2596, $P2595
-    nqp_get_sc_object $P2597, "1304284963.737", 1
-    .const 'Sub' $P2598 = "43_1304284968.543" 
+    nqp_get_sc_object $P2597, "1304456135.999", 1
+    .const 'Sub' $P2598 = "43_1304456140.832" 
     $P2596."add_method"($P2597, "quantifier:sym<+>", $P2598)
-    nqp_get_sc_object $P2599, "1304284963.737", 1
+    nqp_get_sc_object $P2599, "1304456135.999", 1
     get_how $P2600, $P2599
-    nqp_get_sc_object $P2601, "1304284963.737", 1
-    .const 'Sub' $P2602 = "44_1304284968.543" 
+    nqp_get_sc_object $P2601, "1304456135.999", 1
+    .const 'Sub' $P2602 = "44_1304456140.832" 
     $P2600."add_method"($P2601, "!PREFIX__quantifier:sym<+>", $P2602)
-    nqp_get_sc_object $P2603, "1304284963.737", 1
+    nqp_get_sc_object $P2603, "1304456135.999", 1
     get_how $P2604, $P2603
-    nqp_get_sc_object $P2605, "1304284963.737", 1
-    .const 'Sub' $P2606 = "45_1304284968.543" 
+    nqp_get_sc_object $P2605, "1304456135.999", 1
+    .const 'Sub' $P2606 = "45_1304456140.832" 
     $P2604."add_method"($P2605, "quantifier:sym<?>", $P2606)
-    nqp_get_sc_object $P2607, "1304284963.737", 1
+    nqp_get_sc_object $P2607, "1304456135.999", 1
     get_how $P2608, $P2607
-    nqp_get_sc_object $P2609, "1304284963.737", 1
-    .const 'Sub' $P2610 = "46_1304284968.543" 
+    nqp_get_sc_object $P2609, "1304456135.999", 1
+    .const 'Sub' $P2610 = "46_1304456140.832" 
     $P2608."add_method"($P2609, "!PREFIX__quantifier:sym<?>", $P2610)
-    nqp_get_sc_object $P2611, "1304284963.737", 1
+    nqp_get_sc_object $P2611, "1304456135.999", 1
     get_how $P2612, $P2611
-    nqp_get_sc_object $P2613, "1304284963.737", 1
-    .const 'Sub' $P2614 = "47_1304284968.543" 
+    nqp_get_sc_object $P2613, "1304456135.999", 1
+    .const 'Sub' $P2614 = "47_1304456140.832" 
     $P2612."add_method"($P2613, "quantifier:sym<{N,M}>", $P2614)
-    nqp_get_sc_object $P2615, "1304284963.737", 1
+    nqp_get_sc_object $P2615, "1304456135.999", 1
     get_how $P2616, $P2615
-    nqp_get_sc_object $P2617, "1304284963.737", 1
-    .const 'Sub' $P2618 = "52_1304284968.543" 
+    nqp_get_sc_object $P2617, "1304456135.999", 1
+    .const 'Sub' $P2618 = "52_1304456140.832" 
     $P2616."add_method"($P2617, "!PREFIX__quantifier:sym<{N,M}>", $P2618)
-    nqp_get_sc_object $P2619, "1304284963.737", 1
+    nqp_get_sc_object $P2619, "1304456135.999", 1
     get_how $P2620, $P2619
-    nqp_get_sc_object $P2621, "1304284963.737", 1
-    .const 'Sub' $P2622 = "53_1304284968.543" 
+    nqp_get_sc_object $P2621, "1304456135.999", 1
+    .const 'Sub' $P2622 = "53_1304456140.832" 
     $P2620."add_method"($P2621, "quantifier:sym<**>", $P2622)
-    nqp_get_sc_object $P2623, "1304284963.737", 1
+    nqp_get_sc_object $P2623, "1304456135.999", 1
     get_how $P2624, $P2623
-    nqp_get_sc_object $P2625, "1304284963.737", 1
-    .const 'Sub' $P2626 = "54_1304284968.543" 
+    nqp_get_sc_object $P2625, "1304456135.999", 1
+    .const 'Sub' $P2626 = "54_1304456140.832" 
     $P2624."add_method"($P2625, "!PREFIX__quantifier:sym<**>", $P2626)
-    nqp_get_sc_object $P2627, "1304284963.737", 1
+    nqp_get_sc_object $P2627, "1304456135.999", 1
     get_how $P2628, $P2627
-    nqp_get_sc_object $P2629, "1304284963.737", 1
-    .const 'Sub' $P2630 = "55_1304284968.543" 
+    nqp_get_sc_object $P2629, "1304456135.999", 1
+    .const 'Sub' $P2630 = "55_1304456140.832" 
     $P2628."add_method"($P2629, "backmod", $P2630)
-    nqp_get_sc_object $P2631, "1304284963.737", 1
+    nqp_get_sc_object $P2631, "1304456135.999", 1
     get_how $P2632, $P2631
-    nqp_get_sc_object $P2633, "1304284963.737", 1
-    .const 'Sub' $P2634 = "57_1304284968.543" 
+    nqp_get_sc_object $P2633, "1304456135.999", 1
+    .const 'Sub' $P2634 = "57_1304456140.832" 
     $P2632."add_method"($P2633, "!PREFIX__backmod", $P2634)
-    nqp_get_sc_object $P2635, "1304284963.737", 1
+    nqp_get_sc_object $P2635, "1304456135.999", 1
     get_how $P2636, $P2635
-    nqp_get_sc_object $P2637, "1304284963.737", 1
-    .const 'Sub' $P2638 = "58_1304284968.543" 
+    nqp_get_sc_object $P2637, "1304456135.999", 1
+    .const 'Sub' $P2638 = "58_1304456140.832" 
     $P2636."add_method"($P2637, "metachar", $P2638)
-    nqp_get_sc_object $P2639, "1304284963.737", 1
+    nqp_get_sc_object $P2639, "1304456135.999", 1
     get_how $P2640, $P2639
-    nqp_get_sc_object $P2641, "1304284963.737", 1
-    .const 'Sub' $P2642 = "59_1304284968.543" 
+    nqp_get_sc_object $P2641, "1304456135.999", 1
+    .const 'Sub' $P2642 = "59_1304456140.832" 
     $P2640."add_method"($P2641, "!PREFIX__metachar", $P2642)
-    nqp_get_sc_object $P2643, "1304284963.737", 1
+    nqp_get_sc_object $P2643, "1304456135.999", 1
     get_how $P2644, $P2643
-    nqp_get_sc_object $P2645, "1304284963.737", 1
-    .const 'Sub' $P2646 = "60_1304284968.543" 
+    nqp_get_sc_object $P2645, "1304456135.999", 1
+    .const 'Sub' $P2646 = "60_1304456140.832" 
     $P2644."add_method"($P2645, "metachar:sym<ws>", $P2646)
-    nqp_get_sc_object $P2647, "1304284963.737", 1
+    nqp_get_sc_object $P2647, "1304456135.999", 1
     get_how $P2648, $P2647
-    nqp_get_sc_object $P2649, "1304284963.737", 1
-    .const 'Sub' $P2650 = "61_1304284968.543" 
+    nqp_get_sc_object $P2649, "1304456135.999", 1
+    .const 'Sub' $P2650 = "61_1304456140.832" 
     $P2648."add_method"($P2649, "!PREFIX__metachar:sym<ws>", $P2650)
-    nqp_get_sc_object $P2651, "1304284963.737", 1
+    nqp_get_sc_object $P2651, "1304456135.999", 1
     get_how $P2652, $P2651
-    nqp_get_sc_object $P2653, "1304284963.737", 1
-    .const 'Sub' $P2654 = "62_1304284968.543" 
+    nqp_get_sc_object $P2653, "1304456135.999", 1
+    .const 'Sub' $P2654 = "62_1304456140.832" 
     $P2652."add_method"($P2653, "metachar:sym<[ ]>", $P2654)
-    nqp_get_sc_object $P2655, "1304284963.737", 1
+    nqp_get_sc_object $P2655, "1304456135.999", 1
     get_how $P2656, $P2655
-    nqp_get_sc_object $P2657, "1304284963.737", 1
-    .const 'Sub' $P2658 = "63_1304284968.543" 
+    nqp_get_sc_object $P2657, "1304456135.999", 1
+    .const 'Sub' $P2658 = "63_1304456140.832" 
     $P2656."add_method"($P2657, "!PREFIX__metachar:sym<[ ]>", $P2658)
-    nqp_get_sc_object $P2659, "1304284963.737", 1
+    nqp_get_sc_object $P2659, "1304456135.999", 1
     get_how $P2660, $P2659
-    nqp_get_sc_object $P2661, "1304284963.737", 1
-    .const 'Sub' $P2662 = "64_1304284968.543" 
+    nqp_get_sc_object $P2661, "1304456135.999", 1
+    .const 'Sub' $P2662 = "64_1304456140.832" 
     $P2660."add_method"($P2661, "metachar:sym<( )>", $P2662)
-    nqp_get_sc_object $P2663, "1304284963.737", 1
+    nqp_get_sc_object $P2663, "1304456135.999", 1
     get_how $P2664, $P2663
-    nqp_get_sc_object $P2665, "1304284963.737", 1
-    .const 'Sub' $P2666 = "65_1304284968.543" 
+    nqp_get_sc_object $P2665, "1304456135.999", 1
+    .const 'Sub' $P2666 = "65_1304456140.832" 
     $P2664."add_method"($P2665, "!PREFIX__metachar:sym<( )>", $P2666)
-    nqp_get_sc_object $P2667, "1304284963.737", 1
+    nqp_get_sc_object $P2667, "1304456135.999", 1
     get_how $P2668, $P2667
-    nqp_get_sc_object $P2669, "1304284963.737", 1
-    .const 'Sub' $P2670 = "66_1304284968.543" 
+    nqp_get_sc_object $P2669, "1304456135.999", 1
+    .const 'Sub' $P2670 = "66_1304456140.832" 
     $P2668."add_method"($P2669, "metachar:sym<'>", $P2670)
-    nqp_get_sc_object $P2671, "1304284963.737", 1
+    nqp_get_sc_object $P2671, "1304456135.999", 1
     get_how $P2672, $P2671
-    nqp_get_sc_object $P2673, "1304284963.737", 1
-    .const 'Sub' $P2674 = "67_1304284968.543" 
+    nqp_get_sc_object $P2673, "1304456135.999", 1
+    .const 'Sub' $P2674 = "67_1304456140.832" 
     $P2672."add_method"($P2673, "!PREFIX__metachar:sym<'>", $P2674)
-    nqp_get_sc_object $P2675, "1304284963.737", 1
+    nqp_get_sc_object $P2675, "1304456135.999", 1
     get_how $P2676, $P2675
-    nqp_get_sc_object $P2677, "1304284963.737", 1
-    .const 'Sub' $P2678 = "68_1304284968.543" 
+    nqp_get_sc_object $P2677, "1304456135.999", 1
+    .const 'Sub' $P2678 = "68_1304456140.832" 
     $P2676."add_method"($P2677, "metachar:sym<\">", $P2678)
-    nqp_get_sc_object $P2679, "1304284963.737", 1
+    nqp_get_sc_object $P2679, "1304456135.999", 1
     get_how $P2680, $P2679
-    nqp_get_sc_object $P2681, "1304284963.737", 1
-    .const 'Sub' $P2682 = "69_1304284968.543" 
+    nqp_get_sc_object $P2681, "1304456135.999", 1
+    .const 'Sub' $P2682 = "69_1304456140.832" 
     $P2680."add_method"($P2681, "!PREFIX__metachar:sym<\">", $P2682)
-    nqp_get_sc_object $P2683, "1304284963.737", 1
+    nqp_get_sc_object $P2683, "1304456135.999", 1
     get_how $P2684, $P2683
-    nqp_get_sc_object $P2685, "1304284963.737", 1
-    .const 'Sub' $P2686 = "70_1304284968.543" 
+    nqp_get_sc_object $P2685, "1304456135.999", 1
+    .const 'Sub' $P2686 = "70_1304456140.832" 
     $P2684."add_method"($P2685, "metachar:sym<.>", $P2686)
-    nqp_get_sc_object $P2687, "1304284963.737", 1
+    nqp_get_sc_object $P2687, "1304456135.999", 1
     get_how $P2688, $P2687
-    nqp_get_sc_object $P2689, "1304284963.737", 1
-    .const 'Sub' $P2690 = "71_1304284968.543" 
+    nqp_get_sc_object $P2689, "1304456135.999", 1
+    .const 'Sub' $P2690 = "71_1304456140.832" 
     $P2688."add_method"($P2689, "!PREFIX__metachar:sym<.>", $P2690)
-    nqp_get_sc_object $P2691, "1304284963.737", 1
+    nqp_get_sc_object $P2691, "1304456135.999", 1
     get_how $P2692, $P2691
-    nqp_get_sc_object $P2693, "1304284963.737", 1
-    .const 'Sub' $P2694 = "72_1304284968.543" 
+    nqp_get_sc_object $P2693, "1304456135.999", 1
+    .const 'Sub' $P2694 = "72_1304456140.832" 
     $P2692."add_method"($P2693, "metachar:sym<^>", $P2694)
-    nqp_get_sc_object $P2695, "1304284963.737", 1
+    nqp_get_sc_object $P2695, "1304456135.999", 1
     get_how $P2696, $P2695
-    nqp_get_sc_object $P2697, "1304284963.737", 1
-    .const 'Sub' $P2698 = "73_1304284968.543" 
+    nqp_get_sc_object $P2697, "1304456135.999", 1
+    .const 'Sub' $P2698 = "73_1304456140.832" 
     $P2696."add_method"($P2697, "!PREFIX__metachar:sym<^>", $P2698)
-    nqp_get_sc_object $P2699, "1304284963.737", 1
+    nqp_get_sc_object $P2699, "1304456135.999", 1
     get_how $P2700, $P2699
-    nqp_get_sc_object $P2701, "1304284963.737", 1
-    .const 'Sub' $P2702 = "74_1304284968.543" 
+    nqp_get_sc_object $P2701, "1304456135.999", 1
+    .const 'Sub' $P2702 = "74_1304456140.832" 
     $P2700."add_method"($P2701, "metachar:sym<^^>", $P2702)
-    nqp_get_sc_object $P2703, "1304284963.737", 1
+    nqp_get_sc_object $P2703, "1304456135.999", 1
     get_how $P2704, $P2703
-    nqp_get_sc_object $P2705, "1304284963.737", 1
-    .const 'Sub' $P2706 = "75_1304284968.543" 
+    nqp_get_sc_object $P2705, "1304456135.999", 1
+    .const 'Sub' $P2706 = "75_1304456140.832" 
     $P2704."add_method"($P2705, "!PREFIX__metachar:sym<^^>", $P2706)
-    nqp_get_sc_object $P2707, "1304284963.737", 1
+    nqp_get_sc_object $P2707, "1304456135.999", 1
     get_how $P2708, $P2707
-    nqp_get_sc_object $P2709, "1304284963.737", 1
-    .const 'Sub' $P2710 = "76_1304284968.543" 
+    nqp_get_sc_object $P2709, "1304456135.999", 1
+    .const 'Sub' $P2710 = "76_1304456140.832" 
     $P2708."add_method"($P2709, "metachar:sym<$>", $P2710)
-    nqp_get_sc_object $P2711, "1304284963.737", 1
+    nqp_get_sc_object $P2711, "1304456135.999", 1
     get_how $P2712, $P2711
-    nqp_get_sc_object $P2713, "1304284963.737", 1
-    .const 'Sub' $P2714 = "77_1304284968.543" 
+    nqp_get_sc_object $P2713, "1304456135.999", 1
+    .const 'Sub' $P2714 = "77_1304456140.832" 
     $P2712."add_method"($P2713, "!PREFIX__metachar:sym<$>", $P2714)
-    nqp_get_sc_object $P2715, "1304284963.737", 1
+    nqp_get_sc_object $P2715, "1304456135.999", 1
     get_how $P2716, $P2715
-    nqp_get_sc_object $P2717, "1304284963.737", 1
-    .const 'Sub' $P2718 = "78_1304284968.543" 
+    nqp_get_sc_object $P2717, "1304456135.999", 1
+    .const 'Sub' $P2718 = "78_1304456140.832" 
     $P2716."add_method"($P2717, "metachar:sym<$$>", $P2718)
-    nqp_get_sc_object $P2719, "1304284963.737", 1
+    nqp_get_sc_object $P2719, "1304456135.999", 1
     get_how $P2720, $P2719
-    nqp_get_sc_object $P2721, "1304284963.737", 1
-    .const 'Sub' $P2722 = "79_1304284968.543" 
+    nqp_get_sc_object $P2721, "1304456135.999", 1
+    .const 'Sub' $P2722 = "79_1304456140.832" 
     $P2720."add_method"($P2721, "!PREFIX__metachar:sym<$$>", $P2722)
-    nqp_get_sc_object $P2723, "1304284963.737", 1
+    nqp_get_sc_object $P2723, "1304456135.999", 1
     get_how $P2724, $P2723
-    nqp_get_sc_object $P2725, "1304284963.737", 1
-    .const 'Sub' $P2726 = "80_1304284968.543" 
+    nqp_get_sc_object $P2725, "1304456135.999", 1
+    .const 'Sub' $P2726 = "80_1304456140.832" 
     $P2724."add_method"($P2725, "metachar:sym<:::>", $P2726)
-    nqp_get_sc_object $P2727, "1304284963.737", 1
+    nqp_get_sc_object $P2727, "1304456135.999", 1
     get_how $P2728, $P2727
-    nqp_get_sc_object $P2729, "1304284963.737", 1
-    .const 'Sub' $P2730 = "81_1304284968.543" 
+    nqp_get_sc_object $P2729, "1304456135.999", 1
+    .const 'Sub' $P2730 = "81_1304456140.832" 
     $P2728."add_method"($P2729, "!PREFIX__metachar:sym<:::>", $P2730)
-    nqp_get_sc_object $P2731, "1304284963.737", 1
+    nqp_get_sc_object $P2731, "1304456135.999", 1
     get_how $P2732, $P2731
-    nqp_get_sc_object $P2733, "1304284963.737", 1
-    .const 'Sub' $P2734 = "82_1304284968.543" 
+    nqp_get_sc_object $P2733, "1304456135.999", 1
+    .const 'Sub' $P2734 = "82_1304456140.832" 
     $P2732."add_method"($P2733, "metachar:sym<::>", $P2734)
-    nqp_get_sc_object $P2735, "1304284963.737", 1
+    nqp_get_sc_object $P2735, "1304456135.999", 1
     get_how $P2736, $P2735
-    nqp_get_sc_object $P2737, "1304284963.737", 1
-    .const 'Sub' $P2738 = "83_1304284968.543" 
+    nqp_get_sc_object $P2737, "1304456135.999", 1
+    .const 'Sub' $P2738 = "83_1304456140.832" 
     $P2736."add_method"($P2737, "!PREFIX__metachar:sym<::>", $P2738)
-    nqp_get_sc_object $P2739, "1304284963.737", 1
+    nqp_get_sc_object $P2739, "1304456135.999", 1
     get_how $P2740, $P2739
-    nqp_get_sc_object $P2741, "1304284963.737", 1
-    .const 'Sub' $P2742 = "84_1304284968.543" 
+    nqp_get_sc_object $P2741, "1304456135.999", 1
+    .const 'Sub' $P2742 = "84_1304456140.832" 
     $P2740."add_method"($P2741, "metachar:sym<lwb>", $P2742)
-    nqp_get_sc_object $P2743, "1304284963.737", 1
+    nqp_get_sc_object $P2743, "1304456135.999", 1
     get_how $P2744, $P2743
-    nqp_get_sc_object $P2745, "1304284963.737", 1
-    .const 'Sub' $P2746 = "85_1304284968.543" 
+    nqp_get_sc_object $P2745, "1304456135.999", 1
+    .const 'Sub' $P2746 = "85_1304456140.832" 
     $P2744."add_method"($P2745, "!PREFIX__metachar:sym<lwb>", $P2746)
-    nqp_get_sc_object $P2747, "1304284963.737", 1
+    nqp_get_sc_object $P2747, "1304456135.999", 1
     get_how $P2748, $P2747
-    nqp_get_sc_object $P2749, "1304284963.737", 1
-    .const 'Sub' $P2750 = "86_1304284968.543" 
+    nqp_get_sc_object $P2749, "1304456135.999", 1
+    .const 'Sub' $P2750 = "86_1304456140.832" 
     $P2748."add_method"($P2749, "metachar:sym<rwb>", $P2750)
-    nqp_get_sc_object $P2751, "1304284963.737", 1
+    nqp_get_sc_object $P2751, "1304456135.999", 1
     get_how $P2752, $P2751
-    nqp_get_sc_object $P2753, "1304284963.737", 1
-    .const 'Sub' $P2754 = "87_1304284968.543" 
+    nqp_get_sc_object $P2753, "1304456135.999", 1
+    .const 'Sub' $P2754 = "87_1304456140.832" 
     $P2752."add_method"($P2753, "!PREFIX__metachar:sym<rwb>", $P2754)
-    nqp_get_sc_object $P2755, "1304284963.737", 1
+    nqp_get_sc_object $P2755, "1304456135.999", 1
     get_how $P2756, $P2755
-    nqp_get_sc_object $P2757, "1304284963.737", 1
-    .const 'Sub' $P2758 = "88_1304284968.543" 
+    nqp_get_sc_object $P2757, "1304456135.999", 1
+    .const 'Sub' $P2758 = "88_1304456140.832" 
     $P2756."add_method"($P2757, "metachar:sym<bs>", $P2758)
-    nqp_get_sc_object $P2759, "1304284963.737", 1
+    nqp_get_sc_object $P2759, "1304456135.999", 1
     get_how $P2760, $P2759
-    nqp_get_sc_object $P2761, "1304284963.737", 1
-    .const 'Sub' $P2762 = "89_1304284968.543" 
+    nqp_get_sc_object $P2761, "1304456135.999", 1
+    .const 'Sub' $P2762 = "89_1304456140.832" 
     $P2760."add_method"($P2761, "!PREFIX__metachar:sym<bs>", $P2762)
-    nqp_get_sc_object $P2763, "1304284963.737", 1
+    nqp_get_sc_object $P2763, "1304456135.999", 1
     get_how $P2764, $P2763
-    nqp_get_sc_object $P2765, "1304284963.737", 1
-    .const 'Sub' $P2766 = "90_1304284968.543" 
+    nqp_get_sc_object $P2765, "1304456135.999", 1
+    .const 'Sub' $P2766 = "90_1304456140.832" 
     $P2764."add_method"($P2765, "metachar:sym<mod>", $P2766)
-    nqp_get_sc_object $P2767, "1304284963.737", 1
+    nqp_get_sc_object $P2767, "1304456135.999", 1
     get_how $P2768, $P2767
-    nqp_get_sc_object $P2769, "1304284963.737", 1
-    .const 'Sub' $P2770 = "91_1304284968.543" 
+    nqp_get_sc_object $P2769, "1304456135.999", 1
+    .const 'Sub' $P2770 = "91_1304456140.832" 
     $P2768."add_method"($P2769, "!PREFIX__metachar:sym<mod>", $P2770)
-    nqp_get_sc_object $P2771, "1304284963.737", 1
+    nqp_get_sc_object $P2771, "1304456135.999", 1
     get_how $P2772, $P2771
-    nqp_get_sc_object $P2773, "1304284963.737", 1
-    .const 'Sub' $P2774 = "92_1304284968.543" 
+    nqp_get_sc_object $P2773, "1304456135.999", 1
+    .const 'Sub' $P2774 = "92_1304456140.832" 
     $P2772."add_method"($P2773, "metachar:sym<quantifier>", $P2774)
-    nqp_get_sc_object $P2775, "1304284963.737", 1
+    nqp_get_sc_object $P2775, "1304456135.999", 1
     get_how $P2776, $P2775
-    nqp_get_sc_object $P2777, "1304284963.737", 1
-    .const 'Sub' $P2778 = "93_1304284968.543" 
+    nqp_get_sc_object $P2777, "1304456135.999", 1
+    .const 'Sub' $P2778 = "93_1304456140.832" 
     $P2776."add_method"($P2777, "!PREFIX__metachar:sym<quantifier>", $P2778)
-    nqp_get_sc_object $P2779, "1304284963.737", 1
+    nqp_get_sc_object $P2779, "1304456135.999", 1
     get_how $P2780, $P2779
-    nqp_get_sc_object $P2781, "1304284963.737", 1
-    .const 'Sub' $P2782 = "94_1304284968.543" 
+    nqp_get_sc_object $P2781, "1304456135.999", 1
+    .const 'Sub' $P2782 = "94_1304456140.832" 
     $P2780."add_method"($P2781, "metachar:sym<~>", $P2782)
-    nqp_get_sc_object $P2783, "1304284963.737", 1
+    nqp_get_sc_object $P2783, "1304456135.999", 1
     get_how $P2784, $P2783
-    nqp_get_sc_object $P2785, "1304284963.737", 1
-    .const 'Sub' $P2786 = "95_1304284968.543" 
+    nqp_get_sc_object $P2785, "1304456135.999", 1
+    .const 'Sub' $P2786 = "95_1304456140.832" 
     $P2784."add_method"($P2785, "!PREFIX__metachar:sym<~>", $P2786)
-    nqp_get_sc_object $P2787, "1304284963.737", 1
+    nqp_get_sc_object $P2787, "1304456135.999", 1
     get_how $P2788, $P2787
-    nqp_get_sc_object $P2789, "1304284963.737", 1
-    .const 'Sub' $P2790 = "96_1304284968.543" 
+    nqp_get_sc_object $P2789, "1304456135.999", 1
+    .const 'Sub' $P2790 = "96_1304456140.832" 
     $P2788."add_method"($P2789, "metachar:sym<{*}>", $P2790)
-    nqp_get_sc_object $P2791, "1304284963.737", 1
+    nqp_get_sc_object $P2791, "1304456135.999", 1
     get_how $P2792, $P2791
-    nqp_get_sc_object $P2793, "1304284963.737", 1
-    .const 'Sub' $P2794 = "97_1304284968.543" 
+    nqp_get_sc_object $P2793, "1304456135.999", 1
+    .const 'Sub' $P2794 = "97_1304456140.832" 
     $P2792."add_method"($P2793, "!PREFIX__metachar:sym<{*}>", $P2794)
-    nqp_get_sc_object $P2795, "1304284963.737", 1
+    nqp_get_sc_object $P2795, "1304456135.999", 1
     get_how $P2796, $P2795
-    nqp_get_sc_object $P2797, "1304284963.737", 1
-    .const 'Sub' $P2798 = "98_1304284968.543" 
+    nqp_get_sc_object $P2797, "1304456135.999", 1
+    .const 'Sub' $P2798 = "98_1304456140.832" 
     $P2796."add_method"($P2797, "metachar:sym<assert>", $P2798)
-    nqp_get_sc_object $P2799, "1304284963.737", 1
+    nqp_get_sc_object $P2799, "1304456135.999", 1
     get_how $P2800, $P2799
-    nqp_get_sc_object $P2801, "1304284963.737", 1
-    .const 'Sub' $P2802 = "99_1304284968.543" 
+    nqp_get_sc_object $P2801, "1304456135.999", 1
+    .const 'Sub' $P2802 = "99_1304456140.832" 
     $P2800."add_method"($P2801, "!PREFIX__metachar:sym<assert>", $P2802)
-    nqp_get_sc_object $P2803, "1304284963.737", 1
+    nqp_get_sc_object $P2803, "1304456135.999", 1
     get_how $P2804, $P2803
-    nqp_get_sc_object $P2805, "1304284963.737", 1
-    .const 'Sub' $P2806 = "100_1304284968.543" 
+    nqp_get_sc_object $P2805, "1304456135.999", 1
+    .const 'Sub' $P2806 = "100_1304456140.832" 
     $P2804."add_method"($P2805, "metachar:sym<var>", $P2806)
-    nqp_get_sc_object $P2807, "1304284963.737", 1
+    nqp_get_sc_object $P2807, "1304456135.999", 1
     get_how $P2808, $P2807
-    nqp_get_sc_object $P2809, "1304284963.737", 1
-    .const 'Sub' $P2810 = "101_1304284968.543" 
+    nqp_get_sc_object $P2809, "1304456135.999", 1
+    .const 'Sub' $P2810 = "101_1304456140.832" 
     $P2808."add_method"($P2809, "!PREFIX__metachar:sym<var>", $P2810)
-    nqp_get_sc_object $P2811, "1304284963.737", 1
+    nqp_get_sc_object $P2811, "1304456135.999", 1
     get_how $P2812, $P2811
-    nqp_get_sc_object $P2813, "1304284963.737", 1
-    .const 'Sub' $P2814 = "102_1304284968.543" 
+    nqp_get_sc_object $P2813, "1304456135.999", 1
+    .const 'Sub' $P2814 = "102_1304456140.832" 
     $P2812."add_method"($P2813, "metachar:sym<PIR>", $P2814)
-    nqp_get_sc_object $P2815, "1304284963.737", 1
+    nqp_get_sc_object $P2815, "1304456135.999", 1
     get_how $P2816, $P2815
-    nqp_get_sc_object $P2817, "1304284963.737", 1
-    .const 'Sub' $P2818 = "103_1304284968.543" 
+    nqp_get_sc_object $P2817, "1304456135.999", 1
+    .const 'Sub' $P2818 = "103_1304456140.832" 
     $P2816."add_method"($P2817, "!PREFIX__metachar:sym<PIR>", $P2818)
-    nqp_get_sc_object $P2819, "1304284963.737", 1
+    nqp_get_sc_object $P2819, "1304456135.999", 1
     get_how $P2820, $P2819
-    nqp_get_sc_object $P2821, "1304284963.737", 1
-    .const 'Sub' $P2822 = "104_1304284968.543" 
+    nqp_get_sc_object $P2821, "1304456135.999", 1
+    .const 'Sub' $P2822 = "104_1304456140.832" 
     $P2820."add_method"($P2821, "backslash", $P2822)
-    nqp_get_sc_object $P2823, "1304284963.737", 1
+    nqp_get_sc_object $P2823, "1304456135.999", 1
     get_how $P2824, $P2823
-    nqp_get_sc_object $P2825, "1304284963.737", 1
-    .const 'Sub' $P2826 = "105_1304284968.543" 
+    nqp_get_sc_object $P2825, "1304456135.999", 1
+    .const 'Sub' $P2826 = "105_1304456140.832" 
     $P2824."add_method"($P2825, "!PREFIX__backslash", $P2826)
-    nqp_get_sc_object $P2827, "1304284963.737", 1
+    nqp_get_sc_object $P2827, "1304456135.999", 1
     get_how $P2828, $P2827
-    nqp_get_sc_object $P2829, "1304284963.737", 1
-    .const 'Sub' $P2830 = "106_1304284968.543" 
+    nqp_get_sc_object $P2829, "1304456135.999", 1
+    .const 'Sub' $P2830 = "106_1304456140.832" 
     $P2828."add_method"($P2829, "backslash:sym<w>", $P2830)
-    nqp_get_sc_object $P2831, "1304284963.737", 1
+    nqp_get_sc_object $P2831, "1304456135.999", 1
     get_how $P2832, $P2831
-    nqp_get_sc_object $P2833, "1304284963.737", 1
-    .const 'Sub' $P2834 = "107_1304284968.543" 
+    nqp_get_sc_object $P2833, "1304456135.999", 1
+    .const 'Sub' $P2834 = "107_1304456140.832" 
     $P2832."add_method"($P2833, "!PREFIX__backslash:sym<w>", $P2834)
-    nqp_get_sc_object $P2835, "1304284963.737", 1
+    nqp_get_sc_object $P2835, "1304456135.999", 1
     get_how $P2836, $P2835
-    nqp_get_sc_object $P2837, "1304284963.737", 1
-    .const 'Sub' $P2838 = "108_1304284968.543" 
+    nqp_get_sc_object $P2837, "1304456135.999", 1
+    .const 'Sub' $P2838 = "108_1304456140.832" 
     $P2836."add_method"($P2837, "backslash:sym<b>", $P2838)
-    nqp_get_sc_object $P2839, "1304284963.737", 1
+    nqp_get_sc_object $P2839, "1304456135.999", 1
     get_how $P2840, $P2839
-    nqp_get_sc_object $P2841, "1304284963.737", 1
-    .const 'Sub' $P2842 = "109_1304284968.543" 
+    nqp_get_sc_object $P2841, "1304456135.999", 1
+    .const 'Sub' $P2842 = "109_1304456140.832" 
     $P2840."add_method"($P2841, "!PREFIX__backslash:sym<b>", $P2842)
-    nqp_get_sc_object $P2843, "1304284963.737", 1
+    nqp_get_sc_object $P2843, "1304456135.999", 1
     get_how $P2844, $P2843
-    nqp_get_sc_object $P2845, "1304284963.737", 1
-    .const 'Sub' $P2846 = "110_1304284968.543" 
+    nqp_get_sc_object $P2845, "1304456135.999", 1
+    .const 'Sub' $P2846 = "110_1304456140.832" 
     $P2844."add_method"($P2845, "backslash:sym<e>", $P2846)
-    nqp_get_sc_object $P2847, "1304284963.737", 1
+    nqp_get_sc_object $P2847, "1304456135.999", 1
     get_how $P2848, $P2847
-    nqp_get_sc_object $P2849, "1304284963.737", 1
-    .const 'Sub' $P2850 = "111_1304284968.543" 
+    nqp_get_sc_object $P2849, "1304456135.999", 1
+    .const 'Sub' $P2850 = "111_1304456140.832" 
     $P2848."add_method"($P2849, "!PREFIX__backslash:sym<e>", $P2850)
-    nqp_get_sc_object $P2851, "1304284963.737", 1
+    nqp_get_sc_object $P2851, "1304456135.999", 1
     get_how $P2852, $P2851
-    nqp_get_sc_object $P2853, "1304284963.737", 1
-    .const 'Sub' $P2854 = "112_1304284968.543" 
+    nqp_get_sc_object $P2853, "1304456135.999", 1
+    .const 'Sub' $P2854 = "112_1304456140.832" 
     $P2852."add_method"($P2853, "backslash:sym<f>", $P2854)
-    nqp_get_sc_object $P2855, "1304284963.737", 1
+    nqp_get_sc_object $P2855, "1304456135.999", 1
     get_how $P2856, $P2855
-    nqp_get_sc_object $P2857, "1304284963.737", 1
-    .const 'Sub' $P2858 = "113_1304284968.543" 
+    nqp_get_sc_object $P2857, "1304456135.999", 1
+    .const 'Sub' $P2858 = "113_1304456140.832" 
     $P2856."add_method"($P2857, "!PREFIX__backslash:sym<f>", $P2858)
-    nqp_get_sc_object $P2859, "1304284963.737", 1
+    nqp_get_sc_object $P2859, "1304456135.999", 1
     get_how $P2860, $P2859
-    nqp_get_sc_object $P2861, "1304284963.737", 1
-    .const 'Sub' $P2862 = "114_1304284968.543" 
+    nqp_get_sc_object $P2861, "1304456135.999", 1
+    .const 'Sub' $P2862 = "114_1304456140.832" 
     $P2860."add_method"($P2861, "backslash:sym<h>", $P2862)
-    nqp_get_sc_object $P2863, "1304284963.737", 1
+    nqp_get_sc_object $P2863, "1304456135.999", 1
     get_how $P2864, $P2863
-    nqp_get_sc_object $P2865, "1304284963.737", 1
-    .const 'Sub' $P2866 = "115_1304284968.543" 
+    nqp_get_sc_object $P2865, "1304456135.999", 1
+    .const 'Sub' $P2866 = "115_1304456140.832" 
     $P2864."add_method"($P2865, "!PREFIX__backslash:sym<h>", $P2866)
-    nqp_get_sc_object $P2867, "1304284963.737", 1
+    nqp_get_sc_object $P2867, "1304456135.999", 1
     get_how $P2868, $P2867
-    nqp_get_sc_object $P2869, "1304284963.737", 1
-    .const 'Sub' $P2870 = "116_1304284968.543" 
+    nqp_get_sc_object $P2869, "1304456135.999", 1
+    .const 'Sub' $P2870 = "116_1304456140.832" 
     $P2868."add_method"($P2869, "backslash:sym<r>", $P2870)
-    nqp_get_sc_object $P2871, "1304284963.737", 1
+    nqp_get_sc_object $P2871, "1304456135.999", 1
     get_how $P2872, $P2871
-    nqp_get_sc_object $P2873, "1304284963.737", 1
-    .const 'Sub' $P2874 = "117_1304284968.543" 
+    nqp_get_sc_object $P2873, "1304456135.999", 1
+    .const 'Sub' $P2874 = "117_1304456140.832" 
     $P2872."add_method"($P2873, "!PREFIX__backslash:sym<r>", $P2874)
-    nqp_get_sc_object $P2875, "1304284963.737", 1
+    nqp_get_sc_object $P2875, "1304456135.999", 1
     get_how $P2876, $P2875
-    nqp_get_sc_object $P2877, "1304284963.737", 1
-    .const 'Sub' $P2878 = "118_1304284968.543" 
+    nqp_get_sc_object $P2877, "1304456135.999", 1
+    .const 'Sub' $P2878 = "118_1304456140.832" 
     $P2876."add_method"($P2877, "backslash:sym<t>", $P2878)
-    nqp_get_sc_object $P2879, "1304284963.737", 1
+    nqp_get_sc_object $P2879, "1304456135.999", 1
     get_how $P2880, $P2879
-    nqp_get_sc_object $P2881, "1304284963.737", 1
-    .const 'Sub' $P2882 = "119_1304284968.543" 
+    nqp_get_sc_object $P2881, "1304456135.999", 1
+    .const 'Sub' $P2882 = "119_1304456140.832" 
     $P2880."add_method"($P2881, "!PREFIX__backslash:sym<t>", $P2882)
-    nqp_get_sc_object $P2883, "1304284963.737", 1
+    nqp_get_sc_object $P2883, "1304456135.999", 1
     get_how $P2884, $P2883
-    nqp_get_sc_object $P2885, "1304284963.737", 1
-    .const 'Sub' $P2886 = "120_1304284968.543" 
+    nqp_get_sc_object $P2885, "1304456135.999", 1
+    .const 'Sub' $P2886 = "120_1304456140.832" 
     $P2884."add_method"($P2885, "backslash:sym<v>", $P2886)
-    nqp_get_sc_object $P2887, "1304284963.737", 1
+    nqp_get_sc_object $P2887, "1304456135.999", 1
     get_how $P2888, $P2887
-    nqp_get_sc_object $P2889, "1304284963.737", 1
-    .const 'Sub' $P2890 = "121_1304284968.543" 
+    nqp_get_sc_object $P2889, "1304456135.999", 1
+    .const 'Sub' $P2890 = "121_1304456140.832" 
     $P2888."add_method"($P2889, "!PREFIX__backslash:sym<v>", $P2890)
-    nqp_get_sc_object $P2891, "1304284963.737", 1
+    nqp_get_sc_object $P2891, "1304456135.999", 1
     get_how $P2892, $P2891
-    nqp_get_sc_object $P2893, "1304284963.737", 1
-    .const 'Sub' $P2894 = "122_1304284968.543" 
+    nqp_get_sc_object $P2893, "1304456135.999", 1
+    .const 'Sub' $P2894 = "122_1304456140.832" 
     $P2892."add_method"($P2893, "backslash:sym<o>", $P2894)
-    nqp_get_sc_object $P2895, "1304284963.737", 1
+    nqp_get_sc_object $P2895, "1304456135.999", 1
     get_how $P2896, $P2895
-    nqp_get_sc_object $P2897, "1304284963.737", 1
-    .const 'Sub' $P2898 = "123_1304284968.543" 
+    nqp_get_sc_object $P2897, "1304456135.999", 1
+    .const 'Sub' $P2898 = "123_1304456140.832" 
     $P2896."add_method"($P2897, "!PREFIX__backslash:sym<o>", $P2898)
-    nqp_get_sc_object $P2899, "1304284963.737", 1
+    nqp_get_sc_object $P2899, "1304456135.999", 1
     get_how $P2900, $P2899
-    nqp_get_sc_object $P2901, "1304284963.737", 1
-    .const 'Sub' $P2902 = "124_1304284968.543" 
+    nqp_get_sc_object $P2901, "1304456135.999", 1
+    .const 'Sub' $P2902 = "124_1304456140.832" 
     $P2900."add_method"($P2901, "backslash:sym<x>", $P2902)
-    nqp_get_sc_object $P2903, "1304284963.737", 1
+    nqp_get_sc_object $P2903, "1304456135.999", 1
     get_how $P2904, $P2903
-    nqp_get_sc_object $P2905, "1304284963.737", 1
-    .const 'Sub' $P2906 = "125_1304284968.543" 
+    nqp_get_sc_object $P2905, "1304456135.999", 1
+    .const 'Sub' $P2906 = "125_1304456140.832" 
     $P2904."add_method"($P2905, "!PREFIX__backslash:sym<x>", $P2906)
-    nqp_get_sc_object $P2907, "1304284963.737", 1
+    nqp_get_sc_object $P2907, "1304456135.999", 1
     get_how $P2908, $P2907
-    nqp_get_sc_object $P2909, "1304284963.737", 1
-    .const 'Sub' $P2910 = "126_1304284968.543" 
+    nqp_get_sc_object $P2909, "1304456135.999", 1
+    .const 'Sub' $P2910 = "126_1304456140.832" 
     $P2908."add_method"($P2909, "backslash:sym<c>", $P2910)
-    nqp_get_sc_object $P2911, "1304284963.737", 1
+    nqp_get_sc_object $P2911, "1304456135.999", 1
     get_how $P2912, $P2911
-    nqp_get_sc_object $P2913, "1304284963.737", 1
-    .const 'Sub' $P2914 = "127_1304284968.543" 
+    nqp_get_sc_object $P2913, "1304456135.999", 1
+    .const 'Sub' $P2914 = "127_1304456140.832" 
     $P2912."add_method"($P2913, "!PREFIX__backslash:sym<c>", $P2914)
-    nqp_get_sc_object $P2915, "1304284963.737", 1
+    nqp_get_sc_object $P2915, "1304456135.999", 1
     get_how $P2916, $P2915
-    nqp_get_sc_object $P2917, "1304284963.737", 1
-    .const 'Sub' $P2918 = "128_1304284968.543" 
+    nqp_get_sc_object $P2917, "1304456135.999", 1
+    .const 'Sub' $P2918 = "128_1304456140.832" 
     $P2916."add_method"($P2917, "backslash:sym<A>", $P2918)
-    nqp_get_sc_object $P2919, "1304284963.737", 1
+    nqp_get_sc_object $P2919, "1304456135.999", 1
     get_how $P2920, $P2919
-    nqp_get_sc_object $P2921, "1304284963.737", 1
-    .const 'Sub' $P2922 = "129_1304284968.543" 
+    nqp_get_sc_object $P2921, "1304456135.999", 1
+    .const 'Sub' $P2922 = "129_1304456140.832" 
     $P2920."add_method"($P2921, "!PREFIX__backslash:sym<A>", $P2922)
-    nqp_get_sc_object $P2923, "1304284963.737", 1
+    nqp_get_sc_object $P2923, "1304456135.999", 1
     get_how $P2924, $P2923
-    nqp_get_sc_object $P2925, "1304284963.737", 1
-    .const 'Sub' $P2926 = "130_1304284968.543" 
+    nqp_get_sc_object $P2925, "1304456135.999", 1
+    .const 'Sub' $P2926 = "130_1304456140.832" 
     $P2924."add_method"($P2925, "backslash:sym<z>", $P2926)
-    nqp_get_sc_object $P2927, "1304284963.737", 1
+    nqp_get_sc_object $P2927, "1304456135.999", 1
     get_how $P2928, $P2927
-    nqp_get_sc_object $P2929, "1304284963.737", 1
-    .const 'Sub' $P2930 = "131_1304284968.543" 
+    nqp_get_sc_object $P2929, "1304456135.999", 1
+    .const 'Sub' $P2930 = "131_1304456140.832" 
     $P2928."add_method"($P2929, "!PREFIX__backslash:sym<z>", $P2930)
-    nqp_get_sc_object $P2931, "1304284963.737", 1
+    nqp_get_sc_object $P2931, "1304456135.999", 1
     get_how $P2932, $P2931
-    nqp_get_sc_object $P2933, "1304284963.737", 1
-    .const 'Sub' $P2934 = "132_1304284968.543" 
+    nqp_get_sc_object $P2933, "1304456135.999", 1
+    .const 'Sub' $P2934 = "132_1304456140.832" 
     $P2932."add_method"($P2933, "backslash:sym<Z>", $P2934)
-    nqp_get_sc_object $P2935, "1304284963.737", 1
+    nqp_get_sc_object $P2935, "1304456135.999", 1
     get_how $P2936, $P2935
-    nqp_get_sc_object $P2937, "1304284963.737", 1
-    .const 'Sub' $P2938 = "133_1304284968.543" 
+    nqp_get_sc_object $P2937, "1304456135.999", 1
+    .const 'Sub' $P2938 = "133_1304456140.832" 
     $P2936."add_method"($P2937, "!PREFIX__backslash:sym<Z>", $P2938)
-    nqp_get_sc_object $P2939, "1304284963.737", 1
+    nqp_get_sc_object $P2939, "1304456135.999", 1
     get_how $P2940, $P2939
-    nqp_get_sc_object $P2941, "1304284963.737", 1
-    .const 'Sub' $P2942 = "134_1304284968.543" 
+    nqp_get_sc_object $P2941, "1304456135.999", 1
+    .const 'Sub' $P2942 = "134_1304456140.832" 
     $P2940."add_method"($P2941, "backslash:sym<Q>", $P2942)
-    nqp_get_sc_object $P2943, "1304284963.737", 1
+    nqp_get_sc_object $P2943, "1304456135.999", 1
     get_how $P2944, $P2943
-    nqp_get_sc_object $P2945, "1304284963.737", 1
-    .const 'Sub' $P2946 = "135_1304284968.543" 
+    nqp_get_sc_object $P2945, "1304456135.999", 1
+    .const 'Sub' $P2946 = "135_1304456140.832" 
     $P2944."add_method"($P2945, "!PREFIX__backslash:sym<Q>", $P2946)
-    nqp_get_sc_object $P2947, "1304284963.737", 1
+    nqp_get_sc_object $P2947, "1304456135.999", 1
     get_how $P2948, $P2947
-    nqp_get_sc_object $P2949, "1304284963.737", 1
-    .const 'Sub' $P2950 = "136_1304284968.543" 
+    nqp_get_sc_object $P2949, "1304456135.999", 1
+    .const 'Sub' $P2950 = "136_1304456140.832" 
     $P2948."add_method"($P2949, "backslash:sym<unrec>", $P2950)
-    nqp_get_sc_object $P2951, "1304284963.737", 1
+    nqp_get_sc_object $P2951, "1304456135.999", 1
     get_how $P2952, $P2951
-    nqp_get_sc_object $P2953, "1304284963.737", 1
-    .const 'Sub' $P2954 = "138_1304284968.543" 
+    nqp_get_sc_object $P2953, "1304456135.999", 1
+    .const 'Sub' $P2954 = "138_1304456140.832" 
     $P2952."add_method"($P2953, "!PREFIX__backslash:sym<unrec>", $P2954)
-    nqp_get_sc_object $P2955, "1304284963.737", 1
+    nqp_get_sc_object $P2955, "1304456135.999", 1
     get_how $P2956, $P2955
-    nqp_get_sc_object $P2957, "1304284963.737", 1
-    .const 'Sub' $P2958 = "139_1304284968.543" 
+    nqp_get_sc_object $P2957, "1304456135.999", 1
+    .const 'Sub' $P2958 = "139_1304456140.832" 
     $P2956."add_method"($P2957, "backslash:sym<misc>", $P2958)
-    nqp_get_sc_object $P2959, "1304284963.737", 1
+    nqp_get_sc_object $P2959, "1304456135.999", 1
     get_how $P2960, $P2959
-    nqp_get_sc_object $P2961, "1304284963.737", 1
-    .const 'Sub' $P2962 = "140_1304284968.543" 
+    nqp_get_sc_object $P2961, "1304456135.999", 1
+    .const 'Sub' $P2962 = "140_1304456140.832" 
     $P2960."add_method"($P2961, "!PREFIX__backslash:sym<misc>", $P2962)
-    nqp_get_sc_object $P2963, "1304284963.737", 1
+    nqp_get_sc_object $P2963, "1304456135.999", 1
     get_how $P2964, $P2963
-    nqp_get_sc_object $P2965, "1304284963.737", 1
-    .const 'Sub' $P2966 = "141_1304284968.543" 
+    nqp_get_sc_object $P2965, "1304456135.999", 1
+    .const 'Sub' $P2966 = "141_1304456140.832" 
     $P2964."add_method"($P2965, "assertion", $P2966)
-    nqp_get_sc_object $P2967, "1304284963.737", 1
+    nqp_get_sc_object $P2967, "1304456135.999", 1
     get_how $P2968, $P2967
-    nqp_get_sc_object $P2969, "1304284963.737", 1
-    .const 'Sub' $P2970 = "142_1304284968.543" 
+    nqp_get_sc_object $P2969, "1304456135.999", 1
+    .const 'Sub' $P2970 = "142_1304456140.832" 
     $P2968."add_method"($P2969, "!PREFIX__assertion", $P2970)
-    nqp_get_sc_object $P2971, "1304284963.737", 1
+    nqp_get_sc_object $P2971, "1304456135.999", 1
     get_how $P2972, $P2971
-    nqp_get_sc_object $P2973, "1304284963.737", 1
-    .const 'Sub' $P2974 = "143_1304284968.543" 
+    nqp_get_sc_object $P2973, "1304456135.999", 1
+    .const 'Sub' $P2974 = "143_1304456140.832" 
     $P2972."add_method"($P2973, "assertion:sym<?>", $P2974)
-    nqp_get_sc_object $P2975, "1304284963.737", 1
+    nqp_get_sc_object $P2975, "1304456135.999", 1
     get_how $P2976, $P2975
-    nqp_get_sc_object $P2977, "1304284963.737", 1
-    .const 'Sub' $P2978 = "145_1304284968.543" 
+    nqp_get_sc_object $P2977, "1304456135.999", 1
+    .const 'Sub' $P2978 = "145_1304456140.832" 
     $P2976."add_method"($P2977, "!PREFIX__assertion:sym<?>", $P2978)
-    nqp_get_sc_object $P2979, "1304284963.737", 1
+    nqp_get_sc_object $P2979, "1304456135.999", 1
     get_how $P2980, $P2979
-    nqp_get_sc_object $P2981, "1304284963.737", 1
-    .const 'Sub' $P2982 = "146_1304284968.543" 
+    nqp_get_sc_object $P2981, "1304456135.999", 1
+    .const 'Sub' $P2982 = "146_1304456140.832" 
     $P2980."add_method"($P2981, "assertion:sym<!>", $P2982)
-    nqp_get_sc_object $P2983, "1304284963.737", 1
+    nqp_get_sc_object $P2983, "1304456135.999", 1
     get_how $P2984, $P2983
-    nqp_get_sc_object $P2985, "1304284963.737", 1
-    .const 'Sub' $P2986 = "148_1304284968.543" 
+    nqp_get_sc_object $P2985, "1304456135.999", 1
+    .const 'Sub' $P2986 = "148_1304456140.832" 
     $P2984."add_method"($P2985, "!PREFIX__assertion:sym<!>", $P2986)
-    nqp_get_sc_object $P2987, "1304284963.737", 1
+    nqp_get_sc_object $P2987, "1304456135.999", 1
     get_how $P2988, $P2987
-    nqp_get_sc_object $P2989, "1304284963.737", 1
-    .const 'Sub' $P2990 = "149_1304284968.543" 
+    nqp_get_sc_object $P2989, "1304456135.999", 1
+    .const 'Sub' $P2990 = "149_1304456140.832" 
     $P2988."add_method"($P2989, "assertion:sym<method>", $P2990)
-    nqp_get_sc_object $P2991, "1304284963.737", 1
+    nqp_get_sc_object $P2991, "1304456135.999", 1
     get_how $P2992, $P2991
-    nqp_get_sc_object $P2993, "1304284963.737", 1
-    .const 'Sub' $P2994 = "150_1304284968.543" 
+    nqp_get_sc_object $P2993, "1304456135.999", 1
+    .const 'Sub' $P2994 = "150_1304456140.832" 
     $P2992."add_method"($P2993, "!PREFIX__assertion:sym<method>", $P2994)
-    nqp_get_sc_object $P2995, "1304284963.737", 1
+    nqp_get_sc_object $P2995, "1304456135.999", 1
     get_how $P2996, $P2995
-    nqp_get_sc_object $P2997, "1304284963.737", 1
-    .const 'Sub' $P2998 = "151_1304284968.543" 
+    nqp_get_sc_object $P2997, "1304456135.999", 1
+    .const 'Sub' $P2998 = "151_1304456140.832" 
     $P2996."add_method"($P2997, "assertion:sym<name>", $P2998)
-    nqp_get_sc_object $P2999, "1304284963.737", 1
+    nqp_get_sc_object $P2999, "1304456135.999", 1
     get_how $P3000, $P2999
-    nqp_get_sc_object $P3001, "1304284963.737", 1
-    .const 'Sub' $P3002 = "153_1304284968.543" 
+    nqp_get_sc_object $P3001, "1304456135.999", 1
+    .const 'Sub' $P3002 = "153_1304456140.832" 
     $P3000."add_method"($P3001, "!PREFIX__assertion:sym<name>", $P3002)
-    nqp_get_sc_object $P3003, "1304284963.737", 1
+    nqp_get_sc_object $P3003, "1304456135.999", 1
     get_how $P3004, $P3003
-    nqp_get_sc_object $P3005, "1304284963.737", 1
-    .const 'Sub' $P3006 = "154_1304284968.543" 
+    nqp_get_sc_object $P3005, "1304456135.999", 1
+    .const 'Sub' $P3006 = "154_1304456140.832" 
     $P3004."add_method"($P3005, "assertion:sym<[>", $P3006)
-    nqp_get_sc_object $P3007, "1304284963.737", 1
+    nqp_get_sc_object $P3007, "1304456135.999", 1
     get_how $P3008, $P3007
-    nqp_get_sc_object $P3009, "1304284963.737", 1
-    .const 'Sub' $P3010 = "156_1304284968.543" 
+    nqp_get_sc_object $P3009, "1304456135.999", 1
+    .const 'Sub' $P3010 = "156_1304456140.832" 
     $P3008."add_method"($P3009, "!PREFIX__assertion:sym<[>", $P3010)
-    nqp_get_sc_object $P3011, "1304284963.737", 1
+    nqp_get_sc_object $P3011, "1304456135.999", 1
     get_how $P3012, $P3011
-    nqp_get_sc_object $P3013, "1304284963.737", 1
-    .const 'Sub' $P3014 = "157_1304284968.543" 
+    nqp_get_sc_object $P3013, "1304456135.999", 1
+    .const 'Sub' $P3014 = "157_1304456140.832" 
     $P3012."add_method"($P3013, "cclass_elem", $P3014)
-    nqp_get_sc_object $P3015, "1304284963.737", 1
+    nqp_get_sc_object $P3015, "1304456135.999", 1
     get_how $P3016, $P3015
-    nqp_get_sc_object $P3017, "1304284963.737", 1
-    .const 'Sub' $P3018 = "162_1304284968.543" 
+    nqp_get_sc_object $P3017, "1304456135.999", 1
+    .const 'Sub' $P3018 = "162_1304456140.832" 
     $P3016."add_method"($P3017, "!PREFIX__cclass_elem", $P3018)
-    nqp_get_sc_object $P3019, "1304284963.737", 1
+    nqp_get_sc_object $P3019, "1304456135.999", 1
     get_how $P3020, $P3019
-    nqp_get_sc_object $P3021, "1304284963.737", 1
-    .const 'Sub' $P3022 = "163_1304284968.543" 
+    nqp_get_sc_object $P3021, "1304456135.999", 1
+    .const 'Sub' $P3022 = "163_1304456140.832" 
     $P3020."add_method"($P3021, "mod_internal", $P3022)
-    nqp_get_sc_object $P3023, "1304284963.737", 1
+    nqp_get_sc_object $P3023, "1304456135.999", 1
     get_how $P3024, $P3023
-    nqp_get_sc_object $P3025, "1304284963.737", 1
-    .const 'Sub' $P3026 = "165_1304284968.543" 
+    nqp_get_sc_object $P3025, "1304456135.999", 1
+    .const 'Sub' $P3026 = "165_1304456140.832" 
     $P3024."add_method"($P3025, "!PREFIX__mod_internal", $P3026)
-    nqp_get_sc_object $P3027, "1304284963.737", 1
+    nqp_get_sc_object $P3027, "1304456135.999", 1
     get_how $P3028, $P3027
-    nqp_get_sc_object $P3029, "1304284963.737", 1
-    .const 'Sub' $P3030 = "166_1304284968.543" 
+    nqp_get_sc_object $P3029, "1304456135.999", 1
+    .const 'Sub' $P3030 = "166_1304456140.832" 
     $P3028."add_method"($P3029, "mod_ident", $P3030)
-    nqp_get_sc_object $P3031, "1304284963.737", 1
+    nqp_get_sc_object $P3031, "1304456135.999", 1
     get_how $P3032, $P3031
-    nqp_get_sc_object $P3033, "1304284963.737", 1
-    .const 'Sub' $P3034 = "167_1304284968.543" 
+    nqp_get_sc_object $P3033, "1304456135.999", 1
+    .const 'Sub' $P3034 = "167_1304456140.832" 
     $P3032."add_method"($P3033, "!PREFIX__mod_ident", $P3034)
-    nqp_get_sc_object $P3035, "1304284963.737", 1
+    nqp_get_sc_object $P3035, "1304456135.999", 1
     get_how $P3036, $P3035
-    nqp_get_sc_object $P3037, "1304284963.737", 1
-    .const 'Sub' $P3038 = "168_1304284968.543" 
+    nqp_get_sc_object $P3037, "1304456135.999", 1
+    .const 'Sub' $P3038 = "168_1304456140.832" 
     $P3036."add_method"($P3037, "mod_ident:sym<ignorecase>", $P3038)
-    nqp_get_sc_object $P3039, "1304284963.737", 1
+    nqp_get_sc_object $P3039, "1304456135.999", 1
     get_how $P3040, $P3039
-    nqp_get_sc_object $P3041, "1304284963.737", 1
-    .const 'Sub' $P3042 = "169_1304284968.543" 
+    nqp_get_sc_object $P3041, "1304456135.999", 1
+    .const 'Sub' $P3042 = "169_1304456140.832" 
     $P3040."add_method"($P3041, "!PREFIX__mod_ident:sym<ignorecase>", $P3042)
-    nqp_get_sc_object $P3043, "1304284963.737", 1
+    nqp_get_sc_object $P3043, "1304456135.999", 1
     get_how $P3044, $P3043
-    nqp_get_sc_object $P3045, "1304284963.737", 1
-    .const 'Sub' $P3046 = "170_1304284968.543" 
+    nqp_get_sc_object $P3045, "1304456135.999", 1
+    .const 'Sub' $P3046 = "170_1304456140.832" 
     $P3044."add_method"($P3045, "mod_ident:sym<ratchet>", $P3046)
-    nqp_get_sc_object $P3047, "1304284963.737", 1
+    nqp_get_sc_object $P3047, "1304456135.999", 1
     get_how $P3048, $P3047
-    nqp_get_sc_object $P3049, "1304284963.737", 1
-    .const 'Sub' $P3050 = "171_1304284968.543" 
+    nqp_get_sc_object $P3049, "1304456135.999", 1
+    .const 'Sub' $P3050 = "171_1304456140.832" 
     $P3048."add_method"($P3049, "!PREFIX__mod_ident:sym<ratchet>", $P3050)
-    nqp_get_sc_object $P3051, "1304284963.737", 1
+    nqp_get_sc_object $P3051, "1304456135.999", 1
     get_how $P3052, $P3051
-    nqp_get_sc_object $P3053, "1304284963.737", 1
-    .const 'Sub' $P3054 = "172_1304284968.543" 
+    nqp_get_sc_object $P3053, "1304456135.999", 1
+    .const 'Sub' $P3054 = "172_1304456140.832" 
     $P3052."add_method"($P3053, "mod_ident:sym<sigspace>", $P3054)
-    nqp_get_sc_object $P3055, "1304284963.737", 1
+    nqp_get_sc_object $P3055, "1304456135.999", 1
     get_how $P3056, $P3055
-    nqp_get_sc_object $P3057, "1304284963.737", 1
-    .const 'Sub' $P3058 = "173_1304284968.543" 
+    nqp_get_sc_object $P3057, "1304456135.999", 1
+    .const 'Sub' $P3058 = "173_1304456140.832" 
     $P3056."add_method"($P3057, "!PREFIX__mod_ident:sym<sigspace>", $P3058)
-    .const 'Sub' $P3059 = "12_1304284968.543" 
+    .const 'Sub' $P3059 = "12_1304456140.832" 
     $P3060 = $P3059."get_lexinfo"()
-    nqp_get_sc_object $P3061, "1304284963.737", 1
+    nqp_get_sc_object $P3061, "1304456135.999", 1
     $P3060."set_static_lexpad_value"("$?PACKAGE", $P3061)
-    .const 'Sub' $P3062 = "12_1304284968.543" 
+    .const 'Sub' $P3062 = "12_1304456140.832" 
     $P3063 = $P3062."get_lexinfo"()
     $P3063."finish_static_lexpad"()
-    .const 'Sub' $P3064 = "12_1304284968.543" 
+    .const 'Sub' $P3064 = "12_1304456140.832" 
     $P3065 = $P3064."get_lexinfo"()
-    nqp_get_sc_object $P3066, "1304284963.737", 1
+    nqp_get_sc_object $P3066, "1304456135.999", 1
     $P3065."set_static_lexpad_value"("$?CLASS", $P3066)
-    .const 'Sub' $P3067 = "12_1304284968.543" 
+    .const 'Sub' $P3067 = "12_1304456140.832" 
     $P3068 = $P3067."get_lexinfo"()
     $P3068."finish_static_lexpad"()
-    nqp_get_sc_object $P3069, "1304284963.737", 1
+    nqp_get_sc_object $P3069, "1304456135.999", 1
     get_how $P3070, $P3069
-    nqp_get_sc_object $P3071, "1304284963.737", 1
-    nqp_get_sc_object $P3072, "1304284952.167", 1
+    nqp_get_sc_object $P3071, "1304456135.999", 1
+    nqp_get_sc_object $P3072, "1304456124.041", 1
     $P3070."add_parent"($P3071, $P3072)
-    nqp_get_sc_object $P3073, "1304284963.737", 1
+    nqp_get_sc_object $P3073, "1304456135.999", 1
     get_how $P3074, $P3073
-    nqp_get_sc_object $P3075, "1304284963.737", 1
+    nqp_get_sc_object $P3075, "1304456135.999", 1
     $P3074."compose"($P3075)
-    nqp_get_sc_object $P3076, "1304284944.723", 41
+    nqp_get_sc_object $P3076, "1304456116.562", 41
     $P3077 = $P3076."new_type"("Regex::P6Regex::Actions" :named("name"))
     nqp_set_sc_for_object $P3077, cur_sc
-    nqp_set_sc_object "1304284963.737", 145, $P3077
-    nqp_get_sc_object $P3078, "1304284963.737", 145
-    nqp_get_sc_object $P3079, "1304284963.737", 0
+    nqp_set_sc_object "1304456135.999", 145, $P3077
+    nqp_get_sc_object $P3078, "1304456135.999", 145
+    nqp_get_sc_object $P3079, "1304456135.999", 0
     nqp_get_package_through_who $P3080, $P3079, "Regex"
     nqp_get_package_through_who $P3081, $P3080, "P6Regex"
     get_who $P3082, $P3081
     set $P3082["Actions"], $P3078
-    nqp_get_sc_object $P3083, "1304284963.737", 145
+    nqp_get_sc_object $P3083, "1304456135.999", 145
     get_how $P3084, $P3083
-    nqp_get_sc_object $P3085, "1304284963.737", 145
-    .const 'Sub' $P3086 = "190_1304284968.543" 
+    nqp_get_sc_object $P3085, "1304456135.999", 145
+    .const 'Sub' $P3086 = "190_1304456140.832" 
     $P3084."add_method"($P3085, "arg", $P3086)
-    nqp_get_sc_object $P3087, "1304284963.737", 145
+    nqp_get_sc_object $P3087, "1304456135.999", 145
     get_how $P3088, $P3087
-    nqp_get_sc_object $P3089, "1304284963.737", 145
-    .const 'Sub' $P3090 = "191_1304284968.543" 
+    nqp_get_sc_object $P3089, "1304456135.999", 145
+    .const 'Sub' $P3090 = "191_1304456140.832" 
     $P3088."add_method"($P3089, "arglist", $P3090)
-    nqp_get_sc_object $P3091, "1304284963.737", 145
+    nqp_get_sc_object $P3091, "1304456135.999", 145
     get_how $P3092, $P3091
-    nqp_get_sc_object $P3093, "1304284963.737", 145
-    .const 'Sub' $P3094 = "193_1304284968.543" 
+    nqp_get_sc_object $P3093, "1304456135.999", 145
+    .const 'Sub' $P3094 = "193_1304456140.832" 
     $P3092."add_method"($P3093, "TOP", $P3094)
-    nqp_get_sc_object $P3095, "1304284963.737", 145
+    nqp_get_sc_object $P3095, "1304456135.999", 145
     get_how $P3096, $P3095
-    nqp_get_sc_object $P3097, "1304284963.737", 145
-    .const 'Sub' $P3098 = "194_1304284968.543" 
+    nqp_get_sc_object $P3097, "1304456135.999", 145
+    .const 'Sub' $P3098 = "194_1304456140.832" 
     $P3096."add_method"($P3097, "nibbler", $P3098)
-    nqp_get_sc_object $P3099, "1304284963.737", 145
+    nqp_get_sc_object $P3099, "1304456135.999", 145
     get_how $P3100, $P3099
-    nqp_get_sc_object $P3101, "1304284963.737", 145
-    .const 'Sub' $P3102 = "197_1304284968.543" 
+    nqp_get_sc_object $P3101, "1304456135.999", 145
+    .const 'Sub' $P3102 = "197_1304456140.832" 
     $P3100."add_method"($P3101, "termconj", $P3102)
-    nqp_get_sc_object $P3103, "1304284963.737", 145
+    nqp_get_sc_object $P3103, "1304456135.999", 145
     get_how $P3104, $P3103
-    nqp_get_sc_object $P3105, "1304284963.737", 145
-    .const 'Sub' $P3106 = "199_1304284968.543" 
+    nqp_get_sc_object $P3105, "1304456135.999", 145
+    .const 'Sub' $P3106 = "199_1304456140.832" 
     $P3104."add_method"($P3105, "termish", $P3106)
-    nqp_get_sc_object $P3107, "1304284963.737", 145
+    nqp_get_sc_object $P3107, "1304456135.999", 145
     get_how $P3108, $P3107
-    nqp_get_sc_object $P3109, "1304284963.737", 145
-    .const 'Sub' $P3110 = "201_1304284968.543" 
+    nqp_get_sc_object $P3109, "1304456135.999", 145
+    .const 'Sub' $P3110 = "201_1304456140.832" 
     $P3108."add_method"($P3109, "quantified_atom", $P3110)
-    nqp_get_sc_object $P3111, "1304284963.737", 145
+    nqp_get_sc_object $P3111, "1304456135.999", 145
     get_how $P3112, $P3111
-    nqp_get_sc_object $P3113, "1304284963.737", 145
-    .const 'Sub' $P3114 = "203_1304284968.543" 
+    nqp_get_sc_object $P3113, "1304456135.999", 145
+    .const 'Sub' $P3114 = "203_1304456140.832" 
     $P3112."add_method"($P3113, "atom", $P3114)
-    nqp_get_sc_object $P3115, "1304284963.737", 145
+    nqp_get_sc_object $P3115, "1304456135.999", 145
     get_how $P3116, $P3115
-    nqp_get_sc_object $P3117, "1304284963.737", 145
-    .const 'Sub' $P3118 = "204_1304284968.543" 
+    nqp_get_sc_object $P3117, "1304456135.999", 145
+    .const 'Sub' $P3118 = "204_1304456140.832" 
     $P3116."add_method"($P3117, "quantifier:sym<*>", $P3118)
-    nqp_get_sc_object $P3119, "1304284963.737", 145
+    nqp_get_sc_object $P3119, "1304456135.999", 145
     get_how $P3120, $P3119
-    nqp_get_sc_object $P3121, "1304284963.737", 145
-    .const 'Sub' $P3122 = "205_1304284968.543" 
+    nqp_get_sc_object $P3121, "1304456135.999", 145
+    .const 'Sub' $P3122 = "205_1304456140.832" 
     $P3120."add_method"($P3121, "quantifier:sym<+>", $P3122)
-    nqp_get_sc_object $P3123, "1304284963.737", 145
+    nqp_get_sc_object $P3123, "1304456135.999", 145
     get_how $P3124, $P3123
-    nqp_get_sc_object $P3125, "1304284963.737", 145
-    .const 'Sub' $P3126 = "206_1304284968.543" 
+    nqp_get_sc_object $P3125, "1304456135.999", 145
+    .const 'Sub' $P3126 = "206_1304456140.832" 
     $P3124."add_method"($P3125, "quantifier:sym<?>", $P3126)
-    nqp_get_sc_object $P3127, "1304284963.737", 145
+    nqp_get_sc_object $P3127, "1304456135.999", 145
     get_how $P3128, $P3127
-    nqp_get_sc_object $P3129, "1304284963.737", 145
-    .const 'Sub' $P3130 = "207_1304284968.543" 
+    nqp_get_sc_object $P3129, "1304456135.999", 145
+    .const 'Sub' $P3130 = "207_1304456140.832" 
     $P3128."add_method"($P3129, "quantifier:sym<**>", $P3130)
-    nqp_get_sc_object $P3131, "1304284963.737", 145
+    nqp_get_sc_object $P3131, "1304456135.999", 145
     get_how $P3132, $P3131
-    nqp_get_sc_object $P3133, "1304284963.737", 145
-    .const 'Sub' $P3134 = "209_1304284968.543" 
+    nqp_get_sc_object $P3133, "1304456135.999", 145
+    .const 'Sub' $P3134 = "209_1304456140.832" 
     $P3132."add_method"($P3133, "metachar:sym<ws>", $P3134)
-    nqp_get_sc_object $P3135, "1304284963.737", 145
+    nqp_get_sc_object $P3135, "1304456135.999", 145
     get_how $P3136, $P3135
-    nqp_get_sc_object $P3137, "1304284963.737", 145
-    .const 'Sub' $P3138 = "210_1304284968.543" 
+    nqp_get_sc_object $P3137, "1304456135.999", 145
+    .const 'Sub' $P3138 = "210_1304456140.832" 
     $P3136."add_method"($P3137, "metachar:sym<[ ]>", $P3138)
-    nqp_get_sc_object $P3139, "1304284963.737", 145
+    nqp_get_sc_object $P3139, "1304456135.999", 145
     get_how $P3140, $P3139
-    nqp_get_sc_object $P3141, "1304284963.737", 145
-    .const 'Sub' $P3142 = "211_1304284968.543" 
+    nqp_get_sc_object $P3141, "1304456135.999", 145
+    .const 'Sub' $P3142 = "211_1304456140.832" 
     $P3140."add_method"($P3141, "metachar:sym<( )>", $P3142)
-    nqp_get_sc_object $P3143, "1304284963.737", 145
+    nqp_get_sc_object $P3143, "1304456135.999", 145
     get_how $P3144, $P3143
-    nqp_get_sc_object $P3145, "1304284963.737", 145
-    .const 'Sub' $P3146 = "212_1304284968.543" 
+    nqp_get_sc_object $P3145, "1304456135.999", 145
+    .const 'Sub' $P3146 = "212_1304456140.832" 
     $P3144."add_method"($P3145, "metachar:sym<'>", $P3146)
-    nqp_get_sc_object $P3147, "1304284963.737", 145
+    nqp_get_sc_object $P3147, "1304456135.999", 145
     get_how $P3148, $P3147
-    nqp_get_sc_object $P3149, "1304284963.737", 145
-    .const 'Sub' $P3150 = "213_1304284968.543" 
+    nqp_get_sc_object $P3149, "1304456135.999", 145
+    .const 'Sub' $P3150 = "213_1304456140.832" 
     $P3148."add_method"($P3149, "metachar:sym<\">", $P3150)
-    nqp_get_sc_object $P3151, "1304284963.737", 145
+    nqp_get_sc_object $P3151, "1304456135.999", 145
     get_how $P3152, $P3151
-    nqp_get_sc_object $P3153, "1304284963.737", 145
-    .const 'Sub' $P3154 = "214_1304284968.543" 
+    nqp_get_sc_object $P3153, "1304456135.999", 145
+    .const 'Sub' $P3154 = "214_1304456140.832" 
     $P3152."add_method"($P3153, "metachar:sym<.>", $P3154)
-    nqp_get_sc_object $P3155, "1304284963.737", 145
+    nqp_get_sc_object $P3155, "1304456135.999", 145
     get_how $P3156, $P3155
-    nqp_get_sc_object $P3157, "1304284963.737", 145
-    .const 'Sub' $P3158 = "215_1304284968.543" 
+    nqp_get_sc_object $P3157, "1304456135.999", 145
+    .const 'Sub' $P3158 = "215_1304456140.832" 
     $P3156."add_method"($P3157, "metachar:sym<^>", $P3158)
-    nqp_get_sc_object $P3159, "1304284963.737", 145
+    nqp_get_sc_object $P3159, "1304456135.999", 145
     get_how $P3160, $P3159
-    nqp_get_sc_object $P3161, "1304284963.737", 145
-    .const 'Sub' $P3162 = "216_1304284968.543" 
+    nqp_get_sc_object $P3161, "1304456135.999", 145
+    .const 'Sub' $P3162 = "216_1304456140.832" 
     $P3160."add_method"($P3161, "metachar:sym<^^>", $P3162)
-    nqp_get_sc_object $P3163, "1304284963.737", 145
+    nqp_get_sc_object $P3163, "1304456135.999", 145
     get_how $P3164, $P3163
-    nqp_get_sc_object $P3165, "1304284963.737", 145
-    .const 'Sub' $P3166 = "217_1304284968.543" 
+    nqp_get_sc_object $P3165, "1304456135.999", 145
+    .const 'Sub' $P3166 = "217_1304456140.832" 
     $P3164."add_method"($P3165, "metachar:sym<$>", $P3166)
-    nqp_get_sc_object $P3167, "1304284963.737", 145
+    nqp_get_sc_object $P3167, "1304456135.999", 145
     get_how $P3168, $P3167
-    nqp_get_sc_object $P3169, "1304284963.737", 145
-    .const 'Sub' $P3170 = "218_1304284968.543" 
+    nqp_get_sc_object $P3169, "1304456135.999", 145
+    .const 'Sub' $P3170 = "218_1304456140.832" 
     $P3168."add_method"($P3169, "metachar:sym<$$>", $P3170)
-    nqp_get_sc_object $P3171, "1304284963.737", 145
+    nqp_get_sc_object $P3171, "1304456135.999", 145
     get_how $P3172, $P3171
-    nqp_get_sc_object $P3173, "1304284963.737", 145
-    .const 'Sub' $P3174 = "219_1304284968.543" 
+    nqp_get_sc_object $P3173, "1304456135.999", 145
+    .const 'Sub' $P3174 = "219_1304456140.832" 
     $P3172."add_method"($P3173, "metachar:sym<:::>", $P3174)
-    nqp_get_sc_object $P3175, "1304284963.737", 145
+    nqp_get_sc_object $P3175, "1304456135.999", 145
     get_how $P3176, $P3175
-    nqp_get_sc_object $P3177, "1304284963.737", 145
-    .const 'Sub' $P3178 = "220_1304284968.543" 
+    nqp_get_sc_object $P3177, "1304456135.999", 145
+    .const 'Sub' $P3178 = "220_1304456140.832" 
     $P3176."add_method"($P3177, "metachar:sym<lwb>", $P3178)
-    nqp_get_sc_object $P3179, "1304284963.737", 145
+    nqp_get_sc_object $P3179, "1304456135.999", 145
     get_how $P3180, $P3179
-    nqp_get_sc_object $P3181, "1304284963.737", 145
-    .const 'Sub' $P3182 = "221_1304284968.543" 
+    nqp_get_sc_object $P3181, "1304456135.999", 145
+    .const 'Sub' $P3182 = "221_1304456140.832" 
     $P3180."add_method"($P3181, "metachar:sym<rwb>", $P3182)
-    nqp_get_sc_object $P3183, "1304284963.737", 145
+    nqp_get_sc_object $P3183, "1304456135.999", 145
     get_how $P3184, $P3183
-    nqp_get_sc_object $P3185, "1304284963.737", 145
-    .const 'Sub' $P3186 = "222_1304284968.543" 
+    nqp_get_sc_object $P3185, "1304456135.999", 145
+    .const 'Sub' $P3186 = "222_1304456140.832" 
     $P3184."add_method"($P3185, "metachar:sym<bs>", $P3186)
-    nqp_get_sc_object $P3187, "1304284963.737", 145
+    nqp_get_sc_object $P3187, "1304456135.999", 145
     get_how $P3188, $P3187
-    nqp_get_sc_object $P3189, "1304284963.737", 145
-    .const 'Sub' $P3190 = "223_1304284968.543" 
+    nqp_get_sc_object $P3189, "1304456135.999", 145
+    .const 'Sub' $P3190 = "223_1304456140.832" 
     $P3188."add_method"($P3189, "metachar:sym<mod>", $P3190)
-    nqp_get_sc_object $P3191, "1304284963.737", 145
+    nqp_get_sc_object $P3191, "1304456135.999", 145
     get_how $P3192, $P3191
-    nqp_get_sc_object $P3193, "1304284963.737", 145
-    .const 'Sub' $P3194 = "224_1304284968.543" 
+    nqp_get_sc_object $P3193, "1304456135.999", 145
+    .const 'Sub' $P3194 = "224_1304456140.832" 
     $P3192."add_method"($P3193, "metachar:sym<assert>", $P3194)
-    nqp_get_sc_object $P3195, "1304284963.737", 145
+    nqp_get_sc_object $P3195, "1304456135.999", 145
     get_how $P3196, $P3195
-    nqp_get_sc_object $P3197, "1304284963.737", 145
-    .const 'Sub' $P3198 = "225_1304284968.543" 
+    nqp_get_sc_object $P3197, "1304456135.999", 145
+    .const 'Sub' $P3198 = "225_1304456140.832" 
     $P3196."add_method"($P3197, "metachar:sym<~>", $P3198)
-    nqp_get_sc_object $P3199, "1304284963.737", 145
+    nqp_get_sc_object $P3199, "1304456135.999", 145
     get_how $P3200, $P3199
-    nqp_get_sc_object $P3201, "1304284963.737", 145
-    .const 'Sub' $P3202 = "226_1304284968.543" 
+    nqp_get_sc_object $P3201, "1304456135.999", 145
+    .const 'Sub' $P3202 = "226_1304456140.832" 
     $P3200."add_method"($P3201, "metachar:sym<{*}>", $P3202)
-    nqp_get_sc_object $P3203, "1304284963.737", 145
+    nqp_get_sc_object $P3203, "1304456135.999", 145
     get_how $P3204, $P3203
-    nqp_get_sc_object $P3205, "1304284963.737", 145
-    .const 'Sub' $P3206 = "227_1304284968.543" 
+    nqp_get_sc_object $P3205, "1304456135.999", 145
+    .const 'Sub' $P3206 = "227_1304456140.832" 
     $P3204."add_method"($P3205, "metachar:sym<var>", $P3206)
-    nqp_get_sc_object $P3207, "1304284963.737", 145
+    nqp_get_sc_object $P3207, "1304456135.999", 145
     get_how $P3208, $P3207
-    nqp_get_sc_object $P3209, "1304284963.737", 145
-    .const 'Sub' $P3210 = "228_1304284968.543" 
+    nqp_get_sc_object $P3209, "1304456135.999", 145
+    .const 'Sub' $P3210 = "228_1304456140.832" 
     $P3208."add_method"($P3209, "metachar:sym<PIR>", $P3210)
-    nqp_get_sc_object $P3211, "1304284963.737", 145
+    nqp_get_sc_object $P3211, "1304456135.999", 145
     get_how $P3212, $P3211
-    nqp_get_sc_object $P3213, "1304284963.737", 145
-    .const 'Sub' $P3214 = "229_1304284968.543" 
+    nqp_get_sc_object $P3213, "1304456135.999", 145
+    .const 'Sub' $P3214 = "229_1304456140.832" 
     $P3212."add_method"($P3213, "backslash:sym<w>", $P3214)
-    nqp_get_sc_object $P3215, "1304284963.737", 145
+    nqp_get_sc_object $P3215, "1304456135.999", 145
     get_how $P3216, $P3215
-    nqp_get_sc_object $P3217, "1304284963.737", 145
-    .const 'Sub' $P3218 = "230_1304284968.543" 
+    nqp_get_sc_object $P3217, "1304456135.999", 145
+    .const 'Sub' $P3218 = "230_1304456140.832" 
     $P3216."add_method"($P3217, "backslash:sym<b>", $P3218)
-    nqp_get_sc_object $P3219, "1304284963.737", 145
+    nqp_get_sc_object $P3219, "1304456135.999", 145
     get_how $P3220, $P3219
-    nqp_get_sc_object $P3221, "1304284963.737", 145
-    .const 'Sub' $P3222 = "231_1304284968.543" 
+    nqp_get_sc_object $P3221, "1304456135.999", 145
+    .const 'Sub' $P3222 = "231_1304456140.832" 
     $P3220."add_method"($P3221, "backslash:sym<e>", $P3222)
-    nqp_get_sc_object $P3223, "1304284963.737", 145
+    nqp_get_sc_object $P3223, "1304456135.999", 145
     get_how $P3224, $P3223
-    nqp_get_sc_object $P3225, "1304284963.737", 145
-    .const 'Sub' $P3226 = "232_1304284968.543" 
+    nqp_get_sc_object $P3225, "1304456135.999", 145
+    .const 'Sub' $P3226 = "232_1304456140.832" 
     $P3224."add_method"($P3225, "backslash:sym<f>", $P3226)
-    nqp_get_sc_object $P3227, "1304284963.737", 145
+    nqp_get_sc_object $P3227, "1304456135.999", 145
     get_how $P3228, $P3227
-    nqp_get_sc_object $P3229, "1304284963.737", 145
-    .const 'Sub' $P3230 = "233_1304284968.543" 
+    nqp_get_sc_object $P3229, "1304456135.999", 145
+    .const 'Sub' $P3230 = "233_1304456140.832" 
     $P3228."add_method"($P3229, "backslash:sym<h>", $P3230)
-    nqp_get_sc_object $P3231, "1304284963.737", 145
+    nqp_get_sc_object $P3231, "1304456135.999", 145
     get_how $P3232, $P3231
-    nqp_get_sc_object $P3233, "1304284963.737", 145
-    .const 'Sub' $P3234 = "234_1304284968.543" 
+    nqp_get_sc_object $P3233, "1304456135.999", 145
+    .const 'Sub' $P3234 = "234_1304456140.832" 
     $P3232."add_method"($P3233, "backslash:sym<r>", $P3234)
-    nqp_get_sc_object $P3235, "1304284963.737", 145
+    nqp_get_sc_object $P3235, "1304456135.999", 145
     get_how $P3236, $P3235
-    nqp_get_sc_object $P3237, "1304284963.737", 145
-    .const 'Sub' $P3238 = "235_1304284968.543" 
+    nqp_get_sc_object $P3237, "1304456135.999", 145
+    .const 'Sub' $P3238 = "235_1304456140.832" 
     $P3236."add_method"($P3237, "backslash:sym<t>", $P3238)
-    nqp_get_sc_object $P3239, "1304284963.737", 145
+    nqp_get_sc_object $P3239, "1304456135.999", 145
     get_how $P3240, $P3239
-    nqp_get_sc_object $P3241, "1304284963.737", 145
-    .const 'Sub' $P3242 = "236_1304284968.543" 
+    nqp_get_sc_object $P3241, "1304456135.999", 145
+    .const 'Sub' $P3242 = "236_1304456140.832" 
     $P3240."add_method"($P3241, "backslash:sym<v>", $P3242)
-    nqp_get_sc_object $P3243, "1304284963.737", 145
+    nqp_get_sc_object $P3243, "1304456135.999", 145
     get_how $P3244, $P3243
-    nqp_get_sc_object $P3245, "1304284963.737", 145
-    .const 'Sub' $P3246 = "237_1304284968.543" 
+    nqp_get_sc_object $P3245, "1304456135.999", 145
+    .const 'Sub' $P3246 = "237_1304456140.832" 
     $P3244."add_method"($P3245, "backslash:sym<o>", $P3246)
-    nqp_get_sc_object $P3247, "1304284963.737", 145
+    nqp_get_sc_object $P3247, "1304456135.999", 145
     get_how $P3248, $P3247
-    nqp_get_sc_object $P3249, "1304284963.737", 145
-    .const 'Sub' $P3250 = "238_1304284968.543" 
+    nqp_get_sc_object $P3249, "1304456135.999", 145
+    .const 'Sub' $P3250 = "238_1304456140.832" 
     $P3248."add_method"($P3249, "backslash:sym<x>", $P3250)
-    nqp_get_sc_object $P3251, "1304284963.737", 145
+    nqp_get_sc_object $P3251, "1304456135.999", 145
     get_how $P3252, $P3251
-    nqp_get_sc_object $P3253, "1304284963.737", 145
-    .const 'Sub' $P3254 = "239_1304284968.543" 
+    nqp_get_sc_object $P3253, "1304456135.999", 145
+    .const 'Sub' $P3254 = "239_1304456140.832" 
     $P3252."add_method"($P3253, "backslash:sym<c>", $P3254)
-    nqp_get_sc_object $P3255, "1304284963.737", 145
+    nqp_get_sc_object $P3255, "1304456135.999", 145
     get_how $P3256, $P3255
-    nqp_get_sc_object $P3257, "1304284963.737", 145
-    .const 'Sub' $P3258 = "240_1304284968.543" 
+    nqp_get_sc_object $P3257, "1304456135.999", 145
+    .const 'Sub' $P3258 = "240_1304456140.832" 
     $P3256."add_method"($P3257, "backslash:sym<misc>", $P3258)
-    nqp_get_sc_object $P3259, "1304284963.737", 145
+    nqp_get_sc_object $P3259, "1304456135.999", 145
     get_how $P3260, $P3259
-    nqp_get_sc_object $P3261, "1304284963.737", 145
-    .const 'Sub' $P3262 = "241_1304284968.543" 
+    nqp_get_sc_object $P3261, "1304456135.999", 145
+    .const 'Sub' $P3262 = "241_1304456140.832" 
     $P3260."add_method"($P3261, "assertion:sym<?>", $P3262)
-    nqp_get_sc_object $P3263, "1304284963.737", 145
+    nqp_get_sc_object $P3263, "1304456135.999", 145
     get_how $P3264, $P3263
-    nqp_get_sc_object $P3265, "1304284963.737", 145
-    .const 'Sub' $P3266 = "242_1304284968.543" 
+    nqp_get_sc_object $P3265, "1304456135.999", 145
+    .const 'Sub' $P3266 = "242_1304456140.832" 
     $P3264."add_method"($P3265, "assertion:sym<!>", $P3266)
-    nqp_get_sc_object $P3267, "1304284963.737", 145
+    nqp_get_sc_object $P3267, "1304456135.999", 145
     get_how $P3268, $P3267
-    nqp_get_sc_object $P3269, "1304284963.737", 145
-    .const 'Sub' $P3270 = "243_1304284968.543" 
+    nqp_get_sc_object $P3269, "1304456135.999", 145
+    .const 'Sub' $P3270 = "243_1304456140.832" 
     $P3268."add_method"($P3269, "assertion:sym<method>", $P3270)
-    nqp_get_sc_object $P3271, "1304284963.737", 145
+    nqp_get_sc_object $P3271, "1304456135.999", 145
     get_how $P3272, $P3271
-    nqp_get_sc_object $P3273, "1304284963.737", 145
-    .const 'Sub' $P3274 = "244_1304284968.543" 
+    nqp_get_sc_object $P3273, "1304456135.999", 145
+    .const 'Sub' $P3274 = "244_1304456140.832" 
     $P3272."add_method"($P3273, "assertion:sym<name>", $P3274)
-    nqp_get_sc_object $P3275, "1304284963.737", 145
+    nqp_get_sc_object $P3275, "1304456135.999", 145
     get_how $P3276, $P3275
-    nqp_get_sc_object $P3277, "1304284963.737", 145
-    .const 'Sub' $P3278 = "247_1304284968.543" 
+    nqp_get_sc_object $P3277, "1304456135.999", 145
+    .const 'Sub' $P3278 = "247_1304456140.832" 
     $P3276."add_method"($P3277, "assertion:sym<[>", $P3278)
-    nqp_get_sc_object $P3279, "1304284963.737", 145
+    nqp_get_sc_object $P3279, "1304456135.999", 145
     get_how $P3280, $P3279
-    nqp_get_sc_object $P3281, "1304284963.737", 145
-    .const 'Sub' $P3282 = "249_1304284968.543" 
+    nqp_get_sc_object $P3281, "1304456135.999", 145
+    .const 'Sub' $P3282 = "249_1304456140.832" 
     $P3280."add_method"($P3281, "cclass_elem", $P3282)
-    nqp_get_sc_object $P3283, "1304284963.737", 145
+    nqp_get_sc_object $P3283, "1304456135.999", 145
     get_how $P3284, $P3283
-    nqp_get_sc_object $P3285, "1304284963.737", 145
-    .const 'Sub' $P3286 = "253_1304284968.543" 
+    nqp_get_sc_object $P3285, "1304456135.999", 145
+    .const 'Sub' $P3286 = "253_1304456140.832" 
     $P3284."add_method"($P3285, "mod_internal", $P3286)
-    .const 'Sub' $P3287 = "175_1304284968.543" 
-    nqp_get_sc_object $P3288, "1304284963.737", 145
+    .const 'Sub' $P3287 = "175_1304456140.832" 
+    nqp_get_sc_object $P3288, "1304456135.999", 145
     get_who $P3289, $P3288
     set $P3289["buildsub"], $P3287
-    nqp_get_sc_object $P3290, "1304284963.737", 145
+    nqp_get_sc_object $P3290, "1304456135.999", 145
     get_how $P3291, $P3290
-    nqp_get_sc_object $P3292, "1304284963.737", 145
-    .const 'Sub' $P3293 = "254_1304284968.543" 
+    nqp_get_sc_object $P3292, "1304456135.999", 145
+    .const 'Sub' $P3293 = "254_1304456140.832" 
     $P3291."add_method"($P3292, "subrule_alias", $P3293)
-    nqp_get_sc_object $P3294, "1304284963.737", 145
+    nqp_get_sc_object $P3294, "1304456135.999", 145
     get_how $P3295, $P3294
-    nqp_get_sc_object $P3296, "1304284963.737", 145
-    .const 'Sub' $P3297 = "255_1304284968.543" 
+    nqp_get_sc_object $P3296, "1304456135.999", 145
+    .const 'Sub' $P3297 = "255_1304456140.832" 
     $P3295."add_method"($P3296, "named_assertion", $P3297)
-    .const 'Sub' $P3298 = "174_1304284968.543" 
+    .const 'Sub' $P3298 = "174_1304456140.832" 
     $P3299 = $P3298."get_lexinfo"()
-    nqp_get_sc_object $P3300, "1304284963.737", 145
+    nqp_get_sc_object $P3300, "1304456135.999", 145
     $P3299."set_static_lexpad_value"("$?PACKAGE", $P3300)
-    .const 'Sub' $P3301 = "174_1304284968.543" 
+    .const 'Sub' $P3301 = "174_1304456140.832" 
     $P3302 = $P3301."get_lexinfo"()
     $P3302."finish_static_lexpad"()
-    .const 'Sub' $P3303 = "174_1304284968.543" 
+    .const 'Sub' $P3303 = "174_1304456140.832" 
     $P3304 = $P3303."get_lexinfo"()
-    nqp_get_sc_object $P3305, "1304284963.737", 145
+    nqp_get_sc_object $P3305, "1304456135.999", 145
     $P3304."set_static_lexpad_value"("$?CLASS", $P3305)
-    .const 'Sub' $P3306 = "174_1304284968.543" 
+    .const 'Sub' $P3306 = "174_1304456140.832" 
     $P3307 = $P3306."get_lexinfo"()
     $P3307."finish_static_lexpad"()
-    nqp_get_sc_object $P3308, "1304284963.737", 145
+    nqp_get_sc_object $P3308, "1304456135.999", 145
     get_how $P3309, $P3308
-    nqp_get_sc_object $P3310, "1304284963.737", 145
-    nqp_get_sc_object $P3311, "1304284952.167", 105
+    nqp_get_sc_object $P3310, "1304456135.999", 145
+    nqp_get_sc_object $P3311, "1304456124.041", 105
     $P3309."add_parent"($P3310, $P3311)
-    nqp_get_sc_object $P3312, "1304284963.737", 145
+    nqp_get_sc_object $P3312, "1304456135.999", 145
     get_how $P3313, $P3312
-    nqp_get_sc_object $P3314, "1304284963.737", 145
+    nqp_get_sc_object $P3314, "1304456135.999", 145
     $P3313."compose"($P3314)
-    nqp_get_sc_object $P3315, "1304284944.723", 41
+    nqp_get_sc_object $P3315, "1304456116.562", 41
     $P3316 = $P3315."new_type"("Regex::P6Regex::Compiler" :named("name"))
     nqp_set_sc_for_object $P3316, cur_sc
-    nqp_set_sc_object "1304284963.737", 199, $P3316
-    nqp_get_sc_object $P3317, "1304284963.737", 199
-    nqp_get_sc_object $P3318, "1304284963.737", 0
+    nqp_set_sc_object "1304456135.999", 199, $P3316
+    nqp_get_sc_object $P3317, "1304456135.999", 199
+    nqp_get_sc_object $P3318, "1304456135.999", 0
     nqp_get_package_through_who $P3319, $P3318, "Regex"
     nqp_get_package_through_who $P3320, $P3319, "P6Regex"
     get_who $P3321, $P3320
     set $P3321["Compiler"], $P3317
-    .const 'Sub' $P3322 = "256_1304284968.543" 
+    .const 'Sub' $P3322 = "256_1304456140.832" 
     $P3323 = $P3322."get_lexinfo"()
-    nqp_get_sc_object $P3324, "1304284963.737", 199
+    nqp_get_sc_object $P3324, "1304456135.999", 199
     $P3323."set_static_lexpad_value"("$?PACKAGE", $P3324)
-    .const 'Sub' $P3325 = "256_1304284968.543" 
+    .const 'Sub' $P3325 = "256_1304456140.832" 
     $P3326 = $P3325."get_lexinfo"()
     $P3326."finish_static_lexpad"()
-    .const 'Sub' $P3327 = "256_1304284968.543" 
+    .const 'Sub' $P3327 = "256_1304456140.832" 
     $P3328 = $P3327."get_lexinfo"()
-    nqp_get_sc_object $P3329, "1304284963.737", 199
+    nqp_get_sc_object $P3329, "1304456135.999", 199
     $P3328."set_static_lexpad_value"("$?CLASS", $P3329)
-    .const 'Sub' $P3330 = "256_1304284968.543" 
+    .const 'Sub' $P3330 = "256_1304456140.832" 
     $P3331 = $P3330."get_lexinfo"()
     $P3331."finish_static_lexpad"()
-    nqp_get_sc_object $P3332, "1304284963.737", 199
+    nqp_get_sc_object $P3332, "1304456135.999", 199
     get_how $P3333, $P3332
-    nqp_get_sc_object $P3334, "1304284963.737", 199
-    nqp_get_sc_object $P3335, "1304284952.167", 138
+    nqp_get_sc_object $P3334, "1304456135.999", 199
+    nqp_get_sc_object $P3335, "1304456124.041", 138
     $P3333."add_parent"($P3334, $P3335)
-    nqp_get_sc_object $P3336, "1304284963.737", 199
+    nqp_get_sc_object $P3336, "1304456135.999", 199
     get_how $P3337, $P3336
-    nqp_get_sc_object $P3338, "1304284963.737", 199
+    nqp_get_sc_object $P3338, "1304456135.999", 199
     $P3337."compose"($P3338)
   if_2455_end:
-    nqp_get_sc_object $P3774, "1304284963.737", 0
+    nqp_get_sc_object $P3774, "1304456135.999", 0
     set_hll_global "GLOBAL", $P3774
 .end
 
@@ -1892,7 +1892,7 @@
 .HLL "nqp"
 
 .namespace []
-.sub "MAIN"  :subid("11_1304284968.543") :outer("10_1304284968.543")
+.sub "MAIN"  :subid("11_1304456140.832") :outer("10_1304456140.832")
     .param pmc param_18
 .annotate 'line', 833
     .lex "@ARGS", param_18
@@ -1914,278 +1914,278 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block23"  :subid("12_1304284968.543") :outer("10_1304284968.543")
+.sub "_block23"  :subid("12_1304456140.832") :outer("10_1304456140.832")
 .annotate 'line', 9
-    .const 'Sub' $P634 = "173_1304284968.543" 
+    .const 'Sub' $P634 = "173_1304456140.832" 
     capture_lex $P634
-    .const 'Sub' $P629 = "172_1304284968.543" 
+    .const 'Sub' $P629 = "172_1304456140.832" 
     capture_lex $P629
-    .const 'Sub' $P627 = "171_1304284968.543" 
+    .const 'Sub' $P627 = "171_1304456140.832" 
     capture_lex $P627
-    .const 'Sub' $P622 = "170_1304284968.543" 
+    .const 'Sub' $P622 = "170_1304456140.832" 
     capture_lex $P622
-    .const 'Sub' $P620 = "169_1304284968.543" 
+    .const 'Sub' $P620 = "169_1304456140.832" 
     capture_lex $P620
-    .const 'Sub' $P615 = "168_1304284968.543" 
+    .const 'Sub' $P615 = "168_1304456140.832" 
     capture_lex $P615
-    .const 'Sub' $P606 = "165_1304284968.543" 
+    .const 'Sub' $P606 = "165_1304456140.832" 
     capture_lex $P606
-    .const 'Sub' $P593 = "163_1304284968.543" 
+    .const 'Sub' $P593 = "163_1304456140.832" 
     capture_lex $P593
-    .const 'Sub' $P591 = "162_1304284968.543" 
+    .const 'Sub' $P591 = "162_1304456140.832" 
     capture_lex $P591
-    .const 'Sub' $P559 = "157_1304284968.543" 
+    .const 'Sub' $P559 = "157_1304456140.832" 
     capture_lex $P559
-    .const 'Sub' $P557 = "156_1304284968.543" 
+    .const 'Sub' $P557 = "156_1304456140.832" 
     capture_lex $P557
-    .const 'Sub' $P547 = "154_1304284968.543" 
+    .const 'Sub' $P547 = "154_1304456140.832" 
     capture_lex $P547
-    .const 'Sub' $P544 = "153_1304284968.543" 
+    .const 'Sub' $P544 = "153_1304456140.832" 
     capture_lex $P544
-    .const 'Sub' $P535 = "151_1304284968.543" 
+    .const 'Sub' $P535 = "151_1304456140.832" 
     capture_lex $P535
-    .const 'Sub' $P532 = "150_1304284968.543" 
+    .const 'Sub' $P532 = "150_1304456140.832" 
     capture_lex $P532
-    .const 'Sub' $P529 = "149_1304284968.543" 
+    .const 'Sub' $P529 = "149_1304456140.832" 
     capture_lex $P529
-    .const 'Sub' $P526 = "148_1304284968.543" 
+    .const 'Sub' $P526 = "148_1304456140.832" 
     capture_lex $P526
-    .const 'Sub' $P518 = "146_1304284968.543" 
+    .const 'Sub' $P518 = "146_1304456140.832" 
     capture_lex $P518
-    .const 'Sub' $P515 = "145_1304284968.543" 
+    .const 'Sub' $P515 = "145_1304456140.832" 
     capture_lex $P515
-    .const 'Sub' $P507 = "143_1304284968.543" 
+    .const 'Sub' $P507 = "143_1304456140.832" 
     capture_lex $P507
-    .const 'Sub' $P499 = "140_1304284968.543" 
+    .const 'Sub' $P499 = "140_1304456140.832" 
     capture_lex $P499
-    .const 'Sub' $P496 = "139_1304284968.543" 
+    .const 'Sub' $P496 = "139_1304456140.832" 
     capture_lex $P496
-    .const 'Sub' $P494 = "138_1304284968.543" 
+    .const 'Sub' $P494 = "138_1304456140.832" 
     capture_lex $P494
-    .const 'Sub' $P486 = "136_1304284968.543" 
+    .const 'Sub' $P486 = "136_1304456140.832" 
     capture_lex $P486
-    .const 'Sub' $P483 = "135_1304284968.543" 
+    .const 'Sub' $P483 = "135_1304456140.832" 
     capture_lex $P483
-    .const 'Sub' $P480 = "134_1304284968.543" 
+    .const 'Sub' $P480 = "134_1304456140.832" 
     capture_lex $P480
-    .const 'Sub' $P477 = "133_1304284968.543" 
+    .const 'Sub' $P477 = "133_1304456140.832" 
     capture_lex $P477
-    .const 'Sub' $P474 = "132_1304284968.543" 
+    .const 'Sub' $P474 = "132_1304456140.832" 
     capture_lex $P474
-    .const 'Sub' $P471 = "131_1304284968.543" 
+    .const 'Sub' $P471 = "131_1304456140.832" 
     capture_lex $P471
-    .const 'Sub' $P468 = "130_1304284968.543" 
+    .const 'Sub' $P468 = "130_1304456140.832" 
     capture_lex $P468
-    .const 'Sub' $P465 = "129_1304284968.543" 
+    .const 'Sub' $P465 = "129_1304456140.832" 
     capture_lex $P465
-    .const 'Sub' $P462 = "128_1304284968.543" 
+    .const 'Sub' $P462 = "128_1304456140.832" 
     capture_lex $P462
-    .const 'Sub' $P458 = "127_1304284968.543" 
+    .const 'Sub' $P458 = "127_1304456140.832" 
     capture_lex $P458
-    .const 'Sub' $P454 = "126_1304284968.543" 
+    .const 'Sub' $P454 = "126_1304456140.832" 
     capture_lex $P454
-    .const 'Sub' $P448 = "125_1304284968.543" 
+    .const 'Sub' $P448 = "125_1304456140.832" 
     capture_lex $P448
-    .const 'Sub' $P443 = "124_1304284968.543" 
+    .const 'Sub' $P443 = "124_1304456140.832" 
     capture_lex $P443
-    .const 'Sub' $P437 = "123_1304284968.543" 
+    .const 'Sub' $P437 = "123_1304456140.832" 
     capture_lex $P437
-    .const 'Sub' $P432 = "122_1304284968.543" 
+    .const 'Sub' $P432 = "122_1304456140.832" 
     capture_lex $P432
-    .const 'Sub' $P430 = "121_1304284968.543" 
+    .const 'Sub' $P430 = "121_1304456140.832" 
     capture_lex $P430
-    .const 'Sub' $P426 = "120_1304284968.543" 
+    .const 'Sub' $P426 = "120_1304456140.832" 
     capture_lex $P426
-    .const 'Sub' $P424 = "119_1304284968.543" 
+    .const 'Sub' $P424 = "119_1304456140.832" 
     capture_lex $P424
-    .const 'Sub' $P420 = "118_1304284968.543" 
+    .const 'Sub' $P420 = "118_1304456140.832" 
     capture_lex $P420
-    .const 'Sub' $P418 = "117_1304284968.543" 
+    .const 'Sub' $P418 = "117_1304456140.832" 
     capture_lex $P418
-    .const 'Sub' $P414 = "116_1304284968.543" 
+    .const 'Sub' $P414 = "116_1304456140.832" 
     capture_lex $P414
-    .const 'Sub' $P412 = "115_1304284968.543" 
+    .const 'Sub' $P412 = "115_1304456140.832" 
     capture_lex $P412
-    .const 'Sub' $P408 = "114_1304284968.543" 
+    .const 'Sub' $P408 = "114_1304456140.832" 
     capture_lex $P408
-    .const 'Sub' $P406 = "113_1304284968.543" 
+    .const 'Sub' $P406 = "113_1304456140.832" 
     capture_lex $P406
-    .const 'Sub' $P402 = "112_1304284968.543" 
+    .const 'Sub' $P402 = "112_1304456140.832" 
     capture_lex $P402
-    .const 'Sub' $P400 = "111_1304284968.543" 
+    .const 'Sub' $P400 = "111_1304456140.832" 
     capture_lex $P400
-    .const 'Sub' $P396 = "110_1304284968.543" 
+    .const 'Sub' $P396 = "110_1304456140.832" 
     capture_lex $P396
-    .const 'Sub' $P394 = "109_1304284968.543" 
+    .const 'Sub' $P394 = "109_1304456140.832" 
     capture_lex $P394
-    .const 'Sub' $P390 = "108_1304284968.543" 
+    .const 'Sub' $P390 = "108_1304456140.832" 
     capture_lex $P390
-    .const 'Sub' $P388 = "107_1304284968.543" 
+    .const 'Sub' $P388 = "107_1304456140.832" 
     capture_lex $P388
-    .const 'Sub' $P384 = "106_1304284968.543" 
+    .const 'Sub' $P384 = "106_1304456140.832" 
     capture_lex $P384
-    .const 'Sub' $P376 = "103_1304284968.543" 
+    .const 'Sub' $P376 = "103_1304456140.832" 
     capture_lex $P376
-    .const 'Sub' $P370 = "102_1304284968.543" 
+    .const 'Sub' $P370 = "102_1304456140.832" 
     capture_lex $P370
-    .const 'Sub' $P368 = "101_1304284968.543" 
+    .const 'Sub' $P368 = "101_1304456140.832" 
     capture_lex $P368
-    .const 'Sub' $P360 = "100_1304284968.543" 
+    .const 'Sub' $P360 = "100_1304456140.832" 
     capture_lex $P360
-    .const 'Sub' $P357 = "99_1304284968.543" 
+    .const 'Sub' $P357 = "99_1304456140.832" 
     capture_lex $P357
-    .const 'Sub' $P353 = "98_1304284968.543" 
+    .const 'Sub' $P353 = "98_1304456140.832" 
     capture_lex $P353
-    .const 'Sub' $P351 = "97_1304284968.543" 
+    .const 'Sub' $P351 = "97_1304456140.832" 
     capture_lex $P351
-    .const 'Sub' $P341 = "96_1304284968.543" 
+    .const 'Sub' $P341 = "96_1304456140.832" 
     capture_lex $P341
-    .const 'Sub' $P338 = "95_1304284968.543" 
+    .const 'Sub' $P338 = "95_1304456140.832" 
     capture_lex $P338
-    .const 'Sub' $P334 = "94_1304284968.543" 
+    .const 'Sub' $P334 = "94_1304456140.832" 
     capture_lex $P334
-    .const 'Sub' $P331 = "93_1304284968.543" 
+    .const 'Sub' $P331 = "93_1304456140.832" 
     capture_lex $P331
-    .const 'Sub' $P328 = "92_1304284968.543" 
+    .const 'Sub' $P328 = "92_1304456140.832" 
     capture_lex $P328
-    .const 'Sub' $P325 = "91_1304284968.543" 
+    .const 'Sub' $P325 = "91_1304456140.832" 
     capture_lex $P325
-    .const 'Sub' $P322 = "90_1304284968.543" 
+    .const 'Sub' $P322 = "90_1304456140.832" 
     capture_lex $P322
-    .const 'Sub' $P319 = "89_1304284968.543" 
+    .const 'Sub' $P319 = "89_1304456140.832" 
     capture_lex $P319
-    .const 'Sub' $P316 = "88_1304284968.543" 
+    .const 'Sub' $P316 = "88_1304456140.832" 
     capture_lex $P316
-    .const 'Sub' $P314 = "87_1304284968.543" 
+    .const 'Sub' $P314 = "87_1304456140.832" 
     capture_lex $P314
-    .const 'Sub' $P309 = "86_1304284968.543" 
+    .const 'Sub' $P309 = "86_1304456140.832" 
     capture_lex $P309
-    .const 'Sub' $P307 = "85_1304284968.543" 
+    .const 'Sub' $P307 = "85_1304456140.832" 
     capture_lex $P307
-    .const 'Sub' $P302 = "84_1304284968.543" 
+    .const 'Sub' $P302 = "84_1304456140.832" 
     capture_lex $P302
-    .const 'Sub' $P299 = "83_1304284968.543" 
+    .const 'Sub' $P299 = "83_1304456140.832" 
     capture_lex $P299
-    .const 'Sub' $P295 = "82_1304284968.543" 
+    .const 'Sub' $P295 = "82_1304456140.832" 
     capture_lex $P295
-    .const 'Sub' $P292 = "81_1304284968.543" 
+    .const 'Sub' $P292 = "81_1304456140.832" 
     capture_lex $P292
-    .const 'Sub' $P288 = "80_1304284968.543" 
+    .const 'Sub' $P288 = "80_1304456140.832" 
     capture_lex $P288
-    .const 'Sub' $P286 = "79_1304284968.543" 
+    .const 'Sub' $P286 = "79_1304456140.832" 
     capture_lex $P286
-    .const 'Sub' $P282 = "78_1304284968.543" 
+    .const 'Sub' $P282 = "78_1304456140.832" 
     capture_lex $P282
-    .const 'Sub' $P280 = "77_1304284968.543" 
+    .const 'Sub' $P280 = "77_1304456140.832" 
     capture_lex $P280
-    .const 'Sub' $P276 = "76_1304284968.543" 
+    .const 'Sub' $P276 = "76_1304456140.832" 
     capture_lex $P276
-    .const 'Sub' $P274 = "75_1304284968.543" 
+    .const 'Sub' $P274 = "75_1304456140.832" 
     capture_lex $P274
-    .const 'Sub' $P270 = "74_1304284968.543" 
+    .const 'Sub' $P270 = "74_1304456140.832" 
     capture_lex $P270
-    .const 'Sub' $P268 = "73_1304284968.543" 
+    .const 'Sub' $P268 = "73_1304456140.832" 
     capture_lex $P268
-    .const 'Sub' $P264 = "72_1304284968.543" 
+    .const 'Sub' $P264 = "72_1304456140.832" 
     capture_lex $P264
-    .const 'Sub' $P262 = "71_1304284968.543" 
+    .const 'Sub' $P262 = "71_1304456140.832" 
     capture_lex $P262
-    .const 'Sub' $P258 = "70_1304284968.543" 
+    .const 'Sub' $P258 = "70_1304456140.832" 
     capture_lex $P258
-    .const 'Sub' $P256 = "69_1304284968.543" 
+    .const 'Sub' $P256 = "69_1304456140.832" 
     capture_lex $P256
-    .const 'Sub' $P253 = "68_1304284968.543" 
+    .const 'Sub' $P253 = "68_1304456140.832" 
     capture_lex $P253
-    .const 'Sub' $P251 = "67_1304284968.543" 
+    .const 'Sub' $P251 = "67_1304456140.832" 
     capture_lex $P251
-    .const 'Sub' $P248 = "66_1304284968.543" 
+    .const 'Sub' $P248 = "66_1304456140.832" 
     capture_lex $P248
-    .const 'Sub' $P245 = "65_1304284968.543" 
+    .const 'Sub' $P245 = "65_1304456140.832" 
     capture_lex $P245
-    .const 'Sub' $P242 = "64_1304284968.543" 
+    .const 'Sub' $P242 = "64_1304456140.832" 
     capture_lex $P242
-    .const 'Sub' $P239 = "63_1304284968.543" 
+    .const 'Sub' $P239 = "63_1304456140.832" 
     capture_lex $P239
-    .const 'Sub' $P236 = "62_1304284968.543" 
+    .const 'Sub' $P236 = "62_1304456140.832" 
     capture_lex $P236
-    .const 'Sub' $P233 = "61_1304284968.543" 
+    .const 'Sub' $P233 = "61_1304456140.832" 
     capture_lex $P233
-    .const 'Sub' $P230 = "60_1304284968.543" 
+    .const 'Sub' $P230 = "60_1304456140.832" 
     capture_lex $P230
-    .const 'Sub' $P222 = "57_1304284968.543" 
+    .const 'Sub' $P222 = "57_1304456140.832" 
     capture_lex $P222
-    .const 'Sub' $P213 = "55_1304284968.543" 
+    .const 'Sub' $P213 = "55_1304456140.832" 
     capture_lex $P213
-    .const 'Sub' $P211 = "54_1304284968.543" 
+    .const 'Sub' $P211 = "54_1304456140.832" 
     capture_lex $P211
-    .const 'Sub' $P198 = "53_1304284968.543" 
+    .const 'Sub' $P198 = "53_1304456140.832" 
     capture_lex $P198
-    .const 'Sub' $P196 = "52_1304284968.543" 
+    .const 'Sub' $P196 = "52_1304456140.832" 
     capture_lex $P196
-    .const 'Sub' $P175 = "47_1304284968.543" 
+    .const 'Sub' $P175 = "47_1304456140.832" 
     capture_lex $P175
-    .const 'Sub' $P172 = "46_1304284968.543" 
+    .const 'Sub' $P172 = "46_1304456140.832" 
     capture_lex $P172
-    .const 'Sub' $P168 = "45_1304284968.543" 
+    .const 'Sub' $P168 = "45_1304456140.832" 
     capture_lex $P168
-    .const 'Sub' $P165 = "44_1304284968.543" 
+    .const 'Sub' $P165 = "44_1304456140.832" 
     capture_lex $P165
-    .const 'Sub' $P161 = "43_1304284968.543" 
+    .const 'Sub' $P161 = "43_1304456140.832" 
     capture_lex $P161
-    .const 'Sub' $P158 = "42_1304284968.543" 
+    .const 'Sub' $P158 = "42_1304456140.832" 
     capture_lex $P158
-    .const 'Sub' $P154 = "41_1304284968.543" 
+    .const 'Sub' $P154 = "41_1304456140.832" 
     capture_lex $P154
-    .const 'Sub' $P145 = "38_1304284968.543" 
+    .const 'Sub' $P145 = "38_1304456140.832" 
     capture_lex $P145
-    .const 'Sub' $P135 = "36_1304284968.543" 
+    .const 'Sub' $P135 = "36_1304456140.832" 
     capture_lex $P135
-    .const 'Sub' $P132 = "35_1304284968.543" 
+    .const 'Sub' $P132 = "35_1304456140.832" 
     capture_lex $P132
-    .const 'Sub' $P123 = "33_1304284968.543" 
+    .const 'Sub' $P123 = "33_1304456140.832" 
     capture_lex $P123
-    .const 'Sub' $P121 = "32_1304284968.543" 
+    .const 'Sub' $P121 = "32_1304456140.832" 
     capture_lex $P121
-    .const 'Sub' $P116 = "31_1304284968.543" 
+    .const 'Sub' $P116 = "31_1304456140.832" 
     capture_lex $P116
-    .const 'Sub' $P113 = "30_1304284968.543" 
+    .const 'Sub' $P113 = "30_1304456140.832" 
     capture_lex $P113
-    .const 'Sub' $P107 = "29_1304284968.543" 
+    .const 'Sub' $P107 = "29_1304456140.832" 
     capture_lex $P107
-    .const 'Sub' $P105 = "28_1304284968.543" 
+    .const 'Sub' $P105 = "28_1304456140.832" 
     capture_lex $P105
-    .const 'Sub' $P97 = "27_1304284968.543" 
+    .const 'Sub' $P97 = "27_1304456140.832" 
     capture_lex $P97
-    .const 'Sub' $P94 = "26_1304284968.543" 
+    .const 'Sub' $P94 = "26_1304456140.832" 
     capture_lex $P94
-    .const 'Sub' $P90 = "25_1304284968.543" 
+    .const 'Sub' $P90 = "25_1304456140.832" 
     capture_lex $P90
-    .const 'Sub' $P87 = "24_1304284968.543" 
+    .const 'Sub' $P87 = "24_1304456140.832" 
     capture_lex $P87
-    .const 'Sub' $P78 = "23_1304284968.543" 
+    .const 'Sub' $P78 = "23_1304456140.832" 
     capture_lex $P78
-    .const 'Sub' $P76 = "22_1304284968.543" 
+    .const 'Sub' $P76 = "22_1304456140.832" 
     capture_lex $P76
-    .const 'Sub' $P71 = "21_1304284968.543" 
+    .const 'Sub' $P71 = "21_1304456140.832" 
     capture_lex $P71
-    .const 'Sub' $P68 = "20_1304284968.543" 
+    .const 'Sub' $P68 = "20_1304456140.832" 
     capture_lex $P68
-    .const 'Sub' $P64 = "19_1304284968.543" 
+    .const 'Sub' $P64 = "19_1304456140.832" 
     capture_lex $P64
-    .const 'Sub' $P62 = "18_1304284968.543" 
+    .const 'Sub' $P62 = "18_1304456140.832" 
     capture_lex $P62
-    .const 'Sub' $P54 = "16_1304284968.543" 
+    .const 'Sub' $P54 = "16_1304456140.832" 
     capture_lex $P54
-    .const 'Sub' $P52 = "15_1304284968.543" 
+    .const 'Sub' $P52 = "15_1304456140.832" 
     capture_lex $P52
-    .const 'Sub' $P47 = "14_1304284968.543" 
+    .const 'Sub' $P47 = "14_1304456140.832" 
     capture_lex $P47
-    .const 'Sub' $P27 = "13_1304284968.543" 
+    .const 'Sub' $P27 = "13_1304456140.832" 
     capture_lex $P27
     .lex "$?PACKAGE", $P25
     .lex "$?CLASS", $P26
 .annotate 'line', 11
-    .const 'Sub' $P634 = "173_1304284968.543" 
+    .const 'Sub' $P634 = "173_1304456140.832" 
     capture_lex $P634
 .annotate 'line', 9
     .return ($P634)
@@ -2195,7 +2195,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "obs"  :subid("13_1304284968.543") :outer("12_1304284968.543")
+.sub "obs"  :subid("13_1304456140.832") :outer("12_1304456140.832")
     .param pmc param_28
     .param pmc param_29
     .param pmc param_30
@@ -2245,7 +2245,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "ws"  :subid("14_1304284968.543") :method :outer("12_1304284968.543")
+.sub "ws"  :subid("14_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx48_tgt
     .local int rx48_pos
@@ -2344,7 +2344,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__ws"  :subid("15_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__ws"  :subid("15_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P53, "ResizablePMCArray"
     push $P53, ""
@@ -2355,9 +2355,9 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "normspace"  :subid("16_1304284968.543") :method :outer("12_1304284968.543")
+.sub "normspace"  :subid("16_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
-    .const 'Sub' $P58 = "17_1304284968.543" 
+    .const 'Sub' $P58 = "17_1304456140.832" 
     capture_lex $P58
     .local string rx55_tgt
     .local int rx55_pos
@@ -2396,7 +2396,7 @@
 .annotate 'line', 18
   # rx subrule "before" subtype=zerowidth negate=
     rx55_cur."!cursor_pos"(rx55_pos)
-    .const 'Sub' $P58 = "17_1304284968.543" 
+    .const 'Sub' $P58 = "17_1304456140.832" 
     capture_lex $P58
     $P10 = rx55_cur."before"($P58)
     unless $P10, rx55_fail
@@ -2434,7 +2434,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block57"  :anon :subid("17_1304284968.543") :method :outer("16_1304284968.543")
+.sub "_block57"  :anon :subid("17_1304456140.832") :method :outer("16_1304456140.832")
 .annotate 'line', 18
     .local string rx59_tgt
     .local int rx59_pos
@@ -2517,7 +2517,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__normspace"  :subid("18_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__normspace"  :subid("18_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P63, "ResizablePMCArray"
     push $P63, ""
@@ -2528,7 +2528,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "identifier"  :subid("19_1304284968.543") :method :outer("12_1304284968.543")
+.sub "identifier"  :subid("19_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx65_tgt
     .local int rx65_pos
@@ -2621,7 +2621,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__identifier"  :subid("20_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__identifier"  :subid("20_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P69 = self."!PREFIX__!subrule"("ident", "")
     new $P70, "ResizablePMCArray"
@@ -2633,7 +2633,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "arg"  :subid("21_1304284968.543") :method :outer("12_1304284968.543")
+.sub "arg"  :subid("21_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx72_tgt
     .local int rx72_pos
@@ -2757,7 +2757,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__arg"  :subid("22_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__arg"  :subid("22_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P77, "ResizablePMCArray"
     push $P77, ""
@@ -2770,7 +2770,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "arglist"  :subid("23_1304284968.543") :method :outer("12_1304284968.543")
+.sub "arglist"  :subid("23_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx79_tgt
     .local int rx79_pos
@@ -2893,7 +2893,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__arglist"  :subid("24_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__arglist"  :subid("24_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P88 = self."!PREFIX__!subrule"("ws", "")
     new $P89, "ResizablePMCArray"
@@ -2905,7 +2905,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "TOP"  :subid("25_1304284968.543") :method :outer("12_1304284968.543")
+.sub "TOP"  :subid("25_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx91_tgt
     .local int rx91_pos
@@ -2993,7 +2993,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__TOP"  :subid("26_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__TOP"  :subid("26_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P95 = self."!PREFIX__!subrule"("nibbler", "")
     new $P96, "ResizablePMCArray"
@@ -3005,7 +3005,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "nibbler"  :subid("27_1304284968.543") :method :outer("12_1304284968.543")
+.sub "nibbler"  :subid("27_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx98_tgt
     .local int rx98_pos
@@ -3191,7 +3191,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__nibbler"  :subid("28_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__nibbler"  :subid("28_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P106, "ResizablePMCArray"
     push $P106, ""
@@ -3202,7 +3202,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "termconj"  :subid("29_1304284968.543") :method :outer("12_1304284968.543")
+.sub "termconj"  :subid("29_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx108_tgt
     .local int rx108_pos
@@ -3329,7 +3329,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__termconj"  :subid("30_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__termconj"  :subid("30_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P114 = self."!PREFIX__!subrule"("termish", "")
     new $P115, "ResizablePMCArray"
@@ -3341,7 +3341,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "termish"  :subid("31_1304284968.543") :method :outer("12_1304284968.543")
+.sub "termish"  :subid("31_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx117_tgt
     .local int rx117_pos
@@ -3432,7 +3432,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__termish"  :subid("32_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__termish"  :subid("32_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P122, "ResizablePMCArray"
     push $P122, ""
@@ -3443,9 +3443,9 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "quantified_atom"  :subid("33_1304284968.543") :method :outer("12_1304284968.543")
+.sub "quantified_atom"  :subid("33_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
-    .const 'Sub' $P129 = "34_1304284968.543" 
+    .const 'Sub' $P129 = "34_1304456140.832" 
     capture_lex $P129
     .local string rx124_tgt
     .local int rx124_pos
@@ -3513,7 +3513,7 @@
   alt127_1:
   # rx subrule "before" subtype=zerowidth negate=
     rx124_cur."!cursor_pos"(rx124_pos)
-    .const 'Sub' $P129 = "34_1304284968.543" 
+    .const 'Sub' $P129 = "34_1304456140.832" 
     capture_lex $P129
     $P10 = rx124_cur."before"($P129)
     unless $P10, rx124_fail
@@ -3562,7 +3562,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block128"  :anon :subid("34_1304284968.543") :method :outer("33_1304284968.543")
+.sub "_block128"  :anon :subid("34_1304456140.832") :method :outer("33_1304456140.832")
 .annotate 'line', 58
     .local string rx130_tgt
     .local int rx130_pos
@@ -3633,7 +3633,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__quantified_atom"  :subid("35_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__quantified_atom"  :subid("35_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P133 = self."!PREFIX__!subrule"("atom", "")
     new $P134, "ResizablePMCArray"
@@ -3645,9 +3645,9 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "atom"  :subid("36_1304284968.543") :method :outer("12_1304284968.543")
+.sub "atom"  :subid("36_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
-    .const 'Sub' $P142 = "37_1304284968.543" 
+    .const 'Sub' $P142 = "37_1304456140.832" 
     capture_lex $P142
     .local string rx136_tgt
     .local int rx136_pos
@@ -3712,7 +3712,7 @@
   rxquantg140_done:
   # rx subrule "before" subtype=zerowidth negate=
     rx136_cur."!cursor_pos"(rx136_pos)
-    .const 'Sub' $P142 = "37_1304284968.543" 
+    .const 'Sub' $P142 = "37_1304456140.832" 
     capture_lex $P142
     $P10 = rx136_cur."before"($P142)
     unless $P10, rx136_fail
@@ -3760,7 +3760,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block141"  :anon :subid("37_1304284968.543") :method :outer("36_1304284968.543")
+.sub "_block141"  :anon :subid("37_1304456140.832") :method :outer("36_1304456140.832")
 .annotate 'line', 64
     .local string rx143_tgt
     .local int rx143_pos
@@ -3830,7 +3830,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__atom"  :subid("38_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__atom"  :subid("38_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P146 = self."!PREFIX__!subrule"("metachar", "")
     new $P147, "ResizablePMCArray"
@@ -3843,7 +3843,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "quantifier"  :subid("39_1304284968.543")
+.sub "quantifier"  :subid("39_1304456140.832")
     .param pmc param_149
 .annotate 'line', 69
     .lex "self", param_149
@@ -3855,7 +3855,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__quantifier"  :subid("40_1304284968.543")
+.sub "!PREFIX__quantifier"  :subid("40_1304456140.832")
     .param pmc param_152
 .annotate 'line', 69
     .lex "self", param_152
@@ -3867,7 +3867,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "quantifier:sym<*>"  :subid("41_1304284968.543") :method :outer("12_1304284968.543")
+.sub "quantifier:sym<*>"  :subid("41_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx155_tgt
     .local int rx155_pos
@@ -3961,7 +3961,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__quantifier:sym<*>"  :subid("42_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__quantifier:sym<*>"  :subid("42_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P159 = self."!PREFIX__!subrule"("backmod", "*")
     new $P160, "ResizablePMCArray"
@@ -3973,7 +3973,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "quantifier:sym<+>"  :subid("43_1304284968.543") :method :outer("12_1304284968.543")
+.sub "quantifier:sym<+>"  :subid("43_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx162_tgt
     .local int rx162_pos
@@ -4067,7 +4067,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__quantifier:sym<+>"  :subid("44_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__quantifier:sym<+>"  :subid("44_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P166 = self."!PREFIX__!subrule"("backmod", "+")
     new $P167, "ResizablePMCArray"
@@ -4079,7 +4079,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "quantifier:sym<?>"  :subid("45_1304284968.543") :method :outer("12_1304284968.543")
+.sub "quantifier:sym<?>"  :subid("45_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx169_tgt
     .local int rx169_pos
@@ -4173,7 +4173,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__quantifier:sym<?>"  :subid("46_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__quantifier:sym<?>"  :subid("46_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P173 = self."!PREFIX__!subrule"("backmod", "?")
     new $P174, "ResizablePMCArray"
@@ -4185,15 +4185,15 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "quantifier:sym<{N,M}>"  :subid("47_1304284968.543") :method :outer("12_1304284968.543")
+.sub "quantifier:sym<{N,M}>"  :subid("47_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
-    .const 'Sub' $P193 = "51_1304284968.543" 
+    .const 'Sub' $P193 = "51_1304456140.832" 
     capture_lex $P193
-    .const 'Sub' $P188 = "50_1304284968.543" 
+    .const 'Sub' $P188 = "50_1304456140.832" 
     capture_lex $P188
-    .const 'Sub' $P184 = "49_1304284968.543" 
+    .const 'Sub' $P184 = "49_1304456140.832" 
     capture_lex $P184
-    .const 'Sub' $P181 = "48_1304284968.543" 
+    .const 'Sub' $P181 = "48_1304456140.832" 
     capture_lex $P181
     .local string rx176_tgt
     .local int rx176_pos
@@ -4234,7 +4234,7 @@
     find_lex $P178, unicode:"$\x{a2}"
     $P179 = $P178."MATCH"()
     store_lex "$/", $P179
-    .const 'Sub' $P181 = "48_1304284968.543" 
+    .const 'Sub' $P181 = "48_1304456140.832" 
     capture_lex $P181
     $P182 = $P181()
   # rx literal  "{"
@@ -4246,7 +4246,7 @@
     add rx176_pos, 1
   # rx subrule $P184 subtype=capture negate=
     rx176_cur."!cursor_pos"(rx176_pos)
-    .const 'Sub' $P184 = "49_1304284968.543" 
+    .const 'Sub' $P184 = "49_1304456140.832" 
     capture_lex $P184
     $P10 = rx176_cur.$P184()
     unless $P10, rx176_fail
@@ -4255,7 +4255,7 @@
     rx176_pos = $P10."pos"()
   # rx subrule $P188 subtype=capture negate=
     rx176_cur."!cursor_pos"(rx176_pos)
-    .const 'Sub' $P188 = "50_1304284968.543" 
+    .const 'Sub' $P188 = "50_1304456140.832" 
     capture_lex $P188
     $P10 = rx176_cur.$P188()
     unless $P10, rx176_fail
@@ -4264,7 +4264,7 @@
     rx176_pos = $P10."pos"()
   # rx subrule $P193 subtype=capture negate=
     rx176_cur."!cursor_pos"(rx176_pos)
-    .const 'Sub' $P193 = "51_1304284968.543" 
+    .const 'Sub' $P193 = "51_1304456140.832" 
     capture_lex $P193
     $P10 = rx176_cur.$P193()
     unless $P10, rx176_fail
@@ -4314,7 +4314,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block180"  :anon :subid("48_1304284968.543") :outer("47_1304284968.543")
+.sub "_block180"  :anon :subid("48_1304456140.832") :outer("47_1304456140.832")
 .annotate 'line', 73
     .return ()
 .end
@@ -4323,7 +4323,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block183"  :anon :subid("49_1304284968.543") :method :outer("47_1304284968.543")
+.sub "_block183"  :anon :subid("49_1304456140.832") :method :outer("47_1304456140.832")
 .annotate 'line', 73
     .local string rx185_tgt
     .local int rx185_pos
@@ -4393,7 +4393,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block187"  :anon :subid("50_1304284968.543") :method :outer("47_1304284968.543")
+.sub "_block187"  :anon :subid("50_1304456140.832") :method :outer("47_1304456140.832")
 .annotate 'line', 73
     .local string rx189_tgt
     .local int rx189_pos
@@ -4471,7 +4471,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block192"  :anon :subid("51_1304284968.543") :method :outer("47_1304284968.543")
+.sub "_block192"  :anon :subid("51_1304456140.832") :method :outer("47_1304456140.832")
 .annotate 'line', 73
     .local string rx194_tgt
     .local int rx194_pos
@@ -4539,7 +4539,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__quantifier:sym<{N,M}>"  :subid("52_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__quantifier:sym<{N,M}>"  :subid("52_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P197, "ResizablePMCArray"
     push $P197, ""
@@ -4550,7 +4550,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "quantifier:sym<**>"  :subid("53_1304284968.543") :method :outer("12_1304284968.543")
+.sub "quantifier:sym<**>"  :subid("53_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx199_tgt
     .local int rx199_pos
@@ -4787,7 +4787,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__quantifier:sym<**>"  :subid("54_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__quantifier:sym<**>"  :subid("54_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P212, "ResizablePMCArray"
     push $P212, "**"
@@ -4798,9 +4798,9 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backmod"  :subid("55_1304284968.543") :method :outer("12_1304284968.543")
+.sub "backmod"  :subid("55_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
-    .const 'Sub' $P219 = "56_1304284968.543" 
+    .const 'Sub' $P219 = "56_1304456140.832" 
     capture_lex $P219
     .local string rx214_tgt
     .local int rx214_pos
@@ -4876,7 +4876,7 @@
   alt217_2:
   # rx subrule "before" subtype=zerowidth negate=1
     rx214_cur."!cursor_pos"(rx214_pos)
-    .const 'Sub' $P219 = "56_1304284968.543" 
+    .const 'Sub' $P219 = "56_1304456140.832" 
     capture_lex $P219
     $P10 = rx214_cur."before"($P219)
     if $P10, rx214_fail
@@ -4910,7 +4910,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block218"  :anon :subid("56_1304284968.543") :method :outer("55_1304284968.543")
+.sub "_block218"  :anon :subid("56_1304456140.832") :method :outer("55_1304456140.832")
 .annotate 'line', 91
     .local string rx220_tgt
     .local int rx220_pos
@@ -4981,7 +4981,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backmod"  :subid("57_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__backmod"  :subid("57_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P223, "ResizablePMCArray"
     push $P223, ""
@@ -4992,7 +4992,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar"  :subid("58_1304284968.543")
+.sub "metachar"  :subid("58_1304456140.832")
     .param pmc param_225
 .annotate 'line', 93
     .lex "self", param_225
@@ -5004,7 +5004,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar"  :subid("59_1304284968.543")
+.sub "!PREFIX__metachar"  :subid("59_1304456140.832")
     .param pmc param_228
 .annotate 'line', 93
     .lex "self", param_228
@@ -5016,7 +5016,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<ws>"  :subid("60_1304284968.543") :method :outer("12_1304284968.543")
+.sub "metachar:sym<ws>"  :subid("60_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx231_tgt
     .local int rx231_pos
@@ -5087,7 +5087,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<ws>"  :subid("61_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__metachar:sym<ws>"  :subid("61_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P234 = self."!PREFIX__!subrule"("normspace", "")
     new $P235, "ResizablePMCArray"
@@ -5099,7 +5099,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<[ ]>"  :subid("62_1304284968.543") :method :outer("12_1304284968.543")
+.sub "metachar:sym<[ ]>"  :subid("62_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx237_tgt
     .local int rx237_pos
@@ -5186,7 +5186,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<[ ]>"  :subid("63_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__metachar:sym<[ ]>"  :subid("63_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P240 = self."!PREFIX__!subrule"("nibbler", "[")
     new $P241, "ResizablePMCArray"
@@ -5198,7 +5198,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<( )>"  :subid("64_1304284968.543") :method :outer("12_1304284968.543")
+.sub "metachar:sym<( )>"  :subid("64_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx243_tgt
     .local int rx243_pos
@@ -5285,7 +5285,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<( )>"  :subid("65_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__metachar:sym<( )>"  :subid("65_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P246 = self."!PREFIX__!subrule"("nibbler", "(")
     new $P247, "ResizablePMCArray"
@@ -5297,7 +5297,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<'>"  :subid("66_1304284968.543") :method :outer("12_1304284968.543")
+.sub "metachar:sym<'>"  :subid("66_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx249_tgt
     .local int rx249_pos
@@ -5375,7 +5375,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<'>"  :subid("67_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__metachar:sym<'>"  :subid("67_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P252, "ResizablePMCArray"
     push $P252, "'"
@@ -5386,7 +5386,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<\">"  :subid("68_1304284968.543") :method :outer("12_1304284968.543")
+.sub "metachar:sym<\">"  :subid("68_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx254_tgt
     .local int rx254_pos
@@ -5464,7 +5464,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<\">"  :subid("69_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__metachar:sym<\">"  :subid("69_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P257, "ResizablePMCArray"
     push $P257, "\""
@@ -5475,7 +5475,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<.>"  :subid("70_1304284968.543") :method :outer("12_1304284968.543")
+.sub "metachar:sym<.>"  :subid("70_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx259_tgt
     .local int rx259_pos
@@ -5562,7 +5562,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<.>"  :subid("71_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__metachar:sym<.>"  :subid("71_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P263, "ResizablePMCArray"
     push $P263, "."
@@ -5573,7 +5573,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<^>"  :subid("72_1304284968.543") :method :outer("12_1304284968.543")
+.sub "metachar:sym<^>"  :subid("72_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx265_tgt
     .local int rx265_pos
@@ -5660,7 +5660,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<^>"  :subid("73_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__metachar:sym<^>"  :subid("73_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P269, "ResizablePMCArray"
     push $P269, "^"
@@ -5671,7 +5671,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<^^>"  :subid("74_1304284968.543") :method :outer("12_1304284968.543")
+.sub "metachar:sym<^^>"  :subid("74_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx271_tgt
     .local int rx271_pos
@@ -5758,7 +5758,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<^^>"  :subid("75_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__metachar:sym<^^>"  :subid("75_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P275, "ResizablePMCArray"
     push $P275, "^^"
@@ -5769,7 +5769,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<$>"  :subid("76_1304284968.543") :method :outer("12_1304284968.543")
+.sub "metachar:sym<$>"  :subid("76_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx277_tgt
     .local int rx277_pos
@@ -5856,7 +5856,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<$>"  :subid("77_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__metachar:sym<$>"  :subid("77_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P281, "ResizablePMCArray"
     push $P281, "$"
@@ -5867,7 +5867,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<$$>"  :subid("78_1304284968.543") :method :outer("12_1304284968.543")
+.sub "metachar:sym<$$>"  :subid("78_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx283_tgt
     .local int rx283_pos
@@ -5954,7 +5954,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<$$>"  :subid("79_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__metachar:sym<$$>"  :subid("79_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P287, "ResizablePMCArray"
     push $P287, "$$"
@@ -5965,7 +5965,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<:::>"  :subid("80_1304284968.543") :method :outer("12_1304284968.543")
+.sub "metachar:sym<:::>"  :subid("80_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx289_tgt
     .local int rx289_pos
@@ -6057,7 +6057,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<:::>"  :subid("81_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__metachar:sym<:::>"  :subid("81_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P293 = self."!PREFIX__!subrule"("panic", ":::")
     new $P294, "ResizablePMCArray"
@@ -6069,7 +6069,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<::>"  :subid("82_1304284968.543") :method :outer("12_1304284968.543")
+.sub "metachar:sym<::>"  :subid("82_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx296_tgt
     .local int rx296_pos
@@ -6161,7 +6161,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<::>"  :subid("83_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__metachar:sym<::>"  :subid("83_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P300 = self."!PREFIX__!subrule"("panic", "::")
     new $P301, "ResizablePMCArray"
@@ -6173,7 +6173,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<lwb>"  :subid("84_1304284968.543") :method :outer("12_1304284968.543")
+.sub "metachar:sym<lwb>"  :subid("84_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx303_tgt
     .local int rx303_pos
@@ -6273,7 +6273,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<lwb>"  :subid("85_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__metachar:sym<lwb>"  :subid("85_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P308, "ResizablePMCArray"
     push $P308, unicode:"\x{ab}"
@@ -6285,7 +6285,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<rwb>"  :subid("86_1304284968.543") :method :outer("12_1304284968.543")
+.sub "metachar:sym<rwb>"  :subid("86_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx310_tgt
     .local int rx310_pos
@@ -6385,7 +6385,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<rwb>"  :subid("87_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__metachar:sym<rwb>"  :subid("87_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P315, "ResizablePMCArray"
     push $P315, unicode:"\x{bb}"
@@ -6397,7 +6397,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<bs>"  :subid("88_1304284968.543") :method :outer("12_1304284968.543")
+.sub "metachar:sym<bs>"  :subid("88_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx317_tgt
     .local int rx317_pos
@@ -6477,7 +6477,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<bs>"  :subid("89_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__metachar:sym<bs>"  :subid("89_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P320 = self."!PREFIX__!subrule"("backslash", "\\")
     new $P321, "ResizablePMCArray"
@@ -6489,7 +6489,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<mod>"  :subid("90_1304284968.543") :method :outer("12_1304284968.543")
+.sub "metachar:sym<mod>"  :subid("90_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx323_tgt
     .local int rx323_pos
@@ -6562,7 +6562,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<mod>"  :subid("91_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__metachar:sym<mod>"  :subid("91_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P326 = self."!PREFIX__!subrule"("mod_internal", "")
     new $P327, "ResizablePMCArray"
@@ -6574,7 +6574,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<quantifier>"  :subid("92_1304284968.543") :method :outer("12_1304284968.543")
+.sub "metachar:sym<quantifier>"  :subid("92_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx329_tgt
     .local int rx329_pos
@@ -6653,7 +6653,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<quantifier>"  :subid("93_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__metachar:sym<quantifier>"  :subid("93_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P332 = self."!PREFIX__!subrule"("quantifier", "")
     new $P333, "ResizablePMCArray"
@@ -6665,7 +6665,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<~>"  :subid("94_1304284968.543") :method :outer("12_1304284968.543")
+.sub "metachar:sym<~>"  :subid("94_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx335_tgt
     .local int rx335_pos
@@ -6779,7 +6779,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<~>"  :subid("95_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__metachar:sym<~>"  :subid("95_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P339 = self."!PREFIX__!subrule"("ws", "~")
     new $P340, "ResizablePMCArray"
@@ -6791,7 +6791,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<{*}>"  :subid("96_1304284968.543") :method :outer("12_1304284968.543")
+.sub "metachar:sym<{*}>"  :subid("96_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx342_tgt
     .local int rx342_pos
@@ -6977,7 +6977,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<{*}>"  :subid("97_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__metachar:sym<{*}>"  :subid("97_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P352, "ResizablePMCArray"
     push $P352, "{*}"
@@ -6988,7 +6988,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<assert>"  :subid("98_1304284968.543") :method :outer("12_1304284968.543")
+.sub "metachar:sym<assert>"  :subid("98_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx354_tgt
     .local int rx354_pos
@@ -7088,7 +7088,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<assert>"  :subid("99_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__metachar:sym<assert>"  :subid("99_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P358 = self."!PREFIX__!subrule"("assertion", "<")
     new $P359, "ResizablePMCArray"
@@ -7100,7 +7100,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<var>"  :subid("100_1304284968.543") :method :outer("12_1304284968.543")
+.sub "metachar:sym<var>"  :subid("100_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx361_tgt
     .local int rx361_pos
@@ -7279,7 +7279,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<var>"  :subid("101_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__metachar:sym<var>"  :subid("101_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P369, "ResizablePMCArray"
     push $P369, "$"
@@ -7291,7 +7291,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "metachar:sym<PIR>"  :subid("102_1304284968.543") :method :outer("12_1304284968.543")
+.sub "metachar:sym<PIR>"  :subid("102_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx371_tgt
     .local int rx371_pos
@@ -7397,7 +7397,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__metachar:sym<PIR>"  :subid("103_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__metachar:sym<PIR>"  :subid("103_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P377, "ResizablePMCArray"
     push $P377, ":PIR{{"
@@ -7408,7 +7408,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash"  :subid("104_1304284968.543")
+.sub "backslash"  :subid("104_1304456140.832")
     .param pmc param_379
 .annotate 'line', 143
     .lex "self", param_379
@@ -7420,7 +7420,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash"  :subid("105_1304284968.543")
+.sub "!PREFIX__backslash"  :subid("105_1304456140.832")
     .param pmc param_382
 .annotate 'line', 143
     .lex "self", param_382
@@ -7432,7 +7432,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<w>"  :subid("106_1304284968.543") :method :outer("12_1304284968.543")
+.sub "backslash:sym<w>"  :subid("106_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx385_tgt
     .local int rx385_pos
@@ -7519,7 +7519,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<w>"  :subid("107_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__backslash:sym<w>"  :subid("107_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P389, "ResizablePMCArray"
     push $P389, "d"
@@ -7537,7 +7537,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<b>"  :subid("108_1304284968.543") :method :outer("12_1304284968.543")
+.sub "backslash:sym<b>"  :subid("108_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx391_tgt
     .local int rx391_pos
@@ -7624,7 +7624,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<b>"  :subid("109_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__backslash:sym<b>"  :subid("109_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P395, "ResizablePMCArray"
     push $P395, "b"
@@ -7636,7 +7636,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<e>"  :subid("110_1304284968.543") :method :outer("12_1304284968.543")
+.sub "backslash:sym<e>"  :subid("110_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx397_tgt
     .local int rx397_pos
@@ -7723,7 +7723,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<e>"  :subid("111_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__backslash:sym<e>"  :subid("111_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P401, "ResizablePMCArray"
     push $P401, "e"
@@ -7735,7 +7735,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<f>"  :subid("112_1304284968.543") :method :outer("12_1304284968.543")
+.sub "backslash:sym<f>"  :subid("112_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx403_tgt
     .local int rx403_pos
@@ -7822,7 +7822,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<f>"  :subid("113_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__backslash:sym<f>"  :subid("113_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P407, "ResizablePMCArray"
     push $P407, "f"
@@ -7834,7 +7834,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<h>"  :subid("114_1304284968.543") :method :outer("12_1304284968.543")
+.sub "backslash:sym<h>"  :subid("114_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx409_tgt
     .local int rx409_pos
@@ -7921,7 +7921,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<h>"  :subid("115_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__backslash:sym<h>"  :subid("115_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P413, "ResizablePMCArray"
     push $P413, "h"
@@ -7933,7 +7933,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<r>"  :subid("116_1304284968.543") :method :outer("12_1304284968.543")
+.sub "backslash:sym<r>"  :subid("116_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx415_tgt
     .local int rx415_pos
@@ -8020,7 +8020,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<r>"  :subid("117_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__backslash:sym<r>"  :subid("117_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P419, "ResizablePMCArray"
     push $P419, "r"
@@ -8032,7 +8032,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<t>"  :subid("118_1304284968.543") :method :outer("12_1304284968.543")
+.sub "backslash:sym<t>"  :subid("118_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx421_tgt
     .local int rx421_pos
@@ -8119,7 +8119,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<t>"  :subid("119_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__backslash:sym<t>"  :subid("119_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P425, "ResizablePMCArray"
     push $P425, "t"
@@ -8131,7 +8131,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<v>"  :subid("120_1304284968.543") :method :outer("12_1304284968.543")
+.sub "backslash:sym<v>"  :subid("120_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx427_tgt
     .local int rx427_pos
@@ -8218,7 +8218,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<v>"  :subid("121_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__backslash:sym<v>"  :subid("121_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P431, "ResizablePMCArray"
     push $P431, "v"
@@ -8230,7 +8230,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<o>"  :subid("122_1304284968.543") :method :outer("12_1304284968.543")
+.sub "backslash:sym<o>"  :subid("122_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx433_tgt
     .local int rx433_pos
@@ -8351,7 +8351,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<o>"  :subid("123_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__backslash:sym<o>"  :subid("123_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P438 = self."!PREFIX__!subrule"("octints", "O[")
     $P439 = self."!PREFIX__!subrule"("octint", "O")
@@ -8369,7 +8369,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<x>"  :subid("124_1304284968.543") :method :outer("12_1304284968.543")
+.sub "backslash:sym<x>"  :subid("124_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx444_tgt
     .local int rx444_pos
@@ -8490,7 +8490,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<x>"  :subid("125_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__backslash:sym<x>"  :subid("125_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P449 = self."!PREFIX__!subrule"("hexints", "X[")
     $P450 = self."!PREFIX__!subrule"("hexint", "X")
@@ -8508,7 +8508,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<c>"  :subid("126_1304284968.543") :method :outer("12_1304284968.543")
+.sub "backslash:sym<c>"  :subid("126_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx455_tgt
     .local int rx455_pos
@@ -8602,7 +8602,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<c>"  :subid("127_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__backslash:sym<c>"  :subid("127_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P459 = self."!PREFIX__!subrule"("charspec", "C")
     $P460 = self."!PREFIX__!subrule"("charspec", "c")
@@ -8616,7 +8616,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<A>"  :subid("128_1304284968.543") :method :outer("12_1304284968.543")
+.sub "backslash:sym<A>"  :subid("128_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx463_tgt
     .local int rx463_pos
@@ -8694,7 +8694,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<A>"  :subid("129_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__backslash:sym<A>"  :subid("129_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P466 = self."!PREFIX__!subrule"("obs", "A")
     new $P467, "ResizablePMCArray"
@@ -8706,7 +8706,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<z>"  :subid("130_1304284968.543") :method :outer("12_1304284968.543")
+.sub "backslash:sym<z>"  :subid("130_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx469_tgt
     .local int rx469_pos
@@ -8784,7 +8784,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<z>"  :subid("131_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__backslash:sym<z>"  :subid("131_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P472 = self."!PREFIX__!subrule"("obs", "z")
     new $P473, "ResizablePMCArray"
@@ -8796,7 +8796,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<Z>"  :subid("132_1304284968.543") :method :outer("12_1304284968.543")
+.sub "backslash:sym<Z>"  :subid("132_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx475_tgt
     .local int rx475_pos
@@ -8874,7 +8874,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<Z>"  :subid("133_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__backslash:sym<Z>"  :subid("133_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P478 = self."!PREFIX__!subrule"("obs", "Z")
     new $P479, "ResizablePMCArray"
@@ -8886,7 +8886,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<Q>"  :subid("134_1304284968.543") :method :outer("12_1304284968.543")
+.sub "backslash:sym<Q>"  :subid("134_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx481_tgt
     .local int rx481_pos
@@ -8964,7 +8964,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<Q>"  :subid("135_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__backslash:sym<Q>"  :subid("135_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P484 = self."!PREFIX__!subrule"("obs", "Q")
     new $P485, "ResizablePMCArray"
@@ -8976,9 +8976,9 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<unrec>"  :subid("136_1304284968.543") :method :outer("12_1304284968.543")
+.sub "backslash:sym<unrec>"  :subid("136_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
-    .const 'Sub' $P492 = "137_1304284968.543" 
+    .const 'Sub' $P492 = "137_1304456140.832" 
     capture_lex $P492
     .local string rx487_tgt
     .local int rx487_pos
@@ -9019,7 +9019,7 @@
     find_lex $P489, unicode:"$\x{a2}"
     $P490 = $P489."MATCH"()
     store_lex "$/", $P490
-    .const 'Sub' $P492 = "137_1304284968.543" 
+    .const 'Sub' $P492 = "137_1304456140.832" 
     capture_lex $P492
     $P493 = $P492()
   # rx charclass w
@@ -9062,7 +9062,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block491"  :anon :subid("137_1304284968.543") :outer("136_1304284968.543")
+.sub "_block491"  :anon :subid("137_1304456140.832") :outer("136_1304456140.832")
 .annotate 'line', 159
     .return ()
 .end
@@ -9071,7 +9071,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<unrec>"  :subid("138_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__backslash:sym<unrec>"  :subid("138_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P495, "ResizablePMCArray"
     push $P495, ""
@@ -9082,7 +9082,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "backslash:sym<misc>"  :subid("139_1304284968.543") :method :outer("12_1304284968.543")
+.sub "backslash:sym<misc>"  :subid("139_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx497_tgt
     .local int rx497_pos
@@ -9154,7 +9154,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__backslash:sym<misc>"  :subid("140_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__backslash:sym<misc>"  :subid("140_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P500, "ResizablePMCArray"
     push $P500, ""
@@ -9165,7 +9165,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "assertion"  :subid("141_1304284968.543")
+.sub "assertion"  :subid("141_1304456140.832")
     .param pmc param_502
 .annotate 'line', 162
     .lex "self", param_502
@@ -9177,7 +9177,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__assertion"  :subid("142_1304284968.543")
+.sub "!PREFIX__assertion"  :subid("142_1304456140.832")
     .param pmc param_505
 .annotate 'line', 162
     .lex "self", param_505
@@ -9189,9 +9189,9 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "assertion:sym<?>"  :subid("143_1304284968.543") :method :outer("12_1304284968.543")
+.sub "assertion:sym<?>"  :subid("143_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
-    .const 'Sub' $P512 = "144_1304284968.543" 
+    .const 'Sub' $P512 = "144_1304456140.832" 
     capture_lex $P512
     .local string rx508_tgt
     .local int rx508_pos
@@ -9240,7 +9240,7 @@
     rx508_cur."!mark_push"(0, rx508_pos, $I10)
   # rx subrule "before" subtype=zerowidth negate=
     rx508_cur."!cursor_pos"(rx508_pos)
-    .const 'Sub' $P512 = "144_1304284968.543" 
+    .const 'Sub' $P512 = "144_1304456140.832" 
     capture_lex $P512
     $P10 = rx508_cur."before"($P512)
     unless $P10, rx508_fail
@@ -9283,7 +9283,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block511"  :anon :subid("144_1304284968.543") :method :outer("143_1304284968.543")
+.sub "_block511"  :anon :subid("144_1304456140.832") :method :outer("143_1304456140.832")
 .annotate 'line', 164
     .local string rx513_tgt
     .local int rx513_pos
@@ -9354,7 +9354,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__assertion:sym<?>"  :subid("145_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__assertion:sym<?>"  :subid("145_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P516 = self."!PREFIX__!subrule"("assertion", "?")
     new $P517, "ResizablePMCArray"
@@ -9367,9 +9367,9 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "assertion:sym<!>"  :subid("146_1304284968.543") :method :outer("12_1304284968.543")
+.sub "assertion:sym<!>"  :subid("146_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
-    .const 'Sub' $P523 = "147_1304284968.543" 
+    .const 'Sub' $P523 = "147_1304456140.832" 
     capture_lex $P523
     .local string rx519_tgt
     .local int rx519_pos
@@ -9418,7 +9418,7 @@
     rx519_cur."!mark_push"(0, rx519_pos, $I10)
   # rx subrule "before" subtype=zerowidth negate=
     rx519_cur."!cursor_pos"(rx519_pos)
-    .const 'Sub' $P523 = "147_1304284968.543" 
+    .const 'Sub' $P523 = "147_1304456140.832" 
     capture_lex $P523
     $P10 = rx519_cur."before"($P523)
     unless $P10, rx519_fail
@@ -9461,7 +9461,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block522"  :anon :subid("147_1304284968.543") :method :outer("146_1304284968.543")
+.sub "_block522"  :anon :subid("147_1304456140.832") :method :outer("146_1304456140.832")
 .annotate 'line', 165
     .local string rx524_tgt
     .local int rx524_pos
@@ -9532,7 +9532,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__assertion:sym<!>"  :subid("148_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__assertion:sym<!>"  :subid("148_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P527 = self."!PREFIX__!subrule"("assertion", "!")
     new $P528, "ResizablePMCArray"
@@ -9545,7 +9545,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "assertion:sym<method>"  :subid("149_1304284968.543") :method :outer("12_1304284968.543")
+.sub "assertion:sym<method>"  :subid("149_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx530_tgt
     .local int rx530_pos
@@ -9626,7 +9626,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__assertion:sym<method>"  :subid("150_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__assertion:sym<method>"  :subid("150_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P533 = self."!PREFIX__!subrule"("assertion", ".")
     new $P534, "ResizablePMCArray"
@@ -9638,9 +9638,9 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "assertion:sym<name>"  :subid("151_1304284968.543") :method :outer("12_1304284968.543")
+.sub "assertion:sym<name>"  :subid("151_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
-    .const 'Sub' $P541 = "152_1304284968.543" 
+    .const 'Sub' $P541 = "152_1304456140.832" 
     capture_lex $P541
     .local string rx536_tgt
     .local int rx536_pos
@@ -9697,7 +9697,7 @@
 .annotate 'line', 174
   # rx subrule "before" subtype=zerowidth negate=
     rx536_cur."!cursor_pos"(rx536_pos)
-    .const 'Sub' $P541 = "152_1304284968.543" 
+    .const 'Sub' $P541 = "152_1304456140.832" 
     capture_lex $P541
     $P10 = rx536_cur."before"($P541)
     unless $P10, rx536_fail
@@ -9815,7 +9815,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block540"  :anon :subid("152_1304284968.543") :method :outer("151_1304284968.543")
+.sub "_block540"  :anon :subid("152_1304456140.832") :method :outer("151_1304456140.832")
 .annotate 'line', 174
     .local string rx542_tgt
     .local int rx542_pos
@@ -9886,7 +9886,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__assertion:sym<name>"  :subid("153_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__assertion:sym<name>"  :subid("153_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P545 = self."!PREFIX__!subrule"("identifier", "")
     new $P546, "ResizablePMCArray"
@@ -9898,9 +9898,9 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "assertion:sym<[>"  :subid("154_1304284968.543") :method :outer("12_1304284968.543")
+.sub "assertion:sym<[>"  :subid("154_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
-    .const 'Sub' $P551 = "155_1304284968.543" 
+    .const 'Sub' $P551 = "155_1304456140.832" 
     capture_lex $P551
     .local string rx548_tgt
     .local int rx548_pos
@@ -9940,7 +9940,7 @@
 .annotate 'line', 182
   # rx subrule "before" subtype=zerowidth negate=
     rx548_cur."!cursor_pos"(rx548_pos)
-    .const 'Sub' $P551 = "155_1304284968.543" 
+    .const 'Sub' $P551 = "155_1304456140.832" 
     capture_lex $P551
     $P10 = rx548_cur."before"($P551)
     unless $P10, rx548_fail
@@ -9996,7 +9996,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block550"  :anon :subid("155_1304284968.543") :method :outer("154_1304284968.543")
+.sub "_block550"  :anon :subid("155_1304456140.832") :method :outer("154_1304456140.832")
 .annotate 'line', 182
     .local string rx552_tgt
     .local int rx552_pos
@@ -10091,7 +10091,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__assertion:sym<[>"  :subid("156_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__assertion:sym<[>"  :subid("156_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P558, "ResizablePMCArray"
     push $P558, ""
@@ -10102,9 +10102,9 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "cclass_elem"  :subid("157_1304284968.543") :method :outer("12_1304284968.543")
+.sub "cclass_elem"  :subid("157_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
-    .const 'Sub' $P569 = "158_1304284968.543" 
+    .const 'Sub' $P569 = "158_1304456140.832" 
     capture_lex $P569
     .local string rx560_tgt
     .local int rx560_pos
@@ -10220,7 +10220,7 @@
 .annotate 'line', 188
   # rx subrule $P569 subtype=capture negate=
     rx560_cur."!cursor_pos"(rx560_pos)
-    .const 'Sub' $P569 = "158_1304284968.543" 
+    .const 'Sub' $P569 = "158_1304456140.832" 
     capture_lex $P569
     $P10 = rx560_cur.$P569()
     unless $P10, rx560_fail
@@ -10327,13 +10327,13 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block568"  :anon :subid("158_1304284968.543") :method :outer("157_1304284968.543")
+.sub "_block568"  :anon :subid("158_1304456140.832") :method :outer("157_1304456140.832")
 .annotate 'line', 188
-    .const 'Sub' $P584 = "161_1304284968.543" 
+    .const 'Sub' $P584 = "161_1304456140.832" 
     capture_lex $P584
-    .const 'Sub' $P579 = "160_1304284968.543" 
+    .const 'Sub' $P579 = "160_1304456140.832" 
     capture_lex $P579
-    .const 'Sub' $P575 = "159_1304284968.543" 
+    .const 'Sub' $P575 = "159_1304456140.832" 
     capture_lex $P575
     .local string rx570_tgt
     .local int rx570_pos
@@ -10409,7 +10409,7 @@
     add rx570_pos, 1
   # rx subrule $P575 subtype=capture negate=
     rx570_cur."!cursor_pos"(rx570_pos)
-    .const 'Sub' $P575 = "159_1304284968.543" 
+    .const 'Sub' $P575 = "159_1304456140.832" 
     capture_lex $P575
     $P10 = rx570_cur.$P575()
     unless $P10, rx570_fail
@@ -10420,7 +10420,7 @@
   alt573_1:
   # rx subrule $P579 subtype=capture negate=
     rx570_cur."!cursor_pos"(rx570_pos)
-    .const 'Sub' $P579 = "160_1304284968.543" 
+    .const 'Sub' $P579 = "160_1304456140.832" 
     capture_lex $P579
     $P10 = rx570_cur.$P579()
     unless $P10, rx570_fail
@@ -10449,7 +10449,7 @@
     add rx570_pos, rx570_off, $I11
   # rx subrule $P584 subtype=capture negate=
     rx570_cur."!cursor_pos"(rx570_pos)
-    .const 'Sub' $P584 = "161_1304284968.543" 
+    .const 'Sub' $P584 = "161_1304456140.832" 
     capture_lex $P584
     $P10 = rx570_cur.$P584()
     unless $P10, rx570_fail
@@ -10489,7 +10489,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block574"  :anon :subid("159_1304284968.543") :method :outer("158_1304284968.543")
+.sub "_block574"  :anon :subid("159_1304456140.832") :method :outer("158_1304456140.832")
 .annotate 'line', 190
     .local string rx576_tgt
     .local int rx576_pos
@@ -10556,7 +10556,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block578"  :anon :subid("160_1304284968.543") :method :outer("158_1304284968.543")
+.sub "_block578"  :anon :subid("160_1304456140.832") :method :outer("158_1304456140.832")
 .annotate 'line', 190
     .local string rx580_tgt
     .local int rx580_pos
@@ -10627,7 +10627,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block583"  :anon :subid("161_1304284968.543") :method :outer("158_1304284968.543")
+.sub "_block583"  :anon :subid("161_1304456140.832") :method :outer("158_1304456140.832")
 .annotate 'line', 190
     .local string rx585_tgt
     .local int rx585_pos
@@ -10694,7 +10694,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__cclass_elem"  :subid("162_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__cclass_elem"  :subid("162_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P592, "ResizablePMCArray"
     push $P592, ""
@@ -10707,9 +10707,9 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "mod_internal"  :subid("163_1304284968.543") :method :outer("12_1304284968.543")
+.sub "mod_internal"  :subid("163_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
-    .const 'Sub' $P599 = "164_1304284968.543" 
+    .const 'Sub' $P599 = "164_1304456140.832" 
     capture_lex $P599
     .local string rx594_tgt
     .local int rx594_pos
@@ -10764,7 +10764,7 @@
   rxquantr597_loop:
   # rx subrule $P599 subtype=capture negate=
     rx594_cur."!cursor_pos"(rx594_pos)
-    .const 'Sub' $P599 = "164_1304284968.543" 
+    .const 'Sub' $P599 = "164_1304456140.832" 
     capture_lex $P599
     $P10 = rx594_cur.$P599()
     unless $P10, rx594_fail
@@ -10884,7 +10884,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "_block598"  :anon :subid("164_1304284968.543") :method :outer("163_1304284968.543")
+.sub "_block598"  :anon :subid("164_1304456140.832") :method :outer("163_1304456140.832")
 .annotate 'line', 200
     .local string rx600_tgt
     .local int rx600_pos
@@ -10967,7 +10967,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__mod_internal"  :subid("165_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__mod_internal"  :subid("165_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     $P607 = self."!PREFIX__!subrule"("mod_ident", ":")
     new $P608, "ResizablePMCArray"
@@ -10980,7 +10980,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "mod_ident"  :subid("166_1304284968.543")
+.sub "mod_ident"  :subid("166_1304456140.832")
     .param pmc param_610
 .annotate 'line', 205
     .lex "self", param_610
@@ -10992,7 +10992,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__mod_ident"  :subid("167_1304284968.543")
+.sub "!PREFIX__mod_ident"  :subid("167_1304456140.832")
     .param pmc param_613
 .annotate 'line', 205
     .lex "self", param_613
@@ -11004,7 +11004,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "mod_ident:sym<ignorecase>"  :subid("168_1304284968.543") :method :outer("12_1304284968.543")
+.sub "mod_ident:sym<ignorecase>"  :subid("168_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx616_tgt
     .local int rx616_pos
@@ -11105,7 +11105,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__mod_ident:sym<ignorecase>"  :subid("169_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__mod_ident:sym<ignorecase>"  :subid("169_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P621, "ResizablePMCArray"
     push $P621, "i"
@@ -11116,7 +11116,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "mod_ident:sym<ratchet>"  :subid("170_1304284968.543") :method :outer("12_1304284968.543")
+.sub "mod_ident:sym<ratchet>"  :subid("170_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx623_tgt
     .local int rx623_pos
@@ -11217,7 +11217,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__mod_ident:sym<ratchet>"  :subid("171_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__mod_ident:sym<ratchet>"  :subid("171_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P628, "ResizablePMCArray"
     push $P628, "r"
@@ -11228,7 +11228,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "mod_ident:sym<sigspace>"  :subid("172_1304284968.543") :method :outer("12_1304284968.543")
+.sub "mod_ident:sym<sigspace>"  :subid("172_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     .local string rx630_tgt
     .local int rx630_pos
@@ -11329,7 +11329,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Grammar"]
-.sub "!PREFIX__mod_ident:sym<sigspace>"  :subid("173_1304284968.543") :method :outer("12_1304284968.543")
+.sub "!PREFIX__mod_ident:sym<sigspace>"  :subid("173_1304456140.832") :method :outer("12_1304456140.832")
 .annotate 'line', 11
     new $P635, "ResizablePMCArray"
     push $P635, "s"
@@ -11340,122 +11340,122 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block636"  :subid("174_1304284968.543") :outer("10_1304284968.543")
+.sub "_block636"  :subid("174_1304456140.832") :outer("10_1304456140.832")
 .annotate 'line', 212
-    .const 'Sub' $P2402 = "255_1304284968.543" 
+    .const 'Sub' $P2402 = "255_1304456140.832" 
     capture_lex $P2402
-    .const 'Sub' $P2384 = "254_1304284968.543" 
+    .const 'Sub' $P2384 = "254_1304456140.832" 
     capture_lex $P2384
-    .const 'Sub' $P2352 = "253_1304284968.543" 
+    .const 'Sub' $P2352 = "253_1304456140.832" 
     capture_lex $P2352
-    .const 'Sub' $P2279 = "249_1304284968.543" 
+    .const 'Sub' $P2279 = "249_1304456140.832" 
     capture_lex $P2279
-    .const 'Sub' $P2201 = "247_1304284968.543" 
+    .const 'Sub' $P2201 = "247_1304456140.832" 
     capture_lex $P2201
-    .const 'Sub' $P2121 = "244_1304284968.543" 
+    .const 'Sub' $P2121 = "244_1304456140.832" 
     capture_lex $P2121
-    .const 'Sub' $P2109 = "243_1304284968.543" 
+    .const 'Sub' $P2109 = "243_1304456140.832" 
     capture_lex $P2109
-    .const 'Sub' $P2084 = "242_1304284968.543" 
+    .const 'Sub' $P2084 = "242_1304456140.832" 
     capture_lex $P2084
-    .const 'Sub' $P2068 = "241_1304284968.543" 
+    .const 'Sub' $P2068 = "241_1304456140.832" 
     capture_lex $P2068
-    .const 'Sub' $P2053 = "240_1304284968.543" 
+    .const 'Sub' $P2053 = "240_1304456140.832" 
     capture_lex $P2053
-    .const 'Sub' $P2039 = "239_1304284968.543" 
+    .const 'Sub' $P2039 = "239_1304456140.832" 
     capture_lex $P2039
-    .const 'Sub' $P2000 = "238_1304284968.543" 
+    .const 'Sub' $P2000 = "238_1304456140.832" 
     capture_lex $P2000
-    .const 'Sub' $P1961 = "237_1304284968.543" 
+    .const 'Sub' $P1961 = "237_1304456140.832" 
     capture_lex $P1961
-    .const 'Sub' $P1944 = "236_1304284968.543" 
+    .const 'Sub' $P1944 = "236_1304456140.832" 
     capture_lex $P1944
-    .const 'Sub' $P1927 = "235_1304284968.543" 
+    .const 'Sub' $P1927 = "235_1304456140.832" 
     capture_lex $P1927
-    .const 'Sub' $P1910 = "234_1304284968.543" 
+    .const 'Sub' $P1910 = "234_1304456140.832" 
     capture_lex $P1910
-    .const 'Sub' $P1893 = "233_1304284968.543" 
+    .const 'Sub' $P1893 = "233_1304456140.832" 
     capture_lex $P1893
-    .const 'Sub' $P1876 = "232_1304284968.543" 
+    .const 'Sub' $P1876 = "232_1304456140.832" 
     capture_lex $P1876
-    .const 'Sub' $P1859 = "231_1304284968.543" 
+    .const 'Sub' $P1859 = "231_1304456140.832" 
     capture_lex $P1859
-    .const 'Sub' $P1842 = "230_1304284968.543" 
+    .const 'Sub' $P1842 = "230_1304456140.832" 
     capture_lex $P1842
-    .const 'Sub' $P1817 = "229_1304284968.543" 
+    .const 'Sub' $P1817 = "229_1304456140.832" 
     capture_lex $P1817
-    .const 'Sub' $P1798 = "228_1304284968.543" 
+    .const 'Sub' $P1798 = "228_1304456140.832" 
     capture_lex $P1798
-    .const 'Sub' $P1736 = "227_1304284968.543" 
+    .const 'Sub' $P1736 = "227_1304456140.832" 
     capture_lex $P1736
-    .const 'Sub' $P1714 = "226_1304284968.543" 
+    .const 'Sub' $P1714 = "226_1304456140.832" 
     capture_lex $P1714
-    .const 'Sub' $P1685 = "225_1304284968.543" 
+    .const 'Sub' $P1685 = "225_1304456140.832" 
     capture_lex $P1685
-    .const 'Sub' $P1677 = "224_1304284968.543" 
+    .const 'Sub' $P1677 = "224_1304456140.832" 
     capture_lex $P1677
-    .const 'Sub' $P1669 = "223_1304284968.543" 
+    .const 'Sub' $P1669 = "223_1304456140.832" 
     capture_lex $P1669
-    .const 'Sub' $P1661 = "222_1304284968.543" 
+    .const 'Sub' $P1661 = "222_1304456140.832" 
     capture_lex $P1661
-    .const 'Sub' $P1648 = "221_1304284968.543" 
+    .const 'Sub' $P1648 = "221_1304456140.832" 
     capture_lex $P1648
-    .const 'Sub' $P1635 = "220_1304284968.543" 
+    .const 'Sub' $P1635 = "220_1304456140.832" 
     capture_lex $P1635
-    .const 'Sub' $P1622 = "219_1304284968.543" 
+    .const 'Sub' $P1622 = "219_1304456140.832" 
     capture_lex $P1622
-    .const 'Sub' $P1609 = "218_1304284968.543" 
+    .const 'Sub' $P1609 = "218_1304456140.832" 
     capture_lex $P1609
-    .const 'Sub' $P1596 = "217_1304284968.543" 
+    .const 'Sub' $P1596 = "217_1304456140.832" 
     capture_lex $P1596
-    .const 'Sub' $P1583 = "216_1304284968.543" 
+    .const 'Sub' $P1583 = "216_1304456140.832" 
     capture_lex $P1583
-    .const 'Sub' $P1570 = "215_1304284968.543" 
+    .const 'Sub' $P1570 = "215_1304456140.832" 
     capture_lex $P1570
-    .const 'Sub' $P1557 = "214_1304284968.543" 
+    .const 'Sub' $P1557 = "214_1304456140.832" 
     capture_lex $P1557
-    .const 'Sub' $P1523 = "213_1304284968.543" 
+    .const 'Sub' $P1523 = "213_1304456140.832" 
     capture_lex $P1523
-    .const 'Sub' $P1489 = "212_1304284968.543" 
+    .const 'Sub' $P1489 = "212_1304456140.832" 
     capture_lex $P1489
-    .const 'Sub' $P1470 = "211_1304284968.543" 
+    .const 'Sub' $P1470 = "211_1304456140.832" 
     capture_lex $P1470
-    .const 'Sub' $P1462 = "210_1304284968.543" 
+    .const 'Sub' $P1462 = "210_1304456140.832" 
     capture_lex $P1462
-    .const 'Sub' $P1441 = "209_1304284968.543" 
+    .const 'Sub' $P1441 = "209_1304456140.832" 
     capture_lex $P1441
-    .const 'Sub' $P1350 = "207_1304284968.543" 
+    .const 'Sub' $P1350 = "207_1304456140.832" 
     capture_lex $P1350
-    .const 'Sub' $P1332 = "206_1304284968.543" 
+    .const 'Sub' $P1332 = "206_1304456140.832" 
     capture_lex $P1332
-    .const 'Sub' $P1316 = "205_1304284968.543" 
+    .const 'Sub' $P1316 = "205_1304456140.832" 
     capture_lex $P1316
-    .const 'Sub' $P1300 = "204_1304284968.543" 
+    .const 'Sub' $P1300 = "204_1304456140.832" 
     capture_lex $P1300
-    .const 'Sub' $P1271 = "203_1304284968.543" 
+    .const 'Sub' $P1271 = "203_1304456140.832" 
     capture_lex $P1271
-    .const 'Sub' $P1220 = "201_1304284968.543" 
+    .const 'Sub' $P1220 = "201_1304456140.832" 
     capture_lex $P1220
-    .const 'Sub' $P1145 = "199_1304284968.543" 
+    .const 'Sub' $P1145 = "199_1304456140.832" 
     capture_lex $P1145
-    .const 'Sub' $P1107 = "197_1304284968.543" 
+    .const 'Sub' $P1107 = "197_1304456140.832" 
     capture_lex $P1107
-    .const 'Sub' $P1041 = "194_1304284968.543" 
+    .const 'Sub' $P1041 = "194_1304456140.832" 
     capture_lex $P1041
-    .const 'Sub' $P1028 = "193_1304284968.543" 
+    .const 'Sub' $P1028 = "193_1304456140.832" 
     capture_lex $P1028
-    .const 'Sub' $P1001 = "191_1304284968.543" 
+    .const 'Sub' $P1001 = "191_1304456140.832" 
     capture_lex $P1001
-    .const 'Sub' $P986 = "190_1304284968.543" 
+    .const 'Sub' $P986 = "190_1304456140.832" 
     capture_lex $P986
-    .const 'Sub' $P945 = "189_1304284968.543" 
+    .const 'Sub' $P945 = "189_1304456140.832" 
     capture_lex $P945
-    .const 'Sub' $P693 = "176_1304284968.543" 
+    .const 'Sub' $P693 = "176_1304456140.832" 
     capture_lex $P693
-    .const 'Sub' $P638 = "175_1304284968.543" 
+    .const 'Sub' $P638 = "175_1304456140.832" 
     capture_lex $P638
 .annotate 'line', 719
-    .const 'Sub' $P638 = "175_1304284968.543" 
+    .const 'Sub' $P638 = "175_1304456140.832" 
     newclosure $P689, $P638
     .lex "buildsub", $P689
 .annotate 'line', 212
@@ -11464,11 +11464,11 @@
     get_who $P692, $P691
     set $P692["buildsub"], $P690
 .annotate 'line', 737
-    .const 'Sub' $P693 = "176_1304284968.543" 
+    .const 'Sub' $P693 = "176_1304456140.832" 
     newclosure $P944, $P693
     .lex "capnames", $P944
 .annotate 'line', 803
-    .const 'Sub' $P945 = "189_1304284968.543" 
+    .const 'Sub' $P945 = "189_1304456140.832" 
     newclosure $P974, $P945
     .lex "backmod", $P974
 .annotate 'line', 212
@@ -11501,7 +11501,7 @@
     find_lex $P2382, "capnames"
     find_lex $P2383, "backmod"
 .annotate 'line', 816
-    .const 'Sub' $P2402 = "255_1304284968.543" 
+    .const 'Sub' $P2402 = "255_1304456140.832" 
     newclosure $P2420, $P2402
 .annotate 'line', 212
     .return ($P2420)
@@ -11511,7 +11511,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "buildsub"  :subid("175_1304284968.543") :outer("174_1304284968.543")
+.sub "buildsub"  :subid("175_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_639
     .param pmc param_640 :optional
     .param int has_param_640 :opt_flag
@@ -11653,19 +11653,19 @@
 
 .namespace ["Regex";"P6Regex";"Actions"]
 .include "except_types.pasm"
-.sub "capnames"  :subid("176_1304284968.543") :outer("174_1304284968.543")
+.sub "capnames"  :subid("176_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_694
     .param pmc param_695
 .annotate 'line', 737
-    .const 'Sub' $P920 = "187_1304284968.543" 
+    .const 'Sub' $P920 = "187_1304456140.832" 
     capture_lex $P920
-    .const 'Sub' $P857 = "184_1304284968.543" 
+    .const 'Sub' $P857 = "184_1304456140.832" 
     capture_lex $P857
-    .const 'Sub' $P815 = "182_1304284968.543" 
+    .const 'Sub' $P815 = "182_1304456140.832" 
     capture_lex $P815
-    .const 'Sub' $P773 = "180_1304284968.543" 
+    .const 'Sub' $P773 = "180_1304456140.832" 
     capture_lex $P773
-    .const 'Sub' $P706 = "177_1304284968.543" 
+    .const 'Sub' $P706 = "177_1304456140.832" 
     capture_lex $P706
     .lex "$ast", param_694
     .lex "$count", param_695
@@ -11741,21 +11741,21 @@
     set $S917, $P916
     iseq $I918, $S917, "quant"
     unless $I918, if_915_end
-    .const 'Sub' $P920 = "187_1304284968.543" 
+    .const 'Sub' $P920 = "187_1304456140.832" 
     capture_lex $P920
     $P920()
   if_915_end:
     goto if_852_end
   if_852:
 .annotate 'line', 775
-    .const 'Sub' $P857 = "184_1304284968.543" 
+    .const 'Sub' $P857 = "184_1304456140.832" 
     capture_lex $P857
     $P857()
   if_852_end:
     goto if_805_end
   if_805:
 .annotate 'line', 762
-    .const 'Sub' $P815 = "182_1304284968.543" 
+    .const 'Sub' $P815 = "182_1304456140.832" 
     capture_lex $P815
     $P815()
   if_805_end:
@@ -11778,7 +11778,7 @@
     unless $P767, loop802_done
     shift $P771, $P767
   loop802_redo:
-    .const 'Sub' $P773 = "180_1304284968.543" 
+    .const 'Sub' $P773 = "180_1304456140.832" 
     capture_lex $P773
     $P773($P771)
   loop802_next:
@@ -11797,7 +11797,7 @@
     goto if_701_end
   if_701:
 .annotate 'line', 740
-    .const 'Sub' $P706 = "177_1304284968.543" 
+    .const 'Sub' $P706 = "177_1304456140.832" 
     capture_lex $P706
     $P706()
   if_701_end:
@@ -11825,9 +11825,9 @@
 
 .namespace ["Regex";"P6Regex";"Actions"]
 .include "except_types.pasm"
-.sub "_block919"  :anon :subid("187_1304284968.543") :outer("176_1304284968.543")
+.sub "_block919"  :anon :subid("187_1304456140.832") :outer("176_1304456140.832")
 .annotate 'line', 792
-    .const 'Sub' $P931 = "188_1304284968.543" 
+    .const 'Sub' $P931 = "188_1304456140.832" 
     capture_lex $P931
 .annotate 'line', 793
     $P921 = root_new ['parrot';'Hash']
@@ -11862,7 +11862,7 @@
     unless $P926, loop936_done
     shift $P929, $P926
   loop936_redo:
-    .const 'Sub' $P931 = "188_1304284968.543" 
+    .const 'Sub' $P931 = "188_1304456140.832" 
     capture_lex $P931
     $P931($P929)
   loop936_next:
@@ -11894,7 +11894,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block930"  :anon :subid("188_1304284968.543") :outer("187_1304284968.543")
+.sub "_block930"  :anon :subid("188_1304456140.832") :outer("187_1304456140.832")
     .param pmc param_932
 .annotate 'line', 794
     .lex "$_", param_932
@@ -11920,11 +11920,11 @@
 
 .namespace ["Regex";"P6Regex";"Actions"]
 .include "except_types.pasm"
-.sub "_block856"  :anon :subid("184_1304284968.543") :outer("176_1304284968.543")
+.sub "_block856"  :anon :subid("184_1304456140.832") :outer("176_1304456140.832")
 .annotate 'line', 775
-    .const 'Sub' $P897 = "186_1304284968.543" 
+    .const 'Sub' $P897 = "186_1304456140.832" 
     capture_lex $P897
-    .const 'Sub' $P869 = "185_1304284968.543" 
+    .const 'Sub' $P869 = "185_1304456140.832" 
     capture_lex $P869
 .annotate 'line', 776
     new $P858, "Undef"
@@ -11965,7 +11965,7 @@
     unless $P864, loop885_done
     shift $P867, $P864
   loop885_redo:
-    .const 'Sub' $P869 = "185_1304284968.543" 
+    .const 'Sub' $P869 = "185_1304456140.832" 
     capture_lex $P869
     $P869($P867)
   loop885_next:
@@ -12010,7 +12010,7 @@
     unless $P892, loop910_done
     shift $P895, $P892
   loop910_redo:
-    .const 'Sub' $P897 = "186_1304284968.543" 
+    .const 'Sub' $P897 = "186_1304456140.832" 
     capture_lex $P897
     $P897($P895)
   loop910_next:
@@ -12042,7 +12042,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block868"  :anon :subid("185_1304284968.543") :outer("184_1304284968.543")
+.sub "_block868"  :anon :subid("185_1304456140.832") :outer("184_1304456140.832")
     .param pmc param_870
 .annotate 'line', 782
     .lex "$_", param_870
@@ -12096,7 +12096,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block896"  :anon :subid("186_1304284968.543") :outer("184_1304284968.543")
+.sub "_block896"  :anon :subid("186_1304456140.832") :outer("184_1304456140.832")
     .param pmc param_898
 .annotate 'line', 787
     .lex "$_", param_898
@@ -12148,9 +12148,9 @@
 
 .namespace ["Regex";"P6Regex";"Actions"]
 .include "except_types.pasm"
-.sub "_block814"  :anon :subid("182_1304284968.543") :outer("176_1304284968.543")
+.sub "_block814"  :anon :subid("182_1304456140.832") :outer("176_1304456140.832")
 .annotate 'line', 762
-    .const 'Sub' $P833 = "183_1304284968.543" 
+    .const 'Sub' $P833 = "183_1304456140.832" 
     capture_lex $P833
 .annotate 'line', 763
     new $P816, "Undef"
@@ -12211,7 +12211,7 @@
     unless $P828, loop849_done
     shift $P831, $P828
   loop849_redo:
-    .const 'Sub' $P833 = "183_1304284968.543" 
+    .const 'Sub' $P833 = "183_1304456140.832" 
     capture_lex $P833
     $P833($P831)
   loop849_next:
@@ -12233,7 +12233,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block832"  :anon :subid("183_1304284968.543") :outer("182_1304284968.543")
+.sub "_block832"  :anon :subid("183_1304456140.832") :outer("182_1304456140.832")
     .param pmc param_834
 .annotate 'line', 770
     .lex "$_", param_834
@@ -12288,10 +12288,10 @@
 
 .namespace ["Regex";"P6Regex";"Actions"]
 .include "except_types.pasm"
-.sub "_block772"  :anon :subid("180_1304284968.543") :outer("176_1304284968.543")
+.sub "_block772"  :anon :subid("180_1304456140.832") :outer("176_1304456140.832")
     .param pmc param_775
 .annotate 'line', 754
-    .const 'Sub' $P784 = "181_1304284968.543" 
+    .const 'Sub' $P784 = "181_1304456140.832" 
     capture_lex $P784
 .annotate 'line', 755
     $P774 = root_new ['parrot';'Hash']
@@ -12323,7 +12323,7 @@
     unless $P779, loop797_done
     shift $P782, $P779
   loop797_redo:
-    .const 'Sub' $P784 = "181_1304284968.543" 
+    .const 'Sub' $P784 = "181_1304456140.832" 
     capture_lex $P784
     $P784($P782)
   loop797_next:
@@ -12355,7 +12355,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block783"  :anon :subid("181_1304284968.543") :outer("180_1304284968.543")
+.sub "_block783"  :anon :subid("181_1304456140.832") :outer("180_1304456140.832")
     .param pmc param_785
 .annotate 'line', 756
     .lex "$_", param_785
@@ -12407,9 +12407,9 @@
 
 .namespace ["Regex";"P6Regex";"Actions"]
 .include "except_types.pasm"
-.sub "_block705"  :anon :subid("177_1304284968.543") :outer("176_1304284968.543")
+.sub "_block705"  :anon :subid("177_1304456140.832") :outer("176_1304456140.832")
 .annotate 'line', 740
-    .const 'Sub' $P715 = "178_1304284968.543" 
+    .const 'Sub' $P715 = "178_1304456140.832" 
     capture_lex $P715
 .annotate 'line', 741
     new $P707, "Undef"
@@ -12436,7 +12436,7 @@
     unless $P709, loop759_done
     shift $P713, $P709
   loop759_redo:
-    .const 'Sub' $P715 = "178_1304284968.543" 
+    .const 'Sub' $P715 = "178_1304456140.832" 
     capture_lex $P715
     $P715($P713)
   loop759_next:
@@ -12465,10 +12465,10 @@
 
 .namespace ["Regex";"P6Regex";"Actions"]
 .include "except_types.pasm"
-.sub "_block714"  :anon :subid("178_1304284968.543") :outer("177_1304284968.543")
+.sub "_block714"  :anon :subid("178_1304456140.832") :outer("177_1304456140.832")
     .param pmc param_717
 .annotate 'line', 742
-    .const 'Sub' $P726 = "179_1304284968.543" 
+    .const 'Sub' $P726 = "179_1304456140.832" 
     capture_lex $P726
 .annotate 'line', 743
     $P716 = root_new ['parrot';'Hash']
@@ -12500,7 +12500,7 @@
     unless $P721, loop746_done
     shift $P724, $P721
   loop746_redo:
-    .const 'Sub' $P726 = "179_1304284968.543" 
+    .const 'Sub' $P726 = "179_1304456140.832" 
     capture_lex $P726
     $P726($P724)
   loop746_next:
@@ -12554,7 +12554,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block725"  :anon :subid("179_1304284968.543") :outer("178_1304284968.543")
+.sub "_block725"  :anon :subid("179_1304456140.832") :outer("178_1304456140.832")
     .param pmc param_727
 .annotate 'line', 744
     .lex "$_", param_727
@@ -12624,7 +12624,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "backmod"  :subid("189_1304284968.543") :outer("174_1304284968.543")
+.sub "backmod"  :subid("189_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_946
     .param pmc param_947
 .annotate 'line', 803
@@ -12718,7 +12718,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "arg"  :subid("190_1304284968.543") :outer("174_1304284968.543")
+.sub "arg"  :subid("190_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_987
     .param pmc param_988
 .annotate 'line', 226
@@ -12769,11 +12769,11 @@
 
 .namespace ["Regex";"P6Regex";"Actions"]
 .include "except_types.pasm"
-.sub "arglist"  :subid("191_1304284968.543") :outer("174_1304284968.543")
+.sub "arglist"  :subid("191_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1002
     .param pmc param_1003
 .annotate 'line', 230
-    .const 'Sub' $P1016 = "192_1304284968.543" 
+    .const 'Sub' $P1016 = "192_1304456140.832" 
     capture_lex $P1016
     .lex "self", param_1002
     .lex "$/", param_1003
@@ -12806,7 +12806,7 @@
     unless $P1010, loop1022_done
     shift $P1014, $P1010
   loop1022_redo:
-    .const 'Sub' $P1016 = "192_1304284968.543" 
+    .const 'Sub' $P1016 = "192_1304456140.832" 
     capture_lex $P1016
     $P1016($P1014)
   loop1022_next:
@@ -12835,7 +12835,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1015"  :anon :subid("192_1304284968.543") :outer("191_1304284968.543")
+.sub "_block1015"  :anon :subid("192_1304456140.832") :outer("191_1304456140.832")
     .param pmc param_1017
 .annotate 'line', 232
     .lex "$_", param_1017
@@ -12856,7 +12856,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "TOP"  :subid("193_1304284968.543") :outer("174_1304284968.543")
+.sub "TOP"  :subid("193_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1029
     .param pmc param_1030
 .annotate 'line', 236
@@ -12902,15 +12902,15 @@
 
 .namespace ["Regex";"P6Regex";"Actions"]
 .include "except_types.pasm"
-.sub "nibbler"  :subid("194_1304284968.543") :outer("174_1304284968.543")
+.sub "nibbler"  :subid("194_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1044
     .param pmc param_1045
     .param pmc param_1046 :optional
     .param int has_param_1046 :opt_flag
 .annotate 'line', 242
-    .const 'Sub' $P1090 = "196_1304284968.543" 
+    .const 'Sub' $P1090 = "196_1304456140.832" 
     capture_lex $P1090
-    .const 'Sub' $P1054 = "195_1304284968.543" 
+    .const 'Sub' $P1054 = "195_1304456140.832" 
     capture_lex $P1054
     new $P1043, ['ExceptionHandler'], .CONTROL_RETURN
     set_label $P1043, control_1042
@@ -12933,7 +12933,7 @@
     set $S1051, $P1050
     iseq $I1052, $S1051, "open"
     unless $I1052, if_1049_end
-    .const 'Sub' $P1054 = "195_1304284968.543" 
+    .const 'Sub' $P1054 = "195_1304456140.832" 
     capture_lex $P1054
     $P1054()
   if_1049_end:
@@ -13010,7 +13010,7 @@
     unless $P1084, loop1096_done
     shift $P1088, $P1084
   loop1096_redo:
-    .const 'Sub' $P1090 = "196_1304284968.543" 
+    .const 'Sub' $P1090 = "196_1304456140.832" 
     capture_lex $P1090
     $P1090($P1088)
   loop1096_next:
@@ -13046,7 +13046,7 @@
 
 .namespace ["Regex";"P6Regex";"Actions"]
 .include "except_types.pasm"
-.sub "_block1053"  :anon :subid("195_1304284968.543") :outer("194_1304284968.543")
+.sub "_block1053"  :anon :subid("195_1304456140.832") :outer("194_1304456140.832")
 .annotate 'line', 244
     $P1055 = root_new ['parrot';'Hash']
     .lex "%old", $P1055
@@ -13099,7 +13099,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1089"  :anon :subid("196_1304284968.543") :outer("194_1304284968.543")
+.sub "_block1089"  :anon :subid("196_1304456140.832") :outer("194_1304456140.832")
     .param pmc param_1091
 .annotate 'line', 254
     .lex "$_", param_1091
@@ -13123,11 +13123,11 @@
 
 .namespace ["Regex";"P6Regex";"Actions"]
 .include "except_types.pasm"
-.sub "termconj"  :subid("197_1304284968.543") :outer("174_1304284968.543")
+.sub "termconj"  :subid("197_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1108
     .param pmc param_1109
 .annotate 'line', 264
-    .const 'Sub' $P1129 = "198_1304284968.543" 
+    .const 'Sub' $P1129 = "198_1304456140.832" 
     capture_lex $P1129
     .lex "self", param_1108
     .lex "$/", param_1109
@@ -13200,7 +13200,7 @@
     unless $P1123, loop1135_done
     shift $P1127, $P1123
   loop1135_redo:
-    .const 'Sub' $P1129 = "198_1304284968.543" 
+    .const 'Sub' $P1129 = "198_1304456140.832" 
     capture_lex $P1129
     $P1129($P1127)
   loop1135_next:
@@ -13230,7 +13230,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1128"  :anon :subid("198_1304284968.543") :outer("197_1304284968.543")
+.sub "_block1128"  :anon :subid("198_1304456140.832") :outer("197_1304456140.832")
     .param pmc param_1130
 .annotate 'line', 268
     .lex "$_", param_1130
@@ -13254,11 +13254,11 @@
 
 .namespace ["Regex";"P6Regex";"Actions"]
 .include "except_types.pasm"
-.sub "termish"  :subid("199_1304284968.543") :outer("174_1304284968.543")
+.sub "termish"  :subid("199_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1146
     .param pmc param_1147
 .annotate 'line', 278
-    .const 'Sub' $P1163 = "200_1304284968.543" 
+    .const 'Sub' $P1163 = "200_1304456140.832" 
     capture_lex $P1163
     .lex "self", param_1146
     .lex "$/", param_1147
@@ -13303,7 +13303,7 @@
     unless $P1157, loop1214_done
     shift $P1161, $P1157
   loop1214_redo:
-    .const 'Sub' $P1163 = "200_1304284968.543" 
+    .const 'Sub' $P1163 = "200_1304456140.832" 
     capture_lex $P1163
     $P1163($P1161)
   loop1214_next:
@@ -13332,7 +13332,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1162"  :anon :subid("200_1304284968.543") :outer("199_1304284968.543")
+.sub "_block1162"  :anon :subid("200_1304456140.832") :outer("199_1304456140.832")
     .param pmc param_1165
 .annotate 'line', 282
     new $P1164, "Undef"
@@ -13491,11 +13491,11 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "quantified_atom"  :subid("201_1304284968.543") :outer("174_1304284968.543")
+.sub "quantified_atom"  :subid("201_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1221
     .param pmc param_1222
 .annotate 'line', 299
-    .const 'Sub' $P1231 = "202_1304284968.543" 
+    .const 'Sub' $P1231 = "202_1304456140.832" 
     capture_lex $P1231
     .lex "self", param_1221
     .lex "$/", param_1222
@@ -13557,7 +13557,7 @@
     goto if_1227_end
   if_1227:
 .annotate 'line', 301
-    .const 'Sub' $P1231 = "202_1304284968.543" 
+    .const 'Sub' $P1231 = "202_1304456140.832" 
     capture_lex $P1231
     $P1231()
   if_1227_end:
@@ -13622,7 +13622,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1230"  :anon :subid("202_1304284968.543") :outer("201_1304284968.543")
+.sub "_block1230"  :anon :subid("202_1304456140.832") :outer("201_1304456140.832")
 .annotate 'line', 303
     new $P1232, "Undef"
     .lex "$qast", $P1232
@@ -13679,7 +13679,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "atom"  :subid("203_1304284968.543") :outer("174_1304284968.543")
+.sub "atom"  :subid("203_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1272
     .param pmc param_1273
 .annotate 'line', 314
@@ -13771,7 +13771,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "quantifier:sym<*>"  :subid("204_1304284968.543") :outer("174_1304284968.543")
+.sub "quantifier:sym<*>"  :subid("204_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1301
     .param pmc param_1302
 .annotate 'line', 324
@@ -13814,7 +13814,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "quantifier:sym<+>"  :subid("205_1304284968.543") :outer("174_1304284968.543")
+.sub "quantifier:sym<+>"  :subid("205_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1317
     .param pmc param_1318
 .annotate 'line', 329
@@ -13857,7 +13857,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "quantifier:sym<?>"  :subid("206_1304284968.543") :outer("174_1304284968.543")
+.sub "quantifier:sym<?>"  :subid("206_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1333
     .param pmc param_1334
 .annotate 'line', 334
@@ -13907,11 +13907,11 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "quantifier:sym<**>"  :subid("207_1304284968.543") :outer("174_1304284968.543")
+.sub "quantifier:sym<**>"  :subid("207_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1351
     .param pmc param_1352
 .annotate 'line', 340
-    .const 'Sub' $P1369 = "208_1304284968.543" 
+    .const 'Sub' $P1369 = "208_1304456140.832" 
     capture_lex $P1369
     .lex "self", param_1351
     .lex "$/", param_1352
@@ -14071,7 +14071,7 @@
     goto if_1365_end
   if_1365:
 .annotate 'line', 343
-    .const 'Sub' $P1369 = "208_1304284968.543" 
+    .const 'Sub' $P1369 = "208_1304456140.832" 
     capture_lex $P1369
     $P1369()
   if_1365_end:
@@ -14099,7 +14099,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block1368"  :anon :subid("208_1304284968.543") :outer("207_1304284968.543")
+.sub "_block1368"  :anon :subid("208_1304456140.832") :outer("207_1304456140.832")
 .annotate 'line', 344
     new $P1370, "Undef"
     .lex "$ast", $P1370
@@ -14167,7 +14167,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<ws>"  :subid("209_1304284968.543") :outer("174_1304284968.543")
+.sub "metachar:sym<ws>"  :subid("209_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1442
     .param pmc param_1443
 .annotate 'line', 369
@@ -14224,7 +14224,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<[ ]>"  :subid("210_1304284968.543") :outer("174_1304284968.543")
+.sub "metachar:sym<[ ]>"  :subid("210_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1463
     .param pmc param_1464
 .annotate 'line', 378
@@ -14250,7 +14250,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<( )>"  :subid("211_1304284968.543") :outer("174_1304284968.543")
+.sub "metachar:sym<( )>"  :subid("211_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1471
     .param pmc param_1472
 .annotate 'line', 382
@@ -14304,7 +14304,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<'>"  :subid("212_1304284968.543") :outer("174_1304284968.543")
+.sub "metachar:sym<'>"  :subid("212_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1490
     .param pmc param_1491
 .annotate 'line', 389
@@ -14397,7 +14397,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<\">"  :subid("213_1304284968.543") :outer("174_1304284968.543")
+.sub "metachar:sym<\">"  :subid("213_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1524
     .param pmc param_1525
 .annotate 'line', 397
@@ -14490,7 +14490,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<.>"  :subid("214_1304284968.543") :outer("174_1304284968.543")
+.sub "metachar:sym<.>"  :subid("214_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1558
     .param pmc param_1559
 .annotate 'line', 405
@@ -14524,7 +14524,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<^>"  :subid("215_1304284968.543") :outer("174_1304284968.543")
+.sub "metachar:sym<^>"  :subid("215_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1571
     .param pmc param_1572
 .annotate 'line', 410
@@ -14558,7 +14558,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<^^>"  :subid("216_1304284968.543") :outer("174_1304284968.543")
+.sub "metachar:sym<^^>"  :subid("216_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1584
     .param pmc param_1585
 .annotate 'line', 415
@@ -14592,7 +14592,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<$>"  :subid("217_1304284968.543") :outer("174_1304284968.543")
+.sub "metachar:sym<$>"  :subid("217_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1597
     .param pmc param_1598
 .annotate 'line', 420
@@ -14626,7 +14626,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<$$>"  :subid("218_1304284968.543") :outer("174_1304284968.543")
+.sub "metachar:sym<$$>"  :subid("218_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1610
     .param pmc param_1611
 .annotate 'line', 425
@@ -14660,7 +14660,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<:::>"  :subid("219_1304284968.543") :outer("174_1304284968.543")
+.sub "metachar:sym<:::>"  :subid("219_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1623
     .param pmc param_1624
 .annotate 'line', 430
@@ -14694,7 +14694,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<lwb>"  :subid("220_1304284968.543") :outer("174_1304284968.543")
+.sub "metachar:sym<lwb>"  :subid("220_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1636
     .param pmc param_1637
 .annotate 'line', 435
@@ -14728,7 +14728,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<rwb>"  :subid("221_1304284968.543") :outer("174_1304284968.543")
+.sub "metachar:sym<rwb>"  :subid("221_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1649
     .param pmc param_1650
 .annotate 'line', 440
@@ -14762,7 +14762,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<bs>"  :subid("222_1304284968.543") :outer("174_1304284968.543")
+.sub "metachar:sym<bs>"  :subid("222_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1662
     .param pmc param_1663
 .annotate 'line', 445
@@ -14788,7 +14788,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<mod>"  :subid("223_1304284968.543") :outer("174_1304284968.543")
+.sub "metachar:sym<mod>"  :subid("223_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1670
     .param pmc param_1671
 .annotate 'line', 449
@@ -14814,7 +14814,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<assert>"  :subid("224_1304284968.543") :outer("174_1304284968.543")
+.sub "metachar:sym<assert>"  :subid("224_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1678
     .param pmc param_1679
 .annotate 'line', 453
@@ -14840,7 +14840,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<~>"  :subid("225_1304284968.543") :outer("174_1304284968.543")
+.sub "metachar:sym<~>"  :subid("225_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1686
     .param pmc param_1687
 .annotate 'line', 457
@@ -14905,7 +14905,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<{*}>"  :subid("226_1304284968.543") :outer("174_1304284968.543")
+.sub "metachar:sym<{*}>"  :subid("226_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1715
     .param pmc param_1716
 .annotate 'line', 470
@@ -14969,7 +14969,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<var>"  :subid("227_1304284968.543") :outer("174_1304284968.543")
+.sub "metachar:sym<var>"  :subid("227_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1737
     .param pmc param_1738
 .annotate 'line', 477
@@ -15167,7 +15167,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "metachar:sym<PIR>"  :subid("228_1304284968.543") :outer("174_1304284968.543")
+.sub "metachar:sym<PIR>"  :subid("228_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1799
     .param pmc param_1800
 .annotate 'line', 497
@@ -15209,7 +15209,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "backslash:sym<w>"  :subid("229_1304284968.543") :outer("174_1304284968.543")
+.sub "backslash:sym<w>"  :subid("229_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1818
     .param pmc param_1819
 .annotate 'line', 505
@@ -15281,7 +15281,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "backslash:sym<b>"  :subid("230_1304284968.543") :outer("174_1304284968.543")
+.sub "backslash:sym<b>"  :subid("230_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1843
     .param pmc param_1844
 .annotate 'line', 511
@@ -15327,7 +15327,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "backslash:sym<e>"  :subid("231_1304284968.543") :outer("174_1304284968.543")
+.sub "backslash:sym<e>"  :subid("231_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1860
     .param pmc param_1861
 .annotate 'line', 517
@@ -15373,7 +15373,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "backslash:sym<f>"  :subid("232_1304284968.543") :outer("174_1304284968.543")
+.sub "backslash:sym<f>"  :subid("232_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1877
     .param pmc param_1878
 .annotate 'line', 523
@@ -15419,7 +15419,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "backslash:sym<h>"  :subid("233_1304284968.543") :outer("174_1304284968.543")
+.sub "backslash:sym<h>"  :subid("233_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1894
     .param pmc param_1895
 .annotate 'line', 529
@@ -15465,7 +15465,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "backslash:sym<r>"  :subid("234_1304284968.543") :outer("174_1304284968.543")
+.sub "backslash:sym<r>"  :subid("234_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1911
     .param pmc param_1912
 .annotate 'line', 535
@@ -15511,7 +15511,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "backslash:sym<t>"  :subid("235_1304284968.543") :outer("174_1304284968.543")
+.sub "backslash:sym<t>"  :subid("235_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1928
     .param pmc param_1929
 .annotate 'line', 541
@@ -15557,7 +15557,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "backslash:sym<v>"  :subid("236_1304284968.543") :outer("174_1304284968.543")
+.sub "backslash:sym<v>"  :subid("236_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1945
     .param pmc param_1946
 .annotate 'line', 547
@@ -15603,7 +15603,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "backslash:sym<o>"  :subid("237_1304284968.543") :outer("174_1304284968.543")
+.sub "backslash:sym<o>"  :subid("237_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_1962
     .param pmc param_1963
 .annotate 'line', 554
@@ -15702,7 +15702,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "backslash:sym<x>"  :subid("238_1304284968.543") :outer("174_1304284968.543")
+.sub "backslash:sym<x>"  :subid("238_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_2001
     .param pmc param_2002
 .annotate 'line', 563
@@ -15801,7 +15801,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "backslash:sym<c>"  :subid("239_1304284968.543") :outer("174_1304284968.543")
+.sub "backslash:sym<c>"  :subid("239_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_2040
     .param pmc param_2041
 .annotate 'line', 572
@@ -15836,7 +15836,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "backslash:sym<misc>"  :subid("240_1304284968.543") :outer("174_1304284968.543")
+.sub "backslash:sym<misc>"  :subid("240_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_2054
     .param pmc param_2055
 .annotate 'line', 576
@@ -15875,7 +15875,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "assertion:sym<?>"  :subid("241_1304284968.543") :outer("174_1304284968.543")
+.sub "assertion:sym<?>"  :subid("241_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_2069
     .param pmc param_2070
 .annotate 'line', 582
@@ -15938,7 +15938,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "assertion:sym<!>"  :subid("242_1304284968.543") :outer("174_1304284968.543")
+.sub "assertion:sym<!>"  :subid("242_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_2085
     .param pmc param_2086
 .annotate 'line', 592
@@ -16021,7 +16021,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "assertion:sym<method>"  :subid("243_1304284968.543") :outer("174_1304284968.543")
+.sub "assertion:sym<method>"  :subid("243_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_2110
     .param pmc param_2111
 .annotate 'line', 605
@@ -16068,13 +16068,13 @@
 
 .namespace ["Regex";"P6Regex";"Actions"]
 .include "except_types.pasm"
-.sub "assertion:sym<name>"  :subid("244_1304284968.543") :outer("174_1304284968.543")
+.sub "assertion:sym<name>"  :subid("244_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_2122
     .param pmc param_2123
 .annotate 'line', 612
-    .const 'Sub' $P2190 = "246_1304284968.543" 
+    .const 'Sub' $P2190 = "246_1304456140.832" 
     capture_lex $P2190
-    .const 'Sub' $P2146 = "245_1304284968.543" 
+    .const 'Sub' $P2146 = "245_1304456140.832" 
     capture_lex $P2146
     .lex "self", param_2122
     .lex "$/", param_2123
@@ -16173,7 +16173,7 @@
     unless $P2181, loop2195_done
     shift $P2188, $P2181
   loop2195_redo:
-    .const 'Sub' $P2190 = "246_1304284968.543" 
+    .const 'Sub' $P2190 = "246_1304456140.832" 
     capture_lex $P2190
     $P2190($P2188)
   loop2195_next:
@@ -16216,7 +16216,7 @@
     goto if_2141_end
   if_2141:
 .annotate 'line', 619
-    .const 'Sub' $P2146 = "245_1304284968.543" 
+    .const 'Sub' $P2146 = "245_1304456140.832" 
     capture_lex $P2146
     $P2146()
   if_2141_end:
@@ -16264,7 +16264,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block2189"  :anon :subid("246_1304284968.543") :outer("244_1304284968.543")
+.sub "_block2189"  :anon :subid("246_1304456140.832") :outer("244_1304456140.832")
     .param pmc param_2191
 .annotate 'line', 641
     .lex "$_", param_2191
@@ -16284,7 +16284,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block2145"  :anon :subid("245_1304284968.543") :outer("244_1304284968.543")
+.sub "_block2145"  :anon :subid("245_1304456140.832") :outer("244_1304456140.832")
 .annotate 'line', 620
     new $P2147, "Undef"
     .lex "$rxname", $P2147
@@ -16345,11 +16345,11 @@
 
 .namespace ["Regex";"P6Regex";"Actions"]
 .include "except_types.pasm"
-.sub "assertion:sym<[>"  :subid("247_1304284968.543") :outer("174_1304284968.543")
+.sub "assertion:sym<[>"  :subid("247_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_2202
     .param pmc param_2203
 .annotate 'line', 647
-    .const 'Sub' $P2244 = "248_1304284968.543" 
+    .const 'Sub' $P2244 = "248_1304456140.832" 
     capture_lex $P2244
     .lex "self", param_2202
     .lex "$/", param_2203
@@ -16467,7 +16467,7 @@
     islt $I2242, $N2239, $N2241
     unless $I2242, loop2273_done
   loop2273_redo:
-    .const 'Sub' $P2244 = "248_1304284968.543" 
+    .const 'Sub' $P2244 = "248_1304456140.832" 
     capture_lex $P2244
     $P2244()
   loop2273_next:
@@ -16495,7 +16495,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block2243"  :anon :subid("248_1304284968.543") :outer("247_1304284968.543")
+.sub "_block2243"  :anon :subid("248_1304456140.832") :outer("247_1304456140.832")
 .annotate 'line', 661
     new $P2245, "Undef"
     .lex "$ast", $P2245
@@ -16585,13 +16585,13 @@
 
 .namespace ["Regex";"P6Regex";"Actions"]
 .include "except_types.pasm"
-.sub "cclass_elem"  :subid("249_1304284968.543") :outer("174_1304284968.543")
+.sub "cclass_elem"  :subid("249_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_2280
     .param pmc param_2281
 .annotate 'line', 674
-    .const 'Sub' $P2309 = "251_1304284968.543" 
+    .const 'Sub' $P2309 = "251_1304456140.832" 
     capture_lex $P2309
-    .const 'Sub' $P2290 = "250_1304284968.543" 
+    .const 'Sub' $P2290 = "250_1304456140.832" 
     capture_lex $P2290
     .lex "self", param_2280
     .lex "$/", param_2281
@@ -16639,7 +16639,7 @@
     unless $P2303, loop2334_done
     shift $P2307, $P2303
   loop2334_redo:
-    .const 'Sub' $P2309 = "251_1304284968.543" 
+    .const 'Sub' $P2309 = "251_1304456140.832" 
     capture_lex $P2309
     $P2309($P2307)
   loop2334_next:
@@ -16672,7 +16672,7 @@
     goto if_2286_end
   if_2286:
 .annotate 'line', 677
-    .const 'Sub' $P2290 = "250_1304284968.543" 
+    .const 'Sub' $P2290 = "250_1304456140.832" 
     capture_lex $P2290
     $P2290()
   if_2286_end:
@@ -16707,10 +16707,10 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block2308"  :anon :subid("251_1304284968.543") :outer("249_1304284968.543")
+.sub "_block2308"  :anon :subid("251_1304456140.832") :outer("249_1304456140.832")
     .param pmc param_2310
 .annotate 'line', 681
-    .const 'Sub' $P2316 = "252_1304284968.543" 
+    .const 'Sub' $P2316 = "252_1304456140.832" 
     capture_lex $P2316
     .lex "$_", param_2310
 .annotate 'line', 682
@@ -16742,7 +16742,7 @@
 .annotate 'line', 682
     goto if_2312_end
   if_2312:
-    .const 'Sub' $P2316 = "252_1304284968.543" 
+    .const 'Sub' $P2316 = "252_1304456140.832" 
     capture_lex $P2316
     $P2329 = $P2316()
     set $P2311, $P2329
@@ -16755,7 +16755,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block2315"  :anon :subid("252_1304284968.543") :outer("251_1304284968.543")
+.sub "_block2315"  :anon :subid("252_1304456140.832") :outer("251_1304456140.832")
 .annotate 'line', 683
     new $P2317, "Undef"
     .lex "$a", $P2317
@@ -16827,7 +16827,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "_block2289"  :anon :subid("250_1304284968.543") :outer("249_1304284968.543")
+.sub "_block2289"  :anon :subid("250_1304456140.832") :outer("249_1304456140.832")
 .annotate 'line', 678
     new $P2291, "Undef"
     .lex "$name", $P2291
@@ -16866,7 +16866,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "mod_internal"  :subid("253_1304284968.543") :outer("174_1304284968.543")
+.sub "mod_internal"  :subid("253_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_2353
     .param pmc param_2354
 .annotate 'line', 712
@@ -16963,7 +16963,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "subrule_alias"  :subid("254_1304284968.543") :outer("174_1304284968.543")
+.sub "subrule_alias"  :subid("254_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_2385
     .param pmc param_2386
     .param pmc param_2387
@@ -17023,7 +17023,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Actions"]
-.sub "named_assertion"  :subid("255_1304284968.543") :outer("174_1304284968.543")
+.sub "named_assertion"  :subid("255_1304456140.832") :outer("174_1304456140.832")
     .param pmc param_2403
     .param pmc param_2404
 .annotate 'line', 816
@@ -17079,7 +17079,7 @@
 .HLL "nqp"
 
 .namespace ["Regex";"P6Regex";"Compiler"]
-.sub "_block2421"  :subid("256_1304284968.543") :outer("10_1304284968.543")
+.sub "_block2421"  :subid("256_1304456140.832") :outer("10_1304456140.832")
 .annotate 'line', 825
     .lex "$?PACKAGE", $P2423
     .lex "$?CLASS", $P2424
@@ -17090,9 +17090,9 @@
 .HLL "nqp"
 
 .namespace []
-.sub "_block2451" :load :anon :subid("257_1304284968.543")
+.sub "_block2451" :load :anon :subid("257_1304456140.832")
 .annotate 'line', 1
-    .const 'Sub' $P2453 = "10_1304284968.543" 
+    .const 'Sub' $P2453 = "10_1304456140.832" 
     $P2454 = $P2453()
     .return ($P2454)
 .end
