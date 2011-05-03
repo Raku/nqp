@@ -359,6 +359,7 @@ class HLL::Compiler::SerializationContextBuilder {
     # compiled code isn't available until compilation is complete.
     method pkg_add_method($obj, $meta_method_name, $name, $method_past, $is_dispatcher) {
         # See if we already have our compile-time dummy. If not, create it.
+        my $fixups := PAST::Stmts.new();
         my $dummy;
         if pir::defined($method_past<compile_time_dummy>) {
             $dummy := $method_past<compile_time_dummy>;
@@ -370,6 +371,17 @@ class HLL::Compiler::SerializationContextBuilder {
             if $is_dispatcher {
                 $method_past.pirflags(':instanceof("DispatcherSub")');
                 $dummy := pir::assign__0PP(pir::new__Ps('DispatcherSub'), $stub_code);
+                
+                # The dispatcher will get cloned if more candidates are added in
+                # a subclass; this makes sure that we fix up the clone also.
+                pir::setprop__vPsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone) {
+                    self.add_code($clone);
+                    $fixups.push(PAST::Op.new(
+                        :pirop('assign vPP'),
+                        self.get_slot_past_for_object($clone),
+                        PAST::Val.new( :value(pir::getprop__PsP('PAST', $orig)) )
+                    ));
+                });
             }
             else {
                 $dummy := pir::clone__PP($stub_code);
@@ -388,6 +400,11 @@ class HLL::Compiler::SerializationContextBuilder {
         # For fixup, need to assign the method body we actually compiled
         # onto the one that went into the SC. Deserializing is easier -
         # just the straight meta-method call.
+        $fixups.push(PAST::Op.new(
+            :pirop('assign vPP'),
+            self.get_slot_past_for_object($dummy),
+            PAST::Val.new( :value($method_past) )
+        ));
         my $slot_past := self.get_slot_past_for_object($obj);
         self.add_event(
             :deserialize_past(PAST::Op.new(
@@ -397,11 +414,7 @@ class HLL::Compiler::SerializationContextBuilder {
                 $name,
                 PAST::Val.new( :value($method_past) )
             )),
-            :fixup_past(PAST::Op.new(
-                :pirop('assign vPP'),
-                self.get_slot_past_for_object($dummy),
-                PAST::Val.new( :value($method_past) )
-            )));
+            :fixup_past($fixups));
     }
     
     # Associates a signature with a routine.
