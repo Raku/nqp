@@ -14,10 +14,27 @@ my @files := [
     'rx_goal',
 ];
 
+
+
+sub expand_backslashes($s) {
+    my %expansions;
+    %expansions<n> := "\n";
+    %expansions<r> := "\r";
+    %expansions<e> := "\e";
+    %expansions<t> := "\t";
+    %expansions<f> := "\f";
+    my $expand := sub ($m) {
+        my $e := %expansions{$m[0]};
+        return $e if $e;
+        # TODO: handle \x{...};
+    }
+    subst($s, /\\(<[nretf]>)/, $expand, :global);
+}
+
 sub test_line($line) {
     my @chunks      := match($line, /\T+/, :global);
     my $regex       := ~@chunks[0];
-    my $string      := ~@chunks[1];
+    my $string      := expand_backslashes(~@chunks[1]);
     my $expected    := ~@chunks[2];
     my $description := ~@chunks[3];
 
@@ -80,3 +97,5 @@ for @files -> $fn {
     say("# done with file $fn");
 }
 
+
+# vim: ft=perl6
