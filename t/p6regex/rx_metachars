@@ -80,13 +80,13 @@ $$ \n			\n		y	line beginnings and endings ($$)
 ^ [ <[a..d]>+ | <[b..e]>+ ] $	bcd		y	alternation (|)
 ^ [ <[a..c]>+ | <[b..e]>+ ] $	bcd		y	alternation (|)
 ^ [ <[a..d]>+ | <[c..e]>+ ] $	bcd		y	alternation (|)
-b|			bcd		/Null pattern/	alternation (|) - null right arg illegal
+b|			bcd		/'Null pattern'/	alternation (|) - null right arg illegal
 |b			bcd		y	alternation (|) - null left arg ignored
 # todo :pge<feature>
-|			bcd		/Null pattern/	alternation (|) - null both args illegal
+|			bcd		/'Null pattern'/	alternation (|) - null both args illegal
 \|			|		y	alternation (|) - literal must be escaped
 # todo :pge<feature>
-|			|		/Null pattern/	alternation (|) - literal must be escaped
+|			|		/'Null pattern'/	alternation (|) - literal must be escaped
 # todo :pugs<feature>
 <[a..d]> && <[b..e]>	c		y	conjunction (&&)
 <[a..d]> && <[d..e]>	c		n	conjunction (&&)
@@ -122,29 +122,29 @@ a|&b			a|&b		/rule error/	alternation and conjunction (|&) - parse error
 # todo :pugs<feature> :pge<feature>
  b |  | d		abc		n	null pattern invalid
 # todo :pge<error messages>
-\pabc			pabc		/Obsolete|Unrecognized/	retired metachars (\p)
+\pabc			pabc		/Unrecognized|Unsupported/	retired metachars (\p)
 # todo :pge<error messages>
-\p{InConsonant}		a		/Obsolete|Unrecognized/	retired metachars (\p)
+\p{InConsonant}		a		/Unrecognized|Unsupported/	retired metachars (\p)
 # todo :pge<error messages>
-\Pabc			Pabc		/Obsolete|Unrecognized/	retired metachars (\P)
+\Pabc			Pabc		/Unrecognized|Unsupported/	retired metachars (\P)
 # todo :pge<error messages>
-\P{InConsonant}		a		/Obsolete|Unrecognized/	retired metachars (\P)
+\P{InConsonant}		a		/Unrecognized|Unsupported/	retired metachars (\P)
 # todo :pge<error messages>
-\Labc\E			LabcE		/Obsolete|Unrecognized/	retired metachars (\L...\E)
+\Labc\E			LabcE		/Unrecognized|Unsupported/	retired metachars (\L...\E)
 # todo :pge<error messages>
-\LABC\E			abc		/Obsolete|Unrecognized/	retired metachars (\L...\E)
+\LABC\E			abc		/Unrecognized|Unsupported/	retired metachars (\L...\E)
 # todo :pge<error messages>
-\Uabc\E			UabcE		/Obsolete|Unrecognized/	retired metachars (\U...\E)
+\Uabc\E			UabcE		/Unrecognized|Unsupported/	retired metachars (\U...\E)
 # todo :pge<error messages>
-\Uabc\E			ABC		/Obsolete|Unrecognized/	retired metachars (\U...\E)
+\Uabc\E			ABC		/Unrecognized|Unsupported/	retired metachars (\U...\E)
 # todo :pge<error messages>
-\Qabc\E			QabcE		/Obsolete|Unrecognized/	retired metachars (\Q...\E)
+\Qabc\E			QabcE		/Unrecognized|Unsupported/	retired metachars (\Q...\E)
 # todo :pge<error messages>
-\Qabc d?\E		abc d		/Obsolete|Unrecognized/	retired metachars (\Q...\E)
+\Qabc d?\E		abc d		/Unrecognized|Unsupported/	retired metachars (\Q...\E)
 # todo :pge<error messages>
-\Gabc			Gabc		/Obsolete|Unrecognized/	retired metachars (\G)
+\Gabc			Gabc		/Unrecognized|Unsupported/	retired metachars (\G)
 # todo :pge<error messages>
-\1abc			1abc		/Obsolete|Unrecognized/	retired metachars (\1)
+\1abc			1abc		/Unrecognized|Unsupported/	retired metachars (\1)
 # todo :pugs<feature>
 ^ \s+ $			\x0009\x0020\x00a0\x000a\x000b\x000c\x000d\x0085	y	0-255 whitespace (\s)
 # todo :pugs<feature>

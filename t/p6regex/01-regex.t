@@ -59,7 +59,7 @@ sub test_line($line) {
         CATCH {
             $error := 1;
             if $expected_error {
-                my $m := "$_" ~~ /<$expected_error>/;
+                my $m := "$_" ~~ /:s <$expected_error>/;
                 ok($m, $description);
                 unless $m {
                     say("#      got: $_");
