@@ -484,31 +484,12 @@ class HLL::Compiler {
                 }
             }
         }
-        Q:PIR {
-            .local pmc source, options, self
-            source = find_lex '$s'
-            options = find_lex '%adverbs'
-            self = find_lex 'self'
-
-            .local pmc parsegrammar, parseactions, match
-            parsegrammar = self.'parsegrammar'()
-
-            null parseactions
-            $S0 = options['target']
-            if $S0 == 'parse' goto have_parseactions
-            parseactions = self.'parseactions'()
-          have_parseactions:
-
-            .local int rxtrace
-            rxtrace = options['parsetrace']
-            match = parsegrammar.'parse'(source, 'p'=>0, 'actions'=>parseactions, 'rxtrace'=>rxtrace)
-            unless match goto err_parsefail
-            .return (match)
-
-          err_parsefail:
-            self.'panic'('Unable to parse source')
-            .return (match)
-        };
+        my $grammar := self.parsegrammar;
+        my $actions;
+        $actions    := self.parseactions unless %adverbs<target> eq 'parse';
+        my $match   := $grammar.parse($s, p => 0, actions => $actions, rxtrace => %adverbs<rxtrace>);
+        self.panic('Unable to parse source') unless $match;
+        return $match;
     }
 
     method past($source, *%adverbs) {
