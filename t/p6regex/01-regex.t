@@ -1,4 +1,8 @@
 #! nqp
+
+# for string_to_int
+use NQPHLL;
+
 my @files := [
     'rx_basic',
     'rx_metachars',
@@ -16,19 +20,23 @@ my @files := [
 
 
 
+my %expansions;
+%expansions<n> := "\n";
+%expansions<r> := "\r";
+%expansions<e> := "\e";
+%expansions<t> := "\t";
+%expansions<f> := "\f";
+my $expand_basic := sub ($m) {
+    %expansions{$m[0]};
+}
+
+my $expand_x := sub ($m) {
+    HLL::Actions::string_to_int(~$m[0], 16);
+}
+
 sub expand_backslashes($s) {
-    my %expansions;
-    %expansions<n> := "\n";
-    %expansions<r> := "\r";
-    %expansions<e> := "\e";
-    %expansions<t> := "\t";
-    %expansions<f> := "\f";
-    my $expand := sub ($m) {
-        my $e := %expansions{$m[0]};
-        return $e if $e;
-        # TODO: handle \x{...};
-    }
-    subst($s, /\\(<[nretf]>)/, $expand, :global);
+    my $partial := subst($s, /\\(<[nretf]>)/, $expand_basic, :global);
+    subst($partial, /\\x(<[abcdefABCDEF0123456789]>**4)/, $expand_x, :global);
 }
 
 sub test_line($line) {
