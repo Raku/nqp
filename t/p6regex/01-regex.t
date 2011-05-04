@@ -15,7 +15,8 @@ my @files := [
 #    'rx_lookarounds',
 #    'rx_captures',
 #    'rx_modifiers',
-    'rx_goal',
+# loops:
+#    'rx_goal',
 ];
 
 
@@ -84,6 +85,7 @@ sub test_line($line) {
     }
 }
 
+my $tests := 0;
 for @files -> $fn {
     say("# file: $fn");
     my $contents := slurp('t/p6regex/' ~ $fn);
@@ -100,10 +102,12 @@ for @files -> $fn {
             next if     $l ~~ /^'#'/;
             next unless $l ~~ /\S/;
             test_line($l);
+            $tests := $tests + 1;
         }
     }
     say("# done with file $fn");
 }
+say("plan 1..$tests");
 
 
 # vim: ft=perl6
