@@ -475,32 +475,20 @@ class HLL::Compiler {
     }
 
     method parse($source, *%adverbs) {
+        my $s := $source;
+        if %adverbs<transcode> {
+            for pir::split(' ', %adverbs<transcode>) {
+                try {
+                    $s := pir::trans_encoding__ssi($s,
+                            pir::find_encoding__is($_));
+                }
+            }
+        }
         Q:PIR {
             .local pmc source, options, self
-            source = find_lex '$source'
+            source = find_lex '$s'
             options = find_lex '%adverbs'
             self = find_lex 'self'
-
-            .local string tcode
-            tcode = options['transcode']
-            unless tcode goto transcode_done
-            .local pmc tcode_it
-            $P0 = split ' ', tcode
-            tcode_it = iter $P0
-          tcode_loop:
-            unless tcode_it goto transcode_done
-            tcode = shift tcode_it
-            push_eh tcode_fail
-            $I0 = find_encoding tcode
-            $S0 = source
-            $S0 = trans_encoding $S0, $I0
-            assign source, $S0
-            pop_eh
-            goto transcode_done
-          tcode_fail:
-            pop_eh
-            goto tcode_loop
-          transcode_done:
 
             .local pmc parsegrammar, parseactions, match
             parsegrammar = self.'parsegrammar'()
