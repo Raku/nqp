@@ -34,12 +34,6 @@ This result is used in one of two ways: If an exception is thrown by the
 match, the result must be contained in the exception's message. If the match
 succeeds, then the message must be contained in a dump of the match object.
 
-=item test id
-
-A unique test identifier. This allows us to track TODO/SKIP information in
-*this* file instead of the associated test file, which lets us easily
-share the tests across implementations of perl6's regex engine.
-
 =item description
 
 Description of the test.
