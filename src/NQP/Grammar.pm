@@ -1,5 +1,3 @@
-use NQPP6Regex;
-
 grammar NQP::Grammar is HLL::Grammar {
     method TOP() {
         # Language braids.
@@ -19,7 +17,7 @@ grammar NQP::Grammar is HLL::Grammar {
         # Serialization context builder - keeps track of objects that
         # cross the compile-time/run-time boundary that are associated
         # with this compilation unit.
-        my $*SC := HLL::Compiler::SerializationContextBuilder.new(
+        my $*SC := NQP::SymbolTable.new(
             # XXX Need to hash the source, or something.
             :handle(~pir::time__N()));
 

@@ -76,6 +76,7 @@ P6REGEX_SOURCES = \
   src/Regex/P6Regex/Compiler.pm \
 
 NQP_SOURCES = \
+  src/NQP/SymbolTable.pm \
   src/NQP/Grammar.pm \
   src/NQP/Actions.pm \
   src/NQP/Compiler.pm \
