@@ -424,10 +424,10 @@ core-test: $(NQP_EXE)
 core-test-loud: $(NQP_EXE)
 	prove -r -v --exec ./$(NQP_EXE) t/nqp t/hll
 
-p6regex-test: $(NQP_EXE)
+p6regex-test: ./$(NQP_EXE)
 	prove -r --exec $(NQP_EXE) t/p6regex
 
-p6regex-test-loud: $(NQP_EXE)
+p6regex-test-loud: ./$(NQP_EXE)
 	prove -r -v --exec $(NQP_EXE) t/p6regex
 
 setting-test: $(NQP_EXE) $(SETTING_PBC)
