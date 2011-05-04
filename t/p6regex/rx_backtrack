@@ -1,7 +1,7 @@
 ##   Backtracking control tests
 a* a			bazaar		y	control
 # todo :pge<backtracking>
-a*:a			bazaar		/:a/	basic
+a*:a			bazaar		n	basic
 a*: a			bazaar		n	basic
 ^[a|b]*  aba		abbabbababba	y	control
 ^[a|b]*: aba		abbabbababba	n	outside a group
