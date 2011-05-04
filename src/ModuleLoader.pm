@@ -52,6 +52,7 @@ knowhow ModuleLoader {
     # Niecza. This one will likely evolve towards that, but for 
     # now I just need something that's just good enough for the
     # immediate needs of NQP bootstrapping.
+    my $stub_how := 'KnowHOW';
     sub merge_globals($target, $source) {
         # XXX For now just merge the top level symbols;
         # if there's a conflict then don't dig any deeper.
@@ -69,7 +70,17 @@ knowhow ModuleLoader {
                 # No problemo; a symbol can't conflict with itself.
             }
             else {
-                pir::die("Merging GLOBAL symbols failed: duplicate definition of symbol $sym");
+                my $source_mo := $_.value.HOW;
+                my $source_is_stub := $source_mo.WHAT.HOW.name($source_mo) eq $stub_how;
+                my $target_mo := ($target.WHO){$sym}.HOW;
+                my $target_is_stub := $target_mo.WHAT.HOW.name($target_mo) eq $stub_how;
+                if $source_is_stub && $target_is_stub {
+                    # Leave target as is, and merge the nested symbols.
+                    merge_globals(($target.WHO){$sym}, $_.value);
+                }
+                else {
+                    pir::die("Merging GLOBAL symbols failed: duplicate definition of symbol $sym");
+                }
             }
         }
     }
