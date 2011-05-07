@@ -330,7 +330,6 @@ grammar NQP::Grammar is HLL::Grammar {
 
     rule package_def {
         :my $*PACKAGE;     # The type object for this package.
-        :my %*ATTR-CHECK;  # Attribute names we must confirm exist.
         
         <name>
         [ 'is' 'repr(' <repr=.quote_EXPR> ')' ]?
