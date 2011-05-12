@@ -32,8 +32,10 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar {
         {*} #= open
         [ <.ws> ['||'|'|'|'&&'|'&'] ]?
         <termconj>
-        [ ['||'|'|']
-          [ <termconj> || <.panic: 'Null pattern not allowed'> ]
+        [ 
+            || ['||'|'|'] [ <termconj>
+            || (\W) <.panic: "Unrecognized regex metacharacter (must be quoted to match literally)">
+            || <.panic: 'Null pattern not allowed'> ]
         ]*
     }
 
@@ -45,7 +47,8 @@ grammar Regex::P6Regex::Grammar is HLL::Grammar {
     }
 
     token termish {
-        <noun=.quantified_atom>+
+        || <noun=.quantified_atom>+
+        || (\W) <.panic: "Unrecognized regex metacharacter (must be quoted to match literally)">
     }
 
     token quantified_atom {
