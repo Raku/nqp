@@ -93,6 +93,9 @@ knowhow NQPClassHOW {
         if $!composed {
             pir::die("NQPClassHOW does not support adding parents after being composed.");
         }
+        if $obj =:= $parent {
+            pir::die("Class '$!name' cannot inherit from itself.");
+        }
         for @!parents {
             if $_ =:= $parent {
                 pir::die("Already have " ~ $parent ~ " as a parent class.");
