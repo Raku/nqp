@@ -3,6 +3,7 @@ Makefile
 /parrot_install
 .*.swp
 *.o
+*.so
 *.RES
 *.res
 *.ilk
