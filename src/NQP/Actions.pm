@@ -809,6 +809,12 @@ class NQP::Actions is HLL::Actions {
             # Install it in the package also if needed.
             if $*SCOPE eq 'our' {
                 $*SC.install_package_routine($*PACKAGE, $name, $past);
+            } else {
+                if $past.pirflags() {
+                    $past.pirflags(~$past.pirflags() ~ ":anon");
+                } else {
+                    $past.pirflags(":anon");
+                }
             }
         }
 

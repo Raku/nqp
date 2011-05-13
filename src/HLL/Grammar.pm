@@ -570,7 +570,6 @@ An operator precedence parser.
             here.'!cursor_debug'('START', 'EXPR')
           debug_1:
 
-            .const 'Sub' reduce = 'EXPR_reduce'
             .local string termishrx
             termishrx = 'termish'
 
@@ -679,8 +678,7 @@ An operator precedence parser.
             $P0 = $P0['O']
             opprec = $P0['prec']
             unless opprec > inprec goto reduce_gt_done
-            capture_lex reduce
-            self.reduce(termstack, opstack)
+            self.'EXPR_reduce'(termstack, opstack)
             goto reduce_loop
           reduce_gt_done:
 
@@ -688,8 +686,7 @@ An operator precedence parser.
             # equal precedence, use associativity to decide
             unless inassoc == 'left' goto reduce_done
             # left associative, reduce immediately
-            capture_lex reduce
-            self.reduce(termstack, opstack)
+            self.'EXPR_reduce'(termstack, opstack)
           reduce_done:
 
             push opstack, infix        # The Shift
@@ -699,8 +696,7 @@ An operator precedence parser.
 
           opstack_loop:
             unless opstack goto opstack_done
-            capture_lex reduce
-            self.reduce(termstack, opstack)
+            self.'EXPR_reduce'(termstack, opstack)
             goto opstack_loop
           opstack_done:
 
