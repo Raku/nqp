@@ -87,6 +87,7 @@ CORE_SETTING_SOURCES = \
   src/core/NQPCapture.pm \
   src/core/IO.pm \
   src/core/Regex.pm \
+  src/core/Hash.pm \
   src/core/testing.pm \
 
 CORE_SETTING_NQP = NQPCORE.setting
