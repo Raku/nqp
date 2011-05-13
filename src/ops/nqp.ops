@@ -605,6 +605,7 @@ inline op create_dispatch_and_add_candidates(out PMC, in PMC, in PMC) :base_core
         INTVAL to_add = VTABLE_elements(interp, $3);
         PARROT_DISPATCHERSUB(copy)->dispatchees = VTABLE_clone(interp,
                 PARROT_DISPATCHERSUB($2)->dispatchees);
+        PARROT_GC_WRITE_BARRIER(interp, copy);
         for (i = 0; i < to_add; i++)
             VTABLE_push_pmc(interp, PARROT_DISPATCHERSUB(copy)->dispatchees,
                     VTABLE_get_pmc_keyed_int(interp, $3, i));
@@ -626,8 +627,10 @@ Adds a single new code object to the end of a dispatcher's dispatchee list.
 */
 inline op push_dispatchee(in PMC, in PMC) :base_core {
     if ($1->vtable->base_type == disp_id) {
-        if (PMC_IS_NULL(PARROT_DISPATCHERSUB($1)->dispatchees))
+        if (PMC_IS_NULL(PARROT_DISPATCHERSUB($1)->dispatchees)) {
             PARROT_DISPATCHERSUB($1)->dispatchees = pmc_new(interp, enum_class_ResizablePMCArray);
+            PARROT_GC_WRITE_BARRIER(interp, $1);
+        }
         VTABLE_push_pmc(interp, PARROT_DISPATCHERSUB($1)->dispatchees, $2);
     }
     else
