@@ -327,6 +327,13 @@ grammar NQP::Grammar is HLL::Grammar {
         :my $*PKGDECL := 'native';
         <sym> <package_def>
     }
+    rule package_declarator:sym<stub> {
+        :my $*OUTERPACKAGE := $*PACKAGE;
+        :my $*PKGDECL := 'stub';
+        <sym> <name>
+        'metaclass' <metaclass=.name>
+        '{' '...' '}'
+    }
 
     rule package_def {
         :my $*PACKAGE;     # The type object for this package.

@@ -493,6 +493,30 @@ class NQP::Actions is HLL::Actions {
     method package_declarator:sym<grammar>($/) { make $<package_def>.ast }
     method package_declarator:sym<role>($/)    { make $<package_def>.ast }
     method package_declarator:sym<native>($/)  { make $<package_def>.ast }
+    
+    method package_declarator:sym<stub>($/) {
+        # Construct meta-object with specified metaclass, adding it to the
+        # serialization context for this compilation unit.
+        my $HOW := find_sym($<metaclass><identifier>, $/);
+        my $PACKAGE := $*SC.pkg_create_mo($HOW, :name(~$<name>));
+        
+        # Install it in the current package or current lexpad as needed.
+        if $*SCOPE eq 'our' || $*SCOPE eq '' {
+            $*SC.install_package_symbol($*OUTERPACKAGE, $<name><identifier>, $PACKAGE);
+            if +$<name><identifier> == 1 {
+                $*SC.install_lexical_symbol(@BLOCK[0], $<name><identifier>[0], $PACKAGE);
+            }
+        }
+        elsif $*SCOPE eq 'my' {
+            if +$<name><identifier> != 1 {
+                $<name>.CURSOR.panic("A my scoped package cannot have a multi-part name yet");
+            }
+            $*SC.install_lexical_symbol(@BLOCK[0], $<name><identifier>[0], $PACKAGE);
+        }
+        else {
+            $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
+        }
+    }
 
     method package_def($/) {
         # Get name and meta-object.
