@@ -199,18 +199,20 @@ class NQP::SymbolTable is HLL::Compiler::SerializationContextBuilder {
         )));
     }
     
-    # For methods, we need a "stub" that we'll clone and use for the
-    # compile-time representation. It'll really just complain that it
-    # does that code hasn't been compiled yet. (Need something more
-    # complex to handle roles, but one step at a time...)
-    my $stub_code := sub (*@args, *%named) {
-        pir::die("Cannot run code that has not yet been compiled.");
-    };
-    
     # Adds a method to the meta-object, and stores an event for the action.
     # Note that methods are always subject to fixing up since the actual
     # compiled code isn't available until compilation is complete.
     method pkg_add_method($obj, $meta_method_name, $name, $method_past, $is_dispatcher) {
+        # For methods, we need a "stub" that we'll clone and use for the
+        # compile-time representation. If it ever gets invoked it'll go
+        # and compile the code and run it.
+        # XXX Lexical environment.
+        # XXX Cache compiled output.
+        my $stub_code := sub (*@args, *%named) {
+            my $compiled := PAST::Compiler.compile($method_past);
+            $compiled(|@args, |%named);
+        };
+        
         # See if we already have our compile-time dummy. If not, create it.
         my $fixups := PAST::Stmts.new();
         my $dummy;
