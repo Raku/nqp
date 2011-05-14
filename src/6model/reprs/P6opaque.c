@@ -160,9 +160,21 @@ static P6opaqueNameMap* index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, PM
 static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, REPRP6opaque *repr) {
     STRING *type_str       = Parrot_str_new_constant(interp, "type");
     STRING *box_target_str = Parrot_str_new_constant(interp, "box_target");
-    
+    PMC    *flat_list;
+
+    /*
+     * We have to block GC mark here. Because "repr" is assotiated with some
+     * PMC which is not accessible in this function. And we have to write
+     * barrier this PMC because we are poking inside it guts directly. We
+     * do have WB in caller function, but it can be triggered too late is
+     * any of allocation will cause GC run.
+     *
+     * This is kind of minor evil until after I'll find better solution.
+     */
+    Parrot_block_GC_mark(interp);
+
     /* Create flat list that we'll analyze to determine allocation info. */
-    PMC *flat_list = pmc_new(interp, enum_class_ResizablePMCArray);
+    flat_list = pmc_new(interp, enum_class_ResizablePMCArray);
 
     /* Compute index mapping table and get flat list of attributes. */
     repr->name_to_index_mapping = index_mapping_and_flat_list(interp, WHAT, flat_list);
@@ -255,6 +267,8 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, REPRP6opaque *
         /* Finally, put computed allocation size in place. */
         repr->allocation_size = cur_size;
     }
+
+    Parrot_unblock_GC_mark(interp);
 }
 
 /* Helper for reading an int at the specified offset. */
