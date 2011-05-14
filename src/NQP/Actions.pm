@@ -516,6 +516,8 @@ class NQP::Actions is HLL::Actions {
         else {
             $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
         }
+        
+        make PAST::Stmts.new();
     }
 
     method package_def($/) {
