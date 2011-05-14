@@ -213,7 +213,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, REPRP6opaque *
                     bits = spec.bits;
 
                     /* Is it a target for box/unbox operations? */
-                    if (VTABLE_get_bool(interp, box_target)) {
+                    if (!PMC_IS_NULL(box_target) && VTABLE_get_bool(interp, box_target)) {
                         switch (unboxed_type) {
                         case STORAGE_SPEC_BP_INT:
                             if (repr->unbox_int_offset)
