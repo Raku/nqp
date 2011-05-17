@@ -14,6 +14,11 @@ typedef struct {
     PMC *sc;      /* Serialization context. */
 } SixModelObjectCommonalities;
 
+typedef struct {
+    PMC *class_handle;  /* Class handle */
+    STRING *att_name;      /* Name of the attribute. */
+} ParrotVtableHandlerSlot;
+
 /* S-Tables (short for Shared Table) contains the commonalities shared between
  * a (HOW, REPR) pairing (for example, (HOW for the class Dog, P6Opaque). */
 typedef struct {
@@ -61,6 +66,11 @@ typedef struct {
     /* Parrot-specific set of v-table to method mappings, for overriding
      * of Parrot v-table functions. */
     PMC **parrot_vtable_mapping;
+
+	/**
+	 * Parrot-specific set of v-table to object method mappings */
+	ParrotVtableHandlerSlot *parrot_vtable_handler_mapping;
+
 } STable;
 
 /* A representation is what controls the layout of an object and storage of

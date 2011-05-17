@@ -363,7 +363,21 @@ class NQP::SymbolTable is HLL::Compiler::SerializationContextBuilder {
             self.get_object_sc_ref_past($to_add)
         )));
     }
-    
+
+    method pkg_add_parrot_vtable_handler_mapping($obj, $name, $att_name) {
+        # Do the actual addition on the meta-object immediately.
+        $obj.HOW.add_parrot_vtable_handler_mapping($obj, $name, $att_name);
+
+        # Emit code to add it when deserializing.
+        my $slot_past := self.get_slot_past_for_object($obj);
+        self.add_event(:deserialize_past(PAST::Op.new(
+            :pasttype('callmethod'), :name('add_parrot_vtable_handler_mapping'),
+            PAST::Op.new( :pirop('get_how PP'), $slot_past ),
+            $slot_past,
+			$name, $att_name
+        )));
+    }
+
     # Composes the package, and stores an event for this action.
     method pkg_compose($obj) {
         # Compose.

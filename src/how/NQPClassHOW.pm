@@ -33,7 +33,7 @@ knowhow NQPClassHOW {
 
     # Parrot-specific vtable mapping hash. Maps vtable name to method.
     has %!parrot_vtable_mapping;
-
+	has %!parrot_vtable_handler_mapping;
     ##
     ## Declarative.
     ##
@@ -126,6 +126,15 @@ knowhow NQPClassHOW {
         %!parrot_vtable_mapping{$name} := $meth;
     }
 
+    method add_parrot_vtable_handler_mapping($obj, $name, $att_name) {
+        if pir::defined(%!parrot_vtable_handler_mapping{$name}) {
+            pir::die("Class '" ~ $!name ~
+                "' already has a Parrot v-table handler for '" ~
+                $name ~ "'");
+        }
+        %!parrot_vtable_handler_mapping{$name} := [ $obj, $att_name ];
+    }
+
     method compose($obj) {
         # Incorporate roles. First, instantiate them with the type object
         # for this type (so their $?CLASS is correct). Then delegate to
@@ -166,6 +175,7 @@ knowhow NQPClassHOW {
 
         # Install Parrot v-table mapping.
         self.publish_parrot_vtable_mapping($obj);
+		self.publish_parrot_vtablee_handler_mapping($obj);
 
         $obj
     }
@@ -354,6 +364,20 @@ knowhow NQPClassHOW {
         }
     }
 
+    method publish_parrot_vtablee_handler_mapping($obj) {
+        my %mapping;
+        for @!mro {
+            my %map := $_.HOW.parrot_vtable_handler_mappings($_, :local(1));
+            for %map {
+                unless %mapping{$_.key} {
+                    %mapping{$_.key} := $_.value;
+                }
+            }
+        }
+        if +%mapping {
+            pir::stable_publish_vtable_handler_mapping__vPP($obj, %mapping);
+        }
+    }
     ##
     ## Introspecty
     ##
@@ -392,6 +416,10 @@ knowhow NQPClassHOW {
 
     method parrot_vtable_mappings($obj, :$local!) {
         %!parrot_vtable_mapping
+    }
+
+    method parrot_vtable_handler_mappings($obj, :$local!) {
+        %!parrot_vtable_handler_mapping
     }
 
     ##

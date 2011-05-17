@@ -661,7 +661,14 @@ class NQP::Actions is HLL::Actions {
             ));
             $BLOCK.symbol($name, :scope('lexical') );
         }
+
+        # Apply traits.
         make $past;
+
+        if $<trait> {
+            for $<trait> { $_.ast()($/); }
+        }
+
     }
 
     method routine_declarator:sym<sub>($/) { make $<routine_def>.ast; }
@@ -981,6 +988,17 @@ class NQP::Actions is HLL::Actions {
             make -> $match {
                 $*SC.pkg_add_method($package, 'add_parrot_vtable_mapping', $name, 
                     $match.ast<block_past>, $is_dispatcher);
+            };
+        }
+        elsif $<longname> eq 'parrot_vtable_handler' {
+            # XXX This should be in Parrot-specific module and need a pragma.
+            my $cpast := $<circumfix>[0].ast;
+            $/.CURSOR.panic("Trait 'parrot_vtable_handler' requires constant scalar argument")
+                unless $cpast ~~ PAST::Val;
+            my $name := $cpast.value;
+            my $package := $*PACKAGE;
+            make -> $match {
+                $*SC.pkg_add_parrot_vtable_handler_mapping($package, $name, ~$match<variable>);
             };
         }
         elsif $<longname> eq 'pirflags' {

@@ -404,6 +404,7 @@ grammar NQP::Grammar is HLL::Grammar {
         :my $*IN_DECL := 'variable';
         <variable>
         { $*IN_DECL := 0; }
+        <trait>*
     }
 
     proto token routine_declarator { <...> }

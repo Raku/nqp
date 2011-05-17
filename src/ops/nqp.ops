@@ -726,6 +726,57 @@ inline op stable_publish_vtable_mapping(in PMC, in PMC) :base_core {
 }
 
 /*
+=item publish_vtable_handler_mapping()
+
+Publishes a Parrot v-table handler mapping, which will be hung off the s-table.
+It's stored as an array, so lookups will be speedy.
+
+=cut
+
+*/
+inline op stable_publish_vtable_handler_mapping(in PMC, in PMC) :base_core {
+    if ($1->vtable->base_type == smo_id) {
+        INTVAL i;
+
+        /* Get s-table and iterator over the mapping. */
+        STable *st = STABLE($1);
+        PMC    *it = VTABLE_get_iter(interp, $2);
+
+        /* Toss any exist mapping array; allocate new one. */
+        if (st->parrot_vtable_handler_mapping)
+            mem_sys_free(st->parrot_vtable_handler_mapping);
+        st->parrot_vtable_handler_mapping = mem_allocate_n_zeroed_typed(NUM_VTABLE_FUNCTIONS + PARROT_VTABLE_LOW, ParrotVtableHandlerSlot);
+
+        /* Go through the various mapped names and insert them into the
+         * mapping table. */
+        while (VTABLE_get_bool(interp, it)) {
+            STRING *name   = VTABLE_shift_string(interp, it);
+            char   *c_name = Parrot_str_to_cstring(interp, name);
+            PMC    *slot   = VTABLE_get_pmc_keyed_str(interp, $2, name);
+            INTVAL  idx    = -1;
+            for (i = PARROT_VTABLE_LOW; i < NUM_VTABLE_FUNCTIONS + PARROT_VTABLE_LOW; i++) {
+                if (strcmp(Parrot_vtable_slot_names[i], c_name) == 0) {
+                    idx = i;
+                    break;
+                }
+            }
+            if (idx >= 0) {
+                st->parrot_vtable_handler_mapping[idx].class_handle = VTABLE_get_pmc_keyed_int(interp,slot,0);
+                st->parrot_vtable_handler_mapping[idx].att_name = VTABLE_get_string_keyed_int(interp,slot,1);
+            }
+			else
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "No such Parrot v-table '%Ss'", name);
+        }
+
+        PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC($1));
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use stable_publish_vtable_handler_mapping with a SixModelObject");
+}
+
+/*
 
 =item nqp_get_sc_object()
 
