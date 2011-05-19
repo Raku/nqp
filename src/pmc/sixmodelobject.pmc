@@ -481,12 +481,18 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     VTABLE opcode_t *invoke(void *next) {
         PMC **vt = STABLE(SELF)->parrot_vtable_mapping;
         PMC *meth;
+        ParrotVtableHandlerSlot *vth = STABLE(SELF)->parrot_vtable_handler_mapping;
         if (vt && !PMC_IS_NULL(meth = vt[PARROT_VTABLE_SLOT_INVOKE])) {
             PMC *cur_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             VTABLE_unshift_pmc(interp, cur_ctx, SELF);
             Parrot_pcc_invoke_from_sig_object(interp, meth, cur_ctx);
             return (opcode_t *)next;
         }
+        else if (vth && vth[PARROT_VTABLE_SLOT_INVOKE].class_handle) {
+			PMC *val = VTABLE_get_attr_keyed(interp, SELF, vth[PARROT_VTABLE_SLOT_INVOKE].class_handle,
+			  vth[PARROT_VTABLE_SLOT_INVOKE].att_name);
+			return VTABLE_invoke(interp, val, next);
+		}
         else
             return SUPER(next);
     }
