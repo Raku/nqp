@@ -66,8 +66,14 @@ class NQP::Actions is HLL::Actions {
             $unit.push( self.CTXSAVE() );
         }
 
-        # Need to load the NQP dynops/dympmcs.
-        $unit.loadlibs('nqp_group', 'nqp_ops');
+        # Need to load the NQP dynops/dympmcs, plus any extras requested.
+        my @loadlibs := ['nqp_group', 'nqp_ops'];
+        if %*COMPILING<%?OPTIONS><vmlibs> {
+            for pir::split(',', %*COMPILING<%?OPTIONS><vmlibs>) {
+                @loadlibs.push($_);
+            }
+        }
+        $unit.loadlibs(|@loadlibs);
         
         # Detect if we're the main unit by if we were given any args. If so,
         # register the mainline as a module (so trying to use ourself in the
