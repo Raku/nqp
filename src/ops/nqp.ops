@@ -312,7 +312,7 @@ a native str - the repr is not obligated to do boxing/unboxing for you.
 =cut
 
 */
-inline op repr_bind_attr_num(in PMC, in PMC, in STR, in STR) :base_core {
+inline op repr_bind_attr_str(in PMC, in PMC, in STR, in STR) :base_core {
     if ($1->vtable->base_type == smo_id)
         REPR($1)->bind_attribute_str(interp, REPR_PMC($1), $1, $2, $3, NO_HINT, $4);
     else
