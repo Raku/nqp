@@ -36,8 +36,8 @@ static PMC * instance_of(PARROT_INTERP, PMC *self, PMC *WHAT) {
 /* Checks if a given object is defined (from the point of view of the
  * representation). */
 static INTVAL defined(PARROT_INTERP, PMC *self, PMC *obj) {
-    /* Native types cannot be undefined. */
-    return 1;
+    /* Native types only ever exist as the type object, which is undefined. */
+    return 0;
 }
 
 /* Helper to die because this type doesn't support attributes. */
