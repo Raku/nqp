@@ -567,43 +567,85 @@ static INTVAL hint_for(PARROT_INTERP, PMC *self, PMC *class_handle, STRING *name
 /* Used with boxing. Sets an integer value, for representations that can hold
  * one. */
 static void set_int(PARROT_INTERP, PMC *self, PMC *obj, INTVAL value) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6opaque cannot yet box a native int");
+    P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
+    REPRP6opaque     *repr     = P6O_REPR_STRUCT(self);
+    if (repr->unbox_int_offset) {
+        set_int_at_offset(instance, repr->unbox_int_offset, value);
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "This type cannot box a native integer");
+    }
 }
 
 /* Used with boxing. Gets an integer value, for representations that can
  * hold one. */
 static INTVAL get_int(PARROT_INTERP, PMC *self, PMC *obj) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6opaque cannot yet unbox to a native int");
+    P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
+    REPRP6opaque     *repr     = P6O_REPR_STRUCT(self);
+    if (repr->unbox_int_offset) {
+        return get_int_at_offset(instance, repr->unbox_int_offset);
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "This type cannot unbox to a native integer");
+    }
 }
 
 /* Used with boxing. Sets a floating point value, for representations that can
  * hold one. */
 static void set_num(PARROT_INTERP, PMC *self, PMC *obj, FLOATVAL value) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6opaque cannot yet box a native num");
+    P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
+    REPRP6opaque     *repr     = P6O_REPR_STRUCT(self);
+    if (repr->unbox_num_offset) {
+        set_num_at_offset(instance, repr->unbox_num_offset, value);
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "This type cannot box a native number");
+    }
 }
 
 /* Used with boxing. Gets a floating point value, for representations that can
  * hold one. */
 static FLOATVAL get_num(PARROT_INTERP, PMC *self, PMC *obj) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6opaque cannot yet unbox to a native num");
+    P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
+    REPRP6opaque     *repr     = P6O_REPR_STRUCT(self);
+    if (repr->unbox_num_offset) {
+        return get_num_at_offset(instance, repr->unbox_num_offset);
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "This type cannot unbox to a native number");
+    }
 }
 
 /* Used with boxing. Sets a string value, for representations that can hold
  * one. */
 static void set_str(PARROT_INTERP, PMC *self, PMC *obj, STRING *value) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6opaque cannot yet box a native string");
+    P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
+    REPRP6opaque     *repr     = P6O_REPR_STRUCT(self);
+    if (repr->unbox_str_offset) {
+        set_str_at_offset(instance, repr->unbox_str_offset, value);
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "This type cannot box a native string");
+    }
 }
 
 /* Used with boxing. Gets a string value, for representations that can hold
  * one. */
 static STRING * get_str(PARROT_INTERP, PMC *self, PMC *obj) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6opaque cannot yet unbox to a native string");
+    P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
+    REPRP6opaque     *repr     = P6O_REPR_STRUCT(self);
+    if (repr->unbox_str_offset) {
+        return get_str_at_offset(instance, repr->unbox_str_offset);
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "This type cannot unbox to a native string");
+    }
 }
 
 /* This Parrot-specific addition to the API is used to mark an object. */
