@@ -15,7 +15,6 @@ class HLL::Compiler {
     has $!commandline_prompt;
     has @!cmdoptions;
     has $!usage;
-    has $!version;
     has $!compiler_progname;
     has $!language;
     has %!config;
@@ -63,9 +62,6 @@ class HLL::Compiler {
             %r = box .IGLOBALS_CONFIG_HASH
         };
         %parrot_config := pir::getinterp()[$config_hash_idx];
-        my $version  := %parrot_config<VERSION>;
-        my $revision := %parrot_config<git_describe> // '(unknown)';
-        $!version    := "This compiler is built with NQP, parrot $version, revision $revision";
         %!config     := pir::new('Hash');
     }
     
@@ -575,7 +571,10 @@ class HLL::Compiler {
     }
 
     method version() {
-        pir::say($!version);
+        my $version := %!config<version>;
+        my $parver  := %parrot_config<VERSION>;
+        my $parrev  := %parrot_config<git_describe> // '(unknown)';
+        pir::say("This is $!language version $version built on parrot $parver revision $parrev");
         pir::exit__vi(0);
     }
 
