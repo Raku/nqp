@@ -18,6 +18,7 @@ class HLL::Compiler {
     has $!version;
     has $!compiler_progname;
     has $!language;
+    has %!config;
 
     # This INIT serves as a cumulative "outer context" for code
     # executed in HLL::Compiler's interactive REPL.  It's invoked
@@ -28,6 +29,7 @@ class HLL::Compiler {
     # variables.
     our $interactive_ctx;
     our %interactive_pad;
+    our %parrot_config;
     INIT {
         # Set the context.
         $interactive_ctx := pir::getinterp__P(){'context'};
@@ -60,9 +62,9 @@ class HLL::Compiler {
             .include 'iglobals.pasm'
             %r = box .IGLOBALS_CONFIG_HASH
         };
-        my %config   := pir::getinterp()[$config_hash_idx];
-        my $version  := %config<VERSION>;
-        my $revision := %config<git_describe> // '(unknown)';
+        %parrot_config := pir::getinterp()[$config_hash_idx];
+        my $version  := %parrot_config<VERSION>;
+        my $revision := %parrot_config<git_describe> // '(unknown)';
         $!version    := "This compiler is built with NQP, parrot $version, revision $revision";
     }
     
