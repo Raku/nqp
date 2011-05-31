@@ -1,6 +1,6 @@
 Makefile
 /parrot
-/parrot_install
+/install
 .*.swp
 *.o
 *.so
@@ -40,3 +40,4 @@ src/gen/*.pm
 src/gen/*.setting
 src/stage1
 src/stage2
+config.status
