@@ -66,9 +66,9 @@ MAIN: {
 
     my ($revision_want) = $options{'min_parrot-revision'}
                           || split(' ', slurp("tools/build/PARROT_REVISION"));
-    my $revision_have   = $config{'parrot::git_describe'};
+    my $revision_have   = $config{'parrot::git_describe'} || '';
 
-    if (cmp_rev($revision_have, $revision_want) < 0) {
+    if ($revision_have && cmp_rev($revision_have, $revision_want) < 0) {
         $errors .= "Parrot revision $revision_want required"
                    . " (currently $revision_have)\n";
     }
