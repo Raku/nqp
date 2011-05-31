@@ -86,7 +86,7 @@ END
     }
 
     # Verify the Parrot installation is sufficient for building NQP
-    verify_parrot(%config);
+    verify_install(%config);
 
     # Create the Makefile using the information we just got
     create_makefile(%config);
@@ -113,7 +113,42 @@ END
 }
 
 
-sub verify_parrot {
+sub verify_install {
+    my %config = @_;
+    print "Verifying installation...\n";
+    my $EXE = $config{'parrot::exe'};
+    my $PARROT_BIN_DIR = $config{'parrot::bindir'};
+    my $PARROT_VERSION = $config{'parrot::versiondir'};
+    my $PARROT_LIB_DIR = $config{'parrot::libdir'}.$PARROT_VERSION;
+    my $PARROT_SRC_DIR = $config{'parrot::srcdir'}.$PARROT_VERSION;
+    my $PARROT_TOOLS_DIR = "$PARROT_LIB_DIR/tools";
+    my $PARROT_INCLUDE_DIR = $config{'parrot::includedir'}.$PARROT_VERSION;
+    my @required_files = (
+        "$PARROT_BIN_DIR/parrot",
+        "$PARROT_BIN_DIR/pbc_to_exe$EXE",
+        "$PARROT_BIN_DIR/ops2c$EXE",
+        "$PARROT_TOOLS_DIR/build/pmc2c.pl",
+        "$PARROT_SRC_DIR",
+        "$PARROT_SRC_DIR/pmc",
+        "$PARROT_INCLUDE_DIR",
+        "$PARROT_INCLUDE_DIR/pmc",
+    );
+    my @missing;
+    for my $reqfile (@required_files) {
+        push @missing, "    $reqfile" unless -e $reqfile;
+    }
+    if (@missing) {
+        my $missing = join("\n", @missing);
+        die <<"END";
+
+===SORRY!===
+I'm missing some needed files in the install directory:
+$missing
+(Perhaps you need to use Parrot's "make install-dev" target or
+install the "parrot-devel" package for your system?)
+
+END
+    }
     1;
 }
 
