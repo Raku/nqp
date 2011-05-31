@@ -652,7 +652,7 @@ grammar NQP::Grammar is HLL::Grammar {
     token postfix:sym<++> { <sym>  <O('%autoincrement')> }
     token postfix:sym<--> { <sym>  <O('%autoincrement')> }
 
-    token infix:sym<**>   { <sym>  <O('%exponentiation, :pirop<pow>')> }
+    token infix:sym<**>   { <sym>  <O('%exponentiation, :pirop<pow__NNN>')> }
 
     token prefix:sym<+>   { <sym>  <O('%symbolic_unary, :pirop<set N*>')> }
     token prefix:sym<~>   { <sym>  <O('%symbolic_unary, :pirop<set S*>')> }
