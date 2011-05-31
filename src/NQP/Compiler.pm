@@ -7,6 +7,7 @@ sub MAIN(@ARGS) {
     $nqpcomp.language('nqp');
     $nqpcomp.parsegrammar(NQP::Grammar);
     $nqpcomp.parseactions(NQP::Actions);
+    hll-config($nqpcomp.config);
     
     # Add extra command line options.
     my @clo := $nqpcomp.commandline_options();
