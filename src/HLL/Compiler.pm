@@ -53,7 +53,7 @@ class HLL::Compiler {
         @!stages     := pir::split(' ', 'parse past post pir evalpmc');
         
         # Command options and usage.
-        @!cmdoptions := pir::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v stagestats ll-backtrace');
+        @!cmdoptions := pir::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config stagestats ll-backtrace');
         $!usage := "This compiler is based on HLL::Compler.\n\nOptions:\n";
         for @!cmdoptions {
             $!usage := $!usage ~ "    $_\n";
@@ -66,6 +66,7 @@ class HLL::Compiler {
         my $version  := %parrot_config<VERSION>;
         my $revision := %parrot_config<git_describe> // '(unknown)';
         $!version    := "This compiler is built with NQP, parrot $version, revision $revision";
+        %!config     := pir::new('Hash');
     }
     
     my sub value_type($value) {
@@ -114,6 +115,12 @@ class HLL::Compiler {
         }
         $!language;
     }
+
+    method compiler($name) {
+        pir::compreg__Ps($name);
+    }
+
+    method config() { %!config };
 
     method load_module($name) {
         my $base := pir::join('/', self.parse_name($name));
@@ -311,6 +318,7 @@ class HLL::Compiler {
         }
         self.usage($program-name) if %adverbs<help>;
         self.version              if %adverbs<version>;
+        self.show-config          if %adverbs<show-config>;
 
         Q:PIR {
             .include 'except_severity.pasm'
@@ -568,6 +576,16 @@ class HLL::Compiler {
 
     method version() {
         pir::say($!version);
+        pir::exit__vi(0);
+    }
+
+    method show-config() {
+        for %parrot_config {
+            pir::say('parrot::' ~ $_.key ~ '=' ~ $_.value);
+        }
+        for %!config {
+            pir::say($!language ~ '::' ~ $_.key ~ '=' ~ $_.value);
+        }
         pir::exit__vi(0);
     }
 
