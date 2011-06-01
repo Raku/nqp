@@ -31,7 +31,7 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
 
     VTABLE void mark() {
         /* Delegate to the representation. */
-        REPR(SELF)->gc_mark(interp, REPR_PMC(SELF), SELF);
+        REPR(SELF)->gc_mark(interp, SELF);
     }
 
     VTABLE void destroy() {
@@ -48,7 +48,7 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
         if (st) {
             REPRCommonalities *repr = REPR(_self);
             if (repr)
-                repr->gc_free(interp, REPR_PMC(_self), _self);
+                repr->gc_free(interp, _self);
         }
     }
 
@@ -57,11 +57,11 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     }
 
     VTABLE PMC* get_attr_keyed(PMC *class_handle, STRING *name) {
-        return REPR(SELF)->get_attribute(interp, REPR_PMC(SELF), SELF, class_handle, name, NO_HINT);
+        return REPR(SELF)->get_attribute(interp, SELF, class_handle, name, NO_HINT);
     }
 
     VTABLE void set_attr_keyed(PMC *class_handle, STRING *name, PMC* value) {
-        REPR(SELF)->bind_attribute(interp, REPR_PMC(SELF), SELF, class_handle, name, NO_HINT, value);
+        REPR(SELF)->bind_attribute(interp, SELF, class_handle, name, NO_HINT, value);
     }
     
     /* XXX Hack for Parrot issue which needs invokable on stuff. */

@@ -20,7 +20,7 @@ static void new_type(PARROT_INTERP, PMC *nci) {
     /* We first create a new HOW instance. */
     PMC *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
-    PMC *HOW     = REPR(self)->instance_of(interp, REPR_PMC(self), STABLE(self)->WHAT);
+    PMC *HOW     = REPR(self)->instance_of(interp, STABLE(self)->WHAT);
     
     /* See if we have a representation name; if not default to P6opaque. */
     STRING *repr_name = VTABLE_exists_keyed_str(interp, capture, repr_str) ?
@@ -31,7 +31,7 @@ static void new_type(PARROT_INTERP, PMC *nci) {
      * default to KnowHOWREPR here, since it doesn't know how to actually
      * store attributes, it's just for bootstrapping knowhow's. */
     PMC *repr_to_use = REPR_get_by_name(interp, repr_name);
-    PMC *type_object = REPR_STRUCT(repr_to_use)->type_object_for(interp, repr_to_use, HOW);
+    PMC *type_object = REPR_STRUCT(repr_to_use)->type_object_for(interp, HOW);
     
     /* See if we were given a name; put it into the meta-object if so. */
     STRING *name = VTABLE_exists_keyed_str(interp, capture, name_str) ?
@@ -155,12 +155,12 @@ PMC * SixModelObject_bootstrap_knowhow(PARROT_INTERP, PMC *sc) {
     /* Create our KnowHOW type object. Note we don't have a HOW just yet, so
      * pass in null. */
     PMC *REPR        = REPR_get_by_name(interp, Parrot_str_new_constant(interp, "KnowHOWREPR"));
-    PMC *knowhow_pmc = REPR_STRUCT(REPR)->type_object_for(interp, REPR, PMCNULL);
+    PMC *knowhow_pmc = REPR_STRUCT(REPR)->type_object_for(interp, PMCNULL);
 
     /* We create a KnowHOW instance that can describe itself. This means
      * .HOW.HOW.HOW.HOW etc will always return that, which closes the model
      * up. Also pull out its underlying struct. */
-    PMC *knowhow_how_pmc = REPR_STRUCT(REPR)->instance_of(interp, REPR, knowhow_pmc);
+    PMC *knowhow_how_pmc = REPR_STRUCT(REPR)->instance_of(interp, knowhow_pmc);
     KnowHOWREPRInstance *knowhow_how = (KnowHOWREPRInstance *)PMC_data(knowhow_how_pmc);
 
     /* Need to give the knowhow_how a twiddled STable with a different
@@ -226,8 +226,8 @@ static void attr_new(PARROT_INTERP, PMC *nci) {
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *type    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
     STRING *name    = VTABLE_get_string_keyed_str(interp, capture, name_str);
-    PMC    *self    = REPR(type)->instance_of(interp, REPR_PMC(type), type);
-    REPR(self)->set_str(interp, REPR_PMC(self), self, name);
+    PMC    *self    = REPR(type)->instance_of(interp, type);
+    REPR(self)->set_str(interp, self, name);
     Parrot_pcc_build_call_from_c_args(interp, capture, "P", self);
 }
 
@@ -235,7 +235,7 @@ static void attr_new(PARROT_INTERP, PMC *nci) {
 static void attr_name(PARROT_INTERP, PMC *nci) {
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
-    STRING *name    = REPR(self)->get_str(interp, REPR_PMC(self), self);
+    STRING *name    = REPR(self)->get_str(interp, self);
     Parrot_pcc_build_call_from_c_args(interp, capture, "S", name);
 }
 

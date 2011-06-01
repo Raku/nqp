@@ -175,7 +175,7 @@ representation.
 */
 inline op repr_type_object_for(out PMC, in PMC, in STR) :base_core {
     PMC *REPR = REPR_get_by_name(interp, $3);
-    $1 = REPR_STRUCT(REPR)->type_object_for(interp, REPR, $2);
+    $1 = REPR_STRUCT(REPR)->type_object_for(interp, $2);
 }
 
 /*
@@ -189,7 +189,7 @@ Instantiates a new object based on the given WHAT.
 */
 inline op repr_instance_of(out PMC, in PMC) :base_core {
     if ($2->vtable->base_type == smo_id)
-        $1 = REPR($2)->instance_of(interp, REPR_PMC($2), $2);
+        $1 = REPR($2)->instance_of(interp, $2);
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_instance_of on a SixModelObject");
@@ -206,7 +206,7 @@ Checks the REPRs idea of definedness.
 */
 inline op repr_defined(out INT, in PMC) :base_core {
     if ($2->vtable->base_type == smo_id)
-        $1 = REPR($2)->defined(interp, REPR_PMC($2), $2);
+        $1 = REPR($2)->defined(interp, $2);
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_defined on a SixModelObject");
@@ -224,7 +224,7 @@ a native int - the repr is not obligated to do boxing/unboxing for you.
 */
 inline op repr_get_attr_int(out INT, in PMC, in PMC, in STR) :base_core {
     if ($2->vtable->base_type == smo_id)
-        $1 = REPR($2)->get_attribute_int(interp, REPR_PMC($2), $2, $3, $4, NO_HINT);
+        $1 = REPR($2)->get_attribute_int(interp, $2, $3, $4, NO_HINT);
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_get_attr_int on a SixModelObject");
@@ -242,7 +242,7 @@ a native num - the repr is not obligated to do boxing/unboxing for you.
 */
 inline op repr_get_attr_int(out NUM, in PMC, in PMC, in STR) :base_core {
     if ($2->vtable->base_type == smo_id)
-        $1 = REPR($2)->get_attribute_num(interp, REPR_PMC($2), $2, $3, $4, NO_HINT);
+        $1 = REPR($2)->get_attribute_num(interp, $2, $3, $4, NO_HINT);
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_get_attr_num on a SixModelObject");
@@ -260,7 +260,7 @@ a native str - the repr is not obligated to do boxing/unboxing for you.
 */
 inline op repr_get_attr_str(out STR, in PMC, in PMC, in STR) :base_core {
     if ($2->vtable->base_type == smo_id)
-        $1 = REPR($2)->get_attribute_str(interp, REPR_PMC($2), $2, $3, $4, NO_HINT);
+        $1 = REPR($2)->get_attribute_str(interp, $2, $3, $4, NO_HINT);
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_get_attr_str on a SixModelObject");
@@ -278,7 +278,7 @@ a native int - the repr is not obligated to do boxing/unboxing for you.
 */
 inline op repr_bind_attr_int(in PMC, in PMC, in STR, in INT) :base_core {
     if ($1->vtable->base_type == smo_id)
-        REPR($1)->bind_attribute_int(interp, REPR_PMC($1), $1, $2, $3, NO_HINT, $4);
+        REPR($1)->bind_attribute_int(interp, $1, $2, $3, NO_HINT, $4);
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_int on a SixModelObject");
@@ -296,7 +296,7 @@ a native num - the repr is not obligated to do boxing/unboxing for you.
 */
 inline op repr_bind_attr_num(in PMC, in PMC, in STR, in NUM) :base_core {
     if ($1->vtable->base_type == smo_id)
-        REPR($1)->bind_attribute_num(interp, REPR_PMC($1), $1, $2, $3, NO_HINT, $4);
+        REPR($1)->bind_attribute_num(interp, $1, $2, $3, NO_HINT, $4);
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_num on a SixModelObject");
@@ -314,7 +314,7 @@ a native str - the repr is not obligated to do boxing/unboxing for you.
 */
 inline op repr_bind_attr_str(in PMC, in PMC, in STR, in STR) :base_core {
     if ($1->vtable->base_type == smo_id)
-        REPR($1)->bind_attribute_str(interp, REPR_PMC($1), $1, $2, $3, NO_HINT, $4);
+        REPR($1)->bind_attribute_str(interp, $1, $2, $3, NO_HINT, $4);
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_str on a SixModelObject");
@@ -421,7 +421,7 @@ Tries to unbox a native string using the REPR API.
 */
 inline op repr_unbox_str(out STR, in PMC) :base_core {
     if ($2->vtable->base_type == smo_id)
-        $1 = REPR($2)->get_str(interp, REPR_PMC($2), $2);
+        $1 = REPR($2)->get_str(interp, $2);
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_unbox_str on a SixModelObject");
@@ -438,7 +438,7 @@ Tries to unbox a native integer using the REPR API.
 */
 inline op repr_unbox_int(out INT, in PMC) :base_core {
     if ($2->vtable->base_type == smo_id)
-        $1 = REPR($2)->get_int(interp, REPR_PMC($2), $2);
+        $1 = REPR($2)->get_int(interp, $2);
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_unbox_int on a SixModelObject");
@@ -455,7 +455,7 @@ Tries to unbox a native floating pint number using the REPR API.
 */
 inline op repr_unbox_num(out NUM, in PMC) :base_core {
     if ($2->vtable->base_type == smo_id)
-        $1 = REPR($2)->get_num(interp, REPR_PMC($2), $2);
+        $1 = REPR($2)->get_num(interp, $2);
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_unbox_num on a SixModelObject");
@@ -472,8 +472,8 @@ Box a native string to an instance of the specified type.
 */
 inline op repr_box_str(out PMC, in STR, in PMC) :base_core {
     if ($3->vtable->base_type == smo_id) {
-        $1 = REPR($3)->instance_of(interp, REPR_PMC($3), $3);
-        REPR($1)->set_str(interp, REPR_PMC($1), $1, $2);
+        $1 = REPR($3)->instance_of(interp, $3);
+        REPR($1)->set_str(interp, $1, $2);
     }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -491,8 +491,8 @@ Box a native int to an instance of the specified type.
 */
 inline op repr_box_int(out PMC, in INT, in PMC) :base_core {
     if ($3->vtable->base_type == smo_id) {
-        $1 = REPR($3)->instance_of(interp, REPR_PMC($3), $3);
-        REPR($1)->set_int(interp, REPR_PMC($1), $1, $2);
+        $1 = REPR($3)->instance_of(interp, $3);
+        REPR($1)->set_int(interp, $1, $2);
     }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -510,8 +510,8 @@ Box a native floating point number to an instance of the specified type.
 */
 inline op repr_box_num(out PMC, in NUM, in PMC) :base_core {
     if ($3->vtable->base_type == smo_id) {
-        $1 = REPR($3)->instance_of(interp, REPR_PMC($3), $3);
-        REPR($1)->set_num(interp, REPR_PMC($1), $1, $2);
+        $1 = REPR($3)->instance_of(interp, $3);
+        REPR($1)->set_num(interp, $1, $2);
     }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -956,7 +956,7 @@ unboxed, this will return what sort of primitive type it is.
 */
 inline op repr_get_primitive_type_spec(out INT, in PMC) :base_core {
     if ($2->vtable->base_type == smo_id) {
-        storage_spec ss = REPR($2)->get_storage_spec(interp, REPR_PMC($2));
+        storage_spec ss = REPR($2)->get_storage_spec(interp, STABLE($2));
         $1 = ss.inlineable ? ss.boxed_primitive : STORAGE_SPEC_BP_NONE;
     }
     else {

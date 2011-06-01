@@ -8,6 +8,9 @@
 #include "../sixmodelobject.h"
 #include "P6opaque.h"
 
+/* This representation's function pointer table. */
+static PMC *this_repr;
+
 /* How do we go from type-object to a hash value? For now, we make an integer
  * that is the address of the STable struct, which not being subject to GC will
  * never move, and is unique per type object too. */
@@ -214,7 +217,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
             INTVAL bits         = sizeof(PMC *) * 8;
             if (!PMC_IS_NULL(type)) {
                 /* Get the storage spec of the type and see what it wants. */
-                storage_spec spec = REPR(type)->get_storage_spec(interp, REPR_PMC(type));
+                storage_spec spec = REPR(type)->get_storage_spec(interp, STABLE(type));
                 if (spec.inlineable == STORAGE_SPEC_INLINED) {
                     /* Yes, it's something we'll inline. */
                     unboxed_type = spec.boxed_primitive;
@@ -335,12 +338,12 @@ static INTVAL try_get_slot(PARROT_INTERP, P6opaqueREPRData *repr_data, PMC *clas
 
 /* Creates a new type object of this representation, and associates it with
  * the given HOW. */
-static PMC * type_object_for(PARROT_INTERP, PMC *self, PMC *HOW) {
+static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
     /* Create new object instance. */
     P6opaqueInstance *obj = mem_allocate_zeroed_typed(P6opaqueInstance);
 
     /* Build an STable. */
-    PMC *st_pmc = create_stable(interp, self, HOW);
+    PMC *st_pmc = create_stable(interp, this_repr, HOW);
     STable *st  = STABLE_STRUCT(st_pmc);
     
     /* Create REPR data structure and hand it off the STable. */
@@ -358,7 +361,7 @@ static PMC * type_object_for(PARROT_INTERP, PMC *self, PMC *HOW) {
 }
 
 /* Creates a new instance based on the type object. */
-static PMC * instance_of(PARROT_INTERP, PMC *self, PMC *WHAT) {
+static PMC * instance_of(PARROT_INTERP, PMC *WHAT) {
     P6opaqueInstance *obj;
 
     /* Compute allocation strategy if we've not already done so. */
@@ -382,13 +385,13 @@ static PMC * instance_of(PARROT_INTERP, PMC *self, PMC *WHAT) {
 
 /* Checks if a given object is defined (from the point of view of the
  * representation). */
-static INTVAL defined(PARROT_INTERP, PMC *self, PMC *obj) {
+static INTVAL defined(PARROT_INTERP, PMC *obj) {
     P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
     return instance->spill != NULL;
 }
 
 /* Gets the current value for an attribute. */
-static PMC * get_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
+static PMC * get_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
     P6opaqueREPRData *repr_data = STABLE(obj)->REPR_data;
     INTVAL            slot;
@@ -409,7 +412,7 @@ static PMC * get_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6opaque attributes NYFI 1");
 }
-static INTVAL get_attribute_int(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
+static INTVAL get_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
     P6opaqueREPRData *repr_data = STABLE(obj)->REPR_data;
     INTVAL            slot;
@@ -428,7 +431,7 @@ static INTVAL get_attribute_int(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_h
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6opaque attributes NYF 4I");
 }
-static FLOATVAL get_attribute_num(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
+static FLOATVAL get_attribute_num(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
     P6opaqueREPRData *repr_data = STABLE(obj)->REPR_data;
     INTVAL            slot;
@@ -447,7 +450,7 @@ static FLOATVAL get_attribute_num(PARROT_INTERP, PMC *self, PMC *obj, PMC *class
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6opaque attributes NYFI 2");
 }
-static STRING * get_attribute_str(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
+static STRING * get_attribute_str(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
     P6opaqueREPRData *repr_data = STABLE(obj)->REPR_data;
     INTVAL            slot;
@@ -470,7 +473,7 @@ static STRING * get_attribute_str(PARROT_INTERP, PMC *self, PMC *obj, PMC *class
 }
 
 /* Binds the given value to the specified attribute. */
-static void bind_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
+static void bind_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
     P6opaqueREPRData *repr_data = STABLE(obj)->REPR_data;
     INTVAL            slot;
@@ -491,7 +494,7 @@ static void bind_attribute(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6opaque attributes NYFI 4");
 }
-static void bind_attribute_int(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, INTVAL value) {
+static void bind_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, INTVAL value) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
     P6opaqueREPRData *repr_data = STABLE(obj)->REPR_data;
     INTVAL            slot;
@@ -512,7 +515,7 @@ static void bind_attribute_int(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_ha
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6opaque attributes NYFI 5");
 }
-static void bind_attribute_num(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, FLOATVAL value) {
+static void bind_attribute_num(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, FLOATVAL value) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
     P6opaqueREPRData *repr_data = STABLE(obj)->REPR_data;
     INTVAL            slot;
@@ -533,7 +536,7 @@ static void bind_attribute_num(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_ha
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6opaque attributes NYFI 6");
 }
-static void bind_attribute_str(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, STRING *value) {
+static void bind_attribute_str(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, STRING *value) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
     P6opaqueREPRData *repr_data = STABLE(obj)->REPR_data;
     INTVAL            slot;
@@ -556,13 +559,13 @@ static void bind_attribute_str(PARROT_INTERP, PMC *self, PMC *obj, PMC *class_ha
 }
 
 /* Gets the hint for the given attribute ID. */
-static INTVAL hint_for(PARROT_INTERP, PMC *self, PMC *class_handle, STRING *name) {
+static INTVAL hint_for(PARROT_INTERP, PMC *class_handle, STRING *name) {
     return NO_HINT;
 }
 
 /* Used with boxing. Sets an integer value, for representations that can hold
  * one. */
-static void set_int(PARROT_INTERP, PMC *self, PMC *obj, INTVAL value) {
+static void set_int(PARROT_INTERP, PMC *obj, INTVAL value) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
     P6opaqueREPRData *repr_data = STABLE(obj)->REPR_data;
     if (repr_data->unbox_int_offset) {
@@ -576,7 +579,7 @@ static void set_int(PARROT_INTERP, PMC *self, PMC *obj, INTVAL value) {
 
 /* Used with boxing. Gets an integer value, for representations that can
  * hold one. */
-static INTVAL get_int(PARROT_INTERP, PMC *self, PMC *obj) {
+static INTVAL get_int(PARROT_INTERP, PMC *obj) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
     P6opaqueREPRData *repr_data = STABLE(obj)->REPR_data;
     if (repr_data->unbox_int_offset) {
@@ -590,7 +593,7 @@ static INTVAL get_int(PARROT_INTERP, PMC *self, PMC *obj) {
 
 /* Used with boxing. Sets a floating point value, for representations that can
  * hold one. */
-static void set_num(PARROT_INTERP, PMC *self, PMC *obj, FLOATVAL value) {
+static void set_num(PARROT_INTERP, PMC *obj, FLOATVAL value) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
     P6opaqueREPRData *repr_data = STABLE(obj)->REPR_data;
     if (repr_data->unbox_num_offset) {
@@ -604,7 +607,7 @@ static void set_num(PARROT_INTERP, PMC *self, PMC *obj, FLOATVAL value) {
 
 /* Used with boxing. Gets a floating point value, for representations that can
  * hold one. */
-static FLOATVAL get_num(PARROT_INTERP, PMC *self, PMC *obj) {
+static FLOATVAL get_num(PARROT_INTERP, PMC *obj) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
     P6opaqueREPRData *repr_data = STABLE(obj)->REPR_data;
     if (repr_data->unbox_num_offset) {
@@ -618,7 +621,7 @@ static FLOATVAL get_num(PARROT_INTERP, PMC *self, PMC *obj) {
 
 /* Used with boxing. Sets a string value, for representations that can hold
  * one. */
-static void set_str(PARROT_INTERP, PMC *self, PMC *obj, STRING *value) {
+static void set_str(PARROT_INTERP, PMC *obj, STRING *value) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
     P6opaqueREPRData *repr_data = STABLE(obj)->REPR_data;
     if (repr_data->unbox_str_offset) {
@@ -632,7 +635,7 @@ static void set_str(PARROT_INTERP, PMC *self, PMC *obj, STRING *value) {
 
 /* Used with boxing. Gets a string value, for representations that can hold
  * one. */
-static STRING * get_str(PARROT_INTERP, PMC *self, PMC *obj) {
+static STRING * get_str(PARROT_INTERP, PMC *obj) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
     P6opaqueREPRData *repr_data = STABLE(obj)->REPR_data;
     if (repr_data->unbox_str_offset) {
@@ -645,7 +648,7 @@ static STRING * get_str(PARROT_INTERP, PMC *self, PMC *obj) {
 }
 
 /* This Parrot-specific addition to the API is used to mark an object. */
-static void gc_mark(PARROT_INTERP, PMC *self, PMC *obj) {
+static void gc_mark(PARROT_INTERP, PMC *obj) {
     P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
     
     /* Mark STable and SC. */
@@ -693,7 +696,7 @@ static void gc_mark(PARROT_INTERP, PMC *self, PMC *obj) {
 }
 
 /* This Parrot-specific addition to the API is used to free an object. */
-static void gc_free(PARROT_INTERP, PMC *self, PMC *obj) {
+static void gc_free(PARROT_INTERP, PMC *obj) {
     P6opaqueREPRData *repr_data = STABLE(obj)->REPR_data;
 	if (repr_data->allocation_size)
 		Parrot_gc_free_fixed_size_storage(interp, repr_data->allocation_size, PMC_data(obj));
@@ -725,7 +728,7 @@ static void gc_free_repr(PARROT_INTERP, STable *st) {
 }
 
 /* Gets the storage specification for this representation. */
-static storage_spec get_storage_spec(PARROT_INTERP, PMC *self) {
+static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     storage_spec spec;
     spec.inlineable = STORAGE_SPEC_REFERENCE;
     spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
@@ -734,8 +737,6 @@ static storage_spec get_storage_spec(PARROT_INTERP, PMC *self) {
 
 /* Initializes the P6opaque representation. */
 PMC * P6opaque_initialize(PARROT_INTERP) {
-    PMC *repr_pmc;
-
     /* Allocate and populate the representation function table. */
     REPRCommonalities *repr = mem_allocate_zeroed_typed(REPRCommonalities);
     repr->type_object_for = type_object_for;
@@ -763,5 +764,5 @@ PMC * P6opaque_initialize(PARROT_INTERP) {
     repr->get_storage_spec = get_storage_spec;
 
     /* Wrap it in a PMC. */
-    return wrap_repr(interp, repr);
+    return (this_repr = wrap_repr(interp, repr));
 }
