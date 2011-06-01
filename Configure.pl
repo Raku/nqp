@@ -170,6 +170,7 @@ sub create_makefile {
 
     my $makefile = 'Makefile';
     $maketext =~ s/@([:\w]+)@/$config{$1} || $config{"parrot::$1"}/ge;
+    $^O eq 'MSWin32' && $maketext =~ s|/|\\|g;
     print "\nCreating $makefile ...\n";
     open(my $MAKE, '>', $makefile)
         or die "Unable to write $makefile\n";
