@@ -32,7 +32,7 @@ sub read_parrot_config {
     my %config = ();
     for my $file (@parrot_config_src) {
         no warnings;
-        if (-x $file && open my $PARROT_CONFIG, '-|', "$file --dump") {
+        if (open my $PARROT_CONFIG, '-|', "$file --dump") {
             print "\nReading configuration information from $file ...\n";
             while (<$PARROT_CONFIG>) {
                 if (/(\w+) => '(.*)'/) { $config{"parrot::$1"} = $2 }
