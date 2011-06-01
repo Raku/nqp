@@ -124,7 +124,7 @@ sub verify_install {
     my $PARROT_TOOLS_DIR = "$PARROT_LIB_DIR/tools";
     my $PARROT_INCLUDE_DIR = $config{'parrot::includedir'}.$PARROT_VERSION;
     my @required_files = (
-        "$PARROT_BIN_DIR/parrot",
+        "$PARROT_BIN_DIR/parrot$EXE",
         "$PARROT_BIN_DIR/pbc_to_exe$EXE",
         "$PARROT_BIN_DIR/ops2c$EXE",
         "$PARROT_TOOLS_DIR/build/pmc2c.pl",
