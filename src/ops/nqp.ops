@@ -745,7 +745,7 @@ inline op stable_publish_vtable_handler_mapping(in PMC, in PMC) :base_core {
         /* Toss any exist mapping array; allocate new one. */
         if (st->parrot_vtable_handler_mapping)
             mem_sys_free(st->parrot_vtable_handler_mapping);
-        st->parrot_vtable_handler_mapping = mem_allocate_n_zeroed_typed(NUM_VTABLE_FUNCTIONS + PARROT_VTABLE_LOW, ParrotVtableHandlerSlot);
+        st->parrot_vtable_handler_mapping = mem_allocate_n_zeroed_typed(NUM_VTABLE_FUNCTIONS + PARROT_VTABLE_LOW, AttributeIdentifier);
 
         /* Go through the various mapped names and insert them into the
          * mapping table. */
@@ -762,7 +762,7 @@ inline op stable_publish_vtable_handler_mapping(in PMC, in PMC) :base_core {
             }
             if (idx >= 0) {
                 st->parrot_vtable_handler_mapping[idx].class_handle = VTABLE_get_pmc_keyed_int(interp,slot,0);
-                st->parrot_vtable_handler_mapping[idx].att_name = VTABLE_get_string_keyed_int(interp,slot,1);
+                st->parrot_vtable_handler_mapping[idx].attr_name = VTABLE_get_string_keyed_int(interp,slot,1);
             }
 			else
                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,

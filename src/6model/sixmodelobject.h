@@ -14,10 +14,12 @@ typedef struct {
     PMC *sc;      /* Serialization context. */
 } SixModelObjectCommonalities;
 
+/* This is used to identify an attribute for various types of cache. */
 typedef struct {
-    PMC    *class_handle;  /* Class handle */
-    STRING *att_name;      /* Name of the attribute. */
-} ParrotVtableHandlerSlot;
+    PMC    *class_handle;   /* Class handle */
+    STRING *attr_name;      /* Name of the attribute. */
+    INTVAL  hint;           /* Hint for use in static/gradual typing. */
+} AttributeIdentifier;
 
 /* S-Tables (short for Shared Table) contains the commonalities shared between
  * a (HOW, REPR) pairing (for example, (HOW for the class Dog, P6Opaque). */
@@ -71,7 +73,7 @@ typedef struct {
     PMC **parrot_vtable_mapping;
 
 	/* Parrot-specific set of v-table to object method mappings. */
-	ParrotVtableHandlerSlot *parrot_vtable_handler_mapping;
+	AttributeIdentifier *parrot_vtable_handler_mapping;
 } STable;
 
 /* A representation is what controls the layout of an object and storage of
