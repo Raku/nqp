@@ -998,7 +998,7 @@ inline op nqp_decontainerize(out PMC, in PMC) :base_core {
         if (spec) {
             if (!PMC_IS_NULL(spec->value_slot.class_handle)) {
                 /* Just get slot. */
-                $2 = VTABLE_get_attr_keyed(interp, $2, spec->value_slot.class_handle,
+                $1 = VTABLE_get_attr_keyed(interp, $2, spec->value_slot.class_handle,
                     spec->value_slot.attr_name);
             }
             else {
