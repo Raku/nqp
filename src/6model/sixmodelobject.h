@@ -21,6 +21,13 @@ typedef struct {
     INTVAL  hint;           /* Hint for use in static/gradual typing. */
 } AttributeIdentifier;
 
+/* Language interop information that we hold if the type is declaring a
+ * container of some sort. */
+typedef struct {
+    AttributeIdentifier  value_slot;
+    PMC                 *fetch_method;
+} ContainerSpec;
+
 /* S-Tables (short for Shared Table) contains the commonalities shared between
  * a (HOW, REPR) pairing (for example, (HOW for the class Dog, P6Opaque). */
 typedef struct {
@@ -35,9 +42,6 @@ typedef struct {
 
     /* The type-object. */
     PMC *WHAT;
-    
-    /* The underlying package stash. */
-    PMC *WHO;
 
     /* The method finder. */
     PMC * (*find_method) (PARROT_INTERP, PMC *obj, STRING *name, INTVAL hint);
@@ -67,6 +71,14 @@ typedef struct {
      * type directory based upon this ID. Otherwise you'll create memory
      * leaks for anonymous types, and other such screwups. */
     INTVAL type_cache_id;
+    
+    /* If this is a container, then this contains information needed in
+     * order to fetch the value in it. If not, it'll be null, which can
+     * be taken as a "not a container" indication. */
+    ContainerSpec *container_spec;
+    
+    /* The underlying package stash. */
+    PMC *WHO;
 
     /* Parrot-specific set of v-table to method mappings, for overriding
      * of Parrot v-table functions. */
