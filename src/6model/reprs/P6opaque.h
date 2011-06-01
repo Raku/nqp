@@ -21,16 +21,10 @@ typedef struct {
     PMC *name_map;
 } P6opaqueNameMap;
 
-/* A P6opaque REPR instance carries around both a slot mapping with it.
- * We waste some memory here in that we're storing the REPR pointer
- * table per "instantiation" of the REPR. It's per type rather than per
- * instance, so not so bad, but with another level of indirection we
- * could probably do a bit better. OTOH, it'd be another level of
- * indirection... */
+/* The P6opaque REPR data has the slot mapping, allocation size and
+ * various other bits of info. It hangs off the REPR_data pointer
+ * in the s-table. */
 typedef struct {
-    /* The commonalities shared by all representations. */
-    REPRCommonalities common;
-
     /* The memory allocation size for an object instance. Includes space
      * for the Shared Table pointer, spill hash and then for storing the
      * actual, pre-declared attributes. Note, this is in bytes. */
@@ -61,10 +55,7 @@ typedef struct {
 
     /* Offsets into the object that are elligible for string GC marking. */
     INTVAL *gc_str_mark_offsets;
-} REPRP6opaque;
-
-/* Handy macro for getting the struct out. */
-#define P6O_REPR_STRUCT(p)   ((REPRP6opaque *)PMC_data(p))
+} P6opaqueREPRData;
 
 /* Initializes the P6opaque REPR. */
 PMC * P6opaque_initialize(PARROT_INTERP);

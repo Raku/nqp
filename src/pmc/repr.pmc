@@ -6,15 +6,4 @@
  * a REPR for the purposes of GC, etc. It's up to the REPR to set the
  * PMC up as it wishes. */
 pmclass REPR manual_attrs dynpmc group nqp {
-    VTABLE void mark() {
-        REPRCommonalities *repr = REPR_STRUCT(SELF);
-        if (repr->gc_mark_repr)
-            repr->gc_mark_repr(interp, SELF);
-    }
-
-    VTABLE void destroy() {
-        REPRCommonalities *repr = REPR_STRUCT(SELF);
-        if (repr->gc_free_repr)
-            repr->gc_free_repr(interp, SELF);
-    }
 }

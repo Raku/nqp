@@ -51,6 +51,10 @@ pmclass STable manual_attrs dynpmc group nqp {
         if (!PMC_IS_NULL(st->method_cache))
             Parrot_gc_mark_PMC_alive(interp, st->method_cache);
 
+        /* Give the REPR a chance to mark it's own data. */
+        if (REPR_STRUCT(st->REPR)->gc_mark_repr)
+            REPR_STRUCT(st->REPR)->gc_mark_repr(interp, st);
+            
         /* Mark the v-table cache. */
         for (i = 0; i < st->vtable_length; i++) {
             PMC *entry = st->vtable[i];
@@ -66,8 +70,12 @@ pmclass STable manual_attrs dynpmc group nqp {
     }
 
     VTABLE void destroy() {
-        /* If a v-table was allocated, free that. */
+        /* Give the REPR a chance to destroy it's own data. */
         STable *st = (STable *)PMC_data(SELF);
+        if (REPR_STRUCT(st->REPR)->gc_free_repr)
+            REPR_STRUCT(st->REPR)->gc_free_repr(interp, st);
+    
+        /* If a v-table was allocated, free that. */
         if (st->vtable) {
             mem_sys_free(st->vtable);
             st->vtable = NULL;
