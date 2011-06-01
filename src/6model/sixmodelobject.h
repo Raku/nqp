@@ -15,7 +15,7 @@ typedef struct {
 } SixModelObjectCommonalities;
 
 typedef struct {
-    PMC *class_handle;  /* Class handle */
+    PMC    *class_handle;  /* Class handle */
     STRING *att_name;      /* Name of the attribute. */
 } ParrotVtableHandlerSlot;
 
@@ -24,6 +24,9 @@ typedef struct {
 typedef struct {
     /* The representation. */
     PMC *REPR;
+    
+    /* Any data specific to this type that the REPR wants to keep. */
+    void *REPR_data;
 
     /* The meta-object. */
     PMC *HOW;
@@ -67,10 +70,8 @@ typedef struct {
      * of Parrot v-table functions. */
     PMC **parrot_vtable_mapping;
 
-	/**
-	 * Parrot-specific set of v-table to object method mappings */
+	/* Parrot-specific set of v-table to object method mappings. */
 	ParrotVtableHandlerSlot *parrot_vtable_handler_mapping;
-
 } STable;
 
 /* A representation is what controls the layout of an object and storage of
