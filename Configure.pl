@@ -15,7 +15,8 @@ MAIN: {
 
     my %options;
     GetOptions(\%options, 'help!', 'parrot-config=s', 'prefix=s',
-               'gen-parrot!', 'gen-parrot-option=s@', 'min-parrot-revision=s');
+               'gen-parrot!', 'gen-parrot-option=s@', 'min-parrot-revision=s',
+               'make-install!');
 
     # Print help if it's requested
     if ($options{'help'}) {
@@ -102,13 +103,18 @@ END
         }
     }
 
-    print <<"END";
 
-You can now use '$make' to build NQP.
-After that, you can use '$make test' to run some tests, and
-'$make install' to install NQP.
+    if ($options{'make-install'}) {
+        system_or_die($make);
+        system_or_die($make, 'install');
+        print "\nNQP has been built and installed.\n";
+    }
+    else {
+        print "You can now use '$make' to build NQP.\n";
+        print "After that, '$make test' will run some tests and\n";
+        print "'$make install' will install NQP.\n";
+    }
 
-END
     exit 0;
 }
 
