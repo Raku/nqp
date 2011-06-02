@@ -87,7 +87,7 @@ static INTVAL hint_for(PARROT_INTERP, PMC *class_handle, STRING *name) {
 }
 
 /* Clones the current object; simply copies the value. */
-static PMC * clone(PARROT_INTERP, PMC *to_clone) {
+static PMC * repr_clone(PARROT_INTERP, PMC *to_clone) {
     P6numInstance *obj = mem_allocate_zeroed_typed(P6numInstance);
     obj->common.stable = STABLE_PMC(to_clone);
     obj->value         = ((P6numInstance *)PMC_data(to_clone))->value;
@@ -174,7 +174,7 @@ PMC * P6num_initialize(PARROT_INTERP) {
     repr->bind_attribute_num = bind_attribute_num;
     repr->bind_attribute_str = bind_attribute_str;
     repr->hint_for = hint_for;
-    repr->clone = clone;
+    repr->clone = repr_clone;
     repr->set_int = set_int;
     repr->get_int = get_int;
     repr->set_num = set_num;

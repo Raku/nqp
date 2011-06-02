@@ -97,7 +97,7 @@ static INTVAL hint_for(PARROT_INTERP, PMC *class_handle, STRING *name) {
 }
 
 /* Clone. Clone object body and the attribute storage hash. */
-static PMC * clone(PARROT_INTERP, PMC *to_clone) {
+static PMC * repr_clone(PARROT_INTERP, PMC *to_clone) {
     HashAttrStoreInstance *obj;
 
     /* Allocate and set up object instance. */
@@ -193,7 +193,7 @@ PMC * HashAttrStore_initialize(PARROT_INTERP) {
     repr->bind_attribute_num = bind_attribute_num;
     repr->bind_attribute_str = bind_attribute_str;
     repr->hint_for = hint_for;
-    repr->clone = clone;
+    repr->clone = repr_clone;
     repr->set_int = set_int;
     repr->get_int = get_int;
     repr->set_num = set_num;

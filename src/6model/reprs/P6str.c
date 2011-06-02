@@ -87,7 +87,7 @@ static INTVAL hint_for(PARROT_INTERP, PMC *class_handle, STRING *name) {
 }
 
 /* Clone; just copy the string pointer, since strings are immutable. */
-static PMC * clone(PARROT_INTERP, PMC *to_clone) {
+static PMC * repr_clone(PARROT_INTERP, PMC *to_clone) {
     P6strInstance *obj = mem_allocate_zeroed_typed(P6strInstance);
     obj->common.stable = STABLE_PMC(to_clone);
     obj->value         = ((P6strInstance *)PMC_data(to_clone))->value;
@@ -176,7 +176,7 @@ PMC * P6str_initialize(PARROT_INTERP) {
     repr->bind_attribute_num = bind_attribute_num;
     repr->bind_attribute_str = bind_attribute_str;
     repr->hint_for = hint_for;
-    repr->clone = clone;
+    repr->clone = repr_clone;
     repr->set_int = set_int;
     repr->get_int = get_int;
     repr->set_num = set_num;
