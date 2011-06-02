@@ -96,6 +96,18 @@ static INTVAL hint_for(PARROT_INTERP, PMC *class_handle, STRING *name) {
     return NO_HINT;
 }
 
+/* Clone. Clone object body and the attribute storage hash. */
+static PMC * clone(PARROT_INTERP, PMC *to_clone) {
+    HashAttrStoreInstance *obj;
+
+    /* Allocate and set up object instance. */
+    obj = Parrot_gc_allocate_fixed_size_storage(interp, sizeof(HashAttrStoreInstance));
+    obj->common.stable = STABLE_PMC(to_clone);
+    obj->store = VTABLE_clone(interp, ((HashAttrStoreInstance *)PMC_data(to_clone))->store);
+    
+    return wrap_object(interp, obj);
+}
+
 /* Used with boxing. Sets an integer value, for representations that can hold
  * one. */
 static void set_int(PARROT_INTERP, PMC *obj, INTVAL value) {
@@ -181,6 +193,7 @@ PMC * HashAttrStore_initialize(PARROT_INTERP) {
     repr->bind_attribute_num = bind_attribute_num;
     repr->bind_attribute_str = bind_attribute_str;
     repr->hint_for = hint_for;
+    repr->clone = clone;
     repr->set_int = set_int;
     repr->get_int = get_int;
     repr->set_num = set_num;

@@ -563,6 +563,25 @@ static INTVAL hint_for(PARROT_INTERP, PMC *class_handle, STRING *name) {
     return NO_HINT;
 }
 
+/* Clones the current object. */
+static PMC * clone(PARROT_INTERP, PMC *to_clone) {
+    P6opaqueInstance *obj;
+    P6opaqueREPRData *repr_data = STABLE(to_clone)->REPR_data;
+    
+    if (defined(interp, to_clone)) {
+        obj = Parrot_gc_allocate_fixed_size_storage(interp, repr_data->allocation_size);
+        memcpy(obj, PMC_data(to_clone), repr_data->allocation_size);
+        if (!PMC_IS_NULL(obj->spill))
+            obj->spill = VTABLE_clone(interp, obj->spill);
+    }
+    else {
+        obj = mem_allocate_zeroed_typed(P6opaqueInstance);
+        memcpy(obj, PMC_data(to_clone), sizeof(P6opaqueInstance));
+    }
+    
+    return wrap_object(interp, obj);
+}
+
 /* Used with boxing. Sets an integer value, for representations that can hold
  * one. */
 static void set_int(PARROT_INTERP, PMC *obj, INTVAL value) {
@@ -751,6 +770,7 @@ PMC * P6opaque_initialize(PARROT_INTERP) {
     repr->bind_attribute_num = bind_attribute_num;
     repr->bind_attribute_str = bind_attribute_str;
     repr->hint_for = hint_for;
+    repr->clone = clone;
     repr->set_int = set_int;
     repr->get_int = get_int;
     repr->set_num = set_num;
