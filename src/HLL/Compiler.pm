@@ -166,6 +166,10 @@ class HLL::Compiler {
             my $code := $stdin.readline_interactive(~$prompt);
 
             last if pir::isnull($code);
+            unless pir::defined($code) {
+                pir::print("\n");
+                last;
+            }
 
             # Set the current position of stdout for autoprinting control
             my $*AUTOPRINTPOS := (pir::getinterp__P()).stdout_handle().tell();
