@@ -24,6 +24,29 @@
 
 #include "../6model/sixmodelobject.h"
 
+static PMC * decontainerize(PARROT_INTERP, PMC *var) {
+    ContainerSpec *spec = STABLE(var)->container_spec;
+    if (spec && REPR(var)->defined(interp, var)) {
+        if (!PMC_IS_NULL(spec->value_slot.class_handle)) {
+            /* Just get slot. */
+            return VTABLE_get_attr_keyed(interp, var, spec->value_slot.class_handle,
+                spec->value_slot.attr_name);
+        }
+        else {
+            /* Invoke FETCH method. */
+            PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+            PMC *meth    = VTABLE_find_method(interp, var, Parrot_str_new(interp, "FETCH", 0));
+            PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
+            VTABLE_push_pmc(interp, cappy, var);
+            Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
+            cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+            Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
+            return VTABLE_get_pmc_keyed_int(interp, cappy, 0);
+        }
+    }
+    return var;
+}
+
 pmclass SixModelObject manual_attrs dynpmc group nqp {
     /* ********************************************** *
      * These methods are mapped to 6model primitives. *
@@ -53,7 +76,8 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     }
 
     VTABLE PMC * find_method(STRING *name) {
-        return STABLE(SELF)->find_method(interp, SELF, name, NO_HINT);
+        PMC *decont = decontainerize(interp, SELF);
+        return STABLE(decont)->find_method(interp, decont, name, NO_HINT);
     }
 
     VTABLE PMC* get_attr_keyed(PMC *class_handle, STRING *name) {
@@ -74,12 +98,13 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
      * ********************************************************* */
 
     VTABLE FLOATVAL get_number() {
-        PMC **vt = STABLE(SELF)->parrot_vtable_mapping;
+        PMC *decont = decontainerize(interp, SELF);
+        PMC **vt = STABLE(decont)->parrot_vtable_mapping;
         PMC *meth;
         if (vt && !PMC_IS_NULL(meth = vt[PARROT_VTABLE_SLOT_GET_NUMBER])) {
             PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
-            VTABLE_push_pmc(interp, cappy, SELF);
+            VTABLE_push_pmc(interp, cappy, decont);
             Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
             cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
@@ -90,12 +115,13 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     }
 
     VTABLE INTVAL get_integer() {
-        PMC **vt = STABLE(SELF)->parrot_vtable_mapping;
+        PMC *decont = decontainerize(interp, SELF);
+        PMC **vt = STABLE(decont)->parrot_vtable_mapping;
         PMC *meth;
         if (vt && !PMC_IS_NULL(meth = vt[PARROT_VTABLE_SLOT_GET_INTEGER])) {
             PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
-            VTABLE_push_pmc(interp, cappy, SELF);
+            VTABLE_push_pmc(interp, cappy, decont);
             Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
             cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
@@ -106,12 +132,13 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     }
 
     VTABLE STRING * get_string() {
-        PMC **vt = STABLE(SELF)->parrot_vtable_mapping;
+        PMC *decont = decontainerize(interp, SELF);
+        PMC **vt = STABLE(decont)->parrot_vtable_mapping;
         PMC *meth;
         if (vt && !PMC_IS_NULL(meth = vt[PARROT_VTABLE_SLOT_GET_STRING])) {
             PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
-            VTABLE_push_pmc(interp, cappy, SELF);
+            VTABLE_push_pmc(interp, cappy, decont);
             Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
             cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
@@ -122,12 +149,13 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     }
 
     VTABLE INTVAL get_bool() {
-        PMC **vt = STABLE(SELF)->parrot_vtable_mapping;
+        PMC *decont = decontainerize(interp, SELF);
+        PMC **vt = STABLE(decont)->parrot_vtable_mapping;
         PMC *meth;
         if (vt && !PMC_IS_NULL(meth = vt[PARROT_VTABLE_SLOT_GET_BOOL])) {
             PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
-            VTABLE_push_pmc(interp, cappy, SELF);
+            VTABLE_push_pmc(interp, cappy, decont);
             Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
             cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
@@ -145,13 +173,14 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
                 return SELF.get_pmc_keyed_str(VTABLE_get_string(interp, key));
         }
         else {
-            PMC **vt = STABLE(SELF)->parrot_vtable_mapping;
+            PMC *decont = decontainerize(interp, SELF);
+            PMC **vt = STABLE(decont)->parrot_vtable_mapping;
             PMC *meth;
-			AttributeIdentifier *vth = STABLE(SELF)->parrot_vtable_handler_mapping;
+			AttributeIdentifier *vth = STABLE(decont)->parrot_vtable_handler_mapping;
             if (vt && !PMC_IS_NULL(meth = vt[PARROT_VTABLE_SLOT_GET_PMC_KEYED])) {
                 PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
                 PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
-                VTABLE_push_pmc(interp, cappy, SELF);
+                VTABLE_push_pmc(interp, cappy, decont);
                 VTABLE_push_pmc(interp, cappy, key);
                 Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
                 cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
@@ -159,7 +188,7 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
                 return VTABLE_get_pmc_keyed_int(interp, cappy, 0);
             }
 			else if (vth && vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED].class_handle) {
-				PMC *val = VTABLE_get_attr_keyed(interp, SELF, vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED].class_handle,
+				PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED].class_handle,
 				  vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED].attr_name);
 				return VTABLE_get_pmc_keyed(interp, val, key);
 			}
@@ -169,13 +198,14 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     }
     
     VTABLE PMC * get_pmc_keyed_int(INTVAL key) {
-        PMC **vt = STABLE(SELF)->parrot_vtable_mapping;
+        PMC *decont = decontainerize(interp, SELF);
+        PMC **vt = STABLE(decont)->parrot_vtable_mapping;
         PMC *meth;
-        AttributeIdentifier *vth = STABLE(SELF)->parrot_vtable_handler_mapping;
+        AttributeIdentifier *vth = STABLE(decont)->parrot_vtable_handler_mapping;
         if (vt && !PMC_IS_NULL(meth = vt[PARROT_VTABLE_SLOT_GET_PMC_KEYED_INT])) {
             PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
-            VTABLE_push_pmc(interp, cappy, SELF);
+            VTABLE_push_pmc(interp, cappy, decont);
             VTABLE_push_integer(interp, cappy, key);
             Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
             cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
@@ -183,7 +213,7 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             return VTABLE_get_pmc_keyed_int(interp, cappy, 0);
         }
         else if (vth && vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED_INT].class_handle) {
-		    PMC *val = VTABLE_get_attr_keyed(interp, SELF, vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED_INT].class_handle,
+		    PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED_INT].class_handle,
 			  vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED_INT].attr_name);
 			return VTABLE_get_pmc_keyed_int(interp, val, key);
 		}
@@ -192,13 +222,14 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     }
 
     VTABLE PMC * get_pmc_keyed_str(STRING *key) {
-        PMC **vt = STABLE(SELF)->parrot_vtable_mapping;
-        AttributeIdentifier *vth = STABLE(SELF)->parrot_vtable_handler_mapping;
+        PMC *decont = decontainerize(interp, SELF);
+        PMC **vt = STABLE(decont)->parrot_vtable_mapping;
+        AttributeIdentifier *vth = STABLE(decont)->parrot_vtable_handler_mapping;
         PMC *meth;
         if (vt && !PMC_IS_NULL(meth = vt[PARROT_VTABLE_SLOT_GET_PMC_KEYED_STR])) {
             PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
-            VTABLE_push_pmc(interp, cappy, SELF);
+            VTABLE_push_pmc(interp, cappy, decont);
             VTABLE_push_string(interp, cappy, key);
             Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
             cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
@@ -206,7 +237,7 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             return VTABLE_get_pmc_keyed_int(interp, cappy, 0);
         }
         else if (vth && vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED_STR].class_handle) {
-		    PMC *val = VTABLE_get_attr_keyed(interp, SELF, vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED_STR].class_handle,
+		    PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED_STR].class_handle,
 			  vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED_STR].attr_name);
 			return VTABLE_get_pmc_keyed_str(interp, val, key);
 		}
@@ -222,20 +253,21 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
                 SELF.set_pmc_keyed_str(VTABLE_get_string(interp, key), value);
         }
         else {
-            PMC **vt = STABLE(SELF)->parrot_vtable_mapping;
+            PMC *decont = decontainerize(interp, SELF);
+            PMC **vt = STABLE(decont)->parrot_vtable_mapping;
             PMC *meth;
-			AttributeIdentifier *vth = STABLE(SELF)->parrot_vtable_handler_mapping;
+			AttributeIdentifier *vth = STABLE(decont)->parrot_vtable_handler_mapping;
             if (vt && !PMC_IS_NULL(meth = vt[PARROT_VTABLE_SLOT_SET_PMC_KEYED])) {
                 PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
                 PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
-                VTABLE_push_pmc(interp, cappy, SELF);
+                VTABLE_push_pmc(interp, cappy, decont);
                 VTABLE_push_pmc(interp, cappy, key);
                 VTABLE_push_pmc(interp, cappy, value);
                 Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
                 Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
             }
 			else if (vth && vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED].class_handle) {
-				PMC *val = VTABLE_get_attr_keyed(interp, SELF, vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED].class_handle,
+				PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED].class_handle,
 				  vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED].attr_name);
 				VTABLE_set_pmc_keyed(interp, val, key, value);
 			}
@@ -245,20 +277,21 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     }
     
     VTABLE void set_pmc_keyed_int(INTVAL key, PMC *value) {
-        PMC **vt = STABLE(SELF)->parrot_vtable_mapping;
+        PMC *decont = decontainerize(interp, SELF);
+        PMC **vt = STABLE(decont)->parrot_vtable_mapping;
         PMC *meth;
-		AttributeIdentifier *vth = STABLE(SELF)->parrot_vtable_handler_mapping;
+		AttributeIdentifier *vth = STABLE(decont)->parrot_vtable_handler_mapping;
         if (vt && !PMC_IS_NULL(meth = vt[PARROT_VTABLE_SLOT_SET_PMC_KEYED_INT])) {
             PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
-            VTABLE_push_pmc(interp, cappy, SELF);
+            VTABLE_push_pmc(interp, cappy, decont);
             VTABLE_push_integer(interp, cappy, key);
             VTABLE_push_pmc(interp, cappy, value);
             Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
             Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
         }
 		else if (vth && vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED_INT].class_handle) {
-			PMC *val = VTABLE_get_attr_keyed(interp, SELF, vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED_INT].class_handle,
+			PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED_INT].class_handle,
 			  vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED_INT].attr_name);
 			VTABLE_set_pmc_keyed_int(interp, val, key, value);
 		}
@@ -267,20 +300,21 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     }
     
     VTABLE void set_pmc_keyed_str(STRING *key, PMC *value) {
-        PMC **vt = STABLE(SELF)->parrot_vtable_mapping;
+        PMC *decont = decontainerize(interp, SELF);
+        PMC **vt = STABLE(decont)->parrot_vtable_mapping;
         PMC *meth;
-		AttributeIdentifier *vth = STABLE(SELF)->parrot_vtable_handler_mapping;
+		AttributeIdentifier *vth = STABLE(decont)->parrot_vtable_handler_mapping;
         if (vt && !PMC_IS_NULL(meth = vt[PARROT_VTABLE_SLOT_SET_PMC_KEYED_STR])) {
             PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
-            VTABLE_push_pmc(interp, cappy, SELF);
+            VTABLE_push_pmc(interp, cappy, decont);
             VTABLE_push_string(interp, cappy, key);
             VTABLE_push_pmc(interp, cappy, value);
             Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
             Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
         }
 		else if (vth && vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED_STR].class_handle) {
-			PMC *val = VTABLE_get_attr_keyed(interp, SELF, vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED_STR].class_handle,
+			PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED_STR].class_handle,
 			  vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED_STR].attr_name);
 			VTABLE_set_pmc_keyed_str(interp, val, key, value);
 		}
@@ -296,13 +330,14 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
                 return SELF.exists_keyed_str(VTABLE_get_string(interp, key));
         }
         else {
-            PMC **vt = STABLE(SELF)->parrot_vtable_mapping;
+            PMC *decont = decontainerize(interp, SELF);
+            PMC **vt = STABLE(decont)->parrot_vtable_mapping;
             PMC *meth;
-			AttributeIdentifier *vth = STABLE(SELF)->parrot_vtable_handler_mapping;
+			AttributeIdentifier *vth = STABLE(decont)->parrot_vtable_handler_mapping;
             if (vt && !PMC_IS_NULL(meth = vt[PARROT_VTABLE_SLOT_EXISTS_KEYED])) {
                 PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
                 PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
-                VTABLE_push_pmc(interp, cappy, SELF);
+                VTABLE_push_pmc(interp, cappy, decont);
                 VTABLE_push_pmc(interp, cappy, key);
                 Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
                 cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
@@ -310,7 +345,7 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
                 return VTABLE_get_integer_keyed_int(interp, cappy, 0);
             }
 			else if (vth && vth[PARROT_VTABLE_SLOT_EXISTS_KEYED].class_handle) {
-				PMC *val = VTABLE_get_attr_keyed(interp, SELF, vth[PARROT_VTABLE_SLOT_EXISTS_KEYED].class_handle,
+				PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_EXISTS_KEYED].class_handle,
 				  vth[PARROT_VTABLE_SLOT_EXISTS_KEYED].attr_name);
 				return VTABLE_exists_keyed(interp, val, key);
 			}
@@ -320,13 +355,14 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     }
 
     VTABLE INTVAL exists_keyed_int(INTVAL key) {
-        PMC **vt = STABLE(SELF)->parrot_vtable_mapping;
+        PMC *decont = decontainerize(interp, SELF);
+        PMC **vt = STABLE(decont)->parrot_vtable_mapping;
         PMC *meth;
-		AttributeIdentifier *vth = STABLE(SELF)->parrot_vtable_handler_mapping;
+		AttributeIdentifier *vth = STABLE(decont)->parrot_vtable_handler_mapping;
         if (vt && !PMC_IS_NULL(meth = vt[PARROT_VTABLE_SLOT_EXISTS_KEYED_INT])) {
             PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
-            VTABLE_push_pmc(interp, cappy, SELF);
+            VTABLE_push_pmc(interp, cappy, decont);
             VTABLE_push_integer(interp, cappy, key);
             Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
             cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
@@ -334,7 +370,7 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             return VTABLE_get_integer_keyed_int(interp, cappy, 0);
         }
 		else if (vth && vth[PARROT_VTABLE_SLOT_EXISTS_KEYED_INT].class_handle) {
-			PMC *val = VTABLE_get_attr_keyed(interp, SELF, vth[PARROT_VTABLE_SLOT_EXISTS_KEYED_INT].class_handle,
+			PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_EXISTS_KEYED_INT].class_handle,
 			  vth[PARROT_VTABLE_SLOT_EXISTS_KEYED_INT].attr_name);
 			return VTABLE_exists_keyed_int(interp, val, key);
 		}
@@ -343,13 +379,14 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     }
 
     VTABLE INTVAL exists_keyed_str(STRING *key) {
-        PMC **vt = STABLE(SELF)->parrot_vtable_mapping;
+        PMC *decont = decontainerize(interp, SELF);
+        PMC **vt = STABLE(decont)->parrot_vtable_mapping;
         PMC *meth;
-		AttributeIdentifier *vth = STABLE(SELF)->parrot_vtable_handler_mapping;
+		AttributeIdentifier *vth = STABLE(decont)->parrot_vtable_handler_mapping;
         if (vt && !PMC_IS_NULL(meth = vt[PARROT_VTABLE_SLOT_EXISTS_KEYED_STR])) {
             PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
-            VTABLE_push_pmc(interp, cappy, SELF);
+            VTABLE_push_pmc(interp, cappy, decont);
             VTABLE_push_string(interp, cappy, key);
             Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
             cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
@@ -357,7 +394,7 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             return VTABLE_get_integer_keyed_int(interp, cappy, 0);
         }
 		else if (vth && vth[PARROT_VTABLE_SLOT_EXISTS_KEYED_STR].class_handle) {
-			PMC *val = VTABLE_get_attr_keyed(interp, SELF, vth[PARROT_VTABLE_SLOT_EXISTS_KEYED_STR].class_handle,
+			PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_EXISTS_KEYED_STR].class_handle,
 			  vth[PARROT_VTABLE_SLOT_EXISTS_KEYED_STR].attr_name);
 			return VTABLE_exists_keyed_str(interp, val, key);
 		}
@@ -373,20 +410,21 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
                 SELF.delete_keyed_str(VTABLE_get_string(interp, key));
         }
         else {
-            PMC **vt = STABLE(SELF)->parrot_vtable_mapping;
+            PMC *decont = decontainerize(interp, SELF);
+            PMC **vt = STABLE(decont)->parrot_vtable_mapping;
             PMC *meth;
-			AttributeIdentifier *vth = STABLE(SELF)->parrot_vtable_handler_mapping;
+			AttributeIdentifier *vth = STABLE(decont)->parrot_vtable_handler_mapping;
             if (vt && !PMC_IS_NULL(meth = vt[PARROT_VTABLE_SLOT_DELETE_KEYED])) {
                 PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
                 PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
-                VTABLE_push_pmc(interp, cappy, SELF);
+                VTABLE_push_pmc(interp, cappy, decont);
                 VTABLE_push_pmc(interp, cappy, key);
                 Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
                 cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
                 Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
             }
 			else if (vth && vth[PARROT_VTABLE_SLOT_DELETE_KEYED].class_handle) {
-				PMC *val = VTABLE_get_attr_keyed(interp, SELF, vth[PARROT_VTABLE_SLOT_DELETE_KEYED].class_handle,
+				PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_DELETE_KEYED].class_handle,
 				  vth[PARROT_VTABLE_SLOT_DELETE_KEYED].attr_name);
 				VTABLE_delete_keyed(interp, val, key);
 			}
@@ -396,20 +434,21 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     }
 
     VTABLE void delete_keyed_int(INTVAL key) {
-        PMC **vt = STABLE(SELF)->parrot_vtable_mapping;
+        PMC *decont = decontainerize(interp, SELF);
+        PMC **vt = STABLE(decont)->parrot_vtable_mapping;
         PMC *meth;
-		AttributeIdentifier *vth = STABLE(SELF)->parrot_vtable_handler_mapping;
+		AttributeIdentifier *vth = STABLE(decont)->parrot_vtable_handler_mapping;
         if (vt && !PMC_IS_NULL(meth = vt[PARROT_VTABLE_SLOT_DELETE_KEYED_INT])) {
             PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
-            VTABLE_push_pmc(interp, cappy, SELF);
+            VTABLE_push_pmc(interp, cappy, decont);
             VTABLE_push_integer(interp, cappy, key);
             Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
             cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
         }
 		else if (vth && vth[PARROT_VTABLE_SLOT_DELETE_KEYED_INT].class_handle) {
-			PMC *val = VTABLE_get_attr_keyed(interp, SELF, vth[PARROT_VTABLE_SLOT_DELETE_KEYED_INT].class_handle,
+			PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_DELETE_KEYED_INT].class_handle,
 			  vth[PARROT_VTABLE_SLOT_DELETE_KEYED_INT].attr_name);
 			VTABLE_delete_keyed_int(interp, val, key);
 		}
@@ -418,20 +457,21 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     }
 
     VTABLE void delete_keyed_str(STRING *key) {
-        PMC **vt = STABLE(SELF)->parrot_vtable_mapping;
+        PMC *decont = decontainerize(interp, SELF);
+        PMC **vt = STABLE(decont)->parrot_vtable_mapping;
         PMC *meth;
-		AttributeIdentifier *vth = STABLE(SELF)->parrot_vtable_handler_mapping;
+		AttributeIdentifier *vth = STABLE(decont)->parrot_vtable_handler_mapping;
         if (vt && !PMC_IS_NULL(meth = vt[PARROT_VTABLE_SLOT_DELETE_KEYED_STR])) {
             PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
-            VTABLE_push_pmc(interp, cappy, SELF);
+            VTABLE_push_pmc(interp, cappy, decont);
             VTABLE_push_string(interp, cappy, key);
             Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
             cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
         }
 		else if (vth && vth[PARROT_VTABLE_SLOT_DELETE_KEYED_STR].class_handle) {
-			PMC *val = VTABLE_get_attr_keyed(interp, SELF, vth[PARROT_VTABLE_SLOT_DELETE_KEYED_STR].class_handle,
+			PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_DELETE_KEYED_STR].class_handle,
 			  vth[PARROT_VTABLE_SLOT_DELETE_KEYED_STR].attr_name);
 			VTABLE_delete_keyed_str(interp, val, key);
 		}
@@ -440,20 +480,21 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     }
     
     VTABLE void unshift_pmc(PMC *value) {
-        PMC **vt = STABLE(SELF)->parrot_vtable_mapping;
+        PMC *decont = decontainerize(interp, SELF);
+        PMC **vt = STABLE(decont)->parrot_vtable_mapping;
         PMC *meth;
-		AttributeIdentifier *vth = STABLE(SELF)->parrot_vtable_handler_mapping;
+		AttributeIdentifier *vth = STABLE(decont)->parrot_vtable_handler_mapping;
         if (vt && !PMC_IS_NULL(meth = vt[PARROT_VTABLE_SLOT_UNSHIFT_PMC])) {
             PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
-            VTABLE_push_pmc(interp, cappy, SELF);
+            VTABLE_push_pmc(interp, cappy, decont);
             VTABLE_push_pmc(interp, cappy, value);
             Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
             cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
         }
 		  else if (vth && vth[PARROT_VTABLE_SLOT_UNSHIFT_PMC].class_handle) {
-			  PMC *val = VTABLE_get_attr_keyed(interp, SELF, vth[PARROT_VTABLE_SLOT_UNSHIFT_PMC].class_handle,
+			  PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_UNSHIFT_PMC].class_handle,
 				vth[PARROT_VTABLE_SLOT_UNSHIFT_PMC].attr_name);
 			  VTABLE_unshift_pmc(interp, val, value);
 		}
@@ -462,20 +503,21 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     }
     
     VTABLE void push_pmc(PMC *value) {
-        PMC **vt = STABLE(SELF)->parrot_vtable_mapping;
+        PMC *decont = decontainerize(interp, SELF);
+        PMC **vt = STABLE(decont)->parrot_vtable_mapping;
         PMC *meth;
-		AttributeIdentifier *vth = STABLE(SELF)->parrot_vtable_handler_mapping;
+		AttributeIdentifier *vth = STABLE(decont)->parrot_vtable_handler_mapping;
         if (vt && !PMC_IS_NULL(meth = vt[PARROT_VTABLE_SLOT_PUSH_PMC])) {
             PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
-            VTABLE_push_pmc(interp, cappy, SELF);
+            VTABLE_push_pmc(interp, cappy, decont);
             VTABLE_push_pmc(interp, cappy, value);
             Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
             cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
         }
 		else if (vth && vth[PARROT_VTABLE_SLOT_PUSH_PMC].class_handle) {
-			PMC *val = VTABLE_get_attr_keyed(interp, SELF, vth[PARROT_VTABLE_SLOT_PUSH_PMC].class_handle,
+			PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_PUSH_PMC].class_handle,
 			  vth[PARROT_VTABLE_SLOT_PUSH_PMC].attr_name);
 			VTABLE_push_pmc(interp, val, value);
 		}
@@ -484,17 +526,18 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     }
 
     VTABLE opcode_t *invoke(void *next) {
-        PMC **vt = STABLE(SELF)->parrot_vtable_mapping;
+        PMC *decont = decontainerize(interp, SELF);
+        PMC **vt = STABLE(decont)->parrot_vtable_mapping;
         PMC *meth;
-        AttributeIdentifier *vth = STABLE(SELF)->parrot_vtable_handler_mapping;
+        AttributeIdentifier *vth = STABLE(decont)->parrot_vtable_handler_mapping;
         if (vt && !PMC_IS_NULL(meth = vt[PARROT_VTABLE_SLOT_INVOKE])) {
             PMC *cur_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
-            VTABLE_unshift_pmc(interp, cur_ctx, SELF);
+            VTABLE_unshift_pmc(interp, cur_ctx, decont);
             Parrot_pcc_invoke_from_sig_object(interp, meth, cur_ctx);
             return (opcode_t *)next;
         }
         else if (vth && vth[PARROT_VTABLE_SLOT_INVOKE].class_handle) {
-			PMC *val = VTABLE_get_attr_keyed(interp, SELF, vth[PARROT_VTABLE_SLOT_INVOKE].class_handle,
+			PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_INVOKE].class_handle,
 			  vth[PARROT_VTABLE_SLOT_INVOKE].attr_name);
 			return VTABLE_invoke(interp, val, next);
 		}
@@ -503,20 +546,21 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     }
     
     VTABLE PMC * get_iter() {
-        PMC **vt = STABLE(SELF)->parrot_vtable_mapping;
-        AttributeIdentifier *vth = STABLE(SELF)->parrot_vtable_handler_mapping;
+        PMC *decont = decontainerize(interp, SELF);
+        PMC **vt = STABLE(decont)->parrot_vtable_mapping;
+        AttributeIdentifier *vth = STABLE(decont)->parrot_vtable_handler_mapping;
         PMC *meth;
         if (vt && !PMC_IS_NULL(meth = vt[PARROT_VTABLE_SLOT_GET_ITER])) {
             PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
-            VTABLE_push_pmc(interp, cappy, SELF);
+            VTABLE_push_pmc(interp, cappy, decont);
             Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
             cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
             return VTABLE_get_pmc_keyed_int(interp, cappy, 0);
         }
         else if (vth && vth[PARROT_VTABLE_SLOT_GET_ITER].class_handle) {
-		    PMC *val = VTABLE_get_attr_keyed(interp, SELF, vth[PARROT_VTABLE_SLOT_GET_ITER].class_handle,
+		    PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_GET_ITER].class_handle,
 			  vth[PARROT_VTABLE_SLOT_GET_ITER].attr_name);
 			return VTABLE_get_iter(interp, val);
 		}

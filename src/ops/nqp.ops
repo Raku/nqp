@@ -272,10 +272,9 @@ a native int - the repr is not obligated to do boxing/unboxing for you.
 
 */
 inline op repr_get_attr_int(out INT, in PMC, in PMC, in STR) :base_core {
-    PMC *var = decontainerize(interp, $2);
     PMC *ch = decontainerize(interp, $3);
-    if (var->vtable->base_type == smo_id)
-        $1 = REPR(var)->get_attribute_int(interp, var, ch, $4, NO_HINT);
+    if ($2->vtable->base_type == smo_id)
+        $1 = REPR($2)->get_attribute_int(interp, $2, ch, $4, NO_HINT);
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_get_attr_int on a SixModelObject");
@@ -292,10 +291,9 @@ a native num - the repr is not obligated to do boxing/unboxing for you.
 
 */
 inline op repr_get_attr_int(out NUM, in PMC, in PMC, in STR) :base_core {
-    PMC *var = decontainerize(interp, $2);
     PMC *ch = decontainerize(interp, $3);
-    if (var->vtable->base_type == smo_id)
-        $1 = REPR(var)->get_attribute_num(interp, var, ch, $4, NO_HINT);
+    if ($2->vtable->base_type == smo_id)
+        $1 = REPR($2)->get_attribute_num(interp, $2, ch, $4, NO_HINT);
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_get_attr_num on a SixModelObject");
@@ -312,10 +310,9 @@ a native str - the repr is not obligated to do boxing/unboxing for you.
 
 */
 inline op repr_get_attr_str(out STR, in PMC, in PMC, in STR) :base_core {
-    PMC *var = decontainerize(interp, $2);
     PMC *ch = decontainerize(interp, $3);
-    if (var->vtable->base_type == smo_id)
-        $1 = REPR(var)->get_attribute_str(interp, var, ch, $4, NO_HINT);
+    if ($2->vtable->base_type == smo_id)
+        $1 = REPR($2)->get_attribute_str(interp, $2, ch, $4, NO_HINT);
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_get_attr_str on a SixModelObject");
@@ -332,10 +329,9 @@ a native int - the repr is not obligated to do boxing/unboxing for you.
 
 */
 inline op repr_bind_attr_int(in PMC, in PMC, in STR, in INT) :base_core {
-    PMC *var = decontainerize(interp, $1);
     PMC *ch = decontainerize(interp, $2);
-    if (var->vtable->base_type == smo_id)
-        REPR(var)->bind_attribute_int(interp, var, ch, $3, NO_HINT, $4);
+    if ($1->vtable->base_type == smo_id)
+        REPR($1)->bind_attribute_int(interp, $1, ch, $3, NO_HINT, $4);
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_int on a SixModelObject");
@@ -352,10 +348,9 @@ a native num - the repr is not obligated to do boxing/unboxing for you.
 
 */
 inline op repr_bind_attr_num(in PMC, in PMC, in STR, in NUM) :base_core {
-    PMC *var = decontainerize(interp, $1);
     PMC *ch = decontainerize(interp, $2);
-    if (var->vtable->base_type == smo_id)
-        REPR(var)->bind_attribute_num(interp, var, ch, $3, NO_HINT, $4);
+    if ($1->vtable->base_type == smo_id)
+        REPR($1)->bind_attribute_num(interp, $1, ch, $3, NO_HINT, $4);
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_num on a SixModelObject");
@@ -372,10 +367,9 @@ a native str - the repr is not obligated to do boxing/unboxing for you.
 
 */
 inline op repr_bind_attr_str(in PMC, in PMC, in STR, in STR) :base_core {
-    PMC *var = decontainerize(interp, $1);
     PMC *ch = decontainerize(interp, $2);
-    if (var->vtable->base_type == smo_id)
-        REPR(var)->bind_attribute_str(interp, var, ch, $3, NO_HINT, $4);
+    if ($1->vtable->base_type == smo_id)
+        REPR($1)->bind_attribute_str(interp, $1, ch, $3, NO_HINT, $4);
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_str on a SixModelObject");
