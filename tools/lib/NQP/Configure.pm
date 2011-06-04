@@ -5,6 +5,8 @@ use warnings;
 use base qw(Exporter);
 our @EXPORT_OK = qw(cmp_rev read_parrot_config slurp system_or_die);
 
+our $exe = $^O eq 'MSWin32' ? '.exe' : '';
+
 sub parse_revision {
     my $rev = shift;
     my $sep = qr/[_.]/;
@@ -32,12 +34,12 @@ sub read_parrot_config {
     my %config = ();
     for my $file (@parrot_config_src) {
         no warnings;
-        if (open my $PARROT_CONFIG, '-|', "$file --dump") {
+        if (open my $PARROT, '-|', "$file tools/build/parrot-config.pir") {
             print "\nReading configuration information from $file ...\n";
-            while (<$PARROT_CONFIG>) {
-                if (/(\w+) => '(.*)'/) { $config{"parrot::$1"} = $2 }
+            while (<$PARROT>) {
+                if (/^([\w:]+)=(.*)/) { $config{$1} = $2 }
             }
-            close($PARROT_CONFIG) or die $!;
+            close($PARROT) or die $!;
         }
         elsif (-r $file && open my $PARROT_CONFIG, '<', $file) {
             print "\nReading configuration information from $file ...\n";

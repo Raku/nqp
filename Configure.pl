@@ -10,18 +10,28 @@ use lib "tools/lib";
 use NQP::Configure qw(cmp_rev read_parrot_config slurp system_or_die);
 
 MAIN: {
+    my $exe = $NQP::Configure::exe;
+
     my %config;
     $config{'nqp_config_status'} = join(' ', map { "\"$_\""} @ARGV);
 
     my %options;
-    GetOptions(\%options, 'help!', 'parrot-config=s', 'prefix=s',
-               'gen-parrot!', 'gen-parrot-option=s@', 'min-parrot-revision=s',
+    GetOptions(\%options, 'help!', 'prefix=s',
+               'with-parrot=s', 'parrot-config=s',
+               'gen-parrot!', 'parrot-option=s@', 'min-parrot-revision=s',
                'make-install!');
 
     # Print help if it's requested
     if ($options{'help'}) {
         print_help();
         exit(0);
+    }
+
+    # Deprecated --parrot-config option
+    if ($options{'parrot-config'}) {
+        die "===SORRY!===\n"
+            . "The --parrot-config option has been removed.\n"
+            . "Use --with-parrot to specify the parrot executable to use.\n";
     }
 
     # Save options in config.status
@@ -31,10 +41,10 @@ MAIN: {
         close($CONFIG_STATUS);
     }
 
-    my $parrot_config_exe = $options{'parrot-config'};
+    my $parrot_exe = $options{'with-parrot'};
 
     if ($options{'gen-parrot'}) {
-        my @opts = @{ $options{'gen-parrot-option'} || [] };
+        my @opts = @{ $options{'parrot-option'} || [] };
         push @opts, "--min-parrot-revision=$options{'min-parrot-revision'}"
             if $options{'min-parrot-revision'};
         my $prefix = $options{'prefix'} || cwd()."/install";
@@ -44,24 +54,23 @@ MAIN: {
         print "@cmd\n\n";
         system_or_die(@cmd);
         # use the newly-built parrot config
-        $parrot_config_exe = "$prefix/bin/parrot_config";
+        $parrot_exe= "$prefix/bin/parrot$exe";
     }
 
     my %parrot_config;
-    if ($parrot_config_exe) {
-        %parrot_config = read_parrot_config($parrot_config_exe);
+    if ($parrot_exe) {
+        %parrot_config = read_parrot_config($parrot_exe);
     }
     else {
         # look in some standard locations
-        %parrot_config = read_parrot_config(qw(
-                             install/bin/parrot_config
-                             parrot_config
-                         ));
+        %parrot_config = read_parrot_config(
+                             ( "install/bin/parrot$exe", "parrot" )
+                         );
     }
 
     my $errors;
     if (!%parrot_config) {
-        $errors .= "Unable to locate parrot_config\n";
+        $errors .= "Unable to locate parrot\n";
     }
     %config = (%config, %parrot_config);
 
@@ -80,8 +89,8 @@ MAIN: {
 $errors
 To automatically checkout (git) and build a copy of parrot $revision_want,
 try re-running Configure.pl with the '--gen-parrot' option.
-Or, use the the '--parrot-config' option to explicitly specify
-the location of parrot_config to be used to build NQP.
+Or, use the the '--with-parrot=' option to explicitly specify
+the location of the parrot executable to be used to build NQP.
 
 END
     }
@@ -187,12 +196,12 @@ Configure.pl - NQP Configure
 
 General Options:
     --help             Show this text
-    --gen-parrot       Download and build a copy of Parrot to use
     --prefix=dir       Install files in dir
-    --parrot-config=path/to/parrot_config
-                       Use information from existing parrot_config
-    --gen-parrot-option='--option=value'
-                       Pass option(s) to --gen-parrot configuration
+    --with-parrot=path/to/bin/parrot
+                       Parrot executable to use to build NQP
+    --gen-parrot       Download and build a copy of Parrot to use
+    --parrot-option='--option=value'
+                       Options to pass to parrot configuration for --gen-parrot
 END
 
     return;

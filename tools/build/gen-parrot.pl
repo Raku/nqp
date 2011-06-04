@@ -13,21 +13,23 @@ MAIN: {
     my %options;
     GetOptions(\%options, 'help!', 'prefix=s', 'min-parrot-revision=s');
 
+    my $exe = $NQP::Configure::exe;
+
     # Print help if it's requested
     if ($options{'help'}) {
         print_help();
         exit(0);
     }
 
-    my $prefix            = $options{'prefix'} || cwd()."/install";
-    my $revision_want     = $options{'min-parrot-revision'};
+    my $prefix        = $options{'prefix'} || cwd()."/install";
+    my $revision_want = $options{'min-parrot-revision'};
     if (!defined $revision_want) {
         ($revision_want) = split(' ', slurp("tools/build/PARROT_REVISION"));
     }
-    my $parrot_config_exe = "$options{'prefix'}/bin/parrot_config";
-    my %parrot_config     = read_parrot_config($parrot_config_exe);
-    my $revision_have     = %parrot_config 
-                            && $parrot_config{'parrot::git_describe'};
+    my $parrot_exe    = "$options{'prefix'}/bin/parrot$exe";
+    my %parrot_config = read_parrot_config($parrot_exe);
+    my $revision_have = %parrot_config 
+                        && $parrot_config{'parrot::git_describe'};
 
     if ($revision_have && cmp_rev($revision_have, $revision_want) >= 0) {
         print "Parrot $revision_have already available",
