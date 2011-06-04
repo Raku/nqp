@@ -21,6 +21,12 @@ typedef struct {
     PMC *name_map;
 } P6opaqueNameMap;
 
+/* Represents a container that needs automatic vivification. */
+typedef struct {
+    INTVAL  offset;
+    PMC    *value;
+} P6opaqueAutoViv;
+
 /* The P6opaque REPR data has the slot mapping, allocation size and
  * various other bits of info. It hangs off the REPR_data pointer
  * in the s-table. */
@@ -29,6 +35,11 @@ typedef struct {
      * for the Shared Table pointer, spill hash and then for storing the
      * actual, pre-declared attributes. Note, this is in bytes. */
     INTVAL allocation_size;
+    
+    /* Instantiated objects are just a blank piece of memory that needs to
+     * be set up. However, in some cases we'd like them to magically turn in
+     * to some container type. */
+    P6opaqueAutoViv *auto_viv_conf;
 
     /* The number of attributes we have allocated slots for. Does not include
      * any in the spill hash. */

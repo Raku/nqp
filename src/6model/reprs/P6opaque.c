@@ -159,6 +159,7 @@ static P6opaqueNameMap* index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, PM
 static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRData *repr_data) {
     STRING *type_str       = Parrot_str_new_constant(interp, "type");
     STRING *box_target_str = Parrot_str_new_constant(interp, "box_target");
+    STRING *avcont_str     = Parrot_str_new_constant(interp, "auto_viv_container");
     PMC    *flat_list;
 
     /*
@@ -196,6 +197,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
         INTVAL info_alloc   = num_attrs == 0 ? 1 : num_attrs;
         INTVAL cur_pmc_attr = 0;
         INTVAL cur_str_attr = 0;
+        INTVAL cur_avc_attr = 0;
         INTVAL i;
 
         /* Allocate offset array and GC mark info arrays. */
@@ -211,6 +213,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
             /* Fetch its type and box target flag, if available. */
             PMC *type       = accessor_call(interp, attr, type_str);
             PMC *box_target = accessor_call(interp, attr, box_target_str);
+            PMC *av_cont    = accessor_call(interp, attr, avcont_str);
 
             /* Work out what unboxed type it is, if any. Default to a boxed. */
             INTVAL unboxed_type = STORAGE_SPEC_BP_NONE;
@@ -254,6 +257,14 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
             if (unboxed_type == STORAGE_SPEC_BP_NONE) {
                 repr_data->gc_pmc_mark_offsets[cur_pmc_attr] = cur_size;
                 cur_pmc_attr++;
+                if (!PMC_IS_NULL(av_cont)) {
+                    /* Stash away auto-viv container info. */
+                    if (!repr_data->auto_viv_conf)
+                        repr_data->auto_viv_conf = mem_sys_allocate_zeroed(info_alloc * sizeof(P6opaqueAutoViv));
+                    repr_data->auto_viv_conf[cur_avc_attr].offset = cur_size;
+                    repr_data->auto_viv_conf[cur_avc_attr].value  = av_cont;
+                    cur_avc_attr++;
+                }
             }
             if (unboxed_type == STORAGE_SPEC_BP_STR) {
                 repr_data->gc_str_mark_offsets[cur_str_attr] = cur_size;
@@ -404,8 +415,26 @@ static PMC * get_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *n
     /* Try the slot allocation first. */
     slot = try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
-        PMC    *result   = get_pmc_at_offset(instance, repr_data->attribute_offsets[slot]);
-        return result ? result : PMCNULL;
+        PMC *result = get_pmc_at_offset(instance, repr_data->attribute_offsets[slot]);
+        if (result) {
+            return result;
+        }
+        else {
+            /* Maybe we know how to auto-viv it to a container. */
+            if (repr_data->auto_viv_conf) {
+                P6opaqueAutoViv *cur_auto_viv_conf = repr_data->auto_viv_conf;
+                while (cur_auto_viv_conf->offset) {
+                    if (cur_auto_viv_conf->offset == repr_data->attribute_offsets[slot]) {
+                        PMC *value = cur_auto_viv_conf->value;
+                        value = REPR(value)->clone(interp, value);
+                        set_pmc_at_offset(instance, repr_data->attribute_offsets[slot], value);
+                        return value;
+                    }
+                    cur_auto_viv_conf++;
+                }
+            }
+            return PMCNULL;
+        }
     }
     
     /* Fall back to the spill storage. */
