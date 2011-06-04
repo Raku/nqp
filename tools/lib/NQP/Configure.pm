@@ -3,7 +3,8 @@ use strict;
 use warnings;
 
 use base qw(Exporter);
-our @EXPORT_OK = qw(cmp_rev read_parrot_config slurp system_or_die);
+our @EXPORT_OK = qw(cmp_rev read_parrot_config fill_template_file 
+                    fill_template_text slurp system_or_die);
 
 our $exe = $^O eq 'MSWin32' ? '.exe' : '';
 
@@ -51,6 +52,32 @@ sub read_parrot_config {
         last if %config;
     }
     return %config;
+}
+
+
+sub fill_template_file {
+    my $infile = shift;
+    my $outfile = shift;
+    my %config = @_;
+    my $text = slurp( $infile );
+    $text = fill_template_text($text, %config);
+    print "\nCreating $outfile ...\n";
+    open(my $OUT, '>', $outfile)
+        or die "Unable to write $outfile\n";
+    print $OUT $text;
+    close($OUT) or die $!;
+}
+
+
+sub fill_template_text {
+    my $text = shift;
+    my %config = @_;
+
+    $text =~ s/@([:\w]+)@/$config{$1} || $config{"parrot::$1"}/ge;
+    if ($^O eq 'MSWin32' && $text =~ /win32paths/) {
+        $text =~ s{/}{\\}g;
+    }
+    $text;
 }
 
 

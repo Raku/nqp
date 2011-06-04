@@ -7,7 +7,8 @@ use warnings;
 use Getopt::Long;
 use Cwd;
 use lib "tools/lib";
-use NQP::Configure qw(cmp_rev read_parrot_config slurp system_or_die);
+use NQP::Configure qw(cmp_rev read_parrot_config fill_template_file
+                      slurp system_or_die);
 
 MAIN: {
     my $exe = $NQP::Configure::exe;
@@ -73,6 +74,10 @@ MAIN: {
         $errors .= "Unable to locate parrot\n";
     }
     %config = (%config, %parrot_config);
+    $config{'win32_libparrot_copy') =
+        $^O eq 'MSWin32'
+        ? 'copy $(PARROT_BIN_DIR)\libparrot.dll .'
+        : '';
 
     my ($revision_want) = $options{'min_parrot-revision'}
                           || split(' ', slurp("tools/build/PARROT_REVISION"));
@@ -99,7 +104,7 @@ END
     verify_install(%config);
 
     # Create the Makefile using the information we just got
-    create_makefile(%config);
+    fill_template_file('tools/build/Makefile.in', 'Makefile', %config);
 
     my $make = $config{'parrot::make'};
 
@@ -168,27 +173,6 @@ END
 }
 
 
-sub create_makefile {
-    my %config = @_;
-    my $maketext = slurp( 'tools/build/Makefile.in' );
-
-    $config{'win32_libparrot_copy'} = 
-        $^O eq 'MSWin32' 
-        ? 'copy $(PARROT_BIN_DIR)\libparrot.dll .'
-        : '';
-
-    my $makefile = 'Makefile';
-    $maketext =~ s/@([:\w]+)@/$config{$1} || $config{"parrot::$1"}/ge;
-    $^O eq 'MSWin32' && $maketext =~ s|/|\\|g;
-    print "\nCreating $makefile ...\n";
-    open(my $MAKE, '>', $makefile)
-        or die "Unable to write $makefile\n";
-    print $MAKE $maketext;
-    close($MAKE) or die $!;
-    return;
-}
-
-        
 #  Print some help text.
 sub print_help {
     print <<'END';
