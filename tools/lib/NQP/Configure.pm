@@ -1,10 +1,12 @@
 package NQP::Configure;
 use strict;
 use warnings;
+use Cwd;
 
 use base qw(Exporter);
-our @EXPORT_OK = qw(cmp_rev read_parrot_config fill_template_file 
-                    fill_template_text slurp system_or_die verify_install);
+our @EXPORT_OK = qw(cmp_rev fill_template_file fill_template_text 
+                    git_checkout
+                    read_parrot_config slurp system_or_die verify_install);
 
 our $exe = $^O eq 'MSWin32' ? '.exe' : '';
 
@@ -91,6 +93,37 @@ sub fill_template_text {
 }
 
 
+sub git_checkout {
+    my $repo = shift;
+    my $dir  = shift;
+    my $checkout = shift;
+    my $pwd = cwd();
+
+    # get an up-to-date repository
+    if (! -d $dir) {
+        system_or_die('git', 'clone', $repo, $dir);
+        chdir($dir);
+    }
+    else {
+        chdir($dir);
+        system_or_die('git', 'fetch');
+    }
+
+    if ($checkout) {
+        system_or_die('git', 'checkout', $checkout);
+    }
+
+    my $git_describe;
+    if (open(my $GIT, '-|', "git describe --tags")) {
+        $git_describe = <$GIT>;
+        close($GIT);
+        chomp $git_describe;
+    }
+    chdir($pwd);
+    $git_describe;
+}
+
+
 sub slurp {
     my $filename = shift;
     open my $fh, '<', $filename
@@ -112,7 +145,7 @@ sub system_or_die {
 sub verify_install {
     my $files = shift;
     my %config = @_;
-    print "Verifying installation...\n";
+    print "Verifying installation ...\n";
     my @missing;
     for my $reqfile ( @{$files} ) {
         my $f = fill_template_text($reqfile, %config);

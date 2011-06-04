@@ -7,11 +7,13 @@ use warnings;
 use Getopt::Long qw(:config pass_through);
 use Cwd;
 use lib "tools/lib";
-use NQP::Configure qw(cmp_rev read_parrot_config slurp system_or_die);
+use NQP::Configure qw(cmp_rev read_parrot_config git_checkout 
+                      slurp system_or_die);
 
 MAIN: {
     my %options;
-    GetOptions(\%options, 'help!', 'prefix=s', 'min-parrot-revision=s');
+    GetOptions(\%options, 'help!', 'prefix=s', 'min-parrot-revision=s',
+                          'checkout=s');
 
     my $exe = $NQP::Configure::exe;
 
@@ -22,35 +24,34 @@ MAIN: {
     }
 
     my $prefix        = $options{'prefix'} || cwd()."/install";
+    my $checkout      = $options{'checkout'};
+    my $parrot_exe    = "$options{'prefix'}/bin/parrot$exe";
     my $revision_want = $options{'min-parrot-revision'};
     if (!defined $revision_want) {
         ($revision_want) = split(' ', slurp("tools/build/PARROT_REVISION"));
     }
-    my $parrot_exe    = "$options{'prefix'}/bin/parrot$exe";
     my %parrot_config = read_parrot_config($parrot_exe);
     my $revision_have = %parrot_config 
                         && $parrot_config{'parrot::git_describe'};
 
-    if ($revision_have && cmp_rev($revision_have, $revision_want) >= 0) {
+    if (!$checkout && $revision_have
+            && cmp_rev($revision_have, $revision_want) >= 0) {
         print "Parrot $revision_have already available",
               " ($revision_want required)\n";
         exit(0);
     }
 
-    print "Checking out Parrot $revision_want via git...\n";
+    my $co = $checkout || $revision_want;
+    print "Checking out Parrot $co via git...\n";
+    my $git_describe = git_checkout('git://github.com/parrot/parrot.git', 
+                                    'parrot', $co);
 
-    # get an up-to-date parrot repository
-    if (! -d 'parrot') {
-        system_or_die(qw(git clone git://github.com/parrot/parrot.git parrot));
-        chdir('parrot') or die "Can't chdir to 'parrot': $!";
-    }
-    else {
-        chdir('parrot') or die "Can't chdir to 'parrot': $!";
-        system_or_die(qw(git fetch));
+    if ($checkout && $git_describe eq $revision_have) {
+        print "Parrot $checkout ($revision_have) already available\n";
+        exit(0);
     }
 
-    # move to desired parrot revision
-    system_or_die(qw(git checkout), $revision_want);
+    chdir('parrot') or die "$!\n";
 
     # if there's a Makefile from a previous build, do a 'make realclean'
     if (-f 'Makefile') {
@@ -76,7 +77,7 @@ MAIN: {
         die "Unable to determine value for 'make' from parrot config\n";
     system_or_die($make, 'install-dev');
 
-    print "Parrot $revision_want installed.\n";
+    print "Parrot $co installed.\n";
     0;
 }
 

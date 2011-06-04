@@ -18,8 +18,8 @@ MAIN: {
 
     my %options;
     GetOptions(\%options, 'help!', 'prefix=s',
-               'with-parrot=s', 'parrot-config=s',
-               'gen-parrot!', 'parrot-option=s@', 'min-parrot-revision=s',
+               'with-parrot=s', 'parrot-config',
+               'gen-parrot:s', 'parrot-option=s@', 'min-parrot-revision:s',
                'make-install!');
 
     # Print help if it's requested
@@ -42,20 +42,23 @@ MAIN: {
         close($CONFIG_STATUS);
     }
 
-    my $parrot_exe = $options{'with-parrot'};
+    my $parrot_exe      = $options{'with-parrot'};
+    my ($revision_want) = $options{'min_parrot-revision'}
+                          || split(' ', slurp("tools/build/PARROT_REVISION"));
 
-    if ($options{'gen-parrot'}) {
+    if (defined $options{'gen-parrot'}) {
         my @opts = @{ $options{'parrot-option'} || [] };
-        push @opts, "--min-parrot-revision=$options{'min-parrot-revision'}"
-            if $options{'min-parrot-revision'};
+        push @opts, "--checkout=$options{'gen-parrot'}"
+            if $options{'gen-parrot'};
         my $prefix = $options{'prefix'} || cwd()."/install";
-        my @cmd = ($^X, "tools/build/gen-parrot.pl", "--prefix=$prefix",
+        my @cmd = ($^X, "tools/build/gen-parrot.pl", 
+                   "--prefix=$prefix", "--min-parrot-revision=$revision_want",
                    "--optimize", @opts);
         print "Generating Parrot ...\n";
         print "@cmd\n\n";
         system_or_die(@cmd);
         # use the newly-built parrot config
-        $parrot_exe= "$prefix/bin/parrot$exe";
+        $parrot_exe = "$prefix/bin/parrot$exe";
     }
 
     my %parrot_config;
@@ -79,10 +82,7 @@ MAIN: {
         ? 'copy $(PARROT_BIN_DIR)\libparrot.dll .'
         : '';
 
-    my ($revision_want) = $options{'min_parrot-revision'}
-                          || split(' ', slurp("tools/build/PARROT_REVISION"));
     my $revision_have   = $config{'parrot::git_describe'} || '';
-
     if ($revision_have && cmp_rev($revision_have, $revision_want) < 0) {
         $errors .= "Parrot revision $revision_want required"
                    . " (currently $revision_have)\n";
@@ -99,6 +99,8 @@ the location of the parrot executable to be used to build NQP.
 
 END
     }
+
+    print "Using Parrot $config{'parrot::git_describe'}.\n";
 
     # Verify the Parrot installation is sufficient for building NQP
     verify_install([ @NQP::Configure::required_parrot_files ], %config);
