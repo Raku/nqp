@@ -87,6 +87,10 @@ static PMC * default_find_method(PARROT_INTERP, PMC *obj, STRING *name, INTVAL h
         
     /* Call it to get the method to call. */
     /* XXX Really want a way to do this without creating a nested runloop. */
+    if (PMC_IS_NULL(meth)) {
+        Parrot_ex_throw_from_c_args(interp, NULL, 1,
+            "No method cache and no find_method method in meta-object");
+    }
     Parrot_ext_call(interp, meth, "PiPS->P", HOW, obj, name, &result);
     return result;
 }
@@ -111,6 +115,10 @@ static INTVAL default_type_check (PARROT_INTERP, PMC *obj, PMC *checkee) {
         PMC *HOW = st->HOW;
         PMC *meth = STABLE(HOW)->find_method(interp, HOW, type_check_str, NO_HINT);
         PMC *result;
+        if (PMC_IS_NULL(meth)) {
+            Parrot_ex_throw_from_c_args(interp, NULL, 1,
+                "No type check cache and no type_check method in meta-object");
+        }
         Parrot_ext_call(interp, meth, "PiPP->P", HOW, obj, checkee, &result);
         return VTABLE_get_bool(interp, result);
     }
