@@ -418,7 +418,7 @@ inline op publish_type_check_cache(in PMC, in PMC) :base_core {
             PMC    **cache    = mem_sys_allocate(sizeof(PMC *) * items);
             INTVAL i;
             for (i = 0; i < items; i++)
-                cache[i] = VTABLE_get_pmc_keyed_int(interp, $2, i);
+                cache[i] = decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, $2, i));
             target_st->type_check_cache = cache;
             target_st->type_check_cache_length = items;
         }
