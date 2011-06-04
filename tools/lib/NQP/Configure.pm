@@ -84,7 +84,7 @@ sub fill_template_text {
     my %config = @_;
 
     $text =~ s/@([:\w]+)@/$config{$1} || $config{"parrot::$1"}/ge;
-    if ($^O eq 'MSWin32' && $text =~ /win32paths/) {
+    if ($^O eq 'MSWin32' && $text =~ /nqp::win32paths/) {
         $text =~ s{/}{\\}g;
     }
     $text;

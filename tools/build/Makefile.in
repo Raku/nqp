@@ -452,3 +452,6 @@ realclean: clean
 	$(RM_F) Makefile
 
 testclean:
+
+# nqp::win32paths <-- tells Configure.pm to convert / to \ in the above
+#                     template for Win32 systems
