@@ -7,7 +7,7 @@ use warnings;
 use Getopt::Long qw(:config pass_through);
 use Cwd;
 use lib "tools/lib";
-use NQP::Config qw(cmp_rev read_parrot_config slurp system_or_die);
+use NQP::Configure qw(cmp_rev read_parrot_config slurp system_or_die);
 
 MAIN: {
     my %options;

@@ -1,4 +1,4 @@
-package NQP::Config;
+package NQP::Configure;
 use strict;
 use warnings;
 
