@@ -43,7 +43,7 @@ MAIN: {
     }
 
     my $parrot_exe      = $options{'with-parrot'};
-    my ($revision_want) = $options{'min_parrot-revision'}
+    my ($revision_want) = $options{'min-parrot-revision'}
                           || split(' ', slurp("tools/build/PARROT_REVISION"));
 
     if (defined $options{'gen-parrot'}) {
