@@ -8,7 +8,7 @@ use Getopt::Long;
 use Cwd;
 use lib "tools/lib";
 use NQP::Configure qw(cmp_rev read_parrot_config fill_template_file
-                      slurp system_or_die);
+                      slurp system_or_die verify_install);
 
 MAIN: {
     my $exe = $NQP::Configure::exe;
@@ -74,7 +74,7 @@ MAIN: {
         $errors .= "Unable to locate parrot\n";
     }
     %config = (%config, %parrot_config);
-    $config{'win32_libparrot_copy') =
+    $config{'win32_libparrot_copy'} =
         $^O eq 'MSWin32'
         ? 'copy $(PARROT_BIN_DIR)\libparrot.dll .'
         : '';
@@ -101,7 +101,7 @@ END
     }
 
     # Verify the Parrot installation is sufficient for building NQP
-    verify_install(%config);
+    verify_install([ @NQP::Configure::required_parrot_files ], %config);
 
     # Create the Makefile using the information we just got
     fill_template_file('tools/build/Makefile.in', 'Makefile', %config);
@@ -130,46 +130,6 @@ END
     }
 
     exit 0;
-}
-
-
-sub verify_install {
-    my %config = @_;
-    print "Verifying installation...\n";
-    my $EXE = $config{'parrot::exe'};
-    my $PARROT_BIN_DIR = $config{'parrot::bindir'};
-    my $PARROT_VERSION = $config{'parrot::versiondir'};
-    my $PARROT_LIB_DIR = $config{'parrot::libdir'}.$PARROT_VERSION;
-    my $PARROT_SRC_DIR = $config{'parrot::srcdir'}.$PARROT_VERSION;
-    my $PARROT_TOOLS_DIR = "$PARROT_LIB_DIR/tools";
-    my $PARROT_INCLUDE_DIR = $config{'parrot::includedir'}.$PARROT_VERSION;
-    my @required_files = (
-        "$PARROT_BIN_DIR/parrot$EXE",
-        "$PARROT_BIN_DIR/pbc_to_exe$EXE",
-        "$PARROT_BIN_DIR/ops2c$EXE",
-        "$PARROT_TOOLS_DIR/build/pmc2c.pl",
-        "$PARROT_SRC_DIR",
-        "$PARROT_SRC_DIR/pmc",
-        "$PARROT_INCLUDE_DIR",
-        "$PARROT_INCLUDE_DIR/pmc",
-    );
-    my @missing;
-    for my $reqfile (@required_files) {
-        push @missing, "    $reqfile" unless -e $reqfile;
-    }
-    if (@missing) {
-        my $missing = join("\n", @missing);
-        die <<"END";
-
-===SORRY!===
-I'm missing some needed files in the install directory:
-$missing
-(Perhaps you need to use Parrot's "make install-dev" target or
-install the "parrot-devel" package for your system?)
-
-END
-    }
-    1;
 }
 
 

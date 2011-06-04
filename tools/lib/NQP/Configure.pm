@@ -4,9 +4,19 @@ use warnings;
 
 use base qw(Exporter);
 our @EXPORT_OK = qw(cmp_rev read_parrot_config fill_template_file 
-                    fill_template_text slurp system_or_die);
+                    fill_template_text slurp system_or_die verify_install);
 
 our $exe = $^O eq 'MSWin32' ? '.exe' : '';
+
+our @required_parrot_files = qw(
+    @bindir@/parrot@exe@
+    @bindir@/pbc_to_exe@exe@
+    @bindir@/ops2c@exe@
+    @libdir@@versiondir@/tools/build/pmc2c.pl
+    @srcdir@@versiondir@/pmc
+    @includedir@@versiondir@/pmc
+);
+
 
 sub parse_revision {
     my $rev = shift;
@@ -97,6 +107,32 @@ sub system_or_die {
     system( @cmd ) == 0
         or die "Command failed (status $?): @cmd\n";
 }
+
+
+sub verify_install {
+    my $files = shift;
+    my %config = @_;
+    print "Verifying installation...\n";
+    my @missing;
+    for my $reqfile ( @{$files} ) {
+        my $f = fill_template_text($reqfile, %config);
+        push @missing, "    $f" unless -e $f;
+    }
+    if (@missing) {
+        my $missing = join("\n", @missing);
+        die <<"END";
+
+===SORRY!===
+I'm missing some needed files in the install directory:
+$missing
+(Perhaps you need to use Parrot's "make install-dev" target or
+install the "parrot-devel" package for your system?)
+
+END
+    }
+    1;
+}
+
 
 
 1;
