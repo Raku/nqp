@@ -2,7 +2,7 @@
 
 # check literals
 
-say('1..8');
+say('1..9');
 
 print("ok ");
 print(1);
@@ -18,3 +18,6 @@ say(q<ok 6>);
 say(q  <ok 7>);
 
 say("\x6f\x6b 8");
+
+print("ok ");
+say(0_9);

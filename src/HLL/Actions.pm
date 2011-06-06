@@ -6,7 +6,10 @@ class HLL::Actions {
 
         while $i < $len {
             my $char := pir::substr($src, $i, 1);
-            next if $char eq '_';
+            if $char eq '_' {
+                $i := $i + 1;
+                next;
+            };
             my $digitval := pir::index("00112233445566778899AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz", $char);
             $digitval := pir::set__ip($digitval / 2);
             if $digitval < 0 || $digitval >= $base {
