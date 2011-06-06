@@ -392,10 +392,13 @@ inline op type_check(out INT, in PMC, in PMC) :base_core {
     PMC *type = decontainerize(interp, $3);
     if (val->vtable->base_type == smo_id && type->vtable->base_type == smo_id) {
         $1 = STABLE(val)->type_check(interp, val, type);
-    }    
+    }
+    else if (type->vtable->base_type == smo_id) {
+        $1 = 0;
+    }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Can only use type_check on two SixModelObjects");
+            "Can only use type_check to check against a SixModelObject");
     }
 }
 
