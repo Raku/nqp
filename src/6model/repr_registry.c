@@ -12,6 +12,7 @@
 #include "reprs/P6num.h"
 #include "reprs/P6str.h"
 #include "reprs/HashAttrStore.h"
+#include "reprs/Uninstantiable.h"
 
 /* An array of representations. */
 static PMC *repr_registry       = NULL;
@@ -50,6 +51,8 @@ void REPR_initialize_registry(PARROT_INTERP) {
         P6str_initialize(interp));
     register_repr(interp, Parrot_str_new_constant(interp, "HashAttrStore"), 
         HashAttrStore_initialize(interp));
+    register_repr(interp, Parrot_str_new_constant(interp, "Uninstantiable"),
+        Uninstantiable_initialize(interp));
 }
 
 /* Get a representation's ID from its name. Note that the IDs may change so
