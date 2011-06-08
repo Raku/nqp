@@ -61,7 +61,7 @@ MAIN: {
           or push @errors, "Unable to read configuration from $with_parrot.";
     }
     else {
-        %par_config = read_parrot_config("$prefix/bin/parrot$exe")
+        %par_config = read_parrot_config("$prefix/bin/parrot$exe", "parrot$exe")
           or push @errors, "Unable to find parrot.";
         $with_parrot = fill_template_text('@bindir@/parrot@exe@', %par_config);
     }
