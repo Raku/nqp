@@ -35,10 +35,10 @@ static PMC * instance_of(PARROT_INTERP, PMC *WHAT) {
     HashAttrStoreInstance *obj;
 
     /* Allocate and set up object instance. */
-    obj = Parrot_gc_allocate_fixed_size_storage(interp, sizeof(HashAttrStoreInstance));
+    obj = (HashAttrStoreInstance *) Parrot_gc_allocate_fixed_size_storage(interp, sizeof(HashAttrStoreInstance));
     obj->common.stable = STABLE_PMC(WHAT);
     obj->store = pmc_new(interp, enum_class_Hash);
-    
+
     return wrap_object(interp, obj);
 }
 
@@ -101,10 +101,10 @@ static PMC * repr_clone(PARROT_INTERP, PMC *to_clone) {
     HashAttrStoreInstance *obj;
 
     /* Allocate and set up object instance. */
-    obj = Parrot_gc_allocate_fixed_size_storage(interp, sizeof(HashAttrStoreInstance));
+    obj = (HashAttrStoreInstance *) Parrot_gc_allocate_fixed_size_storage(interp, sizeof(HashAttrStoreInstance));
     obj->common.stable = STABLE_PMC(to_clone);
     obj->store = VTABLE_clone(interp, ((HashAttrStoreInstance *)PMC_data(to_clone))->store);
-    
+
     return wrap_object(interp, obj);
 }
 
