@@ -455,5 +455,5 @@ realclean: clean
 
 testclean:
 
-# nqp::win32paths <-- tells Configure.pm to convert / to \ in the above
-#                     template for Win32 systems
+# nqp::makefile <-- tells Configure.pm to convert / to \ in the above
+#                   template for Win32 systems
