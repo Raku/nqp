@@ -71,7 +71,7 @@ static PMC * accessor_call(PARROT_INTERP, PMC *obj, STRING *name) {
  * everything will be looked up in spill. Otherwise returns a
  * populated name to index mapping. Note index is not related to the
  * storage position. */
-static P6opaqueNameMap* index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, PMC *flat_list) {
+P6opaqueNameMap * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, PMC *flat_list) {
     PMC    *class_list     = pmc_new(interp, enum_class_ResizablePMCArray);
     PMC    *attr_map_list  = pmc_new(interp, enum_class_ResizablePMCArray);
     PMC    *current_class  = WHAT;
@@ -81,7 +81,7 @@ static P6opaqueNameMap* index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, PM
     STRING *name_str       = Parrot_str_new_constant(interp, "name");
     INTVAL i, num_classes;
 
-    P6opaqueNameMap *result = NULL;
+    P6opaqueNameMap * result = NULL;
 
     /* Walk through the parents list. */
     while (!PMC_IS_NULL(current_class))
@@ -96,7 +96,7 @@ static P6opaqueNameMap* index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, PM
         PMC *attr_iter  = VTABLE_get_iter(interp, attributes);
         while (VTABLE_get_bool(interp, attr_iter)) {
             /* Get attribute. */
-            PMC *attr = VTABLE_shift_pmc(interp, attr_iter);
+            PMC * attr = VTABLE_shift_pmc(interp, attr_iter);
 
             /* Get its name. */
             PMC    *name_pmc = accessor_call(interp, attr, name_str);
@@ -130,7 +130,7 @@ static P6opaqueNameMap* index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, PM
         else if (num_parents > 1)
         {
             /* Multiple inheritnace, so we can't compute this hierarchy. */
-            return (struct P6opaqueNameMap *) mem_sys_allocate_zeroed(sizeof(P6opaqueNameMap));
+            return (P6opaqueNameMap *) mem_sys_allocate_zeroed(sizeof(P6opaqueNameMap));
         }
         else
         {
@@ -141,7 +141,7 @@ static P6opaqueNameMap* index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, PM
 
     /* We can now form the name map. */
     num_classes = VTABLE_elements(interp, class_list);
-    result = (struct P6opaqueNameMap *) mem_sys_allocate_zeroed(sizeof(P6opaqueNameMap) * (1 + num_classes));
+    result = (P6opaqueNameMap *) mem_sys_allocate_zeroed(sizeof(P6opaqueNameMap) * (1 + num_classes));
     for (i = 0; i < num_classes; i++) {
         result[i].class_key = VTABLE_get_pmc_keyed_int(interp, class_list, i);
         result[i].name_map  = VTABLE_get_pmc_keyed_int(interp, attr_map_list, i);
@@ -247,6 +247,9 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
                                         "Duplicate box_target for native str");
                             repr_data->unbox_str_offset = cur_size;
                             break;
+                        default:
+                            /*  nothing, just suppress 'missing default' warning */
+                            break;
                         }
                     }
                 }
@@ -260,7 +263,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
                 if (!PMC_IS_NULL(av_cont)) {
                     /* Stash away auto-viv container info. */
                     if (!repr_data->auto_viv_conf)
-                        repr_data->auto_viv_conf = (struct P6opaqueAutoViv *) mem_sys_allocate_zeroed(info_alloc * sizeof(P6opaqueAutoViv));
+                        repr_data->auto_viv_conf = (P6opaqueAutoViv *) mem_sys_allocate_zeroed(info_alloc * sizeof(P6opaqueAutoViv));
                     repr_data->auto_viv_conf[cur_avc_attr].offset = cur_size;
                     repr_data->auto_viv_conf[cur_avc_attr].value  = av_cont;
                     cur_avc_attr++;
@@ -373,17 +376,17 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 
 /* Creates a new instance based on the type object. */
 static PMC * instance_of(PARROT_INTERP, PMC *WHAT) {
-    P6opaqueInstance *obj;
+    P6opaqueInstance * obj;
 
     /* Compute allocation strategy if we've not already done so. */
-    P6opaqueREPRData *repr_data = (struct P6opaqueREPRData *) STABLE(WHAT)->REPR_data;
+    P6opaqueREPRData * repr_data = (P6opaqueREPRData *) STABLE(WHAT)->REPR_data;
     if (!repr_data->allocation_size) {
         compute_allocation_strategy(interp, WHAT, repr_data);
         PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC(WHAT));
     }
 
     /* Allocate and set up object instance. */
-    obj = (struct P6opaqueInstance *) Parrot_gc_allocate_fixed_size_storage(interp, repr_data->allocation_size);
+    obj = (P6opaqueInstance *) Parrot_gc_allocate_fixed_size_storage(interp, repr_data->allocation_size);
     memset(obj, 0, repr_data->allocation_size);
     obj->common.stable = STABLE_PMC(WHAT);
 

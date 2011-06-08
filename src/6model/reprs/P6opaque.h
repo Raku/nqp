@@ -68,6 +68,9 @@ typedef struct {
     INTVAL *gc_str_mark_offsets;
 } P6opaqueREPRData;
 
+/* function declarations */
+P6opaqueNameMap * index_mapping_and_flat_list(PARROT_INTERP, PMC * WHAT, PMC * flat_list);
+
 /* Initializes the P6opaque REPR. */
 PMC * P6opaque_initialize(PARROT_INTERP);
 

@@ -17,6 +17,7 @@ Makefile
 *.dump
 *.exe
 *.suo
+*~
 src/ops/*.h
 src/ops/*.c
 src/pmc/pmc_*.h
