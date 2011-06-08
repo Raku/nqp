@@ -8,6 +8,7 @@
 #include "sixmodelobject.h"
 #include "repr_registry.h"
 #include "reprs/KnowHOWREPR.h"
+#include "knowhow_bootstrapper.h"
 
 /* Cached string constants. */
 static STRING *repr_str     = NULL;

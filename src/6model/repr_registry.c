@@ -13,6 +13,7 @@
 #include "reprs/P6str.h"
 #include "reprs/HashAttrStore.h"
 #include "reprs/Uninstantiable.h"
+#include "repr_registry.h"
 
 /* An array of representations. */
 static PMC *repr_registry       = NULL;

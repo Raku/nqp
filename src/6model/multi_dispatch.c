@@ -5,6 +5,7 @@
 #include "../pmc/pmc_dispatchersub.h"
 #include "../pmc/pmc_nqpmultisig.h"
 #include "pmc_sub.h"
+#include "multi_dispatch.h"
 
 /* This file contains a somewhat simplified implementation of the Perl 6
  * multiple dispatch algorithm, to the degree that NQP needs it. */

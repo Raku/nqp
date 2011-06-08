@@ -5,6 +5,7 @@
 #define PARROT_IN_EXTENSION
 #include "parrot/parrot.h"
 #include "parrot/extend.h"
+#include "serialization_context.h"
 
 /* Hash of serialization context objects */
 static PMC *scs = NULL;
