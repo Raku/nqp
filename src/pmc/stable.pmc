@@ -9,7 +9,7 @@
  * defined/undefined flags for the multi dispatch cache, which is the
  * main reason these IDs exist at all. */
 static INTVAL TypeCacheIDSource = 0;
-static INTVAL get_next_type_cache_id() {
+static INTVAL get_next_type_cache_id(void) {
     /* XXX The C# original is doing:
      *     return Interlocked.Add(ref TypeCacheIDSource, 4);
      * But we don't yet have an abstraction layer for an atomic addition
