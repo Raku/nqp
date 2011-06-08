@@ -18,6 +18,7 @@ static STRING *p6opaque_str = NULL;
 
 /* Creates a new type with this HOW as its meta-object. */
 static void new_type(PARROT_INTERP, PMC *nci) {
+    PMC * unused;
     /* We first create a new HOW instance. */
     PMC *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
@@ -46,11 +47,12 @@ static void new_type(PARROT_INTERP, PMC *nci) {
     PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC(type_object));
 
     /* Put it into capture to act as return value. */
-    Parrot_pcc_build_call_from_c_args(interp, capture, "P", type_object);
+    unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", type_object);
 }
 
 /* Adds a method. */
 static void add_method(PARROT_INTERP, PMC *nci) {
+    PMC * unused;
     /* Get methods table out of meta-object. */
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
@@ -62,11 +64,12 @@ static void add_method(PARROT_INTERP, PMC *nci) {
 
     /* Add it, and return added method as result. */
     VTABLE_set_pmc_keyed_str(interp, methods, name, method);
-    Parrot_pcc_build_call_from_c_args(interp, capture, "P", method);
+    unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", method);
 }
 
 /* Adds an attribute meta-object to the list. */
 static void add_attribute(PARROT_INTERP, PMC *nci) {
+    PMC * unused;
     /* Get attributes list out of meta-object. */
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
@@ -75,11 +78,12 @@ static void add_attribute(PARROT_INTERP, PMC *nci) {
     /* Add meta-attribute to it. */
     PMC *meta_attr = VTABLE_get_pmc_keyed_int(interp, capture, 2);
     VTABLE_push_pmc(interp, attrs, meta_attr);
-    Parrot_pcc_build_call_from_c_args(interp, capture, "P", meta_attr);
+    unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", meta_attr);
 }
 
 /* Finds a method. */
 static void find_method(PARROT_INTERP, PMC *nci) {
+    PMC * unused;
     /* Get methods table out of meta-object and look up method. */
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
@@ -88,46 +92,51 @@ static void find_method(PARROT_INTERP, PMC *nci) {
     PMC    *method  = VTABLE_get_pmc_keyed_str(interp, methods, name);
 
     /* Put into capture to act as return value. */
-    Parrot_pcc_build_call_from_c_args(interp, capture, "P", method);
+    unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", method);
 }
 
 /* Composes the meta-object. */
 static void compose(PARROT_INTERP, PMC *nci) {
+    PMC * unused;
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *obj     = VTABLE_get_pmc_keyed_int(interp, capture, 1);
-    Parrot_pcc_build_call_from_c_args(interp, capture, "P", obj);
+    unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", obj);
 }
 
 /* Introspects the parents. Since a KnowHOW doesn't support inheritance,
  * just hand back an empty list. */
 static void parents(PARROT_INTERP, PMC *nci) {
+    PMC * unused;
     PMC *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC *empty   = pmc_new(interp, enum_class_FixedPMCArray);
-    Parrot_pcc_build_call_from_c_args(interp, capture, "P", empty);
+    unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", empty);
 }
 
 /* Introspects the attributes. For now just hand back real list. */
 static void attributes(PARROT_INTERP, PMC *nci) {
+    PMC * unused;
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
     PMC    *attrs   = ((KnowHOWREPRInstance *)PMC_data(self))->attributes;
-    Parrot_pcc_build_call_from_c_args(interp, capture, "P", attrs);
+    unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", attrs);
 }
 
 /* Introspects the methods. For now just hand back real method table. */
 static void methods(PARROT_INTERP, PMC *nci) {
+    PMC * unused;
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
     PMC    *meths   = ((KnowHOWREPRInstance *)PMC_data(self))->methods;
-    Parrot_pcc_build_call_from_c_args(interp, capture, "P", meths);
+    unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", meths);
 }
 
 /* Introspects the name. */
 static void name(PARROT_INTERP, PMC *nci) {
+    PMC * unused;
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
     STRING *name    = ((KnowHOWREPRInstance *)PMC_data(self))->name;
-    Parrot_pcc_build_call_from_c_args(interp, capture, "S", name);
+    unused = Parrot_pcc_build_call_from_c_args(interp, capture, "S", name);
 }
 
 /* Wraps up a C function as a raw NCI method. */
@@ -224,20 +233,22 @@ PMC * SixModelObject_bootstrap_knowhow(PARROT_INTERP, PMC *sc) {
 
 /* Attribute new method. */
 static void attr_new(PARROT_INTERP, PMC *nci) {
+    PMC * unused;
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *type    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
     STRING *name    = VTABLE_get_string_keyed_str(interp, capture, name_str);
     PMC    *self    = REPR(type)->instance_of(interp, type);
     REPR(self)->set_str(interp, self, name);
-    Parrot_pcc_build_call_from_c_args(interp, capture, "P", self);
+    unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", self);
 }
 
 /* Attribute name introspection. */
 static void attr_name(PARROT_INTERP, PMC *nci) {
+    PMC * unused;
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
     STRING *name    = REPR(self)->get_str(interp, self);
-    Parrot_pcc_build_call_from_c_args(interp, capture, "S", name);
+    unused = Parrot_pcc_build_call_from_c_args(interp, capture, "S", name);
 }
 
 /* Sets up a very simple attribute meta-object. Just supports having a
