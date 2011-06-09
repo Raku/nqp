@@ -2,7 +2,7 @@
 
 =head1 TITLE
 
-gen-version.l -- script to generate version information for HLL compilers
+gen-version.pl -- script to generate version information for HLL compilers
 
 =cut
 
