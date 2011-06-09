@@ -147,6 +147,8 @@ General Options:
     --gen-parrot       Download and build a copy of Parrot to use
     --parrot-option='--option=value'
                        Options to pass to parrot configuration for --gen-parrot
+
+Configure.pl also reads options from 'config.default' in the current directory.
 END
 
     return;
