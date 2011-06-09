@@ -42,3 +42,4 @@ src/gen/*.setting
 src/stage1
 src/stage2
 config.status
+config.default

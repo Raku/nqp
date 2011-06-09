@@ -4,6 +4,7 @@
 use 5.008;
 use strict;
 use warnings;
+use Text::ParseWords;
 use Getopt::Long;
 use Cwd;
 use lib "tools/lib";
@@ -12,6 +13,10 @@ use NQP::Configure qw(cmp_rev read_parrot_config
                       slurp system_or_die verify_install sorry gen_parrot);
 
 MAIN: {
+    if (-r "config.default") {
+        unshift @ARGV, shellwords(slurp('config.default'));
+    }
+
     my %config;
     $config{'nqp_config_status'} = join(' ', map { "\"$_\""} @ARGV);
 
