@@ -1,9 +1,11 @@
 #!/usr/bin/perl
 # Copyright (C) 2008-2011, The Perl Foundation.
-# $Id$
 
 use strict;
 use warnings;
+use 5.008;
+
+binmode STDOUT, ':utf8';
 
 my @files = @ARGV;
 
@@ -14,7 +16,7 @@ END_HEAD
 
 foreach my $file (@files) {
     print "# From $file\n\n";
-    open(my $fh, "<",  $file) or die $!;
+    open(my $fh, "<:utf8",  $file) or die "$file: $!";
     local $/;
     my $x = <$fh>;
     close $fh;
