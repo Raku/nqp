@@ -36,6 +36,29 @@ some PAST that will produce it or a name that it can be looked up by.
 .const int STORAGE_SPEC_BP_NUM = 2
 .const int STORAGE_SPEC_BP_STR = 3
 
+.sub 'attribute_6model_type' :method
+    .param pmc node
+
+    # See if we have a type. If so, use it to determine what op to use
+    # and what the register type will be.
+    .local pmc type
+    .local int primitive_type_id
+    type = node.'type'()
+    primitive_type_id = repr_get_primitive_type_spec type
+    if primitive_type_id == STORAGE_SPEC_BP_INT goto prim_int
+    if primitive_type_id == STORAGE_SPEC_BP_NUM goto prim_num
+    if primitive_type_id == STORAGE_SPEC_BP_STR goto prim_str
+    .return ('P', 'getattribute', 'setattribute')
+  prim_int:
+    .return ('i', 'repr_get_attr_int', 'repr_bind_attr_int')
+  prim_num:
+    .return ('n', 'repr_get_attr_num', 'repr_bind_attr_num')
+  prim_str:
+    .return ('s', 'repr_get_attr_str', 'repr_bind_attr_str')
+.end
+
+
+
 .sub 'attribute_6model' :method :multi(_, ['PAST';'Var'])
     .param pmc node
     .param pmc bindpost
@@ -43,40 +66,20 @@ some PAST that will produce it or a name that it can be looked up by.
     .local pmc ops
     $P0 = get_hll_global ['POST'], 'Ops'
     ops = $P0.'new'('node'=>node)
+
+    unless bindpost goto have_bindpost
+    $S0 = bindpost.'result'()
+    bindpost = $P0.'new'('result'=>$S0)
+  have_bindpost:
+
     .local string name
     name = node.'name'()
     name = self.'escape'(name)
     
     # See if we have a type. If so, use it to determine what op to use
     # and what the register type will be.
-    .local pmc type
     .local string get_attr_op, set_attr_op, coerce_reg_type
-    .local int primitive_type_id
-    type = node.'type'()
-    primitive_type_id = repr_get_primitive_type_spec type
-    if primitive_type_id == STORAGE_SPEC_BP_INT goto prim_int
-    if primitive_type_id == STORAGE_SPEC_BP_NUM goto prim_num
-    if primitive_type_id == STORAGE_SPEC_BP_STR goto prim_str
-    get_attr_op = 'getattribute'
-    set_attr_op = 'setattribute'
-    coerce_reg_type = 'P'
-    goto type_done
-  prim_int:
-    get_attr_op = 'repr_get_attr_int'
-    set_attr_op = 'repr_bind_attr_int'
-    coerce_reg_type = 'I'
-    goto type_done
-  prim_num:
-    get_attr_op = 'repr_get_attr_num'
-    set_attr_op = 'repr_bind_attr_num'
-    coerce_reg_type = 'N'
-    goto type_done
-  prim_str:
-    get_attr_op = 'repr_get_attr_str'
-    set_attr_op = 'repr_bind_attr_str'
-    coerce_reg_type = 'S'
-    goto type_done
-  type_done:
+    (coerce_reg_type, get_attr_op, set_attr_op) = self.'attribute_6model_type'(node)
 
     # We have three cases here.
     #   0 children = use self
@@ -113,11 +116,8 @@ some PAST that will produce it or a name that it can be looked up by.
     .tailcall self.'vivify'(node, ops, fetchop, storeop)
 
   attribute_bind:
-    if coerce_reg_type == 'P' goto attribute_bind_coerced    
-    $P0 = self.'uniquereg'(coerce_reg_type)
-    ops.'push_pirop'('set', $P0, bindpost)
-    bindpost = $P0
-  attribute_bind_coerced:
+    bindpost = self.'coerce'(bindpost, coerce_reg_type)
+    ops.'push'(bindpost)
     ops.'push_pirop'(set_attr_op, call_on, name, bindpost)
     ops.'result'(bindpost)
     .return (ops)
@@ -144,11 +144,8 @@ some PAST that will produce it or a name that it can be looked up by.
     .tailcall self.'vivify'(node, ops, fetchop, storeop)
 
   attribute_bind_handle:
-    if coerce_reg_type == 'P' goto attribute_bind_handle_coerced
-    $P0 = self.'uniquereg'(coerce_reg_type)
-    ops.'push_pirop'('set', $P0, bindpost)
-    bindpost = $P0
-  attribute_bind_handle_coerced:
+    bindpost = self.'coerce'(bindpost, coerce_reg_type)
+    ops.'push'(bindpost)
     ops.'push_pirop'(set_attr_op, call_on, handle, name, bindpost)
     ops.'result'(bindpost)
     .return (ops)
