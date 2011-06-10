@@ -201,5 +201,6 @@ void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attri
 PMC * wrap_repr(PARROT_INTERP, void *REPR);
 PMC * wrap_object(PARROT_INTERP, void *obj);
 PMC * create_stable(PARROT_INTERP, PMC *REPR, PMC *HOW);
+PMC * decontainerize(PARROT_INTERP, PMC *var);
 
 #endif
