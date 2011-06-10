@@ -150,3 +150,36 @@ some PAST that will produce it or a name that it can be looked up by.
     ops.'result'(bindpost)
     .return (ops)
 .end
+
+
+.sub 'bind_6model' :method :multi(_, ['PAST';'Op'])
+    .param pmc node
+    .param pmc options         :slurpy :named
+
+    .local pmc ops, lpast, rpast, lpost, rpost
+    lpast = node[0]
+    rpast = node[1]
+
+    .local string rtype
+    rtype = 'P'
+    $I0 = isa lpast, ['PAST';'Var']
+    unless $I0 goto have_rtype
+    $S0 = lpast.'scope'()
+    unless $S0 == 'attribute_6model' goto have_rtype
+    (rtype) = self.'attribute_6model_type'(lpast)
+  have_rtype:
+
+    $P0 = get_hll_global ['POST'], 'Ops'
+    ops = $P0.'new'('node'=>node)
+    rpost = self.'as_post'(rpast, 'rtype'=>rtype)
+    rpost = self.'coerce'(rpost, rtype)
+    ops.'push'(rpost)
+
+    lpast.'lvalue'(1)
+    lpost = self.'as_post'(lpast, 'bindpost'=>rpost)
+    ops.'push'(lpost)
+    ops.'result'(lpost)
+    .return (ops)
+.end
+
+

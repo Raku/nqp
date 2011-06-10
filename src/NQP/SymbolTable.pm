@@ -79,7 +79,7 @@ class NQP::SymbolTable is HLL::Compiler::SerializationContextBuilder {
             $path := PAST::Op.new(:pirop('nqp_get_package_through_who PPs'), $path, ~$_);
         }
         self.add_event(:deserialize_past(PAST::Op.new(
-            :pasttype('bind'),
+            :pasttype('bind_6model'),
             PAST::Var.new(
                 :scope('keyed'),
                 PAST::Op.new( :pirop('get_who PP'), $path ),
@@ -125,7 +125,7 @@ class NQP::SymbolTable is HLL::Compiler::SerializationContextBuilder {
     # specified name.
     method install_package_routine($package, $name, $past_block) {
         my $fixup := PAST::Op.new(
-            :pasttype('bind'),
+            :pasttype('bind_6model'),
             PAST::Var.new(
                 :scope('keyed'),
                 PAST::Op.new( :pirop('get_who PP'), self.get_slot_past_for_object($package) ),
@@ -416,7 +416,7 @@ class NQP::SymbolTable is HLL::Compiler::SerializationContextBuilder {
                     PAST::Op.new( :pirop('get_class Ps'), 'NQPLexPad' )
                 ),
                 PAST::Op.new(
-                    :pasttype('bind'),
+                    :pasttype('bind_6model'),
                     PAST::Var.new( :name('cur_sc'), :scope('register'), :isdecl(1) ),
                     PAST::Op.new( :pirop('nqp_create_sc Ps'), self.handle() )
                 ),

@@ -704,8 +704,8 @@ grammar NQP::Grammar is HLL::Grammar {
     token infix:sym<=>    {
         <sym> <.panic: 'Assignment ("=") not supported in NQP, use ":=" instead'>
     }
-    token infix:sym<:=>   { <sym>  <O('%assignment, :pasttype<bind>')> }
-    token infix:sym<::=>  { <sym>  <O('%assignment, :pasttype<bind>')> }
+    token infix:sym<:=>   { <sym>  <O('%assignment, :pasttype<bind_6model>')> }
+    token infix:sym<::=>  { <sym>  <O('%assignment, :pasttype<bind_6model>')> }
 
     token infix:sym<,>    { <sym>  <O('%comma, :pasttype<list>')> }
 

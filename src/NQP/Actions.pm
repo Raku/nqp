@@ -54,7 +54,7 @@ class NQP::Actions is HLL::Actions {
         # compilation unit that is using this one will then replace it
         # with its view later (or be in a position to restore it).
         $unit.loadinit().push(PAST::Op.new(
-            :pasttype('bind'),
+            :pasttype('bind_6model'),
             PAST::Var.new( :name('GLOBAL'), :namespace([]), :scope('package') ),
             $*SC.get_slot_past_for_object($*PACKAGE)
         ));
@@ -326,7 +326,7 @@ class NQP::Actions is HLL::Actions {
         }
         unless $block.arity {
             $block.unshift(
-                PAST::Op.new( :pasttype('bind'),
+                PAST::Op.new( :pasttype('bind_6model'),
                     PAST::Var.new( :scope('lexical'), :name('$!'), :isdecl(1) ),
                     PAST::Var.new( :scope('lexical'), :name('$_')),
                 ),
@@ -345,7 +345,7 @@ class NQP::Actions is HLL::Actions {
                         $block,
                         PAST::Var.new( :scope('register'), :name('exception')),
                     ),
-                    PAST::Op.new( :pasttype('bind'),
+                    PAST::Op.new( :pasttype('bind_6model'),
                         PAST::Var.new( :scope('keyed'),
                             PAST::Var.new( :scope('register'), :name('exception')),
                             'handled'
@@ -371,7 +371,7 @@ class NQP::Actions is HLL::Actions {
             $past.handlers([PAST::Control.new(
                     :handle_types_except('CONTROL'),
                     PAST::Stmts.new(
-                        PAST::Op.new( :pasttype('bind'),
+                        PAST::Op.new( :pasttype('bind_6model'),
                             PAST::Var.new( :scope('keyed'),
                                 PAST::Var.new( :scope('register'), :name('exception')),
                                 'handled'
@@ -778,7 +778,7 @@ class NQP::Actions is HLL::Actions {
                         # it per invocation.
                         $*SC.install_package_routine($*PACKAGE, $name, $past);
                         @BLOCK[0][0].push(PAST::Op.new(
-                            :pasttype('bind'),
+                            :pasttype('bind_6model'),
                             lexical_package_lookup([$name], $/),
                             PAST::Var.new( :name($name), :scope('lexical') )
                         ));
@@ -1543,7 +1543,7 @@ class NQP::RegexActions is Regex::P6Regex::Actions {
                         :name('MATCH'),
                         :pasttype('callmethod')
                     ),
-                    :pasttype('bind')
+                    :pasttype('bind_6model')
                 ),
                 $block
             );
