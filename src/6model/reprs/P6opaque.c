@@ -135,7 +135,7 @@ P6opaqueNameMap * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, PMC *fla
         else
         {
             /* Just one. Get next parent and work through its attributes. */
-            current_class = VTABLE_get_pmc_keyed_int(interp, parents, 0);
+            current_class = decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, parents, 0));
         }
     }
 
