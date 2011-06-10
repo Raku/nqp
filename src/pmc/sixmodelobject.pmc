@@ -24,7 +24,7 @@
 
 #include "../6model/sixmodelobject.h"
 
-static PMC * decontainerize(PARROT_INTERP, PMC *var) {
+PMC * decontainerize(PARROT_INTERP, PMC *var) {
     ContainerSpec *spec = STABLE(var)->container_spec;
     if (spec && REPR(var)->defined(interp, var)) {
         if (!PMC_IS_NULL(spec->value_slot.class_handle)) {
