@@ -545,8 +545,18 @@ class HLL::Compiler {
         pir::compreg__Ps('PAST').to_post($source, |%adverbs)
     }
 
+    method pirbegin() {
+        ".include 'cclass.pasm'\n"
+        ~ ".include 'except_severity.pasm'\n"
+        ~ ".include 'except_types.pasm'\n"
+        ~ ".include 'iglobals.pasm'\n"
+        ~ ".include 'interpinfo.pasm'\n"
+        ~ ".include 'iterator.pasm'\n"
+        ~ ".include 'sysinfo.pasm'\n"
+    }
+  
     method pir($source, *%adverbs) {
-        pir::compreg__Ps('POST').to_pir($source, |%adverbs)
+        self.pirbegin() ~ pir::compreg__Ps('POST').to_pir($source, |%adverbs)
     }
 
     method evalpmc($source, *%adverbs) {

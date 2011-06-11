@@ -1342,7 +1342,7 @@ class NQP::Actions is HLL::Actions {
             :node($/),
             :pirop('die__vii'),
             0,
-            PAST::Val.new( :value($type), :returns<!except_types> )
+            PAST::Val.new( :value($type), :returns<!macro_const> )
         );
     }
 
