@@ -405,19 +405,19 @@ Match various anchor points, including ^, ^^, $, $$.
     ops.'push_pirop'('ge', pos, eos, fail)
     ops.'push_pirop'('sub', '$I10', pos, off)
     ops.'push_pirop'('dec', '$I10')
-    ops.'push_pirop'('is_cclass', '$I11', .CCLASS_NEWLINE, tgt, '$I10')
+    ops.'push_pirop'('is_cclass', '$I11', '.CCLASS_NEWLINE', tgt, '$I10')
     ops.'push_pirop'('unless', '$I11', fail)
     ops.'push'(donelabel)
     goto done
 
   anchor_eol:
     ops.'push_pirop'('sub', '$I10', pos, off)
-    ops.'push_pirop'('is_cclass', '$I11', .CCLASS_NEWLINE, tgt, '$I10')
+    ops.'push_pirop'('is_cclass', '$I11', '.CCLASS_NEWLINE', tgt, '$I10')
     ops.'push_pirop'('if', '$I11', donelabel)
     ops.'push_pirop'('ne', pos, eos, fail)
     ops.'push_pirop'('eq', pos, 0, donelabel)
     ops.'push_pirop'('dec', '$I10')
-    ops.'push_pirop'('is_cclass', '$I11', .CCLASS_NEWLINE, tgt, '$I10')
+    ops.'push_pirop'('is_cclass', '$I11', '.CCLASS_NEWLINE', tgt, '$I10')
     ops.'push_pirop'('if', '$I11', fail)
     ops.'push'(donelabel)
     goto done
@@ -425,20 +425,20 @@ Match various anchor points, including ^, ^^, $, $$.
   anchor_lwb:
     ops.'push_pirop'('ge', pos, eos, fail)
     ops.'push_pirop'('sub', '$I10', pos, off)
-    ops.'push_pirop'('is_cclass', '$I11', .CCLASS_WORD, tgt, '$I10')
+    ops.'push_pirop'('is_cclass', '$I11', '.CCLASS_WORD', tgt, '$I10')
     ops.'push_pirop'('unless', '$I11', fail)
     ops.'push_pirop'('dec', '$I10')
-    ops.'push_pirop'('is_cclass', '$I11', .CCLASS_WORD, tgt, '$I10')
+    ops.'push_pirop'('is_cclass', '$I11', '.CCLASS_WORD', tgt, '$I10')
     ops.'push_pirop'('if', '$I11', fail)
     goto done
 
   anchor_rwb:
     ops.'push_pirop'('le', pos, 0, fail)
     ops.'push_pirop'('sub', '$I10', pos, off)
-    ops.'push_pirop'('is_cclass', '$I11', .CCLASS_WORD, tgt, '$I10')
+    ops.'push_pirop'('is_cclass', '$I11', '.CCLASS_WORD', tgt, '$I10')
     ops.'push_pirop'('if', '$I11', fail)
     ops.'push_pirop'('dec', '$I10')
-    ops.'push_pirop'('is_cclass', '$I11', .CCLASS_WORD, tgt, '$I10')
+    ops.'push_pirop'('is_cclass', '$I11', '.CCLASS_WORD', tgt, '$I10')
     ops.'push_pirop'('unless', '$I11', fail)
     goto done
 
