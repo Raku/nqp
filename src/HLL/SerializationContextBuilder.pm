@@ -120,10 +120,17 @@ class HLL::Compiler::SerializationContextBuilder {
     }
 
     # Add an event that may have an action to deserialize or fix up.
+    # Note that we can determine which one we need and just save the
+    # needed one.
     method add_event(:$deserialize_past, :$fixup_past) {
-        @!event_stream.push(Event.new(
-            :deserialize_past($deserialize_past), :fixup_past($fixup_past)
-        ));
+        if %*COMPILING<%?OPTIONS><target> eq 'pir' {
+            # Pre-compilation; only need deserialization PAST.
+            @!event_stream.push(Event.new(:deserialize_past($deserialize_past)));
+        }
+        else {
+            # Presumably, going all the way to running, so just fixups.
+            @!event_stream.push(Event.new(:fixup_past($fixup_past)));
+        }
     }
     
     # Gets PAST for referencing an object in a serialization context,
