@@ -170,8 +170,6 @@ C< :!pair >, and C<< :pair<strval> >>.
 =end
     method O($spec, $save?) {
         Q:PIR {
-            .include 'cclass.pasm'
-            
             .local pmc self, cur_class
             .local string spec, save
             .local int has_save
