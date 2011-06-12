@@ -1157,6 +1157,10 @@ class NQP::Actions is HLL::Actions {
         make $past;
     }
 
+    method term:sym<pir::const>($/) {
+        make PAST::Val.new( :value(~$<const>), :returns<!macro_const>, :node($/) );
+    }
+
     method term:sym<onlystar>($/) {
         make PAST::Op.new(
             :pirop('multi_dispatch_over_lexical_candidates P')

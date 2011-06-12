@@ -541,6 +541,10 @@ grammar NQP::Grammar is HLL::Grammar {
         'pir::' $<op>=[\w+] <args>?
     }
 
+    token term:sym<pir::const> {
+        'pir::const::' $<const>=[\w+]
+    }
+
     token term:sym<onlystar> {
         '{*}' <?ENDSTMT>
         [ <?{ $*MULTINESS eq 'proto' }> || <.panic: '{*} may only appear in proto'> ]
