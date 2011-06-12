@@ -456,8 +456,8 @@ Match something in a character class, such as \w, \d, \s, dot, etc.
 .sub 'charclass' :method
     .param pmc node
 
-    .local string subtype
-    .local int cclass, negate
+    .local string subtype, cclass
+    .local int negate
     (subtype, cclass, negate) = self.'!charclass_init'(node)
 
     .local pmc cur, tgt, pos, off, eos, fail, ops
@@ -466,7 +466,7 @@ Match something in a character class, such as \w, \d, \s, dot, etc.
 
     ops.'push_pirop'('inline', subtype, 'inline'=>'  # rx charclass %0')
     ops.'push_pirop'('ge', pos, eos, fail)
-    if cclass == .CCLASS_ANY goto charclass_done
+    if cclass == '.CCLASS_ANY' goto charclass_done
 
     .local pmc cctest
     cctest = self.'??!!'(negate, 'if', 'unless')
@@ -514,20 +514,20 @@ charclass C<node>.
     if $S0 == 'nl' goto cclass_newline
     self.'panic'('Unrecognized subtype "', subtype, '" in PAST::Regex charclass node')
   cclass_dot:
-    .local int cclass
-    cclass = .CCLASS_ANY
+    .local string cclass
+    cclass = '.CCLASS_ANY'
     goto cclass_done
   cclass_digit:
-    cclass = .CCLASS_NUMERIC
+    cclass = '.CCLASS_NUMERIC'
     goto cclass_done
   cclass_space:
-    cclass = .CCLASS_WHITESPACE
+    cclass = '.CCLASS_WHITESPACE'
     goto cclass_done
   cclass_word:
-    cclass = .CCLASS_WORD
+    cclass = '.CCLASS_WORD'
     goto cclass_done
   cclass_newline:
-    cclass = .CCLASS_NEWLINE
+    cclass = '.CCLASS_NEWLINE'
   cclass_done:
     .return (subtype, cclass, negate)
 .end
@@ -551,8 +551,8 @@ standard quantifier code will handle it.
     if backtrack != 'r' goto pessimistic
     if sep goto pessimistic
 
-    .local string subtype
-    .local int cclass, negate
+    .local string subtype, cclass
+    .local int negate
     (subtype, cclass, negate) = self.'!charclass_init'(node)
 
     # positive logical newline matching is special, don't try to optimize it
