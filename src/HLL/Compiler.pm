@@ -57,11 +57,7 @@ class HLL::Compiler {
         for @!cmdoptions {
             $!usage := $!usage ~ "    $_\n";
         }
-        my $config_hash_idx := Q:PIR {
-            .include 'iglobals.pasm'
-            %r = box .IGLOBALS_CONFIG_HASH
-        };
-        %parrot_config := pir::getinterp()[$config_hash_idx];
+        %parrot_config := pir::getinterp()[pir::const::IGLOBALS_CONFIG_HASH];
         %!config     := pir::new('Hash');
     }
     
@@ -321,7 +317,6 @@ class HLL::Compiler {
         self.show-config          if %adverbs<show-config>;
 
         Q:PIR {
-            .include 'except_severity.pasm'
             .local pmc args, adverbs, self
             args = find_lex '@a'
             adverbs = find_lex '%adverbs'
@@ -672,8 +667,6 @@ class HLL::Compiler {
             pos = $P0
             $P0 = find_lex '$cache'
             cache = $P0
-
-            .include 'cclass.pasm'
 
             # If we've previously cached C<linepos> for target, we use it.
             unless cache goto linepos_build
