@@ -548,6 +548,7 @@ class HLL::Compiler {
         ~ ".include 'interpinfo.pasm'\n"
         ~ ".include 'iterator.pasm'\n"
         ~ ".include 'sysinfo.pasm'\n"
+        ~ ".include 'datatypes.pasm'\n"
     }
   
     method pir($source, *%adverbs) {
