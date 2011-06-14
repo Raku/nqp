@@ -15,6 +15,7 @@ static INTVAL sc_id     = 0;
 /* Cached strings. */
 static STRING *find_method_str = NULL;
 static STRING *type_check_str = NULL;
+static STRING *accepts_type_str = NULL;
 
 /* Initializes 6model and produces the KnowHOW core meta-object. */
 void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attribute) {
@@ -22,12 +23,13 @@ void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attri
     STRING *initial_sc_name;
     
     /* Look up and cache some type IDs and strings. */
-    stable_id       = pmc_type(interp, Parrot_str_new(interp, "STable", 0));
-    repr_id         = pmc_type(interp, Parrot_str_new(interp, "REPR", 0));
-    smo_id          = pmc_type(interp, Parrot_str_new(interp, "SixModelObject", 0));
-    sc_id           = pmc_type(interp, Parrot_str_new(interp, "SerializationContext", 0));
-    find_method_str = Parrot_str_new_constant(interp, "find_method");
-    type_check_str  = Parrot_str_new_constant(interp, "type_check");
+    stable_id        = pmc_type(interp, Parrot_str_new(interp, "STable", 0));
+    repr_id          = pmc_type(interp, Parrot_str_new(interp, "REPR", 0));
+    smo_id           = pmc_type(interp, Parrot_str_new(interp, "SixModelObject", 0));
+    sc_id            = pmc_type(interp, Parrot_str_new(interp, "SerializationContext", 0));
+    find_method_str  = Parrot_str_new_constant(interp, "find_method");
+    type_check_str   = Parrot_str_new_constant(interp, "type_check");
+    accepts_type_str = Parrot_str_new_constant(interp, "accepts_type");
 
     /* Create initial core serialization context. */
     initial_sc = pmc_new(interp, sc_id);
@@ -98,30 +100,58 @@ static PMC * default_find_method(PARROT_INTERP, PMC *obj, STRING *name, INTVAL h
 /* This is the default type checking implementation. Note: it may also
  * be the only one we end up with since the HOW is the authority here.
  * So we may end up not calling this through the S-Table in the end. */
-static INTVAL default_type_check (PARROT_INTERP, PMC *obj, PMC *checkee) {
-    STable *st = STABLE(obj);
+static INTVAL default_type_check (PARROT_INTERP, PMC *to_check, PMC *wanted) {
+    PMC *HOW, *meth, *result;
+    
+    STable *st = STABLE(to_check);
+    INTVAL type_check_mode = STABLE(wanted)->type_check_mode;
     if (st->type_check_cache) {
         /* We have the cache, so just look for the type object we
          * want to be in there. */
         INTVAL i;
         for (i = 0; i < st->type_check_cache_length; i++)
-            if (st->type_check_cache[i] == checkee)
+            if (st->type_check_cache[i] == wanted)
                 return 1;
-        return 0;
+                
+        /* If the type check cache is definitive, we're done. */
+        if ((type_check_mode & TYPE_CHECK_CACHE_THEN_METHOD) == 0 &&
+                (type_check_mode & TYPE_CHECK_NEEDS_ACCEPTS) == 0)
+            return 0;
     }
-    else
+    
+    /* If we get here, need to call .^type_check on the value we're
+     * checking. */
+    if (!st->type_check_cache || (type_check_mode & TYPE_CHECK_CACHE_THEN_METHOD))
     {
-        /* Find .^type_check and call it. */
-        PMC *HOW = st->HOW;
-        PMC *meth = STABLE(HOW)->find_method(interp, HOW, type_check_str, NO_HINT);
-        PMC *result;
+        PMC    *HOW = st->HOW;
+        PMC    *meth = STABLE(HOW)->find_method(interp, HOW, type_check_str, NO_HINT);
+        PMC    *result_pmc;
+        INTVAL  result;
         if (PMC_IS_NULL(meth)) {
             Parrot_ex_throw_from_c_args(interp, NULL, 1,
                 "No type check cache and no type_check method in meta-object");
         }
-        Parrot_ext_call(interp, meth, "PiPP->P", HOW, obj, checkee, &result);
-        return VTABLE_get_bool(interp, result);
+        Parrot_ext_call(interp, meth, "PiPP->P", HOW, to_check, wanted, &result_pmc);
+        result = VTABLE_get_bool(interp, result_pmc);
+        if (result)
+            return result;
     }
+    
+    /* If the flag to call .accepts_type on the target value is set, do so. */
+    if (type_check_mode & TYPE_CHECK_NEEDS_ACCEPTS) {
+        PMC    *HOW = STABLE(wanted)->HOW;
+        PMC    *meth = STABLE(HOW)->find_method(interp, HOW, accepts_type_str, NO_HINT);
+        PMC    *result_pmc;
+        if (PMC_IS_NULL(meth)) {
+            Parrot_ex_throw_from_c_args(interp, NULL, 1,
+                "Expected accepts_type method, but none found in meta-object");
+        }
+        Parrot_ext_call(interp, meth, "PiPP->P", HOW, wanted, to_check, &result_pmc);
+        return VTABLE_get_bool(interp, result_pmc);
+    }
+    
+    /* If we get here, type check failed. */
+    return 0;
 }
 
 /* Creates an STable that references the given REPR and HOW. */

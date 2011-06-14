@@ -718,9 +718,29 @@ inline op set_sub_multisig(in PMC, in PMC, in PMC) :base_core {
             "Can only use set_sub_multisig if first operand is a Sub.");
 }
 
+
 /*
 
-=item publish_vtable_mapping()
+=item stable_set_type_check_mode()
+
+Sets the type check mode flags.
+
+=cut
+
+*/
+inline op stable_set_type_check_mode(in PMC, in INT) :base_core {
+    PMC *target = decontainerize(interp, $1);
+    if (target->vtable->base_type == smo_id)
+        STABLE(target)->type_check_mode = $2;
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use stable_set_type_check_mode with a SixModelObject");
+}
+
+
+/*
+
+=item stable_publish_vtable_mapping()
 
 Publishes a Parrot v-table mapping, which will be hung off the s-table.
 It's stored as an array, so lookups will be speedy.
