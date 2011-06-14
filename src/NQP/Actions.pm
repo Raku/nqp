@@ -130,6 +130,7 @@ class NQP::Actions is HLL::Actions {
                 my $ast := $_.ast;
                 $ast := $ast<sink> if pir::defined($ast<sink>);
                 if $ast<bareblock> { $ast := block_immediate($ast); }
+                $ast := PAST::Stmt.new($ast) if $ast ~~ PAST::Node;
                 $past.push( $ast );
             }
         }
