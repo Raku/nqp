@@ -13,7 +13,7 @@ class HLL::Actions {
             my $digitval := pir::index("00112233445566778899AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz", $char);
             $digitval := pir::set__ip($digitval / 2);
             if $digitval < 0 || $digitval >= $base {
-                $src.panic("Invalid radix conversion of character '$char'");
+                $src.CURSOR.panic("Invalid radix conversion of character '$char'");
             }
             $result := $base * $result + $digitval,
             $i := $i + 1;
