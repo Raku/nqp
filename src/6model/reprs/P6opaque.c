@@ -524,7 +524,7 @@ static void bind_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *n
 
     /* Fall back to the spill storage. */
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6opaque attributes NYFI 4");
+            "P6opaque attributes NYFI 4 (attribute '%Ss' not found)", name);
 }
 static void bind_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, INTVAL value) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
