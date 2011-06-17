@@ -442,7 +442,7 @@ static PMC * get_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *n
     
     /* Fall back to the spill storage. */
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6opaque attributes NYFI 1");
+            "P6opaque attributes NYFI 1 (attribute '%Ss')", name);
 }
 static INTVAL get_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
