@@ -1162,6 +1162,17 @@ class NQP::Actions is HLL::Actions {
         make PAST::Val.new( :value(~$<const>), :returns<!macro_const>, :node($/) );
     }
 
+    method term:sym<nqp::op>($/) {
+        my $op    := ~$<op>;
+        my $args  := $<args> ?? $<args>[0].ast.list !! [];
+        my $past  := PAST::Node.'map_node'(|$args, :map<nqp>, :op($op), 
+                                           :node($/));
+
+        pir::defined($past) ||
+            $/.CURSOR.panic("Unrecognized nqp:: opcode 'nqp::$op'");
+        make $past;
+    }
+
     method term:sym<onlystar>($/) {
         make PAST::Op.new(
             :pirop('multi_dispatch_over_lexical_candidates P')

@@ -1,0 +1,117 @@
+General notes:
+  * Not really attempting to be exhaustive just yet -- only want
+    to get the most significant ones done in this pass.
+  * Avoid "set" -- use "bind" or "assign" if that's what we're really doing.
+    Or, if we want to keep "set", make sure it always means "bind".
+  * A suffix of _i, _n, or _s generally denotes an int/num/str version
+    of the opcode.  Stick to lowercase letters here...
+  * ... except that bigints might be a _I suffix  :-)
+  * Perhaps reserve _b for a boolean native type
+  * Might want to reserve _a and _h for "native" list/hash versions of opcodes
+  * Might want to reserve _o for object/instance versions of opcodes
+  * aim for consistency with underscores and the like
+    (i.e., unlike parrot, don't mix "get_foo" and "getbar")
+  * Use the p6-defined terms where possible (e.g., "elems" and "chars"
+    instead of "elements" and "length")
+  * Generally return an appropriate argument instead of void
+  * Items marked (?) mean that the opcode itself might be questionable
+    for inclusion in the set.
+
+
+  control opcodes:
+    nqp::if(test, iftrue, iffalse)
+    nqp::unless(test, iffalse, iftrue)
+    nqp::while(test, body)
+    nqp::loop(init, test, next, body)
+    nqp::throw                     pir::throw__P
+    nqp::die                       pir::die
+    nqp::exit                      pir::exit__vi
+    nqp::sleep                     pir::sleep__vn
+    (need ops to fetch caller, outer, context, etc?)
+
+  I/O:
+    nqp::print                     pir::print
+    nqp::say                       pir::say
+
+  arithmetic:
+    nqp::add_i                     pir::add__Iii
+    nqp::add_n                     pir::add__Nnn
+    ...etc...
+
+  string:
+    nqp::concat                    pir::concat__Sss
+    nqp::join                      pir::join__SsP
+    nqp::substr                    pir::substr__Ssii
+    nqp::downcase                  pir::downcase__Ss
+    nqp::upcase                    pir::upcase__Ss
+    nqp::index                     pir::index__Issi
+    nqp::chr                       pir::chr__Si
+    nqp::ord                       pir::ord__Si
+    nqp::chars                     pir::length__Is
+    nqp::split                     pir::split__Pss
+    nqp::iscclass                  pir::iscclass__Isii          (?)
+    nqp::findcclass                pir::find_cclass__Isii       (?)
+    nqp::findnotcclass             pir::find_not_cclass__Isii   (?)
+
+  relational:
+    nqp::iseq_i                    pir::iseq__Iii
+    nqp::iseq_n                    pir::iseq__Inn
+    nqp::iseq_s                    pir::iseq__Iss
+    ...etc...
+
+  aggregate:
+    nqp::pop                       pir::pop__PP
+    nqp::push                      pir::push__0PP
+    nqp::shift                     pir::shift__PP
+    nqp::unshift                   pir::unshift__0PP
+    nqp::splice                    pir::splice__0PPii
+    nqp::bindpos                   pir::set__1QiP
+    nqp::bindkey                   pir::set__1QsP
+    nqp::atpos                     pir::set__PQi
+    nqp::atkey                     pir::set__PQs
+    nqp::existpos                  pir::exists__IQi
+    nqp::existkey                  pir::exists__IQs
+    nqp::elems                     pir::elements__IP
+
+  object:
+    nqp::bindattribute             pir::setattribute__0PPsP
+    nqp::getattribute              pir::getattribute__PPsP
+    nqp::findmethod                pir::find_method__PPs        (?)
+    nqp::null                      pir::null__P
+    nqp::isnull                    pir::isnull__IP
+    nqp::defined                   pir::defined__IP
+    nqp::??                        pir::istrue__IP
+    nqp::clone                     pir::clone__PP
+    nqp::typecheck or ::isa        pir::type_check__IPP
+                   or ::istype
+    nqp::??                        pir::repr_instance_of__PP    (?)
+    nqp::unbox_i                   pir::repr_unbox_int__IP
+    nqp::unbox_n                   pir::repr_unbox_num__NP
+    nqp::unbox_s                   pir::repr_unbox_str__SP
+    nqp::box_i                     pir::repr_box_int__PPi
+    nqp::box_n                     pir::repr_box_num__PPn
+    nqp::box_s                     pir::repr_box_str__PPs
+    nqp::what or nqp::getwhat                                   (?)
+    nqp::how  or nqp::gethow                                    (?)
+    nqp::??                        pir::can__IPs                (?)
+
+  Rakudo-specific:
+    nqp::p6box_i                   pir::perl6_box_int__Pi
+    nqp::p6box_n                   pir::perl6_box_num__Pn
+    nqp::p6box_s                   pir::perl6_box_str__Ps
+    nqp::p6iscontainer             pir::is_container__IP
+    nqp::??   (::p6capturepos?)    pir::perl6_current_args__P
+    nqp::p6assign or ::p6store     pir::perl6_container_store__0PP
+    nqp::p6bool or ::p6box_b       pir::perl6_booleanize__PI
+    nqp::p6list_a                  pir::perl6_list_from_rpa__PPPP
+    nqp::p6iter_a                  pir::perl6_iter_from_rpa__PPP
+
+  Lexical and variable ops (?)
+    nqp::bindlex                   pir::store_lex__1sP
+    nqp::getlex    or ::lex        pir::find_lex__Ps
+    nqp::getdynlex or ::dynlex     pir::find_dynamic_lex__Ps
+    nqp::binddynlex                pir::store_dynamic_lex__Ps
+
+  STable ops (?)
+    ...??...
+
