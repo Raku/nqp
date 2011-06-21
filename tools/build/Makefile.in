@@ -61,6 +61,7 @@ PAST_SOURCES = \
   src/PAST/Regex.pir \
   src/PAST/Compiler-Regex.pir \
   src/PAST/SixModelPASTExtensions.pir \
+  src/PAST/NQP.pir \
   src/cheats/parrot-callcontext.pir \
   
 HLL_SOURCES = \
