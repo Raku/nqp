@@ -42,8 +42,8 @@ General notes:
     nqp::concat                    pir::concat__Sss
     nqp::join                      pir::join__SsP
     nqp::substr                    pir::substr__Ssii
-    nqp::downcase                  pir::downcase__Ss
-    nqp::upcase                    pir::upcase__Ss
+    nqp::lc                        pir::downcase__Ss
+    nqp::uc                        pir::upcase__Ss
     nqp::index                     pir::index__Issi
     nqp::chr                       pir::chr__Si
     nqp::ord                       pir::ord__Si

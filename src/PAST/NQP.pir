@@ -225,8 +225,8 @@ entry to produce the node to be returned.
     maphash['index']    = 'index__Issi'
     maphash['chr']      = 'chr__Si'
     maphash['ord']      = 'ord__Is'
-    maphash['downcase'] = 'downcase__Ss'
-    maphash['upcase']   = 'upcase__Ss'
+    maphash['lc']       = 'downcase__Ss'
+    maphash['uc']       = 'upcase__Ss'
 
     # relational opcodes
     maphash['iseq_i']   = 'iseq__Iii'
