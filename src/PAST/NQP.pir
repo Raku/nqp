@@ -206,6 +206,10 @@ entry to produce the node to be returned.
     maphash['print'] = 'print'
     maphash['say']   = 'say'
 
+    # terms
+    maphash['time_i'] = 'time__I'
+    maphash['time_n'] = 'time__N'
+
     # arithmetic opcodes
     maphash['add_i']    = 'add__Iii'
     maphash['add_n']    = 'add__Nnn'
@@ -217,6 +221,16 @@ entry to produce the node to be returned.
     maphash['div_n']    = 'div__Nnn'
     maphash['mod_i']    = 'mod__Iii'
     maphash['mod_n']    = 'mod__Nnn'
+    maphash['pow_n']    = 'pow__Nnn'
+    maphash['neg_i']    = 'neg__Ii'
+    maphash['neg_n']    = 'neg__Nn'
+    maphash['abs_i']    = 'abs__Ii'
+    maphash['abs_n']    = 'abs__Nn'
+
+    maphash['ceil_n']   = 'ceil__Nn'
+    maphash['floor_n']  = 'floor__NN'
+    maphash['ln_n']     = 'ln__Nn'
+    maphash['sqrt_n']   = 'sqrt__Nn'
 
     # string opcodes
     maphash['chars']    = 'length__Is'
@@ -228,8 +242,11 @@ entry to produce the node to be returned.
     maphash['ord']      = 'ord__Is'
     maphash['lc']       = 'downcase__Ss'
     maphash['uc']       = 'upcase__Ss'
+    maphash['substr']   = 'substr__Ssii'
+    maphash['x']        = 'repeat__Ssi'
 
     # relational opcodes
+    maphash['cmp_i']    = 'cmp_Iii'
     maphash['iseq_i']   = 'iseq__Iii'
     maphash['isne_i']   = 'isne__Iii'
     maphash['islt_i']   = 'islt__Iii'
@@ -237,6 +254,7 @@ entry to produce the node to be returned.
     maphash['isgt_i']   = 'isgt__Iii'
     maphash['isge_i']   = 'isge__Iii'
 
+    maphash['cmp_n']    = 'cmp_Inn'
     maphash['iseq_n']   = 'iseq__Inn'
     maphash['isne_n']   = 'isne__Inn'
     maphash['islt_n']   = 'islt__Inn'
@@ -251,39 +269,56 @@ entry to produce the node to be returned.
     maphash['isgt_s']   = 'isgt__Iss'
     maphash['isge_s']   = 'isge__Iss'
 
+    # boolean opcodes
+    maphash['not_i']    = 'not__Ii'
+
     # aggregate opcodes
+    maphash['atkey']    = 'set__PQs'
+    maphash['atpos']    = 'set__PQi'
+    maphash['bindkey']  = 'set__1QsP'
+    maphash['bindpos']  = 'set__1QiP'
+    maphash['deletekey'] = 'delete__0Qs'
+    maphash['deletepos'] = 'delete__0Qi'
+    maphash['existskey'] = 'exists__IQs'
+    maphash['existspos'] = 'exists__IQi'
     maphash['elems']    = 'elements__IP'
+    maphash['iterator'] = 'iter__PP'
     maphash['push']     = 'push__0PP'
     maphash['pop']      = 'pop__PP'
     maphash['shift']    = 'shift__PP'
     maphash['unshift']  = 'unshift__0PP'
     maphash['splice']   = 'splice__0PPii'
-    maphash['atpos']    = 'set__PQi'
-    maphash['bindpos']  = 'set__1QiP'
-    maphash['existspos'] = 'exists__IQi'
-    maphash['deletepos'] = 'delete__0Qi'
-    maphash['atkey']    = 'set__PQs'
-    maphash['bindkey']  = 'set__1QsP'
-    maphash['existskey'] = 'exists__IQs'
-    maphash['deletekey'] = 'delete__0Qs'
+    $P0 = new ['Hash']
+    $P0['pasttype'] = 'list'
+    maphash['list'] = $P0
 
     # object opcodes
-    maphash['unbox_i']   = 'repr_unbox_int__IP'
-    maphash['unbox_n']   = 'repr_unbox_num__NP'
-    maphash['unbox_s']   = 'repr_unbox_str__SP'
+    maphash['bindattr']   = 'setattribute__3PPsP'
+    maphash['getattr']    = 'getattribute__PPPs'
+    maphash['create']     = 'repr_instance_of'
+    maphash['clone']      = 'clone__PP'
+    maphash['isconcrete'] = 'repr_defined__IP'
+    maphash['iscont']     = 'is_container__IP'
+    maphash['isnull']     = 'isnull__IP'
+    maphash['istrue']     = 'istrue__IP'
+    maphash['null']       = 'null__P'
+    maphash['unbox_i']    = 'repr_unbox_int__IP'
+    maphash['unbox_n']    = 'repr_unbox_num__NP'
+    maphash['unbox_s']    = 'repr_unbox_str__SP'
+    maphash['where']      = 'get_addr__IP'
 
     # control opcodes
     $P0 = new ['Hash']
     $P0['pasttype'] = 'if'
-    maphash['if']       = $P0
+    maphash['if'] = $P0
 
     $P0 = new ['Hash']
     $P0['pasttype'] = 'unless'
-    maphash['unless']   = $P0
+    maphash['unless'] = $P0
 
     $P0 = new ['Hash']
     $P0['pasttype'] = 'while'
-    maphash['while']    = $P0
+    maphash['while'] = $P0
 
     .return (maphash)
 .end

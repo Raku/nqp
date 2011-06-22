@@ -7,7 +7,7 @@ General notes:
     of the opcode.  Stick to lowercase letters here...
   * ... except that bigints might be a _I suffix  :-)
   * Perhaps reserve _b for a boolean native type
-  * Might want to reserve _a and _h for "native" list/hash versions of opcodes
+  * Might want to reserve _l and _h for "native" list/hash versions of opcodes
   * Might want to reserve _o for object/instance versions of opcodes
   * aim for consistency with underscores and the like
     (i.e., unlike parrot, don't mix "get_foo" and "getbar")

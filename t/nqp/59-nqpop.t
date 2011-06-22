@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(25);
+plan(64);
 
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
@@ -40,4 +40,51 @@ my $a := 10;
 ok( nqp::if(0, ($a++), ($a--)) == 10, 'nqp::if shortcircuit');
 ok( $a == 9, 'nqp::if shortcircuit');
 
+ok( nqp::pow_n(2.0, 4) == 16.0, 'nqp::pow_n');
+ok( nqp::neg_i(5) == -5, 'nqp::neg_i');
+ok( nqp::neg_i(-10) == 10, 'nqp::neg_i');
+ok( nqp::neg_n(5.2) == -5.2, 'nqp::neg_n');
+ok( nqp::neg_n(-10.3) == 10.3, 'nqp::neg_n');
+ok( nqp::abs_i(5) == 5, 'nqp::abs_i');
+ok( nqp::abs_i(-10) == 10, 'nqp::abs_i');
+ok( nqp::abs_n(5.2) == 5.2, 'nqp::abs_n');
+ok( nqp::abs_n(-10.3) == 10.3, 'nqp::abs_n');
+
+ok( nqp::ceil_n(5.2) == 6.0, 'nqp::ceil_n');
+ok( nqp::ceil_n(-5.2) == -5.0, 'nqp::ceil_n');
+ok( nqp::ceil_n(5.0) == 5.0, 'nqp::ceil_n');
+ok( nqp::ceil_n(-5.0) == -5.0, 'nqp::ceil_n');
+ok( nqp::floor_n(5.2) == 5.0, 'nqp::floor_n');
+ok( nqp::floor_n(-5.2) == -6.0, 'nqp::floor_n');
+ok( nqp::floor_n(5.0) == 5.0, 'nqp::floor_n');
+ok( nqp::floor_n(-5.0) == -5.0, 'nqp::floor_n');
+
+ok( nqp::substr('rakudo', 1, 3) eq 'aku', 'nqp::substr');
+ok( nqp::substr('rakudo', 1) eq 'akudo', 'nqp::substr');
+ok( nqp::substr('rakudo', 6, 3) eq '', 'nqp::substr');
+ok( nqp::substr('rakudo', 6) eq '', 'nqp::substr');
+ok( nqp::substr('rakudo', 0, 4) eq 'raku', 'nqp::substr');
+ok( nqp::substr('rakudo', 0) eq 'rakudo', 'nqp::substr');
+
+ok( nqp::x('abc', 5) eq 'abcabcabcabcabc', 'nqp::x');
+ok( nqp::x('abc', 0) eq '', 'nqp::x');
+
+ok( nqp::not_i(0) == 1, 'nqp::not_i');
+ok( nqp::not_i(1) == 0, 'nqp::not_i');
+ok( nqp::not_i(-1) == 0, 'nqp::not_i');
+
+ok( nqp::isnull(nqp::null()) == 1, 'nqp::isnull/nqp::null' );
+
+ok( nqp::istrue(0) == 0, 'nqp::istrue');
+ok( nqp::istrue(1) == 1, 'nqp::istrue');
+ok( nqp::istrue('') == 0, 'nqp::istrue');
+ok( nqp::istrue('0') == 0, 'nqp::istrue');
+ok( nqp::istrue('no') == 1, 'nqp::istrue');
+ok( nqp::istrue(0.0) == 0, 'nqp::istrue');
+ok( nqp::istrue(0.1) == 1, 'nqp::istrue');
+
+my $list := nqp::list(0, 'a', 'b', 3.0);
+ok( nqp::elems($list) == 4, 'nqp::elems');
+ok( nqp::atpos($list, 0) == 0, 'nqp::atpos');
+ok( nqp::atpos($list, 2) eq 'b', 'nqp::atpos');
 
