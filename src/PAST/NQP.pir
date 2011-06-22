@@ -216,6 +216,7 @@ entry to produce the node to be returned.
     maphash['div_i']    = 'div__Iii'
     maphash['div_n']    = 'div__Nnn'
     maphash['mod_i']    = 'mod__Iii'
+    maphash['mod_n']    = 'mod__Nnn'
 
     # string opcodes
     maphash['chars']    = 'length__Is'
