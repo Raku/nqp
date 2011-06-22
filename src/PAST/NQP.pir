@@ -246,7 +246,7 @@ entry to produce the node to be returned.
     maphash['x']        = 'repeat__Ssi'
 
     # relational opcodes
-    maphash['cmp_i']    = 'cmp_Iii'
+    maphash['cmp_i']    = 'cmp__Iii'
     maphash['iseq_i']   = 'iseq__Iii'
     maphash['isne_i']   = 'isne__Iii'
     maphash['islt_i']   = 'islt__Iii'
@@ -254,7 +254,7 @@ entry to produce the node to be returned.
     maphash['isgt_i']   = 'isgt__Iii'
     maphash['isge_i']   = 'isge__Iii'
 
-    maphash['cmp_n']    = 'cmp_Inn'
+    maphash['cmp_n']    = 'cmp__Inn'
     maphash['iseq_n']   = 'iseq__Inn'
     maphash['isne_n']   = 'isne__Inn'
     maphash['islt_n']   = 'islt__Inn'
@@ -262,6 +262,7 @@ entry to produce the node to be returned.
     maphash['isgt_n']   = 'isgt__Inn'
     maphash['isge_n']   = 'isge__Inn'
 
+    maphash['cmp_s']    = 'cmp__Iss'
     maphash['iseq_s']   = 'iseq__Iss'
     maphash['isne_s']   = 'isne__Iss'
     maphash['islt_s']   = 'islt__Iss'

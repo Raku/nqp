@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(71);
+plan(80);
 
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
@@ -26,6 +26,18 @@ ok( nqp::lc('Hello World') eq 'hello world', 'nqp::downcase');
 ok( nqp::uc("Don't Panic") eq "DON'T PANIC", 'nqp::upcase');
 
 ok( nqp::iseq_i(2, 2) == 1, 'nqp::iseq_i');
+
+ok( nqp::cmp_i(2, 0) ==  1, 'nqp::cmp_i');
+ok( nqp::cmp_i(2, 2) ==  0, 'nqp::cmp_i');
+ok( nqp::cmp_i(2, 5) == -1, 'nqp::cmp_i');
+
+ok( nqp::cmp_n(2.5, 0.5) ==  1, 'nqp::cmp_n');
+ok( nqp::cmp_n(2.5, 2.5) ==  0, 'nqp::cmp_n');
+ok( nqp::cmp_n(2.5, 5.0) == -1, 'nqp::cmp_n');
+
+ok( nqp::cmp_s("c", "a") ==  1, 'nqp::cmp_s');
+ok( nqp::cmp_s("c", "c") ==  0, 'nqp::cmp_s');
+ok( nqp::cmp_s("c", "e") == -1, 'nqp::cmp_s');
 
 my @array := ['zero', 'one', 'two'];
 ok( nqp::elems(@array) == 3, 'nqp::elems');
