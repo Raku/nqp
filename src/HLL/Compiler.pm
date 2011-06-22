@@ -62,7 +62,7 @@ class HLL::Compiler {
     }
     
     my sub value_type($value) {
-        pir::isa($value, 'NameSpace') 
+        pir::isa($value, 'NameSpace')
             ?? 'namespace'
             !! (pir::isa($value, 'Sub') ?? 'sub' !! 'var')
     }
@@ -139,7 +139,7 @@ class HLL::Compiler {
     }
 
     method autoprint($value) {
-        pir::say(~$value) 
+        nqp::say(~$value)
             unless (pir::getinterp__P()).stdout_handle().tell() > $*AUTOPRINTPOS;
     }
 
@@ -163,7 +163,7 @@ class HLL::Compiler {
 
             last if pir::isnull($code);
             unless pir::defined($code) {
-                pir::print("\n");
+                nqp::print("\n");
                 last;
             }
 
@@ -178,7 +178,7 @@ class HLL::Compiler {
                 {
                     $output := self.eval($code, :outer_ctx($save_ctx), |%adverbs);
                     CATCH {
-                        pir::print(~$! ~ "\n");
+                        nqp::print(~$! ~ "\n");
                         next;
                     }
                 };
@@ -195,7 +195,7 @@ class HLL::Compiler {
                 if !$target {
                     self.autoprint($output);
                 } elsif $target eq 'pir' {
-                   pir::say($output);
+                   nqp::say($output);
                 } else {
                    self.dumper($output, $target, |%adverbs);
                 }
@@ -420,7 +420,7 @@ class HLL::Compiler {
         try {
             $res := $p.parse(@args);
             CATCH {
-                pir::say($_);
+                nqp::say($_);
                 self.usage;
                 pir::exit(1);
             }
@@ -575,7 +575,7 @@ class HLL::Compiler {
         if $name {
             say($name);
         }
-        pir::say($!usage);
+        nqp::say($!usage);
         pir::exit__vi(0);
     }
 
@@ -583,16 +583,16 @@ class HLL::Compiler {
         my $version := %!config<version>;
         my $parver  := %parrot_config<VERSION>;
         my $parrev  := %parrot_config<git_describe> // '(unknown)';
-        pir::say("This is $!language version $version built on parrot $parver revision $parrev");
+        nqp::say("This is $!language version $version built on parrot $parver revision $parrev");
         pir::exit__vi(0);
     }
 
     method show-config() {
         for %parrot_config {
-            pir::say('parrot::' ~ $_.key ~ '=' ~ $_.value);
+            nqp::say('parrot::' ~ $_.key ~ '=' ~ $_.value);
         }
         for %!config {
-            pir::say($!language ~ '::' ~ $_.key ~ '=' ~ $_.value);
+            nqp::say($!language ~ '::' ~ $_.key ~ '=' ~ $_.value);
         }
         pir::exit__vi(0);
     }

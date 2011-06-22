@@ -49,7 +49,7 @@ sub spew($filename, $contents) {
 
 sub print(*@args) {
     for @args {
-        pir::print($_);
+        nqp::print($_);
     }
     1;
 }
