@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(64);
+plan(71);
 
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
@@ -87,4 +87,12 @@ my $list := nqp::list(0, 'a', 'b', 3.0);
 ok( nqp::elems($list) == 4, 'nqp::elems');
 ok( nqp::atpos($list, 0) == 0, 'nqp::atpos');
 ok( nqp::atpos($list, 2) eq 'b', 'nqp::atpos');
-
+nqp::push($list, 'four');
+ok( nqp::elems($list) == 5, 'nqp::push');
+ok( nqp::shift($list) == 0, 'nqp::shift');
+ok( nqp::pop($list) eq 'four', 'nqp::pop');
+my $iter := nqp::iterator($list);
+ok( nqp::shift($iter) eq 'a', 'nqp::iterator');
+ok( nqp::shift($iter) eq 'b', 'nqp::iterator');
+ok( nqp::shift($iter) == 3.0, 'nqp::iterator');
+ok( nqp::elems($list) == 3, "iterator doesn't modify list");
