@@ -141,7 +141,7 @@ compiler calls this method in response to a ".lex STRING, PREG" directive.
                 STRING *name  = VTABLE_shift_string(interp, iter);
                 INTVAL  slot  = VTABLE_get_integer_keyed_str(interp, SELF, name);
                 PMC    *value = VTABLE_get_pmc_keyed_str(interp, svs, name);
-                VTABLE_push_integer(interp, slots, slot);
+                VTABLE_push_integer(interp, slots, slot >> 2);
                 VTABLE_push_pmc(interp, values, value);
             }
             SET_ATTR_static_slots_cache(INTERP, SELF, slots);

@@ -58,6 +58,27 @@ some PAST that will produce it or a name that it can be looked up by.
 .end
 
 
+.sub 'lexical_6model_type' :method
+    .param pmc node
+
+    # See if we have a type. If so, use it to determine what op to use
+    # and what the register type will be.
+    .local pmc type
+    .local int primitive_type_id
+    type = node.'type'()
+    primitive_type_id = repr_get_primitive_type_spec type
+    if primitive_type_id == STORAGE_SPEC_BP_INT goto prim_int
+    if primitive_type_id == STORAGE_SPEC_BP_NUM goto prim_num
+    if primitive_type_id == STORAGE_SPEC_BP_STR goto prim_str
+    .return ('P')
+  prim_int:
+    .return ('i')
+  prim_num:
+    .return ('n')
+  prim_str:
+    .return ('s')
+.end
+
 
 .sub 'attribute_6model' :method :multi(_, ['PAST';'Var'])
     .param pmc node
@@ -152,6 +173,66 @@ some PAST that will produce it or a name that it can be looked up by.
 .end
 
 
+.sub 'lexical_6model' :method :multi(_, ['PAST';'Var'])
+    .param pmc node
+    .param pmc bindpost
+
+    .local string name
+    name = node.'name'()
+    name = self.'escape'(name)
+
+    .local int isdecl
+    isdecl = node.'isdecl'()
+    
+    .local pmc type
+    .local string reg_type, fetch_op_name, store_op_name
+    (reg_type) = self.'lexical_6model_type'(node)
+
+  lexical_post:
+    if isdecl goto lexical_decl
+    if bindpost goto lexical_bind
+    
+    .local pmc ops, fetchop, storeop
+    $P0 = get_hll_global ['POST'], 'Ops'
+    ops = $P0.'new'('node'=>node)
+    if reg_type == 'P' goto need_vivify
+    $P1 = self.'uniquereg'(reg_type)
+    $P0 = get_hll_global ['POST'], 'Op'
+    fetchop = $P0.'new'($P1, name, 'pirop'=>'find_lex')
+    ops.'push'(fetchop)
+    ops.'result'($P1)
+    .return (ops)
+  need_vivify:
+    $P0 = get_hll_global ['POST'], 'Op'
+    fetchop = $P0.'new'(ops, name, 'pirop'=>'find_lex')
+    storeop = $P0.'new'(name, ops, 'pirop'=>'store_lex')
+    .tailcall self.'vivify'(node, ops, fetchop, storeop)
+    
+  lexical_decl:
+    .local string lexreg
+    # lexical registers cannot be temporaries
+    lexreg = self.'uniquereg'(reg_type)
+    $P0 = get_hll_global ['POST'], 'Ops'
+    ops = $P0.'new'('node'=>node)
+    if bindpost goto have_bindpost
+    .local pmc viviself
+    viviself = node.'viviself'()
+    unless viviself goto have_lexreg
+    bindpost = self.'as_vivipost'(viviself, 'rtype'=>reg_type)
+    ops.'push'(bindpost)
+  have_bindpost:
+    ops.'push_pirop'('set', lexreg, bindpost)
+  have_lexreg:
+    ops.'push_pirop'('.lex', name, lexreg)
+    ops.'result'(lexreg)
+    .return (ops)
+
+  lexical_bind:
+    $P0 = get_hll_global ['POST'], 'Op'
+    .tailcall $P0.'new'(name, bindpost, 'pirop'=>'store_lex', 'result'=>bindpost)
+.end
+
+
 .sub 'bind_6model' :method :multi(_, ['PAST';'Op'])
     .param pmc node
     .param pmc options         :slurpy :named
@@ -165,8 +246,12 @@ some PAST that will produce it or a name that it can be looked up by.
     $I0 = isa lpast, ['PAST';'Var']
     unless $I0 goto have_rtype
     $S0 = lpast.'scope'()
-    unless $S0 == 'attribute_6model' goto have_rtype
+    if $S0 == 'lexical_6model' goto lexical_6model
+    if $S0 != 'attribute_6model' goto have_rtype
     (rtype) = self.'attribute_6model_type'(lpast)
+    goto have_rtype
+  lexical_6model:
+    (rtype) = self.'lexical_6model_type'(lpast)
   have_rtype:
 
     $P0 = get_hll_global ['POST'], 'Ops'
