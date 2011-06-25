@@ -10,7 +10,6 @@ class HLL::Compiler {
     has @!stages;
     has $!parsegrammar;
     has $!parseactions;
-    has $!astgrammar;
     has $!commandline_banner;
     has $!commandline_prompt;
     has @!cmdoptions;
@@ -256,13 +255,6 @@ class HLL::Compiler {
         $!parseactions;
     }
     
-    method astgrammar(*@value) {
-        if +@value {
-            $!astgrammar := @value[0];
-        }
-        $!astgrammar;
-    }
-    
     method commandline_banner($value?) {
         if pir::defined($value) {
             $!commandline_banner := $value;
@@ -426,43 +418,10 @@ class HLL::Compiler {
     }
 
     method past($source, *%adverbs) {
-        Q:PIR {
-            .local pmc source, adverbs, self
-            source = find_lex '$source'
-            adverbs = find_lex '%adverbs'
-            self = find_lex 'self'
-
-          compile_astgrammar:
-            .local pmc astgrammar_name
-            astgrammar_name = self.'astgrammar'()
-            $S0 = typeof astgrammar_name
-            eq $S0, 'NameSpace', astgrammar_ns
-            unless astgrammar_name goto compile_match
-
-            .local pmc astgrammar_namelist
-            .local pmc astgrammar, astbuilder
-            astgrammar_namelist = self.'parse_name'(astgrammar_name)
-            unless astgrammar_namelist goto err_past
-            astgrammar = new astgrammar_namelist
-            astbuilder = astgrammar.'apply'(source)
-            .tailcall astbuilder.'get'('past')
-          astgrammar_ns:
-            $P0 = get_class astgrammar_name
-            astgrammar = new $P0
-            astbuilder = astgrammar.'apply'(source)
-            .tailcall astbuilder.'get'('past')
-
-          compile_match:
-            .local pmc ast
-            ast = source.'ast'()
-            $I0 = isa ast, ['PAST';'Node']
-            unless $I0 goto err_past
-            .return (ast)
-
-          err_past:
-            $S0 = typeof source
-            .tailcall self.'panic'('Unable to obtain PAST from ', $S0)
-        };
+        my $ast := $source.ast();
+        self.panic("Unable to obtain ast from " ~ pir::typeof($source))
+            unless $ast ~~ PAST::Node;
+        $ast;
     }
 
     method post($source, *%adverbs) {
