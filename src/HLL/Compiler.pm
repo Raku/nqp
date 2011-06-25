@@ -316,97 +316,26 @@ class HLL::Compiler {
         self.version              if %adverbs<version>;
         self.show-config          if %adverbs<show-config>;
 
-        Q:PIR {
-            .local pmc args, adverbs, self
-            args = find_lex '@a'
-            adverbs = find_lex '%adverbs'
-            self = find_lex 'self'
+        pir::load_bytecode('dumper.pbc');
+        pir::load_bytecode('PGE/Dumper.pbc');
 
-            load_bytecode 'dumper.pbc'
-            load_bytecode 'PGE/Dumper.pbc'
+        { # try
+            my $result;
+            if %adverbs<e> { $result := self.eval(%adverbs<e>, |@a, |%adverbs) }
+            elsif !@a { $result := self.interactive(|%adverbs) }
+            elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }
+            else { $result := self.evalfiles(@a[0], |@a, |%adverbs) }
 
-
-            .local int can_backtrace, ll_backtrace
-            can_backtrace = can self, 'backtrace'
-            unless can_backtrace goto no_push_eh
-            ll_backtrace = adverbs['ll-backtrace']
-            if ll_backtrace goto no_push_eh
-            push_eh uncaught_exception
-          no_push_eh:
-
-            $S0 = adverbs['e']
-            $I0 = exists adverbs['e']
-            if $I0 goto eval_line
-            .local pmc result
-            result = box ''
-            unless args goto interactive
-            $I0 = adverbs['combine']
-            if $I0 goto combine
-            $S0 = args[0]
-            result = self.'evalfiles'($S0, args :flat, adverbs :flat :named)
-            goto save_output
-          combine:
-            result = self.'evalfiles'(args, adverbs :flat :named)
-            goto save_output
-          interactive:
-            self.'interactive'(args :flat, adverbs :flat :named)
-            goto save_output
-          eval_line:
-            result = self.'eval'($S0, '-e', args :flat, adverbs :flat :named)
-
-          save_output:
-            unless can_backtrace goto no_pop_eh
-            pop_eh
-          no_pop_eh:
-            if null result goto end
-            $I0 = defined result
-            unless $I0 goto end
-            .local string target
-            target = adverbs['target']
-            target = downcase target
-            if target != 'pir' goto end
-            .local string output
-            .local pmc ofh
-            $P0 = getinterp
-            ofh = $P0.'stdout_handle'()
-            output = adverbs['output']
-            if output == '' goto save_output_1
-            if output == '-' goto save_output_1
-            ofh = new ['FileHandle']
-            ofh.'open'(output, 'w')
-            unless ofh goto err_output
-          save_output_1:
-            print ofh, result
-            ofh.'close'()
-          end:
-            .return ()
-
-          err_output:
-            .tailcall self.'panic'('Error: file cannot be written: ', output)
-
-            # If we get an uncaught exception in the program and the HLL provides
-            # a backtrace method, we end up here. We pass it the exception object
-            # so it can render a backtrace, unless the severity is exit or warning
-            # in which case it needs special handling.
-          uncaught_exception:
-            .get_results ($P0)
-            pop_eh
-            $P1 = getinterp
-            $P1 = $P1.'stderr_handle'()
-            $I0 = $P0['severity']
-            if $I0 == .EXCEPT_EXIT goto do_exit
-            $S0 = self.'backtrace'($P0)
-            print $P1, $S0
-            if $I0 <= .EXCEPT_WARNING goto do_warning
-            exit 1
-          do_exit:
-            $I0 = $P0['exit_code']
-            exit $I0
-          do_warning:
-            $P0 = $P0["resume"]
-            push_eh uncaught_exception # Otherwise we get errors about no handler to delete
-            $P0()
-        };
+            if !pir::isnull($result) && %adverbs<target> eq 'pir' {
+                my $output := %adverbs<output>;
+                my $fh := ($output eq '' || $output eq '-')
+                          ?? pir::getinterp__P().stdout_handle()
+                          !! pir::new__Ps('FileHandle').open($output, 'w');
+                self.panic("Cannot write to $output") unless $fh;
+                pir::print($fh, $result);
+                $fh.close()
+            }
+        }
     }
 
     method process_args(@args) {
