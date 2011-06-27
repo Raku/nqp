@@ -60,6 +60,53 @@ Select a single past child based on rtype.
     cpost = self.'as_post'(cpast, options :flat :named)
     .return (cpost)
 .end
+
+
+=item lexotic(PAST::Op node)
+
+Establish a lexotic label (continuation) that can be invoked 
+via a lexical lookup.  The C<name> attribute gives the name of 
+the lexical to be used to hold the continuation.  The result
+of this node is any argument passed when invoking the continuation,
+or the result of the last child node if the continuation isn't
+invoked.
+
+=cut
+
+.sub 'lexotic' :method :multi(_, ['PAST';'Op'])
+    .param pmc node
+    .param pmc options         :slurpy :named
+
+    .local pmc label1, label2
+    $P0 = get_hll_global ['POST'], 'Label'
+    label1 = $P0.'new'('name'=>'lexotic_')
+    label2 = $P0.'new'('name'=>'lexotic_')
+
+    .local string lexname
+    lexname = node.'name'()
+    lexname = self.'escape'(lexname)
+
+    .local pmc ops, handler, cpost
+    $P0 = get_hll_global ['POST'], 'Ops'
+    ops = $P0.'new'('node'=>node)
+    handler = self.'uniquereg'('P')
+    ops.'push_pirop'('root_new', handler, "['parrot';'Continuation']")
+    ops.'push_pirop'('set_label', handler, label1)
+    ops.'push_pirop'('.lex', lexname, handler)
+    .local pmc cpost
+    cpost = self.'stmts'(node, 'rtype'=>'P')
+    ops.'push'(cpost)
+    ops.'result'(cpost)
+    .local string result
+    ops.'push_pirop'('goto', label2)
+    ops.'push'(label1)
+    result = ops.'result'()
+    $S0 = concat '(', result
+    $S0 = concat $S0, ')'
+    ops.'push_pirop'('.get_results', $S0)
+    ops.'push'(label2)
+    .return (ops)
+.end
     
 
 =item map_add(mapid, [hash])
@@ -296,7 +343,7 @@ entry to produce the node to be returned.
     # object opcodes
     maphash['bindattr']   = 'setattribute__3PPsP'
     maphash['getattr']    = 'getattribute__PPPs'
-    maphash['create']     = 'repr_instance_of'
+    maphash['create']     = 'repr_instance_of__PP'
     maphash['clone']      = 'clone__PP'
     maphash['isconcrete'] = 'repr_defined__IP'
     maphash['iscont']     = 'is_container__IP'
