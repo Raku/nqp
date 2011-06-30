@@ -770,16 +770,22 @@ An operator precedence parser.
 
           op_list:
             .local string sym
+            sym = ''
             $P0 = opOPER['sym']
+            if null $P0 goto op_list_1
             sym = $P0
+          op_list_1:
             arg = pop termstack
             unshift op, arg
           op_sym_loop:
             unless opstack goto op_sym_done
+            $S0 = ''
             $P0 = opstack[-1]
             $P0 = $P0['OPER']
             $P0 = $P0['sym']
+            if null $P0 goto op_sym_1
             $S0 = $P0
+          op_sym_1:
             if sym != $S0 goto op_sym_done
             arg = pop termstack
             unshift op, arg
