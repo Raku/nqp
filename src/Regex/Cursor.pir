@@ -645,13 +645,16 @@ with a "real" Match object when requested.
 .sub '!cursor_pass' :method :subid('Regex_Cursor_meth_!cursor_pass') :outer('Regex_Cursor_Body')
     .param int pos
     .param string name
+    .param pmc match           :optional
+    .param int has_match       :opt_flag
 
     .local pmc cur_class
     cur_class = find_lex '$?CLASS'
 
     repr_bind_attr_int self, cur_class, '$!pos', pos
-    .local pmc match
+    if has_match goto have_match
     match = get_global '$!TRUE'
+  have_match:
     setattribute self, cur_class, '$!match', match
     unless name goto done
     self.'!reduce'(name)
