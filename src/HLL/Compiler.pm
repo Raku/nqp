@@ -57,7 +57,7 @@ class HLL::Compiler {
         @!stages     := pir::split(' ', 'parse past post pir evalpmc');
         
         # Command options and usage.
-        @!cmdoptions := pir::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config stagestats ll-backtrace');
+        @!cmdoptions := pir::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config stagestats ll-backtrace nqpevent=s');
         $!usage := "This compiler is based on HLL::Compler.\n\nOptions:\n";
         for @!cmdoptions {
             $!usage := $!usage ~ "    $_\n";
@@ -313,6 +313,7 @@ class HLL::Compiler {
         self.usage($program-name) if %adverbs<help>;
         self.version              if %adverbs<version>;
         self.show-config          if %adverbs<show-config>;
+        self.nqpevent(%adverbs<nqpevent>) if %adverbs<nqpevent>;
 
         pir::load_bytecode('dumper.pbc');
         pir::load_bytecode('PGE/Dumper.pbc');
@@ -489,6 +490,15 @@ class HLL::Compiler {
             nqp::say($!language ~ '::' ~ $_.key ~ '=' ~ $_.value);
         }
         pir::exit__vi(0);
+    }
+
+    method nqpevent($file) {
+        pir::nqpevent_fh(nqp::null());   # close any existing event log
+        if $file {
+            my $fh := pir::new('FileHandle');
+            $fh.open($file, 'w') || self.panic("Cannot write to $file");
+            pir::nqpevent_fh($fh);
+        }
     }
 
     method removestage($stagename) {
