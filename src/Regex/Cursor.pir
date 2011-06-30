@@ -773,8 +773,9 @@ Log a debug message.
     fmt = new ['ResizablePMCArray']
     from = repr_get_attr_int self, cur_class, '$!from'
     orig = getattribute self, cur_class, '$!target'
-    $P0 = get_hll_global ['HLL'], 'Compiler'
-    line = $P0.'lineof'(orig, from, 'cache'=>1)
+    # $P0 = get_hll_global ['HLL'], 'Compiler'
+    # line = $P0.'lineof'(orig, from, 'cache'=>1)
+    line = box -1
 
     $P0 = getinterp
     $P1 = $P0.'stderr_handle'()
@@ -782,9 +783,10 @@ Log a debug message.
     $N0 = time
     push fmt, $N0
     push fmt, from
-    push fmt, line
+    # push fmt, line
     push fmt, tag
-    $S0 = sprintf "%.6f %d/%d %-8s ", fmt
+    # $S0 = sprintf "%.6f %d/%d %-8s ", fmt
+    $S0 = sprintf "%.6f %d/... %-8s ", fmt
     print $P1, $S0
     $S0 = join '', args
     print $P1, $S0

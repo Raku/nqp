@@ -57,7 +57,7 @@ class HLL::Compiler {
         @!stages     := pir::split(' ', 'parse past post pir evalpmc');
         
         # Command options and usage.
-        @!cmdoptions := pir::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config stagestats ll-backtrace nqpevent=s');
+        @!cmdoptions := pir::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config stagestats ll-backtrace nqpevent=s rxtrace');
         $!usage := "This compiler is based on HLL::Compler.\n\nOptions:\n";
         for @!cmdoptions {
             $!usage := $!usage ~ "    $_\n";
