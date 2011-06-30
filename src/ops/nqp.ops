@@ -29,6 +29,9 @@ static INTVAL ms_id     = 0;
 static PMC *KnowHOW = NULL;
 static PMC *KnowHOWAttribute = NULL;
 
+/* FileHandle PMC for nqpevent */
+static PMC *nqpevent_fh = NULL;
+
 END_OPS_PREAMBLE
 
 /*
@@ -1097,3 +1100,49 @@ inline op set_container_spec(in PMC, in PMC, in STR, in PMC) :base_core {
             "Can only use set_container_spec with a SixModelObject");
     }
 }
+
+
+/*
+
+=item nqpevent_fh
+
+Sets nqpevent logging to use the PMC filehandle in $1 for logging.
+
+=item nqpevent
+
+Logs an event.
+
+=cut
+
+*/
+inline op nqpevent_fh(in PMC) :base_core {
+    if (!PMC_IS_NULL(nqpevent_fh)
+            && nqpevent_fh->vtable->base_type == enum_class_FileHandle) {
+        Parrot_io_close_handle(interp, nqpevent_fh);
+    }
+    nqpevent_fh = $1
+}
+inline op nqpevent(in STR) :base_core {
+    if (!PMC_IS_NULL(nqpevent_fh)) {
+        PMC *called_ctx_pmc = CURRENT_CONTEXT(interp);
+        PMC *caller_ctx_pmc =
+            Parrot_pcc_get_caller_ctx(interp, called_ctx_pmc);
+        Parrot_Context *called_ctx =
+            PMC_data_typed(called_ctx_pmc, Parrot_Context *);
+        Parrot_Context *caller_ctx =
+            PMC_data_typed(caller_ctx_pmc, Parrot_Context *);
+        STRING *called_name;
+        STRING *caller_name;
+        STRING *called_subid;
+        STRING *caller_subid;
+        GETATTR_Sub_name(interp, called_ctx->current_sub, called_name);
+        GETATTR_Sub_name(interp, caller_ctx->current_sub, caller_name);
+        GETATTR_Sub_subid(interp, called_ctx->current_sub, called_subid);
+        GETATTR_Sub_subid(interp, caller_ctx->current_sub, caller_subid);
+        Parrot_io_fprintf(interp, nqpevent_fh, "%Ss (%Ss)\t%Ss (%Ss)\t%Ss\n",
+            called_name, called_subid,
+            caller_name, caller_subid,
+            $1);
+    }
+}
+

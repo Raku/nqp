@@ -1,5 +1,11 @@
 INIT {
     pir::load_bytecode('Parrot/Exception.pbc');
+    my $file := pir::new('Env')<NQPEVENT>;
+    if $file {
+        my $fh := pir::new('FileHandle');
+        $fh.open($file, 'w');
+        pir::nqpevent_fh($fh);
+    }
 }
 
 # This incorporates both the code that used to be in PCT::HLLCompiler as well
