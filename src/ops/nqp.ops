@@ -268,7 +268,7 @@ a native num - the repr is not obligated to do boxing/unboxing for you.
 =cut
 
 */
-inline op repr_get_attr_int(out NUM, in PMC, in PMC, in STR) :base_core {
+inline op repr_get_attr_num(out NUM, in PMC, in PMC, in STR) :base_core {
     PMC *ch = decontainerize(interp, $3);
     if ($2->vtable->base_type == smo_id)
         $1 = REPR($2)->get_attribute_num(interp, $2, ch, $4, NO_HINT);
