@@ -342,7 +342,13 @@ entry to produce the node to be returned.
 
     # object opcodes
     maphash['bindattr']   = 'setattribute__3PPsP'
+    maphash['bindattr_i'] = 'repr_bind_attr_int__PPsi'
+    maphash['bindattr_n'] = 'repr_bind_attr_num__PPsn'
+    maphash['bindattr_s'] = 'repr_bind_attr_str__PPss'
     maphash['getattr']    = 'getattribute__PPPs'
+    maphash['getattr_i']  = 'repr_get_attr_int__IPPs'
+    maphash['getattr_n']  = 'repr_get_attr_num__NPPs'
+    maphash['getattr_s']  = 'repr_get_attr_str__SPPs'
     maphash['create']     = 'repr_instance_of__PP'
     maphash['clone']      = 'clone__PP'
     maphash['isconcrete'] = 'repr_defined__IP'
