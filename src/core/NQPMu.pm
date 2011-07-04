@@ -46,4 +46,28 @@ my class NQPMu {
     method isa($type) {
         self.HOW.isa(self, $type)
     }
+
+    method __dump($dumper, $label) {
+        my $subindent;
+        my $indent;
+        Q:PIR {
+            $P0 = find_lex '$dumper'
+            ($P0, $P1) = $P0.'newIndent'()
+            store_lex '$subindent', $P0
+            store_lex '$indent', $P1
+        };
+        print('{');
+        for self.HOW.parents(self) -> $type {
+            my @attr := nqp::list();
+            for $type.HOW.attributes($type, :local) {
+                nqp::push(@attr, $_.name);
+            }
+            @attr.sort();
+            for @attr -> $name {
+                print("\n", $subindent, $type.HOW.name($type), "::", $name, " => ");
+                $dumper.'dump'($label, nqp::getattr(self, $type, $name));
+            }
+        }
+        print("\n", $indent, '}');
+    }
 }
