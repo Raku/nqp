@@ -35,18 +35,20 @@ typedef struct {
      * for the Shared Table pointer, spill hash and then for storing the
      * actual, pre-declared attributes. Note, this is in bytes. */
     INTVAL allocation_size;
+
+    /* The number of attributes we have allocated slots for. */
+    INTVAL num_attributes;
+
+    /* Maps attribute position numbers to the byte offset in the object. */
+    INTVAL *attribute_offsets;
+    
+    /* Flags if we are MI or not. */
+    INTVAL mi;
     
     /* Instantiated objects are just a blank piece of memory that needs to
      * be set up. However, in some cases we'd like them to magically turn in
      * to some container type. */
     P6opaqueAutoViv *auto_viv_conf;
-
-    /* The number of attributes we have allocated slots for. Does not include
-     * any in the spill hash. */
-    INTVAL num_attributes;
-
-    /* Maps attribute position numbers to the byte offset in the object. */
-    INTVAL *attribute_offsets;
 
     /* If we can unbox to a native integer, this is the offset to find it. */
     INTVAL unbox_int_offset;
@@ -67,9 +69,6 @@ typedef struct {
     /* Offsets into the object that are elligible for string GC marking. */
     INTVAL *gc_str_mark_offsets;
 } P6opaqueREPRData;
-
-/* function declarations */
-P6opaqueNameMap * index_mapping_and_flat_list(PARROT_INTERP, PMC * WHAT, PMC * flat_list);
 
 /* Initializes the P6opaque REPR. */
 PMC * P6opaque_initialize(PARROT_INTERP);

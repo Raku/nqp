@@ -73,7 +73,8 @@ static PMC * accessor_call(PARROT_INTERP, PMC *obj, STRING *name) {
  * list of attributes (populating the passed flat_list). Also builds
  * the index mapping for doing named lookups. Note index is not related
  * to the storage position. */
-P6opaqueNameMap * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, PMC *flat_list) {
+PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, P6opaqueREPRData *repr_data) {
+    PMC    *flat_list      = pmc_new(interp, enum_class_ResizablePMCArray);
     PMC    *class_list     = pmc_new(interp, enum_class_ResizablePMCArray);
     PMC    *attr_map_list  = pmc_new(interp, enum_class_ResizablePMCArray);
     STRING *attributes_str = Parrot_str_new_constant(interp, "attributes");
@@ -127,9 +128,10 @@ P6opaqueNameMap * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, PMC *fla
         VTABLE_push_pmc(interp, class_list, current_class);
         VTABLE_push_pmc(interp, attr_map_list, attr_map);
 
-        /* If there's more than one parent, flag that we in an
-         * MI situation. */
-        
+        /* If there's more than one parent, flag that we in an MI
+         * situation. */
+        if (num_parents > 1)
+            repr_data->mi = 1;
     }
 
     /* We can now form the name map. */
@@ -139,8 +141,9 @@ P6opaqueNameMap * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, PMC *fla
         result[i].class_key = VTABLE_get_pmc_keyed_int(interp, class_list, i);
         result[i].name_map  = VTABLE_get_pmc_keyed_int(interp, attr_map_list, i);
     }
+    repr_data->name_to_index_mapping = result;
 
-    return result;
+    return flat_list;
 }
 
 /* This works out an allocation strategy for the object. It takes care of
@@ -163,11 +166,8 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
      */
     Parrot_block_GC_mark(interp);
 
-    /* Create flat list that we'll analyze to determine allocation info. */
-    flat_list = pmc_new(interp, enum_class_ResizablePMCArray);
-
     /* Compute index mapping table and get flat list of attributes. */
-    repr_data->name_to_index_mapping = index_mapping_and_flat_list(interp, WHAT, flat_list);
+    flat_list = index_mapping_and_flat_list(interp, WHAT, repr_data);
     
     /* If we have no attributes in the index mapping, then just the header. */
     if (repr_data->name_to_index_mapping[0].class_key == NULL) {
