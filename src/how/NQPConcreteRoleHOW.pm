@@ -45,9 +45,9 @@ knowhow NQPConcreteRoleHOW {
 
     # Create a new meta-object instance, and then a new type object
     # to go with it, and return that.
-    method new_type(:$name = '<anon>', :$repr = 'P6opaque', :$instance_of!) {
+    method new_type(:$name = '<anon>', :$instance_of!) {
         my $metarole := self.new(:name($name), :instance_of($instance_of));
-        pir::repr_type_object_for__PPS($metarole, $repr);
+        pir::repr_type_object_for__PPS($metarole, 'Uninstantiable');
     }
 
     method add_method($obj, $name, $code_obj) {

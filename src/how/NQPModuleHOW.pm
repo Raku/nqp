@@ -14,10 +14,10 @@ knowhow NQPModuleHOW {
 
     # Create a new meta-class instance, and then a new type object
     # to go with it, and return that.
-    method new_type(:$name = '<anon>', :$repr = 'P6opaque') {
+    method new_type(:$name = '<anon>') {
         my $metaclass := self.new(:name($name));
         pir::set_who__0PP(
-            pir::repr_type_object_for__PPS($metaclass, $repr),
+            pir::repr_type_object_for__PPS($metaclass, 'Uninstantiable'),
             {});
     }
 

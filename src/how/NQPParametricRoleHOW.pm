@@ -44,10 +44,10 @@ knowhow NQPParametricRoleHOW {
 
     # Create a new meta-class instance, and then a new type object
     # to go with it, and return that.
-    method new_type(:$name = '<anon>', :$repr = 'P6opaque') {
+    method new_type(:$name = '<anon>') {
         my $metarole := self.new(:name($name));
         pir::set_who__0PP(
-            pir::repr_type_object_for__PPS($metarole, $repr),
+            pir::repr_type_object_for__PPS($metarole, 'Uninstantiable'),
             {});
     }
     
