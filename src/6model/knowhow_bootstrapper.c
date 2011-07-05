@@ -130,6 +130,16 @@ static void methods(PARROT_INTERP, PMC *nci) {
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", meths);
 }
 
+/* Introspects the MRO. That's just a list with ourself. */
+static void mro(PARROT_INTERP, PMC *nci) {
+    PMC * unused;
+    PMC *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    PMC *obj     = VTABLE_get_pmc_keyed_int(interp, capture, 1);
+    PMC *mro     = pmc_new(interp, enum_class_ResizablePMCArray);
+    VTABLE_push_pmc(interp, mro, STABLE(obj)->WHAT);
+    unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", mro);
+}
+
 /* Introspects the name. */
 static void name(PARROT_INTERP, PMC *nci) {
     PMC * unused;
@@ -205,6 +215,9 @@ PMC * SixModelObject_bootstrap_knowhow(PARROT_INTERP, PMC *sc) {
     VTABLE_set_pmc_keyed_str(interp, knowhow_how->methods,
         Parrot_str_new_constant(interp, "methods"),
         wrap_c(interp, F2DPTR(methods)));
+    VTABLE_set_pmc_keyed_str(interp, knowhow_how->methods,
+        Parrot_str_new_constant(interp, "mro"),
+        wrap_c(interp, F2DPTR(mro)));
     VTABLE_set_pmc_keyed_str(interp, knowhow_how->methods,
         Parrot_str_new_constant(interp, "name"),
         wrap_c(interp, F2DPTR(name)));
