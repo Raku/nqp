@@ -1,6 +1,10 @@
 /* A mostly complete implementation of P6opaque, which supports inlining native
  * types, box/unbox of native types where it's declared possible and doing just
- * a single memory allocation in addition to the PMC header per object. */
+ * a single memory allocation in addition to the PMC header per object. For
+ * single inheritance, memory is laid out parent to child, so that the slot
+ * given to an attribute with be valid in all SI subclasses. For MI we just
+ * go with the MRO to do slot allocations, but we never allow an actual index
+ * lookup with a hint to take place and always slow-path it. */
 
 #define PARROT_IN_EXTENSION
 #include "parrot/parrot.h"
@@ -17,7 +21,7 @@ static PMC *this_repr;
 #define CLASS_KEY(c) ((INTVAL)PMC_data(STABLE_PMC(c)))
 
 /* Helper to make an introspection call, possibly with :local. */
-static PMC * introspection_call(PARROT_INTERP, PMC *WHAT, PMC *HOW, STRING *name) {
+static PMC * introspection_call(PARROT_INTERP, PMC *WHAT, PMC *HOW, STRING *name, INTVAL local) {
     PMC *old_ctx, *cappy;
     
     /* Look up method; if there is none hand back a null. */
@@ -30,7 +34,8 @@ static PMC * introspection_call(PARROT_INTERP, PMC *WHAT, PMC *HOW, STRING *name
     cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
     VTABLE_push_pmc(interp, cappy, HOW);
     VTABLE_push_pmc(interp, cappy, WHAT);
-    VTABLE_set_integer_keyed_str(interp, cappy, Parrot_str_new_constant(interp, "local"), 1);
+    if (local)
+        VTABLE_set_integer_keyed_str(interp, cappy, Parrot_str_new_constant(interp, "local"), 1);
 
     /* Call. */
     Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
@@ -66,32 +71,37 @@ static PMC * accessor_call(PARROT_INTERP, PMC *obj, STRING *name) {
 
 /* Locates all of the attributes. Puts them onto a flattened, ordered
  * list of attributes (populating the passed flat_list). Also builds
- * the index mapping for doing named lookups. If there is multiple
- * inheritance, returns an empty index mapping, which indicates that
- * everything will be looked up in spill. Otherwise returns a
- * populated name to index mapping. Note index is not related to the
- * storage position. */
+ * the index mapping for doing named lookups. Note index is not related
+ * to the storage position. */
 P6opaqueNameMap * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, PMC *flat_list) {
     PMC    *class_list     = pmc_new(interp, enum_class_ResizablePMCArray);
     PMC    *attr_map_list  = pmc_new(interp, enum_class_ResizablePMCArray);
-    PMC    *current_class  = WHAT;
-    INTVAL  current_slot   = 0;
     STRING *attributes_str = Parrot_str_new_constant(interp, "attributes");
     STRING *parents_str    = Parrot_str_new_constant(interp, "parents");
     STRING *name_str       = Parrot_str_new_constant(interp, "name");
-    INTVAL i, num_classes;
-
+    STRING *mro_str        = Parrot_str_new_constant(interp, "mro");
+    INTVAL  current_slot   = 0;
+    
+    INTVAL num_classes, i;
     P6opaqueNameMap * result = NULL;
+    
+    /* Get the MRO. */
+    PMC   *mro     = introspection_call(interp, WHAT, STABLE(WHAT)->HOW, mro_str, 0);
+    INTVAL mro_idx = VTABLE_elements(interp, mro);
 
     /* Walk through the parents list. */
-    while (!PMC_IS_NULL(current_class))
+    while (mro_idx)
     {
-        PMC    *parents;
-        INTVAL  num_parents;
+        /* Get current class in MRO. */
+        PMC    *current_class = VTABLE_get_pmc_keyed_int(interp, mro, --mro_idx);
+        PMC    *HOW           = STABLE(current_class)->HOW;
+        
+        /* Get its local parents. */
+        PMC    *parents     = introspection_call(interp, current_class, HOW, parents_str, 1);
+        INTVAL  num_parents = VTABLE_elements(interp, parents);
 
         /* Get attributes and iterate over them. */
-        PMC *HOW        = STABLE(current_class)->HOW;
-        PMC *attributes = introspection_call(interp, current_class, HOW, attributes_str);
+        PMC *attributes = introspection_call(interp, current_class, HOW, attributes_str, 1);
         PMC *attr_map   = PMCNULL;
         PMC *attr_iter  = VTABLE_get_iter(interp, attributes);
         while (VTABLE_get_bool(interp, attr_iter)) {
@@ -117,26 +127,9 @@ P6opaqueNameMap * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, PMC *fla
         VTABLE_push_pmc(interp, class_list, current_class);
         VTABLE_push_pmc(interp, attr_map_list, attr_map);
 
-        /* Find the next parent(s). */
-        parents = introspection_call(interp, current_class, HOW, parents_str);
-
-        /* Check how many parents we have. */
-        num_parents = VTABLE_elements(interp, parents);
-        if (num_parents == 0)
-        {
-            /* We're done. \o/ */
-            break;
-        }
-        else if (num_parents > 1)
-        {
-            /* Multiple inheritnace, so we can't compute this hierarchy. */
-            return (P6opaqueNameMap *) mem_sys_allocate_zeroed(sizeof(P6opaqueNameMap));
-        }
-        else
-        {
-            /* Just one. Get next parent and work through its attributes. */
-            current_class = decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, parents, 0));
-        }
+        /* If there's more than one parent, flag that we in an
+         * MI situation. */
+        
     }
 
     /* We can now form the name map. */
@@ -150,12 +143,9 @@ P6opaqueNameMap * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, PMC *fla
     return result;
 }
 
-/* This works out an allocation strategy for the object. It can do best when
- * single inheritance is used, in which case it just stores the attributes
- * contiguously in memory. It takes care of "inlining" storage of attributes
- * that are natively typed, as well as noting unbox targets. One current
- * notable limitation is that in the case of multiple inheritance, the box
- * and unbox support breaks. */
+/* This works out an allocation strategy for the object. It takes care of
+ * "inlining" storage of attributes that are natively typed, as well as
+ * noting unbox targets. */
 static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRData *repr_data) {
     STRING *type_str       = Parrot_str_new_constant(interp, "type");
     STRING *box_target_str = Parrot_str_new_constant(interp, "box_target");
@@ -179,9 +169,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
     /* Compute index mapping table and get flat list of attributes. */
     repr_data->name_to_index_mapping = index_mapping_and_flat_list(interp, WHAT, flat_list);
     
-    /* If we have no attributes in the index mapping, then our allocation stratergy
-     * is that everything goes into the spill hash. The size to allocate is just
-     * two pointers - a shared table pointer and one for the spill hash. */
+    /* If we have no attributes in the index mapping, then just the header. */
     if (repr_data->name_to_index_mapping[0].class_key == NULL) {
         repr_data->allocation_size = sizeof(SixModelObjectCommonalities) + sizeof(PMC *);
     }
