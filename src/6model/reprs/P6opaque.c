@@ -392,6 +392,15 @@ static INTVAL defined(PARROT_INTERP, PMC *obj) {
     return instance->spill != NULL;
 }
 
+/* Helper for complaining about attrbiute access errors. */
+static void no_such_attribute(PARROT_INTERP, char *action, PMC *class_handle, STRING *name) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can not %s non-existant attribute '%Ss' on class '%Ss'",
+            action, name, VTABLE_get_string(interp, introspection_call(interp,
+                class_handle, STABLE(class_handle)->HOW,
+                Parrot_str_new_constant(interp, "name"), 0)));
+}
+
 /* Gets the current value for an attribute. */
 static PMC * get_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
@@ -428,9 +437,8 @@ static PMC * get_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *n
         }
     }
     
-    /* Fall back to the spill storage. */
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6opaque attributes NYFI 1 (attribute '%Ss' in get_attribute)", name);
+    /* Otherwise, complain that the attribute doesn't exist. */
+    no_such_attribute(interp, "get", class_handle, name);
 }
 static INTVAL get_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
@@ -447,9 +455,8 @@ static INTVAL get_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRI
     if (slot >= 0)
         return get_int_at_offset(instance, repr_data->attribute_offsets[slot]);
     
-    /* Fall back to the spill storage. */
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6opaque attributes NYF 4I");
+    /* Otherwise, complain that the attribute doesn't exist. */
+    no_such_attribute(interp, "get", class_handle, name);
 }
 static FLOATVAL get_attribute_num(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
@@ -466,9 +473,8 @@ static FLOATVAL get_attribute_num(PARROT_INTERP, PMC *obj, PMC *class_handle, ST
     if (slot >= 0)
         return get_num_at_offset(instance, repr_data->attribute_offsets[slot]);
     
-    /* Fall back to the spill storage. */
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6opaque attributes NYFI 2 (attribute '%Ss' in get_attribute_num)", name);
+    /* Otherwise, complain that the attribute doesn't exist. */
+    no_such_attribute(interp, "get", class_handle, name);
 }
 static STRING * get_attribute_str(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
@@ -487,9 +493,8 @@ static STRING * get_attribute_str(PARROT_INTERP, PMC *obj, PMC *class_handle, ST
         return result ? result : STRINGNULL;
     }
     
-    /* Fall back to the spill storage. */
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6opaque attributes NYFI 3 (attribute '%Ss' in get_attribute_str)", name);
+    /* Otherwise, complain that the attribute doesn't exist. */
+    no_such_attribute(interp, "get", class_handle, name);
 }
 
 /* Binds the given value to the specified attribute. */
@@ -510,9 +515,8 @@ static void bind_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *n
         return;
     }
 
-    /* Fall back to the spill storage. */
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6opaque attributes NYFI 4 (attribute '%Ss' in bind_attribute)", name);
+    /* Otherwise, complain that the attribute doesn't exist. */
+    no_such_attribute(interp, "bind", class_handle, name);
 }
 static void bind_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, INTVAL value) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
@@ -531,9 +535,8 @@ static void bind_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRIN
         return;
     }
 
-    /* Fall back to the spill storage. */
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6opaque attributes NYFI 5 (attribute '%s' in bind_attribute_int)");
+    /* Otherwise, complain that the attribute doesn't exist. */
+    no_such_attribute(interp, "bind", class_handle, name);
 }
 static void bind_attribute_num(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, FLOATVAL value) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
@@ -552,9 +555,8 @@ static void bind_attribute_num(PARROT_INTERP, PMC *obj, PMC *class_handle, STRIN
         return;
     }
 
-    /* Fall back to the spill storage. */
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6opaque attributes NYFI 6 (attribute '%s' in bind_attribute_num)", name);
+    /* Otherwise, complain that the attribute doesn't exist. */
+    no_such_attribute(interp, "bind", class_handle, name);
 }
 static void bind_attribute_str(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, STRING *value) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
@@ -573,9 +575,8 @@ static void bind_attribute_str(PARROT_INTERP, PMC *obj, PMC *class_handle, STRIN
         return;
     }
 
-    /* Fall back to the spill storage. */
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6opaque attributes NYFI 7 (attribute '%s' in bind_attribute_str)", name);
+    /* Otherwise, complain that the attribute doesn't exist. */
+    no_such_attribute(interp, "bind", class_handle, name);
 }
 
 /* Gets the hint for the given attribute ID. */
