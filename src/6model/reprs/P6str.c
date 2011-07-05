@@ -160,6 +160,11 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     return spec;
 }
 
+/* Checks if an attribute has been initialized. */
+static INTVAL is_attribute_initialized(PARROT_INTERP, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint) {
+    die_no_attrs(interp);
+}
+
 /* Initializes the P6str representation. */
 PMC * P6str_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
@@ -188,6 +193,7 @@ PMC * P6str_initialize(PARROT_INTERP) {
     repr->gc_mark_repr = NULL;
     repr->gc_free_repr = NULL;
     repr->get_storage_spec = get_storage_spec;
+    repr->is_attribute_initialized = is_attribute_initialized;
 
     /* Wrap it in a PMC. */
     return (this_repr = wrap_repr(interp, repr));

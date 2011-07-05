@@ -47,7 +47,7 @@ static INTVAL defined(PARROT_INTERP, PMC *obj) {
 /* Helper to die because this type doesn't support attributes. */
 static void die_no_attrs(PARROT_INTERP) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6str representation does not support attribute storage");
+            "KnowHOWREPR representation does not support attribute storage");
 }
 
 /* Gets the current value for an attribute. */
@@ -167,6 +167,11 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     return spec;
 }
 
+/* Checks if an attribute has been initialized. */
+static INTVAL is_attribute_initialized(PARROT_INTERP, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint) {
+    die_no_attrs(interp);
+}
+
 /* Initializes the KnowHOWREPR representation. */
 PMC * KnowHOWREPR_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
@@ -195,6 +200,7 @@ PMC * KnowHOWREPR_initialize(PARROT_INTERP) {
     repr->gc_mark_repr = NULL;
     repr->gc_free_repr = NULL;
     repr->get_storage_spec = get_storage_spec;
+    repr->is_attribute_initialized = is_attribute_initialized;
 
     /* Wrap it in a PMC. */
     return (this_repr = wrap_repr(interp, repr));

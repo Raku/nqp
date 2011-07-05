@@ -775,6 +775,23 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     return spec;
 }
 
+/* Checks if an attribute has been initialized. */
+static INTVAL is_attribute_initialized(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
+    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
+    INTVAL            slot;
+
+    if (!instance->spill)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot access attributes in a type object");
+
+    slot = try_get_slot(interp, repr_data, class_handle, name);
+    if (slot >= 0)
+        return NULL != get_pmc_at_offset(instance, repr_data->attribute_offsets[slot]);
+    else
+        no_such_attribute(interp, "initializedness check", class_handle, name);
+}
+
 /* Initializes the P6opaque representation. */
 PMC * P6opaque_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
@@ -803,6 +820,7 @@ PMC * P6opaque_initialize(PARROT_INTERP) {
     repr->gc_mark_repr = gc_mark_repr;
     repr->gc_free_repr = gc_free_repr;
     repr->get_storage_spec = get_storage_spec;
+    repr->is_attribute_initialized = is_attribute_initialized;
 
     /* Wrap it in a PMC. */
     return (this_repr = wrap_repr(interp, repr));
