@@ -378,7 +378,7 @@ class HLL::Compiler {
             pir::die($err) if $err;
         }
         my $code := pir::join('', @codes);
-#            my $?FILES := pir::join(' ', @files);
+        my $?FILES := pir::join(' ', @files);
         my $r := self.eval($code, |@args, |%adverbs);
         if $target eq '' || $target eq 'pir' {
             return $r;
