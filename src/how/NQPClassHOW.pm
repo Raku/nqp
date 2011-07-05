@@ -34,6 +34,7 @@ knowhow NQPClassHOW {
     # Parrot-specific vtable mapping hash. Maps vtable name to method.
     has %!parrot_vtable_mapping;
 	has %!parrot_vtable_handler_mapping;
+
     ##
     ## Declarative.
     ##
@@ -384,6 +385,10 @@ knowhow NQPClassHOW {
 
     method parents($obj, :$local) {
         $local ?? @!parents !! @!mro
+    }
+    
+    method mro($obj) {
+        @!mro
     }
 
     method roles($obj, :$local!) {
