@@ -63,13 +63,13 @@ my class NQPMu {
                 my $attrtype := $_.type;
                 print("\n", $subindent, $type.HOW.name($type), "::", $name, " => ");
                 if $attrtype eq 'int' {
-                    $dumper.'dump'($label, nqp::getattr_i(self, $type, $name));
+                    $dumper.'dump'($label, pir::box__Pi(nqp::getattr_i(self, $type, $name)));
                 }
                 elsif $attrtype eq 'num' {
-                    $dumper.'dump'($label, nqp::getattr_n(self, $type, $name));
+                    $dumper.'dump'($label, pir::box__Pn(nqp::getattr_n(self, $type, $name)));
                 }
                 elsif $attrtype eq 'str' {
-                    $dumper.'dump'($label, nqp::getattr_s(self, $type, $name));
+                    $dumper.'dump'($label, pir::box__Ps(nqp::getattr_s(self, $type, $name)));
                 }
                 else {
                     $dumper.'dump'($label, nqp::getattr(self, $type, $name));
