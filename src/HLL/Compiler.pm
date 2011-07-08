@@ -1,11 +1,5 @@
 INIT {
     pir::load_bytecode('Parrot/Exception.pbc');
-    my $file := pir::new('Env')<NQPEVENT>;
-    if $file {
-        my $fh := pir::new('FileHandle');
-        $fh.open($file, 'w');
-        pir::nqpevent_fh($fh);
-    }
 }
 
 # This incorporates both the code that used to be in PCT::HLLCompiler as well
@@ -58,7 +52,7 @@ class HLL::Compiler {
         
         # Command options and usage.
         @!cmdoptions := pir::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config stagestats ll-backtrace nqpevent=s rxtrace');
-        $!usage := "This compiler is based on HLL::Compler.\n\nOptions:\n";
+        $!usage := "This compiler is based on HLL::Compiler.\n\nOptions:\n";
         for @!cmdoptions {
             $!usage := $!usage ~ "    $_\n";
         }
@@ -492,12 +486,27 @@ class HLL::Compiler {
         pir::exit__vi(0);
     }
 
-    method nqpevent($file) {
-        pir::nqpevent_fh(nqp::null());   # close any existing event log
-        if $file {
-            my $fh := pir::new('FileHandle');
-            $fh.open($file, 'w') || self.panic("Cannot write to $file");
-            pir::nqpevent_fh($fh);
+    method nqpevent($spec?) {
+        ## close out the current event log, if any
+        pir::nqpevent__vs('nqpevent: log finished');
+        my $fh := pir::nqpevent_fh__PP(nqp::null());
+        $fh.flush() if $fh;
+
+        ## start a new event log
+        if $spec {
+            $spec := nqp::split(';', $spec);
+            my $file := $spec[0];
+            my $flags := $spec[1];
+            if $file gt '' {
+                my $fh := pir::new('FileHandle');
+                $fh.open($file, 'w') || self.panic("Cannot write to $file");
+                pir::nqpevent_fh__PP($fh);
+            }
+            else {
+                pir::nqpevent_fh__PP(pir::getinterp__P().stderr_handle());
+            }
+            pir::nqpdebflags__Ii($flags eq '' ?? 0x1f !! $flags);
+            pir::nqpevent__vs("nqpevent: log started");
         }
     }
 

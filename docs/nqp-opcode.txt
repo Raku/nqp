@@ -115,3 +115,57 @@ General notes:
   STable ops (?)
     ...??...
 
+  Debugging
+    nqp::deb
+
+
+nqp::deb(flags, msg)
+    The nqp::deb opcode provides access into NQP's debug log mechanism.
+    The opcode takes a flag selector argument and a string to be logged.
+
+    The C<flags> are arranged as a bit field that are bitwise-anded
+    with the current debugging level flag to determine if the string
+    should be computed and logged.  The lower bits of the flag form
+    a bitmask that determins the type of event being logged
+    are a bitmask determining the type of event 
+    determine the type of event being logged:
+
+      Bits   (values)     Event
+      0-3     0x0f        open for user programs and short-term debugging
+       4      0x10        subroutine entry/exit
+       5      0x20        regex events
+       6      0x40        compiler events
+       7      0x80        library/setting events
+      8-27    0x0fffff00  reserved
+
+    The top nibble of the flag is used to further filter event
+    logging.  Bits 28 and 29 combine to form a "detail level"
+    filter with levels 0 (lowest) to 3 (highest).  Thus a nqp::deb()
+    call can specify both the type of event and the level of detail:
+        nqp::deb(0x10, '...')         # ordinary sub event
+        nqp::deb(0x10000010, '...')   # sub event at detail level 1
+        nqp::deb(0x20000020, '...')   # regex event at detail level 2
+        nqp::deb(0x30000090, '...')   # library+sub event at detail level 3
+    Events at the higher levels of detail are logged only if the
+    global flag selector requests those higher levels of detail.
+
+    Bits 30 and 31 are reserved for future use; it's speculated that
+    4 levels of detail will be sufficient but if we need more we can
+    grab bit 30 for that.
+
+    The C<msg> argument is the string to be logged.  Within the message
+    string, '%sub%' will be replaced with the identity (name and subid)
+    of the currently executing sub, and '%caller%' will be replaced
+    with the identity of the current sub's caller.
+
+    The HLL::Compiler class (and its subclasses) support a 
+    --nqpevent="logfile;level" option that enables event and debug
+    logging.  C<logfile> specifies a file where events are to
+    be logged; if omitted, the standard error is used.  The C<level>
+    specifies the global debug flag, if omitted it defaults to 31 (0x1f),
+    which displays all user-level debug events and subroutine events
+    at detail level 0.  (Currently the option handler can only handle
+    decimal values for the detail level; this will be fixed to accept
+    '0x...' hex values soon.)
+
+

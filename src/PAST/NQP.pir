@@ -107,6 +107,41 @@ invoked.
     ops.'push'(label2)
     .return (ops)
 .end
+
+
+=item nqpdebug(PAST::Op node)
+
+Generate debugging code using nqpdebskip and nqpevent.  The first
+child is evaluated as an integer flag, used to skip over the
+evaluation and logging of the second child.
+
+=cut
+
+.sub 'nqpdebug' :method :multi(_, ['PAST';'Op'])
+    .param pmc node
+    .param pmc options         :slurpy :named
+
+    .local pmc debskip
+    $P0 = get_hll_global ['POST'], 'Label'
+    debskip = $P0.'new'('name'=>'nqpdeb_')
+
+    .local pmc flagpost, strpost, ops
+    $P0 = node[0]
+    flagpost = self.'as_post'($P0, 'rtype'=>'i')
+    flagpost = self.'coerce'(flagpost, 'i')
+    $P1 = node[1]
+    strpost = self.'as_post'($P1, 'rtype'=>'s')
+    strpost = self.'coerce'(strpost, 's')
+    $P0 = get_hll_global ['POST'], 'Ops'
+    ops = $P0.'new'('node'=>node)
+    ops.'push'(flagpost)
+    ops.'push_pirop'('nqpdebskip', flagpost, debskip)
+    ops.'push'(strpost)
+    ops.'push_pirop'('nqpevent', strpost)
+    ops.'push'(debskip)
+    ops.'result'(flagpost)
+    .return (ops)
+.end
     
 
 =item map_add(mapid, [hash])
@@ -373,6 +408,10 @@ entry to produce the node to be returned.
     $P0 = new ['Hash']
     $P0['pasttype'] = 'while'
     maphash['while'] = $P0
+
+    $P0 = new ['Hash']
+    $P0['pasttype'] = 'nqpdebug'
+    maphash['deb'] = $P0
 
     .return (maphash)
 .end
