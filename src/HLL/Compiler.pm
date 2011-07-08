@@ -18,26 +18,7 @@ class HLL::Compiler {
     has $!language;
     has %!config;
 
-    # This INIT serves as a cumulative "outer context" for code
-    # executed in HLL::Compiler's interactive REPL.  It's invoked
-    # exactly once upon load/init to obtain a context, and its
-    # default LexPad is replaced with a Hash that we can use to
-    # cumulatively store outer context information.  Both the
-    # context and hash are then made available via package
-    # variables.
-    our $interactive_ctx;
-    our %interactive_pad;
     our %parrot_config;
-    INIT {
-        # Set the context.
-        $interactive_ctx := pir::getinterp__P(){'context'};
-        
-        # Set the pad, but transform it to a Hash first.
-        my %pad_contents;
-        %interactive_pad := pir::copy__0PP(
-            pir::getattribute__PPs($interactive_ctx, 'lex_pad'),
-            %pad_contents);
-    }
 
     # XXX HACK!!! Need a Mu. :-)
     method new() {
@@ -143,6 +124,24 @@ class HLL::Compiler {
     }
 
     method interactive(*%adverbs) {
+        # blank_context() serves as a cumulative "outer context"
+        # for code executed in this interactive REPL instance.
+        # It's invoked once to obtain a context, and the LexPad
+        # of that context is replaced with an empty Hash that
+        # we can use to cumulatively store lexicals.
+        sub blank_context() {
+            # transform context's pad into a Hash
+            my %blank_pad;
+            pir::copy__vPP(
+                pir::getattribute__PPs(pir::getinterp__P(){'context'}, 'lex_pad'),
+                %blank_pad);
+            pir::getinterp__P(){'context'};
+        }
+        blank_context.set_outer(nqp::null());
+        my $interactive_ctx := blank_context();
+        my %interactive_pad := 
+            pir::getattribute__PPs($interactive_ctx, 'lex_pad');
+     
         my $target := pir::downcase(%adverbs<target>);
 
         pir::print__vPS( pir::getinterp__P().stderr_handle(), self.commandline_banner );
@@ -182,8 +181,6 @@ class HLL::Compiler {
                     }
                 };
                 if pir::defined($*MAIN_CTX) {
-                    our $interactive_ctx;
-                    our %interactive_pad;
                     for $*MAIN_CTX.lexpad_full() {
                         %interactive_pad{$_.key} := $_.value;
                     }
