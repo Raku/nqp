@@ -792,6 +792,69 @@ static INTVAL is_attribute_initialized(PARROT_INTERP, PMC *obj, PMC *class_handl
         no_such_attribute(interp, "initializedness check", class_handle, name);
 }
 
+/* Performs a change of type, where possible. */
+static void change_type(PARROT_INTERP, PMC *obj, PMC *new_type) {
+    P6opaqueInstance *instance      = (P6opaqueInstance *)PMC_data(obj);
+    P6opaqueREPRData *cur_repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
+    P6opaqueREPRData *new_repr_data = (P6opaqueREPRData *)STABLE(new_type)->REPR_data;
+    STRING           *mro_str       = Parrot_str_new_constant(interp, "mro");
+    PMC              *cur_mro, *new_mro;
+    INTVAL            cur_mro_elems, new_mro_elems, mro_is_suffix;
+    
+    /* Ensure that the destination type REPR is P6opaque also. */
+    if (REPR(obj) != REPR(new_type))
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "P6opaque can only change type to another type with P6opaque REPR");
+
+    /* Ensure that MRO of new type has current type's MRO as a suffix. */
+    mro_is_suffix = 1;
+    cur_mro = introspection_call(interp, STABLE(obj)->WHAT, STABLE(obj)->HOW, mro_str, 0);
+    new_mro = introspection_call(interp, STABLE(new_type)->WHAT, STABLE(new_type)->HOW, mro_str, 0);
+    cur_mro_elems = VTABLE_elements(interp, cur_mro);
+    new_mro_elems = VTABLE_elements(interp, new_mro);
+    if (new_mro_elems >= cur_mro_elems) {
+        INTVAL start = new_mro_elems - cur_mro_elems;
+        INTVAL i;
+        for (i = 0; i < cur_mro_elems; i++) {
+            PMC *cur_elem = VTABLE_get_pmc_keyed_int(interp, cur_mro, i);
+            PMC *new_elem = VTABLE_get_pmc_keyed_int(interp, new_mro, i + start);
+            if (decontainerize(interp, cur_elem) != decontainerize(interp, new_elem)) {
+                mro_is_suffix = 0;
+                break;
+            }
+        }
+    }
+    else {
+        mro_is_suffix = 0;
+    }
+    if (!mro_is_suffix)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "P6opaque only supports type changes where the MRO of the original type is a suffix of the MRO of the new type");
+    
+    /* If the new REPR never calculated it's object layout, do so now. */
+    if (!new_repr_data->allocation_size) {
+        compute_allocation_strategy(interp, new_type, new_repr_data);
+        PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC(new_type));
+    }
+    
+    /* Reallocate ourself to the new allocation size, if needed, and
+     * ensure new chunk of the memory is zeroed. Note that we can't
+     * really re-alloc, we need to go deal with the fixed size pool
+     * allocator. */
+    if (new_repr_data->allocation_size > cur_repr_data->allocation_size) {
+        PMC *new_body = (P6opaqueInstance *) Parrot_gc_allocate_fixed_size_storage(interp, new_repr_data->allocation_size);
+        memset(new_body, 0, new_repr_data->allocation_size);
+        memcpy(new_body, instance, cur_repr_data->allocation_size);
+        PMC_data(obj) = new_body;
+        Parrot_gc_free_fixed_size_storage(interp, cur_repr_data->allocation_size, instance);
+        instance = new_body;
+        PARROT_GC_WRITE_BARRIER(interp, obj);
+    }
+    
+    /* Finally, we're ready to switch the S-Table pointer. */
+    instance->common.stable = STABLE_PMC(new_type);
+}
+
 /* Initializes the P6opaque representation. */
 PMC * P6opaque_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
@@ -821,6 +884,7 @@ PMC * P6opaque_initialize(PARROT_INTERP) {
     repr->gc_free_repr = gc_free_repr;
     repr->get_storage_spec = get_storage_spec;
     repr->is_attribute_initialized = is_attribute_initialized;
+    repr->change_type = change_type;
 
     /* Wrap it in a PMC. */
     return (this_repr = wrap_repr(interp, repr));
