@@ -76,6 +76,16 @@ P6REGEX_SOURCES = \
   src/Regex/P6Regex/Actions.pm \
   src/Regex/P6Regex/Compiler.pm \
 
+QREGEX_COMBINED = QRegex.nqp
+QREGEX_PIR = QRegex.pir
+QREGEX_PBC = QRegex.pbc
+QREGEX_SOURCES = \
+  src/QRegex.nqp \
+  src/QAST/Node.nqp \
+  src/QAST/Regex.nqp \
+  src/QAST/Compiler.nqp \
+  src/QRegex/Cursor.nqp \
+
 NQP_SOURCES = \
   src/NQP/SymbolTable.pm \
   src/NQP/Grammar.pm \
@@ -458,3 +468,12 @@ testclean:
 
 # nqp::makefile <-- tells Configure.pm to convert / to \ in the above
 #                   template for Win32 systems
+
+qregex: $(QREGEX_PBC)
+
+$(QREGEX_PBC): $(NQP_EXE) $(QREGEX_SOURCES)
+	$(MKPATH) $(STAGE2)/gen
+	$(PERL) tools/build/gen-cat.pl $(QREGEX_SOURCES) > $(STAGE2)/$(QREGEX_COMBINED)
+	./$(NQP_EXE) --target=pir --output=$(STAGE2)/$(QREGEX_PIR) $(STAGE2)/$(QREGEX_COMBINED)
+	$(PARROT) -o $(QREGEX_PBC) $(STAGE2)/$(QREGEX_PIR)
+
