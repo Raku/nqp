@@ -376,6 +376,33 @@ inline op repr_is_attr_initialized(out INT, in PMC, in PMC, in STR) :base_core {
 
 /*
 
+=item repr_change_type()
+
+Tries to change the type of the object in $1 to the type $2. This
+delegates to the REPR to do the work, so it is ultimately up to the
+REPR to decide what changes it will or won't allow.
+
+=cut
+
+*/
+inline op repr_change_type(in PMC, in PMC) :base_core {
+    PMC *obj      = decontainerize(interp, $1);
+    PMC *new_type = decontainerize(interp, $2);
+    if (obj->vtable->base_type == smo_id && new_type->vtable->base_type == smo_id) {
+        if (REPR(obj)->change_type)
+            REPR(obj)->change_type(interp, obj, new_type);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Representation does not implement change_type");
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_change_type on SixModelObjects");
+    }
+}
+
+/*
+
 =item type_check(obj, wanted_type)
 
 Checks if the given object's type accepts the checked type, using the
