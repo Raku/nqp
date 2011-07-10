@@ -28,11 +28,14 @@ role QRegex::Cursor {
 
     method !cursor_start() {
         my $new := self.CREATE();
-        nqp::bindattr($new, $?CLASS, '$!target', $!target);
-        nqp::bindattr($new, $?CLASS, '$!from', $!pos);
         nqp::bindattr($new, $?CLASS, '$!pos', $!pos);
-        nqp::bindattr($new, $?CLASS, '$!bstack', pir::new__Ps('ResizableIntegerArray'));
-        pir::return__vPsiPP($new, $!target, $!pos, $?CLASS, $!bstack)   # XXX need for speed
+        pir::return__vPsiPP(
+            $new, 
+            nqp::bindattr($new, $?CLASS, '$!target', $!target),
+            nqp::bindattr($new, $?CLASS, '$!from', $!pos),
+            $?CLASS,
+            nqp::bindattr($new, $?CLASS, '$!bstack', pir::new__Ps('ResizableIntegerArray'))
+        )
     }
 
     method !cursor_pass($pos) {

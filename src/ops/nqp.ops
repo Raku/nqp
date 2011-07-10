@@ -1201,3 +1201,36 @@ inline op nqpdebskip(in INT, in LABEL) :base_core {
 }
 
 
+/*
+
+=item nqp_rxmark(stack, label, pos, rep)
+
+Push a new backtracking mark onto $1 with label $2, position $3, and count $4
+
+=item nqp_rxpeek(ptr, pos, rep, stack, label)
+
+Set $1 to be the index of latest mark frame $3 in stack $2.
+
+=cut
+
+*/
+inline op nqp_rxmark(in PMC, in LABEL, in INT, in INT) :base_core {
+    PMC *bstack = $1;
+    INTVAL mark = PTR2INTVAL(CUR_OPCODE + $2);
+    VTABLE_push_integer(interp, bstack, mark);
+    VTABLE_push_integer(interp, bstack, $3);
+    VTABLE_push_integer(interp, bstack, $4);
+    VTABLE_push_integer(interp, bstack, 0);
+}
+
+inline op nqp_rxpeek(out INT, in PMC, in LABEL) :base_core {
+    PMC *bstack = $2;
+    INTVAL mark = PTR2INTVAL(CUR_OPCODE + $3);
+    INTVAL ptr  = VTABLE_elements(interp, bstack);
+    while (ptr >= 0 && VTABLE_get_integer_keyed_int(interp, bstack, ptr) != mark) { 
+        ptr -= 4;
+    }
+    $1 = ptr;
+}
+
+
