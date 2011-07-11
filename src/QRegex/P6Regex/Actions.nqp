@@ -96,6 +96,22 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         make $<nibbler>.ast;
     }
 
+    method metachar:sym<'>($/) {
+        my $quote := $<quote_EXPR>.ast;
+        if PAST::Val.ACCEPTS($quote) { $quote := $quote.value; }
+        my $qast := QAST::Regex.new( $quote, :rxtype<literal>, :node($/) );
+        $qast.subtype('ignorecase') if %*RX<i>;
+        make $qast;
+    }
+
+    method metachar:sym<">($/) {
+        my $quote := $<quote_EXPR>.ast;
+        if PAST::Val.ACCEPTS($quote) { $quote := $quote.value; }
+        my $qast := QAST::Regex.new( $quote, :rxtype<literal>, :node($/) );
+        $qast.subtype('ignorecase') if %*RX<i>;
+        make $qast;
+    }
+
     method metachar:sym<.>($/) {
         make QAST::Regex.new( :rxtype<cclass>, :subtype<.>, :node($/) );
     }
