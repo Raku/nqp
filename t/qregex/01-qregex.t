@@ -57,7 +57,8 @@ sub test_line($line) {
         }
         CATCH {
             if $expect_error {
-                my $m := nqp::index($_, pir::chopn__Ssi(nqp::substr($expect, 1),1)) >= 0;
+                my $errpat := pir::chopn__Ssi(nqp::substr($expect, 1), 1);
+                my $m := "$_" ~~ /<$errpat>/;
                 ok($m, $desc);
                 say("#      got: $_\n# expected: $expect") unless $m;
             }
@@ -77,9 +78,15 @@ for @files -> $fn {
     my @lines    := pir::split("\n", $contents);
 
     for @lines -> $l {
-        next if $l ~~ /^\s*\# | ^\s*$ /;
-        test_line($l);
-        $tests := $tests + 1;
+        my $m := $l ~~ /'# todo ' .*? ':pge<' (.*?) '>'/;
+        if $m {
+            todo($m[0], 1);
+        }
+        else {
+            next if $l ~~ /^\s*\# | ^\s*$ /;
+            test_line($l);
+            $tests := $tests + 1;
+        }
     }
     say("# done with file $fn");
 }
