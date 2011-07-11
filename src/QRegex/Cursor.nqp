@@ -1,7 +1,7 @@
 role QRegex::Cursor {
-    has $!target;
-    has $!from;
-    has $!pos;
+    has str $!target;
+    has int $!from;
+    has int $!pos;
     has $!match;
     has $!bstack;
 
@@ -20,9 +20,10 @@ role QRegex::Cursor {
 
     method !cursor_init($target, :$p = 0) {
         my $new := self.CREATE();
-        nqp::bindattr($new, $?CLASS, '$!target', $target);
-        nqp::bindattr($new, $?CLASS, '$!from', $p);
-        nqp::bindattr($new, $?CLASS, '$!pos', $p);
+        $target := pir::trans_encoding__Ssi($target, pir::find_encoding__Is('ucs4'));
+        nqp::bindattr_s($new, $?CLASS, '$!target', $target);
+        nqp::bindattr_i($new, $?CLASS, '$!from', $p);
+        nqp::bindattr_i($new, $?CLASS, '$!pos', $p);
         $new;
     }
 
@@ -31,16 +32,22 @@ role QRegex::Cursor {
         nqp::bindattr($new, $?CLASS, '$!pos', $!pos);
         pir::return__vPsiPP(
             $new, 
-            nqp::bindattr($new, $?CLASS, '$!target', $!target),
-            nqp::bindattr($new, $?CLASS, '$!from', $!pos),
+            nqp::bindattr_s($new, $?CLASS, '$!target', $!target),
+            nqp::bindattr_i($new, $?CLASS, '$!from', $!pos),
             $?CLASS,
-            nqp::bindattr($new, $?CLASS, '$!bstack', pir::new__Ps('ResizableIntegerArray'))
+            nqp::bindattr_i($new, $?CLASS, '$!bstack', pir::new__Ps('ResizableIntegerArray'))
         )
     }
 
     method !cursor_pass($pos) {
         $!match := 1;
         $!pos := $pos;
+    }
+
+    method !cursor_fail() {
+        $!match  := nqp::null();
+        $!bstack := nqp::null();
+        $!pos    := -3;
     }
 
 }
@@ -51,6 +58,8 @@ class NQPMatch is NQPCapture {
     has int $!to;
     has $!ast;
     has $!cursor;
+
+    method Bool() is parrot_vtable('get_bool') { $!to >= $!from }
 }
 
 class NQPCursor does QRegex::Cursor {

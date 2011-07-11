@@ -47,6 +47,7 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push_pirop('lt', %*REG<pos>, 0, $faillabel);
         $ops.push_pirop('jump', '$I19');
         $ops.push($donelabel);
+        $ops.push_pirop('callmethod', '"!cursor_fail"', %*REG<cur>);
 
         $ops.result(%*REG<cur>);
         $ops;

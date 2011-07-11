@@ -1,6 +1,6 @@
 class QRegex::P6Regex::Actions is HLL::Actions {
     method TOP($/) {
-        make PAST::QAST.new( $<nibbler>.ast );
+        make buildsub($<nibbler>.ast);
     }
 
     method nibbler($/) {
@@ -51,4 +51,15 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         make $past;
     }
 
+    sub buildsub($qast, $block = PAST::Block.new()) {
+        $qast := QAST::Regex.new( :rxtype<concat>,
+                     $qast,
+                     QAST::Regex.new( :rxtype<pass> ));
+        $block.push(PAST::QAST.new($qast));
+        $block.blocktype('method');
+        $block;
+    }
+
 }
+
+
