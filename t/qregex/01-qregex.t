@@ -5,7 +5,7 @@ use QRegex;
 
 my @files := [
     'rx_basic',
-#    'rx_metachars',
+    'rx_metachars',
 # contains /<xaaaay @ 0>/ - style things, NYI
 #    'rx_quantifiers',
 #    'rx_backtrack',
@@ -27,6 +27,8 @@ sub test_line($line) {
     my $expect := @parts[2];
     my $desc   := @parts[3];
 
+    $target := '' if $target eq "''";
+
     my $rxcomp := pir::compreg__Ps('QRegex::P6Regex');
     my $rxsub  := $rxcomp.compile($regex);
     my $cursor := NQPCursor."!cursor_init"($target);
@@ -42,7 +44,7 @@ for @files -> $fn {
     my @lines    := pir::split("\n", $contents);
 
     for @lines -> $l {
-        next if $l ~~ /^\s*\#/;
+        next if $l ~~ /^\s*\# | ^\s*$ /;
         test_line($l);
         $tests := $tests + 1;
     }

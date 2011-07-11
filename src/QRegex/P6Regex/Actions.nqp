@@ -18,15 +18,17 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         my $lastlit := 0;
         for $<noun> {
             my $ast := $_.ast;
-            if $lastlit && $ast.rxtype eq 'literal'
-                    && !QAST::Node.ACCEPTS($ast[0]) {
-                $lastlit[0] := $lastlit[0] ~ $ast[0];
-            }
-            else {
-                $qast.push($_.ast);
-                $lastlit := $ast.rxtype eq 'literal' 
-                            && !QAST::Node.ACCEPTS($ast[0])
-                              ?? $ast !! 0;
+            if $ast {
+                if $lastlit && $ast.rxtype eq 'literal'
+                        && !QAST::Node.ACCEPTS($ast[0]) {
+                    $lastlit[0] := $lastlit[0] ~ $ast[0];
+                }
+                else {
+                    $qast.push($_.ast);
+                    $lastlit := $ast.rxtype eq 'literal' 
+                                && !QAST::Node.ACCEPTS($ast[0])
+                                  ?? $ast !! 0;
+                }
             }
         }
         make $qast;
@@ -54,7 +56,33 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method metachar:sym<.>($/) {
-        make QAST::Regex.new( :rxtype<cclass>, pir::const::CCLASS_ANY, :node($/) );
+        make QAST::Regex.new( :rxtype<cclass>, '.CCLASS_ANY', :node($/) );
+    }
+
+    method metachar:sym<^>($/) {
+        make QAST::Regex.new( :rxtype<anchor>, :subtype<bos>, :node($/) );
+    }
+
+    method metachar:sym<$>($/) {
+        make QAST::Regex.new( :rxtype<anchor>, :subtype<eos>, :node($/) );
+    }
+
+    method metachar:sym<bs>($/) {
+        make $<backslash>.ast;
+    }
+
+    method metachar:sym<ws>($/) {
+        make 0;
+    }
+
+    method backslash:sym<n>($/) {
+        make QAST::Regex.new(:rxtype<cclass>, '.CCLASS_NEWLINE', 
+                             :node($/), :negate($<sym> eq 'N'));
+    }
+
+    method backslash:sym<s>($/) {
+        make QAST::Regex.new(:rxtype<cclass>, '.CCLASS_WHITESPACE', 
+                             :node($/), :negate($<sym> eq 'S'));
     }
 
     sub buildsub($qast, $block = PAST::Block.new()) {

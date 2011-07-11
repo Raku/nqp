@@ -69,9 +69,27 @@ class QAST::Compiler is HLL::Compiler {
         }
     }
 
+    method anchor($node) {
+        my $ops       := self.post_new('Ops');
+        my $subtype   := $node.subtype;
+        my $donelabel := self.post_new('Ops', :result(self.unique('rxanchor') ~ '_done'));
+        if $subtype eq 'bos' {
+            $ops.push_pirop('ne', %*REG<pos>, 0, %*REG<fail>);
+        }
+        elsif $subtype eq 'eos' {
+            $ops.push_pirop('ne', %*REG<pos>, %*REG<eos>, %*REG<fail>);
+        }
+        $ops;
+    }
+
     method cclass($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
         $ops.push_pirop('ge', %*REG<pos>, %*REG<eos>, %*REG<fail>);
+        if $node[0] != +pir::const::CCLASS_ANY {
+            my $cctest := $node.negate ?? 'if' !! 'unless';
+            $ops.push_pirop('is_cclass', '$I11', $node[0], %*REG<tgt>, %*REG<pos>);
+            $ops.push_pirop($cctest, '$I11', %*REG<fail>); 
+        }
         $ops.push_pirop('add', %*REG<pos>, 1);
         $ops;
     }

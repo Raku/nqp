@@ -35,7 +35,7 @@ role QRegex::Cursor {
             nqp::bindattr_s($new, $?CLASS, '$!target', $!target),
             nqp::bindattr_i($new, $?CLASS, '$!from', $!pos),
             $?CLASS,
-            nqp::bindattr_i($new, $?CLASS, '$!bstack', pir::new__Ps('ResizableIntegerArray'))
+            nqp::bindattr($new, $?CLASS, '$!bstack', pir::new__Ps('ResizableIntegerArray'))
         )
     }
 

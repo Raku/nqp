@@ -137,14 +137,16 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     }
 
     proto token backslash { <...> }
-    token backslash:sym<w> { $<sym>=[<[dswnDSWN]>] }
     token backslash:sym<b> { $<sym>=[<[bB]>] }
     token backslash:sym<e> { $<sym>=[<[eE]>] }
     token backslash:sym<f> { $<sym>=[<[fF]>] }
     token backslash:sym<h> { $<sym>=[<[hH]>] }
+    token backslash:sym<n> { $<sym>=[<[nN]>] }
     token backslash:sym<r> { $<sym>=[<[rR]>] }
+    token backslash:sym<s> { $<sym>=[<[sS]>] }
     token backslash:sym<t> { $<sym>=[<[tT]>] }
     token backslash:sym<v> { $<sym>=[<[vV]>] }
+    token backslash:sym<w> { $<sym>=[<[wW]>] }
     token backslash:sym<o> { $<sym>=[<[oO]>] [ <octint> | '[' <octints> ']' ] }
     token backslash:sym<x> { $<sym>=[<[xX]>] [ <hexint> | '[' <hexints> ']' ] }
     token backslash:sym<c> { $<sym>=[<[cC]>] <charspec> }
