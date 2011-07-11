@@ -5,9 +5,8 @@ use QRegex;
 
 my @files := [
     'rx_basic',
+    'rx_quantifiers',
     'rx_metachars',
-# contains /<xaaaay @ 0>/ - style things, NYI
-#    'rx_quantifiers',
 #    'rx_backtrack',
 #    'rx_charclass',
 # contains /mob <alnum>: <0 @ 35>/ - style things, NYI
@@ -42,6 +41,7 @@ sub test_line($line) {
     $target := unescape($target);
 
     my $expect_error := nqp::substr($expect, 0, 1) eq '/';
+    my $expect_match := nqp::substr($expect, 0, 1) eq '<';
 
     my $rxcomp := pir::compreg__Ps('QRegex::P6Regex');
     try {
@@ -51,6 +51,9 @@ sub test_line($line) {
         if $expect_error {
             ok(0, $desc);
             say("# expected $expect but no exception caught ");
+        }
+        elsif $expect_match {
+            ok($expect eq "<" ~ $match.Str ~ " @ " ~ $match.from ~ ">", $desc);
         }
         else {
             ok($expect eq 'y' ?? $match !! !$match, $desc);
@@ -74,7 +77,7 @@ sub test_line($line) {
 my $tests := 0;
 for @files -> $fn {
     say("# file: $fn");
-    my $contents := slurp('t/p6regex/' ~ $fn);
+    my $contents := slurp('t/qregex/' ~ $fn);
     my @lines    := pir::split("\n", $contents);
 
     for @lines -> $l {
