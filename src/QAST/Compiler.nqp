@@ -70,14 +70,14 @@ class QAST::Compiler is HLL::Compiler {
     }
 
     method anchor($node) {
-        my $ops       := self.post_new('Ops');
+        my $ops       := self.post_new('Ops', :result(%*REG<cur>));
         my $subtype   := $node.subtype;
         my $donelabel := self.post_new('Ops', :result(self.unique('rxanchor') ~ '_done'));
         if $subtype eq 'bos' {
             $ops.push_pirop('ne', %*REG<pos>, 0, %*REG<fail>);
         }
         elsif $subtype eq 'eos' {
-            $ops.push_pirop('ne', %*REG<pos>, %*REG<eos>, %*REG<fail>);
+            $ops.push_pirop('le', %*REG<pos>, %*REG<eos>, %*REG<fail>);
         }
         $ops;
     }
@@ -105,7 +105,7 @@ class QAST::Compiler is HLL::Compiler {
             $ops.push_pirop($cctest, '$I11', %*REG<fail>); 
             if $subtype eq 'nl' {
                 $ops.push_pirop('substr', '$S10', %*REG<tgt>, %*REG<pos>, 2);
-                $ops.push_pirop('iseq', '$I11', '$S10', 'ucs4:"\r\n"');
+                $ops.push_pirop('iseq', '$I11', '$S10', '"\r\n"');
                 $ops.push_pirop('add', %*REG<pos>, '$I11');
             } 
         }
@@ -162,6 +162,25 @@ class QAST::Compiler is HLL::Compiler {
         $ops;
     }
 
+    method scan($node) {
+        my $ops := self.post_new('Ops', :result(%*REG<cur>));
+        my $prefix := self.unique('rxscan');
+        my $looplabel := self.post_new('Label', :result($prefix ~ '_loop'));
+        my $scanlabel := self.post_new('Label', :result($prefix ~ '_scan'));
+        my $donelabel := self.post_new('Label', :result($prefix ~ '_done'));
+        $ops.push_pirop('repr_get_attr_int', '$I11', 'self', %*REG<curclass>, '"$!from"');
+        $ops.push_pirop('ne', '$I11', -1, $donelabel);
+        $ops.push_pirop('goto', $scanlabel);
+        $ops.push($looplabel);
+        $ops.push_pirop('inc', %*REG<pos>);
+        $ops.push_pirop('gt', %*REG<pos>, %*REG<eos>, %*REG<fail>);
+        $ops.push_pirop('repr_bind_attr_int', %*REG<cur>, %*REG<curclass>, '"$!from"', %*REG<pos>);
+        $ops.push($scanlabel);
+        self.regex_mark($ops, $looplabel, %*REG<pos>, 0);
+        $ops.push($donelabel);
+        $ops;
+    }
+ 
     method regex_mark($ops, $mark, $pos, $rep) {
         $ops.push_pirop('nqp_rxmark', %*REG<bstack>, $mark, $pos, $rep);
     }

@@ -83,6 +83,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     sub buildsub($qast, $block = PAST::Block.new()) {
         $qast := QAST::Regex.new( :rxtype<concat>,
+                     QAST::Regex.new( :rxtype<scan> ),
                      $qast,
                      QAST::Regex.new( :rxtype<pass> ));
         $block.push(PAST::QAST.new($qast));

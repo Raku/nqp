@@ -31,7 +31,7 @@ sub test_line($line) {
 
     my $rxcomp := pir::compreg__Ps('QRegex::P6Regex');
     my $rxsub  := $rxcomp.compile($regex);
-    my $cursor := NQPCursor."!cursor_init"($target);
+    my $cursor := NQPCursor."!cursor_init"($target, :c(0));
     my $match  := $rxsub($cursor).MATCH;
     ok($expect eq 'y' ?? $match !! !$match, $desc);
 }

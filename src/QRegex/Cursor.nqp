@@ -18,12 +18,18 @@ role QRegex::Cursor {
         $!match;
     }
 
-    method !cursor_init($target, :$p = 0) {
+    method !cursor_init($target, :$p = 0, :$c) {
         my $new := self.CREATE();
         $target := pir::trans_encoding__Ssi($target, pir::find_encoding__Is('ucs4'));
         nqp::bindattr_s($new, $?CLASS, '$!target', $target);
-        nqp::bindattr_i($new, $?CLASS, '$!from', $p);
-        nqp::bindattr_i($new, $?CLASS, '$!pos', $p);
+        if pir::defined($c) {
+            nqp::bindattr_i($new, $?CLASS, '$!from', -1);
+            nqp::bindattr_i($new, $?CLASS, '$!pos', $c);
+        }
+        else {
+            nqp::bindattr_i($new, $?CLASS, '$!from', $p);
+            nqp::bindattr_i($new, $?CLASS, '$!pos', $p);
+        }
         $new;
     }
 
