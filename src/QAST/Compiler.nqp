@@ -79,6 +79,23 @@ class QAST::Compiler is HLL::Compiler {
         elsif $subtype eq 'eos' {
             $ops.push_pirop('lt', %*REG<pos>, %*REG<eos>, %*REG<fail>);
         }
+        elsif $subtype eq 'lwb' {
+            $ops.push_pirop('ge', %*REG<pos>, %*REG<eos>, %*REG<fail>);
+            $ops.push_pirop('is_cclass', '$I11', '.CCLASS_WORD', %*REG<tgt>, %*REG<pos>);
+            $ops.push_pirop('unless', '$I11', %*REG<fail>);
+            $ops.push_pirop('sub', '$I11', %*REG<pos>, 1);
+            $ops.push_pirop('is_cclass', '$I11', '.CCLASS_WORD', %*REG<tgt>, '$I11');
+            $ops.push_pirop('if', '$I11', %*REG<fail>);
+        }
+        elsif $subtype eq 'rwb' {
+            $ops.push_pirop('le', %*REG<pos>, 0, %*REG<fail>);
+            $ops.push_pirop('is_cclass', '$I11', '.CCLASS_WORD', %*REG<tgt>, %*REG<pos>);
+            $ops.push_pirop('if', '$I11', %*REG<fail>);
+            $ops.push_pirop('sub', '$I11', %*REG<pos>, 1);
+            $ops.push_pirop('is_cclass', '$I11', '.CCLASS_WORD', %*REG<tgt>, '$I11');
+            $ops.push_pirop('unless', '$I11', %*REG<fail>);
+        }
+
         $ops;
     }
 
