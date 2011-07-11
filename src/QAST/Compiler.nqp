@@ -313,6 +313,7 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push($scanlabel);
         self.regex_mark($ops, $looplabel, %*REG<pos>, 0);
         $ops.push($donelabel);
+        $ops;
     }
  
     method regex_mark($ops, $mark, $pos, $rep) {
