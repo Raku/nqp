@@ -11,6 +11,8 @@ class QAST::Node is NQPCapture {
         $new;
     }
 
-    method name(*@value) { $!name := @value[0] if @value; $!name }
+    method name(*@value)   { $!name := @value[0] if @value; $!name }
+    method push($value)    { nqp::push(self.list, $value) }
+    method unshift($value) { nqp::unshift(self.list, $value) }
 }
 

@@ -49,6 +49,7 @@ class NQPMatch is NQPCapture {
     has $!target;
     has int $!from;
     has int $!to;
+    has $!ast;
     has $!cursor;
 }
 

@@ -85,6 +85,9 @@ QREGEX_SOURCES = \
   src/QAST/Regex.nqp \
   src/QAST/Compiler.nqp \
   src/QRegex/Cursor.nqp \
+  src/QRegex/P6Regex/Grammar.nqp \
+  src/QRegex/P6Regex/Actions.nqp \
+  src/QRegex/P6Regex/Compiler.nqp \
 
 NQP_SOURCES = \
   src/NQP/SymbolTable.pm \

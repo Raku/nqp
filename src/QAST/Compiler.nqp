@@ -53,8 +53,8 @@ class QAST::Compiler is HLL::Compiler {
     }
 
     method regex_post($node) {
-        my $regextype := $node.regextype() // 'concat';
-        self."$regextype"($node);
+        my $rxtype := $node.rxtype() // 'concat';
+        self."$rxtype"($node);
     }
 
     method post_new($type, *@args, *%options) {
