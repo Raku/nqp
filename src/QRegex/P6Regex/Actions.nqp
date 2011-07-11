@@ -68,6 +68,11 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         make $past;
     }
 
+    method quantifier:sym<?>($/) {
+        my $past := QAST::Regex.new( :rxtype<quant>, :min(0), :max(1), :node($/) );
+        make $past;
+    }
+
     method metachar:sym<ws>($/) {
         make 0;
     }

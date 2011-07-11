@@ -266,9 +266,10 @@ class QAST::Compiler is HLL::Compiler {
             $ops.push_pirop('ge', %*REG<rep>, $node.max, $donelabel)
                 if $max > 1;
         }
-        self.regex_mark($ops, $donelabel, %*REG<pos>, %*REG<rep>)
-            unless $max == 1;
-        $ops.push_pirop('goto', $looplabel);
+        unless $max == 1 {
+            self.regex_mark($ops, $donelabel, %*REG<pos>, %*REG<rep>);
+            $ops.push_pirop('goto', $looplabel);
+        }
         $ops.push($donelabel);
         $ops.push_pirop('lt', %*REG<rep>, +$node.min, %*REG<fail>)
             if $min > 1;
