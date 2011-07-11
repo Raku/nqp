@@ -4,7 +4,14 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method nibbler($/) {
-        my $qast := $<termconj>[0].ast;
+        my $qast;
+        if +$<termconj> > 1 {
+            $qast := QAST::Regex.new( :rxtype<altseq>, :node($/) );
+            for $<termconj> { $qast.push($_.ast) }
+        }
+        else {
+            $qast := $<termconj>[0].ast;
+        }
         make $qast;
     }
 

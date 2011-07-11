@@ -69,6 +69,29 @@ class QAST::Compiler is HLL::Compiler {
         }
     }
 
+    method altseq($node) {
+        my $ops := self.post_new('Ops', :result(%*REG<cur>));
+        my $prefix := self.unique('alt') ~ '_';
+        my $altcount := 0;
+        my $iter     := nqp::iterator($node.list);
+        my $endlabel := self.post_new('Label', :result($prefix ~ 'end'));
+        my $altlabel := self.post_new('Label', :result($prefix ~ $altcount));
+        my $apost    := self.regex_post(nqp::shift($iter));
+        while $iter {
+            $ops.push($altlabel);
+            $altcount++;
+            $altlabel := self.post_new('Label', :result($prefix ~ $altcount));
+            self.regex_mark($ops, $altlabel, %*REG<pos>, 0);
+            $ops.push($apost);
+            $ops.push_pirop('goto', $endlabel);
+            $apost := self.regex_post(nqp::shift($iter));
+        }
+        $ops.push($altlabel);
+        $ops.push($apost);
+        $ops.push($endlabel);
+        $ops;
+    }
+
     method anchor($node) {
         my $ops       := self.post_new('Ops', :result(%*REG<cur>));
         my $subtype   := $node.subtype;
