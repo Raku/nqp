@@ -4,19 +4,20 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method nibbler($/) {
-        my $qast;
+        my $qast := $<termconj>[0].ast;
         if +$<termconj> > 1 {
             $qast := QAST::Regex.new( :rxtype<altseq>, :node($/) );
             for $<termconj> { $qast.push($_.ast) }
-        }
-        else {
-            $qast := $<termconj>[0].ast;
         }
         make $qast;
     }
 
     method termconj($/) {
         my $qast := $<termish>[0].ast;
+        if +$<termish> > 1 {
+            $qast := QAST::Regex.new( :rxtype<conj>, :node($/) );
+            for $<termish> { $qast.push($_.ast); }
+        }
         make $qast;
     }
 
@@ -55,6 +56,11 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         make $<metachar>
                ?? $<metachar>.ast
                !! QAST::Regex.new( ~$/, :rxtype<literal>, :node($/));
+    }
+
+    method quantifier:sym<*>($/) {
+        my $past := QAST::Regex.new( :rxtype<quant>, :node($/) );
+        make $past;
     }
 
     method quantifier:sym<+>($/) {

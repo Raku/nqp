@@ -177,6 +177,39 @@ class QAST::Compiler is HLL::Compiler {
         $ops;
     }
 
+    method conj($node) {
+        my $ops := self.post_new('Ops', :result(%*REG<cur>));
+        my $prefix := self.unique('rxconj') ~ '_';
+        my $conjlabel := self.post_new('Label', :result($prefix ~ 'fail'));
+        my $firstlabel := self.post_new('Label', :result($prefix ~ 'first'));
+        my $iter := nqp::iterator($node.list);
+        # make a mark that holds our starting position in the pos slot
+        self.regex_mark($ops, $conjlabel, %*REG<pos>, 0);
+        $ops.push_pirop('goto', $firstlabel);
+        $ops.push($conjlabel);
+        $ops.push_pirop('goto', %*REG<fail>);
+        # call the first child
+        $ops.push($firstlabel);
+        $ops.push(self.regex_post(nqp::shift($iter)));
+        # use previous mark to make one with pos=start, rep=end
+        self.regex_peek($ops, '$I19', $conjlabel);
+        $ops.push_pirop('inc', '$I19');
+        $ops.push_pirop('set', '$I11', %*REG<bstack>~'[$I19]');
+        self.regex_mark($ops, $conjlabel, '$I11', %*REG<pos>);
+
+        while $iter {
+            $ops.push_pirop('set', %*REG<pos>, '$I11');
+            $ops.push(self.regex_post(nqp::shift($iter)));
+            self.regex_peek($ops, '$I19', $conjlabel);
+            $ops.push_pirop('inc', '$I19');
+            $ops.push_pirop('set', '$I11', %*REG<bstack>~'[$I19]');
+            $ops.push_pirop('inc', '$I19');
+            $ops.push_pirop('set', '$I12', %*REG<bstack>~'[$I19]');
+            $ops.push_pirop('ne', %*REG<pos>, '$I12', %*REG<fail>);
+        }
+        $ops;
+    }
+
     method enumcharlist($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
         my $charlist := self.escape($node[0]);
@@ -228,7 +261,8 @@ class QAST::Compiler is HLL::Compiler {
             $ops.push_pirop('goto', $looplabel);
         }
         $ops.push($donelabel);
-        $ops.push_pirop('lt', %*REG<rep>, $node.min, %*REG<fail>);
+        $ops.push_pirop('lt', %*REG<rep>, +$node.min, %*REG<fail>)
+            if $node.min > 0;
         $ops;
     }
 
@@ -248,7 +282,6 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push($scanlabel);
         self.regex_mark($ops, $looplabel, %*REG<pos>, 0);
         $ops.push($donelabel);
-        $ops;
     }
  
     method regex_mark($ops, $mark, $pos, $rep) {
