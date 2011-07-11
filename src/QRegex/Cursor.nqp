@@ -1,4 +1,5 @@
 role QRegex::Cursor {
+    has $!orig;
     has str $!target;
     has int $!from;
     has int $!pos;
@@ -12,7 +13,7 @@ role QRegex::Cursor {
     method MATCH() {
         my $mclass := self.match_class();
         $!match := nqp::create($mclass);
-        nqp::bindattr($!match, $mclass, '$!target', $!target);
+        nqp::bindattr($!match, $mclass, '$!orig', $!orig);
         nqp::bindattr_i($!match, $mclass, '$!from', $!from);
         nqp::bindattr_i($!match, $mclass, '$!to', $!pos);
         $!match;
@@ -20,6 +21,7 @@ role QRegex::Cursor {
 
     method !cursor_init($target, :$p = 0, :$c) {
         my $new := self.CREATE();
+        nqp::bindattr($new, $?CLASS, '$!orig', $target);
         $target := pir::trans_encoding__Ssi($target, pir::find_encoding__Is('ucs4'));
         nqp::bindattr_s($new, $?CLASS, '$!target', $target);
         if pir::defined($c) {
@@ -35,7 +37,8 @@ role QRegex::Cursor {
 
     method !cursor_start() {
         my $new := self.CREATE();
-        nqp::bindattr($new, $?CLASS, '$!pos', $!pos);
+        nqp::bindattr($new, $?CLASS, '$!orig', $!orig);
+        nqp::bindattr_i($new, $?CLASS, '$!pos', $!pos);
         pir::return__vPsiPP(
             $new, 
             nqp::bindattr_s($new, $?CLASS, '$!target', $!target),
@@ -59,12 +62,15 @@ role QRegex::Cursor {
 }
 
 class NQPMatch is NQPCapture {
-    has $!target;
+    has $!orig;
     has int $!from;
     has int $!to;
     has $!ast;
     has $!cursor;
 
+    method from() { $!from }
+    method to()   { $!to }
+    method Str() is parrot_vtable('get_string') { nqp::substr($!orig, $!from, $!to-$!from) }
     method Bool() is parrot_vtable('get_bool') { $!to >= $!from }
 }
 
