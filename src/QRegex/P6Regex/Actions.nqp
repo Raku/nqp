@@ -87,6 +87,10 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         make $<backslash>.ast;
     }
 
+    method metachar:sym<assert>($/) {
+        make $<assertion>.ast;
+    }
+
     method metachar:sym<ws>($/) {
         make 0;
     }
@@ -102,6 +106,29 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         make $qast;
     }
 
+    method assertion:sym<[>($/) {
+        my $clist := $<cclass_elem>;
+        my $qast  := $clist[0].ast;
+        make $qast;
+    }
+
+    method cclass_elem($/) {
+        my $str := '';
+        my $qast;
+        {
+            for $<charspec> {
+                if $_[1] {
+                    my $ord0 := nqp::ord($_[0]);
+                    my $ord1 := nqp::ord($_[1][0]);
+                    $str := nqp::concat($str, nqp::chr($ord0++)) while $ord0 <= $ord1;
+                }
+                else { $str := $str ~ $_[0]; }
+            }
+            $qast := QAST::Regex.new( $str, :rxtype<enumcharlist>, :node($/) );
+        }
+        $qast.negate( $<sign> eq '-' );
+        make $qast;
+    }
 
     sub buildsub($qast, $block = PAST::Block.new()) {
         $qast := QAST::Regex.new( :rxtype<concat>,

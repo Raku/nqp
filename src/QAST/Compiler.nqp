@@ -135,9 +135,9 @@ class QAST::Compiler is HLL::Compiler {
         self.panic("Unrecognized subtype '$subtype' in QAST::Regex cclass")
             unless $cclass;
         if $cclass ne '.CCLASS_ANY' {
-            my $cctest := $node.negate ?? 'if' !! 'unless';
+            my $testop := $node.negate ?? 'if' !! 'unless';
             $ops.push_pirop('is_cclass', '$I11', $cclass, %*REG<tgt>, %*REG<pos>);
-            $ops.push_pirop($cctest, '$I11', %*REG<fail>); 
+            $ops.push_pirop($testop, '$I11', %*REG<fail>); 
             if $subtype eq 'nl' {
                 $ops.push_pirop('substr', '$S10', %*REG<tgt>, %*REG<pos>, 2);
                 $ops.push_pirop('iseq', '$I11', '$S10', '"\r\n"');
@@ -151,6 +151,18 @@ class QAST::Compiler is HLL::Compiler {
     method concat($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
         for $node.list { $ops.push(self.regex_post($_)); }
+        $ops;
+    }
+
+    method enumcharlist($node) {
+        my $ops := self.post_new('Ops', :result(%*REG<cur>));
+        my $charlist := self.escape($node[0]);
+        my $testop := $node.negate ?? 'ge' !! 'lt';
+        $ops.push_pirop('ge', %*REG<pos>, %*REG<eos>, %*REG<fail>);
+        $ops.push_pirop('substr', '$S11', %*REG<tgt>, %*REG<pos>, 1);
+        $ops.push_pirop('index', '$I11', $charlist, '$S11');
+        $ops.push_pirop($testop, '$I11', 0, %*REG<fail>);
+        $ops.push_pirop('inc', %*REG<pos>);
         $ops;
     }
 
