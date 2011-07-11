@@ -56,7 +56,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method metachar:sym<.>($/) {
-        make QAST::Regex.new( :rxtype<cclass>, '.CCLASS_ANY', :node($/) );
+        make QAST::Regex.new( :rxtype<cclass>, :subtype<.>, :node($/) );
     }
 
     method metachar:sym<^>($/) {
@@ -75,14 +75,10 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         make 0;
     }
 
-    method backslash:sym<n>($/) {
-        make QAST::Regex.new(:rxtype<cclass>, '.CCLASS_NEWLINE', 
-                             :node($/), :negate($<sym> eq 'N'));
-    }
-
     method backslash:sym<s>($/) {
         make QAST::Regex.new(:rxtype<cclass>, '.CCLASS_WHITESPACE', 
-                             :node($/), :negate($<sym> eq 'S'));
+                             :subtype($<sym> eq 'n' ?? 'nl' !! ~$<sym>), 
+                             :negate($<sym> le 'Z'), :node($/));
     }
 
     sub buildsub($qast, $block = PAST::Block.new()) {

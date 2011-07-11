@@ -82,13 +82,32 @@ class QAST::Compiler is HLL::Compiler {
         $ops;
     }
 
+    our %cclass_code;
+    INIT {
+        %cclass_code<.>  := '.CCLASS_ANY';
+        %cclass_code<d>  := '.CCLASS_NUMERIC';
+        %cclass_code<s>  := '.CCLASS_WHITESPACE';
+        %cclass_code<w>  := '.CCLASS_WORD';
+        %cclass_code<n>  := '.CCLASS_NEWLINE';
+        %cclass_code<nl> := '.CCLASS_NEWLINE';
+    }
+
     method cclass($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
+        my $subtype := $node.subtype;
         $ops.push_pirop('ge', %*REG<pos>, %*REG<eos>, %*REG<fail>);
-        if $node[0] != +pir::const::CCLASS_ANY {
+        my $cclass := %cclass_code{nqp::lc($subtype)};
+        self.panic("Unrecognized subtype '$subtype' in QAST::Regex cclass")
+            unless $cclass;
+        if $cclass ne '.CCLASS_ANY' {
             my $cctest := $node.negate ?? 'if' !! 'unless';
-            $ops.push_pirop('is_cclass', '$I11', $node[0], %*REG<tgt>, %*REG<pos>);
+            $ops.push_pirop('is_cclass', '$I11', $cclass, %*REG<tgt>, %*REG<pos>);
             $ops.push_pirop($cctest, '$I11', %*REG<fail>); 
+            if $subtype eq 'nl' {
+                $ops.push_pirop('substr', '$S10', %*REG<tgt>, %*REG<pos>, 2);
+                $ops.push_pirop('iseq', '$I11', '$S10', 'ucs4:"\r\n"');
+                $ops.push_pirop('add', %*REG<pos>, '$I11');
+            } 
         }
         $ops.push_pirop('add', %*REG<pos>, 1);
         $ops;
