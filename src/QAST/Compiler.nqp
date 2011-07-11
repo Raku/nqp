@@ -77,7 +77,7 @@ class QAST::Compiler is HLL::Compiler {
             $ops.push_pirop('ne', %*REG<pos>, 0, %*REG<fail>);
         }
         elsif $subtype eq 'eos' {
-            $ops.push_pirop('le', %*REG<pos>, %*REG<eos>, %*REG<fail>);
+            $ops.push_pirop('lt', %*REG<pos>, %*REG<eos>, %*REG<fail>);
         }
         $ops;
     }

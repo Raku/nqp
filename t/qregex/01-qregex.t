@@ -19,6 +19,17 @@ my @files := [
 #    'rx_goal',
 ];
 
+my %expansions;
+%expansions<n> := "\n";
+%expansions<r> := "\r";
+%expansions<e> := "\e";
+%expansions<t> := "\t";
+%expansions<f> := "\f";
+sub unescape($s) {
+    $s := subst($s, /\\(<[nretf]>)/, -> $m { %expansions{$m[0]} }, :global);
+    subst($s, /\\x(<?xdigit>**4)/, -> $m { HLL::Actions::string_to_int(~$m[0], 16) }, :global);
+}
+
 
 sub test_line($line) {
     my @parts  := match($line, /\T+/, :global);
@@ -28,6 +39,7 @@ sub test_line($line) {
     my $desc   := @parts[3];
 
     $target := '' if $target eq "''";
+    $target := unescape($target);
 
     my $rxcomp := pir::compreg__Ps('QRegex::P6Regex');
     my $rxsub  := $rxcomp.compile($regex);
