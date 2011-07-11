@@ -24,11 +24,13 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     rule arglist { <arg> [ ',' <arg>]* }
 
     token TOP {
+        :my %*RX;
         <nibbler>
         [ $ || <.panic: 'Confused'> ]
     }
 
     token nibbler {
+        :my %*RX := pir::clone(pir::find_dynamic_lex__Ps('%*RX'));
         [ <.ws> ['||'|'|'|'&&'|'&'] ]?
         <termconj>
         [ 

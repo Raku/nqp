@@ -244,35 +244,56 @@ class QAST::Compiler is HLL::Compiler {
 
     method quant($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
-        my $prefix := self.unique('rxquant' ~ $node.backtrack);
+        my $backtrack := $node.backtrack || 'g';
+        my $prefix    := self.unique('rxquant' ~ $backtrack);
         my $looplabel := self.post_new('Label', :result($prefix ~ '_loop'));
         my $donelabel := self.post_new('Label', :result($prefix ~ '_done'));
         my $min       := $node.min || 0;
         my $max       := $node.max // -1;
         my $needrep   := $min > 1 || $max > 1;
-        my $needmark  := $needrep;
+        my $needmark  := $needrep || $backtrack eq 'r';
 
         $ops.push_pirop('inline', :inline('  # rx %0 ** %1..%2'), $prefix, $min, $max);
 
-        if $min == 0 { self.regex_mark($ops, $donelabel, %*REG<pos>, 0); }
-        elsif $needmark { self.regex_mark($ops, $donelabel, -1, 0); }
-        $ops.push($looplabel);
-        $ops.push(self.regex_post($node[0]));
-        if $needmark {
-            self.regex_peek($ops, '$I19', $donelabel);
-            $ops.push_pirop('add', '$I19', 2);
-            $ops.push_pirop('set', %*REG<rep>, %*REG<bstack>~'[$I19]');
+        if $backtrack eq 'f' {
+            my $ireg := '$I12';
+            $ops.push_pirop('set', %*REG<rep>, 0);
+            if $min < 1 {
+                self.regex_mark($ops, $looplabel, %*REG<pos>, %*REG<rep>);
+                $ops.push_pirop('goto', $donelabel);
+            }
+            $ops.push($looplabel);
+            $ops.push_pirop('set', $ireg, %*REG<rep>);
+            $ops.push(self.regex_post($node[0]));
+            $ops.push_pirop('set', %*REG<rep>, $ireg);
             $ops.push_pirop('inc', %*REG<rep>);
-            $ops.push_pirop('ge', %*REG<rep>, $node.max, $donelabel)
-                if $max > 1;
+            $ops.push_pirop('lt', %*REG<rep>, $min, $looplabel) if $min > 1;
+            $ops.push_pirop('ge', %*REG<rep>, $max, $donelabel) if $max > 1;
+            self.regex_mark($ops, $looplabel, %*REG<pos>, %*REG<rep>) if $max != 1;
+            $ops.push($donelabel);
         }
-        unless $max == 1 {
-            self.regex_mark($ops, $donelabel, %*REG<pos>, %*REG<rep>);
-            $ops.push_pirop('goto', $looplabel);
+        else {
+            if $min == 0 { self.regex_mark($ops, $donelabel, %*REG<pos>, 0); }
+            elsif $needmark { self.regex_mark($ops, $donelabel, -1, 0); }
+            $ops.push($looplabel);
+            $ops.push(self.regex_post($node[0]));
+            if $needmark {
+                self.regex_peek($ops, '$I19', $donelabel);
+                $ops.push_pirop('add', '$I18', '$I19', 2);
+                $ops.push_pirop('set', %*REG<rep>, %*REG<bstack>~'[$I18]');
+                self.regex_commit($ops, $donelabel) if $backtrack eq 'r';
+                $ops.push_pirop('inc', %*REG<rep>);
+                $ops.push_pirop('ge', %*REG<rep>, $node.max, $donelabel)
+                    if $max > 1;
+            }
+            unless $max == 1 {
+                self.regex_mark($ops, $donelabel, %*REG<pos>, %*REG<rep>);
+                $ops.push_pirop('goto', $looplabel);
+            }
+            $ops.push($donelabel);
+            $ops.push_pirop('lt', %*REG<rep>, +$node.min, %*REG<fail>)
+                if $min > 1;
         }
-        $ops.push($donelabel);
-        $ops.push_pirop('lt', %*REG<rep>, +$node.min, %*REG<fail>)
-            if $min > 1;
         $ops;
     }
 
@@ -300,6 +321,11 @@ class QAST::Compiler is HLL::Compiler {
 
     method regex_peek($ops, $bptr, $mark) {
         $ops.push_pirop('nqp_rxpeek', $bptr, %*REG<bstack>, $mark);
+    }
+
+    method regex_commit($ops, $mark) {
+        $ops.push_pirop('nqp_rxpeek', '$I11', %*REG<bstack>, $mark);
+        $ops.push_pirop('assign', %*REG<bstack>, '$I11');
     }
 }
 

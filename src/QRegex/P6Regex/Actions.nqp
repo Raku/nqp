@@ -49,6 +49,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             $ast.unshift($qast);
             $qast := $ast;
         }
+        $qast.backtrack('r') if $qast && !$qast.backtrack && %*RX<r>;
         make $qast;
     }
 
@@ -59,18 +60,18 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method quantifier:sym<*>($/) {
-        my $past := QAST::Regex.new( :rxtype<quant>, :node($/) );
-        make $past;
+        my $qast := QAST::Regex.new( :rxtype<quant>, :node($/) );
+        make backmod($qast, $<backmod>);
     }
 
     method quantifier:sym<+>($/) {
-        my $past := QAST::Regex.new( :rxtype<quant>, :min(1), :node($/) );
-        make $past;
+        my $qast := QAST::Regex.new( :rxtype<quant>, :min(1), :node($/) );
+        make backmod($qast, $<backmod>);
     }
 
     method quantifier:sym<?>($/) {
-        my $past := QAST::Regex.new( :rxtype<quant>, :min(0), :max(1), :node($/) );
-        make $past;
+        my $qast := QAST::Regex.new( :rxtype<quant>, :min(0), :max(1), :node($/) );
+        make backmod($qast, $<backmod>);
     }
 
     method metachar:sym<ws>($/) {
@@ -150,6 +151,19 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         $qast.negate( $<sign> eq '-' );
         make $qast;
+    }
+
+    method mod_internal($/) {
+        my $n := $<n>[0] gt '' ?? +$<n>[0] !! 1;
+        %*RX{ ~$<mod_ident><sym> } := $n;
+        make 0;
+    }
+
+    sub backmod($ast, $backmod) {
+        if $backmod eq ':' { $ast.backtrack('r') }
+        elsif $backmod eq ':?' || $backmod eq '?' { $ast.backtrack('f') }
+        elsif $backmod eq ':!' || $backmod eq '!' { $ast.backtrack('g') }
+        $ast;
     }
 
     sub buildsub($qast, $block = PAST::Block.new()) {
