@@ -76,7 +76,11 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method quantifier:sym<**>($/) {
         my $qast;
-        {
+        if $<quantified_atom> { 
+            my $ast := $<quantified_atom>.ast;
+            $qast := QAST::Regex.new( :rxtype<quant>, :min(1), $ast);
+        }
+        else {
             $qast := QAST::Regex.new( :rxtype<quant>, :min(+$<min>), :node($/) );
             if ! $<max> { $qast.max(+$<min>) }
             elsif $<max>[0] ne '*' { $qast.max(+$<max>[0]); }

@@ -245,6 +245,7 @@ class QAST::Compiler is HLL::Compiler {
     method quant($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
         my $backtrack := $node.backtrack || 'g';
+        my $sep       := $node[1];
         my $prefix    := self.unique('rxquant' ~ $backtrack);
         my $looplabel := self.post_new('Label', :result($prefix ~ '_loop'));
         my $donelabel := self.post_new('Label', :result($prefix ~ '_done'));
@@ -256,14 +257,18 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push_pirop('inline', :inline('  # rx %0 ** %1..%2'), $prefix, $min, $max);
 
         if $backtrack eq 'f' {
+            my $seplabel  := self.post_new('Label', :result($prefix ~ '_sep'));
             my $ireg := '$I12';
             $ops.push_pirop('set', %*REG<rep>, 0);
             if $min < 1 {
                 self.regex_mark($ops, $looplabel, %*REG<pos>, %*REG<rep>);
                 $ops.push_pirop('goto', $donelabel);
             }
+            $ops.push_pirop('goto', $seplabel) if $sep;
             $ops.push($looplabel);
             $ops.push_pirop('set', $ireg, %*REG<rep>);
+            $ops.push(self.regex_post($sep)) if $sep;
+            $ops.push($seplabel) if $sep;
             $ops.push(self.regex_post($node[0]));
             $ops.push_pirop('set', %*REG<rep>, $ireg);
             $ops.push_pirop('inc', %*REG<rep>);
@@ -288,6 +293,7 @@ class QAST::Compiler is HLL::Compiler {
             }
             unless $max == 1 {
                 self.regex_mark($ops, $donelabel, %*REG<pos>, %*REG<rep>);
+                $ops.push(self.regex_post($sep)) if $sep;
                 $ops.push_pirop('goto', $looplabel);
             }
             $ops.push($donelabel);
