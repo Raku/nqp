@@ -62,6 +62,14 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         make $past;
     }
 
+    method metachar:sym<ws>($/) {
+        make 0;
+    }
+
+    method metachar:sym<[ ]>($/) {
+        make $<nibbler>.ast;
+    }
+
     method metachar:sym<.>($/) {
         make QAST::Regex.new( :rxtype<cclass>, :subtype<.>, :node($/) );
     }
@@ -96,10 +104,6 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method metachar:sym<assert>($/) {
         make $<assertion>.ast;
-    }
-
-    method metachar:sym<ws>($/) {
-        make 0;
     }
 
     method backslash:sym<s>($/) {
