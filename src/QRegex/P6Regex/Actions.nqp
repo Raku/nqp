@@ -89,6 +89,12 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                              :negate($<sym> le 'Z'), :node($/));
     }
 
+    method backslash:sym<misc>($/) {
+        my $qast := QAST::Regex.new( ~$/ , :rxtype('literal'), :node($/) );
+        make $qast;
+    }
+
+
     sub buildsub($qast, $block = PAST::Block.new()) {
         $qast := QAST::Regex.new( :rxtype<concat>,
                      QAST::Regex.new( :rxtype<scan> ),

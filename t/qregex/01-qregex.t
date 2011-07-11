@@ -41,11 +41,32 @@ sub test_line($line) {
     $target := '' if $target eq "''";
     $target := unescape($target);
 
+    my $expect_error := nqp::substr($expect, 0, 1) eq '/';
+
     my $rxcomp := pir::compreg__Ps('QRegex::P6Regex');
-    my $rxsub  := $rxcomp.compile($regex);
-    my $cursor := NQPCursor."!cursor_init"($target, :c(0));
-    my $match  := $rxsub($cursor).MATCH;
-    ok($expect eq 'y' ?? $match !! !$match, $desc);
+    try {
+        my $rxsub  := $rxcomp.compile($regex);
+        my $cursor := NQPCursor."!cursor_init"($target, :c(0));
+        my $match  := $rxsub($cursor).MATCH;
+        if $expect_error {
+            ok(0, $desc);
+            say("# expected $expect but no exception caught ");
+        }
+        else {
+            ok($expect eq 'y' ?? $match !! !$match, $desc);
+        }
+        CATCH {
+            if $expect_error {
+                my $m := nqp::index($_, pir::chopn__Ssi(nqp::substr($expect, 1),1)) >= 0;
+                ok($m, $desc);
+                say("#      got: $_\n# expected: $expect") unless $m;
+            }
+            else {
+                ok(0, $desc);
+                say("# ERROR: $_");
+            }
+       }
+   }
 }
 
 
