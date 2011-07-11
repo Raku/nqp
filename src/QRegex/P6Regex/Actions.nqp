@@ -63,8 +63,16 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         make QAST::Regex.new( :rxtype<anchor>, :subtype<bos>, :node($/) );
     }
 
+    method metachar:sym<^^>($/) {
+        make QAST::Regex.new( :rxtype<anchor>, :subtype<bol>, :node($/) );
+    }
+
     method metachar:sym<$>($/) {
         make QAST::Regex.new( :rxtype<anchor>, :subtype<eos>, :node($/) );
+    }
+
+    method metachar:sym<$$>($/) {
+        make QAST::Regex.new( :rxtype<anchor>, :subtype<eol>, :node($/) );
     }
 
     method metachar:sym<lwb>($/) {

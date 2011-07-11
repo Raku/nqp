@@ -72,7 +72,7 @@ class QAST::Compiler is HLL::Compiler {
     method anchor($node) {
         my $ops       := self.post_new('Ops', :result(%*REG<cur>));
         my $subtype   := $node.subtype;
-        my $donelabel := self.post_new('Ops', :result(self.unique('rxanchor') ~ '_done'));
+        my $donelabel := self.post_new('Label', :result(self.unique('rxanchor') ~ '_done'));
         if $subtype eq 'bos' {
             $ops.push_pirop('ne', %*REG<pos>, 0, %*REG<fail>);
         }
@@ -94,6 +94,24 @@ class QAST::Compiler is HLL::Compiler {
             $ops.push_pirop('sub', '$I11', %*REG<pos>, 1);
             $ops.push_pirop('is_cclass', '$I11', '.CCLASS_WORD', %*REG<tgt>, '$I11');
             $ops.push_pirop('unless', '$I11', %*REG<fail>);
+        }
+        elsif $subtype eq 'bol' {
+            $ops.push_pirop('eq', %*REG<pos>, 0, $donelabel);
+            $ops.push_pirop('ge', %*REG<pos>, %*REG<eos>, %*REG<fail>);
+            $ops.push_pirop('sub', '$I11', %*REG<pos>, 1);
+            $ops.push_pirop('is_cclass', '$I11', '.CCLASS_NEWLINE', %*REG<tgt>, '$I11');
+            $ops.push_pirop('unless', '$I11', %*REG<fail>);
+            $ops.push($donelabel);
+        }
+        elsif $subtype eq 'eol' {
+            $ops.push_pirop('is_cclass', '$I11', '.CCLASS_NEWLINE', %*REG<tgt>, %*REG<pos>);
+            $ops.push_pirop('if', '$I11', $donelabel);
+            $ops.push_pirop('ne', %*REG<pos>, %*REG<eos>, %*REG<fail>);
+            $ops.push_pirop('eq', %*REG<pos>, 0, $donelabel);
+            $ops.push_pirop('sub', '$I11', %*REG<pos>, 1);
+            $ops.push_pirop('is_cclass', '$I11', '.CCLASS_NEWLINE', %*REG<tgt>, '$I11');
+            $ops.push_pirop('if', '$I11', %*REG<fail>);
+            $ops.push($donelabel);
         }
 
         $ops;
