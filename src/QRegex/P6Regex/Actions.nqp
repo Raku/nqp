@@ -138,6 +138,73 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                              :negate($<sym> le 'Z'), :node($/));
     }
 
+    method backslash:sym<b>($/) {
+        my $qast := QAST::Regex.new( "\b", :rxtype('enumcharlist'),
+                        :negate($<sym> eq 'B'), :node($/) );
+        make $qast;
+    }
+
+    method backslash:sym<e>($/) {
+        my $qast := QAST::Regex.new( "\c[27]", :rxtype('enumcharlist'),
+                        :negate($<sym> eq 'E'), :node($/) );
+        make $qast;
+    }
+
+    method backslash:sym<f>($/) {
+        my $qast := QAST::Regex.new( "\c[12]", :rxtype('enumcharlist'),
+                        :negate($<sym> eq 'F'), :node($/) );
+        make $qast;
+    }
+
+    method backslash:sym<h>($/) {
+        my $qast := QAST::Regex.new( "\x[09,20,a0,1680,180e,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,200a,202f,205f,3000]", :rxtype('enumcharlist'),
+                        :negate($<sym> eq 'H'), :node($/) );
+        make $qast;
+    }
+
+    method backslash:sym<r>($/) {
+        my $qast := QAST::Regex.new( "\r", :rxtype('enumcharlist'),
+                        :negate($<sym> eq 'R'), :node($/) );
+        make $qast;
+    }
+
+    method backslash:sym<t>($/) {
+        my $qast := QAST::Regex.new( "\t", :rxtype('enumcharlist'),
+                        :negate($<sym> eq 'T'), :node($/) );
+        make $qast;
+    }
+
+    method backslash:sym<v>($/) {
+        my $qast := QAST::Regex.new( "\x[0a,0b,0c,0d,85,2028,2029]",
+                        :rxtype('enumcharlist'),
+                        :negate($<sym> eq 'V'), :node($/) );
+        make $qast;
+    }
+
+    method backslash:sym<o>($/) {
+        my $octlit :=
+            HLL::Actions::ints_to_string( $<octint> || $<octints><octint> );
+        make $<sym> eq 'O'
+             ?? QAST::Regex.new( $octlit, :rxtype('enumcharlist'),
+                                  :negate(1), :node($/) )
+             !! QAST::Regex.new( $octlit, :rxtype('literal'), :node($/) );
+    }
+
+    method backslash:sym<x>($/) {
+        my $hexlit :=
+            HLL::Actions::ints_to_string( $<hexint> || $<hexints><hexint> );
+        make $<sym> eq 'X'
+             ?? QAST::Regex.new( $hexlit, :rxtype('enumcharlist'),
+                                  :negate(1), :node($/) )
+             !! QAST::Regex.new( $hexlit, :rxtype('literal'), :node($/) );
+    }
+
+    method backslash:sym<c>($/) {
+        make QAST::Regex.new( $<charspec>.ast, :rxtype('literal'), :node($/) );
+    }
+
+
+
     method backslash:sym<misc>($/) {
         my $qast := QAST::Regex.new( ~$/ , :rxtype('literal'), :node($/) );
         make $qast;

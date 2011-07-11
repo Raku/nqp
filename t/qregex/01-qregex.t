@@ -9,7 +9,6 @@ my @files := [
     'rx_metachars',
 #    'rx_backtrack',
 #    'rx_charclass',
-# contains /mob <alnum>: <0 @ 35>/ - style things, NYI
 #    'rx_subrules',
 #    'rx_lookarounds',
 #    'rx_captures',
@@ -26,7 +25,7 @@ my %expansions;
 %expansions<f> := "\f";
 sub unescape($s) {
     $s := subst($s, /\\(<[nretf]>)/, -> $m { %expansions{$m[0]} }, :global);
-    subst($s, /\\x(<?xdigit>**4)/, -> $m { HLL::Actions::string_to_int(~$m[0], 16) }, :global);
+    subst($s, /\\x(<[a..fA..F0..9]>**4)/, -> $m { nqp::chr(HLL::Actions::string_to_int(~$m[0], 16)) }, :global);
 }
 
 
