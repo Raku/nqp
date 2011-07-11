@@ -69,6 +69,13 @@ class QAST::Compiler is HLL::Compiler {
         }
     }
 
+    method cclass($node) {
+        my $ops := self.post_new('Ops', :result(%*REG<cur>));
+        $ops.push_pirop('ge', %*REG<pos>, %*REG<eos>, %*REG<fail>);
+        $ops.push_pirop('add', %*REG<pos>, 1);
+        $ops;
+    }
+
     method concat($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
         for $node.list { $ops.push(self.regex_post($_)); }

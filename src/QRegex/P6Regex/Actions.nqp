@@ -43,12 +43,18 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method atom($/) {
-        make QAST::Regex.new( ~$/, :rxtype<literal>, :node($/));
+        make $<metachar>
+               ?? $<metachar>.ast
+               !! QAST::Regex.new( ~$/, :rxtype<literal>, :node($/));
     }
 
     method quantifier:sym<+>($/) {
         my $past := QAST::Regex.new( :rxtype<quant>, :min(1), :node($/) );
         make $past;
+    }
+
+    method metachar:sym<.>($/) {
+        make QAST::Regex.new( :rxtype<cclass>, pir::const::CCLASS_ANY, :node($/) );
     }
 
     sub buildsub($qast, $block = PAST::Block.new()) {
