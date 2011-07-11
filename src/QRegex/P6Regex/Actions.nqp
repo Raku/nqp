@@ -74,6 +74,16 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         make backmod($qast, $<backmod>);
     }
 
+    method quantifier:sym<**>($/) {
+        my $qast;
+        {
+            $qast := QAST::Regex.new( :rxtype<quant>, :min(+$<min>), :node($/) );
+            if ! $<max> { $qast.max(+$<min>) }
+            elsif $<max>[0] ne '*' { $qast.max(+$<max>[0]); }
+        }
+        make backmod($qast, $<backmod>);
+    }
+
     method metachar:sym<ws>($/) {
         make 0;
     }
