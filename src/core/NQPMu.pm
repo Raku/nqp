@@ -48,14 +48,7 @@ my class NQPMu {
     }
 
     method __dump($dumper, $label) {
-        my $subindent;
-        my $indent;
-        Q:PIR {
-            $P0 = find_lex '$dumper'
-            ($P0, $P1) = $P0.'newIndent'()
-            store_lex '$subindent', $P0
-            store_lex '$indent', $P1
-        };
+        my $subindent := $dumper.'newIndent'();
         print('{');
         for self.HOW.parents(self) -> $type {
             for $type.HOW.attributes($type, :local) {
@@ -76,6 +69,7 @@ my class NQPMu {
                 }
             }
         }
-        print("\n", $indent, '}');
+        print("\n", $dumper.indent, '}');
+        $dumper.deleteIndent();
     }
 }

@@ -7,6 +7,7 @@
     p6meta = new 'P6metaclass'
     base = get_hll_global ['PAST'], 'Node'
     p6meta.'new_class'('PAST::Want', 'parent'=>base)
+    p6meta.'new_class'('PAST::QAST', 'parent'=>base)
 
     # add the nqp:: opcode map
     .const 'Sub' nqpmap = 'nqpmap'
@@ -141,6 +142,22 @@ evaluation and logging of the second child.
     ops.'push'(debskip)
     ops.'result'(flagpost)
     .return (ops)
+.end
+
+
+=item as_post(PAST::QAST)
+
+Shim that lets us embed QAST:: nodes inside of a PAST tree.
+
+=cut
+
+.sub 'as_post' :method :multi(_, ['PAST';'QAST'])
+    .param pmc node
+    .param pmc options         :slurpy :named
+    $P0 = get_hll_global ['QAST'], 'Compiler'
+    $P1 = node[0]
+    $P2 = $P0.'as_post'($P1)
+    .return ($P2)
 .end
     
 

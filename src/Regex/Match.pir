@@ -79,6 +79,9 @@ This file implements Match objects for the regex engine.
     .const 'Sub' $P20 = 'Regex_Match_meth_!make'
     how.'add_method'(type_obj, '!make', $P20)
 
+    .const 'Sub' $P21 = 'Regex_Match_meth___dump'
+    how.'add_method'(type_obj, '__dump', $P21)
+
     # Add attributes.
     .local pmc NQPAttribute, int_type, attr
     $P0 = find_lex "EXPORTHOW"
@@ -133,6 +136,8 @@ This file implements Match objects for the regex engine.
     .const 'Sub' $P1 = 'Regex_Match_meth_Num'
     capture_lex $P1
     .const 'Sub' $P1 = 'Regex_Match_meth_!make'
+    capture_lex $P1
+    .const 'Sub' $P1 = 'Regex_Match_meth___dump'
     capture_lex $P1
 .end
 
@@ -308,6 +313,51 @@ Set the "ast object" for the invocant.
     .return (obj)
 .end
 
+
+=item __dump(dumper, label)
+
+Dump the Match object for Data::Dumper
+
+=cut
+
+.sub '__dump' :method :subid('Regex_Match_meth___dump') :outer('Regex_Match_Body')
+    .param pmc dumper
+    .param pmc label
+    .local pmc cur_class
+    cur_class = find_lex '$?CLASS'
+
+    .local string subindent, indent
+    (subindent, indent) = dumper.'newIndent'()
+    $S0 = self.'Str'()
+    $S0 = escape $S0
+    print "\""
+    print $S0
+    print "\" {\n"
+    print subindent
+    print '$!from => '
+    $I0 = repr_get_attr_int self, cur_class, '$!from'
+    say $I0
+    dumper.'dump'(label, $I0)
+    print ",\n"
+    print subindent
+    print '$!to => '
+    $I0 = repr_get_attr_int self, cur_class, '$!to'
+    dumper.'dump'(label, $I0)
+    print ",\n"
+    print subindent
+    print '@!list => '
+    $P0 = self.'list'()
+    dumper.'dump'(label, $P0)
+    print ",\n"
+    print subindent
+    print '%!hash => '
+    $P0 = self.'hash'()
+    dumper.'dump'(label, $P0)
+    print "\n"
+    print indent
+    print "}"
+    dumper.'deleteIndent'()
+.end
 
 =back
 
