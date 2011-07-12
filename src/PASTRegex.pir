@@ -5,3 +5,4 @@
 .include 'src/PAST/SixModelPASTExtensions.pir'
 .include 'src/PAST/NQP.pir'
 .include 'src/cheats/parrot-callcontext.pir'
+.include 'src/cheats/parrot-sub.pir'
