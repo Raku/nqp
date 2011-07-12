@@ -211,6 +211,7 @@ class NQP::Actions is HLL::Actions {
             unless %*COMPILING<%?OPTIONS><setting> eq 'NULL' {
                 import_HOW_exports($SETTING);
                 $*SC.load_module('NQPRegex', $*GLOBALish);
+                $*SC.load_module('QRegex', $*GLOBALish);
             }
         }
         self.SET_BLOCK_OUTER_CTX(@BLOCK[0]);
@@ -573,7 +574,7 @@ class NQP::Actions is HLL::Actions {
             }
         }
         elsif pir::can($how, 'set_default_parent') {
-            my $default := $*PKGDECL eq 'grammar' ?? ['Regex', 'Cursor'] !! ['NQPMu'];
+            my $default := $*PKGDECL eq 'grammar' ?? ['NQPCursor'] !! ['NQPMu'];
             $*SC.pkg_add_parent_or_role($*PACKAGE, "set_default_parent",
                 find_sym($default, $/));
         }
