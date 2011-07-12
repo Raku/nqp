@@ -4,6 +4,7 @@
 use QRegex;
 
 my @files := [
+    'rx_captures',
     'rx_basic',
     'rx_quantifiers',
     'rx_metachars',
@@ -11,7 +12,6 @@ my @files := [
 #    'rx_backtrack',
 #    'rx_subrules',
 #    'rx_lookarounds',
-#    'rx_captures',
 #    'rx_modifiers',
 # loops:
 #    'rx_goal',
@@ -39,28 +39,25 @@ sub test_line($line) {
     $target := '' if $target eq "''";
     $target := unescape($target);
 
-    my $expect_error := nqp::substr($expect, 0, 1) eq '/';
-    my $expect_match := nqp::substr($expect, 0, 1) eq '<';
+    my $expect_substr := nqp::substr($expect, 0, 1) eq '<'
+                           ?? pir::chopn__Ssi(nqp::substr($expect, 1), 1)
+                           !! '';
 
     my $rxcomp := pir::compreg__Ps('QRegex::P6Regex');
     try {
         my $rxsub  := $rxcomp.compile($regex);
         my $cursor := NQPCursor."!cursor_init"($target, :c(0));
         my $match  := $rxsub($cursor).MATCH;
-        if $expect_error {
-            ok(0, $desc);
-            say("# expected $expect but no exception caught ");
-        }
-        elsif $expect_match {
-            ok($expect eq "<" ~ $match.Str ~ " @ " ~ $match.from ~ ">", $desc);
+        if $expect_substr {
+            my $m := nqp::index($match."!dump_str"('mob'), $expect_substr) >= 0;
+            ok($m, $desc);
         }
         else {
             ok($expect eq 'y' ?? $match !! !$match, $desc);
         }
         CATCH {
-            if $expect_error {
-                my $errpat := pir::chopn__Ssi(nqp::substr($expect, 1), 1);
-                my $m := "$_" ~~ /<$errpat>/;
+            if $expect_substr {
+                my $m := nqp::index(~$_, $expect_substr) >= 0;
                 ok($m, $desc);
                 say("#      got: $_\n# expected: $expect") unless $m;
             }

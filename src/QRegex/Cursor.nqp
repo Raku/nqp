@@ -21,7 +21,6 @@ role QRegex::Cursor {
         nqp::bindattr_i($!match, $mclass, '$!to', $!pos);
         if $!cstack {
             my %caps := $!regexsub.nqpattr('caps');
-            _dumper(%caps);
             my $list := $!match.list;
             my $hash := $!match.hash;
             for %caps {
@@ -165,7 +164,8 @@ class NQPMatch is NQPCapture {
 class NQPCursor does QRegex::Cursor {
     method match_class() { NQPMatch }
     method Bool() is parrot_vtable('get_bool') {
-        nqp::istrue(nqp::getattr(self, $?CLASS, '$!match'));
+        !nqp::isnull(nqp::getattr(self, $?CLASS, '$!match'))
+          && nqp::istrue(nqp::getattr(self, $?CLASS, '$!match'));
     }
 }
 
