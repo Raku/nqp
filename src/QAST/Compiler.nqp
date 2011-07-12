@@ -335,19 +335,20 @@ class QAST::Compiler is HLL::Compiler {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
         my $name := $*PASTCOMPILER.as_post($node.name, :rtype<*>);
         my $subtype := $node.subtype;
-        my $zerowidth := $node.zerowidth;
         my $cpn := self.post_children($node[0]);
         my @pargs := $cpn[1];
         my %nargs := $cpn[2];
         my $subpost := nqp::shift(@pargs);
+        my $testop := $node.negate ?? 'if' !! 'unless';
         $ops.push($cpn[0]);
         $ops.push_pirop('repr_bind_attr_int', %*REG<cur>, %*REG<curclass>, '"$!pos"', %*REG<pos>);
         $ops.push_pirop('callmethod', $subpost, %*REG<cur>, :result<$P11>);
-        $ops.push_pirop('unless', '$P11', %*REG<fail>);
+        $ops.push_pirop($testop, '$P11', %*REG<fail>);
         $ops.push_pirop('callmethod', '"!cursor_capture"', %*REG<cur>, 
                         '$P11', $name, :result(%*REG<caps>))
           if $subtype eq 'capture';
-        $ops.push_pirop('repr_get_attr_int', %*REG<pos>, '$P11', %*REG<curclass>, '"$!pos"');
+        $ops.push_pirop('repr_get_attr_int', %*REG<pos>, '$P11', %*REG<curclass>, '"$!pos"')
+          unless $subtype eq 'zerowidth';
         $ops;
     }
  

@@ -231,10 +231,26 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         make $qast;
     }
 
-    method assertion:sym<[>($/) {
-        my $clist := $<cclass_elem>;
-        my $qast  := $clist[0].ast;
+    method assertion:sym<?>($/) {
+        my $qast;
+        if $<assertion> {
+            $qast := $<assertion>.ast;
+            $qast.subtype('zerowidth');
+        }
+        else { $qast := 0; }
         make $qast;
+    }
+
+    method assertion:sym<!>($/) {
+        my $qast;
+        if $<assertion> {
+            $qast := $<assertion>.ast;
+            $qast.negate( !$qast.negate );
+            $qast.subtype('zerowidth');
+        }
+        else {
+            $qast := QAST::Regex.new( :rxtype<anchor>, :subtype<fail>, :node($/) );
+        }
     }
 
     method assertion:sym<method>($/) {
@@ -248,6 +264,12 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         my $name := ~$<longname>;
         my $qast := QAST::Regex.new( :rxtype<subrule>, :subtype<capture>, :node($/),
                                      PAST::Node.new($name), :name($name) );
+        make $qast;
+    }
+
+    method assertion:sym<[>($/) {
+        my $clist := $<cclass_elem>;
+        my $qast  := $clist[0].ast;
         make $qast;
     }
 
