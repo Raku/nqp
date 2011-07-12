@@ -219,8 +219,6 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         make QAST::Regex.new( $<charspec>.ast, :rxtype('literal'), :node($/) );
     }
 
-
-
     method backslash:sym<misc>($/) {
         my $qast := QAST::Regex.new( ~$/ , :rxtype('literal'), :node($/) );
         make $qast;
@@ -229,6 +227,13 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     method assertion:sym<[>($/) {
         my $clist := $<cclass_elem>;
         my $qast  := $clist[0].ast;
+        make $qast;
+    }
+
+    method assertion:sym<name>($/) {
+        my $name := ~$<longname>;
+        my $qast := QAST::Regex.new( :rxtype<subrule>, :subtype<capture>, :node($/),
+                                     PAST::Node.new($name), :name($name) );
         make $qast;
     }
 
@@ -264,6 +269,13 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     sub buildsub($qast, $block = PAST::Block.new()) {
+        my $hashpast := PAST::Op.new( :pasttype<hash> );
+        for capnames($qast, 0) {
+            if $_.key gt '' { $hashpast.push($_.key); $hashpast.push($_.value) }
+        }
+        my $capblock := PAST::Block.new( :hll<nqp>, :namespace(['Sub']), :lexical(0),
+                                         :name($block.subid ~ '_caps'),  $hashpast );
+        $block.push($capblock);
         $qast := QAST::Regex.new( :rxtype<concat>,
                      QAST::Regex.new( :rxtype<scan> ),
                      $qast,
@@ -271,6 +283,51 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         $block.push(PAST::QAST.new($qast));
         $block.blocktype('method');
         $block;
+    }
+
+    sub capnames($ast, $count) {
+        my %capnames;
+        my $rxtype := $ast.rxtype;
+        if $rxtype eq 'concat' {
+            for $ast.list {
+                my %x := capnames($_, $count);
+                for %x { %capnames{$_.key} := +%capnames{$_.key} + $_.value; }
+                $count := %x{''};
+            } 
+        }
+        elsif $rxtype eq 'altseq' {
+            my $max := $count;
+            for $ast.list {
+                my %x := capnames($_, $count);
+                for %x {
+                    %capnames{$_.key} := +%capnames{$_.key} < 2 && %x{$_.key} == 1 ?? 1 !! 2;
+                }
+                $max := %x{''} if %x{''} > $max;
+            }
+            $count := $max;
+        }
+        elsif $rxtype eq 'subrule' && $ast.subtype eq 'capture' {
+            my $name := $ast.name;
+            if $name eq '' { $name := $count; $ast.name($name); }
+            my @names := nqp::split('=', $name);
+            for @names {
+                if $_ eq '0' || $_ > 0 { $count := $_ + 1; }
+                %capnames{$_} := 1;
+            }
+        }
+        elsif $rxtype eq 'quant' {
+            my %astcap := capnames($ast[0], $count);
+            for %astcap { %capnames{$_} := 2 }
+            $count := %astcap{''};
+        }
+        %capnames{''} := $count;
+        %capnames;
+    }
+
+    method subrule_alias($ast, $name) {
+        if $ast.name gt '' { $ast.name( $name ~ '=' ~ $ast.name ); }
+        else { $ast.name($name); }
+        $ast.subtype('capture');
     }
 
 }
