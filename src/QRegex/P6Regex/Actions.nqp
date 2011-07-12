@@ -271,7 +271,11 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     sub buildsub($qast, $block = PAST::Block.new()) {
         my $hashpast := PAST::Op.new( :pasttype<hash> );
         for capnames($qast, 0) {
-            if $_.key gt '' { $hashpast.push($_.key); $hashpast.push($_.value) }
+            if $_.key gt '' { 
+                $hashpast.push($_.key); 
+                $hashpast.push(
+                    nqp::iscclass(pir::const::CCLASS_NUMERIC, $_.key, 0) + ($_.value > 1) * 2); 
+            }
         }
         my $capblock := PAST::Block.new( :hll<nqp>, :namespace(['Sub']), :lexical(0),
                                          :name($block.subid ~ '_caps'),  $hashpast );

@@ -15,10 +15,30 @@ role QRegex::Cursor {
 
     method MATCH() {
         my $mclass := self.match_class();
-        $!match := nqp::create($mclass);
+        $!match := $mclass.new;
         nqp::bindattr($!match, $mclass, '$!orig', $!orig);
         nqp::bindattr_i($!match, $mclass, '$!from', $!from);
         nqp::bindattr_i($!match, $mclass, '$!to', $!pos);
+        if $!cstack {
+            my %caps := $!regexsub.nqpattr('caps');
+            _dumper(%caps);
+            my $list := $!match.list;
+            my $hash := $!match.hash;
+            for %caps {
+                nqp::bindkey($hash, $_.key, nqp::list()) if $_.value == 2;
+                nqp::bindpos($list, $_.key, nqp::list()) if $_.value == 3;
+            }
+            for $!cstack -> $subcur {
+                my $submatch := $subcur.MATCH;
+                for nqp::split(' ', nqp::getattr($subcur, $?CLASS, '$!name')) -> $name {
+                    my $where := %caps{$name};
+                    nqp::bindkey($hash, $name, $submatch) if $where == 0;
+                    nqp::bindpos($list, $name, $submatch) if $where == 1;
+                    nqp::push($hash{$name}, $submatch)    if $where == 2;
+                    nqp::push($list[$name], $submatch)    if $where == 3;
+                }
+            }
+        } 
         $!match;
     }
 
@@ -125,7 +145,7 @@ class NQPMatch is NQPCapture {
 
     method !dump_str($key) {
         sub dump_array($key, $item) {
-            my $str;
+            my $str := '';
             if $item ~~ NQPCapture {
                 $str := $str ~ $item."!dump_str"($key)
             }
