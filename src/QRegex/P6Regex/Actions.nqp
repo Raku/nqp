@@ -237,6 +237,13 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         make $qast;
     }
 
+    method assertion:sym<method>($/) {
+        my $qast := $<assertion>.ast;
+        $qast.subtype('method');
+        $qast.name('');
+        make $qast;
+    }
+
     method assertion:sym<name>($/) {
         my $name := ~$<longname>;
         my $qast := QAST::Regex.new( :rxtype<subrule>, :subtype<capture>, :node($/),
