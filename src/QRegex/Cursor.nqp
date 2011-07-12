@@ -77,7 +77,7 @@ role QRegex::Cursor {
         nqp::elems($!cstack);
     }
 
-    method !cursor_pass($pos) {
+    method !cursor_pass($pos, $name?) {
         $!match := 1;
         $!pos := $pos;
         $!regexsub := Q:PIR {
@@ -90,6 +90,21 @@ role QRegex::Cursor {
         $!match  := nqp::null();
         $!bstack := nqp::null();
         $!pos    := -3;
+    }
+
+    method ws() {
+        # skip over any whitespace, fail if between two word chars
+        my $cur := self."!cursor_start"();
+        $!pos >= nqp::chars($!target)
+          ?? $cur."!cursor_pass"($!pos, 'ws')
+          !! ($!pos < 1
+              || !nqp::iscclass(pir::const::CCLASS_WORD, $!target, $!pos)
+              || !nqp::iscclass(pir::const::CCLASS_WORD, $!target, $!pos-1)
+             ) && $cur."!cursor_pass"(
+                      pir::find_not_cclass__Iisii(
+                          pir::const::CCLASS_WHITESPACE, $!target, $!pos, nqp::chars($!target)),
+                      'ws');
+        $cur;
     }
 
     method alpha() {
