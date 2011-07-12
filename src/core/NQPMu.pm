@@ -69,7 +69,7 @@ my class NQPMu {
                 }
             }
         }
-        print("\n", $dumper.indent, '}');
         $dumper.deleteIndent();
+        print("\n", $dumper.indent, '}');
     }
 }
