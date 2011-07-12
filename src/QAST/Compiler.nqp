@@ -323,6 +323,28 @@ class QAST::Compiler is HLL::Compiler {
         $ops;
     }
 
+    method subcapture($node) {
+        my $ops := self.post_new('Ops', :result(%*REG<cur>));
+        my $prefix := self.unique('rxcap');
+        my $donelabel := self.post_new('Label', :result($prefix ~ '_done'));
+        my $faillabel := self.post_new('Label', :result($prefix ~ '_fail'));
+        my $name := $*PASTCOMPILER.as_post($node.name, :rtype<*>);
+        self.regex_mark($ops, $faillabel, %*REG<pos>, 0);
+        $ops.push(self.regex_post($node[0]));
+        self.regex_peek($ops, $faillabel, '$I11');
+        $ops.push($name);
+        $ops.push_pirop('repr_bind_attr_int', %*REG<cur>, %*REG<curclass>, '"$!pos"', '$I11');
+        $ops.push_pirop('callmethod', '"!cursor_start"', %*REG<cur>, :result<$P11>);
+        $ops.push_pirop('callmethod', '"!cursor_pass"', '$P11', %*REG<pos>);
+        $ops.push_pirop('callmethod', '"!cursor_capture"', %*REG<cur>, 
+                        '$P11', $name, :result(%*REG<caps>));
+        $ops.push_pirop('goto', $donelabel);
+        $ops.push($faillabel);
+        $ops.push_pirop('goto', %*REG<fail>);
+        $ops.push($donelabel);
+        $ops;
+    }
+
     method subrule($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
         my $name := $*PASTCOMPILER.as_post($node.name, :rtype<*>);

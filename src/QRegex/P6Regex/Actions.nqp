@@ -383,6 +383,15 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 %capnames{$_} := 1;
             }
         }
+        elsif $rxtype eq 'subcapture' {
+            for nqp::split(' ', $ast.name) {
+                if $_ eq '0' || $_ > 0 { $count := $_ + 1; }
+                %capnames{$_} := 1;
+            }
+            my %x := capnames($ast[0], $count);
+            for %x { %capnames{$_.key} := +%capnames{$_.key} + %x{$_.key} }
+            $count := %x{''};
+        }
         elsif $rxtype eq 'quant' {
             my %astcap := capnames($ast[0], $count);
             for %astcap { %capnames{$_} := 2 }
