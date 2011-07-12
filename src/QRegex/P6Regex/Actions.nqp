@@ -155,6 +155,25 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         make $<assertion>.ast;
     }
 
+    method metachar:sym<var>($/) {
+        my $qast;
+        my $name := $<pos> ?? +$<pos> !! ~$<name>;
+        if $<quantified_atom> {
+            $qast := $<quantified_atom>[0].ast;
+            if $qast.rxtype eq 'quant' && $qast[0].rxtype eq 'subrule' {
+                self.subrule_alias($qast[0], $name);
+            }
+            elsif $qast.rxtype eq 'subrule' { 
+                self.subrule_alias($qast, $name); 
+            }
+            else {
+                $qast := QAST::Regex.new( $qast, :name($name), 
+                                          :rxtype<subcapture>, :node($/) );
+            }
+        }
+        make $qast;
+    }
+
     method backslash:sym<s>($/) {
         make QAST::Regex.new(:rxtype<cclass>, '.CCLASS_WHITESPACE', 
                              :subtype($<sym> eq 'n' ?? 'nl' !! ~$<sym>), 
@@ -262,8 +281,17 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method assertion:sym<name>($/) {
         my $name := ~$<longname>;
-        my $qast := QAST::Regex.new( :rxtype<subrule>, :subtype<capture>, :node($/),
-                                     PAST::Node.new($name), :name($name) );
+        my $qast;
+        if $<assertion> {
+            say("aliasing to $name");
+            $qast := $<assertion>[0].ast;
+            self.subrule_alias($qast, $name);
+        }
+        else {
+            $qast := QAST::Regex.new(:rxtype<subrule>, :subtype<capture>,
+                                     :node($/), PAST::Node.new($name), 
+                                     :name($name) );
+        }
         make $qast;
     }
 
