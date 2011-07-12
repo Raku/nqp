@@ -96,6 +96,13 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         make $<nibbler>.ast;
     }
 
+    method metachar:sym<( )>($/) {
+        my $subpast := PAST::Node.new(buildsub($<nibbler>.ast));
+        my $qast := QAST::Regex.new( $subpast, :rxtype('subrule'),
+                                     :subtype('capture'), :node($/) );
+        make $qast;
+    }
+
     method metachar:sym<'>($/) {
         my $quote := $<quote_EXPR>.ast;
         if PAST::Val.ACCEPTS($quote) { $quote := $quote.value; }
