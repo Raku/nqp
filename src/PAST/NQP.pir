@@ -110,6 +110,54 @@ invoked.
 .end
 
 
+=item hash(PAST::Op node)
+
+Create a hash from the children.  The type of hash constructed
+is determined by the C<returns> attribute, which defaults to
+C<Hash> if not set.
+
+=cut
+
+.sub 'hash' :method :multi(_, ['PAST';'Op'])
+    .param pmc node
+    .param pmc options         :slurpy :named
+
+    .local pmc ops, posargs
+    $P0 = get_hll_global ['POST'], 'Ops'
+    ops = $P0.'new'('node'=>node)
+
+    .local pmc returns
+    returns = node.'returns'()
+    if returns goto have_returns
+    returns = box 'Hash'
+  have_returns:
+
+    .local pmc hashpost, it
+    hashpost = self.'as_vivipost'(returns, 'rtype'=>'P')
+    ops.'result'(hashpost)
+    ops.'push'(hashpost)
+    it = node.'iterator'()
+  iter_loop:
+    unless it goto iter_done
+    .local pmc kpast, kpost, vpast, vpost
+    kpast = shift it
+    kpost = self.'as_post'(kpast, 'rtype'=>'~')
+    vpast = shift it
+    vpost = self.'as_post'(vpast, 'rtype'=>'*')
+    $S0 = hashpost
+    $S0 = concat $S0, '['
+    $S1 = kpost
+    $S0 = concat $S0, $S1
+    $S0 = concat $S0, ']'
+    ops.'push'(vpost)
+    ops.'push'(kpost)
+    ops.'push_pirop'('set', $S0, vpost)
+    goto iter_loop
+  iter_done:
+    .return (ops)
+.end
+
+
 =item nqpdebug(PAST::Op node)
 
 Generate debugging code using nqpdebskip and nqpevent.  The first
@@ -154,6 +202,7 @@ Shim that lets us embed QAST:: nodes inside of a PAST tree.
 .sub 'as_post' :method :multi(_, ['PAST';'QAST'])
     .param pmc node
     .param pmc options         :slurpy :named
+    .lex '$*PASTCOMPILER', self
     $P0 = get_hll_global ['QAST'], 'Compiler'
     $P1 = node[0]
     $P2 = $P0.'as_post'($P1)
@@ -343,6 +392,7 @@ entry to produce the node to be returned.
     maphash['uc']       = 'upcase__Ss'
     maphash['substr']   = 'substr__Ssii'
     maphash['x']        = 'repeat__Ssi'
+    maphash['iscclass'] = 'is_cclass__Iisi'
 
     # relational opcodes
     maphash['cmp_i']    = 'cmp__Iii'
