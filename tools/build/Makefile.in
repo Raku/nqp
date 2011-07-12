@@ -63,6 +63,7 @@ PAST_SOURCES = \
   src/PAST/SixModelPASTExtensions.pir \
   src/PAST/NQP.pir \
   src/cheats/parrot-callcontext.pir \
+  src/cheats/parrot-sub.pir \
   
 HLL_SOURCES = \
   src/HLL/Grammar.pm \
