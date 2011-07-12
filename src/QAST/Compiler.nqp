@@ -201,19 +201,13 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push($firstlabel);
         $ops.push(self.regex_post(nqp::shift($iter)));
         # use previous mark to make one with pos=start, rep=end
-        self.regex_peek($ops, '$I19', $conjlabel);
-        $ops.push_pirop('inc', '$I19');
-        $ops.push_pirop('set', '$I11', %*REG<bstack>~'[$I19]');
+        self.regex_peek($ops, $conjlabel, '$I11');
         self.regex_mark($ops, $conjlabel, '$I11', %*REG<pos>);
 
         while $iter {
             $ops.push_pirop('set', %*REG<pos>, '$I11');
             $ops.push(self.regex_post(nqp::shift($iter)));
-            self.regex_peek($ops, '$I19', $conjlabel);
-            $ops.push_pirop('inc', '$I19');
-            $ops.push_pirop('set', '$I11', %*REG<bstack>~'[$I19]');
-            $ops.push_pirop('inc', '$I19');
-            $ops.push_pirop('set', '$I12', %*REG<bstack>~'[$I19]');
+            self.regex_peek($ops, $conjlabel, '$I11', '$I12');
             $ops.push_pirop('ne', %*REG<pos>, '$I12', %*REG<fail>);
         }
         $ops;
@@ -292,9 +286,7 @@ class QAST::Compiler is HLL::Compiler {
             $ops.push($looplabel);
             $ops.push(self.regex_post($node[0]));
             if $needmark {
-                self.regex_peek($ops, '$I19', $donelabel);
-                $ops.push_pirop('add', '$I18', '$I19', 2);
-                $ops.push_pirop('set', %*REG<rep>, %*REG<bstack>~'[$I18]');
+                self.regex_peek($ops, $donelabel, '*', %*REG<rep>);
                 self.regex_commit($ops, $donelabel) if $backtrack eq 'r';
                 $ops.push_pirop('inc', %*REG<rep>);
                 $ops.push_pirop('ge', %*REG<rep>, $node.max, $donelabel)
@@ -356,8 +348,12 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push_pirop('nqp_rxmark', %*REG<bstack>, $mark, $pos, $rep);
     }
 
-    method regex_peek($ops, $bptr, $mark) {
-        $ops.push_pirop('nqp_rxpeek', $bptr, %*REG<bstack>, $mark);
+    method regex_peek($ops, $mark, *@regs) {
+        $ops.push_pirop('nqp_rxpeek', '$I19', %*REG<bstack>, $mark);
+        for @regs {
+            $ops.push_pirop('inc', '$I19');
+            $ops.push_pirop('set', $_, %*REG<bstack>~'[$I19]') if $_ ne '*';
+        }
     }
 
     method regex_commit($ops, $mark) {
