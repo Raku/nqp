@@ -275,7 +275,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         $ast;
     }
 
-    sub buildsub($qast, $block = PAST::Block.new()) {
+    our sub buildsub($qast, $block = PAST::Block.new()) {
         my $hashpast := PAST::Op.new( :pasttype<hash> );
         for capnames($qast, 0) {
             if $_.key gt '' { 

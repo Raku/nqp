@@ -48,6 +48,7 @@ my class NQPMu {
     }
 
     method __dump($dumper, $label) {
+        return 0 unless nqp::isconcrete(self);
         my $subindent := $dumper.'newIndent'();
         print('{');
         for self.HOW.parents(self) -> $type {

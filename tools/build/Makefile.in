@@ -476,6 +476,7 @@ testclean:
 # nqp::makefile <-- tells Configure.pm to convert / to \ in the above
 #                   template for Win32 systems
 
+nqpq: $(NQPQ_EXE)
 qregex: $(QREGEX_PBC)
 
 $(QREGEX_PBC): $(NQP_EXE) $(QREGEX_SOURCES)
@@ -483,4 +484,24 @@ $(QREGEX_PBC): $(NQP_EXE) $(QREGEX_SOURCES)
 	$(PERL) tools/build/gen-cat.pl $(QREGEX_SOURCES) > $(STAGE2)/$(QREGEX_COMBINED)
 	./$(NQP_EXE) --target=pir --output=$(STAGE2)/$(QREGEX_PIR) $(STAGE2)/$(QREGEX_COMBINED)
 	$(PARROT) -o $(QREGEX_PBC) $(STAGE2)/$(QREGEX_PIR)
+
+NQPQ_COMBINED     = NQPQ.pm
+NQPQ_COMBINED_PIR = NQPQ.pir
+NQPQ_PBC          = nqpq.pbc
+NQPQ_EXE          = nqpq$(EXE)
+
+NQPQ_SOURCES = \
+  src/NQPQ/SymbolTable.pm \
+  src/NQPQ/Grammar.pm \
+  src/NQPQ/Actions.pm \
+  src/NQPQ/Compiler.pm \
+
+$(NQPQ_EXE): $(NQPQ_PBC)
+	$(PBC_TO_EXE) $(NQPQ_PBC)
+
+$(NQPQ_PBC): $(QREGEX_PBC) $(NQPQ_SOURCES)
+	$(PERL) tools/build/gen-version.pl >src/gen/nqp-config.pm
+	$(PERL) tools/build/gen-cat.pl $(NQPQ_SOURCES) src/gen/nqp-config.pm > $(NQPQ_COMBINED)
+	./$(NQP_EXE) --target=pir --output=$(NQPQ_COMBINED_PIR) $(NQPQ_COMBINED)
+	$(PARROT) -o $(NQPQ_PBC) $(NQPQ_COMBINED_PIR)
 
