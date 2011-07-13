@@ -102,9 +102,9 @@ knowhow NQPParametricRoleHOW {
         1
     }
 
-    # This instantiates the role for the given class and builds a concrete
+    # This specializes the role for the given class and builds a concrete
     # role.
-    method instantiate($obj, $class_arg) {
+    method specialize($obj, $class_arg) {
         # Run the body block to capture the arguments into the correct
         # type argument context.
         $!body_block($class_arg);
@@ -128,8 +128,8 @@ knowhow NQPParametricRoleHOW {
 
         # Copy roles, instantiating them as we go.
         for @!roles {
-            my $instantiated := $irole.HOW.instantiate($irole, $class_arg);
-            $irole.HOW.add_role($irole, $instantiated);
+            my $specialized := $irole.HOW.specialize($irole, $class_arg);
+            $irole.HOW.add_role($irole, $specialized);
         }
 
         # Compose and return produced role.
