@@ -441,6 +441,9 @@ entry to produce the node to be returned.
     $P0 = new ['Hash']
     $P0['pasttype'] = 'list'
     maphash['list'] = $P0
+    $P0 = new ['Hash']
+    $P0['pasttype'] = 'hash'
+    maphash['hash'] = $P0
 
     # object opcodes
     maphash['bindattr']   = 'setattribute__3PPsP'

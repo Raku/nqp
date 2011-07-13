@@ -14,31 +14,22 @@ role NQPCursorRole {
     method pos() { $!pos }
 
     method MATCH() {
-        my $mclass := self.match_class();
-        $!match := $mclass.new;
-        nqp::bindattr($!match, $mclass, '$!orig', $!orig);
-        nqp::bindattr_i($!match, $mclass, '$!from', $!from);
-        nqp::bindattr_i($!match, $mclass, '$!to', $!pos);
+        my $caps := nqp::hash();
         if $!cstack {
-            my %caps := $!regexsub.nqpattr('caps');
-            my $list := $!match.list;
-            my $hash := $!match.hash;
-            for %caps {
-                nqp::bindkey($hash, $_.key, nqp::list()) if $_.value == 2;
-                nqp::bindpos($list, $_.key, nqp::list()) if $_.value == 3;
+            my %caplist := $!regexsub.nqpattr('caps');
+            for %caplist{
+                $caps{$_.key} := nqp::list() if $_.value >= 2;
             }
             for $!cstack -> $subcur {
                 my $submatch := $subcur.MATCH;
                 for nqp::split('=', nqp::getattr($subcur, $?CLASS, '$!name')) -> $name {
-                    my $where := %caps{$name};
-                    nqp::bindkey($hash, $name, $submatch) if $where == 0;
-                    nqp::bindpos($list, $name, $submatch) if $where == 1;
-                    nqp::push($hash{$name}, $submatch)    if $where == 2;
-                    nqp::push($list[$name], $submatch)    if $where == 3;
+                    %caplist{$name} >= 2
+                      ?? nqp::push($caps{$name}, $submatch)
+                      !! nqp::bindkey($caps, $name, $submatch);
                 }
             }
         } 
-        $!match;
+        $!match := self.MATCHBUILD($!orig, $!from, $!pos, $caps);
     }
 
     method !cursor_init($target, :$p = 0, :$c) {
@@ -264,7 +255,21 @@ class NQPMatch is NQPCapture {
 }
 
 class NQPCursor does NQPCursorRole {
-    method match_class() { NQPMatch }
+    method MATCHBUILD($orig, $from, $to, %caps) {
+        my $match := NQPMatch.new();
+        nqp::bindattr($match, NQPMatch, '$!orig', $orig);
+        nqp::bindattr_i($match, NQPMatch, '$!from', $from);
+        nqp::bindattr_i($match, NQPMatch, '$!to', $to);
+        my $list := $match.list;
+        my $hash := $match.hash;
+        for %caps {
+            my $key := $_.key;
+            nqp::iscclass(pir::const::CCLASS_NUMERIC, $key, 0)
+              ?? nqp::bindpos($list, $key, $_.value)
+              !! nqp::bindkey($hash, $key, $_.value);
+        }
+        $match;
+    }
     method Bool() is parrot_vtable('get_bool') {
         !nqp::isnull(nqp::getattr(self, $?CLASS, '$!match'))
           && nqp::istrue(nqp::getattr(self, $?CLASS, '$!match'));
