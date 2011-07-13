@@ -138,6 +138,10 @@ knowhow NQPConcreteRoleHOW {
     method roles($obj) {
         @!roles
     }
+    
+    method does_list($obj) {
+        @!done
+    }
 
     method instance_of($obj) {
         $!instance_of
