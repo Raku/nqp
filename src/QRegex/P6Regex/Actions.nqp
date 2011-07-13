@@ -315,7 +315,11 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     method cclass_elem($/) {
         my $str := '';
         my $qast;
-        {
+        if $<name> {
+            my $name := ~$<name>;
+            $qast := QAST::Regex.new( PAST::Node.new($name), :rxtype<subrule>, :subtype<method>, :node($/) );
+        }
+        else {
             for $<charspec> {
                 if $_[1] {
                     my $ord0 := nqp::ord($_[0]);
