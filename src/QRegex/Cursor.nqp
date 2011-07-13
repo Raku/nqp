@@ -105,7 +105,7 @@ role QRegex::Cursor {
             my $litlen := $subcur.pos - $subcur.from;
             $cur."!cursor_pass"($!pos + $litlen, '')
               if nqp::substr($!target, $!pos, $litlen) 
-                   eq nqp::substr($!target, $subcur.pos, $litlen);
+                   eq nqp::substr($!target, $subcur.from, $litlen);
         }
         else { $cur."!cursor_pass"($!pos, '') }
         $cur;
