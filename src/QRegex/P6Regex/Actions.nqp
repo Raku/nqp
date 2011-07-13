@@ -277,6 +277,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         else {
             $qast := QAST::Regex.new( :rxtype<anchor>, :subtype<fail>, :node($/) );
         }
+        make $qast;
     }
 
     method assertion:sym<method>($/) {
