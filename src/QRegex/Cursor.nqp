@@ -75,7 +75,7 @@ role QRegex::Cursor {
         nqp::push($!cstack, $capture);
         nqp::bindattr($capture, $?CLASS, '$!name', $name);
         pir::push__vPi($!bstack, 0);
-        pir::push__vPi($!bstack, -1);
+        pir::push__vPi($!bstack, $!pos);
         pir::push__vPi($!bstack, 0);
         pir::push__vPi($!bstack, nqp::elems($!cstack));
         $!cstack;

@@ -1245,8 +1245,9 @@ inline op nqp_rxmark(in PMC, in LABEL, in INT, in INT) :base_core {
     PMC *bstack = $1;
     INTVAL mark = PTR2INTVAL(CUR_OPCODE + $2);
     INTVAL elems = VTABLE_elements(interp, bstack);
-    INTVAL caps = (elems > 0 
-                    && VTABLE_get_integer_keyed_int(interp, bstack, elems - 1));
+    INTVAL caps = (elems > 0)
+                    ? VTABLE_get_integer_keyed_int(interp, bstack, elems - 1)
+                    : 0;
                   
     VTABLE_push_integer(interp, bstack, mark);
     VTABLE_push_integer(interp, bstack, $3);
