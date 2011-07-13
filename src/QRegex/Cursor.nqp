@@ -1,4 +1,4 @@
-role QRegex::Cursor {
+role NQPCursorRole {
     has $!orig;
     has str $!target;
     has int $!from;
@@ -263,7 +263,7 @@ class NQPMatch is NQPCapture {
     }
 }
 
-class NQPCursor does QRegex::Cursor {
+class NQPCursor does NQPCursorRole {
     method match_class() { NQPMatch }
     method Bool() is parrot_vtable('get_bool') {
         !nqp::isnull(nqp::getattr(self, $?CLASS, '$!match'))
@@ -271,3 +271,9 @@ class NQPCursor does QRegex::Cursor {
     }
 }
 
+
+my module EXPORT {
+    our module DEFAULT {
+        $?PACKAGE.WHO<NQPCursorRole> := NQPCursorRole;
+    }
+}
