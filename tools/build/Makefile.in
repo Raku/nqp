@@ -41,7 +41,6 @@ CINCLUDES        = -I$(PARROT_INCLUDE_DIR) -I$(PARROT_INCLUDE_DIR)/pmc
 LINKARGS         = $(LDFLAGS) $(LD_LOAD_FLAGS) $(LIBPARROT) @libs@ @icu_shared@
 
 # nqp directories
-NQP_LANG_DIR     = $(PARROT_LIB_DIR)/languages/nqp
 DYNEXT_DIR       = dynext
 PMC_DIR          = src/pmc
 OPS_DIR          = src/ops
@@ -234,7 +233,7 @@ CLEANUPS = \
 all: $(NQP_EXE) qregex
 
 install: all
-	$(MKPATH)               $(DESTDIR)$(NQP_LANG_DIR)
+	$(MKPATH)               $(DESTDIR)$(PARROT_LIBRARY_DIR)
 	$(CP)  $(P6REGEX_PBC)  $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(P6REGEX_PBC)
 	$(CP)  $(REGEX_PBC)    $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(REGEX_PBC)
 	$(CP)  $(HLL_PBC)      $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(HLL_PBC)
