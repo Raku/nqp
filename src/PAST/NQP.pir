@@ -387,7 +387,7 @@ entry to produce the node to be returned.
     maphash['split']    = 'split__Pss'
     maphash['index']    = 'index__Issi'
     maphash['chr']      = 'chr__Si'
-    maphash['ord']      = 'ord__Is'
+    maphash['ord']      = 'ord__Isi'
     maphash['lc']       = 'downcase__Ss'
     maphash['uc']       = 'upcase__Ss'
     maphash['substr']   = 'substr__Ssii'
