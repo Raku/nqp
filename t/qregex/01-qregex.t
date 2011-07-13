@@ -4,12 +4,12 @@
 use QRegex;
 
 my @files := [
-#    'rx_captures',
-#    'rx_basic',
-#    'rx_quantifiers',
-#    'rx_metachars',
-#    'rx_charclass',
-#    'rx_backtrack',
+    'rx_captures',
+    'rx_basic',
+    'rx_quantifiers',
+    'rx_metachars',
+    'rx_charclass',
+    'rx_backtrack',
     'rx_subrules',
 #    'rx_lookarounds',
 #    'rx_modifiers',

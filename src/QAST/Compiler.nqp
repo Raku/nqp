@@ -233,7 +233,7 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push_pirop('substr', '$S11', %*REG<tgt>, %*REG<pos>, 1);
         $ops.push_pirop('index', '$I11', $charlist, '$S11');
         $ops.push_pirop($testop, '$I11', 0, %*REG<fail>);
-        $ops.push_pirop('inc', %*REG<pos>);
+        $ops.push_pirop('inc', %*REG<pos>) unless $node.subtype eq 'zerowidth';
         $ops;
     }
 
