@@ -22,6 +22,10 @@ knowhow NQPAttribute {
     method type() {
         $!type // pir::null__P()
     }
+    
+    method has_accessor() {
+        0
+    }
 
     method box_target() {
         $!box_target ?? 1 !! 0
