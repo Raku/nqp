@@ -29,7 +29,7 @@ role QRegex::Cursor {
             }
             for $!cstack -> $subcur {
                 my $submatch := $subcur.MATCH;
-                for nqp::split(' ', nqp::getattr($subcur, $?CLASS, '$!name')) -> $name {
+                for nqp::split('=', nqp::getattr($subcur, $?CLASS, '$!name')) -> $name {
                     my $where := %caps{$name};
                     nqp::bindkey($hash, $name, $submatch) if $where == 0;
                     nqp::bindpos($list, $name, $submatch) if $where == 1;
