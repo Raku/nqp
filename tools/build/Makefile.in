@@ -231,7 +231,7 @@ CLEANUPS = \
   $(OPS_DIR)/*$(LOAD_EXT) \
   $(DYNEXT_DIR)/*$(LOAD_EXT) \
 
-all: $(NQP_EXE)
+all: $(NQP_EXE) qregex
 
 install: all
 	$(MKPATH)               $(DESTDIR)$(NQP_LANG_DIR)
@@ -243,6 +243,7 @@ install: all
 	$(CP)  $(NQP_MO_PBC)   $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(NQP_MO_PBC)
 	$(CP)  $(NQP_PBC)      $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(NQP_PBC)
 	$(CP)  $(PAST_PBC)     $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(PAST_PBC)
+	$(CP)  $(QREGEX_PBC)   $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(QREGEX_PBC)
 	$(MKPATH)              $(DESTDIR)$(PARROT_BIN_DIR)
 	$(CP)  $(NQP_EXE)      $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
 	$(CHMOD)  755          $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
