@@ -174,6 +174,10 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                                           :rxtype<subcapture>, :node($/) );
             }
         }
+        else {
+            $qast := QAST::Regex.new( PAST::Node.new('!BACKREF', $name),
+                         :rxtype<subrule>, :subtype<method>, :node($/));
+        }
         make $qast;
     }
 
@@ -294,6 +298,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             $qast := QAST::Regex.new(:rxtype<subrule>, :subtype<capture>,
                                      :node($/), PAST::Node.new($name), 
                                      :name($name) );
+            if $<arglist> {
+                for $<arglist>[0].ast.list { $qast[0].push( $_ ) }
+            }
         }
         make $qast;
     }

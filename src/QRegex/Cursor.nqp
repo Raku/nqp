@@ -74,7 +74,11 @@ role QRegex::Cursor {
         $!cstack := [] unless pir::defined($!cstack);
         nqp::push($!cstack, $capture);
         nqp::bindattr($capture, $?CLASS, '$!name', $name);
-        nqp::elems($!cstack);
+        pir::push__vPi($!bstack, 0);
+        pir::push__vPi($!bstack, -1);
+        pir::push__vPi($!bstack, 0);
+        pir::push__vPi($!bstack, nqp::elems($!cstack));
+        $!cstack;
     }
 
     method !cursor_pass($pos, $name?) {
@@ -92,6 +96,21 @@ role QRegex::Cursor {
         $!pos    := -3;
     }
 
+    method !BACKREF($name) {
+        my $cur := self."!cursor_start"();
+        my $n := $!cstack ?? nqp::elems($!cstack) - 1 !! -1;
+        $n-- while $n >= 0 && nqp::getattr($!cstack[$n], $?CLASS, '$!name') ne $name;
+        if $n >= 0 {
+            my $subcur := $!cstack[$n];
+            my $litlen := $subcur.pos - $subcur.from;
+            $cur."!cursor_pass"($!pos + $litlen, '')
+              if nqp::substr($!target, $!pos, $litlen) 
+                   eq nqp::substr($!target, $subcur.pos, $litlen);
+        }
+        else { $cur."!cursor_pass"($!pos, '') }
+        $cur;
+    }
+                 
     method ws() {
         # skip over any whitespace, fail if between two word chars
         my $cur := self."!cursor_start"();

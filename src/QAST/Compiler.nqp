@@ -18,7 +18,7 @@ class QAST::Compiler is HLL::Compiler {
         my %*REG;
 
         # build the list of (unique) registers we need
-        my $reglist := nqp::split(' ', 'tgt string pos int off int eos int rep int cur pmc curclass pmc bstack pmc caps int');
+        my $reglist := nqp::split(' ', 'tgt string pos int off int eos int rep int cur pmc curclass pmc bstack pmc cstack pmc');
         while $reglist {
             my $reg := nqp::shift($reglist);
             my $name := %*REG{$reg} := $prefix ~ $reg;
@@ -30,6 +30,8 @@ class QAST::Compiler is HLL::Compiler {
         my $donelabel    := self.'post_new'('Label', :result($prefix ~ 'done'));
         my $restartlabel := self.'post_new'('Label', :result($prefix ~ 'restart'));
         my $faillabel    := self.'post_new'('Label', :result($prefix ~ 'fail'));
+        my $jumplabel    := self.'post_new'('Label', :result($prefix ~ 'jump'));
+        my $cutlabel     := self.'post_new'('Label', :result($prefix ~ 'cut'));
         %*REG<fail>      := $faillabel;
 
         # common prologue
@@ -39,12 +41,22 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push(self.regex_post($node));
         $ops.push($faillabel);
         $ops.push_pirop('unless', %*REG<bstack>, $donelabel);
-        $ops.push_pirop('pop', %*REG<caps>, %*REG<bstack>);
+        $ops.push_pirop('pop', '$I19', %*REG<bstack>);
         $ops.push_pirop('pop', %*REG<rep>, %*REG<bstack>);
         $ops.push_pirop('pop', %*REG<pos>, %*REG<bstack>);
         $ops.push_pirop('pop', '$I19', %*REG<bstack>);
         $ops.push_pirop('lt', %*REG<pos>, -1, $donelabel);
         $ops.push_pirop('lt', %*REG<pos>, 0, $faillabel);
+        $ops.push_pirop('eq', '$I19', 0, $faillabel);
+        # backtrack the cursor stack
+        $ops.push_pirop('if_null', %*REG<cstack>, $jumplabel);
+        $ops.push_pirop('elements', '$I18', %*REG<bstack>);
+        $ops.push_pirop('le', '$I18', 0, $cutlabel);
+        $ops.push_pirop('dec', '$I18');
+        $ops.push_pirop('set', '$I18', %*REG<bstack>~'[$I18]');
+        $ops.push($cutlabel);
+        $ops.push_pirop('assign', %*REG<cstack>, '$I18');
+        $ops.push($jumplabel);
         $ops.push_pirop('jump', '$I19');
         $ops.push($donelabel);
         $ops.push_pirop('callmethod', '"!cursor_fail"', %*REG<cur>);
@@ -337,7 +349,7 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push_pirop('callmethod', '"!cursor_start"', %*REG<cur>, :result<$P11>);
         $ops.push_pirop('callmethod', '"!cursor_pass"', '$P11', %*REG<pos>);
         $ops.push_pirop('callmethod', '"!cursor_capture"', %*REG<cur>, 
-                        '$P11', $name, :result(%*REG<caps>));
+                        '$P11', $name, :result(%*REG<cstack>));
         $ops.push_pirop('goto', $donelabel);
         $ops.push($faillabel);
         $ops.push_pirop('goto', %*REG<fail>);
@@ -350,16 +362,16 @@ class QAST::Compiler is HLL::Compiler {
         my $name := $*PASTCOMPILER.as_post($node.name, :rtype<*>);
         my $subtype := $node.subtype;
         my $cpn := self.post_children($node[0]);
-        my @pargs := $cpn[1];
-        my %nargs := $cpn[2];
+        my @pargs := $cpn[1] // [];
+        my @nargs := $cpn[2] // [];
         my $subpost := nqp::shift(@pargs);
         my $testop := $node.negate ?? 'if' !! 'unless';
         $ops.push($cpn[0]);
         $ops.push_pirop('repr_bind_attr_int', %*REG<cur>, %*REG<curclass>, '"$!pos"', %*REG<pos>);
-        $ops.push_pirop('callmethod', $subpost, %*REG<cur>, :result<$P11>);
+        $ops.push_pirop('callmethod', $subpost, %*REG<cur>, |@pargs, |@nargs, :result<$P11>);
         $ops.push_pirop($testop, '$P11', %*REG<fail>);
         $ops.push_pirop('callmethod', '"!cursor_capture"', %*REG<cur>, 
-                        '$P11', $name, :result(%*REG<caps>))
+                        '$P11', $name, :result(%*REG<cstack>))
           if $subtype eq 'capture';
         $ops.push_pirop('repr_get_attr_int', %*REG<pos>, '$P11', %*REG<curclass>, '"$!pos"')
           unless $subtype eq 'zerowidth';

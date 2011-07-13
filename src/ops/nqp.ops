@@ -1244,10 +1244,14 @@ Set $1 to be the index of latest mark frame $3 in stack $2.
 inline op nqp_rxmark(in PMC, in LABEL, in INT, in INT) :base_core {
     PMC *bstack = $1;
     INTVAL mark = PTR2INTVAL(CUR_OPCODE + $2);
+    INTVAL elems = VTABLE_elements(interp, bstack);
+    INTVAL caps = (elems > 0 
+                    && VTABLE_get_integer_keyed_int(interp, bstack, elems - 1));
+                  
     VTABLE_push_integer(interp, bstack, mark);
     VTABLE_push_integer(interp, bstack, $3);
     VTABLE_push_integer(interp, bstack, $4);
-    VTABLE_push_integer(interp, bstack, 0);
+    VTABLE_push_integer(interp, bstack, caps);
 }
 
 inline op nqp_rxpeek(out INT, in PMC, in LABEL) :base_core {
