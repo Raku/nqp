@@ -26,6 +26,10 @@ knowhow NQPAttribute {
     method has_accessor() {
         0
     }
+    
+    method build_closure() {
+        0
+    }
 
     method box_target() {
         $!box_target ?? 1 !! 0
