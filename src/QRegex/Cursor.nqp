@@ -150,72 +150,82 @@ role QRegex::Cursor {
     method alpha() {
         my $cur := self."!cursor_start"();
         $cur."!cursor_pass"($!pos+1, 'alpha')
-          if nqp::iscclass(pir::const::CCLASS_ALPHABETIC, $!target, $!pos)
-              || nqp::ord($!target, $!pos) == 95;
+          if $!pos < nqp::chars($!target)
+             && (nqp::iscclass(pir::const::CCLASS_ALPHABETIC, $!target, $!pos)
+                 || nqp::ord($!target, $!pos) == 95);
         $cur;
     }
 
     method alnum() {
         my $cur := self."!cursor_start"();
         $cur."!cursor_pass"($!pos+1, 'alnum')
-          if nqp::iscclass(pir::const::CCLASS_ALPHANUMERIC, $!target, $!pos)
-              || nqp::ord($!target, $!pos) == 95;
+          if $!pos < nqp::chars($!target)
+             && (nqp::iscclass(pir::const::CCLASS_ALPHANUMERIC, $!target, $!pos)
+                 || nqp::ord($!target, $!pos) == 95);
         $cur;
     }
 
     method upper() {
         my $cur := self."!cursor_start"();
         $cur."!cursor_pass"($!pos+1, 'upper')
-          if nqp::iscclass(pir::const::CCLASS_UPPERCASE, $!target, $!pos);
+          if $!pos < nqp::chars($!target)
+             && nqp::iscclass(pir::const::CCLASS_UPPERCASE, $!target, $!pos);
         $cur;
     }
 
     method lower() {
         my $cur := self."!cursor_start"();
         $cur."!cursor_pass"($!pos+1, 'lower')
-          if nqp::iscclass(pir::const::CCLASS_LOWERCASE, $!target, $!pos);
+          if $!pos < nqp::chars($!target)
+             && nqp::iscclass(pir::const::CCLASS_LOWERCASE, $!target, $!pos);
         $cur;
     }
 
     method digit() {
         my $cur := self."!cursor_start"();
         $cur."!cursor_pass"($!pos+1, 'digit')
-          if nqp::iscclass(pir::const::CCLASS_NUMERIC, $!target, $!pos);
+          if $!pos < nqp::chars($!target)
+             && nqp::iscclass(pir::const::CCLASS_NUMERIC, $!target, $!pos);
         $cur;
     }
 
     method xdigit() {
         my $cur := self."!cursor_start"();
         $cur."!cursor_pass"($!pos+1, 'xdigit')
-          if nqp::iscclass(pir::const::CCLASS_HEXADECIMAL, $!target, $!pos);
+          if $!pos < nqp::chars($!target)
+             && nqp::iscclass(pir::const::CCLASS_HEXADECIMAL, $!target, $!pos);
         $cur;
     }
 
     method space() {
         my $cur := self."!cursor_start"();
         $cur."!cursor_pass"($!pos+1, 'space')
-          if nqp::iscclass(pir::const::CCLASS_WHITESPACE, $!target, $!pos);
+          if $!pos < nqp::chars($!target)
+             && nqp::iscclass(pir::const::CCLASS_WHITESPACE, $!target, $!pos);
         $cur;
     }
 
     method blank() {
         my $cur := self."!cursor_start"();
         $cur."!cursor_pass"($!pos+1, 'blank')
-          if nqp::iscclass(pir::const::CCLASS_BLANK, $!target, $!pos);
+          if $!pos < nqp::chars($!target)
+             && nqp::iscclass(pir::const::CCLASS_BLANK, $!target, $!pos);
         $cur;
     }
 
     method cntrl() {
         my $cur := self."!cursor_start"();
         $cur."!cursor_pass"($!pos+1, 'cntrl')
-          if nqp::iscclass(pir::const::CCLASS_CONTROL, $!target, $!pos);
+          if $!pos < nqp::chars($!target)
+             && nqp::iscclass(pir::const::CCLASS_CONTROL, $!target, $!pos);
         $cur;
     }
 
     method punct() {
         my $cur := self."!cursor_start"();
         $cur."!cursor_pass"($!pos+1, 'punct')
-          if nqp::iscclass(pir::const::CCLASS_PUNCTUATION, $!target, $!pos);
+          if $!pos < nqp::chars($!target)
+             && nqp::iscclass(pir::const::CCLASS_PUNCTUATION, $!target, $!pos);
         $cur;
     }
 

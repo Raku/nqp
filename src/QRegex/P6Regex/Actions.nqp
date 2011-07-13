@@ -309,6 +309,25 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     method assertion:sym<[>($/) {
         my $clist := $<cclass_elem>;
         my $qast  := $clist[0].ast;
+        if $qast.negate && $qast.rxtype eq 'subrule' {
+            $qast.subtype('zerowidth');
+            $qast := QAST::Regex.new(:rxtype<concat>, :node($/),
+                                     $qast, 
+                                     QAST::Regex.new( :rxtype<cclass>, :subtype<.> ));
+        }
+        my $i := 1;
+        my $n := +$clist;
+        while $i < $n {
+            my $ast := $clist[$i].ast;
+            if $ast.negate {
+                $ast.subtype('zerowidth');
+                $qast := QAST::Regex.new( $ast, $qast, :rxtype<concat>, :node($/));
+            }
+            else {
+                $qast := QAST::Regex.new( $qast, $ast, :rxtype<altseq>, :node($/));
+            }
+            $i++;
+        }
         make $qast;
     }
 
