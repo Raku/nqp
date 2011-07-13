@@ -458,11 +458,11 @@ class NQP::Actions is HLL::Actions {
                 $past := PAST::Var.new(
                     :name($name), :scope('attribute_6model'),
                     :viviself( vivitype( $<sigil> ) ),
-                    PAST::Var.new( :name('self') ),
+                    PAST::Op.new( :pirop('nqp_decontainerize PP'), PAST::Var.new( :name('self') ) ),
                     PAST::Var.new( :name('$?CLASS') )
                 );
                 
-                # Make sure the attribute exists.
+                # Make sure the attribute exists and add type info.
                 unless $*IN_DECL {
                     my $attr;
                     for $*PACKAGE.HOW.attributes($*PACKAGE, :local(1)) {
