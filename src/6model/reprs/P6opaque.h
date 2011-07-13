@@ -21,12 +21,6 @@ typedef struct {
     PMC *name_map;
 } P6opaqueNameMap;
 
-/* Represents a container that needs automatic vivification. */
-typedef struct {
-    INTVAL  offset;
-    PMC    *value;
-} P6opaqueAutoViv;
-
 /* The P6opaque REPR data has the slot mapping, allocation size and
  * various other bits of info. It hangs off the REPR_data pointer
  * in the s-table. */
@@ -48,7 +42,7 @@ typedef struct {
     /* Instantiated objects are just a blank piece of memory that needs to
      * be set up. However, in some cases we'd like them to magically turn in
      * to some container type. */
-    P6opaqueAutoViv *auto_viv_conf;
+    PMC **auto_viv_values;
 
     /* If we can unbox to a native integer, this is the offset to find it. */
     INTVAL unbox_int_offset;

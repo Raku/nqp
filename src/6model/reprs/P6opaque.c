@@ -185,14 +185,11 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
         INTVAL info_alloc   = num_attrs == 0 ? 1 : num_attrs;
         INTVAL cur_pmc_attr = 0;
         INTVAL cur_str_attr = 0;
-        INTVAL cur_avc_attr = 0;
         INTVAL i;
 
         /* Allocate offset array and GC mark info arrays. */
         repr_data->num_attributes      = num_attrs;
         repr_data->attribute_offsets   = (INTVAL *) mem_sys_allocate(info_alloc * sizeof(INTVAL));
-        repr_data->gc_pmc_mark_offsets = (INTVAL *) mem_sys_allocate_zeroed(info_alloc * sizeof(INTVAL));
-        repr_data->gc_str_mark_offsets = (INTVAL *) mem_sys_allocate_zeroed(info_alloc * sizeof(INTVAL));
 
         /* Go over the attributes and arrange their allocation. */
         for (i = 0; i < num_attrs; i++) {
@@ -246,18 +243,20 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
             /* Do allocation. */
             repr_data->attribute_offsets[i] = cur_size;
             if (unboxed_type == STORAGE_SPEC_BP_NONE) {
+                if (!repr_data->gc_pmc_mark_offsets)
+                    repr_data->gc_pmc_mark_offsets = (INTVAL *) mem_sys_allocate_zeroed(info_alloc * sizeof(INTVAL));
                 repr_data->gc_pmc_mark_offsets[cur_pmc_attr] = cur_size;
                 cur_pmc_attr++;
                 if (!PMC_IS_NULL(av_cont)) {
                     /* Stash away auto-viv container info. */
-                    if (!repr_data->auto_viv_conf)
-                        repr_data->auto_viv_conf = (P6opaqueAutoViv *) mem_sys_allocate_zeroed(info_alloc * sizeof(P6opaqueAutoViv));
-                    repr_data->auto_viv_conf[cur_avc_attr].offset = cur_size;
-                    repr_data->auto_viv_conf[cur_avc_attr].value  = av_cont;
-                    cur_avc_attr++;
+                    if (!repr_data->auto_viv_values)
+                        repr_data->auto_viv_values = (PMC **) mem_sys_allocate_zeroed(info_alloc * sizeof(PMC *));
+                    repr_data->auto_viv_values[i] = av_cont;
                 }
             }
             if (unboxed_type == STORAGE_SPEC_BP_STR) {
+                if (!repr_data->gc_str_mark_offsets)
+                    repr_data->gc_str_mark_offsets = (INTVAL *) mem_sys_allocate_zeroed(info_alloc * sizeof(INTVAL));
                 repr_data->gc_str_mark_offsets[cur_str_attr] = cur_size;
                 cur_str_attr++;
             }
@@ -421,16 +420,12 @@ static PMC * get_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *n
         }
         else {
             /* Maybe we know how to auto-viv it to a container. */
-            if (repr_data->auto_viv_conf) {
-                P6opaqueAutoViv *cur_auto_viv_conf = repr_data->auto_viv_conf;
-                while (cur_auto_viv_conf->offset) {
-                    if (cur_auto_viv_conf->offset == repr_data->attribute_offsets[slot]) {
-                        PMC *value = cur_auto_viv_conf->value;
-                        value = REPR(value)->clone(interp, value);
-                        set_pmc_at_offset(instance, repr_data->attribute_offsets[slot], value);
-                        return value;
-                    }
-                    cur_auto_viv_conf++;
+            if (repr_data->auto_viv_values) {
+                PMC *value = repr_data->auto_viv_values[slot];
+                if (value != NULL) {
+                    value = REPR(value)->clone(interp, value);
+                    set_pmc_at_offset(instance, repr_data->attribute_offsets[slot], value);
+                    return value;
                 }
             }
             return PMCNULL;
@@ -708,28 +703,32 @@ static void gc_mark(PARROT_INTERP, PMC *obj) {
         INTVAL i;
 
         /* Mark PMCs. */
-        for (i = 0; i < repr_data->num_attributes; i++) {
-            INTVAL offset = repr_data->gc_pmc_mark_offsets[i];
-            if (offset) {
-                PMC *to_mark = get_pmc_at_offset(instance, offset);
-                if (!PMC_IS_NULL(to_mark))
-                    Parrot_gc_mark_PMC_alive(interp, to_mark);
-            }
-            else {
-                break;
+        if (repr_data->gc_pmc_mark_offsets) {
+            for (i = 0; i < repr_data->num_attributes; i++) {
+                INTVAL offset = repr_data->gc_pmc_mark_offsets[i];
+                if (offset) {
+                    PMC *to_mark = get_pmc_at_offset(instance, offset);
+                    if (!PMC_IS_NULL(to_mark))
+                        Parrot_gc_mark_PMC_alive(interp, to_mark);
+                }
+                else {
+                    break;
+                }
             }
         }
 
         /* Mark strings. */
-        for (i = 0; i < repr_data->num_attributes; i++) {
-            INTVAL offset = repr_data->gc_str_mark_offsets[i];
-            if (offset) {
-                STRING *to_mark = get_str_at_offset(instance, offset);
-                if (to_mark)
-                    Parrot_gc_mark_STRING_alive(interp, to_mark);
-            }
-            else {
-                break;
+        if (repr_data->gc_str_mark_offsets) {
+            for (i = 0; i < repr_data->num_attributes; i++) {
+                INTVAL offset = repr_data->gc_str_mark_offsets[i];
+                if (offset) {
+                    STRING *to_mark = get_str_at_offset(instance, offset);
+                    if (to_mark)
+                        Parrot_gc_mark_STRING_alive(interp, to_mark);
+                }
+                else {
+                    break;
+                }
             }
         }
     }
@@ -756,6 +755,14 @@ static void gc_mark_repr(PARROT_INTERP, STable *st) {
             cur_map_entry++;
         }
     }
+    if (repr_data->auto_viv_values) {
+        int i;
+        for (i = 0; i < repr_data->num_attributes; i++) {
+            PMC *to_mark = repr_data->auto_viv_values[i];
+            if (to_mark != NULL && !PMC_IS_NULL(to_mark))
+                Parrot_gc_mark_PMC_alive(interp, to_mark);
+        }
+    }
 }
 
 /* This Parrot-specific addition to the API is used to free a repr instance. */
@@ -763,6 +770,12 @@ static void gc_free_repr(PARROT_INTERP, STable *st) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     if (repr_data->name_to_index_mapping)
         mem_sys_free(repr_data->name_to_index_mapping);
+    if (repr_data->gc_pmc_mark_offsets)
+        mem_sys_free(repr_data->gc_pmc_mark_offsets);
+    if (repr_data->gc_str_mark_offsets)
+        mem_sys_free(repr_data->gc_str_mark_offsets);
+    if (repr_data->auto_viv_values)
+        mem_sys_free(repr_data->auto_viv_values);
     mem_sys_free(st->REPR_data);
     st->REPR_data = NULL;
 }
