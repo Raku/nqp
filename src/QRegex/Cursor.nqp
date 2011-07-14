@@ -256,19 +256,22 @@ class NQPMatch is NQPCapture {
 
 class NQPCursor does NQPCursorRole {
     method MATCH() {
-        my $match := NQPMatch.new();
-        nqp::bindattr($match, NQPMatch, '$!orig', nqp::getattr(self, NQPCursor, '$!orig'));
-        nqp::bindattr_i($match, NQPMatch, '$!from', nqp::getattr_i(self, NQPCursor, '$!from'));
-        nqp::bindattr_i($match, NQPMatch, '$!to', nqp::getattr_i(self, NQPCursor, '$!pos'));
-        my $list := $match.list;
-        my $hash := $match.hash;
-        for self.CAPHASH {
-            my $key := $_.key;
-            nqp::iscclass(pir::const::CCLASS_NUMERIC, $key, 0)
-              ?? nqp::bindpos($list, $key, $_.value)
-              !! nqp::bindkey($hash, $key, $_.value);
+        unless nqp::istype(nqp::getattr(self, NQPCursor, '$!match'), NQPMatch) {
+            my $match := NQPMatch.new();
+            nqp::bindattr(self, NQPCursor, '$!match', $match);
+            nqp::bindattr($match, NQPMatch, '$!orig', nqp::getattr(self, NQPCursor, '$!orig'));
+            nqp::bindattr_i($match, NQPMatch, '$!from', nqp::getattr_i(self, NQPCursor, '$!from'));
+            nqp::bindattr_i($match, NQPMatch, '$!to', nqp::getattr_i(self, NQPCursor, '$!pos'));
+            my $list := $match.list;
+            my $hash := $match.hash;
+            for self.CAPHASH {
+                my $key := $_.key;
+                nqp::iscclass(pir::const::CCLASS_NUMERIC, $key, 0)
+                  ?? nqp::bindpos($list, $key, $_.value)
+                  !! nqp::bindkey($hash, $key, $_.value);
+            }
         }
-        $match;
+        nqp::getattr(self, NQPCursor, '$!match');
     }
 
     method Bool() is parrot_vtable('get_bool') {
