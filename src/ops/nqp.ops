@@ -1320,6 +1320,7 @@ inline op nqp_radix(out PMC, in INT, in STR, in INT, in INT) :base_core {
         if (zpos >= chars) break;
         ch = STRING_ord(interp, str, zpos);
         if (ch != '_') continue;
+        zpos++;
         if (zpos >= chars) break;
         ch = STRING_ord(interp, str, zpos);
     }
