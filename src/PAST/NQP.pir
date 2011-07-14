@@ -379,6 +379,7 @@ entry to produce the node to be returned.
     maphash['floor_n']  = 'floor__NN'
     maphash['ln_n']     = 'ln__Nn'
     maphash['sqrt_n']   = 'sqrt__Nn'
+    maphash['radix']    = 'nqp_radix__Pisii'
 
     # string opcodes
     maphash['chars']    = 'length__Is'
