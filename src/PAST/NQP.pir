@@ -460,6 +460,7 @@ entry to produce the node to be returned.
     maphash['iscont']     = 'is_container__IP'
     maphash['isnull']     = 'isnull__IP'
     maphash['istrue']     = 'istrue__IP'
+    maphash['istype']     = 'type_check__IPP'
     maphash['null']       = 'null__P'
     maphash['unbox_i']    = 'repr_unbox_int__IP'
     maphash['unbox_n']    = 'repr_unbox_num__NP'
