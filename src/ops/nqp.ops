@@ -1266,3 +1266,70 @@ inline op nqp_rxpeek(out INT, in PMC, in LABEL) :base_core {
 }
 
 
+/*
+
+=item nqp_radix(out, radix, str, pos, flag)
+
+Convert string $3 into a number starting at offset $4 and using radix $2.
+The result of the conversion returns a FixedFloatArray PMC with
+    out[0] = converted value
+    out[1] = radix ** (number of digits converted)
+    out[2] = offset after consuming digits
+The opcode skips single underscores between pairs of digits, per the Perl 6
+specification.  Leading spaces are not skipped, nor does it honor a leading
+plus or minus sign. 
+
+If $5 is set, then trailing zeroes are not included in the conversion.
+(This is useful when converting values following a decimal point, for
+example.)
+
+=cut
+
+*/
+
+inline op nqp_radix(out PMC, in INT, in STR, in INT, in INT) :base_core {
+    PMC    *out;
+    INTVAL radix = $2;
+    STRING *str  = $3;
+    INTVAL pos   = $4;
+    INTVAL flag  = $5;
+    INTVAL chars = Parrot_str_length(interp, str);
+    FLOATVAL value  = 0.0;
+    FLOATVAL base   = 1.0;
+    FLOATVAL zvalue = value;
+    FLOATVAL zbase  = base;
+    INTVAL   zpos   = pos;
+    INTVAL ch;
+
+    if (radix > 36) {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Cannot convert radix of %d (max 36)", radix);
+    }
+
+    ch = (zpos < chars) ? STRING_ord(interp, str, zpos) : 0;
+    while (zpos < chars) {
+        if (ch >= '0' && ch <= '9') ch = ch - '0';
+        else if (ch >= 'a' && ch <= 'z') ch = ch - 'a' + 10;
+        else if (ch >= 'A' && ch <= 'Z') ch = ch - 'A' + 10;
+        else break;
+        if (ch > radix) break;
+        zvalue = zvalue * radix + ch;
+        zbase = zbase * radix;
+        zpos++; pos = zpos;
+        if (ch != 0 || !flag) { value=zvalue; base=zbase; }
+        if (zpos >= chars) break;
+        ch = STRING_ord(interp, str, zpos);
+        if (ch != '_') continue;
+        if (zpos >= chars) break;
+        ch = STRING_ord(interp, str, zpos);
+    }
+
+    out = pmc_new(interp, enum_class_FixedFloatArray);
+    VTABLE_set_integer_native(interp, out, 3);
+    VTABLE_set_number_keyed_int(interp, out, 0, value);
+    VTABLE_set_number_keyed_int(interp, out, 1, base);
+    VTABLE_set_integer_keyed_int(interp, out, 2, pos);
+    $1 = out;
+}
+    
+ 
