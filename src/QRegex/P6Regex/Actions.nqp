@@ -291,7 +291,6 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         my $name := ~$<longname>;
         my $qast;
         if $<assertion> {
-            say("aliasing to $name");
             $qast := $<assertion>[0].ast;
             self.subrule_alias($qast, $name);
         }
