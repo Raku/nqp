@@ -1,24 +1,9 @@
 class HLL::Actions {
     our sub string_to_int($src, $base) {
-        my $len := pir::length($src);
-        my $i   := 0;
-        my $result := 0;
-
-        while $i < $len {
-            my $char := pir::substr($src, $i, 1);
-            if $char eq '_' {
-                $i := $i + 1;
-                next;
-            };
-            my $digitval := pir::index("00112233445566778899AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz", $char);
-            $digitval := pir::set__ip($digitval / 2);
-            if $digitval < 0 || $digitval >= $base {
-                $src.CURSOR.panic("Invalid radix conversion of character '$char'");
-            }
-            $result := $base * $result + $digitval,
-            $i := $i + 1;
-        }
-        $result;
+        my $res := nqp::radix($base, $src, 0, 2);
+        $src.CURSOR.panic("'$src' is not a valid number")
+            unless nqp::atkey($res, 2) == nqp::chars($src);
+        nqp::atkey($res, 0);
     }
 
     our sub ints_to_string($ints) {
