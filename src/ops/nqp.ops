@@ -1319,7 +1319,7 @@ inline op nqp_radix(out PMC, in INT, in STR, in INT, in INT) :base_core {
         else if (ch >= 'a' && ch <= 'z') ch = ch - 'a' + 10;
         else if (ch >= 'A' && ch <= 'Z') ch = ch - 'A' + 10;
         else break;
-        if (ch > radix) break;
+        if (ch >= radix) break;
         zvalue = zvalue * radix + ch;
         zbase = zbase * radix;
         zpos++; pos = zpos;
