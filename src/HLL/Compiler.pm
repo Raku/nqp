@@ -305,6 +305,7 @@ class HLL::Compiler {
         self.version              if %adverbs<version>;
         self.show-config          if %adverbs<show-config>;
         self.nqpevent(%adverbs<nqpevent>) if %adverbs<nqpevent>;
+        self.validate_target(%adverbs<target>) if (%adverbs<target>);
 
         pir::load_bytecode('dumper.pbc');
         pir::load_bytecode('PGE/Dumper.pbc');
@@ -455,6 +456,17 @@ class HLL::Compiler {
         else {
             _dumper($obj, $name)
         }
+    }
+
+    method validate_target($target) {
+        my $seen := 0;
+        for @!stages {
+            if $_ eq $target {
+                $seen := 1;
+                last;
+            }
+        }
+        self.panic("\"$target\" is not a valid target") unless $seen;
     }
 
     method usage($name?) {
