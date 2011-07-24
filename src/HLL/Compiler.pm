@@ -10,8 +10,6 @@ class HLL::Compiler {
     has @!stages;
     has $!parsegrammar;
     has $!parseactions;
-    has $!commandline_banner;
-    has $!commandline_prompt;
     has @!cmdoptions;
     has $!usage;
     has $!compiler_progname;
@@ -144,7 +142,7 @@ class HLL::Compiler {
      
         my $target := pir::downcase(%adverbs<target>);
 
-        pir::print__vPS( pir::getinterp__P().stderr_handle(), self.commandline_banner );
+        nqp::print(pir::getinterp__P().stderr_handle(), self.interactive_banner);
 
         my $stdin    := pir::getinterp__P().stdin_handle();
         my $encoding := ~%adverbs<encoding>;
@@ -156,7 +154,7 @@ class HLL::Compiler {
         while 1 {
             last unless $stdin;
 
-            my $prompt := self.commandline_prompt // '> ';
+            my $prompt := self.interactive_prompt // '> ';
             my $code := $stdin.readline_interactive(~$prompt);
 
             last if pir::isnull($code);
@@ -252,19 +250,9 @@ class HLL::Compiler {
         $!parseactions;
     }
     
-    method commandline_banner($value?) {
-        if pir::defined($value) {
-            $!commandline_banner := $value;
-        }
-        $!commandline_banner;
-    }
+    method interactive_banner() { '' }
     
-    method commandline_prompt($value?) {
-        if pir::defined($value) {
-            $!commandline_prompt := $value;
-        }
-        $!commandline_prompt;
-    }
+    method interactive_prompt() { '> ' }
     
     method compiler_progname($value?) {
         if pir::defined($value) {
