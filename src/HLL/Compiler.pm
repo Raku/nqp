@@ -290,29 +290,33 @@ class HLL::Compiler {
             %adverbs{$k} := %opts{$k};
         }
         self.usage($program-name) if %adverbs<help>;
-        self.version              if %adverbs<version>;
-        self.show-config          if %adverbs<show-config>;
-        self.nqpevent(%adverbs<nqpevent>) if %adverbs<nqpevent>;
 
         pir::load_bytecode('dumper.pbc');
         pir::load_bytecode('PGE/Dumper.pbc');
 
-        { # try
-            my $result;
-            if %adverbs<e> { $result := self.eval(%adverbs<e>, |@a, |%adverbs) }
-            elsif !@a { $result := self.interactive(|%adverbs) }
-            elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }
-            else { $result := self.evalfiles(@a[0], |@a, |%adverbs) }
+        self.command_eval(|@a, |%adverbs);
+    }
 
-            if !pir::isnull($result) && %adverbs<target> eq 'pir' {
-                my $output := %adverbs<output>;
-                my $fh := ($output eq '' || $output eq '-')
-                          ?? pir::getinterp__P().stdout_handle()
-                          !! pir::new__Ps('FileHandle').open($output, 'w');
-                self.panic("Cannot write to $output") unless $fh;
-                pir::print($fh, $result);
-                $fh.close()
-            }
+
+    method command_eval(*@a, *%adverbs) {
+        self.version              if %adverbs<version>;
+        self.show-config          if %adverbs<show-config>;
+        self.nqpevent(%adverbs<nqpevent>) if %adverbs<nqpevent>;
+
+        my $result;
+        if %adverbs<e> { $result := self.eval(%adverbs<e>, |@a, |%adverbs) }
+        elsif !@a { $result := self.interactive(|%adverbs) }
+        elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }
+        else { $result := self.evalfiles(@a[0], |@a, |%adverbs) }
+
+        if !pir::isnull($result) && %adverbs<target> eq 'pir' {
+            my $output := %adverbs<output>;
+            my $fh := ($output eq '' || $output eq '-')
+                      ?? pir::getinterp__P().stdout_handle()
+                      !! pir::new__Ps('FileHandle').open($output, 'w');
+            self.panic("Cannot write to $output") unless $fh;
+            pir::print($fh, $result);
+            $fh.close()
         }
     }
 
