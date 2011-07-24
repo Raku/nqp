@@ -317,14 +317,18 @@ class HLL::Compiler {
             elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }
             else { $result := self.evalfiles(@a[0], |@a, |%adverbs) }
 
-            if !pir::isnull($result) && %adverbs<target> eq 'pir' {
-                my $output := %adverbs<output>;
-                my $fh := ($output eq '' || $output eq '-')
-                          ?? pir::getinterp__P().stdout_handle()
-                          !! pir::new__Ps('FileHandle').open($output, 'w');
-                self.panic("Cannot write to $output") unless $fh;
-                pir::print($fh, $result);
-                $fh.close()
+            if %adverbs<e> || @a {
+                $result := self.target_output($result, |%adverbs);
+
+                if !pir::isnull($result) && %adverbs<target> eq 'pir' {
+                    my $output := %adverbs<output>;
+                    my $fh := ($output eq '' || $output eq '-')
+                           ?? pir::getinterp__P().stdout_handle()
+                           !! pir::new__Ps('FileHandle').open($output, 'w');
+                    self.panic("Cannot write to $output") unless $fh;
+                    pir::print($fh, $result);
+                    $fh.close()
+                }
             }
         }
     }
@@ -371,12 +375,7 @@ class HLL::Compiler {
         }
         my $code := pir::join('', @codes);
         my $?FILES := pir::join(' ', @files);
-        my $r := self.eval($code, |@args, |%adverbs);
-        if $target eq '' || $target eq 'pir' {
-            return $r;
-        } else {
-            return self.dumper($r, $target, |%adverbs);
-        }
+        return self.eval($code, |@args, |%adverbs);
     }
 
     method compile($source, *%adverbs) {
@@ -445,6 +444,14 @@ class HLL::Compiler {
     method evalpmc($source, *%adverbs) {
         my $compiler := pir::compreg__Ps('PIR');
         $compiler($source)
+    }
+
+    method target_output($result, *%adverbs) {
+        if !%adverbs<target> || %adverbs<target> eq 'pir' {
+            return $result;
+        } else {
+            return self.dumper($result, %adverbs<target>, |%adverbs);
+        }
     }
 
     method dumper($obj, $name, *%options) {
