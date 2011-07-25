@@ -304,7 +304,9 @@ class HLL::Compiler {
         self.nqpevent(%adverbs<nqpevent>) if %adverbs<nqpevent>;
 
         my $result;
-        if %adverbs<e> { $result := self.eval(%adverbs<e>, |@a, |%adverbs) }
+        if %adverbs<e> { 
+            $result := self.eval(%adverbs<e>, '-e', |@a, |%adverbs) 
+        }
         elsif !@a { $result := self.interactive(|%adverbs) }
         elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }
         else { $result := self.evalfiles(@a[0], |@a, |%adverbs) }
