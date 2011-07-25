@@ -365,11 +365,12 @@ class QAST::Compiler is HLL::Compiler {
         my @pargs := $cpn[1] // [];
         my @nargs := $cpn[2] // [];
         my $subpost := nqp::shift(@pargs);
-        my $testop := $node.negate ?? 'if' !! 'unless';
+        my $testop := $node.negate ?? 'ge' !! 'lt';
         $ops.push($cpn[0]);
         $ops.push_pirop('repr_bind_attr_int', %*REG<cur>, %*REG<curclass>, '"$!pos"', %*REG<pos>);
         $ops.push_pirop('callmethod', $subpost, %*REG<cur>, |@pargs, |@nargs, :result<$P11>);
-        $ops.push_pirop($testop, '$P11', %*REG<fail>);
+        $ops.push_pirop('repr_get_attr_int', '$I11', '$P11', %*REG<curclass>, '"$!pos"');
+        $ops.push_pirop($testop, '$I11', '0', %*REG<fail>);
         $ops.push_pirop('callmethod', '"!cursor_capture"', %*REG<cur>, 
                         '$P11', $name, :result(%*REG<cstack>))
           if $subtype eq 'capture';
