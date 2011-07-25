@@ -51,7 +51,7 @@ role NQPCursorRole {
     method !cursor_start() {
         my $new := self.CREATE();
         nqp::bindattr($new, $?CLASS, '$!orig', $!orig);
-        nqp::bindattr_i($new, $?CLASS, '$!pos', $!pos);
+        nqp::bindattr_i($new, $?CLASS, '$!pos', -3);
         pir::return__vPsiPP(
             $new, 
             nqp::bindattr_s($new, $?CLASS, '$!target', $!target),
