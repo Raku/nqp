@@ -302,6 +302,7 @@ class HLL::Compiler {
         self.version              if %adverbs<version>;
         self.show-config          if %adverbs<show-config>;
         self.nqpevent(%adverbs<nqpevent>) if %adverbs<nqpevent>;
+        self.validate_target(%adverbs<target>) if (%adverbs<target>);
 
         my $result;
         if %adverbs<e> { $result := self.eval(%adverbs<e>, |@a, |%adverbs) }
@@ -309,14 +310,18 @@ class HLL::Compiler {
         elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }
         else { $result := self.evalfiles(@a[0], |@a, |%adverbs) }
 
-        if !pir::isnull($result) && %adverbs<target> eq 'pir' {
-            my $output := %adverbs<output>;
-            my $fh := ($output eq '' || $output eq '-')
-                      ?? pir::getinterp__P().stdout_handle()
-                      !! pir::new__Ps('FileHandle').open($output, 'w');
-            self.panic("Cannot write to $output") unless $fh;
-            pir::print($fh, $result);
-            $fh.close()
+        if %adverbs<e> || @a {
+            $result := self.target_output($result, |%adverbs);
+
+            if !pir::isnull($result) && %adverbs<target> eq 'pir' {
+                my $output := %adverbs<output>;
+                my $fh := ($output eq '' || $output eq '-')
+                       ?? pir::getinterp__P().stdout_handle()
+                       !! pir::new__Ps('FileHandle').open($output, 'w');
+                self.panic("Cannot write to $output") unless $fh;
+                pir::print($fh, $result);
+                $fh.close()
+            }
         }
     }
 
@@ -362,12 +367,7 @@ class HLL::Compiler {
         }
         my $code := pir::join('', @codes);
         my $?FILES := pir::join(' ', @files);
-        my $r := self.eval($code, |@args, |%adverbs);
-        if $target eq '' || $target eq 'pir' {
-            return $r;
-        } else {
-            return self.dumper($r, $target, |%adverbs);
-        }
+        return self.eval($code, |@args, |%adverbs);
     }
 
     method compile($source, *%adverbs) {
@@ -438,6 +438,14 @@ class HLL::Compiler {
         $compiler($source)
     }
 
+    method target_output($result, *%adverbs) {
+        if !%adverbs<target> || %adverbs<target> eq 'pir' {
+            return $result;
+        } else {
+            return self.dumper($result, %adverbs<target>, |%adverbs);
+        }
+    }
+
     method dumper($obj, $name, *%options) {
         if %options<dumper> {
             pir::load_bytecode('PCT/Dumper.pbc');
@@ -447,6 +455,17 @@ class HLL::Compiler {
         else {
             _dumper($obj, $name)
         }
+    }
+
+    method validate_target($target) {
+        my $seen := 0;
+        for @!stages {
+            if $_ eq $target {
+                $seen := 1;
+                last;
+            }
+        }
+        self.panic("\"$target\" is not a valid target") unless $seen;
     }
 
     method usage($name?) {
