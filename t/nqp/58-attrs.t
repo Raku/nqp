@@ -3,16 +3,16 @@
 plan(2);
 
 class Foo {
-    has $bar;
-
     has $!answer;
-    method question() { $!answer := 42 };
+    method question($what) { $!answer := $what }
+    method answer() { $!answer }
 };
 
-my $foo := Foo.new;
+my $first  := Foo.new;
+my $second := Foo.new;
 
-$foo.question();
-ok($foo.answer == 42, "Read-only accessors works");
+$first.question(42);
+$second.question(23);
+ok($first.answer  == 42, "attributes work");
+ok($second.answer == 23, "... and are not shared among objects");
 
-$foo.bar(42);
-ok($foo.bar == 42, 'Read-write accessors works');
