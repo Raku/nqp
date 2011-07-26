@@ -57,18 +57,18 @@ class HLL::Compiler::SerializationContextBuilder {
     # Other SCs that we are dependent on (maps handle to SC).
     has %!dependencies;
     
-    # XXX Fix BUILD...
-    method new(:$handle!) {
+    method new(:$handle!, :$description = '<unknown>') {
         my $obj := self.CREATE();
-        $obj.BUILD(:handle($handle));
+        $obj.BUILD(:handle($handle), :description($description));
         $obj
     }
     
-    method BUILD(:$handle) {
-        $!sc := pir::nqp_create_sc__PS($handle);
-        $!handle := $handle;
+    method BUILD(:$handle!, :$description!) {
+        $!sc           := pir::nqp_create_sc__PS($handle);
+        $!handle       := $handle;
         %!addr_to_slot := pir::new('Hash');
         @!event_stream := pir::new('ResizablePMCArray');
+        $!sc.set_description($description);
     }
     
     # Gets the slot for a given object. Dies if it is not in the context.

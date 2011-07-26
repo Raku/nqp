@@ -5,8 +5,11 @@ pmclass SerializationContext auto_attrs dynpmc group nqp {
     /* The handle of this SC. */
     ATTR STRING *handle;
     
-    /* The set of objects that live in this SC. */
+    /* The root set of objects that live in this SC. */
     ATTR PMC *root_objects;
+    
+    /* Description (probably the file name) if any. */
+    ATTR STRING *description;
     
     VTABLE void init() {
         PMC *root_objects = pmc_new(interp, enum_class_ResizablePMCArray);
@@ -20,11 +23,13 @@ pmclass SerializationContext auto_attrs dynpmc group nqp {
 
     VTABLE void mark() {
         PMC    *root_objects;
-        STRING *handle;
+        STRING *handle, *description;
         GETATTR_SerializationContext_root_objects(interp, SELF, root_objects);
         Parrot_gc_mark_PMC_alive(INTERP, root_objects);
         GETATTR_SerializationContext_handle(interp, SELF, handle);
         Parrot_gc_mark_STRING_alive(INTERP, handle);
+        GETATTR_SerializationContext_description(interp, SELF, description);
+        Parrot_gc_mark_STRING_alive(INTERP, description);
     }
     
     VTABLE PMC* get_pmc_keyed_int(INTVAL idx) {
@@ -63,6 +68,17 @@ pmclass SerializationContext auto_attrs dynpmc group nqp {
         STRING *handle;
         GETATTR_SerializationContext_handle(interp, SELF, handle);
         RETURN (STRING* handle);
+    }
+    
+    METHOD set_description(STRING *description) {
+        SETATTR_SerializationContext_description(interp, SELF, description);
+        RETURN (STRING* description);
+    }
+    
+    METHOD STRING* description() {
+        STRING *description;
+        GETATTR_SerializationContext_description(interp, SELF, description);
+        RETURN (STRING* description);
     }
     
     METHOD INTVAL slot_index_for(PMC *obj) {
