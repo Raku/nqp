@@ -54,6 +54,9 @@ class HLL::Compiler::SerializationContextBuilder {
     # The event stream that builds or fixes up objects.
     has @!event_stream;
     
+    # Other SCs that we are dependent on (maps handle to SC).
+    has %!dependencies;
+    
     # XXX Fix BUILD...
     method new(:$handle!) {
         my $obj := self.CREATE();
@@ -151,8 +154,10 @@ class HLL::Compiler::SerializationContextBuilder {
             self.get_slot_past_for_object($obj);
         }
         else {
+            my $handle := $sc.handle;
+            %!dependencies{$handle} := $sc;
             PAST::Op.new( :pirop('nqp_get_sc_object Psi'),
-                $sc.handle, $sc.slot_index_for($obj)
+                $handle, $sc.slot_index_for($obj)
             )
         }
     }
