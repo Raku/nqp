@@ -8,6 +8,6 @@ typedef struct {
 } UninstantiableInstance;
 
 /* Initializes the Uninstantiable REPR. */
-PMC * Uninstantiable_initialize(PARROT_INTERP);
+REPROps * Uninstantiable_initialize(PARROT_INTERP);
 
 #endif

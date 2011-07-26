@@ -13,7 +13,7 @@
 #include "P6opaque.h"
 
 /* This representation's function pointer table. */
-static PMC *this_repr;
+static REPROps *this_repr;
 
 /* How do we go from type-object to a hash value? For now, we make an integer
  * that is the address of the STable struct, which not being subject to GC will
@@ -855,7 +855,7 @@ static void change_type(PARROT_INTERP, PMC *obj, PMC *new_type) {
      * really re-alloc, we need to go deal with the fixed size pool
      * allocator. */
     if (new_repr_data->allocation_size > cur_repr_data->allocation_size) {
-        PMC *new_body = (P6opaqueInstance *) Parrot_gc_allocate_fixed_size_storage(interp, new_repr_data->allocation_size);
+        P6opaqueInstance *new_body = (P6opaqueInstance *) Parrot_gc_allocate_fixed_size_storage(interp, new_repr_data->allocation_size);
         memset(new_body, 0, new_repr_data->allocation_size);
         memcpy(new_body, instance, cur_repr_data->allocation_size);
         PMC_data(obj) = new_body;
@@ -869,36 +869,34 @@ static void change_type(PARROT_INTERP, PMC *obj, PMC *new_type) {
 }
 
 /* Initializes the P6opaque representation. */
-PMC * P6opaque_initialize(PARROT_INTERP) {
+REPROps * P6opaque_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
-    REPRCommonalities *repr = mem_allocate_zeroed_typed(REPRCommonalities);
-    repr->type_object_for = type_object_for;
-    repr->instance_of = instance_of;
-    repr->defined = defined;
-    repr->get_attribute = get_attribute;
-    repr->get_attribute_int = get_attribute_int;
-    repr->get_attribute_num = get_attribute_num;
-    repr->get_attribute_str = get_attribute_str;
-    repr->bind_attribute = bind_attribute;
-    repr->bind_attribute_int = bind_attribute_int;
-    repr->bind_attribute_num = bind_attribute_num;
-    repr->bind_attribute_str = bind_attribute_str;
-    repr->hint_for = hint_for;
-    repr->clone = repr_clone;
-    repr->set_int = set_int;
-    repr->get_int = get_int;
-    repr->set_num = set_num;
-    repr->get_num = get_num;
-    repr->set_str = set_str;
-    repr->get_str = get_str;
-    repr->gc_mark = gc_mark;
-    repr->gc_free = gc_free;
-    repr->gc_mark_repr = gc_mark_repr;
-    repr->gc_free_repr = gc_free_repr;
-    repr->get_storage_spec = get_storage_spec;
-    repr->is_attribute_initialized = is_attribute_initialized;
-    repr->change_type = change_type;
-
-    /* Wrap it in a PMC. */
-    return (this_repr = wrap_repr(interp, repr));
+    this_repr = mem_allocate_zeroed_typed(REPROps);
+    this_repr->type_object_for = type_object_for;
+    this_repr->instance_of = instance_of;
+    this_repr->defined = defined;
+    this_repr->get_attribute = get_attribute;
+    this_repr->get_attribute_int = get_attribute_int;
+    this_repr->get_attribute_num = get_attribute_num;
+    this_repr->get_attribute_str = get_attribute_str;
+    this_repr->bind_attribute = bind_attribute;
+    this_repr->bind_attribute_int = bind_attribute_int;
+    this_repr->bind_attribute_num = bind_attribute_num;
+    this_repr->bind_attribute_str = bind_attribute_str;
+    this_repr->hint_for = hint_for;
+    this_repr->clone = repr_clone;
+    this_repr->set_int = set_int;
+    this_repr->get_int = get_int;
+    this_repr->set_num = set_num;
+    this_repr->get_num = get_num;
+    this_repr->set_str = set_str;
+    this_repr->get_str = get_str;
+    this_repr->gc_mark = gc_mark;
+    this_repr->gc_free = gc_free;
+    this_repr->gc_mark_repr = gc_mark_repr;
+    this_repr->gc_free_repr = gc_free_repr;
+    this_repr->get_storage_spec = get_storage_spec;
+    this_repr->is_attribute_initialized = is_attribute_initialized;
+    this_repr->change_type = change_type;
+    return this_repr;
 }

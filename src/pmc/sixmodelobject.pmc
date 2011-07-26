@@ -64,15 +64,11 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
          * last object pointing to it (a situation that arises when we have
          * anonymous types). That means the REPR - which knows how to free
          * the object - may be unreachable by the time we get here. Oops.
-         * For now, just leak the type object memory. The current REPR
-         * factoring is less than ideal in other ways too.
+         * For now, just leak the type object memory.
          */
         STable *st = STABLE(SELF);
-        if (st) {
-            REPRCommonalities *repr = REPR(_self);
-            if (repr)
-                repr->gc_free(interp, _self);
-        }
+        if (st)
+            st->REPR->gc_free(interp, _self);
     }
 
     VTABLE PMC * find_method(STRING *name) {

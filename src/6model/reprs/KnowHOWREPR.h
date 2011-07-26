@@ -17,6 +17,6 @@ typedef struct {
 } KnowHOWREPRInstance;
 
 /* Initializes the KnowHOW REPR. */
-PMC * KnowHOWREPR_initialize(PARROT_INTERP);
+REPROps * KnowHOWREPR_initialize(PARROT_INTERP);
 
 #endif

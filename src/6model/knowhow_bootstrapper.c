@@ -32,8 +32,8 @@ static void new_type(PARROT_INTERP, PMC *nci) {
     /* Create a new type object of the desired REPR. (Note that we can't
      * default to KnowHOWREPR here, since it doesn't know how to actually
      * store attributes, it's just for bootstrapping knowhow's. */
-    PMC *repr_to_use = REPR_get_by_name(interp, repr_name);
-    PMC *type_object = REPR_STRUCT(repr_to_use)->type_object_for(interp, HOW);
+    REPROps *repr_to_use = REPR_get_by_name(interp, repr_name);
+    PMC     *type_object = repr_to_use->type_object_for(interp, HOW);
     
     /* See if we were given a name; put it into the meta-object if so. */
     STRING *name = VTABLE_exists_keyed_str(interp, capture, name_str) ?
@@ -174,13 +174,13 @@ static PMC * bottom_find_method(PARROT_INTERP, PMC *obj, STRING *name, INTVAL hi
 PMC * SixModelObject_bootstrap_knowhow(PARROT_INTERP, PMC *sc) {
     /* Create our KnowHOW type object. Note we don't have a HOW just yet, so
      * pass in null. */
-    PMC *REPR        = REPR_get_by_name(interp, Parrot_str_new_constant(interp, "KnowHOWREPR"));
-    PMC *knowhow_pmc = REPR_STRUCT(REPR)->type_object_for(interp, PMCNULL);
+    REPROps *REPR        = REPR_get_by_name(interp, Parrot_str_new_constant(interp, "KnowHOWREPR"));
+    PMC     *knowhow_pmc = REPR->type_object_for(interp, PMCNULL);
 
     /* We create a KnowHOW instance that can describe itself. This means
      * .HOW.HOW.HOW.HOW etc will always return that, which closes the model
      * up. Also pull out its underlying struct. */
-    PMC *knowhow_how_pmc = REPR_STRUCT(REPR)->instance_of(interp, knowhow_pmc);
+    PMC *knowhow_how_pmc = REPR->instance_of(interp, knowhow_pmc);
     KnowHOWREPRInstance *knowhow_how = (KnowHOWREPRInstance *)PMC_data(knowhow_how_pmc);
 
     /* Need to give the knowhow_how a twiddled STable with a different

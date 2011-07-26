@@ -15,27 +15,32 @@
 #include "reprs/Uninstantiable.h"
 #include "repr_registry.h"
 
-/* An array of representations. */
-static PMC *repr_registry       = NULL;
+/* An array mapping representation IDs to function tables. */
+static REPROps **repr_registry = NULL;
+
+/* Number of representations registered so far. */
+static INTVAL num_reprs = 0;
 
 /* Hash mapping representation names to IDs. */
 static PMC *repr_name_to_id_map = NULL;
 
 /* Registers a representation. It this is ever made public, it should first be
  * made thread-safe. */
-static void register_repr(PARROT_INTERP, STRING *name, PMC *repr) {
-    INTVAL ID = VTABLE_elements(interp, repr_registry);
-    VTABLE_push_pmc(interp, repr_registry, repr);
+static void register_repr(PARROT_INTERP, STRING *name, REPROps *repr) {
+    INTVAL ID = num_reprs;
+    num_reprs++;
+    if (repr_registry)
+        repr_registry = mem_sys_realloc(repr_registry, num_reprs * sizeof(REPROps *));
+    else
+        repr_registry = mem_sys_allocate(num_reprs * sizeof(REPROps *));
+    repr_registry[ID] = repr;
     VTABLE_set_integer_keyed_str(interp, repr_name_to_id_map, name, ID);
 }
 
 /* Initializes the representations registry, building up all of the various
  * representations. */
 void REPR_initialize_registry(PARROT_INTERP) {
-    /* Allocate registry and name to ID map, and anchor them so they won't
-     * get nommed by the GC. */
-    repr_registry = pmc_new(interp, enum_class_ResizablePMCArray);
-    Parrot_pmc_gc_register(interp, repr_registry);
+    /* Allocate name to ID map, and anchor it with the GC. */
     repr_name_to_id_map = pmc_new(interp, enum_class_Hash);
     Parrot_pmc_gc_register(interp, repr_name_to_id_map);
 
@@ -63,12 +68,11 @@ INTVAL REPR_name_to_id(PARROT_INTERP, STRING *name) {
 }
 
 /* Gets a representation by ID. */
-PMC * REPR_get_by_id(PARROT_INTERP, INTVAL id) {
-    return VTABLE_get_pmc_keyed_int(interp, repr_registry, id);
+REPROps * REPR_get_by_id(PARROT_INTERP, INTVAL id) {
+    return repr_registry[id];
 }
 
 /* Gets a representation by name. */
-PMC * REPR_get_by_name(PARROT_INTERP, STRING *name) {
-    return VTABLE_get_pmc_keyed_int(interp, repr_registry,
-        VTABLE_get_integer_keyed_str(interp, repr_name_to_id_map, name));
+REPROps * REPR_get_by_name(PARROT_INTERP, STRING *name) {
+    return repr_registry[VTABLE_get_integer_keyed_str(interp, repr_name_to_id_map, name)];
 }

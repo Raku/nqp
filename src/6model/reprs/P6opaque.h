@@ -65,6 +65,6 @@ typedef struct {
 } P6opaqueREPRData;
 
 /* Initializes the P6opaque REPR. */
-PMC * P6opaque_initialize(PARROT_INTERP);
+REPROps * P6opaque_initialize(PARROT_INTERP);
 
 #endif

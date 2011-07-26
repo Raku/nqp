@@ -182,8 +182,8 @@ representation.
 
 */
 inline op repr_type_object_for(out PMC, in PMC, in STR) :base_core {
-    PMC *REPR = REPR_get_by_name(interp, $3);
-    $1 = REPR_STRUCT(REPR)->type_object_for(interp, decontainerize(interp, $2));
+    REPROps *REPR = REPR_get_by_name(interp, $3);
+    $1 = REPR->type_object_for(interp, decontainerize(interp, $2));
 }
 
 /*

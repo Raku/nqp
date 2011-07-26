@@ -11,6 +11,6 @@ typedef struct {
 } HashAttrStoreInstance;
 
 /* Initializes the Hash Attribute Store REPR. */
-PMC * HashAttrStore_initialize(PARROT_INTERP);
+REPROps * HashAttrStore_initialize(PARROT_INTERP);
 
 #endif

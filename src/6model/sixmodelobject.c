@@ -8,7 +8,6 @@
 
 /* Cached type IDs. */
 static INTVAL stable_id = 0;
-static INTVAL repr_id   = 0;
 static INTVAL smo_id    = 0;
 static INTVAL sc_id     = 0;
 
@@ -24,7 +23,6 @@ void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attri
     
     /* Look up and cache some type IDs and strings. */
     stable_id        = pmc_type(interp, Parrot_str_new(interp, "STable", 0));
-    repr_id          = pmc_type(interp, Parrot_str_new(interp, "REPR", 0));
     smo_id           = pmc_type(interp, Parrot_str_new(interp, "SixModelObject", 0));
     sc_id            = pmc_type(interp, Parrot_str_new(interp, "SerializationContext", 0));
     find_method_str  = Parrot_str_new_constant(interp, "find_method");
@@ -45,13 +43,6 @@ void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attri
     
     /* Set up the simple KnowHOWAttribute. */
     *knowhow_attribute = SixModelObject_setup_knowhow_attribute(interp, initial_sc, *knowhow);
-}
-
-/* Takes a representation and wraps it up in a REPR PMC. */
-PMC * wrap_repr(PARROT_INTERP, void *REPR) {
-    PMC *repr_pmc = pmc_new_noinit(interp, repr_id);
-    PMC_data(repr_pmc) = REPR;
-    return repr_pmc;
 }
 
 /* Takes an object and wraps it in a SixModelObject PMC. */
@@ -155,7 +146,7 @@ static INTVAL default_type_check (PARROT_INTERP, PMC *to_check, PMC *wanted) {
 }
 
 /* Creates an STable that references the given REPR and HOW. */
-PMC * create_stable(PARROT_INTERP, PMC *REPR, PMC *HOW) {
+PMC * create_stable(PARROT_INTERP, REPROps *REPR, PMC *HOW) {
     PMC *st_pmc = pmc_new_init(interp, stable_id, HOW);
     STABLE_STRUCT(st_pmc)->REPR = REPR;
     STABLE_STRUCT(st_pmc)->WHO = PMCNULL;

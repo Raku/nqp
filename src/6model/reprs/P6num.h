@@ -11,6 +11,6 @@ typedef struct {
 } P6numInstance;
 
 /* Initializes the P6num REPR. */
-PMC * P6num_initialize(PARROT_INTERP);
+REPROps * P6num_initialize(PARROT_INTERP);
 
 #endif
