@@ -149,13 +149,26 @@ class HLL::Compiler::SerializationContextBuilder {
         }
         
         # If it's this context, dead easy. Otherwise, need to build a
-        # cross-reference.
+        # cross-reference, plus check it if it's the first time we are
+        # seeing it.
         if $sc =:= $!sc {
             self.get_slot_past_for_object($obj);
         }
         else {
             my $handle := $sc.handle;
-            %!dependencies{$handle} := $sc;
+            unless pir::exists(%!dependencies, $handle) {
+                %!dependencies{$handle} := $sc;
+                self.add_event(:deserialize_past(PAST::Op.new(
+                    :pasttype('if'),
+                    PAST::Op.new(
+                        :pirop('isnull IP'),
+                        PAST::Op.new( :pirop('nqp_get_sc Ps'), $handle )
+                    ),
+                    PAST::Op.new(
+                        :pirop('die vS'),
+                        "Incorrect pre-compiled version of " ~ ($sc.description || '<unknown>') ~ " loaded"
+                    ))));
+            }
             PAST::Op.new( :pirop('nqp_get_sc_object Psi'),
                 $handle, $sc.slot_index_for($obj)
             )
