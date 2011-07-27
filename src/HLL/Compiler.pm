@@ -428,6 +428,7 @@ class HLL::Compiler {
         ~ ".include 'interpinfo.pasm'\n"
         ~ ".include 'iterator.pasm'\n"
         ~ ".include 'sysinfo.pasm'\n"
+        ~ ".include 'stat.pasm'\n"
         ~ ".include 'datatypes.pasm'\n"
     }
   
