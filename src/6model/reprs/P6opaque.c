@@ -618,6 +618,10 @@ static INTVAL get_int(PARROT_INTERP, PMC *obj) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
     if (repr_data->unbox_int_offset) {
+        if (!instance->spill) {
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot unbox type object to a native integer");
+        }
         return get_int_at_offset(instance, repr_data->unbox_int_offset);
     }
     else {
@@ -646,6 +650,10 @@ static FLOATVAL get_num(PARROT_INTERP, PMC *obj) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
     if (repr_data->unbox_num_offset) {
+        if (!instance->spill) {
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot unbox type object to a native number");
+        }
         return get_num_at_offset(instance, repr_data->unbox_num_offset);
     }
     else {
@@ -674,6 +682,10 @@ static STRING * get_str(PARROT_INTERP, PMC *obj) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
     if (repr_data->unbox_str_offset) {
+        if (!instance->spill) {
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot unbox type object to a native string");
+        }
         return get_str_at_offset(instance, repr_data->unbox_str_offset);
     }
     else {
