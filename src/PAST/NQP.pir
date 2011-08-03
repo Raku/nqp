@@ -158,6 +158,87 @@ C<Hash> if not set.
 .end
 
 
+=item xor_nqp(PAST::Op node)
+
+A short-circuiting exclusive-or operation.  Essentially the
+same as C<xor> in Parrot, but a named child of 'false' determines
+the value to be returned if two children are true.
+
+=cut
+
+.sub 'xor_nqp' :method :multi(_,['PAST';'Op'])
+    .param pmc node
+    .param pmc options         :slurpy :named
+
+    .local pmc ops
+    $P0 = get_hll_global ['POST'], 'Ops'
+    ops = $P0.'new'('node'=>node)
+    $S0 = self.'unique'('$P')
+    ops.'result'($S0)
+
+    .local pmc labelproto, endlabel, falselabel
+    labelproto = get_hll_global ['POST'], 'Label'
+    falselabel = labelproto.'new'('name'=>'xor_false')
+    endlabel = labelproto.'new'('name'=>'xor_end')
+
+    .local pmc childlist, fpast, fpost, apast, apost, iter
+    childlist = new ['ResizablePMCArray']
+    iter = node.'iterator'()
+ child_loop:
+    unless iter goto child_done
+    apast = shift iter
+    $P0 = apast.'named'()
+    if $P0 == 'false' goto child_false
+    push childlist, apast
+    goto child_loop
+ child_false:
+    fpast = apast
+    goto child_loop
+ child_done:
+
+    .local pmc i, t, u
+    i = self.'unique'('$I')
+    t = self.'unique'('$I')
+    u = self.'unique'('$I')
+    apast = shift childlist
+    apost = self.'as_post'(apast, 'rtype'=>'P')
+    ops.'push'(apost)
+    ops.'push_pirop'('set', ops, apost)
+    ops.'push_pirop'('istrue', t, apost)
+  middle_child:
+    .local pmc bpast, bpost
+    bpast = shift childlist
+    bpost = self.'as_post'(bpast, 'rtype'=>'P')
+    ops.'push'(bpost)
+    ops.'push_pirop'('istrue', u, bpost)
+    ops.'push_pirop'('and', i, t, u)
+    ops.'push_pirop'('if', i, falselabel)
+    unless childlist goto last_child
+    .local pmc truelabel
+    truelabel = labelproto.'new'('name'=>'xor_true')
+    ops.'push_pirop'('if', t, truelabel)
+    ops.'push_pirop'('set', ops, bpost)
+    ops.'push_pirop'('set', t, u)
+    ops.'push'(truelabel)
+    goto middle_child
+  last_child:
+    ops.'push_pirop'('if', t, endlabel)
+    ops.'push_pirop'('set', ops, bpost)
+    ops.'push_pirop'('goto', endlabel)
+    ops.'push'(falselabel)
+    unless null fpast goto false_node
+    ops.'push_pirop'('new', ops, '["Undef"]')
+    goto done
+  false_node:
+    fpost = self.'as_post'(fpast, 'rtype'=>'P')
+    ops.'push'(fpost)
+    ops.'push_pirop'('set', ops, fpost)
+  done:
+    ops.'push'(endlabel)
+    .return (ops)
+.end
+
+
 =item nqpdebug(PAST::Op node)
 
 Generate debugging code using nqpdebskip and nqpevent.  The first
