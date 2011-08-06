@@ -10,6 +10,7 @@ PARROT_INCLUDE_DIR = @includedir@$(PARROT_VERSION)
 PARROT_LIB_DIR     = @libdir@$(PARROT_VERSION)
 PARROT_SRC_DIR     = @srcdir@$(PARROT_VERSION)
 PARROT_LIBRARY_DIR = $(PARROT_LIB_DIR)/library
+NQP_LANG_DIR       = $(PARROT_LIB_DIR)/languages/nqp
 HAS_ICU            = @has_icu@
 
 CC            = @cc@
