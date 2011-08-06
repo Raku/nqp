@@ -236,13 +236,13 @@ all: $(NQP_EXE) qregex
 install: all
 	$(MKPATH)                   $(DESTDIR)$(NQP_LANG_DIR)/lib
 	$(CP)  $(MODULE_LOADER_PBC) $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(MODULE_LOADER_PBC)
-    $(CP)  $(P6REGEX_PBC)       $(DESTDIR)$(NQP_LANG_DIR)/lib/$(P6REGEX_PBC)
+	$(CP)  $(PAST_PBC)          $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(PAST_PBC)
+	$(CP)  $(P6REGEX_PBC)       $(DESTDIR)$(NQP_LANG_DIR)/lib/$(P6REGEX_PBC)
 	$(CP)  $(REGEX_PBC)         $(DESTDIR)$(NQP_LANG_DIR)/lib/$(REGEX_PBC)
 	$(CP)  $(HLL_PBC)           $(DESTDIR)$(NQP_LANG_DIR)/lib/$(HLL_PBC)
 	$(CP)  $(CORE_SETTING_PBC)  $(DESTDIR)$(NQP_LANG_DIR)/lib/$(CORE_SETTING_PBC)
 	$(CP)  $(NQP_MO_PBC)        $(DESTDIR)$(NQP_LANG_DIR)/lib/$(NQP_MO_PBC)
 	$(CP)  $(NQP_PBC)           $(DESTDIR)$(NQP_LANG_DIR)/lib/$(NQP_PBC)
-	$(CP)  $(PAST_PBC)          $(DESTDIR)$(NQP_LANG_DIR)/lib/$(PAST_PBC)
 	$(CP)  $(QREGEX_PBC)        $(DESTDIR)$(NQP_LANG_DIR)/lib/$(QREGEX_PBC)
 	$(MKPATH)              $(DESTDIR)$(PARROT_BIN_DIR)
 	$(CP)  $(NQP_EXE)      $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
