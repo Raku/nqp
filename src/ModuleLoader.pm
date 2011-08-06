@@ -6,10 +6,16 @@ knowhow ModuleLoader {
         my @search_paths;
         
         # Put any explicitly specified path on the start of the list.
-        try {
-            my $explicit := %*COMPILING<%?OPTIONS>{$explicit_path};
-            if $explicit {
-                @search_paths.push($explicit);
+        # Otherwise see if --library was passed.
+        my $explicit;
+        try { $explicit := %*COMPILING<%?OPTIONS>{$explicit_path}; }
+        if $explicit {
+            @search_paths.push($explicit);
+        }
+        else {
+            my @lib_paths := pir::getinterp__P()[pir::const::IGLOBALS_LIB_PATHS][1];
+            if +@lib_paths > 3 {
+                @search_paths.push(@lib_paths[0]);
             }
         }
         
