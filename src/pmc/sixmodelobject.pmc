@@ -115,6 +115,11 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     VTABLE INTVAL does(STRING *what) {
         return Parrot_str_equal(interp, what, CONST_STRING(interp, "invokable"));
     }
+    
+    VTABLE PMC *clone() {
+        Parrot_ex_throw_from_c_args(interp, NULL, 1,
+            "SixModelObject does not support the clone v-table; consider using the repr_clone op instead");
+    }
 
     /* ********************************************************* *
      * These v-table methods are overridable by a 6model object. *
