@@ -2,6 +2,29 @@ knowhow ModuleLoader {
     my %modules_loaded;
     my %settings_loaded;
     
+    method search_path($explicit_path) {
+        my @search_paths;
+        
+        # Put any explicitly specified path on the start of the list.
+        try {
+            my $explicit := %*COMPILING<%?OPTIONS>{$explicit_path};
+            if $explicit {
+                @search_paths.push($explicit);
+            }
+        }
+        
+        # Add CWD and blib.
+        @search_paths.push('.');
+        @search_paths.push('blib');
+        
+        # Add NQP langauge directory.
+        my %conf := pir::getinterp__P()[pir::const::IGLOBALS_CONFIG_HASH];
+        @search_paths.push(%conf<libdir> ~ %conf<versiondir> ~
+            '/languages/nqp/lib');
+    
+        @search_paths
+    }
+    
     method ctxsave() {
         $*MAIN_CTX :=
             Q:PIR {
@@ -17,23 +40,12 @@ knowhow ModuleLoader {
         # with what we already have.
         my $module_ctx;
         my $path := pir::join('/', pir::split('::', $module_name)) ~ '.pbc';
-        my @prefixes := [];
-        try {
-            my $prefix := %*COMPILING<%?OPTIONS><module-path>;
-            if $prefix {
-                pir::push(@prefixes, $prefix);
-            } else {
-                pir::push(@prefixes, '.');
-                pir::push(@prefixes, 'blib');
-            }
-            CATCH {
-                pir::push(@prefixes, '.');
-                pir::push(@prefixes, 'blib');
-            }
-        }
+        my @prefixes := self.search_path('module-path');
         for @prefixes -> $prefix {
+            pir::say("# Considering $prefix/$path");
             if pir::stat__isi("$prefix/$path", 0) {
                 $path := "$prefix/$path";
+                pir::say("# ...found!");
                 last;
             }
         }
@@ -105,13 +117,14 @@ knowhow ModuleLoader {
         if $setting_name ne 'NULL' {
             # Add path prefix and .setting suffix.
             my $path := "$setting_name.setting.pbc";
-            try {
-                my $prefix := %*COMPILING<%?OPTIONS><setting-path>;
-                if $prefix {
+            my @prefixes := self.search_path('setting-path');
+            for @prefixes -> $prefix {
+                if pir::stat__isi("$prefix/$path", 0) {
                     $path := "$prefix/$path";
+                    last;
                 }
             }
-        
+
             # Unless we already did so, load the setting.
             unless pir::defined(%settings_loaded{$path}) {
                 my $*CTXSAVE := self;
