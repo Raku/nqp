@@ -42,10 +42,8 @@ knowhow ModuleLoader {
         my $path := pir::join('/', pir::split('::', $module_name)) ~ '.pbc';
         my @prefixes := self.search_path('module-path');
         for @prefixes -> $prefix {
-            pir::say("# Considering $prefix/$path");
             if pir::stat__isi("$prefix/$path", 0) {
                 $path := "$prefix/$path";
-                pir::say("# ...found!");
                 last;
             }
         }
