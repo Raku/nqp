@@ -17,7 +17,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     method termconjseq($/) {
         my $qast := $<termalt>[0].ast;
         if +$<termalt> > 1 {
-            $qast := QAST::Regex.new( :rxtype<conj>, :node($/) );
+            $qast := QAST::Regex.new( :rxtype<conjseq>, :node($/) );
             for $<termalt> { $qast.push($_.ast); }
         }
         make $qast;
@@ -26,7 +26,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     method termalt($/) {
         my $qast := $<termconj>[0].ast;
         if +$<termconj> > 1 {
-            $qast := QAST::Regex.new( :rxtype<altseq>, :node($/) );
+            $qast := QAST::Regex.new( :rxtype<alt>, :node($/) );
             for $<termconj> { $qast.push($_.ast) }
         }
         make $qast;
@@ -423,7 +423,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 $count := %x{''};
             } 
         }
-        elsif $rxtype eq 'altseq' {
+        elsif $rxtype eq 'altseq' || $rxtype eq 'alt' {
             my $max := $count;
             for $ast.list {
                 my %x := capnames($_, $count);

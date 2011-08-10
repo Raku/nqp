@@ -90,6 +90,8 @@ class QAST::Compiler is HLL::Compiler {
         }
     }
 
+    method alt($node) { self.altseq($node) }
+
     method altseq($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
         my $prefix := self.unique('alt') ~ '_';
@@ -198,7 +200,9 @@ class QAST::Compiler is HLL::Compiler {
         $ops;
     }
 
-    method conj($node) {
+    method conj($node) { self.conjseq($node) }
+
+    method conjseq($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
         my $prefix := self.unique('rxconj') ~ '_';
         my $conjlabel := self.post_new('Label', :result($prefix ~ 'fail'));
