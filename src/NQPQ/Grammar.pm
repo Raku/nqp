@@ -507,8 +507,12 @@ grammar NQP::Grammar is HLL::Grammar {
           <deflongname>
           <.newpad>
           [ '(' <signature> ')' ]?
-          {*} #= open
           :my %*RX;
+          {   
+              %*RX<s>    := $<sym> eq 'rule'; 
+              %*RX<r>    := $<sym> eq 'token' || $<sym> eq 'rule'; 
+              %*RX<name> := ~$<deflongname>;
+          }
           '{'<p6regex=.LANG('Regex','nibbler')>'}'<?ENDSTMT>
         ]
     }

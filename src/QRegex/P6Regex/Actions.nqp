@@ -294,6 +294,13 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             $qast := $<assertion>[0].ast;
             self.subrule_alias($qast, $name);
         }
+        elsif $name eq 'sym' {
+            my $rxname := pir::chopn__Ssi( 
+                              nqp::substr(%*RX<name>,
+                                          nqp::index(%*RX<name>, ':sym<') + 5),
+                              1);
+            $qast := QAST::Regex.new(:rxtype<literal>, $rxname, :node($/));
+        }
         else {
             $qast := QAST::Regex.new(:rxtype<subrule>, :subtype<capture>,
                                      :node($/), PAST::Node.new($name), 
