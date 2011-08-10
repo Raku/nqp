@@ -3,7 +3,27 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         make buildsub($<nibbler>.ast);
     }
 
-    method nibbler($/) {
+    method nibbler($/) { make $<termaltseq>.ast }
+
+    method termaltseq($/) {
+        my $qast := $<termconjseq>[0].ast;
+        if +$<termconjseq> > 1 {
+            $qast := QAST::Regex.new( :rxtype<altseq>, :node($/) );
+            for $<termconjseq> { $qast.push($_.ast) }
+        }
+        make $qast;
+    }
+
+    method termconjseq($/) {
+        my $qast := $<termalt>[0].ast;
+        if +$<termalt> > 1 {
+            $qast := QAST::Regex.new( :rxtype<conj>, :node($/) );
+            for $<termalt> { $qast.push($_.ast); }
+        }
+        make $qast;
+    }
+
+    method termalt($/) {
         my $qast := $<termconj>[0].ast;
         if +$<termconj> > 1 {
             $qast := QAST::Regex.new( :rxtype<altseq>, :node($/) );

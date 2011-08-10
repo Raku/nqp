@@ -32,19 +32,27 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token nibbler {
         :my %*RX := pir::clone(pir::find_dynamic_lex__Ps('%*RX'));
         [ <.ws> ['||'|'|'|'&&'|'&'] ]?
+        <termaltseq>
+    }
+
+    token termaltseq {
+        <termconjseq>
+        [ '||' [ <termconjseq> || <.panic: 'Null pattern not allowed'> ] ]*
+    }
+
+    token termconjseq {
+        <termalt>
+        [ '&&' [ <termalt> || <.panic: 'Null pattern not allowed'> ] ]*
+    }
+
+    token termalt {
         <termconj>
-        [ 
-            || ['||'|'|'] [ <termconj>
-            || (\W) <.panic: "Unrecognized regex metacharacter (must be quoted to match literally)">
-            || <.panic: 'Null pattern not allowed'> ]
-        ]*
+        [ '|' <![|]> [ <termconj> || <.panic: 'Null pattern not allowed'> ] ]*
     }
 
     token termconj {
         <termish>
-        [ ['&&'|'&']
-          [ <termish> || <.panic: 'Null pattern not allowed'> ]
-        ]*
+        [ '&' <![&]> [ <termish> || <.panic: 'Null pattern not allowed'> ] ]*
     }
 
     token termish {
