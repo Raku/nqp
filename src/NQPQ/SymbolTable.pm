@@ -421,6 +421,11 @@ class NQP::SymbolTable is HLL::Compiler::SerializationContextBuilder {
                     PAST::Var.new( :name('cur_sc'), :scope('register'), :isdecl(1) ),
                     PAST::Op.new( :pirop('nqp_create_sc Ps'), self.handle() )
                 ),
+                PAST::Op.new(
+                    :pasttype('callmethod'), :name('set_description'),
+                    PAST::Var.new( :name('cur_sc'), :scope('register') ),
+                    self.sc.description
+                ),
                 $des
             ),
             $fix

@@ -17,9 +17,10 @@ grammar NQP::Grammar is HLL::Grammar {
         # Serialization context builder - keeps track of objects that
         # cross the compile-time/run-time boundary that are associated
         # with this compilation unit.
-        my $*SC := NQP::SymbolTable.new(
-            # XXX Need to hash the source, or something.
-            :handle(~pir::time__N()));
+        my $file := pir::find_caller_lex__ps('$?FILES');
+        my $*SC := pir::isnull($file) ??
+            NQP::SymbolTable.new(:handle(~pir::time__N())) !!
+            NQP::SymbolTable.new(:handle(~pir::time__N()), :description($file));
 
         my $*SCOPE       := '';
         my $*MULTINESS   := '';
