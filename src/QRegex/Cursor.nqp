@@ -87,6 +87,10 @@ role NQPCursorRole {
         $!pos    := -3;
     }
 
+    method !protoregex($name) {
+        pir::say($name);
+    }
+
     method !BACKREF($name) {
         my $cur := self."!cursor_start"();
         my $n := $!cstack ?? nqp::elems($!cstack) - 1 !! -1;

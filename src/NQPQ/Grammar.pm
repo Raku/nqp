@@ -499,9 +499,10 @@ grammar NQP::Grammar is HLL::Grammar {
         | $<proto>=[proto] [regex|token|rule]
           <deflongname>
           [ 
+          || '{*}'<?ENDSTMT>
           || '{' '<...>' '}'<?ENDSTMT>
           || '{' '<*>' '}'<?ENDSTMT>
-          || <.panic: "Proto regex body must be <*> (or <...>, which is deprecated)">
+          || <.panic: "Proto regex body must be \{*\} (or <*> or <...>, which are deprecated)">
           ]
         | $<sym>=[regex|token|rule]
           <deflongname>
