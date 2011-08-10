@@ -468,7 +468,7 @@ knowhow NQPClassHOW {
     ##
     ## Dispatchy
     ##
-    method find_method($obj, $name) {
+    method find_method($obj, $name, :$no_fallback) {
         for @!mro {
             my %meths := $_.HOW.method_table($obj);
             my $found := %meths{$name};
