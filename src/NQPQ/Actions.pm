@@ -1039,14 +1039,6 @@ class NQP::Actions is HLL::Actions {
                     $*SC.pkg_add_method($*PACKAGE, 'add_method', $_.name(), $_, 0);
                 }
         }
-        elsif $key eq 'open' {
-            if $<sym> eq 'token' { %*RX<r> := 1; }
-            if $<sym> eq 'rule'  { %*RX<r> := 1;  %*RX<s> := 1; }
-            $QRegex::P6Regex::Actions::REGEXNAME := $name;
-            @BLOCK[0].symbol('$¢', :scope('lexical'));
-            @BLOCK[0].symbol('$/', :scope('lexical'));
-            return 0;
-        }
         else {
             my $regex := 
                 QRegex::P6Regex::Actions::buildsub($<p6regex>.ast, @BLOCK.shift);
