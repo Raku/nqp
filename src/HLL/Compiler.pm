@@ -30,7 +30,7 @@ class HLL::Compiler {
         @!stages     := pir::split(' ', 'parse past post pir evalpmc');
         
         # Command options and usage.
-        @!cmdoptions := pir::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config stagestats ll-backtrace nqpevent=s rxtrace');
+        @!cmdoptions := pir::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config stagestats ll-exception nqpevent=s rxtrace');
         $!usage := "This compiler is based on HLL::Compiler.\n\nOptions:\n";
         for @!cmdoptions {
             $!usage := $!usage ~ "    $_\n";
@@ -304,22 +304,40 @@ class HLL::Compiler {
         self.nqpevent(%adverbs<nqpevent>) if %adverbs<nqpevent>;
 
         my $result;
-        if %adverbs<e> { 
-            $result := self.eval(%adverbs<e>, '-e', |@a, |%adverbs) 
-        }
-        elsif !@a { $result := self.interactive(|%adverbs) }
-        elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }
-        else { $result := self.evalfiles(@a[0], |@a, |%adverbs) }
+        my $error;
+        my $has_error := 0;
+        try {
+            if %adverbs<e> { 
+                $result := self.eval(%adverbs<e>, '-e', |@a, |%adverbs) 
+            }
+            elsif !@a { $result := self.interactive(|%adverbs) }
+            elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }
+            else { $result := self.evalfiles(@a[0], |@a, |%adverbs) }
 
-        if !pir::isnull($result) && %adverbs<target> eq 'pir' {
-            my $output := %adverbs<output>;
-            my $fh := ($output eq '' || $output eq '-')
-                      ?? pir::getinterp__P().stdout_handle()
-                      !! pir::new__Ps('FileHandle').open($output, 'w');
-            self.panic("Cannot write to $output") unless $fh;
-            pir::print($fh, $result);
-            $fh.close()
+            if !pir::isnull($result) && %adverbs<target> eq 'pir' {
+                my $output := %adverbs<output>;
+                my $fh := ($output eq '' || $output eq '-')
+                        ?? pir::getinterp__P().stdout_handle()
+                        !! pir::new__Ps('FileHandle').open($output, 'w');
+                self.panic("Cannot write to $output") unless $fh;
+                pir::print($fh, $result);
+                $fh.close()
+            }
+            CATCH {
+                $has_error := 1;
+                $error     := $_;
+            }
         }
+        if ($has_error) {
+            if %adverbs<ll-exception> || !pir::can(self, 'handle-exception') {
+                nqp::say($error);
+                nqp::say(pir::join("\n", $error.backtrace_strings));
+                pir::exit(1);
+            } else {
+                self.handle-exception($error);
+            }
+        }
+        $result;
     }
 
     method process_args(@args) {
