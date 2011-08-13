@@ -330,8 +330,10 @@ class HLL::Compiler {
         }
         if ($has_error) {
             if %adverbs<ll-exception> || !pir::can(self, 'handle-exception') {
-                nqp::say($error);
-                nqp::say(pir::join("\n", $error.backtrace_strings));
+                my $err := pir::getstderr__P();
+                $err.print($error);
+                $err.print("\n");
+                $err.print(pir::join("\n", $error.backtrace_strings));
                 pir::exit(1);
             } else {
                 self.handle-exception($error);
