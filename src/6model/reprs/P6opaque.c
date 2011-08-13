@@ -873,11 +873,11 @@ static void change_type(PARROT_INTERP, PMC *obj, PMC *new_type) {
         PMC_data(obj) = new_body;
         Parrot_gc_free_fixed_size_storage(interp, cur_repr_data->allocation_size, instance);
         instance = new_body;
-        PARROT_GC_WRITE_BARRIER(interp, obj);
     }
     
     /* Finally, we're ready to switch the S-Table pointer. */
     instance->common.stable = STABLE_PMC(new_type);
+    PARROT_GC_WRITE_BARRIER(interp, obj);
 }
 
 /* Initializes the P6opaque representation. */
