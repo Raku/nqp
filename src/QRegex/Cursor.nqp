@@ -52,6 +52,10 @@ role NQPCursorRole {
         my $new := self.CREATE();
         nqp::bindattr($new, $?CLASS, '$!orig', $!orig);
         nqp::bindattr_i($new, $?CLASS, '$!pos', -3);
+        nqp::bindattr($new, $?CLASS, '$!regexsub', Q:PIR {
+            $P0 = getinterp
+            %r = $P0['sub';1]
+        });
         pir::return__vPsiPP(
             $new, 
             nqp::bindattr_s($new, $?CLASS, '$!target', $!target),

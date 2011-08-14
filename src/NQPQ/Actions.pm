@@ -1040,8 +1040,12 @@ class NQP::Actions is HLL::Actions {
                 }
         }
         else {
-            my $regex := 
-                QRegex::P6Regex::Actions::buildsub($<p6regex>.ast, @BLOCK.shift);
+            my $block := @BLOCK.shift;
+            $block[0].push(PAST::Var.new(:name<$¢>, :scope<lexical>, :isdecl(1)));
+            $block[0].push(PAST::Var.new(:name<$/>, :scope<lexical>, :isdecl(1)));
+            $block.symbol('$¢', :scope<lexical>);
+            $block.symbol('$/', :scope<lexical>);
+            my $regex := QRegex::P6Regex::Actions::buildsub($<p6regex>.ast, $block);
             $regex.name($name);
             my $prefix_meth;
             

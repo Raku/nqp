@@ -392,7 +392,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         $ast;
     }
 
-    our sub buildsub($qast, $block = PAST::Block.new()) {
+    our sub buildsub($qast, $block = PAST::Block.new(:blocktype<method>)) {
         my $hashpast := PAST::Op.new( :pasttype<hash> );
         for capnames($qast, 0) {
             if $_.key gt '' { 
@@ -404,12 +404,16 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         my $capblock := PAST::Block.new( :hll<nqp>, :namespace(['Sub']), :lexical(0),
                                          :name($block.subid ~ '_caps'),  $hashpast );
         $block.push($capblock);
+
+        unless $block.symbol('$¢') {
+            $block.push(PAST::Var.new(:name<$¢>, :scope<lexical>, :isdecl(1)));
+            $block.symbol('$¢', :scope<lexical>);
+        }
         $qast := QAST::Regex.new( :rxtype<concat>,
                      QAST::Regex.new( :rxtype<scan> ),
                      $qast,
                      QAST::Regex.new( :rxtype<pass> ));
         $block.push(PAST::QAST.new($qast));
-        $block.blocktype('method');
         $block;
     }
 
