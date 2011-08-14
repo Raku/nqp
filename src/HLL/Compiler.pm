@@ -403,8 +403,8 @@ class HLL::Compiler {
             $result := self."$_"($result, |%adverbs);
             my $diff := pir::time__N() - $timestamp;
             if %adverbs<stagestats> {
-                # TODO: plug in sprintf with %.3f
-                $stderr.print__N("Stage $_: $diff\n");
+                my $difffmt := pir::sprintf__SsP("%.3f", [$diff]);
+                $stderr.print("Stage $_: $difffmt\n");
             }
             last if $_ eq $target;
         }
