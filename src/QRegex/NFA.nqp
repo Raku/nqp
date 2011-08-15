@@ -113,12 +113,44 @@ class QRegex::NFA {
         $past;
     }
 
+    method mergesubrule($start, $fate, $cursor, $name) {
+        nqp::say("adding $name");
+        my $subrule := $cursor.HOW.find_method($cursor, $name);
+        my @substates := $subrule.nqpattr('nfa') if $subrule;
+        if @substates {
+            # append a clone of the new states to our states
+            my $substart := nqp::elems($!states);            
+            for @substates { nqp::push($!states, nqp::clone($_)) }
+            my $subend   := nqp::elems($!states);
+            # Go through all of the newly added states, and
+            #    apply $substart offset to target states
+            #    adjust fate edges to be $fate
+            #    append any subrules
+            my $i := $substart;
+            while $i < $subend {
+                my $substate := $!states[$i];
+                my $j := 0;
+                my $k := nqp::elems($substate);
+                while $j < $k {
+                    $substate[$j+2] := $substate[$j+2] + $substart;
+                    $substate[$j+1] := $fate if $substate[$j] == $EDGE_FATE;
+                    $j := $j + 3;
+                }
+                $i := $i + 1;
+            }
+            self.addedge($start, $substart+1, $EDGE_EPSILON, 0);
+        }
+        else {
+            self.addedge($start, 0, $EDGE_FATE, $fate);
+        }
+    }
+
     method __dump($dumper, $label) {
         my $subindent := $dumper.'newIndent'();
         print('[');
         my $st := 0;
         for $!states {
-            print(pir::sprintf__SsP("\n%03d: [%s]", [$st, nqp::join(', ', $_)]));
+            print(nqp::sprintf("\n%03d: [%s]", [$st, nqp::join(', ', $_)]));
             $st := $st + 1;
         }
         $dumper.deleteIndent();

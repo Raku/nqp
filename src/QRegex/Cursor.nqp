@@ -92,7 +92,34 @@ role NQPCursorRole {
     }
 
     method !protoregex($name) {
-        pir::say($name);
+        _dumper(self."!protoregex_nfa"($name));
+    }
+
+    method !protoregex_nfa($name) {
+        my %protorx := self."!protoregex_table"();
+        my $nfa := QRegex::NFA.new;
+        my @fates := $nfa.states[0];
+        my $start := 1;
+        my $fate := 0;
+        my $prefix      := $name ~ ':sym<';
+        my $prefixchars := nqp::chars($prefix);
+        for %protorx {
+            my $rxname := $_.key;
+            if nqp::substr($rxname, 0, $prefixchars) eq $prefix {
+                $fate := $fate + 1;
+                $nfa.mergesubrule($start, $fate, self, $rxname);
+            }
+        }
+        $nfa;
+    }
+
+    method !protoregex_table() {
+        my %protorx;
+        for self.HOW.methods(self, :local(0)) -> $meth {
+            my $methname := ~$meth;
+            %protorx{$methname} := $meth if nqp::index($methname, ':sym<') >0;
+        }
+        %protorx;
     }
 
     method !BACKREF($name) {
