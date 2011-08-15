@@ -1,13 +1,13 @@
 class QRegex::NFA {
-    our $NFA_FATE          := 0;
-    our $NFA_EPSILON       := 1;
-    our $NFA_CODEPOINT     := 2;
-    our $NFA_CODEPOINT_NEG := 3;
-    our $NFA_CHARCLASS     := 4;
-    our $NFA_CHARCLASS_NEG := 5;
-    our $NFA_CHARLIST      := 6;
-    our $NFA_CHARLIST_NEG  := 7;
-    our $NFA_SUBRULE       := 8;
+    our $EDGE_FATE          := 0;
+    our $EDGE_EPSILON       := 1;
+    our $EDGE_CODEPOINT     := 2;
+    our $EDGE_CODEPOINT_NEG := 3;
+    our $EDGE_CHARCLASS     := 4;
+    our $EDGE_CHARCLASS_NEG := 5;
+    our $EDGE_CHARLIST      := 6;
+    our $EDGE_CHARLIST_NEG  := 7;
+    our $EDGE_SUBRULE       := 8;
 
     has $!states;
     has $!edges;
@@ -21,17 +21,18 @@ class QRegex::NFA {
 
     method addstate() {
         my $id := +$!states;
-        $!states[$id] := nqp::list();
+        $!states[$id] := [];
         $id;
     }
 
     method addedge($from, $to, $action, $value, :$newedge = 1) {
+        $!edges := 1 if $newedge;
         $to := self.addstate() if $to < 0;
         my $st := $!states[$from];
         nqp::push($st, $action);
         nqp::push($st, $value);
         nqp::push($st, $to+0);
-        $!edges := 1 if $newedge;
+        $to;
     }
 
     method states() { $!states }
@@ -48,7 +49,7 @@ class QRegex::NFA {
          !! self.fate($node, $from, $to);
     }
 
-    method fate($node, $from, $to) { self.addedge($from, 0, $NFA_FATE, 0, :newedge(0)) }
+    method fate($node, $from, $to) { self.addedge($from, 0, $EDGE_FATE, 0, :newedge(0)) }
 
     method alt($node, $from, $to) {
         for $node.list {
@@ -69,7 +70,7 @@ class QRegex::NFA {
     }
 
     method cclass($node, $from, $to) {
-        self.addedge($from, $to, $NFA_CHARCLASS + ?$node.negate,
+        self.addedge($from, $to, $EDGE_CHARCLASS + ?$node.negate,
                      %cclass_code{nqp::lc($node.subtype)});
     }
 
@@ -88,10 +89,10 @@ class QRegex::NFA {
         my $litlen   := nqp::chars($litconst) - 1;
         my $i        := 0;
         while $i < $litlen {
-            $from := self.addedge($from, -1, $NFA_CODEPOINT, nqp::ord($litconst, $i));
+            $from := self.addedge($from, -1, $EDGE_CODEPOINT, nqp::ord($litconst, $i));
             $i := $i + 1;
         }
-        self.addedge($from, $to, $NFA_CODEPOINT, nqp::ord($litconst, $i));
+        self.addedge($from, $to, $EDGE_CODEPOINT, nqp::ord($litconst, $i));
     }
 
     method subrule($node, $from, $to) {
@@ -99,8 +100,8 @@ class QRegex::NFA {
         $subtype eq 'zerowidth'
             ?? ($node.negate 
                   ?? self.fate($node, $from, $to)
-                  !! self.addedge($from, 0, $NFA_SUBRULE, $node.name))
-            !! self.addedge($from, $to, $NFA_SUBRULE, $node[0][0]);
+                  !! self.addedge($from, 0, $EDGE_SUBRULE, $node.name))
+            !! self.addedge($from, $to, $EDGE_SUBRULE, $node[0][0]);
     }
 
     method past() {
@@ -110,6 +111,18 @@ class QRegex::NFA {
             $past.push(PAST::Op.new(:pasttype<list>, |$_));
         }
         $past;
+    }
+
+    method __dump($dumper, $label) {
+        my $subindent := $dumper.'newIndent'();
+        print('[');
+        my $st := 0;
+        for $!states {
+            print(pir::sprintf__SsP("\n%03d: [%s]", [$st, nqp::join(', ', $_)]));
+            $st := $st + 1;
+        }
+        $dumper.deleteIndent();
+        print("\n", $dumper.indent, ']');
     }
 }
 
