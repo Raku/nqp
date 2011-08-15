@@ -85,6 +85,7 @@ QREGEX_SOURCES = \
   src/QAST/Node.nqp \
   src/QAST/Regex.nqp \
   src/QAST/Compiler.nqp \
+  src/QRegex/NFA.nqp \
   src/QRegex/Cursor.nqp \
   src/QRegex/P6Regex/Grammar.nqp \
   src/QRegex/P6Regex/Actions.nqp \
@@ -231,7 +232,7 @@ CLEANUPS = \
   $(OPS_DIR)/*$(LOAD_EXT) \
   $(DYNEXT_DIR)/*$(LOAD_EXT) \
 
-all: $(NQP_EXE) qregex
+all: $(NQP_EXE) qregex nqpq
 
 install: all
 	$(MKPATH)                   $(DESTDIR)$(NQP_LANG_DIR)/lib

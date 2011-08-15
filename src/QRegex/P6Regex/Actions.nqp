@@ -401,18 +401,29 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     nqp::iscclass(pir::const::CCLASS_NUMERIC, $_.key, 0) + ($_.value > 1) * 2); 
             }
         }
+        my $initpast := PAST::Stmts.new();
         my $capblock := PAST::Block.new( :hll<nqp>, :namespace(['Sub']), :lexical(0),
                                          :name($block.subid ~ '_caps'),  $hashpast );
-        $block.push($capblock);
+        $initpast.push(PAST::Stmt.new($capblock));
+
+        my $nfapast := QRegex::NFA.new.addnode($qast).past;
+        if $nfapast {
+            my $nfablock := PAST::Block.new( 
+                                :hll<nqp>, :namespace(['Sub']), :lexical(0),
+                                :name($block.subid ~ '_nfa'), $nfapast);
+            $initpast.push(PAST::Stmt.new($nfablock));
+        }
 
         unless $block.symbol('$¢') {
-            $block.push(PAST::Var.new(:name<$¢>, :scope<lexical>, :isdecl(1)));
+            $initpast.push(PAST::Var.new(:name<$¢>, :scope<lexical>, :isdecl(1)));
             $block.symbol('$¢', :scope<lexical>);
         }
+
         $qast := QAST::Regex.new( :rxtype<concat>,
                      QAST::Regex.new( :rxtype<scan> ),
                      $qast,
                      QAST::Regex.new( :rxtype<pass> ));
+        $block.push($initpast);
         $block.push(PAST::QAST.new($qast));
         $block;
     }
