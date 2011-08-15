@@ -110,7 +110,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method metachar:sym<ws>($/) {
         my $qast := %*RX<s>
-                    ?? QAST::Regex.new(PAST::Node.new('ws'), :rxtype<subrule>, :subtype<method>, :node($/))
+                    ?? QAST::Regex.new(PAST::Node.new('ws'), :rxtype<ws>, :subtype<method>, :node($/))
                     !! 0;
         make $qast;
     }

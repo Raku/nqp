@@ -395,6 +395,9 @@ class QAST::Compiler is HLL::Compiler {
           unless $subtype eq 'zerowidth';
         $ops;
     }
+
+    # a :rxtype<ws> node is a normal subrule call
+    method ws($node) { self.subrule($node) }
  
     method regex_mark($ops, $mark, $pos, $rep) {
         $ops.push_pirop('nqp_rxmark', %*REG<bstack>, $mark, $pos, $rep);
