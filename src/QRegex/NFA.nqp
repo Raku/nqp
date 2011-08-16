@@ -49,7 +49,9 @@ class QRegex::NFA {
          !! self.fate($node, $from, $to);
     }
 
-    method fate($node, $from, $to) { self.addedge($from, 0, $EDGE_FATE, 0, :newedge(0)) }
+    method fate($node, $from, $to) { 
+        self.addedge($from, 0, $EDGE_FATE, 0, :newedge(0)) 
+    }
 
     method alt($node, $from, $to) {
         for $node.list {
@@ -58,6 +60,8 @@ class QRegex::NFA {
         }
         $to;
     }
+
+    method anchor($node, $from, $to) { $from }
 
     our %cclass_code;
     INIT {
@@ -82,6 +86,17 @@ class QRegex::NFA {
             $i := $i + 1;
         }
         $from > 0 ?? self.regex_nfa($node[$i], $from, $to) !! $to;
+    }
+
+    method enumcharlist($node, $from, $to) {
+        my $charlist := $node[0];
+        if $node.subtype eq 'zerowidth' {
+            $from := self.addedge($from, -1, $EDGE_CHARLIST, $charlist);
+            self.addedge($from, 0, $EDGE_FATE, 0);
+        }
+        else {
+            self.addedge($from, $to, $EDGE_CHARLIST, $charlist);
+        }
     }
 
     method literal($node, $from, $to) {
@@ -173,6 +188,9 @@ class QRegex::NFA {
                     elsif $act == $EDGE_CODEPOINT {
                         nqp::push(@nextst, $to) if nqp::ord($target, $offset) == $arg;
                     }
+                    elsif $act == $EDGE_CHARLIST {
+                        nqp::push(@nextst, $to) if nqp::index($arg, nqp::substr($target, $offset, 1)) >= 0;
+                    }
                 }
             }
             $offset := $offset + 1;
@@ -186,7 +204,7 @@ class QRegex::NFA {
         print('[');
         my $st := 0;
         for $!states {
-            print(nqp::sprintf("\n%03d: [%s]", [$st, nqp::join(', ', $_)]));
+            print(nqp::sprintf("\n$subindent'%d' => [%s]", [$st, nqp::join(', ', $_)]));
             $st := $st + 1;
         }
         $dumper.deleteIndent();
