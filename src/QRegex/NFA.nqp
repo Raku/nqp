@@ -135,15 +135,21 @@ class QRegex::NFA {
         my $subrule := $cursor.HOW.find_method($cursor, $name);
         my @substates := $subrule.nqpattr('nfa') if $subrule;
         if @substates {
-            # append a clone of the new states to our states
-            my $substart := nqp::elems($!states);            
-            for @substates { nqp::push($!states, nqp::clone($_)) }
-            my $subend   := nqp::elems($!states);
+            # create an empty end state for the subrule's NFA
+            my $substart := self.addstate();
+            # Copy (yes, clone) @substates[1..*] into our states.
+            # We have to clone because we'll be modifying the
+            # values for use in this particular NFA.
+            @substates := nqp::clone(@substates);
+            nqp::shift(@substates);
+            nqp::push($!states, nqp::clone(nqp::shift(@substates))) 
+              while @substates;
             # Go through all of the newly added states, and
             #    apply $substart offset to target states
             #    adjust fate edges to be $fate
             #    append any subrules
-            my $i := $substart;
+            my $subend := nqp::elems($!states);
+            my $i      := $substart;
             while $i < $subend {
                 my $substate := $!states[$i];
                 my $j := 0;
