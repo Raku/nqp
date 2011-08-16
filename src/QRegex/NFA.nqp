@@ -61,7 +61,9 @@ class QRegex::NFA {
         $to;
     }
 
-    method anchor($node, $from, $to) { $from }
+    method anchor($node, $from, $to) { 
+        self.addedge($from, $to, $EDGE_EPSILON, 0);
+    }
 
     our %cclass_code;
     INIT {
@@ -167,11 +169,12 @@ class QRegex::NFA {
     }
 
     method run($target, $offset) {
+        my $eos := nqp::chars($target);
         my @fatepos;
         my @nextst := [1];
         my $gen := 1;
         my @done;
-        while @nextst {
+        while @nextst && $offset <= $eos {
             my @curst := @nextst;
             @nextst := [];
             while @curst {
@@ -185,6 +188,7 @@ class QRegex::NFA {
                     elsif $act == $EDGE_EPSILON && @done[$to] != $gen {
                         nqp::push(@curst, $to);
                     }
+                    elsif $offset >= $eos { }
                     elsif $act == $EDGE_CODEPOINT {
                         nqp::push(@nextst, $to) if nqp::ord($target, $offset) == $arg;
                     }
