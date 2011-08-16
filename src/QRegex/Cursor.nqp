@@ -107,7 +107,8 @@ role NQPCursorRole {
             my $rxname := $_.key;
             if nqp::substr($rxname, 0, $prefixchars) eq $prefix {
                 $fate := $fate + 1;
-                $nfa.mergesubrule($start, $fate, self, $rxname);
+                @fates[$fate] := $_.value;
+                $nfa.mergesubrule($start, 0, $fate, self, $rxname);
             }
         }
         $nfa;

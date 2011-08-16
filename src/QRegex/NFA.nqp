@@ -113,7 +113,7 @@ class QRegex::NFA {
         $past;
     }
 
-    method mergesubrule($start, $fate, $cursor, $name) {
+    method mergesubrule($start, $to, $fate, $cursor, $name) {
         nqp::say("adding $name");
         my $subrule := $cursor.HOW.find_method($cursor, $name);
         my @substates := $subrule.nqpattr('nfa') if $subrule;
@@ -133,16 +133,52 @@ class QRegex::NFA {
                 my $k := nqp::elems($substate);
                 while $j < $k {
                     $substate[$j+2] := $substate[$j+2] + $substart;
-                    $substate[$j+1] := $fate if $substate[$j] == $EDGE_FATE;
+                    $substate[$j+1] := $fate 
+                        if $substate[$j] == $EDGE_FATE;
+                    self.mergesubrule($i, $substate[$j+2], $fate, $cursor, $substate[$j+1])
+                        if $substate[$j] == $EDGE_SUBRULE;
                     $j := $j + 3;
                 }
                 $i := $i + 1;
             }
             self.addedge($start, $substart+1, $EDGE_EPSILON, 0);
+            $to > 0
+              ?? self.addedge($substart, $to, $EDGE_EPSILON, 0)
+              !! self.addedge($substart, 0, $EDGE_FATE, $fate)
         }
         else {
             self.addedge($start, 0, $EDGE_FATE, $fate);
         }
+    }
+
+    method run($target, $offset) {
+        my @fatepos;
+        my @nextst := [1];
+        my $gen := 1;
+        my @done;
+        while @nextst {
+            my @curst := @nextst;
+            @nextst := [];
+            while @curst {
+                my $st := nqp::pop(@curst);
+                next if @done[$st] == $gen;
+                @done[$st] := $gen;
+                for $!states[$st] -> $act, $arg, $to {
+                    if $act == $EDGE_FATE {
+                        @fatepos[$arg] := $offset;
+                    }
+                    elsif $act == $EDGE_EPSILON && @done[$to] != $gen {
+                        nqp::push(@curst, $to);
+                    }
+                    elsif $act == $EDGE_CODEPOINT {
+                        nqp::push(@nextst, $to) if nqp::ord($target, $offset) == $arg;
+                    }
+                }
+            }
+            $offset := $offset + 1;
+            $gen := $gen + 1;
+        }
+        @fatepos;
     }
 
     method __dump($dumper, $label) {
