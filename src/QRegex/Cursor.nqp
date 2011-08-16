@@ -92,7 +92,33 @@ role NQPCursorRole {
     }
 
     method !protoregex($name) {
-        _dumper(self."!protoregex_nfa"($name));
+        my $nfa := self.'!protoregex_nfa'($name);
+        my @fatepos := $nfa.run($!target, $!pos);
+        my $cur;
+        if @fatepos {
+            my $fate := 0;
+            my @fatesort;
+            my @rxfate := $nfa.states[0];
+            while $fate < @fatepos {
+                my $pos := @fatepos[$fate];
+                if pir::defined($pos) {
+                    my $n := nqp::elems(@fatesort) - 1;
+                    while $n >= 0
+                          && @fatepos[@fatesort[$n]] > @fatepos[$fate] {
+                        $n := $n - 1;
+                    }
+                    nqp::splice(@fatesort, [$fate], $n+1, 0);
+                }
+                $fate := $fate + 1;
+            }
+            while @fatesort {
+                my $rxname := @rxfate[nqp::pop(@fatesort)];
+                nqp::say("invoking $rxname");
+                $cur := self."$rxname"();
+                last if nqp::getattr_i($cur, $?CLASS, '$!pos') >= 0;
+            }
+        }
+        $cur // self."!cursor_start"();
     }
 
     method !protoregex_nfa($name) {
@@ -107,7 +133,7 @@ role NQPCursorRole {
             my $rxname := $_.key;
             if nqp::substr($rxname, 0, $prefixchars) eq $prefix {
                 $fate := $fate + 1;
-                @fates[$fate] := $_.value;
+                @fates[$fate] := $rxname;
                 $nfa.mergesubrule($start, 0, $fate, self, $rxname);
             }
         }
