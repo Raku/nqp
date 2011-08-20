@@ -234,9 +234,10 @@ CLEANUPS = \
 all: $(NQP_EXE) qregex
 
 install: all
-	$(MKPATH)                   $(DESTDIR)$(NQP_LANG_DIR)/lib
+	$(MKPATH)                   $(DESTDIR)$(PARROT_LIBRARY_DIR)
 	$(CP)  $(MODULE_LOADER_PBC) $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(MODULE_LOADER_PBC)
 	$(CP)  $(PAST_PBC)          $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(PAST_PBC)
+	$(MKPATH)                   $(DESTDIR)$(NQP_LANG_DIR)/lib
 	$(CP)  $(P6REGEX_PBC)       $(DESTDIR)$(NQP_LANG_DIR)/lib/$(P6REGEX_PBC)
 	$(CP)  $(REGEX_PBC)         $(DESTDIR)$(NQP_LANG_DIR)/lib/$(REGEX_PBC)
 	$(CP)  $(HLL_PBC)           $(DESTDIR)$(NQP_LANG_DIR)/lib/$(HLL_PBC)
