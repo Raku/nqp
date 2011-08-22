@@ -44,7 +44,8 @@ Such a specification is the name of an option, optionally followed by the
 C<=> equals sign and a single character describing the kind of value it expects.
 Missing value specification or C<b> stand for C<bool>, ie the option does not
 expect a value. C<s> stands for a string value.
-(Optional values are not yet supported).
+Optional values are only supported for string values so far. For the
+value specified with C<s?> the value will default to ''.
 
 =head2 add-stopper(String)
 
