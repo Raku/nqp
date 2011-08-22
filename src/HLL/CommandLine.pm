@@ -178,7 +178,12 @@ class HLL::CommandLine::Parser {
 
     method wants-value($x) {
         my $spec := %!options{$x};
-        $spec eq 's';
+        pir::substr($spec, 0, 1) eq 's';
+    }
+
+    method optional-value($x) {
+        my $spec := %!options{$x};
+        $spec eq 's?';
     }
 
     method parse(@args) {
@@ -226,9 +231,12 @@ class HLL::CommandLine::Parser {
                         $value     := pir::substr($opt, $idx + 1);
                         $opt       := pir::substr($opt, 0,      $idx);
                         $has-value := 1;
+                    } elsif self.optional-value($opt) {
+                        $value     := '';
+                        $has-value := 1;
                     }
                     pir::die("Illegal option --$opt") unless pir::exists(%!options, $opt);
-                    pir::die("Option --$opt does not allow a value") if %!options{$opt} ne 's' && $has-value;
+                    pir::die("Option --$opt does not allow a value") if !self.wants-value($opt) && $has-value;
                     if !$has-value && self.wants-value($opt) {
                         $value := get-value("--$opt");
                     }
