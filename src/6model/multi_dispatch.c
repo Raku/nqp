@@ -222,6 +222,14 @@ static candidate_info** sort_candidates(PARROT_INTERP, PMC *candidates) {
 
     /* Free memory associated with the graph. */
     for (i = 0; i < num_candidates; i++) {
+        candidate_info *info = graph[i]->info;
+        if (info) {
+            if (info->types)
+                mem_sys_free(info->types);
+            if (info->definednesses)
+                mem_sys_free(info->definednesses);
+            mem_sys_free(info);
+        }
         mem_sys_free(graph[i]->edges);
         mem_sys_free(graph[i]);
     }
