@@ -1152,6 +1152,42 @@ inline op set_container_spec(in PMC, in PMC, in STR, in PMC) :base_core {
 
 /*
 
+=item set_boolification_spec
+
+Sets the boolification spec for the type in $1 (it actaully sets it on
+the s-table, so the type object or any instance of the type will do).
+
+The first operand specifies the boolification mode. The second specifies
+the method to call, and is only applicable with boolification mode that
+will call it.
+
+=cut
+
+*/
+inline op set_boolification_spec(in PMC, in INT, in PMC) :base_core {
+    if ($1->vtable->base_type == smo_id) {
+        STable *st = STABLE($1);
+        
+        /* Allocate and populate new boolification spec. */
+        BoolificationSpec *new_spec = mem_allocate_zeroed_typed(BoolificationSpec);
+        new_spec->mode = $2;
+        new_spec->method = $3;
+
+        /* Free any existing spec and put the new one in place. */
+        if (st->boolification_spec)
+            mem_sys_free(st->boolification_spec);
+        st->boolification_spec = new_spec;
+        PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC($1));
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use set_container_spec with a SixModelObject");
+    }
+}
+
+
+/*
+
 =item nqpevent_fh
 
 Sets nqpevent logging to use the PMC filehandle in $2 for logging, PMCNULL

@@ -59,6 +59,10 @@ pmclass STable manual_attrs dynpmc group nqp {
             if (!PMC_IS_NULL(entry))
                 Parrot_gc_mark_PMC_alive(interp, entry);
         }
+        
+        /* Mark the boolification spec, if needed. */
+        if (st->boolification_spec && !PMC_IS_NULL(st->boolification_spec->method))
+            Parrot_gc_mark_PMC_alive(interp, st->boolification_spec->method);
 
         /* If we have one, mark the Parrot v-table mapping. */
         if (st->parrot_vtable_mapping)
