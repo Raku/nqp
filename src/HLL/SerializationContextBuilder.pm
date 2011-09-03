@@ -131,11 +131,16 @@ class HLL::Compiler::SerializationContextBuilder {
         $idx
     }
 
+    # Checks if we are in pre-compilation mode.
+    method is_precompilation_mode() {
+        %*COMPILING<%?OPTIONS><target> eq 'pir'
+    }
+    
     # Add an event that may have an action to deserialize or fix up.
     # Note that we can determine which one we need and just save the
     # needed one.
     method add_event(:$deserialize_past, :$fixup_past) {
-        if %*COMPILING<%?OPTIONS><target> eq 'pir' {
+        if self.is_precompilation_mode() {
             # Pre-compilation; only need deserialization PAST.
             @!event_stream.push(Event.new(:deserialize_past($deserialize_past)));
         }
