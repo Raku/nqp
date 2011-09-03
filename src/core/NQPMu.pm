@@ -38,10 +38,6 @@ my class NQPMu {
     multi method ACCEPTS(NQPMu:U $self: $topic) {
         pir::type_check__IPP($topic, self.WHAT)
     }
-    
-    method () is parrot_vtable('get_bool') {
-        pir::repr_defined__IP(self)
-    }
 
     method isa($type) {
         self.HOW.isa(self, $type)

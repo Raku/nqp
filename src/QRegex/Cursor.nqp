@@ -241,7 +241,7 @@ class NQPMatch is NQPCapture {
     method from() { $!from }
     method to()   { $!to }
     method Str() is parrot_vtable('get_string') { nqp::substr($!orig, $!from, $!to-$!from) }
-    method Bool() is parrot_vtable('get_bool') { $!to >= $!from }
+    method Bool() { $!to >= $!from }
 
     method !dump_str($key) {
         sub dump_array($key, $item) {
@@ -282,7 +282,7 @@ class NQPCursor does NQPCursorRole {
         nqp::getattr(self, NQPCursor, '$!match');
     }
 
-    method Bool() is parrot_vtable('get_bool') {
+    method Bool() {
         !nqp::isnull(nqp::getattr(self, $?CLASS, '$!match'))
           && nqp::istrue(nqp::getattr(self, $?CLASS, '$!match'));
     }
