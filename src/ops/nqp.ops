@@ -1165,8 +1165,13 @@ will call it.
 
 */
 inline op set_boolification_spec(in PMC, in INT, in PMC) :base_core {
-    if ($1->vtable->base_type == smo_id) {
-        STable *st = STABLE($1);
+    PMC *target = decontainerize(interp, $1);
+    if ($2 == BOOL_MODE_CALL_METHOD && PMC_IS_NULL($3)) {
+        Parrot_ex_throw_from_c_args(interp, NULL, 1,
+            "Boolification mode for type is set to 'call method', but method not specified");
+    }
+    if (target->vtable->base_type == smo_id) {
+        STable *st = STABLE(target);
         
         /* Allocate and populate new boolification spec. */
         BoolificationSpec *new_spec = mem_allocate_zeroed_typed(BoolificationSpec);
