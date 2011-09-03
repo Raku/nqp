@@ -942,6 +942,29 @@ inline op nqp_create_sc(out PMC, in STR) {
     SC_set_sc(interp, $2, $1);
 }
 
+
+/*
+
+=item nqp_add_object_to_sc
+
+Adds an object $3 to slot $2 of the serialization context in $1 and marks
+the object as being in the context.
+
+=cut
+
+*/
+inline op nqp_add_object_to_sc(in PMC, in INT, in PMC) :base_core {
+    if ($3->vtable->base_type == smo_id) {
+        VTABLE_set_pmc_keyed_int(interp, $1, $2, $3);
+        SC_PMC($3) = $1;
+        PARROT_GC_WRITE_BARRIER(interp, $3);
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use nqp_add_object_to_sc to add a 6model object");
+}
+
+
 /*
 
 =item nqp_set_sc_object()
@@ -953,8 +976,9 @@ Stores an object in the serialization context keyed by handle and index.
 */
 inline op nqp_set_sc_object(in STR, in INT, in PMC) :base_core {
     PMC *sc = SC_get_sc(interp, $1);
-    if (!PMC_IS_NULL(sc))
+    if (!PMC_IS_NULL(sc)) {
         VTABLE_set_pmc_keyed_int(interp, sc, $2, $3);
+    }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Cannot fetch object from non-existant serialization context %Ss",

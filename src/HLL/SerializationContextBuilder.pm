@@ -105,6 +105,15 @@ class HLL::Compiler::SerializationContextBuilder {
         )
     }
     
+    method add_object_to_cur_sc_past($slot, $to_wrap) {
+        PAST::Op.new(
+            :pirop('nqp_add_object_to_sc 2PiP'),
+            PAST::Var.new( :name('cur_sc'), :scope('register') ),
+            $slot,
+            $to_wrap
+        )
+    }
+    
     # Adds an object to the root set, along with a mapping.
     method add_object($obj) {
         pir::nqp_set_sc_for_object__vPP($obj, $!sc);
