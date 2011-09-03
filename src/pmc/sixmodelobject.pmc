@@ -209,15 +209,22 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
                     Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
                     return VTABLE_get_bool(interp, VTABLE_get_pmc_keyed_int(interp, cappy, 0));
                 case BOOL_MODE_UNBOX_INT:
-                    return REPR(decont)->get_int(interp, decont);
+                    return REPR(decont)->defined(interp, decont) &&
+                        REPR(decont)->get_int(interp, decont);
                 case BOOL_MODE_UNBOX_NUM:
+                    if (!REPR(decont)->defined(interp, decont))
+                        return 0;
                     unnum = REPR(decont)->get_num(interp, decont);
                     return unnum != 0.0;
                 case BOOL_MODE_UNBOX_STR_NOT_EMPTY:
+                    if (!REPR(decont)->defined(interp, decont))
+                        return 0;
                     unstr = REPR(decont)->get_str(interp, decont);
                     return !STRING_IS_NULL(unstr) &&
                         !Parrot_str_equal(interp, unstr, CONST_STRING(interp, ""));
                 case BOOL_MODE_UNBOX_STR_NOT_EMPTY_OR_ZERO:
+                    if (!REPR(decont)->defined(interp, decont))
+                        return 0;
                     unstr = REPR(decont)->get_str(interp, decont);
                     return !STRING_IS_NULL(unstr) &&
                         !Parrot_str_equal(interp, unstr, CONST_STRING(interp, "")) &&
