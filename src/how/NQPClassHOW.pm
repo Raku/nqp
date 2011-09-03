@@ -170,9 +170,10 @@ knowhow NQPClassHOW {
         # Compose attributes.
         for self.attributes($obj, :local<0> ) { $_.compose($obj) }
 
-        # Publish type and method caches.
+        # Publish type and method caches and boolification spec.
         self.publish_type_cache($obj);
         self.publish_method_cache($obj);
+        self.publish_boolification_spec($obj);
 
         # Install Parrot v-table mapping.
         self.publish_parrot_vtable_mapping($obj);
@@ -348,6 +349,16 @@ knowhow NQPClassHOW {
             }
         }
         pir::publish_method_cache($obj, %cache)
+    }
+
+    method publish_boolification_spec($obj) {
+        my $bool_meth := self.find_method($obj, 'Bool');
+        if pir::defined($bool_meth) {
+            pir::set_boolification_spec__0PiP($obj, 0, $bool_meth)
+        }
+        else {
+            pir::set_boolification_spec__0PiP($obj, 5, pir::null__P())
+        }
     }
 
     method publish_parrot_vtable_mapping($obj) {
