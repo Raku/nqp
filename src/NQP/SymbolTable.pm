@@ -161,7 +161,7 @@ class NQP::SymbolTable is HLL::Compiler::SerializationContextBuilder {
             $setup_call.push(PAST::Val.new( :value($repr), :named('repr') ));
         }
         self.add_event(:deserialize_past(
-            self.set_slot_past($slot, self.set_cur_sc($setup_call))));
+            self.add_object_to_cur_sc_past($slot, $setup_call)));
         
         # Result is just the object.
         return $mo;
