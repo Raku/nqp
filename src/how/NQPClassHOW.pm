@@ -66,6 +66,7 @@ knowhow NQPClassHOW {
         if pir::isnull__IP($code_obj) || pir::isa__IPs($code_obj, 'Undef') {
             pir::die("Cannot add a null method '$name' to class '$!name'");
         }
+        pir::set_method_cache_authoritativeness__vPi($obj, 0);
         %!methods{$name} := $code_obj;
     }
 
@@ -79,6 +80,7 @@ knowhow NQPClassHOW {
         %todo<name> := $name;
         %todo<code> := $code_obj;
         @!multi_methods_to_incorporate[+@!multi_methods_to_incorporate] := %todo;
+        pir::set_method_cache_authoritativeness__vPi($obj, 0);
         $code_obj;
     }
 
@@ -348,7 +350,8 @@ knowhow NQPClassHOW {
                 }
             }
         }
-        pir::publish_method_cache($obj, %cache)
+        pir::publish_method_cache($obj, %cache);
+        pir::set_method_cache_authoritativeness__0Pi($obj, 1);
     }
 
     method publish_boolification_spec($obj) {
