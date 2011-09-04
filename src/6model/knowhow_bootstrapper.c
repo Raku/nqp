@@ -99,7 +99,9 @@ static void find_method(PARROT_INTERP, PMC *nci) {
 static void compose(PARROT_INTERP, PMC *nci) {
     PMC * unused;
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
     PMC    *obj     = VTABLE_get_pmc_keyed_int(interp, capture, 1);
+    STABLE(obj)->method_cache = ((KnowHOWREPRInstance *)PMC_data(self))->methods;
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", obj);
 }
 
