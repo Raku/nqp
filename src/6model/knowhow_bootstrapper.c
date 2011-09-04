@@ -102,6 +102,7 @@ static void compose(PARROT_INTERP, PMC *nci) {
     PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
     PMC    *obj     = VTABLE_get_pmc_keyed_int(interp, capture, 1);
     STABLE(obj)->method_cache = ((KnowHOWREPRInstance *)PMC_data(self))->methods;
+    STABLE(obj)->mode_flags   = METHOD_CACHE_AUTHORITATIVE;
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", obj);
 }
 
@@ -229,6 +230,10 @@ PMC * SixModelObject_bootstrap_knowhow(PARROT_INTERP, PMC *sc) {
 
     /* Set this built up HOW as the KnowHOW's HOW. */
     STABLE(knowhow_pmc)->HOW = knowhow_how_pmc;
+    
+    /* Give it an authoritative method cache. */
+    STABLE(knowhow_pmc)->method_cache = knowhow_how->methods;
+    STABLE(knowhow_pmc)->mode_flags   = METHOD_CACHE_AUTHORITATIVE;
 
     /* Set up some string constants that the methods here use. */
     repr_str     = Parrot_str_new_constant(interp, "repr");
