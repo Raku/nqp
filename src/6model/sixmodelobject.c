@@ -79,12 +79,22 @@ static PMC * default_find_method(PARROT_INTERP, PMC *obj, STRING *name, INTVAL h
     meth = STABLE(HOW)->find_method(interp, HOW, find_method_str, NO_HINT);
         
     /* Call it to get the method to call. */
-    /* XXX Really want a way to do this without creating a nested runloop. */
     if (PMC_IS_NULL(meth)) {
         Parrot_ex_throw_from_c_args(interp, NULL, 1,
             "No method cache and no find_method method in meta-object");
     }
-    Parrot_ext_call(interp, meth, "PiPS->P", HOW, obj, name, &result);
+    else {
+        PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+        PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
+        VTABLE_push_pmc(interp, cappy, HOW);
+        VTABLE_push_pmc(interp, cappy, obj);
+        VTABLE_push_string(interp, cappy, name);
+        Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
+        cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+        Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
+        result = VTABLE_get_pmc_keyed_int(interp, cappy, 0);
+    }
+    
     return result;
 }
 
