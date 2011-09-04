@@ -500,6 +500,30 @@ inline op publish_method_cache(in PMC, in PMC) :base_core {
 
 /*
 
+=item set_method_cache_authoritativeness()
+
+If $2 is non-zero, indicates that the method cache can be considered
+authoritative. Otherwise, it is marked as not being.
+
+=cut
+
+*/
+inline op set_method_cache_authoritativeness(in PMC, in INT) :base_core {
+    PMC *target = decontainerize(interp, $1);
+    if (target->vtable->base_type == smo_id) {
+        INTVAL new_flags = STABLE(target)->mode_flags & (~METHOD_CACHE_AUTHORITATIVE);
+        if ($2)
+            new_flags = new_flags | METHOD_CACHE_AUTHORITATIVE;
+        STABLE(target)->mode_flags = new_flags;
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use set_method_cache_authoritativeness with a SixModelObject");
+}
+
+
+/*
+
 =item repr_unbox_str()
 
 Tries to unbox a native string using the REPR API.
@@ -782,7 +806,8 @@ Sets the type check mode flags.
 inline op stable_set_type_check_mode(in PMC, in INT) :base_core {
     PMC *target = decontainerize(interp, $1);
     if (target->vtable->base_type == smo_id)
-        STABLE(target)->type_check_mode = $2;
+        STABLE(target)->mode_flags = $2 |
+            (STABLE(target)->mode_flags & (~TYPE_CHECK_CACHE_FLAG_MASK));
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use stable_set_type_check_mode with a SixModelObject");

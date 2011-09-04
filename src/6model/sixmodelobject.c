@@ -69,9 +69,10 @@ static PMC * default_find_method(PARROT_INTERP, PMC *obj, STRING *name, INTVAL h
     /* Try the by-name method cache, if the HOW published one. */
     if (st->method_cache) {
         PMC *cached_method = VTABLE_get_pmc_keyed_str(interp, st->method_cache, name);
-        if (!PMC_IS_NULL(cached_method)) {
+        if (!PMC_IS_NULL(cached_method))
             return cached_method;
-        }
+        else if (st->mode_flags & METHOD_CACHE_AUTHORITATIVE)
+            return PMCNULL;
     }
 
     /* Otherwise delegate to the HOW. */
@@ -105,7 +106,7 @@ static INTVAL default_type_check (PARROT_INTERP, PMC *to_check, PMC *wanted) {
     PMC *HOW, *meth, *result;
     
     STable *st = STABLE(to_check);
-    INTVAL type_check_mode = STABLE(wanted)->type_check_mode;
+    INTVAL type_check_mode = STABLE(wanted)->mode_flags & TYPE_CHECK_CACHE_FLAG_MASK;
     if (st->type_check_cache) {
         /* We have the cache, so just look for the type object we
          * want to be in there. */
