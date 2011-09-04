@@ -57,6 +57,9 @@ class HLL::Compiler::SerializationContextBuilder {
     # Other SCs that we are dependent on (maps handle to SC).
     has %!dependencies;
     
+    # Whether we're in pre-compilation mode.
+    has $!precomp_mode;
+    
     method new(:$handle!, :$description = '<unknown>') {
         my $obj := self.CREATE();
         $obj.BUILD(:handle($handle), :description($description));
@@ -69,6 +72,7 @@ class HLL::Compiler::SerializationContextBuilder {
         %!addr_to_slot := pir::new('Hash');
         @!event_stream := pir::new('ResizablePMCArray');
         $!sc.set_description($description);
+        $!precomp_mode := %*COMPILING<%?OPTIONS><target> eq 'pir';
     }
     
     # Gets the slot for a given object. Dies if it is not in the context.
@@ -133,14 +137,14 @@ class HLL::Compiler::SerializationContextBuilder {
 
     # Checks if we are in pre-compilation mode.
     method is_precompilation_mode() {
-        %*COMPILING<%?OPTIONS><target> eq 'pir'
+        $!precomp_mode
     }
     
     # Add an event that may have an action to deserialize or fix up.
     # Note that we can determine which one we need and just save the
     # needed one.
     method add_event(:$deserialize_past, :$fixup_past) {
-        if self.is_precompilation_mode() {
+        if $!precomp_mode {
             # Pre-compilation; only need deserialization PAST.
             @!event_stream.push(Event.new(:deserialize_past($deserialize_past)));
         }
