@@ -128,8 +128,9 @@ role NQPCursorRole {
     method wb() {
         my $cur := self."!cursor_start"();
         $cur."!cursor_pass"($!pos, "wb")
-            if $!pos == 0
-               || $!pos == nqp::chars($!target)
+            if ($!pos == 0 && nqp::iscclass(pir::const::CCLASS_WORD, $!target, $!pos))
+               || ($!pos == nqp::chars($!target)
+                   && nqp::iscclass(pir::const::CCLASS_WORD, $!target, $!pos-1))
                || nqp::iscclass(pir::const::CCLASS_WORD, $!target, $!pos-1)
                   != nqp::iscclass(pir::const::CCLASS_WORD, $!target, $!pos);
         $cur;
