@@ -391,7 +391,8 @@ static INTVAL defined(PARROT_INTERP, PMC *obj) {
     return instance->spill != NULL;
 }
 
-/* Helper for complaining about attrbiute access errors. */
+/* Helper for complaining about attribute access errors. */
+PARROT_DOES_NOT_RETURN
 static void no_such_attribute(PARROT_INTERP, char *action, PMC *class_handle, STRING *name) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can not %s non-existant attribute '%Ss' on class '%Ss'",

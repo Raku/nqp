@@ -42,6 +42,7 @@ static INTVAL defined(PARROT_INTERP, PMC *obj) {
 }
 
 /* Helper to die because this type doesn't support attributes. */
+PARROT_DOES_NOT_RETURN
 static void die_no_attrs(PARROT_INTERP) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Uninstantiable representation does not support attribute storage");
