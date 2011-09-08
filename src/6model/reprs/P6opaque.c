@@ -393,7 +393,7 @@ static INTVAL defined(PARROT_INTERP, PMC *obj) {
 
 /* Helper for complaining about attribute access errors. */
 PARROT_DOES_NOT_RETURN
-static void no_such_attribute(PARROT_INTERP, char *action, PMC *class_handle, STRING *name) {
+static void no_such_attribute(PARROT_INTERP, const char *action, PMC *class_handle, STRING *name) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can not %s non-existant attribute '%Ss' on class '%Ss'",
             action, name, VTABLE_get_string(interp, introspection_call(interp,
@@ -436,6 +436,7 @@ static PMC * get_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *n
     /* Otherwise, complain that the attribute doesn't exist. */
     no_such_attribute(interp, "get", class_handle, name);
 }
+
 static INTVAL get_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
