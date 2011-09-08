@@ -73,7 +73,7 @@ static PMC * accessor_call(PARROT_INTERP, PMC *obj, STRING *name) {
  * list of attributes (populating the passed flat_list). Also builds
  * the index mapping for doing named lookups. Note index is not related
  * to the storage position. */
-PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, P6opaqueREPRData *repr_data) {
+static PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, P6opaqueREPRData *repr_data) {
     PMC    *flat_list      = pmc_new(interp, enum_class_ResizablePMCArray);
     PMC    *class_list     = pmc_new(interp, enum_class_ResizablePMCArray);
     PMC    *attr_map_list  = pmc_new(interp, enum_class_ResizablePMCArray);
