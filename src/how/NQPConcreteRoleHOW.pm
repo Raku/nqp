@@ -26,6 +26,10 @@ knowhow NQPConcreteRoleHOW {
     # Have we been composed?
     has $!composed;
 
+    my $archetypes := Archetypes.new( :nominal(1), :composable(1) );
+    method archetypes() {
+        $archetypes
+    }
 
     ##
     ## Declarative

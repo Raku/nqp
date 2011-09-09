@@ -34,6 +34,11 @@ knowhow NQPClassHOW {
     # Parrot-specific vtable mapping hash. Maps vtable name to method.
     has %!parrot_vtable_mapping;
 	has %!parrot_vtable_handler_mapping;
+    
+    my $archetypes := Archetypes.new( :nominal(1), :inheritable(1) );
+    method archetypes() {
+        $archetypes
+    }
 
     ##
     ## Declarative.
