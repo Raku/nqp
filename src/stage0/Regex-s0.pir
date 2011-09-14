@@ -1652,7 +1652,7 @@ Perform a match for protoregex C<name>.
     $I0 = isa rx, ['ResizablePMCArray']
     if $I0 goto rx_array
     .local int rxaddr
-    rxaddr = get_addr rx
+    rxaddr = get_id rx
     $P0 = mcalled[rxaddr]
     unless null $P0 goto token_next
     result = self.rx()
@@ -1665,7 +1665,7 @@ Perform a match for protoregex C<name>.
   cand_loop:
     unless rx_it goto cand_done
     rx = shift rx_it
-    rxaddr = get_addr rx
+    rxaddr = get_id rx
     $P0 = mcalled[rxaddr]
     unless null $P0 goto cand_loop
     result = self.rx()
