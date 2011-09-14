@@ -254,14 +254,18 @@ knowhow NQPClassHOW {
         # Provided we have immediate parents...
         my @result;
         if +@immediate_parents {
-            # Build merge list of lineraizations of all our parents, add
-            # immediate parents and merge.
-            my @merge_list;
-            for @immediate_parents {
-                @merge_list.push(compute_c3_mro($_));
+            if +@immediate_parents == 1 {
+                @result := compute_c3_mro(@immediate_parents[0]);
+            } else {
+                # Build merge list of lineraizations of all our parents, add
+                # immediate parents and merge.
+                my @merge_list;
+                for @immediate_parents {
+                    @merge_list.push(compute_c3_mro($_));
+                }
+                @merge_list.push(@immediate_parents);
+                @result := c3_merge(@merge_list);
             }
-            @merge_list.push(@immediate_parents);
-            @result := c3_merge(@merge_list);
         }
 
         # Put this class on the start of the list, and we're done.
@@ -347,12 +351,14 @@ knowhow NQPClassHOW {
         # Walk MRO and add methods to cache, unless another method
         # lower in the class hierarchy "shadowed" it.
         my %cache;
+        my @mro_reversed;
         for @!mro {
+            @mro_reversed.unshift($_);
+        }
+        for @mro_reversed {
             my %methods := $_.HOW.method_table($_);
             for %methods {
-                unless %cache{$_.key} {
-                    %cache{$_.key} := $_.value;
-                }
+                %cache{$_.key} := $_.value;
             }
         }
         pir::publish_method_cache($obj, %cache);
