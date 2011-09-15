@@ -176,8 +176,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
 
     /* Otherwise, we need to compute the allocation strategy.  */
     else {
-        /* Initial size is for commonalities (e.g. shared table pointer) and
-         * spill hash space. */
+        /* Initial size is for commonalities (e.g. shared table pointer). */
         INTVAL cur_size = sizeof(SixModelObjectCommonalities) + sizeof(PMC *);
         
         /* Get number of attributes and set up various counters. */
@@ -376,10 +375,6 @@ static PMC * instance_of(PARROT_INTERP, PMC *WHAT) {
     obj = (P6opaqueInstance *) Parrot_gc_allocate_fixed_size_storage(interp, repr_data->allocation_size);
     memset(obj, 0, repr_data->allocation_size);
     obj->common.stable = STABLE_PMC(WHAT);
-
-    /* The spill slot gets set to PMCNULL; it not being (C) NULL is what
-     * lets us know it's actually a real instance, not a type object. */
-    obj->spill = PMCNULL;
     
     return wrap_object(interp, obj);
 }
@@ -604,8 +599,6 @@ static PMC * repr_clone(PARROT_INTERP, PMC *to_clone) {
     if (defined(interp, to_clone)) {
         obj = (P6opaqueInstance *)Parrot_gc_allocate_fixed_size_storage(interp, repr_data->allocation_size);
         memcpy(obj, PMC_data(to_clone), repr_data->allocation_size);
-        if (!PMC_IS_NULL(obj->spill))
-            obj->spill = VTABLE_clone(interp, obj->spill);
     }
     else {
         obj = mem_allocate_zeroed_typed(P6opaqueInstance);
@@ -635,7 +628,7 @@ static INTVAL get_int(PARROT_INTERP, PMC *obj) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
     if (repr_data->unbox_int_offset) {
-        if (!instance->spill) {
+        if (PObj_flag_TEST(private0, obj)) {
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot unbox type object to a native integer");
         }
@@ -720,10 +713,6 @@ static void gc_mark(PARROT_INTERP, PMC *obj) {
         Parrot_gc_mark_PMC_alive(interp, instance->common.stable);
     if (!PMC_IS_NULL(instance->common.sc))
         Parrot_gc_mark_PMC_alive(interp, instance->common.sc);
-
-    /* If there's spill storage, mark that. */
-    if (!PMC_IS_NULL(instance->spill))
-        Parrot_gc_mark_PMC_alive(interp, instance->spill);
     
     /* Mark contained PMC and string attributes, provided this is a
      * real object. */
