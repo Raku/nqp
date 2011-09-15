@@ -413,7 +413,8 @@ static PMC * get_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *n
                 "Cannot access attributes in a type object");
 
     /* Try the slot allocation first. */
-    slot = try_get_slot(interp, repr_data, class_handle, name);
+    slot = hint >= 0 && !(repr_data->mi) ? hint :
+        try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
         PMC *result = get_pmc_at_offset(instance, repr_data->attribute_offsets[slot]);
         if (result) {
@@ -448,7 +449,8 @@ static INTVAL get_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRI
                 "Cannot access attributes in a type object");
 
     /* Try the slot allocation first. */
-    slot = try_get_slot(interp, repr_data, class_handle, name);
+    slot = hint >= 0 && !(repr_data->mi) ? hint :
+        try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0)
         return get_int_at_offset(instance, repr_data->attribute_offsets[slot]);
     
@@ -466,7 +468,8 @@ static FLOATVAL get_attribute_num(PARROT_INTERP, PMC *obj, PMC *class_handle, ST
                 "Cannot access attributes in a type object");
 
     /* Try the slot allocation first. */
-    slot = try_get_slot(interp, repr_data, class_handle, name);
+    slot = hint >= 0 && !(repr_data->mi) ? hint :
+        try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0)
         return get_num_at_offset(instance, repr_data->attribute_offsets[slot]);
     
@@ -484,7 +487,8 @@ static STRING * get_attribute_str(PARROT_INTERP, PMC *obj, PMC *class_handle, ST
                 "Cannot access attributes in a type object");
 
     /* Try the slot allocation first. */
-    slot = try_get_slot(interp, repr_data, class_handle, name);
+    slot = hint >= 0 && !(repr_data->mi) ? hint :
+        try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
         STRING *result = get_str_at_offset(instance, repr_data->attribute_offsets[slot]);
         return result ? result : STRINGNULL;
@@ -506,14 +510,15 @@ static void bind_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *n
                 "Cannot access attributes in a type object");
 
     /* Try the slot allocation first. */
-    slot = try_get_slot(interp, repr_data, class_handle, name);
+    slot = hint >= 0 && !(repr_data->mi) ? hint :
+        try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
         set_pmc_at_offset(instance, repr_data->attribute_offsets[slot], value);
-        return;
     }
-
-    /* Otherwise, complain that the attribute doesn't exist. */
-    no_such_attribute(interp, "bind", class_handle, name);
+    else {
+        /* Otherwise, complain that the attribute doesn't exist. */
+        no_such_attribute(interp, "bind", class_handle, name);
+    }
 }
 static void bind_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, INTVAL value) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
@@ -526,14 +531,15 @@ static void bind_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRIN
                 "Cannot access attributes in a type object");
 
     /* Try the slot allocation first. */
-    slot = try_get_slot(interp, repr_data, class_handle, name);
+    slot = hint >= 0 && !(repr_data->mi) ? hint :
+        try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
         set_int_at_offset(instance, repr_data->attribute_offsets[slot], value);
-        return;
     }
-
-    /* Otherwise, complain that the attribute doesn't exist. */
-    no_such_attribute(interp, "bind", class_handle, name);
+    else {
+        /* Otherwise, complain that the attribute doesn't exist. */
+        no_such_attribute(interp, "bind", class_handle, name);
+    }
 }
 static void bind_attribute_num(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, FLOATVAL value) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
@@ -546,14 +552,15 @@ static void bind_attribute_num(PARROT_INTERP, PMC *obj, PMC *class_handle, STRIN
                 "Cannot access attributes in a type object");
 
     /* Try the slot allocation first. */
-    slot = try_get_slot(interp, repr_data, class_handle, name);
+    slot = hint >= 0 && !(repr_data->mi) ? hint :
+        try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
         set_num_at_offset(instance, repr_data->attribute_offsets[slot], value);
-        return;
     }
-
-    /* Otherwise, complain that the attribute doesn't exist. */
-    no_such_attribute(interp, "bind", class_handle, name);
+    else {
+        /* Otherwise, complain that the attribute doesn't exist. */
+        no_such_attribute(interp, "bind", class_handle, name);
+    }
 }
 static void bind_attribute_str(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, STRING *value) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
@@ -566,19 +573,22 @@ static void bind_attribute_str(PARROT_INTERP, PMC *obj, PMC *class_handle, STRIN
                 "Cannot access attributes in a type object");
 
     /* Try the slot allocation first. */
-    slot = try_get_slot(interp, repr_data, class_handle, name);
+    slot = hint >= 0 && !(repr_data->mi) ? hint :
+        try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
         set_str_at_offset(instance, repr_data->attribute_offsets[slot], value);
-        return;
     }
-
-    /* Otherwise, complain that the attribute doesn't exist. */
-    no_such_attribute(interp, "bind", class_handle, name);
+    else {
+        /* Otherwise, complain that the attribute doesn't exist. */
+        no_such_attribute(interp, "bind", class_handle, name);
+    }
 }
 
 /* Gets the hint for the given attribute ID. */
-static INTVAL hint_for(PARROT_INTERP, PMC *class_handle, STRING *name) {
-    return NO_HINT;
+static INTVAL hint_for(PARROT_INTERP, PMC *class_key, STRING *name) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(class_key)->REPR_data;
+    INTVAL slot = try_get_slot(interp, repr_data, class_key, name);
+    return slot >= 0 ? slot : NO_HINT;
 }
 
 /* Clones the current object. */
