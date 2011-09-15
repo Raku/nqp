@@ -1330,6 +1330,23 @@ inline op repr_get_primitive_type_spec(out INT, in PMC) :base_core {
 
 /*
 
+=item repr_hint_for
+
+Gets lookup hint for an attribute.
+
+=cut
+
+*/
+inline op repr_hint_for(out INT, in PMC, in PMC, in STR) :base_core {
+    PMC *ch = decontainerize(interp, $3);
+    if ($2->vtable->base_type == smo_id)
+        $1 = REPR($2)->hint_for(interp, $2, $3, $4);
+    else
+        $1 = NO_HINT;
+}
+
+/*
+
 =item is_container
 
 Checks if the type of thing in $2 is a container or not. Puts a non-zero
