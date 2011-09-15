@@ -586,8 +586,13 @@ static void bind_attribute_str(PARROT_INTERP, PMC *obj, PMC *class_handle, STRIN
 
 /* Gets the hint for the given attribute ID. */
 static INTVAL hint_for(PARROT_INTERP, PMC *obj, PMC *class_key, STRING *name) {
+    INTVAL slot;
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
-    INTVAL slot = try_get_slot(interp, repr_data, class_key, name);
+    if (!repr_data->allocation_size) {
+        compute_allocation_strategy(interp, obj, repr_data);
+        PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC(obj));
+    }
+    slot = try_get_slot(interp, repr_data, class_key, name);
     return slot >= 0 ? slot : NO_HINT;
 }
 
