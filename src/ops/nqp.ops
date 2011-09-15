@@ -333,6 +333,7 @@ inline op repr_bind_attr_obj(in PMC, in PMC, in STR, in PMC) :base_core {
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_obj on a SixModelObject");
+    PARROT_GC_WRITE_BARRIER(interp, $1);
 }
 
 /*
@@ -390,6 +391,7 @@ inline op repr_bind_attr_str(in PMC, in PMC, in STR, in STR) :base_core {
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_str on a SixModelObject");
+    PARROT_GC_WRITE_BARRIER(interp, $1);
 }
 
 /*
@@ -485,6 +487,7 @@ inline op repr_bind_attr_obj(in PMC, in PMC, in STR, in INT, in PMC) :base_core 
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_obj on a SixModelObject");
+    PARROT_GC_WRITE_BARRIER(interp, $1);
 }
 
 /*
@@ -542,6 +545,7 @@ inline op repr_bind_attr_str(in PMC, in PMC, in STR, in INT, in STR) :base_core 
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_str on a SixModelObject");
+    PARROT_GC_WRITE_BARRIER(interp, $1);
 }
 
 /*
