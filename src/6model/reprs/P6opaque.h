@@ -10,9 +10,6 @@
 typedef struct {
     /* The commonalities all objects have. */
     SixModelObjectCommonalities common;
-
-    /* Spill (for MI, dynamically added attributes, etc.) Normally null. */
-    PMC *spill;
 } P6opaqueInstance;
 
 /* This is used in the name to class mapping. */

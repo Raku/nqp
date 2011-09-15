@@ -171,13 +171,13 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
     
     /* If we have no attributes in the index mapping, then just the header. */
     if (repr_data->name_to_index_mapping[0].class_key == NULL) {
-        repr_data->allocation_size = sizeof(SixModelObjectCommonalities) + sizeof(PMC *);
+        repr_data->allocation_size = sizeof(P6opaqueInstance);
     }
 
     /* Otherwise, we need to compute the allocation strategy.  */
     else {
         /* Initial size is for commonalities (e.g. shared table pointer). */
-        INTVAL cur_size = sizeof(SixModelObjectCommonalities) + sizeof(PMC *);
+        INTVAL cur_size = sizeof(P6opaqueInstance);
         
         /* Get number of attributes and set up various counters. */
         INTVAL num_attrs    = VTABLE_elements(interp, flat_list);
