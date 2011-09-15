@@ -350,13 +350,13 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
     /* Create REPR data structure and hand it off the STable. */
     st->REPR_data = mem_allocate_zeroed_typed(P6opaqueREPRData);
 
-    /* Create type object and point it back at the STable. Note that we
-     * do *not* populate the spill pointer at all, we leave it null. A
-     * non-null value (even PMCNULL) is what indicates we have a defined
-     * object. Yes, I know, it's sick. */
+    /* Create type object and point it back at the STable. */
     obj->common.stable = st_pmc;
     st->WHAT = wrap_object(interp, obj);
     PARROT_GC_WRITE_BARRIER(interp, st_pmc);
+    
+    /* Flag it as a type object. */
+    PObj_flag_SET(private0, st->WHAT);
 
     return st->WHAT;
 }
@@ -388,7 +388,7 @@ static PMC * instance_of(PARROT_INTERP, PMC *WHAT) {
  * representation). */
 static INTVAL defined(PARROT_INTERP, PMC *obj) {
     P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
-    return instance->spill != NULL;
+    return !PObj_flag_TEST(private0, obj);
 }
 
 /* Helper for complaining about attribute access errors. */
@@ -408,7 +408,7 @@ static PMC * get_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *n
     INTVAL            slot;
 
     /* Ensure it is a defined object. */
-    if (!instance->spill)
+    if (PObj_flag_TEST(private0, obj))
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot access attributes in a type object");
 
@@ -444,7 +444,7 @@ static INTVAL get_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRI
     INTVAL            slot;
 
     /* Ensure it is a defined object. */
-    if (!instance->spill)
+    if (PObj_flag_TEST(private0, obj))
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot access attributes in a type object");
 
@@ -463,7 +463,7 @@ static FLOATVAL get_attribute_num(PARROT_INTERP, PMC *obj, PMC *class_handle, ST
     INTVAL            slot;
 
     /* Ensure it is a defined object. */
-    if (!instance->spill)
+    if (PObj_flag_TEST(private0, obj))
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot access attributes in a type object");
 
@@ -482,7 +482,7 @@ static STRING * get_attribute_str(PARROT_INTERP, PMC *obj, PMC *class_handle, ST
     INTVAL            slot;
 
     /* Ensure it is a defined object. */
-    if (!instance->spill)
+    if (PObj_flag_TEST(private0, obj))
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot access attributes in a type object");
 
@@ -505,7 +505,7 @@ static void bind_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *n
     INTVAL            slot;
 
     /* Ensure it is a defined object. */
-    if (!instance->spill)
+    if (PObj_flag_TEST(private0, obj))
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot access attributes in a type object");
 
@@ -526,7 +526,7 @@ static void bind_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRIN
     INTVAL            slot;
 
     /* Ensure it is a defined object. */
-    if (!instance->spill)
+    if (PObj_flag_TEST(private0, obj))
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot access attributes in a type object");
 
@@ -547,7 +547,7 @@ static void bind_attribute_num(PARROT_INTERP, PMC *obj, PMC *class_handle, STRIN
     INTVAL            slot;
 
     /* Ensure it is a defined object. */
-    if (!instance->spill)
+    if (PObj_flag_TEST(private0, obj))
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot access attributes in a type object");
 
@@ -568,7 +568,7 @@ static void bind_attribute_str(PARROT_INTERP, PMC *obj, PMC *class_handle, STRIN
     INTVAL            slot;
 
     /* Ensure it is a defined object. */
-    if (!instance->spill)
+    if (PObj_flag_TEST(private0, obj))
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot access attributes in a type object");
 
@@ -667,7 +667,7 @@ static FLOATVAL get_num(PARROT_INTERP, PMC *obj) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
     if (repr_data->unbox_num_offset) {
-        if (!instance->spill) {
+        if (PObj_flag_TEST(private0, obj)) {
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot unbox type object to a native number");
         }
@@ -699,7 +699,7 @@ static STRING * get_str(PARROT_INTERP, PMC *obj) {
     P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
     if (repr_data->unbox_str_offset) {
-        if (!instance->spill) {
+        if (PObj_flag_TEST(private0, obj)) {
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot unbox type object to a native string");
         }
@@ -727,7 +727,7 @@ static void gc_mark(PARROT_INTERP, PMC *obj) {
     
     /* Mark contained PMC and string attributes, provided this is a
      * real object. */
-    if (instance->spill) {
+    if (!PObj_flag_TEST(private0, obj)) {
         P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
         INTVAL i;
 
@@ -766,7 +766,7 @@ static void gc_mark(PARROT_INTERP, PMC *obj) {
 /* This Parrot-specific addition to the API is used to free an object. */
 static void gc_free(PARROT_INTERP, PMC *obj) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
-	if (repr_data->allocation_size)
+	if (repr_data->allocation_size && !PObj_flag_TEST(private0, obj))
 		Parrot_gc_free_fixed_size_storage(interp, repr_data->allocation_size, PMC_data(obj));
 	else
 		mem_sys_free(PMC_data(obj));
@@ -823,7 +823,7 @@ static INTVAL is_attribute_initialized(PARROT_INTERP, PMC *obj, PMC *class_handl
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
     INTVAL            slot;
 
-    if (!instance->spill)
+    if (PObj_flag_TEST(private0, obj))
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot access attributes in a type object");
 
