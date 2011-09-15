@@ -242,6 +242,25 @@ inline op repr_defined(out INT, in PMC) :base_core {
 
 /*
 
+=item repr_get_attr_obj()
+
+Gets the specified object attribute. Note that the attribute must be stored as
+an object - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_get_attr_obj(out PMC, in PMC, in PMC, in STR) :base_core {
+    PMC *ch = decontainerize(interp, $3);
+    if ($2->vtable->base_type == smo_id)
+        $1 = REPR($2)->get_attribute(interp, $2, ch, $4, NO_HINT);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_get_attr_obj on a SixModelObject");
+}
+
+/*
+
 =item repr_get_attr_int()
 
 Gets the specified int attribute. Note that the attribute must be stored as
@@ -295,6 +314,25 @@ inline op repr_get_attr_str(out STR, in PMC, in PMC, in STR) :base_core {
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_get_attr_str on a SixModelObject");
+}
+
+/*
+
+=item repr_bind_attr_obj()
+
+Binds the specified object attribute. Note that the attribute must be stored as
+an object - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_bind_attr_obj(in PMC, in PMC, in STR, in PMC) :base_core {
+    PMC *ch = decontainerize(interp, $2);
+    if ($1->vtable->base_type == smo_id)
+        REPR($1)->bind_attribute(interp, $1, ch, $3, NO_HINT, $4);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_bind_attr_obj on a SixModelObject");
 }
 
 /*

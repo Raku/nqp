@@ -48,7 +48,7 @@ some PAST that will produce it or a name that it can be looked up by.
     if primitive_type_id == STORAGE_SPEC_BP_INT goto prim_int
     if primitive_type_id == STORAGE_SPEC_BP_NUM goto prim_num
     if primitive_type_id == STORAGE_SPEC_BP_STR goto prim_str
-    .return ('P', 'getattribute', 'setattribute')
+    .return ('P', 'repr_get_attr_obj', 'repr_bind_attr_obj')
   prim_int:
     .return ('i', 'repr_get_attr_int', 'repr_bind_attr_int')
   prim_num:
