@@ -465,6 +465,7 @@ entry to produce the node to be returned.
     # string opcodes
     maphash['chars']    = 'length__Is'
     maphash['concat']   = 'concat'          # allow either P or S form
+    maphash['concat_s'] = 'concat__Sss'     # force S form
     maphash['join']     = 'join__SsP'
     maphash['split']    = 'split__Pss'
     maphash['index']    = 'index__Issi'
