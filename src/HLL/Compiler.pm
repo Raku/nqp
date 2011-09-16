@@ -307,7 +307,7 @@ class HLL::Compiler {
         my $error;
         my $has_error := 0;
         try {
-            if %adverbs<e> { 
+            if pir::defined(%adverbs<e>) {
                 $result := self.eval(%adverbs<e>, '-e', |@a, |%adverbs) 
             }
             elsif !@a { $result := self.interactive(|%adverbs) }
