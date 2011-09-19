@@ -175,7 +175,7 @@ struct SixModel_REPROps {
     void (*bind_attribute_str) (PARROT_INTERP, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint, STRING *Value);
 
     /* Gets the hint for the given attribute ID. */
-    INTVAL (*hint_for) (PARROT_INTERP, PMC *ClassHandle, STRING *Name);
+    INTVAL (*hint_for) (PARROT_INTERP, PMC *Object, PMC *ClassHandle, STRING *Name);
 
     /* Clones the object, optionally cloning any containers in its
      * attributes. */

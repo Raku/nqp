@@ -455,11 +455,14 @@ class NQP::Actions is HLL::Actions {
             elsif $<twigil>[0] eq '!' {
                 # Construct PAST.
                 my $name := ~@name.pop;
+                my $ch   := PAST::Var.new( :name('$?CLASS') );
+                $ch<has_compile_time_value> := 1;
+                $ch<compile_time_value> := $*PACKAGE;
                 $past := PAST::Var.new(
                     :name($name), :scope('attribute_6model'),
                     :viviself( vivitype( $<sigil> ) ),
                     PAST::Op.new( :pirop('nqp_decontainerize PP'), PAST::Var.new( :name('self') ) ),
-                    PAST::Var.new( :name('$?CLASS') )
+                    $ch
                 );
                 
                 # Make sure the attribute exists and add type info.

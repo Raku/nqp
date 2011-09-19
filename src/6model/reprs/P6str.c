@@ -83,7 +83,7 @@ static void bind_attribute_str(PARROT_INTERP, PMC *obj, PMC *class_handle, STRIN
 }
 
 /* Gets the hint for the given attribute ID. */
-static INTVAL hint_for(PARROT_INTERP, PMC *class_handle, STRING *name) {
+static INTVAL hint_for(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name) {
     return NO_HINT;
 }
 

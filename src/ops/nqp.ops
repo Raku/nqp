@@ -242,6 +242,25 @@ inline op repr_defined(out INT, in PMC) :base_core {
 
 /*
 
+=item repr_get_attr_obj()
+
+Gets the specified object attribute. Note that the attribute must be stored as
+an object - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_get_attr_obj(out PMC, in PMC, in PMC, in STR) :base_core {
+    PMC *ch = decontainerize(interp, $3);
+    if ($2->vtable->base_type == smo_id)
+        $1 = REPR($2)->get_attribute(interp, $2, ch, $4, NO_HINT);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_get_attr_obj on a SixModelObject");
+}
+
+/*
+
 =item repr_get_attr_int()
 
 Gets the specified int attribute. Note that the attribute must be stored as
@@ -299,6 +318,26 @@ inline op repr_get_attr_str(out STR, in PMC, in PMC, in STR) :base_core {
 
 /*
 
+=item repr_bind_attr_obj()
+
+Binds the specified object attribute. Note that the attribute must be stored as
+an object - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_bind_attr_obj(in PMC, in PMC, in STR, in PMC) :base_core {
+    PMC *ch = decontainerize(interp, $2);
+    if ($1->vtable->base_type == smo_id)
+        REPR($1)->bind_attribute(interp, $1, ch, $3, NO_HINT, $4);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_bind_attr_obj on a SixModelObject");
+    PARROT_GC_WRITE_BARRIER(interp, $1);
+}
+
+/*
+
 =item repr_bind_attr_int()
 
 Binds the specified int attribute. Note that the attribute must be stored as
@@ -352,6 +391,161 @@ inline op repr_bind_attr_str(in PMC, in PMC, in STR, in STR) :base_core {
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_str on a SixModelObject");
+    PARROT_GC_WRITE_BARRIER(interp, $1);
+}
+
+/*
+
+=item repr_get_attr_obj()
+
+Gets the specified object attribute. Note that the attribute must be stored as
+an object - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_get_attr_obj(out PMC, in PMC, in PMC, in STR, in INT) :base_core {
+    PMC *ch = decontainerize(interp, $3);
+    if ($2->vtable->base_type == smo_id)
+        $1 = REPR($2)->get_attribute(interp, $2, ch, $4, $5);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_get_attr_obj on a SixModelObject");
+}
+
+/*
+
+=item repr_get_attr_int()
+
+Gets the specified int attribute. Note that the attribute must be stored as
+a native int - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_get_attr_int(out INT, in PMC, in PMC, in STR, in INT) :base_core {
+    PMC *ch = decontainerize(interp, $3);
+    if ($2->vtable->base_type == smo_id)
+        $1 = REPR($2)->get_attribute_int(interp, $2, ch, $4, $5);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_get_attr_int on a SixModelObject");
+}
+
+/*
+
+=item repr_get_attr_num()
+
+Gets the specified num attribute. Note that the attribute must be stored as
+a native num - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_get_attr_num(out NUM, in PMC, in PMC, in STR, in INT) :base_core {
+    PMC *ch = decontainerize(interp, $3);
+    if ($2->vtable->base_type == smo_id)
+        $1 = REPR($2)->get_attribute_num(interp, $2, ch, $4, $5);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_get_attr_num on a SixModelObject");
+}
+
+/*
+
+=item repr_get_attr_str()
+
+Gets the specified str attribute. Note that the attribute must be stored as
+a native str - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_get_attr_str(out STR, in PMC, in PMC, in STR, in INT) :base_core {
+    PMC *ch = decontainerize(interp, $3);
+    if ($2->vtable->base_type == smo_id)
+        $1 = REPR($2)->get_attribute_str(interp, $2, ch, $4, $5);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_get_attr_str on a SixModelObject");
+}
+
+/*
+
+=item repr_bind_attr_obj()
+
+Binds the specified object attribute. Note that the attribute must be stored as
+an object - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_bind_attr_obj(in PMC, in PMC, in STR, in INT, in PMC) :base_core {
+    PMC *ch = decontainerize(interp, $2);
+    if ($1->vtable->base_type == smo_id)
+        REPR($1)->bind_attribute(interp, $1, ch, $3, $4, $5);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_bind_attr_obj on a SixModelObject");
+    PARROT_GC_WRITE_BARRIER(interp, $1);
+}
+
+/*
+
+=item repr_bind_attr_int()
+
+Binds the specified int attribute. Note that the attribute must be stored as
+a native int - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_bind_attr_int(in PMC, in PMC, in STR, in INT, in INT) :base_core {
+    PMC *ch = decontainerize(interp, $2);
+    if ($1->vtable->base_type == smo_id)
+        REPR($1)->bind_attribute_int(interp, $1, ch, $3, $4, $5);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_bind_attr_int on a SixModelObject");
+}
+
+/*
+
+=item repr_bind_attr_num()
+
+Binds the specified num attribute. Note that the attribute must be stored as
+a native num - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_bind_attr_num(in PMC, in PMC, in STR, in INT, in NUM) :base_core {
+    PMC *ch = decontainerize(interp, $2);
+    if ($1->vtable->base_type == smo_id)
+        REPR($1)->bind_attribute_num(interp, $1, ch, $3, $4, $5);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_bind_attr_num on a SixModelObject");
+}
+
+/*
+
+=item repr_bind_attr_str()
+
+Binds the specified str attribute. Note that the attribute must be stored as
+a native str - the repr is not obligated to do boxing/unboxing for you.
+
+=cut
+
+*/
+inline op repr_bind_attr_str(in PMC, in PMC, in STR, in INT, in STR) :base_core {
+    PMC *ch = decontainerize(interp, $2);
+    if ($1->vtable->base_type == smo_id)
+        REPR($1)->bind_attribute_str(interp, $1, ch, $3, $4, $5);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_bind_attr_str on a SixModelObject");
+    PARROT_GC_WRITE_BARRIER(interp, $1);
 }
 
 /*
@@ -902,8 +1096,12 @@ inline op stable_publish_vtable_handler_mapping(in PMC, in PMC) :base_core {
                 }
             }
             if (idx >= 0) {
-                st->parrot_vtable_handler_mapping[idx].class_handle = VTABLE_get_pmc_keyed_int(interp,slot,0);
-                st->parrot_vtable_handler_mapping[idx].attr_name = VTABLE_get_string_keyed_int(interp,slot,1);
+                PMC *class_handle = VTABLE_get_pmc_keyed_int(interp, slot, 0);
+                STRING *attr_name = VTABLE_get_string_keyed_int(interp, slot, 1);
+                st->parrot_vtable_handler_mapping[idx].class_handle = class_handle;
+                st->parrot_vtable_handler_mapping[idx].attr_name = attr_name;
+                st->parrot_vtable_handler_mapping[idx].hint =
+                    REPR(class_handle)->hint_for(interp, target, class_handle, attr_name);
             }
 			else
                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -1128,6 +1326,23 @@ inline op repr_get_primitive_type_spec(out INT, in PMC) :base_core {
     else {
         $1 = STORAGE_SPEC_BP_NONE;
     }
+}
+
+/*
+
+=item repr_hint_for
+
+Gets lookup hint for an attribute.
+
+=cut
+
+*/
+inline op repr_hint_for(out INT, in PMC, in PMC, in STR) :base_core {
+    PMC *ch = decontainerize(interp, $3);
+    if ($2->vtable->base_type == smo_id)
+        $1 = REPR($2)->hint_for(interp, $2, $3, $4);
+    else
+        $1 = NO_HINT;
 }
 
 /*

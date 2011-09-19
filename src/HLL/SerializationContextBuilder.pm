@@ -90,7 +90,10 @@ class HLL::Compiler::SerializationContextBuilder {
     # a constant and we're using the SC as a constants table).
     method get_slot_past_for_object($obj) {
         my $slot := self.slot_for_object($obj);
-        return PAST::Op.new( :pirop('nqp_get_sc_object Psi'), $!handle, $slot );
+        my $past := PAST::Op.new( :pirop('nqp_get_sc_object Psi'), $!handle, $slot );
+        $past<has_compile_time_value> := 1;
+        $past<compile_time_value> := $obj;
+        $past
     }
     
     # Utility sub to wrap PAST with slot setting.
@@ -187,9 +190,11 @@ class HLL::Compiler::SerializationContextBuilder {
                         "Incorrect pre-compiled version of " ~ ($sc.description || '<unknown>') ~ " loaded"
                     ))));
             }
-            PAST::Op.new( :pirop('nqp_get_sc_object Psi'),
-                $handle, $sc.slot_index_for($obj)
-            )
+            my $past := PAST::Op.new( :pirop('nqp_get_sc_object Psi'),
+                $handle, $sc.slot_index_for($obj) );
+            $past<has_compile_time_value> := 1;
+            $past<compile_time_value> := $obj;
+            $past
         }
     }
     

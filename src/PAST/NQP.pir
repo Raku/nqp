@@ -465,6 +465,7 @@ entry to produce the node to be returned.
     # string opcodes
     maphash['chars']    = 'length__Is'
     maphash['concat']   = 'concat'          # allow either P or S form
+    maphash['concat_s'] = 'concat__Sss'     # force S form
     maphash['join']     = 'join__SsP'
     maphash['split']    = 'split__Pss'
     maphash['index']    = 'index__Issi'
@@ -516,9 +517,21 @@ entry to produce the node to be returned.
     maphash['elems']    = 'elements__IP'
     maphash['iterator'] = 'iter__PP'
     maphash['push']     = 'push__0PP'
+    maphash['push_s']   = 'push__0Ps'
+    maphash['push_i']   = 'push__0Pi'
+    maphash['push_n']   = 'push__0Pn'
     maphash['pop']      = 'pop__PP'
+    maphash['pop_s']    = 'pop__sP'
+    maphash['pop_i']    = 'pop__iP'
+    maphash['pop_n']    = 'pop__nP'
     maphash['shift']    = 'shift__PP'
+    maphash['shift_s']  = 'shift__sP'
+    maphash['shift_i']  = 'shift__iP'
+    maphash['shift_n']  = 'shift__nP'
     maphash['unshift']  = 'unshift__0PP'
+    maphash['unshift_s'] = 'unshift__0Ps'
+    maphash['unshift_i'] = 'unshift__0Pi'
+    maphash['unshift_n'] = 'unshift__0Pn'
     maphash['splice']   = 'splice__0PPii'
     $P0 = new ['Hash']
     $P0['pasttype'] = 'list'
