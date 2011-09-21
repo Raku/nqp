@@ -48,7 +48,7 @@ class HLL::Compiler::SerializationContextBuilder {
     # in the context.
     has %!addr_to_slot;
     sub addr($obj) {
-        pir::get_addr__IP($obj)
+        pir::get_id__IP($obj)
     }
     
     # The event stream that builds or fixes up objects.

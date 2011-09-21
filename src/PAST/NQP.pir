@@ -560,7 +560,7 @@ entry to produce the node to be returned.
     maphash['unbox_i']    = 'repr_unbox_int__IP'
     maphash['unbox_n']    = 'repr_unbox_num__NP'
     maphash['unbox_s']    = 'repr_unbox_str__SP'
-    maphash['where']      = 'get_addr__IP'
+    maphash['where']      = 'get_id__IP'
 
     # control opcodes
     $P0 = new ['Hash']
