@@ -115,7 +115,7 @@ STAGE0_SOURCES = \
   src/stage0/NQPMO-s0.pir \
   src/stage0/NQP-s0.pir \
   src/stage0/NQPCORE.setting-s0.pir \
-
+  
 STAGE0 = src/stage0
 STAGE1 = src/stage1
 STAGE2 = src/stage2
@@ -138,6 +138,9 @@ NQP_COMBINED     = gen/NQP.pm
 NQP_COMBINED_PIR = gen/NQP.pir
 NQP_PBC          = nqp.pbc
 NQP_EXE          = nqp$(EXE)
+
+NCI_SOURCE = src/NCI/CallBuilder.pm
+NCI_PBC    = CallBuilder.pbc
 
 NQP_MO_SOURCES = src/how/Archetypes.pm src/how/RoleToRoleApplier.pm \
                  src/how/NQPConcreteRoleHOW.pm src/how/RoleToClassApplier.pm \
@@ -231,13 +234,14 @@ CLEANUPS = \
   $(OPS_DIR)/*$(LOAD_EXT) \
   $(DYNEXT_DIR)/*$(LOAD_EXT) \
 
-all: $(NQP_EXE) qregex
+all: $(NQP_EXE) qregex $(NCI_PBC)
 
 install: all
 	$(MKPATH)                   $(DESTDIR)$(PARROT_LIBRARY_DIR)
 	$(CP)  $(MODULE_LOADER_PBC) $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(MODULE_LOADER_PBC)
 	$(CP)  $(PAST_PBC)          $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(PAST_PBC)
 	$(MKPATH)                   $(DESTDIR)$(NQP_LANG_DIR)/lib
+	$(MKPATH)                   $(DESTDIR)$(NQP_LANG_DIR)/lib/NCI
 	$(CP)  $(P6REGEX_PBC)       $(DESTDIR)$(NQP_LANG_DIR)/lib/$(P6REGEX_PBC)
 	$(CP)  $(REGEX_PBC)         $(DESTDIR)$(NQP_LANG_DIR)/lib/$(REGEX_PBC)
 	$(CP)  $(HLL_PBC)           $(DESTDIR)$(NQP_LANG_DIR)/lib/$(HLL_PBC)
@@ -245,6 +249,7 @@ install: all
 	$(CP)  $(NQP_MO_PBC)        $(DESTDIR)$(NQP_LANG_DIR)/lib/$(NQP_MO_PBC)
 	$(CP)  $(NQP_PBC)           $(DESTDIR)$(NQP_LANG_DIR)/lib/$(NQP_PBC)
 	$(CP)  $(QREGEX_PBC)        $(DESTDIR)$(NQP_LANG_DIR)/lib/$(QREGEX_PBC)
+	$(CP)  $(NCI_PBC)           $(DESTDIR)$(NQP_LANG_DIR)/lib/NCI/$(NCI_PBC)
 	$(MKPATH)              $(DESTDIR)$(PARROT_BIN_DIR)
 	$(CP)  $(NQP_EXE)      $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
 	$(CHMOD)  755          $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
@@ -394,6 +399,10 @@ $(ALL_PBCS): $(STAGE2_PBCS)
 
 $(NQP_EXE): $(NQP_PBC)
 	$(PBC_TO_EXE) $(NQP_PBC)
+
+$(NCI_PBC): $(NQP_EXE)
+	./$(NQP_EXE) --target=pir --output=src/gen/CallBuilder.pir $(NCI_SOURCE)
+	$(PARROT) -o $(NCI_PBC) src/gen/CallBuilder.pir
 
 $(DYNEXT_TARGET): $(DYNPMC) $(DYNOPS)
 	$(CP) $(DYNPMC) $(DYNEXT_DIR)

@@ -560,6 +560,9 @@ entry to produce the node to be returned.
     maphash['unbox_i']    = 'repr_unbox_int__IP'
     maphash['unbox_n']    = 'repr_unbox_num__NP'
     maphash['unbox_s']    = 'repr_unbox_str__SP'
+    maphash['box_i']      = 'repr_box_int__PiP'
+    maphash['box_n']      = 'repr_box_num__PnP'
+    maphash['box_s']      = 'repr_box_str__PsP'
     maphash['where']      = 'get_id__IP'
 
     # control opcodes

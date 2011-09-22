@@ -156,6 +156,7 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     spec.inlineable = STORAGE_SPEC_INLINED;
     spec.bits = sizeof(INTVAL) * 8;
     spec.boxed_primitive = STORAGE_SPEC_BP_INT;
+    spec.can_box = STORAGE_SPEC_CAN_BOX_INT;
     return spec;
 }
 
