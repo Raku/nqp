@@ -5,16 +5,16 @@
 #include "../6model/sixmodelobject.h"
 
 /* This is a source of type cache IDs (see notes below about them). 
- * The lowest one is 4. This is to make the lower two bits available for
- * defined/undefined flags for the multi dispatch cache, which is the
- * main reason these IDs exist at all. */
+ * The lowest one is 8. This is to make the lower three bits available for
+ * defined/undefined flag and native type flags for the multi dispatch cache,
+ * which is the main reason these IDs exist at all. */
 static INTVAL TypeCacheIDSource = 0;
 static INTVAL get_next_type_cache_id(void) {
     /* XXX The C# original is doing:
-     *     return Interlocked.Add(ref TypeCacheIDSource, 4);
+     *     return Interlocked.Add(ref TypeCacheIDSource, 8);
      * But we don't yet have an abstraction layer for an atomic addition
      * so this is not yet threadsafe. */
-    TypeCacheIDSource += 4;
+    TypeCacheIDSource += 8;
     return TypeCacheIDSource;
 }
 
