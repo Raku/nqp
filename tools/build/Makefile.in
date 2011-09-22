@@ -401,7 +401,7 @@ $(NQP_EXE): $(NQP_PBC)
 	$(PBC_TO_EXE) $(NQP_PBC)
 
 $(NCI_PBC):
-	$(NQP_EXE) --target=pir --output=src/gen/CallBuilder.pir $(NCI_SOURCE)
+	./$(NQP_EXE) --target=pir --output=src/gen/CallBuilder.pir $(NCI_SOURCE)
 	$(PARROT) -o $(NCI_PBC) src/gen/CallBuilder.pir
 
 $(DYNEXT_TARGET): $(DYNPMC) $(DYNOPS)
