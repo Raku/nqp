@@ -800,9 +800,17 @@ static void gc_free_repr(PARROT_INTERP, STable *st) {
 
 /* Gets the storage specification for this representation. */
 static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     storage_spec spec;
     spec.inlineable = STORAGE_SPEC_REFERENCE;
     spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
+    spec.can_box = 0;
+    if (repr_data->unbox_int_offset)
+        spec.can_box += STORAGE_SPEC_CAN_BOX_INT;
+    if (repr_data->unbox_num_offset)
+        spec.can_box += STORAGE_SPEC_CAN_BOX_NUM;
+    if (repr_data->unbox_str_offset)
+        spec.can_box += STORAGE_SPEC_CAN_BOX_STR;
     return spec;
 }
 
