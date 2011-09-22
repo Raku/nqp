@@ -382,7 +382,6 @@ static PMC * instance_of(PARROT_INTERP, PMC *WHAT) {
 /* Checks if a given object is defined (from the point of view of the
  * representation). */
 static INTVAL defined(PARROT_INTERP, PMC *obj) {
-    P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
     return !PObj_flag_TEST(private0, obj);
 }
 
