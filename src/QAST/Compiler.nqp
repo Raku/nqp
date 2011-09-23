@@ -26,12 +26,12 @@ class QAST::Compiler is HLL::Compiler {
         }
 
         # create our labels
-        my $startlabel   := self.'post_new'('Label', :result($prefix ~ 'start'));
-        my $donelabel    := self.'post_new'('Label', :result($prefix ~ 'done'));
-        my $restartlabel := self.'post_new'('Label', :result($prefix ~ 'restart'));
-        my $faillabel    := self.'post_new'('Label', :result($prefix ~ 'fail'));
-        my $jumplabel    := self.'post_new'('Label', :result($prefix ~ 'jump'));
-        my $cutlabel     := self.'post_new'('Label', :result($prefix ~ 'cut'));
+        my $startlabel   := self.post_new('Label', :result($prefix ~ 'start'));
+        my $donelabel    := self.post_new('Label', :result($prefix ~ 'done'));
+        my $restartlabel := self.post_new('Label', :result($prefix ~ 'restart'));
+        my $faillabel    := self.post_new('Label', :result($prefix ~ 'fail'));
+        my $jumplabel    := self.post_new('Label', :result($prefix ~ 'jump'));
+        my $cutlabel     := self.post_new('Label', :result($prefix ~ 'cut'));
         %*REG<fail>      := $faillabel;
 
         # common prologue
