@@ -464,7 +464,7 @@ p6regex-test-loud: $(NQP_EXE)
 	prove -r -v --exec ./$(NQP_EXE) t/p6regex
 
 qregex-test: $(NQP_EXE) qregex
-	prove -r -v --exec ./$(NQP_EXE) t/qregex
+	prove -r --exec ./$(NQP_EXE) t/qregex
 
 setting-test: $(NQP_EXE) $(SETTING_PBC)
 	prove -r --exec ./$(NQP_EXE) t/setting
