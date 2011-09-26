@@ -1,6 +1,6 @@
 # This file contains extensions to PAST for integration with 6model.
 
-.namespace [ 'PAST';'Var' ]
+.namespace [ 'PAST';'Node' ]
 
 =item type([value])
 
