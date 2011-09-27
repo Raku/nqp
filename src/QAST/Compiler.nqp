@@ -257,7 +257,13 @@ class QAST::Compiler is HLL::Compiler {
 
     method pass($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
-        $ops.push_pirop('callmethod', '"!cursor_pass"', %*REG<cur>, %*REG<pos>);
+        if $node.name() {
+            my $name := $*PASTCOMPILER.as_post($node.name(), :rtype<~>);
+            $ops.push_pirop('callmethod', '"!cursor_pass"', %*REG<cur>, %*REG<pos>, $name);
+        }
+        else {
+            $ops.push_pirop('callmethod', '"!cursor_pass"', %*REG<cur>, %*REG<pos>);
+        }
         $ops.push_pirop('return', %*REG<cur>);
         $ops;
     }

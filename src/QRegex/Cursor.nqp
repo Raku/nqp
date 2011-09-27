@@ -83,12 +83,19 @@ role NQPCursorRole {
             $P0 = getinterp
             %r = $P0['sub';1]
         };
+        self.'!reduce'($name) if $name;
     }
 
     method !cursor_fail() {
         $!match  := nqp::null();
         $!bstack := nqp::null();
         $!pos    := -3;
+    }
+
+    method !reduce($name) {
+        my $actions := pir::find_dynamic_lex__Ps('$*ACTIONS');
+        pir::find_method__PPs($actions, $name)($actions, self.MATCH)
+            if pir::can__IPS($actions, $name);
     }
 
     method !protoregex($name) {
@@ -287,7 +294,8 @@ class NQPCursor does NQPCursorRole {
           && nqp::istrue(nqp::getattr(self, $?CLASS, '$!match'));
     }
 
-    method parse($target, :$rule = 'TOP', *%options) {
+    method parse($target, :$rule = 'TOP', :$actions, *%options) {
+        my $*ACTIONS := $actions;
         my $cur := self.'!cursor_init'($target, |%options);
         pir::find_method__PPs($cur, $rule)($cur).MATCH()
     }

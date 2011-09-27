@@ -412,7 +412,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         $qast := QAST::Regex.new( :rxtype<concat>,
                      QAST::Regex.new( :rxtype<scan> ),
                      $qast,
-                     QAST::Regex.new( :rxtype<pass> ));
+                     QAST::Regex.new( :rxtype<pass>, :name(%*RX<name>) ));
         $block.push(PAST::QAST.new($qast));
         $block;
     }
