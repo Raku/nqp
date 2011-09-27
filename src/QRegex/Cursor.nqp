@@ -286,6 +286,11 @@ class NQPCursor does NQPCursorRole {
         !nqp::isnull(nqp::getattr(self, $?CLASS, '$!match'))
           && nqp::istrue(nqp::getattr(self, $?CLASS, '$!match'));
     }
+
+    method parse($target, :$rule = 'TOP', *%options) {
+        my $cur := self.'!cursor_init'($target, |%options);
+        pir::find_method__PPs($cur, $rule)($cur).MATCH()
+    }
 }
 
 
