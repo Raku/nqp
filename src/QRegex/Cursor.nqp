@@ -116,6 +116,14 @@ role NQPCursorRole {
         else { $cur."!cursor_pass"($!pos, '') }
         $cur;
     }
+
+    method !LITERAL($str) {
+        my $cur := self."!cursor_start"();
+        my $litlen := nqp::chars($str);
+        $cur."!cursor_pass"($!pos + $litlen)
+          if nqp::substr($!target, $!pos, $litlen) eq $str;
+        $cur;
+    }
                  
     method ws() {
         # skip over any whitespace, fail if between two word chars
