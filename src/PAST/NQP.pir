@@ -414,8 +414,7 @@ entry to produce the node to be returned.
     $I0 = exists options['WHAT']
     unless $I0 goto have_what
     what = options['WHAT']
-    null $P0
-    options['WHAT'] = $P0
+    delete options['WHAT']
   have_what:
 
     past = what.'new'(args :flat, options :named :flat)
