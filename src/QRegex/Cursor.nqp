@@ -113,7 +113,6 @@ role NQPCursorRole {
               if nqp::substr($!target, $!pos, $litlen) 
                    eq nqp::substr($!target, $subcur.from, $litlen);
         }
-        else { $cur."!cursor_pass"($!pos, '') }
         $cur;
     }
 
