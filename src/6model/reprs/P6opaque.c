@@ -695,7 +695,10 @@ static STRING * get_str(PARROT_INTERP, PMC *obj) {
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot unbox type object to a native string");
         }
-        return get_str_at_offset(instance, repr_data->unbox_str_offset);
+        else {
+            STRING *s = get_str_at_offset(instance, repr_data->unbox_str_offset);
+            return s ? s : STRINGNULL;
+        }
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
