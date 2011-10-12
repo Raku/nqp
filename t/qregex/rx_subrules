@@ -5,8 +5,11 @@
 
 <?wb>def		abc\ndef\n-==\nghi	y	word boundary \W\w
 abc<?wb>		abc\ndef\n-==\nghi	y	word boundary \w\W
+<wb>			-			n	no boundary at all
 <?wb>abc		abc\ndef\n-==\nghi	y	BOS word boundary
+^^<wb>			-ab			n	BOS is not boundary
 ghi<?wb>		abc\ndef\n-==\nghi	y	EOS word boundary
+<wb>$$			ab-			n	EOS is not boundary
 a<?wb>			abc\ndef\n-==\nghi	n	\w\w word boundary
 \-<?wb>			abc\ndef\n-==\nghi	n	\W\W word boundary
 <!wb>def		abc\ndef\n-==\nghi	n	nonword boundary \W\w
