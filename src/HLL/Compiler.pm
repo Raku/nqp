@@ -327,6 +327,22 @@ class HLL::Compiler {
                 $has_error := 1;
                 $error     := $_;
             }
+            CONTROL {
+                if pir::can(self, 'handle-control') {
+                    self.handle-control($_);
+                } elsif pir::islt__IIi(pir::getattribute__PPs($_, 'severity'), pir::const::EXCEPT_ERROR) {
+                    my $err := pir::getstderr__P();
+                    my $message := ~$_;
+                    $err.print($message ?? $message !! "Warning");
+                    $err.print("\n");
+                    my $resume := pir::getattribute__PPs($_, 'resume');
+                    if ($resume) {
+                        $resume();
+                    }
+                }
+                $has_error := 1;
+                $error     := $_;
+            }
         }
         if ($has_error) {
             if %adverbs<ll-exception> || !pir::can(self, 'handle-exception') {
