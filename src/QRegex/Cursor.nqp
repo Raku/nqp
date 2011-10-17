@@ -51,17 +51,25 @@ role NQPCursorRole {
     method !cursor_start() {
         my $new := self.CREATE();
         nqp::bindattr($new, $?CLASS, '$!orig', $!orig);
+        if $!regexsub {
+            nqp::bindattr_i($new, $?CLASS, '$!pos', $!pos);
+            nqp::bindattr($new, $?CLASS, '$!cstack', nqp::clone($!cstack)) if $!cstack;
+            pir::return__vPsiPPi(
+                $new,
+                nqp::bindattr_s($new, $?CLASS, '$!target', $!target),
+                nqp::bindattr_i($new, $?CLASS, '$!from', $!from),
+                $?CLASS,
+                nqp::bindattr($new, $?CLASS, '$!bstack', nqp::clone($!bstack)),
+                1);
+        }
         nqp::bindattr_i($new, $?CLASS, '$!pos', -3);
-        nqp::bindattr($new, $?CLASS, '$!regexsub', Q:PIR {
-            $P0 = getinterp
-            %r = $P0['sub';1]
-        });
-        pir::return__vPsiPP(
+        pir::return__vPsiPPi(
             $new, 
             nqp::bindattr_s($new, $?CLASS, '$!target', $!target),
             nqp::bindattr_i($new, $?CLASS, '$!from', $!pos),
             $?CLASS,
-            nqp::bindattr($new, $?CLASS, '$!bstack', pir::new__Ps('ResizableIntegerArray'))
+            nqp::bindattr($new, $?CLASS, '$!bstack', pir::new__Ps('ResizableIntegerArray')),
+            0
         )
     }
 
@@ -90,6 +98,15 @@ role NQPCursorRole {
         $!match  := nqp::null();
         $!bstack := nqp::null();
         $!pos    := -3;
+    }
+
+    method !cursor_next() {
+        if $!regexsub {
+            $!regexsub(self);
+        }
+        else {
+            self."!cursor_start"()."!cursor_fail"()
+        }
     }
 
     method !reduce($name) {
