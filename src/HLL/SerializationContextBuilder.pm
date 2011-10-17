@@ -47,9 +47,6 @@ class HLL::Compiler::SerializationContextBuilder {
     # Address => slot mapping, so we can quickly look up existing objects
     # in the context.
     has %!addr_to_slot;
-    sub addr($obj) {
-        pir::get_id__IP($obj)
-    }
     
     # The event stream that builds or fixes up objects.
     has @!event_stream;
@@ -77,7 +74,7 @@ class HLL::Compiler::SerializationContextBuilder {
     
     # Gets the slot for a given object. Dies if it is not in the context.
     method slot_for_object($obj) {
-        my $slot := %!addr_to_slot{addr($obj)};
+        my $slot := %!addr_to_slot{nqp::where($obj)};
         unless pir::defined($slot) {
             pir::die('slot_for_object called on object not in context');
         }
@@ -126,7 +123,7 @@ class HLL::Compiler::SerializationContextBuilder {
         pir::nqp_set_sc_for_object__vPP($obj, $!sc);
         my $idx := $!sc.elems();
         $!sc[$idx] := $obj;
-        %!addr_to_slot{addr($obj)} := $idx;
+        %!addr_to_slot{nqp::where($obj)} := $idx;
         $idx
     }
     
@@ -134,7 +131,7 @@ class HLL::Compiler::SerializationContextBuilder {
     method add_code($obj) {
         my $idx := $!sc.elems();
         $!sc[$idx] := $obj;
-        %!addr_to_slot{addr($obj)} := $idx;
+        %!addr_to_slot{nqp::where($obj)} := $idx;
         $idx
     }
 
