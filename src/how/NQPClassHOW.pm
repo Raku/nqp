@@ -356,10 +356,7 @@ knowhow NQPClassHOW {
             @mro_reversed.unshift($_);
         }
         for @mro_reversed {
-            my %methods := $_.HOW.method_table($_);
-            for %methods {
-                %cache{$_.key} := $_.value;
-            }
+            %cache.update($_.HOW.method_table($_));
         }
         pir::publish_method_cache($obj, %cache);
         pir::set_method_cache_authoritativeness__0Pi($obj, 1);
@@ -377,13 +374,12 @@ knowhow NQPClassHOW {
 
     method publish_parrot_vtable_mapping($obj) {
         my %mapping;
+        my @mro_reversed;
         for @!mro {
-            my %map := $_.HOW.parrot_vtable_mappings($_, :local(1));
-            for %map {
-                unless %mapping{$_.key} {
-                    %mapping{$_.key} := $_.value;
-                }
-            }
+            @mro_reversed.unshift($_);
+        }
+        for @mro_reversed {
+            %mapping.update($_.HOW.parrot_vtable_mappings($_, :local(1)));
         }
         if +%mapping {
             pir::stable_publish_vtable_mapping__vPP($obj, %mapping);
@@ -392,13 +388,12 @@ knowhow NQPClassHOW {
 
     method publish_parrot_vtablee_handler_mapping($obj) {
         my %mapping;
+        my @mro_reversed;
         for @!mro {
-            my %map := $_.HOW.parrot_vtable_handler_mappings($_, :local(1));
-            for %map {
-                unless %mapping{$_.key} {
-                    %mapping{$_.key} := $_.value;
-                }
-            }
+            @mro_reversed.unshift($_);
+        }
+        for @mro_reversed {
+            %mapping.update($_.HOW.parrot_vtable_handler_mappings($_, :local(1)));
         }
         if +%mapping {
             pir::stable_publish_vtable_handler_mapping__vPP($obj, %mapping);
