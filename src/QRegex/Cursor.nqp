@@ -8,6 +8,7 @@ role NQPCursorRole {
     has $!bstack;
     has $!cstack;
     has $!regexsub;
+    has $!restart;
 
     method target() { $!target }
     method from() { $!from }
@@ -51,7 +52,11 @@ role NQPCursorRole {
     method !cursor_start() {
         my $new := self.CREATE();
         nqp::bindattr($new, $?CLASS, '$!orig', $!orig);
-        if $!regexsub {
+        nqp::bindattr($new, $?CLASS, '$!regexsub', Q:PIR {
+            $P0 = getinterp
+            %r = $P0['sub';1]
+        });
+        if $!restart {
             nqp::bindattr_i($new, $?CLASS, '$!pos', $!pos);
             nqp::bindattr($new, $?CLASS, '$!cstack', nqp::clone($!cstack)) if $!cstack;
             pir::return__vPsiPPi(
@@ -87,10 +92,7 @@ role NQPCursorRole {
     method !cursor_pass($pos, $name?) {
         $!match := 1;
         $!pos := $pos;
-        $!regexsub := Q:PIR {
-            $P0 = getinterp
-            %r = $P0['sub';1]
-        };
+        $!restart := $!regexsub;
         self.'!reduce'($name) if $name;
     }
 
@@ -101,8 +103,8 @@ role NQPCursorRole {
     }
 
     method !cursor_next() {
-        if $!regexsub {
-            $!regexsub(self);
+        if $!restart {
+            $!restart(self);
         }
         else {
             self."!cursor_start"()."!cursor_fail"()
