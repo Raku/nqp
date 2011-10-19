@@ -304,15 +304,19 @@ class HLL::Compiler {
         my $result;
         my $error;
         my $has_error := 0;
+        my $target := %adverbs<target>;
         try {
             if pir::defined(%adverbs<e>) {
-                $result := self.eval(%adverbs<e>, '-e', |@a, |%adverbs) 
+                $result := self.eval(%adverbs<e>, '-e', |@a, |%adverbs);
+                unless $target eq '' || $target eq 'pir' {
+					self.dumper($result, $target, |%adverbs);
+				}
             }
             elsif !@a { $result := self.interactive(|%adverbs) }
             elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }
             else { $result := self.evalfiles(@a[0], |@a, |%adverbs) }
 
-            if !pir::isnull($result) && %adverbs<target> eq 'pir' {
+            if !pir::isnull($result) && $target eq 'pir' {
                 my $output := %adverbs<output>;
                 my $fh := ($output eq '' || $output eq '-')
                         ?? pir::getinterp__P().stdout_handle()
