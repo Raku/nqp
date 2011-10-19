@@ -46,7 +46,7 @@ typedef struct {
  * a type check cache we treat it as definitive. However, it's possible to
  * declare that in the case the type check cache has no entry we should fall
  * back to asking the .HOW.type_check method (set TYPE_CHECK_CACHE_THEN_METHOD).
- * While a normal type check asks a value if it suppots another type, the
+ * While a normal type check asks a value if it supports another type, the
  * TYPE_CHECK_NEEDS_ACCEPTS flag results in a call to .accepts_type on the
  * HOW of the thing we're checking the value against, giving it a chance to
  * decide answer. */
