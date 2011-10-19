@@ -286,9 +286,7 @@ class HLL::Compiler {
         my %opts := $res.options;
         my @a    := $res.arguments;
 
-        for %opts -> $k {
-            %adverbs{$k} := %opts{$k};
-        }
+        %adverbs.update(%opts);
         self.usage($program-name) if %adverbs<help>;
 
         pir::load_bytecode('dumper.pbc');
