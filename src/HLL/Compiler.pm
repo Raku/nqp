@@ -330,15 +330,8 @@ class HLL::Compiler {
             CONTROL {
                 if pir::can(self, 'handle-control') {
                     self.handle-control($_);
-                } elsif pir::islt__IIi(pir::getattribute__PPs($_, 'severity'), pir::const::EXCEPT_ERROR) {
-                    my $err := pir::getstderr__P();
-                    my $message := ~$_;
-                    $err.print($message ?? $message !! "Warning");
-                    $err.print("\n");
-                    my $resume := pir::getattribute__PPs($_, 'resume');
-                    if ($resume) {
-                        $resume();
-                    }
+                } else {
+                    pir::rethrow__0P($_);
                 }
                 $has_error := 1;
                 $error     := $_;
