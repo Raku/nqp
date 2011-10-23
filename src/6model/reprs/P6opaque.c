@@ -842,6 +842,11 @@ static void change_type(PARROT_INTERP, PMC *obj, PMC *new_type) {
     PMC              *cur_mro, *new_mro;
     INTVAL            cur_mro_elems, new_mro_elems, mro_is_suffix;
     
+    /* Ensure we're not trying to change the type of a type object. */
+    if (PObj_flag_TEST(private0, obj))
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Cannot change the type of a type object");
+    
     /* Ensure that the destination type REPR is P6opaque also. */
     if (REPR(obj) != REPR(new_type))
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
