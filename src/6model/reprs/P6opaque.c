@@ -598,13 +598,16 @@ static PMC * repr_clone(PARROT_INTERP, PMC *to_clone) {
     if (defined(interp, to_clone)) {
         obj = (P6opaqueInstance *)Parrot_gc_allocate_fixed_size_storage(interp, repr_data->allocation_size);
         memcpy(obj, PMC_data(to_clone), repr_data->allocation_size);
+        return wrap_object(interp, obj);
     }
     else {
+        PMC *result;
         obj = mem_allocate_zeroed_typed(P6opaqueInstance);
         memcpy(obj, PMC_data(to_clone), sizeof(P6opaqueInstance));
+        result = wrap_object(interp, obj);
+        PObj_flag_SET(private0, result);
+        return result;
     }
-    
-    return wrap_object(interp, obj);
 }
 
 /* Used with boxing. Sets an integer value, for representations that can hold
