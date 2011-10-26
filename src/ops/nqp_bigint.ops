@@ -1,0 +1,12 @@
+BEGIN_OPS_PREAMBLE
+
+/* Parroty includes. */
+#include "parrot/parrot.h"
+#include "parrot/extend.h"
+#include "parrot/dynext.h"
+
+END_OPS_PREAMBLE
+
+inline op nqp_bigint_setup() :base_core {
+    
+}
