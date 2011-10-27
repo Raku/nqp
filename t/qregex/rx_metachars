@@ -121,29 +121,19 @@ a|&b			a|&b		<rule error>	alternation and conjunction (|&) - parse error
  | d | b		abc		y	leading alternation ignored
 # todo :pugs<feature> :pge<feature>
  b |  | d		abc		n	null pattern invalid
-# todo :pge<error messages>
 \pabc			pabc		<Unrecognized>	retired metachars (\p)
-# todo :pge<error messages>
 \p{InConsonant}		a		<Unrecognized>	retired metachars (\p)
-# todo :pge<error messages>
 \Pabc			Pabc		<Unrecognized>	retired metachars (\P)
-# todo :pge<error messages>
 \P{InConsonant}		a		<Unrecognized>	retired metachars (\P)
-# todo :pge<error messages>
 \Labc\E			LabcE		<Unrecognized>	retired metachars (\L...\E)
-# todo :pge<error messages>
 \LABC\E			abc		<Unrecognized>	retired metachars (\L...\E)
-# todo :pge<error messages>
 \Uabc\E			UabcE		<Unrecognized>	retired metachars (\U...\E)
-# todo :pge<error messages>
 \Uabc\E			ABC		<Unrecognized>	retired metachars (\U...\E)
 # todo :pge<error messages>
 \Qabc\E			QabcE		<Unrecognized>	retired metachars (\Q...\E)
 # todo :pge<error messages>
 \Qabc d?\E		abc d		<Unrecognized>	retired metachars (\Q...\E)
-# todo :pge<error messages>
 \Gabc			Gabc		<Unrecognized>	retired metachars (\G)
-# todo :pge<error messages>
 \1abc			1abc		<Unrecognized>	retired metachars (\1)
 # todo :pugs<feature>
 ^ \s+ $			\x0009\x0020\x00a0\x000a\x000b\x000c\x000d\x0085	y	0-255 whitespace (\s)

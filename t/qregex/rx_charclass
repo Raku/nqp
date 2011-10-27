@@ -67,15 +67,15 @@
 'ab"cd'			ab"cd		y	literal match with quote
 # todo :pugs<feature>
 'ab\\yz'		ab\x005cyz	y	literal match with backslash
-# todo :pugs<feature> :pge<feature>
+# todo :pugs<feature>
 "... --- ..."		... --- ...	y	literal match (\")
-# todo :pugs<feature> :pge<feature>
+# todo :pugs<feature>
 "... --- ..."		...---...	n	literal match (\")
-# todo :pugs<feature> :pge<feature>
+# todo :pugs<feature>
 "ab<\">cd"		ab<">cd		y	literal match with quote
-# todo :pugs<feature> :pge<feature>
+# todo :pugs<feature>
 "ab<'>cd"		ab<'>cd		y	literal match with quote
-# todo :pugs<feature> :pge<feature>
+# todo :pugs<feature>
 "ab\\cd"		ab\x005ccd	y	literal match with backslash
 # todo :pugs<feature> :pge<feature>
 (ab)x"$0"		abxab		y	literal match with interpolation
