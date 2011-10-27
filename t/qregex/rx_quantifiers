@@ -184,6 +184,7 @@ a**:!2..4		baaabbb		y	three "a" characters (explicit greed)
 ^[\w+] ** \,$		foo,bar,baz	y	** with a term
 ^[\w+] **? \, ....$	foo,bar,baz	y	**? with a term
 ^[\w+] ** [\,\s*]$	foo, bar, baz	y	** with term + ws
+# todo :pge<regression>
 :sigspace ^[\w+] ** \, $	foo, bar ,baz	y	** under :sigspace
 # todo :pge<ws and ** modifier'
 :sigspace ^[\w+]** \, $	foo, bar ,baz	n	** under :sigspace w/o ws

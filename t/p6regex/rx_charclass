@@ -55,9 +55,10 @@
 '... --- ...'		...---...	n	literal match (\')
 # todo :pugs<feature>
 'ab\'>cd'		ab'>cd		y	literal match with quote
+# todo :pge<regression>
 'ab\\yz'		ab\x5cyz	y	literal match with backslash
 'ab"cd'			ab"cd		y	literal match with quote
-# todo :pugs<feature>
+# todo :pugs<feature> :pge<regression>
 'ab\\yz'		ab\x5cyz	y	literal match with backslash
 # todo :pugs<feature> :pge<feature>
 "... --- ..."		... --- ...	y	literal match (\")
