@@ -108,6 +108,6 @@ for @files -> $fn {
     say("# done with file $fn");
 }
 say("plan 1..$tests");
-
+pir::exit(0);
 
 # vim: ft=perl6
