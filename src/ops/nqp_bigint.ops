@@ -50,3 +50,20 @@ inline op nqp_bigint_mul(out PMC, in PMC, in PMC) :base_core {
     $1 = REPR($2)->instance_of(interp, $2);
     mp_mul(a, b, get_bigint(interp, $1));
 }
+
+inline op nqp_bigint_from_str(out PMC, in PMC, in STR) :base_core {
+    char *buf = Parrot_str_cstring(interp, $3);
+    $1 = REPR($2)->instance_of(interp, $2);
+    mp_read_radix(get_bigint(interp, $1), buf, 10);
+}
+
+inline op nqp_bigint_to_str(out STR, in PMC) :base_core {
+    mp_int *i = get_bigint(interp, $2);
+    int len;
+    char *buf;
+    mp_radix_size(i, 10, &len);
+    buf = mem_sys_allocate(len);
+    mp_toradix_n(i, buf, 10, len);
+    $1 = Parrot_str_new(interp, buf, len);
+    mem_sys_free(buf);
+}
