@@ -263,4 +263,12 @@ PMC * wrap_object(PARROT_INTERP, void *obj);
 PMC * create_stable(PARROT_INTERP, REPROps *REPR, PMC *HOW);
 PMC * decontainerize(PARROT_INTERP, PMC *var);
 
+/* Dynamic representation registration. */
+typedef void (* rf) (PARROT_INTERP, STRING *name, REPROps * (*reg) (PARROT_INTERP, void *, void *));
+#define REGISTER_DYNAMIC_REPR(interp, name, reg_func) \
+    ((rf) \
+        VTABLE_get_pointer(interp, \
+            VTABLE_get_pmc_keyed_str(interp, interp->root_namespace, \
+                Parrot_str_new_constant(interp, "_REGISTER_REPR"))))(interp, name, reg_func)
+
 #endif
