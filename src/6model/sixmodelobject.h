@@ -146,6 +146,13 @@ struct SixModel_REPROps {
     /* Creates a new instance based on the type object. */
     PMC * (*instance_of) (PARROT_INTERP, PMC *WHAT);
 
+    /* Creates a new instance, but with its state based on data
+     * to be found at the specified address. This is used for
+     * making boxed versions of objects stored "flat" inside of
+     * others. Note that it must always copy the data from the
+     * source address, not point to that piece of memory. */
+    PMC * (*box_from) (PARROT_INTERP, PMC *WHAT, void *src);
+
     /* Checks if a given object is defined (from the point of
      * view of the representation). */
     INTVAL (*defined) (PARROT_INTERP, PMC *Obj);
@@ -161,6 +168,10 @@ struct SixModel_REPROps {
 
     /* Gets the current value for a native str attribute. */
     STRING * (*get_attribute_str) (PARROT_INTERP, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint);
+
+    /* Gets a reference to the memory location of an attribute. Note
+     * that this is only valid so long as the object itself is alive. */
+    void * (*get_attribute_ref) (PARROT_INTERP, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint);
 
     /* Binds the given object value to the specified attribute. */
     void (*bind_attribute) (PARROT_INTERP, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint, PMC *Value);
