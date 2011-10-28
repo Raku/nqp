@@ -4,9 +4,14 @@ BEGIN_OPS_PREAMBLE
 #include "parrot/parrot.h"
 #include "parrot/extend.h"
 #include "parrot/dynext.h"
+#include "../6model/sixmodelobject.h"
+#include "../6model/reprs/P6bigint.h"
 
 END_OPS_PREAMBLE
 
 inline op nqp_bigint_setup() :base_core {
-    
+    /* Register the bigint representation. */
+    REGISTER_DYNAMIC_REPR(interp,
+        Parrot_str_new_constant(interp, "P6bigint"),
+        P6bigint_initialize);
 }

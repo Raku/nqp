@@ -442,7 +442,7 @@ $(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS_SOURCE) $(DYNPMC)
 
 $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT): $(OPS_DIR)/$(BIGINT_OPS_SOURCE)
 	cd $(OPS_DIR) && $(OPS2C) C --dynamic $(BIGINT_OPS_SOURCE)
-	cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(BIGINT_OPS)$(O) $(CINCLUDES) $(CFLAGS) $(BIGINT_OPS).c
+	cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(BIGINT_OPS)$(O) $(CINCLUDES) -I../../3rdparty/libtommath $(CFLAGS) $(BIGINT_OPS).c
 	cd 3rdparty/libtommath && $(CC) -c @cc_o_out@bncore$(O) -I. $(CFLAGS) bncore.c
 	cd 3rdparty/libtommath && $(CC) -c @cc_o_out@bn_error$(O) -I. $(CFLAGS) bn_error.c
 	cd 3rdparty/libtommath && $(CC) -c @cc_o_out@bn_fast_mp_invmod$(O) -I. $(CFLAGS) bn_fast_mp_invmod.c
@@ -562,7 +562,8 @@ $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT): $(OPS_DIR)/$(BIGINT_OPS_SOURCE)
 	cd 3rdparty/libtommath && $(CC) -c @cc_o_out@bn_s_mp_mul_high_digs$(O) -I. $(CFLAGS) bn_s_mp_mul_high_digs.c
 	cd 3rdparty/libtommath && $(CC) -c @cc_o_out@bn_s_mp_sqr$(O) -I. $(CFLAGS) bn_s_mp_sqr.c
 	cd 3rdparty/libtommath && $(CC) -c @cc_o_out@bn_s_mp_sub$(O) -I. $(CFLAGS) bn_s_mp_sub.c
-	cd $(OPS_DIR) && $(LD) @ld_out@$(BIGINT_OPS)$(LOAD_EXT) $(BIGINT_OPS)$(O) ../../3rdparty/libtommath/*$(O) $(LINKARGS)
+	cd src/6model/reprs && $(CC) -c @cc_o_out@P6bigint$(O) -I../../../$(PMC_DIR) -I../../../3rdparty/libtommath $(CINCLUDES) $(CFLAGS) P6bigint.c
+	cd $(OPS_DIR) && $(LD) @ld_out@$(BIGINT_OPS)$(LOAD_EXT) $(BIGINT_OPS)$(O) ../../3rdparty/libtommath/*$(O) ../6model/reprs/P6bigint$(O) $(LINKARGS)
 
 bootstrap-files: $(STAGE2_PBCS) src/stage2/$(CORE_SETTING_NQP)
 	$(PERL) tools/build/gen-bootstrap.pl src/Regex.pir >src/stage0/Regex-s0.pir
