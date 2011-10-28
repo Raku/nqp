@@ -47,7 +47,7 @@ static INTVAL defined(PARROT_INTERP, PMC *obj) {
 PARROT_DOES_NOT_RETURN
 static void die_no_attrs(PARROT_INTERP) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6str representation does not support attribute storage");
+            "P6int representation does not support attribute storage");
 }
 
 /* Gets the current value for an attribute. */
