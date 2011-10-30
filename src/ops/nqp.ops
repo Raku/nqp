@@ -1220,7 +1220,7 @@ inline op stable_publish_vtable_handler_mapping(in PMC, in PMC) :base_core {
                 st->parrot_vtable_handler_mapping[idx].class_handle = class_handle;
                 st->parrot_vtable_handler_mapping[idx].attr_name = attr_name;
                 st->parrot_vtable_handler_mapping[idx].hint =
-                    REPR(class_handle)->hint_for(interp, target, class_handle, attr_name);
+                    REPR(class_handle)->hint_for(interp, STABLE(target), class_handle, attr_name);
             }
 			else
                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -1459,7 +1459,7 @@ Gets lookup hint for an attribute.
 inline op repr_hint_for(out INT, in PMC, in PMC, in STR) :base_core {
     PMC *ch = decontainerize(interp, $3);
     if ($2->vtable->base_type == smo_id)
-        $1 = REPR($2)->hint_for(interp, $2, $3, $4);
+        $1 = REPR($2)->hint_for(interp, STABLE($2), $3, $4);
     else
         $1 = NO_HINT;
 }

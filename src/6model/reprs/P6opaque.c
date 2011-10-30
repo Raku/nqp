@@ -520,12 +520,12 @@ static void bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class
 }
 
 /* Gets the hint for the given attribute ID. */
-static INTVAL hint_for(PARROT_INTERP, PMC *obj, PMC *class_key, STRING *name) {
+static INTVAL hint_for(PARROT_INTERP, STable *st, PMC *class_key, STRING *name) {
     INTVAL slot;
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     if (!repr_data->allocation_size) {
-        compute_allocation_strategy(interp, obj, repr_data);
-        PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC(obj));
+        compute_allocation_strategy(interp, st->WHAT, repr_data);
+        PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
     }
     slot = try_get_slot(interp, repr_data, class_key, name);
     return slot >= 0 ? slot : NO_HINT;
