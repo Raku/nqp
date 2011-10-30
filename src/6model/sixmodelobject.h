@@ -159,8 +159,11 @@ struct SixModel_REPROps {
      * may recursively call initialize for any flattened objects. */
     void (*initialize) (PARROT_INTERP, STable *st, void *data);
 
-    /* Gets the current value for an object attribute. */
-    PMC * (*get_attribute) (PARROT_INTERP, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint);
+    /* Gets the current value for an object attribute. For non-flattened
+     * objects - that is, reference types - this just returns the object
+     * stored in the attribute. For the flattened case, this will auto-box. */
+    PMC * (*get_attribute_boxed) (PARROT_INTERP, STable *st, void *data,
+        PMC *class_handle, STRING *name, INTVAL hint);
 
     /* Gets a reference to the memory location of an attribute. Note
      * that this is only valid so long as the object itself is alive. */

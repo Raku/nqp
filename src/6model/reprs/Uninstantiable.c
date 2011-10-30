@@ -50,7 +50,7 @@ static void die_no_attrs(PARROT_INTERP) {
 }
 
 /* Gets the current value for an attribute. */
-static PMC * get_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
+static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
     die_no_attrs(interp);
     return PMCNULL;
 }
@@ -162,7 +162,7 @@ REPROps * Uninstantiable_initialize(PARROT_INTERP) {
     this_repr->type_object_for = type_object_for;
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
-    this_repr->get_attribute = get_attribute;
+    this_repr->get_attribute_boxed = get_attribute_boxed;
     this_repr->get_attribute_ref = get_attribute_ref;
     this_repr->bind_attribute = bind_attribute;
     this_repr->bind_attribute_int = bind_attribute_int;

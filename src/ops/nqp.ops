@@ -257,7 +257,7 @@ inline op repr_get_attr_obj(out PMC, in PMC, in PMC, in STR) :base_core {
     PMC *ch = decontainerize(interp, $3);
     if ($2->vtable->base_type == smo_id) {
         if (IS_CONCRETE($2))
-            $1 = REPR($2)->get_attribute(interp, $2, ch, $4, NO_HINT);
+            $1 = REPR($2)->get_attribute_boxed(interp, STABLE($2), OBJECT_BODY($2), ch, $4, NO_HINT);
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot look up attributes in a type object");
@@ -434,7 +434,7 @@ inline op repr_get_attr_obj(out PMC, in PMC, in PMC, in STR, in INT) :base_core 
     PMC *ch = decontainerize(interp, $3);
     if ($2->vtable->base_type == smo_id) {
         if (IS_CONCRETE($2))
-            $1 = REPR($2)->get_attribute(interp, $2, ch, $4, $5);
+            $1 = REPR($2)->get_attribute_boxed(interp, STABLE($2), OBJECT_BODY($2), ch, $4, $5);
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot look up attributes in a type object");

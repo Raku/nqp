@@ -47,9 +47,9 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
 }
 
 /* Gets the current value for an attribute. */
-static PMC * get_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
-    HashAttrStoreInstance *instance = (HashAttrStoreInstance *)PMC_data(obj);
-    return VTABLE_get_pmc_keyed_str(interp, instance->body.store, name);
+static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
+    HashAttrStoreBody *body = (HashAttrStoreBody *)data;
+    return VTABLE_get_pmc_keyed_str(interp, body->store, name);
 }
 static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -174,7 +174,7 @@ REPROps * HashAttrStore_initialize(PARROT_INTERP) {
     this_repr->type_object_for = type_object_for;
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
-    this_repr->get_attribute = get_attribute;
+    this_repr->get_attribute_boxed = get_attribute_boxed;
     this_repr->get_attribute_ref = get_attribute_ref;
     this_repr->bind_attribute = bind_attribute;
     this_repr->bind_attribute_int = bind_attribute_int;

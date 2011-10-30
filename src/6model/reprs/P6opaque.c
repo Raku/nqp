@@ -399,16 +399,15 @@ static void no_such_attribute(PARROT_INTERP, const char *action, PMC *class_hand
 }
 
 /* Gets the current value for an attribute. */
-static PMC * get_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
+static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     INTVAL            slot;
 
     /* Try the slot allocation first. */
     slot = hint >= 0 && !(repr_data->mi) ? hint :
         try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
-        PMC *result = get_pmc_at_offset(instance, sizeof(P6opaqueInstance) + repr_data->attribute_offsets[slot]);
+        PMC *result = get_pmc_at_offset(data, repr_data->attribute_offsets[slot]);
         if (result) {
             return result;
         }
@@ -418,7 +417,7 @@ static PMC * get_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *n
                 PMC *value = repr_data->auto_viv_values[slot];
                 if (value != NULL) {
                     value = REPR(value)->clone(interp, value);
-                    set_pmc_at_offset(instance, sizeof(P6opaqueInstance) + repr_data->attribute_offsets[slot], value);
+                    set_pmc_at_offset(data, repr_data->attribute_offsets[slot], value);
                     return value;
                 }
             }
@@ -822,7 +821,7 @@ REPROps * P6opaque_initialize(PARROT_INTERP) {
     this_repr->type_object_for = type_object_for;
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
-    this_repr->get_attribute = get_attribute;
+    this_repr->get_attribute_boxed = get_attribute_boxed;
     this_repr->get_attribute_ref = get_attribute_ref;
     this_repr->bind_attribute = bind_attribute;
     this_repr->bind_attribute_int = bind_attribute_int;
