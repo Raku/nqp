@@ -189,6 +189,10 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
         /* Allocate offset array and GC mark info arrays. */
         repr_data->num_attributes      = num_attrs;
         repr_data->attribute_offsets   = (INTVAL *) mem_sys_allocate(info_alloc * sizeof(INTVAL));
+        repr_data->flattened_stables   = (PMC **) mem_sys_allocate_zeroed(info_alloc * sizeof(PMC *));
+        repr_data->unbox_int_slot      = -1;
+        repr_data->unbox_num_slot      = -1;
+        repr_data->unbox_str_slot      = -1;
 
         /* Go over the attributes and arrange their allocation. */
         for (i = 0; i < num_attrs; i++) {
@@ -206,30 +210,31 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
                 /* Get the storage spec of the type and see what it wants. */
                 storage_spec spec = REPR(type)->get_storage_spec(interp, STABLE(type));
                 if (spec.inlineable == STORAGE_SPEC_INLINED) {
-                    /* Yes, it's something we'll inline. */
+                    /* Yes, it's something we'll flatten. */
                     unboxed_type = spec.boxed_primitive;
                     bits = spec.bits;
+                    repr_data->flattened_stables[i] = STABLE_PMC(type);
 
                     /* Is it a target for box/unbox operations? */
                     if (!PMC_IS_NULL(box_target) && VTABLE_get_bool(interp, box_target)) {
                         switch (unboxed_type) {
                         case STORAGE_SPEC_BP_INT:
-                            if (repr_data->unbox_int_offset)
+                            if (repr_data->unbox_int_slot >= 0)
                                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                                         "Duplicate box_target for native int");
-                            repr_data->unbox_int_offset = cur_size;
+                            repr_data->unbox_int_slot = i;
                             break;
                         case STORAGE_SPEC_BP_NUM:
-                            if (repr_data->unbox_num_offset)
+                            if (repr_data->unbox_num_slot >= 0)
                                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                                         "Duplicate box_target for native num");
-                            repr_data->unbox_num_offset = cur_size;
+                            repr_data->unbox_num_slot = i;
                             break;
                         case STORAGE_SPEC_BP_STR:
-                            if (repr_data->unbox_str_offset)
+                            if (repr_data->unbox_str_slot >= 0)
                                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                                         "Duplicate box_target for native str");
-                            repr_data->unbox_str_offset = cur_size;
+                            repr_data->unbox_str_slot = i;
                             break;
                         default:
                             /*  nothing, just suppress 'missing default' warning */
@@ -572,8 +577,8 @@ static PMC * repr_clone(PARROT_INTERP, PMC *to_clone) {
  * one. */
 static void set_int(PARROT_INTERP, STable *st, void *data, INTVAL value) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
-    if (repr_data->unbox_int_offset) {
-        set_int_at_offset(data, repr_data->unbox_int_offset, value);
+    if (repr_data->unbox_int_slot >= 0) {
+        set_int_at_offset(data, repr_data->attribute_offsets[repr_data->unbox_int_slot], value);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -585,8 +590,8 @@ static void set_int(PARROT_INTERP, STable *st, void *data, INTVAL value) {
  * hold one. */
 static INTVAL get_int(PARROT_INTERP, STable *st, void *data) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
-    if (repr_data->unbox_int_offset) {
-        return get_int_at_offset(data, repr_data->unbox_int_offset);
+    if (repr_data->unbox_int_slot >= 0) {
+        return get_int_at_offset(data, repr_data->attribute_offsets[repr_data->unbox_int_slot]);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -598,8 +603,8 @@ static INTVAL get_int(PARROT_INTERP, STable *st, void *data) {
  * hold one. */
 static void set_num(PARROT_INTERP, STable *st, void *data, FLOATVAL value) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
-    if (repr_data->unbox_num_offset) {
-        set_num_at_offset(data, repr_data->unbox_num_offset, value);
+    if (repr_data->unbox_num_slot >= 0) {
+        set_num_at_offset(data, repr_data->attribute_offsets[repr_data->unbox_num_slot], value);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -611,8 +616,8 @@ static void set_num(PARROT_INTERP, STable *st, void *data, FLOATVAL value) {
  * hold one. */
 static FLOATVAL get_num(PARROT_INTERP, STable *st, void *data) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
-    if (repr_data->unbox_num_offset) {
-        return get_num_at_offset(data, repr_data->unbox_num_offset);
+    if (repr_data->unbox_num_slot >= 0) {
+        return get_num_at_offset(data, repr_data->attribute_offsets[repr_data->unbox_num_slot]);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -624,8 +629,8 @@ static FLOATVAL get_num(PARROT_INTERP, STable *st, void *data) {
  * one. */
 static void set_str(PARROT_INTERP, STable *st, void *data, STRING *value) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
-    if (repr_data->unbox_str_offset) {
-        set_str_at_offset(data, repr_data->unbox_str_offset, value);
+    if (repr_data->unbox_str_slot >= 0) {
+        set_str_at_offset(data, repr_data->attribute_offsets[repr_data->unbox_str_slot], value);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -637,8 +642,8 @@ static void set_str(PARROT_INTERP, STable *st, void *data, STRING *value) {
  * one. */
 static STRING * get_str(PARROT_INTERP, STable *st, void *data) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
-    if (repr_data->unbox_str_offset) {
-        STRING *s = get_str_at_offset(data, repr_data->unbox_str_offset);
+    if (repr_data->unbox_str_slot >= 0) {
+        STRING *s = get_str_at_offset(data, repr_data->attribute_offsets[repr_data->unbox_str_slot]);
         return s ? s : STRINGNULL;
     }
     else {
@@ -726,11 +731,11 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     spec.inlineable = STORAGE_SPEC_REFERENCE;
     spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
     spec.can_box = 0;
-    if (repr_data->unbox_int_offset)
+    if (repr_data->unbox_int_slot >= 0)
         spec.can_box += STORAGE_SPEC_CAN_BOX_INT;
-    if (repr_data->unbox_num_offset)
+    if (repr_data->unbox_num_slot >= 0)
         spec.can_box += STORAGE_SPEC_CAN_BOX_NUM;
-    if (repr_data->unbox_str_offset)
+    if (repr_data->unbox_str_slot >= 0)
         spec.can_box += STORAGE_SPEC_CAN_BOX_STR;
     return spec;
 }

@@ -26,11 +26,17 @@ typedef struct {
      * for the 6model common header and attributes. Size is in bytes. */
     INTVAL allocation_size;
 
-    /* The number of attributes we have allocated slots for. */
+    /* The number of attributes we have allocated slots for. Note that
+     * slots can vary in size. */
     INTVAL num_attributes;
 
     /* Maps attribute position numbers to the byte offset in the object. */
     INTVAL *attribute_offsets;
+
+    /* If the attribute was actually flattened in to this object from another
+     * representation, this is the s-table of the type of that attribute. NULL
+     * for attributes that are just reference types. */
+    PMC **flattened_stables;
     
     /* Flags if we are MI or not. */
     INTVAL mi;
@@ -40,14 +46,14 @@ typedef struct {
      * to some container type. */
     PMC **auto_viv_values;
 
-    /* If we can unbox to a native integer, this is the offset to find it. */
-    INTVAL unbox_int_offset;
+    /* Slot to delegate to when we need to unbox to a native integer. */
+    INTVAL unbox_int_slot;
 
-    /* If we can unbox to a native number, this is the offset to find it. */
-    INTVAL unbox_num_offset;
+    /* Slot to delegate to when we need to unbox to a native number. */
+    INTVAL unbox_num_slot;
 
-    /* If we can unbox to a native string, this is the offset to find it. */
-    INTVAL unbox_str_offset;
+    /* Slot to delegate to when we need to unbox to a native string. */
+    INTVAL unbox_str_slot;
 
     /* A table mapping attribute names to indexes (which can then be looked
      * up in the offset table). Uses a final null entry as a sentinel. */
