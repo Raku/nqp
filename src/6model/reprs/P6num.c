@@ -44,6 +44,11 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
     ((P6numBody *)data)->value = 0.0/x;
 }
 
+/* Copies to the body of one object to another. */
+static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
+    *((FLOATVAL *)dest) = *((FLOATVAL *)src);
+}
+
 /* Helper to die because this type doesn't support attributes. */
 PARROT_DOES_NOT_RETURN
 static void die_no_attrs(PARROT_INTERP) {
@@ -156,6 +161,7 @@ REPROps * P6num_initialize(PARROT_INTERP) {
     this_repr->type_object_for = type_object_for;
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
+    this_repr->copy_to = copy_to;
     this_repr->get_attribute_boxed = get_attribute_boxed;
     this_repr->get_attribute_ref = get_attribute_ref;
     this_repr->bind_attribute = bind_attribute;

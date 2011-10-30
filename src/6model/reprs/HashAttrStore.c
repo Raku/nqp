@@ -46,6 +46,13 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
     ((HashAttrStoreBody *)data)->store = pmc_new(interp, enum_class_Hash);
 }
 
+/* Copies to the body of one object to another. */
+static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
+    HashAttrStoreBody *src_body = (HashAttrStoreBody *)src;
+    HashAttrStoreBody *dest_body = (HashAttrStoreBody *)dest;
+    dest_body->store = VTABLE_clone(interp, src_body->store);
+}
+
 /* Gets the current value for an attribute. */
 static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
     HashAttrStoreBody *body = (HashAttrStoreBody *)data;
@@ -174,6 +181,7 @@ REPROps * HashAttrStore_initialize(PARROT_INTERP) {
     this_repr->type_object_for = type_object_for;
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
+    this_repr->copy_to = copy_to;
     this_repr->get_attribute_boxed = get_attribute_boxed;
     this_repr->get_attribute_ref = get_attribute_ref;
     this_repr->bind_attribute = bind_attribute;

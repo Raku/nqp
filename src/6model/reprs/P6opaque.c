@@ -388,6 +388,12 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
     /* XXX Fill this out when we may have nested things to initialize. */
 }
 
+/* Copies to the body of one object to another. */
+static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
+    P6opaqueREPRData * repr_data = (P6opaqueREPRData *) st->REPR_data;
+    memcpy(dest, src, repr_data->allocation_size - sizeof(P6opaqueInstance));
+}
+
 /* Helper for complaining about attribute access errors. */
 PARROT_DOES_NOT_RETURN
 static void no_such_attribute(PARROT_INTERP, const char *action, PMC *class_handle, STRING *name) {
@@ -821,6 +827,7 @@ REPROps * P6opaque_initialize(PARROT_INTERP) {
     this_repr->type_object_for = type_object_for;
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
+    this_repr->copy_to = copy_to;
     this_repr->get_attribute_boxed = get_attribute_boxed;
     this_repr->get_attribute_ref = get_attribute_ref;
     this_repr->bind_attribute = bind_attribute;

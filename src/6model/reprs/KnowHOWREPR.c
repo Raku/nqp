@@ -46,6 +46,15 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
     body->attributes     = pmc_new(interp, enum_class_ResizablePMCArray);
 }
 
+/* Copies to the body of one object to another. */
+static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
+    KnowHOWREPRBody *src_body = (KnowHOWREPRBody *)src;
+    KnowHOWREPRBody *dest_body = (KnowHOWREPRBody *)dest;
+    dest_body->name = src_body->name;
+    dest_body->methods = VTABLE_clone(interp, src_body->methods);
+    dest_body->attributes = VTABLE_clone(interp, src_body->attributes);
+}
+
 /* Helper to die because this type doesn't support attributes. */
 PARROT_DOES_NOT_RETURN
 static void die_no_attrs(PARROT_INTERP) {
@@ -171,6 +180,7 @@ REPROps * KnowHOWREPR_initialize(PARROT_INTERP) {
     this_repr->type_object_for = type_object_for;
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
+    this_repr->copy_to = copy_to;
     this_repr->get_attribute_boxed = get_attribute_boxed;
     this_repr->get_attribute_ref = get_attribute_ref;
     this_repr->bind_attribute = bind_attribute;
