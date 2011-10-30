@@ -724,18 +724,11 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
 }
 
 /* Checks if an attribute has been initialized. */
-static INTVAL is_attribute_initialized(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
-    INTVAL            slot;
-
-    if (PObj_flag_TEST(private0, obj))
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot access attributes in a type object");
-
-    slot = try_get_slot(interp, repr_data, class_handle, name);
+static INTVAL is_attribute_initialized(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    INTVAL slot = try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0)
-        return NULL != get_pmc_at_offset(instance, sizeof(P6opaqueInstance) + repr_data->attribute_offsets[slot]);
+        return NULL != get_pmc_at_offset(data, repr_data->attribute_offsets[slot]);
     else
         no_such_attribute(interp, "initializedness check", class_handle, name);
 }

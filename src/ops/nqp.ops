@@ -657,11 +657,17 @@ in $1 if so.
 */
 inline op repr_is_attr_initialized(out INT, in PMC, in PMC, in STR) :base_core {
     PMC *ch = decontainerize(interp, $3);
-    if ($2->vtable->base_type == smo_id)
-        $1 = REPR($2)->is_attribute_initialized(interp, $2, ch, $4, NO_HINT);
-    else
+    if ($2->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($2))
+            $1 = REPR($2)->is_attribute_initialized(interp, STABLE($2), OBJECT_BODY($2), ch, $4, NO_HINT);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot check initializedness of attributes in a type object");
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_is_attr_initialized on a SixModelObject");
+    }
 }
 
 

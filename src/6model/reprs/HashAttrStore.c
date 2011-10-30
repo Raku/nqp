@@ -155,12 +155,9 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
 }
 
 /* Checks if an attribute has been initialized. */
-static INTVAL is_attribute_initialized(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
-    HashAttrStoreInstance *instance = (HashAttrStoreInstance *)PMC_data(obj);
-    if (!instance->body.store)
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot access attributes in a type object");
-    return VTABLE_exists_keyed_str(interp, instance->body.store, name);
+static INTVAL is_attribute_initialized(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
+    HashAttrStoreBody *body = (HashAttrStoreBody *)data;
+    return VTABLE_exists_keyed_str(interp, body->store, name);
 }
 
 /* Initializes the HashAttrStore representation. */

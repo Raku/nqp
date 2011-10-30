@@ -164,7 +164,7 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
 }
 
 /* Checks if an attribute has been initialized. */
-static INTVAL is_attribute_initialized(PARROT_INTERP, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint) {
+static INTVAL is_attribute_initialized(PARROT_INTERP, STable *st, void *data, PMC *ClassHandle, STRING *Name, INTVAL Hint) {
     die_no_attrs(interp);
 }
 

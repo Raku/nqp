@@ -242,7 +242,8 @@ struct SixModel_REPROps {
     storage_spec (*get_storage_spec) (PARROT_INTERP, STable *st);
     
     /* Checks if an attribute has been initialized. */
-    INTVAL (*is_attribute_initialized) (PARROT_INTERP, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint);
+    INTVAL (*is_attribute_initialized) (PARROT_INTERP, STable *st, void *data,
+        PMC *class_handle, STRING *name, INTVAL hint);
     
     /* Handles an object changing its type. The representation is responsible
      * for doing any changes to the underlying data structure, and may reject
