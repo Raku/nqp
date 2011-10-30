@@ -462,6 +462,11 @@ entry to produce the node to be returned.
     maphash['abs_I']    = 'nqp_bigint_abs__PP'
     maphash['abs_n']    = 'abs__Nn'
 
+    maphash['gcd_i']    = 'gcd__Ii'
+    maphash['gcd_I']    = 'nqp_bigint_gcd__PP'
+    maphash['lcm_i']    = 'lcmd__Ii'
+    maphash['lcm_I']    = 'nqp_bigint_lcmd__PP'
+
     maphash['ceil_n']   = 'ceil__Nn'
     maphash['floor_n']  = 'floor__NN'
     maphash['ln_n']     = 'ln__Nn'
