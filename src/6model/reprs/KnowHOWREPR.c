@@ -33,9 +33,10 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 }
 
 /* Creates a new instance based on the type object. */
-static PMC * allocate(PARROT_INTERP, PMC *st) {
+static PMC * allocate(PARROT_INTERP, STable *st) {
     KnowHOWREPRInstance *obj = mem_allocate_zeroed_typed(KnowHOWREPRInstance);
-    obj->common.stable       = st;
+    if (st)
+        obj->common.stable = st->stable_pmc;
     return wrap_object(interp, obj);
 }
 

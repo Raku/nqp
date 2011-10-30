@@ -22,7 +22,7 @@ static void new_type(PARROT_INTERP, PMC *nci) {
     /* We first create a new HOW instance. */
     PMC *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
-    PMC *HOW     = REPR(self)->allocate(interp, STABLE_PMC(self));
+    PMC *HOW     = REPR(self)->allocate(interp, STABLE(self));
     
     /* See if we have a representation name; if not default to P6opaque. */
     STRING *repr_name = VTABLE_exists_keyed_str(interp, capture, repr_str) ?
@@ -260,7 +260,7 @@ static void attr_new(PARROT_INTERP, PMC *nci) {
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *type    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
     STRING *name    = VTABLE_get_string_keyed_str(interp, capture, name_str);
-    PMC    *self    = REPR(type)->allocate(interp, STABLE_PMC(type));
+    PMC    *self    = REPR(type)->allocate(interp, STABLE(type));
     REPR(self)->set_str(interp, STABLE(self), OBJECT_BODY(self), name);
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", self);
 }

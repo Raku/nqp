@@ -132,6 +132,9 @@ typedef struct {
 
 	/* Parrot-specific set of v-table to object method mappings. */
 	AttributeIdentifier *parrot_vtable_handler_mapping;
+    
+    /* The PMC that wraps this s-table. */
+    PMC *stable_pmc;
 } STable;
 
 /* A representation is what controls the layout of an object and storage of
@@ -152,7 +155,7 @@ struct SixModel_REPROps {
 
     /* Allocates a new, but uninitialized object, based on the
      * specified s-table. */
-    PMC * (*allocate) (PARROT_INTERP, PMC *stable_pmc);
+    PMC * (*allocate) (PARROT_INTERP, STable *st);
 
     /* Used to initialize the body of an object representing the type
      * describe by the specified s-table. DATA points to the body. It

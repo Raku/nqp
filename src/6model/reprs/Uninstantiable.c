@@ -32,7 +32,7 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 }
 
 /* Creates a new instance based on the type object. */
-static PMC * allocate(PARROT_INTERP, PMC *st) {
+static PMC * allocate(PARROT_INTERP, STable *st) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "You cannot create an instance of this type");
 }

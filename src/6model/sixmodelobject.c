@@ -163,6 +163,7 @@ PMC * create_stable(PARROT_INTERP, REPROps *REPR, PMC *HOW) {
     STABLE_STRUCT(st_pmc)->WHO = PMCNULL;
     STABLE_STRUCT(st_pmc)->find_method = default_find_method;
     STABLE_STRUCT(st_pmc)->type_check = default_type_check;
+    STABLE_STRUCT(st_pmc)->stable_pmc = st_pmc;
     return st_pmc;
 }
 

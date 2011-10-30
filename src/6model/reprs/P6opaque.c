@@ -369,20 +369,20 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 }
 
 /* Creates a new instance based on the type object. */
-static PMC * allocate(PARROT_INTERP, PMC *st) {
+static PMC * allocate(PARROT_INTERP, STable *st) {
     P6opaqueInstance * obj;
 
     /* Compute allocation strategy if we've not already done so. */
-    P6opaqueREPRData * repr_data = (P6opaqueREPRData *) STABLE_STRUCT(st)->REPR_data;
+    P6opaqueREPRData * repr_data = (P6opaqueREPRData *) st->REPR_data;
     if (!repr_data->allocation_size) {
-        compute_allocation_strategy(interp, STABLE_STRUCT(st)->WHAT, repr_data);
-        PARROT_GC_WRITE_BARRIER(interp, st);
+        compute_allocation_strategy(interp, st->WHAT, repr_data);
+        PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
     }
 
     /* Allocate and set up object instance. */
     obj = (P6opaqueInstance *) Parrot_gc_allocate_fixed_size_storage(interp, repr_data->allocation_size);
     memset(obj, 0, repr_data->allocation_size);
-    obj->common.stable = st;
+    obj->common.stable = st->stable_pmc;
     
     return wrap_object(interp, obj);
 }
@@ -418,21 +418,31 @@ static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
     slot = hint >= 0 && !(repr_data->mi) ? hint :
         try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
-        PMC *result = get_pmc_at_offset(data, repr_data->attribute_offsets[slot]);
-        if (result) {
-            return result;
+        if (!repr_data->flattened_stables[slot]) {
+            PMC *result = get_pmc_at_offset(data, repr_data->attribute_offsets[slot]);
+            if (result) {
+                return result;
+            }
+            else {
+                /* Maybe we know how to auto-viv it to a container. */
+                if (repr_data->auto_viv_values) {
+                    PMC *value = repr_data->auto_viv_values[slot];
+                    if (value != NULL) {
+                        value = REPR(value)->clone(interp, value);
+                        set_pmc_at_offset(data, repr_data->attribute_offsets[slot], value);
+                        return value;
+                    }
+                }
+                return PMCNULL;
+            }
         }
         else {
-            /* Maybe we know how to auto-viv it to a container. */
-            if (repr_data->auto_viv_values) {
-                PMC *value = repr_data->auto_viv_values[slot];
-                if (value != NULL) {
-                    value = REPR(value)->clone(interp, value);
-                    set_pmc_at_offset(data, repr_data->attribute_offsets[slot], value);
-                    return value;
-                }
-            }
-            return PMCNULL;
+            /* Need to produce a boxed version of this attribute. */
+            STable *st  = repr_data->flattened_stables[slot];
+            PMC *result = st->REPR->allocate(interp, st);
+            st->REPR->copy_to(interp, st, (char *)data + repr_data->attribute_offsets[slot],
+                OBJECT_BODY(result));
+            return result;
         }
     }
     

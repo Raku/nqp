@@ -34,10 +34,10 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 }
 
 /* Creates a new instance based on the type object. */
-static PMC * allocate(PARROT_INTERP, PMC *st) {
+static PMC * allocate(PARROT_INTERP, STable *st) {
     HashAttrStoreInstance *obj;
     obj = (HashAttrStoreInstance *) Parrot_gc_allocate_fixed_size_storage(interp, sizeof(HashAttrStoreInstance));
-    obj->common.stable = st;
+    obj->common.stable = st->stable_pmc;
     return wrap_object(interp, obj);
 }
 

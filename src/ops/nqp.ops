@@ -197,7 +197,7 @@ Instantiates a new object based on the given WHAT.
 */
 inline op repr_instance_of(out PMC, in PMC) :base_core {
     if ($2->vtable->base_type == smo_id) {
-        $1 = REPR($2)->allocate(interp, STABLE_PMC($2));
+        $1 = REPR($2)->allocate(interp, STABLE($2));
         REPR($1)->initialize(interp, STABLE($2), OBJECT_BODY($1));
     }
     else {
@@ -850,7 +850,7 @@ Box a native string to an instance of the specified type.
 inline op repr_box_str(out PMC, in STR, in PMC) :base_core {
     PMC *type = decontainerize(interp, $3);
     if (type->vtable->base_type == smo_id) {
-        $1 = REPR(type)->allocate(interp, STABLE_PMC(type));
+        $1 = REPR(type)->allocate(interp, STABLE(type));
         REPR($1)->initialize(interp, STABLE(type), OBJECT_BODY($1));
         REPR($1)->set_str(interp, STABLE($1), OBJECT_BODY($1), $2);
         PARROT_GC_WRITE_BARRIER(interp, $1);
@@ -872,7 +872,7 @@ Box a native int to an instance of the specified type.
 inline op repr_box_int(out PMC, in INT, in PMC) :base_core {
     PMC *type = decontainerize(interp, $3);
     if (type->vtable->base_type == smo_id) {
-        $1 = REPR(type)->allocate(interp, STABLE_PMC(type));
+        $1 = REPR(type)->allocate(interp, STABLE(type));
         REPR($1)->initialize(interp, STABLE(type), OBJECT_BODY($1));
         REPR($1)->set_int(interp, STABLE($1), OBJECT_BODY($1), $2);
     }
@@ -893,7 +893,7 @@ Box a native floating point number to an instance of the specified type.
 inline op repr_box_num(out PMC, in NUM, in PMC) :base_core {
     PMC *type = decontainerize(interp, $3);
     if (type->vtable->base_type == smo_id) {
-        $1 = REPR(type)->allocate(interp, STABLE_PMC(type));
+        $1 = REPR(type)->allocate(interp, STABLE(type));
         REPR($1)->initialize(interp, STABLE(type), OBJECT_BODY($1));
         REPR($1)->set_num(interp, STABLE($1), OBJECT_BODY($1), $2);
     }
