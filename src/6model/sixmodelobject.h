@@ -184,14 +184,12 @@ struct SixModel_REPROps {
     /* Binds the given object value to the specified attribute. */
     void (*bind_attribute) (PARROT_INTERP, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint, PMC *Value);
 
-    /* Binds the given int value to the specified attribute. */
-    void (*bind_attribute_int) (PARROT_INTERP, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint, INTVAL Value);
-
-    /* Binds the given num value to the specified attribute. */
-    void (*bind_attribute_num) (PARROT_INTERP, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint, FLOATVAL Value);
-
-    /* Binds the given str value to the specified attribute. */
-    void (*bind_attribute_str) (PARROT_INTERP, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint, STRING *Value);
+    /* Binds a flattened in attribute to the value at the passed reference.
+     * Like with the get_attribute_ref function, presumably the thing calling
+     * this knows about the type of the attribute it is supplying data for.
+     * copy_to will be used to copy the data in to place. */
+    void (*bind_attribute_ref) (PARROT_INTERP, STable *st, void *data,
+        PMC *class_handle, STRING *name, INTVAL hint, void *value);
 
     /* Gets the hint for the given attribute ID. */
     INTVAL (*hint_for) (PARROT_INTERP, PMC *Object, PMC *ClassHandle, STRING *Name);

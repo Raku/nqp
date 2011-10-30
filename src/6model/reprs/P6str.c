@@ -70,13 +70,7 @@ static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *clas
 static void bind_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
     die_no_attrs(interp);
 }
-static void bind_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, INTVAL value) {
-    die_no_attrs(interp);
-}
-static void bind_attribute_num(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, FLOATVAL value) {
-    die_no_attrs(interp);
-}
-static void bind_attribute_str(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, STRING *value) {
+static void bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, void *value) {
     die_no_attrs(interp);
 }
 
@@ -172,9 +166,7 @@ REPROps * P6str_initialize(PARROT_INTERP) {
     this_repr->get_attribute_boxed = get_attribute_boxed;
     this_repr->get_attribute_ref = get_attribute_ref;
     this_repr->bind_attribute = bind_attribute;
-    this_repr->bind_attribute_int = bind_attribute_int;
-    this_repr->bind_attribute_num = bind_attribute_num;
-    this_repr->bind_attribute_str = bind_attribute_str;
+    this_repr->bind_attribute_ref = bind_attribute_ref;
     this_repr->hint_for = hint_for;
     this_repr->clone = repr_clone;
     this_repr->set_int = set_int;
