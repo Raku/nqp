@@ -492,6 +492,14 @@ entry to produce the node to be returned.
     maphash['isgt_i']   = 'isgt__Iii'
     maphash['isge_i']   = 'isge__Iii'
 
+    maphash['cmp_I']    = 'nqp_bigint_cmp__IPP'
+    maphash['iseq_I']   = 'nqp_bigint_eq__IPP'
+    maphash['isne_I']   = 'nqp_bigint_ne__IPP'
+    maphash['islt_I']   = 'nqp_bigint_lt__IPP'
+    maphash['isle_I']   = 'nqp_bigint_le__IPP'
+    maphash['isgt_I']   = 'nqp_bigint_gt__IPP'
+    maphash['isge_I']   = 'nqp_bigint_ge__IPP'
+
     maphash['cmp_n']    = 'cmp__Inn'
     maphash['iseq_n']   = 'iseq__Inn'
     maphash['isne_n']   = 'isne__Inn'

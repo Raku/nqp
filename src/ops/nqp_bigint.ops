@@ -78,6 +78,47 @@ inline op nqp_bigint_abs(out PMC, in PMC) :base_core {
     mp_abs(a, get_bigint(interp, $1));
 }
 
+inline op nqp_bigint_cmp(out INT, in PMC, in PMC) :base_cor {
+    mp_int *a = get_bigint(interp, $2);
+    mp_int *b = get_bigint(interp, $3);
+    $1 = mp_cmp(a, b);
+}
+
+inline op nqp_bigint_eq(out INT, in PMC, in PMC) :base_cor {
+    mp_int *a = get_bigint(interp, $2);
+    mp_int *b = get_bigint(interp, $3);
+    $1 = MP_EQ == mp_cmp(a, b);
+}
+
+inline op nqp_bigint_ne(out INT, in PMC, in PMC) :base_cor {
+    mp_int *a = get_bigint(interp, $2);
+    mp_int *b = get_bigint(interp, $3);
+    $1 = MP_EQ != mp_cmp(a, b);
+}
+
+inline op nqp_bigint_gt(out INT, in PMC, in PMC) :base_cor {
+    mp_int *a = get_bigint(interp, $2);
+    mp_int *b = get_bigint(interp, $3);
+    $1 = MP_GT == mp_cmp(a, b);
+}
+
+inline op nqp_bigint_ge(out INT, in PMC, in PMC) :base_cor {
+    mp_int *a = get_bigint(interp, $2);
+    mp_int *b = get_bigint(interp, $3);
+    $1 = MP_LT != mp_cmp(a, b);
+}
+
+inline op nqp_bigint_lt(out INT, in PMC, in PMC) :base_cor {
+    mp_int *a = get_bigint(interp, $2);
+    mp_int *b = get_bigint(interp, $3);
+    $1 = MP_LT == mp_cmp(a, b);
+}
+
+inline op nqp_bigint_le(out INT, in PMC, in PMC) :base_cor {
+    mp_int *a = get_bigint(interp, $2);
+    mp_int *b = get_bigint(interp, $3);
+    $1 = MP_GT != mp_cmp(a, b);
+}
 inline op nqp_bigint_from_str(out PMC, in PMC, in STR) :base_core {
     char *buf = Parrot_str_cstring(interp, $3);
     $1 = REPR($2)->instance_of(interp, $2);
