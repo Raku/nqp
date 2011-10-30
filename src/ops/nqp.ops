@@ -730,11 +730,17 @@ Tries to unbox a native string using the REPR API.
 */
 inline op repr_unbox_str(out STR, in PMC) :base_core {
     PMC *var = decontainerize(interp, $2);
-    if (var->vtable->base_type == smo_id)
-        $1 = REPR(var)->get_str(interp, STABLE(var), OBJECT_BODY(var));
-    else
+    if (var->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(var))
+            $1 = REPR(var)->get_str(interp, STABLE(var), OBJECT_BODY(var));
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot unbox a type object as a native str");
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_unbox_str on a SixModelObject");
+    }
 }
 
 /*
@@ -748,11 +754,17 @@ Tries to unbox a native integer using the REPR API.
 */
 inline op repr_unbox_int(out INT, in PMC) :base_core {
     PMC *var = decontainerize(interp, $2);
-    if (var->vtable->base_type == smo_id)
-        $1 = REPR(var)->get_int(interp, STABLE(var), OBJECT_BODY(var));
-    else
+    if (var->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(var))
+            $1 = REPR(var)->get_int(interp, STABLE(var), OBJECT_BODY(var));
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot unbox a type object as a native int");
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_unbox_int on a SixModelObject");
+    }
 }
 
 /*
@@ -766,11 +778,17 @@ Tries to unbox a native floating pint number using the REPR API.
 */
 inline op repr_unbox_num(out NUM, in PMC) :base_core {
     PMC *var = decontainerize(interp, $2);
-    if (var->vtable->base_type == smo_id)
-        $1 = REPR(var)->get_num(interp, STABLE(var), OBJECT_BODY(var));
-    else
+    if (var->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(var))
+            $1 = REPR(var)->get_num(interp, STABLE(var), OBJECT_BODY(var));
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot unbox a type object as a native num");
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_unbox_num on a SixModelObject");
+    }
 }
 
 /*
