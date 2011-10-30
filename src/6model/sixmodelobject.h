@@ -14,6 +14,13 @@ typedef struct {
     PMC *sc;      /* Serialization context. */
 } SixModelObjectCommonalities;
 
+/* An example object, mostly used to compute the offset of the data part of
+ * a 6model object. */
+typedef struct {
+    SixModelObjectCommonalities common;
+    void *data;
+} SixModelObjectStooge;
+
 /* This is used to identify an attribute for various types of cache. */
 typedef struct {
     PMC    *class_handle;   /* Class handle */
@@ -143,15 +150,14 @@ struct SixModel_REPROps {
      * representation instance if needed. */
     PMC * (*type_object_for) (PARROT_INTERP, PMC *HOW);
 
-    /* Creates a new instance based on the type object. */
-    PMC * (*instance_of) (PARROT_INTERP, PMC *WHAT);
+    /* Allocates a new, but uninitialized object, based on the
+     * specified s-table. */
+    PMC * (*allocate) (PARROT_INTERP, PMC *stable_pmc);
 
-    /* Creates a new instance, but with its state based on data
-     * to be found at the specified address. This is used for
-     * making boxed versions of objects stored "flat" inside of
-     * others. Note that it must always copy the data from the
-     * source address, not point to that piece of memory. */
-    PMC * (*box_from) (PARROT_INTERP, PMC *WHAT, void *src);
+    /* Used to initialize the body of an object representing the type
+     * describe by the specified s-table. DATA points to the body. It
+     * may recursively call initialize for any flattened objects. */
+    void (*initialize) (PARROT_INTERP, STable *st, void *data);
 
     /* Checks if a given object is defined (from the point of
      * view of the representation). */
@@ -254,6 +260,7 @@ struct SixModel_REPROps {
 #define SC_PMC(o)        (((SixModelObjectCommonalities *)PMC_data(o))->sc)
 #define STABLE_STRUCT(p) ((STable *)PMC_data(p))
 #define REPR(o)          (STABLE(o)->REPR)
+#define OBJECT_BODY(o)   (&(((SixModelObjectStooge *)PMC_data(o))->data))
 
 /* Object model initialization. */
 void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attribute);

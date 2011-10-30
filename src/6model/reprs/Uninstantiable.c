@@ -29,9 +29,14 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 }
 
 /* Creates a new instance based on the type object. */
-static PMC * instance_of(PARROT_INTERP, PMC *WHAT) {
+static PMC * allocate(PARROT_INTERP, PMC *st) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "You cannot create an instance of this type");
+}
+
+/* Initialize a new instance. */
+static void initialize(PARROT_INTERP, STable *st, void *data) {
+    /* Nothing to do. */
 }
 
 /* Checks if a given object is defined (from the point of view of the
@@ -168,7 +173,8 @@ REPROps * Uninstantiable_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
     this_repr = mem_allocate_typed(REPROps);
     this_repr->type_object_for = type_object_for;
-    this_repr->instance_of = instance_of;
+    this_repr->allocate = allocate;
+    this_repr->initialize = initialize;
     this_repr->defined = defined;
     this_repr->get_attribute = get_attribute;
     this_repr->get_attribute_int = get_attribute_int;

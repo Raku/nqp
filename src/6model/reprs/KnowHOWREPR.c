@@ -30,18 +30,23 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 }
 
 /* Creates a new instance based on the type object. */
-static PMC * instance_of(PARROT_INTERP, PMC *WHAT) {
+static PMC * allocate(PARROT_INTERP, PMC *st) {
     KnowHOWREPRInstance *obj = mem_allocate_zeroed_typed(KnowHOWREPRInstance);
-    obj->common.stable       = STABLE_PMC(WHAT);
-    obj->methods             = pmc_new(interp, enum_class_Hash);
-    obj->attributes          = pmc_new(interp, enum_class_ResizablePMCArray);
+    obj->common.stable       = st;
     return wrap_object(interp, obj);
+}
+
+/* Initialize a new instance. */
+static void initialize(PARROT_INTERP, STable *st, void *data) {
+    KnowHOWREPRBody *body = (KnowHOWREPRBody *)data;
+    body->methods        = pmc_new(interp, enum_class_Hash);
+    body->attributes     = pmc_new(interp, enum_class_ResizablePMCArray);
 }
 
 /* Checks if a given object is defined (from the point of view of the
  * representation). */
 static INTVAL defined(PARROT_INTERP, PMC *obj) {
-    return !PMC_IS_NULL(((KnowHOWREPRInstance *)PMC_data(obj))->methods);
+    return !PMC_IS_NULL(((KnowHOWREPRInstance *)PMC_data(obj))->body.methods);
 }
 
 /* Helper to die because this type doesn't support attributes. */
@@ -93,9 +98,9 @@ static INTVAL hint_for(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name)
 static PMC * repr_clone(PARROT_INTERP, PMC *to_clone) {
     KnowHOWREPRInstance *obj = mem_allocate_zeroed_typed(KnowHOWREPRInstance);
     obj->common.stable       = STABLE_PMC(to_clone);
-    obj->methods             = VTABLE_clone(interp, ((KnowHOWREPRInstance *)PMC_data(to_clone))->methods);
-    obj->attributes          = VTABLE_clone(interp, ((KnowHOWREPRInstance *)PMC_data(to_clone))->attributes);
-    obj->name                = ((KnowHOWREPRInstance *)PMC_data(to_clone))->name;
+    obj->body.methods        = VTABLE_clone(interp, ((KnowHOWREPRInstance *)PMC_data(to_clone))->body.methods);
+    obj->body.attributes     = VTABLE_clone(interp, ((KnowHOWREPRInstance *)PMC_data(to_clone))->body.attributes);
+    obj->body.name           = ((KnowHOWREPRInstance *)PMC_data(to_clone))->body.name;
     return wrap_object(interp, obj);
 }
 
@@ -148,10 +153,10 @@ static void gc_mark(PARROT_INTERP, PMC *obj) {
         Parrot_gc_mark_PMC_alive(interp, instance->common.stable);
     if (!PMC_IS_NULL(instance->common.sc))
         Parrot_gc_mark_PMC_alive(interp, instance->common.sc);
-    if (!PMC_IS_NULL(instance->methods))
-        Parrot_gc_mark_PMC_alive(interp, instance->methods);
-    if (!PMC_IS_NULL(instance->attributes))
-        Parrot_gc_mark_PMC_alive(interp, instance->attributes);
+    if (!PMC_IS_NULL(instance->body.methods))
+        Parrot_gc_mark_PMC_alive(interp, instance->body.methods);
+    if (!PMC_IS_NULL(instance->body.attributes))
+        Parrot_gc_mark_PMC_alive(interp, instance->body.attributes);
 }
 
 /* This Parrot-specific addition to the API is used to free an object. */
@@ -179,7 +184,8 @@ REPROps * KnowHOWREPR_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
     this_repr = mem_allocate_typed(REPROps);
     this_repr->type_object_for = type_object_for;
-    this_repr->instance_of = instance_of;
+    this_repr->allocate = allocate;
+    this_repr->initialize = initialize;
     this_repr->defined = defined;
     this_repr->get_attribute = get_attribute;
     this_repr->get_attribute_int = get_attribute_int;

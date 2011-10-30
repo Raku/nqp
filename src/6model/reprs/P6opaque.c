@@ -361,22 +361,28 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 }
 
 /* Creates a new instance based on the type object. */
-static PMC * instance_of(PARROT_INTERP, PMC *WHAT) {
+static PMC * allocate(PARROT_INTERP, PMC *st) {
     P6opaqueInstance * obj;
 
     /* Compute allocation strategy if we've not already done so. */
-    P6opaqueREPRData * repr_data = (P6opaqueREPRData *) STABLE(WHAT)->REPR_data;
+    P6opaqueREPRData * repr_data = (P6opaqueREPRData *) STABLE_STRUCT(st)->REPR_data;
     if (!repr_data->allocation_size) {
-        compute_allocation_strategy(interp, WHAT, repr_data);
-        PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC(WHAT));
+        compute_allocation_strategy(interp, STABLE_STRUCT(st)->WHAT, repr_data);
+        PARROT_GC_WRITE_BARRIER(interp, st);
     }
 
     /* Allocate and set up object instance. */
     obj = (P6opaqueInstance *) Parrot_gc_allocate_fixed_size_storage(interp, repr_data->allocation_size);
     memset(obj, 0, repr_data->allocation_size);
-    obj->common.stable = STABLE_PMC(WHAT);
+    obj->common.stable = st;
     
     return wrap_object(interp, obj);
+}
+
+/* Initialize a new instance. */
+static void initialize(PARROT_INTERP, STable *st, void *data) {
+    P6opaqueREPRData * repr_data = (P6opaqueREPRData *) st->REPR_data;
+    /* XXX Fill this out when we may have nested things to initialize. */
 }
 
 /* Checks if a given object is defined (from the point of view of the
@@ -909,7 +915,8 @@ REPROps * P6opaque_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
     this_repr = mem_allocate_zeroed_typed(REPROps);
     this_repr->type_object_for = type_object_for;
-    this_repr->instance_of = instance_of;
+    this_repr->allocate = allocate;
+    this_repr->initialize = initialize;
     this_repr->defined = defined;
     this_repr->get_attribute = get_attribute;
     this_repr->get_attribute_int = get_attribute_int;

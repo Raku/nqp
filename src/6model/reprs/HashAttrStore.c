@@ -31,31 +31,32 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 }
 
 /* Creates a new instance based on the type object. */
-static PMC * instance_of(PARROT_INTERP, PMC *WHAT) {
+static PMC * allocate(PARROT_INTERP, PMC *st) {
     HashAttrStoreInstance *obj;
-
-    /* Allocate and set up object instance. */
     obj = (HashAttrStoreInstance *) Parrot_gc_allocate_fixed_size_storage(interp, sizeof(HashAttrStoreInstance));
-    obj->common.stable = STABLE_PMC(WHAT);
-    obj->store = pmc_new(interp, enum_class_Hash);
-
+    obj->common.stable = st;
     return wrap_object(interp, obj);
+}
+
+/* Initialize a new instance. */
+static void initialize(PARROT_INTERP, STable *st, void *data) {
+    ((HashAttrStoreBody *)data)->store = pmc_new(interp, enum_class_Hash);
 }
 
 /* Checks if a given object is defined (from the point of view of the
  * representation). */
 static INTVAL defined(PARROT_INTERP, PMC *obj) {
     HashAttrStoreInstance *instance = (HashAttrStoreInstance *)PMC_data(obj);
-    return instance->store != NULL;
+    return instance->body.store != NULL;
 }
 
 /* Gets the current value for an attribute. */
 static PMC * get_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
     HashAttrStoreInstance *instance = (HashAttrStoreInstance *)PMC_data(obj);
-    if (!instance->store)
+    if (!instance->body.store)
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot access attributes in a type object");
-    return VTABLE_get_pmc_keyed_str(interp, instance->store, name);
+    return VTABLE_get_pmc_keyed_str(interp, instance->body.store, name);
 }
 static INTVAL get_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -73,10 +74,10 @@ static STRING * get_attribute_str(PARROT_INTERP, PMC *obj, PMC *class_handle, ST
 /* Binds the given value to the specified attribute. */
 static void bind_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
     HashAttrStoreInstance *instance = (HashAttrStoreInstance *)PMC_data(obj);
-    if (!instance->store)
+    if (!instance->body.store)
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot access attributes in a type object");
-    VTABLE_set_pmc_keyed_str(interp, instance->store, name, value);
+    VTABLE_set_pmc_keyed_str(interp, instance->body.store, name, value);
 }
 static void bind_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, INTVAL value) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -103,7 +104,7 @@ static PMC * repr_clone(PARROT_INTERP, PMC *to_clone) {
     /* Allocate and set up object instance. */
     obj = (HashAttrStoreInstance *) Parrot_gc_allocate_fixed_size_storage(interp, sizeof(HashAttrStoreInstance));
     obj->common.stable = STABLE_PMC(to_clone);
-    obj->store = VTABLE_clone(interp, ((HashAttrStoreInstance *)PMC_data(to_clone))->store);
+    obj->body.store = VTABLE_clone(interp, ((HashAttrStoreInstance *)PMC_data(to_clone))->body.store);
 
     return wrap_object(interp, obj);
 }
@@ -159,8 +160,8 @@ static void gc_mark(PARROT_INTERP, PMC *obj) {
         Parrot_gc_mark_PMC_alive(interp, instance->common.stable);
 
     /* Mark store */
-    if (!PMC_IS_NULL(instance->store))
-        Parrot_gc_mark_PMC_alive(interp, instance->store);
+    if (!PMC_IS_NULL(instance->body.store))
+        Parrot_gc_mark_PMC_alive(interp, instance->body.store);
 }
 
 /* This Parrot-specific addition to the API is used to free an object. */
@@ -181,10 +182,10 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
 /* Checks if an attribute has been initialized. */
 static INTVAL is_attribute_initialized(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
     HashAttrStoreInstance *instance = (HashAttrStoreInstance *)PMC_data(obj);
-    if (!instance->store)
+    if (!instance->body.store)
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot access attributes in a type object");
-    return VTABLE_exists_keyed_str(interp, instance->store, name);
+    return VTABLE_exists_keyed_str(interp, instance->body.store, name);
 }
 
 /* Initializes the HashAttrStore representation. */
@@ -192,7 +193,8 @@ REPROps * HashAttrStore_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
     this_repr = mem_allocate_zeroed_typed(REPROps);
     this_repr->type_object_for = type_object_for;
-    this_repr->instance_of = instance_of;
+    this_repr->allocate = allocate;
+    this_repr->initialize = initialize;
     this_repr->defined = defined;
     this_repr->get_attribute = get_attribute;
     this_repr->get_attribute_int = get_attribute_int;

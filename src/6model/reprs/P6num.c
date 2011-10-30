@@ -29,11 +29,16 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 }
 
 /* Creates a new instance based on the type object. */
-static PMC * instance_of(PARROT_INTERP, PMC *WHAT) {
+static PMC * allocate(PARROT_INTERP, PMC *st) {
     P6numInstance *obj = mem_allocate_zeroed_typed(P6numInstance);
-    obj->common.stable = STABLE_PMC(WHAT);
-    obj->value         = 0.0;
+    obj->common.stable = st;
     return wrap_object(interp, obj);
+}
+
+/* Initialize a new instance. */
+static void initialize(PARROT_INTERP, STable *st, void *data) {
+    double x = 0.0;
+    ((P6numBody *)data)->value = 0.0/x;
 }
 
 /* Checks if a given object is defined (from the point of view of the
@@ -91,7 +96,7 @@ static INTVAL hint_for(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name)
 static PMC * repr_clone(PARROT_INTERP, PMC *to_clone) {
     P6numInstance *obj = mem_allocate_zeroed_typed(P6numInstance);
     obj->common.stable = STABLE_PMC(to_clone);
-    obj->value         = ((P6numInstance *)PMC_data(to_clone))->value;
+    obj->body.value    = ((P6numInstance *)PMC_data(to_clone))->body.value;
     return wrap_object(interp, obj);
 }
 
@@ -112,13 +117,13 @@ static INTVAL get_int(PARROT_INTERP, PMC *obj) {
 /* Used with boxing. Sets a floating point value, for representations that can
  * hold one. */
 static void set_num(PARROT_INTERP, PMC *obj, FLOATVAL value) {
-    ((P6numInstance *)PMC_data(obj))->value = value;
+    ((P6numInstance *)PMC_data(obj))->body.value = value;
 }
 
 /* Used with boxing. Gets a floating point value, for representations that can
  * hold one. */
 static FLOATVAL get_num(PARROT_INTERP, PMC *obj) {
-    return ((P6numInstance *)PMC_data(obj))->value;
+    return ((P6numInstance *)PMC_data(obj))->body.value;
 }
 
 /* Used with boxing. Sets a string value, for representations that can hold
@@ -170,7 +175,8 @@ REPROps * P6num_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
     this_repr = mem_allocate_typed(REPROps);
     this_repr->type_object_for = type_object_for;
-    this_repr->instance_of = instance_of;
+    this_repr->allocate = allocate;
+    this_repr->initialize = initialize;
     this_repr->defined = defined;
     this_repr->get_attribute = get_attribute;
     this_repr->get_attribute_int = get_attribute_int;
