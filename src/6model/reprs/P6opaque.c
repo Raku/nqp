@@ -730,7 +730,7 @@ static void gc_free(PARROT_INTERP, PMC *obj) {
 
 /* This Parrot-specific addition to the API is used to mark a repr's
  * per-type data. */
-static void gc_mark_repr(PARROT_INTERP, STable *st) {
+static void gc_mark_repr_data(PARROT_INTERP, STable *st) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     if (repr_data->name_to_index_mapping) {
         P6opaqueNameMap *cur_map_entry = repr_data->name_to_index_mapping;
@@ -750,7 +750,7 @@ static void gc_mark_repr(PARROT_INTERP, STable *st) {
 }
 
 /* This Parrot-specific addition to the API is used to free a repr instance. */
-static void gc_free_repr(PARROT_INTERP, STable *st) {
+static void gc_free_repr_data(PARROT_INTERP, STable *st) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     if (repr_data->name_to_index_mapping)
         mem_sys_free(repr_data->name_to_index_mapping);
@@ -890,8 +890,8 @@ REPROps * P6opaque_initialize(PARROT_INTERP) {
     this_repr->get_str = get_str;
     this_repr->gc_mark = gc_mark;
     this_repr->gc_free = gc_free;
-    this_repr->gc_mark_repr = gc_mark_repr;
-    this_repr->gc_free_repr = gc_free_repr;
+    this_repr->gc_mark_repr_data = gc_mark_repr_data;
+    this_repr->gc_free_repr_data = gc_free_repr_data;
     this_repr->get_storage_spec = get_storage_spec;
     this_repr->is_attribute_initialized = is_attribute_initialized;
     this_repr->change_type = change_type;

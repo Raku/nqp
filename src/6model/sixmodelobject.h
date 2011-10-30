@@ -225,10 +225,10 @@ struct SixModel_REPROps {
     void (*gc_free) (PARROT_INTERP, PMC *Object);
 
     /* This Parrot-specific addition to the API is used to mark a REPR instance. */
-    void (*gc_mark_repr) (PARROT_INTERP, STable *st);
+    void (*gc_mark_repr_data) (PARROT_INTERP, STable *st);
 
     /* This Parrot-specific addition to the API is used to free a REPR instance. */
-    void (*gc_free_repr) (PARROT_INTERP, STable *st);
+    void (*gc_free_repr_data) (PARROT_INTERP, STable *st);
 
     /* Gets the storage specification for this representation. */
     storage_spec (*get_storage_spec) (PARROT_INTERP, STable *st);
