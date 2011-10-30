@@ -354,11 +354,17 @@ an object - the repr is not obligated to do boxing/unboxing for you.
 */
 inline op repr_bind_attr_obj(in PMC, in PMC, in STR, in PMC) :base_core {
     PMC *ch = decontainerize(interp, $2);
-    if ($1->vtable->base_type == smo_id)
-        REPR($1)->bind_attribute(interp, $1, ch, $3, NO_HINT, $4);
-    else
+    if ($1->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($1))
+            REPR($1)->bind_attribute_boxed(interp, STABLE($1), OBJECT_BODY($1), ch, $3, NO_HINT, $4);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot bind to attributes in a type object");
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_obj on a SixModelObject");
+    }
     PARROT_GC_WRITE_BARRIER(interp, $1);
 }
 
@@ -549,11 +555,17 @@ an object - the repr is not obligated to do boxing/unboxing for you.
 */
 inline op repr_bind_attr_obj(in PMC, in PMC, in STR, in INT, in PMC) :base_core {
     PMC *ch = decontainerize(interp, $2);
-    if ($1->vtable->base_type == smo_id)
-        REPR($1)->bind_attribute(interp, $1, ch, $3, $4, $5);
-    else
+    if ($1->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($1))
+            REPR($1)->bind_attribute_boxed(interp, STABLE($1), OBJECT_BODY($1), ch, $3, $4, $5);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot bind to attributes in a type object");
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_obj on a SixModelObject");
+    }
     PARROT_GC_WRITE_BARRIER(interp, $1);
 }
 

@@ -466,21 +466,29 @@ static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *clas
 
 
 /* Binds the given value to the specified attribute. */
-static void bind_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
+static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     INTVAL            slot;
-
-    /* Ensure it is a defined object. */
-    if (PObj_flag_TEST(private0, obj))
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot access attributes in a type object");
 
     /* Try the slot allocation first. */
     slot = hint >= 0 && !(repr_data->mi) ? hint :
         try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
-        set_pmc_at_offset(instance, sizeof(P6opaqueInstance) + repr_data->attribute_offsets[slot], value);
+        STable *st = repr_data->flattened_stables[slot];
+        if (st) {
+            if (st == STABLE(value))
+                st->REPR->copy_to(interp, st, OBJECT_BODY(value),
+                    (char *)data + repr_data->attribute_offsets[slot]);
+            else
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "Type mismatch when storing value to attribute '%Ss' on class '%Ss'",
+                    name, VTABLE_get_string(interp, introspection_call(interp,
+                        class_handle, STABLE(class_handle)->HOW,
+                        Parrot_str_new_constant(interp, "name"), 0)));
+        }
+        else {
+            set_pmc_at_offset(data, repr_data->attribute_offsets[slot], value);
+        }
     }
     else {
         /* Otherwise, complain that the attribute doesn't exist. */
@@ -810,7 +818,7 @@ REPROps * P6opaque_initialize(PARROT_INTERP) {
     this_repr->copy_to = copy_to;
     this_repr->get_attribute_boxed = get_attribute_boxed;
     this_repr->get_attribute_ref = get_attribute_ref;
-    this_repr->bind_attribute = bind_attribute;
+    this_repr->bind_attribute_boxed = bind_attribute_boxed;
     this_repr->bind_attribute_ref = bind_attribute_ref;
     this_repr->hint_for = hint_for;
     this_repr->clone = repr_clone;

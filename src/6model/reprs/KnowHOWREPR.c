@@ -74,7 +74,7 @@ static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *clas
 }
 
 /* Binds the given value to the specified attribute. */
-static void bind_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
+static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
     die_no_attrs(interp);
 }
 static void bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, void *value) {
@@ -178,7 +178,7 @@ REPROps * KnowHOWREPR_initialize(PARROT_INTERP) {
     this_repr->copy_to = copy_to;
     this_repr->get_attribute_boxed = get_attribute_boxed;
     this_repr->get_attribute_ref = get_attribute_ref;
-    this_repr->bind_attribute = bind_attribute;
+    this_repr->bind_attribute_boxed = bind_attribute_boxed;
     this_repr->bind_attribute_ref = bind_attribute_ref;
     this_repr->hint_for = hint_for;
     this_repr->clone = repr_clone;

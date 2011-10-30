@@ -64,12 +64,9 @@ static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *clas
 }
 
 /* Binds the given value to the specified attribute. */
-static void bind_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
-    HashAttrStoreInstance *instance = (HashAttrStoreInstance *)PMC_data(obj);
-    if (!instance->body.store)
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot access attributes in a type object");
-    VTABLE_set_pmc_keyed_str(interp, instance->body.store, name, value);
+static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
+    HashAttrStoreBody *body = (HashAttrStoreBody *)data;
+    VTABLE_set_pmc_keyed_str(interp, body->store, name, value);
 }
 static void bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, void *value) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -176,7 +173,7 @@ REPROps * HashAttrStore_initialize(PARROT_INTERP) {
     this_repr->copy_to = copy_to;
     this_repr->get_attribute_boxed = get_attribute_boxed;
     this_repr->get_attribute_ref = get_attribute_ref;
-    this_repr->bind_attribute = bind_attribute;
+    this_repr->bind_attribute_boxed = bind_attribute_boxed;
     this_repr->bind_attribute_ref = bind_attribute_ref;
     this_repr->hint_for = hint_for;
     this_repr->clone = repr_clone;

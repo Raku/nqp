@@ -181,8 +181,12 @@ struct SixModel_REPROps {
     void * (*get_attribute_ref) (PARROT_INTERP, STable *st, void *data,
         PMC *class_handle, STRING *name, INTVAL hint);
 
-    /* Binds the given object value to the specified attribute. */
-    void (*bind_attribute) (PARROT_INTERP, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint, PMC *Value);
+    /* Binds the given object value to the specified attribute. If it's
+     * a reference type attribute, this just simply sets the value in 
+     * place. If instead it's some other flattened in representation, then
+     * the value should be a boxed form of the data to store.*/
+    void (*bind_attribute_boxed) (PARROT_INTERP, STable *st, void *data,
+        PMC *class_handle, STRING *name, INTVAL hint, PMC *value);
 
     /* Binds a flattened in attribute to the value at the passed reference.
      * Like with the get_attribute_ref function, presumably the thing calling
