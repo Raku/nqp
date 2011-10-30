@@ -46,13 +46,6 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
     ((HashAttrStoreBody *)data)->store = pmc_new(interp, enum_class_Hash);
 }
 
-/* Checks if a given object is defined (from the point of view of the
- * representation). */
-static INTVAL defined(PARROT_INTERP, PMC *obj) {
-    HashAttrStoreInstance *instance = (HashAttrStoreInstance *)PMC_data(obj);
-    return instance->body.store != NULL;
-}
-
 /* Gets the current value for an attribute. */
 static PMC * get_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
     HashAttrStoreInstance *instance = (HashAttrStoreInstance *)PMC_data(obj);
@@ -198,7 +191,6 @@ REPROps * HashAttrStore_initialize(PARROT_INTERP) {
     this_repr->type_object_for = type_object_for;
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
-    this_repr->defined = defined;
     this_repr->get_attribute = get_attribute;
     this_repr->get_attribute_int = get_attribute_int;
     this_repr->get_attribute_num = get_attribute_num;

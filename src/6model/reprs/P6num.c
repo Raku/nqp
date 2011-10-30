@@ -44,13 +44,6 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
     ((P6numBody *)data)->value = 0.0/x;
 }
 
-/* Checks if a given object is defined (from the point of view of the
- * representation). */
-static INTVAL defined(PARROT_INTERP, PMC *obj) {
-    /* Native types only ever exist as the type object, which is undefined. */
-    return 0;
-}
-
 /* Helper to die because this type doesn't support attributes. */
 PARROT_DOES_NOT_RETURN
 static void die_no_attrs(PARROT_INTERP) {
@@ -180,7 +173,6 @@ REPROps * P6num_initialize(PARROT_INTERP) {
     this_repr->type_object_for = type_object_for;
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
-    this_repr->defined = defined;
     this_repr->get_attribute = get_attribute;
     this_repr->get_attribute_int = get_attribute_int;
     this_repr->get_attribute_num = get_attribute_num;

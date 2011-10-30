@@ -171,7 +171,7 @@ PMC * create_stable(PARROT_INTERP, REPROps *REPR, PMC *HOW) {
 PMC * decontainerize(PARROT_INTERP, PMC *var) {
     if (var->vtable->base_type == smo_id) {
         ContainerSpec *spec = STABLE(var)->container_spec;
-        if (spec && REPR(var)->defined(interp, var)) {
+        if (spec && IS_CONCRETE(var)) {
             if (!PMC_IS_NULL(spec->value_slot.class_handle)) {
                 /* Just get slot. */
                 return VTABLE_get_attr_keyed(interp, var, spec->value_slot.class_handle,

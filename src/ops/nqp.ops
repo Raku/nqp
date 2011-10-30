@@ -237,7 +237,7 @@ Checks the REPRs idea of definedness.
 inline op repr_defined(out INT, in PMC) :base_core {
     PMC *var = decontainerize(interp, $2);
     if (var->vtable->base_type == smo_id)
-        $1 = REPR(var)->defined(interp, var);
+        $1 = IS_CONCRETE(var);
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_defined on a SixModelObject");

@@ -159,10 +159,6 @@ struct SixModel_REPROps {
      * may recursively call initialize for any flattened objects. */
     void (*initialize) (PARROT_INTERP, STable *st, void *data);
 
-    /* Checks if a given object is defined (from the point of
-     * view of the representation). */
-    INTVAL (*defined) (PARROT_INTERP, PMC *Obj);
-
     /* Gets the current value for an object attribute. */
     PMC * (*get_attribute) (PARROT_INTERP, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint);
 

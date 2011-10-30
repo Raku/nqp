@@ -42,13 +42,6 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
     /* Nothing to do. */
 }
 
-/* Checks if a given object is defined (from the point of view of the
- * representation). */
-static INTVAL defined(PARROT_INTERP, PMC *obj) {
-    /* Non-instantiable; always undefined. */
-    return 0;
-}
-
 /* Helper to die because this type doesn't support attributes. */
 PARROT_DOES_NOT_RETURN
 static void die_no_attrs(PARROT_INTERP) {
@@ -178,7 +171,6 @@ REPROps * Uninstantiable_initialize(PARROT_INTERP) {
     this_repr->type_object_for = type_object_for;
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
-    this_repr->defined = defined;
     this_repr->get_attribute = get_attribute;
     this_repr->get_attribute_int = get_attribute_int;
     this_repr->get_attribute_num = get_attribute_num;

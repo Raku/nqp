@@ -388,12 +388,6 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
     /* XXX Fill this out when we may have nested things to initialize. */
 }
 
-/* Checks if a given object is defined (from the point of view of the
- * representation). */
-static INTVAL defined(PARROT_INTERP, PMC *obj) {
-    return !PObj_flag_TEST(private0, obj);
-}
-
 /* Helper for complaining about attribute access errors. */
 PARROT_DOES_NOT_RETURN
 static void no_such_attribute(PARROT_INTERP, const char *action, PMC *class_handle, STRING *name) {
@@ -604,7 +598,7 @@ static PMC * repr_clone(PARROT_INTERP, PMC *to_clone) {
     P6opaqueInstance *obj;
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(to_clone)->REPR_data;
     
-    if (defined(interp, to_clone)) {
+    if (IS_CONCRETE(to_clone)) {
         obj = (P6opaqueInstance *)Parrot_gc_allocate_fixed_size_storage(interp, repr_data->allocation_size);
         memcpy(obj, PMC_data(to_clone), repr_data->allocation_size);
         return wrap_object(interp, obj);
@@ -890,7 +884,6 @@ REPROps * P6opaque_initialize(PARROT_INTERP) {
     this_repr->type_object_for = type_object_for;
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
-    this_repr->defined = defined;
     this_repr->get_attribute = get_attribute;
     this_repr->get_attribute_int = get_attribute_int;
     this_repr->get_attribute_num = get_attribute_num;

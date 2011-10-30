@@ -26,7 +26,7 @@
 
 PMC * decontainerize(PARROT_INTERP, PMC *var) {
     ContainerSpec *spec = STABLE(var)->container_spec;
-    if (spec && REPR(var)->defined(interp, var)) {
+    if (spec && IS_CONCRETE(var)) {
         if (!PMC_IS_NULL(spec->value_slot.class_handle)) {
             /* Just get slot. */
             return VTABLE_get_attr_keyed(interp, var, spec->value_slot.class_handle,
@@ -209,28 +209,28 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
                     Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
                     return VTABLE_get_bool(interp, VTABLE_get_pmc_keyed_int(interp, cappy, 0));
                 case BOOL_MODE_UNBOX_INT:
-                    return REPR(decont)->defined(interp, decont) &&
+                    return IS_CONCRETE(decont) &&
                         REPR(decont)->get_int(interp, STABLE(decont), OBJECT_BODY(decont));
                 case BOOL_MODE_UNBOX_NUM:
-                    if (!REPR(decont)->defined(interp, decont))
+                    if (!IS_CONCRETE(decont))
                         return 0;
                     unnum = REPR(decont)->get_num(interp, STABLE(decont), OBJECT_BODY(decont));
                     return unnum != 0.0;
                 case BOOL_MODE_UNBOX_STR_NOT_EMPTY:
-                    if (!REPR(decont)->defined(interp, decont))
+                    if (!IS_CONCRETE(decont))
                         return 0;
                     unstr = REPR(decont)->get_str(interp, STABLE(decont), OBJECT_BODY(decont));
                     return !STRING_IS_NULL(unstr) &&
                         !Parrot_str_equal(interp, unstr, CONST_STRING(interp, ""));
                 case BOOL_MODE_UNBOX_STR_NOT_EMPTY_OR_ZERO:
-                    if (!REPR(decont)->defined(interp, decont))
+                    if (!IS_CONCRETE(decont))
                         return 0;
                     unstr = REPR(decont)->get_str(interp, STABLE(decont), OBJECT_BODY(decont));
                     return !STRING_IS_NULL(unstr) &&
                         !Parrot_str_equal(interp, unstr, CONST_STRING(interp, "")) &&
                         !Parrot_str_equal(interp, unstr, CONST_STRING(interp, "0"));
                 case BOOL_MODE_NOT_TYPE_OBJECT:
-                    return REPR(decont)->defined(interp, decont);
+                    return IS_CONCRETE(decont);
                 default:
                     return SUPER();
             }
