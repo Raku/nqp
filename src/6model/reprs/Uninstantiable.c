@@ -25,6 +25,9 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
     st->WHAT = wrap_object(interp, obj);
     PARROT_GC_WRITE_BARRIER(interp, st_pmc);
 
+    /* Flag it as a type object. */
+    MARK_AS_TYPE_OBJECT(st->WHAT);
+
     return st->WHAT;
 }
 

@@ -262,6 +262,10 @@ struct SixModel_REPROps {
 #define REPR(o)          (STABLE(o)->REPR)
 #define OBJECT_BODY(o)   (&(((SixModelObjectStooge *)PMC_data(o))->data))
 
+/* Macro for getting/setting type-objectness. */
+#define IS_CONCRETE(o)         (!PObj_flag_TEST(private0, (o)))
+#define MARK_AS_TYPE_OBJECT(o) PObj_flag_SET(private0, (o))
+
 /* Object model initialization. */
 void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attribute);
 
