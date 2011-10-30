@@ -53,8 +53,14 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
      * ********************************************** */
 
     VTABLE void mark() {
-        /* Delegate to the representation. */
-        REPR(SELF)->gc_mark(interp, SELF);
+        /* Mark the common bits. */
+        SixModelObjectCommonalities *obj = (SixModelObjectCommonalities *)PMC_data(SELF);
+        if (obj->stable)
+            Parrot_gc_mark_PMC_alive(interp, obj->stable);
+        if (obj->sc)
+            Parrot_gc_mark_PMC_alive(interp, obj->sc);
+        if (IS_CONCRETE(SELF) && REPR(SELF)->gc_mark)
+            REPR(SELF)->gc_mark(interp, STABLE(SELF), OBJECT_BODY(SELF));
     }
 
     VTABLE void destroy() {

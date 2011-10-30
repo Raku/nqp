@@ -219,7 +219,7 @@ struct SixModel_REPROps {
     STRING * (*get_str) (PARROT_INTERP, STable *st, void *data);
 
     /* This Parrot-specific addition to the API is used to mark an object. */
-    void (*gc_mark) (PARROT_INTERP, PMC *Object);
+    void (*gc_mark) (PARROT_INTERP, STable *st, void *data);
 
     /* This Parrot-specific addition to the API is used to free an object. */
     void (*gc_free) (PARROT_INTERP, PMC *Object);

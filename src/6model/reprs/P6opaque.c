@@ -693,39 +693,27 @@ static STRING * get_str(PARROT_INTERP, STable *st, void *data) {
 }
 
 /* This Parrot-specific addition to the API is used to mark an object. */
-static void gc_mark(PARROT_INTERP, PMC *obj) {
-    P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
-    
-    /* Mark STable and SC. */
-    if (!PMC_IS_NULL(instance->common.stable))
-        Parrot_gc_mark_PMC_alive(interp, instance->common.stable);
-    if (!PMC_IS_NULL(instance->common.sc))
-        Parrot_gc_mark_PMC_alive(interp, instance->common.sc);
-    
-    /* Mark contained PMC and string attributes, provided this is a
-     * real object. */
-    if (!PObj_flag_TEST(private0, obj)) {
-        P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
-        INTVAL i;
+static void gc_mark(PARROT_INTERP, STable *st, void *data) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    INTVAL i;
 
-        /* Mark PMCs. */
-        if (repr_data->gc_pmc_mark_offsets) {
-            for (i = 0; i < repr_data->gc_pmc_mark_offsets_count; i++) {
-                INTVAL offset = repr_data->gc_pmc_mark_offsets[i];
-                PMC *to_mark  = get_pmc_at_offset(instance, sizeof(P6opaqueInstance) + offset);
-                if (!PMC_IS_NULL(to_mark))
-                    Parrot_gc_mark_PMC_alive(interp, to_mark);
-            }
+    /* Mark PMCs. */
+    if (repr_data->gc_pmc_mark_offsets) {
+        for (i = 0; i < repr_data->gc_pmc_mark_offsets_count; i++) {
+            INTVAL offset = repr_data->gc_pmc_mark_offsets[i];
+            PMC *to_mark  = get_pmc_at_offset(data, offset);
+            if (!PMC_IS_NULL(to_mark))
+                Parrot_gc_mark_PMC_alive(interp, to_mark);
         }
+    }
 
-        /* Mark strings. */
-        if (repr_data->gc_str_mark_offsets) {
-            for (i = 0; i < repr_data->gc_str_mark_offsets_count; i++) {
-                INTVAL offset   = repr_data->gc_str_mark_offsets[i];
-                STRING *to_mark = get_str_at_offset(instance, sizeof(P6opaqueInstance) + offset);
-                if (to_mark)
-                    Parrot_gc_mark_STRING_alive(interp, to_mark);
-            }
+    /* Mark strings. */
+    if (repr_data->gc_str_mark_offsets) {
+        for (i = 0; i < repr_data->gc_str_mark_offsets_count; i++) {
+            INTVAL offset   = repr_data->gc_str_mark_offsets[i];
+            STRING *to_mark = get_str_at_offset(data, offset);
+            if (to_mark)
+                Parrot_gc_mark_STRING_alive(interp, to_mark);
         }
     }
 }

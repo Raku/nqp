@@ -144,16 +144,12 @@ static STRING * get_str(PARROT_INTERP, STable *st, void *data) {
 }
 
 /* This Parrot-specific addition to the API is used to mark an object. */
-static void gc_mark(PARROT_INTERP, PMC *obj) {
-    KnowHOWREPRInstance *instance = (KnowHOWREPRInstance *)PMC_data(obj);
-    if (!PMC_IS_NULL(instance->common.stable))
-        Parrot_gc_mark_PMC_alive(interp, instance->common.stable);
-    if (!PMC_IS_NULL(instance->common.sc))
-        Parrot_gc_mark_PMC_alive(interp, instance->common.sc);
-    if (!PMC_IS_NULL(instance->body.methods))
-        Parrot_gc_mark_PMC_alive(interp, instance->body.methods);
-    if (!PMC_IS_NULL(instance->body.attributes))
-        Parrot_gc_mark_PMC_alive(interp, instance->body.attributes);
+static void gc_mark(PARROT_INTERP, STable *st, void *data) {
+    KnowHOWREPRBody *body = (KnowHOWREPRBody *)data;
+    if (!PMC_IS_NULL(body->methods))
+        Parrot_gc_mark_PMC_alive(interp, body->methods);
+    if (!PMC_IS_NULL(body->attributes))
+        Parrot_gc_mark_PMC_alive(interp, body->attributes);
 }
 
 /* This Parrot-specific addition to the API is used to free an object. */

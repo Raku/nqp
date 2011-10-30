@@ -148,16 +148,10 @@ static STRING * get_str(PARROT_INTERP, STable *st, void *data) {
 }
 
 /* This Parrot-specific addition to the API is used to mark an object. */
-static void gc_mark(PARROT_INTERP, PMC *obj) {
-    HashAttrStoreInstance *instance = (HashAttrStoreInstance *)PMC_data(obj);
-    
-    /* Mark STable. */
-    if (!PMC_IS_NULL(instance->common.stable))
-        Parrot_gc_mark_PMC_alive(interp, instance->common.stable);
-
-    /* Mark store */
-    if (!PMC_IS_NULL(instance->body.store))
-        Parrot_gc_mark_PMC_alive(interp, instance->body.store);
+static void gc_mark(PARROT_INTERP, STable *st, void *data) {
+    HashAttrStoreBody *body = (HashAttrStoreBody *)data;
+    if (!PMC_IS_NULL(body->store))
+        Parrot_gc_mark_PMC_alive(interp, body->store);
 }
 
 /* This Parrot-specific addition to the API is used to free an object. */

@@ -136,14 +136,10 @@ static STRING * get_str(PARROT_INTERP, STable *st, void *data) {
 }
 
 /* This Parrot-specific addition to the API is used to mark an object. */
-static void gc_mark(PARROT_INTERP, PMC *obj) {
-    P6strInstance *instance = (P6strInstance *)PMC_data(obj);
-    if (!PMC_IS_NULL(instance->common.stable))
-        Parrot_gc_mark_PMC_alive(interp, instance->common.stable);
-    if (!PMC_IS_NULL(instance->common.sc))
-        Parrot_gc_mark_PMC_alive(interp, instance->common.sc);
-    if (!STRING_IS_NULL(instance->body.value))
-        Parrot_gc_mark_STRING_alive(interp, instance->body.value);
+static void gc_mark(PARROT_INTERP, STable *st, void *data) {
+    P6strBody *body = (P6strBody *)data;
+    if (!STRING_IS_NULL(body->value))
+        Parrot_gc_mark_STRING_alive(interp, body->value);
 }
 
 /* This Parrot-specific addition to the API is used to free an object. */
