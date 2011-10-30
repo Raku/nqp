@@ -36,7 +36,7 @@ typedef struct {
     /* If the attribute was actually flattened in to this object from another
      * representation, this is the s-table of the type of that attribute. NULL
      * for attributes that are just reference types. */
-    PMC **flattened_stables;
+    STable **flattened_stables;
     
     /* Flags if we are MI or not. */
     INTVAL mi;
