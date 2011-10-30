@@ -124,12 +124,13 @@ static void set_int(PARROT_INTERP, PMC *obj, INTVAL value) {
 /* Used with boxing. Gets an integer value, for representations that can
  * hold one. */
 static INTVAL get_int(PARROT_INTERP, PMC *obj) {
+    INTVAL ret;
     mp_int i = ((P6bigintInstance *)PMC_data(obj))->i;
     if (MP_LT == mp_cmp_d(&i, 0)) {
         mp_int neg;
         mp_init(&neg);
         mp_neg(&i, &neg);
-        INTVAL ret = -mp_get_int(&neg);
+        ret = -mp_get_int(&neg);
         mp_clear(&neg);
         return ret;
     }
