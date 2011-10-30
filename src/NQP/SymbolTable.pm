@@ -425,6 +425,7 @@ class NQP::SymbolTable is HLL::Compiler::SerializationContextBuilder {
             ),
             PAST::Stmts.new(
                 PAST::Op.new( :pirop('nqp_dynop_setup v') ),
+                PAST::Op.new( :pirop('nqp_bigint_setup v') ),
                 PAST::Op.new(
                     :pasttype('callmethod'), :name('hll_map'),
                     PAST::Op.new( :pirop('getinterp P') ),
