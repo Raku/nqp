@@ -162,18 +162,10 @@ struct SixModel_REPROps {
     /* Gets the current value for an object attribute. */
     PMC * (*get_attribute) (PARROT_INTERP, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint);
 
-    /* Gets the current value for a native int attribute. */
-    INTVAL (*get_attribute_int) (PARROT_INTERP, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint);
-
-    /* Gets the current value for a native num attribute. */
-    FLOATVAL (*get_attribute_num) (PARROT_INTERP, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint);
-
-    /* Gets the current value for a native str attribute. */
-    STRING * (*get_attribute_str) (PARROT_INTERP, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint);
-
     /* Gets a reference to the memory location of an attribute. Note
      * that this is only valid so long as the object itself is alive. */
-    void * (*get_attribute_ref) (PARROT_INTERP, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint);
+    void * (*get_attribute_ref) (PARROT_INTERP, STable *st, void *data,
+        PMC *class_handle, STRING *name, INTVAL hint);
 
     /* Binds the given object value to the specified attribute. */
     void (*bind_attribute) (PARROT_INTERP, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint, PMC *Value);

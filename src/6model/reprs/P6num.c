@@ -56,17 +56,9 @@ static PMC * get_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *n
     die_no_attrs(interp);
     return PMCNULL;
 }
-static INTVAL get_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
+static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
     die_no_attrs(interp);
     return 0;
-}
-static FLOATVAL get_attribute_num(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
-    die_no_attrs(interp);
-    return 0.0;
-}
-static STRING * get_attribute_str(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
-    die_no_attrs(interp);
-    return NULL;
 }
 
 /* Binds the given value to the specified attribute. */
@@ -165,9 +157,7 @@ REPROps * P6num_initialize(PARROT_INTERP) {
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
     this_repr->get_attribute = get_attribute;
-    this_repr->get_attribute_int = get_attribute_int;
-    this_repr->get_attribute_num = get_attribute_num;
-    this_repr->get_attribute_str = get_attribute_str;
+    this_repr->get_attribute_ref = get_attribute_ref;
     this_repr->bind_attribute = bind_attribute;
     this_repr->bind_attribute_int = bind_attribute_int;
     this_repr->bind_attribute_num = bind_attribute_num;

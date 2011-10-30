@@ -435,65 +435,20 @@ static PMC * get_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *n
     no_such_attribute(interp, "get", class_handle, name);
 }
 
-static INTVAL get_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
+static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     INTVAL            slot;
 
-    /* Ensure it is a defined object. */
-    if (PObj_flag_TEST(private0, obj))
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot access attributes in a type object");
-
-    /* Try the slot allocation first. */
+    /* Look up slot, then offset and compute address. */
     slot = hint >= 0 && !(repr_data->mi) ? hint :
         try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0)
-        return get_int_at_offset(instance, sizeof(P6opaqueInstance) + repr_data->attribute_offsets[slot]);
+        return ((char *)data) + repr_data->attribute_offsets[slot];
     
     /* Otherwise, complain that the attribute doesn't exist. */
     no_such_attribute(interp, "get", class_handle, name);
 }
-static FLOATVAL get_attribute_num(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
-    INTVAL            slot;
 
-    /* Ensure it is a defined object. */
-    if (PObj_flag_TEST(private0, obj))
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot access attributes in a type object");
-
-    /* Try the slot allocation first. */
-    slot = hint >= 0 && !(repr_data->mi) ? hint :
-        try_get_slot(interp, repr_data, class_handle, name);
-    if (slot >= 0)
-        return get_num_at_offset(instance, sizeof(P6opaqueInstance) + repr_data->attribute_offsets[slot]);
-    
-    /* Otherwise, complain that the attribute doesn't exist. */
-    no_such_attribute(interp, "get", class_handle, name);
-}
-static STRING * get_attribute_str(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
-    INTVAL            slot;
-
-    /* Ensure it is a defined object. */
-    if (PObj_flag_TEST(private0, obj))
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot access attributes in a type object");
-
-    /* Try the slot allocation first. */
-    slot = hint >= 0 && !(repr_data->mi) ? hint :
-        try_get_slot(interp, repr_data, class_handle, name);
-    if (slot >= 0) {
-        STRING *result = get_str_at_offset(instance, sizeof(P6opaqueInstance) + repr_data->attribute_offsets[slot]);
-        return result ? result : STRINGNULL;
-    }
-    
-    /* Otherwise, complain that the attribute doesn't exist. */
-    no_such_attribute(interp, "get", class_handle, name);
-}
 
 /* Binds the given value to the specified attribute. */
 static void bind_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
@@ -873,9 +828,7 @@ REPROps * P6opaque_initialize(PARROT_INTERP) {
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
     this_repr->get_attribute = get_attribute;
-    this_repr->get_attribute_int = get_attribute_int;
-    this_repr->get_attribute_num = get_attribute_num;
-    this_repr->get_attribute_str = get_attribute_str;
+    this_repr->get_attribute_ref = get_attribute_ref;
     this_repr->bind_attribute = bind_attribute;
     this_repr->bind_attribute_int = bind_attribute_int;
     this_repr->bind_attribute_num = bind_attribute_num;

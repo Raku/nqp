@@ -54,17 +54,9 @@ static PMC * get_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *n
                 "Cannot access attributes in a type object");
     return VTABLE_get_pmc_keyed_str(interp, instance->body.store, name);
 }
-static INTVAL get_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
+static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "HashAttrStore representation does not support native attribute storage");
-}
-static FLOATVAL get_attribute_num(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "HashAttrStore representation does not support native attribute storage");
-}
-static STRING * get_attribute_str(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "HashAttrStore representation does not support native attribute storage");
+            "HashAttrStore representation does not support value type attributes");
 }
 
 /* Binds the given value to the specified attribute. */
@@ -186,9 +178,7 @@ REPROps * HashAttrStore_initialize(PARROT_INTERP) {
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
     this_repr->get_attribute = get_attribute;
-    this_repr->get_attribute_int = get_attribute_int;
-    this_repr->get_attribute_num = get_attribute_num;
-    this_repr->get_attribute_str = get_attribute_str;
+    this_repr->get_attribute_ref = get_attribute_ref;
     this_repr->bind_attribute = bind_attribute;
     this_repr->bind_attribute_int = bind_attribute_int;
     this_repr->bind_attribute_num = bind_attribute_num;
