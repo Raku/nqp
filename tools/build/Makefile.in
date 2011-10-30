@@ -28,7 +28,7 @@ MV            = @mv@
 RM_F          = @rm_f@
 MKPATH        = $(PERL) -MExtUtils::Command -e mkpath
 CHMOD         = $(PERL) -MExtUtils::Command -e chmod
-TOM           = 3rdparty/libtommath/@c_o_out@bn
+TOM           = 3rdparty/libtommath/bn
 
 # locations of parrot resources
 PARROT           = $(PARROT_BIN_DIR)/parrot$(EXE)
