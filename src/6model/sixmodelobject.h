@@ -158,6 +158,14 @@ struct SixModel_REPROps {
      * describe by the specified s-table. DATA points to the body. It
      * may recursively call initialize for any flattened objects. */
     void (*initialize) (PARROT_INTERP, STable *st, void *data);
+    
+    /* For the given type, copies the object data from the source memory
+     * location to the destination one. Note that it may actually be more
+     * involved than a straightforward bit of copying; what's important is
+     * that the representation knows about that. Note that it may have to
+     * call copy_to recursively on representations of any flattened objects
+     * within its body. */
+    void (*copy_to) (PARROT_INTERP, STable *st, void *src, void *dest);
 
     /* Gets the current value for an object attribute. For non-flattened
      * objects - that is, reference types - this just returns the object
