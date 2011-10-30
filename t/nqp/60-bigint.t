@@ -12,6 +12,9 @@ my $one := nqp::box_i(1, $bi_type);
 
 my $b := pir::nqp_bigint_from_str__PPS($one, '-123');
 my $c := nqp::box_i(-123, $bi_type);
+say(s($c));
+say(s(nqp::box_i(2, $bi_type)));
+say(nqp::unbox_i($c));
 
 ok(s($b) eq '-123', 'can round-trip negative number (string)');
 ok(s($c) eq '-123', 'can round-trip negative number (string) by boxing');

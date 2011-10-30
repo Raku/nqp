@@ -109,13 +109,33 @@ static PMC * repr_clone(PARROT_INTERP, PMC *to_clone) {
 /* Used with boxing. Sets an integer value, for representations that can hold
  * one. */
 static void set_int(PARROT_INTERP, PMC *obj, INTVAL value) {
-    mp_set_int(&((P6bigintInstance *)PMC_data(obj))->i, value);
+    if (value >= 0) {
+        mp_set_int(&((P6bigintInstance *)PMC_data(obj))->i, value);
+    }
+    else {
+        mp_int neg;
+        mp_init(&neg);
+        mp_set_int(&neg, -value);
+        mp_neg(&neg, &((P6bigintInstance *)PMC_data(obj))->i);
+        mp_clear(&neg);
+    }
 }
 
 /* Used with boxing. Gets an integer value, for representations that can
  * hold one. */
 static INTVAL get_int(PARROT_INTERP, PMC *obj) {
-    return mp_get_int(&((P6bigintInstance *)PMC_data(obj))->i);
+    mp_int i = ((P6bigintInstance *)PMC_data(obj))->i;
+    if (MP_LT == mp_cmp_d(&i, 0)) {
+        mp_int neg;
+        mp_init(&neg);
+        mp_neg(&i, &neg);
+        INTVAL ret = -mp_get_int(&neg);
+        mp_clear(&neg);
+        return ret;
+    }
+    else {
+        return mp_get_int(&i);
+    }
 }
 
 /* Used with boxing. Sets a floating point value, for representations that can
