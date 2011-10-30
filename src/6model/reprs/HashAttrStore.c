@@ -49,9 +49,6 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
 /* Gets the current value for an attribute. */
 static PMC * get_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
     HashAttrStoreInstance *instance = (HashAttrStoreInstance *)PMC_data(obj);
-    if (!instance->body.store)
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot access attributes in a type object");
     return VTABLE_get_pmc_keyed_str(interp, instance->body.store, name);
 }
 static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
