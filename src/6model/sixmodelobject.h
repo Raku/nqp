@@ -200,27 +200,27 @@ struct SixModel_REPROps {
     
     /* Used with boxing. Sets an integer value, for representations that
      * can hold one. */
-    void (*set_int) (PARROT_INTERP, PMC *Object, INTVAL Value);
+    void (*set_int) (PARROT_INTERP, STable *st, void *data, INTVAL value);
 
     /* Used with boxing. Gets an integer value, for representations that
      * can hold one. */
-    INTVAL (*get_int) (PARROT_INTERP, PMC *Object);
+    INTVAL (*get_int) (PARROT_INTERP, STable *st, void *data);
 
     /* Used with boxing. Sets a floating point value, for representations that
      * can hold one. */
-    void (*set_num) (PARROT_INTERP, PMC *Object, FLOATVAL Value);
+    void (*set_num) (PARROT_INTERP, STable *st, void *data, FLOATVAL value);
 
     /* Used with boxing. Gets a floating point value, for representations that
      * can hold one. */
-    FLOATVAL (*get_num) (PARROT_INTERP, PMC *Object);
+    FLOATVAL (*get_num) (PARROT_INTERP, STable *st, void *data);
 
     /* Used with boxing. Sets a string value, for representations that
      * can hold one. */
-    void (*set_str) (PARROT_INTERP, PMC *Object, STRING *Value);
+    void (*set_str) (PARROT_INTERP, STable *st, void *data, STRING *value);
 
     /* Used with boxing. Gets a string value, for representations that
      * can hold one. */
-    STRING * (*get_str) (PARROT_INTERP, PMC *Object);
+    STRING * (*get_str) (PARROT_INTERP, STable *st, void *data);
 
     /* This Parrot-specific addition to the API is used to mark an object. */
     void (*gc_mark) (PARROT_INTERP, PMC *Object);

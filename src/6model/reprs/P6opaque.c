@@ -176,8 +176,8 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
 
     /* Otherwise, we need to compute the allocation strategy.  */
     else {
-        /* Initial size is for commonalities (e.g. shared table pointer). */
-        INTVAL cur_size = sizeof(P6opaqueInstance);
+        /* We track the size of the body part, since that's what we want offsets into. */
+        INTVAL cur_size = 0;
         
         /* Get number of attributes and set up various counters. */
         INTVAL num_attrs    = VTABLE_elements(interp, flat_list);
@@ -263,8 +263,11 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
             cur_size += bits / 8;
         }
 
-        /* Finally, put computed allocation size in place. */
-        repr_data->allocation_size = cur_size;
+        /* Finally, put computed allocation size in place; it's body size plus
+         * header size. Also number of markables */
+        repr_data->allocation_size = cur_size + sizeof(P6opaqueInstance);
+        repr_data->gc_pmc_mark_offsets_count = cur_pmc_attr;
+        repr_data->gc_str_mark_offsets_count = cur_str_attr;
     }
 
     Parrot_unblock_GC_mark(interp);
@@ -416,7 +419,7 @@ static PMC * get_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *n
     slot = hint >= 0 && !(repr_data->mi) ? hint :
         try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
-        PMC *result = get_pmc_at_offset(instance, repr_data->attribute_offsets[slot]);
+        PMC *result = get_pmc_at_offset(instance, sizeof(P6opaqueInstance) + repr_data->attribute_offsets[slot]);
         if (result) {
             return result;
         }
@@ -426,7 +429,7 @@ static PMC * get_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *n
                 PMC *value = repr_data->auto_viv_values[slot];
                 if (value != NULL) {
                     value = REPR(value)->clone(interp, value);
-                    set_pmc_at_offset(instance, repr_data->attribute_offsets[slot], value);
+                    set_pmc_at_offset(instance, sizeof(P6opaqueInstance) + repr_data->attribute_offsets[slot], value);
                     return value;
                 }
             }
@@ -452,7 +455,7 @@ static INTVAL get_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRI
     slot = hint >= 0 && !(repr_data->mi) ? hint :
         try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0)
-        return get_int_at_offset(instance, repr_data->attribute_offsets[slot]);
+        return get_int_at_offset(instance, sizeof(P6opaqueInstance) + repr_data->attribute_offsets[slot]);
     
     /* Otherwise, complain that the attribute doesn't exist. */
     no_such_attribute(interp, "get", class_handle, name);
@@ -471,7 +474,7 @@ static FLOATVAL get_attribute_num(PARROT_INTERP, PMC *obj, PMC *class_handle, ST
     slot = hint >= 0 && !(repr_data->mi) ? hint :
         try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0)
-        return get_num_at_offset(instance, repr_data->attribute_offsets[slot]);
+        return get_num_at_offset(instance, sizeof(P6opaqueInstance) + repr_data->attribute_offsets[slot]);
     
     /* Otherwise, complain that the attribute doesn't exist. */
     no_such_attribute(interp, "get", class_handle, name);
@@ -490,7 +493,7 @@ static STRING * get_attribute_str(PARROT_INTERP, PMC *obj, PMC *class_handle, ST
     slot = hint >= 0 && !(repr_data->mi) ? hint :
         try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
-        STRING *result = get_str_at_offset(instance, repr_data->attribute_offsets[slot]);
+        STRING *result = get_str_at_offset(instance, sizeof(P6opaqueInstance) + repr_data->attribute_offsets[slot]);
         return result ? result : STRINGNULL;
     }
     
@@ -513,7 +516,7 @@ static void bind_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *n
     slot = hint >= 0 && !(repr_data->mi) ? hint :
         try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
-        set_pmc_at_offset(instance, repr_data->attribute_offsets[slot], value);
+        set_pmc_at_offset(instance, sizeof(P6opaqueInstance) + repr_data->attribute_offsets[slot], value);
     }
     else {
         /* Otherwise, complain that the attribute doesn't exist. */
@@ -534,7 +537,7 @@ static void bind_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRIN
     slot = hint >= 0 && !(repr_data->mi) ? hint :
         try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
-        set_int_at_offset(instance, repr_data->attribute_offsets[slot], value);
+        set_int_at_offset(instance, sizeof(P6opaqueInstance) + repr_data->attribute_offsets[slot], value);
     }
     else {
         /* Otherwise, complain that the attribute doesn't exist. */
@@ -555,7 +558,7 @@ static void bind_attribute_num(PARROT_INTERP, PMC *obj, PMC *class_handle, STRIN
     slot = hint >= 0 && !(repr_data->mi) ? hint :
         try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
-        set_num_at_offset(instance, repr_data->attribute_offsets[slot], value);
+        set_num_at_offset(instance, sizeof(P6opaqueInstance) + repr_data->attribute_offsets[slot], value);
     }
     else {
         /* Otherwise, complain that the attribute doesn't exist. */
@@ -576,7 +579,7 @@ static void bind_attribute_str(PARROT_INTERP, PMC *obj, PMC *class_handle, STRIN
     slot = hint >= 0 && !(repr_data->mi) ? hint :
         try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
-        set_str_at_offset(instance, repr_data->attribute_offsets[slot], value);
+        set_str_at_offset(instance, sizeof(P6opaqueInstance) + repr_data->attribute_offsets[slot], value);
     }
     else {
         /* Otherwise, complain that the attribute doesn't exist. */
@@ -618,11 +621,10 @@ static PMC * repr_clone(PARROT_INTERP, PMC *to_clone) {
 
 /* Used with boxing. Sets an integer value, for representations that can hold
  * one. */
-static void set_int(PARROT_INTERP, PMC *obj, INTVAL value) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
+static void set_int(PARROT_INTERP, STable *st, void *data, INTVAL value) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     if (repr_data->unbox_int_offset) {
-        set_int_at_offset(instance, repr_data->unbox_int_offset, value);
+        set_int_at_offset(data, repr_data->unbox_int_offset, value);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -632,15 +634,10 @@ static void set_int(PARROT_INTERP, PMC *obj, INTVAL value) {
 
 /* Used with boxing. Gets an integer value, for representations that can
  * hold one. */
-static INTVAL get_int(PARROT_INTERP, PMC *obj) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
+static INTVAL get_int(PARROT_INTERP, STable *st, void *data) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     if (repr_data->unbox_int_offset) {
-        if (PObj_flag_TEST(private0, obj)) {
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot unbox type object to a native integer");
-        }
-        return get_int_at_offset(instance, repr_data->unbox_int_offset);
+        return get_int_at_offset(data, repr_data->unbox_int_offset);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -650,11 +647,10 @@ static INTVAL get_int(PARROT_INTERP, PMC *obj) {
 
 /* Used with boxing. Sets a floating point value, for representations that can
  * hold one. */
-static void set_num(PARROT_INTERP, PMC *obj, FLOATVAL value) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
+static void set_num(PARROT_INTERP, STable *st, void *data, FLOATVAL value) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     if (repr_data->unbox_num_offset) {
-        set_num_at_offset(instance, repr_data->unbox_num_offset, value);
+        set_num_at_offset(data, repr_data->unbox_num_offset, value);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -664,15 +660,10 @@ static void set_num(PARROT_INTERP, PMC *obj, FLOATVAL value) {
 
 /* Used with boxing. Gets a floating point value, for representations that can
  * hold one. */
-static FLOATVAL get_num(PARROT_INTERP, PMC *obj) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
+static FLOATVAL get_num(PARROT_INTERP, STable *st, void *data) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     if (repr_data->unbox_num_offset) {
-        if (PObj_flag_TEST(private0, obj)) {
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot unbox type object to a native number");
-        }
-        return get_num_at_offset(instance, repr_data->unbox_num_offset);
+        return get_num_at_offset(data, repr_data->unbox_num_offset);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -682,11 +673,10 @@ static FLOATVAL get_num(PARROT_INTERP, PMC *obj) {
 
 /* Used with boxing. Sets a string value, for representations that can hold
  * one. */
-static void set_str(PARROT_INTERP, PMC *obj, STRING *value) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
+static void set_str(PARROT_INTERP, STable *st, void *data, STRING *value) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     if (repr_data->unbox_str_offset) {
-        set_str_at_offset(instance, repr_data->unbox_str_offset, value);
+        set_str_at_offset(data, repr_data->unbox_str_offset, value);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -696,18 +686,11 @@ static void set_str(PARROT_INTERP, PMC *obj, STRING *value) {
 
 /* Used with boxing. Gets a string value, for representations that can hold
  * one. */
-static STRING * get_str(PARROT_INTERP, PMC *obj) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
+static STRING * get_str(PARROT_INTERP, STable *st, void *data) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     if (repr_data->unbox_str_offset) {
-        if (PObj_flag_TEST(private0, obj)) {
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot unbox type object to a native string");
-        }
-        else {
-            STRING *s = get_str_at_offset(instance, repr_data->unbox_str_offset);
-            return s ? s : STRINGNULL;
-        }
+        STRING *s = get_str_at_offset(data, repr_data->unbox_str_offset);
+        return s ? s : STRINGNULL;
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -733,31 +716,21 @@ static void gc_mark(PARROT_INTERP, PMC *obj) {
 
         /* Mark PMCs. */
         if (repr_data->gc_pmc_mark_offsets) {
-            for (i = 0; i < repr_data->num_attributes; i++) {
+            for (i = 0; i < repr_data->gc_pmc_mark_offsets_count; i++) {
                 INTVAL offset = repr_data->gc_pmc_mark_offsets[i];
-                if (offset) {
-                    PMC *to_mark = get_pmc_at_offset(instance, offset);
-                    if (!PMC_IS_NULL(to_mark))
-                        Parrot_gc_mark_PMC_alive(interp, to_mark);
-                }
-                else {
-                    break;
-                }
+                PMC *to_mark  = get_pmc_at_offset(instance, sizeof(P6opaqueInstance) + offset);
+                if (!PMC_IS_NULL(to_mark))
+                    Parrot_gc_mark_PMC_alive(interp, to_mark);
             }
         }
 
         /* Mark strings. */
         if (repr_data->gc_str_mark_offsets) {
-            for (i = 0; i < repr_data->num_attributes; i++) {
-                INTVAL offset = repr_data->gc_str_mark_offsets[i];
-                if (offset) {
-                    STRING *to_mark = get_str_at_offset(instance, offset);
-                    if (to_mark)
-                        Parrot_gc_mark_STRING_alive(interp, to_mark);
-                }
-                else {
-                    break;
-                }
+            for (i = 0; i < repr_data->gc_str_mark_offsets_count; i++) {
+                INTVAL offset   = repr_data->gc_str_mark_offsets[i];
+                STRING *to_mark = get_str_at_offset(instance, sizeof(P6opaqueInstance) + offset);
+                if (to_mark)
+                    Parrot_gc_mark_STRING_alive(interp, to_mark);
             }
         }
     }
@@ -837,7 +810,7 @@ static INTVAL is_attribute_initialized(PARROT_INTERP, PMC *obj, PMC *class_handl
 
     slot = try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0)
-        return NULL != get_pmc_at_offset(instance, repr_data->attribute_offsets[slot]);
+        return NULL != get_pmc_at_offset(instance, sizeof(P6opaqueInstance) + repr_data->attribute_offsets[slot]);
     else
         no_such_attribute(interp, "initializedness check", class_handle, name);
 }

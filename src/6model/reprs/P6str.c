@@ -101,42 +101,42 @@ static PMC * repr_clone(PARROT_INTERP, PMC *to_clone) {
 
 /* Used with boxing. Sets an integer value, for representations that can hold
  * one. */
-static void set_int(PARROT_INTERP, PMC *obj, INTVAL value) {
+static void set_int(PARROT_INTERP, STable *st, void *data, INTVAL value) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6str cannot box a native int");
 }
 
 /* Used with boxing. Gets an integer value, for representations that can
  * hold one. */
-static INTVAL get_int(PARROT_INTERP, PMC *obj) {
+static INTVAL get_int(PARROT_INTERP, STable *st, void *data) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6str cannot unbox to a native int");
 }
 
 /* Used with boxing. Sets a floating point value, for representations that can
  * hold one. */
-static void set_num(PARROT_INTERP, PMC *obj, FLOATVAL value) {
+static void set_num(PARROT_INTERP, STable *st, void *data, FLOATVAL value) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6str cannot box a native num");
 }
 
 /* Used with boxing. Gets a floating point value, for representations that can
  * hold one. */
-static FLOATVAL get_num(PARROT_INTERP, PMC *obj) {
+static FLOATVAL get_num(PARROT_INTERP, STable *st, void *data) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6str cannot unbox to a native num");
 }
 
 /* Used with boxing. Sets a string value, for representations that can hold
  * one. */
-static void set_str(PARROT_INTERP, PMC *obj, STRING *value) {
-    ((P6strInstance *)PMC_data(obj))->body.value = value;
+static void set_str(PARROT_INTERP, STable *st, void *data, STRING *value) {
+    ((P6strBody *)data)->value = value;
 }
 
 /* Used with boxing. Gets a string value, for representations that can hold
  * one. */
-static STRING * get_str(PARROT_INTERP, PMC *obj) {
-    return ((P6strInstance *)PMC_data(obj))->body.value;
+static STRING * get_str(PARROT_INTERP, STable *st, void *data) {
+    return ((P6strBody *)data)->value;
 }
 
 /* This Parrot-specific addition to the API is used to mark an object. */
