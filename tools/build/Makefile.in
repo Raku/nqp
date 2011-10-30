@@ -179,6 +179,7 @@ METAMODEL_SOURCE = src/6model/sixmodelobject.h src/6model/sixmodelobject.c \
                    src/6model/reprs/KnowHOWREPR.h src/6model/reprs/KnowHOWREPR.c \
                    src/6model/reprs/P6opaque.h src/6model/reprs/P6opaque.c \
                    src/6model/reprs/P6int.h src/6model/reprs/P6int.c \
+                   src/6model/reprs/P6bigint.h src/6model/reprs/P6bigint.c \
                    src/6model/reprs/P6str.h src/6model/reprs/P6str.c \
                    src/6model/reprs/P6num.h src/6model/reprs/P6num.c \
                    src/6model/reprs/HashAttrStore.h src/6model/reprs/HashAttrStore.c \
