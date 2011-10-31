@@ -228,6 +228,10 @@ struct SixModel_REPROps {
     /* This Parrot-specific addition to the API is used to free an object. */
     void (*gc_free) (PARROT_INTERP, PMC *object);
 
+    /* This is called to do any cleanup of resources when an object gets
+     * embedded inside another one. Never called on a top-level object. */
+    void (*gc_cleanup) (PARROT_INTERP, STable *st, void *data);
+
     /* This Parrot-specific addition to the API is used to mark a REPR instance. */
     void (*gc_mark_repr_data) (PARROT_INTERP, STable *st);
 

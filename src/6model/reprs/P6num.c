@@ -161,6 +161,7 @@ REPROps * P6num_initialize(PARROT_INTERP) {
     this_repr->get_str = get_str;
     this_repr->gc_mark = NULL;
     this_repr->gc_free = gc_free;
+    this_repr->gc_cleanup = NULL;
     this_repr->gc_mark_repr_data = NULL;
     this_repr->gc_free_repr_data = NULL;
     this_repr->get_storage_spec = get_storage_spec;
