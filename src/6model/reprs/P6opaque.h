@@ -64,10 +64,17 @@ typedef struct {
     INTVAL *gc_pmc_mark_offsets;
     INTVAL gc_pmc_mark_offsets_count;
 
-    /* Offsets into the object that are elligible for string GC marking, and how
-     * many of them we have. */
-    INTVAL *gc_str_mark_offsets;
-    INTVAL gc_str_mark_offsets_count;
+    /* Slots holding flattened objects that need another REPR to initialize
+     * them; terminated with -1. */
+    INTVAL *initialize_slots;
+    
+    /* Slots holding flattened objects that need another REPR to mark them;
+     * terminated with -1. */
+    INTVAL *gc_mark_slots;
+    
+    /* Slots holding flattened objects that need another REPR to clean them;
+     * terminated with -1. */
+    INTVAL *gc_cleanup_slots;
 } P6opaqueREPRData;
 
 /* Initializes the P6opaque REPR. */

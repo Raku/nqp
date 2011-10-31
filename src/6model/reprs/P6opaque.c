@@ -180,10 +180,12 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
         INTVAL cur_size = 0;
         
         /* Get number of attributes and set up various counters. */
-        INTVAL num_attrs    = VTABLE_elements(interp, flat_list);
-        INTVAL info_alloc   = num_attrs == 0 ? 1 : num_attrs;
-        INTVAL cur_pmc_attr = 0;
-        INTVAL cur_str_attr = 0;
+        INTVAL num_attrs        = VTABLE_elements(interp, flat_list);
+        INTVAL info_alloc       = num_attrs == 0 ? 1 : num_attrs;
+        INTVAL cur_pmc_attr     = 0;
+        INTVAL cur_init_slot    = 0;
+        INTVAL cur_mark_slot    = 0;
+        INTVAL cur_cleanup_slot = 0;
         INTVAL i;
 
         /* Allocate offset array and GC mark info arrays. */
@@ -214,6 +216,28 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
                     unboxed_type = spec.boxed_primitive;
                     bits = spec.bits;
                     repr_data->flattened_stables[i] = STABLE(type);
+                    
+                    /* Does it need special initialization? */
+                    if (REPR(type)->initialize) {
+                        if (!repr_data->initialize_slots)
+                            repr_data->initialize_slots = (INTVAL *) mem_sys_allocate_zeroed((info_alloc + 1) * sizeof(INTVAL));
+                        repr_data->initialize_slots[cur_init_slot] = i;
+                        cur_init_slot++;
+                    }
+                    
+                    /* Does it have special GC needs? */
+                    if (REPR(type)->gc_mark) {
+                        if (!repr_data->gc_mark_slots)
+                            repr_data->gc_mark_slots = (INTVAL *) mem_sys_allocate_zeroed((info_alloc + 1) * sizeof(INTVAL));
+                        repr_data->gc_mark_slots[cur_mark_slot] = i;
+                        cur_mark_slot++;
+                    }
+                    if (REPR(type)->gc_cleanup) {
+                        if (!repr_data->gc_cleanup_slots)
+                            repr_data->gc_cleanup_slots = (INTVAL *) mem_sys_allocate_zeroed((info_alloc + 1) * sizeof(INTVAL));
+                        repr_data->gc_cleanup_slots[cur_cleanup_slot] = i;
+                        cur_cleanup_slot++;
+                    }
 
                     /* Is it a target for box/unbox operations? */
                     if (!PMC_IS_NULL(box_target) && VTABLE_get_bool(interp, box_target)) {
@@ -244,35 +268,35 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
                 }
             }
 
-            /* Do allocation. */
-            repr_data->attribute_offsets[i] = cur_size;
+            /* Handle PMC attributes, which need marking and may have auto-viv needs. */
             if (unboxed_type == STORAGE_SPEC_BP_NONE) {
                 if (!repr_data->gc_pmc_mark_offsets)
                     repr_data->gc_pmc_mark_offsets = (INTVAL *) mem_sys_allocate_zeroed(info_alloc * sizeof(INTVAL));
                 repr_data->gc_pmc_mark_offsets[cur_pmc_attr] = cur_size;
                 cur_pmc_attr++;
                 if (!PMC_IS_NULL(av_cont)) {
-                    /* Stash away auto-viv container info. */
                     if (!repr_data->auto_viv_values)
                         repr_data->auto_viv_values = (PMC **) mem_sys_allocate_zeroed(info_alloc * sizeof(PMC *));
                     repr_data->auto_viv_values[i] = av_cont;
                 }
             }
-            if (unboxed_type == STORAGE_SPEC_BP_STR) {
-                if (!repr_data->gc_str_mark_offsets)
-                    repr_data->gc_str_mark_offsets = (INTVAL *) mem_sys_allocate_zeroed(info_alloc * sizeof(INTVAL));
-                repr_data->gc_str_mark_offsets[cur_str_attr] = cur_size;
-                cur_str_attr++;
-            }
+            
+            /* Do allocation. */
             /* XXX TODO Alignment! Important when we get int1, int8, etc. */
+            repr_data->attribute_offsets[i] = cur_size;
             cur_size += bits / 8;
         }
 
         /* Finally, put computed allocation size in place; it's body size plus
-         * header size. Also number of markables */
+         * header size. Also number of markables and sentinels. */
         repr_data->allocation_size = cur_size + sizeof(P6opaqueInstance);
         repr_data->gc_pmc_mark_offsets_count = cur_pmc_attr;
-        repr_data->gc_str_mark_offsets_count = cur_str_attr;
+        if (repr_data->initialize_slots)
+            repr_data->initialize_slots[cur_init_slot] = -1;
+        if (repr_data->gc_mark_slots)
+            repr_data->gc_mark_slots[cur_mark_slot] = -1;
+        if (repr_data->gc_cleanup_slots)
+            repr_data->gc_cleanup_slots[cur_cleanup_slot] = -1;
     }
 
     Parrot_unblock_GC_mark(interp);
@@ -632,13 +656,12 @@ static void gc_mark(PARROT_INTERP, STable *st, void *data) {
         }
     }
 
-    /* Mark strings. */
-    if (repr_data->gc_str_mark_offsets) {
-        for (i = 0; i < repr_data->gc_str_mark_offsets_count; i++) {
-            INTVAL offset   = repr_data->gc_str_mark_offsets[i];
-            STRING *to_mark = get_str_at_offset(data, offset);
-            if (to_mark)
-                Parrot_gc_mark_STRING_alive(interp, to_mark);
+    /* Mark any nested reprs that need it. */
+    if (repr_data->gc_mark_slots) {
+        for (i = 0; repr_data->gc_mark_slots[i] >= 0; i++) {
+            INTVAL  offset = repr_data->attribute_offsets[repr_data->gc_mark_slots[i]];
+            STable *st     = repr_data->flattened_stables[repr_data->gc_mark_slots[i]];
+            st->REPR->gc_mark(interp, st, (char *)data + offset);
         }
     }
 }
@@ -681,10 +704,14 @@ static void gc_free_repr_data(PARROT_INTERP, STable *st) {
         mem_sys_free(repr_data->name_to_index_mapping);
     if (repr_data->gc_pmc_mark_offsets)
         mem_sys_free(repr_data->gc_pmc_mark_offsets);
-    if (repr_data->gc_str_mark_offsets)
-        mem_sys_free(repr_data->gc_str_mark_offsets);
     if (repr_data->auto_viv_values)
         mem_sys_free(repr_data->auto_viv_values);
+    if (repr_data->initialize_slots)
+        mem_sys_free(repr_data->initialize_slots);
+    if (repr_data->gc_mark_slots)
+        mem_sys_free(repr_data->gc_mark_slots);
+    if (repr_data->gc_cleanup_slots)
+        mem_sys_free(repr_data->gc_cleanup_slots);
     mem_sys_free(st->REPR_data);
     st->REPR_data = NULL;
 }
