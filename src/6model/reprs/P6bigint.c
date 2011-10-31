@@ -113,11 +113,9 @@ static void set_int(PARROT_INTERP, PMC *obj, INTVAL value) {
         mp_set_int(&((P6bigintInstance *)PMC_data(obj))->i, value);
     }
     else {
-        mp_int neg;
-        mp_init(&neg);
-        mp_set_int(&neg, -value);
-        mp_neg(&neg, &((P6bigintInstance *)PMC_data(obj))->i);
-        mp_clear(&neg);
+        mp_int i = ((P6bigintInstance *)PMC_data(obj))->i;
+        mp_set_int(&i, -value);
+        mp_neg(&i, &i);
     }
 }
 
@@ -127,11 +125,7 @@ static INTVAL get_int(PARROT_INTERP, PMC *obj) {
     INTVAL ret;
     mp_int i = ((P6bigintInstance *)PMC_data(obj))->i;
     if (MP_LT == mp_cmp_d(&i, 0)) {
-        mp_int neg;
-        mp_init(&neg);
-        mp_neg(&i, &neg);
-        ret = -mp_get_int(&neg);
-        mp_clear(&neg);
+        mp_neg(&i, &i);
         return ret;
     }
     else {
