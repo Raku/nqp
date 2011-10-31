@@ -15,6 +15,9 @@
 /* This representation's function pointer table. */
 static REPROps *this_repr;
 
+/* 6model object ID. */
+static INTVAL smo_id = 0;
+
 /* How do we go from type-object to a hash value? For now, we make an integer
  * that is the address of the STable struct, which not being subject to GC will
  * never move, and is unique per type object too. */
@@ -468,6 +471,8 @@ static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
             PMC *result = st->REPR->allocate(interp, st);
             st->REPR->copy_to(interp, st, (char *)data + repr_data->attribute_offsets[slot],
                 OBJECT_BODY(result));
+            PARROT_GC_WRITE_BARRIER(interp, result);
+
             return result;
         }
     }
@@ -502,7 +507,7 @@ static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
     if (slot >= 0) {
         STable *st = repr_data->flattened_stables[slot];
         if (st) {
-            if (st == STABLE(value))
+            if (value->vtable->base_type == smo_id && st == STABLE(value))
                 st->REPR->copy_to(interp, st, OBJECT_BODY(value),
                     (char *)data + repr_data->attribute_offsets[slot]);
             else
@@ -837,5 +842,6 @@ REPROps * P6opaque_initialize(PARROT_INTERP) {
     this_repr->get_storage_spec = get_storage_spec;
     this_repr->is_attribute_initialized = is_attribute_initialized;
     this_repr->change_type = change_type;
+    smo_id = pmc_type(interp, Parrot_str_new(interp, "SixModelObject", 0));
     return this_repr;
 }
