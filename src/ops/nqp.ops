@@ -1234,7 +1234,7 @@ inline op stable_publish_vtable_handler_mapping(in PMC, in PMC) :base_core {
                 st->parrot_vtable_handler_mapping[idx].class_handle = class_handle;
                 st->parrot_vtable_handler_mapping[idx].attr_name = attr_name;
                 st->parrot_vtable_handler_mapping[idx].hint =
-                    REPR(class_handle)->hint_for(interp, STABLE(target), class_handle, attr_name);
+                    REPR(class_handle)->hint_for(interp, st, class_handle, attr_name);
             }
 			else
                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
