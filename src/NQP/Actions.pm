@@ -79,7 +79,8 @@ class NQP::Actions is HLL::Actions {
         # register the mainline as a module (so trying to use ourself in the
         # program will not explode). If we have a MAIN sub, call it at end of
         # mainline.
-        $unit.unshift(PAST::Var.new( :scope('parameter'), :name('@ARGS'), :slurpy(1) ));
+        $unit.unshift(PAST::Var.new( :scope('parameter'), :name('@ARGS'), :slurpy(1),
+            :directaccess(1) ));
         my $main_tasks := PAST::Stmts.new(
             PAST::Op.new( :pirop('load_bytecode vs'), 'ModuleLoader.pbc' ),
             PAST::Op.new(
@@ -548,7 +549,8 @@ class NQP::Actions is HLL::Actions {
         # for parametric types, pass along the role body block.
         if pir::can($how, 'parametric') && $how.parametric($how) {
             $past.blocktype('declaration');
-            $past.unshift(PAST::Var.new( :name('$?CLASS'), :scope('parameter') ));
+            $past.unshift(PAST::Var.new( :name('$?CLASS'), :scope('parameter'),
+                :directaccess(1) ));
             $past.symbol('$?CLASS', :scope('lexical'));
             $*SC.pkg_set_body_block($*PACKAGE, $past);
             $*SC.install_lexical_symbol($past, '$?PACKAGE', $*PACKAGE);
@@ -665,7 +667,7 @@ class NQP::Actions is HLL::Actions {
         }
         else {
             $BLOCK[0].push(PAST::Var.new(
-                :name($name), :scope('lexical'), :isdecl(1),
+                :name($name), :scope('lexical'), :isdecl(1), :directaccess(1),
                 :lvalue(1), :viviself( vivitype($sigil) ),
                 :node($/)
             ));
@@ -744,7 +746,7 @@ class NQP::Actions is HLL::Actions {
                             PAST::Var.new( :name($name), :scope('outer') ),
                             $cholder
                         );
-                        @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1),
+                        @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1), :directaccess(1),
                                           :viviself($dispatch_setup), :scope('lexical') ) );
                         @BLOCK[0].symbol($name, :scope('lexical'), :cholder($cholder) );
                     }
@@ -761,7 +763,7 @@ class NQP::Actions is HLL::Actions {
                     # with the proto.
                     if $*SCOPE eq 'our' { pir::die('our-scoped protos not yet implemented') }
                     my $cholder := PAST::Op.new( :pasttype('list') );
-                    @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1),
+                    @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1), :directaccess(1),
                                           :viviself($past), :scope('lexical') ) );
                     @BLOCK[0][0].push(PAST::Op.new(
                         :pirop('set_dispatchees 0PP'),
@@ -774,7 +776,7 @@ class NQP::Actions is HLL::Actions {
                     $past.pirflags(':instanceof("DispatcherSub")');
                 }
                 else {
-                    @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1),
+                    @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1), :directaccess(1),
                                           :viviself($past), :scope('lexical') ) );
                     @BLOCK[0].symbol($name, :scope('lexical') );
                     if $*SCOPE eq 'our' {
@@ -828,7 +830,7 @@ class NQP::Actions is HLL::Actions {
         # Always need an invocant.
         unless $past<signature_has_invocant> {
             $past[0].unshift(PAST::Var.new(
-                :name('self'), :scope('parameter'),
+                :name('self'), :scope('parameter'), :directaccess(1),
                 :multitype($*SC.get_object_sc_ref_past($*PACKAGE))
             ));
         }
@@ -900,7 +902,7 @@ class NQP::Actions is HLL::Actions {
             my $inv := $<invocant>[0].ast;
             $BLOCKINIT.push($inv);
             $BLOCKINIT.push(PAST::Var.new(
-                :name('self'), :scope('lexical'), :isdecl(1),
+                :name('self'), :scope('lexical'), :isdecl(1), :directaccess(1),
                 :viviself(PAST::Var.new( :scope('lexical'), :name($inv.name) ))
             ));
             @BLOCK[0]<signature_has_invocant> := 1
@@ -955,7 +957,7 @@ class NQP::Actions is HLL::Actions {
     method param_var($/) {
         my $name := ~$/;
         my $past :=  PAST::Var.new( :name($name), :scope('parameter'),
-                                    :isdecl(1), :node($/) );
+                                    :isdecl(1), :directaccess(1), :node($/) );
         @BLOCK[0].symbol($name, :scope('lexical') );
         make $past;
     }
