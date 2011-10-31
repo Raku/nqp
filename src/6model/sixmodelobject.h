@@ -198,10 +198,6 @@ struct SixModel_REPROps {
     /* Gets the hint for the given attribute ID. */
     INTVAL (*hint_for) (PARROT_INTERP, STable *st, PMC *class_handle, STRING *name);
 
-    /* Clones the object, optionally cloning any containers in its
-     * attributes. */
-    PMC * (*clone) (PARROT_INTERP, PMC *to_clone);
-    
     /* Used with boxing. Sets an integer value, for representations that
      * can hold one. */
     void (*set_int) (PARROT_INTERP, STable *st, void *data, INTVAL value);
@@ -230,7 +226,7 @@ struct SixModel_REPROps {
     void (*gc_mark) (PARROT_INTERP, STable *st, void *data);
 
     /* This Parrot-specific addition to the API is used to free an object. */
-    void (*gc_free) (PARROT_INTERP, PMC *Object);
+    void (*gc_free) (PARROT_INTERP, PMC *object);
 
     /* This Parrot-specific addition to the API is used to mark a REPR instance. */
     void (*gc_mark_repr_data) (PARROT_INTERP, STable *st);

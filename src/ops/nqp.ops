@@ -199,6 +199,7 @@ inline op repr_instance_of(out PMC, in PMC) :base_core {
     if ($2->vtable->base_type == smo_id) {
         $1 = REPR($2)->allocate(interp, STABLE($2));
         REPR($1)->initialize(interp, STABLE($2), OBJECT_BODY($1));
+        PARROT_GC_WRITE_BARRIER(interp, $1);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -217,11 +218,18 @@ Gets a REPR to clone itself.
 */
 inline op repr_clone(out PMC, in PMC) :base_core {
     PMC *var = decontainerize(interp, $2);
-    if (var->vtable->base_type == smo_id)
-        $1 = REPR(var)->clone(interp, var);
-    else
+    if (var->vtable->base_type == smo_id) {
+        $1 = REPR(var)->allocate(interp, STABLE(var));
+        if (IS_CONCRETE(var))
+            REPR($1)->copy_to(interp, $1, OBJECT_BODY(var), OBJECT_BODY($1));
+        else
+            MARK_AS_TYPE_OBJECT($1);
+        PARROT_GC_WRITE_BARRIER(interp, $1);
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_clone on a SixModelObject");
+    }
 }
 
 

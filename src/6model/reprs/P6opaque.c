@@ -428,9 +428,11 @@ static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
                 if (repr_data->auto_viv_values) {
                     PMC *value = repr_data->auto_viv_values[slot];
                     if (value != NULL) {
-                        value = REPR(value)->clone(interp, value);
-                        set_pmc_at_offset(data, repr_data->attribute_offsets[slot], value);
-                        return value;
+                        PMC *cloned = REPR(value)->allocate(interp, STABLE(value));
+                        REPR(value)->copy_to(interp, STABLE(value), OBJECT_BODY(value), OBJECT_BODY(cloned));
+                        PARROT_GC_WRITE_BARRIER(interp, cloned);
+                        set_pmc_at_offset(data, repr_data->attribute_offsets[slot], cloned);
+                        return cloned;
                     }
                 }
                 return PMCNULL;
@@ -529,26 +531,6 @@ static INTVAL hint_for(PARROT_INTERP, STable *st, PMC *class_key, STRING *name) 
     }
     slot = try_get_slot(interp, repr_data, class_key, name);
     return slot >= 0 ? slot : NO_HINT;
-}
-
-/* Clones the current object. */
-static PMC * repr_clone(PARROT_INTERP, PMC *to_clone) {
-    P6opaqueInstance *obj;
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(to_clone)->REPR_data;
-    
-    if (IS_CONCRETE(to_clone)) {
-        obj = (P6opaqueInstance *)Parrot_gc_allocate_fixed_size_storage(interp, repr_data->allocation_size);
-        memcpy(obj, PMC_data(to_clone), repr_data->allocation_size);
-        return wrap_object(interp, obj);
-    }
-    else {
-        PMC *result;
-        obj = mem_allocate_zeroed_typed(P6opaqueInstance);
-        memcpy(obj, PMC_data(to_clone), sizeof(P6opaqueInstance));
-        result = wrap_object(interp, obj);
-        PObj_flag_SET(private0, result);
-        return result;
-    }
 }
 
 /* Used with boxing. Sets an integer value, for representations that can hold
@@ -814,7 +796,6 @@ REPROps * P6opaque_initialize(PARROT_INTERP) {
     this_repr->bind_attribute_boxed = bind_attribute_boxed;
     this_repr->bind_attribute_ref = bind_attribute_ref;
     this_repr->hint_for = hint_for;
-    this_repr->clone = repr_clone;
     this_repr->set_int = set_int;
     this_repr->get_int = get_int;
     this_repr->set_num = set_num;
