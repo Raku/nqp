@@ -221,7 +221,7 @@ inline op repr_clone(out PMC, in PMC) :base_core {
     if (var->vtable->base_type == smo_id) {
         $1 = REPR(var)->allocate(interp, STABLE(var));
         if (IS_CONCRETE(var))
-            REPR($1)->copy_to(interp, $1, OBJECT_BODY(var), OBJECT_BODY($1));
+            REPR(var)->copy_to(interp, STABLE(var), OBJECT_BODY(var), OBJECT_BODY($1));
         else
             MARK_AS_TYPE_OBJECT($1);
         PARROT_GC_WRITE_BARRIER(interp, $1);
