@@ -114,8 +114,7 @@ class NQP::SymbolTable is HLL::Compiler::SerializationContextBuilder {
     method install_lexical_symbol($block, $name, $obj) {
         # Install the object directly as a block symbol.
         $block.symbol($name, :scope('lexical'), :value($obj));
-        $block[0].push(PAST::Var.new( :scope('lexical'), :name($name), :isdecl(1),
-            :directaccess(1) ));
+        $block[0].push(PAST::Var.new( :scope('lexical'), :name($name), :isdecl(1) ));
         
         # Fixup and deserialization task is the same.
         my $fixup := PAST::Stmts.new(
