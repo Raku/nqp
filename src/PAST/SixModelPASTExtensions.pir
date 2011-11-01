@@ -211,7 +211,7 @@ some PAST that will produce it or a name that it can be looked up by.
     if reg_type == 'P' goto need_vivify
     $P1 = self.'tempreg'(reg_type)
     ops.'result'($P1)
-    if null lexregs goto no_lexregs_2
+    if null lexregs goto no_lexregs
     .local string lexreg
     lexreg = lexregs[name]
     unless lexreg goto no_lexregs_2
