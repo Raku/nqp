@@ -163,6 +163,7 @@ PMC * create_stable(PARROT_INTERP, REPROps *REPR, PMC *HOW) {
     STABLE_STRUCT(st_pmc)->WHO = PMCNULL;
     STABLE_STRUCT(st_pmc)->find_method = default_find_method;
     STABLE_STRUCT(st_pmc)->type_check = default_type_check;
+    STABLE_STRUCT(st_pmc)->stable_pmc = st_pmc;
     return st_pmc;
 }
 
@@ -171,7 +172,7 @@ PMC * create_stable(PARROT_INTERP, REPROps *REPR, PMC *HOW) {
 PMC * decontainerize(PARROT_INTERP, PMC *var) {
     if (var->vtable->base_type == smo_id) {
         ContainerSpec *spec = STABLE(var)->container_spec;
-        if (spec && REPR(var)->defined(interp, var)) {
+        if (spec && IS_CONCRETE(var)) {
             if (!PMC_IS_NULL(spec->value_slot.class_handle)) {
                 /* Just get slot. */
                 return VTABLE_get_attr_keyed(interp, var, spec->value_slot.class_handle,

@@ -23,15 +23,20 @@ typedef struct {
  * in the s-table. */
 typedef struct {
     /* The memory allocation size for an object instance. Includes space
-     * for the Shared Table pointer, spill hash and then for storing the
-     * actual, pre-declared attributes. Note, this is in bytes. */
+     * for the 6model common header and attributes. Size is in bytes. */
     INTVAL allocation_size;
 
-    /* The number of attributes we have allocated slots for. */
+    /* The number of attributes we have allocated slots for. Note that
+     * slots can vary in size. */
     INTVAL num_attributes;
 
     /* Maps attribute position numbers to the byte offset in the object. */
     INTVAL *attribute_offsets;
+
+    /* If the attribute was actually flattened in to this object from another
+     * representation, this is the s-table of the type of that attribute. NULL
+     * for attributes that are just reference types. */
+    STable **flattened_stables;
     
     /* Flags if we are MI or not. */
     INTVAL mi;
@@ -41,24 +46,35 @@ typedef struct {
      * to some container type. */
     PMC **auto_viv_values;
 
-    /* If we can unbox to a native integer, this is the offset to find it. */
-    INTVAL unbox_int_offset;
+    /* Slot to delegate to when we need to unbox to a native integer. */
+    INTVAL unbox_int_slot;
 
-    /* If we can unbox to a native number, this is the offset to find it. */
-    INTVAL unbox_num_offset;
+    /* Slot to delegate to when we need to unbox to a native number. */
+    INTVAL unbox_num_slot;
 
-    /* If we can unbox to a native string, this is the offset to find it. */
-    INTVAL unbox_str_offset;
+    /* Slot to delegate to when we need to unbox to a native string. */
+    INTVAL unbox_str_slot;
 
     /* A table mapping attribute names to indexes (which can then be looked
      * up in the offset table). Uses a final null entry as a sentinel. */
     P6opaqueNameMap *name_to_index_mapping;
 
-    /* Offsets into the object that are elligible for PMC GC marking. */
+    /* Offsets into the object that are elligible for PMC GC marking, and how
+     * many of them we have. */
     INTVAL *gc_pmc_mark_offsets;
+    INTVAL gc_pmc_mark_offsets_count;
 
-    /* Offsets into the object that are elligible for string GC marking. */
-    INTVAL *gc_str_mark_offsets;
+    /* Slots holding flattened objects that need another REPR to initialize
+     * them; terminated with -1. */
+    INTVAL *initialize_slots;
+    
+    /* Slots holding flattened objects that need another REPR to mark them;
+     * terminated with -1. */
+    INTVAL *gc_mark_slots;
+    
+    /* Slots holding flattened objects that need another REPR to clean them;
+     * terminated with -1. */
+    INTVAL *gc_cleanup_slots;
 } P6opaqueREPRData;
 
 /* Initializes the P6opaque REPR. */
