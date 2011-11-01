@@ -417,7 +417,14 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
 /* Initialize a new instance. */
 static void initialize(PARROT_INTERP, STable *st, void *data) {
     P6opaqueREPRData * repr_data = (P6opaqueREPRData *) st->REPR_data;
-    /* XXX Fill this out when we may have nested things to initialize. */
+    if (repr_data->initialize_slots) {
+        INTVAL i;
+        for (i = 0; repr_data->initialize_slots[i] >= 0; i++) {
+            INTVAL  offset = repr_data->attribute_offsets[repr_data->initialize_slots[i]];
+            STable *st     = repr_data->flattened_stables[repr_data->initialize_slots[i]];
+            st->REPR->initialize(interp, st, (char *)data + offset);
+        }
+    }
 }
 
 /* Copies to the body of one object to another. */
