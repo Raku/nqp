@@ -475,6 +475,7 @@ entry to produce the node to be returned.
     maphash['asec_n']   = 'asec__NN'
     maphash['sin_n']    = 'sin__NN'
     maphash['asin_n']   = 'asin__NN'
+    maphash['sinh_n']   = 'sinh__NN'
     maphash['cosh_n']   = 'cosh__NN'
     maphash['tanh_n']   = 'tanh__NN'
     maphash['sech_n']   = 'sech__NN'
