@@ -461,6 +461,7 @@ entry to produce the node to be returned.
     maphash['sqrt_n']   = 'sqrt__Nn'
     maphash['radix']    = 'nqp_radix__Pisii'
     maphash['log_n']    = 'ln__NN'
+    maphash['exp_n']    = 'exp__Nn'
 
     # trig opcodes
     maphash['sin_n']    = 'sin__NN'
@@ -469,6 +470,7 @@ entry to produce the node to be returned.
     maphash['acos_n']   = 'acos__NN'
     maphash['tan_n']    = 'tan__NN'
     maphash['atan_n']   = 'atan__NN'
+    maphash['atan2_n']  = 'atan__NNN'
     maphash['sec_n']    = 'sec__NN'
     maphash['asec_n']   = 'asec__NN'
     maphash['sin_n']    = 'sin__NN'
