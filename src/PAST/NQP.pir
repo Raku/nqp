@@ -488,6 +488,10 @@ entry to produce the node to be returned.
     maphash['bitshiftl_i']  = 'shl__III'
     maphash['bitshiftr_i']  = 'shr__III'
 
+    maphash['bitor_s']  = 'bors__SS'
+    maphash['bitxor_s'] = 'bxors__SS'
+    maphash['bitand_s'] = 'bands__SS'
+
     # string opcodes
     maphash['chars']    = 'length__Is'
     maphash['concat']   = 'concat'          # allow either P or S form
