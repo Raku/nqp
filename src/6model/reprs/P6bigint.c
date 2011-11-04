@@ -30,7 +30,7 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
     PARROT_GC_WRITE_BARRIER(interp, st_pmc);
 
     /* Flag it as a type object. */
-    PObj_flag_SET(private0, st->WHAT);
+    MARK_AS_TYPE_OBJECT(st->WHAT);
 
     return st->WHAT;
 }
@@ -49,12 +49,6 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
     mp_zero(&body->i);
 }
 
-/* Checks if a given object is defined (from the point of view of the
- * representation). */
-static INTVAL defined(PARROT_INTERP, PMC *obj) {
-    return !PObj_flag_TEST(private0, obj);
-}
-
 /* Helper to die because this type doesn't support attributes. */
 PARROT_DOES_NOT_RETURN
 static void die_no_attrs(PARROT_INTERP) {
@@ -63,43 +57,23 @@ static void die_no_attrs(PARROT_INTERP) {
 }
 
 /* Gets the current value for an attribute. */
-static PMC * get_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
+static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
     die_no_attrs(interp);
-    return PMCNULL;
 }
-static INTVAL get_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
+static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
     die_no_attrs(interp);
-    return 0;
-}
-static FLOATVAL get_attribute_num(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
-    die_no_attrs(interp);
-    return 0.0;
-}
-static STRING * get_attribute_str(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
-    die_no_attrs(interp);
-    return NULL;
-}
-static void * get_attribute_ref(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
-    die_no_attrs(interp);
-    return NULL;
 }
 
 /* Binds the given value to the specified attribute. */
-static void bind_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
+static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
     die_no_attrs(interp);
 }
-static void bind_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, INTVAL value) {
-    die_no_attrs(interp);
-}
-static void bind_attribute_num(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, FLOATVAL value) {
-    die_no_attrs(interp);
-}
-static void bind_attribute_str(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, STRING *value) {
+static void bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, void *value) {
     die_no_attrs(interp);
 }
 
 /* Gets the hint for the given attribute ID. */
-static INTVAL hint_for(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name) {
+static INTVAL hint_for(PARROT_INTERP, STable *st, PMC *class_handle, STRING *name) {
     return NO_HINT;
 }
 
@@ -193,7 +167,7 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
 }
 
 /* Checks if an attribute has been initialized. */
-static INTVAL is_attribute_initialized(PARROT_INTERP, PMC *Object, PMC *ClassHandle, STRING *Name, INTVAL Hint) {
+static INTVAL is_attribute_initialized(PARROT_INTERP, STable *st, void *data, PMC *ClassHandle, STRING *Name, INTVAL Hint) {
     die_no_attrs(interp);
 }
 
@@ -210,16 +184,10 @@ REPROps * P6bigint_initialize(PARROT_INTERP,
     this_repr->type_object_for = type_object_for;
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
-    this_repr->defined = defined;
-    this_repr->get_attribute = get_attribute;
-    this_repr->get_attribute_int = get_attribute_int;
-    this_repr->get_attribute_num = get_attribute_num;
-    this_repr->get_attribute_str = get_attribute_str;
-    this_repr->get_attribute_ref = get_attribute_ref;
-    this_repr->bind_attribute = bind_attribute;
-    this_repr->bind_attribute_int = bind_attribute_int;
-    this_repr->bind_attribute_num = bind_attribute_num;
-    this_repr->bind_attribute_str = bind_attribute_str;
+    this_repr->get_attribute_boxed = get_attribute_boxed;
+    this_repr->get_attribute_boxed = get_attribute_boxed;
+    this_repr->bind_attribute_boxed = bind_attribute_boxed;
+    this_repr->bind_attribute_ref = bind_attribute_ref;
     this_repr->hint_for = hint_for;
     this_repr->clone = repr_clone;
     this_repr->set_int = set_int;
