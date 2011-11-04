@@ -139,20 +139,17 @@ static STRING * get_str(PARROT_INTERP, STable *st, void *data) {
             "P6bigint cannot unbox to a native string");
 }
 
-/* This Parrot-specific addition to the API is used to mark an object. */
-static void gc_mark(PARROT_INTERP, PMC *obj) {
-    P6bigintInstance *instance = (P6bigintInstance *)PMC_data(obj);
-    if (!PMC_IS_NULL(instance->common.stable))
-        Parrot_gc_mark_PMC_alive(interp, instance->common.stable);
-    if (!PMC_IS_NULL(instance->common.sc))
-        Parrot_gc_mark_PMC_alive(interp, instance->common.sc);
-}
-
 /* This Parrot-specific addition to the API is used to free an object. */
 static void gc_free(PARROT_INTERP, PMC *obj) {
-    mp_clear(&((P6bigintInstance *)PMC_data(obj))->i);
+    mp_clear(&((P6bigintInstance *)PMC_data(obj))->body.i);
     mem_sys_free(PMC_data(obj));
     PMC_data(obj) = NULL;
+}
+
+/* This is called to do any cleanup of resources when an object gets
+ * embedded inside another one. Never called on a top-level object. */
+static void gc_cleanup(PARROT_INTERP, STable *st, void *data) {
+    mp_clear(&((P6bigintBody *)data)->i);
 }
 
 /* Gets the storage specification for this representation. */
@@ -195,10 +192,11 @@ REPROps * P6bigint_initialize(PARROT_INTERP,
     this_repr->get_num = get_num;
     this_repr->set_str = set_str;
     this_repr->get_str = get_str;
-    this_repr->gc_mark = gc_mark;
+    this_repr->gc_mark = NULL;
     this_repr->gc_free = gc_free;
-    this_repr->gc_mark_repr = NULL;
-    this_repr->gc_free_repr = NULL;
+    this_repr->gc_cleanup = gc_cleanup;
+    this_repr->gc_mark_repr_data = NULL;
+    this_repr->gc_free_repr_data = NULL;
     this_repr->get_storage_spec = get_storage_spec;
     this_repr->is_attribute_initialized = is_attribute_initialized;
     return this_repr;
