@@ -4,7 +4,7 @@ plan(9);
 pir::nqp_bigint_setup__v();
 
 my $knowhow := pir::get_knowhow__P();
-my $bi_type := $knowhow.HOW.new_type(:name('TestBigInt'), :repr('P6bigint'));
+my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
 $bi_type.HOW.compose($bi_type);
 sub s($x) { pir::nqp_bigint_to_str__SP($x) };
 sub iseq($x, $y) { nqp::iseq_I($x, nqp::box_i($y, $bi_type)) }
