@@ -86,12 +86,12 @@ static INTVAL hint_for(PARROT_INTERP, STable *st, PMC *class_handle, STRING *nam
 
 /* Used with boxing. Sets an integer value, for representations that can hold
  * one. */
-static void set_int(PARROT_INTERP, PMC *obj, INTVAL value) {
+static void set_int(PARROT_INTERP, STable *st, void *data, INTVAL value) {
     if (value >= 0) {
-        mp_set_int(&((P6bigintInstance *)PMC_data(obj))->i, value);
+        mp_set_int(&((P6bigintBody *)data)->i, value);
     }
     else {
-        mp_int i = ((P6bigintInstance *)PMC_data(obj))->i;
+        mp_int i = ((P6bigintBody *)data)->i;
         mp_set_int(&i, -value);
         mp_neg(&i, &i);
     }
@@ -99,9 +99,9 @@ static void set_int(PARROT_INTERP, PMC *obj, INTVAL value) {
 
 /* Used with boxing. Gets an integer value, for representations that can
  * hold one. */
-static INTVAL get_int(PARROT_INTERP, PMC *obj) {
+static INTVAL get_int(PARROT_INTERP, STable *st, void *data) {
     INTVAL ret;
-    mp_int i = ((P6bigintInstance *)PMC_data(obj))->i;
+    mp_int i = ((P6bigintBody *)data)->i;
     if (MP_LT == mp_cmp_d(&i, 0)) {
         mp_neg(&i, &i);
         return ret;
@@ -113,28 +113,28 @@ static INTVAL get_int(PARROT_INTERP, PMC *obj) {
 
 /* Used with boxing. Sets a floating point value, for representations that can
  * hold one. */
-static void set_num(PARROT_INTERP, PMC *obj, FLOATVAL value) {
+static void set_num(PARROT_INTERP, STable *st, void *data, FLOATVAL value) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6bigint cannot box a native num");
 }
 
 /* Used with boxing. Gets a floating point value, for representations that can
  * hold one. */
-static FLOATVAL get_num(PARROT_INTERP, PMC *obj) {
+static FLOATVAL get_num(PARROT_INTERP, STable *st, void *data) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6bigint cannot unbox to a native num");
 }
 
 /* Used with boxing. Sets a string value, for representations that can hold
  * one. */
-static void set_str(PARROT_INTERP, PMC *obj, STRING *value) {
+static void set_str(PARROT_INTERP, STable *st, void *data, STRING *value) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6bigint cannot box a native string");
 }
 
 /* Used with boxing. Gets a string value, for representations that can hold
  * one. */
-static STRING * get_str(PARROT_INTERP, PMC *obj) {
+static STRING * get_str(PARROT_INTERP, STable *st, void *data) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6bigint cannot unbox to a native string");
 }
