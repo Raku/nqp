@@ -49,6 +49,13 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
     mp_zero(&body->i);
 }
 
+/* Copies to the body of one object to another. */
+static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
+    P6bigintBody *src_body = (P6bigintBody *)src;
+    P6bigintBody *dest_body = (P6bigintBody *)dest;
+    mp_init_copy(&src_body->i, &dest_body->i);
+}
+
 /* Helper to die because this type doesn't support attributes. */
 PARROT_DOES_NOT_RETURN
 static void die_no_attrs(PARROT_INTERP) {
@@ -75,14 +82,6 @@ static void bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class
 /* Gets the hint for the given attribute ID. */
 static INTVAL hint_for(PARROT_INTERP, STable *st, PMC *class_handle, STRING *name) {
     return NO_HINT;
-}
-
-/* Clones the current object; simply copies the value. */
-static PMC * repr_clone(PARROT_INTERP, PMC *to_clone) {
-    P6bigintInstance *obj = mem_allocate_zeroed_typed(P6bigintInstance);
-    obj->common.stable = STABLE_PMC(to_clone);
-    mp_init_copy(&obj->i, &((P6bigintInstance *)PMC_data(to_clone))->i);
-    return wrap_object_func(interp, obj);
 }
 
 /* Used with boxing. Sets an integer value, for representations that can hold
@@ -184,12 +183,12 @@ REPROps * P6bigint_initialize(PARROT_INTERP,
     this_repr->type_object_for = type_object_for;
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
+    this_repr->copy_to = copy_to;
     this_repr->get_attribute_boxed = get_attribute_boxed;
     this_repr->get_attribute_boxed = get_attribute_boxed;
     this_repr->bind_attribute_boxed = bind_attribute_boxed;
     this_repr->bind_attribute_ref = bind_attribute_ref;
     this_repr->hint_for = hint_for;
-    this_repr->clone = repr_clone;
     this_repr->set_int = set_int;
     this_repr->get_int = get_int;
     this_repr->set_num = set_num;
