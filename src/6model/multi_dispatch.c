@@ -314,7 +314,7 @@ PMC *nqp_multi_dispatch(PARROT_INTERP, PMC *dispatcher, PMC *capture) {
             if (definedness) {
                 /* Have a constraint on the definedness. */
                 INTVAL defined = param->vtable->base_type == smo_id ?
-                        REPR(param)->defined(interp, param) :
+                        IS_CONCRETE(param) :
                         VTABLE_defined(interp, param);
                 if ((!defined && definedness == DEFINED_ONLY) || (defined && definedness == UNDEFINED_ONLY)) {
                     type_mismatch = 1;

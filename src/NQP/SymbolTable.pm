@@ -36,6 +36,18 @@ class NQP::SymbolTable is HLL::Compiler::SerializationContextBuilder {
                     )
                 )));
             }
+            else {
+                # Needs fixup.
+                self.add_event(:fixup_past(PAST::Op.new(
+                    :pasttype('callmethod'), :name('set_outer_ctx'),
+                       PAST::Var.new( :name('block'), :scope('register') ),
+                       PAST::Op.new(
+                           :pasttype('callmethod'), :name('load_setting'),
+                           PAST::Var.new( :name('ModuleLoader'), :namespace([]), :scope('package') ),
+                           $setting_name
+                       )
+                )));
+            }
             
             return pir::getattribute__PPs($setting, 'lex_pad');
         }

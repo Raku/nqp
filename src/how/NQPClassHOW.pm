@@ -351,10 +351,8 @@ knowhow NQPClassHOW {
         # Walk MRO and add methods to cache, unless another method
         # lower in the class hierarchy "shadowed" it.
         my %cache;
-        my @mro_reversed;
-        for @!mro {
-            @mro_reversed.unshift($_);
-        }
+        my @mro_reversed := nqp::clone(@!mro);
+        @mro_reversed.reverse();
         for @mro_reversed {
             %cache.update($_.HOW.method_table($_));
         }
@@ -374,10 +372,8 @@ knowhow NQPClassHOW {
 
     method publish_parrot_vtable_mapping($obj) {
         my %mapping;
-        my @mro_reversed;
-        for @!mro {
-            @mro_reversed.unshift($_);
-        }
+        my @mro_reversed := nqp::clone(@!mro);
+        @mro_reversed.reverse();
         for @mro_reversed {
             %mapping.update($_.HOW.parrot_vtable_mappings($_, :local(1)));
         }
@@ -388,10 +384,8 @@ knowhow NQPClassHOW {
 
     method publish_parrot_vtablee_handler_mapping($obj) {
         my %mapping;
-        my @mro_reversed;
-        for @!mro {
-            @mro_reversed.unshift($_);
-        }
+        my @mro_reversed := nqp::clone(@!mro);
+        @mro_reversed.reverse();
         for @mro_reversed {
             %mapping.update($_.HOW.parrot_vtable_handler_mappings($_, :local(1)));
         }

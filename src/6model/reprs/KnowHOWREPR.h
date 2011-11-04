@@ -1,11 +1,7 @@
 #ifndef KNOWHOWREPR_H_GUARD
 #define KNOWHOWREPR_H_GUARD
 
-/* This is how an instance with the KnowHOWREPR representation looks. */
 typedef struct {
-    /* The commonalities all objects have. */
-    SixModelObjectCommonalities common;
-
     /* Methods table; a hash. */
     PMC *methods;
 
@@ -14,6 +10,12 @@ typedef struct {
 
     /* Name of the object. */
     STRING *name;
+} KnowHOWREPRBody;
+    
+/* This is how an instance with the KnowHOWREPR representation looks. */
+typedef struct {
+    SixModelObjectCommonalities common;
+    KnowHOWREPRBody body;
 } KnowHOWREPRInstance;
 
 /* Initializes the KnowHOW REPR. */

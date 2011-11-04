@@ -36,6 +36,13 @@ class HLL::Compiler::SerializationContextBuilder {
         # The PAST that we emit to do any fixups if we are in compile-n-run mode.
         has $!fixup_past;
         method fixup_past() { $!fixup_past }
+        
+        method new(:$deserialize_past, :$fixup_past) {
+            my $node := nqp::create(self);
+            nqp::bindattr($node, Event, '$!deserialize_past', $deserialize_past);
+            nqp::bindattr($node, Event, '$!fixup_past', $fixup_past);
+            $node
+        }
     }
 
     # The serialization context that we're building.

@@ -196,11 +196,15 @@ Instantiates a new object based on the given WHAT.
 
 */
 inline op repr_instance_of(out PMC, in PMC) :base_core {
-    if ($2->vtable->base_type == smo_id)
-        $1 = REPR($2)->instance_of(interp, $2);
-    else
+    if ($2->vtable->base_type == smo_id) {
+        $1 = REPR($2)->allocate(interp, STABLE($2));
+        REPR($1)->initialize(interp, STABLE($2), OBJECT_BODY($1));
+        PARROT_GC_WRITE_BARRIER(interp, $1);
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_instance_of on a SixModelObject");
+    }
 }
 
 /*
@@ -214,11 +218,18 @@ Gets a REPR to clone itself.
 */
 inline op repr_clone(out PMC, in PMC) :base_core {
     PMC *var = decontainerize(interp, $2);
-    if (var->vtable->base_type == smo_id)
-        $1 = REPR(var)->clone(interp, var);
-    else
+    if (var->vtable->base_type == smo_id) {
+        $1 = REPR(var)->allocate(interp, STABLE(var));
+        if (IS_CONCRETE(var))
+            REPR(var)->copy_to(interp, STABLE(var), OBJECT_BODY(var), OBJECT_BODY($1));
+        else
+            MARK_AS_TYPE_OBJECT($1);
+        PARROT_GC_WRITE_BARRIER(interp, $1);
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_clone on a SixModelObject");
+    }
 }
 
 
@@ -234,7 +245,7 @@ Checks the REPRs idea of definedness.
 inline op repr_defined(out INT, in PMC) :base_core {
     PMC *var = decontainerize(interp, $2);
     if (var->vtable->base_type == smo_id)
-        $1 = REPR(var)->defined(interp, var);
+        $1 = IS_CONCRETE(var);
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_defined on a SixModelObject");
@@ -252,11 +263,17 @@ an object - the repr is not obligated to do boxing/unboxing for you.
 */
 inline op repr_get_attr_obj(out PMC, in PMC, in PMC, in STR) :base_core {
     PMC *ch = decontainerize(interp, $3);
-    if ($2->vtable->base_type == smo_id)
-        $1 = REPR($2)->get_attribute(interp, $2, ch, $4, NO_HINT);
-    else
+    if ($2->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($2))
+            $1 = REPR($2)->get_attribute_boxed(interp, STABLE($2), OBJECT_BODY($2), ch, $4, NO_HINT);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot look up attributes in a type object");
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_get_attr_obj on a SixModelObject");
+    }
 }
 
 /*
@@ -271,8 +288,13 @@ a native int - the repr is not obligated to do boxing/unboxing for you.
 */
 inline op repr_get_attr_int(out INT, in PMC, in PMC, in STR) :base_core {
     PMC *ch = decontainerize(interp, $3);
-    if ($2->vtable->base_type == smo_id)
-        $1 = REPR($2)->get_attribute_int(interp, $2, ch, $4, NO_HINT);
+    if ($2->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($2))
+            $1 = *((INTVAL *)REPR($2)->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, NO_HINT));
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot look up attributes in a type object");
+    }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_get_attr_int on a SixModelObject");
@@ -290,11 +312,17 @@ a native num - the repr is not obligated to do boxing/unboxing for you.
 */
 inline op repr_get_attr_num(out NUM, in PMC, in PMC, in STR) :base_core {
     PMC *ch = decontainerize(interp, $3);
-    if ($2->vtable->base_type == smo_id)
-        $1 = REPR($2)->get_attribute_num(interp, $2, ch, $4, NO_HINT);
-    else
+    if ($2->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($2))
+            $1 = *((FLOATVAL *)REPR($2)->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, NO_HINT));
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot look up attributes in a type object");
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_get_attr_num on a SixModelObject");
+    }
 }
 
 /*
@@ -309,11 +337,17 @@ a native str - the repr is not obligated to do boxing/unboxing for you.
 */
 inline op repr_get_attr_str(out STR, in PMC, in PMC, in STR) :base_core {
     PMC *ch = decontainerize(interp, $3);
-    if ($2->vtable->base_type == smo_id)
-        $1 = REPR($2)->get_attribute_str(interp, $2, ch, $4, NO_HINT);
-    else
+    if ($2->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($2))
+            $1 = *((STRING **)REPR($2)->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, NO_HINT));
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot look up attributes in a type object");
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_get_attr_str on a SixModelObject");
+    }
 }
 
 /*
@@ -328,11 +362,17 @@ an object - the repr is not obligated to do boxing/unboxing for you.
 */
 inline op repr_bind_attr_obj(in PMC, in PMC, in STR, in PMC) :base_core {
     PMC *ch = decontainerize(interp, $2);
-    if ($1->vtable->base_type == smo_id)
-        REPR($1)->bind_attribute(interp, $1, ch, $3, NO_HINT, $4);
-    else
+    if ($1->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($1))
+            REPR($1)->bind_attribute_boxed(interp, STABLE($1), OBJECT_BODY($1), ch, $3, NO_HINT, $4);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot bind to attributes in a type object");
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_obj on a SixModelObject");
+    }
     PARROT_GC_WRITE_BARRIER(interp, $1);
 }
 
@@ -348,11 +388,17 @@ a native int - the repr is not obligated to do boxing/unboxing for you.
 */
 inline op repr_bind_attr_int(in PMC, in PMC, in STR, in INT) :base_core {
     PMC *ch = decontainerize(interp, $2);
-    if ($1->vtable->base_type == smo_id)
-        REPR($1)->bind_attribute_int(interp, $1, ch, $3, NO_HINT, $4);
-    else
+    if ($1->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($1))
+            REPR($1)->bind_attribute_ref(interp, STABLE($1), OBJECT_BODY($1), ch, $3, NO_HINT, &$4);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot bind to attributes in a type object");
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_int on a SixModelObject");
+    }
 }
 
 /*
@@ -367,11 +413,17 @@ a native num - the repr is not obligated to do boxing/unboxing for you.
 */
 inline op repr_bind_attr_num(in PMC, in PMC, in STR, in NUM) :base_core {
     PMC *ch = decontainerize(interp, $2);
-    if ($1->vtable->base_type == smo_id)
-        REPR($1)->bind_attribute_num(interp, $1, ch, $3, NO_HINT, $4);
-    else
+    if ($1->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($1))
+            REPR($1)->bind_attribute_ref(interp, STABLE($1), OBJECT_BODY($1), ch, $3, NO_HINT, &$4);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot bind to attributes in a type object");
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_num on a SixModelObject");
+    }
 }
 
 /*
@@ -386,8 +438,13 @@ a native str - the repr is not obligated to do boxing/unboxing for you.
 */
 inline op repr_bind_attr_str(in PMC, in PMC, in STR, in STR) :base_core {
     PMC *ch = decontainerize(interp, $2);
-    if ($1->vtable->base_type == smo_id)
-        REPR($1)->bind_attribute_str(interp, $1, ch, $3, NO_HINT, $4);
+    if ($1->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($1))
+            REPR($1)->bind_attribute_ref(interp, STABLE($1), OBJECT_BODY($1), ch, $3, NO_HINT, &$4);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot bind to attributes in a type object");
+    }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_str on a SixModelObject");
@@ -406,11 +463,17 @@ an object - the repr is not obligated to do boxing/unboxing for you.
 */
 inline op repr_get_attr_obj(out PMC, in PMC, in PMC, in STR, in INT) :base_core {
     PMC *ch = decontainerize(interp, $3);
-    if ($2->vtable->base_type == smo_id)
-        $1 = REPR($2)->get_attribute(interp, $2, ch, $4, $5);
-    else
+    if ($2->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($2))
+            $1 = REPR($2)->get_attribute_boxed(interp, STABLE($2), OBJECT_BODY($2), ch, $4, $5);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot look up attributes in a type object");
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_get_attr_obj on a SixModelObject");
+    }
 }
 
 /*
@@ -425,11 +488,17 @@ a native int - the repr is not obligated to do boxing/unboxing for you.
 */
 inline op repr_get_attr_int(out INT, in PMC, in PMC, in STR, in INT) :base_core {
     PMC *ch = decontainerize(interp, $3);
-    if ($2->vtable->base_type == smo_id)
-        $1 = REPR($2)->get_attribute_int(interp, $2, ch, $4, $5);
-    else
+    if ($2->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($2))
+            $1 = *((INTVAL *)REPR($2)->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, $5));
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot look up attributes in a type object");
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_get_attr_int on a SixModelObject");
+    }
 }
 
 /*
@@ -444,11 +513,17 @@ a native num - the repr is not obligated to do boxing/unboxing for you.
 */
 inline op repr_get_attr_num(out NUM, in PMC, in PMC, in STR, in INT) :base_core {
     PMC *ch = decontainerize(interp, $3);
-    if ($2->vtable->base_type == smo_id)
-        $1 = REPR($2)->get_attribute_num(interp, $2, ch, $4, $5);
-    else
+    if ($2->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($2))
+            $1 = *((FLOATVAL *)REPR($2)->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, $5));
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot look up attributes in a type object");
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_get_attr_num on a SixModelObject");
+    }
 }
 
 /*
@@ -463,11 +538,17 @@ a native str - the repr is not obligated to do boxing/unboxing for you.
 */
 inline op repr_get_attr_str(out STR, in PMC, in PMC, in STR, in INT) :base_core {
     PMC *ch = decontainerize(interp, $3);
-    if ($2->vtable->base_type == smo_id)
-        $1 = REPR($2)->get_attribute_str(interp, $2, ch, $4, $5);
-    else
+    if ($2->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($2))
+            $1 = *((STRING **)REPR($2)->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, $5));
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot look up attributes in a type object");
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_get_attr_str on a SixModelObject");
+    }
 }
 
 /*
@@ -482,11 +563,17 @@ an object - the repr is not obligated to do boxing/unboxing for you.
 */
 inline op repr_bind_attr_obj(in PMC, in PMC, in STR, in INT, in PMC) :base_core {
     PMC *ch = decontainerize(interp, $2);
-    if ($1->vtable->base_type == smo_id)
-        REPR($1)->bind_attribute(interp, $1, ch, $3, $4, $5);
-    else
+    if ($1->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($1))
+            REPR($1)->bind_attribute_boxed(interp, STABLE($1), OBJECT_BODY($1), ch, $3, $4, $5);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot bind to attributes in a type object");
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_obj on a SixModelObject");
+    }
     PARROT_GC_WRITE_BARRIER(interp, $1);
 }
 
@@ -502,11 +589,17 @@ a native int - the repr is not obligated to do boxing/unboxing for you.
 */
 inline op repr_bind_attr_int(in PMC, in PMC, in STR, in INT, in INT) :base_core {
     PMC *ch = decontainerize(interp, $2);
-    if ($1->vtable->base_type == smo_id)
-        REPR($1)->bind_attribute_int(interp, $1, ch, $3, $4, $5);
-    else
+    if ($1->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($1))
+            REPR($1)->bind_attribute_ref(interp, STABLE($1), OBJECT_BODY($1), ch, $3, $4, &$5);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot bind to attributes in a type object");
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_int on a SixModelObject");
+    }
 }
 
 /*
@@ -521,11 +614,17 @@ a native num - the repr is not obligated to do boxing/unboxing for you.
 */
 inline op repr_bind_attr_num(in PMC, in PMC, in STR, in INT, in NUM) :base_core {
     PMC *ch = decontainerize(interp, $2);
-    if ($1->vtable->base_type == smo_id)
-        REPR($1)->bind_attribute_num(interp, $1, ch, $3, $4, $5);
-    else
+    if ($1->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($1))
+            REPR($1)->bind_attribute_ref(interp, STABLE($1), OBJECT_BODY($1), ch, $3, $4, &$5);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot bind to attributes in a type object");
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_num on a SixModelObject");
+    }
 }
 
 /*
@@ -540,11 +639,17 @@ a native str - the repr is not obligated to do boxing/unboxing for you.
 */
 inline op repr_bind_attr_str(in PMC, in PMC, in STR, in INT, in STR) :base_core {
     PMC *ch = decontainerize(interp, $2);
-    if ($1->vtable->base_type == smo_id)
-        REPR($1)->bind_attribute_str(interp, $1, ch, $3, $4, $5);
-    else
+    if ($1->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($1))
+            REPR($1)->bind_attribute_ref(interp, STABLE($1), OBJECT_BODY($1), ch, $3, $4, &$5);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot bind to attributes in a type object");
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_str on a SixModelObject");
+    }
     PARROT_GC_WRITE_BARRIER(interp, $1);
 }
 
@@ -560,11 +665,17 @@ in $1 if so.
 */
 inline op repr_is_attr_initialized(out INT, in PMC, in PMC, in STR) :base_core {
     PMC *ch = decontainerize(interp, $3);
-    if ($2->vtable->base_type == smo_id)
-        $1 = REPR($2)->is_attribute_initialized(interp, $2, ch, $4, NO_HINT);
-    else
+    if ($2->vtable->base_type == smo_id) {
+        if (IS_CONCRETE($2))
+            $1 = REPR($2)->is_attribute_initialized(interp, STABLE($2), OBJECT_BODY($2), ch, $4, NO_HINT);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot check initializedness of attributes in a type object");
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_is_attr_initialized on a SixModelObject");
+    }
 }
 
 
@@ -727,11 +838,17 @@ Tries to unbox a native string using the REPR API.
 */
 inline op repr_unbox_str(out STR, in PMC) :base_core {
     PMC *var = decontainerize(interp, $2);
-    if (var->vtable->base_type == smo_id)
-        $1 = REPR(var)->get_str(interp, var);
-    else
+    if (var->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(var))
+            $1 = REPR(var)->get_str(interp, STABLE(var), OBJECT_BODY(var));
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot unbox a type object as a native str");
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_unbox_str on a SixModelObject");
+    }
 }
 
 /*
@@ -745,11 +862,17 @@ Tries to unbox a native integer using the REPR API.
 */
 inline op repr_unbox_int(out INT, in PMC) :base_core {
     PMC *var = decontainerize(interp, $2);
-    if (var->vtable->base_type == smo_id)
-        $1 = REPR(var)->get_int(interp, var);
-    else
+    if (var->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(var))
+            $1 = REPR(var)->get_int(interp, STABLE(var), OBJECT_BODY(var));
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot unbox a type object as a native int");
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_unbox_int on a SixModelObject");
+    }
 }
 
 /*
@@ -763,11 +886,17 @@ Tries to unbox a native floating pint number using the REPR API.
 */
 inline op repr_unbox_num(out NUM, in PMC) :base_core {
     PMC *var = decontainerize(interp, $2);
-    if (var->vtable->base_type == smo_id)
-        $1 = REPR(var)->get_num(interp, var);
-    else
+    if (var->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(var))
+            $1 = REPR(var)->get_num(interp, STABLE(var), OBJECT_BODY(var));
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot unbox a type object as a native num");
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_unbox_num on a SixModelObject");
+    }
 }
 
 /*
@@ -782,8 +911,9 @@ Box a native string to an instance of the specified type.
 inline op repr_box_str(out PMC, in STR, in PMC) :base_core {
     PMC *type = decontainerize(interp, $3);
     if (type->vtable->base_type == smo_id) {
-        $1 = REPR(type)->instance_of(interp, type);
-        REPR($1)->set_str(interp, $1, $2);
+        $1 = REPR(type)->allocate(interp, STABLE(type));
+        REPR($1)->initialize(interp, STABLE(type), OBJECT_BODY($1));
+        REPR($1)->set_str(interp, STABLE($1), OBJECT_BODY($1), $2);
         PARROT_GC_WRITE_BARRIER(interp, $1);
     }
     else
@@ -803,8 +933,9 @@ Box a native int to an instance of the specified type.
 inline op repr_box_int(out PMC, in INT, in PMC) :base_core {
     PMC *type = decontainerize(interp, $3);
     if (type->vtable->base_type == smo_id) {
-        $1 = REPR(type)->instance_of(interp, type);
-        REPR($1)->set_int(interp, $1, $2);
+        $1 = REPR(type)->allocate(interp, STABLE(type));
+        REPR($1)->initialize(interp, STABLE(type), OBJECT_BODY($1));
+        REPR($1)->set_int(interp, STABLE($1), OBJECT_BODY($1), $2);
     }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -823,8 +954,9 @@ Box a native floating point number to an instance of the specified type.
 inline op repr_box_num(out PMC, in NUM, in PMC) :base_core {
     PMC *type = decontainerize(interp, $3);
     if (type->vtable->base_type == smo_id) {
-        $1 = REPR(type)->instance_of(interp, type);
-        REPR($1)->set_num(interp, $1, $2);
+        $1 = REPR(type)->allocate(interp, STABLE(type));
+        REPR($1)->initialize(interp, STABLE(type), OBJECT_BODY($1));
+        REPR($1)->set_num(interp, STABLE($1), OBJECT_BODY($1), $2);
     }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -1102,7 +1234,7 @@ inline op stable_publish_vtable_handler_mapping(in PMC, in PMC) :base_core {
                 st->parrot_vtable_handler_mapping[idx].class_handle = class_handle;
                 st->parrot_vtable_handler_mapping[idx].attr_name = attr_name;
                 st->parrot_vtable_handler_mapping[idx].hint =
-                    REPR(class_handle)->hint_for(interp, target, class_handle, attr_name);
+                    REPR(class_handle)->hint_for(interp, st, class_handle, attr_name);
             }
 			else
                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -1341,7 +1473,7 @@ Gets lookup hint for an attribute.
 inline op repr_hint_for(out INT, in PMC, in PMC, in STR) :base_core {
     PMC *ch = decontainerize(interp, $3);
     if ($2->vtable->base_type == smo_id)
-        $1 = REPR($2)->hint_for(interp, $2, $3, $4);
+        $1 = REPR($2)->hint_for(interp, STABLE($2), $3, $4);
     else
         $1 = NO_HINT;
 }

@@ -22,7 +22,7 @@ static void new_type(PARROT_INTERP, PMC *nci) {
     /* We first create a new HOW instance. */
     PMC *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
-    PMC *HOW     = REPR(self)->instance_of(interp, STABLE(self)->WHAT);
+    PMC *HOW     = REPR(self)->allocate(interp, STABLE(self));
     
     /* See if we have a representation name; if not default to P6opaque. */
     STRING *repr_name = VTABLE_exists_keyed_str(interp, capture, repr_str) ?
@@ -39,7 +39,8 @@ static void new_type(PARROT_INTERP, PMC *nci) {
     STRING *name = VTABLE_exists_keyed_str(interp, capture, name_str) ?
         VTABLE_get_string_keyed_str(interp, capture, name_str) :
         empty_str;
-    ((KnowHOWREPRInstance *)PMC_data(HOW))->name = name;
+    REPR(HOW)->initialize(interp, STABLE(HOW), OBJECT_BODY(HOW));
+    ((KnowHOWREPRInstance *)PMC_data(HOW))->body.name = name;
     PARROT_GC_WRITE_BARRIER(interp, HOW);
     
     /* Set .WHO to an empty hash. */
@@ -56,7 +57,7 @@ static void add_method(PARROT_INTERP, PMC *nci) {
     /* Get methods table out of meta-object. */
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
-    PMC    *methods = ((KnowHOWREPRInstance *)PMC_data(self))->methods;
+    PMC    *methods = ((KnowHOWREPRInstance *)PMC_data(self))->body.methods;
 
     /* Get name and method to add. */
     STRING *name   = VTABLE_get_string_keyed_int(interp, capture, 2);
@@ -73,7 +74,7 @@ static void add_attribute(PARROT_INTERP, PMC *nci) {
     /* Get attributes list out of meta-object. */
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
-    PMC    *attrs   = ((KnowHOWREPRInstance *)PMC_data(self))->attributes;
+    PMC    *attrs   = ((KnowHOWREPRInstance *)PMC_data(self))->body.attributes;
 
     /* Add meta-attribute to it. */
     PMC *meta_attr = VTABLE_get_pmc_keyed_int(interp, capture, 2);
@@ -87,7 +88,7 @@ static void find_method(PARROT_INTERP, PMC *nci) {
     /* Get methods table out of meta-object and look up method. */
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
-    PMC    *methods = ((KnowHOWREPRInstance *)PMC_data(self))->methods;
+    PMC    *methods = ((KnowHOWREPRInstance *)PMC_data(self))->body.methods;
     STRING *name    = VTABLE_get_string_keyed_int(interp, capture, 2);
     PMC    *method  = VTABLE_get_pmc_keyed_str(interp, methods, name);
 
@@ -101,7 +102,7 @@ static void compose(PARROT_INTERP, PMC *nci) {
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
     PMC    *obj     = VTABLE_get_pmc_keyed_int(interp, capture, 1);
-    STABLE(obj)->method_cache = ((KnowHOWREPRInstance *)PMC_data(self))->methods;
+    STABLE(obj)->method_cache = ((KnowHOWREPRInstance *)PMC_data(self))->body.methods;
     STABLE(obj)->mode_flags   = METHOD_CACHE_AUTHORITATIVE;
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", obj);
 }
@@ -120,7 +121,7 @@ static void attributes(PARROT_INTERP, PMC *nci) {
     PMC * unused;
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
-    PMC    *attrs   = ((KnowHOWREPRInstance *)PMC_data(self))->attributes;
+    PMC    *attrs   = ((KnowHOWREPRInstance *)PMC_data(self))->body.attributes;
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", attrs);
 }
 
@@ -129,7 +130,7 @@ static void methods(PARROT_INTERP, PMC *nci) {
     PMC * unused;
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
-    PMC    *meths   = ((KnowHOWREPRInstance *)PMC_data(self))->methods;
+    PMC    *meths   = ((KnowHOWREPRInstance *)PMC_data(self))->body.methods;
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", meths);
 }
 
@@ -148,7 +149,7 @@ static void name(PARROT_INTERP, PMC *nci) {
     PMC * unused;
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
-    STRING *name    = ((KnowHOWREPRInstance *)PMC_data(self))->name;
+    STRING *name    = ((KnowHOWREPRInstance *)PMC_data(self))->body.name;
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "S", name);
 }
 
@@ -161,7 +162,7 @@ static PMC * wrap_c(PARROT_INTERP, void *func) {
 
 /* This is the find_method where things eventually bottom out. */
 static PMC * bottom_find_method(PARROT_INTERP, PMC *obj, STRING *name, INTVAL hint) {
-    PMC *methods = ((KnowHOWREPRInstance *)PMC_data(obj))->methods;
+    PMC *methods = ((KnowHOWREPRInstance *)PMC_data(obj))->body.methods;
     PMC *method  = VTABLE_get_pmc_keyed_str(interp, methods, name);
     if (PMC_IS_NULL(method))
         /* XXX Awesomeize. */
@@ -178,12 +179,12 @@ PMC * SixModelObject_bootstrap_knowhow(PARROT_INTERP, PMC *sc) {
     /* Create our KnowHOW type object. Note we don't have a HOW just yet, so
      * pass in null. */
     REPROps *REPR        = REPR_get_by_name(interp, Parrot_str_new_constant(interp, "KnowHOWREPR"));
-    PMC     *knowhow_pmc = REPR->type_object_for(interp, PMCNULL);
+    PMC     *knowhow_pmc = REPR->type_object_for(interp, NULL);
 
     /* We create a KnowHOW instance that can describe itself. This means
      * .HOW.HOW.HOW.HOW etc will always return that, which closes the model
      * up. Also pull out its underlying struct. */
-    PMC *knowhow_how_pmc = REPR->instance_of(interp, knowhow_pmc);
+    PMC *knowhow_how_pmc = REPR->allocate(interp, NULL);
     KnowHOWREPRInstance *knowhow_how = (KnowHOWREPRInstance *)PMC_data(knowhow_how_pmc);
 
     /* Need to give the knowhow_how a twiddled STable with a different
@@ -194,45 +195,47 @@ PMC * SixModelObject_bootstrap_knowhow(PARROT_INTERP, PMC *sc) {
     knowhow_how->common.stable = st_copy;
 
     /* Add various methods to the KnowHOW's HOW. */
-    VTABLE_set_pmc_keyed_str(interp, knowhow_how->methods,
+    knowhow_how->body.methods = pmc_new(interp, enum_class_Hash);
+    knowhow_how->body.attributes = pmc_new(interp, enum_class_ResizablePMCArray);
+    VTABLE_set_pmc_keyed_str(interp, knowhow_how->body.methods,
         Parrot_str_new_constant(interp, "new_type"),
         wrap_c(interp, F2DPTR(new_type)));
-    VTABLE_set_pmc_keyed_str(interp, knowhow_how->methods,
+    VTABLE_set_pmc_keyed_str(interp, knowhow_how->body.methods,
         Parrot_str_new_constant(interp, "find_method"),
         wrap_c(interp, F2DPTR(find_method)));
-    VTABLE_set_pmc_keyed_str(interp, knowhow_how->methods,
+    VTABLE_set_pmc_keyed_str(interp, knowhow_how->body.methods,
         Parrot_str_new_constant(interp, "add_method"),
         wrap_c(interp, F2DPTR(add_method)));
-    VTABLE_set_pmc_keyed_str(interp, knowhow_how->methods,
+    VTABLE_set_pmc_keyed_str(interp, knowhow_how->body.methods,
         Parrot_str_new_constant(interp, "add_attribute"),
         wrap_c(interp, F2DPTR(add_attribute)));
-    VTABLE_set_pmc_keyed_str(interp, knowhow_how->methods,
+    VTABLE_set_pmc_keyed_str(interp, knowhow_how->body.methods,
         Parrot_str_new_constant(interp, "compose"),
         wrap_c(interp, F2DPTR(compose)));
-    VTABLE_set_pmc_keyed_str(interp, knowhow_how->methods,
+    VTABLE_set_pmc_keyed_str(interp, knowhow_how->body.methods,
         Parrot_str_new_constant(interp, "parents"),
         wrap_c(interp, F2DPTR(parents)));
-    VTABLE_set_pmc_keyed_str(interp, knowhow_how->methods,
+    VTABLE_set_pmc_keyed_str(interp, knowhow_how->body.methods,
         Parrot_str_new_constant(interp, "attributes"),
         wrap_c(interp, F2DPTR(attributes)));
-    VTABLE_set_pmc_keyed_str(interp, knowhow_how->methods,
+    VTABLE_set_pmc_keyed_str(interp, knowhow_how->body.methods,
         Parrot_str_new_constant(interp, "methods"),
         wrap_c(interp, F2DPTR(methods)));
-    VTABLE_set_pmc_keyed_str(interp, knowhow_how->methods,
+    VTABLE_set_pmc_keyed_str(interp, knowhow_how->body.methods,
         Parrot_str_new_constant(interp, "mro"),
         wrap_c(interp, F2DPTR(mro)));
-    VTABLE_set_pmc_keyed_str(interp, knowhow_how->methods,
+    VTABLE_set_pmc_keyed_str(interp, knowhow_how->body.methods,
         Parrot_str_new_constant(interp, "name"),
         wrap_c(interp, F2DPTR(name)));
 
     /* Set name KnowHOW for the KnowHOW's HOW. */
-    knowhow_how->name = Parrot_str_new_constant(interp, "KnowHOW");
+    knowhow_how->body.name = Parrot_str_new_constant(interp, "KnowHOW");
 
     /* Set this built up HOW as the KnowHOW's HOW. */
     STABLE(knowhow_pmc)->HOW = knowhow_how_pmc;
     
     /* Give it an authoritative method cache. */
-    STABLE(knowhow_pmc)->method_cache = knowhow_how->methods;
+    STABLE(knowhow_pmc)->method_cache = knowhow_how->body.methods;
     STABLE(knowhow_pmc)->mode_flags   = METHOD_CACHE_AUTHORITATIVE;
 
     /* Set up some string constants that the methods here use. */
@@ -257,8 +260,8 @@ static void attr_new(PARROT_INTERP, PMC *nci) {
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *type    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
     STRING *name    = VTABLE_get_string_keyed_str(interp, capture, name_str);
-    PMC    *self    = REPR(type)->instance_of(interp, type);
-    REPR(self)->set_str(interp, self, name);
+    PMC    *self    = REPR(type)->allocate(interp, STABLE(type));
+    REPR(self)->set_str(interp, STABLE(self), OBJECT_BODY(self), name);
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", self);
 }
 
@@ -267,7 +270,7 @@ static void attr_name(PARROT_INTERP, PMC *nci) {
     PMC * unused;
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
-    STRING *name    = REPR(self)->get_str(interp, self);
+    STRING *name    = REPR(self)->get_str(interp, STABLE(self), OBJECT_BODY(self));
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "S", name);
 }
 

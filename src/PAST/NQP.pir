@@ -472,6 +472,37 @@ entry to produce the node to be returned.
     maphash['ln_n']     = 'ln__Nn'
     maphash['sqrt_n']   = 'sqrt__Nn'
     maphash['radix']    = 'nqp_radix__Pisii'
+    maphash['log_n']    = 'ln__NN'
+    maphash['exp_n']    = 'exp__Nn'
+
+    # trig opcodes
+    maphash['sin_n']    = 'sin__NN'
+    maphash['asin_n']   = 'asin__NN'
+    maphash['cos_n']    = 'cos__NN'
+    maphash['acos_n']   = 'acos__NN'
+    maphash['tan_n']    = 'tan__NN'
+    maphash['atan_n']   = 'atan__NN'
+    maphash['atan2_n']  = 'atan__NNN'
+    maphash['sec_n']    = 'sec__NN'
+    maphash['asec_n']   = 'asec__NN'
+    maphash['sin_n']    = 'sin__NN'
+    maphash['asin_n']   = 'asin__NN'
+    maphash['sinh_n']   = 'sinh__NN'
+    maphash['cosh_n']   = 'cosh__NN'
+    maphash['tanh_n']   = 'tanh__NN'
+    maphash['sech_n']   = 'sech__NN'
+
+    # bitwise ops
+    maphash['bitor_i']  = 'bor__II'
+    maphash['bitxor_i'] = 'bxor__II'
+    maphash['bitand_i'] = 'band__II'
+    maphash['bitneg_i'] = 'bnot__II'
+    maphash['bitshiftl_i']  = 'shl__III'
+    maphash['bitshiftr_i']  = 'shr__III'
+
+    maphash['bitor_s']  = 'bors__SS'
+    maphash['bitxor_s'] = 'bxors__SS'
+    maphash['bitand_s'] = 'bands__SS'
 
     # string opcodes
     maphash['chars']    = 'length__Is'
