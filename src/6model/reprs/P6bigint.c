@@ -104,6 +104,8 @@ static INTVAL get_int(PARROT_INTERP, STable *st, void *data) {
     mp_int i = ((P6bigintBody *)data)->i;
     if (MP_LT == mp_cmp_d(&i, 0)) {
         mp_neg(&i, &i);
+        ret = mp_get_int(&i);
+        mp_neg(&i, &i);
         return ret;
     }
     else {
