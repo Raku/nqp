@@ -3,13 +3,16 @@
 
 #include "tommath.h"
 
-/* This is how an instance with the P6bigint representation looks. */
+/* Body of a P6bigint.. */
 typedef struct {
-    /* The commonalities all objects have. */
-    SixModelObjectCommonalities common;
-
     /* Big integer storage slot. */
     mp_int i;
+} P6bigintBody;
+
+/* This is how an instance with the P6bigint representation looks. */
+typedef struct {
+    SixModelObjectCommonalities common;
+    P6bigintBody body;
 } P6bigintInstance;
 
 /* Initializes the P6bigint REPR. */

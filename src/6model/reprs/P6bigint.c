@@ -36,12 +36,17 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 }
 
 /* Creates a new instance based on the type object. */
-static PMC * instance_of(PARROT_INTERP, PMC *WHAT) {
+static PMC * allocate(PARROT_INTERP, STable *st) {
     P6bigintInstance *obj = mem_allocate_zeroed_typed(P6bigintInstance);
-    obj->common.stable = STABLE_PMC(WHAT);
-    mp_init(&obj->i);
-    mp_zero(&obj->i);
+    obj->common.stable = st->stable_pmc;
     return wrap_object_func(interp, obj);
+}
+
+/* Initialize a new instance. */
+static void initialize(PARROT_INTERP, STable *st, void *data) {
+    P6bigintBody *body = (P6bigintBody *)data;
+    mp_init(&body->i);
+    mp_zero(&body->i);
 }
 
 /* Checks if a given object is defined (from the point of view of the
@@ -203,7 +208,8 @@ REPROps * P6bigint_initialize(PARROT_INTERP,
     /* Allocate and populate the representation function table. */
     this_repr = mem_allocate_typed(REPROps);
     this_repr->type_object_for = type_object_for;
-    this_repr->instance_of = instance_of;
+    this_repr->allocate = allocate;
+    this_repr->initialize = initialize;
     this_repr->defined = defined;
     this_repr->get_attribute = get_attribute;
     this_repr->get_attribute_int = get_attribute_int;

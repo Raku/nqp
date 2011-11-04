@@ -9,7 +9,7 @@ BEGIN_OPS_PREAMBLE
 
 static mp_int * get_bigint(PARROT_INTERP, PMC *obj) {
     /* XXX sanity checks... */
-    return &((P6bigintInstance *)PMC_data(obj))->i;
+    return &((P6bigintInstance *)PMC_data(obj))->body.i;
 }
 
 END_OPS_PREAMBLE
