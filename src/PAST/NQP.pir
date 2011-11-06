@@ -494,8 +494,11 @@ entry to produce the node to be returned.
 
     # bitwise ops
     maphash['bitor_i']  = 'bor__II'
+    maphash['bitor_I']  = 'nqp_bigint_bor__PPP'
     maphash['bitxor_i'] = 'bxor__II'
+    maphash['bitxor_I']  = 'nqp_bigint_bxor__PPP'
     maphash['bitand_i'] = 'band__II'
+    maphash['bitand_I'] = 'nqp_bigint_band__PPP'
     maphash['bitneg_i'] = 'bnot__II'
     maphash['bitshiftl_i']  = 'shl__III'
     maphash['bitshiftl_I']  = 'nqp_bigint_shl__PPI'

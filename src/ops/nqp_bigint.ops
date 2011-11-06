@@ -178,3 +178,25 @@ inline op nqp_bigint_shl(out PMC, in PMC, in INT) :base_core {
     b = get_bigint(interp, $1);
     mp_mul_2d(a, $3, b);
 }
+
+inline op nqp_bigint_band(out PMC, in PMC, in PMC) :base_cor {
+    mp_int *a = get_bigint(interp, $2);
+    mp_int *b = get_bigint(interp, $3);
+    $1 = REPR($2)->allocate(interp, STABLE($2));
+    REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
+    mp_and(a, b, get_bigint(interp, $1));
+}
+inline op nqp_bigint_bor(out PMC, in PMC, in PMC) :base_cor {
+    mp_int *a = get_bigint(interp, $2);
+    mp_int *b = get_bigint(interp, $3);
+    $1 = REPR($2)->allocate(interp, STABLE($2));
+    REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
+    mp_or(a, b, get_bigint(interp, $1));
+}
+inline op nqp_bigint_bxor(out PMC, in PMC, in PMC) :base_cor {
+    mp_int *a = get_bigint(interp, $2);
+    mp_int *b = get_bigint(interp, $3);
+    $1 = REPR($2)->allocate(interp, STABLE($2));
+    REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
+    mp_xor(a, b, get_bigint(interp, $1));
+}

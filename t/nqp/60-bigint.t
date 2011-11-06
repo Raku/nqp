@@ -1,5 +1,5 @@
-#! nqp
-plan(12);
+#! nq5
+plan(15);
 
 pir::nqp_bigint_setup__v();
 
@@ -8,11 +8,12 @@ my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
 $bi_type.HOW.compose($bi_type);
 sub s($x) { pir::nqp_bigint_to_str__SP($x) };
 sub iseq($x, $y) { nqp::iseq_I($x, nqp::box_i($y, $bi_type)) }
+sub box($x) { nqp::box_i($x, $bi_type) }
 
-my $one := nqp::box_i(1, $bi_type);
+my $one := box(1);
 
 my $b := pir::nqp_bigint_from_str__PPS($one, '-123');
-my $c := nqp::box_i(-123, $bi_type);
+my $c := box(-123);
 
 ok(s($b) eq '-123', 'can round-trip negative number (string)');
 ok(s($c) eq '-123', 'can round-trip negative number (string) by boxing');
@@ -23,6 +24,11 @@ ok(iseq(nqp::mul_I($b, $b), 15129,), 'multiplication');
 ok(iseq(nqp::add_I($b, $b),  -246,), 'addition');
 ok(nqp::iseq_I(nqp::sub_I($b, $b), nqp::box_i(0, $bi_type)), 'subtraction');
 ok(nqp::iseq_I(nqp::div_I($b, $b), $one), 'division');
+
 ok(iseq(nqp::bitshiftl_I($one, 3), 8), 'bitshift left');
 ok(iseq($one, 1), 'original not modified by bitshift left');
-ok(iseq(nqp::bitshiftr_I(nqp::box_i(16, $bi_type), 4), 1), 'bitshift right');
+ok(iseq(nqp::bitshiftr_I(box(16), 4), 1), 'bitshift right');
+
+ok(iseq(nqp::bitand_I(box(0xdead), box(0xbeef)), 0x9ead), 'bit and');
+ok(iseq(nqp::bitor_I( box(0xdead), box(0xbeef)), 0xfeef), 'bit and');
+ok(iseq(nqp::bitxor_I(box(0xdead), box(0xbeef)), 0x6042), 'bit and');
