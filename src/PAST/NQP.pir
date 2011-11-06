@@ -498,7 +498,9 @@ entry to produce the node to be returned.
     maphash['bitand_i'] = 'band__II'
     maphash['bitneg_i'] = 'bnot__II'
     maphash['bitshiftl_i']  = 'shl__III'
+    maphash['bitshiftl_I']  = 'nqp_bigint_shl__PPI'
     maphash['bitshiftr_i']  = 'shr__III'
+    maphash['bitshiftr_I']  = 'nqp_bigint_shr__PPI'
 
     maphash['bitor_s']  = 'bors__SS'
     maphash['bitxor_s'] = 'bxors__SS'

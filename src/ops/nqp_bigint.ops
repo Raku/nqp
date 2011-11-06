@@ -162,3 +162,19 @@ inline op nqp_bigint_to_str(out STR, in PMC) :base_core {
     $1 = Parrot_str_new(interp, buf, len - 1);
     mem_sys_free(buf);
 }
+
+inline op nqp_bigint_shr(out PMC, in PMC, in INT) :base_core {
+    mp_int *a = get_bigint(interp, $2);
+    $1 = REPR($2)->allocate(interp, STABLE($2));
+    REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
+    mp_div_2d(a, $3, get_bigint(interp, $1), NULL);
+}
+
+inline op nqp_bigint_shl(out PMC, in PMC, in INT) :base_core {
+    mp_int *b;
+    mp_int *a = get_bigint(interp, $2);
+    $1 = REPR($2)->allocate(interp, STABLE($2));
+    REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
+    b = get_bigint(interp, $1);
+    mp_mul_2d(a, $3, b);
+}

@@ -1,5 +1,5 @@
 #! nqp
-plan(9);
+plan(12);
 
 pir::nqp_bigint_setup__v();
 
@@ -23,3 +23,6 @@ ok(iseq(nqp::mul_I($b, $b), 15129,), 'multiplication');
 ok(iseq(nqp::add_I($b, $b),  -246,), 'addition');
 ok(nqp::iseq_I(nqp::sub_I($b, $b), nqp::box_i(0, $bi_type)), 'subtraction');
 ok(nqp::iseq_I(nqp::div_I($b, $b), $one), 'division');
+ok(iseq(nqp::bitshiftl_I($one, 3), 8), 'bitshift left');
+ok(iseq($one, 1), 'original not modified by bitshift left');
+ok(iseq(nqp::bitshiftr_I(nqp::box_i(16, $bi_type), 4), 1), 'bitshift right');
