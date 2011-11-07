@@ -200,3 +200,14 @@ inline op nqp_bigint_bxor(out PMC, in PMC, in PMC) :base_cor {
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
     mp_xor(a, b, get_bigint(interp, $1));
 }
+inline op nqp_bigint_bnot(out PMC, in PMC) :base_cor {
+    mp_int *a = get_bigint(interp, $2);
+    mp_int *b;
+    $1 = REPR($2)->allocate(interp, STABLE($2));
+    REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
+    b = get_bigint(interp, $1);
+
+    /* 2s complement: add 1, negate */
+    mp_add_d(a, 1, b);
+    mp_neg(b, b);
+}

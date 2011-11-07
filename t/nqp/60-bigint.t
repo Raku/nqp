@@ -1,5 +1,5 @@
 #! nq5
-plan(15);
+plan(16);
 
 pir::nqp_bigint_setup__v();
 
@@ -30,5 +30,7 @@ ok(iseq($one, 1), 'original not modified by bitshift left');
 ok(iseq(nqp::bitshiftr_I(box(16), 4), 1), 'bitshift right');
 
 ok(iseq(nqp::bitand_I(box(0xdead), box(0xbeef)), 0x9ead), 'bit and');
-ok(iseq(nqp::bitor_I( box(0xdead), box(0xbeef)), 0xfeef), 'bit and');
-ok(iseq(nqp::bitxor_I(box(0xdead), box(0xbeef)), 0x6042), 'bit and');
+ok(iseq(nqp::bitor_I( box(0xdead), box(0xbeef)), 0xfeef), 'bit or');
+ok(iseq(nqp::bitxor_I(box(0xdead), box(0xbeef)), 0x6042), 'bit xor');
+
+ok(iseq(nqp::bitneg_I(box(-123)), 122), 'bit negation');
