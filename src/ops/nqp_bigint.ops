@@ -23,18 +23,15 @@ END_OPS_PREAMBLE
 
 /*
  * The ops in here mostly just delegate off to libtommath. nqp_bigint_setup must be
- * called before you create any types using the bigint representation. For all of the
- * rest ops there are two variants. The first variant simply takes two objects and
- * assumes they directly use the P6bigint REPR; the second one pulls out an (inlined)
- * P6bigint attribute and works on that; this avoids the overhead of creating a boxed
- * version only to throw it away again.
+ * called before you create any types using the bigint representation.
  */
 
 inline op nqp_bigint_setup() :base_core {
     /* Register the bigint representation. */
-    bigint_repr_id = REGISTER_DYNAMIC_REPR(interp,
-        Parrot_str_new_constant(interp, "P6bigint"),
-        P6bigint_initialize);
+    if (!bigint_repr_id)
+        bigint_repr_id = REGISTER_DYNAMIC_REPR(interp,
+            Parrot_str_new_constant(interp, "P6bigint"),
+            P6bigint_initialize);
 }
 
 inline op nqp_bigint_add(out PMC, in PMC, in PMC) :base_core {
