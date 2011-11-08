@@ -7,9 +7,16 @@ BEGIN_OPS_PREAMBLE
 #include "../6model/sixmodelobject.h"
 #include "../6model/reprs/P6bigint.h"
 
+/* The ID of the bigint REPR. */
+static INTVAL bigint_repr_id = 0;
+
 static mp_int * get_bigint(PARROT_INTERP, PMC *obj) {
-    /* XXX sanity checks... */
-    return &((P6bigintInstance *)PMC_data(obj))->body.i;
+    struct SixModel_REPROps *r = REPR(obj);
+    if (r->ID == bigint_repr_id)
+        return &((P6bigintInstance *)PMC_data(obj))->body.i;
+    else
+        return &((P6bigintBody *)r->get_boxed_ref(interp, STABLE(obj), OBJECT_BODY(obj),
+            bigint_repr_id))->i;
 }
 
 END_OPS_PREAMBLE
@@ -25,7 +32,7 @@ END_OPS_PREAMBLE
 
 inline op nqp_bigint_setup() :base_core {
     /* Register the bigint representation. */
-    REGISTER_DYNAMIC_REPR(interp,
+    bigint_repr_id = REGISTER_DYNAMIC_REPR(interp,
         Parrot_str_new_constant(interp, "P6bigint"),
         P6bigint_initialize);
 }
