@@ -35,6 +35,7 @@ static void register_repr(PARROT_INTERP, STRING *name, REPROps *repr) {
         repr_registry = mem_sys_allocate(num_reprs * sizeof(REPROps *));
     repr_registry[ID] = repr;
     VTABLE_set_integer_keyed_str(interp, repr_name_to_id_map, name, ID);
+    repr->ID = ID;
 }
 
 /* Dynamically registers a representation (that is, one defined outside of

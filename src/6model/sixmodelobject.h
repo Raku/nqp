@@ -258,6 +258,9 @@ struct SixModel_REPROps {
      * out, the representation probably knows more about timing issues and
      * thread safety requirements. */
     void (*change_type) (PARROT_INTERP, PMC *Object, PMC *NewType);
+    
+    /* The representation's ID. */
+    INTVAL ID;
 };
 
 /* Hint value to indicate the absence of an attribute lookup or method
