@@ -222,6 +222,11 @@ struct SixModel_REPROps {
      * can hold one. */
     STRING * (*get_str) (PARROT_INTERP, STable *st, void *data);
 
+    /* Some objects serve primarily as boxes of others, inlining them. This gets
+     * gets the reference to such things, using the representation ID to distinguish
+     * them. */
+    void * (*get_boxed_ref) (PARROT_INTERP, STable *st, void *data, INTVAL repr_id);
+
     /* This Parrot-specific addition to the API is used to mark an object. */
     void (*gc_mark) (PARROT_INTERP, STable *st, void *data);
 
