@@ -189,6 +189,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
         INTVAL cur_init_slot    = 0;
         INTVAL cur_mark_slot    = 0;
         INTVAL cur_cleanup_slot = 0;
+        INTVAL cur_unbox_slot   = 0;
         INTVAL i;
 
         /* Allocate offset array and GC mark info arrays. */
@@ -244,6 +245,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
 
                     /* Is it a target for box/unbox operations? */
                     if (!PMC_IS_NULL(box_target) && VTABLE_get_bool(interp, box_target)) {
+                        /* If it boxes a primitive, note that. */
                         switch (unboxed_type) {
                         case STORAGE_SPEC_BP_INT:
                             if (repr_data->unbox_int_slot >= 0)
@@ -264,9 +266,16 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
                             repr_data->unbox_str_slot = i;
                             break;
                         default:
-                            /*  nothing, just suppress 'missing default' warning */
+                            /* nothing, just suppress 'missing default' warning */
                             break;
                         }
+                        
+                        /* Also list in the by-repr unbox list. */
+                        if (repr_data->unbox_slots == NULL)
+                            repr_data->unbox_slots = (P6opaqueBoxedTypeMap *) mem_sys_allocate_zeroed(info_alloc * sizeof(P6opaqueBoxedTypeMap));
+                        repr_data->unbox_slots[cur_unbox_slot].repr_id = REPR(type)->ID;
+                        repr_data->unbox_slots[cur_unbox_slot].slot = i;
+                        cur_unbox_slot++;
                     }
                 }
             }
@@ -657,8 +666,18 @@ static STRING * get_str(PARROT_INTERP, STable *st, void *data) {
  * gets the reference to such things, using the representation ID to distinguish
  * them. */
 static void * get_boxed_ref(PARROT_INTERP, STable *st, void *data, INTVAL repr_id) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    if (repr_data->unbox_slots) {
+        INTVAL i;
+        for (i = 0; i < repr_data->num_attributes; i++)
+            if (repr_data->unbox_slots[i].repr_id == repr_id)
+                return (char *)data + repr_data->attribute_offsets[repr_data->unbox_slots[i].slot];
+            else if (repr_data->unbox_slots[i].repr_id == 0)
+                break;
+    }
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "get_boxed_ref NYI in P6opaque");
+            "get_boxed_ref could not unbox for the given representation");
+    return NULL;
 }
 
 /* This Parrot-specific addition to the API is used to mark an object. */
