@@ -40,9 +40,10 @@ static void register_repr(PARROT_INTERP, STRING *name, REPROps *repr) {
 
 /* Dynamically registers a representation (that is, one defined outside of
  * the 6model core). */
-void REPR_register_dynamic(PARROT_INTERP, STRING *name, REPROps * (*reg) (PARROT_INTERP, void *, void *)) {
+INTVAL REPR_register_dynamic(PARROT_INTERP, STRING *name, REPROps * (*reg) (PARROT_INTERP, void *, void *)) {
     REPROps *repr = reg(interp, wrap_object, create_stable);
     register_repr(interp, name, repr);
+    return repr->ID;
 }
 
 /* Initializes the representations registry, building up all of the various

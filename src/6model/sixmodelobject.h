@@ -288,7 +288,7 @@ PMC * create_stable(PARROT_INTERP, REPROps *REPR, PMC *HOW);
 PMC * decontainerize(PARROT_INTERP, PMC *var);
 
 /* Dynamic representation registration. */
-typedef void (* rf) (PARROT_INTERP, STRING *name, REPROps * (*reg) (PARROT_INTERP, void *, void *));
+typedef INTVAL (* rf) (PARROT_INTERP, STRING *name, REPROps * (*reg) (PARROT_INTERP, void *, void *));
 #define REGISTER_DYNAMIC_REPR(interp, name, reg_func) \
     ((rf) \
         VTABLE_get_pointer(interp, \
