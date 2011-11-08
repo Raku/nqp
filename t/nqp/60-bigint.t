@@ -1,4 +1,4 @@
-#! nq5
+#! nqp
 plan(16);
 
 pir::nqp_bigint_setup__v();
