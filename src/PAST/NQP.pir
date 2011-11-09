@@ -464,8 +464,8 @@ entry to produce the node to be returned.
 
     maphash['gcd_i']    = 'gcd__Ii'
     maphash['gcd_I']    = 'nqp_bigint_gcd__PP'
-    maphash['lcm_i']    = 'lcmd__Ii'
-    maphash['lcm_I']    = 'nqp_bigint_lcmd__PP'
+    maphash['lcm_i']    = 'lcm__Ii'
+    maphash['lcm_I']    = 'nqp_bigint_lcm__PP'
 
     maphash['ceil_n']   = 'ceil__Nn'
     maphash['floor_n']  = 'floor__NN'
@@ -534,6 +534,7 @@ entry to produce the node to be returned.
     maphash['isgt_i']   = 'isgt__Iii'
     maphash['isge_i']   = 'isge__Iii'
 
+    maphash['bool_I']   = 'nqp_bigint_bool__iP'
     maphash['cmp_I']    = 'nqp_bigint_cmp__IPP'
     maphash['iseq_I']   = 'nqp_bigint_eq__IPP'
     maphash['isne_I']   = 'nqp_bigint_ne__IPP'
