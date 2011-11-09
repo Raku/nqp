@@ -100,7 +100,7 @@ inline op nqp_bigint_cmp(out INT, in PMC, in PMC) :base_cor {
 }
 
 inline op nqp_bigint_bool(out INT, in PMC) :base_core {
-    $1 = !mp_is_zero(get_bigint(interp, $2));
+    $1 = !mp_iszero(get_bigint(interp, $2));
 }
 
 inline op nqp_bigint_eq(out INT, in PMC, in PMC) :base_cor {
