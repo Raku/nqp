@@ -226,8 +226,11 @@ inline op nqp_bigint_bnot(out PMC, in PMC) :base_cor {
 =item nqp_bigint_radix(out, radix, str, pos, flag, type)
 
 Convert string $3 into a number starting at offset $4 and using radix $2.
-The result of the conversion returns an object of type $6, which is either
-a bigint or some type that boxes one.
+The result of the conversion returns a FixedPMCArray of size 3 with objects
+of type $6, which is either a bigint or some type that boxes one.
+
+The contents of $6 are the return value, the base to divide the value by if
+it is something after a decimal dot, and the new position.
 
 The $5 flags is a bitmask that modifies the parse and/or result:
     0x01: negate the result (useful if you've already parsed a minus)
