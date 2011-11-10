@@ -90,7 +90,7 @@ inline op nqp_bigint_abs(out PMC, in PMC) :base_core {
     mp_abs(a, get_bigint(interp, $1));
 }
 
-inline op nqp_bigint_cmp(out INT, in PMC, in PMC) :base_cor {
+inline op nqp_bigint_cmp(out INT, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b = get_bigint(interp, $3);
     $1 = mp_cmp(a, b);
@@ -100,13 +100,13 @@ inline op nqp_bigint_bool(out INT, in PMC) :base_core {
     $1 = !mp_iszero(get_bigint(interp, $2));
 }
 
-inline op nqp_bigint_eq(out INT, in PMC, in PMC) :base_cor {
+inline op nqp_bigint_eq(out INT, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b = get_bigint(interp, $3);
     $1 = MP_EQ == mp_cmp(a, b);
 }
 
-inline op nqp_bigint_ne(out INT, in PMC, in PMC) :base_cor {
+inline op nqp_bigint_ne(out INT, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b = get_bigint(interp, $3);
     $1 = MP_EQ != mp_cmp(a, b);
@@ -118,19 +118,19 @@ inline op nqp_bigint_gt(out INT, in PMC, in PMC) :base_cor {
     $1 = MP_GT == mp_cmp(a, b);
 }
 
-inline op nqp_bigint_ge(out INT, in PMC, in PMC) :base_cor {
+inline op nqp_bigint_ge(out INT, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b = get_bigint(interp, $3);
     $1 = MP_LT != mp_cmp(a, b);
 }
 
-inline op nqp_bigint_lt(out INT, in PMC, in PMC) :base_cor {
+inline op nqp_bigint_lt(out INT, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b = get_bigint(interp, $3);
     $1 = MP_LT == mp_cmp(a, b);
 }
 
-inline op nqp_bigint_le(out INT, in PMC, in PMC) :base_cor {
+inline op nqp_bigint_le(out INT, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b = get_bigint(interp, $3);
     $1 = MP_GT != mp_cmp(a, b);
@@ -187,28 +187,28 @@ inline op nqp_bigint_shl(out PMC, in PMC, in INT) :base_core {
     mp_mul_2d(a, $3, b);
 }
 
-inline op nqp_bigint_band(out PMC, in PMC, in PMC) :base_cor {
+inline op nqp_bigint_band(out PMC, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b = get_bigint(interp, $3);
     $1 = REPR($2)->allocate(interp, STABLE($2));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
     mp_and(a, b, get_bigint(interp, $1));
 }
-inline op nqp_bigint_bor(out PMC, in PMC, in PMC) :base_cor {
+inline op nqp_bigint_bor(out PMC, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b = get_bigint(interp, $3);
     $1 = REPR($2)->allocate(interp, STABLE($2));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
     mp_or(a, b, get_bigint(interp, $1));
 }
-inline op nqp_bigint_bxor(out PMC, in PMC, in PMC) :base_cor {
+inline op nqp_bigint_bxor(out PMC, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b = get_bigint(interp, $3);
     $1 = REPR($2)->allocate(interp, STABLE($2));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
     mp_xor(a, b, get_bigint(interp, $1));
 }
-inline op nqp_bigint_bnot(out PMC, in PMC) :base_cor {
+inline op nqp_bigint_bnot(out PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b;
     $1 = REPR($2)->allocate(interp, STABLE($2));
