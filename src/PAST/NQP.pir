@@ -472,6 +472,7 @@ entry to produce the node to be returned.
     maphash['ln_n']     = 'ln__Nn'
     maphash['sqrt_n']   = 'sqrt__Nn'
     maphash['radix']    = 'nqp_radix__Pisii'
+    maphash['radix_I']  = 'nqp_bigint_radix__PisiiP'
     maphash['log_n']    = 'ln__NN'
     maphash['exp_n']    = 'exp__Nn'
 

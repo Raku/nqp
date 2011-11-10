@@ -239,7 +239,7 @@ The $5 flags is a bitmask that modifies the parse and/or result:
 
 */
 
-inline op nqp_radix(out PMC, in INT, in STR, in INT, in INT, in PMC) :base_core {
+inline op nqp_bigint_radix(out PMC, in INT, in STR, in INT, in INT, in PMC) :base_core {
     PMC      *out;
     INTVAL   radix  = $2;
     STRING   *str   = $3;
