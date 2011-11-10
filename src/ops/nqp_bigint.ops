@@ -318,3 +318,64 @@ inline op nqp_bigint_radix(out PMC, in INT, in STR, in INT, in INT, in PMC) :bas
     VTABLE_set_pmc_keyed_int(interp, out, 2, pos_obj);
     $1 = out;
 }
+
+/* calculates $1 = $2 ** $3
+ * if it either overflows ($3 being too big), or $2 is negative,
+ * a float is returned. $4 should contain the type object to box the
+ * float into.
+ */
+inline op nqp_bigint_pow(out PMC, in PMC, in PMC, in PMC) :base_core {
+    mp_digit exponent_d = 0;
+    mp_int *exponent = get_bigint(interp, $3);
+    mp_int *base     = get_bigint(interp, $2);
+    int cmp          = mp_cmp_d(exponent, 0);
+    if (cmp == MP_EQ || MP_EQ == mp_cmp_d(base, 1)) {
+        /* $x ** 0 or 1 ** $x */
+        $1 = REPR($2)->allocate(interp, STABLE($2));
+        REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
+        mp_set_int(get_bigint(interp, $1), 1);
+    }
+    else if (cmp == MP_GT) {
+        exponent_d = mp_get_int(exponent);
+        if (MP_GT == mp_cmp_d(exponent, exponent_d)) {
+            /* the exponent is larger than what fits into an int register...
+             * that's scary, and should be treated with care */
+
+
+            /* XXX a bit ugly that it reuses cmp, but safe for now */
+            cmp = mp_cmp_d(base, 0)
+            if (MP_EQ == cmp || MP_EQ == mp_cmp_d(base, 1)) {
+                /* 0 ** $big_number and 1 ** big_number are easy to do: */
+                $1 = REPR($2)->allocate(interp, STABLE($2));
+                REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
+                mp_copy(base, get_bigint(interp, $1));
+            }
+            else {
+                $1 = REPR($4)->allocate(interp, STABLE($4));
+                REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
+                /* TODO: better ways to create +- Inf */
+                if (MP_GT == cmp) {
+                    REPR($1)->set_num(interp, STABLE($1), OBJECT_BODY($1), (FLOATVAL) 1.0/0.0);
+                }
+                else {
+                    REPR($1)->set_num(interp, STABLE($1), OBJECT_BODY($1), (FLOATVAL) -1.0/0.0);
+                }
+            }
+        }
+        else {
+            /* since the exponent fits into a digit, mp_expt_d is fine */
+            $1 = REPR($2)->allocate(interp, STABLE($2));
+            REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
+            mp_expt_d(get_bigint(interp, $2), exponent_d, get_bigint(interp, $1));
+        }
+    }
+    else {
+        /* TODO: better way to get floats out of mp_int */
+        FLOATVAL f_base = (FLOATVAL) REPR($2)->get_int(interp, STABLE($2), OBJECT_BODY($2));
+        FLOATVAL f_exp  = (FLOATVAL) REPR($3)->get_int(interp, STABLE($3), OBJECT_BODY($3));
+        $1 = REPR($4)->allocate(interp, STABLE($4));
+        REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
+        REPR($1)->set_num(interp, STABLE($1), OBJECT_BODY($1), pow(f_base, f_exp));
+    }
+}
+

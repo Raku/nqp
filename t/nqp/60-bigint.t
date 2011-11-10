@@ -1,14 +1,14 @@
 #! nqp
 use nqpmo;
 
-plan(19);
+plan(22);
 
 pir::nqp_bigint_setup__v();
 
 my $knowhow := pir::get_knowhow__P();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
 $bi_type.HOW.compose($bi_type);
-sub s($x) { pir::nqp_bigint_to_str__SP($x) };
+sub str($x) { pir::nqp_bigint_to_str__SP($x) };
 sub iseq($x, $y) { nqp::iseq_I($x, nqp::box_i($y, $bi_type)) }
 sub box($x) { nqp::box_i($x, $bi_type) }
 
@@ -17,8 +17,8 @@ my $one := box(1);
 my $b := pir::nqp_bigint_from_str__PPS($one, '-123');
 my $c := box(-123);
 
-ok(s($b) eq '-123', 'can round-trip negative number (string)');
-ok(s($c) eq '-123', 'can round-trip negative number (string) by boxing');
+ok(str($b) eq '-123', 'can round-trip negative number (string)');
+ok(str($c) eq '-123', 'can round-trip negative number (string) by boxing');
 ok(nqp::unbox_i($b) == -123, 'can round-trip negative number by unboxing');
 ok(!nqp::iseq_I($one, $b), 'nqp::iseq_I can return false');
 ok(nqp::iseq_I($one, $one), 'nqp::iseq_I can return true');
@@ -51,3 +51,12 @@ ok(iseq($box_val_1, 4), 'can box to a complex type with a P6bigint target');
 my $box_val_2 := pir::nqp_bigint_from_str__PPS($bi_boxer, '38');
 ok(iseq($box_val_2, 38), 'can get a bigint from a string with boxing type');
 ok(iseq(nqp::add_I($box_val_1, $box_val_2), 42), 'addition works on boxing type');
+
+
+# Note that the last argument to pow_I should be capable of boxing a num,
+# so $bi_type is wrong here. But so far we only test the integer case,
+# so we can get away with it.
+my $big := nqp::pow_I($c, box(42), $bi_type);
+ok(str($big) eq '5970554685064519004265641008828923248442340700473500698131071806779372733915289638628729', 'pow (int, positive)');
+ok(iseq(nqp::pow_I(box(0), $big, $bi_type), 0), 'pow 0 ** large_number');
+ok(iseq(nqp::pow_I($one, $big, $bi_type), 1), 'pow 1 ** large_number');

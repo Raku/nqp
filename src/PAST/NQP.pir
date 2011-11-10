@@ -455,6 +455,7 @@ entry to produce the node to be returned.
     maphash['mod_I']    = 'nqp_bigint_mod__PPP'
     maphash['mod_n']    = 'mod__Nnn'
     maphash['pow_n']    = 'pow__Nnn'
+    maphash['pow_I']    = 'nqp_bigint_pow__PPPP'
     maphash['neg_i']    = 'neg__Ii'
     maphash['neg_I']    = 'nqp_bigint_neg__PP'
     maphash['neg_n']    = 'neg__Nn'
