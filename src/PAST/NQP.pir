@@ -561,6 +561,11 @@ entry to produce the node to be returned.
     maphash['isgt_s']   = 'isgt__Iss'
     maphash['isge_s']   = 'isge__Iss'
 
+    # bigint ops
+    maphash['fromstr_I'] = 'nqp_bigint_from_str__PPs'
+    maphash['tostr_I']   = 'nqp_bigint_to_str__SP'
+    maphash['isbig_I']   = 'nqp_bigint_is_big__IP'
+
     # boolean opcodes
     maphash['not_i']    = 'not__Ii'
 

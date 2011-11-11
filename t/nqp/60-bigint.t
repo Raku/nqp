@@ -3,8 +3,6 @@ use nqpmo;
 
 plan(22);
 
-pir::nqp_bigint_setup__v();
-
 my $knowhow := pir::get_knowhow__P();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
 $bi_type.HOW.compose($bi_type);

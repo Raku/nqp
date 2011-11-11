@@ -379,3 +379,9 @@ inline op nqp_bigint_pow(out PMC, in PMC, in PMC, in PMC) :base_core {
     }
 }
 
+/* returns 1 if $2 is too large to fit into an INTVAL without loss of
+   information */
+inline op nqp_bigint_is_big(out INT, in PMC) :base_core {
+    mp_int  *a = get_bigint(interp, $2);
+    $1 = a->used > 1;
+}
