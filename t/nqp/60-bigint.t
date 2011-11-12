@@ -1,7 +1,7 @@
 #! nqp
 use nqpmo;
 
-plan(22);
+plan(25);
 
 my $knowhow := pir::get_knowhow__P();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
@@ -58,3 +58,16 @@ my $big := nqp::pow_I($c, box(42), $bi_type);
 ok(str($big) eq '5970554685064519004265641008828923248442340700473500698131071806779372733915289638628729', 'pow (int, positive)');
 ok(iseq(nqp::pow_I(box(0), $big, $bi_type), 0), 'pow 0 ** large_number');
 ok(iseq(nqp::pow_I($one, $big, $bi_type), 1), 'pow 1 ** large_number');
+
+# test conversion to float
+# try it with 2 ** 100, because that's big enough not to fit into a single
+# int, but can be represented exactly in a double
+$big := nqp::pow_I(box(2), box(100), $bi_type);
+ok(nqp::iseq_n(nqp::tonum_I($big), nqp::pow_n(2, 100)), '2**100 to float');
+$big := nqp::pow_I(box(-2), box(101), $bi_type);
+ok(nqp::iseq_n(nqp::tonum_I($big), nqp::pow_n(-2, 101)), '(-2)**101 to float');
+
+# the mantissa can hold much information accurately, so test that too
+my $factor := 123456789;
+$big := nqp::mul_I($big, box($factor));
+ok(nqp::iseq_n(nqp::tonum_I($big), nqp::mul_n($factor, nqp::pow_n(-2, 101))), "$factor * (-2)**101 to float");
