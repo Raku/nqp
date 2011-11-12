@@ -19,6 +19,30 @@ static mp_int * get_bigint(PARROT_INTERP, PMC *obj) {
             bigint_repr_id))->i;
 }
 
+static FLOATVAL mp_get_double(mp_int *a) {
+    FLOATVAL d    = 0.0;
+    FLOATVAL sign = SIGN(a) == MP_NEG ? -1.0 : 1.0;
+    int i;
+    if (USED(a) == 0)
+        return d;
+    if (USED(a) == 1)
+        return sign * (FLOATVAL) mp_get_int(a);
+
+    for (i = USED(a) - 1; DIGIT(a, i) == 0 && i > 0; i--) {
+        /* do nothing */
+    }
+    d = (FLOATVAL) DIGIT(a, i);
+    i--;
+    if (i == -1) {
+        return sign * d;
+    }
+    d *= pow(2.0, DIGIT_BIT);
+    d += (FLOATVAL) DIGIT(a, i);
+
+    d *= pow(2.0, DIGIT_BIT * i);
+    return sign * d;
+}
+
 END_OPS_PREAMBLE
 
 /*
@@ -172,34 +196,8 @@ inline op nqp_bigint_to_str(out STR, in PMC) :base_core {
 }
 
 inline op nqp_bigint_to_num(out NUM, in PMC) :base_core {
-    mp_int  *a    = get_bigint(interp, $2);
-    FLOATVAL sign = SIGN(a) == MP_NEG ? -1.0 : 1.0;
-    int i;
-    $1            = 0.0;
-    if (USED(a) == 0) {
-        /* we're happy */
-
-    }
-    else if (USED(a) == 1) {
-        $1 = sign * (FLOATVAL) mp_get_int(a);
-    }
-    else {
-        for (i = USED(a) - 1; DIGIT(a, i) == 0 && i > 0; i--) {
-            /* do nothing */
-        }
-        $1 = (FLOATVAL) DIGIT(a, i);
-        i--;
-        if (i == -1) {
-            $1 = sign * $1;
-        }
-        else {
-            $1 *= pow(2.0, DIGIT_BIT);
-            $1 += (FLOATVAL) DIGIT(a, i);
-
-            $1 *= pow(2.0, DIGIT_BIT * i);
-            $1 *= sign;
-        }
-    }
+    mp_int  *a = get_bigint(interp, $2);
+    $1         = mp_get_double(a);
 }
 
 inline op nqp_bigint_shr(out PMC, in PMC, in INT) :base_core {
@@ -401,9 +399,8 @@ inline op nqp_bigint_pow(out PMC, in PMC, in PMC, in PMC) :base_core {
         }
     }
     else {
-        /* TODO: better way to get floats out of mp_int */
-        FLOATVAL f_base = (FLOATVAL) REPR($2)->get_int(interp, STABLE($2), OBJECT_BODY($2));
-        FLOATVAL f_exp  = (FLOATVAL) REPR($3)->get_int(interp, STABLE($3), OBJECT_BODY($3));
+        FLOATVAL f_base = mp_get_double(get_bigint(interp, $2));
+        FLOATVAL f_exp  = mp_get_double(get_bigint(interp, $2));
         $1 = REPR($4)->allocate(interp, STABLE($4));
         REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
         REPR($1)->set_num(interp, STABLE($1), OBJECT_BODY($1), pow(f_base, f_exp));
