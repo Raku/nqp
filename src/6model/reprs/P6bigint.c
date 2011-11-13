@@ -89,10 +89,10 @@ static INTVAL hint_for(PARROT_INTERP, STable *st, PMC *class_handle, STRING *nam
 static void set_int(PARROT_INTERP, STable *st, void *data, INTVAL value) {
     mp_int *i = &((P6bigintBody *)data)->i;
     if (value >= 0) {
-        mp_set_int(i, value);
+        mp_set_long(i, value);
     }
     else {
-        mp_set_int(i, -value);
+        mp_set_long(i, -value);
         mp_neg(i, i);
     }
 }
@@ -104,12 +104,12 @@ static INTVAL get_int(PARROT_INTERP, STable *st, void *data) {
     mp_int *i = &((P6bigintBody *)data)->i;
     if (MP_LT == mp_cmp_d(i, 0)) {
         mp_neg(i, i);
-        ret = mp_get_int(i);
+        ret = mp_get_long(i);
         mp_neg(i, i);
         return -ret;
     }
     else {
-        return mp_get_int(i);
+        return mp_get_long(i);
     }
 }
 

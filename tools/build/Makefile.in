@@ -234,6 +234,7 @@ LIBTOMMATH_BIN = $(TOM)core$(O) \
         $(TOM)_mp_fwrite$(O) \
         $(TOM)_mp_gcd$(O) \
         $(TOM)_mp_get_int$(O) \
+        $(TOM)_mp_get_long$(O) \
         $(TOM)_mp_grow$(O) \
         $(TOM)_mp_init_copy$(O) \
         $(TOM)_mp_init_multi$(O) \
@@ -286,6 +287,7 @@ LIBTOMMATH_BIN = $(TOM)core$(O) \
         $(TOM)_mp_reduce_setup$(O) \
         $(TOM)_mp_rshd$(O) \
         $(TOM)_mp_set_int$(O) \
+        $(TOM)_mp_set_long$(O) \
         $(TOM)_mp_set$(O) \
         $(TOM)_mp_shrink$(O) \
         $(TOM)_mp_signed_bin_size$(O) \
@@ -358,6 +360,7 @@ LIBTOMMATH_SOURCE =	3rdparty/libtommath/bncore.c \
 	3rdparty/libtommath/bn_mp_fwrite.c \
 	3rdparty/libtommath/bn_mp_gcd.c \
 	3rdparty/libtommath/bn_mp_get_int.c \
+	3rdparty/libtommath/bn_mp_get_long.c \
 	3rdparty/libtommath/bn_mp_grow.c \
 	3rdparty/libtommath/bn_mp_init.c \
 	3rdparty/libtommath/bn_mp_init_copy.c \
@@ -411,6 +414,7 @@ LIBTOMMATH_SOURCE =	3rdparty/libtommath/bncore.c \
 	3rdparty/libtommath/bn_mp_rshd.c \
 	3rdparty/libtommath/bn_mp_set.c \
 	3rdparty/libtommath/bn_mp_set_int.c \
+	3rdparty/libtommath/bn_mp_set_long.c \
 	3rdparty/libtommath/bn_mp_shrink.c \
 	3rdparty/libtommath/bn_mp_signed_bin_size.c \
 	3rdparty/libtommath/bn_mp_sqr.c \
@@ -764,6 +768,8 @@ $(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS_SOURCE) $(DYNPMC)
 	cd 3rdparty/libtommath && $(CC) -c @cc_o_out@bn_mp_gcd$(O) -I. $(CFLAGS) bn_mp_gcd.c
 3rdparty/libtommath/bn_mp_get_int$(O): 3rdparty/libtommath/bn_mp_get_int.c $(LIBTOMMATH_H)
 	cd 3rdparty/libtommath && $(CC) -c @cc_o_out@bn_mp_get_int$(O) -I. $(CFLAGS) bn_mp_get_int.c
+3rdparty/libtommath/bn_mp_get_long$(O): 3rdparty/libtommath/bn_mp_get_long.c $(LIBTOMMATH_H)
+	cd 3rdparty/libtommath && $(CC) -c @cc_o_out@bn_mp_get_long$(O) -I. $(CFLAGS) bn_mp_get_long.c
 3rdparty/libtommath/bn_mp_grow$(O): 3rdparty/libtommath/bn_mp_grow.c $(LIBTOMMATH_H)
 	cd 3rdparty/libtommath && $(CC) -c @cc_o_out@bn_mp_grow$(O) -I. $(CFLAGS) bn_mp_grow.c
 3rdparty/libtommath/bn_mp_init$(O): 3rdparty/libtommath/bn_mp_init.c $(LIBTOMMATH_H)
@@ -870,6 +876,8 @@ $(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS_SOURCE) $(DYNPMC)
 	cd 3rdparty/libtommath && $(CC) -c @cc_o_out@bn_mp_set$(O) -I. $(CFLAGS) bn_mp_set.c
 3rdparty/libtommath/bn_mp_set_int$(O): 3rdparty/libtommath/bn_mp_set_int.c $(LIBTOMMATH_H)
 	cd 3rdparty/libtommath && $(CC) -c @cc_o_out@bn_mp_set_int$(O) -I. $(CFLAGS) bn_mp_set_int.c
+3rdparty/libtommath/bn_mp_set_long$(O): 3rdparty/libtommath/bn_mp_set_long.c $(LIBTOMMATH_H)
+	cd 3rdparty/libtommath && $(CC) -c @cc_o_out@bn_mp_set_long$(O) -I. $(CFLAGS) bn_mp_set_long.c
 3rdparty/libtommath/bn_mp_shrink$(O): 3rdparty/libtommath/bn_mp_shrink.c $(LIBTOMMATH_H)
 	cd 3rdparty/libtommath && $(CC) -c @cc_o_out@bn_mp_shrink$(O) -I. $(CFLAGS) bn_mp_shrink.c
 3rdparty/libtommath/bn_mp_signed_bin_size$(O): 3rdparty/libtommath/bn_mp_signed_bin_size.c $(LIBTOMMATH_H)
