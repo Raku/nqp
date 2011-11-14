@@ -62,7 +62,7 @@ static void from_num(FLOATVAL d, mp_int *a) {
     /* populate the top 2 digits */
     upper = da / d_digit;
     lower = fmod(da, d_digit);
-    if (upper != 0) {
+    if (upper >= 1) {
         mp_set_long(a, (unsigned long) upper);
         mp_mul_2d(a, DIGIT_BIT , a);
     } else {
