@@ -421,14 +421,15 @@ inline op nqp_bigint_pow(out PMC, in PMC, in PMC, in PMC) :base_core {
                 mp_copy(base, get_bigint(interp, $1));
             }
             else {
+                FLOATVAL ZERO = 0.0;
                 $1 = REPR($4)->allocate(interp, STABLE($4));
                 REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
                 /* TODO: better ways to create +- Inf */
                 if (MP_GT == cmp) {
-                    REPR($1)->set_num(interp, STABLE($1), OBJECT_BODY($1), (FLOATVAL) 1.0/0.0);
+                    REPR($1)->set_num(interp, STABLE($1), OBJECT_BODY($1), (FLOATVAL) 1.0/ZERO);
                 }
                 else {
-                    REPR($1)->set_num(interp, STABLE($1), OBJECT_BODY($1), (FLOATVAL) -1.0/0.0);
+                    REPR($1)->set_num(interp, STABLE($1), OBJECT_BODY($1), (FLOATVAL) -1.0/ZERO);
                 }
             }
         }
