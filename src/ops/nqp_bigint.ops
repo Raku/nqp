@@ -43,6 +43,41 @@ static FLOATVAL mp_get_double(mp_int *a) {
     return sign * d;
 }
 
+
+static void from_num(FLOATVAL d, mp_int *a) {
+    FLOATVAL d_digit = pow(2, DIGIT_BIT);
+    FLOATVAL da      = fabs(d);
+    FLOATVAL upper;
+    FLOATVAL lower;
+    int      digits  = 0;
+
+    mp_zero(a);
+
+    while (da > d_digit * d_digit) {;
+        da /= d_digit;
+        digits++;
+    }
+    mp_grow(a, digits + 2);
+
+    /* populate the top 2 digits */
+    upper = da / d_digit;
+    lower = fmod(da, d_digit);
+    if (upper != 0) {
+        mp_set_long(a, (unsigned long) upper);
+        mp_mul_2d(a, DIGIT_BIT , a);
+    } else {
+        a->used = 1;
+    }
+    DIGIT(a, 0) = (mp_digit) lower;
+
+    /* shift the rest */
+    mp_mul_2d(a, DIGIT_BIT * digits, a);
+    if (d < 0)
+        mp_neg(a, a);
+    mp_clamp(a);
+    mp_shrink(a);
+}
+
 END_OPS_PREAMBLE
 
 /*
@@ -198,6 +233,12 @@ inline op nqp_bigint_to_str(out STR, in PMC) :base_core {
 inline op nqp_bigint_to_num(out NUM, in PMC) :base_core {
     mp_int  *a = get_bigint(interp, $2);
     $1         = mp_get_double(a);
+}
+
+inline op nqp_bigint_from_num(out PMC, in NUM, in PMC) :base_core {
+    $1 = REPR($3)->allocate(interp, STABLE($3));
+    REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
+    from_num($2, get_bigint(interp, $1));
 }
 
 inline op nqp_bigint_shr(out PMC, in PMC, in INT) :base_core {

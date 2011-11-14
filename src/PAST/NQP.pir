@@ -565,6 +565,7 @@ entry to produce the node to be returned.
     maphash['fromstr_I'] = 'nqp_bigint_from_str__PPs'
     maphash['tostr_I']   = 'nqp_bigint_to_str__SP'
     maphash['isbig_I']   = 'nqp_bigint_is_big__IP'
+    maphash['fromnum_I'] = 'nqp_bigint_from_num__PNP'
     maphash['tonum_I']   = 'nqp_bigint_to_num__NP'
 
     # boolean opcodes

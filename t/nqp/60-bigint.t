@@ -1,7 +1,7 @@
 #! nqp
 use nqpmo;
 
-plan(25);
+plan(27);
 
 my $knowhow := pir::get_knowhow__P();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
@@ -71,3 +71,10 @@ ok(nqp::iseq_n(nqp::tonum_I($big), nqp::pow_n(-2, 101)), '(-2)**101 to float');
 my $factor := 123456789;
 $big := nqp::mul_I($big, box($factor));
 ok(nqp::iseq_n(nqp::tonum_I($big), nqp::mul_n($factor, nqp::pow_n(-2, 101))), "$factor * (-2)**101 to float");
+
+my $float := 123456789e240;
+ok(nqp::iseq_n($float, nqp::tonum_I(nqp::fromnum_I($float, $bi_type))),
+    'to_num and from_num round-trip');
+$float := -$float;
+ok(nqp::iseq_n($float, nqp::tonum_I(nqp::fromnum_I($float, $bi_type))),
+    'to_num and from_num round-trip (negative number)');
