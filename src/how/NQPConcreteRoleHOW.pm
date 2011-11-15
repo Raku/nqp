@@ -21,11 +21,15 @@ knowhow NQPConcreteRoleHOW {
     has @!roles;
 
     # All composed in roles.
-    has @!done;
+    has @!role_typecheck_list;
 
     # Have we been composed?
     has $!composed;
 
+    my $archetypes := Archetypes.new( :nominal(1), :composable(1) );
+    method archetypes() {
+        $archetypes
+    }
 
     ##
     ## Declarative
@@ -91,8 +95,8 @@ knowhow NQPConcreteRoleHOW {
         # add to done list their instantiation source.
         if @!roles {
             for @!roles {
-                @!done[+@!done] := $_;
-                @!done[+@!done] := $_.HOW.instance_of($_);
+                @!role_typecheck_list[+@!role_typecheck_list] := $_;
+                @!role_typecheck_list[+@!role_typecheck_list] := $_.HOW.instance_of($_);
             }
             RoleToRoleApplier.apply($obj, @!roles);
         }
@@ -139,8 +143,8 @@ knowhow NQPConcreteRoleHOW {
         @!roles
     }
     
-    method does_list($obj) {
-        @!done
+    method role_typecheck_list($obj) {
+        @!role_typecheck_list
     }
 
     method instance_of($obj) {

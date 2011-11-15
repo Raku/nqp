@@ -414,8 +414,7 @@ entry to produce the node to be returned.
     $I0 = exists options['WHAT']
     unless $I0 goto have_what
     what = options['WHAT']
-    null $P0
-    options['WHAT'] = $P0
+    delete options['WHAT']
   have_what:
 
     past = what.'new'(args :flat, options :named :flat)
@@ -441,30 +440,82 @@ entry to produce the node to be returned.
 
     # arithmetic opcodes
     maphash['add_i']    = 'add__Iii'
+    maphash['add_I']    = 'nqp_bigint_add__PPP'
     maphash['add_n']    = 'add__Nnn'
     maphash['sub_i']    = 'sub__Iii'
+    maphash['sub_I']    = 'nqp_bigint_sub__PPP'
     maphash['sub_n']    = 'sub__Nnn'
     maphash['mul_i']    = 'mul__Iii'
+    maphash['mul_I']    = 'nqp_bigint_mul__PPP'
     maphash['mul_n']    = 'mul__Nnn'
     maphash['div_i']    = 'div__Iii'
+    maphash['div_I']    = 'nqp_bigint_div__PPP'
     maphash['div_n']    = 'div__Nnn'
     maphash['mod_i']    = 'mod__Iii'
+    maphash['mod_I']    = 'nqp_bigint_mod__PPP'
     maphash['mod_n']    = 'mod__Nnn'
     maphash['pow_n']    = 'pow__Nnn'
+    maphash['pow_I']    = 'nqp_bigint_pow__PPPP'
     maphash['neg_i']    = 'neg__Ii'
+    maphash['neg_I']    = 'nqp_bigint_neg__PP'
     maphash['neg_n']    = 'neg__Nn'
     maphash['abs_i']    = 'abs__Ii'
+    maphash['abs_I']    = 'nqp_bigint_abs__PP'
     maphash['abs_n']    = 'abs__Nn'
+
+    maphash['gcd_i']    = 'gcd__Ii'
+    maphash['gcd_I']    = 'nqp_bigint_gcd__PP'
+    maphash['lcm_i']    = 'lcm__Ii'
+    maphash['lcm_I']    = 'nqp_bigint_lcm__PP'
 
     maphash['ceil_n']   = 'ceil__Nn'
     maphash['floor_n']  = 'floor__NN'
     maphash['ln_n']     = 'ln__Nn'
     maphash['sqrt_n']   = 'sqrt__Nn'
     maphash['radix']    = 'nqp_radix__Pisii'
+    maphash['radix_I']  = 'nqp_bigint_radix__PisiiP'
+    maphash['log_n']    = 'ln__NN'
+    maphash['exp_n']    = 'exp__Nn'
+
+    # trig opcodes
+    maphash['sin_n']    = 'sin__NN'
+    maphash['asin_n']   = 'asin__NN'
+    maphash['cos_n']    = 'cos__NN'
+    maphash['acos_n']   = 'acos__NN'
+    maphash['tan_n']    = 'tan__NN'
+    maphash['atan_n']   = 'atan__NN'
+    maphash['atan2_n']  = 'atan__NNN'
+    maphash['sec_n']    = 'sec__NN'
+    maphash['asec_n']   = 'asec__NN'
+    maphash['sin_n']    = 'sin__NN'
+    maphash['asin_n']   = 'asin__NN'
+    maphash['sinh_n']   = 'sinh__NN'
+    maphash['cosh_n']   = 'cosh__NN'
+    maphash['tanh_n']   = 'tanh__NN'
+    maphash['sech_n']   = 'sech__NN'
+
+    # bitwise ops
+    maphash['bitor_i']  = 'bor__II'
+    maphash['bitor_I']  = 'nqp_bigint_bor__PPP'
+    maphash['bitxor_i'] = 'bxor__II'
+    maphash['bitxor_I'] = 'nqp_bigint_bxor__PPP'
+    maphash['bitand_i'] = 'band__II'
+    maphash['bitand_I'] = 'nqp_bigint_band__PPP'
+    maphash['bitneg_i'] = 'bnot__II'
+    maphash['bitneg_I'] = 'nqp_bigint_bnot__PP'
+    maphash['bitshiftl_i']  = 'shl__III'
+    maphash['bitshiftl_I']  = 'nqp_bigint_shl__PPI'
+    maphash['bitshiftr_i']  = 'shr__III'
+    maphash['bitshiftr_I']  = 'nqp_bigint_shr__PPI'
+
+    maphash['bitor_s']  = 'bors__SS'
+    maphash['bitxor_s'] = 'bxors__SS'
+    maphash['bitand_s'] = 'bands__SS'
 
     # string opcodes
     maphash['chars']    = 'length__Is'
     maphash['concat']   = 'concat'          # allow either P or S form
+    maphash['concat_s'] = 'concat__Sss'     # force S form
     maphash['join']     = 'join__SsP'
     maphash['split']    = 'split__Pss'
     maphash['index']    = 'index__Issi'
@@ -486,6 +537,15 @@ entry to produce the node to be returned.
     maphash['isgt_i']   = 'isgt__Iii'
     maphash['isge_i']   = 'isge__Iii'
 
+    maphash['bool_I']   = 'nqp_bigint_bool__iP'
+    maphash['cmp_I']    = 'nqp_bigint_cmp__IPP'
+    maphash['iseq_I']   = 'nqp_bigint_eq__IPP'
+    maphash['isne_I']   = 'nqp_bigint_ne__IPP'
+    maphash['islt_I']   = 'nqp_bigint_lt__IPP'
+    maphash['isle_I']   = 'nqp_bigint_le__IPP'
+    maphash['isgt_I']   = 'nqp_bigint_gt__IPP'
+    maphash['isge_I']   = 'nqp_bigint_ge__IPP'
+
     maphash['cmp_n']    = 'cmp__Inn'
     maphash['iseq_n']   = 'iseq__Inn'
     maphash['isne_n']   = 'isne__Inn'
@@ -502,14 +562,27 @@ entry to produce the node to be returned.
     maphash['isgt_s']   = 'isgt__Iss'
     maphash['isge_s']   = 'isge__Iss'
 
+    # bigint ops
+    maphash['fromstr_I'] = 'nqp_bigint_from_str__PPs'
+    maphash['tostr_I']   = 'nqp_bigint_to_str__SP'
+    maphash['isbig_I']   = 'nqp_bigint_is_big__IP'
+    maphash['fromnum_I'] = 'nqp_bigint_from_num__PNP'
+    maphash['tonum_I']   = 'nqp_bigint_to_num__NP'
+
     # boolean opcodes
     maphash['not_i']    = 'not__Ii'
 
     # aggregate opcodes
     maphash['atkey']    = 'set__PQs'
     maphash['atpos']    = 'set__PQi'
+    maphash['atpos_i']  = 'set__IQi'
+    maphash['atpos_n']  = 'set__NQi'
+    maphash['atpos_s']  = 'set__SQi'
     maphash['bindkey']  = 'set__1QsP'
     maphash['bindpos']  = 'set__1QiP'
+    maphash['bindpos_i'] = 'set__1Qii'
+    maphash['bindpos_n'] = 'set__1Qin'
+    maphash['bindpos_s'] = 'set__1Qis'
     maphash['deletekey'] = 'delete__0Qs'
     maphash['deletepos'] = 'delete__0Qi'
     maphash['existskey'] = 'exists__IQs'
@@ -517,9 +590,21 @@ entry to produce the node to be returned.
     maphash['elems']    = 'elements__IP'
     maphash['iterator'] = 'iter__PP'
     maphash['push']     = 'push__0PP'
+    maphash['push_s']   = 'push__0Ps'
+    maphash['push_i']   = 'push__0Pi'
+    maphash['push_n']   = 'push__0Pn'
     maphash['pop']      = 'pop__PP'
+    maphash['pop_s']    = 'pop__sP'
+    maphash['pop_i']    = 'pop__iP'
+    maphash['pop_n']    = 'pop__nP'
     maphash['shift']    = 'shift__PP'
+    maphash['shift_s']  = 'shift__sP'
+    maphash['shift_i']  = 'shift__iP'
+    maphash['shift_n']  = 'shift__nP'
     maphash['unshift']  = 'unshift__0PP'
+    maphash['unshift_s'] = 'unshift__0Ps'
+    maphash['unshift_i'] = 'unshift__0Pi'
+    maphash['unshift_n'] = 'unshift__0Pn'
     maphash['splice']   = 'splice__0PPii'
     $P0 = new ['Hash']
     $P0['pasttype'] = 'list'
@@ -548,7 +633,10 @@ entry to produce the node to be returned.
     maphash['unbox_i']    = 'repr_unbox_int__IP'
     maphash['unbox_n']    = 'repr_unbox_num__NP'
     maphash['unbox_s']    = 'repr_unbox_str__SP'
-    maphash['where']      = 'get_addr__IP'
+    maphash['box_i']      = 'repr_box_int__PiP'
+    maphash['box_n']      = 'repr_box_num__PnP'
+    maphash['box_s']      = 'repr_box_str__PsP'
+    maphash['where']      = 'get_id__IP'
 
     # control opcodes
     $P0 = new ['Hash']

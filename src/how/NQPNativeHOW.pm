@@ -2,6 +2,11 @@ knowhow NQPNativeHOW {
     has $!name;
     has $!composed;
 
+    my $archetypes := Archetypes.new( :nominal(1) );
+    method archetypes() {
+        $archetypes
+    }
+    
     method new(:$name) {
         my $obj := pir::repr_instance_of__PP(self);
         $obj.BUILD(:name($name));

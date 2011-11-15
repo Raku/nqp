@@ -15,6 +15,9 @@
 /* This representation's function pointer table. */
 static REPROps *this_repr;
 
+/* 6model object ID. */
+static INTVAL smo_id = 0;
+
 /* How do we go from type-object to a hash value? For now, we make an integer
  * that is the address of the STable struct, which not being subject to GC will
  * never move, and is unique per type object too. */
@@ -73,10 +76,10 @@ static PMC * accessor_call(PARROT_INTERP, PMC *obj, STRING *name) {
  * list of attributes (populating the passed flat_list). Also builds
  * the index mapping for doing named lookups. Note index is not related
  * to the storage position. */
-PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, P6opaqueREPRData *repr_data) {
-    PMC    *flat_list      = pmc_new(interp, enum_class_ResizablePMCArray);
-    PMC    *class_list     = pmc_new(interp, enum_class_ResizablePMCArray);
-    PMC    *attr_map_list  = pmc_new(interp, enum_class_ResizablePMCArray);
+static PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, P6opaqueREPRData *repr_data) {
+    PMC    *flat_list      = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+    PMC    *class_list     = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+    PMC    *attr_map_list  = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
     STRING *attributes_str = Parrot_str_new_constant(interp, "attributes");
     STRING *parents_str    = Parrot_str_new_constant(interp, "parents");
     STRING *name_str       = Parrot_str_new_constant(interp, "name");
@@ -115,7 +118,7 @@ PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, P6opaqueREPRData *re
 
             /* Allocate a slot. */
             if (PMC_IS_NULL(attr_map))
-                attr_map = pmc_new(interp, enum_class_Hash);
+                attr_map = Parrot_pmc_new(interp, enum_class_Hash);
             VTABLE_set_pmc_keyed_str(interp, attr_map, name,
                 Parrot_pmc_new_init_int(interp, enum_class_Integer, current_slot));
             current_slot++;
@@ -171,25 +174,31 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
     
     /* If we have no attributes in the index mapping, then just the header. */
     if (repr_data->name_to_index_mapping[0].class_key == NULL) {
-        repr_data->allocation_size = sizeof(SixModelObjectCommonalities) + sizeof(PMC *);
+        repr_data->allocation_size = sizeof(P6opaqueInstance);
     }
 
     /* Otherwise, we need to compute the allocation strategy.  */
     else {
-        /* Initial size is for commonalities (e.g. shared table pointer) and
-         * spill hash space. */
-        INTVAL cur_size = sizeof(SixModelObjectCommonalities) + sizeof(PMC *);
+        /* We track the size of the body part, since that's what we want offsets into. */
+        INTVAL cur_size = 0;
         
         /* Get number of attributes and set up various counters. */
-        INTVAL num_attrs    = VTABLE_elements(interp, flat_list);
-        INTVAL info_alloc   = num_attrs == 0 ? 1 : num_attrs;
-        INTVAL cur_pmc_attr = 0;
-        INTVAL cur_str_attr = 0;
+        INTVAL num_attrs        = VTABLE_elements(interp, flat_list);
+        INTVAL info_alloc       = num_attrs == 0 ? 1 : num_attrs;
+        INTVAL cur_pmc_attr     = 0;
+        INTVAL cur_init_slot    = 0;
+        INTVAL cur_mark_slot    = 0;
+        INTVAL cur_cleanup_slot = 0;
+        INTVAL cur_unbox_slot   = 0;
         INTVAL i;
 
         /* Allocate offset array and GC mark info arrays. */
         repr_data->num_attributes      = num_attrs;
         repr_data->attribute_offsets   = (INTVAL *) mem_sys_allocate(info_alloc * sizeof(INTVAL));
+        repr_data->flattened_stables   = (STable **) mem_sys_allocate_zeroed(info_alloc * sizeof(PMC *));
+        repr_data->unbox_int_slot      = -1;
+        repr_data->unbox_num_slot      = -1;
+        repr_data->unbox_str_slot      = -1;
 
         /* Go over the attributes and arrange their allocation. */
         for (i = 0; i < num_attrs; i++) {
@@ -207,65 +216,99 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
                 /* Get the storage spec of the type and see what it wants. */
                 storage_spec spec = REPR(type)->get_storage_spec(interp, STABLE(type));
                 if (spec.inlineable == STORAGE_SPEC_INLINED) {
-                    /* Yes, it's something we'll inline. */
+                    /* Yes, it's something we'll flatten. */
                     unboxed_type = spec.boxed_primitive;
                     bits = spec.bits;
+                    repr_data->flattened_stables[i] = STABLE(type);
+                    
+                    /* Does it need special initialization? */
+                    if (REPR(type)->initialize) {
+                        if (!repr_data->initialize_slots)
+                            repr_data->initialize_slots = (INTVAL *) mem_sys_allocate_zeroed((info_alloc + 1) * sizeof(INTVAL));
+                        repr_data->initialize_slots[cur_init_slot] = i;
+                        cur_init_slot++;
+                    }
+                    
+                    /* Does it have special GC needs? */
+                    if (REPR(type)->gc_mark) {
+                        if (!repr_data->gc_mark_slots)
+                            repr_data->gc_mark_slots = (INTVAL *) mem_sys_allocate_zeroed((info_alloc + 1) * sizeof(INTVAL));
+                        repr_data->gc_mark_slots[cur_mark_slot] = i;
+                        cur_mark_slot++;
+                    }
+                    if (REPR(type)->gc_cleanup) {
+                        if (!repr_data->gc_cleanup_slots)
+                            repr_data->gc_cleanup_slots = (INTVAL *) mem_sys_allocate_zeroed((info_alloc + 1) * sizeof(INTVAL));
+                        repr_data->gc_cleanup_slots[cur_cleanup_slot] = i;
+                        cur_cleanup_slot++;
+                    }
 
                     /* Is it a target for box/unbox operations? */
                     if (!PMC_IS_NULL(box_target) && VTABLE_get_bool(interp, box_target)) {
+                        /* If it boxes a primitive, note that. */
                         switch (unboxed_type) {
                         case STORAGE_SPEC_BP_INT:
-                            if (repr_data->unbox_int_offset)
+                            if (repr_data->unbox_int_slot >= 0)
                                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                                         "Duplicate box_target for native int");
-                            repr_data->unbox_int_offset = cur_size;
+                            repr_data->unbox_int_slot = i;
                             break;
                         case STORAGE_SPEC_BP_NUM:
-                            if (repr_data->unbox_num_offset)
+                            if (repr_data->unbox_num_slot >= 0)
                                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                                         "Duplicate box_target for native num");
-                            repr_data->unbox_num_offset = cur_size;
+                            repr_data->unbox_num_slot = i;
                             break;
                         case STORAGE_SPEC_BP_STR:
-                            if (repr_data->unbox_str_offset)
+                            if (repr_data->unbox_str_slot >= 0)
                                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                                         "Duplicate box_target for native str");
-                            repr_data->unbox_str_offset = cur_size;
+                            repr_data->unbox_str_slot = i;
                             break;
                         default:
-                            /*  nothing, just suppress 'missing default' warning */
+                            /* nothing, just suppress 'missing default' warning */
                             break;
                         }
+                        
+                        /* Also list in the by-repr unbox list. */
+                        if (repr_data->unbox_slots == NULL)
+                            repr_data->unbox_slots = (P6opaqueBoxedTypeMap *) mem_sys_allocate_zeroed(info_alloc * sizeof(P6opaqueBoxedTypeMap));
+                        repr_data->unbox_slots[cur_unbox_slot].repr_id = REPR(type)->ID;
+                        repr_data->unbox_slots[cur_unbox_slot].slot = i;
+                        cur_unbox_slot++;
                     }
                 }
             }
 
-            /* Do allocation. */
-            repr_data->attribute_offsets[i] = cur_size;
+            /* Handle PMC attributes, which need marking and may have auto-viv needs. */
             if (unboxed_type == STORAGE_SPEC_BP_NONE) {
                 if (!repr_data->gc_pmc_mark_offsets)
                     repr_data->gc_pmc_mark_offsets = (INTVAL *) mem_sys_allocate_zeroed(info_alloc * sizeof(INTVAL));
                 repr_data->gc_pmc_mark_offsets[cur_pmc_attr] = cur_size;
                 cur_pmc_attr++;
                 if (!PMC_IS_NULL(av_cont)) {
-                    /* Stash away auto-viv container info. */
                     if (!repr_data->auto_viv_values)
                         repr_data->auto_viv_values = (PMC **) mem_sys_allocate_zeroed(info_alloc * sizeof(PMC *));
                     repr_data->auto_viv_values[i] = av_cont;
                 }
             }
-            if (unboxed_type == STORAGE_SPEC_BP_STR) {
-                if (!repr_data->gc_str_mark_offsets)
-                    repr_data->gc_str_mark_offsets = (INTVAL *) mem_sys_allocate_zeroed(info_alloc * sizeof(INTVAL));
-                repr_data->gc_str_mark_offsets[cur_str_attr] = cur_size;
-                cur_str_attr++;
-            }
+            
+            /* Do allocation. */
             /* XXX TODO Alignment! Important when we get int1, int8, etc. */
+            repr_data->attribute_offsets[i] = cur_size;
             cur_size += bits / 8;
         }
 
-        /* Finally, put computed allocation size in place. */
-        repr_data->allocation_size = cur_size;
+        /* Finally, put computed allocation size in place; it's body size plus
+         * header size. Also number of markables and sentinels. */
+        repr_data->allocation_size = cur_size + sizeof(P6opaqueInstance);
+        repr_data->gc_pmc_mark_offsets_count = cur_pmc_attr;
+        if (repr_data->initialize_slots)
+            repr_data->initialize_slots[cur_init_slot] = -1;
+        if (repr_data->gc_mark_slots)
+            repr_data->gc_mark_slots[cur_mark_slot] = -1;
+        if (repr_data->gc_cleanup_slots)
+            repr_data->gc_cleanup_slots[cur_cleanup_slot] = -1;
     }
 
     Parrot_unblock_GC_mark(interp);
@@ -350,49 +393,58 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
     /* Create REPR data structure and hand it off the STable. */
     st->REPR_data = mem_allocate_zeroed_typed(P6opaqueREPRData);
 
-    /* Create type object and point it back at the STable. Note that we
-     * do *not* populate the spill pointer at all, we leave it null. A
-     * non-null value (even PMCNULL) is what indicates we have a defined
-     * object. Yes, I know, it's sick. */
+    /* Create type object and point it back at the STable. */
     obj->common.stable = st_pmc;
     st->WHAT = wrap_object(interp, obj);
     PARROT_GC_WRITE_BARRIER(interp, st_pmc);
+
+    /* Flag it as a type object. */
+    MARK_AS_TYPE_OBJECT(st->WHAT);
 
     return st->WHAT;
 }
 
 /* Creates a new instance based on the type object. */
-static PMC * instance_of(PARROT_INTERP, PMC *WHAT) {
+static PMC * allocate(PARROT_INTERP, STable *st) {
     P6opaqueInstance * obj;
 
     /* Compute allocation strategy if we've not already done so. */
-    P6opaqueREPRData * repr_data = (P6opaqueREPRData *) STABLE(WHAT)->REPR_data;
+    P6opaqueREPRData * repr_data = (P6opaqueREPRData *) st->REPR_data;
     if (!repr_data->allocation_size) {
-        compute_allocation_strategy(interp, WHAT, repr_data);
-        PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC(WHAT));
+        compute_allocation_strategy(interp, st->WHAT, repr_data);
+        PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
     }
 
     /* Allocate and set up object instance. */
     obj = (P6opaqueInstance *) Parrot_gc_allocate_fixed_size_storage(interp, repr_data->allocation_size);
     memset(obj, 0, repr_data->allocation_size);
-    obj->common.stable = STABLE_PMC(WHAT);
-
-    /* The spill slot gets set to PMCNULL; it not being (C) NULL is what
-     * lets us know it's actually a real instance, not a type object. */
-    obj->spill = PMCNULL;
+    obj->common.stable = st->stable_pmc;
     
     return wrap_object(interp, obj);
 }
 
-/* Checks if a given object is defined (from the point of view of the
- * representation). */
-static INTVAL defined(PARROT_INTERP, PMC *obj) {
-    P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
-    return instance->spill != NULL;
+/* Initialize a new instance. */
+static void initialize(PARROT_INTERP, STable *st, void *data) {
+    P6opaqueREPRData * repr_data = (P6opaqueREPRData *) st->REPR_data;
+    if (repr_data->initialize_slots) {
+        INTVAL i;
+        for (i = 0; repr_data->initialize_slots[i] >= 0; i++) {
+            INTVAL  offset = repr_data->attribute_offsets[repr_data->initialize_slots[i]];
+            STable *st     = repr_data->flattened_stables[repr_data->initialize_slots[i]];
+            st->REPR->initialize(interp, st, (char *)data + offset);
+        }
+    }
 }
 
-/* Helper for complaining about attrbiute access errors. */
-static void no_such_attribute(PARROT_INTERP, char *action, PMC *class_handle, STRING *name) {
+/* Copies to the body of one object to another. */
+static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
+    P6opaqueREPRData * repr_data = (P6opaqueREPRData *) st->REPR_data;
+    memcpy(dest, src, repr_data->allocation_size - sizeof(P6opaqueInstance));
+}
+
+/* Helper for complaining about attribute access errors. */
+PARROT_DOES_NOT_RETURN
+static void no_such_attribute(PARROT_INTERP, const char *action, PMC *class_handle, STRING *name) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can not %s non-existant attribute '%Ss' on class '%Ss'",
             action, name, VTABLE_get_string(interp, introspection_call(interp,
@@ -401,210 +453,138 @@ static void no_such_attribute(PARROT_INTERP, char *action, PMC *class_handle, ST
 }
 
 /* Gets the current value for an attribute. */
-static PMC * get_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
+static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     INTVAL            slot;
 
-    /* Ensure it is a defined object. */
-    if (!instance->spill)
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot access attributes in a type object");
-
     /* Try the slot allocation first. */
-    slot = try_get_slot(interp, repr_data, class_handle, name);
+    slot = hint >= 0 && !(repr_data->mi) ? hint :
+        try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
-        PMC *result = get_pmc_at_offset(instance, repr_data->attribute_offsets[slot]);
-        if (result) {
-            return result;
+        if (!repr_data->flattened_stables[slot]) {
+            PMC *result = get_pmc_at_offset(data, repr_data->attribute_offsets[slot]);
+            if (result) {
+                return result;
+            }
+            else {
+                /* Maybe we know how to auto-viv it to a container. */
+                if (repr_data->auto_viv_values) {
+                    PMC *value = repr_data->auto_viv_values[slot];
+                    if (value != NULL) {
+                        PMC *cloned = REPR(value)->allocate(interp, STABLE(value));
+                        REPR(value)->copy_to(interp, STABLE(value), OBJECT_BODY(value), OBJECT_BODY(cloned));
+                        PARROT_GC_WRITE_BARRIER(interp, cloned);
+                        set_pmc_at_offset(data, repr_data->attribute_offsets[slot], cloned);
+                        return cloned;
+                    }
+                }
+                return PMCNULL;
+            }
         }
         else {
-            /* Maybe we know how to auto-viv it to a container. */
-            if (repr_data->auto_viv_values) {
-                PMC *value = repr_data->auto_viv_values[slot];
-                if (value != NULL) {
-                    value = REPR(value)->clone(interp, value);
-                    set_pmc_at_offset(instance, repr_data->attribute_offsets[slot], value);
-                    return value;
-                }
-            }
-            return PMCNULL;
+            /* Need to produce a boxed version of this attribute. */
+            STable *st  = repr_data->flattened_stables[slot];
+            PMC *result = st->REPR->allocate(interp, st);
+            st->REPR->copy_to(interp, st, (char *)data + repr_data->attribute_offsets[slot],
+                OBJECT_BODY(result));
+            PARROT_GC_WRITE_BARRIER(interp, result);
+
+            return result;
         }
     }
     
     /* Otherwise, complain that the attribute doesn't exist. */
     no_such_attribute(interp, "get", class_handle, name);
 }
-static INTVAL get_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
+
+static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     INTVAL            slot;
 
-    /* Ensure it is a defined object. */
-    if (!instance->spill)
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot access attributes in a type object");
-
-    /* Try the slot allocation first. */
-    slot = try_get_slot(interp, repr_data, class_handle, name);
+    /* Look up slot, then offset and compute address. */
+    slot = hint >= 0 && !(repr_data->mi) ? hint :
+        try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0)
-        return get_int_at_offset(instance, repr_data->attribute_offsets[slot]);
+        return ((char *)data) + repr_data->attribute_offsets[slot];
     
     /* Otherwise, complain that the attribute doesn't exist. */
     no_such_attribute(interp, "get", class_handle, name);
 }
-static FLOATVAL get_attribute_num(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
-    INTVAL            slot;
 
-    /* Ensure it is a defined object. */
-    if (!instance->spill)
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot access attributes in a type object");
-
-    /* Try the slot allocation first. */
-    slot = try_get_slot(interp, repr_data, class_handle, name);
-    if (slot >= 0)
-        return get_num_at_offset(instance, repr_data->attribute_offsets[slot]);
-    
-    /* Otherwise, complain that the attribute doesn't exist. */
-    no_such_attribute(interp, "get", class_handle, name);
-}
-static STRING * get_attribute_str(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
-    INTVAL            slot;
-
-    /* Ensure it is a defined object. */
-    if (!instance->spill)
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot access attributes in a type object");
-
-    /* Try the slot allocation first. */
-    slot = try_get_slot(interp, repr_data, class_handle, name);
-    if (slot >= 0) {
-        STRING *result = get_str_at_offset(instance, repr_data->attribute_offsets[slot]);
-        return result ? result : STRINGNULL;
-    }
-    
-    /* Otherwise, complain that the attribute doesn't exist. */
-    no_such_attribute(interp, "get", class_handle, name);
-}
 
 /* Binds the given value to the specified attribute. */
-static void bind_attribute(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
+static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     INTVAL            slot;
 
-    /* Ensure it is a defined object. */
-    if (!instance->spill)
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot access attributes in a type object");
-
     /* Try the slot allocation first. */
-    slot = try_get_slot(interp, repr_data, class_handle, name);
+    slot = hint >= 0 && !(repr_data->mi) ? hint :
+        try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
-        set_pmc_at_offset(instance, repr_data->attribute_offsets[slot], value);
-        return;
+        STable *st = repr_data->flattened_stables[slot];
+        if (st) {
+            if (value->vtable->base_type == smo_id && st == STABLE(value))
+                st->REPR->copy_to(interp, st, OBJECT_BODY(value),
+                    (char *)data + repr_data->attribute_offsets[slot]);
+            else
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "Type mismatch when storing value to attribute '%Ss' on class '%Ss'",
+                    name, VTABLE_get_string(interp, introspection_call(interp,
+                        class_handle, STABLE(class_handle)->HOW,
+                        Parrot_str_new_constant(interp, "name"), 0)));
+        }
+        else {
+            set_pmc_at_offset(data, repr_data->attribute_offsets[slot], value);
+        }
     }
-
-    /* Otherwise, complain that the attribute doesn't exist. */
-    no_such_attribute(interp, "bind", class_handle, name);
+    else {
+        /* Otherwise, complain that the attribute doesn't exist. */
+        no_such_attribute(interp, "bind", class_handle, name);
+    }
 }
-static void bind_attribute_int(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, INTVAL value) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
+static void bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, void *value) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     INTVAL            slot;
 
-    /* Ensure it is a defined object. */
-    if (!instance->spill)
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot access attributes in a type object");
-
-    /* Try the slot allocation first. */
-    slot = try_get_slot(interp, repr_data, class_handle, name);
+    /* Try to find the slot. */
+    slot = hint >= 0 && !(repr_data->mi) ? hint :
+        try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
-        set_int_at_offset(instance, repr_data->attribute_offsets[slot], value);
-        return;
+        STable *st = repr_data->flattened_stables[slot];
+        if (st)
+            st->REPR->copy_to(interp, st, value, (char *)data + repr_data->attribute_offsets[slot]);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Can not bind by reference to non-flattened attribute '%Ss' on class '%Ss'",
+                name, VTABLE_get_string(interp, introspection_call(interp,
+                    class_handle, STABLE(class_handle)->HOW,
+                    Parrot_str_new_constant(interp, "name"), 0)));
     }
-
-    /* Otherwise, complain that the attribute doesn't exist. */
-    no_such_attribute(interp, "bind", class_handle, name);
-}
-static void bind_attribute_num(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, FLOATVAL value) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
-    INTVAL            slot;
-
-    /* Ensure it is a defined object. */
-    if (!instance->spill)
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot access attributes in a type object");
-
-    /* Try the slot allocation first. */
-    slot = try_get_slot(interp, repr_data, class_handle, name);
-    if (slot >= 0) {
-        set_num_at_offset(instance, repr_data->attribute_offsets[slot], value);
-        return;
+    else {
+        /* Otherwise, complain that the attribute doesn't exist. */
+        no_such_attribute(interp, "bind", class_handle, name);
     }
-
-    /* Otherwise, complain that the attribute doesn't exist. */
-    no_such_attribute(interp, "bind", class_handle, name);
-}
-static void bind_attribute_str(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint, STRING *value) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
-    INTVAL            slot;
-
-    /* Ensure it is a defined object. */
-    if (!instance->spill)
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot access attributes in a type object");
-
-    /* Try the slot allocation first. */
-    slot = try_get_slot(interp, repr_data, class_handle, name);
-    if (slot >= 0) {
-        set_str_at_offset(instance, repr_data->attribute_offsets[slot], value);
-        return;
-    }
-
-    /* Otherwise, complain that the attribute doesn't exist. */
-    no_such_attribute(interp, "bind", class_handle, name);
 }
 
 /* Gets the hint for the given attribute ID. */
-static INTVAL hint_for(PARROT_INTERP, PMC *class_handle, STRING *name) {
-    return NO_HINT;
-}
-
-/* Clones the current object. */
-static PMC * repr_clone(PARROT_INTERP, PMC *to_clone) {
-    P6opaqueInstance *obj;
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(to_clone)->REPR_data;
-    
-    if (defined(interp, to_clone)) {
-        obj = (P6opaqueInstance *)Parrot_gc_allocate_fixed_size_storage(interp, repr_data->allocation_size);
-        memcpy(obj, PMC_data(to_clone), repr_data->allocation_size);
-        if (!PMC_IS_NULL(obj->spill))
-            obj->spill = VTABLE_clone(interp, obj->spill);
+static INTVAL hint_for(PARROT_INTERP, STable *st, PMC *class_key, STRING *name) {
+    INTVAL slot;
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    if (!repr_data->allocation_size) {
+        compute_allocation_strategy(interp, st->WHAT, repr_data);
+        PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
     }
-    else {
-        obj = mem_allocate_zeroed_typed(P6opaqueInstance);
-        memcpy(obj, PMC_data(to_clone), sizeof(P6opaqueInstance));
-    }
-    
-    return wrap_object(interp, obj);
+    slot = try_get_slot(interp, repr_data, class_key, name);
+    return slot >= 0 ? slot : NO_HINT;
 }
 
 /* Used with boxing. Sets an integer value, for representations that can hold
  * one. */
-static void set_int(PARROT_INTERP, PMC *obj, INTVAL value) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
-    if (repr_data->unbox_int_offset) {
-        set_int_at_offset(instance, repr_data->unbox_int_offset, value);
+static void set_int(PARROT_INTERP, STable *st, void *data, INTVAL value) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    if (repr_data->unbox_int_slot >= 0) {
+        STable *st = repr_data->flattened_stables[repr_data->unbox_int_slot];
+        st->REPR->set_int(interp, st, (char *)data + repr_data->attribute_offsets[repr_data->unbox_int_slot], value);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -614,15 +594,11 @@ static void set_int(PARROT_INTERP, PMC *obj, INTVAL value) {
 
 /* Used with boxing. Gets an integer value, for representations that can
  * hold one. */
-static INTVAL get_int(PARROT_INTERP, PMC *obj) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
-    if (repr_data->unbox_int_offset) {
-        if (!instance->spill) {
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot unbox type object to a native integer");
-        }
-        return get_int_at_offset(instance, repr_data->unbox_int_offset);
+static INTVAL get_int(PARROT_INTERP, STable *st, void *data) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    if (repr_data->unbox_int_slot >= 0) {
+        STable *st = repr_data->flattened_stables[repr_data->unbox_int_slot];
+        return st->REPR->get_int(interp, st, (char *)data + repr_data->attribute_offsets[repr_data->unbox_int_slot]);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -632,11 +608,11 @@ static INTVAL get_int(PARROT_INTERP, PMC *obj) {
 
 /* Used with boxing. Sets a floating point value, for representations that can
  * hold one. */
-static void set_num(PARROT_INTERP, PMC *obj, FLOATVAL value) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
-    if (repr_data->unbox_num_offset) {
-        set_num_at_offset(instance, repr_data->unbox_num_offset, value);
+static void set_num(PARROT_INTERP, STable *st, void *data, FLOATVAL value) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    if (repr_data->unbox_num_slot >= 0) {
+        STable *st = repr_data->flattened_stables[repr_data->unbox_num_slot];
+        st->REPR->set_num(interp, st, (char *)data + repr_data->attribute_offsets[repr_data->unbox_num_slot], value);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -646,15 +622,11 @@ static void set_num(PARROT_INTERP, PMC *obj, FLOATVAL value) {
 
 /* Used with boxing. Gets a floating point value, for representations that can
  * hold one. */
-static FLOATVAL get_num(PARROT_INTERP, PMC *obj) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
-    if (repr_data->unbox_num_offset) {
-        if (!instance->spill) {
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot unbox type object to a native number");
-        }
-        return get_num_at_offset(instance, repr_data->unbox_num_offset);
+static FLOATVAL get_num(PARROT_INTERP, STable *st, void *data) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    if (repr_data->unbox_num_slot >= 0) {
+        STable *st = repr_data->flattened_stables[repr_data->unbox_num_slot];
+        return st->REPR->get_num(interp, st, (char *)data + repr_data->attribute_offsets[repr_data->unbox_num_slot]);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -664,11 +636,11 @@ static FLOATVAL get_num(PARROT_INTERP, PMC *obj) {
 
 /* Used with boxing. Sets a string value, for representations that can hold
  * one. */
-static void set_str(PARROT_INTERP, PMC *obj, STRING *value) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
-    if (repr_data->unbox_str_offset) {
-        set_str_at_offset(instance, repr_data->unbox_str_offset, value);
+static void set_str(PARROT_INTERP, STable *st, void *data, STRING *value) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    if (repr_data->unbox_str_slot >= 0) {
+        STable *st = repr_data->flattened_stables[repr_data->unbox_str_slot];
+        st->REPR->set_str(interp, st, (char *)data + repr_data->attribute_offsets[repr_data->unbox_str_slot], value);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -678,15 +650,11 @@ static void set_str(PARROT_INTERP, PMC *obj, STRING *value) {
 
 /* Used with boxing. Gets a string value, for representations that can hold
  * one. */
-static STRING * get_str(PARROT_INTERP, PMC *obj) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
-    if (repr_data->unbox_str_offset) {
-        if (!instance->spill) {
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot unbox type object to a native string");
-        }
-        return get_str_at_offset(instance, repr_data->unbox_str_offset);
+static STRING * get_str(PARROT_INTERP, STable *st, void *data) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    if (repr_data->unbox_str_slot >= 0) {
+        STable *st = repr_data->flattened_stables[repr_data->unbox_str_slot];
+        return st->REPR->get_str(interp, st, (char *)data + repr_data->attribute_offsets[repr_data->unbox_str_slot]);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -694,54 +662,45 @@ static STRING * get_str(PARROT_INTERP, PMC *obj) {
     }
 }
 
-/* This Parrot-specific addition to the API is used to mark an object. */
-static void gc_mark(PARROT_INTERP, PMC *obj) {
-    P6opaqueInstance *instance = (P6opaqueInstance *)PMC_data(obj);
-    
-    /* Mark STable and SC. */
-    if (!PMC_IS_NULL(instance->common.stable))
-        Parrot_gc_mark_PMC_alive(interp, instance->common.stable);
-    if (!PMC_IS_NULL(instance->common.sc))
-        Parrot_gc_mark_PMC_alive(interp, instance->common.sc);
-
-    /* If there's spill storage, mark that. */
-    if (!PMC_IS_NULL(instance->spill))
-        Parrot_gc_mark_PMC_alive(interp, instance->spill);
-    
-    /* Mark contained PMC and string attributes, provided this is a
-     * real object. */
-    if (instance->spill) {
-        P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
+/* Some objects serve primarily as boxes of others, inlining them. This gets
+ * gets the reference to such things, using the representation ID to distinguish
+ * them. */
+static void * get_boxed_ref(PARROT_INTERP, STable *st, void *data, INTVAL repr_id) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    if (repr_data->unbox_slots) {
         INTVAL i;
+        for (i = 0; i < repr_data->num_attributes; i++)
+            if (repr_data->unbox_slots[i].repr_id == repr_id)
+                return (char *)data + repr_data->attribute_offsets[repr_data->unbox_slots[i].slot];
+            else if (repr_data->unbox_slots[i].repr_id == 0)
+                break;
+    }
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "get_boxed_ref could not unbox for the given representation");
+    return NULL;
+}
 
-        /* Mark PMCs. */
-        if (repr_data->gc_pmc_mark_offsets) {
-            for (i = 0; i < repr_data->num_attributes; i++) {
-                INTVAL offset = repr_data->gc_pmc_mark_offsets[i];
-                if (offset) {
-                    PMC *to_mark = get_pmc_at_offset(instance, offset);
-                    if (!PMC_IS_NULL(to_mark))
-                        Parrot_gc_mark_PMC_alive(interp, to_mark);
-                }
-                else {
-                    break;
-                }
-            }
+/* This Parrot-specific addition to the API is used to mark an object. */
+static void gc_mark(PARROT_INTERP, STable *st, void *data) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    INTVAL i;
+
+    /* Mark PMCs. */
+    if (repr_data->gc_pmc_mark_offsets) {
+        for (i = 0; i < repr_data->gc_pmc_mark_offsets_count; i++) {
+            INTVAL offset = repr_data->gc_pmc_mark_offsets[i];
+            PMC *to_mark  = get_pmc_at_offset(data, offset);
+            if (!PMC_IS_NULL(to_mark))
+                Parrot_gc_mark_PMC_alive(interp, to_mark);
         }
+    }
 
-        /* Mark strings. */
-        if (repr_data->gc_str_mark_offsets) {
-            for (i = 0; i < repr_data->num_attributes; i++) {
-                INTVAL offset = repr_data->gc_str_mark_offsets[i];
-                if (offset) {
-                    STRING *to_mark = get_str_at_offset(instance, offset);
-                    if (to_mark)
-                        Parrot_gc_mark_STRING_alive(interp, to_mark);
-                }
-                else {
-                    break;
-                }
-            }
+    /* Mark any nested reprs that need it. */
+    if (repr_data->gc_mark_slots) {
+        for (i = 0; repr_data->gc_mark_slots[i] >= 0; i++) {
+            INTVAL  offset = repr_data->attribute_offsets[repr_data->gc_mark_slots[i]];
+            STable *st     = repr_data->flattened_stables[repr_data->gc_mark_slots[i]];
+            st->REPR->gc_mark(interp, st, (char *)data + offset);
         }
     }
 }
@@ -749,7 +708,7 @@ static void gc_mark(PARROT_INTERP, PMC *obj) {
 /* This Parrot-specific addition to the API is used to free an object. */
 static void gc_free(PARROT_INTERP, PMC *obj) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
-	if (repr_data->allocation_size)
+	if (repr_data->allocation_size && !PObj_flag_TEST(private0, obj))
 		Parrot_gc_free_fixed_size_storage(interp, repr_data->allocation_size, PMC_data(obj));
 	else
 		mem_sys_free(PMC_data(obj));
@@ -758,7 +717,7 @@ static void gc_free(PARROT_INTERP, PMC *obj) {
 
 /* This Parrot-specific addition to the API is used to mark a repr's
  * per-type data. */
-static void gc_mark_repr(PARROT_INTERP, STable *st) {
+static void gc_mark_repr_data(PARROT_INTERP, STable *st) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     if (repr_data->name_to_index_mapping) {
         P6opaqueNameMap *cur_map_entry = repr_data->name_to_index_mapping;
@@ -778,41 +737,46 @@ static void gc_mark_repr(PARROT_INTERP, STable *st) {
 }
 
 /* This Parrot-specific addition to the API is used to free a repr instance. */
-static void gc_free_repr(PARROT_INTERP, STable *st) {
+static void gc_free_repr_data(PARROT_INTERP, STable *st) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     if (repr_data->name_to_index_mapping)
         mem_sys_free(repr_data->name_to_index_mapping);
     if (repr_data->gc_pmc_mark_offsets)
         mem_sys_free(repr_data->gc_pmc_mark_offsets);
-    if (repr_data->gc_str_mark_offsets)
-        mem_sys_free(repr_data->gc_str_mark_offsets);
     if (repr_data->auto_viv_values)
         mem_sys_free(repr_data->auto_viv_values);
+    if (repr_data->initialize_slots)
+        mem_sys_free(repr_data->initialize_slots);
+    if (repr_data->gc_mark_slots)
+        mem_sys_free(repr_data->gc_mark_slots);
+    if (repr_data->gc_cleanup_slots)
+        mem_sys_free(repr_data->gc_cleanup_slots);
     mem_sys_free(st->REPR_data);
     st->REPR_data = NULL;
 }
 
 /* Gets the storage specification for this representation. */
 static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     storage_spec spec;
     spec.inlineable = STORAGE_SPEC_REFERENCE;
     spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
+    spec.can_box = 0;
+    if (repr_data->unbox_int_slot >= 0)
+        spec.can_box += STORAGE_SPEC_CAN_BOX_INT;
+    if (repr_data->unbox_num_slot >= 0)
+        spec.can_box += STORAGE_SPEC_CAN_BOX_NUM;
+    if (repr_data->unbox_str_slot >= 0)
+        spec.can_box += STORAGE_SPEC_CAN_BOX_STR;
     return spec;
 }
 
 /* Checks if an attribute has been initialized. */
-static INTVAL is_attribute_initialized(PARROT_INTERP, PMC *obj, PMC *class_handle, STRING *name, INTVAL hint) {
-    P6opaqueInstance *instance  = (P6opaqueInstance *)PMC_data(obj);
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
-    INTVAL            slot;
-
-    if (!instance->spill)
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot access attributes in a type object");
-
-    slot = try_get_slot(interp, repr_data, class_handle, name);
+static INTVAL is_attribute_initialized(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    INTVAL slot = try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0)
-        return NULL != get_pmc_at_offset(instance, repr_data->attribute_offsets[slot]);
+        return NULL != get_pmc_at_offset(data, repr_data->attribute_offsets[slot]);
     else
         no_such_attribute(interp, "initializedness check", class_handle, name);
 }
@@ -825,6 +789,11 @@ static void change_type(PARROT_INTERP, PMC *obj, PMC *new_type) {
     STRING           *mro_str       = Parrot_str_new_constant(interp, "mro");
     PMC              *cur_mro, *new_mro;
     INTVAL            cur_mro_elems, new_mro_elems, mro_is_suffix;
+    
+    /* Ensure we're not trying to change the type of a type object. */
+    if (PObj_flag_TEST(private0, obj))
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Cannot change the type of a type object");
     
     /* Ensure that the destination type REPR is P6opaque also. */
     if (REPR(obj) != REPR(new_type))
@@ -885,30 +854,29 @@ REPROps * P6opaque_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
     this_repr = mem_allocate_zeroed_typed(REPROps);
     this_repr->type_object_for = type_object_for;
-    this_repr->instance_of = instance_of;
-    this_repr->defined = defined;
-    this_repr->get_attribute = get_attribute;
-    this_repr->get_attribute_int = get_attribute_int;
-    this_repr->get_attribute_num = get_attribute_num;
-    this_repr->get_attribute_str = get_attribute_str;
-    this_repr->bind_attribute = bind_attribute;
-    this_repr->bind_attribute_int = bind_attribute_int;
-    this_repr->bind_attribute_num = bind_attribute_num;
-    this_repr->bind_attribute_str = bind_attribute_str;
+    this_repr->allocate = allocate;
+    this_repr->initialize = initialize;
+    this_repr->copy_to = copy_to;
+    this_repr->get_attribute_boxed = get_attribute_boxed;
+    this_repr->get_attribute_ref = get_attribute_ref;
+    this_repr->bind_attribute_boxed = bind_attribute_boxed;
+    this_repr->bind_attribute_ref = bind_attribute_ref;
     this_repr->hint_for = hint_for;
-    this_repr->clone = repr_clone;
     this_repr->set_int = set_int;
     this_repr->get_int = get_int;
     this_repr->set_num = set_num;
     this_repr->get_num = get_num;
     this_repr->set_str = set_str;
     this_repr->get_str = get_str;
+    this_repr->get_boxed_ref = get_boxed_ref;
     this_repr->gc_mark = gc_mark;
     this_repr->gc_free = gc_free;
-    this_repr->gc_mark_repr = gc_mark_repr;
-    this_repr->gc_free_repr = gc_free_repr;
+    this_repr->gc_cleanup = NULL;
+    this_repr->gc_mark_repr_data = gc_mark_repr_data;
+    this_repr->gc_free_repr_data = gc_free_repr_data;
     this_repr->get_storage_spec = get_storage_spec;
     this_repr->is_attribute_initialized = is_attribute_initialized;
     this_repr->change_type = change_type;
+    smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
     return this_repr;
 }

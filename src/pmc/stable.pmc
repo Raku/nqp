@@ -5,16 +5,16 @@
 #include "../6model/sixmodelobject.h"
 
 /* This is a source of type cache IDs (see notes below about them). 
- * The lowest one is 4. This is to make the lower two bits available for
- * defined/undefined flags for the multi dispatch cache, which is the
- * main reason these IDs exist at all. */
+ * The lowest one is 8. This is to make the lower three bits available for
+ * defined/undefined flag and native type flags for the multi dispatch cache,
+ * which is the main reason these IDs exist at all. */
 static INTVAL TypeCacheIDSource = 0;
 static INTVAL get_next_type_cache_id(void) {
     /* XXX The C# original is doing:
-     *     return Interlocked.Add(ref TypeCacheIDSource, 4);
+     *     return Interlocked.Add(ref TypeCacheIDSource, 8);
      * But we don't yet have an abstraction layer for an atomic addition
      * so this is not yet threadsafe. */
-    TypeCacheIDSource += 4;
+    TypeCacheIDSource += 8;
     return TypeCacheIDSource;
 }
 
@@ -50,8 +50,8 @@ pmclass STable manual_attrs dynpmc group nqp {
             Parrot_gc_mark_PMC_alive(interp, st->method_cache);
 
         /* Give the REPR a chance to mark it's own data. */
-        if (st->REPR->gc_mark_repr)
-            st->REPR->gc_mark_repr(interp, st);
+        if (st->REPR->gc_mark_repr_data)
+            st->REPR->gc_mark_repr_data(interp, st);
             
         /* Mark the v-table cache. */
         for (i = 0; i < st->vtable_length; i++) {
@@ -59,6 +59,10 @@ pmclass STable manual_attrs dynpmc group nqp {
             if (!PMC_IS_NULL(entry))
                 Parrot_gc_mark_PMC_alive(interp, entry);
         }
+        
+        /* Mark the boolification spec, if needed. */
+        if (st->boolification_spec && !PMC_IS_NULL(st->boolification_spec->method))
+            Parrot_gc_mark_PMC_alive(interp, st->boolification_spec->method);
 
         /* If we have one, mark the Parrot v-table mapping. */
         if (st->parrot_vtable_mapping)
@@ -70,8 +74,8 @@ pmclass STable manual_attrs dynpmc group nqp {
     VTABLE void destroy() {
         /* Give the REPR a chance to destroy it's own data. */
         STable *st = (STable *)PMC_data(SELF);
-        if (st->REPR->gc_free_repr)
-            st->REPR->gc_free_repr(interp, st);
+        if (st->REPR->gc_free_repr_data)
+            st->REPR->gc_free_repr_data(interp, st);
     
         /* If a v-table was allocated, free that. */
         if (st->vtable) {

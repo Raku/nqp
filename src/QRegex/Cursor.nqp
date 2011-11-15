@@ -8,6 +8,7 @@ role NQPCursorRole {
     has $!bstack;
     has $!cstack;
     has $!regexsub;
+    has $!restart;
 
     method target() { $!target }
     method from() { $!from }
@@ -51,17 +52,29 @@ role NQPCursorRole {
     method !cursor_start() {
         my $new := self.CREATE();
         nqp::bindattr($new, $?CLASS, '$!orig', $!orig);
-        nqp::bindattr_i($new, $?CLASS, '$!pos', -3);
         nqp::bindattr($new, $?CLASS, '$!regexsub', Q:PIR {
             $P0 = getinterp
             %r = $P0['sub';1]
         });
-        pir::return__vPsiPP(
+        if $!restart {
+            nqp::bindattr_i($new, $?CLASS, '$!pos', $!pos);
+            nqp::bindattr($new, $?CLASS, '$!cstack', nqp::clone($!cstack)) if $!cstack;
+            pir::return__vPsiPPi(
+                $new,
+                nqp::bindattr_s($new, $?CLASS, '$!target', $!target),
+                nqp::bindattr_i($new, $?CLASS, '$!from', $!from),
+                $?CLASS,
+                nqp::bindattr($new, $?CLASS, '$!bstack', nqp::clone($!bstack)),
+                1);
+        }
+        nqp::bindattr_i($new, $?CLASS, '$!pos', -3);
+        pir::return__vPsiPPi(
             $new, 
             nqp::bindattr_s($new, $?CLASS, '$!target', $!target),
             nqp::bindattr_i($new, $?CLASS, '$!from', $!pos),
             $?CLASS,
-            nqp::bindattr($new, $?CLASS, '$!bstack', pir::new__Ps('ResizableIntegerArray'))
+            nqp::bindattr($new, $?CLASS, '$!bstack', pir::new__Ps('ResizableIntegerArray')),
+            0
         )
     }
 
@@ -79,16 +92,29 @@ role NQPCursorRole {
     method !cursor_pass($pos, $name?) {
         $!match := 1;
         $!pos := $pos;
-        $!regexsub := Q:PIR {
-            $P0 = getinterp
-            %r = $P0['sub';1]
-        };
+        $!restart := $!regexsub;
+        self.'!reduce'($name) if $name;
     }
 
     method !cursor_fail() {
         $!match  := nqp::null();
         $!bstack := nqp::null();
         $!pos    := -3;
+    }
+
+    method !cursor_next() {
+        if $!restart {
+            $!restart(self);
+        }
+        else {
+            self."!cursor_start"()."!cursor_fail"()
+        }
+    }
+
+    method !reduce($name) {
+        my $actions := pir::find_dynamic_lex__Ps('$*ACTIONS');
+        pir::find_method__PPs($actions, $name)($actions, self.MATCH)
+            if pir::can__IPS($actions, $name);
     }
 
     method !protoregex($name) {
@@ -160,7 +186,21 @@ role NQPCursorRole {
               if nqp::substr($!target, $!pos, $litlen) 
                    eq nqp::substr($!target, $subcur.from, $litlen);
         }
-        else { $cur."!cursor_pass"($!pos, '') }
+        $cur;
+    }
+
+    method !LITERAL($str) {
+        my $cur := self."!cursor_start"();
+        my $litlen := nqp::chars($str);
+        $cur."!cursor_pass"($!pos + $litlen)
+          if nqp::substr($!target, $!pos, $litlen) eq $str;
+        $cur;
+    }
+
+    method before($regex) {
+        my $cur := self.'!cursor_start'();
+        $cur.'!cursor_pass'($!pos, 'before')
+            if $regex($cur);
         $cur;
     }
                  
@@ -182,8 +222,9 @@ role NQPCursorRole {
     method wb() {
         my $cur := self."!cursor_start"();
         $cur."!cursor_pass"($!pos, "wb")
-            if $!pos == 0
-               || $!pos == nqp::chars($!target)
+            if ($!pos == 0 && nqp::iscclass(pir::const::CCLASS_WORD, $!target, $!pos))
+               || ($!pos == nqp::chars($!target)
+                   && nqp::iscclass(pir::const::CCLASS_WORD, $!target, $!pos-1))
                || nqp::iscclass(pir::const::CCLASS_WORD, $!target, $!pos-1)
                   != nqp::iscclass(pir::const::CCLASS_WORD, $!target, $!pos);
         $cur;
@@ -295,7 +336,7 @@ class NQPMatch is NQPCapture {
     method from() { $!from }
     method to()   { $!to }
     method Str() is parrot_vtable('get_string') { nqp::substr($!orig, $!from, $!to-$!from) }
-    method Bool() is parrot_vtable('get_bool') { $!to >= $!from }
+    method Bool() { $!to >= $!from }
 
     method !dump_str($key) {
         sub dump_array($key, $item) {
@@ -336,9 +377,15 @@ class NQPCursor does NQPCursorRole {
         nqp::getattr(self, NQPCursor, '$!match');
     }
 
-    method Bool() is parrot_vtable('get_bool') {
+    method Bool() {
         !nqp::isnull(nqp::getattr(self, $?CLASS, '$!match'))
           && nqp::istrue(nqp::getattr(self, $?CLASS, '$!match'));
+    }
+
+    method parse($target, :$rule = 'TOP', :$actions, *%options) {
+        my $*ACTIONS := $actions;
+        my $cur := self.'!cursor_init'($target, |%options);
+        pir::find_method__PPs($cur, $rule)($cur).MATCH()
     }
 }
 

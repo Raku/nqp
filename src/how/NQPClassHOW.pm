@@ -34,6 +34,11 @@ knowhow NQPClassHOW {
     # Parrot-specific vtable mapping hash. Maps vtable name to method.
     has %!parrot_vtable_mapping;
 	has %!parrot_vtable_handler_mapping;
+    
+    my $archetypes := Archetypes.new( :nominal(1), :inheritable(1) );
+    method archetypes() {
+        $archetypes
+    }
 
     ##
     ## Declarative.
@@ -66,6 +71,7 @@ knowhow NQPClassHOW {
         if pir::isnull__IP($code_obj) || pir::isa__IPs($code_obj, 'Undef') {
             pir::die("Cannot add a null method '$name' to class '$!name'");
         }
+        pir::set_method_cache_authoritativeness__vPi($obj, 0);
         %!methods{$name} := $code_obj;
     }
 
@@ -79,6 +85,7 @@ knowhow NQPClassHOW {
         %todo<name> := $name;
         %todo<code> := $code_obj;
         @!multi_methods_to_incorporate[+@!multi_methods_to_incorporate] := %todo;
+        pir::set_method_cache_authoritativeness__vPi($obj, 0);
         $code_obj;
     }
 
@@ -170,9 +177,10 @@ knowhow NQPClassHOW {
         # Compose attributes.
         for self.attributes($obj, :local<0> ) { $_.compose($obj) }
 
-        # Publish type and method caches.
+        # Publish type and method caches and boolification spec.
         self.publish_type_cache($obj);
         self.publish_method_cache($obj);
+        self.publish_boolification_spec($obj);
 
         # Install Parrot v-table mapping.
         self.publish_parrot_vtable_mapping($obj);
@@ -246,14 +254,18 @@ knowhow NQPClassHOW {
         # Provided we have immediate parents...
         my @result;
         if +@immediate_parents {
-            # Build merge list of lineraizations of all our parents, add
-            # immediate parents and merge.
-            my @merge_list;
-            for @immediate_parents {
-                @merge_list.push(compute_c3_mro($_));
+            if +@immediate_parents == 1 {
+                @result := compute_c3_mro(@immediate_parents[0]);
+            } else {
+                # Build merge list of lineraizations of all our parents, add
+                # immediate parents and merge.
+                my @merge_list;
+                for @immediate_parents {
+                    @merge_list.push(compute_c3_mro($_));
+                }
+                @merge_list.push(@immediate_parents);
+                @result := c3_merge(@merge_list);
             }
-            @merge_list.push(@immediate_parents);
-            @result := c3_merge(@merge_list);
         }
 
         # Put this class on the start of the list, and we're done.
@@ -287,13 +299,13 @@ knowhow NQPClassHOW {
                             $cur_pos := $cur_pos + 1;
                         }
                     }
+                }
 
-                    # If we didn't reject it, this candidate will do.
-                    unless $rejected {
-                        $accepted := $cand_class;
-                        $something_accepted := 1;
-                        last;
-                    }
+                # If we didn't reject it, this candidate will do.
+                unless $rejected {
+                    $accepted := $cand_class;
+                    $something_accepted := 1;
+                    last;
                 }
             }
         }
@@ -339,26 +351,31 @@ knowhow NQPClassHOW {
         # Walk MRO and add methods to cache, unless another method
         # lower in the class hierarchy "shadowed" it.
         my %cache;
-        for @!mro {
-            my %methods := $_.HOW.method_table($_);
-            for %methods {
-                unless %cache{$_.key} {
-                    %cache{$_.key} := $_.value;
-                }
-            }
+        my @mro_reversed := nqp::clone(@!mro);
+        @mro_reversed.reverse();
+        for @mro_reversed {
+            %cache.update($_.HOW.method_table($_));
         }
-        pir::publish_method_cache($obj, %cache)
+        pir::publish_method_cache($obj, %cache);
+        pir::set_method_cache_authoritativeness__0Pi($obj, 1);
+    }
+
+    method publish_boolification_spec($obj) {
+        my $bool_meth := self.find_method($obj, 'Bool');
+        if pir::defined($bool_meth) {
+            pir::set_boolification_spec__0PiP($obj, 0, $bool_meth)
+        }
+        else {
+            pir::set_boolification_spec__0PiP($obj, 5, pir::null__P())
+        }
     }
 
     method publish_parrot_vtable_mapping($obj) {
         my %mapping;
-        for @!mro {
-            my %map := $_.HOW.parrot_vtable_mappings($_, :local(1));
-            for %map {
-                unless %mapping{$_.key} {
-                    %mapping{$_.key} := $_.value;
-                }
-            }
+        my @mro_reversed := nqp::clone(@!mro);
+        @mro_reversed.reverse();
+        for @mro_reversed {
+            %mapping.update($_.HOW.parrot_vtable_mappings($_, :local(1)));
         }
         if +%mapping {
             pir::stable_publish_vtable_mapping__vPP($obj, %mapping);
@@ -367,13 +384,10 @@ knowhow NQPClassHOW {
 
     method publish_parrot_vtablee_handler_mapping($obj) {
         my %mapping;
-        for @!mro {
-            my %map := $_.HOW.parrot_vtable_handler_mappings($_, :local(1));
-            for %map {
-                unless %mapping{$_.key} {
-                    %mapping{$_.key} := $_.value;
-                }
-            }
+        my @mro_reversed := nqp::clone(@!mro);
+        @mro_reversed.reverse();
+        for @mro_reversed {
+            %mapping.update($_.HOW.parrot_vtable_handler_mappings($_, :local(1)));
         }
         if +%mapping {
             pir::stable_publish_vtable_handler_mapping__vPP($obj, %mapping);

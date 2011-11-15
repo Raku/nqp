@@ -89,7 +89,7 @@ for @files -> $fn {
     }
     say("# done with file $fn");
 }
-say("plan 1..$tests");
+say("1..$tests");
 
 
 # vim: ft=perl6

@@ -22,15 +22,15 @@ void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attri
     STRING *initial_sc_name;
     
     /* Look up and cache some type IDs and strings. */
-    stable_id        = pmc_type(interp, Parrot_str_new(interp, "STable", 0));
-    smo_id           = pmc_type(interp, Parrot_str_new(interp, "SixModelObject", 0));
-    sc_id            = pmc_type(interp, Parrot_str_new(interp, "SerializationContext", 0));
+    stable_id        = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "STable", 0));
+    smo_id           = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
+    sc_id            = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SerializationContext", 0));
     find_method_str  = Parrot_str_new_constant(interp, "find_method");
     type_check_str   = Parrot_str_new_constant(interp, "type_check");
     accepts_type_str = Parrot_str_new_constant(interp, "accepts_type");
 
     /* Create initial core serialization context. */
-    initial_sc = pmc_new(interp, sc_id);
+    initial_sc = Parrot_pmc_new(interp, sc_id);
     initial_sc_name = Parrot_str_new(interp, "__6MODEL_CORE__", 0);
     VTABLE_set_string_native(interp, initial_sc, initial_sc_name);
     SC_set_sc(interp, initial_sc_name, initial_sc);
@@ -47,7 +47,7 @@ void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attri
 
 /* Takes an object and wraps it in a SixModelObject PMC. */
 PMC * wrap_object(PARROT_INTERP, void *obj) {
-    PMC *obj_pmc = pmc_new_noinit(interp, smo_id);
+    PMC *obj_pmc = Parrot_pmc_new_noinit(interp, smo_id);
     PObj_custom_mark_SET(obj_pmc);
     PObj_custom_destroy_SET(obj_pmc);
     PMC_data(obj_pmc) = obj;
@@ -69,9 +69,10 @@ static PMC * default_find_method(PARROT_INTERP, PMC *obj, STRING *name, INTVAL h
     /* Try the by-name method cache, if the HOW published one. */
     if (st->method_cache) {
         PMC *cached_method = VTABLE_get_pmc_keyed_str(interp, st->method_cache, name);
-        if (!PMC_IS_NULL(cached_method)) {
+        if (!PMC_IS_NULL(cached_method))
             return cached_method;
-        }
+        else if (st->mode_flags & METHOD_CACHE_AUTHORITATIVE)
+            return PMCNULL;
     }
 
     /* Otherwise delegate to the HOW. */
@@ -79,12 +80,22 @@ static PMC * default_find_method(PARROT_INTERP, PMC *obj, STRING *name, INTVAL h
     meth = STABLE(HOW)->find_method(interp, HOW, find_method_str, NO_HINT);
         
     /* Call it to get the method to call. */
-    /* XXX Really want a way to do this without creating a nested runloop. */
     if (PMC_IS_NULL(meth)) {
         Parrot_ex_throw_from_c_args(interp, NULL, 1,
             "No method cache and no find_method method in meta-object");
     }
-    Parrot_ext_call(interp, meth, "PiPS->P", HOW, obj, name, &result);
+    else {
+        PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+        PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
+        VTABLE_push_pmc(interp, cappy, HOW);
+        VTABLE_push_pmc(interp, cappy, obj);
+        VTABLE_push_string(interp, cappy, name);
+        Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
+        cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+        Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
+        result = VTABLE_get_pmc_keyed_int(interp, cappy, 0);
+    }
+    
     return result;
 }
 
@@ -95,7 +106,7 @@ static INTVAL default_type_check (PARROT_INTERP, PMC *to_check, PMC *wanted) {
     PMC *HOW, *meth, *result;
     
     STable *st = STABLE(to_check);
-    INTVAL type_check_mode = STABLE(wanted)->type_check_mode;
+    INTVAL type_check_mode = STABLE(wanted)->mode_flags & TYPE_CHECK_CACHE_FLAG_MASK;
     if (st->type_check_cache) {
         /* We have the cache, so just look for the type object we
          * want to be in there. */
@@ -147,11 +158,12 @@ static INTVAL default_type_check (PARROT_INTERP, PMC *to_check, PMC *wanted) {
 
 /* Creates an STable that references the given REPR and HOW. */
 PMC * create_stable(PARROT_INTERP, REPROps *REPR, PMC *HOW) {
-    PMC *st_pmc = pmc_new_init(interp, stable_id, HOW);
+    PMC *st_pmc = Parrot_pmc_new_init(interp, stable_id, HOW);
     STABLE_STRUCT(st_pmc)->REPR = REPR;
     STABLE_STRUCT(st_pmc)->WHO = PMCNULL;
     STABLE_STRUCT(st_pmc)->find_method = default_find_method;
     STABLE_STRUCT(st_pmc)->type_check = default_type_check;
+    STABLE_STRUCT(st_pmc)->stable_pmc = st_pmc;
     return st_pmc;
 }
 
@@ -160,7 +172,7 @@ PMC * create_stable(PARROT_INTERP, REPROps *REPR, PMC *HOW) {
 PMC * decontainerize(PARROT_INTERP, PMC *var) {
     if (var->vtable->base_type == smo_id) {
         ContainerSpec *spec = STABLE(var)->container_spec;
-        if (spec && REPR(var)->defined(interp, var)) {
+        if (spec && IS_CONCRETE(var)) {
             if (!PMC_IS_NULL(spec->value_slot.class_handle)) {
                 /* Just get slot. */
                 return VTABLE_get_attr_keyed(interp, var, spec->value_slot.class_handle,

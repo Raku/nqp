@@ -44,7 +44,8 @@ Such a specification is the name of an option, optionally followed by the
 C<=> equals sign and a single character describing the kind of value it expects.
 Missing value specification or C<b> stand for C<bool>, ie the option does not
 expect a value. C<s> stands for a string value.
-(Optional values are not yet supported).
+Optional values are only supported for string values so far. For the
+value specified with C<s?> the value will default to ''.
 
 =head2 add-stopper(String)
 
@@ -178,7 +179,12 @@ class HLL::CommandLine::Parser {
 
     method wants-value($x) {
         my $spec := %!options{$x};
-        $spec eq 's';
+        pir::substr($spec, 0, 1) eq 's';
+    }
+
+    method optional-value($x) {
+        my $spec := %!options{$x};
+        $spec eq 's?';
     }
 
     method parse(@args) {
@@ -226,9 +232,12 @@ class HLL::CommandLine::Parser {
                         $value     := pir::substr($opt, $idx + 1);
                         $opt       := pir::substr($opt, 0,      $idx);
                         $has-value := 1;
+                    } elsif self.optional-value($opt) {
+                        $value     := '';
+                        $has-value := 1;
                     }
                     pir::die("Illegal option --$opt") unless pir::exists(%!options, $opt);
-                    pir::die("Option --$opt does not allow a value") if %!options{$opt} ne 's' && $has-value;
+                    pir::die("Option --$opt does not allow a value") if !self.wants-value($opt) && $has-value;
                     if !$has-value && self.wants-value($opt) {
                         $value := get-value("--$opt");
                     }

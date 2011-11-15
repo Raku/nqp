@@ -26,6 +26,10 @@ knowhow NQPParametricRoleHOW {
     # don't do that in NQP.)
     has $!body_block;
 
+    my $archetypes := Archetypes.new( :nominal(1), :composable(1), :parametric(1) );
+    method archetypes() {
+        $archetypes
+    }
 
     ##
     ## Declarative

@@ -1,6 +1,11 @@
 knowhow NQPModuleHOW {
     has $!name;
     has $!composed;
+    
+    my $archetypes := Archetypes.new( );
+    method archetypes() {
+        $archetypes
+    }
 
     method new(:$name) {
         my $obj := pir::repr_instance_of__PP(self);

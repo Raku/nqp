@@ -20,11 +20,25 @@ class NQP::SymbolTable is HLL::Compiler::SerializationContextBuilder {
                         := $loader.load_setting($setting_name);
             
             # Do load for pre-compiled situation.
-            self.add_event(:deserialize_past(PAST::Stmts.new(
-                PAST::Op.new(
-                    :pirop('load_bytecode vs'), 'ModuleLoader.pbc'
-                ),
-                PAST::Op.new(
+            if self.is_precompilation_mode() {
+                self.add_event(:deserialize_past(PAST::Stmts.new(
+                    PAST::Op.new(
+                        :pirop('load_bytecode vs'), 'ModuleLoader.pbc'
+                    ),
+                    PAST::Op.new(
+                        :pasttype('callmethod'), :name('set_outer_ctx'),
+                           PAST::Var.new( :name('block'), :scope('register') ),
+                           PAST::Op.new(
+                               :pasttype('callmethod'), :name('load_setting'),
+                               PAST::Var.new( :name('ModuleLoader'), :namespace([]), :scope('package') ),
+                               $setting_name
+                           )
+                    )
+                )));
+            }
+            else {
+                # Needs fixup.
+                self.add_event(:fixup_past(PAST::Op.new(
                     :pasttype('callmethod'), :name('set_outer_ctx'),
                        PAST::Var.new( :name('block'), :scope('register') ),
                        PAST::Op.new(
@@ -32,8 +46,8 @@ class NQP::SymbolTable is HLL::Compiler::SerializationContextBuilder {
                            PAST::Var.new( :name('ModuleLoader'), :namespace([]), :scope('package') ),
                            $setting_name
                        )
-                )
-            )));
+                )));
+            }
             
             return pir::getattribute__PPs($setting, 'lex_pad');
         }
@@ -46,17 +60,19 @@ class NQP::SymbolTable is HLL::Compiler::SerializationContextBuilder {
         my $module := $loader.load_module($module_name, $cur_GLOBALish);
         
         # Make sure we do the loading during deserialization.
-        self.add_event(:deserialize_past(PAST::Stmts.new(
-            PAST::Op.new(
-                :pirop('load_bytecode vs'), 'ModuleLoader.pbc'
-            ),
-            PAST::Op.new(
-               :pasttype('callmethod'), :name('load_module'),
-               PAST::Var.new( :name('ModuleLoader'), :namespace([]), :scope('package') ),
-               $module_name,
-               self.get_slot_past_for_object($cur_GLOBALish)
-            ))));
-            
+        if self.is_precompilation_mode() {
+            self.add_event(:deserialize_past(PAST::Stmts.new(
+                PAST::Op.new(
+                    :pirop('load_bytecode vs'), 'ModuleLoader.pbc'
+                ),
+                PAST::Op.new(
+                   :pasttype('callmethod'), :name('load_module'),
+                   PAST::Var.new( :name('ModuleLoader'), :namespace([]), :scope('package') ),
+                   $module_name,
+                   self.get_slot_past_for_object($cur_GLOBALish)
+                ))));
+        }
+
         return pir::getattribute__PPs($module, 'lex_pad');
     }
     
@@ -74,19 +90,21 @@ class NQP::SymbolTable is HLL::Compiler::SerializationContextBuilder {
         ($target.WHO){$name} := $obj;
         
         # Add deserialization installation of the symbol.
-        my $path := self.get_slot_past_for_object($package);
-        for @sym {
-            $path := PAST::Op.new(:pirop('nqp_get_package_through_who PPs'), $path, ~$_);
+        if self.is_precompilation_mode() {
+            my $path := self.get_slot_past_for_object($package);
+            for @sym {
+                $path := PAST::Op.new(:pirop('nqp_get_package_through_who PPs'), $path, ~$_);
+            }
+            self.add_event(:deserialize_past(PAST::Op.new(
+                :pasttype('bind_6model'),
+                PAST::Var.new(
+                    :scope('keyed'),
+                    PAST::Op.new( :pirop('get_who PP'), $path ),
+                    $name
+                ),
+                self.get_slot_past_for_object($obj)
+            )));
         }
-        self.add_event(:deserialize_past(PAST::Op.new(
-            :pasttype('bind_6model'),
-            PAST::Var.new(
-                :scope('keyed'),
-                PAST::Op.new( :pirop('get_who PP'), $path ),
-                $name
-            ),
-            self.get_slot_past_for_object($obj)
-        )));
     }
     
     # Installs a lexical symbol. Takes a PAST::Block object, name and
@@ -148,21 +166,23 @@ class NQP::SymbolTable is HLL::Compiler::SerializationContextBuilder {
         
         # Add an event. There's no fixup to do, just a type object to create
         # on deserialization.
-        my @how_ns := pir::split('::', $how.HOW.name($how));
-        my $how_name := @how_ns.pop();
-        my $setup_call := PAST::Op.new(
-            :pasttype('callmethod'), :name('new_type'),
-            self.get_object_sc_ref_past($how)
-        );
-        if pir::defined($name) {
-            $setup_call.push(PAST::Val.new( :value($name), :named('name') ));
+        if self.is_precompilation_mode() {
+            my @how_ns := pir::split('::', $how.HOW.name($how));
+            my $how_name := @how_ns.pop();
+            my $setup_call := PAST::Op.new(
+                :pasttype('callmethod'), :name('new_type'),
+                self.get_object_sc_ref_past($how)
+            );
+            if pir::defined($name) {
+                $setup_call.push(PAST::Val.new( :value($name), :named('name') ));
+            }
+            if pir::defined($repr) {
+                $setup_call.push(PAST::Val.new( :value($repr), :named('repr') ));
+            }
+            self.add_event(:deserialize_past(
+                self.add_object_to_cur_sc_past($slot, $setup_call)));
         }
-        if pir::defined($repr) {
-            $setup_call.push(PAST::Val.new( :value($repr), :named('repr') ));
-        }
-        self.add_event(:deserialize_past(
-            self.set_slot_past($slot, self.set_cur_sc($setup_call))));
-        
+
         # Result is just the object.
         return $mo;
     }
@@ -178,25 +198,27 @@ class NQP::SymbolTable is HLL::Compiler::SerializationContextBuilder {
         $obj.HOW.add_attribute($obj, $attr);
         
         # Emit code to create and add it when deserializing.
-        my $create_call := PAST::Op.new(
-            :pasttype('callmethod'), :name('new'),
-            self.get_object_sc_ref_past($meta_attr)
-        );
-        for %lit_args {
-            $create_call.push(PAST::Val.new( :value($_.value), :named($_.key) ));
+        if self.is_precompilation_mode() {
+            my $create_call := PAST::Op.new(
+                :pasttype('callmethod'), :name('new'),
+                self.get_object_sc_ref_past($meta_attr)
+            );
+            for %lit_args {
+                $create_call.push(PAST::Val.new( :value($_.value), :named($_.key) ));
+            }
+            for %obj_args {
+                my $lookup := self.get_object_sc_ref_past($_.value);
+                $lookup.named($_.key);
+                $create_call.push($lookup);
+            }
+            my $obj_slot_past := self.get_slot_past_for_object($obj);
+            self.add_event(:deserialize_past(PAST::Op.new(
+                :pasttype('callmethod'), :name('add_attribute'),
+                PAST::Op.new( :pirop('get_how PP'), $obj_slot_past ),
+                $obj_slot_past,
+                $create_call
+            )));
         }
-        for %obj_args {
-            my $lookup := self.get_object_sc_ref_past($_.value);
-            $lookup.named($_.key);
-            $create_call.push($lookup);
-        }
-        my $obj_slot_past := self.get_slot_past_for_object($obj);
-        self.add_event(:deserialize_past(PAST::Op.new(
-            :pasttype('callmethod'), :name('add_attribute'),
-            PAST::Op.new( :pirop('get_how PP'), $obj_slot_past ),
-            $obj_slot_past,
-            $create_call
-        )));
     }
     
     # Adds a method to the meta-object, and stores an event for the action.
@@ -355,13 +377,15 @@ class NQP::SymbolTable is HLL::Compiler::SerializationContextBuilder {
         $obj.HOW."$meta_method_name"($obj, $to_add);
         
         # Emit code to add it when deserializing.
-        my $slot_past := self.get_slot_past_for_object($obj);
-        self.add_event(:deserialize_past(PAST::Op.new(
-            :pasttype('callmethod'), :name($meta_method_name),
-            PAST::Op.new( :pirop('get_how PP'), $slot_past ),
-            $slot_past,
-            self.get_object_sc_ref_past($to_add)
-        )));
+        if self.is_precompilation_mode() {
+            my $slot_past := self.get_slot_past_for_object($obj);
+            self.add_event(:deserialize_past(PAST::Op.new(
+                :pasttype('callmethod'), :name($meta_method_name),
+                PAST::Op.new( :pirop('get_how PP'), $slot_past ),
+                $slot_past,
+                self.get_object_sc_ref_past($to_add)
+            )));
+        }
     }
 
     method pkg_add_parrot_vtable_handler_mapping($obj, $name, $att_name) {
@@ -369,13 +393,15 @@ class NQP::SymbolTable is HLL::Compiler::SerializationContextBuilder {
         $obj.HOW.add_parrot_vtable_handler_mapping($obj, $name, $att_name);
 
         # Emit code to add it when deserializing.
-        my $slot_past := self.get_slot_past_for_object($obj);
-        self.add_event(:deserialize_past(PAST::Op.new(
-            :pasttype('callmethod'), :name('add_parrot_vtable_handler_mapping'),
-            PAST::Op.new( :pirop('get_how PP'), $slot_past ),
-            $slot_past,
-			$name, $att_name
-        )));
+        if self.is_precompilation_mode() {
+            my $slot_past := self.get_slot_past_for_object($obj);
+            self.add_event(:deserialize_past(PAST::Op.new(
+                :pasttype('callmethod'), :name('add_parrot_vtable_handler_mapping'),
+                PAST::Op.new( :pirop('get_how PP'), $slot_past ),
+                $slot_past,
+                $name, $att_name
+            )));
+        }
     }
 
     # Composes the package, and stores an event for this action.
@@ -384,12 +410,14 @@ class NQP::SymbolTable is HLL::Compiler::SerializationContextBuilder {
         $obj.HOW.compose($obj);
         
         # Emit code to do the composition when deserializing.
-        my $slot_past := self.get_slot_past_for_object($obj);
-        self.add_event(:deserialize_past(PAST::Op.new(
-            :pasttype('callmethod'), :name('compose'),
-            PAST::Op.new( :pirop('get_how PP'), $slot_past ),
-            $slot_past
-        )));
+        if self.is_precompilation_mode() {
+            my $slot_past := self.get_slot_past_for_object($obj);
+            self.add_event(:deserialize_past(PAST::Op.new(
+                :pasttype('callmethod'), :name('compose'),
+                PAST::Op.new( :pirop('get_how PP'), $slot_past ),
+                $slot_past
+            )));
+        }
     }
     
     # Generates a series of PAST operations that will build this context if
@@ -409,6 +437,7 @@ class NQP::SymbolTable is HLL::Compiler::SerializationContextBuilder {
             ),
             PAST::Stmts.new(
                 PAST::Op.new( :pirop('nqp_dynop_setup v') ),
+                PAST::Op.new( :pirop('nqp_bigint_setup v') ),
                 PAST::Op.new(
                     :pasttype('callmethod'), :name('hll_map'),
                     PAST::Op.new( :pirop('getinterp P') ),

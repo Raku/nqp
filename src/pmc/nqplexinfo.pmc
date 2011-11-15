@@ -34,7 +34,7 @@ pmclass NQPLexInfo
 
     VTABLE void init_pmc(PMC *sub) {
         /* Set up the lex info storage. */
-        PMC *name_to_register_map = pmc_new(interp, enum_class_Hash);
+        PMC *name_to_register_map = Parrot_pmc_new(interp, enum_class_Hash);
         VTABLE_init_int(interp, name_to_register_map, (INTVAL)enum_type_INTVAL);
         SET_ATTR_name_to_register_map(INTERP, SELF, name_to_register_map);
 
@@ -117,7 +117,7 @@ compiler calls this method in response to a ".lex STRING, PREG" directive.
         PMC *svs;
         GET_ATTR_static_values(INTERP, SELF, svs);
         if (PMC_IS_NULL(svs)) {
-            svs = pmc_new(interp, enum_class_Hash);
+            svs = Parrot_pmc_new(interp, enum_class_Hash);
             SET_ATTR_static_values(INTERP, SELF, svs);
         }
         VTABLE_set_pmc_keyed_str(interp, svs, key, value);
@@ -134,8 +134,8 @@ compiler calls this method in response to a ".lex STRING, PREG" directive.
         }
         else {
             /* Build caches. */
-            PMC *slots  = pmc_new(interp, enum_class_ResizableIntegerArray);
-            PMC *values = pmc_new(interp, enum_class_ResizablePMCArray);
+            PMC *slots  = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
+            PMC *values = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
             PMC *iter   = VTABLE_get_iter(interp, svs);
             while (VTABLE_get_bool(interp, iter)) {
                 STRING *name  = VTABLE_shift_string(interp, iter);

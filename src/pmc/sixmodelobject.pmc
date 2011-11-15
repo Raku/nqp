@@ -26,7 +26,7 @@
 
 PMC * decontainerize(PARROT_INTERP, PMC *var) {
     ContainerSpec *spec = STABLE(var)->container_spec;
-    if (spec && REPR(var)->defined(interp, var)) {
+    if (spec && IS_CONCRETE(var)) {
         if (!PMC_IS_NULL(spec->value_slot.class_handle)) {
             /* Just get slot. */
             return VTABLE_get_attr_keyed(interp, var, spec->value_slot.class_handle,
@@ -47,14 +47,30 @@ PMC * decontainerize(PARROT_INTERP, PMC *var) {
     return var;
 }
 
+/* Looks up an attribute, after checking we don't have a type object. */
+static PMC *get_attr(PARROT_INTERP, PMC *self, PMC *handle, STRING *name, INTVAL hint) {
+    if (IS_CONCRETE(self))
+        return REPR(self)->get_attribute_boxed(interp, STABLE(self), OBJECT_BODY(self), handle, name, hint);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Cannot look up attributes in a type object");
+}
+
+
 pmclass SixModelObject manual_attrs dynpmc group nqp {
     /* ********************************************** *
      * These methods are mapped to 6model primitives. *
      * ********************************************** */
 
     VTABLE void mark() {
-        /* Delegate to the representation. */
-        REPR(SELF)->gc_mark(interp, SELF);
+        /* Mark the common bits. */
+        SixModelObjectCommonalities *obj = (SixModelObjectCommonalities *)PMC_data(SELF);
+        if (obj->stable)
+            Parrot_gc_mark_PMC_alive(interp, obj->stable);
+        if (obj->sc)
+            Parrot_gc_mark_PMC_alive(interp, obj->sc);
+        if (IS_CONCRETE(SELF) && REPR(SELF)->gc_mark)
+            REPR(SELF)->gc_mark(interp, STABLE(SELF), OBJECT_BODY(SELF));
     }
 
     VTABLE void destroy() {
@@ -78,12 +94,16 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
 
     VTABLE PMC* get_attr_keyed(PMC *class_handle, STRING *name) {
         PMC *handle = decontainerize(interp, class_handle);
-        return REPR(SELF)->get_attribute(interp, SELF, handle, name, NO_HINT);
+        return get_attr(interp, SELF, handle, name, NO_HINT);
     }
 
-    VTABLE void set_attr_keyed(PMC *class_handle, STRING *name, PMC* value) {
+    VTABLE void set_attr_keyed(PMC *class_handle, STRING *name, PMC *value) {
         PMC *handle = decontainerize(interp, class_handle);
-        REPR(SELF)->bind_attribute(interp, SELF, handle, name, NO_HINT, value);
+        if (IS_CONCRETE(SELF))
+            REPR(SELF)->bind_attribute_boxed(interp, STABLE(SELF), OBJECT_BODY(SELF), handle, name, NO_HINT, value);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot bind attributes in a type object");            
     }
     
     VTABLE STRING * name() {
@@ -195,16 +215,45 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
 
     VTABLE INTVAL get_bool() {
         PMC *decont = decontainerize(interp, SELF);
-        PMC **vt = STABLE(decont)->parrot_vtable_mapping;
-        PMC *meth;
-        if (vt && !PMC_IS_NULL(meth = vt[PARROT_VTABLE_SLOT_GET_BOOL])) {
-            PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
-            PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
-            VTABLE_push_pmc(interp, cappy, decont);
-            Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
-            cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
-            Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
-            return VTABLE_get_bool(interp, VTABLE_get_pmc_keyed_int(interp, cappy, 0));
+        if (STABLE(decont)->boolification_spec) {
+            PMC      *old_ctx, *cappy;
+            FLOATVAL unnum;
+            STRING   *unstr;
+            switch (STABLE(decont)->boolification_spec->mode) {
+                case BOOL_MODE_CALL_METHOD:
+                    old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+                    cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
+                    VTABLE_push_pmc(interp, cappy, SELF);
+                    Parrot_pcc_invoke_from_sig_object(interp, STABLE(decont)->boolification_spec->method, cappy);
+                    cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+                    Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
+                    return VTABLE_get_bool(interp, VTABLE_get_pmc_keyed_int(interp, cappy, 0));
+                case BOOL_MODE_UNBOX_INT:
+                    return IS_CONCRETE(decont) &&
+                        REPR(decont)->get_int(interp, STABLE(decont), OBJECT_BODY(decont));
+                case BOOL_MODE_UNBOX_NUM:
+                    if (!IS_CONCRETE(decont))
+                        return 0;
+                    unnum = REPR(decont)->get_num(interp, STABLE(decont), OBJECT_BODY(decont));
+                    return unnum != 0.0;
+                case BOOL_MODE_UNBOX_STR_NOT_EMPTY:
+                    if (!IS_CONCRETE(decont))
+                        return 0;
+                    unstr = REPR(decont)->get_str(interp, STABLE(decont), OBJECT_BODY(decont));
+                    return !STRING_IS_NULL(unstr) &&
+                        !Parrot_str_equal(interp, unstr, CONST_STRING(interp, ""));
+                case BOOL_MODE_UNBOX_STR_NOT_EMPTY_OR_ZERO:
+                    if (!IS_CONCRETE(decont))
+                        return 0;
+                    unstr = REPR(decont)->get_str(interp, STABLE(decont), OBJECT_BODY(decont));
+                    return !STRING_IS_NULL(unstr) &&
+                        !Parrot_str_equal(interp, unstr, CONST_STRING(interp, "")) &&
+                        !Parrot_str_equal(interp, unstr, CONST_STRING(interp, "0"));
+                case BOOL_MODE_NOT_TYPE_OBJECT:
+                    return IS_CONCRETE(decont);
+                default:
+                    return SUPER();
+            }
         }
         else
             return SUPER();
@@ -233,8 +282,10 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
                 return VTABLE_get_pmc_keyed_int(interp, cappy, 0);
             }
 			else if (vth && vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED].class_handle) {
-				PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED].class_handle,
-				  vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED].attr_name);
+				PMC *val = get_attr(interp, decont,
+                    vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED].class_handle,
+                    vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED].attr_name,
+                    vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED].hint);
 				return VTABLE_get_pmc_keyed(interp, val, key);
 			}
             else
@@ -258,8 +309,10 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             return VTABLE_get_pmc_keyed_int(interp, cappy, 0);
         }
         else if (vth && vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED_INT].class_handle) {
-		    PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED_INT].class_handle,
-			  vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED_INT].attr_name);
+		    PMC *val = get_attr(interp, decont,
+                vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED_INT].class_handle,
+                vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED_INT].attr_name,
+                vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED_INT].hint);
 			return VTABLE_get_pmc_keyed_int(interp, val, key);
 		}
         else
@@ -282,8 +335,10 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             return VTABLE_get_pmc_keyed_int(interp, cappy, 0);
         }
         else if (vth && vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED_STR].class_handle) {
-		    PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED_STR].class_handle,
-			  vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED_STR].attr_name);
+		    PMC *val = get_attr(interp, decont,
+                vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED_STR].class_handle,
+                vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED_STR].attr_name,
+                vth[PARROT_VTABLE_SLOT_GET_PMC_KEYED_STR].hint);
 			return VTABLE_get_pmc_keyed_str(interp, val, key);
 		}
         else
@@ -312,8 +367,10 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
                 Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
             }
 			else if (vth && vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED].class_handle) {
-				PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED].class_handle,
-				  vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED].attr_name);
+				PMC *val = get_attr(interp, decont,
+                    vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED].class_handle,
+                    vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED].attr_name,
+                    vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED].hint);
 				VTABLE_set_pmc_keyed(interp, val, key, value);
 			}
             else
@@ -336,8 +393,10 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
         }
 		else if (vth && vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED_INT].class_handle) {
-			PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED_INT].class_handle,
-			  vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED_INT].attr_name);
+			PMC *val = get_attr(interp, decont,
+                vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED_INT].class_handle,
+                vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED_INT].attr_name,
+                vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED_INT].hint);
 			VTABLE_set_pmc_keyed_int(interp, val, key, value);
 		}
         else
@@ -359,8 +418,10 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
         }
 		else if (vth && vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED_STR].class_handle) {
-			PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED_STR].class_handle,
-			  vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED_STR].attr_name);
+			PMC *val = get_attr(interp, decont,
+                vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED_STR].class_handle,
+                vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED_STR].attr_name,
+                vth[PARROT_VTABLE_SLOT_SET_PMC_KEYED_STR].hint);
 			VTABLE_set_pmc_keyed_str(interp, val, key, value);
 		}
         else
@@ -390,8 +451,10 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
                 return VTABLE_get_integer_keyed_int(interp, cappy, 0);
             }
 			else if (vth && vth[PARROT_VTABLE_SLOT_EXISTS_KEYED].class_handle) {
-				PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_EXISTS_KEYED].class_handle,
-				  vth[PARROT_VTABLE_SLOT_EXISTS_KEYED].attr_name);
+				PMC *val = get_attr(interp, decont,
+                    vth[PARROT_VTABLE_SLOT_EXISTS_KEYED].class_handle,
+                    vth[PARROT_VTABLE_SLOT_EXISTS_KEYED].attr_name,
+                    vth[PARROT_VTABLE_SLOT_EXISTS_KEYED].hint);
 				return VTABLE_exists_keyed(interp, val, key);
 			}
             else
@@ -415,8 +478,10 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             return VTABLE_get_integer_keyed_int(interp, cappy, 0);
         }
 		else if (vth && vth[PARROT_VTABLE_SLOT_EXISTS_KEYED_INT].class_handle) {
-			PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_EXISTS_KEYED_INT].class_handle,
-			  vth[PARROT_VTABLE_SLOT_EXISTS_KEYED_INT].attr_name);
+			PMC *val = get_attr(interp, decont,
+                vth[PARROT_VTABLE_SLOT_EXISTS_KEYED_INT].class_handle,
+                vth[PARROT_VTABLE_SLOT_EXISTS_KEYED_INT].attr_name,
+                vth[PARROT_VTABLE_SLOT_EXISTS_KEYED_INT].hint);
 			return VTABLE_exists_keyed_int(interp, val, key);
 		}
         else
@@ -439,8 +504,10 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             return VTABLE_get_integer_keyed_int(interp, cappy, 0);
         }
 		else if (vth && vth[PARROT_VTABLE_SLOT_EXISTS_KEYED_STR].class_handle) {
-			PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_EXISTS_KEYED_STR].class_handle,
-			  vth[PARROT_VTABLE_SLOT_EXISTS_KEYED_STR].attr_name);
+			PMC *val = get_attr(interp, decont,
+                vth[PARROT_VTABLE_SLOT_EXISTS_KEYED_STR].class_handle,
+                vth[PARROT_VTABLE_SLOT_EXISTS_KEYED_STR].attr_name,
+                vth[PARROT_VTABLE_SLOT_EXISTS_KEYED_STR].hint);
 			return VTABLE_exists_keyed_str(interp, val, key);
 		}
         else
@@ -469,9 +536,11 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
                 Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
             }
 			else if (vth && vth[PARROT_VTABLE_SLOT_DELETE_KEYED].class_handle) {
-				PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_DELETE_KEYED].class_handle,
-				  vth[PARROT_VTABLE_SLOT_DELETE_KEYED].attr_name);
-				VTABLE_delete_keyed(interp, val, key);
+                PMC *val = get_attr(interp, decont,
+                    vth[PARROT_VTABLE_SLOT_DELETE_KEYED].class_handle,
+                    vth[PARROT_VTABLE_SLOT_DELETE_KEYED].attr_name,
+                    vth[PARROT_VTABLE_SLOT_DELETE_KEYED].hint);
+                VTABLE_delete_keyed(interp, val, key);
 			}
             else
                 SUPER(key);
@@ -493,8 +562,10 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
         }
 		else if (vth && vth[PARROT_VTABLE_SLOT_DELETE_KEYED_INT].class_handle) {
-			PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_DELETE_KEYED_INT].class_handle,
-			  vth[PARROT_VTABLE_SLOT_DELETE_KEYED_INT].attr_name);
+			PMC *val = get_attr(interp, decont,
+                vth[PARROT_VTABLE_SLOT_DELETE_KEYED_INT].class_handle,
+                vth[PARROT_VTABLE_SLOT_DELETE_KEYED_INT].attr_name,
+                vth[PARROT_VTABLE_SLOT_DELETE_KEYED_INT].hint);
 			VTABLE_delete_keyed_int(interp, val, key);
 		}
         else
@@ -516,8 +587,10 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
         }
 		else if (vth && vth[PARROT_VTABLE_SLOT_DELETE_KEYED_STR].class_handle) {
-			PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_DELETE_KEYED_STR].class_handle,
-			  vth[PARROT_VTABLE_SLOT_DELETE_KEYED_STR].attr_name);
+			PMC *val = get_attr(interp, decont,
+                vth[PARROT_VTABLE_SLOT_DELETE_KEYED_STR].class_handle,
+                vth[PARROT_VTABLE_SLOT_DELETE_KEYED_STR].attr_name,
+                vth[PARROT_VTABLE_SLOT_DELETE_KEYED_STR].hint);
 			VTABLE_delete_keyed_str(interp, val, key);
 		}
         else
@@ -539,9 +612,11 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
         }
 		  else if (vth && vth[PARROT_VTABLE_SLOT_UNSHIFT_PMC].class_handle) {
-			  PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_UNSHIFT_PMC].class_handle,
-				vth[PARROT_VTABLE_SLOT_UNSHIFT_PMC].attr_name);
-			  VTABLE_unshift_pmc(interp, val, value);
+			PMC *val = get_attr(interp, decont,
+                vth[PARROT_VTABLE_SLOT_UNSHIFT_PMC].class_handle,
+                vth[PARROT_VTABLE_SLOT_UNSHIFT_PMC].attr_name,
+                vth[PARROT_VTABLE_SLOT_UNSHIFT_PMC].hint);
+			VTABLE_unshift_pmc(interp, val, value);
 		}
         else
             SUPER(value);
@@ -562,8 +637,10 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
         }
 		else if (vth && vth[PARROT_VTABLE_SLOT_PUSH_PMC].class_handle) {
-			PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_PUSH_PMC].class_handle,
-			  vth[PARROT_VTABLE_SLOT_PUSH_PMC].attr_name);
+			PMC *val = get_attr(interp, decont,
+                vth[PARROT_VTABLE_SLOT_PUSH_PMC].class_handle,
+                vth[PARROT_VTABLE_SLOT_PUSH_PMC].attr_name,
+                vth[PARROT_VTABLE_SLOT_PUSH_PMC].hint);
 			VTABLE_push_pmc(interp, val, value);
 		}
         else
@@ -582,8 +659,10 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             return (opcode_t *)next;
         }
         else if (vth && vth[PARROT_VTABLE_SLOT_INVOKE].class_handle) {
-			PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_INVOKE].class_handle,
-			  vth[PARROT_VTABLE_SLOT_INVOKE].attr_name);
+			PMC *val = get_attr(interp, decont,
+                vth[PARROT_VTABLE_SLOT_INVOKE].class_handle,
+                vth[PARROT_VTABLE_SLOT_INVOKE].attr_name,
+                vth[PARROT_VTABLE_SLOT_INVOKE].hint);
 			return VTABLE_invoke(interp, val, next);
 		}
         else
@@ -605,8 +684,10 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             return VTABLE_get_pmc_keyed_int(interp, cappy, 0);
         }
         else if (vth && vth[PARROT_VTABLE_SLOT_GET_ITER].class_handle) {
-		    PMC *val = VTABLE_get_attr_keyed(interp, decont, vth[PARROT_VTABLE_SLOT_GET_ITER].class_handle,
-			  vth[PARROT_VTABLE_SLOT_GET_ITER].attr_name);
+		    PMC *val = get_attr(interp, decont,
+                vth[PARROT_VTABLE_SLOT_GET_ITER].class_handle,
+                vth[PARROT_VTABLE_SLOT_GET_ITER].attr_name,
+                vth[PARROT_VTABLE_SLOT_GET_ITER].hint);
 			return VTABLE_get_iter(interp, val);
 		}
         else

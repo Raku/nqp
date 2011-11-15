@@ -26,20 +26,22 @@ class QAST::Compiler is HLL::Compiler {
         }
 
         # create our labels
-        my $startlabel   := self.'post_new'('Label', :result($prefix ~ 'start'));
-        my $donelabel    := self.'post_new'('Label', :result($prefix ~ 'done'));
-        my $restartlabel := self.'post_new'('Label', :result($prefix ~ 'restart'));
-        my $faillabel    := self.'post_new'('Label', :result($prefix ~ 'fail'));
-        my $jumplabel    := self.'post_new'('Label', :result($prefix ~ 'jump'));
-        my $cutlabel     := self.'post_new'('Label', :result($prefix ~ 'cut'));
+        my $startlabel   := self.post_new('Label', :result($prefix ~ 'start'));
+        my $donelabel    := self.post_new('Label', :result($prefix ~ 'done'));
+        my $restartlabel := self.post_new('Label', :result($prefix ~ 'restart'));
+        my $faillabel    := self.post_new('Label', :result($prefix ~ 'fail'));
+        my $jumplabel    := self.post_new('Label', :result($prefix ~ 'jump'));
+        my $cutlabel     := self.post_new('Label', :result($prefix ~ 'cut'));
         %*REG<fail>      := $faillabel;
 
         # common prologue
-        my $startreg := '(' ~ nqp::join(', ', [%*REG<cur>, %*REG<tgt>, %*REG<pos>, %*REG<curclass>, %*REG<bstack>]) ~ ')';
+        my $startreg := '(' ~ nqp::join(', ', [%*REG<cur>, %*REG<tgt>, %*REG<pos>, %*REG<curclass>, %*REG<bstack>, '$I19']) ~ ')';
         $ops.push_pirop('store_lex', 'unicode:"$\x{a2}"', %*REG<cur>);
         $ops.push_pirop('callmethod', '"!cursor_start"', 'self', :result($startreg));
         $ops.push_pirop('length', %*REG<eos>, %*REG<tgt>);
+        $ops.push_pirop('eq', '$I19', 1, $restartlabel);
         $ops.push(self.regex_post($node));
+        $ops.push($restartlabel);
         $ops.push($faillabel);
         $ops.push_pirop('unless', %*REG<bstack>, $donelabel);
         $ops.push_pirop('pop', '$I19', %*REG<bstack>);
@@ -257,7 +259,13 @@ class QAST::Compiler is HLL::Compiler {
 
     method pass($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
-        $ops.push_pirop('callmethod', '"!cursor_pass"', %*REG<cur>, %*REG<pos>);
+        if $node.name() {
+            my $name := $*PASTCOMPILER.as_post($node.name(), :rtype<~>);
+            $ops.push_pirop('callmethod', '"!cursor_pass"', %*REG<cur>, %*REG<pos>, $name);
+        }
+        else {
+            $ops.push_pirop('callmethod', '"!cursor_pass"', %*REG<cur>, %*REG<pos>);
+        }
         $ops.push_pirop('return', %*REG<cur>);
         $ops;
     }

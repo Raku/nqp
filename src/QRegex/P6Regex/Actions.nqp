@@ -252,7 +252,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method backslash:sym<o>($/) {
         my $octlit :=
-            HLL::Actions::ints_to_string( $<octint> || $<octints><octint> );
+            HLL::Actions.ints_to_string( $<octint> || $<octints><octint> );
         make $<sym> eq 'O'
              ?? QAST::Regex.new( $octlit, :rxtype('enumcharlist'),
                                   :negate(1), :node($/) )
@@ -261,7 +261,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method backslash:sym<x>($/) {
         my $hexlit :=
-            HLL::Actions::ints_to_string( $<hexint> || $<hexints><hexint> );
+            HLL::Actions.ints_to_string( $<hexint> || $<hexints><hexint> );
         make $<sym> eq 'X'
              ?? QAST::Regex.new( $hexlit, :rxtype('enumcharlist'),
                                   :negate(1), :node($/) )
@@ -422,7 +422,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         $qast := QAST::Regex.new( :rxtype<concat>,
                      QAST::Regex.new( :rxtype<scan> ),
                      $qast,
-                     QAST::Regex.new( :rxtype<pass> ));
+                     QAST::Regex.new( :rxtype<pass>, :name(%*RX<name>) ));
         $block.push($initpast);
         $block.push(PAST::QAST.new($qast));
         $block;

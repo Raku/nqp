@@ -222,6 +222,14 @@ static candidate_info** sort_candidates(PARROT_INTERP, PMC *candidates) {
 
     /* Free memory associated with the graph. */
     for (i = 0; i < num_candidates; i++) {
+        candidate_info *info = graph[i]->info;
+        if (info) {
+            if (info->types)
+                mem_sys_free(info->types);
+            if (info->definednesses)
+                mem_sys_free(info->definednesses);
+            mem_sys_free(info);
+        }
         mem_sys_free(graph[i]->edges);
         mem_sys_free(graph[i]);
     }
@@ -259,7 +267,7 @@ PMC *nqp_multi_dispatch(PARROT_INTERP, PMC *dispatcher, PMC *capture) {
 
     /* Ensure we know what is a 6model object and what is not. */
     if (!smo_id)
-        smo_id = pmc_type(interp, Parrot_str_new(interp, "SixModelObject", 0));
+        smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
 
     /* Iterate over the candidates and collect best ones; terminate
      * when we see two nulls (may break out earlier). */
@@ -306,7 +314,7 @@ PMC *nqp_multi_dispatch(PARROT_INTERP, PMC *dispatcher, PMC *capture) {
             if (definedness) {
                 /* Have a constraint on the definedness. */
                 INTVAL defined = param->vtable->base_type == smo_id ?
-                        REPR(param)->defined(interp, param) :
+                        IS_CONCRETE(param) :
                         VTABLE_defined(interp, param);
                 if ((!defined && definedness == DEFINED_ONLY) || (defined && definedness == UNDEFINED_ONLY)) {
                     type_mismatch = 1;

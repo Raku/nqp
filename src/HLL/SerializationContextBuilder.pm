@@ -36,6 +36,13 @@ class HLL::Compiler::SerializationContextBuilder {
         # The PAST that we emit to do any fixups if we are in compile-n-run mode.
         has $!fixup_past;
         method fixup_past() { $!fixup_past }
+        
+        method new(:$deserialize_past, :$fixup_past) {
+            my $node := nqp::create(self);
+            nqp::bindattr($node, Event, '$!deserialize_past', $deserialize_past);
+            nqp::bindattr($node, Event, '$!fixup_past', $fixup_past);
+            $node
+        }
     }
 
     # The serialization context that we're building.
@@ -47,15 +54,15 @@ class HLL::Compiler::SerializationContextBuilder {
     # Address => slot mapping, so we can quickly look up existing objects
     # in the context.
     has %!addr_to_slot;
-    sub addr($obj) {
-        pir::get_addr__IP($obj)
-    }
     
     # The event stream that builds or fixes up objects.
     has @!event_stream;
     
     # Other SCs that we are dependent on (maps handle to SC).
     has %!dependencies;
+    
+    # Whether we're in pre-compilation mode.
+    has $!precomp_mode;
     
     method new(:$handle!, :$description = '<unknown>') {
         my $obj := self.CREATE();
@@ -69,11 +76,12 @@ class HLL::Compiler::SerializationContextBuilder {
         %!addr_to_slot := pir::new('Hash');
         @!event_stream := pir::new('ResizablePMCArray');
         $!sc.set_description($description);
+        $!precomp_mode := %*COMPILING<%?OPTIONS><target> eq 'pir';
     }
     
     # Gets the slot for a given object. Dies if it is not in the context.
     method slot_for_object($obj) {
-        my $slot := %!addr_to_slot{addr($obj)};
+        my $slot := %!addr_to_slot{nqp::where($obj)};
         unless pir::defined($slot) {
             pir::die('slot_for_object called on object not in context');
         }
@@ -86,7 +94,10 @@ class HLL::Compiler::SerializationContextBuilder {
     # a constant and we're using the SC as a constants table).
     method get_slot_past_for_object($obj) {
         my $slot := self.slot_for_object($obj);
-        return PAST::Op.new( :pirop('nqp_get_sc_object Psi'), $!handle, $slot );
+        my $past := PAST::Op.new( :pirop('nqp_get_sc_object Psi'), $!handle, $slot );
+        $past<has_compile_time_value> := 1;
+        $past<compile_time_value> := $obj;
+        $past
     }
     
     # Utility sub to wrap PAST with slot setting.
@@ -105,12 +116,21 @@ class HLL::Compiler::SerializationContextBuilder {
         )
     }
     
+    method add_object_to_cur_sc_past($slot, $to_wrap) {
+        PAST::Op.new(
+            :pirop('nqp_add_object_to_sc 2PiP'),
+            PAST::Var.new( :name('cur_sc'), :scope('register') ),
+            $slot,
+            $to_wrap
+        )
+    }
+    
     # Adds an object to the root set, along with a mapping.
     method add_object($obj) {
         pir::nqp_set_sc_for_object__vPP($obj, $!sc);
         my $idx := $!sc.elems();
         $!sc[$idx] := $obj;
-        %!addr_to_slot{addr($obj)} := $idx;
+        %!addr_to_slot{nqp::where($obj)} := $idx;
         $idx
     }
     
@@ -118,15 +138,20 @@ class HLL::Compiler::SerializationContextBuilder {
     method add_code($obj) {
         my $idx := $!sc.elems();
         $!sc[$idx] := $obj;
-        %!addr_to_slot{addr($obj)} := $idx;
+        %!addr_to_slot{nqp::where($obj)} := $idx;
         $idx
     }
 
+    # Checks if we are in pre-compilation mode.
+    method is_precompilation_mode() {
+        $!precomp_mode
+    }
+    
     # Add an event that may have an action to deserialize or fix up.
     # Note that we can determine which one we need and just save the
     # needed one.
     method add_event(:$deserialize_past, :$fixup_past) {
-        if %*COMPILING<%?OPTIONS><target> eq 'pir' {
+        if $!precomp_mode {
             # Pre-compilation; only need deserialization PAST.
             @!event_stream.push(Event.new(:deserialize_past($deserialize_past)));
         }
@@ -169,9 +194,11 @@ class HLL::Compiler::SerializationContextBuilder {
                         "Incorrect pre-compiled version of " ~ ($sc.description || '<unknown>') ~ " loaded"
                     ))));
             }
-            PAST::Op.new( :pirop('nqp_get_sc_object Psi'),
-                $handle, $sc.slot_index_for($obj)
-            )
+            my $past := PAST::Op.new( :pirop('nqp_get_sc_object Psi'),
+                $handle, $sc.slot_index_for($obj) );
+            $past<has_compile_time_value> := 1;
+            $past<compile_time_value> := $obj;
+            $past
         }
     }
     

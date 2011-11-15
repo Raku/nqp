@@ -121,42 +121,30 @@ a|&b			a|&b		/rule error/	alternation and conjunction (|&) - parse error
  | d | b		abc		y	leading alternation ignored
 # todo :pugs<feature> :pge<feature>
  b |  | d		abc		n	null pattern invalid
-# todo :pge<error messages>
 \pabc			pabc		/Unrecognized|Unsupported/	retired metachars (\p)
-# todo :pge<error messages>
 \p{InConsonant}		a		/Unrecognized|Unsupported/	retired metachars (\p)
-# todo :pge<error messages>
 \Pabc			Pabc		/Unrecognized|Unsupported/	retired metachars (\P)
-# todo :pge<error messages>
 \P{InConsonant}		a		/Unrecognized|Unsupported/	retired metachars (\P)
-# todo :pge<error messages>
 \Labc\E			LabcE		/Unrecognized|Unsupported/	retired metachars (\L...\E)
-# todo :pge<error messages>
 \LABC\E			abc		/Unrecognized|Unsupported/	retired metachars (\L...\E)
-# todo :pge<error messages>
 \Uabc\E			UabcE		/Unrecognized|Unsupported/	retired metachars (\U...\E)
-# todo :pge<error messages>
 \Uabc\E			ABC		/Unrecognized|Unsupported/	retired metachars (\U...\E)
-# todo :pge<error messages>
 \Qabc\E			QabcE		/Unrecognized|Unsupported/	retired metachars (\Q...\E)
-# todo :pge<error messages>
 \Qabc d?\E		abc d		/Unrecognized|Unsupported/	retired metachars (\Q...\E)
-# todo :pge<error messages>
 \Gabc			Gabc		/Unrecognized|Unsupported/	retired metachars (\G)
-# todo :pge<error messages>
 \1abc			1abc		/Unrecognized|Unsupported/	retired metachars (\1)
-# todo :pugs<feature>
+# todo :pugs<feature> :pge<regression>
 ^ \s+ $			\x0009\x0020\x00a0\x000a\x000b\x000c\x000d\x0085	y	0-255 whitespace (\s)
-# todo :pugs<feature>
+# todo :pugs<feature> :pge<regression>
 ^ \h+ $			\x0009\x0020\x00a0	y	0-255 horizontal whitespace (\h)
 ^ \V+ $			\x0009\x0020\x00a0	y	0-255 horizontal whitespace (\V)
-# todo :pugs<feature>
+# todo :pugs<feature> :pge<regression>
 ^ \v+ $			\x000a\x000b\x000c\x000d\x0085	y	0-255 vertical whitespace (\v)
 ^ \h+ $			\x000a\x000b\x000c\x000d\x0085	n	0-255 horizontal whitespace (\h)
 ^ \v+ $			\x0009\x0020\x00a0	n	0-255 vertical whitespace (\v)
-# todo :pugs<feature>
+# todo :pugs<feature> :pge<regression>
 ^ \s+ $			\x1680\x180e\x2000\x2001\x2002\x2003\x2004\x2005\x2006\x2007\x2008\x2008\x2009\x200a\x202f\x205f\x3000	y	unicode whitespace (\s)
-# todo :pugs<feature>
+# todo :pugs<feature> :pge<regression>
 ^ \h+ $			\x1680\x180e\x2000\x2001\x2002\x2003\x2004\x2005\x2006\x2007\x2008\x2008\x2009\x200a\x202f\x205f\x3000	y	unicode whitespace (\h)
 ^ \V+ $			\x1680\x180e\x2000\x2001\x2002\x2003\x2004\x2005\x2006\x2007\x2008\x2008\x2009\x200a\x202f\x205f\x3000	y	unicode whitespace (\V)
 ^ \v+ $			\x1680\x180e\x2000\x2001\x2002\x2003\x2004\x2005\x2006\x2007\x2008\x2008\x2009\x200a\x202f\x205f\x3000	n	unicode whitespace (\v)

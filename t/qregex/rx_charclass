@@ -24,7 +24,15 @@
 <-[b..d]>		bbccdd		n	negated character range
 # todo :pge<reversed character range>
 <-[d..b]>		bbccdd		/parse error/	illegal character range
-<[-]>			ab-def		/Unsupported/	unescaped hyphen
+<[x-z]>			ab-def		<Unsupported>	perl5 range
+<[-]>			ab-def		y	unescaped hyphen, the only thing
+<[ - ]>			ab-def		y	unescaped hyphen, the only thing w spaces
+<[x-]>			ab-def		y	unescaped hyphen, at the end
+<[x - ]>		ab-def		y	unescaped hyphen, at the end w spaces
+# todo :pge<feature>
+<[-x]>			ab-def		y	unescaped hyphen, at the beginning
+# todo :pge<feature>
+<[ -x]>			ab-def		y	unescaped hyphen, at the beginning w spaces
 <[\-]>			ab-def		y	escaped hyphen
 <[\-]>			abcdef		n	escaped hyphen
 <-[\-]>			---x--		y	negated escaped hyphen
@@ -59,15 +67,15 @@
 'ab"cd'			ab"cd		y	literal match with quote
 # todo :pugs<feature>
 'ab\\yz'		ab\x005cyz	y	literal match with backslash
-# todo :pugs<feature> :pge<feature>
+# todo :pugs<feature>
 "... --- ..."		... --- ...	y	literal match (\")
-# todo :pugs<feature> :pge<feature>
+# todo :pugs<feature>
 "... --- ..."		...---...	n	literal match (\")
-# todo :pugs<feature> :pge<feature>
+# todo :pugs<feature>
 "ab<\">cd"		ab<">cd		y	literal match with quote
-# todo :pugs<feature> :pge<feature>
+# todo :pugs<feature>
 "ab<'>cd"		ab<'>cd		y	literal match with quote
-# todo :pugs<feature> :pge<feature>
+# todo :pugs<feature>
 "ab\\cd"		ab\x005ccd	y	literal match with backslash
 # todo :pugs<feature> :pge<feature>
 (ab)x"$0"		abxab		y	literal match with interpolation
@@ -80,6 +88,7 @@
 <[A..Z0..9]>		abcdef		n	two enumerated ranges
 <[A..Z0..9]>		abcDef		y	two enumerated ranges
 
-abc <![d]>		abc		y	negated charclass at end of string (issue #9)
+# todo :pge<regression>
+abc <![d]>		abc		y	negated charclass at end of string (issue 9)
 
 ## vim: noexpandtab tabstop=4 shiftwidth=4
