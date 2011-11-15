@@ -1490,34 +1490,34 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
 
     method metachar:sym<:my>($/) {
         my $past := $<statement>.ast;
-        make PAST::Regex.new( $past, :pasttype('pastnode'),
-                              :subtype('declarative'), :node($/) );
+        make QAST::Regex.new( $past,
+                              :rxtype('pastnode'), :subtype('declarative'), :node($/) );
     }
 
     method metachar:sym<{ }>($/) { 
-        make PAST::Regex.new( $<codeblock>.ast, 
-                              :pasttype<pastnode>, :node($/) );
+        make QAST::Regex.new( $<codeblock>.ast, 
+                              :rxtype<pastnode>, :node($/) );
     }
 
     method metachar:sym<nqpvar>($/) {
-        make PAST::Regex.new( '!INTERPOLATE', $<var>.ast, 
-                              :pasttype<subrule>, :subtype<method>, :node($/));
+        make QAST::Regex.new( '!INTERPOLATE', $<var>.ast, 
+                              :rxtype<subrule>, :subtype<method>, :node($/));
     }
 
     method assertion:sym<{ }>($/) { 
-        make PAST::Regex.new( '!INTERPOLATE_REGEX', $<codeblock>.ast, 
-                              :pasttype<subrule>, :subtype<method>, :node($/));
+        make QAST::Regex.new( '!INTERPOLATE_REGEX', $<codeblock>.ast, 
+                              :rxtype<subrule>, :subtype<method>, :node($/));
     }
 
     method assertion:sym<?{ }>($/) { 
-        make PAST::Regex.new( $<codeblock>.ast, 
+        make QAST::Regex.new( $<codeblock>.ast, 
                               :subtype<zerowidth>, :negate( $<zw> eq '!' ),
-                              :pasttype<pastnode>, :node($/) );
+                              :rxtype<pastnode>, :node($/) );
     }
 
     method assertion:sym<var>($/) {
-        make PAST::Regex.new( '!INTERPOLATE_REGEX', $<var>.ast, 
-                              :pasttype<subrule>, :subtype<method>, :node($/));
+        make QAST::Regex.new( '!INTERPOLATE_REGEX', $<var>.ast, 
+                              :rxtype<subrule>, :subtype<method>, :node($/));
     }
 
     method codeblock($/) {
