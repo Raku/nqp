@@ -35,16 +35,27 @@ static void register_repr(PARROT_INTERP, STRING *name, REPROps *repr) {
         repr_registry = mem_sys_allocate(num_reprs * sizeof(REPROps *));
     repr_registry[ID] = repr;
     VTABLE_set_integer_keyed_str(interp, repr_name_to_id_map, name, ID);
+    repr->ID = ID;
+}
+
+/* Dynamically registers a representation (that is, one defined outside of
+ * the 6model core). */
+INTVAL REPR_register_dynamic(PARROT_INTERP, STRING *name, REPROps * (*reg) (PARROT_INTERP, void *, void *)) {
+    REPROps *repr = reg(interp, wrap_object, create_stable);
+    register_repr(interp, name, repr);
+    return repr->ID;
 }
 
 /* Initializes the representations registry, building up all of the various
  * representations. */
 void REPR_initialize_registry(PARROT_INTERP) {
+    PMC *dyn_reg_func;
+    
     /* Allocate name to ID map, and anchor it with the GC. */
     repr_name_to_id_map = Parrot_pmc_new(interp, enum_class_Hash);
     Parrot_pmc_gc_register(interp, repr_name_to_id_map);
 
-    /* Add all representations. */
+    /* Add all core representations. */
     register_repr(interp, Parrot_str_new_constant(interp, "KnowHOWREPR"), 
         KnowHOWREPR_initialize(interp));
     register_repr(interp, Parrot_str_new_constant(interp, "P6opaque"), 
@@ -59,6 +70,12 @@ void REPR_initialize_registry(PARROT_INTERP) {
         HashAttrStore_initialize(interp));
     register_repr(interp, Parrot_str_new_constant(interp, "Uninstantiable"),
         Uninstantiable_initialize(interp));
+
+    /* Set up object for dynamically registering extra representations. */
+    dyn_reg_func = Parrot_pmc_new(interp, enum_class_Pointer);
+    VTABLE_set_pointer(interp, dyn_reg_func, REPR_register_dynamic);
+    VTABLE_set_pmc_keyed_str(interp, interp->root_namespace,
+        Parrot_str_new_constant(interp, "_REGISTER_REPR"), dyn_reg_func);
 }
 
 /* Get a representation's ID from its name. Note that the IDs may change so

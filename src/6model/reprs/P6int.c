@@ -118,6 +118,14 @@ static STRING * get_str(PARROT_INTERP, STable *st, void *data) {
             "P6int cannot unbox to a native string");
 }
 
+/* Some objects serve primarily as boxes of others, inlining them. This gets
+ * gets the reference to such things, using the representation ID to distinguish
+ * them. */
+static void * get_boxed_ref(PARROT_INTERP, STable *st, void *data, INTVAL repr_id) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "P6int cannot box other types");
+}
+
 /* This Parrot-specific addition to the API is used to free an object. */
 static void gc_free(PARROT_INTERP, PMC *obj) {
     mem_sys_free(PMC_data(obj));
@@ -158,6 +166,7 @@ REPROps * P6int_initialize(PARROT_INTERP) {
     this_repr->get_num = get_num;
     this_repr->set_str = set_str;
     this_repr->get_str = get_str;
+    this_repr->get_boxed_ref = get_boxed_ref;
     this_repr->gc_mark = NULL;
     this_repr->gc_free = gc_free;
     this_repr->gc_cleanup = NULL;

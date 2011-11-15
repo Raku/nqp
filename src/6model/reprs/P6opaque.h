@@ -18,6 +18,12 @@ typedef struct {
     PMC *name_map;
 } P6opaqueNameMap;
 
+/* This is used in boxed type mappings. */
+typedef struct {
+    INTVAL repr_id;
+    INTVAL slot;
+} P6opaqueBoxedTypeMap;
+
 /* The P6opaque REPR data has the slot mapping, allocation size and
  * various other bits of info. It hangs off the REPR_data pointer
  * in the s-table. */
@@ -54,6 +60,9 @@ typedef struct {
 
     /* Slot to delegate to when we need to unbox to a native string. */
     INTVAL unbox_str_slot;
+    
+    /* If we have any other boxings, this maps repr ID to slot. */
+    P6opaqueBoxedTypeMap *unbox_slots;
 
     /* A table mapping attribute names to indexes (which can then be looked
      * up in the offset table). Uses a final null entry as a sentinel. */

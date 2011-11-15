@@ -6,7 +6,7 @@ class HLL::Actions {
         nqp::atkey($res, 0);
     }
 
-    our sub ints_to_string($ints) {
+    method ints_to_string($ints) {
         if pir::does($ints, 'array') {
             my $result := '';
             for $ints {
@@ -144,11 +144,11 @@ class HLL::Actions {
     method quote_escape:sym<esc>($/) { make "\c[27]"; }
 
     method quote_escape:sym<hex>($/) {
-        make ints_to_string( $<hexint> ?? $<hexint> !! $<hexints><hexint> );
+        make self.ints_to_string( $<hexint> ?? $<hexint> !! $<hexints><hexint> );
     }
 
     method quote_escape:sym<oct>($/) {
-        make ints_to_string( $<octint> ?? $<octint> !! $<octints><octint> );
+        make self.ints_to_string( $<octint> ?? $<octint> !! $<octints><octint> );
     }
 
     method quote_escape:sym<chr>($/) {

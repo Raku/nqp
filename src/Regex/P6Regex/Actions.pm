@@ -342,7 +342,7 @@ class Regex::P6Regex::Actions is HLL::Actions {
 
     method backslash:sym<o>($/) {
         my $octlit :=
-            HLL::Actions::ints_to_string( $<octint> || $<octints><octint> );
+            HLL::Actions.ints_to_string( $<octint> || $<octints><octint> );
         make $<sym> eq 'O'
              ?? PAST::Regex.new( $octlit, :pasttype('enumcharlist'),
                                   :negate(1), :node($/) )
@@ -351,7 +351,7 @@ class Regex::P6Regex::Actions is HLL::Actions {
 
     method backslash:sym<x>($/) {
         my $hexlit :=
-            HLL::Actions::ints_to_string( $<hexint> || $<hexints><hexint> );
+            HLL::Actions.ints_to_string( $<hexint> || $<hexints><hexint> );
         make $<sym> eq 'X'
              ?? PAST::Regex.new( $hexlit, :pasttype('enumcharlist'),
                                   :negate(1), :node($/) )

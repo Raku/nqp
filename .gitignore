@@ -10,6 +10,7 @@ Makefile
 *.obj
 *.rc
 *.dll
+*.dll.a
 *.manifest
 *.exp
 *.lib
@@ -27,6 +28,7 @@ PASTRegex.pbc
 NQPHLL.pbc
 NQPP6Regex.pbc
 QRegex.pbc
+CallBuilder.pbc
 nqp
 nqp.c
 nqp_group.c

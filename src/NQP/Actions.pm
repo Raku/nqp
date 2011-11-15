@@ -67,7 +67,7 @@ class NQP::Actions is HLL::Actions {
         }
 
         # Need to load the NQP dynops/dympmcs, plus any extras requested.
-        my @loadlibs := ['nqp_group', 'nqp_ops', 'trans_ops', 'io_ops'];
+        my @loadlibs := ['nqp_group', 'nqp_ops', 'nqp_bigint_ops', 'trans_ops', 'io_ops'];
         if %*COMPILING<%?OPTIONS><vmlibs> {
             for pir::split(',', %*COMPILING<%?OPTIONS><vmlibs>) {
                 @loadlibs.push($_);
