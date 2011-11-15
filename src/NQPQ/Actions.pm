@@ -1049,7 +1049,6 @@ class NQP::Actions is HLL::Actions {
             $block[0].push(PAST::Var.new(:name<$/>, :scope<lexical>, :isdecl(1)));
             $block.symbol('$¢', :scope<lexical>);
             $block.symbol('$/', :scope<lexical>);
-            $block.blocktype('method');
             my $regex := QRegex::P6Regex::Actions::buildsub($<p6regex>.ast, $block);
             $regex.name($name);
             my $prefix_meth;
