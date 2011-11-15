@@ -337,6 +337,7 @@ class NQPMatch is NQPCapture {
     method to()   { $!to }
     method Str() is parrot_vtable('get_string') { nqp::substr($!orig, $!from, $!to-$!from) }
     method Bool() { $!to >= $!from }
+    method chars() { $!to >= $!from ?? $!to - $!from !! 0 }
 
     method !dump_str($key) {
         sub dump_array($key, $item) {
