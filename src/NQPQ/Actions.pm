@@ -1054,7 +1054,6 @@ class NQP::Actions is HLL::Actions {
             $block.symbol('$/', :scope<lexical>);
             my $regex := QRegex::P6Regex::Actions::buildsub($<p6regex>.ast, $block);
             $regex.name($name);
-            my $prefix_meth;
             
             if $*PKGDECL && pir::can($*PACKAGE.HOW, 'add_method') {
                 # Add the actual method.
@@ -1062,7 +1061,11 @@ class NQP::Actions is HLL::Actions {
             }
             
             # In sink context, we don't need the Regex::Regex object.
-            $past := $regex;
+            $past := PAST::Op.new(
+                :pasttype<callmethod>, :name<new>,
+                lexical_package_lookup(['NQPRegexMethod'], $/),
+                $regex);
+            $past<sink> := $regex;
         }
         make $past;
     }
