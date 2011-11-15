@@ -388,10 +388,30 @@ class NQPCursor does NQPCursorRole {
     method parse($target, :$rule = 'TOP', :$actions, *%options) {
         my $*ACTIONS := $actions;
         my $cur := self.'!cursor_init'($target, |%options);
-        pir::find_method__PPs($cur, $rule)($cur).MATCH()
+        pir::is_invokable__IP($rule) ??
+            $rule($cur).MATCH() !!
+            pir::find_method__PPs($cur, $rule)($cur).MATCH()
     }
 }
 
+class NQPRegexMethod {
+    has $!code is parrot_vtable_handler('invoke');
+    method new($code) {
+        self.bless(:code($code));
+    }
+    method ACCEPTS($target) {
+        NQPCursor.parse($target, :rule(self))
+    }
+    method Str() is parrot_vtable('get_string') {
+        ~$!code
+    }
+}
+
+class NQPRegex is NQPRegexMethod {
+    method ACCEPTS($target) {
+        NQPCursor.parse($target, :rule(self), :c(0))
+    }
+}
 
 my module EXPORT {
     our module DEFAULT {
