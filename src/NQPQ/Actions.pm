@@ -1273,21 +1273,23 @@ class NQP::Actions is HLL::Actions {
                            :node($/) );
     }
 
-    method quote:sym</ />($/, $key?) {
-        if $key eq 'open' {
-            $Regex::P6Regex::Actions::REGEXNAME := pir::null__P();
-            @BLOCK[0].symbol('$¢', :scope('lexical'));
-            @BLOCK[0].symbol('$/', :scope('lexical'));
-            return 0;
-        }
-        my $regex := 
-            Regex::P6Regex::Actions::buildsub($<p6regex>.ast, @BLOCK.shift);
-        my $past := 
-            PAST::Op.new(
-                :pasttype<callmethod>, :name<new>,
-                lexical_package_lookup(['Regex', 'Regex'], $/),
-                $regex
-            );
+    method quote:sym</ />($/) {
+        my $block := @BLOCK.shift;
+        $block[0].push(PAST::Var.new(:name<self>, :scope<parameter>));
+        $block[0].push(
+            PAST::Var.new(:name<self>, :scope<register>, :isdecl(1),
+                          :viviself(PAST::Var.new( :name<self>, :scope('lexical_6model') ))));
+        $block[0].push(PAST::Var.new(:name<$¢>, :scope<lexical>, :isdecl(1)));
+        $block[0].push(PAST::Var.new(:name<$/>, :scope<lexical>, :isdecl(1)));
+        $block.symbol('$¢', :scope<lexical>);
+        $block.symbol('$/', :scope<lexical>);
+
+        my $regex := QRegex::P6Regex::Actions::buildsub($<p6regex>.ast, $block);
+        my $past := PAST::Op.new(
+            :pasttype<callmethod>, :name<new>,
+            lexical_package_lookup(['NQPRegex'], $/),
+            $regex);
+
         # In sink context, we don't need the Regex::Regex object.
         $past<sink> := $regex;
         make $past;
