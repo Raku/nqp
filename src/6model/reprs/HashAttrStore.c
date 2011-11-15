@@ -43,7 +43,7 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
 
 /* Initialize a new instance. */
 static void initialize(PARROT_INTERP, STable *st, void *data) {
-    ((HashAttrStoreBody *)data)->store = pmc_new(interp, enum_class_Hash);
+    ((HashAttrStoreBody *)data)->store = Parrot_pmc_new(interp, enum_class_Hash);
 }
 
 /* Copies to the body of one object to another. */

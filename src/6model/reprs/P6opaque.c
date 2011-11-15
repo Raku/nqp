@@ -77,9 +77,9 @@ static PMC * accessor_call(PARROT_INTERP, PMC *obj, STRING *name) {
  * the index mapping for doing named lookups. Note index is not related
  * to the storage position. */
 static PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, P6opaqueREPRData *repr_data) {
-    PMC    *flat_list      = pmc_new(interp, enum_class_ResizablePMCArray);
-    PMC    *class_list     = pmc_new(interp, enum_class_ResizablePMCArray);
-    PMC    *attr_map_list  = pmc_new(interp, enum_class_ResizablePMCArray);
+    PMC    *flat_list      = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+    PMC    *class_list     = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+    PMC    *attr_map_list  = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
     STRING *attributes_str = Parrot_str_new_constant(interp, "attributes");
     STRING *parents_str    = Parrot_str_new_constant(interp, "parents");
     STRING *name_str       = Parrot_str_new_constant(interp, "name");
@@ -118,7 +118,7 @@ static PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, P6opaqueREPRD
 
             /* Allocate a slot. */
             if (PMC_IS_NULL(attr_map))
-                attr_map = pmc_new(interp, enum_class_Hash);
+                attr_map = Parrot_pmc_new(interp, enum_class_Hash);
             VTABLE_set_pmc_keyed_str(interp, attr_map, name,
                 Parrot_pmc_new_init_int(interp, enum_class_Integer, current_slot));
             current_slot++;
@@ -849,6 +849,6 @@ REPROps * P6opaque_initialize(PARROT_INTERP) {
     this_repr->get_storage_spec = get_storage_spec;
     this_repr->is_attribute_initialized = is_attribute_initialized;
     this_repr->change_type = change_type;
-    smo_id = pmc_type(interp, Parrot_str_new(interp, "SixModelObject", 0));
+    smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
     return this_repr;
 }

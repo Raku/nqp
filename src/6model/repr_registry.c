@@ -41,7 +41,7 @@ static void register_repr(PARROT_INTERP, STRING *name, REPROps *repr) {
  * representations. */
 void REPR_initialize_registry(PARROT_INTERP) {
     /* Allocate name to ID map, and anchor it with the GC. */
-    repr_name_to_id_map = pmc_new(interp, enum_class_Hash);
+    repr_name_to_id_map = Parrot_pmc_new(interp, enum_class_Hash);
     Parrot_pmc_gc_register(interp, repr_name_to_id_map);
 
     /* Add all representations. */

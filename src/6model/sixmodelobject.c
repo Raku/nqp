@@ -22,15 +22,15 @@ void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attri
     STRING *initial_sc_name;
     
     /* Look up and cache some type IDs and strings. */
-    stable_id        = pmc_type(interp, Parrot_str_new(interp, "STable", 0));
-    smo_id           = pmc_type(interp, Parrot_str_new(interp, "SixModelObject", 0));
-    sc_id            = pmc_type(interp, Parrot_str_new(interp, "SerializationContext", 0));
+    stable_id        = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "STable", 0));
+    smo_id           = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
+    sc_id            = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SerializationContext", 0));
     find_method_str  = Parrot_str_new_constant(interp, "find_method");
     type_check_str   = Parrot_str_new_constant(interp, "type_check");
     accepts_type_str = Parrot_str_new_constant(interp, "accepts_type");
 
     /* Create initial core serialization context. */
-    initial_sc = pmc_new(interp, sc_id);
+    initial_sc = Parrot_pmc_new(interp, sc_id);
     initial_sc_name = Parrot_str_new(interp, "__6MODEL_CORE__", 0);
     VTABLE_set_string_native(interp, initial_sc, initial_sc_name);
     SC_set_sc(interp, initial_sc_name, initial_sc);
@@ -47,7 +47,7 @@ void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attri
 
 /* Takes an object and wraps it in a SixModelObject PMC. */
 PMC * wrap_object(PARROT_INTERP, void *obj) {
-    PMC *obj_pmc = pmc_new_noinit(interp, smo_id);
+    PMC *obj_pmc = Parrot_pmc_new_noinit(interp, smo_id);
     PObj_custom_mark_SET(obj_pmc);
     PObj_custom_destroy_SET(obj_pmc);
     PMC_data(obj_pmc) = obj;
@@ -158,7 +158,7 @@ static INTVAL default_type_check (PARROT_INTERP, PMC *to_check, PMC *wanted) {
 
 /* Creates an STable that references the given REPR and HOW. */
 PMC * create_stable(PARROT_INTERP, REPROps *REPR, PMC *HOW) {
-    PMC *st_pmc = pmc_new_init(interp, stable_id, HOW);
+    PMC *st_pmc = Parrot_pmc_new_init(interp, stable_id, HOW);
     STABLE_STRUCT(st_pmc)->REPR = REPR;
     STABLE_STRUCT(st_pmc)->WHO = PMCNULL;
     STABLE_STRUCT(st_pmc)->find_method = default_find_method;
