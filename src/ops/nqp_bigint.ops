@@ -120,11 +120,15 @@ inline op nqp_bigint_div(out PMC, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b = get_bigint(interp, $3);
     mp_int remainder;
+    int result;
     mp_init(&remainder);
     $1 = REPR($2)->allocate(interp, STABLE($2));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
-    mp_div(a, b, get_bigint(interp, $1), &remainder);
+    result = mp_div(a, b, get_bigint(interp, $1), &remainder);
     mp_clear(&remainder);
+    if (result == MP_VAL)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Divide by zero");
 }
 
 inline op nqp_bigint_mod(out PMC, in PMC, in PMC) :base_core {
