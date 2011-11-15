@@ -1433,7 +1433,9 @@ is not a 6model object must is otherwise marked invokable.
 inline op is_invokable(out INT, in PMC) :base_core {
     if ($2->vtable->base_type == smo_id) {
         PMC **vt = STABLE($2)->parrot_vtable_mapping;
-        $1 = vt && !PMC_IS_NULL(vt[PARROT_VTABLE_SLOT_INVOKE]);
+        AttributeIdentifier *vth = STABLE($2)->parrot_vtable_handler_mapping;
+        $1 = (vt && !PMC_IS_NULL(vt[PARROT_VTABLE_SLOT_INVOKE])) ||
+             (vth && !PMC_IS_NULL(vth[PARROT_VTABLE_SLOT_INVOKE].class_handle));
     }
     else {
         $1 = VTABLE_does(interp, $2, Parrot_str_new(interp, "invokable", 0));
