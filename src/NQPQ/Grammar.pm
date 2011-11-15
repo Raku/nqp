@@ -597,6 +597,7 @@ grammar NQP::Grammar is HLL::Grammar {
         '/'
         <.newpad>
         {*} #= open
+        :my %*RX;
         <p6regex=.LANG('Regex','nibbler')>
         '/'
     }
