@@ -77,6 +77,46 @@ static void from_num(FLOATVAL d, mp_int *a) {
     mp_shrink(a);
 }
 
+static void grow_and_negate(mp_int *a, int size, mp_int *b) {
+    int i;
+    int actual_size = MAX(size, USED(a));
+    mp_zero(b);
+    mp_grow(b, actual_size);
+    USED(b) = actual_size;
+    for (i = 0; i < actual_size; i++) {
+        DIGIT(b, i) = (~DIGIT(a, i)) & MP_MASK;
+    }
+    mp_add_d(b, 1, b);
+}
+
+static void two_complement_bitop(mp_int *a, mp_int *b, mp_int *c,
+        int (*mp_bitop)(mp_int *, mp_int *, mp_int *)) {
+    mp_int d;
+    if (SIGN(a) ^ SIGN(b)) {
+        /* exactly one of them is negative, so need to perform
+         * some magic. tommath stores a sign bit, but Perl 6 expects
+         * 2's complement */
+        mp_init(&d);
+        if (MP_NEG == SIGN(a)) {
+            grow_and_negate(a, USED(b), &d);
+            mp_bitop(&d, b, c);
+        } else {
+            grow_and_negate(b, USED(a), &d);
+            mp_bitop(a, &d, c);
+        }
+        if (DIGIT(c, USED(c) - 1) & (MP_MASK > 1)) {
+            grow_and_negate(c, c->used, &d);
+            mp_copy(&d, c);
+            mp_neg(c, c);
+        }
+        mp_clear(&d);
+    } else {
+        mp_bitop(a, b, c);
+    }
+
+}
+
+
 END_OPS_PREAMBLE
 
 /*
@@ -265,21 +305,21 @@ inline op nqp_bigint_band(out PMC, in PMC, in PMC) :base_core {
     mp_int *b = get_bigint(interp, $3);
     $1 = REPR($2)->allocate(interp, STABLE($2));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
-    mp_and(a, b, get_bigint(interp, $1));
+    two_complement_bitop(a, b, get_bigint(interp, $1), mp_and);
 }
 inline op nqp_bigint_bor(out PMC, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b = get_bigint(interp, $3);
     $1 = REPR($2)->allocate(interp, STABLE($2));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
-    mp_or(a, b, get_bigint(interp, $1));
+    two_complement_bitop(a, b, get_bigint(interp, $1), mp_or);
 }
 inline op nqp_bigint_bxor(out PMC, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b = get_bigint(interp, $3);
     $1 = REPR($2)->allocate(interp, STABLE($2));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
-    mp_xor(a, b, get_bigint(interp, $1));
+    two_complement_bitop(a, b, get_bigint(interp, $1), mp_xor);
 }
 inline op nqp_bigint_bnot(out PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
