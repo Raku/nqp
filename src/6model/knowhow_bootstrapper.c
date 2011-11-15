@@ -44,7 +44,7 @@ static void new_type(PARROT_INTERP, PMC *nci) {
     PARROT_GC_WRITE_BARRIER(interp, HOW);
     
     /* Set .WHO to an empty hash. */
-    STABLE(type_object)->WHO = pmc_new(interp, enum_class_Hash);
+    STABLE(type_object)->WHO = Parrot_pmc_new(interp, enum_class_Hash);
     PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC(type_object));
 
     /* Put it into capture to act as return value. */
@@ -112,7 +112,7 @@ static void compose(PARROT_INTERP, PMC *nci) {
 static void parents(PARROT_INTERP, PMC *nci) {
     PMC * unused;
     PMC *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
-    PMC *empty   = pmc_new(interp, enum_class_FixedPMCArray);
+    PMC *empty   = Parrot_pmc_new(interp, enum_class_FixedPMCArray);
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", empty);
 }
 
@@ -139,7 +139,7 @@ static void mro(PARROT_INTERP, PMC *nci) {
     PMC * unused;
     PMC *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC *obj     = VTABLE_get_pmc_keyed_int(interp, capture, 1);
-    PMC *mro     = pmc_new(interp, enum_class_ResizablePMCArray);
+    PMC *mro     = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
     VTABLE_push_pmc(interp, mro, STABLE(obj)->WHAT);
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", mro);
 }
@@ -195,8 +195,8 @@ PMC * SixModelObject_bootstrap_knowhow(PARROT_INTERP, PMC *sc) {
     knowhow_how->common.stable = st_copy;
 
     /* Add various methods to the KnowHOW's HOW. */
-    knowhow_how->body.methods = pmc_new(interp, enum_class_Hash);
-    knowhow_how->body.attributes = pmc_new(interp, enum_class_ResizablePMCArray);
+    knowhow_how->body.methods = Parrot_pmc_new(interp, enum_class_Hash);
+    knowhow_how->body.attributes = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
     VTABLE_set_pmc_keyed_str(interp, knowhow_how->body.methods,
         Parrot_str_new_constant(interp, "new_type"),
         wrap_c(interp, F2DPTR(new_type)));

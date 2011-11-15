@@ -384,7 +384,7 @@ inline op nqp_bigint_radix(out PMC, in INT, in STR, in INT, in INT, in PMC) :bas
     REPR(pos_obj)->set_int(interp, STABLE(pos_obj), OBJECT_BODY(pos_obj), pos);
 
     if (neg || flags & 0x01) { mp_neg(value, value); }
-    out = pmc_new(interp, enum_class_FixedPMCArray);
+    out = Parrot_pmc_new(interp, enum_class_FixedPMCArray);
     VTABLE_set_integer_native(interp, out, 3);
     VTABLE_set_pmc_keyed_int(interp, out, 0, value_obj);
     VTABLE_set_pmc_keyed_int(interp, out, 1, base_obj);

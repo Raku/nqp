@@ -49,11 +49,11 @@ inline op nqp_dynop_setup() :base_core {
         initialized = 1;
 
         /* Look up and cache some type IDs. */
-        stable_id = pmc_type(interp, Parrot_str_new(interp, "STable", 0));
-        repr_id   = pmc_type(interp, Parrot_str_new(interp, "REPR", 0));
-        smo_id    = pmc_type(interp, Parrot_str_new(interp, "SixModelObject", 0));
-        disp_id   = pmc_type(interp, Parrot_str_new(interp, "DispatcherSub", 0));
-        ms_id     = pmc_type(interp, Parrot_str_new(interp, "NQPMultiSig", 0));
+        stable_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "STable", 0));
+        repr_id   = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "REPR", 0));
+        smo_id    = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
+        disp_id   = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "DispatcherSub", 0));
+        ms_id     = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "NQPMultiSig", 0));
 
         /* Initialize the object model. */
         SixModelObject_initialize(interp, &KnowHOW, &KnowHOWAttribute);
@@ -786,7 +786,7 @@ inline op publish_method_cache(in PMC, in PMC) :base_core {
          * calls into the language's own hash implementation every
          * time, which may be far more costly. */
         STable *target_st = STABLE(target);
-        PMC    *cache     = pmc_new(interp, enum_class_Hash);
+        PMC    *cache     = Parrot_pmc_new(interp, enum_class_Hash);
         PMC    *iter      = VTABLE_get_iter(interp, $2);
         while (VTABLE_get_bool(interp, iter)) {
             STRING *name = VTABLE_shift_string(interp, iter);
@@ -1073,7 +1073,7 @@ Adds a single new code object to the end of a dispatcher's dispatchee list.
 inline op push_dispatchee(in PMC, in PMC) :base_core {
     if ($1->vtable->base_type == disp_id) {
         if (PMC_IS_NULL(PARROT_DISPATCHERSUB($1)->dispatchees)) {
-            PARROT_DISPATCHERSUB($1)->dispatchees = pmc_new(interp, enum_class_ResizablePMCArray);
+            PARROT_DISPATCHERSUB($1)->dispatchees = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
             PARROT_GC_WRITE_BARRIER(interp, $1);
         }
         VTABLE_push_pmc(interp, PARROT_DISPATCHERSUB($1)->dispatchees, $2);
@@ -1292,7 +1292,7 @@ to the registry and returns it.
 
 */
 inline op nqp_create_sc(out PMC, in STR) {
-    $1 = pmc_new(interp, pmc_type(interp,
+    $1 = Parrot_pmc_new(interp, Parrot_pmc_get_type_str(interp,
         Parrot_str_new(interp, "SerializationContext", 0)));
     VTABLE_set_string_native(interp, $1, $2);
     SC_set_sc(interp, $2, $1);
@@ -1771,7 +1771,7 @@ inline op nqp_radix(out PMC, in INT, in STR, in INT, in INT) :base_core {
     }
 
     if (neg || flags & 0x01) { value = -value; }
-    out = pmc_new(interp, enum_class_FixedFloatArray);
+    out = Parrot_pmc_new(interp, enum_class_FixedFloatArray);
     VTABLE_set_integer_native(interp, out, 3);
     VTABLE_set_number_keyed_int(interp, out, 0, value);
     VTABLE_set_number_keyed_int(interp, out, 1, base);

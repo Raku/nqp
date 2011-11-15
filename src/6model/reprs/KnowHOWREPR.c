@@ -43,8 +43,8 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
 /* Initialize a new instance. */
 static void initialize(PARROT_INTERP, STable *st, void *data) {
     KnowHOWREPRBody *body = (KnowHOWREPRBody *)data;
-    body->methods        = pmc_new(interp, enum_class_Hash);
-    body->attributes     = pmc_new(interp, enum_class_ResizablePMCArray);
+    body->methods        = Parrot_pmc_new(interp, enum_class_Hash);
+    body->attributes     = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
 }
 
 /* Copies to the body of one object to another. */
