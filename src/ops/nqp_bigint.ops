@@ -26,11 +26,10 @@ static FLOATVAL mp_get_double(mp_int *a) {
     if (USED(a) == 0)
         return d;
     if (USED(a) == 1)
-        return sign * (FLOATVAL) mp_get_int(a);
+        return sign * (FLOATVAL) DIGIT(a, 0);
 
-    for (i = USED(a) - 1; DIGIT(a, i) == 0 && i > 0; i--) {
-        /* do nothing */
-    }
+    mp_clamp(a);
+    i = USED(a) - 1;
     d = (FLOATVAL) DIGIT(a, i);
     i--;
     if (i == -1) {

@@ -1,7 +1,7 @@
 #! nqp
 use nqpmo;
 
-plan(27);
+plan(28);
 
 my $knowhow := pir::get_knowhow__P();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
@@ -66,11 +66,14 @@ $big := nqp::pow_I(box(2), box(100), $bi_type);
 ok(nqp::iseq_n(nqp::tonum_I($big), nqp::pow_n(2, 100)), '2**100 to float');
 $big := nqp::pow_I(box(-2), box(101), $bi_type);
 ok(nqp::iseq_n(nqp::tonum_I($big), nqp::pow_n(-2, 101)), '(-2)**101 to float');
-
 # the mantissa can hold much information accurately, so test that too
 my $factor := 123456789;
 $big := nqp::mul_I($big, box($factor));
 ok(nqp::iseq_n(nqp::tonum_I($big), nqp::mul_n($factor, nqp::pow_n(-2, 101))), "$factor * (-2)**101 to float");
+
+$big := 1e16;
+my $converted := nqp::tonum_I(nqp::fromstr_I($bi_type, '10000000000000000'));
+ok(nqp::abs_n($big - $converted) / $big < 1e-4, 'bigint -> float, 1e16');
 
 my $float := 123456789e240;
 ok(nqp::iseq_n($float, nqp::tonum_I(nqp::fromnum_I($float, $bi_type))),
@@ -78,3 +81,4 @@ ok(nqp::iseq_n($float, nqp::tonum_I(nqp::fromnum_I($float, $bi_type))),
 $float := -$float;
 ok(nqp::iseq_n($float, nqp::tonum_I(nqp::fromnum_I($float, $bi_type))),
     'to_num and from_num round-trip (negative number)');
+
