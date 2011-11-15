@@ -179,12 +179,12 @@ PMC * SixModelObject_bootstrap_knowhow(PARROT_INTERP, PMC *sc) {
     /* Create our KnowHOW type object. Note we don't have a HOW just yet, so
      * pass in null. */
     REPROps *REPR        = REPR_get_by_name(interp, Parrot_str_new_constant(interp, "KnowHOWREPR"));
-    PMC     *knowhow_pmc = REPR->type_object_for(interp, NULL);
+    PMC     *knowhow_pmc = REPR->type_object_for(interp, PMCNULL);
 
     /* We create a KnowHOW instance that can describe itself. This means
      * .HOW.HOW.HOW.HOW etc will always return that, which closes the model
      * up. Also pull out its underlying struct. */
-    PMC *knowhow_how_pmc = REPR->allocate(interp, NULL);
+    PMC *knowhow_how_pmc = REPR->allocate(interp, PMCNULL);
     KnowHOWREPRInstance *knowhow_how = (KnowHOWREPRInstance *)PMC_data(knowhow_how_pmc);
 
     /* Need to give the knowhow_how a twiddled STable with a different
