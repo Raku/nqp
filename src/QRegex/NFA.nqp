@@ -137,8 +137,10 @@ class QRegex::NFA {
 
     method mergesubrule($start, $to, $fate, $cursor, $name) {
         nqp::say("adding $name");
-        my $subrule := $cursor.HOW.find_method($cursor, $name);
-        my @substates := $subrule.nqpattr('nfa') if $subrule;
+        my @substates;
+        if pir::can($cursor, $name) {
+            @substates := $cursor.HOW.find_method($cursor, $name).nqpattr('nfa');
+        }
         if @substates {
             # create an empty end state for the subrule's NFA
             my $substart := self.addstate();
@@ -194,6 +196,7 @@ class QRegex::NFA {
                 @done[$st] := $gen;
                 for $!states[$st] -> $act, $arg, $to {
                     if $act == $EDGE_FATE {
+                        say("# crossing fate edge $arg at $offset");
                         @fatepos[$arg] := $offset;
                     }
                     elsif $act == $EDGE_EPSILON && @done[$to] != $gen {
