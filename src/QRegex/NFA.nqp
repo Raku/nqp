@@ -105,11 +105,16 @@ class QRegex::NFA {
         my $litconst := $node[0];
         my $litlen   := nqp::chars($litconst) - 1;
         my $i        := 0;
-        while $i < $litlen {
-            $from := self.addedge($from, -1, $EDGE_CODEPOINT, nqp::ord($litconst, $i));
-            $i := $i + 1;
+        if $litlen >= 0 {
+            while $i < $litlen {
+                $from := self.addedge($from, -1, $EDGE_CODEPOINT, nqp::ord($litconst, $i));
+                $i := $i + 1;
+            }
+            self.addedge($from, $to, $EDGE_CODEPOINT, nqp::ord($litconst, $i));
         }
-        self.addedge($from, $to, $EDGE_CODEPOINT, nqp::ord($litconst, $i));
+        else {
+            self.addedge($from, $to, $EDGE_EPSILON, 0);
+        }
     }
 
     method subrule($node, $from, $to) {
