@@ -87,7 +87,7 @@ class QRegex::NFA {
             $from := self.regex_nfa($node[$i], $from, -1);
             $i := $i + 1;
         }
-        $from > 0 ?? self.regex_nfa($node[$i], $from, $to) !! $to;
+        $from > 0 && $n >= 0 ?? self.regex_nfa($node[$i], $from, $to) !! $to;
     }
 
     method enumcharlist($node, $from, $to) {
@@ -196,7 +196,6 @@ class QRegex::NFA {
                 @done[$st] := $gen;
                 for $!states[$st] -> $act, $arg, $to {
                     if $act == $EDGE_FATE {
-                        say("# crossing fate edge $arg at $offset");
                         @fatepos[$arg] := $offset;
                     }
                     elsif $act == $EDGE_EPSILON && @done[$to] != $gen {
