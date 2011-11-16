@@ -130,7 +130,7 @@ role NQPCursorRole {
                 if pir::defined($pos) {
                     my $n := nqp::elems(@fatesort) - 1;
                     while $n >= 0
-                          && @fatepos[@fatesort[$n]] > @fatepos[$fate] {
+                          && @fatepos[@fatesort[$n]] >= @fatepos[$fate] {
                         $n := $n - 1;
                     }
                     nqp::splice(@fatesort, [$fate], $n+1, 0);
