@@ -63,8 +63,8 @@ some PAST that will produce it or a name that it can be looked up by.
 .sub 'lexical_6model_type' :method
     .param pmc node
 
-    # See if we have a type. If so, use it to determine what op to use
-    # and what the register type will be.
+    # See if we have a type. If so, use it to determine what the
+    # register type will be.
     .local pmc type
     .local int primitive_type_id
     type = node.'type'()
@@ -192,11 +192,13 @@ some PAST that will produce it or a name that it can be looked up by.
     name = node.'name'()
     name = self.'escape'(name)
 
+    .local pmc lexregs
+    lexregs = find_dynamic_lex '%*LEXREGS'
+
     .local int isdecl
     isdecl = node.'isdecl'()
     
-    .local pmc type
-    .local string reg_type, fetch_op_name, store_op_name
+    .local string reg_type
     (reg_type) = self.'lexical_6model_type'(node)
 
   lexical_post:
@@ -207,14 +209,31 @@ some PAST that will produce it or a name that it can be looked up by.
     $P0 = get_hll_global ['POST'], 'Ops'
     ops = $P0.'new'('node'=>node)
     if reg_type == 'P' goto need_vivify
-    $P1 = self.'uniquereg'(reg_type)
+    $P1 = self.'tempreg'(reg_type)
+    ops.'result'($P1)
+    if null lexregs goto no_lexregs_2
+    .local string lexreg
+    lexreg = lexregs[name]
+    unless lexreg goto no_lexregs_2
+    $P0 = get_hll_global ['POST'], 'Op'
+    fetchop = $P0.'new'($P1, lexreg, 'pirop'=>'set')
+    ops.'push'(fetchop)
+    .return (ops)
+  no_lexregs_2:
     $P0 = get_hll_global ['POST'], 'Op'
     fetchop = $P0.'new'($P1, name, 'pirop'=>'find_lex')
     ops.'push'(fetchop)
-    ops.'result'($P1)
     .return (ops)
   need_vivify:
     $P0 = get_hll_global ['POST'], 'Op'
+    if null lexregs goto no_lexregs
+    .local string lexreg
+    lexreg = lexregs[name]
+    unless lexreg goto no_lexregs
+    fetchop = $P0.'new'(ops, lexreg, 'pirop'=>'set')
+    storeop = $P0.'new'(lexreg, ops, 'pirop'=>'set')
+    .tailcall self.'vivify'(node, ops, fetchop, storeop)
+  no_lexregs:
     fetchop = $P0.'new'(ops, name, 'pirop'=>'find_lex')
     storeop = $P0.'new'(name, ops, 'pirop'=>'store_lex')
     .tailcall self.'vivify'(node, ops, fetchop, storeop)
@@ -235,11 +254,26 @@ some PAST that will produce it or a name that it can be looked up by.
     ops.'push_pirop'('set', lexreg, bindpost)
   have_lexreg:
     ops.'push_pirop'('.lex', name, lexreg)
+    .local int directaccess
+    directaccess = node.'directaccess'()
+    unless directaccess goto no_directaccess
+    unless null lexregs goto have_lexregs
+    lexregs = new 'Hash'
+    store_dynamic_lex '%*LEXREGS', lexregs
+  have_lexregs:
+    lexregs[name] = lexreg
+  no_directaccess:
     ops.'result'(lexreg)
     .return (ops)
 
   lexical_bind:
     $P0 = get_hll_global ['POST'], 'Op'
+    if null lexregs goto no_lexregs_bind
+    .local string lexreg
+    lexreg = lexregs[name]
+    unless lexreg goto no_lexregs_bind
+    .tailcall $P0.'new'(lexreg, bindpost, 'pirop'=>'set', 'result'=>bindpost)
+  no_lexregs_bind:
     .tailcall $P0.'new'(name, bindpost, 'pirop'=>'store_lex', 'result'=>bindpost)
 .end
 
