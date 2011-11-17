@@ -237,8 +237,14 @@ class QRegex::NFA {
                     elsif $act == $EDGE_CODEPOINT {
                         nqp::push(@nextst, $to) if nqp::ord($target, $offset) == $arg;
                     }
+                    elsif $act == $EDGE_CODEPOINT_NEG {
+                        nqp::push(@nextst, $to) unless nqp::ord($target, $offset) == $arg;
+                    }
                     elsif $act == $EDGE_CHARLIST {
                         nqp::push(@nextst, $to) if nqp::index($arg, nqp::substr($target, $offset, 1)) >= 0;
+                    }
+                    elsif $act == $EDGE_CHARLIST_NEG {
+                        nqp::push(@nextst, $to) unless nqp::index($arg, nqp::substr($target, $offset, 1)) >= 0;
                     }
                 }
             }
