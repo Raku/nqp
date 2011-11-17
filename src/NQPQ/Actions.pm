@@ -67,7 +67,7 @@ class NQP::Actions is HLL::Actions {
         }
 
         # Need to load the NQP dynops/dympmcs, plus any extras requested.
-        my @loadlibs := ['nqp_group', 'nqp_ops', 'trans_ops', 'io_ops'];
+        my @loadlibs := ['nqp_group', 'nqp_ops', 'nqp_bigint_ops', 'trans_ops', 'io_ops'];
         if %*COMPILING<%?OPTIONS><vmlibs> {
             for pir::split(',', %*COMPILING<%?OPTIONS><vmlibs>) {
                 @loadlibs.push($_);
@@ -456,11 +456,14 @@ class NQP::Actions is HLL::Actions {
             elsif $<twigil>[0] eq '!' {
                 # Construct PAST.
                 my $name := ~@name.pop;
+                my $ch   := PAST::Var.new( :name('$?CLASS') );
+                $ch<has_compile_time_value> := 1;
+                $ch<compile_time_value> := $*PACKAGE;
                 $past := PAST::Var.new(
                     :name($name), :scope('attribute_6model'),
                     :viviself( vivitype( $<sigil> ) ),
                     PAST::Op.new( :pirop('nqp_decontainerize PP'), PAST::Var.new( :name('self') ) ),
-                    PAST::Var.new( :name('$?CLASS') )
+                    $ch
                 );
                 
                 # Make sure the attribute exists and add type info.
@@ -1051,7 +1054,6 @@ class NQP::Actions is HLL::Actions {
             $block.symbol('$/', :scope<lexical>);
             my $regex := QRegex::P6Regex::Actions::buildsub($<p6regex>.ast, $block);
             $regex.name($name);
-            my $prefix_meth;
             
             if $*PKGDECL && pir::can($*PACKAGE.HOW, 'add_method') {
                 # Add the actual method.
@@ -1059,7 +1061,11 @@ class NQP::Actions is HLL::Actions {
             }
             
             # In sink context, we don't need the Regex::Regex object.
-            $past := $regex;
+            $past := PAST::Op.new(
+                :pasttype<callmethod>, :name<new>,
+                lexical_package_lookup(['NQPRegexMethod'], $/),
+                $regex);
+            $past<sink> := $regex;
         }
         make $past;
     }
@@ -1270,21 +1276,23 @@ class NQP::Actions is HLL::Actions {
                            :node($/) );
     }
 
-    method quote:sym</ />($/, $key?) {
-        if $key eq 'open' {
-            $Regex::P6Regex::Actions::REGEXNAME := pir::null__P();
-            @BLOCK[0].symbol('$¢', :scope('lexical'));
-            @BLOCK[0].symbol('$/', :scope('lexical'));
-            return 0;
-        }
-        my $regex := 
-            Regex::P6Regex::Actions::buildsub($<p6regex>.ast, @BLOCK.shift);
-        my $past := 
-            PAST::Op.new(
-                :pasttype<callmethod>, :name<new>,
-                lexical_package_lookup(['Regex', 'Regex'], $/),
-                $regex
-            );
+    method quote:sym</ />($/) {
+        my $block := @BLOCK.shift;
+        $block[0].push(PAST::Var.new(:name<self>, :scope<parameter>));
+        $block[0].push(
+            PAST::Var.new(:name<self>, :scope<register>, :isdecl(1),
+                          :viviself(PAST::Var.new( :name<self>, :scope('lexical_6model') ))));
+        $block[0].push(PAST::Var.new(:name<$¢>, :scope<lexical>, :isdecl(1)));
+        $block[0].push(PAST::Var.new(:name<$/>, :scope<lexical>, :isdecl(1)));
+        $block.symbol('$¢', :scope<lexical>);
+        $block.symbol('$/', :scope<lexical>);
+
+        my $regex := QRegex::P6Regex::Actions::buildsub($<p6regex>.ast, $block);
+        my $past := PAST::Op.new(
+            :pasttype<callmethod>, :name<new>,
+            lexical_package_lookup(['NQPRegex'], $/),
+            $regex);
+
         # In sink context, we don't need the Regex::Regex object.
         $past<sink> := $regex;
         make $past;
@@ -1487,34 +1495,34 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
 
     method metachar:sym<:my>($/) {
         my $past := $<statement>.ast;
-        make PAST::Regex.new( $past, :pasttype('pastnode'),
-                              :subtype('declarative'), :node($/) );
+        make QAST::Regex.new( $past,
+                              :rxtype('pastnode'), :subtype('declarative'), :node($/) );
     }
 
     method metachar:sym<{ }>($/) { 
-        make PAST::Regex.new( $<codeblock>.ast, 
-                              :pasttype<pastnode>, :node($/) );
+        make QAST::Regex.new( $<codeblock>.ast, 
+                              :rxtype<pastnode>, :node($/) );
     }
 
     method metachar:sym<nqpvar>($/) {
-        make PAST::Regex.new( '!INTERPOLATE', $<var>.ast, 
-                              :pasttype<subrule>, :subtype<method>, :node($/));
+        make QAST::Regex.new( '!INTERPOLATE', $<var>.ast, 
+                              :rxtype<subrule>, :subtype<method>, :node($/));
     }
 
     method assertion:sym<{ }>($/) { 
-        make PAST::Regex.new( '!INTERPOLATE_REGEX', $<codeblock>.ast, 
-                              :pasttype<subrule>, :subtype<method>, :node($/));
+        make QAST::Regex.new( '!INTERPOLATE_REGEX', $<codeblock>.ast, 
+                              :rxtype<subrule>, :subtype<method>, :node($/));
     }
 
     method assertion:sym<?{ }>($/) { 
-        make PAST::Regex.new( $<codeblock>.ast, 
+        make QAST::Regex.new( $<codeblock>.ast, 
                               :subtype<zerowidth>, :negate( $<zw> eq '!' ),
-                              :pasttype<pastnode>, :node($/) );
+                              :rxtype<pastnode>, :node($/) );
     }
 
     method assertion:sym<var>($/) {
-        make PAST::Regex.new( '!INTERPOLATE_REGEX', $<var>.ast, 
-                              :pasttype<subrule>, :subtype<method>, :node($/));
+        make QAST::Regex.new( '!INTERPOLATE_REGEX', $<var>.ast, 
+                              :rxtype<subrule>, :subtype<method>, :node($/));
     }
 
     method codeblock($/) {

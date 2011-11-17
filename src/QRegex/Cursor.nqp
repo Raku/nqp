@@ -118,7 +118,61 @@ role NQPCursorRole {
     }
 
     method !protoregex($name) {
-        pir::say($name);
+        my $nfa := self.'!protoregex_nfa'($name);
+        my @fatepos := $nfa.run($!target, $!pos);
+        my $cur;
+        if @fatepos {
+            my $fate := 0;
+            my @fatesort;
+            my @rxfate := $nfa.states[0];
+            while $fate < @fatepos {
+                my $pos := @fatepos[$fate];
+                if pir::defined($pos) {
+                    my $n := nqp::elems(@fatesort) - 1;
+                    while $n >= 0
+                          && @fatepos[@fatesort[$n]] >= @fatepos[$fate] {
+                        $n := $n - 1;
+                    }
+                    nqp::splice(@fatesort, [$fate], $n+1, 0);
+                }
+                $fate := $fate + 1;
+            }
+            while @fatesort {
+                my $rxname := @rxfate[nqp::pop(@fatesort)];
+                nqp::say("invoking $rxname");
+                $cur := self."$rxname"();
+                last if nqp::getattr_i($cur, $?CLASS, '$!pos') >= 0;
+            }
+        }
+        $cur // self."!cursor_start"();
+    }
+
+    method !protoregex_nfa($name) {
+        my %protorx := self."!protoregex_table"();
+        my $nfa := QRegex::NFA.new;
+        my @fates := $nfa.states[0];
+        my $start := 1;
+        my $fate := 0;
+        my $prefix      := $name ~ ':sym<';
+        my $prefixchars := nqp::chars($prefix);
+        for %protorx {
+            my $rxname := $_.key;
+            if nqp::substr($rxname, 0, $prefixchars) eq $prefix {
+                $fate := $fate + 1;
+                @fates[$fate] := $rxname;
+                $nfa.mergesubrule($start, 0, $fate, self, $rxname);
+            }
+        }
+        $nfa;
+    }
+
+    method !protoregex_table() {
+        my %protorx;
+        for self.HOW.methods(self, :local(0)) -> $meth {
+            my $methname := ~$meth;
+            %protorx{$methname} := $meth if nqp::index($methname, ':sym<') >0;
+        }
+        %protorx;
     }
 
     method !BACKREF($name) {
@@ -281,8 +335,11 @@ class NQPMatch is NQPCapture {
 
     method from() { $!from }
     method to()   { $!to }
-    method Str() is parrot_vtable('get_string') { nqp::substr($!orig, $!from, $!to-$!from) }
+    method Str() is parrot_vtable('get_string')  { nqp::substr($!orig, $!from, $!to-$!from) }
+    method ()    is parrot_vtable('get_integer') { +self.Str() }
+    method ()    is parrot_vtable('get_number')  { +self.Str() }
     method Bool() { $!to >= $!from }
+    method chars() { $!to >= $!from ?? $!to - $!from !! 0 }
 
     method !dump_str($key) {
         sub dump_array($key, $item) {
@@ -331,10 +388,30 @@ class NQPCursor does NQPCursorRole {
     method parse($target, :$rule = 'TOP', :$actions, *%options) {
         my $*ACTIONS := $actions;
         my $cur := self.'!cursor_init'($target, |%options);
-        pir::find_method__PPs($cur, $rule)($cur).MATCH()
+        pir::is_invokable__IP($rule) ??
+            $rule($cur).MATCH() !!
+            pir::find_method__PPs($cur, $rule)($cur).MATCH()
     }
 }
 
+class NQPRegexMethod {
+    has $!code is parrot_vtable_handler('invoke');
+    method new($code) {
+        self.bless(:code($code));
+    }
+    method ACCEPTS($target) {
+        NQPCursor.parse($target, :rule(self))
+    }
+    method Str() is parrot_vtable('get_string') {
+        ~$!code
+    }
+}
+
+class NQPRegex is NQPRegexMethod {
+    method ACCEPTS($target) {
+        NQPCursor.parse($target, :rule(self), :c(0))
+    }
+}
 
 my module EXPORT {
     our module DEFAULT {

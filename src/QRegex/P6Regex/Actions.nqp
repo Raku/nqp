@@ -110,7 +110,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method metachar:sym<ws>($/) {
         my $qast := %*RX<s>
-                    ?? QAST::Regex.new(PAST::Node.new('ws'), :rxtype<subrule>, :subtype<method>, :node($/))
+                    ?? QAST::Regex.new(PAST::Node.new('ws'), :rxtype<ws>, :subtype<method>, :node($/))
                     !! 0;
         make $qast;
     }
@@ -319,7 +319,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                               nqp::substr(%*RX<name>,
                                           nqp::index(%*RX<name>, ':sym<') + 5),
                               1);
-            $qast := QAST::Regex.new(:rxtype<literal>, $rxname, :node($/));
+            $qast := QAST::Regex.new(:name('sym'), :rxtype<subcapture>, :node($/),
+                QAST::Regex.new(:rxtype<literal>, $rxname, :node($/)));
         }
         else {
             $qast := QAST::Regex.new(:rxtype<subrule>, :subtype<capture>,
@@ -401,18 +402,29 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     nqp::iscclass(pir::const::CCLASS_NUMERIC, $_.key, 0) + ($_.value > 1) * 2); 
             }
         }
+        my $initpast := PAST::Stmts.new();
         my $capblock := PAST::Block.new( :hll<nqp>, :namespace(['Sub']), :lexical(0),
                                          :name($block.subid ~ '_caps'),  $hashpast );
-        $block.push($capblock);
+        $initpast.push(PAST::Stmt.new($capblock));
+
+        my $nfapast := QRegex::NFA.new.addnode($qast).past;
+        if $nfapast {
+            my $nfablock := PAST::Block.new( 
+                                :hll<nqp>, :namespace(['Sub']), :lexical(0),
+                                :name($block.subid ~ '_nfa'), $nfapast);
+            $initpast.push(PAST::Stmt.new($nfablock));
+        }
 
         unless $block.symbol('$¢') {
-            $block.push(PAST::Var.new(:name<$¢>, :scope<lexical>, :isdecl(1)));
+            $initpast.push(PAST::Var.new(:name<$¢>, :scope<lexical>, :isdecl(1)));
             $block.symbol('$¢', :scope<lexical>);
         }
+
         $qast := QAST::Regex.new( :rxtype<concat>,
                      QAST::Regex.new( :rxtype<scan> ),
                      $qast,
                      QAST::Regex.new( :rxtype<pass>, :name(%*RX<name>) ));
+        $block.push($initpast);
         $block.push(PAST::QAST.new($qast));
         $block;
     }
