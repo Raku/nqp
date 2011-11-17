@@ -139,7 +139,7 @@ role NQPCursorRole {
             }
             while @fatesort {
                 my $rxname := @rxfate[nqp::pop(@fatesort)];
-                nqp::say("invoking $rxname");
+                #nqp::say("invoking $rxname");
                 $cur := self."$rxname"();
                 last if nqp::getattr_i($cur, $?CLASS, '$!pos') >= 0;
             }

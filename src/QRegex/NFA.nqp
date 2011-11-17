@@ -136,7 +136,7 @@ class QRegex::NFA {
     }
 
     method mergesubrule($start, $to, $fate, $cursor, $name) {
-        nqp::say("adding $name");
+        #nqp::say("adding $name");
         my @substates;
         if pir::can($cursor, $name) {
             @substates := $cursor.HOW.find_method($cursor, $name).nqpattr('nfa');
