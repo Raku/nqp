@@ -125,6 +125,38 @@ class QRegex::NFA {
                   !! self.addedge($from, 0, $EDGE_SUBRULE, $node.name))
             !! self.addedge($from, $to, $EDGE_SUBRULE, $node[0][0]);
     }
+    
+    method quant($node, $from, $to) {
+        my $min := 0 + ($node.min // 0);
+        my $max := 0 + ($node.max // -1); # -1 means Inf
+
+        # handle only ?,*,+ for now
+        return self.fate($node, $from, $to) if $max > 1 || $min > 1;
+        if $max == -1 {
+            if $min == 0 { # * quantifier
+                my $st := self.regex_nfa($node[0], $from, $from);
+                $st := self.addedge($from, $to, $EDGE_EPSILON, 0);
+                $to := $st if $to < 0 && $st > 0;
+            } else { # + quantifier
+                my $start := self.addstate();
+                self.addedge($from, $start, $EDGE_EPSILON, 0);
+                my $looper := self.addstate();
+                my $st := self.regex_nfa($node[0], $start, $looper);
+                self.addedge($looper, $start, $EDGE_EPSILON, 0);
+                self.addedge($looper, $to, $EDGE_EPSILON, 0);
+                $to := $st if $to < 0 && $st > 0;
+            }
+            $to;
+        } elsif $min == 0 && $max == 1 { # ? quantifier
+            my $st := self.regex_nfa($node[0], $from, $to);
+            $to := $st if $to < 0 && $st > 0;
+            $st := self.addedge($from, $to, $EDGE_EPSILON, 0);
+            $to := $st if $to < 0 && $st > 0;
+            $to;
+        } else {
+            self.fate($node, $from, $to)
+        }
+    }
 
     method past() {
         return 0 unless $!edges;
