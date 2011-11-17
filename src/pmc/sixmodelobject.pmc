@@ -24,6 +24,12 @@
 
 #include "../6model/sixmodelobject.h"
 
+/* We need to know how to boolify bigints. Really need something better,
+ * but this will do for now. */
+#include "../../3rdparty/libtommath/tommath.h"
+#include "../6model/reprs/P6bigint.h"
+#define bigint_repr_id 7
+
 PMC * decontainerize(PARROT_INTERP, PMC *var) {
     ContainerSpec *spec = STABLE(var)->container_spec;
     if (spec && IS_CONCRETE(var)) {
@@ -251,6 +257,16 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
                         !Parrot_str_equal(interp, unstr, CONST_STRING(interp, "0"));
                 case BOOL_MODE_NOT_TYPE_OBJECT:
                     return IS_CONCRETE(decont);
+                case BOOL_MODE_BIGINT:
+                    if (IS_CONCRETE(decont)) {
+                        struct SixModel_REPROps *r = REPR(decont);
+                        if (r->ID == bigint_repr_id)
+                            return !mp_iszero(&((P6bigintInstance *)PMC_data(decont))->body.i);
+                        else
+                            return !mp_iszero(&((P6bigintBody *)r->get_boxed_ref(interp,
+                                STABLE(decont), OBJECT_BODY(decont), bigint_repr_id))->i);
+                    }
+                    return 0;
                 default:
                     return SUPER();
             }

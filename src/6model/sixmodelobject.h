@@ -48,6 +48,7 @@ typedef struct {
 #define BOOL_MODE_UNBOX_STR_NOT_EMPTY           3
 #define BOOL_MODE_UNBOX_STR_NOT_EMPTY_OR_ZERO   4
 #define BOOL_MODE_NOT_TYPE_OBJECT               5
+#define BOOL_MODE_BIGINT                        6
 
 /* Controls the way that type checks are performed. By default, if there is
  * a type check cache we treat it as definitive. However, it's possible to
