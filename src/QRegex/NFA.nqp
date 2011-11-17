@@ -240,6 +240,12 @@ class QRegex::NFA {
                     elsif $act == $EDGE_CODEPOINT_NEG {
                         nqp::push(@nextst, $to) unless nqp::ord($target, $offset) == $arg;
                     }
+                    elsif $act == $EDGE_CHARCLASS {
+                        nqp::push(@nextst, $to) if nqp::iscclass($arg, $target, $offset);
+                    }
+                    elsif $act == $EDGE_CHARCLASS_NEG {
+                        nqp::push(@nextst, $to) unless nqp::iscclass($arg, $target, $offset);
+                    }
                     elsif $act == $EDGE_CHARLIST {
                         nqp::push(@nextst, $to) if nqp::index($arg, nqp::substr($target, $offset, 1)) >= 0;
                     }
