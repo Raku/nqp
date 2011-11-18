@@ -163,6 +163,10 @@ class QRegex::NFA {
     method pastnode($node, $from, $to) {
         self.addedge($from, $to, $EDGE_EPSILON, 0);
     }
+    
+    method subcapture($node, $from, $to) {
+        self.regex_nfa($node[0], $from, $to);
+    }
 
     method past() {
         return 0 unless $!edges;
