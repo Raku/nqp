@@ -36,8 +36,8 @@ class QAST::Compiler is HLL::Compiler {
 
         # common prologue
         my $startreg := '(' ~ nqp::join(', ', [%*REG<cur>, %*REG<tgt>, %*REG<pos>, %*REG<curclass>, %*REG<bstack>, '$I19']) ~ ')';
-        $ops.push_pirop('store_lex', 'unicode:"$\x{a2}"', %*REG<cur>);
         $ops.push_pirop('callmethod', '"!cursor_start"', 'self', :result($startreg));
+        $ops.push_pirop('store_lex', 'unicode:"$\x{a2}"', %*REG<cur>);
         $ops.push_pirop('length', %*REG<eos>, %*REG<tgt>);
         $ops.push_pirop('eq', '$I19', 1, $restartlabel);
         $ops.push(self.regex_post($node));
