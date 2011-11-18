@@ -207,7 +207,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             QAST::Regex.new(
                 $<GOAL>.ast,
                 QAST::Regex.new( PAST::Node.new('FAILGOAL', ~$<GOAL>),
-                                  :rxtype<subrule>, :subtype<method> ),
+                                 :rxtype<subrule>, :subtype<method> ),
                 :rxtype<altseq>
             ),
             :rxtype<concat>
@@ -341,6 +341,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                                      :name($name) );
             if $<arglist> {
                 for $<arglist>[0].ast.list { $qast[0].push( $_ ) }
+            }
+            elsif $<nibbler> {
+                $qast[0].push(buildsub($<nibbler>[0].ast));
             }
         }
         make $qast;
