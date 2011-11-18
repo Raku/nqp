@@ -120,7 +120,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method metachar:sym<( )>($/) {
-        my $subpast := PAST::Node.new(buildsub($<nibbler>.ast));
+        my $subpast := PAST::Node.new(buildsub($<nibbler>.ast, :anon(1)));
         my $qast := QAST::Regex.new( $subpast, $<nibbler>.ast, :rxtype('subrule'),
                                      :subtype('capture'), :node($/) );
         make $qast;
@@ -343,7 +343,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 for $<arglist>[0].ast.list { $qast[0].push( $_ ) }
             }
             elsif $<nibbler> {
-                $qast[0].push(buildsub($<nibbler>[0].ast));
+                $qast[0].push(buildsub($<nibbler>[0].ast, :anon(1)));
             }
         }
         make $qast;
@@ -409,7 +409,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         $ast;
     }
 
-    our sub buildsub($qast, $block = PAST::Block.new(:blocktype<method>)) {
+    our sub buildsub($qast, $block = PAST::Block.new(:blocktype<method>), :$anon) {
         my $hashpast := PAST::Op.new( :pasttype<hash> );
         for capnames($qast, 0) {
             if $_.key gt '' { 
@@ -439,7 +439,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         $qast := QAST::Regex.new( :rxtype<concat>,
                      QAST::Regex.new( :rxtype<scan> ),
                      $qast,
-                     QAST::Regex.new( :rxtype<pass>, :name(%*RX<name>) ));
+                     ($anon ??
+                          QAST::Regex.new( :rxtype<pass> ) !!
+                          QAST::Regex.new( :rxtype<pass>, :name(%*RX<name>) )));
         $block.push($initpast);
         $block.push(PAST::QAST.new($qast));
         $block;
