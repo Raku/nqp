@@ -161,7 +161,9 @@ class QRegex::NFA {
     }
     
     method pastnode($node, $from, $to) {
-        self.addedge($from, $to, $EDGE_EPSILON, 0);
+        $node.subtype eq 'zerowidth' || $node.subtype eq 'declarative' ??
+            self.addedge($from, $to, $EDGE_EPSILON, 0) !!
+            self.fate($node, $from, $to);
     }
     
     method subcapture($node, $from, $to) {
