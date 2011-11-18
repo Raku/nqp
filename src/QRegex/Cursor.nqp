@@ -198,12 +198,14 @@ role NQPCursorRole {
     }
 
     method before($regex) {
-        my $cur := self.'!cursor_start'();
-        $cur.'!cursor_pass'($!pos, 'before')
-            if $regex($cur);
+        my $cur := self."!cursor_start"();
+        nqp::bindattr_i($cur, $?CLASS, '$!pos', $!pos);
+        nqp::getattr_i($regex($cur), $?CLASS, '$!pos') >= 0 ??
+            $cur."!cursor_pass"($!pos, 'before') !!
+            $cur."!cursor_fail"();
         $cur;
     }
-                 
+
     method ws() {
         # skip over any whitespace, fail if between two word chars
         my $cur := self."!cursor_start"();
