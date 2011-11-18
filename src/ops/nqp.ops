@@ -1678,6 +1678,11 @@ Push a new backtracking mark onto $1 with label $2, position $3, and count $4
 
 Set $1 to be the index of latest mark frame $3 in stack $2.
 
+=item nqp_rxsetcaps(ptr, cstack)
+
+Sets the top cstack count in $1 to be the elements in $2, or 0 if it's null.
+Used to not lose count when doing ratcheting and replacing marks.
+
 =cut
 
 */
@@ -1705,6 +1710,12 @@ inline op nqp_rxpeek(out INT, in PMC, in LABEL) :base_core {
     $1 = ptr;
 }
 
+inline op nqp_rxsetcaps(in PMC, in PMC) :base_core {
+    PMC *bstack = $1;
+    VTABLE_set_integer_keyed_int(interp, bstack,
+        VTABLE_elements(interp, bstack) - 5,
+        PMC_IS_NULL($2) ? 0 : VTABLE_elements(interp, $2));
+}
 
 /*
 
