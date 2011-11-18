@@ -61,9 +61,17 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     }
 
     token quantified_atom {
-        <atom> [ <.ws> [ <quantifier> | <?before ':'> <backmod> <!alpha> ] ]?
+        <atom>
+        [
+            <.ws> [ <quantifier> | <?before ':'> <backmod> <!alpha> ]
+            [ <.ws> <separator> ]?
+        ]?
     }
 
+    token separator {
+        $<septype>=['%''%'?] <normspace>? <quantified_atom>
+    }
+    
     token atom {
         # :dba('regex atom')
         [

@@ -69,8 +69,23 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             $ast.unshift($qast);
             $qast := $ast;
         }
+        if $<separator> {
+            unless $qast.rxtype eq 'quant' {
+                $/.CURSOR.panic("'" ~ $<separator>[0]<septype> ~
+                    "' many only be used immediately following a quantifier")
+            }
+            $qast.push($<separator>[0].ast);
+            if $<separator>[0]<septype> eq '%%' {
+                $qast := QAST::Regex.new( :rxtype<concat>, $qast,
+                    QAST::Regex.new( :rxtype<quant>, :min(0), :max(1), $<separator>[0].ast ));
+            }
+        }
         $qast.backtrack('r') if $qast && !$qast.backtrack && %*RX<r>;
         make $qast;
+    }
+    
+    method separator($/) {
+        make $<quantified_atom>.ast;
     }
 
     method atom($/) {
