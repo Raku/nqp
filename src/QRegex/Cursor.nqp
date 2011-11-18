@@ -323,6 +323,13 @@ role NQPCursorRole {
         $cur;
     }
 
+    method FAILGOAL($goal) {
+        my $sub := Q:PIR {
+            %r = getinterp
+            %r = %r['sub';1]
+        };
+        pir::die("Unable to parse " ~ ~$sub ~ ", couldn't find final $goal");
+    }
 }
 
 
