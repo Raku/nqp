@@ -44,7 +44,6 @@ class QRegex::NFA {
 
     method regex_nfa($node, $from, $to) {
         my $method := ($node.rxtype // 'concat');
-        nqp::say("got method $method");
         self.HOW.can(self, $method) 
          ?? self."$method"($node, $from, $to)
          !! self.fate($node, $from, $to);
@@ -124,7 +123,9 @@ class QRegex::NFA {
             ?? ($node.negate 
                   ?? self.fate($node, $from, $to)
                   !! self.addedge($from, 0, $EDGE_SUBRULE, $node.name))
-            !! self.addedge($from, $to, $EDGE_SUBRULE, $node[0][0]);
+            !! $subtype eq 'capture' && $node[1]
+                  ?? self.regex_nfa($node[1], $from, $to)
+                  !! self.addedge($from, $to, $EDGE_SUBRULE, $node[0][0]);
     }
     
     method quant($node, $from, $to) {

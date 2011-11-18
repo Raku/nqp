@@ -121,7 +121,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method metachar:sym<( )>($/) {
         my $subpast := PAST::Node.new(buildsub($<nibbler>.ast));
-        my $qast := QAST::Regex.new( $subpast, :rxtype('subrule'),
+        my $qast := QAST::Regex.new( $subpast, $<nibbler>.ast, :rxtype('subrule'),
                                      :subtype('capture'), :node($/) );
         make $qast;
     }
