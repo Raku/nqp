@@ -201,6 +201,19 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         make $qast;
     }
 
+    method metachar:sym<~>($/) {
+        make QAST::Regex.new(
+            $<EXPR>.ast,
+            QAST::Regex.new(
+                $<GOAL>.ast,
+                QAST::Regex.new( PAST::Node.new('FAILGOAL', ~$<GOAL>),
+                                  :rxtype<subrule>, :subtype<method> ),
+                :rxtype<altseq>
+            ),
+            :rxtype<concat>
+        );
+    }
+
     method backslash:sym<s>($/) {
         make QAST::Regex.new(:rxtype<cclass>, '.CCLASS_WHITESPACE', 
                              :subtype($<sym> eq 'n' ?? 'nl' !! ~$<sym>), 
