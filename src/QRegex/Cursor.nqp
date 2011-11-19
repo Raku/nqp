@@ -16,11 +16,11 @@ role NQPCursorRole {
 
     method CAPHASH() {
         my $caps := nqp::hash();
+        my %caplist := $!regexsub.nqpattr('caps');
+        for %caplist {
+            $caps{$_.key} := nqp::list() if $_.value >= 2;
+        }
         if $!cstack {
-            my %caplist := $!regexsub.nqpattr('caps');
-            for %caplist {
-                $caps{$_.key} := nqp::list() if $_.value >= 2;
-            }
             for $!cstack -> $subcur {
                 my $submatch := $subcur.MATCH;
                 for nqp::split('=', nqp::getattr($subcur, $?CLASS, '$!name')) -> $name {
