@@ -50,7 +50,7 @@ role NQPCursorRole {
     }
 
     method !cursor_start() {
-        my $new := self.CREATE();
+        my $new := nqp::create(self);
         nqp::bindattr($new, $?CLASS, '$!orig', $!orig);
         nqp::bindattr($new, $?CLASS, '$!regexsub', Q:PIR {
             $P0 = getinterp
@@ -89,8 +89,9 @@ role NQPCursorRole {
         $!cstack;
     }
 
+    my $pass_mark := 1; # NQP has no constant table yet
     method !cursor_pass($pos, $name?) {
-        $!match := 1;
+        $!match := $pass_mark;
         $!pos := $pos;
         $!restart := $!regexsub;
         self.'!reduce'($name) if $name;
@@ -202,7 +203,7 @@ role NQPCursorRole {
         nqp::bindattr_i($cur, $?CLASS, '$!pos', $!pos);
         nqp::getattr_i($regex($cur), $?CLASS, '$!pos') >= 0 ??
             $cur."!cursor_pass"($!pos, 'before') !!
-            $cur."!cursor_fail"();
+            nqp::bindattr_i($cur, $?CLASS, '$!pos', -3);
         $cur;
     }
 
@@ -215,7 +216,7 @@ role NQPCursorRole {
         nqp::bindattr_i($cur, $?CLASS, '$!pos', nqp::chars($!target) - $!pos);
         nqp::getattr_i($regex($cur), $?CLASS, '$!pos') >= 0 ??
             $cur."!cursor_pass"($!pos, 'after') !!
-            $cur."!cursor_fail"();
+            nqp::bindattr_i($cur, $?CLASS, '$!pos', -3);
         $cur;
     }
 
