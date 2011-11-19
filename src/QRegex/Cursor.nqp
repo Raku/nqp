@@ -118,7 +118,7 @@ role NQPCursorRole {
     }
 
     method !protoregex($name) {
-        my $nfa := self.'!protoregex_nfa'($name);
+        my $nfa := self.HOW.cache(self, $name, { self.'!protoregex_nfa'($name) });
         my @fatepos := $nfa.run($!target, $!pos);
         my $cur;
         if @fatepos {
