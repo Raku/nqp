@@ -30,6 +30,9 @@ knowhow NQPClassHOW {
 
     # Full list of roles that we do.
     has @!done;
+    
+    # Cached values, which are thrown away if the class changes.
+    has %!cache;
 
     # Parrot-specific vtable mapping hash. Maps vtable name to method.
     has %!parrot_vtable_mapping;
@@ -72,6 +75,7 @@ knowhow NQPClassHOW {
             pir::die("Cannot add a null method '$name' to class '$!name'");
         }
         pir::set_method_cache_authoritativeness__vPi($obj, 0);
+        %!cache := {};
         %!methods{$name} := $code_obj;
     }
 
@@ -393,6 +397,7 @@ knowhow NQPClassHOW {
             pir::stable_publish_vtable_handler_mapping__vPP($obj, %mapping);
         }
     }
+
     ##
     ## Introspecty
     ##
@@ -491,5 +496,15 @@ knowhow NQPClassHOW {
             }
         }
         pir::null__P()
+    }
+
+    ##
+    ## Cache-related
+    ##
+    method cache($obj, $key, $value_generator) {
+        %!cache || (%!cache := {});
+        pir::exists(%!cache, $key) ??
+            %!cache{$key} !!
+            (%!cache{$key} := $value_generator())
     }
 }
