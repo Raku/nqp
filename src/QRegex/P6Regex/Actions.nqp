@@ -390,6 +390,16 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         make $qast;
     }
+    
+    method arg($/) {
+        make $<quote_EXPR> ?? $<quote_EXPR>.ast !! +$<val>;
+    }
+
+    method arglist($/) {
+        my $past := PAST::Op.new( :pasttype('list') );
+        for $<arg> { $past.push( $_.ast ); }
+        make $past;
+    }
 
     method cclass_elem($/) {
         my $str := '';
