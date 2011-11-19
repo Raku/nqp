@@ -358,7 +358,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 for $<arglist>[0].ast.list { $qast[0].push( $_ ) }
             }
             elsif $<nibbler> {
-                $qast[0].push(buildsub($<nibbler>[0].ast, :anon(1)));
+                $name eq 'after' ??
+                    $qast[0].push(buildsub(self.flip_ast($<nibbler>[0].ast), :anon(1))) !!
+                    $qast[0].push(buildsub($<nibbler>[0].ast, :anon(1)));
             }
         }
         make $qast;
@@ -516,6 +518,21 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         $ast.subtype('capture');
     }
 
+    method flip_ast($qast) {
+        if $qast.rxtype eq 'literal' {
+            $qast[0] := $qast[0].reverse();
+        }
+        elsif $qast.rxtype eq 'concat' {
+            my @tmp;
+            while +@($qast) { @tmp.push(@($qast).shift) }
+            while @tmp      { @($qast).push(self.flip_ast(@tmp.pop)) }
+        }
+        elsif $qast.rxtype eq 'pastnode' {
+            # Don't go exploring these
+        }
+        else {
+            for @($qast) { self.flip_ast($_) }
+        }
+        $qast
+    }
 }
-
-

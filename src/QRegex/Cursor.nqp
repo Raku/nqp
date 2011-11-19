@@ -206,6 +206,19 @@ role NQPCursorRole {
         $cur;
     }
 
+    # Expects to get a regex whose syntax tree was flipped during the
+    # compile.
+    method after($regex) {
+        my $cur := self."!cursor_start"();
+        nqp::bindattr_s($cur, $?CLASS, '$!target', $!target.reverse());
+        nqp::bindattr_i($cur, $?CLASS, '$!from', nqp::chars($!target) - $!pos);
+        nqp::bindattr_i($cur, $?CLASS, '$!pos', nqp::chars($!target) - $!pos);
+        nqp::getattr_i($regex($cur), $?CLASS, '$!pos') >= 0 ??
+            $cur."!cursor_pass"($!pos, 'after') !!
+            $cur."!cursor_fail"();
+        $cur;
+    }
+
     method ws() {
         # skip over any whitespace, fail if between two word chars
         my $cur := self."!cursor_start"();
