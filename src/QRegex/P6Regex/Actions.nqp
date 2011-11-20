@@ -306,7 +306,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
     
     method backlit($/) {
-        my $qast := QAST::Regex.new( '\\', :rxtype('enumcharlist'),
+        my $qast := QAST::Regex.new( ~$/, :rxtype('enumcharlist'),
                         :node($/) );
         make $qast;
     }
