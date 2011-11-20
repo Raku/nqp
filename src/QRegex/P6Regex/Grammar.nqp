@@ -2,7 +2,7 @@ use NQPHLL;
 
 grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
-    method obs ($old, $new, $when = 'in Perl 6') {
+    method obs ($old, $new, $when = ' in Perl 6') {
         self.panic('Unsupported use of ' ~ ~$old ~ ';'
                    ~ ~$when ~ ' please use ' ~ ~$new);
     }
