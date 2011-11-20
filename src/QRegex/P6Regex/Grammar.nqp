@@ -195,15 +195,12 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token assertion:sym<[> { <?before '['|'+'|'-'> <cclass_elem>+ }
 
-    token backlit { '\\' | '-' }
-
     token cclass_elem {
         $<sign>=['+'|'-'|<?>]
         <.normspace>?
         [
         | '[' $<charspec>=(
                   || \s* '-' <!before \s* ']'> <.obs: '- as character range','.. for range, for explicit - in character class, escape it or place as last thing'>
-                  || \s* '\\' <backlit>
                   || \s* '\\' <backslash>
                   || \s* (<-[\]\\]>) [ \s* '..' \s* (.) ]?
               )*

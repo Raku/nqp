@@ -304,12 +304,6 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         my $qast := QAST::Regex.new( ~$/ , :rxtype('literal'), :node($/) );
         make $qast;
     }
-    
-    method backlit($/) {
-        my $qast := QAST::Regex.new( ~$/, :rxtype('enumcharlist'),
-                        :node($/) );
-        make $qast;
-    }
 
     method assertion:sym<?>($/) {
         my $qast;
@@ -422,11 +416,6 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     my $bs := $_<backslash>.ast;
                     $bs.negate(!$bs.negate) if $<sign> eq '-';
                     @alts.push($bs);
-                }
-                elsif $_<backlit> {
-                    my $bslit := $_<backlit>.ast;
-                    $bslit.negate(!$bslit.negate) if $<sign> eq '-';
-                    @alts.push($bslit);
                 }
                 elsif $_[1] {
                     my $ord0 := nqp::ord($_[0]);
