@@ -250,10 +250,11 @@ class QAST::Compiler is HLL::Compiler {
         my $litconst := $node[0];
         my $litlen := nqp::chars($litconst);
         my $litpost := self.escape($litconst);
+        my $cmpop := $node.negate ?? 'eq' !! 'ne';
         $ops.push_pirop('add',    '$I11', %*REG<pos>, $litlen);
         $ops.push_pirop('gt',     '$I11', %*REG<eos>, %*REG<fail>);
         $ops.push_pirop('substr', '$S10', %*REG<tgt>, %*REG<pos>, $litlen);
-        $ops.push_pirop('ne',     '$S10', $litpost, %*REG<fail>);
+        $ops.push_pirop($cmpop,   '$S10', $litpost, %*REG<fail>);
         $ops.push_pirop('add',    %*REG<pos>, $litlen);
         $ops;
     }
