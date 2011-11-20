@@ -396,7 +396,6 @@ class QAST::Compiler is HLL::Compiler {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
         my $name := $*PASTCOMPILER.as_post($node.name, :rtype<*>);
         my $subtype := $node.subtype;
-        my $backtrack := $node.backtrack;
         my $cpn := self.post_children($node[0]);
         my @pargs := $cpn[1] // [];
         my @nargs := $cpn[2] // [];
@@ -410,21 +409,6 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push_pirop('callmethod', '"!cursor_capture"', %*REG<cur>, 
                         '$P11', $name, :result(%*REG<cstack>))
           if $subtype eq 'capture';
-        if $subtype ne 'zerowidth' && $backtrack ne 'r' {
-            my $prefix := self.unique('rxsubrule');
-            my $passlabel := self.post_new('Label', :result($prefix ~ '_pass'));
-            my $backlabel := self.post_new('Label', :result($prefix ~ '_back'));
-            $ops.push_pirop('goto', $passlabel);
-            $ops.push($backlabel);
-            $ops.push_pirop('callmethod', '"!cursor_next"', '$P11', :result('$P11'));
-            $ops.push_pirop('repr_get_attr_int', '$I11', '$P11', %*REG<curclass>, '"$!pos"');
-            $ops.push_pirop($testop, '$I11', '0', %*REG<fail>);
-            $ops.push_pirop('callmethod', '"!cursor_capture"', %*REG<cur>, 
-                            '$P11', $name, :result(%*REG<cstack>))
-              if $subtype eq 'capture';
-            $ops.push($passlabel);
-            self.regex_mark($ops, $backlabel, %*REG<pos>, 0);
-        }
         $ops.push_pirop('repr_get_attr_int', %*REG<pos>, '$P11', %*REG<curclass>, '"$!pos"')
           unless $subtype eq 'zerowidth';
         $ops;
