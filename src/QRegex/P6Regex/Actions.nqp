@@ -304,6 +304,12 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         my $qast := QAST::Regex.new( ~$/ , :rxtype('literal'), :node($/) );
         make $qast;
     }
+    
+    method backlit($/) {
+        my $qast := QAST::Regex.new( '\\', :rxtype('enumcharlist'),
+                        :node($/) );
+        make $qast;
+    }
 
     method assertion:sym<?>($/) {
         my $qast;
@@ -406,20 +412,39 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         my $qast;
         if $<name> {
             my $name := ~$<name>;
-            $qast := QAST::Regex.new( PAST::Node.new($name), :rxtype<subrule>, :subtype<method>, :node($/) );
+            $qast := QAST::Regex.new( PAST::Node.new($name), :rxtype<subrule>, :subtype<method>,
+                                      :negate( $<sign> eq '-' ), :node($/) );
         }
         else {
+            my @alts;
             for $<charspec> {
-                if $_[1] {
+                if $_<backslash> {
+                    my $bs := $_<backslash>.ast;
+                    $bs.negate(!$bs.negate) if $<sign> eq '-';
+                    @alts.push($bs);
+                }
+                elsif $_<backlit> {
+                    my $bslit := $_<backlit>.ast;
+                    $bslit.negate(!$bslit.negate) if $<sign> eq '-';
+                    @alts.push($bslit);
+                }
+                elsif $_[1] {
                     my $ord0 := nqp::ord($_[0]);
                     my $ord1 := nqp::ord($_[1][0]);
                     $str := nqp::concat($str, nqp::chr($ord0++)) while $ord0 <= $ord1;
                 }
                 else { $str := $str ~ $_[0]; }
             }
-            $qast := QAST::Regex.new( $str, :rxtype<enumcharlist>, :node($/) );
+            @alts.push(QAST::Regex.new( $str, :rxtype<enumcharlist>, :node($/), :negate( $<sign> eq '-' ) ))
+                if nqp::chars($str);
+            $qast := +@alts == 1 ?? @alts[0] !!
+                $<sign> eq '-' ??
+                    QAST::Regex.new( :rxtype<concat>, :node($/),
+                        QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, |@alts ), 
+                        QAST::Regex.new( :rxtype<cclass>, :subtype<.> ) ) !!
+                    QAST::Regex.new( :rxtype<alt>, |@alts );
         }
-        $qast.negate( $<sign> eq '-' );
+        #$qast.negate( $<sign> eq '-' );
         make $qast;
     }
 
