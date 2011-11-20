@@ -229,6 +229,7 @@ class QAST::Compiler is HLL::Compiler {
             self.regex_peek($ops, $conjlabel, '$I11', '$I12');
             $ops.push_pirop('ne', %*REG<pos>, '$I12', %*REG<fail>);
         }
+        $ops.push_pirop('set', %*REG<pos>, '$I11') if $node.subtype eq 'zerowidth';
         $ops;
     }
 
