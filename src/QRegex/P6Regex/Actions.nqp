@@ -431,6 +431,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 elsif $_[1] {
                     my $ord0 := nqp::ord($_[0]);
                     my $ord1 := nqp::ord($_[1][0]);
+                    $/.CURSOR.panic("Illegal reversed character range in regex: " ~ ~$_)
+                        if $ord0 > $ord1;
                     $str := nqp::concat($str, nqp::chr($ord0++)) while $ord0 <= $ord1;
                 }
                 else { $str := $str ~ $_[0]; }
