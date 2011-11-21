@@ -121,20 +121,14 @@ class NQP::SymbolTable is HLL::Compiler::SerializationContextBuilder {
         my $fixup := PAST::Stmts.new(
             PAST::Op.new(
                 :pasttype('callmethod'), :name('set_static_lexpad_value'),
-                PAST::Op.new(
-                    :pasttype('callmethod'), :name('get_lexinfo'),
-                    PAST::Val.new( :value($block) )
-                ),
+                PAST::Val.new( :value($block), :returns('LexInfo')),
                 ~$name, self.get_slot_past_for_object($obj)
             ),
             # XXX Should only do this once per block we put static stuff
             # in...or find a way to not do it at all.
             PAST::Op.new(
                 :pasttype('callmethod'), :name('finish_static_lexpad'),
-                PAST::Op.new(
-                    :pasttype('callmethod'), :name('get_lexinfo'),
-                    PAST::Val.new( :value($block) )
-                )
+                PAST::Val.new( :value($block), :returns('LexInfo' ))
             )
         );
         self.add_event(:deserialize_past($fixup), :fixup_past($fixup));
