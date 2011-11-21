@@ -1,0 +1,3 @@
+GMAKE_TOP ?= $(TOP)/buildsys/gmake
+include $(GMAKE_TOP)/prolog.gmake
+

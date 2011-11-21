@@ -1,0 +1,67 @@
+This file lists big/noteworthy changes, only...
+
+Version 0.6 (upcoming)
+building:
+  o new build systems: CMake and Plan9's mk
+  o buildsys/gmake tool chain update: pcc and iphone sdk
+  o x64 bugfix: added "-fPIC" even for static libs
+dynload updates: 
+  o enum symbols update: Mach-O and Win64 (thanks Olivier)
+  o numerous convenience changes to dynload interface (thanks Olivier)
+  o added support for resolving application images itself
+dyncall updates:
+  o new platform support: arm/iphone (armv6), x86/Plan9
+  o new mips calling conventions: oabi, n64 (both endian models)
+  o cleanup: unexported functions in MASM files, b/c export not needed (thanks Olivier)
+  o interface update: added error reporting facility 'dcGetError'
+  o bugfix for ppc32/sysv: ellipsis calls were broken
+  o interface update: added new abstract mode for ellipsis calls (DC_CALL_C_ELLIPSIS) 
+docs:
+  o comprehensive update
+tests:
+  o plain: split "plain" test up in C and C++ part
+  o callbacksuite: added multiple configuration support for callback_suite
+
+Version 0.5
+o renamed arm9 stuff to arm32
+o added non-EABI ABI for arm32 (before, EABI was the default implementation)
+o added dyncallback support for x64/windows (thanks Olivier), x64/darwin, arm32/arm, arm32/thumb
+o synced documentation again with current state of the source (lots of small changes)
+o updated ruby binding to current state of signature string (still some features missing, though)
+o added a couple of new options to configure scripts (e.g. prefix-bd, new targets, etc.)
+o darwin universal binary support
+o added new tests callback_plain and calback_suite
+o added Haiku/BeOS support
+
+Version 0.4
+o added 'doc' makefile target for coherency and ease of use
+o fixed nmake buildfiles and configure.bat (were out of date and wrong)
+o test suite clean up (GNUmake, BSDmake):
+  target "config" modified, phony without dependencies to other builds
+o bugfix: GNU fastcall calling convention for float and double arguments
+  was wrong. no skip of register.
+o update: x86win32* suite tests are built on cygwin now, added total result output
+o signature types change:
+  C Strings: 'S' -> 'Z'
+  long: 'l' -> 'j'
+  long long: 'L' -> 'l'
+  added unsigned integer type signature characters: upper case encoding  
+o added: callbacks component (support only for some platforms ATM)
+o added: test cases for alloc_wx, thunk
+o updated Documentation
+
+Version 0.3
+o added Linux PPC32 support
+o added ARM THUMB mode support
+o cosmetic changes, documentation updated
+o bugfix: on cygwin exported C symbols in GNU as are prefixed with '_' now.
+o removed scons build support
+
+Version 0.2
+o added scons build support
+o configure variables all prefix CONFIG_* now
+o configure variable INSTALL_DIR changed to INSTALL_PREFIX
+o configure (shell version) option "--prefix" changed to "--prefix=<path>"
+
+Version 0.1:
+o initial release
