@@ -412,14 +412,40 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         else {
             my @alts;
             for $<charspec> {
-                if $_<backslash> {
+                if $_<backslashonly> {
                     my $bs := $_<backslash>.ast;
                     $bs.negate(!$bs.negate) if $<sign> eq '-';
                     @alts.push($bs);
                 }
                 elsif $_[1] {
-                    my $ord0 := nqp::ord($_[0]);
-                    my $ord1 := nqp::ord($_[1][0]);
+                    my $node;
+                    my $lhs;
+                    my $rhs;
+                    if $_[0]<backslash> {
+                        nqp::say(pir::typeof__sP($_[0]<backslash>.ast));
+                        $node := $_[0]<backslash>.ast;
+                        $/.CURSOR.panic("Illegal range endpoint in regex: " ~ ~$_)
+                            if $node.rxtype ne 'literal' && $node.rxtype ne 'enumcharlist'
+                                || $node.negate || nqp::chars($node[0]) != 1;
+                        $lhs := $node[0];
+                    }
+                    else {
+                        $lhs := $_[0][0];
+                    }
+                    if $_[1]<backslash> {
+                        nqp::say(pir::typeof__sP($_[1]<backslash>));
+                        nqp::say(pir::typeof__sP($_[1]<backslash>.ast));
+                        $node := $_[1]<backslash>.ast;
+                        $/.CURSOR.panic("Illegal range endpoint in regex: " ~ ~$_)
+                            if $node.rxtype ne 'literal' && $node.rxtype ne 'enumcharlist'
+                                || $node.negate || nqp::chars($node[0]) != 1;
+                        $rhs := $node[0];
+                    }
+                    else {
+                        $rhs := $_[1][0];
+                    }
+                    my $ord0 := nqp::ord($lhs);
+                    my $ord1 := nqp::ord($rhs);
                     $/.CURSOR.panic("Illegal reversed character range in regex: " ~ ~$_)
                         if $ord0 > $ord1;
                     $str := nqp::concat($str, nqp::chr($ord0++)) while $ord0 <= $ord1;
