@@ -201,8 +201,11 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         [
         | '[' $<charspec>=(
                   || \s* '-' <!before \s* ']'> <.obs: '- as character range','.. for range, for explicit - in character class, escape it or place as last thing'>
-                  || \s* ( '\\' <backslash> || (<-[\]\\]>) ) [ \s* '..' \s* ( '\\' <backslash> || (<-[\]\\]>) ) ]?
-                  || \s* '\\' $<backslashonly>=[<backslash>]
+                  || \s* ( '\\' <backslash> || (<-[\]\\]>) )
+                     [
+                         \s* '..' \s*
+                         ( '\\' <backslash> || (<-[\]\\]>) )
+                     ]?
               )*
           \s* ']'
         | $<name>=[\w+]
