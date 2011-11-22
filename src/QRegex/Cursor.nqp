@@ -419,16 +419,16 @@ class NQPCursor does NQPCursorRole {
 
     method !INTERPOLATE($var) {
         if pir::does($var, 'array') {
-            my $maxlen := -1.0;
+            my $maxlen := -1;
             my $cur := self.'!cursor_start'();
-            my $pos := +$cur.from;
+            my $pos := nqp::getattr_i($cur, $?CLASS, '$!from');
             my $tgt := $cur.target;
-            my $eos := +pir::length($tgt);
+            my $eos := pir::length($tgt);
             for $var {
                 if pir::is_invokable__IP($_) {
                     my $res := $_(self);
                     if $res {
-                        my $adv := +$res.pos;
+                        my $adv := nqp::getattr_i($res, $?CLASS, '$!pos');
                         $adv := $adv - $pos;
                         $maxlen := $adv if $adv > $maxlen;
                     }
@@ -439,15 +439,15 @@ class NQPCursor does NQPCursorRole {
                         && pir::substr($tgt, $pos, $len) eq $_;
                 }
             }
-            return $cur if $maxlen < 0;
-            return $cur.'!cursor_pass'($pos + $maxlen, '');
+            $cur.'!cursor_pass'($pos + $maxlen, '') if $maxlen >= 0;
+            return $cur;
         }
         else {
             return $var(self) if pir::is_invokable__IP($var);
             my $cur := self.'!cursor_start'();
-            my $pos := +$cur.from;
+            my $pos := nqp::getattr_i($cur, $?CLASS, '$!from');
             my $tgt := $cur.target;
-            my $len := +pir::length($var);
+            my $len := pir::length($var);
             my $adv := $pos + $len;
             return $cur if $adv > pir::length($tgt)
                 || pir::substr($tgt, $pos, $len) ne $var;
