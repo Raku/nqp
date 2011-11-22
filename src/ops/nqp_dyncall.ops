@@ -101,6 +101,30 @@ get_arg_type(PARROT_INTERP, PMC *info, INTVAL is_return) {
     }
 }
 
+/* Constructs a boxed result from a native integer return. */
+static PMC *
+make_int_result(PARROT_INTERP, PMC *type, INTVAL value) {
+    PMC *result = PMCNULL;
+    if (!PMC_IS_NULL(type)) {
+        result = REPR(type)->allocate(interp, STABLE(type));
+        REPR(result)->initialize(interp, STABLE(result), OBJECT_BODY(result));
+        REPR(result)->set_int(interp, STABLE(result), OBJECT_BODY(result), value);
+    }
+    return result;
+}
+
+/* Constructs a boxed result from a native number return. */
+static PMC *
+make_num_result(PARROT_INTERP, PMC *type, FLOATVAL value) {
+    PMC *result = PMCNULL;
+    if (!PMC_IS_NULL(type)) {
+        result = REPR(type)->allocate(interp, STABLE(type));
+        REPR(result)->initialize(interp, STABLE(result), OBJECT_BODY(result));
+        REPR(result)->set_num(interp, STABLE(result), OBJECT_BODY(result), value);
+    }
+    return result;
+}
+
 END_OPS_PREAMBLE
 
 /* Initialize the native call library. */
@@ -131,7 +155,6 @@ inline op nqp_native_call_setup() :base_core {
  * automatically garbage collected.
  */
 inline op nqp_native_call_build(out PMC, in PMC, in STR, in STR, in STR, in PMC, in PMC) :base_core {
-    PMC  *result_type = $2;
     PMC  *result      = REPR($2)->allocate(interp, STABLE($2));
     char *lib_name    = Parrot_str_to_cstring(interp, $3);
     char *sym_name    = Parrot_str_to_cstring(interp, $4);
@@ -196,8 +219,8 @@ inline op nqp_native_call_build(out PMC, in PMC, in STR, in STR, in STR, in PMC,
  * presumably a type object).
  */
 inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
-    PMC *args = $4;
-    PMC *result;
+    PMC *args   = $4;
+    PMC *result = PMCNULL;
     INTVAL i;
 
     /* Get native call body, so we can locate the call info. */
@@ -249,9 +272,44 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
     }
     
     /* Call and process return values. */
-    /* XXX */
-    dcCallVoid(vm, body->entry_point);
+    switch (body->ret_type) {
+        case DYNCALL_ARG_VOID:
+            dcCallVoid(vm, body->entry_point);
+            result = $2;
+            break;
+        case DYNCALL_ARG_CHAR:
+            result = make_int_result(interp, $2, dcCallChar(vm, body->entry_point));
+            break;
+        case DYNCALL_ARG_SHORT:
+            result = make_int_result(interp, $2, dcCallShort(vm, body->entry_point));
+            break;
+        case DYNCALL_ARG_INT:
+            result = make_int_result(interp, $2, dcCallInt(vm, body->entry_point));
+            break;
+        case DYNCALL_ARG_LONG:
+            result = make_int_result(interp, $2, dcCallLong(vm, body->entry_point));
+            break;
+        case DYNCALL_ARG_LONGLONG:
+            result = make_int_result(interp, $2, dcCallLongLong(vm, body->entry_point));
+            break;
+        case DYNCALL_ARG_FLOAT:
+            result = make_num_result(interp, $2, dcCallFloat(vm, body->entry_point));
+            break;
+        case DYNCALL_ARG_DOUBLE:
+            result = make_num_result(interp, $2, dcCallDouble(vm, body->entry_point));
+            break;
+        case DYNCALL_ARG_ASCIISTR:
+        case DYNCALL_ARG_UTF8STR:
+        case DYNCALL_ARG_CSTRUCT:
+        case DYNCALL_ARG_PACKEDARRAY:
+        case DYNCALL_ARG_CALLBACK:
+            /* XXX Above are all still todo. */
+            dcCallPointer(vm, body->entry_point);
+            result = $2;
+    }
     
     /* Finally, free call VM. */
     dcFree(vm);
+    
+    $1 = result;
 }
