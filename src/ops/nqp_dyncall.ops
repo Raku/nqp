@@ -103,7 +103,7 @@ get_arg_type(PARROT_INTERP, PMC *info, INTVAL is_return) {
 
 END_OPS_PREAMBLE
 
-/* Initialize the navtie call library. */
+/* Initialize the native call library. */
 inline op nqp_native_call_setup() :base_core {
     /* Register the NativeCall representation. */
     if (!nc_repr_id)
