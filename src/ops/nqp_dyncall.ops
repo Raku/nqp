@@ -1,12 +1,140 @@
 BEGIN_OPS_PREAMBLE
 
-/* Parroty includes. */
 #include "parrot/parrot.h"
 #include "parrot/extend.h"
 #include "parrot/dynext.h"
 #include "../6model/sixmodelobject.h"
+#include "../6model/reprs/NativeCall.h"
+
+/* This library contains just three operations: one to initialize it,
+ * one to look up a native function and build a handle to it, and
+ * another to actually make the call.
+ *
+ * It uses hashes to describe arguments and return types. The following
+ * keys are allowable.
+ *
+ * XXX
+ */
+
+/* The ID of the NativeCall REPR. */
+static INTVAL nc_repr_id = 0;
+
+/* Grabs a NativeCall body. */
+static NativeCallBody * get_nc_body(PARROT_INTERP, PMC *obj) {
+    struct SixModel_REPROps *r = REPR(obj);
+    if (r->ID == nc_repr_id)
+        return &((NativeCallInstance *)PMC_data(obj))->body;
+    else
+        return (NativeCallBody *)r->get_boxed_ref(interp, STABLE(obj),
+            OBJECT_BODY(obj), nc_repr_id);
+}
 
 END_OPS_PREAMBLE
 
-inline op nqp_XXX() :base_core {    
+/* Initialize the navtie call library. */
+inline op nqp_native_call_setup() :base_core {
+    /* Register the NativeCall representation. */
+    if (!nc_repr_id)
+        nc_repr_id = REGISTER_DYNAMIC_REPR(interp,
+            Parrot_str_new_constant(interp, "NativeCall"),
+            NativeCall_initialize);
+}
+
+
+/* Build a native call object.
+ *
+ * $2 is the type of object to build. It should be of a type that is
+ *    based on or boxes the NativeCall REPR.
+ * $3 is the name of the library to load the function from.
+ * $4 is the name of the function to load.
+ * $5 is a string name specifying the calling convention to use.
+ * $6 is an nqp::list(...) of nqp::hash(...), one hash per argument.
+      The entries in the hash describe the type of argument being passed.
+ * $7 is an nqp::hash(...) that describes the expected return type
+ *
+ * Provided all is well, $1 will end up containing an object of type $2
+ * that has been initialized with all the relevant call information and
+ * can be used with the nqp_native_call op. There's no need to manually
+ * release the handle; when it is no longer referenced, it will be
+ * automatically garbage collected.
+ */
+inline op nqp_native_call_build(out PMC, in PMC, in STR, in STR, in STR, in PMC, in PMC) :base_core {
+    PMC  *result_type = $2;
+    PMC  *result      = REPR($2)->allocate(interp, STABLE($2));
+    char *lib_name    = Parrot_str_to_cstring(interp, $3);
+    char *sym_name    = Parrot_str_to_cstring(interp, $4);
+    char *convention  = Parrot_str_to_cstring(interp, $5);
+    PMC  *arg_info    = $6;
+    PMC  *ret_info    = $7;
+    int   i;
+    
+    /* Initialize the object; grab native call part of its body. */
+    NativeCallBody *body = get_nc_body(interp, result);
+    REPR(result)->initialize(interp, STABLE(result), OBJECT_BODY(result));
+    
+    /* Try to load the library. */
+    body->lib_name = lib_name;
+    body->lib_handle = dlLoadLibrary(lib_name);
+    if (!body->lib_handle) {
+        Parrot_str_free_cstring(sym_name);
+        Parrot_str_free_cstring(convention);
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Cannot locate native library '%Ss'", $3);
+    }
+    
+    /* Try to locate the symbol. */
+    body->entry_point = dlFindSymbol(body->lib_handle, sym_name);
+    Parrot_str_free_cstring(sym_name);
+    if (!body->entry_point) {
+        Parrot_str_free_cstring(convention);
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Cannot locate symbol '%Ss' in native library '%Ss'", $4, $3);
+    }
+    
+    /* Set calling convention, if any. */
+    Parrot_str_free_cstring(convention);
+    
+    /* Transform each of the args info structures into a flag. */
+    
+    
+    /* Transform return argument type info a flag. */
+    
+    
+    $1 = result;
+}
+
+/* Makes a native call.
+ *
+ * $2 is the type of result to build. It can be a null if the return value
+ *    is void or can simply be discarded. If the return value is a native
+ *    type, then this type should be capable of boxing it.
+ * $3 is an object representing the call, obtained from nqp_native_call_build.
+ * $4 is an nqp::list(...), which contains the arguments to pass; note this
+ *    means they are in boxed form
+ *
+ * $1 will be populated with an instance of $2 that contains the result
+ * of the call. If $2 was null PMC, then $1 also will be. If the call
+ * was to return a struct, array or some other pointer type and the
+ * result comes back as NULL, then $1 will simply be $2 (which is
+ * presumably a type object).
+ */
+inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
+    PMC *result;
+    INTVAL args, i;
+
+    /* Get native call body, so we can locate the call info. */
+    NativeCallBody *body = get_nc_body(interp, $3);
+    
+    /* Create and set up call VM. */
+    DCCallVM *vm = dcNewCallVM(body->num_args * sizeof(void *));
+    
+    /* Process arguments. */
+    /* XXX */
+    
+    /* Call and process return values. */
+    /* XXX */
+    dcCallVoid(vm, body->entry_point);
+    
+    /* Finally, free call VM. */
+    dcFree(vm);
 }
