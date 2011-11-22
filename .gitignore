@@ -45,3 +45,4 @@ src/stage1
 src/stage2
 config.status
 config.default
+3rdparty/dyncall-0.6/ConfigVars
