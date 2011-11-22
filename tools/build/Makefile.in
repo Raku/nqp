@@ -21,6 +21,7 @@ LDFLAGS       = @ldflags@ @ld_debug@
 LD_LOAD_FLAGS = @ld_load_flags@
 LIBPARROT     = @inst_libparrot_ldflags@
 O             = @o@
+A             = @a@
 LOAD_EXT      = @load_ext@
 PERL          = @perl@
 CP            = @cp@
@@ -447,6 +448,13 @@ LIBTOMMATH_SOURCE =	3rdparty/libtommath/bncore.c \
 BIGINT_OPS        = nqp_bigint_ops
 BIGINT_OPS_SOURCE = nqp_bigint.ops
 
+DYNCALL_BIN = 3rdparty/dyncall-0.6/dyncall/libdyncall_s$(A) \
+  3rdparty/dyncall-0.6/dyncallback/libdyncallback_s$(A) \
+  3rdparty/dyncall-0.6/dynload/libdynload_s$(A)
+
+DYNCALL_OPS        = nqp_dyncall_ops
+DYNCALL_OPS_SOURCE = nqp_dyncall.ops
+
 CLEANUPS = \
   *.manifest \
   *.pdb \
@@ -658,7 +666,7 @@ $(NCI_PBC): $(NQP_EXE)
 	./$(NQP_EXE) --target=pir --output=src/gen/CallBuilder.pir $(NCI_SOURCE)
 	$(PARROT) -o $(NCI_PBC) src/gen/CallBuilder.pir
 
-$(DYNEXT_TARGET): $(DYNPMC) $(DYNOPS) $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT)
+$(DYNEXT_TARGET): $(DYNPMC) $(DYNOPS) $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT) $(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT)
 	$(CP) $(DYNPMC) $(DYNEXT_DIR)
 	$(CP) $(DYNOPS) $(DYNEXT_DIR)
 	$(CP) $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT) $(DYNEXT_DIR)
@@ -939,6 +947,14 @@ $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT): $(OPS_DIR)/$(BIGINT_OPS_SOURCE) $(LIBTOMMAT
 	cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(BIGINT_OPS)$(O) $(CINCLUDES) -I../../3rdparty/libtommath $(CFLAGS) $(BIGINT_OPS).c
 	cd src/6model/reprs && $(CC) -c @cc_o_out@P6bigint$(O) -I../../../$(PMC_DIR) -I../../../3rdparty/libtommath $(CINCLUDES) $(CFLAGS) P6bigint.c
 	cd $(OPS_DIR) && $(LD) @ld_out@$(BIGINT_OPS)$(LOAD_EXT) $(BIGINT_OPS)$(O) ../../3rdparty/libtommath/*$(O) ../6model/reprs/P6bigint$(O) $(LINKARGS)
+
+$(DYNCALL_BIN):
+	@dyncall_build@
+
+$(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT): $(OPS_DIR)/$(DYNCALL_OPS_SOURCE) $(DYNCALL_BIN)
+	cd $(OPS_DIR) && $(OPS2C) C --dynamic $(DYNCALL_OPS_SOURCE)
+	cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(DYNCALL_OPS)$(O) $(CINCLUDES) -I../../3rdparty/dyncall-0.6 $(CFLAGS) $(DYNCALL_OPS).c
+	cd $(OPS_DIR) && $(LD) @ld_out@$(DYNCALL_OPS)$(LOAD_EXT) $(DYNCALL_OPS)$(O) ../../3rdparty/dyncall-0.6/dyncall/libdyncall_s$(A) ../../3rdparty/dyncall-0.6/dyncallback/libdyncallback_s$(A) ../../3rdparty/dyncall-0.6/dynload/libdynload_s$(A) $(LINKARGS)
 
 bootstrap-files: $(STAGE2_PBCS) src/stage2/$(CORE_SETTING_NQP)
 	$(PERL) tools/build/gen-bootstrap.pl src/Regex.pir >src/stage0/Regex-s0.pir
