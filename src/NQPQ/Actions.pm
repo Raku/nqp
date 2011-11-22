@@ -1505,12 +1505,12 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
     }
 
     method metachar:sym<nqpvar>($/) {
-        make QAST::Regex.new( '!INTERPOLATE', $<var>.ast, 
+        make QAST::Regex.new( PAST::Node.new('!INTERPOLATE', $<var>.ast), 
                               :rxtype<subrule>, :subtype<method>, :node($/));
     }
 
     method assertion:sym<{ }>($/) { 
-        make QAST::Regex.new( '!INTERPOLATE_REGEX', $<codeblock>.ast, 
+        make QAST::Regex.new( PAST::Node.new('!INTERPOLATE_REGEX', $<codeblock>.ast), 
                               :rxtype<subrule>, :subtype<method>, :node($/));
     }
 
@@ -1521,7 +1521,7 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
     }
 
     method assertion:sym<var>($/) {
-        make QAST::Regex.new( '!INTERPOLATE_REGEX', $<var>.ast, 
+        make QAST::Regex.new( PAST::Node.new('!INTERPOLATE_REGEX', $<var>.ast), 
                               :rxtype<subrule>, :subtype<method>, :node($/));
     }
 
