@@ -11,11 +11,45 @@ BEGIN_OPS_PREAMBLE
  * another to actually make the call.
  *
  * It uses hashes to describe arguments and return types. The following
- * keys are allowable.
+ * keys and values are allowable.
  *
- * XXX
+ * type
+ *   Any of the following strings:
+ *     void
+ *     char
+ *     short
+ *     int
+ *     long
+ *     longlong
+ *     float
+ *     double
+ *     asciistr
+ *     utf8str
+ *     cstruct
+ *     packedarray
+ *     callback
+ *
+ * callback_args
+ *   nqp::list(...) of nqp::hash(...) describing the arguments for the callback.
+ * 
+ * XXX Probably more callback stuff to figure out here...
  */
 
+/* Our various argument types. */
+#define DYNCALL_ARG_VOID            0
+#define DYNCALL_ARG_CHAR            1
+#define DYNCALL_ARG_SHORT           2
+#define DYNCALL_ARG_INT             3
+#define DYNCALL_ARG_LONG            4
+#define DYNCALL_ARG_LONGLONG        5
+#define DYNCALL_ARG_FLOAT           6
+#define DYNCALL_ARG_DOUBLE          7
+#define DYNCALL_ARG_ASCIISTR        8
+#define DYNCALL_ARG_UTF8STR         9
+#define DYNCALL_ARG_CSTRUCT         10
+#define DYNCALL_ARG_PACKEDARRAY     11
+#define DYNCALL_ARG_CALLBACK        12
+ 
 /* The ID of the NativeCall REPR. */
 static INTVAL nc_repr_id = 0;
 
@@ -27,6 +61,44 @@ static NativeCallBody * get_nc_body(PARROT_INTERP, PMC *obj) {
     else
         return (NativeCallBody *)r->get_boxed_ref(interp, STABLE(obj),
             OBJECT_BODY(obj), nc_repr_id);
+}
+
+/* Takes a hash describing a type hands back an argument type code. */
+static INTVAL
+get_arg_type(PARROT_INTERP, PMC *info, INTVAL is_return) {
+    STRING *type_name = VTABLE_get_string_keyed_str(interp, info,
+        Parrot_str_new_constant(interp, "type"));
+    if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "void"))) {
+        if (is_return)
+            return DYNCALL_ARG_VOID;
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Cannot use 'void' type except for on native call return values");
+    }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "char"))) {
+        return DYNCALL_ARG_CHAR;
+    }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "short"))) {
+        return DYNCALL_ARG_SHORT;
+    }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "int"))) {
+        return DYNCALL_ARG_INT;
+    }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "long"))) {
+        return DYNCALL_ARG_LONG;
+    }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "longlong"))) {
+        return DYNCALL_ARG_LONGLONG;
+    }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "float"))) {
+        return DYNCALL_ARG_FLOAT;
+    }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "double"))) {
+        return DYNCALL_ARG_DOUBLE;
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Unknown type '%Ss' used for native call", type_name);
+    }
 }
 
 END_OPS_PREAMBLE
@@ -90,15 +162,20 @@ inline op nqp_native_call_build(out PMC, in PMC, in STR, in STR, in STR, in PMC,
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Cannot locate symbol '%Ss' in native library '%Ss'", $4, $3);
     }
-    
+
     /* Set calling convention, if any. */
     Parrot_str_free_cstring(convention);
-    
+
     /* Transform each of the args info structures into a flag. */
-    
-    
+    body->num_args  = VTABLE_elements(interp, arg_info);
+    body->arg_types = mem_sys_allocate(sizeof(INTVAL) * body->num_args);
+    for (i = 0; i < body->num_args; i++) {
+        PMC *info = VTABLE_get_pmc_keyed_int(interp, arg_info, i);
+        body->arg_types[i] = get_arg_type(interp, info, 0);
+    }
+
     /* Transform return argument type info a flag. */
-    
+    body->ret_type = get_arg_type(interp, ret_info, 1);
     
     $1 = result;
 }
@@ -119,8 +196,9 @@ inline op nqp_native_call_build(out PMC, in PMC, in STR, in STR, in STR, in PMC,
  * presumably a type object).
  */
 inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
+    PMC *args = $4;
     PMC *result;
-    INTVAL args, i;
+    INTVAL i;
 
     /* Get native call body, so we can locate the call info. */
     NativeCallBody *body = get_nc_body(interp, $3);
@@ -129,7 +207,46 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
     DCCallVM *vm = dcNewCallVM(body->num_args * sizeof(void *));
     
     /* Process arguments. */
-    /* XXX */
+    for (i = 0; i < body->num_args; i++) {
+        PMC *value = VTABLE_get_pmc_keyed_int(interp, args, i);
+        switch (body->arg_types[i]) {
+            case DYNCALL_ARG_CHAR:
+                dcArgChar(vm, (DCchar)REPR(value)->get_int(interp,
+                    STABLE(value), OBJECT_BODY(value)));
+                break;
+            case DYNCALL_ARG_SHORT:
+                dcArgShort(vm, (DCshort)REPR(value)->get_int(interp,
+                    STABLE(value), OBJECT_BODY(value)));
+                break;
+            case DYNCALL_ARG_INT:
+                dcArgInt(vm, (DCint)REPR(value)->get_int(interp,
+                    STABLE(value), OBJECT_BODY(value)));
+                break;
+            case DYNCALL_ARG_LONG:
+                dcArgLong(vm, (DClong)REPR(value)->get_int(interp,
+                    STABLE(value), OBJECT_BODY(value)));
+                break;
+            case DYNCALL_ARG_LONGLONG:
+                dcArgLongLong(vm, (DClonglong)REPR(value)->get_int(interp,
+                    STABLE(value), OBJECT_BODY(value)));
+                break;
+            case DYNCALL_ARG_FLOAT:
+                dcArgFloat(vm, (DCfloat)REPR(value)->get_num(interp,
+                    STABLE(value), OBJECT_BODY(value)));
+                break;
+            case DYNCALL_ARG_DOUBLE:
+                dcArgDouble(vm, (DCdouble)REPR(value)->get_num(interp,
+                    STABLE(value), OBJECT_BODY(value)));
+                break;
+            case DYNCALL_ARG_ASCIISTR:
+            case DYNCALL_ARG_UTF8STR:
+            case DYNCALL_ARG_CSTRUCT:
+            case DYNCALL_ARG_PACKEDARRAY:
+            case DYNCALL_ARG_CALLBACK:
+                /* XXX Above are all still todo. */
+                dcArgPointer(vm, NULL);
+        }
+    }
     
     /* Call and process return values. */
     /* XXX */
