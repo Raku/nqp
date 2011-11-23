@@ -144,6 +144,8 @@ static void * get_boxed_ref(PARROT_INTERP, STable *st, void *data, INTVAL repr_i
  * embedded inside another one. Never called on a top-level object. */
 static void gc_cleanup(PARROT_INTERP, STable *st, void *data) {
     NativeCallBody *body = (NativeCallBody *)data;
+    if (body->lib_name)
+        Parrot_str_free_cstring(body->lib_name);
     if (body->lib_handle)
         dlFreeLibrary(body->lib_handle);
     if (body->arg_types)
