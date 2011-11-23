@@ -569,6 +569,10 @@ entry to produce the node to be returned.
     maphash['fromnum_I'] = 'nqp_bigint_from_num__PNP'
     maphash['tonum_I']   = 'nqp_bigint_to_num__NP'
 
+    # native call ops
+    maphash['buildnativecall'] = 'nqp_native_call_build__vPsssPP'
+    maphash['nativecall']      = 'nqp_native_call__PPPP'
+    
     # boolean opcodes
     maphash['not_i']    = 'not__Ii'
 

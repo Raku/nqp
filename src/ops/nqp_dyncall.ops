@@ -170,33 +170,28 @@ inline op nqp_native_call_setup() :base_core {
 
 /* Build a native call object.
  *
- * $2 is the type of object to build. It should be of a type that is
- *    based on or boxes the NativeCall REPR.
- * $3 is the name of the library to load the function from.
- * $4 is the name of the function to load.
- * $5 is a string name specifying the calling convention to use.
- * $6 is an nqp::list(...) of nqp::hash(...), one hash per argument.
+ * $1 is the object to store the call in. It should be of a type that is
+ *    based on or boxes the NativeCall REPR, and should be an instance.
+ * $2 is the name of the library to load the function from.
+ * $3 is the name of the function to load.
+ * $4 is a string name specifying the calling convention to use.
+ * $5 is an nqp::list(...) of nqp::hash(...), one hash per argument.
       The entries in the hash describe the type of argument being passed.
- * $7 is an nqp::hash(...) that describes the expected return type
+ * $6 is an nqp::hash(...) that describes the expected return type
  *
- * Provided all is well, $1 will end up containing an object of type $2
- * that has been initialized with all the relevant call information and
- * can be used with the nqp_native_call op. There's no need to manually
- * release the handle; when it is no longer referenced, it will be
- * automatically garbage collected.
+ * There's no need to manually release the handle; when it is no longer
+ * referenced, it will be automatically garbage collected.
  */
-inline op nqp_native_call_build(out PMC, in PMC, in STR, in STR, in STR, in PMC, in PMC) :base_core {
-    PMC  *result      = REPR($2)->allocate(interp, STABLE($2));
-    char *lib_name    = Parrot_str_to_cstring(interp, $3);
-    char *sym_name    = Parrot_str_to_cstring(interp, $4);
-    char *convention  = Parrot_str_to_cstring(interp, $5);
-    PMC  *arg_info    = $6;
-    PMC  *ret_info    = $7;
+inline op nqp_native_call_build(in PMC, in STR, in STR, in STR, in PMC, in PMC) :base_core {
+    char *lib_name    = Parrot_str_to_cstring(interp, $2);
+    char *sym_name    = Parrot_str_to_cstring(interp, $3);
+    char *convention  = Parrot_str_to_cstring(interp, $4);
+    PMC  *arg_info    = $5;
+    PMC  *ret_info    = $6;
     int   i;
     
     /* Initialize the object; grab native call part of its body. */
-    NativeCallBody *body = get_nc_body(interp, result);
-    REPR(result)->initialize(interp, STABLE(result), OBJECT_BODY(result));
+    NativeCallBody *body = get_nc_body(interp, $1);
     
     /* Try to load the library. */
     body->lib_name = lib_name;
@@ -205,7 +200,7 @@ inline op nqp_native_call_build(out PMC, in PMC, in STR, in STR, in STR, in PMC,
         Parrot_str_free_cstring(sym_name);
         Parrot_str_free_cstring(convention);
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Cannot locate native library '%Ss'", $3);
+            "Cannot locate native library '%Ss'", $2);
     }
     
     /* Try to locate the symbol. */
@@ -214,7 +209,7 @@ inline op nqp_native_call_build(out PMC, in PMC, in STR, in STR, in STR, in PMC,
     if (!body->entry_point) {
         Parrot_str_free_cstring(convention);
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Cannot locate symbol '%Ss' in native library '%Ss'", $4, $3);
+            "Cannot locate symbol '%Ss' in native library '%Ss'", $3, $2);
     }
 
     /* Set calling convention, if any. */
@@ -230,8 +225,6 @@ inline op nqp_native_call_build(out PMC, in PMC, in STR, in STR, in STR, in PMC,
 
     /* Transform return argument type info a flag. */
     body->ret_type = get_arg_type(interp, ret_info, 1);
-    
-    $1 = result;
 }
 
 /* Makes a native call.
