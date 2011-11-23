@@ -118,6 +118,10 @@ struct DLSyms_
 DLSyms* dlSymsInit(DLLib* pLib)
 {
   DLSyms* pSyms;
+  Elf_Ehdr* pH;
+  Elf_Phdr* pP;
+  int i;
+  unsigned char* pMem;
   if(!pLib)
     return NULL;
    
@@ -128,7 +132,7 @@ DLSyms* dlSymsInit(DLLib* pLib)
   pSyms->pGNUHash = 0;
   pSyms->pGNUHashChain = 0;
 
-  Elf_Ehdr* pH   = pLib->pElf_Ehdr;
+  pH   = pLib->pElf_Ehdr;
 #ifdef DL__BinaryFormat_elf32
   assert( pH->e_ident[EI_CLASS] == ELFCLASS32 );
 #else
@@ -137,11 +141,9 @@ DLSyms* dlSymsInit(DLLib* pLib)
 
   assert(pH->e_phoff > 0);
   assert(pH->e_shoff > 0);
-  unsigned char* pMem = (unsigned char*) pH;
-  Elf_Phdr* pP = (Elf_Phdr*) ( pMem + pH->e_phoff );
+  pMem = (unsigned char*) pH;
+  pP = (Elf_Phdr*) ( pMem + pH->e_phoff );
   
-  int i; 
-
   /* traverse run-time program headers */
   
   for (i=0;i<pH->e_phnum;++i)
@@ -207,6 +209,7 @@ int dlSymsCount(DLSyms* pSyms)
 const char* dlSymsName(DLSyms* pSyms, int index)
 {
   int export_base;
+  int str_index;
   if(!pSyms || !pSyms->pSymTab)
     return NULL;
 
@@ -215,7 +218,7 @@ const char* dlSymsName(DLSyms* pSyms, int index)
   } else {
     export_base = 0;
   }
-  int str_index = pSyms->pSymTab[ export_base + index ].st_name;
+  str_index = pSyms->pSymTab[ export_base + index ].st_name;
   return &pSyms->pStrTab[str_index];
 }
 
