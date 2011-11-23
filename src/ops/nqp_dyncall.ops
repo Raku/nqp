@@ -222,7 +222,7 @@ inline op nqp_native_call_build(out PMC, in PMC, in STR, in STR, in STR, in PMC,
 
     /* Transform each of the args info structures into a flag. */
     body->num_args  = VTABLE_elements(interp, arg_info);
-    body->arg_types = mem_sys_allocate(sizeof(INTVAL) * body->num_args);
+    body->arg_types = mem_sys_allocate(sizeof(INTVAL) * (body->num_args || 1));
     for (i = 0; i < body->num_args; i++) {
         PMC *info = VTABLE_get_pmc_keyed_int(interp, arg_info, i);
         body->arg_types[i] = get_arg_type(interp, info, 0);
