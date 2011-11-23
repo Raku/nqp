@@ -30,6 +30,10 @@ BEGIN_OPS_PREAMBLE
  *     packedarray
  *     callback
  *
+ * free_str
+ *   Controls whether strings that are passed get freed or not. Zero to not
+ *   free, non-zero to free. The default is to free.
+ *
  * callback_args
  *   nqp::list(...) of nqp::hash(...) describing the arguments for the callback.
  * 
@@ -38,20 +42,26 @@ BEGIN_OPS_PREAMBLE
 
 /* Our various argument types. */
 #define DYNCALL_ARG_VOID            0
-#define DYNCALL_ARG_CHAR            1
-#define DYNCALL_ARG_SHORT           2
-#define DYNCALL_ARG_INT             3
-#define DYNCALL_ARG_LONG            4
-#define DYNCALL_ARG_LONGLONG        5
-#define DYNCALL_ARG_FLOAT           6
-#define DYNCALL_ARG_DOUBLE          7
-#define DYNCALL_ARG_ASCIISTR        8
-#define DYNCALL_ARG_UTF8STR         9
-#define DYNCALL_ARG_UTF16STR        10
-#define DYNCALL_ARG_CSTRUCT         11
-#define DYNCALL_ARG_PACKEDARRAY     12
-#define DYNCALL_ARG_CALLBACK        13
- 
+#define DYNCALL_ARG_CHAR            2
+#define DYNCALL_ARG_SHORT           4
+#define DYNCALL_ARG_INT             6
+#define DYNCALL_ARG_LONG            8
+#define DYNCALL_ARG_LONGLONG        10
+#define DYNCALL_ARG_FLOAT           12
+#define DYNCALL_ARG_DOUBLE          14
+#define DYNCALL_ARG_ASCIISTR        16
+#define DYNCALL_ARG_UTF8STR         18
+#define DYNCALL_ARG_UTF16STR        20
+#define DYNCALL_ARG_CSTRUCT         22
+#define DYNCALL_ARG_PACKEDARRAY     24
+#define DYNCALL_ARG_CALLBACK        26
+#define DYNCALL_ARG_TYPE_MASK       30
+
+/* Flag for whether we should free a string after passing it or not. */
+#define DYNCALL_ARG_NO_FREE_STR     0
+#define DYNCALL_ARG_FREE_STR        1
+#define DYNCALL_ARG_FREE_STR_MASK   1
+
 /* The ID of the NativeCall REPR. */
 static INTVAL nc_repr_id = 0;
 
@@ -63,6 +73,16 @@ static NativeCallBody * get_nc_body(PARROT_INTERP, PMC *obj) {
     else
         return (NativeCallBody *)r->get_boxed_ref(interp, STABLE(obj),
             OBJECT_BODY(obj), nc_repr_id);
+}
+
+/* Gets the flag for whether to free a string after a call or not. */
+static INTVAL
+get_str_free_flag(PARROT_INTERP, PMC *info) {
+    STRING *flag = Parrot_str_new_constant(interp, "free_str");
+    if (VTABLE_exists_keyed_str(interp, info, flag))
+        if (!VTABLE_get_integer_keyed_str(interp, info, flag))
+            return DYNCALL_ARG_NO_FREE_STR;
+    return DYNCALL_ARG_FREE_STR;
 }
 
 /* Takes a hash describing a type hands back an argument type code. */
@@ -98,13 +118,13 @@ get_arg_type(PARROT_INTERP, PMC *info, INTVAL is_return) {
         return DYNCALL_ARG_DOUBLE;
     }
     else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "asciistr"))) {
-        return DYNCALL_ARG_ASCIISTR;
+        return DYNCALL_ARG_ASCIISTR | get_str_free_flag(interp, info);
     }
     else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "utf8str"))) {
-        return DYNCALL_ARG_UTF8STR;
+        return DYNCALL_ARG_UTF8STR | get_str_free_flag(interp, info);
     }
     else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "utf16str"))) {
-        return DYNCALL_ARG_UTF16STR;
+        return DYNCALL_ARG_UTF16STR | get_str_free_flag(interp, info);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -245,7 +265,7 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
     /* Process arguments. */
     for (i = 0; i < body->num_args; i++) {
         PMC *value = VTABLE_get_pmc_keyed_int(interp, args, i);
-        switch (body->arg_types[i]) {
+        switch (body->arg_types[i] & DYNCALL_ARG_TYPE_MASK) {
             case DYNCALL_ARG_CHAR:
                 dcArgChar(vm, (DCchar)REPR(value)->get_int(interp,
                     STABLE(value), OBJECT_BODY(value)));
@@ -284,9 +304,11 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
                         body->arg_types[i] == DYNCALL_ARG_UTF16STR ? Parrot_utf16_encoding_ptr :
                                                                      Parrot_utf8_encoding_ptr);
                     dcArgPointer(vm, str);
-                    if (!free_strs)
-                        free_strs = mem_sys_allocate(body->num_args * sizeof(char *));
-                    free_strs[num_strs] = str;
+                    if (body->arg_types[i] & DYNCALL_ARG_FREE_STR_MASK) {
+                        if (!free_strs)
+                            free_strs = mem_sys_allocate(body->num_args * sizeof(char *));
+                        free_strs[num_strs] = str;
+                    }
                 }
                 break;
             case DYNCALL_ARG_CSTRUCT:
@@ -298,7 +320,7 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
     }
 
     /* Call and process return values. */
-    switch (body->ret_type) {
+    switch (body->ret_type & DYNCALL_ARG_TYPE_MASK) {
         case DYNCALL_ARG_VOID:
             dcCallVoid(vm, body->entry_point);
             result = $2;
