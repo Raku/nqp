@@ -25,6 +25,7 @@ BEGIN_OPS_PREAMBLE
  *     double
  *     asciistr
  *     utf8str
+ *     utf16str
  *     cstruct
  *     packedarray
  *     callback
@@ -46,9 +47,10 @@ BEGIN_OPS_PREAMBLE
 #define DYNCALL_ARG_DOUBLE          7
 #define DYNCALL_ARG_ASCIISTR        8
 #define DYNCALL_ARG_UTF8STR         9
-#define DYNCALL_ARG_CSTRUCT         10
-#define DYNCALL_ARG_PACKEDARRAY     11
-#define DYNCALL_ARG_CALLBACK        12
+#define DYNCALL_ARG_UTF16STR        10
+#define DYNCALL_ARG_CSTRUCT         11
+#define DYNCALL_ARG_PACKEDARRAY     12
+#define DYNCALL_ARG_CALLBACK        13
  
 /* The ID of the NativeCall REPR. */
 static INTVAL nc_repr_id = 0;
@@ -94,6 +96,15 @@ get_arg_type(PARROT_INTERP, PMC *info, INTVAL is_return) {
     }
     else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "double"))) {
         return DYNCALL_ARG_DOUBLE;
+    }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "asciistr"))) {
+        return DYNCALL_ARG_ASCIISTR;
+    }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "utf8str"))) {
+        return DYNCALL_ARG_UTF8STR;
+    }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "utf16str"))) {
+        return DYNCALL_ARG_UTF16STR;
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -263,6 +274,16 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
                 break;
             case DYNCALL_ARG_ASCIISTR:
             case DYNCALL_ARG_UTF8STR:
+            case DYNCALL_ARG_UTF16STR:
+                {
+                    char *str = Parrot_str_to_encoded_cstring(interp,
+                        REPR(value)->get_str(interp, STABLE(value), OBJECT_BODY(value)),
+                        body->arg_types[i] == DYNCALL_ARG_ASCIISTR ? Parrot_ascii_encoding_ptr :
+                        body->arg_types[i] == DYNCALL_ARG_UTF16STR ? Parrot_utf16_encoding_ptr :
+                                                                     Parrot_utf8_encoding_ptr);
+                    dcArgPointer(vm, str);
+                }
+                break;
             case DYNCALL_ARG_CSTRUCT:
             case DYNCALL_ARG_PACKEDARRAY:
             case DYNCALL_ARG_CALLBACK:
