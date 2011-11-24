@@ -5,6 +5,7 @@ BEGIN_OPS_PREAMBLE
 #include "parrot/dynext.h"
 #include "../6model/sixmodelobject.h"
 #include "../6model/reprs/NativeCall.h"
+#include "../6model/reprs/CStruct.h"
 
 /* This library contains just three operations: one to initialize it,
  * one to look up a native function and build a handle to it, and
@@ -62,8 +63,9 @@ BEGIN_OPS_PREAMBLE
 #define DYNCALL_ARG_FREE_STR        1
 #define DYNCALL_ARG_FREE_STR_MASK   1
 
-/* The ID of the NativeCall REPR. */
+/* The ID of the NativeCall and CStruct REPRs. */
 static INTVAL nc_repr_id = 0;
+static INTVAL cs_repr_id = 0;
 
 /* Grabs a NativeCall body. */
 static NativeCallBody * get_nc_body(PARROT_INTERP, PMC *obj) {
@@ -207,11 +209,14 @@ END_OPS_PREAMBLE
 
 /* Initialize the native call library. */
 inline op nqp_native_call_setup() :base_core {
-    /* Register the NativeCall representation. */
     if (!nc_repr_id)
         nc_repr_id = REGISTER_DYNAMIC_REPR(interp,
             Parrot_str_new_constant(interp, "NativeCall"),
             NativeCall_initialize);
+    if (!cs_repr_id)
+        cs_repr_id = REGISTER_DYNAMIC_REPR(interp,
+            Parrot_str_new_constant(interp, "CStruct"),
+            CStruct_initialize);
 }
 
 
@@ -354,6 +359,14 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
                 }
                 break;
             case DYNCALL_ARG_CSTRUCT:
+                if (!IS_CONCRETE(value))
+                    dcArgPointer(vm, NULL);
+                else if (REPR(value)->ID == cs_repr_id)
+                    dcArgPointer(vm, &((CStructInstance *)PMC_data(value))->body.cstruct);
+                else
+                    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                        "Native call expected object with CStruct representation, but got something else");
+                break;
             case DYNCALL_ARG_PACKEDARRAY:
             case DYNCALL_ARG_CALLBACK:
                 /* XXX Above are all still todo. */
