@@ -335,7 +335,7 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
             case DYNCALL_ARG_ASCIISTR:
             case DYNCALL_ARG_UTF8STR:
             case DYNCALL_ARG_UTF16STR:
-                {
+                if (IS_CONCRETE(value)) {
                     char *str = Parrot_str_to_encoded_cstring(interp,
                         REPR(value)->get_str(interp, STABLE(value), OBJECT_BODY(value)),
                         body->arg_types[i] == DYNCALL_ARG_ASCIISTR ? Parrot_ascii_encoding_ptr :
@@ -348,6 +348,9 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
                         free_strs[num_strs] = str;
                         num_strs++;
                     }
+                }
+                else {
+                    dcArgPointer(vm, NULL);
                 }
                 break;
             case DYNCALL_ARG_CSTRUCT:
@@ -387,6 +390,7 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
             break;
         case DYNCALL_ARG_ASCIISTR:
         case DYNCALL_ARG_UTF8STR:
+        case DYNCALL_ARG_UTF16STR:
         case DYNCALL_ARG_CSTRUCT:
         case DYNCALL_ARG_PACKEDARRAY:
         case DYNCALL_ARG_CALLBACK:
