@@ -171,7 +171,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
     /* Otherwise, we need to compute the allocation strategy.  */
     else {
         /* We track the size of the body part, since that's what we want offsets into. */
-        INTVAL cur_size = 0;
+        INTVAL cur_size = sizeof(PMC **) + sizeof(STRING **);
         
         /* Get number of attributes and set up various counters. */
         INTVAL num_attrs        = VTABLE_elements(interp, flat_list);
@@ -192,7 +192,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
             /* Fetch its type; see if it's some kind of unboxed type. */
             PMC    *attr         = VTABLE_get_pmc_keyed_int(interp, flat_list, i);
             PMC    *type         = accessor_call(interp, attr, type_str);
-            INTVAL  bits         = sizeof(PMC *) * 8;
+            INTVAL  bits         = sizeof(void *) * 8;
             if (!PMC_IS_NULL(type)) {
                 /* See if it's a type that we know how to handle in a C struct. */
                 storage_spec spec = REPR(type)->get_storage_spec(interp, STABLE(type));
@@ -229,7 +229,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
 
         /* Finally, put computed allocation size in place; it's body size plus
          * header size. Also number of markables and sentinels. */
-        repr_data->allocation_size = cur_size + sizeof(CStructInstance);
+        repr_data->allocation_size = cur_size + (sizeof(CStructInstance) - sizeof(void *));
         if (repr_data->initialize_slots)
             repr_data->initialize_slots[cur_init_slot] = -1;
     }
@@ -371,7 +371,7 @@ static void no_such_attribute(PARROT_INTERP, const char *action, PMC *class_hand
 PARROT_DOES_NOT_RETURN
 static void die_no_attrs(PARROT_INTERP) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "CStruct representation does not support attribute storage");
+            "CStruct representation attribute not yet fully implemented");
 }
 
 /* Gets the current value for an attribute. */
@@ -379,7 +379,17 @@ static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
     die_no_attrs(interp);
 }
 static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
-    die_no_attrs(interp);
+    CStructREPRData *repr_data = (CStructREPRData *)st->REPR_data;
+    INTVAL            slot;
+
+    /* Look up slot, then offset and compute address. */
+    slot = hint >= 0 ? hint :
+        try_get_slot(interp, repr_data, class_handle, name);
+    if (slot >= 0)
+        return ((char *)data) + repr_data->struct_offsets[slot];
+    
+    /* Otherwise, complain that the attribute doesn't exist. */
+    no_such_attribute(interp, "get", class_handle, name);
 }
 
 /* Binds the given value to the specified attribute. */
@@ -387,7 +397,27 @@ static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
     die_no_attrs(interp);
 }
 static void bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, void *value) {
-    die_no_attrs(interp);
+    CStructREPRData *repr_data = (CStructREPRData *)st->REPR_data;
+    INTVAL            slot;
+
+    /* Try to find the slot. */
+    slot = hint >= 0 ? hint :
+        try_get_slot(interp, repr_data, class_handle, name);
+    if (slot >= 0) {
+        STable *st = repr_data->flattened_stables[slot];
+        if (st)
+            st->REPR->copy_to(interp, st, value, (char *)data + repr_data->struct_offsets[slot]);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Can not bind by reference to non-flattened attribute '%Ss' on class '%Ss'",
+                name, VTABLE_get_string(interp, introspection_call(interp,
+                    class_handle, STABLE(class_handle)->HOW,
+                    Parrot_str_new_constant(interp, "name"), 0)));
+    }
+    else {
+        /* Otherwise, complain that the attribute doesn't exist. */
+        no_such_attribute(interp, "bind", class_handle, name);
+    }
 }
 
 /* Gets the hint for the given attribute ID. */
