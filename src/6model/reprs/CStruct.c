@@ -532,7 +532,7 @@ REPROps * CStruct_initialize(PARROT_INTERP,
     this_repr->initialize = initialize;
     this_repr->copy_to = copy_to;
     this_repr->get_attribute_boxed = get_attribute_boxed;
-    this_repr->get_attribute_boxed = get_attribute_boxed;
+    this_repr->get_attribute_ref = get_attribute_ref;
     this_repr->bind_attribute_boxed = bind_attribute_boxed;
     this_repr->bind_attribute_ref = bind_attribute_ref;
     this_repr->hint_for = hint_for;
