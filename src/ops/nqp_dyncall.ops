@@ -156,6 +156,29 @@ make_num_result(PARROT_INTERP, PMC *type, FLOATVAL value) {
     return result;
 }
 
+PMC * decontainerize(PARROT_INTERP, PMC *var) {
+    ContainerSpec *spec = STABLE(var)->container_spec;
+    if (spec && IS_CONCRETE(var)) {
+        if (!PMC_IS_NULL(spec->value_slot.class_handle)) {
+            /* Just get slot. */
+            return VTABLE_get_attr_keyed(interp, var, spec->value_slot.class_handle,
+                spec->value_slot.attr_name);
+        }
+        else {
+            /* Invoke FETCH method. */
+            PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+            PMC *meth    = spec->fetch_method;
+            PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
+            VTABLE_push_pmc(interp, cappy, var);
+            Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
+            cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+            Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
+            return VTABLE_get_pmc_keyed_int(interp, cappy, 0);
+        }
+    }
+    return var;
+}
+
 END_OPS_PREAMBLE
 
 /* Initialize the native call library. */
@@ -257,7 +280,7 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
     
     /* Process arguments. */
     for (i = 0; i < body->num_args; i++) {
-        PMC *value = VTABLE_get_pmc_keyed_int(interp, args, i);
+        PMC *value = decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, args, i));
         switch (body->arg_types[i] & DYNCALL_ARG_TYPE_MASK) {
             case DYNCALL_ARG_CHAR:
                 dcArgChar(vm, (DCchar)REPR(value)->get_int(interp,
