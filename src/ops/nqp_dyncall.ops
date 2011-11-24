@@ -324,6 +324,7 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
                         if (!free_strs)
                             free_strs = mem_sys_allocate(body->num_args * sizeof(char *));
                         free_strs[num_strs] = str;
+                        num_strs++;
                     }
                 }
                 break;
