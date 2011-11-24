@@ -943,7 +943,7 @@ $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT): $(OPS_DIR)/$(BIGINT_OPS_SOURCE) $(LIBTOMMAT
 $(DYNCALL_BIN):
 	@dyncall_build@
 
-$(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT): $(OPS_DIR)/$(DYNCALL_OPS_SOURCE) $(DYNCALL_BIN)
+$(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT): $(OPS_DIR)/$(DYNCALL_OPS_SOURCE) $(DYNCALL_BIN) src/6model/reprs/NativeCall.c src/6model/reprs/NativeCall.h src/6model/reprs/CStruct.c src/6model/reprs/CStruct.h
 	cd $(OPS_DIR) && $(OPS2C) C --dynamic $(DYNCALL_OPS_SOURCE)
 	cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(DYNCALL_OPS)$(O) $(CINCLUDES) -I../../3rdparty/dyncall-0.6 $(CFLAGS) $(DYNCALL_OPS).c
 	cd src/6model/reprs && $(CC) -c @cc_o_out@NativeCall$(O) -I../../../$(PMC_DIR) -I../../../3rdparty/dyncall-0.6 $(CINCLUDES) $(CFLAGS) NativeCall.c
