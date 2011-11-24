@@ -132,6 +132,30 @@ get_arg_type(PARROT_INTERP, PMC *info, INTVAL is_return) {
     }
 }
 
+/* Maps a calling convention name to an ID. */
+static INTVAL
+get_calling_convention(PARROT_INTERP, STRING *name) {
+    if (STRING_IS_NULL(name)) {
+        return DC_CALL_C_DEFAULT;
+    }
+    else if (Parrot_str_equal(interp, name, Parrot_str_new_constant(interp, ""))) {
+        return DC_CALL_C_DEFAULT;
+    }
+    else if (Parrot_str_equal(interp, name, Parrot_str_new_constant(interp, "cdecl"))) {
+        return DC_CALL_C_X86_CDECL;
+    }
+    else if (Parrot_str_equal(interp, name, Parrot_str_new_constant(interp, "stdcall"))) {
+        return DC_CALL_C_X86_WIN32_STD;
+    }
+    else if (Parrot_str_equal(interp, name, Parrot_str_new_constant(interp, "win64"))) {
+        return DC_CALL_C_X64_WIN64;
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Unknown calling convention '%Ss' used for native call", name);
+    }
+}
+
 /* Constructs a boxed result from a native integer return. */
 static PMC *
 make_int_result(PARROT_INTERP, PMC *type, INTVAL value) {
@@ -208,7 +232,6 @@ inline op nqp_native_call_setup() :base_core {
 inline op nqp_native_call_build(in PMC, in STR, in STR, in STR, in PMC, in PMC) :base_core {
     char *lib_name    = Parrot_str_to_cstring(interp, $2);
     char *sym_name    = Parrot_str_to_cstring(interp, $3);
-    char *convention  = Parrot_str_to_cstring(interp, $4);
     PMC  *arg_info    = $5;
     PMC  *ret_info    = $6;
     int   i;
@@ -221,7 +244,6 @@ inline op nqp_native_call_build(in PMC, in STR, in STR, in STR, in PMC, in PMC) 
     body->lib_handle = dlLoadLibrary(lib_name);
     if (!body->lib_handle) {
         Parrot_str_free_cstring(sym_name);
-        Parrot_str_free_cstring(convention);
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Cannot locate native library '%Ss'", $2);
     }
@@ -230,13 +252,12 @@ inline op nqp_native_call_build(in PMC, in STR, in STR, in STR, in PMC, in PMC) 
     body->entry_point = dlFindSymbol(body->lib_handle, sym_name);
     Parrot_str_free_cstring(sym_name);
     if (!body->entry_point) {
-        Parrot_str_free_cstring(convention);
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Cannot locate symbol '%Ss' in native library '%Ss'", $3, $2);
     }
 
     /* Set calling convention, if any. */
-    Parrot_str_free_cstring(convention);
+    body->convention = get_calling_convention(interp, $4);
 
     /* Transform each of the args info structures into a flag. */
     body->num_args  = VTABLE_elements(interp, arg_info);
@@ -277,6 +298,7 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
     
     /* Create and set up call VM. */
     DCCallVM *vm = dcNewCallVM(body->num_args * sizeof(void *));
+    dcMode(vm, body->convention);
     
     /* Process arguments. */
     for (i = 0; i < body->num_args; i++) {

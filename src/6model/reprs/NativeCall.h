@@ -9,6 +9,7 @@ typedef struct {
     char *lib_name;
     void *lib_handle;
     void *entry_point;
+    INTVAL convention;
     INTVAL num_args;
     INTVAL *arg_types;
     INTVAL ret_type;

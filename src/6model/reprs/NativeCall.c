@@ -56,6 +56,7 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     
     /* Rest is just simple copying. */
     dest_body->entry_point = src_body->entry_point;
+    dest_body->convention = src_body->convention;
     dest_body->num_args = src_body->num_args;
     dest_body->arg_types = mem_sys_allocate(src_body->num_args * sizeof(INTVAL));
     memcpy(dest_body->arg_types, src_body->arg_types, src_body->num_args * sizeof(INTVAL));
