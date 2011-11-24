@@ -116,7 +116,7 @@ MAIN: {
     }
     else {
         system_or_die('cd 3rdparty/dyncall-0.6 && sh configure');
-        $config{'dyncall_build'} = "cd 3rdparty/dyncall-0.6 && $make";
+        $config{'dyncall_build'} = "cd 3rdparty/dyncall-0.6 && BUILD_DIR=. $make";
     }
     
     fill_template_file('tools/build/Makefile.in', 'Makefile', %config);
