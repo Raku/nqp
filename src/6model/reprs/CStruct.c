@@ -237,6 +237,60 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
     Parrot_unblock_GC_mark(interp);
 }
 
+/* Helper for reading an int at the specified offset. */
+static INTVAL get_int_at_offset(void *data, INTVAL offset) {
+    void *location = (char *)data + offset;
+    return *((INTVAL *)location);
+}
+
+/* Helper for writing an int at the specified offset. */
+static void set_int_at_offset(void *data, INTVAL offset, INTVAL value) {
+    void *location = (char *)data + offset;
+    *((INTVAL *)location) = value;
+}
+
+/* Helper for reading a num at the specified offset. */
+static FLOATVAL get_num_at_offset(void *data, INTVAL offset) {
+    void *location = (char *)data + offset;
+    return *((FLOATVAL *)location);
+}
+
+/* Helper for writing a num at the specified offset. */
+static void set_num_at_offset(void *data, INTVAL offset, FLOATVAL value) {
+    void *location = (char *)data + offset;
+    *((FLOATVAL *)location) = value;
+}
+
+/* Helper for reading a pointer at the specified offset. */
+static void * get_ptr_at_offset(void *data, INTVAL offset) {
+    void *location = (char *)data + offset;
+    return *((void **)location);
+}
+
+/* Helper for writing a pointer at the specified offset. */
+static void set_ptr_at_offset(void *data, INTVAL offset, void *value) {
+    void *location = (char *)data + offset;
+    *((void **)location) = value;
+}
+
+/* Helper for finding a slot number. */
+static INTVAL try_get_slot(PARROT_INTERP, CStructREPRData *repr_data, PMC *class_key, STRING *name) {
+    INTVAL slot = -1;
+    if (repr_data->name_to_index_mapping) {
+        CStructNameMap *cur_map_entry = repr_data->name_to_index_mapping;
+        while (cur_map_entry->class_key != NULL) {
+            if (cur_map_entry->class_key == class_key) {
+                PMC *slot_pmc = VTABLE_get_pmc_keyed_str(interp, cur_map_entry->name_map, name);
+                if (!PMC_IS_NULL(slot_pmc))
+                    slot = VTABLE_get_integer(interp, slot_pmc);
+                break;
+            }
+            cur_map_entry++;
+        }
+    }
+    return slot;
+}
+
 /* Creates a new type object of this representation, and associates it with
  * the given HOW. */
 static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
@@ -246,6 +300,9 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
     /* Build an STable. */
     PMC *st_pmc = create_stable_func(interp, this_repr, HOW);
     STable *st  = STABLE_STRUCT(st_pmc);
+    
+    /* Create REPR data structure and hand it off the STable. */
+    st->REPR_data = mem_allocate_zeroed_typed(CStructREPRData);
 
     /* Create type object and point it back at the STable. */
     obj->common.stable = st_pmc;
@@ -260,21 +317,54 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 
 /* Creates a new instance based on the type object. */
 static PMC * allocate(PARROT_INTERP, STable *st) {
-    CStructInstance *obj = mem_allocate_zeroed_typed(CStructInstance);
+    CStructInstance * obj;
+
+    /* Compute allocation strategy if we've not already done so. */
+    CStructREPRData * repr_data = (CStructREPRData *) st->REPR_data;
+    if (!repr_data->allocation_size) {
+        compute_allocation_strategy(interp, st->WHAT, repr_data);
+        PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
+    }
+
+    /* Allocate and set up object instance. */
+    obj = (CStructInstance *) Parrot_gc_allocate_fixed_size_storage(interp, repr_data->allocation_size);
+    memset(obj, 0, repr_data->allocation_size);
     obj->common.stable = st->stable_pmc;
+    /* XXX allocate child str and obj arrays if needed. */
+    
     return wrap_object_func(interp, obj);
 }
 
 /* Initialize a new instance. */
 static void initialize(PARROT_INTERP, STable *st, void *data) {
-    /* Nothing to do here. */
+    CStructREPRData * repr_data = (CStructREPRData *) st->REPR_data;
+    if (repr_data->initialize_slots) {
+        INTVAL i;
+        for (i = 0; repr_data->initialize_slots[i] >= 0; i++) {
+            INTVAL  offset = repr_data->struct_offsets[repr_data->initialize_slots[i]];
+            STable *st     = repr_data->flattened_stables[repr_data->initialize_slots[i]];
+            st->REPR->initialize(interp, st, (char *)data + offset);
+        }
+    }
 }
 
 /* Copies to the body of one object to another. */
 static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
+    CStructREPRData * repr_data = (CStructREPRData *) st->REPR_data;
     CStructBody *src_body = (CStructBody *)src;
     CStructBody *dest_body = (CStructBody *)dest;
-    /* XXX TODO */
+    memcpy(dest, src, repr_data->allocation_size - sizeof(CStructInstance));
+    /* XXX also need to shallow copy the obj and str arrays */
+}
+
+/* Helper for complaining about attribute access errors. */
+PARROT_DOES_NOT_RETURN
+static void no_such_attribute(PARROT_INTERP, const char *action, PMC *class_handle, STRING *name) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can not %s non-existant attribute '%Ss' on class '%Ss'",
+            action, name, VTABLE_get_string(interp, introspection_call(interp,
+                class_handle, STABLE(class_handle)->HOW,
+                Parrot_str_new_constant(interp, "name"), 0)));
 }
 
 /* Helper to die because this type doesn't support attributes. */
@@ -357,11 +447,11 @@ static void * get_boxed_ref(PARROT_INTERP, STable *st, void *data, INTVAL repr_i
 
 /* This Parrot-specific addition to the API is used to mark an object. */
 static void gc_mark(PARROT_INTERP, STable *st, void *data) {
+    CStructREPRData *repr_data = (CStructREPRData *) st->REPR_data;
     CStructBody *body = (CStructBody *)data;
     INTVAL i;
-    if (body->child_objs)
-        for (i = 0; i < body->num_child_objs; i++)
-            Parrot_gc_mark_PMC_alive(interp, body->child_objs[i]);
+    for (i = 0; i < repr_data->num_child_objs; i++)
+        Parrot_gc_mark_PMC_alive(interp, body->child_objs[i]);
 }
 
 /* This is called to do any cleanup of resources when an object gets
@@ -374,8 +464,12 @@ static void gc_cleanup(PARROT_INTERP, STable *st, void *data) {
 
 /* This Parrot-specific addition to the API is used to free an object. */
 static void gc_free(PARROT_INTERP, PMC *obj) {
-    gc_cleanup(interp, STABLE(obj), OBJECT_BODY(obj));
-    mem_sys_free(PMC_data(obj));
+    CStructREPRData *repr_data = (CStructREPRData *)STABLE(obj)->REPR_data;
+	gc_cleanup(interp, STABLE(obj), OBJECT_BODY(obj));
+    if (repr_data->allocation_size && IS_CONCRETE(obj))
+		Parrot_gc_free_fixed_size_storage(interp, repr_data->allocation_size, PMC_data(obj));
+	else
+		mem_sys_free(PMC_data(obj));
     PMC_data(obj) = NULL;
 }
 

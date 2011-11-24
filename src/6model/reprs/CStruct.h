@@ -9,12 +9,10 @@
 typedef struct {
     /* GC-marked objects that our C structure points into. */
     PMC **child_objs;
-    INTVAL num_child_objs;
 
     /* STRING* objects that we have converted to char arrays as well
      * when we put them in the C structure. */
     STRING **child_strs;
-    INTVAL num_child_strs;
     
     /* This is not an actual pointer; instead it's just a marker we can
      * use to get at the start of the data that we'll actually pass off
@@ -51,6 +49,12 @@ typedef struct {
     /* The number of attributes we have allocated slots for. Note that
      * slots can vary in size. */
     INTVAL num_attributes;
+    
+    /* Number of child objects we store. */
+    INTVAL num_child_objs;
+    
+    /* Number of child strings we store. */
+    INTVAL num_child_strs;
     
     /* Lower bits are flags indicating what kind of attribute we have;
      * whether it's one that is just a simple value that we can always
