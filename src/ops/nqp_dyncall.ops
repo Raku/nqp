@@ -128,6 +128,9 @@ get_arg_type(PARROT_INTERP, PMC *info, INTVAL is_return) {
     else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "utf16str"))) {
         return DYNCALL_ARG_UTF16STR | get_str_free_flag(interp, info);
     }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "cstruct"))) {
+        return DYNCALL_ARG_CSTRUCT;
+    }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Unknown type '%Ss' used for native call", type_name);
