@@ -11,6 +11,232 @@ static REPROps *this_repr;
 static PMC * (* wrap_object_func) (PARROT_INTERP, void *obj);
 static PMC * (* create_stable_func) (PARROT_INTERP, REPROps *REPR, PMC *HOW);
 
+/* How do we go from type-object to a hash value? For now, we make an integer
+ * that is the address of the STable struct, which not being subject to GC will
+ * never move, and is unique per type object too. */
+#define CLASS_KEY(c) ((INTVAL)PMC_data(STABLE_PMC(c)))
+
+/* Helper to make an introspection call, possibly with :local. */
+static PMC * introspection_call(PARROT_INTERP, PMC *WHAT, PMC *HOW, STRING *name, INTVAL local) {
+    PMC *old_ctx, *cappy;
+    
+    /* Look up method; if there is none hand back a null. */
+    PMC *meth = VTABLE_find_method(interp, HOW, name);
+    if (PMC_IS_NULL(meth))
+        return meth;
+
+    /* Set up call capture. */
+    old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
+    VTABLE_push_pmc(interp, cappy, HOW);
+    VTABLE_push_pmc(interp, cappy, WHAT);
+    if (local)
+        VTABLE_set_integer_keyed_str(interp, cappy, Parrot_str_new_constant(interp, "local"), 1);
+
+    /* Call. */
+    Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
+
+    /* Grab result. */
+    cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
+    return VTABLE_get_pmc_keyed_int(interp, cappy, 0);
+}
+
+/* Helper to make an accessor call. */
+static PMC * accessor_call(PARROT_INTERP, PMC *obj, STRING *name) {
+    PMC *old_ctx, *cappy;
+    
+    /* Look up method; if there is none hand back a null. */
+    PMC *meth = VTABLE_find_method(interp, obj, name);
+    if (PMC_IS_NULL(meth))
+        return meth;
+
+    /* Set up call capture. */
+    old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
+    VTABLE_push_pmc(interp, cappy, obj);
+
+    /* Call. */
+    Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
+
+    /* Grab result. */
+    cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
+    return VTABLE_get_pmc_keyed_int(interp, cappy, 0);
+}
+
+/* Locates all of the attributes. Puts them onto a flattened, ordered
+ * list of attributes (populating the passed flat_list). Also builds
+ * the index mapping for doing named lookups. Note index is not related
+ * to the storage position. */
+static PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, CStructREPRData *repr_data) {
+    PMC    *flat_list      = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+    PMC    *class_list     = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+    PMC    *attr_map_list  = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+    STRING *attributes_str = Parrot_str_new_constant(interp, "attributes");
+    STRING *parents_str    = Parrot_str_new_constant(interp, "parents");
+    STRING *name_str       = Parrot_str_new_constant(interp, "name");
+    STRING *mro_str        = Parrot_str_new_constant(interp, "mro");
+    INTVAL  current_slot   = 0;
+    
+    INTVAL num_classes, i;
+    CStructNameMap * result = NULL;
+    
+    /* Get the MRO. */
+    PMC   *mro     = introspection_call(interp, WHAT, STABLE(WHAT)->HOW, mro_str, 0);
+    INTVAL mro_idx = VTABLE_elements(interp, mro);
+
+    /* Walk through the parents list. */
+    while (mro_idx)
+    {
+        /* Get current class in MRO. */
+        PMC    *current_class = decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, mro, --mro_idx));
+        PMC    *HOW           = STABLE(current_class)->HOW;
+        
+        /* Get its local parents; make sure we're not doing MI. */
+        PMC    *parents     = introspection_call(interp, current_class, HOW, parents_str, 1);
+        INTVAL  num_parents = VTABLE_elements(interp, parents);
+        if (num_parents <= 1) {
+            /* Get attributes and iterate over them. */
+            PMC *attributes = introspection_call(interp, current_class, HOW, attributes_str, 1);
+            PMC *attr_map   = PMCNULL;
+            PMC *attr_iter  = VTABLE_get_iter(interp, attributes);
+            while (VTABLE_get_bool(interp, attr_iter)) {
+                /* Get attribute. */
+                PMC * attr = VTABLE_shift_pmc(interp, attr_iter);
+
+                /* Get its name. */
+                PMC    *name_pmc = accessor_call(interp, attr, name_str);
+                STRING *name     = VTABLE_get_string(interp, name_pmc);
+
+                /* Allocate a slot. */
+                if (PMC_IS_NULL(attr_map))
+                    attr_map = Parrot_pmc_new(interp, enum_class_Hash);
+                VTABLE_set_pmc_keyed_str(interp, attr_map, name,
+                    Parrot_pmc_new_init_int(interp, enum_class_Integer, current_slot));
+                current_slot++;
+
+                /* Push attr onto the flat list. */
+                VTABLE_push_pmc(interp, flat_list, attr);
+            }
+
+            /* Add to class list and map list. */
+            VTABLE_push_pmc(interp, class_list, current_class);
+            VTABLE_push_pmc(interp, attr_map_list, attr_map);
+        }
+        else {
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "CStruct representation does not support multiple inheritance");
+        }
+    }
+
+    /* We can now form the name map. */
+    num_classes = VTABLE_elements(interp, class_list);
+    result = (CStructNameMap *) mem_sys_allocate_zeroed(sizeof(CStructNameMap) * (1 + num_classes));
+    for (i = 0; i < num_classes; i++) {
+        result[i].class_key = VTABLE_get_pmc_keyed_int(interp, class_list, i);
+        result[i].name_map  = VTABLE_get_pmc_keyed_int(interp, attr_map_list, i);
+    }
+    repr_data->name_to_index_mapping = result;
+
+    return flat_list;
+}
+
+/* This works out an allocation strategy for the object. It takes care of
+ * "inlining" storage of attributes that are natively typed, as well as
+ * noting unbox targets. */
+static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRData *repr_data) {
+    STRING *type_str = Parrot_str_new_constant(interp, "type");
+    PMC    *flat_list;
+
+    /*
+     * We have to block GC mark here. Because "repr" is assotiated with some
+     * PMC which is not accessible in this function. And we have to write
+     * barrier this PMC because we are poking inside it guts directly. We
+     * do have WB in caller function, but it can be triggered too late is
+     * any of allocation will cause GC run.
+     *
+     * This is kind of minor evil until after I'll find better solution.
+     */
+    Parrot_block_GC_mark(interp);
+
+    /* Compute index mapping table and get flat list of attributes. */
+    flat_list = index_mapping_and_flat_list(interp, WHAT, repr_data);
+    
+    /* If we have no attributes in the index mapping, then just the header. */
+    if (repr_data->name_to_index_mapping[0].class_key == NULL) {
+        repr_data->allocation_size = sizeof(CStructInstance);
+    }
+
+    /* Otherwise, we need to compute the allocation strategy.  */
+    else {
+        /* We track the size of the body part, since that's what we want offsets into. */
+        INTVAL cur_size = 0;
+        
+        /* Get number of attributes and set up various counters. */
+        INTVAL num_attrs        = VTABLE_elements(interp, flat_list);
+        INTVAL info_alloc       = num_attrs == 0 ? 1 : num_attrs;
+        INTVAL cur_obj_attr     = 0;
+        INTVAL cur_str_attr     = 0;
+        INTVAL cur_init_slot    = 0;
+        INTVAL i;
+
+        /* Allocate location/offset arrays and GC mark info arrays. */
+        repr_data->num_attributes      = num_attrs;
+        repr_data->attribute_locations = (INTVAL *) mem_sys_allocate(info_alloc * sizeof(INTVAL));
+        repr_data->struct_offsets      = (INTVAL *) mem_sys_allocate(info_alloc * sizeof(INTVAL));
+        repr_data->flattened_stables   = (STable **) mem_sys_allocate_zeroed(info_alloc * sizeof(PMC *));
+
+        /* Go over the attributes and arrange their allocation. */
+        for (i = 0; i < num_attrs; i++) {
+            /* Fetch its type; see if it's some kind of unboxed type. */
+            PMC    *attr         = VTABLE_get_pmc_keyed_int(interp, flat_list, i);
+            PMC    *type         = accessor_call(interp, attr, type_str);
+            INTVAL  bits         = sizeof(PMC *) * 8;
+            if (!PMC_IS_NULL(type)) {
+                /* See if it's a type that we know how to handle in a C struct. */
+                storage_spec spec = REPR(type)->get_storage_spec(interp, STABLE(type));
+                if (spec.inlineable == STORAGE_SPEC_INLINED &&
+                        (spec.boxed_primitive == STORAGE_SPEC_BP_INT ||
+                         spec.boxed_primitive == STORAGE_SPEC_BP_NUM)) {
+                    /* It's a boxed int or num; pretty easy. It'll just live in the
+                     * body of the struct. */
+                    repr_data->attribute_locations[i] = 0;
+                    bits = spec.bits;
+                    repr_data->flattened_stables[i] = STABLE(type);
+                    if (REPR(type)->initialize) {
+                        if (!repr_data->initialize_slots)
+                            repr_data->initialize_slots = (INTVAL *) mem_sys_allocate_zeroed((info_alloc + 1) * sizeof(INTVAL));
+                        repr_data->initialize_slots[cur_init_slot] = i;
+                        cur_init_slot++;
+                    }
+                }
+                else {
+                    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                        "CStruct representation only implements native int and float members so far");
+                }
+            }
+            else {
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "CStruct representation requires the types of all attributes to be specified");
+            }
+            
+            /* Do allocation. */
+            /* XXX TODO C structure needs careful alignment */
+            repr_data->struct_offsets[i] = cur_size;
+            cur_size += bits / 8;
+        }
+
+        /* Finally, put computed allocation size in place; it's body size plus
+         * header size. Also number of markables and sentinels. */
+        repr_data->allocation_size = cur_size + sizeof(CStructInstance);
+        if (repr_data->initialize_slots)
+            repr_data->initialize_slots[cur_init_slot] = -1;
+    }
+
+    Parrot_unblock_GC_mark(interp);
+}
+
 /* Creates a new type object of this representation, and associates it with
  * the given HOW. */
 static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {

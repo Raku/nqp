@@ -68,13 +68,6 @@ typedef struct {
      * representation, this is the s-table of the type of that attribute. NULL
      * for attributes that are reference types. */
     STable **flattened_stables;
-    
-    /* Instantiated objects are just a blank piece of memory that needs to
-     * be set up. However, in some cases we'd like them to magically turn in
-     * to some container type. Only for making reference type style things
-     * behave as expected - the struct body itself sees straight though any
-     * scalar containers. */
-    PMC **auto_viv_values;
 
     /* A table mapping attribute names to indexes (which can then be looked
      * up in the offset table). Uses a final null entry as a sentinel. */
