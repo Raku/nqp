@@ -1,6 +1,67 @@
 This file lists big/noteworthy changes, only...
 
-Version 0.6 (upcoming)
+Version 0.7 (upcoming)
+architecture:
+  o added subproject: portasm - portable (GNU AS,+Apple and MASM) assembly framework  
+  o added support for sparc (32-bit) (tested on linux/debian)
+  o added support for sparc (64-bit) (tested on linux/debian, buggy on openbsd)
+  o added support for Solaris and SunPro compiler for i386, x86_64, sparc and sparc64
+  o improved auto-detection via preprocessor defines
+dyncall updates:
+  o uses portasm (GNU,Apple,Microsoft) common sources for x86,x64,ppc32,arm32_arm
+  o bug fixes for x64/win64 calling convention
+  o added support for mingw32-w64 on x64
+  o improved cdecl x86 calling convention: stack always 16 byte aligned
+  o updated API and initial support for structs (for x86/AMD64)
+  o initial support for syscalls on x86, added x86 int80h linux/bsd
+  o added Minix port (stable)
+  o optimized vector buffer for small type pushing
+  o minor fix for amd64/sysv: alignment to 32-byte
+  o bug fix for ppc32/sysv: ellipsis calls work now
+  o updated API, introduced DC_CALL_C_ELLIPSIS_VARARGS
+  o changed interface: dcMode does not reset internally anymore
+ dyncallback updates:
+  o uses portasm for x86,x64
+  o added Solaris/x86/sunpro port (stable)
+  o added Minix port (unstable)
+  o updates source, uses relative includes
+dynload updates:
+  o fixes for missing includes (dyncall_alloc.h)
+  o fixes for self-resolving symbols on windows
+  o removed Dbghelf.lib dependency
+  o bug fixes for cygwin/x86
+  o fixes for beos/haiku
+buildsys additions:
+  o added zero-config (BSD,GNU,SUN) make files (Makefile.embedded)
+  o added in/out-of-source configure2 w/ (BSD,GNU) make files (Makefile.generic')
+  o added bootstrap lua script (download/build) 
+  o Nmakefile: more tests included (resolve_self)
+  o improved cross-compilation for iOS (upgrade to 4.3 sdk)
+  o darwin 8.0 support
+buildsys/gmake updates:
+  o added support for msvc/x64 tool-chain
+  o default settings for build-dir changed to '.'
+  o cleanup: removed top-level Make{Prolog,Epilog,Rules} files and updated all sub-projects and tests
+buildsys/cmake updates:
+  o updated find module scripts (see cmake/Modules)
+  o added support for using dyncall as sub-project (via *Config.cmake files)
+    see details in README.CMake
+  o fixes for msvc and ml
+  o fixes for CPack
+  o fixes for universal builds on Mac OS X
+  o supports SunPro with *.S files.
+documentation updates:
+  o added dyncallback documentation
+  o updated dyncall documentation 
+  o minor updates
+tests:
+  o added flexible test suite for calls (call_suite) based on Lua and C
+  o added syscall test
+  o updates to resolve-self test (adding additional link flags to export symbols)
+  o improved dir name portability (renamed plain_c++ -> plain_cxx) 
+  o renamed *.cpp -> *.cc files (OpenBSD/Sun make has no implicit rules for cpp)
+
+Version 0.6
 building:
   o new build systems: CMake and Plan9's mk
   o buildsys/gmake tool chain update: pcc and iphone sdk

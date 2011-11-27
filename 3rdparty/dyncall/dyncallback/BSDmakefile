@@ -43,9 +43,6 @@ UNITS += dyncall_args
 UNITS += dyncall_callback
 UNITS += dyncall_callback_arch
 
-# Use some dyncall headers - no other dependencies.
-CPPFLAGS += -I$(TOP)/dyncall
-
 .if $(BUILD_ARCH) == x64
 # @@@ should be moved to BSDmake in general (for x64 platforms)
 CFLAGS		+= -fPIC

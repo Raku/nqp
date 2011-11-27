@@ -29,6 +29,7 @@ LIBRARY		= dyncall
 # Gather needed modules to build.
 
 UNITS += dyncall_vector
+UNITS += dyncall_struct
 UNITS += dyncall_api
 UNITS += dyncall_callf
 UNITS += dyncall_call

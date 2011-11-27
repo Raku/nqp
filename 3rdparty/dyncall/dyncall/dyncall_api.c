@@ -1,24 +1,28 @@
 /*
+
  Package: dyncall
+ Library: dyncall
  File: dyncall/dyncall_api.c
  Description: C interface to call vm
  License:
- Copyright (c) 2007-2009 Daniel Adler <dadler@uni-goettingen.de>, 
-                         Tassilo Philipp <tphilipp@potion-studios.com>
 
- Permission to use, copy, modify, and distribute this software for any
- purpose with or without fee is hereby granted, provided that the above
- copyright notice and this permission notice appear in all copies.
+   Copyright (c) 2007-2011 Daniel Adler <dadler@uni-goettingen.de>, 
+                           Tassilo Philipp <tphilipp@potion-studios.com>
 
- THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+   Permission to use, copy, modify, and distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
+
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+   WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+   MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+   ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 */
+
 
 #include "dyncall.h"
 #include "dyncall_callvm.h"
@@ -37,7 +41,8 @@ void dcFree(DCCallVM* vm)
 void dcMode(DCCallVM* vm,DCint mode) 
 { 
   vm->mVTpointer->mode(vm,mode);
-  dcReset(vm);
+  /* dcReset(vm); -- in order to support ellipsis calls, we need to allow
+   * a dcMode(callvm, DC_CALL_C_ELLIPSIS_VARARGS) */
 }
 
 void dcArgBool(DCCallVM* vm,DCbool x) 
@@ -57,33 +62,39 @@ void dcArgShort(DCCallVM* vm,DCshort x)
 
 void dcArgInt(DCCallVM* vm,DCint x) 
 { 
-  vm->mVTpointer->argInt(vm,x); 
+  vm->mVTpointer->argInt(vm, x); 
 }
 
 void dcArgLong(DCCallVM* vm,DClong x) 
 { 
-  vm->mVTpointer->argLong(vm,x); 
+  vm->mVTpointer->argLong(vm, x); 
 }
 
 void dcArgLongLong(DCCallVM* vm, DClonglong x) 
 { 
-  vm->mVTpointer->argLongLong(vm,x); 
+  vm->mVTpointer->argLongLong(vm, x); 
 }
 
 void dcArgFloat(DCCallVM* vm, DCfloat x) 
 { 
-  vm->mVTpointer->argFloat(vm,x); 
+  vm->mVTpointer->argFloat(vm, x); 
 }
 
 void dcArgDouble(DCCallVM* vm, DCdouble x) 
 { 
-  vm->mVTpointer->argDouble(vm,x); 
+  vm->mVTpointer->argDouble(vm, x); 
 }
 
 void dcArgPointer(DCCallVM* vm, DCpointer x) 
 { 
-  vm->mVTpointer->argPointer(vm,x); 
+  vm->mVTpointer->argPointer(vm, x); 
 }
+
+void dcArgStruct(DCCallVM* vm, DCstruct* s, DCpointer x) 
+{ 
+  vm->mVTpointer->argStruct(vm, s, x); 
+}
+
 
 void dcCallVoid(DCCallVM* vm, DCpointer funcptr) 
 {        
@@ -133,6 +144,11 @@ DCdouble dcCallDouble(DCCallVM* vm, DCpointer funcptr)
 DCpointer dcCallPointer(DCCallVM* vm, DCpointer funcptr) 
 { 
   return vm->mVTpointer->callPointer(vm, funcptr); 
+}
+
+void dcCallStruct(DCCallVM* vm, DCpointer funcptr, DCstruct* s, DCpointer x) 
+{ 
+  vm->mVTpointer->callStruct(vm, funcptr, s, x); 
 }
 
 DCint dcGetError(DCCallVM *vm)

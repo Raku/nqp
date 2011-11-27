@@ -1,25 +1,28 @@
 /*
+
  Package: dyncall
+ Library: dyncall
  File: dyncall/dyncall_callvm_mips_n64.c
  Description: mips "n64" ABI callvm implementation
  License:
 
- Copyright (c) 2007-2010 Daniel Adler <dadler@uni-goettingen.de>, 
-                         Tassilo Philipp <tphilipp@potion-studios.com>
+   Copyright (c) 2007-2011 Daniel Adler <dadler@uni-goettingen.de>, 
+                           Tassilo Philipp <tphilipp@potion-studios.com>
 
- Permission to use, copy, modify, and distribute this software for any
- purpose with or without fee is hereby granted, provided that the above
- copyright notice and this permission notice appear in all copies.
+   Permission to use, copy, modify, and distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
 
- THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+   WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+   MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+   ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 */
+
 
 /*
 
@@ -135,7 +138,7 @@ static void dc_callvm_argFloat_mips_n64(DCCallVM* in_self, DCfloat x)
 {
   DCCallVM_mips_n64* self = (DCCallVM_mips_n64*)in_self;
   if (self->mRegCount < 8) {
-    // self->mRegData.mFloatData[self->mRegCount++].d = (DCdouble) x;
+    /*self->mRegData.mFloatData[self->mRegCount++].d = (DCdouble) x;*/
     self->mRegData.mFloatData[self->mRegCount++].f = x;
   } else {
     dcVecAppend(&self->mVecHead, &x, sizeof(DCfloat) );
@@ -190,6 +193,7 @@ DCCallVM_vt gVT_mips_n64 =
 , &dc_callvm_argFloat_mips_n64
 , &dc_callvm_argDouble_mips_n64
 , &dc_callvm_argPointer_mips_n64
+, NULL /* argStruct */
 , (DCvoidvmfunc*)       &dc_callvm_call_mips_n64
 , (DCboolvmfunc*)       &dc_callvm_call_mips_n64
 , (DCcharvmfunc*)       &dc_callvm_call_mips_n64
@@ -200,6 +204,7 @@ DCCallVM_vt gVT_mips_n64 =
 , (DCfloatvmfunc*)      &dc_callvm_call_mips_n64
 , (DCdoublevmfunc*)     &dc_callvm_call_mips_n64
 , (DCpointervmfunc*)    &dc_callvm_call_mips_n64
+, NULL /* callStruct */
 };
 
 DCCallVM_vt gVT_mips_n64_ellipsis =
@@ -216,6 +221,7 @@ DCCallVM_vt gVT_mips_n64_ellipsis =
 , &dc_callvm_argFloat_mips_n64_ellipsis
 , &dc_callvm_argDouble_mips_n64_ellipsis
 , &dc_callvm_argPointer_mips_n64
+, NULL /* argStruct */
 , (DCvoidvmfunc*)       &dc_callvm_call_mips_n64
 , (DCboolvmfunc*)       &dc_callvm_call_mips_n64
 , (DCcharvmfunc*)       &dc_callvm_call_mips_n64
@@ -226,6 +232,7 @@ DCCallVM_vt gVT_mips_n64_ellipsis =
 , (DCfloatvmfunc*)      &dc_callvm_call_mips_n64
 , (DCdoublevmfunc*)     &dc_callvm_call_mips_n64
 , (DCpointervmfunc*)    &dc_callvm_call_mips_n64
+, NULL /* callStruct */
 };
 
 static void dc_callvm_mode_mips_n64(DCCallVM* self,DCint mode)

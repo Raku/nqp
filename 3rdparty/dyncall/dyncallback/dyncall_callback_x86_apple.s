@@ -1,26 +1,28 @@
 /*
+
  Package: dyncall
  Library: dyncallback
  File: dyncallback/dyncall_callback_x86_apple.s
  Description: Callback Thunk - Implementation for x86 on Darwin/Apple's as
  License:
 
- Copyright (c) 2007-2009 Daniel Adler <dadler@uni-goettingen.de>,
-                         Tassilo Philipp <tphilipp@potion-studios.com>
+   Copyright (c) 2007-2011 Daniel Adler <dadler@uni-goettingen.de>,
+                           Tassilo Philipp <tphilipp@potion-studios.com>
 
- Permission to use, copy, modify, and distribute this software for any
- purpose with or without fee is hereby granted, provided that the above
- copyright notice and this permission notice appear in all copies.
+   Permission to use, copy, modify, and distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
 
- THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+   WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+   MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+   ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 */
+
 .text
 .file "dyncall_callback_x86_apple.s"
 .intel_syntax
@@ -44,10 +46,12 @@ frame_CTX          = -4
 frame_DCArgs       = -24
 frame_DCValue      = -32
 
+ASCII_L = 76
 ASCII_l = 108
 ASCII_d	= 100
 ASCII_f = 102
 ASCII_i = 105
+ASCII_v = 118
 
 _dcCallbackThunkEntry:
 	push %ebp
@@ -96,21 +100,25 @@ _dcCallbackThunkEntry:
 
 	// handle return value
 
+	cmp %al, ASCII_v
+	je .return_void
 	cmp %al, ASCII_d
 	je .return_f64
 	cmp %al, ASCII_f
 	je .return_f32
 	cmp %al, ASCII_l
 	je .return_i64
-	cmp %al, ASCII_i
-	je .return_i32
-	ret
+	cmp %al, ASCII_L
+	je .return_i64_
+	
+	// All int cases <= 32 bits (+ pointer & string cases) fall in the 32 bits int case	
 
 .return_i32:
 	mov  %eax, [%edx]
 	ret
 
 .return_i64:
+.return_i64_:
 	mov  %eax, [%edx]
 	mov  %edx, [%edx+4]
 	ret
@@ -121,4 +129,7 @@ _dcCallbackThunkEntry:
 
 .return_f64:
 	fld qword ptr [%edx]
+	ret
+
+.return_void:
 	ret

@@ -1,6 +1,9 @@
-#//////////////////////////////////////////////////////////////////////////////
+# Package: dyncall
+# File: dyncallback/GNUmakefile
+# Description: dyncallback library buildsys/gmake GNUmakefile
+# License:
 #
-# Copyright (c) 2007,2009 Daniel Adler <dadler@uni-goettingen.de>, 
+# Copyright (c) 2007,2011 Daniel Adler <dadler@uni-goettingen.de>, 
 #                         Tassilo Philipp <tphilipp@potion-studios.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -15,10 +18,10 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
-#//////////////////////////////////////////////////////////////////////////////
 
-TOP = ..
-include $(TOP)/MakeProlog
+TOP ?= ..
+GMAKE_TOP ?= $(TOP)/buildsys/gmake
+include $(GMAKE_TOP)/prolog.gmake
 
 TARGET_LIB	 = dyncallback
 INSTALL_LIB	 = 1
@@ -41,7 +44,7 @@ UNITS += dyncall_thunk
 
 # component: write-and-executable memory allocation
 
-INSTALL_HEADERS	+= dyncall_alloc_wx.h
+# INSTALL_HEADERS	+= dyncall_alloc_wx.h
 UNITS += dyncall_alloc_wx
 
 # component: unmarshall arguments at callee-site
@@ -75,6 +78,5 @@ UNITS += dyncall_callback_x64_masm
 endif
 endif
 
-
-include $(TOP)/MakeEpilog
+include $(GMAKE_TOP)/epilog.gmake
 

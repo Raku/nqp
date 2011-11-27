@@ -93,16 +93,19 @@ _dcCallbackThunkEntry PROC
   mov  ebp, [ebp]                    ; EBP = parent frame
 
   ; handle return value
+  
+  cmp al, 'v'
+  je return_void
   cmp al, 'd'
   je return_f64
   cmp al, 'f'
   je return_f32
   cmp al, 'l'
   je return_i64
-  cmp al, 'i'
-  je return_i32
-  ret
-
+  cmp al, 'L'
+  je return_i64
+  ; All int cases <= 32 bits (+ pointer & string cases) fall in the 32 bits int case
+  
 return_i32:
   mov  eax, [edx]
   ret
@@ -118,6 +121,9 @@ return_f32:
 
 return_f64:
   fld qword ptr [edx]
+  ret
+
+return_void:
   ret
 
 _dcCallbackThunkEntry ENDP

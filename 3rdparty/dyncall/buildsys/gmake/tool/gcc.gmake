@@ -1,6 +1,6 @@
 #//////////////////////////////////////////////////////////////////////////////
 #
-# Copyright (c) 2007,2009 Daniel Adler <dadler@uni-goettingen.de>, 
+# Copyright (c) 2007,2011 Daniel Adler <dadler@uni-goettingen.de>, 
 #                         Tassilo Philipp <tphilipp@potion-studios.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -91,11 +91,14 @@ $(BUILD_DIR)/%.o: %.c
 $(BUILD_DIR)/%.o: %.cpp
 	$(COMPILE.cpp) $< $(OUTPUT_OPTION)
 
+$(BUILD_DIR)/%.o: %.cc
+	$(COMPILE.cpp) $< $(OUTPUT_OPTION)
+
 #	$(CXX) -MM -MT $@ $(CPPFLAGS) $(CXXFLAGS) $< > $(BUILD_DIR)/$*.d
 
 # --- static library ----------------------------------------------------------
 
-LIBTOOL_STATIC ?= $(RM) $@ ; $(AR) -cr $@ $^
+LIBTOOL_STATIC ?= $(RM) $@ ; $(AR) -rcs $@ $^ 
 
 $(BUILD_DIR)/%.a:
 	$(LIBTOOL_STATIC)

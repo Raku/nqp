@@ -1,6 +1,9 @@
-#//////////////////////////////////////////////////////////////////////////////
+# Package: dynload
+# File: dynload/GNUmakefile
+# Description: dynload library buildsys/gmake Makefile
+# License:
 #
-# Copyright (c) 2007,2009 Daniel Adler <dadler@uni-goettingen.de>, 
+# Copyright (c) 2007,2011 Daniel Adler <dadler@uni-goettingen.de>, 
 #                         Tassilo Philipp <tphilipp@potion-studios.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -15,22 +18,15 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
-#//////////////////////////////////////////////////////////////////////////////
 
-#///////////////////////////////////////////////////
-#
-#	gnu make makefile
-#	GNUmakefile
-#
-#///////////////////////////////////////////////////
-
-TOP = ..
+TOP ?= ..
+GMAKE_TOP ?= $(TOP)/buildsys/gmake
+include $(GMAKE_TOP)/prolog.gmake
 
 TARGET_LIB = dynload
 UNITS = dynload dynload_syms
-CPPFLAGS += -I../dyncall
 INSTALL_HEADERS = dynload.h
 INSTALL_LIB = 1
 
-include $(TOP)/MakeRules
+include $(GMAKE_TOP)/epilog.gmake
 

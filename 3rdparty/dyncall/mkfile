@@ -23,7 +23,7 @@ TOP = .
 <$TOP/buildsys/mk/prolog.mk
 
 # directories:
-DIRS  = dyncall dyncallback dynload
+DIRS  = dyncall
 AUTOS = ConfigVars
 
 #.PHONY: test doc

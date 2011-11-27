@@ -1,0 +1,12 @@
+MAKEFILE = Makefile.embedded
+MAKE_CMD = ${MAKE} -f ${MAKEFILE} 
+TARGET	= libdyncall_s.a
+OBJS	= dyncall_vector.o dyncall_api.o dyncall_callvm.o dyncall_callvm_base.o dyncall_call.o dyncall_callf.o dyncall_struct.o
+all: ${TARGET}
+libdyncall_s.a: ${OBJS}
+	${AR} ${ARFLAGS} $@ ${OBJS}
+clean:
+	rm -f ${OBJS} ${TARGET}
+.PHONY: all clean
+osx-universal:
+	CFLAGS="${CFLAGS} -arch i386 -arch x86_64 -arch ppc" ASFLAGS="${ASFLAGS} -arch i386 -arch x86_64 -arch ppc" AR="libtool" ARFLAGS="-static -o" ${MAKE_CMD} all

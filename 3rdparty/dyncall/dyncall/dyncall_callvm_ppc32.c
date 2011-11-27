@@ -1,21 +1,28 @@
 /*
 
- Copyright (c) 2007-2009 Daniel Adler <dadler@uni-goettingen.de>, 
-                         Tassilo Philipp <tphilipp@potion-studios.com>
+ Package: dyncall
+ Library: dyncall
+ File: dyncall/dyncall_callvm_ppc32.c
+ Description: 
+ License:
 
- Permission to use, copy, modify, and distribute this software for any
- purpose with or without fee is hereby granted, provided that the above
- copyright notice and this permission notice appear in all copies.
+   Copyright (c) 2007-2011 Daniel Adler <dadler@uni-goettingen.de>, 
+                           Tassilo Philipp <tphilipp@potion-studios.com>
 
- THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+   Permission to use, copy, modify, and distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
+
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+   WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+   MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+   ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 */
+
 
 /*
 
@@ -36,6 +43,7 @@
 #include "dyncall_alloc.h"
 #include "dyncall_macros.h"
 #include "dyncall_types.h"
+#include "dyncall_utils.h"
 
 /* Support for Mac OS X (Darwin) and Systen V ABI for Power PC 32-bit */
 
@@ -176,10 +184,8 @@ static void dc_callvm_argFloat_ppc32_sysv(DCCallVM* in_self, DCfloat f)
 static void dc_callvm_argLongLong_ppc32_darwin(DCCallVM* in_self, DClonglong L)
 {
   DCint* p = (DCint*) &L;
-  dcArgInt(in_self, p[0] );
-  dcArgInt(in_self, p[1] );
-//  dc_callvm_argInt_ppc32( in_self, p[0] ); 
-//  dc_callvm_argInt_ppc32( in_self, p[1] ); 
+  dcArgInt(in_self, p[0]);
+  dcArgInt(in_self, p[1]);
 }
 
 static void dc_callvm_argLongLong_ppc32_sysv(DCCallVM* in_self, DClonglong L)
@@ -213,7 +219,6 @@ static void dc_callvm_argBool_ppc32(DCCallVM* in_self, DCbool x)
 {
   /* promote to integer */
   dcArgInt(in_self, (x == 0) ? DC_FALSE : DC_TRUE );
-//  dc_callvm_argInt_ppc32( in_self, (x == 0) ? DC_FALSE : DC_TRUE );
 }
 
 
@@ -221,7 +226,6 @@ static void dc_callvm_argChar_ppc32(DCCallVM* in_self, DCchar ch)
 {
   /* promote to integer */
   dcArgInt(in_self, (DCint) ch );
-//  dc_callvm_argInt_ppc32(in_self, (DCint) ch);
 }
 
 
@@ -229,7 +233,6 @@ static void dc_callvm_argShort_ppc32(DCCallVM* in_self, DCshort s)
 {
   /* promote to integer */
   dcArgInt(in_self, (DCint) s );
-//  dc_callvm_argInt_ppc32(in_self, (DCint) s);
 }
 
 
@@ -237,45 +240,22 @@ static void dc_callvm_argLong_ppc32(DCCallVM* in_self, DClong l)
 {
   /* promote to integer */
   dcArgInt(in_self, (DCint) l );
-//  dc_callvm_argInt_ppc32(in_self, (DCint) l);
 }
 
 static void dc_callvm_argPointer_ppc32(DCCallVM* in_self, DCpointer p)
 {
   /* promote to integer */
   dcArgInt(in_self, *(DCint*) &p );
-//  dc_callvm_argInt_ppc32(in_self, * (DCint*) &p);
 }
 
-#ifndef max
-#define max(a,b) (a>=b)?a:b
-#endif
-
-
-#if 0
-/* Call. */
-void dc_callvm_call_ppc32(DCCallVM* in_self, DCpointer target)
-{
-  DCCallVM_ppc32* self = (DCCallVM_ppc32*)in_self;
-  ( void (*) (DCpointer, DCpointer, DCint, DCpointer) self->mpCallFunc ) (
-/*  
-  dcCall_ppc32(
- */
-    target
-   ,&self->mRegData
-   ,DC_MAX( dcVecSize(&self->mVecHead) , 8*4 )
-   ,dcVecData(&self->mVecHead)
-  );
-}
-#endif
 
 void dc_callvm_call_ppc32_darwin(DCCallVM* in_self, DCpointer target)
 {
-  DCCallVM_ppc32* self = (DCCallVM_ppc32*) in_self;
+  DCCallVM_ppc32* self = (DCCallVM_ppc32*)in_self;
   dcCall_ppc32_darwin( 
     target, 
     &self->mRegData, 
-    max( dcVecSize(&self->mVecHead), 8*4 ) , 
+    DC_MAX(dcVecSize(&self->mVecHead), 8*4),
     dcVecData(&self->mVecHead)
   );
 }
@@ -302,6 +282,7 @@ DCCallVM_vt gVT_ppc32_darwin =
 , &dc_callvm_argFloat_ppc32_darwin
 , &dc_callvm_argDouble_ppc32_darwin
 , &dc_callvm_argPointer_ppc32
+, NULL /* argStruct */
 , (DCvoidvmfunc*)       &dc_callvm_call_ppc32_darwin
 , (DCboolvmfunc*)       &dc_callvm_call_ppc32_darwin
 , (DCcharvmfunc*)       &dc_callvm_call_ppc32_darwin
@@ -312,6 +293,7 @@ DCCallVM_vt gVT_ppc32_darwin =
 , (DCfloatvmfunc*)      &dc_callvm_call_ppc32_darwin
 , (DCdoublevmfunc*)     &dc_callvm_call_ppc32_darwin
 , (DCpointervmfunc*)    &dc_callvm_call_ppc32_darwin
+, NULL /* callStruct */
 };
 
 DCCallVM_vt gVT_ppc32_sysv =
@@ -328,6 +310,7 @@ DCCallVM_vt gVT_ppc32_sysv =
 , &dc_callvm_argFloat_ppc32_sysv
 , &dc_callvm_argDouble_ppc32_sysv
 , &dc_callvm_argPointer_ppc32
+, NULL /* argStruct */
 , (DCvoidvmfunc*)       &dc_callvm_call_ppc32_sysv
 , (DCboolvmfunc*)       &dc_callvm_call_ppc32_sysv
 , (DCcharvmfunc*)       &dc_callvm_call_ppc32_sysv
@@ -338,6 +321,7 @@ DCCallVM_vt gVT_ppc32_sysv =
 , (DCfloatvmfunc*)      &dc_callvm_call_ppc32_sysv
 , (DCdoublevmfunc*)     &dc_callvm_call_ppc32_sysv
 , (DCpointervmfunc*)    &dc_callvm_call_ppc32_sysv
+, NULL /* callStruct */
 };
 
 void dc_callvm_mode_ppc32(DCCallVM* in_self, DCint mode)
@@ -351,6 +335,7 @@ void dc_callvm_mode_ppc32(DCCallVM* in_self, DCint mode)
 #if defined(DC__ABI_Darwin)
     case DC_CALL_C_DEFAULT:
     case DC_CALL_C_ELLIPSIS:
+    case DC_CALL_C_ELLIPSIS_VARARGS:
 #endif
 
       vt = &gVT_ppc32_darwin; 
@@ -361,6 +346,7 @@ void dc_callvm_mode_ppc32(DCCallVM* in_self, DCint mode)
 #if defined(DC__ABI_SysV)
     case DC_CALL_C_DEFAULT:
     case DC_CALL_C_ELLIPSIS:
+    case DC_CALL_C_ELLIPSIS_VARARGS:
 #endif
 
       vt = &gVT_ppc32_sysv;
@@ -372,8 +358,6 @@ void dc_callvm_mode_ppc32(DCCallVM* in_self, DCint mode)
   }
   
   dc_callvm_base_init(&self->mInterface, vt);
-
-  dcReset(in_self);
 }
 
 DCCallVM* dcNewCallVM(DCsize size)

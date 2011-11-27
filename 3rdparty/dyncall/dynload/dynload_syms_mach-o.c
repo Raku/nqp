@@ -1,20 +1,27 @@
 /*
 
- Copyright (c) 2007-2010 Olivier Chafik <olivier.chafik@gmail.com>
+ Package: dyncall
+ Library: dynload
+ File: dynload/dynload_syms_mach-o.c
+ Description: 
+ License:
 
- Permission to use, copy, modify, and distribute this software for any
- purpose with or without fee is hereby granted, provided that the above
- copyright notice and this permission notice appear in all copies.
+   Copyright (c) 2007-2011 Olivier Chafik <olivier.chafik@gmail.com>
 
- THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+   Permission to use, copy, modify, and distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
+
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+   WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+   MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+   ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 */
+
 
 /*
  
@@ -23,19 +30,20 @@
 */
 
 #include "dynload.h"
-#include "dynload_macros.h"
-#include "dyncall_macros.h"
-#include "dyncall_alloc.h"
+#include "dynload_alloc.h"
 
 #include <mach-o/dyld.h>
 #include <mach-o/nlist.h>
 #include <dlfcn.h>
+#include <string.h>
 
-#if defined(DC__Arch_AMD64)
+#if defined(ARCH_X64)
 #define MACH_HEADER_TYPE mach_header_64
+#define SEGMENT_COMMAND segment_command_64
 #define NLIST_TYPE nlist_64
 #else
 #define MACH_HEADER_TYPE mach_header
+#define SEGMENT_COMMAND segment_command
 #define NLIST_TYPE nlist
 #endif
 
@@ -55,20 +63,22 @@ struct DLSyms_
 };
 
 
-DLSyms* dlSymsInit(DLLib* pLib)
+DLSyms* dlSymsInit(const char* libPath) 
 {
 	DLSyms* pSyms = NULL;
 	uint32_t iImage, nImages;
-	if (!pLib || !pLib->libPath)
-		return NULL;
-	
 	for (iImage = 0, nImages = _dyld_image_count(); iImage < nImages; iImage++)
 	{
 		const char* name = _dyld_get_image_name(iImage);
-		if (name && !strcmp(name, pLib->libPath))
+		if (name && !strcmp(name, libPath))
 		{
-			const struct mach_header* pHeader = _dyld_get_image_header(iImage);
-			const char* pBase = (const char*)pHeader;
+			const struct MACH_HEADER_TYPE* pHeader = (const struct MACH_HEADER_TYPE*) _dyld_get_image_header(iImage);
+			const char* pBase = ((const char*)pHeader);
+			if (pHeader->filetype != MH_DYLIB)
+				return NULL;
+			if (pHeader->flags & MH_SPLIT_SEGS)
+				return NULL;
+
 			if (pHeader)
 			{
 				uint32_t iCmd, nCmds = pHeader->ncmds;
@@ -78,10 +88,9 @@ DLSyms* dlSymsInit(DLLib* pLib)
 				{
 					if (cmd->cmd == LC_SYMTAB) 
 					{
-						int iSymTab = 0;
 						const struct symtab_command* scmd = (const struct symtab_command*)cmd;
 					
-						pSyms = (DLSyms*)( dcAllocMem(sizeof(DLSyms)) );
+						pSyms = (DLSyms*)( dlAllocMem(sizeof(DLSyms)) );
 						pSyms->symbolCount = scmd->nsyms;
 						pSyms->pStringTable = pBase + scmd->stroff;
 						pSyms->pSymbolTable = (struct NLIST_TYPE*)(pBase + scmd->symoff);
@@ -103,9 +112,8 @@ void dlSymsCleanup(DLSyms* pSyms)
 	if (!pSyms)
 		return;
 	
-	dcFreeMem(pSyms);
+	dlFreeMem(pSyms);
 }
-
 
 int dlSymsCount(DLSyms* pSyms)
 {
@@ -113,7 +121,6 @@ int dlSymsCount(DLSyms* pSyms)
 		return 0;
 	return pSyms->symbolCount;
 }
-
 
 static const struct NLIST_TYPE* get_nlist(DLSyms* pSyms, int index)
 {
@@ -146,7 +153,7 @@ void* dlSymsValue(DLSyms* pSyms, int index)
 	if (!nl)
 		return NULL;
 	
-	return (void*)nl->n_value;
+	return (void*) (ptrdiff_t) (nl->n_value);
 }
 
 

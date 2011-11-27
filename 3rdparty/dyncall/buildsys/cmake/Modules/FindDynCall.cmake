@@ -1,9 +1,19 @@
+# - Try to find dyncall library
+#
+#   The following variables will be defined:
+#
+#     DYNCALL_FOUND
+#     DYNCALL_INCLUDE_DIRS
+#     DYNCALL_LIBRARIES
+#
+# ----------------------------------------------------------------------------
+#
 # Package: dyncall
-# File: share/cmake/Modules/CMakeLists.txt
-# Description: Find DynCall library
+# File: buildsys/cmake/Modules/CMakeLists.txt
+# Description: CMake Module to find DynCall library
 # License:
 #
-# Copyright (c) 2010 Daniel Adler <dadler@uni-goettingen.de>
+# Copyright (c) 2010,2011 Daniel Adler <dadler@uni-goettingen.de>
 # 
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -18,18 +28,16 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-find_path(DynCall_INCLUDE_DIR NAMES dyncall.h)
-find_library(DynCall_LIBRARY dyncall_s)
+find_path(DYNCALL_INCLUDE_DIR NAMES dyncall.h)
+find_library(DYNCALL_LIBRARY dyncall_s)
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(DynCall DEFAULT_MSG DynCall_LIBRARY DynCall_INCLUDE_DIR)
+find_package_handle_standard_args(DynCall DEFAULT_MSG DYNCALL_LIBRARY DYNCALL_INCLUDE_DIR)
 
-if(DynCall_FOUND)
-  set(DynCall_INCLUDE_DIRS ${DynCall_INCLUDE_DIR})
-  set(DynCall_LIBRARIES ${DynCall_LIBRARY})
-endif(DynCall_FOUND)
+if(DYNCALL_FOUND)
+  set(DYNCALL_INCLUDE_DIRS ${DYNCALL_INCLUDE_DIR})
+  set(DYNCALL_LIBRARIES ${DYNCALL_LIBRARY})
+endif(DYNCALL_FOUND)
 
-mark_as_advanced(DynCall_INCLUDE_DIR DynCall_LIBRARY)
-
-
+mark_as_advanced(DYNCALL_INCLUDE_DIR DYNCALL_LIBRARY)
 

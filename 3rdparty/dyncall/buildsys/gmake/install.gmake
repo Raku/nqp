@@ -1,6 +1,6 @@
 #//////////////////////////////////////////////////////////////////////////////
 #
-# Copyright (c) 2007,2009 Daniel Adler <dadler@uni-goettingen.de>, 
+# Copyright (c) 2007,2011 Daniel Adler <dadler@uni-goettingen.de>, 
 #                         Tassilo Philipp <tphilipp@potion-studios.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -32,7 +32,7 @@ INSTALL_HEADERS ?= $(INSTALL_INCLUDES)
 endif
 
 
-INSTALL_PARTS = install-app install-dll install-lib install-includes install-mod 
+INSTALL_PARTS = install-app install-dll install-lib install-includes  
 .PHONY: install $(INSTALL_PARTS)
 $(INSTALL_PARTS): build
 install: $(INSTALL_PARTS)
@@ -40,7 +40,6 @@ install: $(INSTALL_PARTS)
 ifdef INSTALL_PREFIX
 
 INSTALL_BINDIR ?= $(INSTALL_PREFIX)/bin
-INSTALL_MODDIR ?= $(INSTALL_PREFIX)/bin/ucom
 INSTALL_LIBDIR ?= $(INSTALL_PREFIX)/lib
 INSTALL_INCDIR ?= $(INSTALL_PREFIX)/include
 
@@ -52,8 +51,6 @@ $(INSTALL_LIBDIR):
 	mkdir -p $(INSTALL_LIBDIR)
 $(INSTALL_INCDIR):
 	mkdir -p $(INSTALL_INCDIR)
-$(INSTALL_MODDIR):
-	mkdir -p $(INSTALL_MODDIR)
 
 endif
 
@@ -62,7 +59,6 @@ INSTALL_LIB ?= 1
 INSTALL_APP ?= 1
 INSTALL_DLL ?= 1
 INSTALL_HEADERS ?= 1
-INSTALL_MOD ?= 1
 endif
 
 ifdef INSTALL_LIB
@@ -76,14 +72,6 @@ ifdef INSTALL_APP
 ifdef APP_FILE
 install-app: $(APP_FILE) $(INSTALL_BINDIR)
 	cp -Rf $(APP_FILE) $(INSTALL_BINDIR)
-endif
-endif
-
-ifdef INSTALL_MOD
-MOD_FILE ?= $(DLL_FILE)
-ifdef MOD_FILE
-install-mod: $(MOD_FILE) $(INSTALL_MODDIR)
-	cp -Rf $(MOD_FILE) $(INSTALL_MODDIR)
 endif
 endif
 

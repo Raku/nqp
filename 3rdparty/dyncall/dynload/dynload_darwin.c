@@ -1,21 +1,28 @@
 /*
 
- Copyright (c) 2007-2010 Olivier Chafik <olivier.chafik@gmail.com>
- Minor bug-fix modifications by Daniel Adler. 
+ Package: dyncall
+ Library: dynload
+ File: dynload/dynload_darwin.c
+ Description: dynload module for .dylib (mach-o darwin/OS X) files
+ License:
 
- Permission to use, copy, modify, and distribute this software for any
- purpose with or without fee is hereby granted, provided that the above
- copyright notice and this permission notice appear in all copies.
+   Copyright (c) 2007-2011 Olivier Chafik <olivier.chafik@gmail.com>
+                           Minor bug-fix modifications by Daniel Adler.
 
- THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+   Permission to use, copy, modify, and distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
+
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+   WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+   MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+   ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 */
+
 
 /*
 
@@ -27,7 +34,7 @@
 
 
 #include "dynload.h"
-#include "dyncall_alloc.h"
+#include "dynload_alloc.h"
 #include <dlfcn.h>
 #include <string.h>
 
@@ -49,12 +56,12 @@ DLLib* dlLoadLibrary(const char* libPath)
 		return NULL;
 
       
-        lib = (DLLib*)dcAllocMem(sizeof(DLLib));
+        lib = (DLLib*)dlAllocMem(sizeof(DLLib));
         lib->handle = handle;
         /* libPath might be null (self reference on image) [Daniel] */
         if (libPath != NULL) {
                 len = strlen(libPath);
-                lib->libPath = (char*)dcAllocMem(len + 1);
+                lib->libPath = (char*)dlAllocMem(len + 1);
                 strcpy(lib->libPath, libPath);
                 lib->libPath[len] = '\0';
         } else {
@@ -62,7 +69,6 @@ DLLib* dlLoadLibrary(const char* libPath)
         }
         return lib;
 }
-
 
 void* dlFindSymbol(DLLib* libHandle, const char* symbol)
 {
@@ -77,7 +83,7 @@ void  dlFreeLibrary(DLLib* libHandle)
 	
 	dlclose(libHandle->handle);
         if (libHandle->libPath)
-	        dcFreeMem(libHandle->libPath);
-	dcFreeMem(libHandle);
+	        dlFreeMem(libHandle->libPath);
+	dlFreeMem(libHandle);
 }
 

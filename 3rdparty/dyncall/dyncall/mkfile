@@ -23,7 +23,7 @@ TOP		= ..
 
 
 LIBRARY		= dyncall
-UNITS = $UNITS dyncall_vector dyncall_api dyncall_callf dyncall_call dyncall_callvm dyncall_callvm_base
+UNITS = $UNITS dyncall_vector dyncall_api dyncall_callf dyncall_call dyncall_callvm dyncall_callvm_base dyncall_struct
 
 
 <$TOP/buildsys/mk/epilog.mk

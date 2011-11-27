@@ -21,21 +21,46 @@
 cmake_minimum_required (VERSION 2.6)
 project(DynCall)
 
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "dyncall enables dynamic invocation of machine-level function calls")
+set(CPACK_PACKAGE_VENDOR "dyncall project")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/Description.txt")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")
+if(APPLE)
+set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/Description.txt")
+endif(APPLE)
+set(CPACK_PACKAGE_NAME "dyncall")
+include(CPack)
+
 # add cmake modules shipped with the package to cmake's module path.
 # currently we have no use for this, but maybe later..
 #set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/buildsys/cmake/Modules" "${CMAKE_MODULE_PATH}")
 
-# enable gcc as front-end to assembler for .S files
-if(CMAKE_COMPILER_IS_GNUCC)
-  enable_language(ASM)
+
+if(MSVC)
+  enable_language(ASM_MASM)
+  #if(CMAKE_SIZEOF_VOID_P MATCHES 8)
+  #  set(CMAKE_ASM_COMPILER "ml64")
+  #else()
+  #  set(CMAKE_ASM_COMPILER "ml")
+  #endif()
+  #set(CMAKE_ASM_COMPILER_ARG1 "/c")
+  #set(CMAKE_ASM_MASM_SOURCE_FILE_EXTENSIONS asm)
+  #set(CMAKE_ASM_MASM_COMPILE_OBJECT "<CMAKE_ASM_MASM_COMPILER> <FLAGS> /c /Fo <OBJECT> <SOURCE>")
+elseif(CMAKE_COMPILER_IS_GNUCC)
+  # when used in shared libraries, -fPIC is required by several architectures
+  # and platforms (observed on AMD64, Solaris/Sparc).
+  # we enable it per default here.
+  add_definitions("-fPIC")
+  # enable gcc as front-end to assembler for .S files
   set(CMAKE_ASM_COMPILER "${CMAKE_C_COMPILER}")
-  set(CMAKE_ASM_COMPILER_ARG1 "-c")
+  set(CMAKE_ASM_COMPILER_ARG1 "${CPPFLAGS} -c")
+  enable_language(ASM)
+elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "SunPro")
+  set(CMAKE_ASM_COMPILER "${CMAKE_C_COMPILER}")
+  set(CMAKE_ASM_COMPILER_ARG1 "${CPPFLAGS} -c")
+  enable_language(ASM)
 endif()
 
-# fix for AMD64: force -fPIC (even for static libs).
-if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64")
-  add_definitions("-fPIC")
-endif()
 
 add_subdirectory(dynload)
 add_subdirectory(dyncall)

@@ -22,9 +22,11 @@
 # REVISION
 # 2009/03/23
 #	dadler: Added preprocessor assembly rules for .S files.
+# 2011/05/04
+#       dadler: We switch from *.cpp -> *.cc. Added .cc suffix and rule. 
 
 .SUFFIXES:
-.SUFFIXES: .o .c .cpp .s .S .pdf .tex
+.SUFFIXES: .o .c .cpp .s .S .pdf .tex .cc
 
 
 .c.o: .SILENT
@@ -33,6 +35,10 @@
 
 .cpp.o: .SILENT
 	echo .cpp.o: Compiling $(.IMPSRC)...
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I$(TOP)/dyncall -I$(TOP)/dyncallback $(TARGET_ARCH) -c $(.IMPSRC) -o $(.TARGET)
+
+.cc.o: .SILENT
+	echo .cc.o: Compiling $(.IMPSRC)...
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I$(TOP)/dyncall -I$(TOP)/dyncallback $(TARGET_ARCH) -c $(.IMPSRC) -o $(.TARGET)
 
 .s.o: .SILENT

@@ -20,12 +20,21 @@
 
 include_directories(${PROJECT_SOURCE_DIR}/dyncall)
 
-add_library(dyncallback_s STATIC
+if(MSVC)
+  if(CMAKE_SIZEOF_VOID_P MATCHES 4)
+    set(ASM_SRC dyncall_callback_x86_masm.asm)	
+  else()
+    set(ASM_SRC dyncall_callback_x64_masm.asm)
+  endif()
+else()
+  set(ASM_SRC dyncall_callback_arch.S)
+endif()
+
+add_library(dyncallback_s STATIC ${ASM_SRC}
   dyncall_thunk.c
   dyncall_alloc_wx.c
   dyncall_args.c
   dyncall_callback.c
-  dyncall_callback_arch.S
 )
 
 install(TARGETS dyncallback_s ARCHIVE DESTINATION lib )

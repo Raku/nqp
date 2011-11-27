@@ -36,7 +36,7 @@ endif
 
 # project settings 
 
--include $(TOP)/ProjectVars
+#-include $(TOP)/ProjectVars
 
  
 # setup BUILD_* from CONFIG_* variables

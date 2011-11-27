@@ -1,2 +1,0 @@
-include $(GMAKE_TOP)/epilog.gmake
-

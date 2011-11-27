@@ -59,12 +59,12 @@ LDFLAGS  = $(LDFLAGS) -specs=ds_arm9.specs
 
 
 .SUFFIXES:
-.SUFFIXES: .o .so .a .arm9 .nds .pdf .c .cpp .s .tex
+.SUFFIXES: .o .so .a .arm9 .nds .pdf .c .cpp .S .tex .cc
 
 
-.s.o:
-	echo .s.o: Assembling $< ...
-	$(AS) $(ASFLAGS) -o $@ $<
+.S.o:
+	echo .S.o: Assembling $< ...
+	$(CC) $(ASFLAGS) $(CFLAGS) -o $@ -c $<
 
 .c.o:
 	echo .c.o: Compiling $< ...
@@ -72,6 +72,10 @@ LDFLAGS  = $(LDFLAGS) -specs=ds_arm9.specs
 
 .cpp.o:
 	echo .cpp.o: Compiling $< ...
+	$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+.cc.o:
+	echo .cc.o: Compiling $< ...
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
 
 .tex.pdf:

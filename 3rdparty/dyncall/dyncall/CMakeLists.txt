@@ -18,10 +18,20 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-add_library(dyncall_s STATIC 
+if(MSVC)
+  if(CMAKE_SIZEOF_VOID_P MATCHES 4)
+    set(ASM_SRC dyncall_call_x86_generic_masm.asm)	
+  else()
+    set(ASM_SRC dyncall_call_x64_generic_masm.asm)
+  endif()
+else()
+  set(ASM_SRC dyncall_call.S)
+endif()
+
+add_library(dyncall_s STATIC ${ASM_SRC} 
   dyncall_vector.c 
+  dyncall_struct.c 
   dyncall_api.c 
-  dyncall_call.S 
   dyncall_callvm.c 
   dyncall_callvm_base.c
   dyncall_callf.c

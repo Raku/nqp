@@ -1,34 +1,38 @@
 /*
- Package: dynload
- File: include/dynload.h
- Description: main header file for dynload
+
+ Package: dyncall
+ Library: dynload
+ File: dynload/dynload.h
+ Description: public header for library dynload
  License:
 
- Copyright (c) 2007-2010 Daniel Adler <dadler@uni-goettingen.de>, 
-                         Tassilo Philipp <tphilipp@potion-studios.com>
+   Copyright (c) 2007-2011 Daniel Adler <dadler@uni-goettingen.de>, 
+                           Tassilo Philipp <tphilipp@potion-studios.com>
 
- Permission to use, copy, modify, and distribute this software for any
- purpose with or without fee is hereby granted, provided that the above
- copyright notice and this permission notice appear in all copies.
+   Permission to use, copy, modify, and distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
 
- THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+   WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+   MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+   ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 */
+
 
 #ifndef DYNLOAD_H
 #define DYNLOAD_H
 
-#include <stddef.h>
-#include <stdlib.h>
-
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+#ifndef DL_API
+#define DL_API
 #endif
 
 /* --- public api ---------------------------------------------------------- */
@@ -37,21 +41,20 @@ extern "C" {
 
 typedef struct DLLib_ DLLib;
 
-DLLib* dlLoadLibrary(const char* libpath);
-void   dlFreeLibrary(DLLib* pLib);
-void*  dlFindSymbol(DLLib* pLib, const char* pSymbolName);
+DL_API DLLib* dlLoadLibrary(const char* libpath);
+DL_API void   dlFreeLibrary(DLLib* pLib);
+DL_API void*  dlFindSymbol(DLLib* pLib, const char* pSymbolName);
 
-/* symbol table enumeration */
+/* symbol table enumeration - only for symbol lookup, not resolve */
 
 typedef struct DLSyms_ DLSyms;
 
-DLSyms*     dlSymsInit   (DLLib* pLib);
-void        dlSymsCleanup(DLSyms* pSyms);
+DL_API DLSyms*     dlSymsInit   (const char* libPath);
+DL_API void        dlSymsCleanup(DLSyms* pSyms);
 
-int         dlSymsCount        (DLSyms* pSyms);
-const char* dlSymsName         (DLSyms* pSyms, int index);
-void*       dlSymsValue        (DLSyms* pSyms, int index);
-const char* dlSymsNameFromValue(DLSyms* pSyms, void* value);
+DL_API int         dlSymsCount        (DLSyms* pSyms);
+DL_API const char* dlSymsName         (DLSyms* pSyms, int index);
+DL_API const char* dlSymsNameFromValue(DLSyms* pSyms, void* value); /* symbol must be loaded */
 
 
 #ifdef __cplusplus

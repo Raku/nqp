@@ -29,7 +29,7 @@ endif
 # --- objects -----------------------------------------------------------------
 
 OBJ_SUFFIX ?= .o
-OBJS += $(foreach X,$(UNITS) $(MODS),$(BUILD_DIR)/$X$(OBJ_SUFFIX))
+OBJS += $(foreach X,$(UNITS),$(BUILD_DIR)/$X$(OBJ_SUFFIX))
 
 # --- build application -------------------------------------------------------
 

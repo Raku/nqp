@@ -1,21 +1,28 @@
 /*
 
- Copyright (c) 2007-2009 Daniel Adler <dadler@uni-goettingen.de>, 
-                         Tassilo Philipp <tphilipp@potion-studios.com>
+ Package: dyncall
+ Library: dyncall
+ File: dyncall/dyncall_callvm_x64.c
+ Description: 
+ License:
 
- Permission to use, copy, modify, and distribute this software for any
- purpose with or without fee is hereby granted, provided that the above
- copyright notice and this permission notice appear in all copies.
+   Copyright (c) 2007-2011 Daniel Adler <dadler@uni-goettingen.de>, 
+                           Tassilo Philipp <tphilipp@potion-studios.com>
 
- THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+   Permission to use, copy, modify, and distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
+
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+   WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+   MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+   ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 */
+
 
 
 /* MS Windows x64 calling convention, AMD64 SystemV ABI. */
@@ -23,7 +30,7 @@
 
 #include "dyncall_callvm_x64.h"
 #include "dyncall_alloc.h"
-
+#include "dyncall_struct.h"
 
 static DCCallVM* dc_callvm_new_x64(DCCallVM_vt* vt, DCsize size)
 {
@@ -148,6 +155,17 @@ static void dc_callvm_argPointer_x64(DCCallVM* in_self, DCpointer x)
     dcVecAppend(&self->mVecHead, &x, sizeof(DCpointer));
 }
 
+static void dc_callvm_argStruct_x64(DCCallVM* in_self, DCstruct* s, DCpointer x)
+{
+  DCCallVM_x64* self = (DCCallVM_x64*)in_self;
+  dcVecAppend(&self->mVecHead, x, s->size);
+  /*printf("dc_callvm_argStruct_x64 size = %d\n", (int)s->size);@@@*/
+  if (s->size <= 64)
+  	  dcArgStructUnroll(in_self, s, x);
+  /*else@@@*/
+  /*	  dcVecAppend(&self->mVecHead, &x, sizeof(DCpointer));@@@*/
+}
+
 
 /* Call. */
 void dc_callvm_call_x64(DCCallVM* in_self, DCpointer target)
@@ -183,6 +201,7 @@ DCCallVM_vt gVT_x64 =
 , &dc_callvm_argFloat_x64
 , &dc_callvm_argDouble_x64
 , &dc_callvm_argPointer_x64
+, &dc_callvm_argStruct_x64
 , (DCvoidvmfunc*)       &dc_callvm_call_x64
 , (DCboolvmfunc*)       &dc_callvm_call_x64
 , (DCcharvmfunc*)       &dc_callvm_call_x64
@@ -193,6 +212,7 @@ DCCallVM_vt gVT_x64 =
 , (DCfloatvmfunc*)      &dc_callvm_call_x64
 , (DCdoublevmfunc*)     &dc_callvm_call_x64
 , (DCpointervmfunc*)    &dc_callvm_call_x64
+, NULL /* callStruct */
 };
 
 

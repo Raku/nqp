@@ -1,6 +1,6 @@
 #//////////////////////////////////////////////////////////////////////////////
 #
-# Copyright (c) 2007,2009 Daniel Adler <dadler@uni-goettingen.de>, 
+# Copyright (c) 2007-2009 Daniel Adler <dadler@uni-goettingen.de>, 
 #                         Tassilo Philipp <tphilipp@potion-studios.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -19,8 +19,8 @@
 
 #///////////////////////////////////////////////////
 #
-#	dyncall bsdmake makefile
-#	Copyright 2007 Tassilo Philipp
+#	library dynload bsdmake makefile
+#	Copyright 2007-2011 Tassilo Philipp
 #	BSDmakefile
 #
 #///////////////////////////////////////////////////
@@ -38,8 +38,6 @@ TOP		= ..
 # Overrides.
 
 LIBRARY		= dynload
-
-CPPFLAGS	+= -I../dyncall
 
 # Modules to build.
 

@@ -18,6 +18,10 @@
 #//////////////////////////////////////////////////////////////////////////////
 
 
+ifndef BUILD_OS
+BUILD_OS=generic
+endif
+
 -include $(GMAKE_TOP)/os/$(BUILD_OS).gmake
 
 ifdef BUILD_ASM_nasm

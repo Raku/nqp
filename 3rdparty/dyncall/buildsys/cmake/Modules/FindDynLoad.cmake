@@ -1,9 +1,19 @@
+# - Try to find dynload library
+#
+#   The following variables will be defined:
+#
+#     DYNLOAD_FOUND
+#     DYNLOAD_INCLUDE_DIRS
+#     DYNLOAD_LIBRARIES
+#
+# ----------------------------------------------------------------------------
+#
 # Package: dyncall
-# File: share/cmake/Modules/FindDynLoad.cmake
-# Description: Find DynLoad library
+# File: buildsys/cmake/Modules/FindDynLoad.cmake
+# Description: CMake Module to find dynload library
 # License:
 #
-# Copyright (c) 2010 Daniel Adler <dadler@uni-goettingen.de>
+# Copyright (c) 2010-2011 Daniel Adler <dadler@uni-goettingen.de>
 # 
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -18,16 +28,18 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-find_path(DynLoad_INCLUDE_DIR NAMES dynload.h)
-find_library(DynLoad_LIBRARY dynload_s)
+find_path(DYNLOAD_INCLUDE_DIR NAMES dynload.h)
+find_library(DYNLOAD_LIBRARY dynload_s)
+
+mark_as_advanced(DYNLOAD_INCLUDE_DIR DYNLOAD_LIBRARY)
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(DynLoad DEFAULT_MSG DynLoad_LIBRARY DynLoad_INCLUDE_DIR)
+find_package_handle_standard_args(DynLoad DEFAULT_MSG DYNLOAD_LIBRARY DYNLOAD_INCLUDE_DIR)
 
-if(DynLoad_FOUND)
-  set(DynLoad_INCLUDE_DIRS ${DynLoad_INCLUDE_DIR})
-  set(DynLoad_LIBRARIES ${DynLoad_LIBRARY})
-endif(DynLoad_FOUND)
+if(DYNLOAD_FOUND)
+  set(DYNLOAD_INCLUDE_DIRS ${DYNLOAD_INCLUDE_DIR})
+  set(DYNLOAD_LIBRARIES ${DYNLOAD_LIBRARY})
+endif(DYNLOAD_FOUND)
 
-mark_as_advanced(DynLoad_INCLUDE_DIR DynLoad_LIBRARY)
+mark_as_advanced(DYNLOAD_INCLUDE_DIR DYNLOAD_LIBRARY)
 

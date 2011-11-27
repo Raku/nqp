@@ -44,7 +44,7 @@ ARFLAGS  = /NOLOGO
 
 
 .SUFFIXES:
-.SUFFIXES: .obj .exe .dll .lib .pdf .c .cpp .asm .tex
+.SUFFIXES: .obj .exe .dll .lib .pdf .c .cpp .asm .tex .cc
 
 
 .asm.obj:
@@ -57,6 +57,10 @@ ARFLAGS  = /NOLOGO
 
 .cpp.obj:
 	echo .cpp.obj: Compiling $< ...
+	$(CXX) $(CXXFLAGS) /Fo$@ $<
+
+.cc.obj:
+	echo .cc.obj: Compiling $< ...
 	$(CXX) $(CXXFLAGS) /Fo$@ $<
 
 .tex.pdf:
