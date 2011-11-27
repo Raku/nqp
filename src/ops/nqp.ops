@@ -706,6 +706,28 @@ inline op repr_change_type(in PMC, in PMC) :base_core {
     }
 }
 
+
+/*
+
+=item repr_name
+
+Takes an object and returns a string containing the name of its representation.
+
+=cut
+
+*/
+inline op repr_name(out STR, in PMC) :base_core {
+    PMC *val = decontainerize(interp, $2);
+    if (val->vtable->base_type == smo_id) {
+        $1 = REPR(val)->name;
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_name with a SixModelObject");
+    }
+}
+
+
 /*
 
 =item type_check(obj, wanted_type)

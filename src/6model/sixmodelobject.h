@@ -262,6 +262,9 @@ struct SixModel_REPROps {
     
     /* The representation's ID. */
     INTVAL ID;
+    
+    /* The representation's name. */
+    STRING *name;
 };
 
 /* Hint value to indicate the absence of an attribute lookup or method
