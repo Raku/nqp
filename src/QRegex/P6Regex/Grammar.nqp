@@ -193,7 +193,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
             ]?
     }
 
-    token assertion:sym<[> { <?before '['|'+'|'-'> <cclass_elem>+ }
+    token assertion:sym<[> { <?before '['|'+'|'-'|':'> <cclass_elem>+ }
 
     token cclass_elem {
         $<sign>=['+'|'-'|<?>]
@@ -209,6 +209,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
               )*
           \s* ']'
         | $<name>=[\w+]
+        | ':' $<uniprop>=[\w+]
         ]
         <.normspace>?
     }
