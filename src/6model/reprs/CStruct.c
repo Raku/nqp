@@ -165,13 +165,13 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
     
     /* If we have no attributes in the index mapping, then just the header. */
     if (repr_data->name_to_index_mapping[0].class_key == NULL) {
-        repr_data->allocation_size = sizeof(CStructInstance);
+        repr_data->struct_size = 1; /* avoid 0-byte malloc */
     }
 
     /* Otherwise, we need to compute the allocation strategy.  */
     else {
-        /* We track the size of the body part, since that's what we want offsets into. */
-        INTVAL cur_size = sizeof(PMC **) + sizeof(STRING **);
+        /* We track the size of the struct, which is what we'll want offsets into. */
+        INTVAL cur_size = 0;
         
         /* Get number of attributes and set up various counters. */
         INTVAL num_attrs        = VTABLE_elements(interp, flat_list);
@@ -229,7 +229,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
 
         /* Finally, put computed allocation size in place; it's body size plus
          * header size. Also number of markables and sentinels. */
-        repr_data->allocation_size = cur_size + (sizeof(CStructInstance) - sizeof(void *));
+        repr_data->struct_size = cur_size;
         if (repr_data->initialize_slots)
             repr_data->initialize_slots[cur_init_slot] = -1;
     }
@@ -321,14 +321,13 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
 
     /* Compute allocation strategy if we've not already done so. */
     CStructREPRData * repr_data = (CStructREPRData *) st->REPR_data;
-    if (!repr_data->allocation_size) {
+    if (!repr_data->struct_size) {
         compute_allocation_strategy(interp, st->WHAT, repr_data);
         PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
     }
 
     /* Allocate and set up object instance. */
-    obj = (CStructInstance *) Parrot_gc_allocate_fixed_size_storage(interp, repr_data->allocation_size);
-    memset(obj, 0, repr_data->allocation_size);
+    obj = (CStructInstance *) Parrot_gc_allocate_fixed_size_storage(interp, sizeof(CStructInstance));
     obj->common.stable = st->stable_pmc;
     /* XXX allocate child str and obj arrays if needed. */
     
@@ -338,12 +337,19 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
 /* Initialize a new instance. */
 static void initialize(PARROT_INTERP, STable *st, void *data) {
     CStructREPRData * repr_data = (CStructREPRData *) st->REPR_data;
+    
+    /* Allocate object body. */
+    CStructBody *body = (CStructBody *)data;
+    body->cstruct = mem_sys_allocate(repr_data->struct_size);
+    memset(body->cstruct, 0, repr_data->struct_size);
+    
+    /* Initialize the slots. */
     if (repr_data->initialize_slots) {
         INTVAL i;
         for (i = 0; repr_data->initialize_slots[i] >= 0; i++) {
             INTVAL  offset = repr_data->struct_offsets[repr_data->initialize_slots[i]];
             STable *st     = repr_data->flattened_stables[repr_data->initialize_slots[i]];
-            st->REPR->initialize(interp, st, (char *)data + offset);
+            st->REPR->initialize(interp, st, (char *)body->cstruct + offset);
         }
     }
 }
@@ -353,7 +359,7 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     CStructREPRData * repr_data = (CStructREPRData *) st->REPR_data;
     CStructBody *src_body = (CStructBody *)src;
     CStructBody *dest_body = (CStructBody *)dest;
-    memcpy(dest, src, repr_data->allocation_size - sizeof(CStructInstance));
+    /* XXX todo */
     /* XXX also need to shallow copy the obj and str arrays */
 }
 
@@ -380,13 +386,14 @@ static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
 }
 static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
     CStructREPRData *repr_data = (CStructREPRData *)st->REPR_data;
-    INTVAL            slot;
+    CStructBody     *body      = (CStructBody *)data;
+    INTVAL           slot;
 
     /* Look up slot, then offset and compute address. */
     slot = hint >= 0 ? hint :
         try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0)
-        return ((char *)data) + repr_data->struct_offsets[slot];
+        return ((char *)body->cstruct) + repr_data->struct_offsets[slot];
     
     /* Otherwise, complain that the attribute doesn't exist. */
     no_such_attribute(interp, "get", class_handle, name);
@@ -398,6 +405,7 @@ static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
 }
 static void bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, void *value) {
     CStructREPRData *repr_data = (CStructREPRData *)st->REPR_data;
+    CStructBody     *body      = (CStructBody *)data;
     INTVAL            slot;
 
     /* Try to find the slot. */
@@ -406,7 +414,7 @@ static void bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class
     if (slot >= 0) {
         STable *st = repr_data->flattened_stables[slot];
         if (st)
-            st->REPR->copy_to(interp, st, value, (char *)data + repr_data->struct_offsets[slot]);
+            st->REPR->copy_to(interp, st, value, ((char *)body->cstruct) + repr_data->struct_offsets[slot]);
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Can not bind by reference to non-flattened attribute '%Ss' on class '%Ss'",
@@ -490,14 +498,16 @@ static void gc_cleanup(PARROT_INTERP, STable *st, void *data) {
     CStructBody *body = (CStructBody *)data;
     if (body->child_objs)
         mem_sys_free(body->child_objs);
+    if (body->cstruct)
+        mem_sys_free(body->cstruct);
 }
 
 /* This Parrot-specific addition to the API is used to free an object. */
 static void gc_free(PARROT_INTERP, PMC *obj) {
     CStructREPRData *repr_data = (CStructREPRData *)STABLE(obj)->REPR_data;
 	gc_cleanup(interp, STABLE(obj), OBJECT_BODY(obj));
-    if (repr_data->allocation_size && IS_CONCRETE(obj))
-		Parrot_gc_free_fixed_size_storage(interp, repr_data->allocation_size, PMC_data(obj));
+    if (IS_CONCRETE(obj))
+		Parrot_gc_free_fixed_size_storage(interp, sizeof(CStructInstance), PMC_data(obj));
 	else
 		mem_sys_free(PMC_data(obj));
     PMC_data(obj) = NULL;

@@ -14,9 +14,9 @@ typedef struct {
      * when we put them in the C structure. */
     STRING **child_strs;
     
-    /* This is not an actual pointer; instead it's just a marker we can
-     * use to get at the start of the data that we'll actually pass off
-     * to C land. */
+    /* Pointer to the actual C structure memory; we don't inline it
+     * directly in the body, since it doesn't work so well if we get
+     * something returned and are wrapping it. */
     void *cstruct;
 } CStructBody;
 
@@ -42,9 +42,8 @@ typedef struct {
 /* The CStruct REPR data contains info we need to do allocations, look up
  * attributes and so forth. */
 typedef struct {
-    /* The memory allocation size for an object instance. Includes space
-     * for the common header and the C struct part. */
-    INTVAL allocation_size;
+    /* The size of the structure. */
+    INTVAL struct_size;
 
     /* The number of attributes we have allocated slots for. Note that
      * slots can vary in size. */
