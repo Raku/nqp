@@ -14,6 +14,10 @@ BEGIN_OPS_PREAMBLE
 #include "../6model/serialization_context.h"
 #include "pmc_sub.h"
 
+#if PARROT_HAS_ICU
+#  include <unicode/uchar.h>
+#endif
+
 /* Did we do the dynop setup yet?
  * XXX Relies on this happening once in a single thread at startup. */
 static INTVAL initialized = 0;
