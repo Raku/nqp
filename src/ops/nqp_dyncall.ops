@@ -28,6 +28,7 @@ BEGIN_OPS_PREAMBLE
  *     asciistr
  *     utf8str
  *     utf16str
+ *     cpointer
  *     cstruct
  *     packedarray
  *     callback
@@ -57,6 +58,7 @@ BEGIN_OPS_PREAMBLE
 #define DYNCALL_ARG_CSTRUCT         22
 #define DYNCALL_ARG_PACKEDARRAY     24
 #define DYNCALL_ARG_CALLBACK        26
+#define DYNCALL_ARG_CPOINTER        28
 #define DYNCALL_ARG_TYPE_MASK       30
 
 /* Flag for whether we should free a string after passing it or not. */
@@ -132,6 +134,9 @@ get_arg_type(PARROT_INTERP, PMC *info, INTVAL is_return) {
     }
     else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "cstruct"))) {
         return DYNCALL_ARG_CSTRUCT;
+    }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "cpointer"))) {
+        return DYNCALL_ARG_CPOINTER;
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -224,6 +229,20 @@ make_cstruct_result(PARROT_INTERP, PMC *type, void *cstruct) {
                 "Native call expected return type with CStruct representation, but got something else");
         result = REPR(type)->allocate(interp, STABLE(type));
         ((CStructInstance *)PMC_data(result))->body.cstruct = cstruct;
+    }
+    return result;
+}
+
+/* Constructs a boxed result using a CPointer REPR type. */
+static PMC *
+make_cpointer_result(PARROT_INTERP, PMC *type, void *ptr) {
+    PMC *result = type;
+    if (ptr != NULL && !PMC_IS_NULL(type)) {
+        if (REPR(type)->ID != cp_repr_id)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Native call expected return type with CPointer representation, but got something else");
+        result = REPR(type)->allocate(interp, STABLE(type));
+        ((CPointerInstance *)PMC_data(result))->body.ptr = ptr;
     }
     return result;
 }
@@ -417,6 +436,15 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
                     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                         "Native call expected object with CStruct representation, but got something else");
                 break;
+            case DYNCALL_ARG_CPOINTER:
+                if (!IS_CONCRETE(value))
+                    dcArgPointer(vm, NULL);
+                else if (REPR(value)->ID == cp_repr_id)
+                    dcArgPointer(vm, ((CPointerInstance *)PMC_data(value))->body.ptr);
+                else
+                    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                        "Native call expected object with CPointer representation, but got something else");
+                break;
             case DYNCALL_ARG_PACKEDARRAY:
             case DYNCALL_ARG_CALLBACK:
                 /* XXX Above are all still todo. */
@@ -459,6 +487,9 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
             break;
         case DYNCALL_ARG_CSTRUCT:
             result = make_cstruct_result(interp, $2, dcCallPointer(vm, body->entry_point));
+            break;
+        case DYNCALL_ARG_CPOINTER:
+            result = make_cpointer_result(interp, $2, dcCallPointer(vm, body->entry_point));
             break;
         case DYNCALL_ARG_PACKEDARRAY:
         case DYNCALL_ARG_CALLBACK:
