@@ -1791,5 +1791,30 @@ inline op nqp_radix(out PMC, in INT, in STR, in INT, in INT) :base_core {
     VTABLE_set_integer_keyed_int(interp, out, 2, pos);
     $1 = out;
 }
-    
- 
+
+
+/*
+
+=item nqp_get_runcore()
+
+Returns the name of the current runcore.
+
+=item nqp_set_runcore(name)
+
+Switches parrot's runcore to the specified one.
+
+=cut
+
+*/
+
+inline op nqp_get_runcore(out STR) :base_core {
+    $1 = interp->run_core->name;
+}
+
+
+inline op nqp_set_runcore(in STR) :flow {
+    Parrot_runcore_switch(interp, $1);
+    restart NEXT();
+}
+
+

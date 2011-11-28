@@ -30,7 +30,7 @@ class HLL::Compiler {
         @!stages     := pir::split(' ', 'parse past post pir evalpmc');
         
         # Command options and usage.
-        @!cmdoptions := pir::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config stagestats ll-exception nqpevent=s rxtrace');
+        @!cmdoptions := pir::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config stagestats ll-exception nqpevent=s rxtrace profile profile-compile');
         $!usage := "This compiler is based on HLL::Compiler.\n\nOptions:\n";
         for @!cmdoptions {
             $!usage := $!usage ~ "    $_\n";
@@ -199,6 +199,11 @@ class HLL::Compiler {
 
     method eval($code, *@args, *%adverbs) {
         my $output;
+
+        my $old_runcore := pir::nqp_get_runcore__s();
+        if (%adverbs<profile-compile>) {
+            pir::nqp_set_runcore__vs("subprof_hll");
+        }
         $output := self.compile($code, |%adverbs);
 
         if !pir::isa($output, 'String')
@@ -208,10 +213,14 @@ class HLL::Compiler {
                 $output[0].set_outer_ctx($outer_ctx);
             }
 
+            if (%adverbs<profile>) {
+                pir::nqp_set_runcore__vs("subprof_hll");
+            }
             pir::trace(%adverbs<trace>);
             $output := $output(|@args);
             pir::trace(0);
         }
+        pir::nqp_set_runcore__vs($old_runcore);
 
         $output;
     }
