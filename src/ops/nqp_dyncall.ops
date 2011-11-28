@@ -6,6 +6,7 @@ BEGIN_OPS_PREAMBLE
 #include "../6model/sixmodelobject.h"
 #include "../6model/reprs/NativeCall.h"
 #include "../6model/reprs/CStruct.h"
+#include "../6model/reprs/CPointer.h"
 
 /* This library contains just three operations: one to initialize it,
  * one to look up a native function and build a handle to it, and
@@ -63,9 +64,10 @@ BEGIN_OPS_PREAMBLE
 #define DYNCALL_ARG_FREE_STR        1
 #define DYNCALL_ARG_FREE_STR_MASK   1
 
-/* The ID of the NativeCall and CStruct REPRs. */
+/* The ID of the NativeCall, CPointer and CStruct REPRs. */
 static INTVAL nc_repr_id = 0;
 static INTVAL cs_repr_id = 0;
+static INTVAL cp_repr_id = 0;
 
 /* Grabs a NativeCall body. */
 static NativeCallBody * get_nc_body(PARROT_INTERP, PMC *obj) {
@@ -261,6 +263,10 @@ inline op nqp_native_call_setup() :base_core {
         cs_repr_id = REGISTER_DYNAMIC_REPR(interp,
             Parrot_str_new_constant(interp, "CStruct"),
             CStruct_initialize);
+    if (!cp_repr_id)
+        cp_repr_id = REGISTER_DYNAMIC_REPR(interp,
+            Parrot_str_new_constant(interp, "CPointer"),
+            CPointer_initialize);
 }
 
 
