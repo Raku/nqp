@@ -412,7 +412,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         elsif $<uniprop> {
             my $uniprop := ~$<uniprop>;
             $qast := QAST::Regex.new( $uniprop, :rxtype<uniprop>,
-                                      :negate( $<sign> eq '-' ), :node($/) );
+                                      :negate( $<sign> eq '-' && $<invert> ne '!' # $<sign> ^^ $<invert>
+                                        || $<sign> ne '-' && $<invert> eq '!' ), :node($/) );
         }
         else {
             my @alts;

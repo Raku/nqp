@@ -209,7 +209,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
               )*
           \s* ']'
         | $<name>=[\w+]
-        | ':' $<uniprop>=[\w+]
+        | ':' $<invert>=['!'|<?>] $<uniprop>=[\w+]
         ]
         <.normspace>?
     }
