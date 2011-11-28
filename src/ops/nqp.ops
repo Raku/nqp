@@ -14,6 +14,10 @@ BEGIN_OPS_PREAMBLE
 #include "../6model/serialization_context.h"
 #include "pmc_sub.h"
 
+#if PARROT_HAS_ICU
+#  include <unicode/uchar.h>
+#endif
+
 /* Did we do the dynop setup yet?
  * XXX Relies on this happening once in a single thread at startup. */
 static INTVAL initialized = 0;
@@ -1792,7 +1796,6 @@ inline op nqp_radix(out PMC, in INT, in STR, in INT, in INT) :base_core {
     $1 = out;
 }
 
-
 /*
 
 =item nqp_get_runcore()
@@ -1815,6 +1818,94 @@ inline op nqp_get_runcore(out STR) :base_core {
 inline op nqp_set_runcore(in STR) :flow {
     Parrot_runcore_switch(interp, $1);
     restart NEXT();
+}
+    
+/*
+
+=item inline op is_uprop(out INT, in STR, in STR, in INT)
+
+Sets a true value in $1 if character $4 in string $3 has the unicode property
+named $2.
+
+=cut
+
+*/
+inline op is_uprop(out INT, in STR, in STR, in INT) :base_core {
+#if PARROT_HAS_ICU
+    char     *cstr;
+    INTVAL    ord;
+    int32_t   strwhich, ordwhich;
+    UProperty strprop;
+    opcode_t  *handler;
+
+    if ($4 > 0 && (UINTVAL)$4 == ($3->strlen)) {
+        $1 = 0;
+        goto NEXT();
+    }
+
+    ord = Parrot_str_indexed(interp, $3, $4);
+    cstr = Parrot_str_to_cstring(interp, $2);
+
+    /* try block tests */
+    if (strncmp(cstr, "In", 2) == 0) {
+        strwhich = u_getPropertyValueEnum(UCHAR_BLOCK, cstr+2);
+        ordwhich = u_getIntPropertyValue(ord, UCHAR_BLOCK);
+        if (strwhich != UCHAR_INVALID_CODE) {
+            $1 = (strwhich == ordwhich);
+            Parrot_str_free_cstring(cstr);
+            goto NEXT();
+        }
+    }
+
+    /* try bidi tests */
+    if (strncmp(cstr, "Bidi", 4) == 0) {
+        strwhich = u_getPropertyValueEnum(UCHAR_BIDI_CLASS, cstr+4);
+        ordwhich = u_getIntPropertyValue(ord, UCHAR_BIDI_CLASS);
+        if (strwhich != UCHAR_INVALID_CODE) {
+            $1 = (strwhich == ordwhich);
+            Parrot_str_free_cstring(cstr);
+            goto NEXT();
+        }
+    }
+
+    /* try property value aliases */
+    strwhich = u_getPropertyValueEnum(UCHAR_GENERAL_CATEGORY_MASK, cstr);
+    if (strwhich != UCHAR_INVALID_CODE) {
+        ordwhich = u_getIntPropertyValue(ord, UCHAR_GENERAL_CATEGORY_MASK);
+        $1 = ((strwhich & ordwhich) != 0);
+        Parrot_str_free_cstring(cstr);
+        goto NEXT();
+    }
+
+    /* try property */
+    strprop = u_getPropertyEnum(cstr);
+    if (strprop != UCHAR_INVALID_CODE) {
+        $1 = (u_hasBinaryProperty(ord, strprop) != 0);
+        Parrot_str_free_cstring(cstr);
+        goto NEXT();
+    }
+
+    /* try script aliases */
+    strwhich = u_getPropertyValueEnum(UCHAR_SCRIPT, cstr);
+    if (strwhich != UCHAR_INVALID_CODE) {
+        ordwhich = u_getIntPropertyValue(ord, UCHAR_SCRIPT);
+        $1 = (strwhich == ordwhich);
+        Parrot_str_free_cstring(cstr);
+        goto NEXT();
+    }
+
+    /* unrecognized property name */
+    Parrot_str_free_cstring(cstr);
+    handler =  Parrot_ex_throw_from_op_args(interp, NULL,
+            EXCEPTION_ICU_ERROR,
+            "Unicode property '%Ss' not found", $2);
+    goto ADDRESS(handler);
+#else
+    opcode_t * const handler = Parrot_ex_throw_from_op_args(interp, NULL,
+            EXCEPTION_ICU_ERROR,
+            "ICU not loaded", $2);
+    goto ADDRESS(handler);
+#endif
 }
 
 

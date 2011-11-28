@@ -409,6 +409,12 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             $qast := QAST::Regex.new( PAST::Node.new($name), :rxtype<subrule>, :subtype<method>,
                                       :negate( $<sign> eq '-' ), :node($/) );
         }
+        elsif $<uniprop> {
+            my $uniprop := ~$<uniprop>;
+            $qast := QAST::Regex.new( $uniprop, :rxtype<uniprop>,
+                                      :negate( $<sign> eq '-' && $<invert> ne '!' # $<sign> ^^ $<invert>
+                                        || $<sign> ne '-' && $<invert> eq '!' ), :node($/) );
+        }
         else {
             my @alts;
             for $<charspec> {

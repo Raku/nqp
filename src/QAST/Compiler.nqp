@@ -415,6 +415,16 @@ class QAST::Compiler is HLL::Compiler {
         $ops;
     }
 
+    method uniprop($node) {
+        my $ops := self.post_new('Ops', :result(%*REG<cur>));
+        my $cmpop := $node.negate ?? 'ne' !! 'eq';
+        $ops.push_pirop('assign', '$S10', '"' ~ $node[0] ~ '"');
+        $ops.push_pirop('is_uprop', '$I11', '$S10', %*REG<tgt>, %*REG<pos>);
+        $ops.push_pirop($cmpop, '$I11', 0, %*REG<fail>);
+        $ops.push_pirop('inc', %*REG<pos>) unless $node.subtype eq 'zerowidth';
+        $ops;
+    }
+
     # a :rxtype<ws> node is a normal subrule call
     method ws($node) { self.subrule($node) }
  
