@@ -1,0 +1,512 @@
+BEGIN_OPS_PREAMBLE
+
+#include "parrot/parrot.h"
+#include "parrot/extend.h"
+#include "parrot/dynext.h"
+#include "../6model/sixmodelobject.h"
+#include "../6model/reprs/NativeCall.h"
+#include "../6model/reprs/CStruct.h"
+#include "../6model/reprs/CPointer.h"
+
+/* This library contains just three operations: one to initialize it,
+ * one to look up a native function and build a handle to it, and
+ * another to actually make the call.
+ *
+ * It uses hashes to describe arguments and return types. The following
+ * keys and values are allowable.
+ *
+ * type
+ *   Any of the following strings:
+ *     void
+ *     char
+ *     short
+ *     int
+ *     long
+ *     longlong
+ *     float
+ *     double
+ *     asciistr
+ *     utf8str
+ *     utf16str
+ *     cpointer
+ *     cstruct
+ *     packedarray
+ *     callback
+ *
+ * free_str
+ *   Controls whether strings that are passed get freed or not. Zero to not
+ *   free, non-zero to free. The default is to free.
+ *
+ * callback_args
+ *   nqp::list(...) of nqp::hash(...) describing the arguments for the callback.
+ * 
+ * XXX Probably more callback stuff to figure out here...
+ */
+
+/* Our various argument types. */
+#define DYNCALL_ARG_VOID            0
+#define DYNCALL_ARG_CHAR            2
+#define DYNCALL_ARG_SHORT           4
+#define DYNCALL_ARG_INT             6
+#define DYNCALL_ARG_LONG            8
+#define DYNCALL_ARG_LONGLONG        10
+#define DYNCALL_ARG_FLOAT           12
+#define DYNCALL_ARG_DOUBLE          14
+#define DYNCALL_ARG_ASCIISTR        16
+#define DYNCALL_ARG_UTF8STR         18
+#define DYNCALL_ARG_UTF16STR        20
+#define DYNCALL_ARG_CSTRUCT         22
+#define DYNCALL_ARG_PACKEDARRAY     24
+#define DYNCALL_ARG_CALLBACK        26
+#define DYNCALL_ARG_CPOINTER        28
+#define DYNCALL_ARG_TYPE_MASK       30
+
+/* Flag for whether we should free a string after passing it or not. */
+#define DYNCALL_ARG_NO_FREE_STR     0
+#define DYNCALL_ARG_FREE_STR        1
+#define DYNCALL_ARG_FREE_STR_MASK   1
+
+/* The ID of the NativeCall, CPointer and CStruct REPRs. */
+static INTVAL nc_repr_id = 0;
+static INTVAL cs_repr_id = 0;
+static INTVAL cp_repr_id = 0;
+
+/* Grabs a NativeCall body. */
+static NativeCallBody * get_nc_body(PARROT_INTERP, PMC *obj) {
+    struct SixModel_REPROps *r = REPR(obj);
+    if (r->ID == nc_repr_id)
+        return &((NativeCallInstance *)PMC_data(obj))->body;
+    else
+        return (NativeCallBody *)r->get_boxed_ref(interp, STABLE(obj),
+            OBJECT_BODY(obj), nc_repr_id);
+}
+
+/* Gets the flag for whether to free a string after a call or not. */
+static INTVAL
+get_str_free_flag(PARROT_INTERP, PMC *info) {
+    STRING *flag = Parrot_str_new_constant(interp, "free_str");
+    if (VTABLE_exists_keyed_str(interp, info, flag))
+        if (!VTABLE_get_integer_keyed_str(interp, info, flag))
+            return DYNCALL_ARG_NO_FREE_STR;
+    return DYNCALL_ARG_FREE_STR;
+}
+
+/* Takes a hash describing a type hands back an argument type code. */
+static INTVAL
+get_arg_type(PARROT_INTERP, PMC *info, INTVAL is_return) {
+    STRING *type_name = VTABLE_get_string_keyed_str(interp, info,
+        Parrot_str_new_constant(interp, "type"));
+    if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "void"))) {
+        if (is_return)
+            return DYNCALL_ARG_VOID;
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Cannot use 'void' type except for on native call return values");
+    }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "char"))) {
+        return DYNCALL_ARG_CHAR;
+    }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "short"))) {
+        return DYNCALL_ARG_SHORT;
+    }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "int"))) {
+        return DYNCALL_ARG_INT;
+    }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "long"))) {
+        return DYNCALL_ARG_LONG;
+    }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "longlong"))) {
+        return DYNCALL_ARG_LONGLONG;
+    }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "float"))) {
+        return DYNCALL_ARG_FLOAT;
+    }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "double"))) {
+        return DYNCALL_ARG_DOUBLE;
+    }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "asciistr"))) {
+        return DYNCALL_ARG_ASCIISTR | get_str_free_flag(interp, info);
+    }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "utf8str"))) {
+        return DYNCALL_ARG_UTF8STR | get_str_free_flag(interp, info);
+    }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "utf16str"))) {
+        return DYNCALL_ARG_UTF16STR | get_str_free_flag(interp, info);
+    }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "cstruct"))) {
+        return DYNCALL_ARG_CSTRUCT;
+    }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "cpointer"))) {
+        return DYNCALL_ARG_CPOINTER;
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Unknown type '%Ss' used for native call", type_name);
+    }
+}
+
+/* Maps a calling convention name to an ID. */
+static INTVAL
+get_calling_convention(PARROT_INTERP, STRING *name) {
+    if (STRING_IS_NULL(name)) {
+        return DC_CALL_C_DEFAULT;
+    }
+    else if (Parrot_str_equal(interp, name, Parrot_str_new_constant(interp, ""))) {
+        return DC_CALL_C_DEFAULT;
+    }
+    else if (Parrot_str_equal(interp, name, Parrot_str_new_constant(interp, "cdecl"))) {
+        return DC_CALL_C_X86_CDECL;
+    }
+    else if (Parrot_str_equal(interp, name, Parrot_str_new_constant(interp, "stdcall"))) {
+        return DC_CALL_C_X86_WIN32_STD;
+    }
+    else if (Parrot_str_equal(interp, name, Parrot_str_new_constant(interp, "win64"))) {
+        return DC_CALL_C_X64_WIN64;
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Unknown calling convention '%Ss' used for native call", name);
+    }
+}
+
+/* Constructs a boxed result from a native integer return. */
+static PMC *
+make_int_result(PARROT_INTERP, PMC *type, INTVAL value) {
+    PMC *result = PMCNULL;
+    if (!PMC_IS_NULL(type)) {
+        result = REPR(type)->allocate(interp, STABLE(type));
+        REPR(result)->initialize(interp, STABLE(result), OBJECT_BODY(result));
+        REPR(result)->set_int(interp, STABLE(result), OBJECT_BODY(result), value);
+    }
+    return result;
+}
+
+/* Constructs a boxed result from a native number return. */
+static PMC *
+make_num_result(PARROT_INTERP, PMC *type, FLOATVAL value) {
+    PMC *result = PMCNULL;
+    if (!PMC_IS_NULL(type)) {
+        result = REPR(type)->allocate(interp, STABLE(type));
+        REPR(result)->initialize(interp, STABLE(result), OBJECT_BODY(result));
+        REPR(result)->set_num(interp, STABLE(result), OBJECT_BODY(result), value);
+    }
+    return result;
+}
+
+/* Constructs a boxed result from a string return. */
+static PMC *
+make_str_result(PARROT_INTERP, PMC *type, INTVAL ret_type, char *cstring) {
+    PMC *result = type;
+    if (result != NULL && !PMC_IS_NULL(type)) {
+        STRING *value = STRINGNULL;
+        switch (ret_type & DYNCALL_ARG_TYPE_MASK) {
+            case DYNCALL_ARG_ASCIISTR:
+                value = Parrot_str_new_init(interp, cstring, strlen(cstring), Parrot_ascii_encoding_ptr, 0);
+                break;
+            case DYNCALL_ARG_UTF8STR:
+                value = Parrot_str_new_init(interp, cstring, strlen(cstring), Parrot_utf8_encoding_ptr, 0);
+                break;
+            case DYNCALL_ARG_UTF16STR:
+                value = Parrot_str_new_init(interp, cstring, strlen(cstring), Parrot_utf16_encoding_ptr, 0);
+                break;
+        }
+        result = REPR(type)->allocate(interp, STABLE(type));
+        REPR(result)->initialize(interp, STABLE(result), OBJECT_BODY(result));
+        REPR(result)->set_str(interp, STABLE(result), OBJECT_BODY(result), value);
+        PARROT_GC_WRITE_BARRIER(interp, result);
+        if (ret_type & DYNCALL_ARG_FREE_STR)
+            free(cstring);
+    }
+    return result;
+}
+
+/* Constructs a boxed result using a CStruct REPR type. */
+static PMC *
+make_cstruct_result(PARROT_INTERP, PMC *type, void *cstruct) {
+    PMC *result = type;
+    if (cstruct != NULL && !PMC_IS_NULL(type)) {
+        if (REPR(type)->ID != cs_repr_id)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Native call expected return type with CStruct representation, but got something else");
+        result = REPR(type)->allocate(interp, STABLE(type));
+        ((CStructInstance *)PMC_data(result))->body.cstruct = cstruct;
+    }
+    return result;
+}
+
+/* Constructs a boxed result using a CPointer REPR type. */
+static PMC *
+make_cpointer_result(PARROT_INTERP, PMC *type, void *ptr) {
+    PMC *result = type;
+    if (ptr != NULL && !PMC_IS_NULL(type)) {
+        if (REPR(type)->ID != cp_repr_id)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Native call expected return type with CPointer representation, but got something else");
+        result = REPR(type)->allocate(interp, STABLE(type));
+        ((CPointerInstance *)PMC_data(result))->body.ptr = ptr;
+    }
+    return result;
+}
+
+PMC * decontainerize(PARROT_INTERP, PMC *var) {
+    ContainerSpec *spec = STABLE(var)->container_spec;
+    if (spec && IS_CONCRETE(var)) {
+        if (!PMC_IS_NULL(spec->value_slot.class_handle)) {
+            /* Just get slot. */
+            return VTABLE_get_attr_keyed(interp, var, spec->value_slot.class_handle,
+                spec->value_slot.attr_name);
+        }
+        else {
+            /* Invoke FETCH method. */
+            PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+            PMC *meth    = spec->fetch_method;
+            PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
+            VTABLE_push_pmc(interp, cappy, var);
+            Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
+            cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+            Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
+            return VTABLE_get_pmc_keyed_int(interp, cappy, 0);
+        }
+    }
+    return var;
+}
+
+END_OPS_PREAMBLE
+
+/* Initialize the native call library. */
+inline op nqp_native_call_setup() :base_core {
+    if (!nc_repr_id)
+        nc_repr_id = REGISTER_DYNAMIC_REPR(interp,
+            Parrot_str_new_constant(interp, "NativeCall"),
+            NativeCall_initialize);
+    if (!cs_repr_id)
+        cs_repr_id = REGISTER_DYNAMIC_REPR(interp,
+            Parrot_str_new_constant(interp, "CStruct"),
+            CStruct_initialize);
+    if (!cp_repr_id)
+        cp_repr_id = REGISTER_DYNAMIC_REPR(interp,
+            Parrot_str_new_constant(interp, "CPointer"),
+            CPointer_initialize);
+}
+
+
+/* Build a native call object.
+ *
+ * $1 is the object to store the call in. It should be of a type that is
+ *    based on or boxes the NativeCall REPR, and should be an instance.
+ * $2 is the name of the library to load the function from.
+ * $3 is the name of the function to load.
+ * $4 is a string name specifying the calling convention to use.
+ * $5 is an nqp::list(...) of nqp::hash(...), one hash per argument.
+      The entries in the hash describe the type of argument being passed.
+ * $6 is an nqp::hash(...) that describes the expected return type
+ *
+ * There's no need to manually release the handle; when it is no longer
+ * referenced, it will be automatically garbage collected.
+ */
+inline op nqp_native_call_build(in PMC, in STR, in STR, in STR, in PMC, in PMC) :base_core {
+    char *lib_name    = Parrot_str_to_cstring(interp, $2);
+    char *sym_name    = Parrot_str_to_cstring(interp, $3);
+    PMC  *arg_info    = $5;
+    PMC  *ret_info    = $6;
+    int   i;
+    
+    /* Initialize the object; grab native call part of its body. */
+    NativeCallBody *body = get_nc_body(interp, $1);
+    
+    /* Try to load the library. */
+    body->lib_name = lib_name;
+    body->lib_handle = dlLoadLibrary(lib_name);
+    if (!body->lib_handle) {
+        Parrot_str_free_cstring(sym_name);
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Cannot locate native library '%Ss'", $2);
+    }
+    
+    /* Try to locate the symbol. */
+    body->entry_point = dlFindSymbol(body->lib_handle, sym_name);
+    Parrot_str_free_cstring(sym_name);
+    if (!body->entry_point) {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Cannot locate symbol '%Ss' in native library '%Ss'", $3, $2);
+    }
+
+    /* Set calling convention, if any. */
+    body->convention = get_calling_convention(interp, $4);
+
+    /* Transform each of the args info structures into a flag. */
+    body->num_args  = VTABLE_elements(interp, arg_info);
+    body->arg_types = mem_sys_allocate(sizeof(INTVAL) * (body->num_args || 1));
+    for (i = 0; i < body->num_args; i++) {
+        PMC *info = VTABLE_get_pmc_keyed_int(interp, arg_info, i);
+        body->arg_types[i] = get_arg_type(interp, info, 0);
+    }
+
+    /* Transform return argument type info a flag. */
+    body->ret_type = get_arg_type(interp, ret_info, 1);
+}
+
+/* Makes a native call.
+ *
+ * $2 is the type of result to build. It can be a null if the return value
+ *    is void or can simply be discarded. If the return value is a native
+ *    type, then this type should be capable of boxing it.
+ * $3 is an object representing the call, obtained from nqp_native_call_build.
+ * $4 is an nqp::list(...), which contains the arguments to pass; note this
+ *    means they are in boxed form
+ *
+ * $1 will be populated with an instance of $2 that contains the result
+ * of the call. If $2 was null PMC, then $1 also will be. If the call
+ * was to return a struct, array or some other pointer type and the
+ * result comes back as NULL, then $1 will simply be $2 (which is
+ * presumably a type object).
+ */
+inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
+    PMC *args        = $4;
+    PMC *result      = PMCNULL;
+    char **free_strs = NULL;
+    INTVAL num_strs  = 0;
+    INTVAL i;
+
+    /* Get native call body, so we can locate the call info. */
+    NativeCallBody *body = get_nc_body(interp, $3);
+    
+    /* Create and set up call VM. */
+    DCCallVM *vm = dcNewCallVM(body->num_args * sizeof(void *));
+    dcMode(vm, body->convention);
+    
+    /* Process arguments. */
+    for (i = 0; i < body->num_args; i++) {
+        PMC *value = decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, args, i));
+        switch (body->arg_types[i] & DYNCALL_ARG_TYPE_MASK) {
+            case DYNCALL_ARG_CHAR:
+                dcArgChar(vm, (DCchar)REPR(value)->get_int(interp,
+                    STABLE(value), OBJECT_BODY(value)));
+                break;
+            case DYNCALL_ARG_SHORT:
+                dcArgShort(vm, (DCshort)REPR(value)->get_int(interp,
+                    STABLE(value), OBJECT_BODY(value)));
+                break;
+            case DYNCALL_ARG_INT:
+                dcArgInt(vm, (DCint)REPR(value)->get_int(interp,
+                    STABLE(value), OBJECT_BODY(value)));
+                break;
+            case DYNCALL_ARG_LONG:
+                dcArgLong(vm, (DClong)REPR(value)->get_int(interp,
+                    STABLE(value), OBJECT_BODY(value)));
+                break;
+            case DYNCALL_ARG_LONGLONG:
+                dcArgLongLong(vm, (DClonglong)REPR(value)->get_int(interp,
+                    STABLE(value), OBJECT_BODY(value)));
+                break;
+            case DYNCALL_ARG_FLOAT:
+                dcArgFloat(vm, (DCfloat)REPR(value)->get_num(interp,
+                    STABLE(value), OBJECT_BODY(value)));
+                break;
+            case DYNCALL_ARG_DOUBLE:
+                dcArgDouble(vm, (DCdouble)REPR(value)->get_num(interp,
+                    STABLE(value), OBJECT_BODY(value)));
+                break;
+            case DYNCALL_ARG_ASCIISTR:
+            case DYNCALL_ARG_UTF8STR:
+            case DYNCALL_ARG_UTF16STR:
+                if (IS_CONCRETE(value)) {
+                    char *str = Parrot_str_to_encoded_cstring(interp,
+                        REPR(value)->get_str(interp, STABLE(value), OBJECT_BODY(value)),
+                        body->arg_types[i] == DYNCALL_ARG_ASCIISTR ? Parrot_ascii_encoding_ptr :
+                        body->arg_types[i] == DYNCALL_ARG_UTF16STR ? Parrot_utf16_encoding_ptr :
+                                                                     Parrot_utf8_encoding_ptr);
+                    dcArgPointer(vm, str);
+                    if (body->arg_types[i] & DYNCALL_ARG_FREE_STR_MASK) {
+                        if (!free_strs)
+                            free_strs = mem_sys_allocate(body->num_args * sizeof(char *));
+                        free_strs[num_strs] = str;
+                        num_strs++;
+                    }
+                }
+                else {
+                    dcArgPointer(vm, NULL);
+                }
+                break;
+            case DYNCALL_ARG_CSTRUCT:
+                if (!IS_CONCRETE(value))
+                    dcArgPointer(vm, NULL);
+                else if (REPR(value)->ID == cs_repr_id)
+                    dcArgPointer(vm, ((CStructInstance *)PMC_data(value))->body.cstruct);
+                else
+                    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                        "Native call expected object with CStruct representation, but got something else");
+                break;
+            case DYNCALL_ARG_CPOINTER:
+                if (!IS_CONCRETE(value))
+                    dcArgPointer(vm, NULL);
+                else if (REPR(value)->ID == cp_repr_id)
+                    dcArgPointer(vm, ((CPointerInstance *)PMC_data(value))->body.ptr);
+                else
+                    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                        "Native call expected object with CPointer representation, but got something else");
+                break;
+            case DYNCALL_ARG_PACKEDARRAY:
+            case DYNCALL_ARG_CALLBACK:
+                /* XXX Above are all still todo. */
+                dcArgPointer(vm, NULL);
+        }
+    }
+
+    /* Call and process return values. */
+    switch (body->ret_type & DYNCALL_ARG_TYPE_MASK) {
+        case DYNCALL_ARG_VOID:
+            dcCallVoid(vm, body->entry_point);
+            result = $2;
+            break;
+        case DYNCALL_ARG_CHAR:
+            result = make_int_result(interp, $2, dcCallChar(vm, body->entry_point));
+            break;
+        case DYNCALL_ARG_SHORT:
+            result = make_int_result(interp, $2, dcCallShort(vm, body->entry_point));
+            break;
+        case DYNCALL_ARG_INT:
+            result = make_int_result(interp, $2, dcCallInt(vm, body->entry_point));
+            break;
+        case DYNCALL_ARG_LONG:
+            result = make_int_result(interp, $2, dcCallLong(vm, body->entry_point));
+            break;
+        case DYNCALL_ARG_LONGLONG:
+            result = make_int_result(interp, $2, dcCallLongLong(vm, body->entry_point));
+            break;
+        case DYNCALL_ARG_FLOAT:
+            result = make_num_result(interp, $2, dcCallFloat(vm, body->entry_point));
+            break;
+        case DYNCALL_ARG_DOUBLE:
+            result = make_num_result(interp, $2, dcCallDouble(vm, body->entry_point));
+            break;
+        case DYNCALL_ARG_ASCIISTR:
+        case DYNCALL_ARG_UTF8STR:
+        case DYNCALL_ARG_UTF16STR:
+            result = make_str_result(interp, $2, body->ret_type,
+                (char *)dcCallPointer(vm, body->entry_point));
+            break;
+        case DYNCALL_ARG_CSTRUCT:
+            result = make_cstruct_result(interp, $2, dcCallPointer(vm, body->entry_point));
+            break;
+        case DYNCALL_ARG_CPOINTER:
+            result = make_cpointer_result(interp, $2, dcCallPointer(vm, body->entry_point));
+            break;
+        case DYNCALL_ARG_PACKEDARRAY:
+        case DYNCALL_ARG_CALLBACK:
+            /* XXX Above are all still todo. */
+            dcCallPointer(vm, body->entry_point);
+            result = $2;
+    }
+    
+    /* Free any memory that we need to. */
+    if (free_strs) {
+        for (i = 0; i < num_strs; i++)
+            Parrot_str_free_cstring(free_strs[i]);
+        mem_sys_free(free_strs);
+    }
+    
+    /* Finally, free call VM. */
+    dcFree(vm);
+    
+    $1 = result;
+}

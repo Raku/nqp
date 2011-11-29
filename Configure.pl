@@ -108,6 +108,17 @@ MAIN: {
     }
 
     my $make = fill_template_text('@make@', %config);
+    
+    if ($make eq 'nmake') {
+        system_or_die('cd 3rdparty\dyncall && Configure.bat' .
+            ($config{'parrot::archname'} =~ /x64/ ? ' /target-x64' : ''));
+        $config{'dyncall_build'} = 'cd 3rdparty\dyncall && nmake Nmakefile';
+    }
+    else {
+        system_or_die('cd 3rdparty/dyncall && sh configure');
+        $config{'dyncall_build'} = "cd 3rdparty/dyncall && BUILD_DIR=. $make";
+    }
+    
     fill_template_file('tools/build/Makefile.in', 'Makefile', %config);
 
     {

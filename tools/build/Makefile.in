@@ -21,6 +21,7 @@ LDFLAGS       = @ldflags@ @ld_debug@
 LD_LOAD_FLAGS = @ld_load_flags@
 LIBPARROT     = @inst_libparrot_ldflags@
 O             = @o@
+A             = @a@
 LOAD_EXT      = @load_ext@
 PERL          = @perl@
 CP            = @cp@
@@ -140,9 +141,6 @@ NQP_COMBINED     = gen/NQP.pm
 NQP_COMBINED_PIR = gen/NQP.pir
 NQP_PBC          = nqp.pbc
 NQP_EXE          = nqp$(EXE)
-
-NCI_SOURCE = src/NCI/CallBuilder.pm
-NCI_PBC    = CallBuilder.pbc
 
 NQP_MO_SOURCES = src/how/Archetypes.pm src/how/RoleToRoleApplier.pm \
                  src/how/NQPConcreteRoleHOW.pm src/how/RoleToClassApplier.pm \
@@ -447,6 +445,13 @@ LIBTOMMATH_SOURCE =	3rdparty/libtommath/bncore.c \
 BIGINT_OPS        = nqp_bigint_ops
 BIGINT_OPS_SOURCE = nqp_bigint.ops
 
+DYNCALL_BIN = 3rdparty/dyncall/dyncall/libdyncall_s$(A) \
+  3rdparty/dyncall/dyncallback/libdyncallback_s$(A) \
+  3rdparty/dyncall/dynload/libdynload_s$(A)
+
+DYNCALL_OPS        = nqp_dyncall_ops
+DYNCALL_OPS_SOURCE = nqp_dyncall.ops
+
 CLEANUPS = \
   *.manifest \
   *.pdb \
@@ -488,14 +493,13 @@ CLEANUPS = \
   3rdparty/libtommath/*$(O) \
   $(DYNEXT_DIR)/*$(LOAD_EXT) \
 
-all: $(NQP_EXE) qregex $(NCI_PBC)
+all: $(NQP_EXE) qregex
 
 install: all
 	$(MKPATH)                   $(DESTDIR)$(PARROT_LIBRARY_DIR)
 	$(CP)  $(MODULE_LOADER_PBC) $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(MODULE_LOADER_PBC)
 	$(CP)  $(PAST_PBC)          $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(PAST_PBC)
 	$(MKPATH)                   $(DESTDIR)$(NQP_LANG_DIR)/lib
-	$(MKPATH)                   $(DESTDIR)$(NQP_LANG_DIR)/lib/NCI
 	$(CP)  $(P6REGEX_PBC)       $(DESTDIR)$(NQP_LANG_DIR)/lib/$(P6REGEX_PBC)
 	$(CP)  $(REGEX_PBC)         $(DESTDIR)$(NQP_LANG_DIR)/lib/$(REGEX_PBC)
 	$(CP)  $(HLL_PBC)           $(DESTDIR)$(NQP_LANG_DIR)/lib/$(HLL_PBC)
@@ -503,12 +507,11 @@ install: all
 	$(CP)  $(NQP_MO_PBC)        $(DESTDIR)$(NQP_LANG_DIR)/lib/$(NQP_MO_PBC)
 	$(CP)  $(NQP_PBC)           $(DESTDIR)$(NQP_LANG_DIR)/lib/$(NQP_PBC)
 	$(CP)  $(QREGEX_PBC)        $(DESTDIR)$(NQP_LANG_DIR)/lib/$(QREGEX_PBC)
-	$(CP)  $(NCI_PBC)           $(DESTDIR)$(NQP_LANG_DIR)/lib/NCI/$(NCI_PBC)
 	$(MKPATH)              $(DESTDIR)$(PARROT_BIN_DIR)
 	$(CP)  $(NQP_EXE)      $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
 	$(CHMOD)  755          $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
 	$(MKPATH)                     $(DESTDIR)$(PARROT_LIB_DIR)/dynext
-	$(CP)     $(DYNPMC) $(DYNOPS) $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT) $(DESTDIR)$(PARROT_LIB_DIR)/dynext
+	$(CP)     $(DYNPMC) $(DYNOPS) $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT) $(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT) $(DESTDIR)$(PARROT_LIB_DIR)/dynext
 
 stage0: $(STAGE0)
 stage1: $(STAGE1)
@@ -654,14 +657,11 @@ $(ALL_PBCS): $(STAGE2_PBCS)
 $(NQP_EXE): $(NQP_PBC)
 	$(PBC_TO_EXE) $(NQP_PBC)
 
-$(NCI_PBC): $(NQP_EXE)
-	./$(NQP_EXE) --target=pir --output=src/gen/CallBuilder.pir $(NCI_SOURCE)
-	$(PARROT) -o $(NCI_PBC) src/gen/CallBuilder.pir
-
-$(DYNEXT_TARGET): $(DYNPMC) $(DYNOPS) $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT)
+$(DYNEXT_TARGET): $(DYNPMC) $(DYNOPS) $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT) $(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT)
 	$(CP) $(DYNPMC) $(DYNEXT_DIR)
 	$(CP) $(DYNOPS) $(DYNEXT_DIR)
 	$(CP) $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT) $(DYNEXT_DIR)
+	$(CP) $(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT) $(DYNEXT_DIR)
 	$(CHMOD) 755 $(DYNEXT_TARGET)
 	$(CHMOD) 755 $(DYNEXT_DIR)/$(OPS)$(LOAD_EXT)
 
@@ -939,6 +939,17 @@ $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT): $(OPS_DIR)/$(BIGINT_OPS_SOURCE) $(LIBTOMMAT
 	cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(BIGINT_OPS)$(O) $(CINCLUDES) -I../../3rdparty/libtommath $(CFLAGS) $(BIGINT_OPS).c
 	cd src/6model/reprs && $(CC) -c @cc_o_out@P6bigint$(O) -I../../../$(PMC_DIR) -I../../../3rdparty/libtommath $(CINCLUDES) $(CFLAGS) P6bigint.c
 	cd $(OPS_DIR) && $(LD) @ld_out@$(BIGINT_OPS)$(LOAD_EXT) $(BIGINT_OPS)$(O) ../../3rdparty/libtommath/*$(O) ../6model/reprs/P6bigint$(O) $(LINKARGS)
+
+$(DYNCALL_BIN):
+	@dyncall_build@
+
+$(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT): $(OPS_DIR)/$(DYNCALL_OPS_SOURCE) $(DYNCALL_BIN) src/6model/reprs/NativeCall.c src/6model/reprs/NativeCall.h src/6model/reprs/CStruct.c src/6model/reprs/CStruct.h  src/6model/reprs/CPointer.c src/6model/reprs/CPointer.h
+	cd $(OPS_DIR) && $(OPS2C) C --dynamic $(DYNCALL_OPS_SOURCE)
+	cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(DYNCALL_OPS)$(O) $(CINCLUDES) -I../../3rdparty/dyncall $(CFLAGS) $(DYNCALL_OPS).c
+	cd src/6model/reprs && $(CC) -c @cc_o_out@NativeCall$(O) -I../../../$(PMC_DIR) -I../../../3rdparty/dyncall $(CINCLUDES) $(CFLAGS) NativeCall.c
+	cd src/6model/reprs && $(CC) -c @cc_o_out@CStruct$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) CStruct.c
+	cd src/6model/reprs && $(CC) -c @cc_o_out@CPointer$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) CPointer.c
+	cd $(OPS_DIR) && $(LD) @ld_out@$(DYNCALL_OPS)$(LOAD_EXT) $(DYNCALL_OPS)$(O) ../6model/reprs/NativeCall$(O) ../6model/reprs/CStruct$(O) ../6model/reprs/CPointer$(O) ../../3rdparty/dyncall/dyncall/libdyncall_s$(A) ../../3rdparty/dyncall/dyncallback/libdyncallback_s$(A) ../../3rdparty/dyncall/dynload/libdynload_s$(A) $(LINKARGS)
 
 bootstrap-files: $(STAGE2_PBCS) src/stage2/$(CORE_SETTING_NQP)
 	$(PERL) tools/build/gen-bootstrap.pl src/Regex.pir >src/stage0/Regex-s0.pir
