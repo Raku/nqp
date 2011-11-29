@@ -446,7 +446,7 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
 PARROT_DOES_NOT_RETURN
 static void no_such_attribute(PARROT_INTERP, const char *action, PMC *class_handle, STRING *name) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Can not %s non-existant attribute '%Ss' on class '%Ss'",
+            "Can not %s non-existent attribute '%Ss' on class '%Ss'",
             action, name, VTABLE_get_string(interp, introspection_call(interp,
                 class_handle, STABLE(class_handle)->HOW,
                 Parrot_str_new_constant(interp, "name"), 0)));
