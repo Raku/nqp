@@ -200,9 +200,9 @@ class HLL::Compiler {
     method eval($code, *@args, *%adverbs) {
         my $output;
 
-        my $old_runcore := pir::nqp_get_runcore__s();
+        my $old_runcore := pir::interpinfo__si(pir::const::INTERPINFO_CURRENT_RUNCORE);
         if (%adverbs<profile-compile>) {
-            pir::nqp_set_runcore__vs("subprof_hll");
+            pir::set_runcore__vs("subprof_hll");
         }
         $output := self.compile($code, |%adverbs);
 
@@ -214,13 +214,13 @@ class HLL::Compiler {
             }
 
             if (%adverbs<profile>) {
-                pir::nqp_set_runcore__vs("subprof_hll");
+                pir::set_runcore__vs("subprof_hll");
             }
             pir::trace(%adverbs<trace>);
             $output := $output(|@args);
             pir::trace(0);
         }
-        pir::nqp_set_runcore__vs($old_runcore);
+        pir::set_runcore__vs($old_runcore);
 
         $output;
     }
