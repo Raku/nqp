@@ -1125,7 +1125,8 @@ class NQP::Actions is HLL::Actions {
     ## Terms
 
     method term:sym<self>($/) {
-        make PAST::Var.new( :name('self') );
+        make PAST::Op.new( :pirop('nqp_decontainerize PP'),
+            PAST::Var.new( :name('self') ) );
     }
 
     method term:sym<identifier>($/) {
