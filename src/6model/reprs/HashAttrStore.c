@@ -114,7 +114,7 @@ REPROps * HashAttrStore_initialize(PARROT_INTERP) {
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
     this_repr->copy_to = copy_to;
-    this_repr->attr_funcs = mem_allocate_typed(REPROps_Attributes);
+    this_repr->attr_funcs = mem_allocate_typed(REPROps_Attribute);
     this_repr->attr_funcs->get_attribute_boxed = get_attribute_boxed;
     this_repr->attr_funcs->get_attribute_ref = get_attribute_ref;
     this_repr->attr_funcs->bind_attribute_boxed = bind_attribute_boxed;

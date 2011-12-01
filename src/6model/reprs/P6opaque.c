@@ -594,7 +594,7 @@ static void set_int(PARROT_INTERP, STable *st, void *data, INTVAL value) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     if (repr_data->unbox_int_slot >= 0) {
         STable *st = repr_data->flattened_stables[repr_data->unbox_int_slot];
-        st->REPR->set_int(interp, st, (char *)data + repr_data->attribute_offsets[repr_data->unbox_int_slot], value);
+        st->REPR->box_funcs->set_int(interp, st, (char *)data + repr_data->attribute_offsets[repr_data->unbox_int_slot], value);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -608,7 +608,7 @@ static INTVAL get_int(PARROT_INTERP, STable *st, void *data) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     if (repr_data->unbox_int_slot >= 0) {
         STable *st = repr_data->flattened_stables[repr_data->unbox_int_slot];
-        return st->REPR->get_int(interp, st, (char *)data + repr_data->attribute_offsets[repr_data->unbox_int_slot]);
+        return st->REPR->box_funcs->get_int(interp, st, (char *)data + repr_data->attribute_offsets[repr_data->unbox_int_slot]);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -622,7 +622,7 @@ static void set_num(PARROT_INTERP, STable *st, void *data, FLOATVAL value) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     if (repr_data->unbox_num_slot >= 0) {
         STable *st = repr_data->flattened_stables[repr_data->unbox_num_slot];
-        st->REPR->set_num(interp, st, (char *)data + repr_data->attribute_offsets[repr_data->unbox_num_slot], value);
+        st->REPR->box_funcs->set_num(interp, st, (char *)data + repr_data->attribute_offsets[repr_data->unbox_num_slot], value);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -636,7 +636,7 @@ static FLOATVAL get_num(PARROT_INTERP, STable *st, void *data) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     if (repr_data->unbox_num_slot >= 0) {
         STable *st = repr_data->flattened_stables[repr_data->unbox_num_slot];
-        return st->REPR->get_num(interp, st, (char *)data + repr_data->attribute_offsets[repr_data->unbox_num_slot]);
+        return st->REPR->box_funcs->get_num(interp, st, (char *)data + repr_data->attribute_offsets[repr_data->unbox_num_slot]);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -650,7 +650,7 @@ static void set_str(PARROT_INTERP, STable *st, void *data, STRING *value) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     if (repr_data->unbox_str_slot >= 0) {
         STable *st = repr_data->flattened_stables[repr_data->unbox_str_slot];
-        st->REPR->set_str(interp, st, (char *)data + repr_data->attribute_offsets[repr_data->unbox_str_slot], value);
+        st->REPR->box_funcs->set_str(interp, st, (char *)data + repr_data->attribute_offsets[repr_data->unbox_str_slot], value);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -664,7 +664,7 @@ static STRING * get_str(PARROT_INTERP, STable *st, void *data) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     if (repr_data->unbox_str_slot >= 0) {
         STable *st = repr_data->flattened_stables[repr_data->unbox_str_slot];
-        return st->REPR->get_str(interp, st, (char *)data + repr_data->attribute_offsets[repr_data->unbox_str_slot]);
+        return st->REPR->box_funcs->get_str(interp, st, (char *)data + repr_data->attribute_offsets[repr_data->unbox_str_slot]);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -857,7 +857,7 @@ REPROps * P6opaque_initialize(PARROT_INTERP) {
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
     this_repr->copy_to = copy_to;
-    this_repr->attr_funcs = mem_allocate_typed(REPROps_Attributes);
+    this_repr->attr_funcs = mem_allocate_typed(REPROps_Attribute);
     this_repr->attr_funcs->get_attribute_boxed = get_attribute_boxed;
     this_repr->attr_funcs->get_attribute_ref = get_attribute_ref;
     this_repr->attr_funcs->bind_attribute_boxed = bind_attribute_boxed;
