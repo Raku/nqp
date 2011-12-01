@@ -566,6 +566,16 @@ static void bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class
     }
 }
 
+/* Checks if an attribute has been initialized. */
+static INTVAL is_attribute_initialized(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    INTVAL slot = try_get_slot(interp, repr_data, class_handle, name);
+    if (slot >= 0)
+        return NULL != get_pmc_at_offset(data, repr_data->attribute_offsets[slot]);
+    else
+        no_such_attribute(interp, "initializedness check", class_handle, name);
+}
+
 /* Gets the hint for the given attribute ID. */
 static INTVAL hint_for(PARROT_INTERP, STable *st, PMC *class_key, STRING *name) {
     INTVAL slot;
@@ -771,16 +781,6 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     return spec;
 }
 
-/* Checks if an attribute has been initialized. */
-static INTVAL is_attribute_initialized(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
-    INTVAL slot = try_get_slot(interp, repr_data, class_handle, name);
-    if (slot >= 0)
-        return NULL != get_pmc_at_offset(data, repr_data->attribute_offsets[slot]);
-    else
-        no_such_attribute(interp, "initializedness check", class_handle, name);
-}
-
 /* Performs a change of type, where possible. */
 static void change_type(PARROT_INTERP, PMC *obj, PMC *new_type) {
     P6opaqueInstance *instance      = (P6opaqueInstance *)PMC_data(obj);
@@ -857,25 +857,27 @@ REPROps * P6opaque_initialize(PARROT_INTERP) {
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
     this_repr->copy_to = copy_to;
-    this_repr->get_attribute_boxed = get_attribute_boxed;
-    this_repr->get_attribute_ref = get_attribute_ref;
-    this_repr->bind_attribute_boxed = bind_attribute_boxed;
-    this_repr->bind_attribute_ref = bind_attribute_ref;
-    this_repr->hint_for = hint_for;
-    this_repr->set_int = set_int;
-    this_repr->get_int = get_int;
-    this_repr->set_num = set_num;
-    this_repr->get_num = get_num;
-    this_repr->set_str = set_str;
-    this_repr->get_str = get_str;
-    this_repr->get_boxed_ref = get_boxed_ref;
+    this_repr->attr_funcs = mem_allocate_typed(REPROps_Attributes);
+    this_repr->attr_funcs->get_attribute_boxed = get_attribute_boxed;
+    this_repr->attr_funcs->get_attribute_ref = get_attribute_ref;
+    this_repr->attr_funcs->bind_attribute_boxed = bind_attribute_boxed;
+    this_repr->attr_funcs->bind_attribute_ref = bind_attribute_ref;
+    this_repr->attr_funcs->is_attribute_initialized = is_attribute_initialized;
+    this_repr->attr_funcs->hint_for = hint_for;
+    this_repr->box_funcs = mem_allocate_typed(REPROps_Boxing);
+    this_repr->box_funcs->set_int = set_int;
+    this_repr->box_funcs->get_int = get_int;
+    this_repr->box_funcs->set_num = set_num;
+    this_repr->box_funcs->get_num = get_num;
+    this_repr->box_funcs->set_str = set_str;
+    this_repr->box_funcs->get_str = get_str;
+    this_repr->box_funcs->get_boxed_ref = get_boxed_ref;
     this_repr->gc_mark = gc_mark;
     this_repr->gc_free = gc_free;
     this_repr->gc_cleanup = NULL;
     this_repr->gc_mark_repr_data = gc_mark_repr_data;
     this_repr->gc_free_repr_data = gc_free_repr_data;
     this_repr->get_storage_spec = get_storage_spec;
-    this_repr->is_attribute_initialized = is_attribute_initialized;
     this_repr->change_type = change_type;
     smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
     return this_repr;

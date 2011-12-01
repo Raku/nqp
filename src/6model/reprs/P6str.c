@@ -49,36 +49,6 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     *((STRING **)dest) = *((STRING **)src);
 }
 
-/* Helper to die because this type doesn't support attributes. */
-PARROT_DOES_NOT_RETURN
-static void die_no_attrs(PARROT_INTERP) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "P6str representation does not support attribute storage");
-}
-
-/* Gets the current value for an attribute. */
-static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
-    die_no_attrs(interp);
-    return PMCNULL;
-}
-static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
-    die_no_attrs(interp);
-    return NULL;
-}
-
-/* Binds the given value to the specified attribute. */
-static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
-    die_no_attrs(interp);
-}
-static void bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, void *value) {
-    die_no_attrs(interp);
-}
-
-/* Gets the hint for the given attribute ID. */
-static INTVAL hint_for(PARROT_INTERP, STable *st, PMC *class_handle, STRING *name) {
-    return NO_HINT;
-}
-
 /* Used with boxing. Sets an integer value, for representations that can hold
  * one. */
 static void set_int(PARROT_INTERP, STable *st, void *data, INTVAL value) {
@@ -150,11 +120,6 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     return spec;
 }
 
-/* Checks if an attribute has been initialized. */
-static INTVAL is_attribute_initialized(PARROT_INTERP, STable *st, void *data, PMC *ClassHandle, STRING *Name, INTVAL Hint) {
-    die_no_attrs(interp);
-}
-
 /* Initializes the P6str representation. */
 REPROps * P6str_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
@@ -163,24 +128,20 @@ REPROps * P6str_initialize(PARROT_INTERP) {
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
     this_repr->copy_to = copy_to;
-    this_repr->get_attribute_boxed = get_attribute_boxed;
-    this_repr->get_attribute_ref = get_attribute_ref;
-    this_repr->bind_attribute_boxed = bind_attribute_boxed;
-    this_repr->bind_attribute_ref = bind_attribute_ref;
-    this_repr->hint_for = hint_for;
-    this_repr->set_int = set_int;
-    this_repr->get_int = get_int;
-    this_repr->set_num = set_num;
-    this_repr->get_num = get_num;
-    this_repr->set_str = set_str;
-    this_repr->get_str = get_str;
-    this_repr->get_boxed_ref = get_boxed_ref;
+    this_repr->attr_funcs = NULL;
+    this_repr->box_funcs = mem_allocate_typed(REPROps_Boxing);
+    this_repr->box_funcs->set_int = set_int;
+    this_repr->box_funcs->get_int = get_int;
+    this_repr->box_funcs->set_num = set_num;
+    this_repr->box_funcs->get_num = get_num;
+    this_repr->box_funcs->set_str = set_str;
+    this_repr->box_funcs->get_str = get_str;
+    this_repr->box_funcs->get_boxed_ref = get_boxed_ref;
     this_repr->gc_mark = gc_mark;
     this_repr->gc_free = gc_free;
     this_repr->gc_cleanup = NULL;
     this_repr->gc_mark_repr_data = NULL;
     this_repr->gc_free_repr_data = NULL;
     this_repr->get_storage_spec = get_storage_spec;
-    this_repr->is_attribute_initialized = is_attribute_initialized;
     return this_repr;
 }

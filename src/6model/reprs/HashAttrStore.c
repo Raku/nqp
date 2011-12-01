@@ -73,59 +73,15 @@ static void bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class
             "HashAttrStore representation does not support native attribute storage");
 }
 
+/* Checks if an attribute has been initialized. */
+static INTVAL is_attribute_initialized(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
+    HashAttrStoreBody *body = (HashAttrStoreBody *)data;
+    return VTABLE_exists_keyed_str(interp, body->store, name);
+}
+
 /* Gets the hint for the given attribute ID. */
 static INTVAL hint_for(PARROT_INTERP, STable *st, PMC *class_handle, STRING *name) {
     return NO_HINT;
-}
-
-/* Used with boxing. Sets an integer value, for representations that can hold
- * one. */
-static void set_int(PARROT_INTERP, STable *st, void *data, INTVAL value) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "HashAttrStore cannot box a native int");
-}
-
-/* Used with boxing. Gets an integer value, for representations that can
- * hold one. */
-static INTVAL get_int(PARROT_INTERP, STable *st, void *data) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "HashAttrStore cannot unbox to a native int");
-}
-
-/* Used with boxing. Sets a floating point value, for representations that can
- * hold one. */
-static void set_num(PARROT_INTERP, STable *st, void *data, FLOATVAL value) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "HashAttrStore cannot box a native num");
-}
-
-/* Used with boxing. Gets a floating point value, for representations that can
- * hold one. */
-static FLOATVAL get_num(PARROT_INTERP, STable *st, void *data) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "HashAttrStore cannot unbox to a native num");
-}
-
-/* Used with boxing. Sets a string value, for representations that can hold
- * one. */
-static void set_str(PARROT_INTERP, STable *st, void *data, STRING *value) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "HashAttrStore cannot box a native string");
-}
-
-/* Used with boxing. Gets a string value, for representations that can hold
- * one. */
-static STRING * get_str(PARROT_INTERP, STable *st, void *data) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "HashAttrStore cannot unbox to a native string");
-}
-
-/* Some objects serve primarily as boxes of others, inlining them. This gets
- * gets the reference to such things, using the representation ID to distinguish
- * them. */
-static void * get_boxed_ref(PARROT_INTERP, STable *st, void *data, INTVAL repr_id) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "HashAttrStore cannot box other types");
 }
 
 /* This Parrot-specific addition to the API is used to mark an object. */
@@ -150,12 +106,6 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     return spec;
 }
 
-/* Checks if an attribute has been initialized. */
-static INTVAL is_attribute_initialized(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
-    HashAttrStoreBody *body = (HashAttrStoreBody *)data;
-    return VTABLE_exists_keyed_str(interp, body->store, name);
-}
-
 /* Initializes the HashAttrStore representation. */
 REPROps * HashAttrStore_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
@@ -164,24 +114,19 @@ REPROps * HashAttrStore_initialize(PARROT_INTERP) {
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
     this_repr->copy_to = copy_to;
-    this_repr->get_attribute_boxed = get_attribute_boxed;
-    this_repr->get_attribute_ref = get_attribute_ref;
-    this_repr->bind_attribute_boxed = bind_attribute_boxed;
-    this_repr->bind_attribute_ref = bind_attribute_ref;
-    this_repr->hint_for = hint_for;
-    this_repr->set_int = set_int;
-    this_repr->get_int = get_int;
-    this_repr->set_num = set_num;
-    this_repr->get_num = get_num;
-    this_repr->set_str = set_str;
-    this_repr->get_str = get_str;
-    this_repr->get_boxed_ref = get_boxed_ref;
+    this_repr->attr_funcs = mem_allocate_typed(REPROps_Attributes);
+    this_repr->attr_funcs->get_attribute_boxed = get_attribute_boxed;
+    this_repr->attr_funcs->get_attribute_ref = get_attribute_ref;
+    this_repr->attr_funcs->bind_attribute_boxed = bind_attribute_boxed;
+    this_repr->attr_funcs->bind_attribute_ref = bind_attribute_ref;
+    this_repr->attr_funcs->is_attribute_initialized = is_attribute_initialized;
+    this_repr->attr_funcs->hint_for = hint_for;
+    this_repr->box_funcs = NULL;
     this_repr->gc_mark = gc_mark;
     this_repr->gc_free = gc_free;
     this_repr->gc_cleanup = NULL;
     this_repr->gc_mark_repr_data = NULL;
     this_repr->gc_free_repr_data = NULL;
     this_repr->get_storage_spec = get_storage_spec;
-    this_repr->is_attribute_initialized = is_attribute_initialized;
     return this_repr;
 }
