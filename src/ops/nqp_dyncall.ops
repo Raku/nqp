@@ -77,7 +77,7 @@ static NativeCallBody * get_nc_body(PARROT_INTERP, PMC *obj) {
     if (r->ID == nc_repr_id)
         return &((NativeCallInstance *)PMC_data(obj))->body;
     else
-        return (NativeCallBody *)r->get_boxed_ref(interp, STABLE(obj),
+        return (NativeCallBody *)r->box_funcs->get_boxed_ref(interp, STABLE(obj),
             OBJECT_BODY(obj), nc_repr_id);
 }
 
@@ -175,7 +175,7 @@ make_int_result(PARROT_INTERP, PMC *type, INTVAL value) {
     if (!PMC_IS_NULL(type)) {
         result = REPR(type)->allocate(interp, STABLE(type));
         REPR(result)->initialize(interp, STABLE(result), OBJECT_BODY(result));
-        REPR(result)->set_int(interp, STABLE(result), OBJECT_BODY(result), value);
+        REPR(result)->box_funcs->set_int(interp, STABLE(result), OBJECT_BODY(result), value);
     }
     return result;
 }
@@ -187,7 +187,7 @@ make_num_result(PARROT_INTERP, PMC *type, FLOATVAL value) {
     if (!PMC_IS_NULL(type)) {
         result = REPR(type)->allocate(interp, STABLE(type));
         REPR(result)->initialize(interp, STABLE(result), OBJECT_BODY(result));
-        REPR(result)->set_num(interp, STABLE(result), OBJECT_BODY(result), value);
+        REPR(result)->box_funcs->set_num(interp, STABLE(result), OBJECT_BODY(result), value);
     }
     return result;
 }
@@ -211,7 +211,7 @@ make_str_result(PARROT_INTERP, PMC *type, INTVAL ret_type, char *cstring) {
         }
         result = REPR(type)->allocate(interp, STABLE(type));
         REPR(result)->initialize(interp, STABLE(result), OBJECT_BODY(result));
-        REPR(result)->set_str(interp, STABLE(result), OBJECT_BODY(result), value);
+        REPR(result)->box_funcs->set_str(interp, STABLE(result), OBJECT_BODY(result), value);
         PARROT_GC_WRITE_BARRIER(interp, result);
         if (ret_type & DYNCALL_ARG_FREE_STR)
             free(cstring);
@@ -379,31 +379,31 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
         PMC *value = decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, args, i));
         switch (body->arg_types[i] & DYNCALL_ARG_TYPE_MASK) {
             case DYNCALL_ARG_CHAR:
-                dcArgChar(vm, (DCchar)REPR(value)->get_int(interp,
+                dcArgChar(vm, (DCchar)REPR(value)->box_funcs->get_int(interp,
                     STABLE(value), OBJECT_BODY(value)));
                 break;
             case DYNCALL_ARG_SHORT:
-                dcArgShort(vm, (DCshort)REPR(value)->get_int(interp,
+                dcArgShort(vm, (DCshort)REPR(value)->box_funcs->get_int(interp,
                     STABLE(value), OBJECT_BODY(value)));
                 break;
             case DYNCALL_ARG_INT:
-                dcArgInt(vm, (DCint)REPR(value)->get_int(interp,
+                dcArgInt(vm, (DCint)REPR(value)->box_funcs->get_int(interp,
                     STABLE(value), OBJECT_BODY(value)));
                 break;
             case DYNCALL_ARG_LONG:
-                dcArgLong(vm, (DClong)REPR(value)->get_int(interp,
+                dcArgLong(vm, (DClong)REPR(value)->box_funcs->get_int(interp,
                     STABLE(value), OBJECT_BODY(value)));
                 break;
             case DYNCALL_ARG_LONGLONG:
-                dcArgLongLong(vm, (DClonglong)REPR(value)->get_int(interp,
+                dcArgLongLong(vm, (DClonglong)REPR(value)->box_funcs->get_int(interp,
                     STABLE(value), OBJECT_BODY(value)));
                 break;
             case DYNCALL_ARG_FLOAT:
-                dcArgFloat(vm, (DCfloat)REPR(value)->get_num(interp,
+                dcArgFloat(vm, (DCfloat)REPR(value)->box_funcs->get_num(interp,
                     STABLE(value), OBJECT_BODY(value)));
                 break;
             case DYNCALL_ARG_DOUBLE:
-                dcArgDouble(vm, (DCdouble)REPR(value)->get_num(interp,
+                dcArgDouble(vm, (DCdouble)REPR(value)->box_funcs->get_num(interp,
                     STABLE(value), OBJECT_BODY(value)));
                 break;
             case DYNCALL_ARG_ASCIISTR:
@@ -411,7 +411,7 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
             case DYNCALL_ARG_UTF16STR:
                 if (IS_CONCRETE(value)) {
                     char *str = Parrot_str_to_encoded_cstring(interp,
-                        REPR(value)->get_str(interp, STABLE(value), OBJECT_BODY(value)),
+                        REPR(value)->box_funcs->get_str(interp, STABLE(value), OBJECT_BODY(value)),
                         body->arg_types[i] == DYNCALL_ARG_ASCIISTR ? Parrot_ascii_encoding_ptr :
                         body->arg_types[i] == DYNCALL_ARG_UTF16STR ? Parrot_utf16_encoding_ptr :
                                                                      Parrot_utf8_encoding_ptr);
