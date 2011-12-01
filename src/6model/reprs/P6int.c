@@ -115,12 +115,11 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
 /* Initializes the P6int representation. */
 REPROps * P6int_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
-    this_repr = mem_allocate_typed(REPROps);
+    this_repr = mem_allocate_zeroed_typed(REPROps);
     this_repr->type_object_for = type_object_for;
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
     this_repr->copy_to = copy_to;
-    this_repr->attr_funcs = NULL;
     this_repr->box_funcs = mem_allocate_typed(REPROps_Boxing);
     this_repr->box_funcs->set_int = set_int;
     this_repr->box_funcs->get_int = get_int;
@@ -129,11 +128,7 @@ REPROps * P6int_initialize(PARROT_INTERP) {
     this_repr->box_funcs->set_str = set_str;
     this_repr->box_funcs->get_str = get_str;
     this_repr->box_funcs->get_boxed_ref = get_boxed_ref;
-    this_repr->gc_mark = NULL;
     this_repr->gc_free = gc_free;
-    this_repr->gc_cleanup = NULL;
-    this_repr->gc_mark_repr_data = NULL;
-    this_repr->gc_free_repr_data = NULL;
     this_repr->get_storage_spec = get_storage_spec;
     return this_repr;
 }

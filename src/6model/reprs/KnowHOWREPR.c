@@ -83,18 +83,13 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
 /* Initializes the KnowHOWREPR representation. */
 REPROps * KnowHOWREPR_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
-    this_repr = mem_allocate_typed(REPROps);
+    this_repr = mem_allocate_zeroed_typed(REPROps);
     this_repr->type_object_for = type_object_for;
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
     this_repr->copy_to = copy_to;
-    this_repr->attr_funcs = NULL;
-    this_repr->box_funcs = NULL;
     this_repr->gc_mark = gc_mark;
     this_repr->gc_free = gc_free;
-    this_repr->gc_cleanup = NULL;
-    this_repr->gc_mark_repr_data = NULL;
-    this_repr->gc_free_repr_data = NULL;
     this_repr->get_storage_spec = get_storage_spec;
     return this_repr;
 }
