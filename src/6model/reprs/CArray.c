@@ -2,6 +2,7 @@
 #include "parrot/parrot.h"
 #include "parrot/extend.h"
 #include "../sixmodelobject.h"
+#include "../storage_spec.h"
 #include "CArray.h"
 
 /* This representation's function pointer table. */
@@ -13,7 +14,52 @@ static PMC * (* create_stable_func) (PARROT_INTERP, REPROps *REPR, PMC *HOW);
 
 /* Gets size and type information to put it into the REPR data. */
 static void fill_repr_data(PARROT_INTERP, STable *st) {
-    /* XXX TODO. */
+    CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
+    PMC *old_ctx, *cappy;
+    storage_spec ss;
+
+    /* Look up "of" method. */
+    PMC *meth = VTABLE_find_method(interp, st->WHAT,
+        Parrot_str_new_constant(interp, "of"));
+    if (PMC_IS_NULL(meth))
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "CArray representation expects an 'of' method, specifying the element type");
+
+    /* Call it to get the type. */
+    old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
+    VTABLE_push_pmc(interp, cappy, st->WHAT);
+    Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
+    cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
+    repr_data->elem_type = VTABLE_get_pmc_keyed_int(interp, cappy, 0);
+    
+    /* Ensure we got a type. */
+    if (PMC_IS_NULL(repr_data->elem_type))
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "CArray representation expects an 'of' method, specifying the element type");
+
+    /* What we do next depends on what kind of type we have. */
+    ss = REPR(repr_data->elem_type)->get_storage_spec(interp, STABLE(repr_data->elem_type));
+    if (ss.boxed_primitive == STORAGE_SPEC_BP_INT) {
+        if (ss.bits == 8 || ss.bits == 16 || ss.bits == 32 || ss.bits == 64)
+            repr_data->elem_size = ss.bits;
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "CArray representation can only have 8, 16, 32 or 64 bit integer elements");
+    }
+    else if (ss.boxed_primitive == STORAGE_SPEC_BP_NUM) {
+        if (ss.bits == 32 || ss.bits == 64)
+            repr_data->elem_size = ss.bits;
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "CArray representation can only have 32 or 64 bit floating point elements");
+    }
+    /* XXX TODO: strings, structs, pointers, other arrays */
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "CArray may only contain native integers and numbers, strings, C Structs or C Pointers");
+    }
 }
 
 /* Creates a new type object of this representation, and associates it with
@@ -102,6 +148,71 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     return spec;
 }
 
+PARROT_DOES_NOT_RETURN
+static void die_idx_nyi(PARROT_INTERP) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+        "CArray representation does not fully indexed storage yet");
+}
+static void expand(PARROT_INTERP, CArrayBody *body, INTVAL min_size) {
+    INTVAL next_size = 2 * body->allocated;
+    if (min_size > next_size)
+        next_size = min_size;
+    mem_sys_realloc(body->storage, next_size);
+}
+static void * at_pos_ref(PARROT_INTERP, STable *st, void *data, INTVAL index) {
+    CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
+    CArrayBody     *body      = (CArrayBody *)data;
+    if (body->allocated && index >= body->elems)
+        return NULL;
+    return ((char *)body->storage) + index * repr_data->elem_size;
+}
+static PMC * at_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index) {
+    CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
+    CArrayBody     *body      = (CArrayBody *)data;
+    die_idx_nyi(interp);
+}
+static void bind_pos_ref(PARROT_INTERP, STable *st, void *data, INTVAL index, void *value) {
+    CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
+    CArrayBody     *body      = (CArrayBody *)data;
+    STable         *type_st   = STABLE(repr_data->elem_type);
+    if (body->allocated && index >= body->elems)
+        expand(interp, body, index + 1);
+    /* XXX make sure this is appropriate, once we support other than int/num elems. */
+    type_st->REPR->copy_to(interp, type_st, value, ((char *)body->storage) + index * repr_data->elem_size);
+}
+static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, PMC *obj) {
+    CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
+    CArrayBody     *body      = (CArrayBody *)data;
+    die_idx_nyi(interp);
+}
+static INTVAL elems(PARROT_INTERP, STable *st, void *data) {
+    CArrayBody     *body      = (CArrayBody *)data;
+    if (body->allocated)
+        return body->elems;
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+        "Don't know how many elements a C array returned from a library has");
+}
+static void preallocate(PARROT_INTERP, STable *st, void *data, INTVAL count) {
+    CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
+    CArrayBody     *body      = (CArrayBody *)data;
+    die_idx_nyi(interp);
+}
+static void trim_to(PARROT_INTERP, STable *st, void *data, INTVAL count) {
+    CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
+    CArrayBody     *body      = (CArrayBody *)data;
+    die_idx_nyi(interp);
+}
+static void make_hole(PARROT_INTERP, STable *st, void *data, INTVAL at_index, INTVAL count) {
+    CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
+    CArrayBody     *body      = (CArrayBody *)data;
+    die_idx_nyi(interp);
+}
+static void delete_elems(PARROT_INTERP, STable *st, void *data, INTVAL at_index, INTVAL count) {
+    CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
+    CArrayBody     *body      = (CArrayBody *)data;
+    die_idx_nyi(interp);
+}
+
 /* Initializes the CArray representation. */
 REPROps * CArray_initialize(PARROT_INTERP,
         PMC * (* wrap_object_func_ptr) (PARROT_INTERP, void *obj),
@@ -119,5 +230,16 @@ REPROps * CArray_initialize(PARROT_INTERP,
     this_repr->gc_cleanup = gc_cleanup;
     this_repr->gc_free = gc_free;
     this_repr->get_storage_spec = get_storage_spec;
+    this_repr->idx_funcs = mem_allocate_zeroed_typed(REPROps_Indexing);
+    this_repr->idx_funcs->at_pos_ref = at_pos_ref;
+    this_repr->idx_funcs->at_pos_boxed = at_pos_boxed;
+    this_repr->idx_funcs->bind_pos_ref = bind_pos_ref;
+    this_repr->idx_funcs->bind_pos_boxed = bind_pos_boxed;
+    this_repr->idx_funcs->elems = elems;
+    this_repr->idx_funcs->preallocate = preallocate;
+    this_repr->idx_funcs->trim_to = trim_to;
+    this_repr->idx_funcs->make_hole = make_hole;
+    this_repr->idx_funcs->delete_elems = delete_elems;
+    
     return this_repr;
 }
