@@ -301,7 +301,7 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
     PMC *st_pmc = create_stable_func(interp, this_repr, HOW);
     STable *st  = STABLE_STRUCT(st_pmc);
     
-    /* Create REPR data structure and hand it off the STable. */
+    /* Create REPR data structure and hang it off the STable. */
     st->REPR_data = mem_allocate_zeroed_typed(CStructREPRData);
 
     /* Create type object and point it back at the STable. */
