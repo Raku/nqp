@@ -7,6 +7,7 @@ BEGIN_OPS_PREAMBLE
 #include "../6model/reprs/NativeCall.h"
 #include "../6model/reprs/CStruct.h"
 #include "../6model/reprs/CPointer.h"
+#include "../6model/reprs/CArray.h"
 
 /* This library contains just three operations: one to initialize it,
  * one to look up a native function and build a handle to it, and
@@ -30,7 +31,7 @@ BEGIN_OPS_PREAMBLE
  *     utf16str
  *     cpointer
  *     cstruct
- *     packedarray
+ *     carray
  *     callback
  *
  * free_str
@@ -56,7 +57,7 @@ BEGIN_OPS_PREAMBLE
 #define DYNCALL_ARG_UTF8STR         18
 #define DYNCALL_ARG_UTF16STR        20
 #define DYNCALL_ARG_CSTRUCT         22
-#define DYNCALL_ARG_PACKEDARRAY     24
+#define DYNCALL_ARG_CARRAY          24
 #define DYNCALL_ARG_CALLBACK        26
 #define DYNCALL_ARG_CPOINTER        28
 #define DYNCALL_ARG_TYPE_MASK       30
@@ -70,6 +71,7 @@ BEGIN_OPS_PREAMBLE
 static INTVAL nc_repr_id = 0;
 static INTVAL cs_repr_id = 0;
 static INTVAL cp_repr_id = 0;
+static INTVAL ca_repr_id = 0;
 
 /* Grabs a NativeCall body. */
 static NativeCallBody * get_nc_body(PARROT_INTERP, PMC *obj) {
@@ -137,6 +139,9 @@ get_arg_type(PARROT_INTERP, PMC *info, INTVAL is_return) {
     }
     else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "cpointer"))) {
         return DYNCALL_ARG_CPOINTER;
+    }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "carray"))) {
+        return DYNCALL_ARG_CARRAY;
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -247,6 +252,20 @@ make_cpointer_result(PARROT_INTERP, PMC *type, void *ptr) {
     return result;
 }
 
+/* Constructs a boxed result using a CArray REPR type. */
+static PMC *
+make_carray_result(PARROT_INTERP, PMC *type, void *carray) {
+    PMC *result = type;
+    if (carray != NULL && !PMC_IS_NULL(type)) {
+        if (REPR(type)->ID != ca_repr_id)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Native call expected return type with CArray representation, but got something else");
+        result = REPR(type)->allocate(interp, STABLE(type));
+        ((CArrayInstance *)PMC_data(result))->body.storage = carray;
+    }
+    return result;
+}
+
 PMC * decontainerize(PARROT_INTERP, PMC *var) {
     ContainerSpec *spec = STABLE(var)->container_spec;
     if (spec && IS_CONCRETE(var)) {
@@ -286,6 +305,10 @@ inline op nqp_native_call_setup() :base_core {
         cp_repr_id = REGISTER_DYNAMIC_REPR(interp,
             Parrot_str_new_constant(interp, "CPointer"),
             CPointer_initialize);
+    if (!ca_repr_id)
+        ca_repr_id = REGISTER_DYNAMIC_REPR(interp,
+            Parrot_str_new_constant(interp, "CArray"),
+            CArray_initialize);
 }
 
 
@@ -445,7 +468,15 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
                     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                         "Native call expected object with CPointer representation, but got something else");
                 break;
-            case DYNCALL_ARG_PACKEDARRAY:
+            case DYNCALL_ARG_CARRAY:
+                if (!IS_CONCRETE(value))
+                    dcArgPointer(vm, NULL);
+                else if (REPR(value)->ID == ca_repr_id)
+                    dcArgPointer(vm, ((CArrayInstance *)PMC_data(value))->body.storage);
+                else
+                    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                        "Native call expected object with CArray representation, but got something else");
+                break;
             case DYNCALL_ARG_CALLBACK:
                 /* XXX Above are all still todo. */
                 dcArgPointer(vm, NULL);
@@ -491,7 +522,9 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
         case DYNCALL_ARG_CPOINTER:
             result = make_cpointer_result(interp, $2, dcCallPointer(vm, body->entry_point));
             break;
-        case DYNCALL_ARG_PACKEDARRAY:
+        case DYNCALL_ARG_CARRAY:
+            result = make_carray_result(interp, $2, dcCallPointer(vm, body->entry_point));
+            break;
         case DYNCALL_ARG_CALLBACK:
             /* XXX Above are all still todo. */
             dcCallPointer(vm, body->entry_point);
