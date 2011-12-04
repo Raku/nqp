@@ -270,6 +270,18 @@ inline op nqp_bigint_to_str(out STR, in PMC) :base_core {
     mem_sys_free(buf);
 }
 
+inline op nqp_bigint_to_str_base(out STR, in PMC, in INT) :base_core {
+    mp_int *i = get_bigint(interp, $2);
+    int len;
+    char *buf;
+    mp_radix_size(i, $3, &len);
+    buf = mem_sys_allocate(len);
+    mp_toradix_n(i, buf, $3, len);
+    /* len - 1 because buf is \0-terminated */
+    $1 = Parrot_str_new(interp, buf, len - 1);
+    mem_sys_free(buf);
+}
+
 inline op nqp_bigint_to_num(out NUM, in PMC) :base_core {
     mp_int  *a = get_bigint(interp, $2);
     $1         = mp_get_double(a);
