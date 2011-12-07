@@ -248,12 +248,16 @@ class QAST::Compiler is HLL::Compiler {
     method literal($node) {
         my $ops := self.post_new('Ops');
         my $litconst := $node[0];
+        $litconst := nqp::lc($litconst)
+            if $node.subtype eq 'ignorecase';
         my $litlen := nqp::chars($litconst);
         my $litpost := self.escape($litconst);
         my $cmpop := $node.negate ?? 'eq' !! 'ne';
         $ops.push_pirop('add',    '$I11', %*REG<pos>, $litlen);
         $ops.push_pirop('gt',     '$I11', %*REG<eos>, %*REG<fail>);
         $ops.push_pirop('substr', '$S10', %*REG<tgt>, %*REG<pos>, $litlen);
+        $ops.push_pirop('downcase', '$S10', '$S10')
+            if $node.subtype eq 'ignorecase';
         $ops.push_pirop($cmpop,   '$S10', $litpost, %*REG<fail>);
         $ops.push_pirop('add',    %*REG<pos>, $litlen);
         $ops;
