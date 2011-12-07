@@ -477,6 +477,8 @@ entry to produce the node to be returned.
     maphash['log_n']    = 'ln__NN'
     maphash['exp_n']    = 'exp__Nn'
 
+    maphash['isspecial_n'] = 'is_inf_or_nan__In'
+
     # trig opcodes
     maphash['sin_n']    = 'sin__NN'
     maphash['asin_n']   = 'asin__NN'
