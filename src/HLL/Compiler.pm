@@ -660,6 +660,8 @@ class HLL::Compiler {
             inc line
             goto line_loop
           line_done:
+            # line numbers are generall 1-based
+            inc line
             .return (line)
         };
     }
