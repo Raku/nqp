@@ -60,9 +60,9 @@ static void gc_free(PARROT_INTERP, PMC *obj) {
 /* Gets the storage specification for this representation. */
 static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     storage_spec spec;
-    spec.inlineable = STORAGE_SPEC_INLINED;
-    spec.bits = sizeof(CPointerBody) * 8;
+    spec.inlineable = STORAGE_SPEC_REFERENCE;
     spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
+    spec.can_box = 0;
     return spec;
 }
 
