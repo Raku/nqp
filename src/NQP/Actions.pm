@@ -1115,6 +1115,9 @@ class NQP::Actions is HLL::Actions {
         elsif $<longname> eq 'WHO' {
             $past.pirop('get_who PP');
         }
+        elsif $<longname> eq 'REPR' {
+            $past.pirop('repr_name SP');
+        }
         else {
             $past.name(~$<longname>);
             $past.pasttype('callmethod');
