@@ -94,7 +94,7 @@ QREGEX_SOURCES = \
   src/QRegex/P6Regex/Compiler.nqp \
 
 NQP_SOURCES = \
-  src/NQP/SymbolTable.pm \
+  src/NQP/World.pm \
   src/NQP/Grammar.pm \
   src/NQP/Actions.pm \
   src/NQP/Compiler.pm \
@@ -1019,7 +1019,7 @@ NQPQ_PBC          = nqpq.pbc
 NQPQ_EXE          = nqpq$(EXE)
 
 NQPQ_SOURCES = \
-  src/NQPQ/SymbolTable.pm \
+  src/NQPQ/World.pm \
   src/NQPQ/Grammar.pm \
   src/NQPQ/Actions.pm \
   src/NQPQ/Compiler.pm \

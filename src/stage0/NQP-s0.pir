@@ -172,13 +172,13 @@
     die $S100
   if_3791_end:
     nqp_get_sc_object $P116, "1323686346.03416", 55
-    $P117 = $P116."new_type"("NQP::SymbolTable" :named("name"))
+    $P117 = $P116."new_type"("NQP::World" :named("name"))
     nqp_add_object_to_sc cur_sc, 1, $P117
     nqp_get_sc_object $P116, "1323686365.69582", 1
     nqp_get_sc_object $P117, "1323686365.69582", 0
     nqp_get_package_through_who $P118, $P117, "NQP"
     get_who $P119, $P118
-    set $P119["SymbolTable"], $P116
+    set $P119["World"], $P116
     nqp_get_sc_object $P116, "1323686365.69582", 1
     get_how $P117, $P116
     nqp_get_sc_object $P118, "1323686365.69582", 1
@@ -3068,7 +3068,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .sub "_block1024"  :subid("13_1323686375.84348") :outer("10_1323686375.84348")
 .annotate 'file', "src/stage2/gen/NQP.pm"
 .annotate 'line', 9
@@ -3118,7 +3118,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .include "except_types.pasm"
 .sub "load_setting" :anon :subid("14_1323686375.84348") :outer("13_1323686375.84348")
     .param pmc param_1032
@@ -3161,7 +3161,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .include "except_types.pasm"
 .sub "_block1035"  :anon :subid("15_1323686375.84348") :outer("14_1323686375.84348")
 .annotate 'file', "src/stage2/gen/NQP.pm"
@@ -3303,7 +3303,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .include "except_types.pasm"
 .sub "load_module" :anon :subid("16_1323686375.84348") :outer("13_1323686375.84348")
     .param pmc param_1043
@@ -3405,7 +3405,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .include "except_types.pasm"
 .sub "install_package_symbol" :anon :subid("17_1323686375.84348") :outer("13_1323686375.84348")
     .param pmc param_1049
@@ -3519,7 +3519,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .sub "_block1058"  :anon :subid("18_1323686375.84348") :outer("17_1323686375.84348")
     .param pmc param_1060
 .annotate 'file', "src/stage2/gen/NQP.pm"
@@ -3544,7 +3544,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .include "except_types.pasm"
 .sub "_block1063"  :anon :subid("19_1323686375.84348") :outer("17_1323686375.84348")
 .annotate 'file', "src/stage2/gen/NQP.pm"
@@ -3638,7 +3638,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .sub "_block1067"  :anon :subid("20_1323686375.84348") :outer("19_1323686375.84348")
     .param pmc param_1069
 .annotate 'file', "src/stage2/gen/NQP.pm"
@@ -3667,7 +3667,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .sub "install_lexical_symbol" :anon :subid("21_1323686375.84348") :outer("13_1323686375.84348")
     .param pmc param_1072
     .param pmc param_1073
@@ -3792,7 +3792,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .sub "install_package_routine" :anon :subid("22_1323686375.84348") :outer("13_1323686375.84348")
     .param pmc param_1079
     .param pmc param_1080
@@ -3869,7 +3869,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .include "except_types.pasm"
 .sub "pkg_create_mo" :anon :subid("23_1323686375.84348") :outer("13_1323686375.84348")
     .param pmc param_1087
@@ -4000,7 +4000,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .sub "_block1102"  :anon :subid("24_1323686375.84348") :outer("23_1323686375.84348")
 .annotate 'file', "src/stage2/gen/NQP.pm"
 .annotate 'line', 169
@@ -4121,7 +4121,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .sub "pkg_add_attribute" :anon :subid("25_1323686375.84348") :outer("13_1323686375.84348")
     .param pmc param_1112
     .param pmc param_1113
@@ -4190,7 +4190,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .include "except_types.pasm"
 .sub "_block1121"  :anon :subid("26_1323686375.84348") :outer("25_1323686375.84348")
 .annotate 'file', "src/stage2/gen/NQP.pm"
@@ -4327,7 +4327,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .sub "_block1126"  :anon :subid("27_1323686375.84348") :outer("26_1323686375.84348")
     .param pmc param_1128
 .annotate 'file', "src/stage2/gen/NQP.pm"
@@ -4361,7 +4361,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .sub "_block1131"  :anon :subid("28_1323686375.84348") :outer("26_1323686375.84348")
     .param pmc param_1134
 .annotate 'file', "src/stage2/gen/NQP.pm"
@@ -4407,7 +4407,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .sub "pkg_add_method" :anon :subid("29_1323686375.84348") :outer("13_1323686375.84348")
     .param pmc param_1137
     .param pmc param_1138
@@ -4680,7 +4680,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .sub "_block1147"  :anon :subid("30_1323686375.84348") :outer("29_1323686375.84348")
     .param pmc param_1149 :slurpy
     .param pmc param_1150 :slurpy :named
@@ -4723,7 +4723,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .sub "_block1159"  :anon :subid("31_1323686375.84348") :outer("29_1323686375.84348")
     .param pmc param_1161
     .param pmc param_1162
@@ -4777,7 +4777,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .sub "set_routine_signature" :anon :subid("32_1323686375.84348") :outer("13_1323686375.84348")
     .param pmc param_1166
     .param pmc param_1167
@@ -4904,7 +4904,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .sub "pkg_set_body_block" :anon :subid("33_1323686375.84348") :outer("13_1323686375.84348")
     .param pmc param_1176
     .param pmc param_1177
@@ -5018,7 +5018,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .include "except_types.pasm"
 .sub "_block1183"  :anon :subid("34_1323686375.84348") :outer("33_1323686375.84348")
     .param pmc param_1185 :slurpy
@@ -5133,7 +5133,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .sub "_block1188"  :anon :subid("35_1323686375.84348") :outer("34_1323686375.84348")
     .param pmc param_1190
 .annotate 'file', "src/stage2/gen/NQP.pm"
@@ -5159,7 +5159,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .sub "_block1192"  :anon :subid("36_1323686375.84348") :outer("34_1323686375.84348")
     .param pmc param_1194
 .annotate 'file', "src/stage2/gen/NQP.pm"
@@ -5182,7 +5182,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .sub "_block1195"  :anon :subid("37_1323686375.84348") :outer("36_1323686375.84348")
     .param pmc param_1197
 .annotate 'file', "src/stage2/gen/NQP.pm"
@@ -5248,7 +5248,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .sub "pkg_add_parent_or_role" :anon :subid("38_1323686375.84348") :outer("13_1323686375.84348")
     .param pmc param_1203
     .param pmc param_1204
@@ -5302,7 +5302,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .sub "_block1208"  :anon :subid("39_1323686375.84348") :outer("38_1323686375.84348")
 .annotate 'file', "src/stage2/gen/NQP.pm"
 .annotate 'line', 380
@@ -5360,7 +5360,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .sub "pkg_add_parrot_vtable_handler_mapping" :anon :subid("40_1323686375.84348") :outer("13_1323686375.84348")
     .param pmc param_1212
     .param pmc param_1213
@@ -5413,7 +5413,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .sub "_block1217"  :anon :subid("41_1323686375.84348") :outer("40_1323686375.84348")
 .annotate 'file', "src/stage2/gen/NQP.pm"
 .annotate 'line', 396
@@ -5467,7 +5467,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .sub "pkg_compose" :anon :subid("42_1323686375.84348") :outer("13_1323686375.84348")
     .param pmc param_1221
     .param pmc param_1222
@@ -5508,7 +5508,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .sub "_block1224"  :anon :subid("43_1323686375.84348") :outer("42_1323686375.84348")
 .annotate 'file', "src/stage2/gen/NQP.pm"
 .annotate 'line', 413
@@ -5554,7 +5554,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .include "except_types.pasm"
 .sub "to_past" :anon :subid("44_1323686375.84348") :outer("13_1323686375.84348")
     .param pmc param_1228
@@ -5735,7 +5735,7 @@
 
 .HLL "nqp"
 
-.namespace ["NQP";"SymbolTable"]
+.namespace ["NQP";"World"]
 .sub "_block1231"  :anon :subid("45_1323686375.84348") :outer("44_1323686375.84348")
     .param pmc param_1233
 .annotate 'file', "src/stage2/gen/NQP.pm"
@@ -6753,7 +6753,7 @@
     get_hll_global $P117, "GLOBAL"
     nqp_get_package_through_who $P118, $P117, "NQP"
     get_who $P119, $P118
-    set $P120, $P119["SymbolTable"]
+    set $P120, $P119["World"]
     time $N101
     set $S101, $N101
     set $P121, $P1248
@@ -6769,7 +6769,7 @@
     get_hll_global $P112, "GLOBAL"
     nqp_get_package_through_who $P113, $P112, "NQP"
     get_who $P114, $P113
-    set $P115, $P114["SymbolTable"]
+    set $P115, $P114["World"]
     time $N100
     set $S100, $N100
     $P116 = $P115."new"($S100 :named("handle"))
