@@ -108,6 +108,9 @@ static void default_make_hole(PARROT_INTERP, STable *st, void *data, INTVAL at_i
 static void default_delete_elems(PARROT_INTERP, STable *st, void *data, INTVAL at_index, INTVAL count) {
     die_no_idx(interp, st->REPR->name);
 }
+static STable * default_get_elem_stable(PARROT_INTERP, STable *st) {
+    die_no_idx(interp, st->REPR->name);
+}
 
 /* Set default attribute functions on a REPR that lacks them. */
 static void add_default_attr_funcs(PARROT_INTERP, REPROps *repr) {
@@ -144,6 +147,7 @@ static void add_default_idx_funcs(PARROT_INTERP, REPROps *repr) {
     repr->idx_funcs->trim_to = default_trim_to;
     repr->idx_funcs->make_hole = default_make_hole;
     repr->idx_funcs->delete_elems = default_delete_elems;
+    repr->idx_funcs->get_elem_stable = default_get_elem_stable;
 }
 
 /* Registers a representation. It this is ever made public, it should first be

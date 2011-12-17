@@ -212,6 +212,10 @@ static void delete_elems(PARROT_INTERP, STable *st, void *data, INTVAL at_index,
     CArrayBody     *body      = (CArrayBody *)data;
     die_idx_nyi(interp);
 }
+static void get_elem_stable(PARROT_INTERP, STable *st) {
+    CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
+    return STABLE(repr_data->elem_type);
+}
 
 /* Initializes the CArray representation. */
 REPROps * CArray_initialize(PARROT_INTERP,
@@ -240,6 +244,7 @@ REPROps * CArray_initialize(PARROT_INTERP,
     this_repr->idx_funcs->trim_to = trim_to;
     this_repr->idx_funcs->make_hole = make_hole;
     this_repr->idx_funcs->delete_elems = delete_elems;
+    this_repr->idx_funcs->get_elem_stable = get_elem_stable;
     
     return this_repr;
 }
