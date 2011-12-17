@@ -19,11 +19,11 @@ grammar NQP::Grammar is HLL::Grammar {
         # with this compilation unit.
         my $file := pir::find_caller_lex__ps('$?FILES');
         my $source_id := nqp::sha1(nqp::getattr(self, Regex::Cursor, '$!target'));
-        my $*SC := pir::isnull($file) ??
+        my $*W := pir::isnull($file) ??
             NQP::World.new(:handle($source_id)) !!
             NQP::World.new(:handle($source_id), :description($file));
 
-        my $*SCOPE       := '';
+        my $*WOPE       := '';
         my $*MULTINESS   := '';
         my $*PKGDECL     := '';
         my $*INVOCANT_OK := 0;
@@ -351,23 +351,23 @@ grammar NQP::Grammar is HLL::Grammar {
             if $<repr> {
                 %args<repr> := ~$<repr>[0]<quote_delimited><quote_atom>[0];
             }
-            $*PACKAGE := $*SC.pkg_create_mo(%*HOW{$*PKGDECL}, |%args);
+            $*PACKAGE := $*W.pkg_create_mo(%*HOW{$*PKGDECL}, |%args);
             
             # Install it in the current package or current lexpad as needed.
-            if $*SCOPE eq 'our' || $*SCOPE eq '' {
-                $*SC.install_package_symbol($*OUTERPACKAGE, $<name><identifier>, $*PACKAGE);
+            if $*WOPE eq 'our' || $*WOPE eq '' {
+                $*W.install_package_symbol($*OUTERPACKAGE, $<name><identifier>, $*PACKAGE);
                 if +$<name><identifier> == 1 {
-                    $*SC.install_lexical_symbol(@NQP::Actions::BLOCK[0], $<name><identifier>[0], $*PACKAGE);
+                    $*W.install_lexical_symbol(@NQP::Actions::BLOCK[0], $<name><identifier>[0], $*PACKAGE);
                 }
             }
-            elsif $*SCOPE eq 'my' {
+            elsif $*WOPE eq 'my' {
                 if +$<name><identifier> != 1 {
                     $<name>.CURSOR.panic("A my scoped package cannot have a multi-part name yet");
                 }
-                $*SC.install_lexical_symbol(@NQP::Actions::BLOCK[0], $<name><identifier>[0], $*PACKAGE);
+                $*W.install_lexical_symbol(@NQP::Actions::BLOCK[0], $<name><identifier>[0], $*PACKAGE);
             }
             else {
-                $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
+                $/.CURSOR.panic("$*WOPE scoped packages are not supported");
             }
         }
         
@@ -385,7 +385,7 @@ grammar NQP::Grammar is HLL::Grammar {
     token scope_declarator:sym<our> { <sym> <scoped('our')> }
     token scope_declarator:sym<has> { <sym> <scoped('has')> }
 
-    rule scoped($*SCOPE) {
+    rule scoped($*WOPE) {
         | <declarator>
         | <multi_declarator>
         | <package_declarator>
