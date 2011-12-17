@@ -831,7 +831,7 @@ class NQP::Actions is HLL::Actions {
         unless $past<signature_has_invocant> {
             $past[0].unshift(PAST::Var.new(
                 :name('self'), :scope('parameter'), :directaccess(1),
-                :multitype($*SC.get_object_sc_ref_past($*PACKAGE))
+                :multitype($*SC.get_ref($*PACKAGE))
             ));
         }
         $past.symbol('self', :scope('lexical') );
@@ -976,7 +976,7 @@ class NQP::Actions is HLL::Actions {
         my $found := 0;
         try {
             my $sym := find_sym(@name, $/);
-            make $*SC.get_object_sc_ref_past($sym);
+            make $*SC.get_ref($sym);
             $found := 1;
         }
         unless $found {

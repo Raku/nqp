@@ -2,7 +2,7 @@ use NQPP6Regex;
 
 # This builds upon the SerializationContextBuilder to add the specifics
 # needed by NQP.
-class NQP::World is HLL::Compiler::SerializationContextBuilder {
+class NQP::World is HLL::World {
     # XXX We need to load the module loader to load modules, which means we
     # can't just use ...; it, which means we can't get the ModuleLoader symbol
     # merged into anywhere...anyway, we chop the circularity by finding it
@@ -166,7 +166,7 @@ class NQP::World is HLL::Compiler::SerializationContextBuilder {
             my $how_name := @how_ns.pop();
             my $setup_call := PAST::Op.new(
                 :pasttype('callmethod'), :name('new_type'),
-                self.get_object_sc_ref_past($how)
+                self.get_ref($how)
             );
             if pir::defined($name) {
                 $setup_call.push(PAST::Val.new( :value($name), :named('name') ));
@@ -196,13 +196,13 @@ class NQP::World is HLL::Compiler::SerializationContextBuilder {
         if self.is_precompilation_mode() {
             my $create_call := PAST::Op.new(
                 :pasttype('callmethod'), :name('new'),
-                self.get_object_sc_ref_past($meta_attr)
+                self.get_ref($meta_attr)
             );
             for %lit_args {
                 $create_call.push(PAST::Val.new( :value($_.value), :named($_.key) ));
             }
             for %obj_args {
-                my $lookup := self.get_object_sc_ref_past($_.value);
+                my $lookup := self.get_ref($_.value);
                 $lookup.named($_.key);
                 $create_call.push($lookup);
             }
@@ -378,7 +378,7 @@ class NQP::World is HLL::Compiler::SerializationContextBuilder {
                 :pasttype('callmethod'), :name($meta_method_name),
                 PAST::Op.new( :pirop('get_how PP'), $slot_past ),
                 $slot_past,
-                self.get_object_sc_ref_past($to_add)
+                self.get_ref($to_add)
             )));
         }
     }

@@ -72,7 +72,7 @@ HLL_SOURCES = \
   src/HLL/Actions.pm \
   src/HLL/Compiler.pm \
   src/HLL/CommandLine.pm \
-  src/HLL/SerializationContextBuilder.pm \
+  src/HLL/World.pm \
 
 P6REGEX_SOURCES = \
   src/Regex/P6Regex/Grammar.pm \
