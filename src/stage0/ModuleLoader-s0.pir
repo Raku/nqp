@@ -21,11 +21,11 @@
 .loadlib "io_ops"
 
 .namespace []
-.sub "_block1000"  :anon :subid("10_1323686346.61877")
+.sub "_block1000"  :anon :subid("10_1324128493.38599")
     .param pmc param_1002 :slurpy
 .annotate 'file', "src/ModuleLoader.pm"
 .annotate 'line', 0
-    .const 'Sub' $P1007 = "11_1323686346.61877" 
+    .const 'Sub' $P1007 = "11_1324128493.38599" 
     capture_lex $P1007
 .annotate 'line', 1
     .lex "@ARGS", param_1002
@@ -38,7 +38,7 @@
     unless $I0 goto ctxsave_done
     $P0."ctxsave"()
   ctxsave_done:
-    .const 'Sub' $P1007 = "11_1323686346.61877" 
+    .const 'Sub' $P1007 = "11_1324128493.38599" 
     capture_lex $P1007
     $P1007()
 .annotate 'line', 178
@@ -58,7 +58,7 @@
     set $P100, $P105
   if_1155_end:
     .return ($P100)
-    .const 'Sub' $P1157 = "29_1323686346.61877" 
+    .const 'Sub' $P1157 = "29_1324128493.38599" 
     .return ($P1157)
 .end
 
@@ -66,13 +66,13 @@
 .HLL "nqp"
 
 .namespace []
-.sub "" :load :init :subid("post30") :outer("10_1323686346.61877")
+.sub "" :load :init :subid("post30") :outer("10_1324128493.38599")
 .annotate 'file', "src/ModuleLoader.pm"
 .annotate 'line', 0
-    .const 'Sub' $P1001 = "10_1323686346.61877" 
+    .const 'Sub' $P1001 = "10_1324128493.38599" 
     .local pmc block
     set block, $P1001
-    nqp_get_sc $P107, "1323686346.0302"
+    nqp_get_sc $P107, "1324128492.77092"
     isnull $I100, $P107
     if $I100, if_1159
     goto if_1159_end
@@ -83,7 +83,7 @@
     get_class $P109, "LexPad"
     get_class $P110, "NQPLexPad"
     $P108."hll_map"($P109, $P110)
-    nqp_create_sc $P111, "1323686346.0302"
+    nqp_create_sc $P111, "1324128492.77092"
     .local pmc cur_sc
     set cur_sc, $P111
     cur_sc."set_description"("src/ModuleLoader.pm")
@@ -96,69 +96,69 @@
     nqp_get_sc_object $P112, "__6MODEL_CORE__", 0
     $P113 = $P112."new_type"("GLOBALish" :named("name"))
     nqp_add_object_to_sc cur_sc, 0, $P113
-    .const 'LexInfo' $P1161 = "10_1323686346.61877" 
-    nqp_get_sc_object $P112, "1323686346.0302", 0
+    .const 'LexInfo' $P1161 = "10_1324128493.38599" 
+    nqp_get_sc_object $P112, "1324128492.77092", 0
     $P1161."set_static_lexpad_value"("GLOBALish", $P112)
-    .const 'LexInfo' $P1162 = "10_1323686346.61877" 
+    .const 'LexInfo' $P1162 = "10_1324128493.38599" 
     $P1162."finish_static_lexpad"()
-    .const 'LexInfo' $P1163 = "10_1323686346.61877" 
-    nqp_get_sc_object $P112, "1323686346.0302", 0
+    .const 'LexInfo' $P1163 = "10_1324128493.38599" 
+    nqp_get_sc_object $P112, "1324128492.77092", 0
     $P1163."set_static_lexpad_value"("$?PACKAGE", $P112)
-    .const 'LexInfo' $P1164 = "10_1323686346.61877" 
+    .const 'LexInfo' $P1164 = "10_1324128493.38599" 
     $P1164."finish_static_lexpad"()
     nqp_get_sc_object $P112, "__6MODEL_CORE__", 0
     $P113 = $P112."new_type"("ModuleLoader" :named("name"))
     nqp_add_object_to_sc cur_sc, 1, $P113
-    nqp_get_sc_object $P112, "1323686346.0302", 1
-    nqp_get_sc_object $P113, "1323686346.0302", 0
+    nqp_get_sc_object $P112, "1324128492.77092", 1
+    nqp_get_sc_object $P113, "1324128492.77092", 0
     get_who $P114, $P113
     set $P114["ModuleLoader"], $P112
-    .const 'LexInfo' $P1165 = "10_1323686346.61877" 
-    nqp_get_sc_object $P112, "1323686346.0302", 1
+    .const 'LexInfo' $P1165 = "10_1324128493.38599" 
+    nqp_get_sc_object $P112, "1324128492.77092", 1
     $P1165."set_static_lexpad_value"("ModuleLoader", $P112)
-    .const 'LexInfo' $P1166 = "10_1323686346.61877" 
+    .const 'LexInfo' $P1166 = "10_1324128493.38599" 
     $P1166."finish_static_lexpad"()
-    nqp_get_sc_object $P112, "1323686346.0302", 1
+    nqp_get_sc_object $P112, "1324128492.77092", 1
     get_how $P113, $P112
-    nqp_get_sc_object $P114, "1323686346.0302", 1
-    .const '' $P1167 = "16_1323686346.61877" 
+    nqp_get_sc_object $P114, "1324128492.77092", 1
+    .const '' $P1167 = "16_1324128493.38599" 
     $P113."add_method"($P114, "search_path", $P1167)
-    nqp_get_sc_object $P112, "1323686346.0302", 1
+    nqp_get_sc_object $P112, "1324128492.77092", 1
     get_how $P113, $P112
-    nqp_get_sc_object $P114, "1323686346.0302", 1
-    .const '' $P1168 = "19_1323686346.61877" 
+    nqp_get_sc_object $P114, "1324128492.77092", 1
+    .const '' $P1168 = "19_1324128493.38599" 
     $P113."add_method"($P114, "ctxsave", $P1168)
-    nqp_get_sc_object $P112, "1323686346.0302", 1
+    nqp_get_sc_object $P112, "1324128492.77092", 1
     get_how $P113, $P112
-    nqp_get_sc_object $P114, "1323686346.0302", 1
-    .const '' $P1169 = "20_1323686346.61877" 
+    nqp_get_sc_object $P114, "1324128492.77092", 1
+    .const '' $P1169 = "20_1324128493.38599" 
     $P113."add_method"($P114, "load_module", $P1169)
-    nqp_get_sc_object $P112, "1323686346.0302", 1
+    nqp_get_sc_object $P112, "1324128492.77092", 1
     get_how $P113, $P112
-    nqp_get_sc_object $P114, "1323686346.0302", 1
-    .const '' $P1170 = "24_1323686346.61877" 
+    nqp_get_sc_object $P114, "1324128492.77092", 1
+    .const '' $P1170 = "24_1324128493.38599" 
     $P113."add_method"($P114, "load_setting", $P1170)
-    nqp_get_sc_object $P112, "1323686346.0302", 1
+    nqp_get_sc_object $P112, "1324128492.77092", 1
     get_how $P113, $P112
-    nqp_get_sc_object $P114, "1323686346.0302", 1
-    .const '' $P1171 = "28_1323686346.61877" 
+    nqp_get_sc_object $P114, "1324128492.77092", 1
+    .const '' $P1171 = "28_1324128493.38599" 
     $P113."add_method"($P114, "set_mainline_module", $P1171)
-    .const 'LexInfo' $P1172 = "11_1323686346.61877" 
-    nqp_get_sc_object $P112, "1323686346.0302", 1
+    .const 'LexInfo' $P1172 = "11_1324128493.38599" 
+    nqp_get_sc_object $P112, "1324128492.77092", 1
     $P1172."set_static_lexpad_value"("$?PACKAGE", $P112)
-    .const 'LexInfo' $P1173 = "11_1323686346.61877" 
+    .const 'LexInfo' $P1173 = "11_1324128493.38599" 
     $P1173."finish_static_lexpad"()
-    .const 'LexInfo' $P1174 = "11_1323686346.61877" 
-    nqp_get_sc_object $P112, "1323686346.0302", 1
+    .const 'LexInfo' $P1174 = "11_1324128493.38599" 
+    nqp_get_sc_object $P112, "1324128492.77092", 1
     $P1174."set_static_lexpad_value"("$?CLASS", $P112)
-    .const 'LexInfo' $P1175 = "11_1323686346.61877" 
+    .const 'LexInfo' $P1175 = "11_1324128493.38599" 
     $P1175."finish_static_lexpad"()
-    nqp_get_sc_object $P112, "1323686346.0302", 1
+    nqp_get_sc_object $P112, "1324128492.77092", 1
     get_how $P113, $P112
-    nqp_get_sc_object $P114, "1323686346.0302", 1
+    nqp_get_sc_object $P114, "1324128492.77092", 1
     $P113."compose"($P114)
   if_1159_end:
-    nqp_get_sc_object $P112, "1323686346.0302", 0
+    nqp_get_sc_object $P112, "1324128492.77092", 0
     set_hll_global "GLOBAL", $P112
 .end
 
@@ -166,20 +166,20 @@
 .HLL "nqp"
 
 .namespace ["ModuleLoader"]
-.sub "_block1006"  :subid("11_1323686346.61877") :outer("10_1323686346.61877")
+.sub "_block1006"  :subid("11_1324128493.38599") :outer("10_1324128493.38599")
 .annotate 'file', "src/ModuleLoader.pm"
 .annotate 'line', 1
-    .const 'Sub' $P1145 = "28_1323686346.61877" 
+    .const 'Sub' $P1145 = "28_1324128493.38599" 
     capture_lex $P1145
-    .const 'Sub' $P1117 = "24_1323686346.61877" 
+    .const 'Sub' $P1117 = "24_1324128493.38599" 
     capture_lex $P1117
-    .const 'Sub' $P1085 = "20_1323686346.61877" 
+    .const 'Sub' $P1085 = "20_1324128493.38599" 
     capture_lex $P1085
-    .const 'Sub' $P1082 = "19_1323686346.61877" 
+    .const 'Sub' $P1082 = "19_1324128493.38599" 
     capture_lex $P1082
-    .const 'Sub' $P1046 = "16_1323686346.61877" 
+    .const 'Sub' $P1046 = "16_1324128493.38599" 
     capture_lex $P1046
-    .const 'Sub' $P1014 = "12_1323686346.61877" 
+    .const 'Sub' $P1014 = "12_1324128493.38599" 
     capture_lex $P1014
 .annotate 'line', 2
     $P1009 = root_new ['parrot';'Hash']
@@ -194,7 +194,7 @@
     set $P1012, $P100
     .lex "$stub_how", $P1012
 .annotate 'line', 86
-    .const 'Sub' $P1014 = "12_1323686346.61877" 
+    .const 'Sub' $P1014 = "12_1324128493.38599" 
     newclosure $P1041, $P1014
     set $P1013, $P1041
     .lex "merge_globals", $P1013
@@ -217,7 +217,7 @@
 .annotate 'line', 1
     set $P102, $P1013
 .annotate 'line', 153
-    .const 'Sub' $P1145 = "28_1323686346.61877" 
+    .const 'Sub' $P1145 = "28_1324128493.38599" 
     newclosure $P1154, $P1145
 .annotate 'line', 1
     .return ($P1154)
@@ -228,14 +228,14 @@
 
 .namespace ["ModuleLoader"]
 .include "except_types.pasm"
-.sub "merge_globals"  :subid("12_1323686346.61877") :outer("11_1323686346.61877")
+.sub "merge_globals"  :subid("12_1324128493.38599") :outer("11_1324128493.38599")
     .param pmc param_1015
     .param pmc param_1016
 .annotate 'file', "src/ModuleLoader.pm"
 .annotate 'line', 86
-    .const 'Sub' $P1026 = "14_1323686346.61877" 
+    .const 'Sub' $P1026 = "14_1324128493.38599" 
     capture_lex $P1026
-    .const 'Sub' $P1021 = "13_1323686346.61877" 
+    .const 'Sub' $P1021 = "13_1324128493.38599" 
     capture_lex $P1021
     .lex "$target", param_1015
     .lex "$source", param_1016
@@ -264,7 +264,7 @@
     unless $P101, loop1024_done
     shift $P104, $P101
   loop1024_redo:
-    .const 'Sub' $P1021 = "13_1323686346.61877" 
+    .const 'Sub' $P1021 = "13_1324128493.38599" 
     capture_lex $P1021
     $P1021($P104)
   loop1024_next:
@@ -295,7 +295,7 @@
     unless $P101, loop1040_done
     shift $P104, $P101
   loop1040_redo:
-    .const 'Sub' $P1026 = "14_1323686346.61877" 
+    .const 'Sub' $P1026 = "14_1324128493.38599" 
     capture_lex $P1026
     $P1026($P104)
   loop1040_next:
@@ -318,7 +318,7 @@
 .HLL "nqp"
 
 .namespace ["ModuleLoader"]
-.sub "_block1020"  :anon :subid("13_1323686346.61877") :outer("12_1323686346.61877")
+.sub "_block1020"  :anon :subid("13_1324128493.38599") :outer("12_1324128493.38599")
     .param pmc param_1022
 .annotate 'file', "src/ModuleLoader.pm"
 .annotate 'line', 91
@@ -345,11 +345,11 @@
 .HLL "nqp"
 
 .namespace ["ModuleLoader"]
-.sub "_block1025"  :anon :subid("14_1323686346.61877") :outer("12_1323686346.61877")
+.sub "_block1025"  :anon :subid("14_1324128493.38599") :outer("12_1324128493.38599")
     .param pmc param_1028
 .annotate 'file', "src/ModuleLoader.pm"
 .annotate 'line', 94
-    .const 'Sub' $P1033 = "15_1323686346.61877" 
+    .const 'Sub' $P1033 = "15_1324128493.38599" 
     capture_lex $P1033
 .annotate 'line', 95
     new $P105, "Undef"
@@ -399,7 +399,7 @@
     issame $I102, $P114, $P116
     if $I102, if_1031
 .annotate 'line', 102
-    .const 'Sub' $P1033 = "15_1323686346.61877" 
+    .const 'Sub' $P1033 = "15_1324128493.38599" 
     capture_lex $P1033
     $P122 = $P1033()
     set $P109, $P122
@@ -439,7 +439,7 @@
 .HLL "nqp"
 
 .namespace ["ModuleLoader"]
-.sub "_block1032"  :anon :subid("15_1323686346.61877") :outer("14_1323686346.61877")
+.sub "_block1032"  :anon :subid("15_1324128493.38599") :outer("14_1324128493.38599")
 .annotate 'file', "src/ModuleLoader.pm"
 .annotate 'line', 103
     new $P117, "Undef"
@@ -582,14 +582,14 @@
 .HLL "nqp"
 
 .namespace ["ModuleLoader"]
-.sub "search_path" :anon :subid("16_1323686346.61877") :outer("11_1323686346.61877")
+.sub "search_path" :anon :subid("16_1324128493.38599") :outer("11_1324128493.38599")
     .param pmc param_1047
     .param pmc param_1048
 .annotate 'file', "src/ModuleLoader.pm"
 .annotate 'line', 5
-    .const 'Sub' $P1068 = "18_1323686346.61877" 
+    .const 'Sub' $P1068 = "18_1324128493.38599" 
     capture_lex $P1068
-    .const 'Sub' $P1056 = "17_1323686346.61877" 
+    .const 'Sub' $P1056 = "17_1324128493.38599" 
     capture_lex $P1056
     .lex "self", param_1047
     .lex "$explicit_path", param_1048
@@ -615,7 +615,7 @@
     new $P103, "Undef"
   vivify_69:
 .annotate 'line', 11
-    .const 'Sub' $P1056 = "17_1323686346.61877" 
+    .const 'Sub' $P1056 = "17_1324128493.38599" 
     capture_lex $P1056
     $P1056()
 .annotate 'line', 12
@@ -625,7 +625,7 @@
   vivify_75:
     if $P103, if_1065
 .annotate 'line', 15
-    .const 'Sub' $P1068 = "18_1323686346.61877" 
+    .const 'Sub' $P1068 = "18_1324128493.38599" 
     capture_lex $P1068
     $P1068()
     goto if_1065_end
@@ -697,7 +697,7 @@
 
 .namespace ["ModuleLoader"]
 .include "except_types.pasm"
-.sub "_block1055"  :anon :subid("17_1323686346.61877") :outer("16_1323686346.61877")
+.sub "_block1055"  :anon :subid("17_1324128493.38599") :outer("16_1324128493.38599")
 .annotate 'file', "src/ModuleLoader.pm"
 .annotate 'line', 11
     new $P1060, 'ExceptionHandler'
@@ -749,7 +749,7 @@
 .HLL "nqp"
 
 .namespace ["ModuleLoader"]
-.sub "_block1067"  :anon :subid("18_1323686346.61877") :outer("16_1323686346.61877")
+.sub "_block1067"  :anon :subid("18_1324128493.38599") :outer("16_1324128493.38599")
 .annotate 'file', "src/ModuleLoader.pm"
 .annotate 'line', 16
     $P1070 = root_new ['parrot';'ResizablePMCArray']
@@ -809,7 +809,7 @@
 .HLL "nqp"
 
 .namespace ["ModuleLoader"]
-.sub "ctxsave" :anon :subid("19_1323686346.61877") :outer("11_1323686346.61877")
+.sub "ctxsave" :anon :subid("19_1324128493.38599") :outer("11_1324128493.38599")
     .param pmc param_1083
 .annotate 'file', "src/ModuleLoader.pm"
 .annotate 'line', 34
@@ -833,17 +833,17 @@
 
 .namespace ["ModuleLoader"]
 .include "except_types.pasm"
-.sub "load_module" :anon :subid("20_1323686346.61877") :outer("11_1323686346.61877")
+.sub "load_module" :anon :subid("20_1324128493.38599") :outer("11_1324128493.38599")
     .param pmc param_1088
     .param pmc param_1089
     .param pmc param_1090
 .annotate 'file', "src/ModuleLoader.pm"
 .annotate 'line', 43
-    .const 'Sub' $P1112 = "23_1323686346.61877" 
+    .const 'Sub' $P1112 = "23_1324128493.38599" 
     capture_lex $P1112
-    .const 'Sub' $P1105 = "22_1323686346.61877" 
+    .const 'Sub' $P1105 = "22_1324128493.38599" 
     capture_lex $P1105
-    .const 'Sub' $P1097 = "21_1323686346.61877" 
+    .const 'Sub' $P1097 = "21_1324128493.38599" 
     capture_lex $P1097
     new $P1087, 'ExceptionHandler', [.CONTROL_RETURN]
     set_label $P1087, control_1086
@@ -900,7 +900,7 @@
     unless $P104, loop1100_done
     shift $P105, $P104
   loop1100_redo:
-    .const 'Sub' $P1097 = "21_1323686346.61877" 
+    .const 'Sub' $P1097 = "21_1324128493.38599" 
     capture_lex $P1097
     $P1097($P105)
   loop1100_next:
@@ -931,7 +931,7 @@
     defined $I100, $P105
     if $I100, if_1101
 .annotate 'line', 59
-    .const 'Sub' $P1105 = "22_1323686346.61877" 
+    .const 'Sub' $P1105 = "22_1324128493.38599" 
     capture_lex $P1105
     $P1105()
     goto if_1101_end
@@ -958,7 +958,7 @@
   vivify_115:
     defined $I100, $P104
     unless $I100, if_1110_end
-    .const 'Sub' $P1112 = "23_1323686346.61877" 
+    .const 'Sub' $P1112 = "23_1324128493.38599" 
     capture_lex $P1112
     $P1112()
   if_1110_end:
@@ -984,7 +984,7 @@
 .HLL "nqp"
 
 .namespace ["ModuleLoader"]
-.sub "_block1096"  :anon :subid("21_1323686346.61877") :outer("20_1323686346.61877")
+.sub "_block1096"  :anon :subid("21_1324128493.38599") :outer("20_1324128493.38599")
     .param pmc param_1098
 .annotate 'file', "src/ModuleLoader.pm"
 .annotate 'line', 50
@@ -1033,7 +1033,7 @@
 .HLL "nqp"
 
 .namespace ["ModuleLoader"]
-.sub "_block1104"  :anon :subid("22_1323686346.61877") :outer("20_1323686346.61877")
+.sub "_block1104"  :anon :subid("22_1324128493.38599") :outer("20_1324128493.38599")
 .annotate 'file', "src/ModuleLoader.pm"
 .annotate 'line', 60
     new $P106, "Undef"
@@ -1106,7 +1106,7 @@
 .HLL "nqp"
 
 .namespace ["ModuleLoader"]
-.sub "_block1111"  :anon :subid("23_1323686346.61877") :outer("20_1323686346.61877")
+.sub "_block1111"  :anon :subid("23_1324128493.38599") :outer("20_1324128493.38599")
 .annotate 'file', "src/ModuleLoader.pm"
 .annotate 'line', 71
     new $P105, "Undef"
@@ -1159,12 +1159,12 @@
 
 .namespace ["ModuleLoader"]
 .include "except_types.pasm"
-.sub "load_setting" :anon :subid("24_1323686346.61877") :outer("11_1323686346.61877")
+.sub "load_setting" :anon :subid("24_1324128493.38599") :outer("11_1324128493.38599")
     .param pmc param_1120
     .param pmc param_1121
 .annotate 'file', "src/ModuleLoader.pm"
 .annotate 'line', 118
-    .const 'Sub' $P1125 = "25_1323686346.61877" 
+    .const 'Sub' $P1125 = "25_1324128493.38599" 
     capture_lex $P1125
     new $P1119, 'ExceptionHandler', [.CONTROL_RETURN]
     set_label $P1119, control_1118
@@ -1188,7 +1188,7 @@
     set $S100, $P103
     isne $I100, $S100, "NULL"
     unless $I100, if_1123_end
-    .const 'Sub' $P1125 = "25_1323686346.61877" 
+    .const 'Sub' $P1125 = "25_1324128493.38599" 
     capture_lex $P1125
     $P1125()
   if_1123_end:
@@ -1215,12 +1215,12 @@
 
 .namespace ["ModuleLoader"]
 .include "except_types.pasm"
-.sub "_block1124"  :anon :subid("25_1323686346.61877") :outer("24_1323686346.61877")
+.sub "_block1124"  :anon :subid("25_1324128493.38599") :outer("24_1324128493.38599")
 .annotate 'file', "src/ModuleLoader.pm"
 .annotate 'line', 121
-    .const 'Sub' $P1138 = "27_1323686346.61877" 
+    .const 'Sub' $P1138 = "27_1324128493.38599" 
     capture_lex $P1138
-    .const 'Sub' $P1131 = "26_1323686346.61877" 
+    .const 'Sub' $P1131 = "26_1324128493.38599" 
     capture_lex $P1131
 .annotate 'line', 123
     new $P104, "Undef"
@@ -1257,7 +1257,7 @@
     unless $P105, loop1134_done
     shift $P106, $P105
   loop1134_redo:
-    .const 'Sub' $P1131 = "26_1323686346.61877" 
+    .const 'Sub' $P1131 = "26_1324128493.38599" 
     capture_lex $P1131
     $P1131($P106)
   loop1134_next:
@@ -1287,7 +1287,7 @@
   vivify_134:
     defined $I101, $P106
     if $I101, unless_1135_end
-    .const 'Sub' $P1138 = "27_1323686346.61877" 
+    .const 'Sub' $P1138 = "27_1324128493.38599" 
     capture_lex $P1138
     $P1138()
   unless_1135_end:
@@ -1313,7 +1313,7 @@
 .HLL "nqp"
 
 .namespace ["ModuleLoader"]
-.sub "_block1130"  :anon :subid("26_1323686346.61877") :outer("25_1323686346.61877")
+.sub "_block1130"  :anon :subid("26_1324128493.38599") :outer("25_1324128493.38599")
     .param pmc param_1132
 .annotate 'file', "src/ModuleLoader.pm"
 .annotate 'line', 125
@@ -1362,7 +1362,7 @@
 .HLL "nqp"
 
 .namespace ["ModuleLoader"]
-.sub "_block1137"  :anon :subid("27_1323686346.61877") :outer("25_1323686346.61877")
+.sub "_block1137"  :anon :subid("27_1324128493.38599") :outer("25_1324128493.38599")
 .annotate 'file', "src/ModuleLoader.pm"
 .annotate 'line', 134
     new $P107, "Undef"
@@ -1457,7 +1457,7 @@
 .HLL "nqp"
 
 .namespace ["ModuleLoader"]
-.sub "set_mainline_module" :anon :subid("28_1323686346.61877") :outer("11_1323686346.61877")
+.sub "set_mainline_module" :anon :subid("28_1324128493.38599") :outer("11_1324128493.38599")
     .param pmc param_1146
     .param pmc param_1147
 .annotate 'file', "src/ModuleLoader.pm"
@@ -1629,10 +1629,10 @@
 .HLL "nqp"
 
 .namespace []
-.sub "_block1156" :load :anon :subid("29_1323686346.61877")
+.sub "_block1156" :load :anon :subid("29_1324128493.38599")
 .annotate 'file', "src/ModuleLoader.pm"
 .annotate 'line', 1
-    .const '' $P1158 = "10_1323686346.61877" 
+    .const '' $P1158 = "10_1324128493.38599" 
     $P106 = $P1158()
     .return ($P106)
 .end
