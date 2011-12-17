@@ -737,6 +737,108 @@ inline op repr_name(out STR, in PMC) :base_core {
 
 /*
 
+=item repr_at_pos_int()
+
+Gets an element from the specified position, as an integer.
+
+=cut
+
+*/
+inline op repr_at_pos_int(out INT, in PMC, in INT) :base_core {
+    PMC *obj = decontainerize(interp, $2);
+    if (obj->vtable->base_type == smo_id) {
+        STable *elem_st = REPR(obj)->idx_funcs->get_elem_stable(interp, STABLE(obj));
+        if (IS_CONCRETE(obj))
+            $1 = elem_st->REPR->box_funcs->get_int(interp, elem_st,
+                REPR(obj)->idx_funcs->at_pos_ref(interp, STABLE(obj), OBJECT_BODY(obj), $3));
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot do at_pos on a type object");
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_at_pos_int on a SixModelObject");
+}
+
+
+/*
+
+=item repr_at_pos_num()
+
+Gets an element from the specified position, as an floating point number.
+
+=cut
+
+*/
+inline op repr_at_pos_num(out NUM, in PMC, in INT) :base_core {
+    PMC *obj = decontainerize(interp, $2);
+    if (obj->vtable->base_type == smo_id) {
+        STable *elem_st = REPR(obj)->idx_funcs->get_elem_stable(interp, STABLE(obj));
+        if (IS_CONCRETE(obj))
+            $1 = elem_st->REPR->box_funcs->get_num(interp, elem_st,
+                REPR(obj)->idx_funcs->at_pos_ref(interp, STABLE(obj), OBJECT_BODY(obj), $3));
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot do at_pos on a type object");
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_at_pos_num on a SixModelObject");
+}
+
+
+/*
+
+=item repr_bind_pos_int()
+
+Sets the element at the specified position to an integer.
+
+=cut
+
+*/
+inline op repr_bind_pos_int(in PMC, in INT, in INT) :base_core {
+    PMC *obj = decontainerize(interp, $1);
+    if (obj->vtable->base_type == smo_id) {
+        STable *elem_st = REPR(obj)->idx_funcs->get_elem_stable(interp, STABLE(obj));
+        if (IS_CONCRETE(obj))
+            REPR(obj)->idx_funcs->bind_pos_ref(interp, STABLE(obj), OBJECT_BODY(obj), $2, &$3);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot do bind_pos on a type object");
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_bind_pos_int on a SixModelObject");
+}
+
+
+/*
+
+=item repr_bind_pos_num()
+
+Sets the element at the specified position to a floating point number.
+
+=cut
+
+*/
+inline op repr_bind_pos_num(in PMC, in INT, in NUM) :base_core {
+    PMC *obj = decontainerize(interp, $1);
+    if (obj->vtable->base_type == smo_id) {
+        STable *elem_st = REPR(obj)->idx_funcs->get_elem_stable(interp, STABLE(obj));
+        if (IS_CONCRETE(obj))
+            REPR(obj)->idx_funcs->bind_pos_ref(interp, STABLE(obj), OBJECT_BODY(obj), $2, &$3);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot do bind_pos on a type object");
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_bind_pos_num on a SixModelObject");
+}
+
+
+/*
+
 =item type_check(obj, wanted_type)
 
 Checks if the given object's type accepts the checked type, using the

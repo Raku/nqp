@@ -579,7 +579,7 @@ entry to produce the node to be returned.
     # boolean opcodes
     maphash['not_i']    = 'not__Ii'
 
-    # aggregate opcodes
+    # aggregate opcodes, mapping to the Parrot v-table functions
     maphash['atkey']    = 'set__PQs'
     maphash['atpos']    = 'set__PQi'
     maphash['atpos_i']  = 'set__IQi'
@@ -620,6 +620,12 @@ entry to produce the node to be returned.
     $P0['pasttype'] = 'hash'
     maphash['hash'] = $P0
 
+    # repr-level aggregate operations
+    maphash['r_atpos_i']   = 'repr_at_pos_int__IPi'
+    maphash['r_atpos_n']   = 'repr_at_pos_num__NPi'
+    maphash['r_bindpos_i'] = 'repr_bind_pos_int__2Pii'
+    maphash['r_bindpos_n'] = 'repr_bind_pos_num__2Pin'
+    
     # object opcodes
     maphash['bindattr']   = 'setattribute__3PPsP'
     maphash['bindattr_i'] = 'repr_bind_attr_int__3PPsi'
