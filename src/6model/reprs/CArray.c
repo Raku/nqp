@@ -43,14 +43,14 @@ static void fill_repr_data(PARROT_INTERP, STable *st) {
     ss = REPR(repr_data->elem_type)->get_storage_spec(interp, STABLE(repr_data->elem_type));
     if (ss.boxed_primitive == STORAGE_SPEC_BP_INT) {
         if (ss.bits == 8 || ss.bits == 16 || ss.bits == 32 || ss.bits == 64)
-            repr_data->elem_size = ss.bits;
+            repr_data->elem_size = ss.bits / 8;
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "CArray representation can only have 8, 16, 32 or 64 bit integer elements");
     }
     else if (ss.boxed_primitive == STORAGE_SPEC_BP_NUM) {
         if (ss.bits == 32 || ss.bits == 64)
-            repr_data->elem_size = ss.bits;
+            repr_data->elem_size = ss.bits / 8;
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "CArray representation can only have 32 or 64 bit floating point elements");
