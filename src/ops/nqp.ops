@@ -14,6 +14,9 @@ BEGIN_OPS_PREAMBLE
 #include "../6model/serialization_context.h"
 #include "pmc_sub.h"
 
+/* SHA1 algorithm. */
+#include "../../3rdparty/sha1/sha1.h"
+
 #if PARROT_HAS_ICU
 #  include <unicode/uchar.h>
 #endif
@@ -1907,3 +1910,29 @@ inline op is_uprop(out INT, in STR, in STR, in INT) :base_core {
 }
 
 
+/*
+
+=item nqp_sha1
+
+Computes the SHA-1 hash of $2 and puts the result in $1.
+
+=cut
+
+*/
+inline op nqp_sha1(out STR, in STR) :base_core {
+    /* Grab the Parrot string as a C string. */
+    char *cstr = Parrot_str_to_encoded_cstring(interp, $2, Parrot_utf8_encoding_ptr);
+
+    /* Compute its SHA-1 and encode it. */
+    SHA1_CTX      context;
+    unsigned char digest[20];
+    char          output[80];
+    SHA1_Init(&context);
+    SHA1_Update(&context, (unsigned char*)cstr, strlen(cstr));
+    SHA1_Final(&context, digest);
+    SHA1_DigestToHex(digest, output);
+
+    /* Free the C-string and put result into a new string. */
+    Parrot_str_free_cstring(cstr);
+    $1 = Parrot_str_new_init(interp, &output, 40, Parrot_utf8_encoding_ptr, 0);
+}

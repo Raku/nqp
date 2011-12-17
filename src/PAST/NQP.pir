@@ -645,6 +645,9 @@ entry to produce the node to be returned.
     maphash['box_s']      = 'repr_box_str__PsP'
     maphash['where']      = 'get_id__IP'
 
+    # serialization context related opcodes
+    maphash['sha1']       = 'nqp_sha1__Ss'
+
     # control opcodes
     $P0 = new ['Hash']
     $P0['pasttype'] = 'if'

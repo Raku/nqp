@@ -491,6 +491,7 @@ CLEANUPS = \
   $(OPS_DIR)/*$(O) \
   $(OPS_DIR)/*$(LOAD_EXT) \
   3rdparty/libtommath/*$(O) \
+  3rdparty/sha1/*$(O) \
   $(DYNEXT_DIR)/*$(LOAD_EXT) \
 
 all: $(NQP_EXE) qregex
@@ -688,7 +689,8 @@ $(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS_SOURCE) $(DYNPMC)
 	cd src/6model/reprs && $(CC) -c @cc_o_out@Uninstantiable$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) Uninstantiable.c
 	cd src/6model && $(CC) -c @cc_o_out@multi_dispatch$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) multi_dispatch.c
 	cd src/6model && $(CC) -c @cc_o_out@serialization_context$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) serialization_context.c
-	cd $(OPS_DIR) && $(LD) @ld_out@$(OPS)$(LOAD_EXT) $(OPS)$(O) $(METAMODEL_OBJS) $(LINKARGS)
+	cd 3rdparty/sha1 && $(CC) -c @cc_o_out@sha1$(O) $(CINCLUDES) $(CFLAGS) sha1.c
+	cd $(OPS_DIR) && $(LD) @ld_out@$(OPS)$(LOAD_EXT) $(OPS)$(O) $(METAMODEL_OBJS) ../../3rdparty/sha1/sha1$(O) $(LINKARGS)
 
 
 3rdparty/libtommath/bncore$(O): 3rdparty/libtommath/bncore.c $(LIBTOMMATH_H)
