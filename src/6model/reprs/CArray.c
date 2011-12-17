@@ -212,7 +212,7 @@ static void delete_elems(PARROT_INTERP, STable *st, void *data, INTVAL at_index,
     CArrayBody     *body      = (CArrayBody *)data;
     die_idx_nyi(interp);
 }
-static void get_elem_stable(PARROT_INTERP, STable *st) {
+static STable * get_elem_stable(PARROT_INTERP, STable *st) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     return STABLE(repr_data->elem_type);
 }
