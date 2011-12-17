@@ -512,20 +512,20 @@ class NQP::Actions is HLL::Actions {
         my $PACKAGE := $*W.pkg_create_mo($HOW, :name(~$<name>));
         
         # Install it in the current package or current lexpad as needed.
-        if $*WOPE eq 'our' || $*WOPE eq '' {
+        if $*SCOPE eq 'our' || $*SCOPE eq '' {
             $*W.install_package_symbol($*OUTERPACKAGE, $<name><identifier>, $PACKAGE);
             if +$<name><identifier> == 1 {
                 $*W.install_lexical_symbol(@BLOCK[0], $<name><identifier>[0], $PACKAGE);
             }
         }
-        elsif $*WOPE eq 'my' {
+        elsif $*SCOPE eq 'my' {
             if +$<name><identifier> != 1 {
                 $<name>.CURSOR.panic("A my scoped package cannot have a multi-part name yet");
             }
             $*W.install_lexical_symbol(@BLOCK[0], $<name><identifier>[0], $PACKAGE);
         }
         else {
-            $/.CURSOR.panic("$*WOPE scoped packages are not supported");
+            $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
         }
         
         make PAST::Stmts.new();
@@ -539,7 +539,7 @@ class NQP::Actions is HLL::Actions {
 
         # Get the body code.
         my $past := $<block> ?? $<block>.ast !! $<comp_unit>.ast;
-        if $*WOPE eq 'our' || $*WOPE eq '' {
+        if $*SCOPE eq 'our' || $*SCOPE eq '' {
             $past.namespace( $<name><identifier> );
         }
 
@@ -636,7 +636,7 @@ class NQP::Actions is HLL::Actions {
         if $name && $BLOCK.symbol($name) {
             $/.CURSOR.panic("Redeclaration of symbol ", $name);
         }
-        if $*WOPE eq 'has' {
+        if $*SCOPE eq 'has' {
             # Locate the type of meta-attribute we need.
             unless pir::exists(%*HOW, $*PKGDECL ~ '-attr') {
                 $/.CURSOR.panic("$*PKGDECL packages do not support attributes");
@@ -656,7 +656,7 @@ class NQP::Actions is HLL::Actions {
 
             $past := PAST::Stmts.new();
         }
-        elsif $*WOPE eq 'our' {
+        elsif $*SCOPE eq 'our' {
             # Depending on if this was already considered our scoped,
             # we may or may not have got a node in $var that's set up
             # right already. We build it here just to be sure.
@@ -705,10 +705,10 @@ class NQP::Actions is HLL::Actions {
         if $<deflongname> {
             my $name := ~$<sigil>[0] ~ $<deflongname>[0].ast;
             $past.name($name);
-            if $*WOPE eq '' || $*WOPE eq 'my' || $*WOPE eq 'our' {
+            if $*SCOPE eq '' || $*SCOPE eq 'my' || $*SCOPE eq 'our' {
                 if $*MULTINESS eq 'multi' {
                     # Does the current block have a candidate holder in place?
-                    if $*WOPE eq 'our' { pir::die('our-scoped multis not yet implemented') }
+                    if $*SCOPE eq 'our' { pir::die('our-scoped multis not yet implemented') }
                     my $cholder;
                     my %sym := @BLOCK[0].symbol($name);
                     if %sym<cholder> {
@@ -761,7 +761,7 @@ class NQP::Actions is HLL::Actions {
                     # Create a candidate list holder for the dispatchees
                     # this proto will work over, and install them along
                     # with the proto.
-                    if $*WOPE eq 'our' { pir::die('our-scoped protos not yet implemented') }
+                    if $*SCOPE eq 'our' { pir::die('our-scoped protos not yet implemented') }
                     my $cholder := PAST::Op.new( :pasttype('list') );
                     @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1), :directaccess(1),
                                           :viviself($past), :scope('lexical') ) );
@@ -779,7 +779,7 @@ class NQP::Actions is HLL::Actions {
                     @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1), :directaccess(1),
                                           :viviself($past), :scope('lexical') ) );
                     @BLOCK[0].symbol($name, :scope('lexical') );
-                    if $*WOPE eq 'our' {
+                    if $*SCOPE eq 'our' {
                         # Need to install it at loadinit time but also re-bind
                         # it per invocation.
                         $*W.install_package_routine($*PACKAGE, $name, $past);
@@ -793,7 +793,7 @@ class NQP::Actions is HLL::Actions {
                 $past := PAST::Var.new( :name($name) );
             }
             else {
-                $/.CURSOR.panic("$*WOPE scoped routines are not supported yet");
+                $/.CURSOR.panic("$*SCOPE scoped routines are not supported yet");
             }
             
             # Is it the MAIN sub?
@@ -852,7 +852,7 @@ class NQP::Actions is HLL::Actions {
             $*W.pkg_add_method($*PACKAGE, $meta_meth, $name, $past, $is_dispatcher);
             
             # Install it in the package also if needed.
-            if $*WOPE eq 'our' {
+            if $*SCOPE eq 'our' {
                 $*W.install_package_routine($*PACKAGE, $name, $past);
             } else {
                 if $past.pirflags() {
@@ -996,7 +996,7 @@ class NQP::Actions is HLL::Actions {
                 unless $cpast ~~ PAST::Val;
             my $name := $cpast.value;
             my $package := $*PACKAGE;
-            my $is_dispatcher := $*WOPE eq 'proto';
+            my $is_dispatcher := $*SCOPE eq 'proto';
             make -> $match {
                 $*W.pkg_add_method($package, 'add_parrot_vtable_mapping', $name, 
                     $match.ast<block_past>, $is_dispatcher);
