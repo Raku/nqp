@@ -153,11 +153,12 @@ static void die_idx_nyi(PARROT_INTERP) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
         "CArray representation does not fully indexed storage yet");
 }
-static void expand(PARROT_INTERP, CArrayBody *body, INTVAL min_size) {
+static void expand(PARROT_INTERP, CArrayREPRData *repr_data, CArrayBody *body, INTVAL min_size) {
     INTVAL next_size = 2 * body->allocated;
     if (min_size > next_size)
         next_size = min_size;
-    mem_sys_realloc(body->storage, next_size);
+    body->storage = mem_sys_realloc(body->storage, next_size * repr_data->elem_size);
+    body->allocated = next_size;
 }
 static void * at_pos_ref(PARROT_INTERP, STable *st, void *data, INTVAL index) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
@@ -175,10 +176,12 @@ static void bind_pos_ref(PARROT_INTERP, STable *st, void *data, INTVAL index, vo
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody     *body      = (CArrayBody *)data;
     STable         *type_st   = STABLE(repr_data->elem_type);
-    if (body->allocated && index >= body->elems)
-        expand(interp, body, index + 1);
+    if (body->allocated && index >= body->allocated)
+        expand(interp, repr_data, body, index + 1);
     /* XXX make sure this is appropriate, once we support other than int/num elems. */
     type_st->REPR->copy_to(interp, type_st, value, ((char *)body->storage) + index * repr_data->elem_size);
+    if (index >= body->elems)
+        body->elems = index;
 }
 static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, PMC *obj) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
