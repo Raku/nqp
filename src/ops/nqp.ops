@@ -799,7 +799,6 @@ Sets the element at the specified position to an integer.
 inline op repr_bind_pos_int(in PMC, in INT, in INT) :base_core {
     PMC *obj = decontainerize(interp, $1);
     if (obj->vtable->base_type == smo_id) {
-        STable *elem_st = REPR(obj)->idx_funcs->get_elem_stable(interp, STABLE(obj));
         if (IS_CONCRETE(obj))
             REPR(obj)->idx_funcs->bind_pos_ref(interp, STABLE(obj), OBJECT_BODY(obj), $2, &$3);
         else
@@ -824,7 +823,6 @@ Sets the element at the specified position to a floating point number.
 inline op repr_bind_pos_num(in PMC, in INT, in NUM) :base_core {
     PMC *obj = decontainerize(interp, $1);
     if (obj->vtable->base_type == smo_id) {
-        STable *elem_st = REPR(obj)->idx_funcs->get_elem_stable(interp, STABLE(obj));
         if (IS_CONCRETE(obj))
             REPR(obj)->idx_funcs->bind_pos_ref(interp, STABLE(obj), OBJECT_BODY(obj), $2, &$3);
         else
