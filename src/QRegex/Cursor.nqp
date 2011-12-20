@@ -198,6 +198,12 @@ role NQPCursorRole {
         $cur;
     }
 
+    method at($pos) {
+        my $cur := self."!cursor_start"();
+        $cur."!cursor_pass"($!pos) if +$pos == $!pos;
+        $cur;
+    }
+
     method before($regex) {
         my $cur := self."!cursor_start"();
         nqp::bindattr_i($cur, $?CLASS, '$!pos', $!pos);
