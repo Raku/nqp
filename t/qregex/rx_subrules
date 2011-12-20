@@ -1,5 +1,7 @@
 ##  builtin subrules
 
+a<at(1)>		ab					y	at (matching)
+b<at(1)>		ab					n	at (not matching)
 <ident>			2+3 ab2		<mob<ident>: ab2 @ 4>		capturing builtin <ident>
 <.ident>			2+3 ab2		y		non-capturing builtin <.ident>
 
