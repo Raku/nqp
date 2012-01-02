@@ -22,6 +22,8 @@
  * out (since that depends on the representation).
  */
 
+#include "parrot/exceptions.h"
+#include "parrot/events.h"
 #include "../6model/sixmodelobject.h"
 
 /* We need to know how to boolify bigints. Really need something better,
@@ -94,8 +96,29 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     }
 
     VTABLE PMC * find_method(STRING *name) {
-        PMC *decont = decontainerize(interp, SELF);
-        return STABLE(decont)->find_method(interp, decont, name, NO_HINT);
+        PMC *m = PMCNULL;
+        PMC *decont;
+        Parrot_runloop jmp;
+        Parrot_Context *initialctx;
+        int runloop_id;
+
+        initialctx = CONTEXT(interp);
+        runloop_id = interp->current_runloop_id;
+        if (!setjmp(jmp.resume)) {
+            Parrot_ex_add_c_handler(interp, &jmp);
+            /* try */
+            decont = decontainerize(interp, SELF);
+            m = STABLE(decont)->find_method(interp, decont, name, NO_HINT);
+        } else {
+            while (interp->current_runloop && interp->current_runloop_id != runloop_id)
+                free_runloop_jump_point(interp);
+            if (initialctx != CONTEXT(interp))
+                Parrot_warn((interp), PARROT_WARNINGS_ALL_FLAG,
+                        "find_method contexts differ!");
+        }
+        Parrot_cx_delete_handler_local(interp);
+
+        return m;
     }
 
     VTABLE PMC* get_attr_keyed(PMC *class_handle, STRING *name) {
