@@ -15,7 +15,7 @@ static mp_int * get_bigint(PARROT_INTERP, PMC *obj) {
     if (r->ID == bigint_repr_id)
         return &((P6bigintInstance *)PMC_data(obj))->body.i;
     else
-        return &((P6bigintBody *)r->get_boxed_ref(interp, STABLE(obj), OBJECT_BODY(obj),
+        return &((P6bigintBody *)r->box_funcs->get_boxed_ref(interp, STABLE(obj), OBJECT_BODY(obj),
             bigint_repr_id))->i;
 }
 
@@ -270,6 +270,18 @@ inline op nqp_bigint_to_str(out STR, in PMC) :base_core {
     mem_sys_free(buf);
 }
 
+inline op nqp_bigint_to_str_base(out STR, in PMC, in INT) :base_core {
+    mp_int *i = get_bigint(interp, $2);
+    int len;
+    char *buf;
+    mp_radix_size(i, $3, &len);
+    buf = mem_sys_allocate(len);
+    mp_toradix_n(i, buf, $3, len);
+    /* len - 1 because buf is \0-terminated */
+    $1 = Parrot_str_new(interp, buf, len - 1);
+    mem_sys_free(buf);
+}
+
 inline op nqp_bigint_to_num(out NUM, in PMC) :base_core {
     mp_int  *a = get_bigint(interp, $2);
     $1         = mp_get_double(a);
@@ -418,7 +430,7 @@ inline op nqp_bigint_radix(out PMC, in INT, in STR, in INT, in INT, in PMC) :bas
     
     pos_obj = REPR($6)->allocate(interp, STABLE($6));
     REPR(pos_obj)->initialize(interp, STABLE(pos_obj), OBJECT_BODY(pos_obj));
-    REPR(pos_obj)->set_int(interp, STABLE(pos_obj), OBJECT_BODY(pos_obj), pos);
+    REPR(pos_obj)->box_funcs->set_int(interp, STABLE(pos_obj), OBJECT_BODY(pos_obj), pos);
 
     if (neg || flags & 0x01) { mp_neg(value, value); }
     out = Parrot_pmc_new(interp, enum_class_FixedPMCArray);
@@ -466,10 +478,10 @@ inline op nqp_bigint_pow(out PMC, in PMC, in PMC, in PMC) :base_core {
                 REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
                 /* TODO: better ways to create +- Inf */
                 if (MP_GT == cmp) {
-                    REPR($1)->set_num(interp, STABLE($1), OBJECT_BODY($1), (FLOATVAL) 1.0/ZERO);
+                    REPR($1)->box_funcs->set_num(interp, STABLE($1), OBJECT_BODY($1), (FLOATVAL) 1.0/ZERO);
                 }
                 else {
-                    REPR($1)->set_num(interp, STABLE($1), OBJECT_BODY($1), (FLOATVAL) -1.0/ZERO);
+                    REPR($1)->box_funcs->set_num(interp, STABLE($1), OBJECT_BODY($1), (FLOATVAL) -1.0/ZERO);
                 }
             }
         }
@@ -485,7 +497,7 @@ inline op nqp_bigint_pow(out PMC, in PMC, in PMC, in PMC) :base_core {
         FLOATVAL f_exp  = mp_get_double(exponent);
         $1 = REPR($4)->allocate(interp, STABLE($4));
         REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
-        REPR($1)->set_num(interp, STABLE($1), OBJECT_BODY($1), pow(f_base, f_exp));
+        REPR($1)->box_funcs->set_num(interp, STABLE($1), OBJECT_BODY($1), pow(f_base, f_exp));
     }
 }
 

@@ -477,6 +477,8 @@ entry to produce the node to be returned.
     maphash['log_n']    = 'ln__NN'
     maphash['exp_n']    = 'exp__Nn'
 
+    maphash['isnanorinf'] = 'is_inf_or_nan__In'
+
     # trig opcodes
     maphash['sin_n']    = 'sin__NN'
     maphash['asin_n']   = 'asin__NN'
@@ -565,6 +567,7 @@ entry to produce the node to be returned.
     # bigint ops
     maphash['fromstr_I'] = 'nqp_bigint_from_str__PPs'
     maphash['tostr_I']   = 'nqp_bigint_to_str__SP'
+    maphash['base_I']    = 'nqp_bigint_to_str_base__SPI'
     maphash['isbig_I']   = 'nqp_bigint_is_big__IP'
     maphash['fromnum_I'] = 'nqp_bigint_from_num__PNP'
     maphash['tonum_I']   = 'nqp_bigint_to_num__NP'
@@ -576,7 +579,7 @@ entry to produce the node to be returned.
     # boolean opcodes
     maphash['not_i']    = 'not__Ii'
 
-    # aggregate opcodes
+    # aggregate opcodes, mapping to the Parrot v-table functions
     maphash['atkey']    = 'set__PQs'
     maphash['atpos']    = 'set__PQi'
     maphash['atpos_i']  = 'set__IQi'
@@ -617,6 +620,12 @@ entry to produce the node to be returned.
     $P0['pasttype'] = 'hash'
     maphash['hash'] = $P0
 
+    # repr-level aggregate operations
+    maphash['r_atpos_i']   = 'repr_at_pos_int__IPi'
+    maphash['r_atpos_n']   = 'repr_at_pos_num__NPi'
+    maphash['r_bindpos_i'] = 'repr_bind_pos_int__2Pii'
+    maphash['r_bindpos_n'] = 'repr_bind_pos_num__2Pin'
+    
     # object opcodes
     maphash['bindattr']   = 'setattribute__3PPsP'
     maphash['bindattr_i'] = 'repr_bind_attr_int__3PPsi'
@@ -641,6 +650,9 @@ entry to produce the node to be returned.
     maphash['box_n']      = 'repr_box_num__PnP'
     maphash['box_s']      = 'repr_box_str__PsP'
     maphash['where']      = 'get_id__IP'
+
+    # serialization context related opcodes
+    maphash['sha1']       = 'nqp_sha1__Ss'
 
     # control opcodes
     $P0 = new ['Hash']

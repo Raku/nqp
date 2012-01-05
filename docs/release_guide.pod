@@ -37,12 +37,20 @@ immediately prior release of Parrot.
 
 =item 2.
 
+Change the C<VERSION> file in nqp:
+
+    $ echo '2012.12' > VERSION
+    $ git commit -m 'bump VERSION to 2012' VERSION
+    $ git push
+
+=item 3.
+
 Tag NQP by its release month ("YYYY.MM")
 
   $ git tag -a -m"tag release YYYY.MM" YYYY.MM    # e.g., 2011.10
   $ git push --tags
 
-=item 3.
+=item 4.
 
 Update F<tools/build/NQP_REVISION> in your Rakudo repository to contain
 the tag you just set on NQP.
@@ -50,10 +58,9 @@ the tag you just set on NQP.
     $ cd ~/git/rakudo
     $ echo "2011.10" > tools/build/NQP_REVISION
 
-=item 4.
+=item 5.
 
 Continue with the Rakudo release since that's currently the only reason
 to have an NQP release.
 
 =back
-

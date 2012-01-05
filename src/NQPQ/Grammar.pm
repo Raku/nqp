@@ -19,8 +19,8 @@ grammar NQP::Grammar is HLL::Grammar {
         # with this compilation unit.
         my $file := pir::find_caller_lex__ps('$?FILES');
         my $*SC := pir::isnull($file) ??
-            NQP::SymbolTable.new(:handle(~pir::time__N())) !!
-            NQP::SymbolTable.new(:handle(~pir::time__N()), :description($file));
+            NQP::World.new(:handle(~pir::time__N())) !!
+            NQP::World.new(:handle(~pir::time__N()), :description($file));
 
         my $*SCOPE       := '';
         my $*MULTINESS   := '';

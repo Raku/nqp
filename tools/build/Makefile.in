@@ -72,7 +72,7 @@ HLL_SOURCES = \
   src/HLL/Actions.pm \
   src/HLL/Compiler.pm \
   src/HLL/CommandLine.pm \
-  src/HLL/SerializationContextBuilder.pm \
+  src/HLL/World.pm \
 
 QHLL_SOURCES = \
   src/QHLL/Grammar.pm \
@@ -101,7 +101,7 @@ QREGEX_SOURCES = \
   src/QRegex/P6Regex/Compiler.nqp \
 
 NQP_SOURCES = \
-  src/NQP/SymbolTable.pm \
+  src/NQP/World.pm \
   src/NQP/Grammar.pm \
   src/NQP/Actions.pm \
   src/NQP/Compiler.pm \
@@ -504,6 +504,7 @@ CLEANUPS = \
   $(OPS_DIR)/*$(O) \
   $(OPS_DIR)/*$(LOAD_EXT) \
   3rdparty/libtommath/*$(O) \
+  3rdparty/sha1/*$(O) \
   $(DYNEXT_DIR)/*$(LOAD_EXT) \
 
 all: $(NQP_EXE)
@@ -710,7 +711,8 @@ $(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS_SOURCE) $(DYNPMC)
 	cd src/6model/reprs && $(CC) -c @cc_o_out@Uninstantiable$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) Uninstantiable.c
 	cd src/6model && $(CC) -c @cc_o_out@multi_dispatch$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) multi_dispatch.c
 	cd src/6model && $(CC) -c @cc_o_out@serialization_context$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) serialization_context.c
-	cd $(OPS_DIR) && $(LD) @ld_out@$(OPS)$(LOAD_EXT) $(OPS)$(O) $(METAMODEL_OBJS) $(LINKARGS)
+	cd 3rdparty/sha1 && $(CC) -c @cc_o_out@sha1$(O) $(CINCLUDES) $(CFLAGS) sha1.c
+	cd $(OPS_DIR) && $(LD) @ld_out@$(OPS)$(LOAD_EXT) $(OPS)$(O) $(METAMODEL_OBJS) ../../3rdparty/sha1/sha1$(O) $(LINKARGS)
 
 
 3rdparty/libtommath/bncore$(O): 3rdparty/libtommath/bncore.c $(LIBTOMMATH_H)
@@ -965,13 +967,14 @@ $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT): $(OPS_DIR)/$(BIGINT_OPS_SOURCE) $(LIBTOMMAT
 $(DYNCALL_BIN):
 	@dyncall_build@
 
-$(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT): $(OPS_DIR)/$(DYNCALL_OPS_SOURCE) $(DYNCALL_BIN) src/6model/reprs/NativeCall.c src/6model/reprs/NativeCall.h src/6model/reprs/CStruct.c src/6model/reprs/CStruct.h  src/6model/reprs/CPointer.c src/6model/reprs/CPointer.h
+$(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT): $(OPS_DIR)/$(DYNCALL_OPS_SOURCE) $(DYNCALL_BIN) src/6model/reprs/NativeCall.c src/6model/reprs/NativeCall.h src/6model/reprs/CStruct.c src/6model/reprs/CStruct.h src/6model/reprs/CPointer.c src/6model/reprs/CPointer.h src/6model/reprs/CArray.c src/6model/reprs/CArray.h
 	cd $(OPS_DIR) && $(OPS2C) C --dynamic $(DYNCALL_OPS_SOURCE)
 	cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(DYNCALL_OPS)$(O) $(CINCLUDES) -I../../3rdparty/dyncall $(CFLAGS) $(DYNCALL_OPS).c
 	cd src/6model/reprs && $(CC) -c @cc_o_out@NativeCall$(O) -I../../../$(PMC_DIR) -I../../../3rdparty/dyncall $(CINCLUDES) $(CFLAGS) NativeCall.c
 	cd src/6model/reprs && $(CC) -c @cc_o_out@CStruct$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) CStruct.c
 	cd src/6model/reprs && $(CC) -c @cc_o_out@CPointer$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) CPointer.c
-	cd $(OPS_DIR) && $(LD) @ld_out@$(DYNCALL_OPS)$(LOAD_EXT) $(DYNCALL_OPS)$(O) ../6model/reprs/NativeCall$(O) ../6model/reprs/CStruct$(O) ../6model/reprs/CPointer$(O) ../../3rdparty/dyncall/dyncall/libdyncall_s$(A) ../../3rdparty/dyncall/dyncallback/libdyncallback_s$(A) ../../3rdparty/dyncall/dynload/libdynload_s$(A) $(LINKARGS)
+	cd src/6model/reprs && $(CC) -c @cc_o_out@CArray$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) CArray.c
+	cd $(OPS_DIR) && $(LD) @ld_out@$(DYNCALL_OPS)$(LOAD_EXT) $(DYNCALL_OPS)$(O) ../6model/reprs/NativeCall$(O) ../6model/reprs/CStruct$(O) ../6model/reprs/CPointer$(O) ../6model/reprs/CArray$(O) ../../3rdparty/dyncall/dyncall/libdyncall_s$(A) ../../3rdparty/dyncall/dyncallback/libdyncallback_s$(A) ../../3rdparty/dyncall/dynload/libdynload_s$(A) $(LINKARGS)
 
 bootstrap-files: $(STAGE2_PBCS) src/stage2/$(CORE_SETTING_NQP)
 	$(PERL) tools/build/gen-bootstrap.pl src/Regex.pir >src/stage0/Regex-s0.pir

@@ -89,9 +89,14 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method atom($/) {
-        make $<metachar>
-               ?? $<metachar>.ast
-               !! QAST::Regex.new( ~$/, :rxtype<literal>, :node($/));
+        if $<metachar> {
+            make $<metachar>.ast;
+        }
+        else {
+            my $qast := QAST::Regex.new( ~$/, :rxtype<literal>, :node($/));
+            $qast.subtype('ignorecase') if %*RX<i>;
+            make $qast;
+        }
     }
 
     method quantifier:sym<*>($/) {

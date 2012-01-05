@@ -22,6 +22,8 @@
  * out (since that depends on the representation).
  */
 
+#include "parrot/exceptions.h"
+#include "parrot/events.h"
 #include "../6model/sixmodelobject.h"
 
 /* We need to know how to boolify bigints. Really need something better,
@@ -56,7 +58,7 @@ PMC * decontainerize(PARROT_INTERP, PMC *var) {
 /* Looks up an attribute, after checking we don't have a type object. */
 static PMC *get_attr(PARROT_INTERP, PMC *self, PMC *handle, STRING *name, INTVAL hint) {
     if (IS_CONCRETE(self))
-        return REPR(self)->get_attribute_boxed(interp, STABLE(self), OBJECT_BODY(self), handle, name, hint);
+        return REPR(self)->attr_funcs->get_attribute_boxed(interp, STABLE(self), OBJECT_BODY(self), handle, name, hint);
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Cannot look up attributes in a type object");
@@ -94,8 +96,29 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     }
 
     VTABLE PMC * find_method(STRING *name) {
-        PMC *decont = decontainerize(interp, SELF);
-        return STABLE(decont)->find_method(interp, decont, name, NO_HINT);
+        PMC *m = PMCNULL;
+        PMC *decont;
+        Parrot_runloop jmp;
+        Parrot_Context *initialctx;
+        int runloop_id;
+
+        initialctx = CONTEXT(interp);
+        runloop_id = interp->current_runloop_id;
+        if (!setjmp(jmp.resume)) {
+            Parrot_ex_add_c_handler(interp, &jmp);
+            /* try */
+            decont = decontainerize(interp, SELF);
+            m = STABLE(decont)->find_method(interp, decont, name, NO_HINT);
+        } else {
+            while (interp->current_runloop && interp->current_runloop_id != runloop_id)
+                free_runloop_jump_point(interp);
+            if (initialctx != CONTEXT(interp))
+                Parrot_warn((interp), PARROT_WARNINGS_ALL_FLAG,
+                        "find_method contexts differ!");
+        }
+        Parrot_cx_delete_handler_local(interp);
+
+        return m;
     }
 
     VTABLE PMC* get_attr_keyed(PMC *class_handle, STRING *name) {
@@ -106,7 +129,7 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     VTABLE void set_attr_keyed(PMC *class_handle, STRING *name, PMC *value) {
         PMC *handle = decontainerize(interp, class_handle);
         if (IS_CONCRETE(SELF))
-            REPR(SELF)->bind_attribute_boxed(interp, STABLE(SELF), OBJECT_BODY(SELF), handle, name, NO_HINT, value);
+            REPR(SELF)->attr_funcs->bind_attribute_boxed(interp, STABLE(SELF), OBJECT_BODY(SELF), handle, name, NO_HINT, value);
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot bind attributes in a type object");            
@@ -236,22 +259,22 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
                     return VTABLE_get_bool(interp, VTABLE_get_pmc_keyed_int(interp, cappy, 0));
                 case BOOL_MODE_UNBOX_INT:
                     return IS_CONCRETE(decont) &&
-                        REPR(decont)->get_int(interp, STABLE(decont), OBJECT_BODY(decont));
+                        REPR(decont)->box_funcs->get_int(interp, STABLE(decont), OBJECT_BODY(decont));
                 case BOOL_MODE_UNBOX_NUM:
                     if (!IS_CONCRETE(decont))
                         return 0;
-                    unnum = REPR(decont)->get_num(interp, STABLE(decont), OBJECT_BODY(decont));
+                    unnum = REPR(decont)->box_funcs->get_num(interp, STABLE(decont), OBJECT_BODY(decont));
                     return unnum != 0.0;
                 case BOOL_MODE_UNBOX_STR_NOT_EMPTY:
                     if (!IS_CONCRETE(decont))
                         return 0;
-                    unstr = REPR(decont)->get_str(interp, STABLE(decont), OBJECT_BODY(decont));
+                    unstr = REPR(decont)->box_funcs->get_str(interp, STABLE(decont), OBJECT_BODY(decont));
                     return !STRING_IS_NULL(unstr) &&
                         !Parrot_str_equal(interp, unstr, CONST_STRING(interp, ""));
                 case BOOL_MODE_UNBOX_STR_NOT_EMPTY_OR_ZERO:
                     if (!IS_CONCRETE(decont))
                         return 0;
-                    unstr = REPR(decont)->get_str(interp, STABLE(decont), OBJECT_BODY(decont));
+                    unstr = REPR(decont)->box_funcs->get_str(interp, STABLE(decont), OBJECT_BODY(decont));
                     return !STRING_IS_NULL(unstr) &&
                         !Parrot_str_equal(interp, unstr, CONST_STRING(interp, "")) &&
                         !Parrot_str_equal(interp, unstr, CONST_STRING(interp, "0"));
@@ -263,7 +286,7 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
                         if (r->ID == bigint_repr_id)
                             return !mp_iszero(&((P6bigintInstance *)PMC_data(decont))->body.i);
                         else
-                            return !mp_iszero(&((P6bigintBody *)r->get_boxed_ref(interp,
+                            return !mp_iszero(&((P6bigintBody *)r->box_funcs->get_boxed_ref(interp,
                                 STABLE(decont), OBJECT_BODY(decont), bigint_repr_id))->i);
                     }
                     return 0;
