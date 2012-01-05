@@ -728,10 +728,10 @@ static void gc_free(PARROT_INTERP, PMC *obj) {
             st->REPR->gc_cleanup(interp, st, (char *)OBJECT_BODY(obj) + offset);
         }
     }
-	if (repr_data->allocation_size && !PObj_flag_TEST(private0, obj))
-		Parrot_gc_free_fixed_size_storage(interp, repr_data->allocation_size, PMC_data(obj));
-	else
-		mem_sys_free(PMC_data(obj));
+    if (repr_data->allocation_size && !PObj_flag_TEST(private0, obj))
+        Parrot_gc_free_fixed_size_storage(interp, repr_data->allocation_size, PMC_data(obj));
+    else
+        mem_sys_free(PMC_data(obj));
     PMC_data(obj) = NULL;
 }
 
