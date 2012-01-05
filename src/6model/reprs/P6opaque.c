@@ -718,6 +718,16 @@ static void gc_mark(PARROT_INTERP, STable *st, void *data) {
 /* This Parrot-specific addition to the API is used to free an object. */
 static void gc_free(PARROT_INTERP, PMC *obj) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)STABLE(obj)->REPR_data;
+    INTVAL i;
+
+    /* Cleanup any nested reprs that need it. */
+    if (repr_data->gc_cleanup_slots) {
+        for (i = 0; repr_data->gc_cleanup_slots[i] >= 0; i++) {
+            INTVAL  offset = repr_data->attribute_offsets[repr_data->gc_cleanup_slots[i]];
+            STable *st     = repr_data->flattened_stables[repr_data->gc_cleanup_slots[i]];
+            st->REPR->gc_cleanup(interp, st, (char *)OBJECT_BODY(obj) + offset);
+        }
+    }
 	if (repr_data->allocation_size && !PObj_flag_TEST(private0, obj))
 		Parrot_gc_free_fixed_size_storage(interp, repr_data->allocation_size, PMC_data(obj));
 	else
