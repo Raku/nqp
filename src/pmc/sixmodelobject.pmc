@@ -123,7 +123,9 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
 
     VTABLE PMC* get_attr_keyed(PMC *class_handle, STRING *name) {
         PMC *handle = decontainerize(interp, class_handle);
-        return get_attr(interp, SELF, handle, name, NO_HINT);
+        PMC *result = get_attr(interp, SELF, handle, name, NO_HINT);
+        PARROT_GC_WRITE_BARRIER(interp, SELF);
+        return result;
     }
 
     VTABLE void set_attr_keyed(PMC *class_handle, STRING *name, PMC *value) {
@@ -132,7 +134,7 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             REPR(SELF)->attr_funcs->bind_attribute_boxed(interp, STABLE(SELF), OBJECT_BODY(SELF), handle, name, NO_HINT, value);
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot bind attributes in a type object");            
+                "Cannot bind attributes in a type object");
     }
     
     VTABLE STRING * name() {
