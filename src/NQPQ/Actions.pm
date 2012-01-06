@@ -48,7 +48,7 @@ class NQP::Actions is HLL::Actions {
         
         # Unit needs to have a load-init holding the deserialization or
         # fixup code for this compilation unit.
-        $unit.loadinit().push($*SC.to_past());
+        $unit.loadinit().push($*W.to_past());
         
         # We'll install our view of GLOBAL as the main one; any other
         # compilation unit that is using this one will then replace it
@@ -56,7 +56,7 @@ class NQP::Actions is HLL::Actions {
         $unit.loadinit().push(PAST::Op.new(
             :pasttype('bind_6model'),
             PAST::Var.new( :name('GLOBAL'), :namespace([]), :scope('package') ),
-            $*SC.get_slot_past_for_object($*PACKAGE)
+            $*W.get_slot_past_for_object($*PACKAGE)
         ));
 
         # If our caller wants to know the mainline ctx, provide it here.
@@ -79,7 +79,8 @@ class NQP::Actions is HLL::Actions {
         # register the mainline as a module (so trying to use ourself in the
         # program will not explode). If we have a MAIN sub, call it at end of
         # mainline.
-        $unit.unshift(PAST::Var.new( :scope('parameter'), :name('@ARGS'), :slurpy(1) ));
+        $unit.unshift(PAST::Var.new( :scope('parameter'), :name('@ARGS'), :slurpy(1),
+            :directaccess(1) ));
         my $main_tasks := PAST::Stmts.new(
             PAST::Op.new( :pirop('load_bytecode vs'), 'ModuleLoader.pbc' ),
             PAST::Op.new(
@@ -203,15 +204,15 @@ class NQP::Actions is HLL::Actions {
         unless pir::defined(%*COMPILING<%?OPTIONS><outer_ctx>) {
             # We haven't got a specified outer context already, so load a
             # setting.
-            my $SETTING := $*SC.load_setting(%*COMPILING<%?OPTIONS><setting> // 'NQPCORE');
+            my $SETTING := $*W.load_setting(%*COMPILING<%?OPTIONS><setting> // 'NQPCORE');
             
             # If it exports HOWs, grab them. Also, if we're loading the
             # setting, also by default load Regex library (we can't load
             # this in the setting as Regex depends on the setting).
             unless %*COMPILING<%?OPTIONS><setting> eq 'NULL' {
                 import_HOW_exports($SETTING);
-                $*SC.load_module('NQPRegex', $*GLOBALish);
-                $*SC.load_module('QRegex', $*GLOBALish);
+                $*W.load_module('NQPRegex', $*GLOBALish);
+                $*W.load_module('QRegex', $*GLOBALish);
             }
         }
         self.SET_BLOCK_OUTER_CTX(@BLOCK[0]);
@@ -230,13 +231,13 @@ class NQP::Actions is HLL::Actions {
         # Create GLOBALish - the current GLOBAL view, created cleanly
         # for each compilation unit so we get separate compilation.
         # XXX Uses KnowHOW for now; want something lighter really.
-        $*GLOBALish := $*SC.pkg_create_mo(%*HOW<knowhow>, :name('GLOBALish'));
+        $*GLOBALish := $*W.pkg_create_mo(%*HOW<knowhow>, :name('GLOBALish'));
         $*GLOBALish.HOW.compose($*GLOBALish);
-        $*SC.install_lexical_symbol(@BLOCK[0], 'GLOBALish', $*GLOBALish);
+        $*W.install_lexical_symbol(@BLOCK[0], 'GLOBALish', $*GLOBALish);
         
         # This is also the starting package.
         $*PACKAGE := $*GLOBALish;
-        $*SC.install_lexical_symbol(@BLOCK[0], '$?PACKAGE', $*PACKAGE);
+        $*W.install_lexical_symbol(@BLOCK[0], '$?PACKAGE', $*PACKAGE);
     }
 
     method you_are_here($/) {
@@ -246,7 +247,7 @@ class NQP::Actions is HLL::Actions {
     ## Statement control
 
     method statement_control:sym<use>($/) {
-        my $module := $*SC.load_module(~$<name>, $*GLOBALish);
+        my $module := $*W.load_module(~$<name>, $*GLOBALish);
         if pir::defined($module) {
             import_HOW_exports($module);
         }
@@ -509,20 +510,20 @@ class NQP::Actions is HLL::Actions {
         # Construct meta-object with specified metaclass, adding it to the
         # serialization context for this compilation unit.
         my $HOW := find_sym($<metaclass><identifier>, $/);
-        my $PACKAGE := $*SC.pkg_create_mo($HOW, :name(~$<name>));
+        my $PACKAGE := $*W.pkg_create_mo($HOW, :name(~$<name>));
         
         # Install it in the current package or current lexpad as needed.
         if $*SCOPE eq 'our' || $*SCOPE eq '' {
-            $*SC.install_package_symbol($*OUTERPACKAGE, $<name><identifier>, $PACKAGE);
+            $*W.install_package_symbol($*OUTERPACKAGE, $<name><identifier>, $PACKAGE);
             if +$<name><identifier> == 1 {
-                $*SC.install_lexical_symbol(@BLOCK[0], $<name><identifier>[0], $PACKAGE);
+                $*W.install_lexical_symbol(@BLOCK[0], $<name><identifier>[0], $PACKAGE);
             }
         }
         elsif $*SCOPE eq 'my' {
             if +$<name><identifier> != 1 {
                 $<name>.CURSOR.panic("A my scoped package cannot have a multi-part name yet");
             }
-            $*SC.install_lexical_symbol(@BLOCK[0], $<name><identifier>[0], $PACKAGE);
+            $*W.install_lexical_symbol(@BLOCK[0], $<name><identifier>[0], $PACKAGE);
         }
         else {
             $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
@@ -549,16 +550,17 @@ class NQP::Actions is HLL::Actions {
         # for parametric types, pass along the role body block.
         if pir::can($how, 'parametric') && $how.parametric($how) {
             $past.blocktype('declaration');
-            $past.unshift(PAST::Var.new( :name('$?CLASS'), :scope('parameter') ));
+            $past.unshift(PAST::Var.new( :name('$?CLASS'), :scope('parameter'),
+                :directaccess(1) ));
             $past.symbol('$?CLASS', :scope('lexical'));
-            $*SC.pkg_set_body_block($*PACKAGE, $past);
-            $*SC.install_lexical_symbol($past, '$?PACKAGE', $*PACKAGE);
-            $*SC.install_lexical_symbol($past, '$?ROLE', $*PACKAGE);
+            $*W.pkg_set_body_block($*PACKAGE, $past);
+            $*W.install_lexical_symbol($past, '$?PACKAGE', $*PACKAGE);
+            $*W.install_lexical_symbol($past, '$?ROLE', $*PACKAGE);
         }
         else {
             $past.blocktype('immediate');
-            $*SC.install_lexical_symbol($past, '$?PACKAGE', $*PACKAGE);
-            $*SC.install_lexical_symbol($past, '$?CLASS', $*PACKAGE);
+            $*W.install_lexical_symbol($past, '$?PACKAGE', $*PACKAGE);
+            $*W.install_lexical_symbol($past, '$?CLASS', $*PACKAGE);
         }
 
         # Add parent, if we have one; otherwise set default.
@@ -570,7 +572,7 @@ class NQP::Actions is HLL::Actions {
                 $parent_found := 1;
             }
             if $parent_found {
-                $*SC.pkg_add_parent_or_role($*PACKAGE, "add_parent", $parent);
+                $*W.pkg_add_parent_or_role($*PACKAGE, "add_parent", $parent);
             }
             else {
                 $/.CURSOR.panic("Could not find parent class '" ~ ~$<parent>[0] ~ "'");
@@ -578,7 +580,7 @@ class NQP::Actions is HLL::Actions {
         }
         elsif pir::can($how, 'set_default_parent') {
             my $default := $*PKGDECL eq 'grammar' ?? ['NQPCursor'] !! ['NQPMu'];
-            $*SC.pkg_add_parent_or_role($*PACKAGE, "set_default_parent",
+            $*W.pkg_add_parent_or_role($*PACKAGE, "set_default_parent",
                 find_sym($default, $/));
         }
 
@@ -592,7 +594,7 @@ class NQP::Actions is HLL::Actions {
                     $role_found := 1;
                 }
                 if $role_found {
-                    $*SC.pkg_add_parent_or_role($*PACKAGE, "add_role", $role);
+                    $*W.pkg_add_parent_or_role($*PACKAGE, "add_role", $role);
                 }
                 else {
                     $/.CURSOR.panic("Could not find role '" ~ ~$_ ~ "'");
@@ -601,7 +603,7 @@ class NQP::Actions is HLL::Actions {
         }
 
         # Finally, compose.
-        $*SC.pkg_compose($*PACKAGE);
+        $*W.pkg_compose($*PACKAGE);
 
         make $past;
     }
@@ -650,7 +652,7 @@ class NQP::Actions is HLL::Actions {
             }
             
             # Add it.
-            $*SC.pkg_add_attribute($*PACKAGE, %*HOW{$*PKGDECL ~ '-attr'},
+            $*W.pkg_add_attribute($*PACKAGE, %*HOW{$*PKGDECL ~ '-attr'},
                 %lit_args, %obj_args);
 
             $past := PAST::Stmts.new();
@@ -666,7 +668,7 @@ class NQP::Actions is HLL::Actions {
         }
         else {
             $BLOCK[0].push(PAST::Var.new(
-                :name($name), :scope('lexical'), :isdecl(1),
+                :name($name), :scope('lexical'), :isdecl(1), :directaccess(1),
                 :lvalue(1), :viviself( vivitype($sigil) ),
                 :node($/)
             ));
@@ -745,7 +747,7 @@ class NQP::Actions is HLL::Actions {
                             PAST::Var.new( :name($name), :scope('outer') ),
                             $cholder
                         );
-                        @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1),
+                        @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1), :directaccess(1),
                                           :viviself($dispatch_setup), :scope('lexical') ) );
                         @BLOCK[0].symbol($name, :scope('lexical'), :cholder($cholder) );
                     }
@@ -762,7 +764,7 @@ class NQP::Actions is HLL::Actions {
                     # with the proto.
                     if $*SCOPE eq 'our' { pir::die('our-scoped protos not yet implemented') }
                     my $cholder := PAST::Op.new( :pasttype('list') );
-                    @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1),
+                    @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1), :directaccess(1),
                                           :viviself($past), :scope('lexical') ) );
                     @BLOCK[0][0].push(PAST::Op.new(
                         :pirop('set_dispatchees 0PP'),
@@ -775,13 +777,13 @@ class NQP::Actions is HLL::Actions {
                     $past.pirflags(':instanceof("DispatcherSub")');
                 }
                 else {
-                    @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1),
+                    @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1), :directaccess(1),
                                           :viviself($past), :scope('lexical') ) );
                     @BLOCK[0].symbol($name, :scope('lexical') );
                     if $*SCOPE eq 'our' {
                         # Need to install it at loadinit time but also re-bind
                         # it per invocation.
-                        $*SC.install_package_routine($*PACKAGE, $name, $past);
+                        $*W.install_package_routine($*PACKAGE, $name, $past);
                         @BLOCK[0][0].push(PAST::Op.new(
                             :pasttype('bind_6model'),
                             lexical_package_lookup([$name], $/),
@@ -829,8 +831,8 @@ class NQP::Actions is HLL::Actions {
         # Always need an invocant.
         unless $past<signature_has_invocant> {
             $past[0].unshift(PAST::Var.new(
-                :name('self'), :scope('parameter'),
-                :multitype($*SC.get_object_sc_ref_past($*PACKAGE))
+                :name('self'), :scope('parameter'), :directaccess(1),
+                :multitype($*W.get_ref_past($*PACKAGE))
             ));
         }
         $past.symbol('self', :scope('lexical') );
@@ -848,11 +850,11 @@ class NQP::Actions is HLL::Actions {
             # Insert it into the method table.
             my $meta_meth := $*MULTINESS eq 'multi' ?? 'add_multi_method' !! 'add_method';
             my $is_dispatcher := $*MULTINESS eq 'proto';
-            $*SC.pkg_add_method($*PACKAGE, $meta_meth, $name, $past, $is_dispatcher);
+            $*W.pkg_add_method($*PACKAGE, $meta_meth, $name, $past, $is_dispatcher);
             
             # Install it in the package also if needed.
             if $*SCOPE eq 'our' {
-                $*SC.install_package_routine($*PACKAGE, $name, $past);
+                $*W.install_package_routine($*PACKAGE, $name, $past);
             } else {
                 if $past.pirflags() {
                     $past.pirflags(~$past.pirflags() ~ ":anon");
@@ -892,7 +894,7 @@ class NQP::Actions is HLL::Actions {
                                     $_<definedness> eq 'U' ?? 2 !! 0);
             }
         }
-        $*SC.set_routine_signature($routine, $types, $definednesses);
+        $*W.set_routine_signature($routine, $types, $definednesses);
     }
 
     method signature($/) {
@@ -901,7 +903,7 @@ class NQP::Actions is HLL::Actions {
             my $inv := $<invocant>[0].ast;
             $BLOCKINIT.push($inv);
             $BLOCKINIT.push(PAST::Var.new(
-                :name('self'), :scope('lexical'), :isdecl(1),
+                :name('self'), :scope('lexical'), :isdecl(1), :directaccess(1),
                 :viviself(PAST::Var.new( :scope('lexical'), :name($inv.name) ))
             ));
             @BLOCK[0]<signature_has_invocant> := 1
@@ -956,7 +958,7 @@ class NQP::Actions is HLL::Actions {
     method param_var($/) {
         my $name := ~$/;
         my $past :=  PAST::Var.new( :name($name), :scope('parameter'),
-                                    :isdecl(1), :node($/) );
+                                    :isdecl(1), :directaccess(1), :node($/) );
         @BLOCK[0].symbol($name, :scope('lexical') );
         make $past;
     }
@@ -975,7 +977,7 @@ class NQP::Actions is HLL::Actions {
         my $found := 0;
         try {
             my $sym := find_sym(@name, $/);
-            make $*SC.get_object_sc_ref_past($sym);
+            make $*W.get_ref_past($sym);
             $found := 1;
         }
         unless $found {
@@ -997,7 +999,7 @@ class NQP::Actions is HLL::Actions {
             my $package := $*PACKAGE;
             my $is_dispatcher := $*SCOPE eq 'proto';
             make -> $match {
-                $*SC.pkg_add_method($package, 'add_parrot_vtable_mapping', $name, 
+                $*W.pkg_add_method($package, 'add_parrot_vtable_mapping', $name, 
                     $match.ast<block_past>, $is_dispatcher);
             };
         }
@@ -1009,7 +1011,7 @@ class NQP::Actions is HLL::Actions {
             my $name := $cpast.value;
             my $package := $*PACKAGE;
             make -> $match {
-                $*SC.pkg_add_parrot_vtable_handler_mapping($package, $name, ~$match<variable>);
+                $*W.pkg_add_parrot_vtable_handler_mapping($package, $name, ~$match<variable>);
             };
         }
         elsif $<longname> eq 'pirflags' {
@@ -1039,7 +1041,7 @@ class NQP::Actions is HLL::Actions {
                     ),
                 );
                 for @($past) {
-                    $*SC.pkg_add_method($*PACKAGE, 'add_method', $_.name(), $_, 0);
+                    $*W.pkg_add_method($*PACKAGE, 'add_method', $_.name(), $_, 0);
                 }
         }
         else {
@@ -1057,7 +1059,7 @@ class NQP::Actions is HLL::Actions {
             
             if $*PKGDECL && pir::can($*PACKAGE.HOW, 'add_method') {
                 # Add the actual method.
-                $*SC.pkg_add_method($*PACKAGE, 'add_method', $name, $regex, 0);
+                $*W.pkg_add_method($*PACKAGE, 'add_method', $name, $regex, 0);
             }
             
             # In sink context, we don't need the Regex::Regex object.
@@ -1086,6 +1088,9 @@ class NQP::Actions is HLL::Actions {
         elsif $<longname> eq 'WHO' {
             $past.pirop('get_who PP');
         }
+        elsif $<longname> eq 'REPR' {
+            $past.pirop('repr_name SP');
+        }
         else {
             $past.name(~$<longname>);
             $past.pasttype('callmethod');
@@ -1096,7 +1101,8 @@ class NQP::Actions is HLL::Actions {
     ## Terms
 
     method term:sym<self>($/) {
-        make PAST::Var.new( :name('self') );
+        make PAST::Op.new( :pirop('nqp_decontainerize PP'),
+            PAST::Var.new( :name('self') ) );
     }
 
     method term:sym<identifier>($/) {
