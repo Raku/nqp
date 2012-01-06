@@ -403,15 +403,11 @@ position C<pos>.
             cur_class = find_lex '$cursor_class'
             args = find_lex '@args'
 
-            .local pmc cur, debug
+            .local pmc cur
             .local string target
             .local int pos
 
             (cur, pos, target) = self.'!cursor_start'()
-            debug = getattribute cur, cur_class, '$!debug'
-            if null debug goto debug_1
-            cur.'!cursor_debug'('START', 'quote_EXPR')
-          debug_1:
 
             .local pmc quotemod, true
             .lex '%*QUOTEMOD', quotemod
@@ -454,12 +450,8 @@ position C<pos>.
             $P10.'!cursor_names'('quote_delimited')
             pos = $P10.'pos'()
             cur.'!cursor_pass'(pos, 'quote_EXPR')
-            if null debug goto done
-            cur.'!cursor_debug'('PASS', 'quote_EXPR')
             goto done
           fail:
-            if null debug goto done
-            cur.'!cursor_debug'('FAIL', 'quote_EXPR')
           done:
             .return (cur)
         };
@@ -557,13 +549,9 @@ An operator precedence parser.
             $P0 = find_lex '$preclim'
             preclim = $P0
             
-            .local pmc here, debug
+            .local pmc here
             .local int pos
             (here, pos) = self.'!cursor_start'()
-            debug = getattribute here, cur_class, '$!debug'
-            if null debug goto debug_1
-            here.'!cursor_debug'('START', 'EXPR')
-          debug_1:
 
             .local string termishrx
             termishrx = 'termish'
@@ -703,13 +691,9 @@ An operator precedence parser.
             repr_bind_attr_int here, cur_class, '$!pos', pos
             setattribute here, cur_class, '$!match', term
             here.'!reduce'('EXPR')
-            if null debug goto done
-            here.'!cursor_debug'('PASS', 'EXPR')
             goto done
 
           fail:
-            if null debug goto done
-            here.'!cursor_debug'('FAIL', 'EXPR')
           done:
             .return (here)
 
@@ -806,7 +790,6 @@ An operator precedence parser.
 
     method MARKER($markname) {
         my $pos := self.pos();
-        self.'!cursor_debug'('START', 'MARKER name=', $markname, ', pos=', $pos);
         my %markhash := Q:PIR {
             %r = get_global '%!MARKHASH'
             unless null %r goto have_markhash
@@ -815,12 +798,10 @@ An operator precedence parser.
           have_markhash:
         };
         %markhash{$markname} := $pos;
-        self.'!cursor_debug'('PASS', 'MARKER');
         1;
     }
     
     method MARKED($markname) {
-        self.'!cursor_debug'('START', 'MARKED name=', $markname);
         Q:PIR {
             .local pmc self, markname, markhash
             self = find_lex 'self'
@@ -831,10 +812,8 @@ An operator precedence parser.
             if null $P0 goto fail
             $P1 = self.'pos'()
             unless $P0 == $P1 goto fail
-            self.'!cursor_debug'('PASS','MARKED')
             .return (1)
           fail:
-            self.'!cursor_debug'('FAIL','MARKED')
             .return (0)
         };
     }
