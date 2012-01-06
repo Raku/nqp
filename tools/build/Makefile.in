@@ -150,7 +150,7 @@ NQP_PBC          = nqp.pbc
 NQP_EXE          = nqp$(EXE)
 
 NQPQ_SOURCES = \
-  src/NQPQ/SymbolTable.pm \
+  src/NQPQ/World.pm \
   src/NQPQ/Grammar.pm \
   src/NQPQ/Actions.pm \
   src/NQPQ/Compiler.pm \
