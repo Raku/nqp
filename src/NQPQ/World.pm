@@ -1,5 +1,4 @@
-use NQPP6Regex;
-use QRegex;
+use NQPP6QRegex;
 
 class NQP::World is HLL::World {
     # XXX We need to load the module loader to load modules, which means we
