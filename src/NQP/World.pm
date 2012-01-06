@@ -1,7 +1,5 @@
 use NQPP6Regex;
 
-# This builds upon the SerializationContextBuilder to add the specifics
-# needed by NQP.
 class NQP::World is HLL::World {
     # XXX We need to load the module loader to load modules, which means we
     # can't just use ...; it, which means we can't get the ModuleLoader symbol
