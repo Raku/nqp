@@ -1,4 +1,5 @@
 use NQPHLL;
+use QAST;
 
 grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 

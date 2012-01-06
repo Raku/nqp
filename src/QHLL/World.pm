@@ -1,32 +1,26 @@
-# A serialization context contains a bunch of objects that we want to persist
-# across the compile time / run time boundary.
+# While the grammar represents the syntactic elements of our language and
+# the actions take care of building up an AST to represent the semantics
+# of it, the world is about the declarative aspects of a language. This
+# includes:
 #
-# The long term goal is that we'll support actually serializing these in an
-# efficient way, and be able to do load-time linking between objects in
-# different libraries. For now, that's a lot of work, so we adopt a simpler
-# approach, in the hope that it will be upgradeable to a "full blown"
-# mechanism in the future.
+# * Symbol table management
+# * Creating meta-object instances
+# * Parts of library loading (most likely it delegates to an actual loader)
+# * Resolving references to objects, within or between compilation units
 #
-# A serialization context is essentially made up of objects and "events" that
-# we perform on them. By performing an action on an object through the context
-# builder, it ensures that the action is performed both on the object now, and
-# also enough information is persisted to be able to re-create an object with
-# the same state. There are two common situations.
+# Just as there is one AST produced per compilation unit, there is also a
+# world produce per compilation unit.
 #
-# 1) We compile some code and run it straight away. In this case, the objects
-#    have already been created, and we only need to do some fixing up.
-# 2) We compile some code and persist it as PIR. In this case, the objects need
-#    to be re-created by replaying the event stream that creates them.
+# A world includes a serialization context. This contains a bunch of
+# objects - often meta-objects - that we want to persist across the
+# compile time / run time boundary. In the near future, we'll switch to
+# actually serializing these. At the moment, we instead save a series of
+# "events" that will be used to re-construct them.
 #
-# Essentially, we use PIR as our serialization language until we can do better.
-# Note that deserialization and installation aren't the same thing; the first
-# step sees us producing an array of objects, while the second is about putting
-# them in places the HLL can find them.
-#
-# It may be that this approach will also carry almost directly over to nqpclr
-# and nqpjvm.
+# Note that this reconstruction code is not generated in the case that we
+# are just going to immediately run.
 
-class HLL::Compiler::SerializationContextBuilder {
+class HLL::World {
     # Represents an event that we need to handle when fixing up or deserializing.
     my class Event {
         # The PAST that we emit to perform the action if in deserialization mode.
@@ -73,8 +67,8 @@ class HLL::Compiler::SerializationContextBuilder {
     method BUILD(:$handle!, :$description!) {
         $!sc           := pir::nqp_create_sc__PS($handle);
         $!handle       := $handle;
-        %!addr_to_slot := pir::new('Hash');
-        @!event_stream := pir::new('ResizablePMCArray');
+        %!addr_to_slot := nqp::hash();
+        @!event_stream := nqp::list();
         $!sc.set_description($description);
         $!precomp_mode := %*COMPILING<%?OPTIONS><target> eq 'pir';
     }
@@ -163,7 +157,7 @@ class HLL::Compiler::SerializationContextBuilder {
     
     # Gets PAST for referencing an object in a serialization context,
     # either the one being built or another one.
-    method get_object_sc_ref_past($obj) {
+    method get_ref($obj) {
         # Get the object's serialization context; we're stuck if it
         # has none.
         my $sc := pir::nqp_get_sc_for_object__PP($obj);
