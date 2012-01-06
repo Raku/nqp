@@ -281,6 +281,7 @@ inline op repr_get_attr_obj(out PMC, in PMC, in PMC, in STR) :base_core {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_get_attr_obj on a SixModelObject");
     }
+    PARROT_GC_WRITE_BARRIER(interp, $2);
 }
 
 /*
@@ -355,6 +356,7 @@ inline op repr_get_attr_str(out STR, in PMC, in PMC, in STR) :base_core {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_get_attr_str on a SixModelObject");
     }
+    PARROT_GC_WRITE_BARRIER(interp, $2);
 }
 
 /*
@@ -481,6 +483,7 @@ inline op repr_get_attr_obj(out PMC, in PMC, in PMC, in STR, in INT) :base_core 
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_get_attr_obj on a SixModelObject");
     }
+    PARROT_GC_WRITE_BARRIER(interp, $2);
 }
 
 /*
@@ -556,6 +559,7 @@ inline op repr_get_attr_str(out STR, in PMC, in PMC, in STR, in INT) :base_core 
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_get_attr_str on a SixModelObject");
     }
+    PARROT_GC_WRITE_BARRIER(interp, $2);
 }
 
 /*

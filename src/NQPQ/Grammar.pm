@@ -18,9 +18,10 @@ grammar NQP::Grammar is HLL::Grammar {
         # cross the compile-time/run-time boundary that are associated
         # with this compilation unit.
         my $file := pir::find_caller_lex__ps('$?FILES');
-        my $*SC := pir::isnull($file) ??
-            NQP::World.new(:handle(~pir::time__N())) !!
-            NQP::World.new(:handle(~pir::time__N()), :description($file));
+        my $source_id := nqp::sha1(nqp::getattr(self, Regex::Cursor, '$!target'));
+        my $*W := pir::isnull($file) ??
+            NQP::World.new(:handle($source_id)) !!
+            NQP::World.new(:handle($source_id), :description($file));
 
         my $*SCOPE       := '';
         my $*MULTINESS   := '';
@@ -350,20 +351,20 @@ grammar NQP::Grammar is HLL::Grammar {
             if $<repr> {
                 %args<repr> := ~$<repr>[0]<quote_delimited><quote_atom>[0];
             }
-            $*PACKAGE := $*SC.pkg_create_mo(%*HOW{$*PKGDECL}, |%args);
+            $*PACKAGE := $*W.pkg_create_mo(%*HOW{$*PKGDECL}, |%args);
             
             # Install it in the current package or current lexpad as needed.
             if $*SCOPE eq 'our' || $*SCOPE eq '' {
-                $*SC.install_package_symbol($*OUTERPACKAGE, $<name><identifier>, $*PACKAGE);
+                $*W.install_package_symbol($*OUTERPACKAGE, $<name><identifier>, $*PACKAGE);
                 if +$<name><identifier> == 1 {
-                    $*SC.install_lexical_symbol(@NQP::Actions::BLOCK[0], $<name><identifier>[0], $*PACKAGE);
+                    $*W.install_lexical_symbol(@NQP::Actions::BLOCK[0], $<name><identifier>[0], $*PACKAGE);
                 }
             }
             elsif $*SCOPE eq 'my' {
                 if +$<name><identifier> != 1 {
                     $<name>.CURSOR.panic("A my scoped package cannot have a multi-part name yet");
                 }
-                $*SC.install_lexical_symbol(@NQP::Actions::BLOCK[0], $<name><identifier>[0], $*PACKAGE);
+                $*W.install_lexical_symbol(@NQP::Actions::BLOCK[0], $<name><identifier>[0], $*PACKAGE);
             }
             else {
                 $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
