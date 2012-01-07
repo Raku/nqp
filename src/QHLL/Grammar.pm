@@ -564,12 +564,14 @@ An operator precedence parser.
             .lex '@termstack', termstack
 
           term_loop:
+            .local pmc termcur
             repr_bind_attr_int here, cur_class, "$!pos", pos
-            here = here.termishrx()
-            pos = repr_get_attr_int here, cur_class, "$!pos"
+            termcur = here.termishrx()
+            pos = repr_get_attr_int termcur, cur_class, "$!pos"
+            repr_bind_attr_int here, cur_class, "$!pos", pos
             if pos < 0 goto fail
             .local pmc termish
-            termish = here.'MATCH'()
+            termish = termcur.'MATCH'()
 
             # interleave any prefix/postfix we might have found
             .local pmc termOPER, prefixish, postfixish
@@ -633,28 +635,39 @@ An operator precedence parser.
 
             # Now see if we can fetch an infix operator
             .local pmc wscur, infixcur, infix
+            
+            # First, we need ws to match.
+            repr_bind_attr_int here, cur_class, "$!pos", pos
             wscur = here.'ws'()
-            $I0 = repr_get_attr_int wscur, cur_class, '$!pos'
-            if $I0 < 0 goto term_done
-            here = wscur
+            pos = repr_get_attr_int wscur, cur_class, '$!pos'
+            if pos < 0 goto term_done
+            repr_bind_attr_int here, cur_class, "$!pos", pos
+            
+            # Next, try the infix itself.
             infixcur = here.'infixish'()
-            $I0 = repr_get_attr_int here, cur_class, '$!pos'
-            if $I0 < 0 goto term_done
+            pos = repr_get_attr_int infixcur, cur_class, '$!pos'
+            if pos < 0 goto term_done
             infix = infixcur.'MATCH'()
 
+            # We got an infix.
             .local pmc inO
             $P0 = infix['OPER']
             inO = $P0['O']
-            termishrx = inO['nextterm']
+            $P0 = inO['nextterm']
+            if null $P0 goto nonextterm
+            termishrx = $P0
             if termishrx goto have_termishrx
+          nonextterm:
             termishrx = 'termish'
           have_termishrx:
 
             .local string inprec, inassoc, opprec
-            inprec = inO['prec']
+            $P0 = inO['prec']
+            inprec = $P0
             unless inprec goto err_inprec
             if inprec <= preclim goto term_done
-            inassoc = inO['assoc']
+            $P0 = inO['assoc']
+            inassoc = $P0
 
             $P0 = inO['sub']
             if null $P0 goto subprec_done
@@ -666,7 +679,8 @@ An operator precedence parser.
             $P0 = opstack[-1]
             $P0 = $P0['OPER']
             $P0 = $P0['O']
-            opprec = $P0['prec']
+            $P0 = $P0['prec']
+            opprec = $P0
             unless opprec > inprec goto reduce_gt_done
             self.'EXPR_reduce'(termstack, opstack)
             goto reduce_loop
@@ -680,7 +694,11 @@ An operator precedence parser.
           reduce_done:
 
             push opstack, infix        # The Shift
-            here = infixcur.'ws'()
+            repr_bind_attr_int here, cur_class, "$!pos", pos
+            wscur = here.'ws'()
+            pos = repr_get_attr_int wscur, cur_class, '$!pos'
+            repr_bind_attr_int here, cur_class, "$!pos", pos
+            if pos < 0 goto fail
             goto term_loop
           term_done:
 
@@ -695,6 +713,7 @@ An operator precedence parser.
             term = pop termstack
             pos = here.'pos'()
             here = self.'!cursor_start'()
+            here.'!cursor_pass'(pos)
             repr_bind_attr_int here, cur_class, '$!pos', pos
             setattribute here, cur_class, '$!match', term
             here.'!reduce'('EXPR')
