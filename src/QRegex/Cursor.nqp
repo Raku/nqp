@@ -240,6 +240,15 @@ role NQPCursorRole {
                       'ws');
         $cur;
     }
+    
+    method ww() {
+        my $cur := self."!cursor_start"();
+        $cur."!cursor_pass"($!pos, "ww")
+            if $!pos >= 1
+            && nqp::iscclass(pir::const::CCLASS_WORD, $!target, $!pos)
+            && nqp::iscclass(pir::const::CCLASS_WORD, $!target, $!pos-1);
+        $cur;
+    }
 
     method wb() {
         my $cur := self."!cursor_start"();
