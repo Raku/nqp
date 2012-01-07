@@ -798,10 +798,13 @@ An operator precedence parser.
           have_markhash:
         };
         %markhash{$markname} := $pos;
-        1;
+        my $cur := self."!cursor_start"();
+        $cur."!cursor_pass"($pos);
+        $cur;
     }
     
     method MARKED($markname) {
+        my $cur := self."!cursor_start"();
         Q:PIR {
             .local pmc self, markname, markhash
             self = find_lex 'self'
@@ -812,10 +815,11 @@ An operator precedence parser.
             if null $P0 goto fail
             $P1 = self.'pos'()
             unless $P0 == $P1 goto fail
-            .return (1)
+            $P2 = find_lex '$cur'
+            $P2."!cursor_pass"($P1)
           fail:
-            .return (0)
         };
+        $cur
     }
 
     method LANG($lang, $regex) {
