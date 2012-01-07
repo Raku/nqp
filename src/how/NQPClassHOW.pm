@@ -418,10 +418,19 @@ knowhow NQPClassHOW {
         @!roles
     }
 
-    method methods($obj, :$local!) {
+    method methods($obj, :$local) {
         my @meths;
-        for %!methods {
-            @meths.push($_.value);
+        if $local {
+            for %!methods {
+                @meths.push($_.value)
+            }
+        }
+        else {
+            for @!mro {
+                for $_.HOW.method_table($_) {
+                    @meths.push($_.value)
+                }
+            }
         }
         @meths
     }
