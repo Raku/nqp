@@ -30,7 +30,7 @@ class HLL::Compiler {
         @!stages     := pir::split(' ', 'parse past post pir evalpmc');
         
         # Command options and usage.
-        @!cmdoptions := pir::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config stagestats ll-exception nqpevent=s profile profile-compile');
+        @!cmdoptions := pir::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config stagestats ll-exception rxtrace nqpevent=s profile profile-compile');
         $!usage := "This compiler is based on HLL::Compiler.\n\nOptions:\n";
         for @!cmdoptions {
             $!usage := $!usage ~ "    $_\n";
@@ -444,7 +444,9 @@ class HLL::Compiler {
         my $grammar := self.parsegrammar;
         my $actions;
         $actions    := self.parseactions unless %adverbs<target> eq 'parse';
+        $grammar.HOW.trace-on($grammar) if %adverbs<rxtrace>;
         my $match   := $grammar.parse($s, p => 0, actions => $actions);
+        $grammar.HOW.trace-off($grammar) if %adverbs<rxtrace>;
         self.panic('Unable to parse source') unless $match;
         return $match;
     }

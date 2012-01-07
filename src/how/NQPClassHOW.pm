@@ -38,6 +38,10 @@ knowhow NQPClassHOW {
     has %!parrot_vtable_mapping;
 	has %!parrot_vtable_handler_mapping;
     
+    # Call tracing.
+    has $!trace;
+    has $!trace_depth;
+    
     my $archetypes := Archetypes.new( :nominal(1), :inheritable(1) );
     method archetypes() {
         $archetypes
@@ -492,7 +496,15 @@ knowhow NQPClassHOW {
             my %meths := $_.HOW.method_table($obj);
             my $found := %meths{$name};
             if pir::defined($found) {
-                return $found;
+                return $!trace && nqp::substr($name, 0, 1) ne '!' ??
+                    -> *@pos, *%named { 
+                        say(nqp::x('  ', $!trace_depth) ~ "Calling $name");
+                        $!trace_depth := $!trace_depth + 1;
+                        my $result := $found(|@pos, |%named);
+                        $!trace_depth := $!trace_depth - 1;
+                        $result
+                    } !!
+                    $found;
             }
         }
         pir::null__P()
@@ -506,5 +518,18 @@ knowhow NQPClassHOW {
         pir::exists(%!cache, $key) ??
             %!cache{$key} !!
             (%!cache{$key} := $value_generator())
+    }
+    
+    ##
+    ## Tracing
+    ##
+    method trace-on($obj) {
+        $!trace := 1;
+        $!trace_depth := 0;
+        pir::set_method_cache_authoritativeness__0Pi($obj, 0);
+        pir::publish_method_cache($obj, nqp::hash());
+    }
+    method trace-off($obj) {
+        $!trace := 0;
     }
 }
