@@ -416,6 +416,7 @@ class NQPCursor does NQPCursorRole {
         unless pir::isa($match, 'Hash') || nqp::istype($match, NQPMatch) {
             $match := NQPMatch.new();
             nqp::bindattr(self, NQPCursor, '$!match', $match);
+            nqp::bindattr($match, NQPMatch, '$!cursor', self);
             nqp::bindattr($match, NQPMatch, '$!orig', nqp::getattr(self, NQPCursor, '$!orig'));
             nqp::bindattr_i($match, NQPMatch, '$!from', nqp::getattr_i(self, NQPCursor, '$!from'));
             nqp::bindattr_i($match, NQPMatch, '$!to', nqp::getattr_i(self, NQPCursor, '$!pos'));
