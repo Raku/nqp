@@ -313,7 +313,7 @@ of the match.
 
     method panic(*@args) {
         my $pos := self.pos();
-        my $target := pir::getattribute__PPPs(self, NQPCursor, '$!target');
+        my $target := nqp::getattr_s(self, NQPCursor, '$!target');
         @args.push(' at line ');
         @args.push(HLL::Compiler.lineof($target, $pos) + 1);
         @args.push(', near "');
