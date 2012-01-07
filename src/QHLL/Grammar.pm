@@ -443,8 +443,8 @@ position C<pos>.
         <quote_delimited>
     }
 
-    our method quotemod_check($mod) {
-        %*QUOTEMOD{$mod}
+    token quotemod_check($mod) {
+        <?{ %*QUOTEMOD{$mod} }>
     }
 
     method starter() {
