@@ -118,6 +118,12 @@ role NQPCursorRole {
             if pir::can__IPS($actions, $name);
     }
 
+    method !reduce_with_match($name, $key, $match) {
+        my $actions := pir::find_dynamic_lex__Ps('$*ACTIONS');
+        pir::find_method__PPs($actions, $name)($actions, $match, $key)
+            if pir::can__IPS($actions, $name);
+    }
+
     method !protoregex($name) {
         my $nfa := self.HOW.cache(self, $name, { self.'!protoregex_nfa'($name) });
         my @fatepos := $nfa.run($!target, $!pos);
@@ -244,7 +250,8 @@ role NQPCursorRole {
     method ww() {
         my $cur := self."!cursor_start"();
         $cur."!cursor_pass"($!pos, "ww")
-            if $!pos >= 1
+            if $!pos > 0
+            && $!pos != nqp::chars($!target)
             && nqp::iscclass(pir::const::CCLASS_WORD, $!target, $!pos)
             && nqp::iscclass(pir::const::CCLASS_WORD, $!target, $!pos-1);
         $cur;
@@ -405,8 +412,9 @@ class NQPMatch is NQPCapture {
 
 class NQPCursor does NQPCursorRole {
     method MATCH() {
-        unless nqp::istype(nqp::getattr(self, NQPCursor, '$!match'), NQPMatch) {
-            my $match := NQPMatch.new();
+        my $match := nqp::getattr(self, NQPCursor, '$!match');
+        unless pir::isa($match, 'Hash') || nqp::istype($match, NQPMatch) {
+            $match := NQPMatch.new();
             nqp::bindattr(self, NQPCursor, '$!match', $match);
             nqp::bindattr($match, NQPMatch, '$!orig', nqp::getattr(self, NQPCursor, '$!orig'));
             nqp::bindattr_i($match, NQPMatch, '$!from', nqp::getattr_i(self, NQPCursor, '$!from'));
@@ -420,7 +428,7 @@ class NQPCursor does NQPCursorRole {
                   !! nqp::bindkey($hash, $key, $_.value);
             }
         }
-        nqp::getattr(self, NQPCursor, '$!match');
+        $match
     }
 
     method Bool() {

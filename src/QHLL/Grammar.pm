@@ -653,21 +653,17 @@ An operator precedence parser.
             .local pmc inO
             $P0 = infix['OPER']
             inO = $P0['O']
-            $P0 = inO['nextterm']
-            if null $P0 goto nonextterm
-            termishrx = $P0
+            termishrx = inO['nextterm']
             if termishrx goto have_termishrx
           nonextterm:
             termishrx = 'termish'
           have_termishrx:
 
             .local string inprec, inassoc, opprec
-            $P0 = inO['prec']
-            inprec = $P0
+            inprec = inO['prec']
             unless inprec goto err_inprec
             if inprec <= preclim goto term_done
-            $P0 = inO['assoc']
-            inassoc = $P0
+            inassoc = inO['assoc']
 
             $P0 = inO['sub']
             if null $P0 goto subprec_done
@@ -679,8 +675,7 @@ An operator precedence parser.
             $P0 = opstack[-1]
             $P0 = $P0['OPER']
             $P0 = $P0['O']
-            $P0 = $P0['prec']
-            opprec = $P0
+            opprec = $P0['prec']
             unless opprec > inprec goto reduce_gt_done
             self.'EXPR_reduce'(termstack, opstack)
             goto reduce_loop
@@ -758,7 +753,7 @@ An operator precedence parser.
             $S0 = $P0
             self.$S0(op)
           op_infix_1:
-            self.'!reduce'('EXPR', 'INFIX', op)
+            self.'!reduce_with_match'('EXPR', 'INFIX', op)
             goto done
 
           op_unary:
@@ -769,10 +764,10 @@ An operator precedence parser.
             ofrom = op.'from'()
             if afrom < ofrom goto op_postfix
           op_prefix:
-            self.'!reduce'('EXPR', 'PREFIX', op)
+            self.'!reduce_with_match'('EXPR', 'PREFIX', op)
             goto done
           op_postfix:
-            self.'!reduce'('EXPR', 'POSTFIX', op)
+            self.'!reduce_with_match'('EXPR', 'POSTFIX', op)
             goto done
 
           op_list:
@@ -801,7 +796,7 @@ An operator precedence parser.
           op_sym_done:
             arg = pop termstack
             unshift op, arg
-            self.'!reduce'('EXPR', 'LIST', op)
+            self.'!reduce_with_match'('EXPR', 'LIST', op)
             goto done
 
           done:
