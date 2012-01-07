@@ -1045,7 +1045,7 @@ class NQP::Actions is HLL::Actions {
         }
         else {
             my $block := @BLOCK.shift;
-            $block[0].push(PAST::Var.new(:name<self>, :scope<parameter>));
+            $block[0].unshift(PAST::Var.new(:name<self>, :scope<parameter>));
             $block[0].push(
                 PAST::Var.new(:name<self>, :scope<register>, :isdecl(1),
                               :viviself(PAST::Var.new( :name<self>, :scope('lexical_6model') ))));
