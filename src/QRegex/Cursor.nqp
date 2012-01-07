@@ -380,6 +380,9 @@ class NQPMatch is NQPCapture {
     method ()    is parrot_vtable('get_number')  { +self.Str() }
     method Bool() { $!to >= $!from }
     method chars() { $!to >= $!from ?? $!to - $!from !! 0 }
+    
+    method !make($ast) { $!ast := $ast }
+    method ast()       { $!ast }
 
     method !dump_str($key) {
         sub dump_array($key, $item) {
