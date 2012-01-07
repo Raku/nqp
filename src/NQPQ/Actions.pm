@@ -212,7 +212,6 @@ class NQP::Actions is HLL::Actions {
             unless %*COMPILING<%?OPTIONS><setting> eq 'NULL' {
                 import_HOW_exports($SETTING);
                 $*W.load_module('NQPRegex', $*GLOBALish);
-                $*W.load_module('NQPP6QRegex', $*GLOBALish);
             }
         }
         self.SET_BLOCK_OUTER_CTX(@BLOCK[0]);

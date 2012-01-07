@@ -1,3 +1,4 @@
+use QRegex;
 use NQPHLL;
 use QAST;
 
