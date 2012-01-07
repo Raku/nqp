@@ -372,6 +372,7 @@ class NQPMatch is NQPCapture {
     has $!cursor;
 
     method from() { $!from }
+    method orig() { $!orig }
     method to()   { $!to }
     method CURSOR() { $!cursor }
     method Str() is parrot_vtable('get_string')  { nqp::substr($!orig, $!from, $!to-$!from) }
