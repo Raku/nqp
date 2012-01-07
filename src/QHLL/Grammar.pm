@@ -394,67 +394,53 @@ position C<pos>.
         };
     }
 
-    method quote_EXPR(*@args) {
-        Q:PIR {
-            .include 'src/Regex/constants.pir'
-            
-            .local pmc self, cur_class, args
-            self = find_lex 'self'
-            cur_class = find_lex '$cursor_class'
-            args = find_lex '@args'
+    token quote_EXPR(*@args) {
+        :my %*QUOTEMOD;
+        :my $*QUOTE_START;
+        :my $*QUOTE_STOP;
+        {
+            Q:PIR {            
+                .local pmc self, cur_class, args
+                self = find_lex 'self'
+                cur_class = find_lex '$cursor_class'
+                args = find_lex '@args'
 
-            .local pmc cur
-            .local string target
-            .local int pos
+                .local pmc quotemod, true
+                quotemod = find_lex '%*QUOTEMOD'
+                true = box 1
 
-            (cur, target, pos) = self.'!cursor_start'()
+              args_loop:
+                unless args goto args_done
+                .local string mod
+                mod = shift args
+                mod = substr mod, 1
+                quotemod[mod] = true
+                if mod == 'qq' goto opt_qq
+                if mod == 'b' goto opt_b
+                goto args_loop
+              opt_qq:
+                quotemod['s'] = true
+                quotemod['a'] = true
+                quotemod['h'] = true
+                quotemod['f'] = true
+                quotemod['c'] = true
+                quotemod['b'] = true
+              opt_b:
+                quotemod['q'] = true
+                goto args_loop
+              args_done:
 
-            .local pmc quotemod, true
-            .lex '%*QUOTEMOD', quotemod
-            quotemod = new ['Hash']
-
-            true = box 1
-
-
-          args_loop:
-            unless args goto args_done
-            .local string mod
-            mod = shift args
-            mod = substr mod, 1
-            quotemod[mod] = true
-            if mod == 'qq' goto opt_qq
-            if mod == 'b' goto opt_b
-            goto args_loop
-          opt_qq:
-            quotemod['s'] = true
-            quotemod['a'] = true
-            quotemod['h'] = true
-            quotemod['f'] = true
-            quotemod['c'] = true
-            quotemod['b'] = true
-          opt_b:
-            quotemod['q'] = true
-            goto args_loop
-          args_done:
-
-
-            .local pmc start, stop
-            (start, stop) = self.'peek_delimiters'(target, pos)
-
-            .lex '$*QUOTE_START', start
-            .lex '$*QUOTE_STOP', stop
-
-            $P10 = cur.'quote_delimited'()
-            unless $P10 goto fail
-            cur.'!mark_push'(0, CURSOR_FAIL, 0, $P10)
-            $P10.'!cursor_names'('quote_delimited')
-            pos = $P10.'pos'()
-            cur.'!cursor_pass'(pos, 'quote_EXPR')
-            goto done
-          fail:
-          done:
-            .return (cur)
-        };
+                .local pmc start, stop
+                .local string target
+                .local int pos
+                target = repr_get_attr_str self, cur_class, '$!target'
+                pos = repr_get_attr_int self, cur_class, '$!pos'
+                (start, stop) = self.'peek_delimiters'(target, pos)
+                store_lex '$*QUOTE_START', start
+                store_lex '$*QUOTE_STOP', stop
+            }
+        }
+        <quote_delimited>
     }
 
     our method quotemod_check($mod) {
@@ -509,6 +495,7 @@ position C<pos>.
 
     our method split_words($words) {
         Q:PIR {
+            .include 'src/Regex/constants.pir'
             .local string words
             $P0 = find_lex '$words'
             words = $P0
