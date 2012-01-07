@@ -536,9 +536,6 @@ grammar NQP::Grammar is HLL::Grammar {
         ]?
     }
 
-
-    proto token term { <...> }
-
     token term:sym<self> { <sym> » }
 
     token term:sym<identifier> {
