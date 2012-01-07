@@ -175,7 +175,7 @@ role NQPCursorRole {
 
     method !protoregex_table() {
         my %protorx;
-        for self.HOW.methods(self, :local(0)) -> $meth {
+        for self.HOW.methods(self) -> $meth {
             my $methname := ~$meth;
             %protorx{$methname} := $meth if nqp::index($methname, ':sym<') >0;
         }
