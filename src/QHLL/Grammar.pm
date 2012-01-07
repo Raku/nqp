@@ -564,8 +564,10 @@ An operator precedence parser.
             .lex '@termstack', termstack
 
           term_loop:
+            repr_bind_attr_int here, cur_class, "$!pos", pos
             here = here.termishrx()
-            unless here goto fail
+            pos = repr_get_attr_int here, cur_class, "$!pos"
+            if pos < 0 goto fail
             .local pmc termish
             termish = here.'MATCH'()
 
@@ -630,10 +632,14 @@ An operator precedence parser.
             push termstack, $P0
 
             # Now see if we can fetch an infix operator
-            .local pmc infixcur, infix
-            here = here.'ws'()
+            .local pmc wscur, infixcur, infix
+            wscur = here.'ws'()
+            $I0 = repr_get_attr_int wscur, cur_class, '$!pos'
+            if $I0 < 0 goto term_done
+            here = wscur
             infixcur = here.'infixish'()
-            unless infixcur goto term_done
+            $I0 = repr_get_attr_int here, cur_class, '$!pos'
+            if $I0 < 0 goto term_done
             infix = infixcur.'MATCH'()
 
             .local pmc inO
