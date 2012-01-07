@@ -285,7 +285,7 @@ C< :!pair >, and C<< :pair<strval> >>.
             # If we've been called as a subrule, then build a pass-cursor
             # to indicate success and set the hash as the subrule's match object.
             if has_save goto save_hash
-            ($P0, $I0) = self.'!cursor_start'()
+            ($P0, $S0, $I0) = self.'!cursor_start'()
             $P0.'!cursor_pass'($I0, '')
             setattribute $P0, cur_class, '$!match', hash
             .return ($P0)
@@ -407,7 +407,7 @@ position C<pos>.
             .local string target
             .local int pos
 
-            (cur, pos, target) = self.'!cursor_start'()
+            (cur, target, pos) = self.'!cursor_start'()
 
             .local pmc quotemod, true
             .lex '%*QUOTEMOD', quotemod
@@ -468,7 +468,7 @@ position C<pos>.
             .local int pos
             self = find_lex 'self'
 
-            (cur, pos, target) = self.'!cursor_start'()
+            (cur, target, pos) = self.'!cursor_start'()
 
             $P0 = find_dynamic_lex '$*QUOTE_START'
             if null $P0 goto fail
@@ -491,7 +491,7 @@ position C<pos>.
             .local int pos
             self = find_lex 'self'
 
-            (cur, pos, target) = self.'!cursor_start'()
+            (cur, target, pos) = self.'!cursor_start'()
 
             $P0 = find_dynamic_lex '$*QUOTE_STOP'
             if null $P0 goto fail
@@ -550,8 +550,9 @@ An operator precedence parser.
             preclim = $P0
             
             .local pmc here
+            .local string tgt
             .local int pos
-            (here, pos) = self.'!cursor_start'()
+            (here, tgt, pos) = self.'!cursor_start'()
 
             .local string termishrx
             termishrx = 'termish'
@@ -827,10 +828,11 @@ An operator precedence parser.
         my $*ACTIONS    := %*LANG{$lang ~ '-actions'};
         my $cur := Q:PIR {
             .local pmc self
+            .local string tgt
             .local int pos
             self = find_lex 'self'
             $P0 = find_lex '$lang_cursor'
-            (%r, pos) = self.'!cursor_start'($P0)
+            (%r, tgt, pos) = self.'!cursor_start'($P0)
             %r.'!cursor_pos'(pos)
         };
         $cur."$regex"();
