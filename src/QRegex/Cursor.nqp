@@ -79,6 +79,7 @@ role NQPCursorRole {
     }
 
     method !cursor_capture($capture, $name) {
+        $!match  := nqp::null();
         $!cstack := [] unless pir::defined($!cstack);
         nqp::push($!cstack, $capture);
         nqp::bindattr($capture, $?CLASS, '$!name', $name);
