@@ -183,7 +183,7 @@ class QRegex::NFA {
         #nqp::say("adding $name");
         my @substates;
         if pir::can($cursor, $name) {
-            @substates := $cursor.HOW.find_method($cursor, $name).nqpattr('nfa');
+            @substates := $cursor.HOW.find_method($cursor, $name, :no_trace(1)).nqpattr('nfa');
         }
         if @substates {
             # create an empty end state for the subrule's NFA
