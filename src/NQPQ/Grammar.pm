@@ -333,10 +333,10 @@ grammar NQP::Grammar is HLL::Grammar {
         :my $*PKGDECL := 'native';
         <sym> <package_def>
     }
-    rule package_declarator:sym<stub> {
+    token package_declarator:sym<stub> {
         :my $*OUTERPACKAGE := $*PACKAGE;
         :my $*PKGDECL := 'stub';
-        <sym> <name>
+        <sym> :s <name>
         'metaclass' <metaclass=.name>
         '{' '...' '}'
     }
@@ -499,9 +499,9 @@ grammar NQP::Grammar is HLL::Grammar {
     proto token trait_mod { <...> }
     token trait_mod:sym<is> { <sym>:s <longname=.deflongname><circumfix>? }
 
-    rule regex_declarator {
+    token regex_declarator {
         [
-        | $<proto>=[proto] [regex|token|rule]
+        | $<proto>=[proto] :s [regex|token|rule]
           <deflongname>
           [ 
           || '{*}'<?ENDSTMT>
@@ -509,7 +509,7 @@ grammar NQP::Grammar is HLL::Grammar {
           || '{' '<*>' '}'<?ENDSTMT>
           || <.panic: "Proto regex body must be \{*\} (or <*> or <...>, which are deprecated)">
           ]
-        | $<sym>=[regex|token|rule]
+        | $<sym>=[regex|token|rule] :s
           <deflongname>
           <.newpad>
           [ '(' <signature> ')' ]?
