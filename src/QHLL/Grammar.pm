@@ -831,17 +831,10 @@ An operator precedence parser.
     }
 
     method LANG($lang, $regex) {
-        my $lang_cursor := %*LANG{$lang};
+        my $lang_cursor := %*LANG{$lang}.'!cursor_init'(self.target(), :p(self.pos()));
         my $*ACTIONS    := %*LANG{$lang ~ '-actions'};
-        my $cur := Q:PIR {
-            .local pmc self
-            .local string tgt
-            .local int pos
-            self = find_lex 'self'
-            $P0 = find_lex '$lang_cursor'
-            (%r, tgt, pos) = self.'!cursor_start'($P0)
-            %r.'!cursor_pos'(pos)
-        };
-        $cur."$regex"();
+        #my $cur         := $lang_cursor.'!cursor_start'();
+        #nqp::bindattr_i($cur, $cur_class, '$!pos', self.pos());
+        $lang_cursor."$regex"();  
     }
 }
