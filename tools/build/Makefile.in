@@ -667,7 +667,7 @@ $(STAGE2)/$(QREGEX_PBC): $(STAGE1_PBCS) $(STAGE2)/$(CORE_SETTING_PBC) $(QREGEX_S
 	$(MKPATH) $(STAGE2)/gen
 	$(PERL) tools/build/gen-cat.pl $(QREGEX_SOURCES) > $(STAGE2)/$(QREGEX_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
-	    --target=pir --output=$(STAGE2)/$(QREGEX_PIR) \
+	    --target=pir --output=$(STAGE2)/$(QREGEX_PIR) --no-regex-lib \
 	    --module-path=$(STAGE2) --setting-path=$(STAGE2) $(STAGE2)/$(QREGEX_COMBINED)
 	$(PARROT) -o $(STAGE2)/$(QREGEX_PBC) $(STAGE2)/$(QREGEX_PIR)
 

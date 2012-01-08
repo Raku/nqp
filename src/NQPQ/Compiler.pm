@@ -16,6 +16,7 @@ sub MAIN(@ARGS) {
     @clo.push('setting-path=s');
     @clo.push('module-path=s');
     @clo.push('vmlibs=s');
+    @clo.push('no-regex-lib');
     
     # Enter the compiler.
     $nqpcomp.command_line(@ARGS, :encoding('utf8'), :transcode('ascii iso-8859-1'));
