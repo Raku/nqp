@@ -96,29 +96,11 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     }
 
     VTABLE PMC * find_method(STRING *name) {
-        PMC *m = PMCNULL;
-        PMC *decont;
-        Parrot_runloop jmp;
-        Parrot_Context *initialctx;
-        int runloop_id;
-
-        initialctx = CONTEXT(interp);
-        runloop_id = interp->current_runloop_id;
-        if (!setjmp(jmp.resume)) {
-            Parrot_ex_add_c_handler(interp, &jmp);
-            /* try */
-            decont = decontainerize(interp, SELF);
-            m = STABLE(decont)->find_method(interp, decont, name, NO_HINT);
-        } else {
-            while (interp->current_runloop && interp->current_runloop_id != runloop_id)
-                free_runloop_jump_point(interp);
-            if (initialctx != CONTEXT(interp))
-                Parrot_warn((interp), PARROT_WARNINGS_ALL_FLAG,
-                        "find_method contexts differ!");
-        }
-        Parrot_cx_delete_handler_local(interp);
-
-        return m;
+        PMC *decont = decontainerize(interp, SELF);
+        PMC *meth   = STABLE(decont)->find_method(interp, decont, name, NO_HINT);
+        /* Map type objects into Parrot NULLPMC. */
+        return meth->vtable->base_type != decont->vtable->base_type || IS_CONCRETE(meth) ?
+            meth : PMCNULL;
     }
 
     VTABLE PMC* get_attr_keyed(PMC *class_handle, STRING *name) {
@@ -165,6 +147,13 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     /* XXX Hack for Parrot issue which needs invokable on stuff. */
     VTABLE INTVAL does(STRING *what) {
         return Parrot_str_equal(interp, what, CONST_STRING(interp, "invokable"));
+    }
+    
+    VTABLE INTVAL can(STRING *name) {
+        PMC *decont = decontainerize(interp, SELF);
+        PMC *meth   = STABLE(decont)->find_method(interp, decont, name, NO_HINT);
+        return !PMC_IS_NULL(meth) &&
+            (meth->vtable->base_type != decont->vtable->base_type || IS_CONCRETE(meth));
     }
     
     VTABLE PMC *clone() {
