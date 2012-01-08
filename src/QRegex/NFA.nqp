@@ -179,11 +179,12 @@ class QRegex::NFA {
         $past;
     }
 
-    method mergesubrule($start, $to, $fate, $cursor, $name) {
+    method mergesubrule($start, $to, $fate, $cursor, $name, %seen?) {
         #nqp::say("adding $name");
         my @substates;
-        if pir::can($cursor, $name) {
+        if !%seen{$name} && pir::can($cursor, $name) {
             @substates := $cursor.HOW.find_method($cursor, $name, :no_trace(1)).nqpattr('nfa');
+            %seen{$name} := 1;
         }
         if @substates {
             # create an empty end state for the subrule's NFA
@@ -209,7 +210,7 @@ class QRegex::NFA {
                     $substate[$j+2] := $substate[$j+2] + $substart;
                     $substate[$j+1] := $fate 
                         if $substate[$j] == $EDGE_FATE;
-                    self.mergesubrule($i, $substate[$j+2], $fate, $cursor, $substate[$j+1])
+                    self.mergesubrule($i, $substate[$j+2], $fate, $cursor, $substate[$j+1], %seen)
                         if $substate[$j] == $EDGE_SUBRULE;
                     $j := $j + 3;
                 }
