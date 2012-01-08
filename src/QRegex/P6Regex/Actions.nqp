@@ -348,10 +348,10 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             self.subrule_alias($qast, $name);
         }
         elsif $name eq 'sym' {
-            my $rxname := pir::chopn__Ssi( 
-                              nqp::substr(%*RX<name>,
-                                          nqp::index(%*RX<name>, ':sym<') + 5),
-                              1);
+            my $loc := nqp::index(%*RX<name>, ':sym<');
+            $loc := nqp::index(%*RX<name>, ':sym«')
+                if $loc < 0;
+            my $rxname := pir::chopn__Ssi(nqp::substr(%*RX<name>, $loc + 5), 1);
             $qast := QAST::Regex.new(:name('sym'), :rxtype<subcapture>, :node($/),
                 QAST::Regex.new(:rxtype<literal>, $rxname, :node($/)));
         }
