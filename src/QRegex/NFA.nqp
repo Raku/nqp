@@ -93,11 +93,11 @@ class QRegex::NFA {
     method enumcharlist($node, $from, $to) {
         my $charlist := $node[0];
         if $node.subtype eq 'zerowidth' {
-            $from := self.addedge($from, -1, $EDGE_CHARLIST, $charlist);
+            $from := self.addedge($from, -1, $EDGE_CHARLIST + ?$node.negate, $charlist);
             self.addedge($from, 0, $EDGE_FATE, 0);
         }
         else {
-            self.addedge($from, $to, $EDGE_CHARLIST, $charlist);
+            self.addedge($from, $to, $EDGE_CHARLIST + ?$node.negate, $charlist);
         }
     }
 
