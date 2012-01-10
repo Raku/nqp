@@ -18,7 +18,7 @@ role NQPCursorRole {
         my $caps := nqp::hash();
         my %caplist := $!regexsub.nqpattr('caps');
         for %caplist {
-            $caps{$_.key} := nqp::list() if $_.value >= 2;
+            $caps{~$_} := nqp::list() if %caplist{~$_} >= 2;
         }
         if $!cstack {
             for $!cstack -> $subcur {
@@ -415,19 +415,22 @@ class NQPCursor does NQPCursorRole {
     method MATCH() {
         my $match := nqp::getattr(self, NQPCursor, '$!match');
         unless pir::isa($match, 'Hash') || nqp::istype($match, NQPMatch) {
-            $match := NQPMatch.new();
+            my $list := nqp::list();
+            my $hash := nqp::hash();
+            $match := nqp::create(NQPMatch);
             nqp::bindattr(self, NQPCursor, '$!match', $match);
+            nqp::bindattr($match, NQPCapture, '@!array', $list);
+            nqp::bindattr($match, NQPCapture, '%!hash', $hash);
             nqp::bindattr($match, NQPMatch, '$!cursor', self);
             nqp::bindattr($match, NQPMatch, '$!orig', nqp::getattr(self, NQPCursor, '$!orig'));
             nqp::bindattr_i($match, NQPMatch, '$!from', nqp::getattr_i(self, NQPCursor, '$!from'));
             nqp::bindattr_i($match, NQPMatch, '$!to', nqp::getattr_i(self, NQPCursor, '$!pos'));
-            my $list := $match.list;
-            my $hash := $match.hash;
-            for self.CAPHASH {
-                my $key := $_.key;
+            my %ch := self.CAPHASH;
+            for %ch {
+                my $key := ~$_;
                 nqp::iscclass(pir::const::CCLASS_NUMERIC, $key, 0)
-                  ?? nqp::bindpos($list, $key, $_.value)
-                  !! nqp::bindkey($hash, $key, $_.value);
+                  ?? nqp::bindpos($list, $key, %ch{$key})
+                  !! nqp::bindkey($hash, $key, %ch{$key});
             }
         }
         $match
