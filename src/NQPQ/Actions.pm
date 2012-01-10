@@ -1270,7 +1270,9 @@ class NQP::Actions is HLL::Actions {
     method number($/) {
         my $value := $<dec_number> ?? $<dec_number>.ast !! $<integer>.ast;
         if ~$<sign> eq '-' { $value := -$value; }
-        make PAST::Val.new( :value($value) );
+        make $<dec_number> ??
+            PAST::Val.new( :value($value) ) !!
+            PAST::Want.new( PAST::Val.new( :value($value) ), 'Ii', $value );
     }
 
     method quote:sym<apos>($/) { make $<quote_EXPR>.ast; }
