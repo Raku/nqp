@@ -156,7 +156,7 @@ role NQPCursorRole {
     }
 
     method !protoregex_nfa($name) {
-        my %protorx := self."!protoregex_table"();
+        my %protorx := self.HOW.cache(self, "!protoregex_table", { self."!protoregex_table"() });
         my $nfa := QRegex::NFA.new;
         my @fates := $nfa.states[0];
         my $start := 1;
@@ -164,7 +164,7 @@ role NQPCursorRole {
         my $prefix      := $name ~ ':sym<';
         my $prefixchars := nqp::chars($prefix);
         for %protorx {
-            my $rxname := $_.key;
+            my $rxname := ~$_;
             if nqp::substr($rxname, 0, $prefixchars) eq $prefix {
                 $fate := $fate + 1;
                 @fates[$fate] := $rxname;
