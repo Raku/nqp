@@ -439,7 +439,19 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
 /* Copies to the body of one object to another. */
 static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     P6opaqueREPRData * repr_data = (P6opaqueREPRData *) st->REPR_data;
+    INTVAL i;
+
+    /* Copy main body. */
     memcpy(dest, src, repr_data->allocation_size - sizeof(P6opaqueInstance));
+
+    /* Flattened in REPRs need a chance to copy 'emselves. */
+    for (i = 0; i < repr_data->num_attributes; i++) {
+        STable *st_copy = repr_data->flattened_stables[i];
+        if (st_copy) {
+            INTVAL offset = repr_data->attribute_offsets[i];
+            st_copy->REPR->copy_to(interp, st_copy, (char*)src + offset, (char*)dest + offset);
+        }
+    }
 }
 
 /* Helper for complaining about attribute access errors. */
