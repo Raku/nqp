@@ -832,6 +832,7 @@ inline op repr_bind_pos_obj(in PMC, in INT, in PMC) :base_core {
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot do bind_pos on a type object");
+        PARROT_GC_WRITE_BARRIER(interp, obj);
     }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
