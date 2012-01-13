@@ -132,35 +132,35 @@ inline op nqp_bigint_setup() :base_core {
             P6bigint_initialize);
 }
 
-inline op nqp_bigint_add(out PMC, in PMC, in PMC) :base_core {
+inline op nqp_bigint_add(out PMC, in PMC, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b = get_bigint(interp, $3);
-    $1 = REPR($2)->allocate(interp, STABLE($2));
+    $1 = REPR($4)->allocate(interp, STABLE($4));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
     mp_add(a, b, get_bigint(interp, $1));
 }
 
-inline op nqp_bigint_sub(out PMC, in PMC, in PMC) :base_core {
+inline op nqp_bigint_sub(out PMC, in PMC, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b = get_bigint(interp, $3);
-    $1 = REPR($2)->allocate(interp, STABLE($2));
+    $1 = REPR($4)->allocate(interp, STABLE($4));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
     mp_sub(a, b, get_bigint(interp, $1));
 }
 
-inline op nqp_bigint_mul(out PMC, in PMC, in PMC) :base_core {
+inline op nqp_bigint_mul(out PMC, in PMC, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b = get_bigint(interp, $3);
-    $1 = REPR($2)->allocate(interp, STABLE($2));
+    $1 = REPR($4)->allocate(interp, STABLE($4));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
     mp_mul(a, b, get_bigint(interp, $1));
 }
 
-inline op nqp_bigint_div(out PMC, in PMC, in PMC) :base_core {
+inline op nqp_bigint_div(out PMC, in PMC, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b = get_bigint(interp, $3);
     int result;
-    $1 = REPR($2)->allocate(interp, STABLE($2));
+    $1 = REPR($4)->allocate(interp, STABLE($4));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
     result = mp_div(a, b, get_bigint(interp, $1), NULL);
     if (result == MP_VAL)
@@ -168,23 +168,23 @@ inline op nqp_bigint_div(out PMC, in PMC, in PMC) :base_core {
             "Divide by zero");
 }
 
-inline op nqp_bigint_mod(out PMC, in PMC, in PMC) :base_core {
+inline op nqp_bigint_mod(out PMC, in PMC, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b = get_bigint(interp, $3);
-    $1 = REPR($2)->allocate(interp, STABLE($2));
+    $1 = REPR($4)->allocate(interp, STABLE($4));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
     mp_mod(a, b, get_bigint(interp, $1));
 }
 
-inline op nqp_bigint_neg(out PMC, in PMC) :base_core {
+inline op nqp_bigint_neg(out PMC, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
-    $1 = REPR($2)->allocate(interp, STABLE($2));
+    $1 = REPR($3)->allocate(interp, STABLE($3));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
     mp_neg(a, get_bigint(interp, $1));
 }
-inline op nqp_bigint_abs(out PMC, in PMC) :base_core {
+inline op nqp_bigint_abs(out PMC, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
-    $1 = REPR($2)->allocate(interp, STABLE($2));
+    $1 = REPR($3)->allocate(interp, STABLE($3));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
     mp_abs(a, get_bigint(interp, $1));
 }
@@ -235,25 +235,25 @@ inline op nqp_bigint_le(out INT, in PMC, in PMC) :base_core {
     $1 = MP_GT != mp_cmp(a, b);
 }
 
-inline op nqp_bigint_gcd(out PMC, in PMC, in PMC) :base_core {
+inline op nqp_bigint_gcd(out PMC, in PMC, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b = get_bigint(interp, $3);
-    $1 = REPR($2)->allocate(interp, STABLE($2));
+    $1 = REPR($4)->allocate(interp, STABLE($4));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
     mp_gcd(a, b, get_bigint(interp, $1));
 }
 
-inline op nqp_bigint_lcm(out PMC, in PMC, in PMC) :base_core {
+inline op nqp_bigint_lcm(out PMC, in PMC, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b = get_bigint(interp, $3);
-    $1 = REPR($2)->allocate(interp, STABLE($2));
+    $1 = REPR($4)->allocate(interp, STABLE($4));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
     mp_lcm(a, b, get_bigint(interp, $1));
 }
 
-inline op nqp_bigint_from_str(out PMC, in PMC, in STR) :base_core {
-    char *buf = Parrot_str_cstring(interp, $3);
-    $1 = REPR($2)->allocate(interp, STABLE($2));
+inline op nqp_bigint_from_str(out PMC, in STR, in PMC) :base_core {
+    char *buf = Parrot_str_cstring(interp, $2);
+    $1 = REPR($3)->allocate(interp, STABLE($3));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
     mp_read_radix(get_bigint(interp, $1), buf, 10);
 }
@@ -293,47 +293,47 @@ inline op nqp_bigint_from_num(out PMC, in NUM, in PMC) :base_core {
     from_num($2, get_bigint(interp, $1));
 }
 
-inline op nqp_bigint_shr(out PMC, in PMC, in INT) :base_core {
+inline op nqp_bigint_shr(out PMC, in PMC, in INT, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
-    $1 = REPR($2)->allocate(interp, STABLE($2));
+    $1 = REPR($4)->allocate(interp, STABLE($4));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
     mp_div_2d(a, $3, get_bigint(interp, $1), NULL);
 }
 
-inline op nqp_bigint_shl(out PMC, in PMC, in INT) :base_core {
+inline op nqp_bigint_shl(out PMC, in PMC, in INT, in PMC) :base_core {
     mp_int *b;
     mp_int *a = get_bigint(interp, $2);
-    $1 = REPR($2)->allocate(interp, STABLE($2));
+    $1 = REPR($4)->allocate(interp, STABLE($4));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
     b = get_bigint(interp, $1);
     mp_mul_2d(a, $3, b);
 }
 
-inline op nqp_bigint_band(out PMC, in PMC, in PMC) :base_core {
+inline op nqp_bigint_band(out PMC, in PMC, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b = get_bigint(interp, $3);
-    $1 = REPR($2)->allocate(interp, STABLE($2));
+    $1 = REPR($4)->allocate(interp, STABLE($4));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
     two_complement_bitop(a, b, get_bigint(interp, $1), mp_and);
 }
-inline op nqp_bigint_bor(out PMC, in PMC, in PMC) :base_core {
+inline op nqp_bigint_bor(out PMC, in PMC, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b = get_bigint(interp, $3);
-    $1 = REPR($2)->allocate(interp, STABLE($2));
+    $1 = REPR($4)->allocate(interp, STABLE($4));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
     two_complement_bitop(a, b, get_bigint(interp, $1), mp_or);
 }
-inline op nqp_bigint_bxor(out PMC, in PMC, in PMC) :base_core {
+inline op nqp_bigint_bxor(out PMC, in PMC, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b = get_bigint(interp, $3);
-    $1 = REPR($2)->allocate(interp, STABLE($2));
+    $1 = REPR($4)->allocate(interp, STABLE($4));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
     two_complement_bitop(a, b, get_bigint(interp, $1), mp_xor);
 }
-inline op nqp_bigint_bnot(out PMC, in PMC) :base_core {
+inline op nqp_bigint_bnot(out PMC, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     mp_int *b;
-    $1 = REPR($2)->allocate(interp, STABLE($2));
+    $1 = REPR($3)->allocate(interp, STABLE($3));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
     b = get_bigint(interp, $1);
 
@@ -444,16 +444,16 @@ inline op nqp_bigint_radix(out PMC, in INT, in STR, in INT, in INT, in PMC) :bas
 /* calculates $1 = $2 ** $3
  * if it either overflows ($3 being too big), or $2 is negative,
  * a float is returned. $4 should contain the type object to box the
- * float into.
+ * float into, $5 the type object to box the bigint into.
  */
-inline op nqp_bigint_pow(out PMC, in PMC, in PMC, in PMC) :base_core {
+inline op nqp_bigint_pow(out PMC, in PMC, in PMC, in PMC, in PMC) :base_core {
     mp_digit exponent_d = 0;
     mp_int *exponent = get_bigint(interp, $3);
     mp_int *base     = get_bigint(interp, $2);
     int cmp          = mp_cmp_d(exponent, 0);
     if (cmp == MP_EQ || MP_EQ == mp_cmp_d(base, 1)) {
         /* $x ** 0 or 1 ** $x */
-        $1 = REPR($2)->allocate(interp, STABLE($2));
+        $1 = REPR($5)->allocate(interp, STABLE($5));
         REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
         mp_set_int(get_bigint(interp, $1), 1);
     }
@@ -487,7 +487,7 @@ inline op nqp_bigint_pow(out PMC, in PMC, in PMC, in PMC) :base_core {
         }
         else {
             /* since the exponent fits into a digit, mp_expt_d is fine */
-            $1 = REPR($2)->allocate(interp, STABLE($2));
+            $1 = REPR($5)->allocate(interp, STABLE($5));
             REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
             mp_expt_d(get_bigint(interp, $2), exponent_d, get_bigint(interp, $1));
         }
