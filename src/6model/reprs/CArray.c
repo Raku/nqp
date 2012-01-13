@@ -47,6 +47,7 @@ static void fill_repr_data(PARROT_INTERP, STable *st) {
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "CArray representation can only have 8, 16, 32 or 64 bit integer elements");
+        repr_data->elem_kind = CARRAY_ELEM_KIND_NUMERIC;
     }
     else if (ss.boxed_primitive == STORAGE_SPEC_BP_NUM) {
         if (ss.bits == 32 || ss.bits == 64)
@@ -54,8 +55,13 @@ static void fill_repr_data(PARROT_INTERP, STable *st) {
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "CArray representation can only have 32 or 64 bit floating point elements");
+        repr_data->elem_kind = CARRAY_ELEM_KIND_NUMERIC;
     }
-    /* XXX TODO: strings, structs, pointers, other arrays */
+    else if (ss.can_box & STORAGE_SPEC_CAN_BOX_STR) {
+        repr_data->elem_size = sizeof(PMC *);
+        repr_data->elem_kind = CARRAY_ELEM_KIND_STRING;
+    }
+    /* XXX TODO: structs, pointers, other arrays */
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "CArray may only contain native integers and numbers, strings, C Structs or C Pointers");
@@ -165,12 +171,39 @@ static void * at_pos_ref(PARROT_INTERP, STable *st, void *data, INTVAL index) {
     CArrayBody     *body      = (CArrayBody *)data;
     if (body->allocated && index >= body->elems)
         return NULL;
-    return ((char *)body->storage) + index * repr_data->elem_size;
+    switch (repr_data->elem_kind) {
+        case CARRAY_ELEM_KIND_NUMERIC:
+            return ((char *)body->storage) + index * repr_data->elem_size;
+        default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "at_pos_ref on CArray REPR only usable with numeric element types");
+    }
 }
 static PMC * at_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody     *body      = (CArrayBody *)data;
-    die_idx_nyi(interp);
+    if (body->allocated && index >= body->elems)
+        return repr_data->elem_type;
+    switch (repr_data->elem_kind) {
+        case CARRAY_ELEM_KIND_STRING:
+        {
+            char *elem = *((char **)(((char *)body->storage) + index * repr_data->elem_size));
+            if (elem) {
+                STRING *str = Parrot_str_new_init(interp, elem, strlen(elem), Parrot_utf8_encoding_ptr, 0);
+                PMC    *res = REPR(repr_data->elem_type)->allocate(interp, STABLE(repr_data->elem_type));
+                REPR(res)->initialize(interp, STABLE(res), OBJECT_BODY(res));
+                REPR(res)->box_funcs->set_str(interp, STABLE(res), OBJECT_BODY(res), str);
+                PARROT_GC_WRITE_BARRIER(interp, res);
+                return res;
+            }
+            else
+                return repr_data->elem_type;
+            break;
+        }
+        default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "at_pos_boxed on CArray REPR not usable with this element type");
+    }
 }
 static void bind_pos_ref(PARROT_INTERP, STable *st, void *data, INTVAL index, void *value) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
@@ -178,15 +211,36 @@ static void bind_pos_ref(PARROT_INTERP, STable *st, void *data, INTVAL index, vo
     STable         *type_st   = STABLE(repr_data->elem_type);
     if (body->allocated && index >= body->allocated)
         expand(interp, repr_data, body, index + 1);
-    /* XXX make sure this is appropriate, once we support other than int/num elems. */
-    type_st->REPR->copy_to(interp, type_st, value, ((char *)body->storage) + index * repr_data->elem_size);
     if (index >= body->elems)
         body->elems = index;
+    switch (repr_data->elem_kind) {
+        case CARRAY_ELEM_KIND_NUMERIC:
+            type_st->REPR->copy_to(interp, type_st, value, ((char *)body->storage) + index * repr_data->elem_size);
+            break;
+        default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "bind_pos_ref on CArray REPR only usable with numeric element types");
+    }
 }
 static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, PMC *obj) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody     *body      = (CArrayBody *)data;
-    die_idx_nyi(interp);
+    if (body->allocated && index >= body->allocated)
+        expand(interp, repr_data, body, index + 1);
+    if (index >= body->elems)
+        body->elems = index;
+    switch (repr_data->elem_kind) {
+        case CARRAY_ELEM_KIND_STRING:
+        {
+            STRING *str  = REPR(obj)->box_funcs->get_str(interp, STABLE(obj), OBJECT_BODY(obj));
+            char   *elem = Parrot_str_to_encoded_cstring(interp, str, Parrot_utf8_encoding_ptr);
+            *((char **)(((char *)body->storage) + index * repr_data->elem_size)) = elem;
+            break;
+        }
+        default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "bind_pos_boxed on CArray REPR not usable with this element type");
+    }
 }
 static INTVAL elems(PARROT_INTERP, STable *st, void *data) {
     CArrayBody     *body      = (CArrayBody *)data;
