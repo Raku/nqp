@@ -50,16 +50,20 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     NativeCallBody *dest_body = (NativeCallBody *)dest;
     
     /* Need a fresh handle for resource management purposes. */
-    dest_body->lib_name = mem_sys_allocate(strlen(dest_body->lib_name) + 1);
-    strcpy(dest_body->lib_name, src_body->lib_name);
-    dest_body->lib_handle = dlLoadLibrary(dest_body->lib_name);
+    if (src_body->lib_name) {
+        dest_body->lib_name = mem_sys_allocate(strlen(src_body->lib_name) + 1);
+        strcpy(dest_body->lib_name, src_body->lib_name);
+        dest_body->lib_handle = dlLoadLibrary(dest_body->lib_name);
+    }
     
     /* Rest is just simple copying. */
     dest_body->entry_point = src_body->entry_point;
     dest_body->convention = src_body->convention;
     dest_body->num_args = src_body->num_args;
-    dest_body->arg_types = mem_sys_allocate(src_body->num_args * sizeof(INTVAL));
-    memcpy(dest_body->arg_types, src_body->arg_types, src_body->num_args * sizeof(INTVAL));
+    if (src_body->arg_types) {
+        dest_body->arg_types = mem_sys_allocate(src_body->num_args * sizeof(INTVAL));
+        memcpy(dest_body->arg_types, src_body->arg_types, src_body->num_args * sizeof(INTVAL));
+    }
     dest_body->ret_type = src_body->ret_type;
 }
 
