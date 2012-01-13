@@ -621,8 +621,10 @@ entry to produce the node to be returned.
     maphash['hash'] = $P0
 
     # repr-level aggregate operations
+    maphash['r_atpos']     = 'repr_at_pos_obj__PPi'
     maphash['r_atpos_i']   = 'repr_at_pos_int__IPi'
     maphash['r_atpos_n']   = 'repr_at_pos_num__NPi'
+    maphash['r_bindpos']   = 'repr_bind_pos_obj__2PiP'
     maphash['r_bindpos_i'] = 'repr_bind_pos_int__2Pii'
     maphash['r_bindpos_n'] = 'repr_bind_pos_num__2Pin'
     

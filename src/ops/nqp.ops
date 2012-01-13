@@ -741,6 +741,30 @@ inline op repr_name(out STR, in PMC) :base_core {
 
 /*
 
+=item repr_at_pos_obj()
+
+Gets an element from the specified position, as an object.
+
+=cut
+
+*/
+inline op repr_at_pos_obj(out PMC, in PMC, in INT) :base_core {
+    PMC *obj = decontainerize(interp, $2);
+    if (obj->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(obj))
+            $1 = REPR(obj)->idx_funcs->at_pos_boxed(interp, STABLE(obj), OBJECT_BODY(obj), $3);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot do at_pos on a type object");
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_at_pos_obj on a SixModelObject");
+}
+
+
+/*
+
 =item repr_at_pos_int()
 
 Gets an element from the specified position, as an integer.
@@ -788,6 +812,30 @@ inline op repr_at_pos_num(out NUM, in PMC, in INT) :base_core {
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_at_pos_num on a SixModelObject");
+}
+
+
+/*
+
+=item repr_bind_pos_obj()
+
+Sets the element at the specified position to an object.
+
+=cut
+
+*/
+inline op repr_bind_pos_obj(in PMC, in INT, in PMC) :base_core {
+    PMC *obj = decontainerize(interp, $1);
+    if (obj->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(obj))
+            REPR(obj)->idx_funcs->bind_pos_boxed(interp, STABLE(obj), OBJECT_BODY(obj), $2, $3);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot do bind_pos on a type object");
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_bind_pos_obj on a SixModelObject");
 }
 
 
