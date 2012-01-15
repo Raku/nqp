@@ -24,12 +24,6 @@
 
 */
 
-
-#if defined(OS_Linux) && !defined(_GNU_SOURCE)
-#define _GNU_SOURCE
-#define __USE_GNU
-#endif
-
 /*
  
  dynamic symbol resolver for elf
@@ -48,6 +42,12 @@
 #else
 #  include <elf.h>
 #endif
+
+#if defined(__GLIBC__)
+#define _GNU_SOURCE
+#define __USE_GNU
+#endif /* defined(__GLIBC__) */
+
 #include "dynload_alloc.h"
 
 #include <assert.h>

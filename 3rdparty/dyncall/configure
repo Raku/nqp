@@ -125,6 +125,8 @@ guess_os()
     CONFIG_OS="beos"
   elif [ "$OS" = "Minix" ]; then
     CONFIG_OS="minix"
+  elif [ "$OS" = "GNU/kFreeBSD" ]; then
+    CONFIG_OS="freebsd"
   fi
   info "guess operating system $CONFIG_OS"
 }

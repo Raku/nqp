@@ -71,7 +71,7 @@
 #define DC__OS_Linux
 
 /* The most powerful open source Unix-like OS - FreeBSD. */
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
 #define DC__OS_FreeBSD
 
 /* The most secure open source Unix-like OS - OpenBSD. */
