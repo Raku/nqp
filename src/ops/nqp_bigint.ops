@@ -176,6 +176,16 @@ inline op nqp_bigint_mod(out PMC, in PMC, in PMC, in PMC) :base_core {
     mp_mod(a, b, get_bigint(interp, $1));
 }
 
+inline op nqp_bigint_exp_mod(out PMC, in PMC, in PMC, in PMC, in PMC) :base_core {
+    mp_int *a = get_bigint(interp, $2);
+    mp_int *b = get_bigint(interp, $3);
+    mp_int *c = get_bigint(interp, $4);
+    $1 = REPR($5)->allocate(interp, STABLE($5));
+    REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
+    mp_exptmod(a, b, c, get_bigint(interp, $1));
+}
+
+
 inline op nqp_bigint_neg(out PMC, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     $1 = REPR($3)->allocate(interp, STABLE($3));
