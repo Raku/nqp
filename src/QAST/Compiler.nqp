@@ -32,6 +32,7 @@ class QAST::Compiler is HLL::Compiler {
         my $faillabel    := self.post_new('Label', :result($prefix ~ 'fail'));
         my $jumplabel    := self.post_new('Label', :result($prefix ~ 'jump'));
         my $cutlabel     := self.post_new('Label', :result($prefix ~ 'cut'));
+        my $cstacklabel  := self.post_new('Label', :result($prefix ~ 'cstack_done'));
         %*REG<fail>      := $faillabel;
 
         # common prologue
@@ -45,6 +46,11 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push($faillabel);
         $ops.push_pirop('unless', %*REG<bstack>, $donelabel);
         $ops.push_pirop('pop', '$I19', %*REG<bstack>);
+        $ops.push_pirop('if_null', %*REG<cstack>, $cstacklabel);
+        $ops.push_pirop('unless', %*REG<cstack>, $cstacklabel);
+        $ops.push_pirop('dec', '$I19');
+        $ops.push_pirop('set', '$P11', %*REG<cstack> ~ '[$I19]');
+        $ops.push($cstacklabel);
         $ops.push_pirop('pop', %*REG<rep>, %*REG<bstack>);
         $ops.push_pirop('pop', %*REG<pos>, %*REG<bstack>);
         $ops.push_pirop('pop', '$I19', %*REG<bstack>);
@@ -411,6 +417,34 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push_pirop('callmethod', $subpost, %*REG<cur>, |@pargs, |@nargs, :result<$P11>);
         $ops.push_pirop('repr_get_attr_int', '$I11', '$P11', %*REG<curclass>, '"$!pos"');
         $ops.push_pirop($testop, '$I11', '0', %*REG<fail>);
+        if $subtype ne 'zerowidth' {
+            my $rxname := self.unique('rxsubrule');
+            my $passlabel := self.post_new('Label', :result($rxname ~ '_pass'));
+            if $node.backtrack eq 'r' {
+                unless $subtype eq 'method' {
+                    self.regex_mark($ops, $passlabel, -1, 0);
+                    $ops.push($passlabel);
+                }
+            }
+            else {
+                my $backlabel := self.post_new('Label', :result($rxname ~ '_back'));
+                $ops.push_pirop('goto', $passlabel);
+                $ops.push($backlabel);
+                $ops.push_pirop('callmethod', '"!cursor_next"', '$P11', :result('$P11'));
+                $ops.push_pirop('repr_get_attr_int', '$I11', '$P11', %*REG<curclass>, '"$!pos"');
+                $ops.push_pirop($testop, '$I11', '0', %*REG<fail>);
+                $ops.push($passlabel);
+                $ops.push_pirop('callmethod', '"!cursor_push_cstack"', %*REG<cur>, 
+                                '$P11', :result(%*REG<cstack>));
+                $ops.push_pirop('push', %*REG<cstack>, '$P11');
+                $ops.push_pirop('set_addr', '$I11', $backlabel);
+                $ops.push_pirop('push', %*REG<bstack>, '$I11');
+                $ops.push_pirop('push', %*REG<bstack>, 0);
+                $ops.push_pirop('push', %*REG<bstack>, %*REG<pos>);
+                $ops.push_pirop('elements', '$I11', %*REG<cstack>);
+                $ops.push_pirop('push', %*REG<bstack>, '$I11');
+            }
+        }
         $ops.push_pirop('callmethod', '"!cursor_capture"', %*REG<cur>, 
                         '$P11', $name, :result(%*REG<cstack>))
           if $subtype eq 'capture';

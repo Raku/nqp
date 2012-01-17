@@ -88,6 +88,12 @@ role NQPCursorRole {
         pir::push__vPi($!bstack, nqp::elems($!cstack));
         $!cstack;
     }
+    
+    method !cursor_push_cstack($capture) {
+        $!cstack := [] unless pir::defined($!cstack);
+        nqp::push($!cstack, $capture);
+        $!cstack;
+    }
 
     my $pass_mark := 1; # NQP has no constant table yet
     method !cursor_pass($pos, $name?) {
