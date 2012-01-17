@@ -24,7 +24,7 @@ role NQPCursorRole {
             for $!cstack -> $subcur {
                 my $submatch := $subcur.MATCH;
                 my $name := nqp::getattr($subcur, $?CLASS, '$!name');
-                if $name {
+                if pir::defined($name) {
                     for nqp::split('=', $name) -> $name {
                         %caplist{$name} >= 2
                             ?? nqp::push($caps{$name}, $submatch)
