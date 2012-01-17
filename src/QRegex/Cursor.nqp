@@ -23,10 +23,13 @@ role NQPCursorRole {
         if $!cstack {
             for $!cstack -> $subcur {
                 my $submatch := $subcur.MATCH;
-                for nqp::split('=', nqp::getattr($subcur, $?CLASS, '$!name')) -> $name {
-                    %caplist{$name} >= 2
-                      ?? nqp::push($caps{$name}, $submatch)
-                      !! nqp::bindkey($caps, $name, $submatch);
+                my $name := nqp::getattr($subcur, $?CLASS, '$!name');
+                if $name {
+                    for nqp::split('=', $name) -> $name {
+                        %caplist{$name} >= 2
+                            ?? nqp::push($caps{$name}, $submatch)
+                            !! nqp::bindkey($caps, $name, $submatch);
+                    }
                 }
             }
         } 
