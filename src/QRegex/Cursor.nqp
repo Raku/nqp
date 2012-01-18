@@ -189,7 +189,8 @@ role NQPCursorRole {
     method !BACKREF($name) {
         my $cur := self."!cursor_start"();
         my $n := $!cstack ?? nqp::elems($!cstack) - 1 !! -1;
-        $n-- while $n >= 0 && nqp::getattr($!cstack[$n], $?CLASS, '$!name') ne $name;
+        $n-- while $n >= 0 && (nqp::isnull(nqp::getattr($!cstack[$n], $?CLASS, '$!name')) ||
+                               nqp::getattr($!cstack[$n], $?CLASS, '$!name') ne $name);
         if $n >= 0 {
             my $subcur := $!cstack[$n];
             my $litlen := $subcur.pos - $subcur.from;
