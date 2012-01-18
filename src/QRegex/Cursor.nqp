@@ -99,10 +99,11 @@ role NQPCursorRole {
     }
 
     my $pass_mark := 1; # NQP has no constant table yet
-    method !cursor_pass($pos, $name?) {
+    method !cursor_pass($pos, $name?, :$backtrack) {
         $!match := $pass_mark;
         $!pos := $pos;
-        $!restart := $!regexsub;
+        $!restart := $!regexsub
+            if $backtrack;
         self.'!reduce'($name) if $name;
     }
 
