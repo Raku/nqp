@@ -118,7 +118,9 @@ role NQPCursorRole {
             $!restart(self);
         }
         else {
-            self."!cursor_start"()."!cursor_fail"()
+            my $cur := self."!cursor_start"();
+            $cur."!cursor_fail"();
+            $cur
         }
     }
 
