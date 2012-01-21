@@ -414,6 +414,7 @@ class QAST::Compiler is HLL::Compiler {
         my @nargs := $cpn[2] // [];
         my $subpost := nqp::shift(@pargs);
         my $testop := $node.negate ?? 'ge' !! 'lt';
+        my $captured := 0;
         $ops.push($cpn[0]);
         $ops.push_pirop('repr_bind_attr_int', %*REG<cur>, %*REG<curclass>, '"$!pos"', %*REG<pos>);
         $ops.push_pirop('callmethod', $subpost, %*REG<cur>, |@pargs, |@nargs, :result<$P11>);
@@ -436,9 +437,15 @@ class QAST::Compiler is HLL::Compiler {
                 $ops.push_pirop('repr_get_attr_int', '$I11', '$P11', %*REG<curclass>, '"$!pos"');
                 $ops.push_pirop($testop, '$I11', '0', %*REG<fail>);
                 $ops.push($passlabel);
-                $ops.push_pirop('callmethod', '"!cursor_push_cstack"', %*REG<cur>, 
-                                '$P11', :result(%*REG<cstack>));
-                $ops.push_pirop('push', %*REG<cstack>, '$P11');
+                if $subtype eq 'capture' {
+                    $ops.push_pirop('callmethod', '"!cursor_capture"', %*REG<cur>, 
+                                    '$P11', $name, :result(%*REG<cstack>));
+                    $captured := 1;
+                }
+                else {
+                    $ops.push_pirop('callmethod', '"!cursor_push_cstack"', %*REG<cur>, 
+                                    '$P11', :result(%*REG<cstack>));
+                }
                 $ops.push_pirop('set_addr', '$I11', $backlabel);
                 $ops.push_pirop('push', %*REG<bstack>, '$I11');
                 $ops.push_pirop('push', %*REG<bstack>, 0);
@@ -449,7 +456,7 @@ class QAST::Compiler is HLL::Compiler {
         }
         $ops.push_pirop('callmethod', '"!cursor_capture"', %*REG<cur>, 
                         '$P11', $name, :result(%*REG<cstack>))
-          if $subtype eq 'capture';
+          if !$captured && $subtype eq 'capture';
         $ops.push_pirop('repr_get_attr_int', %*REG<pos>, '$P11', %*REG<curclass>, '"$!pos"')
           unless $subtype eq 'zerowidth';
         $ops;
