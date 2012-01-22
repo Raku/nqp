@@ -43,6 +43,7 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push_pirop('eq', '$I19', 1, $restartlabel);
         $ops.push(self.regex_post($node));
         $ops.push($restartlabel);
+        $ops.push_pirop('repr_get_attr_obj', %*REG<cstack>, %*REG<cur>, %*REG<curclass>, '"$!cstack"');
         $ops.push($faillabel);
         $ops.push_pirop('unless', %*REG<bstack>, $donelabel);
         $ops.push_pirop('pop', '$I19', %*REG<bstack>);
