@@ -394,7 +394,7 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
     NativeCallBody *body = get_nc_body(interp, $3);
     
     /* Create and set up call VM. */
-    DCCallVM *vm = dcNewCallVM(body->num_args * sizeof(void *));
+    DCCallVM *vm = dcNewCallVM(8192);
     dcMode(vm, body->convention);
     
     /* Process arguments. */
