@@ -8,7 +8,7 @@ use Text::ParseWords;
 use Getopt::Long;
 use Cwd;
 use lib "tools/lib";
-use NQP::Configure qw(cmp_rev read_parrot_config 
+use NQP::Configure qw(cmp_rev read_parrot_config
                       fill_template_file fill_template_text
                       slurp system_or_die verify_install sorry gen_parrot);
 
@@ -100,15 +100,16 @@ MAIN: {
 
     $config{'makefile-timing'} = $options{'makefile-timing'};
     $config{'stagestats'} = '--stagestats' if $options{'makefile-timing'};
-    $config{'shell'} = 'sh';
-    if ($^O eq 'MSWin32') {
-        $config{'shell'} = 'cmd';
-        $config{'win32_libparrot_copy'} =
-            'copy $(PARROT_BIN_DIR)\libparrot.dll .';
+    $config{'shell'} = $^O eq 'MSWin32' ? 'cmd' : 'sh';
+    if ($^O eq 'MSWin32' or $^O eq 'cygwin') {
+        $config{'dll'} = '$(PARROT_BIN_DIR)/$(PARROT_LIB_SHARED)';
+        $config{'dllcopy'} = '$(PARROT_LIB_SHARED)';
+        $config{'make_dllcopy'} =
+            '$(PARROT_DLL_COPY) : $(PARROT_DLL)'."\n\t".'$(CP) $(PARROT_DLL) .';
     }
 
     my $make = fill_template_text('@make@', %config);
-    
+
     if ($make eq 'nmake') {
         system_or_die('cd 3rdparty\dyncall && Configure.bat' .
             ($config{'parrot::archname'} =~ /x64/ ? ' /target-x64' : ''));
@@ -118,7 +119,7 @@ MAIN: {
         system_or_die('cd 3rdparty/dyncall && sh configure');
         $config{'dyncall_build'} = "cd 3rdparty/dyncall && BUILD_DIR=. $make";
     }
-    
+
     fill_template_file('tools/build/Makefile.in', 'Makefile', %config);
 
     {

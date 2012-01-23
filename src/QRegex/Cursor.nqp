@@ -23,10 +23,13 @@ role NQPCursorRole {
         if $!cstack {
             for $!cstack -> $subcur {
                 my $submatch := $subcur.MATCH;
-                for nqp::split('=', nqp::getattr($subcur, $?CLASS, '$!name')) -> $name {
-                    %caplist{$name} >= 2
-                      ?? nqp::push($caps{$name}, $submatch)
-                      !! nqp::bindkey($caps, $name, $submatch);
+                my $name := nqp::getattr($subcur, $?CLASS, '$!name');
+                if pir::defined($name) {
+                    for nqp::split('=', $name) -> $name {
+                        %caplist{$name} >= 2
+                            ?? nqp::push($caps{$name}, $submatch)
+                            !! nqp::bindkey($caps, $name, $submatch);
+                    }
                 }
             }
         } 
@@ -89,12 +92,19 @@ role NQPCursorRole {
         pir::push__vPi($!bstack, nqp::elems($!cstack));
         $!cstack;
     }
+    
+    method !cursor_push_cstack($capture) {
+        $!cstack := [] unless pir::defined($!cstack);
+        nqp::push($!cstack, $capture);
+        $!cstack;
+    }
 
     my $pass_mark := 1; # NQP has no constant table yet
-    method !cursor_pass($pos, $name?) {
+    method !cursor_pass($pos, $name?, :$backtrack) {
         $!match := $pass_mark;
         $!pos := $pos;
-        $!restart := $!regexsub;
+        $!restart := $!regexsub
+            if $backtrack;
         self.'!reduce'($name) if $name;
     }
 
@@ -109,7 +119,9 @@ role NQPCursorRole {
             $!restart(self);
         }
         else {
-            self."!cursor_start"()."!cursor_fail"()
+            my $cur := self."!cursor_start"();
+            $cur."!cursor_fail"();
+            $cur
         }
     }
 
@@ -186,7 +198,8 @@ role NQPCursorRole {
     method !BACKREF($name) {
         my $cur := self."!cursor_start"();
         my $n := $!cstack ?? nqp::elems($!cstack) - 1 !! -1;
-        $n-- while $n >= 0 && nqp::getattr($!cstack[$n], $?CLASS, '$!name') ne $name;
+        $n-- while $n >= 0 && (nqp::isnull(nqp::getattr($!cstack[$n], $?CLASS, '$!name')) ||
+                               nqp::getattr($!cstack[$n], $?CLASS, '$!name') ne $name);
         if $n >= 0 {
             my $subcur := $!cstack[$n];
             my $litlen := $subcur.pos - $subcur.from;

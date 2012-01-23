@@ -5,6 +5,7 @@ PARROT_ARGS      =
 
 # values from parrot_config
 PARROT_BIN_DIR     = @bindir@
+PARROT_LIB_SHARED  = @libparrot_shared@
 PARROT_VERSION     = @versiondir@
 PARROT_INCLUDE_DIR = @includedir@$(PARROT_VERSION)
 PARROT_LIB_DIR     = @libdir@$(PARROT_VERSION)
@@ -32,16 +33,18 @@ CHMOD         = $(PERL) -MExtUtils::Command -e chmod
 TOM           = 3rdparty/libtommath/bn
 
 # locations of parrot resources
-PARROT           = $(PARROT_BIN_DIR)/parrot$(EXE)
-PARROT_NQP       = $(PARROT_BIN_DIR)/parrot_nqp$(EXE)
-PBC_TO_EXE       = $(PARROT_BIN_DIR)/pbc_to_exe$(EXE)
-PARROT_TOOLS_DIR = $(PARROT_LIB_DIR)/tools
-PARROT_PERL_LIB  = $(PARROT_TOOLS_DIR)/lib
-OPS2C            = $(PARROT_BIN_DIR)/ops2c$(EXE)
-PMC2C            = $(PERL) $(PARROT_TOOLS_DIR)/build/pmc2c.pl
-PMC2C_INCLUDES   = --include src/pmc --include $(PARROT_SRC_DIR) --include $(PARROT_SRC_DIR)/pmc
-CINCLUDES        = -I$(PARROT_INCLUDE_DIR) -I$(PARROT_INCLUDE_DIR)/pmc
-LINKARGS         = $(LDFLAGS) $(LD_LOAD_FLAGS) $(LIBPARROT) @libs@ @icu_shared@
+PARROT            = $(PARROT_BIN_DIR)/parrot$(EXE)
+PARROT_DLL        = @dll@
+PARROT_DLL_COPY   = @dllcopy@
+PARROT_NQP        = $(PARROT_BIN_DIR)/parrot_nqp$(EXE)
+PBC_TO_EXE        = $(PARROT_BIN_DIR)/pbc_to_exe$(EXE)
+PARROT_TOOLS_DIR  = $(PARROT_LIB_DIR)/tools
+PARROT_PERL_LIB   = $(PARROT_TOOLS_DIR)/lib
+OPS2C             = $(PARROT_BIN_DIR)/ops2c$(EXE)
+PMC2C             = $(PERL) $(PARROT_TOOLS_DIR)/build/pmc2c.pl
+PMC2C_INCLUDES    = --include src/pmc --include $(PARROT_SRC_DIR) --include $(PARROT_SRC_DIR)/pmc
+CINCLUDES         = -I$(PARROT_INCLUDE_DIR) -I$(PARROT_INCLUDE_DIR)/pmc
+LINKARGS          = $(LDFLAGS) $(LD_LOAD_FLAGS) $(LIBPARROT) @libs@ @icu_shared@
 
 # nqp directories
 DYNEXT_DIR       = dynext
@@ -66,7 +69,7 @@ PAST_SOURCES = \
   src/PAST/NQP.pir \
   src/cheats/parrot-callcontext.pir \
   src/cheats/parrot-sub.pir \
-  
+
 HLL_SOURCES = \
   src/HLL/Grammar.pm \
   src/HLL/Actions.pm \
@@ -123,7 +126,7 @@ CORE_SETTING_SOURCES = \
   src/core/YOUAREHERE.pm \
 
 CORE_SETTING_NQP = NQPCORE.setting
-  
+
 STAGE0_SOURCES = \
   src/stage0/Regex-s0.pir \
   src/stage0/HLL-s0.pir \
@@ -131,7 +134,7 @@ STAGE0_SOURCES = \
   src/stage0/NQPMO-s0.pir \
   src/stage0/NQP-s0.pir \
   src/stage0/NQPCORE.setting-s0.pir \
-  
+
 STAGE0 = src/stage0
 STAGE1 = src/stage1
 STAGE2 = src/stage2
@@ -192,7 +195,7 @@ DYNOPS          = $(OPS_DIR)/$(OPS)$(LOAD_EXT)
 PMC_SOURCES     = $(PMC_DIR)/stable.pmc $(PMC_DIR)/sixmodelobject.pmc \
                   $(PMC_DIR)/dispatchersub.pmc \
                   $(PMC_DIR)/nqpmultisig.pmc $(PMC_DIR)/nqplexinfo.pmc \
-                  $(PMC_DIR)/nqplexpad.pmc $(PMC_DIR)/serializationcontext.pmc 
+                  $(PMC_DIR)/nqplexpad.pmc $(PMC_DIR)/serializationcontext.pmc
 
 OPS_SOURCE      = nqp.ops
 
@@ -488,6 +491,7 @@ CLEANUPS = \
   P6Regex$(EXE) \
   nqp.pbc \
   nqp$(EXE) \
+  $(PARROT_DLL_COPY) \
   *.c\
   *.o\
   src/stage0/*.pbc \
@@ -580,7 +584,7 @@ $(STAGE1)/$(CORE_SETTING_PBC): $(STAGE0_PBCS) $(STAGE1)/$(NQP_MO_PBC) $(STAGE1)/
 	    --target=pir --output=$(STAGE1)/$(CORE_SETTING_PIR) \
 	    --module-path=$(STAGE1) --setting=NULL $(STAGE1)/$(CORE_SETTING_NQP)
 	$(PARROT) -o $(STAGE1)/$(CORE_SETTING_PBC) $(STAGE1)/$(CORE_SETTING_PIR)
-        
+
 $(STAGE1)/$(REGEX_PBC): $(DYNEXT_TARGET) $(REGEX_SOURCES) $(STAGE1)/$(CORE_SETTING_PBC)
 	$(PARROT) -o $(STAGE1)/$(REGEX_PBC) $(REGEX_SOURCES)
 
@@ -654,7 +658,7 @@ $(STAGE2)/$(MODULE_LOADER_PBC): $(STAGE1_PBCS) src/ModuleLoader.pm
 	    --setting=NULL src/ModuleLoader.pm
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(MODULE_LOADER_PBC) \
 	    $(STAGE2)/gen/module_loader.pir
-        
+
 $(STAGE2)/$(CORE_SETTING_PBC): $(STAGE1_PBCS) $(STAGE2)/$(NQP_MO_PBC) $(STAGE2)/$(MODULE_LOADER_PBC) $(CORE_SETTING_SOURCES)
 	$(MKPATH) $(STAGE2)/gen
 	$(PERL) tools/build/gen-cat.pl $(CORE_SETTING_SOURCES) > $(STAGE2)/$(CORE_SETTING_NQP)
@@ -721,8 +725,10 @@ $(ALL_PBCS): $(STAGE2_PBCS)
 	$(CP) $(STAGE2)/$(P6QREGEX_PBC) .
 	$(CP) $(STAGE2)/$(NQP_PBC) .
 
-$(NQP_EXE): $(NQP_PBC)
+$(NQP_EXE): $(NQP_PBC) $(PARROT_DLL_COPY)
 	$(PBC_TO_EXE) $(NQP_PBC)
+
+@make_dllcopy@
 
 $(DYNEXT_TARGET): $(DYNPMC) $(DYNOPS) $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT) $(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT)
 	$(CP) $(DYNPMC) $(DYNEXT_DIR)

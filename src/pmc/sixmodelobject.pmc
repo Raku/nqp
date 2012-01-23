@@ -97,10 +97,7 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
 
     VTABLE PMC * find_method(STRING *name) {
         PMC *decont = decontainerize(interp, SELF);
-        PMC *meth   = STABLE(decont)->find_method(interp, decont, name, NO_HINT);
-        /* Map type objects into Parrot NULLPMC. */
-        return meth->vtable->base_type != decont->vtable->base_type || IS_CONCRETE(meth) ?
-            meth : PMCNULL;
+        return STABLE(decont)->find_method(interp, decont, name, NO_HINT);
     }
 
     VTABLE PMC* get_attr_keyed(PMC *class_handle, STRING *name) {

@@ -105,9 +105,16 @@ guess_os()
     CONFIG_OS="windows"
   elif [ "$OS" = "Darwin" ]; then
     CONFIG_OS="darwin"
-  elif [ "$OS" = "CYGWIN_NT-5.1" ]; then
+  elif [ "$OS" = "CYGWIN_NT-5.0" ] ||
+       [ "$OS" = "CYGWIN_NT-5.1" ] ||
+       [ "$OS" = "CYGWIN_NT-5.2" ] ||
+       [ "$OS" = "CYGWIN_NT-6.0" ] ||
+       [ "$OS" = "CYGWIN_NT-6.1" ] ||
+       [ "$OS" = "CYGWIN_NT-6.1-WOW64" ]; then
     CONFIG_OS="cygwin"
-  elif [ "$OS" = "MINGW32_NT-5.1" ]; then
+  elif [ "$OS" = "MINGW32_NT-5.0" ] ||
+       [ "$OS" = "MINGW32_NT-5.1" ] ||
+       [ "$OS" = "MINGW32_NT-5.2" ]; then
     CONFIG_OS="msys"
   elif [ "$OS" = "Linux" ]; then
     CONFIG_OS="linux"
@@ -125,6 +132,8 @@ guess_os()
     CONFIG_OS="beos"
   elif [ "$OS" = "Minix" ]; then
     CONFIG_OS="minix"
+  elif [ "$OS" = "GNU/kFreeBSD" ]; then
+    CONFIG_OS="freebsd"
   fi
   info "guess operating system $CONFIG_OS"
 }

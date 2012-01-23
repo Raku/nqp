@@ -27,6 +27,7 @@ ab:::cd | gh:::ij	xyabghij	n	rule cut at top
 [ab:::cd | gh:::ij]	xyabghij	n	rule cut in group
 # todo :pge<:>
 [ ab | abc ]: de	xyzabcde	n	no backtrack into group
+# todo :pge<:>
 ( ab | abc ): de	xyzabcde	n	no backtrack into subpattern
 # todo :pge<:>
 [ when <commit> ever ] | whence	whence	n	full backtrack failure

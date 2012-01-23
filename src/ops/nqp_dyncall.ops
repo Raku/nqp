@@ -338,7 +338,7 @@ inline op nqp_native_call_build(in PMC, in STR, in STR, in STR, in PMC, in PMC) 
     
     /* Try to load the library. */
     body->lib_name = lib_name;
-    body->lib_handle = dlLoadLibrary(lib_name);
+    body->lib_handle = dlLoadLibrary(strlen(lib_name) ? lib_name : NULL);
     if (!body->lib_handle) {
         Parrot_str_free_cstring(sym_name);
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -394,7 +394,7 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
     NativeCallBody *body = get_nc_body(interp, $3);
     
     /* Create and set up call VM. */
-    DCCallVM *vm = dcNewCallVM(body->num_args * sizeof(void *));
+    DCCallVM *vm = dcNewCallVM(8192);
     dcMode(vm, body->convention);
     
     /* Process arguments. */

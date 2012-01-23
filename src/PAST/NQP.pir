@@ -440,33 +440,34 @@ entry to produce the node to be returned.
 
     # arithmetic opcodes
     maphash['add_i']    = 'add__Iii'
-    maphash['add_I']    = 'nqp_bigint_add__PPP'
+    maphash['add_I']    = 'nqp_bigint_add__PPPP'
     maphash['add_n']    = 'add__Nnn'
     maphash['sub_i']    = 'sub__Iii'
-    maphash['sub_I']    = 'nqp_bigint_sub__PPP'
+    maphash['sub_I']    = 'nqp_bigint_sub__PPPP'
     maphash['sub_n']    = 'sub__Nnn'
     maphash['mul_i']    = 'mul__Iii'
-    maphash['mul_I']    = 'nqp_bigint_mul__PPP'
+    maphash['mul_I']    = 'nqp_bigint_mul__PPPP'
     maphash['mul_n']    = 'mul__Nnn'
     maphash['div_i']    = 'div__Iii'
-    maphash['div_I']    = 'nqp_bigint_div__PPP'
+    maphash['div_I']    = 'nqp_bigint_div__PPPP'
     maphash['div_n']    = 'div__Nnn'
     maphash['mod_i']    = 'mod__Iii'
-    maphash['mod_I']    = 'nqp_bigint_mod__PPP'
+    maphash['mod_I']    = 'nqp_bigint_mod__PPPP'
+    maphash['expmod_I'] = 'nqp_bigint_exp_mod__PPPPP'
     maphash['mod_n']    = 'mod__Nnn'
     maphash['pow_n']    = 'pow__Nnn'
-    maphash['pow_I']    = 'nqp_bigint_pow__PPPP'
+    maphash['pow_I']    = 'nqp_bigint_pow__PPPPP'
     maphash['neg_i']    = 'neg__Ii'
-    maphash['neg_I']    = 'nqp_bigint_neg__PP'
+    maphash['neg_I']    = 'nqp_bigint_neg__PPP'
     maphash['neg_n']    = 'neg__Nn'
     maphash['abs_i']    = 'abs__Ii'
-    maphash['abs_I']    = 'nqp_bigint_abs__PP'
+    maphash['abs_I']    = 'nqp_bigint_abs__PPP'
     maphash['abs_n']    = 'abs__Nn'
 
     maphash['gcd_i']    = 'gcd__Ii'
-    maphash['gcd_I']    = 'nqp_bigint_gcd__PP'
+    maphash['gcd_I']    = 'nqp_bigint_gcd__PPP'
     maphash['lcm_i']    = 'lcm__Ii'
-    maphash['lcm_I']    = 'nqp_bigint_lcm__PP'
+    maphash['lcm_I']    = 'nqp_bigint_lcm__PPP'
 
     maphash['ceil_n']   = 'ceil__Nn'
     maphash['floor_n']  = 'floor__NN'
@@ -498,17 +499,17 @@ entry to produce the node to be returned.
 
     # bitwise ops
     maphash['bitor_i']  = 'bor__II'
-    maphash['bitor_I']  = 'nqp_bigint_bor__PPP'
+    maphash['bitor_I']  = 'nqp_bigint_bor__PPPP'
     maphash['bitxor_i'] = 'bxor__II'
-    maphash['bitxor_I'] = 'nqp_bigint_bxor__PPP'
+    maphash['bitxor_I'] = 'nqp_bigint_bxor__PPPP'
     maphash['bitand_i'] = 'band__II'
-    maphash['bitand_I'] = 'nqp_bigint_band__PPP'
+    maphash['bitand_I'] = 'nqp_bigint_band__PPPP'
     maphash['bitneg_i'] = 'bnot__II'
     maphash['bitneg_I'] = 'nqp_bigint_bnot__PP'
     maphash['bitshiftl_i']  = 'shl__III'
-    maphash['bitshiftl_I']  = 'nqp_bigint_shl__PPI'
+    maphash['bitshiftl_I']  = 'nqp_bigint_shl__PPIP'
     maphash['bitshiftr_i']  = 'shr__III'
-    maphash['bitshiftr_I']  = 'nqp_bigint_shr__PPI'
+    maphash['bitshiftr_I']  = 'nqp_bigint_shr__PPIP'
 
     maphash['bitor_s']  = 'bors__SS'
     maphash['bitxor_s'] = 'bxors__SS'
@@ -565,7 +566,7 @@ entry to produce the node to be returned.
     maphash['isge_s']   = 'isge__Iss'
 
     # bigint ops
-    maphash['fromstr_I'] = 'nqp_bigint_from_str__PPs'
+    maphash['fromstr_I'] = 'nqp_bigint_from_str__PsP'
     maphash['tostr_I']   = 'nqp_bigint_to_str__SP'
     maphash['base_I']    = 'nqp_bigint_to_str_base__SPI'
     maphash['isbig_I']   = 'nqp_bigint_is_big__IP'
@@ -621,8 +622,10 @@ entry to produce the node to be returned.
     maphash['hash'] = $P0
 
     # repr-level aggregate operations
+    maphash['r_atpos']     = 'repr_at_pos_obj__PPi'
     maphash['r_atpos_i']   = 'repr_at_pos_int__IPi'
     maphash['r_atpos_n']   = 'repr_at_pos_num__NPi'
+    maphash['r_bindpos']   = 'repr_bind_pos_obj__2PiP'
     maphash['r_bindpos_i'] = 'repr_bind_pos_int__2Pii'
     maphash['r_bindpos_n'] = 'repr_bind_pos_num__2Pin'
     

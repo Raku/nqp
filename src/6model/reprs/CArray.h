@@ -22,6 +22,13 @@ typedef struct {
     CArrayBody body;
 } CArrayInstance;
 
+/* What kind of element do we have? */
+#define CARRAY_ELEM_KIND_NUMERIC    1
+#define CARRAY_ELEM_KIND_STRING     2
+#define CARRAY_ELEM_KIND_POINTER    3
+#define CARRAY_ELEM_KIND_CARRAY     4
+#define CARRAY_ELEM_KIND_CSTRUCT    5
+
 /* The CArray REPR data contains a little info about the type of array
  * that we have. */
 typedef struct {
@@ -30,6 +37,10 @@ typedef struct {
 
     /* The type of an element. */
     PMC *elem_type;
+    
+    /* What kind of element is it (lets us quickly know how to handle access
+     * to it). */
+    INTVAL elem_kind;
 } CArrayREPRData;
 
 /* Initializes the CArray REPR. */
