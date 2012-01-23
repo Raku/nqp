@@ -126,6 +126,9 @@ typedef struct {
     
     /* The underlying package stash. */
     PMC *WHO;
+    
+    /* Serialization context that this s-table belongs to. */
+    PMC *sc;
 
     /* Parrot-specific set of v-table to method mappings, for overriding
      * of Parrot v-table functions. */
