@@ -250,6 +250,8 @@ PMC * SixModelObject_bootstrap_knowhow(PARROT_INTERP, PMC *sc) {
     SC_PMC(knowhow_pmc) = sc;
     VTABLE_set_pmc_keyed_int(interp, sc, 1, knowhow_how_pmc);
     SC_PMC(knowhow_how_pmc) = sc;
+    STABLE(knowhow_pmc)->sc = sc;
+    STABLE(knowhow_how_pmc)->sc = sc;
 
     return knowhow_pmc;
 }
@@ -329,6 +331,7 @@ PMC * SixModelObject_setup_knowhow_attribute(PARROT_INTERP, PMC *sc, PMC *knowho
      * context. */
     VTABLE_set_pmc_keyed_int(interp, sc, 2, knowhow_attr);
     SC_PMC(knowhow_attr) = sc;
+    STABLE(knowhow_attr)->sc = sc;
     
     return knowhow_attr;
 }
