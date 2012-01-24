@@ -32,6 +32,20 @@ void SC_set_sc(PARROT_INTERP, STRING *handle, PMC *sc) {
     VTABLE_set_pmc_keyed_str(interp, scs, handle, sc);
 }
 
+/* Given an SC, returns its unique handle. */
+STRING * SC_get_handle(PARROT_INTERP, PMC *sc) {
+    STRING *handle;
+    GETATTR_SerializationContext_handle(interp, sc, handle);
+    return handle;
+}
+
+/* Given an SC, returns its description. */
+STRING * SC_get_description(PARROT_INTERP, PMC *sc) {
+    STRING *description;
+    GETATTR_SerializationContext_description(interp, sc, description);
+    return description;
+}
+
 /* Given an SC, looks up the index of an STable that is in its root set. */
 INTVAL SC_find_stable_idx(PARROT_INTERP, PMC *sc, PMC *st) {
     PMC *to_search;
