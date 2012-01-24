@@ -48,18 +48,16 @@ typedef struct {
     PMC *seen_strings;
     
     /* Amount of memory allocated for various things. */
-    size_t dependencies_table_alloc;
-    size_t stables_table_alloc;
-    size_t stables_data_alloc;
-    size_t objects_table_alloc;
-    size_t objects_data_alloc;
+    Parrot_Int4 dependencies_table_alloc;
+    Parrot_Int4 stables_table_alloc;
+    Parrot_Int4 stables_data_alloc;
+    Parrot_Int4 objects_table_alloc;
+    Parrot_Int4 objects_data_alloc;
     
-    /* Current offsets for various things. */
-    size_t dependencies_table_offset;
-    size_t stables_table_offset;
-    size_t stables_data_offset;
-    size_t objects_table_offset;
-    size_t objects_data_offset;
+    /* Current offsets for the data chunks (also correspond to the amount of
+     * data written in to them). */
+    Parrot_Int4 stables_data_offset;
+    Parrot_Int4 objects_data_offset;
 } SerializationWriter;
 
 /* Core serialize and deserialize functions. */
