@@ -71,3 +71,13 @@ INTVAL SC_find_object_idx(PARROT_INTERP, PMC *sc, PMC *obj) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
         "Object does not exist in serialization context");
 }
+
+/* Given an SC and an index, fetch the STable stored there. */
+PMC * SC_get_stable(PARROT_INTERP, PMC *sc, INTVAL idx) {
+    PMC *stables;
+    GETATTR_SerializationContext_root_stables(interp, sc, stables);
+    if (idx >= VTABLE_elements(interp, stables))
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "No STable at index %d", idx);
+    return VTABLE_get_pmc_keyed_int(interp, stables, idx);
+}

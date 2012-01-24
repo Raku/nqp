@@ -266,7 +266,7 @@ static void serialize_object(PARROT_INTERP, SerializationWriter *writer, PMC *ob
     /* Increment count of objects in the table. */
     writer->root.num_objects++;
     
-    /* Delegate to its serialization REPR method. */
+    /* Delegate to its serialization REPR function. */
     writer->writing_object = 1;
     if (REPR(obj)->serialize)
         REPR(obj)->serialize(interp, STABLE(obj), OBJECT_BODY(obj), writer);
@@ -322,6 +322,7 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     GETATTR_SerializationContext_root_stables(interp, sc, stables);
     GETATTR_SerializationContext_root_objects(interp, sc, objects);
     writer->root.version        = CURRENT_VERSION;
+    writer->root.sc             = sc;
     writer->stables_list        = stables;
     writer->objects_list        = objects;
     writer->root.string_heap    = empty_string_heap;
@@ -404,6 +405,24 @@ static STRING * read_string_from_heap(PARROT_INTERP, SerializationReader *reader
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Attempt to read past end of string heap (index %d)", idx);
     return VTABLE_get_string_keyed_int(interp, reader->root.string_heap, idx);
+}
+
+/* Locates a serialization context; 0 is the current one, otherwise see the
+ * dependencies table. */
+static PMC * locate_sc(PARROT_INTERP, SerializationReader *reader, Parrot_Int4 sc_id) {
+    PMC *sc;
+    if (sc_id == 0)
+        return reader->root.sc;
+    sc = VTABLE_get_pmc_keyed_int(interp, reader->root.dependent_scs, sc_id - 1);
+    if (PMC_IS_NULL(sc))
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Invalid dependencies table index encountered (index %d)", sc_id);
+    return sc;
+}
+
+/* Looks up an STable. */
+static PMC * lookup_stable(PARROT_INTERP, SerializationReader *reader, Parrot_Int4 sc_id, Parrot_Int4 idx) {
+    return SC_get_stable(interp, locate_sc(interp, reader, sc_id), idx);
 }
 
 /* Checks the header looks sane and all of the places it points to make sense.
@@ -515,8 +534,26 @@ static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVA
 
 /* Deserializes a single object, along with its REPR data. */
 static void deserialize_object(PARROT_INTERP, SerializationReader *reader, INTVAL i, PMC *obj) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-        "Object deserialization not yet implemented");
+    /* Calculate location of object's table row. */
+    char *obj_table_row = reader->root.objects_table + i * OBJECTS_TABLE_ENTRY_SIZE;
+    
+    /* Resolve the STable. */
+    PMC *stable = lookup_stable(interp, reader,
+        read_int32(obj_table_row, 0),   /* The SC in the dependencies table, + 1 */
+        read_int32(obj_table_row, 4));  /* The index in that SC */
+
+    /* Allocate the object, fiddling things so that it gets wrapped in the
+     * PMC we want it to. */
+    set_wrapping_object(obj);
+    STABLE_STRUCT(stable)->REPR->allocate(interp, STABLE_STRUCT(stable));
+     
+    /* Delegate to its deserialization REPR function. */
+    reader->reading_object = 1;
+    if (REPR(obj)->deserialize)
+        REPR(obj)->deserialize(interp, STABLE(obj), OBJECT_BODY(obj), reader);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Missing deserialize REPR function");
 }
 
 /* Takes serialized data, an empty SerializationContext to deserialize it into
@@ -535,6 +572,7 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, STRING 
     GETATTR_SerializationContext_root_objects(interp, sc, objects);
     reader->stables_list        = stables;
     reader->objects_list        = objects;
+    reader->root.sc             = sc;
     reader->root.string_heap    = string_heap;
     reader->root.dependent_scs  = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
     

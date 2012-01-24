@@ -7,4 +7,5 @@ INTVAL SC_find_stable_idx(PARROT_INTERP, PMC *sc, PMC *st);
 INTVAL SC_find_object_idx(PARROT_INTERP, PMC *sc, PMC *st);
 STRING * SC_get_handle(PARROT_INTERP, PMC *sc);
 STRING * SC_get_description(PARROT_INTERP, PMC *sc);
+PMC * SC_get_stable(PARROT_INTERP, PMC *sc, INTVAL idx);
 #endif
