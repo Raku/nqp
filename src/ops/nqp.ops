@@ -2065,6 +2065,35 @@ inline op is_uprop(out INT, in STR, in STR, in INT) :base_core {
 
 /*
 
+=item nqp_serialize_sc
+
+Serializes the Serialization Context located in $2. Places any required strings
+into the string heap in $3. Returns a string containing the serialized data in $1.
+
+=cut
+
+*/
+inline op nqp_serialize_sc(out STR, in PMC, in PMC) :base_core {
+    $1 = Serialization_serialize(interp, $2, $3);
+}
+
+
+/*
+
+=item nqp_deserialize_sc
+
+Deserializes the data in $1, populating the serialization context located in $2.
+Expects to find any required strings in the string heap, passed in $3.
+
+=cut
+
+*/
+inline op nqp_deserialize_sc(in STR, in PMC, in PMC) :base_core {
+    Serialization_deserialize(interp, $2, $3, $1);
+}
+
+/*
+
 =item nqp_sha1
 
 Computes the SHA-1 hash of $2 and puts the result in $1.
