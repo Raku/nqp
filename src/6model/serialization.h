@@ -50,6 +50,10 @@ typedef struct {
      * data written in to them). */
     Parrot_Int4 stables_data_offset;
     Parrot_Int4 objects_data_offset;
+    
+    /* Limits up to where we can read stables and objects data. */
+    char *stables_data_end;
+    char *objects_data_end;
 } SerializationReader;
 
 /* Represents the serialization writer and the various functions available

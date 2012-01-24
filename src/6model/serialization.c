@@ -366,11 +366,119 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
  * Deserialization (reading related)
  * ***************************************************************************/
 
+/* Reads an int64 from a buffer. */
+static Parrot_Int8 read_int64(char *buffer, size_t offset) {
+    Parrot_Int8 value;
+    /* XXX: Big Endian Handling! */
+    memcpy(&value, buffer + offset, 8);
+    return value;
+}
+
+/* Reads an int32 from a buffer. */
+static Parrot_Int4 read_int32(char *buffer, size_t offset) {
+    Parrot_Int4 value;
+    /* XXX: Big Endian Handling! */
+    memcpy(&value, buffer + offset, 4);
+    return value;
+}
+
+/* Reads an int16 from a buffer. */
+static Parrot_Int2 read_int16(char *buffer, size_t offset) {
+    Parrot_Int2 value;
+    /* XXX: Big Endian Handling! */
+    memcpy(&value, buffer + offset, 2);
+    return value;
+}
+
+/* Reads double from a buffer. */
+static double read_double(char *buffer, size_t offset) {
+    double value;
+    /* XXX: Big Endian Handling! */
+    memcpy(&value, buffer + offset, 8);
+    return value;
+}
+
 /* Checks the header looks sane and all of the places it points to make sense.
  * Also disects the input string into the tables and data segments and populates
  * the reader data structure more fully. */
-static void check_and_disect_input(PARROT_INTERP, SerializationReader *reader, STRING *data) {
+static void check_and_disect_input(PARROT_INTERP, SerializationReader *reader, STRING *data_str) {
+    /* Grab data from string. */
+    char   *data     = (char *)Parrot_str_cstring(interp, data_str);
+    INTVAL  data_len = Parrot_str_byte_length(interp, data_str);
+    char   *prov_pos = data;
+    char   *data_end = data + data_len;
+
+    /* Ensure that we have enough space to read a version number and check it. */
+    if (data_len < 4)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Serialized data too short to read a version number (< 4 bytes)");
+    reader->root.version = read_int32(data, 0);
+    if (reader->root.version != CURRENT_VERSION)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Unknown serialization format version %d", reader->root.version);
+
+    /* Ensure that the data is at least as long as the header is expected to be. */
+    if (data_len < HEADER_SIZE)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Serialized data shorter than header (< %d bytes)", HEADER_SIZE);
+    prov_pos += HEADER_SIZE;
+
+    /* Get size and location of dependencies table. */
+    reader->root.dependencies_table = data + read_int32(data, 4);
+    reader->root.num_dependencies   = read_int32(data, 8);
+    if (reader->root.dependencies_table < prov_pos)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Corruption detected (dependencies table starts before header ends)");
+    prov_pos = reader->root.dependencies_table + reader->root.num_dependencies * DEP_TABLE_ENTRY_SIZE;
+    if (prov_pos > data_end)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Corruption detected (dependencies table overruns end of data)");
+ 
+    /* Get size and location of STables table. */
+    reader->root.stables_table = data + read_int32(data, 12);
+    reader->root.num_stables   = read_int32(data, 16);
+    if (reader->root.stables_table < prov_pos)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Corruption detected (STables table starts before dependencies table ends)");
+    prov_pos = reader->root.stables_table + reader->root.num_stables * STABLE_TABLE_ENTRY_SIZE;
+    if (prov_pos > data_end)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Corruption detected (STables table overruns end of data)");
+
+    /* Get location of STables data. */
+    reader->root.stables_data = data + read_int32(data, 20);
+    if (reader->root.stables_data < prov_pos)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Corruption detected (STables data starts before STables table ends)");
+    prov_pos = reader->root.stables_data;
+    if (prov_pos > data_end)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Corruption detected (STables data starts after end of data)");
+            
+    /* Get size and location of objects table. */
+    reader->root.objects_table = data + read_int32(data, 24);
+    reader->root.num_objects   = read_int32(data, 28);
+    if (reader->root.objects_table < prov_pos)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Corruption detected (objects table starts before STables data ends)");
+    prov_pos = reader->root.objects_table + reader->root.num_objects * OBJECTS_TABLE_ENTRY_SIZE;
+    if (prov_pos > data_end)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Corruption detected (objects table overruns end of data)");
+            
+    /* Get location of objects data. */
+    reader->root.objects_data = data + read_int32(data, 32);
+    if (reader->root.objects_data < prov_pos)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Corruption detected (objects data starts before objects table ends)");
+    prov_pos = reader->root.objects_data;
+    if (prov_pos > data_end)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Corruption detected (objects data starts after end of data)");
     
+    /* Set reading limits for data chunks. */
+    reader->stables_data_end = reader->root.objects_table;
+    reader->objects_data_end = data_end;
 }
 
 /* Takes serialized data, an empty SerializationContext to deserialize it into
