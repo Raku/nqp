@@ -81,9 +81,9 @@ static Parrot_Int4 get_sc_id(PARROT_INTERP, SerializationWriter *writer, PMC *sc
     
     /* Add dependency. */
     VTABLE_push_pmc(interp, writer->root.dependent_scs, sc);
-    write_int32(writer->root.objects_table, offset,
+    write_int32(writer->root.dependencies_table, offset,
         add_string_to_heap(interp, writer, SC_get_handle(interp, sc)));
-    write_int32(writer->root.objects_table, offset + 4,
+    write_int32(writer->root.dependencies_table, offset + 4,
         add_string_to_heap(interp, writer, SC_get_description(interp, sc)));
     writer->root.num_dependencies++;
     return writer->root.num_dependencies; /* Deliberately index + 1. */
