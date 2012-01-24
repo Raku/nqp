@@ -11,6 +11,9 @@ typedef struct {
     Parrot_Int4   num_dependencies;
     char         *dependencies_table;
     
+    /* The SC we're serializing/deserializing. */
+    PMC          *sc;
+
     /* List of the serialization context objects that we depend on. */
     PMC          *dependent_scs;
     

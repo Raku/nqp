@@ -34,6 +34,65 @@ static void write_int16(char *buffer, size_t offset, Parrot_Int2 value) {
     memcpy(buffer + offset, &value, 2);
 }
 
+/* Adds an item to the string heap if needed, and returns the index where
+ * it may be found. */
+static Parrot_Int4 add_to_string_heap(PARROT_INTERP, SerializationWriter *writer, STRING *s) {
+    /* XXX Use seen hash to avoid dupes. */
+    INTVAL next_idx = VTABLE_elements(interp, writer->root.string_heap);
+    VTABLE_set_string_keyed_int(interp, writer->root.string_heap, next_idx, s);
+    return (Parrot_Int4)next_idx;
+}
+
+/* Gets the ID of a serialization context. Returns 0 if it's the current
+ * one, or its dependency table offset (base-1) otherwise. Note that if
+ * it is not yet in the dependency table, it will be added. */
+static Parrot_Int4 get_sc_id(PARROT_INTERP, SerializationWriter *writer, PMC *sc) {
+    INTVAL i, num_deps, offset;
+
+    /* Easy if it's in the current SC. */
+    if (writer->root.sc == sc)
+        return 0;
+    
+    /* Otherwise, find it in our dependencies list. */
+    num_deps = writer->root.num_dependencies;
+    for (i = 0; i < num_deps; i++)
+        if (VTABLE_get_pmc_keyed_int(interp, writer->root.dependent_scs, i) == sc)
+            return (Parrot_Int4)i + 1;
+
+    /* Otherwise, need to add it to our dependencies list. Ensure there's
+     * space in the dependencies table; grow if not. */
+    offset = num_deps * DEP_TABLE_ENTRY_SIZE;
+    if (offset + DEP_TABLE_ENTRY_SIZE > writer->dependencies_table_alloc) {
+        writer->dependencies_table_alloc *= 2;
+        writer->root.dependencies_table = mem_sys_realloc(writer->root.dependencies_table, writer->dependencies_table_alloc);
+    }
+    
+    /* Add dependency. */
+    VTABLE_push_pmc(interp, writer->root.dependent_scs, sc);
+    write_int32(writer->root.objects_table, offset,
+        add_to_string_heap(interp, writer, SC_get_handle(interp, sc)));
+    write_int32(writer->root.objects_table, offset + 4,
+        add_to_string_heap(interp, writer, SC_get_description(interp, sc)));
+    writer->root.num_dependencies++;
+    return writer->root.num_dependencies; /* Deliberately index + 1. */
+}
+
+/* Takes an STable. If it's already in an SC, returns information on how
+ * to reference it. Otherwise, adds it to the current SC, effectively
+ * placing it onto the work list. */
+static void get_stable_ref_info(PARROT_INTERP, SerializationWriter *writer,
+                                PMC *st, Parrot_Int4 *sc, Parrot_Int4 *sc_idx) {
+    /* Add to this SC if needed. */
+    if (PMC_IS_NULL(STABLE_STRUCT(st)->sc)) {
+        STABLE_STRUCT(st)->sc = writer->root.sc;
+        VTABLE_push_pmc(interp, writer->stables_list, st);
+    }
+    
+    /* Work out SC reference. */
+    *sc     = get_sc_id(interp, writer, STABLE_STRUCT(st)->sc);
+    *sc_idx = (Parrot_Int4)SC_find_stable_idx(interp, STABLE_STRUCT(st)->sc, st);
+}
+
 /* Concatenates the various output segments into a single binary string. */
 static STRING * concatenate_outputs(PARROT_INTERP, SerializationWriter *writer) {
     char        *output      = NULL;
@@ -109,8 +168,31 @@ static void serialize_stable(PARROT_INTERP, SerializationWriter *writer, PMC *st
 /* This handles the serialization of an object, which largely involves a
  * delegation to its representation. */
 static void serialize_object(PARROT_INTERP, SerializationWriter *writer, PMC *obj) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-        "Object serialization not yet implemented");
+    Parrot_Int4 offset;
+    
+    /* Get index of SC that holds the STable and its index. */
+    Parrot_Int4 sc;
+    Parrot_Int4 sc_idx;
+    get_stable_ref_info(interp, writer, STABLE_PMC(obj), &sc, &sc_idx);
+    
+    /* Ensure there's space in the objects table; grow if not. */
+    offset = writer->root.num_objects * OBJECTS_TABLE_ENTRY_SIZE;
+    if (offset + OBJECTS_TABLE_ENTRY_SIZE > writer->objects_table_alloc) {
+        writer->objects_table_alloc *= 2;
+        writer->root.objects_table = mem_sys_realloc(writer->root.objects_table, writer->objects_table_alloc);
+    }
+    
+    /* Make objects table entry. */
+    write_int32(writer->root.objects_table, offset, sc);
+    write_int32(writer->root.objects_table, offset + 4, sc_idx);
+    write_int32(writer->root.objects_table, offset + 8, writer->objects_data_offset);
+    
+    /* Delegate to its serialization REPR method. */
+    if (REPR(obj)->serialize)
+        REPR(obj)->serialize(interp, STABLE(obj), OBJECT_BODY(obj), writer);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Missing serialize REPR function");
 }
 
 /* This is the overall serialization loop. It keeps an index into the list of
