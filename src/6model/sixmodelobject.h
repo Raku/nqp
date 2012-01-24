@@ -5,6 +5,7 @@
 #define SIXMODELOBJECT_H_GUARD
 
 #include "storage_spec.h"
+#include "serialization.h"
 
 /* The commonalities shared between all 6model objects, no matter what the
  * REPR is. This struct should be placed as the first thing in the object
@@ -293,6 +294,14 @@ struct SixModel_REPROps {
      * out, the representation probably knows more about timing issues and
      * thread safety requirements. */
     void (*change_type) (PARROT_INTERP, PMC *Object, PMC *NewType);
+    
+    /* Object serialization. Writes the objects body out using the passed
+     * serialization writer. */
+    void (*serialize) (PARROT_INTERP, STable *st, void *data, SerializationWriter *writer);
+    
+    /* Object deserialization. Reads the objects body in using the passed
+     * serialization reader. */
+    void (*deserialize) (PARROT_INTERP, STable *st, void *data, SerializationReader *reader);
     
     /* This Parrot-specific addition to the API is used to mark an object. */
     void (*gc_mark) (PARROT_INTERP, STable *st, void *data);
