@@ -9,21 +9,21 @@ typedef struct {
     /* The number of dependencies, as well as a pointer to the
      * dependencies table. */
     Parrot_Int4   num_dependencies;
-    Parrot_Int4 **dependencies_table;
+    char         *dependencies_table;
     
     /* List of the serialization context objects that we depend on. */
-    PMC         **dependent_scs;
+    PMC          *dependent_scs;
     
     /* The number of STables, as well as pointers to the STables
      * table and data chunk. */
     Parrot_Int4   num_stables;
-    Parrot_Int4 **stables_table;
+    char         *stables_table;
     char         *stables_data;
     
     /* The number of objects, as well as pointers to the objects
      * table and data chunk. */
     Parrot_Int4   num_objects;
-    Parrot_Int4  *objects_table;
+    char         *objects_table;
     char         *objects_data;
     
     /* Array of STRINGs. */
@@ -33,11 +33,35 @@ typedef struct {
 /* Represents the serialization reader and the various functions available
  * on it. */
 typedef struct {
+    /* Serialization root data. */
     SerializationRoot root;
 } SerializationReader;
 
 /* Represents the serialization writer and the various functions available
  * on it. */
 typedef struct {
+    /* Serialization root data. */
     SerializationRoot root;
+
+    /* Hash of strings we've already seen while serializing to the index they
+     * are placed at in the string heap. */
+    PMC *seen_strings;
+    
+    /* Amount of memory allocated for various things. */
+    size_t dependencies_table_alloc;
+    size_t stables_table_alloc;
+    size_t stables_data_alloc;
+    size_t objects_table_alloc;
+    size_t objects_data_alloc;
+    
+    /* Current offsets for various things. */
+    size_t dependencies_table_offset;
+    size_t stables_table_offset;
+    size_t stables_data_offset;
+    size_t objects_table_offset;
+    size_t objects_data_offset;
 } SerializationWriter;
+
+/* Core serialize and deserialize functions. */
+STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap);
+void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, STRING *data);
