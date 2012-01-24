@@ -35,7 +35,7 @@ typedef struct {
 
 /* Represents the serialization reader and the various functions available
  * on it. */
-typedef struct {
+typedef struct SerializationReader {
     /* Serialization root data. */
     SerializationRoot root;
     
@@ -54,6 +54,11 @@ typedef struct {
     /* Limits up to where we can read stables and objects data. */
     char *stables_data_end;
     char *objects_data_end;
+    
+    /* Various reading functions. */
+    INTVAL   (*read_int) (PARROT_INTERP, struct SerializationReader *reader);
+    FLOATVAL (*read_num) (PARROT_INTERP, struct SerializationReader *reader);
+    STRING * (*read_str) (PARROT_INTERP, struct SerializationReader *reader);
 } SerializationReader;
 
 /* Represents the serialization writer and the various functions available

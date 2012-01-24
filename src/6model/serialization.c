@@ -425,6 +425,69 @@ static PMC * lookup_stable(PARROT_INTERP, SerializationReader *reader, Parrot_In
     return SC_get_stable(interp, locate_sc(interp, reader, sc_id), idx);
 }
 
+/* Ensure that we aren't going to read off the end of the buffer. */
+void assert_can_read(PARROT_INTERP, SerializationReader *reader, INTVAL amount) {
+    if (reader->reading_object) {
+        char *read_end = reader->root.objects_data + reader->objects_data_offset + amount;
+        if (read_end > reader->objects_data_end)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Read past end of objects data");
+    }
+    else {
+        char *read_end = reader->root.stables_data + reader->stables_data_offset + amount;
+        if (read_end > reader->stables_data_end)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Read past end of STables data");
+    }
+}
+
+/* Reading function for native integers. */
+INTVAL read_int_func(PARROT_INTERP, SerializationReader *reader) {
+    assert_can_read(interp, reader, 8);
+    if (reader->reading_object) {
+        INTVAL result = read_int64(reader->root.objects_data, reader->objects_data_offset);
+        reader->objects_data_offset += 8;
+        return result;
+    }
+    else {
+        INTVAL result = read_int64(reader->root.stables_data, reader->stables_data_offset);
+        reader->stables_data_offset += 8;
+        return result;
+    }
+}
+
+/* Reading function for native numbers. */
+FLOATVAL read_num_func(PARROT_INTERP, SerializationReader *reader) {
+    assert_can_read(interp, reader, 8);
+    if (reader->reading_object) {
+        FLOATVAL result = read_double(reader->root.objects_data, reader->objects_data_offset);
+        reader->objects_data_offset += 8;
+        return result;
+    }
+    else {
+        FLOATVAL result = read_double(reader->root.stables_data, reader->stables_data_offset);
+        reader->stables_data_offset += 8;
+        return result;
+    }
+}
+
+/* Reading function for native strings. */
+STRING * read_str_func(PARROT_INTERP, SerializationReader *reader) {
+    assert_can_read(interp, reader, 4);
+    if (reader->reading_object) {
+        STRING *result = read_string_from_heap(interp, reader,
+            read_int32(reader->root.objects_data, reader->objects_data_offset));
+        reader->objects_data_offset += 4;
+        return result;
+    }
+    else {
+        STRING *result = read_string_from_heap(interp, reader,
+            read_int32(reader->root.stables_data, reader->stables_data_offset));
+        reader->stables_data_offset += 4;
+        return result;
+    }
+}
+
 /* Checks the header looks sane and all of the places it points to make sense.
  * Also disects the input string into the tables and data segments and populates
  * the reader data structure more fully. */
@@ -549,6 +612,7 @@ static void deserialize_object(PARROT_INTERP, SerializationReader *reader, INTVA
      
     /* Delegate to its deserialization REPR function. */
     reader->reading_object = 1;
+    reader->objects_data_offset = read_int32(obj_table_row, 8);
     if (REPR(obj)->deserialize)
         REPR(obj)->deserialize(interp, STABLE(obj), OBJECT_BODY(obj), reader);
     else
@@ -575,6 +639,11 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, STRING 
     reader->root.sc             = sc;
     reader->root.string_heap    = string_heap;
     reader->root.dependent_scs  = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+    
+    /* Put reader functions in place. */
+    reader->read_int = read_int_func;
+    reader->read_num = read_num_func;
+    reader->read_str = read_str_func;
     
     /* Read header and disect the data into its parts. */
     check_and_disect_input(interp, reader, data);
