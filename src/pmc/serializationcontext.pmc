@@ -1,6 +1,10 @@
 /* A serialization context is a container for a set of objects
  * that exist per compilation unit and cross the compile-time /
- * runtime boundary.*/
+ * runtime boundary. */
+
+#include "../6model/sixmodelobject.h"
+static INTVAL smo_id    = 0;
+ 
 pmclass SerializationContext auto_attrs dynpmc group nqp {
     /* The handle of this SC. */
     ATTR STRING *handle;
@@ -8,13 +12,20 @@ pmclass SerializationContext auto_attrs dynpmc group nqp {
     /* The root set of objects that live in this SC. */
     ATTR PMC *root_objects;
     
+    /* The root set of STables that live in this SC. */
+    ATTR PMC *root_stables;
+    
     /* Description (probably the file name) if any. */
     ATTR STRING *description;
     
     VTABLE void init() {
         PMC *root_objects = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+        PMC *root_stables = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
         SET_ATTR_root_objects(interp, SELF, root_objects);
+        SET_ATTR_root_stables(interp, SELF, root_stables);
         PObj_custom_mark_SET(SELF);
+        if (!smo_id)
+            smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
     }
     
     VTABLE void set_string_native(STRING *handle) {
@@ -22,10 +33,12 @@ pmclass SerializationContext auto_attrs dynpmc group nqp {
     }
 
     VTABLE void mark() {
-        PMC    *root_objects;
+        PMC    *root_objects, *root_stables;
         STRING *handle, *description;
         GET_ATTR_root_objects(interp, SELF, root_objects);
         Parrot_gc_mark_PMC_alive(INTERP, root_objects);
+        GET_ATTR_root_stables(interp, SELF, root_stables);
+        Parrot_gc_mark_PMC_alive(INTERP, root_stables);
         GET_ATTR_handle(interp, SELF, handle);
         Parrot_gc_mark_STRING_alive(INTERP, handle);
         GET_ATTR_description(interp, SELF, description);
@@ -48,12 +61,28 @@ pmclass SerializationContext auto_attrs dynpmc group nqp {
         PMC    *root_objects;
         GET_ATTR_root_objects(interp, SELF, root_objects);
         VTABLE_set_pmc_keyed_int(interp, root_objects, idx, value);
+        if (value->vtable->base_type == smo_id) {
+            /* Check if the STable is already owned; if not, take it
+             * for this SC. */
+            if (PMC_IS_NULL(STABLE(value)->sc)) {
+                PMC *root_stables;
+                GET_ATTR_root_stables(interp, SELF, root_stables);
+                STABLE(value)->sc = SELF;
+                VTABLE_push_pmc(interp, root_stables, STABLE_PMC(value));
+            }
+        }
     }
     
     VTABLE void set_pmc_keyed(PMC *idx, PMC *value) {
         PMC    *root_objects;
         GET_ATTR_root_objects(interp, SELF, root_objects);
         VTABLE_set_pmc_keyed(interp, root_objects, idx, value);
+    }
+    
+    VTABLE INTVAL elements() {
+        PMC    *root_objects;
+        GET_ATTR_root_objects(interp, SELF, root_objects);
+        return VTABLE_elements(interp, root_objects);
     }
     
     METHOD INTVAL elems() {
