@@ -1,6 +1,6 @@
 #! nqp
 
-plan(4);
+plan(8);
 
 # Serializing an empty SC.
 {
@@ -17,3 +17,24 @@ plan(4);
     
     ok(nqp::elems($dsc) == 0, 'deserialized SC is also empty');
 }
+
+# Serializing an SC with a single object with P6int REPR.
+{
+    my $sc := pir::nqp_create_sc__Ps('TEST_SC_2_IN');
+    my $sh := pir::new__Ps('ResizableStringArray');
+    
+    class T1 is repr('P6int') { }
+    my $v1 := nqp::box_i(42, T1);
+    $sc[0] := $v1;
+
+    my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+    ok(nqp::chars($serialized) > 36, 'serialized SC with P6int output longer than a header');
+    
+    my $dsc := pir::nqp_create_sc__Ps('TEST_SC_2_OUT');
+    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh);
+    
+    ok(nqp::elems($dsc) == 1,       'deserialized SC has a single element');
+    ok(nqp::istype($dsc, T1),       'deserialized object has correct type');
+    ok(nqp::unbox_i($dsc[0]) == 42, 'deserialized object has correct value');
+}
+    
