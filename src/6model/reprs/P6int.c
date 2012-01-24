@@ -112,9 +112,14 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     return spec;
 }
 
-/* Serializes the data into an object. */
+/* Serializes the data. */
 static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter *writer) {
     writer->write_int(interp, writer, ((P6intBody *)data)->value);
+}
+
+/* Deserializes the data. */
+static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationReader *reader) {
+    ((P6intBody *)data)->value = reader->read_int(interp, reader);
 }
 
 /* Initializes the P6int representation. */
@@ -136,5 +141,6 @@ REPROps * P6int_initialize(PARROT_INTERP) {
     this_repr->gc_free = gc_free;
     this_repr->get_storage_spec = get_storage_spec;
     this_repr->serialize = serialize;
+    this_repr->deserialize = deserialize;
     return this_repr;
 }
