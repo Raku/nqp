@@ -6,6 +6,7 @@
 #include "parrot/parrot.h"
 #include "parrot/extend.h"
 #include "serialization_context.h"
+#include "pmc_serializationcontext.h"
 
 /* Hash of serialization context objects */
 static PMC *scs = NULL;
@@ -29,4 +30,30 @@ void SC_set_sc(PARROT_INTERP, STRING *handle, PMC *sc) {
     if (!scs)
         setup_sc_stores(interp);
     VTABLE_set_pmc_keyed_str(interp, scs, handle, sc);
+}
+
+/* Given an SC, looks up the index of an STable that is in its root set. */
+INTVAL SC_find_stable_idx(PARROT_INTERP, PMC *sc, PMC *st) {
+    PMC *to_search;
+    INTVAL i, count;
+    GETATTR_SerializationContext_root_stables(interp, sc, to_search);
+    count = VTABLE_elements(interp, to_search);
+    for (i = 0; i < count; i++)
+        if (VTABLE_get_pmc_keyed_int(interp, to_search, i) == st)
+            return i;
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+        "STable does not exist in serialization context");
+}
+
+/* Given an SC, looks up the index of an object that is in its root set. */
+INTVAL SC_find_object_idx(PARROT_INTERP, PMC *sc, PMC *obj) {
+    PMC   *to_search;
+    INTVAL i, count;
+    GETATTR_SerializationContext_root_objects(interp, sc, to_search);
+    count = VTABLE_elements(interp, to_search);
+    for (i = 0; i < count; i++)
+        if (VTABLE_get_pmc_keyed_int(interp, to_search, i) == obj)
+            return i;
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+        "Object does not exist in serialization context");
 }
