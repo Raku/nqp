@@ -398,6 +398,14 @@ static double read_double(char *buffer, size_t offset) {
     return value;
 }
 
+/* Reads the item from the string heap at the specified index. */
+static STRING * read_string_from_heap(PARROT_INTERP, SerializationReader *reader, Parrot_Int4 idx) {
+    if (idx >= VTABLE_elements(interp, reader->root.string_heap))
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Attempt to read past end of string heap (index %d)", idx);
+    return VTABLE_get_string_keyed_int(interp, reader->root.string_heap, idx);
+}
+
 /* Checks the header looks sane and all of the places it points to make sense.
  * Also disects the input string into the tables and data segments and populates
  * the reader data structure more fully. */
@@ -484,6 +492,19 @@ static void check_and_disect_input(PARROT_INTERP, SerializationReader *reader, S
 /* Goes through the dependencies table and resolves the dependencies that it
  * contains to SerializationContexts. */
 static void resolve_dependencies(PARROT_INTERP, SerializationReader *reader) {
+    char        *table_pos = reader->root.dependencies_table;
+    Parrot_Int4  i;
+    for (i = 0; i < reader->root.num_dependencies; i++) {
+        STRING *handle = read_string_from_heap(interp, reader, read_int32(table_pos, 0));
+        PMC    *sc     = SC_get_sc(interp, handle);
+        if (PMC_IS_NULL(sc)) {
+            STRING *desc = read_string_from_heap(interp, reader, read_int32(table_pos, 4));
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Missing or wrong version of dependency '%Ss'", desc);
+        }
+        VTABLE_push_pmc(interp, reader->root.dependent_scs, sc);
+        table_pos += 8;
+    }
 }
 
 /* Deserializes a single STable, along with its REPR data. */
