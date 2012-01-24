@@ -7,6 +7,7 @@
 #include "parrot/extend.h"
 #include "sixmodelobject.h"
 #include "serialization_context.h"
+#include "pmc_serializationcontext.h"
 
 /* Version of the serialization format that we are currently at. */
 #define CURRENT_VERSION 1
@@ -98,17 +99,69 @@ static STRING * concatenate_outputs(PARROT_INTERP, SerializationWriter *writer) 
         Parrot_binary_encoding_ptr, PObj_external_FLAG);
 }
 
+/* This handles the serialization of an STable, and calls off to serialize
+ * its representation data also. */
+static void serialize_stable(PARROT_INTERP, SerializationWriter *writer, PMC *st) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+        "STable serialization not yet implemented");
+}
+
+/* This handles the serialization of an object, which largely involves a
+ * delegation to its representation. */
+static void serialize_object(PARROT_INTERP, SerializationWriter *writer, PMC *obj) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+        "Object serialization not yet implemented");
+}
+
+/* This is the overall serialization loop. It keeps an index into the list of
+ * STables and objects in the SC. As we discover new ones, they get added. We
+ * finished when we've serialized everything. */
+static void serialize(PARROT_INTERP, SerializationWriter *writer) {
+    INTVAL work_todo = 1;
+    while (work_todo) {
+        /* Current work list sizes. */
+        INTVAL stables_todo = VTABLE_elements(interp, writer->stables_list);
+        INTVAL objects_todo = VTABLE_elements(interp, writer->objects_list);
+        
+        /* Reset todo flag - if we do some work we'll go round again as it
+         * may have generated more. */
+        work_todo = 0;
+        
+        /* Serialize any STables on the todo list. */
+        while (writer->stables_list_pos < stables_todo) {
+            serialize_stable(interp, writer, VTABLE_get_pmc_keyed_int(interp,
+                writer->stables_list, writer->stables_list_pos));
+            writer->stables_list_pos++;
+            work_todo = 1;
+        }
+        
+        /* Serialize any objects on the todo list. */
+        while (writer->objects_list_pos < objects_todo) {
+            serialize_object(interp, writer, VTABLE_get_pmc_keyed_int(interp,
+                writer->objects_list, writer->objects_list_pos));
+            writer->objects_list_pos++;
+            work_todo = 1;
+        }
+    }
+}
+
 /* Takes a serialization context along with an empty string array. Taking the
  * serialization context's contents as the roots, recursively walks them until
  * everything is serialized or a reference to something already serialized in
  * another context. */
 STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap) {
-    STRING      *result  = STRINGNULL;
+    PMC         *stables  = PMCNULL;
+    PMC         *objects  = PMCNULL;
+    STRING      *result   = STRINGNULL;
     Parrot_Int4  sc_elems = (Parrot_Int4)VTABLE_elements(interp, sc);
     
     /* Set up writer with some initial settings. */
     SerializationWriter *writer = mem_allocate_zeroed_typed(SerializationWriter);
+    GETATTR_SerializationContext_root_stables(interp, sc, stables);
+    GETATTR_SerializationContext_root_objects(interp, sc, objects);
     writer->root.version        = CURRENT_VERSION;
+    writer->stables_list        = stables;
+    writer->objects_list        = objects;
     writer->root.string_heap    = empty_string_heap;
     writer->root.dependent_scs  = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
     
@@ -124,9 +177,12 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     writer->objects_data_alloc       = OBJECT_SIZE_GUESS * (sc_elems || 1);
     writer->root.objects_data        = mem_sys_allocate(writer->objects_data_alloc);
     
+    /* Populate write functions table. */
+    
+
     /* Start serializing. */
-    
-    
+    serialize(interp, writer);
+
     /* Build a single result string out of the serialized data. */
     result = concatenate_outputs(interp, writer);
 

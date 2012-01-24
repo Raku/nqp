@@ -42,6 +42,14 @@ typedef struct {
 typedef struct {
     /* Serialization root data. */
     SerializationRoot root;
+    
+    /* The stables list and object list we're working through. */
+    PMC *stables_list;
+    PMC *objects_list;
+    
+    /* Current position in the stables list and objects list. */
+    INTVAL stables_list_pos;
+    INTVAL objects_list_pos;
 
     /* Hash of strings we've already seen while serializing to the index they
      * are placed at in the string heap. */
