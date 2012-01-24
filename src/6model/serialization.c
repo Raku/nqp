@@ -22,6 +22,12 @@
 #define DEFAULT_STABLE_DATA_SIZE    4096
 #define OBJECT_SIZE_GUESS           8
 
+/* Writes an int64 into a buffer. */
+static void write_int64(char *buffer, size_t offset, Parrot_Int8 value) {
+    /* XXX: Big Endian Handling! */
+    memcpy(buffer + offset, &value, 8);
+}
+
 /* Writes an int32 into a buffer. */
 static void write_int32(char *buffer, size_t offset, Parrot_Int4 value) {
     /* XXX: Big Endian Handling! */
@@ -34,9 +40,15 @@ static void write_int16(char *buffer, size_t offset, Parrot_Int2 value) {
     memcpy(buffer + offset, &value, 2);
 }
 
+/* Writes an double into a buffer. */
+static void write_double(char *buffer, size_t offset, double value) {
+    /* XXX: Big Endian Handling! */
+    memcpy(buffer + offset, &value, 8);
+}
+
 /* Adds an item to the string heap if needed, and returns the index where
  * it may be found. */
-static Parrot_Int4 add_to_string_heap(PARROT_INTERP, SerializationWriter *writer, STRING *s) {
+static Parrot_Int4 add_string_to_heap(PARROT_INTERP, SerializationWriter *writer, STRING *s) {
     /* XXX Use seen hash to avoid dupes. */
     INTVAL next_idx = VTABLE_elements(interp, writer->root.string_heap);
     VTABLE_set_string_keyed_int(interp, writer->root.string_heap, next_idx, s);
@@ -70,9 +82,9 @@ static Parrot_Int4 get_sc_id(PARROT_INTERP, SerializationWriter *writer, PMC *sc
     /* Add dependency. */
     VTABLE_push_pmc(interp, writer->root.dependent_scs, sc);
     write_int32(writer->root.objects_table, offset,
-        add_to_string_heap(interp, writer, SC_get_handle(interp, sc)));
+        add_string_to_heap(interp, writer, SC_get_handle(interp, sc)));
     write_int32(writer->root.objects_table, offset + 4,
-        add_to_string_heap(interp, writer, SC_get_description(interp, sc)));
+        add_string_to_heap(interp, writer, SC_get_description(interp, sc)));
     writer->root.num_dependencies++;
     return writer->root.num_dependencies; /* Deliberately index + 1. */
 }
@@ -91,6 +103,64 @@ static void get_stable_ref_info(PARROT_INTERP, SerializationWriter *writer,
     /* Work out SC reference. */
     *sc     = get_sc_id(interp, writer, STABLE_STRUCT(st)->sc);
     *sc_idx = (Parrot_Int4)SC_find_stable_idx(interp, STABLE_STRUCT(st)->sc, st);
+}
+
+/* Expands current target storage as needed. */
+void expand_storage_if_needed(PARROT_INTERP, SerializationWriter *writer, INTVAL need) {
+    if (writer->writing_object) {
+        if (writer->objects_data_offset + need > writer->objects_data_alloc) {
+            writer->objects_data_alloc *= 2;
+            writer->root.objects_data = mem_sys_realloc(writer->root.objects_data,
+                writer->objects_data_alloc);
+        }
+    }
+    else {
+        if (writer->stables_data_offset + need > writer->stables_data_alloc) {
+            writer->stables_data_alloc *= 2;
+            writer->root.stables_data = mem_sys_realloc(writer->root.stables_data,
+                writer->stables_data_alloc);
+        }
+    }
+}
+
+/* Writing function for native integers. */
+void write_int_func(PARROT_INTERP, SerializationWriter *writer, INTVAL value) {
+    expand_storage_if_needed(interp, writer, 8);
+    if (writer->writing_object) {
+        write_int64(writer->root.objects_data, writer->objects_data_offset, value);
+        writer->objects_data_offset += 8;
+    }
+    else {
+        write_int64(writer->root.stables_data, writer->stables_data_offset, value);
+        writer->stables_data_offset += 8;
+    }
+}
+
+/* Writing function for native numbers. */
+void write_num_func(PARROT_INTERP, SerializationWriter *writer, FLOATVAL value) {
+    expand_storage_if_needed(interp, writer, 8);
+    if (writer->writing_object) {
+        write_double(writer->root.objects_data, writer->objects_data_offset, value);
+        writer->objects_data_offset += 8;
+    }
+    else {
+        write_double(writer->root.stables_data, writer->stables_data_offset, value);
+        writer->stables_data_offset += 8;
+    }
+}
+
+/* Writing function for native strings. */
+void write_str_func(PARROT_INTERP, SerializationWriter *writer, STRING *value) {
+    Parrot_Int4 heap_loc = add_string_to_heap(interp, writer, value);
+    expand_storage_if_needed(interp, writer, 4);
+    if (writer->writing_object) {
+        write_int32(writer->root.objects_data, writer->objects_data_offset, heap_loc);
+        writer->objects_data_offset += 4;
+    }
+    else {
+        write_int32(writer->root.stables_data, writer->stables_data_offset, heap_loc);
+        writer->stables_data_offset += 4;
+    }
 }
 
 /* Concatenates the various output segments into a single binary string. */
@@ -161,6 +231,8 @@ static STRING * concatenate_outputs(PARROT_INTERP, SerializationWriter *writer) 
 /* This handles the serialization of an STable, and calls off to serialize
  * its representation data also. */
 static void serialize_stable(PARROT_INTERP, SerializationWriter *writer, PMC *st) {
+    /* Increment count of stables in the table. */
+    writer->root.num_stables++;
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
         "STable serialization not yet implemented");
 }
@@ -187,7 +259,11 @@ static void serialize_object(PARROT_INTERP, SerializationWriter *writer, PMC *ob
     write_int32(writer->root.objects_table, offset + 4, sc_idx);
     write_int32(writer->root.objects_table, offset + 8, writer->objects_data_offset);
     
+    /* Increment count of objects in the table. */
+    writer->root.num_objects++;
+    
     /* Delegate to its serialization REPR method. */
+    writer->writing_object = 1;
     if (REPR(obj)->serialize)
         REPR(obj)->serialize(interp, STABLE(obj), OBJECT_BODY(obj), writer);
     else
@@ -260,7 +336,9 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     writer->root.objects_data        = mem_sys_allocate(writer->objects_data_alloc);
     
     /* Populate write functions table. */
-    
+    writer->write_int = write_int_func;
+    writer->write_num = write_num_func;
+    writer->write_str = write_str_func;
 
     /* Start serializing. */
     serialize(interp, writer);

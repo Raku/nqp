@@ -42,7 +42,7 @@ typedef struct {
 
 /* Represents the serialization writer and the various functions available
  * on it. */
-typedef struct {
+typedef struct SerializationWriter {
     /* Serialization root data. */
     SerializationRoot root;
     
@@ -69,6 +69,14 @@ typedef struct {
      * data written in to them). */
     Parrot_Int4 stables_data_offset;
     Parrot_Int4 objects_data_offset;
+    
+    /* Flag for if we're writing to stable data chunk or object data chunk. */
+    char writing_object;
+    
+    /* Various writing functions. */
+    void (*write_int) (PARROT_INTERP, struct SerializationWriter *writer, INTVAL value);
+    void (*write_num) (PARROT_INTERP, struct SerializationWriter *writer, FLOATVAL value);
+    void (*write_str) (PARROT_INTERP, struct SerializationWriter *writer, STRING *value);
 } SerializationWriter;
 
 /* Core serialize and deserialize functions. */
