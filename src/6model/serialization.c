@@ -481,12 +481,32 @@ static void check_and_disect_input(PARROT_INTERP, SerializationReader *reader, S
     reader->objects_data_end = data_end;
 }
 
+/* Goes through the dependencies table and resolves the dependencies that it
+ * contains to SerializationContexts. */
+static void resolve_dependencies(PARROT_INTERP, SerializationReader *reader) {
+}
+
+/* Deserializes a single STable, along with its REPR data. */
+static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVAL i, PMC *st) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+        "STable deserialization not yet implemented");
+}
+
+/* Deserializes a single object, along with its REPR data. */
+static void deserialize_object(PARROT_INTERP, SerializationReader *reader, INTVAL i, PMC *obj) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+        "Object deserialization not yet implemented");
+}
+
 /* Takes serialized data, an empty SerializationContext to deserialize it into
  * and a strings heap. Deserializes the data into the required objects and
  * STables. */
 void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, STRING *data) {
-    PMC *stables  = PMCNULL;
-    PMC *objects  = PMCNULL;
+    PMC    *stables   = PMCNULL;
+    PMC    *objects   = PMCNULL;
+    INTVAL  stable_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "STable", 0));
+    INTVAL  smo_id    = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
+    Parrot_Int4 i;
     
     /* Create reader data structure and populate the basic bits. */
     SerializationReader *reader = mem_allocate_zeroed_typed(SerializationReader);
@@ -501,6 +521,7 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, STRING 
     check_and_disect_input(interp, reader, data);
     
     /* Resolve the SCs in the dependencies table. */
+    resolve_dependencies(interp, reader);
     
     /* Disable GC at this stage; for one there's no point collecting when all
      * we're doing in here is allocating, but more importantly STable REPRData
@@ -510,10 +531,20 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, STRING 
     
     /* Stub-allocate PMCs for all STables and objects, so we know where
      * they will all end up. */
+    for (i = 0; i < reader->root.num_stables; i++)
+        VTABLE_set_pmc_keyed_int(interp, stables, i, Parrot_pmc_new(interp, stable_id));
+    for (i = 0; i < reader->root.num_objects; i++)
+        VTABLE_set_pmc_keyed_int(interp, objects, i, Parrot_pmc_new(interp, smo_id));
      
      /* Deserialize STables, along with their representation data. */
+     for (i = 0; i < reader->root.num_stables; i++)
+        deserialize_stable(interp, reader, i,
+            VTABLE_get_pmc_keyed_int(interp, stables, i));
      
      /* Deserialize objects. */
+     for (i = 0; i < reader->root.num_objects; i++)
+        deserialize_object(interp, reader, i,
+            VTABLE_get_pmc_keyed_int(interp, objects, i));
      
      /* Re-enable GC. */
      Parrot_unblock_GC_mark(interp);
