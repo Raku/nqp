@@ -34,7 +34,7 @@ plan(8);
     pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh);
     
     ok(nqp::elems($dsc) == 1,       'deserialized SC has a single element');
-    ok(nqp::istype($dsc, T1),       'deserialized object has correct type');
+    ok(nqp::istype($dsc[0], T1),    'deserialized object has correct type');
     ok(nqp::unbox_i($dsc[0]) == 42, 'deserialized object has correct value');
 }
     
