@@ -22,6 +22,10 @@
 #define DEFAULT_STABLE_DATA_SIZE    4096
 #define OBJECT_SIZE_GUESS           8
 
+/* ***************************************************************************
+ * Serialization (writing related)
+ * ***************************************************************************/
+
 /* Writes an int64 into a buffer. */
 static void write_int64(char *buffer, size_t offset, Parrot_Int8 value) {
     /* XXX: Big Endian Handling! */
@@ -357,8 +361,55 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     return result;
 }
 
+
+/* ***************************************************************************
+ * Deserialization (reading related)
+ * ***************************************************************************/
+
+/* Checks the header looks sane and all of the places it points to make sense.
+ * Also disects the input string into the tables and data segments and populates
+ * the reader data structure more fully. */
+static void check_and_disect_input(PARROT_INTERP, SerializationReader *reader, STRING *data) {
+    
+}
+
 /* Takes serialized data, an empty SerializationContext to deserialize it into
  * and a strings heap. Deserializes the data into the required objects and
  * STables. */
 void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, STRING *data) {
+    PMC *stables  = PMCNULL;
+    PMC *objects  = PMCNULL;
+    
+    /* Create reader data structure and populate the basic bits. */
+    SerializationReader *reader = mem_allocate_zeroed_typed(SerializationReader);
+    GETATTR_SerializationContext_root_stables(interp, sc, stables);
+    GETATTR_SerializationContext_root_objects(interp, sc, objects);
+    reader->stables_list        = stables;
+    reader->objects_list        = objects;
+    reader->root.string_heap    = string_heap;
+    reader->root.dependent_scs  = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+    
+    /* Read header and disect the data into its parts. */
+    check_and_disect_input(interp, reader, data);
+    
+    /* Resolve the SCs in the dependencies table. */
+    
+    /* Disable GC at this stage; for one there's no point collecting when all
+     * we're doing in here is allocating, but more importantly STable REPRData
+     * may be in an inconsistent state during all of this and so we may not have
+     * yet deserialized enough to know how to do marking/freeing. */
+     Parrot_block_GC_mark(interp);
+    
+    /* Stub-allocate PMCs for all STables and objects, so we know where
+     * they will all end up. */
+     
+     /* Deserialize STables, along with their representation data. */
+     
+     /* Deserialize objects. */
+     
+     /* Re-enable GC. */
+     Parrot_unblock_GC_mark(interp);
+    
+    /* Clear up afterwards. */
+    mem_sys_free(reader);
 }

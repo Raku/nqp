@@ -38,6 +38,18 @@ typedef struct {
 typedef struct {
     /* Serialization root data. */
     SerializationRoot root;
+    
+    /* The stables list and object list we're deserializing things into. */
+    PMC *stables_list;
+    PMC *objects_list;
+    
+    /* Flag for if we're reading the stable data chunk or object data chunk. */
+    char reading_object;
+    
+    /* Current offsets for the data chunks (also correspond to the amount of
+     * data written in to them). */
+    Parrot_Int4 stables_data_offset;
+    Parrot_Int4 objects_data_offset;
 } SerializationReader;
 
 /* Represents the serialization writer and the various functions available
