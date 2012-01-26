@@ -313,7 +313,7 @@ class HLL::Compiler {
         my $result;
         my $error;
         my $has_error := 0;
-        my $target := %adverbs<target>;
+        my $target := pir::downcase(%adverbs<target>);
         try {
             if pir::defined(%adverbs<e>) {
                 $result := self.eval(%adverbs<e>, '-e', |@a, |%adverbs);
@@ -443,7 +443,7 @@ class HLL::Compiler {
         }
         my $grammar := self.parsegrammar;
         my $actions;
-        $actions    := self.parseactions unless %adverbs<target> eq 'parse';
+        $actions    := self.parseactions unless pir::downcase(%adverbs<target>) eq 'parse';
         my $match   := $grammar.parse($s, p => 0, actions => $actions, rxtrace => %adverbs<rxtrace>);
         self.panic('Unable to parse source') unless $match;
         return $match;
