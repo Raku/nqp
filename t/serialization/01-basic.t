@@ -1,6 +1,6 @@
 #! nqp
 
-plan(22);
+plan(28);
 
 # Serializing an empty SC.
 {
@@ -115,5 +115,37 @@ plan(22);
     ok($dsc[0].a == 42,                   'P6int attribute has correct value');
     ok($dsc[0].b == 6.9,                  'P6num attribute has correct value');
     ok($dsc[0].c eq 'llama',              'P6str attribute has correct value');
+}
+
+# Serializing an SC with P6opaues and circular references
+{
+    my $sc := pir::nqp_create_sc__Ps('TEST_SC_6_IN');
+    my $sh := pir::new__Ps('ResizableStringArray');
+    
+    class T5 {
+        has $!x;
+        method set_x($x) {
+            $!x := $x;
+        }
+        method x() { $!x }
+    }
+    my $v1 := T5.new();
+    my $v2 := T5.new();
+    $v1.set_x($v2);
+    $v2.set_x($v1);
+    $sc[0] := $v1;
+    $sc[1] := $v2;
+
+    my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+    ok(nqp::chars($serialized) > 36, 'serialized SC with P6opaque output longer than a header');
+    
+    my $dsc := pir::nqp_create_sc__Ps('TEST_SC_6_OUT');
+    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh);
+    
+    ok(nqp::elems($dsc) == 2,       'deserialized SC has 2 element');
+    ok(nqp::istype($dsc[0], T5),    'first deserialized object has correct type');
+    ok(nqp::istype($dsc[1], T5),    'second deserialized object has correct type');
+    ok($dsc[0].x =:= $dsc[1],       'reference from first object to second ok');
+    ok($dsc[1].x =:= $dsc[0],       'reference from second object to first ok');
 }
 
