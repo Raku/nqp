@@ -871,6 +871,36 @@ static void change_type(PARROT_INTERP, PMC *obj, PMC *new_type) {
     PARROT_GC_WRITE_BARRIER(interp, obj);
 }
 
+/* Serializes the data. */
+static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter *writer) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    INTVAL num_attributes = repr_data->num_attributes;
+    INTVAL i;
+    for (i = 0; i < num_attributes; i++) {
+        INTVAL a_offset = repr_data->attribute_offsets[i];
+        STable *a_st = repr_data->flattened_stables[i];
+        if (a_st)
+            a_st->REPR->serialize(interp, a_st, (char *)data + a_offset, writer);
+        else
+            writer->write_ref(interp, writer, get_pmc_at_offset(data, a_offset));
+    }
+}
+
+/* Deserializes the data. */
+static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationReader *reader) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    INTVAL num_attributes = repr_data->num_attributes;
+    INTVAL i;
+    for (i = 0; i < num_attributes; i++) {
+        INTVAL a_offset = repr_data->attribute_offsets[i];
+        STable *a_st = repr_data->flattened_stables[i];
+        if (a_st)
+            a_st->REPR->deserialize(interp, a_st, (char *)data + a_offset, reader);
+        else
+            set_pmc_at_offset(data, a_offset, reader->read_ref(interp, reader));
+    }
+}
+
 /* Initializes the P6opaque representation. */
 REPROps * P6opaque_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
@@ -900,6 +930,8 @@ REPROps * P6opaque_initialize(PARROT_INTERP) {
     this_repr->gc_free_repr_data = gc_free_repr_data;
     this_repr->get_storage_spec = get_storage_spec;
     this_repr->change_type = change_type;
+    this_repr->serialize = serialize;
+    this_repr->deserialize = deserialize;
     smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
     return this_repr;
 }
