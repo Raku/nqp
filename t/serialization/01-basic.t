@@ -25,7 +25,7 @@ plan(28);
     
     class T1 is repr('P6int') { }
     my $v1 := nqp::box_i(42, T1);
-    $sc[0] := $v1;
+    pir::nqp_add_object_to_sc__vPiP($sc, 0, $v1);
 
     my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6int output longer than a header');
@@ -45,7 +45,7 @@ plan(28);
     
     class T2 is repr('P6num') { }
     my $v := nqp::box_n(6.9, T2);
-    $sc[0] := $v;
+    pir::nqp_add_object_to_sc__vPiP($sc, 0, $v);
 
     my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6num output longer than a header');
@@ -65,7 +65,7 @@ plan(28);
     
     class T3 is repr('P6str') { }
     my $v := nqp::box_s('dugong', T3);
-    $sc[0] := $v;
+    pir::nqp_add_object_to_sc__vPiP($sc, 0, $v);
 
     my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6str output longer than a header');
@@ -102,7 +102,7 @@ plan(28);
         method c() { $!c }
     }
     my $v := T4.new();
-    $sc[0] := $v;
+    pir::nqp_add_object_to_sc__vPiP($sc, 0, $v);
 
     my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6opaque output longer than a header');
@@ -133,8 +133,8 @@ plan(28);
     my $v2 := T5.new();
     $v1.set_x($v2);
     $v2.set_x($v1);
-    $sc[0] := $v1;
-    $sc[1] := $v2;
+    pir::nqp_add_object_to_sc__vPiP($sc, 0, $v1);
+    pir::nqp_add_object_to_sc__vPiP($sc, 1, $v2);
 
     my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6opaque output longer than a header');
