@@ -224,6 +224,15 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
     else if (ref->vtable->base_type == smo_id) {
         discrim = REFVAR_OBJECT;
     }
+    else if (ref->vtable->base_type == enum_class_Integer) {
+        discrim = REFVAR_VM_INT;
+    }
+    else if (ref->vtable->base_type == enum_class_Float) {
+        discrim = REFVAR_VM_NUM;
+    }
+    else if (ref->vtable->base_type == enum_class_String) {
+        discrim = REFVAR_VM_STR;
+    }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Serialization Error: Unimplemented object type passed to write_ref");
@@ -248,6 +257,15 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
             break;
         case REFVAR_OBJECT:
             write_obj_ref(interp, writer, ref);
+            break;
+        case REFVAR_VM_INT:
+            write_int_func(interp, writer, VTABLE_get_integer(interp, ref));
+            break;
+        case REFVAR_VM_NUM:
+            write_num_func(interp, writer, VTABLE_get_number(interp, ref));
+            break;
+        case REFVAR_VM_STR:
+            write_str_func(interp, writer, VTABLE_get_string(interp, ref));
             break;
         default:
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -604,6 +622,8 @@ PMC * read_obj_ref(PARROT_INTERP, SerializationReader *reader) {
 
 /* Reading function for references. */
 PMC * read_ref_func(PARROT_INTERP, SerializationReader *reader) {
+    PMC *result;
+    
     /* Read the discriminator. */
     Parrot_Int2 discrim;
     assert_can_read(interp, reader, 2);
@@ -624,6 +644,18 @@ PMC * read_ref_func(PARROT_INTERP, SerializationReader *reader) {
             return read_obj_ref(interp, reader);
         case REFVAR_VM_NULL:
             return PMCNULL;
+        case REFVAR_VM_INT:
+            result = Parrot_pmc_new(interp, enum_class_Integer);
+            VTABLE_set_integer_native(interp, result, read_int_func(interp, reader));
+            return result;
+        case REFVAR_VM_NUM:
+            result = Parrot_pmc_new(interp, enum_class_Float);
+            VTABLE_set_number_native(interp, result, read_num_func(interp, reader));
+            return result;
+        case REFVAR_VM_STR:
+            result = Parrot_pmc_new(interp, enum_class_String);
+            VTABLE_set_string_native(interp, result, read_str_func(interp, reader));
+            return result;
         default:
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Serialization Error: Unimplemented case of read_ref");
