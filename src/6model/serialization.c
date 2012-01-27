@@ -16,7 +16,7 @@
 #define HEADER_SIZE                 4 * 9
 #define DEP_TABLE_ENTRY_SIZE        8
 #define STABLE_TABLE_ENTRY_SIZE     8
-#define OBJECTS_TABLE_ENTRY_SIZE    12
+#define OBJECTS_TABLE_ENTRY_SIZE    16
 
 /* Some guesses. */
 #define DEFAULT_STABLE_DATA_SIZE    4096
@@ -262,6 +262,7 @@ static void serialize_object(PARROT_INTERP, SerializationWriter *writer, PMC *ob
     write_int32(writer->root.objects_table, offset, sc);
     write_int32(writer->root.objects_table, offset + 4, sc_idx);
     write_int32(writer->root.objects_table, offset + 8, writer->objects_data_offset);
+    write_int32(writer->root.objects_table, offset + 12, IS_CONCRETE(obj) ? 1 : 0);
     
     /* Increment count of objects in the table. */
     writer->root.num_objects++;
@@ -613,6 +614,8 @@ static void deserialize_object(PARROT_INTERP, SerializationReader *reader, INTVA
     /* Delegate to its deserialization REPR function. */
     reader->reading_object = 1;
     reader->objects_data_offset = read_int32(obj_table_row, 8);
+    if ((read_int32(obj_table_row, 12) & 1) != 1)
+        MARK_AS_TYPE_OBJECT(obj);
     if (REPR(obj)->deserialize)
         REPR(obj)->deserialize(interp, STABLE(obj), OBJECT_BODY(obj), reader);
     else
