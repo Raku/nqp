@@ -1,6 +1,6 @@
 #! nqp
 
-plan(8);
+plan(16);
 
 # Serializing an empty SC.
 {
