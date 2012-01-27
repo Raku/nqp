@@ -25,14 +25,18 @@
 /* Possible reference types we can serialize. */
 #define REFVAR_NULL                 1
 #define REFVAR_OBJECT               2
-#define REFVAR_VM_INT               3
-#define REFVAR_VM_NUM               4
-#define REFVAR_VM_STR               5
-#define REFVAR_VM_ARR_VAR           6
-#define REFVAR_VM_ARR_STR           7
-#define REFVAR_VM_ARR_INT           8
-#define REFVAR_VM_HASH_STR_VAR      9
-#define REFVAR_STATIC_CODEREF       10
+#define REFVAR_VM_NULL              3
+#define REFVAR_VM_INT               4
+#define REFVAR_VM_NUM               5
+#define REFVAR_VM_STR               6
+#define REFVAR_VM_ARR_VAR           7
+#define REFVAR_VM_ARR_STR           8
+#define REFVAR_VM_ARR_INT           9
+#define REFVAR_VM_HASH_STR_VAR      10
+#define REFVAR_STATIC_CODEREF       11
+
+/* Cached type IDs. */
+static INTVAL smo_id = 0;
 
 /* ***************************************************************************
  * Serialization (writing related)
@@ -179,11 +183,51 @@ void write_str_func(PARROT_INTERP, SerializationWriter *writer, STRING *value) {
     }
 }
 
+/* Writes an object reference. */
+void write_obj_ref(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
+    Parrot_Int4 sc_id, idx;
+    
+    if (PMC_IS_NULL(SC_PMC(ref))) {
+        /* This object doesn't belong to an SC yet, so it must be serialized as part of
+         * this compilation unit. Add it to the work list. */
+        SC_PMC(ref) = writer->root.sc;
+        VTABLE_push_pmc(interp, writer->objects_list, ref);
+    }
+    sc_id = get_sc_id(interp, writer, SC_PMC(ref));
+    idx   = (Parrot_Int4)SC_find_object_idx(interp, SC_PMC(ref), ref);
+    
+    expand_storage_if_needed(interp, writer, 8);
+    if (writer->writing_object) {
+        write_int32(writer->root.objects_data, writer->objects_data_offset, sc_id);
+        writer->objects_data_offset += 4;
+        write_int32(writer->root.objects_data, writer->objects_data_offset, idx);
+        writer->objects_data_offset += 4;
+    }
+    else {
+        write_int32(writer->root.stables_data, writer->stables_data_offset, sc_id);
+        writer->stables_data_offset += 4;
+        write_int32(writer->root.stables_data, writer->stables_data_offset, idx);
+        writer->stables_data_offset += 4;
+    }
+}
+
 /* Writing function for references to things. */
 void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
     /* Work out what kind of thing we have and determine the discriminator. */
     Parrot_Int2 discrim = 0;
-    /* XXX */
+    if (ref == NULL) {
+        discrim = REFVAR_NULL;
+    }
+    else if (PMC_IS_NULL(ref)) {
+        discrim = REFVAR_VM_NULL;
+    }
+    else if (ref->vtable->base_type == smo_id) {
+        discrim = REFVAR_OBJECT;
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Serialization Error: Unimplemented object type passed to write_ref");
+    }
 
     /* Write the discriminator. */
     expand_storage_if_needed(interp, writer, 2);
@@ -197,8 +241,18 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
     }
     
     /* Now take appropriate action. */
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-        "write_ref not yet implemented");
+    switch (discrim) {
+        case REFVAR_NULL:
+        case REFVAR_VM_NULL:
+            /* Nothing to do for these. */
+            break;
+        case REFVAR_OBJECT:
+            write_obj_ref(interp, writer, ref);
+            break;
+        default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Serialization Error: Unimplemented object type passed to write_ref");
+    }
 }
 
 /* Concatenates the various output segments into a single binary string. */
@@ -380,6 +434,9 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     writer->write_num = write_num_func;
     writer->write_str = write_str_func;
     writer->write_ref = write_ref_func;
+    
+    /* Other init. */
+    smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
 
     /* Start serializing. */
     serialize(interp, writer);
@@ -524,7 +581,28 @@ STRING * read_str_func(PARROT_INTERP, SerializationReader *reader) {
     }
 }
 
-/* Reading function for native strings. */
+/* Reads in and resolves an object references. */
+PMC * read_obj_ref(PARROT_INTERP, SerializationReader *reader) {
+    Parrot_Int4 sc_id, idx;
+    
+    assert_can_read(interp, reader, 8);
+    if (reader->reading_object) {
+        sc_id = read_int32(reader->root.objects_data, reader->objects_data_offset);
+        reader->objects_data_offset += 4;
+        idx = read_int32(reader->root.objects_data, reader->objects_data_offset);
+        reader->objects_data_offset += 4;
+    }
+    else {
+        sc_id = read_int32(reader->root.stables_data, reader->stables_data_offset);
+        reader->stables_data_offset += 4;
+        idx = read_int32(reader->root.stables_data, reader->stables_data_offset);
+        reader->stables_data_offset += 4;
+    }
+    
+    return SC_get_object(interp, locate_sc(interp, reader, sc_id), idx);
+}
+
+/* Reading function for references. */
 PMC * read_ref_func(PARROT_INTERP, SerializationReader *reader) {
     /* Read the discriminator. */
     Parrot_Int2 discrim;
@@ -539,8 +617,17 @@ PMC * read_ref_func(PARROT_INTERP, SerializationReader *reader) {
     }
     
     /* Decide what to do based on it. */
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-        "read_ref not yet implemented");
+    switch (discrim) {
+        case REFVAR_NULL:
+            return NULL;
+        case REFVAR_OBJECT:
+            return read_obj_ref(interp, reader);
+        case REFVAR_VM_NULL:
+            return PMCNULL;
+        default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Serialization Error: Unimplemented case of read_ref");
+    }
 }
 
 /* Checks the header looks sane and all of the places it points to make sense.
@@ -702,6 +789,9 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, STRING 
     reader->read_num = read_num_func;
     reader->read_str = read_str_func;
     reader->read_ref = read_ref_func;
+    
+    /* Other init. */
+    smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
     
     /* Read header and disect the data into its parts. */
     check_and_disect_input(interp, reader, data);

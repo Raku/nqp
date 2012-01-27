@@ -81,3 +81,13 @@ PMC * SC_get_stable(PARROT_INTERP, PMC *sc, INTVAL idx) {
             "No STable at index %d", idx);
     return VTABLE_get_pmc_keyed_int(interp, stables, idx);
 }
+
+/* Given an SC and an index, fetch the object stored there. */
+PMC * SC_get_object(PARROT_INTERP, PMC *sc, INTVAL idx) {
+    PMC *objects;
+    GETATTR_SerializationContext_root_objects(interp, sc, objects);
+    if (idx >= VTABLE_elements(interp, objects))
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "No object at index %d", idx);
+    return VTABLE_get_pmc_keyed_int(interp, objects, idx);
+}
