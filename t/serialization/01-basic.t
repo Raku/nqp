@@ -87,6 +87,11 @@ plan(22);
         has int $!a;
         has num $!b;
         has str $!c;
+        method new() {
+            my $obj := nqp::create(self);
+            $obj.BUILD();
+            $obj;
+        }
         method BUILD() {
             $!a := 42;
             $!b := 6.9;
@@ -104,11 +109,11 @@ plan(22);
     
     my $dsc := pir::nqp_create_sc__Ps('TEST_SC_5_OUT');
     pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh);
-    
+
     ok(nqp::elems($dsc) == 1,             'deserialized SC has a single element');
     ok(nqp::istype($dsc[0], T4),          'deserialized object has correct type');
     ok($dsc[0].a == 42,                   'P6int attribute has correct value');
     ok($dsc[0].b == 6.9,                  'P6num attribute has correct value');
-    ok($dsc[0].c == 'llama',              'P6str attribute has correct value');
+    ok($dsc[0].c eq 'llama',              'P6str attribute has correct value');
 }
 
