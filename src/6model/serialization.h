@@ -59,6 +59,7 @@ typedef struct SerializationReader {
     INTVAL   (*read_int) (PARROT_INTERP, struct SerializationReader *reader);
     FLOATVAL (*read_num) (PARROT_INTERP, struct SerializationReader *reader);
     STRING * (*read_str) (PARROT_INTERP, struct SerializationReader *reader);
+    PMC *    (*read_ref) (PARROT_INTERP, struct SerializationReader *reader);
 } SerializationReader;
 
 /* Represents the serialization writer and the various functions available
@@ -98,6 +99,7 @@ typedef struct SerializationWriter {
     void (*write_int) (PARROT_INTERP, struct SerializationWriter *writer, INTVAL value);
     void (*write_num) (PARROT_INTERP, struct SerializationWriter *writer, FLOATVAL value);
     void (*write_str) (PARROT_INTERP, struct SerializationWriter *writer, STRING *value);
+    void (*write_ref) (PARROT_INTERP, struct SerializationWriter *writer, PMC *value);
 } SerializationWriter;
 
 /* Core serialize and deserialize functions. */

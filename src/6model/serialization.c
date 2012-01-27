@@ -22,6 +22,18 @@
 #define DEFAULT_STABLE_DATA_SIZE    4096
 #define OBJECT_SIZE_GUESS           8
 
+/* Possible reference types we can serialize. */
+#define REFVAR_NULL                 1
+#define REFVAR_OBJECT               2
+#define REFVAR_VM_INT               3
+#define REFVAR_VM_NUM               4
+#define REFVAR_VM_STR               5
+#define REFVAR_VM_ARR_VAR           6
+#define REFVAR_VM_ARR_STR           7
+#define REFVAR_VM_ARR_INT           8
+#define REFVAR_VM_HASH_STR_VAR      9
+#define REFVAR_STATIC_CODEREF       10
+
 /* ***************************************************************************
  * Serialization (writing related)
  * ***************************************************************************/
@@ -165,6 +177,28 @@ void write_str_func(PARROT_INTERP, SerializationWriter *writer, STRING *value) {
         write_int32(writer->root.stables_data, writer->stables_data_offset, heap_loc);
         writer->stables_data_offset += 4;
     }
+}
+
+/* Writing function for references to things. */
+void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
+    /* Work out what kind of thing we have and determine the discriminator. */
+    Parrot_Int2 discrim = 0;
+    /* XXX */
+
+    /* Write the discriminator. */
+    expand_storage_if_needed(interp, writer, 2);
+    if (writer->writing_object) {
+        write_int16(writer->root.objects_data, writer->objects_data_offset, discrim);
+        writer->objects_data_offset += 2;
+    }
+    else {
+        write_int16(writer->root.stables_data, writer->stables_data_offset, discrim);
+        writer->stables_data_offset += 2;
+    }
+    
+    /* Now take appropriate action. */
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+        "write_ref not yet implemented");
 }
 
 /* Concatenates the various output segments into a single binary string. */
@@ -345,6 +379,7 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     writer->write_int = write_int_func;
     writer->write_num = write_num_func;
     writer->write_str = write_str_func;
+    writer->write_ref = write_ref_func;
 
     /* Start serializing. */
     serialize(interp, writer);
@@ -487,6 +522,25 @@ STRING * read_str_func(PARROT_INTERP, SerializationReader *reader) {
         reader->stables_data_offset += 4;
         return result;
     }
+}
+
+/* Reading function for native strings. */
+PMC * read_ref_func(PARROT_INTERP, SerializationReader *reader) {
+    /* Read the discriminator. */
+    Parrot_Int2 discrim;
+    assert_can_read(interp, reader, 2);
+    if (reader->reading_object) {
+        discrim = read_int16(reader->root.objects_data, reader->objects_data_offset);
+        reader->objects_data_offset += 2;
+    }
+    else {
+        discrim = read_int16(reader->root.stables_data, reader->stables_data_offset);
+        reader->stables_data_offset += 2;
+    }
+    
+    /* Decide what to do based on it. */
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+        "read_ref not yet implemented");
 }
 
 /* Checks the header looks sane and all of the places it points to make sense.
@@ -647,6 +701,7 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, STRING 
     reader->read_int = read_int_func;
     reader->read_num = read_num_func;
     reader->read_str = read_str_func;
+    reader->read_ref = read_ref_func;
     
     /* Read header and disect the data into its parts. */
     check_and_disect_input(interp, reader, data);
