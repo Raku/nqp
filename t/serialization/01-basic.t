@@ -1,6 +1,6 @@
 #! nqp
 
-plan(28);
+plan(37);
 
 # Serializing an empty SC.
 {
@@ -147,5 +147,48 @@ plan(28);
     ok(nqp::istype($dsc[1], T5),    'second deserialized object has correct type');
     ok($dsc[0].x =:= $dsc[1],       'reference from first object to second ok');
     ok($dsc[1].x =:= $dsc[0],       'reference from second object to first ok');
+}
+
+# Tracing an object graph.
+{
+    my $sc := pir::nqp_create_sc__Ps('TEST_SC_7_IN');
+    my $sh := pir::new__Ps('ResizableStringArray');
+    
+    class T6 {
+        has $!x;
+        has int $!v;
+        method set_xv($x, $v) {
+            $!x := $x;
+            $!v := $v;
+        }
+        method set_v($v) {
+            $!v := $v;
+        }
+        method x() { $!x }
+        method v() { $!v }
+    }
+    my $v1 := T6.new();
+    my $v2 := T6.new();
+    my $v3 := T6.new();
+    $v1.set_xv($v2, 5);
+    $v2.set_xv($v3, 8);
+    $v3.set_v(40);
+    
+    # Here, we only add *one* of the three explicitly to the SC.
+    pir::nqp_add_object_to_sc__vPiP($sc, 0, $v1);
+    my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+    
+    my $dsc := pir::nqp_create_sc__Ps('TEST_SC_7_OUT');
+    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh);
+    
+    ok(nqp::elems($dsc) == 3,       'deserialized SC has 3 elements - the one we added and two discovered');
+    ok(nqp::istype($dsc[0], T6),    'first deserialized object has correct type');
+    ok(nqp::istype($dsc[1], T6),    'second deserialized object has correct type');
+    ok(nqp::istype($dsc[2], T6),    'third deserialized object has correct type');
+    ok($dsc[0].x =:= $dsc[1],       'reference from first object to second ok');
+    ok($dsc[0].v == 5,              'first object value attribute is ok');
+    ok($dsc[1].x =:= $dsc[2],       'reference from second object to third ok');
+    ok($dsc[1].v == 8,              'second object value attribute is ok');
+    ok($dsc[2].v == 40,             'third object value attribute is ok');
 }
 
