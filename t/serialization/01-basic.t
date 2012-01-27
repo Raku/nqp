@@ -1,6 +1,6 @@
 #! nqp
 
-plan(16);
+plan(22);
 
 # Serializing an empty SC.
 {
@@ -76,5 +76,39 @@ plan(16);
     ok(nqp::elems($dsc) == 1,             'deserialized SC has a single element');
     ok(nqp::istype($dsc[0], T3),          'deserialized object has correct type');
     ok(nqp::unbox_s($dsc[0]) eq 'dugong', 'deserialized object has correct value');
+}
+
+# Serializing an SC with a P6opaque containing a P6int, P6num and P6str.
+{
+    my $sc := pir::nqp_create_sc__Ps('TEST_SC_5_IN');
+    my $sh := pir::new__Ps('ResizableStringArray');
+    
+    class T4 {
+        has int $!a;
+        has num $!b;
+        has str $!c;
+        method BUILD() {
+            $!a := 42;
+            $!b := 6.9;
+            $!c := 'llama';
+        }
+        method a() { $!a }
+        method b() { $!b }
+        method c() { $!c }
+    }
+    my $v := T4.new();
+    $sc[0] := $v;
+
+    my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+    ok(nqp::chars($serialized) > 36, 'serialized SC with P6opaque output longer than a header');
+    
+    my $dsc := pir::nqp_create_sc__Ps('TEST_SC_5_OUT');
+    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh);
+    
+    ok(nqp::elems($dsc) == 1,             'deserialized SC has a single element');
+    ok(nqp::istype($dsc[0], T4),          'deserialized object has correct type');
+    ok($dsc[0].a == 42,                   'P6int attribute has correct value');
+    ok($dsc[0].b == 6.9,                  'P6num attribute has correct value');
+    ok($dsc[0].c == 'llama',              'P6str attribute has correct value');
 }
 
