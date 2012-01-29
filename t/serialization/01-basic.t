@@ -1,6 +1,6 @@
 #! nqp
 
-plan(42);
+plan(53);
 
 # Serializing an empty SC.
 {
@@ -192,7 +192,6 @@ plan(42);
     ok($dsc[2].v == 40,             'third object value attribute is ok');
 }
 
-# VM Integer/Float/String types
 # Serializing an SC with a P6opaque containing VM Integer/Float/String
 {
     my $sc := pir::nqp_create_sc__Ps('TEST_SC_8_IN');
@@ -230,3 +229,45 @@ plan(42);
     ok($dsc[0].b == 6.9,                  'Float survived serialization');
     ok($dsc[0].c eq 'llama',              'String survived serialization');
 }
+
+# Array in an object attribute
+{
+    my $sc := pir::nqp_create_sc__Ps('TEST_SC_9_IN');
+    my $sh := pir::new__Ps('ResizableStringArray');
+    
+    class T8 {
+        has $!a;
+        has $!b;
+        method new() {
+            my $obj := nqp::create(self);
+            $obj.BUILD();
+            $obj;
+        }
+        method BUILD() {
+            $!a := [1,'lol',3];
+            $!b := [1,[2,3],4];
+        }
+        method a() { $!a }
+        method b() { $!b }
+    }
+    my $v := T8.new();
+    pir::nqp_add_object_to_sc__vPiP($sc, 0, $v);
+
+    my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+    
+    my $dsc := pir::nqp_create_sc__Ps('TEST_SC_9_OUT');
+    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh);
+
+    ok(nqp::istype($dsc[0], T8),          'deserialized object has correct type');
+    ok(+$dsc[0].a == 3,                   'array a came back with correct element count');
+    ok($dsc[0].a[0] == 1,                 'array a first element is correct');
+    ok($dsc[0].a[1] eq 'lol',             'array a second element is correct');
+    ok($dsc[0].a[2] == 3,                 'array a third element is fine');
+    ok(+$dsc[0].b == 3,                   'array b came back with correct element count');
+    ok($dsc[0].b[0] == 1,                 'array b first element is correct');
+    ok(+$dsc[0].b[1] == 2,                'array b nested array has correct count');
+    ok(+$dsc[0].b[1][0] == 2,             'array b nested array first element ok');
+    ok(+$dsc[0].b[1][1] == 3,             'array b nested array second element ok');
+    ok(+$dsc[0].b[2] == 4,                'array b third element is correct');
+}
+
