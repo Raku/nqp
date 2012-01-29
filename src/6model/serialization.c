@@ -233,6 +233,31 @@ static void write_var_array(PARROT_INTERP, SerializationWriter *writer, PMC *arr
         write_ref_func(interp, writer, VTABLE_get_pmc_keyed_int(interp, arr, i));
 }
 
+/* Writes a hash where each key is a string and each value a variant reference. */
+void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref);
+static void write_str_var_hash(PARROT_INTERP, SerializationWriter *writer, PMC *hash) {
+    PMC *iter = VTABLE_get_iter(interp, hash);
+    Parrot_Int4 elems = (Parrot_Int4)VTABLE_elements(interp, hash);
+    
+    /* Write out element count. */
+    expand_storage_if_needed(interp, writer, 4);
+    if (writer->writing_object) {
+        write_int32(writer->root.objects_data, writer->objects_data_offset, elems);
+        writer->objects_data_offset += 4;
+    }
+    else {
+        write_int32(writer->root.stables_data, writer->stables_data_offset, elems);
+        writer->stables_data_offset += 4;
+    }
+    
+    /* Write elements, as key,value,key,value etc. */
+    while (VTABLE_get_bool(interp, iter)) {
+        STRING *key = VTABLE_shift_string(interp, iter);
+        write_str_func(interp, writer, key);
+        write_ref_func(interp, writer, VTABLE_get_pmc_keyed_str(interp, hash, key));
+    }
+}
+
 /* Writing function for references to things. */
 void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
     /* Work out what kind of thing we have and determine the discriminator. */
@@ -257,6 +282,9 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
     }
     else if (ref->vtable->base_type == enum_class_ResizablePMCArray) {
         discrim = REFVAR_VM_ARR_VAR;
+    }
+    else if (ref->vtable->base_type == enum_class_Hash) {
+        discrim = REFVAR_VM_HASH_STR_VAR;
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -294,6 +322,9 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
             break;
         case REFVAR_VM_ARR_VAR:
             write_var_array(interp, writer, ref);
+            break;
+        case REFVAR_VM_HASH_STR_VAR:
+            write_str_var_hash(interp, writer, ref);
             break;
         default:
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -672,6 +703,31 @@ static PMC * read_var_array(PARROT_INTERP, SerializationReader *reader) {
     return result;
 }
 
+/* Reads in an hash with string keys and variant references. */
+static PMC * read_str_var_hash(PARROT_INTERP, SerializationReader *reader) {
+    PMC *result = Parrot_pmc_new(interp, enum_class_Hash);
+    Parrot_Int4 elems, i;
+
+    /* Read the element count. */
+    assert_can_read(interp, reader, 4);
+    if (reader->reading_object) {
+        elems = read_int32(reader->root.objects_data, reader->objects_data_offset);
+        reader->objects_data_offset += 4;
+    }
+    else {
+        elems = read_int32(reader->root.stables_data, reader->stables_data_offset);
+        reader->stables_data_offset += 4;
+    }
+
+    /* Read in the elements. */
+    for (i = 0; i < elems; i++) {
+        STRING *key = read_str_func(interp, reader);
+        VTABLE_set_pmc_keyed_str(interp, result, key, read_ref_func(interp, reader));
+    }
+
+    return result;
+}
+
 /* Reading function for references. */
 PMC * read_ref_func(PARROT_INTERP, SerializationReader *reader) {
     PMC *result;
@@ -710,6 +766,8 @@ PMC * read_ref_func(PARROT_INTERP, SerializationReader *reader) {
             return result;
         case REFVAR_VM_ARR_VAR:
             return read_var_array(interp, reader);
+        case REFVAR_VM_HASH_STR_VAR:
+            return read_str_var_hash(interp, reader);
         default:
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Serialization Error: Unimplemented case of read_ref");
