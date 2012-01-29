@@ -259,13 +259,13 @@ plan(67);
     pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh);
 
     ok(nqp::istype($dsc[0], T8),          'deserialized object has correct type');
-    ok(+$dsc[0].a == 3,                   'array a came back with correct element count');
+    ok(nqp::elems($dsc[0].a) == 3,        'array a came back with correct element count');
     ok($dsc[0].a[0] == 1,                 'array a first element is correct');
     ok($dsc[0].a[1] eq 'lol',             'array a second element is correct');
     ok($dsc[0].a[2] == 3,                 'array a third element is fine');
-    ok(+$dsc[0].b == 3,                   'array b came back with correct element count');
+    ok(nqp::elems($dsc[0].b) == 3,        'array b came back with correct element count');
     ok($dsc[0].b[0] == 1,                 'array b first element is correct');
-    ok(+$dsc[0].b[1] == 2,                'array b nested array has correct count');
+    ok(nqp::elems($dsc[0].b[1]) == 2,     'array b nested array has correct element count');
     ok(+$dsc[0].b[1][0] == 2,             'array b nested array first element ok');
     ok(+$dsc[0].b[1][1] == 3,             'array b nested array second element ok');
     ok(+$dsc[0].b[2] == 4,                'array b third element is correct');
@@ -300,7 +300,7 @@ plan(67);
     pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh);
 
     ok(nqp::istype($dsc[0], T9),          'deserialized object has correct type');
-    ok(+$dsc[0].a == 2,                   'hash came back with correct element count');
+    ok(nqp::elems($dsc[0].a) == 2,        'hash came back with correct element count');
     ok($dsc[0].a<a> == 42,                'hash first element is correct');
     ok($dsc[0].a<b> eq 'polar bear',      'hash second element is correct');
 }
@@ -335,7 +335,7 @@ plan(67);
     pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh);
 
     ok(nqp::istype($dsc[0], T10),          'deserialized object has correct type');
-    ok(+$dsc[0].a == 3,                    'integer array came back with correct element count');
+    ok(nqp::elems($dsc[0].a) == 3,         'integer array came back with correct element count');
     ok($dsc[0].a[0] == 101,                'integer array first element is correct');
     ok($dsc[0].a[1] == 102,                'integer array second element is correct');
     ok($dsc[0].a[2] == 103,                'integer array third element is correct');
@@ -371,7 +371,7 @@ plan(67);
     pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh);
 
     ok(nqp::istype($dsc[0], T11),          'deserialized object has correct type');
-    ok(+$dsc[0].a == 3,                    'string array came back with correct element count');
+    ok(nqp::elems($dsc[0].a) == 3,         'string array came back with correct element count');
     ok($dsc[0].a[0] eq 'cow',              'string array first element is correct');
     ok($dsc[0].a[1] eq 'sheep',            'string array second element is correct');
     ok($dsc[0].a[2] eq 'pig',              'string array third element is correct');
