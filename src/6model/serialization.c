@@ -213,7 +213,7 @@ void write_obj_ref(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
 
 /* Writes an array where each item is a variant reference. */
 void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref);
-static void write_var_array(PARROT_INTERP, SerializationWriter *writer, PMC *arr) {
+static void write_array_var(PARROT_INTERP, SerializationWriter *writer, PMC *arr) {
     Parrot_Int4 elems = (Parrot_Int4)VTABLE_elements(interp, arr);
     Parrot_Int4 i;
     
@@ -235,7 +235,7 @@ static void write_var_array(PARROT_INTERP, SerializationWriter *writer, PMC *arr
 
 /* Writes a hash where each key is a string and each value a variant reference. */
 void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref);
-static void write_str_var_hash(PARROT_INTERP, SerializationWriter *writer, PMC *hash) {
+static void write_hash_str_var(PARROT_INTERP, SerializationWriter *writer, PMC *hash) {
     PMC *iter = VTABLE_get_iter(interp, hash);
     Parrot_Int4 elems = (Parrot_Int4)VTABLE_elements(interp, hash);
     
@@ -321,10 +321,10 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
             write_str_func(interp, writer, VTABLE_get_string(interp, ref));
             break;
         case REFVAR_VM_ARR_VAR:
-            write_var_array(interp, writer, ref);
+            write_array_var(interp, writer, ref);
             break;
         case REFVAR_VM_HASH_STR_VAR:
-            write_str_var_hash(interp, writer, ref);
+            write_hash_str_var(interp, writer, ref);
             break;
         default:
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -681,7 +681,7 @@ PMC * read_obj_ref(PARROT_INTERP, SerializationReader *reader) {
 
 /* Reads in an array of variant references. */
 PMC * read_ref_func(PARROT_INTERP, SerializationReader *reader);
-static PMC * read_var_array(PARROT_INTERP, SerializationReader *reader) {
+static PMC * read_array_var(PARROT_INTERP, SerializationReader *reader) {
     PMC *result = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
     Parrot_Int4 elems, i;
 
@@ -704,7 +704,7 @@ static PMC * read_var_array(PARROT_INTERP, SerializationReader *reader) {
 }
 
 /* Reads in an hash with string keys and variant references. */
-static PMC * read_str_var_hash(PARROT_INTERP, SerializationReader *reader) {
+static PMC * read_hash_str_var(PARROT_INTERP, SerializationReader *reader) {
     PMC *result = Parrot_pmc_new(interp, enum_class_Hash);
     Parrot_Int4 elems, i;
 
@@ -765,9 +765,9 @@ PMC * read_ref_func(PARROT_INTERP, SerializationReader *reader) {
             VTABLE_set_string_native(interp, result, read_str_func(interp, reader));
             return result;
         case REFVAR_VM_ARR_VAR:
-            return read_var_array(interp, reader);
+            return read_array_var(interp, reader);
         case REFVAR_VM_HASH_STR_VAR:
-            return read_str_var_hash(interp, reader);
+            return read_hash_str_var(interp, reader);
         default:
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Serialization Error: Unimplemented case of read_ref");
