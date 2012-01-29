@@ -233,6 +233,48 @@ static void write_array_var(PARROT_INTERP, SerializationWriter *writer, PMC *arr
         write_ref_func(interp, writer, VTABLE_get_pmc_keyed_int(interp, arr, i));
 }
 
+/* Writes an array where each item is an integer. */
+static void write_array_int(PARROT_INTERP, SerializationWriter *writer, PMC *arr) {
+    Parrot_Int4 elems = (Parrot_Int4)VTABLE_elements(interp, arr);
+    Parrot_Int4 i;
+    
+    /* Write out element count. */
+    expand_storage_if_needed(interp, writer, 4);
+    if (writer->writing_object) {
+        write_int32(writer->root.objects_data, writer->objects_data_offset, elems);
+        writer->objects_data_offset += 4;
+    }
+    else {
+        write_int32(writer->root.stables_data, writer->stables_data_offset, elems);
+        writer->stables_data_offset += 4;
+    }
+    
+    /* Write elements. */
+    for (i = 0; i < elems; i++)
+        write_int_func(interp, writer, VTABLE_get_integer_keyed_int(interp, arr, i));
+}
+
+/* Writes an array where each item is a string. */
+static void write_array_str(PARROT_INTERP, SerializationWriter *writer, PMC *arr) {
+    Parrot_Int4 elems = (Parrot_Int4)VTABLE_elements(interp, arr);
+    Parrot_Int4 i;
+    
+    /* Write out element count. */
+    expand_storage_if_needed(interp, writer, 4);
+    if (writer->writing_object) {
+        write_int32(writer->root.objects_data, writer->objects_data_offset, elems);
+        writer->objects_data_offset += 4;
+    }
+    else {
+        write_int32(writer->root.stables_data, writer->stables_data_offset, elems);
+        writer->stables_data_offset += 4;
+    }
+    
+    /* Write elements. */
+    for (i = 0; i < elems; i++)
+        write_str_func(interp, writer, VTABLE_get_string_keyed_int(interp, arr, i));
+}
+
 /* Writes a hash where each key is a string and each value a variant reference. */
 void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref);
 static void write_hash_str_var(PARROT_INTERP, SerializationWriter *writer, PMC *hash) {
@@ -283,6 +325,12 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
     else if (ref->vtable->base_type == enum_class_ResizablePMCArray) {
         discrim = REFVAR_VM_ARR_VAR;
     }
+    else if (ref->vtable->base_type == enum_class_ResizableIntegerArray) {
+        discrim = REFVAR_VM_ARR_INT;
+    }
+    else if (ref->vtable->base_type == enum_class_ResizableStringArray) {
+        discrim = REFVAR_VM_ARR_STR;
+    }
     else if (ref->vtable->base_type == enum_class_Hash) {
         discrim = REFVAR_VM_HASH_STR_VAR;
     }
@@ -322,6 +370,12 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
             break;
         case REFVAR_VM_ARR_VAR:
             write_array_var(interp, writer, ref);
+            break;
+        case REFVAR_VM_ARR_INT:
+            write_array_int(interp, writer, ref);
+            break;
+        case REFVAR_VM_ARR_STR:
+            write_array_str(interp, writer, ref);
             break;
         case REFVAR_VM_HASH_STR_VAR:
             write_hash_str_var(interp, writer, ref);
@@ -703,6 +757,52 @@ static PMC * read_array_var(PARROT_INTERP, SerializationReader *reader) {
     return result;
 }
 
+/* Reads in an array of integers. */
+static PMC * read_array_int(PARROT_INTERP, SerializationReader *reader) {
+    PMC *result = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
+    Parrot_Int4 elems, i;
+
+    /* Read the element count. */
+    assert_can_read(interp, reader, 4);
+    if (reader->reading_object) {
+        elems = read_int32(reader->root.objects_data, reader->objects_data_offset);
+        reader->objects_data_offset += 4;
+    }
+    else {
+        elems = read_int32(reader->root.stables_data, reader->stables_data_offset);
+        reader->stables_data_offset += 4;
+    }
+
+    /* Read in the elements. */
+    for (i = 0; i < elems; i++)
+        VTABLE_set_integer_keyed_int(interp, result, i, read_int_func(interp, reader));
+
+    return result;
+}
+
+/* Reads in an array of strings. */
+static PMC * read_array_str(PARROT_INTERP, SerializationReader *reader) {
+    PMC *result = Parrot_pmc_new(interp, enum_class_ResizableStringArray);
+    Parrot_Int4 elems, i;
+
+    /* Read the element count. */
+    assert_can_read(interp, reader, 4);
+    if (reader->reading_object) {
+        elems = read_int32(reader->root.objects_data, reader->objects_data_offset);
+        reader->objects_data_offset += 4;
+    }
+    else {
+        elems = read_int32(reader->root.stables_data, reader->stables_data_offset);
+        reader->stables_data_offset += 4;
+    }
+
+    /* Read in the elements. */
+    for (i = 0; i < elems; i++)
+        VTABLE_set_string_keyed_int(interp, result, i, read_str_func(interp, reader));
+
+    return result;
+}
+
 /* Reads in an hash with string keys and variant references. */
 static PMC * read_hash_str_var(PARROT_INTERP, SerializationReader *reader) {
     PMC *result = Parrot_pmc_new(interp, enum_class_Hash);
@@ -766,6 +866,10 @@ PMC * read_ref_func(PARROT_INTERP, SerializationReader *reader) {
             return result;
         case REFVAR_VM_ARR_VAR:
             return read_array_var(interp, reader);
+        case REFVAR_VM_ARR_INT:
+            return read_array_int(interp, reader);
+        case REFVAR_VM_ARR_STR:
+            return read_array_str(interp, reader);
         case REFVAR_VM_HASH_STR_VAR:
             return read_hash_str_var(interp, reader);
         default:
