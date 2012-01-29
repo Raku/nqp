@@ -1,6 +1,6 @@
 #! nqp
 
-plan(57);
+plan(67);
 
 # Serializing an empty SC.
 {
@@ -303,4 +303,76 @@ plan(57);
     ok(+$dsc[0].a == 2,                   'hash came back with correct element count');
     ok($dsc[0].a<a> == 42,                'hash first element is correct');
     ok($dsc[0].a<b> eq 'polar bear',      'hash second element is correct');
+}
+
+# Integer array (probably needed for NFA serialization).
+{
+    my $sc := pir::nqp_create_sc__Ps('TEST_SC_11_IN');
+    my $sh := pir::new__Ps('ResizableStringArray');
+    
+    class T10 {
+        has $!a;
+        method new() {
+            my $obj := nqp::create(self);
+            $obj.BUILD();
+            $obj;
+        }
+        method BUILD() {
+            my @a := pir::new__Ps('ResizableIntegerArray');
+            @a[0] := 101;
+            @a[1] := 102;
+            @a[2] := 103;
+            $!a := @a;
+        }
+        method a() { $!a }
+    }
+    my $v := T10.new();
+    pir::nqp_add_object_to_sc__vPiP($sc, 0, $v);
+
+    my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+    
+    my $dsc := pir::nqp_create_sc__Ps('TEST_SC_11_OUT');
+    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh);
+
+    ok(nqp::istype($dsc[0], T10),          'deserialized object has correct type');
+    ok(+$dsc[0].a == 3,                    'integer array came back with correct element count');
+    ok($dsc[0].a[0] == 101,                'integer array first element is correct');
+    ok($dsc[0].a[1] == 102,                'integer array second element is correct');
+    ok($dsc[0].a[2] == 103,                'integer array third element is correct');
+}
+
+# String array (used by Rakudo in signatures)
+{
+    my $sc := pir::nqp_create_sc__Ps('TEST_SC_12_IN');
+    my $sh := pir::new__Ps('ResizableStringArray');
+    
+    class T11 {
+        has $!a;
+        method new() {
+            my $obj := nqp::create(self);
+            $obj.BUILD();
+            $obj;
+        }
+        method BUILD() {
+            my @a := pir::new__Ps('ResizableStringArray');
+            @a[0] := 'cow';
+            @a[1] := 'sheep';
+            @a[2] := 'pig';
+            $!a := @a;
+        }
+        method a() { $!a }
+    }
+    my $v := T11.new();
+    pir::nqp_add_object_to_sc__vPiP($sc, 0, $v);
+
+    my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+    
+    my $dsc := pir::nqp_create_sc__Ps('TEST_SC_12_OUT');
+    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh);
+
+    ok(nqp::istype($dsc[0], T11),          'deserialized object has correct type');
+    ok(+$dsc[0].a == 3,                    'string array came back with correct element count');
+    ok($dsc[0].a[0] eq 'cow',              'string array first element is correct');
+    ok($dsc[0].a[1] eq 'sheep',            'string array second element is correct');
+    ok($dsc[0].a[2] eq 'pig',              'string array third element is correct');
 }
