@@ -1,6 +1,6 @@
 #! nqp
 
-plan(53);
+plan(57);
 
 # Serializing an empty SC.
 {
@@ -271,3 +271,36 @@ plan(53);
     ok(+$dsc[0].b[2] == 4,                'array b third element is correct');
 }
 
+# Hash in an object attribute.
+{
+    my $sc := pir::nqp_create_sc__Ps('TEST_SC_10_IN');
+    my $sh := pir::new__Ps('ResizableStringArray');
+    
+    class T9 {
+        has $!a;
+        method new() {
+            my $obj := nqp::create(self);
+            $obj.BUILD();
+            $obj;
+        }
+        method BUILD() {
+            my %h;
+            %h<a> := 42;
+            %h<b> := 'polar bear';
+            $!a := %h;
+        }
+        method a() { $!a }
+    }
+    my $v := T9.new();
+    pir::nqp_add_object_to_sc__vPiP($sc, 0, $v);
+
+    my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+    
+    my $dsc := pir::nqp_create_sc__Ps('TEST_SC_10_OUT');
+    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh);
+
+    ok(nqp::istype($dsc[0], T9),          'deserialized object has correct type');
+    ok(+$dsc[0].a == 2,                   'hash came back with correct element count');
+    ok($dsc[0].a<a> == 42,                'hash first element is correct');
+    ok($dsc[0].a<b> eq 'polar bear',      'hash second element is correct');
+}
