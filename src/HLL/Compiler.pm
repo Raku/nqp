@@ -296,7 +296,7 @@ class HLL::Compiler {
         my @a    := $res.arguments;
 
         %adverbs.update(%opts);
-        self.usage($program-name) if %adverbs<help>;
+        self.usage($program-name) if %adverbs<help>  || %adverbs<h>;
 
         pir::load_bytecode('dumper.pbc');
         pir::load_bytecode('PGE/Dumper.pbc');
