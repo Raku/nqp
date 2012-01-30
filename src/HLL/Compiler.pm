@@ -306,7 +306,7 @@ class HLL::Compiler {
 
 
     method command_eval(*@a, *%adverbs) {
-        self.version              if %adverbs<version>;
+        self.version              if %adverbs<version> || %adverbs<v>;
         self.show-config          if %adverbs<show-config>;
         self.nqpevent(%adverbs<nqpevent>) if %adverbs<nqpevent>;
 
