@@ -596,84 +596,49 @@ static PMC * lookup_stable(PARROT_INTERP, SerializationReader *reader, Parrot_In
 
 /* Ensure that we aren't going to read off the end of the buffer. */
 void assert_can_read(PARROT_INTERP, SerializationReader *reader, INTVAL amount) {
-    if (reader->reading_object) {
-        char *read_end = reader->root.objects_data + reader->objects_data_offset + amount;
-        if (read_end > reader->objects_data_end)
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Read past end of objects data");
-    }
-    else {
-        char *read_end = reader->root.stables_data + reader->stables_data_offset + amount;
-        if (read_end > reader->stables_data_end)
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Read past end of STables data");
-    }
+    char *read_end = *(reader->cur_read_buffer) + *(reader->cur_read_offset) + amount;
+    if (read_end > *(reader->cur_read_end))
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Read past end of serialization data buffer");
 }
 
 /* Reading function for native integers. */
 INTVAL read_int_func(PARROT_INTERP, SerializationReader *reader) {
+    INTVAL result;
     assert_can_read(interp, reader, 8);
-    if (reader->reading_object) {
-        INTVAL result = read_int64(reader->root.objects_data, reader->objects_data_offset);
-        reader->objects_data_offset += 8;
-        return result;
-    }
-    else {
-        INTVAL result = read_int64(reader->root.stables_data, reader->stables_data_offset);
-        reader->stables_data_offset += 8;
-        return result;
-    }
+    result = read_int64(*(reader->cur_read_buffer), *(reader->cur_read_offset));
+    *(reader->cur_read_offset) += 8;
+    return result;
 }
 
 /* Reading function for native numbers. */
 FLOATVAL read_num_func(PARROT_INTERP, SerializationReader *reader) {
+    FLOATVAL result;
     assert_can_read(interp, reader, 8);
-    if (reader->reading_object) {
-        FLOATVAL result = read_double(reader->root.objects_data, reader->objects_data_offset);
-        reader->objects_data_offset += 8;
-        return result;
-    }
-    else {
-        FLOATVAL result = read_double(reader->root.stables_data, reader->stables_data_offset);
-        reader->stables_data_offset += 8;
-        return result;
-    }
+    result = read_double(*(reader->cur_read_buffer), *(reader->cur_read_offset));
+    *(reader->cur_read_offset) += 8;
+    return result;
 }
 
 /* Reading function for native strings. */
 STRING * read_str_func(PARROT_INTERP, SerializationReader *reader) {
+    STRING *result;
     assert_can_read(interp, reader, 4);
-    if (reader->reading_object) {
-        STRING *result = read_string_from_heap(interp, reader,
-            read_int32(reader->root.objects_data, reader->objects_data_offset));
-        reader->objects_data_offset += 4;
-        return result;
-    }
-    else {
-        STRING *result = read_string_from_heap(interp, reader,
-            read_int32(reader->root.stables_data, reader->stables_data_offset));
-        reader->stables_data_offset += 4;
-        return result;
-    }
+    result = read_string_from_heap(interp, reader,
+        read_int32(*(reader->cur_read_buffer), *(reader->cur_read_offset)));
+    *(reader->cur_read_offset) += 4;
+    return result;
 }
 
 /* Reads in and resolves an object references. */
 PMC * read_obj_ref(PARROT_INTERP, SerializationReader *reader) {
     Parrot_Int4 sc_id, idx;
-    
+
     assert_can_read(interp, reader, 8);
-    if (reader->reading_object) {
-        sc_id = read_int32(reader->root.objects_data, reader->objects_data_offset);
-        reader->objects_data_offset += 4;
-        idx = read_int32(reader->root.objects_data, reader->objects_data_offset);
-        reader->objects_data_offset += 4;
-    }
-    else {
-        sc_id = read_int32(reader->root.stables_data, reader->stables_data_offset);
-        reader->stables_data_offset += 4;
-        idx = read_int32(reader->root.stables_data, reader->stables_data_offset);
-        reader->stables_data_offset += 4;
-    }
+    sc_id = read_int32(*(reader->cur_read_buffer), *(reader->cur_read_offset));
+    *(reader->cur_read_offset) += 4;
+    idx = read_int32(*(reader->cur_read_buffer), *(reader->cur_read_offset));
+    *(reader->cur_read_offset) += 4;
     
     return SC_get_object(interp, locate_sc(interp, reader, sc_id), idx);
 }
@@ -686,14 +651,8 @@ static PMC * read_array_var(PARROT_INTERP, SerializationReader *reader) {
 
     /* Read the element count. */
     assert_can_read(interp, reader, 4);
-    if (reader->reading_object) {
-        elems = read_int32(reader->root.objects_data, reader->objects_data_offset);
-        reader->objects_data_offset += 4;
-    }
-    else {
-        elems = read_int32(reader->root.stables_data, reader->stables_data_offset);
-        reader->stables_data_offset += 4;
-    }
+    elems = read_int32(*(reader->cur_read_buffer), *(reader->cur_read_offset));
+    *(reader->cur_read_offset) += 4;
 
     /* Read in the elements. */
     for (i = 0; i < elems; i++)
@@ -709,14 +668,8 @@ static PMC * read_array_int(PARROT_INTERP, SerializationReader *reader) {
 
     /* Read the element count. */
     assert_can_read(interp, reader, 4);
-    if (reader->reading_object) {
-        elems = read_int32(reader->root.objects_data, reader->objects_data_offset);
-        reader->objects_data_offset += 4;
-    }
-    else {
-        elems = read_int32(reader->root.stables_data, reader->stables_data_offset);
-        reader->stables_data_offset += 4;
-    }
+    elems = read_int32(*(reader->cur_read_buffer), *(reader->cur_read_offset));
+    *(reader->cur_read_offset) += 4;
 
     /* Read in the elements. */
     for (i = 0; i < elems; i++)
@@ -732,14 +685,8 @@ static PMC * read_array_str(PARROT_INTERP, SerializationReader *reader) {
 
     /* Read the element count. */
     assert_can_read(interp, reader, 4);
-    if (reader->reading_object) {
-        elems = read_int32(reader->root.objects_data, reader->objects_data_offset);
-        reader->objects_data_offset += 4;
-    }
-    else {
-        elems = read_int32(reader->root.stables_data, reader->stables_data_offset);
-        reader->stables_data_offset += 4;
-    }
+    elems = read_int32(*(reader->cur_read_buffer), *(reader->cur_read_offset));
+    *(reader->cur_read_offset) += 4;
 
     /* Read in the elements. */
     for (i = 0; i < elems; i++)
@@ -755,14 +702,8 @@ static PMC * read_hash_str_var(PARROT_INTERP, SerializationReader *reader) {
 
     /* Read the element count. */
     assert_can_read(interp, reader, 4);
-    if (reader->reading_object) {
-        elems = read_int32(reader->root.objects_data, reader->objects_data_offset);
-        reader->objects_data_offset += 4;
-    }
-    else {
-        elems = read_int32(reader->root.stables_data, reader->stables_data_offset);
-        reader->stables_data_offset += 4;
-    }
+    elems = read_int32(*(reader->cur_read_buffer), *(reader->cur_read_offset));
+    *(reader->cur_read_offset) += 4;
 
     /* Read in the elements. */
     for (i = 0; i < elems; i++) {
@@ -780,14 +721,8 @@ PMC * read_ref_func(PARROT_INTERP, SerializationReader *reader) {
     /* Read the discriminator. */
     Parrot_Int2 discrim;
     assert_can_read(interp, reader, 2);
-    if (reader->reading_object) {
-        discrim = read_int16(reader->root.objects_data, reader->objects_data_offset);
-        reader->objects_data_offset += 2;
-    }
-    else {
-        discrim = read_int16(reader->root.stables_data, reader->stables_data_offset);
-        reader->stables_data_offset += 2;
-    }
+    discrim = read_int16(*(reader->cur_read_buffer), *(reader->cur_read_offset));
+    *(reader->cur_read_offset) += 2;
     
     /* Decide what to do based on it. */
     switch (discrim) {
@@ -926,6 +861,11 @@ static void resolve_dependencies(PARROT_INTERP, SerializationReader *reader) {
 
 /* Deserializes a single STable, along with its REPR data. */
 static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVAL i, PMC *st) {
+    /* Set current read buffer to the correct thing. */
+    reader->cur_read_buffer = &(reader->root.stables_data);
+    reader->cur_read_offset = &(reader->stables_data_offset);
+    reader->cur_read_end    = &(reader->stables_data_end);
+    
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
         "STable deserialization not yet implemented");
 }
@@ -944,9 +884,13 @@ static void deserialize_object(PARROT_INTERP, SerializationReader *reader, INTVA
      * PMC we want it to. */
     set_wrapping_object(obj);
     STABLE_STRUCT(stable)->REPR->allocate(interp, STABLE_STRUCT(stable));
+    
+    /* Set current read buffer to the correct thing. */
+    reader->cur_read_buffer = &(reader->root.objects_data);
+    reader->cur_read_offset = &(reader->objects_data_offset);
+    reader->cur_read_end    = &(reader->objects_data_end);
      
     /* Delegate to its deserialization REPR function. */
-    reader->reading_object = 1;
     reader->objects_data_offset = read_int32(obj_table_row, 8);
     if ((read_int32(obj_table_row, 12) & 1) != 1)
         MARK_AS_TYPE_OBJECT(obj);

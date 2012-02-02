@@ -43,9 +43,6 @@ typedef struct SerializationReader {
     PMC *stables_list;
     PMC *objects_list;
     
-    /* Flag for if we're reading the stable data chunk or object data chunk. */
-    char reading_object;
-    
     /* Current offsets for the data chunks (also correspond to the amount of
      * data written in to them). */
     Parrot_Int4 stables_data_offset;
@@ -54,6 +51,13 @@ typedef struct SerializationReader {
     /* Limits up to where we can read stables and objects data. */
     char *stables_data_end;
     char *objects_data_end;
+    
+    /* Where to find details related to the current buffer we're reading from:
+     * the buffer pointer itself, the current offset and the amount that is
+     * allocated. These are all pointers back into this data structure. */
+    char        **cur_read_buffer;
+    Parrot_Int4  *cur_read_offset;
+    char        **cur_read_end;
     
     /* Various reading functions. */
     INTVAL   (*read_int) (PARROT_INTERP, struct SerializationReader *reader);
