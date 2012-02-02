@@ -127,60 +127,33 @@ static void get_stable_ref_info(PARROT_INTERP, SerializationWriter *writer,
 
 /* Expands current target storage as needed. */
 void expand_storage_if_needed(PARROT_INTERP, SerializationWriter *writer, INTVAL need) {
-    if (writer->writing_object) {
-        if (writer->objects_data_offset + need > writer->objects_data_alloc) {
-            writer->objects_data_alloc *= 2;
-            writer->root.objects_data = mem_sys_realloc(writer->root.objects_data,
-                writer->objects_data_alloc);
-        }
-    }
-    else {
-        if (writer->stables_data_offset + need > writer->stables_data_alloc) {
-            writer->stables_data_alloc *= 2;
-            writer->root.stables_data = mem_sys_realloc(writer->root.stables_data,
-                writer->stables_data_alloc);
-        }
+    if (*(writer->cur_write_offset) + need > *(writer->cur_write_limit)) {
+        *(writer->cur_write_limit) *= 2;
+        *(writer->cur_write_buffer) = mem_sys_realloc(*(writer->cur_write_buffer),
+            *(writer->cur_write_limit));
     }
 }
 
 /* Writing function for native integers. */
 void write_int_func(PARROT_INTERP, SerializationWriter *writer, INTVAL value) {
     expand_storage_if_needed(interp, writer, 8);
-    if (writer->writing_object) {
-        write_int64(writer->root.objects_data, writer->objects_data_offset, value);
-        writer->objects_data_offset += 8;
-    }
-    else {
-        write_int64(writer->root.stables_data, writer->stables_data_offset, value);
-        writer->stables_data_offset += 8;
-    }
+    write_int64(*(writer->cur_write_buffer), *(writer->cur_write_offset), value);
+    *(writer->cur_write_offset) += 8;
 }
 
 /* Writing function for native numbers. */
 void write_num_func(PARROT_INTERP, SerializationWriter *writer, FLOATVAL value) {
     expand_storage_if_needed(interp, writer, 8);
-    if (writer->writing_object) {
-        write_double(writer->root.objects_data, writer->objects_data_offset, value);
-        writer->objects_data_offset += 8;
-    }
-    else {
-        write_double(writer->root.stables_data, writer->stables_data_offset, value);
-        writer->stables_data_offset += 8;
-    }
+    write_double(*(writer->cur_write_buffer), *(writer->cur_write_offset), value);
+    *(writer->cur_write_offset) += 8;
 }
 
 /* Writing function for native strings. */
 void write_str_func(PARROT_INTERP, SerializationWriter *writer, STRING *value) {
     Parrot_Int4 heap_loc = add_string_to_heap(interp, writer, value);
     expand_storage_if_needed(interp, writer, 4);
-    if (writer->writing_object) {
-        write_int32(writer->root.objects_data, writer->objects_data_offset, heap_loc);
-        writer->objects_data_offset += 4;
-    }
-    else {
-        write_int32(writer->root.stables_data, writer->stables_data_offset, heap_loc);
-        writer->stables_data_offset += 4;
-    }
+    write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), heap_loc);
+    *(writer->cur_write_offset) += 4;
 }
 
 /* Writes an object reference. */
@@ -197,18 +170,10 @@ void write_obj_ref(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
     idx   = (Parrot_Int4)SC_find_object_idx(interp, SC_PMC(ref), ref);
     
     expand_storage_if_needed(interp, writer, 8);
-    if (writer->writing_object) {
-        write_int32(writer->root.objects_data, writer->objects_data_offset, sc_id);
-        writer->objects_data_offset += 4;
-        write_int32(writer->root.objects_data, writer->objects_data_offset, idx);
-        writer->objects_data_offset += 4;
-    }
-    else {
-        write_int32(writer->root.stables_data, writer->stables_data_offset, sc_id);
-        writer->stables_data_offset += 4;
-        write_int32(writer->root.stables_data, writer->stables_data_offset, idx);
-        writer->stables_data_offset += 4;
-    }
+    write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), sc_id);
+    *(writer->cur_write_offset) += 4;
+    write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), idx);
+    *(writer->cur_write_offset) += 4;
 }
 
 /* Writes an array where each item is a variant reference. */
@@ -219,14 +184,8 @@ static void write_array_var(PARROT_INTERP, SerializationWriter *writer, PMC *arr
     
     /* Write out element count. */
     expand_storage_if_needed(interp, writer, 4);
-    if (writer->writing_object) {
-        write_int32(writer->root.objects_data, writer->objects_data_offset, elems);
-        writer->objects_data_offset += 4;
-    }
-    else {
-        write_int32(writer->root.stables_data, writer->stables_data_offset, elems);
-        writer->stables_data_offset += 4;
-    }
+    write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), elems);
+    *(writer->cur_write_offset) += 4;
     
     /* Write elements. */
     for (i = 0; i < elems; i++)
@@ -240,14 +199,8 @@ static void write_array_int(PARROT_INTERP, SerializationWriter *writer, PMC *arr
     
     /* Write out element count. */
     expand_storage_if_needed(interp, writer, 4);
-    if (writer->writing_object) {
-        write_int32(writer->root.objects_data, writer->objects_data_offset, elems);
-        writer->objects_data_offset += 4;
-    }
-    else {
-        write_int32(writer->root.stables_data, writer->stables_data_offset, elems);
-        writer->stables_data_offset += 4;
-    }
+    write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), elems);
+    *(writer->cur_write_offset) += 4;
     
     /* Write elements. */
     for (i = 0; i < elems; i++)
@@ -261,14 +214,8 @@ static void write_array_str(PARROT_INTERP, SerializationWriter *writer, PMC *arr
     
     /* Write out element count. */
     expand_storage_if_needed(interp, writer, 4);
-    if (writer->writing_object) {
-        write_int32(writer->root.objects_data, writer->objects_data_offset, elems);
-        writer->objects_data_offset += 4;
-    }
-    else {
-        write_int32(writer->root.stables_data, writer->stables_data_offset, elems);
-        writer->stables_data_offset += 4;
-    }
+    write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), elems);
+    *(writer->cur_write_offset) += 4;
     
     /* Write elements. */
     for (i = 0; i < elems; i++)
@@ -283,14 +230,8 @@ static void write_hash_str_var(PARROT_INTERP, SerializationWriter *writer, PMC *
     
     /* Write out element count. */
     expand_storage_if_needed(interp, writer, 4);
-    if (writer->writing_object) {
-        write_int32(writer->root.objects_data, writer->objects_data_offset, elems);
-        writer->objects_data_offset += 4;
-    }
-    else {
-        write_int32(writer->root.stables_data, writer->stables_data_offset, elems);
-        writer->stables_data_offset += 4;
-    }
+    write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), elems);
+    *(writer->cur_write_offset) += 4;
     
     /* Write elements, as key,value,key,value etc. */
     while (VTABLE_get_bool(interp, iter)) {
@@ -341,14 +282,8 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
 
     /* Write the discriminator. */
     expand_storage_if_needed(interp, writer, 2);
-    if (writer->writing_object) {
-        write_int16(writer->root.objects_data, writer->objects_data_offset, discrim);
-        writer->objects_data_offset += 2;
-    }
-    else {
-        write_int16(writer->root.stables_data, writer->stables_data_offset, discrim);
-        writer->stables_data_offset += 2;
-    }
+    write_int16(*(writer->cur_write_buffer), *(writer->cur_write_offset), discrim);
+    *(writer->cur_write_offset) += 2;
     
     /* Now take appropriate action. */
     switch (discrim) {
@@ -456,6 +391,12 @@ static STRING * concatenate_outputs(PARROT_INTERP, SerializationWriter *writer) 
 static void serialize_stable(PARROT_INTERP, SerializationWriter *writer, PMC *st) {
     /* Increment count of stables in the table. */
     writer->root.num_stables++;
+    
+    /* Make sure we're going to write to the correct place. */
+    writer->cur_write_buffer = &(writer->root.stables_data);
+    writer->cur_write_offset = &(writer->stables_data_offset);
+    writer->cur_write_limit  = &(writer->stables_data_alloc);
+    
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
         "STable serialization not yet implemented");
 }
@@ -486,8 +427,12 @@ static void serialize_object(PARROT_INTERP, SerializationWriter *writer, PMC *ob
     /* Increment count of objects in the table. */
     writer->root.num_objects++;
     
+    /* Make sure we're going to write to the correct place. */
+    writer->cur_write_buffer = &(writer->root.objects_data);
+    writer->cur_write_offset = &(writer->objects_data_offset);
+    writer->cur_write_limit  = &(writer->objects_data_alloc);
+    
     /* Delegate to its serialization REPR function. */
-    writer->writing_object = 1;
     if (REPR(obj)->serialize)
         REPR(obj)->serialize(interp, STABLE(obj), OBJECT_BODY(obj), writer);
     else

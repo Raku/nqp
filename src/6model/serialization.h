@@ -92,8 +92,12 @@ typedef struct SerializationWriter {
     Parrot_Int4 stables_data_offset;
     Parrot_Int4 objects_data_offset;
     
-    /* Flag for if we're writing to stable data chunk or object data chunk. */
-    char writing_object;
+    /* Where to find details related to the current buffer we're writing in
+     * to: the buffer pointer itself, the current offset and the amount that
+     * is allocated. These are all pointers back into this data structure. */
+    char        **cur_write_buffer;
+    Parrot_Int4  *cur_write_offset;
+    Parrot_Int4  *cur_write_limit;
     
     /* Various writing functions. */
     void (*write_int) (PARROT_INTERP, struct SerializationWriter *writer, INTVAL value);
