@@ -459,11 +459,13 @@ static void serialize_object(PARROT_INTERP, SerializationWriter *writer, PMC *ob
     writer->cur_write_limit  = &(writer->objects_data_alloc);
     
     /* Delegate to its serialization REPR function. */
-    if (REPR(obj)->serialize)
-        REPR(obj)->serialize(interp, STABLE(obj), OBJECT_BODY(obj), writer);
-    else
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Missing serialize REPR function");
+    if (IS_CONCRETE(obj)) {
+        if (REPR(obj)->serialize)
+            REPR(obj)->serialize(interp, STABLE(obj), OBJECT_BODY(obj), writer);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Missing serialize REPR function");
+    }
 }
 
 /* This is the overall serialization loop. It keeps an index into the list of
@@ -944,7 +946,7 @@ static void deserialize_object(PARROT_INTERP, SerializationReader *reader, INTVA
     reader->objects_data_offset = read_int32(obj_table_row, 8);
     if ((read_int32(obj_table_row, 12) & 1) != 1)
         MARK_AS_TYPE_OBJECT(obj);
-    if (REPR(obj)->deserialize)
+    else if (REPR(obj)->deserialize)
         REPR(obj)->deserialize(interp, STABLE(obj), OBJECT_BODY(obj), reader);
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
