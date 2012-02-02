@@ -1,6 +1,6 @@
 #! nqp
 
-plan(5);
+plan(6);
 
 # Serializing a knowhow with no attributes and no methods; P6int REPR
 # (very simple REPR).
