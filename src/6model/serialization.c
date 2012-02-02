@@ -6,6 +6,7 @@
 #include "parrot/parrot.h"
 #include "parrot/extend.h"
 #include "sixmodelobject.h"
+#include "repr_registry.h"
 #include "serialization_context.h"
 #include "pmc_serializationcontext.h"
 
@@ -15,7 +16,7 @@
 /* Various sizes (in bytes). */
 #define HEADER_SIZE                 4 * 9
 #define DEP_TABLE_ENTRY_SIZE        8
-#define STABLE_TABLE_ENTRY_SIZE     8
+#define STABLES_TABLE_ENTRY_SIZE    8
 #define OBJECTS_TABLE_ENTRY_SIZE    16
 
 /* Some guesses. */
@@ -330,7 +331,7 @@ static STRING * concatenate_outputs(PARROT_INTERP, SerializationWriter *writer) 
     /* Calculate total size. */
     output_size += HEADER_SIZE;
     output_size += writer->root.num_dependencies * DEP_TABLE_ENTRY_SIZE;
-    output_size += writer->root.num_stables * STABLE_TABLE_ENTRY_SIZE;
+    output_size += writer->root.num_stables * STABLES_TABLE_ENTRY_SIZE;
     output_size += writer->stables_data_offset;
     output_size += writer->root.num_objects * OBJECTS_TABLE_ENTRY_SIZE;
     output_size += writer->objects_data_offset;
@@ -353,8 +354,8 @@ static STRING * concatenate_outputs(PARROT_INTERP, SerializationWriter *writer) 
     write_int32(output, 12, offset);
     write_int32(output, 16, writer->root.num_stables);
     memcpy(output + offset, writer->root.stables_table, 
-        writer->root.num_stables * STABLE_TABLE_ENTRY_SIZE);
-    offset += writer->root.num_stables * STABLE_TABLE_ENTRY_SIZE;
+        writer->root.num_stables * STABLES_TABLE_ENTRY_SIZE);
+    offset += writer->root.num_stables * STABLES_TABLE_ENTRY_SIZE;
     
     /* Put STables data in place. */
     write_int32(output, 20, offset);
@@ -388,7 +389,20 @@ static STRING * concatenate_outputs(PARROT_INTERP, SerializationWriter *writer) 
 
 /* This handles the serialization of an STable, and calls off to serialize
  * its representation data also. */
-static void serialize_stable(PARROT_INTERP, SerializationWriter *writer, PMC *st) {
+static void serialize_stable(PARROT_INTERP, SerializationWriter *writer, PMC *st_pmc) {
+    STable *st    = STABLE_STRUCT(st_pmc);
+    
+    /* Ensure there's space in the STables table; grow if not. */
+    Parrot_Int4 offset = writer->root.num_stables * STABLES_TABLE_ENTRY_SIZE;
+    if (offset + STABLES_TABLE_ENTRY_SIZE > writer->stables_table_alloc) {
+        writer->stables_table_alloc *= 2;
+        writer->root.stables_table = mem_sys_realloc(writer->root.stables_table, writer->stables_table_alloc);
+    }
+    
+    /* Make STables table entry. */
+    write_int32(writer->root.stables_table, offset, add_string_to_heap(interp, writer, st->REPR->name));
+    write_int32(writer->root.objects_table, offset + 4, writer->objects_data_offset);
+    
     /* Increment count of stables in the table. */
     writer->root.num_stables++;
     
@@ -397,8 +411,12 @@ static void serialize_stable(PARROT_INTERP, SerializationWriter *writer, PMC *st
     writer->cur_write_offset = &(writer->stables_data_offset);
     writer->cur_write_limit  = &(writer->stables_data_alloc);
     
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-        "STable serialization not yet implemented");
+    /* Write HOW and WHAT. */
+    write_obj_ref(interp, writer, st->HOW);
+    write_obj_ref(interp, writer, st->WHAT);
+
+    /* XXX More to do here. */
+    printf("WARNING: STable serialization not yet fully implemented\n");
 }
 
 /* This handles the serialization of an object, which largely involves a
@@ -496,7 +514,7 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     /* Allocate initial memory space for storing serialized tables and data. */
     writer->dependencies_table_alloc = DEP_TABLE_ENTRY_SIZE * 4;
     writer->root.dependencies_table  = mem_sys_allocate(writer->dependencies_table_alloc);
-    writer->stables_table_alloc      = STABLE_TABLE_ENTRY_SIZE * (sc_elems || 1);
+    writer->stables_table_alloc      = STABLES_TABLE_ENTRY_SIZE * (sc_elems || 1);
     writer->root.stables_table       = mem_sys_allocate(writer->stables_table_alloc);
     writer->objects_table_alloc      = OBJECTS_TABLE_ENTRY_SIZE * (sc_elems || 1);
     writer->root.objects_table       = mem_sys_allocate(writer->objects_table_alloc);
@@ -800,7 +818,7 @@ static void check_and_disect_input(PARROT_INTERP, SerializationReader *reader, S
     if (reader->root.stables_table < prov_pos)
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Corruption detected (STables table starts before dependencies table ends)");
-    prov_pos = reader->root.stables_table + reader->root.num_stables * STABLE_TABLE_ENTRY_SIZE;
+    prov_pos = reader->root.stables_table + reader->root.num_stables * STABLES_TABLE_ENTRY_SIZE;
     if (prov_pos > data_end)
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Corruption detected (STables table overruns end of data)");
@@ -860,14 +878,28 @@ static void resolve_dependencies(PARROT_INTERP, SerializationReader *reader) {
 }
 
 /* Deserializes a single STable, along with its REPR data. */
-static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVAL i, PMC *st) {
-    /* Set current read buffer to the correct thing. */
-    reader->cur_read_buffer = &(reader->root.stables_data);
-    reader->cur_read_offset = &(reader->stables_data_offset);
-    reader->cur_read_end    = &(reader->stables_data_end);
+static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVAL i, PMC *st_pmc) {
+    STable *st = STABLE_STRUCT(st_pmc);
+
+    /* Calculate location of STable's table row. */
+    char *st_table_row = reader->root.objects_table + i * STABLES_TABLE_ENTRY_SIZE;
     
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-        "STable deserialization not yet implemented");
+    /* Read in and look up representation. */
+    st->REPR = REPR_get_by_name(interp,
+        read_string_from_heap(interp, reader, read_int32(st_table_row, 0)));
+    
+    /* Set STable read position, and set current read buffer to the correct thing. */
+    reader->stables_data_offset = read_int32(st_table_row, 4);
+    reader->cur_read_buffer     = &(reader->root.stables_data);
+    reader->cur_read_offset     = &(reader->stables_data_offset);
+    reader->cur_read_end        = &(reader->stables_data_end);
+    
+    /* Read the HOW and WHAT. */
+    st->HOW  = read_obj_ref(interp, reader);
+    st->WHAT = read_obj_ref(interp, reader);
+
+    /* XXX More to do here. */
+    printf("WARNING: STable deserialization not yet fully implemented\n");
 }
 
 /* Deserializes a single object, along with its REPR data. */
