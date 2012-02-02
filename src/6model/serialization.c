@@ -967,7 +967,6 @@ static void deserialize_object(PARROT_INTERP, SerializationReader *reader, INTVA
 void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, STRING *data) {
     PMC    *stables   = PMCNULL;
     PMC    *objects   = PMCNULL;
-    INTVAL  stable_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "STable", 0));
     INTVAL  smo_id    = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
     Parrot_Int4 i;
     
