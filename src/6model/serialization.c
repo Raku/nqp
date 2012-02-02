@@ -390,7 +390,8 @@ static STRING * concatenate_outputs(PARROT_INTERP, SerializationWriter *writer) 
 /* This handles the serialization of an STable, and calls off to serialize
  * its representation data also. */
 static void serialize_stable(PARROT_INTERP, SerializationWriter *writer, PMC *st_pmc) {
-    STable *st    = STABLE_STRUCT(st_pmc);
+    STable *st = STABLE_STRUCT(st_pmc);
+    INTVAL  i;
     
     /* Ensure there's space in the STables table; grow if not. */
     Parrot_Int4 offset = writer->root.num_stables * STABLES_TABLE_ENTRY_SIZE;
@@ -415,6 +416,13 @@ static void serialize_stable(PARROT_INTERP, SerializationWriter *writer, PMC *st
     write_obj_ref(interp, writer, st->HOW);
     write_obj_ref(interp, writer, st->WHAT);
 
+    /* XXX Method cache and v-table. */
+    
+    /* Type check cache. */
+    write_int_func(interp, writer, st->type_check_cache_length);
+    for (i = 0; i < st->type_check_cache_length; i++)
+        write_ref_func(interp, writer, st->type_check_cache[i]);
+    
     /* XXX More to do here. */
     printf("WARNING: STable serialization not yet fully implemented\n");
 }
@@ -897,6 +905,16 @@ static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVA
     /* Read the HOW and WHAT. */
     st->HOW  = read_obj_ref(interp, reader);
     st->WHAT = read_obj_ref(interp, reader);
+    
+    /* XXX Method cache and v-table. */
+    
+    /* Type check cache. */
+    st->type_check_cache_length = read_int_func(interp, reader);
+    if (st->type_check_cache_length > 0) {
+        st->type_check_cache = mem_sys_allocate(st->type_check_cache_length * sizeof(PMC *));
+        for (i = 0; i < st->type_check_cache_length; i++)
+            st->type_check_cache[i] = read_ref_func(interp, reader);
+    }
 
     /* XXX More to do here. */
     printf("WARNING: STable deserialization not yet fully implemented\n");
