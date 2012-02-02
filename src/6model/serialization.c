@@ -977,7 +977,7 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, STRING 
     /* Stub-allocate PMCs for all STables and objects, so we know where
      * they will all end up. */
     for (i = 0; i < reader->root.num_stables; i++)
-        VTABLE_set_pmc_keyed_int(interp, stables, i, Parrot_pmc_new(interp, stable_id));
+        VTABLE_set_pmc_keyed_int(interp, stables, i, create_stable(interp, NULL, PMCNULL));
     for (i = 0; i < reader->root.num_objects; i++)
         VTABLE_set_pmc_keyed_int(interp, objects, i, Parrot_pmc_new(interp, smo_id));
      
