@@ -322,6 +322,17 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
     }
 }
 
+/* Writing function for references to STables. */
+void write_stable_ref_func(PARROT_INTERP, SerializationWriter *writer, STable *st) {
+    Parrot_Int4 sc_id, idx;
+    get_stable_ref_info(interp, writer, st->stable_pmc, &sc_id, &idx);
+    expand_storage_if_needed(interp, writer, 8);
+    write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), sc_id);
+    *(writer->cur_write_offset) += 4;
+    write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), idx);
+    *(writer->cur_write_offset) += 4;
+}
+
 /* Concatenates the various output segments into a single binary string. */
 static STRING * concatenate_outputs(PARROT_INTERP, SerializationWriter *writer) {
     char        *output      = NULL;
@@ -538,10 +549,11 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     writer->root.objects_data        = mem_sys_allocate(writer->objects_data_alloc);
     
     /* Populate write functions table. */
-    writer->write_int = write_int_func;
-    writer->write_num = write_num_func;
-    writer->write_str = write_str_func;
-    writer->write_ref = write_ref_func;
+    writer->write_int        = write_int_func;
+    writer->write_num        = write_num_func;
+    writer->write_str        = write_str_func;
+    writer->write_ref        = write_ref_func;
+    writer->write_stable_ref = write_stable_ref_func;
     
     /* Other init. */
     smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
@@ -790,6 +802,19 @@ PMC * read_ref_func(PARROT_INTERP, SerializationReader *reader) {
     }
 }
 
+/* Reading function for STable references. */
+STable * read_stable_ref_func(PARROT_INTERP, SerializationReader *reader) {
+    Parrot_Int4 sc_id, idx;
+    
+    assert_can_read(interp, reader, 8);
+    sc_id = read_int32(*(reader->cur_read_buffer), *(reader->cur_read_offset));
+    *(reader->cur_read_offset) += 4;
+    idx = read_int32(*(reader->cur_read_buffer), *(reader->cur_read_offset));
+    *(reader->cur_read_offset) += 4;
+    
+    return STABLE_STRUCT(lookup_stable(interp, reader,sc_id, idx));
+}
+
 /* Checks the header looks sane and all of the places it points to make sense.
  * Also disects the input string into the tables and data segments and populates
  * the reader data structure more fully. */
@@ -981,10 +1006,11 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, STRING 
     reader->root.dependent_scs  = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
     
     /* Put reader functions in place. */
-    reader->read_int = read_int_func;
-    reader->read_num = read_num_func;
-    reader->read_str = read_str_func;
-    reader->read_ref = read_ref_func;
+    reader->read_int        = read_int_func;
+    reader->read_num        = read_num_func;
+    reader->read_str        = read_str_func;
+    reader->read_ref        = read_ref_func;
+    reader->read_stable_ref = read_stable_ref_func;
     
     /* Other init. */
     smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));

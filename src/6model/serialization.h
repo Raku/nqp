@@ -35,6 +35,7 @@ typedef struct {
 
 /* Represents the serialization reader and the various functions available
  * on it. */
+typedef struct SixModel_STable STable;
 typedef struct SerializationReader {
     /* Serialization root data. */
     SerializationRoot root;
@@ -64,6 +65,7 @@ typedef struct SerializationReader {
     FLOATVAL (*read_num) (PARROT_INTERP, struct SerializationReader *reader);
     STRING * (*read_str) (PARROT_INTERP, struct SerializationReader *reader);
     PMC *    (*read_ref) (PARROT_INTERP, struct SerializationReader *reader);
+    STable * (*read_stable_ref) (PARROT_INTERP, struct SerializationReader *reader);
 } SerializationReader;
 
 /* Represents the serialization writer and the various functions available
@@ -108,6 +110,7 @@ typedef struct SerializationWriter {
     void (*write_num) (PARROT_INTERP, struct SerializationWriter *writer, FLOATVAL value);
     void (*write_str) (PARROT_INTERP, struct SerializationWriter *writer, STRING *value);
     void (*write_ref) (PARROT_INTERP, struct SerializationWriter *writer, PMC *value);
+    void (*write_stable_ref) (PARROT_INTERP, struct SerializationWriter *writer, STable *st);
 } SerializationWriter;
 
 /* Core serialize and deserialize functions. */

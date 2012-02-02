@@ -70,7 +70,7 @@ typedef struct {
 /* S-Tables (short for Shared Table) contains the commonalities shared between
  * a (HOW, REPR) pairing (for example, (HOW for the class Dog, P6Opaque). */
 typedef struct SixModel_REPROps REPROps;
-typedef struct {
+typedef struct SixModel_STable {
     /* The representation operation table. */
     REPROps *REPR;
     
