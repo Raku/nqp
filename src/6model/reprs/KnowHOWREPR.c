@@ -80,6 +80,22 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     return spec;
 }
 
+/* Serializes the data. */
+static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter *writer) {
+    KnowHOWREPRBody *body = (KnowHOWREPRBody *)data;
+    writer->write_str(interp, writer, body->name);
+    writer->write_ref(interp, writer, body->attributes);
+    writer->write_ref(interp, writer, body->methods);
+}
+
+/* Deserializes the data. */
+static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationReader *reader) {
+    KnowHOWREPRBody *body = (KnowHOWREPRBody *)data;
+    body->name       = reader->read_str(interp, reader);
+    body->attributes = reader->read_ref(interp, reader);
+    body->methods    = reader->read_ref(interp, reader);
+}
+
 /* Initializes the KnowHOWREPR representation. */
 REPROps * KnowHOWREPR_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
@@ -91,5 +107,7 @@ REPROps * KnowHOWREPR_initialize(PARROT_INTERP) {
     this_repr->gc_mark = gc_mark;
     this_repr->gc_free = gc_free;
     this_repr->get_storage_spec = get_storage_spec;
+    this_repr->serialize = serialize;
+    this_repr->deserialize = deserialize;
     return this_repr;
 }
