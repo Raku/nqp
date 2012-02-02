@@ -901,6 +901,108 @@ static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationRead
     }
 }
 
+/* Serializes the REPR data. */
+static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *writer) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    INTVAL i, num_classes;
+    
+    writer->write_int(interp, writer, repr_data->allocation_size);  /* XXX should re-calcuate for platform */
+    writer->write_int(interp, writer, repr_data->num_attributes);
+    
+    for (i = 0; i < repr_data->num_attributes; i++)
+        writer->write_int(interp, writer, repr_data->attribute_offsets[i]);
+
+    for (i = 0; i < repr_data->num_attributes; i++) {
+        writer->write_int(interp, writer, repr_data->flattened_stables[i] != NULL);
+        if (repr_data->flattened_stables[i])
+            writer->write_stable_ref(interp, writer, repr_data->flattened_stables[i]);
+    }
+    
+    writer->write_int(interp, writer, repr_data->mi);
+    
+    if (repr_data->auto_viv_values) {
+        writer->write_int(interp, writer, 1);
+        for (i = 0; i < repr_data->num_attributes; i++)
+            writer->write_ref(interp, writer, repr_data->auto_viv_values[i]);
+    }
+    else {
+        writer->write_int(interp, writer, 0);
+    }
+    
+    writer->write_int(interp, writer, repr_data->unbox_int_slot);
+    writer->write_int(interp, writer, repr_data->unbox_num_slot);
+    writer->write_int(interp, writer, repr_data->unbox_str_slot);
+    
+    if (repr_data->unbox_slots) {
+        writer->write_int(interp, writer, 1);
+        for (i = 0; i < repr_data->num_attributes; i++) {
+            writer->write_int(interp, writer, repr_data->unbox_slots[i].repr_id);
+            writer->write_int(interp, writer, repr_data->unbox_slots[i].slot);
+        }
+    }
+    else {
+        writer->write_int(interp, writer, 0);
+    }
+    
+    num_classes = i = 0;
+    while (repr_data->name_to_index_mapping[i].class_key)
+        num_classes++, i++;
+    writer->write_int(interp, writer, num_classes);
+    for (i = 0; i < num_classes; i++) {
+        writer->write_ref(interp, writer, repr_data->name_to_index_mapping[i].class_key);
+        writer->write_ref(interp, writer, repr_data->name_to_index_mapping[i].name_map);
+    }
+}
+
+/* Deserializes the data. */
+static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader *reader) {
+    P6opaqueREPRData *repr_data = st->REPR_data = mem_sys_allocate_zeroed(sizeof(P6opaqueREPRData));
+    INTVAL i, num_classes;
+    
+    repr_data->allocation_size = reader->read_int(interp, reader); /* XXX should re-calcuate for platform */
+    repr_data->num_attributes = reader->read_int(interp, reader);
+    
+    repr_data->attribute_offsets = mem_sys_allocate((repr_data->num_attributes || 1) * sizeof(INTVAL));
+    for (i = 0; i < repr_data->num_attributes; i++)
+        repr_data->attribute_offsets[i] = reader->read_int(interp, reader);
+        
+    repr_data->flattened_stables = mem_sys_allocate((repr_data->num_attributes || 1) * sizeof(STable *));
+    for (i = 0; i < repr_data->num_attributes; i++)
+        if (reader->read_int(interp, reader))
+            repr_data->flattened_stables[i] = reader->read_stable_ref(interp, reader);
+        else
+            repr_data->flattened_stables[i] = NULL;
+
+    repr_data->mi = reader->read_int(interp, reader);
+    
+    if (reader->read_int(interp, reader)) {
+        repr_data->auto_viv_values = mem_sys_allocate((repr_data->num_attributes || 1) * sizeof(PMC *));
+        for (i = 0; i < repr_data->num_attributes; i++)
+            repr_data->auto_viv_values[i] = reader->read_ref(interp, reader);
+    }
+    
+    repr_data->unbox_int_slot = reader->read_int(interp, reader);
+    repr_data->unbox_num_slot = reader->read_int(interp, reader);
+    repr_data->unbox_str_slot = reader->read_int(interp, reader);
+    
+    if (reader->read_int(interp, reader)) {
+        repr_data->unbox_slots = mem_sys_allocate((repr_data->num_attributes || 1) * sizeof(P6opaqueBoxedTypeMap));
+        for (i = 0; i < repr_data->num_attributes; i++) {
+            repr_data->unbox_slots[i].repr_id = reader->read_int(interp, reader);
+            repr_data->unbox_slots[i].slot = reader->read_int(interp, reader);
+        }
+    }
+    
+    num_classes = reader->read_int(interp, reader);
+    repr_data->name_to_index_mapping = mem_sys_allocate_zeroed((num_classes + 1) * sizeof(P6opaqueNameMap));
+    for (i = 0; i < num_classes; i++) {
+        repr_data->name_to_index_mapping[i].class_key = reader->read_ref(interp, reader);
+        repr_data->name_to_index_mapping[i].name_map = reader->read_ref(interp, reader);
+    }
+    
+    /* XXX Need to re-calculate the remaining info. */
+}
+
 /* Initializes the P6opaque representation. */
 REPROps * P6opaque_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
@@ -932,6 +1034,8 @@ REPROps * P6opaque_initialize(PARROT_INTERP) {
     this_repr->change_type = change_type;
     this_repr->serialize = serialize;
     this_repr->deserialize = deserialize;
+    this_repr->serialize_repr_data = serialize_repr_data;
+    this_repr->deserialize_repr_data = deserialize_repr_data;
     smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
     return this_repr;
 }
