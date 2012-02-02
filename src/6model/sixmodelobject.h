@@ -303,6 +303,14 @@ struct SixModel_REPROps {
      * serialization reader. */
     void (*deserialize) (PARROT_INTERP, STable *st, void *data, SerializationReader *reader);
     
+    /* REPR data serialization. Seserializes the per-type representation data that
+     * is attached to the supplied STable. */
+    void (*serialize_repr_data) (PARROT_INTERP, STable *st, SerializationWriter *writer);
+    
+    /* REPR data deserialization. Deserializes the per-type representation data and
+     * attaches it to the supplied STable. */
+    void (*deserialize_repr_data) (PARROT_INTERP, STable *st, SerializationReader *reader);
+    
     /* This Parrot-specific addition to the API is used to mark an object. */
     void (*gc_mark) (PARROT_INTERP, STable *st, void *data);
 

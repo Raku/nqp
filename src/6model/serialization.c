@@ -425,6 +425,10 @@ static void serialize_stable(PARROT_INTERP, SerializationWriter *writer, PMC *st
     
     /* XXX More to do here. */
     printf("WARNING: STable serialization not yet fully implemented\n");
+    
+    /* If the REPR has a function to serialize representation data, call it. */
+    if (st->REPR->serialize_repr_data)
+        st->REPR->serialize_repr_data(interp, st, writer);
 }
 
 /* This handles the serialization of an object, which largely involves a
@@ -920,6 +924,10 @@ static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVA
 
     /* XXX More to do here. */
     printf("WARNING: STable deserialization not yet fully implemented\n");
+    
+    /* If the REPR has a function to deserialize representation data, call it. */
+    if (st->REPR->deserialize_repr_data)
+        st->REPR->deserialize_repr_data(interp, st, reader);
 }
 
 /* Deserializes a single object, along with its REPR data. */
