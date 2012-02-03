@@ -419,7 +419,7 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
     obj = (P6opaqueInstance *) Parrot_gc_allocate_fixed_size_storage(interp, repr_data->allocation_size);
     memset(obj, 0, repr_data->allocation_size);
     obj->common.stable = st->stable_pmc;
-    
+
     return wrap_object(interp, obj);
 }
 
@@ -1027,9 +1027,8 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
             cur_offset += cur_st->REPR->get_storage_spec(interp, st).bits / 8;
         }
     }
+    
     repr_data->allocation_size = sizeof(P6opaqueInstance) + cur_offset;
-
-    PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
 }
 
 /* Initializes the P6opaque representation. */

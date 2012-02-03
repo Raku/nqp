@@ -953,6 +953,8 @@ static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVA
     /* If the REPR has a function to deserialize representation data, call it. */
     if (st->REPR->deserialize_repr_data)
         st->REPR->deserialize_repr_data(interp, st, reader);
+
+    PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
 }
 
 /* Deserializes a single object, along with its REPR data. */
@@ -984,6 +986,8 @@ static void deserialize_object(PARROT_INTERP, SerializationReader *reader, INTVA
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Missing deserialize REPR function");
+
+    PARROT_GC_WRITE_BARRIER(interp, obj);
 }
 
 /* Takes serialized data, an empty SerializationContext to deserialize it into
