@@ -2,7 +2,7 @@
 
 use nqpmo;
 
-plan(20);
+plan(24);
 
 # Serializing a knowhow with no attributes and no methods; P6int REPR
 # (very simple REPR).
@@ -93,4 +93,17 @@ plan(20);
                                               'int attribute declared in P6opaque-based type is OK');
     ok(nqp::getattr_n($dsc[1], $dsc[0], '$!weight') == 2.3,
                                               'num attribute declared in P6opaque-based type is OK');
+
+    my $other_instance := nqp::create($dsc[0]);
+    ok(nqp::isconcrete($other_instance), 'can make new instance of deserialized type');
+    
+    nqp::bindattr_s($other_instance, $dsc[0], '$!eats', 'snakes');
+    nqp::bindattr_i($other_instance, $dsc[0], '$!age', 10);
+    nqp::bindattr_n($other_instance, $dsc[0], '$!weight', 3.4);
+    ok(nqp::getattr_s($other_instance, $dsc[0], '$!eats') eq 'snakes',
+                                              'str attribute in new instance OK');
+    ok(nqp::getattr_i($other_instance, $dsc[0], '$!age') == 10,
+                                              'int attribute in new instance OK');
+    ok(nqp::getattr_n($other_instance, $dsc[0], '$!weight') == 3.4,
+                                              'num attribute in new instance OK');
 }
