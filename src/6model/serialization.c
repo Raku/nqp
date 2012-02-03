@@ -249,7 +249,7 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
     if (ref == NULL) {
         discrim = REFVAR_NULL;
     }
-    else if (PMC_IS_NULL(ref)) {
+    else if (PMC_IS_NULL(ref) || ref->vtable->base_type == enum_class_Undef) {
         discrim = REFVAR_VM_NULL;
     }
     else if (ref->vtable->base_type == smo_id) {
