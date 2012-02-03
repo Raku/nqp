@@ -1027,6 +1027,9 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
             cur_offset += cur_st->REPR->get_storage_spec(interp, st).bits / 8;
         }
     }
+    repr_data->initialize_slots[cur_initialize_slot] = -1;
+    repr_data->gc_mark_slots[cur_gc_mark_slot] = -1;
+    repr_data->gc_cleanup_slots[cur_gc_cleanup_slot] = -1;
     
     repr_data->allocation_size = sizeof(P6opaqueInstance) + cur_offset;
 }
