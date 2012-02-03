@@ -906,11 +906,7 @@ static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     INTVAL i, num_classes;
     
-    writer->write_int(interp, writer, repr_data->allocation_size);  /* XXX should re-calcuate for platform */
     writer->write_int(interp, writer, repr_data->num_attributes);
-    
-    for (i = 0; i < repr_data->num_attributes; i++)
-        writer->write_int(interp, writer, repr_data->attribute_offsets[i]);
 
     for (i = 0; i < repr_data->num_attributes; i++) {
         writer->write_int(interp, writer, repr_data->flattened_stables[i] != NULL);
@@ -957,14 +953,9 @@ static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *
 /* Deserializes the data. */
 static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader *reader) {
     P6opaqueREPRData *repr_data = st->REPR_data = mem_sys_allocate_zeroed(sizeof(P6opaqueREPRData));
-    INTVAL i, num_classes;
+    INTVAL i, num_classes, cur_offset, cur_initialize_slot, cur_gc_mark_slot, cur_gc_cleanup_slot;
     
-    repr_data->allocation_size = reader->read_int(interp, reader); /* XXX should re-calcuate for platform */
     repr_data->num_attributes = reader->read_int(interp, reader);
-    
-    repr_data->attribute_offsets = mem_sys_allocate((repr_data->num_attributes || 1) * sizeof(INTVAL));
-    for (i = 0; i < repr_data->num_attributes; i++)
-        repr_data->attribute_offsets[i] = reader->read_int(interp, reader);
         
     repr_data->flattened_stables = mem_sys_allocate((repr_data->num_attributes || 1) * sizeof(STable *));
     for (i = 0; i < repr_data->num_attributes; i++)
@@ -1000,7 +991,43 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
         repr_data->name_to_index_mapping[i].name_map = reader->read_ref(interp, reader);
     }
     
-    /* XXX Need to re-calculate the remaining info. */
+    /* Re-calculate the remaining info, which is platform specific or
+     * derived information. */
+    repr_data->attribute_offsets   = mem_sys_allocate((repr_data->num_attributes || 1) * sizeof(INTVAL));
+    repr_data->gc_pmc_mark_offsets = mem_sys_allocate((repr_data->num_attributes || 1) * sizeof(INTVAL));
+    repr_data->initialize_slots    = mem_sys_allocate((repr_data->num_attributes + 1) * sizeof(INTVAL));
+    repr_data->gc_mark_slots       = mem_sys_allocate((repr_data->num_attributes + 1) * sizeof(INTVAL));
+    repr_data->gc_cleanup_slots    = mem_sys_allocate((repr_data->num_attributes + 1) * sizeof(INTVAL));
+    repr_data->gc_pmc_mark_offsets_count = 0;
+    cur_offset          = 0;
+    cur_initialize_slot = 0;
+    cur_gc_mark_slot    = 0;
+    cur_gc_cleanup_slot = 0;
+    for (i = 0; i < repr_data->num_attributes; i++) {
+        repr_data->attribute_offsets[i] = cur_offset;
+        if (repr_data->flattened_stables[i] == NULL) {
+            /* Reference type. Needs marking. */
+            repr_data->gc_pmc_mark_offsets[repr_data->gc_pmc_mark_offsets_count] = cur_offset;
+            repr_data->gc_pmc_mark_offsets_count++;
+            
+            /* Increment by pointer size. */
+            cur_offset += sizeof(PMC *);
+        }
+        else {
+            /* Set up flags for initialization and GC. */
+            STable *cur_st = repr_data->flattened_stables[i];
+            if (cur_st->REPR->initialize)
+                repr_data->initialize_slots[cur_initialize_slot++] = i;
+            if (cur_st->REPR->gc_mark)
+                repr_data->gc_mark_slots[cur_gc_mark_slot++] = i;
+            if (cur_st->REPR->gc_cleanup)
+                repr_data->gc_cleanup_slots[cur_gc_cleanup_slot++] = i;
+            
+            /* Increment by size reported by representation. */
+            cur_offset += cur_st->REPR->get_storage_spec(interp, st).bits / 8;
+        }
+    }
+    repr_data->allocation_size = sizeof(P6opaqueInstance) + cur_offset;
 }
 
 /* Initializes the P6opaque representation. */
