@@ -1028,6 +1028,8 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
         }
     }
     repr_data->allocation_size = sizeof(P6opaqueInstance) + cur_offset;
+
+    PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
 }
 
 /* Initializes the P6opaque representation. */
