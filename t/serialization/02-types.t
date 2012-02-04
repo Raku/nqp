@@ -2,7 +2,7 @@
 
 use nqpmo;
 
-plan(24);
+plan(31);
 
 # Serializing a knowhow with no attributes and no methods; P6int REPR
 # (very simple REPR).
@@ -106,4 +106,34 @@ plan(24);
                                               'int attribute in new instance OK');
     ok(nqp::getattr_n($other_instance, $dsc[0], '$!weight') == 3.4,
                                               'num attribute in new instance OK');
+}
+
+# Serializing a type with methods (P6opaque REPR, knowhow)
+{
+    my $sc := pir::nqp_create_sc__Ps('TEST_SC_4_IN');
+    my $sh := pir::new__Ps('ResizableStringArray');
+    
+    my $type := pir::get_knowhow__P().new_type(:name('Llama'), :repr('P6opaque'));
+    $type.HOW.add_attribute($type, NQPAttribute.new(name => '$!name'));
+    $type.HOW.add_method($type, 'smell', method () { "awful" });
+    $type.HOW.add_method($type, 'intro', method () { "Hi, I'm " ~ nqp::getattr(self, self.WHAT, '$!name') });
+    $type.HOW.compose($type);
+    pir::nqp_add_object_to_sc__vPiP($sc, 0, $type);
+    
+    my $instance := nqp::create($type);
+    nqp::bindattr($instance, $type, '$!name', 'Bob');
+    pir::nqp_add_object_to_sc__vPiP($sc, 1, $instance);
+    
+    my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+    
+    my $dsc := pir::nqp_create_sc__Ps('TEST_SC_4_OUT');
+    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh);
+    
+    ok(nqp::elems($dsc) >= 2,                 'deserialized SC has at least the knowhow type and its instance');
+    ok(!nqp::isconcrete($dsc[0]),             'type object deserialized and is not concrete');
+    ok(nqp::isconcrete($dsc[1]),              'instance deserialized and is concrete');
+    ok(nqp::istype($dsc[1], $dsc[0]),         'type checking is OK after deserialization');
+    ok($dsc[0].smell eq 'awful',              'method call on deserialized type object ok');
+    ok($dsc[1].smell eq 'awful',              'method call on deserialized instance object ok');
+    ok($dsc[1].intro eq "Hi, I'm Bob",        'method call accessing instance attributes ok');
 }
