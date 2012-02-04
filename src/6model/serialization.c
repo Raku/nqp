@@ -244,9 +244,9 @@ static void write_hash_str_var(PARROT_INTERP, SerializationWriter *writer, PMC *
 
 /* Writes a reference to a code object in some SC. */
 static void write_code_ref(PARROT_INTERP, SerializationWriter *writer, PMC *code) {
-    PMC    *code_sc = VTABLE_getprop(interp, code, Parrot_str_new_constant(interp, "SC"));
-    INTVAL  sc_id   = get_sc_id(interp, writer, code_sc);
-    INTVAL  idx     = (Parrot_Int4)SC_find_code_idx(interp, code_sc, code);
+    PMC         *code_sc = VTABLE_getprop(interp, code, Parrot_str_new_constant(interp, "SC"));
+    Parrot_Int4  sc_id   = get_sc_id(interp, writer, code_sc);
+    Parrot_Int4  idx     = (Parrot_Int4)SC_find_code_idx(interp, code_sc, code);
     expand_storage_if_needed(interp, writer, 8);
     write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), sc_id);
     *(writer->cur_write_offset) += 4;
@@ -550,6 +550,7 @@ static void serialize(PARROT_INTERP, SerializationWriter *writer) {
 STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap) {
     PMC         *stables  = PMCNULL;
     PMC         *objects  = PMCNULL;
+    PMC         *codes    = PMCNULL;
     STRING      *result   = STRINGNULL;
     Parrot_Int4  sc_elems = (Parrot_Int4)VTABLE_elements(interp, sc);
     
@@ -557,10 +558,12 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     SerializationWriter *writer = mem_allocate_zeroed_typed(SerializationWriter);
     GETATTR_SerializationContext_root_stables(interp, sc, stables);
     GETATTR_SerializationContext_root_objects(interp, sc, objects);
+    GETATTR_SerializationContext_root_codes(interp, sc, codes);
     writer->root.version        = CURRENT_VERSION;
     writer->root.sc             = sc;
     writer->stables_list        = stables;
     writer->objects_list        = objects;
+    writer->codes_list          = codes;
     writer->root.string_heap    = empty_string_heap;
     writer->root.dependent_scs  = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
     
@@ -1018,10 +1021,10 @@ static void deserialize_object(PARROT_INTERP, SerializationReader *reader, INTVA
     PARROT_GC_WRITE_BARRIER(interp, obj);
 }
 
-/* Takes serialized data, an empty SerializationContext to deserialize it into
- * and a strings heap. Deserializes the data into the required objects and
- * STables. */
-void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, STRING *data) {
+/* Takes serialized data, an empty SerializationContext to deserialize it into,
+ * a strings heap and the set of static code refs for the compilation unit.
+ * Deserializes the data into the required objects and STables. */
+void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *static_codes, STRING *data) {
     PMC    *stables   = PMCNULL;
     PMC    *objects   = PMCNULL;
     INTVAL  smo_id    = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
@@ -1036,6 +1039,11 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, STRING 
     reader->root.sc             = sc;
     reader->root.string_heap    = string_heap;
     reader->root.dependent_scs  = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+    
+    /* Static code refs list for the SC becomes the initial full code
+     * refs list. */
+    SETATTR_SerializationContext_root_codes(interp, sc, static_codes);
+    reader->codes_list = static_codes;
     
     /* Put reader functions in place. */
     reader->read_int        = read_int_func;

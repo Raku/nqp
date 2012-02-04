@@ -2081,13 +2081,14 @@ inline op nqp_serialize_sc(out STR, in PMC, in PMC) :base_core {
 =item nqp_deserialize_sc
 
 Deserializes the data in $1, populating the serialization context located in $2.
-Expects to find any required strings in the string heap, passed in $3.
+Expects to find any required strings in the string heap, passed in $3, and any of
+the compilation unit's static code refs in the list in $4.
 
 =cut
 
 */
-inline op nqp_deserialize_sc(in STR, in PMC, in PMC) :base_core {
-    Serialization_deserialize(interp, $2, $3, $1);
+inline op nqp_deserialize_sc(in STR, in PMC, in PMC, in PMC) :base_core {
+    Serialization_deserialize(interp, $2, $3, $4, $1);
 }
 
 /*

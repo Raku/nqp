@@ -40,9 +40,10 @@ typedef struct SerializationReader {
     /* Serialization root data. */
     SerializationRoot root;
     
-    /* The stables list and object list we're deserializing things into. */
+    /* The stables, objects and code refs lists we're deserializing things into. */
     PMC *stables_list;
     PMC *objects_list;
+    PMC *codes_list;
     
     /* Current offsets for the data chunks (also correspond to the amount of
      * data written in to them). */
@@ -74,9 +75,10 @@ typedef struct SerializationWriter {
     /* Serialization root data. */
     SerializationRoot root;
     
-    /* The stables list and object list we're working through. */
+    /* The stables, objects and code refs lists we're working through/adding to. */
     PMC *stables_list;
     PMC *objects_list;
+    PMC *codes_list;
     
     /* Current position in the stables list and objects list. */
     INTVAL stables_list_pos;
@@ -115,4 +117,4 @@ typedef struct SerializationWriter {
 
 /* Core serialize and deserialize functions. */
 STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap);
-void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, STRING *data);
+void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *codes_static, STRING *data);
