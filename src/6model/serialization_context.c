@@ -72,6 +72,19 @@ INTVAL SC_find_object_idx(PARROT_INTERP, PMC *sc, PMC *obj) {
         "Object does not exist in serialization context");
 }
 
+/* Given an SC, looks up the index of a code ref that is in its root set. */
+INTVAL SC_find_code_idx(PARROT_INTERP, PMC *sc, PMC *obj) {
+    PMC   *to_search;
+    INTVAL i, count;
+    GETATTR_SerializationContext_root_codes(interp, sc, to_search);
+    count = VTABLE_elements(interp, to_search);
+    for (i = 0; i < count; i++)
+        if (VTABLE_get_pmc_keyed_int(interp, to_search, i) == obj)
+            return i;
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+        "Code ref does not exist in serialization context");
+}
+
 /* Given an SC and an index, fetch the STable stored there. */
 PMC * SC_get_stable(PARROT_INTERP, PMC *sc, INTVAL idx) {
     PMC *stables;
@@ -90,4 +103,14 @@ PMC * SC_get_object(PARROT_INTERP, PMC *sc, INTVAL idx) {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "No object at index %d", idx);
     return VTABLE_get_pmc_keyed_int(interp, objects, idx);
+}
+
+/* Given an SC and an index, fetch the code ref stored there. */
+PMC * SC_get_code(PARROT_INTERP, PMC *sc, INTVAL idx) {
+    PMC *codes;
+    GETATTR_SerializationContext_root_codes(interp, sc, codes);
+    if (idx >= VTABLE_elements(interp, codes))
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "No code ref at index %d", idx);
+    return VTABLE_get_pmc_keyed_int(interp, codes, idx);
 }

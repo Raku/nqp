@@ -15,14 +15,19 @@ pmclass SerializationContext auto_attrs dynpmc group nqp {
     /* The root set of STables that live in this SC. */
     ATTR PMC *root_stables;
     
+    /* The root set of code refs that live in this SC. */
+    ATTR PMC *root_codes;
+    
     /* Description (probably the file name) if any. */
     ATTR STRING *description;
     
     VTABLE void init() {
         PMC *root_objects = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
         PMC *root_stables = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+        PMC *root_codes   = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
         SET_ATTR_root_objects(interp, SELF, root_objects);
         SET_ATTR_root_stables(interp, SELF, root_stables);
+        SET_ATTR_root_codes(interp, SELF, root_codes);
         PObj_custom_mark_SET(SELF);
         if (!smo_id)
             smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
@@ -33,12 +38,14 @@ pmclass SerializationContext auto_attrs dynpmc group nqp {
     }
 
     VTABLE void mark() {
-        PMC    *root_objects, *root_stables;
+        PMC    *root_objects, *root_stables, *root_codes;
         STRING *handle, *description;
         GET_ATTR_root_objects(interp, SELF, root_objects);
         Parrot_gc_mark_PMC_alive(INTERP, root_objects);
         GET_ATTR_root_stables(interp, SELF, root_stables);
         Parrot_gc_mark_PMC_alive(INTERP, root_stables);
+        GET_ATTR_root_codes(interp, SELF, root_codes);
+        Parrot_gc_mark_PMC_alive(INTERP, root_codes);
         GET_ATTR_handle(interp, SELF, handle);
         Parrot_gc_mark_STRING_alive(INTERP, handle);
         GET_ATTR_description(interp, SELF, description);
