@@ -18,7 +18,7 @@ plan(31);
     my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
     
     my $dsc := pir::nqp_create_sc__Ps('TEST_SC_1_OUT');
-    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh);
+    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh, nqp::list());
     
     ok(nqp::elems($dsc) >= 2,                 'deserialized SC has at least the knowhow type and its instance');
     ok(!nqp::isconcrete($dsc[0]),             'type object deserialized and is not concrete');
@@ -46,7 +46,7 @@ plan(31);
     my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
     
     my $dsc := pir::nqp_create_sc__Ps('TEST_SC_2_OUT');
-    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh);
+    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh, nqp::list());
     
     ok(nqp::elems($dsc) >= 2,                 'deserialized SC has at least the knowhow type and its instance');
     ok(!nqp::isconcrete($dsc[0]),             'type object deserialized and is not concrete');
@@ -80,7 +80,7 @@ plan(31);
     my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
     
     my $dsc := pir::nqp_create_sc__Ps('TEST_SC_3_OUT');
-    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh);
+    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh, nqp::list());
     
     ok(nqp::elems($dsc) >= 2,                 'deserialized SC has at least the knowhow type and its instance');
     ok(!nqp::isconcrete($dsc[0]),             'type object deserialized and is not concrete');
@@ -127,7 +127,7 @@ plan(31);
     my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
     
     my $dsc := pir::nqp_create_sc__Ps('TEST_SC_4_OUT');
-    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh);
+    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh, nqp::list());
     
     ok(nqp::elems($dsc) >= 2,                 'deserialized SC has at least the knowhow type and its instance');
     ok(!nqp::isconcrete($dsc[0]),             'type object deserialized and is not concrete');
