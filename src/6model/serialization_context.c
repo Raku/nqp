@@ -114,3 +114,10 @@ PMC * SC_get_code(PARROT_INTERP, PMC *sc, INTVAL idx) {
             "No code ref at index %d", idx);
     return VTABLE_get_pmc_keyed_int(interp, codes, idx);
 }
+
+/* Adds a code ref to an SC. */
+void SC_set_code(PARROT_INTERP, PMC *sc, INTVAL idx, PMC *code) {
+    PMC *codes;
+    GETATTR_SerializationContext_root_codes(interp, sc, codes);
+    VTABLE_set_pmc_keyed_int(interp, codes, idx, code);
+}

@@ -1503,6 +1503,28 @@ inline op nqp_add_object_to_sc(in PMC, in INT, in PMC) :base_core {
 
 /*
 
+=item nqp_add_code_ref_to_sc
+
+Adds a code ref $3 to slot $2 of the serialization context in $1 and marks
+it as being in the context.
+
+=cut
+
+*/
+inline op nqp_add_code_ref_to_sc(in PMC, in INT, in PMC) :base_core {
+    if ($3->vtable->base_type == enum_class_Sub) {
+        SC_set_code(interp, $1, $2, $3);
+        VTABLE_setprop(interp, $3, Parrot_str_new_constant(interp, "SC"), $1);
+        PARROT_GC_WRITE_BARRIER(interp, $3);
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use nqp_add_object_to_sc to add a Sub");
+}
+
+
+/*
+
 =item nqp_set_sc_object()
 
 Stores an object in the serialization context keyed by handle and index.

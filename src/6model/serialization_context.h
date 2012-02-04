@@ -11,4 +11,5 @@ STRING * SC_get_description(PARROT_INTERP, PMC *sc);
 PMC * SC_get_stable(PARROT_INTERP, PMC *sc, INTVAL idx);
 PMC * SC_get_object(PARROT_INTERP, PMC *sc, INTVAL idx);
 PMC * SC_get_code(PARROT_INTERP, PMC *sc, INTVAL idx);
+void SC_set_code(PARROT_INTERP, PMC *sc, INTVAL idx, PMC *code);
 #endif
