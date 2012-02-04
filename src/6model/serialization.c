@@ -789,6 +789,19 @@ static PMC * read_hash_str_var(PARROT_INTERP, SerializationReader *reader) {
     return result;
 }
 
+/* Reads in a code reference. */
+PMC * read_code_ref(PARROT_INTERP, SerializationReader *reader) {
+    Parrot_Int4 sc_id, idx;
+
+    assert_can_read(interp, reader, 8);
+    sc_id = read_int32(*(reader->cur_read_buffer), *(reader->cur_read_offset));
+    *(reader->cur_read_offset) += 4;
+    idx = read_int32(*(reader->cur_read_buffer), *(reader->cur_read_offset));
+    *(reader->cur_read_offset) += 4;
+    
+    return SC_get_code(interp, locate_sc(interp, reader, sc_id), idx);
+}
+
 /* Reading function for references. */
 PMC * read_ref_func(PARROT_INTERP, SerializationReader *reader) {
     PMC *result;
@@ -827,6 +840,8 @@ PMC * read_ref_func(PARROT_INTERP, SerializationReader *reader) {
             return read_array_str(interp, reader);
         case REFVAR_VM_HASH_STR_VAR:
             return read_hash_str_var(interp, reader);
+        case REFVAR_STATIC_CODEREF:
+            return read_code_ref(interp, reader);
         default:
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Serialization Error: Unimplemented case of read_ref");
