@@ -242,6 +242,18 @@ static void write_hash_str_var(PARROT_INTERP, SerializationWriter *writer, PMC *
     }
 }
 
+/* Writes a reference to a code object in some SC. */
+static void write_code_ref(PARROT_INTERP, SerializationWriter *writer, PMC *code) {
+    PMC    *code_sc = VTABLE_getprop(interp, code, Parrot_str_new_constant(interp, "SC"));
+    INTVAL  sc_id   = get_sc_id(interp, writer, code_sc);
+    INTVAL  idx     = (Parrot_Int4)SC_find_code_idx(interp, code_sc, code);
+    expand_storage_if_needed(interp, writer, 8);
+    write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), sc_id);
+    *(writer->cur_write_offset) += 4;
+    write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), idx);
+    *(writer->cur_write_offset) += 4;
+}
+
 /* Writing function for references to things. */
 void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
     /* Work out what kind of thing we have and determine the discriminator. */
@@ -275,6 +287,19 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
     }
     else if (ref->vtable->base_type == enum_class_Hash) {
         discrim = REFVAR_VM_HASH_STR_VAR;
+    }
+    else if (ref->vtable->base_type == enum_class_Sub) {
+        /* Is it a static code reference? */
+        PMC *code_sc = VTABLE_getprop(interp, ref, Parrot_str_new_constant(interp, "SC"));
+        PMC *static_cr = VTABLE_getprop(interp, ref, Parrot_str_new_constant(interp, "STATIC_CODE_REF"));
+        if (!PMC_IS_NULL(code_sc) && !PMC_IS_NULL(static_cr)) {
+            discrim = REFVAR_STATIC_CODEREF;
+        }
+        else {
+            printf("WARNING: No closure serialization\n");
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Serialization Error: Closure serializatin not yet implemented");
+        }
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -315,6 +340,9 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
             break;
         case REFVAR_VM_HASH_STR_VAR:
             write_hash_str_var(interp, writer, ref);
+            break;
+        case REFVAR_STATIC_CODEREF:
+            write_code_ref(interp, writer, ref);
             break;
         default:
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
