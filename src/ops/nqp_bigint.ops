@@ -89,6 +89,7 @@ static void grow_and_negate(mp_int *a, int size, mp_int *b) {
     mp_add_d(b, 1, b);
 }
 
+
 static void two_complement_bitop(mp_int *a, mp_int *b, mp_int *c,
         int (*mp_bitop)(mp_int *, mp_int *, mp_int *)) {
     mp_int d;
@@ -104,7 +105,7 @@ static void two_complement_bitop(mp_int *a, mp_int *b, mp_int *c,
             grow_and_negate(b, USED(a), &d);
             mp_bitop(a, &d, c);
         }
-        if (DIGIT(c, USED(c) - 1) & (MP_MASK > 1)) {
+        if (DIGIT(c, USED(c) - 1) & ((mp_digit)1<<(mp_digit)(DIGIT_BIT - 1))) {
             grow_and_negate(c, c->used, &d);
             mp_copy(&d, c);
             mp_neg(c, c);
