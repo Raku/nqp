@@ -874,8 +874,14 @@ static void change_type(PARROT_INTERP, PMC *obj, PMC *new_type) {
 /* Serializes the data. */
 static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter *writer) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
-    INTVAL num_attributes = repr_data->num_attributes;
-    INTVAL i;
+    INTVAL num_attributes, i;
+    
+    if (!repr_data->allocation_size) {
+        compute_allocation_strategy(interp, st->WHAT, repr_data);
+        PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
+    }
+    
+    num_attributes = repr_data->num_attributes;
     for (i = 0; i < num_attributes; i++) {
         INTVAL a_offset = repr_data->attribute_offsets[i];
         STable *a_st = repr_data->flattened_stables[i];
@@ -905,6 +911,11 @@ static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationRead
 static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *writer) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     INTVAL i, num_classes;
+    
+    if (!repr_data->allocation_size) {
+        compute_allocation_strategy(interp, st->WHAT, repr_data);
+        PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
+    }
     
     writer->write_int(interp, writer, repr_data->num_attributes);
 
