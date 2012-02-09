@@ -1202,7 +1202,8 @@ static void resolve_dependencies(PARROT_INTERP, SerializationReader *reader) {
     }
 }
 
-/* Deserializes a closure. */
+/* Deserializes a closure, though without attaching outer (that comes in a
+ * later step). */
 static void deserialize_closure(PARROT_INTERP, SerializationReader *reader, INTVAL i) {
     /* Calculate location of closure's table row. */
     char *table_row = reader->root.closures_table + i * CLOSURES_TABLE_ENTRY_SIZE;
@@ -1215,8 +1216,23 @@ static void deserialize_closure(PARROT_INTERP, SerializationReader *reader, INTV
     /* Clone it and add it to the SC's code refs list. */
     PMC *closure = VTABLE_clone(interp, static_code);
     VTABLE_push_pmc(interp, reader->codes_list, closure);
-    
-    /* XXX Outer handling to come. */
+}
+
+/* Deserializes a context. */
+static void deserialize_context(PARROT_INTERP, SerializationReader *reader, INTVAL i) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+        "Context deserialization NYI");
+}
+
+/* Deserializes a closure, though without attaching outer (that comes in a
+ * later step). */
+static void attach_closure_outer(PARROT_INTERP, SerializationReader *reader, INTVAL i, PMC *closure) {
+    char        *row = reader->root.closures_table + i * CLOSURES_TABLE_ENTRY_SIZE;
+    Parrot_Int4  idx = read_int32(row, 8);
+    if (idx) {
+        PMC *ctx = VTABLE_get_pmc_keyed_int(interp, reader->contexts_list, idx - 1);
+        PARROT_SUB(closure)->outer_ctx = ctx;
+    }
 }
 
 /* Deserializes a single STable, along with its REPR data. */
@@ -1360,10 +1376,15 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *st
     for (i = 0; i < reader->root.num_objects; i++)
         VTABLE_set_pmc_keyed_int(interp, objects, i, Parrot_pmc_new(interp, smo_id));
      
-     /* Deserialize closures. */
+     /* Deserialize closures, deserialize contexts, then attach outers. */
      for (i = 0; i < reader->root.num_closures; i++)
         deserialize_closure(interp, reader, i);
-     
+     for (i = 0; i < reader->root.num_contexts; i++)
+        deserialize_context(interp, reader, i);
+    for (i = 0; i < reader->root.num_closures; i++)
+        attach_closure_outer(interp, reader, i,
+            VTABLE_get_pmc_keyed_int(interp, reader->codes_list, i));
+
      /* Deserialize STables, along with their representation data. */
      for (i = 0; i < reader->root.num_stables; i++)
         deserialize_stable(interp, reader, i,
