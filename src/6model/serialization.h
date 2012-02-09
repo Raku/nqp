@@ -29,6 +29,11 @@ typedef struct {
     char         *objects_table;
     char         *objects_data;
     
+    /* The number of closures, as we as a pointer to the closures
+     * table. */
+    Parrot_Int4  num_closures;
+    char        *closures_table;
+    
     /* Array of STRINGs. */
     PMC          *string_heap;
 } SerializationRoot;

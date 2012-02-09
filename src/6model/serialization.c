@@ -14,10 +14,11 @@
 #define CURRENT_VERSION 1
 
 /* Various sizes (in bytes). */
-#define HEADER_SIZE                 4 * 9
+#define HEADER_SIZE                 4 * 11
 #define DEP_TABLE_ENTRY_SIZE        8
 #define STABLES_TABLE_ENTRY_SIZE    8
 #define OBJECTS_TABLE_ENTRY_SIZE    16
+#define CLOSURES_TABLE_ENTRY_SIZE   8
 
 /* Some guesses. */
 #define DEFAULT_STABLE_DATA_SIZE    4096
@@ -379,6 +380,7 @@ static STRING * concatenate_outputs(PARROT_INTERP, SerializationWriter *writer) 
     output_size += writer->stables_data_offset;
     output_size += writer->root.num_objects * OBJECTS_TABLE_ENTRY_SIZE;
     output_size += writer->objects_data_offset;
+    output_size += writer->root.num_closures * CLOSURES_TABLE_ENTRY_SIZE;
     
     /* Allocate a buffer that size. */
     output = mem_sys_allocate(output_size);
@@ -419,6 +421,13 @@ static STRING * concatenate_outputs(PARROT_INTERP, SerializationWriter *writer) 
     memcpy(output + offset, writer->root.objects_data, 
         writer->objects_data_offset);
     offset += writer->objects_data_offset;
+    
+    /* Put closures table in place, and set location/rows in header. */
+    write_int32(output, 36, offset);
+    write_int32(output, 40, writer->root.num_closures);
+    memcpy(output + offset, writer->root.closures_table, 
+        writer->root.num_closures * CLOSURES_TABLE_ENTRY_SIZE);
+    offset += writer->root.num_closures * CLOSURES_TABLE_ENTRY_SIZE;
     
     /* Sanity check. */
     if (offset != output_size)
@@ -949,9 +958,20 @@ static void check_and_disect_input(PARROT_INTERP, SerializationReader *reader, S
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Corruption detected (objects data starts after end of data)");
     
+    /* Get size and location of STables table. */
+    reader->root.closures_table = data + read_int32(data, 36);
+    reader->root.num_closures   = read_int32(data, 40);
+    if (reader->root.closures_table < prov_pos)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Corruption detected (Closures table starts before objects data ends)");
+    prov_pos = reader->root.closures_table + reader->root.num_closures * CLOSURES_TABLE_ENTRY_SIZE;
+    if (prov_pos > data_end)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Corruption detected (Closures table overruns end of data)");
+    
     /* Set reading limits for data chunks. */
     reader->stables_data_end = reader->root.objects_table;
-    reader->objects_data_end = data_end;
+    reader->objects_data_end = reader->root.closures_table;
 }
 
 /* Goes through the dependencies table and resolves the dependencies that it
