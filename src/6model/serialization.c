@@ -1004,7 +1004,7 @@ PMC * read_code_ref(PARROT_INTERP, SerializationReader *reader) {
     *(reader->cur_read_offset) += 4;
     idx = read_int32(*(reader->cur_read_buffer), *(reader->cur_read_offset));
     *(reader->cur_read_offset) += 4;
-    
+
     return SC_get_code(interp, locate_sc(interp, reader, sc_id), idx);
 }
 
@@ -1250,11 +1250,12 @@ static void deserialize_context(PARROT_INTERP, SerializationReader *reader, INTV
     syms = reader->read_int(interp, reader);
     for (i = 0; i < syms; i++) {
         STRING *sym = reader->read_str(interp, reader);
-        VTABLE_set_pmc_keyed_str(interp, lexpad, sym, reader->read_ref(interp, reader));
+        PMC    *val = reader->read_ref(interp, reader);
+        VTABLE_set_pmc_keyed_str(interp, lexpad, sym, val);
     }
     
     /* Put context in place. */
-    VTABLE_set_pmc_keyed_int(interp, reader->contexts_list, i, ctx);
+    VTABLE_set_pmc_keyed_int(interp, reader->contexts_list, row, ctx);
 }
 
 /* Deserializes a closure, though without attaching outer (that comes in a
@@ -1273,7 +1274,7 @@ static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVA
     STable *st = STABLE_STRUCT(st_pmc);
 
     /* Calculate location of STable's table row. */
-    char *st_table_row = reader->root.objects_table + i * STABLES_TABLE_ENTRY_SIZE;
+    char *st_table_row = reader->root.stables_table + i * STABLES_TABLE_ENTRY_SIZE;
     
     /* Read in and look up representation. */
     st->REPR = REPR_get_by_name(interp,
