@@ -1039,6 +1039,23 @@ static void resolve_dependencies(PARROT_INTERP, SerializationReader *reader) {
     }
 }
 
+/* Deserializes a closure. */
+static void deserialize_closure(PARROT_INTERP, SerializationReader *reader, INTVAL i) {
+    /* Calculate location of closure's table row. */
+    char *table_row = reader->root.closures_table + i * CLOSURES_TABLE_ENTRY_SIZE;
+    
+    /* Resolve the reference to the static code object. */
+    Parrot_Int4  static_sc_id = read_int32(table_row, 0);
+    Parrot_Int4  static_idx   = read_int32(table_row, 4);
+    PMC         *static_code  = SC_get_code(interp, locate_sc(interp, reader, static_sc_id), static_idx);
+    
+    /* Clone it and add it to the SC's code refs list. */
+    PMC *closure = VTABLE_clone(interp, static_code);
+    VTABLE_push_pmc(interp, reader->codes_list, closure);
+    
+    /* XXX Outer handling to come. */
+}
+
 /* Deserializes a single STable, along with its REPR data. */
 static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVAL i, PMC *st_pmc) {
     STable *st = STABLE_STRUCT(st_pmc);
@@ -1178,6 +1195,10 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *st
         VTABLE_set_pmc_keyed_int(interp, stables, i, create_stable(interp, NULL, PMCNULL));
     for (i = 0; i < reader->root.num_objects; i++)
         VTABLE_set_pmc_keyed_int(interp, objects, i, Parrot_pmc_new(interp, smo_id));
+     
+     /* Deserialize closures. */
+     for (i = 0; i < reader->root.num_closures; i++)
+        deserialize_closure(interp, reader, i);
      
      /* Deserialize STables, along with their representation data. */
      for (i = 0; i < reader->root.num_stables; i++)
