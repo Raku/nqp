@@ -996,6 +996,9 @@ static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVA
     /* XXX More to do here. */
     printf("WARNING: STable deserialization not yet fully implemented\n");
     
+    /* Mark it as being in the SC we're currently deserializing. */
+    st->sc = reader->root.sc;
+
     /* If the REPR has a function to deserialize representation data, call it. */
     if (st->REPR->deserialize_repr_data)
         st->REPR->deserialize_repr_data(interp, st, reader);
@@ -1017,6 +1020,10 @@ static void deserialize_object(PARROT_INTERP, SerializationReader *reader, INTVA
      * PMC we want it to. */
     set_wrapping_object(obj);
     STABLE_STRUCT(stable)->REPR->allocate(interp, STABLE_STRUCT(stable));
+    
+    /* Tag object with this SC, so any future referencing against it
+     * works out. */
+    SC_PMC(obj) = reader->root.sc;
     
     /* Set current read buffer to the correct thing. */
     reader->cur_read_buffer = &(reader->root.objects_data);
