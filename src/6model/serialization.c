@@ -35,6 +35,7 @@
 #define REFVAR_VM_ARR_INT           9
 #define REFVAR_VM_HASH_STR_VAR      10
 #define REFVAR_STATIC_CODEREF       11
+#define REFVAR_CLONED_CODEREF       12
 
 /* Cached type IDs. */
 static INTVAL smo_id = 0;
@@ -289,14 +290,17 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
         discrim = REFVAR_VM_HASH_STR_VAR;
     }
     else if (ref->vtable->base_type == enum_class_Sub) {
-        /* Is it a static code reference? */
         PMC *code_sc = VTABLE_getprop(interp, ref, Parrot_str_new_constant(interp, "SC"));
         PMC *static_cr = VTABLE_getprop(interp, ref, Parrot_str_new_constant(interp, "STATIC_CODE_REF"));
         if (!PMC_IS_NULL(code_sc) && !PMC_IS_NULL(static_cr)) {
+            /* Static code reference. */
             discrim = REFVAR_STATIC_CODEREF;
         }
+        else if (!PMC_IS_NULL(code_sc)) {
+            /* Closure, but already seen and serialization already handled. */
+            discrim = REFVAR_CLONED_CODEREF;
+        }
         else {
-            printf("WARNING: No closure serialization\n");
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Serialization Error: Closure serializatin not yet implemented");
         }
@@ -342,6 +346,7 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
             write_hash_str_var(interp, writer, ref);
             break;
         case REFVAR_STATIC_CODEREF:
+        case REFVAR_CLONED_CODEREF:
             write_code_ref(interp, writer, ref);
             break;
         default:
@@ -845,6 +850,7 @@ PMC * read_ref_func(PARROT_INTERP, SerializationReader *reader) {
         case REFVAR_VM_HASH_STR_VAR:
             return read_hash_str_var(interp, reader);
         case REFVAR_STATIC_CODEREF:
+        case REFVAR_CLONED_CODEREF:
             return read_code_ref(interp, reader);
         default:
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
