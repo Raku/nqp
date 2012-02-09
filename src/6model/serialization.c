@@ -455,7 +455,11 @@ static void serialize_stable(PARROT_INTERP, SerializationWriter *writer, PMC *st
     write_obj_ref(interp, writer, st->HOW);
     write_obj_ref(interp, writer, st->WHAT);
 
-    /* XXX Method cache and v-table. */
+    /* Method cache and v-table. */
+    write_ref_func(interp, writer, st->method_cache);
+    write_int_func(interp, writer, st->vtable_length);
+    for (i = 0; i < st->vtable_length; i++)
+        write_ref_func(interp, writer, st->vtable[i]);
     
     /* Type check cache. */
     write_int_func(interp, writer, st->type_check_cache_length);
@@ -983,7 +987,13 @@ static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVA
     st->HOW  = read_obj_ref(interp, reader);
     st->WHAT = read_obj_ref(interp, reader);
     
-    /* XXX Method cache and v-table. */
+    /* Method cache and v-table. */
+    st->method_cache = read_ref_func(interp, reader);
+    st->vtable_length = read_int_func(interp, reader);
+    if (st->vtable_length > 0)
+        st->vtable = mem_sys_allocate(st->vtable_length * sizeof(PMC *));
+    for (i = 0; i < st->vtable_length; i++)
+        st->vtable[i] = read_ref_func(interp, reader);
     
     /* Type check cache. */
     st->type_check_cache_length = read_int_func(interp, reader);
