@@ -9,6 +9,8 @@
 #include "repr_registry.h"
 #include "serialization_context.h"
 #include "pmc_serializationcontext.h"
+#include "pmc_nqplexinfo.h"
+#include "pmc/pmc_sub.h"
 
 /* Version of the serialization format that we are currently at. */
 #define CURRENT_VERSION 1
@@ -42,6 +44,7 @@
 
 /* Cached type IDs. */
 static INTVAL smo_id = 0;
+static INTVAL nqp_lexpad_id = 0;
 
 /* ***************************************************************************
  * Serialization (writing related)
@@ -261,8 +264,22 @@ static void write_code_ref(PARROT_INTERP, SerializationWriter *writer, PMC *code
 /* Given a closure, locate the static code reference it was originally cloned
  * from. */
 static PMC * closure_to_static_code_ref(PARROT_INTERP, PMC *closure) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-        "Serialization Error: getting from closure to static code ref NYI");
+    /* Look up the static lexical info. */
+    PMC *lexinfo = PARROT_SUB(closure)->lex_info;
+    if (lexinfo->vtable->base_type == nqp_lexpad_id) {
+        PMC *static_code = PARROT_NQPLEXINFO(lexinfo)->static_code;
+        if (PMC_IS_NULL(static_code))
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Serialization Error: missing static code ref for closure");
+        if (PMC_IS_NULL(VTABLE_getprop(interp, static_code, Parrot_str_new_constant(interp, "STATIC_CODE_REF"))))
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Serialization Error: could not locate static code ref for closure");
+        return static_code;
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Serialization Error: unknown static lexical info type");
+    }
 }
 
 /* Takes a closure that needs to be serialized. Makes an entry in the closures
@@ -273,7 +290,7 @@ static void serialize_closure(PARROT_INTERP, SerializationWriter *writer, PMC *c
     
     /* Locate the static code object. */
     PMC *static_code_ref = closure_to_static_code_ref(interp, closure);
-    PMC *static_code_sc  = VTABLE_getprop(interp, static_code_sc, Parrot_str_new_constant(interp, "SC"));
+    PMC *static_code_sc  = VTABLE_getprop(interp, static_code_ref, Parrot_str_new_constant(interp, "SC"));
 
     /* Ensure there's space in the closures table; grow if not. */
     Parrot_Int4 offset = writer->root.num_closures * CLOSURES_TABLE_ENTRY_SIZE;
@@ -282,16 +299,14 @@ static void serialize_closure(PARROT_INTERP, SerializationWriter *writer, PMC *c
         writer->root.closures_table = mem_sys_realloc(writer->root.closures_table, writer->closures_table_alloc);
     }
     
-    /* Make closures table entry. */
+    /* Add an entry to the closures table. */
+    static_sc_id = get_sc_id(interp, writer, static_code_sc);
+    static_idx   = (Parrot_Int4)SC_find_code_idx(interp, static_code_sc, static_code_ref);
     write_int32(writer->root.closures_table, offset, static_sc_id);
     write_int32(writer->root.closures_table, offset + 4, static_idx);
     
     /* Increment count of closures in the table. */
     writer->root.num_closures++;
-    
-    /* Add an entry to the closures table. */
-    static_sc_id = get_sc_id(interp, writer, static_code_sc);
-    static_idx   = (Parrot_Int4)SC_find_code_idx(interp, static_code_sc, static_code_ref);
 
     /* Add the closure to this SC, and mark it as as being in it. */
     VTABLE_push_pmc(interp, writer->codes_list, closure);
@@ -653,6 +668,7 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     
     /* Other init. */
     smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
+    nqp_lexpad_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "NQPLexInfo", 0));
 
     /* Start serializing. */
     serialize(interp, writer);
