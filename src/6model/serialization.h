@@ -99,6 +99,7 @@ typedef struct SerializationWriter {
     Parrot_Int4 stables_data_alloc;
     Parrot_Int4 objects_table_alloc;
     Parrot_Int4 objects_data_alloc;
+    Parrot_Int4 closures_table_alloc;
     
     /* Current offsets for the data chunks (also correspond to the amount of
      * data written in to them). */

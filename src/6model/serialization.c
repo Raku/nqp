@@ -21,8 +21,10 @@
 #define CLOSURES_TABLE_ENTRY_SIZE   8
 
 /* Some guesses. */
-#define DEFAULT_STABLE_DATA_SIZE    4096
-#define OBJECT_SIZE_GUESS           8
+#define DEFAULT_STABLE_DATA_SIZE     4096
+#define STABLES_TABLE_ENTRIES_GUESS  16
+#define OBJECT_SIZE_GUESS            8
+#define CLOSURES_TABLE_ENTRIES_GUESS 16
 
 /* Possible reference types we can serialize. */
 #define REFVAR_NULL                 1
@@ -256,6 +258,46 @@ static void write_code_ref(PARROT_INTERP, SerializationWriter *writer, PMC *code
     *(writer->cur_write_offset) += 4;
 }
 
+/* Given a closure, locate the static code reference it was originally cloned
+ * from. */
+static PMC * closure_to_static_code_ref(PARROT_INTERP, PMC *closure) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+        "Serialization Error: getting from closure to static code ref NYI");
+}
+
+/* Takes a closure that needs to be serialized. Makes an entry in the closures
+ * table for it. Also adds it to this SC's code refs set and tags it with the
+ * current SC. XXX Also needs to handle outers etc. */
+static void serialize_closure(PARROT_INTERP, SerializationWriter *writer, PMC *closure) {
+    Parrot_Int4 static_sc_id, static_idx;
+    
+    /* Locate the static code object. */
+    PMC *static_code_ref = closure_to_static_code_ref(interp, closure);
+    PMC *static_code_sc  = VTABLE_getprop(interp, static_code_sc, Parrot_str_new_constant(interp, "SC"));
+
+    /* Ensure there's space in the closures table; grow if not. */
+    Parrot_Int4 offset = writer->root.num_closures * CLOSURES_TABLE_ENTRY_SIZE;
+    if (offset + CLOSURES_TABLE_ENTRY_SIZE > writer->closures_table_alloc) {
+        writer->closures_table_alloc *= 2;
+        writer->root.closures_table = mem_sys_realloc(writer->root.closures_table, writer->closures_table_alloc);
+    }
+    
+    /* Make closures table entry. */
+    write_int32(writer->root.closures_table, offset, static_sc_id);
+    write_int32(writer->root.closures_table, offset + 4, static_idx);
+    
+    /* Increment count of closures in the table. */
+    writer->root.num_closures++;
+    
+    /* Add an entry to the closures table. */
+    static_sc_id = get_sc_id(interp, writer, static_code_sc);
+    static_idx   = (Parrot_Int4)SC_find_code_idx(interp, static_code_sc, static_code_ref);
+
+    /* Add the closure to this SC, and mark it as as being in it. */
+    VTABLE_push_pmc(interp, writer->codes_list, closure);
+    VTABLE_setprop(interp, closure, Parrot_str_new_constant(interp, "SC"), writer->root.sc);
+}
+
 /* Writing function for references to things. */
 void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
     /* Work out what kind of thing we have and determine the discriminator. */
@@ -302,8 +344,11 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
             discrim = REFVAR_CLONED_CODEREF;
         }
         else {
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Serialization Error: Closure serializatin not yet implemented");
+            /* Closure but didn't see it yet. Take care of it serialization, which
+             * gets it marked with this SC. Then it's just a normal code ref that
+             * needs serializing. */
+            serialize_closure(interp, writer, ref);
+            discrim = REFVAR_CLONED_CODEREF;
         }
     }
     else {
@@ -455,7 +500,7 @@ static void serialize_stable(PARROT_INTERP, SerializationWriter *writer, PMC *st
     
     /* Make STables table entry. */
     write_int32(writer->root.stables_table, offset, add_string_to_heap(interp, writer, st->REPR->name));
-    write_int32(writer->root.objects_table, offset + 4, writer->objects_data_offset);
+    write_int32(writer->root.stables_table, offset + 4, writer->stables_data_offset);
     
     /* Increment count of stables in the table. */
     writer->root.num_stables++;
@@ -588,7 +633,7 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     /* Allocate initial memory space for storing serialized tables and data. */
     writer->dependencies_table_alloc = DEP_TABLE_ENTRY_SIZE * 4;
     writer->root.dependencies_table  = mem_sys_allocate(writer->dependencies_table_alloc);
-    writer->stables_table_alloc      = STABLES_TABLE_ENTRY_SIZE * (sc_elems || 1);
+    writer->stables_table_alloc      = STABLES_TABLE_ENTRY_SIZE * STABLES_TABLE_ENTRIES_GUESS;
     writer->root.stables_table       = mem_sys_allocate(writer->stables_table_alloc);
     writer->objects_table_alloc      = OBJECTS_TABLE_ENTRY_SIZE * (sc_elems || 1);
     writer->root.objects_table       = mem_sys_allocate(writer->objects_table_alloc);
@@ -596,6 +641,8 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     writer->root.stables_data        = mem_sys_allocate(writer->stables_data_alloc);
     writer->objects_data_alloc       = OBJECT_SIZE_GUESS * (sc_elems || 1);
     writer->root.objects_data        = mem_sys_allocate(writer->objects_data_alloc);
+    writer->closures_table_alloc     = CLOSURES_TABLE_ENTRY_SIZE * CLOSURES_TABLE_ENTRIES_GUESS;
+    writer->root.closures_table      = mem_sys_allocate(writer->closures_table_alloc);
     
     /* Populate write functions table. */
     writer->write_int        = write_int_func;
