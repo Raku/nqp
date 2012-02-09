@@ -661,7 +661,7 @@ An operator precedence parser.
             .local string inprec, inassoc, opprec
             inprec = inO['prec']
             unless inprec goto err_inprec
-            if inprec <= preclim goto term_done
+            if inprec < preclim goto term_done
             inassoc = inO['assoc']
 
             $P0 = inO['sub']
