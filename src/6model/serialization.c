@@ -1219,9 +1219,42 @@ static void deserialize_closure(PARROT_INTERP, SerializationReader *reader, INTV
 }
 
 /* Deserializes a context. */
-static void deserialize_context(PARROT_INTERP, SerializationReader *reader, INTVAL i) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-        "Context deserialization NYI");
+static void deserialize_context(PARROT_INTERP, SerializationReader *reader, INTVAL row) {
+    PMC *ctx, *lexpad;
+    opcode_t *where;
+    INTVAL syms, i;
+    
+    /* Calculate location of closure's table row. */
+    char *table_row = reader->root.contexts_table + row * CONTEXTS_TABLE_ENTRY_SIZE;
+    
+    /* Resolve the reference to the static code object this context is for. */
+    Parrot_Int4  static_sc_id = read_int32(table_row, 0);
+    Parrot_Int4  static_idx   = read_int32(table_row, 4);
+    PMC         *static_code  = SC_get_code(interp, locate_sc(interp, reader, static_sc_id), static_idx);
+    
+    /* Create a context; also grab the lexpad. */
+    Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), NULL);
+    interp->current_cont = NEED_CONTINUATION;
+    where  = VTABLE_invoke(interp, static_code, NULL);
+    ctx    = CURRENT_CONTEXT(interp);
+    lexpad = Parrot_pcc_get_lex_pad(interp, ctx);
+    VTABLE_invoke(interp, Parrot_pcc_get_continuation(interp, ctx), where);
+
+    /* Set context data read position, and set current read buffer to the correct thing. */
+    reader->contexts_data_offset = read_int32(table_row, 8);
+    reader->cur_read_buffer      = &(reader->root.contexts_data);
+    reader->cur_read_offset      = &(reader->contexts_data_offset);
+    reader->cur_read_end         = &(reader->contexts_data_end);
+    
+    /* Deserialize lexicals. */
+    syms = reader->read_int(interp, reader);
+    for (i = 0; i < syms; i++) {
+        STRING *sym = reader->read_str(interp, reader);
+        VTABLE_set_pmc_keyed_str(interp, lexpad, sym, reader->read_ref(interp, reader));
+    }
+    
+    /* Put context in place. */
+    VTABLE_set_pmc_keyed_int(interp, reader->contexts_list, i, ctx);
 }
 
 /* Deserializes a closure, though without attaching outer (that comes in a
@@ -1329,6 +1362,7 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *st
     PMC    *stables   = PMCNULL;
     PMC    *objects   = PMCNULL;
     INTVAL  smo_id    = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
+    INTVAL  scodes    = VTABLE_elements(interp, static_codes);
     Parrot_Int4 i;
     
     /* Create reader data structure and populate the basic bits. */
@@ -1383,7 +1417,7 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *st
         deserialize_context(interp, reader, i);
     for (i = 0; i < reader->root.num_closures; i++)
         attach_closure_outer(interp, reader, i,
-            VTABLE_get_pmc_keyed_int(interp, reader->codes_list, i));
+            VTABLE_get_pmc_keyed_int(interp, reader->codes_list, scodes + i));
 
      /* Deserialize STables, along with their representation data. */
      for (i = 0; i < reader->root.num_stables; i++)
