@@ -34,6 +34,12 @@ typedef struct {
     Parrot_Int4  num_closures;
     char        *closures_table;
     
+    /* The number of contexts (e.g. lexpads), as well as pointers
+     * to the contexts table and data chunk. */
+    Parrot_Int4   num_contexts;
+    char         *contexts_table;
+    char         *contexts_data;
+    
     /* Array of STRINGs. */
     PMC          *string_heap;
 } SerializationRoot;
@@ -45,19 +51,23 @@ typedef struct SerializationReader {
     /* Serialization root data. */
     SerializationRoot root;
     
-    /* The stables, objects and code refs lists we're deserializing things into. */
+    /* The stables, objects code refs and contexts lists we're deserializing
+     * things into. */
     PMC *stables_list;
     PMC *objects_list;
     PMC *codes_list;
+    PMC *contexts_list;
     
     /* Current offsets for the data chunks (also correspond to the amount of
      * data written in to them). */
     Parrot_Int4 stables_data_offset;
     Parrot_Int4 objects_data_offset;
+    Parrot_Int4 contexts_data_offset;
     
-    /* Limits up to where we can read stables and objects data. */
+    /* Limits up to where we can read stables, objects and contexts data. */
     char *stables_data_end;
     char *objects_data_end;
+    char *contexts_data_end;
     
     /* Where to find details related to the current buffer we're reading from:
      * the buffer pointer itself, the current offset and the amount that is
@@ -80,10 +90,12 @@ typedef struct SerializationWriter {
     /* Serialization root data. */
     SerializationRoot root;
     
-    /* The stables, objects and code refs lists we're working through/adding to. */
+    /* The stables, objects, code refs and contexts lists we're working
+     * through/adding to. */
     PMC *stables_list;
     PMC *objects_list;
     PMC *codes_list;
+    PMC *contexts_list;
     
     /* Current position in the stables list and objects list. */
     INTVAL stables_list_pos;
@@ -100,11 +112,14 @@ typedef struct SerializationWriter {
     Parrot_Int4 objects_table_alloc;
     Parrot_Int4 objects_data_alloc;
     Parrot_Int4 closures_table_alloc;
+    Parrot_Int4 contexts_table_alloc;
+    Parrot_Int4 contexts_data_alloc;
     
     /* Current offsets for the data chunks (also correspond to the amount of
      * data written in to them). */
     Parrot_Int4 stables_data_offset;
     Parrot_Int4 objects_data_offset;
+    Parrot_Int4 contexts_data_offset;
     
     /* Where to find details related to the current buffer we're writing in
      * to: the buffer pointer itself, the current offset and the amount that

@@ -16,17 +16,20 @@
 #define CURRENT_VERSION 1
 
 /* Various sizes (in bytes). */
-#define HEADER_SIZE                 4 * 11
+#define HEADER_SIZE                 4 * 14
 #define DEP_TABLE_ENTRY_SIZE        8
 #define STABLES_TABLE_ENTRY_SIZE    8
 #define OBJECTS_TABLE_ENTRY_SIZE    16
 #define CLOSURES_TABLE_ENTRY_SIZE   12
+#define CONTEXTS_TABLE_ENTRY_SIZE   12
 
 /* Some guesses. */
 #define DEFAULT_STABLE_DATA_SIZE     4096
 #define STABLES_TABLE_ENTRIES_GUESS  16
 #define OBJECT_SIZE_GUESS            8
 #define CLOSURES_TABLE_ENTRIES_GUESS 16
+#define CONTEXTS_TABLE_ENTRIES_GUESS 4
+#define DEFAULT_CONTEXTS_DATA_SIZE   1024
 
 /* Possible reference types we can serialize. */
 #define REFVAR_NULL                 1
@@ -452,6 +455,8 @@ static STRING * concatenate_outputs(PARROT_INTERP, SerializationWriter *writer) 
     output_size += writer->root.num_objects * OBJECTS_TABLE_ENTRY_SIZE;
     output_size += writer->objects_data_offset;
     output_size += writer->root.num_closures * CLOSURES_TABLE_ENTRY_SIZE;
+    output_size += writer->root.num_contexts * CONTEXTS_TABLE_ENTRY_SIZE;
+    output_size += writer->contexts_data_offset;
     
     /* Allocate a buffer that size. */
     output = mem_sys_allocate(output_size);
@@ -499,6 +504,19 @@ static STRING * concatenate_outputs(PARROT_INTERP, SerializationWriter *writer) 
     memcpy(output + offset, writer->root.closures_table, 
         writer->root.num_closures * CLOSURES_TABLE_ENTRY_SIZE);
     offset += writer->root.num_closures * CLOSURES_TABLE_ENTRY_SIZE;
+    
+    /* Put contexts table in place, and set location/rows in header. */
+    write_int32(output, 44, offset);
+    write_int32(output, 48, writer->root.num_contexts);
+    memcpy(output + offset, writer->root.contexts_table, 
+        writer->root.num_contexts * CONTEXTS_TABLE_ENTRY_SIZE);
+    offset += writer->root.num_contexts * CONTEXTS_TABLE_ENTRY_SIZE;
+    
+    /* Put contexts data in place. */
+    write_int32(output, 52, offset);
+    memcpy(output + offset, writer->root.contexts_data,
+        writer->contexts_data_offset);
+    offset += writer->contexts_data_offset;
     
     /* Sanity check. */
     if (offset != output_size)
@@ -653,6 +671,7 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     writer->stables_list        = stables;
     writer->objects_list        = objects;
     writer->codes_list          = codes;
+    writer->contexts_list       = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
     writer->root.string_heap    = empty_string_heap;
     writer->root.dependent_scs  = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
     
@@ -669,6 +688,10 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     writer->root.objects_data        = mem_sys_allocate(writer->objects_data_alloc);
     writer->closures_table_alloc     = CLOSURES_TABLE_ENTRY_SIZE * CLOSURES_TABLE_ENTRIES_GUESS;
     writer->root.closures_table      = mem_sys_allocate(writer->closures_table_alloc);
+    writer->contexts_table_alloc     = CONTEXTS_TABLE_ENTRY_SIZE * CONTEXTS_TABLE_ENTRIES_GUESS;
+    writer->root.contexts_table      = mem_sys_allocate(writer->contexts_table_alloc);
+    writer->contexts_data_alloc      = DEFAULT_CONTEXTS_DATA_SIZE;
+    writer->root.contexts_data       = mem_sys_allocate(writer->contexts_data_alloc);
     
     /* Populate write functions table. */
     writer->write_int        = write_int_func;
@@ -1032,7 +1055,7 @@ static void check_and_disect_input(PARROT_INTERP, SerializationReader *reader, S
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Corruption detected (objects data starts after end of data)");
     
-    /* Get size and location of STables table. */
+    /* Get size and location of closures table. */
     reader->root.closures_table = data + read_int32(data, 36);
     reader->root.num_closures   = read_int32(data, 40);
     if (reader->root.closures_table < prov_pos)
@@ -1043,9 +1066,31 @@ static void check_and_disect_input(PARROT_INTERP, SerializationReader *reader, S
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Corruption detected (Closures table overruns end of data)");
     
+    /* Get size and location of contexts table. */
+    reader->root.contexts_table = data + read_int32(data, 44);
+    reader->root.num_contexts   = read_int32(data, 48);
+    if (reader->root.contexts_table < prov_pos)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Corruption detected (contexts table starts before closures table ends)");
+    prov_pos = reader->root.contexts_table + reader->root.num_contexts * CONTEXTS_TABLE_ENTRY_SIZE;
+    if (prov_pos > data_end)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Corruption detected (contexts table overruns end of data)");
+    
+    /* Get location of contexts data. */
+    reader->root.contexts_data = data + read_int32(data, 52);
+    if (reader->root.contexts_data < prov_pos)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Corruption detected (contexts data starts before contexts table ends)");
+    prov_pos = reader->root.contexts_data;
+    if (prov_pos > data_end)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Corruption detected (contexts data starts after end of data)");
+    
     /* Set reading limits for data chunks. */
     reader->stables_data_end = reader->root.objects_table;
     reader->objects_data_end = reader->root.closures_table;
+    reader->contexts_data_end = data_end;
 }
 
 /* Goes through the dependencies table and resolves the dependencies that it
@@ -1185,6 +1230,7 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *st
     GETATTR_SerializationContext_root_objects(interp, sc, objects);
     reader->stables_list        = stables;
     reader->objects_list        = objects;
+    reader->contexts_list       = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
     reader->root.sc             = sc;
     reader->root.string_heap    = string_heap;
     reader->root.dependent_scs  = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
