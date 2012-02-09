@@ -97,9 +97,10 @@ typedef struct SerializationWriter {
     PMC *codes_list;
     PMC *contexts_list;
     
-    /* Current position in the stables list and objects list. */
+    /* Current position in the stables, objects and contexts lists. */
     INTVAL stables_list_pos;
     INTVAL objects_list_pos;
+    INTVAL contexts_list_pos;
 
     /* Hash of strings we've already seen while serializing to the index they
      * are placed at in the string heap. */

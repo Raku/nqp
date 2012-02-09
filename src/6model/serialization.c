@@ -276,7 +276,8 @@ static PMC * closure_to_static_code_ref(PARROT_INTERP, PMC *closure) {
                 "Serialization Error: missing static code ref for closure");
         if (PMC_IS_NULL(VTABLE_getprop(interp, static_code, Parrot_str_new_constant(interp, "STATIC_CODE_REF"))))
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Serialization Error: could not locate static code ref for closure");
+                "Serialization Error: could not locate static code ref for closure '%Ss'",
+                VTABLE_get_string(interp, static_code));
         return static_code;
     }
     else {
@@ -288,7 +289,25 @@ static PMC * closure_to_static_code_ref(PARROT_INTERP, PMC *closure) {
 /* Takes a closure, that is to be serialized. Checks if it has an outer that is
  * of interest, and if so sets it up to be serialized. */
 Parrot_Int4 get_serialized_outer_context_idx(PARROT_INTERP, SerializationWriter *writer, PMC *closure) {
-    return 0;
+    PMC *outer_ctx = PARROT_SUB(closure)->outer_ctx;
+    PMC *ctx_sc    = VTABLE_getprop(interp, outer_ctx, Parrot_str_new_constant(interp, "SC"));
+    if (PMC_IS_NULL(ctx_sc)) {
+        INTVAL idx = VTABLE_elements(interp, writer->contexts_list);
+        VTABLE_set_pmc_keyed_int(interp, writer->contexts_list, idx, outer_ctx);
+        return (Parrot_Int4)idx;
+    }
+    else {
+        INTVAL i, c;
+        if (ctx_sc != writer->root.sc)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Serialization Error: reference to context outside of SC");
+        c = VTABLE_elements(interp, writer->contexts_list);
+        for (i = 0; i < c; i++)
+            if (VTABLE_get_pmc_keyed_int(interp, writer->contexts_list, i) == outer_ctx)
+                return (Parrot_Int4)i;
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Serialization Error: could not locate outer context in current SC");
+    }
 }
 
 /* Takes a closure that needs to be serialized. Makes an entry in the closures
@@ -618,6 +637,54 @@ static void serialize_object(PARROT_INTERP, SerializationWriter *writer, PMC *ob
     }
 }
 
+/* This handles the serialization of a context, which means serializing
+ * the stuff in its lexpad. */
+static void serialize_context(PARROT_INTERP, SerializationWriter *writer, PMC *ctx) {
+    Parrot_Int4 i, offset, static_sc_id, static_idx;
+    
+    /* Grab lexpad, which we'll serialize later on. */
+    PMC *lexpad    = PARROT_CALLCONTEXT(ctx)->lex_pad;
+    PMC *lexiter   = VTABLE_get_iter(interp, lexpad);
+    
+    /* Locate the static code ref this context points to. */
+    PMC *static_code_ref = closure_to_static_code_ref(interp, PARROT_CALLCONTEXT(ctx)->current_sub);
+    PMC *static_code_sc  = VTABLE_getprop(interp, static_code_ref, Parrot_str_new_constant(interp, "SC"));
+    if (PMC_IS_NULL(static_code_sc))
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Serialization Error: closure outer is a code object not in an SC");
+    static_sc_id = get_sc_id(interp, writer, static_code_sc);
+    static_idx   = (Parrot_Int4)SC_find_code_idx(interp, static_code_sc, static_code_ref);
+    
+    /* Ensure there's space in the STables table; grow if not. */
+    offset = writer->root.num_contexts * CONTEXTS_TABLE_ENTRY_SIZE;
+    if (offset + CONTEXTS_TABLE_ENTRY_SIZE > writer->contexts_table_alloc) {
+        writer->contexts_table_alloc *= 2;
+        writer->root.contexts_table = mem_sys_realloc(writer->root.contexts_table, writer->contexts_table_alloc);
+    }
+    
+    /* Make contexts table entry. */
+    write_int32(writer->root.contexts_table, offset, static_sc_id);
+    write_int32(writer->root.contexts_table, offset + 4, static_idx);
+    write_int32(writer->root.contexts_table, offset + 8, writer->contexts_data_offset);
+    
+    /* Increment count of stables in the table. */
+    writer->root.num_contexts++;
+    
+    /* Set up writer. */
+    writer->cur_write_buffer = &(writer->root.contexts_data);
+    writer->cur_write_offset = &(writer->contexts_data_offset);
+    writer->cur_write_limit  = &(writer->contexts_data_alloc);
+    
+    /* Serialize lexicals. */
+    writer->write_int(interp, writer, VTABLE_elements(interp, lexpad));
+    while (VTABLE_get_bool(interp, lexiter)) {
+        STRING *sym = VTABLE_shift_string(interp, lexiter);
+        writer->write_str(interp, writer, sym);
+        writer->write_ref(interp, writer,
+            VTABLE_get_pmc_keyed_str(interp, lexpad, sym));
+    }
+}
+
 /* This is the overall serialization loop. It keeps an index into the list of
  * STables and objects in the SC. As we discover new ones, they get added. We
  * finished when we've serialized everything. */
@@ -625,8 +692,9 @@ static void serialize(PARROT_INTERP, SerializationWriter *writer) {
     INTVAL work_todo = 1;
     while (work_todo) {
         /* Current work list sizes. */
-        INTVAL stables_todo = VTABLE_elements(interp, writer->stables_list);
-        INTVAL objects_todo = VTABLE_elements(interp, writer->objects_list);
+        INTVAL stables_todo  = VTABLE_elements(interp, writer->stables_list);
+        INTVAL objects_todo  = VTABLE_elements(interp, writer->objects_list);
+        INTVAL contexts_todo = VTABLE_elements(interp, writer->contexts_list);
         
         /* Reset todo flag - if we do some work we'll go round again as it
          * may have generated more. */
@@ -645,6 +713,14 @@ static void serialize(PARROT_INTERP, SerializationWriter *writer) {
             serialize_object(interp, writer, VTABLE_get_pmc_keyed_int(interp,
                 writer->objects_list, writer->objects_list_pos));
             writer->objects_list_pos++;
+            work_todo = 1;
+        }
+        
+        /* Serialize any contexts on the todo list. */
+        while (writer->contexts_list_pos < contexts_todo) {
+            serialize_context(interp, writer, VTABLE_get_pmc_keyed_int(interp,
+                writer->contexts_list, writer->contexts_list_pos));
+            writer->contexts_list_pos++;
             work_todo = 1;
         }
     }
