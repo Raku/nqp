@@ -10,7 +10,7 @@ plan(4);
     my $sc := pir::nqp_create_sc__Ps('TEST_SC_1_IN');
     my $sh := pir::new__Ps('ResizableStringArray');
     
-    my $m1 := method () { "success!" };
+    my $m1 := (method () { "success!" }).get_lexinfo().get_static_code();
     pir::nqp_add_code_ref_to_sc__vPiP($sc, 0, $m1);
     pir::setprop__vPsP($m1, 'STATIC_CODE_REF', $m1);
     
