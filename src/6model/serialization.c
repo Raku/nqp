@@ -266,18 +266,27 @@ static void write_code_ref(PARROT_INTERP, SerializationWriter *writer, PMC *code
 
 /* Given a closure, locate the static code reference it was originally cloned
  * from. */
-static PMC * closure_to_static_code_ref(PARROT_INTERP, PMC *closure) {
+static PMC * closure_to_static_code_ref(PARROT_INTERP, PMC *closure, INTVAL fatal) {
     /* Look up the static lexical info. */
     PMC *lexinfo = PARROT_SUB(closure)->lex_info;
     if (lexinfo->vtable->base_type == nqp_lexpad_id) {
         PMC *static_code = PARROT_NQPLEXINFO(lexinfo)->static_code;
         if (PMC_IS_NULL(static_code))
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Serialization Error: missing static code ref for closure");
-        if (PMC_IS_NULL(VTABLE_getprop(interp, static_code, Parrot_str_new_constant(interp, "STATIC_CODE_REF"))))
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Serialization Error: could not locate static code ref for closure '%Ss'",
-                VTABLE_get_string(interp, static_code));
+        {
+            if (fatal)
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "Serialization Error: missing static code ref for closure");
+            else
+                return PMCNULL;
+        }
+        if (PMC_IS_NULL(VTABLE_getprop(interp, static_code, Parrot_str_new_constant(interp, "STATIC_CODE_REF")))) {
+            if (fatal)
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "Serialization Error: could not locate static code ref for closure '%Ss'",
+                    VTABLE_get_string(interp, static_code));
+            else
+                return PMCNULL;
+        }
         return static_code;
     }
     else {
@@ -292,9 +301,15 @@ Parrot_Int4 get_serialized_outer_context_idx(PARROT_INTERP, SerializationWriter 
     PMC *outer_ctx = PARROT_SUB(closure)->outer_ctx;
     PMC *ctx_sc    = VTABLE_getprop(interp, outer_ctx, Parrot_str_new_constant(interp, "SC"));
     if (PMC_IS_NULL(ctx_sc)) {
-        INTVAL idx = VTABLE_elements(interp, writer->contexts_list);
-        VTABLE_set_pmc_keyed_int(interp, writer->contexts_list, idx, outer_ctx);
-        return (Parrot_Int4)idx;
+        /* Make sure we should chase a level down. */
+        if (PMC_IS_NULL(closure_to_static_code_ref(interp, PARROT_CALLCONTEXT(outer_ctx)->current_sub, 0))) {
+            return 0;
+        }
+        else {
+            INTVAL idx = VTABLE_elements(interp, writer->contexts_list);
+            VTABLE_set_pmc_keyed_int(interp, writer->contexts_list, idx, outer_ctx);
+            return (Parrot_Int4)idx + 1;
+        }
     }
     else {
         INTVAL i, c;
@@ -304,7 +319,7 @@ Parrot_Int4 get_serialized_outer_context_idx(PARROT_INTERP, SerializationWriter 
         c = VTABLE_elements(interp, writer->contexts_list);
         for (i = 0; i < c; i++)
             if (VTABLE_get_pmc_keyed_int(interp, writer->contexts_list, i) == outer_ctx)
-                return (Parrot_Int4)i;
+                return (Parrot_Int4)i + 1;
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Serialization Error: could not locate outer context in current SC");
     }
@@ -317,7 +332,7 @@ static void serialize_closure(PARROT_INTERP, SerializationWriter *writer, PMC *c
     Parrot_Int4 static_sc_id, static_idx, context_idx;
     
     /* Locate the static code object. */
-    PMC *static_code_ref = closure_to_static_code_ref(interp, closure);
+    PMC *static_code_ref = closure_to_static_code_ref(interp, closure, 1);
     PMC *static_code_sc  = VTABLE_getprop(interp, static_code_ref, Parrot_str_new_constant(interp, "SC"));
 
     /* Ensure there's space in the closures table; grow if not. */
@@ -647,7 +662,7 @@ static void serialize_context(PARROT_INTERP, SerializationWriter *writer, PMC *c
     PMC *lexiter   = VTABLE_get_iter(interp, lexpad);
     
     /* Locate the static code ref this context points to. */
-    PMC *static_code_ref = closure_to_static_code_ref(interp, PARROT_CALLCONTEXT(ctx)->current_sub);
+    PMC *static_code_ref = closure_to_static_code_ref(interp, PARROT_CALLCONTEXT(ctx)->current_sub, 1);
     PMC *static_code_sc  = VTABLE_getprop(interp, static_code_ref, Parrot_str_new_constant(interp, "SC"));
     if (PMC_IS_NULL(static_code_sc))
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
