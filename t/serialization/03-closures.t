@@ -2,7 +2,7 @@
 
 use nqpmo;
 
-plan(8);
+plan(9);
 
 # Serializing a type where some methods are clones; no dependency on outers
 # just yet.
