@@ -20,7 +20,7 @@
 #define DEP_TABLE_ENTRY_SIZE        8
 #define STABLES_TABLE_ENTRY_SIZE    8
 #define OBJECTS_TABLE_ENTRY_SIZE    16
-#define CLOSURES_TABLE_ENTRY_SIZE   8
+#define CLOSURES_TABLE_ENTRY_SIZE   12
 
 /* Some guesses. */
 #define DEFAULT_STABLE_DATA_SIZE     4096
@@ -282,11 +282,17 @@ static PMC * closure_to_static_code_ref(PARROT_INTERP, PMC *closure) {
     }
 }
 
+/* Takes a closure, that is to be serialized. Checks if it has an outer that is
+ * of interest, and if so sets it up to be serialized. */
+Parrot_Int4 get_serialized_outer_context_idx(PARROT_INTERP, SerializationWriter *writer, PMC *closure) {
+    return 0;
+}
+
 /* Takes a closure that needs to be serialized. Makes an entry in the closures
  * table for it. Also adds it to this SC's code refs set and tags it with the
- * current SC. XXX Also needs to handle outers etc. */
+ * current SC. */
 static void serialize_closure(PARROT_INTERP, SerializationWriter *writer, PMC *closure) {
-    Parrot_Int4 static_sc_id, static_idx;
+    Parrot_Int4 static_sc_id, static_idx, context_idx;
     
     /* Locate the static code object. */
     PMC *static_code_ref = closure_to_static_code_ref(interp, closure);
@@ -299,11 +305,16 @@ static void serialize_closure(PARROT_INTERP, SerializationWriter *writer, PMC *c
         writer->root.closures_table = mem_sys_realloc(writer->root.closures_table, writer->closures_table_alloc);
     }
     
+    /* Get the index of the context (which will add it to the todo list if
+     * needed). */
+    context_idx = get_serialized_outer_context_idx(interp, writer, closure);
+    
     /* Add an entry to the closures table. */
     static_sc_id = get_sc_id(interp, writer, static_code_sc);
     static_idx   = (Parrot_Int4)SC_find_code_idx(interp, static_code_sc, static_code_ref);
     write_int32(writer->root.closures_table, offset, static_sc_id);
     write_int32(writer->root.closures_table, offset + 4, static_idx);
+    write_int32(writer->root.closures_table, offset + 8, context_idx);
     
     /* Increment count of closures in the table. */
     writer->root.num_closures++;
