@@ -1,7 +1,7 @@
 #! nqp
 use nqpmo;
 
-plan(31);
+plan(32);
 
 my $knowhow := pir::get_knowhow__P();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
@@ -35,6 +35,8 @@ ok(iseq(nqp::bitxor_I(box(0xdead), box(0xbeef), $one), 0x6042), 'bit xor');
 
 ok(iseq(nqp::bitneg_I(box(-123), $one), 122), 'bit negation');
 
+ok(iseq(nqp::bitand_I(pir::nqp_bigint_from_str__PSP('-1073741825', $one), $one, $one), 1),
+    'Bit ops (RT 109740)');
 
 # Now we'll create a type that boxes a P6bigint.
 my $bi_boxer := $knowhow.new_type(:name('TestPerl6Int'), :repr('P6opaque'));

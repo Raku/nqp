@@ -296,7 +296,7 @@ class HLL::Compiler {
         my @a    := $res.arguments;
 
         %adverbs.update(%opts);
-        self.usage($program-name) if %adverbs<help>;
+        self.usage($program-name) if %adverbs<help>  || %adverbs<h>;
 
         pir::load_bytecode('dumper.pbc');
         pir::load_bytecode('PGE/Dumper.pbc');
@@ -306,14 +306,14 @@ class HLL::Compiler {
 
 
     method command_eval(*@a, *%adverbs) {
-        self.version              if %adverbs<version>;
+        self.version              if %adverbs<version> || %adverbs<v>;
         self.show-config          if %adverbs<show-config>;
         self.nqpevent(%adverbs<nqpevent>) if %adverbs<nqpevent>;
 
         my $result;
         my $error;
         my $has_error := 0;
-        my $target := %adverbs<target>;
+        my $target := pir::downcase(%adverbs<target>);
         try {
             if pir::defined(%adverbs<e>) {
                 $result := self.eval(%adverbs<e>, '-e', |@a, |%adverbs);
@@ -443,7 +443,7 @@ class HLL::Compiler {
         }
         my $grammar := self.parsegrammar;
         my $actions;
-        $actions    := self.parseactions unless %adverbs<target> eq 'parse';
+        $actions    := self.parseactions unless pir::downcase(%adverbs<target>) eq 'parse';
         my $match   := $grammar.parse($s, p => 0, actions => $actions, rxtrace => %adverbs<rxtrace>);
         self.panic('Unable to parse source') unless $match;
         return $match;
