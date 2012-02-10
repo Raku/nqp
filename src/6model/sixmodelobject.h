@@ -70,7 +70,7 @@ typedef struct {
 /* S-Tables (short for Shared Table) contains the commonalities shared between
  * a (HOW, REPR) pairing (for example, (HOW for the class Dog, P6Opaque). */
 typedef struct SixModel_REPROps REPROps;
-typedef struct SixModel_STable {
+struct SixModel_STable {
     /* The representation operation table. */
     REPROps *REPR;
     
@@ -140,7 +140,7 @@ typedef struct SixModel_STable {
     
     /* The PMC that wraps this s-table. */
     PMC *stable_pmc;
-} STable;
+};
 
 /* A representation is what controls the layout of an object and access and
  * manipulation of the memory it manages. This includes attribute storage
