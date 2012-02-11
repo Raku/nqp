@@ -316,6 +316,7 @@ class HLL::Compiler {
         my $target := pir::downcase(%adverbs<target>);
         try {
             if pir::defined(%adverbs<e>) {
+                my $?FILES := '-e';
                 $result := self.eval(%adverbs<e>, '-e', |@a, |%adverbs);
                 unless $target eq '' || $target eq 'pir' {
 					self.dumper($result, $target, |%adverbs);
