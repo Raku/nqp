@@ -245,7 +245,7 @@ class NQP::World is HLL::World {
                 # The dispatcher will get cloned if more candidates are added in
                 # a subclass; this makes sure that we fix up the clone also.
                 pir::setprop__vPsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone) {
-                    self.add_code($clone);
+                    self.add_code_LEGACY($clone);
                     $fixups.push(PAST::Op.new(
                         :pirop('assign vPP'),
                         self.get_slot_past_for_object($clone),
@@ -257,7 +257,7 @@ class NQP::World is HLL::World {
                 $dummy := pir::clone__PP($stub_code);
             }
             pir::assign__vPS($dummy, $name);
-            self.add_code($dummy);
+            self.add_code_LEGACY($dummy);
             $method_past<compile_time_dummy> := $dummy;
         }
         
@@ -333,7 +333,7 @@ class NQP::World is HLL::World {
                 pir::setprop__vPsP($_, 'REIFY_CALLBACK', sub ($meth) {
                     # Make a clone and add it to the SC.
                     my $clone := pir::clone($meth);
-                    self.add_code($clone);
+                    self.add_code_LEGACY($clone);
                     
                     # Add fixup for the cloned code.
                     $fixups.push(PAST::Op.new(

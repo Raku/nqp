@@ -129,7 +129,7 @@ class HLL::World {
     }
     
     # Adds a code ref to the root set, along with a mapping.
-    method add_code($obj) {
+    method add_code_LEGACY($obj) {
         my $idx := $!sc.elems();
         $!sc[$idx] := $obj;
         %!addr_to_slot{nqp::where($obj)} := $idx;
