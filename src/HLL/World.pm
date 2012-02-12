@@ -233,17 +233,20 @@ class HLL::World {
         # Serialize.
         my $sh := pir::new__Ps('ResizableStringArray');
         my $serialized := pir::nqp_serialize_sc__SPP($!sc, $sh);
+        say(nqp::chars($serialized) ~ " bytes of serialized data produced");
+        say(nqp::elems($sh) ~ " strings in heap");
         
         # String heap PAST.
         my $sh_past := PAST::Stmts.new(
             PAST::Op.new(
                 :pasttype('bind'),
-                PAST::Var.new( :scope('register'), :name('string_heap'), :isdecl(1) )));
+                PAST::Var.new( :scope('register'), :name('string_heap'), :isdecl(1) ),
+                PAST::Op.new( :pirop('new Ps'), 'ResizableStringArray' )));
         for $sh -> $s {
             $sh_past.push(PAST::Op.new(
-                :pirop('push Ps'),
+                :pirop('push vPs'),
                 PAST::Var.new( :scope('register'), :name('string_heap') ),
-                $s));
+                (nqp::isnull($s) ?? PAST::Op.new( :pirop('null S') ) !! $s)));
         }
         $sh_past.push(PAST::Var.new( :scope('register'), :name('string_heap') ));
         
@@ -257,6 +260,7 @@ class HLL::World {
         PAST::Op.new(
             :pirop('nqp_deserialize_sc__vSPPP'),
             $serialized,
-            PAST::Op.new( :pirop('nqp_create_sc Ps'), 'XXX-' ~ $!handle, $sh_past, $cr_past ))
+            PAST::Op.new( :pirop('nqp_create_sc Ps'), 'XXX-' ~ $!handle ),
+            $sh_past, $cr_past)
     }
 }
