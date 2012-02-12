@@ -1519,7 +1519,7 @@ inline op nqp_add_code_ref_to_sc(in PMC, in INT, in PMC) :base_core {
     }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Can only use nqp_add_object_to_sc to add a Sub");
+            "Can only use nqp_code_ref_to_sc to add a Sub");
 }
 
 
