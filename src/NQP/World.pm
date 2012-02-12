@@ -447,7 +447,10 @@ class NQP::World is HLL::World {
                     PAST::Var.new( :name('cur_sc'), :scope('register') ),
                     self.sc.description
                 ),
-                $des
+                $des,
+                # XXX Uncomment the following to try new serialize/deserialize code
+                #PAST::Op.new( :inline('#### DESERIALIZATION PROTOTYPE ####') ),
+                #self.serialize_and_produce_deserialization_past()
             ),
             $fix
         );
