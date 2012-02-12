@@ -258,6 +258,8 @@ class NQP::World is HLL::World {
             }
             pir::assign__vPS($dummy, $name);
             self.add_code_LEGACY($dummy);
+            pir::setprop__vPsP($dummy, 'STATIC_CODE_REF', $dummy);
+            self.add_root_code_ref($dummy, $method_past);
             $method_past<compile_time_dummy> := $dummy;
         }
         
