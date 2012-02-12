@@ -1,5 +1,7 @@
 use NQPP6Regex;
 
+my $NEW_SER := 0;
+
 class NQP::World is HLL::World {
     # XXX We need to load the module loader to load modules, which means we
     # can't just use ...; it, which means we can't get the ModuleLoader symbol
@@ -257,9 +259,13 @@ class NQP::World is HLL::World {
                 $dummy := pir::clone__PP($stub_code);
             }
             pir::assign__vPS($dummy, $name);
-            self.add_code_LEGACY($dummy);
-            pir::setprop__vPsP($dummy, 'STATIC_CODE_REF', $dummy);
-            self.add_root_code_ref($dummy, $method_past);
+            if $NEW_SER {
+                pir::setprop__vPsP($dummy, 'STATIC_CODE_REF', $dummy);
+                self.add_root_code_ref($dummy, $method_past);
+            }
+            else {
+                self.add_code_LEGACY($dummy);
+            }
             $method_past<compile_time_dummy> := $dummy;
         }
         
@@ -272,21 +278,25 @@ class NQP::World is HLL::World {
         # For fixup, need to assign the method body we actually compiled
         # onto the one that went into the SC. Deserializing is easier -
         # just the straight meta-method call.
-        $fixups.push(PAST::Op.new(
-            :pirop('assign vPP'),
-            self.get_slot_past_for_object($dummy),
-            PAST::Val.new( :value($method_past) )
-        ));
-        my $slot_past := self.get_slot_past_for_object($obj);
-        self.add_event(
-            :deserialize_past(PAST::Op.new(
-                :pasttype('callmethod'), :name($meta_method_name),
-                PAST::Op.new( :pirop('get_how PP'), $slot_past ),
-                $slot_past,
-                $name,
+        unless $NEW_SER {
+            # XXX need to re-do the following for the new serialization
+            $fixups.push(PAST::Op.new(
+                :pirop('assign vPP'),
+                self.get_slot_past_for_object($dummy),
                 PAST::Val.new( :value($method_past) )
-            )),
-            :fixup_past($fixups));
+            ));
+            # XXX and below bit for deserialization goes away...
+            my $slot_past := self.get_slot_past_for_object($obj);
+            self.add_event(
+                :deserialize_past(PAST::Op.new(
+                    :pasttype('callmethod'), :name($meta_method_name),
+                    PAST::Op.new( :pirop('get_how PP'), $slot_past ),
+                    $slot_past,
+                    $name,
+                    PAST::Val.new( :value($method_past) )
+                )),
+                :fixup_past($fixups));
+        }
     }
     
     # Associates a signature with a routine.
@@ -450,9 +460,9 @@ class NQP::World is HLL::World {
                     self.sc.description
                 ),
                 $des,
-                # XXX Uncomment the following to try new serialize/deserialize code
-                #PAST::Op.new( :inline('#### DESERIALIZATION PROTOTYPE ####') ),
-                #self.serialize_and_produce_deserialization_past()
+                ($NEW_SER ??
+                    self.serialize_and_produce_deserialization_past() !!
+                    PAST::Op.new( :pasttype('null') ))
             ),
             $fix
         );
