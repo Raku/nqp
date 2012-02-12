@@ -619,6 +619,9 @@ static void serialize_object(PARROT_INTERP, SerializationWriter *writer, PMC *ob
     /* Get index of SC that holds the STable and its index. */
     Parrot_Int4 sc;
     Parrot_Int4 sc_idx;
+    if (obj->vtable->base_type != smo_id)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Non-6model object in object serialization list");
     get_stable_ref_info(interp, writer, STABLE_PMC(obj), &sc, &sc_idx);
     
     /* Ensure there's space in the objects table; grow if not. */
