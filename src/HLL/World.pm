@@ -13,12 +13,9 @@
 #
 # A world includes a serialization context. This contains a bunch of
 # objects - often meta-objects - that we want to persist across the
-# compile time / run time boundary. In the near future, we'll switch to
-# actually serializing these. At the moment, we instead save a series of
-# "events" that will be used to re-construct them.
-#
-# Note that this reconstruction code is not generated in the case that we
-# are just going to immediately run.
+# compile time / run time boundary. If we're doing pre-compilation
+# rather than "immediate run" then we serialize the contents of the
+# serialization context.
 
 class HLL::World {
     # Represents an event that we need to handle when fixing up or deserializing.
@@ -45,18 +42,27 @@ class HLL::World {
     # The handle for the context.
     has $!handle;
     
-    # Address => slot mapping, so we can quickly look up existing objects
-    # in the context.
-    has %!addr_to_slot;
+    # Whether we're in pre-compilation mode.
+    has $!precomp_mode;
+    
+    # The number of code refs we've added to the code refs root so far.
+    has $!num_code_refs;
+    
+    # List of PAST blocks that map to the code refs table, for use in
+    # building deserialization code.
+    has $!code_ref_blocks;
     
     # The event stream that builds or fixes up objects.
     has @!event_stream;
     
-    # Other SCs that we are dependent on (maps handle to SC).
-    has %!dependencies;
+    # Address => slot mapping, so we can quickly look up existing objects
+    # in the context.
+    # XXX LEGACY
+    has %!addr_to_slot;
     
-    # Whether we're in pre-compilation mode.
-    has $!precomp_mode;
+    # Other SCs that we are dependent on (maps handle to SC).
+    # XXX LEGACY
+    has %!dependencies;
     
     method new(:$handle!, :$description = '<unknown>') {
         my $obj := self.CREATE();
@@ -71,6 +77,8 @@ class HLL::World {
         @!event_stream := nqp::list();
         $!sc.set_description($description);
         $!precomp_mode := %*COMPILING<%?OPTIONS><target> eq 'pir';
+        $!num_code_refs := 0;
+        $!code_ref_blocks := [];
     }
     
     # Gets the slot for a given object. Dies if it is not in the context.
@@ -129,11 +137,19 @@ class HLL::World {
     }
     
     # Adds a code ref to the root set, along with a mapping.
+    # XXX LEGACY: should no longer add to the root set.
     method add_code_LEGACY($obj) {
         my $idx := $!sc.elems();
         $!sc[$idx] := $obj;
         %!addr_to_slot{nqp::where($obj)} := $idx;
         $idx
+    }
+    
+    # Adds a code reference to the root set of code refs.
+    method add_root_code_ref($code_ref, $past_block) {
+        pir::nqp_add_code_ref_to_sc__vPiP($!sc, $!num_code_refs, $code_ref);
+        $!num_code_refs := $!num_code_refs + 1;
+        $!code_ref_blocks.push($past_block);
     }
 
     # Checks if we are in pre-compilation mode.
@@ -209,5 +225,38 @@ class HLL::World {
     # Gets the event stream.
     method event_stream() {
         @!event_stream
+    }
+    
+    # Serializes the SC to binary and a string heap. Then produces PAST to handle
+    # the deserialization.
+    method serialize_and_produce_deserialization_past() {
+        # Serialize.
+        my $sh := pir::new__Ps('ResizableStringArray');
+        my $serialized := pir::nqp_serialize_sc__SPP($!sc, $sh);
+        
+        # String heap PAST.
+        my $sh_past := PAST::Stmts.new(
+            PAST::Op.new(
+                :pasttype('bind'),
+                PAST::Var.new( :scope('register'), :name('string_heap'), :isdecl(1) )));
+        for $sh -> $s {
+            $sh_past.push(PAST::Op.new(
+                :pirop('push Ps'),
+                PAST::Var.new( :scope('register'), :name('string_heap') ),
+                $s));
+        }
+        $sh_past.push(PAST::Var.new( :scope('register'), :name('string_heap') ));
+        
+        # Code references.
+        my $cr_past := PAST::Op.new( :pasttype('list') );
+        for $!code_ref_blocks -> $block {
+            $cr_past.push(PAST::Val.new( :value($block) ));
+        }
+        
+        # Overall deserialization PAST.
+        PAST::Op.new(
+            :pirop('nqp_deserialize_sc__vSPPP'),
+            $serialized,
+            PAST::Op.new( :pirop('nqp_create_sc Ps'), 'XXX-' ~ $!handle, $sh_past, $cr_past ))
     }
 }
