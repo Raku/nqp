@@ -102,6 +102,11 @@ class HLL::World {
         $past
     }
     
+    # Gets a code ref from the SC.
+    method get_slot_past_for_code_ref_at($idx) {
+        PAST::Op.new( :pirop('nqp_get_sc_code_ref Psi'), $!handle, $idx );
+    }
+    
     # Utility sub to wrap PAST with slot setting.
     method set_slot_past($slot, $past_to_set) {
         return PAST::Op.new( :pirop('nqp_set_sc_object vsiP'),
@@ -147,9 +152,11 @@ class HLL::World {
     
     # Adds a code reference to the root set of code refs.
     method add_root_code_ref($code_ref, $past_block) {
-        pir::nqp_add_code_ref_to_sc__vPiP($!sc, $!num_code_refs, $code_ref);
+        my $code_ref_idx := $!num_code_refs;
         $!num_code_refs := $!num_code_refs + 1;
         $!code_ref_blocks.push($past_block);
+        pir::nqp_add_code_ref_to_sc__vPiP($!sc, $!num_code_refs, $code_ref);
+        $code_ref_idx
     }
 
     # Checks if we are in pre-compilation mode.
