@@ -90,7 +90,7 @@ class NQP::World is HLL::World {
         ($target.WHO){$name} := $obj;
         
         # Add deserialization installation of the symbol.
-        if self.is_precompilation_mode() {
+        if self.is_precompilation_mode() && !$NEW_SER {
             my $path := self.get_slot_past_for_object($package);
             for @sym {
                 $path := PAST::Op.new(:pirop('nqp_get_package_through_who PPs'), $path, ~$_);
@@ -161,7 +161,7 @@ class NQP::World is HLL::World {
         
         # Add an event. There's no fixup to do, just a type object to create
         # on deserialization.
-        if self.is_precompilation_mode() {
+        if self.is_precompilation_mode() && !$NEW_SER {
             my @how_ns := pir::split('::', $how.HOW.name($how));
             my $how_name := @how_ns.pop();
             my $setup_call := PAST::Op.new(
@@ -193,7 +193,7 @@ class NQP::World is HLL::World {
         $obj.HOW.add_attribute($obj, $attr);
         
         # Emit code to create and add it when deserializing.
-        if self.is_precompilation_mode() {
+        if self.is_precompilation_mode() && !$NEW_SER {
             my $create_call := PAST::Op.new(
                 :pasttype('callmethod'), :name('new'),
                 self.get_ref($meta_attr)
@@ -233,6 +233,7 @@ class NQP::World is HLL::World {
         # See if we already have our compile-time dummy. If not, create it.
         my $fixups := PAST::Stmts.new();
         my $dummy;
+        my $code_ref_idx;
         if pir::defined($method_past<compile_time_dummy>) {
             $dummy := $method_past<compile_time_dummy>;
         }
@@ -261,7 +262,7 @@ class NQP::World is HLL::World {
             pir::assign__vPS($dummy, $name);
             if $NEW_SER {
                 pir::setprop__vPsP($dummy, 'STATIC_CODE_REF', $dummy);
-                self.add_root_code_ref($dummy, $method_past);
+                $code_ref_idx := self.add_root_code_ref($dummy, $method_past);
             }
             else {
                 self.add_code_LEGACY($dummy);
@@ -278,7 +279,13 @@ class NQP::World is HLL::World {
         # For fixup, need to assign the method body we actually compiled
         # onto the one that went into the SC. Deserializing is easier -
         # just the straight meta-method call.
-        unless $NEW_SER {
+        if $NEW_SER {
+            $fixups.push(PAST::Op.new(
+                :pirop('assign vPP'),
+                self.get_slot_past_for_code_ref_at($code_ref_idx),
+                PAST::Val.new( :value($method_past) )
+            ));
+        } else {
             # XXX need to re-do the following for the new serialization
             $fixups.push(PAST::Op.new(
                 :pirop('assign vPP'),
@@ -382,7 +389,7 @@ class NQP::World is HLL::World {
         $obj.HOW."$meta_method_name"($obj, $to_add);
         
         # Emit code to add it when deserializing.
-        if self.is_precompilation_mode() {
+        if self.is_precompilation_mode() && !$NEW_SER {
             my $slot_past := self.get_slot_past_for_object($obj);
             self.add_event(:deserialize_past(PAST::Op.new(
                 :pasttype('callmethod'), :name($meta_method_name),
@@ -415,7 +422,7 @@ class NQP::World is HLL::World {
         $obj.HOW.compose($obj);
         
         # Emit code to do the composition when deserializing.
-        if self.is_precompilation_mode() {
+        if self.is_precompilation_mode() && !$NEW_SER {
             my $slot_past := self.get_slot_past_for_object($obj);
             self.add_event(:deserialize_past(PAST::Op.new(
                 :pasttype('callmethod'), :name('compose'),

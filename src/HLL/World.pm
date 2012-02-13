@@ -260,7 +260,7 @@ class HLL::World {
         # Code references.
         my $cr_past := PAST::Op.new( :pasttype('list') );
         for $!code_ref_blocks -> $block {
-            $cr_past.push(PAST::Val.new( :value($block) ));
+            $cr_past.push(PAST::Val.new( :value($block), :returns('Sub') ));
         }
         
         # Overall deserialization PAST.
