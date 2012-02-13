@@ -18,24 +18,6 @@
 # serialization context.
 
 class HLL::World {
-    # Represents an event that we need to handle when fixing up or deserializing.
-    my class Event {
-        # The PAST that we emit to perform the action if in deserialization mode.
-        has $!deserialize_past;
-        method deserialize_past() { $!deserialize_past }
-        
-        # The PAST that we emit to do any fixups if we are in compile-n-run mode.
-        has $!fixup_past;
-        method fixup_past() { $!fixup_past }
-        
-        method new(:$deserialize_past, :$fixup_past) {
-            my $node := nqp::create(self);
-            nqp::bindattr($node, Event, '$!deserialize_past', $deserialize_past);
-            nqp::bindattr($node, Event, '$!fixup_past', $fixup_past);
-            $node
-        }
-    }
-
     # The serialization context that we're building.
     has $!sc;
     
@@ -51,9 +33,10 @@ class HLL::World {
     # List of PAST blocks that map to the code refs table, for use in
     # building deserialization code.
     has $!code_ref_blocks;
-    
-    # The event stream that builds or fixes up objects.
-    has @!event_stream;
+
+    # List of PAST nodes specifying fixup tasks, either after deserialization
+    # or between compile time and run time.
+    has @!fixup_tasks;
     
     # Address => slot mapping, so we can quickly look up existing objects
     # in the context.
@@ -74,7 +57,7 @@ class HLL::World {
         $!sc           := pir::nqp_create_sc__PS($handle);
         $!handle       := $handle;
         %!addr_to_slot := nqp::hash();
-        @!event_stream := nqp::list();
+        @!fixup_tasks := nqp::list();
         $!sc.set_description($description);
         $!precomp_mode := %*COMPILING<%?OPTIONS><target> eq 'pir';
         $!num_code_refs := 0;
@@ -164,17 +147,14 @@ class HLL::World {
         $!precomp_mode
     }
     
-    # Add an event that may have an action to deserialize or fix up.
-    # Note that we can determine which one we need and just save the
-    # needed one.
-    method add_event(:$deserialize_past, :$fixup_past) {
+    # Add an event that we need to run at fixup time (after deserialization of
+    # between compilation and runtime).
+    method add_fixup_task(:$deserialize_past, :$fixup_past) {
         if $!precomp_mode {
-            # Pre-compilation; only need deserialization PAST.
-            @!event_stream.push(Event.new(:deserialize_past($deserialize_past)));
+            @!fixup_tasks.push($deserialize_past) if $deserialize_past;
         }
         else {
-            # Presumably, going all the way to running, so just fixups.
-            @!event_stream.push(Event.new(:fixup_past($fixup_past)));
+            @!fixup_tasks.push($fixup_past) if $fixup_past;
         }
     }
     
@@ -200,7 +180,7 @@ class HLL::World {
             my $handle := $sc.handle;
             unless pir::exists(%!dependencies, $handle) {
                 %!dependencies{$handle} := $sc;
-                self.add_event(:deserialize_past(PAST::Op.new(
+                self.add_fixup_task(:deserialize_past(PAST::Op.new(
                     :pasttype('if'),
                     PAST::Op.new(
                         :pirop('isnull IP'),
@@ -229,9 +209,9 @@ class HLL::World {
          $!handle
     }
     
-    # Gets the event stream.
-    method event_stream() {
-        @!event_stream
+    # Gets the list of tasks to do at fixup time.
+    method fixup_tasks() {
+        @!fixup_tasks
     }
     
     # Serializes the SC to binary and a string heap. Then produces PAST to handle

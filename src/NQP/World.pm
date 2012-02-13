@@ -21,7 +21,7 @@ class NQP::World is HLL::World {
             
             # Do load for pre-compiled situation.
             if self.is_precompilation_mode() {
-                self.add_event(:deserialize_past(PAST::Stmts.new(
+                self.add_fixup_task(:deserialize_past(PAST::Stmts.new(
                     PAST::Op.new(
                         :pirop('load_bytecode vs'), 'ModuleLoader.pbc'
                     ),
@@ -38,7 +38,7 @@ class NQP::World is HLL::World {
             }
             else {
                 # Needs fixup.
-                self.add_event(:fixup_past(PAST::Op.new(
+                self.add_fixup_task(:fixup_past(PAST::Op.new(
                     :pasttype('callmethod'), :name('set_outer_ctx'),
                        PAST::Var.new( :name('block'), :scope('register') ),
                        PAST::Op.new(
@@ -61,7 +61,7 @@ class NQP::World is HLL::World {
         
         # Make sure we do the loading during deserialization.
         if self.is_precompilation_mode() {
-            self.add_event(:deserialize_past(PAST::Stmts.new(
+            self.add_fixup_task(:deserialize_past(PAST::Stmts.new(
                 PAST::Op.new(
                     :pirop('load_bytecode vs'), 'ModuleLoader.pbc'
                 ),
@@ -95,7 +95,7 @@ class NQP::World is HLL::World {
             for @sym {
                 $path := PAST::Op.new(:pirop('nqp_get_package_through_who PPs'), $path, ~$_);
             }
-            self.add_event(:deserialize_past(PAST::Op.new(
+            self.add_fixup_task(:deserialize_past(PAST::Op.new(
                 :pasttype('bind_6model'),
                 PAST::Var.new(
                     :scope('keyed'),
@@ -131,7 +131,7 @@ class NQP::World is HLL::World {
                 PAST::Val.new( :value($block), :returns('LexInfo' ))
             )
         );
-        self.add_event(:deserialize_past($fixup), :fixup_past($fixup));
+        self.add_fixup_task(:deserialize_past($fixup), :fixup_past($fixup));
     }
     
     # Adds a fixup to install a specified PAST::Block in a package under the
@@ -146,7 +146,7 @@ class NQP::World is HLL::World {
             ),
             PAST::Val.new( :value($past_block) )
         );
-        self.add_event(:deserialize_past($fixup), :fixup_past($fixup));
+        self.add_fixup_task(:deserialize_past($fixup), :fixup_past($fixup));
     }
     
     # Creates a meta-object for a package, adds it to the root objects and
@@ -174,7 +174,7 @@ class NQP::World is HLL::World {
             if pir::defined($repr) {
                 $setup_call.push(PAST::Val.new( :value($repr), :named('repr') ));
             }
-            self.add_event(:deserialize_past(
+            self.add_fixup_task(:deserialize_past(
                 self.add_object_to_cur_sc_past($slot, $setup_call)));
         }
 
@@ -207,7 +207,7 @@ class NQP::World is HLL::World {
                 $create_call.push($lookup);
             }
             my $obj_slot_past := self.get_slot_past_for_object($obj);
-            self.add_event(:deserialize_past(PAST::Op.new(
+            self.add_fixup_task(:deserialize_past(PAST::Op.new(
                 :pasttype('callmethod'), :name('add_attribute'),
                 PAST::Op.new( :pirop('get_how PP'), $obj_slot_past ),
                 $obj_slot_past,
@@ -294,7 +294,7 @@ class NQP::World is HLL::World {
             ));
             # XXX and below bit for deserialization goes away...
             my $slot_past := self.get_slot_past_for_object($obj);
-            self.add_event(
+            self.add_fixup_task(
                 :deserialize_past(PAST::Op.new(
                     :pasttype('callmethod'), :name($meta_method_name),
                     PAST::Op.new( :pirop('get_how PP'), $slot_past ),
@@ -320,7 +320,7 @@ class NQP::World is HLL::World {
         my $des := PAST::Op.new( :pirop('set_sub_multisig vPPP'),
             PAST::Val.new( :value($routine) ), $types, $definednesses
         );
-        self.add_event(:deserialize_past($des), :fixup_past($fixup));
+        self.add_fixup_task(:deserialize_past($des), :fixup_past($fixup));
     }
     
     # This handles associating the role body with a role declaration.
@@ -379,7 +379,7 @@ class NQP::World is HLL::World {
             PAST::Val.new( :value($body_past) )
         );
         
-        self.add_event(:deserialize_past($des), :fixup_past($fixups));
+        self.add_fixup_task(:deserialize_past($des), :fixup_past($fixups));
     }
     
     # Adds a parent or role to the meta-object, and stores an event for
@@ -391,7 +391,7 @@ class NQP::World is HLL::World {
         # Emit code to add it when deserializing.
         if self.is_precompilation_mode() && !$NEW_SER {
             my $slot_past := self.get_slot_past_for_object($obj);
-            self.add_event(:deserialize_past(PAST::Op.new(
+            self.add_fixup_task(:deserialize_past(PAST::Op.new(
                 :pasttype('callmethod'), :name($meta_method_name),
                 PAST::Op.new( :pirop('get_how PP'), $slot_past ),
                 $slot_past,
@@ -407,7 +407,7 @@ class NQP::World is HLL::World {
         # Emit code to add it when deserializing.
         if self.is_precompilation_mode() {
             my $slot_past := self.get_slot_past_for_object($obj);
-            self.add_event(:deserialize_past(PAST::Op.new(
+            self.add_fixup_task(:deserialize_past(PAST::Op.new(
                 :pasttype('callmethod'), :name('add_parrot_vtable_handler_mapping'),
                 PAST::Op.new( :pirop('get_how PP'), $slot_past ),
                 $slot_past,
@@ -424,7 +424,7 @@ class NQP::World is HLL::World {
         # Emit code to do the composition when deserializing.
         if self.is_precompilation_mode() && !$NEW_SER {
             my $slot_past := self.get_slot_past_for_object($obj);
-            self.add_event(:deserialize_past(PAST::Op.new(
+            self.add_fixup_task(:deserialize_past(PAST::Op.new(
                 :pasttype('callmethod'), :name('compose'),
                 PAST::Op.new( :pirop('get_how PP'), $slot_past ),
                 $slot_past
@@ -435,19 +435,12 @@ class NQP::World is HLL::World {
     # Generates a series of PAST operations that will build this context if
     # it doesn't exist, and fix it up if it already does.
     method to_past() {
-        my $des := PAST::Stmts.new();
-        my $fix := PAST::Stmts.new();
-        for self.event_stream() {
-            $des.push(PAST::Stmt.new( $_.deserialize_past() )) if pir::defined($_.deserialize_past());
-            $fix.push(PAST::Stmt.new( $_.fixup_past() )) if pir::defined($_.fixup_past());
-        }
-        make PAST::Op.new(
-            :pasttype('if'),
-            PAST::Op.new(
-                :pirop('isnull IP'),
-                PAST::Op.new( :pirop('nqp_get_sc Ps'), self.handle() )
-            ),
-            PAST::Stmts.new(
+        if self.is_precompilation_mode() {
+            my $des := PAST::Stmts.new();
+            for self.fixup_tasks() {
+                $des.push(PAST::Stmt.new($_));
+            }
+            return PAST::Stmts.new(
                 PAST::Op.new( :pirop('nqp_dynop_setup v') ),
                 PAST::Op.new( :pirop('nqp_bigint_setup v') ),
                 PAST::Op.new(
@@ -470,8 +463,14 @@ class NQP::World is HLL::World {
                 ($NEW_SER ??
                     self.serialize_and_produce_deserialization_past() !!
                     PAST::Op.new( :pasttype('null') ))
-            ),
-            $fix
-        );
+            );
+        }
+        else {
+            my $fix := PAST::Stmts.new();
+            for self.fixup_tasks() {
+                $fix.push(PAST::Stmt.new($_));
+            }
+            return $fix
+        }
     }
 }
