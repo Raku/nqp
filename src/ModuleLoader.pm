@@ -40,7 +40,7 @@ knowhow ModuleLoader {
         $*CTXSAVE := 0;
     }
     
-    method load_module($module_name, $cur_GLOBALish) {
+    method load_module($module_name, *@global_merge_target) {
         # If we didn't already do so, load the module and capture
         # its mainline. Otherwise, we already loaded it so go on
         # with what we already have.
@@ -70,7 +70,9 @@ knowhow ModuleLoader {
             # Merge any globals.
             my $UNIT := pir::getattribute__PPs($module_ctx, 'lex_pad');
             unless pir::isnull($UNIT<GLOBALish>) {
-                merge_globals($cur_GLOBALish, $UNIT<GLOBALish>);
+                if +@global_merge_target {
+                    merge_globals(@global_merge_target[0], $UNIT<GLOBALish>);
+                }
             }
         }
 

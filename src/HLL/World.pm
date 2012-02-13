@@ -34,6 +34,11 @@ class HLL::World {
     # building deserialization code.
     has $!code_ref_blocks;
 
+    # List of PAST nodes specifying dependency loading related tasks. These
+    # are done before the deserialization of the current context, or if in
+    # immediate run mode before any of the other fixup tasks.
+    has @!load_dependency_tasks;
+
     # List of PAST nodes specifying fixup tasks, either after deserialization
     # or between compile time and run time.
     has @!fixup_tasks;
@@ -58,6 +63,7 @@ class HLL::World {
         $!handle       := $handle;
         %!addr_to_slot := nqp::hash();
         @!fixup_tasks := nqp::list();
+        @!load_dependency_tasks := nqp::list();
         $!sc.set_description($description);
         $!precomp_mode := %*COMPILING<%?OPTIONS><target> eq 'pir';
         $!num_code_refs := 0;
@@ -147,6 +153,17 @@ class HLL::World {
         $!precomp_mode
     }
     
+    # Add an event that we want to run before deserialization or before any
+    # other fixup.
+    method add_load_dependency_task(:$deserialize_past, :$fixup_past) {
+        if $!precomp_mode {
+            @!load_dependency_tasks.push($deserialize_past) if $deserialize_past;
+        }
+        else {
+            @!load_dependency_tasks.push($fixup_past) if $fixup_past;
+        }
+    }
+    
     # Add an event that we need to run at fixup time (after deserialization of
     # between compilation and runtime).
     method add_fixup_task(:$deserialize_past, :$fixup_past) {
@@ -209,6 +226,11 @@ class HLL::World {
          $!handle
     }
     
+    # Gets the list of load dependency tasks to do.
+    method load_dependency_tasks() {
+        @!load_dependency_tasks
+    }
+    
     # Gets the list of tasks to do at fixup time.
     method fixup_tasks() {
         @!fixup_tasks
@@ -216,7 +238,7 @@ class HLL::World {
     
     # Serializes the SC to binary and a string heap. Then produces PAST to handle
     # the deserialization.
-    method serialize_and_produce_deserialization_past() {
+    method serialize_and_produce_deserialization_past($sc_reg) {
         # Serialize.
         my $sh := pir::new__Ps('ResizableStringArray');
         my $serialized := pir::nqp_serialize_sc__SPP($!sc, $sh);
@@ -250,7 +272,7 @@ class HLL::World {
                 '    $S0 = binary:"' ~ pir::escape__SS($serialized) ~ '"',
                 '    %r = box $S0'
                 ) ),
-            PAST::Op.new( :pirop('nqp_create_sc Ps'), 'XXX-' ~ $!handle ),
+            PAST::Var.new( :name($sc_reg), :scope('register') ),
             $sh_past, $cr_past)
     }
 }

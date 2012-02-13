@@ -21,20 +21,38 @@ class NQP::World is HLL::World {
             
             # Do load for pre-compiled situation.
             if self.is_precompilation_mode() {
-                self.add_fixup_task(:deserialize_past(PAST::Stmts.new(
-                    PAST::Op.new(
-                        :pirop('load_bytecode vs'), 'ModuleLoader.pbc'
-                    ),
-                    PAST::Op.new(
-                        :pasttype('callmethod'), :name('set_outer_ctx'),
-                           PAST::Var.new( :name('block'), :scope('register') ),
-                           PAST::Op.new(
-                               :pasttype('callmethod'), :name('load_setting'),
-                               PAST::Var.new( :name('ModuleLoader'), :namespace([]), :scope('package') ),
-                               $setting_name
-                           )
-                    )
-                )));
+                if $NEW_SER {
+                    self.add_load_dependency_task(:deserialize_past(PAST::Stmts.new(
+                        PAST::Op.new(
+                            :pirop('load_bytecode vs'), 'ModuleLoader.pbc'
+                        ),
+                        PAST::Op.new(
+                            :pasttype('callmethod'), :name('set_outer_ctx'),
+                               PAST::Var.new( :name('block'), :scope('register') ),
+                               PAST::Op.new(
+                                   :pasttype('callmethod'), :name('load_setting'),
+                                   PAST::Var.new( :name('ModuleLoader'), :namespace([]), :scope('package') ),
+                                   $setting_name
+                               )
+                        )
+                    )));
+                }
+                else {
+                    self.add_fixup_task(:deserialize_past(PAST::Stmts.new(
+                        PAST::Op.new(
+                            :pirop('load_bytecode vs'), 'ModuleLoader.pbc'
+                        ),
+                        PAST::Op.new(
+                            :pasttype('callmethod'), :name('set_outer_ctx'),
+                               PAST::Var.new( :name('block'), :scope('register') ),
+                               PAST::Op.new(
+                                   :pasttype('callmethod'), :name('load_setting'),
+                                   PAST::Var.new( :name('ModuleLoader'), :namespace([]), :scope('package') ),
+                                   $setting_name
+                               )
+                        )
+                    )));
+                }
             }
             else {
                 # Needs fixup.
@@ -61,16 +79,29 @@ class NQP::World is HLL::World {
         
         # Make sure we do the loading during deserialization.
         if self.is_precompilation_mode() {
-            self.add_fixup_task(:deserialize_past(PAST::Stmts.new(
-                PAST::Op.new(
-                    :pirop('load_bytecode vs'), 'ModuleLoader.pbc'
-                ),
-                PAST::Op.new(
-                   :pasttype('callmethod'), :name('load_module'),
-                   PAST::Var.new( :name('ModuleLoader'), :namespace([]), :scope('package') ),
-                   $module_name,
-                   self.get_slot_past_for_object($cur_GLOBALish)
-                ))));
+            if $NEW_SER {
+                self.add_fixup_task(:deserialize_past(PAST::Stmts.new(
+                    PAST::Op.new(
+                        :pirop('load_bytecode vs'), 'ModuleLoader.pbc'
+                    ),
+                    PAST::Op.new(
+                       :pasttype('callmethod'), :name('load_module'),
+                       PAST::Var.new( :name('ModuleLoader'), :namespace([]), :scope('package') ),
+                       $module_name
+                    ))));
+            }
+            else {
+                self.add_fixup_task(:deserialize_past(PAST::Stmts.new(
+                    PAST::Op.new(
+                        :pirop('load_bytecode vs'), 'ModuleLoader.pbc'
+                    ),
+                    PAST::Op.new(
+                       :pasttype('callmethod'), :name('load_module'),
+                       PAST::Var.new( :name('ModuleLoader'), :namespace([]), :scope('package') ),
+                       $module_name,
+                       self.get_slot_past_for_object($cur_GLOBALish)
+                    ))));
+            }
         }
 
         return pir::getattribute__PPs($module, 'lex_pad');
@@ -436,9 +467,13 @@ class NQP::World is HLL::World {
     # it doesn't exist, and fix it up if it already does.
     method to_past() {
         if self.is_precompilation_mode() {
-            my $des := PAST::Stmts.new();
+            my $load_tasks := PAST::Stmts.new();
+            for self.load_dependency_tasks() {
+                $load_tasks.push(PAST::Stmt.new($_));
+            }
+            my $fixup_tasks := PAST::Stmts.new();
             for self.fixup_tasks() {
-                $des.push(PAST::Stmt.new($_));
+                $fixup_tasks.push(PAST::Stmt.new($_));
             }
             return PAST::Stmts.new(
                 PAST::Op.new( :pirop('nqp_dynop_setup v') ),
@@ -459,18 +494,22 @@ class NQP::World is HLL::World {
                     PAST::Var.new( :name('cur_sc'), :scope('register') ),
                     self.sc.description
                 ),
-                $des,
+                $load_tasks,
                 ($NEW_SER ??
-                    self.serialize_and_produce_deserialization_past() !!
-                    PAST::Op.new( :pasttype('null') ))
+                    self.serialize_and_produce_deserialization_past('cur_sc') !!
+                    PAST::Op.new( :pasttype('null') )),
+                $fixup_tasks
             );
         }
         else {
-            my $fix := PAST::Stmts.new();
-            for self.fixup_tasks() {
-                $fix.push(PAST::Stmt.new($_));
+            my $tasks := PAST::Stmts.new();
+            for self.load_dependency_tasks() {
+                $tasks.push(PAST::Stmt.new($_));
             }
-            return $fix
+            for self.fixup_tasks() {
+                $tasks.push(PAST::Stmt.new($_));
+            }
+            return $tasks
         }
     }
 }
