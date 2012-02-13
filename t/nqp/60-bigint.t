@@ -1,7 +1,7 @@
 #! nqp
 use nqpmo;
 
-plan(32);
+plan(34);
 
 my $knowhow := pir::get_knowhow__P();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
@@ -93,3 +93,10 @@ ok(str(nqp::expmod_I(
     nqp::fromstr_I('10000000000000000000000000000000000000000', $bi_type),
     $bi_type,
 )) eq '1527229998585248450016808958343740453059', 'nqp::expmod_I');
+
+ok(nqp::div_In(box(1234500), box(100)) == 12345, 'div_In santiy');
+my $n := nqp::div_In(
+    nqp::pow_I(box(203), box(200), $bi_type, $bi_type),
+    nqp::pow_I(box(200), box(200), $bi_type, $bi_type),
+);
+ok(nqp::abs_n($n - 19.6430286394751) < 1e-10, 'div_In with big numbers');

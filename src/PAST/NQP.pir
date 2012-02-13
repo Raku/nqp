@@ -450,6 +450,7 @@ entry to produce the node to be returned.
     maphash['mul_n']    = 'mul__Nnn'
     maphash['div_i']    = 'div__Iii'
     maphash['div_I']    = 'nqp_bigint_div__PPPP'
+    maphash['div_In']   = 'nqp_bigint_div_num__NPP'
     maphash['div_n']    = 'div__Nnn'
     maphash['mod_i']    = 'mod__Iii'
     maphash['mod_I']    = 'nqp_bigint_mod__PPPP'

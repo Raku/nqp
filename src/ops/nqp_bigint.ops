@@ -304,6 +304,25 @@ inline op nqp_bigint_from_num(out PMC, in NUM, in PMC) :base_core {
     from_num($2, get_bigint(interp, $1));
 }
 
+inline op nqp_bigint_div_num(out NUM, in PMC, in PMC) :base_core {
+    mp_int *a = get_bigint(interp, $2);
+    mp_int *b = get_bigint(interp, $3);
+
+    int max_size = DIGIT_BIT * MAX(USED(a), USED(b));
+    if (max_size > 1023) {
+        mp_int reduced_a, reduced_b;
+        mp_init(&reduced_a);
+        mp_init(&reduced_b);
+        mp_div_2d(a, max_size - 1023, &reduced_a, NULL);
+        mp_div_2d(b, max_size - 1023, &reduced_b, NULL);
+        $1 = mp_get_double(&reduced_a) / mp_get_double(&reduced_b);
+        mp_clear(&reduced_a);
+        mp_clear(&reduced_b);
+    } else {
+        $1 = mp_get_double(a) / mp_get_double(b);
+    }
+}
+
 inline op nqp_bigint_shr(out PMC, in PMC, in INT, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
     $1 = REPR($4)->allocate(interp, STABLE($4));
