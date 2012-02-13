@@ -12,6 +12,8 @@
 #include "../sixmodelobject.h"
 #include "P6opaque.h"
 
+#define MAX(x, y) ((y) > (x) ? (y) : (x))
+
 /* This representation's function pointer table. */
 static REPROps *this_repr;
 
@@ -968,7 +970,7 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
     
     repr_data->num_attributes = reader->read_int(interp, reader);
         
-    repr_data->flattened_stables = mem_sys_allocate((repr_data->num_attributes || 1) * sizeof(STable *));
+    repr_data->flattened_stables = mem_sys_allocate(MAX(repr_data->num_attributes, 1) * sizeof(STable *));
     for (i = 0; i < repr_data->num_attributes; i++)
         if (reader->read_int(interp, reader))
             repr_data->flattened_stables[i] = reader->read_stable_ref(interp, reader);
@@ -978,7 +980,7 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
     repr_data->mi = reader->read_int(interp, reader);
     
     if (reader->read_int(interp, reader)) {
-        repr_data->auto_viv_values = mem_sys_allocate((repr_data->num_attributes || 1) * sizeof(PMC *));
+        repr_data->auto_viv_values = mem_sys_allocate(MAX(repr_data->num_attributes, 1) * sizeof(PMC *));
         for (i = 0; i < repr_data->num_attributes; i++)
             repr_data->auto_viv_values[i] = reader->read_ref(interp, reader);
     }
@@ -988,7 +990,7 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
     repr_data->unbox_str_slot = reader->read_int(interp, reader);
     
     if (reader->read_int(interp, reader)) {
-        repr_data->unbox_slots = mem_sys_allocate((repr_data->num_attributes || 1) * sizeof(P6opaqueBoxedTypeMap));
+        repr_data->unbox_slots = mem_sys_allocate(MAX(repr_data->num_attributes, 1) * sizeof(P6opaqueBoxedTypeMap));
         for (i = 0; i < repr_data->num_attributes; i++) {
             repr_data->unbox_slots[i].repr_id = reader->read_int(interp, reader);
             repr_data->unbox_slots[i].slot = reader->read_int(interp, reader);
@@ -1004,8 +1006,8 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
     
     /* Re-calculate the remaining info, which is platform specific or
      * derived information. */
-    repr_data->attribute_offsets   = mem_sys_allocate((repr_data->num_attributes || 1) * sizeof(INTVAL));
-    repr_data->gc_pmc_mark_offsets = mem_sys_allocate((repr_data->num_attributes || 1) * sizeof(INTVAL));
+    repr_data->attribute_offsets   = mem_sys_allocate(MAX(repr_data->num_attributes, 1) * sizeof(INTVAL));
+    repr_data->gc_pmc_mark_offsets = mem_sys_allocate(MAX(repr_data->num_attributes, 1) * sizeof(INTVAL));
     repr_data->initialize_slots    = mem_sys_allocate((repr_data->num_attributes + 1) * sizeof(INTVAL));
     repr_data->gc_mark_slots       = mem_sys_allocate((repr_data->num_attributes + 1) * sizeof(INTVAL));
     repr_data->gc_cleanup_slots    = mem_sys_allocate((repr_data->num_attributes + 1) * sizeof(INTVAL));

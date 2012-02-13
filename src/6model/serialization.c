@@ -12,6 +12,8 @@
 #include "pmc_nqplexinfo.h"
 #include "pmc/pmc_sub.h"
 
+#define MAX(x, y) ((y) > (x) ? (y) : (x))
+
 /* Version of the serialization format that we are currently at. */
 #define CURRENT_VERSION 1
 
@@ -774,11 +776,11 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     writer->root.dependencies_table  = mem_sys_allocate(writer->dependencies_table_alloc);
     writer->stables_table_alloc      = STABLES_TABLE_ENTRY_SIZE * STABLES_TABLE_ENTRIES_GUESS;
     writer->root.stables_table       = mem_sys_allocate(writer->stables_table_alloc);
-    writer->objects_table_alloc      = OBJECTS_TABLE_ENTRY_SIZE * (sc_elems || 1);
+    writer->objects_table_alloc      = OBJECTS_TABLE_ENTRY_SIZE * MAX(sc_elems, 1);
     writer->root.objects_table       = mem_sys_allocate(writer->objects_table_alloc);
     writer->stables_data_alloc       = DEFAULT_STABLE_DATA_SIZE;
     writer->root.stables_data        = mem_sys_allocate(writer->stables_data_alloc);
-    writer->objects_data_alloc       = OBJECT_SIZE_GUESS * (sc_elems || 1);
+    writer->objects_data_alloc       = OBJECT_SIZE_GUESS * MAX(sc_elems, 1);
     writer->root.objects_data        = mem_sys_allocate(writer->objects_data_alloc);
     writer->closures_table_alloc     = CLOSURES_TABLE_ENTRY_SIZE * CLOSURES_TABLE_ENTRIES_GUESS;
     writer->root.closures_table      = mem_sys_allocate(writer->closures_table_alloc);
