@@ -259,7 +259,10 @@ class HLL::World {
         # Overall deserialization PAST.
         PAST::Op.new(
             :pirop('nqp_deserialize_sc__vSPPP'),
-            $serialized,
+            PAST::Op.new( :inline(
+                '    $S0 = binary:"' ~ pir::escape__SS($serialized) ~ '"',
+                '    %r = box $S0'
+                ) ),
             PAST::Op.new( :pirop('nqp_create_sc Ps'), 'XXX-' ~ $!handle ),
             $sh_past, $cr_past)
     }
