@@ -144,7 +144,7 @@ class HLL::World {
         my $code_ref_idx := $!num_code_refs;
         $!num_code_refs := $!num_code_refs + 1;
         $!code_ref_blocks.push($past_block);
-        pir::nqp_add_code_ref_to_sc__vPiP($!sc, $!num_code_refs, $code_ref);
+        pir::nqp_add_code_ref_to_sc__vPiP($!sc, $code_ref_idx, $code_ref);
         $code_ref_idx
     }
 
