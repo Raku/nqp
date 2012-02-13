@@ -590,9 +590,10 @@ static void serialize_stable(PARROT_INTERP, SerializationWriter *writer, PMC *st
     writer->cur_write_offset = &(writer->stables_data_offset);
     writer->cur_write_limit  = &(writer->stables_data_alloc);
     
-    /* Write HOW and WHAT. */
+    /* Write HOW, WHAT and WHO. */
     write_obj_ref(interp, writer, st->HOW);
     write_obj_ref(interp, writer, st->WHAT);
+    write_ref_func(interp, writer, st->WHO);
 
     /* Method cache and v-table. */
     write_ref_func(interp, writer, st->method_cache);
@@ -1291,9 +1292,10 @@ static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVA
     reader->cur_read_offset     = &(reader->stables_data_offset);
     reader->cur_read_end        = &(reader->stables_data_end);
     
-    /* Read the HOW and WHAT. */
+    /* Read the HOW, WHAT and WHO. */
     st->HOW  = read_obj_ref(interp, reader);
     st->WHAT = read_obj_ref(interp, reader);
+    st->WHO = read_ref_func(interp, reader);
     
     /* Method cache and v-table. */
     st->method_cache = read_ref_func(interp, reader);
