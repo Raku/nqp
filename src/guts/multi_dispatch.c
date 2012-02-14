@@ -120,6 +120,11 @@ static candidate_info** sort_candidates(PARROT_INTERP, PMC *candidates) {
     candidate_graph_node ** const graph = mem_allocate_n_zeroed_typed(
             num_candidates, candidate_graph_node*);
     INTVAL insert_pos = 0;
+    
+    /* Ensure we know what is a 6model object and what is not. */
+    if (!smo_id)
+        smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
+    
     for (i = 0; i < num_candidates; i++) {
         PMC *multi_sig_pmc, *types_list, *definedness_list;
         NQP_Signature *multi_sig;
@@ -272,10 +277,6 @@ PMC *nqp_multi_dispatch(PARROT_INTERP, PMC *dispatcher, PMC *capture) {
      * XXX We'll cache this in the future. */
     candidate_info** candidates    = sort_candidates(interp, dispatchees);
     candidate_info** cur_candidate = candidates;
-
-    /* Ensure we know what is a 6model object and what is not. */
-    if (!smo_id)
-        smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
 
     /* Iterate over the candidates and collect best ones; terminate
      * when we see two nulls (may break out earlier). */
