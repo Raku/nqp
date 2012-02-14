@@ -506,7 +506,7 @@ class NQP::Actions is HLL::Actions {
     method package_declarator:sym<stub>($/) {
         # Construct meta-object with specified metaclass, adding it to the
         # serialization context for this compilation unit.
-        my $HOW := $*W.find_sym($<metaclass><identifier>, $/);
+        my $HOW := $*W.find_sym($<metaclass><identifier>);
         my $PACKAGE := $*W.pkg_create_mo($HOW, :name(~$<name>));
         
         # Install it in the current package or current lexpad as needed.
@@ -565,7 +565,7 @@ class NQP::Actions is HLL::Actions {
             my $parent;
             my $parent_found;
             try {
-                $parent := $*W.find_sym(pir::clone__PP($<parent>[0]<identifier>), $/);
+                $parent := $*W.find_sym(pir::clone__PP($<parent>[0]<identifier>));
                 $parent_found := 1;
             }
             if $parent_found {
@@ -578,7 +578,7 @@ class NQP::Actions is HLL::Actions {
         elsif pir::can($how, 'set_default_parent') {
             my $default := $*PKGDECL eq 'grammar' ?? ['Regex', 'Cursor'] !! ['NQPMu'];
             $*W.pkg_add_parent_or_role($*PACKAGE, "set_default_parent",
-                $*W.find_sym($default, $/));
+                $*W.find_sym($default));
         }
 
         # Add any done roles.
@@ -587,7 +587,7 @@ class NQP::Actions is HLL::Actions {
                 my $role;
                 my $role_found;
                 try {
-                    $role := $*W.find_sym(pir::clone__PP($_<identifier>), $/);
+                    $role := $*W.find_sym(pir::clone__PP($_<identifier>));
                     $role_found := 1;
                 }
                 if $role_found {
@@ -645,7 +645,7 @@ class NQP::Actions is HLL::Actions {
             my %obj_args;
             %lit_args<name> := $name;
             if $<typename> {
-                %obj_args<type> := $*W.find_sym([~$<typename>[0]], $/);
+                %obj_args<type> := $*W.find_sym([~$<typename>[0]]);
             }
             
             # Add it.
@@ -885,11 +885,11 @@ class NQP::Actions is HLL::Actions {
         # Use set_sub_multisig op to set up a multi sig. Note that we stick
         # it in the same slot Parrot multis use for their multi signature,
         # this is just a bit more complex than what Parrot needs.
-        my $types := PAST::Op.new( :pasttype('list') );
-        my $definednesses := PAST::Op.new( :pasttype('list') );
+        my $types := nqp::list();
+        my $definednesses := nqp::list();
         for @($routine[0]) {
             if $_ ~~ PAST::Var && $_.scope eq 'parameter' {
-                $types.push($_.multitype // PAST::Op.new( :pirop('null P') ));
+                $types.push($_.multitype ?? ($_.multitype())<compile_time_value> !! nqp::null() );
                 $definednesses.push($_<definedness> eq 'D' ?? 1 !!
                                     $_<definedness> eq 'U' ?? 2 !! 0);
             }
@@ -977,7 +977,7 @@ class NQP::Actions is HLL::Actions {
         my @name := HLL::Compiler.parse_name(~$/);
         my $found := 0;
         try {
-            my $sym := $*W.find_sym(@name, $/);
+            my $sym := $*W.find_sym(@name);
             make $*W.get_ref($sym);
             $found := 1;
         }

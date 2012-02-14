@@ -371,19 +371,56 @@ class NQP::World is HLL::World {
     
     # Associates a signature with a routine.
     method set_routine_signature($routine, $types, $definednesses) {
-        # Fixup code depends on if we have the routine in the SC for
-        # fixing up. Deserialization always goes on the blockref.
-        my $fixup := PAST::Op.new( :pirop('set_sub_multisig vPPP'), $types, $definednesses );
-        if pir::defined($routine<compile_time_dummy>) {
-            $fixup.unshift(self.get_slot_past_for_object($routine<compile_time_dummy>));
+        # Build signature object and put it in place now.
+        my $sig_type := self.find_sym(['NQPSignature']);
+        my $sig_obj  := nqp::create($sig_type);
+        nqp::bindattr($sig_obj, $sig_type, '$!types', $types);
+        nqp::bindattr($sig_obj, $sig_type, '$!definednesses', $definednesses);
+        my $slot := self.add_object($sig_obj);
+        
+        if self.is_precompilation_mode() {
+            unless $NEW_SER {
+                my $types_past := PAST::Op.new( :pasttype('list') );
+                my $definednesses_past := PAST::Op.new( :pasttype('list') );
+                for $types {
+                    $types_past.push(pir::isa($_, 'Undef') ?? $_ !! self.get_ref($_));
+                }
+                for $definednesses {
+                    $definednesses_past.push($_);
+                }
+                self.add_fixup_task(:deserialize_past(PAST::Stmts.new(
+                    self.add_object_to_cur_sc_past($slot,
+                        PAST::Op.new( :pirop('repr_instance_of__PP'), self.get_ref($sig_type) )),
+                    PAST::Op.new( :pirop('setattribute__vPPsP'),
+                        self.get_ref($sig_obj),
+                        self.get_ref($sig_type),
+                        '$!types',
+                        $types_past),
+                    PAST::Op.new( :pirop('setattribute__vPPsP'),
+                        self.get_ref($sig_obj),
+                        self.get_ref($sig_type),
+                        '$!definednesses',
+                        $definednesses_past)
+                )));
+            }
+            self.add_fixup_task(:deserialize_past(PAST::Op.new(
+                :pirop('set_sub_multisig vPP'),
+                PAST::Val.new( :value($routine) ),
+                self.get_ref($sig_obj)
+            )));
         }
         else {
-            $fixup.unshift(PAST::Val.new( :value($routine) ));
+            # Fixup code depends on if we have the routine in the SC for
+            # fixing up.
+            my $fixup := PAST::Op.new( :pirop('set_sub_multisig vPP'), self.get_ref($sig_obj) );
+            if pir::defined($routine<compile_time_dummy>) {
+                $fixup.unshift(self.get_slot_past_for_object($routine<compile_time_dummy>));
+            }
+            else {
+                $fixup.unshift(PAST::Val.new( :value($routine) ));
+            }
+            self.add_fixup_task(:fixup_past($fixup));
         }
-        my $des := PAST::Op.new( :pirop('set_sub_multisig vPPP'),
-            PAST::Val.new( :value($routine) ), $types, $definednesses
-        );
-        self.add_fixup_task(:deserialize_past($des), :fixup_past($fixup));
     }
     
     # This handles associating the role body with a role declaration.
@@ -575,7 +612,7 @@ class NQP::World is HLL::World {
     method known_sym($/, @name) {
         my $known := 0;
         try {
-            self.find_sym(@name, $/);
+            self.find_sym(@name);
             $known := 1;
         }
         $known
@@ -584,9 +621,9 @@ class NQP::World is HLL::World {
     # Finds a symbol that has a known value at compile time from the
     # perspective of the current scope. Checks for lexicals, then if
     # that fails tries package lookup.
-    method find_sym(@name, $/) {
+    method find_sym(@name) {
         # Make sure it's not an empty name.
-        unless +@name { $/.CURSOR.panic("Cannot look up empty name"); }
+        unless +@name { pir::die("Cannot look up empty name"); }
         
         # If it's a single-part name, look through the lexical
         # scopes.
