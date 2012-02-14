@@ -11,6 +11,7 @@ BEGIN_OPS_PREAMBLE
 #include "../6model/serialization_context.h"
 #include "../guts/multi_dispatch.h"
 #include "../pmc/pmc_dispatchersub.h"
+#include "../pmc/pmc_nqpmultisig.h"
 #include "pmc_sub.h"
 
 /* SHA1 algorithm. */
@@ -57,6 +58,7 @@ inline op nqp_dynop_setup() :base_core {
         stable_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "STable", 0));
         smo_id    = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
         disp_id   = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "DispatcherSub", 0));
+        ms_id     = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "NQPMultiSig", 0));
 
         /* Initialize the object model. */
         SixModelObject_initialize(interp, &KnowHOW, &KnowHOWAttribute);
