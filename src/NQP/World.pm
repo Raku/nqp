@@ -3,6 +3,38 @@ use NQPP6Regex;
 my $NEW_SER := 0;
 
 class NQP::World is HLL::World {
+    # The stack of lexical pads, actually as PAST::Block objects. The
+    # outermost frame is at the bottom, the latest frame is on top.
+    has @!BLOCKS;
+    
+    # Creates a new lexical scope and puts it on top of the stack.
+    method push_lexpad($/) {
+        # Create pad, link to outer and add to stack.
+        my $pad := PAST::Block.new( PAST::Stmts.new(), :node($/) );
+        if +@!BLOCKS {
+            $pad<outer> := @!BLOCKS[+@!BLOCKS - 1];
+        }
+        @!BLOCKS[+@!BLOCKS] := $pad;
+        $pad
+    }
+    
+    # Pops a lexical scope off the stack.
+    method pop_lexpad() {
+        @!BLOCKS.pop()
+    }
+    
+    # Gets the top lexpad.
+    method cur_lexpad() {
+        @!BLOCKS[+@!BLOCKS - 1]
+    }
+    
+    # XXX This goes away really soon...after the multi refactor.
+    method get_legacy_block_list() {
+        my @x := nqp::clone(@!BLOCKS);
+        @x.reverse();
+        @x
+    }
+
     # XXX We need to load the module loader to load modules, which means we
     # can't just use ...; it, which means we can't get the ModuleLoader symbol
     # merged into anywhere...anyway, we chop the circularity by finding it
@@ -511,5 +543,104 @@ class NQP::World is HLL::World {
             }
             return $tasks
         }
+    }
+    
+    # Checks if the given name is known anywhere in the lexpad
+    # and with lexical scope.
+    method is_lexical($name) {
+        self.is_scope($name, 'lexical')
+    }
+    
+    # Checks if the given name is known anywhere in the lexpad
+    # and with package scope.
+    method is_package($name) {
+        self.is_scope($name, 'package')
+    }
+    
+    # Checks if a given name is known in the lexpad anywhere
+    # with the specified scope.
+    method is_scope($name, $wanted_scope) {
+        my $i := +@!BLOCKS;
+        while $i > 0 {
+            $i := $i - 1;
+            my %sym := @!BLOCKS[$i].symbol($name);
+            if +%sym {
+                return %sym<scope> eq $wanted_scope;
+            }
+        }
+        0;
+    }
+    
+    # Checks if the symbol is known.
+    method known_sym($/, @name) {
+        my $known := 0;
+        try {
+            self.find_sym(@name, $/);
+            $known := 1;
+        }
+        $known
+    }
+    
+    # Finds a symbol that has a known value at compile time from the
+    # perspective of the current scope. Checks for lexicals, then if
+    # that fails tries package lookup.
+    method find_sym(@name, $/) {
+        # Make sure it's not an empty name.
+        unless +@name { $/.CURSOR.panic("Cannot look up empty name"); }
+        
+        # If it's a single-part name, look through the lexical
+        # scopes.
+        if +@name == 1 {
+            my $final_name := @name[0];
+            my $i := +@!BLOCKS;
+            while $i > 0 {
+                $i := $i - 1;
+                my %sym := @!BLOCKS[$i].symbol($final_name);
+                if +%sym {
+                    if pir::exists(%sym, 'value') {
+                        return %sym<value>;
+                    }
+                    else {
+                        pir::die("No compile-time value for $final_name");
+                    }
+                }
+            }
+        }
+        
+        # If it's a multi-part name, see if the containing package
+        # is a lexical somewhere. Otherwise we fall back to looking
+        # in GLOBALish.
+        my $result := $*GLOBALish;
+        if +@name >= 2 {
+            my $first := @name[0];
+            my $i := +@!BLOCKS;
+            while $i > 0 {
+                $i := $i - 1;
+                my %sym := @!BLOCKS[$i].symbol($first);
+                if +%sym {
+                    if pir::exists(%sym, 'value') {
+                        $result := %sym<value>;
+                        @name.shift();
+                        $i := 0;
+                    }
+                    else {
+                        pir::die("No compile-time value for $first");
+                    }                    
+                }
+            }
+        }
+        
+        # Try to chase down the parts of the name.
+        for @name {
+            if pir::exists($result.WHO, ~$_) {
+                $result := ($result.WHO){$_};
+            }
+            else {
+                pir::die("Could not locate compile-time value for symbol " ~
+                    pir::join('::', @name));
+            }
+        }
+        
+        $result;
     }
 }
