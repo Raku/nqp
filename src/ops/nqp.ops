@@ -10,8 +10,8 @@ BEGIN_OPS_PREAMBLE
 #include "../6model/repr_registry.h"
 #include "../pmc/pmc_dispatchersub.h"
 #include "../pmc/pmc_nqpmultisig.h"
-#include "../6model/multi_dispatch.h"
 #include "../6model/serialization_context.h"
+#include "../guts/multi_dispatch.h"
 #include "pmc_sub.h"
 
 /* SHA1 algorithm. */
