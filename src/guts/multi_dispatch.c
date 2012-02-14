@@ -4,7 +4,6 @@
 #include "../6model/sixmodelobject.h"
 #include "../pmc/pmc_dispatchersub.h"
 #include "pmc_sub.h"
-#include "../pmc/pmc_nqpmultisig.h"
 #include "multi_dispatch.h"
 
 /* This file contains a somewhat simplified implementation of the Perl 6
@@ -142,15 +141,9 @@ static candidate_info** sort_candidates(PARROT_INTERP, PMC *candidates) {
 
         /* Get hold of signature, types and definednesses. */
         GETATTR_Sub_multi_signature(interp, candidate, multi_sig_pmc);
-        if (multi_sig_pmc->vtable->base_type == smo_id) {
-            multi_sig = (NQP_Signature *)PMC_data(multi_sig_pmc);
-            types_list = multi_sig->types;
-            definedness_list = multi_sig->definednesses;
-        }
-        else {
-            GETATTR_NQPMultiSig_types(interp, multi_sig_pmc, types_list);
-            GETATTR_NQPMultiSig_definedness_constraints(interp, multi_sig_pmc, definedness_list);
-        }
+        multi_sig = (NQP_Signature *)PMC_data(multi_sig_pmc);
+        types_list = multi_sig->types;
+        definedness_list = multi_sig->definednesses;
         sig_elems = VTABLE_elements(interp, types_list);
 
         /* Type information. */

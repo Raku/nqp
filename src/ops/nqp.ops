@@ -11,7 +11,6 @@ BEGIN_OPS_PREAMBLE
 #include "../6model/serialization_context.h"
 #include "../guts/multi_dispatch.h"
 #include "../pmc/pmc_dispatchersub.h"
-#include "../pmc/pmc_nqpmultisig.h"
 #include "pmc_sub.h"
 
 /* SHA1 algorithm. */
@@ -29,7 +28,6 @@ static INTVAL initialized = 0;
 static INTVAL stable_id = 0;
 static INTVAL smo_id    = 0;
 static INTVAL disp_id   = 0;
-static INTVAL ms_id     = 0;
 
 /* Built-in meta-objects. */
 static PMC *KnowHOW = NULL;
@@ -58,7 +56,6 @@ inline op nqp_dynop_setup() :base_core {
         stable_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "STable", 0));
         smo_id    = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
         disp_id   = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "DispatcherSub", 0));
-        ms_id     = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "NQPMultiSig", 0));
 
         /* Initialize the object model. */
         SixModelObject_initialize(interp, &KnowHOW, &KnowHOWAttribute);
@@ -1275,30 +1272,6 @@ list of dispatchees).
 */
 inline op is_dispatcher(out INT, in PMC) :base_core {
     $1 = $2->vtable->base_type == disp_id;
-}
-
-
-/*
-
-=item set_sub_multisig()
-
-Sets a sub's multi_signature. $1 is the sub, $2 is an array of type objects
-and $3 is is an array of definedness constraint descriptors.
-
-=cut
-
-*/
-inline op set_sub_multisig(in PMC, in PMC, in PMC) :base_core {
-    if ($1->vtable->base_type == enum_class_Sub) {
-        PMC *sig = Parrot_pmc_new(interp, ms_id);
-        SETATTR_NQPMultiSig_types(interp, sig, $2);
-        SETATTR_NQPMultiSig_definedness_constraints(interp, sig, $3);
-        SETATTR_Sub_multi_signature(interp, $1, sig);
-        PARROT_GC_WRITE_BARRIER(interp, $1);
-    }
-    else
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Can only use set_sub_multisig if first operand is a Sub.");
 }
 
 
