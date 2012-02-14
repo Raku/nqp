@@ -8,10 +8,9 @@ BEGIN_OPS_PREAMBLE
 /* 6modely includes. */
 #include "../6model/sixmodelobject.h"
 #include "../6model/repr_registry.h"
-#include "../pmc/pmc_dispatchersub.h"
-#include "../pmc/pmc_nqpmultisig.h"
 #include "../6model/serialization_context.h"
 #include "../guts/multi_dispatch.h"
+#include "../pmc/pmc_dispatchersub.h"
 #include "pmc_sub.h"
 
 /* SHA1 algorithm. */
@@ -58,7 +57,6 @@ inline op nqp_dynop_setup() :base_core {
         stable_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "STable", 0));
         smo_id    = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
         disp_id   = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "DispatcherSub", 0));
-        ms_id     = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "NQPMultiSig", 0));
 
         /* Initialize the object model. */
         SixModelObject_initialize(interp, &KnowHOW, &KnowHOWAttribute);
@@ -1277,6 +1275,7 @@ inline op is_dispatcher(out INT, in PMC) :base_core {
     $1 = $2->vtable->base_type == disp_id;
 }
 
+
 /*
 
 =item set_sub_multisig()
@@ -1293,6 +1292,26 @@ inline op set_sub_multisig(in PMC, in PMC, in PMC) :base_core {
         SETATTR_NQPMultiSig_types(interp, sig, $2);
         SETATTR_NQPMultiSig_definedness_constraints(interp, sig, $3);
         SETATTR_Sub_multi_signature(interp, $1, sig);
+        PARROT_GC_WRITE_BARRIER(interp, $1);
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use set_sub_multisig if first operand is a Sub.");
+}
+
+
+/*
+
+=item set_sub_multisig()
+
+Sets a sub's multi_signature. $1 is the sub, $2 is the signature object.
+
+=cut
+
+*/
+inline op set_sub_multisig(in PMC, in PMC) :base_core {
+    if ($1->vtable->base_type == enum_class_Sub) {
+        SETATTR_Sub_multi_signature(interp, $1, $2);
         PARROT_GC_WRITE_BARRIER(interp, $1);
     }
     else
