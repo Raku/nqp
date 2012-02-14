@@ -3,8 +3,8 @@
 #include "parrot/extend.h"
 #include "../6model/sixmodelobject.h"
 #include "../pmc/pmc_dispatchersub.h"
-#include "../pmc/pmc_nqpmultisig.h"
 #include "pmc_sub.h"
+#include "../pmc/pmc_nqpmultisig.h"
 #include "multi_dispatch.h"
 
 /* This file contains a somewhat simplified implementation of the Perl 6
@@ -121,7 +121,8 @@ static candidate_info** sort_candidates(PARROT_INTERP, PMC *candidates) {
             num_candidates, candidate_graph_node*);
     INTVAL insert_pos = 0;
     for (i = 0; i < num_candidates; i++) {
-        PMC *multi_sig, *types_list, *definedness_list;
+        PMC *multi_sig_pmc, *types_list, *definedness_list;
+        NQP_Signature *multi_sig;
         candidate_info *info;
         INTVAL sig_elems;
         INTVAL j;
@@ -135,9 +136,16 @@ static candidate_info** sort_candidates(PARROT_INTERP, PMC *candidates) {
         info->sub = candidate;
 
         /* Get hold of signature, types and definednesses. */
-        GETATTR_Sub_multi_signature(interp, candidate, multi_sig);
-        GETATTR_NQPMultiSig_types(interp, multi_sig, types_list);
-        GETATTR_NQPMultiSig_definedness_constraints(interp, multi_sig, definedness_list);
+        GETATTR_Sub_multi_signature(interp, candidate, multi_sig_pmc);
+        if (multi_sig_pmc->vtable->base_type == smo_id) {
+            multi_sig = (NQP_Signature *)PMC_data(multi_sig_pmc);
+            types_list = multi_sig->types;
+            definedness_list = multi_sig->definednesses;
+        }
+        else {
+            GETATTR_NQPMultiSig_types(interp, multi_sig_pmc, types_list);
+            GETATTR_NQPMultiSig_definedness_constraints(interp, multi_sig_pmc, definedness_list);
+        }
         sig_elems = VTABLE_elements(interp, types_list);
 
         /* Type information. */
