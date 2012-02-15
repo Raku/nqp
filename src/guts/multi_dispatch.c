@@ -120,10 +120,6 @@ static candidate_info** sort_candidates(PARROT_INTERP, PMC *candidates) {
             num_candidates, candidate_graph_node*);
     INTVAL insert_pos = 0;
     
-    /* Ensure we know what is a 6model object and what is not. */
-    if (!smo_id)
-        smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
-    
     for (i = 0; i < num_candidates; i++) {
         PMC *multi_sig_pmc, *types_list, *definedness_list;
         NQP_Signature *multi_sig;
@@ -250,11 +246,24 @@ static candidate_info** sort_candidates(PARROT_INTERP, PMC *candidates) {
     return result;
 }
 
+/* Gets the list of possible candidates to dispatch too. */
+static PMC *get_dispatchees(PARROT_INTERP, PMC *dispatcher) {
+    if (!smo_id)
+        smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
+    if (dispatcher->vtable->base_type == smo_id) {
+        NQP_Routine *r = (NQP_Routine *)PMC_data(dispatcher);
+        return r->dispatchees;
+    }
+    else {
+        return PARROT_DISPATCHERSUB(dispatcher)->dispatchees;
+    }
+}
+
 /* Performs a multiple dispatch using the candidates held in the passed
- * DispatcherSub and using the arguments in the passed capture. */
+ * dispatcher and using the arguments in the passed capture. */
 PMC *nqp_multi_dispatch(PARROT_INTERP, PMC *dispatcher, PMC *capture) {
     /* Get list and number of dispatchees. */
-    PMC *dispatchees = PARROT_DISPATCHERSUB(dispatcher)->dispatchees;
+    PMC *dispatchees = get_dispatchees(interp, dispatcher);
     const INTVAL num_candidates = VTABLE_elements(interp, dispatchees);
 
     /* Count arguments. */
