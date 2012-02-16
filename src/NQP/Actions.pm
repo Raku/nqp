@@ -454,7 +454,7 @@ class NQP::Actions is HLL::Actions {
             elsif $<twigil>[0] eq '!' {
                 # Construct PAST.
                 my $name := ~@name.pop;
-                my $ch   := PAST::Var.new( :name('$?CLASS') );
+                my $ch   := $*PKGDECL eq 'role' ?? PAST::Var.new( :name('$?CLASS') ) !! $*W.get_ref($*PACKAGE);
                 $ch<has_compile_time_value> := 1;
                 $ch<compile_time_value> := $*PACKAGE;
                 $past := PAST::Var.new(
