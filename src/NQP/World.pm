@@ -215,7 +215,7 @@ class NQP::World is HLL::World {
     # Registers a code object, and gives it a dynamic compilation thunk.
     # Makes a real code object if it's a dispatcher.
     method create_code($past, $name, $is_dispatcher) {
-        # For methods, we need a "stub" that we'll clone and use for the
+        # For code refs, we need a "stub" that we'll clone and use for the
         # compile-time representation. If it ever gets invoked it'll go
         # and compile the code and run it.
         # XXX Lexical environment.
@@ -233,13 +233,7 @@ class NQP::World is HLL::World {
             $dummy := $past<compile_time_dummy>;
         }
         else {
-            # What we create depends on whether it's a dispatcher or not.
-            # If it is a dispatcher, set the PMC type it uses and then use
-            # that for the dummy.
-            if $is_dispatcher {
-                $past.pirflags(':instanceof("DispatcherSub")');
-                $dummy := pir::assign__0PP(pir::new__Ps('DispatcherSub'), $stub_code);
-                
+            if $is_dispatcher && !$NEW_SER {
                 # The dispatcher will get cloned if more candidates are added in
                 # a subclass; this makes sure that we fix up the clone also.
                 pir::setprop__vPsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone) {
@@ -251,9 +245,7 @@ class NQP::World is HLL::World {
                     ));
                 });
             }
-            else {
-                $dummy := pir::clone__PP($stub_code);
-            }
+            $dummy := pir::clone__PP($stub_code);
             pir::assign__vPS($dummy, $name);
             if $NEW_SER {
                 pir::setprop__vPsP($dummy, 'STATIC_CODE_REF', $dummy);
@@ -269,8 +261,7 @@ class NQP::World is HLL::World {
         pir::setprop__vPsP($dummy, 'PAST', $past);
         
         # For fixup, need to assign the method body we actually compiled
-        # onto the one that went into the SC. Deserializing is easier -
-        # just the straight meta-method call.
+        # onto the one that went into the SC.
         if $NEW_SER {
             $fixups.push(PAST::Op.new(
                 :pirop('assign vPP'),
@@ -286,8 +277,39 @@ class NQP::World is HLL::World {
             self.add_fixup_task(:fixup_past($fixups));
         }
         
-        # Hand back the code object.
-        return $dummy;
+        # If it's a dispatcher, now need to wrap it in a code object,
+        # so we have a place to store the dispatch list.
+        if $is_dispatcher {
+            # Create it now.
+            my $code_type := self.find_sym(['NQPRoutine']);
+            my $code_obj  := nqp::create($code_type);
+            nqp::bindattr($code_obj, $code_type, '$!do', $dummy);
+            nqp::bindattr($code_obj, $code_type, '$!dispatchees', nqp::list());
+            my $slot := self.add_object($code_obj);
+            
+            # Deserialization code.
+            unless $NEW_SER {
+                self.add_fixup_task(:deserialize_past(PAST::Stmts.new(
+                    self.add_object_to_cur_sc_past($slot,
+                        PAST::Op.new( :pirop('repr_instance_of__PP'), self.get_ref($code_type) )),
+                    PAST::Op.new( :pirop('setattribute__vPPsP'),
+                        self.get_ref($code_obj),
+                        self.get_ref($code_type),
+                        '$!do',
+                        PAST::Val.new( :value($past) )),
+                    PAST::Op.new( :pirop('setattribute__vPPsP'),
+                        self.get_ref($code_obj),
+                        self.get_ref($code_type),
+                        '$!dispatchees',
+                        PAST::Op.new( :pasttype('list') ))
+                )));
+            }
+            
+            $code_obj
+        }
+        else {
+            return $dummy;
+        }
     }
     
     # Creates a meta-object for a package, adds it to the root objects and
@@ -365,9 +387,9 @@ class NQP::World is HLL::World {
         # Deserialization code - goes away with new serializer.
         unless $NEW_SER {
             my $slot_past := self.get_slot_past_for_object($obj);
-            my $code_past := pir::getprop__PsP('PAST', $code) ??
-                PAST::Val.new( :value(pir::getprop__PsP('PAST', $code)) ) !!
-                self.get_slot_past_for_object($code);
+            my $code_past := nqp::isnull(pir::getprop__PsP('PAST', $code)) ??
+                self.get_slot_past_for_object($code) !!
+                PAST::Val.new( :value(pir::getprop__PsP('PAST', $code)) );
             self.add_fixup_task(
                 :deserialize_past(PAST::Op.new(
                     :pasttype('callmethod'), :name($meta_method_name),
