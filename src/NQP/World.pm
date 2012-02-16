@@ -212,6 +212,84 @@ class NQP::World is HLL::World {
         self.add_fixup_task(:deserialize_past($fixup), :fixup_past($fixup));
     }
     
+    # Registers a code object, and gives it a dynamic compilation thunk.
+    # Makes a real code object if it's a dispatcher.
+    method create_code($past, $name, $is_dispatcher) {
+        # For methods, we need a "stub" that we'll clone and use for the
+        # compile-time representation. If it ever gets invoked it'll go
+        # and compile the code and run it.
+        # XXX Lexical environment.
+        # XXX Cache compiled output.
+        my $stub_code := sub (*@args, *%named) {
+            my $compiled := PAST::Compiler.compile($past);
+            $compiled(|@args, |%named);
+        };
+        
+        # See if we already have our compile-time dummy. If not, create it.
+        my $fixups := PAST::Stmts.new();
+        my $dummy;
+        my $code_ref_idx;
+        if pir::defined($past<compile_time_dummy>) {
+            $dummy := $past<compile_time_dummy>;
+        }
+        else {
+            # What we create depends on whether it's a dispatcher or not.
+            # If it is a dispatcher, set the PMC type it uses and then use
+            # that for the dummy.
+            if $is_dispatcher {
+                $past.pirflags(':instanceof("DispatcherSub")');
+                $dummy := pir::assign__0PP(pir::new__Ps('DispatcherSub'), $stub_code);
+                
+                # The dispatcher will get cloned if more candidates are added in
+                # a subclass; this makes sure that we fix up the clone also.
+                pir::setprop__vPsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone) {
+                    self.add_code_LEGACY($clone);
+                    $fixups.push(PAST::Op.new(
+                        :pirop('assign vPP'),
+                        self.get_slot_past_for_object($clone),
+                        PAST::Val.new( :value(pir::getprop__PsP('PAST', $orig)) )
+                    ));
+                });
+            }
+            else {
+                $dummy := pir::clone__PP($stub_code);
+            }
+            pir::assign__vPS($dummy, $name);
+            if $NEW_SER {
+                pir::setprop__vPsP($dummy, 'STATIC_CODE_REF', $dummy);
+                $code_ref_idx := self.add_root_code_ref($dummy, $past);
+            }
+            else {
+                self.add_code_LEGACY($dummy);
+            }
+            $past<compile_time_dummy> := $dummy;
+        }
+        
+        # Attach PAST as a property to the dummy.
+        pir::setprop__vPsP($dummy, 'PAST', $past);
+        
+        # For fixup, need to assign the method body we actually compiled
+        # onto the one that went into the SC. Deserializing is easier -
+        # just the straight meta-method call.
+        if $NEW_SER {
+            $fixups.push(PAST::Op.new(
+                :pirop('assign vPP'),
+                self.get_slot_past_for_code_ref_at($code_ref_idx),
+                PAST::Val.new( :value($past) )
+            ));
+        } else {
+            $fixups.push(PAST::Op.new(
+                :pirop('assign vPP'),
+                self.get_slot_past_for_object($dummy),
+                PAST::Val.new( :value($past) )
+            ));
+            self.add_fixup_task(:fixup_past($fixups));
+        }
+        
+        # Hand back the code object.
+        return $dummy;
+    }
+    
     # Creates a meta-object for a package, adds it to the root objects and
     # stores an event for the action. Returns the created object.
     method pkg_create_mo($how, :$name, :$repr) {
@@ -280,92 +358,24 @@ class NQP::World is HLL::World {
     }
     
     # Adds a method to the meta-object, and stores an event for the action.
-    # Note that methods are always subject to fixing up since the actual
-    # compiled code isn't available until compilation is complete.
-    method pkg_add_method($obj, $meta_method_name, $name, $method_past, $is_dispatcher) {
-        # For methods, we need a "stub" that we'll clone and use for the
-        # compile-time representation. If it ever gets invoked it'll go
-        # and compile the code and run it.
-        # XXX Lexical environment.
-        # XXX Cache compiled output.
-        my $stub_code := sub (*@args, *%named) {
-            my $compiled := PAST::Compiler.compile($method_past);
-            $compiled(|@args, |%named);
-        };
-        
-        # See if we already have our compile-time dummy. If not, create it.
-        my $fixups := PAST::Stmts.new();
-        my $dummy;
-        my $code_ref_idx;
-        if pir::defined($method_past<compile_time_dummy>) {
-            $dummy := $method_past<compile_time_dummy>;
-        }
-        else {
-            # What we create depends on whether it's a dispatcher or not.
-            # If it is a dispatcher, set the PMC type it uses and then use
-            # that for the dummy.
-            if $is_dispatcher {
-                $method_past.pirflags(':instanceof("DispatcherSub")');
-                $dummy := pir::assign__0PP(pir::new__Ps('DispatcherSub'), $stub_code);
-                
-                # The dispatcher will get cloned if more candidates are added in
-                # a subclass; this makes sure that we fix up the clone also.
-                pir::setprop__vPsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone) {
-                    self.add_code_LEGACY($clone);
-                    $fixups.push(PAST::Op.new(
-                        :pirop('assign vPP'),
-                        self.get_slot_past_for_object($clone),
-                        PAST::Val.new( :value(pir::getprop__PsP('PAST', $orig)) )
-                    ));
-                });
-            }
-            else {
-                $dummy := pir::clone__PP($stub_code);
-            }
-            pir::assign__vPS($dummy, $name);
-            if $NEW_SER {
-                pir::setprop__vPsP($dummy, 'STATIC_CODE_REF', $dummy);
-                $code_ref_idx := self.add_root_code_ref($dummy, $method_past);
-            }
-            else {
-                self.add_code_LEGACY($dummy);
-            }
-            $method_past<compile_time_dummy> := $dummy;
-        }
-        
-        # Attach PAST as a property to the dummy.
-        pir::setprop__vPsP($dummy, 'PAST', $method_past);
-        
+    method pkg_add_method($obj, $meta_method_name, $name, $code) {
         # Add it to the compile time meta-object.
-        $obj.HOW."$meta_method_name"($obj, $name, $dummy);
-        
-        # For fixup, need to assign the method body we actually compiled
-        # onto the one that went into the SC. Deserializing is easier -
-        # just the straight meta-method call.
-        if $NEW_SER {
-            $fixups.push(PAST::Op.new(
-                :pirop('assign vPP'),
-                self.get_slot_past_for_code_ref_at($code_ref_idx),
-                PAST::Val.new( :value($method_past) )
-            ));
-        } else {
-            # XXX need to re-do the following for the new serialization
-            $fixups.push(PAST::Op.new(
-                :pirop('assign vPP'),
-                self.get_slot_past_for_object($dummy),
-                PAST::Val.new( :value($method_past) )
-            ));
-            # XXX and below bit for deserialization goes away...
+        $obj.HOW."$meta_method_name"($obj, $name, $code);
+                
+        # Deserialization code - goes away with new serializer.
+        unless $NEW_SER {
             my $slot_past := self.get_slot_past_for_object($obj);
+            my $code_past := pir::getprop__PsP('PAST', $code) ??
+                PAST::Val.new( :value(pir::getprop__PsP('PAST', $code)) ) !!
+                self.get_slot_past_for_object($code);
             self.add_fixup_task(
                 :deserialize_past(PAST::Op.new(
                     :pasttype('callmethod'), :name($meta_method_name),
                     PAST::Op.new( :pirop('get_how PP'), $slot_past ),
                     $slot_past,
                     $name,
-                    PAST::Val.new( :value($method_past) )
-                )),
-                :fixup_past($fixups));
+                    $code_past
+                )));
         }
     }
     

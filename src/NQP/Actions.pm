@@ -850,7 +850,8 @@ class NQP::Actions is HLL::Actions {
             # Insert it into the method table.
             my $meta_meth := $*MULTINESS eq 'multi' ?? 'add_multi_method' !! 'add_method';
             my $is_dispatcher := $*MULTINESS eq 'proto';
-            $*W.pkg_add_method($*PACKAGE, $meta_meth, $name, $past, $is_dispatcher);
+            my $code := $*W.create_code($past, $name, $is_dispatcher);
+            $*W.pkg_add_method($*PACKAGE, $meta_meth, $name, $code);
             
             # Install it in the package also if needed.
             if $*SCOPE eq 'our' {
@@ -1001,7 +1002,7 @@ class NQP::Actions is HLL::Actions {
             my $is_dispatcher := $*SCOPE eq 'proto';
             make -> $match {
                 $*W.pkg_add_method($package, 'add_parrot_vtable_mapping', $name, 
-                    $match.ast<block_past>, $is_dispatcher);
+                    $*W.create_code($match.ast<block_past>, $name, $is_dispatcher));
             };
         }
         elsif $<longname> eq 'parrot_vtable_handler' {
@@ -1054,7 +1055,7 @@ class NQP::Actions is HLL::Actions {
                     )
                 );
                 for @($past) {
-                    $*W.pkg_add_method($*PACKAGE, 'add_method', $_.name(), $_, 0);
+                    $*W.pkg_add_method($*PACKAGE, 'add_method', $_.name(), $*W.create_code($_, $_.name(), 0));
                 }
         }
         elsif $key eq 'open' {
@@ -1075,7 +1076,7 @@ class NQP::Actions is HLL::Actions {
             
             if $*PKGDECL && pir::can($*PACKAGE.HOW, 'add_method') {
                 # Add the actual method.
-                $*W.pkg_add_method($*PACKAGE, 'add_method', $name, $regex, 0);
+                $*W.pkg_add_method($*PACKAGE, 'add_method', $name, $*W.create_code($regex, $name, 0));
                 
                 # Produce the prefixes method and add it.
                 my @prefixes := $<p6regex>.ast.prefix_list();
@@ -1084,7 +1085,7 @@ class NQP::Actions is HLL::Actions {
                     PAST::Op.new( :pasttype('list'), |@prefixes )
                 );
                 $*W.pkg_add_method($*PACKAGE, 'add_method', $prefix_meth.name,
-                    $prefix_meth, 0);
+                    $*W.create_code($prefix_meth, $prefix_meth.name, 0));
             }
             
             # In sink context, we don't need the Regex::Regex object.
