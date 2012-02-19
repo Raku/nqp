@@ -235,24 +235,43 @@ class NQP::World is HLL::World {
         else {
             $dummy := pir::clone__PP($stub_code);
             pir::assign__vPS($dummy, $name);
-            if $is_dispatcher && !$NEW_SER {
+            if $is_dispatcher {
                 # The dispatcher will get cloned if more candidates are added in
                 # a subclass; this makes sure that we fix up the clone also.
-                pir::setprop__vPsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone, $dispatcher_code_obj) {
-                    self.add_code_LEGACY($clone);
-                    self.add_object($dispatcher_code_obj);
-                    $fixups.push(PAST::Stmts.new(
-                        PAST::Op.new(
-                            :pirop('assign vPP'),
-                            self.get_slot_past_for_object($clone),
-                            PAST::Val.new( :value(pir::getprop__PsP('PAST', $orig)) )
-                        ),
-                        PAST::Op.new(
-                            :pirop('set_sub_code_object vPP'),
-                            self.get_slot_past_for_object($clone),
-                            self.get_ref($dispatcher_code_obj)
-                        )));
-                });
+                if $NEW_SER && !self.is_precompilation_mode() {
+                    pir::setprop__vPsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone, $dispatcher_code_obj) {
+                        my $clone_idx := self.add_root_code_ref($clone, $past);
+                        self.add_object($dispatcher_code_obj);
+                        $fixups.push(PAST::Stmts.new(
+                            PAST::Op.new(
+                                :pirop('assign vPP'),
+                                self.get_slot_past_for_code_ref_at($clone_idx),
+                                PAST::Val.new( :value(pir::getprop__PsP('PAST', $orig)) )
+                            ),
+                            PAST::Op.new(
+                                :pirop('set_sub_code_object vPP'),
+                                self.get_slot_past_for_code_ref_at($clone_idx),
+                                self.get_ref($dispatcher_code_obj)
+                            )));
+                    });
+                }
+                elsif !$NEW_SER {
+                    pir::setprop__vPsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone, $dispatcher_code_obj) {
+                        self.add_code_LEGACY($clone);
+                        self.add_object($dispatcher_code_obj);
+                        $fixups.push(PAST::Stmts.new(
+                            PAST::Op.new(
+                                :pirop('assign vPP'),
+                                self.get_slot_past_for_object($clone),
+                                PAST::Val.new( :value(pir::getprop__PsP('PAST', $orig)) )
+                            ),
+                            PAST::Op.new(
+                                :pirop('set_sub_code_object vPP'),
+                                self.get_slot_past_for_object($clone),
+                                self.get_ref($dispatcher_code_obj)
+                            )));
+                    });
+                }
             }
             if $NEW_SER {
                 pir::setprop__vPsP($dummy, 'STATIC_CODE_REF', $dummy);
@@ -281,8 +300,8 @@ class NQP::World is HLL::World {
                 self.get_slot_past_for_object($dummy),
                 PAST::Val.new( :value($past) )
             ));
-            self.add_fixup_task(:fixup_past($fixups));
         }
+        self.add_fixup_task(:fixup_past($fixups));
         
         # If it's a dispatcher, now need to wrap it in a code object,
         # so we have a place to store the dispatch list.
@@ -313,13 +332,23 @@ class NQP::World is HLL::World {
                         :pirop('set_sub_code_object vPP'),
                         PAST::Val.new( :value($past) ),
                         self.get_ref($code_obj)
-                    ))),
-                    :fixup_past(PAST::Op.new(
-                        :pirop('set_sub_code_object vPP'),
-                        self.get_slot_past_for_object($dummy),
-                        self.get_ref($code_obj)
-                    )));
+                    ))));
             }
+            
+            # Add fixup task.
+            self.add_fixup_task(
+                :deserialize_past(PAST::Op.new(
+                    :pirop('set_sub_code_object vPP'),
+                    PAST::Val.new( :value($past) ),
+                    self.get_ref($code_obj)
+                )),
+                :fixup_past(PAST::Op.new(
+                    :pirop('set_sub_code_object vPP'),
+                    ($NEW_SER ??
+                        self.get_slot_past_for_code_ref_at($code_ref_idx) !!
+                        self.get_slot_past_for_object($dummy)),
+                    self.get_ref($code_obj)
+                )));
             
             $code_obj
         }
