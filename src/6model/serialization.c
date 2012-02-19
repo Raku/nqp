@@ -611,6 +611,13 @@ static void serialize_stable(PARROT_INTERP, SerializationWriter *writer, PMC *st
     /* Mode flags. */
     write_int_func(interp, writer, st->mode_flags);
     
+    /* Boolification spec. */
+    write_int_func(interp, writer, st->boolification_spec != NULL);
+    if (st->boolification_spec) {
+        write_int_func(interp, writer, st->boolification_spec->mode);
+        write_ref_func(interp, writer, st->boolification_spec->method);
+    }
+    
     /* XXX More to do here. */
     printf("WARNING: STable serialization not yet fully implemented\n");
     
@@ -1320,6 +1327,13 @@ static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVA
     
     /* Mode flags. */
     st->mode_flags = read_int_func(interp, reader);
+    
+    /* Boolification spec. */
+    if (read_int_func(interp, reader)) {
+        st->boolification_spec = mem_sys_allocate(sizeof(BoolificationSpec));
+        st->boolification_spec->mode = read_int_func(interp, reader);
+        st->boolification_spec->method = read_ref_func(interp, reader);
+    }
 
     /* XXX More to do here. */
     printf("WARNING: STable deserialization not yet fully implemented\n");
