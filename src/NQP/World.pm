@@ -553,7 +553,7 @@ class NQP::World is HLL::World {
         $obj.HOW.add_parrot_vtable_handler_mapping($obj, $name, $att_name);
 
         # Emit code to add it when deserializing.
-        if self.is_precompilation_mode() {
+        if self.is_precompilation_mode() && !$NEW_SER {
             my $slot_past := self.get_slot_past_for_object($obj);
             self.add_fixup_task(:deserialize_past(PAST::Op.new(
                 :pasttype('callmethod'), :name('add_parrot_vtable_handler_mapping'),
