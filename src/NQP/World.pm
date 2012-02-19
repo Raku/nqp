@@ -1,6 +1,6 @@
 use NQPP6Regex;
 
-my $NEW_SER := 0;
+my $NEW_SER := 1;
 
 class NQP::World is HLL::World {
     # The stack of lexical pads, actually as PAST::Block objects. The
