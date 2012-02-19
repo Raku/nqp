@@ -82,10 +82,16 @@ static void write_double(char *buffer, size_t offset, double value) {
 /* Adds an item to the string heap if needed, and returns the index where
  * it may be found. */
 static Parrot_Int4 add_string_to_heap(PARROT_INTERP, SerializationWriter *writer, STRING *s) {
-    /* XXX Use seen hash to avoid dupes. */
-    INTVAL next_idx = VTABLE_elements(interp, writer->root.string_heap);
-    VTABLE_set_string_keyed_int(interp, writer->root.string_heap, next_idx, s);
-    return (Parrot_Int4)next_idx;
+    if (!STRING_IS_NULL(s) && VTABLE_exists_keyed_str(interp, writer->seen_strings, s)) {
+        return (Parrot_Int4)VTABLE_get_integer_keyed_str(interp, writer->seen_strings, s);
+    }
+    else {
+        INTVAL next_idx = VTABLE_elements(interp, writer->root.string_heap);
+        VTABLE_set_string_keyed_int(interp, writer->root.string_heap, next_idx, s);
+        if (!STRING_IS_NULL(s))
+            VTABLE_set_integer_keyed_str(interp, writer->seen_strings, s, next_idx);
+        return (Parrot_Int4)next_idx;
+    }
 }
 
 /* Gets the ID of a serialization context. Returns 0 if it's the current
@@ -783,6 +789,7 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     writer->contexts_list       = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
     writer->root.string_heap    = empty_string_heap;
     writer->root.dependent_scs  = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+    writer->seen_strings        = Parrot_pmc_new(interp, enum_class_Hash);
     
     /* Allocate initial memory space for storing serialized tables and data. */
     writer->dependencies_table_alloc = DEP_TABLE_ENTRY_SIZE * 4;
