@@ -277,7 +277,8 @@ static PMC * closure_to_static_code_ref(PARROT_INTERP, PMC *closure, INTVAL fata
         {
             if (fatal)
                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                    "Serialization Error: missing static code ref for closure");
+                    "Serialization Error: missing static code ref for closure '%Ss'",
+                    VTABLE_get_string(interp, closure));
             else
                 return PMCNULL;
         }
