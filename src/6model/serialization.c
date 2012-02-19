@@ -1336,30 +1336,40 @@ static void deserialize_object(PARROT_INTERP, SerializationReader *reader, INTVA
         read_int32(obj_table_row, 0),   /* The SC in the dependencies table, + 1 */
         read_int32(obj_table_row, 4));  /* The index in that SC */
 
-    /* Allocate the object, fiddling things so that it gets wrapped in the
-     * PMC we want it to. */
-    set_wrapping_object(obj);
-    STABLE_STRUCT(stable)->REPR->allocate(interp, STABLE_STRUCT(stable));
+    /* Is it a type object? */
+    if ((read_int32(obj_table_row, 12) & 1) != 1) {
+        /* Yes; allocate a bare object and set up the STable pointer; also mark
+         * it as a type object. */
+        SixModelObjectCommonalities *body = mem_allocate_zeroed_typed(SixModelObjectCommonalities);
+        body->stable = stable;
+        PMC_data(obj) = body;
+        MARK_AS_TYPE_OBJECT(obj);
+    }
+    else {        
+        /* Instance; allocate the object, fiddling things so that it gets wrapped
+         * in the PMC we want it to. */
+        set_wrapping_object(obj);
+        STABLE_STRUCT(stable)->REPR->allocate(interp, STABLE_STRUCT(stable));
+
+        /* Set current read buffer to the correct thing. */
+        reader->cur_read_buffer = &(reader->root.objects_data);
+        reader->cur_read_offset = &(reader->objects_data_offset);
+        reader->cur_read_end    = &(reader->objects_data_end);
+         
+        /* Delegate to its deserialization REPR function. */
+        reader->objects_data_offset = read_int32(obj_table_row, 8);        
+        if (REPR(obj)->deserialize)
+            REPR(obj)->deserialize(interp, STABLE(obj), OBJECT_BODY(obj), reader);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Missing deserialize REPR function");
+    }
     
     /* Tag object with this SC, so any future referencing against it
      * works out. */
     SC_PMC(obj) = reader->root.sc;
     
-    /* Set current read buffer to the correct thing. */
-    reader->cur_read_buffer = &(reader->root.objects_data);
-    reader->cur_read_offset = &(reader->objects_data_offset);
-    reader->cur_read_end    = &(reader->objects_data_end);
-     
-    /* Delegate to its deserialization REPR function. */
-    reader->objects_data_offset = read_int32(obj_table_row, 8);
-    if ((read_int32(obj_table_row, 12) & 1) != 1)
-        MARK_AS_TYPE_OBJECT(obj);
-    else if (REPR(obj)->deserialize)
-        REPR(obj)->deserialize(interp, STABLE(obj), OBJECT_BODY(obj), reader);
-    else
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Missing deserialize REPR function");
-
+    /* Write barrier it. */
     PARROT_GC_WRITE_BARRIER(interp, obj);
 }
 
