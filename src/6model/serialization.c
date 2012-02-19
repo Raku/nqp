@@ -608,6 +608,9 @@ static void serialize_stable(PARROT_INTERP, SerializationWriter *writer, PMC *st
     for (i = 0; i < st->type_check_cache_length; i++)
         write_ref_func(interp, writer, st->type_check_cache[i]);
     
+    /* Mode flags. */
+    write_int_func(interp, writer, st->mode_flags);
+    
     /* XXX More to do here. */
     printf("WARNING: STable serialization not yet fully implemented\n");
     
@@ -1314,6 +1317,9 @@ static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVA
         for (i = 0; i < st->type_check_cache_length; i++)
             st->type_check_cache[i] = read_ref_func(interp, reader);
     }
+    
+    /* Mode flags. */
+    st->mode_flags = read_int_func(interp, reader);
 
     /* XXX More to do here. */
     printf("WARNING: STable deserialization not yet fully implemented\n");
