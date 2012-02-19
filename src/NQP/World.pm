@@ -301,8 +301,17 @@ class NQP::World is HLL::World {
                         self.get_ref($code_obj),
                         self.get_ref($code_type),
                         '$!dispatchees',
-                        PAST::Op.new( :pasttype('list') ))
-                )));
+                        PAST::Op.new( :pasttype('list') )),
+                    PAST::Op.new(
+                        :pirop('set_sub_code_object vPP'),
+                        PAST::Val.new( :value($past) ),
+                        self.get_ref($code_obj)
+                    ))),
+                    :fixup_past(PAST::Op.new(
+                        :pirop('set_sub_code_object vPP'),
+                        self.get_slot_past_for_object($dummy),
+                        self.get_ref($code_obj)
+                    )));
             }
             
             $code_obj

@@ -250,8 +250,8 @@ static candidate_info** sort_candidates(PARROT_INTERP, PMC *candidates) {
 static PMC *get_dispatchees(PARROT_INTERP, PMC *dispatcher) {
     if (!smo_id)
         smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
-    if (dispatcher->vtable->base_type == smo_id) {
-        NQP_Routine *r = (NQP_Routine *)PMC_data(dispatcher);
+    if (dispatcher->vtable->base_type == enum_class_Sub && PARROT_SUB(dispatcher)->multi_signature->vtable->base_type == smo_id) {
+        NQP_Routine *r = (NQP_Routine *)PMC_data(PARROT_SUB(dispatcher)->multi_signature);
         return r->dispatchees;
     }
     else {

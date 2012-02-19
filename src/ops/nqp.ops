@@ -1154,7 +1154,9 @@ inline op multi_dispatch_over_lexical_candidates(out PMC) :base_core {
     PMC *cur_ctx = CURRENT_CONTEXT(interp);
     while (!PMC_IS_NULL(cur_ctx)) {
         Parrot_Context *ctx_struct = CONTEXT_STRUCT(cur_ctx);
-        if (ctx_struct->current_sub->vtable->base_type == disp_id) {
+        if (ctx_struct->current_sub->vtable->base_type == disp_id ||
+                ctx_struct->current_sub->vtable->base_type == enum_class_Sub &&
+                PARROT_SUB(ctx_struct->current_sub)->multi_signature->vtable->base_type == smo_id) {
             /* Found a dispatcher. Enter the multi-dispatcher to find a the
              * best candidate, if any. */
             PMC *chosen = nqp_multi_dispatch(interp, ctx_struct->current_sub, cur_ctx);
@@ -1292,6 +1294,27 @@ inline op set_sub_multisig(in PMC, in PMC) :base_core {
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use set_sub_multisig if first operand is a Sub.");
+}
+
+
+/*
+
+=item set_sub_code_object()
+
+Associates a high level code object with a Parrot sub. $1 is the sub, $2 is the
+code object.
+
+=cut
+
+*/
+inline op set_sub_code_object(in PMC, in PMC) :base_core {
+    if ($1->vtable->base_type == enum_class_Sub) {
+        SETATTR_Sub_multi_signature(interp, $1, $2);
+        PARROT_GC_WRITE_BARRIER(interp, $1);
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use set_sub_code_object if first operand is a Sub.");
 }
 
 
