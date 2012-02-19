@@ -293,7 +293,8 @@ static PMC * closure_to_static_code_ref(PARROT_INTERP, PMC *closure, INTVAL fata
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Serialization Error: unknown static lexical info type");
+            "Serialization Error: unknown static lexical info type for '%Ss'",
+            VTABLE_get_string(interp, closure));
     }
 }
 
