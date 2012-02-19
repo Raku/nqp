@@ -578,6 +578,23 @@ class NQP::World is HLL::World {
                 $slot_past
             )));
         }
+        if self.is_precompilation_mode() && $NEW_SER {
+            # Make sure we fix up Parrot-specific vtable handling.
+            if pir::can__IPs($obj.HOW, 'publish_parrot_vtable_mapping') {
+                my $slot_past := self.get_slot_past_for_object($obj);
+                self.add_fixup_task(:deserialize_past(PAST::Stmts.new(
+                    PAST::Op.new(
+                        :pasttype('callmethod'), :name('publish_parrot_vtable_mapping'),
+                        PAST::Op.new( :pirop('get_how PP'), $slot_past ),
+                        $slot_past
+                    ),
+                    PAST::Op.new(
+                        :pasttype('callmethod'), :name('publish_parrot_vtablee_handler_mapping'),
+                        PAST::Op.new( :pirop('get_how PP'), $slot_past ),
+                        $slot_past
+                    ))));
+            }
+        }
     }
     
     # Generates a series of PAST operations that will build this context if
