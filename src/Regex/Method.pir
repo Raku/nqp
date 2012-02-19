@@ -31,6 +31,11 @@ containers for Regex subs that need .ACCEPTS and other regex attributes.
     RegexWHO["Method"] = method_type_obj
     set_global "$?CLASS", method_type_obj
     method_how = get_how method_type_obj
+    
+    # Add to serialization context.
+    $P0 = nqp_get_sc "__REGEX_CORE_SC__"
+    nqp_set_sc_object "__REGEX_CORE_SC__", 2, method_type_obj
+    nqp_set_sc_for_object method_type_obj, $P0
 
     # Set default parent.
     .local pmc def_parent
@@ -48,13 +53,17 @@ containers for Regex subs that need .ACCEPTS and other regex attributes.
     # Add methods.
     .const 'Sub' $P1 = 'Regex_Method_new'
     method_how.'add_method'(method_type_obj, 'new', $P1)
+    'add_code_to_sc'($P1)
     .const 'Sub' $P2 = 'Regex_Method_ACCEPTS'
     method_how.'add_method'(method_type_obj, 'ACCEPTS', $P2)
+    'add_code_to_sc'($P2)
     .const 'Sub' $P2 = 'Regex_Method_Str'
     method_how.'add_method'(method_type_obj, 'Str', $P2)
     method_how.'add_parrot_vtable_mapping'(method_type_obj, 'get_string', $P2)
+    'add_code_to_sc'($P2)
     .const 'Sub' $P3 = 'Regex_Method_invoke'
     method_how.'add_parrot_vtable_mapping'(method_type_obj, 'invoke', $P3)
+    'add_code_to_sc'($P3)
     
     # Compose.
     method_how."compose"(method_type_obj)
@@ -65,6 +74,11 @@ containers for Regex subs that need .ACCEPTS and other regex attributes.
     RegexWHO["Regex"] = regex_type_obj
     regex_how = get_how regex_type_obj
     
+    # Add to serialization context.
+    $P0 = nqp_get_sc "__REGEX_CORE_SC__"
+    nqp_set_sc_object "__REGEX_CORE_SC__", 3, regex_type_obj
+    nqp_set_sc_for_object regex_type_obj, $P0
+    
     # XXXNS Old namespace handling installation, during migration to new.
     set_hll_global ["Regex"], "Regex", regex_type_obj
     
@@ -74,6 +88,7 @@ containers for Regex subs that need .ACCEPTS and other regex attributes.
     # Add methods.
     .const 'Sub' $P4 = 'Regex_Regex_ACCEPTS'
     regex_how.'add_method'(regex_type_obj, 'ACCEPTS', $P4)
+    'add_code_to_sc'($P4)
     
     # Compose.
     regex_how."compose"(regex_type_obj)

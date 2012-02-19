@@ -57,6 +57,26 @@ This file brings together the various Regex modules needed for Regex.pbc .
     .const 'Sub' $P2 = 'Regex_Outer'
     $P2.'set_outer_ctx'($P1)
     $P2()
+    
+    # Initialize SC code object counter.
+    $P3 = box 0
+    set_hll_global 'SC_CODE_COUNT', $P3
+.end
+
+.sub 'add_code_to_sc'
+    .param pmc code
+
+    $P0 = nqp_get_sc "__REGEX_CORE_SC__"
+    $P1 = get_hll_global 'SC_CODE_COUNT'
+    $I0 = $P1
+    
+    nqp_add_code_ref_to_sc $P0, $I0, code
+    setprop code, 'SC', $P0
+    setprop code, 'STATIC_CODE_REF', code
+    
+    inc $I0
+    $P1 = box $I0
+    set_hll_global 'SC_CODE_COUNT', $P1
 .end
 
 .include 'src/Regex/Cursor.pir'
@@ -101,13 +121,11 @@ This file brings together the various Regex modules needed for Regex.pbc .
     
     # Add PAST dummy NS to the SC.
     $P0 = nqp_get_sc "__REGEX_CORE_SC__"
-    nqp_set_sc_object "__REGEX_CORE_SC__", 1, PAST
+    nqp_set_sc_object "__REGEX_CORE_SC__", 4, PAST
     nqp_set_sc_for_object PAST, $P0
     
     # Add _dumper to the SC.
-    nqp_add_code_ref_to_sc $P0, 0, _dumper
-    setprop _dumper, 'SC', $P0
-    setprop _dumper, 'STATIC_CODE_REF', _dumper
+    'add_code_to_sc'(_dumper)
     
     ## XXX Legacy namespace import.
     .local pmc hllns, imports
