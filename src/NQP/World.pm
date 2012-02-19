@@ -112,7 +112,7 @@ class NQP::World is HLL::World {
         # Make sure we do the loading during deserialization.
         if self.is_precompilation_mode() {
             if $NEW_SER {
-                self.add_fixup_task(:deserialize_past(PAST::Stmts.new(
+                self.add_load_dependency_task(:deserialize_past(PAST::Stmts.new(
                     PAST::Op.new(
                         :pirop('load_bytecode vs'), 'ModuleLoader.pbc'
                     ),
