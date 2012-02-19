@@ -4,6 +4,7 @@ my knowhow NQPRoutine {
     has $!dispatchees;
     has $!dispatch_cache;
     method add_dispatchee($code) {
+        $!dispatchees := [] unless $!dispatchees;
         $!dispatchees.push($code);
     }
     method is_dispatcher() {
@@ -11,7 +12,10 @@ my knowhow NQPRoutine {
     }
     method derive_dispatcher() {
         my $der := pir::repr_clone__PP(self);
+        my $do  := pir::clone__PP($!do);
+        nqp::bindattr($der, NQPRoutine, '$!do', $do);
         nqp::bindattr($der, NQPRoutine, '$!dispatchees', pir::clone__PP($!dispatchees));
+        pir::set_sub_code_object__vPP($do, $der);
         $der
     }
 }
