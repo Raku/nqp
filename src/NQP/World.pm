@@ -233,20 +233,27 @@ class NQP::World is HLL::World {
             $dummy := $past<compile_time_dummy>;
         }
         else {
+            $dummy := pir::clone__PP($stub_code);
+            pir::assign__vPS($dummy, $name);
             if $is_dispatcher && !$NEW_SER {
                 # The dispatcher will get cloned if more candidates are added in
                 # a subclass; this makes sure that we fix up the clone also.
-                pir::setprop__vPsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone) {
+                pir::setprop__vPsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone, $dispatcher_code_obj) {
                     self.add_code_LEGACY($clone);
-                    $fixups.push(PAST::Op.new(
-                        :pirop('assign vPP'),
-                        self.get_slot_past_for_object($clone),
-                        PAST::Val.new( :value(pir::getprop__PsP('PAST', $orig)) )
-                    ));
+                    self.add_object($dispatcher_code_obj);
+                    $fixups.push(PAST::Stmts.new(
+                        PAST::Op.new(
+                            :pirop('assign vPP'),
+                            self.get_slot_past_for_object($clone),
+                            PAST::Val.new( :value(pir::getprop__PsP('PAST', $orig)) )
+                        ),
+                        PAST::Op.new(
+                            :pirop('set_sub_code_object vPP'),
+                            self.get_slot_past_for_object($clone),
+                            self.get_ref($dispatcher_code_obj)
+                        )));
                 });
             }
-            $dummy := pir::clone__PP($stub_code);
-            pir::assign__vPS($dummy, $name);
             if $NEW_SER {
                 pir::setprop__vPsP($dummy, 'STATIC_CODE_REF', $dummy);
                 $code_ref_idx := self.add_root_code_ref($dummy, $past);
