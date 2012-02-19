@@ -95,8 +95,19 @@ This file brings together the various Regex modules needed for Regex.pbc .
     goto it_loop
   it_loop_end:
     
-    $P0 = parrotns['_dumper']
-    GLOBALishWHO['_dumper'] = $P0
+    .local pmc _dumper
+    _dumper = parrotns['_dumper']
+    GLOBALishWHO['_dumper'] = _dumper
+    
+    # Add PAST dummy NS to the SC.
+    $P0 = nqp_get_sc "__REGEX_CORE_SC__"
+    nqp_set_sc_object "__REGEX_CORE_SC__", 1, PAST
+    nqp_set_sc_for_object PAST, $P0
+    
+    # Add _dumper to the SC.
+    nqp_add_code_ref_to_sc $P0, 0, _dumper
+    setprop _dumper, 'SC', $P0
+    setprop _dumper, 'STATIC_CODE_REF', _dumper
     
     ## XXX Legacy namespace import.
     .local pmc hllns, imports
