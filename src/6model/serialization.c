@@ -1383,6 +1383,8 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *st
     PMC    *objects   = PMCNULL;
     INTVAL  smo_id    = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
     INTVAL  scodes    = VTABLE_elements(interp, static_codes);
+    STRING *scr_str   = Parrot_str_new_constant(interp, "STATIC_CODE_REF");
+    STRING *sc_str    = Parrot_str_new_constant(interp, "SC");
     Parrot_Int4 i;
     
     /* Create reader data structure and populate the basic bits. */
@@ -1429,11 +1431,18 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *st
         VTABLE_set_pmc_keyed_int(interp, stables, i, create_stable(interp, NULL, PMCNULL));
     for (i = 0; i < reader->root.num_objects; i++)
         VTABLE_set_pmc_keyed_int(interp, objects, i, Parrot_pmc_new(interp, smo_id));
-     
-     /* Deserialize closures, deserialize contexts, then attach outers. */
-     for (i = 0; i < reader->root.num_closures; i++)
+        
+     /* Mark all the static code refs we've been provided with as static. */
+     for (i = 0; i < scodes; i++) {
+        PMC *scr = VTABLE_get_pmc_keyed_int(interp, reader->codes_list, i);
+        VTABLE_setprop(interp, scr, scr_str, scr);
+        VTABLE_setprop(interp, scr, sc_str, sc);
+    }
+
+    /* Deserialize closures, deserialize contexts, then attach outers. */
+    for (i = 0; i < reader->root.num_closures; i++)
         deserialize_closure(interp, reader, i);
-     for (i = 0; i < reader->root.num_contexts; i++)
+    for (i = 0; i < reader->root.num_contexts; i++)
         deserialize_context(interp, reader, i);
     for (i = 0; i < reader->root.num_closures; i++)
         attach_closure_outer(interp, reader, i,
