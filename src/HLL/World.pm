@@ -130,15 +130,6 @@ class HLL::World {
         $idx
     }
     
-    # Adds a code ref to the root set, along with a mapping.
-    # XXX LEGACY: should no longer add to the root set.
-    method add_code_LEGACY($obj) {
-        my $idx := $!sc.elems();
-        $!sc[$idx] := $obj;
-        %!addr_to_slot{nqp::where($obj)} := $idx;
-        $idx
-    }
-    
     # Adds a code reference to the root set of code refs.
     method add_root_code_ref($code_ref, $past_block) {
         my $code_ref_idx := $!num_code_refs;
