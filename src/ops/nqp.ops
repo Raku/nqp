@@ -11,6 +11,7 @@ BEGIN_OPS_PREAMBLE
 #include "../6model/serialization_context.h"
 #include "../guts/multi_dispatch.h"
 #include "../pmc/pmc_dispatchersub.h"
+#include "../pmc/pmc_nqplexinfo.h"
 #include "pmc_sub.h"
 
 /* SHA1 algorithm. */
@@ -2176,4 +2177,27 @@ inline op nqp_sha1(out STR, in STR) :base_core {
     /* Free the C-string and put result into a new string. */
     Parrot_str_free_cstring(cstr);
     $1 = Parrot_str_new_init(interp, &output, 40, Parrot_utf8_encoding_ptr, 0);
+}
+
+
+/*
+
+=item nqp_fresh_stub
+
+Takes the Parrot Sub in $2 and makes a clone of it along with a fresh NQPLexInfo.
+(This is used for closure to static resolution).
+
+=cut
+
+*/
+inline op nqp_fresh_stub(out PMC, in PMC) :base_core {
+    if ($2->vtable->base_type == enum_class_Sub) {
+        $1 = VTABLE_clone(interp, $2);
+        PARROT_SUB($1)->lex_info = VTABLE_clone(interp, PARROT_SUB($2)->lex_info);
+        PARROT_NQPLEXINFO(PARROT_SUB($1)->lex_info)->static_code = $1;
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "nqp_fresh_sub can only operate on a Parrot Sub");
+    }
 }

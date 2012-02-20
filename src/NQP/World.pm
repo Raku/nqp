@@ -182,7 +182,7 @@ class NQP::World is HLL::World {
             $dummy := $past<compile_time_dummy>;
         }
         else {
-            $dummy := pir::clone__PP($stub_code);
+            $dummy := pir::nqp_fresh_stub__PP($stub_code);
             pir::assign__vPS($dummy, $name);
             if $is_dispatcher {
                 # The dispatcher will get cloned if more candidates are added in
