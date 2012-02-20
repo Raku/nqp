@@ -339,14 +339,15 @@ class NQP::World is HLL::World {
             for $obj.HOW.methods($obj, :local(1)) {
                 pir::setprop__vPsP($_, 'REIFY_CALLBACK', sub ($meth) {
                     # Make a clone and add it to the SC.
+                    my $past := pir::getprop__PsP('PAST', $meth);
                     my $clone := pir::clone($meth);
-                    self.add_code_LEGACY($clone);
+                    my $clone_idx := self.add_root_code_ref($clone, $past);
                     
                     # Add fixup for the cloned code.
                     $fixups.push(PAST::Op.new(
                         :pirop('assign vPP'),
-                        self.get_slot_past_for_object($clone),
-                        PAST::Val.new( :value(pir::getprop__PsP('PAST', $meth)) )
+                        self.get_slot_past_for_code_ref_at($clone_idx),
+                        PAST::Val.new( :value($past) )
                     ));
                     
                     # Result is the cloned method that will be fixed up.
@@ -358,16 +359,7 @@ class NQP::World is HLL::World {
         # Pass the dummy along as the role body block.
         $obj.HOW.set_body_block($obj, $dummy);
         
-        # In deserialization, easy - just do the meta-object call.
-        my $slot_past := self.get_slot_past_for_object($obj);
-        my $des := PAST::Op.new(
-            :pasttype('callmethod'), :name('set_body_block'),
-            PAST::Op.new( :pirop('get_how PP'), $slot_past ),
-            $slot_past,
-            PAST::Val.new( :value($body_past) )
-        );
-        
-        self.add_fixup_task(:deserialize_past($des), :fixup_past($fixups));
+        self.add_fixup_task(:fixup_past($fixups));
     }
     
     # Adds a parent or role to the meta-object.
