@@ -1,6 +1,6 @@
 =head1 NQP - Not Quite Perl (6)
 
-NQP is Copyright (C) 2009-2011 by The Perl Foundation.  See F<LICENSE>
+NQP is Copyright (C) 2009-2012 by The Perl Foundation.  See F<LICENSE>
 for licensing details.
 
 This is "Not Quite Perl" -- a compiler for quickly generating PIR
