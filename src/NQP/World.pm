@@ -193,8 +193,11 @@ class NQP::World is HLL::World {
         my $stub_code := sub (*@args, *%named) {
             # Do the compilation.
             self.set_nqp_language_defaults($past);
-            my $compiled := PAST::Compiler.compile($past);
-            
+            my $nqpcomp  := pir::compreg__Ps('nqp');
+            my $post     := $nqpcomp.post($past);
+            my $pir      := $nqpcomp.pir($post);
+            my $compiled := $nqpcomp.evalpmc($pir);
+
             # Fix up any code objects holding stubs with the real compiled thing.
             my $c := nqp::elems($compiled);
             my $i := 0;
