@@ -313,53 +313,11 @@ class NQP::World is HLL::World {
     
     # This handles associating the role body with a role declaration.
     method pkg_set_body_block($obj, $body_past) {
-        # In fixup, we'll actually run the real body block, but we
-        # need to run it with the parameters that were used at compile
-        # time. We rely on those being in the SC. The "dummy" body block
-        # we supply will simply capture those and append to the body
-        # invoke PAST. That's the "easy" part. The harder part is that
-        # it also sets up the fixups for all the reified (cloned) methods.
-        # Note that the fact we back-reference it always to the original
-        # method, which in fact was just captured by running the block for
-        # each role setup, means we get the timing right in order to end
-        # up with methods capturing the correct type argument.
-        my $fixups := PAST::Stmts.new();
-        my $dummy := sub (*@type_args) {
-            # Set up call to invoke body block with the type arguments.
-            my $invoke_body := PAST::Op.new(
-                :pasttype('call'),
-                PAST::Val.new( :value($body_past) )
-            );
-            for @type_args {
-                $invoke_body.push(self.get_slot_past_for_object($_));
-            }
-            $fixups.push($invoke_body);
-            
-            # Set a reification callback on all the dummy methods.
-            for $obj.HOW.methods($obj, :local(1)) {
-                pir::setprop__vPsP($_, 'REIFY_CALLBACK', sub ($meth) {
-                    # Make a clone and add it to the SC.
-                    my $past := pir::getprop__PsP('PAST', $meth);
-                    my $clone := pir::clone($meth);
-                    my $clone_idx := self.add_root_code_ref($clone, $past);
-                    
-                    # Add fixup for the cloned code.
-                    $fixups.push(PAST::Op.new(
-                        :pirop('assign vPP'),
-                        self.get_slot_past_for_code_ref_at($clone_idx),
-                        PAST::Val.new( :value($past) )
-                    ));
-                    
-                    # Result is the cloned method that will be fixed up.
-                    $clone
-                });
-            }
-        };
+        # Get a code object for the body block.
+        my $body_code_obj := self.create_code($body_past, $body_past.name, 0);
         
-        # Pass the dummy along as the role body block.
-        $obj.HOW.set_body_block($obj, $dummy);
-        
-        self.add_fixup_task(:fixup_past($fixups));
+        # Set it as the body block.
+        $obj.HOW.set_body_block($obj, $body_code_obj);
     }
     
     # Adds a parent or role to the meta-object.
