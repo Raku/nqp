@@ -16,6 +16,9 @@ class NQP::World is HLL::World {
     # then clear this list.
     has %!code_object_fixup_list;
     
+    # Mapping of sub IDs to SC indexes of code stubs.
+    has %!code_stub_sc_idx;
+    
     # Creates a new lexical scope and puts it on top of the stack.
     method push_lexpad($/) {
         # Create pad, link to outer and add to stack.
@@ -187,7 +190,6 @@ class NQP::World is HLL::World {
         # compile-time representation. If it ever gets invoked it'll go
         # and compile the code and run it.
         # XXX Lexical environment.
-        # XXX Cache compiled output.
         my $stub_code := sub (*@args, *%named) {
             # Do the compilation.
             self.set_nqp_language_defaults($past);
@@ -199,9 +201,18 @@ class NQP::World is HLL::World {
             while $i < $c {
                 my $subid := $compiled[$i].get_subid();
                 if pir::exists(%!code_objects_to_fix_up, $subid) {
+                    # First, go over the code objects. Update the $!do, and the
+                    # entry in the SC. Make sure the newly compiled code is marked
+                    # as a static code ref.
+                    my $static := %!code_objects_to_fix_up{$subid}.shift();
+                    nqp::bindattr($static, $code_type, '$!do', $compiled[$i]);
                     for %!code_objects_to_fix_up{$subid} {
-                        nqp::bindattr($_, $code_type, '$!do', $compiled[$i]);
+                        nqp::bindattr($_, $code_type, '$!do', pir::clone($compiled[$i]));
                     }
+                    pir::setprop__vPsP($compiled[$i], 'STATIC_CODE_REF', $compiled[$i]);
+                    self.update_root_code_ref(%!code_stub_sc_idx{$subid}, $compiled[$i]);
+                    
+                    # Clear up the fixup statements.
                     my $fixup_stmts := %!code_object_fixup_list{$subid};
                     $fixup_stmts.shift() while +@($fixup_stmts);
                 }
@@ -226,6 +237,7 @@ class NQP::World is HLL::World {
             # Tag it as a static code ref and add it to the root code refs set.
             pir::setprop__vPsP($dummy, 'STATIC_CODE_REF', $dummy);
             $code_ref_idx := self.add_root_code_ref($dummy, $past);
+            %!code_stub_sc_idx{$past.subid()} := $code_ref_idx;
             $past<compile_time_dummy> := $dummy;
             
             # Attach PAST as a property to the stub code.
