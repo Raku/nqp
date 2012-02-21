@@ -4,11 +4,10 @@ my knowhow NQPRoutine {
     has $!dispatchees;
     has $!dispatch_cache;
     method add_dispatchee($code) {
-        $!dispatchees := [] unless $!dispatchees;
         $!dispatchees.push($code);
     }
     method is_dispatcher() {
-        !nqp::isnull($!dispatchees)
+        pir::defined($!dispatchees)
     }
     method derive_dispatcher() {
         # Clone the underlying VM code ref.
