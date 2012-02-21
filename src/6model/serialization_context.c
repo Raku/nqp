@@ -82,7 +82,8 @@ INTVAL SC_find_code_idx(PARROT_INTERP, PMC *sc, PMC *obj) {
         if (VTABLE_get_pmc_keyed_int(interp, to_search, i) == obj)
             return i;
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-        "Code ref does not exist in serialization context");
+        "Code ref '%Ss' does not exist in serialization context",
+        VTABLE_get_string(interp, obj));
 }
 
 /* Given an SC and an index, fetch the STable stored there. */
