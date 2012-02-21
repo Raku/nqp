@@ -349,8 +349,7 @@ class NQP::Actions is HLL::Actions {
     }
 
     method statement_prefix:sym<BEGIN>($/) {
-        $*W.run_begin_block($<blorst>.ast);
-        make PAST::Stmts.new();
+        make $*W.run_begin_block($<blorst>.ast);
     }
 
     method statement_prefix:sym<INIT>($/) {

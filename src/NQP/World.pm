@@ -474,6 +474,11 @@ class NQP::World is HLL::World {
         pir::set_hll_global__vPsP(nqp::list(), 'GLOBAL', $*GLOBALish);
         $code();
         pir::set_hll_global__vPsP(nqp::list(), 'GLOBAL', $old_global);
+        
+        # Need any nested blocks inside the BEGIN block to make it into the
+        # output code.
+        $wrapper.shift();
+        return $wrapper;
     }
     
     # Sets NQP language defaults on a block for compilation.
