@@ -11,6 +11,11 @@ class NQP::World is HLL::World {
     # to a list of code objects.
     has %!code_objects_to_fix_up;
     
+    # Mapping of PAST::Stmts node containing fixups, keyed by sub ID. If
+    # we do dynamic compilation then we do the fixups immediately and
+    # then clear this list.
+    has %!code_object_fixup_list;
+    
     # Creates a new lexical scope and puts it on top of the stack.
     method push_lexpad($/) {
         # Create pad, link to outer and add to stack.
@@ -214,6 +219,7 @@ class NQP::World is HLL::World {
             # list.
             if $have_code_type {
                 %!code_objects_to_fix_up{$past.subid()} := [$dummy];
+                %!code_object_fixup_list{$past.subid()} := $fixups;
                 if self.is_precompilation_mode() {
                     pir::setprop__vPsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone, $code_obj) {
                         %!code_objects_to_fix_up{$past.subid()}.push($code_obj);
@@ -222,19 +228,18 @@ class NQP::World is HLL::World {
                 else {
                     pir::setprop__vPsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone, $code_obj) {
                         # Emit fixup code.
-                        my $clone_idx := self.add_root_code_ref($clone, $past);
                         self.add_object($code_obj);
-                        $fixups.push(PAST::Stmts.new(
+                        $fixups.push(PAST::Op.new(
+                            :pirop('setattribute vPPsP'),
+                            self.get_ref($code_obj),
+                            self.get_ref($code_type),
+                            '$!do',
                             PAST::Op.new(
-                                :pirop('assign vPP'),
-                                self.get_slot_past_for_code_ref_at($clone_idx),
-                                PAST::Val.new( :value(pir::getprop__PsP('PAST', $orig)) )
-                            ),
-                            PAST::Op.new(
-                                :pirop('set_sub_code_object vPP'),
-                                self.get_slot_past_for_code_ref_at($clone_idx),
+                                :pirop('set_sub_code_object 0PP'),
+                                PAST::Op.new( :pirop('clone PP'), PAST::Val.new( :value($past) ) ),
                                 self.get_ref($code_obj)
-                            )));
+                            )
+                        ));
                             
                         # Add to dynamic compilation fixup list.
                         %!code_objects_to_fix_up{$past.subid()}.push($code_obj);
@@ -243,14 +248,7 @@ class NQP::World is HLL::World {
             }
         }
         
-        # For fixup, need to assign the method body we actually compiled
-        # onto the one that went into the SC.
-        $fixups.push(PAST::Op.new(
-            :pirop('assign vPP'),
-            self.get_slot_past_for_code_ref_at($code_ref_idx),
-            PAST::Val.new( :value($past) )
-        ));
-        
+        # Add fixups task node; it'll get populated or cleared during the compile.
         self.add_fixup_task(:fixup_past($fixups));
         
         # Provided we have the code type, now wrap what we have up in a
@@ -263,22 +261,38 @@ class NQP::World is HLL::World {
                 if $is_dispatcher;
             my $slot := self.add_object($code_obj);
 
-            # Add fixup task.
+            # Add deserialization fixup task.
             self.add_fixup_task(
                 :deserialize_past(PAST::Op.new(
                     :pirop('set_sub_code_object vPP'),
                     PAST::Val.new( :value($past) ),
                     self.get_ref($code_obj)
-                )),
-                :fixup_past(PAST::Op.new(
-                    :pirop('set_sub_code_object vPP'),
-                    self.get_slot_past_for_code_ref_at($code_ref_idx),
-                    self.get_ref($code_obj)
                 )));
+            
+            # Add fixup of the code object and the $!do attribute.
+            $fixups.push(PAST::Op.new(
+                :pirop('setattribute vPPsP'),
+                self.get_ref($code_obj),
+                self.get_ref($code_type),
+                '$!do',
+                PAST::Val.new( :value($past) )
+            ));
+            $fixups.push(PAST::Op.new(
+                :pirop('set_sub_code_object vPP'),
+                PAST::Val.new( :value($past) ),
+                self.get_ref($code_obj)
+            ));
             
             $code_obj
         }
         else {
+            # For fixup, if we have no code body, we need to assign the method body
+            # we actually compiled into the one that went into the SC.
+            $fixups.push(PAST::Op.new(
+                :pirop('assign vPP'),
+                self.get_slot_past_for_code_ref_at($code_ref_idx),
+                PAST::Val.new( :value($past) )
+            ));
             return $dummy;
         }
     }
