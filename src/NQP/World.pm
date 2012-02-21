@@ -164,6 +164,14 @@ class NQP::World is HLL::World {
     # Registers a code object, and gives it a dynamic compilation thunk.
     # Makes a real code object if it's a dispatcher.
     method create_code($past, $name, $is_dispatcher) {
+        # See if NQPRoutine is available to wrap this up in.
+        my $code_type;
+        my $have_code_type := 0;
+        try {
+            $code_type := self.find_sym(['NQPRoutine']);
+            $have_code_type := $*PACKAGE.HOW.name($*PACKAGE) ne 'NQPRoutine';
+        }
+        
         # For code refs, we need a "stub" that we'll clone and use for the
         # compile-time representation. If it ever gets invoked it'll go
         # and compile the code and run it.
@@ -223,14 +231,14 @@ class NQP::World is HLL::World {
         ));
         self.add_fixup_task(:fixup_past($fixups));
         
-        # If it's a dispatcher, now need to wrap it in a code object,
-        # so we have a place to store the dispatch list.
-        if $is_dispatcher {
+        # Provided we have the code type, now wrap what we have up in a
+        # code object.
+        if $have_code_type {
             # Create it now.
-            my $code_type := self.find_sym(['NQPRoutine']);
-            my $code_obj  := nqp::create($code_type);
+            my $code_obj := nqp::create($code_type);
             nqp::bindattr($code_obj, $code_type, '$!do', $dummy);
-            nqp::bindattr($code_obj, $code_type, '$!dispatchees', nqp::list());
+            nqp::bindattr($code_obj, $code_type, '$!dispatchees', nqp::list())
+                if $is_dispatcher;
             my $slot := self.add_object($code_obj);
 
             # Add fixup task.
@@ -282,8 +290,18 @@ class NQP::World is HLL::World {
         $obj.HOW."$meta_method_name"($obj, $name, $code);
     }
     
-    # Associates a signature with a routine.
-    method set_routine_signature($routine, $types, $definednesses) {
+    # Associates a signature with a code object.
+    method set_routine_signature($code_obj, $types, $definednesses) {
+        my $sig_type  := self.find_sym(['NQPSignature']);
+        my $code_type := self.find_sym(['NQPRoutine']);
+        my $sig_obj   := nqp::create($sig_type);
+        nqp::bindattr($sig_obj, $sig_type, '$!types', $types);
+        nqp::bindattr($sig_obj, $sig_type, '$!definednesses', $definednesses);
+        nqp::bindattr($code_obj, $code_type, '$!signature', $sig_obj);
+    }
+    
+    # Associates a signature with a Parrot sub.
+    method set_routine_signature_on_parrot_sub($routine, $types, $definednesses) {
         # Build signature object and put it in place now.
         my $sig_type := self.find_sym(['NQPSignature']);
         my $sig_obj  := nqp::create($sig_type);

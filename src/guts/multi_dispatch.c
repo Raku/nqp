@@ -136,7 +136,10 @@ static candidate_info** sort_candidates(PARROT_INTERP, PMC *candidates) {
         info->sub = candidate;
 
         /* Get hold of signature, types and definednesses. */
-        GETATTR_Sub_multi_signature(interp, candidate, multi_sig_pmc);
+        if (candidate->vtable->base_type == enum_class_Sub)
+            GETATTR_Sub_multi_signature(interp, candidate, multi_sig_pmc);
+        else
+            multi_sig_pmc = ((NQP_Routine *)PMC_data(candidate))->signature;
         multi_sig = (NQP_Signature *)PMC_data(multi_sig_pmc);
         types_list = multi_sig->types;
         definedness_list = multi_sig->definednesses;
