@@ -189,8 +189,25 @@ class NQP::World is HLL::World {
         # XXX Lexical environment.
         # XXX Cache compiled output.
         my $stub_code := sub (*@args, *%named) {
+            # Do the compilation.
             self.set_nqp_language_defaults($past);
             my $compiled := PAST::Compiler.compile($past);
+            
+            # Fix up any code objects holding stubs with the real compiled thing.
+            my $c := nqp::elems($compiled);
+            my $i := 0;
+            while $i < $c {
+                my $subid := $compiled[$i].get_subid();
+                if pir::exists(%!code_objects_to_fix_up, $subid) {
+                    for %!code_objects_to_fix_up{$subid} {
+                        nqp::bindattr($_, $code_type, '$!do', $compiled[$i]);
+                    }
+                    my $fixup_stmts := %!code_object_fixup_list{$subid};
+                    $fixup_stmts.shift() while +@($fixup_stmts);
+                }
+                $i := $i + 1;
+            }
+            
             $compiled(|@args, |%named);
         };
         
@@ -218,7 +235,6 @@ class NQP::World is HLL::World {
             # routines. We need to handle their cloning and maintain the fixup
             # list.
             if $have_code_type {
-                %!code_objects_to_fix_up{$past.subid()} := [$dummy];
                 %!code_object_fixup_list{$past.subid()} := $fixups;
                 if self.is_precompilation_mode() {
                     pir::setprop__vPsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone, $code_obj) {
@@ -282,6 +298,9 @@ class NQP::World is HLL::World {
                 PAST::Val.new( :value($past) ),
                 self.get_ref($code_obj)
             ));
+            
+            # Add it to the dynamic compilation fixup todo list.
+            %!code_objects_to_fix_up{$past.subid()} := [$code_obj];
             
             $code_obj
         }
