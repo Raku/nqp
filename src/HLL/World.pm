@@ -138,6 +138,11 @@ class HLL::World {
         pir::nqp_add_code_ref_to_sc__vPiP($!sc, $code_ref_idx, $code_ref);
         $code_ref_idx
     }
+    
+    # Updates a code reference in the root set.
+    method update_root_code_ref($idx, $new_code_ref) {
+        pir::nqp_add_code_ref_to_sc__vPiP($!sc, $idx, $new_code_ref);
+    }
 
     # Checks if we are in pre-compilation mode.
     method is_precompilation_mode() {
