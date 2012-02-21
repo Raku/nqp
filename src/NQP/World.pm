@@ -354,6 +354,21 @@ class NQP::World is HLL::World {
         }
     }
     
+    # Sets NQP language defaults on a block for compilation.
+    method set_nqp_language_defaults($block) {
+        # Need to load the NQP dynops/dympmcs, plus any extras requested.
+        my @loadlibs := ['nqp_group', 'nqp_ops', 'nqp_bigint_ops', 'trans_ops', 'io_ops'];
+        if %*COMPILING<%?OPTIONS><vmlibs> {
+            for pir::split(',', %*COMPILING<%?OPTIONS><vmlibs>) {
+                @loadlibs.push($_);
+            }
+        }
+        $block.loadlibs(|@loadlibs);
+        
+        # Set HLL.
+        $block.hll('nqp');
+    }
+    
     # Generates a series of PAST operations that will build this context if
     # it doesn't exist, and fix it up if it already does.
     method to_past() {
