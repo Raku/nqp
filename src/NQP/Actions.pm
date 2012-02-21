@@ -348,6 +348,11 @@ class NQP::Actions is HLL::Actions {
         );
     }
 
+    method statement_prefix:sym<BEGIN>($/) {
+        $*W.run_begin_block($<blorst>.ast);
+        make PAST::Stmts.new();
+    }
+
     method statement_prefix:sym<INIT>($/) {
         $*W.cur_lexpad().push($<blorst>.ast);
         make PAST::Stmts.new();

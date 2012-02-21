@@ -443,6 +443,36 @@ class NQP::World is HLL::World {
         }
     }
     
+    # Runs a block at BEGIN time.
+    method run_begin_block($past) {
+        # Create a wrapper that makes all outer symbols visible.
+        my $wrapper := PAST::Block.new(
+            PAST::Stmts.new(),
+            $past
+        );
+        my %seen;
+        my $i := +@!BLOCKS;
+        while $i > 0 {
+            $i := $i - 1;
+            my %symbols := @!BLOCKS[$i].symtable();
+            for %symbols {
+                if !%seen{$_.key} && pir::exists($_.value, 'value') {
+                    try {
+                        $wrapper[0].push(PAST::Var.new(
+                            :name($_.key), :scope('lexical_6model'), :isdecl(1),
+                            :viviself(self.get_ref(($_.value)<value>))
+                        ));
+                    };
+                    %seen{$_.key} := 1;
+                }
+            }
+        }
+        
+        # Compile and run it.
+        my $code := self.create_code($wrapper, 'BEGIN block', 0);
+        $code();
+    }
+    
     # Sets NQP language defaults on a block for compilation.
     method set_nqp_language_defaults($block) {
         # Need to load the NQP dynops/dympmcs, plus any extras requested.

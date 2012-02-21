@@ -235,7 +235,8 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     proto token statement_prefix { <...> }
-    token statement_prefix:sym<INIT> { <sym> <blorst> }
+    token statement_prefix:sym<BEGIN> { <sym> <blorst> }
+    token statement_prefix:sym<INIT>  { <sym> <blorst> }
 
     token statement_prefix:sym<try> {
         <sym>
