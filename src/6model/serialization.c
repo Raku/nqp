@@ -1380,9 +1380,6 @@ static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVA
         st->container_spec->fetch_method = read_ref_func(interp, reader);
     }
 
-    /* XXX More to do here. */
-    printf("WARNING: STable deserialization not yet fully implemented\n");
-    
     /* Mark it as being in the SC we're currently deserializing. */
     st->sc = reader->root.sc;
 
