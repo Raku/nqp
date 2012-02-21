@@ -5,6 +5,12 @@ class NQP::World is HLL::World {
     # outermost frame is at the bottom, the latest frame is on top.
     has @!BLOCKS;
     
+    # Set of code objects that need to be fixed up if dynamic compilation
+    # takes place (that is, compiling parts of the program early during
+    # compile time because they're needed at a BEGIN phase). Maps subid
+    # to a list of code objects.
+    has %!code_objects_to_fix_up;
+    
     # Creates a new lexical scope and puts it on top of the stack.
     method push_lexpad($/) {
         # Create pad, link to outer and add to stack.
@@ -191,15 +197,33 @@ class NQP::World is HLL::World {
             $dummy := $past<compile_time_dummy>;
         }
         else {
+            # Create a fresh stub code, and set its name.
             $dummy := pir::nqp_fresh_stub__PP($stub_code);
             pir::assign__vPS($dummy, $name);
-            if $is_dispatcher {
-                # The dispatcher will get cloned if more candidates are added in
-                # a subclass; this makes sure that we fix up the clone also.
-                if !self.is_precompilation_mode() {
-                    pir::setprop__vPsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone, $dispatcher_code_obj) {
+            
+            # Tag it as a static code ref and add it to the root code refs set.
+            pir::setprop__vPsP($dummy, 'STATIC_CODE_REF', $dummy);
+            $code_ref_idx := self.add_root_code_ref($dummy, $past);
+            $past<compile_time_dummy> := $dummy;
+            
+            # Attach PAST as a property to the stub code.
+            pir::setprop__vPsP($dummy, 'PAST', $past);
+            
+            # Things with code objects may be methods in roles or multi-dispatch
+            # routines. We need to handle their cloning and maintain the fixup
+            # list.
+            if $have_code_type {
+                %!code_objects_to_fix_up{$past.subid()} := [$dummy];
+                if self.is_precompilation_mode() {
+                    pir::setprop__vPsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone, $code_obj) {
+                        %!code_objects_to_fix_up{$past.subid()}.push($code_obj);
+                    });
+                }
+                else {
+                    pir::setprop__vPsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone, $code_obj) {
+                        # Emit fixup code.
                         my $clone_idx := self.add_root_code_ref($clone, $past);
-                        self.add_object($dispatcher_code_obj);
+                        self.add_object($code_obj);
                         $fixups.push(PAST::Stmts.new(
                             PAST::Op.new(
                                 :pirop('assign vPP'),
@@ -209,18 +233,15 @@ class NQP::World is HLL::World {
                             PAST::Op.new(
                                 :pirop('set_sub_code_object vPP'),
                                 self.get_slot_past_for_code_ref_at($clone_idx),
-                                self.get_ref($dispatcher_code_obj)
+                                self.get_ref($code_obj)
                             )));
+                            
+                        # Add to dynamic compilation fixup list.
+                        %!code_objects_to_fix_up{$past.subid()}.push($code_obj);
                     });
                 }
             }
-            pir::setprop__vPsP($dummy, 'STATIC_CODE_REF', $dummy);
-            $code_ref_idx := self.add_root_code_ref($dummy, $past);
-            $past<compile_time_dummy> := $dummy;
         }
-        
-        # Attach PAST as a property to the dummy.
-        pir::setprop__vPsP($dummy, 'PAST', $past);
         
         # For fixup, need to assign the method body we actually compiled
         # onto the one that went into the SC.
@@ -229,6 +250,7 @@ class NQP::World is HLL::World {
             self.get_slot_past_for_code_ref_at($code_ref_idx),
             PAST::Val.new( :value($past) )
         ));
+        
         self.add_fixup_task(:fixup_past($fixups));
         
         # Provided we have the code type, now wrap what we have up in a
