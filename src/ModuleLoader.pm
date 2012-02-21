@@ -96,7 +96,27 @@ knowhow ModuleLoader {
         for $source.WHO {
             my $sym := $_.key;
             if !%known_symbols{$sym} {
-                ($target.WHO){$sym} := $_.value;
+                my $source_is_stub := 0;
+                try {
+                    my $source_mo := $_.value.HOW;
+                    $source_is_stub := $source_mo.WHAT.HOW.name($source_mo) eq $stub_how &&
+                        !nqp::isnull(pir::get_who__PP($_.value)) && pir::get_who__PP($_.value) &&
+                        $_.value.HOW.name($_.value) ne 'PAST';
+                }
+                if $source_is_stub {
+                    my $source := $_.value;
+                    my $source_clone := $source.HOW.new_type(:name($source.HOW.name($source)));
+                    $source_clone.HOW.compose($source_clone);
+                    my %WHO_clone;
+                    for pir::get_who__PP($source) {
+                        %WHO_clone{$_.key} := $_.value;
+                    }
+                    pir::set_who__vPP($source_clone, %WHO_clone);
+                    ($target.WHO){$sym} := $source_clone;
+                }
+                else {
+                    ($target.WHO){$sym} := $_.value;
+                }
             }
             elsif ($target.WHO){$sym} =:= $_.value {
                 # No problemo; a symbol can't conflict with itself.
