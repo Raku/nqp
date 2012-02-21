@@ -1157,7 +1157,8 @@ inline op multi_dispatch_over_lexical_candidates(out PMC) :base_core {
         Parrot_Context *ctx_struct = CONTEXT_STRUCT(cur_ctx);
         if (ctx_struct->current_sub->vtable->base_type == disp_id ||
                 ctx_struct->current_sub->vtable->base_type == enum_class_Sub &&
-                PARROT_SUB(ctx_struct->current_sub)->multi_signature->vtable->base_type == smo_id) {
+                PARROT_SUB(ctx_struct->current_sub)->multi_signature->vtable->base_type == smo_id &&
+                !PMC_IS_NULL(((NQP_Routine *)PMC_data(PARROT_SUB(ctx_struct->current_sub)->multi_signature))->dispatchees)) {
             /* Found a dispatcher. Enter the multi-dispatcher to find a the
              * best candidate, if any. */
             PMC *chosen = nqp_multi_dispatch(interp, ctx_struct->current_sub, cur_ctx);
