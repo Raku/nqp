@@ -170,6 +170,7 @@ class NQP::World is HLL::World {
         # XXX Lexical environment.
         # XXX Cache compiled output.
         my $stub_code := sub (*@args, *%named) {
+            self.set_nqp_language_defaults($past);
             my $compiled := PAST::Compiler.compile($past);
             $compiled(|@args, |%named);
         };
