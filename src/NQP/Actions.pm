@@ -798,6 +798,11 @@ class NQP::Actions is HLL::Actions {
                 $*MAIN_SUB := $block;
             }
         }
+        else {            
+            if $*W.is_precompilation_mode() {
+                $*W.create_code($past, '<anon>', 0)
+            }
+        }
 
         # Apply traits.
         $past<block_past> := $block;
