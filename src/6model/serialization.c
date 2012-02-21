@@ -641,8 +641,14 @@ static void serialize_stable(PARROT_INTERP, SerializationWriter *writer, PMC *st
         write_ref_func(interp, writer, st->boolification_spec->method);
     }
     
-    /* XXX More to do here. */
-    printf("WARNING: STable serialization not yet fully implemented\n");
+    /* Container spec. */
+    write_int_func(interp, writer, st->container_spec != NULL);
+    if (st->container_spec) {
+        write_ref_func(interp, writer, st->container_spec->value_slot.class_handle);
+        write_str_func(interp, writer, st->container_spec->value_slot.attr_name);
+        write_int_func(interp, writer, st->container_spec->value_slot.hint);
+        write_ref_func(interp, writer, st->container_spec->fetch_method);
+    }
     
     /* If the REPR has a function to serialize representation data, call it. */
     if (st->REPR->serialize_repr_data)
@@ -1363,6 +1369,15 @@ static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVA
         st->boolification_spec = mem_sys_allocate(sizeof(BoolificationSpec));
         st->boolification_spec->mode = read_int_func(interp, reader);
         st->boolification_spec->method = read_ref_func(interp, reader);
+    }
+
+    /* Container spec. */
+    if (read_int_func(interp, reader)) {
+        st->container_spec = mem_sys_allocate(sizeof(ContainerSpec));
+        st->container_spec->value_slot.class_handle = read_ref_func(interp, reader);
+        st->container_spec->value_slot.attr_name = read_str_func(interp, reader);
+        st->container_spec->value_slot.hint = read_int_func(interp, reader);
+        st->container_spec->fetch_method = read_ref_func(interp, reader);
     }
 
     /* XXX More to do here. */
