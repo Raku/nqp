@@ -22,7 +22,7 @@
 #define DEP_TABLE_ENTRY_SIZE        8
 #define STABLES_TABLE_ENTRY_SIZE    8
 #define OBJECTS_TABLE_ENTRY_SIZE    16
-#define CLOSURES_TABLE_ENTRY_SIZE   12
+#define CLOSURES_TABLE_ENTRY_SIZE   24
 #define CONTEXTS_TABLE_ENTRY_SIZE   12
 
 /* Some guesses. */
@@ -362,6 +362,23 @@ static void serialize_closure(PARROT_INTERP, SerializationWriter *writer, PMC *c
     write_int32(writer->root.closures_table, offset, static_sc_id);
     write_int32(writer->root.closures_table, offset + 4, static_idx);
     write_int32(writer->root.closures_table, offset + 8, context_idx);
+    
+    /* Check if it has a static code object. */
+    if (!PMC_IS_NULL(PARROT_SUB(closure)->multi_signature)) {
+        PMC *code_obj = PARROT_SUB(closure)->multi_signature;
+        write_int32(writer->root.closures_table, offset + 12, 1);
+        if (PMC_IS_NULL(SC_PMC(code_obj))) {
+            SC_PMC(code_obj) = writer->root.sc;
+            VTABLE_push_pmc(interp, writer->objects_list, code_obj);
+        }
+        write_int32(writer->root.closures_table, offset + 16,
+            get_sc_id(interp, writer, SC_PMC(code_obj)));
+        write_int32(writer->root.closures_table, offset + 20,
+            (Parrot_Int4)SC_find_object_idx(interp, SC_PMC(code_obj), code_obj));
+    }
+    else {
+        write_int32(writer->root.closures_table, offset + 12, 0);
+    }
     
     /* Increment count of closures in the table. */
     writer->root.num_closures++;
@@ -1241,6 +1258,12 @@ static void deserialize_closure(PARROT_INTERP, SerializationReader *reader, INTV
     /* Clone it and add it to the SC's code refs list. */
     PMC *closure = VTABLE_clone(interp, static_code);
     VTABLE_push_pmc(interp, reader->codes_list, closure);
+    
+    /* See if there's a code object we need to attach. */
+    if (read_int32(table_row, 12))
+        PARROT_SUB(closure)->multi_signature = SC_get_object(interp,
+            locate_sc(interp, reader, read_int32(table_row, 16)),
+            read_int32(table_row, 20));
 }
 
 /* Deserializes a context. */
