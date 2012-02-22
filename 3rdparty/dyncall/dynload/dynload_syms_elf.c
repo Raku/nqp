@@ -27,11 +27,6 @@
 
 #include "../autovar/autovar_OS.h"
 
-#if defined(OS_Linux) && !defined(_GNU_SOURCE)
-#define _GNU_SOURCE
-#define __USE_GNU
-#endif
-
 /*
  
  dynamic symbol resolver for elf
@@ -49,6 +44,12 @@
 #else
 #  include <elf.h>
 #endif
+
+#if defined(__GLIBC__)
+#  define _GNU_SOURCE
+#  define __USE_GNU
+#endif /* defined(__GLIBC__) */
+
 #include "dynload_alloc.h"
 
 #include <assert.h>
@@ -122,6 +123,7 @@ DLSyms* dlSymsInit(const char* libPath)
   void* pSectionContent;
   int i;
   struct stat st;
+  Elf_Shdr* pS;
   DLSyms* pSyms = (DLSyms*)dlAllocMem(sizeof(DLSyms));
   memset(pSyms, 0, sizeof(DLSyms));
   pSyms->file = open(libPath, O_RDONLY);
@@ -142,7 +144,7 @@ DLSyms* dlSymsInit(const char* libPath)
   pMem = (unsigned char*)pSyms->pElf_Ehdr;
   
   /* traverse section headers */
-  Elf_Shdr* pS = (Elf_Shdr*) ( pMem + pSyms->pElf_Ehdr->e_shoff );
+  pS = (Elf_Shdr*) ( pMem + pSyms->pElf_Ehdr->e_shoff );
   /* skip section 0 which is always zero due to the Elf standard. */
   for (i = 1; i < pSyms->pElf_Ehdr->e_shnum; i++) 
   {
@@ -189,10 +191,11 @@ int dlSymsCount(DLSyms* pSyms)
 
 const char* dlSymsName(DLSyms* pSyms, int index)
 {
+  int str_index;
   if(!pSyms || !pSyms->pSymTab || index < 0 || index >= pSyms->nSymbols)
     return NULL;
   
-  int str_index = pSyms->pSymTab[index].st_name;
+  str_index = pSyms->pSymTab[index].st_name;
   if (str_index < 0 || str_index >= pSyms->strTabSize)
     return NULL;
   return &pSyms->pStrTab[str_index];
