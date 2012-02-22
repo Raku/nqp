@@ -19,6 +19,8 @@
 
 APP_SUFFIX=.exe
 DLL_SUFFIX=.dll
+RM = del
+SLASH = \\
 
 ifdef TARGET_DLL
 ifdef DLL_IMPORTLIB
