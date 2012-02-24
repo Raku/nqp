@@ -160,7 +160,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\dyncall\dyncall_call_x86_masm.asm"
+				RelativePath="..\..\..\dyncall\dyncall_call_x86_generic_masm.asm"
 				>
 			</File>
 			<File
@@ -168,7 +168,10 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\dyncall\dyncall_callvm_x86.c"
+				RelativePath="..\..\..\dyncall\dyncall_callvm.c"
+				>
+			<File
+				RelativePath="..\..\..\dyncall\dyncall_callvm_base.c"
 				>
 			</File>
 			<File

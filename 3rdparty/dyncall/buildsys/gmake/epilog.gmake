@@ -1,6 +1,6 @@
 #//////////////////////////////////////////////////////////////////////////////
 #
-# Copyright (c) 2007,2009 Daniel Adler <dadler@uni-goettingen.de>, 
+# Copyright (c) 2007,2011 Daniel Adler <dadler@uni-goettingen.de>, 
 #                         Tassilo Philipp <tphilipp@potion-studios.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -17,7 +17,6 @@
 #
 #//////////////////////////////////////////////////////////////////////////////
 
-
 ifndef BUILD_OS
 BUILD_OS=generic
 endif
@@ -29,6 +28,7 @@ include $(GMAKE_TOP)/tool/nasm.gmake
 endif
 
 include $(GMAKE_TOP)/tool/latex.gmake
+include $(GMAKE_TOP)/tool/man.gmake
 
 
 ifndef BUILD_TOOL_pspsdk

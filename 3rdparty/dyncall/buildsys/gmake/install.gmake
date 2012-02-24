@@ -32,17 +32,18 @@ INSTALL_HEADERS ?= $(INSTALL_INCLUDES)
 endif
 
 
-INSTALL_PARTS = install-app install-dll install-lib install-includes  
+INSTALL_PARTS = install-app install-dll install-lib install-includes install-man3
 .PHONY: install $(INSTALL_PARTS)
 $(INSTALL_PARTS): build
 install: $(INSTALL_PARTS)
 
 ifdef INSTALL_PREFIX
 
-INSTALL_BINDIR ?= $(INSTALL_PREFIX)/bin
-INSTALL_LIBDIR ?= $(INSTALL_PREFIX)/lib
-INSTALL_INCDIR ?= $(INSTALL_PREFIX)/include
-
+INSTALL_BINDIR ?= $(DESTDIR)$(INSTALL_PREFIX)/bin
+INSTALL_LIBDIR ?= $(DESTDIR)$(INSTALL_PREFIX)/lib
+INSTALL_INCDIR ?= $(DESTDIR)$(INSTALL_PREFIX)/include
+INSTALL_MANDIR ?= $(DESTDIR)$(INSTALL_PREFIX)/share/man
+INSTALL_MAN3DIR ?= $(INSTALL_MANDIR)/man3
 $(INSTALL_PREFIX):
 	mkdir -p $(INSTALL_PREFIX)
 $(INSTALL_BINDIR):
@@ -51,6 +52,10 @@ $(INSTALL_LIBDIR):
 	mkdir -p $(INSTALL_LIBDIR)
 $(INSTALL_INCDIR):
 	mkdir -p $(INSTALL_INCDIR)
+$(INSTALL_MANDIR):
+	mkdir -p $(INSTALL_MANDIR)
+$(INSTALL_MAN3DIR):
+	mkdir -p $(INSTALL_MAN3DIR)
 
 endif
 
@@ -64,26 +69,31 @@ endif
 ifdef INSTALL_LIB
 ifdef LIB_FILE
 install-lib: $(INSTALL_LIBDIR)
-	cp -Rf $(LIB_FILE) $(INSTALL_LIBDIR)
+	install -m 644 $(LIB_FILE) $(INSTALL_LIBDIR)
 endif
 endif
 
 ifdef INSTALL_APP
 ifdef APP_FILE
 install-app: $(APP_FILE) $(INSTALL_BINDIR)
-	cp -Rf $(APP_FILE) $(INSTALL_BINDIR)
+	install $(APP_FILE) $(INSTALL_BINDIR)
 endif
 endif
 
 ifdef INSTALL_DLL
 ifdef DLL_FILE
 install-dll: $(DLL_FILE) $(INSTALL_BINDIR)
-	cp -Rf $(DLL_FILE) $(INSTALL_BINDIR)
+	install -m 644 $(DLL_FILE) $(INSTALL_BINDIR)
 endif
 endif
 
 ifdef INSTALL_HEADERS
 install-includes: $(INSTALL_HEADERS) $(INSTALL_INCDIR)
-	cp -Rf $(INSTALL_HEADERS) $(INSTALL_INCDIR)
+	install -m 644 $(INSTALL_HEADERS) $(INSTALL_INCDIR)
+endif
+
+ifdef INSTALL_MAN3
+install-man3: $(INSTALL_MAN3) $(INSTALL_MAN3DIR)
+	install -m 644 $(INSTALL_MAN3) $(INSTALL_MAN3DIR)
 endif
 

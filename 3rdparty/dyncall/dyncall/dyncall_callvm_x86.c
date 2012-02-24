@@ -622,6 +622,7 @@ void dc_callvm_mode_x86(DCCallVM* in_self, DCint mode)
   DCCallVM_vt*  vt;
   switch(mode) {
     case DC_CALL_C_ELLIPSIS:
+    case DC_CALL_C_ELLIPSIS_VARARGS:
     case DC_CALL_C_DEFAULT:
 #if defined(DC__OS_Plan9) /* Plan9 has its own calling convention (and no support for foreign ones). */
     case DC_CALL_C_X86_PLAN9:          vt = &gVT_x86_plan9;          break;

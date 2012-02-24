@@ -1,10 +1,11 @@
 This file lists big/noteworthy changes, only...
 
-Version 0.7 (upcoming)
+Version 0.7
 architecture:
   o added subproject: portasm - portable (GNU AS,+Apple and MASM) assembly framework  
-  o added support for sparc (32-bit) (tested on linux/debian)
-  o added support for sparc (64-bit) (tested on linux/debian, buggy on openbsd)
+  o added subproject: autovar - predefined macro framework (was dyncall_macros.h)
+  o added support for sparc (32-bit) (tested on linux/debian,openbsd,solaris)
+  o added support for sparc (64-bit) (tested on linux/debian,openbsd,solaris)
   o added support for Solaris and SunPro compiler for i386, x86_64, sparc and sparc64
   o improved auto-detection via preprocessor defines
 dyncall updates:
@@ -20,7 +21,7 @@ dyncall updates:
   o bug fix for ppc32/sysv: ellipsis calls work now
   o updated API, introduced DC_CALL_C_ELLIPSIS_VARARGS
   o changed interface: dcMode does not reset internally anymore
- dyncallback updates:
+dyncallback updates:
   o uses portasm for x86,x64
   o added Solaris/x86/sunpro port (stable)
   o added Minix port (unstable)
@@ -31,6 +32,7 @@ dynload updates:
   o removed Dbghelf.lib dependency
   o bug fixes for cygwin/x86
   o fixes for beos/haiku
+  o no dependencies to libdyncall sources.
 buildsys additions:
   o added zero-config (BSD,GNU,SUN) make files (Makefile.embedded)
   o added in/out-of-source configure2 w/ (BSD,GNU) make files (Makefile.generic')
@@ -38,10 +40,13 @@ buildsys additions:
   o Nmakefile: more tests included (resolve_self)
   o improved cross-compilation for iOS (upgrade to 4.3 sdk)
   o darwin 8.0 support
+  o added 'install' support for Makefile.embedded
 buildsys/gmake updates:
   o added support for msvc/x64 tool-chain
   o default settings for build-dir changed to '.'
   o cleanup: removed top-level Make{Prolog,Epilog,Rules} files and updated all sub-projects and tests
+  o added support for DESTDIR staging installation
+  o added support for manual page installation
 buildsys/cmake updates:
   o updated find module scripts (see cmake/Modules)
   o added support for using dyncall as sub-project (via *Config.cmake files)
@@ -50,6 +55,7 @@ buildsys/cmake updates:
   o fixes for CPack
   o fixes for universal builds on Mac OS X
   o supports SunPro with *.S files.
+  o added experimental 'dynMake' portable make-based build-system (not stable, yet)
 documentation updates:
   o added dyncallback documentation
   o updated dyncall documentation 
