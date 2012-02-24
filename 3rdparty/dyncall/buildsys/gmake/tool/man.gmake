@@ -1,6 +1,6 @@
 #//////////////////////////////////////////////////////////////////////////////
 #
-# Copyright (c) 2007,2009 Daniel Adler <dadler@uni-goettingen.de>, 
+# Copyright (c) 2007,2011 Daniel Adler <dadler@uni-goettingen.de>, 
 #                         Tassilo Philipp <tphilipp@potion-studios.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -17,16 +17,6 @@
 #
 #//////////////////////////////////////////////////////////////////////////////
 
-APP_SUFFIX=.exe
-DLL_SUFFIX=.dll
-RM = del
-SLASH = \\
-
-ifdef TARGET_DLL
-ifdef DLL_IMPORTLIB
-LIB_FILE = $(BUILD_DIR)/$(LIB_PREFIX)$(TARGET_DLL)$(LIB_SUFFIX)
-endif
-endif
-
-include $(GMAKE_TOP)/tool/$(BUILD_TOOL).gmake
+%.gz: %
+	gzip -c $< >$@
 

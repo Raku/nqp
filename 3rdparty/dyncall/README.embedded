@@ -18,11 +18,21 @@ Building the tests:
 -------------------
 $ cd test ; make -f Makefile.embedded <variant>
 
+Installation:
+-------------
+$ make -f Makefile.embedded PREFIX=/usr/local install
+
+Installation with support for DESTDIR:
+--------------------------------------
+$ make -f Makefile.embedded DESTDIR=/tmp/staging PREFIX=/usr/local install
+
+
 Available variants:
 -------------------
 bsd                   Free/Net/Open/DragonFly/Mir BSD     
 linux                 Linux
-macosx                
+osx                   Mac OS X
+osx-universal         Mac OS X universal binaries (i386,x86_64 and ppc)
 sun                   SunOS and Sun Pro compiler
 sun-64bit             SunOS and Sun Pro compiler for sparc64(? amd64) 
 sun-gcc               SunOS and GCC compiler
@@ -60,4 +70,12 @@ are Assembly files which are preprocessed by the C Preprocessor.
 
 This feature is available by GCC and SunPro compilers.
 
+Limitations
+-----------
+
+Mac OS X universal static libraries require to use 
+
+'libtool -static -o libname.a obj1.o obj2.o ...' instead of 'ar cru libname.a obj1.o obj2.o'.
+We use predefined variables AR and ARFLAGS. 
+The variant osx-universal uses AR=libtool.
 

@@ -233,6 +233,7 @@ static void dc_callvm_mode_arm32_arm(DCCallVM* in_self,DCint mode)
   switch(mode) {
 /* Check OS if we need EABI as default. */
     case DC_CALL_C_ELLIPSIS:
+    case DC_CALL_C_ELLIPSIS_VARARGS:
 #if defined(DC__ABI_ARM_EABI)
     case DC_CALL_C_DEFAULT:          vt = &gVT_arm32_arm_eabi; break;
 #else
@@ -240,7 +241,9 @@ static void dc_callvm_mode_arm32_arm(DCCallVM* in_self,DCint mode)
 #endif
     case DC_CALL_C_ARM_ARM:          vt = &gVT_arm32_arm;      break;
     case DC_CALL_C_ARM_ARM_EABI:     vt = &gVT_arm32_arm_eabi; break;
-    default: return;
+    default: 
+      in_self->mError = DC_ERROR_UNSUPPORTED_MODE;
+      return;
   }
   self->mInterface.mVTpointer = vt;
 }

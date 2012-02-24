@@ -1,6 +1,5 @@
 MAKEFILE = Makefile.embedded
 MAKE_CMD = ${MAKE} -f ${MAKEFILE} 
-.PHONY: all tests clean bsd linux sun sun-64bit sun-gcc sun-gcc-64bit
 all:
 	cd dynload ; ${MAKE_CMD}
 	cd dyncall ; ${MAKE_CMD}
@@ -12,6 +11,10 @@ clean:
 	cd dyncall     ; ${MAKE_CMD} clean
 	cd dyncallback ; ${MAKE_CMD} clean
 	cd test        ; ${MAKE_CMD} clean
+install:
+	cd dynload     ; ${MAKE_CMD} install
+	cd dyncall     ; ${MAKE_CMD} install
+	cd dyncallback ; ${MAKE_CMD} install
 bsd:
 	${MAKE_CMD} all
 linux:
@@ -34,3 +37,4 @@ sun-gcc:
 sun-gcc-64bit:
 	CC=gcc CFLAGS="${CFLAGS} -m64" ASFLAGS="${ASFLAGS} -m64" ${MAKE_CMD} all
 
+.PHONY: all tests clean install bsd linux linux64 minix-gcc osx osx-universal sun sun-64bit sun-gcc sun-gcc-64bit

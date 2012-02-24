@@ -53,6 +53,10 @@ Build with CMake, Sun make and SunPro for sparc64
   $ cmake -DCMAKE_C_FLAGS=-m64 -DCMAKE_ASM_FLAGS=-m64 -DCMAKE_CXX_FLAGS=-m64 .
   $ make
 
+Installation
+------------
+  $ make -f Makefile.embedded PREFIX=<some/prefix> install
+
 
 Tested Platforms
 ----------------

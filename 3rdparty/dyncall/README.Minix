@@ -19,7 +19,7 @@ $ sh buildsys/scripts/batch-build-minix.sh
 Notes
 -----
 
-As Minix as no dynamic linker, the default '-fPIC' CFLAGS need to be cleared,
+As Minix has no dynamic linker, the default '-fPIC' CFLAGS need to be cleared,
 which does the batch-build script setting CFLAGs for dyncall and dyncallback
 explicitly.
 
