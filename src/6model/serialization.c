@@ -318,6 +318,7 @@ Parrot_Int4 get_serialized_outer_context_idx(PARROT_INTERP, SerializationWriter 
         else {
             INTVAL idx = VTABLE_elements(interp, writer->contexts_list);
             VTABLE_set_pmc_keyed_int(interp, writer->contexts_list, idx, outer_ctx);
+            VTABLE_setprop(interp, outer_ctx, Parrot_str_new_constant(interp, "SC"), writer->root.sc);
             return (Parrot_Int4)idx + 1;
         }
     }
