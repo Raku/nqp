@@ -1265,6 +1265,9 @@ static void deserialize_closure(PARROT_INTERP, SerializationReader *reader, INTV
     PMC *closure = VTABLE_clone(interp, static_code);
     VTABLE_push_pmc(interp, reader->codes_list, closure);
     
+    /* Tag it as being in this SC. */
+    VTABLE_setprop(interp, closure, Parrot_str_new_constant(interp, "SC"), reader->root.sc);
+    
     /* See if there's a code object we need to attach. */
     if (read_int32(table_row, 12))
         PARROT_SUB(closure)->multi_signature = SC_get_object(interp,
