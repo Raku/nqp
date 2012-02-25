@@ -445,7 +445,8 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Serialization Error: Unimplemented object type passed to write_ref");
+            "Serialization Error: Unimplemented object type '%Ss' passed to write_ref",
+            ref->vtable->whoami);
     }
 
     /* Write the discriminator. */
@@ -489,7 +490,8 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
             break;
         default:
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Serialization Error: Unimplemented object type passed to write_ref");
+                "Serialization Error: Unimplemented object type '%Ss' passed to write_ref",
+                ref->vtable->whoami);
     }
 }
 
