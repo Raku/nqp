@@ -887,8 +887,13 @@ static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter
     for (i = 0; i < num_attributes; i++) {
         INTVAL a_offset = repr_data->attribute_offsets[i];
         STable *a_st = repr_data->flattened_stables[i];
-        if (a_st)
-            a_st->REPR->serialize(interp, a_st, (char *)data + a_offset, writer);
+        if (a_st) {
+            if (a_st->REPR->serialize)
+                a_st->REPR->serialize(interp, a_st, (char *)data + a_offset, writer);
+            else
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "Missing serialize REPR function");
+        }
         else
             writer->write_ref(interp, writer, get_pmc_at_offset(data, a_offset));
     }
