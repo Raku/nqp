@@ -50,6 +50,7 @@
 /* Cached type IDs. */
 static INTVAL smo_id = 0;
 static INTVAL nqp_lexpad_id = 0;
+static INTVAL perl6_lexpad_id = 0;
 
 /* ***************************************************************************
  * Serialization (writing related)
@@ -277,7 +278,7 @@ static void write_code_ref(PARROT_INTERP, SerializationWriter *writer, PMC *code
 static PMC * closure_to_static_code_ref(PARROT_INTERP, PMC *closure, INTVAL fatal) {
     /* Look up the static lexical info. */
     PMC *lexinfo = PARROT_SUB(closure)->lex_info;
-    if (lexinfo->vtable->base_type == nqp_lexpad_id) {
+    if (lexinfo->vtable->base_type == nqp_lexpad_id || lexinfo->vtable->base_type == perl6_lexpad_id) {
         PMC *static_code = PARROT_NQPLEXINFO(lexinfo)->static_code;
         if (PMC_IS_NULL(static_code))
         {
@@ -843,6 +844,7 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     /* Other init. */
     smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
     nqp_lexpad_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "NQPLexInfo", 0));
+    perl6_lexpad_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "Perl6LexInfo", 0));
 
     /* Start serializing. */
     serialize(interp, writer);
