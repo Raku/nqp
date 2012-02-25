@@ -848,6 +848,9 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     writer->write_ref        = write_ref_func;
     writer->write_stable_ref = write_stable_ref_func;
     
+    /* Disable GC at this stage; the stuff hanging off writer isn't anchored. */
+     Parrot_block_GC_mark(interp);
+    
     /* Other init. */
     smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
     nqp_lexpad_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "NQPLexInfo", 0));
@@ -858,6 +861,9 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
 
     /* Build a single result string out of the serialized data. */
     result = concatenate_outputs(interp, writer);
+    
+    /* Re-enable GC. */
+     Parrot_unblock_GC_mark(interp);
 
     /* Clear up afterwards. */
     mem_sys_free(writer->root.dependencies_table);
