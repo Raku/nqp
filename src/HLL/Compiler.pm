@@ -402,7 +402,7 @@ class HLL::Compiler {
                 }
             }
             if $err {
-                say($err);
+                pir::printerr($err);
                 pir::exit(1);
             }
         }
