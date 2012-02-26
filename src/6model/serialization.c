@@ -411,6 +411,11 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
          * we just drop it. */
         discrim = REFVAR_VM_NULL;
     }
+    else if (ref->vtable->base_type == enum_class_CallContext) {
+        /* XXX This is a hack for Rakudo's sake; it keeps a CallContext around in
+         * the lexpad, for no really good reason. */
+        discrim = REFVAR_VM_NULL;
+    }
     else if (ref->vtable->base_type == smo_id) {
         discrim = REFVAR_OBJECT;
     }
