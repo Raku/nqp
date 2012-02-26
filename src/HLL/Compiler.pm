@@ -398,7 +398,7 @@ class HLL::Compiler {
                 pir::push(@codes, $in-handle.readall($_));
                 $in-handle.close;
                 CATCH {
-                    $err := $_;
+                    $err := "$_\n";
                 }
             }
             if $err {
