@@ -83,14 +83,18 @@ static void write_double(char *buffer, size_t offset, double value) {
 /* Adds an item to the string heap if needed, and returns the index where
  * it may be found. */
 static Parrot_Int4 add_string_to_heap(PARROT_INTERP, SerializationWriter *writer, STRING *s) {
-    if (!STRING_IS_NULL(s) && VTABLE_exists_keyed_str(interp, writer->seen_strings, s)) {
+    if (STRING_IS_NULL(s)) {
+        /* We ensured that the first entry in the heap represents the null string,
+         * so can just hand back 0 here. */
+        return 0;
+    }
+    else if (VTABLE_exists_keyed_str(interp, writer->seen_strings, s)) {
         return (Parrot_Int4)VTABLE_get_integer_keyed_str(interp, writer->seen_strings, s);
     }
     else {
         INTVAL next_idx = VTABLE_elements(interp, writer->root.string_heap);
         VTABLE_set_string_keyed_int(interp, writer->root.string_heap, next_idx, s);
-        if (!STRING_IS_NULL(s))
-            VTABLE_set_integer_keyed_str(interp, writer->seen_strings, s, next_idx);
+        VTABLE_set_integer_keyed_str(interp, writer->seen_strings, s, next_idx);
         return (Parrot_Int4)next_idx;
     }
 }
@@ -323,9 +327,6 @@ Parrot_Int4 get_serialized_outer_context_idx(PARROT_INTERP, SerializationWriter 
             INTVAL idx = VTABLE_elements(interp, writer->contexts_list);
             VTABLE_set_pmc_keyed_int(interp, writer->contexts_list, idx, outer_ctx);
             VTABLE_setprop(interp, outer_ctx, Parrot_str_new_constant(interp, "SC"), writer->root.sc);
-printf("Added context with %s due to %s\n",
-    Parrot_str_cstring(interp, VTABLE_get_string(interp, PARROT_CALLCONTEXT(outer_ctx)->current_sub)),
-    Parrot_str_cstring(interp, VTABLE_get_string(interp, closure)));
             return (Parrot_Int4)idx + 1;
         }
     }
@@ -741,7 +742,7 @@ static void serialize_context(PARROT_INTERP, SerializationWriter *writer, PMC *c
             "Serialization Error: closure outer is a code object not in an SC");
     static_sc_id = get_sc_id(interp, writer, static_code_sc);
     static_idx   = (Parrot_Int4)SC_find_code_idx(interp, static_code_sc, static_code_ref);
-    
+
     /* Ensure there's space in the STables table; grow if not. */
     offset = writer->root.num_contexts * CONTEXTS_TABLE_ENTRY_SIZE;
     if (offset + CONTEXTS_TABLE_ENTRY_SIZE > writer->contexts_table_alloc) {
@@ -871,6 +872,9 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
     nqp_lexpad_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "NQPLexInfo", 0));
     perl6_lexpad_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "Perl6LexInfo", 0));
+    
+    /* Initialize string heap so first entry is the NULL string. */
+    VTABLE_push_string(interp, empty_string_heap, STRINGNULL);
 
     /* Start serializing. */
     serialize(interp, writer);
