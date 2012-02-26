@@ -87,6 +87,7 @@ pmclass NQPLexInfo
     
     VTABLE void visit(PMC *info) {
         VISIT_PMC_ATTR(INTERP, info, SELF, NQPLexInfo, name_to_register_map);
+        VISIT_PMC_ATTR(INTERP, info, SELF, NQPLexInfo, static_code);
         SUPER(info);
     }
     
