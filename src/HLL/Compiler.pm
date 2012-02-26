@@ -398,11 +398,11 @@ class HLL::Compiler {
                 pir::push(@codes, $in-handle.readall($_));
                 $in-handle.close;
                 CATCH {
-                    $err := 1;
+                    $err := $_;
                 }
             }
             if $err {
-                say("Cannot open \"$_\".");
+                say($err);
                 pir::exit(1);
             }
         }
