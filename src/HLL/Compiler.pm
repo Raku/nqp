@@ -398,10 +398,13 @@ class HLL::Compiler {
                 pir::push(@codes, $in-handle.readall($_));
                 $in-handle.close;
                 CATCH {
-                    $err := "Error while reading from file: $_";
+                    $err := 1;
                 }
             }
-            pir::die($err) if $err;
+            if $err {
+                say("Cannot open \"$_\".");
+                pir::exit(1);
+            }
         }
         my $code := pir::join('', @codes);
         my $?FILES := pir::join(' ', @files);
