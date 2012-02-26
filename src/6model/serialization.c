@@ -448,6 +448,11 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
             discrim = REFVAR_CLONED_CODEREF;
         }
     }
+    else if (ref->vtable->base_type == enum_class_Object) {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Serialization Error: Parrot object type '%Ss' passed to write_ref",
+            VTABLE_name(interp, VTABLE_get_class(interp, ref)));
+    }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Serialization Error: Unimplemented object type '%Ss' passed to write_ref",
