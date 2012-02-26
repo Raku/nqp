@@ -371,10 +371,19 @@ static INTVAL try_get_slot(PARROT_INTERP, P6opaqueREPRData *repr_data, PMC *clas
         P6opaqueNameMap *cur_map_entry = repr_data->name_to_index_mapping;
         while (cur_map_entry->class_key != NULL) {
             if (cur_map_entry->class_key == class_key) {
-                PMC *slot_pmc = VTABLE_get_pmc_keyed_str(interp, cur_map_entry->name_map, name);
-                if (!PMC_IS_NULL(slot_pmc))
-                    slot = VTABLE_get_integer(interp, slot_pmc);
-                break;
+                if (!PMC_IS_NULL(cur_map_entry->name_map)) {
+                    PMC *slot_pmc = VTABLE_get_pmc_keyed_str(interp, cur_map_entry->name_map, name);
+                    if (!PMC_IS_NULL(slot_pmc))
+                        slot = VTABLE_get_integer(interp, slot_pmc);
+                    break;
+                }
+                else {
+                    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                        "Null attribute map for P6opaque in class '%Ss'",
+                        VTABLE_get_string(interp, introspection_call(interp,
+                            class_key, STABLE(class_key)->HOW,
+                            Parrot_str_new_constant(interp, "name"), 0)));
+                }
             }
             cur_map_entry++;
         }
