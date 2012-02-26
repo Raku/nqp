@@ -48,10 +48,6 @@ class HLL::World {
     # XXX LEGACY
     has %!addr_to_slot;
     
-    # Other SCs that we are dependent on (maps handle to SC).
-    # XXX LEGACY
-    has %!dependencies;
-    
     method new(:$handle!, :$description = '<unknown>') {
         my $obj := self.CREATE();
         $obj.BUILD(:handle($handle), :description($description));
@@ -191,19 +187,6 @@ class HLL::World {
         }
         else {
             my $handle := $sc.handle;
-            unless pir::exists(%!dependencies, $handle) {
-                %!dependencies{$handle} := $sc;
-                self.add_fixup_task(:deserialize_past(PAST::Op.new(
-                    :pasttype('if'),
-                    PAST::Op.new(
-                        :pirop('isnull IP'),
-                        PAST::Op.new( :pirop('nqp_get_sc Ps'), $handle )
-                    ),
-                    PAST::Op.new(
-                        :pirop('die vS'),
-                        "Incorrect pre-compiled version of " ~ ($sc.description || '<unknown>') ~ " loaded"
-                    ))));
-            }
             my $past := PAST::Op.new( :pirop('nqp_get_sc_object Psi'),
                 $handle, $sc.slot_index_for($obj) );
             $past<has_compile_time_value> := 1;
