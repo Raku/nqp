@@ -247,11 +247,14 @@ class HLL::World {
                 :pasttype('bind'),
                 PAST::Var.new( :scope('register'), :name('string_heap'), :isdecl(1) ),
                 PAST::Op.new( :pirop('new Ps'), 'ResizableStringArray' )));
-        for $sh -> $s {
+         my $sh_elems := nqp::elems($sh);
+         my $i := 0;
+         while $i < $sh_elems {
             $sh_past.push(PAST::Op.new(
                 :pirop('push vPs'),
                 PAST::Var.new( :scope('register'), :name('string_heap') ),
-                (nqp::isnull($s) ?? PAST::Op.new( :pirop('null S') ) !! $s)));
+                (nqp::isnull_s($sh[$i]) ?? PAST::Op.new( :pirop('null S') ) !! $sh[$i])));
+                $i := $i + 1;
         }
         $sh_past.push(PAST::Var.new( :scope('register'), :name('string_heap') ));
         
