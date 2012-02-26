@@ -311,6 +311,9 @@ static PMC * closure_to_static_code_ref(PARROT_INTERP, PMC *closure, INTVAL fata
 Parrot_Int4 get_serialized_outer_context_idx(PARROT_INTERP, SerializationWriter *writer, PMC *closure) {
     PMC *outer_ctx = PARROT_SUB(closure)->outer_ctx;
     PMC *ctx_sc    = VTABLE_getprop(interp, outer_ctx, Parrot_str_new_constant(interp, "SC"));
+    if (!PMC_IS_NULL(VTABLE_getprop(interp, closure, Parrot_str_new_constant(interp, "COMPILER_STUB")))) {
+        return 0;
+    }
     if (PMC_IS_NULL(ctx_sc)) {
         /* Make sure we should chase a level down. */
         if (PMC_IS_NULL(closure_to_static_code_ref(interp, PARROT_CALLCONTEXT(outer_ctx)->current_sub, 0))) {
@@ -320,6 +323,9 @@ Parrot_Int4 get_serialized_outer_context_idx(PARROT_INTERP, SerializationWriter 
             INTVAL idx = VTABLE_elements(interp, writer->contexts_list);
             VTABLE_set_pmc_keyed_int(interp, writer->contexts_list, idx, outer_ctx);
             VTABLE_setprop(interp, outer_ctx, Parrot_str_new_constant(interp, "SC"), writer->root.sc);
+printf("Added context with %s due to %s\n",
+    Parrot_str_cstring(interp, VTABLE_get_string(interp, PARROT_CALLCONTEXT(outer_ctx)->current_sub)),
+    Parrot_str_cstring(interp, VTABLE_get_string(interp, closure)));
             return (Parrot_Int4)idx + 1;
         }
     }
