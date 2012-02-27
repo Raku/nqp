@@ -350,6 +350,10 @@ struct SixModel_REPROps {
 #define IS_CONCRETE(o)         (!PObj_flag_TEST(private0, (o)))
 #define MARK_AS_TYPE_OBJECT(o) PObj_flag_SET(private0, (o))
 
+/* Write barriers for noticing changes to objects or STables with an SC. */
+#define OBJ_SC_WRITE_BARRIER(o) if (SC_PMC(o)) { }
+#define ST_SC_WRITE_BARRIER(st) if ((st)->sc) { }
+
 /* Object model initialization. */
 void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attribute);
 
