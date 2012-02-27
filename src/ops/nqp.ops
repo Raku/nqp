@@ -168,6 +168,7 @@ inline op set_who(in PMC, in PMC) :base_core {
     if (var->vtable->base_type == smo_id) {
         STABLE(var)->WHO = $2;
         PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC(var));
+        ST_SC_WRITE_BARRIER(STABLE(var));
     }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -379,6 +380,7 @@ inline op repr_bind_attr_obj(in PMC, in PMC, in STR, in PMC) :base_core {
             "Can only use repr_bind_attr_obj on a SixModelObject");
     }
     PARROT_GC_WRITE_BARRIER(interp, $1);
+    OBJ_SC_WRITE_BARRIER($1);
 }
 
 /*
@@ -404,6 +406,7 @@ inline op repr_bind_attr_int(in PMC, in PMC, in STR, in INT) :base_core {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_int on a SixModelObject");
     }
+    OBJ_SC_WRITE_BARRIER($1);
 }
 
 /*
@@ -429,6 +432,7 @@ inline op repr_bind_attr_num(in PMC, in PMC, in STR, in NUM) :base_core {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_num on a SixModelObject");
     }
+    OBJ_SC_WRITE_BARRIER($1);
 }
 
 /*
@@ -454,6 +458,7 @@ inline op repr_bind_attr_str(in PMC, in PMC, in STR, in STR) :base_core {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_str on a SixModelObject");
     PARROT_GC_WRITE_BARRIER(interp, $1);
+    OBJ_SC_WRITE_BARRIER($1);
 }
 
 /*
@@ -582,6 +587,7 @@ inline op repr_bind_attr_obj(in PMC, in PMC, in STR, in INT, in PMC) :base_core 
             "Can only use repr_bind_attr_obj on a SixModelObject");
     }
     PARROT_GC_WRITE_BARRIER(interp, $1);
+    OBJ_SC_WRITE_BARRIER($1);
 }
 
 /*
@@ -607,6 +613,7 @@ inline op repr_bind_attr_int(in PMC, in PMC, in STR, in INT, in INT) :base_core 
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_int on a SixModelObject");
     }
+    OBJ_SC_WRITE_BARRIER($1);
 }
 
 /*
@@ -632,6 +639,7 @@ inline op repr_bind_attr_num(in PMC, in PMC, in STR, in INT, in NUM) :base_core 
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_num on a SixModelObject");
     }
+    OBJ_SC_WRITE_BARRIER($1);
 }
 
 /*
@@ -658,6 +666,7 @@ inline op repr_bind_attr_str(in PMC, in PMC, in STR, in INT, in STR) :base_core 
             "Can only use repr_bind_attr_str on a SixModelObject");
     }
     PARROT_GC_WRITE_BARRIER(interp, $1);
+    OBJ_SC_WRITE_BARRIER($1);
 }
 
 /*
@@ -711,6 +720,7 @@ inline op repr_change_type(in PMC, in PMC) :base_core {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_change_type on SixModelObjects");
     }
+    OBJ_SC_WRITE_BARRIER($1);
 }
 
 
@@ -829,6 +839,7 @@ inline op repr_bind_pos_obj(in PMC, in INT, in PMC) :base_core {
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot do bind_pos on a type object");
         PARROT_GC_WRITE_BARRIER(interp, obj);
+        OBJ_SC_WRITE_BARRIER($1);
     }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -853,6 +864,7 @@ inline op repr_bind_pos_int(in PMC, in INT, in INT) :base_core {
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot do bind_pos on a type object");
+        OBJ_SC_WRITE_BARRIER($1);
     }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -877,6 +889,7 @@ inline op repr_bind_pos_num(in PMC, in INT, in NUM) :base_core {
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot do bind_pos on a type object");
+        OBJ_SC_WRITE_BARRIER($1);
     }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -939,6 +952,7 @@ inline op publish_type_check_cache(in PMC, in PMC) :base_core {
             target_st->type_check_cache_length = 0;
         }
         PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC(target));
+        ST_SC_WRITE_BARRIER(target_st);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -973,6 +987,7 @@ inline op publish_method_cache(in PMC, in PMC) :base_core {
         }
         target_st->method_cache = cache;
         PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC(target));
+        ST_SC_WRITE_BARRIER(target_st);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -998,6 +1013,7 @@ inline op set_method_cache_authoritativeness(in PMC, in INT) :base_core {
         if ($2)
             new_flags = new_flags | METHOD_CACHE_AUTHORITATIVE;
         STABLE(target)->mode_flags = new_flags;
+        ST_SC_WRITE_BARRIER(STABLE(target));
     }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -1337,6 +1353,7 @@ inline op stable_set_type_check_mode(in PMC, in INT) :base_core {
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use stable_set_type_check_mode with a SixModelObject");
+    ST_SC_WRITE_BARRIER(STABLE(target));
 }
 
 
@@ -1783,6 +1800,7 @@ inline op set_container_spec(in PMC, in PMC, in STR, in PMC) :base_core {
             mem_sys_free(st->container_spec);
         st->container_spec = new_spec;
         PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC($1));
+        ST_SC_WRITE_BARRIER(st);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -1824,6 +1842,7 @@ inline op set_boolification_spec(in PMC, in INT, in PMC) :base_core {
             mem_sys_free(st->boolification_spec);
         st->boolification_spec = new_spec;
         PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC($1));
+        ST_SC_WRITE_BARRIER(st);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
