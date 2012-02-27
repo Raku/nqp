@@ -250,10 +250,7 @@ class HLL::World {
         # Overall deserialization PAST.
         PAST::Op.new(
             :pirop('nqp_deserialize_sc__vSPPP'),
-            PAST::Op.new( :inline(
-                '    $S0 = binary:"' ~ pir::escape__SS($serialized) ~ '"',
-                '    %r = box $S0'
-                ) ),
+            $serialized,
             PAST::Var.new( :name($sc_reg), :scope('register') ),
             $sh_past, $cr_past)
     }

@@ -11,6 +11,7 @@
 #include "pmc_serializationcontext.h"
 #include "pmc_nqplexinfo.h"
 #include "pmc/pmc_sub.h"
+#include "base64.h"
 
 #define MAX(x, y) ((y) > (x) ? (y) : (x))
 
@@ -531,6 +532,7 @@ void write_stable_ref_func(PARROT_INTERP, SerializationWriter *writer, STable *s
 /* Concatenates the various output segments into a single binary string. */
 static STRING * concatenate_outputs(PARROT_INTERP, SerializationWriter *writer) {
     char        *output      = NULL;
+    char        *output_b64  = NULL;
     Parrot_Int4  output_size = 0;
     Parrot_Int4  offset      = 0;
     
@@ -591,7 +593,7 @@ static STRING * concatenate_outputs(PARROT_INTERP, SerializationWriter *writer) 
     memcpy(output + offset, writer->root.closures_table, 
         writer->root.num_closures * CLOSURES_TABLE_ENTRY_SIZE);
     offset += writer->root.num_closures * CLOSURES_TABLE_ENTRY_SIZE;
-    
+
     /* Put contexts table in place, and set location/rows in header. */
     write_int32(output, 44, offset);
     write_int32(output, 48, writer->root.num_contexts);
@@ -610,9 +612,16 @@ static STRING * concatenate_outputs(PARROT_INTERP, SerializationWriter *writer) 
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Serialization sanity check failed: offset != output_size");
     
+    /* Base 64 encode. */
+    output_b64 = base64_encode(output, output_size);
+    mem_sys_free(output);
+    if (output_b64 == NULL)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Serialization error: failed to convert to base64");
+    
     /* Make a Parrot binary string containing it (external flag means use
      * this buffer, not copy it to a new one). */
-    return Parrot_str_new_init(interp, output, output_size,
+    return Parrot_str_new_init(interp, output_b64, strlen(output_b64),
         Parrot_binary_encoding_ptr, PObj_external_FLAG);
 }
 
@@ -883,7 +892,7 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     result = concatenate_outputs(interp, writer);
     
     /* Re-enable GC. */
-     Parrot_unblock_GC_mark(interp);
+    Parrot_unblock_GC_mark(interp);
 
     /* Clear up afterwards. */
     mem_sys_free(writer->root.dependencies_table);
@@ -1157,10 +1166,17 @@ STable * read_stable_ref_func(PARROT_INTERP, SerializationReader *reader) {
  * the reader data structure more fully. */
 static void check_and_disect_input(PARROT_INTERP, SerializationReader *reader, STRING *data_str) {
     /* Grab data from string. */
-    char   *data     = (char *)Parrot_str_cstring(interp, data_str);
-    INTVAL  data_len = Parrot_str_byte_length(interp, data_str);
+    size_t  data_len;
+    char   *data_b64 = (char *)Parrot_str_to_cstring(interp, data_str);
+    char   *data     = base64_decode(data_b64, &data_len);
     char   *prov_pos = data;
     char   *data_end = data + data_len;
+    mem_sys_free(data_b64);
+    
+    /* Ensure we got the data. */
+    if (data == NULL)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Failed to decode base64-encoded serialization data");
 
     /* Ensure that we have enough space to read a version number and check it. */
     if (data_len < 4)
@@ -1525,14 +1541,14 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *st
      * may be in an inconsistent state during all of this and so we may not have
      * yet deserialized enough to know how to do marking/freeing. */
      Parrot_block_GC_mark(interp);
-    
+
     /* Stub-allocate PMCs for all STables and objects, so we know where
      * they will all end up. */
     for (i = 0; i < reader->root.num_stables; i++)
         VTABLE_set_pmc_keyed_int(interp, stables, i, create_stable(interp, NULL, PMCNULL));
     for (i = 0; i < reader->root.num_objects; i++)
         VTABLE_set_pmc_keyed_int(interp, objects, i, Parrot_pmc_new(interp, smo_id));
-        
+
      /* Mark all the static code refs we've been provided with as static. */
      for (i = 0; i < scodes; i++) {
         PMC *scr = VTABLE_get_pmc_keyed_int(interp, reader->codes_list, i);
@@ -1543,8 +1559,10 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *st
     /* Deserialize closures, deserialize contexts, then attach outers. */
     for (i = 0; i < reader->root.num_closures; i++)
         deserialize_closure(interp, reader, i);
+
     for (i = 0; i < reader->root.num_contexts; i++)
         deserialize_context(interp, reader, i);
+
     for (i = 0; i < reader->root.num_closures; i++)
         attach_closure_outer(interp, reader, i,
             VTABLE_get_pmc_keyed_int(interp, reader->codes_list, scodes + i));
@@ -1553,12 +1571,12 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *st
      for (i = 0; i < reader->root.num_stables; i++)
         deserialize_stable(interp, reader, i,
             VTABLE_get_pmc_keyed_int(interp, stables, i));
-     
+
      /* Deserialize objects. */
      for (i = 0; i < reader->root.num_objects; i++)
         deserialize_object(interp, reader, i,
             VTABLE_get_pmc_keyed_int(interp, objects, i));
-     
+
      /* Re-enable GC. */
      Parrot_unblock_GC_mark(interp);
     
