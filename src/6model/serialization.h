@@ -82,6 +82,9 @@ typedef struct SerializationReader {
     STRING * (*read_str) (PARROT_INTERP, struct SerializationReader *reader);
     PMC *    (*read_ref) (PARROT_INTERP, struct SerializationReader *reader);
     STable * (*read_stable_ref) (PARROT_INTERP, struct SerializationReader *reader);
+    
+    /* The data, which we'll want to free after deserialization. */
+    char *data;
 } SerializationReader;
 
 /* Represents the serialization writer and the various functions available

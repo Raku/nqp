@@ -1177,6 +1177,7 @@ static void check_and_disect_input(PARROT_INTERP, SerializationReader *reader, S
     if (data == NULL)
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Failed to decode base64-encoded serialization data");
+    reader->data = data;
 
     /* Ensure that we have enough space to read a version number and check it. */
     if (data_len < 4)
@@ -1581,5 +1582,6 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *st
      Parrot_unblock_GC_mark(interp);
     
     /* Clear up afterwards. */
+    mem_sys_free(reader->data);
     mem_sys_free(reader);
 }
