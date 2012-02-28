@@ -38,6 +38,11 @@ static PMC *KnowHOWAttribute = NULL;
 static PMC *nqpevent_fh = NULL;
 static INTVAL nqpdebflags_i = 0;
 
+/* Serialization context upside-down stack (element 0 is the latest, new entries
+ * unshifted). Tracks the SC (if any) that we are currently in; stack because we
+ * may have multiple on the go due to compiling nested module dependencies. */
+PMC *compiling_scs = NULL;
+
 END_OPS_PREAMBLE
 
 /*
@@ -60,6 +65,10 @@ inline op nqp_dynop_setup() :base_core {
 
         /* Initialize the object model. */
         SixModelObject_initialize(interp, &KnowHOW, &KnowHOWAttribute);
+        
+        /* Initialize compiling SCs list. */
+        compiling_scs = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+        Parrot_pmc_gc_register(interp, compiling_scs);
     }
 }
 
@@ -1635,6 +1644,34 @@ inline op nqp_get_sc_for_object(out PMC, in PMC) :base_core {
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use nqp_get_sc_for_object with a SixModelObject");
+}
+
+
+/*
+
+=item nqp_push_compiling_sc()
+
+Pushes an SC on to the stack of those currently being compiled.
+
+=cut
+
+*/
+inline op nqp_push_compiling_sc(in PMC) :base_core {
+    VTABLE_unshift_pmc(interp, compiling_scs, $1);
+}
+
+
+/*
+
+=item nqp_pop_compiling_sc()
+
+Pops an SC off the stack of those currently being compiled.
+
+=cut
+
+*/
+inline op nqp_pop_compiling_sc() :base_core {
+    VTABLE_shift_pmc(interp, compiling_scs);
 }
 
 
