@@ -50,8 +50,8 @@ static void SC_write_barrier_obj(PARROT_INTERP, PMC *obj) {
         if (SC_PMC(obj) != comp_sc) {
             SC_repossess_object(interp, comp_sc, SC_PMC(obj), obj);
             SC_PMC(obj) = comp_sc;
-            printf("SC OBJECT WRITE BARRIER HIT (%s)\n",
-                Parrot_str_cstring(interp, VTABLE_name(interp, obj)));
+            /*printf("SC OBJECT WRITE BARRIER HIT (%s)\n",
+                Parrot_str_cstring(interp, VTABLE_name(interp, obj)));*/
         }
     }
 }
@@ -63,8 +63,8 @@ static void SC_write_barrier_st(PARROT_INTERP, STable *st) {
         if (st->sc != comp_sc) {
             SC_repossess_stable(interp, comp_sc, st->sc, st->stable_pmc);
             st->sc = comp_sc;
-            printf("SC STABLE WRITE BARRIER HIT (%s)\n",
-                Parrot_str_cstring(interp, VTABLE_name(interp, st->WHAT)));
+            /*printf("SC STABLE WRITE BARRIER HIT (%s)\n",
+                Parrot_str_cstring(interp, VTABLE_name(interp, st->WHAT)));*/
         }
     }
 }
