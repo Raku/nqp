@@ -1327,11 +1327,22 @@ static void check_and_disect_input(PARROT_INTERP, SerializationReader *reader, S
     if (prov_pos > data_end)
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Corruption detected (contexts data starts after end of data)");
+
+    /* Get size and location of repossessions table. */
+    reader->root.repos_table = data + read_int32(data, 56);
+    reader->root.num_repos   = read_int32(data, 60);
+    if (reader->root.repos_table < prov_pos)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Corruption detected (repossessions table starts before contexts data ends)");
+    prov_pos = reader->root.repos_table + reader->root.num_repos * REPOS_TABLE_ENTRY_SIZE;
+    if (prov_pos > data_end)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Corruption detected (repossessions table overruns end of data)");
     
     /* Set reading limits for data chunks. */
     reader->stables_data_end = reader->root.objects_table;
     reader->objects_data_end = reader->root.closures_table;
-    reader->contexts_data_end = data_end;
+    reader->contexts_data_end = reader->root.repos_table;
 }
 
 /* Goes through the dependencies table and resolves the dependencies that it
@@ -1542,6 +1553,48 @@ static void deserialize_object(PARROT_INTERP, SerializationReader *reader, INTVA
     PARROT_GC_WRITE_BARRIER(interp, obj);
 }
 
+/* Repossess an object or STable. */
+void repossess(PARROT_INTERP, SerializationReader *reader, INTVAL i) {
+    /* Calculate location of table row. */
+    char *table_row = reader->root.repos_table + i * REPOS_TABLE_ENTRY_SIZE;
+    
+    /* Do appropriate type of repossession. */
+    Parrot_Int4 repo_type = read_int32(table_row, 0);
+    if (repo_type == 0) {
+        /* Get object to repossess. */
+        PMC *orig_obj = SC_get_object(interp,
+            locate_sc(interp, reader, read_int32(table_row, 8)),
+            read_int32(table_row, 12));
+        
+        /* Clear it up, since we'll re-allocate all the bits inside
+         * it on deserialization. */
+        STABLE(orig_obj)->REPR->gc_free(interp, orig_obj);
+        
+        /* Put it into objects root set at the apporpriate slot. */
+        VTABLE_set_pmc_keyed_int(interp, reader->objects_list,
+            read_int32(table_row, 4), orig_obj);
+    }
+    else if (repo_type == 1) {
+        /* Get STable to repossess. */
+        PMC *orig_st = SC_get_stable(interp,
+            locate_sc(interp, reader, read_int32(table_row, 8)),
+            read_int32(table_row, 12));
+        
+        /* Clear it up, since we'll re-allocate all the bits inside
+         * it on deserialization. */
+        if (STABLE_STRUCT(orig_st)->REPR->gc_free_repr_data)
+            STABLE_STRUCT(orig_st)->REPR->gc_free_repr_data(interp, STABLE_STRUCT(orig_st));
+        
+        /* Put it into STables root set at the apporpriate slot. */
+        VTABLE_set_pmc_keyed_int(interp, reader->stables_list,
+            read_int32(table_row, 4), orig_st);
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Unknown repossession type");
+    }
+}
+
 /* Takes serialized data, an empty SerializationContext to deserialize it into,
  * a strings heap and the set of static code refs for the compilation unit.
  * Deserializes the data into the required objects and STables. */
@@ -1591,13 +1644,20 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *st
      * may be in an inconsistent state during all of this and so we may not have
      * yet deserialized enough to know how to do marking/freeing. */
      Parrot_block_GC_mark(interp);
+     
+     /* If we're repossessing objects and STables from other SCs, then first
+      * get those raw objects into our root set. */
+     for (i = 0; i < reader->root.num_repos; i++)
+        repossess(interp, reader, i);
 
     /* Stub-allocate PMCs for all STables and objects, so we know where
      * they will all end up. */
     for (i = 0; i < reader->root.num_stables; i++)
-        VTABLE_set_pmc_keyed_int(interp, stables, i, create_stable(interp, NULL, PMCNULL));
+        if (PMC_IS_NULL(VTABLE_get_pmc_keyed_int(interp, stables, i)))
+            VTABLE_set_pmc_keyed_int(interp, stables, i, create_stable(interp, NULL, PMCNULL));
     for (i = 0; i < reader->root.num_objects; i++)
-        VTABLE_set_pmc_keyed_int(interp, objects, i, Parrot_pmc_new(interp, smo_id));
+        if (PMC_IS_NULL(VTABLE_get_pmc_keyed_int(interp, objects, i)))
+            VTABLE_set_pmc_keyed_int(interp, objects, i, Parrot_pmc_new(interp, smo_id));
 
      /* Mark all the static code refs we've been provided with as static. */
      for (i = 0; i < scodes; i++) {
