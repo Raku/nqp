@@ -46,7 +46,10 @@ PMC *compiling_scs = NULL;
 /* SC write barrier for objects. */
 static void SC_write_barrier_obj(PARROT_INTERP, PMC *obj) {
     if (VTABLE_get_bool(interp, compiling_scs)) {
-        if (VTABLE_get_pmc_keyed_int(interp, compiling_scs, 0) != SC_PMC(obj)) {
+        PMC *comp_sc = VTABLE_get_pmc_keyed_int(interp, compiling_scs, 0);
+        if (SC_PMC(obj) != comp_sc) {
+            SC_repossess_object(interp, comp_sc, SC_PMC(obj), obj);
+            SC_PMC(obj) = comp_sc;
             printf("SC OBJECT WRITE BARRIER HIT (%s)\n",
                 Parrot_str_cstring(interp, VTABLE_name(interp, obj)));
         }
@@ -56,7 +59,10 @@ static void SC_write_barrier_obj(PARROT_INTERP, PMC *obj) {
 /* SC write barrier for STables. */
 static void SC_write_barrier_st(PARROT_INTERP, STable *st) {
     if (VTABLE_get_bool(interp, compiling_scs)) {
-        if (VTABLE_get_pmc_keyed_int(interp, compiling_scs, 0) != st->sc) {
+        PMC *comp_sc = VTABLE_get_pmc_keyed_int(interp, compiling_scs, 0);
+        if (st->sc != comp_sc) {
+            SC_repossess_stable(interp, comp_sc, st->sc, st->stable_pmc);
+            st->sc = comp_sc;
             printf("SC STABLE WRITE BARRIER HIT (%s)\n",
                 Parrot_str_cstring(interp, VTABLE_name(interp, st->WHAT)));
         }

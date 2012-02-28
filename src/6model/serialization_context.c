@@ -122,3 +122,41 @@ void SC_set_code(PARROT_INTERP, PMC *sc, INTVAL idx, PMC *code) {
     GETATTR_SerializationContext_root_codes(interp, sc, codes);
     VTABLE_set_pmc_keyed_int(interp, codes, idx, code);
 }
+
+/* Takes an object and adds it to this SC's root set, and installs a
+ * reposession entry. */
+void SC_repossess_object(PARROT_INTERP, PMC *target_sc, PMC *orig_sc, PMC *object) {
+    PMC *rep_indexes, *rep_scs;
+    
+    /* Add to root set. */
+    PMC    *objects;
+    INTVAL  new_slot;
+    GETATTR_SerializationContext_root_objects(interp, target_sc, objects);
+    new_slot = VTABLE_elements(interp, objects);
+    VTABLE_set_pmc_keyed_int(interp, objects, new_slot, object);
+    
+    /* Add repossession entry. */
+    GETATTR_SerializationContext_rep_indexes(interp, target_sc, rep_indexes);
+    GETATTR_SerializationContext_rep_scs(interp, target_sc, rep_scs);
+    VTABLE_push_integer(interp, rep_indexes, new_slot);
+    VTABLE_push_pmc(interp, rep_scs, orig_sc);
+}
+
+/* Takes an STable and adds it to this SC's root set, and installs a
+ * reposession entry. */
+void SC_repossess_stable(PARROT_INTERP, PMC *target_sc, PMC *orig_sc, PMC *st_pmc) {
+    PMC *rep_indexes, *rep_scs;
+    
+    /* Add to root set. */
+    PMC    *stables;
+    INTVAL  new_slot;
+    GETATTR_SerializationContext_root_stables(interp, target_sc, stables);
+    new_slot = VTABLE_elements(interp, stables);
+    VTABLE_set_pmc_keyed_int(interp, stables, new_slot, st_pmc);
+    
+    /* Add repossession entry. */
+    GETATTR_SerializationContext_rep_indexes(interp, target_sc, rep_indexes);
+    GETATTR_SerializationContext_rep_scs(interp, target_sc, rep_scs);
+    VTABLE_push_integer(interp, rep_indexes, new_slot);
+    VTABLE_push_pmc(interp, rep_scs, orig_sc);
+}

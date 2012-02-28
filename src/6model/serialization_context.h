@@ -12,4 +12,6 @@ PMC * SC_get_stable(PARROT_INTERP, PMC *sc, INTVAL idx);
 PMC * SC_get_object(PARROT_INTERP, PMC *sc, INTVAL idx);
 PMC * SC_get_code(PARROT_INTERP, PMC *sc, INTVAL idx);
 void SC_set_code(PARROT_INTERP, PMC *sc, INTVAL idx, PMC *code);
+void SC_repossess_object(PARROT_INTERP, PMC *target_sc, PMC *orig_sc, PMC *object);
+void SC_repossess_stable(PARROT_INTERP, PMC *target_sc, PMC *orig_sc, PMC *st_pmc);
 #endif
