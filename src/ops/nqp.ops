@@ -1919,7 +1919,7 @@ inline op set_boolification_spec(in PMC, in INT, in PMC) :base_core {
             mem_sys_free(st->boolification_spec);
         st->boolification_spec = new_spec;
         PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC($1));
-        ST_SC_WRITE_BARRIER(st);
+        /*ST_SC_WRITE_BARRIER(st);*/
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
