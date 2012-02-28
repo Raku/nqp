@@ -351,8 +351,22 @@ struct SixModel_REPROps {
 #define MARK_AS_TYPE_OBJECT(o) PObj_flag_SET(private0, (o))
 
 /* Write barriers for noticing changes to objects or STables with an SC. */
-#define OBJ_SC_WRITE_BARRIER(o) if (SC_PMC(o)) { }
-#define ST_SC_WRITE_BARRIER(st) if ((st)->sc) { }
+typedef void (* obj_sc_barrier_func) (PARROT_INTERP, PMC *obj);
+typedef void (* st_sc_barrier_func) (PARROT_INTERP, STable *st);
+#define OBJ_SC_WRITE_BARRIER(o) \
+    if (SC_PMC(o)) { \
+        ((obj_sc_barrier_func) \
+        D2FPTR(VTABLE_get_pointer(interp, \
+            VTABLE_get_pmc_keyed_str(interp, interp->root_namespace, \
+                Parrot_str_new_constant(interp, "_OBJ_SC_BARRIER")))))(interp, o); \
+    }
+#define ST_SC_WRITE_BARRIER(st) \
+    if ((st)->sc) { \
+        ((st_sc_barrier_func) \
+        D2FPTR(VTABLE_get_pointer(interp, \
+            VTABLE_get_pmc_keyed_str(interp, interp->root_namespace, \
+                Parrot_str_new_constant(interp, "_ST_SC_BARRIER")))))(interp, st); \
+    }
 
 /* Object model initialization. */
 void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attribute);

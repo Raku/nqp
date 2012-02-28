@@ -43,6 +43,26 @@ static INTVAL nqpdebflags_i = 0;
  * may have multiple on the go due to compiling nested module dependencies. */
 PMC *compiling_scs = NULL;
 
+/* SC write barrier for objects. */
+static void SC_write_barrier_obj(PARROT_INTERP, PMC *obj) {
+    if (VTABLE_get_bool(interp, compiling_scs)) {
+        if (VTABLE_get_pmc_keyed_int(interp, compiling_scs, 0) != SC_PMC(obj)) {
+            printf("SC OBJECT WRITE BARRIER HIT (%s)\n",
+                Parrot_str_cstring(interp, VTABLE_name(interp, obj)));
+        }
+    }
+}
+
+/* SC write barrier for STables. */
+static void SC_write_barrier_st(PARROT_INTERP, STable *st) {
+    if (VTABLE_get_bool(interp, compiling_scs)) {
+        if (VTABLE_get_pmc_keyed_int(interp, compiling_scs, 0) != st->sc) {
+            printf("SC STABLE WRITE BARRIER HIT (%s)\n",
+                Parrot_str_cstring(interp, VTABLE_name(interp, st->WHAT)));
+        }
+    }
+}
+
 END_OPS_PREAMBLE
 
 /*
@@ -56,7 +76,7 @@ Does various setup tasks for the benefit of the other dynops.
 */
 inline op nqp_dynop_setup() :base_core {
     if (!initialized) {
-        initialized = 1;
+        PMC *obj_sc_barrier, *st_sc_barrier;
 
         /* Look up and cache some type IDs. */
         stable_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "STable", 0));
@@ -69,6 +89,20 @@ inline op nqp_dynop_setup() :base_core {
         /* Initialize compiling SCs list. */
         compiling_scs = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
         Parrot_pmc_gc_register(interp, compiling_scs);
+        
+        /* Set up write barrier functions. */
+        /* XXX Really want a better, cheaper place to put them... */
+        obj_sc_barrier = Parrot_pmc_new(interp, enum_class_Pointer);
+        VTABLE_set_pointer(interp, obj_sc_barrier, SC_write_barrier_obj);
+        VTABLE_set_pmc_keyed_str(interp, interp->root_namespace,
+            Parrot_str_new_constant(interp, "_OBJ_SC_BARRIER"), obj_sc_barrier);
+        st_sc_barrier = Parrot_pmc_new(interp, enum_class_Pointer);
+        VTABLE_set_pointer(interp, st_sc_barrier, SC_write_barrier_st);
+        VTABLE_set_pmc_keyed_str(interp, interp->root_namespace,
+            Parrot_str_new_constant(interp, "_ST_SC_BARRIER"), st_sc_barrier);
+        
+        /* Mark initialized. */
+        initialized = 1;
     }
 }
 
