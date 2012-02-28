@@ -1582,8 +1582,10 @@ void repossess(PARROT_INTERP, SerializationReader *reader, INTVAL i) {
         
         /* Clear it up, since we'll re-allocate all the bits inside
          * it on deserialization. */
-        if (STABLE_STRUCT(orig_st)->REPR->gc_free_repr_data)
+        if (STABLE_STRUCT(orig_st)->REPR->gc_free_repr_data) {
             STABLE_STRUCT(orig_st)->REPR->gc_free_repr_data(interp, STABLE_STRUCT(orig_st));
+            STABLE_STRUCT(orig_st)->REPR_data = NULL;
+        }
         
         /* Put it into STables root set at the apporpriate slot. */
         VTABLE_set_pmc_keyed_int(interp, reader->stables_list,
