@@ -138,7 +138,7 @@ void SC_repossess_object(PARROT_INTERP, PMC *target_sc, PMC *orig_sc, PMC *objec
     /* Add repossession entry. */
     GETATTR_SerializationContext_rep_indexes(interp, target_sc, rep_indexes);
     GETATTR_SerializationContext_rep_scs(interp, target_sc, rep_scs);
-    VTABLE_push_integer(interp, rep_indexes, new_slot);
+    VTABLE_push_integer(interp, rep_indexes, new_slot << 1);
     VTABLE_push_pmc(interp, rep_scs, orig_sc);
 }
 
@@ -157,6 +157,6 @@ void SC_repossess_stable(PARROT_INTERP, PMC *target_sc, PMC *orig_sc, PMC *st_pm
     /* Add repossession entry. */
     GETATTR_SerializationContext_rep_indexes(interp, target_sc, rep_indexes);
     GETATTR_SerializationContext_rep_scs(interp, target_sc, rep_scs);
-    VTABLE_push_integer(interp, rep_indexes, new_slot);
+    VTABLE_push_integer(interp, rep_indexes, (new_slot << 1) | 1);
     VTABLE_push_pmc(interp, rep_scs, orig_sc);
 }
