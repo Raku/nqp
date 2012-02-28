@@ -25,7 +25,7 @@
 #define OBJECTS_TABLE_ENTRY_SIZE    16
 #define CLOSURES_TABLE_ENTRY_SIZE   24
 #define CONTEXTS_TABLE_ENTRY_SIZE   12
-#define REPO_TABLE_ENTRY_SIZE       16
+#define REPOS_TABLE_ENTRY_SIZE      16
 
 /* Some guesses. */
 #define DEFAULT_STABLE_DATA_SIZE     4096
@@ -547,6 +547,7 @@ static STRING * concatenate_outputs(PARROT_INTERP, SerializationWriter *writer) 
     output_size += writer->root.num_closures * CLOSURES_TABLE_ENTRY_SIZE;
     output_size += writer->root.num_contexts * CONTEXTS_TABLE_ENTRY_SIZE;
     output_size += writer->contexts_data_offset;
+    output_size += writer->root.num_repos * REPOS_TABLE_ENTRY_SIZE;
     
     /* Allocate a buffer that size. */
     output = mem_sys_allocate(output_size);
@@ -607,6 +608,13 @@ static STRING * concatenate_outputs(PARROT_INTERP, SerializationWriter *writer) 
     memcpy(output + offset, writer->root.contexts_data,
         writer->contexts_data_offset);
     offset += writer->contexts_data_offset;
+    
+    /* Put repossessions table in place, and set location/rows in header. */
+    write_int32(output, 56, offset);
+    write_int32(output, 60, writer->root.num_repos);
+    memcpy(output + offset, writer->root.repos_table, 
+        writer->root.num_repos * REPOS_TABLE_ENTRY_SIZE);
+    offset += writer->root.num_repos * REPOS_TABLE_ENTRY_SIZE;
     
     /* Sanity check. */
     if (offset != output_size)
@@ -783,6 +791,42 @@ static void serialize_context(PARROT_INTERP, SerializationWriter *writer, PMC *c
     }
 }
 
+/* Goes through the list of repossessions and serializes them all. */
+static void serialize_repossessions(PARROT_INTERP, SerializationWriter *writer) {
+    INTVAL i;
+    
+    /* Obtain list of repossession object indexes and original SCs. */
+    PMC *rep_indexes, *rep_scs;
+    GETATTR_SerializationContext_rep_indexes(interp, writer->root.sc, rep_indexes);
+    GETATTR_SerializationContext_rep_scs(interp, writer->root.sc, rep_scs);
+    
+    /* Allocate table space, provided we've actually something to do. */
+    writer->root.num_repos = (Parrot_Int4)VTABLE_elements(interp, rep_indexes);
+    if (writer->root.num_repos == 0)
+        return;
+    writer->root.repos_table = mem_sys_allocate(writer->root.num_repos * REPOS_TABLE_ENTRY_SIZE);
+    
+    /* Make entries. */
+    for (i = 0; i < writer->root.num_repos; i++) {
+        Parrot_Int4  offset  = (Parrot_Int4)(i * REPOS_TABLE_ENTRY_SIZE);
+        Parrot_Int4  obj_idx = (Parrot_Int4)(VTABLE_get_integer_keyed_int(interp, rep_indexes, i) >> 1);
+        Parrot_Int4  is_st   = VTABLE_get_integer_keyed_int(interp, rep_indexes, i) & 1;
+        PMC         *orig_sc = VTABLE_get_pmc_keyed_int(interp, rep_scs, i);
+
+        /* Work out original object's SC location. */
+        Parrot_Int4 orig_sc_id = get_sc_id(interp, writer, orig_sc);
+        Parrot_Int4 orig_idx   = (Parrot_Int4)(is_st ?
+            SC_find_stable_idx(interp, orig_sc, VTABLE_get_pmc_keyed_int(interp, writer->stables_list, obj_idx)) :
+            SC_find_object_idx(interp, orig_sc, VTABLE_get_pmc_keyed_int(interp, writer->objects_list, obj_idx)));
+        
+        /* Write table row. */
+        write_int32(writer->root.repos_table, offset, is_st);
+        write_int32(writer->root.repos_table, offset + 4, obj_idx);
+        write_int32(writer->root.repos_table, offset + 8, orig_sc_id);
+        write_int32(writer->root.repos_table, offset + 12, orig_idx);
+    }
+}
+
 /* This is the overall serialization loop. It keeps an index into the list of
  * STables and objects in the SC. As we discover new ones, they get added. We
  * finished when we've serialized everything. */
@@ -822,6 +866,10 @@ static void serialize(PARROT_INTERP, SerializationWriter *writer) {
             work_todo = 1;
         }
     }
+    
+    /* Finally, serialize repossessions table (this can't make any more
+     * work, so is done as a separate step here at the end). */
+    serialize_repossessions(interp, writer);
 }
 
 /* Takes a serialization context along with an empty string array. Taking the
