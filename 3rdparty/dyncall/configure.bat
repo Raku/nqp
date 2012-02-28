@@ -127,6 +127,8 @@ ECHO CONFIG_ASM=%CONFIG_ASM%#>>ConfigVars
 ECHO CONFIG_CONFIG=%CONFIG_CONFIG%#>>ConfigVars
 ECHO CONFIG_PREFIX=%CONFIG_PREFIX%#>>ConfigVars
 ECHO CONFIG_BUILDPREFIX=%CONFIG_BUILDPREFIX%#>>ConfigVars
+ECHO RM=del#>>ConfigVars
+ECHO SLASH=\\#>>ConfigVars
 
 ECHO Writing following configuration to ConfigVars:
 ECHO.
