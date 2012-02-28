@@ -1472,8 +1472,7 @@ static void deserialize_context(PARROT_INTERP, SerializationReader *reader, INTV
     VTABLE_set_pmc_keyed_int(interp, reader->contexts_list, row, ctx);
 }
 
-/* Deserializes a closure, though without attaching outer (that comes in a
- * later step). */
+/* Attaches a closure's outer pointer. */
 static void attach_closure_outer(PARROT_INTERP, SerializationReader *reader, INTVAL i, PMC *closure) {
     char        *row = reader->root.closures_table + i * CLOSURES_TABLE_ENTRY_SIZE;
     Parrot_Int4  idx = read_int32(row, 8);
