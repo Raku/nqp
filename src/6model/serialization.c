@@ -24,7 +24,7 @@
 #define STABLES_TABLE_ENTRY_SIZE    8
 #define OBJECTS_TABLE_ENTRY_SIZE    16
 #define CLOSURES_TABLE_ENTRY_SIZE   24
-#define CONTEXTS_TABLE_ENTRY_SIZE   12
+#define CONTEXTS_TABLE_ENTRY_SIZE   16
 #define REPOS_TABLE_ENTRY_SIZE      16
 
 /* Some guesses. */
@@ -312,23 +312,19 @@ static PMC * closure_to_static_code_ref(PARROT_INTERP, PMC *closure, INTVAL fata
     }
 }
 
-/* Takes a closure, that is to be serialized. Checks if it has an outer that is
- * of interest, and if so sets it up to be serialized. */
-Parrot_Int4 get_serialized_outer_context_idx(PARROT_INTERP, SerializationWriter *writer, PMC *closure) {
-    PMC *outer_ctx = PARROT_SUB(closure)->outer_ctx;
-    PMC *ctx_sc    = VTABLE_getprop(interp, outer_ctx, Parrot_str_new_constant(interp, "SC"));
-    if (!PMC_IS_NULL(VTABLE_getprop(interp, closure, Parrot_str_new_constant(interp, "COMPILER_STUB")))) {
-        return 0;
-    }
+/* Takes an outer context that is potentially to be serialized. Checks if it
+ * is of interest, and if so sets it up to be serialized. */
+static Parrot_Int4 get_serialized_context_idx(PARROT_INTERP, SerializationWriter *writer, PMC *ctx) {
+    PMC *ctx_sc = VTABLE_getprop(interp, ctx, Parrot_str_new_constant(interp, "SC"));
     if (PMC_IS_NULL(ctx_sc)) {
         /* Make sure we should chase a level down. */
-        if (PMC_IS_NULL(closure_to_static_code_ref(interp, PARROT_CALLCONTEXT(outer_ctx)->current_sub, 0))) {
+        if (PMC_IS_NULL(closure_to_static_code_ref(interp, PARROT_CALLCONTEXT(ctx)->current_sub, 0))) {
             return 0;
         }
         else {
             INTVAL idx = VTABLE_elements(interp, writer->contexts_list);
-            VTABLE_set_pmc_keyed_int(interp, writer->contexts_list, idx, outer_ctx);
-            VTABLE_setprop(interp, outer_ctx, Parrot_str_new_constant(interp, "SC"), writer->root.sc);
+            VTABLE_set_pmc_keyed_int(interp, writer->contexts_list, idx, ctx);
+            VTABLE_setprop(interp, ctx, Parrot_str_new_constant(interp, "SC"), writer->root.sc);
             return (Parrot_Int4)idx + 1;
         }
     }
@@ -339,11 +335,19 @@ Parrot_Int4 get_serialized_outer_context_idx(PARROT_INTERP, SerializationWriter 
                 "Serialization Error: reference to context outside of SC");
         c = VTABLE_elements(interp, writer->contexts_list);
         for (i = 0; i < c; i++)
-            if (VTABLE_get_pmc_keyed_int(interp, writer->contexts_list, i) == outer_ctx)
+            if (VTABLE_get_pmc_keyed_int(interp, writer->contexts_list, i) == ctx)
                 return (Parrot_Int4)i + 1;
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Serialization Error: could not locate outer context in current SC");
     }
+}
+
+/* Takes a closure, that is to be serialized. Checks if it has an outer that is
+ * of interest, and if so sets it up to be serialized. */
+static Parrot_Int4 get_serialized_outer_context_idx(PARROT_INTERP, SerializationWriter *writer, PMC *closure) {
+    if (!PMC_IS_NULL(VTABLE_getprop(interp, closure, Parrot_str_new_constant(interp, "COMPILER_STUB"))))
+        return 0;
+    return get_serialized_context_idx(interp, writer, PARROT_SUB(closure)->outer_ctx);
 }
 
 /* Takes a closure that needs to be serialized. Makes an entry in the closures
@@ -772,6 +776,14 @@ static void serialize_context(PARROT_INTERP, SerializationWriter *writer, PMC *c
     write_int32(writer->root.contexts_table, offset, static_sc_id);
     write_int32(writer->root.contexts_table, offset + 4, static_idx);
     write_int32(writer->root.contexts_table, offset + 8, writer->contexts_data_offset);
+    
+    /* See if there's any relevant outer context, and if so set it up to
+     * be serialized. */
+    if (!PMC_IS_NULL(PARROT_CALLCONTEXT(ctx)->outer_ctx))
+        write_int32(writer->root.contexts_table, offset + 12,
+            get_serialized_context_idx(interp, writer, PARROT_CALLCONTEXT(ctx)->outer_ctx));
+    else
+        write_int32(writer->root.contexts_table, offset + 12, 0);
     
     /* Increment count of stables in the table. */
     writer->root.num_contexts++;
