@@ -1482,6 +1482,16 @@ static void attach_closure_outer(PARROT_INTERP, SerializationReader *reader, INT
     }
 }
 
+/* Attaches a context's outer pointer. */
+static void attach_context_outer(PARROT_INTERP, SerializationReader *reader, INTVAL i, PMC *context) {
+    char        *row = reader->root.contexts_table + i * CONTEXTS_TABLE_ENTRY_SIZE;
+    Parrot_Int4  idx = read_int32(row, 12);
+    if (idx) {
+        PMC *ctx = VTABLE_get_pmc_keyed_int(interp, reader->contexts_list, idx - 1);
+        PARROT_CALLCONTEXT(context)->outer_ctx = ctx;
+    }
+}
+
 /* Deserializes a single STable, along with its REPR data. */
 static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVAL i, PMC *st_pmc) {
     STable *st = STABLE_STRUCT(st_pmc);
@@ -1735,6 +1745,10 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *st
         attach_closure_outer(interp, reader, i,
             VTABLE_get_pmc_keyed_int(interp, reader->codes_list, scodes + i));
 
+    for (i = 0; i < reader->root.num_contexts; i++)
+        attach_context_outer(interp, reader, i,
+            VTABLE_get_pmc_keyed_int(interp, reader->contexts_list, i));
+    
      /* Deserialize STables, along with their representation data. */
      for (i = 0; i < reader->root.num_stables; i++)
         deserialize_stable(interp, reader, i,
