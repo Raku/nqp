@@ -418,29 +418,9 @@ class NQP::World is HLL::World {
         $obj.HOW.add_parrot_vtable_handler_mapping($obj, $name, $att_name);
     }
 
-    # Composes the package, and stores an event for this action.
+    # Composes the package.
     method pkg_compose($obj) {
-        # Compose.
         $obj.HOW.compose($obj);
-        
-        if self.is_precompilation_mode() {
-            # Make sure we fix up Parrot-specific vtable handling;
-            # we don't serialize this.
-            if pir::can__IPs($obj.HOW, 'publish_parrot_vtable_mapping') {
-                my $slot_past := self.get_slot_past_for_object($obj);
-                self.add_fixup_task(:deserialize_past(PAST::Stmts.new(
-                    PAST::Op.new(
-                        :pasttype('callmethod'), :name('publish_parrot_vtable_mapping'),
-                        PAST::Op.new( :pirop('get_how PP'), $slot_past ),
-                        $slot_past
-                    ),
-                    PAST::Op.new(
-                        :pasttype('callmethod'), :name('publish_parrot_vtablee_handler_mapping'),
-                        PAST::Op.new( :pirop('get_how PP'), $slot_past ),
-                        $slot_past
-                    ))));
-            }
-        }
     }
     
     # Runs a block at BEGIN time.

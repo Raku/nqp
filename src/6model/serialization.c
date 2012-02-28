@@ -1597,6 +1597,19 @@ void repossess(PARROT_INTERP, SerializationReader *reader, INTVAL i) {
     }
 }
 
+/* Handles doing Parrot v-table publication (we don't serialize that data). */
+static void do_parrot_vtable_fixup_if_needed(PARROT_INTERP, PMC *obj, STRING *meth_name) {
+    PMC *meth = VTABLE_find_method(interp, STABLE(obj)->HOW, meth_name);
+    if (!PMC_IS_NULL(meth)) {
+        PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+        PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
+        VTABLE_push_pmc(interp, cappy, STABLE(obj)->HOW);
+        VTABLE_push_pmc(interp, cappy, obj);
+        Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
+        Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
+    }
+}
+
 /* Takes serialized data, an empty SerializationContext to deserialize it into,
  * a strings heap and the set of static code refs for the compilation unit.
  * Deserializes the data into the required objects and STables. */
@@ -1688,6 +1701,16 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *st
      for (i = 0; i < reader->root.num_objects; i++)
         deserialize_object(interp, reader, i,
             VTABLE_get_pmc_keyed_int(interp, objects, i));
+
+     /* Do any Parrot v-table publication. */
+     for (i = 0; i < reader->root.num_objects; i++) {
+        PMC *obj = VTABLE_get_pmc_keyed_int(interp, objects, i);
+        if (!IS_CONCRETE(obj)) {
+            do_parrot_vtable_fixup_if_needed(interp, obj, Parrot_str_new_constant(interp, "publish_parrot_vtable_mapping"));
+            do_parrot_vtable_fixup_if_needed(interp, obj, Parrot_str_new_constant(interp, "publish_parrot_vtablee_handler_mapping"));
+            do_parrot_vtable_fixup_if_needed(interp, obj, Parrot_str_new_constant(interp, "publish_parrot_vtable_handler_mapping"));
+        }
+     }
 
      /* Re-enable GC. */
      Parrot_unblock_GC_mark(interp);
