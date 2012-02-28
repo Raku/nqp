@@ -19,12 +19,13 @@
 #define CURRENT_VERSION 1
 
 /* Various sizes (in bytes). */
-#define HEADER_SIZE                 4 * 14
+#define HEADER_SIZE                 4 * 16
 #define DEP_TABLE_ENTRY_SIZE        8
 #define STABLES_TABLE_ENTRY_SIZE    8
 #define OBJECTS_TABLE_ENTRY_SIZE    16
 #define CLOSURES_TABLE_ENTRY_SIZE   24
 #define CONTEXTS_TABLE_ENTRY_SIZE   12
+#define REPO_TABLE_ENTRY_SIZE       16
 
 /* Some guesses. */
 #define DEFAULT_STABLE_DATA_SIZE     4096

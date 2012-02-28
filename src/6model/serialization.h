@@ -40,6 +40,10 @@ typedef struct {
     char         *contexts_table;
     char         *contexts_data;
     
+    /* The number of repossessions and pointer to repossessions table. */
+    Parrot_Int4   num_repos;
+    char         *repos_table;
+    
     /* Array of STRINGs. */
     PMC          *string_heap;
 } SerializationRoot;
@@ -118,6 +122,7 @@ typedef struct SerializationWriter {
     Parrot_Int4 closures_table_alloc;
     Parrot_Int4 contexts_table_alloc;
     Parrot_Int4 contexts_data_alloc;
+    Parrot_Int4 repos_table_alloc;
     
     /* Current offsets for the data chunks (also correspond to the amount of
      * data written in to them). */
