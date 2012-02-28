@@ -754,6 +754,7 @@ static void serialize_context(PARROT_INTERP, SerializationWriter *writer, PMC *c
     
     /* Grab lexpad, which we'll serialize later on. */
     PMC *lexpad    = PARROT_CALLCONTEXT(ctx)->lex_pad;
+    PMC *lexinfo   = PARROT_SUB(PARROT_CALLCONTEXT(ctx)->current_sub)->lex_info;
     PMC *lexiter   = VTABLE_get_iter(interp, lexpad);
     
     /* Locate the static code ref this context points to. */
@@ -798,8 +799,23 @@ static void serialize_context(PARROT_INTERP, SerializationWriter *writer, PMC *c
     while (VTABLE_get_bool(interp, lexiter)) {
         STRING *sym = VTABLE_shift_string(interp, lexiter);
         writer->write_str(interp, writer, sym);
-        writer->write_ref(interp, writer,
-            VTABLE_get_pmc_keyed_str(interp, lexpad, sym));
+        switch (VTABLE_get_integer_keyed_str(interp, lexinfo, sym) & 3) {
+            case REGNO_INT:
+                writer->write_int(interp, writer,
+                    VTABLE_get_integer_keyed_str(interp, lexpad, sym));
+                break;
+            case REGNO_NUM:
+                writer->write_num(interp, writer,
+                    VTABLE_get_number_keyed_str(interp, lexpad, sym));
+                break;
+            case REGNO_STR:
+                writer->write_str(interp, writer,
+                    VTABLE_get_string_keyed_str(interp, lexpad, sym));
+                break;
+            default:
+                writer->write_ref(interp, writer,
+                    VTABLE_get_pmc_keyed_str(interp, lexpad, sym));
+        }
     }
 }
 
@@ -1402,7 +1418,7 @@ static void deserialize_closure(PARROT_INTERP, SerializationReader *reader, INTV
 
 /* Deserializes a context. */
 static void deserialize_context(PARROT_INTERP, SerializationReader *reader, INTVAL row) {
-    PMC *ctx, *lexpad;
+    PMC *ctx, *lexinfo, *lexpad;
     opcode_t *where;
     INTVAL syms, i;
     
@@ -1417,9 +1433,10 @@ static void deserialize_context(PARROT_INTERP, SerializationReader *reader, INTV
     /* Create a context; also grab the lexpad. */
     Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), NULL);
     interp->current_cont = NEED_CONTINUATION;
-    where  = VTABLE_invoke(interp, static_code, NULL);
-    ctx    = CURRENT_CONTEXT(interp);
-    lexpad = Parrot_pcc_get_lex_pad(interp, ctx);
+    where   = VTABLE_invoke(interp, static_code, NULL);
+    ctx     = CURRENT_CONTEXT(interp);
+    lexpad  = Parrot_pcc_get_lex_pad(interp, ctx);
+    lexinfo = PARROT_SUB(static_code)->lex_info;
     VTABLE_invoke(interp, Parrot_pcc_get_continuation(interp, ctx), where);
 
     /* Set context data read position, and set current read buffer to the correct thing. */
@@ -1432,8 +1449,23 @@ static void deserialize_context(PARROT_INTERP, SerializationReader *reader, INTV
     syms = reader->read_int(interp, reader);
     for (i = 0; i < syms; i++) {
         STRING *sym = reader->read_str(interp, reader);
-        PMC    *val = reader->read_ref(interp, reader);
-        VTABLE_set_pmc_keyed_str(interp, lexpad, sym, val);
+        switch (VTABLE_get_integer_keyed_str(interp, lexinfo, sym) & 3) {
+            case REGNO_INT:
+                VTABLE_set_integer_keyed_str(interp, lexpad, sym,
+                    reader->read_int(interp, reader));
+                break;
+            case REGNO_NUM:
+                VTABLE_set_number_keyed_str(interp, lexpad, sym,
+                    reader->read_num(interp, reader));
+                break;
+            case REGNO_STR:
+                VTABLE_set_string_keyed_str(interp, lexpad, sym,
+                    reader->read_str(interp, reader));
+                break;
+            default:
+                VTABLE_set_pmc_keyed_str(interp, lexpad, sym,
+                    reader->read_ref(interp, reader));
+        }
     }
     
     /* Put context in place. */
