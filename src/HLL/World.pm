@@ -55,15 +55,19 @@ class HLL::World {
     }
     
     method BUILD(:$handle!, :$description!) {
-        $!sc           := pir::nqp_create_sc__PS($handle);
-        $!handle       := $handle;
-        %!addr_to_slot := nqp::hash();
-        @!fixup_tasks := nqp::list();
+        # Initialize attributes.
+        $!sc              := pir::nqp_create_sc__PS($handle);
+        $!handle          := $handle;
+        %!addr_to_slot    := nqp::hash();
+        @!fixup_tasks     := nqp::list();
         @!load_dependency_tasks := nqp::list();
-        $!sc.set_description($description);
-        $!precomp_mode := %*COMPILING<%?OPTIONS><target> eq 'pir';
-        $!num_code_refs := 0;
+        $!precomp_mode    := %*COMPILING<%?OPTIONS><target> eq 'pir';
+        $!num_code_refs   := 0;
         $!code_ref_blocks := [];
+        $!sc.set_description($description);
+        
+        # Add to currently compiling SC stack.
+        pir::nqp_push_compiling_sc__vP($!sc);
     }
     
     # Gets the slot for a given object. Dies if it is not in the context.
@@ -223,6 +227,9 @@ class HLL::World {
         my $serialized := pir::nqp_serialize_sc__SPP($!sc, $sh);
         say(nqp::chars($serialized) ~ " bytes of serialized data produced");
         say(nqp::elems($sh) ~ " strings in heap");
+        
+        # Now it's serialized, pop this SC off the compiling SC stack.
+        pir::nqp_pop_compiling_sc__v();
         
         # String heap PAST.
         my $sh_past := PAST::Stmts.new(
