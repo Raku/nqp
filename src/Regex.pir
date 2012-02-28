@@ -47,6 +47,7 @@ This file brings together the various Regex modules needed for Regex.pbc .
     # Create a serialization context for this compilation unit.
     .local pmc sc
     sc = nqp_create_sc "__REGEX_CORE_SC__"
+    nqp_push_compiling_sc sc
     
     # Load setting.
     load_bytecode 'ModuleLoader.pbc'
@@ -132,6 +133,9 @@ This file brings together the various Regex modules needed for Regex.pbc .
     hllns = get_hll_namespace
     imports = split ' ', 'PAST _dumper'
     parrotns.'export_to'(hllns, imports)
+    
+    # Pop SC off current SCs stack.
+    nqp_pop_compiling_sc
 .end
 
 =head1 AUTHOR
