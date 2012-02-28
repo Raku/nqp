@@ -447,7 +447,7 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
     else if (ref->vtable->base_type == enum_class_Hash) {
         discrim = REFVAR_VM_HASH_STR_VAR;
     }
-    else if (ref->vtable->base_type == enum_class_Sub) {
+    else if (ref->vtable->base_type == enum_class_Sub || ref->vtable->base_type == enum_class_Coroutine) {
         PMC *code_sc = VTABLE_getprop(interp, ref, Parrot_str_new_constant(interp, "SC"));
         PMC *static_cr = VTABLE_getprop(interp, ref, Parrot_str_new_constant(interp, "STATIC_CODE_REF"));
         if (!PMC_IS_NULL(code_sc) && !PMC_IS_NULL(static_cr)) {
