@@ -27,8 +27,8 @@
 #define DYNCALL_CALLBACK_H
 
 #include "dyncall_args.h"
-#include "../dyncall/dyncall_signature.h"
-#include "../dyncall/dyncall_value.h"
+#include "dyncall_signature.h"
+#include "dyncall_value.h"
 
 typedef struct DCCallback DCCallback;
 

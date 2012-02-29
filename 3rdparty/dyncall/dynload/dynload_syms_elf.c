@@ -24,14 +24,16 @@
 
 */
 
+
+#include "../autovar/autovar_OS.h"
+
 /*
  
  dynamic symbol resolver for elf
 
- */
+*/
 
 #include "dynload.h"
-#include "../autovar/autovar_OS.h"
 #if defined(OS_OpenBSD)
 #  include <stdint.h>
 #  include <elf_abi.h>
@@ -44,8 +46,8 @@
 #endif
 
 #if defined(__GLIBC__)
-#define _GNU_SOURCE
-#define __USE_GNU
+#  define _GNU_SOURCE
+#  define __USE_GNU
 #endif /* defined(__GLIBC__) */
 
 #include "dynload_alloc.h"
@@ -63,29 +65,45 @@
 /* run-time configuration 64/32 */
 #if defined(OS_OpenBSD)
 #else 
-#include "../autovar/autovar_ABI.h"
-#ifdef ABI_ELF64
+#  include "../autovar/autovar_ABI.h"
+#  ifdef ABI_ELF64
+
 typedef Elf64_Ehdr   Elf_Ehdr;
 typedef Elf64_Phdr   Elf_Phdr;
 typedef Elf64_Shdr   Elf_Shdr;
 typedef Elf64_Sym    Elf_Sym;
-#ifndef OS_SunOS
+#    ifndef OS_SunOS
 typedef Elf64_Dyn    Elf_Dyn;
-#endif
+#    endif
 typedef Elf64_Sxword Elf_tag;
 typedef Elf64_Addr   Elf_Addr;
-#else
+
+#  else
+#    if defined(OS_BeOS)
+typedef struct Elf32_Ehdr   Elf_Ehdr;
+typedef struct Elf32_Phdr   Elf_Phdr;
+typedef struct Elf32_Shdr   Elf_Shdr;
+typedef struct Elf32_Sym    Elf_Sym;
+typedef struct Elf32_Dyn    Elf_Dyn;
+typedef        Elf32_Sword  Elf_tag;
+typedef        Elf32_Addr   Elf_Addr;
+
+#    else
+
 typedef Elf32_Ehdr   Elf_Ehdr;
 typedef Elf32_Phdr   Elf_Phdr;
 typedef Elf32_Shdr   Elf_Shdr;
 typedef Elf32_Sym    Elf_Sym;
-#ifndef OS_SunOS
+#      ifndef OS_SunOS
 typedef Elf32_Dyn    Elf_Dyn;
-#endif
+#      endif
 typedef Elf32_Sword  Elf_tag;
 typedef Elf32_Addr   Elf_Addr;
+
+#    endif
+#  endif
 #endif
-#endif
+
 
 struct DLSyms_
 {
@@ -96,8 +114,8 @@ struct DLSyms_
   Elf_Ehdr*   pElf_Ehdr;	/* pointer to elf header */
   int         file;			/* fd of lib */
   size_t      fileSize;	    /* filesize of open lib */
-
 };
+
 
 DLSyms* dlSymsInit(const char* libPath)
 {
@@ -105,8 +123,8 @@ DLSyms* dlSymsInit(const char* libPath)
   void* pSectionContent;
   int i;
   struct stat st;
-  DLSyms* pSyms = (DLSyms*)dlAllocMem(sizeof(DLSyms));
   Elf_Shdr* pS;
+  DLSyms* pSyms = (DLSyms*)dlAllocMem(sizeof(DLSyms));
   memset(pSyms, 0, sizeof(DLSyms));
   pSyms->file = open(libPath, O_RDONLY);
   stat(libPath, &st);
@@ -154,12 +172,14 @@ DLSyms* dlSymsInit(const char* libPath)
   return pSyms;
 }
 
+
 void dlSymsCleanup(DLSyms* pSyms)
 {
   munmap( (void*) pSyms->pElf_Ehdr, pSyms->fileSize);
   close(pSyms->file);
   dlFreeMem(pSyms);
 }
+
 
 int dlSymsCount(DLSyms* pSyms)
 {
@@ -168,18 +188,19 @@ int dlSymsCount(DLSyms* pSyms)
   return pSyms->nSymbols;
 }
 
+
 const char* dlSymsName(DLSyms* pSyms, int index)
 {
   int str_index;
-
   if(!pSyms || !pSyms->pSymTab || index < 0 || index >= pSyms->nSymbols)
     return NULL;
-
+  
   str_index = pSyms->pSymTab[index].st_name;
   if (str_index < 0 || str_index >= pSyms->strTabSize)
     return NULL;
   return &pSyms->pStrTab[str_index];
 }
+
 
 const char* dlSymsNameFromValue(DLSyms* pSyms, void* value)
 {

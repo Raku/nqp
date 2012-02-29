@@ -34,7 +34,7 @@
  *
  */
 
-#include "../dyncall/dyncall.h"
+#include "dyncall.h"
 
 
 #ifdef __cplusplus

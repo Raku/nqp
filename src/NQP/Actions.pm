@@ -413,11 +413,16 @@ class NQP::Actions is HLL::Actions {
     }
 
     method colonpair($/) {
-        my $past := $<circumfix>
-                    ?? $<circumfix>[0].ast
-                    !! PAST::Val.new( :value( !$<not> ) );
-        $past.named( ~$<identifier> );
-        make $past;
+        if $<variable> {
+            $<variable>.ast.named(~$<variable><desigilname>);
+            make $<variable>.ast;
+        } else {
+            my $past := $<circumfix>
+                        ?? $<circumfix>[0].ast
+                        !! PAST::Val.new( :value( !$<not> ) );
+            $past.named( ~$<identifier> );
+            make $past;
+        }
     }
 
     method variable($/) {

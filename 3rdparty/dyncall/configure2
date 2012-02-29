@@ -19,7 +19,7 @@ usage: $0 [options]
   -o <os>    --os=<os>
   -a <arch>  --arch=<arch>
              
-  os   := Linux, (Open|Free|Net|DragonFly)BSD, Windows, Darwin, iPhoneOS, MacOSX, Sun, Haiku, BeOS
+  os   := Linux, (Open|Free|Net|DragonFly)BSD, Windows, Darwin, iOS, MacOSX, Sun, Haiku, BeOS
   arch := x86, x64, arm, ppc, mips or ""
 
 EOF
@@ -118,7 +118,7 @@ ConfigureByHost()
       addVar TARGET_MACH "-arch i386 -arch x86_64 -arch ppc"
       addVar MKLIB "libtool -static -o"
       ;;
-    IOS|iPhoneOS)
+    IOS|iPhoneOS|iOS)
       addVar CFLAGS "-fPIC"
       addVar TARGET_ARCH "-arch armv6"
       addVar TARGET_MACH "-arch armv6"
