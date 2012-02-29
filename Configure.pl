@@ -126,7 +126,11 @@ MAIN: {
             $config{'dyncall_build'} = "cd 3rdparty/dyncall && $make BUILD_DIR=. -f GNUmakefile";
         } else {
             system_or_die('cd 3rdparty/dyncall && sh configure');
-            $config{'dyncall_build'} = "cd 3rdparty/dyncall && BUILD_DIR=. $make";
+            if ($^O eq 'netbsd') {
+                $config{'dyncall_build'} = "cd 3rdparty/dyncall && BUILD_DIR=. $make -f BSDmakefile";
+            } else {
+                $config{'dyncall_build'} = "cd 3rdparty/dyncall && BUILD_DIR=. $make";
+            }
         }
     }
 
