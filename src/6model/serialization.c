@@ -1432,7 +1432,7 @@ static void deserialize_context(PARROT_INTERP, SerializationReader *reader, INTV
     
     /* Create a context; also grab the lexpad. */
     Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), NULL);
-    interp->current_cont = NEED_CONTINUATION;
+    Parrot_pcc_reuse_continuation(interp, CURRENT_CONTEXT(interp), NULL);
     where   = VTABLE_invoke(interp, static_code, NULL);
     ctx     = CURRENT_CONTEXT(interp);
     lexpad  = Parrot_pcc_get_lex_pad(interp, ctx);
