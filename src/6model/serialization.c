@@ -347,6 +347,10 @@ static Parrot_Int4 get_serialized_context_idx(PARROT_INTERP, SerializationWriter
 static Parrot_Int4 get_serialized_outer_context_idx(PARROT_INTERP, SerializationWriter *writer, PMC *closure) {
     if (!PMC_IS_NULL(VTABLE_getprop(interp, closure, Parrot_str_new_constant(interp, "COMPILER_STUB"))))
         return 0;
+    if (PMC_IS_NULL(PARROT_SUB(closure)->outer_ctx))
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Serialization Error: missing outer context for closure '%Ss'",
+            VTABLE_get_string(interp, closure));
     return get_serialized_context_idx(interp, writer, PARROT_SUB(closure)->outer_ctx);
 }
 
