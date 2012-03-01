@@ -225,8 +225,6 @@ class HLL::World {
         # Serialize.
         my $sh := pir::new__Ps('ResizableStringArray');
         my $serialized := pir::nqp_serialize_sc__SPP($!sc, $sh);
-        say(nqp::chars($serialized) ~ " bytes of serialized data produced");
-        say(nqp::elems($sh) ~ " strings in heap");
         
         # Now it's serialized, pop this SC off the compiling SC stack.
         pir::nqp_pop_compiling_sc__v();
