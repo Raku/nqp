@@ -53,7 +53,7 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
 static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     P6bigintBody *src_body = (P6bigintBody *)src;
     P6bigintBody *dest_body = (P6bigintBody *)dest;
-    mp_init_copy(&src_body->i, &dest_body->i);
+    mp_init_copy(&dest_body->i, &src_body->i);
 }
 
 /* Used with boxing. Sets an integer value, for representations that can hold
