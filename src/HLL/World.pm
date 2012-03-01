@@ -259,6 +259,8 @@ class HLL::World {
             :pirop('nqp_deserialize_sc__vSPPP'),
             $serialized,
             PAST::Var.new( :name($sc_reg), :scope('register') ),
-            $sh_past, $cr_past)
+            $sh_past,
+            PAST::Block.new( :blocktype('immediate'), $cr_past )
+        )
     }
 }
