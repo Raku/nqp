@@ -90,13 +90,13 @@ static Parrot_Int4 add_string_to_heap(PARROT_INTERP, SerializationWriter *writer
          * so can just hand back 0 here. */
         return 0;
     }
-    else if (VTABLE_exists_keyed_str(interp, writer->seen_strings, s)) {
+    /*else if (VTABLE_exists_keyed_str(interp, writer->seen_strings, s)) {
         return (Parrot_Int4)VTABLE_get_integer_keyed_str(interp, writer->seen_strings, s);
     }
-    else {
+    else*/ {
         INTVAL next_idx = VTABLE_elements(interp, writer->root.string_heap);
         VTABLE_set_string_keyed_int(interp, writer->root.string_heap, next_idx, s);
-        VTABLE_set_integer_keyed_str(interp, writer->seen_strings, s, next_idx);
+        /*VTABLE_set_integer_keyed_str(interp, writer->seen_strings, s, next_idx);*/
         return (Parrot_Int4)next_idx;
     }
 }
