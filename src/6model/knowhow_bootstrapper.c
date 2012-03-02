@@ -102,8 +102,11 @@ static void compose(PARROT_INTERP, PMC *nci) {
     PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
     PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
     PMC    *obj     = VTABLE_get_pmc_keyed_int(interp, capture, 1);
-    STABLE(obj)->method_cache = ((KnowHOWREPRInstance *)PMC_data(self))->body.methods;
-    STABLE(obj)->mode_flags   = METHOD_CACHE_AUTHORITATIVE;
+    STABLE(obj)->method_cache            = ((KnowHOWREPRInstance *)PMC_data(self))->body.methods;
+    STABLE(obj)->mode_flags              = METHOD_CACHE_AUTHORITATIVE;
+    STABLE(obj)->type_check_cache_length = 1;
+    STABLE(obj)->type_check_cache        = mem_sys_allocate(sizeof(PMC *));
+    STABLE(obj)->type_check_cache[0]     = obj;
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", obj);
 }
 
@@ -245,6 +248,8 @@ PMC * SixModelObject_bootstrap_knowhow(PARROT_INTERP, PMC *sc) {
     SC_PMC(knowhow_pmc) = sc;
     VTABLE_set_pmc_keyed_int(interp, sc, 1, knowhow_how_pmc);
     SC_PMC(knowhow_how_pmc) = sc;
+    STABLE(knowhow_pmc)->sc = sc;
+    STABLE(knowhow_how_pmc)->sc = sc;
 
     return knowhow_pmc;
 }
@@ -324,6 +329,7 @@ PMC * SixModelObject_setup_knowhow_attribute(PARROT_INTERP, PMC *sc, PMC *knowho
      * context. */
     VTABLE_set_pmc_keyed_int(interp, sc, 2, knowhow_attr);
     SC_PMC(knowhow_attr) = sc;
+    STABLE(knowhow_attr)->sc = sc;
     
     return knowhow_attr;
 }

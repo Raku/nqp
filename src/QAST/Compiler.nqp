@@ -170,6 +170,9 @@ class QAST::Compiler is HLL::Compiler {
             $ops.push_pirop('if', '$I11', %*REG<fail>);
             $ops.push($donelabel);
         }
+        elsif $subtype eq 'fail' {
+            $ops.push_pirop('goto', %*REG<fail>);
+        }
 
         $ops;
     }

@@ -1,7 +1,7 @@
 #! nqp
 use nqpmo;
 
-plan(31);
+plan(34);
 
 my $knowhow := pir::get_knowhow__P();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
@@ -35,6 +35,8 @@ ok(iseq(nqp::bitxor_I(box(0xdead), box(0xbeef), $one), 0x6042), 'bit xor');
 
 ok(iseq(nqp::bitneg_I(box(-123), $one), 122), 'bit negation');
 
+ok(iseq(nqp::bitand_I(pir::nqp_bigint_from_str__PSP('-1073741825', $one), $one, $one), 1),
+    'Bit ops (RT 109740)');
 
 # Now we'll create a type that boxes a P6bigint.
 my $bi_boxer := $knowhow.new_type(:name('TestPerl6Int'), :repr('P6opaque'));
@@ -91,3 +93,10 @@ ok(str(nqp::expmod_I(
     nqp::fromstr_I('10000000000000000000000000000000000000000', $bi_type),
     $bi_type,
 )) eq '1527229998585248450016808958343740453059', 'nqp::expmod_I');
+
+ok(nqp::div_In(box(1234500), box(100)) == 12345, 'div_In santiy');
+my $n := nqp::div_In(
+    nqp::pow_I(box(203), box(200), $bi_type, $bi_type),
+    nqp::pow_I(box(200), box(200), $bi_type, $bi_type),
+);
+ok(nqp::abs_n($n - 19.6430286394751) < 1e-10, 'div_In with big numbers');

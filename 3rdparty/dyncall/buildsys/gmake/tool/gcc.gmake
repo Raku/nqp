@@ -22,7 +22,7 @@
 # GNU Compiler Collection configuration
 #//////////////////////////////////////////////////////////////////////////////
 
-CC	?= gcc
+CC	= gcc
 CXX	?= g++
 AR	?= ar
 AS	?= as
@@ -45,11 +45,11 @@ endif
 
 # --- Assemble ----------------------------------------------------------------
 
-$(BUILD_DIR)/%.o: %.s
-	$(COMPILE.s) $(OUTPUT_OPTION) $<
-
 $(BUILD_DIR)/%.o: %.S
 	$(COMPILE.S) $(OUTPUT_OPTION) $<
+
+$(BUILD_DIR)/%.o: %.s
+	$(COMPILE.s) $(OUTPUT_OPTION) $<
 
 #	auto-dependency: disabled, due to problems when including *.d files, see targets.gmake for details 
 #	$(CC) -MM -MT $@ $(CPPFLAGS) $< > $(BUILD_DIR)/$*.d
@@ -98,9 +98,11 @@ $(BUILD_DIR)/%.o: %.cc
 
 # --- static library ----------------------------------------------------------
 
-LIBTOOL_STATIC ?= $(RM) $@ ; $(AR) -rcs $@ $^ 
+LIBTOOL_STATIC ?= $(AR) -rcs $@ $^ 
+SLASH ?= /
 
 $(BUILD_DIR)/%.a:
+	$(RM) $(BUILD_DIR)$(SLASH)$(*F).a
 	$(LIBTOOL_STATIC)
 
 # --- dynamic library ---------------------------------------------------------

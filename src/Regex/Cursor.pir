@@ -56,110 +56,163 @@ grammars.
     # Add all methods.
     .const 'Sub' $P10 = 'Regex_Cursor_meth_new_match'
     how.'add_method'(type_obj, 'new_match', $P10)
+    'add_code_to_sc'($P10)
     .const 'Sub' $P11 = 'Regex_Cursor_meth_new_array'
     how.'add_method'(type_obj, 'new_array', $P11)
+    'add_code_to_sc'($P11)
     .const 'Sub' $P12 = 'Regex_Cursor_meth_MATCH'
     how.'add_method'(type_obj, 'MATCH', $P12)
+    'add_code_to_sc'($P12)
     .const 'Sub' $P13 = 'Regex_Cursor_meth_parse'
     how.'add_method'(type_obj, 'parse', $P13)
+    'add_code_to_sc'($P13)
     .const 'Sub' $P14 = 'Regex_Cursor_meth_next'
     how.'add_method'(type_obj, 'next', $P14)
+    'add_code_to_sc'($P14)
     .const 'Sub' $P15 = 'Regex_Cursor_meth_pos'
     how.'add_method'(type_obj, 'pos', $P15)
+    'add_code_to_sc'($P15)
     .const 'Sub' $P16 = 'Regex_Cursor_meth_from'
     how.'add_method'(type_obj, 'from', $P16)
+    'add_code_to_sc'($P16)
     .const 'Sub' $P17 = 'Regex_Cursor_meth_!cursor_init'
     how.'add_method'(type_obj, '!cursor_init', $P17)
+    'add_code_to_sc'($P17)
     .const 'Sub' $P18 = 'Regex_Cursor_meth_!cursor_start'
     how.'add_method'(type_obj, '!cursor_start', $P18)
+    'add_code_to_sc'($P18)
     .const 'Sub' $P19 = 'Regex_Cursor_meth_!cursor_fail'
     how.'add_method'(type_obj, '!cursor_fail', $P19)
+    'add_code_to_sc'($P19)
     .const 'Sub' $P20 = 'Regex_Cursor_meth_!cursor_pass'
     how.'add_method'(type_obj, '!cursor_pass', $P20)
+    'add_code_to_sc'($P20)
     .const 'Sub' $P21 = 'Regex_Cursor_meth_!cursor_backtrack'
     how.'add_method'(type_obj, '!cursor_backtrack', $P21)
+    'add_code_to_sc'($P21)
     .const 'Sub' $P22 = 'Regex_Cursor_meth_!cursor_next'
     how.'add_method'(type_obj, '!cursor_next', $P22)
+    'add_code_to_sc'($P22)
     .const 'Sub' $P23 = 'Regex_Cursor_meth_!cursor_caparray'
     how.'add_method'(type_obj, '!cursor_caparray', $P23)
+    'add_code_to_sc'($P23)
     .const 'Sub' $P24 = 'Regex_Cursor_meth_!cursor_names'
     how.'add_method'(type_obj, '!cursor_names', $P24)
+    'add_code_to_sc'($P24)
     .const 'Sub' $P25 = 'Regex_Cursor_meth_!cursor_pos'
     how.'add_method'(type_obj, '!cursor_pos', $P25)
+    'add_code_to_sc'($P25)
     .const 'Sub' $P26 = 'Regex_Cursor_meth_!cursor_debug'
     how.'add_method'(type_obj, '!cursor_debug', $P26)
+    'add_code_to_sc'($P26)
     .const 'Sub' $P27 = 'Regex_Cursor_meth_!mark_push'
     how.'add_method'(type_obj, '!mark_push', $P27)
+    'add_code_to_sc'($P27)
     .const 'Sub' $P28 = 'Regex_Cursor_meth_!mark_peek'
     how.'add_method'(type_obj, '!mark_peek', $P28)
+    'add_code_to_sc'($P28)
     .const 'Sub' $P29 = 'Regex_Cursor_meth_!mark_fail'
     how.'add_method'(type_obj, '!mark_fail', $P29)
+    'add_code_to_sc'($P29)
     .const 'Sub' $P30 = 'Regex_Cursor_meth_!mark_commit'
     how.'add_method'(type_obj, '!mark_commit', $P30)
+    'add_code_to_sc'($P30)
     .const 'Sub' $P31 = 'Regex_Cursor_meth_!reduce'
     how.'add_method'(type_obj, '!reduce', $P31)
+    'add_code_to_sc'($P31)
     .const 'Sub' $P32 = 'Regex_Cursor_meth_!BACKREF'
     how.'add_method'(type_obj, '!BACKREF', $P32)
+    'add_code_to_sc'($P32)
     .const 'Sub' $P33 = 'Regex_Cursor_meth_!INTERPOLATE'
     how.'add_method'(type_obj, '!INTERPOLATE', $P33)
+    'add_code_to_sc'($P33)
     .const 'Sub' $P34 = 'Regex_Cursor_meth_!INTERPOLATE_REGEX'
     how.'add_method'(type_obj, '!INTERPOLATE_REGEX', $P34)
+    'add_code_to_sc'($P34)
     .const 'Sub' $P35 = 'Regex_Cursor_meth_!cursor_from'
     how.'add_method'(type_obj, '!cursor_from', $P35)
+    'add_code_to_sc'($P35)
     .const 'Sub' $P10 = 'Regex_Cursor_meth_before'
     how.'add_method'(type_obj, 'before', $P10)
+    'add_code_to_sc'($P10)
     .const 'Sub' $P11 = 'Regex_Cursor_meth_ident'
     how.'add_method'(type_obj, 'ident', $P11)
+    'add_code_to_sc'($P11)
     .const 'Sub' $P12 = 'Regex_Cursor_meth_wb'
     how.'add_method'(type_obj, 'wb', $P12)
+    'add_code_to_sc'($P12)
     .const 'Sub' $P13 = 'Regex_Cursor_meth_ww'
     how.'add_method'(type_obj, 'ww', $P13)
+    'add_code_to_sc'($P13)
     .const 'Sub' $P14 = 'Regex_Cursor_meth_ws'
     how.'add_method'(type_obj, 'ws', $P14)
+    'add_code_to_sc'($P14)
     .const 'Sub' $P15 = 'Regex_Cursor_meth_alpha'
     how.'add_method'(type_obj, 'alpha', $P15)
+    'add_code_to_sc'($P15)
     .const 'Sub' $P16 = 'Regex_Cursor_meth_upper'
     how.'add_method'(type_obj, 'upper', $P16)
+    'add_code_to_sc'($P16)
     .const 'Sub' $P17 = 'Regex_Cursor_meth_lower'
     how.'add_method'(type_obj, 'lower', $P17)
+    'add_code_to_sc'($P17)
     .const 'Sub' $P18 = 'Regex_Cursor_meth_digit'
     how.'add_method'(type_obj, 'digit', $P18)
+    'add_code_to_sc'($P18)
     .const 'Sub' $P19 = 'Regex_Cursor_meth_xdigit'
     how.'add_method'(type_obj, 'xdigit', $P19)
+    'add_code_to_sc'($P19)
     .const 'Sub' $P20 = 'Regex_Cursor_meth_print'
     how.'add_method'(type_obj, 'print', $P20)
+    'add_code_to_sc'($P20)
     .const 'Sub' $P21 = 'Regex_Cursor_meth_graph'
     how.'add_method'(type_obj, 'graph', $P21)
+    'add_code_to_sc'($P21)
     .const 'Sub' $P22 = 'Regex_Cursor_meth_cntrl'
     how.'add_method'(type_obj, 'cntrl', $P22)
+    'add_code_to_sc'($P22)
     .const 'Sub' $P23 = 'Regex_Cursor_meth_punct'
     how.'add_method'(type_obj, 'punct', $P23)
+    'add_code_to_sc'($P23)
     .const 'Sub' $P24 = 'Regex_Cursor_meth_alnum'
     how.'add_method'(type_obj, 'alnum', $P24)
+    'add_code_to_sc'($P24)
     .const 'Sub' $P25 = 'Regex_Cursor_meth_space'
     how.'add_method'(type_obj, 'space', $P25)
+    'add_code_to_sc'($P25)
     .const 'Sub' $P26 = 'Regex_Cursor_meth_blank'
     how.'add_method'(type_obj, 'blank', $P26)
+    'add_code_to_sc'($P26)
     .const 'Sub' $P27 = 'Regex_Cursor_meth_FAILGOAL'
     how.'add_method'(type_obj, 'FAILGOAL', $P27)
+    'add_code_to_sc'($P27)
     .const 'Sub' $P28 = 'Regex_Cursor_meth_DEBUG'
     how.'add_method'(type_obj, 'DEBUG', $P28)
+    'add_code_to_sc'($P28)
     .const 'Sub' $P10 = 'Regex_Cursor_meth_!protoregex'
     how.'add_method'(type_obj, '!protoregex', $P10)
+    'add_code_to_sc'($P10)
     .const 'Sub' $P11 = 'Regex_Cursor_meth_!protoregex_generation'
     how.'add_method'(type_obj, '!protoregex_generation', $P11)
+    'add_code_to_sc'($P11)
     .const 'Sub' $P12 = 'Regex_Cursor_meth_!protoregex_tokrx'
     how.'add_method'(type_obj, '!protoregex_tokrx', $P12)
+    'add_code_to_sc'($P12)
     .const 'Sub' $P13 = 'Regex_Cursor_meth_!protoregex_gen_table'
     how.'add_method'(type_obj, '!protoregex_gen_table', $P13)
+    'add_code_to_sc'($P13)
     .const 'Sub' $P14 = 'Regex_Cursor_meth_!PREFIX__!protoregex'
     how.'add_method'(type_obj, '!PREFIX__!protoregex', $P14)
+    'add_code_to_sc'($P14)
     .const 'Sub' $P15 = 'Regex_Cursor_meth_!PREFIX__!subrule'
     how.'add_method'(type_obj, '!PREFIX__!subrule', $P15)
+    'add_code_to_sc'($P15)
     .const 'Sub' $P16 = 'Regex_Cursor_meth_DUMP_TOKRX'
     how.'add_method'(type_obj, 'DUMP_TOKRX', $P16)
+    'add_code_to_sc'($P16)
     .const 'Sub' $P17 = 'Regex_Cursor_meth_Bool'
     how.'add_method'(type_obj, 'Bool', $P17)
+    'add_code_to_sc'($P17)
     how.'add_parrot_vtable_mapping'(type_obj, 'get_bool', $P17)
 
     # Add attributes.

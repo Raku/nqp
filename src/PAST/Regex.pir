@@ -251,7 +251,7 @@ at this node.
 
   charlist_negate:
     if subtype == 'zerowidth' goto charlist_negate_0
-    unless tail goto charlist_negate_0
+    if tail goto charlist_negate_0
     .return (prefix)
   charlist_negate_0:
     head = shift tail

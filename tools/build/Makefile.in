@@ -117,6 +117,7 @@ NQP_SOURCES = \
 
 CORE_SETTING_SOURCES = \
   src/core/NativeTypes.pm \
+  src/core/NQPRoutine.pm \
   src/core/NQPMu.pm \
   src/core/NQPCapture.pm \
   src/core/IO.pm \
@@ -193,8 +194,7 @@ DYNPMC          = $(PMC_DIR)/$(GROUP)$(LOAD_EXT)
 DYNOPS          = $(OPS_DIR)/$(OPS)$(LOAD_EXT)
 
 PMC_SOURCES     = $(PMC_DIR)/stable.pmc $(PMC_DIR)/sixmodelobject.pmc \
-                  $(PMC_DIR)/dispatchersub.pmc \
-                  $(PMC_DIR)/nqpmultisig.pmc $(PMC_DIR)/nqplexinfo.pmc \
+                  $(PMC_DIR)/dispatchersub.pmc $(PMC_DIR)/nqplexinfo.pmc \
                   $(PMC_DIR)/nqplexpad.pmc $(PMC_DIR)/serializationcontext.pmc
 
 OPS_SOURCE      = nqp.ops
@@ -209,16 +209,18 @@ METAMODEL_SOURCE = src/6model/sixmodelobject.h src/6model/sixmodelobject.c \
                    src/6model/reprs/P6num.h src/6model/reprs/P6num.c \
                    src/6model/reprs/HashAttrStore.h src/6model/reprs/HashAttrStore.c \
                    src/6model/reprs/Uninstantiable.h src/6model/reprs/Uninstantiable.c \
-                   src/6model/multi_dispatch.h src/6model/multi_dispatch.c \
                    src/6model/storage_spec.h src/6model/serialization_context.c \
-                   src/6model/serialization_context.h
+                   src/6model/serialization_context.h src/6model/serialization.c \
+                   src/6model/serialization.h src/guts/multi_dispatch.h \
+                   src/guts/multi_dispatch.c src/6model/base64.c src/6model/base64.h \
 
 METAMODEL_OBJS   = ../6model/sixmodelobject$(O) ../6model/repr_registry$(O) \
                    ../6model/knowhow_bootstrapper$(O) ../6model/reprs/KnowHOWREPR$(O) \
                    ../6model/reprs/P6opaque$(O) ../6model/reprs/P6int$(O) \
                    ../6model/reprs/P6str$(O) ../6model/reprs/P6num$(O) \
                    ../6model/reprs/HashAttrStore$(O) ../6model/reprs/Uninstantiable$(O) \
-                   ../6model/multi_dispatch$(O) ../6model/serialization_context$(O)
+                   ../6model/serialization_context$(O) ../6model/serialization$(O) \
+                   ../guts/multi_dispatch$(O) ../6model/base64$(O)
 
 LIBTOMMATH_BIN = $(TOM)core$(O) \
         $(TOM)_error$(O) \
@@ -759,8 +761,10 @@ $(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS_SOURCE) $(DYNPMC)
 	cd src/6model/reprs && $(CC) -c @cc_o_out@P6num$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6num.c
 	cd src/6model/reprs && $(CC) -c @cc_o_out@HashAttrStore$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) HashAttrStore.c
 	cd src/6model/reprs && $(CC) -c @cc_o_out@Uninstantiable$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) Uninstantiable.c
-	cd src/6model && $(CC) -c @cc_o_out@multi_dispatch$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) multi_dispatch.c
 	cd src/6model && $(CC) -c @cc_o_out@serialization_context$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) serialization_context.c
+	cd src/6model && $(CC) -c @cc_o_out@serialization$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) serialization.c
+	cd src/6model && $(CC) -c @cc_o_out@base64$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) base64.c
+	cd src/guts && $(CC) -c @cc_o_out@multi_dispatch$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) multi_dispatch.c
 	cd 3rdparty/sha1 && $(CC) -c @cc_o_out@sha1$(O) $(CINCLUDES) $(CFLAGS) sha1.c
 	cd $(OPS_DIR) && $(LD) @ld_out@$(OPS)$(LOAD_EXT) $(OPS)$(O) $(METAMODEL_OBJS) ../../3rdparty/sha1/sha1$(O) $(LINKARGS)
 

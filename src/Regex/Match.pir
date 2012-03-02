@@ -33,6 +33,11 @@ This file implements Match objects for the regex engine.
     RegexWHO["Match"] = type_obj
     how = get_how type_obj
     
+    # Add to serialization context.
+    $P0 = nqp_get_sc "__REGEX_CORE_SC__"
+    nqp_set_sc_object "__REGEX_CORE_SC__", 1, type_obj
+    nqp_set_sc_for_object type_obj, $P0
+    
     # XXXNS Old namespace handling installation, during migration to new.
     set_hll_global ["Regex"], "Match", type_obj
 
@@ -44,43 +49,55 @@ This file implements Match objects for the regex engine.
     # Add all methods.
     .const 'Sub' $P10 = 'Regex_Match_meth_CURSOR'
     how.'add_method'(type_obj, 'CURSOR', $P10)
+    'add_code_to_sc'($P10)
 
     .const 'Sub' $P11 = 'Regex_Match_meth_from'
     how.'add_method'(type_obj, 'from', $P11)
+    'add_code_to_sc'($P11)
 
     .const 'Sub' $P12 = 'Regex_Match_meth_to'
     how.'add_method'(type_obj, 'to', $P12)
+    'add_code_to_sc'($P12)
 
     .const 'Sub' $P13 = 'Regex_Match_meth_chars'
     how.'add_method'(type_obj, 'chars', $P13)
+    'add_code_to_sc'($P13)
 
     .const 'Sub' $P14 = 'Regex_Match_meth_orig'
     how.'add_method'(type_obj, 'orig', $P14)
+    'add_code_to_sc'($P14)
 
     .const 'Sub' $P15 = 'Regex_Match_meth_Str'
     how.'add_method'(type_obj, 'Str', $P15)
     how.'add_parrot_vtable_mapping'(type_obj, 'get_string', $P15)
+    'add_code_to_sc'($P15)
 
     .const 'Sub' $P16 = 'Regex_Match_meth_ast'
     how.'add_method'(type_obj, 'ast', $P16)
+    'add_code_to_sc'($P16)
 
     .const 'Sub' $P17 = 'Regex_Match_meth_Bool'
     how.'add_method'(type_obj, 'Bool', $P17)
     how.'add_parrot_vtable_mapping'(type_obj, 'get_bool', $P17)
+    'add_code_to_sc'($P17)
 
     .const 'Sub' $P18 = 'Regex_Match_meth_Int'
     how.'add_method'(type_obj, 'Int', $P18)
     how.'add_parrot_vtable_mapping'(type_obj, 'get_integer', $P18)
+    'add_code_to_sc'($P18)
 
     .const 'Sub' $P19 = 'Regex_Match_meth_Num'
     how.'add_method'(type_obj, 'Num', $P19)
     how.'add_parrot_vtable_mapping'(type_obj, 'get_number', $P19)
+    'add_code_to_sc'($P19)
 
     .const 'Sub' $P20 = 'Regex_Match_meth_!make'
     how.'add_method'(type_obj, '!make', $P20)
+    'add_code_to_sc'($P20)
 
     .const 'Sub' $P21 = 'Regex_Match_meth___dump'
     how.'add_method'(type_obj, '__dump', $P21)
+    'add_code_to_sc'($P21)
 
     # Add attributes.
     .local pmc NQPAttribute, int_type, attr

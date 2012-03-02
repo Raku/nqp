@@ -1,7 +1,4 @@
 class NQP::Actions is HLL::Actions {
-
-    our @BLOCK := [];
-
     sub xblock_immediate($xblock) {
         $xblock[1] := block_immediate($xblock[1]);
         $xblock;
@@ -44,7 +41,7 @@ class NQP::Actions is HLL::Actions {
 
     method comp_unit($/) {
         my $mainline := $<statementlist>.ast;
-        my $unit     := @BLOCK.shift;
+        my $unit     := $*W.pop_lexpad();
         
         # Unit needs to have a load-init holding the deserialization or
         # fixup code for this compilation unit.
@@ -65,15 +62,6 @@ class NQP::Actions is HLL::Actions {
         unless $*HAS_YOU_ARE_HERE {
             $unit.push( self.CTXSAVE() );
         }
-
-        # Need to load the NQP dynops/dympmcs, plus any extras requested.
-        my @loadlibs := ['nqp_group', 'nqp_ops', 'nqp_bigint_ops', 'trans_ops', 'io_ops'];
-        if %*COMPILING<%?OPTIONS><vmlibs> {
-            for pir::split(',', %*COMPILING<%?OPTIONS><vmlibs>) {
-                @loadlibs.push($_);
-            }
-        }
-        $unit.loadlibs(|@loadlibs);
         
         # Detect if we're the main unit by if we were given any args. If so,
         # register the mainline as a module (so trying to use ourself in the
@@ -118,8 +106,8 @@ class NQP::Actions is HLL::Actions {
         );
         $unit.node($/);
         
-        # Set HLL.
-        $unit.hll('nqp');
+        # Set NQP defaults.
+        $*W.set_nqp_language_defaults($unit);
         
         make $unit;
     }
@@ -179,7 +167,7 @@ class NQP::Actions is HLL::Actions {
     }
 
     method blockoid($/) {
-        my $BLOCK := @BLOCK.shift;
+        my $BLOCK := $*W.pop_lexpad();
         if $<statementlist> {
             my $past := $<statementlist>.ast;
             $BLOCK.push($past);
@@ -197,7 +185,7 @@ class NQP::Actions is HLL::Actions {
     }
 
     method newpad($/) {
-        @BLOCK.unshift( PAST::Block.new( PAST::Stmts.new() ) );
+        $*W.push_lexpad($/)
     }
 
     method outerctx($/) {
@@ -214,7 +202,7 @@ class NQP::Actions is HLL::Actions {
                 $*W.load_module('NQPRegex', $*GLOBALish);
             }
         }
-        self.SET_BLOCK_OUTER_CTX(@BLOCK[0]);
+        self.SET_BLOCK_OUTER_CTX($*W.cur_lexpad());
     }
     
     sub import_HOW_exports($UNIT) {    
@@ -232,11 +220,11 @@ class NQP::Actions is HLL::Actions {
         # XXX Uses KnowHOW for now; want something lighter really.
         $*GLOBALish := $*W.pkg_create_mo(%*HOW<knowhow>, :name('GLOBALish'));
         $*GLOBALish.HOW.compose($*GLOBALish);
-        $*W.install_lexical_symbol(@BLOCK[0], 'GLOBALish', $*GLOBALish);
+        $*W.install_lexical_symbol($*W.cur_lexpad(), 'GLOBALish', $*GLOBALish);
         
         # This is also the starting package.
         $*PACKAGE := $*GLOBALish;
-        $*W.install_lexical_symbol(@BLOCK[0], '$?PACKAGE', $*PACKAGE);
+        $*W.install_lexical_symbol($*W.cur_lexpad(), '$?PACKAGE', $*PACKAGE);
     }
 
     method you_are_here($/) {
@@ -311,20 +299,21 @@ class NQP::Actions is HLL::Actions {
     method statement_control:sym<CATCH>($/) {
         my $block := $<block>.ast;
         push_block_handler($/, $block);
-        @BLOCK[0].handlers()[0].handle_types_except('CONTROL');
+        $*W.cur_lexpad().handlers()[0].handle_types_except('CONTROL');
         make PAST::Stmts.new(:node($/));
     }
 
     method statement_control:sym<CONTROL>($/) {
         my $block := $<block>.ast;
         push_block_handler($/, $block);
-        @BLOCK[0].handlers()[0].handle_types('CONTROL');
+        $*W.cur_lexpad().handlers()[0].handle_types('CONTROL');
         make PAST::Stmts.new(:node($/));
     }
 
     sub push_block_handler($/, $block) {
-        unless @BLOCK[0].handlers() {
-            @BLOCK[0].handlers([]);
+        my $BLOCK := $*W.cur_lexpad();
+        unless $BLOCK.handlers() {
+            $BLOCK.handlers([]);
         }
         unless $block.arity {
             $block.unshift(
@@ -339,7 +328,7 @@ class NQP::Actions is HLL::Actions {
             $block.arity(1);
         }
         $block.blocktype('declaration');
-        @BLOCK[0].handlers.unshift(
+        $BLOCK.handlers.unshift(
             PAST::Control.new(
                 :node($/),
                 PAST::Stmts.new(
@@ -359,8 +348,12 @@ class NQP::Actions is HLL::Actions {
         );
     }
 
+    method statement_prefix:sym<BEGIN>($/) {
+        make $*W.run_begin_block($<blorst>.ast);
+    }
+
     method statement_prefix:sym<INIT>($/) {
-        @BLOCK[0].push($<blorst>.ast);
+        $*W.cur_lexpad().push($<blorst>.ast);
         make PAST::Stmts.new();
     }
 
@@ -420,11 +413,16 @@ class NQP::Actions is HLL::Actions {
     }
 
     method colonpair($/) {
-        my $past := $<circumfix>
-                    ?? $<circumfix>[0].ast
-                    !! PAST::Val.new( :value( !$<not> ) );
-        $past.named( ~$<identifier> );
-        make $past;
+        if $<variable> {
+            $<variable>.ast.named(~$<variable><desigilname>);
+            make $<variable>.ast;
+        } else {
+            my $past := $<circumfix>
+                        ?? $<circumfix>[0].ast
+                        !! PAST::Val.new( :value( !$<not> ) );
+            $past.named( ~$<identifier> );
+            make $past;
+        }
     }
 
     method variable($/) {
@@ -456,7 +454,7 @@ class NQP::Actions is HLL::Actions {
             elsif $<twigil>[0] eq '!' {
                 # Construct PAST.
                 my $name := ~@name.pop;
-                my $ch   := PAST::Var.new( :name('$?CLASS') );
+                my $ch   := $*PKGDECL eq 'role' ?? PAST::Var.new( :name('$?CLASS') ) !! $*W.get_ref($*PACKAGE);
                 $ch<has_compile_time_value> := 1;
                 $ch<compile_time_value> := $*PACKAGE;
                 $past := PAST::Var.new(
@@ -485,7 +483,7 @@ class NQP::Actions is HLL::Actions {
                     }
                 }
             }
-            elsif is_package(~@name[0]) {
+            elsif $*W.is_package(~@name[0]) {
                 $past := lexical_package_lookup(@name, $/);
                 $past.viviself( vivitype( $<sigil> ) );
             }
@@ -508,21 +506,21 @@ class NQP::Actions is HLL::Actions {
     method package_declarator:sym<stub>($/) {
         # Construct meta-object with specified metaclass, adding it to the
         # serialization context for this compilation unit.
-        my $HOW := find_sym($<metaclass><identifier>, $/);
+        my $HOW := $*W.find_sym($<metaclass><identifier>);
         my $PACKAGE := $*W.pkg_create_mo($HOW, :name(~$<name>));
         
         # Install it in the current package or current lexpad as needed.
         if $*SCOPE eq 'our' || $*SCOPE eq '' {
             $*W.install_package_symbol($*OUTERPACKAGE, $<name><identifier>, $PACKAGE);
             if +$<name><identifier> == 1 {
-                $*W.install_lexical_symbol(@BLOCK[0], $<name><identifier>[0], $PACKAGE);
+                $*W.install_lexical_symbol($*W.cur_lexpad(), $<name><identifier>[0], $PACKAGE);
             }
         }
         elsif $*SCOPE eq 'my' {
             if +$<name><identifier> != 1 {
                 $<name>.CURSOR.panic("A my scoped package cannot have a multi-part name yet");
             }
-            $*W.install_lexical_symbol(@BLOCK[0], $<name><identifier>[0], $PACKAGE);
+            $*W.install_lexical_symbol($*W.cur_lexpad(), $<name><identifier>[0], $PACKAGE);
         }
         else {
             $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
@@ -567,7 +565,7 @@ class NQP::Actions is HLL::Actions {
             my $parent;
             my $parent_found;
             try {
-                $parent := find_sym(pir::clone__PP($<parent>[0]<identifier>), $/);
+                $parent := $*W.find_sym(pir::clone__PP($<parent>[0]<identifier>));
                 $parent_found := 1;
             }
             if $parent_found {
@@ -580,7 +578,7 @@ class NQP::Actions is HLL::Actions {
         elsif pir::can($how, 'set_default_parent') {
             my $default := $*PKGDECL eq 'grammar' ?? ['Regex', 'Cursor'] !! ['NQPMu'];
             $*W.pkg_add_parent_or_role($*PACKAGE, "set_default_parent",
-                find_sym($default, $/));
+                $*W.find_sym($default));
         }
 
         # Add any done roles.
@@ -589,7 +587,7 @@ class NQP::Actions is HLL::Actions {
                 my $role;
                 my $role_found;
                 try {
-                    $role := find_sym(pir::clone__PP($_<identifier>), $/);
+                    $role := $*W.find_sym(pir::clone__PP($_<identifier>));
                     $role_found := 1;
                 }
                 if $role_found {
@@ -632,7 +630,7 @@ class NQP::Actions is HLL::Actions {
         my $past := $<variable>.ast;
         my $sigil := $<variable><sigil>;
         my $name := $past.name;
-        my $BLOCK := @BLOCK[0];
+        my $BLOCK := $*W.cur_lexpad();
         if $name && $BLOCK.symbol($name) {
             $/.CURSOR.panic("Redeclaration of symbol ", $name);
         }
@@ -647,7 +645,7 @@ class NQP::Actions is HLL::Actions {
             my %obj_args;
             %lit_args<name> := $name;
             if $<typename> {
-                %obj_args<type> := find_sym([~$<typename>[0]], $/);
+                %obj_args<type> := $*W.find_sym([~$<typename>[0]]);
             }
             
             # Add it.
@@ -710,7 +708,7 @@ class NQP::Actions is HLL::Actions {
                     # Does the current block have a candidate holder in place?
                     if $*SCOPE eq 'our' { pir::die('our-scoped multis not yet implemented') }
                     my $cholder;
-                    my %sym := @BLOCK[0].symbol($name);
+                    my %sym := $*W.cur_lexpad().symbol($name);
                     if %sym<cholder> {
                         $cholder := %sym<cholder>;
                     }
@@ -724,7 +722,7 @@ class NQP::Actions is HLL::Actions {
                             $/.CURSOR.panic('Internal Error: Current scope has a proto, but no candidate list holder was set up. (This should never happen.)');
                         }
                         my $found_proto;
-                        for @BLOCK {
+                        for $*W.get_legacy_block_list() {
                             my %sym := $_.symbol($name);
                             if %sym<proto> || %sym<cholder> {
                                 $found_proto := 1;
@@ -740,22 +738,23 @@ class NQP::Actions is HLL::Actions {
                         }
 
                         # Set up dispatch routine in this scope.
+                        my $BLOCK := $*W.cur_lexpad();
                         $cholder := PAST::Op.new( :pasttype('list') );
                         my $dispatch_setup := PAST::Op.new(
                             :pirop('create_dispatch_and_add_candidates PPP'),
                             PAST::Var.new( :name($name), :scope('outer') ),
                             $cholder
                         );
-                        @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1), :directaccess(1),
+                        $BLOCK[0].push(PAST::Var.new( :name($name), :isdecl(1), :directaccess(1),
                                           :viviself($dispatch_setup), :scope('lexical') ) );
-                        @BLOCK[0].symbol($name, :scope('lexical'), :cholder($cholder) );
+                        $BLOCK.symbol($name, :scope('lexical'), :cholder($cholder) );
                     }
 
                     # Add this candidate to the holder.
                     $cholder.push($past);
 
                     # Build a type signature object for the multi-dispatcher to use.
-                    attach_multi_signature($past);
+                    attach_multi_signature_to_parrot_sub($past);
                 }
                 elsif $*MULTINESS eq 'proto' {
                     # Create a candidate list holder for the dispatchees
@@ -763,27 +762,29 @@ class NQP::Actions is HLL::Actions {
                     # with the proto.
                     if $*SCOPE eq 'our' { pir::die('our-scoped protos not yet implemented') }
                     my $cholder := PAST::Op.new( :pasttype('list') );
-                    @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1), :directaccess(1),
+                    my $BLOCK := $*W.cur_lexpad();
+                    $BLOCK[0].push(PAST::Var.new( :name($name), :isdecl(1), :directaccess(1),
                                           :viviself($past), :scope('lexical') ) );
-                    @BLOCK[0][0].push(PAST::Op.new(
+                    $BLOCK[0].push(PAST::Op.new(
                         :pirop('set_dispatchees 0PP'),
                         PAST::Var.new( :name($name) ),
                         $cholder
                     ));
-                    @BLOCK[0].symbol($name, :scope('lexical'), :proto(1), :cholder($cholder) );
+                    $BLOCK.symbol($name, :scope('lexical'), :proto(1), :cholder($cholder) );
 
                     # Need it to be a DispatcherSub.
                     $past.pirflags(':instanceof("DispatcherSub")');
                 }
                 else {
-                    @BLOCK[0][0].push(PAST::Var.new( :name($name), :isdecl(1), :directaccess(1),
+                    my $BLOCK := $*W.cur_lexpad();
+                    $BLOCK[0].push(PAST::Var.new( :name($name), :isdecl(1), :directaccess(1),
                                           :viviself($past), :scope('lexical') ) );
-                    @BLOCK[0].symbol($name, :scope('lexical') );
+                    $BLOCK.symbol($name, :scope('lexical') );
                     if $*SCOPE eq 'our' {
                         # Need to install it at loadinit time but also re-bind
                         # it per invocation.
                         $*W.install_package_routine($*PACKAGE, $name, $past);
-                        @BLOCK[0][0].push(PAST::Op.new(
+                        $BLOCK[0].push(PAST::Op.new(
                             :pasttype('bind_6model'),
                             lexical_package_lookup([$name], $/),
                             PAST::Var.new( :name($name), :scope('lexical') )
@@ -799,6 +800,11 @@ class NQP::Actions is HLL::Actions {
             # Is it the MAIN sub?
             if $name eq 'MAIN' && $*MULTINESS ne 'multi' {
                 $*MAIN_SUB := $block;
+            }
+        }
+        else {            
+            if $*W.is_precompilation_mode() {
+                $*W.create_code($past, '<anon>', 0)
             }
         }
 
@@ -841,15 +847,13 @@ class NQP::Actions is HLL::Actions {
             # Set name.
             my $name := ~$<private> ~ ~$<deflongname>[0].ast;
             $past.name($name);
-
-            # If it is a multi, we need to build a type signature object for
-            # the multi-dispatcher to use.
-            if $*MULTINESS eq 'multi' { attach_multi_signature($past); }
-
+            
             # Insert it into the method table.
             my $meta_meth := $*MULTINESS eq 'multi' ?? 'add_multi_method' !! 'add_method';
             my $is_dispatcher := $*MULTINESS eq 'proto';
-            $*W.pkg_add_method($*PACKAGE, $meta_meth, $name, $past, $is_dispatcher);
+            my $code := $*W.create_code($past, $name, $is_dispatcher);
+            if $*MULTINESS eq 'multi' { attach_multi_signature($code, $past); }
+            $*W.pkg_add_method($*PACKAGE, $meta_meth, $name, $code);
             
             # Install it in the package also if needed.
             if $*SCOPE eq 'our' {
@@ -872,32 +876,46 @@ class NQP::Actions is HLL::Actions {
     }
 
     sub only_star_block() {
-        my $past := @BLOCK.shift;
+        my $past := $*W.pop_lexpad();
         $past.closure(1);
         $past.push(PAST::Op.new(
             :pirop('multi_dispatch_over_lexical_candidates P')
         ));
         $past
     }
-
-    sub attach_multi_signature($routine) {
-        # Use set_sub_multisig op to set up a multi sig. Note that we stick
-        # it in the same slot Parrot multis use for their multi signature,
-        # this is just a bit more complex than what Parrot needs.
-        my $types := PAST::Op.new( :pasttype('list') );
-        my $definednesses := PAST::Op.new( :pasttype('list') );
+    
+    sub attach_multi_signature($code_obj, $routine) {
+        my $types := nqp::list();
+        my $definednesses := nqp::list();
         for @($routine[0]) {
             if $_ ~~ PAST::Var && $_.scope eq 'parameter' {
-                $types.push($_.multitype // PAST::Op.new( :pirop('null P') ));
+                $types.push($_.multitype ?? ($_.multitype())<compile_time_value> !! nqp::null() );
                 $definednesses.push($_<definedness> eq 'D' ?? 1 !!
                                     $_<definedness> eq 'U' ?? 2 !! 0);
             }
         }
-        $*W.set_routine_signature($routine, $types, $definednesses);
+        $*W.set_routine_signature($code_obj, $types, $definednesses);
+    }
+
+    sub attach_multi_signature_to_parrot_sub($routine) {
+        # Use set_sub_multisig op to set up a multi sig. Note that we stick
+        # it in the same slot Parrot multis use for their multi signature,
+        # this is just a bit more complex than what Parrot needs.
+        my $types := nqp::list();
+        my $definednesses := nqp::list();
+        for @($routine[0]) {
+            if $_ ~~ PAST::Var && $_.scope eq 'parameter' {
+                $types.push($_.multitype ?? ($_.multitype())<compile_time_value> !! nqp::null() );
+                $definednesses.push($_<definedness> eq 'D' ?? 1 !!
+                                    $_<definedness> eq 'U' ?? 2 !! 0);
+            }
+        }
+        $*W.set_routine_signature_on_parrot_sub($routine, $types, $definednesses);
     }
 
     method signature($/) {
-        my $BLOCKINIT := @BLOCK[0][0];
+        my $BLOCK     := $*W.cur_lexpad();
+        my $BLOCKINIT := $BLOCK[0];
         if $<invocant> {
             my $inv := $<invocant>[0].ast;
             $BLOCKINIT.push($inv);
@@ -905,7 +923,7 @@ class NQP::Actions is HLL::Actions {
                 :name('self'), :scope('lexical'), :isdecl(1), :directaccess(1),
                 :viviself(PAST::Var.new( :scope('lexical'), :name($inv.name) ))
             ));
-            @BLOCK[0]<signature_has_invocant> := 1
+            $BLOCK<signature_has_invocant> := 1
         }
         for $<parameter> { $BLOCKINIT.push($_.ast); }
     }
@@ -938,7 +956,7 @@ class NQP::Actions is HLL::Actions {
             }
             $past.viviself( $<default_value>[0]<EXPR>.ast );
         }
-        unless $past.viviself { @BLOCK[0].arity( +@BLOCK[0].arity + 1 ); }
+        unless $past.viviself { $*W.cur_lexpad().arity( +$*W.cur_lexpad().arity + 1 ); }
 
         # Note: this is hijacking multitype a bit here comapred to what it was
         # originally used for (a textual name). But it's ignored 
@@ -958,7 +976,7 @@ class NQP::Actions is HLL::Actions {
         my $name := ~$/;
         my $past :=  PAST::Var.new( :name($name), :scope('parameter'),
                                     :isdecl(1), :directaccess(1), :node($/) );
-        @BLOCK[0].symbol($name, :scope('lexical') );
+        $*W.cur_lexpad().symbol($name, :scope('lexical') );
         make $past;
     }
 
@@ -975,7 +993,7 @@ class NQP::Actions is HLL::Actions {
         my @name := HLL::Compiler.parse_name(~$/);
         my $found := 0;
         try {
-            my $sym := find_sym(@name, $/);
+            my $sym := $*W.find_sym(@name);
             make $*W.get_ref($sym);
             $found := 1;
         }
@@ -999,7 +1017,7 @@ class NQP::Actions is HLL::Actions {
             my $is_dispatcher := $*SCOPE eq 'proto';
             make -> $match {
                 $*W.pkg_add_method($package, 'add_parrot_vtable_mapping', $name, 
-                    $match.ast<block_past>, $is_dispatcher);
+                    $*W.create_code($match.ast<block_past>, $name, $is_dispatcher));
             };
         }
         elsif $<longname> eq 'parrot_vtable_handler' {
@@ -1052,7 +1070,7 @@ class NQP::Actions is HLL::Actions {
                     )
                 );
                 for @($past) {
-                    $*W.pkg_add_method($*PACKAGE, 'add_method', $_.name(), $_, 0);
+                    $*W.pkg_add_method($*PACKAGE, 'add_method', $_.name(), $*W.create_code($_, $_.name(), 0));
                 }
         }
         elsif $key eq 'open' {
@@ -1061,19 +1079,19 @@ class NQP::Actions is HLL::Actions {
             if $<sym> eq 'rule'  { %h<r> := 1;  %h<s> := 1; }
             @MODIFIERS.unshift(%h);
             $Regex::P6Regex::Actions::REGEXNAME := $name;
-            @BLOCK[0].symbol('$¢', :scope('lexical'));
-            @BLOCK[0].symbol('$/', :scope('lexical'));
+            $*W.cur_lexpad().symbol('$¢', :scope('lexical'));
+            $*W.cur_lexpad().symbol('$/', :scope('lexical'));
             return 0;
         }
         else {
             my $regex := 
-                Regex::P6Regex::Actions::buildsub($<p6regex>.ast, @BLOCK.shift);
+                Regex::P6Regex::Actions::buildsub($<p6regex>.ast, $*W.pop_lexpad());
             $regex.name($name);
             my $prefix_meth;
             
             if $*PKGDECL && pir::can($*PACKAGE.HOW, 'add_method') {
                 # Add the actual method.
-                $*W.pkg_add_method($*PACKAGE, 'add_method', $name, $regex, 0);
+                $*W.pkg_add_method($*PACKAGE, 'add_method', $name, $*W.create_code($regex, $name, 0));
                 
                 # Produce the prefixes method and add it.
                 my @prefixes := $<p6regex>.ast.prefix_list();
@@ -1082,7 +1100,7 @@ class NQP::Actions is HLL::Actions {
                     PAST::Op.new( :pasttype('list'), |@prefixes )
                 );
                 $*W.pkg_add_method($*PACKAGE, 'add_method', $prefix_meth.name,
-                    $prefix_meth, 0);
+                    $*W.create_code($prefix_meth, $prefix_meth.name, 0));
             }
             
             # In sink context, we don't need the Regex::Regex object.
@@ -1141,7 +1159,7 @@ class NQP::Actions is HLL::Actions {
     method term:sym<name>($/) {
         # See if it's a lexical symbol (known in any outer scope).
         my $var;
-        if is_lexical(~$<name>) {
+        if $*W.is_lexical(~$<name>) {
             $var := PAST::Var.new( :name(~$<name>), :scope('lexical') );
         }
         else {
@@ -1312,12 +1330,12 @@ class NQP::Actions is HLL::Actions {
     method quote:sym</ />($/, $key?) {
         if $key eq 'open' {
             $Regex::P6Regex::Actions::REGEXNAME := pir::null__P();
-            @BLOCK[0].symbol('$¢', :scope('lexical'));
-            @BLOCK[0].symbol('$/', :scope('lexical'));
+            $*W.cur_lexpad().symbol('$¢', :scope('lexical'));
+            $*W.cur_lexpad().symbol('$/', :scope('lexical'));
             return 0;
         }
         my $regex := 
-            Regex::P6Regex::Actions::buildsub($<p6regex>.ast, @BLOCK.shift);
+            Regex::P6Regex::Actions::buildsub($<p6regex>.ast, $*W.pop_lexpad());
         my $past := 
             PAST::Op.new(
                 :pasttype<callmethod>, :name<new>,
@@ -1411,7 +1429,7 @@ class NQP::Actions is HLL::Actions {
         # known. If not, it's in GLOBAL. Also, if first part is GLOBAL
         # then strip it off.
         else {
-            my $path := is_lexical(@name[0]) ??
+            my $path := $*W.is_lexical(@name[0]) ??
                 PAST::Var.new( :name(@name.shift()), :scope('lexical') ) !!
                 PAST::Var.new( :name('GLOBAL'), :namespace([]), :scope('package') );
             if @name[0] eq 'GLOBAL' {
@@ -1426,99 +1444,6 @@ class NQP::Actions is HLL::Actions {
         }
         
         return $lookup;
-    }
-    
-    # Checks if the given name is known anywhere in the lexpad
-    # and with lexical scope.
-    sub is_lexical($name) {
-        is_scope($name, 'lexical')
-    }
-    
-    # Checks if the given name is known anywhere in the lexpad
-    # and with package scope.
-    sub is_package($name) {
-        is_scope($name, 'package')
-    }
-    
-    # Checks if a given name is known in the lexpad anywhere
-    # with the specified scope.
-    sub is_scope($name, $wanted_scope) {
-        for @BLOCK {
-            my %sym := $_.symbol($name);
-            if +%sym {
-                return %sym<scope> eq $wanted_scope;
-            }
-        }
-        0;
-    }
-    
-    # Checks if the symbol is known.
-    method known_sym($/, @name) {
-        my $known := 0;
-        try {
-            find_sym(@name, $/);
-            $known := 1;
-        }
-        $known
-    }
-    
-    # Finds a symbol that has a known value at compile time from the
-    # perspective of the current scope. Checks for lexicals, then if
-    # that fails tries package lookup.
-    sub find_sym(@name, $/) {
-        # Make sure it's not an empty name.
-        unless +@name { $/.CURSOR.panic("Cannot look up empty name"); }
-        
-        # If it's a single-part name, look through the lexical
-        # scopes.
-        if +@name == 1 {
-            my $final_name := @name[0];
-            for @BLOCK {
-                my %sym := $_.symbol($final_name);
-                if +%sym {
-                    if pir::exists(%sym, 'value') {
-                        return %sym<value>;
-                    }
-                    else {
-                        pir::die("No compile-time value for $final_name");
-                    }
-                }
-            }
-        }
-        
-        # If it's a multi-part name, see if the containing package
-        # is a lexical somewhere. Otherwise we fall back to looking
-        # in GLOBALish.
-        my $result := $*GLOBALish;
-        if +@name >= 2 {
-            my $first := @name[0];
-            for @BLOCK {
-                my %sym := $_.symbol($first);
-                if +%sym {
-                    if pir::exists(%sym, 'value') {
-                        $result := %sym<value>;
-                        @name.shift();
-                        last;
-                    }
-                    else {
-                        pir::die("No compile-time value for $first");
-                    }                    
-                }
-            }
-        }
-        
-        # Try to chase down the parts of the name.
-        for @name {
-            if pir::exists($result.WHO, ~$_) {
-                $result := ($result.WHO){$_};
-            }
-            else {
-                pir::die("Could not locate compile-time value for symbol " ~
-                    pir::join('::', @name));
-            }
-        }
-        
-        $result;
     }
 }
 

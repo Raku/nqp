@@ -8,10 +8,10 @@ BEGIN_OPS_PREAMBLE
 /* 6modely includes. */
 #include "../6model/sixmodelobject.h"
 #include "../6model/repr_registry.h"
-#include "../pmc/pmc_dispatchersub.h"
-#include "../pmc/pmc_nqpmultisig.h"
-#include "../6model/multi_dispatch.h"
 #include "../6model/serialization_context.h"
+#include "../guts/multi_dispatch.h"
+#include "../pmc/pmc_dispatchersub.h"
+#include "../pmc/pmc_nqplexinfo.h"
 #include "pmc_sub.h"
 
 /* SHA1 algorithm. */
@@ -27,10 +27,8 @@ static INTVAL initialized = 0;
 
 /* Cached type IDs. */
 static INTVAL stable_id = 0;
-static INTVAL repr_id   = 0;
 static INTVAL smo_id    = 0;
 static INTVAL disp_id   = 0;
-static INTVAL ms_id     = 0;
 
 /* Built-in meta-objects. */
 static PMC *KnowHOW = NULL;
@@ -50,6 +48,37 @@ static INTVAL nqpdebflags_i = 0;
 #define EDGE_CHARLIST        6
 #define EDGE_CHARLIST_NEG    7
 
+/* Serialization context upside-down stack (element 0 is the latest, new entries
+ * unshifted). Tracks the SC (if any) that we are currently in; stack because we
+ * may have multiple on the go due to compiling nested module dependencies. */
+PMC *compiling_scs = NULL;
+
+/* SC write barrier for objects. */
+static void SC_write_barrier_obj(PARROT_INTERP, PMC *obj) {
+    if (VTABLE_get_bool(interp, compiling_scs)) {
+        PMC *comp_sc = VTABLE_get_pmc_keyed_int(interp, compiling_scs, 0);
+        if (SC_PMC(obj) != comp_sc) {
+            SC_repossess_object(interp, comp_sc, SC_PMC(obj), obj);
+            SC_PMC(obj) = comp_sc;
+            /*printf("SC OBJECT WRITE BARRIER HIT (%s)\n",
+                Parrot_str_cstring(interp, VTABLE_name(interp, obj)));*/
+        }
+    }
+}
+
+/* SC write barrier for STables. */
+static void SC_write_barrier_st(PARROT_INTERP, STable *st) {
+    if (VTABLE_get_bool(interp, compiling_scs)) {
+        PMC *comp_sc = VTABLE_get_pmc_keyed_int(interp, compiling_scs, 0);
+        if (st->sc != comp_sc) {
+            SC_repossess_stable(interp, comp_sc, st->sc, st->stable_pmc);
+            st->sc = comp_sc;
+            /*printf("SC STABLE WRITE BARRIER HIT (%s)\n",
+                Parrot_str_cstring(interp, VTABLE_name(interp, st->WHAT)));*/
+        }
+    }
+}
+
 END_OPS_PREAMBLE
 
 /*
@@ -63,17 +92,33 @@ Does various setup tasks for the benefit of the other dynops.
 */
 inline op nqp_dynop_setup() :base_core {
     if (!initialized) {
-        initialized = 1;
+        PMC *obj_sc_barrier, *st_sc_barrier;
 
         /* Look up and cache some type IDs. */
         stable_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "STable", 0));
-        repr_id   = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "REPR", 0));
         smo_id    = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
         disp_id   = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "DispatcherSub", 0));
-        ms_id     = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "NQPMultiSig", 0));
 
         /* Initialize the object model. */
         SixModelObject_initialize(interp, &KnowHOW, &KnowHOWAttribute);
+        
+        /* Initialize compiling SCs list. */
+        compiling_scs = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+        Parrot_pmc_gc_register(interp, compiling_scs);
+        
+        /* Set up write barrier functions. */
+        /* XXX Really want a better, cheaper place to put them... */
+        obj_sc_barrier = Parrot_pmc_new(interp, enum_class_Pointer);
+        VTABLE_set_pointer(interp, obj_sc_barrier, SC_write_barrier_obj);
+        VTABLE_set_pmc_keyed_str(interp, interp->root_namespace,
+            Parrot_str_new_constant(interp, "_OBJ_SC_BARRIER"), obj_sc_barrier);
+        st_sc_barrier = Parrot_pmc_new(interp, enum_class_Pointer);
+        VTABLE_set_pointer(interp, st_sc_barrier, SC_write_barrier_st);
+        VTABLE_set_pmc_keyed_str(interp, interp->root_namespace,
+            Parrot_str_new_constant(interp, "_ST_SC_BARRIER"), st_sc_barrier);
+        
+        /* Mark initialized. */
+        initialized = 1;
     }
 }
 
@@ -182,6 +227,7 @@ inline op set_who(in PMC, in PMC) :base_core {
     if (var->vtable->base_type == smo_id) {
         STABLE(var)->WHO = $2;
         PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC(var));
+        ST_SC_WRITE_BARRIER(STABLE(var));
     }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -393,6 +439,7 @@ inline op repr_bind_attr_obj(in PMC, in PMC, in STR, in PMC) :base_core {
             "Can only use repr_bind_attr_obj on a SixModelObject");
     }
     PARROT_GC_WRITE_BARRIER(interp, $1);
+    OBJ_SC_WRITE_BARRIER($1);
 }
 
 /*
@@ -418,6 +465,7 @@ inline op repr_bind_attr_int(in PMC, in PMC, in STR, in INT) :base_core {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_int on a SixModelObject");
     }
+    OBJ_SC_WRITE_BARRIER($1);
 }
 
 /*
@@ -443,6 +491,7 @@ inline op repr_bind_attr_num(in PMC, in PMC, in STR, in NUM) :base_core {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_num on a SixModelObject");
     }
+    OBJ_SC_WRITE_BARRIER($1);
 }
 
 /*
@@ -468,6 +517,7 @@ inline op repr_bind_attr_str(in PMC, in PMC, in STR, in STR) :base_core {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_str on a SixModelObject");
     PARROT_GC_WRITE_BARRIER(interp, $1);
+    OBJ_SC_WRITE_BARRIER($1);
 }
 
 /*
@@ -596,6 +646,7 @@ inline op repr_bind_attr_obj(in PMC, in PMC, in STR, in INT, in PMC) :base_core 
             "Can only use repr_bind_attr_obj on a SixModelObject");
     }
     PARROT_GC_WRITE_BARRIER(interp, $1);
+    OBJ_SC_WRITE_BARRIER($1);
 }
 
 /*
@@ -621,6 +672,7 @@ inline op repr_bind_attr_int(in PMC, in PMC, in STR, in INT, in INT) :base_core 
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_int on a SixModelObject");
     }
+    OBJ_SC_WRITE_BARRIER($1);
 }
 
 /*
@@ -646,6 +698,7 @@ inline op repr_bind_attr_num(in PMC, in PMC, in STR, in INT, in NUM) :base_core 
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_attr_num on a SixModelObject");
     }
+    OBJ_SC_WRITE_BARRIER($1);
 }
 
 /*
@@ -672,6 +725,7 @@ inline op repr_bind_attr_str(in PMC, in PMC, in STR, in INT, in STR) :base_core 
             "Can only use repr_bind_attr_str on a SixModelObject");
     }
     PARROT_GC_WRITE_BARRIER(interp, $1);
+    OBJ_SC_WRITE_BARRIER($1);
 }
 
 /*
@@ -725,6 +779,7 @@ inline op repr_change_type(in PMC, in PMC) :base_core {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_change_type on SixModelObjects");
     }
+    OBJ_SC_WRITE_BARRIER($1);
 }
 
 
@@ -843,6 +898,7 @@ inline op repr_bind_pos_obj(in PMC, in INT, in PMC) :base_core {
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot do bind_pos on a type object");
         PARROT_GC_WRITE_BARRIER(interp, obj);
+        OBJ_SC_WRITE_BARRIER($1);
     }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -867,6 +923,7 @@ inline op repr_bind_pos_int(in PMC, in INT, in INT) :base_core {
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot do bind_pos on a type object");
+        OBJ_SC_WRITE_BARRIER($1);
     }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -891,6 +948,7 @@ inline op repr_bind_pos_num(in PMC, in INT, in NUM) :base_core {
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot do bind_pos on a type object");
+        OBJ_SC_WRITE_BARRIER($1);
     }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -953,6 +1011,7 @@ inline op publish_type_check_cache(in PMC, in PMC) :base_core {
             target_st->type_check_cache_length = 0;
         }
         PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC(target));
+        ST_SC_WRITE_BARRIER(target_st);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -987,6 +1046,7 @@ inline op publish_method_cache(in PMC, in PMC) :base_core {
         }
         target_st->method_cache = cache;
         PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC(target));
+        ST_SC_WRITE_BARRIER(target_st);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -1012,6 +1072,7 @@ inline op set_method_cache_authoritativeness(in PMC, in INT) :base_core {
         if ($2)
             new_flags = new_flags | METHOD_CACHE_AUTHORITATIVE;
         STABLE(target)->mode_flags = new_flags;
+        ST_SC_WRITE_BARRIER(STABLE(target));
     }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -1169,7 +1230,10 @@ inline op multi_dispatch_over_lexical_candidates(out PMC) :base_core {
     PMC *cur_ctx = CURRENT_CONTEXT(interp);
     while (!PMC_IS_NULL(cur_ctx)) {
         Parrot_Context *ctx_struct = CONTEXT_STRUCT(cur_ctx);
-        if (ctx_struct->current_sub->vtable->base_type == disp_id) {
+        if (ctx_struct->current_sub->vtable->base_type == disp_id ||
+                ctx_struct->current_sub->vtable->base_type == enum_class_Sub &&
+                PARROT_SUB(ctx_struct->current_sub)->multi_signature->vtable->base_type == smo_id &&
+                !PMC_IS_NULL(((NQP_Routine *)PMC_data(PARROT_SUB(ctx_struct->current_sub)->multi_signature))->dispatchees)) {
             /* Found a dispatcher. Enter the multi-dispatcher to find a the
              * best candidate, if any. */
             PMC *chosen = nqp_multi_dispatch(interp, ctx_struct->current_sub, cur_ctx);
@@ -1289,27 +1353,45 @@ inline op is_dispatcher(out INT, in PMC) :base_core {
     $1 = $2->vtable->base_type == disp_id;
 }
 
+
 /*
 
 =item set_sub_multisig()
 
-Sets a sub's multi_signature. $1 is the sub, $2 is an array of type objects
-and $3 is is an array of definedness constraint descriptors.
+Sets a sub's multi_signature. $1 is the sub, $2 is the signature object.
 
 =cut
 
 */
-inline op set_sub_multisig(in PMC, in PMC, in PMC) :base_core {
+inline op set_sub_multisig(in PMC, in PMC) :base_core {
     if ($1->vtable->base_type == enum_class_Sub) {
-        PMC *sig = Parrot_pmc_new(interp, ms_id);
-        SETATTR_NQPMultiSig_types(interp, sig, $2);
-        SETATTR_NQPMultiSig_definedness_constraints(interp, sig, $3);
-        SETATTR_Sub_multi_signature(interp, $1, sig);
+        SETATTR_Sub_multi_signature(interp, $1, $2);
         PARROT_GC_WRITE_BARRIER(interp, $1);
     }
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use set_sub_multisig if first operand is a Sub.");
+}
+
+
+/*
+
+=item set_sub_code_object()
+
+Associates a high level code object with a Parrot sub. $1 is the sub, $2 is the
+code object.
+
+=cut
+
+*/
+inline op set_sub_code_object(in PMC, in PMC) :base_core {
+    if ($1->vtable->base_type == enum_class_Sub) {
+        SETATTR_Sub_multi_signature(interp, $1, $2);
+        PARROT_GC_WRITE_BARRIER(interp, $1);
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use set_sub_code_object if first operand is a Sub.");
 }
 
 
@@ -1330,6 +1412,7 @@ inline op stable_set_type_check_mode(in PMC, in INT) :base_core {
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use stable_set_type_check_mode with a SixModelObject");
+    ST_SC_WRITE_BARRIER(STABLE(target));
 }
 
 
@@ -1459,6 +1542,27 @@ inline op nqp_get_sc_object(out PMC, in STR, in INT) :base_core {
             $2);
 }
 
+
+/*
+
+=item nqp_get_sc_code_ref()
+
+Fetches the code ref from the serialization context keyed by handle and index.
+
+=cut
+
+*/
+inline op nqp_get_sc_code_ref(out PMC, in STR, in INT) :base_core {
+    PMC *sc = SC_get_sc(interp, $2);
+    if (!PMC_IS_NULL(sc))
+        $1 = SC_get_code(interp, sc, $3);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Cannot fetch code ref from non-existent serialization context %Ss",
+            $2);
+}
+
+
 /*
 
 =item nqp_get_sc()
@@ -1510,6 +1614,28 @@ inline op nqp_add_object_to_sc(in PMC, in INT, in PMC) :base_core {
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use nqp_add_object_to_sc to add a 6model object");
+}
+
+
+/*
+
+=item nqp_add_code_ref_to_sc
+
+Adds a code ref $3 to slot $2 of the serialization context in $1 and marks
+it as being in the context.
+
+=cut
+
+*/
+inline op nqp_add_code_ref_to_sc(in PMC, in INT, in PMC) :base_core {
+    if ($3->vtable->base_type == enum_class_Sub) {
+        SC_set_code(interp, $1, $2, $3);
+        VTABLE_setprop(interp, $3, Parrot_str_new_constant(interp, "SC"), $1);
+        PARROT_GC_WRITE_BARRIER(interp, $3);
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use nqp_code_ref_to_sc to add a Sub");
 }
 
 
@@ -1568,6 +1694,34 @@ inline op nqp_get_sc_for_object(out PMC, in PMC) :base_core {
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use nqp_get_sc_for_object with a SixModelObject");
+}
+
+
+/*
+
+=item nqp_push_compiling_sc()
+
+Pushes an SC on to the stack of those currently being compiled.
+
+=cut
+
+*/
+inline op nqp_push_compiling_sc(in PMC) :base_core {
+    VTABLE_unshift_pmc(interp, compiling_scs, $1);
+}
+
+
+/*
+
+=item nqp_pop_compiling_sc()
+
+Pops an SC off the stack of those currently being compiled.
+
+=cut
+
+*/
+inline op nqp_pop_compiling_sc() :base_core {
+    VTABLE_shift_pmc(interp, compiling_scs);
 }
 
 
@@ -1733,6 +1887,7 @@ inline op set_container_spec(in PMC, in PMC, in STR, in PMC) :base_core {
             mem_sys_free(st->container_spec);
         st->container_spec = new_spec;
         PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC($1));
+        ST_SC_WRITE_BARRIER(st);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -1774,6 +1929,7 @@ inline op set_boolification_spec(in PMC, in INT, in PMC) :base_core {
             mem_sys_free(st->boolification_spec);
         st->boolification_spec = new_spec;
         PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC($1));
+        /*ST_SC_WRITE_BARRIER(st);*/
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -2169,6 +2325,36 @@ inline op is_uprop(out INT, in STR, in STR, in INT) :base_core {
 
 /*
 
+=item nqp_serialize_sc
+
+Serializes the Serialization Context located in $2. Places any required strings
+into the string heap in $3. Returns a string containing the serialized data in $1.
+
+=cut
+
+*/
+inline op nqp_serialize_sc(out STR, in PMC, in PMC) :base_core {
+    $1 = Serialization_serialize(interp, $2, $3);
+}
+
+
+/*
+
+=item nqp_deserialize_sc
+
+Deserializes the data in $1, populating the serialization context located in $2.
+Expects to find any required strings in the string heap, passed in $3, and any of
+the compilation unit's static code refs in the list in $4.
+
+=cut
+
+*/
+inline op nqp_deserialize_sc(in STR, in PMC, in PMC, in PMC) :base_core {
+    Serialization_deserialize(interp, $2, $3, $4, $1);
+}
+
+/*
+
 =item nqp_sha1
 
 Computes the SHA-1 hash of $2 and puts the result in $1.
@@ -2192,4 +2378,27 @@ inline op nqp_sha1(out STR, in STR) :base_core {
     /* Free the C-string and put result into a new string. */
     Parrot_str_free_cstring(cstr);
     $1 = Parrot_str_new_init(interp, &output, 40, Parrot_utf8_encoding_ptr, 0);
+}
+
+
+/*
+
+=item nqp_fresh_stub
+
+Takes the Parrot Sub in $2 and makes a clone of it along with a fresh NQPLexInfo.
+(This is used for closure to static resolution).
+
+=cut
+
+*/
+inline op nqp_fresh_stub(out PMC, in PMC) :base_core {
+    if ($2->vtable->base_type == enum_class_Sub) {
+        $1 = VTABLE_clone(interp, $2);
+        PARROT_SUB($1)->lex_info = VTABLE_clone(interp, PARROT_SUB($2)->lex_info);
+        PARROT_NQPLEXINFO(PARROT_SUB($1)->lex_info)->static_code = $1;
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "nqp_fresh_sub can only operate on a Parrot Sub");
+    }
 }

@@ -45,9 +45,22 @@ void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attri
     *knowhow_attribute = SixModelObject_setup_knowhow_attribute(interp, initial_sc, *knowhow);
 }
 
+/* Sets the object that we'll wrap the next allocation in. */
+static PMC *next_wrapper = NULL;
+void set_wrapping_object(PMC *wrapper) {
+    next_wrapper = wrapper;
+}
+
 /* Takes an object and wraps it in a SixModelObject PMC. */
 PMC * wrap_object(PARROT_INTERP, void *obj) {
-    PMC *obj_pmc = Parrot_pmc_new_noinit(interp, smo_id);
+    PMC *obj_pmc;
+    if (next_wrapper) {
+        obj_pmc = next_wrapper;
+        next_wrapper = NULL;
+    }
+    else {
+        obj_pmc = Parrot_pmc_new_noinit(interp, smo_id);
+    }
     PObj_custom_mark_SET(obj_pmc);
     PObj_custom_destroy_SET(obj_pmc);
     PMC_data(obj_pmc) = obj;

@@ -214,6 +214,9 @@ knowhow NQPClassHOW {
                 if pir::is_dispatcher__IP($dispatcher) {
                     pir::push_dispatchee__0PP($dispatcher, $code);
                 }
+                elsif pir::can($dispatcher, 'is_dispatcher') && $dispatcher.is_dispatcher {
+                    $dispatcher.add_dispatchee($code);
+                }
                 else {
                     pir::die("Cannot have a multi candidate for $name when an only method is also in the class");
                 }
@@ -238,6 +241,12 @@ knowhow NQPClassHOW {
                             if pir::defined($clone_callback) {
                                 $clone_callback($dispatcher, $new_disp);
                             }
+                            %!methods{$name} := $new_disp;
+                            $found := 1;
+                        }
+                        elsif pir::can($dispatcher, 'is_dispatcher') && $dispatcher.is_dispatcher {
+                            my $new_disp := $dispatcher.derive_dispatcher();
+                            $new_disp.add_dispatchee($code);
                             %!methods{$name} := $new_disp;
                             $found := 1;
                         }

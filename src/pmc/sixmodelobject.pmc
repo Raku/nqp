@@ -216,6 +216,7 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     VTABLE STRING * get_string() {
         PMC *decont = decontainerize(interp, SELF);
         PMC **vt = STABLE(decont)->parrot_vtable_mapping;
+        AttributeIdentifier *vth = STABLE(decont)->parrot_vtable_handler_mapping;
         PMC *meth;
         if (vt && !PMC_IS_NULL(meth = vt[PARROT_VTABLE_SLOT_GET_STRING])) {
             PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
@@ -225,6 +226,13 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
             return VTABLE_get_string_keyed_int(interp, cappy, 0);
+        }
+        else if (vth && vth[PARROT_VTABLE_SLOT_GET_STRING].class_handle) {
+            PMC *val = get_attr(interp, decont,
+                vth[PARROT_VTABLE_SLOT_GET_STRING].class_handle,
+                vth[PARROT_VTABLE_SLOT_GET_STRING].attr_name,
+                vth[PARROT_VTABLE_SLOT_GET_STRING].hint);
+            return VTABLE_get_string(interp, val);
         }
         else
             return SUPER();

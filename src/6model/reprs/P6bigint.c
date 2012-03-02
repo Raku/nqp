@@ -53,7 +53,7 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
 static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     P6bigintBody *src_body = (P6bigintBody *)src;
     P6bigintBody *dest_body = (P6bigintBody *)dest;
-    mp_init_copy(&src_body->i, &dest_body->i);
+    mp_init_copy(&dest_body->i, &src_body->i);
 }
 
 /* Used with boxing. Sets an integer value, for representations that can hold
@@ -144,6 +144,27 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     return spec;
 }
 
+/* Serializes the data. */
+static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter *writer) {
+    mp_int *i = &((P6bigintBody *)data)->i;
+    int len;
+    char *buf;
+    mp_radix_size(i, 10, &len);
+    buf = mem_sys_allocate(len);
+    mp_toradix_n(i, buf, 10, len);
+    /* len - 1 because buf is \0-terminated */
+    writer->write_str(interp, writer, Parrot_str_new(interp, buf, len - 1));
+    mem_sys_free(buf);
+}
+
+/* Deserializes the data. */
+static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationReader *reader) {
+    P6bigintBody *body = (P6bigintBody *)data;
+    const char *buf = Parrot_str_cstring(interp, reader->read_str(interp, reader));
+    mp_init(&body->i);
+    mp_read_radix(&body->i, buf, 10);
+}
+
 /* Initializes the P6bigint representation. */
 REPROps * P6bigint_initialize(PARROT_INTERP,
         PMC * (* wrap_object_func_ptr) (PARROT_INTERP, void *obj),
@@ -169,5 +190,7 @@ REPROps * P6bigint_initialize(PARROT_INTERP,
     this_repr->gc_free = gc_free;
     this_repr->gc_cleanup = gc_cleanup;
     this_repr->get_storage_spec = get_storage_spec;
+    this_repr->serialize = serialize;
+    this_repr->deserialize = deserialize;
     return this_repr;
 }

@@ -12,6 +12,8 @@
 #include "../sixmodelobject.h"
 #include "P6opaque.h"
 
+#define MAX(x, y) ((y) > (x) ? (y) : (x))
+
 /* This representation's function pointer table. */
 static REPROps *this_repr;
 
@@ -369,10 +371,19 @@ static INTVAL try_get_slot(PARROT_INTERP, P6opaqueREPRData *repr_data, PMC *clas
         P6opaqueNameMap *cur_map_entry = repr_data->name_to_index_mapping;
         while (cur_map_entry->class_key != NULL) {
             if (cur_map_entry->class_key == class_key) {
-                PMC *slot_pmc = VTABLE_get_pmc_keyed_str(interp, cur_map_entry->name_map, name);
-                if (!PMC_IS_NULL(slot_pmc))
-                    slot = VTABLE_get_integer(interp, slot_pmc);
-                break;
+                if (!PMC_IS_NULL(cur_map_entry->name_map)) {
+                    PMC *slot_pmc = VTABLE_get_pmc_keyed_str(interp, cur_map_entry->name_map, name);
+                    if (!PMC_IS_NULL(slot_pmc))
+                        slot = VTABLE_get_integer(interp, slot_pmc);
+                    break;
+                }
+                else {
+                    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                        "Null attribute map for P6opaque in class '%Ss'",
+                        VTABLE_get_string(interp, introspection_call(interp,
+                            class_key, STABLE(class_key)->HOW,
+                            Parrot_str_new_constant(interp, "name"), 0)));
+                }
             }
             cur_map_entry++;
         }
@@ -419,7 +430,7 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
     obj = (P6opaqueInstance *) Parrot_gc_allocate_fixed_size_storage(interp, repr_data->allocation_size);
     memset(obj, 0, repr_data->allocation_size);
     obj->common.stable = st->stable_pmc;
-    
+
     return wrap_object(interp, obj);
 }
 
@@ -871,6 +882,185 @@ static void change_type(PARROT_INTERP, PMC *obj, PMC *new_type) {
     PARROT_GC_WRITE_BARRIER(interp, obj);
 }
 
+/* Serializes the data. */
+static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter *writer) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    INTVAL num_attributes, i;
+    
+    if (!repr_data->allocation_size) {
+        compute_allocation_strategy(interp, st->WHAT, repr_data);
+        PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
+    }
+    
+    num_attributes = repr_data->num_attributes;
+    for (i = 0; i < num_attributes; i++) {
+        INTVAL a_offset = repr_data->attribute_offsets[i];
+        STable *a_st = repr_data->flattened_stables[i];
+        if (a_st) {
+            if (a_st->REPR->serialize)
+                a_st->REPR->serialize(interp, a_st, (char *)data + a_offset, writer);
+            else
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "Missing serialize REPR function");
+        }
+        else
+            writer->write_ref(interp, writer, get_pmc_at_offset(data, a_offset));
+    }
+}
+
+/* Deserializes the data. */
+static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationReader *reader) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    INTVAL num_attributes = repr_data->num_attributes;
+    INTVAL i;
+    for (i = 0; i < num_attributes; i++) {
+        INTVAL a_offset = repr_data->attribute_offsets[i];
+        STable *a_st = repr_data->flattened_stables[i];
+        if (a_st)
+            a_st->REPR->deserialize(interp, a_st, (char *)data + a_offset, reader);
+        else
+            set_pmc_at_offset(data, a_offset, reader->read_ref(interp, reader));
+    }
+}
+
+/* Serializes the REPR data. */
+static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *writer) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    INTVAL i, num_classes;
+    
+    if (!repr_data->allocation_size) {
+        compute_allocation_strategy(interp, st->WHAT, repr_data);
+        PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
+    }
+    
+    writer->write_int(interp, writer, repr_data->num_attributes);
+
+    for (i = 0; i < repr_data->num_attributes; i++) {
+        writer->write_int(interp, writer, repr_data->flattened_stables[i] != NULL);
+        if (repr_data->flattened_stables[i])
+            writer->write_stable_ref(interp, writer, repr_data->flattened_stables[i]);
+    }
+    
+    writer->write_int(interp, writer, repr_data->mi);
+    
+    if (repr_data->auto_viv_values) {
+        writer->write_int(interp, writer, 1);
+        for (i = 0; i < repr_data->num_attributes; i++)
+            writer->write_ref(interp, writer, repr_data->auto_viv_values[i]);
+    }
+    else {
+        writer->write_int(interp, writer, 0);
+    }
+    
+    writer->write_int(interp, writer, repr_data->unbox_int_slot);
+    writer->write_int(interp, writer, repr_data->unbox_num_slot);
+    writer->write_int(interp, writer, repr_data->unbox_str_slot);
+    
+    if (repr_data->unbox_slots) {
+        writer->write_int(interp, writer, 1);
+        for (i = 0; i < repr_data->num_attributes; i++) {
+            writer->write_int(interp, writer, repr_data->unbox_slots[i].repr_id);
+            writer->write_int(interp, writer, repr_data->unbox_slots[i].slot);
+        }
+    }
+    else {
+        writer->write_int(interp, writer, 0);
+    }
+    
+    num_classes = i = 0;
+    while (repr_data->name_to_index_mapping[i].class_key)
+        num_classes++, i++;
+    writer->write_int(interp, writer, num_classes);
+    for (i = 0; i < num_classes; i++) {
+        writer->write_ref(interp, writer, repr_data->name_to_index_mapping[i].class_key);
+        writer->write_ref(interp, writer, repr_data->name_to_index_mapping[i].name_map);
+    }
+}
+
+/* Deserializes the data. */
+static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader *reader) {
+    P6opaqueREPRData *repr_data = st->REPR_data = mem_sys_allocate_zeroed(sizeof(P6opaqueREPRData));
+    INTVAL i, num_classes, cur_offset, cur_initialize_slot, cur_gc_mark_slot, cur_gc_cleanup_slot;
+    
+    repr_data->num_attributes = reader->read_int(interp, reader);
+        
+    repr_data->flattened_stables = mem_sys_allocate(MAX(repr_data->num_attributes, 1) * sizeof(STable *));
+    for (i = 0; i < repr_data->num_attributes; i++)
+        if (reader->read_int(interp, reader))
+            repr_data->flattened_stables[i] = reader->read_stable_ref(interp, reader);
+        else
+            repr_data->flattened_stables[i] = NULL;
+
+    repr_data->mi = reader->read_int(interp, reader);
+    
+    if (reader->read_int(interp, reader)) {
+        repr_data->auto_viv_values = mem_sys_allocate(MAX(repr_data->num_attributes, 1) * sizeof(PMC *));
+        for (i = 0; i < repr_data->num_attributes; i++)
+            repr_data->auto_viv_values[i] = reader->read_ref(interp, reader);
+    }
+    
+    repr_data->unbox_int_slot = reader->read_int(interp, reader);
+    repr_data->unbox_num_slot = reader->read_int(interp, reader);
+    repr_data->unbox_str_slot = reader->read_int(interp, reader);
+    
+    if (reader->read_int(interp, reader)) {
+        repr_data->unbox_slots = mem_sys_allocate(MAX(repr_data->num_attributes, 1) * sizeof(P6opaqueBoxedTypeMap));
+        for (i = 0; i < repr_data->num_attributes; i++) {
+            repr_data->unbox_slots[i].repr_id = reader->read_int(interp, reader);
+            repr_data->unbox_slots[i].slot = reader->read_int(interp, reader);
+        }
+    }
+    
+    num_classes = reader->read_int(interp, reader);
+    repr_data->name_to_index_mapping = mem_sys_allocate_zeroed((num_classes + 1) * sizeof(P6opaqueNameMap));
+    for (i = 0; i < num_classes; i++) {
+        repr_data->name_to_index_mapping[i].class_key = reader->read_ref(interp, reader);
+        repr_data->name_to_index_mapping[i].name_map = reader->read_ref(interp, reader);
+    }
+    
+    /* Re-calculate the remaining info, which is platform specific or
+     * derived information. */
+    repr_data->attribute_offsets   = mem_sys_allocate(MAX(repr_data->num_attributes, 1) * sizeof(INTVAL));
+    repr_data->gc_pmc_mark_offsets = mem_sys_allocate(MAX(repr_data->num_attributes, 1) * sizeof(INTVAL));
+    repr_data->initialize_slots    = mem_sys_allocate((repr_data->num_attributes + 1) * sizeof(INTVAL));
+    repr_data->gc_mark_slots       = mem_sys_allocate((repr_data->num_attributes + 1) * sizeof(INTVAL));
+    repr_data->gc_cleanup_slots    = mem_sys_allocate((repr_data->num_attributes + 1) * sizeof(INTVAL));
+    repr_data->gc_pmc_mark_offsets_count = 0;
+    cur_offset          = 0;
+    cur_initialize_slot = 0;
+    cur_gc_mark_slot    = 0;
+    cur_gc_cleanup_slot = 0;
+    for (i = 0; i < repr_data->num_attributes; i++) {
+        repr_data->attribute_offsets[i] = cur_offset;
+        if (repr_data->flattened_stables[i] == NULL) {
+            /* Reference type. Needs marking. */
+            repr_data->gc_pmc_mark_offsets[repr_data->gc_pmc_mark_offsets_count] = cur_offset;
+            repr_data->gc_pmc_mark_offsets_count++;
+            
+            /* Increment by pointer size. */
+            cur_offset += sizeof(PMC *);
+        }
+        else {
+            /* Set up flags for initialization and GC. */
+            STable *cur_st = repr_data->flattened_stables[i];
+            if (cur_st->REPR->initialize)
+                repr_data->initialize_slots[cur_initialize_slot++] = i;
+            if (cur_st->REPR->gc_mark)
+                repr_data->gc_mark_slots[cur_gc_mark_slot++] = i;
+            if (cur_st->REPR->gc_cleanup)
+                repr_data->gc_cleanup_slots[cur_gc_cleanup_slot++] = i;
+            
+            /* Increment by size reported by representation. */
+            cur_offset += cur_st->REPR->get_storage_spec(interp, st).bits / 8;
+        }
+    }
+    repr_data->initialize_slots[cur_initialize_slot] = -1;
+    repr_data->gc_mark_slots[cur_gc_mark_slot] = -1;
+    repr_data->gc_cleanup_slots[cur_gc_cleanup_slot] = -1;
+    
+    repr_data->allocation_size = sizeof(P6opaqueInstance) + cur_offset;
+}
+
 /* Initializes the P6opaque representation. */
 REPROps * P6opaque_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
@@ -900,6 +1090,10 @@ REPROps * P6opaque_initialize(PARROT_INTERP) {
     this_repr->gc_free_repr_data = gc_free_repr_data;
     this_repr->get_storage_spec = get_storage_spec;
     this_repr->change_type = change_type;
+    this_repr->serialize = serialize;
+    this_repr->deserialize = deserialize;
+    this_repr->serialize_repr_data = serialize_repr_data;
+    this_repr->deserialize_repr_data = deserialize_repr_data;
     smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
     return this_repr;
 }

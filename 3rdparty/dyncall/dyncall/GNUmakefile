@@ -36,6 +36,7 @@ INSTALL_HEADERS	= \
 	dyncall_alloc.h
 
 INSTALL_LIB = 1
+INSTALL_MAN3 = dyncall.3.gz
 
 UNITS = dyncall_vector dyncall_api dyncall_callvm dyncall_callvm_base dyncall_struct
 

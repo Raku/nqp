@@ -116,8 +116,22 @@ MAIN: {
         $config{'dyncall_build'} = 'cd 3rdparty\dyncall && nmake Nmakefile';
     }
     else {
-        system_or_die('cd 3rdparty/dyncall && sh configure');
-        $config{'dyncall_build'} = "cd 3rdparty/dyncall && BUILD_DIR=. $make";
+        if ($^O eq 'MSWin32') {
+            my $configure_args = 
+                $config{'parrot::archname'} =~ /x86/ ? ' /target-x86' : ' /target-x64'; 
+
+            $configure_args   .= $config{'parrot::cc'} eq 'gcc' ? ' /tool-gcc' : '';
+
+            system_or_die('cd 3rdparty\dyncall && Configure.bat' . $configure_args);
+            $config{'dyncall_build'} = "cd 3rdparty/dyncall && $make BUILD_DIR=. -f GNUmakefile";
+        } else {
+            system_or_die('cd 3rdparty/dyncall && sh configure');
+            if ($^O eq 'netbsd') {
+                $config{'dyncall_build'} = "cd 3rdparty/dyncall && BUILD_DIR=. $make -f BSDmakefile";
+            } else {
+                $config{'dyncall_build'} = "cd 3rdparty/dyncall && BUILD_DIR=. $make";
+            }
+        }
     }
 
     fill_template_file('tools/build/Makefile.in', 'Makefile', %config);

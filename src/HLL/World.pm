@@ -13,50 +13,40 @@
 #
 # A world includes a serialization context. This contains a bunch of
 # objects - often meta-objects - that we want to persist across the
-# compile time / run time boundary. In the near future, we'll switch to
-# actually serializing these. At the moment, we instead save a series of
-# "events" that will be used to re-construct them.
-#
-# Note that this reconstruction code is not generated in the case that we
-# are just going to immediately run.
+# compile time / run time boundary. If we're doing pre-compilation
+# rather than "immediate run" then we serialize the contents of the
+# serialization context.
 
 class HLL::World {
-    # Represents an event that we need to handle when fixing up or deserializing.
-    my class Event {
-        # The PAST that we emit to perform the action if in deserialization mode.
-        has $!deserialize_past;
-        method deserialize_past() { $!deserialize_past }
-        
-        # The PAST that we emit to do any fixups if we are in compile-n-run mode.
-        has $!fixup_past;
-        method fixup_past() { $!fixup_past }
-        
-        method new(:$deserialize_past, :$fixup_past) {
-            my $node := nqp::create(self);
-            nqp::bindattr($node, Event, '$!deserialize_past', $deserialize_past);
-            nqp::bindattr($node, Event, '$!fixup_past', $fixup_past);
-            $node
-        }
-    }
-
     # The serialization context that we're building.
     has $!sc;
     
     # The handle for the context.
     has $!handle;
     
-    # Address => slot mapping, so we can quickly look up existing objects
-    # in the context.
-    has %!addr_to_slot;
-    
-    # The event stream that builds or fixes up objects.
-    has @!event_stream;
-    
-    # Other SCs that we are dependent on (maps handle to SC).
-    has %!dependencies;
-    
     # Whether we're in pre-compilation mode.
     has $!precomp_mode;
+    
+    # The number of code refs we've added to the code refs root so far.
+    has $!num_code_refs;
+    
+    # List of PAST blocks that map to the code refs table, for use in
+    # building deserialization code.
+    has $!code_ref_blocks;
+
+    # List of PAST nodes specifying dependency loading related tasks. These
+    # are done before the deserialization of the current context, or if in
+    # immediate run mode before any of the other fixup tasks.
+    has @!load_dependency_tasks;
+
+    # List of PAST nodes specifying fixup tasks, either after deserialization
+    # or between compile time and run time.
+    has @!fixup_tasks;
+    
+    # Address => slot mapping, so we can quickly look up existing objects
+    # in the context.
+    # XXX LEGACY
+    has %!addr_to_slot;
     
     method new(:$handle!, :$description = '<unknown>') {
         my $obj := self.CREATE();
@@ -65,12 +55,19 @@ class HLL::World {
     }
     
     method BUILD(:$handle!, :$description!) {
-        $!sc           := pir::nqp_create_sc__PS($handle);
-        $!handle       := $handle;
-        %!addr_to_slot := nqp::hash();
-        @!event_stream := nqp::list();
+        # Initialize attributes.
+        $!sc              := pir::nqp_create_sc__PS($handle);
+        $!handle          := $handle;
+        %!addr_to_slot    := nqp::hash();
+        @!fixup_tasks     := nqp::list();
+        @!load_dependency_tasks := nqp::list();
+        $!precomp_mode    := %*COMPILING<%?OPTIONS><target> eq 'pir';
+        $!num_code_refs   := 0;
+        $!code_ref_blocks := [];
         $!sc.set_description($description);
-        $!precomp_mode := %*COMPILING<%?OPTIONS><target> eq 'pir';
+        
+        # Add to currently compiling SC stack.
+        pir::nqp_push_compiling_sc__vP($!sc);
     }
     
     # Gets the slot for a given object. Dies if it is not in the context.
@@ -92,6 +89,11 @@ class HLL::World {
         $past<has_compile_time_value> := 1;
         $past<compile_time_value> := $obj;
         $past
+    }
+    
+    # Gets a code ref from the SC.
+    method get_slot_past_for_code_ref_at($idx) {
+        PAST::Op.new( :pirop('nqp_get_sc_code_ref Psi'), $!handle, $idx );
     }
     
     # Utility sub to wrap PAST with slot setting.
@@ -128,12 +130,18 @@ class HLL::World {
         $idx
     }
     
-    # Adds a code ref to the root set, along with a mapping.
-    method add_code($obj) {
-        my $idx := $!sc.elems();
-        $!sc[$idx] := $obj;
-        %!addr_to_slot{nqp::where($obj)} := $idx;
-        $idx
+    # Adds a code reference to the root set of code refs.
+    method add_root_code_ref($code_ref, $past_block) {
+        my $code_ref_idx := $!num_code_refs;
+        $!num_code_refs := $!num_code_refs + 1;
+        $!code_ref_blocks.push($past_block);
+        pir::nqp_add_code_ref_to_sc__vPiP($!sc, $code_ref_idx, $code_ref);
+        $code_ref_idx
+    }
+    
+    # Updates a code reference in the root set.
+    method update_root_code_ref($idx, $new_code_ref) {
+        pir::nqp_add_code_ref_to_sc__vPiP($!sc, $idx, $new_code_ref);
     }
 
     # Checks if we are in pre-compilation mode.
@@ -141,17 +149,25 @@ class HLL::World {
         $!precomp_mode
     }
     
-    # Add an event that may have an action to deserialize or fix up.
-    # Note that we can determine which one we need and just save the
-    # needed one.
-    method add_event(:$deserialize_past, :$fixup_past) {
+    # Add an event that we want to run before deserialization or before any
+    # other fixup.
+    method add_load_dependency_task(:$deserialize_past, :$fixup_past) {
         if $!precomp_mode {
-            # Pre-compilation; only need deserialization PAST.
-            @!event_stream.push(Event.new(:deserialize_past($deserialize_past)));
+            @!load_dependency_tasks.push($deserialize_past) if $deserialize_past;
         }
         else {
-            # Presumably, going all the way to running, so just fixups.
-            @!event_stream.push(Event.new(:fixup_past($fixup_past)));
+            @!load_dependency_tasks.push($fixup_past) if $fixup_past;
+        }
+    }
+    
+    # Add an event that we need to run at fixup time (after deserialization of
+    # between compilation and runtime).
+    method add_fixup_task(:$deserialize_past, :$fixup_past) {
+        if $!precomp_mode {
+            @!fixup_tasks.push($deserialize_past) if $deserialize_past;
+        }
+        else {
+            @!fixup_tasks.push($fixup_past) if $fixup_past;
         }
     }
     
@@ -175,19 +191,6 @@ class HLL::World {
         }
         else {
             my $handle := $sc.handle;
-            unless pir::exists(%!dependencies, $handle) {
-                %!dependencies{$handle} := $sc;
-                self.add_event(:deserialize_past(PAST::Op.new(
-                    :pasttype('if'),
-                    PAST::Op.new(
-                        :pirop('isnull IP'),
-                        PAST::Op.new( :pirop('nqp_get_sc Ps'), $handle )
-                    ),
-                    PAST::Op.new(
-                        :pirop('die vS'),
-                        "Incorrect pre-compiled version of " ~ ($sc.description || '<unknown>') ~ " loaded"
-                    ))));
-            }
             my $past := PAST::Op.new( :pirop('nqp_get_sc_object Psi'),
                 $handle, $sc.slot_index_for($obj) );
             $past<has_compile_time_value> := 1;
@@ -206,8 +209,56 @@ class HLL::World {
          $!handle
     }
     
-    # Gets the event stream.
-    method event_stream() {
-        @!event_stream
+    # Gets the list of load dependency tasks to do.
+    method load_dependency_tasks() {
+        @!load_dependency_tasks
+    }
+    
+    # Gets the list of tasks to do at fixup time.
+    method fixup_tasks() {
+        @!fixup_tasks
+    }
+    
+    # Serializes the SC to binary and a string heap. Then produces PAST to handle
+    # the deserialization.
+    method serialize_and_produce_deserialization_past($sc_reg) {
+        # Serialize.
+        my $sh := pir::new__Ps('ResizableStringArray');
+        my $serialized := pir::nqp_serialize_sc__SPP($!sc, $sh);
+        
+        # Now it's serialized, pop this SC off the compiling SC stack.
+        pir::nqp_pop_compiling_sc__v();
+        
+        # String heap PAST.
+        my $sh_past := PAST::Stmts.new(
+            PAST::Op.new(
+                :pasttype('bind'),
+                PAST::Var.new( :scope('register'), :name('string_heap'), :isdecl(1) ),
+                PAST::Op.new( :pirop('new Ps'), 'ResizableStringArray' )));
+         my $sh_elems := nqp::elems($sh);
+         my $i := 0;
+         while $i < $sh_elems {
+            $sh_past.push(PAST::Op.new(
+                :pirop('push vPs'),
+                PAST::Var.new( :scope('register'), :name('string_heap') ),
+                (nqp::isnull_s($sh[$i]) ?? PAST::Op.new( :pirop('null S') ) !! $sh[$i])));
+                $i := $i + 1;
+        }
+        $sh_past.push(PAST::Var.new( :scope('register'), :name('string_heap') ));
+        
+        # Code references.
+        my $cr_past := PAST::Op.new( :pasttype('list') );
+        for $!code_ref_blocks -> $block {
+            $cr_past.push(PAST::Val.new( :value($block), :returns('Sub') ));
+        }
+        
+        # Overall deserialization PAST.
+        PAST::Op.new(
+            :pirop('nqp_deserialize_sc__vSPPP'),
+            $serialized,
+            PAST::Var.new( :name($sc_reg), :scope('register') ),
+            $sh_past,
+            PAST::Block.new( :blocktype('immediate'), $cr_past )
+        )
     }
 }
