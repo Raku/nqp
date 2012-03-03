@@ -172,15 +172,15 @@ class HLL::World {
     }
     
     # Gets PAST for referencing an object in a serialization context,
-    # either the one being built or another one.
+    # either the one being built or another one. If the object is not
+    # yet in an SC, adds it to the currnet one.
     method get_ref($obj) {
         # Get the object's serialization context; we're stuck if it
         # has none.
         my $sc := pir::nqp_get_sc_for_object__PP($obj);
         unless pir::defined($sc) {
-            pir::die("Object of type '" ~ $obj.HOW.name($obj) ~
-                "' cannot be referenced without having been " ~
-                "assigned a serialization context");
+            self.add_object($obj);
+            $sc := $!sc;
         }
         
         # If it's this context, dead easy. Otherwise, need to build a
