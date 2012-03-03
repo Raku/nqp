@@ -269,7 +269,7 @@ static void write_hash_str_var(PARROT_INTERP, SerializationWriter *writer, PMC *
 
 /* Writes a reference to a code object in some SC. */
 static void write_code_ref(PARROT_INTERP, SerializationWriter *writer, PMC *code) {
-    PMC         *code_sc = VTABLE_getprop(interp, code, Parrot_str_new_constant(interp, "SC"));
+    PMC         *code_sc = Parrot_pmc_getprop(interp, code, Parrot_str_new_constant(interp, "SC"));
     Parrot_Int4  sc_id   = get_sc_id(interp, writer, code_sc);
     Parrot_Int4  idx     = (Parrot_Int4)SC_find_code_idx(interp, code_sc, code);
     expand_storage_if_needed(interp, writer, 8);
@@ -295,7 +295,7 @@ static PMC * closure_to_static_code_ref(PARROT_INTERP, PMC *closure, INTVAL fata
             else
                 return PMCNULL;
         }
-        if (PMC_IS_NULL(VTABLE_getprop(interp, static_code, Parrot_str_new_constant(interp, "STATIC_CODE_REF")))) {
+        if (PMC_IS_NULL(Parrot_pmc_getprop(interp, static_code, Parrot_str_new_constant(interp, "STATIC_CODE_REF")))) {
             if (fatal)
                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                     "Serialization Error: could not locate static code ref for closure '%Ss'",
@@ -315,7 +315,7 @@ static PMC * closure_to_static_code_ref(PARROT_INTERP, PMC *closure, INTVAL fata
 /* Takes an outer context that is potentially to be serialized. Checks if it
  * is of interest, and if so sets it up to be serialized. */
 static Parrot_Int4 get_serialized_context_idx(PARROT_INTERP, SerializationWriter *writer, PMC *ctx) {
-    PMC *ctx_sc = VTABLE_getprop(interp, ctx, Parrot_str_new_constant(interp, "SC"));
+    PMC *ctx_sc = Parrot_pmc_getprop(interp, ctx, Parrot_str_new_constant(interp, "SC"));
     if (PMC_IS_NULL(ctx_sc)) {
         /* Make sure we should chase a level down. */
         if (PMC_IS_NULL(closure_to_static_code_ref(interp, PARROT_CALLCONTEXT(ctx)->current_sub, 0))) {
@@ -324,7 +324,7 @@ static Parrot_Int4 get_serialized_context_idx(PARROT_INTERP, SerializationWriter
         else {
             INTVAL idx = VTABLE_elements(interp, writer->contexts_list);
             VTABLE_set_pmc_keyed_int(interp, writer->contexts_list, idx, ctx);
-            VTABLE_setprop(interp, ctx, Parrot_str_new_constant(interp, "SC"), writer->root.sc);
+            Parrot_pmc_setprop(interp, ctx, Parrot_str_new_constant(interp, "SC"), writer->root.sc);
             return (Parrot_Int4)idx + 1;
         }
     }
@@ -345,7 +345,7 @@ static Parrot_Int4 get_serialized_context_idx(PARROT_INTERP, SerializationWriter
 /* Takes a closure, that is to be serialized. Checks if it has an outer that is
  * of interest, and if so sets it up to be serialized. */
 static Parrot_Int4 get_serialized_outer_context_idx(PARROT_INTERP, SerializationWriter *writer, PMC *closure) {
-    if (!PMC_IS_NULL(VTABLE_getprop(interp, closure, Parrot_str_new_constant(interp, "COMPILER_STUB"))))
+    if (!PMC_IS_NULL(Parrot_pmc_getprop(interp, closure, Parrot_str_new_constant(interp, "COMPILER_STUB"))))
         return 0;
     if (PMC_IS_NULL(PARROT_SUB(closure)->outer_ctx))
         return 0;
@@ -360,7 +360,7 @@ static void serialize_closure(PARROT_INTERP, SerializationWriter *writer, PMC *c
     
     /* Locate the static code object. */
     PMC *static_code_ref = closure_to_static_code_ref(interp, closure, 1);
-    PMC *static_code_sc  = VTABLE_getprop(interp, static_code_ref, Parrot_str_new_constant(interp, "SC"));
+    PMC *static_code_sc  = Parrot_pmc_getprop(interp, static_code_ref, Parrot_str_new_constant(interp, "SC"));
 
     /* Ensure there's space in the closures table; grow if not. */
     Parrot_Int4 offset = writer->root.num_closures * CLOSURES_TABLE_ENTRY_SIZE;
@@ -402,7 +402,7 @@ static void serialize_closure(PARROT_INTERP, SerializationWriter *writer, PMC *c
 
     /* Add the closure to this SC, and mark it as as being in it. */
     VTABLE_push_pmc(interp, writer->codes_list, closure);
-    VTABLE_setprop(interp, closure, Parrot_str_new_constant(interp, "SC"), writer->root.sc);
+    Parrot_pmc_setprop(interp, closure, Parrot_str_new_constant(interp, "SC"), writer->root.sc);
 }
 
 /* Writing function for references to things. */
@@ -450,8 +450,8 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
         discrim = REFVAR_VM_HASH_STR_VAR;
     }
     else if (ref->vtable->base_type == enum_class_Sub || ref->vtable->base_type == enum_class_Coroutine) {
-        PMC *code_sc = VTABLE_getprop(interp, ref, Parrot_str_new_constant(interp, "SC"));
-        PMC *static_cr = VTABLE_getprop(interp, ref, Parrot_str_new_constant(interp, "STATIC_CODE_REF"));
+        PMC *code_sc = Parrot_pmc_getprop(interp, ref, Parrot_str_new_constant(interp, "SC"));
+        PMC *static_cr = Parrot_pmc_getprop(interp, ref, Parrot_str_new_constant(interp, "STATIC_CODE_REF"));
         if (!PMC_IS_NULL(code_sc) && !PMC_IS_NULL(static_cr)) {
             /* Static code reference. */
             discrim = REFVAR_STATIC_CODEREF;
@@ -761,7 +761,7 @@ static void serialize_context(PARROT_INTERP, SerializationWriter *writer, PMC *c
     
     /* Locate the static code ref this context points to. */
     PMC *static_code_ref = closure_to_static_code_ref(interp, PARROT_CALLCONTEXT(ctx)->current_sub, 1);
-    PMC *static_code_sc  = VTABLE_getprop(interp, static_code_ref, Parrot_str_new_constant(interp, "SC"));
+    PMC *static_code_sc  = Parrot_pmc_getprop(interp, static_code_ref, Parrot_str_new_constant(interp, "SC"));
     if (PMC_IS_NULL(static_code_sc))
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Serialization Error: closure outer is a code object not in an SC");
@@ -1409,7 +1409,7 @@ static void deserialize_closure(PARROT_INTERP, SerializationReader *reader, INTV
     VTABLE_push_pmc(interp, reader->codes_list, closure);
     
     /* Tag it as being in this SC. */
-    VTABLE_setprop(interp, closure, Parrot_str_new_constant(interp, "SC"), reader->root.sc);
+    Parrot_pmc_setprop(interp, closure, Parrot_str_new_constant(interp, "SC"), reader->root.sc);
     
     /* See if there's a code object we need to attach. */
     if (read_int32(table_row, 12))
@@ -1732,8 +1732,8 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *st
      /* Mark all the static code refs we've been provided with as static. */
      for (i = 0; i < scodes; i++) {
         PMC *scr = VTABLE_get_pmc_keyed_int(interp, reader->codes_list, i);
-        VTABLE_setprop(interp, scr, scr_str, scr);
-        VTABLE_setprop(interp, scr, sc_str, sc);
+        Parrot_pmc_setprop(interp, scr, scr_str, scr);
+        Parrot_pmc_setprop(interp, scr, sc_str, sc);
     }
 
     /* Deserialize closures, deserialize contexts, then attach outers. */
