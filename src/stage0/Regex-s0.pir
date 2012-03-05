@@ -47,6 +47,7 @@ This file brings together the various Regex modules needed for Regex.pbc .
     # Create a serialization context for this compilation unit.
     .local pmc sc
     sc = nqp_create_sc "__REGEX_CORE_SC__"
+    nqp_push_compiling_sc sc
     
     # Load setting.
     load_bytecode 'ModuleLoader.pbc'
@@ -57,6 +58,26 @@ This file brings together the various Regex modules needed for Regex.pbc .
     .const 'Sub' $P2 = 'Regex_Outer'
     $P2.'set_outer_ctx'($P1)
     $P2()
+    
+    # Initialize SC code object counter.
+    $P3 = box 0
+    set_hll_global 'SC_CODE_COUNT', $P3
+.end
+
+.sub 'add_code_to_sc'
+    .param pmc code
+
+    $P0 = nqp_get_sc "__REGEX_CORE_SC__"
+    $P1 = get_hll_global 'SC_CODE_COUNT'
+    $I0 = $P1
+    
+    nqp_add_code_ref_to_sc $P0, $I0, code
+    setprop code, 'SC', $P0
+    setprop code, 'STATIC_CODE_REF', code
+    
+    inc $I0
+    $P1 = box $I0
+    set_hll_global 'SC_CODE_COUNT', $P1
 .end
 
 ### .include 'src/Regex/Cursor.pir'
@@ -125,110 +146,163 @@ grammars.
     # Add all methods.
     .const 'Sub' $P10 = 'Regex_Cursor_meth_new_match'
     how.'add_method'(type_obj, 'new_match', $P10)
+    'add_code_to_sc'($P10)
     .const 'Sub' $P11 = 'Regex_Cursor_meth_new_array'
     how.'add_method'(type_obj, 'new_array', $P11)
+    'add_code_to_sc'($P11)
     .const 'Sub' $P12 = 'Regex_Cursor_meth_MATCH'
     how.'add_method'(type_obj, 'MATCH', $P12)
+    'add_code_to_sc'($P12)
     .const 'Sub' $P13 = 'Regex_Cursor_meth_parse'
     how.'add_method'(type_obj, 'parse', $P13)
+    'add_code_to_sc'($P13)
     .const 'Sub' $P14 = 'Regex_Cursor_meth_next'
     how.'add_method'(type_obj, 'next', $P14)
+    'add_code_to_sc'($P14)
     .const 'Sub' $P15 = 'Regex_Cursor_meth_pos'
     how.'add_method'(type_obj, 'pos', $P15)
+    'add_code_to_sc'($P15)
     .const 'Sub' $P16 = 'Regex_Cursor_meth_from'
     how.'add_method'(type_obj, 'from', $P16)
+    'add_code_to_sc'($P16)
     .const 'Sub' $P17 = 'Regex_Cursor_meth_!cursor_init'
     how.'add_method'(type_obj, '!cursor_init', $P17)
+    'add_code_to_sc'($P17)
     .const 'Sub' $P18 = 'Regex_Cursor_meth_!cursor_start'
     how.'add_method'(type_obj, '!cursor_start', $P18)
+    'add_code_to_sc'($P18)
     .const 'Sub' $P19 = 'Regex_Cursor_meth_!cursor_fail'
     how.'add_method'(type_obj, '!cursor_fail', $P19)
+    'add_code_to_sc'($P19)
     .const 'Sub' $P20 = 'Regex_Cursor_meth_!cursor_pass'
     how.'add_method'(type_obj, '!cursor_pass', $P20)
+    'add_code_to_sc'($P20)
     .const 'Sub' $P21 = 'Regex_Cursor_meth_!cursor_backtrack'
     how.'add_method'(type_obj, '!cursor_backtrack', $P21)
+    'add_code_to_sc'($P21)
     .const 'Sub' $P22 = 'Regex_Cursor_meth_!cursor_next'
     how.'add_method'(type_obj, '!cursor_next', $P22)
+    'add_code_to_sc'($P22)
     .const 'Sub' $P23 = 'Regex_Cursor_meth_!cursor_caparray'
     how.'add_method'(type_obj, '!cursor_caparray', $P23)
+    'add_code_to_sc'($P23)
     .const 'Sub' $P24 = 'Regex_Cursor_meth_!cursor_names'
     how.'add_method'(type_obj, '!cursor_names', $P24)
+    'add_code_to_sc'($P24)
     .const 'Sub' $P25 = 'Regex_Cursor_meth_!cursor_pos'
     how.'add_method'(type_obj, '!cursor_pos', $P25)
+    'add_code_to_sc'($P25)
     .const 'Sub' $P26 = 'Regex_Cursor_meth_!cursor_debug'
     how.'add_method'(type_obj, '!cursor_debug', $P26)
+    'add_code_to_sc'($P26)
     .const 'Sub' $P27 = 'Regex_Cursor_meth_!mark_push'
     how.'add_method'(type_obj, '!mark_push', $P27)
+    'add_code_to_sc'($P27)
     .const 'Sub' $P28 = 'Regex_Cursor_meth_!mark_peek'
     how.'add_method'(type_obj, '!mark_peek', $P28)
+    'add_code_to_sc'($P28)
     .const 'Sub' $P29 = 'Regex_Cursor_meth_!mark_fail'
     how.'add_method'(type_obj, '!mark_fail', $P29)
+    'add_code_to_sc'($P29)
     .const 'Sub' $P30 = 'Regex_Cursor_meth_!mark_commit'
     how.'add_method'(type_obj, '!mark_commit', $P30)
+    'add_code_to_sc'($P30)
     .const 'Sub' $P31 = 'Regex_Cursor_meth_!reduce'
     how.'add_method'(type_obj, '!reduce', $P31)
+    'add_code_to_sc'($P31)
     .const 'Sub' $P32 = 'Regex_Cursor_meth_!BACKREF'
     how.'add_method'(type_obj, '!BACKREF', $P32)
+    'add_code_to_sc'($P32)
     .const 'Sub' $P33 = 'Regex_Cursor_meth_!INTERPOLATE'
     how.'add_method'(type_obj, '!INTERPOLATE', $P33)
+    'add_code_to_sc'($P33)
     .const 'Sub' $P34 = 'Regex_Cursor_meth_!INTERPOLATE_REGEX'
     how.'add_method'(type_obj, '!INTERPOLATE_REGEX', $P34)
+    'add_code_to_sc'($P34)
     .const 'Sub' $P35 = 'Regex_Cursor_meth_!cursor_from'
     how.'add_method'(type_obj, '!cursor_from', $P35)
+    'add_code_to_sc'($P35)
     .const 'Sub' $P10 = 'Regex_Cursor_meth_before'
     how.'add_method'(type_obj, 'before', $P10)
+    'add_code_to_sc'($P10)
     .const 'Sub' $P11 = 'Regex_Cursor_meth_ident'
     how.'add_method'(type_obj, 'ident', $P11)
+    'add_code_to_sc'($P11)
     .const 'Sub' $P12 = 'Regex_Cursor_meth_wb'
     how.'add_method'(type_obj, 'wb', $P12)
+    'add_code_to_sc'($P12)
     .const 'Sub' $P13 = 'Regex_Cursor_meth_ww'
     how.'add_method'(type_obj, 'ww', $P13)
+    'add_code_to_sc'($P13)
     .const 'Sub' $P14 = 'Regex_Cursor_meth_ws'
     how.'add_method'(type_obj, 'ws', $P14)
+    'add_code_to_sc'($P14)
     .const 'Sub' $P15 = 'Regex_Cursor_meth_alpha'
     how.'add_method'(type_obj, 'alpha', $P15)
+    'add_code_to_sc'($P15)
     .const 'Sub' $P16 = 'Regex_Cursor_meth_upper'
     how.'add_method'(type_obj, 'upper', $P16)
+    'add_code_to_sc'($P16)
     .const 'Sub' $P17 = 'Regex_Cursor_meth_lower'
     how.'add_method'(type_obj, 'lower', $P17)
+    'add_code_to_sc'($P17)
     .const 'Sub' $P18 = 'Regex_Cursor_meth_digit'
     how.'add_method'(type_obj, 'digit', $P18)
+    'add_code_to_sc'($P18)
     .const 'Sub' $P19 = 'Regex_Cursor_meth_xdigit'
     how.'add_method'(type_obj, 'xdigit', $P19)
+    'add_code_to_sc'($P19)
     .const 'Sub' $P20 = 'Regex_Cursor_meth_print'
     how.'add_method'(type_obj, 'print', $P20)
+    'add_code_to_sc'($P20)
     .const 'Sub' $P21 = 'Regex_Cursor_meth_graph'
     how.'add_method'(type_obj, 'graph', $P21)
+    'add_code_to_sc'($P21)
     .const 'Sub' $P22 = 'Regex_Cursor_meth_cntrl'
     how.'add_method'(type_obj, 'cntrl', $P22)
+    'add_code_to_sc'($P22)
     .const 'Sub' $P23 = 'Regex_Cursor_meth_punct'
     how.'add_method'(type_obj, 'punct', $P23)
+    'add_code_to_sc'($P23)
     .const 'Sub' $P24 = 'Regex_Cursor_meth_alnum'
     how.'add_method'(type_obj, 'alnum', $P24)
+    'add_code_to_sc'($P24)
     .const 'Sub' $P25 = 'Regex_Cursor_meth_space'
     how.'add_method'(type_obj, 'space', $P25)
+    'add_code_to_sc'($P25)
     .const 'Sub' $P26 = 'Regex_Cursor_meth_blank'
     how.'add_method'(type_obj, 'blank', $P26)
+    'add_code_to_sc'($P26)
     .const 'Sub' $P27 = 'Regex_Cursor_meth_FAILGOAL'
     how.'add_method'(type_obj, 'FAILGOAL', $P27)
+    'add_code_to_sc'($P27)
     .const 'Sub' $P28 = 'Regex_Cursor_meth_DEBUG'
     how.'add_method'(type_obj, 'DEBUG', $P28)
+    'add_code_to_sc'($P28)
     .const 'Sub' $P10 = 'Regex_Cursor_meth_!protoregex'
     how.'add_method'(type_obj, '!protoregex', $P10)
+    'add_code_to_sc'($P10)
     .const 'Sub' $P11 = 'Regex_Cursor_meth_!protoregex_generation'
     how.'add_method'(type_obj, '!protoregex_generation', $P11)
+    'add_code_to_sc'($P11)
     .const 'Sub' $P12 = 'Regex_Cursor_meth_!protoregex_tokrx'
     how.'add_method'(type_obj, '!protoregex_tokrx', $P12)
+    'add_code_to_sc'($P12)
     .const 'Sub' $P13 = 'Regex_Cursor_meth_!protoregex_gen_table'
     how.'add_method'(type_obj, '!protoregex_gen_table', $P13)
+    'add_code_to_sc'($P13)
     .const 'Sub' $P14 = 'Regex_Cursor_meth_!PREFIX__!protoregex'
     how.'add_method'(type_obj, '!PREFIX__!protoregex', $P14)
+    'add_code_to_sc'($P14)
     .const 'Sub' $P15 = 'Regex_Cursor_meth_!PREFIX__!subrule'
     how.'add_method'(type_obj, '!PREFIX__!subrule', $P15)
+    'add_code_to_sc'($P15)
     .const 'Sub' $P16 = 'Regex_Cursor_meth_DUMP_TOKRX'
     how.'add_method'(type_obj, 'DUMP_TOKRX', $P16)
+    'add_code_to_sc'($P16)
     .const 'Sub' $P17 = 'Regex_Cursor_meth_Bool'
     how.'add_method'(type_obj, 'Bool', $P17)
+    'add_code_to_sc'($P17)
     how.'add_parrot_vtable_mapping'(type_obj, 'get_bool', $P17)
 
     # Add attributes.
@@ -1735,9 +1809,9 @@ create a new one and return it.
     # new one.
     .local pmc type_obj, prototable
     type_obj = get_what self
-    prototable = getprop '%!prototable', type_obj
+    prototable = getprop type_obj, '%!prototable'
     if null prototable goto make_prototable
-    $P0 = getprop '$!generation', prototable
+    $P0 = getprop prototable, '$!generation'
     $I0 = issame $P0, generation
     if $I0 goto have_prototable
   make_prototable:
@@ -2080,6 +2154,11 @@ This file implements Match objects for the regex engine.
     RegexWHO["Match"] = type_obj
     how = get_how type_obj
     
+    # Add to serialization context.
+    $P0 = nqp_get_sc "__REGEX_CORE_SC__"
+    nqp_set_sc_object "__REGEX_CORE_SC__", 1, type_obj
+    nqp_set_sc_for_object type_obj, $P0
+    
     # XXXNS Old namespace handling installation, during migration to new.
     set_hll_global ["Regex"], "Match", type_obj
 
@@ -2091,43 +2170,55 @@ This file implements Match objects for the regex engine.
     # Add all methods.
     .const 'Sub' $P10 = 'Regex_Match_meth_CURSOR'
     how.'add_method'(type_obj, 'CURSOR', $P10)
+    'add_code_to_sc'($P10)
 
     .const 'Sub' $P11 = 'Regex_Match_meth_from'
     how.'add_method'(type_obj, 'from', $P11)
+    'add_code_to_sc'($P11)
 
     .const 'Sub' $P12 = 'Regex_Match_meth_to'
     how.'add_method'(type_obj, 'to', $P12)
+    'add_code_to_sc'($P12)
 
     .const 'Sub' $P13 = 'Regex_Match_meth_chars'
     how.'add_method'(type_obj, 'chars', $P13)
+    'add_code_to_sc'($P13)
 
     .const 'Sub' $P14 = 'Regex_Match_meth_orig'
     how.'add_method'(type_obj, 'orig', $P14)
+    'add_code_to_sc'($P14)
 
     .const 'Sub' $P15 = 'Regex_Match_meth_Str'
     how.'add_method'(type_obj, 'Str', $P15)
     how.'add_parrot_vtable_mapping'(type_obj, 'get_string', $P15)
+    'add_code_to_sc'($P15)
 
     .const 'Sub' $P16 = 'Regex_Match_meth_ast'
     how.'add_method'(type_obj, 'ast', $P16)
+    'add_code_to_sc'($P16)
 
     .const 'Sub' $P17 = 'Regex_Match_meth_Bool'
     how.'add_method'(type_obj, 'Bool', $P17)
     how.'add_parrot_vtable_mapping'(type_obj, 'get_bool', $P17)
+    'add_code_to_sc'($P17)
 
     .const 'Sub' $P18 = 'Regex_Match_meth_Int'
     how.'add_method'(type_obj, 'Int', $P18)
     how.'add_parrot_vtable_mapping'(type_obj, 'get_integer', $P18)
+    'add_code_to_sc'($P18)
 
     .const 'Sub' $P19 = 'Regex_Match_meth_Num'
     how.'add_method'(type_obj, 'Num', $P19)
     how.'add_parrot_vtable_mapping'(type_obj, 'get_number', $P19)
+    'add_code_to_sc'($P19)
 
     .const 'Sub' $P20 = 'Regex_Match_meth_!make'
     how.'add_method'(type_obj, '!make', $P20)
+    'add_code_to_sc'($P20)
 
     .const 'Sub' $P21 = 'Regex_Match_meth___dump'
     how.'add_method'(type_obj, '__dump', $P21)
+    'add_code_to_sc'($P21)
 
     # Add attributes.
     .local pmc NQPAttribute, int_type, attr
@@ -2453,6 +2544,11 @@ containers for Regex subs that need .ACCEPTS and other regex attributes.
     RegexWHO["Method"] = method_type_obj
     set_global "$?CLASS", method_type_obj
     method_how = get_how method_type_obj
+    
+    # Add to serialization context.
+    $P0 = nqp_get_sc "__REGEX_CORE_SC__"
+    nqp_set_sc_object "__REGEX_CORE_SC__", 2, method_type_obj
+    nqp_set_sc_for_object method_type_obj, $P0
 
     # Set default parent.
     .local pmc def_parent
@@ -2470,13 +2566,17 @@ containers for Regex subs that need .ACCEPTS and other regex attributes.
     # Add methods.
     .const 'Sub' $P1 = 'Regex_Method_new'
     method_how.'add_method'(method_type_obj, 'new', $P1)
+    'add_code_to_sc'($P1)
     .const 'Sub' $P2 = 'Regex_Method_ACCEPTS'
     method_how.'add_method'(method_type_obj, 'ACCEPTS', $P2)
+    'add_code_to_sc'($P2)
     .const 'Sub' $P2 = 'Regex_Method_Str'
     method_how.'add_method'(method_type_obj, 'Str', $P2)
     method_how.'add_parrot_vtable_mapping'(method_type_obj, 'get_string', $P2)
+    'add_code_to_sc'($P2)
     .const 'Sub' $P3 = 'Regex_Method_invoke'
     method_how.'add_parrot_vtable_mapping'(method_type_obj, 'invoke', $P3)
+    'add_code_to_sc'($P3)
     
     # Compose.
     method_how."compose"(method_type_obj)
@@ -2487,6 +2587,11 @@ containers for Regex subs that need .ACCEPTS and other regex attributes.
     RegexWHO["Regex"] = regex_type_obj
     regex_how = get_how regex_type_obj
     
+    # Add to serialization context.
+    $P0 = nqp_get_sc "__REGEX_CORE_SC__"
+    nqp_set_sc_object "__REGEX_CORE_SC__", 3, regex_type_obj
+    nqp_set_sc_for_object regex_type_obj, $P0
+    
     # XXXNS Old namespace handling installation, during migration to new.
     set_hll_global ["Regex"], "Regex", regex_type_obj
     
@@ -2496,6 +2601,7 @@ containers for Regex subs that need .ACCEPTS and other regex attributes.
     # Add methods.
     .const 'Sub' $P4 = 'Regex_Regex_ACCEPTS'
     regex_how.'add_method'(regex_type_obj, 'ACCEPTS', $P4)
+    'add_code_to_sc'($P4)
     
     # Compose.
     regex_how."compose"(regex_type_obj)
@@ -2829,14 +2935,26 @@ An alternate dump output for a Match object and all of its subcaptures.
     goto it_loop
   it_loop_end:
     
-    $P0 = parrotns['_dumper']
-    GLOBALishWHO['_dumper'] = $P0
+    .local pmc _dumper
+    _dumper = parrotns['_dumper']
+    GLOBALishWHO['_dumper'] = _dumper
+    
+    # Add PAST dummy NS to the SC.
+    $P0 = nqp_get_sc "__REGEX_CORE_SC__"
+    nqp_set_sc_object "__REGEX_CORE_SC__", 4, PAST
+    nqp_set_sc_for_object PAST, $P0
+    
+    # Add _dumper to the SC.
+    'add_code_to_sc'(_dumper)
     
     ## XXX Legacy namespace import.
     .local pmc hllns, imports
     hllns = get_hll_namespace
     imports = split ' ', 'PAST _dumper'
     parrotns.'export_to'(hllns, imports)
+    
+    # Pop SC off current SCs stack.
+    nqp_pop_compiling_sc
 .end
 
 =head1 AUTHOR
