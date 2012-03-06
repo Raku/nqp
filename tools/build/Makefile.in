@@ -42,7 +42,7 @@ PARROT_PERL_LIB   = $(PARROT_TOOLS_DIR)/lib
 OPS2C             = $(PARROT_BIN_DIR)/ops2c$(EXE)
 PMC2C             = $(PERL) $(PARROT_TOOLS_DIR)/build/pmc2c.pl
 PMC2C_INCLUDES    = --include src/pmc --include $(PARROT_SRC_DIR) --include $(PARROT_SRC_DIR)/pmc
-CINCLUDES         = -I$(PARROT_INCLUDE_DIR) -I$(PARROT_INCLUDE_DIR)/pmc
+CINCLUDES         = -I$(PARROT_INCLUDE_DIR) -I$(PARROT_INCLUDE_DIR)/pmc -I3rdparty/dyncall -I3rdparty/libtommath -I3rdparty/sha1
 LINKARGS          = $(LDFLAGS) $(LD_LOAD_FLAGS) $(LIBPARROT) @libs@ @icu_shared@
 
 # nqp directories
@@ -431,8 +431,6 @@ $(OPS_DIR)/$(OPS).c: $(OPS_DIR)/$(OPS_SOURCE)
 $(OPS_DIR)/$(OPS)$(O): $(OPS_DIR)/$(OPS).c $(PMC_DIR)/pmc_dispatchersub.h $(PMC_DIR)/pmc_nqplexinfo.h
 
 $(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS).o $(DYNPMC) $(METAMODEL_OBJS)
-	#cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(OPS)$(O) $(CINCLUDES) $(CFLAGS) $(OPS).c
-	#cd src/guts && $(CC) -c @cc_o_out@multi_dispatch$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) multi_dispatch.c
 	cd 3rdparty/sha1 && $(CC) -c @cc_o_out@sha1$(O) $(CINCLUDES) $(CFLAGS) sha1.c
 	$(LD) @ld_out@$(OPS_DIR)/$(OPS)$(LOAD_EXT) $(OPS_DIR)/$(OPS)$(O) $(METAMODEL_OBJS) 3rdparty/sha1/sha1$(O) $(LINKARGS)
 
@@ -447,7 +445,7 @@ $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT): $(OPS_DIR)/$(BIGINT_OPS_SOURCE) $(LIBTOMMAT
 $(DYNCALL_BIN):
 	@dyncall_build@
 
-$(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT): $(OPS_DIR)/$(DYNCALL_OPS_SOURCE) $(DYNCALL_BIN) src/6model/reprs/NativeCall.c src/6model/reprs/NativeCall.h src/6model/reprs/CStruct.c src/6model/reprs/CStruct.h src/6model/reprs/CPointer.c src/6model/reprs/CPointer.h src/6model/reprs/CArray.c src/6model/reprs/CArray.h
+$(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT): $(OPS_DIR)/$(DYNCALL_OPS_SOURCE) $(DYNCALL_BIN) src/6model/reprs/NativeCall.o src/6model/reprs/CStruct.o src/6model/reprs/CPointer.o src/6model/reprs/CArray.o
 	cd $(OPS_DIR) && $(OPS2C) C --dynamic $(DYNCALL_OPS_SOURCE)
 	cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(DYNCALL_OPS)$(O) $(CINCLUDES) -I../../3rdparty/dyncall $(CFLAGS) $(DYNCALL_OPS).c
 	cd src/6model/reprs && $(CC) -c @cc_o_out@NativeCall$(O) -I../../../$(PMC_DIR) -I../../../3rdparty/dyncall $(CINCLUDES) $(CFLAGS) NativeCall.c
