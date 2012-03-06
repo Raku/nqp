@@ -1,3 +1,7 @@
+#
+# TODO Add proper dependencies between various source and header files.
+#
+
 METAMODEL_SOURCE = src/6model/sixmodelobject.h src/6model/sixmodelobject.c \
                    src/6model/repr_registry.h src/6model/repr_registry.c \
                    src/6model/knowhow_bootstrapper.h src/6model/knowhow_bootstrapper.c \
