@@ -465,11 +465,12 @@ $(PMC_DIR)/serializationcontext.dump: $(PMC_DIR)/serializationcontext.pmc
 
 $(PMC_DIR)/pmc_serializationcontext.h: $(PMC_DIR)/serializationcontext.c
 
+# We need .dump files actually
 $(PMC_DIR)/$(GROUP).c: $(PMC_OBJECTS)
 	$(PMC2C) --no-lines --library $(PMC_DIR)/$(GROUP) --c $(PMC_SOURCES)
 
 $(DYNPMC): $(PMC_OBJECTS) $(PMC_DIR)/$(GROUP)$(O)
-	$(LD) @ld_out@$(DYNPMC) $(PMC_DIR)/$(GROUP)$(O) $(PMC_OBJECTS) $(LINKARGS)
+	$(LD) @ld_out@$@ $^ $(LINKARGS)
 
 
 
@@ -479,26 +480,26 @@ $(DYNPMC): $(PMC_OBJECTS) $(PMC_DIR)/$(GROUP)$(O)
 # nqp_ops
 
 $(OPS_DIR)/$(OPS).c: $(OPS_DIR)/$(OPS_SOURCE)
-	$(OPS2C) --dynamic $(OPS_DIR)/$(OPS_SOURCE)
+	$(OPS2C) --dynamic $<
 
 $(OPS_DIR)/$(OPS)$(O): $(OPS_DIR)/$(OPS).c $(PMC_DIR)/pmc_dispatchersub.h $(PMC_DIR)/pmc_nqplexinfo.h
 
 $(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS)$(O) $(METAMODEL_OBJS) 3rdparty/sha1/sha1$(O)
-	$(LD) @ld_out@$(OPS_DIR)/$(OPS)$(LOAD_EXT) $(OPS_DIR)/$(OPS)$(O) $(METAMODEL_OBJS) 3rdparty/sha1/sha1$(O) $(LINKARGS)
+	$(LD) @ld_out@$@ $^ $(LINKARGS)
 
 
 # bigint_ops
 
 $(OPS_DIR)/$(BIGINT_OPS).c: $(OPS_DIR)/$(BIGINT_OPS_SOURCE)
-	$(OPS2C) --dynamic $(OPS_DIR)/$(BIGINT_OPS_SOURCE)
+	$(OPS2C) --dynamic $<
 
 $(OPS_DIR)/$(BIGINT_OPS)$(O): $(OPS_DIR)/$(BIGINT_OPS).c \
 		src/6model/reprs/P6bigint.h \
 		src/6model/sixmodelobject.h
 
 
-$(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT): $(OPS_DIR)/$(BIGINT_OPS)$(O) $(LIBTOMMATH_BIN) $(LIBTOMMATH_H) src/6model/reprs/P6bigint$(O)
-	$(LD) @ld_out@$(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT) $(OPS_DIR)/$(BIGINT_OPS)$(O) $(LIBTOMMATH_BIN) src/6model/reprs/P6bigint$(O) $(LINKARGS)
+$(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT): $(OPS_DIR)/$(BIGINT_OPS)$(O) $(LIBTOMMATH_BIN) src/6model/reprs/P6bigint$(O)
+	$(LD) @ld_out@$@ $^ $(LINKARGS)
 
 
 # dyncall
@@ -507,7 +508,7 @@ $(DYNCALL_BIN):
 	@dyncall_build@
 
 $(OPS_DIR)/$(DYNCALL_OPS).c: $(OPS_DIR)/$(DYNCALL_OPS_SOURCE)
-	$(OPS2C) --dynamic $(OPS_DIR)/$(DYNCALL_OPS_SOURCE)
+	$(OPS2C) --dynamic $<
 
 $(OPS_DIR)/$(DYNCALL_OPS)$(O): $(OPS_DIR)/$(DYNCALL_OPS).c \
 		src/6model/reprs/NativeCall.h \
@@ -517,7 +518,7 @@ $(OPS_DIR)/$(DYNCALL_OPS)$(O): $(OPS_DIR)/$(DYNCALL_OPS).c \
 		src/6model/sixmodelobject.h
 
 $(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT): $(OPS_DIR)/$(DYNCALL_OPS)$(O) $(DYNCALL_BIN) src/6model/reprs/NativeCall$(O) src/6model/reprs/CStruct$(O) src/6model/reprs/CPointer$(O) src/6model/reprs/CArray$(O)
-	$(LD) @ld_out@$(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT) $(OPS_DIR)/$(DYNCALL_OPS)$(O) src/6model/reprs/NativeCall$(O) src/6model/reprs/CStruct$(O) src/6model/reprs/CPointer$(O) src/6model/reprs/CArray$(O) $(DYNCALL_BIN) $(LINKARGS)
+	$(LD) @ld_out@$@ $^ $(LINKARGS)
 
 bootstrap-files: $(STAGE2_PBCS) src/stage2/$(CORE_SETTING_NQP)
 	$(PERL) tools/build/gen-bootstrap.pl src/Regex.pir >src/stage0/Regex-s0.pir
