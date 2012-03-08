@@ -243,7 +243,7 @@ CLEANUPS = \
 .SUFFIXES : .c .S .s .pmc .dump $(O) .str .pir .pbc
 
 .c$(O) : # suffix rule (limited support)
-	$(CC) -I$(PMC_DIR) $(CFLAGS) $(CINCLUDES) $(CC_WARN) -I$(@D) -Isrc/ -o $@ -c $<
+	$(CC) -I$(PMC_DIR) $(CFLAGS) $(CINCLUDES) $(CC_WARN) -I$(@D) -Isrc/ @cc_o_out@$@ -c $<
 
 .pmc.dump : # suffix rule (limited support)
 	$(PMC2C) --no-lines --dump $(PMC2C_INCLUDES) $<
