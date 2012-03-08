@@ -437,7 +437,6 @@ src/pmc/stable.c: src/pmc/stable.dump
 
 src/pmc/stable.dump: src/pmc/stable.pmc
 
-
 src/pmc/dispatchersub.c: src/pmc/dispatchersub.dump
 
 src/pmc/dispatchersub.dump: src/pmc/dispatchersub.pmc
@@ -454,12 +453,13 @@ src/pmc/serializationcontext.c: src/pmc/serializationcontext.dump
 
 src/pmc/serializationcontext.dump: src/pmc/serializationcontext.pmc
 
+src/pmc/$(GROUP).c: $(PMC_OBJECTS)
+	$(PMC2C) --no-lines --library src/pmc/$(GROUP) --c $(PMC_SOURCES)
+
+$(DYNPMC): $(PMC_OBJECTS) src/pmc/$(GROUP).o
+	$(LD) @ld_out@$(DYNPMC) src/pmc/$(GROUP)$(O) $(PMC_OBJECTS) $(LINKARGS)
 
 
-$(DYNPMC): $(PMC_OBJECTS)
-	$(PMC2C) --no-lines --library $(GROUP) --c $(PMC_SOURCES)
-	$(CC) -c @cc_o_out@$(GROUP)$(O) -I$(PMC_DIR) $(CINCLUDES) $(CFLAGS) $(GROUP).c
-	$(LD) @ld_out@$(DYNPMC) $(GROUP)$(O) src/pmc/*$(O) $(LINKARGS)
 
 $(OPS_DIR)/$(OPS).c: $(OPS_DIR)/$(OPS_SOURCE)
 	$(OPS2C) --dynamic $(OPS_DIR)/$(OPS_SOURCE)
