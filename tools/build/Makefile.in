@@ -468,7 +468,7 @@ $(PMC_DIR)/pmc_serializationcontext.h: $(PMC_DIR)/serializationcontext.c
 $(PMC_DIR)/$(GROUP).c: $(PMC_OBJECTS)
 	$(PMC2C) --no-lines --library $(PMC_DIR)/$(GROUP) --c $(PMC_SOURCES)
 
-$(PMC_DIR)/$(DYNPMC): $(PMC_OBJECTS) $(PMC_DIR)/$(GROUP)$(O)
+$(DYNPMC): $(PMC_OBJECTS) $(PMC_DIR)/$(GROUP)$(O)
 	$(LD) @ld_out@$(PMC_DIR)/$(DYNPMC) $(PMC_DIR)/$(GROUP)$(O) $(PMC_OBJECTS) $(LINKARGS)
 
 
