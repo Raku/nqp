@@ -27,3 +27,9 @@ METAMODEL_OBJS   = src/6model/sixmodelobject$(O) src/6model/repr_registry$(O) \
 				   src/guts/multi_dispatch$(O)
 
 
+src/6model/serialization_context$(O): src/6model/serialization_context.c $(PMC_DIR)/pmc_serializationcontext.h
+
+src/6model/serialization$(O): src/6model/serialization.c $(PMC_DIR)/pmc_serializationcontext.h $(PMC_DIR)/pmc_nqplexinfo.h
+
+src/guts/multi_dispatch$(O): src/guts/multi_dispatch.c $(PMC_DIR)/pmc_dispatchersub.h
+
