@@ -53,6 +53,7 @@
 static INTVAL smo_id = 0;
 static INTVAL nqp_lexpad_id = 0;
 static INTVAL perl6_lexpad_id = 0;
+static INTVAL ctmthunk_id = 0;
 
 /* ***************************************************************************
  * Serialization (writing related)
@@ -418,6 +419,10 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
     else if (ref->vtable->base_type == enum_class_Pointer) {
         /* This is really being used to hang caches off in Rakudo, at least. So
          * we just drop it. */
+        discrim = REFVAR_VM_NULL;
+    }
+    else if (ref->vtable->base_type == ctmthunk_id) {
+        /* Another example of a generated cache/thunk that we should not serialize. */
         discrim = REFVAR_VM_NULL;
     }
     else if (ref->vtable->base_type == enum_class_CallContext) {
@@ -960,6 +965,7 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
     nqp_lexpad_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "NQPLexInfo", 0));
     perl6_lexpad_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "Perl6LexInfo", 0));
+    ctmthunk_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "CTMThunk", 0));
     
     /* Initialize string heap so first entry is the NULL string. */
     VTABLE_push_string(interp, empty_string_heap, STRINGNULL);
