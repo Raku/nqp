@@ -233,7 +233,7 @@ knowhow NQPClassHOW {
                             my @new_dispatchees;
                             @new_dispatchees[0] := $code;
                             my $new_disp := pir::create_dispatch_and_add_candidates__PPP($dispatcher, @new_dispatchees);
-                            my $clone_callback := pir::getprop__PsP('CLONE_CALLBACK', $dispatcher);
+                            my $clone_callback := pir::getprop__PPs($dispatcher, 'CLONE_CALLBACK');
                             if pir::defined($clone_callback) {
                                 $clone_callback($dispatcher, $new_disp);
                             }

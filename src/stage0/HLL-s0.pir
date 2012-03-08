@@ -21,27 +21,29 @@
 .loadlib "io_ops"
 
 .namespace []
-.sub "_block1000"  :anon :subid("10_1329260312.462")
+.sub "_block1000"  :anon :subid("222_1330909682.33311")
     .param pmc param_1002 :slurpy
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 0
-    .const 'Sub' $P2408 = "273_1329260312.462" 
-    capture_lex $P2408
-    .const 'Sub' $P2273 = "253_1329260312.462" 
-    capture_lex $P2273
-    .const 'Sub' $P2241 = "246_1329260312.462" 
-    capture_lex $P2241
-    .const 'Sub' $P1565 = "164_1329260312.462" 
+    .const 'Sub' $P2529 = "297_1330909682.33311" 
+    capture_lex $P2529
+    .const 'Sub' $P2407 = "293_1330909682.33311" 
+    capture_lex $P2407
+    .const 'Sub' $P2272 = "283_1330909682.33311" 
+    capture_lex $P2272
+    .const 'Sub' $P2240 = "281_1330909682.33311" 
+    capture_lex $P2240
+    .const 'Sub' $P1565 = "240_1330909682.33311" 
     capture_lex $P1565
-    .const 'Sub' $P1318 = "119_1329260312.462" 
+    .const 'Sub' $P1318 = "228_1330909682.33311" 
     capture_lex $P1318
-    .const 'Sub' $P1007 = "11_1329260312.462" 
+    .const 'Sub' $P1007 = "223_1330909682.33311" 
     capture_lex $P1007
 .annotate 'line', 1
     .lex "@ARGS", param_1002
     .lex "GLOBALish", $P1003
     .lex "$?PACKAGE", $P1004
-.annotate 'line', 1723
+.annotate 'line', 1726
     new $P100, "Undef"
     set $P1005, $P100
     .lex "$compiler", $P1005
@@ -55,70 +57,70 @@
     $P0."ctxsave"()
   ctxsave_done:
 .annotate 'line', 7
-    .const 'Sub' $P1007 = "11_1329260312.462" 
+    .const 'Sub' $P1007 = "223_1330909682.33311" 
     capture_lex $P1007
     $P1007()
 .annotate 'line', 865
-    .const 'Sub' $P1318 = "119_1329260312.462" 
+    .const 'Sub' $P1318 = "228_1330909682.33311" 
     capture_lex $P1318
     $P1318()
 .annotate 'line', 1058
-    .const 'Sub' $P1565 = "164_1329260312.462" 
+    .const 'Sub' $P1565 = "240_1330909682.33311" 
     capture_lex $P1565
     $P1565()
-.annotate 'line', 1723
+.annotate 'line', 1726
     get_hll_global $P101, "GLOBAL"
     nqp_get_package_through_who $P102, $P101, "HLL"
     get_who $P103, $P102
     set $P104, $P103["Compiler"]
     $P105 = $P104."new"()
     set $P1005, $P105
-.annotate 'line', 1724
+.annotate 'line', 1727
     set $P101, $P1005
     unless_null $P101, vivify_1118
     new $P101, "Undef"
   vivify_1118:
     $P101."language"("parrot")
-.annotate 'line', 1818
-    .const 'Sub' $P2241 = "246_1329260312.462" 
-    capture_lex $P2241
-    $P2241()
-.annotate 'line', 1851
-    .const 'Sub' $P2273 = "253_1329260312.462" 
-    capture_lex $P2273
-    $P2273()
-.annotate 'line', 2028
-    .const 'Sub' $P2408 = "273_1329260312.462" 
-    capture_lex $P2408
-    $P2408()
+.annotate 'line', 1821
+    .const 'Sub' $P2240 = "281_1330909682.33311" 
+    capture_lex $P2240
+    $P2240()
+.annotate 'line', 1854
+    .const 'Sub' $P2272 = "283_1330909682.33311" 
+    capture_lex $P2272
+    $P2272()
+.annotate 'line', 2031
+    .const 'Sub' $P2407 = "293_1330909682.33311" 
+    capture_lex $P2407
+    $P2407()
 .annotate 'line', 1
     set $P102, param_1002
-    if $P102, if_2530
+    if $P102, if_2524
     set $P101, $P102
-    goto if_2530_end
-  if_2530:
+    goto if_2524_end
+  if_2524:
     load_bytecode "ModuleLoader.pbc"
     get_hll_global $P103, "ModuleLoader"
     getinterp $P104
     set $P105, $P104["context"]
     $P106 = $P103."set_mainline_module"($P105)
     set $P101, $P106
-  if_2530_end:
+  if_2524_end:
     .return ($P101)
 .annotate 'line', 1050
-    .const 'Sub' $P2532 = "297_1329260312.462" 
+    .const 'Sub' $P2526 = "296_1330909682.33311" 
 .annotate 'line', 1
-    .return ($P2532)
+    .return ($P2526)
 .end
 
 
 .HLL "nqp"
 
 .namespace []
-.sub "" :load :init :subid("post298") :outer("10_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "" :load :init :subid("post298") :outer("222_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 0
-    .const 'Sub' $P1001 = "10_1329260312.462" 
+    .const 'Sub' $P1001 = "222_1330909682.33311" 
     .local pmc block
     set block, $P1001
     nqp_dynop_setup 
@@ -127,1621 +129,2015 @@
     get_class $P109, "LexPad"
     get_class $P110, "NQPLexPad"
     $P108."hll_map"($P109, $P110)
-    nqp_create_sc $P111, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34"
+    nqp_create_sc $P111, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482"
     .local pmc cur_sc
     set cur_sc, $P111
-    cur_sc."set_description"("src\\stage2\\gen\\NQPHLL.pm")
-    nqp_get_sc $P112, "__6MODEL_CORE__"
-    isnull $I100, $P112
-    unless $I100, if_2534_end
-    set $S100, "Incorrect pre-compiled version of <unknown> loaded"
-    die $S100
-  if_2534_end:
-    nqp_get_sc_object $P112, "__6MODEL_CORE__", 0
-    $P113 = $P112."new_type"("GLOBALish" :named("name"))
-    nqp_add_object_to_sc cur_sc, 0, $P113
-    .const 'LexInfo' $P2535 = "10_1329260312.462" 
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 0
-    $P2535."set_static_lexpad_value"("GLOBALish", $P112)
-    .const 'LexInfo' $P2536 = "10_1329260312.462" 
-    $P2536."finish_static_lexpad"()
-    .const 'LexInfo' $P2537 = "10_1329260312.462" 
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 0
-    $P2537."set_static_lexpad_value"("$?PACKAGE", $P112)
-    .const 'LexInfo' $P2538 = "10_1329260312.462" 
-    $P2538."finish_static_lexpad"()
+    cur_sc."set_description"("src/stage2/gen/NQPHLL.pm")
     load_bytecode "ModuleLoader.pbc"
     get_hll_global $P112, "ModuleLoader"
     $P113 = $P112."load_setting"("NQPCORE")
     block."set_outer_ctx"($P113)
     load_bytecode "ModuleLoader.pbc"
     get_hll_global $P112, "ModuleLoader"
-    nqp_get_sc_object $P113, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 0
-    $P112."load_module"("NQPRegex", $P113)
+    $P112."load_module"("NQPRegex")
     load_bytecode "ModuleLoader.pbc"
     get_hll_global $P112, "ModuleLoader"
-    nqp_get_sc_object $P113, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 0
-    $P112."load_module"("NQPRegex", $P113)
-    nqp_get_sc $P112, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061"
-    isnull $I100, $P112
-    unless $I100, if_2539_end
-    set $S100, "Incorrect pre-compiled version of src\\stage2\\gen\\nqp-mo.pm loaded"
-    die $S100
-  if_2539_end:
-    nqp_get_sc_object $P112, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 55
-    $P113 = $P112."new_type"("HLL::Grammar" :named("name"))
-    nqp_add_object_to_sc cur_sc, 1, $P113
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    nqp_get_sc_object $P113, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 0
-    nqp_get_package_through_who $P114, $P113, "HLL"
-    get_who $P115, $P114
-    set $P115["Grammar"], $P112
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2540 = "12_1329260312.462" 
-    $P113."add_method"($P114, "ws", $P2540)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2541 = "13_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__ws", $P2541)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2542 = "14_1329260312.462" 
-    $P113."add_method"($P114, "termish", $P2542)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2543 = "15_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__termish", $P2543)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2544 = "16_1329260312.462" 
-    $P113."add_method"($P114, "term", $P2544)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2545 = "17_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__term", $P2545)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2546 = "18_1329260312.462" 
-    $P113."add_method"($P114, "infix", $P2546)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2547 = "19_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__infix", $P2547)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2548 = "20_1329260312.462" 
-    $P113."add_method"($P114, "prefix", $P2548)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2549 = "21_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__prefix", $P2549)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2550 = "22_1329260312.462" 
-    $P113."add_method"($P114, "postfix", $P2550)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2551 = "23_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__postfix", $P2551)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2552 = "24_1329260312.462" 
-    $P113."add_method"($P114, "circumfix", $P2552)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2553 = "25_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__circumfix", $P2553)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2554 = "26_1329260312.462" 
-    $P113."add_method"($P114, "postcircumfix", $P2554)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2555 = "27_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__postcircumfix", $P2555)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2556 = "28_1329260312.462" 
-    $P113."add_method"($P114, "term:sym<circumfix>", $P2556)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2557 = "29_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__term:sym<circumfix>", $P2557)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2558 = "30_1329260312.462" 
-    $P113."add_method"($P114, "infixish", $P2558)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2559 = "31_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__infixish", $P2559)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2560 = "32_1329260312.462" 
-    $P113."add_method"($P114, "prefixish", $P2560)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2561 = "33_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__prefixish", $P2561)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2562 = "34_1329260312.462" 
-    $P113."add_method"($P114, "postfixish", $P2562)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2563 = "35_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__postfixish", $P2563)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2564 = "36_1329260312.462" 
-    $P113."add_method"($P114, "nullterm", $P2564)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2565 = "37_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__nullterm", $P2565)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2566 = "38_1329260312.462" 
-    $P113."add_method"($P114, "nullterm_alt", $P2566)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2567 = "39_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__nullterm_alt", $P2567)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2568 = "40_1329260312.462" 
-    $P113."add_method"($P114, "nulltermish", $P2568)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2569 = "41_1329260312.462" 
-    $P113."add_method"($P114, "quote_delimited", $P2569)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2570 = "42_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__quote_delimited", $P2570)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2571 = "43_1329260312.462" 
-    $P113."add_method"($P114, "quote_atom", $P2571)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2572 = "44_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__quote_atom", $P2572)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2573 = "45_1329260312.462" 
-    $P113."add_method"($P114, "decint", $P2573)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2574 = "46_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__decint", $P2574)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2575 = "47_1329260312.462" 
-    $P113."add_method"($P114, "decints", $P2575)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2576 = "48_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__decints", $P2576)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2577 = "49_1329260312.462" 
-    $P113."add_method"($P114, "hexint", $P2577)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2578 = "50_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__hexint", $P2578)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2579 = "51_1329260312.462" 
-    $P113."add_method"($P114, "hexints", $P2579)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2580 = "52_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__hexints", $P2580)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2581 = "53_1329260312.462" 
-    $P113."add_method"($P114, "octint", $P2581)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2582 = "54_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__octint", $P2582)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2583 = "55_1329260312.462" 
-    $P113."add_method"($P114, "octints", $P2583)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2584 = "56_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__octints", $P2584)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2585 = "57_1329260312.462" 
-    $P113."add_method"($P114, "binint", $P2585)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2586 = "58_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__binint", $P2586)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2587 = "59_1329260312.462" 
-    $P113."add_method"($P114, "binints", $P2587)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2588 = "60_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__binints", $P2588)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2589 = "61_1329260312.462" 
-    $P113."add_method"($P114, "integer", $P2589)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2590 = "62_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__integer", $P2590)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2591 = "63_1329260312.462" 
-    $P113."add_method"($P114, "dec_number", $P2591)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2592 = "64_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__dec_number", $P2592)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2593 = "65_1329260312.462" 
-    $P113."add_method"($P114, "escale", $P2593)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2594 = "66_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__escale", $P2594)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2595 = "67_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape", $P2595)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2596 = "68_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__quote_escape", $P2596)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2597 = "69_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<backslash>", $P2597)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2598 = "70_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__quote_escape:sym<backslash>", $P2598)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2599 = "71_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<stopper>", $P2599)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2600 = "72_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__quote_escape:sym<stopper>", $P2600)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2601 = "73_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<bs>", $P2601)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2602 = "74_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__quote_escape:sym<bs>", $P2602)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2603 = "75_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<nl>", $P2603)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2604 = "76_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__quote_escape:sym<nl>", $P2604)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2605 = "77_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<cr>", $P2605)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2606 = "78_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__quote_escape:sym<cr>", $P2606)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2607 = "79_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<tab>", $P2607)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2608 = "80_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__quote_escape:sym<tab>", $P2608)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2609 = "81_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<ff>", $P2609)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2610 = "82_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__quote_escape:sym<ff>", $P2610)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2611 = "83_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<esc>", $P2611)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2612 = "84_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__quote_escape:sym<esc>", $P2612)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2613 = "85_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<hex>", $P2613)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2614 = "86_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__quote_escape:sym<hex>", $P2614)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2615 = "87_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<oct>", $P2615)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2616 = "88_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__quote_escape:sym<oct>", $P2616)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2617 = "89_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<chr>", $P2617)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2618 = "90_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__quote_escape:sym<chr>", $P2618)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2619 = "91_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<0>", $P2619)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2620 = "92_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__quote_escape:sym<0>", $P2620)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2621 = "93_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<misc>", $P2621)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2622 = "97_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__quote_escape:sym<misc>", $P2622)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2623 = "98_1329260312.462" 
-    $P113."add_method"($P114, "charname", $P2623)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2624 = "100_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__charname", $P2624)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2625 = "101_1329260312.462" 
-    $P113."add_method"($P114, "charnames", $P2625)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2626 = "102_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__charnames", $P2626)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2627 = "103_1329260312.462" 
-    $P113."add_method"($P114, "charspec", $P2627)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2628 = "104_1329260312.462" 
-    $P113."add_method"($P114, "!PREFIX__charspec", $P2628)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2629 = "105_1329260312.462" 
-    $P113."add_method"($P114, "O", $P2629)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2630 = "106_1329260312.462" 
-    $P113."add_method"($P114, "panic", $P2630)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2631 = "107_1329260312.462" 
-    $P113."add_method"($P114, "peek_delimiters", $P2631)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2632 = "108_1329260312.462" 
-    $P113."add_method"($P114, "quote_EXPR", $P2632)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2633 = "109_1329260312.462" 
-    $P113."add_method"($P114, "quotemod_check", $P2633)
-    .const '' $P2634 = "109_1329260312.462" 
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_who $P113, $P112
-    set $P113["quotemod_check"], $P2634
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2635 = "110_1329260312.462" 
-    $P113."add_method"($P114, "starter", $P2635)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2636 = "111_1329260312.462" 
-    $P113."add_method"($P114, "stopper", $P2636)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2637 = "112_1329260312.462" 
-    $P113."add_method"($P114, "split_words", $P2637)
-    .const '' $P2638 = "112_1329260312.462" 
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_who $P113, $P112
-    set $P113["split_words"], $P2638
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2639 = "113_1329260312.462" 
-    $P113."add_method"($P114, "EXPR", $P2639)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2640 = "114_1329260312.462" 
-    $P113."add_method"($P114, "EXPR_reduce", $P2640)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2641 = "115_1329260312.462" 
-    $P113."add_method"($P114, "ternary", $P2641)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2642 = "116_1329260312.462" 
-    $P113."add_method"($P114, "MARKER", $P2642)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2643 = "117_1329260312.462" 
-    $P113."add_method"($P114, "MARKED", $P2643)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    .const '' $P2644 = "118_1329260312.462" 
-    $P113."add_method"($P114, "LANG", $P2644)
-    .const 'LexInfo' $P2645 = "11_1329260312.462" 
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    $P2645."set_static_lexpad_value"("$?PACKAGE", $P112)
-    .const 'LexInfo' $P2646 = "11_1329260312.462" 
-    $P2646."finish_static_lexpad"()
-    .const 'LexInfo' $P2647 = "11_1329260312.462" 
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    $P2647."set_static_lexpad_value"("$?CLASS", $P112)
-    .const 'LexInfo' $P2648 = "11_1329260312.462" 
-    $P2648."finish_static_lexpad"()
-    nqp_get_sc $P112, "__REGEX_CORE_SC__"
-    isnull $I100, $P112
-    unless $I100, if_2649_end
-    set $S100, "Incorrect pre-compiled version of <unknown> loaded"
-    die $S100
-  if_2649_end:
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    nqp_get_sc_object $P115, "__REGEX_CORE_SC__", 0
-    $P113."set_default_parent"($P114, $P115)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 1
-    $P113."compose"($P114)
-    nqp_get_sc_object $P112, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 55
-    $P113 = $P112."new_type"("HLL::Actions" :named("name"))
-    nqp_add_object_to_sc cur_sc, 105, $P113
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    nqp_get_sc_object $P113, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 0
-    nqp_get_package_through_who $P114, $P113, "HLL"
-    get_who $P115, $P114
-    set $P115["Actions"], $P112
-    .const '' $P2650 = "120_1329260312.462" 
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_who $P113, $P112
-    set $P113["string_to_int"], $P2650
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2651 = "121_1329260312.462" 
-    $P113."add_method"($P114, "ints_to_string", $P2651)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2652 = "124_1329260312.462" 
-    $P113."add_method"($P114, "CTXSAVE", $P2652)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2653 = "125_1329260312.462" 
-    $P113."add_method"($P114, "SET_BLOCK_OUTER_CTX", $P2653)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2654 = "128_1329260312.462" 
-    $P113."add_method"($P114, "EXPR", $P2654)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2655 = "131_1329260312.462" 
-    $P113."add_method"($P114, "term:sym<circumfix>", $P2655)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2656 = "132_1329260312.462" 
-    $P113."add_method"($P114, "termish", $P2656)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2657 = "133_1329260312.462" 
-    $P113."add_method"($P114, "nullterm", $P2657)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2658 = "134_1329260312.462" 
-    $P113."add_method"($P114, "nullterm_alt", $P2658)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2659 = "135_1329260312.462" 
-    $P113."add_method"($P114, "integer", $P2659)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2660 = "136_1329260312.462" 
-    $P113."add_method"($P114, "dec_number", $P2660)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2661 = "137_1329260312.462" 
-    $P113."add_method"($P114, "decint", $P2661)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2662 = "138_1329260312.462" 
-    $P113."add_method"($P114, "hexint", $P2662)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2663 = "139_1329260312.462" 
-    $P113."add_method"($P114, "octint", $P2663)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2664 = "140_1329260312.462" 
-    $P113."add_method"($P114, "binint", $P2664)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2665 = "141_1329260312.462" 
-    $P113."add_method"($P114, "quote_EXPR", $P2665)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2666 = "144_1329260312.462" 
-    $P113."add_method"($P114, "quote_delimited", $P2666)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2667 = "146_1329260312.462" 
-    $P113."add_method"($P114, "quote_atom", $P2667)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2668 = "147_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<backslash>", $P2668)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2669 = "148_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<stopper>", $P2669)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2670 = "149_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<bs>", $P2670)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2671 = "150_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<nl>", $P2671)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2672 = "151_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<cr>", $P2672)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2673 = "152_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<tab>", $P2673)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2674 = "153_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<ff>", $P2674)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2675 = "154_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<esc>", $P2675)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2676 = "155_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<hex>", $P2676)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2677 = "156_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<oct>", $P2677)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2678 = "157_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<chr>", $P2678)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2679 = "158_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<0>", $P2679)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2680 = "159_1329260312.462" 
-    $P113."add_method"($P114, "quote_escape:sym<misc>", $P2680)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2681 = "160_1329260312.462" 
-    $P113."add_method"($P114, "charname", $P2681)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2682 = "161_1329260312.462" 
-    $P113."add_method"($P114, "charnames", $P2682)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    .const '' $P2683 = "163_1329260312.462" 
-    $P113."add_method"($P114, "charspec", $P2683)
-    .const 'LexInfo' $P2684 = "119_1329260312.462" 
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    $P2684."set_static_lexpad_value"("$?PACKAGE", $P112)
-    .const 'LexInfo' $P2685 = "119_1329260312.462" 
-    $P2685."finish_static_lexpad"()
-    .const 'LexInfo' $P2686 = "119_1329260312.462" 
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    $P2686."set_static_lexpad_value"("$?CLASS", $P112)
-    .const 'LexInfo' $P2687 = "119_1329260312.462" 
-    $P2687."finish_static_lexpad"()
-    nqp_get_sc $P112, "27F3ECF6B2C866B16E6CB93AFBA1EB3CA80F57C5-1329260308.629"
-    isnull $I100, $P112
-    unless $I100, if_2688_end
-    set $S100, "Incorrect pre-compiled version of src\\stage2\\NQPCORE.setting loaded"
-    die $S100
-  if_2688_end:
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    nqp_get_sc_object $P115, "27F3ECF6B2C866B16E6CB93AFBA1EB3CA80F57C5-1329260308.629", 7
-    $P113."set_default_parent"($P114, $P115)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 105
-    $P113."compose"($P114)
-    nqp_get_sc_object $P112, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 55
-    $P113 = $P112."new_type"("HLL::Compiler" :named("name"))
-    nqp_add_object_to_sc cur_sc, 139, $P113
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    nqp_get_sc_object $P113, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 0
-    nqp_get_package_through_who $P114, $P113, "HLL"
-    get_who $P115, $P114
-    set $P115["Compiler"], $P112
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    nqp_get_sc_object $P115, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 99
-    $P116 = $P115."new"("@!stages" :named("name"))
-    $P113."add_attribute"($P114, $P116)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    nqp_get_sc_object $P115, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 99
-    $P116 = $P115."new"("$!parsegrammar" :named("name"))
-    $P113."add_attribute"($P114, $P116)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    nqp_get_sc_object $P115, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 99
-    $P116 = $P115."new"("$!parseactions" :named("name"))
-    $P113."add_attribute"($P114, $P116)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    nqp_get_sc_object $P115, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 99
-    $P116 = $P115."new"("@!cmdoptions" :named("name"))
-    $P113."add_attribute"($P114, $P116)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    nqp_get_sc_object $P115, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 99
-    $P116 = $P115."new"("$!usage" :named("name"))
-    $P113."add_attribute"($P114, $P116)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    nqp_get_sc_object $P115, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 99
-    $P116 = $P115."new"("$!compiler_progname" :named("name"))
-    $P113."add_attribute"($P114, $P116)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    nqp_get_sc_object $P115, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 99
-    $P116 = $P115."new"("$!language" :named("name"))
-    $P113."add_attribute"($P114, $P116)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    nqp_get_sc_object $P115, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 99
-    $P116 = $P115."new"("%!config" :named("name"))
-    $P113."add_attribute"($P114, $P116)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2689 = "166_1329260312.462" 
-    $P113."add_method"($P114, "new", $P2689)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2690 = "167_1329260312.462" 
-    $P113."add_method"($P114, "BUILD", $P2690)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2691 = "169_1329260312.462" 
-    $P113."add_method"($P114, "get_exports", $P2691)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2692 = "172_1329260312.462" 
-    $P113."add_method"($P114, "get_module", $P2692)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2693 = "173_1329260312.462" 
-    $P113."add_method"($P114, "language", $P2693)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2694 = "174_1329260312.462" 
-    $P113."add_method"($P114, "compiler", $P2694)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2695 = "175_1329260312.462" 
-    $P113."add_method"($P114, "config", $P2695)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2696 = "176_1329260312.462" 
-    $P113."add_method"($P114, "load_module", $P2696)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2697 = "178_1329260312.462" 
-    $P113."add_method"($P114, "import", $P2697)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2698 = "183_1329260312.462" 
-    $P113."add_method"($P114, "autoprint", $P2698)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2699 = "184_1329260312.462" 
-    $P113."add_method"($P114, "interactive", $P2699)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2700 = "191_1329260312.462" 
-    $P113."add_method"($P114, "eval", $P2700)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2701 = "193_1329260312.462" 
-    $P113."add_method"($P114, "ctxsave", $P2701)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2702 = "194_1329260312.462" 
-    $P113."add_method"($P114, "panic", $P2702)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2703 = "195_1329260312.462" 
-    $P113."add_method"($P114, "stages", $P2703)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2704 = "196_1329260312.462" 
-    $P113."add_method"($P114, "parsegrammar", $P2704)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2705 = "197_1329260312.462" 
-    $P113."add_method"($P114, "parseactions", $P2705)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2706 = "198_1329260312.462" 
-    $P113."add_method"($P114, "interactive_banner", $P2706)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2707 = "199_1329260312.462" 
-    $P113."add_method"($P114, "interactive_prompt", $P2707)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2708 = "200_1329260312.462" 
-    $P113."add_method"($P114, "compiler_progname", $P2708)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2709 = "201_1329260312.462" 
-    $P113."add_method"($P114, "commandline_options", $P2709)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2710 = "202_1329260312.462" 
-    $P113."add_method"($P114, "command_line", $P2710)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2711 = "203_1329260312.462" 
-    $P113."add_method"($P114, "command_eval", $P2711)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2712 = "210_1329260312.462" 
-    $P113."add_method"($P114, "process_args", $P2712)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2713 = "213_1329260312.462" 
-    $P113."add_method"($P114, "evalfiles", $P2713)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2714 = "217_1329260312.462" 
-    $P113."add_method"($P114, "compile", $P2714)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2715 = "220_1329260312.462" 
-    $P113."add_method"($P114, "parse", $P2715)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2716 = "223_1329260312.462" 
-    $P113."add_method"($P114, "past", $P2716)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2717 = "224_1329260312.462" 
-    $P113."add_method"($P114, "post", $P2717)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2718 = "225_1329260312.462" 
-    $P113."add_method"($P114, "pirbegin", $P2718)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2719 = "226_1329260312.462" 
-    $P113."add_method"($P114, "pir", $P2719)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2720 = "227_1329260312.462" 
-    $P113."add_method"($P114, "evalpmc", $P2720)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2721 = "228_1329260312.462" 
-    $P113."add_method"($P114, "dumper", $P2721)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2722 = "230_1329260312.462" 
-    $P113."add_method"($P114, "usage", $P2722)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2723 = "231_1329260312.462" 
-    $P113."add_method"($P114, "version", $P2723)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2724 = "232_1329260312.462" 
-    $P113."add_method"($P114, "show-config", $P2724)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2725 = "235_1329260312.462" 
-    $P113."add_method"($P114, "nqpevent", $P2725)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2726 = "238_1329260312.462" 
-    $P113."add_method"($P114, "removestage", $P2726)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2727 = "240_1329260312.462" 
-    $P113."add_method"($P114, "addstage", $P2727)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2728 = "243_1329260312.462" 
-    $P113."add_method"($P114, "parse_name", $P2728)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    .const '' $P2729 = "245_1329260312.462" 
-    $P113."add_method"($P114, "lineof", $P2729)
-    .const 'LexInfo' $P2730 = "164_1329260312.462" 
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    $P2730."set_static_lexpad_value"("$?PACKAGE", $P112)
-    .const 'LexInfo' $P2731 = "164_1329260312.462" 
-    $P2731."finish_static_lexpad"()
-    .const 'LexInfo' $P2732 = "164_1329260312.462" 
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    $P2732."set_static_lexpad_value"("$?CLASS", $P112)
-    .const 'LexInfo' $P2733 = "164_1329260312.462" 
-    $P2733."finish_static_lexpad"()
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    nqp_get_sc_object $P115, "27F3ECF6B2C866B16E6CB93AFBA1EB3CA80F57C5-1329260308.629", 7
-    $P113."set_default_parent"($P114, $P115)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 139
-    $P113."compose"($P114)
-    nqp_get_sc_object $P112, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 55
-    $P113 = $P112."new_type"("HLL::CommandLine::Result" :named("name"))
-    nqp_add_object_to_sc cur_sc, 181, $P113
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 181
-    nqp_get_sc_object $P113, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 0
-    nqp_get_package_through_who $P114, $P113, "HLL"
-    nqp_get_package_through_who $P115, $P114, "CommandLine"
+    $P112."load_module"("NQPRegex")
+    set $S100, "AQAAAEAAAAAEAAAAYAAAAAoAAACwAAAAZhwAAP4AAABGLAAApEoAAAAAAACkSgAAAAAAAKRKAACkSgAAAAAAAAQAAAAAAAAACQAAAAoAAABqAQAAAAAAAGwBAABtAQAAAQAAAAAAAAAHAAAA0gAAALgAAACSCwAA4wAAAJgOAAAdAQAAtBIAAC4BAABiFAAARQEAAHQWAABeAgAAahkAAGMCAAA8GgAAgQIAAA4bAAAAAAAA2wAAAAAAAAAAAAAACgAEAAAAAgAAAAIAAAAAANwAAAADAAAAAgABAAAABAAAAAUAAAALAAEAAABGAAAABgAAAAIAAAAAAN0AAAAKAAAAAAAAAAAAAAAAAAEAAAAAAAAAAgAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///////////////////////////////wAAAAAAAAAAAQAAAAAAAAACAAAAAAAAAAAAAwAAAAAA3gAAAAAAAAABAAAACgAAAAAACgCkAAAACAAAAAIAAgAAAAgAAAALAAAAAgACAAAACQAAAAwAAAACAAIAAAAKAAAADQAAAAIAAgAAAAsAAAAOAAAAAgACAAAADAAAAA8AAAACAAIAAAANAAAAEAAAAAIAAgAAABAAAAARAAAAAgACAAAAEgAAABIAAAACAAIAAAATAAAAEwAAAAsAAQAAAAAAAAAUAAAACwABAAAAAQAAABUAAAALAAEAAAACAAAAFgAAAAsAAQAAAAMAAAAXAAAACwABAAAABAAAABgAAAALAAEAAAAFAAAAGQAAAAsAAQAAAAYAAAAaAAAACwABAAAABwAAABsAAAALAAEAAAAIAAAAHAAAAAsAAQAAAAkAAAAdAAAACwABAAAACgAAAB4AAAALAAEAAAALAAAAHwAAAAsAAQAAAAwAAAAgAAAACwABAAAADQAAACEAAAALAAEAAAAOAAAAIgAAAAsAAQAAAA8AAAAjAAAACwABAAAAEAAAACQAAAALAAEAAAARAAAAJQAAAAsAAQAAABIAAAAmAAAACwABAAAAEwAAACcAAAALAAEAAAAUAAAAKAAAAAsAAQAAABUAAAApAAAACwABAAAAFgAAACoAAAALAAEAAAAXAAAAKwAAAAsAAQAAABgAAAAsAAAACwABAAAAGQAAAC0AAAALAAEAAAAaAAAALgAAAAsAAQAAABsAAAAvAAAACwABAAAAHAAAADAAAAALAAEAAAAdAAAAMQAAAAIAAAAAAAIAAAAyAAAACwABAAAAHwAAADMAAAALAAEAAAAgAAAANAAAAAsAAQAAACEAAAA1AAAACwABAAAAIgAAADYAAAALAAEAAAAjAAAANwAAAAsAAQAAACQAAAA4AAAACwABAAAAJQAAADkAAAALAAEAAAAmAAAAOgAAAAsAAQAAACcAAAA7AAAACwABAAAAKAAAADwAAAALAAEAAAApAAAAPQAAAAsAAQAAACoAAAA+AAAACwABAAAAKwAAAD8AAAALAAEAAAAsAAAAQAAAAAsAAQAAAC0AAABBAAAACwABAAAALgAAAEIAAAALAAEAAAAvAAAAQwAAAAsAAQAAADAAAABEAAAACwABAAAAMQAAAEUAAAALAAEAAAAyAAAARgAAAAsAAQAAADMAAABHAAAACwABAAAANAAAAEgAAAACAAAAAAADAAAASQAAAAIAAAAAAAQAAABKAAAAAgAAAAAABQAAAEsAAAACAAAAAAAGAAAATAAAAAIAAAAAAAcAAABNAAAAAgAAAAAACAAAAE4AAAACAAAAAAAJAAAATwAAAAIAAAAAAAoAAABQAAAAAgAAAAAACwAAAFEAAAACAAAAAAAMAAAAUgAAAAIAAAAAAA0AAABTAAAAAgAAAAAADgAAAFQAAAACAAAAAAAPAAAAVQAAAAIAAAAAABAAAABWAAAAAgAAAAAAEQAAAFcAAAACAAAAAAASAAAAWAAAAAIAAAAAABMAAABZAAAAAgAAAAAAFAAAAFoAAAACAAAAAAAVAAAAWwAAAAIAAAAAABYAAABcAAAAAgAAAAAAFwAAAF0AAAACAAAAAAAYAAAAXgAAAAIAAAAAABkAAABfAAAAAgAAAAAAGgAAAGAAAAACAAAAAAAbAAAAYQAAAAIAAAAAABwAAABiAAAAAgAAAAAAHQAAAGMAAAACAAAAAAAeAAAAZAAAAAIAAAAAAB8AAABlAAAAAgAAAAAAIAAAAGYAAAACAAAAAAAhAAAAZwAAAAIAAAAAACIAAABoAAAAAgAAAAAAIwAAAGkAAAACAAAAAAAkAAAAagAAAAIAAAAAACUAAABrAAAAAgAAAAAAJgAAAGwAAAACAAAAAAAnAAAAbQAAAAIAAAAAACgAAABuAAAAAgAAAAAAKQAAAG8AAAACAAAAAAAqAAAAcAAAAAIAAAAAACsAAABxAAAAAgAAAAAALAAAAHIAAAACAAAAAAAtAAAAcwAAAAIAAAAAAC4AAAB0AAAAAgAAAAAALwAAAHUAAAACAAAAAAAwAAAAdgAAAAIAAAAAADEAAAB3AAAAAgAAAAAAMgAAAHgAAAACAAAAAAAzAAAAeQAAAAIAAAAAADQAAAB6AAAAAgAAAAAANQAAAHsAAAACAAAAAAA2AAAAfAAAAAIAAAAAADcAAAB9AAAAAgAAAAAAOAAAAH4AAAACAAAAAAA5AAAAfwAAAAIAAAAAADoAAACAAAAAAgAAAAAAOwAAAIEAAAACAAAAAAA8AAAAggAAAAIAAAAAAD0AAACDAAAAAgAAAAAAPgAAAIQAAAACAAAAAAA/AAAAhQAAAAIAAAAAAEAAAACGAAAAAgAAAAAAQQAAAIcAAAACAAAAAABCAAAAiAAAAAIAAAAAAEMAAACJAAAAAgAAAAAARAAAAIoAAAACAAAAAABFAAAAiwAAAAIAAAAAAEYAAACMAAAAAgAAAAAARwAAAI0AAAACAAAAAABIAAAAjgAAAAIAAAAAAEkAAACPAAAAAgAAAAAASgAAAJAAAAACAAAAAABLAAAAkQAAAAIAAAAAAEwAAACSAAAAAgAAAAAATQAAAJMAAAACAAAAAABOAAAAlAAAAAIAAAAAAE8AAACVAAAAAgAAAAAAUAAAAJYAAAACAAAAAABRAAAAlwAAAAIAAAAAAFIAAACYAAAAAgAAAAAAUwAAAJkAAAACAAAAAABUAAAAmgAAAAIAAAAAAFUAAACbAAAAAgAAAAAAVgAAAJwAAAACAAAAAABXAAAAnQAAAAIAAAAAAFgAAACeAAAAAgAAAAAAWQAAAJ8AAAACAAAAAABaAAAAoAAAAAIAAAAAAFsAAAChAAAAAgAAAAAAXAAAAKIAAAACAAAAAABdAAAAowAAAAIAAAAAAF4AAACkAAAAAgAAAAAAXwAAAKUAAAACAAAAAABgAAAApgAAAAIAAAAAAGEAAACnAAAAAgAAAAAAYgAAAKgAAAACAAAAAABjAAAAqQAAAAIAAAAAAGQAAACqAAAAAgAAAAAAZQAAAKsAAAACAAAAAABmAAAArAAAAAIAAAAAAGcAAACtAAAAAgAAAAAAaAAAAAAAAAAAAAAAAwAAAAAAAAACAAAAAAABAAAAAgABAAAAAAAAAAIAAgAAAAcAAAAEAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAALAAEAAAA0AAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAACAAAAAgAAAAEAAAAAAAAAAgAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///////////////////////////////8AAAAAAAAAAAMAAAAAAAAAAgACAAAABwAAAAMAAgABAAAAAAAAAAoACgAAAK4AAAAEAAAAAAAAAAAArwAAAAQAAQAAAAAAAACwAAAABAACAAAAAAAAALEAAAAEAAMAAAAAAAAAsgAAAAQABAAAAAAAAACzAAAABAAFAAAAAAAAALQAAAAEAAYAAAAAAAAAtQAAAAQABwAAAAAAAAC2AAAABAAIAAAAAAAAALcAAAAEAAkAAAAAAAAAAgAAAAAAAQAAAAMAAAAAAN8AAAAAAAAAaQAAAAoAAAAAAAoAKgAAALkAAAACAAIAAAAIAAAAugAAAAIAAgAAAAkAAAC7AAAAAgACAAAACgAAALwAAAACAAIAAAALAAAAvQAAAAIAAgAAAAwAAAC+AAAAAgACAAAADQAAAL8AAAACAAIAAAAQAAAAwAAAAAIAAgAAABIAAADBAAAAAgACAAAAEwAAAMIAAAACAAAAAABqAAAAwwAAAAIAAAAAAGsAAADEAAAAAgAAAAAAbAAAAMUAAAACAAAAAABtAAAAxgAAAAIAAAAAAG4AAADHAAAAAgAAAAAAbwAAAMgAAAACAAAAAABwAAAAyQAAAAIAAAAAAHEAAADKAAAAAgAAAAAAcgAAAMsAAAACAAAAAABzAAAAzAAAAAIAAAAAAHQAAADNAAAAAgAAAAAAdQAAAM4AAAACAAAAAAB2AAAAzwAAAAIAAAAAAHcAAADQAAAAAgAAAAAAeAAAANEAAAACAAAAAAB5AAAA0gAAAAIAAAAAAHoAAADTAAAAAgAAAAAAewAAANQAAAACAAAAAAB8AAAA1QAAAAIAAAAAAH0AAADWAAAAAgAAAAAAfgAAANcAAAACAAAAAAB/AAAA2AAAAAIAAAAAAIAAAADZAAAAAgAAAAAAgQAAANoAAAACAAAAAACCAAAA2wAAAAIAAAAAAIMAAADcAAAAAgAAAAAAhAAAAN0AAAACAAAAAACFAAAA3gAAAAIAAAAAAIYAAADfAAAAAgAAAAAAhwAAAOAAAAACAAAAAACIAAAA4QAAAAIAAAAAAIkAAADiAAAAAgAAAAAAigAAAAAAAAAAAAAAAgAAAAAAAAACAAAAAABpAAAAAgACAAAABwAAAAQAAAAAAAAAAQAAAAAAAAAFAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///////////////////////////////8AAAAAAAAAAAIAAAAAAAAAAgACAAAABwAAAAMAAgAAAAAAaQAAAAMAAAAAAOAAAAAAAAAAiwAAAAoAAAAAAAoAMQAAAOQAAAACAAIAAAAIAAAA5QAAAAIAAgAAAAkAAADmAAAAAgACAAAACgAAAOcAAAACAAIAAAALAAAA6AAAAAIAAAAAAIwAAADpAAAAAgACAAAADQAAAOoAAAACAAIAAAAQAAAA6wAAAAIAAgAAABIAAADsAAAAAgACAAAAEwAAAO0AAAACAAAAAACNAAAA7gAAAAIAAAAAAI4AAADvAAAAAgAAAAAAjwAAAPAAAAACAAAAAACQAAAA8QAAAAIAAAAAAJEAAADyAAAAAgAAAAAAkgAAAPMAAAACAAAAAACTAAAA9AAAAAIAAAAAAJQAAAD1AAAAAgAAAAAAlQAAAPYAAAACAAAAAACWAAAA9wAAAAIAAAAAAJcAAAD4AAAAAgAAAAAAmAAAAPkAAAACAAAAAACZAAAA+gAAAAIAAAAAAJoAAAD7AAAAAgAAAAAAmwAAAPwAAAACAAAAAACcAAAA/QAAAAIAAAAAAJ0AAAD+AAAAAgAAAAAAngAAAP8AAAACAAAAAACfAAAAAAEAAAIAAAAAAKAAAAABAQAAAgAAAAAAoQAAAAIBAAACAAAAAACiAAAAAwEAAAIAAAAAAKMAAAAEAQAAAgAAAAAApAAAAAUBAAACAAAAAAClAAAABgEAAAIAAAAAAKYAAAAHAQAAAgAAAAAApwAAAAgBAAACAAAAAACoAAAACQEAAAIAAAAAAKkAAAAKAQAAAgAAAAAAqgAAAAsBAAACAAAAAACrAAAADAEAAAIAAAAAAKwAAAANAQAAAgAAAAAArQAAAA4BAAACAAAAAACuAAAADwEAAAIAAAAAAK8AAAAQAQAAAgAAAAAAsAAAABEBAAACAAAAAACxAAAAEgEAAAIAAAAAALIAAAATAQAAAgAAAAAAswAAABQBAAACAAAAAAC0AAAAAAAAAAAAAAACAAAAAAAAAAIAAAAAAIsAAAACAAIAAAAHAAAABAAAAAAAAAABAAAAAAAAAAUAAAAAAAAAAwAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///////////////////////////////8AAAAAAAAAAAIAAAAAAAAAAgACAAAABwAAAAMAAgAAAAAAiwAAAAoACAAAABUBAAAEAAAAAAAAAAAAFgEAAAQAAQAAAAAAAAAXAQAABAACAAAAAAAAABgBAAAEAAMAAAAAAAAAGQEAAAQABAAAAAAAAAAaAQAABAAFAAAAAAAAABsBAAAEAAYAAAAAAAAAHAEAAAQABwAAAAAAAAAAAAAA4QAAAAAAAAC1AAAACgAAAAAACgAOAAAAHgEAAAIAAgAAAAgAAAAfAQAAAgACAAAACQAAACABAAACAAIAAAAKAAAAIQEAAAIAAgAAAAsAAAAiAQAAAgACAAAADAAAACMBAAACAAIAAAANAAAAJAEAAAIAAgAAABAAAAAlAQAAAgACAAAAEgAAACYBAAACAAIAAAATAAAAJwEAAAIAAAAAALYAAAAoAQAAAgAAAAAAtwAAACkBAAACAAAAAAC4AAAAKgEAAAIAAAAAALkAAAArAQAAAgAAAAAAugAAAAAAAAAAAAAAAgAAAAAAAAACAAAAAAC1AAAAAgACAAAABwAAAAQAAAAAAAAAAQAAAAAAAAAFAAAAAAAAAAMAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////////////////////////////////AAAAAAAAAAACAAAAAAAAAAIAAgAAAAcAAAADAAIAAAAAALUAAAAKAAIAAAAsAQAABAAAAAAAAAAAAC0BAAAEAAEAAAAAAAAAAAAAAOIAAAAAAAAAuwAAAAoAAAAAAAoAEgAAAC8BAAACAAIAAAAIAAAAMAEAAAIAAgAAAAkAAAAxAQAAAgACAAAACgAAADIBAAACAAIAAAALAAAAMwEAAAIAAAAAALwAAAA0AQAAAgACAAAADQAAADUBAAACAAIAAAAQAAAANgEAAAIAAgAAABIAAAA3AQAAAgACAAAAEwAAADgBAAACAAAAAAC9AAAAOQEAAAIAAAAAAL4AAAA6AQAAAgAAAAAAvwAAADsBAAACAAAAAADAAAAAPAEAAAIAAAAAAMEAAAA9AQAAAgAAAAAAwgAAAD4BAAACAAAAAADDAAAAPwEAAAIAAAAAAMQAAABAAQAAAgAAAAAAxQAAAAAAAAAAAAAAAgAAAAAAAAACAAAAAAC7AAAAAgACAAAABwAAAAQAAAAAAAAAAQAAAAAAAAAFAAAAAAAAAAMAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///////////////////////////////wAAAAAAAAAAAgAAAAAAAAACAAIAAAAHAAAAAwACAAAAAAC7AAAACgAEAAAAQQEAAAQAAAAAAAAAAABCAQAABAABAAAAAAAAAEMBAAAEAAIAAAAAAAAARAEAAAQAAwAAAAAAAAAAAAAA4wAAAAAAAADGAAAACgAAAAAACgAcAAAARgEAAAIAAgAAAAgAAABHAQAAAgACAAAACQAAAEgBAAACAAIAAAAKAAAASQEAAAIAAgAAAAsAAABKAQAAAgAAAAAAxwAAAEsBAAACAAIAAAANAAAATAEAAAIAAgAAABAAAABNAQAAAgACAAAAEgAAAE4BAAACAAIAAAATAAAATwEAAAIAAAAAAMgAAABQAQAAAgAAAAAAyQAAAFEBAAACAAAAAADKAAAAUgEAAAIAAAAAAMsAAABTAQAAAgAAAAAAzAAAAFQBAAACAAAAAADNAAAAVQEAAAIAAAAAAM4AAABWAQAAAgAAAAAAzwAAAFcBAAACAAAAAADQAAAAWAEAAAIAAAAAANEAAABZAQAAAgAAAAAA0gAAAFoBAAACAAAAAADTAAAAWwEAAAIAAAAAANQAAABcAQAAAgAAAAAA1QAAAF0BAAACAAAAAADWAAAAXgEAAAIAAAAAANcAAABfAQAAAgAAAAAA2AAAAGABAAACAAAAAADZAAAAYQEAAAIAAAAAANoAAAAAAAAAAAAAAAIAAAAAAAAAAgAAAAAAxgAAAAIAAgAAAAcAAAAEAAAAAAAAAAEAAAAAAAAABQAAAAAAAAADAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///////////////////////////////wAAAAAAAAAAAgAAAAAAAAACAAIAAAAHAAAAAwACAAAAAADGAAAACgAIAAAAYgEAAAQAAAAAAAAAAABjAQAABAABAAAAAAAAAGQBAAAEAAIAAAAAAAAAZQEAAAQAAwAAAAAAAABmAQAABAAEAAAAAAAAAGcBAAAEAAUAAAAAAAAAaAEAAAQABgAAAAAAAABpAQAABAAHAAAAAAAAAAAAAAD6AAAAAAAAANwAAAAKAAQAAABfAgAAAgABAAAAAAAAAGACAAACAAEAAAABAAAAYQIAAAIAAQAAAAIAAABiAgAAAgABAAAAAwAAAAoAAAAAAAAAAAAAAAAAAQAAAAAAAAACAAAAAADcAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////////////////////////////////AAAAAAAAAAABAAAAAAAAAAIAAAAAANwAAAADAAAAAAD7AAAAAAAAAN0AAAAKAAUAAABkAgAAAgAAAAAAAQAAAGUCAAACAAAAAABpAAAAZgIAAAIAAAAAAIsAAABnAgAAAgAAAAAA/AAAAGgCAAACAAAAAADGAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////////////////////////////////AAAAAAAAAAABAAAAAAAAAAIAAAAAAN0AAAADAAAAAAD9AAAAAAAAAPwAAAAKAAIAAACCAgAAAgAAAAAAtQAAAIMCAAACAAAAAAC7AAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////////////////////////////////AAAAAAAAAAABAAAAAAAAAAIAAAAAAPwAAAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAgAAAAUAAAAAAAAAAQAAAAIAAAAFAAAAEAAAAAEAAAACAAAABQAAACAAAAABAAAAAgAAAAUAAAAwAAAAAQAAAAIAAAAFAAAAQAAAAAEAAAACAAAABQAAAFAAAAABAAAAAgAAAAUAAABgAAAAAQAAAAIAAAAFAAAAcAAAAAEAAAACAAAABQAAAIAAAAABAAAAAgAAAAUAAACQAAAAAQAAAAIAAAAFAAAAoAAAAAEAAAACAAAABQAAALAAAAABAAAAAgAAAAUAAADAAAAAAQAAAAIAAAAFAAAA0AAAAAEAAAACAAAABQAAAOAAAAABAAAAAgAAAAUAAADwAAAAAQAAAAIAAAAFAAAAAAEAAAEAAAACAAAABQAAABABAAABAAAAAgAAAAUAAAAgAQAAAQAAAAIAAAAFAAAAMAEAAAEAAAACAAAABQAAAEABAAABAAAAAgAAAAUAAABQAQAAAQAAAAIAAAAFAAAAYAEAAAEAAAACAAAABQAAAHABAAABAAAAAgAAAAUAAACAAQAAAQAAAAIAAAAFAAAAkAEAAAEAAAACAAAABQAAAKABAAABAAAAAgAAAAUAAACwAQAAAQAAAAIAAAAFAAAAwAEAAAEAAAACAAAABQAAANABAAABAAAAAgAAAAUAAADgAQAAAQAAAAIAAAAFAAAA8AEAAAEAAAACAAAABQAAAAACAAABAAAAAgAAAAUAAAAQAgAAAQAAAAIAAAAFAAAAIAIAAAEAAAACAAAABQAAADACAAABAAAAAgAAAAUAAABAAgAAAQAAAAIAAAAFAAAAUAIAAAEAAAACAAAABQAAAGACAAABAAAAAgAAAAUAAABwAgAAAQAAAAIAAAAFAAAAgAIAAAEAAAACAAAABQAAAJACAAABAAAAAgAAAAUAAACgAgAAAQAAAAIAAAAFAAAAsAIAAAEAAAACAAAABQAAAMACAAABAAAAAgAAAAUAAADQAgAAAQAAAAIAAAAFAAAA4AIAAAEAAAACAAAABQAAAPACAAABAAAAAgAAAAUAAAAAAwAAAQAAAAIAAAAFAAAAEAMAAAEAAAACAAAABQAAACADAAABAAAAAgAAAAUAAAAwAwAAAQAAAAIAAAAFAAAAQAMAAAEAAAACAAAABQAAAFADAAABAAAAAgAAAAUAAABgAwAAAQAAAAIAAAAFAAAAcAMAAAEAAAACAAAABQAAAIADAAABAAAAAgAAAAUAAACQAwAAAQAAAAIAAAAFAAAAoAMAAAEAAAACAAAABQAAALADAAABAAAAAgAAAAUAAADAAwAAAQAAAAIAAAAFAAAA0AMAAAEAAAACAAAABQAAAOADAAABAAAAAgAAAAUAAADwAwAAAQAAAAIAAAAFAAAAAAQAAAEAAAACAAAABQAAABAEAAABAAAAAgAAAAUAAAAgBAAAAQAAAAIAAAAFAAAAMAQAAAEAAAACAAAABQAAAEAEAAABAAAAAgAAAAUAAABQBAAAAQAAAAIAAAAFAAAAYAQAAAEAAAACAAAABQAAAHAEAAABAAAAAgAAAAUAAACABAAAAQAAAAIAAAAFAAAAkAQAAAEAAAACAAAABQAAAKAEAAABAAAAAgAAAAUAAACwBAAAAQAAAAIAAAAFAAAAwAQAAAEAAAACAAAABQAAANAEAAABAAAAAgAAAAUAAADgBAAAAQAAAAIAAAAFAAAA8AQAAAEAAAACAAAABQAAAAAFAAABAAAAAgAAAAUAAAAQBQAAAQAAAAIAAAAFAAAAIAUAAAEAAAACAAAABQAAADAFAAABAAAAAgAAAAUAAABABQAAAQAAAAIAAAAFAAAAUAUAAAEAAAACAAAABQAAAGAFAAABAAAAAgAAAAUAAABwBQAAAQAAAAIAAAAFAAAAgAUAAAEAAAACAAAABQAAAJAFAAABAAAAAgAAAAUAAACgBQAAAQAAAAIAAAAFAAAAsAUAAAEAAAACAAAABQAAAMAFAAABAAAAAgAAAAUAAADQBQAAAQAAAAIAAAAFAAAA4AUAAAEAAAACAAAABQAAAPAFAAABAAAAAgAAAAUAAAAABgAAAQAAAAIAAAAFAAAAEAYAAAEAAAACAAAABQAAACAGAAABAAAAAgAAAAUAAAAwBgAAAQAAAAIAAAAFAAAAQAYAAAEAAAACAAAABQAAAFAGAAABAAAAAgAAAAUAAABgBgAAAQAAAAAAAAACAAAAcAYAAAAAAAACAAAABQAAAHAGAAABAAAAAgAAAAUAAACABgAAAQAAAAIAAAAFAAAAkAYAAAEAAAACAAAABQAAAKAGAAABAAAAAgAAAAUAAACwBgAAAQAAAAIAAAAFAAAAwAYAAAEAAAACAAAABQAAANAGAAABAAAAAgAAAAUAAADgBgAAAQAAAAIAAAAFAAAA8AYAAAEAAAACAAAABQAAAAAHAAABAAAAAgAAAAUAAAAQBwAAAQAAAAIAAAAFAAAAIAcAAAEAAAACAAAABQAAADAHAAABAAAAAgAAAAUAAABABwAAAQAAAAIAAAAFAAAAUAcAAAEAAAACAAAABQAAAGAHAAABAAAAAgAAAAUAAABwBwAAAQAAAAIAAAAFAAAAgAcAAAEAAAACAAAABQAAAJAHAAABAAAAAgAAAAUAAACgBwAAAQAAAAIAAAAFAAAAsAcAAAEAAAACAAAABQAAAMAHAAABAAAAAgAAAAUAAADQBwAAAQAAAAIAAAAFAAAA4AcAAAEAAAACAAAABQAAAPAHAAABAAAAAgAAAAUAAAAACAAAAQAAAAIAAAAFAAAAEAgAAAEAAAACAAAABQAAACAIAAABAAAAAgAAAAUAAAAwCAAAAQAAAAIAAAAFAAAAQAgAAAEAAAACAAAABQAAAFAIAAABAAAAAgAAAAUAAABgCAAAAQAAAAIAAAAFAAAAcAgAAAEAAAAAAAAAAwAAAIAIAAAAAAAAAgAAAAUAAACACAAAAQAAAAIAAAAFAAAAkAgAAAEAAAACAAAABQAAAKAIAAABAAAAAgAAAAUAAACwCAAAAQAAAAIAAAAFAAAAwAgAAAEAAAACAAAABQAAANAIAAABAAAAAgAAAAUAAADgCAAAAQAAAAIAAAAFAAAA8AgAAAEAAAACAAAABQAAAAAJAAABAAAAAgAAAAUAAAAQCQAAAQAAAAIAAAAFAAAAIAkAAAEAAAACAAAABQAAADAJAAABAAAAAgAAAAUAAABACQAAAQAAAAIAAAAFAAAAUAkAAAEAAAACAAAABQAAAGAJAAABAAAAAgAAAAUAAABwCQAAAQAAAAIAAAAFAAAAgAkAAAEAAAACAAAABQAAAJAJAAABAAAAAgAAAAUAAACgCQAAAQAAAAIAAAAFAAAAsAkAAAEAAAACAAAABQAAAMAJAAABAAAAAgAAAAUAAADQCQAAAQAAAAIAAAAFAAAA4AkAAAEAAAACAAAABQAAAPAJAAABAAAAAgAAAAUAAAAACgAAAQAAAAIAAAAFAAAAEAoAAAEAAAACAAAABQAAACAKAAABAAAAAgAAAAUAAAAwCgAAAQAAAAIAAAAFAAAAQAoAAAEAAAACAAAABQAAAFAKAAABAAAAAgAAAAUAAABgCgAAAQAAAAIAAAAFAAAAcAoAAAEAAAACAAAABQAAAIAKAAABAAAAAgAAAAUAAACQCgAAAQAAAAIAAAAFAAAAoAoAAAEAAAACAAAABQAAALAKAAABAAAAAgAAAAUAAADACgAAAQAAAAIAAAAFAAAA0AoAAAEAAAACAAAABQAAAOAKAAABAAAAAgAAAAUAAADwCgAAAQAAAAIAAAAFAAAAAAsAAAEAAAAAAAAABAAAABALAAAAAAAAAgAAAAUAAAAQCwAAAQAAAAIAAAAFAAAAIAsAAAEAAAACAAAABQAAADALAAABAAAAAgAAAAUAAABACwAAAQAAAAIAAAAFAAAAUAsAAAEAAAAAAAAABQAAAGALAAAAAAAAAgAAAAUAAABgCwAAAQAAAAIAAAAFAAAAcAsAAAEAAAACAAAABQAAAIALAAABAAAAAgAAAAUAAACQCwAAAQAAAAIAAAAFAAAAoAsAAAEAAAACAAAABQAAALALAAABAAAAAgAAAAUAAADACwAAAQAAAAIAAAAFAAAA0AsAAAEAAAACAAAABQAAAOALAAABAAAAAgAAAAUAAADwCwAAAQAAAAAAAAAGAAAAAAwAAAAAAAACAAAABQAAAAAMAAABAAAAAgAAAAUAAAAQDAAAAQAAAAIAAAAFAAAAIAwAAAEAAAACAAAABQAAADAMAAABAAAAAgAAAAUAAABADAAAAQAAAAIAAAAFAAAAUAwAAAEAAAACAAAABQAAAGAMAAABAAAAAgAAAAUAAABwDAAAAQAAAAIAAAAFAAAAgAwAAAEAAAACAAAABQAAAJAMAAABAAAAAgAAAAUAAACgDAAAAQAAAAIAAAAFAAAAsAwAAAEAAAACAAAABQAAAMAMAAABAAAAAgAAAAUAAADQDAAAAQAAAAIAAAAFAAAA4AwAAAEAAAACAAAABQAAAPAMAAABAAAAAgAAAAUAAAAADQAAAQAAAAIAAAAFAAAAEA0AAAEAAAACAAAABQAAACANAAABAAAAAgAAAAUAAAAwDQAAAQAAAAMAAAAAAAAAQA0AAAEAAAAAAAAABwAAAFANAAAAAAAAAAAAAAgAAABQDQAAAAAAAAQAAAAGAAAAUA0AAAEAAAAEAAAABgAAAFwTAAABAAAABAAAAAYAAACKFQAAAQAAAAQAAAAGAAAAnBgAAAEAAAAEAAAABgAAAGIZAAABAAAABAAAAAYAAACKGgAAAQAAAAQAAAAIAAAAdhwAAAEAAAAEAAAACAAAAIocAAABAAAABAAAAAgAAACeHAAAAQAAAAQAAAAIAAAAshwAAAEAAAAEAAAACAAAAMYcAAABAAAABAAAAAgAAADaHAAAAQAAAAQAAAAIAAAA7hwAAAEAAAAEAAAACAAAAAIdAAABAAAABAAAAAgAAAAWHQAAAQAAAAQAAAAIAAAAKh0AAAEAAAAEAAAACAAAAD4dAAABAAAABAAAAAgAAABSHQAAAQAAAAQAAAAIAAAAZh0AAAEAAAAEAAAACAAAAHodAAABAAAABAAAAAgAAACOHQAAAQAAAAQAAAAIAAAAoh0AAAEAAAAEAAAACAAAALYdAAABAAAABAAAAAgAAADKHQAAAQAAAAQAAAAIAAAA3h0AAAEAAAAEAAAACAAAAPIdAAABAAAABAAAAAgAAAAGHgAAAQAAAAQAAAAIAAAAGh4AAAEAAAADAAAAAAAAAC4eAAABAAAAAwAAAAAAAAA+HgAAAQAAAAAAAAAJAAAATh4AAAAAAAADAAAAAAAAAE4eAAABAAAACwAAAAAAAAAAAAEAAQABAAsAAAAAAAEAAAABAAEAAQALAAAAAAACAAAAAQABAAEACwAAAAAAAwAAAAEAAQABAAsAAAAAAAQAAAABAAEAAQALAAAAAAAFAAAAAQABAAEACwAAAAAABgAAAAEAAQABAAsAAAAAAAcAAAABAAEAAQALAAAAAAAIAAAAAQABAAEACwAAAAAACQAAAAEAAQABAAsAAAAAAAoAAAABAAEAAQALAAAAAAALAAAAAQABAAEACwAAAAAADAAAAAEAAQABAAsAAAAAAA0AAAABAAEAAQALAAAAAAAOAAAAAQABAAEACwAAAAAADwAAAAEAAQABAAsAAAAAABAAAAABAAEAAQALAAAAAAARAAAAAQABAAEACwAAAAAAEgAAAAEAAQABAAsAAAAAABMAAAABAAEAAQALAAAAAAAUAAAAAQABAAEACwAAAAAAFQAAAAEAAQABAAsAAAAAABYAAAABAAEAAQALAAAAAAAXAAAAAQABAAEACwAAAAAAGAAAAAEAAQABAAsAAAAAABkAAAABAAEAAQALAAAAAAAaAAAAAQABAAEACwAAAAAAGwAAAAEAAQABAAsAAAAAABwAAAABAAEAAQALAAAAAAAdAAAAAQABAAEACwAAAAAAHgAAAAEAAQABAAsAAAAAAB8AAAABAAEAAQALAAAAAAAgAAAAAQABAAEACwAAAAAAIQAAAAEAAQABAAsAAAAAACIAAAABAAEAAQALAAAAAAAjAAAAAQABAAEACwAAAAAAJAAAAAEAAQABAAsAAAAAACUAAAABAAEAAQALAAAAAAAmAAAAAQABAAEACwAAAAAAJwAAAAEAAQABAAsAAAAAACgAAAABAAEAAQALAAAAAAApAAAAAQABAAEACwAAAAAAKgAAAAEAAQABAAsAAAAAACsAAAABAAEAAQALAAAAAAAsAAAAAQABAAEACwAAAAAALQAAAAEAAQABAAsAAAAAAC4AAAABAAEAAQALAAAAAAAvAAAAAQABAAEACwAAAAAAMAAAAAEAAQABAAsAAAAAADEAAAABAAEAAQALAAAAAAAyAAAAAQABAAEACwAAAAAAMwAAAAEAAQABAAsAAAAAADQAAAABAAEAAQALAAAAAAA1AAAAAQABAAEACwAAAAAANgAAAAEAAQABAAsAAAAAADcAAAABAAEAAQALAAAAAAA4AAAAAQABAAEACwAAAAAAOQAAAAEAAQABAAsAAAAAADoAAAABAAEAAQALAAAAAAA7AAAAAQABAAEACwAAAAAAPAAAAAEAAQABAAsAAAAAAD0AAAABAAEAAQALAAAAAAA+AAAAAQABAAEACwAAAAAAPwAAAAEAAQABAAsAAAAAAEAAAAABAAEAAQALAAAAAABBAAAAAQABAAEACwAAAAAAQgAAAAEAAQABAAsAAAAAAEMAAAABAAEAAQALAAAAAABEAAAAAQABAAEACwAAAAAARQAAAAEAAQABAAsAAAAAAEYAAAABAAEAAQALAAAAAABHAAAAAQABAAEACwAAAAAASAAAAAEAAQABAAsAAAAAAEkAAAABAAEAAQALAAAAAABKAAAAAQABAAEACwAAAAAASwAAAAEAAQABAAsAAAAAAEwAAAABAAEAAQALAAAAAABNAAAAAQABAAEACwAAAAAATgAAAAEAAQABAAsAAAAAAE8AAAABAAEAAQALAAAAAABQAAAAAQABAAEACwAAAAAAUQAAAAEAAQABAAsAAAAAAFIAAAABAAEAAQALAAAAAABTAAAAAQABAAEACwAAAAAAVAAAAAEAAQABAAsAAAAAAFUAAAABAAEAAQALAAAAAABWAAAAAQABAAEACwAAAAAAVwAAAAEAAQABAAsAAAAAAFgAAAABAAEAAQALAAAAAABZAAAAAQABAAEACwAAAAAAWgAAAAEAAQABAAsAAAAAAFsAAAABAAEAAQALAAAAAABcAAAAAQABAAEACwAAAAAAXQAAAAEAAQABAAsAAAAAAF4AAAABAAEAAQALAAAAAABfAAAAAQABAAEACwAAAAAAYAAAAAEAAQABAAsAAAAAAGEAAAABAAEAAQALAAAAAABiAAAAAQABAAEACwAAAAAAYwAAAAEAAQABAAsAAAAAAGQAAAABAAEAAQALAAAAAABlAAAAAQABAAEACwAAAAAAZgAAAAEAAQABAAsAAAAAAGcAAAABAAEAAQALAAAAAABoAAAAAQABAAEACwAAAAAAaQAAAAEAAQABAAsAAAAAAGoAAAABAAEAAQALAAAAAABrAAAAAQABAAEACwAAAAAAbAAAAAEAAQABAAsAAAAAAG0AAAABAAEAAQALAAAAAABuAAAAAQABAAEACwAAAAAAbwAAAAEAAQABAAsAAAAAAHAAAAABAAEAAQALAAAAAABxAAAAAQABAAEACwAAAAAAcgAAAAEAAQABAAsAAAAAAHMAAAABAAEAAQALAAAAAAB0AAAAAQABAAEACwAAAAAAdQAAAAEAAQABAAsAAAAAAHYAAAABAAEAAQALAAAAAAB3AAAAAQABAAEACwAAAAAAeAAAAAEAAQABAAsAAAAAAHkAAAABAAEAAQALAAAAAAB6AAAAAQABAAEACwAAAAAAewAAAAEAAQABAAsAAAAAAHwAAAABAAEAAQALAAAAAAB9AAAAAQABAAEACwAAAAAAfgAAAAEAAQABAAsAAAAAAH8AAAABAAEAAQALAAAAAACAAAAAAQABAAEACwAAAAAAgQAAAAEAAQABAAsAAAAAAIIAAAABAAEAAQALAAAAAACDAAAAAQABAAEACwAAAAAAhAAAAAEAAQABAAsAAAAAAIUAAAABAAEAAQALAAAAAACGAAAAAQABAAEACwAAAAAAhwAAAAEAAQABAAsAAAAAAIgAAAABAAEAAQALAAAAAACJAAAAAQABAAEACwAAAAAAigAAAAEAAQABAAsAAAAAAIsAAAABAAEAAQALAAAAAACMAAAAAQABAAEACwAAAAAAjQAAAAEAAQABAAsAAAAAAI4AAAABAAEAAQALAAAAAACPAAAAAQABAAEACwAAAAAAkAAAAAEAAQABAAsAAAAAAJEAAAABAAEAAQALAAAAAACSAAAAAQABAAEACwAAAAAAkwAAAAEAAQABAAsAAAAAAJQAAAABAAEAAQALAAAAAACVAAAAAQABAAEACwAAAAAAlgAAAAEAAQABAAsAAAAAAJcAAAABAAEAAQALAAAAAACYAAAAAQABAAEACwAAAAAAmQAAAAEAAQABAAsAAAAAAJoAAAABAAEAAQALAAAAAACbAAAAAQABAAEACwAAAAAAnAAAAAEAAQABAAsAAAAAAJ0AAAABAAEAAQALAAAAAACeAAAAAQABAAEACwAAAAAAnwAAAAEAAQABAAsAAAAAAKAAAAABAAEAAQALAAAAAAChAAAAAQABAAEACwAAAAAAogAAAAEAAQABAAsAAAAAAKMAAAABAAEAAQALAAAAAACkAAAAAQABAAEACwAAAAAApQAAAAEAAQABAAsAAAAAAKYAAAABAAEAAQALAAAAAACnAAAAAQABAAEACwAAAAAAqAAAAAEAAQABAAsAAAAAAKkAAAABAAEAAQALAAAAAACqAAAAAQABAAEACwAAAAAAqwAAAAEAAQABAAsAAAAAAKwAAAABAAEAAQALAAAAAACtAAAAAQABAAEACwAAAAAArgAAAAEAAQABAAsAAAAAAK8AAAABAAEAAQALAAAAAACwAAAAAQABAAEACwAAAAAAsQAAAAEAAQABAAsAAAAAALIAAAABAAEAAQALAAAAAACzAAAAAQABAAEACwAAAAAAtAAAAAEAAQABAAsAAAAAALUAAAABAAEAAQALAAAAAAC2AAAAAQABAAEACwAAAAAAtwAAAAEAAQABAAsAAAAAALgAAAABAAEAAQALAAAAAAC5AAAAAQABAAEACwAAAAAAugAAAAEAAQABAAsAAAAAALsAAAABAAEAAQALAAAAAAC8AAAAAQABAAEACwAAAAAAvQAAAAEAAQABAAsAAAAAAL4AAAABAAEAAQALAAAAAAC/AAAAAQABAAEACwAAAAAAwAAAAAEAAQABAAsAAAAAAMEAAAABAAEAAQALAAAAAADCAAAAAQABAAEACwAAAAAAwwAAAAEAAQABAAsAAAAAAMQAAAABAAEAAQALAAAAAADFAAAAAQABAAEACwAAAAAAxgAAAAEAAQABAAsAAAAAAMcAAAABAAEAAQALAAAAAADIAAAAAQABAAEACwAAAAAAyQAAAAEAAQABAAsAAAAAAMoAAAABAAEAAQALAAAAAADLAAAAAQABAAEACwAAAAAAzAAAAAEAAQABAAsAAAAAAM0AAAABAAEAAQALAAAAAADOAAAAAQABAAEACwAAAAAAzwAAAAEAAQABAAsAAAAAANAAAAABAAEAAQALAAAAAADRAAAAAQABAAEACwAAAAAA0gAAAAEAAQABAAsAAAAAANMAAAABAAEAAQBrAQAABwAAAAAACgAAAAAABgBuAQAAAQAKAGcAAABvAQAAAgAAAAAAAgAAAHABAAACAAAAAAADAAAAcQEAAAIAAAAAAAQAAAByAQAAAgAAAAAABQAAAHMBAAACAAAAAAAGAAAAdAEAAAIAAAAAAAcAAAB1AQAAAgAAAAAACAAAAHYBAAACAAAAAAAJAAAAdwEAAAIAAAAAAAoAAAB4AQAAAgAAAAAACwAAAHkBAAACAAAAAAAMAAAAegEAAAIAAAAAAA0AAAB7AQAAAgAAAAAADgAAAHwBAAACAAAAAAAPAAAAfQEAAAIAAAAAABAAAAB+AQAAAgAAAAAAEQAAAH8BAAACAAAAAAASAAAAgAEAAAIAAAAAABMAAACBAQAAAgAAAAAAFAAAAIIBAAACAAAAAAAVAAAAgwEAAAIAAAAAABYAAACEAQAAAgAAAAAAFwAAAIUBAAACAAAAAAAYAAAAhgEAAAIAAAAAABkAAACHAQAAAgAAAAAAGgAAAIgBAAACAAAAAAAbAAAAiQEAAAIAAAAAABwAAACKAQAAAgAAAAAAHQAAAIsBAAACAAAAAAAeAAAAjAEAAAIAAAAAAB8AAACNAQAAAgAAAAAAIAAAAI4BAAACAAAAAAAhAAAAjwEAAAIAAAAAACIAAACQAQAAAgAAAAAAIwAAAJEBAAACAAAAAAAkAAAAkgEAAAIAAAAAACUAAACTAQAAAgAAAAAAJgAAAJQBAAACAAAAAAAnAAAAlQEAAAIAAAAAACgAAACWAQAAAgAAAAAAKQAAAJcBAAACAAAAAAAqAAAAmAEAAAIAAAAAACsAAACZAQAAAgAAAAAALAAAAJoBAAACAAAAAAAtAAAAmwEAAAIAAAAAAC4AAACcAQAAAgAAAAAALwAAAJ0BAAACAAAAAAAwAAAAngEAAAIAAAAAADEAAACfAQAAAgAAAAAAMgAAAKABAAACAAAAAAAzAAAAoQEAAAIAAAAAADQAAACiAQAAAgAAAAAANQAAAKMBAAACAAAAAAA2AAAApAEAAAIAAAAAADcAAAClAQAAAgAAAAAAOAAAAKYBAAACAAAAAAA5AAAApwEAAAIAAAAAADoAAACoAQAAAgAAAAAAOwAAAKkBAAACAAAAAAA8AAAAqgEAAAIAAAAAAD0AAACrAQAAAgAAAAAAPgAAAKwBAAACAAAAAAA/AAAArQEAAAIAAAAAAEAAAACuAQAAAgAAAAAAQQAAAK8BAAACAAAAAABCAAAAsAEAAAIAAAAAAEMAAACxAQAAAgAAAAAARAAAALIBAAACAAAAAABFAAAAswEAAAIAAAAAAEYAAAC0AQAAAgAAAAAARwAAALUBAAACAAAAAABIAAAAtgEAAAIAAAAAAEkAAAC3AQAAAgAAAAAASgAAALgBAAACAAAAAABLAAAAuQEAAAIAAAAAAEwAAAC6AQAAAgAAAAAATQAAALsBAAACAAAAAABOAAAAvAEAAAIAAAAAAE8AAAC9AQAAAgAAAAAAUAAAAL4BAAACAAAAAABRAAAAvwEAAAIAAAAAAFIAAADAAQAAAgAAAAAAUwAAAMEBAAACAAAAAABUAAAAwgEAAAIAAAAAAFUAAADDAQAAAgAAAAAAVgAAAMQBAAACAAAAAABXAAAAxQEAAAIAAAAAAFgAAADGAQAAAgAAAAAAWQAAAMcBAAACAAAAAABaAAAAyAEAAAIAAAAAAFsAAADJAQAAAgAAAAAAXAAAAMoBAAACAAAAAABdAAAAywEAAAIAAAAAAF4AAADMAQAAAgAAAAAAXwAAAM0BAAACAAAAAABgAAAAzgEAAAIAAAAAAGEAAADPAQAAAgAAAAAAYgAAANABAAACAAAAAABjAAAA0QEAAAIAAAAAAGQAAADSAQAAAgAAAAAAZQAAANMBAAACAAAAAABmAAAA1AEAAAIAAAAAAGcAAADVAQAAAgAAAAAAaAAAAAEABwABAAAAAgABAAAAAAAAAAEAAgABAAAAAAAAAAEAAQAEAAEAAAAAAAAABwADAAAAAgAAAAAAAQAAAAIAAQAAAAAAAAACAAIAAAAHAAAAAQAKAAAAAAABAAEABgDWAQAAAQAKACEAAADXAQAAAgAAAAAAagAAANgBAAACAAAAAABrAAAA2QEAAAIAAAAAAGwAAADaAQAAAgAAAAAAbQAAANsBAAACAAAAAABuAAAA3AEAAAIAAAAAAG8AAADdAQAAAgAAAAAAcAAAAN4BAAACAAAAAABxAAAA3wEAAAIAAAAAAHIAAADgAQAAAgAAAAAAcwAAAOEBAAACAAAAAAB0AAAA4gEAAAIAAAAAAHUAAADjAQAAAgAAAAAAdgAAAOQBAAACAAAAAAB3AAAA5QEAAAIAAAAAAHgAAADmAQAAAgAAAAAAeQAAAOcBAAACAAAAAAB6AAAA6AEAAAIAAAAAAHsAAADpAQAAAgAAAAAAfAAAAOoBAAACAAAAAAB9AAAA6wEAAAIAAAAAAH4AAADsAQAAAgAAAAAAfwAAAO0BAAACAAAAAACAAAAA7gEAAAIAAAAAAIEAAADvAQAAAgAAAAAAggAAAPABAAACAAAAAACDAAAA8QEAAAIAAAAAAIQAAADyAQAAAgAAAAAAhQAAAPMBAAACAAAAAACGAAAA9AEAAAIAAAAAAIcAAAD1AQAAAgAAAAAAiAAAAPYBAAACAAAAAACJAAAA9wEAAAIAAAAAAIoAAAABAAcAAQAAAAIAAgAAAAcAAAABAAIAAgAAAAcAAAABAAEABAABAAAAAAAAAAcAAgAAAAIAAAAAAGkAAAACAAIAAAAHAAAAAQAKAAAAAAABAAEABgD4AQAACgAIAAAA+QEAAAIAAAAAAOQAAAD6AQAAAgAAAAAA5QAAAPsBAAACAAAAAADmAAAA/AEAAAIAAAAAAOcAAAD9AQAAAgAAAAAA6AAAAP4BAAACAAAAAADpAAAA/wEAAAIAAAAAAOoAAAAAAgAAAgAAAAAA6wAAAAoAKQAAAAECAAACAAAAAACMAAAAAgIAAAIAAAAAAI0AAAADAgAAAgAAAAAAjgAAAAQCAAACAAAAAACPAAAABQIAAAIAAAAAAJAAAAAGAgAAAgAAAAAAkQAAAAcCAAACAAAAAACSAAAACAIAAAIAAAAAAJMAAAAJAgAAAgAAAAAAlAAAAAoCAAACAAAAAACVAAAACwIAAAIAAAAAAJYAAAAMAgAAAgAAAAAAlwAAAA0CAAACAAAAAACYAAAADgIAAAIAAAAAAJkAAAAPAgAAAgAAAAAAmgAAABACAAACAAAAAACbAAAAEQIAAAIAAAAAAJwAAAASAgAAAgAAAAAAnQAAABMCAAACAAAAAACeAAAAFAIAAAIAAAAAAJ8AAAAVAgAAAgAAAAAAoAAAABYCAAACAAAAAAChAAAAFwIAAAIAAAAAAKIAAAAYAgAAAgAAAAAAowAAABkCAAACAAAAAACkAAAAGgIAAAIAAAAAAKUAAAAbAgAAAgAAAAAApgAAABwCAAACAAAAAACnAAAAHQIAAAIAAAAAAKgAAAAeAgAAAgAAAAAAqQAAAB8CAAACAAAAAACqAAAAIAIAAAIAAAAAAKsAAAAhAgAAAgAAAAAArAAAACICAAACAAAAAACtAAAAIwIAAAIAAAAAAK4AAAAkAgAAAgAAAAAArwAAACUCAAACAAAAAACwAAAAJgIAAAIAAAAAALEAAAAnAgAAAgAAAAAAsgAAACgCAAACAAAAAACzAAAAKQIAAAIAAAAAALQAAAABAAcAAQAAAAIAAgAAAAcAAAABAAIAAgAAAAcAAAABAAEABAABAAAAAAAAAAcAAgAAAAIAAAAAAIsAAAACAAIAAAAHAAAAAQAKAAAAAAABAAEABgAqAgAACgACAAAAKwIAAAIAAAAAAOwAAAAsAgAAAgAAAAAA7QAAAAoABQAAAC0CAAACAAAAAAC2AAAALgIAAAIAAAAAALcAAAAvAgAAAgAAAAAAuAAAADACAAACAAAAAAC5AAAAMQIAAAIAAAAAALoAAAABAAcAAQAAAAIAAgAAAAcAAAABAAIAAgAAAAcAAAABAAEABAABAAAAAAAAAAcAAgAAAAIAAAAAALUAAAACAAIAAAAHAAAAAQAKAAAAAAABAAEABgAyAgAACgAEAAAAMwIAAAIAAAAAAO4AAAA0AgAAAgAAAAAA7wAAADUCAAACAAAAAADwAAAANgIAAAIAAAAAAPEAAAAKAAoAAAA3AgAAAgAAAAAAvAAAADgCAAACAAAAAAC9AAAAOQIAAAIAAAAAAL4AAAA6AgAAAgAAAAAAvwAAADsCAAACAAAAAADAAAAAPAIAAAIAAAAAAMEAAAA9AgAAAgAAAAAAwgAAAD4CAAACAAAAAADDAAAAPwIAAAIAAAAAAMQAAABAAgAAAgAAAAAAxQAAAAEABwABAAAAAgACAAAABwAAAAEAAgACAAAABwAAAAEAAQAEAAEAAAAAAAAABwACAAAAAgAAAAAAuwAAAAIAAgAAAAcAAAABAAoAAAAAAAEAAQAGAEECAAAKAAgAAABCAgAAAgAAAAAA8gAAAEMCAAACAAAAAADzAAAARAIAAAIAAAAAAPQAAABFAgAAAgAAAAAA9QAAAEYCAAACAAAAAAD2AAAARwIAAAIAAAAAAPcAAABIAgAAAgAAAAAA+AAAAEkCAAACAAAAAAD5AAAACgAUAAAASgIAAAIAAAAAAMcAAABLAgAAAgAAAAAAyAAAAEwCAAACAAAAAADJAAAATQIAAAIAAAAAAMoAAABOAgAAAgAAAAAAywAAAE8CAAACAAAAAADMAAAAUAIAAAIAAAAAAM0AAABRAgAAAgAAAAAAzgAAAFICAAACAAAAAADPAAAAUwIAAAIAAAAAANAAAABUAgAAAgAAAAAA0QAAAFUCAAACAAAAAADSAAAAVgIAAAIAAAAAANMAAABXAgAAAgAAAAAA1AAAAFgCAAACAAAAAADVAAAAWQIAAAIAAAAAANYAAABaAgAAAgAAAAAA1wAAAFsCAAACAAAAAADYAAAAXAIAAAIAAAAAANkAAABdAgAAAgAAAAAA2gAAAAEABwABAAAAAgACAAAABwAAAAEAAgACAAAABwAAAAEAAQAEAAEAAAAAAAAABwACAAAAAgAAAAAAxgAAAAIAAgAAAAcAAAABAAoAAAAAAAEAAQAGAGkCAAADAAQAAAAAAAAAAAADAAYAagIAAAMABAAAAAAAAAAAAAMABgBrAgAAAwAEAAAAAAAAAAAAAwAGAGwCAAADAAQAAAAAAAAAAAADAAYAbQIAAAMABAAAAAAAAAAAAAMABgBuAgAAAwAEAAAAAAAAAAAAAwAGAG8CAAADAAQAAAAAAAAAAAADAAYAcAIAAAMABAAAAAAAAAAAAAMABgBxAgAAAwAEAAAAAAAAAAAAAwAGAHICAAADAAQAAAAAAAAAAAADAAYAcwIAAAMABAAAAAAAAAAAAAMABgB0AgAAAwAEAAAAAAAAAAAAAwAGAHUCAAADAAQAAAAAAAAAAAADAAYAdgIAAAMABAAAAAAAAAAAAAMABgB3AgAAAwAEAAAAAAAAAAAAAwAGAHgCAAADAAQAAAAAAAAAAAADAAYAeQIAAAMABAAAAAAAAAAAAAMABgB6AgAAAwAEAAAAAAAAAAAAAwAGAHsCAAADAAQAAAAAAAAAAAADAAYAfAIAAAMABAAAAAAAAAAAAAMABgB9AgAAAwAEAAAAAAAAAAAAAwAGAH4CAAADAAQAAAAAAAAAAAADAH8CAAAHAAAAAAAKAAAAAACAAgAABwAAAAAACgAAAAAAhAIAAAcAAAAAAAoAAAAAAA=="
+    new $P112, "ResizableStringArray"
+    .local pmc string_heap
+    set string_heap, $P112
+    null $S101
+    push string_heap, $S101
+    push string_heap, "P6opaque"
+    push string_heap, "Regex"
+    push string_heap, "PAST"
+    push string_heap, "__REGEX_CORE_SC__"
+    push string_heap, "_dumper"
+    push string_heap, "HLL"
+    push string_heap, "P6opaque"
+    push string_heap, "CREATE"
+    push string_heap, "3940BAAC6795364DE724F4268A50AA0EB6318065-1330909681.17426"
+    push string_heap, "src/stage2/NQPCORE.setting"
+    push string_heap, "bless"
+    push string_heap, "BUILDALL"
+    push string_heap, "BUILD_MAGIC"
+    push string_heap, "new"
+    push string_heap, "Str"
+    push string_heap, "ACCEPTS"
+    push string_heap, "isa"
+    push string_heap, "__dump"
+    push string_heap, "new_match"
+    push string_heap, "new_array"
+    push string_heap, "MATCH"
+    push string_heap, "parse"
+    push string_heap, "next"
+    push string_heap, "pos"
+    push string_heap, "from"
+    push string_heap, "!cursor_init"
+    push string_heap, "!cursor_start"
+    push string_heap, "!cursor_fail"
+    push string_heap, "!cursor_pass"
+    push string_heap, "!cursor_backtrack"
+    push string_heap, "!cursor_next"
+    push string_heap, "!cursor_caparray"
+    push string_heap, "!cursor_names"
+    push string_heap, "!cursor_pos"
+    push string_heap, "!cursor_debug"
+    push string_heap, "!mark_push"
+    push string_heap, "!mark_peek"
+    push string_heap, "!mark_fail"
+    push string_heap, "!mark_commit"
+    push string_heap, "!reduce"
+    push string_heap, "!BACKREF"
+    push string_heap, "!INTERPOLATE"
+    push string_heap, "!INTERPOLATE_REGEX"
+    push string_heap, "!cursor_from"
+    push string_heap, "before"
+    push string_heap, "ident"
+    push string_heap, "wb"
+    push string_heap, "ww"
+    push string_heap, "ws"
+    push string_heap, "alpha"
+    push string_heap, "upper"
+    push string_heap, "lower"
+    push string_heap, "digit"
+    push string_heap, "xdigit"
+    push string_heap, "print"
+    push string_heap, "graph"
+    push string_heap, "cntrl"
+    push string_heap, "punct"
+    push string_heap, "alnum"
+    push string_heap, "space"
+    push string_heap, "blank"
+    push string_heap, "FAILGOAL"
+    push string_heap, "DEBUG"
+    push string_heap, "!protoregex"
+    push string_heap, "!protoregex_generation"
+    push string_heap, "!protoregex_tokrx"
+    push string_heap, "!protoregex_gen_table"
+    push string_heap, "!PREFIX__!protoregex"
+    push string_heap, "!PREFIX__!subrule"
+    push string_heap, "DUMP_TOKRX"
+    push string_heap, "Bool"
+    push string_heap, "!PREFIX__ws"
+    push string_heap, "termish"
+    push string_heap, "!PREFIX__termish"
+    push string_heap, "term"
+    push string_heap, "!PREFIX__term"
+    push string_heap, "infix"
+    push string_heap, "!PREFIX__infix"
+    push string_heap, "prefix"
+    push string_heap, "!PREFIX__prefix"
+    push string_heap, "postfix"
+    push string_heap, "!PREFIX__postfix"
+    push string_heap, "circumfix"
+    push string_heap, "!PREFIX__circumfix"
+    push string_heap, "postcircumfix"
+    push string_heap, "!PREFIX__postcircumfix"
+    push string_heap, "term:sym<circumfix>"
+    push string_heap, "!PREFIX__term:sym<circumfix>"
+    push string_heap, "infixish"
+    push string_heap, "!PREFIX__infixish"
+    push string_heap, "prefixish"
+    push string_heap, "!PREFIX__prefixish"
+    push string_heap, "postfixish"
+    push string_heap, "!PREFIX__postfixish"
+    push string_heap, "nullterm"
+    push string_heap, "!PREFIX__nullterm"
+    push string_heap, "nullterm_alt"
+    push string_heap, "!PREFIX__nullterm_alt"
+    push string_heap, "nulltermish"
+    push string_heap, "quote_delimited"
+    push string_heap, "!PREFIX__quote_delimited"
+    push string_heap, "quote_atom"
+    push string_heap, "!PREFIX__quote_atom"
+    push string_heap, "decint"
+    push string_heap, "!PREFIX__decint"
+    push string_heap, "decints"
+    push string_heap, "!PREFIX__decints"
+    push string_heap, "hexint"
+    push string_heap, "!PREFIX__hexint"
+    push string_heap, "hexints"
+    push string_heap, "!PREFIX__hexints"
+    push string_heap, "octint"
+    push string_heap, "!PREFIX__octint"
+    push string_heap, "octints"
+    push string_heap, "!PREFIX__octints"
+    push string_heap, "binint"
+    push string_heap, "!PREFIX__binint"
+    push string_heap, "binints"
+    push string_heap, "!PREFIX__binints"
+    push string_heap, "integer"
+    push string_heap, "!PREFIX__integer"
+    push string_heap, "dec_number"
+    push string_heap, "!PREFIX__dec_number"
+    push string_heap, "escale"
+    push string_heap, "!PREFIX__escale"
+    push string_heap, "quote_escape"
+    push string_heap, "!PREFIX__quote_escape"
+    push string_heap, "quote_escape:sym<backslash>"
+    push string_heap, "!PREFIX__quote_escape:sym<backslash>"
+    push string_heap, "quote_escape:sym<stopper>"
+    push string_heap, "!PREFIX__quote_escape:sym<stopper>"
+    push string_heap, "quote_escape:sym<bs>"
+    push string_heap, "!PREFIX__quote_escape:sym<bs>"
+    push string_heap, "quote_escape:sym<nl>"
+    push string_heap, "!PREFIX__quote_escape:sym<nl>"
+    push string_heap, "quote_escape:sym<cr>"
+    push string_heap, "!PREFIX__quote_escape:sym<cr>"
+    push string_heap, "quote_escape:sym<tab>"
+    push string_heap, "!PREFIX__quote_escape:sym<tab>"
+    push string_heap, "quote_escape:sym<ff>"
+    push string_heap, "!PREFIX__quote_escape:sym<ff>"
+    push string_heap, "quote_escape:sym<esc>"
+    push string_heap, "!PREFIX__quote_escape:sym<esc>"
+    push string_heap, "quote_escape:sym<hex>"
+    push string_heap, "!PREFIX__quote_escape:sym<hex>"
+    push string_heap, "quote_escape:sym<oct>"
+    push string_heap, "!PREFIX__quote_escape:sym<oct>"
+    push string_heap, "quote_escape:sym<chr>"
+    push string_heap, "!PREFIX__quote_escape:sym<chr>"
+    push string_heap, "quote_escape:sym<0>"
+    push string_heap, "!PREFIX__quote_escape:sym<0>"
+    push string_heap, "quote_escape:sym<misc>"
+    push string_heap, "!PREFIX__quote_escape:sym<misc>"
+    push string_heap, "charname"
+    push string_heap, "!PREFIX__charname"
+    push string_heap, "charnames"
+    push string_heap, "!PREFIX__charnames"
+    push string_heap, "charspec"
+    push string_heap, "!PREFIX__charspec"
+    push string_heap, "O"
+    push string_heap, "panic"
+    push string_heap, "peek_delimiters"
+    push string_heap, "quote_EXPR"
+    push string_heap, "quotemod_check"
+    push string_heap, "starter"
+    push string_heap, "stopper"
+    push string_heap, "split_words"
+    push string_heap, "EXPR"
+    push string_heap, "EXPR_reduce"
+    push string_heap, "ternary"
+    push string_heap, "MARKER"
+    push string_heap, "MARKED"
+    push string_heap, "LANG"
+    push string_heap, "$!target"
+    push string_heap, "$!from"
+    push string_heap, "$!pos"
+    push string_heap, "$!match"
+    push string_heap, "$!names"
+    push string_heap, "$!debug"
+    push string_heap, "@!bstack"
+    push string_heap, "@!cstack"
+    push string_heap, "@!caparray"
+    push string_heap, "&!regex"
+    push string_heap, "P6opaque"
+    push string_heap, "CREATE"
+    push string_heap, "bless"
+    push string_heap, "BUILDALL"
+    push string_heap, "BUILD_MAGIC"
+    push string_heap, "new"
+    push string_heap, "Str"
+    push string_heap, "ACCEPTS"
+    push string_heap, "isa"
+    push string_heap, "__dump"
+    push string_heap, "ints_to_string"
+    push string_heap, "CTXSAVE"
+    push string_heap, "SET_BLOCK_OUTER_CTX"
+    push string_heap, "EXPR"
+    push string_heap, "term:sym<circumfix>"
+    push string_heap, "termish"
+    push string_heap, "nullterm"
+    push string_heap, "nullterm_alt"
+    push string_heap, "integer"
+    push string_heap, "dec_number"
+    push string_heap, "decint"
+    push string_heap, "hexint"
+    push string_heap, "octint"
+    push string_heap, "binint"
+    push string_heap, "quote_EXPR"
+    push string_heap, "quote_delimited"
+    push string_heap, "quote_atom"
+    push string_heap, "quote_escape:sym<backslash>"
+    push string_heap, "quote_escape:sym<stopper>"
+    push string_heap, "quote_escape:sym<bs>"
+    push string_heap, "quote_escape:sym<nl>"
+    push string_heap, "quote_escape:sym<cr>"
+    push string_heap, "quote_escape:sym<tab>"
+    push string_heap, "quote_escape:sym<ff>"
+    push string_heap, "quote_escape:sym<esc>"
+    push string_heap, "quote_escape:sym<hex>"
+    push string_heap, "quote_escape:sym<oct>"
+    push string_heap, "quote_escape:sym<chr>"
+    push string_heap, "quote_escape:sym<0>"
+    push string_heap, "quote_escape:sym<misc>"
+    push string_heap, "charname"
+    push string_heap, "charnames"
+    push string_heap, "charspec"
+    push string_heap, "P6opaque"
+    push string_heap, "CREATE"
+    push string_heap, "bless"
+    push string_heap, "BUILDALL"
+    push string_heap, "BUILD_MAGIC"
+    push string_heap, "new"
+    push string_heap, "Str"
+    push string_heap, "ACCEPTS"
+    push string_heap, "isa"
+    push string_heap, "__dump"
+    push string_heap, "BUILD"
+    push string_heap, "get_exports"
+    push string_heap, "get_module"
+    push string_heap, "language"
+    push string_heap, "compiler"
+    push string_heap, "config"
+    push string_heap, "load_module"
+    push string_heap, "import"
+    push string_heap, "autoprint"
+    push string_heap, "interactive"
+    push string_heap, "eval"
+    push string_heap, "ctxsave"
+    push string_heap, "panic"
+    push string_heap, "stages"
+    push string_heap, "parsegrammar"
+    push string_heap, "parseactions"
+    push string_heap, "interactive_banner"
+    push string_heap, "interactive_prompt"
+    push string_heap, "compiler_progname"
+    push string_heap, "commandline_options"
+    push string_heap, "command_line"
+    push string_heap, "command_eval"
+    push string_heap, "process_args"
+    push string_heap, "evalfiles"
+    push string_heap, "compile"
+    push string_heap, "parse"
+    push string_heap, "past"
+    push string_heap, "post"
+    push string_heap, "pirbegin"
+    push string_heap, "pir"
+    push string_heap, "evalpmc"
+    push string_heap, "dumper"
+    push string_heap, "usage"
+    push string_heap, "version"
+    push string_heap, "show-config"
+    push string_heap, "nqpevent"
+    push string_heap, "removestage"
+    push string_heap, "addstage"
+    push string_heap, "parse_name"
+    push string_heap, "lineof"
+    push string_heap, "@!stages"
+    push string_heap, "$!parsegrammar"
+    push string_heap, "$!parseactions"
+    push string_heap, "@!cmdoptions"
+    push string_heap, "$!usage"
+    push string_heap, "$!compiler_progname"
+    push string_heap, "$!language"
+    push string_heap, "%!config"
+    push string_heap, "P6opaque"
+    push string_heap, "CREATE"
+    push string_heap, "bless"
+    push string_heap, "BUILDALL"
+    push string_heap, "BUILD_MAGIC"
+    push string_heap, "new"
+    push string_heap, "Str"
+    push string_heap, "ACCEPTS"
+    push string_heap, "isa"
+    push string_heap, "__dump"
+    push string_heap, "init"
+    push string_heap, "arguments"
+    push string_heap, "options"
+    push string_heap, "add-argument"
+    push string_heap, "add-option"
+    push string_heap, "@!arguments"
+    push string_heap, "%!options"
+    push string_heap, "P6opaque"
+    push string_heap, "CREATE"
+    push string_heap, "bless"
+    push string_heap, "BUILDALL"
+    push string_heap, "BUILD_MAGIC"
+    push string_heap, "new"
+    push string_heap, "Str"
+    push string_heap, "ACCEPTS"
+    push string_heap, "isa"
+    push string_heap, "__dump"
+    push string_heap, "stop-after-first-arg"
+    push string_heap, "BUILD"
+    push string_heap, "add-stopper"
+    push string_heap, "split-option-aliases"
+    push string_heap, "add-spec"
+    push string_heap, "is-option"
+    push string_heap, "wants-value"
+    push string_heap, "optional-value"
+    push string_heap, "parse"
+    push string_heap, "@!specs"
+    push string_heap, "%!options"
+    push string_heap, "%!stopper"
+    push string_heap, "$!stop-after-first-arg"
+    push string_heap, "P6opaque"
+    push string_heap, "CREATE"
+    push string_heap, "bless"
+    push string_heap, "BUILDALL"
+    push string_heap, "BUILD_MAGIC"
+    push string_heap, "new"
+    push string_heap, "Str"
+    push string_heap, "ACCEPTS"
+    push string_heap, "isa"
+    push string_heap, "__dump"
+    push string_heap, "BUILD"
+    push string_heap, "slot_for_object"
+    push string_heap, "get_slot_past_for_object"
+    push string_heap, "get_slot_past_for_code_ref_at"
+    push string_heap, "set_slot_past"
+    push string_heap, "set_cur_sc"
+    push string_heap, "add_object_to_cur_sc_past"
+    push string_heap, "add_object"
+    push string_heap, "add_root_code_ref"
+    push string_heap, "update_root_code_ref"
+    push string_heap, "is_precompilation_mode"
+    push string_heap, "add_load_dependency_task"
+    push string_heap, "add_fixup_task"
+    push string_heap, "get_ref"
+    push string_heap, "sc"
+    push string_heap, "handle"
+    push string_heap, "load_dependency_tasks"
+    push string_heap, "fixup_tasks"
+    push string_heap, "serialize_and_produce_deserialization_past"
+    push string_heap, "$!sc"
+    push string_heap, "$!handle"
+    push string_heap, "$!precomp_mode"
+    push string_heap, "$!num_code_refs"
+    push string_heap, "$!code_ref_blocks"
+    push string_heap, "@!load_dependency_tasks"
+    push string_heap, "@!fixup_tasks"
+    push string_heap, "%!addr_to_slot"
+    push string_heap, "__6MODEL_CORE__"
+    push string_heap, "GLOBALish"
+    push string_heap, "67B20E3C7A7BB8197F67BABB87CA2F77E5CBCABC-1330909677.45112"
+    push string_heap, "src/stage2/gen/nqp-mo.pm"
+    push string_heap, "HLL::Grammar"
+    push string_heap, "ws"
+    push string_heap, "!PREFIX__ws"
+    push string_heap, "termish"
+    push string_heap, "!PREFIX__termish"
+    push string_heap, "term"
+    push string_heap, "!PREFIX__term"
+    push string_heap, "infix"
+    push string_heap, "!PREFIX__infix"
+    push string_heap, "prefix"
+    push string_heap, "!PREFIX__prefix"
+    push string_heap, "postfix"
+    push string_heap, "!PREFIX__postfix"
+    push string_heap, "circumfix"
+    push string_heap, "!PREFIX__circumfix"
+    push string_heap, "postcircumfix"
+    push string_heap, "!PREFIX__postcircumfix"
+    push string_heap, "term:sym<circumfix>"
+    push string_heap, "!PREFIX__term:sym<circumfix>"
+    push string_heap, "infixish"
+    push string_heap, "!PREFIX__infixish"
+    push string_heap, "prefixish"
+    push string_heap, "!PREFIX__prefixish"
+    push string_heap, "postfixish"
+    push string_heap, "!PREFIX__postfixish"
+    push string_heap, "nullterm"
+    push string_heap, "!PREFIX__nullterm"
+    push string_heap, "nullterm_alt"
+    push string_heap, "!PREFIX__nullterm_alt"
+    push string_heap, "nulltermish"
+    push string_heap, "quote_delimited"
+    push string_heap, "!PREFIX__quote_delimited"
+    push string_heap, "quote_atom"
+    push string_heap, "!PREFIX__quote_atom"
+    push string_heap, "decint"
+    push string_heap, "!PREFIX__decint"
+    push string_heap, "decints"
+    push string_heap, "!PREFIX__decints"
+    push string_heap, "hexint"
+    push string_heap, "!PREFIX__hexint"
+    push string_heap, "hexints"
+    push string_heap, "!PREFIX__hexints"
+    push string_heap, "octint"
+    push string_heap, "!PREFIX__octint"
+    push string_heap, "octints"
+    push string_heap, "!PREFIX__octints"
+    push string_heap, "binint"
+    push string_heap, "!PREFIX__binint"
+    push string_heap, "binints"
+    push string_heap, "!PREFIX__binints"
+    push string_heap, "integer"
+    push string_heap, "!PREFIX__integer"
+    push string_heap, "dec_number"
+    push string_heap, "!PREFIX__dec_number"
+    push string_heap, "escale"
+    push string_heap, "!PREFIX__escale"
+    push string_heap, "quote_escape"
+    push string_heap, "!PREFIX__quote_escape"
+    push string_heap, "quote_escape:sym<backslash>"
+    push string_heap, "!PREFIX__quote_escape:sym<backslash>"
+    push string_heap, "quote_escape:sym<stopper>"
+    push string_heap, "!PREFIX__quote_escape:sym<stopper>"
+    push string_heap, "quote_escape:sym<bs>"
+    push string_heap, "!PREFIX__quote_escape:sym<bs>"
+    push string_heap, "quote_escape:sym<nl>"
+    push string_heap, "!PREFIX__quote_escape:sym<nl>"
+    push string_heap, "quote_escape:sym<cr>"
+    push string_heap, "!PREFIX__quote_escape:sym<cr>"
+    push string_heap, "quote_escape:sym<tab>"
+    push string_heap, "!PREFIX__quote_escape:sym<tab>"
+    push string_heap, "quote_escape:sym<ff>"
+    push string_heap, "!PREFIX__quote_escape:sym<ff>"
+    push string_heap, "quote_escape:sym<esc>"
+    push string_heap, "!PREFIX__quote_escape:sym<esc>"
+    push string_heap, "quote_escape:sym<hex>"
+    push string_heap, "!PREFIX__quote_escape:sym<hex>"
+    push string_heap, "quote_escape:sym<oct>"
+    push string_heap, "!PREFIX__quote_escape:sym<oct>"
+    push string_heap, "quote_escape:sym<chr>"
+    push string_heap, "!PREFIX__quote_escape:sym<chr>"
+    push string_heap, "quote_escape:sym<0>"
+    push string_heap, "!PREFIX__quote_escape:sym<0>"
+    push string_heap, "quote_escape:sym<misc>"
+    push string_heap, "!PREFIX__quote_escape:sym<misc>"
+    push string_heap, "charname"
+    push string_heap, "!PREFIX__charname"
+    push string_heap, "charnames"
+    push string_heap, "!PREFIX__charnames"
+    push string_heap, "charspec"
+    push string_heap, "!PREFIX__charspec"
+    push string_heap, "O"
+    push string_heap, "panic"
+    push string_heap, "peek_delimiters"
+    push string_heap, "quote_EXPR"
+    push string_heap, "quotemod_check"
+    push string_heap, "starter"
+    push string_heap, "stopper"
+    push string_heap, "split_words"
+    push string_heap, "EXPR"
+    push string_heap, "EXPR_reduce"
+    push string_heap, "ternary"
+    push string_heap, "MARKER"
+    push string_heap, "MARKED"
+    push string_heap, "LANG"
+    push string_heap, "HLL::Actions"
+    push string_heap, "ints_to_string"
+    push string_heap, "CTXSAVE"
+    push string_heap, "SET_BLOCK_OUTER_CTX"
+    push string_heap, "EXPR"
+    push string_heap, "term:sym<circumfix>"
+    push string_heap, "termish"
+    push string_heap, "nullterm"
+    push string_heap, "nullterm_alt"
+    push string_heap, "integer"
+    push string_heap, "dec_number"
+    push string_heap, "decint"
+    push string_heap, "hexint"
+    push string_heap, "octint"
+    push string_heap, "binint"
+    push string_heap, "quote_EXPR"
+    push string_heap, "quote_delimited"
+    push string_heap, "quote_atom"
+    push string_heap, "quote_escape:sym<backslash>"
+    push string_heap, "quote_escape:sym<stopper>"
+    push string_heap, "quote_escape:sym<bs>"
+    push string_heap, "quote_escape:sym<nl>"
+    push string_heap, "quote_escape:sym<cr>"
+    push string_heap, "quote_escape:sym<tab>"
+    push string_heap, "quote_escape:sym<ff>"
+    push string_heap, "quote_escape:sym<esc>"
+    push string_heap, "quote_escape:sym<hex>"
+    push string_heap, "quote_escape:sym<oct>"
+    push string_heap, "quote_escape:sym<chr>"
+    push string_heap, "quote_escape:sym<0>"
+    push string_heap, "quote_escape:sym<misc>"
+    push string_heap, "charname"
+    push string_heap, "charnames"
+    push string_heap, "charspec"
+    push string_heap, "HLL::Compiler"
+    push string_heap, "@!stages"
+    push string_heap, "$!parsegrammar"
+    push string_heap, "$!parseactions"
+    push string_heap, "@!cmdoptions"
+    push string_heap, "$!usage"
+    push string_heap, "$!compiler_progname"
+    push string_heap, "$!language"
+    push string_heap, "%!config"
+    push string_heap, "new"
+    push string_heap, "BUILD"
+    push string_heap, "get_exports"
+    push string_heap, "get_module"
+    push string_heap, "language"
+    push string_heap, "compiler"
+    push string_heap, "config"
+    push string_heap, "load_module"
+    push string_heap, "import"
+    push string_heap, "autoprint"
+    push string_heap, "interactive"
+    push string_heap, "eval"
+    push string_heap, "ctxsave"
+    push string_heap, "panic"
+    push string_heap, "stages"
+    push string_heap, "parsegrammar"
+    push string_heap, "parseactions"
+    push string_heap, "interactive_banner"
+    push string_heap, "interactive_prompt"
+    push string_heap, "compiler_progname"
+    push string_heap, "commandline_options"
+    push string_heap, "command_line"
+    push string_heap, "command_eval"
+    push string_heap, "process_args"
+    push string_heap, "evalfiles"
+    push string_heap, "compile"
+    push string_heap, "parse"
+    push string_heap, "past"
+    push string_heap, "post"
+    push string_heap, "pirbegin"
+    push string_heap, "pir"
+    push string_heap, "evalpmc"
+    push string_heap, "dumper"
+    push string_heap, "usage"
+    push string_heap, "version"
+    push string_heap, "show-config"
+    push string_heap, "nqpevent"
+    push string_heap, "removestage"
+    push string_heap, "addstage"
+    push string_heap, "parse_name"
+    push string_heap, "lineof"
+    push string_heap, "HLL::CommandLine::Result"
+    push string_heap, "@!arguments"
+    push string_heap, "%!options"
+    push string_heap, "init"
+    push string_heap, "arguments"
+    push string_heap, "options"
+    push string_heap, "add-argument"
+    push string_heap, "add-option"
+    push string_heap, "HLL::CommandLine::Parser"
+    push string_heap, "@!specs"
+    push string_heap, "%!options"
+    push string_heap, "%!stopper"
+    push string_heap, "$!stop-after-first-arg"
+    push string_heap, "new"
+    push string_heap, "stop-after-first-arg"
+    push string_heap, "BUILD"
+    push string_heap, "add-stopper"
+    push string_heap, "split-option-aliases"
+    push string_heap, "add-spec"
+    push string_heap, "is-option"
+    push string_heap, "wants-value"
+    push string_heap, "optional-value"
+    push string_heap, "parse"
+    push string_heap, "HLL::World"
+    push string_heap, "$!sc"
+    push string_heap, "$!handle"
+    push string_heap, "$!precomp_mode"
+    push string_heap, "$!num_code_refs"
+    push string_heap, "$!code_ref_blocks"
+    push string_heap, "@!load_dependency_tasks"
+    push string_heap, "@!fixup_tasks"
+    push string_heap, "%!addr_to_slot"
+    push string_heap, "new"
+    push string_heap, "BUILD"
+    push string_heap, "slot_for_object"
+    push string_heap, "get_slot_past_for_object"
+    push string_heap, "get_slot_past_for_code_ref_at"
+    push string_heap, "set_slot_past"
+    push string_heap, "set_cur_sc"
+    push string_heap, "add_object_to_cur_sc_past"
+    push string_heap, "add_object"
+    push string_heap, "add_root_code_ref"
+    push string_heap, "update_root_code_ref"
+    push string_heap, "is_precompilation_mode"
+    push string_heap, "add_load_dependency_task"
+    push string_heap, "add_fixup_task"
+    push string_heap, "get_ref"
+    push string_heap, "sc"
+    push string_heap, "handle"
+    push string_heap, "load_dependency_tasks"
+    push string_heap, "fixup_tasks"
+    push string_heap, "serialize_and_produce_deserialization_past"
+    push string_heap, "P6opaque"
+    push string_heap, "Cursor"
+    push string_heap, "Match"
+    push string_heap, "Method"
+    push string_heap, "Regex"
+    push string_heap, "P6opaque"
+    push string_heap, "Grammar"
+    push string_heap, "Actions"
+    push string_heap, "Compiler"
+    push string_heap, "CommandLine"
+    push string_heap, "World"
+    push string_heap, "@!stages"
+    push string_heap, "$!parsegrammar"
+    push string_heap, "$!parseactions"
+    push string_heap, "@!cmdoptions"
+    push string_heap, "$!usage"
+    push string_heap, "$!compiler_progname"
+    push string_heap, "$!language"
+    push string_heap, "%!config"
+    push string_heap, "@!arguments"
+    push string_heap, "%!options"
+    push string_heap, "@!specs"
+    push string_heap, "%!options"
+    push string_heap, "%!stopper"
+    push string_heap, "$!stop-after-first-arg"
+    push string_heap, "$!sc"
+    push string_heap, "$!handle"
+    push string_heap, "$!precomp_mode"
+    push string_heap, "$!num_code_refs"
+    push string_heap, "$!code_ref_blocks"
+    push string_heap, "@!load_dependency_tasks"
+    push string_heap, "@!fixup_tasks"
+    push string_heap, "%!addr_to_slot"
+    push string_heap, "Regex"
+    push string_heap, "HLL"
+    push string_heap, "P6opaque"
+    push string_heap, "Result"
+    push string_heap, "Parser"
+    push string_heap, "CommandLine"
+    .const 'Sub' $P2529 = "297_1330909682.33311" 
+    capture_lex $P2529
+    $P114 = $P2529()
+    nqp_deserialize_sc $S100, cur_sc, string_heap, $P114
+    .const 'LexInfo' $P2742 = "222_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 0
+    $P2742."set_static_lexpad_value"("GLOBALish", $P115)
+    .const 'LexInfo' $P2743 = "222_1330909682.33311" 
+    $P2743."finish_static_lexpad"()
+    .const 'LexInfo' $P2744 = "222_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 0
+    $P2744."set_static_lexpad_value"("$?PACKAGE", $P115)
+    .const 'LexInfo' $P2745 = "222_1330909682.33311" 
+    $P2745."finish_static_lexpad"()
+    .const '' $P2746 = "10_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 2
+    set_sub_code_object $P2746, $P115
+    .const '' $P2747 = "11_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 3
+    set_sub_code_object $P2747, $P115
+    .const '' $P2748 = "12_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 4
+    set_sub_code_object $P2748, $P115
+    .const '' $P2749 = "13_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 5
+    set_sub_code_object $P2749, $P115
+    .const '' $P2750 = "14_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 6
+    set_sub_code_object $P2750, $P115
+    .const '' $P2751 = "15_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 7
+    set_sub_code_object $P2751, $P115
+    .const '' $P2752 = "16_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 8
+    set_sub_code_object $P2752, $P115
+    .const '' $P2753 = "17_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 9
+    set_sub_code_object $P2753, $P115
+    .const '' $P2754 = "18_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 10
+    set_sub_code_object $P2754, $P115
+    .const '' $P2755 = "19_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 11
+    set_sub_code_object $P2755, $P115
+    .const '' $P2756 = "20_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 12
+    set_sub_code_object $P2756, $P115
+    .const '' $P2757 = "21_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 13
+    set_sub_code_object $P2757, $P115
+    .const '' $P2758 = "22_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 14
+    set_sub_code_object $P2758, $P115
+    .const '' $P2759 = "23_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 15
+    set_sub_code_object $P2759, $P115
+    .const '' $P2760 = "24_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 16
+    set_sub_code_object $P2760, $P115
+    .const '' $P2761 = "25_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 17
+    set_sub_code_object $P2761, $P115
+    .const '' $P2762 = "26_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 18
+    set_sub_code_object $P2762, $P115
+    .const '' $P2763 = "27_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 19
+    set_sub_code_object $P2763, $P115
+    .const '' $P2764 = "28_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 20
+    set_sub_code_object $P2764, $P115
+    .const '' $P2765 = "29_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 21
+    set_sub_code_object $P2765, $P115
+    .const '' $P2766 = "30_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 22
+    set_sub_code_object $P2766, $P115
+    .const '' $P2767 = "31_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 23
+    set_sub_code_object $P2767, $P115
+    .const '' $P2768 = "32_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 24
+    set_sub_code_object $P2768, $P115
+    .const '' $P2769 = "33_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 25
+    set_sub_code_object $P2769, $P115
+    .const '' $P2770 = "34_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 26
+    set_sub_code_object $P2770, $P115
+    .const '' $P2771 = "35_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 27
+    set_sub_code_object $P2771, $P115
+    .const '' $P2772 = "36_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 28
+    set_sub_code_object $P2772, $P115
+    .const '' $P2773 = "37_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 29
+    set_sub_code_object $P2773, $P115
+    .const '' $P2774 = "38_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 30
+    set_sub_code_object $P2774, $P115
+    .const '' $P2775 = "39_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 31
+    set_sub_code_object $P2775, $P115
+    .const '' $P2776 = "40_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 32
+    set_sub_code_object $P2776, $P115
+    .const '' $P2777 = "41_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 33
+    set_sub_code_object $P2777, $P115
+    .const '' $P2778 = "42_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 34
+    set_sub_code_object $P2778, $P115
+    .const '' $P2779 = "43_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 35
+    set_sub_code_object $P2779, $P115
+    .const '' $P2780 = "44_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 36
+    set_sub_code_object $P2780, $P115
+    .const '' $P2781 = "45_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 37
+    set_sub_code_object $P2781, $P115
+    .const '' $P2782 = "46_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 38
+    set_sub_code_object $P2782, $P115
+    .const '' $P2783 = "47_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 39
+    set_sub_code_object $P2783, $P115
+    .const '' $P2784 = "48_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 40
+    set_sub_code_object $P2784, $P115
+    .const '' $P2785 = "49_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 41
+    set_sub_code_object $P2785, $P115
+    .const '' $P2786 = "50_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 42
+    set_sub_code_object $P2786, $P115
+    .const '' $P2787 = "51_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 43
+    set_sub_code_object $P2787, $P115
+    .const '' $P2788 = "52_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 44
+    set_sub_code_object $P2788, $P115
+    .const '' $P2789 = "53_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 45
+    set_sub_code_object $P2789, $P115
+    .const '' $P2790 = "54_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 46
+    set_sub_code_object $P2790, $P115
+    .const '' $P2791 = "55_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 47
+    set_sub_code_object $P2791, $P115
+    .const '' $P2792 = "56_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 48
+    set_sub_code_object $P2792, $P115
+    .const '' $P2793 = "57_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 49
+    set_sub_code_object $P2793, $P115
+    .const '' $P2794 = "58_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 50
+    set_sub_code_object $P2794, $P115
+    .const '' $P2795 = "59_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 51
+    set_sub_code_object $P2795, $P115
+    .const '' $P2796 = "60_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 52
+    set_sub_code_object $P2796, $P115
+    .const '' $P2797 = "61_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 53
+    set_sub_code_object $P2797, $P115
+    .const '' $P2798 = "62_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 54
+    set_sub_code_object $P2798, $P115
+    .const '' $P2799 = "63_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 55
+    set_sub_code_object $P2799, $P115
+    .const '' $P2800 = "64_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 56
+    set_sub_code_object $P2800, $P115
+    .const '' $P2801 = "65_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 57
+    set_sub_code_object $P2801, $P115
+    .const '' $P2802 = "66_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 58
+    set_sub_code_object $P2802, $P115
+    .const '' $P2803 = "67_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 59
+    set_sub_code_object $P2803, $P115
+    .const '' $P2804 = "68_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 60
+    set_sub_code_object $P2804, $P115
+    .const '' $P2805 = "69_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 61
+    set_sub_code_object $P2805, $P115
+    .const '' $P2806 = "70_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 62
+    set_sub_code_object $P2806, $P115
+    .const '' $P2807 = "71_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 63
+    set_sub_code_object $P2807, $P115
+    .const '' $P2808 = "72_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 64
+    set_sub_code_object $P2808, $P115
+    .const '' $P2809 = "73_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 65
+    set_sub_code_object $P2809, $P115
+    .const '' $P2810 = "74_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 66
+    set_sub_code_object $P2810, $P115
+    .const '' $P2811 = "75_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 67
+    set_sub_code_object $P2811, $P115
+    .const '' $P2812 = "76_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 68
+    set_sub_code_object $P2812, $P115
+    .const '' $P2813 = "77_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 69
+    set_sub_code_object $P2813, $P115
+    .const '' $P2814 = "78_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 70
+    set_sub_code_object $P2814, $P115
+    .const '' $P2815 = "79_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 71
+    set_sub_code_object $P2815, $P115
+    .const '' $P2816 = "80_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 72
+    set_sub_code_object $P2816, $P115
+    .const '' $P2817 = "81_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 73
+    set_sub_code_object $P2817, $P115
+    .const '' $P2818 = "82_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 74
+    set_sub_code_object $P2818, $P115
+    .const '' $P2819 = "83_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 75
+    set_sub_code_object $P2819, $P115
+    .const '' $P2820 = "84_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 76
+    set_sub_code_object $P2820, $P115
+    .const '' $P2821 = "85_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 77
+    set_sub_code_object $P2821, $P115
+    .const '' $P2822 = "86_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 78
+    set_sub_code_object $P2822, $P115
+    .const '' $P2823 = "87_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 79
+    set_sub_code_object $P2823, $P115
+    .const '' $P2824 = "88_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 80
+    set_sub_code_object $P2824, $P115
+    .const '' $P2825 = "89_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 81
+    set_sub_code_object $P2825, $P115
+    .const '' $P2826 = "90_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 82
+    set_sub_code_object $P2826, $P115
+    .const '' $P2827 = "91_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 83
+    set_sub_code_object $P2827, $P115
+    .const '' $P2828 = "92_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 84
+    set_sub_code_object $P2828, $P115
+    .const '' $P2829 = "93_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 85
+    set_sub_code_object $P2829, $P115
+    .const '' $P2830 = "94_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 86
+    set_sub_code_object $P2830, $P115
+    .const '' $P2831 = "95_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 87
+    set_sub_code_object $P2831, $P115
+    .const '' $P2832 = "96_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 88
+    set_sub_code_object $P2832, $P115
+    .const '' $P2833 = "97_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 89
+    set_sub_code_object $P2833, $P115
+    .const '' $P2834 = "98_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 90
+    set_sub_code_object $P2834, $P115
+    .const '' $P2835 = "99_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 91
+    set_sub_code_object $P2835, $P115
+    .const '' $P2836 = "100_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 92
+    set_sub_code_object $P2836, $P115
+    .const '' $P2837 = "101_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 93
+    set_sub_code_object $P2837, $P115
+    .const '' $P2838 = "102_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 94
+    set_sub_code_object $P2838, $P115
+    .const '' $P2839 = "103_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 95
+    set_sub_code_object $P2839, $P115
+    .const '' $P2840 = "103_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 1
     get_who $P116, $P115
-    set $P116["Result"], $P112
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 181
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 181
-    nqp_get_sc_object $P115, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 99
-    $P116 = $P115."new"("@!arguments" :named("name"))
-    $P113."add_attribute"($P114, $P116)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 181
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 181
-    nqp_get_sc_object $P115, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 99
-    $P116 = $P115."new"("%!options" :named("name"))
-    $P113."add_attribute"($P114, $P116)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 181
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 181
-    .const '' $P2734 = "247_1329260312.462" 
-    $P113."add_method"($P114, "init", $P2734)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 181
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 181
-    .const '' $P2735 = "248_1329260312.462" 
-    $P113."add_method"($P114, "arguments", $P2735)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 181
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 181
-    .const '' $P2736 = "249_1329260312.462" 
-    $P113."add_method"($P114, "options", $P2736)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 181
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 181
-    .const '' $P2737 = "250_1329260312.462" 
-    $P113."add_method"($P114, "add-argument", $P2737)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 181
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 181
-    .const '' $P2738 = "251_1329260312.462" 
-    $P113."add_method"($P114, "add-option", $P2738)
-    .const 'LexInfo' $P2739 = "246_1329260312.462" 
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 181
-    $P2739."set_static_lexpad_value"("$?PACKAGE", $P112)
-    .const 'LexInfo' $P2740 = "246_1329260312.462" 
-    $P2740."finish_static_lexpad"()
-    .const 'LexInfo' $P2741 = "246_1329260312.462" 
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 181
-    $P2741."set_static_lexpad_value"("$?CLASS", $P112)
-    .const 'LexInfo' $P2742 = "246_1329260312.462" 
-    $P2742."finish_static_lexpad"()
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 181
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 181
-    nqp_get_sc_object $P115, "27F3ECF6B2C866B16E6CB93AFBA1EB3CA80F57C5-1329260308.629", 7
-    $P113."set_default_parent"($P114, $P115)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 181
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 181
-    $P113."compose"($P114)
-    nqp_get_sc_object $P112, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 55
-    $P113 = $P112."new_type"("HLL::CommandLine::Parser" :named("name"))
-    nqp_add_object_to_sc cur_sc, 187, $P113
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    nqp_get_sc_object $P113, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 0
-    nqp_get_package_through_who $P114, $P113, "HLL"
-    nqp_get_package_through_who $P115, $P114, "CommandLine"
+    set $P116["quotemod_check"], $P2840
+    .const '' $P2841 = "104_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 96
+    set_sub_code_object $P2841, $P115
+    .const '' $P2842 = "105_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 97
+    set_sub_code_object $P2842, $P115
+    .const '' $P2843 = "106_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 98
+    set_sub_code_object $P2843, $P115
+    .const '' $P2844 = "106_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 1
     get_who $P116, $P115
-    set $P116["Parser"], $P112
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    nqp_get_sc_object $P115, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 99
-    $P116 = $P115."new"("@!specs" :named("name"))
-    $P113."add_attribute"($P114, $P116)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    nqp_get_sc_object $P115, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 99
-    $P116 = $P115."new"("%!options" :named("name"))
-    $P113."add_attribute"($P114, $P116)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    nqp_get_sc_object $P115, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 99
-    $P116 = $P115."new"("%!stopper" :named("name"))
-    $P113."add_attribute"($P114, $P116)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    nqp_get_sc_object $P115, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 99
-    $P116 = $P115."new"("$!stop-after-first-arg" :named("name"))
-    $P113."add_attribute"($P114, $P116)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    .const '' $P2743 = "254_1329260312.462" 
-    $P113."add_method"($P114, "new", $P2743)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    .const '' $P2744 = "255_1329260312.462" 
-    $P113."add_method"($P114, "stop-after-first-arg", $P2744)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    .const '' $P2745 = "256_1329260312.462" 
-    $P113."add_method"($P114, "BUILD", $P2745)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    .const '' $P2746 = "258_1329260312.462" 
-    $P113."add_method"($P114, "add-stopper", $P2746)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    .const '' $P2747 = "259_1329260312.462" 
-    $P113."add_method"($P114, "split-option-aliases", $P2747)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    .const '' $P2748 = "260_1329260312.462" 
-    $P113."add_method"($P114, "add-spec", $P2748)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    .const '' $P2749 = "262_1329260312.462" 
-    $P113."add_method"($P114, "is-option", $P2749)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    .const '' $P2750 = "263_1329260312.462" 
-    $P113."add_method"($P114, "wants-value", $P2750)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    .const '' $P2751 = "264_1329260312.462" 
-    $P113."add_method"($P114, "optional-value", $P2751)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    .const '' $P2752 = "265_1329260312.462" 
-    $P113."add_method"($P114, "parse", $P2752)
-    .const 'LexInfo' $P2753 = "253_1329260312.462" 
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    $P2753."set_static_lexpad_value"("$?PACKAGE", $P112)
-    .const 'LexInfo' $P2754 = "253_1329260312.462" 
-    $P2754."finish_static_lexpad"()
-    .const 'LexInfo' $P2755 = "253_1329260312.462" 
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    $P2755."set_static_lexpad_value"("$?CLASS", $P112)
-    .const 'LexInfo' $P2756 = "253_1329260312.462" 
-    $P2756."finish_static_lexpad"()
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    nqp_get_sc_object $P115, "27F3ECF6B2C866B16E6CB93AFBA1EB3CA80F57C5-1329260308.629", 7
-    $P113."set_default_parent"($P114, $P115)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 187
-    $P113."compose"($P114)
-    nqp_get_sc_object $P112, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 55
-    $P113 = $P112."new_type"("HLL::World" :named("name"))
-    nqp_add_object_to_sc cur_sc, 198, $P113
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    nqp_get_sc_object $P113, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 0
-    nqp_get_package_through_who $P114, $P113, "HLL"
-    get_who $P115, $P114
-    set $P115["World"], $P112
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    nqp_get_sc_object $P115, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 99
-    $P116 = $P115."new"("$!sc" :named("name"))
-    $P113."add_attribute"($P114, $P116)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    nqp_get_sc_object $P115, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 99
-    $P116 = $P115."new"("$!handle" :named("name"))
-    $P113."add_attribute"($P114, $P116)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    nqp_get_sc_object $P115, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 99
-    $P116 = $P115."new"("$!precomp_mode" :named("name"))
-    $P113."add_attribute"($P114, $P116)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    nqp_get_sc_object $P115, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 99
-    $P116 = $P115."new"("$!num_code_refs" :named("name"))
-    $P113."add_attribute"($P114, $P116)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    nqp_get_sc_object $P115, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 99
-    $P116 = $P115."new"("$!code_ref_blocks" :named("name"))
-    $P113."add_attribute"($P114, $P116)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    nqp_get_sc_object $P115, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 99
-    $P116 = $P115."new"("@!load_dependency_tasks" :named("name"))
-    $P113."add_attribute"($P114, $P116)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    nqp_get_sc_object $P115, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 99
-    $P116 = $P115."new"("@!fixup_tasks" :named("name"))
-    $P113."add_attribute"($P114, $P116)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    nqp_get_sc_object $P115, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 99
-    $P116 = $P115."new"("%!addr_to_slot" :named("name"))
-    $P113."add_attribute"($P114, $P116)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    nqp_get_sc_object $P115, "F3E24B0F152705B4B497A988620E1A8B7CA5D66B-1329260306.061", 99
-    $P116 = $P115."new"("%!dependencies" :named("name"))
-    $P113."add_attribute"($P114, $P116)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    .const '' $P2757 = "274_1329260312.462" 
-    $P113."add_method"($P114, "new", $P2757)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    .const '' $P2758 = "275_1329260312.462" 
-    $P113."add_method"($P114, "BUILD", $P2758)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    .const '' $P2759 = "276_1329260312.462" 
-    $P113."add_method"($P114, "slot_for_object", $P2759)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    .const '' $P2760 = "277_1329260312.462" 
-    $P113."add_method"($P114, "get_slot_past_for_object", $P2760)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    .const '' $P2761 = "278_1329260312.462" 
-    $P113."add_method"($P114, "get_slot_past_for_code_ref_at", $P2761)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    .const '' $P2762 = "279_1329260312.462" 
-    $P113."add_method"($P114, "set_slot_past", $P2762)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    .const '' $P2763 = "280_1329260312.462" 
-    $P113."add_method"($P114, "set_cur_sc", $P2763)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    .const '' $P2764 = "281_1329260312.462" 
-    $P113."add_method"($P114, "add_object_to_cur_sc_past", $P2764)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    .const '' $P2765 = "282_1329260312.462" 
-    $P113."add_method"($P114, "add_object", $P2765)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    .const '' $P2766 = "283_1329260312.462" 
-    $P113."add_method"($P114, "add_code_LEGACY", $P2766)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    .const '' $P2767 = "284_1329260312.462" 
-    $P113."add_method"($P114, "add_root_code_ref", $P2767)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    .const '' $P2768 = "285_1329260312.462" 
-    $P113."add_method"($P114, "is_precompilation_mode", $P2768)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    .const '' $P2769 = "286_1329260312.462" 
-    $P113."add_method"($P114, "add_load_dependency_task", $P2769)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    .const '' $P2770 = "287_1329260312.462" 
-    $P113."add_method"($P114, "add_fixup_task", $P2770)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    .const '' $P2771 = "288_1329260312.462" 
-    $P113."add_method"($P114, "get_ref", $P2771)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    .const '' $P2772 = "290_1329260312.462" 
-    $P113."add_method"($P114, "sc", $P2772)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    .const '' $P2773 = "291_1329260312.462" 
-    $P113."add_method"($P114, "handle", $P2773)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    .const '' $P2774 = "292_1329260312.462" 
-    $P113."add_method"($P114, "load_dependency_tasks", $P2774)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    .const '' $P2775 = "293_1329260312.462" 
-    $P113."add_method"($P114, "fixup_tasks", $P2775)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    .const '' $P2776 = "294_1329260312.462" 
-    $P113."add_method"($P114, "serialize_and_produce_deserialization_past", $P2776)
-    .const 'LexInfo' $P2777 = "273_1329260312.462" 
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    $P2777."set_static_lexpad_value"("$?PACKAGE", $P112)
-    .const 'LexInfo' $P2778 = "273_1329260312.462" 
-    $P2778."finish_static_lexpad"()
-    .const 'LexInfo' $P2779 = "273_1329260312.462" 
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    $P2779."set_static_lexpad_value"("$?CLASS", $P112)
-    .const 'LexInfo' $P2780 = "273_1329260312.462" 
-    $P2780."finish_static_lexpad"()
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    nqp_get_sc_object $P115, "27F3ECF6B2C866B16E6CB93AFBA1EB3CA80F57C5-1329260308.629", 7
-    $P113."set_default_parent"($P114, $P115)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    get_how $P113, $P112
-    nqp_get_sc_object $P114, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 198
-    $P113."compose"($P114)
-    nqp_get_sc_object $P112, "876E116BE302376F7722A4391725308FCA8A04FA-1329260309.34", 0
-    set_hll_global "GLOBAL", $P112
+    set $P116["split_words"], $P2844
+    .const '' $P2845 = "107_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 99
+    set_sub_code_object $P2845, $P115
+    .const '' $P2846 = "108_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 100
+    set_sub_code_object $P2846, $P115
+    .const '' $P2847 = "109_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 101
+    set_sub_code_object $P2847, $P115
+    .const '' $P2848 = "110_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 102
+    set_sub_code_object $P2848, $P115
+    .const '' $P2849 = "111_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 103
+    set_sub_code_object $P2849, $P115
+    .const '' $P2850 = "112_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 104
+    set_sub_code_object $P2850, $P115
+    .const 'LexInfo' $P2851 = "223_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 1
+    $P2851."set_static_lexpad_value"("$?PACKAGE", $P115)
+    .const 'LexInfo' $P2852 = "223_1330909682.33311" 
+    $P2852."finish_static_lexpad"()
+    .const 'LexInfo' $P2853 = "223_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 1
+    $P2853."set_static_lexpad_value"("$?CLASS", $P115)
+    .const 'LexInfo' $P2854 = "223_1330909682.33311" 
+    $P2854."finish_static_lexpad"()
+    .const '' $P2855 = "229_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 105
+    get_who $P116, $P115
+    set $P116["string_to_int"], $P2855
+    .const '' $P2856 = "113_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 106
+    set_sub_code_object $P2856, $P115
+    .const '' $P2857 = "114_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 107
+    set_sub_code_object $P2857, $P115
+    .const '' $P2858 = "115_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 108
+    set_sub_code_object $P2858, $P115
+    .const '' $P2859 = "116_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 109
+    set_sub_code_object $P2859, $P115
+    .const '' $P2860 = "117_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 110
+    set_sub_code_object $P2860, $P115
+    .const '' $P2861 = "118_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 111
+    set_sub_code_object $P2861, $P115
+    .const '' $P2862 = "119_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 112
+    set_sub_code_object $P2862, $P115
+    .const '' $P2863 = "120_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 113
+    set_sub_code_object $P2863, $P115
+    .const '' $P2864 = "121_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 114
+    set_sub_code_object $P2864, $P115
+    .const '' $P2865 = "122_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 115
+    set_sub_code_object $P2865, $P115
+    .const '' $P2866 = "123_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 116
+    set_sub_code_object $P2866, $P115
+    .const '' $P2867 = "124_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 117
+    set_sub_code_object $P2867, $P115
+    .const '' $P2868 = "125_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 118
+    set_sub_code_object $P2868, $P115
+    .const '' $P2869 = "126_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 119
+    set_sub_code_object $P2869, $P115
+    .const '' $P2870 = "127_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 120
+    set_sub_code_object $P2870, $P115
+    .const '' $P2871 = "128_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 121
+    set_sub_code_object $P2871, $P115
+    .const '' $P2872 = "129_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 122
+    set_sub_code_object $P2872, $P115
+    .const '' $P2873 = "130_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 123
+    set_sub_code_object $P2873, $P115
+    .const '' $P2874 = "131_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 124
+    set_sub_code_object $P2874, $P115
+    .const '' $P2875 = "132_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 125
+    set_sub_code_object $P2875, $P115
+    .const '' $P2876 = "133_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 126
+    set_sub_code_object $P2876, $P115
+    .const '' $P2877 = "134_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 127
+    set_sub_code_object $P2877, $P115
+    .const '' $P2878 = "135_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 128
+    set_sub_code_object $P2878, $P115
+    .const '' $P2879 = "136_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 129
+    set_sub_code_object $P2879, $P115
+    .const '' $P2880 = "137_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 130
+    set_sub_code_object $P2880, $P115
+    .const '' $P2881 = "138_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 131
+    set_sub_code_object $P2881, $P115
+    .const '' $P2882 = "139_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 132
+    set_sub_code_object $P2882, $P115
+    .const '' $P2883 = "140_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 133
+    set_sub_code_object $P2883, $P115
+    .const '' $P2884 = "141_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 134
+    set_sub_code_object $P2884, $P115
+    .const '' $P2885 = "142_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 135
+    set_sub_code_object $P2885, $P115
+    .const '' $P2886 = "143_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 136
+    set_sub_code_object $P2886, $P115
+    .const '' $P2887 = "144_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 137
+    set_sub_code_object $P2887, $P115
+    .const '' $P2888 = "145_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 138
+    set_sub_code_object $P2888, $P115
+    .const 'LexInfo' $P2889 = "228_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 105
+    $P2889."set_static_lexpad_value"("$?PACKAGE", $P115)
+    .const 'LexInfo' $P2890 = "228_1330909682.33311" 
+    $P2890."finish_static_lexpad"()
+    .const 'LexInfo' $P2891 = "228_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 105
+    $P2891."set_static_lexpad_value"("$?CLASS", $P115)
+    .const 'LexInfo' $P2892 = "228_1330909682.33311" 
+    $P2892."finish_static_lexpad"()
+    .const '' $P2893 = "146_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 140
+    set_sub_code_object $P2893, $P115
+    .const '' $P2894 = "147_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 141
+    set_sub_code_object $P2894, $P115
+    .const '' $P2895 = "148_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 142
+    set_sub_code_object $P2895, $P115
+    .const '' $P2896 = "149_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 143
+    set_sub_code_object $P2896, $P115
+    .const '' $P2897 = "150_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 144
+    set_sub_code_object $P2897, $P115
+    .const '' $P2898 = "151_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 145
+    set_sub_code_object $P2898, $P115
+    .const '' $P2899 = "152_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 146
+    set_sub_code_object $P2899, $P115
+    .const '' $P2900 = "153_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 147
+    set_sub_code_object $P2900, $P115
+    .const '' $P2901 = "154_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 148
+    set_sub_code_object $P2901, $P115
+    .const '' $P2902 = "155_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 149
+    set_sub_code_object $P2902, $P115
+    .const '' $P2903 = "156_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 150
+    set_sub_code_object $P2903, $P115
+    .const '' $P2904 = "157_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 151
+    set_sub_code_object $P2904, $P115
+    .const '' $P2905 = "158_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 152
+    set_sub_code_object $P2905, $P115
+    .const '' $P2906 = "159_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 153
+    set_sub_code_object $P2906, $P115
+    .const '' $P2907 = "160_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 154
+    set_sub_code_object $P2907, $P115
+    .const '' $P2908 = "161_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 155
+    set_sub_code_object $P2908, $P115
+    .const '' $P2909 = "162_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 156
+    set_sub_code_object $P2909, $P115
+    .const '' $P2910 = "163_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 157
+    set_sub_code_object $P2910, $P115
+    .const '' $P2911 = "164_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 158
+    set_sub_code_object $P2911, $P115
+    .const '' $P2912 = "165_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 159
+    set_sub_code_object $P2912, $P115
+    .const '' $P2913 = "166_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 160
+    set_sub_code_object $P2913, $P115
+    .const '' $P2914 = "167_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 161
+    set_sub_code_object $P2914, $P115
+    .const '' $P2915 = "168_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 162
+    set_sub_code_object $P2915, $P115
+    .const '' $P2916 = "169_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 163
+    set_sub_code_object $P2916, $P115
+    .const '' $P2917 = "170_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 164
+    set_sub_code_object $P2917, $P115
+    .const '' $P2918 = "171_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 165
+    set_sub_code_object $P2918, $P115
+    .const '' $P2919 = "172_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 166
+    set_sub_code_object $P2919, $P115
+    .const '' $P2920 = "173_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 167
+    set_sub_code_object $P2920, $P115
+    .const '' $P2921 = "174_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 168
+    set_sub_code_object $P2921, $P115
+    .const '' $P2922 = "175_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 169
+    set_sub_code_object $P2922, $P115
+    .const '' $P2923 = "176_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 170
+    set_sub_code_object $P2923, $P115
+    .const '' $P2924 = "177_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 171
+    set_sub_code_object $P2924, $P115
+    .const '' $P2925 = "178_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 172
+    set_sub_code_object $P2925, $P115
+    .const '' $P2926 = "179_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 173
+    set_sub_code_object $P2926, $P115
+    .const '' $P2927 = "180_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 174
+    set_sub_code_object $P2927, $P115
+    .const '' $P2928 = "181_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 175
+    set_sub_code_object $P2928, $P115
+    .const '' $P2929 = "182_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 176
+    set_sub_code_object $P2929, $P115
+    .const '' $P2930 = "183_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 177
+    set_sub_code_object $P2930, $P115
+    .const '' $P2931 = "184_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 178
+    set_sub_code_object $P2931, $P115
+    .const '' $P2932 = "185_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 179
+    set_sub_code_object $P2932, $P115
+    .const '' $P2933 = "186_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 180
+    set_sub_code_object $P2933, $P115
+    .const 'LexInfo' $P2934 = "240_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
+    $P2934."set_static_lexpad_value"("$?PACKAGE", $P115)
+    .const 'LexInfo' $P2935 = "240_1330909682.33311" 
+    $P2935."finish_static_lexpad"()
+    .const 'LexInfo' $P2936 = "240_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
+    $P2936."set_static_lexpad_value"("$?CLASS", $P115)
+    .const 'LexInfo' $P2937 = "240_1330909682.33311" 
+    $P2937."finish_static_lexpad"()
+    .const '' $P2938 = "187_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 182
+    set_sub_code_object $P2938, $P115
+    .const '' $P2939 = "188_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 183
+    set_sub_code_object $P2939, $P115
+    .const '' $P2940 = "189_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 184
+    set_sub_code_object $P2940, $P115
+    .const '' $P2941 = "190_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 185
+    set_sub_code_object $P2941, $P115
+    .const '' $P2942 = "191_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 186
+    set_sub_code_object $P2942, $P115
+    .const 'LexInfo' $P2943 = "281_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 181
+    $P2943."set_static_lexpad_value"("$?PACKAGE", $P115)
+    .const 'LexInfo' $P2944 = "281_1330909682.33311" 
+    $P2944."finish_static_lexpad"()
+    .const 'LexInfo' $P2945 = "281_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 181
+    $P2945."set_static_lexpad_value"("$?CLASS", $P115)
+    .const 'LexInfo' $P2946 = "281_1330909682.33311" 
+    $P2946."finish_static_lexpad"()
+    .const '' $P2947 = "192_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 188
+    set_sub_code_object $P2947, $P115
+    .const '' $P2948 = "193_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 189
+    set_sub_code_object $P2948, $P115
+    .const '' $P2949 = "194_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 190
+    set_sub_code_object $P2949, $P115
+    .const '' $P2950 = "195_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 191
+    set_sub_code_object $P2950, $P115
+    .const '' $P2951 = "196_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 192
+    set_sub_code_object $P2951, $P115
+    .const '' $P2952 = "197_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 193
+    set_sub_code_object $P2952, $P115
+    .const '' $P2953 = "198_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 194
+    set_sub_code_object $P2953, $P115
+    .const '' $P2954 = "199_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 195
+    set_sub_code_object $P2954, $P115
+    .const '' $P2955 = "200_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 196
+    set_sub_code_object $P2955, $P115
+    .const '' $P2956 = "201_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 197
+    set_sub_code_object $P2956, $P115
+    .const 'LexInfo' $P2957 = "283_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 187
+    $P2957."set_static_lexpad_value"("$?PACKAGE", $P115)
+    .const 'LexInfo' $P2958 = "283_1330909682.33311" 
+    $P2958."finish_static_lexpad"()
+    .const 'LexInfo' $P2959 = "283_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 187
+    $P2959."set_static_lexpad_value"("$?CLASS", $P115)
+    .const 'LexInfo' $P2960 = "283_1330909682.33311" 
+    $P2960."finish_static_lexpad"()
+    .const '' $P2961 = "202_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 199
+    set_sub_code_object $P2961, $P115
+    .const '' $P2962 = "203_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 200
+    set_sub_code_object $P2962, $P115
+    .const '' $P2963 = "204_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 201
+    set_sub_code_object $P2963, $P115
+    .const '' $P2964 = "205_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 202
+    set_sub_code_object $P2964, $P115
+    .const '' $P2965 = "206_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 203
+    set_sub_code_object $P2965, $P115
+    .const '' $P2966 = "207_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 204
+    set_sub_code_object $P2966, $P115
+    .const '' $P2967 = "208_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 205
+    set_sub_code_object $P2967, $P115
+    .const '' $P2968 = "209_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 206
+    set_sub_code_object $P2968, $P115
+    .const '' $P2969 = "210_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 207
+    set_sub_code_object $P2969, $P115
+    .const '' $P2970 = "211_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 208
+    set_sub_code_object $P2970, $P115
+    .const '' $P2971 = "212_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 209
+    set_sub_code_object $P2971, $P115
+    .const '' $P2972 = "213_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 210
+    set_sub_code_object $P2972, $P115
+    .const '' $P2973 = "214_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 211
+    set_sub_code_object $P2973, $P115
+    .const '' $P2974 = "215_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 212
+    set_sub_code_object $P2974, $P115
+    .const '' $P2975 = "216_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 213
+    set_sub_code_object $P2975, $P115
+    .const '' $P2976 = "217_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 214
+    set_sub_code_object $P2976, $P115
+    .const '' $P2977 = "218_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 215
+    set_sub_code_object $P2977, $P115
+    .const '' $P2978 = "219_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 216
+    set_sub_code_object $P2978, $P115
+    .const '' $P2979 = "220_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 217
+    set_sub_code_object $P2979, $P115
+    .const '' $P2980 = "221_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 218
+    set_sub_code_object $P2980, $P115
+    .const 'LexInfo' $P2981 = "293_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    $P2981."set_static_lexpad_value"("$?PACKAGE", $P115)
+    .const 'LexInfo' $P2982 = "293_1330909682.33311" 
+    $P2982."finish_static_lexpad"()
+    .const 'LexInfo' $P2983 = "293_1330909682.33311" 
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    $P2983."set_static_lexpad_value"("$?CLASS", $P115)
+    .const 'LexInfo' $P2984 = "293_1330909682.33311" 
+    $P2984."finish_static_lexpad"()
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 0
+    set_hll_global "GLOBAL", $P115
+.end
+
+
+.HLL "nqp"
+
+.namespace []
+.sub "_block2528"  :anon :subid("297_1330909682.33311") :outer("222_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 0
+    .const 'Sub' $P2530 = "10_1330909682.33311" 
+    .const 'Sub' $P2531 = "11_1330909682.33311" 
+    .const 'Sub' $P2532 = "12_1330909682.33311" 
+    .const 'Sub' $P2533 = "13_1330909682.33311" 
+    .const 'Sub' $P2534 = "14_1330909682.33311" 
+    .const 'Sub' $P2535 = "15_1330909682.33311" 
+    .const 'Sub' $P2536 = "16_1330909682.33311" 
+    .const 'Sub' $P2537 = "17_1330909682.33311" 
+    .const 'Sub' $P2538 = "18_1330909682.33311" 
+    .const 'Sub' $P2539 = "19_1330909682.33311" 
+    .const 'Sub' $P2540 = "20_1330909682.33311" 
+    .const 'Sub' $P2541 = "21_1330909682.33311" 
+    .const 'Sub' $P2542 = "22_1330909682.33311" 
+    .const 'Sub' $P2543 = "23_1330909682.33311" 
+    .const 'Sub' $P2544 = "24_1330909682.33311" 
+    .const 'Sub' $P2545 = "25_1330909682.33311" 
+    .const 'Sub' $P2546 = "26_1330909682.33311" 
+    .const 'Sub' $P2547 = "27_1330909682.33311" 
+    .const 'Sub' $P2548 = "28_1330909682.33311" 
+    .const 'Sub' $P2549 = "29_1330909682.33311" 
+    .const 'Sub' $P2550 = "30_1330909682.33311" 
+    .const 'Sub' $P2551 = "31_1330909682.33311" 
+    .const 'Sub' $P2552 = "32_1330909682.33311" 
+    .const 'Sub' $P2553 = "33_1330909682.33311" 
+    .const 'Sub' $P2554 = "34_1330909682.33311" 
+    .const 'Sub' $P2555 = "35_1330909682.33311" 
+    .const 'Sub' $P2556 = "36_1330909682.33311" 
+    .const 'Sub' $P2557 = "37_1330909682.33311" 
+    .const 'Sub' $P2558 = "38_1330909682.33311" 
+    .const 'Sub' $P2559 = "39_1330909682.33311" 
+    .const 'Sub' $P2560 = "40_1330909682.33311" 
+    .const 'Sub' $P2561 = "41_1330909682.33311" 
+    .const 'Sub' $P2562 = "42_1330909682.33311" 
+    .const 'Sub' $P2563 = "43_1330909682.33311" 
+    .const 'Sub' $P2564 = "44_1330909682.33311" 
+    .const 'Sub' $P2565 = "45_1330909682.33311" 
+    .const 'Sub' $P2566 = "46_1330909682.33311" 
+    .const 'Sub' $P2567 = "47_1330909682.33311" 
+    .const 'Sub' $P2568 = "48_1330909682.33311" 
+    .const 'Sub' $P2569 = "49_1330909682.33311" 
+    .const 'Sub' $P2570 = "50_1330909682.33311" 
+    .const 'Sub' $P2571 = "51_1330909682.33311" 
+    .const 'Sub' $P2572 = "52_1330909682.33311" 
+    .const 'Sub' $P2573 = "53_1330909682.33311" 
+    .const 'Sub' $P2574 = "54_1330909682.33311" 
+    .const 'Sub' $P2575 = "55_1330909682.33311" 
+    .const 'Sub' $P2576 = "56_1330909682.33311" 
+    .const 'Sub' $P2577 = "57_1330909682.33311" 
+    .const 'Sub' $P2578 = "58_1330909682.33311" 
+    .const 'Sub' $P2579 = "59_1330909682.33311" 
+    .const 'Sub' $P2580 = "60_1330909682.33311" 
+    .const 'Sub' $P2581 = "61_1330909682.33311" 
+    .const 'Sub' $P2582 = "62_1330909682.33311" 
+    .const 'Sub' $P2583 = "63_1330909682.33311" 
+    .const 'Sub' $P2584 = "64_1330909682.33311" 
+    .const 'Sub' $P2585 = "65_1330909682.33311" 
+    .const 'Sub' $P2586 = "66_1330909682.33311" 
+    .const 'Sub' $P2587 = "67_1330909682.33311" 
+    .const 'Sub' $P2588 = "68_1330909682.33311" 
+    .const 'Sub' $P2589 = "69_1330909682.33311" 
+    .const 'Sub' $P2590 = "70_1330909682.33311" 
+    .const 'Sub' $P2591 = "71_1330909682.33311" 
+    .const 'Sub' $P2592 = "72_1330909682.33311" 
+    .const 'Sub' $P2593 = "73_1330909682.33311" 
+    .const 'Sub' $P2594 = "74_1330909682.33311" 
+    .const 'Sub' $P2595 = "75_1330909682.33311" 
+    .const 'Sub' $P2596 = "76_1330909682.33311" 
+    .const 'Sub' $P2597 = "77_1330909682.33311" 
+    .const 'Sub' $P2598 = "78_1330909682.33311" 
+    .const 'Sub' $P2599 = "79_1330909682.33311" 
+    .const 'Sub' $P2600 = "80_1330909682.33311" 
+    .const 'Sub' $P2601 = "81_1330909682.33311" 
+    .const 'Sub' $P2602 = "82_1330909682.33311" 
+    .const 'Sub' $P2603 = "83_1330909682.33311" 
+    .const 'Sub' $P2604 = "84_1330909682.33311" 
+    .const 'Sub' $P2605 = "85_1330909682.33311" 
+    .const 'Sub' $P2606 = "86_1330909682.33311" 
+    .const 'Sub' $P2607 = "87_1330909682.33311" 
+    .const 'Sub' $P2608 = "88_1330909682.33311" 
+    .const 'Sub' $P2609 = "89_1330909682.33311" 
+    .const 'Sub' $P2610 = "90_1330909682.33311" 
+    .const 'Sub' $P2611 = "91_1330909682.33311" 
+    .const 'Sub' $P2612 = "92_1330909682.33311" 
+    .const 'Sub' $P2613 = "93_1330909682.33311" 
+    .const 'Sub' $P2614 = "94_1330909682.33311" 
+    .const 'Sub' $P2615 = "95_1330909682.33311" 
+    .const 'Sub' $P2616 = "96_1330909682.33311" 
+    .const 'Sub' $P2617 = "97_1330909682.33311" 
+    .const 'Sub' $P2618 = "98_1330909682.33311" 
+    .const 'Sub' $P2619 = "99_1330909682.33311" 
+    .const 'Sub' $P2620 = "100_1330909682.33311" 
+    .const 'Sub' $P2621 = "101_1330909682.33311" 
+    .const 'Sub' $P2622 = "102_1330909682.33311" 
+    .const 'Sub' $P2623 = "103_1330909682.33311" 
+    .const 'Sub' $P2624 = "104_1330909682.33311" 
+    .const 'Sub' $P2625 = "105_1330909682.33311" 
+    .const 'Sub' $P2626 = "106_1330909682.33311" 
+    .const 'Sub' $P2627 = "107_1330909682.33311" 
+    .const 'Sub' $P2628 = "108_1330909682.33311" 
+    .const 'Sub' $P2629 = "109_1330909682.33311" 
+    .const 'Sub' $P2630 = "110_1330909682.33311" 
+    .const 'Sub' $P2631 = "111_1330909682.33311" 
+    .const 'Sub' $P2632 = "112_1330909682.33311" 
+    .const 'Sub' $P2633 = "113_1330909682.33311" 
+    .const 'Sub' $P2634 = "114_1330909682.33311" 
+    .const 'Sub' $P2635 = "115_1330909682.33311" 
+    .const 'Sub' $P2636 = "116_1330909682.33311" 
+    .const 'Sub' $P2637 = "117_1330909682.33311" 
+    .const 'Sub' $P2638 = "118_1330909682.33311" 
+    .const 'Sub' $P2639 = "119_1330909682.33311" 
+    .const 'Sub' $P2640 = "120_1330909682.33311" 
+    .const 'Sub' $P2641 = "121_1330909682.33311" 
+    .const 'Sub' $P2642 = "122_1330909682.33311" 
+    .const 'Sub' $P2643 = "123_1330909682.33311" 
+    .const 'Sub' $P2644 = "124_1330909682.33311" 
+    .const 'Sub' $P2645 = "125_1330909682.33311" 
+    .const 'Sub' $P2646 = "126_1330909682.33311" 
+    .const 'Sub' $P2647 = "127_1330909682.33311" 
+    .const 'Sub' $P2648 = "128_1330909682.33311" 
+    .const 'Sub' $P2649 = "129_1330909682.33311" 
+    .const 'Sub' $P2650 = "130_1330909682.33311" 
+    .const 'Sub' $P2651 = "131_1330909682.33311" 
+    .const 'Sub' $P2652 = "132_1330909682.33311" 
+    .const 'Sub' $P2653 = "133_1330909682.33311" 
+    .const 'Sub' $P2654 = "134_1330909682.33311" 
+    .const 'Sub' $P2655 = "135_1330909682.33311" 
+    .const 'Sub' $P2656 = "136_1330909682.33311" 
+    .const 'Sub' $P2657 = "137_1330909682.33311" 
+    .const 'Sub' $P2658 = "138_1330909682.33311" 
+    .const 'Sub' $P2659 = "139_1330909682.33311" 
+    .const 'Sub' $P2660 = "140_1330909682.33311" 
+    .const 'Sub' $P2661 = "141_1330909682.33311" 
+    .const 'Sub' $P2662 = "142_1330909682.33311" 
+    .const 'Sub' $P2663 = "143_1330909682.33311" 
+    .const 'Sub' $P2664 = "144_1330909682.33311" 
+    .const 'Sub' $P2665 = "145_1330909682.33311" 
+    .const 'Sub' $P2666 = "146_1330909682.33311" 
+    .const 'Sub' $P2667 = "147_1330909682.33311" 
+    .const 'Sub' $P2668 = "148_1330909682.33311" 
+    .const 'Sub' $P2669 = "149_1330909682.33311" 
+    .const 'Sub' $P2670 = "150_1330909682.33311" 
+    .const 'Sub' $P2671 = "151_1330909682.33311" 
+    .const 'Sub' $P2672 = "152_1330909682.33311" 
+    .const 'Sub' $P2673 = "153_1330909682.33311" 
+    .const 'Sub' $P2674 = "154_1330909682.33311" 
+    .const 'Sub' $P2675 = "155_1330909682.33311" 
+    .const 'Sub' $P2676 = "156_1330909682.33311" 
+    .const 'Sub' $P2677 = "157_1330909682.33311" 
+    .const 'Sub' $P2678 = "158_1330909682.33311" 
+    .const 'Sub' $P2679 = "159_1330909682.33311" 
+    .const 'Sub' $P2680 = "160_1330909682.33311" 
+    .const 'Sub' $P2681 = "161_1330909682.33311" 
+    .const 'Sub' $P2682 = "162_1330909682.33311" 
+    .const 'Sub' $P2683 = "163_1330909682.33311" 
+    .const 'Sub' $P2684 = "164_1330909682.33311" 
+    .const 'Sub' $P2685 = "165_1330909682.33311" 
+    .const 'Sub' $P2686 = "166_1330909682.33311" 
+    .const 'Sub' $P2687 = "167_1330909682.33311" 
+    .const 'Sub' $P2688 = "168_1330909682.33311" 
+    .const 'Sub' $P2689 = "169_1330909682.33311" 
+    .const 'Sub' $P2690 = "170_1330909682.33311" 
+    .const 'Sub' $P2691 = "171_1330909682.33311" 
+    .const 'Sub' $P2692 = "172_1330909682.33311" 
+    .const 'Sub' $P2693 = "173_1330909682.33311" 
+    .const 'Sub' $P2694 = "174_1330909682.33311" 
+    .const 'Sub' $P2695 = "175_1330909682.33311" 
+    .const 'Sub' $P2696 = "176_1330909682.33311" 
+    .const 'Sub' $P2697 = "177_1330909682.33311" 
+    .const 'Sub' $P2698 = "178_1330909682.33311" 
+    .const 'Sub' $P2699 = "179_1330909682.33311" 
+    .const 'Sub' $P2700 = "180_1330909682.33311" 
+    .const 'Sub' $P2701 = "181_1330909682.33311" 
+    .const 'Sub' $P2702 = "182_1330909682.33311" 
+    .const 'Sub' $P2703 = "183_1330909682.33311" 
+    .const 'Sub' $P2704 = "184_1330909682.33311" 
+    .const 'Sub' $P2705 = "185_1330909682.33311" 
+    .const 'Sub' $P2706 = "186_1330909682.33311" 
+    .const 'Sub' $P2707 = "187_1330909682.33311" 
+    .const 'Sub' $P2708 = "188_1330909682.33311" 
+    .const 'Sub' $P2709 = "189_1330909682.33311" 
+    .const 'Sub' $P2710 = "190_1330909682.33311" 
+    .const 'Sub' $P2711 = "191_1330909682.33311" 
+    .const 'Sub' $P2712 = "192_1330909682.33311" 
+    .const 'Sub' $P2713 = "193_1330909682.33311" 
+    .const 'Sub' $P2714 = "194_1330909682.33311" 
+    .const 'Sub' $P2715 = "195_1330909682.33311" 
+    .const 'Sub' $P2716 = "196_1330909682.33311" 
+    .const 'Sub' $P2717 = "197_1330909682.33311" 
+    .const 'Sub' $P2718 = "198_1330909682.33311" 
+    .const 'Sub' $P2719 = "199_1330909682.33311" 
+    .const 'Sub' $P2720 = "200_1330909682.33311" 
+    .const 'Sub' $P2721 = "201_1330909682.33311" 
+    .const 'Sub' $P2722 = "202_1330909682.33311" 
+    .const 'Sub' $P2723 = "203_1330909682.33311" 
+    .const 'Sub' $P2724 = "204_1330909682.33311" 
+    .const 'Sub' $P2725 = "205_1330909682.33311" 
+    .const 'Sub' $P2726 = "206_1330909682.33311" 
+    .const 'Sub' $P2727 = "207_1330909682.33311" 
+    .const 'Sub' $P2728 = "208_1330909682.33311" 
+    .const 'Sub' $P2729 = "209_1330909682.33311" 
+    .const 'Sub' $P2730 = "210_1330909682.33311" 
+    .const 'Sub' $P2731 = "211_1330909682.33311" 
+    .const 'Sub' $P2732 = "212_1330909682.33311" 
+    .const 'Sub' $P2733 = "213_1330909682.33311" 
+    .const 'Sub' $P2734 = "214_1330909682.33311" 
+    .const 'Sub' $P2735 = "215_1330909682.33311" 
+    .const 'Sub' $P2736 = "216_1330909682.33311" 
+    .const 'Sub' $P2737 = "217_1330909682.33311" 
+    .const 'Sub' $P2738 = "218_1330909682.33311" 
+    .const 'Sub' $P2739 = "219_1330909682.33311" 
+    .const 'Sub' $P2740 = "220_1330909682.33311" 
+    .const 'Sub' $P2741 = "221_1330909682.33311" 
+    new $P113, "ResizablePMCArray"
+    push $P113, $P2530
+    push $P113, $P2531
+    push $P113, $P2532
+    push $P113, $P2533
+    push $P113, $P2534
+    push $P113, $P2535
+    push $P113, $P2536
+    push $P113, $P2537
+    push $P113, $P2538
+    push $P113, $P2539
+    push $P113, $P2540
+    push $P113, $P2541
+    push $P113, $P2542
+    push $P113, $P2543
+    push $P113, $P2544
+    push $P113, $P2545
+    push $P113, $P2546
+    push $P113, $P2547
+    push $P113, $P2548
+    push $P113, $P2549
+    push $P113, $P2550
+    push $P113, $P2551
+    push $P113, $P2552
+    push $P113, $P2553
+    push $P113, $P2554
+    push $P113, $P2555
+    push $P113, $P2556
+    push $P113, $P2557
+    push $P113, $P2558
+    push $P113, $P2559
+    push $P113, $P2560
+    push $P113, $P2561
+    push $P113, $P2562
+    push $P113, $P2563
+    push $P113, $P2564
+    push $P113, $P2565
+    push $P113, $P2566
+    push $P113, $P2567
+    push $P113, $P2568
+    push $P113, $P2569
+    push $P113, $P2570
+    push $P113, $P2571
+    push $P113, $P2572
+    push $P113, $P2573
+    push $P113, $P2574
+    push $P113, $P2575
+    push $P113, $P2576
+    push $P113, $P2577
+    push $P113, $P2578
+    push $P113, $P2579
+    push $P113, $P2580
+    push $P113, $P2581
+    push $P113, $P2582
+    push $P113, $P2583
+    push $P113, $P2584
+    push $P113, $P2585
+    push $P113, $P2586
+    push $P113, $P2587
+    push $P113, $P2588
+    push $P113, $P2589
+    push $P113, $P2590
+    push $P113, $P2591
+    push $P113, $P2592
+    push $P113, $P2593
+    push $P113, $P2594
+    push $P113, $P2595
+    push $P113, $P2596
+    push $P113, $P2597
+    push $P113, $P2598
+    push $P113, $P2599
+    push $P113, $P2600
+    push $P113, $P2601
+    push $P113, $P2602
+    push $P113, $P2603
+    push $P113, $P2604
+    push $P113, $P2605
+    push $P113, $P2606
+    push $P113, $P2607
+    push $P113, $P2608
+    push $P113, $P2609
+    push $P113, $P2610
+    push $P113, $P2611
+    push $P113, $P2612
+    push $P113, $P2613
+    push $P113, $P2614
+    push $P113, $P2615
+    push $P113, $P2616
+    push $P113, $P2617
+    push $P113, $P2618
+    push $P113, $P2619
+    push $P113, $P2620
+    push $P113, $P2621
+    push $P113, $P2622
+    push $P113, $P2623
+    push $P113, $P2624
+    push $P113, $P2625
+    push $P113, $P2626
+    push $P113, $P2627
+    push $P113, $P2628
+    push $P113, $P2629
+    push $P113, $P2630
+    push $P113, $P2631
+    push $P113, $P2632
+    push $P113, $P2633
+    push $P113, $P2634
+    push $P113, $P2635
+    push $P113, $P2636
+    push $P113, $P2637
+    push $P113, $P2638
+    push $P113, $P2639
+    push $P113, $P2640
+    push $P113, $P2641
+    push $P113, $P2642
+    push $P113, $P2643
+    push $P113, $P2644
+    push $P113, $P2645
+    push $P113, $P2646
+    push $P113, $P2647
+    push $P113, $P2648
+    push $P113, $P2649
+    push $P113, $P2650
+    push $P113, $P2651
+    push $P113, $P2652
+    push $P113, $P2653
+    push $P113, $P2654
+    push $P113, $P2655
+    push $P113, $P2656
+    push $P113, $P2657
+    push $P113, $P2658
+    push $P113, $P2659
+    push $P113, $P2660
+    push $P113, $P2661
+    push $P113, $P2662
+    push $P113, $P2663
+    push $P113, $P2664
+    push $P113, $P2665
+    push $P113, $P2666
+    push $P113, $P2667
+    push $P113, $P2668
+    push $P113, $P2669
+    push $P113, $P2670
+    push $P113, $P2671
+    push $P113, $P2672
+    push $P113, $P2673
+    push $P113, $P2674
+    push $P113, $P2675
+    push $P113, $P2676
+    push $P113, $P2677
+    push $P113, $P2678
+    push $P113, $P2679
+    push $P113, $P2680
+    push $P113, $P2681
+    push $P113, $P2682
+    push $P113, $P2683
+    push $P113, $P2684
+    push $P113, $P2685
+    push $P113, $P2686
+    push $P113, $P2687
+    push $P113, $P2688
+    push $P113, $P2689
+    push $P113, $P2690
+    push $P113, $P2691
+    push $P113, $P2692
+    push $P113, $P2693
+    push $P113, $P2694
+    push $P113, $P2695
+    push $P113, $P2696
+    push $P113, $P2697
+    push $P113, $P2698
+    push $P113, $P2699
+    push $P113, $P2700
+    push $P113, $P2701
+    push $P113, $P2702
+    push $P113, $P2703
+    push $P113, $P2704
+    push $P113, $P2705
+    push $P113, $P2706
+    push $P113, $P2707
+    push $P113, $P2708
+    push $P113, $P2709
+    push $P113, $P2710
+    push $P113, $P2711
+    push $P113, $P2712
+    push $P113, $P2713
+    push $P113, $P2714
+    push $P113, $P2715
+    push $P113, $P2716
+    push $P113, $P2717
+    push $P113, $P2718
+    push $P113, $P2719
+    push $P113, $P2720
+    push $P113, $P2721
+    push $P113, $P2722
+    push $P113, $P2723
+    push $P113, $P2724
+    push $P113, $P2725
+    push $P113, $P2726
+    push $P113, $P2727
+    push $P113, $P2728
+    push $P113, $P2729
+    push $P113, $P2730
+    push $P113, $P2731
+    push $P113, $P2732
+    push $P113, $P2733
+    push $P113, $P2734
+    push $P113, $P2735
+    push $P113, $P2736
+    push $P113, $P2737
+    push $P113, $P2738
+    push $P113, $P2739
+    push $P113, $P2740
+    push $P113, $P2741
+    .return ($P113)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "_block1006"  :subid("11_1329260312.462") :outer("10_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "_block1006"  :subid("223_1330909682.33311") :outer("222_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 7
-    .const 'Sub' $P1308 = "118_1329260312.462" 
+    .const 'Sub' $P1308 = "112_1330909682.33311" 
     capture_lex $P1308
-    .const 'Sub' $P1305 = "117_1329260312.462" 
+    .const 'Sub' $P1305 = "111_1330909682.33311" 
     capture_lex $P1305
-    .const 'Sub' $P1297 = "116_1329260312.462" 
+    .const 'Sub' $P1297 = "110_1330909682.33311" 
     capture_lex $P1297
-    .const 'Sub' $P1289 = "115_1329260312.462" 
+    .const 'Sub' $P1289 = "109_1330909682.33311" 
     capture_lex $P1289
-    .const 'Sub' $P1285 = "114_1329260312.462" 
+    .const 'Sub' $P1285 = "108_1330909682.33311" 
     capture_lex $P1285
-    .const 'Sub' $P1282 = "113_1329260312.462" 
+    .const 'Sub' $P1282 = "107_1330909682.33311" 
     capture_lex $P1282
-    .const 'Sub' $P1279 = "112_1329260312.462" 
+    .const 'Sub' $P1279 = "106_1330909682.33311" 
     capture_lex $P1279
-    .const 'Sub' $P1277 = "111_1329260312.462" 
+    .const 'Sub' $P1277 = "105_1330909682.33311" 
     capture_lex $P1277
-    .const 'Sub' $P1275 = "110_1329260312.462" 
+    .const 'Sub' $P1275 = "104_1330909682.33311" 
     capture_lex $P1275
-    .const 'Sub' $P1272 = "109_1329260312.462" 
+    .const 'Sub' $P1272 = "103_1330909682.33311" 
     capture_lex $P1272
-    .const 'Sub' $P1269 = "108_1329260312.462" 
+    .const 'Sub' $P1269 = "102_1330909682.33311" 
     capture_lex $P1269
-    .const 'Sub' $P1265 = "107_1329260312.462" 
+    .const 'Sub' $P1265 = "101_1330909682.33311" 
     capture_lex $P1265
-    .const 'Sub' $P1254 = "106_1329260312.462" 
+    .const 'Sub' $P1254 = "100_1330909682.33311" 
     capture_lex $P1254
-    .const 'Sub' $P1250 = "105_1329260312.462" 
+    .const 'Sub' $P1250 = "99_1330909682.33311" 
     capture_lex $P1250
-    .const 'Sub' $P1249 = "104_1329260312.462" 
+    .const 'Sub' $P1249 = "98_1330909682.33311" 
     capture_lex $P1249
-    .const 'Sub' $P1244 = "103_1329260312.462" 
+    .const 'Sub' $P1244 = "97_1330909682.33311" 
     capture_lex $P1244
-    .const 'Sub' $P1243 = "102_1329260312.462" 
+    .const 'Sub' $P1243 = "96_1330909682.33311" 
     capture_lex $P1243
-    .const 'Sub' $P1239 = "101_1329260312.462" 
+    .const 'Sub' $P1239 = "95_1330909682.33311" 
     capture_lex $P1239
-    .const 'Sub' $P1238 = "100_1329260312.462" 
+    .const 'Sub' $P1238 = "94_1330909682.33311" 
     capture_lex $P1238
-    .const 'Sub' $P1228 = "98_1329260312.462" 
+    .const 'Sub' $P1228 = "93_1330909682.33311" 
     capture_lex $P1228
-    .const 'Sub' $P1227 = "97_1329260312.462" 
+    .const 'Sub' $P1227 = "92_1330909682.33311" 
     capture_lex $P1227
-    .const 'Sub' $P1211 = "93_1329260312.462" 
+    .const 'Sub' $P1211 = "91_1330909682.33311" 
     capture_lex $P1211
-    .const 'Sub' $P1210 = "92_1329260312.462" 
+    .const 'Sub' $P1210 = "90_1330909682.33311" 
     capture_lex $P1210
-    .const 'Sub' $P1206 = "91_1329260312.462" 
+    .const 'Sub' $P1206 = "89_1330909682.33311" 
     capture_lex $P1206
-    .const 'Sub' $P1205 = "90_1329260312.462" 
+    .const 'Sub' $P1205 = "88_1330909682.33311" 
     capture_lex $P1205
-    .const 'Sub' $P1202 = "89_1329260312.462" 
+    .const 'Sub' $P1202 = "87_1330909682.33311" 
     capture_lex $P1202
-    .const 'Sub' $P1201 = "88_1329260312.462" 
+    .const 'Sub' $P1201 = "86_1330909682.33311" 
     capture_lex $P1201
-    .const 'Sub' $P1197 = "87_1329260312.462" 
+    .const 'Sub' $P1197 = "85_1330909682.33311" 
     capture_lex $P1197
-    .const 'Sub' $P1196 = "86_1329260312.462" 
+    .const 'Sub' $P1196 = "84_1330909682.33311" 
     capture_lex $P1196
-    .const 'Sub' $P1192 = "85_1329260312.462" 
+    .const 'Sub' $P1192 = "83_1330909682.33311" 
     capture_lex $P1192
-    .const 'Sub' $P1191 = "84_1329260312.462" 
+    .const 'Sub' $P1191 = "82_1330909682.33311" 
     capture_lex $P1191
-    .const 'Sub' $P1188 = "83_1329260312.462" 
+    .const 'Sub' $P1188 = "81_1330909682.33311" 
     capture_lex $P1188
-    .const 'Sub' $P1187 = "82_1329260312.462" 
+    .const 'Sub' $P1187 = "80_1330909682.33311" 
     capture_lex $P1187
-    .const 'Sub' $P1184 = "81_1329260312.462" 
+    .const 'Sub' $P1184 = "79_1330909682.33311" 
     capture_lex $P1184
-    .const 'Sub' $P1183 = "80_1329260312.462" 
+    .const 'Sub' $P1183 = "78_1330909682.33311" 
     capture_lex $P1183
-    .const 'Sub' $P1180 = "79_1329260312.462" 
+    .const 'Sub' $P1180 = "77_1330909682.33311" 
     capture_lex $P1180
-    .const 'Sub' $P1179 = "78_1329260312.462" 
+    .const 'Sub' $P1179 = "76_1330909682.33311" 
     capture_lex $P1179
-    .const 'Sub' $P1176 = "77_1329260312.462" 
+    .const 'Sub' $P1176 = "75_1330909682.33311" 
     capture_lex $P1176
-    .const 'Sub' $P1175 = "76_1329260312.462" 
+    .const 'Sub' $P1175 = "74_1330909682.33311" 
     capture_lex $P1175
-    .const 'Sub' $P1172 = "75_1329260312.462" 
+    .const 'Sub' $P1172 = "73_1330909682.33311" 
     capture_lex $P1172
-    .const 'Sub' $P1171 = "74_1329260312.462" 
+    .const 'Sub' $P1171 = "72_1330909682.33311" 
     capture_lex $P1171
-    .const 'Sub' $P1168 = "73_1329260312.462" 
+    .const 'Sub' $P1168 = "71_1330909682.33311" 
     capture_lex $P1168
-    .const 'Sub' $P1167 = "72_1329260312.462" 
+    .const 'Sub' $P1167 = "70_1330909682.33311" 
     capture_lex $P1167
-    .const 'Sub' $P1164 = "71_1329260312.462" 
+    .const 'Sub' $P1164 = "69_1330909682.33311" 
     capture_lex $P1164
-    .const 'Sub' $P1163 = "70_1329260312.462" 
+    .const 'Sub' $P1163 = "68_1330909682.33311" 
     capture_lex $P1163
-    .const 'Sub' $P1160 = "69_1329260312.462" 
+    .const 'Sub' $P1160 = "67_1330909682.33311" 
     capture_lex $P1160
-    .const 'Sub' $P1155 = "66_1329260312.462" 
+    .const 'Sub' $P1155 = "64_1330909682.33311" 
     capture_lex $P1155
-    .const 'Sub' $P1151 = "65_1329260312.462" 
+    .const 'Sub' $P1151 = "63_1330909682.33311" 
     capture_lex $P1151
-    .const 'Sub' $P1150 = "64_1329260312.462" 
+    .const 'Sub' $P1150 = "62_1330909682.33311" 
     capture_lex $P1150
-    .const 'Sub' $P1139 = "63_1329260312.462" 
+    .const 'Sub' $P1139 = "61_1330909682.33311" 
     capture_lex $P1139
-    .const 'Sub' $P1138 = "62_1329260312.462" 
+    .const 'Sub' $P1138 = "60_1330909682.33311" 
     capture_lex $P1138
-    .const 'Sub' $P1133 = "61_1329260312.462" 
+    .const 'Sub' $P1133 = "59_1330909682.33311" 
     capture_lex $P1133
-    .const 'Sub' $P1132 = "60_1329260312.462" 
+    .const 'Sub' $P1132 = "58_1330909682.33311" 
     capture_lex $P1132
-    .const 'Sub' $P1128 = "59_1329260312.462" 
+    .const 'Sub' $P1128 = "57_1330909682.33311" 
     capture_lex $P1128
-    .const 'Sub' $P1127 = "58_1329260312.462" 
+    .const 'Sub' $P1127 = "56_1330909682.33311" 
     capture_lex $P1127
-    .const 'Sub' $P1122 = "57_1329260312.462" 
+    .const 'Sub' $P1122 = "55_1330909682.33311" 
     capture_lex $P1122
-    .const 'Sub' $P1121 = "56_1329260312.462" 
+    .const 'Sub' $P1121 = "54_1330909682.33311" 
     capture_lex $P1121
-    .const 'Sub' $P1117 = "55_1329260312.462" 
+    .const 'Sub' $P1117 = "53_1330909682.33311" 
     capture_lex $P1117
-    .const 'Sub' $P1116 = "54_1329260312.462" 
+    .const 'Sub' $P1116 = "52_1330909682.33311" 
     capture_lex $P1116
-    .const 'Sub' $P1111 = "53_1329260312.462" 
+    .const 'Sub' $P1111 = "51_1330909682.33311" 
     capture_lex $P1111
-    .const 'Sub' $P1110 = "52_1329260312.462" 
+    .const 'Sub' $P1110 = "50_1330909682.33311" 
     capture_lex $P1110
-    .const 'Sub' $P1106 = "51_1329260312.462" 
+    .const 'Sub' $P1106 = "49_1330909682.33311" 
     capture_lex $P1106
-    .const 'Sub' $P1105 = "50_1329260312.462" 
+    .const 'Sub' $P1105 = "48_1330909682.33311" 
     capture_lex $P1105
-    .const 'Sub' $P1100 = "49_1329260312.462" 
+    .const 'Sub' $P1100 = "47_1330909682.33311" 
     capture_lex $P1100
-    .const 'Sub' $P1099 = "48_1329260312.462" 
+    .const 'Sub' $P1099 = "46_1330909682.33311" 
     capture_lex $P1099
-    .const 'Sub' $P1095 = "47_1329260312.462" 
+    .const 'Sub' $P1095 = "45_1330909682.33311" 
     capture_lex $P1095
-    .const 'Sub' $P1094 = "46_1329260312.462" 
+    .const 'Sub' $P1094 = "44_1330909682.33311" 
     capture_lex $P1094
-    .const 'Sub' $P1090 = "45_1329260312.462" 
+    .const 'Sub' $P1090 = "43_1330909682.33311" 
     capture_lex $P1090
-    .const 'Sub' $P1089 = "44_1329260312.462" 
+    .const 'Sub' $P1089 = "42_1330909682.33311" 
     capture_lex $P1089
-    .const 'Sub' $P1084 = "43_1329260312.462" 
+    .const 'Sub' $P1084 = "41_1330909682.33311" 
     capture_lex $P1084
-    .const 'Sub' $P1083 = "42_1329260312.462" 
+    .const 'Sub' $P1083 = "40_1330909682.33311" 
     capture_lex $P1083
-    .const 'Sub' $P1078 = "41_1329260312.462" 
+    .const 'Sub' $P1078 = "39_1330909682.33311" 
     capture_lex $P1078
-    .const 'Sub' $P1075 = "40_1329260312.462" 
+    .const 'Sub' $P1075 = "38_1330909682.33311" 
     capture_lex $P1075
-    .const 'Sub' $P1074 = "39_1329260312.462" 
+    .const 'Sub' $P1074 = "37_1330909682.33311" 
     capture_lex $P1074
-    .const 'Sub' $P1071 = "38_1329260312.462" 
+    .const 'Sub' $P1071 = "36_1330909682.33311" 
     capture_lex $P1071
-    .const 'Sub' $P1070 = "37_1329260312.462" 
+    .const 'Sub' $P1070 = "35_1330909682.33311" 
     capture_lex $P1070
-    .const 'Sub' $P1067 = "36_1329260312.462" 
+    .const 'Sub' $P1067 = "34_1330909682.33311" 
     capture_lex $P1067
-    .const 'Sub' $P1066 = "35_1329260312.462" 
+    .const 'Sub' $P1066 = "33_1330909682.33311" 
     capture_lex $P1066
-    .const 'Sub' $P1062 = "34_1329260312.462" 
+    .const 'Sub' $P1062 = "32_1330909682.33311" 
     capture_lex $P1062
-    .const 'Sub' $P1061 = "33_1329260312.462" 
+    .const 'Sub' $P1061 = "31_1330909682.33311" 
     capture_lex $P1061
-    .const 'Sub' $P1058 = "32_1329260312.462" 
+    .const 'Sub' $P1058 = "30_1330909682.33311" 
     capture_lex $P1058
-    .const 'Sub' $P1057 = "31_1329260312.462" 
+    .const 'Sub' $P1057 = "29_1330909682.33311" 
     capture_lex $P1057
-    .const 'Sub' $P1054 = "30_1329260312.462" 
+    .const 'Sub' $P1054 = "28_1330909682.33311" 
     capture_lex $P1054
-    .const 'Sub' $P1053 = "29_1329260312.462" 
+    .const 'Sub' $P1053 = "27_1330909682.33311" 
     capture_lex $P1053
-    .const 'Sub' $P1050 = "28_1329260312.462" 
+    .const 'Sub' $P1050 = "26_1330909682.33311" 
     capture_lex $P1050
-    .const 'Sub' $P1025 = "15_1329260312.462" 
+    .const 'Sub' $P1025 = "13_1330909682.33311" 
     capture_lex $P1025
-    .const 'Sub' $P1018 = "14_1329260312.462" 
+    .const 'Sub' $P1018 = "12_1330909682.33311" 
     capture_lex $P1018
-    .const 'Sub' $P1017 = "13_1329260312.462" 
+    .const 'Sub' $P1017 = "11_1330909682.33311" 
     capture_lex $P1017
-    .const 'Sub' $P1012 = "12_1329260312.462" 
+    .const 'Sub' $P1012 = "10_1330909682.33311" 
     capture_lex $P1012
 .annotate 'line', 8
     new $P101, "Undef"
@@ -1771,7 +2167,7 @@
   vivify_300:
     set $P1009, $P107
 .annotate 'line', 849
-    .const 'Sub' $P1308 = "118_1329260312.462" 
+    .const 'Sub' $P1308 = "112_1330909682.33311" 
     newclosure $P1316, $P1308
 .annotate 'line', 7
     .return ($P1316)
@@ -1781,8 +2177,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "ws"  :subid("12_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "ws"  :subid("10_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 12
     .local string rx1013_tgt
     .local int rx1013_pos
@@ -1883,8 +2279,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__ws"  :subid("13_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__ws"  :subid("11_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 12
     new $P103, "ResizablePMCArray"
     push $P103, ""
@@ -1895,8 +2291,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "termish"  :subid("14_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "termish"  :subid("12_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 14
     .local string rx1019_tgt
     .local int rx1019_pos
@@ -2018,8 +2414,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__termish"  :subid("15_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__termish"  :subid("13_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 14
     new $P103, "ResizablePMCArray"
     push $P103, ""
@@ -2030,9 +2426,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "term"  :subid("16_1329260312.462")
+.sub "term"  :subid("14_1330909682.33311")
     .param pmc param_1027
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 20
     .lex "self", param_1027
     $P103 = param_1027."!protoregex"("term")
@@ -2043,9 +2439,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__term"  :subid("17_1329260312.462")
+.sub "!PREFIX__term"  :subid("15_1330909682.33311")
     .param pmc param_1029
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 20
     .lex "self", param_1029
     $P104 = param_1029."!PREFIX__!protoregex"("term")
@@ -2056,9 +2452,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "infix"  :subid("18_1329260312.462")
+.sub "infix"  :subid("16_1330909682.33311")
     .param pmc param_1031
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 21
     .lex "self", param_1031
     $P103 = param_1031."!protoregex"("infix")
@@ -2069,9 +2465,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__infix"  :subid("19_1329260312.462")
+.sub "!PREFIX__infix"  :subid("17_1330909682.33311")
     .param pmc param_1033
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 21
     .lex "self", param_1033
     $P104 = param_1033."!PREFIX__!protoregex"("infix")
@@ -2082,9 +2478,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "prefix"  :subid("20_1329260312.462")
+.sub "prefix"  :subid("18_1330909682.33311")
     .param pmc param_1035
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 22
     .lex "self", param_1035
     $P103 = param_1035."!protoregex"("prefix")
@@ -2095,9 +2491,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__prefix"  :subid("21_1329260312.462")
+.sub "!PREFIX__prefix"  :subid("19_1330909682.33311")
     .param pmc param_1037
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 22
     .lex "self", param_1037
     $P104 = param_1037."!PREFIX__!protoregex"("prefix")
@@ -2108,9 +2504,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "postfix"  :subid("22_1329260312.462")
+.sub "postfix"  :subid("20_1330909682.33311")
     .param pmc param_1039
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 23
     .lex "self", param_1039
     $P103 = param_1039."!protoregex"("postfix")
@@ -2121,9 +2517,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__postfix"  :subid("23_1329260312.462")
+.sub "!PREFIX__postfix"  :subid("21_1330909682.33311")
     .param pmc param_1041
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 23
     .lex "self", param_1041
     $P104 = param_1041."!PREFIX__!protoregex"("postfix")
@@ -2134,9 +2530,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "circumfix"  :subid("24_1329260312.462")
+.sub "circumfix"  :subid("22_1330909682.33311")
     .param pmc param_1043
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 24
     .lex "self", param_1043
     $P103 = param_1043."!protoregex"("circumfix")
@@ -2147,9 +2543,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__circumfix"  :subid("25_1329260312.462")
+.sub "!PREFIX__circumfix"  :subid("23_1330909682.33311")
     .param pmc param_1045
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 24
     .lex "self", param_1045
     $P104 = param_1045."!PREFIX__!protoregex"("circumfix")
@@ -2160,9 +2556,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "postcircumfix"  :subid("26_1329260312.462")
+.sub "postcircumfix"  :subid("24_1330909682.33311")
     .param pmc param_1047
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 25
     .lex "self", param_1047
     $P103 = param_1047."!protoregex"("postcircumfix")
@@ -2173,9 +2569,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__postcircumfix"  :subid("27_1329260312.462")
+.sub "!PREFIX__postcircumfix"  :subid("25_1330909682.33311")
     .param pmc param_1049
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 25
     .lex "self", param_1049
     $P104 = param_1049."!PREFIX__!protoregex"("postcircumfix")
@@ -2186,8 +2582,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "term:sym<circumfix>"  :subid("28_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "term:sym<circumfix>"  :subid("26_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 27
     .local string rx1051_tgt
     .local int rx1051_pos
@@ -2258,8 +2654,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__term:sym<circumfix>"  :subid("29_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__term:sym<circumfix>"  :subid("27_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 27
     $P103 = self."!PREFIX__!subrule"("circumfix", "")
     new $P104, "ResizablePMCArray"
@@ -2271,8 +2667,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "infixish"  :subid("30_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "infixish"  :subid("28_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 29
     .local string rx1055_tgt
     .local int rx1055_pos
@@ -2343,8 +2739,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__infixish"  :subid("31_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__infixish"  :subid("29_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 29
     $P103 = self."!PREFIX__!subrule"("infix", "")
     new $P104, "ResizablePMCArray"
@@ -2356,8 +2752,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "prefixish"  :subid("32_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "prefixish"  :subid("30_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 30
     .local string rx1059_tgt
     .local int rx1059_pos
@@ -2433,8 +2829,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__prefixish"  :subid("33_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__prefixish"  :subid("31_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 30
     $P103 = self."!PREFIX__!subrule"("prefix", "")
     new $P104, "ResizablePMCArray"
@@ -2446,8 +2842,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "postfixish"  :subid("34_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "postfixish"  :subid("32_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 31
     .local string rx1063_tgt
     .local int rx1063_pos
@@ -2534,8 +2930,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__postfixish"  :subid("35_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__postfixish"  :subid("33_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 31
     $P103 = self."!PREFIX__!subrule"("postcircumfix", "")
     $P104 = self."!PREFIX__!subrule"("postfix", "")
@@ -2549,8 +2945,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "nullterm"  :subid("36_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "nullterm"  :subid("34_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 36
     .local string rx1068_tgt
     .local int rx1068_pos
@@ -2614,8 +3010,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__nullterm"  :subid("37_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__nullterm"  :subid("35_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 36
     new $P103, "ResizablePMCArray"
     push $P103, ""
@@ -2626,8 +3022,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "nullterm_alt"  :subid("38_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "nullterm_alt"  :subid("36_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 37
     .local string rx1072_tgt
     .local int rx1072_pos
@@ -2698,8 +3094,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__nullterm_alt"  :subid("39_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__nullterm_alt"  :subid("37_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 37
     $P103 = self."!PREFIX__!subrule"("nullterm", "")
     new $P104, "ResizablePMCArray"
@@ -2711,9 +3107,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "nulltermish" :anon :subid("40_1329260312.462") :outer("11_1329260312.462")
+.sub "nulltermish" :anon :subid("38_1330909682.33311") :outer("223_1330909682.33311")
     .param pmc param_1076
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 40
     .lex "self", param_1076
     set $P104, param_1076
@@ -2735,8 +3131,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "quote_delimited"  :subid("41_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "quote_delimited"  :subid("39_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 43
     .local string rx1079_tgt
     .local int rx1079_pos
@@ -2840,8 +3236,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__quote_delimited"  :subid("42_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__quote_delimited"  :subid("40_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 43
     $P103 = self."!PREFIX__!subrule"("starter", "")
     new $P104, "ResizablePMCArray"
@@ -2853,8 +3249,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "quote_atom"  :subid("43_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "quote_atom"  :subid("41_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 47
     .local string rx1085_tgt
     .local int rx1085_pos
@@ -2961,8 +3357,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__quote_atom"  :subid("44_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__quote_atom"  :subid("42_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 47
     new $P105, "ResizablePMCArray"
     push $P105, ""
@@ -2973,8 +3369,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "decint"  :subid("45_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "decint"  :subid("43_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 55
     .local string rx1091_tgt
     .local int rx1091_pos
@@ -3061,8 +3457,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__decint"  :subid("46_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__decint"  :subid("44_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 55
     new $P103, "ResizablePMCArray"
     push $P103, ""
@@ -3073,8 +3469,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "decints"  :subid("47_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "decints"  :subid("45_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 56
     .local string rx1096_tgt
     .local int rx1096_pos
@@ -3173,8 +3569,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__decints"  :subid("48_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__decints"  :subid("46_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 56
     new $P103, "ResizablePMCArray"
     push $P103, ""
@@ -3185,8 +3581,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "hexint"  :subid("49_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "hexint"  :subid("47_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 58
     .local string rx1101_tgt
     .local int rx1101_pos
@@ -3283,8 +3679,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__hexint"  :subid("50_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__hexint"  :subid("48_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 58
     new $P103, "ResizablePMCArray"
     push $P103, ""
@@ -3295,8 +3691,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "hexints"  :subid("51_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "hexints"  :subid("49_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 59
     .local string rx1107_tgt
     .local int rx1107_pos
@@ -3395,8 +3791,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__hexints"  :subid("52_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__hexints"  :subid("50_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 59
     new $P103, "ResizablePMCArray"
     push $P103, ""
@@ -3407,8 +3803,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "octint"  :subid("53_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "octint"  :subid("51_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 61
     .local string rx1112_tgt
     .local int rx1112_pos
@@ -3505,8 +3901,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__octint"  :subid("54_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__octint"  :subid("52_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 61
     new $P103, "ResizablePMCArray"
     push $P103, ""
@@ -3517,8 +3913,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "octints"  :subid("55_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "octints"  :subid("53_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 62
     .local string rx1118_tgt
     .local int rx1118_pos
@@ -3617,8 +4013,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__octints"  :subid("56_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__octints"  :subid("54_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 62
     new $P103, "ResizablePMCArray"
     push $P103, ""
@@ -3629,8 +4025,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "binint"  :subid("57_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "binint"  :subid("55_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 64
     .local string rx1123_tgt
     .local int rx1123_pos
@@ -3727,8 +4123,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__binint"  :subid("58_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__binint"  :subid("56_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 64
     new $P103, "ResizablePMCArray"
     push $P103, ""
@@ -3739,8 +4135,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "binints"  :subid("59_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "binints"  :subid("57_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 65
     .local string rx1129_tgt
     .local int rx1129_pos
@@ -3839,8 +4235,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__binints"  :subid("60_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__binints"  :subid("58_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 65
     new $P103, "ResizablePMCArray"
     push $P103, ""
@@ -3851,8 +4247,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "integer"  :subid("61_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "integer"  :subid("59_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 67
     .local string rx1134_tgt
     .local int rx1134_pos
@@ -4014,8 +4410,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__integer"  :subid("62_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__integer"  :subid("60_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 67
     $P103 = self."!PREFIX__!subrule"("decint", "")
     $P104 = self."!PREFIX__!subrule"("decint", "0d")
@@ -4035,8 +4431,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "dec_number"  :subid("63_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "dec_number"  :subid("61_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 78
     .local string rx1140_tgt
     .local int rx1140_pos
@@ -4242,8 +4638,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__dec_number"  :subid("64_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__dec_number"  :subid("62_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 78
     new $P103, "ResizablePMCArray"
     push $P103, ""
@@ -4256,8 +4652,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "escale"  :subid("65_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "escale"  :subid("63_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 84
     .local string rx1152_tgt
     .local int rx1152_pos
@@ -4348,8 +4744,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__escale"  :subid("66_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__escale"  :subid("64_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 84
     new $P103, "ResizablePMCArray"
     push $P103, "e"
@@ -4361,9 +4757,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "quote_escape"  :subid("67_1329260312.462")
+.sub "quote_escape"  :subid("65_1330909682.33311")
     .param pmc param_1157
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 86
     .lex "self", param_1157
     $P103 = param_1157."!protoregex"("quote_escape")
@@ -4374,9 +4770,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__quote_escape"  :subid("68_1329260312.462")
+.sub "!PREFIX__quote_escape"  :subid("66_1330909682.33311")
     .param pmc param_1159
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 86
     .lex "self", param_1159
     $P104 = param_1159."!PREFIX__!protoregex"("quote_escape")
@@ -4387,8 +4783,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "quote_escape:sym<backslash>"  :subid("69_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "quote_escape:sym<backslash>"  :subid("67_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 87
     .local string rx1161_tgt
     .local int rx1161_pos
@@ -4463,8 +4859,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__quote_escape:sym<backslash>"  :subid("70_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__quote_escape:sym<backslash>"  :subid("68_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 87
     new $P103, "ResizablePMCArray"
     push $P103, "\\\\"
@@ -4475,8 +4871,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "quote_escape:sym<stopper>"  :subid("71_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "quote_escape:sym<stopper>"  :subid("69_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 88
     .local string rx1165_tgt
     .local int rx1165_pos
@@ -4558,8 +4954,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__quote_escape:sym<stopper>"  :subid("72_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__quote_escape:sym<stopper>"  :subid("70_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 88
     new $P103, "ResizablePMCArray"
     push $P103, "\\"
@@ -4570,8 +4966,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "quote_escape:sym<bs>"  :subid("73_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "quote_escape:sym<bs>"  :subid("71_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 90
     .local string rx1169_tgt
     .local int rx1169_pos
@@ -4646,8 +5042,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__quote_escape:sym<bs>"  :subid("74_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__quote_escape:sym<bs>"  :subid("72_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 90
     new $P103, "ResizablePMCArray"
     push $P103, "\\b"
@@ -4658,8 +5054,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "quote_escape:sym<nl>"  :subid("75_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "quote_escape:sym<nl>"  :subid("73_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 91
     .local string rx1173_tgt
     .local int rx1173_pos
@@ -4734,8 +5130,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__quote_escape:sym<nl>"  :subid("76_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__quote_escape:sym<nl>"  :subid("74_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 91
     new $P103, "ResizablePMCArray"
     push $P103, "\\n"
@@ -4746,8 +5142,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "quote_escape:sym<cr>"  :subid("77_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "quote_escape:sym<cr>"  :subid("75_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 92
     .local string rx1177_tgt
     .local int rx1177_pos
@@ -4822,8 +5218,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__quote_escape:sym<cr>"  :subid("78_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__quote_escape:sym<cr>"  :subid("76_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 92
     new $P103, "ResizablePMCArray"
     push $P103, "\\r"
@@ -4834,8 +5230,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "quote_escape:sym<tab>"  :subid("79_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "quote_escape:sym<tab>"  :subid("77_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 93
     .local string rx1181_tgt
     .local int rx1181_pos
@@ -4910,8 +5306,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__quote_escape:sym<tab>"  :subid("80_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__quote_escape:sym<tab>"  :subid("78_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 93
     new $P103, "ResizablePMCArray"
     push $P103, "\\t"
@@ -4922,8 +5318,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "quote_escape:sym<ff>"  :subid("81_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "quote_escape:sym<ff>"  :subid("79_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 94
     .local string rx1185_tgt
     .local int rx1185_pos
@@ -4998,8 +5394,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__quote_escape:sym<ff>"  :subid("82_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__quote_escape:sym<ff>"  :subid("80_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 94
     new $P103, "ResizablePMCArray"
     push $P103, "\\f"
@@ -5010,8 +5406,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "quote_escape:sym<esc>"  :subid("83_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "quote_escape:sym<esc>"  :subid("81_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 95
     .local string rx1189_tgt
     .local int rx1189_pos
@@ -5086,8 +5482,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__quote_escape:sym<esc>"  :subid("84_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__quote_escape:sym<esc>"  :subid("82_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 95
     new $P103, "ResizablePMCArray"
     push $P103, "\\e"
@@ -5098,8 +5494,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "quote_escape:sym<hex>"  :subid("85_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "quote_escape:sym<hex>"  :subid("83_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 96
     .local string rx1193_tgt
     .local int rx1193_pos
@@ -5211,8 +5607,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__quote_escape:sym<hex>"  :subid("86_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__quote_escape:sym<hex>"  :subid("84_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 96
     new $P103, "ResizablePMCArray"
     push $P103, unicode:"\\x"
@@ -5223,8 +5619,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "quote_escape:sym<oct>"  :subid("87_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "quote_escape:sym<oct>"  :subid("85_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 100
     .local string rx1198_tgt
     .local int rx1198_pos
@@ -5336,8 +5732,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__quote_escape:sym<oct>"  :subid("88_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__quote_escape:sym<oct>"  :subid("86_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 100
     new $P103, "ResizablePMCArray"
     push $P103, "\\o"
@@ -5348,8 +5744,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "quote_escape:sym<chr>"  :subid("89_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "quote_escape:sym<chr>"  :subid("87_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 104
     .local string rx1203_tgt
     .local int rx1203_pos
@@ -5431,8 +5827,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__quote_escape:sym<chr>"  :subid("90_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__quote_escape:sym<chr>"  :subid("88_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 104
     new $P103, "ResizablePMCArray"
     push $P103, "\\c"
@@ -5443,8 +5839,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "quote_escape:sym<0>"  :subid("91_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "quote_escape:sym<0>"  :subid("89_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 105
     .local string rx1207_tgt
     .local int rx1207_pos
@@ -5540,8 +5936,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__quote_escape:sym<0>"  :subid("92_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__quote_escape:sym<0>"  :subid("90_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 105
     new $P103, "ResizablePMCArray"
     push $P103, "\\0"
@@ -5552,14 +5948,14 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "quote_escape:sym<misc>"  :subid("93_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "quote_escape:sym<misc>"  :subid("91_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 106
-    .const 'Sub' $P1224 = "96_1329260312.462" 
+    .const 'Sub' $P1224 = "226_1330909682.33311" 
     capture_lex $P1224
-    .const 'Sub' $P1219 = "95_1329260312.462" 
+    .const 'Sub' $P1219 = "225_1330909682.33311" 
     capture_lex $P1219
-    .const 'Sub' $P1215 = "94_1329260312.462" 
+    .const 'Sub' $P1215 = "224_1330909682.33311" 
     capture_lex $P1215
     .local string rx1212_tgt
     .local int rx1212_pos
@@ -5600,7 +5996,7 @@
     find_lex $P103, unicode:"$\x{a2}"
     $P104 = $P103."MATCH"()
     store_lex "$/", $P104
-    .const 'Sub' $P1215 = "94_1329260312.462" 
+    .const 'Sub' $P1215 = "224_1330909682.33311" 
     capture_lex $P1215
     $P105 = $P1215()
   # rx literal  "\\"
@@ -5626,7 +6022,7 @@
 .annotate 'line', 111
   # rx subrule $P1219 subtype=capture negate=
     rx1212_cur."!cursor_pos"(rx1212_pos)
-    .const 'Sub' $P1219 = "95_1329260312.462" 
+    .const 'Sub' $P1219 = "225_1330909682.33311" 
     capture_lex $P1219
     $P10 = rx1212_cur.$P1219()
     unless $P10, rx1212_fail
@@ -5660,7 +6056,7 @@
     find_lex $P106, unicode:"$\x{a2}"
     $P107 = $P106."MATCH"()
     store_lex "$/", $P107
-    .const 'Sub' $P1224 = "96_1329260312.462" 
+    .const 'Sub' $P1224 = "226_1330909682.33311" 
     capture_lex $P1224
     $P108 = $P1224()
   alt1217_end:
@@ -5715,8 +6111,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "_block1214"  :anon :subid("94_1329260312.462") :outer("93_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "_block1214"  :anon :subid("224_1330909682.33311") :outer("91_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 107
     .return ()
 .end
@@ -5725,8 +6121,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "_block1218"  :anon :subid("95_1329260312.462") :method :outer("93_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "_block1218"  :anon :subid("225_1330909682.33311") :method :outer("91_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 111
     .local string rx1220_tgt
     .local int rx1220_pos
@@ -5796,8 +6192,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "_block1223"  :anon :subid("96_1329260312.462") :outer("93_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "_block1223"  :anon :subid("226_1330909682.33311") :outer("91_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 112
     find_lex $P108, "$/"
     unless_null $P108, vivify_438
@@ -5825,8 +6221,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__quote_escape:sym<misc>"  :subid("97_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__quote_escape:sym<misc>"  :subid("92_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 106
     new $P109, "ResizablePMCArray"
     push $P109, ""
@@ -5837,10 +6233,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "charname"  :subid("98_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "charname"  :subid("93_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 118
-    .const 'Sub' $P1235 = "99_1329260312.462" 
+    .const 'Sub' $P1235 = "227_1330909682.33311" 
     capture_lex $P1235
     .local string rx1229_tgt
     .local int rx1229_pos
@@ -5922,7 +6318,7 @@
 .annotate 'line', 121
   # rx subrule "before" subtype=zerowidth negate=
     rx1229_cur."!cursor_pos"(rx1229_pos)
-    .const 'Sub' $P1235 = "99_1329260312.462" 
+    .const 'Sub' $P1235 = "227_1330909682.33311" 
     capture_lex $P1235
     $P10 = rx1229_cur."before"($P1235)
     unless $P10, rx1229_fail
@@ -5956,8 +6352,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "_block1234"  :anon :subid("99_1329260312.462") :method :outer("98_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "_block1234"  :anon :subid("227_1330909682.33311") :method :outer("93_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 121
     .local string rx1236_tgt
     .local int rx1236_pos
@@ -6032,8 +6428,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__charname"  :subid("100_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__charname"  :subid("94_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 118
     $P103 = self."!PREFIX__!subrule"("integer", "")
     new $P104, "ResizablePMCArray"
@@ -6097,8 +6493,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "charnames"  :subid("101_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "charnames"  :subid("95_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 123
     .local string rx1240_tgt
     .local int rx1240_pos
@@ -6197,8 +6593,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__charnames"  :subid("102_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__charnames"  :subid("96_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 123
     new $P103, "ResizablePMCArray"
     push $P103, ""
@@ -6209,8 +6605,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "charspec"  :subid("103_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "charspec"  :subid("97_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 124
     .local string rx1245_tgt
     .local int rx1245_pos
@@ -6356,8 +6752,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "!PREFIX__charspec"  :subid("104_1329260312.462") :method :outer("11_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "!PREFIX__charspec"  :subid("98_1330909682.33311") :method :outer("223_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 124
     $P103 = self."!PREFIX__!subrule"("panic", "")
     $P104 = self."!PREFIX__!subrule"("charnames", "[")
@@ -6400,12 +6796,12 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "O" :anon :subid("105_1329260312.462") :outer("11_1329260312.462")
+.sub "O" :anon :subid("99_1330909682.33311") :outer("223_1330909682.33311")
     .param pmc param_1251
     .param pmc param_1252
     .param pmc param_1253 :optional
     .param int has_param_1253 :opt_flag
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 175
     .lex "self", param_1251
     .lex "$spec", param_1252
@@ -6555,10 +6951,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "panic" :anon :subid("106_1329260312.462") :outer("11_1329260312.462")
+.sub "panic" :anon :subid("100_1330909682.33311") :outer("223_1330909682.33311")
     .param pmc param_1255
     .param pmc param_1256 :slurpy
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 321
     .lex "self", param_1255
     .lex "@args", param_1256
@@ -6657,11 +7053,11 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "peek_delimiters" :anon :subid("107_1329260312.462") :outer("11_1329260312.462")
+.sub "peek_delimiters" :anon :subid("101_1330909682.33311") :outer("223_1330909682.33311")
     .param pmc param_1266
     .param pmc param_1267
     .param pmc param_1268
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 342
     .lex "self", param_1266
     .lex "$target", param_1267
@@ -6734,10 +7130,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "quote_EXPR" :anon :subid("108_1329260312.462") :outer("11_1329260312.462")
+.sub "quote_EXPR" :anon :subid("102_1330909682.33311") :outer("223_1330909682.33311")
     .param pmc param_1270
     .param pmc param_1271 :slurpy
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 404
     .lex "self", param_1270
     .lex "@args", param_1271
@@ -6818,10 +7214,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "quotemod_check"  :subid("109_1329260312.462") :outer("11_1329260312.462")
+.sub "quotemod_check"  :subid("103_1330909682.33311") :outer("223_1330909682.33311")
     .param pmc param_1273
     .param pmc param_1274
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 475
     .lex "self", param_1273
     .lex "$mod", param_1274
@@ -6849,9 +7245,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "starter" :anon :subid("110_1329260312.462") :outer("11_1329260312.462")
+.sub "starter" :anon :subid("104_1330909682.33311") :outer("223_1330909682.33311")
     .param pmc param_1276
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 479
     .lex "self", param_1276
 .annotate 'line', 480
@@ -6883,9 +7279,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "stopper" :anon :subid("111_1329260312.462") :outer("11_1329260312.462")
+.sub "stopper" :anon :subid("105_1330909682.33311") :outer("223_1330909682.33311")
     .param pmc param_1278
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 502
     .lex "self", param_1278
 .annotate 'line', 503
@@ -6917,10 +7313,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "split_words"  :subid("112_1329260312.462") :outer("11_1329260312.462")
+.sub "split_words"  :subid("106_1330909682.33311") :outer("223_1330909682.33311")
     .param pmc param_1280
     .param pmc param_1281
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 525
     .lex "self", param_1280
     .lex "$words", param_1281
@@ -6954,11 +7350,11 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "EXPR" :anon :subid("113_1329260312.462") :outer("11_1329260312.462")
+.sub "EXPR" :anon :subid("107_1330909682.33311") :outer("223_1330909682.33311")
     .param pmc param_1283
     .param pmc param_1284 :optional
     .param int has_param_1284 :opt_flag
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 557
     .lex "self", param_1283
     if has_param_1284, optparam_475
@@ -7147,11 +7543,11 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "EXPR_reduce" :anon :subid("114_1329260312.462") :outer("11_1329260312.462")
+.sub "EXPR_reduce" :anon :subid("108_1330909682.33311") :outer("223_1330909682.33311")
     .param pmc param_1286
     .param pmc param_1287
     .param pmc param_1288
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 731
     .lex "self", param_1286
     .lex "$termstack", param_1287
@@ -7240,10 +7636,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "ternary" :anon :subid("115_1329260312.462") :outer("11_1329260312.462")
+.sub "ternary" :anon :subid("109_1330909682.33311") :outer("223_1330909682.33311")
     .param pmc param_1290
     .param pmc param_1291
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 809
     .lex "self", param_1290
     .lex "$match", param_1291
@@ -7298,10 +7694,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "MARKER" :anon :subid("116_1329260312.462") :outer("11_1329260312.462")
+.sub "MARKER" :anon :subid("110_1330909682.33311") :outer("223_1330909682.33311")
     .param pmc param_1298
     .param pmc param_1299
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 814
     .lex "self", param_1298
     .lex "$markname", param_1299
@@ -7366,10 +7762,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "MARKED" :anon :subid("117_1329260312.462") :outer("11_1329260312.462")
+.sub "MARKED" :anon :subid("111_1330909682.33311") :outer("223_1330909682.33311")
     .param pmc param_1306
     .param pmc param_1307
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 829
     .lex "self", param_1306
     .lex "$markname", param_1307
@@ -7406,11 +7802,11 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Grammar"]
-.sub "LANG" :anon :subid("118_1329260312.462") :outer("11_1329260312.462")
+.sub "LANG" :anon :subid("112_1330909682.33311") :outer("223_1330909682.33311")
     .param pmc param_1309
     .param pmc param_1310
     .param pmc param_1311
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 849
     .lex "self", param_1309
     .lex "$lang", param_1310
@@ -7495,79 +7891,79 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "_block1317"  :subid("119_1329260312.462") :outer("10_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "_block1317"  :subid("228_1330909682.33311") :outer("222_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 865
-    .const 'Sub' $P1557 = "163_1329260312.462" 
+    .const 'Sub' $P1557 = "145_1330909682.33311" 
     capture_lex $P1557
-    .const 'Sub' $P1548 = "161_1329260312.462" 
+    .const 'Sub' $P1548 = "144_1330909682.33311" 
     capture_lex $P1548
-    .const 'Sub' $P1540 = "160_1329260312.462" 
+    .const 'Sub' $P1540 = "143_1330909682.33311" 
     capture_lex $P1540
-    .const 'Sub' $P1533 = "159_1329260312.462" 
+    .const 'Sub' $P1533 = "142_1330909682.33311" 
     capture_lex $P1533
-    .const 'Sub' $P1530 = "158_1329260312.462" 
+    .const 'Sub' $P1530 = "141_1330909682.33311" 
     capture_lex $P1530
-    .const 'Sub' $P1526 = "157_1329260312.462" 
+    .const 'Sub' $P1526 = "140_1330909682.33311" 
     capture_lex $P1526
-    .const 'Sub' $P1518 = "156_1329260312.462" 
+    .const 'Sub' $P1518 = "139_1330909682.33311" 
     capture_lex $P1518
-    .const 'Sub' $P1510 = "155_1329260312.462" 
+    .const 'Sub' $P1510 = "138_1330909682.33311" 
     capture_lex $P1510
-    .const 'Sub' $P1507 = "154_1329260312.462" 
+    .const 'Sub' $P1507 = "137_1330909682.33311" 
     capture_lex $P1507
-    .const 'Sub' $P1504 = "153_1329260312.462" 
+    .const 'Sub' $P1504 = "136_1330909682.33311" 
     capture_lex $P1504
-    .const 'Sub' $P1501 = "152_1329260312.462" 
+    .const 'Sub' $P1501 = "135_1330909682.33311" 
     capture_lex $P1501
-    .const 'Sub' $P1498 = "151_1329260312.462" 
+    .const 'Sub' $P1498 = "134_1330909682.33311" 
     capture_lex $P1498
-    .const 'Sub' $P1495 = "150_1329260312.462" 
+    .const 'Sub' $P1495 = "133_1330909682.33311" 
     capture_lex $P1495
-    .const 'Sub' $P1492 = "149_1329260312.462" 
+    .const 'Sub' $P1492 = "132_1330909682.33311" 
     capture_lex $P1492
-    .const 'Sub' $P1488 = "148_1329260312.462" 
+    .const 'Sub' $P1488 = "131_1330909682.33311" 
     capture_lex $P1488
-    .const 'Sub' $P1485 = "147_1329260312.462" 
+    .const 'Sub' $P1485 = "130_1330909682.33311" 
     capture_lex $P1485
-    .const 'Sub' $P1479 = "146_1329260312.462" 
+    .const 'Sub' $P1479 = "129_1330909682.33311" 
     capture_lex $P1479
-    .const 'Sub' $P1452 = "144_1329260312.462" 
+    .const 'Sub' $P1452 = "128_1330909682.33311" 
     capture_lex $P1452
-    .const 'Sub' $P1432 = "141_1329260312.462" 
+    .const 'Sub' $P1432 = "127_1330909682.33311" 
     capture_lex $P1432
-    .const 'Sub' $P1429 = "140_1329260312.462" 
+    .const 'Sub' $P1429 = "126_1330909682.33311" 
     capture_lex $P1429
-    .const 'Sub' $P1426 = "139_1329260312.462" 
+    .const 'Sub' $P1426 = "125_1330909682.33311" 
     capture_lex $P1426
-    .const 'Sub' $P1423 = "138_1329260312.462" 
+    .const 'Sub' $P1423 = "124_1330909682.33311" 
     capture_lex $P1423
-    .const 'Sub' $P1420 = "137_1329260312.462" 
+    .const 'Sub' $P1420 = "123_1330909682.33311" 
     capture_lex $P1420
-    .const 'Sub' $P1417 = "136_1329260312.462" 
+    .const 'Sub' $P1417 = "122_1330909682.33311" 
     capture_lex $P1417
-    .const 'Sub' $P1413 = "135_1329260312.462" 
+    .const 'Sub' $P1413 = "121_1330909682.33311" 
     capture_lex $P1413
-    .const 'Sub' $P1409 = "134_1329260312.462" 
+    .const 'Sub' $P1409 = "120_1330909682.33311" 
     capture_lex $P1409
-    .const 'Sub' $P1406 = "133_1329260312.462" 
+    .const 'Sub' $P1406 = "119_1330909682.33311" 
     capture_lex $P1406
-    .const 'Sub' $P1402 = "132_1329260312.462" 
+    .const 'Sub' $P1402 = "118_1330909682.33311" 
     capture_lex $P1402
-    .const 'Sub' $P1398 = "131_1329260312.462" 
+    .const 'Sub' $P1398 = "117_1330909682.33311" 
     capture_lex $P1398
-    .const 'Sub' $P1357 = "128_1329260312.462" 
+    .const 'Sub' $P1357 = "116_1330909682.33311" 
     capture_lex $P1357
-    .const 'Sub' $P1341 = "125_1329260312.462" 
+    .const 'Sub' $P1341 = "115_1330909682.33311" 
     capture_lex $P1341
-    .const 'Sub' $P1339 = "124_1329260312.462" 
+    .const 'Sub' $P1339 = "114_1330909682.33311" 
     capture_lex $P1339
-    .const 'Sub' $P1328 = "121_1329260312.462" 
+    .const 'Sub' $P1328 = "113_1330909682.33311" 
     capture_lex $P1328
-    .const 'Sub' $P1320 = "120_1329260312.462" 
+    .const 'Sub' $P1320 = "229_1330909682.33311" 
     capture_lex $P1320
 .annotate 'line', 866
-    .const 'Sub' $P1320 = "120_1329260312.462" 
+    .const 'Sub' $P1320 = "229_1330909682.33311" 
     newclosure $P1325, $P1320
     set $P1319, $P1325
     .lex "string_to_int", $P1319
@@ -7580,7 +7976,7 @@
     .lex "$?CLASS", $P1327
     set $P106, $P1319
 .annotate 'line', 1044
-    .const 'Sub' $P1557 = "163_1329260312.462" 
+    .const 'Sub' $P1557 = "145_1330909682.33311" 
     newclosure $P1563, $P1557
 .annotate 'line', 865
     .return ($P1563)
@@ -7590,10 +7986,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "string_to_int"  :subid("120_1329260312.462") :outer("119_1329260312.462")
+.sub "string_to_int"  :subid("229_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1321
     .param pmc param_1322
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 866
     .lex "$src", param_1321
     .lex "$base", param_1322
@@ -7671,12 +8067,12 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "ints_to_string" :anon :subid("121_1329260312.462") :outer("119_1329260312.462")
+.sub "ints_to_string" :anon :subid("113_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1329
     .param pmc param_1330
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 873
-    .const 'Sub' $P1333 = "122_1329260312.462" 
+    .const 'Sub' $P1333 = "230_1330909682.33311" 
     capture_lex $P1333
     .lex "self", param_1329
     .lex "$ints", param_1330
@@ -7701,7 +8097,7 @@
 .annotate 'line', 874
     goto if_1331_end
   if_1331:
-    .const 'Sub' $P1333 = "122_1329260312.462" 
+    .const 'Sub' $P1333 = "230_1330909682.33311" 
     capture_lex $P1333
     $P110 = $P1333()
     set $P106, $P110
@@ -7715,10 +8111,10 @@
 
 .namespace ["HLL";"Actions"]
 .include "except_types.pasm"
-.sub "_block1332"  :anon :subid("122_1329260312.462") :outer("121_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "_block1332"  :anon :subid("230_1330909682.33311") :outer("113_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 874
-    .const 'Sub' $P1336 = "123_1329260312.462" 
+    .const 'Sub' $P1336 = "231_1330909682.33311" 
     capture_lex $P1336
 .annotate 'line', 875
     new $P108, "Undef"
@@ -7742,7 +8138,7 @@
     unless $P109, loop1338_done
     shift $P111, $P109
   loop1338_redo:
-    .const 'Sub' $P1336 = "123_1329260312.462" 
+    .const 'Sub' $P1336 = "231_1330909682.33311" 
     capture_lex $P1336
     $P1336($P111)
   loop1338_next:
@@ -7769,9 +8165,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "_block1335"  :anon :subid("123_1329260312.462") :outer("122_1329260312.462")
+.sub "_block1335"  :anon :subid("231_1330909682.33311") :outer("230_1330909682.33311")
     .param pmc param_1337
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 876
     .lex "$_", param_1337
 .annotate 'line', 877
@@ -7795,9 +8191,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "CTXSAVE" :anon :subid("124_1329260312.462") :outer("119_1329260312.462")
+.sub "CTXSAVE" :anon :subid("114_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1340
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 886
     .lex "self", param_1340
 .annotate 'line', 887
@@ -7823,12 +8219,12 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "SET_BLOCK_OUTER_CTX" :anon :subid("125_1329260312.462") :outer("119_1329260312.462")
+.sub "SET_BLOCK_OUTER_CTX" :anon :subid("115_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1342
     .param pmc param_1343
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 900
-    .const 'Sub' $P1348 = "126_1329260312.462" 
+    .const 'Sub' $P1348 = "232_1330909682.33311" 
     capture_lex $P1348
     .lex "self", param_1342
     .lex "$block", param_1343
@@ -7865,7 +8261,7 @@
     set $P107, $I100
     goto if_1346_end
   if_1346:
-    .const 'Sub' $P1348 = "126_1329260312.462" 
+    .const 'Sub' $P1348 = "232_1330909682.33311" 
     capture_lex $P1348
     $P110 = $P1348()
     set $P107, $P110
@@ -7879,10 +8275,10 @@
 
 .namespace ["HLL";"Actions"]
 .include "except_types.pasm"
-.sub "_block1347"  :anon :subid("126_1329260312.462") :outer("125_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "_block1347"  :anon :subid("232_1330909682.33311") :outer("115_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 902
-    .const 'Sub' $P1354 = "127_1329260312.462" 
+    .const 'Sub' $P1354 = "233_1330909682.33311" 
     capture_lex $P1354
 .annotate 'line', 903
     $P1350 = root_new ['parrot';'ResizablePMCArray']
@@ -7927,7 +8323,7 @@
     unless $P109, loop1356_done
     shift $P112, $P109
   loop1356_redo:
-    .const 'Sub' $P1354 = "127_1329260312.462" 
+    .const 'Sub' $P1354 = "233_1330909682.33311" 
     capture_lex $P1354
     $P1354($P112)
   loop1356_next:
@@ -7950,9 +8346,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "_block1353"  :anon :subid("127_1329260312.462") :outer("126_1329260312.462")
+.sub "_block1353"  :anon :subid("233_1330909682.33311") :outer("232_1330909682.33311")
     .param pmc param_1355
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 906
     .lex "$_", param_1355
 .annotate 'line', 907
@@ -7980,16 +8376,16 @@
 
 .namespace ["HLL";"Actions"]
 .include "except_types.pasm"
-.sub "EXPR" :anon :subid("128_1329260312.462") :outer("119_1329260312.462")
+.sub "EXPR" :anon :subid("116_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1360
     .param pmc param_1361
     .param pmc param_1362 :optional
     .param int has_param_1362 :opt_flag
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 913
-    .const 'Sub' $P1394 = "130_1329260312.462" 
+    .const 'Sub' $P1394 = "235_1330909682.33311" 
     capture_lex $P1394
-    .const 'Sub' $P1386 = "129_1329260312.462" 
+    .const 'Sub' $P1386 = "234_1330909682.33311" 
     capture_lex $P1386
     new $P1359, 'ExceptionHandler', [.CONTROL_RETURN]
     set_label $P1359, control_1358
@@ -8148,7 +8544,7 @@
   vivify_552:
     $P110 = $P109."name"()
     if $P110, unless_1384_end
-    .const 'Sub' $P1386 = "129_1329260312.462" 
+    .const 'Sub' $P1386 = "234_1330909682.33311" 
     capture_lex $P1386
     $P1386()
   unless_1384_end:
@@ -8177,7 +8573,7 @@
     unless $P109, loop1397_done
     shift $P112, $P109
   loop1397_redo:
-    .const 'Sub' $P1394 = "130_1329260312.462" 
+    .const 'Sub' $P1394 = "235_1330909682.33311" 
     capture_lex $P1394
     $P1394($P112)
   loop1397_next:
@@ -8234,8 +8630,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "_block1385"  :anon :subid("129_1329260312.462") :outer("128_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "_block1385"  :anon :subid("234_1330909682.33311") :outer("116_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 922
     new $P111, "Undef"
     set $P1387, $P111
@@ -8298,9 +8694,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "_block1393"  :anon :subid("130_1329260312.462") :outer("128_1329260312.462")
+.sub "_block1393"  :anon :subid("235_1330909682.33311") :outer("116_1330909682.33311")
     .param pmc param_1395
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 928
     .lex "$_", param_1395
     find_lex $P114, "$_"
@@ -8333,10 +8729,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "term:sym<circumfix>" :anon :subid("131_1329260312.462") :outer("119_1329260312.462")
+.sub "term:sym<circumfix>" :anon :subid("117_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1399
     .param pmc param_1400
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 933
     .lex "self", param_1399
     .lex "$/", param_1400
@@ -8358,10 +8754,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "termish" :anon :subid("132_1329260312.462") :outer("119_1329260312.462")
+.sub "termish" :anon :subid("118_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1403
     .param pmc param_1404
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 935
     .lex "self", param_1403
     .lex "$/", param_1404
@@ -8383,10 +8779,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "nullterm" :anon :subid("133_1329260312.462") :outer("119_1329260312.462")
+.sub "nullterm" :anon :subid("119_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1407
     .param pmc param_1408
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 936
     .lex "self", param_1407
     .lex "$/", param_1408
@@ -8400,10 +8796,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "nullterm_alt" :anon :subid("134_1329260312.462") :outer("119_1329260312.462")
+.sub "nullterm_alt" :anon :subid("120_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1410
     .param pmc param_1411
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 937
     .lex "self", param_1410
     .lex "$/", param_1411
@@ -8425,10 +8821,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "integer" :anon :subid("135_1329260312.462") :outer("119_1329260312.462")
+.sub "integer" :anon :subid("121_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1414
     .param pmc param_1415
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 939
     .lex "self", param_1414
     .lex "$/", param_1415
@@ -8450,10 +8846,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "dec_number" :anon :subid("136_1329260312.462") :outer("119_1329260312.462")
+.sub "dec_number" :anon :subid("122_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1418
     .param pmc param_1419
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 941
     .lex "self", param_1418
     .lex "$/", param_1419
@@ -8471,10 +8867,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "decint" :anon :subid("137_1329260312.462") :outer("119_1329260312.462")
+.sub "decint" :anon :subid("123_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1421
     .param pmc param_1422
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 943
     .lex "self", param_1421
     .lex "$/", param_1422
@@ -8492,10 +8888,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "hexint" :anon :subid("138_1329260312.462") :outer("119_1329260312.462")
+.sub "hexint" :anon :subid("124_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1424
     .param pmc param_1425
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 944
     .lex "self", param_1424
     .lex "$/", param_1425
@@ -8513,10 +8909,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "octint" :anon :subid("139_1329260312.462") :outer("119_1329260312.462")
+.sub "octint" :anon :subid("125_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1427
     .param pmc param_1428
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 945
     .lex "self", param_1427
     .lex "$/", param_1428
@@ -8534,10 +8930,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "binint" :anon :subid("140_1329260312.462") :outer("119_1329260312.462")
+.sub "binint" :anon :subid("126_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1430
     .param pmc param_1431
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 946
     .lex "self", param_1430
     .lex "$/", param_1431
@@ -8555,12 +8951,12 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "quote_EXPR" :anon :subid("141_1329260312.462") :outer("119_1329260312.462")
+.sub "quote_EXPR" :anon :subid("127_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1433
     .param pmc param_1434
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 948
-    .const 'Sub' $P1440 = "142_1329260312.462" 
+    .const 'Sub' $P1440 = "236_1330909682.33311" 
     capture_lex $P1440
     .lex "self", param_1433
     .lex "$/", param_1434
@@ -8598,7 +8994,7 @@
     $P115 = $P113."ACCEPTS"($P114)
     if $P115, if_1438
 .annotate 'line', 954
-    .const 'Sub' $P1440 = "142_1329260312.462" 
+    .const 'Sub' $P1440 = "236_1330909682.33311" 
     capture_lex $P1440
     $P1440()
     goto if_1438_end
@@ -8653,10 +9049,10 @@
 
 .namespace ["HLL";"Actions"]
 .include "except_types.pasm"
-.sub "_block1439"  :anon :subid("142_1329260312.462") :outer("141_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "_block1439"  :anon :subid("236_1330909682.33311") :outer("127_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 954
-    .const 'Sub' $P1447 = "143_1329260312.462" 
+    .const 'Sub' $P1447 = "237_1330909682.33311" 
     capture_lex $P1447
 .annotate 'line', 955
     $P1442 = root_new ['parrot';'ResizablePMCArray']
@@ -8733,7 +9129,7 @@
     unless $P117, loop1449_done
     shift $P118, $P117
   loop1449_redo:
-    .const 'Sub' $P1447 = "143_1329260312.462" 
+    .const 'Sub' $P1447 = "237_1330909682.33311" 
     capture_lex $P1447
     $P1447($P118)
   loop1449_next:
@@ -8759,9 +9155,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "_block1446"  :anon :subid("143_1329260312.462") :outer("142_1329260312.462")
+.sub "_block1446"  :anon :subid("237_1330909682.33311") :outer("236_1330909682.33311")
     .param pmc param_1448
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 958
     .lex "$_", param_1448
     find_lex $P119, "$past"
@@ -8781,12 +9177,12 @@
 
 .namespace ["HLL";"Actions"]
 .include "except_types.pasm"
-.sub "quote_delimited" :anon :subid("144_1329260312.462") :outer("119_1329260312.462")
+.sub "quote_delimited" :anon :subid("128_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1453
     .param pmc param_1454
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 971
-    .const 'Sub' $P1462 = "145_1329260312.462" 
+    .const 'Sub' $P1462 = "238_1330909682.33311" 
     capture_lex $P1462
     .lex "self", param_1453
     .lex "$/", param_1454
@@ -8830,7 +9226,7 @@
     unless $P108, loop1470_done
     shift $P110, $P108
   loop1470_redo:
-    .const 'Sub' $P1462 = "145_1329260312.462" 
+    .const 'Sub' $P1462 = "238_1330909682.33311" 
     capture_lex $P1462
     $P1462($P110)
   loop1470_next:
@@ -8936,9 +9332,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "_block1461"  :anon :subid("145_1329260312.462") :outer("144_1329260312.462")
+.sub "_block1461"  :anon :subid("238_1330909682.33311") :outer("128_1330909682.33311")
     .param pmc param_1464
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 975
     new $P111, "Undef"
     set $P1463, $P111
@@ -9051,10 +9447,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "quote_atom" :anon :subid("146_1329260312.462") :outer("119_1329260312.462")
+.sub "quote_atom" :anon :subid("129_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1480
     .param pmc param_1481
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 996
     .lex "self", param_1480
     .lex "$/", param_1481
@@ -9098,10 +9494,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "quote_escape:sym<backslash>" :anon :subid("147_1329260312.462") :outer("119_1329260312.462")
+.sub "quote_escape:sym<backslash>" :anon :subid("130_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1486
     .param pmc param_1487
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1000
     .lex "self", param_1486
     .lex "$/", param_1487
@@ -9114,10 +9510,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "quote_escape:sym<stopper>" :anon :subid("148_1329260312.462") :outer("119_1329260312.462")
+.sub "quote_escape:sym<stopper>" :anon :subid("131_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1489
     .param pmc param_1490
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1001
     .lex "self", param_1489
     .lex "$/", param_1490
@@ -9139,10 +9535,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "quote_escape:sym<bs>" :anon :subid("149_1329260312.462") :outer("119_1329260312.462")
+.sub "quote_escape:sym<bs>" :anon :subid("132_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1493
     .param pmc param_1494
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1003
     .lex "self", param_1493
     .lex "$/", param_1494
@@ -9155,10 +9551,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "quote_escape:sym<nl>" :anon :subid("150_1329260312.462") :outer("119_1329260312.462")
+.sub "quote_escape:sym<nl>" :anon :subid("133_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1496
     .param pmc param_1497
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1004
     .lex "self", param_1496
     .lex "$/", param_1497
@@ -9171,10 +9567,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "quote_escape:sym<cr>" :anon :subid("151_1329260312.462") :outer("119_1329260312.462")
+.sub "quote_escape:sym<cr>" :anon :subid("134_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1499
     .param pmc param_1500
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1005
     .lex "self", param_1499
     .lex "$/", param_1500
@@ -9187,10 +9583,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "quote_escape:sym<tab>" :anon :subid("152_1329260312.462") :outer("119_1329260312.462")
+.sub "quote_escape:sym<tab>" :anon :subid("135_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1502
     .param pmc param_1503
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1006
     .lex "self", param_1502
     .lex "$/", param_1503
@@ -9203,10 +9599,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "quote_escape:sym<ff>" :anon :subid("153_1329260312.462") :outer("119_1329260312.462")
+.sub "quote_escape:sym<ff>" :anon :subid("136_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1505
     .param pmc param_1506
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1007
     .lex "self", param_1505
     .lex "$/", param_1506
@@ -9219,10 +9615,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "quote_escape:sym<esc>" :anon :subid("154_1329260312.462") :outer("119_1329260312.462")
+.sub "quote_escape:sym<esc>" :anon :subid("137_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1508
     .param pmc param_1509
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1008
     .lex "self", param_1508
     .lex "$/", param_1509
@@ -9235,10 +9631,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "quote_escape:sym<hex>" :anon :subid("155_1329260312.462") :outer("119_1329260312.462")
+.sub "quote_escape:sym<hex>" :anon :subid("138_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1511
     .param pmc param_1512
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1010
     .lex "self", param_1511
     .lex "$/", param_1512
@@ -9290,10 +9686,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "quote_escape:sym<oct>" :anon :subid("156_1329260312.462") :outer("119_1329260312.462")
+.sub "quote_escape:sym<oct>" :anon :subid("139_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1519
     .param pmc param_1520
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1014
     .lex "self", param_1519
     .lex "$/", param_1520
@@ -9345,10 +9741,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "quote_escape:sym<chr>" :anon :subid("157_1329260312.462") :outer("119_1329260312.462")
+.sub "quote_escape:sym<chr>" :anon :subid("140_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1527
     .param pmc param_1528
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1018
     .lex "self", param_1527
     .lex "$/", param_1528
@@ -9372,10 +9768,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "quote_escape:sym<0>" :anon :subid("158_1329260312.462") :outer("119_1329260312.462")
+.sub "quote_escape:sym<0>" :anon :subid("141_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1531
     .param pmc param_1532
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1022
     .lex "self", param_1531
     .lex "$/", param_1532
@@ -9390,10 +9786,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "quote_escape:sym<misc>" :anon :subid("159_1329260312.462") :outer("119_1329260312.462")
+.sub "quote_escape:sym<misc>" :anon :subid("142_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1534
     .param pmc param_1535
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1026
     .lex "self", param_1534
     .lex "$/", param_1535
@@ -9443,10 +9839,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "charname" :anon :subid("160_1329260312.462") :outer("119_1329260312.462")
+.sub "charname" :anon :subid("143_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1541
     .param pmc param_1542
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1030
     .lex "self", param_1541
     .lex "$/", param_1542
@@ -9529,12 +9925,12 @@
 
 .namespace ["HLL";"Actions"]
 .include "except_types.pasm"
-.sub "charnames" :anon :subid("161_1329260312.462") :outer("119_1329260312.462")
+.sub "charnames" :anon :subid("144_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1549
     .param pmc param_1550
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1038
-    .const 'Sub' $P1554 = "162_1329260312.462" 
+    .const 'Sub' $P1554 = "239_1330909682.33311" 
     capture_lex $P1554
     .lex "self", param_1549
     .lex "$/", param_1550
@@ -9564,7 +9960,7 @@
     unless $P107, loop1556_done
     shift $P109, $P107
   loop1556_redo:
-    .const 'Sub' $P1554 = "162_1329260312.462" 
+    .const 'Sub' $P1554 = "239_1330909682.33311" 
     capture_lex $P1554
     $P1554($P109)
   loop1556_next:
@@ -9594,9 +9990,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "_block1553"  :anon :subid("162_1329260312.462") :outer("161_1329260312.462")
+.sub "_block1553"  :anon :subid("239_1330909682.33311") :outer("144_1330909682.33311")
     .param pmc param_1555
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1040
     .lex "$_", param_1555
     find_lex $P110, "$str"
@@ -9617,10 +10013,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Actions"]
-.sub "charspec" :anon :subid("163_1329260312.462") :outer("119_1329260312.462")
+.sub "charspec" :anon :subid("145_1330909682.33311") :outer("228_1330909682.33311")
     .param pmc param_1558
     .param pmc param_1559
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1044
     .lex "self", param_1558
     .lex "$/", param_1559
@@ -9665,95 +10061,95 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block1564"  :subid("164_1329260312.462") :outer("10_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "_block1564"  :subid("240_1330909682.33311") :outer("222_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1058
-    .const 'Sub' $P2234 = "245_1329260312.462" 
-    capture_lex $P2234
-    .const 'Sub' $P2210 = "243_1329260312.462" 
-    capture_lex $P2210
-    .const 'Sub' $P2176 = "240_1329260312.462" 
-    capture_lex $P2176
-    .const 'Sub' $P2163 = "238_1329260312.462" 
-    capture_lex $P2163
-    .const 'Sub' $P2145 = "235_1329260312.462" 
-    capture_lex $P2145
-    .const 'Sub' $P2133 = "232_1329260312.462" 
-    capture_lex $P2133
-    .const 'Sub' $P2122 = "231_1329260312.462" 
-    capture_lex $P2122
-    .const 'Sub' $P2118 = "230_1329260312.462" 
-    capture_lex $P2118
-    .const 'Sub' $P2106 = "228_1329260312.462" 
-    capture_lex $P2106
-    .const 'Sub' $P2101 = "227_1329260312.462" 
-    capture_lex $P2101
-    .const 'Sub' $P2096 = "226_1329260312.462" 
-    capture_lex $P2096
-    .const 'Sub' $P2094 = "225_1329260312.462" 
-    capture_lex $P2094
-    .const 'Sub' $P2089 = "224_1329260312.462" 
-    capture_lex $P2089
-    .const 'Sub' $P2083 = "223_1329260312.462" 
-    capture_lex $P2083
-    .const 'Sub' $P2053 = "220_1329260312.462" 
-    capture_lex $P2053
-    .const 'Sub' $P2027 = "217_1329260312.462" 
-    capture_lex $P2027
-    .const 'Sub' $P1973 = "213_1329260312.462" 
+    .const 'Sub' $P2233 = "186_1330909682.33311" 
+    capture_lex $P2233
+    .const 'Sub' $P2209 = "185_1330909682.33311" 
+    capture_lex $P2209
+    .const 'Sub' $P2175 = "184_1330909682.33311" 
+    capture_lex $P2175
+    .const 'Sub' $P2162 = "183_1330909682.33311" 
+    capture_lex $P2162
+    .const 'Sub' $P2144 = "182_1330909682.33311" 
+    capture_lex $P2144
+    .const 'Sub' $P2132 = "181_1330909682.33311" 
+    capture_lex $P2132
+    .const 'Sub' $P2121 = "180_1330909682.33311" 
+    capture_lex $P2121
+    .const 'Sub' $P2117 = "179_1330909682.33311" 
+    capture_lex $P2117
+    .const 'Sub' $P2105 = "178_1330909682.33311" 
+    capture_lex $P2105
+    .const 'Sub' $P2100 = "177_1330909682.33311" 
+    capture_lex $P2100
+    .const 'Sub' $P2095 = "176_1330909682.33311" 
+    capture_lex $P2095
+    .const 'Sub' $P2093 = "175_1330909682.33311" 
+    capture_lex $P2093
+    .const 'Sub' $P2088 = "174_1330909682.33311" 
+    capture_lex $P2088
+    .const 'Sub' $P2082 = "173_1330909682.33311" 
+    capture_lex $P2082
+    .const 'Sub' $P2052 = "172_1330909682.33311" 
+    capture_lex $P2052
+    .const 'Sub' $P2026 = "171_1330909682.33311" 
+    capture_lex $P2026
+    .const 'Sub' $P1973 = "170_1330909682.33311" 
     capture_lex $P1973
-    .const 'Sub' $P1945 = "210_1329260312.462" 
+    .const 'Sub' $P1945 = "169_1330909682.33311" 
     capture_lex $P1945
-    .const 'Sub' $P1850 = "203_1329260312.462" 
+    .const 'Sub' $P1850 = "168_1330909682.33311" 
     capture_lex $P1850
-    .const 'Sub' $P1828 = "202_1329260312.462" 
+    .const 'Sub' $P1828 = "167_1330909682.33311" 
     capture_lex $P1828
-    .const 'Sub' $P1820 = "201_1329260312.462" 
+    .const 'Sub' $P1820 = "166_1330909682.33311" 
     capture_lex $P1820
-    .const 'Sub' $P1816 = "200_1329260312.462" 
+    .const 'Sub' $P1816 = "165_1330909682.33311" 
     capture_lex $P1816
-    .const 'Sub' $P1814 = "199_1329260312.462" 
+    .const 'Sub' $P1814 = "164_1330909682.33311" 
     capture_lex $P1814
-    .const 'Sub' $P1812 = "198_1329260312.462" 
+    .const 'Sub' $P1812 = "163_1330909682.33311" 
     capture_lex $P1812
-    .const 'Sub' $P1806 = "197_1329260312.462" 
+    .const 'Sub' $P1806 = "162_1330909682.33311" 
     capture_lex $P1806
-    .const 'Sub' $P1800 = "196_1329260312.462" 
+    .const 'Sub' $P1800 = "161_1330909682.33311" 
     capture_lex $P1800
-    .const 'Sub' $P1792 = "195_1329260312.462" 
+    .const 'Sub' $P1792 = "160_1330909682.33311" 
     capture_lex $P1792
-    .const 'Sub' $P1788 = "194_1329260312.462" 
+    .const 'Sub' $P1788 = "159_1330909682.33311" 
     capture_lex $P1788
-    .const 'Sub' $P1785 = "193_1329260312.462" 
+    .const 'Sub' $P1785 = "158_1330909682.33311" 
     capture_lex $P1785
-    .const 'Sub' $P1762 = "191_1329260312.462" 
+    .const 'Sub' $P1762 = "157_1330909682.33311" 
     capture_lex $P1762
-    .const 'Sub' $P1693 = "184_1329260312.462" 
+    .const 'Sub' $P1693 = "156_1330909682.33311" 
     capture_lex $P1693
-    .const 'Sub' $P1689 = "183_1329260312.462" 
+    .const 'Sub' $P1689 = "155_1330909682.33311" 
     capture_lex $P1689
-    .const 'Sub' $P1659 = "178_1329260312.462" 
+    .const 'Sub' $P1659 = "154_1330909682.33311" 
     capture_lex $P1659
-    .const 'Sub' $P1644 = "176_1329260312.462" 
+    .const 'Sub' $P1644 = "153_1330909682.33311" 
     capture_lex $P1644
-    .const 'Sub' $P1641 = "175_1329260312.462" 
+    .const 'Sub' $P1641 = "152_1330909682.33311" 
     capture_lex $P1641
-    .const 'Sub' $P1638 = "174_1329260312.462" 
+    .const 'Sub' $P1638 = "151_1330909682.33311" 
     capture_lex $P1638
-    .const 'Sub' $P1634 = "173_1329260312.462" 
+    .const 'Sub' $P1634 = "150_1330909682.33311" 
     capture_lex $P1634
-    .const 'Sub' $P1627 = "172_1329260312.462" 
+    .const 'Sub' $P1627 = "149_1330909682.33311" 
     capture_lex $P1627
-    .const 'Sub' $P1585 = "169_1329260312.462" 
+    .const 'Sub' $P1585 = "148_1330909682.33311" 
     capture_lex $P1585
-    .const 'Sub' $P1578 = "167_1329260312.462" 
+    .const 'Sub' $P1578 = "147_1330909682.33311" 
     capture_lex $P1578
-    .const 'Sub' $P1575 = "166_1329260312.462" 
+    .const 'Sub' $P1575 = "146_1330909682.33311" 
     capture_lex $P1575
-    .const 'Sub' $P1567 = "165_1329260312.462" 
+    .const 'Sub' $P1567 = "241_1330909682.33311" 
     capture_lex $P1567
 .annotate 'line', 1091
-    .const 'Sub' $P1567 = "165_1329260312.462" 
+    .const 'Sub' $P1567 = "241_1330909682.33311" 
     newclosure $P1571, $P1567
     set $P1566, $P1571
     .lex "value_type", $P1566
@@ -9767,20 +10163,20 @@
     $P1574 = root_new ['parrot';'Hash']
   vivify_677:
     set $P102, $P1566
-.annotate 'line', 1657
-    .const 'Sub' $P2234 = "245_1329260312.462" 
-    newclosure $P2239, $P2234
+.annotate 'line', 1660
+    .const 'Sub' $P2233 = "186_1330909682.33311" 
+    newclosure $P2238, $P2233
 .annotate 'line', 1058
-    .return ($P2239)
+    .return ($P2238)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "value_type"  :subid("165_1329260312.462") :outer("164_1329260312.462")
+.sub "value_type"  :subid("241_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1568
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1091
     .lex "$value", param_1568
 .annotate 'line', 1092
@@ -9822,9 +10218,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "new" :anon :subid("166_1329260312.462") :outer("164_1329260312.462")
+.sub "new" :anon :subid("146_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1576
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1071
     .lex "self", param_1576
 .annotate 'line', 1072
@@ -9854,36 +10250,36 @@
 
 .namespace ["HLL";"Compiler"]
 .include "except_types.pasm"
-.sub "BUILD" :anon :subid("167_1329260312.462") :outer("164_1329260312.462")
+.sub "BUILD" :anon :subid("147_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1579
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1077
-    .const 'Sub' $P1582 = "168_1329260312.462" 
+    .const 'Sub' $P1582 = "242_1330909682.33311" 
     capture_lex $P1582
     .lex "self", param_1579
 .annotate 'line', 1079
     split $P102, " ", "parse past post pir evalpmc"
     set $P103, param_1579
     nqp_decontainerize $P104, $P103
-    find_lex $P105, "$?CLASS"
+    nqp_get_sc_object $P105, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_bind_attr_obj $P104, $P105, "@!stages", 0, $P102
 .annotate 'line', 1082
     split $P102, " ", "e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config stagestats ll-exception nqpevent=s rxtrace profile profile-compile"
     set $P103, param_1579
     nqp_decontainerize $P104, $P103
-    find_lex $P105, "$?CLASS"
+    nqp_get_sc_object $P105, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_bind_attr_obj $P104, $P105, "@!cmdoptions", 3, $P102
 .annotate 'line', 1083
     new $P102, "String"
     assign $P102, "This compiler is based on HLL::Compiler.\n\nOptions:\n"
     set $P103, param_1579
     nqp_decontainerize $P104, $P103
-    find_lex $P105, "$?CLASS"
+    nqp_get_sc_object $P105, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_bind_attr_obj $P104, $P105, "$!usage", 4, $P102
 .annotate 'line', 1084
     set $P103, param_1579
     nqp_decontainerize $P104, $P103
-    find_lex $P105, "$?CLASS"
+    nqp_get_sc_object $P105, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_get_attr_obj $P1580, $P104, $P105, "@!cmdoptions", 3
     unless_null $P1580, vivify_680
     $P1580 = root_new ['parrot';'ResizablePMCArray']
@@ -9898,7 +10294,7 @@
     unless $P102, loop1584_done
     shift $P106, $P102
   loop1584_redo:
-    .const 'Sub' $P1582 = "168_1329260312.462" 
+    .const 'Sub' $P1582 = "242_1330909682.33311" 
     capture_lex $P1582
     $P1582($P106)
   loop1584_next:
@@ -9926,7 +10322,7 @@
     new $P102, "Hash"
     set $P103, param_1579
     nqp_decontainerize $P104, $P103
-    find_lex $P105, "$?CLASS"
+    nqp_get_sc_object $P105, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_bind_attr_obj $P104, $P105, "%!config", 7, $P102
 .annotate 'line', 1077
     .return ($P102)
@@ -9936,15 +10332,15 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block1581"  :anon :subid("168_1329260312.462") :outer("167_1329260312.462")
+.sub "_block1581"  :anon :subid("242_1330909682.33311") :outer("147_1330909682.33311")
     .param pmc param_1583
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1084
     .lex "$_", param_1583
 .annotate 'line', 1085
     find_lex $P107, "self"
     nqp_decontainerize $P108, $P107
-    find_lex $P109, "$?CLASS"
+    nqp_get_sc_object $P109, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_get_attr_obj $P110, $P108, $P109, "$!usage", 4
     unless_null $P110, vivify_682
     new $P110, "Undef"
@@ -9960,7 +10356,7 @@
     concat $P115, $P110, $P114
     find_lex $P116, "self"
     nqp_decontainerize $P117, $P116
-    find_lex $P118, "$?CLASS"
+    nqp_get_sc_object $P118, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_bind_attr_obj $P117, $P118, "$!usage", 4, $P115
 .annotate 'line', 1084
     .return ($P115)
@@ -9971,17 +10367,17 @@
 
 .namespace ["HLL";"Compiler"]
 .include "except_types.pasm"
-.sub "get_exports" :anon :subid("169_1329260312.462") :outer("164_1329260312.462")
+.sub "get_exports" :anon :subid("148_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1586
     .param pmc param_1587
     .param pmc param_1589 :slurpy
     .param pmc param_1588 :optional :named("tagset")
     .param int has_param_1588 :opt_flag
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1097
-    .const 'Sub' $P1620 = "171_1329260312.462" 
+    .const 'Sub' $P1620 = "244_1330909682.33311" 
     capture_lex $P1620
-    .const 'Sub' $P1611 = "170_1329260312.462" 
+    .const 'Sub' $P1611 = "243_1330909682.33311" 
     capture_lex $P1611
     .lex "self", param_1586
     .lex "$module", param_1587
@@ -10119,7 +10515,7 @@
     unless $P103, loop1625_done
     shift $P104, $P103
   loop1625_redo:
-    .const 'Sub' $P1620 = "171_1329260312.462" 
+    .const 'Sub' $P1620 = "244_1330909682.33311" 
     capture_lex $P1620
     $P1620($P104)
   loop1625_next:
@@ -10152,7 +10548,7 @@
     unless $P103, loop1617_done
     shift $P104, $P103
   loop1617_redo:
-    .const 'Sub' $P1611 = "170_1329260312.462" 
+    .const 'Sub' $P1611 = "243_1330909682.33311" 
     capture_lex $P1611
     $P1611($P104)
   loop1617_next:
@@ -10180,9 +10576,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block1619"  :anon :subid("171_1329260312.462") :outer("169_1329260312.462")
+.sub "_block1619"  :anon :subid("244_1330909682.33311") :outer("148_1330909682.33311")
     .param pmc param_1622
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1117
     new $P105, "Undef"
     set $P1621, $P105
@@ -10228,9 +10624,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block1610"  :anon :subid("170_1329260312.462") :outer("169_1329260312.462")
+.sub "_block1610"  :anon :subid("243_1330909682.33311") :outer("148_1330909682.33311")
     .param pmc param_1613
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1111
     new $P105, "Undef"
     set $P1612, $P105
@@ -10283,10 +10679,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "get_module" :anon :subid("172_1329260312.462") :outer("164_1329260312.462")
+.sub "get_module" :anon :subid("149_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1628
     .param pmc param_1629
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1124
     .lex "self", param_1628
     .lex "$name", param_1629
@@ -10309,7 +10705,7 @@
   vivify_719:
     set $P102, param_1628
     nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_get_attr_obj $P105, $P103, $P104, "$!language", 6
     unless_null $P105, vivify_720
     new $P105, "Undef"
@@ -10331,11 +10727,11 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "language" :anon :subid("173_1329260312.462") :outer("164_1329260312.462")
+.sub "language" :anon :subid("150_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1635
     .param pmc param_1636 :optional
     .param int has_param_1636 :opt_flag
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1130
     .lex "self", param_1635
     if has_param_1636, optparam_722
@@ -10356,7 +10752,7 @@
   vivify_724:
     set $P105, param_1635
     nqp_decontainerize $P106, $P105
-    find_lex $P107, "$?CLASS"
+    nqp_get_sc_object $P107, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_bind_attr_obj $P106, $P107, "$!language", 6, $P104
 .annotate 'line', 1133
     set $P104, param_1636
@@ -10371,7 +10767,7 @@
 .annotate 'line', 1130
     set $P103, param_1635
     nqp_decontainerize $P104, $P103
-    find_lex $P105, "$?CLASS"
+    nqp_get_sc_object $P105, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_get_attr_obj $P106, $P104, $P105, "$!language", 6
     unless_null $P106, vivify_726
     new $P106, "Undef"
@@ -10383,10 +10779,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "compiler" :anon :subid("174_1329260312.462") :outer("164_1329260312.462")
+.sub "compiler" :anon :subid("151_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1639
     .param pmc param_1640
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1138
     .lex "self", param_1639
     .lex "$name", param_1640
@@ -10405,14 +10801,14 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "config" :anon :subid("175_1329260312.462") :outer("164_1329260312.462")
+.sub "config" :anon :subid("152_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1642
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1142
     .lex "self", param_1642
     set $P102, param_1642
     nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_get_attr_obj $P1643, $P103, $P104, "%!config", 7
     unless_null $P1643, vivify_728
     $P1643 = root_new ['parrot';'Hash']
@@ -10424,12 +10820,12 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "load_module" :anon :subid("176_1329260312.462") :outer("164_1329260312.462")
+.sub "load_module" :anon :subid("153_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1645
     .param pmc param_1646
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1144
-    .const 'Sub' $P1650 = "177_1329260312.462" 
+    .const 'Sub' $P1650 = "245_1330909682.33311" 
     capture_lex $P1650
     .lex "self", param_1645
     .lex "$name", param_1646
@@ -10458,7 +10854,7 @@
     assign $P104, 0
     set $P1648, $P104
 .annotate 'line', 1147
-    .const 'Sub' $P1650 = "177_1329260312.462" 
+    .const 'Sub' $P1650 = "245_1330909682.33311" 
     capture_lex $P1650
     $P1650()
 .annotate 'line', 1148
@@ -10495,8 +10891,8 @@
 
 .namespace ["HLL";"Compiler"]
 .include "except_types.pasm"
-.sub "_block1649"  :anon :subid("177_1329260312.462") :outer("176_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "_block1649"  :anon :subid("245_1330909682.33311") :outer("153_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1147
     new $P1653, 'ExceptionHandler'
     set_label $P1653, control_1652
@@ -10536,13 +10932,13 @@
 
 .namespace ["HLL";"Compiler"]
 .include "except_types.pasm"
-.sub "import" :anon :subid("178_1329260312.462") :outer("164_1329260312.462")
+.sub "import" :anon :subid("154_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1660
     .param pmc param_1661
     .param pmc param_1662
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1152
-    .const 'Sub' $P1665 = "179_1329260312.462" 
+    .const 'Sub' $P1665 = "246_1330909682.33311" 
     capture_lex $P1665
     .lex "self", param_1660
     .lex "$target", param_1661
@@ -10562,7 +10958,7 @@
     unless $P102, loop1688_done
     shift $P103, $P102
   loop1688_redo:
-    .const 'Sub' $P1665 = "179_1329260312.462" 
+    .const 'Sub' $P1665 = "246_1330909682.33311" 
     capture_lex $P1665
     $P1665($P103)
   loop1688_next:
@@ -10586,15 +10982,15 @@
 
 .namespace ["HLL";"Compiler"]
 .include "except_types.pasm"
-.sub "_block1664"  :anon :subid("179_1329260312.462") :outer("178_1329260312.462")
+.sub "_block1664"  :anon :subid("246_1330909682.33311") :outer("154_1330909682.33311")
     .param pmc param_1669
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1153
-    .const 'Sub' $P1684 = "182_1329260312.462" 
+    .const 'Sub' $P1684 = "249_1330909682.33311" 
     capture_lex $P1684
-    .const 'Sub' $P1679 = "181_1329260312.462" 
+    .const 'Sub' $P1679 = "248_1330909682.33311" 
     capture_lex $P1679
-    .const 'Sub' $P1673 = "180_1329260312.462" 
+    .const 'Sub' $P1673 = "247_1330909682.33311" 
     capture_lex $P1673
 .annotate 'line', 1154
     new $P104, "Undef"
@@ -10662,7 +11058,7 @@
     unless $P118, loop1687_done
     shift $P119, $P118
   loop1687_redo:
-    .const 'Sub' $P1684 = "182_1329260312.462" 
+    .const 'Sub' $P1684 = "249_1330909682.33311" 
     capture_lex $P1684
     $P1684($P119)
   loop1687_next:
@@ -10697,7 +11093,7 @@
     unless $P117, loop1681_done
     shift $P118, $P117
   loop1681_redo:
-    .const 'Sub' $P1679 = "181_1329260312.462" 
+    .const 'Sub' $P1679 = "248_1330909682.33311" 
     capture_lex $P1679
     $P1679($P118)
   loop1681_next:
@@ -10734,7 +11130,7 @@
     unless $P111, loop1675_done
     shift $P112, $P111
   loop1675_redo:
-    .const 'Sub' $P1673 = "180_1329260312.462" 
+    .const 'Sub' $P1673 = "247_1330909682.33311" 
     capture_lex $P1673
     $P1673($P112)
   loop1675_next:
@@ -10760,9 +11156,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block1683"  :anon :subid("182_1329260312.462") :outer("179_1329260312.462")
+.sub "_block1683"  :anon :subid("249_1330909682.33311") :outer("246_1330909682.33311")
     .param pmc param_1685
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1163
     .lex "$_", param_1685
     find_lex $P120, "$_"
@@ -10789,9 +11185,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block1678"  :anon :subid("181_1329260312.462") :outer("179_1329260312.462")
+.sub "_block1678"  :anon :subid("248_1330909682.33311") :outer("246_1330909682.33311")
     .param pmc param_1680
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1160
     .lex "$_", param_1680
     find_lex $P119, "$target"
@@ -10824,9 +11220,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block1672"  :anon :subid("180_1329260312.462") :outer("179_1329260312.462")
+.sub "_block1672"  :anon :subid("247_1330909682.33311") :outer("246_1330909682.33311")
     .param pmc param_1674
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1157
     .lex "$_", param_1674
     find_lex $P113, "self"
@@ -10861,10 +11257,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "autoprint" :anon :subid("183_1329260312.462") :outer("164_1329260312.462")
+.sub "autoprint" :anon :subid("155_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1690
     .param pmc param_1691
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1168
     .lex "self", param_1690
     .lex "$value", param_1691
@@ -10905,19 +11301,19 @@
 
 .namespace ["HLL";"Compiler"]
 .include "except_types.pasm"
-.sub "interactive" :anon :subid("184_1329260312.462") :outer("164_1329260312.462")
+.sub "interactive" :anon :subid("156_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1694
     .param pmc param_1695 :slurpy :named
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1173
-    .const 'Sub' $P1715 = "186_1329260312.462" 
+    .const 'Sub' $P1715 = "251_1330909682.33311" 
     capture_lex $P1715
-    .const 'Sub' $P1697 = "185_1329260312.462" 
+    .const 'Sub' $P1697 = "250_1330909682.33311" 
     capture_lex $P1697
     .lex "self", param_1694
     .lex "%adverbs", param_1695
 .annotate 'line', 1179
-    .const 'Sub' $P1697 = "185_1329260312.462" 
+    .const 'Sub' $P1697 = "250_1330909682.33311" 
     newclosure $P1702, $P1697
     set $P1696, $P1702
     .lex "blank_context", $P1696
@@ -11043,7 +11439,7 @@
     assign $P108, 1
     unless $P108, loop1761_done
   loop1761_redo:
-    .const 'Sub' $P1715 = "186_1329260312.462" 
+    .const 'Sub' $P1715 = "251_1330909682.33311" 
     capture_lex $P1715
     $P1715()
   loop1761_next:
@@ -11065,8 +11461,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "blank_context"  :subid("185_1329260312.462") :outer("184_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "blank_context"  :subid("250_1330909682.33311") :outer("156_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1181
     $P1699 = root_new ['parrot';'Hash']
     set $P1698, $P1699
@@ -11102,10 +11498,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block1714"  :anon :subid("186_1329260312.462") :outer("184_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "_block1714"  :anon :subid("251_1330909682.33311") :outer("156_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1203
-    .const 'Sub' $P1729 = "187_1329260312.462" 
+    .const 'Sub' $P1729 = "252_1330909682.33311" 
     capture_lex $P1729
 .annotate 'line', 1206
     new $P109, "Undef"
@@ -11208,7 +11604,7 @@
     set $P114, $P115
     goto if_1727_end
   if_1727:
-    .const 'Sub' $P1729 = "187_1329260312.462" 
+    .const 'Sub' $P1729 = "252_1330909682.33311" 
     capture_lex $P1729
     $P118 = $P1729()
     set $P114, $P118
@@ -11222,12 +11618,12 @@
 
 .namespace ["HLL";"Compiler"]
 .include "except_types.pasm"
-.sub "_block1728"  :anon :subid("187_1329260312.462") :outer("186_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "_block1728"  :anon :subid("252_1330909682.33311") :outer("251_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1220
-    .const 'Sub' $P1753 = "190_1329260312.462" 
+    .const 'Sub' $P1753 = "255_1330909682.33311" 
     capture_lex $P1753
-    .const 'Sub' $P1732 = "188_1329260312.462" 
+    .const 'Sub' $P1732 = "253_1330909682.33311" 
     capture_lex $P1732
 .annotate 'line', 1222
     new $P116, "Undef"
@@ -11246,7 +11642,7 @@
     new $P117, "Undef"
   vivify_784:
 .annotate 'line', 1223
-    .const 'Sub' $P1732 = "188_1329260312.462" 
+    .const 'Sub' $P1732 = "253_1330909682.33311" 
     capture_lex $P1732
     $P1732()
 .annotate 'line', 1230
@@ -11282,7 +11678,7 @@
     unless $P120, loop1756_done
     shift $P125, $P120
   loop1756_redo:
-    .const 'Sub' $P1753 = "190_1329260312.462" 
+    .const 'Sub' $P1753 = "255_1330909682.33311" 
     capture_lex $P1753
     $P1753($P125)
   loop1756_next:
@@ -11381,10 +11777,10 @@
 
 .namespace ["HLL";"Compiler"]
 .include "except_types.pasm"
-.sub "_block1731"  :anon :subid("188_1329260312.462") :outer("187_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "_block1731"  :anon :subid("253_1330909682.33311") :outer("252_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1223
-    .const 'Sub' $P1740 = "189_1329260312.462" 
+    .const 'Sub' $P1740 = "254_1330909682.33311" 
     capture_lex $P1740
     new $P1736, 'ExceptionHandler'
     set_label $P1736, control_1735
@@ -11415,7 +11811,7 @@
 .annotate 'line', 1225
     .local pmc exception 
     .get_results (exception) 
-    .const 'Sub' $P1740 = "189_1329260312.462" 
+    .const 'Sub' $P1740 = "254_1330909682.33311" 
     newclosure $P1748, $P1740
     $P1748(exception)
     new $P1749, 'Integer'
@@ -11436,9 +11832,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block1739"  :anon :subid("189_1329260312.462") :outer("188_1329260312.462")
+.sub "_block1739"  :anon :subid("254_1330909682.33311") :outer("253_1330909682.33311")
     .param pmc param_1741
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1225
     .lex "$_", param_1741
     find_lex $P1742, "$_"
@@ -11464,9 +11860,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block1752"  :anon :subid("190_1329260312.462") :outer("187_1329260312.462")
+.sub "_block1752"  :anon :subid("255_1330909682.33311") :outer("252_1330909682.33311")
     .param pmc param_1754
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1231
     .lex "$_", param_1754
 .annotate 'line', 1232
@@ -11494,14 +11890,14 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "eval" :anon :subid("191_1329260312.462") :outer("164_1329260312.462")
+.sub "eval" :anon :subid("157_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1763
     .param pmc param_1764
     .param pmc param_1765 :slurpy
     .param pmc param_1766 :slurpy :named
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1249
-    .const 'Sub' $P1776 = "192_1329260312.462" 
+    .const 'Sub' $P1776 = "256_1330909682.33311" 
     capture_lex $P1776
     .lex "self", param_1763
     .lex "$code", param_1764
@@ -11580,7 +11976,7 @@
     set $P104, $I102
   if_1773_end:
     unless $P104, if_1772_end
-    .const 'Sub' $P1776 = "192_1329260312.462" 
+    .const 'Sub' $P1776 = "256_1330909682.33311" 
     capture_lex $P1776
     $P1776()
   if_1772_end:
@@ -11603,8 +11999,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block1775"  :anon :subid("192_1329260312.462") :outer("191_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "_block1775"  :anon :subid("256_1330909682.33311") :outer("157_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1260
     new $P108, "Undef"
     set $P1777, $P108
@@ -11691,9 +12087,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "ctxsave" :anon :subid("193_1329260312.462") :outer("164_1329260312.462")
+.sub "ctxsave" :anon :subid("158_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1786
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1277
     .lex "self", param_1786
 .annotate 'line', 1279
@@ -11714,10 +12110,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "panic" :anon :subid("194_1329260312.462") :outer("164_1329260312.462")
+.sub "panic" :anon :subid("159_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1789
     .param pmc param_1790 :slurpy
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1286
     .lex "self", param_1789
     .lex "@args", param_1790
@@ -11736,11 +12132,11 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "stages" :anon :subid("195_1329260312.462") :outer("164_1329260312.462")
+.sub "stages" :anon :subid("160_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1793
     .param pmc param_1794 :optional
     .param int has_param_1794 :opt_flag
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1290
     .lex "self", param_1793
     if has_param_1794, optparam_829
@@ -11762,13 +12158,13 @@
   vivify_831:
     set $P102, param_1793
     nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_bind_attr_obj $P103, $P104, "@!stages", 0, $P1798
   if_1796_end:
 .annotate 'line', 1290
     set $P102, param_1793
     nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_get_attr_obj $P1799, $P103, $P104, "@!stages", 0
     unless_null $P1799, vivify_832
     $P1799 = root_new ['parrot';'ResizablePMCArray']
@@ -11780,10 +12176,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "parsegrammar" :anon :subid("196_1329260312.462") :outer("164_1329260312.462")
+.sub "parsegrammar" :anon :subid("161_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1801
     .param pmc param_1802 :slurpy
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1297
     .lex "self", param_1801
     .lex "@value", param_1802
@@ -11808,13 +12204,13 @@
   vivify_835:
     set $P104, param_1801
     nqp_decontainerize $P105, $P104
-    find_lex $P106, "$?CLASS"
+    nqp_get_sc_object $P106, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_bind_attr_obj $P105, $P106, "$!parsegrammar", 1, $P103
   if_1803_end:
 .annotate 'line', 1297
     set $P102, param_1801
     nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_get_attr_obj $P105, $P103, $P104, "$!parsegrammar", 1
     unless_null $P105, vivify_836
     new $P105, "Undef"
@@ -11826,10 +12222,10 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "parseactions" :anon :subid("197_1329260312.462") :outer("164_1329260312.462")
+.sub "parseactions" :anon :subid("162_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1807
     .param pmc param_1808 :slurpy
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1304
     .lex "self", param_1807
     .lex "@value", param_1808
@@ -11854,13 +12250,13 @@
   vivify_839:
     set $P104, param_1807
     nqp_decontainerize $P105, $P104
-    find_lex $P106, "$?CLASS"
+    nqp_get_sc_object $P106, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_bind_attr_obj $P105, $P106, "$!parseactions", 2, $P103
   if_1809_end:
 .annotate 'line', 1304
     set $P102, param_1807
     nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_get_attr_obj $P105, $P103, $P104, "$!parseactions", 2
     unless_null $P105, vivify_840
     new $P105, "Undef"
@@ -11872,9 +12268,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "interactive_banner" :anon :subid("198_1329260312.462") :outer("164_1329260312.462")
+.sub "interactive_banner" :anon :subid("163_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1813
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1311
     .lex "self", param_1813
     .return ("")
@@ -11884,9 +12280,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "interactive_prompt" :anon :subid("199_1329260312.462") :outer("164_1329260312.462")
+.sub "interactive_prompt" :anon :subid("164_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1815
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1313
     .lex "self", param_1815
     .return ("> ")
@@ -11896,11 +12292,11 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "compiler_progname" :anon :subid("200_1329260312.462") :outer("164_1329260312.462")
+.sub "compiler_progname" :anon :subid("165_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1817
     .param pmc param_1818 :optional
     .param int has_param_1818 :opt_flag
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1315
     .lex "self", param_1817
     if has_param_1818, optparam_841
@@ -11922,13 +12318,13 @@
   vivify_843:
     set $P105, param_1817
     nqp_decontainerize $P106, $P105
-    find_lex $P107, "$?CLASS"
+    nqp_get_sc_object $P107, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_bind_attr_obj $P106, $P107, "$!compiler_progname", 5, $P104
   if_1819_end:
 .annotate 'line', 1315
     set $P103, param_1817
     nqp_decontainerize $P104, $P103
-    find_lex $P105, "$?CLASS"
+    nqp_get_sc_object $P105, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_get_attr_obj $P106, $P104, $P105, "$!compiler_progname", 5
     unless_null $P106, vivify_844
     new $P106, "Undef"
@@ -11940,11 +12336,11 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "commandline_options" :anon :subid("201_1329260312.462") :outer("164_1329260312.462")
+.sub "commandline_options" :anon :subid("166_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1821
     .param pmc param_1822 :optional
     .param int has_param_1822 :opt_flag
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1322
     .lex "self", param_1821
     if has_param_1822, optparam_845
@@ -11966,13 +12362,13 @@
   vivify_847:
     set $P102, param_1821
     nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_bind_attr_obj $P103, $P104, "@!cmdoptions", 3, $P1826
   if_1824_end:
 .annotate 'line', 1322
     set $P102, param_1821
     nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_get_attr_obj $P1827, $P103, $P104, "@!cmdoptions", 3
     unless_null $P1827, vivify_848
     $P1827 = root_new ['parrot';'ResizablePMCArray']
@@ -11984,11 +12380,11 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "command_line" :anon :subid("202_1329260312.462") :outer("164_1329260312.462")
+.sub "command_line" :anon :subid("167_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1829
     .param pmc param_1830
     .param pmc param_1831 :slurpy :named
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1329
     .lex "self", param_1829
     .lex "@args", param_1830
@@ -12135,15 +12531,15 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "command_eval" :anon :subid("203_1329260312.462") :outer("164_1329260312.462")
+.sub "command_eval" :anon :subid("168_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1851
     .param pmc param_1852 :slurpy
     .param pmc param_1853 :slurpy :named
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1357
-    .const 'Sub' $P1943 = "209_1329260312.462" 
+    .const 'Sub' $P1943 = "262_1330909682.33311" 
     capture_lex $P1943
-    .const 'Sub' $P1869 = "204_1329260312.462" 
+    .const 'Sub' $P1869 = "257_1330909682.33311" 
     capture_lex $P1869
     .lex "self", param_1851
     .lex "@a", param_1852
@@ -12256,7 +12652,7 @@
     set $P107, $S101
     set $P1857, $P107
 .annotate 'line', 1366
-    .const 'Sub' $P1869 = "204_1329260312.462" 
+    .const 'Sub' $P1869 = "257_1330909682.33311" 
     capture_lex $P1869
     $P1869()
 .annotate 'line', 1401
@@ -12300,7 +12696,7 @@
     goto if_1939_end
   if_1939:
 .annotate 'line', 1402
-    .const 'Sub' $P1943 = "209_1329260312.462" 
+    .const 'Sub' $P1943 = "262_1330909682.33311" 
     capture_lex $P1943
     $P1943()
   if_1939_end:
@@ -12318,16 +12714,16 @@
 
 .namespace ["HLL";"Compiler"]
 .include "except_types.pasm"
-.sub "_block1868"  :anon :subid("204_1329260312.462") :outer("203_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "_block1868"  :anon :subid("257_1330909682.33311") :outer("168_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1366
-    .const 'Sub' $P1929 = "208_1329260312.462" 
+    .const 'Sub' $P1929 = "261_1330909682.33311" 
     capture_lex $P1929
-    .const 'Sub' $P1907 = "207_1329260312.462" 
+    .const 'Sub' $P1907 = "260_1330909682.33311" 
     capture_lex $P1907
-    .const 'Sub' $P1894 = "206_1329260312.462" 
+    .const 'Sub' $P1894 = "259_1330909682.33311" 
     capture_lex $P1894
-    .const 'Sub' $P1873 = "205_1329260312.462" 
+    .const 'Sub' $P1873 = "258_1330909682.33311" 
     capture_lex $P1873
     new $P1903, 'ExceptionHandler', [.CONTROL_ALL]
     set_label $P1903, control_1902
@@ -12419,7 +12815,7 @@
     goto if_1870_end
   if_1870:
 .annotate 'line', 1367
-    .const 'Sub' $P1873 = "205_1329260312.462" 
+    .const 'Sub' $P1873 = "258_1330909682.33311" 
     capture_lex $P1873
     $P1873()
   if_1870_end:
@@ -12447,7 +12843,7 @@
     set $P106, $I102
   if_1892_end:
     unless $P106, if_1891_end
-    .const 'Sub' $P1894 = "206_1329260312.462" 
+    .const 'Sub' $P1894 = "259_1330909682.33311" 
     capture_lex $P1894
     $P1894()
   if_1891_end:
@@ -12460,7 +12856,7 @@
 .annotate 'line', 1391
     .local pmc exception 
     .get_results (exception) 
-    .const 'Sub' $P1907 = "207_1329260312.462" 
+    .const 'Sub' $P1907 = "260_1330909682.33311" 
     newclosure $P1921, $P1907
     $P1921(exception)
     new $P1922, 'Integer'
@@ -12477,7 +12873,7 @@
 .annotate 'line', 1387
     .local pmc exception 
     .get_results (exception) 
-    .const 'Sub' $P1929 = "208_1329260312.462" 
+    .const 'Sub' $P1929 = "261_1330909682.33311" 
     newclosure $P1935, $P1929
     $P1935(exception)
     new $P1936, 'Integer'
@@ -12498,8 +12894,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block1872"  :anon :subid("205_1329260312.462") :outer("204_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "_block1872"  :anon :subid("258_1330909682.33311") :outer("257_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1368
     new $P107, "Undef"
     set $P1874, $P107
@@ -12580,8 +12976,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block1893"  :anon :subid("206_1329260312.462") :outer("204_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "_block1893"  :anon :subid("259_1330909682.33311") :outer("257_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1379
     new $P110, "Undef"
     set $P1895, $P110
@@ -12680,9 +13076,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block1906"  :anon :subid("207_1329260312.462") :outer("204_1329260312.462")
+.sub "_block1906"  :anon :subid("260_1330909682.33311") :outer("257_1330909682.33311")
     .param pmc param_1908
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1391
     .lex "$_", param_1908
     find_lex $P1909, "$_"
@@ -12729,9 +13125,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block1928"  :anon :subid("208_1329260312.462") :outer("204_1329260312.462")
+.sub "_block1928"  :anon :subid("261_1330909682.33311") :outer("257_1330909682.33311")
     .param pmc param_1930
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1387
     .lex "$_", param_1930
     find_lex $P1931, "$_"
@@ -12755,8 +13151,8 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block1942"  :anon :subid("209_1329260312.462") :outer("203_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "_block1942"  :anon :subid("262_1330909682.33311") :outer("168_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1403
     new $P112, "Undef"
     set $P1944, $P112
@@ -12804,12 +13200,12 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "process_args" :anon :subid("210_1329260312.462") :outer("164_1329260312.462")
+.sub "process_args" :anon :subid("169_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1946
     .param pmc param_1947
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1415
-    .const 'Sub' $P1953 = "211_1329260312.462" 
+    .const 'Sub' $P1953 = "263_1330909682.33311" 
     capture_lex $P1953
     .lex "self", param_1946
     .lex "@args", param_1947
@@ -12838,7 +13234,7 @@
     set $P108, $P107["Parser"]
     set $P109, param_1946
     nqp_decontainerize $P110, $P109
-    find_lex $P111, "$?CLASS"
+    nqp_get_sc_object $P111, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_get_attr_obj $P1951, $P110, $P111, "@!cmdoptions", 3
     unless_null $P1951, vivify_927
     $P1951 = root_new ['parrot';'ResizablePMCArray']
@@ -12863,7 +13259,7 @@
     new $P104, "Undef"
   vivify_930:
 .annotate 'line', 1423
-    .const 'Sub' $P1953 = "211_1329260312.462" 
+    .const 'Sub' $P1953 = "263_1330909682.33311" 
     capture_lex $P1953
     $P1953()
 .annotate 'line', 1415
@@ -12879,10 +13275,10 @@
 
 .namespace ["HLL";"Compiler"]
 .include "except_types.pasm"
-.sub "_block1952"  :anon :subid("211_1329260312.462") :outer("210_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "_block1952"  :anon :subid("263_1330909682.33311") :outer("169_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1423
-    .const 'Sub' $P1961 = "212_1329260312.462" 
+    .const 'Sub' $P1961 = "264_1330909682.33311" 
     capture_lex $P1961
     new $P1957, 'ExceptionHandler'
     set_label $P1957, control_1956
@@ -12907,7 +13303,7 @@
 .annotate 'line', 1425
     .local pmc exception 
     .get_results (exception) 
-    .const 'Sub' $P1961 = "212_1329260312.462" 
+    .const 'Sub' $P1961 = "264_1330909682.33311" 
     newclosure $P1970, $P1961
     $P1970(exception)
     new $P1971, 'Integer'
@@ -12928,9 +13324,9 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block1960"  :anon :subid("212_1329260312.462") :outer("211_1329260312.462")
+.sub "_block1960"  :anon :subid("264_1330909682.33311") :outer("263_1330909682.33311")
     .param pmc param_1962
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1425
     .lex "$_", param_1962
     find_lex $P1963, "$_"
@@ -12960,14 +13356,14 @@
 
 .namespace ["HLL";"Compiler"]
 .include "except_types.pasm"
-.sub "evalfiles" :anon :subid("213_1329260312.462") :outer("164_1329260312.462")
+.sub "evalfiles" :anon :subid("170_1330909682.33311") :outer("240_1330909682.33311")
     .param pmc param_1976
     .param pmc param_1977
     .param pmc param_1978 :slurpy
     .param pmc param_1979 :slurpy :named
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1434
-    .const 'Sub' $P1995 = "214_1329260312.462" 
+    .const 'Sub' $P1995 = "265_1330909682.33311" 
     capture_lex $P1995
     new $P1975, 'ExceptionHandler', [.CONTROL_RETURN]
     set_label $P1975, control_1974
@@ -12992,15 +13388,15 @@
     $P1985 = root_new ['parrot';'ResizablePMCArray']
     set $P1984, $P1985
     .lex "@codes", $P1984
-.annotate 'line', 1455
+.annotate 'line', 1458
     new $P104, "Undef"
     set $P1986, $P104
     .lex "$code", $P1986
-.annotate 'line', 1456
+.annotate 'line', 1459
     new $P105, "Undef"
     set $P1987, $P105
     .lex "$?FILES", $P1987
-.annotate 'line', 1457
+.annotate 'line', 1460
     new $P106, "Undef"
     set $P1988, $P106
     .lex "$r", $P1988
@@ -13065,74 +13461,74 @@
     unless $I100, for_undef_944
     iter $P107, $P1993
     new $P112, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P112, loop2019_handler
+    set_label $P112, loop2018_handler
     push_eh $P112
-  loop2019_test:
-    unless $P107, loop2019_done
+  loop2018_test:
+    unless $P107, loop2018_done
     shift $P108, $P107
-  loop2019_redo:
-    .const 'Sub' $P1995 = "214_1329260312.462" 
+  loop2018_redo:
+    .const 'Sub' $P1995 = "265_1330909682.33311" 
     capture_lex $P1995
     $P1995($P108)
-  loop2019_next:
-    goto loop2019_test
-  loop2019_handler:
+  loop2018_next:
+    goto loop2018_test
+  loop2018_handler:
     .local pmc exception 
     .get_results (exception) 
     pop_upto_eh exception
     getattribute $P113, exception, 'type'
-    eq $P113, .CONTROL_LOOP_NEXT, loop2019_next
-    eq $P113, .CONTROL_LOOP_REDO, loop2019_redo
-  loop2019_done:
+    eq $P113, .CONTROL_LOOP_NEXT, loop2018_next
+    eq $P113, .CONTROL_LOOP_REDO, loop2018_redo
+  loop2018_done:
     pop_eh 
   for_undef_944:
-.annotate 'line', 1455
-    set $P2020, $P1984
-    unless_null $P2020, vivify_954
-    $P2020 = root_new ['parrot';'ResizablePMCArray']
+.annotate 'line', 1458
+    set $P2019, $P1984
+    unless_null $P2019, vivify_954
+    $P2019 = root_new ['parrot';'ResizablePMCArray']
   vivify_954:
-    join $S100, "", $P2020
+    join $S100, "", $P2019
     new $P107, 'String'
     set $P107, $S100
     set $P1986, $P107
-.annotate 'line', 1456
-    set $P2021, $P1982
-    unless_null $P2021, vivify_955
-    $P2021 = root_new ['parrot';'ResizablePMCArray']
+.annotate 'line', 1459
+    set $P2020, $P1982
+    unless_null $P2020, vivify_955
+    $P2020 = root_new ['parrot';'ResizablePMCArray']
   vivify_955:
-    join $S100, " ", $P2021
+    join $S100, " ", $P2020
     new $P107, 'String'
     set $P107, $S100
     set $P1987, $P107
-.annotate 'line', 1457
+.annotate 'line', 1460
     set $P107, param_1976
     nqp_decontainerize $P108, $P107
     set $P109, $P1986
     unless_null $P109, vivify_956
     new $P109, "Undef"
   vivify_956:
-    set $P2022, param_1978
-    unless_null $P2022, vivify_957
-    $P2022 = root_new ['parrot';'ResizablePMCArray']
+    set $P2021, param_1978
+    unless_null $P2021, vivify_957
+    $P2021 = root_new ['parrot';'ResizablePMCArray']
   vivify_957:
-    set $P2023, param_1979
-    unless_null $P2023, vivify_958
-    $P2023 = root_new ['parrot';'Hash']
+    set $P2022, param_1979
+    unless_null $P2022, vivify_958
+    $P2022 = root_new ['parrot';'Hash']
   vivify_958:
-    $P110 = $P108."eval"($P109, $P2022 :flat, $P2023 :flat)
+    $P110 = $P108."eval"($P109, $P2021 :flat, $P2022 :flat)
     set $P1988, $P110
-.annotate 'line', 1458
+.annotate 'line', 1461
     set $P109, $P1980
     unless_null $P109, vivify_959
     new $P109, "Undef"
   vivify_959:
     set $S100, $P109
     iseq $I100, $S100, ""
-    unless $I100, unless_2025
+    unless $I100, unless_2024
     new $P108, 'Integer'
     set $P108, $I100
-    goto unless_2025_end
-  unless_2025:
+    goto unless_2024_end
+  unless_2024:
     set $P110, $P1980
     unless_null $P110, vivify_960
     new $P110, "Undef"
@@ -13141,9 +13537,9 @@
     iseq $I101, $S101, "pir"
     new $P108, 'Integer'
     set $P108, $I101
-  unless_2025_end:
-    if $P108, if_2024
-.annotate 'line', 1461
+  unless_2024_end:
+    if $P108, if_2023
+.annotate 'line', 1464
     new $P111, "Exception"
     set $P111['type'], .CONTROL_RETURN
     set $P112, param_1976
@@ -13156,17 +13552,17 @@
     unless_null $P115, vivify_962
     new $P115, "Undef"
   vivify_962:
-    set $P2026, param_1979
-    unless_null $P2026, vivify_963
-    $P2026 = root_new ['parrot';'Hash']
+    set $P2025, param_1979
+    unless_null $P2025, vivify_963
+    $P2025 = root_new ['parrot';'Hash']
   vivify_963:
-    $P116 = $P113."dumper"($P114, $P115, $P2026 :flat)
+    $P116 = $P113."dumper"($P114, $P115, $P2025 :flat)
     setattribute $P111, 'payload', $P116
     throw $P111
-.annotate 'line', 1460
-    goto if_2024_end
-  if_2024:
-.annotate 'line', 1459
+.annotate 'line', 1463
+    goto if_2023_end
+  if_2023:
+.annotate 'line', 1462
     new $P111, "Exception"
     set $P111['type'], .CONTROL_RETURN
     set $P112, $P1988
@@ -13175,7 +13571,7 @@
   vivify_964:
     setattribute $P111, 'payload', $P112
     throw $P111
-  if_2024_end:
+  if_2023_end:
 .annotate 'line', 1434
     .return ($P107)
   control_1974:
@@ -13189,11 +13585,11 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block1994"  :anon :subid("214_1329260312.462") :outer("213_1329260312.462")
+.sub "_block1994"  :anon :subid("265_1330909682.33311") :outer("170_1330909682.33311")
     .param pmc param_1998
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1439
-    .const 'Sub' $P2000 = "215_1329260312.462" 
+    .const 'Sub' $P2000 = "266_1330909682.33311" 
     capture_lex $P2000
 .annotate 'line', 1440
     new $P109, "Undef"
@@ -13212,7 +13608,7 @@
     assign $P111, 0
     set $P1997, $P111
 .annotate 'line', 1442
-    .const 'Sub' $P2000 = "215_1329260312.462" 
+    .const 'Sub' $P2000 = "266_1330909682.33311" 
     capture_lex $P2000
     $P2000()
 .annotate 'line', 1453
@@ -13220,16 +13616,22 @@
     unless_null $P112, vivify_952
     new $P112, "Undef"
   vivify_952:
-    if $P112, if_2018
+    if $P112, if_2017
     set $P111, $P112
-    goto if_2018_end
-  if_2018:
+    goto if_2017_end
+  if_2017:
+.annotate 'line', 1454
     set $P113, $P1997
     unless_null $P113, vivify_953
     new $P113, "Undef"
   vivify_953:
-    die $P113
-  if_2018_end:
+    printerr $P113
+.annotate 'line', 1455
+    new $P113, "Float"
+    assign $P113, 1
+    set $I101, $P113
+    exit $I101
+  if_2017_end:
 .annotate 'line', 1439
     .return ($P111)
 .end
@@ -13239,10 +13641,10 @@
 
 .namespace ["HLL";"Compiler"]
 .include "except_types.pasm"
-.sub "_block1999"  :anon :subid("215_1329260312.462") :outer("214_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "_block1999"  :anon :subid("266_1330909682.33311") :outer("265_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1442
-    .const 'Sub' $P2008 = "216_1329260312.462" 
+    .const 'Sub' $P2008 = "267_1330909682.33311" 
     capture_lex $P2008
     new $P2004, 'ExceptionHandler'
     set_label $P2004, control_2003
@@ -13287,14 +13689,14 @@
 .annotate 'line', 1449
     .local pmc exception 
     .get_results (exception) 
-    .const 'Sub' $P2008 = "216_1329260312.462" 
-    newclosure $P2015, $P2008
-    $P2015(exception)
-    new $P2016, 'Integer'
-    set $P2016, 1
-    set exception["handled"], $P2016
-    set $I2017, exception["handled"]
-    eq $I2017, 1, handled_2006
+    .const 'Sub' $P2008 = "267_1330909682.33311" 
+    newclosure $P2014, $P2008
+    $P2014(exception)
+    new $P2015, 'Integer'
+    set $P2015, 1
+    set exception["handled"], $P2015
+    set $I2016, exception["handled"]
+    eq $I2016, 1, handled_2006
     rethrow exception
   handled_2006:
     finalize $P2005
@@ -13308,25 +13710,23 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block2007"  :anon :subid("216_1329260312.462") :outer("215_1329260312.462")
+.sub "_block2007"  :anon :subid("267_1330909682.33311") :outer("266_1330909682.33311")
     .param pmc param_2009
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1449
     .lex "$_", param_2009
     find_lex $P2010, "$_"
     set $P2011, $P2010
     .lex "$!", $P2011
 .annotate 'line', 1450
-    new $P2012, 'String'
-    set $P2012, "Error while reading from file: "
-    find_lex $P2013, "$_"
-    unless_null $P2013, vivify_951
-    new $P2013, "Undef"
+    find_lex $P2012, "$_"
+    unless_null $P2012, vivify_951
+    new $P2012, "Undef"
   vivify_951:
-    concat $P2014, $P2012, $P2013
-    store_lex "$err", $P2014
+    concat $P2013, $P2012, "\n"
+    store_lex "$err", $P2013
 .annotate 'line', 1449
-    .return ($P2014)
+    .return ($P2013)
 .end
 
 
@@ -13334,42 +13734,42 @@
 
 .namespace ["HLL";"Compiler"]
 .include "except_types.pasm"
-.sub "compile" :anon :subid("217_1329260312.462") :outer("164_1329260312.462")
+.sub "compile" :anon :subid("171_1330909682.33311") :outer("240_1330909682.33311")
+    .param pmc param_2029
     .param pmc param_2030
-    .param pmc param_2031
-    .param pmc param_2032 :slurpy :named
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1465
-    .const 'Sub' $P2041 = "218_1329260312.462" 
-    capture_lex $P2041
-    new $P2029, 'ExceptionHandler', [.CONTROL_RETURN]
-    set_label $P2029, control_2028
-    push_eh $P2029
-    .lex "self", param_2030
-    .lex "$source", param_2031
-    .lex "%adverbs", param_2032
-.annotate 'line', 1466
-    $P2034 = root_new ['parrot';'Hash']
-    set $P2033, $P2034
-    .lex "%*COMPILING", $P2033
+    .param pmc param_2031 :slurpy :named
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1468
-    new $P102, "Undef"
-    set $P2035, $P102
-    .lex "$target", $P2035
+    .const 'Sub' $P2040 = "268_1330909682.33311" 
+    capture_lex $P2040
+    new $P2028, 'ExceptionHandler', [.CONTROL_RETURN]
+    set_label $P2028, control_2027
+    push_eh $P2028
+    .lex "self", param_2029
+    .lex "$source", param_2030
+    .lex "%adverbs", param_2031
 .annotate 'line', 1469
+    $P2033 = root_new ['parrot';'Hash']
+    set $P2032, $P2033
+    .lex "%*COMPILING", $P2032
+.annotate 'line', 1471
+    new $P102, "Undef"
+    set $P2034, $P102
+    .lex "$target", $P2034
+.annotate 'line', 1472
     new $P103, "Undef"
-    set $P2036, $P103
-    .lex "$result", $P2036
-.annotate 'line', 1470
+    set $P2035, $P103
+    .lex "$result", $P2035
+.annotate 'line', 1473
     new $P104, "Undef"
-    set $P2037, $P104
-    .lex "$stderr", $P2037
-.annotate 'line', 1466
-    set $P2038, param_2032
-    unless_null $P2038, vivify_965
-    $P2038 = root_new ['parrot';'Hash']
+    set $P2036, $P104
+    .lex "$stderr", $P2036
+.annotate 'line', 1469
+    set $P2037, param_2031
+    unless_null $P2037, vivify_965
+    $P2037 = root_new ['parrot';'Hash']
   vivify_965:
-    set $P107, $P2033
+    set $P107, $P2032
     unless_null $P107, vivify_966
     get_hll_global $P105, "GLOBAL"
     get_who $P106, $P105
@@ -13377,15 +13777,15 @@
     unless_null $P107, vivify_967
     die "Contextual %*COMPILING not found"
   vivify_967:
-    set $P2033, $P107
+    set $P2032, $P107
   vivify_966:
-    set $P107["%?OPTIONS"], $P2038
-.annotate 'line', 1468
-    set $P2039, param_2032
-    unless_null $P2039, vivify_968
-    $P2039 = root_new ['parrot';'Hash']
+    set $P107["%?OPTIONS"], $P2037
+.annotate 'line', 1471
+    set $P2038, param_2031
+    unless_null $P2038, vivify_968
+    $P2038 = root_new ['parrot';'Hash']
   vivify_968:
-    set $P105, $P2039["target"]
+    set $P105, $P2038["target"]
     unless_null $P105, vivify_969
     new $P105, "Undef"
   vivify_969:
@@ -13393,58 +13793,58 @@
     downcase $S101, $S100
     new $P106, 'String'
     set $P106, $S101
-    set $P2035, $P106
-.annotate 'line', 1469
-    set $P105, param_2031
+    set $P2034, $P106
+.annotate 'line', 1472
+    set $P105, param_2030
     unless_null $P105, vivify_970
     new $P105, "Undef"
   vivify_970:
-    set $P2036, $P105
-.annotate 'line', 1470
+    set $P2035, $P105
+.annotate 'line', 1473
     getinterp $P105
     $P106 = $P105."stderr_handle"()
-    set $P2037, $P106
-.annotate 'line', 1471
-    set $P106, param_2030
+    set $P2036, $P106
+.annotate 'line', 1474
+    set $P106, param_2029
     nqp_decontainerize $P107, $P106
     $P108 = $P107."stages"()
     defined $I100, $P108
     unless $I100, for_undef_971
     iter $P105, $P108
     new $P113, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P113, loop2052_handler
+    set_label $P113, loop2051_handler
     push_eh $P113
-  loop2052_test:
-    unless $P105, loop2052_done
+  loop2051_test:
+    unless $P105, loop2051_done
     shift $P109, $P105
-  loop2052_redo:
-    .const 'Sub' $P2041 = "218_1329260312.462" 
-    capture_lex $P2041
-    $P2041($P109)
-  loop2052_next:
-    goto loop2052_test
-  loop2052_handler:
+  loop2051_redo:
+    .const 'Sub' $P2040 = "268_1330909682.33311" 
+    capture_lex $P2040
+    $P2040($P109)
+  loop2051_next:
+    goto loop2051_test
+  loop2051_handler:
     .local pmc exception 
     .get_results (exception) 
     pop_upto_eh exception
     getattribute $P114, exception, 'type'
-    eq $P114, .CONTROL_LOOP_NEXT, loop2052_next
-    eq $P114, .CONTROL_LOOP_REDO, loop2052_redo
-  loop2052_done:
+    eq $P114, .CONTROL_LOOP_NEXT, loop2051_next
+    eq $P114, .CONTROL_LOOP_REDO, loop2051_redo
+  loop2051_done:
     pop_eh 
   for_undef_971:
-.annotate 'line', 1481
+.annotate 'line', 1484
     new $P105, "Exception"
     set $P105['type'], .CONTROL_RETURN
-    set $P106, $P2036
+    set $P106, $P2035
     unless_null $P106, vivify_984
     new $P106, "Undef"
   vivify_984:
     setattribute $P105, 'payload', $P106
     throw $P105
-.annotate 'line', 1465
+.annotate 'line', 1468
     .return ()
-  control_2028:
+  control_2027:
     .local pmc exception 
     .get_results (exception) 
     getattribute $P105, exception, "payload"
@@ -13455,69 +13855,69 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block2040"  :anon :subid("218_1329260312.462") :outer("217_1329260312.462")
-    .param pmc param_2044
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1471
-    .const 'Sub' $P2049 = "219_1329260312.462" 
-    capture_lex $P2049
-.annotate 'line', 1472
-    new $P110, "Undef"
-    set $P2042, $P110
-    .lex "$timestamp", $P2042
+.sub "_block2039"  :anon :subid("268_1330909682.33311") :outer("171_1330909682.33311")
+    .param pmc param_2043
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1474
+    .const 'Sub' $P2048 = "269_1330909682.33311" 
+    capture_lex $P2048
+.annotate 'line', 1475
+    new $P110, "Undef"
+    set $P2041, $P110
+    .lex "$timestamp", $P2041
+.annotate 'line', 1477
     new $P111, "Undef"
-    set $P2043, $P111
-    .lex "$diff", $P2043
-    .lex "$_", param_2044
-.annotate 'line', 1472
+    set $P2042, $P111
+    .lex "$diff", $P2042
+    .lex "$_", param_2043
+.annotate 'line', 1475
     time $N100
     new $P112, 'Float'
     set $P112, $N100
-    set $P2042, $P112
-.annotate 'line', 1473
+    set $P2041, $P112
+.annotate 'line', 1476
     find_lex $P112, "self"
     nqp_decontainerize $P113, $P112
     find_lex $P114, "$result"
     unless_null $P114, vivify_972
     new $P114, "Undef"
   vivify_972:
-    find_lex $P2045, "%adverbs"
-    unless_null $P2045, vivify_973
-    $P2045 = root_new ['parrot';'Hash']
+    find_lex $P2044, "%adverbs"
+    unless_null $P2044, vivify_973
+    $P2044 = root_new ['parrot';'Hash']
   vivify_973:
     find_lex $P115, "$_"
     unless_null $P115, vivify_974
     new $P115, "Undef"
   vivify_974:
     set $S100, $P115
-    $P116 = $P113.$S100($P114, $P2045 :flat)
+    $P116 = $P113.$S100($P114, $P2044 :flat)
     store_lex "$result", $P116
-.annotate 'line', 1474
+.annotate 'line', 1477
     time $N100
     new $P112, 'Float'
     set $P112, $N100
-    set $P113, $P2042
+    set $P113, $P2041
     unless_null $P113, vivify_975
     new $P113, "Undef"
   vivify_975:
     sub $P114, $P112, $P113
-    set $P2043, $P114
-.annotate 'line', 1475
-    find_lex $P2047, "%adverbs"
-    unless_null $P2047, vivify_976
-    $P2047 = root_new ['parrot';'Hash']
+    set $P2042, $P114
+.annotate 'line', 1478
+    find_lex $P2046, "%adverbs"
+    unless_null $P2046, vivify_976
+    $P2046 = root_new ['parrot';'Hash']
   vivify_976:
-    set $P112, $P2047["stagestats"]
+    set $P112, $P2046["stagestats"]
     unless_null $P112, vivify_977
     new $P112, "Undef"
   vivify_977:
-    unless $P112, if_2046_end
-    .const 'Sub' $P2049 = "219_1329260312.462" 
-    capture_lex $P2049
-    $P2049()
-  if_2046_end:
-.annotate 'line', 1479
+    unless $P112, if_2045_end
+    .const 'Sub' $P2048 = "269_1330909682.33311" 
+    capture_lex $P2048
+    $P2048()
+  if_2045_end:
+.annotate 'line', 1482
     find_lex $P113, "$_"
     unless_null $P113, vivify_982
     new $P113, "Undef"
@@ -13529,14 +13929,14 @@
   vivify_983:
     set $S101, $P114
     iseq $I101, $S100, $S101
-    if $I101, if_2051
+    if $I101, if_2050
     new $P112, 'Integer'
     set $P112, $I101
-    goto if_2051_end
-  if_2051:
+    goto if_2050_end
+  if_2050:
     die 0, .CONTROL_LOOP_LAST
-  if_2051_end:
-.annotate 'line', 1471
+  if_2050_end:
+.annotate 'line', 1474
     .return ($P112)
 .end
 
@@ -13544,12 +13944,12 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block2048"  :anon :subid("219_1329260312.462") :outer("218_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1476
+.sub "_block2047"  :anon :subid("269_1330909682.33311") :outer("268_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1479
     new $P113, "Undef"
-    set $P2050, $P113
-    .lex "$difffmt", $P2050
+    set $P2049, $P113
+    .lex "$difffmt", $P2049
     find_lex $P114, "$diff"
     unless_null $P114, vivify_978
     new $P114, "Undef"
@@ -13559,8 +13959,8 @@
     sprintf $S100, "%.3f", $P115
     new $P116, 'String'
     set $P116, $S100
-    set $P2050, $P116
-.annotate 'line', 1477
+    set $P2049, $P116
+.annotate 'line', 1480
     find_lex $P114, "$stderr"
     unless_null $P114, vivify_979
     new $P114, "Undef"
@@ -13573,14 +13973,14 @@
   vivify_980:
     concat $P117, $P115, $P116
     concat $P118, $P117, ": "
-    set $P119, $P2050
+    set $P119, $P2049
     unless_null $P119, vivify_981
     new $P119, "Undef"
   vivify_981:
     concat $P120, $P118, $P119
     concat $P121, $P120, "\n"
     $P122 = $P114."print"($P121)
-.annotate 'line', 1475
+.annotate 'line', 1478
     .return ($P122)
 .end
 
@@ -13589,58 +13989,58 @@
 
 .namespace ["HLL";"Compiler"]
 .include "except_types.pasm"
-.sub "parse" :anon :subid("220_1329260312.462") :outer("164_1329260312.462")
+.sub "parse" :anon :subid("172_1330909682.33311") :outer("240_1330909682.33311")
+    .param pmc param_2055
     .param pmc param_2056
-    .param pmc param_2057
-    .param pmc param_2058 :slurpy :named
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1484
-    .const 'Sub' $P2067 = "221_1329260312.462" 
-    capture_lex $P2067
-    new $P2055, 'ExceptionHandler', [.CONTROL_RETURN]
-    set_label $P2055, control_2054
-    push_eh $P2055
-    .lex "self", param_2056
-    .lex "$source", param_2057
-    .lex "%adverbs", param_2058
-.annotate 'line', 1485
+    .param pmc param_2057 :slurpy :named
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1487
+    .const 'Sub' $P2066 = "270_1330909682.33311" 
+    capture_lex $P2066
+    new $P2054, 'ExceptionHandler', [.CONTROL_RETURN]
+    set_label $P2054, control_2053
+    push_eh $P2054
+    .lex "self", param_2055
+    .lex "$source", param_2056
+    .lex "%adverbs", param_2057
+.annotate 'line', 1488
     new $P102, "Undef"
-    set $P2059, $P102
-    .lex "$s", $P2059
-.annotate 'line', 1494
-    new $P103, "Undef"
-    set $P2060, $P103
-    .lex "$grammar", $P2060
-.annotate 'line', 1495
-    new $P104, "Undef"
-    set $P2061, $P104
-    .lex "$actions", $P2061
+    set $P2058, $P102
+    .lex "$s", $P2058
 .annotate 'line', 1497
+    new $P103, "Undef"
+    set $P2059, $P103
+    .lex "$grammar", $P2059
+.annotate 'line', 1498
+    new $P104, "Undef"
+    set $P2060, $P104
+    .lex "$actions", $P2060
+.annotate 'line', 1500
     new $P105, "Undef"
-    set $P2062, $P105
-    .lex "$match", $P2062
-.annotate 'line', 1485
-    set $P106, param_2057
+    set $P2061, $P105
+    .lex "$match", $P2061
+.annotate 'line', 1488
+    set $P106, param_2056
     unless_null $P106, vivify_985
     new $P106, "Undef"
   vivify_985:
-    set $P2059, $P106
-.annotate 'line', 1486
-    set $P2064, param_2058
-    unless_null $P2064, vivify_986
-    $P2064 = root_new ['parrot';'Hash']
+    set $P2058, $P106
+.annotate 'line', 1489
+    set $P2063, param_2057
+    unless_null $P2063, vivify_986
+    $P2063 = root_new ['parrot';'Hash']
   vivify_986:
-    set $P106, $P2064["transcode"]
+    set $P106, $P2063["transcode"]
     unless_null $P106, vivify_987
     new $P106, "Undef"
   vivify_987:
-    unless $P106, if_2063_end
-.annotate 'line', 1487
-    set $P2065, param_2058
-    unless_null $P2065, vivify_988
-    $P2065 = root_new ['parrot';'Hash']
+    unless $P106, if_2062_end
+.annotate 'line', 1490
+    set $P2064, param_2057
+    unless_null $P2064, vivify_988
+    $P2064 = root_new ['parrot';'Hash']
   vivify_988:
-    set $P108, $P2065["transcode"]
+    set $P108, $P2064["transcode"]
     unless_null $P108, vivify_989
     new $P108, "Undef"
   vivify_989:
@@ -13650,101 +14050,101 @@
     unless $I100, for_undef_990
     iter $P107, $P109
     new $P112, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P112, loop2078_handler
+    set_label $P112, loop2077_handler
     push_eh $P112
-  loop2078_test:
-    unless $P107, loop2078_done
+  loop2077_test:
+    unless $P107, loop2077_done
     shift $P110, $P107
-  loop2078_redo:
-    .const 'Sub' $P2067 = "221_1329260312.462" 
-    capture_lex $P2067
-    $P2067($P110)
-  loop2078_next:
-    goto loop2078_test
-  loop2078_handler:
+  loop2077_redo:
+    .const 'Sub' $P2066 = "270_1330909682.33311" 
+    capture_lex $P2066
+    $P2066($P110)
+  loop2077_next:
+    goto loop2077_test
+  loop2077_handler:
     .local pmc exception 
     .get_results (exception) 
     pop_upto_eh exception
     getattribute $P113, exception, 'type'
-    eq $P113, .CONTROL_LOOP_NEXT, loop2078_next
-    eq $P113, .CONTROL_LOOP_REDO, loop2078_redo
-  loop2078_done:
+    eq $P113, .CONTROL_LOOP_NEXT, loop2077_next
+    eq $P113, .CONTROL_LOOP_REDO, loop2077_redo
+  loop2077_done:
     pop_eh 
   for_undef_990:
-  if_2063_end:
-.annotate 'line', 1494
-    set $P106, param_2056
+  if_2062_end:
+.annotate 'line', 1497
+    set $P106, param_2055
     nqp_decontainerize $P107, $P106
     $P108 = $P107."parsegrammar"()
-    set $P2060, $P108
-.annotate 'line', 1484
-    set $P106, $P2061
+    set $P2059, $P108
+.annotate 'line', 1487
+    set $P106, $P2060
     unless_null $P106, vivify_993
     new $P106, "Undef"
   vivify_993:
-.annotate 'line', 1496
-    set $P2080, param_2058
-    unless_null $P2080, vivify_994
-    $P2080 = root_new ['parrot';'Hash']
+.annotate 'line', 1499
+    set $P2079, param_2057
+    unless_null $P2079, vivify_994
+    $P2079 = root_new ['parrot';'Hash']
   vivify_994:
-    set $P106, $P2080["target"]
+    set $P106, $P2079["target"]
     unless_null $P106, vivify_995
     new $P106, "Undef"
   vivify_995:
     set $S100, $P106
     downcase $S101, $S100
     iseq $I100, $S101, "parse"
-    if $I100, unless_2079_end
-    set $P107, param_2056
+    if $I100, unless_2078_end
+    set $P107, param_2055
     nqp_decontainerize $P108, $P107
     $P109 = $P108."parseactions"()
-    set $P2061, $P109
-  unless_2079_end:
-.annotate 'line', 1497
-    set $P106, $P2060
+    set $P2060, $P109
+  unless_2078_end:
+.annotate 'line', 1500
+    set $P106, $P2059
     unless_null $P106, vivify_996
     new $P106, "Undef"
   vivify_996:
-    set $P107, $P2059
+    set $P107, $P2058
     unless_null $P107, vivify_997
     new $P107, "Undef"
   vivify_997:
-    set $P108, $P2061
+    set $P108, $P2060
     unless_null $P108, vivify_998
     new $P108, "Undef"
   vivify_998:
-    set $P2081, param_2058
-    unless_null $P2081, vivify_999
-    $P2081 = root_new ['parrot';'Hash']
+    set $P2080, param_2057
+    unless_null $P2080, vivify_999
+    $P2080 = root_new ['parrot';'Hash']
   vivify_999:
-    set $P109, $P2081["rxtrace"]
+    set $P109, $P2080["rxtrace"]
     unless_null $P109, vivify_1000
     new $P109, "Undef"
   vivify_1000:
     $P110 = $P106."parse"($P107, 0 :named("p"), $P108 :named("actions"), $P109 :named("rxtrace"))
-    set $P2062, $P110
-.annotate 'line', 1498
-    set $P106, $P2062
+    set $P2061, $P110
+.annotate 'line', 1501
+    set $P106, $P2061
     unless_null $P106, vivify_1001
     new $P106, "Undef"
   vivify_1001:
-    if $P106, unless_2082_end
-    set $P107, param_2056
+    if $P106, unless_2081_end
+    set $P107, param_2055
     nqp_decontainerize $P108, $P107
     $P108."panic"("Unable to parse source")
-  unless_2082_end:
-.annotate 'line', 1499
+  unless_2081_end:
+.annotate 'line', 1502
     new $P106, "Exception"
     set $P106['type'], .CONTROL_RETURN
-    set $P107, $P2062
+    set $P107, $P2061
     unless_null $P107, vivify_1002
     new $P107, "Undef"
   vivify_1002:
     setattribute $P106, 'payload', $P107
     throw $P106
-.annotate 'line', 1484
+.annotate 'line', 1487
     .return ()
-  control_2054:
+  control_2053:
     .local pmc exception 
     .get_results (exception) 
     getattribute $P106, exception, "payload"
@@ -13755,18 +14155,18 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block2066"  :anon :subid("221_1329260312.462") :outer("220_1329260312.462")
-    .param pmc param_2068
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1487
-    .const 'Sub' $P2070 = "222_1329260312.462" 
-    capture_lex $P2070
-    .lex "$_", param_2068
-.annotate 'line', 1488
-    .const 'Sub' $P2070 = "222_1329260312.462" 
-    capture_lex $P2070
-    $P111 = $P2070()
-.annotate 'line', 1487
+.sub "_block2065"  :anon :subid("270_1330909682.33311") :outer("172_1330909682.33311")
+    .param pmc param_2067
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1490
+    .const 'Sub' $P2069 = "271_1330909682.33311" 
+    capture_lex $P2069
+    .lex "$_", param_2067
+.annotate 'line', 1491
+    .const 'Sub' $P2069 = "271_1330909682.33311" 
+    capture_lex $P2069
+    $P111 = $P2069()
+.annotate 'line', 1490
     .return ($P111)
 .end
 
@@ -13775,20 +14175,20 @@
 
 .namespace ["HLL";"Compiler"]
 .include "except_types.pasm"
-.sub "_block2069"  :anon :subid("222_1329260312.462") :outer("221_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1488
-    new $P2073, 'ExceptionHandler'
-    set_label $P2073, control_2072
-    $P2073."handle_types_except"(.CONTROL_ALL)
-    push_eh $P2073
-.annotate 'line', 1489
+.sub "_block2068"  :anon :subid("271_1330909682.33311") :outer("270_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1491
+    new $P2072, 'ExceptionHandler'
+    set_label $P2072, control_2071
+    $P2072."handle_types_except"(.CONTROL_ALL)
+    push_eh $P2072
+.annotate 'line', 1492
     find_lex $P111, "$s"
     unless_null $P111, vivify_991
     new $P111, "Undef"
   vivify_991:
     set $S101, $P111
-.annotate 'line', 1490
+.annotate 'line', 1493
     find_lex $P112, "$_"
     unless_null $P112, vivify_992
     new $P112, "Undef"
@@ -13796,27 +14196,27 @@
     set $S102, $P112
     find_encoding $I101, $S102
     trans_encoding $S103, $S101, $I101
-.annotate 'line', 1489
+.annotate 'line', 1492
     new $P113, 'String'
     set $P113, $S103
     store_lex "$s", $P113
-.annotate 'line', 1488
+.annotate 'line', 1491
     pop_eh 
-    goto skip_handler_2071
-  control_2072:
-    peek_exception $P2074
+    goto skip_handler_2070
+  control_2071:
+    peek_exception $P2073
     .local pmc exception 
     .get_results (exception) 
-    new $P2076, 'Integer'
-    set $P2076, 1
-    set exception["handled"], $P2076
-    set $I2077, exception["handled"]
-    eq $I2077, 1, handled_2075
+    new $P2075, 'Integer'
+    set $P2075, 1
+    set exception["handled"], $P2075
+    set $I2076, exception["handled"]
+    eq $I2076, 1, handled_2074
     rethrow exception
-  handled_2075:
-    finalize $P2074
+  handled_2074:
+    finalize $P2073
     .return (exception)
-  skip_handler_2071:
+  skip_handler_2070:
     .return ($P113)
 .end
 
@@ -13824,51 +14224,51 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "past" :anon :subid("223_1329260312.462") :outer("164_1329260312.462")
+.sub "past" :anon :subid("173_1330909682.33311") :outer("240_1330909682.33311")
+    .param pmc param_2083
     .param pmc param_2084
-    .param pmc param_2085
-    .param pmc param_2086 :slurpy :named
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1502
-    .lex "self", param_2084
-    .lex "$source", param_2085
-    .lex "%adverbs", param_2086
-.annotate 'line', 1503
+    .param pmc param_2085 :slurpy :named
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1505
+    .lex "self", param_2083
+    .lex "$source", param_2084
+    .lex "%adverbs", param_2085
+.annotate 'line', 1506
     new $P102, "Undef"
-    set $P2087, $P102
-    .lex "$ast", $P2087
-    set $P103, param_2085
+    set $P2086, $P102
+    .lex "$ast", $P2086
+    set $P103, param_2084
     unless_null $P103, vivify_1003
     new $P103, "Undef"
   vivify_1003:
     $P104 = $P103."ast"()
-    set $P2087, $P104
-.annotate 'line', 1505
+    set $P2086, $P104
+.annotate 'line', 1508
     get_hll_global $P103, "GLOBAL"
     nqp_get_package_through_who $P104, $P103, "PAST"
     get_who $P105, $P104
     set $P106, $P105["Node"]
-    set $P107, $P2087
+    set $P107, $P2086
     unless_null $P107, vivify_1004
     new $P107, "Undef"
   vivify_1004:
     $P108 = $P106."ACCEPTS"($P107)
-    if $P108, unless_2088_end
-.annotate 'line', 1504
-    set $P109, param_2084
+    if $P108, unless_2087_end
+.annotate 'line', 1507
+    set $P109, param_2083
     nqp_decontainerize $P110, $P109
     new $P111, "String"
     assign $P111, "Unable to obtain ast from "
-    set $P112, param_2085
+    set $P112, param_2084
     unless_null $P112, vivify_1005
     new $P112, "Undef"
   vivify_1005:
     typeof $S100, $P112
     concat $P113, $P111, $S100
     $P110."panic"($P113)
-  unless_2088_end:
-.annotate 'line', 1502
-    set $P103, $P2087
+  unless_2087_end:
+.annotate 'line', 1505
+    set $P103, $P2086
     unless_null $P103, vivify_1006
     new $P103, "Undef"
   vivify_1006:
@@ -13879,27 +14279,27 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "post" :anon :subid("224_1329260312.462") :outer("164_1329260312.462")
+.sub "post" :anon :subid("174_1330909682.33311") :outer("240_1330909682.33311")
+    .param pmc param_2089
     .param pmc param_2090
-    .param pmc param_2091
-    .param pmc param_2092 :slurpy :named
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1509
-    .lex "self", param_2090
-    .lex "$source", param_2091
-    .lex "%adverbs", param_2092
-.annotate 'line', 1510
+    .param pmc param_2091 :slurpy :named
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1512
+    .lex "self", param_2089
+    .lex "$source", param_2090
+    .lex "%adverbs", param_2091
+.annotate 'line', 1513
     compreg $P102, "PAST"
-    set $P103, param_2091
+    set $P103, param_2090
     unless_null $P103, vivify_1007
     new $P103, "Undef"
   vivify_1007:
-    set $P2093, param_2092
-    unless_null $P2093, vivify_1008
-    $P2093 = root_new ['parrot';'Hash']
+    set $P2092, param_2091
+    unless_null $P2092, vivify_1008
+    $P2092 = root_new ['parrot';'Hash']
   vivify_1008:
-    $P104 = $P102."to_post"($P103, $P2093 :flat)
-.annotate 'line', 1509
+    $P104 = $P102."to_post"($P103, $P2092 :flat)
+.annotate 'line', 1512
     .return ($P104)
 .end
 
@@ -13907,29 +14307,29 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "pirbegin" :anon :subid("225_1329260312.462") :outer("164_1329260312.462")
-    .param pmc param_2095
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1513
-    .lex "self", param_2095
-.annotate 'line', 1515
+.sub "pirbegin" :anon :subid("175_1330909682.33311") :outer("240_1330909682.33311")
+    .param pmc param_2094
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1516
+    .lex "self", param_2094
+.annotate 'line', 1518
     new $P102, "String"
     assign $P102, ".include 'cclass.pasm'\n"
     concat $P103, $P102, ".include 'except_severity.pasm'\n"
     concat $P104, $P103, ".include 'except_types.pasm'\n"
-.annotate 'line', 1516
-    concat $P105, $P104, ".include 'iglobals.pasm'\n"
-.annotate 'line', 1517
-    concat $P106, $P105, ".include 'interpinfo.pasm'\n"
-.annotate 'line', 1518
-    concat $P107, $P106, ".include 'iterator.pasm'\n"
 .annotate 'line', 1519
-    concat $P108, $P107, ".include 'sysinfo.pasm'\n"
+    concat $P105, $P104, ".include 'iglobals.pasm'\n"
 .annotate 'line', 1520
-    concat $P109, $P108, ".include 'stat.pasm'\n"
+    concat $P106, $P105, ".include 'interpinfo.pasm'\n"
 .annotate 'line', 1521
+    concat $P107, $P106, ".include 'iterator.pasm'\n"
+.annotate 'line', 1522
+    concat $P108, $P107, ".include 'sysinfo.pasm'\n"
+.annotate 'line', 1523
+    concat $P109, $P108, ".include 'stat.pasm'\n"
+.annotate 'line', 1524
     concat $P110, $P109, ".include 'datatypes.pasm'\n"
-.annotate 'line', 1513
+.annotate 'line', 1516
     .return ($P110)
 .end
 
@@ -13937,31 +14337,31 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "pir" :anon :subid("226_1329260312.462") :outer("164_1329260312.462")
+.sub "pir" :anon :subid("176_1330909682.33311") :outer("240_1330909682.33311")
+    .param pmc param_2096
     .param pmc param_2097
-    .param pmc param_2098
-    .param pmc param_2099 :slurpy :named
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1525
-    .lex "self", param_2097
-    .lex "$source", param_2098
-    .lex "%adverbs", param_2099
-.annotate 'line', 1526
-    set $P102, param_2097
+    .param pmc param_2098 :slurpy :named
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1528
+    .lex "self", param_2096
+    .lex "$source", param_2097
+    .lex "%adverbs", param_2098
+.annotate 'line', 1529
+    set $P102, param_2096
     nqp_decontainerize $P103, $P102
     $P104 = $P103."pirbegin"()
     compreg $P105, "POST"
-    set $P106, param_2098
+    set $P106, param_2097
     unless_null $P106, vivify_1009
     new $P106, "Undef"
   vivify_1009:
-    set $P2100, param_2099
-    unless_null $P2100, vivify_1010
-    $P2100 = root_new ['parrot';'Hash']
+    set $P2099, param_2098
+    unless_null $P2099, vivify_1010
+    $P2099 = root_new ['parrot';'Hash']
   vivify_1010:
-    $S100 = $P105."to_pir"($P106, $P2100 :flat)
+    $S100 = $P105."to_pir"($P106, $P2099 :flat)
     concat $P107, $P104, $S100
-.annotate 'line', 1525
+.annotate 'line', 1528
     .return ($P107)
 .end
 
@@ -13969,32 +14369,32 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "evalpmc" :anon :subid("227_1329260312.462") :outer("164_1329260312.462")
+.sub "evalpmc" :anon :subid("177_1330909682.33311") :outer("240_1330909682.33311")
+    .param pmc param_2101
     .param pmc param_2102
-    .param pmc param_2103
-    .param pmc param_2104 :slurpy :named
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1529
-    .lex "self", param_2102
-    .lex "$source", param_2103
-    .lex "%adverbs", param_2104
-.annotate 'line', 1530
+    .param pmc param_2103 :slurpy :named
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1532
+    .lex "self", param_2101
+    .lex "$source", param_2102
+    .lex "%adverbs", param_2103
+.annotate 'line', 1533
     new $P102, "Undef"
-    set $P2105, $P102
-    .lex "$compiler", $P2105
+    set $P2104, $P102
+    .lex "$compiler", $P2104
     compreg $P103, "PIR"
-    set $P2105, $P103
-.annotate 'line', 1531
-    set $P103, $P2105
+    set $P2104, $P103
+.annotate 'line', 1534
+    set $P103, $P2104
     unless_null $P103, vivify_1011
     new $P103, "Undef"
   vivify_1011:
-    set $P104, param_2103
+    set $P104, param_2102
     unless_null $P104, vivify_1012
     new $P104, "Undef"
   vivify_1012:
     $P105 = $P103($P104)
-.annotate 'line', 1529
+.annotate 'line', 1532
     .return ($P105)
 .end
 
@@ -14002,50 +14402,50 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "dumper" :anon :subid("228_1329260312.462") :outer("164_1329260312.462")
+.sub "dumper" :anon :subid("178_1330909682.33311") :outer("240_1330909682.33311")
+    .param pmc param_2106
     .param pmc param_2107
     .param pmc param_2108
-    .param pmc param_2109
-    .param pmc param_2110 :slurpy :named
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1534
-    .const 'Sub' $P2114 = "229_1329260312.462" 
-    capture_lex $P2114
-    .lex "self", param_2107
-    .lex "$obj", param_2108
-    .lex "$name", param_2109
-    .lex "%options", param_2110
-.annotate 'line', 1535
-    set $P2112, param_2110
-    unless_null $P2112, vivify_1013
-    $P2112 = root_new ['parrot';'Hash']
+    .param pmc param_2109 :slurpy :named
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1537
+    .const 'Sub' $P2113 = "272_1330909682.33311" 
+    capture_lex $P2113
+    .lex "self", param_2106
+    .lex "$obj", param_2107
+    .lex "$name", param_2108
+    .lex "%options", param_2109
+.annotate 'line', 1538
+    set $P2111, param_2109
+    unless_null $P2111, vivify_1013
+    $P2111 = root_new ['parrot';'Hash']
   vivify_1013:
-    set $P103, $P2112["dumper"]
+    set $P103, $P2111["dumper"]
     unless_null $P103, vivify_1014
     new $P103, "Undef"
   vivify_1014:
-    if $P103, if_2111
-.annotate 'line', 1541
-    set $P106, param_2108
+    if $P103, if_2110
+.annotate 'line', 1544
+    set $P106, param_2107
     unless_null $P106, vivify_1015
     new $P106, "Undef"
   vivify_1015:
-    set $P107, param_2109
+    set $P107, param_2108
     unless_null $P107, vivify_1016
     new $P107, "Undef"
   vivify_1016:
     $P109 = "_dumper"($P106, $P107)
-.annotate 'line', 1540
+.annotate 'line', 1543
     set $P102, $P109
-.annotate 'line', 1535
-    goto if_2111_end
-  if_2111:
-    .const 'Sub' $P2114 = "229_1329260312.462" 
-    capture_lex $P2114
-    $P105 = $P2114()
+.annotate 'line', 1538
+    goto if_2110_end
+  if_2110:
+    .const 'Sub' $P2113 = "272_1330909682.33311" 
+    capture_lex $P2113
+    $P105 = $P2113()
     set $P102, $P105
-  if_2111_end:
-.annotate 'line', 1534
+  if_2110_end:
+.annotate 'line', 1537
     .return ($P102)
 .end
 
@@ -14053,20 +14453,20 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block2113"  :anon :subid("229_1329260312.462") :outer("228_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1537
+.sub "_block2112"  :anon :subid("272_1330909682.33311") :outer("178_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1540
     new $P104, "Undef"
-    set $P2115, $P104
-    .lex "$dumper", $P2115
-.annotate 'line', 1536
+    set $P2114, $P104
+    .lex "$dumper", $P2114
+.annotate 'line', 1539
     load_bytecode "PCT/Dumper.pbc"
-.annotate 'line', 1537
-    find_lex $P2116, "%options"
-    unless_null $P2116, vivify_1017
-    $P2116 = root_new ['parrot';'Hash']
+.annotate 'line', 1540
+    find_lex $P2115, "%options"
+    unless_null $P2115, vivify_1017
+    $P2115 = root_new ['parrot';'Hash']
   vivify_1017:
-    set $P105, $P2116["dumper"]
+    set $P105, $P2115["dumper"]
     unless_null $P105, vivify_1018
     new $P105, "Undef"
   vivify_1018:
@@ -14075,17 +14475,17 @@
     get_hll_global $P106, "GLOBAL"
     nqp_get_package_through_who $P107, $P106, "PCT"
     get_who $P108, $P107
-    set $P2117, $P108["Dumper"]
-    unless_null $P2117, vivify_1019
-    $P2117 = root_new ['parrot';'Hash']
+    set $P2116, $P108["Dumper"]
+    unless_null $P2116, vivify_1019
+    $P2116 = root_new ['parrot';'Hash']
   vivify_1019:
-    set $P109, $P2117[$S101]
+    set $P109, $P2116[$S101]
     unless_null $P109, vivify_1020
     new $P109, "Undef"
   vivify_1020:
-    set $P2115, $P109
-.annotate 'line', 1538
-    set $P105, $P2115
+    set $P2114, $P109
+.annotate 'line', 1541
+    set $P105, $P2114
     unless_null $P105, vivify_1021
     new $P105, "Undef"
   vivify_1021:
@@ -14098,7 +14498,7 @@
     new $P107, "Undef"
   vivify_1023:
     $P108 = $P105($P106, $P107)
-.annotate 'line', 1535
+.annotate 'line', 1538
     .return ($P108)
 .end
 
@@ -14106,46 +14506,46 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "usage" :anon :subid("230_1329260312.462") :outer("164_1329260312.462")
-    .param pmc param_2119
-    .param pmc param_2120 :optional
-    .param int has_param_2120 :opt_flag
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1545
-    .lex "self", param_2119
-    if has_param_2120, optparam_1024
+.sub "usage" :anon :subid("179_1330909682.33311") :outer("240_1330909682.33311")
+    .param pmc param_2118
+    .param pmc param_2119 :optional
+    .param int has_param_2119 :opt_flag
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1548
+    .lex "self", param_2118
+    if has_param_2119, optparam_1024
     new $P102, "Undef"
-    set param_2120, $P102
+    set param_2119, $P102
   optparam_1024:
-    .lex "$name", param_2120
-.annotate 'line', 1546
-    set $P103, param_2120
+    .lex "$name", param_2119
+.annotate 'line', 1549
+    set $P103, param_2119
     unless_null $P103, vivify_1025
     new $P103, "Undef"
   vivify_1025:
-    unless $P103, if_2121_end
-.annotate 'line', 1547
-    set $P104, param_2120
+    unless $P103, if_2120_end
+.annotate 'line', 1550
+    set $P104, param_2119
     unless_null $P104, vivify_1026
     new $P104, "Undef"
   vivify_1026:
     "say"($P104)
-  if_2121_end:
-.annotate 'line', 1549
-    set $P103, param_2119
+  if_2120_end:
+.annotate 'line', 1552
+    set $P103, param_2118
     nqp_decontainerize $P104, $P103
-    find_lex $P105, "$?CLASS"
+    nqp_get_sc_object $P105, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_get_attr_obj $P106, $P104, $P105, "$!usage", 4
     unless_null $P106, vivify_1027
     new $P106, "Undef"
   vivify_1027:
     say $P106
-.annotate 'line', 1550
+.annotate 'line', 1553
     new $P103, "Float"
     assign $P103, 0
     set $I100, $P103
     exit $I100
-.annotate 'line', 1545
+.annotate 'line', 1548
     .return ()
 .end
 
@@ -14153,103 +14553,103 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "version" :anon :subid("231_1329260312.462") :outer("164_1329260312.462")
-    .param pmc param_2123
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1553
-    .lex "self", param_2123
-.annotate 'line', 1554
-    new $P102, "Undef"
-    set $P2124, $P102
-    .lex "$version", $P2124
-.annotate 'line', 1555
-    new $P103, "Undef"
-    set $P2125, $P103
-    .lex "$parver", $P2125
+.sub "version" :anon :subid("180_1330909682.33311") :outer("240_1330909682.33311")
+    .param pmc param_2122
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1556
+    .lex "self", param_2122
+.annotate 'line', 1557
+    new $P102, "Undef"
+    set $P2123, $P102
+    .lex "$version", $P2123
+.annotate 'line', 1558
+    new $P103, "Undef"
+    set $P2124, $P103
+    .lex "$parver", $P2124
+.annotate 'line', 1559
     new $P104, "Undef"
-    set $P2126, $P104
-    .lex "$parrev", $P2126
-.annotate 'line', 1554
-    set $P105, param_2123
+    set $P2125, $P104
+    .lex "$parrev", $P2125
+.annotate 'line', 1557
+    set $P105, param_2122
     nqp_decontainerize $P106, $P105
-    find_lex $P107, "$?CLASS"
-    repr_get_attr_obj $P2127, $P106, $P107, "%!config", 7
-    unless_null $P2127, vivify_1028
-    $P2127 = root_new ['parrot';'Hash']
+    nqp_get_sc_object $P107, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
+    repr_get_attr_obj $P2126, $P106, $P107, "%!config", 7
+    unless_null $P2126, vivify_1028
+    $P2126 = root_new ['parrot';'Hash']
   vivify_1028:
-    set $P108, $P2127["version"]
+    set $P108, $P2126["version"]
     unless_null $P108, vivify_1029
     new $P108, "Undef"
   vivify_1029:
-    set $P2124, $P108
-.annotate 'line', 1555
+    set $P2123, $P108
+.annotate 'line', 1558
     find_lex $P105, "$?PACKAGE"
     get_who $P106, $P105
-    set $P2128, $P106["%parrot_config"]
-    unless_null $P2128, vivify_1030
-    $P2128 = root_new ['parrot';'Hash']
+    set $P2127, $P106["%parrot_config"]
+    unless_null $P2127, vivify_1030
+    $P2127 = root_new ['parrot';'Hash']
   vivify_1030:
-    set $P107, $P2128["VERSION"]
+    set $P107, $P2127["VERSION"]
     unless_null $P107, vivify_1031
     new $P107, "Undef"
   vivify_1031:
-    set $P2125, $P107
-.annotate 'line', 1556
+    set $P2124, $P107
+.annotate 'line', 1559
     find_lex $P105, "$?PACKAGE"
     get_who $P106, $P105
-    set $P2130, $P106["%parrot_config"]
-    unless_null $P2130, vivify_1032
-    $P2130 = root_new ['parrot';'Hash']
+    set $P2129, $P106["%parrot_config"]
+    unless_null $P2129, vivify_1032
+    $P2129 = root_new ['parrot';'Hash']
   vivify_1032:
-    set $P107, $P2130["git_describe"]
+    set $P107, $P2129["git_describe"]
     unless_null $P107, vivify_1033
     new $P107, "Undef"
   vivify_1033:
-    set $P2129, $P107
-    defined $I2132, $P2129
-    if $I2132, default_2131
+    set $P2128, $P107
+    defined $I2131, $P2128
+    if $I2131, default_2130
     new $P108, "String"
     assign $P108, "(unknown)"
-    set $P2129, $P108
-  default_2131:
-    set $P2126, $P2129
-.annotate 'line', 1557
+    set $P2128, $P108
+  default_2130:
+    set $P2125, $P2128
+.annotate 'line', 1560
     new $P105, 'String'
     set $P105, "This is "
-    set $P106, param_2123
+    set $P106, param_2122
     nqp_decontainerize $P107, $P106
-    find_lex $P108, "$?CLASS"
+    nqp_get_sc_object $P108, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_get_attr_obj $P109, $P107, $P108, "$!language", 6
     unless_null $P109, vivify_1034
     new $P109, "Undef"
   vivify_1034:
     concat $P110, $P105, $P109
     concat $P111, $P110, " version "
-    set $P112, $P2124
+    set $P112, $P2123
     unless_null $P112, vivify_1035
     new $P112, "Undef"
   vivify_1035:
     concat $P113, $P111, $P112
     concat $P114, $P113, " built on parrot "
-    set $P115, $P2125
+    set $P115, $P2124
     unless_null $P115, vivify_1036
     new $P115, "Undef"
   vivify_1036:
     concat $P116, $P114, $P115
     concat $P117, $P116, " revision "
-    set $P118, $P2126
+    set $P118, $P2125
     unless_null $P118, vivify_1037
     new $P118, "Undef"
   vivify_1037:
     concat $P119, $P117, $P118
     say $P119
-.annotate 'line', 1558
+.annotate 'line', 1561
     new $P105, "Float"
     assign $P105, 0
     set $I100, $P105
     exit $I100
-.annotate 'line', 1553
+.annotate 'line', 1556
     .return ()
 .end
 
@@ -14258,86 +14658,86 @@
 
 .namespace ["HLL";"Compiler"]
 .include "except_types.pasm"
-.sub "show-config" :anon :subid("232_1329260312.462") :outer("164_1329260312.462")
-    .param pmc param_2134
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1561
-    .const 'Sub' $P2142 = "234_1329260312.462" 
-    capture_lex $P2142
-    .const 'Sub' $P2137 = "233_1329260312.462" 
-    capture_lex $P2137
-    .lex "self", param_2134
-.annotate 'line', 1562
+.sub "show-config" :anon :subid("181_1330909682.33311") :outer("240_1330909682.33311")
+    .param pmc param_2133
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1564
+    .const 'Sub' $P2141 = "274_1330909682.33311" 
+    capture_lex $P2141
+    .const 'Sub' $P2136 = "273_1330909682.33311" 
+    capture_lex $P2136
+    .lex "self", param_2133
+.annotate 'line', 1565
     find_lex $P103, "$?PACKAGE"
     get_who $P104, $P103
-    set $P2135, $P104["%parrot_config"]
-    unless_null $P2135, vivify_1038
-    $P2135 = root_new ['parrot';'Hash']
+    set $P2134, $P104["%parrot_config"]
+    unless_null $P2134, vivify_1038
+    $P2134 = root_new ['parrot';'Hash']
   vivify_1038:
-    defined $I100, $P2135
+    defined $I100, $P2134
     unless $I100, for_undef_1039
-    iter $P102, $P2135
+    iter $P102, $P2134
     new $P106, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P106, loop2139_handler
+    set_label $P106, loop2138_handler
     push_eh $P106
-  loop2139_test:
-    unless $P102, loop2139_done
+  loop2138_test:
+    unless $P102, loop2138_done
     shift $P105, $P102
-  loop2139_redo:
-    .const 'Sub' $P2137 = "233_1329260312.462" 
-    capture_lex $P2137
-    $P2137($P105)
-  loop2139_next:
-    goto loop2139_test
-  loop2139_handler:
+  loop2138_redo:
+    .const 'Sub' $P2136 = "273_1330909682.33311" 
+    capture_lex $P2136
+    $P2136($P105)
+  loop2138_next:
+    goto loop2138_test
+  loop2138_handler:
     .local pmc exception 
     .get_results (exception) 
     pop_upto_eh exception
     getattribute $P107, exception, 'type'
-    eq $P107, .CONTROL_LOOP_NEXT, loop2139_next
-    eq $P107, .CONTROL_LOOP_REDO, loop2139_redo
-  loop2139_done:
+    eq $P107, .CONTROL_LOOP_NEXT, loop2138_next
+    eq $P107, .CONTROL_LOOP_REDO, loop2138_redo
+  loop2138_done:
     pop_eh 
   for_undef_1039:
-.annotate 'line', 1565
-    set $P103, param_2134
+.annotate 'line', 1568
+    set $P103, param_2133
     nqp_decontainerize $P104, $P103
-    find_lex $P105, "$?CLASS"
-    repr_get_attr_obj $P2140, $P104, $P105, "%!config", 7
-    unless_null $P2140, vivify_1042
-    $P2140 = root_new ['parrot';'Hash']
+    nqp_get_sc_object $P105, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
+    repr_get_attr_obj $P2139, $P104, $P105, "%!config", 7
+    unless_null $P2139, vivify_1042
+    $P2139 = root_new ['parrot';'Hash']
   vivify_1042:
-    defined $I100, $P2140
+    defined $I100, $P2139
     unless $I100, for_undef_1043
-    iter $P102, $P2140
+    iter $P102, $P2139
     new $P107, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P107, loop2144_handler
+    set_label $P107, loop2143_handler
     push_eh $P107
-  loop2144_test:
-    unless $P102, loop2144_done
+  loop2143_test:
+    unless $P102, loop2143_done
     shift $P106, $P102
-  loop2144_redo:
-    .const 'Sub' $P2142 = "234_1329260312.462" 
-    capture_lex $P2142
-    $P2142($P106)
-  loop2144_next:
-    goto loop2144_test
-  loop2144_handler:
+  loop2143_redo:
+    .const 'Sub' $P2141 = "274_1330909682.33311" 
+    capture_lex $P2141
+    $P2141($P106)
+  loop2143_next:
+    goto loop2143_test
+  loop2143_handler:
     .local pmc exception 
     .get_results (exception) 
     pop_upto_eh exception
     getattribute $P108, exception, 'type'
-    eq $P108, .CONTROL_LOOP_NEXT, loop2144_next
-    eq $P108, .CONTROL_LOOP_REDO, loop2144_redo
-  loop2144_done:
+    eq $P108, .CONTROL_LOOP_NEXT, loop2143_next
+    eq $P108, .CONTROL_LOOP_REDO, loop2143_redo
+  loop2143_done:
     pop_eh 
   for_undef_1043:
-.annotate 'line', 1568
+.annotate 'line', 1571
     new $P102, "Float"
     assign $P102, 0
     set $I100, $P102
     exit $I100
-.annotate 'line', 1561
+.annotate 'line', 1564
     .return ()
 .end
 
@@ -14345,12 +14745,12 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block2136"  :anon :subid("233_1329260312.462") :outer("232_1329260312.462")
-    .param pmc param_2138
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1562
-    .lex "$_", param_2138
-.annotate 'line', 1563
+.sub "_block2135"  :anon :subid("273_1330909682.33311") :outer("181_1330909682.33311")
+    .param pmc param_2137
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1565
+    .lex "$_", param_2137
+.annotate 'line', 1566
     new $P106, "String"
     assign $P106, "parrot::"
     find_lex $P107, "$_"
@@ -14367,7 +14767,7 @@
     $S101 = $P110."value"()
     concat $P111, $P109, $S101
     say $P111
-.annotate 'line', 1562
+.annotate 'line', 1565
     .return ()
 .end
 
@@ -14375,15 +14775,15 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block2141"  :anon :subid("234_1329260312.462") :outer("232_1329260312.462")
-    .param pmc param_2143
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1565
-    .lex "$_", param_2143
-.annotate 'line', 1566
+.sub "_block2140"  :anon :subid("274_1330909682.33311") :outer("181_1330909682.33311")
+    .param pmc param_2142
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1568
+    .lex "$_", param_2142
+.annotate 'line', 1569
     find_lex $P107, "self"
     nqp_decontainerize $P108, $P107
-    find_lex $P109, "$?CLASS"
+    nqp_get_sc_object $P109, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
     repr_get_attr_obj $P110, $P108, $P109, "$!language", 6
     unless_null $P110, vivify_1044
     new $P110, "Undef"
@@ -14403,7 +14803,7 @@
     $S101 = $P115."value"()
     concat $P116, $P114, $S101
     say $P116
-.annotate 'line', 1565
+.annotate 'line', 1568
     .return ()
 .end
 
@@ -14411,57 +14811,57 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "nqpevent" :anon :subid("235_1329260312.462") :outer("164_1329260312.462")
-    .param pmc param_2146
-    .param pmc param_2147 :optional
-    .param int has_param_2147 :opt_flag
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1571
-    .const 'Sub' $P2152 = "236_1329260312.462" 
-    capture_lex $P2152
-    .lex "self", param_2146
-    if has_param_2147, optparam_1047
+.sub "nqpevent" :anon :subid("182_1330909682.33311") :outer("240_1330909682.33311")
+    .param pmc param_2145
+    .param pmc param_2146 :optional
+    .param int has_param_2146 :opt_flag
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1574
+    .const 'Sub' $P2151 = "275_1330909682.33311" 
+    capture_lex $P2151
+    .lex "self", param_2145
+    if has_param_2146, optparam_1047
     new $P102, "Undef"
-    set param_2147, $P102
+    set param_2146, $P102
   optparam_1047:
-    .lex "$spec", param_2147
-.annotate 'line', 1574
+    .lex "$spec", param_2146
+.annotate 'line', 1577
     new $P103, "Undef"
-    set $P2148, $P103
-    .lex "$fh", $P2148
-.annotate 'line', 1573
+    set $P2147, $P103
+    .lex "$fh", $P2147
+.annotate 'line', 1576
     nqpevent "nqpevent: log finished"
-.annotate 'line', 1574
+.annotate 'line', 1577
     null $P104
     nqpevent_fh $P105, $P104
-    set $P2148, $P105
-.annotate 'line', 1575
-    set $P104, $P2148
+    set $P2147, $P105
+.annotate 'line', 1578
+    set $P104, $P2147
     unless_null $P104, vivify_1048
     new $P104, "Undef"
   vivify_1048:
-    unless $P104, if_2149_end
-    set $P105, $P2148
+    unless $P104, if_2148_end
+    set $P105, $P2147
     unless_null $P105, vivify_1049
     new $P105, "Undef"
   vivify_1049:
     $P105."flush"()
-  if_2149_end:
-.annotate 'line', 1578
-    set $P105, param_2147
+  if_2148_end:
+.annotate 'line', 1581
+    set $P105, param_2146
     unless_null $P105, vivify_1050
     new $P105, "Undef"
   vivify_1050:
-    if $P105, if_2150
+    if $P105, if_2149
     set $P104, $P105
-    goto if_2150_end
-  if_2150:
-    .const 'Sub' $P2152 = "236_1329260312.462" 
-    capture_lex $P2152
-    $P108 = $P2152()
+    goto if_2149_end
+  if_2149:
+    .const 'Sub' $P2151 = "275_1330909682.33311" 
+    capture_lex $P2151
+    $P108 = $P2151()
     set $P104, $P108
-  if_2150_end:
-.annotate 'line', 1571
+  if_2149_end:
+.annotate 'line', 1574
     .return ($P104)
 .end
 
@@ -14469,20 +14869,20 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block2151"  :anon :subid("236_1329260312.462") :outer("235_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1578
-    .const 'Sub' $P2159 = "237_1329260312.462" 
-    capture_lex $P2159
-.annotate 'line', 1580
-    new $P106, "Undef"
-    set $P2153, $P106
-    .lex "$file", $P2153
+.sub "_block2150"  :anon :subid("275_1330909682.33311") :outer("182_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1581
+    .const 'Sub' $P2158 = "276_1330909682.33311" 
+    capture_lex $P2158
+.annotate 'line', 1583
+    new $P106, "Undef"
+    set $P2152, $P106
+    .lex "$file", $P2152
+.annotate 'line', 1584
     new $P107, "Undef"
-    set $P2154, $P107
-    .lex "$flags", $P2154
-.annotate 'line', 1579
+    set $P2153, $P107
+    .lex "$flags", $P2153
+.annotate 'line', 1582
     find_lex $P108, "$spec"
     unless_null $P108, vivify_1051
     new $P108, "Undef"
@@ -14490,75 +14890,75 @@
     set $S100, $P108
     split $P109, ";", $S100
     store_lex "$spec", $P109
-.annotate 'line', 1580
+.annotate 'line', 1583
     new $P108, "Float"
     assign $P108, 0
     set $I100, $P108
-    find_lex $P2155, "$spec"
-    unless_null $P2155, vivify_1052
-    $P2155 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P2154, "$spec"
+    unless_null $P2154, vivify_1052
+    $P2154 = root_new ['parrot';'ResizablePMCArray']
   vivify_1052:
-    set $P109, $P2155[$I100]
+    set $P109, $P2154[$I100]
     unless_null $P109, vivify_1053
     new $P109, "Undef"
   vivify_1053:
-    set $P2153, $P109
-.annotate 'line', 1581
+    set $P2152, $P109
+.annotate 'line', 1584
     new $P108, "Float"
     assign $P108, 1
     set $I100, $P108
-    find_lex $P2156, "$spec"
-    unless_null $P2156, vivify_1054
-    $P2156 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P2155, "$spec"
+    unless_null $P2155, vivify_1054
+    $P2155 = root_new ['parrot';'ResizablePMCArray']
   vivify_1054:
-    set $P109, $P2156[$I100]
+    set $P109, $P2155[$I100]
     unless_null $P109, vivify_1055
     new $P109, "Undef"
   vivify_1055:
-    set $P2154, $P109
-.annotate 'line', 1582
-    set $P108, $P2153
+    set $P2153, $P109
+.annotate 'line', 1585
+    set $P108, $P2152
     unless_null $P108, vivify_1056
     new $P108, "Undef"
   vivify_1056:
     set $S100, $P108
     isgt $I100, $S100, ""
-    if $I100, if_2157
-.annotate 'line', 1588
+    if $I100, if_2156
+.annotate 'line', 1591
     getinterp $P110
     $P112 = $P110."stderr_handle"()
     nqpevent_fh $P113, $P112
-.annotate 'line', 1587
-    goto if_2157_end
-  if_2157:
-.annotate 'line', 1582
-    .const 'Sub' $P2159 = "237_1329260312.462" 
-    capture_lex $P2159
-    $P2159()
-  if_2157_end:
 .annotate 'line', 1590
-    set $P108, $P2154
+    goto if_2156_end
+  if_2156:
+.annotate 'line', 1585
+    .const 'Sub' $P2158 = "276_1330909682.33311" 
+    capture_lex $P2158
+    $P2158()
+  if_2156_end:
+.annotate 'line', 1593
+    set $P108, $P2153
     unless_null $P108, vivify_1061
     new $P108, "Undef"
   vivify_1061:
     set $S100, $P108
     iseq $I101, $S100, ""
-    if $I101, if_2162
-    set $P110, $P2154
+    if $I101, if_2161
+    set $P110, $P2153
     unless_null $P110, vivify_1062
     new $P110, "Undef"
   vivify_1062:
     set $I100, $P110
-    goto if_2162_end
-  if_2162:
+    goto if_2161_end
+  if_2161:
     new $P109, "Float"
     assign $P109, 31
     set $I100, $P109
-  if_2162_end:
+  if_2161_end:
     nqpdebflags $I102, $I100
-.annotate 'line', 1591
+.annotate 'line', 1594
     nqpevent "nqpevent: log started"
-.annotate 'line', 1578
+.annotate 'line', 1581
     .return ()
 .end
 
@@ -14566,16 +14966,16 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block2158"  :anon :subid("237_1329260312.462") :outer("236_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1583
+.sub "_block2157"  :anon :subid("276_1330909682.33311") :outer("275_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1586
     new $P109, "Undef"
-    set $P2160, $P109
-    .lex "$fh", $P2160
+    set $P2159, $P109
+    .lex "$fh", $P2159
     new $P110, "FileHandle"
-    set $P2160, $P110
-.annotate 'line', 1584
-    set $P110, $P2160
+    set $P2159, $P110
+.annotate 'line', 1587
+    set $P110, $P2159
     unless_null $P110, vivify_1057
     new $P110, "Undef"
   vivify_1057:
@@ -14584,7 +14984,7 @@
     new $P111, "Undef"
   vivify_1058:
     $P112 = $P110."open"($P111, "w")
-    if $P112, unless_2161_end
+    if $P112, unless_2160_end
     find_lex $P113, "self"
     nqp_decontainerize $P114, $P113
     new $P115, 'String'
@@ -14595,14 +14995,14 @@
   vivify_1059:
     concat $P117, $P115, $P116
     $P114."panic"($P117)
-  unless_2161_end:
-.annotate 'line', 1585
-    set $P110, $P2160
+  unless_2160_end:
+.annotate 'line', 1588
+    set $P110, $P2159
     unless_null $P110, vivify_1060
     new $P110, "Undef"
   vivify_1060:
     nqpevent_fh $P111, $P110
-.annotate 'line', 1582
+.annotate 'line', 1585
     .return ($P111)
 .end
 
@@ -14611,77 +15011,77 @@
 
 .namespace ["HLL";"Compiler"]
 .include "except_types.pasm"
-.sub "removestage" :anon :subid("238_1329260312.462") :outer("164_1329260312.462")
+.sub "removestage" :anon :subid("183_1330909682.33311") :outer("240_1330909682.33311")
+    .param pmc param_2163
     .param pmc param_2164
-    .param pmc param_2165
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1595
-    .const 'Sub' $P2170 = "239_1329260312.462" 
-    capture_lex $P2170
-    .lex "self", param_2164
-    .lex "$stagename", param_2165
-.annotate 'line', 1596
-    $P2167 = root_new ['parrot';'ResizablePMCArray']
-    set $P2166, $P2167
-    .lex "@new_stages", $P2166
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1598
+    .const 'Sub' $P2169 = "277_1330909682.33311" 
+    capture_lex $P2169
+    .lex "self", param_2163
+    .lex "$stagename", param_2164
+.annotate 'line', 1599
+    $P2166 = root_new ['parrot';'ResizablePMCArray']
+    set $P2165, $P2166
+    .lex "@new_stages", $P2165
     new $P102, "ResizableStringArray"
-    set $P2166, $P102
-.annotate 'line', 1597
-    set $P103, param_2164
+    set $P2165, $P102
+.annotate 'line', 1600
+    set $P103, param_2163
     nqp_decontainerize $P104, $P103
-    find_lex $P105, "$?CLASS"
-    repr_get_attr_obj $P2168, $P104, $P105, "@!stages", 0
-    unless_null $P2168, vivify_1063
-    $P2168 = root_new ['parrot';'ResizablePMCArray']
+    nqp_get_sc_object $P105, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
+    repr_get_attr_obj $P2167, $P104, $P105, "@!stages", 0
+    unless_null $P2167, vivify_1063
+    $P2167 = root_new ['parrot';'ResizablePMCArray']
   vivify_1063:
-    defined $I100, $P2168
+    defined $I100, $P2167
     unless $I100, for_undef_1064
-    iter $P102, $P2168
+    iter $P102, $P2167
     new $P108, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P108, loop2174_handler
+    set_label $P108, loop2173_handler
     push_eh $P108
-  loop2174_test:
-    unless $P102, loop2174_done
+  loop2173_test:
+    unless $P102, loop2173_done
     shift $P106, $P102
-  loop2174_redo:
-    .const 'Sub' $P2170 = "239_1329260312.462" 
-    capture_lex $P2170
-    $P2170($P106)
-  loop2174_next:
-    goto loop2174_test
-  loop2174_handler:
+  loop2173_redo:
+    .const 'Sub' $P2169 = "277_1330909682.33311" 
+    capture_lex $P2169
+    $P2169($P106)
+  loop2173_next:
+    goto loop2173_test
+  loop2173_handler:
     .local pmc exception 
     .get_results (exception) 
     pop_upto_eh exception
     getattribute $P109, exception, 'type'
-    eq $P109, .CONTROL_LOOP_NEXT, loop2174_next
-    eq $P109, .CONTROL_LOOP_REDO, loop2174_redo
-  loop2174_done:
+    eq $P109, .CONTROL_LOOP_NEXT, loop2173_next
+    eq $P109, .CONTROL_LOOP_REDO, loop2173_redo
+  loop2173_done:
     pop_eh 
   for_undef_1064:
-.annotate 'line', 1602
-    set $P2175, $P2166
-    unless_null $P2175, vivify_1069
-    $P2175 = root_new ['parrot';'ResizablePMCArray']
+.annotate 'line', 1605
+    set $P2174, $P2165
+    unless_null $P2174, vivify_1069
+    $P2174 = root_new ['parrot';'ResizablePMCArray']
   vivify_1069:
-    set $P102, param_2164
+    set $P102, param_2163
     nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
-    repr_bind_attr_obj $P103, $P104, "@!stages", 0, $P2175
-.annotate 'line', 1595
-    .return ($P2175)
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 139
+    repr_bind_attr_obj $P103, $P104, "@!stages", 0, $P2174
+.annotate 'line', 1598
+    .return ($P2174)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block2169"  :anon :subid("239_1329260312.462") :outer("238_1329260312.462")
-    .param pmc param_2171
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1597
-    .lex "$_", param_2171
-.annotate 'line', 1598
+.sub "_block2168"  :anon :subid("277_1330909682.33311") :outer("183_1330909682.33311")
+    .param pmc param_2170
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1600
+    .lex "$_", param_2170
+.annotate 'line', 1601
     find_lex $P108, "$_"
     unless_null $P108, vivify_1065
     new $P108, "Undef"
@@ -14693,25 +15093,25 @@
   vivify_1066:
     set $S101, $P109
     isne $I101, $S100, $S101
-    if $I101, if_2172
+    if $I101, if_2171
     new $P107, 'Integer'
     set $P107, $I101
-    goto if_2172_end
-  if_2172:
-.annotate 'line', 1599
-    find_lex $P2173, "@new_stages"
-    unless_null $P2173, vivify_1067
-    $P2173 = root_new ['parrot';'ResizablePMCArray']
+    goto if_2171_end
+  if_2171:
+.annotate 'line', 1602
+    find_lex $P2172, "@new_stages"
+    unless_null $P2172, vivify_1067
+    $P2172 = root_new ['parrot';'ResizablePMCArray']
   vivify_1067:
     find_lex $P110, "$_"
     unless_null $P110, vivify_1068
     new $P110, "Undef"
   vivify_1068:
-    $P111 = $P2173."push"($P110)
-.annotate 'line', 1598
+    $P111 = $P2172."push"($P110)
+.annotate 'line', 1601
     set $P107, $P111
-  if_2172_end:
-.annotate 'line', 1597
+  if_2171_end:
+.annotate 'line', 1600
     .return ($P107)
 .end
 
@@ -14720,145 +15120,145 @@
 
 .namespace ["HLL";"Compiler"]
 .include "except_types.pasm"
-.sub "addstage" :anon :subid("240_1329260312.462") :outer("164_1329260312.462")
+.sub "addstage" :anon :subid("184_1330909682.33311") :outer("240_1330909682.33311")
+    .param pmc param_2178
     .param pmc param_2179
-    .param pmc param_2180
-    .param pmc param_2181 :slurpy :named
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1605
-    .const 'Sub' $P2199 = "242_1329260312.462" 
-    capture_lex $P2199
-    .const 'Sub' $P2193 = "241_1329260312.462" 
-    capture_lex $P2193
-    new $P2178, 'ExceptionHandler', [.CONTROL_RETURN]
-    set_label $P2178, control_2177
-    push_eh $P2178
-    .lex "self", param_2179
-    .lex "$stagename", param_2180
-    .lex "%adverbs", param_2181
-.annotate 'line', 1606
+    .param pmc param_2180 :slurpy :named
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1608
+    .const 'Sub' $P2198 = "279_1330909682.33311" 
+    capture_lex $P2198
+    .const 'Sub' $P2192 = "278_1330909682.33311" 
+    capture_lex $P2192
+    new $P2177, 'ExceptionHandler', [.CONTROL_RETURN]
+    set_label $P2177, control_2176
+    push_eh $P2177
+    .lex "self", param_2178
+    .lex "$stagename", param_2179
+    .lex "%adverbs", param_2180
+.annotate 'line', 1609
     new $P102, "Undef"
-    set $P2182, $P102
-    .lex "$position", $P2182
-.annotate 'line', 1607
+    set $P2181, $P102
+    .lex "$position", $P2181
+.annotate 'line', 1610
     new $P103, "Undef"
-    set $P2183, $P103
-    .lex "$where", $P2183
-.annotate 'line', 1620
-    $P2185 = root_new ['parrot';'ResizablePMCArray']
-    set $P2184, $P2185
-    .lex "@new-stages", $P2184
-.annotate 'line', 1605
-    set $P104, $P2182
+    set $P2182, $P103
+    .lex "$where", $P2182
+.annotate 'line', 1623
+    $P2184 = root_new ['parrot';'ResizablePMCArray']
+    set $P2183, $P2184
+    .lex "@new-stages", $P2183
+.annotate 'line', 1608
+    set $P104, $P2181
     unless_null $P104, vivify_1070
     new $P104, "Undef"
   vivify_1070:
-    set $P104, $P2183
+    set $P104, $P2182
     unless_null $P104, vivify_1071
     new $P104, "Undef"
   vivify_1071:
-.annotate 'line', 1608
-    set $P2187, param_2181
-    unless_null $P2187, vivify_1072
-    $P2187 = root_new ['parrot';'Hash']
+.annotate 'line', 1611
+    set $P2186, param_2180
+    unless_null $P2186, vivify_1072
+    $P2186 = root_new ['parrot';'Hash']
   vivify_1072:
-    set $P104, $P2187["before"]
+    set $P104, $P2186["before"]
     unless_null $P104, vivify_1073
     new $P104, "Undef"
   vivify_1073:
-    if $P104, if_2186
-.annotate 'line', 1611
-    set $P2190, param_2181
-    unless_null $P2190, vivify_1074
-    $P2190 = root_new ['parrot';'Hash']
+    if $P104, if_2185
+.annotate 'line', 1614
+    set $P2189, param_2180
+    unless_null $P2189, vivify_1074
+    $P2189 = root_new ['parrot';'Hash']
   vivify_1074:
-    set $P105, $P2190["after"]
+    set $P105, $P2189["after"]
     unless_null $P105, vivify_1075
     new $P105, "Undef"
   vivify_1075:
-    if $P105, if_2189
-.annotate 'line', 1614
-    .const 'Sub' $P2193 = "241_1329260312.462" 
-    capture_lex $P2193
-    $P2193()
-    goto if_2189_end
-  if_2189:
-.annotate 'line', 1612
-    set $P2191, param_2181
-    unless_null $P2191, vivify_1079
-    $P2191 = root_new ['parrot';'Hash']
+    if $P105, if_2188
+.annotate 'line', 1617
+    .const 'Sub' $P2192 = "278_1330909682.33311" 
+    capture_lex $P2192
+    $P2192()
+    goto if_2188_end
+  if_2188:
+.annotate 'line', 1615
+    set $P2190, param_2180
+    unless_null $P2190, vivify_1079
+    $P2190 = root_new ['parrot';'Hash']
   vivify_1079:
-    set $P106, $P2191["after"]
+    set $P106, $P2190["after"]
     unless_null $P106, vivify_1080
     new $P106, "Undef"
   vivify_1080:
-    set $P2183, $P106
-.annotate 'line', 1613
+    set $P2182, $P106
+.annotate 'line', 1616
     new $P106, "String"
     assign $P106, "after"
-    set $P2182, $P106
-  if_2189_end:
-.annotate 'line', 1611
-    goto if_2186_end
-  if_2186:
-.annotate 'line', 1609
-    set $P2188, param_2181
-    unless_null $P2188, vivify_1081
-    $P2188 = root_new ['parrot';'Hash']
+    set $P2181, $P106
+  if_2188_end:
+.annotate 'line', 1614
+    goto if_2185_end
+  if_2185:
+.annotate 'line', 1612
+    set $P2187, param_2180
+    unless_null $P2187, vivify_1081
+    $P2187 = root_new ['parrot';'Hash']
   vivify_1081:
-    set $P105, $P2188["before"]
+    set $P105, $P2187["before"]
     unless_null $P105, vivify_1082
     new $P105, "Undef"
   vivify_1082:
-    set $P2183, $P105
-.annotate 'line', 1610
+    set $P2182, $P105
+.annotate 'line', 1613
     new $P105, "String"
     assign $P105, "before"
-    set $P2182, $P105
-  if_2186_end:
-.annotate 'line', 1620
+    set $P2181, $P105
+  if_2185_end:
+.annotate 'line', 1623
     new $P104, "ResizableStringArray"
-    set $P2184, $P104
-.annotate 'line', 1621
-    set $P105, param_2179
+    set $P2183, $P104
+.annotate 'line', 1624
+    set $P105, param_2178
     nqp_decontainerize $P106, $P105
     $P107 = $P106."stages"()
     defined $I100, $P107
     unless $I100, for_undef_1083
     iter $P104, $P107
     new $P110, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P110, loop2208_handler
+    set_label $P110, loop2207_handler
     push_eh $P110
-  loop2208_test:
-    unless $P104, loop2208_done
+  loop2207_test:
+    unless $P104, loop2207_done
     shift $P108, $P104
-  loop2208_redo:
-    .const 'Sub' $P2199 = "242_1329260312.462" 
-    capture_lex $P2199
-    $P2199($P108)
-  loop2208_next:
-    goto loop2208_test
-  loop2208_handler:
+  loop2207_redo:
+    .const 'Sub' $P2198 = "279_1330909682.33311" 
+    capture_lex $P2198
+    $P2198($P108)
+  loop2207_next:
+    goto loop2207_test
+  loop2207_handler:
     .local pmc exception 
     .get_results (exception) 
     pop_upto_eh exception
     getattribute $P111, exception, 'type'
-    eq $P111, .CONTROL_LOOP_NEXT, loop2208_next
-    eq $P111, .CONTROL_LOOP_REDO, loop2208_redo
-  loop2208_done:
+    eq $P111, .CONTROL_LOOP_NEXT, loop2207_next
+    eq $P111, .CONTROL_LOOP_REDO, loop2207_redo
+  loop2207_done:
     pop_eh 
   for_undef_1083:
-.annotate 'line', 1634
-    set $P104, param_2179
+.annotate 'line', 1637
+    set $P104, param_2178
     nqp_decontainerize $P105, $P104
-    set $P2209, $P2184
-    unless_null $P2209, vivify_1097
-    $P2209 = root_new ['parrot';'ResizablePMCArray']
+    set $P2208, $P2183
+    unless_null $P2208, vivify_1097
+    $P2208 = root_new ['parrot';'ResizablePMCArray']
   vivify_1097:
-    $P106 = $P105."stages"($P2209)
-.annotate 'line', 1605
+    $P106 = $P105."stages"($P2208)
+.annotate 'line', 1608
     .return ($P106)
-  control_2177:
+  control_2176:
     .local pmc exception 
     .get_results (exception) 
     getattribute $P104, exception, "payload"
@@ -14870,43 +15270,43 @@
 
 .namespace ["HLL";"Compiler"]
 .include "except_types.pasm"
-.sub "_block2192"  :anon :subid("241_1329260312.462") :outer("240_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1615
-    $P2195 = root_new ['parrot';'ResizablePMCArray']
-    set $P2194, $P2195
-    .lex "@new-stages", $P2194
+.sub "_block2191"  :anon :subid("278_1330909682.33311") :outer("184_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1618
+    $P2194 = root_new ['parrot';'ResizablePMCArray']
+    set $P2193, $P2194
+    .lex "@new-stages", $P2193
     find_lex $P106, "self"
     nqp_decontainerize $P107, $P106
     $P108 = $P107."stages"()
     clone $P109, $P108
-    set $P2194, $P109
-.annotate 'line', 1616
-    set $P2196, $P2194
-    unless_null $P2196, vivify_1076
-    $P2196 = root_new ['parrot';'ResizablePMCArray']
+    set $P2193, $P109
+.annotate 'line', 1619
+    set $P2195, $P2193
+    unless_null $P2195, vivify_1076
+    $P2195 = root_new ['parrot';'ResizablePMCArray']
   vivify_1076:
     find_lex $P106, "$stagename"
     unless_null $P106, vivify_1077
     new $P106, "Undef"
   vivify_1077:
-    push $P2196, $P106
-.annotate 'line', 1617
+    push $P2195, $P106
+.annotate 'line', 1620
     find_lex $P106, "self"
     nqp_decontainerize $P107, $P106
-    set $P2197, $P2194
-    unless_null $P2197, vivify_1078
-    $P2197 = root_new ['parrot';'ResizablePMCArray']
+    set $P2196, $P2193
+    unless_null $P2196, vivify_1078
+    $P2196 = root_new ['parrot';'ResizablePMCArray']
   vivify_1078:
-    $P107."stages"($P2197)
-.annotate 'line', 1618
+    $P107."stages"($P2196)
+.annotate 'line', 1621
     new $P106, "Exception"
     set $P106['type'], .CONTROL_RETURN
     new $P107, "Float"
     assign $P107, 1
     setattribute $P106, 'payload', $P107
     throw $P106
-.annotate 'line', 1614
+.annotate 'line', 1617
     .return ()
 .end
 
@@ -14914,12 +15314,12 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block2198"  :anon :subid("242_1329260312.462") :outer("240_1329260312.462")
-    .param pmc param_2200
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1621
-    .lex "$_", param_2200
-.annotate 'line', 1622
+.sub "_block2197"  :anon :subid("279_1330909682.33311") :outer("184_1330909682.33311")
+    .param pmc param_2199
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1624
+    .lex "$_", param_2199
+.annotate 'line', 1625
     find_lex $P110, "$_"
     unless_null $P110, vivify_1084
     new $P110, "Undef"
@@ -14931,82 +15331,82 @@
   vivify_1085:
     set $S101, $P111
     iseq $I101, $S100, $S101
-    if $I101, if_2201
-.annotate 'line', 1631
-    find_lex $P2207, "@new-stages"
-    unless_null $P2207, vivify_1086
-    $P2207 = root_new ['parrot';'ResizablePMCArray']
+    if $I101, if_2200
+.annotate 'line', 1634
+    find_lex $P2206, "@new-stages"
+    unless_null $P2206, vivify_1086
+    $P2206 = root_new ['parrot';'ResizablePMCArray']
   vivify_1086:
     find_lex $P113, "$_"
     unless_null $P113, vivify_1087
     new $P113, "Undef"
   vivify_1087:
-    push $P2207, $P113
-.annotate 'line', 1630
-    set $P109, $P2207
-.annotate 'line', 1622
-    goto if_2201_end
-  if_2201:
-.annotate 'line', 1623
+    push $P2206, $P113
+.annotate 'line', 1633
+    set $P109, $P2206
+.annotate 'line', 1625
+    goto if_2200_end
+  if_2200:
+.annotate 'line', 1626
     find_lex $P113, "$position"
     unless_null $P113, vivify_1088
     new $P113, "Undef"
   vivify_1088:
     set $S102, $P113
     iseq $I102, $S102, "before"
-    if $I102, if_2202
-.annotate 'line', 1627
-    find_lex $P2205, "@new-stages"
-    unless_null $P2205, vivify_1089
-    $P2205 = root_new ['parrot';'ResizablePMCArray']
+    if $I102, if_2201
+.annotate 'line', 1630
+    find_lex $P2204, "@new-stages"
+    unless_null $P2204, vivify_1089
+    $P2204 = root_new ['parrot';'ResizablePMCArray']
   vivify_1089:
     find_lex $P114, "$_"
     unless_null $P114, vivify_1090
     new $P114, "Undef"
   vivify_1090:
-    push $P2205, $P114
-.annotate 'line', 1628
-    find_lex $P2206, "@new-stages"
-    unless_null $P2206, vivify_1091
-    $P2206 = root_new ['parrot';'ResizablePMCArray']
+    push $P2204, $P114
+.annotate 'line', 1631
+    find_lex $P2205, "@new-stages"
+    unless_null $P2205, vivify_1091
+    $P2205 = root_new ['parrot';'ResizablePMCArray']
   vivify_1091:
     find_lex $P114, "$stagename"
     unless_null $P114, vivify_1092
     new $P114, "Undef"
   vivify_1092:
-    push $P2206, $P114
+    push $P2205, $P114
+.annotate 'line', 1629
+    set $P112, $P2205
 .annotate 'line', 1626
-    set $P112, $P2206
-.annotate 'line', 1623
-    goto if_2202_end
-  if_2202:
-.annotate 'line', 1624
-    find_lex $P2203, "@new-stages"
-    unless_null $P2203, vivify_1093
-    $P2203 = root_new ['parrot';'ResizablePMCArray']
+    goto if_2201_end
+  if_2201:
+.annotate 'line', 1627
+    find_lex $P2202, "@new-stages"
+    unless_null $P2202, vivify_1093
+    $P2202 = root_new ['parrot';'ResizablePMCArray']
   vivify_1093:
     find_lex $P114, "$stagename"
     unless_null $P114, vivify_1094
     new $P114, "Undef"
   vivify_1094:
-    push $P2203, $P114
-.annotate 'line', 1625
-    find_lex $P2204, "@new-stages"
-    unless_null $P2204, vivify_1095
-    $P2204 = root_new ['parrot';'ResizablePMCArray']
+    push $P2202, $P114
+.annotate 'line', 1628
+    find_lex $P2203, "@new-stages"
+    unless_null $P2203, vivify_1095
+    $P2203 = root_new ['parrot';'ResizablePMCArray']
   vivify_1095:
     find_lex $P114, "$_"
     unless_null $P114, vivify_1096
     new $P114, "Undef"
   vivify_1096:
-    push $P2204, $P114
-.annotate 'line', 1623
-    set $P112, $P2204
-  if_2202_end:
-.annotate 'line', 1622
-    set $P109, $P112
+    push $P2203, $P114
+.annotate 'line', 1626
+    set $P112, $P2203
   if_2201_end:
-.annotate 'line', 1621
+.annotate 'line', 1625
+    set $P109, $P112
+  if_2200_end:
+.annotate 'line', 1624
     .return ($P109)
 .end
 
@@ -15015,48 +15415,48 @@
 
 .namespace ["HLL";"Compiler"]
 .include "except_types.pasm"
-.sub "parse_name" :anon :subid("243_1329260312.462") :outer("164_1329260312.462")
+.sub "parse_name" :anon :subid("185_1330909682.33311") :outer("240_1330909682.33311")
+    .param pmc param_2210
     .param pmc param_2211
-    .param pmc param_2212
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1637
-    .const 'Sub' $P2228 = "244_1329260312.462" 
-    capture_lex $P2228
-    .lex "self", param_2211
-    .lex "$name", param_2212
-.annotate 'line', 1638
-    $P2214 = root_new ['parrot';'ResizablePMCArray']
-    set $P2213, $P2214
-    .lex "@ns", $P2213
-.annotate 'line', 1639
-    new $P102, "Undef"
-    set $P2215, $P102
-    .lex "$sigil", $P2215
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1640
+    .const 'Sub' $P2227 = "280_1330909682.33311" 
+    capture_lex $P2227
+    .lex "self", param_2210
+    .lex "$name", param_2211
+.annotate 'line', 1641
+    $P2213 = root_new ['parrot';'ResizablePMCArray']
+    set $P2212, $P2213
+    .lex "@ns", $P2212
 .annotate 'line', 1642
+    new $P102, "Undef"
+    set $P2214, $P102
+    .lex "$sigil", $P2214
+.annotate 'line', 1645
     new $P103, "Undef"
-    set $P2216, $P103
-    .lex "$idx", $P2216
-.annotate 'line', 1650
-    $P2218 = root_new ['parrot';'ResizablePMCArray']
-    set $P2217, $P2218
-    .lex "@actual_ns", $P2217
-.annotate 'line', 1638
-    set $P104, param_2212
+    set $P2215, $P103
+    .lex "$idx", $P2215
+.annotate 'line', 1653
+    $P2217 = root_new ['parrot';'ResizablePMCArray']
+    set $P2216, $P2217
+    .lex "@actual_ns", $P2216
+.annotate 'line', 1641
+    set $P104, param_2211
     unless_null $P104, vivify_1098
     new $P104, "Undef"
   vivify_1098:
     set $S100, $P104
     split $P105, "::", $S100
-    set $P2213, $P105
-.annotate 'line', 1639
+    set $P2212, $P105
+.annotate 'line', 1642
     new $P104, "Float"
     assign $P104, 0
     set $I100, $P104
-    set $P2219, $P2213
-    unless_null $P2219, vivify_1099
-    $P2219 = root_new ['parrot';'ResizablePMCArray']
+    set $P2218, $P2212
+    unless_null $P2218, vivify_1099
+    $P2218 = root_new ['parrot';'ResizablePMCArray']
   vivify_1099:
-    set $P105, $P2219[$I100]
+    set $P105, $P2218[$I100]
     unless_null $P105, vivify_1100
     new $P105, "Undef"
   vivify_1100:
@@ -15070,9 +15470,9 @@
     substr $S101, $S100, $I101, $I102
     new $P108, 'String'
     set $P108, $S101
-    set $P2215, $P108
-.annotate 'line', 1642
-    set $P104, $P2215
+    set $P2214, $P108
+.annotate 'line', 1645
+    set $P104, $P2214
     unless_null $P104, vivify_1101
     new $P104, "Undef"
   vivify_1101:
@@ -15080,25 +15480,25 @@
     index $I100, "$@%&", $S100
     new $P105, 'Integer'
     set $P105, $I100
-    set $P2216, $P105
-.annotate 'line', 1643
-    set $P104, $P2216
+    set $P2215, $P105
+.annotate 'line', 1646
+    set $P104, $P2215
     unless_null $P104, vivify_1102
     new $P104, "Undef"
   vivify_1102:
     set $N100, $P104
     set $N101, 0
     isge $I100, $N100, $N101
-    unless $I100, if_2220_end
-.annotate 'line', 1644
+    unless $I100, if_2219_end
+.annotate 'line', 1647
     new $P105, "Float"
     assign $P105, 0
     set $I101, $P105
-    set $P2221, $P2213
-    unless_null $P2221, vivify_1103
-    $P2221 = root_new ['parrot';'ResizablePMCArray']
+    set $P2220, $P2212
+    unless_null $P2220, vivify_1103
+    $P2220 = root_new ['parrot';'ResizablePMCArray']
   vivify_1103:
-    set $P106, $P2221[$I101]
+    set $P106, $P2220[$I101]
     unless_null $P106, vivify_1104
     new $P106, "Undef"
   vivify_1104:
@@ -15112,25 +15512,25 @@
     new $P109, "Float"
     assign $P109, 0
     set $I103, $P109
-    set $P2222, $P2213
-    unless_null $P2222, vivify_1105
-    $P2222 = root_new ['parrot';'ResizablePMCArray']
-    set $P2213, $P2222
+    set $P2221, $P2212
+    unless_null $P2221, vivify_1105
+    $P2221 = root_new ['parrot';'ResizablePMCArray']
+    set $P2212, $P2221
   vivify_1105:
-    set $P2222[$I103], $P108
-.annotate 'line', 1645
-    set $P105, $P2215
+    set $P2221[$I103], $P108
+.annotate 'line', 1648
+    set $P105, $P2214
     unless_null $P105, vivify_1106
     new $P105, "Undef"
   vivify_1106:
     new $P106, "Float"
     assign $P106, -1
     set $I101, $P106
-    set $P2223, $P2213
-    unless_null $P2223, vivify_1107
-    $P2223 = root_new ['parrot';'ResizablePMCArray']
+    set $P2222, $P2212
+    unless_null $P2222, vivify_1107
+    $P2222 = root_new ['parrot';'ResizablePMCArray']
   vivify_1107:
-    set $P107, $P2223[$I101]
+    set $P107, $P2222[$I101]
     unless_null $P107, vivify_1108
     new $P107, "Undef"
   vivify_1108:
@@ -15138,89 +15538,89 @@
     new $P109, "Float"
     assign $P109, -1
     set $I102, $P109
-    set $P2224, $P2213
-    unless_null $P2224, vivify_1109
-    $P2224 = root_new ['parrot';'ResizablePMCArray']
-    set $P2213, $P2224
+    set $P2223, $P2212
+    unless_null $P2223, vivify_1109
+    $P2223 = root_new ['parrot';'ResizablePMCArray']
+    set $P2212, $P2223
   vivify_1109:
-    set $P2224[$I102], $P108
-  if_2220_end:
-.annotate 'line', 1637
-    set $P2225, $P2217
-    unless_null $P2225, vivify_1110
-    $P2225 = root_new ['parrot';'ResizablePMCArray']
+    set $P2223[$I102], $P108
+  if_2219_end:
+.annotate 'line', 1640
+    set $P2224, $P2216
+    unless_null $P2224, vivify_1110
+    $P2224 = root_new ['parrot';'ResizablePMCArray']
   vivify_1110:
-.annotate 'line', 1651
-    set $P2226, $P2213
-    unless_null $P2226, vivify_1111
-    $P2226 = root_new ['parrot';'ResizablePMCArray']
+.annotate 'line', 1654
+    set $P2225, $P2212
+    unless_null $P2225, vivify_1111
+    $P2225 = root_new ['parrot';'ResizablePMCArray']
   vivify_1111:
-    defined $I100, $P2226
+    defined $I100, $P2225
     unless $I100, for_undef_1112
-    iter $P104, $P2226
+    iter $P104, $P2225
     new $P107, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P107, loop2232_handler
+    set_label $P107, loop2231_handler
     push_eh $P107
-  loop2232_test:
-    unless $P104, loop2232_done
+  loop2231_test:
+    unless $P104, loop2231_done
     shift $P105, $P104
-  loop2232_redo:
-    .const 'Sub' $P2228 = "244_1329260312.462" 
-    capture_lex $P2228
-    $P2228($P105)
-  loop2232_next:
-    goto loop2232_test
-  loop2232_handler:
+  loop2231_redo:
+    .const 'Sub' $P2227 = "280_1330909682.33311" 
+    capture_lex $P2227
+    $P2227($P105)
+  loop2231_next:
+    goto loop2231_test
+  loop2231_handler:
     .local pmc exception 
     .get_results (exception) 
     pop_upto_eh exception
     getattribute $P108, exception, 'type'
-    eq $P108, .CONTROL_LOOP_NEXT, loop2232_next
-    eq $P108, .CONTROL_LOOP_REDO, loop2232_redo
-  loop2232_done:
+    eq $P108, .CONTROL_LOOP_NEXT, loop2231_next
+    eq $P108, .CONTROL_LOOP_REDO, loop2231_redo
+  loop2231_done:
     pop_eh 
   for_undef_1112:
-.annotate 'line', 1637
-    set $P2233, $P2217
-    unless_null $P2233, vivify_1116
-    $P2233 = root_new ['parrot';'ResizablePMCArray']
+.annotate 'line', 1640
+    set $P2232, $P2216
+    unless_null $P2232, vivify_1116
+    $P2232 = root_new ['parrot';'ResizablePMCArray']
   vivify_1116:
-    .return ($P2233)
+    .return ($P2232)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "_block2227"  :anon :subid("244_1329260312.462") :outer("243_1329260312.462")
-    .param pmc param_2229
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1651
-    .lex "$_", param_2229
-.annotate 'line', 1652
+.sub "_block2226"  :anon :subid("280_1330909682.33311") :outer("185_1330909682.33311")
+    .param pmc param_2228
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1654
+    .lex "$_", param_2228
+.annotate 'line', 1655
     find_lex $P107, "$_"
     unless_null $P107, vivify_1113
     new $P107, "Undef"
   vivify_1113:
     set $S100, $P107
     iseq $I101, $S100, ""
-    unless $I101, unless_2230
+    unless $I101, unless_2229
     new $P106, 'Integer'
     set $P106, $I101
-    goto unless_2230_end
-  unless_2230:
-    find_lex $P2231, "@actual_ns"
-    unless_null $P2231, vivify_1114
-    $P2231 = root_new ['parrot';'ResizablePMCArray']
+    goto unless_2229_end
+  unless_2229:
+    find_lex $P2230, "@actual_ns"
+    unless_null $P2230, vivify_1114
+    $P2230 = root_new ['parrot';'ResizablePMCArray']
   vivify_1114:
     find_lex $P108, "$_"
     unless_null $P108, vivify_1115
     new $P108, "Undef"
   vivify_1115:
-    push $P2231, $P108
-    set $P106, $P2231
-  unless_2230_end:
-.annotate 'line', 1651
+    push $P2230, $P108
+    set $P106, $P2230
+  unless_2229_end:
+.annotate 'line', 1654
     .return ($P106)
 .end
 
@@ -15228,23 +15628,23 @@
 .HLL "nqp"
 
 .namespace ["HLL";"Compiler"]
-.sub "lineof" :anon :subid("245_1329260312.462") :outer("164_1329260312.462")
+.sub "lineof" :anon :subid("186_1330909682.33311") :outer("240_1330909682.33311")
+    .param pmc param_2234
     .param pmc param_2235
     .param pmc param_2236
-    .param pmc param_2237
-    .param pmc param_2238 :optional :named("cache")
-    .param int has_param_2238 :opt_flag
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1657
-    .lex "self", param_2235
-    .lex "$target", param_2236
-    .lex "$pos", param_2237
-    if has_param_2238, optparam_1117
+    .param pmc param_2237 :optional :named("cache")
+    .param int has_param_2237 :opt_flag
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1660
+    .lex "self", param_2234
+    .lex "$target", param_2235
+    .lex "$pos", param_2236
+    if has_param_2237, optparam_1117
     new $P102, "Undef"
-    set param_2238, $P102
+    set param_2237, $P102
   optparam_1117:
-    .lex "$cache", param_2238
-.annotate 'line', 1658
+    .lex "$cache", param_2237
+.annotate 'line', 1661
 
             .local pmc target, linepos
             .local int pos, cache
@@ -15256,7 +15656,7 @@
 
             # If we've previously cached C<linepos> for target, we use it.
             unless cache goto linepos_build
-            linepos = getprop '!linepos', target
+            linepos = getprop target, '!linepos'
             unless null linepos goto linepos_done
 
             # calculate a new linepos array.
@@ -15307,7 +15707,7 @@
             inc lo
             .return (lo)
         
-.annotate 'line', 1657
+.annotate 'line', 1660
     .return ()
 .end
 
@@ -15315,50 +15715,50 @@
 .HLL "nqp"
 
 .namespace ["HLL";"CommandLine";"Result"]
-.sub "_block2240"  :subid("246_1329260312.462") :outer("10_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1818
-    .const 'Sub' $P2256 = "251_1329260312.462" 
-    capture_lex $P2256
-    .const 'Sub' $P2252 = "250_1329260312.462" 
-    capture_lex $P2252
-    .const 'Sub' $P2249 = "249_1329260312.462" 
-    capture_lex $P2249
-    .const 'Sub' $P2246 = "248_1329260312.462" 
-    capture_lex $P2246
-    .const 'Sub' $P2244 = "247_1329260312.462" 
-    capture_lex $P2244
-    .lex "$?PACKAGE", $P2242
-    .lex "$?CLASS", $P2243
-.annotate 'line', 1834
-    .const 'Sub' $P2256 = "251_1329260312.462" 
-    newclosure $P2271, $P2256
-.annotate 'line', 1818
-    .return ($P2271)
+.sub "_block2239"  :subid("281_1330909682.33311") :outer("222_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1821
+    .const 'Sub' $P2255 = "191_1330909682.33311" 
+    capture_lex $P2255
+    .const 'Sub' $P2251 = "190_1330909682.33311" 
+    capture_lex $P2251
+    .const 'Sub' $P2248 = "189_1330909682.33311" 
+    capture_lex $P2248
+    .const 'Sub' $P2245 = "188_1330909682.33311" 
+    capture_lex $P2245
+    .const 'Sub' $P2243 = "187_1330909682.33311" 
+    capture_lex $P2243
+    .lex "$?PACKAGE", $P2241
+    .lex "$?CLASS", $P2242
+.annotate 'line', 1837
+    .const 'Sub' $P2255 = "191_1330909682.33311" 
+    newclosure $P2270, $P2255
+.annotate 'line', 1821
+    .return ($P2270)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["HLL";"CommandLine";"Result"]
-.sub "init" :anon :subid("247_1329260312.462") :outer("246_1329260312.462")
-    .param pmc param_2245
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1822
-    .lex "self", param_2245
-.annotate 'line', 1823
+.sub "init" :anon :subid("187_1330909682.33311") :outer("281_1330909682.33311")
+    .param pmc param_2244
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1825
+    .lex "self", param_2244
+.annotate 'line', 1826
     new $P101, "ResizablePMCArray"
-    set $P102, param_2245
+    set $P102, param_2244
     nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 181
     repr_bind_attr_obj $P103, $P104, "@!arguments", 0, $P101
-.annotate 'line', 1824
+.annotate 'line', 1827
     new $P101, "Hash"
-    set $P102, param_2245
+    set $P102, param_2244
     nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 181
     repr_bind_attr_obj $P103, $P104, "%!options", 1, $P101
-.annotate 'line', 1822
+.annotate 'line', 1825
     .return ($P101)
 .end
 
@@ -15366,65 +15766,65 @@
 .HLL "nqp"
 
 .namespace ["HLL";"CommandLine";"Result"]
-.sub "arguments" :anon :subid("248_1329260312.462") :outer("246_1329260312.462")
-    .param pmc param_2247
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1827
-    .lex "self", param_2247
-    set $P101, param_2247
-    nqp_decontainerize $P102, $P101
-    find_lex $P103, "$?CLASS"
-    repr_get_attr_obj $P2248, $P102, $P103, "@!arguments", 0
-    unless_null $P2248, vivify_1119
-    $P2248 = root_new ['parrot';'ResizablePMCArray']
-  vivify_1119:
-    .return ($P2248)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["HLL";"CommandLine";"Result"]
-.sub "options" :anon :subid("249_1329260312.462") :outer("246_1329260312.462")
-    .param pmc param_2250
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1828
-    .lex "self", param_2250
-    set $P101, param_2250
-    nqp_decontainerize $P102, $P101
-    find_lex $P103, "$?CLASS"
-    repr_get_attr_obj $P2251, $P102, $P103, "%!options", 1
-    unless_null $P2251, vivify_1120
-    $P2251 = root_new ['parrot';'Hash']
-  vivify_1120:
-    .return ($P2251)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["HLL";"CommandLine";"Result"]
-.sub "add-argument" :anon :subid("250_1329260312.462") :outer("246_1329260312.462")
-    .param pmc param_2253
-    .param pmc param_2254
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "arguments" :anon :subid("188_1330909682.33311") :outer("281_1330909682.33311")
+    .param pmc param_2246
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1830
-    .lex "self", param_2253
-    .lex "$x", param_2254
-.annotate 'line', 1831
-    set $P101, param_2253
+    .lex "self", param_2246
+    set $P101, param_2246
     nqp_decontainerize $P102, $P101
-    find_lex $P103, "$?CLASS"
-    repr_get_attr_obj $P2255, $P102, $P103, "@!arguments", 0
-    unless_null $P2255, vivify_1121
-    $P2255 = root_new ['parrot';'ResizablePMCArray']
+    nqp_get_sc_object $P103, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 181
+    repr_get_attr_obj $P2247, $P102, $P103, "@!arguments", 0
+    unless_null $P2247, vivify_1119
+    $P2247 = root_new ['parrot';'ResizablePMCArray']
+  vivify_1119:
+    .return ($P2247)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["HLL";"CommandLine";"Result"]
+.sub "options" :anon :subid("189_1330909682.33311") :outer("281_1330909682.33311")
+    .param pmc param_2249
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1831
+    .lex "self", param_2249
+    set $P101, param_2249
+    nqp_decontainerize $P102, $P101
+    nqp_get_sc_object $P103, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 181
+    repr_get_attr_obj $P2250, $P102, $P103, "%!options", 1
+    unless_null $P2250, vivify_1120
+    $P2250 = root_new ['parrot';'Hash']
+  vivify_1120:
+    .return ($P2250)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["HLL";"CommandLine";"Result"]
+.sub "add-argument" :anon :subid("190_1330909682.33311") :outer("281_1330909682.33311")
+    .param pmc param_2252
+    .param pmc param_2253
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1833
+    .lex "self", param_2252
+    .lex "$x", param_2253
+.annotate 'line', 1834
+    set $P101, param_2252
+    nqp_decontainerize $P102, $P101
+    nqp_get_sc_object $P103, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 181
+    repr_get_attr_obj $P2254, $P102, $P103, "@!arguments", 0
+    unless_null $P2254, vivify_1121
+    $P2254 = root_new ['parrot';'ResizablePMCArray']
   vivify_1121:
-    set $P104, param_2254
+    set $P104, param_2253
     unless_null $P104, vivify_1122
     new $P104, "Undef"
   vivify_1122:
-    push $P2255, $P104
-.annotate 'line', 1830
+    push $P2254, $P104
+.annotate 'line', 1833
     .return ()
 .end
 
@@ -15432,60 +15832,60 @@
 .HLL "nqp"
 
 .namespace ["HLL";"CommandLine";"Result"]
-.sub "add-option" :anon :subid("251_1329260312.462") :outer("246_1329260312.462")
+.sub "add-option" :anon :subid("191_1330909682.33311") :outer("281_1330909682.33311")
+    .param pmc param_2256
     .param pmc param_2257
     .param pmc param_2258
-    .param pmc param_2259
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1834
-    .const 'Sub' $P2263 = "252_1329260312.462" 
-    capture_lex $P2263
-    .lex "self", param_2257
-    .lex "$name", param_2258
-    .lex "$value", param_2259
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1837
-    set $P105, param_2258
+    .const 'Sub' $P2262 = "282_1330909682.33311" 
+    capture_lex $P2262
+    .lex "self", param_2256
+    .lex "$name", param_2257
+    .lex "$value", param_2258
+.annotate 'line', 1840
+    set $P105, param_2257
     unless_null $P105, vivify_1123
     new $P105, "Undef"
   vivify_1123:
-    set $P102, param_2257
+    set $P102, param_2256
     nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
-    repr_get_attr_obj $P2261, $P103, $P104, "%!options", 1
-    unless_null $P2261, vivify_1124
-    $P2261 = root_new ['parrot';'Hash']
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 181
+    repr_get_attr_obj $P2260, $P103, $P104, "%!options", 1
+    unless_null $P2260, vivify_1124
+    $P2260 = root_new ['parrot';'Hash']
   vivify_1124:
-    exists $I100, $P2261[$P105]
-    if $I100, if_2260
-.annotate 'line', 1846
-    set $P109, param_2259
+    exists $I100, $P2260[$P105]
+    if $I100, if_2259
+.annotate 'line', 1849
+    set $P109, param_2258
     unless_null $P109, vivify_1125
     new $P109, "Undef"
   vivify_1125:
-    set $P110, param_2258
+    set $P110, param_2257
     unless_null $P110, vivify_1126
     new $P110, "Undef"
   vivify_1126:
-    set $P111, param_2257
+    set $P111, param_2256
     nqp_decontainerize $P112, $P111
-    find_lex $P113, "$?CLASS"
-    repr_get_attr_obj $P2270, $P112, $P113, "%!options", 1
-    unless_null $P2270, vivify_1127
-    $P2270 = root_new ['parrot';'Hash']
-    repr_bind_attr_obj $P112, $P113, "%!options", 1, $P2270
+    nqp_get_sc_object $P113, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 181
+    repr_get_attr_obj $P2269, $P112, $P113, "%!options", 1
+    unless_null $P2269, vivify_1127
+    $P2269 = root_new ['parrot';'Hash']
+    repr_bind_attr_obj $P112, $P113, "%!options", 1, $P2269
   vivify_1127:
-    set $P2270[$P110], $P109
-.annotate 'line', 1845
+    set $P2269[$P110], $P109
+.annotate 'line', 1848
     set $P101, $P109
-.annotate 'line', 1837
-    goto if_2260_end
-  if_2260:
-    .const 'Sub' $P2263 = "252_1329260312.462" 
-    capture_lex $P2263
-    $P108 = $P2263()
+.annotate 'line', 1840
+    goto if_2259_end
+  if_2259:
+    .const 'Sub' $P2262 = "282_1330909682.33311" 
+    capture_lex $P2262
+    $P108 = $P2262()
     set $P101, $P108
-  if_2260_end:
-.annotate 'line', 1834
+  if_2259_end:
+.annotate 'line', 1837
     .return ($P101)
 .end
 
@@ -15493,50 +15893,50 @@
 .HLL "nqp"
 
 .namespace ["HLL";"CommandLine";"Result"]
-.sub "_block2262"  :anon :subid("252_1329260312.462") :outer("251_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1838
+.sub "_block2261"  :anon :subid("282_1330909682.33311") :outer("191_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1841
     new $P106, "Undef"
-    set $P2264, $P106
-    .lex "$t", $P2264
+    set $P2263, $P106
+    .lex "$t", $P2263
     find_lex $P107, "self"
     nqp_decontainerize $P108, $P107
-    find_lex $P109, "$?CLASS"
-    repr_get_attr_obj $P2265, $P108, $P109, "%!options", 1
-    unless_null $P2265, vivify_1128
-    $P2265 = root_new ['parrot';'Hash']
+    nqp_get_sc_object $P109, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 181
+    repr_get_attr_obj $P2264, $P108, $P109, "%!options", 1
+    unless_null $P2264, vivify_1128
+    $P2264 = root_new ['parrot';'Hash']
   vivify_1128:
-    typeof $S100, $P2265
+    typeof $S100, $P2264
     new $P110, 'String'
     set $P110, $S100
-    set $P2264, $P110
-.annotate 'line', 1839
-    set $P107, $P2264
+    set $P2263, $P110
+.annotate 'line', 1842
+    set $P107, $P2263
     unless_null $P107, vivify_1129
     new $P107, "Undef"
   vivify_1129:
     "say"($P107)
-.annotate 'line', 1840
-    set $P108, $P2264
+.annotate 'line', 1843
+    set $P108, $P2263
     unless_null $P108, vivify_1130
     new $P108, "Undef"
   vivify_1130:
     set $S100, $P108
     iseq $I101, $S100, "ResizablePMCArray"
-    if $I101, if_2266
-.annotate 'line', 1843
+    if $I101, if_2265
+.annotate 'line', 1846
     find_lex $P109, "$name"
     unless_null $P109, vivify_1131
     new $P109, "Undef"
   vivify_1131:
     find_lex $P110, "self"
     nqp_decontainerize $P111, $P110
-    find_lex $P112, "$?CLASS"
-    repr_get_attr_obj $P2268, $P111, $P112, "%!options", 1
-    unless_null $P2268, vivify_1132
-    $P2268 = root_new ['parrot';'Hash']
+    nqp_get_sc_object $P112, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 181
+    repr_get_attr_obj $P2267, $P111, $P112, "%!options", 1
+    unless_null $P2267, vivify_1132
+    $P2267 = root_new ['parrot';'Hash']
   vivify_1132:
-    set $P114, $P2268[$P109]
+    set $P114, $P2267[$P109]
     unless_null $P114, vivify_1133
     new $P114, "Undef"
   vivify_1133:
@@ -15553,31 +15953,31 @@
   vivify_1135:
     find_lex $P118, "self"
     nqp_decontainerize $P119, $P118
-    find_lex $P120, "$?CLASS"
-    repr_get_attr_obj $P2269, $P119, $P120, "%!options", 1
-    unless_null $P2269, vivify_1136
-    $P2269 = root_new ['parrot';'Hash']
-    repr_bind_attr_obj $P119, $P120, "%!options", 1, $P2269
+    nqp_get_sc_object $P120, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 181
+    repr_get_attr_obj $P2268, $P119, $P120, "%!options", 1
+    unless_null $P2268, vivify_1136
+    $P2268 = root_new ['parrot';'Hash']
+    repr_bind_attr_obj $P119, $P120, "%!options", 1, $P2268
   vivify_1136:
-    set $P2269[$P117], $P116
-.annotate 'line', 1842
+    set $P2268[$P117], $P116
+.annotate 'line', 1845
     set $P107, $P116
-.annotate 'line', 1840
-    goto if_2266_end
-  if_2266:
-.annotate 'line', 1841
+.annotate 'line', 1843
+    goto if_2265_end
+  if_2265:
+.annotate 'line', 1844
     find_lex $P109, "$name"
     unless_null $P109, vivify_1137
     new $P109, "Undef"
   vivify_1137:
     find_lex $P110, "self"
     nqp_decontainerize $P111, $P110
-    find_lex $P112, "$?CLASS"
-    repr_get_attr_obj $P2267, $P111, $P112, "%!options", 1
-    unless_null $P2267, vivify_1138
-    $P2267 = root_new ['parrot';'Hash']
+    nqp_get_sc_object $P112, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 181
+    repr_get_attr_obj $P2266, $P111, $P112, "%!options", 1
+    unless_null $P2266, vivify_1138
+    $P2266 = root_new ['parrot';'Hash']
   vivify_1138:
-    set $P113, $P2267[$P109]
+    set $P113, $P2266[$P109]
     unless_null $P113, vivify_1139
     new $P113, "Undef"
   vivify_1139:
@@ -15586,10 +15986,10 @@
     new $P114, "Undef"
   vivify_1140:
     push $P113, $P114
-.annotate 'line', 1840
+.annotate 'line', 1843
     set $P107, $P113
-  if_2266_end:
-.annotate 'line', 1837
+  if_2265_end:
+.annotate 'line', 1840
     .return ($P107)
 .end
 
@@ -15597,69 +15997,69 @@
 .HLL "nqp"
 
 .namespace ["HLL";"CommandLine";"Parser"]
-.sub "_block2272"  :subid("253_1329260312.462") :outer("10_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1851
-    .const 'Sub' $P2333 = "265_1329260312.462" 
-    capture_lex $P2333
-    .const 'Sub' $P2328 = "264_1329260312.462" 
-    capture_lex $P2328
-    .const 'Sub' $P2323 = "263_1329260312.462" 
-    capture_lex $P2323
-    .const 'Sub' $P2315 = "262_1329260312.462" 
-    capture_lex $P2315
-    .const 'Sub' $P2300 = "260_1329260312.462" 
-    capture_lex $P2300
-    .const 'Sub' $P2297 = "259_1329260312.462" 
-    capture_lex $P2297
-    .const 'Sub' $P2293 = "258_1329260312.462" 
-    capture_lex $P2293
-    .const 'Sub' $P2283 = "256_1329260312.462" 
-    capture_lex $P2283
-    .const 'Sub' $P2281 = "255_1329260312.462" 
-    capture_lex $P2281
-    .const 'Sub' $P2276 = "254_1329260312.462" 
-    capture_lex $P2276
-    .lex "$?PACKAGE", $P2274
-    .lex "$?CLASS", $P2275
-.annotate 'line', 1916
-    .const 'Sub' $P2333 = "265_1329260312.462" 
-    newclosure $P2406, $P2333
-.annotate 'line', 1851
-    .return ($P2406)
+.sub "_block2271"  :subid("283_1330909682.33311") :outer("222_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1854
+    .const 'Sub' $P2332 = "201_1330909682.33311" 
+    capture_lex $P2332
+    .const 'Sub' $P2327 = "200_1330909682.33311" 
+    capture_lex $P2327
+    .const 'Sub' $P2322 = "199_1330909682.33311" 
+    capture_lex $P2322
+    .const 'Sub' $P2314 = "198_1330909682.33311" 
+    capture_lex $P2314
+    .const 'Sub' $P2299 = "197_1330909682.33311" 
+    capture_lex $P2299
+    .const 'Sub' $P2296 = "196_1330909682.33311" 
+    capture_lex $P2296
+    .const 'Sub' $P2292 = "195_1330909682.33311" 
+    capture_lex $P2292
+    .const 'Sub' $P2282 = "194_1330909682.33311" 
+    capture_lex $P2282
+    .const 'Sub' $P2280 = "193_1330909682.33311" 
+    capture_lex $P2280
+    .const 'Sub' $P2275 = "192_1330909682.33311" 
+    capture_lex $P2275
+    .lex "$?PACKAGE", $P2273
+    .lex "$?CLASS", $P2274
+.annotate 'line', 1919
+    .const 'Sub' $P2332 = "201_1330909682.33311" 
+    newclosure $P2405, $P2332
+.annotate 'line', 1854
+    .return ($P2405)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["HLL";"CommandLine";"Parser"]
-.sub "new" :anon :subid("254_1329260312.462") :outer("253_1329260312.462")
+.sub "new" :anon :subid("192_1330909682.33311") :outer("283_1330909682.33311")
+    .param pmc param_2276
     .param pmc param_2277
-    .param pmc param_2278
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1857
-    .lex "self", param_2277
-    .lex "@specs", param_2278
-.annotate 'line', 1858
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1860
+    .lex "self", param_2276
+    .lex "@specs", param_2277
+.annotate 'line', 1861
     new $P101, "Undef"
-    set $P2279, $P101
-    .lex "$obj", $P2279
-    set $P102, param_2277
+    set $P2278, $P101
+    .lex "$obj", $P2278
+    set $P102, param_2276
     nqp_decontainerize $P103, $P102
     $P104 = $P103."CREATE"()
-    set $P2279, $P104
-.annotate 'line', 1859
-    set $P102, $P2279
+    set $P2278, $P104
+.annotate 'line', 1862
+    set $P102, $P2278
     unless_null $P102, vivify_1141
     new $P102, "Undef"
   vivify_1141:
-    set $P2280, param_2278
-    unless_null $P2280, vivify_1142
-    $P2280 = root_new ['parrot';'ResizablePMCArray']
+    set $P2279, param_2277
+    unless_null $P2279, vivify_1142
+    $P2279 = root_new ['parrot';'ResizablePMCArray']
   vivify_1142:
-    $P102."BUILD"($P2280 :named("specs"))
-.annotate 'line', 1857
-    set $P102, $P2279
+    $P102."BUILD"($P2279 :named("specs"))
+.annotate 'line', 1860
+    set $P102, $P2278
     unless_null $P102, vivify_1143
     new $P102, "Undef"
   vivify_1143:
@@ -15670,19 +16070,19 @@
 .HLL "nqp"
 
 .namespace ["HLL";"CommandLine";"Parser"]
-.sub "stop-after-first-arg" :anon :subid("255_1329260312.462") :outer("253_1329260312.462")
-    .param pmc param_2282
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1863
-    .lex "self", param_2282
-.annotate 'line', 1864
+.sub "stop-after-first-arg" :anon :subid("193_1330909682.33311") :outer("283_1330909682.33311")
+    .param pmc param_2281
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1866
+    .lex "self", param_2281
+.annotate 'line', 1867
     new $P101, "Float"
     assign $P101, 1
-    set $P102, param_2282
+    set $P102, param_2281
     nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 187
     repr_bind_attr_obj $P103, $P104, "$!stop-after-first-arg", 3, $P101
-.annotate 'line', 1863
+.annotate 'line', 1866
     .return ($P101)
 .end
 
@@ -15691,70 +16091,70 @@
 
 .namespace ["HLL";"CommandLine";"Parser"]
 .include "except_types.pasm"
-.sub "BUILD" :anon :subid("256_1329260312.462") :outer("253_1329260312.462")
-    .param pmc param_2284
-    .param pmc param_2285 :optional :named("specs")
-    .param int has_param_2285 :opt_flag
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1867
-    .const 'Sub' $P2290 = "257_1329260312.462" 
-    capture_lex $P2290
-    .lex "self", param_2284
-    if has_param_2285, optparam_1144
-    $P2286 = root_new ['parrot';'ResizablePMCArray']
-    set param_2285, $P2286
+.sub "BUILD" :anon :subid("194_1330909682.33311") :outer("283_1330909682.33311")
+    .param pmc param_2283
+    .param pmc param_2284 :optional :named("specs")
+    .param int has_param_2284 :opt_flag
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1870
+    .const 'Sub' $P2289 = "284_1330909682.33311" 
+    capture_lex $P2289
+    .lex "self", param_2283
+    if has_param_2284, optparam_1144
+    $P2285 = root_new ['parrot';'ResizablePMCArray']
+    set param_2284, $P2285
   optparam_1144:
-    .lex "@specs", param_2285
-.annotate 'line', 1868
+    .lex "@specs", param_2284
+.annotate 'line', 1871
     new $P101, "Float"
     assign $P101, 1
-    set $P102, param_2284
+    set $P102, param_2283
     nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
-    repr_get_attr_obj $P2287, $P103, $P104, "%!stopper", 2
-    unless_null $P2287, vivify_1145
-    $P2287 = root_new ['parrot';'Hash']
-    repr_bind_attr_obj $P103, $P104, "%!stopper", 2, $P2287
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 187
+    repr_get_attr_obj $P2286, $P103, $P104, "%!stopper", 2
+    unless_null $P2286, vivify_1145
+    $P2286 = root_new ['parrot';'Hash']
+    repr_bind_attr_obj $P103, $P104, "%!stopper", 2, $P2286
   vivify_1145:
-    set $P2287["--"], $P101
-.annotate 'line', 1869
+    set $P2286["--"], $P101
+.annotate 'line', 1872
     new $P101, "Float"
     assign $P101, 0
-    set $P102, param_2284
+    set $P102, param_2283
     nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 187
     repr_bind_attr_obj $P103, $P104, "$!stop-after-first-arg", 3, $P101
-.annotate 'line', 1870
-    set $P2288, param_2285
-    unless_null $P2288, vivify_1146
-    $P2288 = root_new ['parrot';'ResizablePMCArray']
+.annotate 'line', 1873
+    set $P2287, param_2284
+    unless_null $P2287, vivify_1146
+    $P2287 = root_new ['parrot';'ResizablePMCArray']
   vivify_1146:
-    defined $I100, $P2288
+    defined $I100, $P2287
     unless $I100, for_undef_1147
-    iter $P101, $P2288
+    iter $P101, $P2287
     new $P103, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P103, loop2292_handler
+    set_label $P103, loop2291_handler
     push_eh $P103
-  loop2292_test:
-    unless $P101, loop2292_done
+  loop2291_test:
+    unless $P101, loop2291_done
     shift $P102, $P101
-  loop2292_redo:
-    .const 'Sub' $P2290 = "257_1329260312.462" 
-    capture_lex $P2290
-    $P2290($P102)
-  loop2292_next:
-    goto loop2292_test
-  loop2292_handler:
+  loop2291_redo:
+    .const 'Sub' $P2289 = "284_1330909682.33311" 
+    capture_lex $P2289
+    $P2289($P102)
+  loop2291_next:
+    goto loop2291_test
+  loop2291_handler:
     .local pmc exception 
     .get_results (exception) 
     pop_upto_eh exception
     getattribute $P104, exception, 'type'
-    eq $P104, .CONTROL_LOOP_NEXT, loop2292_next
-    eq $P104, .CONTROL_LOOP_REDO, loop2292_redo
-  loop2292_done:
+    eq $P104, .CONTROL_LOOP_NEXT, loop2291_next
+    eq $P104, .CONTROL_LOOP_REDO, loop2291_redo
+  loop2291_done:
     pop_eh 
   for_undef_1147:
-.annotate 'line', 1867
+.annotate 'line', 1870
     .return ($P101)
 .end
 
@@ -15762,12 +16162,12 @@
 .HLL "nqp"
 
 .namespace ["HLL";"CommandLine";"Parser"]
-.sub "_block2289"  :anon :subid("257_1329260312.462") :outer("256_1329260312.462")
-    .param pmc param_2291
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1870
-    .lex "$_", param_2291
-.annotate 'line', 1871
+.sub "_block2288"  :anon :subid("284_1330909682.33311") :outer("194_1330909682.33311")
+    .param pmc param_2290
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1873
+    .lex "$_", param_2290
+.annotate 'line', 1874
     find_lex $P103, "self"
     nqp_decontainerize $P104, $P103
     find_lex $P105, "$_"
@@ -15775,7 +16175,7 @@
     new $P105, "Undef"
   vivify_1148:
     $P106 = $P104."add-spec"($P105)
-.annotate 'line', 1870
+.annotate 'line', 1873
     .return ($P106)
 .end
 
@@ -15783,30 +16183,30 @@
 .HLL "nqp"
 
 .namespace ["HLL";"CommandLine";"Parser"]
-.sub "add-stopper" :anon :subid("258_1329260312.462") :outer("253_1329260312.462")
+.sub "add-stopper" :anon :subid("195_1330909682.33311") :outer("283_1330909682.33311")
+    .param pmc param_2293
     .param pmc param_2294
-    .param pmc param_2295
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1874
-    .lex "self", param_2294
-    .lex "$x", param_2295
-.annotate 'line', 1875
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1877
+    .lex "self", param_2293
+    .lex "$x", param_2294
+.annotate 'line', 1878
     new $P101, "Float"
     assign $P101, 1
-    set $P102, param_2295
+    set $P102, param_2294
     unless_null $P102, vivify_1149
     new $P102, "Undef"
   vivify_1149:
-    set $P103, param_2294
+    set $P103, param_2293
     nqp_decontainerize $P104, $P103
-    find_lex $P105, "$?CLASS"
-    repr_get_attr_obj $P2296, $P104, $P105, "%!stopper", 2
-    unless_null $P2296, vivify_1150
-    $P2296 = root_new ['parrot';'Hash']
-    repr_bind_attr_obj $P104, $P105, "%!stopper", 2, $P2296
+    nqp_get_sc_object $P105, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 187
+    repr_get_attr_obj $P2295, $P104, $P105, "%!stopper", 2
+    unless_null $P2295, vivify_1150
+    $P2295 = root_new ['parrot';'Hash']
+    repr_bind_attr_obj $P104, $P105, "%!stopper", 2, $P2295
   vivify_1150:
-    set $P2296[$P102], $P101
-.annotate 'line', 1874
+    set $P2295[$P102], $P101
+.annotate 'line', 1877
     .return ($P101)
 .end
 
@@ -15814,21 +16214,21 @@
 .HLL "nqp"
 
 .namespace ["HLL";"CommandLine";"Parser"]
-.sub "split-option-aliases" :anon :subid("259_1329260312.462") :outer("253_1329260312.462")
+.sub "split-option-aliases" :anon :subid("196_1330909682.33311") :outer("283_1330909682.33311")
+    .param pmc param_2297
     .param pmc param_2298
-    .param pmc param_2299
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1878
-    .lex "self", param_2298
-    .lex "$s", param_2299
-.annotate 'line', 1879
-    set $P101, param_2299
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1881
+    .lex "self", param_2297
+    .lex "$s", param_2298
+.annotate 'line', 1882
+    set $P101, param_2298
     unless_null $P101, vivify_1151
     new $P101, "Undef"
   vivify_1151:
     set $S100, $P101
     split $P102, "|", $S100
-.annotate 'line', 1878
+.annotate 'line', 1881
     .return ($P102)
 .end
 
@@ -15837,29 +16237,29 @@
 
 .namespace ["HLL";"CommandLine";"Parser"]
 .include "except_types.pasm"
-.sub "add-spec" :anon :subid("260_1329260312.462") :outer("253_1329260312.462")
+.sub "add-spec" :anon :subid("197_1330909682.33311") :outer("283_1330909682.33311")
+    .param pmc param_2300
     .param pmc param_2301
-    .param pmc param_2302
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1883
-    .const 'Sub' $P2311 = "261_1329260312.462" 
-    capture_lex $P2311
-    .lex "self", param_2301
-    .lex "$s", param_2302
-.annotate 'line', 1884
-    new $P101, "Undef"
-    set $P2303, $P101
-    .lex "$i", $P2303
-.annotate 'line', 1885
-    new $P102, "Undef"
-    set $P2304, $P102
-    .lex "$type", $P2304
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1886
-    $P2306 = root_new ['parrot';'ResizablePMCArray']
-    set $P2305, $P2306
-    .lex "@options", $P2305
-.annotate 'line', 1884
-    set $P103, param_2302
+    .const 'Sub' $P2310 = "285_1330909682.33311" 
+    capture_lex $P2310
+    .lex "self", param_2300
+    .lex "$s", param_2301
+.annotate 'line', 1887
+    new $P101, "Undef"
+    set $P2302, $P101
+    .lex "$i", $P2302
+.annotate 'line', 1888
+    new $P102, "Undef"
+    set $P2303, $P102
+    .lex "$type", $P2303
+.annotate 'line', 1889
+    $P2305 = root_new ['parrot';'ResizablePMCArray']
+    set $P2304, $P2305
+    .lex "@options", $P2304
+.annotate 'line', 1887
+    set $P103, param_2301
     unless_null $P103, vivify_1152
     new $P103, "Undef"
   vivify_1152:
@@ -15867,32 +16267,32 @@
     index $I100, $S100, "="
     new $P104, 'Integer'
     set $P104, $I100
-    set $P2303, $P104
-.annotate 'line', 1883
-    set $P103, $P2304
+    set $P2302, $P104
+.annotate 'line', 1886
+    set $P103, $P2303
     unless_null $P103, vivify_1153
     new $P103, "Undef"
   vivify_1153:
-    set $P2307, $P2305
-    unless_null $P2307, vivify_1154
-    $P2307 = root_new ['parrot';'ResizablePMCArray']
+    set $P2306, $P2304
+    unless_null $P2306, vivify_1154
+    $P2306 = root_new ['parrot';'ResizablePMCArray']
   vivify_1154:
-.annotate 'line', 1887
-    set $P103, $P2303
+.annotate 'line', 1890
+    set $P103, $P2302
     unless_null $P103, vivify_1155
     new $P103, "Undef"
   vivify_1155:
     set $N100, $P103
     set $N101, 0
     islt $I100, $N100, $N101
-    if $I100, if_2308
-.annotate 'line', 1891
-    set $P104, param_2302
+    if $I100, if_2307
+.annotate 'line', 1894
+    set $P104, param_2301
     unless_null $P104, vivify_1156
     new $P104, "Undef"
   vivify_1156:
     set $S100, $P104
-    set $P105, $P2303
+    set $P105, $P2302
     unless_null $P105, vivify_1157
     new $P105, "Undef"
   vivify_1157:
@@ -15901,11 +16301,11 @@
     substr $S101, $S100, $I101
     new $P107, 'String'
     set $P107, $S101
-    set $P2304, $P107
-.annotate 'line', 1892
-    set $P104, param_2301
+    set $P2303, $P107
+.annotate 'line', 1895
+    set $P104, param_2300
     nqp_decontainerize $P105, $P104
-    set $P106, param_2302
+    set $P106, param_2301
     unless_null $P106, vivify_1158
     new $P106, "Undef"
   vivify_1158:
@@ -15913,62 +16313,62 @@
     new $P107, "Float"
     assign $P107, 0
     set $I101, $P107
-    set $P108, $P2303
+    set $P108, $P2302
     unless_null $P108, vivify_1159
     new $P108, "Undef"
   vivify_1159:
     set $I102, $P108
     substr $S101, $S100, $I101, $I102
     $P109 = $P105."split-option-aliases"($S101)
-    set $P2305, $P109
-.annotate 'line', 1890
-    goto if_2308_end
-  if_2308:
-.annotate 'line', 1888
+    set $P2304, $P109
+.annotate 'line', 1893
+    goto if_2307_end
+  if_2307:
+.annotate 'line', 1891
     new $P104, "String"
     assign $P104, "b"
-    set $P2304, $P104
-.annotate 'line', 1889
-    set $P104, param_2301
+    set $P2303, $P104
+.annotate 'line', 1892
+    set $P104, param_2300
     nqp_decontainerize $P105, $P104
-    set $P106, param_2302
+    set $P106, param_2301
     unless_null $P106, vivify_1160
     new $P106, "Undef"
   vivify_1160:
     $P107 = $P105."split-option-aliases"($P106)
-    set $P2305, $P107
-  if_2308_end:
-.annotate 'line', 1894
-    set $P2309, $P2305
-    unless_null $P2309, vivify_1161
-    $P2309 = root_new ['parrot';'ResizablePMCArray']
+    set $P2304, $P107
+  if_2307_end:
+.annotate 'line', 1897
+    set $P2308, $P2304
+    unless_null $P2308, vivify_1161
+    $P2308 = root_new ['parrot';'ResizablePMCArray']
   vivify_1161:
-    defined $I100, $P2309
+    defined $I100, $P2308
     unless $I100, for_undef_1162
-    iter $P103, $P2309
+    iter $P103, $P2308
     new $P106, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P106, loop2314_handler
+    set_label $P106, loop2313_handler
     push_eh $P106
-  loop2314_test:
-    unless $P103, loop2314_done
+  loop2313_test:
+    unless $P103, loop2313_done
     shift $P104, $P103
-  loop2314_redo:
-    .const 'Sub' $P2311 = "261_1329260312.462" 
-    capture_lex $P2311
-    $P2311($P104)
-  loop2314_next:
-    goto loop2314_test
-  loop2314_handler:
+  loop2313_redo:
+    .const 'Sub' $P2310 = "285_1330909682.33311" 
+    capture_lex $P2310
+    $P2310($P104)
+  loop2313_next:
+    goto loop2313_test
+  loop2313_handler:
     .local pmc exception 
     .get_results (exception) 
     pop_upto_eh exception
     getattribute $P107, exception, 'type'
-    eq $P107, .CONTROL_LOOP_NEXT, loop2314_next
-    eq $P107, .CONTROL_LOOP_REDO, loop2314_redo
-  loop2314_done:
+    eq $P107, .CONTROL_LOOP_NEXT, loop2313_next
+    eq $P107, .CONTROL_LOOP_REDO, loop2313_redo
+  loop2313_done:
     pop_eh 
   for_undef_1162:
-.annotate 'line', 1883
+.annotate 'line', 1886
     .return ($P103)
 .end
 
@@ -15976,12 +16376,12 @@
 .HLL "nqp"
 
 .namespace ["HLL";"CommandLine";"Parser"]
-.sub "_block2310"  :anon :subid("261_1329260312.462") :outer("260_1329260312.462")
-    .param pmc param_2312
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1894
-    .lex "$_", param_2312
-.annotate 'line', 1895
+.sub "_block2309"  :anon :subid("285_1330909682.33311") :outer("197_1330909682.33311")
+    .param pmc param_2311
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1897
+    .lex "$_", param_2311
+.annotate 'line', 1898
     find_lex $P105, "$type"
     unless_null $P105, vivify_1163
     new $P105, "Undef"
@@ -15992,14 +16392,14 @@
   vivify_1164:
     find_lex $P107, "self"
     nqp_decontainerize $P108, $P107
-    find_lex $P109, "$?CLASS"
-    repr_get_attr_obj $P2313, $P108, $P109, "%!options", 1
-    unless_null $P2313, vivify_1165
-    $P2313 = root_new ['parrot';'Hash']
-    repr_bind_attr_obj $P108, $P109, "%!options", 1, $P2313
+    nqp_get_sc_object $P109, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 187
+    repr_get_attr_obj $P2312, $P108, $P109, "%!options", 1
+    unless_null $P2312, vivify_1165
+    $P2312 = root_new ['parrot';'Hash']
+    repr_bind_attr_obj $P108, $P109, "%!options", 1, $P2312
   vivify_1165:
-    set $P2313[$P106], $P105
-.annotate 'line', 1894
+    set $P2312[$P106], $P105
+.annotate 'line', 1897
     .return ($P105)
 .end
 
@@ -16008,29 +16408,29 @@
 
 .namespace ["HLL";"CommandLine";"Parser"]
 .include "except_types.pasm"
-.sub "is-option" :anon :subid("262_1329260312.462") :outer("253_1329260312.462")
+.sub "is-option" :anon :subid("198_1330909682.33311") :outer("283_1330909682.33311")
+    .param pmc param_2317
     .param pmc param_2318
-    .param pmc param_2319
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1900
-    new $P2317, 'ExceptionHandler', [.CONTROL_RETURN]
-    set_label $P2317, control_2316
-    push_eh $P2317
-    .lex "self", param_2318
-    .lex "$x", param_2319
-.annotate 'line', 1901
-    set $P102, param_2319
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1903
+    new $P2316, 'ExceptionHandler', [.CONTROL_RETURN]
+    set_label $P2316, control_2315
+    push_eh $P2316
+    .lex "self", param_2317
+    .lex "$x", param_2318
+.annotate 'line', 1904
+    set $P102, param_2318
     unless_null $P102, vivify_1166
     new $P102, "Undef"
   vivify_1166:
     set $S100, $P102
     iseq $I100, $S100, "-"
-    unless $I100, unless_2321
+    unless $I100, unless_2320
     new $P101, 'Integer'
     set $P101, $I100
-    goto unless_2321_end
-  unless_2321:
-    set $P103, param_2319
+    goto unless_2320_end
+  unless_2320:
+    set $P103, param_2318
     unless_null $P103, vivify_1167
     new $P103, "Undef"
   vivify_1167:
@@ -16038,17 +16438,17 @@
     iseq $I101, $S101, "--"
     new $P101, 'Integer'
     set $P101, $I101
-  unless_2321_end:
-    unless $P101, if_2320_end
+  unless_2320_end:
+    unless $P101, if_2319_end
     new $P104, "Exception"
     set $P104['type'], .CONTROL_RETURN
     new $P105, "Float"
     assign $P105, 0
     setattribute $P104, 'payload', $P105
     throw $P104
-  if_2320_end:
-.annotate 'line', 1902
-    set $P101, param_2319
+  if_2319_end:
+.annotate 'line', 1905
+    set $P101, param_2318
     unless_null $P101, vivify_1168
     new $P101, "Undef"
   vivify_1168:
@@ -16061,17 +16461,17 @@
     set $I101, $P103
     substr $S101, $S100, $I100, $I101
     iseq $I102, $S101, "-"
-    unless $I102, if_2322_end
+    unless $I102, if_2321_end
     new $P104, "Exception"
     set $P104['type'], .CONTROL_RETURN
     new $P105, "Float"
     assign $P105, 1
     setattribute $P104, 'payload', $P105
     throw $P104
-  if_2322_end:
-.annotate 'line', 1900
+  if_2321_end:
+.annotate 'line', 1903
     .return (0)
-  control_2316:
+  control_2315:
     .local pmc exception 
     .get_results (exception) 
     getattribute $P101, exception, "payload"
@@ -16082,35 +16482,35 @@
 .HLL "nqp"
 
 .namespace ["HLL";"CommandLine";"Parser"]
-.sub "wants-value" :anon :subid("263_1329260312.462") :outer("253_1329260312.462")
+.sub "wants-value" :anon :subid("199_1330909682.33311") :outer("283_1330909682.33311")
+    .param pmc param_2323
     .param pmc param_2324
-    .param pmc param_2325
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1906
-    .lex "self", param_2324
-    .lex "$x", param_2325
-.annotate 'line', 1907
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1909
+    .lex "self", param_2323
+    .lex "$x", param_2324
+.annotate 'line', 1910
     new $P101, "Undef"
-    set $P2326, $P101
-    .lex "$spec", $P2326
-    set $P102, param_2325
+    set $P2325, $P101
+    .lex "$spec", $P2325
+    set $P102, param_2324
     unless_null $P102, vivify_1169
     new $P102, "Undef"
   vivify_1169:
-    set $P103, param_2324
+    set $P103, param_2323
     nqp_decontainerize $P104, $P103
-    find_lex $P105, "$?CLASS"
-    repr_get_attr_obj $P2327, $P104, $P105, "%!options", 1
-    unless_null $P2327, vivify_1170
-    $P2327 = root_new ['parrot';'Hash']
+    nqp_get_sc_object $P105, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 187
+    repr_get_attr_obj $P2326, $P104, $P105, "%!options", 1
+    unless_null $P2326, vivify_1170
+    $P2326 = root_new ['parrot';'Hash']
   vivify_1170:
-    set $P106, $P2327[$P102]
+    set $P106, $P2326[$P102]
     unless_null $P106, vivify_1171
     new $P106, "Undef"
   vivify_1171:
-    set $P2326, $P106
-.annotate 'line', 1908
-    set $P102, $P2326
+    set $P2325, $P106
+.annotate 'line', 1911
+    set $P102, $P2325
     unless_null $P102, vivify_1172
     new $P102, "Undef"
   vivify_1172:
@@ -16123,7 +16523,7 @@
     set $I101, $P104
     substr $S101, $S100, $I100, $I101
     iseq $I102, $S101, "s"
-.annotate 'line', 1906
+.annotate 'line', 1909
     .return ($I102)
 .end
 
@@ -16131,41 +16531,41 @@
 .HLL "nqp"
 
 .namespace ["HLL";"CommandLine";"Parser"]
-.sub "optional-value" :anon :subid("264_1329260312.462") :outer("253_1329260312.462")
+.sub "optional-value" :anon :subid("200_1330909682.33311") :outer("283_1330909682.33311")
+    .param pmc param_2328
     .param pmc param_2329
-    .param pmc param_2330
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1911
-    .lex "self", param_2329
-    .lex "$x", param_2330
-.annotate 'line', 1912
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1914
+    .lex "self", param_2328
+    .lex "$x", param_2329
+.annotate 'line', 1915
     new $P101, "Undef"
-    set $P2331, $P101
-    .lex "$spec", $P2331
-    set $P102, param_2330
+    set $P2330, $P101
+    .lex "$spec", $P2330
+    set $P102, param_2329
     unless_null $P102, vivify_1173
     new $P102, "Undef"
   vivify_1173:
-    set $P103, param_2329
+    set $P103, param_2328
     nqp_decontainerize $P104, $P103
-    find_lex $P105, "$?CLASS"
-    repr_get_attr_obj $P2332, $P104, $P105, "%!options", 1
-    unless_null $P2332, vivify_1174
-    $P2332 = root_new ['parrot';'Hash']
+    nqp_get_sc_object $P105, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 187
+    repr_get_attr_obj $P2331, $P104, $P105, "%!options", 1
+    unless_null $P2331, vivify_1174
+    $P2331 = root_new ['parrot';'Hash']
   vivify_1174:
-    set $P106, $P2332[$P102]
+    set $P106, $P2331[$P102]
     unless_null $P106, vivify_1175
     new $P106, "Undef"
   vivify_1175:
-    set $P2331, $P106
-.annotate 'line', 1913
-    set $P102, $P2331
+    set $P2330, $P106
+.annotate 'line', 1916
+    set $P102, $P2330
     unless_null $P102, vivify_1176
     new $P102, "Undef"
   vivify_1176:
     set $S100, $P102
     iseq $I100, $S100, "s?"
-.annotate 'line', 1911
+.annotate 'line', 1914
     .return ($I100)
 .end
 
@@ -16174,118 +16574,118 @@
 
 .namespace ["HLL";"CommandLine";"Parser"]
 .include "except_types.pasm"
-.sub "parse" :anon :subid("265_1329260312.462") :outer("253_1329260312.462")
+.sub "parse" :anon :subid("201_1330909682.33311") :outer("283_1330909682.33311")
+    .param pmc param_2335
     .param pmc param_2336
-    .param pmc param_2337
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1916
-    .const 'Sub' $P2362 = "268_1329260312.462" 
-    capture_lex $P2362
-    .const 'Sub' $P2354 = "267_1329260312.462" 
-    capture_lex $P2354
-    .const 'Sub' $P2342 = "266_1329260312.462" 
-    capture_lex $P2342
-    new $P2335, 'ExceptionHandler', [.CONTROL_RETURN]
-    set_label $P2335, control_2334
-    push_eh $P2335
-    .lex "self", param_2336
-    .lex "@args", param_2337
-.annotate 'line', 1917
-    new $P101, "Undef"
-    set $P2338, $P101
-    .lex "$i", $P2338
-.annotate 'line', 1918
-    new $P102, "Undef"
-    set $P2339, $P102
-    .lex "$arg-count", $P2339
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1919
+    .const 'Sub' $P2361 = "288_1330909682.33311" 
+    capture_lex $P2361
+    .const 'Sub' $P2353 = "287_1330909682.33311" 
+    capture_lex $P2353
+    .const 'Sub' $P2341 = "286_1330909682.33311" 
+    capture_lex $P2341
+    new $P2334, 'ExceptionHandler', [.CONTROL_RETURN]
+    set_label $P2334, control_2333
+    push_eh $P2334
+    .lex "self", param_2335
+    .lex "@args", param_2336
 .annotate 'line', 1920
+    new $P101, "Undef"
+    set $P2337, $P101
+    .lex "$i", $P2337
+.annotate 'line', 1921
+    new $P102, "Undef"
+    set $P2338, $P102
+    .lex "$arg-count", $P2338
+.annotate 'line', 1923
     new $P103, "Undef"
-    set $P2340, $P103
-    .lex "$result", $P2340
-.annotate 'line', 1924
-    .const 'Sub' $P2342 = "266_1329260312.462" 
-    newclosure $P2352, $P2342
-    set $P2341, $P2352
-    .lex "get-value", $P2341
-.annotate 'line', 1939
-    .const 'Sub' $P2354 = "267_1329260312.462" 
-    newclosure $P2359, $P2354
-    set $P2353, $P2359
-    .lex "slurp-rest", $P2353
-.annotate 'line', 1917
+    set $P2339, $P103
+    .lex "$result", $P2339
+.annotate 'line', 1927
+    .const 'Sub' $P2341 = "286_1330909682.33311" 
+    newclosure $P2351, $P2341
+    set $P2340, $P2351
+    .lex "get-value", $P2340
+.annotate 'line', 1942
+    .const 'Sub' $P2353 = "287_1330909682.33311" 
+    newclosure $P2358, $P2353
+    set $P2352, $P2358
+    .lex "slurp-rest", $P2352
+.annotate 'line', 1920
     new $P105, "Float"
     assign $P105, 0
-    set $P2338, $P105
-.annotate 'line', 1918
-    set $P2360, param_2337
-    unless_null $P2360, vivify_1202
-    $P2360 = root_new ['parrot';'ResizablePMCArray']
+    set $P2337, $P105
+.annotate 'line', 1921
+    set $P2359, param_2336
+    unless_null $P2359, vivify_1202
+    $P2359 = root_new ['parrot';'ResizablePMCArray']
   vivify_1202:
-    set $N100, $P2360
+    set $N100, $P2359
     new $P105, 'Float'
     set $P105, $N100
-    set $P2339, $P105
-.annotate 'line', 1920
+    set $P2338, $P105
+.annotate 'line', 1923
     get_hll_global $P105, "GLOBAL"
     nqp_get_package_through_who $P106, $P105, "HLL"
     nqp_get_package_through_who $P107, $P106, "CommandLine"
     get_who $P108, $P107
     set $P109, $P108["Result"]
     $P110 = $P109."new"()
-    set $P2340, $P110
-.annotate 'line', 1921
-    set $P105, $P2340
+    set $P2339, $P110
+.annotate 'line', 1924
+    set $P105, $P2339
     unless_null $P105, vivify_1203
     new $P105, "Undef"
   vivify_1203:
     $P105."init"()
-.annotate 'line', 1916
-    set $P105, $P2341
-    set $P105, $P2353
-.annotate 'line', 1947
+.annotate 'line', 1919
+    set $P105, $P2340
+    set $P105, $P2352
+.annotate 'line', 1950
     new $P108, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P108, loop2405_handler
+    set_label $P108, loop2404_handler
     push_eh $P108
-  loop2405_test:
-    set $P105, $P2338
+  loop2404_test:
+    set $P105, $P2337
     unless_null $P105, vivify_1204
     new $P105, "Undef"
   vivify_1204:
     set $N100, $P105
-    set $P106, $P2339
+    set $P106, $P2338
     unless_null $P106, vivify_1205
     new $P106, "Undef"
   vivify_1205:
     set $N101, $P106
     islt $I101, $N100, $N101
-    unless $I101, loop2405_done
-  loop2405_redo:
-    .const 'Sub' $P2362 = "268_1329260312.462" 
-    capture_lex $P2362
-    $P2362()
-  loop2405_next:
-    goto loop2405_test
-  loop2405_handler:
+    unless $I101, loop2404_done
+  loop2404_redo:
+    .const 'Sub' $P2361 = "288_1330909682.33311" 
+    capture_lex $P2361
+    $P2361()
+  loop2404_next:
+    goto loop2404_test
+  loop2404_handler:
     .local pmc exception 
     .get_results (exception) 
     pop_upto_eh exception
     getattribute $P109, exception, 'type'
-    eq $P109, .CONTROL_LOOP_NEXT, loop2405_next
-    eq $P109, .CONTROL_LOOP_REDO, loop2405_redo
-  loop2405_done:
+    eq $P109, .CONTROL_LOOP_NEXT, loop2404_next
+    eq $P109, .CONTROL_LOOP_REDO, loop2404_redo
+  loop2404_done:
     pop_eh 
-.annotate 'line', 2002
+.annotate 'line', 2005
     new $P105, "Exception"
     set $P105['type'], .CONTROL_RETURN
-    set $P106, $P2340
+    set $P106, $P2339
     unless_null $P106, vivify_1265
     new $P106, "Undef"
   vivify_1265:
     setattribute $P105, 'payload', $P106
     throw $P105
-.annotate 'line', 1916
+.annotate 'line', 1919
     .return ()
-  control_2334:
+  control_2333:
     .local pmc exception 
     .get_results (exception) 
     getattribute $P105, exception, "payload"
@@ -16296,12 +16696,12 @@
 .HLL "nqp"
 
 .namespace ["HLL";"CommandLine";"Parser"]
-.sub "get-value"  :subid("266_1329260312.462") :outer("265_1329260312.462")
-    .param pmc param_2343
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1924
-    .lex "$opt", param_2343
-.annotate 'line', 1925
+.sub "get-value"  :subid("286_1330909682.33311") :outer("201_1330909682.33311")
+    .param pmc param_2342
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1927
+    .lex "$opt", param_2342
+.annotate 'line', 1928
     find_lex $P105, "$i"
     unless_null $P105, vivify_1177
     new $P105, "Undef"
@@ -16314,8 +16714,8 @@
     sub $P107, $P106, 1
     set $N101, $P107
     iseq $I100, $N100, $N101
-    if $I100, if_2344
-.annotate 'line', 1927
+    if $I100, if_2343
+.annotate 'line', 1930
     find_lex $P109, "self"
     nqp_decontainerize $P110, $P109
     find_lex $P111, "$i"
@@ -16324,111 +16724,111 @@
   vivify_1179:
     add $P112, $P111, 1
     set $I101, $P112
-    find_lex $P2346, "@args"
-    unless_null $P2346, vivify_1180
-    $P2346 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P2345, "@args"
+    unless_null $P2345, vivify_1180
+    $P2345 = root_new ['parrot';'ResizablePMCArray']
   vivify_1180:
-    set $P113, $P2346[$I101]
+    set $P113, $P2345[$I101]
     unless_null $P113, vivify_1181
     new $P113, "Undef"
   vivify_1181:
     $P114 = $P110."is-option"($P113)
-    if $P114, if_2345
-.annotate 'line', 1929
+    if $P114, if_2344
+.annotate 'line', 1932
     find_lex $P116, "$i"
     unless_null $P116, vivify_1182
     new $P116, "Undef"
   vivify_1182:
     add $P117, $P116, 1
     set $I102, $P117
-    find_lex $P2348, "@args"
-    unless_null $P2348, vivify_1183
-    $P2348 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P2347, "@args"
+    unless_null $P2347, vivify_1183
+    $P2347 = root_new ['parrot';'ResizablePMCArray']
   vivify_1183:
-    set $P118, $P2348[$I102]
+    set $P118, $P2347[$I102]
     unless_null $P118, vivify_1184
     new $P118, "Undef"
   vivify_1184:
     find_lex $P119, "self"
     nqp_decontainerize $P120, $P119
-    find_lex $P121, "$?CLASS"
-    repr_get_attr_obj $P2349, $P120, $P121, "%!stopper", 2
-    unless_null $P2349, vivify_1185
-    $P2349 = root_new ['parrot';'Hash']
+    nqp_get_sc_object $P121, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 187
+    repr_get_attr_obj $P2348, $P120, $P121, "%!stopper", 2
+    unless_null $P2348, vivify_1185
+    $P2348 = root_new ['parrot';'Hash']
   vivify_1185:
-    set $P122, $P2349[$P118]
+    set $P122, $P2348[$P118]
     unless_null $P122, vivify_1186
     new $P122, "Undef"
   vivify_1186:
-    if $P122, if_2347
-.annotate 'line', 1931
+    if $P122, if_2346
+.annotate 'line', 1934
     find_lex $P123, "$i"
     unless_null $P123, vivify_1187
     new $P123, "Undef"
   vivify_1187:
-    clone $P2350, $P123
+    clone $P2349, $P123
     inc $P123
     find_lex $P123, "$i"
     unless_null $P123, vivify_1188
     new $P123, "Undef"
   vivify_1188:
     set $I103, $P123
-    find_lex $P2351, "@args"
-    unless_null $P2351, vivify_1189
-    $P2351 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P2350, "@args"
+    unless_null $P2350, vivify_1189
+    $P2350 = root_new ['parrot';'ResizablePMCArray']
   vivify_1189:
-    set $P124, $P2351[$I103]
+    set $P124, $P2350[$I103]
     unless_null $P124, vivify_1190
     new $P124, "Undef"
   vivify_1190:
     set $P115, $P124
-.annotate 'line', 1929
-    goto if_2347_end
-  if_2347:
-.annotate 'line', 1930
+.annotate 'line', 1932
+    goto if_2346_end
+  if_2346:
+.annotate 'line', 1933
     new $P123, 'String'
     set $P123, "Option "
-    set $P124, param_2343
+    set $P124, param_2342
     unless_null $P124, vivify_1191
     new $P124, "Undef"
   vivify_1191:
     concat $P125, $P123, $P124
     concat $P126, $P125, " needs a value, but is followed by a stopper"
     die $P126
-  if_2347_end:
-.annotate 'line', 1929
+  if_2346_end:
+.annotate 'line', 1932
     set $P108, $P115
-.annotate 'line', 1927
-    goto if_2345_end
-  if_2345:
-.annotate 'line', 1928
+.annotate 'line', 1930
+    goto if_2344_end
+  if_2344:
+.annotate 'line', 1931
     new $P115, 'String'
     set $P115, "Option "
-    set $P116, param_2343
+    set $P116, param_2342
     unless_null $P116, vivify_1192
     new $P116, "Undef"
   vivify_1192:
     concat $P117, $P115, $P116
     concat $P118, $P117, " needs a value, but is followed by an option"
     die $P118
-  if_2345_end:
-.annotate 'line', 1927
+  if_2344_end:
+.annotate 'line', 1930
     set $P104, $P108
-.annotate 'line', 1925
-    goto if_2344_end
-  if_2344:
-.annotate 'line', 1926
+.annotate 'line', 1928
+    goto if_2343_end
+  if_2343:
+.annotate 'line', 1929
     new $P108, 'String'
     set $P108, "Option "
-    set $P109, param_2343
+    set $P109, param_2342
     unless_null $P109, vivify_1193
     new $P109, "Undef"
   vivify_1193:
     concat $P110, $P108, $P109
     concat $P111, $P110, " needs a value"
     die $P111
-  if_2344_end:
-.annotate 'line', 1924
+  if_2343_end:
+.annotate 'line', 1927
     .return ($P104)
 .end
 
@@ -16437,20 +16837,20 @@
 
 .namespace ["HLL";"CommandLine";"Parser"]
 .include "except_types.pasm"
-.sub "slurp-rest"  :subid("267_1329260312.462") :outer("265_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1939
+.sub "slurp-rest"  :subid("287_1330909682.33311") :outer("201_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1942
     find_lex $P105, "$i"
     unless_null $P105, vivify_1194
     new $P105, "Undef"
   vivify_1194:
-    clone $P2355, $P105
+    clone $P2354, $P105
     inc $P105
-.annotate 'line', 1941
+.annotate 'line', 1944
     new $P107, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P107, loop2358_handler
+    set_label $P107, loop2357_handler
     push_eh $P107
-  loop2358_test:
+  loop2357_test:
     find_lex $P105, "$i"
     unless_null $P105, vivify_1195
     new $P105, "Undef"
@@ -16462,9 +16862,9 @@
   vivify_1196:
     set $N101, $P106
     islt $I100, $N100, $N101
-    unless $I100, loop2358_done
-  loop2358_redo:
-.annotate 'line', 1942
+    unless $I100, loop2357_done
+  loop2357_redo:
+.annotate 'line', 1945
     find_lex $P107, "$result"
     unless_null $P107, vivify_1197
     new $P107, "Undef"
@@ -16474,34 +16874,34 @@
     new $P108, "Undef"
   vivify_1198:
     set $I101, $P108
-    find_lex $P2356, "@args"
-    unless_null $P2356, vivify_1199
-    $P2356 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P2355, "@args"
+    unless_null $P2355, vivify_1199
+    $P2355 = root_new ['parrot';'ResizablePMCArray']
   vivify_1199:
-    set $P109, $P2356[$I101]
+    set $P109, $P2355[$I101]
     unless_null $P109, vivify_1200
     new $P109, "Undef"
   vivify_1200:
     $P107."add-argument"($P109)
-.annotate 'line', 1941
+.annotate 'line', 1944
     find_lex $P107, "$i"
     unless_null $P107, vivify_1201
     new $P107, "Undef"
   vivify_1201:
-    clone $P2357, $P107
+    clone $P2356, $P107
     inc $P107
-  loop2358_next:
-    goto loop2358_test
-  loop2358_handler:
+  loop2357_next:
+    goto loop2357_test
+  loop2357_handler:
     .local pmc exception 
     .get_results (exception) 
     pop_upto_eh exception
     getattribute $P108, exception, 'type'
-    eq $P108, .CONTROL_LOOP_NEXT, loop2358_next
-    eq $P108, .CONTROL_LOOP_REDO, loop2358_redo
-  loop2358_done:
+    eq $P108, .CONTROL_LOOP_NEXT, loop2357_next
+    eq $P108, .CONTROL_LOOP_REDO, loop2357_redo
+  loop2357_done:
     pop_eh 
-.annotate 'line', 1939
+.annotate 'line', 1942
     .return ($I100)
 .end
 
@@ -16509,89 +16909,89 @@
 .HLL "nqp"
 
 .namespace ["HLL";"CommandLine";"Parser"]
-.sub "_block2361"  :anon :subid("268_1329260312.462") :outer("265_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1947
-    .const 'Sub' $P2385 = "270_1329260312.462" 
-    capture_lex $P2385
-    .const 'Sub' $P2368 = "269_1329260312.462" 
-    capture_lex $P2368
-.annotate 'line', 1948
+.sub "_block2360"  :anon :subid("288_1330909682.33311") :outer("201_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1950
+    .const 'Sub' $P2384 = "290_1330909682.33311" 
+    capture_lex $P2384
+    .const 'Sub' $P2367 = "289_1330909682.33311" 
+    capture_lex $P2367
+.annotate 'line', 1951
     new $P107, "Undef"
-    set $P2363, $P107
-    .lex "$cur", $P2363
+    set $P2362, $P107
+    .lex "$cur", $P2362
     find_lex $P108, "$i"
     unless_null $P108, vivify_1206
     new $P108, "Undef"
   vivify_1206:
     set $I102, $P108
-    find_lex $P2364, "@args"
-    unless_null $P2364, vivify_1207
-    $P2364 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P2363, "@args"
+    unless_null $P2363, vivify_1207
+    $P2363 = root_new ['parrot';'ResizablePMCArray']
   vivify_1207:
-    set $P109, $P2364[$I102]
+    set $P109, $P2363[$I102]
     unless_null $P109, vivify_1208
     new $P109, "Undef"
   vivify_1208:
-    set $P2363, $P109
-.annotate 'line', 1949
+    set $P2362, $P109
+.annotate 'line', 1952
     find_lex $P108, "self"
     nqp_decontainerize $P109, $P108
-    set $P110, $P2363
+    set $P110, $P2362
     unless_null $P110, vivify_1209
     new $P110, "Undef"
   vivify_1209:
     $P111 = $P109."is-option"($P110)
-    if $P111, if_2365
-.annotate 'line', 1994
-    set $P112, $P2363
+    if $P111, if_2364
+.annotate 'line', 1997
+    set $P112, $P2362
     unless_null $P112, vivify_1210
     new $P112, "Undef"
   vivify_1210:
     find_lex $P113, "self"
     nqp_decontainerize $P114, $P113
-    find_lex $P115, "$?CLASS"
-    repr_get_attr_obj $P2402, $P114, $P115, "%!stopper", 2
-    unless_null $P2402, vivify_1211
-    $P2402 = root_new ['parrot';'Hash']
+    nqp_get_sc_object $P115, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 187
+    repr_get_attr_obj $P2401, $P114, $P115, "%!stopper", 2
+    unless_null $P2401, vivify_1211
+    $P2401 = root_new ['parrot';'Hash']
   vivify_1211:
-    set $P116, $P2402[$P112]
+    set $P116, $P2401[$P112]
     unless_null $P116, vivify_1212
     new $P116, "Undef"
   vivify_1212:
-    if $P116, if_2401
-.annotate 'line', 1997
+    if $P116, if_2400
+.annotate 'line', 2000
     find_lex $P117, "$result"
     unless_null $P117, vivify_1213
     new $P117, "Undef"
   vivify_1213:
-    set $P118, $P2363
+    set $P118, $P2362
     unless_null $P118, vivify_1214
     new $P118, "Undef"
   vivify_1214:
     $P117."add-argument"($P118)
-.annotate 'line', 1998
+.annotate 'line', 2001
     find_lex $P117, "self"
     nqp_decontainerize $P118, $P117
-    find_lex $P119, "$?CLASS"
+    nqp_get_sc_object $P119, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 187
     repr_get_attr_obj $P120, $P118, $P119, "$!stop-after-first-arg", 3
     unless_null $P120, vivify_1215
     new $P120, "Undef"
   vivify_1215:
-    unless $P120, if_2403_end
+    unless $P120, if_2402_end
     "slurp-rest"()
-  if_2403_end:
-.annotate 'line', 1996
-    goto if_2401_end
-  if_2401:
-.annotate 'line', 1995
+  if_2402_end:
+.annotate 'line', 1999
+    goto if_2400_end
+  if_2400:
+.annotate 'line', 1998
     "slurp-rest"()
-  if_2401_end:
-.annotate 'line', 1994
-    goto if_2365_end
-  if_2365:
-.annotate 'line', 1950
-    set $P112, $P2363
+  if_2400_end:
+.annotate 'line', 1997
+    goto if_2364_end
+  if_2364:
+.annotate 'line', 1953
+    set $P112, $P2362
     unless_null $P112, vivify_1216
     new $P112, "Undef"
   vivify_1216:
@@ -16604,42 +17004,42 @@
     set $I103, $P114
     substr $S101, $S100, $I102, $I103
     iseq $I104, $S101, "--"
-    if $I104, if_2366
-.annotate 'line', 1972
-    .const 'Sub' $P2385 = "270_1329260312.462" 
-    capture_lex $P2385
-    $P2385()
-    goto if_2366_end
-  if_2366:
-.annotate 'line', 1950
-    .const 'Sub' $P2368 = "269_1329260312.462" 
-    capture_lex $P2368
-    $P2368()
-  if_2366_end:
+    if $I104, if_2365
+.annotate 'line', 1975
+    .const 'Sub' $P2384 = "290_1330909682.33311" 
+    capture_lex $P2384
+    $P2384()
+    goto if_2365_end
+  if_2365:
+.annotate 'line', 1953
+    .const 'Sub' $P2367 = "289_1330909682.33311" 
+    capture_lex $P2367
+    $P2367()
   if_2365_end:
-.annotate 'line', 1947
+  if_2364_end:
+.annotate 'line', 1950
     find_lex $P108, "$i"
     unless_null $P108, vivify_1264
     new $P108, "Undef"
   vivify_1264:
-    clone $P2404, $P108
+    clone $P2403, $P108
     inc $P108
-    .return ($P2404)
+    .return ($P2403)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["HLL";"CommandLine";"Parser"]
-.sub "_block2384"  :anon :subid("270_1329260312.462") :outer("268_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1972
-    .const 'Sub' $P2394 = "271_1329260312.462" 
-    capture_lex $P2394
-.annotate 'line', 1973
+.sub "_block2383"  :anon :subid("290_1330909682.33311") :outer("288_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1975
+    .const 'Sub' $P2393 = "291_1330909682.33311" 
+    capture_lex $P2393
+.annotate 'line', 1976
     new $P120, "Undef"
-    set $P2386, $P120
-    .lex "$opt", $P2386
+    set $P2385, $P120
+    .lex "$opt", $P2385
     find_lex $P121, "$cur"
     unless_null $P121, vivify_1217
     new $P121, "Undef"
@@ -16651,9 +17051,9 @@
     substr $S103, $S102, $I105
     new $P123, 'String'
     set $P123, $S103
-    set $P2386, $P123
-.annotate 'line', 1974
-    set $P122, $P2386
+    set $P2385, $P123
+.annotate 'line', 1977
+    set $P122, $P2385
     unless_null $P122, vivify_1218
     new $P122, "Undef"
   vivify_1218:
@@ -16662,113 +17062,113 @@
     set $N102, $I105
     set $N103, 1
     iseq $I106, $N102, $N103
-    if $I106, if_2387
-.annotate 'line', 1984
-    .const 'Sub' $P2394 = "271_1329260312.462" 
-    capture_lex $P2394
-    $P126 = $P2394()
+    if $I106, if_2386
+.annotate 'line', 1987
+    .const 'Sub' $P2393 = "291_1330909682.33311" 
+    capture_lex $P2393
+    $P126 = $P2393()
     set $P121, $P126
-.annotate 'line', 1974
-    goto if_2387_end
-  if_2387:
-.annotate 'line', 1976
-    set $P123, $P2386
+.annotate 'line', 1977
+    goto if_2386_end
+  if_2386:
+.annotate 'line', 1979
+    set $P123, $P2385
     unless_null $P123, vivify_1226
     new $P123, "Undef"
   vivify_1226:
     find_lex $P124, "self"
     nqp_decontainerize $P125, $P124
-    find_lex $P126, "$?CLASS"
-    repr_get_attr_obj $P2389, $P125, $P126, "%!options", 1
-    unless_null $P2389, vivify_1227
-    $P2389 = root_new ['parrot';'Hash']
+    nqp_get_sc_object $P126, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 187
+    repr_get_attr_obj $P2388, $P125, $P126, "%!options", 1
+    unless_null $P2388, vivify_1227
+    $P2388 = root_new ['parrot';'Hash']
   vivify_1227:
-    set $P127, $P2389[$P123]
+    set $P127, $P2388[$P123]
     unless_null $P127, vivify_1228
     new $P127, "Undef"
   vivify_1228:
-    if $P127, unless_2388_end
+    if $P127, unless_2387_end
     new $P128, 'String'
     set $P128, "No such option -"
-    set $P129, $P2386
+    set $P129, $P2385
     unless_null $P129, vivify_1229
     new $P129, "Undef"
   vivify_1229:
     concat $P130, $P128, $P129
     die $P130
-  unless_2388_end:
-.annotate 'line', 1977
+  unless_2387_end:
+.annotate 'line', 1980
     find_lex $P123, "self"
     nqp_decontainerize $P124, $P123
-    set $P125, $P2386
+    set $P125, $P2385
     unless_null $P125, vivify_1230
     new $P125, "Undef"
   vivify_1230:
     $P126 = $P124."wants-value"($P125)
-    if $P126, if_2390
-.annotate 'line', 1981
+    if $P126, if_2389
+.annotate 'line', 1984
     find_lex $P127, "$result"
     unless_null $P127, vivify_1231
     new $P127, "Undef"
   vivify_1231:
-    set $P128, $P2386
+    set $P128, $P2385
     unless_null $P128, vivify_1232
     new $P128, "Undef"
   vivify_1232:
     $P127."add-option"($P128, 1)
-.annotate 'line', 1980
-    goto if_2390_end
-  if_2390:
-.annotate 'line', 1978
+.annotate 'line', 1983
+    goto if_2389_end
+  if_2389:
+.annotate 'line', 1981
     find_lex $P127, "$result"
     unless_null $P127, vivify_1233
     new $P127, "Undef"
   vivify_1233:
-    set $P128, $P2386
+    set $P128, $P2385
     unless_null $P128, vivify_1234
     new $P128, "Undef"
   vivify_1234:
-.annotate 'line', 1979
+.annotate 'line', 1982
     new $P129, 'String'
     set $P129, "-"
-    set $P130, $P2386
+    set $P130, $P2385
     unless_null $P130, vivify_1235
     new $P130, "Undef"
   vivify_1235:
     concat $P131, $P129, $P130
     $P132 = "get-value"($P131)
     $P127."add-option"($P128, $P132)
-  if_2390_end:
-.annotate 'line', 1983
+  if_2389_end:
+.annotate 'line', 1986
     new $P124, 'String'
     set $P124, "-"
-    set $P125, $P2386
+    set $P125, $P2385
     unless_null $P125, vivify_1236
     new $P125, "Undef"
   vivify_1236:
     concat $P126, $P124, $P125
     find_lex $P127, "self"
     nqp_decontainerize $P128, $P127
-    find_lex $P129, "$?CLASS"
-    repr_get_attr_obj $P2392, $P128, $P129, "%!stopper", 2
-    unless_null $P2392, vivify_1237
-    $P2392 = root_new ['parrot';'Hash']
+    nqp_get_sc_object $P129, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 187
+    repr_get_attr_obj $P2391, $P128, $P129, "%!stopper", 2
+    unless_null $P2391, vivify_1237
+    $P2391 = root_new ['parrot';'Hash']
   vivify_1237:
-    set $P130, $P2392[$P126]
+    set $P130, $P2391[$P126]
     unless_null $P130, vivify_1238
     new $P130, "Undef"
   vivify_1238:
-    if $P130, if_2391
+    if $P130, if_2390
     set $P123, $P130
-    goto if_2391_end
-  if_2391:
+    goto if_2390_end
+  if_2390:
     $P131 = "slurp-rest"()
     set $P123, $P131
-  if_2391_end:
-.annotate 'line', 1974
+  if_2390_end:
+.annotate 'line', 1977
     set $P121, $P123
-  if_2387_end:
-.annotate 'line', 1972
+  if_2386_end:
+.annotate 'line', 1975
     .return ($P121)
 .end
 
@@ -16777,47 +17177,47 @@
 
 .namespace ["HLL";"CommandLine";"Parser"]
 .include "except_types.pasm"
-.sub "_block2393"  :anon :subid("271_1329260312.462") :outer("270_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1984
-    .const 'Sub' $P2397 = "272_1329260312.462" 
-    capture_lex $P2397
-.annotate 'line', 1986
+.sub "_block2392"  :anon :subid("291_1330909682.33311") :outer("290_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1987
+    .const 'Sub' $P2396 = "292_1330909682.33311" 
+    capture_lex $P2396
+.annotate 'line', 1989
     new $P124, "Undef"
-    set $P2395, $P124
-    .lex "$iter", $P2395
+    set $P2394, $P124
+    .lex "$iter", $P2394
     find_lex $P125, "$opt"
     unless_null $P125, vivify_1219
     new $P125, "Undef"
   vivify_1219:
     iter $P126, $P125
-    set $P2395, $P126
-.annotate 'line', 1987
+    set $P2394, $P126
+.annotate 'line', 1990
     new $P127, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P127, loop2400_handler
+    set_label $P127, loop2399_handler
     push_eh $P127
-  loop2400_test:
-    set $P125, $P2395
+  loop2399_test:
+    set $P125, $P2394
     unless_null $P125, vivify_1220
     new $P125, "Undef"
   vivify_1220:
-    unless $P125, loop2400_done
-  loop2400_redo:
-    .const 'Sub' $P2397 = "272_1329260312.462" 
-    capture_lex $P2397
-    $P2397()
-  loop2400_next:
-    goto loop2400_test
-  loop2400_handler:
+    unless $P125, loop2399_done
+  loop2399_redo:
+    .const 'Sub' $P2396 = "292_1330909682.33311" 
+    capture_lex $P2396
+    $P2396()
+  loop2399_next:
+    goto loop2399_test
+  loop2399_handler:
     .local pmc exception 
     .get_results (exception) 
     pop_upto_eh exception
     getattribute $P128, exception, 'type'
-    eq $P128, .CONTROL_LOOP_NEXT, loop2400_next
-    eq $P128, .CONTROL_LOOP_REDO, loop2400_redo
-  loop2400_done:
+    eq $P128, .CONTROL_LOOP_NEXT, loop2399_next
+    eq $P128, .CONTROL_LOOP_REDO, loop2399_redo
+  loop2399_done:
     pop_eh 
-.annotate 'line', 1984
+.annotate 'line', 1987
     .return ($P125)
 .end
 
@@ -16825,48 +17225,48 @@
 .HLL "nqp"
 
 .namespace ["HLL";"CommandLine";"Parser"]
-.sub "_block2396"  :anon :subid("272_1329260312.462") :outer("271_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1988
+.sub "_block2395"  :anon :subid("292_1330909682.33311") :outer("291_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 1991
     new $P126, "Undef"
-    set $P2398, $P126
-    .lex "$o", $P2398
+    set $P2397, $P126
+    .lex "$o", $P2397
     find_lex $P127, "$iter"
     unless_null $P127, vivify_1221
     new $P127, "Undef"
   vivify_1221:
     shift $P128, $P127
-    set $P2398, $P128
-.annotate 'line', 1989
+    set $P2397, $P128
+.annotate 'line', 1992
     find_lex $P127, "self"
     nqp_decontainerize $P128, $P127
-    set $P129, $P2398
+    set $P129, $P2397
     unless_null $P129, vivify_1222
     new $P129, "Undef"
   vivify_1222:
     $P130 = $P128."wants-value"($P129)
-    unless $P130, if_2399_end
+    unless $P130, if_2398_end
     new $P131, 'String'
     set $P131, "Option -"
-    set $P132, $P2398
+    set $P132, $P2397
     unless_null $P132, vivify_1223
     new $P132, "Undef"
   vivify_1223:
     concat $P133, $P131, $P132
     concat $P134, $P133, " requires a value and cannot be grouped"
     die $P134
-  if_2399_end:
-.annotate 'line', 1990
+  if_2398_end:
+.annotate 'line', 1993
     find_lex $P127, "$result"
     unless_null $P127, vivify_1224
     new $P127, "Undef"
   vivify_1224:
-    set $P128, $P2398
+    set $P128, $P2397
     unless_null $P128, vivify_1225
     new $P128, "Undef"
   vivify_1225:
     $P129 = $P127."add-option"($P128, 1)
-.annotate 'line', 1987
+.annotate 'line', 1990
     .return ($P129)
 .end
 
@@ -16874,35 +17274,35 @@
 .HLL "nqp"
 
 .namespace ["HLL";"CommandLine";"Parser"]
-.sub "_block2367"  :anon :subid("269_1329260312.462") :outer("268_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 1952
-    new $P115, "Undef"
-    set $P2369, $P115
-    .lex "$opt", $P2369
-.annotate 'line', 1953
-    new $P116, "Undef"
-    set $P2370, $P116
-    .lex "$idx", $P2370
-.annotate 'line', 1954
-    new $P117, "Undef"
-    set $P2371, $P117
-    .lex "$value", $P2371
+.sub "_block2366"  :anon :subid("289_1330909682.33311") :outer("288_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1955
+    new $P115, "Undef"
+    set $P2368, $P115
+    .lex "$opt", $P2368
+.annotate 'line', 1956
+    new $P116, "Undef"
+    set $P2369, $P116
+    .lex "$idx", $P2369
+.annotate 'line', 1957
+    new $P117, "Undef"
+    set $P2370, $P117
+    .lex "$value", $P2370
+.annotate 'line', 1958
     new $P118, "Undef"
-    set $P2372, $P118
-    .lex "$has-value", $P2372
-.annotate 'line', 1952
+    set $P2371, $P118
+    .lex "$has-value", $P2371
+.annotate 'line', 1955
     find_lex $P119, "$i"
     unless_null $P119, vivify_1239
     new $P119, "Undef"
   vivify_1239:
     set $I105, $P119
-    find_lex $P2373, "@args"
-    unless_null $P2373, vivify_1240
-    $P2373 = root_new ['parrot';'ResizablePMCArray']
+    find_lex $P2372, "@args"
+    unless_null $P2372, vivify_1240
+    $P2372 = root_new ['parrot';'ResizablePMCArray']
   vivify_1240:
-    set $P120, $P2373[$I105]
+    set $P120, $P2372[$I105]
     unless_null $P120, vivify_1241
     new $P120, "Undef"
   vivify_1241:
@@ -16913,9 +17313,9 @@
     substr $S103, $S102, $I106
     new $P122, 'String'
     set $P122, $S103
-    set $P2369, $P122
-.annotate 'line', 1953
-    set $P119, $P2369
+    set $P2368, $P122
+.annotate 'line', 1956
+    set $P119, $P2368
     unless_null $P119, vivify_1242
     new $P119, "Undef"
   vivify_1242:
@@ -16923,52 +17323,52 @@
     index $I105, $S102, "="
     new $P120, 'Integer'
     set $P120, $I105
-    set $P2370, $P120
-.annotate 'line', 1954
+    set $P2369, $P120
+.annotate 'line', 1957
     new $P119, "Float"
     assign $P119, 1
-    set $P2371, $P119
-.annotate 'line', 1955
+    set $P2370, $P119
+.annotate 'line', 1958
     new $P119, "Float"
     assign $P119, 0
-    set $P2372, $P119
-.annotate 'line', 1957
-    set $P119, $P2370
+    set $P2371, $P119
+.annotate 'line', 1960
+    set $P119, $P2369
     unless_null $P119, vivify_1243
     new $P119, "Undef"
   vivify_1243:
     set $N102, $P119
     set $N103, 0
     isge $I105, $N102, $N103
-    if $I105, if_2374
-.annotate 'line', 1961
+    if $I105, if_2373
+.annotate 'line', 1964
     find_lex $P120, "self"
     nqp_decontainerize $P121, $P120
-    set $P122, $P2369
+    set $P122, $P2368
     unless_null $P122, vivify_1244
     new $P122, "Undef"
   vivify_1244:
     $P123 = $P121."optional-value"($P122)
-    unless $P123, if_2375_end
-.annotate 'line', 1962
+    unless $P123, if_2374_end
+.annotate 'line', 1965
     new $P124, "String"
     assign $P124, ""
-    set $P2371, $P124
-.annotate 'line', 1963
+    set $P2370, $P124
+.annotate 'line', 1966
     new $P124, "Float"
     assign $P124, 1
-    set $P2372, $P124
-  if_2375_end:
+    set $P2371, $P124
+  if_2374_end:
+.annotate 'line', 1964
+    goto if_2373_end
+  if_2373:
 .annotate 'line', 1961
-    goto if_2374_end
-  if_2374:
-.annotate 'line', 1958
-    set $P120, $P2369
+    set $P120, $P2368
     unless_null $P120, vivify_1245
     new $P120, "Undef"
   vivify_1245:
     set $S102, $P120
-    set $P121, $P2370
+    set $P121, $P2369
     unless_null $P121, vivify_1246
     new $P121, "Undef"
   vivify_1246:
@@ -16977,9 +17377,9 @@
     substr $S103, $S102, $I106
     new $P123, 'String'
     set $P123, $S103
-    set $P2371, $P123
-.annotate 'line', 1959
-    set $P120, $P2369
+    set $P2370, $P123
+.annotate 'line', 1962
+    set $P120, $P2368
     unless_null $P120, vivify_1247
     new $P120, "Undef"
   vivify_1247:
@@ -16987,7 +17387,7 @@
     new $P121, "Float"
     assign $P121, 0
     set $I106, $P121
-    set $P122, $P2370
+    set $P122, $P2369
     unless_null $P122, vivify_1248
     new $P122, "Undef"
   vivify_1248:
@@ -16995,139 +17395,139 @@
     substr $S103, $S102, $I106, $I107
     new $P123, 'String'
     set $P123, $S103
-    set $P2369, $P123
-.annotate 'line', 1960
+    set $P2368, $P123
+.annotate 'line', 1963
     new $P120, "Float"
     assign $P120, 1
-    set $P2372, $P120
-  if_2374_end:
-.annotate 'line', 1965
-    set $P122, $P2369
+    set $P2371, $P120
+  if_2373_end:
+.annotate 'line', 1968
+    set $P122, $P2368
     unless_null $P122, vivify_1249
     new $P122, "Undef"
   vivify_1249:
     find_lex $P119, "self"
     nqp_decontainerize $P120, $P119
-    find_lex $P121, "$?CLASS"
-    repr_get_attr_obj $P2377, $P120, $P121, "%!options", 1
-    unless_null $P2377, vivify_1250
-    $P2377 = root_new ['parrot';'Hash']
+    nqp_get_sc_object $P121, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 187
+    repr_get_attr_obj $P2376, $P120, $P121, "%!options", 1
+    unless_null $P2376, vivify_1250
+    $P2376 = root_new ['parrot';'Hash']
   vivify_1250:
-    exists $I105, $P2377[$P122]
-    if $I105, unless_2376_end
+    exists $I105, $P2376[$P122]
+    if $I105, unless_2375_end
     new $P123, 'String'
     set $P123, "Illegal option --"
-    set $P124, $P2369
+    set $P124, $P2368
     unless_null $P124, vivify_1251
     new $P124, "Undef"
   vivify_1251:
     concat $P125, $P123, $P124
     die $P125
-  unless_2376_end:
-.annotate 'line', 1966
+  unless_2375_end:
+.annotate 'line', 1969
     find_lex $P120, "self"
     nqp_decontainerize $P121, $P120
-    set $P122, $P2369
+    set $P122, $P2368
     unless_null $P122, vivify_1252
     new $P122, "Undef"
   vivify_1252:
     $P123 = $P121."wants-value"($P122)
     isfalse $I105, $P123
-    if $I105, if_2379
+    if $I105, if_2378
     new $P119, 'Integer'
     set $P119, $I105
-    goto if_2379_end
-  if_2379:
-    set $P124, $P2372
+    goto if_2378_end
+  if_2378:
+    set $P124, $P2371
     unless_null $P124, vivify_1253
     new $P124, "Undef"
   vivify_1253:
     set $P119, $P124
-  if_2379_end:
-    unless $P119, if_2378_end
+  if_2378_end:
+    unless $P119, if_2377_end
     new $P125, 'String'
     set $P125, "Option --"
-    set $P126, $P2369
+    set $P126, $P2368
     unless_null $P126, vivify_1254
     new $P126, "Undef"
   vivify_1254:
     concat $P127, $P125, $P126
     concat $P128, $P127, " does not allow a value"
     die $P128
-  if_2378_end:
-.annotate 'line', 1967
-    set $P120, $P2372
+  if_2377_end:
+.annotate 'line', 1970
+    set $P120, $P2371
     unless_null $P120, vivify_1255
     new $P120, "Undef"
   vivify_1255:
     isfalse $I105, $P120
-    if $I105, if_2381
+    if $I105, if_2380
     new $P119, 'Integer'
     set $P119, $I105
-    goto if_2381_end
-  if_2381:
+    goto if_2380_end
+  if_2380:
     find_lex $P121, "self"
     nqp_decontainerize $P122, $P121
-    set $P123, $P2369
+    set $P123, $P2368
     unless_null $P123, vivify_1256
     new $P123, "Undef"
   vivify_1256:
     $P124 = $P122."wants-value"($P123)
     set $P119, $P124
-  if_2381_end:
-    unless $P119, if_2380_end
-.annotate 'line', 1968
+  if_2380_end:
+    unless $P119, if_2379_end
+.annotate 'line', 1971
     new $P125, 'String'
     set $P125, "--"
-    set $P126, $P2369
+    set $P126, $P2368
     unless_null $P126, vivify_1257
     new $P126, "Undef"
   vivify_1257:
     concat $P127, $P125, $P126
     $P128 = "get-value"($P127)
-    set $P2371, $P128
-  if_2380_end:
-.annotate 'line', 1970
+    set $P2370, $P128
+  if_2379_end:
+.annotate 'line', 1973
     find_lex $P119, "$result"
     unless_null $P119, vivify_1258
     new $P119, "Undef"
   vivify_1258:
-    set $P120, $P2369
+    set $P120, $P2368
     unless_null $P120, vivify_1259
     new $P120, "Undef"
   vivify_1259:
-    set $P121, $P2371
+    set $P121, $P2370
     unless_null $P121, vivify_1260
     new $P121, "Undef"
   vivify_1260:
     $P119."add-option"($P120, $P121)
-.annotate 'line', 1971
+.annotate 'line', 1974
     new $P120, 'String'
     set $P120, "--"
-    set $P121, $P2369
+    set $P121, $P2368
     unless_null $P121, vivify_1261
     new $P121, "Undef"
   vivify_1261:
     concat $P122, $P120, $P121
     find_lex $P123, "self"
     nqp_decontainerize $P124, $P123
-    find_lex $P125, "$?CLASS"
-    repr_get_attr_obj $P2383, $P124, $P125, "%!stopper", 2
-    unless_null $P2383, vivify_1262
-    $P2383 = root_new ['parrot';'Hash']
+    nqp_get_sc_object $P125, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 187
+    repr_get_attr_obj $P2382, $P124, $P125, "%!stopper", 2
+    unless_null $P2382, vivify_1262
+    $P2382 = root_new ['parrot';'Hash']
   vivify_1262:
-    set $P126, $P2383[$P122]
+    set $P126, $P2382[$P122]
     unless_null $P126, vivify_1263
     new $P126, "Undef"
   vivify_1263:
-    if $P126, if_2382
+    if $P126, if_2381
     set $P119, $P126
-    goto if_2382_end
-  if_2382:
+    goto if_2381_end
+  if_2381:
     find_lex $P127, "slurp-rest"
     set $P119, $P127
-  if_2382_end:
-.annotate 'line', 1950
+  if_2381_end:
+.annotate 'line', 1953
     .return ($P119)
 .end
 
@@ -17135,101 +17535,101 @@
 .HLL "nqp"
 
 .namespace ["HLL";"World"]
-.sub "_block2407"  :subid("273_1329260312.462") :outer("10_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 2028
-    .const 'Sub' $P2513 = "294_1329260312.462" 
-    capture_lex $P2513
-    .const 'Sub' $P2510 = "293_1329260312.462" 
-    capture_lex $P2510
-    .const 'Sub' $P2507 = "292_1329260312.462" 
-    capture_lex $P2507
-    .const 'Sub' $P2505 = "291_1329260312.462" 
-    capture_lex $P2505
-    .const 'Sub' $P2503 = "290_1329260312.462" 
+.sub "_block2406"  :subid("293_1330909682.33311") :outer("222_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 2031
+    .const 'Sub' $P2506 = "221_1330909682.33311" 
+    capture_lex $P2506
+    .const 'Sub' $P2503 = "220_1330909682.33311" 
     capture_lex $P2503
-    .const 'Sub' $P2487 = "288_1329260312.462" 
-    capture_lex $P2487
-    .const 'Sub' $P2478 = "287_1329260312.462" 
-    capture_lex $P2478
-    .const 'Sub' $P2469 = "286_1329260312.462" 
-    capture_lex $P2469
-    .const 'Sub' $P2467 = "285_1329260312.462" 
-    capture_lex $P2467
-    .const 'Sub' $P2462 = "284_1329260312.462" 
-    capture_lex $P2462
-    .const 'Sub' $P2456 = "283_1329260312.462" 
-    capture_lex $P2456
-    .const 'Sub' $P2450 = "282_1329260312.462" 
-    capture_lex $P2450
-    .const 'Sub' $P2446 = "281_1329260312.462" 
-    capture_lex $P2446
-    .const 'Sub' $P2443 = "280_1329260312.462" 
-    capture_lex $P2443
-    .const 'Sub' $P2437 = "279_1329260312.462" 
-    capture_lex $P2437
-    .const 'Sub' $P2434 = "278_1329260312.462" 
-    capture_lex $P2434
-    .const 'Sub' $P2427 = "277_1329260312.462" 
-    capture_lex $P2427
-    .const 'Sub' $P2421 = "276_1329260312.462" 
-    capture_lex $P2421
-    .const 'Sub' $P2416 = "275_1329260312.462" 
-    capture_lex $P2416
-    .const 'Sub' $P2411 = "274_1329260312.462" 
-    capture_lex $P2411
-    .lex "$?PACKAGE", $P2409
-    .lex "$?CLASS", $P2410
-.annotate 'line', 2249
-    .const 'Sub' $P2513 = "294_1329260312.462" 
-    newclosure $P2529, $P2513
-.annotate 'line', 2028
-    .return ($P2529)
+    .const 'Sub' $P2500 = "219_1330909682.33311" 
+    capture_lex $P2500
+    .const 'Sub' $P2498 = "218_1330909682.33311" 
+    capture_lex $P2498
+    .const 'Sub' $P2496 = "217_1330909682.33311" 
+    capture_lex $P2496
+    .const 'Sub' $P2484 = "216_1330909682.33311" 
+    capture_lex $P2484
+    .const 'Sub' $P2475 = "215_1330909682.33311" 
+    capture_lex $P2475
+    .const 'Sub' $P2466 = "214_1330909682.33311" 
+    capture_lex $P2466
+    .const 'Sub' $P2464 = "213_1330909682.33311" 
+    capture_lex $P2464
+    .const 'Sub' $P2460 = "212_1330909682.33311" 
+    capture_lex $P2460
+    .const 'Sub' $P2455 = "211_1330909682.33311" 
+    capture_lex $P2455
+    .const 'Sub' $P2449 = "210_1330909682.33311" 
+    capture_lex $P2449
+    .const 'Sub' $P2445 = "209_1330909682.33311" 
+    capture_lex $P2445
+    .const 'Sub' $P2442 = "208_1330909682.33311" 
+    capture_lex $P2442
+    .const 'Sub' $P2436 = "207_1330909682.33311" 
+    capture_lex $P2436
+    .const 'Sub' $P2433 = "206_1330909682.33311" 
+    capture_lex $P2433
+    .const 'Sub' $P2426 = "205_1330909682.33311" 
+    capture_lex $P2426
+    .const 'Sub' $P2420 = "204_1330909682.33311" 
+    capture_lex $P2420
+    .const 'Sub' $P2415 = "203_1330909682.33311" 
+    capture_lex $P2415
+    .const 'Sub' $P2410 = "202_1330909682.33311" 
+    capture_lex $P2410
+    .lex "$?PACKAGE", $P2408
+    .lex "$?CLASS", $P2409
+.annotate 'line', 2235
+    .const 'Sub' $P2506 = "221_1330909682.33311" 
+    newclosure $P2523, $P2506
+.annotate 'line', 2031
+    .return ($P2523)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["HLL";"World"]
-.sub "new" :anon :subid("274_1329260312.462") :outer("273_1329260312.462")
-    .param pmc param_2412
-    .param pmc param_2413 :named("handle")
-    .param pmc param_2414 :optional :named("description")
-    .param int has_param_2414 :opt_flag
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 2063
-    .lex "self", param_2412
-    .lex "$handle", param_2413
-    if has_param_2414, optparam_1266
+.sub "new" :anon :subid("202_1330909682.33311") :outer("293_1330909682.33311")
+    .param pmc param_2411
+    .param pmc param_2412 :named("handle")
+    .param pmc param_2413 :optional :named("description")
+    .param int has_param_2413 :opt_flag
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 2062
+    .lex "self", param_2411
+    .lex "$handle", param_2412
+    if has_param_2413, optparam_1266
     new $P101, "String"
     assign $P101, "<unknown>"
-    set param_2414, $P101
+    set param_2413, $P101
   optparam_1266:
-    .lex "$description", param_2414
-.annotate 'line', 2064
+    .lex "$description", param_2413
+.annotate 'line', 2063
     new $P102, "Undef"
-    set $P2415, $P102
-    .lex "$obj", $P2415
-    set $P103, param_2412
+    set $P2414, $P102
+    .lex "$obj", $P2414
+    set $P103, param_2411
     nqp_decontainerize $P104, $P103
     $P105 = $P104."CREATE"()
-    set $P2415, $P105
-.annotate 'line', 2065
-    set $P103, $P2415
+    set $P2414, $P105
+.annotate 'line', 2064
+    set $P103, $P2414
     unless_null $P103, vivify_1267
     new $P103, "Undef"
   vivify_1267:
-    set $P104, param_2413
+    set $P104, param_2412
     unless_null $P104, vivify_1268
     new $P104, "Undef"
   vivify_1268:
-    set $P105, param_2414
+    set $P105, param_2413
     unless_null $P105, vivify_1269
     new $P105, "Undef"
   vivify_1269:
     $P103."BUILD"($P104 :named("handle"), $P105 :named("description"))
-.annotate 'line', 2063
-    set $P103, $P2415
+.annotate 'line', 2062
+    set $P103, $P2414
     unless_null $P103, vivify_1270
     new $P103, "Undef"
   vivify_1270:
@@ -17240,156 +17640,165 @@
 .HLL "nqp"
 
 .namespace ["HLL";"World"]
-.sub "BUILD" :anon :subid("275_1329260312.462") :outer("273_1329260312.462")
-    .param pmc param_2417
-    .param pmc param_2418 :named("handle")
-    .param pmc param_2419 :named("description")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 2069
-    .lex "self", param_2417
-    .lex "$handle", param_2418
-    .lex "$description", param_2419
+.sub "BUILD" :anon :subid("203_1330909682.33311") :outer("293_1330909682.33311")
+    .param pmc param_2416
+    .param pmc param_2417 :named("handle")
+    .param pmc param_2418 :named("description")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 2068
+    .lex "self", param_2416
+    .lex "$handle", param_2417
+    .lex "$description", param_2418
 .annotate 'line', 2070
-    set $P101, param_2418
+    set $P101, param_2417
     unless_null $P101, vivify_1271
     new $P101, "Undef"
   vivify_1271:
     set $S100, $P101
     nqp_create_sc $P102, $S100
-    set $P103, param_2417
+    set $P103, param_2416
     nqp_decontainerize $P104, $P103
-    find_lex $P105, "$?CLASS"
+    nqp_get_sc_object $P105, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
     repr_bind_attr_obj $P104, $P105, "$!sc", 0, $P102
 .annotate 'line', 2071
-    set $P101, param_2418
+    set $P101, param_2417
     unless_null $P101, vivify_1272
     new $P101, "Undef"
   vivify_1272:
-    set $P102, param_2417
+    set $P102, param_2416
     nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
     repr_bind_attr_obj $P103, $P104, "$!handle", 1, $P101
 .annotate 'line', 2072
     new $P101, "Hash"
-    set $P102, param_2417
+    set $P102, param_2416
     nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
     repr_bind_attr_obj $P103, $P104, "%!addr_to_slot", 7, $P101
 .annotate 'line', 2073
     new $P101, "ResizablePMCArray"
-    set $P102, param_2417
+    set $P102, param_2416
     nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
     repr_bind_attr_obj $P103, $P104, "@!fixup_tasks", 6, $P101
 .annotate 'line', 2074
     new $P101, "ResizablePMCArray"
-    set $P102, param_2417
+    set $P102, param_2416
     nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
     repr_bind_attr_obj $P103, $P104, "@!load_dependency_tasks", 5, $P101
 .annotate 'line', 2075
-    set $P101, param_2417
-    nqp_decontainerize $P102, $P101
-    find_lex $P103, "$?CLASS"
-    repr_get_attr_obj $P104, $P102, $P103, "$!sc", 0
-    unless_null $P104, vivify_1273
-    new $P104, "Undef"
-  vivify_1273:
-    set $P105, param_2419
-    unless_null $P105, vivify_1274
-    new $P105, "Undef"
-  vivify_1274:
-    $P104."set_description"($P105)
-.annotate 'line', 2076
     find_dynamic_lex $P103, "%*COMPILING"
-    unless_null $P103, vivify_1275
+    unless_null $P103, vivify_1273
     get_hll_global $P101, "GLOBAL"
     get_who $P102, $P101
     set $P103, $P102["%COMPILING"]
-    unless_null $P103, vivify_1276
+    unless_null $P103, vivify_1274
     die "Contextual %*COMPILING not found"
-  vivify_1276:
+  vivify_1274:
+  vivify_1273:
+    set $P2419, $P103["%?OPTIONS"]
+    unless_null $P2419, vivify_1275
+    $P2419 = root_new ['parrot';'Hash']
   vivify_1275:
-    set $P2420, $P103["%?OPTIONS"]
-    unless_null $P2420, vivify_1277
-    $P2420 = root_new ['parrot';'Hash']
-  vivify_1277:
-    set $P104, $P2420["target"]
-    unless_null $P104, vivify_1278
+    set $P104, $P2419["target"]
+    unless_null $P104, vivify_1276
     new $P104, "Undef"
-  vivify_1278:
+  vivify_1276:
     set $S100, $P104
     iseq $I100, $S100, "pir"
     new $P105, 'Integer'
     set $P105, $I100
-    set $P106, param_2417
+    set $P106, param_2416
     nqp_decontainerize $P107, $P106
-    find_lex $P108, "$?CLASS"
+    nqp_get_sc_object $P108, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
     repr_bind_attr_obj $P107, $P108, "$!precomp_mode", 2, $P105
-.annotate 'line', 2077
+.annotate 'line', 2076
     new $P101, "Float"
     assign $P101, 0
-    set $P102, param_2417
+    set $P102, param_2416
     nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
     repr_bind_attr_obj $P103, $P104, "$!num_code_refs", 3, $P101
-.annotate 'line', 2078
+.annotate 'line', 2077
     new $P101, "ResizablePMCArray"
-    set $P102, param_2417
+    set $P102, param_2416
     nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
     repr_bind_attr_obj $P103, $P104, "$!code_ref_blocks", 4, $P101
-.annotate 'line', 2069
-    .return ($P101)
+.annotate 'line', 2078
+    set $P101, param_2416
+    nqp_decontainerize $P102, $P101
+    nqp_get_sc_object $P103, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    repr_get_attr_obj $P104, $P102, $P103, "$!sc", 0
+    unless_null $P104, vivify_1277
+    new $P104, "Undef"
+  vivify_1277:
+    set $P105, param_2418
+    unless_null $P105, vivify_1278
+    new $P105, "Undef"
+  vivify_1278:
+    $P104."set_description"($P105)
+.annotate 'line', 2081
+    set $P101, param_2416
+    nqp_decontainerize $P102, $P101
+    nqp_get_sc_object $P103, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    repr_get_attr_obj $P104, $P102, $P103, "$!sc", 0
+    unless_null $P104, vivify_1279
+    new $P104, "Undef"
+  vivify_1279:
+    nqp_push_compiling_sc $P104
+.annotate 'line', 2068
+    .return ()
 .end
 
 
 .HLL "nqp"
 
 .namespace ["HLL";"World"]
-.sub "slot_for_object" :anon :subid("276_1329260312.462") :outer("273_1329260312.462")
+.sub "slot_for_object" :anon :subid("204_1330909682.33311") :outer("293_1330909682.33311")
+    .param pmc param_2421
     .param pmc param_2422
-    .param pmc param_2423
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 2082
-    .lex "self", param_2422
-    .lex "$obj", param_2423
-.annotate 'line', 2083
-    new $P101, "Undef"
-    set $P2424, $P101
-    .lex "$slot", $P2424
-    set $P102, param_2423
-    unless_null $P102, vivify_1279
-    new $P102, "Undef"
-  vivify_1279:
-    get_id $I100, $P102
-    set $P103, param_2422
-    nqp_decontainerize $P104, $P103
-    find_lex $P105, "$?CLASS"
-    repr_get_attr_obj $P2425, $P104, $P105, "%!addr_to_slot", 7
-    unless_null $P2425, vivify_1280
-    $P2425 = root_new ['parrot';'Hash']
-  vivify_1280:
-    set $P106, $P2425[$I100]
-    unless_null $P106, vivify_1281
-    new $P106, "Undef"
-  vivify_1281:
-    set $P2424, $P106
-.annotate 'line', 2084
-    set $P102, $P2424
-    unless_null $P102, vivify_1282
-    new $P102, "Undef"
-  vivify_1282:
-    defined $I100, $P102
-    if $I100, unless_2426_end
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 2085
-    die "slot_for_object called on object not in context"
-  unless_2426_end:
-.annotate 'line', 2082
-    set $P102, $P2424
+    .lex "self", param_2421
+    .lex "$obj", param_2422
+.annotate 'line', 2086
+    new $P101, "Undef"
+    set $P2423, $P101
+    .lex "$slot", $P2423
+    set $P102, param_2422
+    unless_null $P102, vivify_1280
+    new $P102, "Undef"
+  vivify_1280:
+    get_id $I100, $P102
+    set $P103, param_2421
+    nqp_decontainerize $P104, $P103
+    nqp_get_sc_object $P105, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    repr_get_attr_obj $P2424, $P104, $P105, "%!addr_to_slot", 7
+    unless_null $P2424, vivify_1281
+    $P2424 = root_new ['parrot';'Hash']
+  vivify_1281:
+    set $P106, $P2424[$I100]
+    unless_null $P106, vivify_1282
+    new $P106, "Undef"
+  vivify_1282:
+    set $P2423, $P106
+.annotate 'line', 2087
+    set $P102, $P2423
     unless_null $P102, vivify_1283
     new $P102, "Undef"
   vivify_1283:
+    defined $I100, $P102
+    if $I100, unless_2425_end
+.annotate 'line', 2088
+    die "slot_for_object called on object not in context"
+  unless_2425_end:
+.annotate 'line', 2085
+    set $P102, $P2423
+    unless_null $P102, vivify_1284
+    new $P102, "Undef"
+  vivify_1284:
     .return ($P102)
 .end
 
@@ -17397,73 +17806,73 @@
 .HLL "nqp"
 
 .namespace ["HLL";"World"]
-.sub "get_slot_past_for_object" :anon :subid("277_1329260312.462") :outer("273_1329260312.462")
+.sub "get_slot_past_for_object" :anon :subid("205_1330909682.33311") :outer("293_1330909682.33311")
+    .param pmc param_2427
     .param pmc param_2428
-    .param pmc param_2429
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 2094
-    .lex "self", param_2428
-    .lex "$obj", param_2429
-.annotate 'line', 2095
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 2097
+    .lex "self", param_2427
+    .lex "$obj", param_2428
+.annotate 'line', 2098
     new $P101, "Undef"
-    set $P2430, $P101
-    .lex "$slot", $P2430
-.annotate 'line', 2096
+    set $P2429, $P101
+    .lex "$slot", $P2429
+.annotate 'line', 2099
     new $P102, "Undef"
-    set $P2431, $P102
-    .lex "$past", $P2431
-.annotate 'line', 2095
-    set $P103, param_2428
+    set $P2430, $P102
+    .lex "$past", $P2430
+.annotate 'line', 2098
+    set $P103, param_2427
     nqp_decontainerize $P104, $P103
-    set $P105, param_2429
-    unless_null $P105, vivify_1284
+    set $P105, param_2428
+    unless_null $P105, vivify_1285
     new $P105, "Undef"
-  vivify_1284:
+  vivify_1285:
     $P106 = $P104."slot_for_object"($P105)
-    set $P2430, $P106
-.annotate 'line', 2096
+    set $P2429, $P106
+.annotate 'line', 2099
     get_hll_global $P103, "GLOBAL"
     nqp_get_package_through_who $P104, $P103, "PAST"
     get_who $P105, $P104
     set $P106, $P105["Op"]
-    set $P107, param_2428
+    set $P107, param_2427
     nqp_decontainerize $P108, $P107
-    find_lex $P109, "$?CLASS"
+    nqp_get_sc_object $P109, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
     repr_get_attr_obj $P110, $P108, $P109, "$!handle", 1
-    unless_null $P110, vivify_1285
+    unless_null $P110, vivify_1286
     new $P110, "Undef"
-  vivify_1285:
-    set $P111, $P2430
-    unless_null $P111, vivify_1286
-    new $P111, "Undef"
   vivify_1286:
+    set $P111, $P2429
+    unless_null $P111, vivify_1287
+    new $P111, "Undef"
+  vivify_1287:
     $P112 = $P106."new"($P110, $P111, "nqp_get_sc_object Psi" :named("pirop"))
-    set $P2431, $P112
-.annotate 'line', 2097
+    set $P2430, $P112
+.annotate 'line', 2100
     new $P103, "Float"
     assign $P103, 1
-    set $P2432, $P2431
-    unless_null $P2432, vivify_1287
-    $P2432 = root_new ['parrot';'Hash']
-    set $P2431, $P2432
-  vivify_1287:
-    set $P2432["has_compile_time_value"], $P103
-.annotate 'line', 2098
-    set $P103, param_2429
-    unless_null $P103, vivify_1288
-    new $P103, "Undef"
+    set $P2431, $P2430
+    unless_null $P2431, vivify_1288
+    $P2431 = root_new ['parrot';'Hash']
+    set $P2430, $P2431
   vivify_1288:
-    set $P2433, $P2431
-    unless_null $P2433, vivify_1289
-    $P2433 = root_new ['parrot';'Hash']
-    set $P2431, $P2433
-  vivify_1289:
-    set $P2433["compile_time_value"], $P103
-.annotate 'line', 2094
-    set $P103, $P2431
-    unless_null $P103, vivify_1290
+    set $P2431["has_compile_time_value"], $P103
+.annotate 'line', 2101
+    set $P103, param_2428
+    unless_null $P103, vivify_1289
     new $P103, "Undef"
+  vivify_1289:
+    set $P2432, $P2430
+    unless_null $P2432, vivify_1290
+    $P2432 = root_new ['parrot';'Hash']
+    set $P2430, $P2432
   vivify_1290:
+    set $P2432["compile_time_value"], $P103
+.annotate 'line', 2097
+    set $P103, $P2430
+    unless_null $P103, vivify_1291
+    new $P103, "Undef"
+  vivify_1291:
     .return ($P103)
 .end
 
@@ -17471,31 +17880,31 @@
 .HLL "nqp"
 
 .namespace ["HLL";"World"]
-.sub "get_slot_past_for_code_ref_at" :anon :subid("278_1329260312.462") :outer("273_1329260312.462")
+.sub "get_slot_past_for_code_ref_at" :anon :subid("206_1330909682.33311") :outer("293_1330909682.33311")
+    .param pmc param_2434
     .param pmc param_2435
-    .param pmc param_2436
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 2103
-    .lex "self", param_2435
-    .lex "$idx", param_2436
-.annotate 'line', 2104
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 2106
+    .lex "self", param_2434
+    .lex "$idx", param_2435
+.annotate 'line', 2107
     get_hll_global $P101, "GLOBAL"
     nqp_get_package_through_who $P102, $P101, "PAST"
     get_who $P103, $P102
     set $P104, $P103["Op"]
-    set $P105, param_2435
+    set $P105, param_2434
     nqp_decontainerize $P106, $P105
-    find_lex $P107, "$?CLASS"
+    nqp_get_sc_object $P107, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
     repr_get_attr_obj $P108, $P106, $P107, "$!handle", 1
-    unless_null $P108, vivify_1291
+    unless_null $P108, vivify_1292
     new $P108, "Undef"
-  vivify_1291:
-    set $P109, param_2436
-    unless_null $P109, vivify_1292
-    new $P109, "Undef"
   vivify_1292:
+    set $P109, param_2435
+    unless_null $P109, vivify_1293
+    new $P109, "Undef"
+  vivify_1293:
     $P110 = $P104."new"($P108, $P109, "nqp_get_sc_code_ref Psi" :named("pirop"))
-.annotate 'line', 2103
+.annotate 'line', 2106
     .return ($P110)
 .end
 
@@ -17504,46 +17913,46 @@
 
 .namespace ["HLL";"World"]
 .include "except_types.pasm"
-.sub "set_slot_past" :anon :subid("279_1329260312.462") :outer("273_1329260312.462")
+.sub "set_slot_past" :anon :subid("207_1330909682.33311") :outer("293_1330909682.33311")
+    .param pmc param_2439
     .param pmc param_2440
     .param pmc param_2441
-    .param pmc param_2442
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 2108
-    new $P2439, 'ExceptionHandler', [.CONTROL_RETURN]
-    set_label $P2439, control_2438
-    push_eh $P2439
-    .lex "self", param_2440
-    .lex "$slot", param_2441
-    .lex "$past_to_set", param_2442
-.annotate 'line', 2109
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 2111
+    new $P2438, 'ExceptionHandler', [.CONTROL_RETURN]
+    set_label $P2438, control_2437
+    push_eh $P2438
+    .lex "self", param_2439
+    .lex "$slot", param_2440
+    .lex "$past_to_set", param_2441
+.annotate 'line', 2112
     new $P101, "Exception"
     set $P101['type'], .CONTROL_RETURN
     get_hll_global $P102, "GLOBAL"
     nqp_get_package_through_who $P103, $P102, "PAST"
     get_who $P104, $P103
     set $P105, $P104["Op"]
-    set $P106, param_2440
+    set $P106, param_2439
     nqp_decontainerize $P107, $P106
-    find_lex $P108, "$?CLASS"
+    nqp_get_sc_object $P108, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
     repr_get_attr_obj $P109, $P107, $P108, "$!handle", 1
-    unless_null $P109, vivify_1293
+    unless_null $P109, vivify_1294
     new $P109, "Undef"
-  vivify_1293:
-    set $P110, param_2441
-    unless_null $P110, vivify_1294
-    new $P110, "Undef"
   vivify_1294:
-    set $P111, param_2442
-    unless_null $P111, vivify_1295
-    new $P111, "Undef"
+    set $P110, param_2440
+    unless_null $P110, vivify_1295
+    new $P110, "Undef"
   vivify_1295:
+    set $P111, param_2441
+    unless_null $P111, vivify_1296
+    new $P111, "Undef"
+  vivify_1296:
     $P112 = $P105."new"($P109, $P110, $P111, "nqp_set_sc_object vsiP" :named("pirop"))
     setattribute $P101, 'payload', $P112
     throw $P101
-.annotate 'line', 2108
+.annotate 'line', 2111
     .return ()
-  control_2438:
+  control_2437:
     .local pmc exception 
     .get_results (exception) 
     getattribute $P101, exception, "payload"
@@ -17554,30 +17963,30 @@
 .HLL "nqp"
 
 .namespace ["HLL";"World"]
-.sub "set_cur_sc" :anon :subid("280_1329260312.462") :outer("273_1329260312.462")
+.sub "set_cur_sc" :anon :subid("208_1330909682.33311") :outer("293_1330909682.33311")
+    .param pmc param_2443
     .param pmc param_2444
-    .param pmc param_2445
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 2115
-    .lex "self", param_2444
-    .lex "$to_wrap", param_2445
-.annotate 'line', 2116
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 2118
+    .lex "self", param_2443
+    .lex "$to_wrap", param_2444
+.annotate 'line', 2119
     get_hll_global $P101, "GLOBAL"
     nqp_get_package_through_who $P102, $P101, "PAST"
     get_who $P103, $P102
     set $P104, $P103["Op"]
-    set $P105, param_2445
-    unless_null $P105, vivify_1296
+    set $P105, param_2444
+    unless_null $P105, vivify_1297
     new $P105, "Undef"
-  vivify_1296:
-.annotate 'line', 2119
+  vivify_1297:
+.annotate 'line', 2122
     get_hll_global $P106, "GLOBAL"
     nqp_get_package_through_who $P107, $P106, "PAST"
     get_who $P108, $P107
     set $P109, $P108["Var"]
     $P110 = $P109."new"("cur_sc" :named("name"), "register" :named("scope"))
     $P111 = $P104."new"($P105, $P110, "nqp_set_sc_for_object__0PP" :named("pirop"))
-.annotate 'line', 2115
+.annotate 'line', 2118
     .return ($P111)
 .end
 
@@ -17585,36 +17994,36 @@
 .HLL "nqp"
 
 .namespace ["HLL";"World"]
-.sub "add_object_to_cur_sc_past" :anon :subid("281_1329260312.462") :outer("273_1329260312.462")
+.sub "add_object_to_cur_sc_past" :anon :subid("209_1330909682.33311") :outer("293_1330909682.33311")
+    .param pmc param_2446
     .param pmc param_2447
     .param pmc param_2448
-    .param pmc param_2449
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 2123
-    .lex "self", param_2447
-    .lex "$slot", param_2448
-    .lex "$to_wrap", param_2449
-.annotate 'line', 2124
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 2126
+    .lex "self", param_2446
+    .lex "$slot", param_2447
+    .lex "$to_wrap", param_2448
+.annotate 'line', 2127
     get_hll_global $P101, "GLOBAL"
     nqp_get_package_through_who $P102, $P101, "PAST"
     get_who $P103, $P102
     set $P104, $P103["Op"]
-.annotate 'line', 2126
+.annotate 'line', 2129
     get_hll_global $P105, "GLOBAL"
     nqp_get_package_through_who $P106, $P105, "PAST"
     get_who $P107, $P106
     set $P108, $P107["Var"]
     $P109 = $P108."new"("cur_sc" :named("name"), "register" :named("scope"))
-    set $P110, param_2448
-    unless_null $P110, vivify_1297
+    set $P110, param_2447
+    unless_null $P110, vivify_1298
     new $P110, "Undef"
-  vivify_1297:
-    set $P111, param_2449
-    unless_null $P111, vivify_1298
-    new $P111, "Undef"
   vivify_1298:
+    set $P111, param_2448
+    unless_null $P111, vivify_1299
+    new $P111, "Undef"
+  vivify_1299:
     $P112 = $P104."new"($P109, $P110, $P111, "nqp_add_object_to_sc 2PiP" :named("pirop"))
-.annotate 'line', 2123
+.annotate 'line', 2126
     .return ($P112)
 .end
 
@@ -17622,83 +18031,83 @@
 .HLL "nqp"
 
 .namespace ["HLL";"World"]
-.sub "add_object" :anon :subid("282_1329260312.462") :outer("273_1329260312.462")
+.sub "add_object" :anon :subid("210_1330909682.33311") :outer("293_1330909682.33311")
+    .param pmc param_2450
     .param pmc param_2451
-    .param pmc param_2452
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 2133
-    .lex "self", param_2451
-    .lex "$obj", param_2452
-.annotate 'line', 2135
-    new $P101, "Undef"
-    set $P2453, $P101
-    .lex "$idx", $P2453
-.annotate 'line', 2134
-    set $P102, param_2452
-    unless_null $P102, vivify_1299
-    new $P102, "Undef"
-  vivify_1299:
-    set $P103, param_2451
-    nqp_decontainerize $P104, $P103
-    find_lex $P105, "$?CLASS"
-    repr_get_attr_obj $P106, $P104, $P105, "$!sc", 0
-    unless_null $P106, vivify_1300
-    new $P106, "Undef"
-  vivify_1300:
-    nqp_set_sc_for_object $P102, $P106
-.annotate 'line', 2135
-    set $P102, param_2451
-    nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
-    repr_get_attr_obj $P105, $P103, $P104, "$!sc", 0
-    unless_null $P105, vivify_1301
-    new $P105, "Undef"
-  vivify_1301:
-    $P106 = $P105."elems"()
-    set $P2453, $P106
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 2136
-    set $P102, param_2452
-    unless_null $P102, vivify_1302
-    new $P102, "Undef"
-  vivify_1302:
-    set $P103, $P2453
-    unless_null $P103, vivify_1303
-    new $P103, "Undef"
-  vivify_1303:
-    set $I100, $P103
-    set $P104, param_2451
-    nqp_decontainerize $P105, $P104
-    find_lex $P106, "$?CLASS"
-    repr_get_attr_obj $P2454, $P105, $P106, "$!sc", 0
-    unless_null $P2454, vivify_1304
-    $P2454 = root_new ['parrot';'ResizablePMCArray']
-    repr_bind_attr_obj $P105, $P106, "$!sc", 0, $P2454
-  vivify_1304:
-    set $P2454[$I100], $P102
+    .lex "self", param_2450
+    .lex "$obj", param_2451
+.annotate 'line', 2138
+    new $P101, "Undef"
+    set $P2452, $P101
+    .lex "$idx", $P2452
 .annotate 'line', 2137
-    set $P102, $P2453
-    unless_null $P102, vivify_1305
+    set $P102, param_2451
+    unless_null $P102, vivify_1300
     new $P102, "Undef"
-  vivify_1305:
-    set $P103, param_2452
-    unless_null $P103, vivify_1306
+  vivify_1300:
+    set $P103, param_2450
+    nqp_decontainerize $P104, $P103
+    nqp_get_sc_object $P105, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    repr_get_attr_obj $P106, $P104, $P105, "$!sc", 0
+    unless_null $P106, vivify_1301
+    new $P106, "Undef"
+  vivify_1301:
+    nqp_set_sc_for_object $P102, $P106
+.annotate 'line', 2138
+    set $P102, param_2450
+    nqp_decontainerize $P103, $P102
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    repr_get_attr_obj $P105, $P103, $P104, "$!sc", 0
+    unless_null $P105, vivify_1302
+    new $P105, "Undef"
+  vivify_1302:
+    $P106 = $P105."elems"()
+    set $P2452, $P106
+.annotate 'line', 2139
+    set $P102, param_2451
+    unless_null $P102, vivify_1303
+    new $P102, "Undef"
+  vivify_1303:
+    set $P103, $P2452
+    unless_null $P103, vivify_1304
     new $P103, "Undef"
-  vivify_1306:
-    get_id $I100, $P103
-    set $P104, param_2451
+  vivify_1304:
+    set $I100, $P103
+    set $P104, param_2450
     nqp_decontainerize $P105, $P104
-    find_lex $P106, "$?CLASS"
-    repr_get_attr_obj $P2455, $P105, $P106, "%!addr_to_slot", 7
-    unless_null $P2455, vivify_1307
-    $P2455 = root_new ['parrot';'Hash']
-    repr_bind_attr_obj $P105, $P106, "%!addr_to_slot", 7, $P2455
-  vivify_1307:
-    set $P2455[$I100], $P102
-.annotate 'line', 2133
-    set $P102, $P2453
-    unless_null $P102, vivify_1308
+    nqp_get_sc_object $P106, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    repr_get_attr_obj $P2453, $P105, $P106, "$!sc", 0
+    unless_null $P2453, vivify_1305
+    $P2453 = root_new ['parrot';'ResizablePMCArray']
+    repr_bind_attr_obj $P105, $P106, "$!sc", 0, $P2453
+  vivify_1305:
+    set $P2453[$I100], $P102
+.annotate 'line', 2140
+    set $P102, $P2452
+    unless_null $P102, vivify_1306
     new $P102, "Undef"
+  vivify_1306:
+    set $P103, param_2451
+    unless_null $P103, vivify_1307
+    new $P103, "Undef"
+  vivify_1307:
+    get_id $I100, $P103
+    set $P104, param_2450
+    nqp_decontainerize $P105, $P104
+    nqp_get_sc_object $P106, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    repr_get_attr_obj $P2454, $P105, $P106, "%!addr_to_slot", 7
+    unless_null $P2454, vivify_1308
+    $P2454 = root_new ['parrot';'Hash']
+    repr_bind_attr_obj $P105, $P106, "%!addr_to_slot", 7, $P2454
   vivify_1308:
+    set $P2454[$I100], $P102
+.annotate 'line', 2136
+    set $P102, $P2452
+    unless_null $P102, vivify_1309
+    new $P102, "Undef"
+  vivify_1309:
     .return ($P102)
 .end
 
@@ -17706,69 +18115,76 @@
 .HLL "nqp"
 
 .namespace ["HLL";"World"]
-.sub "add_code_LEGACY" :anon :subid("283_1329260312.462") :outer("273_1329260312.462")
+.sub "add_root_code_ref" :anon :subid("211_1330909682.33311") :outer("293_1330909682.33311")
+    .param pmc param_2456
     .param pmc param_2457
     .param pmc param_2458
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 2143
-    .lex "self", param_2457
-    .lex "$obj", param_2458
-.annotate 'line', 2144
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 2145
+    .lex "self", param_2456
+    .lex "$code_ref", param_2457
+    .lex "$past_block", param_2458
+.annotate 'line', 2146
     new $P101, "Undef"
     set $P2459, $P101
-    .lex "$idx", $P2459
-    set $P102, param_2457
+    .lex "$code_ref_idx", $P2459
+    set $P102, param_2456
     nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
-    repr_get_attr_obj $P105, $P103, $P104, "$!sc", 0
-    unless_null $P105, vivify_1309
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    repr_get_attr_obj $P105, $P103, $P104, "$!num_code_refs", 3
+    unless_null $P105, vivify_1310
     new $P105, "Undef"
-  vivify_1309:
-    $P106 = $P105."elems"()
-    set $P2459, $P106
-.annotate 'line', 2145
-    set $P102, param_2458
-    unless_null $P102, vivify_1310
-    new $P102, "Undef"
   vivify_1310:
-    set $P103, $P2459
-    unless_null $P103, vivify_1311
-    new $P103, "Undef"
+    set $P2459, $P105
+.annotate 'line', 2147
+    set $P102, param_2456
+    nqp_decontainerize $P103, $P102
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    repr_get_attr_obj $P105, $P103, $P104, "$!num_code_refs", 3
+    unless_null $P105, vivify_1311
+    new $P105, "Undef"
   vivify_1311:
-    set $I100, $P103
-    set $P104, param_2457
-    nqp_decontainerize $P105, $P104
-    find_lex $P106, "$?CLASS"
-    repr_get_attr_obj $P2460, $P105, $P106, "$!sc", 0
-    unless_null $P2460, vivify_1312
-    $P2460 = root_new ['parrot';'ResizablePMCArray']
-    repr_bind_attr_obj $P105, $P106, "$!sc", 0, $P2460
+    add $P106, $P105, 1
+    set $P107, param_2456
+    nqp_decontainerize $P108, $P107
+    nqp_get_sc_object $P109, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    repr_bind_attr_obj $P108, $P109, "$!num_code_refs", 3, $P106
+.annotate 'line', 2148
+    set $P102, param_2456
+    nqp_decontainerize $P103, $P102
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    repr_get_attr_obj $P105, $P103, $P104, "$!code_ref_blocks", 4
+    unless_null $P105, vivify_1312
+    new $P105, "Undef"
   vivify_1312:
-    set $P2460[$I100], $P102
-.annotate 'line', 2146
-    set $P102, $P2459
-    unless_null $P102, vivify_1313
-    new $P102, "Undef"
+    set $P106, param_2458
+    unless_null $P106, vivify_1313
+    new $P106, "Undef"
   vivify_1313:
-    set $P103, param_2458
-    unless_null $P103, vivify_1314
-    new $P103, "Undef"
+    $P105."push"($P106)
+.annotate 'line', 2149
+    set $P102, param_2456
+    nqp_decontainerize $P103, $P102
+    nqp_get_sc_object $P104, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    repr_get_attr_obj $P105, $P103, $P104, "$!sc", 0
+    unless_null $P105, vivify_1314
+    new $P105, "Undef"
   vivify_1314:
-    get_id $I100, $P103
-    set $P104, param_2457
-    nqp_decontainerize $P105, $P104
-    find_lex $P106, "$?CLASS"
-    repr_get_attr_obj $P2461, $P105, $P106, "%!addr_to_slot", 7
-    unless_null $P2461, vivify_1315
-    $P2461 = root_new ['parrot';'Hash']
-    repr_bind_attr_obj $P105, $P106, "%!addr_to_slot", 7, $P2461
+    set $P106, $P2459
+    unless_null $P106, vivify_1315
+    new $P106, "Undef"
   vivify_1315:
-    set $P2461[$I100], $P102
-.annotate 'line', 2143
-    set $P102, $P2459
-    unless_null $P102, vivify_1316
-    new $P102, "Undef"
+    set $I100, $P106
+    set $P107, param_2457
+    unless_null $P107, vivify_1316
+    new $P107, "Undef"
   vivify_1316:
+    nqp_add_code_ref_to_sc $P105, $I100, $P107
+.annotate 'line', 2145
+    set $P102, $P2459
+    unless_null $P102, vivify_1317
+    new $P102, "Undef"
+  vivify_1317:
     .return ($P102)
 .end
 
@@ -17776,95 +18192,53 @@
 .HLL "nqp"
 
 .namespace ["HLL";"World"]
-.sub "add_root_code_ref" :anon :subid("284_1329260312.462") :outer("273_1329260312.462")
+.sub "update_root_code_ref" :anon :subid("212_1330909682.33311") :outer("293_1330909682.33311")
+    .param pmc param_2461
+    .param pmc param_2462
     .param pmc param_2463
-    .param pmc param_2464
-    .param pmc param_2465
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 2151
-    .lex "self", param_2463
-    .lex "$code_ref", param_2464
-    .lex "$past_block", param_2465
-.annotate 'line', 2152
-    new $P101, "Undef"
-    set $P2466, $P101
-    .lex "$code_ref_idx", $P2466
-    set $P102, param_2463
-    nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
-    repr_get_attr_obj $P105, $P103, $P104, "$!num_code_refs", 3
-    unless_null $P105, vivify_1317
-    new $P105, "Undef"
-  vivify_1317:
-    set $P2466, $P105
-.annotate 'line', 2153
-    set $P102, param_2463
-    nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
-    repr_get_attr_obj $P105, $P103, $P104, "$!num_code_refs", 3
-    unless_null $P105, vivify_1318
-    new $P105, "Undef"
-  vivify_1318:
-    add $P106, $P105, 1
-    set $P107, param_2463
-    nqp_decontainerize $P108, $P107
-    find_lex $P109, "$?CLASS"
-    repr_bind_attr_obj $P108, $P109, "$!num_code_refs", 3, $P106
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 2154
-    set $P102, param_2463
-    nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
-    repr_get_attr_obj $P105, $P103, $P104, "$!code_ref_blocks", 4
+    .lex "self", param_2461
+    .lex "$idx", param_2462
+    .lex "$new_code_ref", param_2463
+.annotate 'line', 2155
+    set $P101, param_2461
+    nqp_decontainerize $P102, $P101
+    nqp_get_sc_object $P103, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    repr_get_attr_obj $P104, $P102, $P103, "$!sc", 0
+    unless_null $P104, vivify_1318
+    new $P104, "Undef"
+  vivify_1318:
+    set $P105, param_2462
     unless_null $P105, vivify_1319
     new $P105, "Undef"
   vivify_1319:
-    set $P106, param_2465
+    set $I100, $P105
+    set $P106, param_2463
     unless_null $P106, vivify_1320
     new $P106, "Undef"
   vivify_1320:
-    $P105."push"($P106)
-.annotate 'line', 2155
-    set $P102, param_2463
-    nqp_decontainerize $P103, $P102
-    find_lex $P104, "$?CLASS"
-    repr_get_attr_obj $P105, $P103, $P104, "$!sc", 0
-    unless_null $P105, vivify_1321
-    new $P105, "Undef"
-  vivify_1321:
-    set $P106, $P2466
-    unless_null $P106, vivify_1322
-    new $P106, "Undef"
-  vivify_1322:
-    set $I100, $P106
-    set $P107, param_2464
-    unless_null $P107, vivify_1323
-    new $P107, "Undef"
-  vivify_1323:
-    nqp_add_code_ref_to_sc $P105, $I100, $P107
-.annotate 'line', 2151
-    set $P102, $P2466
-    unless_null $P102, vivify_1324
-    new $P102, "Undef"
-  vivify_1324:
-    .return ($P102)
+    nqp_add_code_ref_to_sc $P104, $I100, $P106
+.annotate 'line', 2154
+    .return ()
 .end
 
 
 .HLL "nqp"
 
 .namespace ["HLL";"World"]
-.sub "is_precompilation_mode" :anon :subid("285_1329260312.462") :outer("273_1329260312.462")
-    .param pmc param_2468
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 2160
-    .lex "self", param_2468
-    set $P101, param_2468
+.sub "is_precompilation_mode" :anon :subid("213_1330909682.33311") :outer("293_1330909682.33311")
+    .param pmc param_2465
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 2159
+    .lex "self", param_2465
+    set $P101, param_2465
     nqp_decontainerize $P102, $P101
-    find_lex $P103, "$?CLASS"
+    nqp_get_sc_object $P103, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
     repr_get_attr_obj $P104, $P102, $P103, "$!precomp_mode", 2
-    unless_null $P104, vivify_1325
+    unless_null $P104, vivify_1321
     new $P104, "Undef"
-  vivify_1325:
+  vivify_1321:
     .return ($P104)
 .end
 
@@ -17872,89 +18246,89 @@
 .HLL "nqp"
 
 .namespace ["HLL";"World"]
-.sub "add_load_dependency_task" :anon :subid("286_1329260312.462") :outer("273_1329260312.462")
-    .param pmc param_2470
-    .param pmc param_2471 :optional :named("deserialize_past")
-    .param int has_param_2471 :opt_flag
-    .param pmc param_2472 :optional :named("fixup_past")
-    .param int has_param_2472 :opt_flag
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 2166
-    .lex "self", param_2470
-    if has_param_2471, optparam_1326
+.sub "add_load_dependency_task" :anon :subid("214_1330909682.33311") :outer("293_1330909682.33311")
+    .param pmc param_2467
+    .param pmc param_2468 :optional :named("deserialize_past")
+    .param int has_param_2468 :opt_flag
+    .param pmc param_2469 :optional :named("fixup_past")
+    .param int has_param_2469 :opt_flag
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 2165
+    .lex "self", param_2467
+    if has_param_2468, optparam_1322
     new $P101, "Undef"
-    set param_2471, $P101
-  optparam_1326:
-    .lex "$deserialize_past", param_2471
-    if has_param_2472, optparam_1327
+    set param_2468, $P101
+  optparam_1322:
+    .lex "$deserialize_past", param_2468
+    if has_param_2469, optparam_1323
     new $P102, "Undef"
-    set param_2472, $P102
-  optparam_1327:
-    .lex "$fixup_past", param_2472
-.annotate 'line', 2167
-    set $P104, param_2470
+    set param_2469, $P102
+  optparam_1323:
+    .lex "$fixup_past", param_2469
+.annotate 'line', 2166
+    set $P104, param_2467
     nqp_decontainerize $P105, $P104
-    find_lex $P106, "$?CLASS"
+    nqp_get_sc_object $P106, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
     repr_get_attr_obj $P107, $P105, $P106, "$!precomp_mode", 2
-    unless_null $P107, vivify_1328
+    unless_null $P107, vivify_1324
     new $P107, "Undef"
-  vivify_1328:
-    if $P107, if_2473
-.annotate 'line', 2171
-    set $P110, param_2472
-    unless_null $P110, vivify_1329
-    new $P110, "Undef"
-  vivify_1329:
-    if $P110, if_2476
-    set $P109, $P110
-    goto if_2476_end
-  if_2476:
-    set $P111, param_2470
-    nqp_decontainerize $P112, $P111
-    find_lex $P113, "$?CLASS"
-    repr_get_attr_obj $P2477, $P112, $P113, "@!load_dependency_tasks", 5
-    unless_null $P2477, vivify_1330
-    $P2477 = root_new ['parrot';'ResizablePMCArray']
-  vivify_1330:
-    set $P114, param_2472
-    unless_null $P114, vivify_1331
-    new $P114, "Undef"
-  vivify_1331:
-    $P115 = $P2477."push"($P114)
-    set $P109, $P115
-  if_2476_end:
+  vivify_1324:
+    if $P107, if_2470
 .annotate 'line', 2170
-    set $P103, $P109
-.annotate 'line', 2167
+    set $P110, param_2469
+    unless_null $P110, vivify_1325
+    new $P110, "Undef"
+  vivify_1325:
+    if $P110, if_2473
+    set $P109, $P110
     goto if_2473_end
   if_2473:
-.annotate 'line', 2168
-    set $P109, param_2471
-    unless_null $P109, vivify_1332
-    new $P109, "Undef"
-  vivify_1332:
-    if $P109, if_2474
-    set $P108, $P109
-    goto if_2474_end
-  if_2474:
-    set $P110, param_2470
-    nqp_decontainerize $P111, $P110
-    find_lex $P112, "$?CLASS"
-    repr_get_attr_obj $P2475, $P111, $P112, "@!load_dependency_tasks", 5
-    unless_null $P2475, vivify_1333
-    $P2475 = root_new ['parrot';'ResizablePMCArray']
-  vivify_1333:
-    set $P113, param_2471
-    unless_null $P113, vivify_1334
-    new $P113, "Undef"
-  vivify_1334:
-    $P114 = $P2475."push"($P113)
-    set $P108, $P114
-  if_2474_end:
-.annotate 'line', 2167
-    set $P103, $P108
+    set $P111, param_2467
+    nqp_decontainerize $P112, $P111
+    nqp_get_sc_object $P113, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    repr_get_attr_obj $P2474, $P112, $P113, "@!load_dependency_tasks", 5
+    unless_null $P2474, vivify_1326
+    $P2474 = root_new ['parrot';'ResizablePMCArray']
+  vivify_1326:
+    set $P114, param_2469
+    unless_null $P114, vivify_1327
+    new $P114, "Undef"
+  vivify_1327:
+    $P115 = $P2474."push"($P114)
+    set $P109, $P115
   if_2473_end:
+.annotate 'line', 2169
+    set $P103, $P109
 .annotate 'line', 2166
+    goto if_2470_end
+  if_2470:
+.annotate 'line', 2167
+    set $P109, param_2468
+    unless_null $P109, vivify_1328
+    new $P109, "Undef"
+  vivify_1328:
+    if $P109, if_2471
+    set $P108, $P109
+    goto if_2471_end
+  if_2471:
+    set $P110, param_2467
+    nqp_decontainerize $P111, $P110
+    nqp_get_sc_object $P112, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    repr_get_attr_obj $P2472, $P111, $P112, "@!load_dependency_tasks", 5
+    unless_null $P2472, vivify_1329
+    $P2472 = root_new ['parrot';'ResizablePMCArray']
+  vivify_1329:
+    set $P113, param_2468
+    unless_null $P113, vivify_1330
+    new $P113, "Undef"
+  vivify_1330:
+    $P114 = $P2472."push"($P113)
+    set $P108, $P114
+  if_2471_end:
+.annotate 'line', 2166
+    set $P103, $P108
+  if_2470_end:
+.annotate 'line', 2165
     .return ($P103)
 .end
 
@@ -17962,89 +18336,89 @@
 .HLL "nqp"
 
 .namespace ["HLL";"World"]
-.sub "add_fixup_task" :anon :subid("287_1329260312.462") :outer("273_1329260312.462")
-    .param pmc param_2479
-    .param pmc param_2480 :optional :named("deserialize_past")
-    .param int has_param_2480 :opt_flag
-    .param pmc param_2481 :optional :named("fixup_past")
-    .param int has_param_2481 :opt_flag
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 2177
-    .lex "self", param_2479
-    if has_param_2480, optparam_1335
+.sub "add_fixup_task" :anon :subid("215_1330909682.33311") :outer("293_1330909682.33311")
+    .param pmc param_2476
+    .param pmc param_2477 :optional :named("deserialize_past")
+    .param int has_param_2477 :opt_flag
+    .param pmc param_2478 :optional :named("fixup_past")
+    .param int has_param_2478 :opt_flag
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 2176
+    .lex "self", param_2476
+    if has_param_2477, optparam_1331
     new $P101, "Undef"
-    set param_2480, $P101
-  optparam_1335:
-    .lex "$deserialize_past", param_2480
-    if has_param_2481, optparam_1336
+    set param_2477, $P101
+  optparam_1331:
+    .lex "$deserialize_past", param_2477
+    if has_param_2478, optparam_1332
     new $P102, "Undef"
-    set param_2481, $P102
-  optparam_1336:
-    .lex "$fixup_past", param_2481
-.annotate 'line', 2178
-    set $P104, param_2479
+    set param_2478, $P102
+  optparam_1332:
+    .lex "$fixup_past", param_2478
+.annotate 'line', 2177
+    set $P104, param_2476
     nqp_decontainerize $P105, $P104
-    find_lex $P106, "$?CLASS"
+    nqp_get_sc_object $P106, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
     repr_get_attr_obj $P107, $P105, $P106, "$!precomp_mode", 2
-    unless_null $P107, vivify_1337
+    unless_null $P107, vivify_1333
     new $P107, "Undef"
-  vivify_1337:
-    if $P107, if_2482
-.annotate 'line', 2182
-    set $P110, param_2481
-    unless_null $P110, vivify_1338
-    new $P110, "Undef"
-  vivify_1338:
-    if $P110, if_2485
-    set $P109, $P110
-    goto if_2485_end
-  if_2485:
-    set $P111, param_2479
-    nqp_decontainerize $P112, $P111
-    find_lex $P113, "$?CLASS"
-    repr_get_attr_obj $P2486, $P112, $P113, "@!fixup_tasks", 6
-    unless_null $P2486, vivify_1339
-    $P2486 = root_new ['parrot';'ResizablePMCArray']
-  vivify_1339:
-    set $P114, param_2481
-    unless_null $P114, vivify_1340
-    new $P114, "Undef"
-  vivify_1340:
-    $P115 = $P2486."push"($P114)
-    set $P109, $P115
-  if_2485_end:
+  vivify_1333:
+    if $P107, if_2479
 .annotate 'line', 2181
-    set $P103, $P109
-.annotate 'line', 2178
+    set $P110, param_2478
+    unless_null $P110, vivify_1334
+    new $P110, "Undef"
+  vivify_1334:
+    if $P110, if_2482
+    set $P109, $P110
     goto if_2482_end
   if_2482:
-.annotate 'line', 2179
-    set $P109, param_2480
-    unless_null $P109, vivify_1341
-    new $P109, "Undef"
-  vivify_1341:
-    if $P109, if_2483
-    set $P108, $P109
-    goto if_2483_end
-  if_2483:
-    set $P110, param_2479
-    nqp_decontainerize $P111, $P110
-    find_lex $P112, "$?CLASS"
-    repr_get_attr_obj $P2484, $P111, $P112, "@!fixup_tasks", 6
-    unless_null $P2484, vivify_1342
-    $P2484 = root_new ['parrot';'ResizablePMCArray']
-  vivify_1342:
-    set $P113, param_2480
-    unless_null $P113, vivify_1343
-    new $P113, "Undef"
-  vivify_1343:
-    $P114 = $P2484."push"($P113)
-    set $P108, $P114
-  if_2483_end:
-.annotate 'line', 2178
-    set $P103, $P108
+    set $P111, param_2476
+    nqp_decontainerize $P112, $P111
+    nqp_get_sc_object $P113, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    repr_get_attr_obj $P2483, $P112, $P113, "@!fixup_tasks", 6
+    unless_null $P2483, vivify_1335
+    $P2483 = root_new ['parrot';'ResizablePMCArray']
+  vivify_1335:
+    set $P114, param_2478
+    unless_null $P114, vivify_1336
+    new $P114, "Undef"
+  vivify_1336:
+    $P115 = $P2483."push"($P114)
+    set $P109, $P115
   if_2482_end:
+.annotate 'line', 2180
+    set $P103, $P109
 .annotate 'line', 2177
+    goto if_2479_end
+  if_2479:
+.annotate 'line', 2178
+    set $P109, param_2477
+    unless_null $P109, vivify_1337
+    new $P109, "Undef"
+  vivify_1337:
+    if $P109, if_2480
+    set $P108, $P109
+    goto if_2480_end
+  if_2480:
+    set $P110, param_2476
+    nqp_decontainerize $P111, $P110
+    nqp_get_sc_object $P112, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    repr_get_attr_obj $P2481, $P111, $P112, "@!fixup_tasks", 6
+    unless_null $P2481, vivify_1338
+    $P2481 = root_new ['parrot';'ResizablePMCArray']
+  vivify_1338:
+    set $P113, param_2477
+    unless_null $P113, vivify_1339
+    new $P113, "Undef"
+  vivify_1339:
+    $P114 = $P2481."push"($P113)
+    set $P108, $P114
+  if_2480_end:
+.annotate 'line', 2177
+    set $P103, $P108
+  if_2479_end:
+.annotate 'line', 2176
     .return ($P103)
 .end
 
@@ -18052,84 +18426,83 @@
 .HLL "nqp"
 
 .namespace ["HLL";"World"]
-.sub "get_ref" :anon :subid("288_1329260312.462") :outer("273_1329260312.462")
-    .param pmc param_2488
-    .param pmc param_2489
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "get_ref" :anon :subid("216_1330909682.33311") :outer("293_1330909682.33311")
+    .param pmc param_2485
+    .param pmc param_2486
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 2188
-    .const 'Sub' $P2494 = "289_1329260312.462" 
-    capture_lex $P2494
-    .lex "self", param_2488
-    .lex "$obj", param_2489
+    .const 'Sub' $P2491 = "294_1330909682.33311" 
+    capture_lex $P2491
+    .lex "self", param_2485
+    .lex "$obj", param_2486
 .annotate 'line', 2191
     new $P101, "Undef"
-    set $P2490, $P101
-    .lex "$sc", $P2490
-    set $P102, param_2489
-    unless_null $P102, vivify_1344
+    set $P2487, $P101
+    .lex "$sc", $P2487
+    set $P102, param_2486
+    unless_null $P102, vivify_1340
     new $P102, "Undef"
-  vivify_1344:
+  vivify_1340:
     nqp_get_sc_for_object $P103, $P102
-    set $P2490, $P103
+    set $P2487, $P103
 .annotate 'line', 2192
-    set $P102, $P2490
-    unless_null $P102, vivify_1345
+    set $P102, $P2487
+    unless_null $P102, vivify_1341
     new $P102, "Undef"
-  vivify_1345:
+  vivify_1341:
     defined $I100, $P102
-    if $I100, unless_2491_end
+    if $I100, unless_2488_end
 .annotate 'line', 2193
-    new $P103, "String"
-    assign $P103, "Object of type '"
-    set $P104, param_2489
-    unless_null $P104, vivify_1346
-    new $P104, "Undef"
-  vivify_1346:
-    get_how $P105, $P104
-    set $P106, param_2489
-    unless_null $P106, vivify_1347
-    new $P106, "Undef"
-  vivify_1347:
-    $S100 = $P105."name"($P106)
-    concat $P107, $P103, $S100
-    concat $P108, $P107, "' cannot be referenced without having been "
-    concat $P109, $P108, "assigned a serialization context"
+    set $P103, param_2485
+    nqp_decontainerize $P104, $P103
+    set $P105, param_2486
+    unless_null $P105, vivify_1342
+    new $P105, "Undef"
+  vivify_1342:
+    $P104."add_object"($P105)
 .annotate 'line', 2194
-    die $P109
-  unless_2491_end:
-.annotate 'line', 2201
-    set $P103, $P2490
-    unless_null $P103, vivify_1348
+    set $P103, param_2485
+    nqp_decontainerize $P104, $P103
+    nqp_get_sc_object $P105, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    repr_get_attr_obj $P106, $P104, $P105, "$!sc", 0
+    unless_null $P106, vivify_1343
+    new $P106, "Undef"
+  vivify_1343:
+    set $P2487, $P106
+  unless_2488_end:
+.annotate 'line', 2200
+    set $P103, $P2487
+    unless_null $P103, vivify_1344
     new $P103, "Undef"
-  vivify_1348:
-    set $P104, param_2488
+  vivify_1344:
+    set $P104, param_2485
     nqp_decontainerize $P105, $P104
-    find_lex $P106, "$?CLASS"
+    nqp_get_sc_object $P106, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
     repr_get_attr_obj $P107, $P105, $P106, "$!sc", 0
-    unless_null $P107, vivify_1349
+    unless_null $P107, vivify_1345
     new $P107, "Undef"
-  vivify_1349:
+  vivify_1345:
     issame $I100, $P103, $P107
-    if $I100, if_2492
-.annotate 'line', 2204
-    .const 'Sub' $P2494 = "289_1329260312.462" 
-    capture_lex $P2494
-    $P112 = $P2494()
+    if $I100, if_2489
+.annotate 'line', 2203
+    .const 'Sub' $P2491 = "294_1330909682.33311" 
+    capture_lex $P2491
+    $P112 = $P2491()
     set $P102, $P112
+.annotate 'line', 2200
+    goto if_2489_end
+  if_2489:
 .annotate 'line', 2201
-    goto if_2492_end
-  if_2492:
-.annotate 'line', 2202
-    set $P108, param_2488
+    set $P108, param_2485
     nqp_decontainerize $P109, $P108
-    set $P110, param_2489
-    unless_null $P110, vivify_1365
+    set $P110, param_2486
+    unless_null $P110, vivify_1354
     new $P110, "Undef"
-  vivify_1365:
+  vivify_1354:
     $P111 = $P109."get_slot_past_for_object"($P110)
-.annotate 'line', 2201
+.annotate 'line', 2200
     set $P102, $P111
-  if_2492_end:
+  if_2489_end:
 .annotate 'line', 2188
     .return ($P102)
 .end
@@ -18138,152 +18511,70 @@
 .HLL "nqp"
 
 .namespace ["HLL";"World"]
-.sub "_block2493"  :anon :subid("289_1329260312.462") :outer("288_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 2205
+.sub "_block2490"  :anon :subid("294_1330909682.33311") :outer("216_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 2204
     new $P108, "Undef"
-    set $P2495, $P108
-    .lex "$handle", $P2495
-.annotate 'line', 2219
-    new $P109, "Undef"
-    set $P2496, $P109
-    .lex "$past", $P2496
+    set $P2492, $P108
+    .lex "$handle", $P2492
 .annotate 'line', 2205
+    new $P109, "Undef"
+    set $P2493, $P109
+    .lex "$past", $P2493
+.annotate 'line', 2204
     find_lex $P110, "$sc"
-    unless_null $P110, vivify_1350
+    unless_null $P110, vivify_1346
     new $P110, "Undef"
-  vivify_1350:
+  vivify_1346:
     $P112 = $P110."handle"()
-    set $P2495, $P112
-.annotate 'line', 2206
-    set $P114, $P2495
-    unless_null $P114, vivify_1351
-    new $P114, "Undef"
-  vivify_1351:
-    find_lex $P110, "self"
-    nqp_decontainerize $P112, $P110
-    find_lex $P113, "$?CLASS"
-    repr_get_attr_obj $P2498, $P112, $P113, "%!dependencies", 8
-    unless_null $P2498, vivify_1352
-    $P2498 = root_new ['parrot';'Hash']
-  vivify_1352:
-    exists $I101, $P2498[$P114]
-    if $I101, unless_2497_end
-.annotate 'line', 2207
-    find_lex $P115, "$sc"
-    unless_null $P115, vivify_1353
-    new $P115, "Undef"
-  vivify_1353:
-    set $P116, $P2495
-    unless_null $P116, vivify_1354
-    new $P116, "Undef"
-  vivify_1354:
-    find_lex $P117, "self"
-    nqp_decontainerize $P118, $P117
-    find_lex $P119, "$?CLASS"
-    repr_get_attr_obj $P2499, $P118, $P119, "%!dependencies", 8
-    unless_null $P2499, vivify_1355
-    $P2499 = root_new ['parrot';'Hash']
-    repr_bind_attr_obj $P118, $P119, "%!dependencies", 8, $P2499
-  vivify_1355:
-    set $P2499[$P116], $P115
-.annotate 'line', 2208
-    find_lex $P115, "self"
-    nqp_decontainerize $P116, $P115
-    get_hll_global $P117, "GLOBAL"
-    nqp_get_package_through_who $P118, $P117, "PAST"
-    get_who $P119, $P118
-    set $P120, $P119["Op"]
-.annotate 'line', 2210
-    get_hll_global $P121, "GLOBAL"
-    nqp_get_package_through_who $P122, $P121, "PAST"
-    get_who $P123, $P122
-    set $P124, $P123["Op"]
-.annotate 'line', 2212
-    get_hll_global $P125, "GLOBAL"
-    nqp_get_package_through_who $P126, $P125, "PAST"
-    get_who $P127, $P126
-    set $P128, $P127["Op"]
-    set $P129, $P2495
-    unless_null $P129, vivify_1356
-    new $P129, "Undef"
-  vivify_1356:
-    $P130 = $P128."new"($P129, "nqp_get_sc Ps" :named("pirop"))
-    $P131 = $P124."new"($P130, "isnull IP" :named("pirop"))
-.annotate 'line', 2214
-    get_hll_global $P132, "GLOBAL"
-    nqp_get_package_through_who $P133, $P132, "PAST"
-    get_who $P134, $P133
-    set $P135, $P134["Op"]
-.annotate 'line', 2216
-    new $P136, "String"
-    assign $P136, "Incorrect pre-compiled version of "
-    find_lex $P137, "$sc"
-    unless_null $P137, vivify_1357
-    new $P137, "Undef"
-  vivify_1357:
-    $P138 = $P137."description"()
-    unless $P138, unless_2500
-    set $S100, $P138
-    goto unless_2500_end
-  unless_2500:
-    set $S100, "<unknown>"
-  unless_2500_end:
-    concat $P139, $P136, $S100
-    concat $P140, $P139, " loaded"
-    $P141 = $P135."new"($P140, "die vS" :named("pirop"))
-.annotate 'line', 2214
-    $P142 = $P120."new"($P131, $P141, "if" :named("pasttype"))
-.annotate 'line', 2208
-    $P116."add_fixup_task"($P142 :named("deserialize_past"))
-  unless_2497_end:
-.annotate 'line', 2219
+    set $P2492, $P112
+.annotate 'line', 2205
     get_hll_global $P110, "GLOBAL"
     nqp_get_package_through_who $P112, $P110, "PAST"
     get_who $P113, $P112
     set $P114, $P113["Op"]
-    set $P115, $P2495
-    unless_null $P115, vivify_1358
+    set $P115, $P2492
+    unless_null $P115, vivify_1347
     new $P115, "Undef"
-  vivify_1358:
-.annotate 'line', 2220
+  vivify_1347:
+.annotate 'line', 2206
     find_lex $P116, "$sc"
-    unless_null $P116, vivify_1359
+    unless_null $P116, vivify_1348
     new $P116, "Undef"
-  vivify_1359:
+  vivify_1348:
     find_lex $P117, "$obj"
-    unless_null $P117, vivify_1360
+    unless_null $P117, vivify_1349
     new $P117, "Undef"
-  vivify_1360:
+  vivify_1349:
     $P118 = $P116."slot_index_for"($P117)
     $P119 = $P114."new"($P115, $P118, "nqp_get_sc_object Psi" :named("pirop"))
-.annotate 'line', 2219
-    set $P2496, $P119
-.annotate 'line', 2221
+.annotate 'line', 2205
+    set $P2493, $P119
+.annotate 'line', 2207
     new $P110, "Float"
     assign $P110, 1
-    set $P2501, $P2496
-    unless_null $P2501, vivify_1361
-    $P2501 = root_new ['parrot';'Hash']
-    set $P2496, $P2501
-  vivify_1361:
-    set $P2501["has_compile_time_value"], $P110
-.annotate 'line', 2222
+    set $P2494, $P2493
+    unless_null $P2494, vivify_1350
+    $P2494 = root_new ['parrot';'Hash']
+    set $P2493, $P2494
+  vivify_1350:
+    set $P2494["has_compile_time_value"], $P110
+.annotate 'line', 2208
     find_lex $P110, "$obj"
-    unless_null $P110, vivify_1362
+    unless_null $P110, vivify_1351
     new $P110, "Undef"
-  vivify_1362:
-    set $P2502, $P2496
-    unless_null $P2502, vivify_1363
-    $P2502 = root_new ['parrot';'Hash']
-    set $P2496, $P2502
-  vivify_1363:
-    set $P2502["compile_time_value"], $P110
-.annotate 'line', 2204
-    set $P110, $P2496
-    unless_null $P110, vivify_1364
+  vivify_1351:
+    set $P2495, $P2493
+    unless_null $P2495, vivify_1352
+    $P2495 = root_new ['parrot';'Hash']
+    set $P2493, $P2495
+  vivify_1352:
+    set $P2495["compile_time_value"], $P110
+.annotate 'line', 2203
+    set $P110, $P2493
+    unless_null $P110, vivify_1353
     new $P110, "Undef"
-  vivify_1364:
+  vivify_1353:
     .return ($P110)
 .end
 
@@ -18291,76 +18582,76 @@
 .HLL "nqp"
 
 .namespace ["HLL";"World"]
-.sub "sc" :anon :subid("290_1329260312.462") :outer("273_1329260312.462")
+.sub "sc" :anon :subid("217_1330909682.33311") :outer("293_1330909682.33311")
+    .param pmc param_2497
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 2214
+    .lex "self", param_2497
+    set $P101, param_2497
+    nqp_decontainerize $P102, $P101
+    nqp_get_sc_object $P103, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    repr_get_attr_obj $P104, $P102, $P103, "$!sc", 0
+    unless_null $P104, vivify_1355
+    new $P104, "Undef"
+  vivify_1355:
+    .return ($P104)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["HLL";"World"]
+.sub "handle" :anon :subid("218_1330909682.33311") :outer("293_1330909682.33311")
+    .param pmc param_2499
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 2219
+    .lex "self", param_2499
+    set $P101, param_2499
+    nqp_decontainerize $P102, $P101
+    nqp_get_sc_object $P103, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    repr_get_attr_obj $P104, $P102, $P103, "$!handle", 1
+    unless_null $P104, vivify_1356
+    new $P104, "Undef"
+  vivify_1356:
+    .return ($P104)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["HLL";"World"]
+.sub "load_dependency_tasks" :anon :subid("219_1330909682.33311") :outer("293_1330909682.33311")
+    .param pmc param_2501
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 2224
+    .lex "self", param_2501
+    set $P101, param_2501
+    nqp_decontainerize $P102, $P101
+    nqp_get_sc_object $P103, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    repr_get_attr_obj $P2502, $P102, $P103, "@!load_dependency_tasks", 5
+    unless_null $P2502, vivify_1357
+    $P2502 = root_new ['parrot';'ResizablePMCArray']
+  vivify_1357:
+    .return ($P2502)
+.end
+
+
+.HLL "nqp"
+
+.namespace ["HLL";"World"]
+.sub "fixup_tasks" :anon :subid("220_1330909682.33311") :outer("293_1330909682.33311")
     .param pmc param_2504
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 2228
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 2229
     .lex "self", param_2504
     set $P101, param_2504
     nqp_decontainerize $P102, $P101
-    find_lex $P103, "$?CLASS"
-    repr_get_attr_obj $P104, $P102, $P103, "$!sc", 0
-    unless_null $P104, vivify_1366
-    new $P104, "Undef"
-  vivify_1366:
-    .return ($P104)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["HLL";"World"]
-.sub "handle" :anon :subid("291_1329260312.462") :outer("273_1329260312.462")
-    .param pmc param_2506
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 2233
-    .lex "self", param_2506
-    set $P101, param_2506
-    nqp_decontainerize $P102, $P101
-    find_lex $P103, "$?CLASS"
-    repr_get_attr_obj $P104, $P102, $P103, "$!handle", 1
-    unless_null $P104, vivify_1367
-    new $P104, "Undef"
-  vivify_1367:
-    .return ($P104)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["HLL";"World"]
-.sub "load_dependency_tasks" :anon :subid("292_1329260312.462") :outer("273_1329260312.462")
-    .param pmc param_2508
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 2238
-    .lex "self", param_2508
-    set $P101, param_2508
-    nqp_decontainerize $P102, $P101
-    find_lex $P103, "$?CLASS"
-    repr_get_attr_obj $P2509, $P102, $P103, "@!load_dependency_tasks", 5
-    unless_null $P2509, vivify_1368
-    $P2509 = root_new ['parrot';'ResizablePMCArray']
-  vivify_1368:
-    .return ($P2509)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["HLL";"World"]
-.sub "fixup_tasks" :anon :subid("293_1329260312.462") :outer("273_1329260312.462")
-    .param pmc param_2511
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 2243
-    .lex "self", param_2511
-    set $P101, param_2511
-    nqp_decontainerize $P102, $P101
-    find_lex $P103, "$?CLASS"
-    repr_get_attr_obj $P2512, $P102, $P103, "@!fixup_tasks", 6
-    unless_null $P2512, vivify_1369
-    $P2512 = root_new ['parrot';'ResizablePMCArray']
-  vivify_1369:
-    .return ($P2512)
+    nqp_get_sc_object $P103, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    repr_get_attr_obj $P2505, $P102, $P103, "@!fixup_tasks", 6
+    unless_null $P2505, vivify_1358
+    $P2505 = root_new ['parrot';'ResizablePMCArray']
+  vivify_1358:
+    .return ($P2505)
 .end
 
 
@@ -18368,319 +18659,321 @@
 
 .namespace ["HLL";"World"]
 .include "except_types.pasm"
-.sub "serialize_and_produce_deserialization_past" :anon :subid("294_1329260312.462") :outer("273_1329260312.462")
-    .param pmc param_2514
-    .param pmc param_2515
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 2249
-    .const 'Sub' $P2526 = "296_1329260312.462" 
-    capture_lex $P2526
-    .const 'Sub' $P2521 = "295_1329260312.462" 
-    capture_lex $P2521
-    .lex "self", param_2514
-    .lex "$sc_reg", param_2515
-.annotate 'line', 2251
+.sub "serialize_and_produce_deserialization_past" :anon :subid("221_1330909682.33311") :outer("293_1330909682.33311")
+    .param pmc param_2507
+    .param pmc param_2508
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 2235
+    .const 'Sub' $P2520 = "295_1330909682.33311" 
+    capture_lex $P2520
+    .lex "self", param_2507
+    .lex "$sc_reg", param_2508
+.annotate 'line', 2237
     new $P101, "Undef"
-    set $P2516, $P101
-    .lex "$sh", $P2516
-.annotate 'line', 2252
+    set $P2509, $P101
+    .lex "$sh", $P2509
+.annotate 'line', 2238
     new $P102, "Undef"
-    set $P2517, $P102
-    .lex "$serialized", $P2517
-.annotate 'line', 2257
+    set $P2510, $P102
+    .lex "$serialized", $P2510
+.annotate 'line', 2244
     new $P103, "Undef"
-    set $P2518, $P103
-    .lex "$sh_past", $P2518
-.annotate 'line', 2271
-    new $P104, "Undef"
-    set $P2519, $P104
-    .lex "$cr_past", $P2519
-.annotate 'line', 2251
-    new $P105, "ResizableStringArray"
-    set $P2516, $P105
-.annotate 'line', 2252
-    set $P105, param_2514
-    nqp_decontainerize $P106, $P105
-    find_lex $P107, "$?CLASS"
-    repr_get_attr_obj $P108, $P106, $P107, "$!sc", 0
-    unless_null $P108, vivify_1370
-    new $P108, "Undef"
-  vivify_1370:
-    set $P109, $P2516
-    unless_null $P109, vivify_1371
-    new $P109, "Undef"
-  vivify_1371:
-    nqp_serialize_sc $S100, $P108, $P109
-    new $P110, 'String'
-    set $P110, $S100
-    set $P2517, $P110
-.annotate 'line', 2253
-    set $P105, $P2517
-    unless_null $P105, vivify_1372
-    new $P105, "Undef"
-  vivify_1372:
-    set $S100, $P105
-    length $I100, $S100
-    new $P106, 'Integer'
-    set $P106, $I100
-    concat $P107, $P106, " bytes of serialized data produced"
-    "say"($P107)
-.annotate 'line', 2254
-    set $P105, $P2516
-    unless_null $P105, vivify_1373
-    new $P105, "Undef"
-  vivify_1373:
-    elements $I100, $P105
-    new $P106, 'Integer'
-    set $P106, $I100
-    concat $P107, $P106, " strings in heap"
-    "say"($P107)
-.annotate 'line', 2257
-    get_hll_global $P105, "GLOBAL"
-    nqp_get_package_through_who $P106, $P105, "PAST"
-    get_who $P107, $P106
-    set $P108, $P107["Stmts"]
-.annotate 'line', 2258
-    get_hll_global $P109, "GLOBAL"
-    nqp_get_package_through_who $P110, $P109, "PAST"
-    get_who $P111, $P110
-    set $P112, $P111["Op"]
-.annotate 'line', 2260
-    get_hll_global $P113, "GLOBAL"
-    nqp_get_package_through_who $P114, $P113, "PAST"
-    get_who $P115, $P114
-    set $P116, $P115["Var"]
-    $P117 = $P116."new"("register" :named("scope"), "string_heap" :named("name"), 1 :named("isdecl"))
-.annotate 'line', 2261
-    get_hll_global $P118, "GLOBAL"
-    nqp_get_package_through_who $P119, $P118, "PAST"
-    get_who $P120, $P119
-    set $P121, $P120["Op"]
-    $P122 = $P121."new"("ResizableStringArray", "new Ps" :named("pirop"))
-    $P123 = $P112."new"($P117, $P122, "bind" :named("pasttype"))
-.annotate 'line', 2258
-    $P124 = $P108."new"($P123)
-.annotate 'line', 2257
-    set $P2518, $P124
-.annotate 'line', 2262
-    set $P106, $P2516
-    unless_null $P106, vivify_1374
-    new $P106, "Undef"
-  vivify_1374:
-    defined $I100, $P106
-    unless $I100, for_undef_1375
-    iter $P105, $P106
-    new $P108, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P108, loop2524_handler
-    push_eh $P108
-  loop2524_test:
-    unless $P105, loop2524_done
-    shift $P107, $P105
-  loop2524_redo:
-    .const 'Sub' $P2521 = "295_1329260312.462" 
-    capture_lex $P2521
-    $P2521($P107)
-  loop2524_next:
-    goto loop2524_test
-  loop2524_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    pop_upto_eh exception
-    getattribute $P109, exception, 'type'
-    eq $P109, .CONTROL_LOOP_NEXT, loop2524_next
-    eq $P109, .CONTROL_LOOP_REDO, loop2524_redo
-  loop2524_done:
-    pop_eh 
-  for_undef_1375:
-.annotate 'line', 2268
-    set $P105, $P2518
-    unless_null $P105, vivify_1379
-    new $P105, "Undef"
-  vivify_1379:
-    get_hll_global $P106, "GLOBAL"
-    nqp_get_package_through_who $P107, $P106, "PAST"
-    get_who $P108, $P107
-    set $P109, $P108["Var"]
-    $P110 = $P109."new"("register" :named("scope"), "string_heap" :named("name"))
-    $P105."push"($P110)
-.annotate 'line', 2271
-    get_hll_global $P105, "GLOBAL"
-    nqp_get_package_through_who $P106, $P105, "PAST"
-    get_who $P107, $P106
-    set $P108, $P107["Op"]
-    $P109 = $P108."new"("list" :named("pasttype"))
-    set $P2519, $P109
-.annotate 'line', 2272
-    set $P106, param_2514
-    nqp_decontainerize $P107, $P106
-    find_lex $P108, "$?CLASS"
-    repr_get_attr_obj $P109, $P107, $P108, "$!code_ref_blocks", 4
-    unless_null $P109, vivify_1380
-    new $P109, "Undef"
-  vivify_1380:
-    defined $I100, $P109
-    unless $I100, for_undef_1381
-    iter $P105, $P109
-    new $P111, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P111, loop2528_handler
-    push_eh $P111
-  loop2528_test:
-    unless $P105, loop2528_done
-    shift $P110, $P105
-  loop2528_redo:
-    .const 'Sub' $P2526 = "296_1329260312.462" 
-    capture_lex $P2526
-    $P2526($P110)
-  loop2528_next:
-    goto loop2528_test
-  loop2528_handler:
-    .local pmc exception 
-    .get_results (exception) 
-    pop_upto_eh exception
-    getattribute $P112, exception, 'type'
-    eq $P112, .CONTROL_LOOP_NEXT, loop2528_next
-    eq $P112, .CONTROL_LOOP_REDO, loop2528_redo
-  loop2528_done:
-    pop_eh 
-  for_undef_1381:
-.annotate 'line', 2277
-    get_hll_global $P105, "GLOBAL"
-    nqp_get_package_through_who $P106, $P105, "PAST"
-    get_who $P107, $P106
-    set $P108, $P107["Op"]
-.annotate 'line', 2279
-    get_hll_global $P109, "GLOBAL"
-    nqp_get_package_through_who $P110, $P109, "PAST"
-    get_who $P111, $P110
-    set $P112, $P111["Op"]
-.annotate 'line', 2280
-    new $P113, "String"
-    assign $P113, "    $S0 = binary:\""
-    set $P114, $P2517
-    unless_null $P114, vivify_1384
-    new $P114, "Undef"
-  vivify_1384:
-    set $S100, $P114
-    escape $S101, $S100
-    concat $P115, $P113, $S101
-    concat $P116, $P115, "\""
-    new $P117, "ResizablePMCArray"
-    push $P117, $P116
-    push $P117, "    %r = box $S0"
-.annotate 'line', 2279
-    $P118 = $P112."new"($P117 :named("inline"))
-.annotate 'line', 2283
-    get_hll_global $P119, "GLOBAL"
-    nqp_get_package_through_who $P120, $P119, "PAST"
-    get_who $P121, $P120
-    set $P122, $P121["Var"]
-    set $P123, param_2515
-    unless_null $P123, vivify_1385
-    new $P123, "Undef"
-  vivify_1385:
-    $P124 = $P122."new"($P123 :named("name"), "register" :named("scope"))
-    set $P125, $P2518
-    unless_null $P125, vivify_1386
-    new $P125, "Undef"
-  vivify_1386:
-    set $P126, $P2519
-    unless_null $P126, vivify_1387
-    new $P126, "Undef"
-  vivify_1387:
-    $P127 = $P108."new"($P118, $P124, $P125, $P126, "nqp_deserialize_sc__vSPPP" :named("pirop"))
+    set $P2511, $P103
+    .lex "$sh_past", $P2511
 .annotate 'line', 2249
-    .return ($P127)
-.end
-
-
-.HLL "nqp"
-
-.namespace ["HLL";"World"]
-.sub "_block2520"  :anon :subid("295_1329260312.462") :outer("294_1329260312.462")
-    .param pmc param_2522
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 2262
-    .lex "$s", param_2522
-.annotate 'line', 2263
-    find_lex $P108, "$sh_past"
-    unless_null $P108, vivify_1376
-    new $P108, "Undef"
-  vivify_1376:
-    get_hll_global $P109, "GLOBAL"
-    nqp_get_package_through_who $P110, $P109, "PAST"
-    get_who $P111, $P110
-    set $P112, $P111["Op"]
-.annotate 'line', 2265
-    get_hll_global $P113, "GLOBAL"
-    nqp_get_package_through_who $P114, $P113, "PAST"
-    get_who $P115, $P114
-    set $P116, $P115["Var"]
-    $P117 = $P116."new"("register" :named("scope"), "string_heap" :named("name"))
-.annotate 'line', 2266
-    set $P119, param_2522
-    unless_null $P119, vivify_1377
-    new $P119, "Undef"
-  vivify_1377:
-    isnull $I101, $P119
-    if $I101, if_2523
-    set $P125, param_2522
-    unless_null $P125, vivify_1378
-    new $P125, "Undef"
-  vivify_1378:
-    set $P118, $P125
-    goto if_2523_end
-  if_2523:
+    new $P104, "Undef"
+    set $P2512, $P104
+    .lex "$sh_elems", $P2512
+.annotate 'line', 2250
+    new $P105, "Undef"
+    set $P2513, $P105
+    .lex "$i", $P2513
+.annotate 'line', 2261
+    new $P106, "Undef"
+    set $P2514, $P106
+    .lex "$cr_past", $P2514
+.annotate 'line', 2237
+    new $P107, "ResizableStringArray"
+    set $P2509, $P107
+.annotate 'line', 2238
+    set $P107, param_2507
+    nqp_decontainerize $P108, $P107
+    nqp_get_sc_object $P109, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    repr_get_attr_obj $P110, $P108, $P109, "$!sc", 0
+    unless_null $P110, vivify_1359
+    new $P110, "Undef"
+  vivify_1359:
+    set $P111, $P2509
+    unless_null $P111, vivify_1360
+    new $P111, "Undef"
+  vivify_1360:
+    nqp_serialize_sc $S100, $P110, $P111
+    new $P112, 'String'
+    set $P112, $S100
+    set $P2510, $P112
+.annotate 'line', 2241
+    nqp_pop_compiling_sc 
+.annotate 'line', 2244
+    get_hll_global $P107, "GLOBAL"
+    nqp_get_package_through_who $P108, $P107, "PAST"
+    get_who $P109, $P108
+    set $P110, $P109["Stmts"]
+.annotate 'line', 2245
+    get_hll_global $P111, "GLOBAL"
+    nqp_get_package_through_who $P112, $P111, "PAST"
+    get_who $P113, $P112
+    set $P114, $P113["Op"]
+.annotate 'line', 2247
+    get_hll_global $P115, "GLOBAL"
+    nqp_get_package_through_who $P116, $P115, "PAST"
+    get_who $P117, $P116
+    set $P118, $P117["Var"]
+    $P119 = $P118."new"("register" :named("scope"), "string_heap" :named("name"), 1 :named("isdecl"))
+.annotate 'line', 2248
     get_hll_global $P120, "GLOBAL"
     nqp_get_package_through_who $P121, $P120, "PAST"
     get_who $P122, $P121
     set $P123, $P122["Op"]
-    $P124 = $P123."new"("null S" :named("pirop"))
-    set $P118, $P124
-  if_2523_end:
-    $P126 = $P112."new"($P117, $P118, "push vPs" :named("pirop"))
-.annotate 'line', 2263
-    $P127 = $P108."push"($P126)
+    $P124 = $P123."new"("ResizableStringArray", "new Ps" :named("pirop"))
+    $P125 = $P114."new"($P119, $P124, "bind" :named("pasttype"))
+.annotate 'line', 2245
+    $P126 = $P110."new"($P125)
+.annotate 'line', 2244
+    set $P2511, $P126
+.annotate 'line', 2249
+    set $P107, $P2509
+    unless_null $P107, vivify_1361
+    new $P107, "Undef"
+  vivify_1361:
+    elements $I100, $P107
+    new $P108, 'Integer'
+    set $P108, $I100
+    set $P2512, $P108
+.annotate 'line', 2250
+    new $P107, "Float"
+    assign $P107, 0
+    set $P2513, $P107
+.annotate 'line', 2251
+    new $P109, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P109, loop2518_handler
+    push_eh $P109
+  loop2518_test:
+    set $P107, $P2513
+    unless_null $P107, vivify_1362
+    new $P107, "Undef"
+  vivify_1362:
+    set $N100, $P107
+    set $P108, $P2512
+    unless_null $P108, vivify_1363
+    new $P108, "Undef"
+  vivify_1363:
+    set $N101, $P108
+    islt $I100, $N100, $N101
+    unless $I100, loop2518_done
+  loop2518_redo:
+.annotate 'line', 2252
+    set $P109, $P2511
+    unless_null $P109, vivify_1364
+    new $P109, "Undef"
+  vivify_1364:
+    get_hll_global $P110, "GLOBAL"
+    nqp_get_package_through_who $P111, $P110, "PAST"
+    get_who $P112, $P111
+    set $P113, $P112["Op"]
+.annotate 'line', 2254
+    get_hll_global $P114, "GLOBAL"
+    nqp_get_package_through_who $P115, $P114, "PAST"
+    get_who $P116, $P115
+    set $P117, $P116["Var"]
+    $P118 = $P117."new"("register" :named("scope"), "string_heap" :named("name"))
+.annotate 'line', 2255
+    set $P120, $P2513
+    unless_null $P120, vivify_1365
+    new $P120, "Undef"
+  vivify_1365:
+    set $I101, $P120
+    set $P2516, $P2509
+    unless_null $P2516, vivify_1366
+    $P2516 = root_new ['parrot';'ResizablePMCArray']
+  vivify_1366:
+    set $P121, $P2516[$I101]
+    unless_null $P121, vivify_1367
+    new $P121, "Undef"
+  vivify_1367:
+    set $S100, $P121
+    isnull $I102, $S100
+    if $I102, if_2515
+    set $P127, $P2513
+    unless_null $P127, vivify_1368
+    new $P127, "Undef"
+  vivify_1368:
+    set $I103, $P127
+    set $P2517, $P2509
+    unless_null $P2517, vivify_1369
+    $P2517 = root_new ['parrot';'ResizablePMCArray']
+  vivify_1369:
+    set $P128, $P2517[$I103]
+    unless_null $P128, vivify_1370
+    new $P128, "Undef"
+  vivify_1370:
+    set $P119, $P128
+    goto if_2515_end
+  if_2515:
+    get_hll_global $P122, "GLOBAL"
+    nqp_get_package_through_who $P123, $P122, "PAST"
+    get_who $P124, $P123
+    set $P125, $P124["Op"]
+    $P126 = $P125."new"("null S" :named("pirop"))
+    set $P119, $P126
+  if_2515_end:
+    $P129 = $P113."new"($P118, $P119, "push vPs" :named("pirop"))
+.annotate 'line', 2252
+    $P109."push"($P129)
+.annotate 'line', 2256
+    set $P109, $P2513
+    unless_null $P109, vivify_1371
+    new $P109, "Undef"
+  vivify_1371:
+    add $P110, $P109, 1
+    set $P2513, $P110
+  loop2518_next:
+.annotate 'line', 2251
+    goto loop2518_test
+  loop2518_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    pop_upto_eh exception
+    getattribute $P110, exception, 'type'
+    eq $P110, .CONTROL_LOOP_NEXT, loop2518_next
+    eq $P110, .CONTROL_LOOP_REDO, loop2518_redo
+  loop2518_done:
+    pop_eh 
+.annotate 'line', 2258
+    set $P107, $P2511
+    unless_null $P107, vivify_1372
+    new $P107, "Undef"
+  vivify_1372:
+    get_hll_global $P108, "GLOBAL"
+    nqp_get_package_through_who $P109, $P108, "PAST"
+    get_who $P110, $P109
+    set $P111, $P110["Var"]
+    $P112 = $P111."new"("register" :named("scope"), "string_heap" :named("name"))
+    $P107."push"($P112)
+.annotate 'line', 2261
+    get_hll_global $P107, "GLOBAL"
+    nqp_get_package_through_who $P108, $P107, "PAST"
+    get_who $P109, $P108
+    set $P110, $P109["Op"]
+    $P111 = $P110."new"("list" :named("pasttype"))
+    set $P2514, $P111
 .annotate 'line', 2262
-    .return ($P127)
+    set $P108, param_2507
+    nqp_decontainerize $P109, $P108
+    nqp_get_sc_object $P110, "C24079FE29327F8F97E814BB6BA86604E6E21E35-1330909682.2482", 198
+    repr_get_attr_obj $P111, $P109, $P110, "$!code_ref_blocks", 4
+    unless_null $P111, vivify_1373
+    new $P111, "Undef"
+  vivify_1373:
+    defined $I100, $P111
+    unless $I100, for_undef_1374
+    iter $P107, $P111
+    new $P113, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P113, loop2522_handler
+    push_eh $P113
+  loop2522_test:
+    unless $P107, loop2522_done
+    shift $P112, $P107
+  loop2522_redo:
+    .const 'Sub' $P2520 = "295_1330909682.33311" 
+    capture_lex $P2520
+    $P2520($P112)
+  loop2522_next:
+    goto loop2522_test
+  loop2522_handler:
+    .local pmc exception 
+    .get_results (exception) 
+    pop_upto_eh exception
+    getattribute $P114, exception, 'type'
+    eq $P114, .CONTROL_LOOP_NEXT, loop2522_next
+    eq $P114, .CONTROL_LOOP_REDO, loop2522_redo
+  loop2522_done:
+    pop_eh 
+  for_undef_1374:
+.annotate 'line', 2267
+    get_hll_global $P107, "GLOBAL"
+    nqp_get_package_through_who $P108, $P107, "PAST"
+    get_who $P109, $P108
+    set $P110, $P109["Op"]
+    set $P111, $P2510
+    unless_null $P111, vivify_1377
+    new $P111, "Undef"
+  vivify_1377:
+.annotate 'line', 2270
+    get_hll_global $P112, "GLOBAL"
+    nqp_get_package_through_who $P113, $P112, "PAST"
+    get_who $P114, $P113
+    set $P115, $P114["Var"]
+    set $P116, param_2508
+    unless_null $P116, vivify_1378
+    new $P116, "Undef"
+  vivify_1378:
+    $P117 = $P115."new"($P116 :named("name"), "register" :named("scope"))
+    set $P118, $P2511
+    unless_null $P118, vivify_1379
+    new $P118, "Undef"
+  vivify_1379:
+.annotate 'line', 2272
+    get_hll_global $P119, "GLOBAL"
+    nqp_get_package_through_who $P120, $P119, "PAST"
+    get_who $P121, $P120
+    set $P122, $P121["Block"]
+    set $P123, $P2514
+    unless_null $P123, vivify_1380
+    new $P123, "Undef"
+  vivify_1380:
+    $P124 = $P122."new"($P123, "immediate" :named("blocktype"))
+    $P125 = $P110."new"($P111, $P117, $P118, $P124, "nqp_deserialize_sc__vSPPP" :named("pirop"))
+.annotate 'line', 2235
+    .return ($P125)
 .end
 
 
 .HLL "nqp"
 
 .namespace ["HLL";"World"]
-.sub "_block2525"  :anon :subid("296_1329260312.462") :outer("294_1329260312.462")
-    .param pmc param_2527
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
-.annotate 'line', 2272
-    .lex "$block", param_2527
-.annotate 'line', 2273
-    find_lex $P111, "$cr_past"
-    unless_null $P111, vivify_1382
-    new $P111, "Undef"
-  vivify_1382:
-    get_hll_global $P112, "GLOBAL"
-    nqp_get_package_through_who $P113, $P112, "PAST"
-    get_who $P114, $P113
-    set $P115, $P114["Val"]
-    set $P116, param_2527
-    unless_null $P116, vivify_1383
-    new $P116, "Undef"
-  vivify_1383:
-    $P117 = $P115."new"($P116 :named("value"), "Sub" :named("returns"))
-    $P118 = $P111."push"($P117)
-.annotate 'line', 2272
-    .return ($P118)
+.sub "_block2519"  :anon :subid("295_1330909682.33311") :outer("221_1330909682.33311")
+    .param pmc param_2521
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
+.annotate 'line', 2262
+    .lex "$block", param_2521
+.annotate 'line', 2263
+    find_lex $P113, "$cr_past"
+    unless_null $P113, vivify_1375
+    new $P113, "Undef"
+  vivify_1375:
+    get_hll_global $P114, "GLOBAL"
+    nqp_get_package_through_who $P115, $P114, "PAST"
+    get_who $P116, $P115
+    set $P117, $P116["Val"]
+    set $P118, param_2521
+    unless_null $P118, vivify_1376
+    new $P118, "Undef"
+  vivify_1376:
+    $P119 = $P117."new"($P118 :named("value"), "Sub" :named("returns"))
+    $P120 = $P113."push"($P119)
+.annotate 'line', 2262
+    .return ($P120)
 .end
 
 
 .HLL "nqp"
 
 .namespace []
-.sub "_block2531" :load :anon :subid("297_1329260312.462")
-.annotate 'file', "src\\stage2\\gen\\NQPHLL.pm"
+.sub "_block2525" :load :anon :subid("296_1330909682.33311")
+.annotate 'file', "src/stage2/gen/NQPHLL.pm"
 .annotate 'line', 1050
-    .const '' $P2533 = "10_1329260312.462" 
-    $P107 = $P2533()
+    .const '' $P2527 = "222_1330909682.33311" 
+    $P107 = $P2527()
     .return ($P107)
 .end
 
