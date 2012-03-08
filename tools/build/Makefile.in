@@ -468,7 +468,7 @@ $(PMC_DIR)/pmc_serializationcontext.h: $(PMC_DIR)/serializationcontext.c
 $(PMC_DIR)/$(GROUP).c: $(PMC_OBJECTS)
 	$(PMC2C) --no-lines --library $(PMC_DIR)/$(GROUP) --c $(PMC_SOURCES)
 
-$(DYNPMC): $(PMC_OBJECTS) src/pmc/$(GROUP).o
+$(DYNPMC): $(PMC_OBJECTS) src/pmc/$(GROUP)$(O)
 	$(LD) @ld_out@$(DYNPMC) src/pmc/$(GROUP)$(O) $(PMC_OBJECTS) $(LINKARGS)
 
 
@@ -483,7 +483,7 @@ $(OPS_DIR)/$(OPS).c: $(OPS_DIR)/$(OPS_SOURCE)
 
 $(OPS_DIR)/$(OPS)$(O): $(OPS_DIR)/$(OPS).c $(PMC_DIR)/pmc_dispatchersub.h $(PMC_DIR)/pmc_nqplexinfo.h
 
-$(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS).o $(METAMODEL_OBJS) 3rdparty/sha1/sha1$(O)
+$(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS)$(O) $(METAMODEL_OBJS) 3rdparty/sha1/sha1$(O)
 	$(LD) @ld_out@$(OPS_DIR)/$(OPS)$(LOAD_EXT) $(OPS_DIR)/$(OPS)$(O) $(METAMODEL_OBJS) 3rdparty/sha1/sha1$(O) $(LINKARGS)
 
 
