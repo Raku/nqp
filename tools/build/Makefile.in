@@ -248,7 +248,7 @@ CLEANUPS = \
 .pmc.dump : # suffix rule (limited support)
 	$(PMC2C) --no-lines --dump $(PMC2C_INCLUDES) $<
 
-.dump.c : # suffix rule (limited support)
+.pmc.c : # suffix rule (limited support)
 	$(PMC2C) --no-lines --c $(PMC2C_INCLUDES) $<
 
 all: $(NQP_EXE) qregex
@@ -427,6 +427,34 @@ $(DYNEXT_TARGET): $(DYNPMC) $(DYNOPS) $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT) $(OPS_
 	$(CP) $(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT) $(DYNEXT_DIR)
 	$(CHMOD) 755 $(DYNEXT_TARGET)
 	$(CHMOD) 755 $(DYNEXT_DIR)/$(OPS)$(LOAD_EXT)
+
+# Dependencies for PMCs
+src/pmc/sixmodelobject.c: src/pmc/sixmodelobject.dump src/pmc/stable.dump
+
+src/pmc/sixmodelobject.dump: src/pmc/sixmodelobject.pmc src/pmc/stable.dump
+
+src/pmc/stable.c: src/pmc/stable.dump
+
+src/pmc/stable.dump: src/pmc/stable.pmc
+
+
+src/pmc/dispatchersub.c: src/pmc/dispatchersub.dump
+
+src/pmc/dispatchersub.dump: src/pmc/dispatchersub.pmc
+
+src/pmc/nqplexinfo.c: src/pmc/nqplexinfo.dump
+
+src/pmc/nqplexinfo.dump: src/pmc/nqplexinfo.pmc
+
+src/pmc/nqplexpad.c: src/pmc/nqplexpad.dump
+
+src/pmc/nqplexpad.dump: src/pmc/nqplexpad.pmc
+
+src/pmc/serializationcontext.c: src/pmc/serializationcontext.dump
+
+src/pmc/serializationcontext.dump: src/pmc/serializationcontext.pmc
+
+
 
 $(DYNPMC): $(PMC_OBJECTS)
 	$(PMC2C) --no-lines --library $(GROUP) --c $(PMC_SOURCES)
