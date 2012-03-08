@@ -469,7 +469,7 @@ $(PMC_DIR)/$(GROUP).c: $(PMC_OBJECTS)
 	$(PMC2C) --no-lines --library $(PMC_DIR)/$(GROUP) --c $(PMC_SOURCES)
 
 $(DYNPMC): $(PMC_OBJECTS) $(PMC_DIR)/$(GROUP)$(O)
-	$(LD) @ld_out@$(PMC_DIR)/$(DYNPMC) $(PMC_DIR)/$(GROUP)$(O) $(PMC_OBJECTS) $(LINKARGS)
+	$(LD) @ld_out@$(DYNPMC) $(PMC_DIR)/$(GROUP)$(O) $(PMC_OBJECTS) $(LINKARGS)
 
 
 
