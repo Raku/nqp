@@ -173,6 +173,15 @@ PMC_SOURCES     = $(PMC_DIR)/stable.pmc $(PMC_DIR)/sixmodelobject.pmc \
                   $(PMC_DIR)/dispatchersub.pmc $(PMC_DIR)/nqplexinfo.pmc \
                   $(PMC_DIR)/nqplexpad.pmc $(PMC_DIR)/serializationcontext.pmc
 
+PMC_C_SOURCES    = $(PMC_DIR)/stable.c $(PMC_DIR)/sixmodelobject.c \
+                  $(PMC_DIR)/dispatchersub.c $(PMC_DIR)/nqplexinfo.c \
+                  $(PMC_DIR)/nqplexpad.c $(PMC_DIR)/serializationcontext.c
+
+PMC_OBJECTS      = $(PMC_DIR)/stable$(O) $(PMC_DIR)/sixmodelobject$(O) \
+                  $(PMC_DIR)/dispatchersub$(O) $(PMC_DIR)/nqplexinfo$(O) \
+                  $(PMC_DIR)/nqplexpad$(O) $(PMC_DIR)/serializationcontext$(O)
+
+
 OPS_SOURCE      = nqp.ops
 
 
@@ -236,8 +245,10 @@ CLEANUPS = \
 .c$(O) : # suffix rule (limited support)
 	$(CC) -I$(PMC_DIR) $(CFLAGS) $(CINCLUDES) $(CC_WARN) -I$(@D) -Isrc/ -o $@ -c $<
 
-.pmc.c : # suffix rule (limited support)
+.pmc.dump : # suffix rule (limited support)
 	$(PMC2C) --no-lines --dump $(PMC2C_INCLUDES) $<
+
+.dump.c : # suffix rule (limited support)
 	$(PMC2C) --no-lines --c $(PMC2C_INCLUDES) $<
 
 all: $(NQP_EXE) qregex
@@ -417,12 +428,9 @@ $(DYNEXT_TARGET): $(DYNPMC) $(DYNOPS) $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT) $(OPS_
 	$(CHMOD) 755 $(DYNEXT_TARGET)
 	$(CHMOD) 755 $(DYNEXT_DIR)/$(OPS)$(LOAD_EXT)
 
-$(DYNPMC): $(PMC_SOURCES) $(METAMODEL_SOURCE)
-	$(PMC2C) --no-lines --dump $(PMC2C_INCLUDES) $(PMC_SOURCES)
-	$(PMC2C) --no-lines --c $(PMC2C_INCLUDES) $(PMC_SOURCES)
+$(DYNPMC): $(PMC_OBJECTS)
 	$(PMC2C) --no-lines --library $(GROUP) --c $(PMC_SOURCES)
 	$(CC) -c @cc_o_out@$(GROUP)$(O) -I$(PMC_DIR) $(CINCLUDES) $(CFLAGS) $(GROUP).c
-	cd $(PMC_DIR) && $(CC) -c $(CINCLUDES) -I../../3rdparty/libtommath $(CFLAGS) *.c
 	$(LD) @ld_out@$(DYNPMC) $(GROUP)$(O) src/pmc/*$(O) $(LINKARGS)
 
 $(OPS_DIR)/$(OPS).c: $(OPS_DIR)/$(OPS_SOURCE)
