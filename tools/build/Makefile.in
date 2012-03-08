@@ -429,35 +429,49 @@ $(DYNEXT_TARGET): $(DYNPMC) $(DYNOPS) $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT) $(OPS_
 	$(CHMOD) 755 $(DYNEXT_DIR)/$(OPS)$(LOAD_EXT)
 
 # Dependencies for PMCs
-src/pmc/sixmodelobject.c: src/pmc/sixmodelobject.dump src/pmc/stable.dump
+$(PMC_DIR)/sixmodelobject.c: $(PMC_DIR)/sixmodelobject.dump $(PMC_DIR)/stable.dump
 
-src/pmc/sixmodelobject.dump: src/pmc/sixmodelobject.pmc src/pmc/stable.dump
+$(PMC_DIR)/sixmodelobject.dump: $(PMC_DIR)/sixmodelobject.pmc $(PMC_DIR)/stable.dump
 
-src/pmc/stable.c: src/pmc/stable.dump
+$(PMC_DIR)/pmc_sixmodelobject.h: $(PMC_DIR)/sixmodelobject.c
 
-src/pmc/stable.dump: src/pmc/stable.pmc
+$(PMC_DIR)/stable.c: $(PMC_DIR)/stable.dump
 
-src/pmc/dispatchersub.c: src/pmc/dispatchersub.dump
+$(PMC_DIR)/stable.dump: $(PMC_DIR)/stable.pmc
 
-src/pmc/dispatchersub.dump: src/pmc/dispatchersub.pmc
+$(PMC_DIR)/pmc_stable.h: $(PMC_DIR)/stable.c
 
-src/pmc/nqplexinfo.c: src/pmc/nqplexinfo.dump
+$(PMC_DIR)/dispatchersub.c: $(PMC_DIR)/dispatchersub.dump
 
-src/pmc/nqplexinfo.dump: src/pmc/nqplexinfo.pmc
+$(PMC_DIR)/dispatchersub.dump: $(PMC_DIR)/dispatchersub.pmc
 
-src/pmc/nqplexpad.c: src/pmc/nqplexpad.dump
+$(PMC_DIR)/pmc_dispatchersub.h: $(PMC_DIR)/dispatchersub.c
 
-src/pmc/nqplexpad.dump: src/pmc/nqplexpad.pmc
+$(PMC_DIR)/nqplexinfo.c: $(PMC_DIR)/nqplexinfo.dump
 
-src/pmc/serializationcontext.c: src/pmc/serializationcontext.dump
+$(PMC_DIR)/nqplexinfo.dump: $(PMC_DIR)/nqplexinfo.pmc
 
-src/pmc/serializationcontext.dump: src/pmc/serializationcontext.pmc
+$(PMC_DIR)/pmc_nqplexinfo.h: $(PMC_DIR)/nqplexinfo.c
 
-src/pmc/$(GROUP).c: $(PMC_OBJECTS)
-	$(PMC2C) --no-lines --library src/pmc/$(GROUP) --c $(PMC_SOURCES)
+$(PMC_DIR)/nqplexpad.c: $(PMC_DIR)/nqplexpad.dump
+
+$(PMC_DIR)/nqplexpad.dump: $(PMC_DIR)/nqplexpad.pmc
+
+$(PMC_DIR)/pmc_nqplexpad.h: $(PMC_DIR)/nqplexpad.c
+
+$(PMC_DIR)/serializationcontext.c: $(PMC_DIR)/serializationcontext.dump
+
+$(PMC_DIR)/serializationcontext.dump: $(PMC_DIR)/serializationcontext.pmc
+
+$(PMC_DIR)/pmc_serializationcontext.h: $(PMC_DIR)/serializationcontext.c
+
+$(PMC_DIR)/$(GROUP).c: $(PMC_OBJECTS)
+	$(PMC2C) --no-lines --library $(PMC_DIR)/$(GROUP) --c $(PMC_SOURCES)
 
 $(DYNPMC): $(PMC_OBJECTS) src/pmc/$(GROUP).o
 	$(LD) @ld_out@$(DYNPMC) src/pmc/$(GROUP)$(O) $(PMC_OBJECTS) $(LINKARGS)
+
+
 
 
 # OPS
@@ -585,17 +599,4 @@ $(NQPQ_PBC): $(QREGEX_PBC) $(NQPQ_SOURCES)
 	$(PERL) tools/build/gen-cat.pl $(NQPQ_SOURCES) src/gen/nqp-config.pm > $(NQPQ_COMBINED)
 	./$(NQP_EXE) --target=pir --output=$(NQPQ_COMBINED_PIR) $(NQPQ_COMBINED)
 	$(PARROT) -o $(NQPQ_PBC) $(NQPQ_COMBINED_PIR)
-
-$(PMC_DIR)/pmc_stable.h: $(PMC_DIR)/stable.c
-
-$(PMC_DIR)/pmc_sixmodelobject.h: $(PMC_DIR)/sixmodelobject.c
-
-$(PMC_DIR)/pmc_dispatchersub.h: $(PMC_DIR)/dispatchersub.c
-
-$(PMC_DIR)/pmc_nqplexinfo.h: $(PMC_DIR)/nqplexinfo.c
-
-$(PMC_DIR)/pmc_nqplexpad.h: $(PMC_DIR)/nqplexpad.c
-
-$(PMC_DIR)/pmc_serializationcontext.h: $(PMC_DIR)/serializationcontext.c
-
 
