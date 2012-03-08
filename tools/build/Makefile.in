@@ -503,8 +503,11 @@ $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT): $(OPS_DIR)/$(BIGINT_OPS)$(O) $(LIBTOMMATH_B
 
 
 # dyncall
+.PHONY: dyncall_build
 
-$(DYNCALL_BIN):
+$(DYNCALL_BIN): dyncall_build
+
+dyncall_build:
 	@dyncall_build@
 
 $(OPS_DIR)/$(DYNCALL_OPS).c: $(OPS_DIR)/$(DYNCALL_OPS_SOURCE)
