@@ -123,7 +123,7 @@ static Parrot_Int4 get_sc_id(PARROT_INTERP, SerializationWriter *writer, PMC *sc
     offset = num_deps * DEP_TABLE_ENTRY_SIZE;
     if (offset + DEP_TABLE_ENTRY_SIZE > writer->dependencies_table_alloc) {
         writer->dependencies_table_alloc *= 2;
-        writer->root.dependencies_table = mem_sys_realloc(writer->root.dependencies_table, writer->dependencies_table_alloc);
+        writer->root.dependencies_table = (char *)mem_sys_realloc(writer->root.dependencies_table, writer->dependencies_table_alloc);
     }
     
     /* Add dependency. */
@@ -156,7 +156,7 @@ static void get_stable_ref_info(PARROT_INTERP, SerializationWriter *writer,
 void expand_storage_if_needed(PARROT_INTERP, SerializationWriter *writer, INTVAL need) {
     if (*(writer->cur_write_offset) + need > *(writer->cur_write_limit)) {
         *(writer->cur_write_limit) *= 2;
-        *(writer->cur_write_buffer) = mem_sys_realloc(*(writer->cur_write_buffer),
+        *(writer->cur_write_buffer) = (char *)mem_sys_realloc(*(writer->cur_write_buffer),
             *(writer->cur_write_limit));
     }
 }
@@ -367,7 +367,7 @@ static void serialize_closure(PARROT_INTERP, SerializationWriter *writer, PMC *c
     Parrot_Int4 offset = writer->root.num_closures * CLOSURES_TABLE_ENTRY_SIZE;
     if (offset + CLOSURES_TABLE_ENTRY_SIZE > writer->closures_table_alloc) {
         writer->closures_table_alloc *= 2;
-        writer->root.closures_table = mem_sys_realloc(writer->root.closures_table, writer->closures_table_alloc);
+        writer->root.closures_table = (char *)mem_sys_realloc(writer->root.closures_table, writer->closures_table_alloc);
     }
     
     /* Get the index of the context (which will add it to the todo list if
@@ -561,7 +561,7 @@ static STRING * concatenate_outputs(PARROT_INTERP, SerializationWriter *writer) 
     output_size += writer->root.num_repos * REPOS_TABLE_ENTRY_SIZE;
     
     /* Allocate a buffer that size. */
-    output = mem_sys_allocate(output_size);
+    output = (char *)mem_sys_allocate(output_size);
     
     /* Write version into header. */
     write_int32(output, 0, CURRENT_VERSION);
@@ -655,7 +655,7 @@ static void serialize_stable(PARROT_INTERP, SerializationWriter *writer, PMC *st
     Parrot_Int4 offset = writer->root.num_stables * STABLES_TABLE_ENTRY_SIZE;
     if (offset + STABLES_TABLE_ENTRY_SIZE > writer->stables_table_alloc) {
         writer->stables_table_alloc *= 2;
-        writer->root.stables_table = mem_sys_realloc(writer->root.stables_table, writer->stables_table_alloc);
+        writer->root.stables_table = (char *)mem_sys_realloc(writer->root.stables_table, writer->stables_table_alloc);
     }
     
     /* Make STables table entry. */
@@ -727,7 +727,7 @@ static void serialize_object(PARROT_INTERP, SerializationWriter *writer, PMC *ob
     offset = writer->root.num_objects * OBJECTS_TABLE_ENTRY_SIZE;
     if (offset + OBJECTS_TABLE_ENTRY_SIZE > writer->objects_table_alloc) {
         writer->objects_table_alloc *= 2;
-        writer->root.objects_table = mem_sys_realloc(writer->root.objects_table, writer->objects_table_alloc);
+        writer->root.objects_table = (char *)mem_sys_realloc(writer->root.objects_table, writer->objects_table_alloc);
     }
     
     /* Make objects table entry. */
@@ -777,7 +777,7 @@ static void serialize_context(PARROT_INTERP, SerializationWriter *writer, PMC *c
     offset = writer->root.num_contexts * CONTEXTS_TABLE_ENTRY_SIZE;
     if (offset + CONTEXTS_TABLE_ENTRY_SIZE > writer->contexts_table_alloc) {
         writer->contexts_table_alloc *= 2;
-        writer->root.contexts_table = mem_sys_realloc(writer->root.contexts_table, writer->contexts_table_alloc);
+        writer->root.contexts_table = (char *)mem_sys_realloc(writer->root.contexts_table, writer->contexts_table_alloc);
     }
     
     /* Make contexts table entry. */
@@ -839,7 +839,7 @@ static void serialize_repossessions(PARROT_INTERP, SerializationWriter *writer) 
     writer->root.num_repos = (Parrot_Int4)VTABLE_elements(interp, rep_indexes);
     if (writer->root.num_repos == 0)
         return;
-    writer->root.repos_table = mem_sys_allocate(writer->root.num_repos * REPOS_TABLE_ENTRY_SIZE);
+    writer->root.repos_table = (char *)mem_sys_allocate(writer->root.num_repos * REPOS_TABLE_ENTRY_SIZE);
     
     /* Make entries. */
     for (i = 0; i < writer->root.num_repos; i++) {
@@ -935,21 +935,21 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     
     /* Allocate initial memory space for storing serialized tables and data. */
     writer->dependencies_table_alloc = DEP_TABLE_ENTRY_SIZE * 4;
-    writer->root.dependencies_table  = mem_sys_allocate(writer->dependencies_table_alloc);
+    writer->root.dependencies_table  = (char *)mem_sys_allocate(writer->dependencies_table_alloc);
     writer->stables_table_alloc      = STABLES_TABLE_ENTRY_SIZE * STABLES_TABLE_ENTRIES_GUESS;
-    writer->root.stables_table       = mem_sys_allocate(writer->stables_table_alloc);
+    writer->root.stables_table       = (char *)mem_sys_allocate(writer->stables_table_alloc);
     writer->objects_table_alloc      = OBJECTS_TABLE_ENTRY_SIZE * MAX(sc_elems, 1);
-    writer->root.objects_table       = mem_sys_allocate(writer->objects_table_alloc);
+    writer->root.objects_table       = (char *)mem_sys_allocate(writer->objects_table_alloc);
     writer->stables_data_alloc       = DEFAULT_STABLE_DATA_SIZE;
-    writer->root.stables_data        = mem_sys_allocate(writer->stables_data_alloc);
+    writer->root.stables_data        = (char *)mem_sys_allocate(writer->stables_data_alloc);
     writer->objects_data_alloc       = OBJECT_SIZE_GUESS * MAX(sc_elems, 1);
-    writer->root.objects_data        = mem_sys_allocate(writer->objects_data_alloc);
+    writer->root.objects_data        = (char *)mem_sys_allocate(writer->objects_data_alloc);
     writer->closures_table_alloc     = CLOSURES_TABLE_ENTRY_SIZE * CLOSURES_TABLE_ENTRIES_GUESS;
-    writer->root.closures_table      = mem_sys_allocate(writer->closures_table_alloc);
+    writer->root.closures_table      = (char *)mem_sys_allocate(writer->closures_table_alloc);
     writer->contexts_table_alloc     = CONTEXTS_TABLE_ENTRY_SIZE * CONTEXTS_TABLE_ENTRIES_GUESS;
-    writer->root.contexts_table      = mem_sys_allocate(writer->contexts_table_alloc);
+    writer->root.contexts_table      = (char *)mem_sys_allocate(writer->contexts_table_alloc);
     writer->contexts_data_alloc      = DEFAULT_CONTEXTS_DATA_SIZE;
-    writer->root.contexts_data       = mem_sys_allocate(writer->contexts_data_alloc);
+    writer->root.contexts_data       = (char *)mem_sys_allocate(writer->contexts_data_alloc);
     
     /* Populate write functions table. */
     writer->write_int        = write_int_func;
@@ -1253,7 +1253,7 @@ static void check_and_disect_input(PARROT_INTERP, SerializationReader *reader, S
     /* Grab data from string. */
     size_t  data_len;
     char   *data_b64 = (char *)Parrot_str_to_cstring(interp, data_str);
-    char   *data     = base64_decode(data_b64, &data_len);
+    char   *data     = (char *)base64_decode(data_b64, &data_len);
     char   *prov_pos = data;
     char   *data_end = data + data_len;
     mem_sys_free(data_b64);
@@ -1526,14 +1526,14 @@ static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVA
     st->method_cache = read_ref_func(interp, reader);
     st->vtable_length = read_int_func(interp, reader);
     if (st->vtable_length > 0)
-        st->vtable = mem_sys_allocate(st->vtable_length * sizeof(PMC *));
+        st->vtable = (PMC **)mem_sys_allocate(st->vtable_length * sizeof(PMC *));
     for (i = 0; i < st->vtable_length; i++)
         st->vtable[i] = read_ref_func(interp, reader);
     
     /* Type check cache. */
     st->type_check_cache_length = read_int_func(interp, reader);
     if (st->type_check_cache_length > 0) {
-        st->type_check_cache = mem_sys_allocate(st->type_check_cache_length * sizeof(PMC *));
+        st->type_check_cache = (PMC **)mem_sys_allocate(st->type_check_cache_length * sizeof(PMC *));
         for (i = 0; i < st->type_check_cache_length; i++)
             st->type_check_cache[i] = read_ref_func(interp, reader);
     }
@@ -1543,14 +1543,14 @@ static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVA
     
     /* Boolification spec. */
     if (read_int_func(interp, reader)) {
-        st->boolification_spec = mem_sys_allocate(sizeof(BoolificationSpec));
+        st->boolification_spec = (BoolificationSpec *)mem_sys_allocate(sizeof(BoolificationSpec));
         st->boolification_spec->mode = read_int_func(interp, reader);
         st->boolification_spec->method = read_ref_func(interp, reader);
     }
 
     /* Container spec. */
     if (read_int_func(interp, reader)) {
-        st->container_spec = mem_sys_allocate(sizeof(ContainerSpec));
+        st->container_spec = (ContainerSpec *)mem_sys_allocate(sizeof(ContainerSpec));
         st->container_spec->value_slot.class_handle = read_ref_func(interp, reader);
         st->container_spec->value_slot.attr_name = read_str_func(interp, reader);
         st->container_spec->value_slot.hint = read_int_func(interp, reader);
