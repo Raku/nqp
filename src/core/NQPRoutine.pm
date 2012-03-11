@@ -20,7 +20,7 @@ my knowhow NQPRoutine {
         pir::set_sub_code_object__vPP($do, $der);
         
         # If needed, arrange for a fixup of the cloned code-ref.
-        my $clone_callback := pir::getprop__PsP('CLONE_CALLBACK', $!do);
+        my $clone_callback := pir::getprop__PPs($!do, 'CLONE_CALLBACK');
         if pir::defined($clone_callback) {
             $clone_callback($!do, $do, $der);
         }
@@ -37,7 +37,7 @@ my knowhow NQPRoutine {
         pir::set_sub_code_object__vPP($do, $der);
         
         # If needed, arrange for a fixup of the cloned code-ref.
-        my $clone_callback := pir::getprop__PsP('CLONE_CALLBACK', $!do);
+        my $clone_callback := pir::getprop__PPs($!do, 'CLONE_CALLBACK');
         if pir::defined($clone_callback) {
             $clone_callback($!do, $do, $der);
         }
