@@ -89,6 +89,7 @@ QREGEX_SOURCES = \
   src/QRegex.nqp \
   src/QAST/Node.nqp \
   src/QAST/Regex.nqp \
+  src/QAST/Op.nqp \
   src/QAST/Compiler.nqp \
   src/QRegex/NFA.nqp \
   src/QRegex/Cursor.nqp \
