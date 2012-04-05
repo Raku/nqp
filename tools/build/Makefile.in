@@ -87,8 +87,10 @@ QREGEX_PIR = QRegex.pir
 QREGEX_PBC = QRegex.pbc
 QREGEX_SOURCES = \
   src/QRegex.nqp \
+  src/QAST/CompileTimeValue.nqp \
   src/QAST/Node.nqp \
   src/QAST/Regex.nqp \
+  src/QAST/WorldValue.nqp \
   src/QAST/Op.nqp \
   src/QAST/Compiler.nqp \
   src/QRegex/NFA.nqp \
