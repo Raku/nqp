@@ -1,5 +1,5 @@
 class QAST::Node is NQPCapture {
-    has $!name;
+    has str $!name;
     has $!node;
 
     method new(*@children, *%options) {
