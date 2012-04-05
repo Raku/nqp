@@ -1,10 +1,10 @@
 class QAST::Regex is QAST::Node {
-    has $!rxtype;
-    has $!subtype;
-    has $!backtrack;
-    has $!negate;
-    has $!min;
-    has $!max;
+    has str $!rxtype;
+    has str $!subtype;
+    has str $!backtrack;
+    has int $!negate;
+    has int $!min;
+    has int $!max;
 
     method rxtype(*@value)    { $!rxtype := @value[0] if @value; $!rxtype }
     method subtype(*@value)   { $!subtype := @value[0] if @value; $!subtype }
@@ -12,6 +12,5 @@ class QAST::Regex is QAST::Node {
     method negate(*@value)    { $!negate := @value[0] if @value; $!negate }
     method min(*@value)       { $!min := @value[0] if @value; $!min }
     method max(*@value)       { $!max := @value[0] if @value; $!max }
-
 }
 
