@@ -238,6 +238,7 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     proto token statement_prefix { <...> }
+    token statement_prefix:sym<BEGIN> { <sym> <blorst> }
     token statement_prefix:sym<INIT> { <sym> <blorst> }
 
     token statement_prefix:sym<try> {
@@ -289,6 +290,7 @@ grammar NQP::Grammar is HLL::Grammar {
         | $<not>='!' <identifier>
         | <identifier> <circumfix>?
         | <circumfix>
+        | <variable>
         ]
     }
 
@@ -361,14 +363,14 @@ grammar NQP::Grammar is HLL::Grammar {
             if $*SCOPE eq 'our' || $*SCOPE eq '' {
                 $*W.install_package_symbol($*OUTERPACKAGE, $<name><identifier>, $*PACKAGE);
                 if +$<name><identifier> == 1 {
-                    $*W.install_lexical_symbol(@NQP::Actions::BLOCK[0], $<name><identifier>[0], $*PACKAGE);
+                    $*W.install_lexical_symbol($*W.cur_lexpad(), $<name><identifier>[0], $*PACKAGE);
                 }
             }
             elsif $*SCOPE eq 'my' {
                 if +$<name><identifier> != 1 {
                     $<name>.CURSOR.panic("A my scoped package cannot have a multi-part name yet");
                 }
-                $*W.install_lexical_symbol(@NQP::Actions::BLOCK[0], $<name><identifier>[0], $*PACKAGE);
+                $*W.install_lexical_symbol($*W.cur_lexpad(), $<name><identifier>[0], $*PACKAGE);
             }
             else {
                 $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
@@ -397,7 +399,7 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token typename {
         <name>
-        <?{ $*ACTIONS.known_sym($/, $<name><identifier>) }>
+        <?{ $*W.known_sym($/, $<name><identifier>) }>
     }
 
     token declarator {
