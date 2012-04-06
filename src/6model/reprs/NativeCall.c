@@ -61,7 +61,7 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     dest_body->convention = src_body->convention;
     dest_body->num_args = src_body->num_args;
     if (src_body->arg_types) {
-        dest_body->arg_types = mem_sys_allocate(src_body->num_args * sizeof(INTVAL));
+        dest_body->arg_types = mem_sys_allocate(sizeof(INTVAL) * (src_body->num_args ? src_body->num_args : 1));
         memcpy(dest_body->arg_types, src_body->arg_types, src_body->num_args * sizeof(INTVAL));
     }
     dest_body->ret_type = src_body->ret_type;
