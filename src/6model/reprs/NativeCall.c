@@ -61,7 +61,7 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     dest_body->convention = src_body->convention;
     dest_body->num_args = src_body->num_args;
     if (src_body->arg_types) {
-        dest_body->arg_types = mem_sys_allocate(src_body->num_args * sizeof(INTVAL));
+        dest_body->arg_types = mem_sys_allocate(sizeof(INTVAL) * (src_body->num_args ? src_body->num_args : 1));
         memcpy(dest_body->arg_types, src_body->arg_types, src_body->num_args * sizeof(INTVAL));
     }
     dest_body->ret_type = src_body->ret_type;
@@ -95,6 +95,14 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     return spec;
 }
 
+/* We can't actually serialize the handle, but since this REPR gets inlined
+ * we just do nothing here since it may well have never been opened. Various
+ * more involved approaches are possible... */
+static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter *writer) {
+}
+static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationReader *reader) {
+}
+
 /* Initializes the NativeCall representation. */
 REPROps * NativeCall_initialize(PARROT_INTERP,
         PMC * (* wrap_object_func_ptr) (PARROT_INTERP, void *obj),
@@ -112,5 +120,7 @@ REPROps * NativeCall_initialize(PARROT_INTERP,
     this_repr->gc_free = gc_free;
     this_repr->gc_cleanup = gc_cleanup;
     this_repr->get_storage_spec = get_storage_spec;
+    this_repr->serialize = serialize;
+    this_repr->deserialize = deserialize;
     return this_repr;
 }

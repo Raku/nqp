@@ -1630,7 +1630,7 @@ it as being in the context.
 inline op nqp_add_code_ref_to_sc(in PMC, in INT, in PMC) :base_core {
     if ($3->vtable->base_type == enum_class_Sub) {
         SC_set_code(interp, $1, $2, $3);
-        VTABLE_setprop(interp, $3, Parrot_str_new_constant(interp, "SC"), $1);
+        Parrot_pmc_setprop(interp, $3, Parrot_str_new_constant(interp, "SC"), $1);
         PARROT_GC_WRITE_BARRIER(interp, $3);
     }
     else

@@ -398,13 +398,10 @@ class HLL::Compiler {
                 pir::push(@codes, $in-handle.readall($_));
                 $in-handle.close;
                 CATCH {
-                    $err := "$_\n";
+                    $err := "Error while reading from file: $_";
                 }
             }
-            if $err {
-                pir::printerr($err);
-                pir::exit(1);
-            }
+            pir::die($err) if $err;
         }
         my $code := pir::join('', @codes);
         my $?FILES := pir::join(' ', @files);
@@ -620,7 +617,7 @@ class HLL::Compiler {
 
             # If we've previously cached C<linepos> for target, we use it.
             unless cache goto linepos_build
-            linepos = getprop '!linepos', target
+            linepos = getprop target, '!linepos'
             unless null linepos goto linepos_done
 
             # calculate a new linepos array.

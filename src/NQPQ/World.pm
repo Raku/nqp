@@ -249,7 +249,7 @@ class NQP::World is HLL::World {
                     $fixups.push(PAST::Op.new(
                         :pirop('assign vPP'),
                         self.get_slot_past_for_object($clone),
-                        PAST::Val.new( :value(pir::getprop__PsP('PAST', $orig)) )
+                        PAST::Val.new( :value(pir::getprop__PPs($orig, 'PAST')) )
                     ));
                 });
             }
@@ -339,7 +339,7 @@ class NQP::World is HLL::World {
                     $fixups.push(PAST::Op.new(
                         :pirop('assign vPP'),
                         self.get_slot_past_for_object($clone),
-                        PAST::Val.new( :value(pir::getprop__PsP('PAST', $meth)) )
+                        PAST::Val.new( :value(pir::getprop__PPs($meth, 'PAST')) )
                     ));
                     
                     # Result is the cloned method that will be fixed up.

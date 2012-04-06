@@ -19,6 +19,9 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+# FIXME: workaround for Parrot issue #735
+CFLAGS	  := $(CFLAGS) -w
+
 TOP 	   = .
 GMAKE_TOP ?= $(TOP)/buildsys/gmake
 include $(GMAKE_TOP)/prolog.gmake

@@ -53,6 +53,7 @@
 static INTVAL smo_id = 0;
 static INTVAL nqp_lexpad_id = 0;
 static INTVAL perl6_lexpad_id = 0;
+static INTVAL ctmthunk_id = 0;
 
 /* ***************************************************************************
  * Serialization (writing related)
@@ -122,7 +123,7 @@ static Parrot_Int4 get_sc_id(PARROT_INTERP, SerializationWriter *writer, PMC *sc
     offset = num_deps * DEP_TABLE_ENTRY_SIZE;
     if (offset + DEP_TABLE_ENTRY_SIZE > writer->dependencies_table_alloc) {
         writer->dependencies_table_alloc *= 2;
-        writer->root.dependencies_table = mem_sys_realloc(writer->root.dependencies_table, writer->dependencies_table_alloc);
+        writer->root.dependencies_table = (char *)mem_sys_realloc(writer->root.dependencies_table, writer->dependencies_table_alloc);
     }
     
     /* Add dependency. */
@@ -155,7 +156,7 @@ static void get_stable_ref_info(PARROT_INTERP, SerializationWriter *writer,
 void expand_storage_if_needed(PARROT_INTERP, SerializationWriter *writer, INTVAL need) {
     if (*(writer->cur_write_offset) + need > *(writer->cur_write_limit)) {
         *(writer->cur_write_limit) *= 2;
-        *(writer->cur_write_buffer) = mem_sys_realloc(*(writer->cur_write_buffer),
+        *(writer->cur_write_buffer) = (char *)mem_sys_realloc(*(writer->cur_write_buffer),
             *(writer->cur_write_limit));
     }
 }
@@ -269,7 +270,7 @@ static void write_hash_str_var(PARROT_INTERP, SerializationWriter *writer, PMC *
 
 /* Writes a reference to a code object in some SC. */
 static void write_code_ref(PARROT_INTERP, SerializationWriter *writer, PMC *code) {
-    PMC         *code_sc = VTABLE_getprop(interp, code, Parrot_str_new_constant(interp, "SC"));
+    PMC         *code_sc = Parrot_pmc_getprop(interp, code, Parrot_str_new_constant(interp, "SC"));
     Parrot_Int4  sc_id   = get_sc_id(interp, writer, code_sc);
     Parrot_Int4  idx     = (Parrot_Int4)SC_find_code_idx(interp, code_sc, code);
     expand_storage_if_needed(interp, writer, 8);
@@ -295,7 +296,7 @@ static PMC * closure_to_static_code_ref(PARROT_INTERP, PMC *closure, INTVAL fata
             else
                 return PMCNULL;
         }
-        if (PMC_IS_NULL(VTABLE_getprop(interp, static_code, Parrot_str_new_constant(interp, "STATIC_CODE_REF")))) {
+        if (PMC_IS_NULL(Parrot_pmc_getprop(interp, static_code, Parrot_str_new_constant(interp, "STATIC_CODE_REF")))) {
             if (fatal)
                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                     "Serialization Error: could not locate static code ref for closure '%Ss'",
@@ -315,7 +316,7 @@ static PMC * closure_to_static_code_ref(PARROT_INTERP, PMC *closure, INTVAL fata
 /* Takes an outer context that is potentially to be serialized. Checks if it
  * is of interest, and if so sets it up to be serialized. */
 static Parrot_Int4 get_serialized_context_idx(PARROT_INTERP, SerializationWriter *writer, PMC *ctx) {
-    PMC *ctx_sc = VTABLE_getprop(interp, ctx, Parrot_str_new_constant(interp, "SC"));
+    PMC *ctx_sc = Parrot_pmc_getprop(interp, ctx, Parrot_str_new_constant(interp, "SC"));
     if (PMC_IS_NULL(ctx_sc)) {
         /* Make sure we should chase a level down. */
         if (PMC_IS_NULL(closure_to_static_code_ref(interp, PARROT_CALLCONTEXT(ctx)->current_sub, 0))) {
@@ -324,7 +325,7 @@ static Parrot_Int4 get_serialized_context_idx(PARROT_INTERP, SerializationWriter
         else {
             INTVAL idx = VTABLE_elements(interp, writer->contexts_list);
             VTABLE_set_pmc_keyed_int(interp, writer->contexts_list, idx, ctx);
-            VTABLE_setprop(interp, ctx, Parrot_str_new_constant(interp, "SC"), writer->root.sc);
+            Parrot_pmc_setprop(interp, ctx, Parrot_str_new_constant(interp, "SC"), writer->root.sc);
             return (Parrot_Int4)idx + 1;
         }
     }
@@ -345,7 +346,7 @@ static Parrot_Int4 get_serialized_context_idx(PARROT_INTERP, SerializationWriter
 /* Takes a closure, that is to be serialized. Checks if it has an outer that is
  * of interest, and if so sets it up to be serialized. */
 static Parrot_Int4 get_serialized_outer_context_idx(PARROT_INTERP, SerializationWriter *writer, PMC *closure) {
-    if (!PMC_IS_NULL(VTABLE_getprop(interp, closure, Parrot_str_new_constant(interp, "COMPILER_STUB"))))
+    if (!PMC_IS_NULL(Parrot_pmc_getprop(interp, closure, Parrot_str_new_constant(interp, "COMPILER_STUB"))))
         return 0;
     if (PMC_IS_NULL(PARROT_SUB(closure)->outer_ctx))
         return 0;
@@ -360,13 +361,13 @@ static void serialize_closure(PARROT_INTERP, SerializationWriter *writer, PMC *c
     
     /* Locate the static code object. */
     PMC *static_code_ref = closure_to_static_code_ref(interp, closure, 1);
-    PMC *static_code_sc  = VTABLE_getprop(interp, static_code_ref, Parrot_str_new_constant(interp, "SC"));
+    PMC *static_code_sc  = Parrot_pmc_getprop(interp, static_code_ref, Parrot_str_new_constant(interp, "SC"));
 
     /* Ensure there's space in the closures table; grow if not. */
     Parrot_Int4 offset = writer->root.num_closures * CLOSURES_TABLE_ENTRY_SIZE;
     if (offset + CLOSURES_TABLE_ENTRY_SIZE > writer->closures_table_alloc) {
         writer->closures_table_alloc *= 2;
-        writer->root.closures_table = mem_sys_realloc(writer->root.closures_table, writer->closures_table_alloc);
+        writer->root.closures_table = (char *)mem_sys_realloc(writer->root.closures_table, writer->closures_table_alloc);
     }
     
     /* Get the index of the context (which will add it to the todo list if
@@ -402,7 +403,7 @@ static void serialize_closure(PARROT_INTERP, SerializationWriter *writer, PMC *c
 
     /* Add the closure to this SC, and mark it as as being in it. */
     VTABLE_push_pmc(interp, writer->codes_list, closure);
-    VTABLE_setprop(interp, closure, Parrot_str_new_constant(interp, "SC"), writer->root.sc);
+    Parrot_pmc_setprop(interp, closure, Parrot_str_new_constant(interp, "SC"), writer->root.sc);
 }
 
 /* Writing function for references to things. */
@@ -418,6 +419,10 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
     else if (ref->vtable->base_type == enum_class_Pointer) {
         /* This is really being used to hang caches off in Rakudo, at least. So
          * we just drop it. */
+        discrim = REFVAR_VM_NULL;
+    }
+    else if (ref->vtable->base_type == ctmthunk_id) {
+        /* Another example of a generated cache/thunk that we should not serialize. */
         discrim = REFVAR_VM_NULL;
     }
     else if (ref->vtable->base_type == enum_class_CallContext) {
@@ -450,8 +455,8 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
         discrim = REFVAR_VM_HASH_STR_VAR;
     }
     else if (ref->vtable->base_type == enum_class_Sub || ref->vtable->base_type == enum_class_Coroutine) {
-        PMC *code_sc = VTABLE_getprop(interp, ref, Parrot_str_new_constant(interp, "SC"));
-        PMC *static_cr = VTABLE_getprop(interp, ref, Parrot_str_new_constant(interp, "STATIC_CODE_REF"));
+        PMC *code_sc = Parrot_pmc_getprop(interp, ref, Parrot_str_new_constant(interp, "SC"));
+        PMC *static_cr = Parrot_pmc_getprop(interp, ref, Parrot_str_new_constant(interp, "STATIC_CODE_REF"));
         if (!PMC_IS_NULL(code_sc) && !PMC_IS_NULL(static_cr)) {
             /* Static code reference. */
             discrim = REFVAR_STATIC_CODEREF;
@@ -556,7 +561,7 @@ static STRING * concatenate_outputs(PARROT_INTERP, SerializationWriter *writer) 
     output_size += writer->root.num_repos * REPOS_TABLE_ENTRY_SIZE;
     
     /* Allocate a buffer that size. */
-    output = mem_sys_allocate(output_size);
+    output = (char *)mem_sys_allocate(output_size);
     
     /* Write version into header. */
     write_int32(output, 0, CURRENT_VERSION);
@@ -650,7 +655,7 @@ static void serialize_stable(PARROT_INTERP, SerializationWriter *writer, PMC *st
     Parrot_Int4 offset = writer->root.num_stables * STABLES_TABLE_ENTRY_SIZE;
     if (offset + STABLES_TABLE_ENTRY_SIZE > writer->stables_table_alloc) {
         writer->stables_table_alloc *= 2;
-        writer->root.stables_table = mem_sys_realloc(writer->root.stables_table, writer->stables_table_alloc);
+        writer->root.stables_table = (char *)mem_sys_realloc(writer->root.stables_table, writer->stables_table_alloc);
     }
     
     /* Make STables table entry. */
@@ -722,7 +727,7 @@ static void serialize_object(PARROT_INTERP, SerializationWriter *writer, PMC *ob
     offset = writer->root.num_objects * OBJECTS_TABLE_ENTRY_SIZE;
     if (offset + OBJECTS_TABLE_ENTRY_SIZE > writer->objects_table_alloc) {
         writer->objects_table_alloc *= 2;
-        writer->root.objects_table = mem_sys_realloc(writer->root.objects_table, writer->objects_table_alloc);
+        writer->root.objects_table = (char *)mem_sys_realloc(writer->root.objects_table, writer->objects_table_alloc);
     }
     
     /* Make objects table entry. */
@@ -761,7 +766,7 @@ static void serialize_context(PARROT_INTERP, SerializationWriter *writer, PMC *c
     
     /* Locate the static code ref this context points to. */
     PMC *static_code_ref = closure_to_static_code_ref(interp, PARROT_CALLCONTEXT(ctx)->current_sub, 1);
-    PMC *static_code_sc  = VTABLE_getprop(interp, static_code_ref, Parrot_str_new_constant(interp, "SC"));
+    PMC *static_code_sc  = Parrot_pmc_getprop(interp, static_code_ref, Parrot_str_new_constant(interp, "SC"));
     if (PMC_IS_NULL(static_code_sc))
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Serialization Error: closure outer is a code object not in an SC");
@@ -772,7 +777,7 @@ static void serialize_context(PARROT_INTERP, SerializationWriter *writer, PMC *c
     offset = writer->root.num_contexts * CONTEXTS_TABLE_ENTRY_SIZE;
     if (offset + CONTEXTS_TABLE_ENTRY_SIZE > writer->contexts_table_alloc) {
         writer->contexts_table_alloc *= 2;
-        writer->root.contexts_table = mem_sys_realloc(writer->root.contexts_table, writer->contexts_table_alloc);
+        writer->root.contexts_table = (char *)mem_sys_realloc(writer->root.contexts_table, writer->contexts_table_alloc);
     }
     
     /* Make contexts table entry. */
@@ -834,7 +839,7 @@ static void serialize_repossessions(PARROT_INTERP, SerializationWriter *writer) 
     writer->root.num_repos = (Parrot_Int4)VTABLE_elements(interp, rep_indexes);
     if (writer->root.num_repos == 0)
         return;
-    writer->root.repos_table = mem_sys_allocate(writer->root.num_repos * REPOS_TABLE_ENTRY_SIZE);
+    writer->root.repos_table = (char *)mem_sys_allocate(writer->root.num_repos * REPOS_TABLE_ENTRY_SIZE);
     
     /* Make entries. */
     for (i = 0; i < writer->root.num_repos; i++) {
@@ -930,21 +935,21 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     
     /* Allocate initial memory space for storing serialized tables and data. */
     writer->dependencies_table_alloc = DEP_TABLE_ENTRY_SIZE * 4;
-    writer->root.dependencies_table  = mem_sys_allocate(writer->dependencies_table_alloc);
+    writer->root.dependencies_table  = (char *)mem_sys_allocate(writer->dependencies_table_alloc);
     writer->stables_table_alloc      = STABLES_TABLE_ENTRY_SIZE * STABLES_TABLE_ENTRIES_GUESS;
-    writer->root.stables_table       = mem_sys_allocate(writer->stables_table_alloc);
+    writer->root.stables_table       = (char *)mem_sys_allocate(writer->stables_table_alloc);
     writer->objects_table_alloc      = OBJECTS_TABLE_ENTRY_SIZE * MAX(sc_elems, 1);
-    writer->root.objects_table       = mem_sys_allocate(writer->objects_table_alloc);
+    writer->root.objects_table       = (char *)mem_sys_allocate(writer->objects_table_alloc);
     writer->stables_data_alloc       = DEFAULT_STABLE_DATA_SIZE;
-    writer->root.stables_data        = mem_sys_allocate(writer->stables_data_alloc);
+    writer->root.stables_data        = (char *)mem_sys_allocate(writer->stables_data_alloc);
     writer->objects_data_alloc       = OBJECT_SIZE_GUESS * MAX(sc_elems, 1);
-    writer->root.objects_data        = mem_sys_allocate(writer->objects_data_alloc);
+    writer->root.objects_data        = (char *)mem_sys_allocate(writer->objects_data_alloc);
     writer->closures_table_alloc     = CLOSURES_TABLE_ENTRY_SIZE * CLOSURES_TABLE_ENTRIES_GUESS;
-    writer->root.closures_table      = mem_sys_allocate(writer->closures_table_alloc);
+    writer->root.closures_table      = (char *)mem_sys_allocate(writer->closures_table_alloc);
     writer->contexts_table_alloc     = CONTEXTS_TABLE_ENTRY_SIZE * CONTEXTS_TABLE_ENTRIES_GUESS;
-    writer->root.contexts_table      = mem_sys_allocate(writer->contexts_table_alloc);
+    writer->root.contexts_table      = (char *)mem_sys_allocate(writer->contexts_table_alloc);
     writer->contexts_data_alloc      = DEFAULT_CONTEXTS_DATA_SIZE;
-    writer->root.contexts_data       = mem_sys_allocate(writer->contexts_data_alloc);
+    writer->root.contexts_data       = (char *)mem_sys_allocate(writer->contexts_data_alloc);
     
     /* Populate write functions table. */
     writer->write_int        = write_int_func;
@@ -960,6 +965,7 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
     nqp_lexpad_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "NQPLexInfo", 0));
     perl6_lexpad_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "Perl6LexInfo", 0));
+    ctmthunk_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "CTMThunk", 0));
     
     /* Initialize string heap so first entry is the NULL string. */
     VTABLE_push_string(interp, empty_string_heap, STRINGNULL);
@@ -1247,7 +1253,7 @@ static void check_and_disect_input(PARROT_INTERP, SerializationReader *reader, S
     /* Grab data from string. */
     size_t  data_len;
     char   *data_b64 = (char *)Parrot_str_to_cstring(interp, data_str);
-    char   *data     = base64_decode(data_b64, &data_len);
+    char   *data     = (char *)base64_decode(data_b64, &data_len);
     char   *prov_pos = data;
     char   *data_end = data + data_len;
     mem_sys_free(data_b64);
@@ -1409,7 +1415,7 @@ static void deserialize_closure(PARROT_INTERP, SerializationReader *reader, INTV
     VTABLE_push_pmc(interp, reader->codes_list, closure);
     
     /* Tag it as being in this SC. */
-    VTABLE_setprop(interp, closure, Parrot_str_new_constant(interp, "SC"), reader->root.sc);
+    Parrot_pmc_setprop(interp, closure, Parrot_str_new_constant(interp, "SC"), reader->root.sc);
     
     /* See if there's a code object we need to attach. */
     if (read_int32(table_row, 12))
@@ -1520,14 +1526,14 @@ static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVA
     st->method_cache = read_ref_func(interp, reader);
     st->vtable_length = read_int_func(interp, reader);
     if (st->vtable_length > 0)
-        st->vtable = mem_sys_allocate(st->vtable_length * sizeof(PMC *));
+        st->vtable = (PMC **)mem_sys_allocate(st->vtable_length * sizeof(PMC *));
     for (i = 0; i < st->vtable_length; i++)
         st->vtable[i] = read_ref_func(interp, reader);
     
     /* Type check cache. */
     st->type_check_cache_length = read_int_func(interp, reader);
     if (st->type_check_cache_length > 0) {
-        st->type_check_cache = mem_sys_allocate(st->type_check_cache_length * sizeof(PMC *));
+        st->type_check_cache = (PMC **)mem_sys_allocate(st->type_check_cache_length * sizeof(PMC *));
         for (i = 0; i < st->type_check_cache_length; i++)
             st->type_check_cache[i] = read_ref_func(interp, reader);
     }
@@ -1537,14 +1543,14 @@ static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVA
     
     /* Boolification spec. */
     if (read_int_func(interp, reader)) {
-        st->boolification_spec = mem_sys_allocate(sizeof(BoolificationSpec));
+        st->boolification_spec = (BoolificationSpec *)mem_sys_allocate(sizeof(BoolificationSpec));
         st->boolification_spec->mode = read_int_func(interp, reader);
         st->boolification_spec->method = read_ref_func(interp, reader);
     }
 
     /* Container spec. */
     if (read_int_func(interp, reader)) {
-        st->container_spec = mem_sys_allocate(sizeof(ContainerSpec));
+        st->container_spec = (ContainerSpec *)mem_sys_allocate(sizeof(ContainerSpec));
         st->container_spec->value_slot.class_handle = read_ref_func(interp, reader);
         st->container_spec->value_slot.attr_name = read_str_func(interp, reader);
         st->container_spec->value_slot.hint = read_int_func(interp, reader);
@@ -1732,8 +1738,8 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *st
      /* Mark all the static code refs we've been provided with as static. */
      for (i = 0; i < scodes; i++) {
         PMC *scr = VTABLE_get_pmc_keyed_int(interp, reader->codes_list, i);
-        VTABLE_setprop(interp, scr, scr_str, scr);
-        VTABLE_setprop(interp, scr, sc_str, sc);
+        Parrot_pmc_setprop(interp, scr, scr_str, scr);
+        Parrot_pmc_setprop(interp, scr, sc_str, sc);
     }
 
     /* Deserialize closures, deserialize contexts, then attach outers. */

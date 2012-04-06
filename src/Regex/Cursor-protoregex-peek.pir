@@ -158,9 +158,9 @@ create a new one and return it.
     # new one.
     .local pmc type_obj, prototable
     type_obj = get_what self
-    prototable = getprop '%!prototable', type_obj
+    prototable = getprop type_obj, '%!prototable'
     if null prototable goto make_prototable
-    $P0 = getprop '$!generation', prototable
+    $P0 = getprop prototable, '$!generation'
     $I0 = issame $P0, generation
     if $I0 goto have_prototable
   make_prototable:
