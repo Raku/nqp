@@ -5,8 +5,6 @@
 #include "CStruct.h"
 
 /* TODO:
- * - The initialize_slots member in the REPRData needs to be more complex
- * - So that we can handle initialisation of member objects as well as numbers
  * - We need to handle setting and getting non-number members. In particular,
  *   setting an object member needs to not only update the child_obj pointer,
  *   but also set the pointer in the cstruct part.
@@ -223,18 +221,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
                 }
                 else if(STRING_equal(interp, REPR(type)->name, carray_str)) {
                     /* It's a CArray of some kind.  */
-
                     repr_data->num_child_objs++;
-                    if (REPR(type)->initialize) {
-                        /* Copy-pasta of what happens in the flattening case.
-                         * initialize_slots probably needs to be a list of
-                         * something more complex to handle objects as well,
-                         * though.
-                        if (!repr_data->initialize_slots)
-                            repr_data->initialize_slots = (INTVAL *) mem_sys_allocate_zeroed((info_alloc + 1) * sizeof(INTVAL));
-                        repr_data->initialize_slots[cur_init_slot] = i;
-                        cur_init_slot++;*/
-                    }
                 }
                 else {
                     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
