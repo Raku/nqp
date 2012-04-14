@@ -4,6 +4,14 @@
 #include "../sixmodelobject.h"
 #include "CStruct.h"
 
+/* TODO:
+ * - The initialize_slots member in the REPRData needs to be more complex
+ * - So that we can handle initialisation of member objects as well as numbers
+ * - We need to handle setting and getting non-number members. In particular,
+ *   setting an object member needs to not only update the child_obj pointer,
+ *   but also set the pointer in the cstruct part.
+ */
+
 /* This representation's function pointer table. */
 static REPROps *this_repr;
 
@@ -147,6 +155,8 @@ static PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, CStructREPRDa
  * noting unbox targets. */
 static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRData *repr_data) {
     STRING *type_str = Parrot_str_new_constant(interp, "type");
+    STRING *carray_str = Parrot_str_new_constant(interp, "CArray");
+    /*INTVAL carray_id = REPR_name_to_id(interp, carray_str);*/
     PMC    *flat_list;
 
     /*
@@ -209,6 +219,21 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
                             repr_data->initialize_slots = (INTVAL *) mem_sys_allocate_zeroed((info_alloc + 1) * sizeof(INTVAL));
                         repr_data->initialize_slots[cur_init_slot] = i;
                         cur_init_slot++;
+                    }
+                }
+                else if(STRING_equal(interp, REPR(type)->name, carray_str)) {
+                    /* It's a CArray of some kind.  */
+
+                    repr_data->num_child_objs++;
+                    if (REPR(type)->initialize) {
+                        /* Copy-pasta of what happens in the flattening case.
+                         * initialize_slots probably needs to be a list of
+                         * something more complex to handle objects as well,
+                         * though.
+                        if (!repr_data->initialize_slots)
+                            repr_data->initialize_slots = (INTVAL *) mem_sys_allocate_zeroed((info_alloc + 1) * sizeof(INTVAL));
+                        repr_data->initialize_slots[cur_init_slot] = i;
+                        cur_init_slot++;*/
                     }
                 }
                 else {
@@ -329,7 +354,15 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
     /* Allocate and set up object instance. */
     obj = (CStructInstance *) Parrot_gc_allocate_fixed_size_storage(interp, sizeof(CStructInstance));
     obj->common.stable = st->stable_pmc;
-    /* XXX allocate child str and obj arrays if needed. */
+
+    /* Allocate child obj array. */
+    if(repr_data->num_child_objs > 0) {
+        size_t bytes = repr_data->num_child_objs*sizeof(PMC *);
+        obj->body.child_objs = mem_sys_allocate(bytes);
+        memset(obj->body.child_objs, 0, bytes);
+    }
+
+    /* XXX allocate child str array if needed. */
     
     return wrap_object_func(interp, obj);
 }
@@ -352,6 +385,8 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
             st->REPR->initialize(interp, st, (char *)body->cstruct + offset);
         }
     }
+
+    /* TODO: Initialize child objects. */
 }
 
 /* Copies to the body of one object to another. */
