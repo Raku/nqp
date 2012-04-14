@@ -18,6 +18,7 @@ Makefile
 *.dump
 *.exe
 *.suo
+*.bundle
 *~
 src/ops/*.h
 src/ops/*.c
