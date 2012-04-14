@@ -154,7 +154,6 @@ static PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, CStructREPRDa
 static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRData *repr_data) {
     STRING *type_str = Parrot_str_new_constant(interp, "type");
     STRING *carray_str = Parrot_str_new_constant(interp, "CArray");
-    /*INTVAL carray_id = REPR_name_to_id(interp, carray_str);*/
     PMC    *flat_list;
 
     /*
@@ -372,8 +371,6 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
             st->REPR->initialize(interp, st, (char *)body->cstruct + offset);
         }
     }
-
-    /* TODO: Initialize child objects. */
 }
 
 /* Copies to the body of one object to another. */
