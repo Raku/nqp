@@ -193,6 +193,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
         repr_data->attribute_locations = (INTVAL *) mem_sys_allocate(info_alloc * sizeof(INTVAL));
         repr_data->struct_offsets      = (INTVAL *) mem_sys_allocate(info_alloc * sizeof(INTVAL));
         repr_data->flattened_stables   = (STable **) mem_sys_allocate_zeroed(info_alloc * sizeof(PMC *));
+        repr_data->member_types        = (PMC** )    mem_sys_allocate_zeroed(info_alloc * sizeof(PMC *));
 
         /* Go over the attributes and arrange their allocation. */
         for (i = 0; i < num_attrs; i++) {
@@ -208,7 +209,9 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
                          spec.boxed_primitive == STORAGE_SPEC_BP_NUM)) {
                     /* It's a boxed int or num; pretty easy. It'll just live in the
                      * body of the struct. */
-                    repr_data->attribute_locations[i] = 0;
+                    /* XXX: We could mask in i here as well, but it's not
+                     * really necessary. */
+                    repr_data->attribute_locations[i] = CSTRUCT_ATTR_IN_STRUCT;
                     bits = spec.bits;
                     repr_data->flattened_stables[i] = STABLE(type);
                     if (REPR(type)->initialize) {
@@ -221,6 +224,8 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
                 else if(STRING_equal(interp, REPR(type)->name, carray_str)) {
                     /* It's a CArray of some kind.  */
                     repr_data->num_child_objs++;
+                    repr_data->attribute_locations[i] = (cur_obj_attr++ << CSTRUCT_ATTR_SHIFT) | CSTRUCT_ATTR_CARRAY;
+                    repr_data->member_types[i] = type;
                 }
                 else {
                     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -401,7 +406,30 @@ static void die_no_attrs(PARROT_INTERP) {
 
 /* Gets the current value for an attribute. */
 static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
-    die_no_attrs(interp);
+    CStructREPRData *repr_data = (CStructREPRData *)st->REPR_data;
+    CStructBody     *body      = (CStructBody *)data;
+    INTVAL           slot;
+
+    /* Look up slot, then offset and compute address. */
+    slot = hint >= 0 ? hint :
+        try_get_slot(interp, repr_data, class_handle, name);
+    if (slot >= 0) {
+        INTVAL placement = repr_data->attribute_locations[slot] & CSTRUCT_ATTR_MASK;
+        INTVAL real_slot = repr_data->attribute_locations[slot] >> CSTRUCT_ATTR_SHIFT;
+
+        if(placement == CSTRUCT_ATTR_IN_STRUCT)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "CStruct Can't perform boxed get on flattened attributes yet");
+        else {
+            PMC *obj = body->child_objs[real_slot];
+            if(!obj)
+                obj = repr_data->member_types[slot];
+            return obj;
+        }
+    }
+
+    /* Otherwise, complain that the attribute doesn't exist. */
+    no_such_attribute(interp, "get", class_handle, name);
 }
 static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
     CStructREPRData *repr_data = (CStructREPRData *)st->REPR_data;

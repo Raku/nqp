@@ -32,12 +32,15 @@ typedef struct {
     PMC *name_map;
 } CStructNameMap;
 
+/* TODO: Better description here. */
 /* Attribute location flags. */
 #define CSTRUCT_ATTR_IN_STRUCT 0
 #define CSTRUCT_ATTR_CSTRUCT   1
 #define CSTRUCT_ATTR_CARRAY    2
 #define CSTRUCT_ATTR_CPTR      3
 #define CSTRUCT_ATTR_MASK      3
+/* Bits to shift a slot position to make room for CSTRUCT_ATTR_*. */
+#define CSTRUCT_ATTR_SHIFT     2
 
 /* The CStruct REPR data contains info we need to do allocations, look up
  * attributes and so forth. */
@@ -71,6 +74,10 @@ typedef struct {
      * representation, this is the s-table of the type of that attribute. NULL
      * for attributes that are reference types. */
     STable **flattened_stables;
+
+    /* For reference type members, we cache the relevant type objects.
+     * Flattened types have NULL here. */
+    PMC **member_types;
 
     /* A table mapping attribute names to indexes (which can then be looked
      * up in the offset table). Uses a final null entry as a sentinel. */
