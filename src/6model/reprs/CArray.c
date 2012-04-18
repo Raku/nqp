@@ -212,7 +212,7 @@ static void bind_pos_ref(PARROT_INTERP, STable *st, void *data, INTVAL index, vo
     if (body->allocated && index >= body->allocated)
         expand(interp, repr_data, body, index + 1);
     if (index >= body->elems)
-        body->elems = index;
+        body->elems = index + 1;
     switch (repr_data->elem_kind) {
         case CARRAY_ELEM_KIND_NUMERIC:
             type_st->REPR->copy_to(interp, type_st, value, ((char *)body->storage) + index * repr_data->elem_size);
@@ -228,7 +228,7 @@ static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, 
     if (body->allocated && index >= body->allocated)
         expand(interp, repr_data, body, index + 1);
     if (index >= body->elems)
-        body->elems = index;
+        body->elems = index + 1;
     switch (repr_data->elem_kind) {
         case CARRAY_ELEM_KIND_STRING:
         {

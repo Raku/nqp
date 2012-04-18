@@ -364,7 +364,7 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
     
     /* Allocate object body. */
     CStructBody *body = (CStructBody *)data;
-    body->cstruct = mem_sys_allocate(repr_data->struct_size);
+    body->cstruct = mem_sys_allocate(repr_data->struct_size > 0 ? repr_data->struct_size : 1);
     memset(body->cstruct, 0, repr_data->struct_size);
     
     /* Initialize the slots. */
