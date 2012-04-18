@@ -3,12 +3,7 @@
 #include "parrot/extend.h"
 #include "../sixmodelobject.h"
 #include "CStruct.h"
-
-/* TODO:
- * - We need to handle setting and getting non-number members. In particular,
- *   setting an object member needs to not only update the child_obj pointer,
- *   but also set the pointer in the cstruct part.
- */
+#include "CArray.h"
 
 /* This representation's function pointer table. */
 static REPROps *this_repr;
@@ -448,7 +443,47 @@ static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *clas
 
 /* Binds the given value to the specified attribute. */
 static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
-    die_no_attrs(interp);
+    CStructREPRData *repr_data = (CStructREPRData *)st->REPR_data;
+    CStructBody     *body      = (CStructBody *)data;
+    STRING          *type_str  = Parrot_str_new_constant(interp, "type");
+    STRING          *carray_str = Parrot_str_new_constant(interp, "CArray");
+    INTVAL            slot;
+
+    /* Try to find the slot. */
+    slot = hint >= 0 ? hint :
+        try_get_slot(interp, repr_data, class_handle, name);
+    if (slot >= 0) {
+        STable *st = repr_data->flattened_stables[slot];
+        if (st)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "CStruct Can't perform boxed bind on flattened attributes yet");
+        else {
+            INTVAL placement = repr_data->attribute_locations[slot] & CSTRUCT_ATTR_MASK;
+            INTVAL real_slot = repr_data->attribute_locations[slot] >> CSTRUCT_ATTR_SHIFT;
+
+            if(IS_CONCRETE(value)) {
+                PMC  *value_type = STABLE(value)->WHAT;
+                void *cobj       = NULL;
+
+                body->child_objs[real_slot] = value;
+
+                /* Set cobj to correct pointer based on type of value. */
+                if(STRING_equal(interp, REPR(value_type)->name, carray_str)) {
+                    cobj = ((CArrayInstance *) value)->body.storage;
+                }
+
+                set_ptr_at_offset(body->cstruct, repr_data->struct_offsets[slot], cobj);
+            }
+            else {
+                body->child_objs[real_slot] = NULL;
+                set_ptr_at_offset(body->cstruct, repr_data->struct_offsets[slot], NULL);
+            }
+        }
+    }
+    else {
+        /* Otherwise, complain that the attribute doesn't exist. */
+        no_such_attribute(interp, "bind", class_handle, name);
+    }
 }
 static void bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, void *value) {
     CStructREPRData *repr_data = (CStructREPRData *)st->REPR_data;
