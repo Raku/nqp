@@ -10,6 +10,7 @@
 #include "serialization_context.h"
 #include "pmc_serializationcontext.h"
 #include "pmc_nqplexinfo.h"
+#include "pmc_ownedhash.h"
 #include "pmc/pmc_sub.h"
 #include "base64.h"
 
@@ -54,6 +55,7 @@ static INTVAL smo_id = 0;
 static INTVAL nqp_lexpad_id = 0;
 static INTVAL perl6_lexpad_id = 0;
 static INTVAL ctmthunk_id = 0;
+static INTVAL ownedhash_id = 0;
 
 /* ***************************************************************************
  * Serialization (writing related)
@@ -974,6 +976,7 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     nqp_lexpad_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "NQPLexInfo", 0));
     perl6_lexpad_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "Perl6LexInfo", 0));
     ctmthunk_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "CTMThunk", 0));
+    ownedhash_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "OwnedHash", 0));
     
     /* Initialize string heap so first entry is the NULL string. */
     VTABLE_push_string(interp, empty_string_heap, STRINGNULL);
@@ -1164,7 +1167,7 @@ static PMC * read_array_str(PARROT_INTERP, SerializationReader *reader) {
 
 /* Reads in an hash with string keys and variant references. */
 static PMC * read_hash_str_var(PARROT_INTERP, SerializationReader *reader) {
-    PMC *result = Parrot_pmc_new(interp, enum_class_Hash);
+    PMC *result = Parrot_pmc_new(interp, ownedhash_id);
     Parrot_Int4 elems, i;
 
     /* Read the element count. */
@@ -1177,6 +1180,9 @@ static PMC * read_hash_str_var(PARROT_INTERP, SerializationReader *reader) {
         STRING *key = read_str_func(interp, reader);
         VTABLE_set_pmc_keyed_str(interp, result, key, read_ref_func(interp, reader));
     }
+    
+    /* Set the owner. */
+    PARROT_OWNEDHASH(result)->owner = reader->cur_object;
 
     return result;
 }
@@ -1604,6 +1610,9 @@ static void deserialize_object(PARROT_INTERP, SerializationReader *reader, INTVA
         reader->cur_read_buffer = &(reader->root.objects_data);
         reader->cur_read_offset = &(reader->objects_data_offset);
         reader->cur_read_end    = &(reader->objects_data_end);
+        
+        /* Set current object, so any sub-objects get ownership right. */
+        reader->cur_object = obj;
          
         /* Delegate to its deserialization REPR function. */
         reader->objects_data_offset = read_int32(obj_table_row, 8);        
@@ -1612,6 +1621,9 @@ static void deserialize_object(PARROT_INTERP, SerializationReader *reader, INTVA
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Missing deserialize REPR function");
+                
+        /* Clear current object. */
+        reader->cur_object = PMCNULL;
     }
     
     /* Tag object with this SC, so any future referencing against it
@@ -1685,7 +1697,6 @@ static void do_parrot_vtable_fixup_if_needed(PARROT_INTERP, PMC *obj, STRING *me
 void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *static_codes, STRING *data) {
     PMC    *stables   = PMCNULL;
     PMC    *objects   = PMCNULL;
-    INTVAL  smo_id    = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
     INTVAL  scodes    = VTABLE_elements(interp, static_codes);
     STRING *scr_str   = Parrot_str_new_constant(interp, "STATIC_CODE_REF");
     STRING *sc_str    = Parrot_str_new_constant(interp, "SC");
@@ -1716,6 +1727,7 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *st
     
     /* Other init. */
     smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
+    ownedhash_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "OwnedHash", 0));
     
     /* Read header and disect the data into its parts. */
     check_and_disect_input(interp, reader, data);
