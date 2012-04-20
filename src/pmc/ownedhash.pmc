@@ -10,76 +10,95 @@ pmclass OwnedHash extends Hash auto_attrs dynpmc group nqp {
     VTABLE void set_integer_keyed(PMC* key, INTVAL value) {
         PMC *owner;
         GET_ATTR_owner(interp, SELF, owner);
-        OBJ_SC_WRITE_BARRIER(owner);
+        if (!PMC_IS_NULL(owner))
+            OBJ_SC_WRITE_BARRIER(owner);
         SUPER(key, value);
     }
     VTABLE void set_integer_keyed_int(INTVAL key, INTVAL value) {
         PMC *owner;
         GET_ATTR_owner(interp, SELF, owner);
-        OBJ_SC_WRITE_BARRIER(owner);
+        if (!PMC_IS_NULL(owner))
+            OBJ_SC_WRITE_BARRIER(owner);
         SUPER(key, value);
     }
     VTABLE void set_integer_keyed_str(STRING* key, INTVAL value) {
         PMC *owner;
         GET_ATTR_owner(interp, SELF, owner);
-        OBJ_SC_WRITE_BARRIER(owner);
+        if (!PMC_IS_NULL(owner))
+            OBJ_SC_WRITE_BARRIER(owner);
         SUPER(key, value);
     }
 
     VTABLE void set_number_keyed(PMC* key, FLOATVAL value) {
         PMC *owner;
         GET_ATTR_owner(interp, SELF, owner);
-        OBJ_SC_WRITE_BARRIER(owner);
+        if (!PMC_IS_NULL(owner))
+            OBJ_SC_WRITE_BARRIER(owner);
         SUPER(key, value);
     }
     VTABLE void set_number_keyed_int(INTVAL key, FLOATVAL value) {
         PMC *owner;
         GET_ATTR_owner(interp, SELF, owner);
-        OBJ_SC_WRITE_BARRIER(owner);
+        if (!PMC_IS_NULL(owner))
+            OBJ_SC_WRITE_BARRIER(owner);
         SUPER(key, value);
     }
     VTABLE void set_number_keyed_str(STRING* key, FLOATVAL value) {
         PMC *owner;
         GET_ATTR_owner(interp, SELF, owner);
-        OBJ_SC_WRITE_BARRIER(owner);
+        if (!PMC_IS_NULL(owner))
+            OBJ_SC_WRITE_BARRIER(owner);
         SUPER(key, value);
     }
 
     VTABLE void set_string_keyed(PMC* key, STRING* value) {
         PMC *owner;
         GET_ATTR_owner(interp, SELF, owner);
-        OBJ_SC_WRITE_BARRIER(owner);
+        if (!PMC_IS_NULL(owner))
+            OBJ_SC_WRITE_BARRIER(owner);
         SUPER(key, value);
     }
     VTABLE void set_string_keyed_int(INTVAL key, STRING* value) {
         PMC *owner;
         GET_ATTR_owner(interp, SELF, owner);
-        OBJ_SC_WRITE_BARRIER(owner);
+        if (!PMC_IS_NULL(owner))
+            OBJ_SC_WRITE_BARRIER(owner);
         SUPER(key, value);
     }
     VTABLE void set_string_keyed_str(STRING* key, STRING* value) {
         PMC *owner;
         GET_ATTR_owner(interp, SELF, owner);
-        OBJ_SC_WRITE_BARRIER(owner);
+        if (!PMC_IS_NULL(owner))
+            OBJ_SC_WRITE_BARRIER(owner);
         SUPER(key, value);
     }
     
     VTABLE void set_pmc_keyed(PMC* key, PMC* value) {
         PMC *owner;
         GET_ATTR_owner(interp, SELF, owner);
-        OBJ_SC_WRITE_BARRIER(owner);
+        if (!PMC_IS_NULL(owner))
+            OBJ_SC_WRITE_BARRIER(owner);
         SUPER(key, value);
     }
     VTABLE void set_pmc_keyed_int(INTVAL key, PMC* value) {
         PMC *owner;
         GET_ATTR_owner(interp, SELF, owner);
-        OBJ_SC_WRITE_BARRIER(owner);
+        if (!PMC_IS_NULL(owner))
+            OBJ_SC_WRITE_BARRIER(owner);
         SUPER(key, value);
     }
     VTABLE void set_pmc_keyed_str(STRING* key, PMC* value) {
         PMC *owner;
         GET_ATTR_owner(interp, SELF, owner);
-        OBJ_SC_WRITE_BARRIER(owner);
+        if (!PMC_IS_NULL(owner))
+            OBJ_SC_WRITE_BARRIER(owner);
         SUPER(key, value);
+    }
+    
+    VTABLE void mark() {
+        PMC *owner;
+        GET_ATTR_owner(interp, SELF, owner);
+        Parrot_gc_mark_PMC_alive(INTERP, owner);
+        SUPER();
     }
 }
