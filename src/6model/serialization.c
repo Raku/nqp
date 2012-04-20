@@ -435,6 +435,10 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
         /* Another example of a generated cache/thunk that we should not serialize. */
         discrim = REFVAR_VM_NULL;
     }
+    else if (ref->vtable->base_type == enum_class_FileHandle) {
+        /* Can't serialize handles. */
+        discrim = REFVAR_VM_NULL;
+    }
     else if (ref->vtable->base_type == enum_class_CallContext) {
         /* XXX This is a hack for Rakudo's sake; it keeps a CallContext around in
          * the lexpad, for no really good reason. */
