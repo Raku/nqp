@@ -367,7 +367,9 @@ knowhow NQPClassHOW {
         my @mro_reversed := nqp::clone(@!mro);
         @mro_reversed.reverse();
         for @mro_reversed {
-            %cache.update($_.HOW.method_table($_));
+            for $_.HOW.method_table($_) {
+                %cache{$_.key} := $_.value;
+            }
         }
         pir::publish_method_cache($obj, %cache);
         pir::set_method_cache_authoritativeness__0Pi($obj, 1);
