@@ -285,6 +285,14 @@ static void write_code_ref(PARROT_INTERP, SerializationWriter *writer, PMC *code
 static PMC * closure_to_static_code_ref(PARROT_INTERP, PMC *closure, INTVAL fatal) {
     /* Look up the static lexical info. */
     PMC *lexinfo = PARROT_SUB(closure)->lex_info;
+    if (lexinfo == NULL) {
+        if (fatal)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Serialization Error: NULL lexical info for closure '%Ss'",
+                VTABLE_get_string(interp, closure));
+        else
+            return PMCNULL;
+    }
     if (lexinfo->vtable->base_type == nqp_lexpad_id || lexinfo->vtable->base_type == perl6_lexpad_id) {
         PMC *static_code = PARROT_NQPLEXINFO(lexinfo)->static_code;
         if (PMC_IS_NULL(static_code))
