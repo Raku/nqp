@@ -53,9 +53,12 @@ static INTVAL nqpdebflags_i = 0;
  * may have multiple on the go due to compiling nested module dependencies. */
 PMC *compiling_scs = NULL;
 
+/* Flag we can use to disable the SC write barrier temporarily. */
+INTVAL sc_write_barrier_off = 0;
+
 /* SC write barrier for objects. */
 static void SC_write_barrier_obj(PARROT_INTERP, PMC *obj) {
-    if (VTABLE_get_bool(interp, compiling_scs)) {
+    if (!sc_write_barrier_off && VTABLE_get_bool(interp, compiling_scs)) {
         PMC *comp_sc = VTABLE_get_pmc_keyed_int(interp, compiling_scs, 0);
         if (SC_PMC(obj) != comp_sc) {
             SC_repossess_object(interp, comp_sc, SC_PMC(obj), obj);
@@ -68,7 +71,7 @@ static void SC_write_barrier_obj(PARROT_INTERP, PMC *obj) {
 
 /* SC write barrier for STables. */
 static void SC_write_barrier_st(PARROT_INTERP, STable *st) {
-    if (VTABLE_get_bool(interp, compiling_scs)) {
+    if (!sc_write_barrier_off && VTABLE_get_bool(interp, compiling_scs)) {
         PMC *comp_sc = VTABLE_get_pmc_keyed_int(interp, compiling_scs, 0);
         if (st->sc != comp_sc) {
             SC_repossess_stable(interp, comp_sc, st->sc, st->stable_pmc);
@@ -1724,6 +1727,27 @@ inline op nqp_pop_compiling_sc() :base_core {
     VTABLE_shift_pmc(interp, compiling_scs);
 }
 
+
+/*
+
+=item nqp_disable_sc_write_barrier
+
+Disables the SC write barrier.
+
+=item nqp_enable_sc_write_barrier
+
+Enables the SC write barrier.
+
+=cut
+
+*/
+inline op nqp_disable_sc_write_barrier() :base_core {
+    sc_write_barrier_off = 1;
+}
+
+inline op nqp_enable_sc_write_barrier() :base_core {
+    sc_write_barrier_off = 0;
+}
 
 /*
 

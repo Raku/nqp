@@ -87,6 +87,9 @@ typedef struct SerializationReader {
     PMC *    (*read_ref) (PARROT_INTERP, struct SerializationReader *reader);
     STable * (*read_stable_ref) (PARROT_INTERP, struct SerializationReader *reader);
     
+    /* The object we're currently deserializing. */
+    PMC *cur_object;
+    
     /* The data, which we'll want to free after deserialization. */
     char *data;
 } SerializationReader;
