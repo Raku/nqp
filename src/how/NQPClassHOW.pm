@@ -390,7 +390,9 @@ knowhow NQPClassHOW {
         my @mro_reversed := nqp::clone(@!mro);
         @mro_reversed.reverse();
         for @mro_reversed {
-            %mapping.update($_.HOW.parrot_vtable_mappings($_, :local(1)));
+            for $_.HOW.parrot_vtable_mappings($_, :local(1)) {
+                %mapping{$_.key} := $_.value;
+            }
         }
         if +%mapping {
             pir::stable_publish_vtable_mapping__vPP($obj, %mapping);
@@ -402,7 +404,9 @@ knowhow NQPClassHOW {
         my @mro_reversed := nqp::clone(@!mro);
         @mro_reversed.reverse();
         for @mro_reversed {
-            %mapping.update($_.HOW.parrot_vtable_handler_mappings($_, :local(1)));
+            for $_.HOW.parrot_vtable_handler_mappings($_, :local(1)) {
+                %mapping{$_.key} := $_.value;
+            }
         }
         if +%mapping {
             pir::stable_publish_vtable_handler_mapping__vPP($obj, %mapping);
