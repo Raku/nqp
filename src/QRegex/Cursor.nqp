@@ -208,7 +208,7 @@ role NQPCursorRole {
         my $litlen := nqp::chars($str);
         $cur."!cursor_pass"($!pos + $litlen)
           if $i
-            ?? nqp::lc(nqp::substr($!target, $!pos, $litlen)) eq nqp::lc($str)
+            ?? nqp::lc(pir::trans_encoding__Ssi(nqp::substr($!target, $!pos, $l
             !! nqp::substr($!target, $!pos, $litlen) eq $str;
         $cur;
     }
