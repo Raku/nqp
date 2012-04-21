@@ -149,7 +149,6 @@ static PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, CStructREPRDa
  * noting unbox targets. */
 static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRData *repr_data) {
     STRING *type_str = Parrot_str_new_constant(interp, "type");
-    STRING *carray_str = Parrot_str_new_constant(interp, "CArray");
     PMC    *flat_list;
 
     /*
@@ -217,7 +216,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
                         cur_init_slot++;
                     }
                 }
-                else if(STRING_equal(interp, REPR(type)->name, carray_str)) {
+                else if(REPR(type)->ID == get_ca_repr_id()) {
                     /* It's a CArray of some kind.  */
                     repr_data->num_child_objs++;
                     repr_data->attribute_locations[i] = (cur_obj_attr++ << CSTRUCT_ATTR_SHIFT) | CSTRUCT_ATTR_CARRAY;
@@ -460,7 +459,6 @@ static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
     CStructREPRData *repr_data = (CStructREPRData *)st->REPR_data;
     CStructBody     *body      = (CStructBody *)data;
     STRING          *type_str  = Parrot_str_new_constant(interp, "type");
-    STRING          *carray_str = Parrot_str_new_constant(interp, "CArray");
     INTVAL            slot;
 
     value = decontainerize(interp, value);
@@ -478,13 +476,13 @@ static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
             INTVAL real_slot = repr_data->attribute_locations[slot] >> CSTRUCT_ATTR_SHIFT;
 
             if(IS_CONCRETE(value)) {
-                STRING *value_type = REPR(value)->name;
+                STRING *value_type = REPR(value)->ID;
                 void *cobj       = NULL;
 
                 body->child_objs[real_slot] = value;
 
                 /* Set cobj to correct pointer based on type of value. */
-                if(STRING_equal(interp, value_type, carray_str)) {
+                if(value_type == get_ca_repr_id()) {
                     cobj = ((CArrayBody *) OBJECT_BODY(value))->storage;
                 }
 
