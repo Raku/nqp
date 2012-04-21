@@ -1,5 +1,5 @@
 class QAST::Op is QAST::Node {
-    has str $!qasttype;
+    has str $!op;
     
-    method qasttype(*@value) { $!qasttype := @value[0] if @value; $!qasttype }
+    method op(*@value) { $!op := @value[0] if @value; $!op }
 }
