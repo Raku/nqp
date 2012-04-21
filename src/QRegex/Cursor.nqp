@@ -203,11 +203,13 @@ role NQPCursorRole {
         $cur;
     }
 
-    method !LITERAL($str) {
+    method !LITERAL($str, $i = 0) {
         my $cur := self."!cursor_start"();
         my $litlen := nqp::chars($str);
         $cur."!cursor_pass"($!pos + $litlen)
-          if nqp::substr($!target, $!pos, $litlen) eq $str;
+          if $i
+            ?? nqp::lc(nqp::substr($!target, $!pos, $litlen)) eq nqp::lc($str)
+            !! nqp::substr($!target, $!pos, $litlen) eq $str;
         $cur;
     }
 
