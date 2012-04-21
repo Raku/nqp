@@ -277,8 +277,6 @@ static STable * get_elem_stable(PARROT_INTERP, STable *st) {
 /* Serializes the REPR data. */
 static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *writer) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
-    if (!repr_data->elem_size)
-        fill_repr_data(interp, st);
     writer->write_int(interp, writer, repr_data->elem_size);
     writer->write_ref(interp, writer, repr_data->elem_type);
     writer->write_int(interp, writer, repr_data->elem_kind);
