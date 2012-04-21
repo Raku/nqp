@@ -12,7 +12,7 @@ my @files := [
     'rx_backtrack',
     'rx_subrules',
 #    'rx_lookarounds',
-#    'rx_modifiers',
+    'rx_modifiers',
 # loops:
 #    'rx_goal',
 ];
