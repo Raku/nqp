@@ -5,6 +5,7 @@
 #include "dyncall_reprs.h"
 #include "CStruct.h"
 #include "CArray.h"
+#include "CPointer.h"
 
 /* This representation's function pointer table. */
 static REPROps *this_repr;
@@ -229,6 +230,12 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
                     repr_data->attribute_locations[i] = (cur_obj_attr++ << CSTRUCT_ATTR_SHIFT) | CSTRUCT_ATTR_CSTRUCT;
                     repr_data->member_types[i] = type;
                 }
+                else if(type_id == get_cp_repr_id()) {
+                    /* It's a CPointer. */
+                    repr_data->num_child_objs++;
+                    repr_data->attribute_locations[i] = (cur_obj_attr++ << CSTRUCT_ATTR_SHIFT) | CSTRUCT_ATTR_CPTR;
+                    repr_data->member_types[i] = type;
+                }
                 else {
                     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                         "CStruct representation only implements native int and float members so far");
@@ -438,6 +445,10 @@ static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
                         obj = make_cstruct_result(interp, type, cobj);
                         body->child_objs[real_slot] = obj;
                     }
+                    else if(id == get_cp_repr_id()) {
+                        obj = make_cpointer_result(interp, type, cobj);
+                        body->child_objs[real_slot] = obj;
+                    }
                 }
                 else {
                     obj = type;
@@ -498,6 +509,9 @@ static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
                 }
                 else if(value_type == get_cs_repr_id()) {
                     cobj = ((CStructBody *) OBJECT_BODY(value))->cstruct;
+                }
+                else if(value_type == get_cp_repr_id()) {
+                    cobj = ((CPointerBody *) OBJECT_BODY(value))->ptr;
                 }
 
                 set_ptr_at_offset(body->cstruct, repr_data->struct_offsets[slot], cobj);
