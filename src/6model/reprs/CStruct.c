@@ -195,6 +195,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
             /* Fetch its type; see if it's some kind of unboxed type. */
             PMC    *attr         = VTABLE_get_pmc_keyed_int(interp, flat_list, i);
             PMC    *type         = accessor_call(interp, attr, type_str);
+            INTVAL  type_id      = REPR(type)->ID;
             INTVAL  bits         = sizeof(void *) * 8;
             if (!PMC_IS_NULL(type)) {
                 /* See if it's a type that we know how to handle in a C struct. */
@@ -216,10 +217,16 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
                         cur_init_slot++;
                     }
                 }
-                else if(REPR(type)->ID == get_ca_repr_id()) {
+                else if(type_id == get_ca_repr_id()) {
                     /* It's a CArray of some kind.  */
                     repr_data->num_child_objs++;
                     repr_data->attribute_locations[i] = (cur_obj_attr++ << CSTRUCT_ATTR_SHIFT) | CSTRUCT_ATTR_CARRAY;
+                    repr_data->member_types[i] = type;
+                }
+                else if(type_id == get_cs_repr_id()) {
+                    /* It's a CStruct. */
+                    repr_data->num_child_objs++;
+                    repr_data->attribute_locations[i] = (cur_obj_attr++ << CSTRUCT_ATTR_SHIFT) | CSTRUCT_ATTR_CSTRUCT;
                     repr_data->member_types[i] = type;
                 }
                 else {
@@ -427,6 +434,10 @@ static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
                         obj = make_carray_result(interp, type, cobj);
                         body->child_objs[real_slot] = obj;
                     }
+                    else if(id == get_cs_repr_id()) {
+                        obj = make_cstruct_result(interp, type, cobj);
+                        body->child_objs[real_slot] = obj;
+                    }
                 }
                 else {
                     obj = type;
@@ -484,6 +495,9 @@ static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
                 /* Set cobj to correct pointer based on type of value. */
                 if(value_type == get_ca_repr_id()) {
                     cobj = ((CArrayBody *) OBJECT_BODY(value))->storage;
+                }
+                else if(value_type == get_cs_repr_id()) {
+                    cobj = ((CStructBody *) OBJECT_BODY(value))->cstruct;
                 }
 
                 set_ptr_at_offset(body->cstruct, repr_data->struct_offsets[slot], cobj);
