@@ -1,0 +1,1 @@
+class QAST::BVal is QAST::Node {    has $!block;    method block(*@value) { $!block := @value[0] if @value; $!block }}

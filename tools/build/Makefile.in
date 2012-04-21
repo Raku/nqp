@@ -90,10 +90,17 @@ QREGEX_SOURCES = \
   src/QAST/CompileTimeValue.nqp \
   src/QAST/Node.nqp \
   src/QAST/Regex.nqp \
-  src/QAST/WorldValue.nqp \
+  src/QAST/IVal.nqp \
+  src/QAST/NVal.nqp \
+  src/QAST/SVal.nqp \
+  src/QAST/BVal.nqp \
+  src/QAST/WVal.nqp \
+  src/QAST/Var.nqp \
   src/QAST/Op.nqp \
-  src/QAST/Block.nqp \
+  src/QAST/VM.nqp \
   src/QAST/Stmts.nqp \
+  src/QAST/Stmt.nqp \
+  src/QAST/Block.nqp \
   src/QAST/Compiler.nqp \
   src/QRegex/NFA.nqp \
   src/QRegex/Cursor.nqp \

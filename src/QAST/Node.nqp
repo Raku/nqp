@@ -1,7 +1,10 @@
 class QAST::Node is NQPCapture {
-    has str $!name;
     has $!node;
-    has $!type;
+    has str $!name;
+    has $!returns;
+    has int $!arity;
+    has int $!flat;
+    has str $!childorder;
 
     method new(*@children, *%options) {
         my $new := self.CREATE();
@@ -13,9 +16,15 @@ class QAST::Node is NQPCapture {
         $new;
     }
 
-    method name(*@value)   { $!name := @value[0] if @value; $!name }
-    method node(*@value)   { $!node := @value[0] if @value; $!node }
+    method node(*@value)       { $!node := @value[0] if @value; $!node }
+    method name(*@value)       { $!name := @value[0] if @value; $!name }
+    method returns(*@value)    { $!returns := @value[0] if @value; $!returns }
+    method arity(*@value)      { $!arity := @value[0] if @value; $!arity }
+    method flat(*@value)       { $!flat := @value[0] if @value; $!flat }
+    method childorder(*@value) { $!childorder := @value[0] if @value; $!childorder }
+    
+    method pop()           { nqp::pop(self.list) }
     method push($value)    { nqp::push(self.list, $value) }
+    method shift()         { nqp::shift(self.list) }
     method unshift($value) { nqp::unshift(self.list, $value) }
-    method type(*@value)   { $!type := @value[0] if @value; $!type }
 }
