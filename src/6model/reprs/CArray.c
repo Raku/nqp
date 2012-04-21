@@ -274,6 +274,24 @@ static STable * get_elem_stable(PARROT_INTERP, STable *st) {
     return STABLE(repr_data->elem_type);
 }
 
+/* Serializes the REPR data. */
+static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *writer) {
+    CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
+    if (!repr_data->elem_size)
+        fill_repr_data(interp, st);
+    writer->write_int(interp, writer, repr_data->elem_size);
+    writer->write_ref(interp, writer, repr_data->elem_type);
+    writer->write_int(interp, writer, repr_data->elem_kind);
+}
+
+/* Deserializes the REPR data. */
+static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader *reader) {
+    CArrayREPRData *repr_data = st->REPR_data = mem_sys_allocate_zeroed(sizeof(CArrayREPRData));
+    repr_data->elem_size = reader->read_int(interp, reader);
+    repr_data->elem_type = reader->read_ref(interp, reader);
+    repr_data->elem_kind = reader->read_int(interp, reader);
+}
+
 /* Initializes the CArray representation. */
 REPROps * CArray_initialize(PARROT_INTERP,
         PMC * (* wrap_object_func_ptr) (PARROT_INTERP, void *obj),
@@ -302,6 +320,8 @@ REPROps * CArray_initialize(PARROT_INTERP,
     this_repr->idx_funcs->make_hole = make_hole;
     this_repr->idx_funcs->delete_elems = delete_elems;
     this_repr->idx_funcs->get_elem_stable = get_elem_stable;
+    this_repr->serialize_repr_data = serialize_repr_data;
+    this_repr->deserialize_repr_data = deserialize_repr_data;
     
     return this_repr;
 }
