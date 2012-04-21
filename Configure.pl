@@ -26,7 +26,7 @@ MAIN: {
     GetOptions(\%options, 'help!', 'prefix=s',
                'with-parrot=s', 'gen-parrot:s',
                'make-install!', 'makefile-timing!',
-               'parrot-config=s');
+               'parrot-config=s', 'parrot-option=s@');
 
     # Print help if it's requested
     if ($options{'help'}) {
