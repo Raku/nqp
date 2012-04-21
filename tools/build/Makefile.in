@@ -172,7 +172,8 @@ DYNOPS          = $(OPS_DIR)/$(OPS)$(LOAD_EXT)
 
 PMC_SOURCES     = $(PMC_DIR)/stable.pmc $(PMC_DIR)/sixmodelobject.pmc \
                   $(PMC_DIR)/dispatchersub.pmc $(PMC_DIR)/nqplexinfo.pmc \
-                  $(PMC_DIR)/nqplexpad.pmc $(PMC_DIR)/serializationcontext.pmc
+                  $(PMC_DIR)/nqplexpad.pmc $(PMC_DIR)/serializationcontext.pmc \
+                  $(PMC_DIR)/ownedhash.pmc \
 
 OPS_SOURCE      = nqp.ops
 
