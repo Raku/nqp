@@ -124,7 +124,7 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
         memcpy(dest_body->storage, src_body->storage, alsize);
     }
     else {
-        src_body->storage = dest_body->storage;
+        dest_body->storage = src_body->storage;
     }
     dest_body->allocated = src_body->allocated;
     dest_body->elems = src_body->elems;
