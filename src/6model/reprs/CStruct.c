@@ -477,6 +477,18 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     return spec;
 }
 
+/* Serializes the REPR data. */
+static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *writer) {
+    CStructREPRData *repr_data = (CStructREPRData *)st->REPR_data;
+    /* Could do this, but can also re-compute it each time for now. */
+}
+
+/* Deserializes the REPR data. */
+static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader *reader) {
+    /* Just allocating it will do for now. */
+    st->REPR_data = mem_sys_allocate_zeroed(sizeof(CStructREPRData));
+}
+
 /* Initializes the CStruct representation. */
 REPROps * CStruct_initialize(PARROT_INTERP,
         PMC * (* wrap_object_func_ptr) (PARROT_INTERP, void *obj),
@@ -502,5 +514,7 @@ REPROps * CStruct_initialize(PARROT_INTERP,
     this_repr->gc_free = gc_free;
     this_repr->gc_cleanup = gc_cleanup;
     this_repr->get_storage_spec = get_storage_spec;
+    this_repr->serialize_repr_data = serialize_repr_data;
+    this_repr->deserialize_repr_data = deserialize_repr_data;
     return this_repr;
 }
