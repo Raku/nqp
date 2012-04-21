@@ -92,6 +92,8 @@ QREGEX_SOURCES = \
   src/QAST/Regex.nqp \
   src/QAST/WorldValue.nqp \
   src/QAST/Op.nqp \
+  src/QAST/Block.nqp \
+  src/QAST/Stmts.nqp \
   src/QAST/Compiler.nqp \
   src/QRegex/NFA.nqp \
   src/QRegex/Cursor.nqp \
