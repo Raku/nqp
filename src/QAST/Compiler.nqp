@@ -1,4 +1,50 @@
-class QAST::Compiler is HLL::Compiler { 
+class QAST::Compiler is HLL::Compiler {
+    # Holds information about the current register usage, for when
+    # we're allocating tempories.
+    my class RegAlloc {
+        has int $!cur_p;
+        has int $!cur_s;
+        has int $!cur_i;
+        has int $!cur_n;
+        
+        method new($cur?) {
+            my $obj := nqp::create(self);
+            $cur ??
+                $obj.BUILD($cur.cur_p, $cur.cur_s, $cur.cur_i, $cur.cur_n) !!
+                $obj.BUILD(10, 10, 10, 10);
+            $obj
+        }
+        
+        method BUILD($p, $s, $i, $n) {
+            $!cur_p := $p;
+            $!cur_s := $s;
+            $!cur_i := $i;
+            $!cur_n := $n;
+        }
+        
+        method fresh_p() {
+            $!cur_p := $!cur_p + 1;
+            $!cur_p
+        }
+        method fresh_s() {
+            $!cur_s := $!cur_s + 1;
+            $!cur_s
+        }
+        method fresh_i() {
+            $!cur_i := $!cur_i + 1;
+            $!cur_i
+        }
+        method fresh_n() {
+            $!cur_n := $!cur_n + 1;
+            $!cur_n
+        }
+        
+        method cur_p() { $!cur_p }
+        method cur_s() { $!cur_s }
+        method cur_i() { $!cur_i }
+        method cur_n() { $!cur_n }
+    }
+    
     our $serno;
     INIT { 
         $serno := 10; 
@@ -12,6 +58,46 @@ class QAST::Compiler is HLL::Compiler {
     method escape($str) { 'ucs4:"' ~ pir::escape__Ss($str) ~ '"' }
 
     proto method as_post(*@args, *%_) { * }
+    
+    multi method as_post(QAST::Block $node) {
+        # Fresh registers.
+        my $*REGALLOC := RegAlloc.new();
+        
+        # DO ALL THE STUFFS
+    }
+    
+    multi method as_post(QAST::Stmt $node) {
+        my $orig_reg := $*REGALLOC;
+        {
+            my $*REGALLOC := RegAlloc.new($orig_reg);
+            
+            # COMPILE ALL THE NODES
+        }
+    }
+    
+    multi method as_post(QAST::IVal $node) {
+        ~$node.value
+    }
+    
+    multi method as_post(QAST::NVal $node) {
+        ~$node.value
+    }
+    
+    multi method as_post(QAST::SVal $node) {
+        self.escape($node.value)
+    }
+    
+    multi method as_post(QAST::WVal $node) {
+        my $val    := $node.value;
+        my $sc     := pir::nqp_get_sc_for_object__PP($val);
+        my $handle := $sc.handle;
+        my $idx    := $sc.slot_index_for($val);
+        my $reg    := $*REGALLOC.fresh_p();
+        my $ops    := self.post_new('Ops', :result($reg));
+        $ops.push_pirop('nqp_get_sc_object', $reg, self.escape($handle), ~$idx);
+        $ops;
+    }
+    
     multi method as_post(QAST::Regex $node) {
         my $ops := self.post_new('Ops');
         my $prefix := self.unique('rx') ~ '_';
