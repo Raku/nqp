@@ -73,6 +73,11 @@ static INTVAL cs_repr_id = 0;
 static INTVAL cp_repr_id = 0;
 static INTVAL ca_repr_id = 0;
 
+INTVAL get_nc_repr_id(void) { return nc_repr_id; }
+INTVAL get_cs_repr_id(void) { return cs_repr_id; }
+INTVAL get_cp_repr_id(void) { return cp_repr_id; }
+INTVAL get_ca_repr_id(void) { return ca_repr_id; }
+
 /* Grabs a NativeCall body. */
 static NativeCallBody * get_nc_body(PARROT_INTERP, PMC *obj) {
     struct SixModel_REPROps *r = REPR(obj);
@@ -174,7 +179,7 @@ get_calling_convention(PARROT_INTERP, STRING *name) {
 }
 
 /* Constructs a boxed result from a native integer return. */
-static PMC *
+PMC *
 make_int_result(PARROT_INTERP, PMC *type, INTVAL value) {
     PMC *result = PMCNULL;
     if (!PMC_IS_NULL(type)) {
@@ -186,7 +191,7 @@ make_int_result(PARROT_INTERP, PMC *type, INTVAL value) {
 }
 
 /* Constructs a boxed result from a native number return. */
-static PMC *
+PMC *
 make_num_result(PARROT_INTERP, PMC *type, FLOATVAL value) {
     PMC *result = PMCNULL;
     if (!PMC_IS_NULL(type)) {
@@ -198,7 +203,7 @@ make_num_result(PARROT_INTERP, PMC *type, FLOATVAL value) {
 }
 
 /* Constructs a boxed result from a string return. */
-static PMC *
+PMC *
 make_str_result(PARROT_INTERP, PMC *type, INTVAL ret_type, char *cstring) {
     PMC *result = type;
     if (result != NULL && !PMC_IS_NULL(type)) {
@@ -225,7 +230,7 @@ make_str_result(PARROT_INTERP, PMC *type, INTVAL ret_type, char *cstring) {
 }
 
 /* Constructs a boxed result using a CStruct REPR type. */
-static PMC *
+PMC *
 make_cstruct_result(PARROT_INTERP, PMC *type, void *cstruct) {
     PMC *result = type;
     if (cstruct != NULL && !PMC_IS_NULL(type)) {
@@ -239,7 +244,7 @@ make_cstruct_result(PARROT_INTERP, PMC *type, void *cstruct) {
 }
 
 /* Constructs a boxed result using a CPointer REPR type. */
-static PMC *
+PMC *
 make_cpointer_result(PARROT_INTERP, PMC *type, void *ptr) {
     PMC *result = type;
     if (ptr != NULL && !PMC_IS_NULL(type)) {
@@ -253,7 +258,7 @@ make_cpointer_result(PARROT_INTERP, PMC *type, void *ptr) {
 }
 
 /* Constructs a boxed result using a CArray REPR type. */
-static PMC *
+PMC *
 make_carray_result(PARROT_INTERP, PMC *type, void *carray) {
     PMC *result = type;
     if (carray != NULL && !PMC_IS_NULL(type)) {

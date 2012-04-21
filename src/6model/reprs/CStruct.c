@@ -2,6 +2,7 @@
 #include "parrot/parrot.h"
 #include "parrot/extend.h"
 #include "../sixmodelobject.h"
+#include "dyncall_reprs.h"
 #include "CStruct.h"
 #include "CArray.h"
 
@@ -417,8 +418,21 @@ static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
                     "CStruct Can't perform boxed get on flattened attributes yet");
         else {
             PMC *obj = body->child_objs[real_slot];
-            if(!obj)
-                obj = repr_data->member_types[slot];
+            PMC *type = repr_data->member_types[slot];
+
+            if(!obj) {
+                void *cobj = get_ptr_at_offset(body->cstruct, repr_data->struct_offsets[slot]);
+                if(cobj) {
+                    INTVAL id = REPR(type)->ID;
+                    if(id == get_ca_repr_id()) {
+                        obj = make_carray_result(interp, type, cobj);
+                        body->child_objs[real_slot] = obj;
+                    }
+                }
+                else {
+                    obj = type;
+                }
+            }
             return obj;
         }
     }
@@ -449,6 +463,8 @@ static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
     STRING          *carray_str = Parrot_str_new_constant(interp, "CArray");
     INTVAL            slot;
 
+    value = decontainerize(interp, value);
+
     /* Try to find the slot. */
     slot = hint >= 0 ? hint :
         try_get_slot(interp, repr_data, class_handle, name);
@@ -462,14 +478,14 @@ static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
             INTVAL real_slot = repr_data->attribute_locations[slot] >> CSTRUCT_ATTR_SHIFT;
 
             if(IS_CONCRETE(value)) {
-                PMC  *value_type = STABLE(value)->WHAT;
+                STRING *value_type = REPR(value)->name;
                 void *cobj       = NULL;
 
                 body->child_objs[real_slot] = value;
 
                 /* Set cobj to correct pointer based on type of value. */
-                if(STRING_equal(interp, REPR(value_type)->name, carray_str)) {
-                    cobj = ((CArrayInstance *) value)->body.storage;
+                if(STRING_equal(interp, value_type, carray_str)) {
+                    cobj = ((CArrayBody *) OBJECT_BODY(value))->storage;
                 }
 
                 set_ptr_at_offset(body->cstruct, repr_data->struct_offsets[slot], cobj);
