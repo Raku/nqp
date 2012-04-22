@@ -3,8 +3,11 @@
 
 /* Body of a CArray. */
 typedef struct {
-    /* The storage of elements. */
+    /* The storage of C-land elements. */
     void *storage;
+
+    /* The storage of Perl-land elements */
+    PMC **child_objs;
 
     /* Are we managing the memory for this array ourselves, or does it come
      * from C? */
@@ -29,7 +32,7 @@ typedef struct {
 /* What kind of element do we have? */
 #define CARRAY_ELEM_KIND_NUMERIC    1
 #define CARRAY_ELEM_KIND_STRING     2
-#define CARRAY_ELEM_KIND_POINTER    3
+#define CARRAY_ELEM_KIND_CPOINTER   3
 #define CARRAY_ELEM_KIND_CARRAY     4
 #define CARRAY_ELEM_KIND_CSTRUCT    5
 

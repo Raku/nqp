@@ -354,6 +354,9 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
     /* Allocate and set up object instance. */
     obj = (CStructInstance *) Parrot_gc_allocate_fixed_size_storage(interp, sizeof(CStructInstance));
     obj->common.stable = st->stable_pmc;
+    obj->common.sc = NULL;
+    obj->body.child_objs = NULL;
+    obj->body.child_strs = NULL;
 
     /* Allocate child obj array. */
     if(repr_data->num_child_objs > 0) {
@@ -571,6 +574,19 @@ static void gc_mark(PARROT_INTERP, STable *st, void *data) {
         Parrot_gc_mark_PMC_alive(interp, body->child_objs[i]);
 }
 
+static void gc_mark_repr_data(PARROT_INTERP, STable *st) {
+    CStructREPRData *repr_data = (CStructREPRData *) st->REPR_data;
+    CStructNameMap *map = repr_data->name_to_index_mapping;
+    INTVAL i;
+
+    if (!map) return;
+
+    for (i = 0; map[i].class_key; i++) {
+        Parrot_gc_mark_PMC_alive(interp, map[i].class_key);
+        Parrot_gc_mark_PMC_alive(interp, map[i].name_map);
+    }
+}
+
 /* This is called to do any cleanup of resources when an object gets
  * embedded inside another one. Never called on a top-level object. */
 static void gc_cleanup(PARROT_INTERP, STable *st, void *data) {
@@ -636,6 +652,7 @@ REPROps * CStruct_initialize(PARROT_INTERP,
     this_repr->attr_funcs->hint_for = hint_for;
     this_repr->gc_mark = gc_mark;
     this_repr->gc_free = gc_free;
+    this_repr->gc_mark_repr_data = gc_mark_repr_data;
     this_repr->gc_cleanup = gc_cleanup;
     this_repr->get_storage_spec = get_storage_spec;
     this_repr->serialize_repr_data = serialize_repr_data;
