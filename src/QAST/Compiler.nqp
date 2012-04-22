@@ -84,7 +84,7 @@ class QAST::Compiler is HLL::Compiler {
         $sub
     }
     
-    multi method as_post(QAST::Stmt $node) {
+    multi method as_post(QAST::Stmts $node) {
         self.compile_all_the_stmts($node.list)
     }
     
