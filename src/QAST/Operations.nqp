@@ -58,15 +58,17 @@ class QAST::Operations {
             
             # Build the arguments list.
             # XXX keyed
-            # XXX coercions/boxings/unboxings
-            if +$op.list != +@arg_types {
+            my $num_args := +$op.list;
+            my $i := 0;
+            if +@arg_types != $num_args {
                 pir::die("Operation '" ~ $op.op ~ "' requires " ~
-                    +@arg_types ~ " operands, but got " ~ +$op.list);
+                    +@arg_types ~ " operands, but got $num_args");
             }
-            for $op.list {
-                my $post := $qastcomp.as_post($_);
+            while $i < $num_args {
+                my $post := $qastcomp.coerce($qastcomp.as_post($op.list[$i]), @arg_types[$i]);
                 $ops.push($post);
                 @args.push($post.result);
+                $i := $i + 1;
             }
             
             # If we have an integer as the return type, find the arg that

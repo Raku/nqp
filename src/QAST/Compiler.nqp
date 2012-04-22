@@ -146,6 +146,40 @@ class QAST::Compiler is HLL::Compiler {
         $ops;
     }
     
+    method coerce($qast, $desired) {
+        my $result := self.infer_type($qast.result());
+        if $result eq $desired {
+            # Exact match
+            return $qast;
+        }
+        elsif nqp::lc($result) eq $desired {
+            # The result is in a register, and our desired type allows
+            # both registers and literals.
+            return $qast;
+        }
+        else {
+            pir::die("Coercion from '$result' to '$desired' NYI");
+        }
+    }
+    
+    method infer_type($inferee) {
+        if nqp::substr($inferee, 0, 1) eq '$' {
+            nqp::substr($inferee, 1, 1)
+        }
+        elsif nqp::substr($inferee, 0, 6) eq 'utf8:"' || nqp::substr($inferee, 0, 6) eq 'ucs4:"' {
+            "s"
+        }
+        elsif nqp::index($inferee, ".", 0) > 0 {
+            "n"
+        }
+        elsif +$inferee eq $inferee {
+            "i"
+        }
+        else {
+            pir::die("Cannot infer type from '$inferee'");
+        }
+    }
+    
     multi method as_post(QAST::Regex $node) {
         my $ops := self.post_new('Ops');
         my $prefix := self.unique('rx') ~ '_';
