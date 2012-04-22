@@ -55,7 +55,13 @@ class QAST::Compiler is HLL::Compiler {
     }
 
     method unique($prefix = '') { $prefix ~ $serno++ }
-    method escape($str) { 'ucs4:"' ~ pir::escape__Ss($str) ~ '"' }
+    method escape($str) {
+        my $esc := pir::escape__Ss($str);
+        nqp::index($esc, '\x', 0) > 0 ??
+            'utf8:"' ~ $esc ~ '"' !!
+            '"' ~ $esc ~ '"'
+    }
+    method rxescape($str) { 'ucs4:"' ~ pir::escape__Ss($str) ~ '"' }
 
     proto method as_post(*@args, *%_) { * }
     
@@ -369,7 +375,7 @@ class QAST::Compiler is HLL::Compiler {
 
     method enumcharlist($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
-        my $charlist := self.escape($node[0]);
+        my $charlist := self.rxescape($node[0]);
         my $testop := $node.negate ?? 'ge' !! 'lt';
         $ops.push_pirop('ge', %*REG<pos>, %*REG<eos>, %*REG<fail>);
         $ops.push_pirop('substr', '$S11', %*REG<tgt>, %*REG<pos>, 1);
@@ -385,7 +391,7 @@ class QAST::Compiler is HLL::Compiler {
         $litconst := nqp::lc($litconst)
             if $node.subtype eq 'ignorecase';
         my $litlen := nqp::chars($litconst);
-        my $litpost := self.escape($litconst);
+        my $litpost := self.rxescape($litconst);
         my $cmpop := $node.negate ?? 'eq' !! 'ne';
         $ops.push_pirop('add',    '$I11', %*REG<pos>, $litlen);
         $ops.push_pirop('gt',     '$I11', %*REG<eos>, %*REG<fail>);
