@@ -67,12 +67,28 @@ class QAST::Compiler is HLL::Compiler {
     }
     
     multi method as_post(QAST::Stmt $node) {
+        self.compile_all_the_stmts($node.list)
+    }
+    
+    multi method as_post(QAST::Stmt $node) {
         my $orig_reg := $*REGALLOC;
         {
             my $*REGALLOC := RegAlloc.new($orig_reg);
-            
-            # COMPILE ALL THE NODES
+            self.compile_all_the_stmts($node.list)
         }
+    }
+    
+    method compile_all_the_stmts(@stmts) {
+        my $last;
+        my $ops := self.post_new('Ops');
+        for @stmts {
+            $last := self.as_post($_);
+            $ops.push($last);
+        }
+        if $last {
+            $ops.result($last.result);
+        }
+        $ops
     }
     
     multi method as_post(QAST::IVal $node) {
