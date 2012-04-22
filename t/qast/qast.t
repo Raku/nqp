@@ -1,6 +1,6 @@
 use QRegex;
 
-plan(4);
+plan(5);
 
 sub compile_qast($qast) {
     my $post := QAST::Compiler.as_post($qast);
@@ -46,3 +46,19 @@ is_qast(
     ),
     105,
     'add_i operation with two IVal nodes');
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('add_i'),
+            QAST::IVal.new(:value(10)),
+            QAST::Op.new(
+                :op('add_i'),
+                QAST::IVal.new(:value(20)),
+                QAST::IVal.new(:value(30))
+            )
+        )
+    ),
+    60,
+    'an add_i op inside an add_i op');
+
