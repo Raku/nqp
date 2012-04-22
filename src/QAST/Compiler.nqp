@@ -87,6 +87,14 @@ class QAST::Compiler is HLL::Compiler {
         self.escape($node.value)
     }
     
+    multi method as_post(QAST::BVal $node) {
+        my $cuid := self.escape($node.block.cuid);
+        my $reg  := $*REGALLOC.fresh_p();
+        my $ops  := self.post_new('Ops', :result($reg));
+        $ops.push_pirop(".const 'Sub' $reg = '$cuid'");
+        $ops;
+    }
+    
     multi method as_post(QAST::WVal $node) {
         my $val    := $node.value;
         my $sc     := pir::nqp_get_sc_for_object__PP($val);
