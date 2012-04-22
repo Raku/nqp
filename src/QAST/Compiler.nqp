@@ -24,19 +24,19 @@ class QAST::Compiler is HLL::Compiler {
         
         method fresh_p() {
             $!cur_p := $!cur_p + 1;
-            $!cur_p
+            '$P' ~ $!cur_p
         }
         method fresh_s() {
             $!cur_s := $!cur_s + 1;
-            $!cur_s
+            '$S' ~ $!cur_s
         }
         method fresh_i() {
             $!cur_i := $!cur_i + 1;
-            $!cur_i
+            '$I' ~ $!cur_i
         }
         method fresh_n() {
             $!cur_n := $!cur_n + 1;
-            $!cur_n
+            '$N' ~ $!cur_n
         }
         
         method cur_p() { $!cur_p }
