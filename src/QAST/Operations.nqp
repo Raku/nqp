@@ -59,7 +59,10 @@ class QAST::Operations {
             # Build the arguments list.
             # XXX keyed
             # XXX coercions/boxings/unboxings
-            # XXX count check
+            if +$op.list != +@arg_types {
+                pir::die("Operation '" ~ $op.op ~ "' requires " ~
+                    +@arg_types ~ " operands, but got " ~ +$op.list);
+            }
             for $op.list {
                 my $post := $qastcomp.as_post($_);
                 $ops.push($post);
