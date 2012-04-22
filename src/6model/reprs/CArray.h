@@ -6,13 +6,17 @@ typedef struct {
     /* The storage of elements. */
     void *storage;
 
+    /* Are we managing the memory for this array ourselves, or does it come
+     * from C? */
+    INTVAL managed;
+
     /* The number of elements we've allocated. If we do not know,
      * because the array was returned to us from elsewhere and we
      * are not managing it's memory, this is 0. */
     INTVAL allocated;
 
     /* The number of elements we have, if known. Invalid if we
-     * are not managing the array (that is, allocated is 0). */
+     * are not managing the array. */
     INTVAL elems;
 } CArrayBody;
 

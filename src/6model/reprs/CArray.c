@@ -109,6 +109,7 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody *body = (CArrayBody *)data;
     body->storage = mem_sys_allocate(4 * repr_data->elem_size);
+    body->managed = 1;
     body->allocated = 4;
     body->elems = 0;
 }
@@ -118,7 +119,7 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody     *src_body  = (CArrayBody *)src;
     CArrayBody     *dest_body = (CArrayBody *)dest;
-    if (src_body->allocated) {
+    if (src_body->managed) {
         INTVAL alsize = src_body->allocated * repr_data->elem_size;
         dest_body->storage = mem_sys_allocate(alsize);
         memcpy(dest_body->storage, src_body->storage, alsize);
@@ -126,6 +127,7 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     else {
         dest_body->storage = src_body->storage;
     }
+    dest_body->managed = src_body->managed;
     dest_body->allocated = src_body->allocated;
     dest_body->elems = src_body->elems;
 }
@@ -134,7 +136,7 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
  * embedded inside another one. Never called on a top-level object. */
 static void gc_cleanup(PARROT_INTERP, STable *st, void *data) {
     CArrayBody *body = (CArrayBody *)data;
-    if (body->allocated)
+    if (body->managed)
         mem_sys_free(body->storage);
 }
 
@@ -169,7 +171,7 @@ static void expand(PARROT_INTERP, CArrayREPRData *repr_data, CArrayBody *body, I
 static void * at_pos_ref(PARROT_INTERP, STable *st, void *data, INTVAL index) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody     *body      = (CArrayBody *)data;
-    if (body->allocated && index >= body->elems)
+    if (body->managed && index >= body->elems)
         return NULL;
     switch (repr_data->elem_kind) {
         case CARRAY_ELEM_KIND_NUMERIC:
@@ -182,7 +184,7 @@ static void * at_pos_ref(PARROT_INTERP, STable *st, void *data, INTVAL index) {
 static PMC * at_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody     *body      = (CArrayBody *)data;
-    if (body->allocated && index >= body->elems)
+    if (body->managed && index >= body->elems)
         return repr_data->elem_type;
     switch (repr_data->elem_kind) {
         case CARRAY_ELEM_KIND_STRING:
@@ -209,7 +211,7 @@ static void bind_pos_ref(PARROT_INTERP, STable *st, void *data, INTVAL index, vo
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody     *body      = (CArrayBody *)data;
     STable         *type_st   = STABLE(repr_data->elem_type);
-    if (body->allocated && index >= body->allocated)
+    if (body->managed && index >= body->allocated)
         expand(interp, repr_data, body, index + 1);
     if (index >= body->elems)
         body->elems = index + 1;
@@ -225,7 +227,7 @@ static void bind_pos_ref(PARROT_INTERP, STable *st, void *data, INTVAL index, vo
 static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, PMC *obj) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody     *body      = (CArrayBody *)data;
-    if (body->allocated && index >= body->allocated)
+    if (body->managed && index >= body->allocated)
         expand(interp, repr_data, body, index + 1);
     if (index >= body->elems)
         body->elems = index + 1;
@@ -244,7 +246,7 @@ static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, 
 }
 static INTVAL elems(PARROT_INTERP, STable *st, void *data) {
     CArrayBody     *body      = (CArrayBody *)data;
-    if (body->allocated)
+    if (body->managed)
         return body->elems;
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
         "Don't know how many elements a C array returned from a library has");
