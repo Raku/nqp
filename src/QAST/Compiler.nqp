@@ -60,10 +60,22 @@ class QAST::Compiler is HLL::Compiler {
     proto method as_post(*@args, *%_) { * }
     
     multi method as_post(QAST::Block $node) {
-        # Fresh registers.
+        # Block gets completely fresh registers.
         my $*REGALLOC := RegAlloc.new();
         
-        # DO ALL THE STUFFS
+        # First need to compile all of the statements.
+        my $stmts := self.compile_all_the_stmts($node.list);
+        
+        # XXX Generate parameter handling code.
+        my $params := self.post_new('Ops');
+        
+        # Wrap all up in a POST::Sub.
+        my $sub := self.post_new('Sub');
+        $sub.push($params);
+        $sub.push($stmts);
+        $sub.push(".return (" ~ $stmts.result ~ ")");
+        
+        $sub
     }
     
     multi method as_post(QAST::Stmt $node) {
