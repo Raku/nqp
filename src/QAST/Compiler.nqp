@@ -73,7 +73,7 @@ class QAST::Compiler is HLL::Compiler {
         my $sub := self.post_new('Sub');
         $sub.push($params);
         $sub.push($stmts);
-        $sub.push(".return (" ~ $stmts.result ~ ")");
+        $sub.push_pirop(".return (" ~ $stmts.result ~ ")");
         
         $sub
     }
@@ -104,15 +104,17 @@ class QAST::Compiler is HLL::Compiler {
     }
     
     multi method as_post(QAST::IVal $node) {
-        ~$node.value
+        self.post_new('Ops', :result(~$node.value))
     }
     
     multi method as_post(QAST::NVal $node) {
-        ~$node.value
+        my $val := ~$node.value;
+        $val := $val ~ '.0' unless nqp::index($val, '.', 0) >= 0;
+        self.post_new('Ops', :result($val))
     }
     
     multi method as_post(QAST::SVal $node) {
-        self.escape($node.value)
+        self.post_new('Ops', :result(self.escape($node.value)))
     }
     
     multi method as_post(QAST::BVal $node) {
