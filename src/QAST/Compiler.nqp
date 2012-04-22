@@ -46,7 +46,7 @@ class QAST::Compiler is HLL::Compiler {
     }
     
     our $serno;
-    INIT { 
+    INIT {
         $serno := 10; 
         Q:PIR {
             $P0 = find_lex '$?CLASS'
@@ -107,6 +107,10 @@ class QAST::Compiler is HLL::Compiler {
             $ops.result($last.result);
         }
         $ops
+    }
+    
+    multi method as_post(QAST::Op $node) {
+        QAST::Operations.compile_op(self, '', $node)
     }
     
     multi method as_post(QAST::IVal $node) {
