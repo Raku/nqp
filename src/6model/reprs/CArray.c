@@ -199,15 +199,16 @@ static void die_idx_nyi(PARROT_INTERP) {
         "CArray representation does not fully indexed storage yet");
 }
 static void expand(PARROT_INTERP, CArrayREPRData *repr_data, CArrayBody *body, INTVAL min_size) {
+    INTVAL is_complex = 0;
     INTVAL next_size = body->allocated? 2 * body->allocated: 4;
     if (min_size > next_size)
         next_size = min_size;
     if (body->managed)
         body->storage = mem_sys_realloc(body->storage, next_size * repr_data->elem_size);
 
-    INTVAL is_complex = (repr_data->elem_kind == CARRAY_ELEM_KIND_CARRAY
-                      || repr_data->elem_kind == CARRAY_ELEM_KIND_CPOINTER
-                      || repr_data->elem_kind == CARRAY_ELEM_KIND_CSTRUCT);
+    is_complex = (repr_data->elem_kind == CARRAY_ELEM_KIND_CARRAY
+               || repr_data->elem_kind == CARRAY_ELEM_KIND_CPOINTER
+               || repr_data->elem_kind == CARRAY_ELEM_KIND_CSTRUCT);
     if (is_complex)
         body->child_objs = mem_sys_realloc_zeroed(body->child_objs, next_size * sizeof(PMC *), body->allocated * sizeof(PMC *));
     body->allocated = next_size;
