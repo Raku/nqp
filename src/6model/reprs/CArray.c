@@ -231,8 +231,10 @@ static PMC * at_pos_complex(PARROT_INTERP, STable *st, void *data, INTVAL index)
 
     if (body->managed) {
         /* We manage this array. */
-        /* TODO: Will segfault if index is out of bounds. */
-        return body->child_objs[index]? body->child_objs[index]: repr_data->elem_type;
+        if (index < body->elems && body->child_objs[index])
+            return body->child_objs[index];
+        else
+            return repr_data->elem_type;
     }
     else {
         /* Array comes from C. */
