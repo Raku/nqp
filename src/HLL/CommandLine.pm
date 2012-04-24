@@ -261,6 +261,7 @@ class HLL::CommandLine::Parser {
                         while $iter {
                             my $o := pir::shift($iter);
                             pir::die("Option -$o requires a value and cannot be grouped") if self.wants-value($o);
+                            pir::die("Grouped options '$opt' contain $o, which is not a valid option") unless %!options{$o};
                             $result.add-option($o, 1);
                         }
                     }
