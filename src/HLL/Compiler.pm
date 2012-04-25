@@ -28,7 +28,7 @@ class HLL::Compiler {
     method BUILD() {
         # Default stages.
         @!stages     := pir::split(' ', 'parse past post pir evalpmc');
-        
+
         # Command options and usage.
         @!cmdoptions := pir::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config stagestats ll-exception nqpevent=s rxtrace profile profile-compile');
         $!usage := "This compiler is based on HLL::Compiler.\n\nOptions:\n";
@@ -38,13 +38,13 @@ class HLL::Compiler {
         %parrot_config := pir::getinterp()[pir::const::IGLOBALS_CONFIG_HASH];
         %!config     := pir::new('Hash');
     }
-    
+
     my sub value_type($value) {
         pir::isa($value, 'NameSpace')
             ?? 'namespace'
             !! (pir::isa($value, 'Sub') ?? 'sub' !! 'var')
     }
-        
+
     method get_exports($module, :$tagset, *@symbols) {
         # convert a module name to something hash-like, if needed
         if (!pir::does($module, 'hash')) {
@@ -137,9 +137,9 @@ class HLL::Compiler {
         }
         blank_context.set_outer(nqp::null());
         my $interactive_ctx := blank_context();
-        my %interactive_pad := 
+        my %interactive_pad :=
             pir::getattribute__PPs($interactive_ctx, 'lex_pad');
-     
+
         my $target := pir::downcase(%adverbs<target>);
 
         nqp::print(pir::getinterp__P().stderr_handle(), self.interactive_banner);
@@ -217,7 +217,17 @@ class HLL::Compiler {
                 pir::set_runcore__vs("subprof_hll");
             }
             pir::trace(%adverbs<trace>);
-            $output := $output(|@args);
+
+            # Execute :init subs
+            if !$output.is_initialized('init') {
+                for $output.subs_by_tag('init') -> $sub { $sub(); }
+                $output.mark_initialized('init');
+            }
+
+            # Now execute the :main sub
+            my $main_sub := $output.main_sub();
+            $output := $main_sub(|@args);
+
             pir::trace(0);
         }
         pir::set_runcore__vs($old_runcore);
@@ -244,7 +254,7 @@ class HLL::Compiler {
         }
         @!stages;
     }
-    
+
     method parsegrammar(*@value) {
         if +@value {
             $!parsegrammar := @value[0];
@@ -258,24 +268,24 @@ class HLL::Compiler {
         }
         $!parseactions;
     }
-    
+
     method interactive_banner() { '' }
-    
+
     method interactive_prompt() { '> ' }
-    
+
     method compiler_progname($value?) {
         if pir::defined($value) {
             $!compiler_progname := $value;
         }
         $!compiler_progname;
     }
-    
+
     method commandline_options(@value?) {
         if +@value {
             @!cmdoptions := @value;
         }
         @!cmdoptions;
-    }    
+    }
 
     method command_line(@args, *%adverbs) {
         ## this bizarre piece of code causes the compiler to
@@ -472,14 +482,16 @@ class HLL::Compiler {
         ~ ".include 'stat.pasm'\n"
         ~ ".include 'datatypes.pasm'\n"
     }
-  
+
     method pir($source, *%adverbs) {
         self.pirbegin() ~ pir::compreg__Ps('POST').to_pir($source, |%adverbs)
     }
 
     method evalpmc($source, *%adverbs) {
         my $compiler := pir::compreg__Ps('PIR');
-        $compiler($source)
+        my $packfile := $compiler.compile($source);
+        for $packfile.subs_by_tag('init') -> $sub { $sub(); }
+        $packfile.mark_initialized('init');
     }
 
     method dumper($obj, $name, *%options) {
