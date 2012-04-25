@@ -130,7 +130,7 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
     if (repr_data->elem_kind == CARRAY_ELEM_KIND_NUMERIC || repr_data->elem_kind == CARRAY_ELEM_KIND_STRING)
         body->child_objs = NULL;
     else
-        body->child_objs = mem_sys_allocate(4*sizeof(PMC *));
+        body->child_objs = mem_sys_allocate_zeroed(4*sizeof(PMC *));
     body->allocated = 4;
     body->elems = 0;
 }
