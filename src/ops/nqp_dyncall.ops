@@ -67,6 +67,10 @@ BEGIN_OPS_PREAMBLE
 #define DYNCALL_ARG_FREE_STR        1
 #define DYNCALL_ARG_FREE_STR_MASK   1
 
+/* Predeclare some mutually recursive functions. */
+static void dyncall_wb_ca(PMC *);
+static void dyncall_wb_cs(PMC *);
+
 /* The ID of the NativeCall, CPointer and CStruct REPRs. */
 static INTVAL nc_repr_id = 0;
 static INTVAL cs_repr_id = 0;
@@ -293,6 +297,89 @@ PMC * decontainerize(PARROT_INTERP, PMC *var) {
     }
     return var;
 }
+
+static void dyncall_wb_ca(PMC *obj) {
+    CArrayBody      *body      = (CArrayBody *) OBJECT_BODY(obj);
+    CArrayREPRData  *repr_data = (CArrayREPRData *) STABLE(obj)->REPR_data;
+    void           **storage   = (void **) body->storage;
+    INTVAL           i;
+
+    /* No need to check for numbers. They're stored directly in the array. */
+    if (repr_data->elem_kind == CARRAY_ELEM_KIND_NUMERIC)
+        return;
+
+    for (i = 0; i < body->elems; i++) {
+        /* Ignore elements where we haven't generated an object. */
+        if (!body->child_objs[i])
+            continue;
+
+        switch (repr_data->elem_kind) {
+            case CARRAY_ELEM_KIND_CARRAY:
+                if (storage[i] == ((CArrayBody *) OBJECT_BODY(body->child_objs[i]))->storage) {
+                    dyncall_wb_ca(body->child_objs[i]);
+                }
+                else {
+                    body->child_objs[i] = NULL;
+                }
+                break;
+            case CARRAY_ELEM_KIND_CPOINTER:
+                if (storage[i] != ((CPointerBody *) OBJECT_BODY(body->child_objs[i]))->ptr) {
+                    body->child_objs[i] = NULL;
+                }
+                break;
+            case CARRAY_ELEM_KIND_CSTRUCT:
+                if (storage[i] == ((CStructBody *) OBJECT_BODY(body->child_objs[i]))->cstruct) {
+                    dyncall_wb_cs(body->child_objs[i]);
+                }
+                else {
+                    body->child_objs[i] = NULL;
+                }
+                break;
+        }
+    }
+}
+
+static void dyncall_wb_cs(PMC *obj) {
+    CStructBody     *body      = (CStructBody *) OBJECT_BODY(obj);
+    CStructREPRData *repr_data = (CStructREPRData *) STABLE(obj)->REPR_data;
+    char            *storage   = (char *) body->cstruct;
+    INTVAL           i;
+
+    for (i = 0; i < repr_data->num_attributes; i++) {
+        INTVAL kind = repr_data->attribute_locations[i] & CSTRUCT_ATTR_MASK;
+        INTVAL slot = repr_data->attribute_locations[i] >> CSTRUCT_ATTR_SHIFT;
+        void *ptr;
+
+        if (kind == CSTRUCT_ATTR_IN_STRUCT)
+            continue;
+
+        ptr = *((void **) (storage + repr_data->struct_offsets[i]));
+        switch (kind) {
+            case CSTRUCT_ATTR_CARRAY:
+                if (ptr == ((CArrayBody *) OBJECT_BODY(body->child_objs[slot]))->storage) {
+                    dyncall_wb_ca(body->child_objs[slot]);
+                }
+                else {
+                    body->child_objs[slot] = NULL;
+                }
+                break;
+            case CSTRUCT_ATTR_CPTR:
+                if (ptr != ((CPointerBody *) OBJECT_BODY(body->child_objs[slot]))->ptr) {
+                    body->child_objs[slot] = NULL;
+                }
+                break;
+            case CSTRUCT_ATTR_CSTRUCT:
+                if (ptr == ((CStructBody *) OBJECT_BODY(body->child_objs[slot]))->cstruct) {
+                    dyncall_wb_cs(body->child_objs[slot]);
+                }
+                else {
+                    body->child_objs[slot] = NULL;
+                }
+                break;
+        }
+    }
+}
+
 
 END_OPS_PREAMBLE
 
@@ -534,6 +621,17 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
             /* XXX Above are all still todo. */
             dcCallPointer(vm, body->entry_point);
             result = $2;
+    }
+
+    for (i = 0; i < body->num_args; i++) {
+        switch (body->arg_types[i]) {
+            case DYNCALL_ARG_CARRAY:
+                dyncall_wb_ca(decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, args, i)));
+                break;
+            case DYNCALL_ARG_CSTRUCT:
+                dyncall_wb_cs(decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, args, i)));
+                break;
+        }
     }
     
     /* Free any memory that we need to. */

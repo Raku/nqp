@@ -227,9 +227,34 @@ static void * at_pos_ref(PARROT_INTERP, STable *st, void *data, INTVAL index) {
                 "at_pos_ref on CArray REPR only usable with numeric element types");
     }
 }
+static PMC * make_object(PARROT_INTERP, STable *st, void *data) {
+    CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
+    CArrayBody     *body      = (CArrayBody *)data;
+
+    switch (repr_data->elem_kind) {
+        case CARRAY_ELEM_KIND_STRING:
+        {
+            char   *elem = (char *) data;
+            STRING *str  = Parrot_str_new_init(interp, elem, strlen(elem), Parrot_utf8_encoding_ptr, 0);
+            PMC    *obj  = REPR(repr_data->elem_type)->allocate(interp, STABLE(repr_data->elem_type));
+            REPR(obj)->initialize(interp, STABLE(obj), OBJECT_BODY(obj));
+            REPR(obj)->box_funcs->set_str(interp, STABLE(obj), OBJECT_BODY(obj), str);
+            PARROT_GC_WRITE_BARRIER(interp, obj);
+            return obj;
+        }
+        case CARRAY_ELEM_KIND_CARRAY:
+            return make_carray_result(interp, repr_data->elem_type, data);
+        case CARRAY_ELEM_KIND_CPOINTER:
+            return make_cpointer_result(interp, repr_data->elem_type, data);
+        case CARRAY_ELEM_KIND_CSTRUCT:
+            return make_cstruct_result(interp, repr_data->elem_type, data);
+    }
+}
 static PMC * at_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody     *body      = (CArrayBody *)data;
+    void **storage            = (void **) body->storage;
+    PMC *obj;
 
     switch (repr_data->elem_kind) {
         case CARRAY_ELEM_KIND_STRING:
@@ -249,14 +274,18 @@ static PMC * at_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index) {
         /* We manage this array. */
         if (index < body->elems && body->child_objs[index])
             return body->child_objs[index];
+        else if (index < body->elems) {
+            /* Someone's changed the array since the cached object was
+             * created. Recreate it. */
+            obj = make_object(interp, st, storage[index]);
+            body->child_objs[index] = obj;
+            return obj;
+        }
         else
             return repr_data->elem_type;
     }
     else {
         /* Array comes from C. */
-        void **storage = (void **) body->storage;
-        PMC *obj;
-
         /* Enlarge child_objs if needed. */
         if (index >= body->allocated)
             expand(interp, repr_data, body, index+1);
@@ -270,28 +299,7 @@ static PMC * at_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index) {
         /* No cached object, but non-NULL pointer in array. Construct object,
          * put it in the cache and return it. */
         else if (storage[index]) {
-            switch (repr_data->elem_kind) {
-                case CARRAY_ELEM_KIND_STRING:
-                {
-                    char *elem = *((char **)(((char *)body->storage) + index * repr_data->elem_size));
-                    STRING *str = Parrot_str_new_init(interp, elem, strlen(elem), Parrot_utf8_encoding_ptr, 0);
-
-                    obj = REPR(repr_data->elem_type)->allocate(interp, STABLE(repr_data->elem_type));
-                    REPR(obj)->initialize(interp, STABLE(obj), OBJECT_BODY(obj));
-                    REPR(obj)->box_funcs->set_str(interp, STABLE(obj), OBJECT_BODY(obj), str);
-                    PARROT_GC_WRITE_BARRIER(interp, obj);
-                    break;
-                }
-                case CARRAY_ELEM_KIND_CARRAY:
-                    obj = make_carray_result(interp, repr_data->elem_type, storage[index]);
-                    break;
-                case CARRAY_ELEM_KIND_CPOINTER:
-                    obj = make_cpointer_result(interp, repr_data->elem_type, storage[index]);
-                    break;
-                case CARRAY_ELEM_KIND_CSTRUCT:
-                    obj = make_cstruct_result(interp, repr_data->elem_type, storage[index]);
-                    break;
-            }
+            obj = make_object(interp, st, storage[index]);
             body->child_objs[index] = obj;
             return obj;
         }
