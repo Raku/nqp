@@ -624,12 +624,16 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
     }
 
     for (i = 0; i < body->num_args; i++) {
+        PMC *value = decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, args, i));
+        if(!IS_CONCRETE(value))
+            continue;
+
         switch (body->arg_types[i]) {
             case DYNCALL_ARG_CARRAY:
-                dyncall_wb_ca(decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, args, i)));
+                dyncall_wb_ca(value);
                 break;
             case DYNCALL_ARG_CSTRUCT:
-                dyncall_wb_cs(decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, args, i)));
+                dyncall_wb_cs(value);
                 break;
         }
     }
