@@ -62,3 +62,13 @@ is_qast(
     60,
     'an add_i op inside an add_i op');
 
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('neg_i'),
+            QAST::IVal.new(:value(206))
+        )
+    ),
+    -206,
+    'neg_i operation with one IVal node');
+
