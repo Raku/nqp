@@ -28,7 +28,7 @@ grammars.
     $P0 = new ['Boolean']
     assign $P0, 1
     set_global '$!TRUE', $P0
-    
+
     # Create Regex outer package and put it in GLOBALish.
     .local pmc GLOBALish, GLOBALishWHO, Regex, RegexWHO
     GLOBALish = find_lex "GLOBALish"
@@ -47,7 +47,7 @@ grammars.
     RegexWHO["Cursor"] = type_obj
     set_global "$?CLASS", type_obj
     how = get_how type_obj
-    
+
     # Add to serialization context.
     $P0 = nqp_get_sc "__REGEX_CORE_SC__"
     nqp_set_sc_object "__REGEX_CORE_SC__", 0, type_obj
@@ -241,7 +241,7 @@ grammars.
     how."add_attribute"(type_obj, attr)
     attr = NQPAttribute."new"("&!regex" :named("name"))
     how."add_attribute"(type_obj, attr)
-    
+
     # Set default parent.
     .local pmc NQPMu
     NQPMu = find_lex "NQPMu"
@@ -249,10 +249,10 @@ grammars.
 
     # Compose meta-object.
     how."compose"(type_obj)
-    
+
     .const 'Sub' $P0 = 'Regex_Cursor_Body'
     $P0(type_obj)
-    
+
     .return ()
 .end
 
@@ -653,7 +653,7 @@ provided, then the new cursor has the same type as lang.
     pos    = CURSOR_FAIL
 
     repr_bind_attr_int cur, cur_class, '$!from', from
-    repr_bind_attr_int cur, cur_class, '$!pos', pos 
+    repr_bind_attr_int cur, cur_class, '$!pos', pos
     setattribute cur, cur_class, '$!target', target
     setattribute cur, cur_class, '$!debug', debug
     if null cstack goto cstack_done
@@ -1215,7 +1215,7 @@ and the longest match is returned.
 =item !INTERPOLATE_REGEX(var)
 
 Same as C<!INTERPOLATE> above, except that any non-regex values
-are first compiled to regexes prior to being matched.  
+are first compiled to regexes prior to being matched.
 
 =cut
 
@@ -1231,6 +1231,7 @@ are first compiled to regexes prior to being matched.
     $I0 = does var, 'array'
     if $I0 goto var_array
     var = p6regex.'compile'(var)
+    var = var.'main_sub'()
     goto done
 
   var_array:
@@ -1243,6 +1244,7 @@ are first compiled to regexes prior to being matched.
     $I0 = is_invokable elem
     if $I0 goto var_next
     elem = p6regex.'compile'(elem)
+    elem = elem.'main_sub'()
   var_next:
     push var, elem
     goto var_loop
@@ -1250,7 +1252,7 @@ are first compiled to regexes prior to being matched.
   done:
     .tailcall self.'!INTERPOLATE'(var)
 .end
-    
+
 
 =back
 

@@ -492,6 +492,7 @@ class HLL::Compiler {
         my $packfile := $compiler.compile($source);
         for $packfile.subs_by_tag('init') -> $sub { $sub(); }
         $packfile.mark_initialized('init');
+        $packfile
     }
 
     method dumper($obj, $name, *%options) {

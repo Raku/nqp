@@ -32,7 +32,7 @@ role NQPCursorRole {
                     }
                 }
             }
-        } 
+        }
         $caps;
     }
 
@@ -72,7 +72,7 @@ role NQPCursorRole {
         }
         nqp::bindattr_i($new, $?CLASS, '$!pos', -3);
         pir::return__vPsiPPi(
-            $new, 
+            $new,
             nqp::bindattr_s($new, $?CLASS, '$!target', $!target),
             nqp::bindattr_i($new, $?CLASS, '$!from', $!pos),
             $?CLASS,
@@ -91,7 +91,7 @@ role NQPCursorRole {
         pir::push__vPi($!bstack, nqp::elems($!cstack));
         $!cstack;
     }
-    
+
     method !cursor_push_cstack($capture) {
         $!cstack := [] unless pir::defined($!cstack);
         nqp::push($!cstack, $capture);
@@ -197,7 +197,7 @@ role NQPCursorRole {
             my $subcur := $!cstack[$n];
             my $litlen := $subcur.pos - $subcur.from;
             $cur."!cursor_pass"($!pos + $litlen, '')
-              if nqp::substr($!target, $!pos, $litlen) 
+              if nqp::substr($!target, $!pos, $litlen)
                    eq nqp::substr($!target, $subcur.from, $litlen);
         }
         $cur;
@@ -485,12 +485,14 @@ class NQPCursor does NQPCursorRole {
                 for $var {
                     my $elem := $_;
                     $elem := $rxcompiler.compile($elem) unless pir::is_invokable__IP($elem);
+                    $elem := $elem.main_sub();
                     nqp::push($res, $elem);
                 }
                 $var := $res;
             }
             else {
                 $var := $rxcompiler.compile($var);
+                $var := $var.main_sub();
             }
         }
         return self.'!INTERPOLATE'($var);
