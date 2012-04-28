@@ -112,5 +112,69 @@ QAST::Operations.add_core_op('list', -> $qastcomp, $op {
     $ops
 });
 
+# Conditionals.
+for <if unless> -> $op_name {
+    QAST::Operations.add_core_op($op_name, -> $qastcomp, $op {
+        # Check operand count.
+        my $operands := +$op.list;
+        pir::die("Operation '$op_name' needs either 2 or 3 operands")
+            if $operands < 2 || $operands > 3;
+        
+        # Create labels.
+        my $if_id    := $qastcomp.unique($op_name);
+        my $else_lbl := $qastcomp.post_new('Label', :result($if_id ~ '_else'));
+        my $end_lbl  := $qastcomp.post_new('Label', :result($if_id ~ '_end'));
+        
+        # Compile each of the children; we'll need to look at the result
+        # types and pick an overall result type if in non-void context.
+        my @comp_ops;
+        my @op_types;
+        for $op.list {
+            my $comp := $qastcomp.as_post($_);
+            @comp_ops.push($comp);
+            @op_types.push(nqp::uc($qastcomp.infer_type($comp.result)));
+        }
+        my $res_type := $operands == 3 ??
+            (@op_types[1] eq @op_types[2] ?? nqp::lc(@op_types[1]) !! 'p') !!
+            (@op_types[0] eq @op_types[1] ?? nqp::lc(@op_types[0]) !! 'p');
+        my $res_reg := $*REGALLOC."fresh_$res_type"();
+        
+        # Evaluate the condition first; store result if needed.
+        my $ops := $qastcomp.post_new('Ops');
+        if $operands == 2 {
+            my $coerced := $qastcomp.coerce(@comp_ops[0], $res_type);
+            $ops.push($coerced);
+            $ops.push_pirop('set', $res_reg, $coerced.result);
+        }
+        else {
+            $ops.push(@comp_ops[0]);
+        }
+        
+        # Emit the jump.
+        $ops.push_pirop(($op_name eq 'if' ?? 'unless ' !! 'if ') ~
+            @comp_ops[0].result ~ ' goto ' ~
+            ($operands == 2 ?? $end_lbl.result !! $else_lbl.result));
+        
+        # Emit the then; stash the result.
+        my $then := $qastcomp.coerce(@comp_ops[1], $res_type);
+        $ops.push($then);
+        $ops.push_pirop('set', $res_reg, $then.result);
+        
+        # Handle else branch if needed.
+        if $operands == 3 {
+            my $else := $qastcomp.coerce(@comp_ops[2], $res_type);
+            $ops.push_pirop('goto', $end_lbl.result);
+            $ops.push($else_lbl);
+            $ops.push($else);
+            $ops.push_pirop('set', $res_reg, $else.result);
+        }
+        
+        # Emit end label and tag ops with result.
+        $ops.push($end_lbl);
+        $ops.result($res_reg);
+        $ops;
+    });
+}
+
 # Straight mappings to Parrot opcodes.
 QAST::Operations.add_core_pirop_mapping('add_i', 'add', 'Iii');
