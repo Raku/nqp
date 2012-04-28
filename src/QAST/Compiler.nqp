@@ -45,6 +45,34 @@ class QAST::Compiler is HLL::Compiler {
         method cur_n() { $!cur_n }
     }
     
+    # Holds information about the QAST::Block we're currently compiling.
+    my class BlockInfo {
+        has $!outer;
+        
+        method new($outer?) {
+            my $obj := nqp::create(self);
+            $obj.BUILD($outer);
+            $obj
+        }
+        
+        method BUILD($outer) {
+            $!outer := $outer;
+        }
+        
+        method outer() {
+            $!outer
+        }
+        
+        method add_param($var) {
+        }
+        
+        method add_lexical($var) {
+        }
+        
+        method add_local($var) {
+        }
+    }
+    
     our $serno;
     INIT {
         $serno := 10; 
@@ -66,11 +94,17 @@ class QAST::Compiler is HLL::Compiler {
     proto method as_post(*@args, *%_) { * }
     
     multi method as_post(QAST::Block $node) {
-        # Block gets completely fresh registers.
+        # Block gets completely fresh registers, and fresh BlockInfo.
         my $*REGALLOC := RegAlloc.new();
+        my $outer     := try $*BLOCK;
+        my $block     := BlockInfo.new($outer);
         
         # First need to compile all of the statements.
-        my $stmts := self.compile_all_the_stmts($node.list);
+        my $stmts;
+        {
+            my $*BLOCK := $block;
+            $stmts := self.compile_all_the_stmts($node.list);
+        }
         
         # XXX Generate parameter handling code.
         my $params := self.post_new('Ops');
