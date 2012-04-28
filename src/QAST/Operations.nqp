@@ -20,6 +20,17 @@ class QAST::Operations {
         pir::die("No registered operation handler for '$name'");
     }
     
+    # Adds a core op handler.
+    method add_core_op($op, $handler) {
+        %core_ops{$op} := $handler;
+    }
+    
+    # Adds a HLL op handler.
+    method add_hll_op($hll, $op, $handler) {
+        %hll_ops{$hll} := {} unless %hll_ops{$hll};
+        %hll_ops{$hll}{$op} := $handler;
+    }
+    
     # Adds a core op that maps to a PIR op.
     method add_core_pirop_mapping($op, $pirop, $sig) {
         %core_ops{$op} := pirop_mapper($pirop, $sig);
