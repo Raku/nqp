@@ -818,6 +818,8 @@ inline op repr_at_pos_obj(out PMC, in PMC, in INT) :base_core {
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_at_pos_obj on a SixModelObject");
+
+    PARROT_GC_WRITE_BARRIER(interp, obj);
 }
 
 
