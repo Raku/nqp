@@ -1,7 +1,8 @@
 use QRegex;
 
-plan(6);
+plan(7);
 
+# Following a test infrastructure.
 sub compile_qast($qast) {
     my $post := QAST::Compiler.as_post($qast);
     my $pir := QAST::Compiler.pir($post);
@@ -14,6 +15,17 @@ sub is_qast($qast, $value, $desc) {
         CATCH { ok(0, $desc) }
     }
 }
+sub test_qast_result($qast, $tester) {
+    try {
+        my $code := compile_qast($qast);
+        $tester($code());
+        CATCH { ok(0, 'Compilation failure in test_qast_result') }
+    }
+}
+
+# Couple of handly classes, which we may want to refer as WVals in tests.
+class A { method m() { 'a' } }
+class B { method m() { 'b' } }
 
 is_qast(
     QAST::Block.new(
@@ -35,6 +47,14 @@ is_qast(
     ),
     'Gorillas just love pizza',
     'SVal node');
+
+test_qast_result(
+    QAST::Block.new(
+        QAST::WVal.new(:value(A))
+    ),
+    -> $r {
+        ok($r.m eq 'a', 'WVal node');
+    });
 
 is_qast(
     QAST::Block.new(
@@ -71,4 +91,3 @@ is_qast(
     ),
     -206,
     'neg_i operation with one IVal node');
-
