@@ -1,6 +1,6 @@
 use QRegex;
 
-plan(8);
+plan(15);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -104,3 +104,72 @@ test_qast_result(
         ok($r[0].m eq 'a', 'op list works (first elem)');
         ok($r[1].m eq 'b', 'op list works (second elem)');
     });
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('if'),
+            QAST::IVal.new(:value(1)),
+            QAST::IVal.new(:value(2)),
+            QAST::IVal.new(:value(3))
+        )
+    ),
+    2,
+    'if with IVal, 3-operand');
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('if'),
+            QAST::IVal.new(:value(0)),
+            QAST::IVal.new(:value(2)),
+            QAST::IVal.new(:value(3))
+        )
+    ),
+    3,
+    'if with IVal, 3-operand');
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('if'),
+            QAST::IVal.new(:value(1)),
+            QAST::IVal.new(:value(2))
+        )
+    ),
+    2,
+    'if with IVal, 2-operand');
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('if'),
+            QAST::IVal.new(:value(0)),
+            QAST::IVal.new(:value(2))
+        )
+    ),
+    0,
+    'if with IVal, 2-operand');
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('unless'),
+            QAST::IVal.new(:value(1)),
+            QAST::IVal.new(:value(2))
+        )
+    ),
+    1,
+    'unless with IVal');
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('unless'),
+            QAST::IVal.new(:value(0)),
+            QAST::IVal.new(:value(2))
+        )
+    ),
+    2,
+    'unless with IVal');
+
