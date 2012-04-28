@@ -95,5 +95,22 @@ class QAST::Operations {
     }
 }
 
+# Data structures
+QAST::Operations.add_core_op('list', -> $qastcomp, $op {
+    # Create register for the resulting list and make an empty one.
+    my $list_reg := $*REGALLOC.fresh_p();
+    my $ops := $qastcomp.post_new('Ops', :result($list_reg));
+    $ops.push_pirop('new', $list_reg, "'ResizablePMCArray'");
+    
+    # Push all the things.
+    for $op.list {
+        my $post := $qastcomp.coerce($qastcomp.as_post($_), 'P');
+        $ops.push($post);
+        $ops.push_pirop('push', $list_reg, $post.result);
+    }
+    
+    $ops
+});
+
 # Straight mappings to Parrot opcodes.
 QAST::Operations.add_core_pirop_mapping('add_i', 'add', 'Iii');

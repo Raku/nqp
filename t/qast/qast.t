@@ -1,6 +1,6 @@
 use QRegex;
 
-plan(7);
+plan(8);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -91,3 +91,16 @@ is_qast(
     ),
     -206,
     'neg_i operation with one IVal node');
+
+test_qast_result(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('list'),
+            QAST::WVal.new(:value(A)),
+            QAST::WVal.new(:value(B))
+        )
+    ),
+    -> $r {
+        ok($r[0].m eq 'a', 'op list works (first elem)');
+        ok($r[1].m eq 'b', 'op list works (second elem)');
+    });
