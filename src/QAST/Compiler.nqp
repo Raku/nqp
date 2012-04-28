@@ -147,6 +147,37 @@ class QAST::Compiler is HLL::Compiler {
         QAST::Operations.compile_op(self, '', $node)
     }
     
+    multi method as_post(QAST::Var $node) {
+        my $scope := $node.scope;
+        my $decl  := $node.decl;
+        
+        # Handle any declarations; after this, we call through to the
+        # lookup code.
+        if $decl {
+            # If it's a parameter, add it to the things we should bind
+            # at block entry.
+            if $node.decl eq 'param' {
+                $*BLOCK.add_param($node);
+            }
+            elsif $decl ne 'var' {
+                pir::die("Don't understand declaration type '$decl'");
+            }
+            
+            # Register storage.
+            if $scope eq 'local' {
+                $*BLOCK.add_local($node);
+            }
+            elsif $scope eq 'lexical' {
+                $*BLOCK.add_lexical($node);
+            }
+            else {
+                pir::die("Cannot declare $decl of scope '$scope'; use 'local' or 'lexical'");
+            }
+        }
+        
+        pir::die("QAST::Var NYI");
+    }
+    
     multi method as_post(QAST::IVal $node) {
         self.post_new('Ops', :result(~$node.value))
     }
