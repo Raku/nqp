@@ -1,6 +1,6 @@
 use QRegex;
 
-plan(5);
+plan(6);
 
 sub compile_qast($qast) {
     my $post := QAST::Compiler.as_post($qast);
