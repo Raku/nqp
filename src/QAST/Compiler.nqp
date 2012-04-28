@@ -146,16 +146,16 @@ class QAST::Compiler is HLL::Compiler {
         $ops;
     }
     
-    method coerce($qast, $desired) {
-        my $result := self.infer_type($qast.result());
+    method coerce($post, $desired) {
+        my $result := self.infer_type($post.result());
         if $result eq $desired {
             # Exact match
-            return $qast;
+            return $post;
         }
         elsif nqp::lc($result) eq $desired {
             # The result is in a register, and our desired type allows
             # both registers and literals.
-            return $qast;
+            return $post;
         }
         else {
             pir::die("Coercion from '$result' to '$desired' NYI");
