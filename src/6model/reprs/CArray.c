@@ -330,6 +330,7 @@ static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, 
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody     *body      = (CArrayBody *)data;
     void **storage = (void **) body->storage;
+    void *cptr; /* Pointer to C data. */
 
     /* Enlarge child_objs if needed. */
     if (index >= body->allocated)
@@ -337,32 +338,43 @@ static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, 
     if (index >= body->elems)
         body->elems = index + 1;
 
+    /* Make sure the type isn't something we can't handle. */
     switch (repr_data->elem_kind) {
         case CARRAY_ELEM_KIND_STRING:
-        {
-            STRING *str  = REPR(obj)->box_funcs->get_str(interp, STABLE(obj), OBJECT_BODY(obj));
-            char   *elem = Parrot_str_to_encoded_cstring(interp, str, Parrot_utf8_encoding_ptr);
-            *((char **)(((char *)body->storage) + index * repr_data->elem_size)) = elem;
-            body->child_objs[index] = obj;
-            break;
-        }
         case CARRAY_ELEM_KIND_CARRAY:
-            storage[index] = ((CArrayBody *) OBJECT_BODY(obj))->storage;
-            body->child_objs[index] = obj;
-            break;
         case CARRAY_ELEM_KIND_CSTRUCT:
-            storage[index] = ((CStructBody *) OBJECT_BODY(obj))->cstruct;
-            body->child_objs[index] = obj;
-            break;
         case CARRAY_ELEM_KIND_CPOINTER:
-            storage[index] = ((CPointerBody *) OBJECT_BODY(obj))->ptr;
-            body->child_objs[index] = obj;
             break;
         default:
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "bind_pos_boxed on CArray REPR not usable with this element type");
-
     }
+
+    if (IS_CONCRETE(obj)) {
+        switch (repr_data->elem_kind) {
+            case CARRAY_ELEM_KIND_STRING:
+            {
+                STRING *str  = REPR(obj)->box_funcs->get_str(interp, STABLE(obj), OBJECT_BODY(obj));
+                cptr = Parrot_str_to_encoded_cstring(interp, str, Parrot_utf8_encoding_ptr);
+                break;
+            }
+            case CARRAY_ELEM_KIND_CARRAY:
+                cptr = ((CArrayBody *) OBJECT_BODY(obj))->storage;
+                break;
+            case CARRAY_ELEM_KIND_CSTRUCT:
+                cptr = ((CStructBody *) OBJECT_BODY(obj))->cstruct;
+                break;
+            case CARRAY_ELEM_KIND_CPOINTER:
+                cptr = ((CPointerBody *) OBJECT_BODY(obj))->ptr;
+                break;
+        }
+    }
+    else {
+        cptr = NULL;
+    }
+
+    body->child_objs[index] = obj;
+    storage[index] = cptr;
 }
 static INTVAL elems(PARROT_INTERP, STable *st, void *data) {
     CArrayBody     *body      = (CArrayBody *)data;
