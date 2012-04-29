@@ -231,7 +231,9 @@ class QAST::Compiler is HLL::Compiler {
         if nqp::substr($inferee, 0, 1) eq '$' {
             nqp::substr($inferee, 1, 1)
         }
-        elsif nqp::substr($inferee, 0, 6) eq 'utf8:"' || nqp::substr($inferee, 0, 6) eq 'ucs4:"' {
+        elsif nqp::substr($inferee, 0, 6) eq 'utf8:"'
+              || nqp::substr($inferee, 0, 6) eq 'ucs4:"'
+              || nqp::substr($inferee, 0, 1) eq '"' {
             "s"
         }
         elsif nqp::index($inferee, ".", 0) > 0 {

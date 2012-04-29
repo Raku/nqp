@@ -179,3 +179,4 @@ for <if unless> -> $op_name {
 # Straight mappings to Parrot opcodes.
 QAST::Operations.add_core_pirop_mapping('add_i', 'add', 'Iii');
 QAST::Operations.add_core_pirop_mapping('neg_i', 'neg', 'Ii');
+QAST::Operations.add_core_pirop_mapping('fromstr_I', 'nqp_bigint_from_str', 'PsP');

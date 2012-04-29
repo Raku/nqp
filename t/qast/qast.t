@@ -1,6 +1,6 @@
 use QRegex;
 
-plan(15);
+plan(16);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -172,4 +172,18 @@ is_qast(
     ),
     2,
     'unless with IVal');
+
+class MyBigInt is repr('P6bigint') { }
+
+test_qast_result(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('fromstr_I'),
+            QAST::SVal.new(:value('-42')),
+            QAST::WVal.new(:value(MyBigInt))
+        )
+    ),
+    -> $r {
+        ok(nqp::unbox_i($r) == -42, 'bigint conversion roundtrips');
+    });
 
