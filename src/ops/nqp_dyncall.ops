@@ -309,32 +309,39 @@ static void dyncall_wb_ca(PMC *obj) {
         return;
 
     for (i = 0; i < body->elems; i++) {
+        void *cptr;   /* The pointer in the C storage. */
+        void *objptr; /* The pointer in the object representing the C object. */
+
         /* Ignore elements where we haven't generated an object. */
         if (!body->child_objs[i])
             continue;
 
-        switch (repr_data->elem_kind) {
-            case CARRAY_ELEM_KIND_CARRAY:
-                if (storage[i] == ((CArrayBody *) OBJECT_BODY(body->child_objs[i]))->storage) {
-                    dyncall_wb_ca(body->child_objs[i]);
-                }
-                else {
-                    body->child_objs[i] = NULL;
-                }
-                break;
-            case CARRAY_ELEM_KIND_CPOINTER:
-                if (storage[i] != ((CPointerBody *) OBJECT_BODY(body->child_objs[i]))->ptr) {
-                    body->child_objs[i] = NULL;
-                }
-                break;
-            case CARRAY_ELEM_KIND_CSTRUCT:
-                if (storage[i] == ((CStructBody *) OBJECT_BODY(body->child_objs[i]))->cstruct) {
-                    dyncall_wb_cs(body->child_objs[i]);
-                }
-                else {
-                    body->child_objs[i] = NULL;
-                }
-                break;
+        cptr = storage[i];
+        if (IS_CONCRETE(body->child_objs[i])) {
+            switch (repr_data->elem_kind) {
+                case CARRAY_ELEM_KIND_CARRAY:
+                    objptr = ((CArrayBody *) OBJECT_BODY(body->child_objs[i]))->storage;
+                    break;
+                case CARRAY_ELEM_KIND_CPOINTER:
+                    objptr = ((CPointerBody *) OBJECT_BODY(body->child_objs[i]))->ptr;
+                    break;
+                case CARRAY_ELEM_KIND_CSTRUCT:
+                    objptr = (CStructBody *) OBJECT_BODY(body->child_objs[i]);
+                    break;
+            }
+        }
+        else {
+            objptr = NULL;
+        }
+
+        if (objptr != cptr) {
+            body->child_objs[i] = NULL;
+        }
+        else if (repr_data->elem_kind == CARRAY_ELEM_KIND_CARRAY) {
+            dyncall_wb_ca(body->child_objs[i]);
+        }
+        else if (repr_data->elem_kind == CARRAY_ELEM_KIND_CSTRUCT) {
+            dyncall_wb_cs(body->child_objs[i]);
         }
     }
 }
@@ -348,34 +355,38 @@ static void dyncall_wb_cs(PMC *obj) {
     for (i = 0; i < repr_data->num_attributes; i++) {
         INTVAL kind = repr_data->attribute_locations[i] & CSTRUCT_ATTR_MASK;
         INTVAL slot = repr_data->attribute_locations[i] >> CSTRUCT_ATTR_SHIFT;
-        void *ptr;
+        void *cptr;   /* The pointer in the C storage. */
+        void *objptr; /* The pointer in the object representing the C object. */
 
         if (kind == CSTRUCT_ATTR_IN_STRUCT)
             continue;
 
-        ptr = *((void **) (storage + repr_data->struct_offsets[i]));
-        switch (kind) {
-            case CSTRUCT_ATTR_CARRAY:
-                if (ptr == ((CArrayBody *) OBJECT_BODY(body->child_objs[slot]))->storage) {
-                    dyncall_wb_ca(body->child_objs[slot]);
-                }
-                else {
-                    body->child_objs[slot] = NULL;
-                }
-                break;
-            case CSTRUCT_ATTR_CPTR:
-                if (ptr != ((CPointerBody *) OBJECT_BODY(body->child_objs[slot]))->ptr) {
-                    body->child_objs[slot] = NULL;
-                }
-                break;
-            case CSTRUCT_ATTR_CSTRUCT:
-                if (ptr == ((CStructBody *) OBJECT_BODY(body->child_objs[slot]))->cstruct) {
-                    dyncall_wb_cs(body->child_objs[slot]);
-                }
-                else {
-                    body->child_objs[slot] = NULL;
-                }
-                break;
+        cptr = *((void **) (storage + repr_data->struct_offsets[i]));
+        if (IS_CONCRETE(body->child_objs[slot])) {
+            switch (kind) {
+                case CSTRUCT_ATTR_CARRAY:
+                    objptr = ((CArrayBody *) OBJECT_BODY(body->child_objs[slot]))->storage;
+                    break;
+                case CSTRUCT_ATTR_CPTR:
+                    objptr = ((CPointerBody *) OBJECT_BODY(body->child_objs[slot]))->ptr;
+                    break;
+                case CSTRUCT_ATTR_CSTRUCT:
+                    objptr = (CStructBody *) OBJECT_BODY(body->child_objs[slot]);
+                    break;
+            }
+        }
+        else {
+            objptr = NULL;
+        }
+
+        if (objptr != cptr) {
+            body->child_objs[slot] = NULL;
+        }
+        else if (kind == CSTRUCT_ATTR_CARRAY) {
+            dyncall_wb_ca(body->child_objs[slot]);
+        }
+        else if (kind == CSTRUCT_ATTR_CSTRUCT) {
+            dyncall_wb_cs(body->child_objs[slot]);
         }
     }
 }
