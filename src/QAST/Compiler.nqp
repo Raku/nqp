@@ -48,6 +48,11 @@ class QAST::Compiler is HLL::Compiler {
     # Holds information about the QAST::Block we're currently compiling.
     my class BlockInfo {
         has $!outer;
+        has @!params;
+        has @!locals;
+        has @!lexicals;
+        has %!local_types;
+        has %!lexical_types;
         
         method new($outer?) {
             my $obj := nqp::create(self);
@@ -59,18 +64,43 @@ class QAST::Compiler is HLL::Compiler {
             $!outer := $outer;
         }
         
-        method outer() {
-            $!outer
-        }
-        
         method add_param($var) {
+            $var.scope eq 'local' ??
+                self.register_local($var) !!
+                self.register_lexical($var);
+            @!params[+@!params] := $var;
         }
         
         method add_lexical($var) {
+            self.register_lexical($var);
+            @!lexicals[+@!lexicals] := $var;
         }
         
         method add_local($var) {
+            self.register_local($var);
+            @!locals[+@!locals] := $var;
         }
+        
+        method register_lexical($var) {
+            my $name := $var.name;
+            if nqp::existskey(%!lexical_types, $name) {
+                pir::die("Lexical '$name' already declared");
+            }
+            %!lexical_types{$name} := type_to_register_type($var.returns);
+        }
+        
+        method register_local($var) {
+            my $name := $var.name;
+            if nqp::existskey(%!local_types, $name) {
+                pir::die("Local '$name' already declared");
+            }
+            %!local_types{$name} := type_to_register_type($var.returns);
+        }
+        
+        method outer() { $!outer }
+        method params() { @!params }
+        method lexicals() { @!lexicals }
+        method locals() { @!locals }
     }
     
     our $serno;
@@ -80,6 +110,11 @@ class QAST::Compiler is HLL::Compiler {
             $P0 = find_lex '$?CLASS'
             set_root_global ['parrot';'QAST'], 'Compiler', $P0
         };
+    }
+    
+    my @prim_to_reg := ['P', 'I', 'N', 'S'];
+    sub type_to_register_type($type) {
+        @prim_to_reg[pir::repr_get_primitive_type_spec__IP($type)]
     }
 
     method unique($prefix = '') { $prefix ~ $serno++ }
@@ -156,22 +191,27 @@ class QAST::Compiler is HLL::Compiler {
         if $decl {
             # If it's a parameter, add it to the things we should bind
             # at block entry.
-            if $node.decl eq 'param' {
-                $*BLOCK.add_param($node);
+            if $decl eq 'param' {
+                if $scope eq 'local' || $scope eq 'lexical' {
+                    $*BLOCK.add_param($node);
+                }
+                else {
+                    pir::die("Parameter cannot have scope '$scope'; use 'local' or 'lexical'");
+                }
             }
-            elsif $decl ne 'var' {
-                pir::die("Don't understand declaration type '$decl'");
-            }
-            
-            # Register storage.
-            if $scope eq 'local' {
-                $*BLOCK.add_local($node);
-            }
-            elsif $scope eq 'lexical' {
-                $*BLOCK.add_lexical($node);
+            elsif $decl eq 'var' {
+                if $scope eq 'local' {
+                    $*BLOCK.add_local($node);
+                }
+                elsif $scope eq 'lexical' {
+                    $*BLOCK.add_lexical($node);
+                }
+                else {
+                    pir::die("Cannot declare variable with scope '$scope'; use 'local' or 'lexical'");
+                }
             }
             else {
-                pir::die("Cannot declare $decl of scope '$scope'; use 'local' or 'lexical'");
+                pir::die("Don't understand declaration type '$decl'");
             }
         }
         
