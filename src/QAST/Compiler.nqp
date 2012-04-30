@@ -53,6 +53,7 @@ class QAST::Compiler is HLL::Compiler {
         has @!lexicals;
         has %!local_types;
         has %!lexical_types;
+        has %!lexical_regs;
         
         method new($outer?) {
             my $obj := nqp::create(self);
@@ -83,10 +84,12 @@ class QAST::Compiler is HLL::Compiler {
         
         method register_lexical($var) {
             my $name := $var.name;
+            my $type := type_to_register_type($var.returns);
             if nqp::existskey(%!lexical_types, $name) {
                 pir::die("Lexical '$name' already declared");
             }
-            %!lexical_types{$name} := type_to_register_type($var.returns);
+            %!lexical_types{$name} := $type;
+            %!lexical_regs{$name} := $*BLOCKRA."fresh_{nqp::lc($type)}"();
         }
         
         method register_local($var) {
@@ -101,6 +104,14 @@ class QAST::Compiler is HLL::Compiler {
         method params() { @!params }
         method lexicals() { @!lexicals }
         method locals() { @!locals }
+        
+        method lex_reg($name) { %!lexical_regs{$name} }
+        
+        my %longnames := nqp::hash('P', 'pmc', 'I', 'int', 'N', 'num', 'S', 'string');
+        method local_type($name) { %!local_types{$name} }
+        method local_type_long($name) { %longnames{%!local_types{$name}} }
+        method lexical_type($name) { %!lexical_types{$name} }
+        method lexical_type_long($name) { %longnames{%!lexical_types{$name}} }
     }
     
     our $serno;
@@ -131,6 +142,7 @@ class QAST::Compiler is HLL::Compiler {
     multi method as_post(QAST::Block $node) {
         # Block gets completely fresh registers, and fresh BlockInfo.
         my $*REGALLOC := RegAlloc.new();
+        my $*BLOCKRA  := $*REGALLOC;
         my $outer     := try $*BLOCK;
         my $block     := BlockInfo.new($outer);
         
@@ -141,12 +153,23 @@ class QAST::Compiler is HLL::Compiler {
             $stmts := self.compile_all_the_stmts($node.list);
         }
         
-        # XXX Generate parameter handling code.
-        my $params := self.post_new('Ops');
+        # Generate parameter handling code.
+        my $decls := self.post_new('Ops');
+        for $block.params {
+            
+        }
+        
+        # Generate declarations.
+        for $block.lexicals {
+            $decls.push_pirop('.lex ' ~ self.escape($_.name) ~ ', ' ~ $block.lex_reg($_.name));
+        }
+        for $block.locals {
+            $decls.push_pirop('.local ' ~ $block.local_type_long($_.name) ~ ' ' ~ $_.name);
+        }
         
         # Wrap all up in a POST::Sub.
         my $sub := self.post_new('Sub');
-        $sub.push($params);
+        $sub.push($decls);
         $sub.push($stmts);
         $sub.push_pirop(".return (" ~ $stmts.result ~ ")");
         
