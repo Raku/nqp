@@ -239,7 +239,27 @@ class QAST::Compiler is HLL::Compiler {
             }
         }
         
-        pir::die("QAST::Var NYI");
+        # Now go by scope.
+        my $name := $node.name;
+        my $ops := self.post_new('Ops');
+        if $scope eq 'local' {
+            if $*BLOCK.local_type($name) -> $type {
+                if $*BINDVAL {
+                    my $valpost := self.coerce(self.as_post($*BINDVAL), nqp::lc($type));
+                    $ops.push($valpost);
+                    $ops.push_pirop('set', $name, $valpost.result);
+                }
+                $ops.result($name);
+            }
+            else {
+                pir::die("Cannot reference undeclared local '$name'");
+            }
+        }
+        else {
+            pir::die("QAST::Var with scope '$scope' NYI");
+        }
+        
+        $ops
     }
     
     multi method as_post(QAST::IVal $node) {
@@ -294,6 +314,9 @@ class QAST::Compiler is HLL::Compiler {
     method infer_type($inferee) {
         if nqp::substr($inferee, 0, 1) eq '$' {
             nqp::substr($inferee, 1, 1)
+        }
+        elsif $*BLOCK.local_type($inferee) -> $type {
+            nqp::lc($type)
         }
         elsif nqp::substr($inferee, 0, 6) eq 'utf8:"'
               || nqp::substr($inferee, 0, 6) eq 'ucs4:"'
