@@ -1,6 +1,6 @@
 use QRegex;
 
-plan(19);
+plan(20);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -219,3 +219,19 @@ is_qast(
     ),
     "Is cabbage what you pay the taxi driver?",
     'local with type str');
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('bind'),
+            QAST::Var.new( :name('a'), :scope('local'), :decl('var'), :returns(int) ),
+            QAST::IVal.new(:value(12))
+        ),
+        QAST::Op.new(
+            :op('add_i'),
+            QAST::Var.new( :name('a'), :scope('local') ),
+            QAST::IVal.new(:value(13))
+        )
+    ),
+    25,
+    'local int bound to a value then used in addition');
