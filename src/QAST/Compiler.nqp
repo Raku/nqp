@@ -143,6 +143,7 @@ class QAST::Compiler is HLL::Compiler {
         # Block gets completely fresh registers, and fresh BlockInfo.
         my $*REGALLOC := RegAlloc.new();
         my $*BLOCKRA  := $*REGALLOC;
+        my $*BINDVAL  := 0;
         my $outer     := try $*BLOCK;
         my $block     := BlockInfo.new($outer);
         

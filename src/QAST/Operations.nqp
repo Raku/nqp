@@ -176,6 +176,23 @@ for <if unless> -> $op_name {
     });
 }
 
+# Binding
+QAST::Operations.add_core_op('bind', -> $qastcomp, $op {
+    # Sanity checks.
+    my @children := $op.list;
+    if +@children != 2 {
+        pir::die("A 'bind' op must have exactly two children");
+    }
+    unless nqp::istype(@children[0], QAST::Var) {
+        pir::die("First child of a 'bind' op must be a QAST::Var");
+    }
+    
+    # Set the QAST of the think we're to bind, then delegate to
+    # the compilation of the QAST::Var to handle the rest.
+    my $*BINDVAL := @children[1];
+    $qastcomp.as_post(@children[0])
+});
+
 # Straight mappings to Parrot opcodes.
 QAST::Operations.add_core_pirop_mapping('add_i', 'add', 'Iii');
 QAST::Operations.add_core_pirop_mapping('neg_i', 'neg', 'Ii');
