@@ -13,12 +13,40 @@ static PMC * (* create_stable_func) (PARROT_INTERP, REPROps *REPR, PMC *HOW);
 
 static void set_str(PARROT_INTERP, STable *st, void *data, STRING *value) {
     CStrBody *body = (CStrBody *) data;
+    PMC *old_ctx, *cappy, *meth, *enc_pmc;
+    STRING *enc;
+    void *encoding;
 
     if(body->cstr)
         mem_sys_free(body->cstr);
 
-    /* TODO: Encodings. */
-    body->cstr = Parrot_str_to_encoded_cstring(interp, value, Parrot_utf8_encoding_ptr);
+    /* Look up "encoding" method. */
+    meth = VTABLE_find_method(interp, st->WHAT,
+        Parrot_str_new_constant(interp, "encoding"));
+    if (PMC_IS_NULL(meth))
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "CStr representation expects an 'encoding' method, specifying the encoding");
+
+    old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
+    VTABLE_push_pmc(interp, cappy, st->WHAT);
+    Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
+    cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
+    enc_pmc = decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, cappy, 0));
+    enc = REPR(enc_pmc)->box_funcs->get_str(interp, STABLE(enc_pmc), OBJECT_BODY(enc_pmc));
+
+    if (STRING_equal(interp, enc, Parrot_str_new_constant(interp, "utf8")))
+        encoding = Parrot_utf8_encoding_ptr;
+    else if (STRING_equal(interp, enc, Parrot_str_new_constant(interp, "utf16")))
+        encoding = Parrot_utf16_encoding_ptr;
+    else if (STRING_equal(interp, enc, Parrot_str_new_constant(interp, "ascii")))
+        encoding = Parrot_ascii_encoding_ptr;
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Unknown encoding passed to CStr representation");
+
+    body->cstr = Parrot_str_to_encoded_cstring(interp, value, encoding);
 }
 
 /* Creates a new type object of this representation, and associates it with
