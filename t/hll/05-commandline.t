@@ -1,6 +1,6 @@
 #! nqp
 
-plan(27);
+plan(29);
 
 use NQPHLL;
 
@@ -52,6 +52,10 @@ $x.stop-after-first-arg;
 $r := $x.parse(['-a', 'script.pl', '--verbose']);
 ok(pir::join(',', $r.arguments) eq 'script.pl,--verbose',
     'stop-after-first-arg');
+
+$r := $x.parse(['-aefoo']);
+ok($r.options{'a'}, 'can group one-letter options of which one has an argument');
+ok($r.options{'e'} eq 'foo', 'can join one-letter option and its argument');
 
 # TODO: tests for long options as stoppers
 
