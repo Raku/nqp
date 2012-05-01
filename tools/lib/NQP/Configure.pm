@@ -30,6 +30,9 @@ our @required_nqp_files = qw(
 our $nqp_git = 'git://github.com/perl6/nqp.git';
 our $par_git = 'git://github.com/parrot/parrot.git';
 
+our $nqp_push = 'git@github.com:perl6/nqp.git';
+our $par_push = 'git@github.com:parrot/parrot.git';
+
 sub sorry {
     my @msg = @_;
     die join("\n", '', '===SORRY!===', @msg, "\n");
@@ -188,12 +191,15 @@ sub git_checkout {
     my $repo = shift;
     my $dir  = shift;
     my $checkout = shift;
+    my $pushurl = shift;
     my $pwd = cwd();
 
     # get an up-to-date repository
     if (! -d $dir) {
         system_or_die('git', 'clone', $repo, $dir);
         chdir($dir);
+        system('git', 'config', 'remote.origin.pushurl', $pushurl)
+            if defined $pushurl;
     }
     else {
         chdir($dir);
@@ -262,11 +268,11 @@ sub gen_nqp {
     my $nqp_have = $config{'nqp::version'} || '';
     my $nqp_ok   = $nqp_have && cmp_rev($nqp_have, $nqp_want) >= 0;
     if ($gen_nqp) {
-        my $nqp_repo = git_checkout($nqp_git, 'nqp', $gen_nqp);
+        my $nqp_repo = git_checkout($nqp_git, 'nqp', $gen_nqp, $nqp_push);
         $nqp_ok = $nqp_have eq $nqp_repo;
     }
     elsif (!$nqp_ok || defined $gen_parrot && !-f $PARROT_REVISION) {
-        git_checkout($nqp_git, 'nqp', $nqp_want);
+        git_checkout($nqp_git, 'nqp', $nqp_want, $nqp_push);
     }
 
     if (defined $gen_parrot) {
@@ -311,11 +317,11 @@ sub gen_parrot {
     my $par_have = $config{'parrot::git_describe'} || '';
     my $par_ok   = $par_have && cmp_rev($par_have, $par_want) >= 0;
     if ($gen_parrot) {
-        my $par_repo = git_checkout($par_git, 'parrot', $gen_parrot);
+        my $par_repo = git_checkout($par_git, 'parrot', $gen_parrot, $par_push);
         $par_ok = $par_have eq $par_repo;
     }
     elsif (!$par_ok) {
-        git_checkout($par_git, 'parrot', $par_want);
+        git_checkout($par_git, 'parrot', $par_want, $par_push);
     }
 
     if ($par_ok) {
