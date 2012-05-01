@@ -1,6 +1,6 @@
 use QRegex;
 
-plan(16);
+plan(19);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -187,3 +187,35 @@ test_qast_result(
         ok(nqp::unbox_i($r) == -42, 'bigint conversion roundtrips');
     });
 
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('bind'),
+            QAST::Var.new( :name('lol'), :scope('local'), :decl('var'), :returns(int) ),
+            QAST::IVal.new(:value(42))
+        )
+    ),
+    42,
+    'local with type int');
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('bind'),
+            QAST::Var.new( :name('omg'), :scope('local'), :decl('var'), :returns(num) ),
+            QAST::NVal.new(:value(6.9))
+        )
+    ),
+    6.9,
+    'local with type num');
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('bind'),
+            QAST::Var.new( :name('wtf'), :scope('local'), :decl('var'), :returns(str) ),
+            QAST::SVal.new(:value("Is cabbage what you pay the taxi driver?"))
+        )
+    ),
+    "Is cabbage what you pay the taxi driver?",
+    'local with type str');
