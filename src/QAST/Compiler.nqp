@@ -156,8 +156,29 @@ class QAST::Compiler is HLL::Compiler {
         
         # Generate parameter handling code.
         my $decls := self.post_new('Ops');
+        my $param_id := 1;
         for $block.params {
+            my @param := ['.param'];
             
+            if $_.scope eq 'local'{
+                nqp::push(@param, $block.local_type_long($_.name));
+                nqp::push(@param, $_.name);
+            }
+            else {
+                pir::die("Lexical parameters NYI");
+            }
+            
+            if $_.slurpy {
+                nqp::push(@param, ':slurpy');
+                if $_.named {
+                    nqp::push(@param, ':named');
+                }
+            }
+            elsif $_.named {
+                nqp::push(@param, ':named(' ~ self.escape($_.named) ~ ')');
+            }
+            
+            $decls.push_pirop(pir::join(' ', @param));
         }
         
         # Generate declarations.
