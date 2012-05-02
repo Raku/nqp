@@ -109,11 +109,10 @@ class HLL::CommandLine::Result {
         # how I miss p6's Hash.push
 
         if pir::exists(%!options, $name) {
-            my $t := pir::typeof(%!options);
-            if $t eq 'ResizablePMCArray' {
+            if pir::does(%!options{$name}, 'array') {
                 pir::push(%!options{$name}, $value);
             } else {
-                %!options{$name} := [ %!options{$name}, $name ];
+                %!options{$name} := [ %!options{$name}, $value ];
             }
         } else {
             %!options{$name} := $value;

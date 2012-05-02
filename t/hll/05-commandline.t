@@ -1,6 +1,6 @@
 #! nqp
 
-plan(29);
+plan(30);
 
 use NQPHLL;
 
@@ -78,3 +78,6 @@ ok($r.options{'with-arg'} eq 'v2', 'short+long alias  with value(right)');
 
 ok($r.options<o> eq 'v4', 'long|short alias (short)');
 ok($r.options<other> eq 'v3', 'long|short alias (short)');
+
+$r := $x.parse(['-w', 'A', '-w', 'B']);
+ok(nqp::join(',', $r.options<w>) eq 'A,B', 'multiple options with the same name');
