@@ -110,7 +110,6 @@ class HLL::CommandLine::Result {
 
         if pir::exists(%!options, $name) {
             my $t := pir::typeof(%!options);
-            say($t);
             if $t eq 'ResizablePMCArray' {
                 pir::push(%!options{$name}, $value);
             } else {
