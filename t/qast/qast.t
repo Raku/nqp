@@ -1,6 +1,6 @@
 use QRegex;
 
-plan(20);
+plan(23);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -12,6 +12,13 @@ sub is_qast($qast, $value, $desc) {
     try {
         my $code := compile_qast($qast);
         ok($code() eq $value, $desc);
+        CATCH { ok(0, $desc) }
+    }
+}
+sub is_qast_args($qast, @args, $value, $desc) {
+    try {
+        my $code := compile_qast($qast);
+        ok($code(|@args) eq $value, $desc);
         CATCH { ok(0, $desc) }
     }
 }
@@ -235,3 +242,37 @@ is_qast(
     ),
     25,
     'local int bound to a value then used in addition');
+
+is_qast_args(
+    QAST::Block.new(
+        QAST::Var.new( :name('arg'), :scope('local'), :decl('param'), :returns(str) ),
+    ),
+    ['Mmmmm...Highland Park!'],
+    'Mmmmm...Highland Park!',
+    'local param being returned immediately');
+
+is_qast_args(
+    QAST::Block.new(
+        QAST::Var.new( :name('a'), :scope('local'), :decl('param'), :returns(int) ),
+        QAST::Var.new( :name('b'), :scope('local'), :decl('param'), :returns(int) ),
+        QAST::Op.new(
+            :op('add_i'),
+            QAST::Var.new( :name('a'), :scope('local') ),
+            QAST::Var.new( :name('b'), :scope('local') )
+        )
+    ),
+    [9, 18],
+    27,
+    'two int args declared, then used');
+
+is_qast_args(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('add_i'),
+            QAST::Var.new( :name('a'), :scope('local'), :decl('param'), :returns(int) ),
+            QAST::Var.new( :name('b'), :scope('local'), :decl('param'), :returns(int) )
+        )
+    ),
+    [14, 20],
+    34,
+    'two int args declared/used simultaneously');
