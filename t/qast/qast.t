@@ -1,6 +1,6 @@
 use QRegex;
 
-plan(23);
+plan(25);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -263,7 +263,7 @@ is_qast_args(
     ),
     [9, 18],
     27,
-    'two int args declared, then used');
+    'two local int args declared, then used');
 
 is_qast_args(
     QAST::Block.new(
@@ -275,4 +275,30 @@ is_qast_args(
     ),
     [14, 20],
     34,
-    'two int args declared/used simultaneously');
+    'two local int args declared/used simultaneously');
+
+is_qast_args(
+    QAST::Block.new(
+        QAST::Var.new( :name('$a'), :scope('lexical'), :decl('param'), :returns(int) ),
+        QAST::Var.new( :name('$b'), :scope('lexical'), :decl('param'), :returns(int) ),
+        QAST::Op.new(
+            :op('add_i'),
+            QAST::Var.new( :name('$a'), :scope('lexical') ),
+            QAST::Var.new( :name('$b'), :scope('lexical') )
+        )
+    ),
+    [10, 19],
+    29,
+    'two lexical int args declared, then used');
+
+is_qast_args(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('add_i'),
+            QAST::Var.new( :name('$a'), :scope('lexical'), :decl('param'), :returns(int) ),
+            QAST::Var.new( :name('$b'), :scope('lexical'), :decl('param'), :returns(int) )
+        )
+    ),
+    [16, 22],
+    38,
+    'two lexical int args declared/used simultaneously');
