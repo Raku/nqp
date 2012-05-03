@@ -194,8 +194,8 @@ QAST::Operations.add_core_op('bind', -> $qastcomp, $op {
 });
 
 # I/O opcodes
-QAST::Operations.add_core_pirop_mapping('print', 'print', '');
-QAST::Operations.add_core_pirop_mapping('say', 'say', '');
+QAST::Operations.add_core_pirop_mapping('print', 'print', '0s');
+QAST::Operations.add_core_pirop_mapping('say', 'say', '0s');
 
 # terms
 QAST::Operations.add_core_pirop_mapping('time_i', 'time', 'I');
@@ -274,14 +274,14 @@ QAST::Operations.add_core_pirop_mapping('bitshiftl_I', 'nqp_bigint_shl', 'PPIP')
 QAST::Operations.add_core_pirop_mapping('bitshiftr_i', 'shr', 'III');
 QAST::Operations.add_core_pirop_mapping('bitshiftr_I', 'nqp_bigint_shr', 'PPIP');
 
+# string bitwise ops
 QAST::Operations.add_core_pirop_mapping('bitor_s', 'bors', 'SS');
 QAST::Operations.add_core_pirop_mapping('bitxor_s', 'bxors', 'SS');
 QAST::Operations.add_core_pirop_mapping('bitand_s', 'bands', 'SS');
 
 # string opcodes
 QAST::Operations.add_core_pirop_mapping('chars', 'length', 'Is');
-QAST::Operations.add_core_pirop_mapping('concat', 'concat', '');      # allow either P or S form
-QAST::Operations.add_core_pirop_mapping('concat_s', 'concat', 'Sss'); # force S form
+QAST::Operations.add_core_pirop_mapping('concat', 'concat', 'Sss');
 QAST::Operations.add_core_pirop_mapping('join', 'join', 'SsP');
 QAST::Operations.add_core_pirop_mapping('split', 'split', 'Pss');
 QAST::Operations.add_core_pirop_mapping('index', 'index', 'Issi');
