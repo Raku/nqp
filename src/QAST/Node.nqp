@@ -5,7 +5,6 @@ class QAST::Node is NQPCapture {
     has $!returns;
     has int $!arity;
     has int $!flat;
-    has int $!slurpy;
     has str $!childorder;
 
     method new(*@children, *%options) {
@@ -24,7 +23,6 @@ class QAST::Node is NQPCapture {
     method returns(*@value)    { $!returns := @value[0] if @value; $!returns }
     method arity(*@value)      { $!arity := @value[0] if @value; $!arity }
     method flat(*@value)       { $!flat := @value[0] if @value; $!flat }
-    method slurpy(*@value)     { $!slurpy := @value[0] if @value; $!slurpy }
     method childorder(*@value) { $!childorder := @value[0] if @value; $!childorder }
     
     method pop()           { nqp::pop(self.list) }
