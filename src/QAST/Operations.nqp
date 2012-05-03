@@ -377,3 +377,40 @@ QAST::Operations.add_core_pirop_mapping('unshift_s', 'unshift', '0Ps');
 QAST::Operations.add_core_pirop_mapping('unshift_i', 'unshift', '0Pi');
 QAST::Operations.add_core_pirop_mapping('unshift_n', 'unshift', '0Pn');
 QAST::Operations.add_core_pirop_mapping('splice', 'splice', '0PPii');
+
+# repr-level aggregate operations
+QAST::Operations.add_core_pirop_mapping('r_atpos', 'repr_at_pos_obj', 'PPi');
+QAST::Operations.add_core_pirop_mapping('r_atpos_i', 'repr_at_pos_int', 'IPi');
+QAST::Operations.add_core_pirop_mapping('r_atpos_n', 'repr_at_pos_num', 'NPi');
+QAST::Operations.add_core_pirop_mapping('r_bindpos', 'repr_bind_pos_obj', '2PiP');
+QAST::Operations.add_core_pirop_mapping('r_bindpos_i', 'repr_bind_pos_int', '2Pii');
+QAST::Operations.add_core_pirop_mapping('r_bindpos_n', 'repr_bind_pos_num', '2Pin');
+
+# object opcodes
+QAST::Operations.add_core_pirop_mapping('bindattr', 'setattribute', '3PPsP');
+QAST::Operations.add_core_pirop_mapping('bindattr_i', 'repr_bind_attr_int', '3PPsi');
+QAST::Operations.add_core_pirop_mapping('bindattr_n', 'repr_bind_attr_num', '3PPsn');
+QAST::Operations.add_core_pirop_mapping('bindattr_s', 'repr_bind_attr_str', '3PPss');
+QAST::Operations.add_core_pirop_mapping('getattr', 'getattribute', 'PPPs');
+QAST::Operations.add_core_pirop_mapping('getattr_i', 'repr_get_attr_int', 'IPPs');
+QAST::Operations.add_core_pirop_mapping('getattr_n', 'repr_get_attr_num', 'NPPs');
+QAST::Operations.add_core_pirop_mapping('getattr_s', 'repr_get_attr_str', 'SPPs');
+QAST::Operations.add_core_pirop_mapping('create', 'repr_instance_of', 'PP');
+QAST::Operations.add_core_pirop_mapping('clone', 'clone', 'PP');
+QAST::Operations.add_core_pirop_mapping('isconcrete', 'repr_defined', 'IP');
+QAST::Operations.add_core_pirop_mapping('iscont', 'is_container', 'IP');
+QAST::Operations.add_core_pirop_mapping('isnull', 'isnull', 'IP');
+QAST::Operations.add_core_pirop_mapping('isnull_s', 'isnull', 'IS');
+QAST::Operations.add_core_pirop_mapping('istrue', 'istrue', 'IP');
+QAST::Operations.add_core_pirop_mapping('istype', 'type_check', 'IPP');
+QAST::Operations.add_core_pirop_mapping('null', 'null', 'P');
+QAST::Operations.add_core_pirop_mapping('unbox_i', 'repr_unbox_int', 'IP');
+QAST::Operations.add_core_pirop_mapping('unbox_n', 'repr_unbox_num', 'NP');
+QAST::Operations.add_core_pirop_mapping('unbox_s', 'repr_unbox_str', 'SP');
+QAST::Operations.add_core_pirop_mapping('box_i', 'repr_box_int', 'PiP');
+QAST::Operations.add_core_pirop_mapping('box_n', 'repr_box_num', 'PnP');
+QAST::Operations.add_core_pirop_mapping('box_s', 'repr_box_str', 'PsP');
+QAST::Operations.add_core_pirop_mapping('where', 'get_id', 'IP');
+
+# serialization context related opcodes
+QAST::Operations.add_core_pirop_mapping('sha1', 'nqp_sha1', 'Ss');
