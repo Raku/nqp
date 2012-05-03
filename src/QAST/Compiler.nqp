@@ -47,13 +47,15 @@ class QAST::Compiler is HLL::Compiler {
     
     # Holds information about the QAST::Block we're currently compiling.
     my class BlockInfo {
-        has $!outer;
-        has @!params;
-        has @!locals;
-        has @!lexicals;
-        has %!local_types;
-        has %!lexical_types;
-        has %!lexical_regs;
+        has $!outer;            # Outer block
+        has @!params;           # QAST::Var nodes of params
+        has @!locals;           # QAST::Var nodes of declared locals
+        has @!lexicals;         # QAST::Var nodes of declared lexicals
+        has %!local_types;      # Mapping of local registers to type names
+        has %!lexical_types;    # Mapping of lexical names to types
+        has %!lexical_regs;     # Mapping of lexical names to registers
+        has %!reg_types;        # Mapping of all registers to types
+        has int $!param_idx;    # Current lexical parameter index
         
         method new($outer?) {
             my $obj := nqp::create(self);
@@ -66,9 +68,14 @@ class QAST::Compiler is HLL::Compiler {
         }
         
         method add_param($var) {
-            $var.scope eq 'local' ??
-                self.register_local($var) !!
-                self.register_lexical($var);
+            if $var.scope eq 'local' {
+                self.register_local($var);
+            }
+            else {
+                my $reg := '_lex_param_' ~ $!param_idx;
+                $!param_idx := $!param_idx + 1;
+                self.register_lexical($var, $reg);
+            }
             @!params[+@!params] := $var;
         }
         
@@ -82,14 +89,15 @@ class QAST::Compiler is HLL::Compiler {
             @!locals[+@!locals] := $var;
         }
         
-        method register_lexical($var) {
+        method register_lexical($var, $reg?) {
             my $name := $var.name;
             my $type := type_to_register_type($var.returns);
             if nqp::existskey(%!lexical_types, $name) {
                 pir::die("Lexical '$name' already declared");
             }
             %!lexical_types{$name} := $type;
-            %!lexical_regs{$name} := $*BLOCKRA."fresh_{nqp::lc($type)}"();
+            %!lexical_regs{$name} := $reg ?? $reg !! $*BLOCKRA."fresh_{nqp::lc($type)}"();
+            %!reg_types{%!lexical_regs{$name}} := $type;
         }
         
         method register_local($var) {
@@ -98,6 +106,7 @@ class QAST::Compiler is HLL::Compiler {
                 pir::die("Local '$name' already declared");
             }
             %!local_types{$name} := type_to_register_type($var.returns);
+            %!reg_types{$name} := %!local_types{$name};
         }
         
         method outer() { $!outer }
@@ -112,6 +121,7 @@ class QAST::Compiler is HLL::Compiler {
         method local_type_long($name) { %longnames{%!local_types{$name}} }
         method lexical_type($name) { %!lexical_types{$name} }
         method lexical_type_long($name) { %longnames{%!lexical_types{$name}} }
+        method reg_type($name) { %!reg_types{$name} }
     }
     
     our $serno;
@@ -156,7 +166,7 @@ class QAST::Compiler is HLL::Compiler {
         
         # Generate parameter handling code.
         my $decls := self.post_new('Ops');
-        my $param_id := 1;
+        my %lex_params;
         for $block.params {
             my @param := ['.param'];
             
@@ -165,7 +175,10 @@ class QAST::Compiler is HLL::Compiler {
                 nqp::push(@param, $_.name);
             }
             else {
-                pir::die("Lexical parameters NYI");
+                my $reg := $block.lex_reg($_.name);
+                nqp::push(@param, $block.lexical_type_long($_.name));
+                nqp::push(@param, $reg);
+                %lex_params{$_.name} := $reg;
             }
             
             if $_.slurpy {
@@ -184,6 +197,9 @@ class QAST::Compiler is HLL::Compiler {
         # Generate declarations.
         for $block.lexicals {
             $decls.push_pirop('.lex ' ~ self.escape($_.name) ~ ', ' ~ $block.lex_reg($_.name));
+        }
+        for %lex_params {
+            $decls.push_pirop('.lex ' ~ self.escape($_.key) ~ ', ' ~ $_.value);
         }
         for $block.locals {
             $decls.push_pirop('.local ' ~ $block.local_type_long($_.name) ~ ' ' ~ $_.name);
@@ -276,6 +292,22 @@ class QAST::Compiler is HLL::Compiler {
                 pir::die("Cannot reference undeclared local '$name'");
             }
         }
+        elsif $scope eq 'lexical' {
+            # If the lexical is directly declared in this block, we use the
+            # register directly.
+            if $*BLOCK.lexical_type($name) -> $type {
+                my $reg := $*BLOCK.lex_reg($name);
+                if $*BINDVAL {
+                    my $valpost := self.coerce(self.as_post($*BINDVAL), nqp::lc($type));
+                    $ops.push($valpost);
+                    $ops.push_pirop('set', $reg, $valpost.result);
+                }
+                $ops.result($reg);
+            }
+            else {
+                pir::die("Lexical lookup/bind NYI");
+            }
+        }
         else {
             pir::die("QAST::Var with scope '$scope' NYI");
         }
@@ -336,7 +368,7 @@ class QAST::Compiler is HLL::Compiler {
         if nqp::substr($inferee, 0, 1) eq '$' {
             nqp::substr($inferee, 1, 1)
         }
-        elsif $*BLOCK.local_type($inferee) -> $type {
+        elsif $*BLOCK.reg_type($inferee) -> $type {
             nqp::lc($type)
         }
         elsif nqp::substr($inferee, 0, 6) eq 'utf8:"'
