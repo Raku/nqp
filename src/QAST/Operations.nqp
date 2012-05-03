@@ -193,7 +193,187 @@ QAST::Operations.add_core_op('bind', -> $qastcomp, $op {
     $qastcomp.as_post(@children[0])
 });
 
-# Straight mappings to Parrot opcodes.
+# I/O opcodes
+QAST::Operations.add_core_pirop_mapping('print', 'print', '');
+QAST::Operations.add_core_pirop_mapping('say', 'say', '');
+
+# terms
+QAST::Operations.add_core_pirop_mapping('time_i', 'time', 'I');
+QAST::Operations.add_core_pirop_mapping('time_n', 'time', 'N');
+
+# arithmetic opcodes
 QAST::Operations.add_core_pirop_mapping('add_i', 'add', 'Iii');
+QAST::Operations.add_core_pirop_mapping('add_I', 'nqp_bigint_add', 'PPPP');
+QAST::Operations.add_core_pirop_mapping('add_n', 'add', 'Nnn');
+QAST::Operations.add_core_pirop_mapping('sub_i', 'sub', 'Iii');
+QAST::Operations.add_core_pirop_mapping('sub_I', 'nqp_bigint_sub', 'PPPP');
+QAST::Operations.add_core_pirop_mapping('sub_n', 'sub', 'Nnn');
+QAST::Operations.add_core_pirop_mapping('mul_i', 'mul', 'Iii');
+QAST::Operations.add_core_pirop_mapping('mul_I', 'nqp_bigint_mul', 'PPPP');
+QAST::Operations.add_core_pirop_mapping('mul_n', 'mul', 'Nnn');
+QAST::Operations.add_core_pirop_mapping('div_i', 'div', 'Iii');
+QAST::Operations.add_core_pirop_mapping('div_I', 'nqp_bigint_div', 'PPPP');
+QAST::Operations.add_core_pirop_mapping('div_In', 'nqp_bigint_div_num', 'NPP');
+QAST::Operations.add_core_pirop_mapping('div_n', 'div', 'Nnn');
+QAST::Operations.add_core_pirop_mapping('mod_i', 'mod', 'Iii');
+QAST::Operations.add_core_pirop_mapping('mod_I', 'nqp_bigint_mod', 'PPPP');
+QAST::Operations.add_core_pirop_mapping('expmod_I', 'nqp_bigint_exp_mod', 'PPPPP');
+QAST::Operations.add_core_pirop_mapping('mod_n', 'mod', 'Nnn');
+QAST::Operations.add_core_pirop_mapping('pow_n', 'pow', 'Nnn');
+QAST::Operations.add_core_pirop_mapping('pow_I', 'nqp_bigint_pow', 'PPPPP');
 QAST::Operations.add_core_pirop_mapping('neg_i', 'neg', 'Ii');
+QAST::Operations.add_core_pirop_mapping('neg_I', 'nqp_bigint_neg', 'PPP');
+QAST::Operations.add_core_pirop_mapping('neg_n', 'neg', 'Nn');
+QAST::Operations.add_core_pirop_mapping('abs_i', 'abs', 'Ii');
+QAST::Operations.add_core_pirop_mapping('abs_I', 'nqp_bigint_abs', 'PPP');
+QAST::Operations.add_core_pirop_mapping('abs_n', 'abs', 'Nn');
+
+QAST::Operations.add_core_pirop_mapping('gcd_i', 'gcd', 'Ii');
+QAST::Operations.add_core_pirop_mapping('gcd_I', 'nqp_bigint_gcd', 'PPP');
+QAST::Operations.add_core_pirop_mapping('lcm_i', 'lcm', 'Ii');
+QAST::Operations.add_core_pirop_mapping('lcm_I', 'nqp_bigint_lcm', 'PPP');
+
+QAST::Operations.add_core_pirop_mapping('ceil_n', 'ceil', 'Nn');
+QAST::Operations.add_core_pirop_mapping('floor_n', 'floor', 'NN');
+QAST::Operations.add_core_pirop_mapping('ln_n', 'ln', 'Nn');
+QAST::Operations.add_core_pirop_mapping('sqrt_n', 'sqrt', 'Nn');
+QAST::Operations.add_core_pirop_mapping('radix', 'nqp_radix', 'Pisii');
+QAST::Operations.add_core_pirop_mapping('radix_I', 'nqp_bigint_radix', 'PisiiP');
+QAST::Operations.add_core_pirop_mapping('log_n', 'ln', 'NN');
+QAST::Operations.add_core_pirop_mapping('exp_n', 'exp', 'Nn');
+QAST::Operations.add_core_pirop_mapping('isnanorinf', 'is_inf_or_nan', 'In');
+
+# trig opcodes
+QAST::Operations.add_core_pirop_mapping('sin_n', 'sin', 'NN');
+QAST::Operations.add_core_pirop_mapping('asin_n', 'asin', 'NN');
+QAST::Operations.add_core_pirop_mapping('cos_n', 'cos', 'NN');
+QAST::Operations.add_core_pirop_mapping('acos_n', 'acos', 'NN');
+QAST::Operations.add_core_pirop_mapping('tan_n', 'tan', 'NN');
+QAST::Operations.add_core_pirop_mapping('atan_n', 'atan', 'NN');
+QAST::Operations.add_core_pirop_mapping('atan2_n', 'atan', 'NNN');
+QAST::Operations.add_core_pirop_mapping('sec_n', 'sec', 'NN');
+QAST::Operations.add_core_pirop_mapping('asec_n', 'asec', 'NN');
+QAST::Operations.add_core_pirop_mapping('sin_n', 'sin', 'NN');
+QAST::Operations.add_core_pirop_mapping('asin_n', 'asin', 'NN');
+QAST::Operations.add_core_pirop_mapping('sinh_n', 'sinh', 'NN');
+QAST::Operations.add_core_pirop_mapping('cosh_n', 'cosh', 'NN');
+QAST::Operations.add_core_pirop_mapping('tanh_n', 'tanh', 'NN');
+QAST::Operations.add_core_pirop_mapping('sech_n', 'sech', 'NN');
+
+# bitwise ops
+QAST::Operations.add_core_pirop_mapping('bitor_i', 'bor', 'II');
+QAST::Operations.add_core_pirop_mapping('bitor_I', 'nqp_bigint_bor', 'PPPP');
+QAST::Operations.add_core_pirop_mapping('bitxor_i', 'bxor', 'II');
+QAST::Operations.add_core_pirop_mapping('bitxor_I', 'nqp_bigint_bxor', 'PPPP');
+QAST::Operations.add_core_pirop_mapping('bitand_i', 'band', 'II');
+QAST::Operations.add_core_pirop_mapping('bitand_I', 'nqp_bigint_band', 'PPPP');
+QAST::Operations.add_core_pirop_mapping('bitneg_i', 'bnot', 'II');
+QAST::Operations.add_core_pirop_mapping('bitneg_I', 'nqp_bigint_bnot', 'PP');
+QAST::Operations.add_core_pirop_mapping('bitshiftl_i', 'shl', 'III');
+QAST::Operations.add_core_pirop_mapping('bitshiftl_I', 'nqp_bigint_shl', 'PPIP');
+QAST::Operations.add_core_pirop_mapping('bitshiftr_i', 'shr', 'III');
+QAST::Operations.add_core_pirop_mapping('bitshiftr_I', 'nqp_bigint_shr', 'PPIP');
+
+QAST::Operations.add_core_pirop_mapping('bitor_s', 'bors', 'SS');
+QAST::Operations.add_core_pirop_mapping('bitxor_s', 'bxors', 'SS');
+QAST::Operations.add_core_pirop_mapping('bitand_s', 'bands', 'SS');
+
+# string opcodes
+QAST::Operations.add_core_pirop_mapping('chars', 'length', 'Is');
+QAST::Operations.add_core_pirop_mapping('concat', 'concat', '');      # allow either P or S form
+QAST::Operations.add_core_pirop_mapping('concat_s', 'concat', 'Sss'); # force S form
+QAST::Operations.add_core_pirop_mapping('join', 'join', 'SsP');
+QAST::Operations.add_core_pirop_mapping('split', 'split', 'Pss');
+QAST::Operations.add_core_pirop_mapping('index', 'index', 'Issi');
+QAST::Operations.add_core_pirop_mapping('chr', 'chr', 'Si');
+QAST::Operations.add_core_pirop_mapping('ord', 'ord', 'Isi');
+QAST::Operations.add_core_pirop_mapping('lc', 'downcase', 'Ss');
+QAST::Operations.add_core_pirop_mapping('uc', 'upcase', 'Ss');
+QAST::Operations.add_core_pirop_mapping('substr', 'substr', 'Ssii');
+QAST::Operations.add_core_pirop_mapping('x', 'repeat', 'Ssi');
+QAST::Operations.add_core_pirop_mapping('iscclass', 'is_cclass', 'Iisi');
+QAST::Operations.add_core_pirop_mapping('sprintf', 'sprintf', 'SsP');
+
+# relational opcodes
+QAST::Operations.add_core_pirop_mapping('cmp_i', 'cmp', 'Iii');
+QAST::Operations.add_core_pirop_mapping('iseq_i', 'iseq', 'Iii');
+QAST::Operations.add_core_pirop_mapping('isne_i', 'isne', 'Iii');
+QAST::Operations.add_core_pirop_mapping('islt_i', 'islt', 'Iii');
+QAST::Operations.add_core_pirop_mapping('isle_i', 'isle', 'Iii');
+QAST::Operations.add_core_pirop_mapping('isgt_i', 'isgt', 'Iii');
+QAST::Operations.add_core_pirop_mapping('isge_i', 'isge', 'Iii');
+
+QAST::Operations.add_core_pirop_mapping('bool_I', 'nqp_bigint_bool', 'iP');
+QAST::Operations.add_core_pirop_mapping('cmp_I', 'nqp_bigint_cmp', 'IPP');
+QAST::Operations.add_core_pirop_mapping('iseq_I', 'nqp_bigint_eq', 'IPP');
+QAST::Operations.add_core_pirop_mapping('isne_I', 'nqp_bigint_ne', 'IPP');
+QAST::Operations.add_core_pirop_mapping('islt_I', 'nqp_bigint_lt', 'IPP');
+QAST::Operations.add_core_pirop_mapping('isle_I', 'nqp_bigint_le', 'IPP');
+QAST::Operations.add_core_pirop_mapping('isgt_I', 'nqp_bigint_gt', 'IPP');
+QAST::Operations.add_core_pirop_mapping('isge_I', 'nqp_bigint_ge', 'IPP');
+
+QAST::Operations.add_core_pirop_mapping('cmp_n', 'cmp', 'Inn');
+QAST::Operations.add_core_pirop_mapping('iseq_n', 'iseq', 'Inn');
+QAST::Operations.add_core_pirop_mapping('isne_n', 'isne', 'Inn');
+QAST::Operations.add_core_pirop_mapping('islt_n', 'islt', 'Inn');
+QAST::Operations.add_core_pirop_mapping('isle_n', 'isle', 'Inn');
+QAST::Operations.add_core_pirop_mapping('isgt_n', 'isgt', 'Inn');
+QAST::Operations.add_core_pirop_mapping('isge_n', 'isge', 'Inn');
+
+QAST::Operations.add_core_pirop_mapping('cmp_s', 'cmp', 'Iss');
+QAST::Operations.add_core_pirop_mapping('iseq_s', 'iseq', 'Iss');
+QAST::Operations.add_core_pirop_mapping('isne_s', 'isne', 'Iss');
+QAST::Operations.add_core_pirop_mapping('islt_s', 'islt', 'Iss');
+QAST::Operations.add_core_pirop_mapping('isle_s', 'isle', 'Iss');
+QAST::Operations.add_core_pirop_mapping('isgt_s', 'isgt', 'Iss');
+QAST::Operations.add_core_pirop_mapping('isge_s', 'isge', 'Iss');
+
+# bigint ops
 QAST::Operations.add_core_pirop_mapping('fromstr_I', 'nqp_bigint_from_str', 'PsP');
+QAST::Operations.add_core_pirop_mapping('tostr_I', 'nqp_bigint_to_str', 'SP');
+QAST::Operations.add_core_pirop_mapping('base_I', 'nqp_bigint_to_str_base', 'SPI');
+QAST::Operations.add_core_pirop_mapping('isbig_I', 'nqp_bigint_is_big', 'IP');
+QAST::Operations.add_core_pirop_mapping('fromnum_I', 'nqp_bigint_from_num', 'PNP');
+QAST::Operations.add_core_pirop_mapping('tonum_I', 'nqp_bigint_to_num', 'NP');
+
+# native call ops
+QAST::Operations.add_core_pirop_mapping('buildnativecall', 'nqp_native_call_build', 'vPsssPP');
+QAST::Operations.add_core_pirop_mapping('nativecall', 'nqp_native_call', 'PPPP');
+
+# boolean opcodes
+QAST::Operations.add_core_pirop_mapping('not_i', 'not', 'Ii');
+
+# aggregate opcodes, mapping to the Parrot v-table functions
+QAST::Operations.add_core_pirop_mapping('atkey', 'set', 'PQs');
+QAST::Operations.add_core_pirop_mapping('atpos', 'set', 'PQi');
+QAST::Operations.add_core_pirop_mapping('atpos_i', 'set', 'IQi');
+QAST::Operations.add_core_pirop_mapping('atpos_n', 'set', 'NQi');
+QAST::Operations.add_core_pirop_mapping('atpos_s', 'set', 'SQi');
+QAST::Operations.add_core_pirop_mapping('bindkey', 'set', '1QsP');
+QAST::Operations.add_core_pirop_mapping('bindpos', 'set', '1QiP');
+QAST::Operations.add_core_pirop_mapping('bindpos_i', 'set', '1Qii');
+QAST::Operations.add_core_pirop_mapping('bindpos_n', 'set', '1Qin');
+QAST::Operations.add_core_pirop_mapping('bindpos_s', 'set', '1Qis');
+QAST::Operations.add_core_pirop_mapping('deletekey', 'delete', '0Qs');
+QAST::Operations.add_core_pirop_mapping('deletepos', 'delete', '0Qi');
+QAST::Operations.add_core_pirop_mapping('existskey', 'exists', 'IQs');
+QAST::Operations.add_core_pirop_mapping('existspos', 'exists', 'IQi');
+QAST::Operations.add_core_pirop_mapping('elems', 'elements', 'IP');
+QAST::Operations.add_core_pirop_mapping('iterator', 'iter', 'PP');
+QAST::Operations.add_core_pirop_mapping('push', 'push', '0PP');
+QAST::Operations.add_core_pirop_mapping('push_s', 'push', '0Ps');
+QAST::Operations.add_core_pirop_mapping('push_i', 'push', '0Pi');
+QAST::Operations.add_core_pirop_mapping('push_n', 'push', '0Pn');
+QAST::Operations.add_core_pirop_mapping('pop', 'pop', 'PP');
+QAST::Operations.add_core_pirop_mapping('pop_s', 'pop', 'sP');
+QAST::Operations.add_core_pirop_mapping('pop_i', 'pop', 'iP');
+QAST::Operations.add_core_pirop_mapping('pop_n', 'pop', 'nP');
+QAST::Operations.add_core_pirop_mapping('shift', 'shift', 'PP');
+QAST::Operations.add_core_pirop_mapping('shift_s', 'shift', 'sP');
+QAST::Operations.add_core_pirop_mapping('shift_i', 'shift', 'iP');
+QAST::Operations.add_core_pirop_mapping('shift_n', 'shift', 'nP');
+QAST::Operations.add_core_pirop_mapping('unshift', 'unshift', '0PP');
+QAST::Operations.add_core_pirop_mapping('unshift_s', 'unshift', '0Ps');
+QAST::Operations.add_core_pirop_mapping('unshift_i', 'unshift', '0Pi');
+QAST::Operations.add_core_pirop_mapping('unshift_n', 'unshift', '0Pn');
+QAST::Operations.add_core_pirop_mapping('splice', 'splice', '0PPii');
