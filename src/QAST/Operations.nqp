@@ -193,6 +193,43 @@ QAST::Operations.add_core_op('bind', -> $qastcomp, $op {
     $qastcomp.as_post(@children[0])
 });
 
+# Calling.
+QAST::Operations.add_core_op('call', -> $qastcomp, $op {
+    # Work out what callee is.
+    my $callee;
+    my @args := $op.list;
+    if $op.name {
+        $callee := $qastcomp.post_new('Ops', :result($qastcomp.escape($op.name)));
+    }
+    elsif +@args {
+        $callee := $qastcomp.as_post(@args.shift());
+    }
+    else {
+        pir::die("No name for call and empty children list");
+    }
+    
+    # Process arguments.
+    my $ops := $qastcomp.post_new('Ops');
+    my @arg_results;
+    for @args {
+        my $arg_post := $qastcomp.as_post($_);
+        $ops.push($arg_post);
+        @arg_results.push($arg_post.result);
+    }
+    
+    # Figure out result register type and allocate a register for it.
+    my $res_type := $qastcomp.type_to_register_type($op.returns);
+    my $res_reg := $*REGALLOC."fresh_{nqp::lc($res_type)}"();
+    
+    # Generate call.
+    $ops.push($callee);
+    $ops.push_pirop('call', $callee.result, |@arg_results, :result($res_reg));
+    
+    # Result is the result of the call.
+    $ops.result($res_reg);
+    $ops
+});
+
 # I/O opcodes
 QAST::Operations.add_core_pirop_mapping('print', 'print', '0s');
 QAST::Operations.add_core_pirop_mapping('say', 'say', '0s');

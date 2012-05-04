@@ -140,6 +140,9 @@ class QAST::Compiler is HLL::Compiler {
     sub type_to_register_type($type) {
         @prim_to_reg[pir::repr_get_primitive_type_spec__IP($type)]
     }
+    method type_to_register_type($type) {
+        type_to_register_type($type)
+    }
 
     method unique($prefix = '') { $prefix ~ $serno++ }
     method escape($str) {
