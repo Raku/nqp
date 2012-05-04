@@ -47,7 +47,8 @@ class QAST::Compiler is HLL::Compiler {
     
     # Holds information about the QAST::Block we're currently compiling.
     my class BlockInfo {
-        has $!outer;            # Outer block
+        has $!qast;             # The QAST::Block
+        has $!outer;            # Outer block's BlockInfo
         has @!params;           # QAST::Var nodes of params
         has @!locals;           # QAST::Var nodes of declared locals
         has @!lexicals;         # QAST::Var nodes of declared lexicals
@@ -57,13 +58,14 @@ class QAST::Compiler is HLL::Compiler {
         has %!reg_types;        # Mapping of all registers to types
         has int $!param_idx;    # Current lexical parameter index
         
-        method new($outer?) {
+        method new($qast, $outer) {
             my $obj := nqp::create(self);
-            $obj.BUILD($outer);
+            $obj.BUILD($qast, $outer);
             $obj
         }
         
-        method BUILD($outer) {
+        method BUILD($qast, $outer) {
+            $!qast := $qast;
             $!outer := $outer;
         }
         
@@ -109,6 +111,7 @@ class QAST::Compiler is HLL::Compiler {
             %!reg_types{$name} := %!local_types{$name};
         }
         
+        method qast() { $!qast }
         method outer() { $!outer }
         method params() { @!params }
         method lexicals() { @!lexicals }
@@ -155,7 +158,7 @@ class QAST::Compiler is HLL::Compiler {
         my $*BLOCKRA  := $*REGALLOC;
         my $*BINDVAL  := 0;
         my $outer     := try $*BLOCK;
-        my $block     := BlockInfo.new($outer);
+        my $block     := BlockInfo.new($node, $outer);
         
         # First need to compile all of the statements.
         my $stmts;
@@ -210,6 +213,12 @@ class QAST::Compiler is HLL::Compiler {
         $sub.push($decls);
         $sub.push($stmts);
         $sub.push_pirop(".return (" ~ $stmts.result ~ ")");
+        
+        # Set compilation unit ID and, if applicable, outer.
+        $sub.subid($node.cuid);
+        if nqp::istype($block.outer, BlockInfo) {
+            $sub.pirflags(':outer(' ~ self.escape($block.outer.qast.cuid) ~ ')');
+        }
         
         $sub
     }
