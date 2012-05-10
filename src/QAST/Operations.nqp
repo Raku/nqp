@@ -112,6 +112,30 @@ QAST::Operations.add_core_op('list', -> $qastcomp, $op {
     $ops
 });
 
+QAST::Operations.add_core_op('hash', -> $qastcomp, $op {
+    # Create register for the resulting hash and make an empty one.
+    my $hash_reg := $*REGALLOC.fresh_p();
+    my $ops := $qastcomp.post_new('Ops', :result($hash_reg));
+    $ops.push_pirop('new', $hash_reg, "'Hash'");
+
+    # Set all the values by key on the hash.
+    my $i := 0;
+    my @op_list := $op.list;
+    while $i < +@op_list {
+        my $kpost := $qastcomp.coerce($qastcomp.as_post(@op_list[$i]), 's');
+        $ops.push($kpost);
+        $i := $i + 1;
+
+        my $vpost := $qastcomp.coerce($qastcomp.as_post(@op_list[$i]), 'P');
+        $ops.push($vpost);
+        $i := $i + 1;
+
+        $ops.push_pirop('set', $hash_reg ~ '[' ~ $kpost.result ~ ']', $vpost.result);
+    }
+
+    $ops
+});
+
 # Conditionals.
 for <if unless> -> $op_name {
     QAST::Operations.add_core_op($op_name, -> $qastcomp, $op {

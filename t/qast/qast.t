@@ -112,6 +112,22 @@ test_qast_result(
         ok($r[1].m eq 'b', 'op list works (second elem)');
     });
 
+test_qast_result(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('hash'),
+            QAST::SVal.new(:value('a')),
+            QAST::WVal.new(:value(A)),
+            QAST::SVal.new(:value('b')),
+            QAST::WVal.new(:value(B))
+        )
+    ),
+    -> $r {
+        ok($r{'a'}.m eq 'a', 'op hash works (a keyed elem)');
+        ok($r{'b'}.m eq 'b', 'op hash works (b keyed elem)');
+    });
+
+
 is_qast(
     QAST::Block.new(
         QAST::Op.new(
