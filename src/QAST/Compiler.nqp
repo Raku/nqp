@@ -143,6 +143,11 @@ class QAST::Compiler is HLL::Compiler {
     method type_to_register_type($type) {
         type_to_register_type($type)
     }
+    
+    my @prim_to_lookup_name := ['obj', 'int', 'num', 'str'];
+    sub type_to_lookup_name($type) {
+        @prim_to_lookup_name[pir::repr_get_primitive_type_spec__IP($type)]
+    }
 
     method unique($prefix = '') { $prefix ~ $serno++ }
     method escape($str) {
@@ -329,7 +334,7 @@ class QAST::Compiler is HLL::Compiler {
         if $scope eq 'local' {
             if $*BLOCK.local_type($name) -> $type {
                 if $*BINDVAL {
-                    my $valpost := self.coerce(self.as_post($*BINDVAL), nqp::lc($type));
+                    my $valpost := self.coerce(self.as_post_clear_bindval($*BINDVAL), nqp::lc($type));
                     $ops.push($valpost);
                     $ops.push_pirop('set', $name, $valpost.result);
                 }
@@ -345,7 +350,7 @@ class QAST::Compiler is HLL::Compiler {
             if $*BLOCK.lexical_type($name) -> $type {
                 my $reg := $*BLOCK.lex_reg($name);
                 if $*BINDVAL {
-                    my $valpost := self.coerce(self.as_post($*BINDVAL), nqp::lc($type));
+                    my $valpost := self.coerce(self.as_post_clear_bindval($*BINDVAL), nqp::lc($type));
                     $ops.push($valpost);
                     $ops.push_pirop('set', $reg, $valpost.result);
                 }
@@ -361,7 +366,7 @@ class QAST::Compiler is HLL::Compiler {
                 
                 # Emit the lookup or bind.
                 if $*BINDVAL {
-                    my $valpost := self.coerce(self.as_post($*BINDVAL), nqp::lc($type));
+                    my $valpost := self.coerce(self.as_post_clear_bindval($*BINDVAL), nqp::lc($type));
                     $ops.push($valpost);
                     $ops.push_pirop('store_lex', self.escape($node.name), $valpost.result);
                     $ops.result($valpost.result);
@@ -373,11 +378,46 @@ class QAST::Compiler is HLL::Compiler {
                 }
             }
         }
+        elsif $scope eq 'attribute' {
+            # Ensure we have object and class handle.
+            my @args := $node.list();
+            if +@args != 2 {
+                pir::die("An attribute lookup needs an object and a class handle");
+            }
+            
+            # Compile object and handle.
+            my $obj := self.coerce(self.as_post_clear_bindval(@args[0]), 'p');
+            my $han := self.coerce(self.as_post_clear_bindval(@args[1]), 'p');
+            $ops.push($obj);
+            $ops.push($han);
+            
+            # Go by whether it's a bind or lookup.
+            my $type    := type_to_register_type($node.returns);
+            my $op_type := type_to_lookup_name($node.returns);
+            if $*BINDVAL {
+                my $valpost := self.coerce(self.as_post_clear_bindval($*BINDVAL), nqp::lc($type));
+                $ops.push($valpost);
+                $ops.push_pirop("repr_bind_attr_$op_type", $obj.result, $han.result,
+                    self.escape($name), $valpost.result);
+                $ops.result($valpost.result);
+            }
+            else {
+                my $res_reg := $*REGALLOC."fresh_{nqp::lc($type)}"();
+                $ops.push_pirop("repr_get_attr_$op_type", $res_reg, $obj.result, $han.result,
+                    self.escape($name));
+                $ops.result($res_reg);
+            }
+        }
         else {
             pir::die("QAST::Var with scope '$scope' NYI");
         }
         
         $ops
+    }
+    
+    method as_post_clear_bindval($node) {
+        my $*BINDVAL := 0;
+        self.as_post($node)
     }
     
     multi method as_post(QAST::IVal $node) {
