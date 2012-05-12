@@ -377,10 +377,10 @@ class QAST::Compiler is HLL::Compiler {
     }
     
     multi method as_post(QAST::BVal $node) {
-        my $cuid := self.escape($node.block.cuid);
+        my $cuid := self.escape($node.value.cuid);
         my $reg  := $*REGALLOC.fresh_p();
         my $ops  := self.post_new('Ops', :result($reg));
-        $ops.push_pirop(".const 'Sub' $reg = '$cuid'");
+        $ops.push_pirop(".const 'Sub' $reg = $cuid");
         $ops;
     }
     
