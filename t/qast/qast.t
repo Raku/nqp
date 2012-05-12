@@ -1,6 +1,6 @@
 use QRegex;
 
-plan(34);
+plan(35);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -63,6 +63,18 @@ test_qast_result(
     -> $r {
         ok($r.m eq 'a', 'WVal node');
     });
+
+my $block := QAST::Block.new( QAST::IVal.new( :value(666) ) );
+is_qast(
+    QAST::Block.new(
+        $block,
+        QAST::Op.new(
+            :op('call'),
+            QAST::BVal.new( :value($block) )
+        )
+    ),
+    666,
+    'BVal node');
 
 is_qast(
     QAST::Block.new(
