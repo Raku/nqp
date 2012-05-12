@@ -122,9 +122,20 @@ grammar NQP::Grammar is HLL::Grammar {
         | [<statement><.eat_terminator> ]*
     }
 
+    token label {
+        <identifier> ':' <?before \s> <.ws>
+    }
+
+    # not a real Perl 6 goto, so not a real &goto
+    token goto {
+        'goto' <?before \s> <.ws> <identifier>
+    }
+
     token statement {
         <!before <[\])}]> | $ >
         [
+        | <goto>
+        | <label> <statement>
         | <statement_control>
         | <EXPR> <.ws>
             [

@@ -126,6 +126,30 @@ class NQP::Actions is HLL::Actions {
         make $past;
     }
 
+    method label($/) {
+        my $name := 'VNDUNVD84VN'~$<identifier>;
+        my $BLOCK := $*W.cur_lexpad();
+        if $BLOCK.symbol($name) {
+            $/.CURSOR.panic("Redeclaration of symbol ", $name);
+        }
+        $BLOCK.symbol($name, :scope('label') );
+        my $past := PAST::Label.new( :node($/), :name($name) );
+        make $past;
+    }
+
+    method goto($/) {
+        my $origname := $<identifier>;
+        my $name := 'VNDUNVD84VN'~$origname;
+        unless $*W.is_scope($name, 'label') {
+            $/.CURSOR.panic("missing label (no forward gotos) ", $origname);
+        }
+        my $past := PAST::Op.new(
+            :pasttype('goto'),
+            PAST::Label.new( :node($/), :name($name) )
+        );
+        make $past;
+    }
+
     method statement($/, $key?) {
         my $past;
         if $<EXPR> {
@@ -150,6 +174,15 @@ class NQP::Actions is HLL::Actions {
             }
         }
         elsif $<statement_control> { $past := $<statement_control>.ast; }
+        elsif $<label> {
+            $past := PAST::Stmts.new(
+                $<label>.ast,
+                $<statement>.ast
+            );
+        }
+        elsif $<goto> {
+            $past := $<goto>.ast;
+        }
         else { $past := 0; }
         make $past;
     }

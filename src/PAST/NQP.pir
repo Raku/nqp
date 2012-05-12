@@ -8,12 +8,63 @@
     base = get_hll_global ['PAST'], 'Node'
     p6meta.'new_class'('PAST::Want', 'parent'=>base)
     p6meta.'new_class'('PAST::QAST', 'parent'=>base)
+    p6meta.'new_class'('PAST::Label', 'parent'=>base)
 
     # add the nqp:: opcode map
     .const 'Sub' nqpmap = 'nqpmap'
     base.'map_add'('nqp', nqpmap)
 .end
 
+=head2 PAST::Label
+
+A C<PAST::Label> node stores the name of a label. It
+translates directly to a POST::Label.
+
+=cut 
+
+=item as_post(PAST::Label)
+
+Create the POST::Label.
+
+=cut
+
+.namespace ['PAST';'Compiler']
+
+.sub 'as_post' :method :multi(_, ['PAST';'Label'])
+    .param pmc node
+    .param pmc options         :slurpy :named
+
+    .local pmc label
+    .local string name
+    $P0 = get_hll_global ['POST'], 'Label'
+    name = node.'name'()
+    label = $P0.'new'('result'=>name)
+
+    .return (label)
+.end
+
+=item goto(PAST::Op)
+
+implement the goto pasttype
+
+=cut
+
+.sub 'goto' :method :multi(_, ['PAST';'Op'])
+    .param pmc node
+    .param pmc options         :slurpy :named
+
+    .local pmc lpast, ops, label
+    .local string name
+    lpast = node[0]
+    name = lpast.'name'()
+    $P0 = get_hll_global ['POST'], 'Ops'
+    ops = $P0.'new'('node'=>node)
+    $P0 = get_hll_global ['POST'], 'Label'
+    label = $P0.'new'('result'=>name)
+    ops.'push_pirop'('goto', label)
+
+    .return (ops)
+.end
 
 =head2 PAST::Want
 
@@ -36,8 +87,6 @@ as only one of the children will be selected.
 Select a single past child based on rtype.
 
 =cut
-
-.namespace ['PAST';'Compiler']
 
 .sub 'as_post' :method :multi(_, ['PAST';'Want'])
     .param pmc node
