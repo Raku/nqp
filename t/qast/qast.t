@@ -318,3 +318,13 @@ is_qast_args(
     [16, 22],
     38,
     'two lexical int args declared/used simultaneously');
+
+is_qast(
+    QAST::Block.new(
+        QAST::Block.new(
+            :blocktype('immediate'),
+            QAST::IVal.new( :value(2000) )
+        )
+    ),
+    2000,
+    'immediate blocktype');

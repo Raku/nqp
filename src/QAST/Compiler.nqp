@@ -156,77 +156,105 @@ class QAST::Compiler is HLL::Compiler {
     proto method as_post(*@args, *%_) { * }
     
     multi method as_post(QAST::Block $node) {
-        # Block gets completely fresh registers, and fresh BlockInfo.
-        my $*REGALLOC := RegAlloc.new();
-        my $*BLOCKRA  := $*REGALLOC;
-        my $*BINDVAL  := 0;
-        my $outer     := try $*BLOCK;
-        my $block     := BlockInfo.new($node, $outer);
-        
-        # First need to compile all of the statements.
-        my $stmts;
+        # Build the POST::Sub.
+        my $sub;
         {
-            my $*BLOCK := $block;
-            $stmts := self.compile_all_the_stmts($node.list);
-        }
-        
-        # Generate parameter handling code.
-        my $decls := self.post_new('Ops');
-        my %lex_params;
-        for $block.params {
-            my @param := ['.param'];
+            # Block gets completely fresh registers, and fresh BlockInfo.
+            my $*REGALLOC := RegAlloc.new();
+            my $*BLOCKRA  := $*REGALLOC;
+            my $*BINDVAL  := 0;
+            my $outer     := try $*BLOCK;
+            my $block     := BlockInfo.new($node, $outer);
             
-            if $_.scope eq 'local'{
-                nqp::push(@param, $block.local_type_long($_.name));
-                nqp::push(@param, $_.name);
+            # First need to compile all of the statements.
+            my $stmts;
+            {
+                my $*BLOCK := $block;
+                $stmts := self.compile_all_the_stmts($node.list);
+            }
+            
+            # Generate parameter handling code.
+            my $decls := self.post_new('Ops');
+            my %lex_params;
+            for $block.params {
+                my @param := ['.param'];
+                
+                if $_.scope eq 'local'{
+                    nqp::push(@param, $block.local_type_long($_.name));
+                    nqp::push(@param, $_.name);
+                }
+                else {
+                    my $reg := $block.lex_reg($_.name);
+                    nqp::push(@param, $block.lexical_type_long($_.name));
+                    nqp::push(@param, $reg);
+                    %lex_params{$_.name} := $reg;
+                }
+                
+                if $_.slurpy {
+                    nqp::push(@param, ':slurpy');
+                    if $_.named {
+                        nqp::push(@param, ':named');
+                    }
+                }
+                elsif $_.named {
+                    nqp::push(@param, ':named(' ~ self.escape($_.named) ~ ')');
+                }
+                
+                $decls.push_pirop(pir::join(' ', @param));
+            }
+            
+            # Generate declarations.
+            for $block.lexicals {
+                $decls.push_pirop('.lex ' ~ self.escape($_.name) ~ ', ' ~ $block.lex_reg($_.name));
+            }
+            for %lex_params {
+                $decls.push_pirop('.lex ' ~ self.escape($_.key) ~ ', ' ~ $_.value);
+            }
+            for $block.locals {
+                $decls.push_pirop('.local ' ~ $block.local_type_long($_.name) ~ ' ' ~ $_.name);
+            }
+            
+            # Wrap all up in a POST::Sub.
+            $sub := self.post_new('Sub');
+            $sub.push($decls);
+            $sub.push($stmts);
+            $sub.push_pirop(".return (" ~ $stmts.result ~ ")");
+            
+            # Set compilation unit ID and, if applicable, outer.
+            $sub.subid($node.cuid);
+            if nqp::istype($block.outer, BlockInfo) {
+                $sub.pirflags(':anon :outer(' ~ self.escape($block.outer.qast.cuid) ~ ')');
             }
             else {
-                my $reg := $block.lex_reg($_.name);
-                nqp::push(@param, $block.lexical_type_long($_.name));
-                nqp::push(@param, $reg);
-                %lex_params{$_.name} := $reg;
+                $sub.pirflags(':anon');
             }
+        }
+        
+        # If we are at the top level, we'll immediately return.
+        unless nqp::istype((try $*BLOCK), BlockInfo) {
+            return $sub;
+        }
+        
+        # What we evaluate to depends on whether it's a declaration or an
+        # immediate.
+        my $ops := self.post_new('Ops');
+        $ops.push($sub);
+        if $node.blocktype eq 'immediate' {
+            # Look up and capture the block.
+            my $breg := $*REGALLOC.fresh_p();
+            $ops.push_pirop(".const 'Sub' $breg = '" ~ $node.cuid() ~ "'");
+            $ops.push_pirop("capture_lex", $breg);
             
-            if $_.slurpy {
-                nqp::push(@param, ':slurpy');
-                if $_.named {
-                    nqp::push(@param, ':named');
-                }
-            }
-            elsif $_.named {
-                nqp::push(@param, ':named(' ~ self.escape($_.named) ~ ')');
-            }
-            
-            $decls.push_pirop(pir::join(' ', @param));
-        }
-        
-        # Generate declarations.
-        for $block.lexicals {
-            $decls.push_pirop('.lex ' ~ self.escape($_.name) ~ ', ' ~ $block.lex_reg($_.name));
-        }
-        for %lex_params {
-            $decls.push_pirop('.lex ' ~ self.escape($_.key) ~ ', ' ~ $_.value);
-        }
-        for $block.locals {
-            $decls.push_pirop('.local ' ~ $block.local_type_long($_.name) ~ ' ' ~ $_.name);
-        }
-        
-        # Wrap all up in a POST::Sub.
-        my $sub := self.post_new('Sub');
-        $sub.push($decls);
-        $sub.push($stmts);
-        $sub.push_pirop(".return (" ~ $stmts.result ~ ")");
-        
-        # Set compilation unit ID and, if applicable, outer.
-        $sub.subid($node.cuid);
-        if nqp::istype($block.outer, BlockInfo) {
-            $sub.pirflags(':anon :outer(' ~ self.escape($block.outer.qast.cuid) ~ ')');
+            # Pick a result register.
+            my $rtype := nqp::lc(type_to_register_type($node.returns));
+            my $rreg := $*REGALLOC."fresh_$rtype"();
+            $ops.push_pirop('call', $breg, :result($rreg));
+            $ops.result($rreg);
         }
         else {
-            $sub.pirflags(':anon');
+            
         }
-        
-        $sub
+        $ops
     }
     
     multi method as_post(QAST::Stmts $node) {
