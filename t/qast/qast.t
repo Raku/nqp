@@ -1,6 +1,6 @@
 use QRegex;
 
-plan(45);
+plan(46);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -598,3 +598,18 @@ test_qast_result(
     -> $r {
         ok(nqp::getattr_i($r, E, '$!x') == 99, 'attribute binding works');
     });
+    
+my $test_obj := nqp::create(E);
+nqp::bindattr_i($test_obj, E, '$!x', 199);
+is_qast_args(
+    QAST::Block.new(
+        QAST::Var.new( :name('foo'), :scope('local'), :decl('param') ),
+        QAST::Var.new(
+            :scope('attribute'), :name('$!x'), :returns(int),
+            QAST::Var.new( :name('foo'), :scope('local') ),
+            QAST::WVal.new( :value(E) )
+        )
+    ),
+    [$test_obj],
+    199,
+    'attribute lookup works');
