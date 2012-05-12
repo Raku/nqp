@@ -1,6 +1,6 @@
 use QRegex;
 
-plan(37);
+plan(41);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -403,6 +403,68 @@ test_qast_result(
     ),
     -> $r {
         ok($r<bananas>.m eq 'a', 'bindkey operation (str)');
+    });
+
+is_qast_args(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('atpos'),
+            QAST::Var.new( :name('$a'), :scope('lexical'), :decl('param') ),
+            QAST::IVal.new(:value(1))
+        )
+    ),
+    [nqp::list(1, 2, 3)],
+    2,
+    'atkey operation (int)');
+
+is_qast_args(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('atpos'),
+            QAST::Var.new( :name('$a'), :scope('lexical'), :decl('param') ),
+            QAST::IVal.new(:value(2))
+        )
+    ),
+    [nqp::list('huey', 'dewey', 'louie')],
+    'louie',
+    'atkey operation (str)');
+
+test_qast_result(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('bind'),
+            QAST::Var.new( :name('list'), :scope('local'), :decl('var') ),
+            QAST::Op.new( :op('list') ),
+        ),
+        QAST::Op.new(
+            :op('bindpos'),
+            QAST::Var.new( :name('list'), :scope('local') ),
+            QAST::IVal.new(:value(0)),
+            QAST::WVal.new(:value(D))
+        ),
+        QAST::Var.new( :name('list'), :scope('local') )
+    ),
+    -> $r {
+        ok($r[0].m == 206, 'bindkey operation (int)');
+    });
+
+test_qast_result(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('bind'),
+            QAST::Var.new( :name('list'), :scope('local'), :decl('var') ),
+            QAST::Op.new( :op('list') ),
+        ),
+        QAST::Op.new(
+            :op('bindpos'),
+            QAST::Var.new( :name('list'), :scope('local') ),
+            QAST::IVal.new(:value(3)),
+            QAST::WVal.new(:value(A))
+        ),
+        QAST::Var.new( :name('list'), :scope('local') )
+    ),
+    -> $r {
+        ok($r[3].m eq 'a', 'bindkey operation (str)');
     });
 
 is_qast(
