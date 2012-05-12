@@ -40,6 +40,7 @@ class NQP::Actions is HLL::Actions {
     }
 
     method comp_unit($/) {
+        resolve_gotos($/);
         my $mainline := $<statementlist>.ast;
         my $unit     := $*W.pop_lexpad();
         
@@ -127,25 +128,25 @@ class NQP::Actions is HLL::Actions {
     }
 
     method label($/) {
-        my $name := 'VNDUNVD84VN'~$<identifier>;
-        my $BLOCK := $*W.cur_lexpad();
-        if $BLOCK.symbol($name) {
-            $/.CURSOR.panic("Redeclaration of symbol ", $name);
+        my $name := $<identifier>;
+        if (%*LABELS{$name}) {
+            $/.CURSOR.panic("Duplicate label: ", $name);
         }
-        $BLOCK.symbol($name, :scope('label') );
-        my $past := PAST::Label.new( :node($/), :name($name) );
+        $*W.cur_lexpad().symbol($name, :scope('label') );
+        $*LABEL_INDEX++;
+        my $mangled := "nqp_label_"~$*LABEL_INDEX~'_'~$name;
+        my $past := PAST::Label.new( :node($/), :name($mangled) );
+        %*LABELS{$name} := $past;
         make $past;
     }
 
     method goto($/) {
-        my $origname := $<identifier>;
-        my $name := 'VNDUNVD84VN'~$origname;
-        unless $*W.is_scope($name, 'label') {
-            $/.CURSOR.panic("missing label (no forward gotos) ", $origname);
-        }
+        my $name := $<identifier>;
+        my $glabel := PAST::Label.new( :node($/), :name($name) );
+        @*GOTOS.push($glabel);
         my $past := PAST::Op.new(
             :pasttype('goto'),
-            PAST::Label.new( :node($/), :name($name) )
+            $glabel
         );
         make $past;
     }
@@ -714,10 +715,22 @@ class NQP::Actions is HLL::Actions {
 
     }
 
+    sub resolve_gotos($/) {
+        for @*GOTOS {
+            my $name := $_.name();
+            my $label := %*LABELS{$name};
+            unless $label {
+                $/.CURSOR.panic('Could not find label '~$name~' for a goto');
+            }
+            $_.name($label.name());
+        }
+    }
+
     method routine_declarator:sym<sub>($/) { make $<routine_def>.ast; }
     method routine_declarator:sym<method>($/) { make $<method_def>.ast; }
 
     method routine_def($/) {
+        resolve_gotos($/);
         # If it's just got * as a body, make a multi-dispatch enterer.
         # Otherwise, need to build a sub.
         my $past;
@@ -852,6 +865,7 @@ class NQP::Actions is HLL::Actions {
 
 
     method method_def($/) {
+        resolve_gotos($/);
         # If it's just got * as a body, make a multi-dispatch enterer.
         # Otherwise, build method block PAST.
         my $past;

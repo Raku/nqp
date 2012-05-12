@@ -106,7 +106,9 @@ grammar NQP::Grammar is HLL::Grammar {
         :my $*HAS_YOU_ARE_HERE := 0;
         :my $*MAIN_SUB;
         <.newpad>
-        
+        :my %*LABELS;
+        :my @*GOTOS;
+        :my $*LABEL_INDEX := 0;
         :my $*PACKAGE;
         :my $*GLOBALish;
         <.GLOBALish>
@@ -128,7 +130,7 @@ grammar NQP::Grammar is HLL::Grammar {
 
     # not a real Perl 6 goto, so not a real &goto
     token goto {
-        'goto' <?before \s> <.ws> <identifier>
+        'goto' <?before \s> <.ws> <identifier> <.ws>
     }
 
     token statement {
@@ -429,6 +431,9 @@ grammar NQP::Grammar is HLL::Grammar {
 
     rule routine_def {
         :my $*RETURN_USED := 0;
+        :my %*LABELS;
+        :my @*GOTOS;
+        :my $*LABEL_INDEX := 0;
         [ $<sigil>=['&'?]<deflongname> ]?
         <.newpad>
         [ '(' <signature> ')'
@@ -443,6 +448,9 @@ grammar NQP::Grammar is HLL::Grammar {
     rule method_def {
         :my $*RETURN_USED := 0;
         :my $*INVOCANT_OK := 1;
+        :my %*LABELS;
+        :my @*GOTOS;
+        :my $*LABEL_INDEX := 0;
         $<private>=['!'?]
         <deflongname>?
         <.newpad>
