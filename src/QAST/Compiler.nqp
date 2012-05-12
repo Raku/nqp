@@ -352,7 +352,25 @@ class QAST::Compiler is HLL::Compiler {
                 $ops.result($reg);
             }
             else {
-                pir::die("Lexical lookup/bind NYI");
+                # Does the node have a native type marked on it?
+                my $type := type_to_register_type($node.returns);
+                if $type eq 'P' {
+                    # Consider the blocks for a declared native type.
+                    # XXX TODO
+                }
+                
+                # Emit the lookup or bind.
+                if $*BINDVAL {
+                    my $valpost := self.coerce(self.as_post($*BINDVAL), nqp::lc($type));
+                    $ops.push($valpost);
+                    $ops.push_pirop('store_lex', self.escape($node.name), $valpost.result);
+                    $ops.result($valpost.result);
+                }
+                else {
+                    my $res_reg := $*REGALLOC."fresh_{nqp::lc($type)}"();
+                    $ops.push_pirop('find_lex', $res_reg, self.escape($node.name));
+                    $ops.result($res_reg);
+                }
             }
         }
         else {
