@@ -1,6 +1,6 @@
 use QRegex;
 
-plan(30);
+plan(34);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -33,6 +33,7 @@ sub test_qast_result($qast, $tester) {
 # Couple of handly classes, which we may want to refer as WVals in tests.
 class A { method m() { 'a' } }
 class B { method m() { 'b' } }
+class C { method add($a, $b) { $a + $b } }
 
 is_qast(
     QAST::Block.new(
@@ -353,3 +354,55 @@ is_qast(
     ),
     2012,
     'declaration blocktype directly inside a call op');
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('callmethod'), :name('m'),
+            QAST::WVal.new( :value(A) )
+        )
+    ),
+    'a',
+    'callmethod with no args');
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('callmethod'), :name('add'),
+            QAST::WVal.new( :value(C) ),
+            QAST::IVal.new( :value(2) ),
+            QAST::IVal.new( :value(300) )
+        )
+    ),
+    302,
+    'callmethod with two args');
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('callmethod'),
+            QAST::WVal.new( :value(C) ),
+            QAST::SVal.new( :value('add') ),
+            QAST::IVal.new( :value(2) ),
+            QAST::IVal.new( :value(300) )
+        )
+    ),
+    302,
+    'callmethod with two args, name is string value node');
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('callmethod'),
+            QAST::WVal.new( :value(C) ),
+            QAST::Op.new(
+                :op('concat'),
+                QAST::SVal.new( :value('ad') ),
+                QAST::SVal.new( :value('d') )
+            ),
+            QAST::IVal.new( :value(2) ),
+            QAST::IVal.new( :value(300) )
+        )
+    ),
+    302,
+    'callmethod with two args, name is computed');
