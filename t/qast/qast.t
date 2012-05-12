@@ -1,6 +1,6 @@
 use QRegex;
 
-plan(35);
+plan(37);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -418,3 +418,44 @@ is_qast(
     ),
     302,
     'callmethod with two args, name is computed');
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('bind'),
+            QAST::Var.new( :name('$x'), :scope('lexical'), :decl('var') ),
+            QAST::WVal.new( :value(B) )
+        ),
+        QAST::Block.new(
+            :blocktype('immediate'),
+            QAST::Op.new(
+                :op('callmethod'), :name('m'),
+                QAST::Var.new( :name('$x'), :scope('lexical') )
+            )
+        )
+    ),
+    'b',
+    'lexical lookup in a nested block');
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('bind'),
+            QAST::Var.new( :name('$x'), :scope('lexical'), :decl('var') ),
+            QAST::WVal.new( :value(B) )
+        ),
+        QAST::Block.new(
+            :blocktype('immediate'),
+            QAST::Op.new(
+                :op('bind'),
+                QAST::Var.new( :name('$x'), :scope('lexical') ),
+                QAST::WVal.new( :value(A) )
+            )
+        ),
+        QAST::Op.new(
+            :op('callmethod'), :name('m'),
+            QAST::Var.new( :name('$x'), :scope('lexical') )
+        )
+    ),
+    'a',
+    'lexical binding in a nested block');
