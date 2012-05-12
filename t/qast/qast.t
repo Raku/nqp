@@ -1,6 +1,6 @@
 use QRegex;
 
-plan(41);
+plan(45);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -35,6 +35,7 @@ class A { method m() { 'a' } }
 class B { method m() { 'b' } }
 class C { method add($a, $b) { $a + $b } }
 class D { method m() { 206 } }
+class E { has int $!x; }
 
 is_qast(
     QAST::Block.new(
@@ -572,3 +573,28 @@ is_qast(
     ),
     'a',
     'lexical binding in a nested block');
+
+test_qast_result(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('bind'),
+            QAST::Var.new( :name('foo'), :scope('local'), :decl('var') ),
+            QAST::Op.new(
+                :op('create'),
+                QAST::WVal.new( :value(E) )
+            )
+        ),
+        QAST::Op.new(
+            :op('bind'),
+            QAST::Var.new(
+                :scope('attribute'), :name('$!x'), :returns(int),
+                QAST::Var.new( :name('foo'), :scope('local') ),
+                QAST::WVal.new( :value(E) )
+            ),
+            QAST::IVal.new( :value(99) )
+        ),
+        QAST::Var.new( :name('foo'), :scope('local') )
+    ),
+    -> $r {
+        ok(nqp::getattr_i($r, E, '$!x') == 99, 'attribute binding works');
+    });
