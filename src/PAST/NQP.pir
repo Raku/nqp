@@ -676,5 +676,7 @@ entry to produce the node to be returned.
     $P0['pasttype'] = 'nqpdebug'
     maphash['deb'] = $P0
 
+    maphash['die']      = 'die__vP'
+
     .return (maphash)
 .end

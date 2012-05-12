@@ -109,12 +109,10 @@ class HLL::CommandLine::Result {
         # how I miss p6's Hash.push
 
         if pir::exists(%!options, $name) {
-            my $t := pir::typeof(%!options);
-            say($t);
-            if $t eq 'ResizablePMCArray' {
+            if pir::does(%!options{$name}, 'array') {
                 pir::push(%!options{$name}, $value);
             } else {
-                %!options{$name} := [ %!options{$name}, $name ];
+                %!options{$name} := [ %!options{$name}, $value ];
             }
         } else {
             %!options{$name} := $value;
@@ -245,7 +243,8 @@ class HLL::CommandLine::Parser {
                     slurp-rest if %!stopper{"--$opt"};
                 } else {
                     my $opt := pir::substr($cur, 1);
-                    if pir::length($opt) == 1 {
+                    my $len := pir::length($opt);
+                    if $len == 1 {
                         # not grouped, so it might have a value
                         pir::die("No such option -$opt") unless %!options{$opt};
                         if self.wants-value($opt) {
@@ -256,13 +255,25 @@ class HLL::CommandLine::Parser {
                         }
                         slurp-rest() if %!stopper{"-$opt"};
                     } else {
-                        # length > 1, so the options are grouped
-                        my $iter := pir::iter__pp($opt);
-                        while $iter {
-                            my $o := pir::shift($iter);
-                            pir::die("Option -$o requires a value and cannot be grouped") if self.wants-value($o);
-                            pir::die("Grouped options '$opt' contain $o, which is not a valid option") unless %!options{$o};
-                            $result.add-option($o, 1);
+                        my $i := 0;
+                        while $i < $len {
+                            my $o := nqp::substr($opt, $i, 1);
+                            if %!options{$o} {
+                                if self.wants-value($o) {
+                                    if $i + 1 == $len {
+                                        nqp::die("Option '$o' in grouped options '-$opt' needs a value, but does not have one");
+                                    }
+                                    $result.add-option($o, nqp::substr($opt, $i + 1));
+                                    last;
+                                }
+                                else {
+                                    $result.add-option($o, 1);
+                                }
+                            }
+                            else {
+                                pir::die("Grouped options '-$opt' contain '$o', which is not a valid option")
+                            }
+                            $i++;
                         }
                     }
                 }
