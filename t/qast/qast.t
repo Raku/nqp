@@ -1,6 +1,6 @@
 use QRegex;
 
-plan(25);
+plan(29);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -328,3 +328,15 @@ is_qast(
     ),
     2000,
     'immediate blocktype');
+
+is_qast_args(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('atkey'),
+            QAST::Var.new( :name('$a'), :scope('lexical'), :decl('param') ),
+            QAST::SVal.new(:value("coconuts"))
+        )
+    ),
+    [nqp::hash('coconuts', 42)],
+    42,
+    'atkey operation');

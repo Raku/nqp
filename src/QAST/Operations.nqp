@@ -68,17 +68,32 @@ class QAST::Operations {
             }
             
             # Build the arguments list.
-            # XXX keyed
             my $num_args := +$op.list;
-            my $i := 0;
             if +@arg_types != $num_args {
                 pir::die("Operation '" ~ $op.op ~ "' requires " ~
                     +@arg_types ~ " operands, but got $num_args");
             }
+            my $i := 0;
+            my $last_argtype_was_Q := 0;
+            my $aggregate := '';
             while $i < $num_args {
-                my $post := $qastcomp.coerce($qastcomp.as_post($op.list[$i]), @arg_types[$i]);
-                $ops.push($post);
-                @args.push($post.result);
+                if @arg_types[$i] eq 'Q' {
+                    my $post := $qastcomp.coerce($qastcomp.as_post($op.list[$i]), 'p');
+                    $ops.push($post);
+                    $aggregate := $post.result;
+                    $last_argtype_was_Q := 1;
+                }
+                elsif $last_argtype_was_Q {
+                    my $post := $qastcomp.coerce($qastcomp.as_post($op.list[$i]), @arg_types[$i]);
+                    $ops.push($post);
+                    @args.push("$aggregate[" ~ $post.result ~ "]");
+                    $last_argtype_was_Q := 0;
+                }
+                else {
+                    my $post := $qastcomp.coerce($qastcomp.as_post($op.list[$i]), @arg_types[$i]);
+                    $ops.push($post);
+                    @args.push($post.result);
+                }
                 $i := $i + 1;
             }
             
