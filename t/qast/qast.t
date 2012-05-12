@@ -34,6 +34,7 @@ sub test_qast_result($qast, $tester) {
 class A { method m() { 'a' } }
 class B { method m() { 'b' } }
 class C { method add($a, $b) { $a + $b } }
+class D { method m() { 206 } }
 
 is_qast(
     QAST::Block.new(
@@ -352,7 +353,57 @@ is_qast_args(
     ),
     [nqp::hash('coconuts', 42)],
     42,
-    'atkey operation');
+    'atkey operation (int)');
+
+is_qast_args(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('atkey'),
+            QAST::Var.new( :name('$a'), :scope('lexical'), :decl('param') ),
+            QAST::SVal.new(:value("papayas"))
+        )
+    ),
+    [nqp::hash('papayas', 'OH HAI')],
+    'OH HAI',
+    'atkey operation (str)');
+
+test_qast_result(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('bind'),
+            QAST::Var.new( :name('hash'), :scope('local'), :decl('var') ),
+            QAST::Op.new( :op('hash') ),
+        ),
+        QAST::Op.new(
+            :op('bindkey'),
+            QAST::Var.new( :name('hash'), :scope('local') ),
+            QAST::SVal.new(:value("pineapples")),
+            QAST::WVal.new(:value(D))
+        ),
+        QAST::Var.new( :name('hash'), :scope('local') )
+    ),
+    -> $r {
+        ok($r<pineapples>.m == 206, 'bindkey operation (int)');
+    });
+
+test_qast_result(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('bind'),
+            QAST::Var.new( :name('hash'), :scope('local'), :decl('var') ),
+            QAST::Op.new( :op('hash') ),
+        ),
+        QAST::Op.new(
+            :op('bindkey'),
+            QAST::Var.new( :name('hash'), :scope('local') ),
+            QAST::SVal.new(:value("bananas")),
+            QAST::WVal.new(:value(A))
+        ),
+        QAST::Var.new( :name('hash'), :scope('local') )
+    ),
+    -> $r {
+        ok($r<bananas>.m eq 'a', 'bindkey operation (str)');
+    });
 
 is_qast(
     QAST::Block.new(
