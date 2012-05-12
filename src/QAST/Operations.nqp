@@ -268,6 +268,48 @@ QAST::Operations.add_core_op('call', -> $qastcomp, $op {
     $ops.result($res_reg);
     $ops
 });
+QAST::Operations.add_core_op('callmethod', -> $qastcomp, $op {
+    # Ensure we at least have an invocant.
+    my @args := $op.list;
+    if +@args == 0 {
+        pir::die('Method call node requires at least one child');
+    }
+    
+    # Where is the name coming from?
+    my $name;
+    if $op.name {
+        $name := $qastcomp.post_new('Ops', :result($qastcomp.escape($op.name)));
+    }
+    elsif +@args >= 2 {
+        my $invocant := @args.shift();
+        $name := $qastcomp.coerce($qastcomp.as_post(@args.shift()), 's');
+        @args.unshift($invocant);
+    }
+    else {
+        pir::die("Method call must either supply a name or have a child node that evaluates to the name");
+    }
+    
+    # Process arguments.
+    my $ops := $qastcomp.post_new('Ops');
+    my @arg_results;
+    for @args {
+        my $arg_post := $qastcomp.as_post($_);
+        $ops.push($arg_post);
+        @arg_results.push($arg_post.result);
+    }
+    
+    # Figure out result register type and allocate a register for it.
+    my $res_type := $qastcomp.type_to_register_type($op.returns);
+    my $res_reg := $*REGALLOC."fresh_{nqp::lc($res_type)}"();
+    
+    # Generate method call.
+    $ops.push($name);
+    $ops.push_pirop('callmethod', $name.result, |@arg_results, :result($res_reg));
+    
+    # Result is the result of the call.
+    $ops.result($res_reg);
+    $ops
+});
 
 # I/O opcodes
 QAST::Operations.add_core_pirop_mapping('print', 'print', '0s');
