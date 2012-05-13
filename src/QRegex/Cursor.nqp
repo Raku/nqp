@@ -485,12 +485,12 @@ class NQPCursor does NQPCursorRole {
                 for $var {
                     my $elem := $_;
                     $elem := $rxcompiler.compile($elem) unless pir::is_invokable__IP($elem);
-                    nqp::push($res, $elem);
+                    nqp::push($res, $elem.main_sub());
                 }
                 $var := $res;
             }
             else {
-                $var := $rxcompiler.compile($var);
+                $var := $rxcompiler.compile($var).main_sub();
             }
         }
         return self.'!INTERPOLATE'($var);

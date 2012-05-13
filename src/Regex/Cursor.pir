@@ -1231,6 +1231,7 @@ are first compiled to regexes prior to being matched.
     $I0 = does var, 'array'
     if $I0 goto var_array
     var = p6regex.'compile'(var)
+    var = var.'main_sub'()
     goto done
 
   var_array:
@@ -1243,6 +1244,7 @@ are first compiled to regexes prior to being matched.
     $I0 = is_invokable elem
     if $I0 goto var_next
     elem = p6regex.'compile'(elem)
+    elem = elem.'main_sub'()
   var_next:
     push var, elem
     goto var_loop

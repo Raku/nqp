@@ -199,21 +199,22 @@ class NQP::World is HLL::World {
             my $compiled := $nqpcomp.evalpmc($pir);
 
             # Fix up any code objects holding stubs with the real compiled thing.
-            my $c := nqp::elems($compiled);
+            my @all_subs := $compiled.all_subs();
+            my $c := nqp::elems(@all_subs);
             my $i := 0;
             while $i < $c {
-                my $subid := $compiled[$i].get_subid();
+                my $subid := @all_subs[$i].get_subid();
                 if pir::exists(%!code_objects_to_fix_up, $subid) {
                     # First, go over the code objects. Update the $!do, and the
                     # entry in the SC. Make sure the newly compiled code is marked
                     # as a static code ref.
                     my $static := %!code_objects_to_fix_up{$subid}.shift();
-                    nqp::bindattr($static, $code_type, '$!do', $compiled[$i]);
+                    nqp::bindattr($static, $code_type, '$!do', @all_subs[$i]);
                     for %!code_objects_to_fix_up{$subid} {
-                        nqp::bindattr($_, $code_type, '$!do', pir::clone($compiled[$i]));
+                        nqp::bindattr($_, $code_type, '$!do', pir::clone(@all_subs[$i]));
                     }
-                    pir::setprop__vPsP($compiled[$i], 'STATIC_CODE_REF', $compiled[$i]);
-                    self.update_root_code_ref(%!code_stub_sc_idx{$subid}, $compiled[$i]);
+                    pir::setprop__vPsP(@all_subs[$i], 'STATIC_CODE_REF', @all_subs[$i]);
+                    self.update_root_code_ref(%!code_stub_sc_idx{$subid}, @all_subs[$i]);
                     
                     # Clear up the fixup statements.
                     my $fixup_stmts := %!code_object_fixup_list{$subid};
@@ -222,7 +223,8 @@ class NQP::World is HLL::World {
                 $i := $i + 1;
             }
             
-            $compiled(|@args, |%named);
+            my $main_sub := $compiled.main_sub();
+            $main_sub(|@args, |%named);
         };
         
         # See if we already have our compile-time dummy. If not, create it.
