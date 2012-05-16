@@ -98,7 +98,6 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
                        || <.panic: "Only integers or '*' allowed as range quantifier endpoint"> 
                        ] 
             ]?
-        ||  <quantified_atom>
         ]
     }
 
