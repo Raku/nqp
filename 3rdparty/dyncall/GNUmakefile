@@ -20,7 +20,7 @@
 #
 
 # FIXME: workaround for Parrot issue #735
-CFLAGS	  := $(CFLAGS) -w
+CFLAGS += -Wno-strict-prototypes
 
 TOP 	   = .
 GMAKE_TOP ?= $(TOP)/buildsys/gmake
