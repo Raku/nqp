@@ -2038,7 +2038,7 @@ inline op nqpdebskip(in INT, in LABEL) :base_core {
 
 Push a new backtracking mark onto $1 with label $2, position $3, and count $4
 
-=item nqp_rxpeek(ptr, pos, rep, stack, label)
+=item nqp_rxpeek(ptr, stack, label)
 
 Set $1 to be the index of latest mark frame $3 in stack $2.
 
