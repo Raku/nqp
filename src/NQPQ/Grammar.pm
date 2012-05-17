@@ -39,7 +39,7 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token identifier { <.ident> [ <[\-']> <.ident> ]* }
 
-    token name { <identifier> ** '::' }
+    token name { <identifier> ['::'<identifier>]* }
 
     token deflongname {
         <identifier> <colonpair>?
@@ -473,7 +473,7 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token signature {
         [ <?{ $*INVOCANT_OK }> <.ws><invocant=.parameter><.ws> ':' ]?
-        [ [<.ws><parameter><.ws>] ** ',' ]?
+        [ [<.ws><parameter><.ws> [',' | <before \s* [')' | '{']>]]* ]?
     }
 
     token parameter {
