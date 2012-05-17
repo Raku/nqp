@@ -2069,6 +2069,16 @@ inline op nqp_rxpeek(out INT, in PMC, in LABEL) :base_core {
     $1 = ptr;
 }
 
+inline op nqp_rxcommit(in PMC, in LABEL) :base_core {
+    PMC *bstack = $1;
+    INTVAL mark = PTR2INTVAL(CUR_OPCODE + $2);
+    INTVAL ptr  = VTABLE_elements(interp, bstack);
+    while (ptr >= 0 && VTABLE_get_integer_keyed_int(interp, bstack, ptr) != mark) { 
+        ptr -= 4;
+    }
+    VTABLE_set_integer_native(interp, bstack, ptr);
+}
+
 
 /*
 

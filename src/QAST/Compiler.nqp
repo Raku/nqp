@@ -483,8 +483,7 @@ class QAST::Compiler is HLL::Compiler {
     }
 
     method regex_commit($ops, $mark) {
-        $ops.push_pirop('nqp_rxpeek', '$I11', %*REG<bstack>, $mark);
-        $ops.push_pirop('assign', %*REG<bstack>, '$I11');
+        $ops.push_pirop('nqp_rxcommit', %*REG<bstack>, $mark);
     }
 }
 
