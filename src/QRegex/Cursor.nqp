@@ -16,7 +16,7 @@ role NQPCursorRole {
 
     method CAPHASH() {
         my $caps := nqp::hash();
-        my %caplist := $!regexsub.nqpattr('caps');
+        my %caplist := $!regexsub ?? $!regexsub.nqpattr('caps') !! nqp::hash();
         for %caplist {
             $caps{$_.key} := nqp::list() if $_.value >= 2;
         }
@@ -79,6 +79,15 @@ role NQPCursorRole {
             nqp::bindattr($new, $?CLASS, '$!bstack', pir::new__Ps('ResizableIntegerArray')),
             0
         )
+    }
+
+    method !cursor_start_subcapture($from) {
+        my $new := nqp::create(self);
+        nqp::bindattr($new, $?CLASS, '$!orig', $!orig);
+        nqp::bindattr_s($new, $?CLASS, '$!target', $!target);
+        nqp::bindattr_i($new, $?CLASS, '$!from', $from);
+        nqp::bindattr_i($new, $?CLASS, '$!pos', -3);
+        $new;
     }
 
     method !cursor_capture($capture, $name) {
