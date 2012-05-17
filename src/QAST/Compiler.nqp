@@ -307,7 +307,6 @@ class QAST::Compiler is HLL::Compiler {
         my $prefix    := self.unique('rxquant' ~ $backtrack);
         my $looplabel := self.post_new('Label', :result($prefix ~ '_loop'));
         my $donelabel := self.post_new('Label', :result($prefix ~ '_done'));
-        my $rcslabel  := self.post_new('Label', :result($prefix ~ '_ratchet_cstack'));
         my $min       := $node.min || 0;
         my $max       := $node.max // -1;
         my $needrep   := $min > 1 || $max > 1;
@@ -337,8 +336,6 @@ class QAST::Compiler is HLL::Compiler {
             $ops.push($donelabel);
         }
         else {
-            self.regex_mark($ops, $rcslabel, -1, 0) # to track cstack as we ratchet
-                if $backtrack eq 'r' && $max != 1;
             if $min == 0 { self.regex_mark($ops, $donelabel, %*REG<pos>, 0); }
             elsif $needmark { self.regex_mark($ops, $donelabel, -1, 0); }
             $ops.push($looplabel);
@@ -352,16 +349,10 @@ class QAST::Compiler is HLL::Compiler {
             }
             unless $max == 1 {
                 self.regex_mark($ops, $donelabel, %*REG<pos>, %*REG<rep>);
-                $ops.push_pirop('nqp_rxsetcaps', %*REG<bstack>, %*REG<cstack>)
-                    if $backtrack eq 'r';
                 $ops.push(self.regex_post($sep)) if $sep;
                 $ops.push_pirop('goto', $looplabel);
             }
             $ops.push($donelabel);
-            if $backtrack eq 'r' && $max != 1 {
-                self.regex_commit($ops, $rcslabel); # pop cstack/ratchet tracking mark
-                $ops.push($rcslabel);
-            }
             $ops.push_pirop('lt', %*REG<rep>, +$node.min, %*REG<fail>)
                 if $min > 1;
         }
