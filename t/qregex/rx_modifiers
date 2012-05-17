@@ -42,7 +42,7 @@ ab [:i cd ] ef		abCDEf	n	ignorecase, lexical (:i)
 :i aa [:i(0) bb [:i(1) cc [:0i dd [:1i ee [:i(0) ff ] ] ] ] ]	AabbCcddEeFf	n	ignorecase, lexical (:i)
 # todo :pugs<feature>
 :i ab [:i(0) cd ] ef	AbcdeF	y	ignorecase, lexical repetition (:i)
-# todo :pugs<feature> :pge<feature>
+# todo :pugs<feature>
 :i ab [:!i cd ] ef	AbcdeF	y	ignorecase, lexical repetition (:i)
 # todo :pugs<feature>
 :i ab [:0i cd ] ef	AbcdeF	y	ignorecase, lexical repetition (:i)
@@ -95,13 +95,10 @@ ab [:ignorecase cd ] ef		aBCDef	n	ignorecase, lexical (:ignorecase)
 :sigspace b c d		ab c d ef	n	sigspace (:sigspace)
 # todo :pugs<feature>
 :s(1) b c [:s(0) d e f ]	a b c def	y	sigspace, lexical repetition (:s)
-# todo :pugs<feature> :pge<feature>
 :s b c [:!s d e f ]	a b c def	y	sigspace, lexical repetition (:s)
 :s(0) b c [:s(1) d e f ]	a b c def	n	sigspace, lexical repetition (:s)
-# todo :pge<feature>
 :!s b c [:s d e f ]	a b c def	n	sigspace, lexical repetition (:s)
 :s(0) b c [:s(0) d e f ]	a b c def	n	sigspace, lexical repetition (:s)
-# todo :pge<feature>
 :!s b c [:!s d e f ]	a b c def	n	sigspace, lexical repetition (:s)
 # todo :pugs<feature>
 :s ab 				ab		y	sigspace, trailing ws

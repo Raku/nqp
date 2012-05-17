@@ -2,7 +2,10 @@
 #include "parrot/parrot.h"
 #include "parrot/extend.h"
 #include "../sixmodelobject.h"
+#include "dyncall_reprs.h"
 #include "CStruct.h"
+#include "CArray.h"
+#include "CPointer.h"
 
 /* This representation's function pointer table. */
 static REPROps *this_repr;
@@ -186,12 +189,14 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
         repr_data->attribute_locations = (INTVAL *) mem_sys_allocate(info_alloc * sizeof(INTVAL));
         repr_data->struct_offsets      = (INTVAL *) mem_sys_allocate(info_alloc * sizeof(INTVAL));
         repr_data->flattened_stables   = (STable **) mem_sys_allocate_zeroed(info_alloc * sizeof(PMC *));
+        repr_data->member_types        = (PMC** )    mem_sys_allocate_zeroed(info_alloc * sizeof(PMC *));
 
         /* Go over the attributes and arrange their allocation. */
         for (i = 0; i < num_attrs; i++) {
             /* Fetch its type; see if it's some kind of unboxed type. */
             PMC    *attr         = VTABLE_get_pmc_keyed_int(interp, flat_list, i);
             PMC    *type         = accessor_call(interp, attr, type_str);
+            INTVAL  type_id      = REPR(type)->ID;
             INTVAL  bits         = sizeof(void *) * 8;
             if (!PMC_IS_NULL(type)) {
                 /* See if it's a type that we know how to handle in a C struct. */
@@ -201,7 +206,9 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
                          spec.boxed_primitive == STORAGE_SPEC_BP_NUM)) {
                     /* It's a boxed int or num; pretty easy. It'll just live in the
                      * body of the struct. */
-                    repr_data->attribute_locations[i] = 0;
+                    /* XXX: We could mask in i here as well, but it's not
+                     * really necessary. */
+                    repr_data->attribute_locations[i] = CSTRUCT_ATTR_IN_STRUCT;
                     bits = spec.bits;
                     repr_data->flattened_stables[i] = STABLE(type);
                     if (REPR(type)->initialize) {
@@ -210,6 +217,24 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
                         repr_data->initialize_slots[cur_init_slot] = i;
                         cur_init_slot++;
                     }
+                }
+                else if(type_id == get_ca_repr_id()) {
+                    /* It's a CArray of some kind.  */
+                    repr_data->num_child_objs++;
+                    repr_data->attribute_locations[i] = (cur_obj_attr++ << CSTRUCT_ATTR_SHIFT) | CSTRUCT_ATTR_CARRAY;
+                    repr_data->member_types[i] = type;
+                }
+                else if(type_id == get_cs_repr_id()) {
+                    /* It's a CStruct. */
+                    repr_data->num_child_objs++;
+                    repr_data->attribute_locations[i] = (cur_obj_attr++ << CSTRUCT_ATTR_SHIFT) | CSTRUCT_ATTR_CSTRUCT;
+                    repr_data->member_types[i] = type;
+                }
+                else if(type_id == get_cp_repr_id()) {
+                    /* It's a CPointer. */
+                    repr_data->num_child_objs++;
+                    repr_data->attribute_locations[i] = (cur_obj_attr++ << CSTRUCT_ATTR_SHIFT) | CSTRUCT_ATTR_CPTR;
+                    repr_data->member_types[i] = type;
                 }
                 else {
                     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -329,7 +354,18 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
     /* Allocate and set up object instance. */
     obj = (CStructInstance *) Parrot_gc_allocate_fixed_size_storage(interp, sizeof(CStructInstance));
     obj->common.stable = st->stable_pmc;
-    /* XXX allocate child str and obj arrays if needed. */
+    obj->common.sc = NULL;
+    obj->body.child_objs = NULL;
+    obj->body.child_strs = NULL;
+
+    /* Allocate child obj array. */
+    if(repr_data->num_child_objs > 0) {
+        size_t bytes = repr_data->num_child_objs*sizeof(PMC *);
+        obj->body.child_objs = mem_sys_allocate(bytes);
+        memset(obj->body.child_objs, 0, bytes);
+    }
+
+    /* XXX allocate child str array if needed. */
     
     return wrap_object_func(interp, obj);
 }
@@ -382,7 +418,51 @@ static void die_no_attrs(PARROT_INTERP) {
 
 /* Gets the current value for an attribute. */
 static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
-    die_no_attrs(interp);
+    CStructREPRData *repr_data = (CStructREPRData *)st->REPR_data;
+    CStructBody     *body      = (CStructBody *)data;
+    INTVAL           slot;
+
+    /* Look up slot, then offset and compute address. */
+    slot = hint >= 0 ? hint :
+        try_get_slot(interp, repr_data, class_handle, name);
+    if (slot >= 0) {
+        INTVAL placement = repr_data->attribute_locations[slot] & CSTRUCT_ATTR_MASK;
+        INTVAL real_slot = repr_data->attribute_locations[slot] >> CSTRUCT_ATTR_SHIFT;
+
+        if(placement == CSTRUCT_ATTR_IN_STRUCT)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "CStruct Can't perform boxed get on flattened attributes yet");
+        else {
+            PMC *obj = body->child_objs[real_slot];
+            PMC *type = repr_data->member_types[slot];
+
+            if(!obj) {
+                void *cobj = get_ptr_at_offset(body->cstruct, repr_data->struct_offsets[slot]);
+                if(cobj) {
+                    INTVAL id = REPR(type)->ID;
+                    if(id == get_ca_repr_id()) {
+                        obj = make_carray_result(interp, type, cobj);
+                        body->child_objs[real_slot] = obj;
+                    }
+                    else if(id == get_cs_repr_id()) {
+                        obj = make_cstruct_result(interp, type, cobj);
+                        body->child_objs[real_slot] = obj;
+                    }
+                    else if(id == get_cp_repr_id()) {
+                        obj = make_cpointer_result(interp, type, cobj);
+                        body->child_objs[real_slot] = obj;
+                    }
+                }
+                else {
+                    obj = type;
+                }
+            }
+            return obj;
+        }
+    }
+
+    /* Otherwise, complain that the attribute doesn't exist. */
+    no_such_attribute(interp, "get", class_handle, name);
 }
 static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
     CStructREPRData *repr_data = (CStructREPRData *)st->REPR_data;
@@ -401,7 +481,54 @@ static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *clas
 
 /* Binds the given value to the specified attribute. */
 static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
-    die_no_attrs(interp);
+    CStructREPRData *repr_data = (CStructREPRData *)st->REPR_data;
+    CStructBody     *body      = (CStructBody *)data;
+    STRING          *type_str  = Parrot_str_new_constant(interp, "type");
+    INTVAL            slot;
+
+    value = decontainerize(interp, value);
+
+    /* Try to find the slot. */
+    slot = hint >= 0 ? hint :
+        try_get_slot(interp, repr_data, class_handle, name);
+    if (slot >= 0) {
+        STable *st = repr_data->flattened_stables[slot];
+        if (st)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "CStruct Can't perform boxed bind on flattened attributes yet");
+        else {
+            INTVAL placement = repr_data->attribute_locations[slot] & CSTRUCT_ATTR_MASK;
+            INTVAL real_slot = repr_data->attribute_locations[slot] >> CSTRUCT_ATTR_SHIFT;
+
+            if(IS_CONCRETE(value)) {
+                STRING *value_type = REPR(value)->ID;
+                void *cobj       = NULL;
+
+                body->child_objs[real_slot] = value;
+
+                /* Set cobj to correct pointer based on type of value. */
+                if(value_type == get_ca_repr_id()) {
+                    cobj = ((CArrayBody *) OBJECT_BODY(value))->storage;
+                }
+                else if(value_type == get_cs_repr_id()) {
+                    cobj = ((CStructBody *) OBJECT_BODY(value))->cstruct;
+                }
+                else if(value_type == get_cp_repr_id()) {
+                    cobj = ((CPointerBody *) OBJECT_BODY(value))->ptr;
+                }
+
+                set_ptr_at_offset(body->cstruct, repr_data->struct_offsets[slot], cobj);
+            }
+            else {
+                body->child_objs[real_slot] = NULL;
+                set_ptr_at_offset(body->cstruct, repr_data->struct_offsets[slot], NULL);
+            }
+        }
+    }
+    else {
+        /* Otherwise, complain that the attribute doesn't exist. */
+        no_such_attribute(interp, "bind", class_handle, name);
+    }
 }
 static void bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, void *value) {
     CStructREPRData *repr_data = (CStructREPRData *)st->REPR_data;
@@ -447,6 +574,19 @@ static void gc_mark(PARROT_INTERP, STable *st, void *data) {
         Parrot_gc_mark_PMC_alive(interp, body->child_objs[i]);
 }
 
+static void gc_mark_repr_data(PARROT_INTERP, STable *st) {
+    CStructREPRData *repr_data = (CStructREPRData *) st->REPR_data;
+    CStructNameMap *map = repr_data->name_to_index_mapping;
+    INTVAL i;
+
+    if (!map) return;
+
+    for (i = 0; map[i].class_key; i++) {
+        Parrot_gc_mark_PMC_alive(interp, map[i].class_key);
+        Parrot_gc_mark_PMC_alive(interp, map[i].name_map);
+    }
+}
+
 /* This is called to do any cleanup of resources when an object gets
  * embedded inside another one. Never called on a top-level object. */
 static void gc_cleanup(PARROT_INTERP, STable *st, void *data) {
@@ -477,6 +617,18 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     return spec;
 }
 
+/* Serializes the REPR data. */
+static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *writer) {
+    CStructREPRData *repr_data = (CStructREPRData *)st->REPR_data;
+    /* Could do this, but can also re-compute it each time for now. */
+}
+
+/* Deserializes the REPR data. */
+static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader *reader) {
+    /* Just allocating it will do for now. */
+    st->REPR_data = mem_sys_allocate_zeroed(sizeof(CStructREPRData));
+}
+
 /* Initializes the CStruct representation. */
 REPROps * CStruct_initialize(PARROT_INTERP,
         PMC * (* wrap_object_func_ptr) (PARROT_INTERP, void *obj),
@@ -500,7 +652,10 @@ REPROps * CStruct_initialize(PARROT_INTERP,
     this_repr->attr_funcs->hint_for = hint_for;
     this_repr->gc_mark = gc_mark;
     this_repr->gc_free = gc_free;
+    this_repr->gc_mark_repr_data = gc_mark_repr_data;
     this_repr->gc_cleanup = gc_cleanup;
     this_repr->get_storage_spec = get_storage_spec;
+    this_repr->serialize_repr_data = serialize_repr_data;
+    this_repr->deserialize_repr_data = deserialize_repr_data;
     return this_repr;
 }

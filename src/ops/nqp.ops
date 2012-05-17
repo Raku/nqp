@@ -828,6 +828,8 @@ inline op repr_at_pos_obj(out PMC, in PMC, in INT) :base_core {
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_at_pos_obj on a SixModelObject");
+
+    PARROT_GC_WRITE_BARRIER(interp, obj);
 }
 
 
@@ -2046,14 +2048,13 @@ inline op nqpdebskip(in INT, in LABEL) :base_core {
 
 Push a new backtracking mark onto $1 with label $2, position $3, and count $4
 
-=item nqp_rxpeek(ptr, pos, rep, stack, label)
+=item nqp_rxpeek(ptr, stack, label)
 
 Set $1 to be the index of latest mark frame $3 in stack $2.
 
-=item nqp_rxsetcaps(ptr, cstack)
+=item nqp_rxcommit(stack, label)
 
-Sets the top cstack count in $1 to be the elements in $2, or 0 if it's null.
-Used to not lose count when doing ratcheting and replacing marks.
+Commit all captures and backtracking on stack $1 up to mark frame $2.
 
 =cut
 
@@ -2089,11 +2090,30 @@ inline op nqp_rxpeek(out INT, in PMC, in LABEL) :base_core {
     $1 = ptr;
 }
 
-inline op nqp_rxsetcaps(in PMC, in PMC) :base_core {
+inline op nqp_rxcommit(in PMC, in LABEL) :base_core {
     PMC *bstack = $1;
-    VTABLE_set_integer_keyed_int(interp, bstack,
-        VTABLE_elements(interp, bstack) - 5,
-        PMC_IS_NULL($2) ? 0 : VTABLE_elements(interp, $2));
+    INTVAL mark = PTR2INTVAL(CUR_OPCODE + $2);
+    INTVAL ptr  = VTABLE_elements(interp, bstack);
+    INTVAL caps = (ptr > 0)
+                    ? VTABLE_get_integer_keyed_int(interp, bstack, ptr-1)
+                    : 0;
+    while (ptr >= 0 && VTABLE_get_integer_keyed_int(interp, bstack, ptr) != mark) { 
+        ptr -= 4;
+    }
+    VTABLE_set_integer_native(interp, bstack, ptr);
+    if (caps > 0) {
+        if (ptr > 0 && VTABLE_get_integer_keyed_int(interp, bstack, ptr-3) < 0) {
+            /* top mark frame is an autofail frame, reuse it to hold captures */
+            VTABLE_set_integer_keyed_int(interp, bstack, ptr-1, caps);
+        }
+        else {
+            /* push a new autofail frame onto bstack to hold the captures */
+            VTABLE_push_integer(interp, bstack, 0);
+            VTABLE_push_integer(interp, bstack, -1);
+            VTABLE_push_integer(interp, bstack, 0);
+            VTABLE_push_integer(interp, bstack, caps);
+        }
+    }
 }
 
 inline op nqp_nfa_run(out PMC, in PMC, in STR, in INT) :base_core {
@@ -2182,6 +2202,7 @@ inline op nqp_nfa_run(out PMC, in PMC, in STR, in INT) :base_core {
     }
     $1 = fatepos;
 }
+
 
 /*
 

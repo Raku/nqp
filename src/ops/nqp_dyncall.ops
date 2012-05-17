@@ -8,6 +8,7 @@ BEGIN_OPS_PREAMBLE
 #include "../6model/reprs/CStruct.h"
 #include "../6model/reprs/CPointer.h"
 #include "../6model/reprs/CArray.h"
+#include "../6model/reprs/CStr.h"
 
 /* This library contains just three operations: one to initialize it,
  * one to look up a native function and build a handle to it, and
@@ -67,11 +68,21 @@ BEGIN_OPS_PREAMBLE
 #define DYNCALL_ARG_FREE_STR        1
 #define DYNCALL_ARG_FREE_STR_MASK   1
 
+/* Predeclare some mutually recursive functions. */
+static void dyncall_wb_ca(PMC *);
+static void dyncall_wb_cs(PMC *);
+
 /* The ID of the NativeCall, CPointer and CStruct REPRs. */
 static INTVAL nc_repr_id = 0;
 static INTVAL cs_repr_id = 0;
 static INTVAL cp_repr_id = 0;
 static INTVAL ca_repr_id = 0;
+static INTVAL cstr_repr_id = 0;
+
+INTVAL get_nc_repr_id(void) { return nc_repr_id; }
+INTVAL get_cs_repr_id(void) { return cs_repr_id; }
+INTVAL get_cp_repr_id(void) { return cp_repr_id; }
+INTVAL get_ca_repr_id(void) { return ca_repr_id; }
 
 /* Grabs a NativeCall body. */
 static NativeCallBody * get_nc_body(PARROT_INTERP, PMC *obj) {
@@ -174,7 +185,7 @@ get_calling_convention(PARROT_INTERP, STRING *name) {
 }
 
 /* Constructs a boxed result from a native integer return. */
-static PMC *
+PMC *
 make_int_result(PARROT_INTERP, PMC *type, INTVAL value) {
     PMC *result = PMCNULL;
     if (!PMC_IS_NULL(type)) {
@@ -186,7 +197,7 @@ make_int_result(PARROT_INTERP, PMC *type, INTVAL value) {
 }
 
 /* Constructs a boxed result from a native number return. */
-static PMC *
+PMC *
 make_num_result(PARROT_INTERP, PMC *type, FLOATVAL value) {
     PMC *result = PMCNULL;
     if (!PMC_IS_NULL(type)) {
@@ -198,7 +209,7 @@ make_num_result(PARROT_INTERP, PMC *type, FLOATVAL value) {
 }
 
 /* Constructs a boxed result from a string return. */
-static PMC *
+PMC *
 make_str_result(PARROT_INTERP, PMC *type, INTVAL ret_type, char *cstring) {
     PMC *result = type;
     if (result != NULL && !PMC_IS_NULL(type)) {
@@ -225,7 +236,7 @@ make_str_result(PARROT_INTERP, PMC *type, INTVAL ret_type, char *cstring) {
 }
 
 /* Constructs a boxed result using a CStruct REPR type. */
-static PMC *
+PMC *
 make_cstruct_result(PARROT_INTERP, PMC *type, void *cstruct) {
     PMC *result = type;
     if (cstruct != NULL && !PMC_IS_NULL(type)) {
@@ -239,7 +250,7 @@ make_cstruct_result(PARROT_INTERP, PMC *type, void *cstruct) {
 }
 
 /* Constructs a boxed result using a CPointer REPR type. */
-static PMC *
+PMC *
 make_cpointer_result(PARROT_INTERP, PMC *type, void *ptr) {
     PMC *result = type;
     if (ptr != NULL && !PMC_IS_NULL(type)) {
@@ -253,7 +264,7 @@ make_cpointer_result(PARROT_INTERP, PMC *type, void *ptr) {
 }
 
 /* Constructs a boxed result using a CArray REPR type. */
-static PMC *
+PMC *
 make_carray_result(PARROT_INTERP, PMC *type, void *carray) {
     PMC *result = type;
     if (carray != NULL && !PMC_IS_NULL(type)) {
@@ -289,6 +300,100 @@ PMC * decontainerize(PARROT_INTERP, PMC *var) {
     return var;
 }
 
+static void dyncall_wb_ca(PMC *obj) {
+    CArrayBody      *body      = (CArrayBody *) OBJECT_BODY(obj);
+    CArrayREPRData  *repr_data = (CArrayREPRData *) STABLE(obj)->REPR_data;
+    void           **storage   = (void **) body->storage;
+    INTVAL           i;
+
+    /* No need to check for numbers. They're stored directly in the array. */
+    if (repr_data->elem_kind == CARRAY_ELEM_KIND_NUMERIC)
+        return;
+
+    for (i = 0; i < body->elems; i++) {
+        void *cptr;   /* The pointer in the C storage. */
+        void *objptr; /* The pointer in the object representing the C object. */
+
+        /* Ignore elements where we haven't generated an object. */
+        if (!body->child_objs[i])
+            continue;
+
+        cptr = storage[i];
+        if (IS_CONCRETE(body->child_objs[i])) {
+            switch (repr_data->elem_kind) {
+                case CARRAY_ELEM_KIND_CARRAY:
+                    objptr = ((CArrayBody *) OBJECT_BODY(body->child_objs[i]))->storage;
+                    break;
+                case CARRAY_ELEM_KIND_CPOINTER:
+                    objptr = ((CPointerBody *) OBJECT_BODY(body->child_objs[i]))->ptr;
+                    break;
+                case CARRAY_ELEM_KIND_CSTRUCT:
+                    objptr = (CStructBody *) OBJECT_BODY(body->child_objs[i]);
+                    break;
+            }
+        }
+        else {
+            objptr = NULL;
+        }
+
+        if (objptr != cptr) {
+            body->child_objs[i] = NULL;
+        }
+        else if (repr_data->elem_kind == CARRAY_ELEM_KIND_CARRAY) {
+            dyncall_wb_ca(body->child_objs[i]);
+        }
+        else if (repr_data->elem_kind == CARRAY_ELEM_KIND_CSTRUCT) {
+            dyncall_wb_cs(body->child_objs[i]);
+        }
+    }
+}
+
+static void dyncall_wb_cs(PMC *obj) {
+    CStructBody     *body      = (CStructBody *) OBJECT_BODY(obj);
+    CStructREPRData *repr_data = (CStructREPRData *) STABLE(obj)->REPR_data;
+    char            *storage   = (char *) body->cstruct;
+    INTVAL           i;
+
+    for (i = 0; i < repr_data->num_attributes; i++) {
+        INTVAL kind = repr_data->attribute_locations[i] & CSTRUCT_ATTR_MASK;
+        INTVAL slot = repr_data->attribute_locations[i] >> CSTRUCT_ATTR_SHIFT;
+        void *cptr;   /* The pointer in the C storage. */
+        void *objptr; /* The pointer in the object representing the C object. */
+
+        if (kind == CSTRUCT_ATTR_IN_STRUCT)
+            continue;
+
+        cptr = *((void **) (storage + repr_data->struct_offsets[i]));
+        if (IS_CONCRETE(body->child_objs[slot])) {
+            switch (kind) {
+                case CSTRUCT_ATTR_CARRAY:
+                    objptr = ((CArrayBody *) OBJECT_BODY(body->child_objs[slot]))->storage;
+                    break;
+                case CSTRUCT_ATTR_CPTR:
+                    objptr = ((CPointerBody *) OBJECT_BODY(body->child_objs[slot]))->ptr;
+                    break;
+                case CSTRUCT_ATTR_CSTRUCT:
+                    objptr = (CStructBody *) OBJECT_BODY(body->child_objs[slot]);
+                    break;
+            }
+        }
+        else {
+            objptr = NULL;
+        }
+
+        if (objptr != cptr) {
+            body->child_objs[slot] = NULL;
+        }
+        else if (kind == CSTRUCT_ATTR_CARRAY) {
+            dyncall_wb_ca(body->child_objs[slot]);
+        }
+        else if (kind == CSTRUCT_ATTR_CSTRUCT) {
+            dyncall_wb_cs(body->child_objs[slot]);
+        }
+    }
+}
+
+
 END_OPS_PREAMBLE
 
 /* Initialize the native call library. */
@@ -309,6 +414,10 @@ inline op nqp_native_call_setup() :base_core {
         ca_repr_id = REGISTER_DYNAMIC_REPR(interp,
             Parrot_str_new_constant(interp, "CArray"),
             CArray_initialize);
+    if (!cstr_repr_id)
+        cstr_repr_id = REGISTER_DYNAMIC_REPR(interp,
+            Parrot_str_new_constant(interp, "CStr"),
+            CStr_initialize);
 }
 
 
@@ -433,18 +542,36 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
             case DYNCALL_ARG_UTF8STR:
             case DYNCALL_ARG_UTF16STR:
                 if (IS_CONCRETE(value)) {
-                    char *str = Parrot_str_to_encoded_cstring(interp,
-                        REPR(value)->box_funcs->get_str(interp, STABLE(value), OBJECT_BODY(value)),
-                        body->arg_types[i] == DYNCALL_ARG_ASCIISTR ? Parrot_ascii_encoding_ptr :
-                        body->arg_types[i] == DYNCALL_ARG_UTF16STR ? Parrot_utf16_encoding_ptr :
-                                                                     Parrot_utf8_encoding_ptr);
-                    dcArgPointer(vm, str);
-                    if (body->arg_types[i] & DYNCALL_ARG_FREE_STR_MASK) {
-                        if (!free_strs)
-                            free_strs = mem_sys_allocate(body->num_args * sizeof(char *));
-                        free_strs[num_strs] = str;
-                        num_strs++;
+                    char *str;
+                    PMC *meth = VTABLE_find_method(interp, STABLE(value)->WHAT,
+                        Parrot_str_new_constant(interp, "cstr"));
+                    if (!PMC_IS_NULL(meth)) {
+                        PMC *obj;
+                        PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+                        PMC *cappy = Parrot_pmc_new(interp, enum_class_CallContext);
+
+                        VTABLE_push_pmc(interp, cappy, value);
+                        Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
+                        cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+                        Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
+                        obj = decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, cappy, 0));
+
+                        str = ((CStrInstance *)PMC_data(obj))->body.cstr;
                     }
+                    else {
+                        str = Parrot_str_to_encoded_cstring(interp,
+                            REPR(value)->box_funcs->get_str(interp, STABLE(value), OBJECT_BODY(value)),
+                            body->arg_types[i] == DYNCALL_ARG_ASCIISTR ? Parrot_ascii_encoding_ptr :
+                            body->arg_types[i] == DYNCALL_ARG_UTF16STR ? Parrot_utf16_encoding_ptr :
+                                                                        Parrot_utf8_encoding_ptr);
+                        if (body->arg_types[i] & DYNCALL_ARG_FREE_STR_MASK) {
+                            if (!free_strs)
+                                free_strs = mem_sys_allocate(body->num_args * sizeof(char *));
+                            free_strs[num_strs] = str;
+                            num_strs++;
+                        }
+                    }
+                    dcArgPointer(vm, str);
                 }
                 else {
                     dcArgPointer(vm, NULL);
@@ -529,6 +656,21 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
             /* XXX Above are all still todo. */
             dcCallPointer(vm, body->entry_point);
             result = $2;
+    }
+
+    for (i = 0; i < body->num_args; i++) {
+        PMC *value = decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, args, i));
+        if(!IS_CONCRETE(value))
+            continue;
+
+        switch (body->arg_types[i]) {
+            case DYNCALL_ARG_CARRAY:
+                dyncall_wb_ca(value);
+                break;
+            case DYNCALL_ARG_CSTRUCT:
+                dyncall_wb_cs(value);
+                break;
+        }
     }
     
     /* Free any memory that we need to. */

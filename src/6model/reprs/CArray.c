@@ -3,7 +3,10 @@
 #include "parrot/extend.h"
 #include "../sixmodelobject.h"
 #include "../storage_spec.h"
+#include "dyncall_reprs.h"
 #include "CArray.h"
+#include "CStruct.h"
+#include "CPointer.h"
 
 /* This representation's function pointer table. */
 static REPROps *this_repr;
@@ -17,6 +20,7 @@ static void fill_repr_data(PARROT_INTERP, STable *st) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     PMC *old_ctx, *cappy;
     storage_spec ss;
+    INTVAL type_id;
 
     /* Look up "of" method. */
     PMC *meth = VTABLE_find_method(interp, st->WHAT,
@@ -41,6 +45,7 @@ static void fill_repr_data(PARROT_INTERP, STable *st) {
 
     /* What we do next depends on what kind of type we have. */
     ss = REPR(repr_data->elem_type)->get_storage_spec(interp, STABLE(repr_data->elem_type));
+    type_id = REPR(repr_data->elem_type)->ID;
     if (ss.boxed_primitive == STORAGE_SPEC_BP_INT) {
         if (ss.bits == 8 || ss.bits == 16 || ss.bits == 32 || ss.bits == 64)
             repr_data->elem_size = ss.bits / 8;
@@ -61,7 +66,18 @@ static void fill_repr_data(PARROT_INTERP, STable *st) {
         repr_data->elem_size = sizeof(PMC *);
         repr_data->elem_kind = CARRAY_ELEM_KIND_STRING;
     }
-    /* XXX TODO: structs, pointers, other arrays */
+    else if (type_id == get_ca_repr_id()) {
+        repr_data->elem_kind = CARRAY_ELEM_KIND_CARRAY;
+        repr_data->elem_size = sizeof(void *);
+    }
+    else if (type_id == get_cs_repr_id()) {
+        repr_data->elem_kind = CARRAY_ELEM_KIND_CSTRUCT;
+        repr_data->elem_size = sizeof(void *);
+    }
+    else if (type_id == get_cp_repr_id()) {
+        repr_data->elem_kind = CARRAY_ELEM_KIND_CPOINTER;
+        repr_data->elem_size = sizeof(void *);
+    }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "CArray may only contain native integers and numbers, strings, C Structs or C Pointers");
@@ -109,6 +125,12 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody *body = (CArrayBody *)data;
     body->storage = mem_sys_allocate(4 * repr_data->elem_size);
+    body->managed = 1;
+    /* Don't need child_objs for numerics or strings. */
+    if (repr_data->elem_kind == CARRAY_ELEM_KIND_NUMERIC)
+        body->child_objs = NULL;
+    else
+        body->child_objs = mem_sys_allocate_zeroed(4*sizeof(PMC *));
     body->allocated = 4;
     body->elems = 0;
 }
@@ -118,14 +140,15 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody     *src_body  = (CArrayBody *)src;
     CArrayBody     *dest_body = (CArrayBody *)dest;
-    if (src_body->allocated) {
+    if (src_body->managed) {
         INTVAL alsize = src_body->allocated * repr_data->elem_size;
         dest_body->storage = mem_sys_allocate(alsize);
         memcpy(dest_body->storage, src_body->storage, alsize);
     }
     else {
-        src_body->storage = dest_body->storage;
+        dest_body->storage = src_body->storage;
     }
+    dest_body->managed = src_body->managed;
     dest_body->allocated = src_body->allocated;
     dest_body->elems = src_body->elems;
 }
@@ -134,8 +157,11 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
  * embedded inside another one. Never called on a top-level object. */
 static void gc_cleanup(PARROT_INTERP, STable *st, void *data) {
     CArrayBody *body = (CArrayBody *)data;
-    if (body->allocated)
+    if (body->managed) {
         mem_sys_free(body->storage);
+        if (body->child_objs)
+            mem_sys_free(body->child_objs);
+    }
 }
 
 /* This Parrot-specific addition to the API is used to free an object. */
@@ -143,6 +169,19 @@ static void gc_free(PARROT_INTERP, PMC *obj) {
     gc_cleanup(interp, STABLE(obj), OBJECT_BODY(obj));
     mem_sys_free(PMC_data(obj));
     PMC_data(obj) = NULL;
+}
+
+static void gc_mark(PARROT_INTERP, STable *st, void *data) {
+    CArrayREPRData *repr_data = (CArrayREPRData *) st->REPR_data;
+    CArrayBody *body = (CArrayBody *)data;
+    INTVAL i;
+
+    /* Don't traverse child_objs list if there isn't one. */
+    if (!body->child_objs) return;
+
+    for (i = 0; i < body->elems; i++)
+        if (body->child_objs[i])
+            Parrot_gc_mark_PMC_alive(interp, body->child_objs[i]);
 }
 
 /* Gets the storage specification for this representation. */
@@ -160,16 +199,25 @@ static void die_idx_nyi(PARROT_INTERP) {
         "CArray representation does not fully indexed storage yet");
 }
 static void expand(PARROT_INTERP, CArrayREPRData *repr_data, CArrayBody *body, INTVAL min_size) {
-    INTVAL next_size = 2 * body->allocated;
+    INTVAL is_complex = 0;
+    INTVAL next_size = body->allocated? 2 * body->allocated: 4;
     if (min_size > next_size)
         next_size = min_size;
-    body->storage = mem_sys_realloc(body->storage, next_size * repr_data->elem_size);
+    if (body->managed)
+        body->storage = mem_sys_realloc(body->storage, next_size * repr_data->elem_size);
+
+    is_complex = (repr_data->elem_kind == CARRAY_ELEM_KIND_CARRAY
+               || repr_data->elem_kind == CARRAY_ELEM_KIND_CPOINTER
+               || repr_data->elem_kind == CARRAY_ELEM_KIND_CSTRUCT
+               || repr_data->elem_kind == CARRAY_ELEM_KIND_STRING);
+    if (is_complex)
+        body->child_objs = mem_sys_realloc_zeroed(body->child_objs, next_size * sizeof(PMC *), body->allocated * sizeof(PMC *));
     body->allocated = next_size;
 }
 static void * at_pos_ref(PARROT_INTERP, STable *st, void *data, INTVAL index) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody     *body      = (CArrayBody *)data;
-    if (body->allocated && index >= body->elems)
+    if (body->managed && index >= body->elems)
         return NULL;
     switch (repr_data->elem_kind) {
         case CARRAY_ELEM_KIND_NUMERIC:
@@ -179,37 +227,93 @@ static void * at_pos_ref(PARROT_INTERP, STable *st, void *data, INTVAL index) {
                 "at_pos_ref on CArray REPR only usable with numeric element types");
     }
 }
-static PMC * at_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index) {
+static PMC * make_object(PARROT_INTERP, STable *st, void *data) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody     *body      = (CArrayBody *)data;
-    if (body->allocated && index >= body->elems)
-        return repr_data->elem_type;
+
     switch (repr_data->elem_kind) {
         case CARRAY_ELEM_KIND_STRING:
         {
-            char *elem = *((char **)(((char *)body->storage) + index * repr_data->elem_size));
-            if (elem) {
-                STRING *str = Parrot_str_new_init(interp, elem, strlen(elem), Parrot_utf8_encoding_ptr, 0);
-                PMC    *res = REPR(repr_data->elem_type)->allocate(interp, STABLE(repr_data->elem_type));
-                REPR(res)->initialize(interp, STABLE(res), OBJECT_BODY(res));
-                REPR(res)->box_funcs->set_str(interp, STABLE(res), OBJECT_BODY(res), str);
-                PARROT_GC_WRITE_BARRIER(interp, res);
-                return res;
-            }
-            else
-                return repr_data->elem_type;
-            break;
+            char   *elem = (char *) data;
+            STRING *str  = Parrot_str_new_init(interp, elem, strlen(elem), Parrot_utf8_encoding_ptr, 0);
+            PMC    *obj  = REPR(repr_data->elem_type)->allocate(interp, STABLE(repr_data->elem_type));
+            REPR(obj)->initialize(interp, STABLE(obj), OBJECT_BODY(obj));
+            REPR(obj)->box_funcs->set_str(interp, STABLE(obj), OBJECT_BODY(obj), str);
+            PARROT_GC_WRITE_BARRIER(interp, obj);
+            return obj;
         }
+        case CARRAY_ELEM_KIND_CARRAY:
+            return make_carray_result(interp, repr_data->elem_type, data);
+        case CARRAY_ELEM_KIND_CPOINTER:
+            return make_cpointer_result(interp, repr_data->elem_type, data);
+        case CARRAY_ELEM_KIND_CSTRUCT:
+            return make_cstruct_result(interp, repr_data->elem_type, data);
+    }
+}
+static PMC * at_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index) {
+    CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
+    CArrayBody     *body      = (CArrayBody *)data;
+    void **storage            = (void **) body->storage;
+    PMC *obj;
+
+    switch (repr_data->elem_kind) {
+        case CARRAY_ELEM_KIND_STRING:
+        case CARRAY_ELEM_KIND_CARRAY:
+        case CARRAY_ELEM_KIND_CPOINTER:
+        case CARRAY_ELEM_KIND_CSTRUCT:
+            break;
         default:
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "at_pos_boxed on CArray REPR not usable with this element type");
+    }
+
+    if (body->managed && index >= body->elems)
+        return repr_data->elem_type;
+
+    if (body->managed) {
+        /* We manage this array. */
+        if (index < body->elems && body->child_objs[index])
+            return body->child_objs[index];
+        else if (index < body->elems) {
+            /* Someone's changed the array since the cached object was
+             * created. Recreate it. */
+            obj = make_object(interp, st, storage[index]);
+            body->child_objs[index] = obj;
+            return obj;
+        }
+        else
+            return repr_data->elem_type;
+    }
+    else {
+        /* Array comes from C. */
+        /* Enlarge child_objs if needed. */
+        if (index >= body->allocated)
+            expand(interp, repr_data, body, index+1);
+        if (index >= body->elems)
+            body->elems = index + 1;
+
+        /* We've already fetched this object. Return that. */
+        if (storage[index] && body->child_objs[index]) {
+            return body->child_objs[index];
+        }
+        /* No cached object, but non-NULL pointer in array. Construct object,
+         * put it in the cache and return it. */
+        else if (storage[index]) {
+            obj = make_object(interp, st, storage[index]);
+            body->child_objs[index] = obj;
+            return obj;
+        }
+        /* NULL pointer in the array, just return the type object. */
+        else {
+            return repr_data->elem_type;
+        }
     }
 }
 static void bind_pos_ref(PARROT_INTERP, STable *st, void *data, INTVAL index, void *value) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody     *body      = (CArrayBody *)data;
     STable         *type_st   = STABLE(repr_data->elem_type);
-    if (body->allocated && index >= body->allocated)
+    if (body->managed && index >= body->allocated)
         expand(interp, repr_data, body, index + 1);
     if (index >= body->elems)
         body->elems = index + 1;
@@ -225,26 +329,56 @@ static void bind_pos_ref(PARROT_INTERP, STable *st, void *data, INTVAL index, vo
 static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, PMC *obj) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody     *body      = (CArrayBody *)data;
-    if (body->allocated && index >= body->allocated)
-        expand(interp, repr_data, body, index + 1);
+    void **storage = (void **) body->storage;
+    void *cptr; /* Pointer to C data. */
+
+    /* Enlarge child_objs if needed. */
+    if (index >= body->allocated)
+        expand(interp, repr_data, body, index+1);
     if (index >= body->elems)
         body->elems = index + 1;
+
+    /* Make sure the type isn't something we can't handle. */
     switch (repr_data->elem_kind) {
         case CARRAY_ELEM_KIND_STRING:
-        {
-            STRING *str  = REPR(obj)->box_funcs->get_str(interp, STABLE(obj), OBJECT_BODY(obj));
-            char   *elem = Parrot_str_to_encoded_cstring(interp, str, Parrot_utf8_encoding_ptr);
-            *((char **)(((char *)body->storage) + index * repr_data->elem_size)) = elem;
+        case CARRAY_ELEM_KIND_CARRAY:
+        case CARRAY_ELEM_KIND_CSTRUCT:
+        case CARRAY_ELEM_KIND_CPOINTER:
             break;
-        }
         default:
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "bind_pos_boxed on CArray REPR not usable with this element type");
     }
+
+    if (IS_CONCRETE(obj)) {
+        switch (repr_data->elem_kind) {
+            case CARRAY_ELEM_KIND_STRING:
+            {
+                STRING *str  = REPR(obj)->box_funcs->get_str(interp, STABLE(obj), OBJECT_BODY(obj));
+                cptr = Parrot_str_to_encoded_cstring(interp, str, Parrot_utf8_encoding_ptr);
+                break;
+            }
+            case CARRAY_ELEM_KIND_CARRAY:
+                cptr = ((CArrayBody *) OBJECT_BODY(obj))->storage;
+                break;
+            case CARRAY_ELEM_KIND_CSTRUCT:
+                cptr = ((CStructBody *) OBJECT_BODY(obj))->cstruct;
+                break;
+            case CARRAY_ELEM_KIND_CPOINTER:
+                cptr = ((CPointerBody *) OBJECT_BODY(obj))->ptr;
+                break;
+        }
+    }
+    else {
+        cptr = NULL;
+    }
+
+    body->child_objs[index] = obj;
+    storage[index] = cptr;
 }
 static INTVAL elems(PARROT_INTERP, STable *st, void *data) {
     CArrayBody     *body      = (CArrayBody *)data;
-    if (body->allocated)
+    if (body->managed)
         return body->elems;
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
         "Don't know how many elements a C array returned from a library has");
@@ -274,6 +408,22 @@ static STable * get_elem_stable(PARROT_INTERP, STable *st) {
     return STABLE(repr_data->elem_type);
 }
 
+/* Serializes the REPR data. */
+static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *writer) {
+    CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
+    writer->write_int(interp, writer, repr_data->elem_size);
+    writer->write_ref(interp, writer, repr_data->elem_type);
+    writer->write_int(interp, writer, repr_data->elem_kind);
+}
+
+/* Deserializes the REPR data. */
+static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader *reader) {
+    CArrayREPRData *repr_data = st->REPR_data = mem_sys_allocate_zeroed(sizeof(CArrayREPRData));
+    repr_data->elem_size = reader->read_int(interp, reader);
+    repr_data->elem_type = reader->read_ref(interp, reader);
+    repr_data->elem_kind = reader->read_int(interp, reader);
+}
+
 /* Initializes the CArray representation. */
 REPROps * CArray_initialize(PARROT_INTERP,
         PMC * (* wrap_object_func_ptr) (PARROT_INTERP, void *obj),
@@ -290,6 +440,7 @@ REPROps * CArray_initialize(PARROT_INTERP,
     this_repr->copy_to = copy_to;
     this_repr->gc_cleanup = gc_cleanup;
     this_repr->gc_free = gc_free;
+    this_repr->gc_mark = gc_mark;
     this_repr->get_storage_spec = get_storage_spec;
     this_repr->idx_funcs = mem_allocate_zeroed_typed(REPROps_Indexing);
     this_repr->idx_funcs->at_pos_ref = at_pos_ref;
@@ -302,6 +453,8 @@ REPROps * CArray_initialize(PARROT_INTERP,
     this_repr->idx_funcs->make_hole = make_hole;
     this_repr->idx_funcs->delete_elems = delete_elems;
     this_repr->idx_funcs->get_elem_stable = get_elem_stable;
+    this_repr->serialize_repr_data = serialize_repr_data;
+    this_repr->deserialize_repr_data = deserialize_repr_data;
     
     return this_repr;
 }

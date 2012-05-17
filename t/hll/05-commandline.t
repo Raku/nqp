@@ -1,6 +1,6 @@
 #! nqp
 
-plan(27);
+plan(30);
 
 use NQPHLL;
 
@@ -53,6 +53,10 @@ $r := $x.parse(['-a', 'script.pl', '--verbose']);
 ok(pir::join(',', $r.arguments) eq 'script.pl,--verbose',
     'stop-after-first-arg');
 
+$r := $x.parse(['-aefoo']);
+ok($r.options{'a'}, 'can group one-letter options of which one has an argument');
+ok($r.options{'e'} eq 'foo', 'can join one-letter option and its argument');
+
 # TODO: tests for long options as stoppers
 
 $x := HLL::CommandLine::Parser.new(['a|b', 'l|long',
@@ -74,3 +78,6 @@ ok($r.options{'with-arg'} eq 'v2', 'short+long alias  with value(right)');
 
 ok($r.options<o> eq 'v4', 'long|short alias (short)');
 ok($r.options<other> eq 'v3', 'long|short alias (short)');
+
+$r := $x.parse(['-w', 'A', '-w', 'B']);
+ok(nqp::join(',', $r.options<w>) eq 'A,B', 'multiple options with the same name');
