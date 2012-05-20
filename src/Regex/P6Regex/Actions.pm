@@ -391,6 +391,26 @@ class Regex::P6Regex::Actions is HLL::Actions {
         make $past;
     }
 
+    method assertion:sym<|>($/) {
+        my $past;
+        my $name := ~$<identifier>;
+        if $name eq 'c' {
+            # codepoint boundary is always true at our
+            # current Unicode abstraction level
+            $past := 0;
+        }
+        elsif $name eq 'w' {
+            $past := PAST::Regex.new(
+                'wb', :name('wb'),
+                :pasttype('subrule'), :node($/)
+            );
+        }
+        else {
+            self.panic("Don't know how to handle zero-width asertion <|$name>");
+        }
+        make $past;
+    }
+
     method assertion:sym<method>($/) {
         my $past := $<assertion>.ast;
         $past.subtype('method');
