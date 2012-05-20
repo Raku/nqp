@@ -327,6 +327,22 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         make $qast;
     }
 
+    method assertion:sym<|>($/) {
+        my $qast;
+        my $name := ~$<identifier>;
+        if $name eq 'c' {
+            # codepoint boundaries alway match in
+            # our current Unicode abstraction level
+            $qast := 0;
+        }
+        elsif $name eq 'w' {
+            $qast := QAST::Regex.new(:rxtype<subrule>, :subtype<method>,
+                                     :node($/), PAST::Node.new('wb'), 
+                                     :name('') );
+        }
+        make $qast;
+    }
+
     method assertion:sym<method>($/) {
         my $qast := $<assertion>.ast;
         $qast.subtype('method');
