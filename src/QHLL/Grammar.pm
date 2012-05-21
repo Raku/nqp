@@ -833,8 +833,6 @@ An operator precedence parser.
     method LANG($lang, $regex) {
         my $lang_cursor := %*LANG{$lang}.'!cursor_init'(self.target(), :p(self.pos()));
         my $*ACTIONS    := %*LANG{$lang ~ '-actions'};
-        #my $cur         := $lang_cursor.'!cursor_start'();
-        #nqp::bindattr_i($cur, $cur_class, '$!pos', self.pos());
         $lang_cursor."$regex"();  
     }
 }
