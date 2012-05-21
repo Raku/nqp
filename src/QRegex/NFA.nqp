@@ -179,13 +179,31 @@ class QRegex::NFA {
         $past;
     }
 
-    method mergesubrule($start, $to, $fate, $cursor, $name, %seen?) {
+    method mergesubrule($start, $to, $fate, $cursor, $name, %caller_seen?) {
         #nqp::say("adding $name");
+        my %seen := nqp::clone(%caller_seen);
         my @substates;
         if !%seen{$name} && pir::can($cursor, $name) {
             @substates := $cursor.HOW.find_method($cursor, $name, :no_trace(1)).nqpattr('nfa');
-            %seen{$name} := 1;
         }
+        if !@substates && !%seen{$name} {
+            # Maybe it's a protoregex, in which case states are an alternation
+            # of all of the possible rules.
+            my %protorx     := $cursor.HOW.cache($cursor, "!protoregex_table", { $cursor."!protoregex_table"() });
+            my $nfa         := QRegex::NFA.new;
+            my $prefix      := $name ~ ':sym<';
+            my $prefixchars := nqp::chars($prefix);
+            my $gotmatch    := 0;
+            for %protorx {
+                my $rxname := ~$_;
+                if nqp::substr($rxname, 0, $prefixchars) eq $prefix {
+                    $nfa.addedge(1, 0, $EDGE_SUBRULE, $rxname);
+                    $gotmatch := 1;
+                }
+            }
+            @substates := $nfa.states() if $gotmatch;
+        }
+        %seen{$name} := 1;
         if @substates {
             # create an empty end state for the subrule's NFA
             my $substart := self.addstate();
