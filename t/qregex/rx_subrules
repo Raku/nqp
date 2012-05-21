@@ -66,5 +66,7 @@ a<!wb>			abc\ndef\n-==\nghi	y	\w\w nonword boundary
 <+alpha-[Jj]>+	abc				y	character class with no j
 <+ alpha - [ Jj ]>	abc			y	character class with no j with ws
 ^<+alpha-[Jj]>+$	aJc			n	character class with no j fail
+^a<|w>				a/			y	<|w> matches
+^a<|w>				ab			n	<|w> without match
 
 ## vim: noexpandtab tabstop=4 shiftwidth=4

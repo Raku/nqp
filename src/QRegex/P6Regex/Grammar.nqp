@@ -178,6 +178,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token assertion:sym<?> { '?' [ <?before '>' > | <assertion> ] }
     token assertion:sym<!> { '!' [ <?before '>' > | <assertion> ] }
+    token assertion:sym<|> { '|' <identifier> }
 
     token assertion:sym<method> {
         '.' <assertion>
