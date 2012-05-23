@@ -215,6 +215,61 @@ for <if unless> -> $op_name {
     });
 }
 
+# Loops.
+for <while until> -> $op_name {
+    QAST::Operations.add_core_op($op_name, -> $qastcomp, $op {
+        # Check operand count.
+        my $operands := +$op.list;
+        pir::die("Operation '$op_name' needs 2 operands")
+            if $operands != 2;
+
+        # Create labels.
+        my $while_id := $qastcomp.unique($op_name);
+        my $loop_lbl := $qastcomp.post_new('Label', :result($while_id ~ '_loop'));
+        my $last_lbl := $qastcomp.post_new('Label', :result($while_id ~ '_last'));
+
+        # Compile each of the children; we'll need to look at the result
+        # types and pick an overall result type if in non-void context.
+        my @comp_ops;
+        my @op_types;
+        for $op.list {
+            my $comp := $qastcomp.as_post($_);
+            @comp_ops.push($comp);
+            @op_types.push(nqp::uc($qastcomp.infer_type($comp.result)));
+        }
+        my $res_type := 'i';
+        my $res_reg := $*REGALLOC."fresh_$res_type"();
+
+        # Evaluate the condition; store result if needed.
+        my $ops := $qastcomp.post_new('Ops');
+
+        # Emit loop label.
+        $ops.push($loop_lbl);
+        $ops.result($res_reg);
+
+        my $coerced := $qastcomp.coerce(@comp_ops[0], $res_type);
+        $ops.push($coerced);
+        $ops.push_pirop('set', $res_reg, $coerced.result);
+
+        # Emit the exiting jump.
+        $ops.push_pirop(($op_name eq 'while' ?? 'unless ' !! 'if ') ~
+            @comp_ops[0].result ~ ' goto ' ~ $last_lbl.result);
+
+        # Emit the loop body; stash the result.
+        my $body := $qastcomp.coerce(@comp_ops[1], $res_type);
+        $ops.push($body);
+        $ops.push_pirop('set', $res_reg, $body.result);
+
+        # Emit the iteration jump.
+        $ops.push_pirop('goto ' ~ $loop_lbl.result);
+
+        # Emit last label and tag ops with result.
+        $ops.push($last_lbl);
+        $ops.result($res_reg);
+        $ops;
+    });
+}
+
 # Binding
 QAST::Operations.add_core_op('bind', -> $qastcomp, $op {
     # Sanity checks.
