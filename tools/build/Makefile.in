@@ -651,14 +651,14 @@ $(STAGE2)/$(NQP_MO_PBC): $(STAGE1_PBCS) $(NQP_MO_SOURCES)
 	$(PERL) tools/build/gen-cat.pl $(NQP_MO_SOURCES) > $(STAGE2)/$(NQP_MO_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(NQP_MO_PIR) \
-	    --setting=NULL $(STAGE2)/$(NQP_MO_COMBINED)
+	    --old-regex-lib --setting=NULL $(STAGE2)/$(NQP_MO_COMBINED)
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(NQP_MO_PBC) \
 	    $(STAGE2)/$(NQP_MO_PIR)
 
 $(STAGE2)/$(MODULE_LOADER_PBC): $(STAGE1_PBCS) src/ModuleLoader.pm
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/gen/module_loader.pir \
-	    --setting=NULL src/ModuleLoader.pm
+	    --old-regex-lib --setting=NULL src/ModuleLoader.pm
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(MODULE_LOADER_PBC) \
 	    $(STAGE2)/gen/module_loader.pir
 
@@ -667,7 +667,7 @@ $(STAGE2)/$(CORE_SETTING_PBC): $(STAGE1_PBCS) $(STAGE2)/$(NQP_MO_PBC) $(STAGE2)/
 	$(PERL) tools/build/gen-cat.pl $(CORE_SETTING_SOURCES) > $(STAGE2)/$(CORE_SETTING_NQP)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(CORE_SETTING_PIR) \
-	    --module-path=$(STAGE2) --setting=NULL $(STAGE2)/$(CORE_SETTING_NQP)
+	    --old-regex-lib --module-path=$(STAGE2) --setting=NULL $(STAGE2)/$(CORE_SETTING_NQP)
 	$(PARROT) -o $(STAGE2)/$(CORE_SETTING_PBC) $(STAGE2)/$(CORE_SETTING_PIR)
 
 $(STAGE2)/$(QREGEX_PBC): $(STAGE1_PBCS) $(STAGE2)/$(CORE_SETTING_PBC) $(QREGEX_SOURCES)
@@ -675,7 +675,7 @@ $(STAGE2)/$(QREGEX_PBC): $(STAGE1_PBCS) $(STAGE2)/$(CORE_SETTING_PBC) $(QREGEX_S
 	$(PERL) tools/build/gen-cat.pl $(QREGEX_SOURCES) > $(STAGE2)/$(QREGEX_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(QREGEX_PIR) --no-regex-lib \
-	    --module-path=$(STAGE2) --setting-path=$(STAGE2) $(STAGE2)/$(QREGEX_COMBINED)
+	    --old-regex-lib --module-path=$(STAGE2) --setting-path=$(STAGE2) $(STAGE2)/$(QREGEX_COMBINED)
 	$(PARROT) -o $(STAGE2)/$(QREGEX_PBC) $(STAGE2)/$(QREGEX_PIR)
 
 $(STAGE2)/$(REGEX_PBC): $(DYNEXT_TARGET) $(REGEX_SOURCES) $(STAGE2)/$(CORE_SETTING_PBC)
@@ -686,7 +686,7 @@ $(STAGE2)/$(HLL_PBC): $(STAGE1_PBCS) $(STAGE2)/$(REGEX_PBC) $(STAGE2)/$(CORE_SET
 	$(PERL) tools/build/gen-cat.pl $(QHLL_SOURCES) > $(STAGE2)/$(HLL_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(HLL_COMBINED_PIR) \
-	    --module-path=$(STAGE2) --setting-path=$(STAGE2) $(STAGE2)/$(HLL_COMBINED)
+	    --old-regex-lib --module-path=$(STAGE2) --setting-path=$(STAGE2) $(STAGE2)/$(HLL_COMBINED)
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(HLL_PBC) \
 	    $(STAGE2)/$(HLL_COMBINED_PIR)
 
@@ -695,7 +695,7 @@ $(STAGE2)/$(QAST_PBC): $(STAGE1_PBCS) $(STAGE2)/$(CORE_SETTING_PBC) $(STAGE2)/$(
 	$(PERL) tools/build/gen-cat.pl $(QAST_SOURCES) > $(STAGE2)/$(QAST_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(QAST_PIR) \
-	    --module-path=$(STAGE2) --setting-path=$(STAGE2) $(STAGE2)/$(QAST_COMBINED)
+	    --old-regex-lib --module-path=$(STAGE2) --setting-path=$(STAGE2) $(STAGE2)/$(QAST_COMBINED)
 	$(PARROT) -o $(STAGE2)/$(QAST_PBC) $(STAGE2)/$(QAST_PIR)
 
 $(STAGE2)/$(P6QREGEX_PBC): $(STAGE1_PBCS) $(STAGE2)/$(HLL_PBC) $(STAGE2)/$(QAST_PBC) $(P6QREGEX_SOURCES)
@@ -703,7 +703,7 @@ $(STAGE2)/$(P6QREGEX_PBC): $(STAGE1_PBCS) $(STAGE2)/$(HLL_PBC) $(STAGE2)/$(QAST_
 	$(PERL) tools/build/gen-cat.pl $(P6QREGEX_SOURCES) > $(STAGE2)/$(P6QREGEX_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(P6QREGEX_COMBINED_PIR) \
-	    --module-path=$(STAGE2) --setting-path=$(STAGE2) $(STAGE2)/$(P6QREGEX_COMBINED)
+	    --old-regex-lib --module-path=$(STAGE2) --setting-path=$(STAGE2) $(STAGE2)/$(P6QREGEX_COMBINED)
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(P6QREGEX_PBC) \
 	    $(STAGE2)/$(P6QREGEX_COMBINED_PIR)
 
@@ -713,7 +713,7 @@ $(STAGE2)/$(NQP_PBC): $(STAGE1_PBCS) $(STAGE2)/$(P6QREGEX_PBC) $(NQPQ_SOURCES)
 	$(PERL) tools/build/gen-cat.pl $(NQPQ_SOURCES) src/gen/nqp-config.pm > $(STAGE2)/$(NQP_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(NQP_COMBINED_PIR) \
-	    --module-path=$(STAGE2) --setting-path=$(STAGE2) $(STAGE2)/$(NQP_COMBINED)
+	    --old-regex-lib --module-path=$(STAGE2) --setting-path=$(STAGE2) $(STAGE2)/$(NQP_COMBINED)
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(NQP_PBC) \
 	    $(STAGE2)/$(NQP_COMBINED_PIR)
 
