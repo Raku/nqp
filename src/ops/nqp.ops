@@ -2134,7 +2134,7 @@ inline op nqp_nfa_run(out PMC, in PMC, in STR, in INT) :base_core {
         VTABLE_set_integer_keyed_int(interp, done, i, 0);
     
     VTABLE_push_integer(interp, nextst, 1);
-    while (VTABLE_elements(interp, nextst) && offset < eos) {
+    while (VTABLE_elements(interp, nextst) && offset <= eos) {
         /* Translation of:
          *    my @curst := @nextst;
          *    @nextst := [];
