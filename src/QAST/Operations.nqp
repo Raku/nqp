@@ -268,6 +268,51 @@ for <while until> -> $op_name {
     });
 }
 
+for <repeat_while repeat_until> -> $op_name {
+    QAST::Operations.add_core_op($op_name, -> $qastcomp, $op {
+        # Check operand count.
+        my $operands := +$op.list;
+        pir::die("Operation '$op_name' needs 2 operands")
+            if $operands != 2;
+
+        # Create labels.
+        my $while_id := $qastcomp.unique($op_name);
+        my $loop_lbl := $qastcomp.post_new('Label', :result($while_id ~ '_loop'));
+
+        # Compile each of the children; we'll need to look at the result
+        # types and pick an overall result type if in non-void context.
+        my @comp_ops;
+        for $op.list {
+            my $comp := $qastcomp.as_post($_);
+            @comp_ops.push($comp);
+        }
+        my $res_type := 'i';
+        my $res_reg := $*REGALLOC."fresh_$res_type"();
+
+        # Evaluate the condition; store result if needed.
+        my $ops := $qastcomp.post_new('Ops');
+
+        # Emit loop label.
+        $ops.push($loop_lbl);
+        $ops.result($res_reg);
+
+        my $coerced := $qastcomp.coerce(@comp_ops[0], $res_type);
+        $ops.push($coerced);
+        $ops.push_pirop('set', $res_reg, $coerced.result);
+
+        # Emit the loop body; stash the result.
+        my $body := $qastcomp.coerce(@comp_ops[1], $res_type);
+        $ops.push($body);
+        $ops.push_pirop('set', $res_reg, $body.result);
+
+        # Emit the conditional iteration jump.
+        $ops.push_pirop(($op_name eq 'repeat_while' ?? 'if ' !! 'unless ') ~
+            @comp_ops[0].result ~ ' goto ' ~ $loop_lbl.result);
+
+        $ops;
+    });
+}
+
 # Binding
 QAST::Operations.add_core_op('bind', -> $qastcomp, $op {
     # Sanity checks.

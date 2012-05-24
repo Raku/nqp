@@ -667,3 +667,61 @@ is_qast(
     ),
     2,
     'until loop works');
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('bind'),
+            QAST::Var.new( :name('$i'), :scope('lexical'), :decl('var'), :returns(int) ),
+            QAST::IVal.new( :value(5) )
+        ),
+        QAST::Op.new(
+            :op('repeat_while'),
+            QAST::Op.new(
+                :op('islt_i'),
+                QAST::Var.new( :name('$i'), :scope('lexical') ),
+                QAST::IVal.new( :value(3) )
+            ),
+            QAST::Op.new(
+                :op('bind'),
+                QAST::Var.new( :name('$i'), :scope('lexical') ),
+                QAST::Op.new(
+                    :op('sub_i'),
+                    QAST::Var.new( :name('$i'), :scope('lexical') ),
+                    QAST::IVal.new( :value(1) )
+                )
+            ),
+        ),
+        QAST::Var.new( :name('$i'), :scope('lexical') ),
+    ),
+    4,
+    'repeat_while loop works');
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('bind'),
+            QAST::Var.new( :name('$i'), :scope('lexical'), :decl('var'), :returns(int) ),
+            QAST::IVal.new( :value(0) )
+        ),
+        QAST::Op.new(
+            :op('repeat_until'),
+            QAST::Op.new(
+                :op('islt_i'),
+                QAST::Var.new( :name('$i'), :scope('lexical') ),
+                QAST::IVal.new( :value(3) )
+            ),
+            QAST::Op.new(
+                :op('bind'),
+                QAST::Var.new( :name('$i'), :scope('lexical') ),
+                QAST::Op.new(
+                    :op('add_i'),
+                    QAST::Var.new( :name('$i'), :scope('lexical') ),
+                    QAST::IVal.new( :value(1) )
+                )
+            ),
+        ),
+        QAST::Var.new( :name('$i'), :scope('lexical') ),
+    ),
+    1,
+    'repeat_until loop works');
