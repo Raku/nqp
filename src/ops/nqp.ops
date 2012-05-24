@@ -2126,8 +2126,14 @@ inline op nqp_nfa_run(out PMC, in PMC, in STR, in INT) :base_core {
     INTVAL  gen     = 1;
     PMC    *curst   = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
     PMC    *nextst  = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
-    VTABLE_push_integer(interp, nextst, 1);
+    INTVAL  i, num_states;
     
+    /* Zero out the done array; we don't get zeroed memory by default. */
+    num_states = VTABLE_elements(interp, states);
+    for (i = 0; i < num_states; i++)
+        VTABLE_set_integer_keyed_int(interp, done, i, 0);
+    
+    VTABLE_push_integer(interp, nextst, 1);
     while (VTABLE_elements(interp, nextst) && offset < eos) {
         /* Translation of:
          *    my @curst := @nextst;
@@ -2136,11 +2142,11 @@ inline op nqp_nfa_run(out PMC, in PMC, in STR, in INT) :base_core {
         PMC *temp = curst;
         curst = nextst;
         VTABLE_set_integer_native(interp, temp, 0);
-        nextst = temp
+        nextst = temp;
         
         while (VTABLE_elements(interp, curst)) {
             PMC    *edge_info;
-            INTVAL  edge_info_elems, i;
+            INTVAL  edge_info_elems;
             
             INTVAL st = VTABLE_pop_integer(interp, curst);
             if (VTABLE_get_integer_keyed_int(interp, done, st) == gen)
@@ -2200,6 +2206,7 @@ inline op nqp_nfa_run(out PMC, in PMC, in STR, in INT) :base_core {
         offset++;
         gen++;
     }
+
     $1 = fatepos;
 }
 
