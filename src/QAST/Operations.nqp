@@ -231,11 +231,9 @@ for <while until> -> $op_name {
         # Compile each of the children; we'll need to look at the result
         # types and pick an overall result type if in non-void context.
         my @comp_ops;
-        my @op_types;
         for $op.list {
             my $comp := $qastcomp.as_post($_);
             @comp_ops.push($comp);
-            @op_types.push(nqp::uc($qastcomp.infer_type($comp.result)));
         }
         my $res_type := 'i';
         my $res_reg := $*REGALLOC."fresh_$res_type"();
