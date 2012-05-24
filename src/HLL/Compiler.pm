@@ -15,6 +15,8 @@ class HLL::Compiler {
     has $!compiler_progname;
     has $!language;
     has %!config;
+    has @!cli-arguments;
+    has %!cli-options;
 
     our %parrot_config;
 
@@ -379,6 +381,14 @@ class HLL::Compiler {
                 pir::exit(1);
             }
         }
+        if $res {
+            %!cli-options   := $res.options();
+            @!cli-arguments := $res.arguments();
+        }
+        else {
+            %!cli-options   := nqp::hash();
+            @!cli-arguments := [];
+        }
         $res;
     }
 
@@ -669,6 +679,9 @@ class HLL::Compiler {
             .return (lo)
         };
     }
+
+    method cli-options()   { %!cli-options   }
+    method cli-arguments() { @!cli-arguments }
 }
 
 my $compiler := HLL::Compiler.new();
