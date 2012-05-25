@@ -136,11 +136,11 @@ NQP_COMBINED_PIR = gen/NQP.pir
 NQP_PBC          = nqp.pbc
 NQP_EXE          = nqp$(EXE)
 
-NQPQ_SOURCES = \
-  src/NQPQ/World.pm \
-  src/NQPQ/Grammar.pm \
-  src/NQPQ/Actions.pm \
-  src/NQPQ/Compiler.pm \
+NQP_SOURCES = \
+  src/NQP/World.pm \
+  src/NQP/Grammar.pm \
+  src/NQP/Actions.pm \
+  src/NQP/Compiler.pm \
 
 NQP_MO_SOURCES = src/how/Archetypes.pm src/how/RoleToRoleApplier.pm \
                  src/how/NQPConcreteRoleHOW.pm src/how/RoleToClassApplier.pm \
@@ -601,10 +601,10 @@ $(STAGE1)/$(P6QREGEX_PBC): $(STAGE0_PBCS) $(STAGE1)/$(HLL_PBC) $(STAGE1)/$(QREGE
 	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(P6QREGEX_PBC) \
 	    $(STAGE1)/$(P6QREGEX_COMBINED_PIR)
 
-$(STAGE1)/$(NQP_PBC): $(STAGE0_PBCS) $(STAGE1)/$(CORE_SETTING_PBC) $(STAGE1)/$(P6QREGEX_PBC) $(NQPQ_SOURCES)
+$(STAGE1)/$(NQP_PBC): $(STAGE0_PBCS) $(STAGE1)/$(CORE_SETTING_PBC) $(STAGE1)/$(P6QREGEX_PBC) $(NQP_SOURCES)
 	$(MKPATH) $(STAGE1)/gen
 	$(PERL) tools/build/gen-version.pl >src/gen/nqp-config.pm
-	$(PERL) tools/build/gen-cat.pl $(NQPQ_SOURCES) src/gen/nqp-config.pm > $(STAGE1)/$(NQP_COMBINED)
+	$(PERL) tools/build/gen-cat.pl $(NQP_SOURCES) src/gen/nqp-config.pm > $(STAGE1)/$(NQP_COMBINED)
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE1)/$(NQP_COMBINED_PIR) \
 	    --module-path=$(STAGE1) --setting-path=$(STAGE1) $(STAGE1)/$(NQP_COMBINED)
@@ -671,10 +671,10 @@ $(STAGE2)/$(P6QREGEX_PBC): $(STAGE1_PBCS) $(STAGE2)/$(HLL_PBC) $(STAGE2)/$(QAST_
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(P6QREGEX_PBC) \
 	    $(STAGE2)/$(P6QREGEX_COMBINED_PIR)
 
-$(STAGE2)/$(NQP_PBC): $(STAGE1_PBCS) $(STAGE2)/$(P6QREGEX_PBC) $(NQPQ_SOURCES)
+$(STAGE2)/$(NQP_PBC): $(STAGE1_PBCS) $(STAGE2)/$(P6QREGEX_PBC) $(NQP_SOURCES)
 	$(MKPATH) $(STAGE2)/gen
 	$(PERL) tools/build/gen-version.pl >src/gen/nqp-config.pm
-	$(PERL) tools/build/gen-cat.pl $(NQPQ_SOURCES) src/gen/nqp-config.pm > $(STAGE2)/$(NQP_COMBINED)
+	$(PERL) tools/build/gen-cat.pl $(NQP_SOURCES) src/gen/nqp-config.pm > $(STAGE2)/$(NQP_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(NQP_COMBINED_PIR) \
 	    --module-path=$(STAGE2) --setting-path=$(STAGE2) $(STAGE2)/$(NQP_COMBINED)
