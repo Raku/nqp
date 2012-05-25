@@ -519,7 +519,7 @@ grammar NQP::Grammar is HLL::Grammar {
           {   
               %*RX<s>    := $<sym> eq 'rule'; 
               %*RX<r>    := $<sym> eq 'token' || $<sym> eq 'rule'; 
-              %*RX<name> := ~$<deflongname>;
+              %*RX<name> := $<deflongname>.ast;
           }
           '{'<p6regex=.LANG('Regex','nibbler')>'}'<?ENDSTMT>
         ]
