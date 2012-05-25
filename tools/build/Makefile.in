@@ -58,12 +58,12 @@ PAST_SOURCES = \
   src/cheats/parrot-callcontext.pir \
   src/cheats/parrot-sub.pir \
 
-QHLL_SOURCES = \
-  src/QHLL/Grammar.pm \
-  src/QHLL/Actions.pm \
-  src/QHLL/Compiler.pm \
-  src/QHLL/CommandLine.pm \
-  src/QHLL/World.pm \
+HLL_SOURCES = \
+  src/HLL/Grammar.pm \
+  src/HLL/Actions.pm \
+  src/HLL/Compiler.pm \
+  src/HLL/CommandLine.pm \
+  src/HLL/World.pm \
 
 QAST_COMBINED = QAST.nqp
 QAST_PIR = QAST.pir
@@ -572,9 +572,9 @@ $(STAGE1)/$(QREGEX_PBC): $(STAGE0_PBCS) $(STAGE1)/$(CORE_SETTING_PBC) $(QREGEX_S
         $(STAGE1)/$(QREGEX_COMBINED)
 	$(PARROT) -o $(STAGE1)/$(QREGEX_PBC) $(STAGE1)/$(QREGEX_PIR)
 
-$(STAGE1)/$(HLL_PBC): $(STAGE0_PBCS) $(STAGE1)/$(QREGEX_PBC) $(STAGE1)/$(CORE_SETTING_PBC) $(QHLL_SOURCES)
+$(STAGE1)/$(HLL_PBC): $(STAGE0_PBCS) $(STAGE1)/$(QREGEX_PBC) $(STAGE1)/$(CORE_SETTING_PBC) $(HLL_SOURCES)
 	$(MKPATH) $(STAGE1)/gen
-	$(PERL) tools/build/gen-cat.pl $(QHLL_SOURCES) > $(STAGE1)/$(HLL_COMBINED)
+	$(PERL) tools/build/gen-cat.pl $(HLL_SOURCES) > $(STAGE1)/$(HLL_COMBINED)
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE1)/$(HLL_COMBINED_PIR) \
 	    --module-path=$(STAGE1) --setting-path=$(STAGE1) --no-regex-lib \
@@ -645,9 +645,9 @@ $(STAGE2)/$(QREGEX_PBC): $(STAGE1_PBCS) $(STAGE2)/$(CORE_SETTING_PBC) $(QREGEX_S
 	    --module-path=$(STAGE2) --setting-path=$(STAGE2) $(STAGE2)/$(QREGEX_COMBINED)
 	$(PARROT) -o $(STAGE2)/$(QREGEX_PBC) $(STAGE2)/$(QREGEX_PIR)
 
-$(STAGE2)/$(HLL_PBC): $(STAGE1_PBCS) $(STAGE2)/$(CORE_SETTING_PBC) $(STAGE2)/$(QREGEX_PBC) $(QHLL_SOURCES)
+$(STAGE2)/$(HLL_PBC): $(STAGE1_PBCS) $(STAGE2)/$(CORE_SETTING_PBC) $(STAGE2)/$(QREGEX_PBC) $(HLL_SOURCES)
 	$(MKPATH) $(STAGE2)/gen
-	$(PERL) tools/build/gen-cat.pl $(QHLL_SOURCES) > $(STAGE2)/$(HLL_COMBINED)
+	$(PERL) tools/build/gen-cat.pl $(HLL_SOURCES) > $(STAGE2)/$(HLL_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(HLL_COMBINED_PIR) --no-regex-lib \
 	    --module-path=$(STAGE2) --setting-path=$(STAGE2) $(STAGE2)/$(HLL_COMBINED)

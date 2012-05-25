@@ -1,11 +1,8 @@
-use NQPRegex;
+use QRegex;
 
 grammar HLL::Grammar {
     my $brackets := "<>[]()\{}\xab\xbb\x[0f3a]\x[0f3b]\x[0f3c]\x[0f3d]\x[169b]\x[169c]\x[2045]\x[2046]\x[207d]\x[207e]\x[208d]\x[208e]\x[2329]\x[232a]\x[2768]\x[2769]\x[276a]\x[276b]\x[276c]\x[276d]\x[276e]\x[276f]\x[2770]\x[2771]\x[2772]\x[2773]\x[2774]\x[2775]\x[27c5]\x[27c6]\x[27e6]\x[27e7]\x[27e8]\x[27e9]\x[27ea]\x[27eb]\x[2983]\x[2984]\x[2985]\x[2986]\x[2987]\x[2988]\x[2989]\x[298a]\x[298b]\x[298c]\x[298d]\x[298e]\x[298f]\x[2990]\x[2991]\x[2992]\x[2993]\x[2994]\x[2995]\x[2996]\x[2997]\x[2998]\x[29d8]\x[29d9]\x[29da]\x[29db]\x[29fc]\x[29fd]\x[3008]\x[3009]\x[300a]\x[300b]\x[300c]\x[300d]\x[300e]\x[300f]\x[3010]\x[3011]\x[3014]\x[3015]\x[3016]\x[3017]\x[3018]\x[3019]\x[301a]\x[301b]\x[301d]\x[301e]\x[fd3e]\x[fd3f]\x[fe17]\x[fe18]\x[fe35]\x[fe36]\x[fe37]\x[fe38]\x[fe39]\x[fe3a]\x[fe3b]\x[fe3c]\x[fe3d]\x[fe3e]\x[fe3f]\x[fe40]\x[fe41]\x[fe42]\x[fe43]\x[fe44]\x[fe47]\x[fe48]\x[fe59]\x[fe5a]\x[fe5b]\x[fe5c]\x[fe5d]\x[fe5e]\x[ff08]\x[ff09]\x[ff3b]\x[ff3d]\x[ff5b]\x[ff5d]\x[ff5f]\x[ff60]\x[ff62]\x[ff63]";
-    # XXX Can just be Regex::Cursor after full package refactor switch-over.
-    my $cursor_class := (((GLOBALish.WHO)<Regex>).WHO)<Cursor>;
-    
-    token ws { <!ww> [ \s+ | '#' \N* ]* }
+    my $cursor_class := NQPCursor;
 
     token termish {
         <prefixish>*
@@ -48,17 +45,17 @@ grammar HLL::Grammar {
         ]
     }
 
-    token decint  { [\d+] ** '_' }
-    token decints { [<.ws><decint><.ws>] ** ',' }
+    token decint  { [\d+]+ % '_' }
+    token decints { [<.ws><decint><.ws>]+ % ',' }
 
-    token hexint  { [<[ 0..9 a..f A..F ]>+] ** '_' }
-    token hexints { [<.ws><hexint><.ws>] ** ',' }
+    token hexint  { [<[ 0..9 a..f A..F ]>+]+ % '_' }
+    token hexints { [<.ws><hexint><.ws>]+ % ',' }
 
-    token octint  { [<[ 0..7 ]>+] ** '_' }
-    token octints { [<.ws><octint><.ws>] ** ',' }
+    token octint  { [<[ 0..7 ]>+]+ % '_' }
+    token octints { [<.ws><octint><.ws>]+ % ',' }
 
-    token binint  { [<[ 0..1 ]>+] ** '_' }
-    token binints { [<.ws><binint><.ws>] ** ',' }
+    token binint  { [<[ 0..1 ]>+]+ % '_' }
+    token binints { [<.ws><binint><.ws>]+ % ',' }
 
     token integer {
         [
@@ -116,7 +113,7 @@ grammar HLL::Grammar {
         || <[a..z A..Z]> <-[ \] , # ]>*? <[a..z A..Z ) ]>
            <?before \s* <[ \] , # ]> >
     }
-    token charnames { [<.ws><charname><.ws>] ** ',' }
+    token charnames { [<.ws><charname><.ws>]+ % ',' }
     token charspec {
         [
         | '[' <charnames> ']' 
@@ -288,7 +285,7 @@ C< :!pair >, and C<< :pair<strval> >>.
             # If we've been called as a subrule, then build a pass-cursor
             # to indicate success and set the hash as the subrule's match object.
             if has_save goto save_hash
-            ($P0, $I0) = self.'!cursor_start'()
+            ($P0, $S0, $I0) = self.'!cursor_start'()
             $P0.'!cursor_pass'($I0, '')
             setattribute $P0, cur_class, '$!match', hash
             .return ($P0)
@@ -316,9 +313,9 @@ of the match.
 
     method panic(*@args) {
         my $pos := self.pos();
-        my $target := pir::getattribute__PPPs(self, Regex::Cursor, '$!target');
+        my $target := nqp::getattr_s(self, NQPCursor, '$!target');
         @args.push(' at line ');
-        @args.push(HLL::Compiler.lineof($target, $pos));
+        @args.push(HLL::Compiler.lineof($target, $pos) + 1);
         @args.push(', near "');
         @args.push(pir::escape__SS(pir::substr($target, $pos, 10)));
         @args.push('"');
@@ -397,79 +394,57 @@ position C<pos>.
         };
     }
 
-    method quote_EXPR(*@args) {
-        Q:PIR {
-            .include 'src/Regex/constants.pir'
-            
-            .local pmc self, cur_class, args
-            self = find_lex 'self'
-            cur_class = find_lex '$cursor_class'
-            args = find_lex '@args'
+    token quote_EXPR(*@args) {
+        :my %*QUOTEMOD;
+        :my $*QUOTE_START;
+        :my $*QUOTE_STOP;
+        {
+            Q:PIR {            
+                .local pmc self, cur_class, args
+                self = find_lex 'self'
+                cur_class = find_lex '$cursor_class'
+                args = find_lex '@args'
 
-            .local pmc cur, debug
-            .local string target
-            .local int pos
+                .local pmc quotemod, true
+                quotemod = find_lex '%*QUOTEMOD'
+                true = box 1
 
-            (cur, pos, target) = self.'!cursor_start'()
-            debug = getattribute cur, cur_class, '$!debug'
-            if null debug goto debug_1
-            cur.'!cursor_debug'('START', 'quote_EXPR')
-          debug_1:
+              args_loop:
+                unless args goto args_done
+                .local string mod
+                mod = shift args
+                mod = substr mod, 1
+                quotemod[mod] = true
+                if mod == 'qq' goto opt_qq
+                if mod == 'b' goto opt_b
+                goto args_loop
+              opt_qq:
+                quotemod['s'] = true
+                quotemod['a'] = true
+                quotemod['h'] = true
+                quotemod['f'] = true
+                quotemod['c'] = true
+                quotemod['b'] = true
+              opt_b:
+                quotemod['q'] = true
+                goto args_loop
+              args_done:
 
-            .local pmc quotemod, true
-            .lex '%*QUOTEMOD', quotemod
-            quotemod = new ['Hash']
-
-            true = box 1
-
-
-          args_loop:
-            unless args goto args_done
-            .local string mod
-            mod = shift args
-            mod = substr mod, 1
-            quotemod[mod] = true
-            if mod == 'qq' goto opt_qq
-            if mod == 'b' goto opt_b
-            goto args_loop
-          opt_qq:
-            quotemod['s'] = true
-            quotemod['a'] = true
-            quotemod['h'] = true
-            quotemod['f'] = true
-            quotemod['c'] = true
-            quotemod['b'] = true
-          opt_b:
-            quotemod['q'] = true
-            goto args_loop
-          args_done:
-
-
-            .local pmc start, stop
-            (start, stop) = self.'peek_delimiters'(target, pos)
-
-            .lex '$*QUOTE_START', start
-            .lex '$*QUOTE_STOP', stop
-
-            $P10 = cur.'quote_delimited'()
-            unless $P10 goto fail
-            cur.'!mark_push'(0, CURSOR_FAIL, 0, $P10)
-            $P10.'!cursor_names'('quote_delimited')
-            pos = $P10.'pos'()
-            cur.'!cursor_pass'(pos, 'quote_EXPR')
-            if null debug goto done
-            cur.'!cursor_debug'('PASS', 'quote_EXPR')
-            goto done
-          fail:
-            if null debug goto done
-            cur.'!cursor_debug'('FAIL', 'quote_EXPR')
-          done:
-            .return (cur)
-        };
+                .local pmc start, stop
+                .local string target
+                .local int pos
+                target = repr_get_attr_str self, cur_class, '$!target'
+                pos = repr_get_attr_int self, cur_class, '$!pos'
+                (start, stop) = self.'peek_delimiters'(target, pos)
+                store_lex '$*QUOTE_START', start
+                store_lex '$*QUOTE_STOP', stop
+            }
+        }
+        <quote_delimited>
     }
 
-    our method quotemod_check($mod) {
-        %*QUOTEMOD{$mod}
+    token quotemod_check($mod) {
+        <?{ %*QUOTEMOD{$mod} }>
     }
 
     method starter() {
@@ -479,7 +454,7 @@ position C<pos>.
             .local int pos
             self = find_lex 'self'
 
-            (cur, pos, target) = self.'!cursor_start'()
+            (cur, target, pos) = self.'!cursor_start'()
 
             $P0 = find_dynamic_lex '$*QUOTE_START'
             if null $P0 goto fail
@@ -502,7 +477,7 @@ position C<pos>.
             .local int pos
             self = find_lex 'self'
 
-            (cur, pos, target) = self.'!cursor_start'()
+            (cur, target, pos) = self.'!cursor_start'()
 
             $P0 = find_dynamic_lex '$*QUOTE_STOP'
             if null $P0 goto fail
@@ -520,6 +495,7 @@ position C<pos>.
 
     our method split_words($words) {
         Q:PIR {
+            .include 'src/Regex/constants.pir'
             .local string words
             $P0 = find_lex '$words'
             words = $P0
@@ -560,13 +536,10 @@ An operator precedence parser.
             $P0 = find_lex '$preclim'
             preclim = $P0
             
-            .local pmc here, debug
+            .local pmc here
+            .local string tgt
             .local int pos
-            (here, pos) = self.'!cursor_start'()
-            debug = getattribute here, cur_class, '$!debug'
-            if null debug goto debug_1
-            here.'!cursor_debug'('START', 'EXPR')
-          debug_1:
+            (here, tgt, pos) = self.'!cursor_start'()
 
             .local string termishrx
             termishrx = 'termish'
@@ -578,10 +551,14 @@ An operator precedence parser.
             .lex '@termstack', termstack
 
           term_loop:
-            here = here.termishrx()
-            unless here goto fail
+            .local pmc termcur
+            repr_bind_attr_int here, cur_class, "$!pos", pos
+            termcur = here.termishrx()
+            pos = repr_get_attr_int termcur, cur_class, "$!pos"
+            repr_bind_attr_int here, cur_class, "$!pos", pos
+            if pos < 0 goto fail
             .local pmc termish
-            termish = here.'MATCH'()
+            termish = termcur.'MATCH'()
 
             # interleave any prefix/postfix we might have found
             .local pmc termOPER, prefixish, postfixish
@@ -644,24 +621,35 @@ An operator precedence parser.
             push termstack, $P0
 
             # Now see if we can fetch an infix operator
-            .local pmc infixcur, infix
-            here = here.'ws'()
+            .local pmc wscur, infixcur, infix
+            
+            # First, we need ws to match.
+            repr_bind_attr_int here, cur_class, "$!pos", pos
+            wscur = here.'ws'()
+            pos = repr_get_attr_int wscur, cur_class, '$!pos'
+            if pos < 0 goto term_done
+            repr_bind_attr_int here, cur_class, "$!pos", pos
+            
+            # Next, try the infix itself.
             infixcur = here.'infixish'()
-            unless infixcur goto term_done
+            pos = repr_get_attr_int infixcur, cur_class, '$!pos'
+            if pos < 0 goto term_done
             infix = infixcur.'MATCH'()
 
+            # We got an infix.
             .local pmc inO
             $P0 = infix['OPER']
             inO = $P0['O']
             termishrx = inO['nextterm']
             if termishrx goto have_termishrx
+          nonextterm:
             termishrx = 'termish'
           have_termishrx:
 
             .local string inprec, inassoc, opprec
             inprec = inO['prec']
             unless inprec goto err_inprec
-            if inprec < preclim goto term_done
+            if inprec <= preclim goto term_done
             inassoc = inO['assoc']
 
             $P0 = inO['sub']
@@ -688,7 +676,11 @@ An operator precedence parser.
           reduce_done:
 
             push opstack, infix        # The Shift
-            here = infixcur.'ws'()
+            repr_bind_attr_int here, cur_class, "$!pos", pos
+            wscur = here.'ws'()
+            pos = repr_get_attr_int wscur, cur_class, '$!pos'
+            repr_bind_attr_int here, cur_class, "$!pos", pos
+            if pos < 0 goto fail
             goto term_loop
           term_done:
 
@@ -703,16 +695,13 @@ An operator precedence parser.
             term = pop termstack
             pos = here.'pos'()
             here = self.'!cursor_start'()
+            here.'!cursor_pass'(pos)
             repr_bind_attr_int here, cur_class, '$!pos', pos
             setattribute here, cur_class, '$!match', term
             here.'!reduce'('EXPR')
-            if null debug goto done
-            here.'!cursor_debug'('PASS', 'EXPR')
             goto done
 
           fail:
-            if null debug goto done
-            here.'!cursor_debug'('FAIL', 'EXPR')
           done:
             .return (here)
 
@@ -751,7 +740,7 @@ An operator precedence parser.
             $S0 = $P0
             self.$S0(op)
           op_infix_1:
-            self.'!reduce'('EXPR', 'INFIX', op)
+            self.'!reduce_with_match'('EXPR', 'INFIX', op)
             goto done
 
           op_unary:
@@ -762,10 +751,10 @@ An operator precedence parser.
             ofrom = op.'from'()
             if afrom < ofrom goto op_postfix
           op_prefix:
-            self.'!reduce'('EXPR', 'PREFIX', op)
+            self.'!reduce_with_match'('EXPR', 'PREFIX', op)
             goto done
           op_postfix:
-            self.'!reduce'('EXPR', 'POSTFIX', op)
+            self.'!reduce_with_match'('EXPR', 'POSTFIX', op)
             goto done
 
           op_list:
@@ -794,7 +783,7 @@ An operator precedence parser.
           op_sym_done:
             arg = pop termstack
             unshift op, arg
-            self.'!reduce'('EXPR', 'LIST', op)
+            self.'!reduce_with_match'('EXPR', 'LIST', op)
             goto done
 
           done:
@@ -809,7 +798,6 @@ An operator precedence parser.
 
     method MARKER($markname) {
         my $pos := self.pos();
-        self.'!cursor_debug'('START', 'MARKER name=', $markname, ', pos=', $pos);
         my %markhash := Q:PIR {
             %r = get_global '%!MARKHASH'
             unless null %r goto have_markhash
@@ -818,12 +806,13 @@ An operator precedence parser.
           have_markhash:
         };
         %markhash{$markname} := $pos;
-        self.'!cursor_debug'('PASS', 'MARKER');
-        1;
+        my $cur := self."!cursor_start"();
+        $cur."!cursor_pass"($pos);
+        $cur;
     }
     
     method MARKED($markname) {
-        self.'!cursor_debug'('START', 'MARKED name=', $markname);
+        my $cur := self."!cursor_start"();
         Q:PIR {
             .local pmc self, markname, markhash
             self = find_lex 'self'
@@ -834,25 +823,16 @@ An operator precedence parser.
             if null $P0 goto fail
             $P1 = self.'pos'()
             unless $P0 == $P1 goto fail
-            self.'!cursor_debug'('PASS','MARKED')
-            .return (1)
+            $P2 = find_lex '$cur'
+            $P2."!cursor_pass"($P1)
           fail:
-            self.'!cursor_debug'('FAIL','MARKED')
-            .return (0)
         };
+        $cur
     }
 
     method LANG($lang, $regex) {
-        my $lang_cursor := %*LANG{$lang};
+        my $lang_cursor := %*LANG{$lang}.'!cursor_init'(self.target(), :p(self.pos()));
         my $*ACTIONS    := %*LANG{$lang ~ '-actions'};
-        my $cur := Q:PIR {
-            .local pmc self
-            .local int pos
-            self = find_lex 'self'
-            $P0 = find_lex '$lang_cursor'
-            (%r, pos) = self.'!cursor_start'($P0)
-            %r.'!cursor_pos'(pos)
-        };
-        $cur."$regex"();
+        $lang_cursor."$regex"();  
     }
 }

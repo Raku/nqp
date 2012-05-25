@@ -30,7 +30,7 @@ class HLL::Compiler {
         @!stages     := pir::split(' ', 'parse past post pir evalpmc');
         
         # Command options and usage.
-        @!cmdoptions := pir::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config stagestats ll-exception nqpevent=s rxtrace profile profile-compile');
+        @!cmdoptions := pir::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config stagestats ll-exception rxtrace nqpevent=s profile profile-compile');
         $!usage := "This compiler is based on HLL::Compiler.\n\nOptions:\n";
         for @!cmdoptions {
             $!usage := $!usage ~ "    $_\n";
@@ -296,7 +296,7 @@ class HLL::Compiler {
         my @a    := $res.arguments;
 
         %adverbs.update(%opts);
-        self.usage($program-name) if %adverbs<help>  || %adverbs<h>;
+        self.usage($program-name) if %adverbs<help>;
 
         pir::load_bytecode('dumper.pbc');
         pir::load_bytecode('PGE/Dumper.pbc');
@@ -306,17 +306,16 @@ class HLL::Compiler {
 
 
     method command_eval(*@a, *%adverbs) {
-        self.version              if %adverbs<version> || %adverbs<v>;
+        self.version              if %adverbs<version>;
         self.show-config          if %adverbs<show-config>;
         self.nqpevent(%adverbs<nqpevent>) if %adverbs<nqpevent>;
 
         my $result;
         my $error;
         my $has_error := 0;
-        my $target := pir::downcase(%adverbs<target>);
+        my $target := %adverbs<target>;
         try {
             if pir::defined(%adverbs<e>) {
-                my $?FILES := '-e';
                 $result := self.eval(%adverbs<e>, '-e', |@a, |%adverbs);
                 unless $target eq '' || $target eq 'pir' {
 					self.dumper($result, $target, |%adverbs);
@@ -444,8 +443,10 @@ class HLL::Compiler {
         }
         my $grammar := self.parsegrammar;
         my $actions;
-        $actions    := self.parseactions unless pir::downcase(%adverbs<target>) eq 'parse';
-        my $match   := $grammar.parse($s, p => 0, actions => $actions, rxtrace => %adverbs<rxtrace>);
+        $actions    := self.parseactions unless %adverbs<target> eq 'parse';
+        $grammar.HOW.trace-on($grammar) if %adverbs<rxtrace>;
+        my $match   := $grammar.parse($s, p => 0, actions => $actions);
+        $grammar.HOW.trace-off($grammar) if %adverbs<rxtrace>;
         self.panic('Unable to parse source') unless $match;
         return $match;
     }
@@ -617,15 +618,15 @@ class HLL::Compiler {
 
             # If we've previously cached C<linepos> for target, we use it.
             unless cache goto linepos_build
-            linepos = getprop target, '!linepos'
+            linepos = getprop '!linepos', target
             unless null linepos goto linepos_done
 
             # calculate a new linepos array.
-        linepos_build:
+          linepos_build:
             linepos = new ['ResizableIntegerArray']
             unless cache goto linepos_build_1
             setprop target, '!linepos', linepos
-        linepos_build_1:
+          linepos_build_1:
             .local string s
             .local int jpos, eos
             s = target
@@ -633,9 +634,9 @@ class HLL::Compiler {
             jpos = 0
             # Search for all of the newline markers in C<target>.  When we
             # find one, mark the ending offset of the line in C<linepos>.
-        linepos_loop:
+          linepos_loop:
             jpos = find_cclass .CCLASS_NEWLINE, s, jpos, eos
-            unless jpos < eos goto linepos_done_1
+            unless jpos < eos goto linepos_done
             $I0 = ord s, jpos
             inc jpos
             push linepos, jpos
@@ -645,28 +646,23 @@ class HLL::Compiler {
             if $I0 != 10 goto linepos_loop
             inc jpos
             goto linepos_loop
-        linepos_done_1:
-        linepos_done:
+          linepos_done:
 
-            # We have C<linepos>, so now we (binary) search the array
-            # for the largest element that is not greater than C<pos>.
-            .local int lo, hi, line
-            lo = 0
-            hi = elements linepos
-        binary_loop:
-            if lo >= hi goto binary_done
-            line = lo + hi
-            line = line / 2
+            # We have C<linepos>, so now we search the array for the largest
+            # element that is not greater than C<pos>.  The index of that
+            # element is the line number to be returned.
+            # (Potential optimization: use a binary search.)
+            .local int line, count
+            count = elements linepos
+            line = 0
+          line_loop:
+            if line >= count goto line_done
             $I0 = linepos[line]
-            if $I0 > pos goto binary_hi
-            lo = line + 1
-            goto binary_loop
-        binary_hi:
-            hi = line
-            goto binary_loop
-        binary_done:
-            inc lo
-            .return (lo)
+            if $I0 > pos goto line_done
+            inc line
+            goto line_loop
+          line_done:
+            .return (line)
         };
     }
 }
