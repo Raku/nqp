@@ -2,6 +2,7 @@ class QAST::Block is QAST::Node {
     has str $!blocktype;
     has int $!lexical;
     has str $!cuid;
+    has %!symbol;
     
     method blocktype(*@value) { $!blocktype := @value[0] if @value; $!blocktype }
     method lexical(*@value)   { $!lexical := @value[0] if @value; $!lexical }
@@ -23,5 +24,13 @@ class QAST::Block is QAST::Node {
             $cur_cuid := $cur_cuid + 1;
             $!cuid := 'cuid_' ~ $cur_cuid ~ '_' ~ $cuid_suffix;
         }
+    }
+
+    method symbol($name, *%attrs) {
+        %!symbol{$name} := %!symbol{$name} // {};
+        for %attrs {
+            %!symbol{$name}{$_.key} := $_.value;
+        }
+        %!symbol{$name}
     }
 }

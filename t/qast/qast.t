@@ -725,3 +725,19 @@ is_qast(
     ),
     1,
     'repeat_until loop works');
+
+{
+    my $block := QAST::Block.new();
+    $block.symbol('rhinoceros', food => 'pizza', mood => 'giddy');
+    my %hash := $block.symbol('rhinoceros');
+    ok(%hash<food> eq 'pizza', 'QAST::Block.symbol getter/setter works I');
+    ok(%hash<mood> eq 'giddy', 'QAST::Block.symbol getter/setter works II');
+}
+
+{
+    my $block := QAST::Block.new();
+    $block.symbol('slug', food => 'cheeseburger');
+    $block.symbol('slug', mood => 'laconic');
+    my %hash := $block.symbol('slug');
+    ok(%hash<food> eq 'cheeseburger', 'QAST::Block.symbol existing attributes don\'t disappear');
+}
