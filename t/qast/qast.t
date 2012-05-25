@@ -741,3 +741,9 @@ is_qast(
     my %hash := $block.symbol('slug');
     ok(%hash<food> eq 'cheeseburger', 'QAST::Block.symbol existing attributes don\'t disappear');
 }
+
+{
+    my $block := QAST::Block.new();
+    my $missing := $block.symbol('sabre-toothed tiger');
+    ok(!pir::defined($missing), 'QAST::Block.symbol on a nonexistent key returns an undefined value');
+}

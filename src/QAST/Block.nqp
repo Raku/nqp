@@ -27,9 +27,11 @@ class QAST::Block is QAST::Node {
     }
 
     method symbol($name, *%attrs) {
-        %!symbol{$name} := %!symbol{$name} // {};
-        for %attrs {
-            %!symbol{$name}{$_.key} := $_.value;
+        if %attrs {
+            %!symbol{$name} := %!symbol{$name} // {};
+            for %attrs {
+                %!symbol{$name}{$_.key} := $_.value;
+            }
         }
         %!symbol{$name}
     }
