@@ -756,6 +756,9 @@ grammar NQP::Regex is QRegex::P6Regex::Grammar {
     token assertion:sym<{ }> {
         <?[{]> <codeblock>
     }
+    
+    token assertion:sym<?> { '?' [ <?before '>' > | <!before '{'> <assertion> ] }
+    token assertion:sym<!> { '!' [ <?before '>' > | <!before '{'> <assertion> ] }
 
     token assertion:sym<?{ }> {
         $<zw>=[ <[?!]> <?before '{'> ] <codeblock>
