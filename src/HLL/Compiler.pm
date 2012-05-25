@@ -15,6 +15,9 @@ class HLL::Compiler {
     has $!compiler_progname;
     has $!language;
     has %!config;
+    has $!user_progname;
+    has @!cli-arguments;
+    has %!cli-options;
 
     our %parrot_config;
 
@@ -269,6 +272,7 @@ class HLL::Compiler {
         }
         $!compiler_progname;
     }
+
     
     method commandline_options(@value?) {
         if +@value {
@@ -316,6 +320,8 @@ class HLL::Compiler {
         my $target := %adverbs<target>;
         try {
             if pir::defined(%adverbs<e>) {
+                $!user_progname := '-e';
+                my $?FILES := '-e';
                 $result := self.eval(%adverbs<e>, '-e', |@a, |%adverbs);
                 unless $target eq '' || $target eq 'pir' {
 					self.dumper($result, $target, |%adverbs);
@@ -378,6 +384,14 @@ class HLL::Compiler {
                 pir::exit(1);
             }
         }
+        if $res {
+            %!cli-options   := $res.options();
+            @!cli-arguments := $res.arguments();
+        }
+        else {
+            %!cli-options   := nqp::hash();
+            @!cli-arguments := [];
+        }
         $res;
     }
 
@@ -385,6 +399,7 @@ class HLL::Compiler {
         my $target := pir::downcase(%adverbs<target>);
         my $encoding := %adverbs<encoding>;
         my @files := pir::does($files, 'array') ?? $files !! [$files];
+        $!user_progname := nqp::join(',', @files);
         my @codes;
         for @files {
             my $in-handle := pir::new('FileHandle');
@@ -665,6 +680,13 @@ class HLL::Compiler {
             .return (line)
         };
     }
+
+    # the name of the file(s) that are executed, or -e  or 'interactive'
+    method user-progname() { $!user_progname // 'interactive' }
+
+    # command line options and arguments as provided by the user
+    method cli-options()   { %!cli-options   }
+    method cli-arguments() { @!cli-arguments }
 }
 
 my $compiler := HLL::Compiler.new();
