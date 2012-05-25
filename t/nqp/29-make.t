@@ -4,7 +4,7 @@
 
 plan(2);
 
-my $/ := Regex::Match.new();
+my $/ := NQPMatch.new();
 make 'ok 1';
 say($/.ast);
 
