@@ -523,6 +523,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             $block.symbol('$¢', :scope<lexical>);
         }
 
+        $block<orig_qast> := $qast;
+        
         $qast := QAST::Regex.new( :rxtype<concat>,
                      QAST::Regex.new( :rxtype<scan> ),
                      $qast,

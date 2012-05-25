@@ -119,13 +119,19 @@ class QRegex::NFA {
 
     method subrule($node, $from, $to) {
         my $subtype := $node.subtype;
-        $subtype eq 'zerowidth'
-            ?? ($node.negate 
-                  ?? self.fate($node, $from, $to)
-                  !! self.addedge($from, 0, $EDGE_SUBRULE, $node.name))
-            !! $subtype eq 'capture' && $node[1]
-                  ?? self.regex_nfa($node[1], $from, $to)
-                  !! self.addedge($from, $to, $EDGE_SUBRULE, $node[0][0]);
+        if $node.name eq 'before' && !$node.negate {
+            self.regex_nfa($node[0][1]<orig_qast>, $from, 0);
+        }
+        elsif $subtype eq 'zerowidth' {
+            $node.negate 
+                ?? self.fate($node, $from, $to)
+                !! self.addedge($from, 0, $EDGE_SUBRULE, $node.name)
+        }
+        else {
+            $subtype eq 'capture' && $node[1]
+                ?? self.regex_nfa($node[1], $from, $to)
+                !! self.addedge($from, $to, $EDGE_SUBRULE, $node[0][0])
+        }
     }
     
     method quant($node, $from, $to) {
