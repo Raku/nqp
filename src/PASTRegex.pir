@@ -35,8 +35,11 @@
     $P2()
 .end
 
-.include 'src/PAST/Regex.pir'
-.include 'src/PAST/Compiler-Regex.pir'
+.sub '' :init :load
+    load_bytecode 'P6object.pbc'
+    load_bytecode 'PCT/PAST.pbc'
+.end
+
 .include 'src/PAST/SixModelPASTExtensions.pir'
 .include 'src/PAST/NQP.pir'
 .include 'src/cheats/parrot-callcontext.pir'
