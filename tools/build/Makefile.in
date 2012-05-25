@@ -51,16 +51,6 @@ DYNEXT_DIR       = dynext
 PMC_DIR          = src/pmc
 OPS_DIR          = src/ops
 
-REGEX_SOURCES = \
-  src/Regex.pir \
-  src/Regex/constants.pir \
-  src/Regex/Cursor.pir \
-  src/Regex/Cursor-builtins.pir \
-  src/Regex/Cursor-protoregex-peek.pir \
-  src/Regex/Match.pir \
-  src/Regex/Method.pir \
-  src/Regex/Dumper.pir \
-
 PAST_SOURCES = \
   src/PASTRegex.pir \
   src/PAST/Regex.pir \
@@ -69,13 +59,6 @@ PAST_SOURCES = \
   src/PAST/NQP.pir \
   src/cheats/parrot-callcontext.pir \
   src/cheats/parrot-sub.pir \
-
-HLL_SOURCES = \
-  src/HLL/Grammar.pm \
-  src/HLL/Actions.pm \
-  src/HLL/Compiler.pm \
-  src/HLL/CommandLine.pm \
-  src/HLL/World.pm \
 
 QHLL_SOURCES = \
   src/QHLL/Grammar.pm \
@@ -92,11 +75,6 @@ QAST_SOURCES = \
   src/QAST/Regex.nqp \
   src/QAST/Compiler.nqp \
 
-P6REGEX_SOURCES = \
-  src/Regex/P6Regex/Grammar.pm \
-  src/Regex/P6Regex/Actions.pm \
-  src/Regex/P6Regex/Compiler.pm \
-
 P6QREGEX_SOURCES = \
   src/QRegex/P6Regex/Grammar.nqp \
   src/QRegex/P6Regex/Actions.nqp \
@@ -108,12 +86,6 @@ QREGEX_PBC = QRegex.pbc
 QREGEX_SOURCES = \
   src/QRegex/NFA.nqp \
   src/QRegex/Cursor.nqp \
-
-NQP_SOURCES = \
-  src/NQP/World.pm \
-  src/NQP/Grammar.pm \
-  src/NQP/Actions.pm \
-  src/NQP/Compiler.pm \
 
 CORE_SETTING_SOURCES = \
   src/core/NativeTypes.pm \
