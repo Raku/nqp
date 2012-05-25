@@ -202,11 +202,11 @@ class NQP::Actions is HLL::Actions {
                 if %*COMPILING<%?OPTIONS><old-regex-lib> {
                     $*W.load_module('NQPRegex', $*GLOBALish);
                 }
-                else {
-                    $*W.load_module('NQPP6QRegex', $*GLOBALish);
-                }
                 unless %*COMPILING<%?OPTIONS><no-regex-lib> {
                     $*W.load_module('QRegex', $*GLOBALish);
+                    unless %*COMPILING<%?OPTIONS><old-regex-lib> {
+                        $*W.load_module('NQPP6QRegex', $*GLOBALish);
+                    }
                 }
             }
         }
