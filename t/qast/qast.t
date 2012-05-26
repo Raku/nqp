@@ -815,3 +815,29 @@ is_qast(
         'call to block with slurpy parameter works');
 }
 
+{
+    my $third := QAST::Block.new(
+        QAST::Var.new( :name('a'), :scope('local'), :decl('param') ),
+        QAST::Var.new( :name('b'), :scope('local'), :decl('param') ),
+        QAST::Var.new( :name('c'), :scope('local'), :decl('param') ),
+        QAST::Var.new( :name('c'), :scope('local') ),
+    );
+
+    is_qast(
+        QAST::Block.new(
+            $third,
+            QAST::Op.new(
+                :op('call'),
+                QAST::BVal.new( :value($third) ),
+                QAST::Op.new(
+                    :op('list_i'),
+                    QAST::IVal.new( :value(40) ),
+                    QAST::IVal.new( :value(41) ),
+                    QAST::IVal.new( :value(42) ),
+                    :flat,
+                )
+            )
+        ),
+        42,
+        'call with flattened argument works');
+}

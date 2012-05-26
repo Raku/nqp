@@ -127,6 +127,22 @@ QAST::Operations.add_core_op('list', -> $qastcomp, $op {
     $ops
 });
 
+QAST::Operations.add_core_op('list_i', -> $qastcomp, $op {
+    # Create register for the resulting list and make an empty one.
+    my $list_reg := $*REGALLOC.fresh_p();
+    my $ops := $qastcomp.post_new('Ops', :result($list_reg));
+    $ops.push_pirop('new', $list_reg, "'ResizableIntegerArray'");
+
+    # Push all the things.
+    for $op.list {
+        my $post := $qastcomp.coerce($qastcomp.as_post($_), 'i');
+        $ops.push($post);
+        $ops.push_pirop('push', $list_reg, $post.result);
+    }
+
+    $ops
+});
+
 QAST::Operations.add_core_op('hash', -> $qastcomp, $op {
     # Create register for the resulting hash and make an empty one.
     my $hash_reg := $*REGALLOC.fresh_p();
@@ -335,8 +351,11 @@ sub handle_arg($arg, $qastcomp, $ops, @arg_results) {
     my $arg_post := $qastcomp.as_post($arg);
     $ops.push($arg_post);
     my $result := $arg_post.result;
-    if $arg.named -> $name {
-        $result := $result ~ " :named(" ~ $qastcomp.escape($name) ~ ")";
+    if $arg.flat {
+        $result := "$result :flat";
+    }
+    elsif $arg.named -> $name {
+        $result := "$result :named(" ~ $qastcomp.escape($name) ~ ")";
     }
     @arg_results.push($result);
 }
