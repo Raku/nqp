@@ -331,6 +331,16 @@ QAST::Operations.add_core_op('bind', -> $qastcomp, $op {
 });
 
 # Calling.
+sub handle_arg($arg, $qastcomp, $ops, @arg_results) {
+    my $arg_post := $qastcomp.as_post($arg);
+    $ops.push($arg_post);
+    my $result := $arg_post.result;
+    if $arg.named -> $name {
+        $result := $result ~ " :named(" ~ $qastcomp.escape($name) ~ ")";
+    }
+    @arg_results.push($result);
+}
+
 QAST::Operations.add_core_op('call', -> $qastcomp, $op {
     # Work out what callee is.
     my $callee;
@@ -349,13 +359,7 @@ QAST::Operations.add_core_op('call', -> $qastcomp, $op {
     my $ops := $qastcomp.post_new('Ops');
     my @arg_results;
     for @args {
-        my $arg_post := $qastcomp.as_post($_);
-        $ops.push($arg_post);
-        my $result := $arg_post.result;
-        if $_.named -> $name {
-            $result := $result ~ " :named(" ~ $qastcomp.escape($name) ~ ")";
-        }
-        @arg_results.push($result);
+        handle_arg($_, $qastcomp, $ops, @arg_results);
     }
     
     # Figure out result register type and allocate a register for it.
@@ -395,13 +399,7 @@ QAST::Operations.add_core_op('callmethod', -> $qastcomp, $op {
     my $ops := $qastcomp.post_new('Ops');
     my @arg_results;
     for @args {
-        my $arg_post := $qastcomp.as_post($_);
-        $ops.push($arg_post);
-        my $result := $arg_post.result;
-        if $_.named -> $name {
-            $result := $result ~ " :named(" ~ $qastcomp.escape($name) ~ ")";
-        }
-        @arg_results.push($result);
+        handle_arg($_, $qastcomp, $ops, @arg_results);
     }
     
     # Figure out result register type and allocate a register for it.
