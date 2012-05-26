@@ -14,21 +14,34 @@ role NQPCursorRole {
     method from() { $!from }
     method pos() { $!pos }
 
+    my $NO_CAPS := nqp::hash();
     method CAPHASH() {
-        my $caps := nqp::hash();
-        my %caplist := $!regexsub ?? $!regexsub.nqpattr('caps') !! nqp::hash();
-        for %caplist {
-            $caps{~$_} := nqp::list() if %caplist{~$_} >= 2;
+        my $caps    := nqp::hash();
+        my %caplist := $NO_CAPS;
+        if $!regexsub {
+            %caplist := $!regexsub.nqpattr('caps');
+            if %caplist {
+                for %caplist {
+                    $caps{~$_} := nqp::list() if %caplist{~$_} >= 2;
+                }
+            }
         }
         if $!cstack {
             for $!cstack -> $subcur {
                 my $submatch := $subcur.MATCH;
                 my $name := nqp::getattr($subcur, $?CLASS, '$!name');
                 if pir::defined($name) {
-                    for nqp::split('=', $name) -> $name {
+                    if nqp::index($name, '=') < 0 {
                         %caplist{$name} >= 2
                             ?? nqp::push($caps{$name}, $submatch)
                             !! nqp::bindkey($caps, $name, $submatch);
+                    }
+                    else {
+                        for nqp::split('=', $name) -> $name {
+                            %caplist{$name} >= 2
+                                ?? nqp::push($caps{$name}, $submatch)
+                                !! nqp::bindkey($caps, $name, $submatch);
+                        }
                     }
                 }
             }
@@ -428,15 +441,15 @@ class NQPMatch is NQPCapture {
 }
 
 class NQPCursor does NQPCursorRole {
+    my $EMPTY_MATCH_LIST := nqp::list();
+    my $EMPTY_MATCH_HASH := nqp::hash();
     method MATCH() {
         my $match := nqp::getattr(self, NQPCursor, '$!match');
-        unless pir::isa($match, 'Hash') || nqp::istype($match, NQPMatch) {
-            my $list := nqp::list();
-            my $hash := nqp::hash();
+        unless nqp::istype($match, NQPMatch) || pir::isa($match, 'Hash') {
+            my $list := $EMPTY_MATCH_LIST;
+            my $hash := $EMPTY_MATCH_HASH;
             $match := nqp::create(NQPMatch);
             nqp::bindattr(self, NQPCursor, '$!match', $match);
-            nqp::bindattr($match, NQPCapture, '@!array', $list);
-            nqp::bindattr($match, NQPCapture, '%!hash', $hash);
             nqp::bindattr($match, NQPMatch, '$!cursor', self);
             nqp::bindattr($match, NQPMatch, '$!orig', nqp::getattr(self, NQPCursor, '$!orig'));
             nqp::bindattr_i($match, NQPMatch, '$!from', nqp::getattr_i(self, NQPCursor, '$!from'));
@@ -444,10 +457,17 @@ class NQPCursor does NQPCursorRole {
             my %ch := self.CAPHASH;
             for %ch {
                 my $key := ~$_;
-                nqp::iscclass(pir::const::CCLASS_NUMERIC, $key, 0)
-                  ?? nqp::bindpos($list, $key, %ch{$key})
-                  !! nqp::bindkey($hash, $key, %ch{$key});
+                if nqp::iscclass(pir::const::CCLASS_NUMERIC, $key, 0) {
+                    $list := nqp::list() unless $list;
+                    nqp::bindpos($list, $key, %ch{$key});
+                }
+                else {
+                    $hash := nqp::hash() unless $hash;
+                    nqp::bindkey($hash, $key, %ch{$key});
+                }
             }
+            nqp::bindattr($match, NQPCapture, '@!array', $list);
+            nqp::bindattr($match, NQPCapture, '%!hash', $hash);
         }
         $match
     }

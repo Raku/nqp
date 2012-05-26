@@ -723,6 +723,14 @@ An operator precedence parser.
             .local pmc op, opOPER, opO
             .local string opassoc
             op = pop opstack
+            
+            # Give it a fresh capture list, since we'll have assumed it has
+            # no positional captures and not taken them.
+            .local pmc cap_class
+            cap_class = find_lex 'NQPCapture'
+            $P0 = new ['ResizablePMCArray']
+            setattribute op, cap_class, '@!array', $P0
+            
             opOPER = op['OPER']
             opO = opOPER['O']
             $P0 = opO['assoc']
