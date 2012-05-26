@@ -1,2 +1,2 @@
-class QAST::WVal does QAST::CompileTimeValue {
+class QAST::WVal is QAST::Node does QAST::CompileTimeValue {
 }

@@ -397,7 +397,11 @@ QAST::Operations.add_core_op('callmethod', -> $qastcomp, $op {
     for @args {
         my $arg_post := $qastcomp.as_post($_);
         $ops.push($arg_post);
-        @arg_results.push($arg_post.result);
+        my $result := $arg_post.result;
+        if $_.named -> $name {
+            $result := $result ~ " :named(" ~ $qastcomp.escape($name) ~ ")";
+        }
+        @arg_results.push($result);
     }
     
     # Figure out result register type and allocate a register for it.

@@ -36,6 +36,7 @@ class B { method m() { 'b' } }
 class C { method add($a, $b) { $a + $b } }
 class D { method m() { 206 } }
 class E { has int $!x; }
+class F { method greet(:$greeting, :$name) { "$greeting $name" } }
 
 is_qast(
     QAST::Block.new(
@@ -774,5 +775,18 @@ is_qast(
             )
         ),
         'OH HAI kathy',
-        'call with named argument works');
+        'call with named arguments works');
 }
+
+is_qast(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('callmethod'), :name('greet'),
+            QAST::WVal.new( :value(F) ),
+            QAST::SVal.new( :named('name'), :value('greg') ),
+            QAST::SVal.new( :named('greeting'), :value('DDD,') ),
+        )
+    ),
+    'DDD, greg',
+    'callmethod with named arguments works');
+
