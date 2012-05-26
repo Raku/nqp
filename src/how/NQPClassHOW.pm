@@ -462,6 +462,14 @@ knowhow NQPClassHOW {
         $!name
     }
 
+    method traced($obj) {
+        $!trace
+    }
+
+    method trace_depth($obj) {
+        $!trace_depth
+    }
+
     method attributes($obj, :$local!) {
         my @attrs;
         for %!attributes {
@@ -551,9 +559,9 @@ knowhow NQPClassHOW {
     ##
     ## Tracing
     ##
-    method trace-on($obj) {
+    method trace-on($obj, $depth?) {
         $!trace := 1;
-        $!trace_depth := 0;
+        $!trace_depth := $depth // 0;
         pir::set_method_cache_authoritativeness__0Pi($obj, 0);
         pir::publish_method_cache($obj, nqp::hash());
     }
