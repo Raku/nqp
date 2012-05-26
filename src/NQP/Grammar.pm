@@ -750,7 +750,7 @@ grammar NQP::Regex is QRegex::P6Regex::Grammar {
     }
 
     token metachar:sym<nqpvar> {
-        <?[$@]> <?before .\w> <var=.LANG('MAIN', 'variable')>
+        <?before <[$@&]> [\W\w | \w]> <var=.LANG('MAIN', 'variable')>
     }
 
     token assertion:sym<{ }> {
