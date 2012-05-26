@@ -805,7 +805,6 @@ An operator precedence parser.
     }
 
     method MARKER($markname) {
-        my $pos := self.pos();
         my %markhash := Q:PIR {
             %r = get_global '%!MARKHASH'
             unless null %r goto have_markhash
@@ -813,28 +812,23 @@ An operator precedence parser.
             set_global '%!MARKHASH', %r
           have_markhash:
         };
-        %markhash{$markname} := $pos;
         my $cur := self."!cursor_start"();
-        $cur."!cursor_pass"($pos);
-        $cur;
+        $cur."!cursor_pass"(self.pos());
+        %markhash{$markname} := $cur;
     }
     
     method MARKED($markname) {
-        my $cur := self."!cursor_start"();
-        Q:PIR {
-            .local pmc self, markname, markhash
-            self = find_lex 'self'
-            markname = find_lex '$markname'
-            markhash = get_global '%!MARKHASH'
-            if null markhash goto fail
-            $P0 = markhash[markname]
-            if null $P0 goto fail
-            $P1 = self.'pos'()
-            unless $P0 == $P1 goto fail
-            $P2 = find_lex '$cur'
-            $P2."!cursor_pass"($P1)
-          fail:
+        my %markhash := Q:PIR {
+            %r = get_global '%!MARKHASH'
+            unless null %r goto have_markhash
+            %r = new ['Hash']
+            set_global '%!MARKHASH', %r
+          have_markhash:
         };
+        my $cur := %markhash{$markname};
+        unless nqp::istype($cur, NQPCursor) && $cur.pos() == self.pos() {
+            $cur := self."!cursor_start"();
+        }
         $cur
     }
 
