@@ -747,3 +747,32 @@ is_qast(
     my $missing := $block.symbol('sabre-toothed tiger');
     ok(!pir::defined($missing), 'QAST::Block.symbol on a nonexistent key returns an undefined value');
 }
+
+{
+    my $greeter := QAST::Block.new(
+        QAST::Var.new( :name('greeting'), :named('greeting'), :scope('local'), :decl('param'), :returns(str) ),
+        QAST::Var.new( :name('name'), :named('name'), :scope('local'), :decl('param'), :returns(str) ),
+        QAST::Op.new(
+            :op('concat'),
+            QAST::Op.new(
+                :op('concat'),
+                QAST::Var.new( :name('greeting'), :scope('local') ),
+                QAST::SVal.new( :value(' ') ),
+            ),
+            QAST::Var.new( :name('name'), :scope('local') )
+        ),
+    );
+
+    is_qast(
+        QAST::Block.new(
+            $greeter,
+            QAST::Op.new(
+                :op('call'),
+                QAST::BVal.new( :value($greeter) ),
+                QAST::SVal.new( :named('name'), :value('kathy') ),
+                QAST::SVal.new( :named('greeting'), :value('OH HAI') ),
+            )
+        ),
+        'OH HAI kathy',
+        'call with named argument works');
+}
