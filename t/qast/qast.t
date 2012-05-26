@@ -790,3 +790,28 @@ is_qast(
     'DDD, greg',
     'callmethod with named arguments works');
 
+{
+    my $elems := QAST::Block.new(
+        QAST::Var.new( :name('array'), :slurpy, :scope('local'), :decl('param') ),
+        QAST::Op.new(
+            :op('elems'),
+            QAST::Var.new( :name('array'), :scope('local') ),
+        ),
+    );
+
+    is_qast(
+        QAST::Block.new(
+            $elems,
+            QAST::Op.new(
+                :op('call'),
+                QAST::BVal.new( :value($elems) ),
+                QAST::IVal.new( :value(1) ),
+                QAST::IVal.new( :value(2) ),
+                QAST::IVal.new( :value(3) ),
+                QAST::IVal.new( :value(4) ),
+            )
+        ),
+        4,
+        'call to block with slurpy parameter works');
+}
+

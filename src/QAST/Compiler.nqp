@@ -464,6 +464,10 @@ class QAST::Compiler is HLL::Compiler {
             # both registers and literals.
             return $post;
         }
+        elsif $result eq 'p' && $desired eq 'P' {
+            # <jnthn> Hmm...lowercase p doesn't make any sense
+            return $post;
+        }
         else {
             pir::die("Coercion from '$result' to '$desired' NYI");
         }
