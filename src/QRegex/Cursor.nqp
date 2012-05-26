@@ -299,8 +299,9 @@ role NQPCursorRole {
                 pir::find_not_cclass__Iisii(
                     pir::const::CCLASS_WORD,
                     $!target, $!pos, nqp::chars($!target)))
-            if nqp::ord($!target, $!pos) == 95
-               || nqp::iscclass(pir::const::CCLASS_ALPHABETIC, $!target, $!pos);
+            if $!pos < nqp::chars($!target) &&
+                (nqp::ord($!target, $!pos) == 95
+                 || nqp::iscclass(pir::const::CCLASS_ALPHABETIC, $!target, $!pos));
         $cur;
     }
 
