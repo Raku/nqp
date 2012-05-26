@@ -300,7 +300,7 @@ class HLL::Compiler {
         my @a    := $res.arguments;
 
         %adverbs.update(%opts);
-        self.usage($program-name) if %adverbs<help>;
+        self.usage($program-name) if %adverbs<help>  || %adverbs<h>;
 
         pir::load_bytecode('dumper.pbc');
         pir::load_bytecode('PGE/Dumper.pbc');
@@ -310,14 +310,14 @@ class HLL::Compiler {
 
 
     method command_eval(*@a, *%adverbs) {
-        self.version              if %adverbs<version>;
+        self.version              if %adverbs<version> || %adverbs<v>;
         self.show-config          if %adverbs<show-config>;
         self.nqpevent(%adverbs<nqpevent>) if %adverbs<nqpevent>;
 
         my $result;
         my $error;
         my $has_error := 0;
-        my $target := %adverbs<target>;
+        my $target := pir::downcase(%adverbs<target>);
         try {
             if pir::defined(%adverbs<e>) {
                 $!user_progname := '-e';
@@ -633,15 +633,15 @@ class HLL::Compiler {
 
             # If we've previously cached C<linepos> for target, we use it.
             unless cache goto linepos_build
-            linepos = getprop '!linepos', target
+            linepos = getprop target, '!linepos'
             unless null linepos goto linepos_done
 
             # calculate a new linepos array.
-          linepos_build:
+        linepos_build:
             linepos = new ['ResizableIntegerArray']
             unless cache goto linepos_build_1
             setprop target, '!linepos', linepos
-          linepos_build_1:
+        linepos_build_1:
             .local string s
             .local int jpos, eos
             s = target
@@ -649,9 +649,9 @@ class HLL::Compiler {
             jpos = 0
             # Search for all of the newline markers in C<target>.  When we
             # find one, mark the ending offset of the line in C<linepos>.
-          linepos_loop:
+        linepos_loop:
             jpos = find_cclass .CCLASS_NEWLINE, s, jpos, eos
-            unless jpos < eos goto linepos_done
+            unless jpos < eos goto linepos_done_1
             $I0 = ord s, jpos
             inc jpos
             push linepos, jpos
@@ -661,23 +661,28 @@ class HLL::Compiler {
             if $I0 != 10 goto linepos_loop
             inc jpos
             goto linepos_loop
-          linepos_done:
+        linepos_done_1:
+        linepos_done:
 
-            # We have C<linepos>, so now we search the array for the largest
-            # element that is not greater than C<pos>.  The index of that
-            # element is the line number to be returned.
-            # (Potential optimization: use a binary search.)
-            .local int line, count
-            count = elements linepos
-            line = 0
-          line_loop:
-            if line >= count goto line_done
+            # We have C<linepos>, so now we (binary) search the array
+            # for the largest element that is not greater than C<pos>.
+            .local int lo, hi, line
+            lo = 0
+            hi = elements linepos
+        binary_loop:
+            if lo >= hi goto binary_done
+            line = lo + hi
+            line = line / 2
             $I0 = linepos[line]
-            if $I0 > pos goto line_done
-            inc line
-            goto line_loop
-          line_done:
-            .return (line)
+            if $I0 > pos goto binary_hi
+            lo = line + 1
+            goto binary_loop
+        binary_hi:
+            hi = line
+            goto binary_loop
+        binary_done:
+            inc lo
+            .return (lo)
         };
     }
 
