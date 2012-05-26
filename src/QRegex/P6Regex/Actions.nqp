@@ -310,7 +310,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             $qast := $<assertion>.ast;
             $qast.subtype('zerowidth');
         }
-        else { $qast := 0; }
+        else {
+            $qast := QAST::Regex.new( :rxtype<anchor>, :subtype<pass>, :node($/) );
+        }
         make $qast;
     }
 
