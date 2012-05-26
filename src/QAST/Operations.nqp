@@ -353,6 +353,9 @@ sub handle_arg($arg, $qastcomp, $ops, @arg_results) {
     my $result := $arg_post.result;
     if $arg.flat {
         $result := "$result :flat";
+        if $arg.named {
+            $result := "$result :named";
+        }
     }
     elsif $arg.named -> $name {
         $result := "$result :named(" ~ $qastcomp.escape($name) ~ ")";

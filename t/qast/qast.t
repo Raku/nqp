@@ -841,3 +841,44 @@ is_qast(
         42,
         'call with flattened argument works');
 }
+
+{
+    my $greeter := QAST::Block.new(
+        QAST::Var.new( :name('greeting'), :named('greeting'), :scope('local'), :decl('param') ),
+        QAST::Var.new( :name('name'), :named('name'), :scope('local'), :decl('param') ),
+        QAST::Op.new(
+            :op('concat'),
+            QAST::Op.new(
+                :op('callmethod'), :name('m'),
+                QAST::Var.new( :name('greeting'), :scope('local') ),
+                :returns(str)
+            ),
+            QAST::Op.new(
+                :op('callmethod'), :name('m'),
+                QAST::Var.new( :name('name'), :scope('local') ),
+                :returns(str)
+            )
+        ),
+    );
+
+    is_qast(
+        QAST::Block.new(
+            $greeter,
+            QAST::Op.new(
+                :op('call'),
+                QAST::BVal.new( :value($greeter) ),
+                QAST::Op.new(
+                    :op('hash'),
+                    QAST::SVal.new( :value('name') ),
+                    QAST::WVal.new( :value(A) ),
+                    QAST::SVal.new( :value('greeting') ),
+                    QAST::WVal.new( :value(B) ),
+                    :flat,
+                    :named,
+                )
+            )
+        ),
+        'ba',
+        'call with named flattened argument works');
+}
+
