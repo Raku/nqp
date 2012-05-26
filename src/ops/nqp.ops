@@ -2216,16 +2216,15 @@ inline op nqp_nfa_run_new(out PMC, in PMC, in STR, in INT) :base_core {
     INTVAL  offset  = $4;
     INTVAL  eos     = Parrot_str_length(interp, target);
     PMC    *fates   = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
-    PMC    *done    = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
     INTVAL  gen     = 1;
     PMC    *curst   = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
     PMC    *nextst  = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
+    INTVAL *done;
     INTVAL  i, num_states;
     
     /* Zero out the done array; we don't get zeroed memory by default. */
     num_states = VTABLE_elements(interp, states);
-    for (i = 0; i < num_states; i++)
-        VTABLE_set_integer_keyed_int(interp, done, i, 0);
+    done = mem_sys_allocate_zeroed(num_states * sizeof(INTVAL));
     
     VTABLE_push_integer(interp, nextst, 1);
     while (VTABLE_elements(interp, nextst) && offset <= eos) {
@@ -2243,9 +2242,11 @@ inline op nqp_nfa_run_new(out PMC, in PMC, in STR, in INT) :base_core {
             INTVAL  edge_info_elems;
             
             INTVAL st = VTABLE_pop_integer(interp, curst);
-            if (VTABLE_get_integer_keyed_int(interp, done, st) == gen)
-                continue;
-            VTABLE_set_integer_keyed_int(interp, done, st, gen);
+            if (st < num_states) {
+                if (done[st] == gen)
+                    continue;
+                done[st] = gen;
+            }
             
             edge_info = VTABLE_get_pmc_keyed_int(interp, states, st);
             edge_info_elems = VTABLE_elements(interp, edge_info);
@@ -2257,7 +2258,7 @@ inline op nqp_nfa_run_new(out PMC, in PMC, in STR, in INT) :base_core {
                     INTVAL arg = VTABLE_get_integer_keyed_int(interp, edge_info, i + 1);
                     VTABLE_push_integer(interp, fates, arg);
                 }
-                else if (act == EDGE_EPSILON && VTABLE_get_integer_keyed_int(interp, done, to) != gen) {
+                else if (act == EDGE_EPSILON && to < num_states && done[to] != gen) {
                     VTABLE_push_integer(interp, curst, to);
                 }
                 else if (offset >= eos) {
@@ -2301,6 +2302,7 @@ inline op nqp_nfa_run_new(out PMC, in PMC, in STR, in INT) :base_core {
         gen++;
     }
 
+    mem_sys_free(done); 
     $1 = fates;
 }
 
