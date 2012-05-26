@@ -1,6 +1,7 @@
 use QRegex;
 use NQPHLL;
 use QAST;
+use PASTRegex;
 
 grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
