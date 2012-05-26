@@ -182,11 +182,8 @@ role NQPCursorRole {
         my @fates := $nfa.states[0];
         my $start := 1;
         my $fate := 0;
-        my $prefix      := $name ~ ':sym<';
-        my $prefixchars := nqp::chars($prefix);
-        for %protorx {
-            my $rxname := ~$_;
-            if nqp::substr($rxname, 0, $prefixchars) eq $prefix {
+        if nqp::existskey(%protorx, $name) {
+            for %protorx{$name} -> $rxname {
                 $fate := $fate + 1;
                 @fates[$fate] := $rxname;
                 $nfa.mergesubrule($start, 0, $fate, self, $rxname);
@@ -199,7 +196,12 @@ role NQPCursorRole {
         my %protorx;
         for self.HOW.methods(self) -> $meth {
             my $methname := ~$meth;
-            %protorx{$methname} := $meth if nqp::index($methname, ':sym<') >0;
+            my $sympos   := nqp::index($methname, ':sym<');
+            if $sympos > 0 {
+                my $prefix := nqp::substr($methname, 0, $sympos);
+                %protorx{$prefix} := [] unless nqp::existskey(%protorx, $prefix);
+                nqp::push(%protorx{$prefix}, $methname);
+            }
         }
         %protorx;
     }

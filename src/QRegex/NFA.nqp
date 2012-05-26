@@ -198,12 +198,9 @@ class QRegex::NFA {
                 # of all of the possible rules.
                 my %protorx     := $cursor.HOW.cache($cursor, "!protoregex_table", { $cursor."!protoregex_table"() });
                 my $nfa         := QRegex::NFA.new;
-                my $prefix      := $name ~ ':sym<';
-                my $prefixchars := nqp::chars($prefix);
                 my $gotmatch    := 0;
-                for %protorx {
-                    my $rxname := ~$_;
-                    if nqp::substr($rxname, 0, $prefixchars) eq $prefix {
+                if nqp::existskey(%protorx, $name) {
+                    for %protorx{$name} -> $rxname {
                         $nfa.addedge(1, 0, $EDGE_SUBRULE, $rxname);
                         $gotmatch := 1;
                     }
