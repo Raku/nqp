@@ -253,7 +253,7 @@ class QRegex::NFA {
         # This does what the NQP below says, but these days an op is used since
         # it's hugely faster.
         #my $eos := nqp::chars($target);
-        #my @fatepos;
+        #my @fates;
         #my @nextst := [1];
         #my $gen := 1;
         #my @done;
@@ -266,7 +266,7 @@ class QRegex::NFA {
         #        @done[$st] := $gen;
         #        for $!states[$st] -> $act, $arg, $to {
         #            if $act == $EDGE_FATE {
-        #                @fatepos[$arg] := $offset;
+        #                @fates.push($arg);
         #            }
         #            elsif $act == $EDGE_EPSILON && @done[$to] != $gen {
         #                nqp::push(@curst, $to);
@@ -295,8 +295,8 @@ class QRegex::NFA {
         #    $offset := $offset + 1;
         #    $gen := $gen + 1;
         #}
-        #@fatepos;
-        pir::nqp_nfa_run__PPSI($!states, $target, $offset)
+        #@fates;
+        pir::nqp_nfa_run_new__PPSI($!states, $target, $offset)
     }
 
     method __dump($dumper, $label) {

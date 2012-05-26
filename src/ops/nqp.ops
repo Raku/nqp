@@ -2210,6 +2210,100 @@ inline op nqp_nfa_run(out PMC, in PMC, in STR, in INT) :base_core {
     $1 = fatepos;
 }
 
+inline op nqp_nfa_run_new(out PMC, in PMC, in STR, in INT) :base_core {
+    PMC    *states  = $2;
+    STRING *target  = $3;
+    INTVAL  offset  = $4;
+    INTVAL  eos     = Parrot_str_length(interp, target);
+    PMC    *fates   = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
+    PMC    *done    = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
+    INTVAL  gen     = 1;
+    PMC    *curst   = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
+    PMC    *nextst  = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
+    INTVAL  i, num_states;
+    
+    /* Zero out the done array; we don't get zeroed memory by default. */
+    num_states = VTABLE_elements(interp, states);
+    for (i = 0; i < num_states; i++)
+        VTABLE_set_integer_keyed_int(interp, done, i, 0);
+    
+    VTABLE_push_integer(interp, nextst, 1);
+    while (VTABLE_elements(interp, nextst) && offset <= eos) {
+        /* Translation of:
+         *    my @curst := @nextst;
+         *    @nextst := [];
+         * But avoids an extra allocation per offset. */
+        PMC *temp = curst;
+        curst = nextst;
+        VTABLE_set_integer_native(interp, temp, 0);
+        nextst = temp;
+        
+        while (VTABLE_elements(interp, curst)) {
+            PMC    *edge_info;
+            INTVAL  edge_info_elems;
+            
+            INTVAL st = VTABLE_pop_integer(interp, curst);
+            if (VTABLE_get_integer_keyed_int(interp, done, st) == gen)
+                continue;
+            VTABLE_set_integer_keyed_int(interp, done, st, gen);
+            
+            edge_info = VTABLE_get_pmc_keyed_int(interp, states, st);
+            edge_info_elems = VTABLE_elements(interp, edge_info);
+            for (i = 0; i < edge_info_elems; i += 3) {
+                INTVAL act = VTABLE_get_integer_keyed_int(interp, edge_info, i);
+                INTVAL to  = VTABLE_get_integer_keyed_int(interp, edge_info, i + 2);
+                
+                if (act == EDGE_FATE) {
+                    INTVAL arg = VTABLE_get_integer_keyed_int(interp, edge_info, i + 1);
+                    VTABLE_push_integer(interp, fates, arg);
+                }
+                else if (act == EDGE_EPSILON && VTABLE_get_integer_keyed_int(interp, done, to) != gen) {
+                    VTABLE_push_integer(interp, curst, to);
+                }
+                else if (offset >= eos) {
+                    /* Can't match, so drop state. */
+                }
+                else if (act == EDGE_CODEPOINT) {
+                    UINTVAL arg = VTABLE_get_integer_keyed_int(interp, edge_info, i + 1);
+                    if (STRING_ord(interp, target, offset) == arg)
+                        VTABLE_push_integer(interp, nextst, to);
+                }
+                else if (act == EDGE_CODEPOINT_NEG) {
+                    UINTVAL arg = VTABLE_get_integer_keyed_int(interp, edge_info, i + 1);
+                    if (STRING_ord(interp, target, offset) != arg)
+                        VTABLE_push_integer(interp, nextst, to);
+                }
+                else if (act == EDGE_CHARCLASS) {
+                    INTVAL arg = VTABLE_get_integer_keyed_int(interp, edge_info, i + 1);
+                    if (Parrot_str_is_cclass(interp, arg, target, offset))
+                        VTABLE_push_integer(interp, nextst, to);
+                }
+                else if (act == EDGE_CHARCLASS_NEG) {
+                    INTVAL arg = VTABLE_get_integer_keyed_int(interp, edge_info, i + 1);
+                    if (!Parrot_str_is_cclass(interp, arg, target, offset))
+                        VTABLE_push_integer(interp, nextst, to);
+                }
+                else if (act == EDGE_CHARLIST) {
+                    STRING *arg = VTABLE_get_string_keyed_int(interp, edge_info, i + 1);
+                    STRING *chr = STRING_substr(interp, target, offset, 1);
+                    if (STRING_index(interp, arg, chr, 0) >= 0)
+                        VTABLE_push_integer(interp, nextst, to);
+                }
+                else if (act == EDGE_CHARLIST_NEG) {
+                    STRING *arg = VTABLE_get_string_keyed_int(interp, edge_info, i + 1);
+                    STRING *chr = STRING_substr(interp, target, offset, 1);
+                    if (STRING_index(interp, arg, chr, 0) < 0)
+                        VTABLE_push_integer(interp, nextst, to);
+                }
+            }
+        }
+        offset++;
+        gen++;
+    }
+
+    $1 = fates;
+}
+
 
 /*
 

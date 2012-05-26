@@ -147,31 +147,20 @@ role NQPCursorRole {
     }
 
     method !protoregex($name) {
+        # Obtain and run NFA.
         my $nfa := self.HOW.cache(self, $name, { self.'!protoregex_nfa'($name) });
-        my @fatepos := $nfa.run($!target, $!pos);
+        my @fates := $nfa.run($!target, $!pos);
+        
+        # Visit rules in fate order.
+        my @rxfate := $nfa.states[0];
         my $cur;
-        if @fatepos {
-            my $fate := 0;
-            my @fatesort;
-            my @rxfate := $nfa.states[0];
-            while $fate < @fatepos {
-                my $pos := @fatepos[$fate];
-                if pir::defined($pos) {
-                    my $n := nqp::elems(@fatesort) - 1;
-                    while $n >= 0
-                          && @fatepos[@fatesort[$n]] >= @fatepos[$fate] {
-                        $n := $n - 1;
-                    }
-                    nqp::splice(@fatesort, [$fate], $n+1, 0);
-                }
-                $fate := $fate + 1;
-            }
-            while @fatesort {
-                my $rxname := @rxfate[nqp::pop(@fatesort)];
-                #nqp::say("invoking $rxname");
-                $cur := self."$rxname"();
-                last if nqp::getattr_i($cur, $?CLASS, '$!pos') >= 0;
-            }
+        my $i := nqp::elems(@fates);
+        while $i > 0 {
+            $i := $i - 1;
+            my $rxname := nqp::atpos(@rxfate, nqp::atpos_i(@fates, $i));
+            #nqp::say("invoking $rxname");
+            $cur := self."$rxname"();
+            last if nqp::getattr_i($cur, $?CLASS, '$!pos') >= 0;
         }
         $cur // self."!cursor_start"();
     }
