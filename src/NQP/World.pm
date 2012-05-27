@@ -1,4 +1,4 @@
-use NQPP6Regex;
+use NQPP6QRegex;
 
 class NQP::World is HLL::World {
     # The stack of lexical pads, actually as PAST::Block objects. The

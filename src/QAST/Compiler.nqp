@@ -11,8 +11,9 @@ class QAST::Compiler is HLL::Compiler {
     method unique($prefix = '') { $prefix ~ $serno++ }
     method escape($str) { 'ucs4:"' ~ pir::escape__Ss($str) ~ '"' }
 
-    proto method as_post(*@args, *%_) { * }
-    multi method as_post(QAST::Regex $node) {
+    #proto method as_post(*@args, *%_) { * }
+    #multi method as_post(QAST::Regex $node) {
+    method as_post(QAST::Regex $node) {
         my $ops := self.post_new('Ops');
         my $prefix := self.unique('rx') ~ '_';
         my %*REG;

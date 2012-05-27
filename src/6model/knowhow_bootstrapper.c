@@ -166,12 +166,7 @@ static PMC * wrap_c(PARROT_INTERP, void *func) {
 /* This is the find_method where things eventually bottom out. */
 static PMC * bottom_find_method(PARROT_INTERP, PMC *obj, STRING *name, INTVAL hint) {
     PMC *methods = ((KnowHOWREPRInstance *)PMC_data(obj))->body.methods;
-    PMC *method  = VTABLE_get_pmc_keyed_str(interp, methods, name);
-    if (PMC_IS_NULL(method))
-        /* XXX Awesomeize. */
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Could not find method '%Ss'", name);
-    return method;
+    return VTABLE_get_pmc_keyed_str(interp, methods, name);
 }
 
 /* Bootstraps the KnowHOW. This is were things "bottom out" in the meta-model

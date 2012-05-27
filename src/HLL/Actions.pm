@@ -83,7 +83,7 @@ class HLL::Actions {
 
     method quote_EXPR($/) {
         my $past := $<quote_delimited>.ast;
-        if $/.CURSOR.quotemod_check('w') {
+        if %*QUOTEMOD<w> {
             if PAST::Node.ACCEPTS($past) {
                 $/.CURSOR.panic("Can't form :w list from non-constant strings (yet)");
             }
@@ -166,7 +166,9 @@ class HLL::Actions {
     method charname($/) {
         my $codepoint := $<integer>
                          ?? $<integer>.ast
-                         !! pir::find_codepoint__Is( ~$/ );
+                         !! pir::find_codepoint__Is(
+                                pir::trans_encoding__Ssi(~$/,
+                                    pir::find_encoding__Is('utf8')) );
         $/.CURSOR.panic("Unrecognized character name $/") if $codepoint < 0;
         make pir::chr($codepoint);
     }

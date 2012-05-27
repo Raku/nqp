@@ -32,11 +32,19 @@ knowhow NQPClassHOW {
     has @!done;
     
     # Cached values, which are thrown away if the class changes.
-    has %!cache;
+    # XXX Should be an attribute later, but we get into some trouble with
+    # the bootstrap for now since we end up with SC references back to the
+    # previous build due to a parse altering the cache, and the SC WB getting
+    # hit.
+    my %caches;
 
     # Parrot-specific vtable mapping hash. Maps vtable name to method.
     has %!parrot_vtable_mapping;
 	has %!parrot_vtable_handler_mapping;
+    
+    # Call tracing.
+    has $!trace;
+    has $!trace_depth;
     
     my $archetypes := Archetypes.new( :nominal(1), :inheritable(1) );
     method archetypes() {
@@ -75,7 +83,7 @@ knowhow NQPClassHOW {
             pir::die("Cannot add a null method '$name' to class '$!name'");
         }
         pir::set_method_cache_authoritativeness__vPi($obj, 0);
-        %!cache := {};
+        %caches{nqp::where(self)} := {};
         %!methods{$name} := $code_obj;
     }
 
@@ -429,10 +437,19 @@ knowhow NQPClassHOW {
         @!roles
     }
 
-    method methods($obj, :$local!) {
+    method methods($obj, :$local) {
         my @meths;
-        for %!methods {
-            @meths.push($_.value);
+        if $local {
+            for %!methods {
+                @meths.push($_.value)
+            }
+        }
+        else {
+            for @!mro {
+                for $_.HOW.method_table($_) {
+                    @meths.push($_.value)
+                }
+            }
         }
         @meths
     }
@@ -443,6 +460,14 @@ knowhow NQPClassHOW {
 
     method name($obj) {
         $!name
+    }
+
+    method traced($obj) {
+        $!trace
+    }
+
+    method trace_depth($obj) {
+        $!trace_depth
     }
 
     method attributes($obj, :$local!) {
@@ -502,12 +527,20 @@ knowhow NQPClassHOW {
     ##
     ## Dispatchy
     ##
-    method find_method($obj, $name, :$no_fallback) {
+    method find_method($obj, $name, :$no_fallback, :$no_trace) {
         for @!mro {
             my %meths := $_.HOW.method_table($obj);
             my $found := %meths{$name};
             if pir::defined($found) {
-                return $found;
+                return $!trace && !$no_trace && nqp::substr($name, 0, 1) ne '!' ??
+                    -> *@pos, *%named { 
+                        say(nqp::x('  ', $!trace_depth) ~ "Calling $name");
+                        $!trace_depth := $!trace_depth + 1;
+                        my $result := $found(|@pos, |%named);
+                        $!trace_depth := $!trace_depth - 1;
+                        $result
+                    } !!
+                    $found;
             }
         }
         pir::null__P()
@@ -517,9 +550,22 @@ knowhow NQPClassHOW {
     ## Cache-related
     ##
     method cache($obj, $key, $value_generator) {
-        %!cache || (%!cache := {});
-        pir::exists(%!cache, $key) ??
-            %!cache{$key} !!
-            (%!cache{$key} := $value_generator())
+        nqp::existskey(%caches, nqp::where(self)) || (%caches{nqp::where(self)} := {});
+        pir::exists(%caches{nqp::where(self)}, $key) ??
+            %caches{nqp::where(self)}{$key} !!
+            (%caches{nqp::where(self)}{$key} := $value_generator())
+    }
+    
+    ##
+    ## Tracing
+    ##
+    method trace-on($obj, $depth?) {
+        $!trace := 1;
+        $!trace_depth := $depth // 0;
+        pir::set_method_cache_authoritativeness__0Pi($obj, 0);
+        pir::publish_method_cache($obj, nqp::hash());
+    }
+    method trace-off($obj) {
+        $!trace := 0;
     }
 }

@@ -1,3 +1,5 @@
+use NQPHLL;
+
 class QAST::Node is NQPCapture {
     has $!name;
     has $!node;

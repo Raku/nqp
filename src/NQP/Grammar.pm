@@ -18,7 +18,10 @@ grammar NQP::Grammar is HLL::Grammar {
         # cross the compile-time/run-time boundary that are associated
         # with this compilation unit.
         my $file := pir::find_caller_lex__ps('$?FILES');
-        my $source_id := nqp::sha1(nqp::getattr(self, Regex::Cursor, '$!target')) ~
+        # XXX HACK - NQPCursor vs Regex::Cursor
+        my $source_id := nqp::sha1(nqp::istype(self, NQPCursor) ??
+                    nqp::getattr_s(self, NQPCursor, '$!target') !!
+                    nqp::getattr(self, Regex::Cursor, '$!target')) ~
             '-' ~ ~pir::time__N();
         my $*W := pir::isnull($file) ??
             NQP::World.new(:handle($source_id)) !!
@@ -36,7 +39,7 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token identifier { <.ident> [ <[\-']> <.ident> ]* }
 
-    token name { <identifier> ** '::' }
+    token name { <identifier> ['::'<identifier>]* }
 
     token deflongname {
         <identifier> <colonpair>?
@@ -236,7 +239,7 @@ grammar NQP::Grammar is HLL::Grammar {
 
     proto token statement_prefix { <...> }
     token statement_prefix:sym<BEGIN> { <sym> <blorst> }
-    token statement_prefix:sym<INIT>  { <sym> <blorst> }
+    token statement_prefix:sym<INIT> { <sym> <blorst> }
 
     token statement_prefix:sym<try> {
         <sym>
@@ -332,10 +335,10 @@ grammar NQP::Grammar is HLL::Grammar {
         :my $*PKGDECL := 'native';
         <sym> <package_def>
     }
-    rule package_declarator:sym<stub> {
+    token package_declarator:sym<stub> {
         :my $*OUTERPACKAGE := $*PACKAGE;
         :my $*PKGDECL := 'stub';
-        <sym> <name>
+        <sym> :s <name>
         'metaclass' <metaclass=.name>
         '{' '...' '}'
     }
@@ -470,7 +473,7 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token signature {
         [ <?{ $*INVOCANT_OK }> <.ws><invocant=.parameter><.ws> ':' ]?
-        [ [<.ws><parameter><.ws>] ** ',' ]?
+        [ [<.ws><parameter><.ws> [',' | <before \s* [')' | '{']>]]* ]?
     }
 
     token parameter {
@@ -498,20 +501,26 @@ grammar NQP::Grammar is HLL::Grammar {
     proto token trait_mod { <...> }
     token trait_mod:sym<is> { <sym>:s <longname=.deflongname><circumfix>? }
 
-    rule regex_declarator {
+    token regex_declarator {
         [
-        | $<proto>=[proto] [regex|token|rule]
+        | $<proto>=[proto] :s [regex|token|rule]
           <deflongname>
           [ 
+          || '{*}'<?ENDSTMT>
           || '{' '<...>' '}'<?ENDSTMT>
           || '{' '<*>' '}'<?ENDSTMT>
-          || <.panic: "Proto regex body must be <*> (or <...>, which is deprecated)">
+          || <.panic: "Proto regex body must be \{*\} (or <*> or <...>, which are deprecated)">
           ]
-        | $<sym>=[regex|token|rule]
+        | $<sym>=[regex|token|rule] :s
           <deflongname>
           <.newpad>
           [ '(' <signature> ')' ]?
-          {*} #= open
+          :my %*RX;
+          {   
+              %*RX<s>    := $<sym> eq 'rule'; 
+              %*RX<r>    := $<sym> eq 'token' || $<sym> eq 'rule'; 
+              %*RX<name> := $<deflongname>.ast;
+          }
           '{'<p6regex=.LANG('Regex','nibbler')>'}'<?ENDSTMT>
         ]
     }
@@ -528,9 +537,6 @@ grammar NQP::Grammar is HLL::Grammar {
         | ':' \s <args=.arglist>
         ]?
     }
-
-
-    proto token term { <...> }
 
     token term:sym<self> { <sym> » }
 
@@ -594,7 +600,7 @@ grammar NQP::Grammar is HLL::Grammar {
     token quote:sym</ />  {
         '/'
         <.newpad>
-        {*} #= open
+        :my %*RX;
         <p6regex=.LANG('Regex','nibbler')>
         '/'
     }
@@ -734,7 +740,7 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 }
 
-grammar NQP::Regex is Regex::P6Regex::Grammar {
+grammar NQP::Regex is QRegex::P6Regex::Grammar {
     token metachar:sym<:my> {
         ':' <?before 'my'> <statement=.LANG('MAIN', 'statement')> <.ws> ';'
     }
@@ -744,12 +750,15 @@ grammar NQP::Regex is Regex::P6Regex::Grammar {
     }
 
     token metachar:sym<nqpvar> {
-        <?[$@]> <?before .\w> <var=.LANG('MAIN', 'variable')>
+        <?before <[$@&]> [\W\w | \w]> <var=.LANG('MAIN', 'variable')>
     }
 
     token assertion:sym<{ }> {
         <?[{]> <codeblock>
     }
+    
+    token assertion:sym<?> { '?' [ <?before '>' > | <!before '{'> <assertion> ] }
+    token assertion:sym<!> { '!' [ <?before '>' > | <!before '{'> <assertion> ] }
 
     token assertion:sym<?{ }> {
         $<zw>=[ <[?!]> <?before '{'> ] <codeblock>

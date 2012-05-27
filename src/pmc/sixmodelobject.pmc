@@ -146,6 +146,13 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
         return Parrot_str_equal(interp, what, CONST_STRING(interp, "invokable"));
     }
     
+    VTABLE INTVAL can(STRING *name) {
+        PMC *decont = decontainerize(interp, SELF);
+        PMC *meth   = STABLE(decont)->find_method(interp, decont, name, NO_HINT);
+        return !PMC_IS_NULL(meth) &&
+            (meth->vtable->base_type != decont->vtable->base_type || IS_CONCRETE(meth));
+    }
+    
     VTABLE PMC *clone() {
         Parrot_ex_throw_from_c_args(interp, NULL, 1,
             "SixModelObject does not support the clone v-table; consider using the repr_clone op instead");

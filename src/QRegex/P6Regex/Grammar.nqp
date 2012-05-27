@@ -1,4 +1,7 @@
+use QRegex;
 use NQPHLL;
+use QAST;
+use PASTRegex;
 
 grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
@@ -162,8 +165,8 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token backslash:sym<r> { $<sym>=[<[rR]>] }
     token backslash:sym<t> { $<sym>=[<[tT]>] }
     token backslash:sym<v> { $<sym>=[<[vV]>] }
-    token backslash:sym<o> { $<sym>=[<[oO]>] [ <octint> | '[' <octints> ']' ] }
-    token backslash:sym<x> { $<sym>=[<[xX]>] [ <hexint> | '[' <hexints> ']' ] }
+    token backslash:sym<o> { $<sym>=[<[oO]>] [ <octint> | '[' {} <octints> ']' ] }
+    token backslash:sym<x> { $<sym>=[<[xX]>] [ <hexint> | '[' {} <hexints> ']' ] }
     token backslash:sym<c> { $<sym>=[<[cC]>] <charspec> }
     token backslash:sym<A> { 'A' <.obs: '\\A as beginning-of-string matcher', '^'> }
     token backslash:sym<z> { 'z' <.obs: '\\z as end-of-string matcher', '$'> }

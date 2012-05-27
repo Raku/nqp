@@ -44,6 +44,9 @@ my knowhow NQPRoutine {
         
         $der
     }
+    method nqpattr($key) {
+        $!do.nqpattr($key)
+    }
 }
 pir::stable_publish_vtable_handler_mapping__vPP(NQPRoutine,
     nqp::hash(
