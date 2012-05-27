@@ -166,7 +166,9 @@ class HLL::Actions {
     method charname($/) {
         my $codepoint := $<integer>
                          ?? $<integer>.ast
-                         !! pir::find_codepoint__Is( ~$/ );
+                         !! pir::find_codepoint__Is(
+                                pir::trans_encoding__Ssi(~$/,
+                                    pir::find_encoding__Is('utf8')) );
         $/.CURSOR.panic("Unrecognized character name $/") if $codepoint < 0;
         make pir::chr($codepoint);
     }
