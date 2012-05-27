@@ -140,22 +140,28 @@ class QRegex::NFA {
 
         # handle only ?,*,+ for now
         return self.fate($node, $from, $to) if $max > 1 || $min > 1;
-        
-        if $max == -1 || ($min == 0 && $max == 1) {
-            my $st := self.addstate();
-            self.addedge($from, $st, $EDGE_EPSILON, 0);
-            self.addedge($from, $to, $EDGE_EPSILON, 0) if $min == 0;
-            my $atom := self.regex_nfa($node[0], $st, $to);
-            if pir::defined($node[1]) {
-                self.regex_nfa($node[1], $atom, $atom) if pir::defined($node[1]);
+        if $max == -1 {
+            if $min == 0 { # * quantifier
+                my $st := self.regex_nfa($node[0], $from, $from);
+                $st := self.addedge($from, $to, $EDGE_EPSILON, 0);
+                $to := $st if $to < 0 && $st > 0;
+            } else { # + quantifier
+                my $start := self.addstate();
+                self.addedge($from, $start, $EDGE_EPSILON, 0);
+                my $looper := self.addstate();
+                my $st := self.regex_nfa($node[0], $start, $looper);
+                self.addedge($looper, $start, $EDGE_EPSILON, 0);
+                self.addedge($looper, $to, $EDGE_EPSILON, 0);
+                $to := $st if $to < 0 && $st > 0;
             }
-            elsif $max == -1 {
-                self.addedge($atom, $st, $EDGE_EPSILON, 0)
-            }
+            $to;
+        } elsif $min == 0 && $max == 1 { # ? quantifier
+            my $st := self.regex_nfa($node[0], $from, $to);
             $to := $st if $to < 0 && $st > 0;
-            $to
-        }
-        else {
+            $st := self.addedge($from, $to, $EDGE_EPSILON, 0);
+            $to := $st if $to < 0 && $st > 0;
+            $to;
+        } else {
             self.fate($node, $from, $to)
         }
     }
