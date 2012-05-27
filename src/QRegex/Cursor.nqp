@@ -18,18 +18,28 @@ role NQPCursorRole {
     method CAPHASH() {
         my $caps    := nqp::hash();
         my %caplist := $NO_CAPS;
+        my $iter;
+        my $curcap;
+        my $subcur;
+        my $submatch;
+        my $name;
+        
         if $!regexsub {
             %caplist := $!regexsub.nqpattr('caps');
             if %caplist {
-                for %caplist {
-                    $caps{~$_} := nqp::list() if %caplist{~$_} >= 2;
+                $iter := nqp::iterator(%caplist);
+                while $iter {
+                    $curcap := ~nqp::shift($iter);
+                    $caps{$curcap} := nqp::list() if %caplist{$curcap} >= 2;
                 }
             }
         }
         if $!cstack {
-            for $!cstack -> $subcur {
-                my $submatch := $subcur.MATCH;
-                my $name := nqp::getattr($subcur, $?CLASS, '$!name');
+            $iter := nqp::iterator($!cstack);
+            while $iter {
+                $subcur := nqp::shift($iter);
+                $submatch := $subcur.MATCH;
+                $name := nqp::getattr($subcur, $?CLASS, '$!name');
                 if pir::defined($name) {
                     if nqp::index($name, '=') < 0 {
                         %caplist{$name} >= 2
@@ -167,10 +177,11 @@ role NQPCursorRole {
         # Visit rules in fate order.
         my @rxfate := $nfa.states[0];
         my $cur;
+        my $rxname;
         my $i := nqp::elems(@fates);
         while $i > 0 {
             $i := $i - 1;
-            my $rxname := nqp::atpos(@rxfate, nqp::atpos_i(@fates, $i));
+            $rxname := nqp::atpos(@rxfate, nqp::atpos_i(@fates, $i));
             #nqp::say("invoking $rxname");
             $cur := self."$rxname"();
             last if nqp::getattr_i($cur, $?CLASS, '$!pos') >= 0;
@@ -455,8 +466,10 @@ class NQPCursor does NQPCursorRole {
             nqp::bindattr_i($match, NQPMatch, '$!from', nqp::getattr_i(self, NQPCursor, '$!from'));
             nqp::bindattr_i($match, NQPMatch, '$!to', nqp::getattr_i(self, NQPCursor, '$!pos'));
             my %ch := self.CAPHASH;
-            for %ch {
-                my $key := ~$_;
+            my $key;
+            my $iter := nqp::iterator(%ch);
+            while $iter {
+                $key := ~nqp::shift($iter);
                 if nqp::iscclass(pir::const::CCLASS_NUMERIC, $key, 0) {
                     $list := nqp::list() unless $list;
                     nqp::bindpos($list, $key, %ch{$key});
