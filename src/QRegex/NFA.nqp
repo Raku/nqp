@@ -141,7 +141,7 @@ class QRegex::NFA {
         # handle only ?,*,+ for now
         return self.fate($node, $from, $to) if $max > 1 || $min > 1;
         
-        if $max == 1 || ($min == 0 && $max == 1) {
+        if $max == -1 || ($min == 0 && $max == 1) {
             my $st := self.addstate();
             self.addedge($from, $st, $EDGE_EPSILON, 0);
             self.addedge($from, $to, $EDGE_EPSILON, 0) if $min == 0;
