@@ -80,7 +80,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     QAST::Regex.new( :rxtype<quant>, :min(0), :max(1), $<separator>[0].ast ));
             }
         }
-        $qast.backtrack('r') if $qast && !$qast.backtrack && %*RX<r>;
+        $qast.backtrack('r') if $qast && !$qast.backtrack &&
+            (%*RX<r> || $<backmod> && ~$<backmod>[0] eq ':');
         make $qast;
     }
     
