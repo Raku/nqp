@@ -141,9 +141,38 @@ class QRegex::NFA {
     method quant($node, $from, $to) {
         my $min := 0 + ($node.min // 0);
         my $max := 0 + ($node.max // -1); # -1 means Inf
-
-        # handle only ?,*,+ for now
-        return self.fate($node, $from, $to) if $max > 1 || $min > 1;
+        
+        if $max > 1 || $min > 1 {
+            my $count := 0;
+            my $st;
+            my $has_sep := pir::defined($node[1]);
+            while $count < $max || $count < $min {
+                if $count >= $min {
+                    my $f := self.addedge($from, $to, $EDGE_EPSILON, 0);
+                    $st := $st || $f;
+                }
+                if $has_sep && $count > 0 {
+                    $from := self.regex_nfa($node[1], $from, -1);
+                }
+                $from := self.regex_nfa($node[0], $from, -1);
+                $count := $count + 1;
+            }
+            self.addedge($from, $to, $EDGE_EPSILON, 0);
+            if $max == -1 { # actually I think this is currently unreachable
+                my $start := self.addstate();
+                self.addedge($from, $start, $EDGE_EPSILON, 0);
+                $from := $start;
+                my $looper := self.addstate();
+                self.addedge($looper, $to, $EDGE_EPSILON, 0);
+                self.addedge($looper, $from, $EDGE_EPSILON, 0);
+                if $has_sep && $count > 0 {
+                    $from := self.regex_nfa($node[1], $from, -1);
+                }
+                self.regex_nfa($node[0], $from, $looper);
+            }
+            $to := $st if $to < 0 && $st > 0;
+            return $to;
+        }
         if $max == -1 {
             if $min == 0 { # * quantifier
                 if pir::defined($node[1]) { # * %
@@ -178,9 +207,6 @@ class QRegex::NFA {
             $to;
         } elsif $min == 0 && $max == 1 { # ? quantifier
             my $st := self.regex_nfa($node[0], $from, $to);
-            if pir::defined($node[1]) {
-                self.regex_nfa($node[1], $st, $to);
-            }
             $to := $st if $to < 0 && $st > 0;
             $st := self.addedge($from, $to, $EDGE_EPSILON, 0);
             $to := $st if $to < 0 && $st > 0;
