@@ -655,6 +655,7 @@ entry to produce the node to be returned.
     maphash['box_n']      = 'repr_box_num__PnP'
     maphash['box_s']      = 'repr_box_str__PsP'
     maphash['where']      = 'get_id__IP'
+    maphash['can']        = 'can__IPs'
 
     # serialization context related opcodes
     maphash['sha1']       = 'nqp_sha1__Ss'
