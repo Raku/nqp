@@ -317,9 +317,9 @@ of the match.
         @args.push(' at line ');
         @args.push(HLL::Compiler.lineof($target, $pos) + 1);
         @args.push(', near "');
-        @args.push(pir::escape__SS(pir::substr($target, $pos, 10)));
+        @args.push(pir::escape__SS(nqp::substr($target, $pos, 10)));
         @args.push('"');
-        pir::die(pir::join('', @args))
+        nqp::die(nqp::join('', @args))
     }
 
 

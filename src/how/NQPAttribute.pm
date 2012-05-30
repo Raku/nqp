@@ -5,9 +5,9 @@ knowhow NQPAttribute {
     has $!box_target;
 
     method new(:$name!, :$box_target, *%extra) {
-        my $attr := pir::repr_instance_of__PP(self);
+        my $attr := nqp::create(self);
         $attr.BUILD(:name($name), |%extra, :box_target($box_target),
-            :has_type(pir::exists(%extra, 'type')));
+            :has_type(nqp::existskey(%extra, 'type')));
         $attr
     }
 
@@ -23,7 +23,7 @@ knowhow NQPAttribute {
     }
 
     method type() {
-        $!has_type ?? $!type !! pir::null__P()
+        $!has_type ?? $!type !! nqp::null()
     }
     
     method has_accessor() {
@@ -41,7 +41,7 @@ knowhow NQPAttribute {
     method compose($obj) {
         #my $long_name := ~$!name;
         #if self.has_mutator {
-        #    my $method := pir::substr($long_name, 1);
+        #    my $method := nqp::substr($long_name, 1);
         #    unless has_method($obj, $method, 0) {
         #        $obj.HOW.add_method($obj.WHAT, $method, method ($value?) {
         #                pir::setattribute__vppsp(self, $obj.WHAT, $long_name, $value)
@@ -52,7 +52,7 @@ knowhow NQPAttribute {
         #    }
         #}
         #else {
-        #    my $method := pir::substr($long_name, 2);
+        #    my $method := nqp::substr($long_name, 2);
         #    unless has_method($obj, $method, 0) {
         #        $obj.HOW.add_method($obj, $method,
         #            method () {
@@ -66,7 +66,7 @@ knowhow NQPAttribute {
 
     # Hack to check twigil.
     method has_mutator() {
-        pir::substr(~$!name, 1, 1) ne '!';
+        nqp::substr(~$!name, 1, 1) ne '!';
     }
 
     sub has_method($target, $name, $local) {

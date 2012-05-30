@@ -95,22 +95,22 @@ class HLL::CommandLine::Result {
 
     method init() {
         @!arguments := [];
-        %!options := pir::new('Hash');
+        %!options := nqp::hash();
     }
 
     method arguments() { @!arguments }
     method options()   { %!options   }
 
     method add-argument($x) {
-        pir::push__vPP(@!arguments, $x);
+        nqp::push(@!arguments, $x);
     }
 
     method add-option($name, $value) {
         # how I miss p6's Hash.push
 
-        if pir::exists(%!options, $name) {
+        if nqp::existskey(%!options, $name) {
             if pir::does(%!options{$name}, 'array') {
-                pir::push(%!options{$name}, $value);
+                nqp::push(%!options{$name}, $value);
             } else {
                 %!options{$name} := [ %!options{$name}, $value ];
             }
@@ -148,20 +148,20 @@ class HLL::CommandLine::Parser {
     }
 
     method split-option-aliases($s) {
-        pir::split('|', $s);
+        nqp::split('|', $s);
 
     }
 
     method add-spec($s) {
-        my $i := pir::index($s, '=');
+        my $i := nqp::index($s, '=');
         my $type;
         my @options;
         if $i < 0 {
             $type    := 'b';
             @options := self.split-option-aliases($s);
         } else {
-            $type    := pir::substr($s, $i + 1);
-            @options := self.split-option-aliases(pir::substr($s, 0, $i));
+            $type    := nqp::substr($s, $i + 1);
+            @options := self.split-option-aliases(nqp::substr($s, 0, $i));
         }
         for @options {
             %!options{$_} := $type;
@@ -171,13 +171,13 @@ class HLL::CommandLine::Parser {
 
     method is-option($x) {
         return 0 if $x eq '-' || $x eq '--';
-        return 1 if pir::substr($x, 0, 1) eq '-';
+        return 1 if nqp::substr($x, 0, 1) eq '-';
         0;
     }
 
     method wants-value($x) {
         my $spec := %!options{$x};
-        pir::substr($spec, 0, 1) eq 's';
+        nqp::substr($spec, 0, 1) eq 's';
     }
 
     method optional-value($x) {
@@ -195,11 +195,11 @@ class HLL::CommandLine::Parser {
         # called when an option expects a value after it
         sub get-value($opt) {
             if $i == $arg-count - 1 {
-                pir::die("Option $opt needs a value");
+                nqp::die("Option $opt needs a value");
             } elsif self.is-option(@args[$i + 1]) {
-                pir::die("Option $opt needs a value, but is followed by an option");
+                nqp::die("Option $opt needs a value, but is followed by an option");
             } elsif %!stopper{@args[$i + 1]} {
-                pir::die("Option $opt needs a value, but is followed by a stopper");
+                nqp::die("Option $opt needs a value, but is followed by a stopper");
             } else {
                 $i++;
                 @args[$i];
@@ -219,34 +219,34 @@ class HLL::CommandLine::Parser {
         while $i < $arg-count {
             my $cur := @args[$i];
             if self.is-option($cur) {
-                if pir::substr($cur, 0, 2) eq '--' {
+                if nqp::substr($cur, 0, 2) eq '--' {
                     # long option
-                    my $opt := pir::substr(@args[$i], 2);
-                    my $idx := pir::index($opt, '=');
+                    my $opt := nqp::substr(@args[$i], 2);
+                    my $idx := nqp::index($opt, '=');
                     my $value := 1;
                     my $has-value := 0;
 
                     if $idx >= 0 {
-                        $value     := pir::substr($opt, $idx + 1);
-                        $opt       := pir::substr($opt, 0,      $idx);
+                        $value     := nqp::substr($opt, $idx + 1);
+                        $opt       := nqp::substr($opt, 0,      $idx);
                         $has-value := 1;
                     } elsif self.optional-value($opt) {
                         $value     := '';
                         $has-value := 1;
                     }
-                    pir::die("Illegal option --$opt") unless pir::exists(%!options, $opt);
-                    pir::die("Option --$opt does not allow a value") if !self.wants-value($opt) && $has-value;
+                    nqp::die("Illegal option --$opt") unless nqp::existskey(%!options, $opt);
+                    nqp::die("Option --$opt does not allow a value") if !self.wants-value($opt) && $has-value;
                     if !$has-value && self.wants-value($opt) {
                         $value := get-value("--$opt");
                     }
                     $result.add-option($opt, $value);
                     slurp-rest if %!stopper{"--$opt"};
                 } else {
-                    my $opt := pir::substr($cur, 1);
-                    my $len := pir::length($opt);
+                    my $opt := nqp::substr($cur, 1);
+                    my $len := nqp::chars($opt);
                     if $len == 1 {
                         # not grouped, so it might have a value
-                        pir::die("No such option -$opt") unless %!options{$opt};
+                        nqp::die("No such option -$opt") unless %!options{$opt};
                         if self.wants-value($opt) {
                             $result.add-option($opt,
                             get-value("-$opt"));
@@ -271,7 +271,7 @@ class HLL::CommandLine::Parser {
                                 }
                             }
                             else {
-                                pir::die("Grouped options '-$opt' contain '$o', which is not a valid option")
+                                nqp::die("Grouped options '-$opt' contain '$o', which is not a valid option")
                             }
                             $i++;
                         }

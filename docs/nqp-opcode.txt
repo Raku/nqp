@@ -23,8 +23,9 @@ General notes:
     nqp::unless(test, iffalse, iftrue)
     nqp::while(test, body)
     nqp::loop(init, test, next, body)
-    nqp::throw                     pir::throw__P
-    nqp::die                       pir::die
+    nqp::throw                     pir::throw__0P
+    nqp::rethrow                   pir::rethrow__0P
+    nqp::die                       pir::die__vP
     nqp::exit                      pir::exit__vi
     nqp::sleep                     pir::sleep__vn
     (need ops to fetch caller, outer, context, etc?)
@@ -75,7 +76,7 @@ General notes:
 
   object:
     nqp::bindattribute             pir::setattribute__0PPsP
-    nqp::getattribute              pir::getattribute__PPsP
+    nqp::getattribute              pir::getattribute__PPPs
     nqp::findmethod                pir::find_method__PPs        (?)
     nqp::null                      pir::null__P
     nqp::isnull                    pir::isnull__IP
@@ -84,7 +85,7 @@ General notes:
     nqp::clone                     pir::clone__PP
     nqp::typecheck or ::isa        pir::type_check__IPP
                    or ::istype
-    nqp::??                        pir::repr_instance_of__PP    (?)
+    nqp::create                    pir::repr_instance_of__PP    (?)
     nqp::unbox_i                   pir::repr_unbox_int__IP
     nqp::unbox_n                   pir::repr_unbox_num__NP
     nqp::unbox_s                   pir::repr_unbox_str__SP

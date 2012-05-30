@@ -22,8 +22,8 @@ grammar NQP::Grammar is HLL::Grammar {
         my $source_id := nqp::sha1(nqp::istype(self, NQPCursor) ??
                     nqp::getattr_s(self, NQPCursor, '$!target') !!
                     nqp::getattr(self, Regex::Cursor, '$!target')) ~
-            '-' ~ ~pir::time__N();
-        my $*W := pir::isnull($file) ??
+            '-' ~ ~nqp::time_n();
+        my $*W := nqp::isnull($file) ??
             NQP::World.new(:handle($source_id)) !!
             NQP::World.new(:handle($source_id), :description($file));
 

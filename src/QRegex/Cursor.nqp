@@ -160,13 +160,13 @@ role NQPCursorRole {
     method !reduce($name) {
         my $actions := pir::find_dynamic_lex__Ps('$*ACTIONS');
         pir::find_method__PPs($actions, $name)($actions, self.MATCH)
-            if pir::can__IPS($actions, $name);
+            if nqp::can($actions, $name);
     }
 
     method !reduce_with_match($name, $key, $match) {
         my $actions := pir::find_dynamic_lex__Ps('$*ACTIONS');
         pir::find_method__PPs($actions, $name)($actions, $match, $key)
-            if pir::can__IPS($actions, $name);
+            if nqp::can($actions, $name);
     }
 
     method !protoregex($name) {
@@ -407,7 +407,7 @@ role NQPCursorRole {
             %r = getinterp
             %r = %r['sub';1]
         };
-        pir::die("Unable to parse " ~ ~$sub ~ ", couldn't find final $goal");
+        nqp::die("Unable to parse " ~ ~$sub ~ ", couldn't find final $goal");
     }
 }
 
@@ -504,7 +504,7 @@ class NQPCursor does NQPCursorRole {
             my $cur := self.'!cursor_start'();
             my $pos := nqp::getattr_i($cur, $?CLASS, '$!from');
             my $tgt := $cur.target;
-            my $eos := pir::length($tgt);
+            my $eos := nqp::chars($tgt);
             for $var {
                 if pir::is_invokable__IP($_) {
                     my $res := $_(self);
@@ -515,9 +515,9 @@ class NQPCursor does NQPCursorRole {
                     }
                 }
                 else {
-                    my $len := pir::length($_);
+                    my $len := nqp::chars($_);
                     $maxlen := $len if $len > $maxlen && $pos + $len <= $eos
-                        && pir::substr($tgt, $pos, $len) eq $_;
+                        && nqp::substr($tgt, $pos, $len) eq $_;
                 }
             }
             $cur.'!cursor_pass'($pos + $maxlen, '') if $maxlen >= 0;
@@ -528,10 +528,10 @@ class NQPCursor does NQPCursorRole {
             my $cur := self.'!cursor_start'();
             my $pos := nqp::getattr_i($cur, $?CLASS, '$!from');
             my $tgt := $cur.target;
-            my $len := pir::length($var);
+            my $len := nqp::chars($var);
             my $adv := $pos + $len;
-            return $cur if $adv > pir::length($tgt)
-                || pir::substr($tgt, $pos, $len) ne $var;
+            return $cur if $adv > nqp::chars($tgt)
+                || nqp::substr($tgt, $pos, $len) ne $var;
             $cur.'!cursor_pass'($adv, '');
             return $cur;
         }

@@ -45,7 +45,7 @@ knowhow ModuleLoader {
         # its mainline. Otherwise, we already loaded it so go on
         # with what we already have.
         my $module_ctx;
-        my $path := pir::join('/', pir::split('::', $module_name)) ~ '.pbc';
+        my $path := nqp::join('/', nqp::split('::', $module_name)) ~ '.pbc';
         my @prefixes := self.search_path('module-path');
         for @prefixes -> $prefix {
             if pir::stat__isi("$prefix/$path", 0) {
@@ -69,7 +69,7 @@ knowhow ModuleLoader {
         if pir::defined($module_ctx) {
             # Merge any globals.
             my $UNIT := pir::getattribute__PPs($module_ctx, 'lex_pad');
-            unless pir::isnull($UNIT<GLOBALish>) {
+            unless nqp::isnull($UNIT<GLOBALish>) {
                 if +@global_merge_target {
                     merge_globals(@global_merge_target[0], $UNIT<GLOBALish>);
                 }
@@ -131,7 +131,7 @@ knowhow ModuleLoader {
                     merge_globals(($target.WHO){$sym}, $_.value);
                 }
                 else {
-                    pir::die("Merging GLOBAL symbols failed: duplicate definition of symbol $sym");
+                    nqp::die("Merging GLOBAL symbols failed: duplicate definition of symbol $sym");
                 }
             }
         }
@@ -159,7 +159,7 @@ knowhow ModuleLoader {
                 pir::load_bytecode($path);
                 pir::set_hll_global__vsP('GLOBAL', $preserve_global);
                 unless pir::defined($*MAIN_CTX) {
-                    pir::die("Unable to load setting $setting_name; maybe it is missing a YOU_ARE_HERE?");
+                    nqp::die("Unable to load setting $setting_name; maybe it is missing a YOU_ARE_HERE?");
                 }
                 %settings_loaded{$path} := $*MAIN_CTX;
             }
@@ -176,15 +176,15 @@ knowhow ModuleLoader {
         # May be fake executable, so may not end in .pbc. If so, add it.
         # Strip any .exe.
         my $module_name := ((pir::getinterp__P())[2])[0];
-        if pir::substr($module_name, 0, 2) eq './' {
-            $module_name := pir::substr($module_name, 2, pir::length($module_name) - 2);
+        if nqp::substr($module_name, 0, 2) eq './' {
+            $module_name := nqp::substr($module_name, 2, nqp::chars($module_name) - 2);
         }
-        if pir::substr($module_name, pir::length($module_name) - 4, 4) eq '.pbc' {
+        if nqp::substr($module_name, nqp::chars($module_name) - 4, 4) eq '.pbc' {
             # Fine as it is.
         }
-        elsif pir::substr($module_name, pir::length($module_name) - 4, 4) eq '.exe' {
+        elsif nqp::substr($module_name, nqp::chars($module_name) - 4, 4) eq '.exe' {
             # Replace exe with pbc.
-            $module_name := pir::substr($module_name, 0, pir::length($module_name) - 3) ~ 'pbc';
+            $module_name := nqp::substr($module_name, 0, nqp::chars($module_name) - 3) ~ 'pbc';
         }
         else {
             $module_name := $module_name ~ '.pbc';
