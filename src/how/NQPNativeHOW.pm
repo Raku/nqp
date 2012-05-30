@@ -28,15 +28,15 @@ knowhow NQPNativeHOW {
     }
 
     method add_method($obj, $name, $code_obj) {
-        pir::die("Native types may not have methods (must be boxed to call method)");
+        nqp::die("Native types may not have methods (must be boxed to call method)");
     }
 
     method add_multi_method($obj, $name, $code_obj) {
-        pir::die("Native types may not have methods (must be boxed to call method)");
+        nqp::die("Native types may not have methods (must be boxed to call method)");
     }
 
     method add_attribute($obj, $meta_attr) {
-        pir::die("Native types may not have attributes");
+        nqp::die("Native types may not have attributes");
     }
 
     method compose($obj) {

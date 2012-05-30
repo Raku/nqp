@@ -56,7 +56,7 @@ knowhow NQPConcreteRoleHOW {
 
     method add_method($obj, $name, $code_obj) {
         if %!methods{$name} {
-            pir::die("This role already has a method named " ~ $name);
+            nqp::die("This role already has a method named " ~ $name);
         }
         %!methods{$name} := $code_obj;
     }
@@ -72,13 +72,13 @@ knowhow NQPConcreteRoleHOW {
     method add_attribute($obj, $meta_attr) {
         my $name := $meta_attr.name;
         if %!attributes{$name} {
-            pir::die("This role already has an attribute named " ~ $name);
+            nqp::die("This role already has an attribute named " ~ $name);
         }
         %!attributes{$name} := $meta_attr;
     }
 
     method add_parent($obj, $parent) {
-        pir::die("A role cannot inherit from a class in NQP")
+        nqp::die("A role cannot inherit from a class in NQP")
     }
 
     method add_role($obj, $role) {

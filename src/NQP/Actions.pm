@@ -714,7 +714,7 @@ class NQP::Actions is HLL::Actions {
             if $*SCOPE eq '' || $*SCOPE eq 'my' || $*SCOPE eq 'our' {
                 if $*MULTINESS eq 'multi' {
                     # Does the current block have a candidate holder in place?
-                    if $*SCOPE eq 'our' { pir::die('our-scoped multis not yet implemented') }
+                    if $*SCOPE eq 'our' { nqp::die('our-scoped multis not yet implemented') }
                     my $cholder;
                     my %sym := $*W.cur_lexpad().symbol($name);
                     if %sym<cholder> {
@@ -768,7 +768,7 @@ class NQP::Actions is HLL::Actions {
                     # Create a candidate list holder for the dispatchees
                     # this proto will work over, and install them along
                     # with the proto.
-                    if $*SCOPE eq 'our' { pir::die('our-scoped protos not yet implemented') }
+                    if $*SCOPE eq 'our' { nqp::die('our-scoped protos not yet implemented') }
                     my $cholder := PAST::Op.new( :pasttype('list') );
                     my $BLOCK := $*W.cur_lexpad();
 					$BLOCK[0].push(PAST::Var.new( :name($name), :isdecl(1), :directaccess(1),

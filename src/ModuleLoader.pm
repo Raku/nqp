@@ -131,7 +131,7 @@ knowhow ModuleLoader {
                     merge_globals(($target.WHO){$sym}, $_.value);
                 }
                 else {
-                    pir::die("Merging GLOBAL symbols failed: duplicate definition of symbol $sym");
+                    nqp::die("Merging GLOBAL symbols failed: duplicate definition of symbol $sym");
                 }
             }
         }
@@ -159,7 +159,7 @@ knowhow ModuleLoader {
                 pir::load_bytecode($path);
                 pir::set_hll_global__vsP('GLOBAL', $preserve_global);
                 unless pir::defined($*MAIN_CTX) {
-                    pir::die("Unable to load setting $setting_name; maybe it is missing a YOU_ARE_HERE?");
+                    nqp::die("Unable to load setting $setting_name; maybe it is missing a YOU_ARE_HERE?");
                 }
                 %settings_loaded{$path} := $*MAIN_CTX;
             }

@@ -319,7 +319,7 @@ of the match.
         @args.push(', near "');
         @args.push(pir::escape__SS(nqp::substr($target, $pos, 10)));
         @args.push('"');
-        pir::die(nqp::join('', @args))
+        nqp::die(nqp::join('', @args))
     }
 
 

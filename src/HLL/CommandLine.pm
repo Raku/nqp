@@ -195,11 +195,11 @@ class HLL::CommandLine::Parser {
         # called when an option expects a value after it
         sub get-value($opt) {
             if $i == $arg-count - 1 {
-                pir::die("Option $opt needs a value");
+                nqp::die("Option $opt needs a value");
             } elsif self.is-option(@args[$i + 1]) {
-                pir::die("Option $opt needs a value, but is followed by an option");
+                nqp::die("Option $opt needs a value, but is followed by an option");
             } elsif %!stopper{@args[$i + 1]} {
-                pir::die("Option $opt needs a value, but is followed by a stopper");
+                nqp::die("Option $opt needs a value, but is followed by a stopper");
             } else {
                 $i++;
                 @args[$i];
@@ -234,8 +234,8 @@ class HLL::CommandLine::Parser {
                         $value     := '';
                         $has-value := 1;
                     }
-                    pir::die("Illegal option --$opt") unless pir::exists(%!options, $opt);
-                    pir::die("Option --$opt does not allow a value") if !self.wants-value($opt) && $has-value;
+                    nqp::die("Illegal option --$opt") unless pir::exists(%!options, $opt);
+                    nqp::die("Option --$opt does not allow a value") if !self.wants-value($opt) && $has-value;
                     if !$has-value && self.wants-value($opt) {
                         $value := get-value("--$opt");
                     }
@@ -246,7 +246,7 @@ class HLL::CommandLine::Parser {
                     my $len := pir::length($opt);
                     if $len == 1 {
                         # not grouped, so it might have a value
-                        pir::die("No such option -$opt") unless %!options{$opt};
+                        nqp::die("No such option -$opt") unless %!options{$opt};
                         if self.wants-value($opt) {
                             $result.add-option($opt,
                             get-value("-$opt"));
@@ -271,7 +271,7 @@ class HLL::CommandLine::Parser {
                                 }
                             }
                             else {
-                                pir::die("Grouped options '-$opt' contain '$o', which is not a valid option")
+                                nqp::die("Grouped options '-$opt' contain '$o', which is not a valid option")
                             }
                             $i++;
                         }

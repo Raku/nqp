@@ -407,7 +407,7 @@ role NQPCursorRole {
             %r = getinterp
             %r = %r['sub';1]
         };
-        pir::die("Unable to parse " ~ ~$sub ~ ", couldn't find final $goal");
+        nqp::die("Unable to parse " ~ ~$sub ~ ", couldn't find final $goal");
     }
 }
 

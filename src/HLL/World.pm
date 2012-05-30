@@ -74,7 +74,7 @@ class HLL::World {
     method slot_for_object($obj) {
         my $slot := %!addr_to_slot{nqp::where($obj)};
         unless pir::defined($slot) {
-            pir::die('slot_for_object called on object not in context');
+            nqp::die('slot_for_object called on object not in context');
         }
         $slot
     }

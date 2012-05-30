@@ -238,7 +238,7 @@ class HLL::Compiler {
     }
 
     method panic(*@args) {
-        pir::die(nqp::join('', @args))
+        nqp::die(nqp::join('', @args))
     }
 
     method stages(@value?) {
@@ -415,7 +415,7 @@ class HLL::Compiler {
                     $err := "Error while reading from file: $_";
                 }
             }
-            pir::die($err) if $err;
+            nqp::die($err) if $err;
         }
         my $code := nqp::join('', @codes);
         my $?FILES := nqp::join(' ', @files);

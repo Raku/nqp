@@ -77,10 +77,10 @@ knowhow NQPClassHOW {
 
     method add_method($obj, $name, $code_obj) {
         if %!methods{$name} {
-            pir::die("This class already has a method named " ~ $name);
+            nqp::die("This class already has a method named " ~ $name);
         }
         if pir::isnull__IP($code_obj) || pir::isa__IPs($code_obj, 'Undef') {
-            pir::die("Cannot add a null method '$name' to class '$!name'");
+            nqp::die("Cannot add a null method '$name' to class '$!name'");
         }
         pir::set_method_cache_authoritativeness__vPi($obj, 0);
         %caches{nqp::where(self)} := {};
@@ -104,21 +104,21 @@ knowhow NQPClassHOW {
     method add_attribute($obj, $meta_attr) {
         my $name := $meta_attr.name;
         if %!attributes{$name} {
-            pir::die("This class already has an attribute named " ~ $name);
+            nqp::die("This class already has an attribute named " ~ $name);
         }
         %!attributes{$name} := $meta_attr;
     }
 
     method add_parent($obj, $parent) {
         if $!composed {
-            pir::die("NQPClassHOW does not support adding parents after being composed.");
+            nqp::die("NQPClassHOW does not support adding parents after being composed.");
         }
         if $obj =:= $parent {
-            pir::die("Class '$!name' cannot inherit from itself.");
+            nqp::die("Class '$!name' cannot inherit from itself.");
         }
         for @!parents {
             if $_ =:= $parent {
-                pir::die("Already have " ~ $parent ~ " as a parent class.");
+                nqp::die("Already have " ~ $parent ~ " as a parent class.");
             }
         }
         @!parents[+@!parents] := $parent;
@@ -131,7 +131,7 @@ knowhow NQPClassHOW {
     method add_role($obj, $role) {
         for @!roles {
             if $_ =:= $role {
-                pir::die("The role " ~ $role ~ " has already been added.");
+                nqp::die("The role " ~ $role ~ " has already been added.");
             }
         }
         @!roles[+@!roles] := $role;
@@ -139,7 +139,7 @@ knowhow NQPClassHOW {
 
     method add_parrot_vtable_mapping($obj, $name, $meth) {
         if pir::defined(%!parrot_vtable_mapping{$name}) {
-            pir::die("Class '" ~ $!name ~
+            nqp::die("Class '" ~ $!name ~
                 "' already has a Parrot v-table override for '" ~
                 $name ~ "'");
         }
@@ -148,7 +148,7 @@ knowhow NQPClassHOW {
 
     method add_parrot_vtable_handler_mapping($obj, $name, $att_name) {
         if pir::defined(%!parrot_vtable_handler_mapping{$name}) {
-            pir::die("Class '" ~ $!name ~
+            nqp::die("Class '" ~ $!name ~
                 "' already has a Parrot v-table handler for '" ~
                 $name ~ "'");
         }
@@ -222,7 +222,7 @@ knowhow NQPClassHOW {
                     $dispatcher.add_dispatchee($code);
                 }
                 else {
-                    pir::die("Cannot have a multi candidate for $name when an only method is also in the class");
+                    nqp::die("Cannot have a multi candidate for $name when an only method is also in the class");
                 }
             }
             else {
@@ -255,13 +255,13 @@ knowhow NQPClassHOW {
                             $found := 1;
                         }
                         else {
-                            pir::die("Could not find a proto for multi $name (it may exist, but an only is hiding it if so)");
+                            nqp::die("Could not find a proto for multi $name (it may exist, but an only is hiding it if so)");
                         }
                     }
                     $j := $j + 1;
                 }
                 unless $found {
-                    pir::die("Could not find a proto for multi $name, and proto generation is NYI");
+                    nqp::die("Could not find a proto for multi $name, and proto generation is NYI");
                 }
             }
             $i := $i + 1;
@@ -338,7 +338,7 @@ knowhow NQPClassHOW {
 
         # If we didn't find anything to accept, error.
         unless $something_accepted {
-            pir::die("Could not build C3 linearization: ambiguous hierarchy");
+            nqp::die("Could not build C3 linearization: ambiguous hierarchy");
         }
 
         # Otherwise, remove what was accepted from the merge lists.

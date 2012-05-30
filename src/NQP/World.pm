@@ -565,7 +565,7 @@ class NQP::World is HLL::World {
     # that fails tries package lookup.
     method find_sym(@name) {
         # Make sure it's not an empty name.
-        unless +@name { pir::die("Cannot look up empty name"); }
+        unless +@name { nqp::die("Cannot look up empty name"); }
         
         # If it's a single-part name, look through the lexical
         # scopes.
@@ -580,7 +580,7 @@ class NQP::World is HLL::World {
                         return %sym<value>;
                     }
                     else {
-                        pir::die("No compile-time value for $final_name");
+                        nqp::die("No compile-time value for $final_name");
                     }
                 }
             }
@@ -603,7 +603,7 @@ class NQP::World is HLL::World {
                         $i := 0;
                     }
                     else {
-                        pir::die("No compile-time value for $first");
+                        nqp::die("No compile-time value for $first");
                     }                    
                 }
             }
@@ -615,7 +615,7 @@ class NQP::World is HLL::World {
                 $result := ($result.WHO){$_};
             }
             else {
-                pir::die("Could not locate compile-time value for symbol " ~
+                nqp::die("Could not locate compile-time value for symbol " ~
                     nqp::join('::', @name));
             }
         }
