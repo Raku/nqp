@@ -20,7 +20,7 @@ my class NQPMu {
             my $name := $_.name;
             my $shortname := nqp::substr($name, 2);
             if nqp::existskey(%attributes, $shortname) {
-                pir::setattribute__vPPsP($self, $type, $name, %attributes{$shortname});
+                nqp::bindattr($self, $type, $name, %attributes{$shortname});
             }
         }
     }
