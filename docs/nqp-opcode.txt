@@ -23,8 +23,9 @@ General notes:
     nqp::unless(test, iffalse, iftrue)
     nqp::while(test, body)
     nqp::loop(init, test, next, body)
-    nqp::throw                     pir::throw__P
-    nqp::die                       pir::die
+    nqp::throw                     pir::throw__0P
+    nqp::rethrow                   pir::rethrow__0P
+    nqp::die                       pir::die__vP
     nqp::exit                      pir::exit__vi
     nqp::sleep                     pir::sleep__vn
     (need ops to fetch caller, outer, context, etc?)
