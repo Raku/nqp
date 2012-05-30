@@ -7,7 +7,7 @@ plan(8);
 sub oops($msg = "oops!") { # throw an exception
     my $ex := Q:PIR { %r = new ['Exception'] };
     $ex<message> := $msg;
-    pir::throw($ex);
+    nqp::throw($ex);
 }
 
 my $ok := 1;
@@ -48,11 +48,11 @@ $ok := 1;
     {
         {
             oops();
-            CATCH { $ok := $ok * 2; pir::rethrow($!); }
+            CATCH { $ok := $ok * 2; nqp::rethrow($!); }
         }
-        CATCH { $ok := $ok * 2; pir::rethrow($!); }
+        CATCH { $ok := $ok * 2; nqp::rethrow($!); }
     }
-    CATCH { $ok := $ok * 2; pir::rethrow($!); }
+    CATCH { $ok := $ok * 2; nqp::rethrow($!); }
     CATCH { ok($ok == 8, "rethrow and multiple exception handlers work") }
 }
 

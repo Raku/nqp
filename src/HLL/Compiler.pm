@@ -291,7 +291,7 @@ class HLL::Compiler {
         ## whether you want it or not.)  We expect to remove this
         ## check eventually (or make it a lot smarter than it is here).
         if nqp::index(@args[2], '@INC') >= 0 {
-            pir::exit(0);
+            nqp::exit(0);
         }
 
         my $program-name := @args[0];
@@ -348,7 +348,7 @@ class HLL::Compiler {
                 if nqp::can(self, 'handle-control') {
                     self.handle-control($_);
                 } else {
-                    pir::rethrow__0P($_);
+                    nqp::rethrow($_);
                 }
                 $has_error := 1;
                 $error     := $_;
@@ -360,7 +360,7 @@ class HLL::Compiler {
                 $err.print($error);
                 $err.print("\n");
                 $err.print(nqp::join("\n", $error.backtrace_strings));
-                pir::exit(1);
+                nqp::exit(1);
             } else {
                 self.handle-exception($error);
             }
@@ -381,7 +381,7 @@ class HLL::Compiler {
             CATCH {
                 nqp::say($_);
                 self.usage;
-                pir::exit(1);
+                nqp::exit(1);
             }
         }
         if $res {
@@ -514,7 +514,7 @@ class HLL::Compiler {
             say($name);
         }
         nqp::say($!usage);
-        pir::exit__vi(0);
+        nqp::exit(0);
     }
 
     method version() {
@@ -522,7 +522,7 @@ class HLL::Compiler {
         my $parver  := %parrot_config<VERSION>;
         my $parrev  := %parrot_config<git_describe> // '(unknown)';
         nqp::say("This is $!language version $version built on parrot $parver revision $parrev");
-        pir::exit__vi(0);
+        nqp::exit(0);
     }
 
     method show-config() {
@@ -532,7 +532,7 @@ class HLL::Compiler {
         for %!config {
             nqp::say($!language ~ '::' ~ $_.key ~ '=' ~ $_.value);
         }
-        pir::exit__vi(0);
+        nqp::exit(0);
     }
 
     method nqpevent($spec?) {

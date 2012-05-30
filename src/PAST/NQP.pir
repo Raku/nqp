@@ -678,6 +678,10 @@ entry to produce the node to be returned.
     maphash['deb'] = $P0
 
     maphash['die']      = 'die__vP'
+    maphash['exit']     = 'exit__vi'
+    maphash['sleep']    = 'sleep__vn'
+    maphash['throw']    = 'throw__P'
+    maphash['rethrow']  = 'rethrow__0P'
 
     .return (maphash)
 .end
