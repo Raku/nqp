@@ -30,10 +30,10 @@ class HLL::Compiler {
 
     method BUILD() {
         # Default stages.
-        @!stages     := pir::split(' ', 'parse past post pir evalpmc');
+        @!stages     := nqp::split(' ', 'parse past post pir evalpmc');
         
         # Command options and usage.
-        @!cmdoptions := pir::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config stagestats ll-exception rxtrace nqpevent=s profile profile-compile');
+        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config stagestats ll-exception rxtrace nqpevent=s profile profile-compile');
         $!usage := "This compiler is based on HLL::Compiler.\n\nOptions:\n";
         for @!cmdoptions {
             $!usage := $!usage ~ "    $_\n";
@@ -449,7 +449,7 @@ class HLL::Compiler {
     method parse($source, *%adverbs) {
         my $s := $source;
         if %adverbs<transcode> {
-            for pir::split(' ', %adverbs<transcode>) {
+            for nqp::split(' ', %adverbs<transcode>) {
                 try {
                     $s := pir::trans_encoding__ssi($s,
                             pir::find_encoding__is($_));
@@ -602,7 +602,7 @@ class HLL::Compiler {
     }
 
     method parse_name($name) {
-        my @ns    := pir::split('::', $name);
+        my @ns    := nqp::split('::', $name);
         my $sigil := pir::substr(@ns[0], 0, 1);
 
         # move any leading sigil to the last item

@@ -1159,7 +1159,7 @@ class NQP::Actions is HLL::Actions {
     method term:sym<pir::op>($/) {
         my $past := $<args> ?? $<args>[0].ast !! PAST::Op.new( :node($/) );
         my $pirop := ~$<op>;
-        $pirop := pir::join(' ', pir::split('__', $pirop));
+        $pirop := pir::join(' ', nqp::split('__', $pirop));
         $past.pirop($pirop);
         $past.pasttype('pirop');
         make $past;

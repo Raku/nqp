@@ -466,7 +466,7 @@ class NQP::World is HLL::World {
         # Need to load the NQP dynops/dympmcs, plus any extras requested.
         my @loadlibs := ['nqp_group', 'nqp_ops', 'nqp_bigint_ops', 'trans_ops', 'io_ops'];
         if %*COMPILING<%?OPTIONS><vmlibs> {
-            for pir::split(',', %*COMPILING<%?OPTIONS><vmlibs>) {
+            for nqp::split(',', %*COMPILING<%?OPTIONS><vmlibs>) {
                 @loadlibs.push($_);
             }
         }

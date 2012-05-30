@@ -148,7 +148,7 @@ class HLL::CommandLine::Parser {
     }
 
     method split-option-aliases($s) {
-        pir::split('|', $s);
+        nqp::split('|', $s);
 
     }
 
