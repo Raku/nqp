@@ -239,7 +239,7 @@ class QRegex::NFA {
         #nqp::say("adding $name");
         my %seen := nqp::clone(%caller_seen);
         my @substates;
-        if pir::can($cursor, $name) {
+        if nqp::can($cursor, $name) {
             if !%seen{$name} {
                 @substates := $cursor.HOW.find_method($cursor, $name, :no_trace(1)).nqpattr('nfa');
             }

@@ -482,7 +482,7 @@ class NQP::Actions is HLL::Actions {
                         }
                     }
                     if pir::defined($attr) {
-                        if pir::can($attr, 'type') {
+                        if nqp::can($attr, 'type') {
                             $past.type($attr.type);
                         }
                     }
@@ -553,7 +553,7 @@ class NQP::Actions is HLL::Actions {
         # type in which case it needs delayed evaluation. Normally, $?CLASS is
         # a fixed lexical, but for generic types it becomes a parameter. Also
         # for parametric types, pass along the role body block.
-        if pir::can($how, 'parametric') && $how.parametric($how) {
+        if nqp::can($how, 'parametric') && $how.parametric($how) {
             $past.blocktype('declaration');
             $past.unshift(PAST::Var.new( :name('$?CLASS'), :scope('parameter'),
                 :directaccess(1) ));
@@ -583,7 +583,7 @@ class NQP::Actions is HLL::Actions {
                 $/.CURSOR.panic("Could not find parent class '" ~ ~$<parent>[0] ~ "'");
             }
         }
-        elsif pir::can($how, 'set_default_parent') {
+        elsif nqp::can($how, 'set_default_parent') {
             my $default := $*PKGDECL eq 'grammar' ?? ['NQPCursor'] !! ['NQPMu'];
             $*W.pkg_add_parent_or_role($*PACKAGE, "set_default_parent",
                 $*W.find_sym($default));
@@ -1082,7 +1082,7 @@ class NQP::Actions is HLL::Actions {
             my $regex := QRegex::P6Regex::Actions::buildsub($<p6regex>.ast, $block);
             $regex.name($name);
             
-            if $*PKGDECL && pir::can($*PACKAGE.HOW, 'add_method') {
+            if $*PKGDECL && nqp::can($*PACKAGE.HOW, 'add_method') {
                 # Add the actual method.
                 $*W.pkg_add_method($*PACKAGE, 'add_method', $name, $*W.create_code($regex, $name, 0));
             }

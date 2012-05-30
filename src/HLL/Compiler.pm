@@ -107,10 +107,10 @@ class HLL::Compiler {
         for %exports {
             my $type := $_.key;
             my %items := $_.value;
-            if pir::can(self, "import_$type") {
+            if nqp::can(self, "import_$type") {
                 for %items { self."import_$type"($target, $_.key, $_.value); }
             }
-            elsif pir::can($target, "add_$type") {
+            elsif nqp::can($target, "add_$type") {
                 for %items { $target."add_$type"($_.key, $_.value); }
             }
             else {
@@ -345,7 +345,7 @@ class HLL::Compiler {
                 $error     := $_;
             }
             CONTROL {
-                if pir::can(self, 'handle-control') {
+                if nqp::can(self, 'handle-control') {
                     self.handle-control($_);
                 } else {
                     pir::rethrow__0P($_);
@@ -355,7 +355,7 @@ class HLL::Compiler {
             }
         }
         if ($has_error) {
-            if %adverbs<ll-exception> || !pir::can(self, 'handle-exception') {
+            if %adverbs<ll-exception> || !nqp::can(self, 'handle-exception') {
                 my $err := pir::getstderr__P();
                 $err.print($error);
                 $err.print("\n");
