@@ -539,7 +539,7 @@ class NQP::Actions is HLL::Actions {
 
     method package_def($/) {
         # Get name and meta-object.
-        my @ns := pir::clone__PP($<name><identifier>);
+        my @ns := nqp::clone($<name><identifier>);
         my $name := ~@ns.pop;
         my $how := %*HOW{$*PKGDECL};
 
@@ -573,7 +573,7 @@ class NQP::Actions is HLL::Actions {
             my $parent;
             my $parent_found;
             try {
-                $parent := $*W.find_sym(pir::clone__PP($<parent>[0]<identifier>));
+                $parent := $*W.find_sym(nqp::clone($<parent>[0]<identifier>));
                 $parent_found := 1;
             }
             if $parent_found {
@@ -595,7 +595,7 @@ class NQP::Actions is HLL::Actions {
                 my $role;
                 my $role_found;
                 try {
-                    $role := $*W.find_sym(pir::clone__PP($_<identifier>));
+                    $role := $*W.find_sym(nqp::clone($_<identifier>));
                     $role_found := 1;
                 }
                 if $role_found {
@@ -1143,7 +1143,7 @@ class NQP::Actions is HLL::Actions {
             $var := PAST::Var.new( :name(~$<name>), :scope('lexical') );
         }
         else {
-            my @ns := pir::clone__PP($<name><identifier>);
+            my @ns := nqp::clone($<name><identifier>);
             $var := lexical_package_lookup(@ns, $/);
         }
         
