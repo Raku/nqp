@@ -434,9 +434,9 @@ class HLL::Compiler {
         my $result := $source;
         my $stderr := pir::getinterp().stderr_handle;
         for self.stages() {
-            my $timestamp := pir::time__N();
+            my $timestamp := nqp::time_n();
             $result := self."$_"($result, |%adverbs);
-            my $diff := pir::time__N() - $timestamp;
+            my $diff := nqp::time_n() - $timestamp;
             if %adverbs<stagestats> {
                 my $difffmt := pir::sprintf__SsP("%.3f", [$diff]);
                 $stderr.print("Stage $_: $difffmt\n");
