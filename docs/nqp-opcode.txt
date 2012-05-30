@@ -75,7 +75,7 @@ General notes:
 
   object:
     nqp::bindattribute             pir::setattribute__0PPsP
-    nqp::getattribute              pir::getattribute__PPsP
+    nqp::getattribute              pir::getattribute__PPPs
     nqp::findmethod                pir::find_method__PPs        (?)
     nqp::null                      pir::null__P
     nqp::isnull                    pir::isnull__IP
