@@ -40,7 +40,7 @@ sub subst ($text, $regex, $repl, :$global?) {
 
     for @matches -> $match {
         if $match {
-            pir::push($result, pir::substr($text, $offset, $match.from - $offset))
+            pir::push($result, nqp::substr($text, $offset, $match.from - $offset))
                 if $match.from > $offset;
             pir::push($result, $is_code ?? $repl($match) !! $repl);
             $offset := $match.to;
@@ -48,7 +48,7 @@ sub subst ($text, $regex, $repl, :$global?) {
     }
 
     my $chars := pir::length($text);
-    pir::push($result, pir::substr($text, $offset, $chars))
+    pir::push($result, nqp::substr($text, $offset, $chars))
         if $chars > $offset;
 
     ~$result;

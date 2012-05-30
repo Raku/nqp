@@ -603,12 +603,12 @@ class HLL::Compiler {
 
     method parse_name($name) {
         my @ns    := nqp::split('::', $name);
-        my $sigil := pir::substr(@ns[0], 0, 1);
+        my $sigil := nqp::substr(@ns[0], 0, 1);
 
         # move any leading sigil to the last item
         my $idx   := pir::index('$@%&', $sigil);
         if $idx >= 0 {
-            @ns[0]  := pir::substr(@ns[0], 1);
+            @ns[0]  := nqp::substr(@ns[0], 1);
             @ns[-1] := $sigil ~ @ns[-1];
         }
 

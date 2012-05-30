@@ -18,7 +18,7 @@ my class NQPMu {
     method BUILD_MAGIC(NQPMu:D $self: $type, *%attributes) {
         for $type.HOW.attributes($type, :local) {
             my $name := $_.name;
-            my $shortname := pir::substr($name, 2);
+            my $shortname := nqp::substr($name, 2);
             if pir::exists(%attributes, $shortname) {
                 pir::setattribute__vPPsP($self, $type, $name, %attributes{$shortname});
             }

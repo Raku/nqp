@@ -517,7 +517,7 @@ class NQPCursor does NQPCursorRole {
                 else {
                     my $len := pir::length($_);
                     $maxlen := $len if $len > $maxlen && $pos + $len <= $eos
-                        && pir::substr($tgt, $pos, $len) eq $_;
+                        && nqp::substr($tgt, $pos, $len) eq $_;
                 }
             }
             $cur.'!cursor_pass'($pos + $maxlen, '') if $maxlen >= 0;
@@ -531,7 +531,7 @@ class NQPCursor does NQPCursorRole {
             my $len := pir::length($var);
             my $adv := $pos + $len;
             return $cur if $adv > pir::length($tgt)
-                || pir::substr($tgt, $pos, $len) ne $var;
+                || nqp::substr($tgt, $pos, $len) ne $var;
             $cur.'!cursor_pass'($adv, '');
             return $cur;
         }

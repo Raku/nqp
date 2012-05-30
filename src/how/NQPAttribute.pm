@@ -41,7 +41,7 @@ knowhow NQPAttribute {
     method compose($obj) {
         #my $long_name := ~$!name;
         #if self.has_mutator {
-        #    my $method := pir::substr($long_name, 1);
+        #    my $method := nqp::substr($long_name, 1);
         #    unless has_method($obj, $method, 0) {
         #        $obj.HOW.add_method($obj.WHAT, $method, method ($value?) {
         #                pir::setattribute__vppsp(self, $obj.WHAT, $long_name, $value)
@@ -52,7 +52,7 @@ knowhow NQPAttribute {
         #    }
         #}
         #else {
-        #    my $method := pir::substr($long_name, 2);
+        #    my $method := nqp::substr($long_name, 2);
         #    unless has_method($obj, $method, 0) {
         #        $obj.HOW.add_method($obj, $method,
         #            method () {
@@ -66,7 +66,7 @@ knowhow NQPAttribute {
 
     # Hack to check twigil.
     method has_mutator() {
-        pir::substr(~$!name, 1, 1) ne '!';
+        nqp::substr(~$!name, 1, 1) ne '!';
     }
 
     sub has_method($target, $name, $local) {

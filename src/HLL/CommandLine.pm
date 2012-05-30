@@ -160,8 +160,8 @@ class HLL::CommandLine::Parser {
             $type    := 'b';
             @options := self.split-option-aliases($s);
         } else {
-            $type    := pir::substr($s, $i + 1);
-            @options := self.split-option-aliases(pir::substr($s, 0, $i));
+            $type    := nqp::substr($s, $i + 1);
+            @options := self.split-option-aliases(nqp::substr($s, 0, $i));
         }
         for @options {
             %!options{$_} := $type;
@@ -171,13 +171,13 @@ class HLL::CommandLine::Parser {
 
     method is-option($x) {
         return 0 if $x eq '-' || $x eq '--';
-        return 1 if pir::substr($x, 0, 1) eq '-';
+        return 1 if nqp::substr($x, 0, 1) eq '-';
         0;
     }
 
     method wants-value($x) {
         my $spec := %!options{$x};
-        pir::substr($spec, 0, 1) eq 's';
+        nqp::substr($spec, 0, 1) eq 's';
     }
 
     method optional-value($x) {
@@ -219,16 +219,16 @@ class HLL::CommandLine::Parser {
         while $i < $arg-count {
             my $cur := @args[$i];
             if self.is-option($cur) {
-                if pir::substr($cur, 0, 2) eq '--' {
+                if nqp::substr($cur, 0, 2) eq '--' {
                     # long option
-                    my $opt := pir::substr(@args[$i], 2);
+                    my $opt := nqp::substr(@args[$i], 2);
                     my $idx := pir::index($opt, '=');
                     my $value := 1;
                     my $has-value := 0;
 
                     if $idx >= 0 {
-                        $value     := pir::substr($opt, $idx + 1);
-                        $opt       := pir::substr($opt, 0,      $idx);
+                        $value     := nqp::substr($opt, $idx + 1);
+                        $opt       := nqp::substr($opt, 0,      $idx);
                         $has-value := 1;
                     } elsif self.optional-value($opt) {
                         $value     := '';
@@ -242,7 +242,7 @@ class HLL::CommandLine::Parser {
                     $result.add-option($opt, $value);
                     slurp-rest if %!stopper{"--$opt"};
                 } else {
-                    my $opt := pir::substr($cur, 1);
+                    my $opt := nqp::substr($cur, 1);
                     my $len := pir::length($opt);
                     if $len == 1 {
                         # not grouped, so it might have a value
