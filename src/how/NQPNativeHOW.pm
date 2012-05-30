@@ -8,7 +8,7 @@ knowhow NQPNativeHOW {
     }
     
     method new(:$name) {
-        my $obj := pir::repr_instance_of__PP(self);
+        my $obj := nqp::create(self);
         $obj.BUILD(:name($name));
         $obj
     }

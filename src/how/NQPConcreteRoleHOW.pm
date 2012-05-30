@@ -37,7 +37,7 @@ knowhow NQPConcreteRoleHOW {
 
     # Creates a new instance of this meta-class.
     method new(:$name!, :$instance_of!) {
-        my $obj := pir::repr_instance_of__PP(self);
+        my $obj := nqp::create(self);
         $obj.BUILD(:name($name), :instance_of($instance_of));
         $obj
     }

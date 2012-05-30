@@ -57,7 +57,7 @@ knowhow NQPClassHOW {
 
     # Creates a new instance of this meta-class.
     method new(:$name) {
-        my $obj := pir::repr_instance_of__PP(self);
+        my $obj := nqp::create(self);
         $obj.BUILD(:name($name));
         $obj
     }

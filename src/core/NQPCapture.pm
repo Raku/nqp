@@ -26,8 +26,8 @@ my class NQPCapture {
     }
 
     method BUILD() {
-        @!array := pir::new('ResizablePMCArray');
-        %!hash := pir::new('Hash');
+        @!array := nqp::list();
+        %!hash := nqp::hash();
     }
     
     method list() { @!array }

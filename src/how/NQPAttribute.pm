@@ -5,7 +5,7 @@ knowhow NQPAttribute {
     has $!box_target;
 
     method new(:$name!, :$box_target, *%extra) {
-        my $attr := pir::repr_instance_of__PP(self);
+        my $attr := nqp::create(self);
         $attr.BUILD(:name($name), |%extra, :box_target($box_target),
             :has_type(nqp::existskey(%extra, 'type')));
         $attr

@@ -23,7 +23,7 @@ class HLL::Compiler {
 
     # XXX HACK!!! Need a Mu. :-)
     method new() {
-        my $obj := pir::repr_instance_of__PP(self);
+        my $obj := nqp::create(self);
         $obj.BUILD();
         $obj
     }
@@ -39,7 +39,7 @@ class HLL::Compiler {
             $!usage := $!usage ~ "    $_\n";
         }
         %parrot_config := pir::getinterp()[pir::const::IGLOBALS_CONFIG_HASH];
-        %!config     := pir::new('Hash');
+        %!config     := nqp::hash();
     }
     
     my sub value_type($value) {

@@ -1,6 +1,6 @@
 my class NQPMu {
     method CREATE() {
-        pir::repr_instance_of__PP(self)
+        nqp::create(self)
     }
 
     method bless(NQPMu:U $self: *%attributes) {

@@ -95,7 +95,7 @@ class HLL::CommandLine::Result {
 
     method init() {
         @!arguments := [];
-        %!options := pir::new('Hash');
+        %!options := nqp::hash();
     }
 
     method arguments() { @!arguments }
