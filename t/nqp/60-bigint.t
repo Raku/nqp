@@ -6,13 +6,13 @@ plan(34);
 my $knowhow := pir::get_knowhow__P();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
 $bi_type.HOW.compose($bi_type);
-sub str($x) { pir::nqp_bigint_to_str__SP($x) };
+sub str($x) { nqp::tostr_I($x) };
 sub iseq($x, $y) { nqp::iseq_I($x, nqp::box_i($y, $bi_type)) }
 sub box($x) { nqp::box_i($x, $bi_type) }
 
 my $one := box(1);
 
-my $b := pir::nqp_bigint_from_str__PSP('-123', $one);
+my $b := nqp::fromstr_I('-123', $one);
 my $c := box(-123);
 
 ok(str($b) eq '-123', 'can round-trip negative number (string)');
@@ -35,7 +35,7 @@ ok(iseq(nqp::bitxor_I(box(0xdead), box(0xbeef), $one), 0x6042), 'bit xor');
 
 ok(iseq(nqp::bitneg_I(box(-123), $one), 122), 'bit negation');
 
-ok(iseq(nqp::bitand_I(pir::nqp_bigint_from_str__PSP('-1073741825', $one), $one, $one), 1),
+ok(iseq(nqp::bitand_I(nqp::fromstr_I('-1073741825', $one), $one, $one), 1),
     'Bit ops (RT 109740)');
 
 # Now we'll create a type that boxes a P6bigint.
@@ -48,7 +48,7 @@ $bi_boxer.HOW.compose($bi_boxer);
 # Try some basic operations with it.
 my $box_val_1 := nqp::box_i(4, $bi_boxer);
 ok(iseq($box_val_1, 4), 'can box to a complex type with a P6bigint target');
-my $box_val_2 := pir::nqp_bigint_from_str__PSP('38', $bi_boxer);
+my $box_val_2 := nqp::fromstr_I('38', $bi_boxer);
 ok(iseq($box_val_2, 38), 'can get a bigint from a string with boxing type');
 ok(iseq(nqp::add_I($box_val_1, $box_val_2, $bi_boxer), 42), 'addition works on boxing type');
 
