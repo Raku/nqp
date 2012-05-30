@@ -60,7 +60,10 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token termish {
         || <noun=.quantified_atom>+
-        || (\W) <.panic: "Unrecognized regex metacharacter (must be quoted to match literally)">
+        || (\W) {
+            my $char := ~$/[0];
+            $/.CURSOR.panic("Unrecognized regex metacharacter $char (must be quoted to match literally)")
+            }
     }
 
     token quantified_atom {
