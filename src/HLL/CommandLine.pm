@@ -243,7 +243,7 @@ class HLL::CommandLine::Parser {
                     slurp-rest if %!stopper{"--$opt"};
                 } else {
                     my $opt := nqp::substr($cur, 1);
-                    my $len := pir::length($opt);
+                    my $len := nqp::chars($opt);
                     if $len == 1 {
                         # not grouped, so it might have a value
                         nqp::die("No such option -$opt") unless %!options{$opt};

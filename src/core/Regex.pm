@@ -47,7 +47,7 @@ sub subst ($text, $regex, $repl, :$global?) {
         }
     }
 
-    my $chars := pir::length($text);
+    my $chars := nqp::chars($text);
     nqp::push_s($result, nqp::substr($text, $offset, $chars))
         if $chars > $offset;
 

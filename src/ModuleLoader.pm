@@ -177,14 +177,14 @@ knowhow ModuleLoader {
         # Strip any .exe.
         my $module_name := ((pir::getinterp__P())[2])[0];
         if nqp::substr($module_name, 0, 2) eq './' {
-            $module_name := nqp::substr($module_name, 2, pir::length($module_name) - 2);
+            $module_name := nqp::substr($module_name, 2, nqp::chars($module_name) - 2);
         }
-        if nqp::substr($module_name, pir::length($module_name) - 4, 4) eq '.pbc' {
+        if nqp::substr($module_name, nqp::chars($module_name) - 4, 4) eq '.pbc' {
             # Fine as it is.
         }
-        elsif nqp::substr($module_name, pir::length($module_name) - 4, 4) eq '.exe' {
+        elsif nqp::substr($module_name, nqp::chars($module_name) - 4, 4) eq '.exe' {
             # Replace exe with pbc.
-            $module_name := nqp::substr($module_name, 0, pir::length($module_name) - 3) ~ 'pbc';
+            $module_name := nqp::substr($module_name, 0, nqp::chars($module_name) - 3) ~ 'pbc';
         }
         else {
             $module_name := $module_name ~ '.pbc';
