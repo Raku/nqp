@@ -10,11 +10,11 @@ class HLL::Actions {
         if pir::does($ints, 'array') {
             my $result := '';
             for $ints {
-                $result := $result ~ pir::chr($_.ast);
+                $result := $result ~ nqp::chr($_.ast);
             }
             $result;
         } else {
-            pir::chr($ints.ast);
+            nqp::chr($ints.ast);
         }
     }
 
@@ -170,7 +170,7 @@ class HLL::Actions {
                                 pir::trans_encoding__Ssi(~$/,
                                     pir::find_encoding__Is('utf8')) );
         $/.CURSOR.panic("Unrecognized character name $/") if $codepoint < 0;
-        make pir::chr($codepoint);
+        make nqp::chr($codepoint);
     }
 
     method charnames($/) {
@@ -180,6 +180,6 @@ class HLL::Actions {
     }
 
     method charspec($/) {
-        make $<charnames> ?? $<charnames>.ast !! pir::chr(string_to_int( $/, 10 ));
+        make $<charnames> ?? $<charnames>.ast !! nqp::chr(string_to_int( $/, 10 ));
     }
 }

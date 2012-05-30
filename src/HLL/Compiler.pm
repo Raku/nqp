@@ -337,7 +337,7 @@ class HLL::Compiler {
                         ?? pir::getinterp__P().stdout_handle()
                         !! pir::new__Ps('FileHandle').open($output, 'w');
                 self.panic("Cannot write to $output") unless $fh;
-                pir::print($fh, $result);
+                nqp::print($fh, $result);
                 $fh.close()
             }
             CATCH {
