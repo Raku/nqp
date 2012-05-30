@@ -167,7 +167,7 @@ to add_method in order to specify what happens when the method is called.
 Finally, we can make an instance and call the method.
     
     # Make an instance.
-    my $obj := pir::repr_instance_of__PP($type);
+    my $obj := nqp::create($type);
 
     # Call the method.
     $obj.drink();

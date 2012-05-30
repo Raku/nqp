@@ -15,7 +15,7 @@ plan(9);
     pir::setprop__vPsP($m1, 'STATIC_CODE_REF', $m1);
     
     # Here we make a clone of it, which is what we're testing.
-    my $m2 := pir::clone__PP($m1);
+    my $m2 := nqp::clone($m1);
     
     my $type := pir::get_knowhow__P().new_type(:name('SimpleCloneTest'), :repr('P6opaque'));
     $type.HOW.add_method($type, 'original', $m1);

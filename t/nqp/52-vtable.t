@@ -21,34 +21,34 @@ ok($def eq 'def', "get_string vtable as override works");
 
 class Hashy {
     has %!h;
-    method init() { %!h := pir::new('Hash') }
+    method init() { %!h := nqp::hash() }
     method ($k)     is parrot_vtable('get_pmc_keyed_str') { %!h{$k}}
     method ($k, $v) is parrot_vtable('set_pmc_keyed_str') { %!h{$k} := $v }
-    method ($k)     is parrot_vtable('exists_keyed_str')  { pir::exists(%!h, $k)      }
-    method ($k)     is parrot_vtable('delete_keyed_str')  { pir::delete(%!h, $k)      }
+    method ($k)     is parrot_vtable('exists_keyed_str')  { nqp::existskey(%!h, $k)      }
+    method ($k)     is parrot_vtable('delete_keyed_str')  { nqp::deletekey(%!h, $k)      }
 }
 
 my $h := Hashy.new; $h.init();
 
 $h<foo> := 'bar';
 ok($h<foo> eq 'bar', '{set,get}_pmc_keyed_str');
-ok(pir::exists($h, 'foo'), 'exists');
-pir::delete($h, 'foo');
-ok(!pir::exists($h, 'foo'), 'delete');
+ok(nqp::existskey($h, 'foo'), 'exists');
+nqp::deletekey($h, 'foo');
+ok(!nqp::existskey($h, 'foo'), 'delete');
 
 class Arrayy {
     has @!a;
-    method init() { @!a := pir::new('ResizablePMCArray') }
+    method init() { @!a := nqp::list() }
     method ($k)     is parrot_vtable('get_pmc_keyed_int') { @!a{$k}}
     method ($k, $v) is parrot_vtable('set_pmc_keyed_int') { @!a{$k} := $v }
-    method ($k)     is parrot_vtable('exists_keyed_int')  { pir::exists(@!a, $k)      }
-    method ($k)     is parrot_vtable('delete_keyed_int')  { pir::delete(@!a, $k)      }
+    method ($k)     is parrot_vtable('exists_keyed_int')  { nqp::existspos(@!a, $k)      }
+    method ($k)     is parrot_vtable('delete_keyed_int')  { nqp::deletepos(@!a, $k)      }
 }
 
 my $a := Arrayy.new; $a.init();
 
 $a[0] := 'bar';
 ok($a[0] eq 'bar', '{set,get}_pmc_keyed_int');
-ok(pir::exists($a, 0), 'exists');
-pir::delete($a, 0);
-ok(!pir::exists($a, 0), 'delete');
+ok(nqp::existspos($a, 0), 'exists');
+nqp::deletepos($a, 0);
+ok(!nqp::existspos($a, 0), 'delete');

@@ -1,6 +1,6 @@
 my class NQPMu {
     method CREATE() {
-        pir::repr_instance_of__PP(self)
+        nqp::create(self)
     }
 
     method bless(NQPMu:U $self: *%attributes) {
@@ -18,9 +18,9 @@ my class NQPMu {
     method BUILD_MAGIC(NQPMu:D $self: $type, *%attributes) {
         for $type.HOW.attributes($type, :local) {
             my $name := $_.name;
-            my $shortname := pir::substr($name, 2);
-            if pir::exists(%attributes, $shortname) {
-                pir::setattribute__vPPsP($self, $type, $name, %attributes{$shortname});
+            my $shortname := nqp::substr($name, 2);
+            if nqp::existskey(%attributes, $shortname) {
+                nqp::bindattr($self, $type, $name, %attributes{$shortname});
             }
         }
     }
@@ -36,7 +36,7 @@ my class NQPMu {
 
     proto method ACCEPTS($topic) { * }
     multi method ACCEPTS(NQPMu:U $self: $topic) {
-        pir::type_check__IPP($topic, self.WHAT)
+        nqp::istype($topic, self.WHAT)
     }
 
     method isa($type) {

@@ -69,7 +69,7 @@ knowhow RoleToRoleApplier {
                     }
                     else {
                         if $_.name eq $add_attr.name {
-                            pir::die("Attribute '" ~ $_.name ~ "' conflicts in role composition");
+                            nqp::die("Attribute '" ~ $_.name ~ "' conflicts in role composition");
                         }
                     }
                 }

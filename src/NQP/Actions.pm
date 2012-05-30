@@ -35,7 +35,7 @@ class NQP::Actions is HLL::Actions {
 
     sub colonpair_str($ast) {
         PAST::Op.ACCEPTS($ast)
-        ?? pir::join(' ', $ast.list)
+        ?? nqp::join(' ', $ast.list)
         !! $ast.value;
     }
 
@@ -215,7 +215,7 @@ class NQP::Actions is HLL::Actions {
     
     sub import_HOW_exports($UNIT) {    
         # See if we've exported any HOWs.
-        if pir::exists($UNIT, 'EXPORTHOW') {
+        if nqp::existskey($UNIT, 'EXPORTHOW') {
             for $UNIT<EXPORTHOW>.WHO {
                 %*HOW{$_.key} := $_.value;
             }
@@ -482,7 +482,7 @@ class NQP::Actions is HLL::Actions {
                         }
                     }
                     if pir::defined($attr) {
-                        if pir::can($attr, 'type') {
+                        if nqp::can($attr, 'type') {
                             $past.type($attr.type);
                         }
                     }
@@ -539,7 +539,7 @@ class NQP::Actions is HLL::Actions {
 
     method package_def($/) {
         # Get name and meta-object.
-        my @ns := pir::clone__PP($<name><identifier>);
+        my @ns := nqp::clone($<name><identifier>);
         my $name := ~@ns.pop;
         my $how := %*HOW{$*PKGDECL};
 
@@ -553,7 +553,7 @@ class NQP::Actions is HLL::Actions {
         # type in which case it needs delayed evaluation. Normally, $?CLASS is
         # a fixed lexical, but for generic types it becomes a parameter. Also
         # for parametric types, pass along the role body block.
-        if pir::can($how, 'parametric') && $how.parametric($how) {
+        if nqp::can($how, 'parametric') && $how.parametric($how) {
             $past.blocktype('declaration');
             $past.unshift(PAST::Var.new( :name('$?CLASS'), :scope('parameter'),
                 :directaccess(1) ));
@@ -573,7 +573,7 @@ class NQP::Actions is HLL::Actions {
             my $parent;
             my $parent_found;
             try {
-                $parent := $*W.find_sym(pir::clone__PP($<parent>[0]<identifier>));
+                $parent := $*W.find_sym(nqp::clone($<parent>[0]<identifier>));
                 $parent_found := 1;
             }
             if $parent_found {
@@ -583,7 +583,7 @@ class NQP::Actions is HLL::Actions {
                 $/.CURSOR.panic("Could not find parent class '" ~ ~$<parent>[0] ~ "'");
             }
         }
-        elsif pir::can($how, 'set_default_parent') {
+        elsif nqp::can($how, 'set_default_parent') {
             my $default := $*PKGDECL eq 'grammar' ?? ['NQPCursor'] !! ['NQPMu'];
             $*W.pkg_add_parent_or_role($*PACKAGE, "set_default_parent",
                 $*W.find_sym($default));
@@ -595,7 +595,7 @@ class NQP::Actions is HLL::Actions {
                 my $role;
                 my $role_found;
                 try {
-                    $role := $*W.find_sym(pir::clone__PP($_<identifier>));
+                    $role := $*W.find_sym(nqp::clone($_<identifier>));
                     $role_found := 1;
                 }
                 if $role_found {
@@ -644,7 +644,7 @@ class NQP::Actions is HLL::Actions {
         }
         if $*SCOPE eq 'has' {
             # Locate the type of meta-attribute we need.
-            unless pir::exists(%*HOW, $*PKGDECL ~ '-attr') {
+            unless nqp::existskey(%*HOW, $*PKGDECL ~ '-attr') {
                 $/.CURSOR.panic("$*PKGDECL packages do not support attributes");
             }
             
@@ -714,7 +714,7 @@ class NQP::Actions is HLL::Actions {
             if $*SCOPE eq '' || $*SCOPE eq 'my' || $*SCOPE eq 'our' {
                 if $*MULTINESS eq 'multi' {
                     # Does the current block have a candidate holder in place?
-                    if $*SCOPE eq 'our' { pir::die('our-scoped multis not yet implemented') }
+                    if $*SCOPE eq 'our' { nqp::die('our-scoped multis not yet implemented') }
                     my $cholder;
                     my %sym := $*W.cur_lexpad().symbol($name);
                     if %sym<cholder> {
@@ -768,7 +768,7 @@ class NQP::Actions is HLL::Actions {
                     # Create a candidate list holder for the dispatchees
                     # this proto will work over, and install them along
                     # with the proto.
-                    if $*SCOPE eq 'our' { pir::die('our-scoped protos not yet implemented') }
+                    if $*SCOPE eq 'our' { nqp::die('our-scoped protos not yet implemented') }
                     my $cholder := PAST::Op.new( :pasttype('list') );
                     my $BLOCK := $*W.cur_lexpad();
 					$BLOCK[0].push(PAST::Var.new( :name($name), :isdecl(1), :directaccess(1),
@@ -1082,7 +1082,7 @@ class NQP::Actions is HLL::Actions {
             my $regex := QRegex::P6Regex::Actions::buildsub($<p6regex>.ast, $block);
             $regex.name($name);
             
-            if $*PKGDECL && pir::can($*PACKAGE.HOW, 'add_method') {
+            if $*PKGDECL && nqp::can($*PACKAGE.HOW, 'add_method') {
                 # Add the actual method.
                 $*W.pkg_add_method($*PACKAGE, 'add_method', $name, $*W.create_code($regex, $name, 0));
             }
@@ -1143,7 +1143,7 @@ class NQP::Actions is HLL::Actions {
             $var := PAST::Var.new( :name(~$<name>), :scope('lexical') );
         }
         else {
-            my @ns := pir::clone__PP($<name><identifier>);
+            my @ns := nqp::clone($<name><identifier>);
             $var := lexical_package_lookup(@ns, $/);
         }
         
@@ -1159,7 +1159,7 @@ class NQP::Actions is HLL::Actions {
     method term:sym<pir::op>($/) {
         my $past := $<args> ?? $<args>[0].ast !! PAST::Op.new( :node($/) );
         my $pirop := ~$<op>;
-        $pirop := pir::join(' ', pir::split('__', $pirop));
+        $pirop := nqp::join(' ', nqp::split('__', $pirop));
         $past.pirop($pirop);
         $past.pasttype('pirop');
         make $past;
@@ -1204,7 +1204,7 @@ class NQP::Actions is HLL::Actions {
                 $past[$i] := $past[$i][0];
                 $past[$i].flat(1);
                 if $past[$i].isa(PAST::Val)
-                    && pir::substr($past[$i].name, 0, 1) eq '%' {
+                    && nqp::substr($past[$i].name, 0, 1) eq '%' {
                         $past[$i].named(1);
                 }
             }

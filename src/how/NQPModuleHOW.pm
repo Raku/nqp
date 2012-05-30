@@ -8,7 +8,7 @@ knowhow NQPModuleHOW {
     }
 
     method new(:$name) {
-        my $obj := pir::repr_instance_of__PP(self);
+        my $obj := nqp::create(self);
         $obj.BUILD(:name($name));
         $obj
     }
@@ -29,15 +29,15 @@ knowhow NQPModuleHOW {
     method add_method($obj, $name, $code_obj) {
         # XXX Commented out as in some places, module is used to try to
         # shove methods into Parrot classes (which doesn't work any, mind).
-        #pir::die("Modules may not have methods");
+        #nqp::die("Modules may not have methods");
     }
 
     method add_multi_method($obj, $name, $code_obj) {
-        pir::die("Modules may not have methods");
+        nqp::die("Modules may not have methods");
     }
 
     method add_attribute($obj, $meta_attr) {
-        pir::die("Modules may not have attributes");
+        nqp::die("Modules may not have attributes");
     }
 
     method compose($obj) {
