@@ -108,7 +108,7 @@ class HLL::CommandLine::Result {
     method add-option($name, $value) {
         # how I miss p6's Hash.push
 
-        if pir::exists(%!options, $name) {
+        if nqp::existskey(%!options, $name) {
             if pir::does(%!options{$name}, 'array') {
                 nqp::push(%!options{$name}, $value);
             } else {
@@ -234,7 +234,7 @@ class HLL::CommandLine::Parser {
                         $value     := '';
                         $has-value := 1;
                     }
-                    nqp::die("Illegal option --$opt") unless pir::exists(%!options, $opt);
+                    nqp::die("Illegal option --$opt") unless nqp::existskey(%!options, $opt);
                     nqp::die("Option --$opt does not allow a value") if !self.wants-value($opt) && $has-value;
                     if !$has-value && self.wants-value($opt) {
                         $value := get-value("--$opt");

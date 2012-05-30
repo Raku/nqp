@@ -2,7 +2,7 @@ knowhow RoleToClassApplier {
 
     sub has_method($target, $name, $local) {
         my %mt := $target.HOW.method_table($target);
-        pir::exists(%mt, $name);
+        nqp::existskey(%mt, $name);
     }
 
     sub has_attribute($target, $name) {

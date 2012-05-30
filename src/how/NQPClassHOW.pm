@@ -551,7 +551,7 @@ knowhow NQPClassHOW {
     ##
     method cache($obj, $key, $value_generator) {
         nqp::existskey(%caches, nqp::where(self)) || (%caches{nqp::where(self)} := {});
-        pir::exists(%caches{nqp::where(self)}, $key) ??
+        nqp::existskey(%caches{nqp::where(self)}, $key) ??
             %caches{nqp::where(self)}{$key} !!
             (%caches{nqp::where(self)}{$key} := $value_generator())
     }

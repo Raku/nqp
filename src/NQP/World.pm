@@ -203,7 +203,7 @@ class NQP::World is HLL::World {
             my $i := 0;
             while $i < $c {
                 my $subid := $compiled[$i].get_subid();
-                if pir::exists(%!code_objects_to_fix_up, $subid) {
+                if nqp::existskey(%!code_objects_to_fix_up, $subid) {
                     # First, go over the code objects. Update the $!do, and the
                     # entry in the SC. Make sure the newly compiled code is marked
                     # as a static code ref.
@@ -436,7 +436,7 @@ class NQP::World is HLL::World {
             $i := $i - 1;
             my %symbols := @!BLOCKS[$i].symtable();
             for %symbols {
-                if !%seen{$_.key} && pir::exists($_.value, 'value') {
+                if !%seen{$_.key} && nqp::existskey($_.value, 'value') {
                     try {
                         $wrapper[0].push(PAST::Var.new(
                             :name($_.key), :scope('lexical_6model'), :isdecl(1),
@@ -576,7 +576,7 @@ class NQP::World is HLL::World {
                 $i := $i - 1;
                 my %sym := @!BLOCKS[$i].symbol($final_name);
                 if +%sym {
-                    if pir::exists(%sym, 'value') {
+                    if nqp::existskey(%sym, 'value') {
                         return %sym<value>;
                     }
                     else {
@@ -597,7 +597,7 @@ class NQP::World is HLL::World {
                 $i := $i - 1;
                 my %sym := @!BLOCKS[$i].symbol($first);
                 if +%sym {
-                    if pir::exists(%sym, 'value') {
+                    if nqp::existskey(%sym, 'value') {
                         $result := %sym<value>;
                         @name.shift();
                         $i := 0;
@@ -611,7 +611,7 @@ class NQP::World is HLL::World {
         
         # Try to chase down the parts of the name.
         for @name {
-            if pir::exists($result.WHO, ~$_) {
+            if nqp::existskey($result.WHO, ~$_) {
                 $result := ($result.WHO){$_};
             }
             else {

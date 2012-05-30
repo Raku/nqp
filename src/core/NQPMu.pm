@@ -19,7 +19,7 @@ my class NQPMu {
         for $type.HOW.attributes($type, :local) {
             my $name := $_.name;
             my $shortname := nqp::substr($name, 2);
-            if pir::exists(%attributes, $shortname) {
+            if nqp::existskey(%attributes, $shortname) {
                 pir::setattribute__vPPsP($self, $type, $name, %attributes{$shortname});
             }
         }

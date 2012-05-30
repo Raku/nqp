@@ -215,7 +215,7 @@ class NQP::Actions is HLL::Actions {
     
     sub import_HOW_exports($UNIT) {    
         # See if we've exported any HOWs.
-        if pir::exists($UNIT, 'EXPORTHOW') {
+        if nqp::existskey($UNIT, 'EXPORTHOW') {
             for $UNIT<EXPORTHOW>.WHO {
                 %*HOW{$_.key} := $_.value;
             }
@@ -644,7 +644,7 @@ class NQP::Actions is HLL::Actions {
         }
         if $*SCOPE eq 'has' {
             # Locate the type of meta-attribute we need.
-            unless pir::exists(%*HOW, $*PKGDECL ~ '-attr') {
+            unless nqp::existskey(%*HOW, $*PKGDECL ~ '-attr') {
                 $/.CURSOR.panic("$*PKGDECL packages do not support attributes");
             }
             
