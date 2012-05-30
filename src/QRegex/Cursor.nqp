@@ -137,6 +137,8 @@ role NQPCursorRole {
         $!pos := $pos;
         $!restart := $!regexsub
             if $backtrack;
+        $!bstack := nqp::null()
+            unless $backtrack;
         self.'!reduce'($name) if $name;
     }
 
