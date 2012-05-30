@@ -55,7 +55,7 @@ class HLL::Actions {
             elsif $<OPER><O><pirop>    { $past.pirop( ~$<OPER><O><pirop> ); }
             unless $past.name {
                 if $key eq 'LIST' { $key := 'infix'; }
-                my $name := pir::downcase($key) ~ ':<' ~ $<OPER><sym> ~ '>';
+                my $name := nqp::lc($key) ~ ':<' ~ $<OPER><sym> ~ '>';
                 $past.name('&' ~ $name);
             }
         }

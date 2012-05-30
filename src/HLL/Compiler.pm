@@ -77,7 +77,7 @@ class HLL::Compiler {
 
     method get_module($name) {
         my @name := self.parse_name($name);
-        @name.unshift(pir::downcase($!language));
+        @name.unshift(nqp::lc($!language));
         pir::get_root_namespace__PP(@name);
     }
 
@@ -143,7 +143,7 @@ class HLL::Compiler {
         my %interactive_pad := 
             pir::getattribute__PPs($interactive_ctx, 'lex_pad');
      
-        my $target := pir::downcase(%adverbs<target>);
+        my $target := nqp::lc(%adverbs<target>);
 
         nqp::print(pir::getinterp__P().stderr_handle(), self.interactive_banner);
 
@@ -317,7 +317,7 @@ class HLL::Compiler {
         my $result;
         my $error;
         my $has_error := 0;
-        my $target := pir::downcase(%adverbs<target>);
+        my $target := nqp::lc(%adverbs<target>);
         try {
             if pir::defined(%adverbs<e>) {
                 $!user_progname := '-e';
@@ -396,7 +396,7 @@ class HLL::Compiler {
     }
 
     method evalfiles($files, *@args, *%adverbs) {
-        my $target := pir::downcase(%adverbs<target>);
+        my $target := nqp::lc(%adverbs<target>);
         my $encoding := %adverbs<encoding>;
         my @files := pir::does($files, 'array') ?? $files !! [$files];
         $!user_progname := nqp::join(',', @files);
@@ -430,7 +430,7 @@ class HLL::Compiler {
     method compile($source, *%adverbs) {
         my %*COMPILING<%?OPTIONS> := %adverbs;
 
-        my $target := pir::downcase(%adverbs<target>);
+        my $target := nqp::lc(%adverbs<target>);
         my $result := $source;
         my $stderr := pir::getinterp().stderr_handle;
         for self.stages() {
@@ -501,7 +501,7 @@ class HLL::Compiler {
     method dumper($obj, $name, *%options) {
         if %options<dumper> {
             pir::load_bytecode('PCT/Dumper.pbc');
-            my $dumper := PCT::Dumper{pir::downcase__SS(%options<dumper>)};
+            my $dumper := PCT::Dumper{nqp::lc(%options<dumper>)};
             $dumper($obj, $name)
         }
         else {
