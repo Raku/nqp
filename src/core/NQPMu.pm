@@ -36,7 +36,7 @@ my class NQPMu {
 
     proto method ACCEPTS($topic) { * }
     multi method ACCEPTS(NQPMu:U $self: $topic) {
-        pir::type_check__IPP($topic, self.WHAT)
+        nqp::istype($topic, self.WHAT)
     }
 
     method isa($type) {
