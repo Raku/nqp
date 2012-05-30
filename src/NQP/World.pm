@@ -210,7 +210,7 @@ class NQP::World is HLL::World {
                     my $static := %!code_objects_to_fix_up{$subid}.shift();
                     nqp::bindattr($static, $code_type, '$!do', $compiled[$i]);
                     for %!code_objects_to_fix_up{$subid} {
-                        nqp::bindattr($_, $code_type, '$!do', pir::clone($compiled[$i]));
+                        nqp::bindattr($_, $code_type, '$!do', nqp::clone($compiled[$i]));
                     }
                     pir::setprop__vPsP($compiled[$i], 'STATIC_CODE_REF', $compiled[$i]);
                     self.update_root_code_ref(%!code_stub_sc_idx{$subid}, $compiled[$i]);

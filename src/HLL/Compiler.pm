@@ -579,7 +579,7 @@ class HLL::Compiler {
             $where    := %adverbs<after>;
             $position := 'after';
         } else {
-            my @new-stages := pir::clone(self.stages);
+            my @new-stages := nqp::clone(self.stages);
             nqp::push_s(@new-stages, $stagename);
             self.stages(@new-stages);
             return 1;
