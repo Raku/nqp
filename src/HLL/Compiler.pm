@@ -290,7 +290,7 @@ class HLL::Compiler {
         ## always passed to an initial run of the interpreter binary,
         ## whether you want it or not.)  We expect to remove this
         ## check eventually (or make it a lot smarter than it is here).
-        if pir::index(@args[2], '@INC') >= 0 {
+        if nqp::index(@args[2], '@INC') >= 0 {
             pir::exit(0);
         }
 
@@ -606,7 +606,7 @@ class HLL::Compiler {
         my $sigil := nqp::substr(@ns[0], 0, 1);
 
         # move any leading sigil to the last item
-        my $idx   := pir::index('$@%&', $sigil);
+        my $idx   := nqp::index('$@%&', $sigil);
         if $idx >= 0 {
             @ns[0]  := nqp::substr(@ns[0], 1);
             @ns[-1] := $sigil ~ @ns[-1];

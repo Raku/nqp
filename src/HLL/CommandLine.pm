@@ -153,7 +153,7 @@ class HLL::CommandLine::Parser {
     }
 
     method add-spec($s) {
-        my $i := pir::index($s, '=');
+        my $i := nqp::index($s, '=');
         my $type;
         my @options;
         if $i < 0 {
@@ -222,7 +222,7 @@ class HLL::CommandLine::Parser {
                 if nqp::substr($cur, 0, 2) eq '--' {
                     # long option
                     my $opt := nqp::substr(@args[$i], 2);
-                    my $idx := pir::index($opt, '=');
+                    my $idx := nqp::index($opt, '=');
                     my $value := 1;
                     my $has-value := 0;
 
