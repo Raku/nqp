@@ -45,7 +45,7 @@ knowhow ModuleLoader {
         # its mainline. Otherwise, we already loaded it so go on
         # with what we already have.
         my $module_ctx;
-        my $path := pir::join('/', nqp::split('::', $module_name)) ~ '.pbc';
+        my $path := nqp::join('/', nqp::split('::', $module_name)) ~ '.pbc';
         my @prefixes := self.search_path('module-path');
         for @prefixes -> $prefix {
             if pir::stat__isi("$prefix/$path", 0) {

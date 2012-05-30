@@ -9,7 +9,7 @@ my $r := $x.parse(['-a', 'b']);
 
 ok($r.isa(HLL::CommandLine::Result), 'got the right object type back');
 ok($r.arguments()[0] eq 'b', '"b" got classified as argument')
-    || say("# arguments: '", pir::join('|', $r.arguments()), "'");
+    || say("# arguments: '", nqp::join('|', $r.arguments()), "'");
 ok($r.options(){'a'} == 1, '-a is an option');
 
 
@@ -34,7 +34,7 @@ ok($r.arguments[0] eq 'bar', '...and  it is the right one');
 
 $r := $x.parse(['a', '--', 'b', '--target', 'c']);
 ok(+$r.arguments == 4, 'got 4 arguments, -- does not count');
-ok(pir::join(',',$r.arguments) eq 'a,b,--target,c', '... and the right arguments');
+ok(nqp::join(',',$r.arguments) eq 'a,b,--target,c', '... and the right arguments');
 
 $x.add-stopper('-e');
 
@@ -50,7 +50,7 @@ ok(+$r.arguments == 1, 'non-option stopper worked');
 $x.stop-after-first-arg;
 
 $r := $x.parse(['-a', 'script.pl', '--verbose']);
-ok(pir::join(',', $r.arguments) eq 'script.pl,--verbose',
+ok(nqp::join(',', $r.arguments) eq 'script.pl,--verbose',
     'stop-after-first-arg');
 
 $r := $x.parse(['-aefoo']);
@@ -65,7 +65,7 @@ $r := $x.parse(['-a', '-b', '-l', '--long', '-w', 'v1',
                 '--other=v3', '-o', 'v4',
                 '--with-arg', 'v2', 'arg1', 'arg2']);
 
-ok(pir::join(',', $r.arguments) eq 'arg1,arg2',
+ok(nqp::join(',', $r.arguments) eq 'arg1,arg2',
         'arguments in presence of aliases');
 
 ok($r.options{'a'} == 1, 'short alias (left)');

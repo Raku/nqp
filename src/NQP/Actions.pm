@@ -35,7 +35,7 @@ class NQP::Actions is HLL::Actions {
 
     sub colonpair_str($ast) {
         PAST::Op.ACCEPTS($ast)
-        ?? pir::join(' ', $ast.list)
+        ?? nqp::join(' ', $ast.list)
         !! $ast.value;
     }
 
@@ -1159,7 +1159,7 @@ class NQP::Actions is HLL::Actions {
     method term:sym<pir::op>($/) {
         my $past := $<args> ?? $<args>[0].ast !! PAST::Op.new( :node($/) );
         my $pirop := ~$<op>;
-        $pirop := pir::join(' ', nqp::split('__', $pirop));
+        $pirop := nqp::join(' ', nqp::split('__', $pirop));
         $past.pirop($pirop);
         $past.pasttype('pirop');
         make $past;

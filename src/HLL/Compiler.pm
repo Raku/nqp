@@ -96,7 +96,7 @@ class HLL::Compiler {
     method config() { %!config };
 
     method load_module($name) {
-        my $base := pir::join('/', self.parse_name($name));
+        my $base := nqp::join('/', self.parse_name($name));
         my $loaded := 0;
         try { pir::load_bytecode("$base.pbc"); $loaded := 1 };
         unless $loaded { pir::load_bytecode("$base.pir"); $loaded := 1 }
@@ -238,7 +238,7 @@ class HLL::Compiler {
     }
 
     method panic(*@args) {
-        pir::die(pir::join('', @args))
+        pir::die(nqp::join('', @args))
     }
 
     method stages(@value?) {
@@ -359,7 +359,7 @@ class HLL::Compiler {
                 my $err := pir::getstderr__P();
                 $err.print($error);
                 $err.print("\n");
-                $err.print(pir::join("\n", $error.backtrace_strings));
+                $err.print(nqp::join("\n", $error.backtrace_strings));
                 pir::exit(1);
             } else {
                 self.handle-exception($error);
@@ -417,8 +417,8 @@ class HLL::Compiler {
             }
             pir::die($err) if $err;
         }
-        my $code := pir::join('', @codes);
-        my $?FILES := pir::join(' ', @files);
+        my $code := nqp::join('', @codes);
+        my $?FILES := nqp::join(' ', @files);
         my $r := self.eval($code, |@args, |%adverbs);
         if $target eq '' || $target eq 'pir' {
             return $r;

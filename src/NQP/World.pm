@@ -616,7 +616,7 @@ class NQP::World is HLL::World {
             }
             else {
                 pir::die("Could not locate compile-time value for symbol " ~
-                    pir::join('::', @name));
+                    nqp::join('::', @name));
             }
         }
         
