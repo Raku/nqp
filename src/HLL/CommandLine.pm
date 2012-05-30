@@ -102,7 +102,7 @@ class HLL::CommandLine::Result {
     method options()   { %!options   }
 
     method add-argument($x) {
-        pir::push__vPP(@!arguments, $x);
+        nqp::push(@!arguments, $x);
     }
 
     method add-option($name, $value) {
@@ -110,7 +110,7 @@ class HLL::CommandLine::Result {
 
         if pir::exists(%!options, $name) {
             if pir::does(%!options{$name}, 'array') {
-                pir::push(%!options{$name}, $value);
+                nqp::push(%!options{$name}, $value);
             } else {
                 %!options{$name} := [ %!options{$name}, $value ];
             }

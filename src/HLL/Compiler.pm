@@ -409,7 +409,7 @@ class HLL::Compiler {
                 # dunno why it was this way, and why it doesn't work in nqp
 #                $in-handle.encoding($encoding) unless $encoding eq 'utf8';
                 $in-handle.encoding($encoding);
-                pir::push(@codes, $in-handle.readall($_));
+                nqp::push_s(@codes, $in-handle.readall($_));
                 $in-handle.close;
                 CATCH {
                     $err := "Error while reading from file: $_";
@@ -580,7 +580,7 @@ class HLL::Compiler {
             $position := 'after';
         } else {
             my @new-stages := pir::clone(self.stages);
-            pir::push(@new-stages, $stagename);
+            nqp::push_s(@new-stages, $stagename);
             self.stages(@new-stages);
             return 1;
         }
@@ -588,14 +588,14 @@ class HLL::Compiler {
         for self.stages {
             if $_ eq $where {
                 if $position eq 'before' {
-                    pir::push(@new-stages, $stagename);
-                    pir::push(@new-stages, $_);
+                    nqp::push_s(@new-stages, $stagename);
+                    nqp::push_s(@new-stages, $_);
                 } else {
-                    pir::push(@new-stages, $_);
-                    pir::push(@new-stages, $stagename);
+                    nqp::push_s(@new-stages, $_);
+                    nqp::push_s(@new-stages, $stagename);
                 }
             } else {
-                pir::push(@new-stages, $_)
+                nqp::push_s(@new-stages, $_)
             }
         }
         self.stages(@new-stages);
@@ -616,7 +616,7 @@ class HLL::Compiler {
         # maybe replace with a grep() once we have the setting for sure
         my @actual_ns;
         for @ns {
-            pir::push(@actual_ns, $_) unless $_ eq '';
+            nqp::push_s(@actual_ns, $_) unless $_ eq '';
         }
         @actual_ns;
     }
