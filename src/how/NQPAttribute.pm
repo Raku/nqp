@@ -23,7 +23,7 @@ knowhow NQPAttribute {
     }
 
     method type() {
-        $!has_type ?? $!type !! pir::null__P()
+        $!has_type ?? $!type !! nqp::null()
     }
     
     method has_accessor() {

@@ -160,7 +160,7 @@ class HLL::Compiler {
             my $prompt := self.interactive_prompt // '> ';
             my $code := $stdin.readline_interactive(~$prompt);
 
-            last if pir::isnull($code);
+            last if nqp::isnull($code);
             unless pir::defined($code) {
                 nqp::print("\n");
                 last;
@@ -187,7 +187,7 @@ class HLL::Compiler {
                     }
                     $save_ctx := $interactive_ctx;
                 }
-                next if pir::isnull($output);
+                next if nqp::isnull($output);
 
                 if !$target {
                     self.autoprint($output);
@@ -331,7 +331,7 @@ class HLL::Compiler {
             elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }
             else { $result := self.evalfiles(@a[0], |@a, |%adverbs) }
 
-            if !pir::isnull($result) && $target eq 'pir' {
+            if !nqp::isnull($result) && $target eq 'pir' {
                 my $output := %adverbs<output>;
                 my $fh := ($output eq '' || $output eq '-')
                         ?? pir::getinterp__P().stdout_handle()

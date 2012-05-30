@@ -69,7 +69,7 @@ knowhow ModuleLoader {
         if pir::defined($module_ctx) {
             # Merge any globals.
             my $UNIT := pir::getattribute__PPs($module_ctx, 'lex_pad');
-            unless pir::isnull($UNIT<GLOBALish>) {
+            unless nqp::isnull($UNIT<GLOBALish>) {
                 if +@global_merge_target {
                     merge_globals(@global_merge_target[0], $UNIT<GLOBALish>);
                 }

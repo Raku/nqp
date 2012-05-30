@@ -23,7 +23,7 @@ grammar NQP::Grammar is HLL::Grammar {
                     nqp::getattr_s(self, NQPCursor, '$!target') !!
                     nqp::getattr(self, Regex::Cursor, '$!target')) ~
             '-' ~ ~pir::time__N();
-        my $*W := pir::isnull($file) ??
+        my $*W := nqp::isnull($file) ??
             NQP::World.new(:handle($source_id)) !!
             NQP::World.new(:handle($source_id), :description($file));
 

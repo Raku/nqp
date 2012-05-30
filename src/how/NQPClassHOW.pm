@@ -79,7 +79,7 @@ knowhow NQPClassHOW {
         if %!methods{$name} {
             nqp::die("This class already has a method named " ~ $name);
         }
-        if pir::isnull__IP($code_obj) || pir::isa__IPs($code_obj, 'Undef') {
+        if nqp::isnull($code_obj) || pir::isa__IPs($code_obj, 'Undef') {
             nqp::die("Cannot add a null method '$name' to class '$!name'");
         }
         pir::set_method_cache_authoritativeness__vPi($obj, 0);
@@ -389,7 +389,7 @@ knowhow NQPClassHOW {
             pir::set_boolification_spec__0PiP($obj, 0, $bool_meth)
         }
         else {
-            pir::set_boolification_spec__0PiP($obj, 5, pir::null__P())
+            pir::set_boolification_spec__0PiP($obj, 5, nqp::null())
         }
     }
 
@@ -543,7 +543,7 @@ knowhow NQPClassHOW {
                     $found;
             }
         }
-        pir::null__P()
+        nqp::null()
     }
 
     ##
