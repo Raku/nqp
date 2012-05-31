@@ -22,7 +22,7 @@ say("1..0 skip design changes (EXPORT now lexical), need re-work");
 #ok( alpha() eq 'alpha', "imported 'alpha' sub into current namespace" );
 #
 #our &beta;
-#ok( !pir::defined(&beta), "didn't import &beta");
+#ok( !nqp::defined(&beta), "didn't import &beta");
 #
 #our $gamma;
 #ok( $gamma eq 'gamma', 'did import $gamma');

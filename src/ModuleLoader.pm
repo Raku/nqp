@@ -53,7 +53,7 @@ knowhow ModuleLoader {
                 last;
             }
         }
-        if pir::defined(%modules_loaded{$path}) {
+        if nqp::defined(%modules_loaded{$path}) {
             $module_ctx := %modules_loaded{$path};
         }
         else {
@@ -66,7 +66,7 @@ knowhow ModuleLoader {
         }
 
         # Provided we have a mainline...
-        if pir::defined($module_ctx) {
+        if nqp::defined($module_ctx) {
             # Merge any globals.
             my $UNIT := pir::getattribute__PPs($module_ctx, 'lex_pad');
             unless nqp::isnull($UNIT<GLOBALish>) {
@@ -152,13 +152,13 @@ knowhow ModuleLoader {
             }
 
             # Unless we already did so, load the setting.
-            unless pir::defined(%settings_loaded{$path}) {
+            unless nqp::defined(%settings_loaded{$path}) {
                 my $*CTXSAVE := self;
                 my $*MAIN_CTX;
                 my $preserve_global := pir::get_hll_global__Ps('GLOBAL');
                 pir::load_bytecode($path);
                 pir::set_hll_global__vsP('GLOBAL', $preserve_global);
-                unless pir::defined($*MAIN_CTX) {
+                unless nqp::defined($*MAIN_CTX) {
                     nqp::die("Unable to load setting $setting_name; maybe it is missing a YOU_ARE_HERE?");
                 }
                 %settings_loaded{$path} := $*MAIN_CTX;

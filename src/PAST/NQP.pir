@@ -530,6 +530,7 @@ entry to produce the node to be returned.
     maphash['substr']   = 'substr__Ssii'
     maphash['x']        = 'repeat__Ssi'
     maphash['iscclass'] = 'is_cclass__Iisi'
+    maphash['findnotcclass'] = 'find_not_cclass__Iisii'
     maphash['sprintf']  = 'sprintf__SsP'
 
     # relational opcodes
@@ -656,6 +657,8 @@ entry to produce the node to be returned.
     maphash['box_s']      = 'repr_box_str__PsP'
     maphash['where']      = 'get_id__IP'
     maphash['can']        = 'can__IPs'
+    maphash['findmethod'] = 'find_method__PPs'
+    maphash['defined']    = 'defined__IP'
 
     # serialization context related opcodes
     maphash['sha1']       = 'nqp_sha1__Ss'

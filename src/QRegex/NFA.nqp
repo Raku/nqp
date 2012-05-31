@@ -145,7 +145,7 @@ class QRegex::NFA {
         if $max > 1 || $min > 1 {
             my $count := 0;
             my $st;
-            my $has_sep := pir::defined($node[1]);
+            my $has_sep := nqp::defined($node[1]);
             while $count < $max || $count < $min {
                 if $count >= $min {
                     my $f := self.addedge($from, $to, $EDGE_EPSILON, 0);
@@ -175,7 +175,7 @@ class QRegex::NFA {
         }
         if $max == -1 {
             if $min == 0 { # * quantifier
-                if pir::defined($node[1]) { # * %
+                if nqp::defined($node[1]) { # * %
                     my $start := self.addstate();
                     self.addedge($from, $start, $EDGE_EPSILON, 0);
                     my $looper := self.addstate();
@@ -195,7 +195,7 @@ class QRegex::NFA {
                 self.addedge($from, $start, $EDGE_EPSILON, 0);
                 my $looper := self.addstate();
                 my $st := self.regex_nfa($node[0], $start, $looper);
-                if pir::defined($node[1]) {
+                if nqp::defined($node[1]) {
                     self.regex_nfa($node[1], $looper, $start);
                 }
                 else {
