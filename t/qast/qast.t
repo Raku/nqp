@@ -1,6 +1,6 @@
 use QRegex;
 
-plan(46);
+plan(59);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
