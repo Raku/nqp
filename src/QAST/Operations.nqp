@@ -111,37 +111,26 @@ class QAST::Operations {
 }
 
 # Data structures
-QAST::Operations.add_core_op('list', -> $qastcomp, $op {
-    # Create register for the resulting list and make an empty one.
-    my $list_reg := $*REGALLOC.fresh_p();
-    my $ops := $qastcomp.post_new('Ops', :result($list_reg));
-    $ops.push_pirop('new', $list_reg, "'ResizablePMCArray'");
-    
-    # Push all the things.
-    for $op.list {
-        my $post := $qastcomp.coerce($qastcomp.as_post($_), 'P');
-        $ops.push($post);
-        $ops.push_pirop('push', $list_reg, $post.result);
+sub make_listgen_code($rpa_name, $rpa_type) {
+    -> $qastcomp, $op {
+        # Create register for the resulting list and make an empty one.
+        my $list_reg := $*REGALLOC.fresh_p();
+        my $ops := $qastcomp.post_new('Ops', :result($list_reg));
+        $ops.push_pirop('new', $list_reg, $rpa_name);
+
+        # Push all the things.
+        for $op.list {
+            my $post := $qastcomp.coerce($qastcomp.as_post($_), $rpa_type);
+            $ops.push($post);
+            $ops.push_pirop('push', $list_reg, $post.result);
+        }
+        $ops
     }
-    
-    $ops
-});
-
-QAST::Operations.add_core_op('list_i', -> $qastcomp, $op {
-    # Create register for the resulting list and make an empty one.
-    my $list_reg := $*REGALLOC.fresh_p();
-    my $ops := $qastcomp.post_new('Ops', :result($list_reg));
-    $ops.push_pirop('new', $list_reg, "'ResizableIntegerArray'");
-
-    # Push all the things.
-    for $op.list {
-        my $post := $qastcomp.coerce($qastcomp.as_post($_), 'i');
-        $ops.push($post);
-        $ops.push_pirop('push', $list_reg, $post.result);
-    }
-
-    $ops
-});
+}
+QAST::Operations.add_core_op('list',   make_listgen_code("'ResizablePMCArray'",     'P'));
+QAST::Operations.add_core_op('list_i', make_listgen_code("'ResizableIntegerArray'", 'i'));
+QAST::Operations.add_core_op('list_n', make_listgen_code("'ResizableFloatArray'",   'n'));
+QAST::Operations.add_core_op('list_s', make_listgen_code("'ResizableStringArray'",  's'));
 
 QAST::Operations.add_core_op('hash', -> $qastcomp, $op {
     # Create register for the resulting hash and make an empty one.
