@@ -433,6 +433,7 @@ entry to produce the node to be returned.
     # I/O opcodes
     maphash['print'] = 'print'
     maphash['say']   = 'say'
+    maphash['stat']   = 'stat__isi'
 
     # terms
     maphash['time_i'] = 'time__I'
