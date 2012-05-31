@@ -40,7 +40,7 @@ role NQPCursorRole {
                 $subcur := nqp::shift($iter);
                 $submatch := $subcur.MATCH;
                 $name := nqp::getattr($subcur, $?CLASS, '$!name');
-                if pir::defined($name) {
+                if nqp::defined($name) {
                     if nqp::index($name, '=') < 0 {
                         %caplist{$name} >= 2
                             ?? nqp::push($caps{$name}, $submatch)
@@ -64,7 +64,7 @@ role NQPCursorRole {
         nqp::bindattr($new, $?CLASS, '$!orig', $target);
         $target := pir::trans_encoding__Ssi($target, pir::find_encoding__Is('ucs4'));
         nqp::bindattr_s($new, $?CLASS, '$!target', $target);
-        if pir::defined($c) {
+        if nqp::defined($c) {
             nqp::bindattr_i($new, $?CLASS, '$!from', -1);
             nqp::bindattr_i($new, $?CLASS, '$!pos', $c);
         }
@@ -115,7 +115,7 @@ role NQPCursorRole {
 
     method !cursor_capture($capture, $name) {
         $!match  := nqp::null();
-        $!cstack := [] unless pir::defined($!cstack);
+        $!cstack := [] unless nqp::defined($!cstack);
         nqp::push($!cstack, $capture);
         nqp::bindattr($capture, $?CLASS, '$!name', $name);
         pir::push__vPi($!bstack, 0);
@@ -126,7 +126,7 @@ role NQPCursorRole {
     }
     
     method !cursor_push_cstack($capture) {
-        $!cstack := [] unless pir::defined($!cstack);
+        $!cstack := [] unless nqp::defined($!cstack);
         nqp::push($!cstack, $capture);
         $!cstack;
     }
@@ -161,13 +161,13 @@ role NQPCursorRole {
 
     method !reduce($name) {
         my $actions := pir::find_dynamic_lex__Ps('$*ACTIONS');
-        pir::find_method__PPs($actions, $name)($actions, self.MATCH)
+        nqp::find_method($actions, $name)($actions, self.MATCH)
             if nqp::can($actions, $name);
     }
 
     method !reduce_with_match($name, $key, $match) {
         my $actions := pir::find_dynamic_lex__Ps('$*ACTIONS');
-        pir::find_method__PPs($actions, $name)($actions, $match, $key)
+        nqp::find_method($actions, $name)($actions, $match, $key)
             if nqp::can($actions, $name);
     }
 
@@ -283,7 +283,7 @@ role NQPCursorRole {
               || !nqp::iscclass(pir::const::CCLASS_WORD, $!target, $!pos)
               || !nqp::iscclass(pir::const::CCLASS_WORD, $!target, $!pos-1)
              ) && $cur."!cursor_pass"(
-                      pir::find_not_cclass__Iisii(
+                      nqp::findnotcclass(
                           pir::const::CCLASS_WHITESPACE, $!target, $!pos, nqp::chars($!target)),
                       'ws');
         $cur;
@@ -313,7 +313,7 @@ role NQPCursorRole {
     method ident() {
         my $cur := self."!cursor_start"();
         $cur."!cursor_pass"(
-                pir::find_not_cclass__Iisii(
+                nqp::findnotcclass(
                     pir::const::CCLASS_WORD,
                     $!target, $!pos, nqp::chars($!target)))
             if $!pos < nqp::chars($!target) &&
@@ -497,7 +497,7 @@ class NQPCursor does NQPCursorRole {
         my $cur := self.'!cursor_init'($target, |%options);
         pir::is_invokable__IP($rule) ??
             $rule($cur).MATCH() !!
-            pir::find_method__PPs($cur, $rule)($cur).MATCH()
+            nqp::find_method($cur, $rule)($cur).MATCH()
     }
 
     method !INTERPOLATE($var) {

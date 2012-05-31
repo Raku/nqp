@@ -35,7 +35,7 @@ class HLL::Actions {
 
     method SET_BLOCK_OUTER_CTX($block) {
         my $outer_ctx := %*COMPILING<%?OPTIONS><outer_ctx>;
-        if pir::defined($outer_ctx) {
+        if nqp::defined($outer_ctx) {
             my @ns := pir::getattribute__PPs($outer_ctx, 'current_namespace').get_name;
             @ns.shift;
             $block.namespace(@ns);
@@ -61,7 +61,7 @@ class HLL::Actions {
         }
         if $key eq 'POSTFIX' { $past.unshift($/[0].ast); }
         else {
-            for $/.list { if pir::defined__IP($_.ast) { $past.push($_.ast); } }
+            for $/.list { if nqp::defined($_.ast) { $past.push($_.ast); } }
         }
         make $past;
     }
