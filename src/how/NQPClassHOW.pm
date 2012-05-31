@@ -138,7 +138,7 @@ knowhow NQPClassHOW {
     }
 
     method add_parrot_vtable_mapping($obj, $name, $meth) {
-        if pir::defined(%!parrot_vtable_mapping{$name}) {
+        if nqp::defined(%!parrot_vtable_mapping{$name}) {
             nqp::die("Class '" ~ $!name ~
                 "' already has a Parrot v-table override for '" ~
                 $name ~ "'");
@@ -147,7 +147,7 @@ knowhow NQPClassHOW {
     }
 
     method add_parrot_vtable_handler_mapping($obj, $name, $att_name) {
-        if pir::defined(%!parrot_vtable_handler_mapping{$name}) {
+        if nqp::defined(%!parrot_vtable_handler_mapping{$name}) {
             nqp::die("Class '" ~ $!name ~
                 "' already has a Parrot v-table handler for '" ~
                 $name ~ "'");
@@ -212,7 +212,7 @@ knowhow NQPClassHOW {
             # Do we have anything in the methods table already in
             # this class?
             my $dispatcher := %!methods{$name};
-            if pir::defined($dispatcher) {
+            if nqp::defined($dispatcher) {
                 # Yes. Only or dispatcher, though? If only, error. If
                 # dispatcher, simply add new dispatchee.
                 if pir::is_dispatcher__IP($dispatcher) {
@@ -233,7 +233,7 @@ knowhow NQPClassHOW {
                     my $parent := @!mro[$j];
                     my %meths := $parent.HOW.method_table($parent);
                     my $dispatcher := %meths{$name};
-                    if pir::defined($dispatcher) {
+                    if nqp::defined($dispatcher) {
                         # Found a possible - make sure it's a dispatcher, not
                         # an only.
                         if pir::is_dispatcher__IP($dispatcher) {
@@ -242,7 +242,7 @@ knowhow NQPClassHOW {
                             @new_dispatchees[0] := $code;
                             my $new_disp := pir::create_dispatch_and_add_candidates__PPP($dispatcher, @new_dispatchees);
                             my $clone_callback := pir::getprop__PPs($dispatcher, 'CLONE_CALLBACK');
-                            if pir::defined($clone_callback) {
+                            if nqp::defined($clone_callback) {
                                 $clone_callback($dispatcher, $new_disp);
                             }
                             %!methods{$name} := $new_disp;
@@ -385,7 +385,7 @@ knowhow NQPClassHOW {
 
     method publish_boolification_spec($obj) {
         my $bool_meth := self.find_method($obj, 'Bool');
-        if pir::defined($bool_meth) {
+        if nqp::defined($bool_meth) {
             pir::set_boolification_spec__0PiP($obj, 0, $bool_meth)
         }
         else {
@@ -517,7 +517,7 @@ knowhow NQPClassHOW {
         for @!mro {
             my %meths := $_.HOW.method_table($obj);
             my $can := %meths{$name};
-            if pir::defined($can) {
+            if nqp::defined($can) {
                 return $can;
             }
         }
@@ -531,7 +531,7 @@ knowhow NQPClassHOW {
         for @!mro {
             my %meths := $_.HOW.method_table($obj);
             my $found := %meths{$name};
-            if pir::defined($found) {
+            if nqp::defined($found) {
                 return $!trace && !$no_trace && nqp::substr($name, 0, 1) ne '!' ??
                     -> *@pos, *%named { 
                         say(nqp::x('  ', $!trace_depth) ~ "Calling $name");

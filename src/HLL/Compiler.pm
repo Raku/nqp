@@ -57,7 +57,7 @@ class HLL::Compiler {
         $tagset := $tagset // (@symbols ?? 'ALL' !! 'DEFAULT');
         my %exports;
         my %source := $module{'EXPORT'}{~$tagset};
-        if !pir::defined(%source) {
+        if !nqp::defined(%source) {
             %source := $tagset eq 'ALL' ?? $module !! {};
         }
         if @symbols {
@@ -161,7 +161,7 @@ class HLL::Compiler {
             my $code := $stdin.readline_interactive(~$prompt);
 
             last if nqp::isnull($code);
-            unless pir::defined($code) {
+            unless nqp::defined($code) {
                 nqp::print("\n");
                 last;
             }
@@ -181,7 +181,7 @@ class HLL::Compiler {
                         next;
                     }
                 };
-                if pir::defined($*MAIN_CTX) {
+                if nqp::defined($*MAIN_CTX) {
                     for $*MAIN_CTX.lexpad_full() {
                         %interactive_pad{$_.key} := $_.value;
                     }
@@ -212,7 +212,7 @@ class HLL::Compiler {
         if !pir::isa($output, 'String')
                 && %adverbs<target> eq '' {
             my $outer_ctx := %adverbs<outer_ctx>;
-            if pir::defined($outer_ctx) {
+            if nqp::defined($outer_ctx) {
                 $output[0].set_outer_ctx($outer_ctx);
             }
 
@@ -267,7 +267,7 @@ class HLL::Compiler {
     method interactive_prompt() { '> ' }
     
     method compiler_progname($value?) {
-        if pir::defined($value) {
+        if nqp::defined($value) {
             $!compiler_progname := $value;
         }
         $!compiler_progname;
@@ -319,7 +319,7 @@ class HLL::Compiler {
         my $has_error := 0;
         my $target := nqp::lc(%adverbs<target>);
         try {
-            if pir::defined(%adverbs<e>) {
+            if nqp::defined(%adverbs<e>) {
                 $!user_progname := '-e';
                 my $?FILES := '-e';
                 $result := self.eval(%adverbs<e>, '-e', |@a, |%adverbs);

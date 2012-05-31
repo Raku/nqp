@@ -9,7 +9,7 @@ class QAST::Node is NQPCapture {
         $new.BUILD();
         nqp::splice($new.list, @children, 0, 0);
         for %options {
-            pir::find_method__PPs($new, $_.key)($new, $_.value);
+            nqp::findmethod($new, $_.key)($new, $_.value);
         }
         $new;
     }

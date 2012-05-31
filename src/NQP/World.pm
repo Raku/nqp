@@ -229,7 +229,7 @@ class NQP::World is HLL::World {
         my $fixups := PAST::Stmts.new();
         my $dummy;
         my $code_ref_idx;
-        if pir::defined($past<compile_time_dummy>) {
+        if nqp::defined($past<compile_time_dummy>) {
             $dummy := $past<compile_time_dummy>;
         }
         else {
@@ -336,8 +336,8 @@ class NQP::World is HLL::World {
     method pkg_create_mo($how, :$name, :$repr) {
         # Create the meta-object and add to root objects.
         my %args;
-        if pir::defined($name) { %args<name> := $name; }
-        if pir::defined($repr) { %args<repr> := $repr; }
+        if nqp::defined($name) { %args<name> := $name; }
+        if nqp::defined($repr) { %args<repr> := $repr; }
         my $mo := $how.new_type(|%args);
         my $slot := self.add_object($mo);
 
@@ -390,7 +390,7 @@ class NQP::World is HLL::World {
             # Fixup code depends on if we have the routine in the SC for
             # fixing up.
             my $fixup := PAST::Op.new( :pirop('set_sub_multisig vPP'), self.get_ref($sig_obj) );
-            if pir::defined($routine<compile_time_dummy>) {
+            if nqp::defined($routine<compile_time_dummy>) {
                 $fixup.unshift(self.get_slot_past_for_object($routine<compile_time_dummy>));
             }
             else {

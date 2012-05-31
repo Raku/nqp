@@ -117,7 +117,7 @@ class NQP::Actions is HLL::Actions {
         if $<statement> {
             for $<statement> {
                 my $ast := $_.ast;
-                $ast := $ast<sink> if pir::defined($ast<sink>);
+                $ast := $ast<sink> if nqp::defined($ast<sink>);
                 if $ast<bareblock> { $ast := block_immediate($ast); }
                 $ast := PAST::Stmt.new($ast) if $ast ~~ PAST::Node;
                 $past.push( $ast );
@@ -189,7 +189,7 @@ class NQP::Actions is HLL::Actions {
     }
 
     method outerctx($/) {
-        unless pir::defined(%*COMPILING<%?OPTIONS><outer_ctx>) {
+        unless nqp::defined(%*COMPILING<%?OPTIONS><outer_ctx>) {
             # We haven't got a specified outer context already, so load a
             # setting.
             my $SETTING := $*W.load_setting(%*COMPILING<%?OPTIONS><setting> // 'NQPCORE');
@@ -243,7 +243,7 @@ class NQP::Actions is HLL::Actions {
 
     method statement_control:sym<use>($/) {
         my $module := $*W.load_module(~$<name>, $*GLOBALish);
-        if pir::defined($module) {
+        if nqp::defined($module) {
             import_HOW_exports($module);
         }
         make PAST::Stmts.new();
@@ -481,7 +481,7 @@ class NQP::Actions is HLL::Actions {
                             last;
                         }
                     }
-                    if pir::defined($attr) {
+                    if nqp::defined($attr) {
                         if nqp::can($attr, 'type') {
                             $past.type($attr.type);
                         }
@@ -1175,7 +1175,7 @@ class NQP::Actions is HLL::Actions {
         my $past  := PAST::Node.'map_node'(|$args, :map<nqp>, :op($op), 
                                            :node($/));
 
-        pir::defined($past) ||
+        nqp::defined($past) ||
             $/.CURSOR.panic("Unrecognized nqp:: opcode 'nqp::$op'");
         make $past;
     }
