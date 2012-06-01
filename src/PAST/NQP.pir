@@ -434,6 +434,7 @@ entry to produce the node to be returned.
     maphash['print'] = 'print'
     maphash['say']   = 'say'
     maphash['stat']   = 'stat__isi'
+    maphash['open']   = 'open__Pss'
 
     # terms
     maphash['time_i'] = 'time__I'
