@@ -659,6 +659,7 @@ entry to produce the node to be returned.
     maphash['can']        = 'can__IPs'
     maphash['does']       = 'does'
     maphash['isa']        = 'isa__IPs'
+    maphash['new']        = 'new__PsP'
     maphash['find_method'] = 'find_method__pps'
 
     # serialization context related opcodes
