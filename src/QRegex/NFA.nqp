@@ -226,8 +226,11 @@ class QRegex::NFA {
         self.regex_nfa($node[0], $from, $to);
     }
 
-    method past() {
-        return 0 unless $!edges;
+    method past(:$non_empty) {
+        unless $!edges {
+            return 0 unless $non_empty;
+            self.addedge(1, 0, $EDGE_FATE, 0, :newedge(1)) 
+        }
         my $past := PAST::Op.new(:pasttype<list>);
         for $!states {
             $past.push(PAST::Op.new(:pasttype<list>, |$_));

@@ -519,8 +519,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                                 :hll<nqp>, :namespace(['Sub']), :lexical(0),
                                 :name($block.subid ~ '_nfa'), $nfapast);
             $initpast.push(PAST::Stmt.new($nfablock));
-        alt_nfas($qast, $block.subid, $initpast);
         }
+        alt_nfas($qast, $block.subid, $initpast);
 
         unless $block.symbol('$¢') {
             $initpast.push(PAST::Var.new(:name<$¢>, :scope<lexical>, :isdecl(1)));
@@ -595,7 +595,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             $ast.name(PAST::Node.unique('alt_nfa_'));
             for $ast.list {
                 alt_nfas($_, $subid, $initpast);
-                $nfapast.push(QRegex::NFA.new.addnode($_).past);
+                $nfapast.push(QRegex::NFA.new.addnode($_).past(:non_empty));
             }
             my $nfablock := PAST::Block.new(
                                 :hll<nqp>, :namespace(['Sub']), :lexical(0),
