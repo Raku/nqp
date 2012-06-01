@@ -221,6 +221,34 @@ role NQPCursorRole {
         %protorx;
     }
 
+    method !alt($pos, $name, @labels = []) {
+        # Obtain and run NFA.
+        my $nfa := self.HOW.cache(self, $name, { self.'!alt_nfa'($name, @labels) });
+        my @fates := $nfa.run($!target, $pos);
+
+        # Push points onto the bstack.
+        my $i := 0;
+        my $num_fates := nqp::elems(@fates);
+        while $i < $num_fates {
+            # XXX TODO
+            $i := $i + 1;
+        }
+    }
+
+    method !alt_nfa($name, @labels) {
+        my $nfa := QRegex::NFA.new;
+        my @fates := $nfa.states[0];
+        my $start := 1;
+        my $fate := 0;
+        for $!regexsub.nqpattr($name) {
+            my $label := @labels[$fate];
+            $fate := $fate + 1;
+            @fates[$fate] := $label;
+            $nfa.mergesubstates($start, 0, $fate, $_, self);
+        }
+        $nfa
+    }
+
     method !BACKREF($name) {
         my $cur := self."!cursor_start"();
         my $n := $!cstack ?? nqp::elems($!cstack) - 1 !! -1;
