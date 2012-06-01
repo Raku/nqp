@@ -533,6 +533,7 @@ entry to produce the node to be returned.
     maphash['x']        = 'repeat__Ssi'
     maphash['iscclass'] = 'is_cclass__Iisi'
     maphash['sprintf']  = 'sprintf__SsP'
+    maphash['find_not_cclass']  = 'find_not_cclass__Iisii'
 
     # relational opcodes
     maphash['cmp_i']    = 'cmp__Iii'
