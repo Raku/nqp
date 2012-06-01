@@ -259,6 +259,10 @@ class QRegex::NFA {
             }
         }
         %seen{$name} := 1;
+        self.mergesubstates($start, $to, $fate, @substates, $cursor, %seen);
+    }
+    
+    method mergesubstates($start, $to, $fate, @substates, $cursor, %seen?) {
         if @substates {
             # create an empty end state for the subrule's NFA
             my $substart := self.addstate();
