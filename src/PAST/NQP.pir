@@ -664,6 +664,7 @@ entry to produce the node to be returned.
     maphash['isa']        = 'isa__IPs'
     maphash['new']        = 'new__PsP'
     maphash['find_method'] = 'find_method__pps'
+    maphash['typeof']     = 'typeof__SP'
 
     # serialization context related opcodes
     maphash['sha1']       = 'nqp_sha1__Ss'
