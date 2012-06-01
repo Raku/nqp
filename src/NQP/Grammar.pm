@@ -139,10 +139,10 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     token eat_terminator {
-        | ';'
-        | <?MARKED('endstmt')>
-        | <?terminator>
-        | $
+        || ';'
+        || <?MARKED('endstmt')>
+        || <?terminator>
+        || $
     }
 
     token xblock {
