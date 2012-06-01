@@ -20,4 +20,4 @@ ok( < a > eq 'a', 'spaces around individual element stripped');
 
 ok( +< a b > == 2, 'angle quotes correctly produce list');
 
-ok( nqp::does(< >, 'array'), 'empty angle quotes correctly produce list');
+ok( pir::does(< >, 'array'), 'empty angle quotes correctly produce list');

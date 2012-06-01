@@ -223,7 +223,7 @@ class HLL::World {
     # the deserialization.
     method serialize_and_produce_deserialization_past($sc_reg) {
         # Serialize.
-        my $sh := nqp::new('ResizableStringArray');
+        my $sh := pir::new__Ps('ResizableStringArray');
         my $serialized := pir::nqp_serialize_sc__SPP($!sc, $sh);
         
         # Now it's serialized, pop this SC off the compiling SC stack.

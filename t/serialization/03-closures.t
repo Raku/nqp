@@ -8,7 +8,7 @@ plan(9);
 # just yet.
 {
     my $sc := pir::nqp_create_sc__Ps('TEST_SC_1_IN');
-    my $sh := nqp::new('ResizableStringArray');
+    my $sh := pir::new__Ps('ResizableStringArray');
     
     my $m1 := (method () { "success!" }).get_lexinfo().get_static_code();
     pir::nqp_add_code_ref_to_sc__vPiP($sc, 0, $m1);
@@ -39,7 +39,7 @@ plan(9);
 # environment. This is kinda faking up how roles work.
 {
     my $sc := pir::nqp_create_sc__Ps('TEST_SC_2_IN');
-    my $sh := nqp::new('ResizableStringArray');
+    my $sh := pir::new__Ps('ResizableStringArray');
     
     my $raw_sub := (sub make_meth_with($x) {
         my $m := method () { $x };

@@ -4,37 +4,37 @@ plan(18);
 
 my $a;
 $a := (8);
-ok( nqp::typeof($a) eq 'Integer', 'basic parens');
+ok( pir::typeof($a) eq 'Integer', 'basic parens');
 
 $a := (8,9);
-ok( nqp::typeof($a) eq 'ResizablePMCArray', 'paren list');
+ok( pir::typeof($a) eq 'ResizablePMCArray', 'paren list');
 ok( +$a == 2, 'paren list elems' );
 
 $a := (8,);
-ok( nqp::typeof($a) eq 'ResizablePMCArray', 'paren comma');
+ok( pir::typeof($a) eq 'ResizablePMCArray', 'paren comma');
 ok( +$a == 1, 'paren comma' );
 
 $a := ();
-ok( nqp::typeof($a) eq 'ResizablePMCArray', 'empty parens');
+ok( pir::typeof($a) eq 'ResizablePMCArray', 'empty parens');
 ok( +$a == 0, 'paren list elems' );
 
 $a := [8];
-ok( nqp::typeof($a) eq 'ResizablePMCArray', 'brackets of one elem');
+ok( pir::typeof($a) eq 'ResizablePMCArray', 'brackets of one elem');
 ok( +$a == 1, 'brackets of one elem' );
 
 $a := [7,8,9];
-ok( nqp::typeof($a) eq 'ResizablePMCArray', 'brackets of 3 elems');
+ok( pir::typeof($a) eq 'ResizablePMCArray', 'brackets of 3 elems');
 ok( +$a == 3, 'brackets of 3 elems' );
 
 $a := [];
-ok( nqp::typeof($a) eq 'ResizablePMCArray', 'brackets of 0 elems');
+ok( pir::typeof($a) eq 'ResizablePMCArray', 'brackets of 0 elems');
 ok( +$a == 0, 'brackets of 0 elems' );
 
 $a := {};
-ok( nqp::typeof($a) eq 'Hash', 'empty braces');
+ok( pir::typeof($a) eq 'Hash', 'empty braces');
 
 $a := { 1 };
-ok( nqp::typeof($a) eq 'Sub', 'non-empty braces');
+ok( pir::typeof($a) eq 'Sub', 'non-empty braces');
 
 sub xyz(*@a) {
     ok( +@a == 1, "brackets as single argument #1" );

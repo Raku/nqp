@@ -99,7 +99,7 @@ role NQPCursorRole {
             nqp::bindattr_s($new, $?CLASS, '$!target', $!target),
             nqp::bindattr_i($new, $?CLASS, '$!from', $!pos),
             $?CLASS,
-            nqp::bindattr($new, $?CLASS, '$!bstack', nqp::new('ResizableIntegerArray')),
+            nqp::bindattr($new, $?CLASS, '$!bstack', pir::new__Ps('ResizableIntegerArray')),
             0
         )
     }
@@ -161,13 +161,13 @@ role NQPCursorRole {
 
     method !reduce($name) {
         my $actions := pir::find_dynamic_lex__Ps('$*ACTIONS');
-        nqp::find_method($actions, $name)($actions, self.MATCH)
+        nqp::findmethod($actions, $name)($actions, self.MATCH)
             if nqp::can($actions, $name);
     }
 
     method !reduce_with_match($name, $key, $match) {
         my $actions := pir::find_dynamic_lex__Ps('$*ACTIONS');
-        nqp::find_method($actions, $name)($actions, $match, $key)
+        nqp::findmethod($actions, $name)($actions, $match, $key)
             if nqp::can($actions, $name);
     }
 
@@ -458,7 +458,7 @@ class NQPCursor does NQPCursorRole {
     my $EMPTY_MATCH_HASH := nqp::hash();
     method MATCH() {
         my $match := nqp::getattr(self, NQPCursor, '$!match');
-        unless nqp::istype($match, NQPMatch) || nqp::isa($match, 'Hash') {
+        unless nqp::istype($match, NQPMatch) || pir::isa($match, 'Hash') {
             my $list := $EMPTY_MATCH_LIST;
             my $hash := $EMPTY_MATCH_HASH;
             $match := nqp::create(NQPMatch);
@@ -497,11 +497,11 @@ class NQPCursor does NQPCursorRole {
         my $cur := self.'!cursor_init'($target, |%options);
         pir::is_invokable__IP($rule) ??
             $rule($cur).MATCH() !!
-            nqp::find_method($cur, $rule)($cur).MATCH()
+            nqp::findmethod($cur, $rule)($cur).MATCH()
     }
 
     method !INTERPOLATE($var) {
-        if nqp::does($var, 'array') {
+        if pir::does($var, 'array') {
             my $maxlen := -1;
             my $cur := self.'!cursor_start'();
             my $pos := nqp::getattr_i($cur, $?CLASS, '$!from');
@@ -542,7 +542,7 @@ class NQPCursor does NQPCursorRole {
     method !INTERPOLATE_REGEX($var) {
         unless pir::is_invokable__IP($var) {
             my $rxcompiler := pir::compreg__Ps('QRegex::P6Regex');
-            if nqp::does($var, 'array') {
+            if pir::does($var, 'array') {
                 my $res := [];
                 for $var {
                     my $elem := $_;

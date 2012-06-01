@@ -10,7 +10,7 @@ say("1..0 skip design changes, need re-work");
 #ok($comp =:= $parrot-comp.WHO, "correctly retrieved namespace");#
 #
 #my $crow := $parrot-comp.load_module('Crow');
-#ok( nqp::isa(Crow::help, 'Sub'), "successfully loaded Crow::help");
+#ok( pir::isa(Crow::help, 'Sub'), "successfully loaded Crow::help");
 #ok( $crow =:= pir::get_hll_namespace__PP(['Crow']), "Crow ns correct");
 #
 #my $getopt := $parrot-comp.load_module('Getopt::Obj');

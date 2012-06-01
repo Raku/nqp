@@ -7,7 +7,7 @@ class HLL::Actions {
     }
 
     method ints_to_string($ints) {
-        if nqp::does($ints, 'array') {
+        if pir::does($ints, 'array') {
             my $result := '';
             for $ints {
                 $result := $result ~ nqp::chr($_.ast);
@@ -69,7 +69,7 @@ class HLL::Actions {
     method term:sym<circumfix>($/) { make $<circumfix>.ast }
 
     method termish($/) { make $<term>.ast; }
-    method nullterm($/) { make nqp::new('Undef') }
+    method nullterm($/) { make pir::new__Ps('Undef') }
     method nullterm_alt($/) { make $<term>.ast; }
 
     method integer($/) { make $<VALUE>.ast; }

@@ -433,7 +433,7 @@ entry to produce the node to be returned.
     # I/O opcodes
     maphash['print'] = 'print'
     maphash['say']   = 'say'
-    maphash['stat']   = 'stat__isi'
+    maphash['stat']   = 'stat__Isi'
     maphash['open']   = 'open__Pss'
 
     # terms
@@ -535,7 +535,6 @@ entry to produce the node to be returned.
     maphash['iscclass'] = 'is_cclass__Iisi'
     maphash['findnotcclass'] = 'find_not_cclass__Iisii'
     maphash['sprintf']  = 'sprintf__SsP'
-    maphash['find_not_cclass']  = 'find_not_cclass__Iisii'
 
     # relational opcodes
     maphash['cmp_i']    = 'cmp__Iii'
@@ -661,11 +660,7 @@ entry to produce the node to be returned.
     maphash['box_s']      = 'repr_box_str__PsP'
     maphash['where']      = 'get_id__IP'
     maphash['can']        = 'can__IPs'
-    maphash['does']       = 'does'
-    maphash['isa']        = 'isa__IPs'
-    maphash['new']        = 'new__PsP'
-    maphash['find_method'] = 'find_method__pps'
-    maphash['typeof']     = 'typeof__SP'
+    maphash['findmethod'] = 'find_method__pps'
 
     # serialization context related opcodes
     maphash['sha1']       = 'nqp_sha1__Ss'

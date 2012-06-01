@@ -5,7 +5,7 @@ plan(66);
 # Serializing an empty SC.
 {
     my $sc := pir::nqp_create_sc__Ps('TEST_SC_1_IN');
-    my $sh := nqp::new('ResizableStringArray');
+    my $sh := pir::new__Ps('ResizableStringArray');
     
     my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
     ok(nqp::chars($serialized) > 0,   'serialized empty SC to non-empty string');
@@ -20,7 +20,7 @@ plan(66);
 # Serializing an SC with a single object with P6int REPR.
 {
     my $sc := pir::nqp_create_sc__Ps('TEST_SC_2_IN');
-    my $sh := nqp::new('ResizableStringArray');
+    my $sh := pir::new__Ps('ResizableStringArray');
     
     class T1 is repr('P6int') { }
     my $v1 := nqp::box_i(42, T1);
@@ -40,7 +40,7 @@ plan(66);
 # Serializing an SC with a single object with P6num REPR.
 {
     my $sc := pir::nqp_create_sc__Ps('TEST_SC_3_IN');
-    my $sh := nqp::new('ResizableStringArray');
+    my $sh := pir::new__Ps('ResizableStringArray');
     
     class T2 is repr('P6num') { }
     my $v := nqp::box_n(6.9, T2);
@@ -60,7 +60,7 @@ plan(66);
 # Serializing an SC with a single object with P6str REPR.
 {
     my $sc := pir::nqp_create_sc__Ps('TEST_SC_4_IN');
-    my $sh := nqp::new('ResizableStringArray');
+    my $sh := pir::new__Ps('ResizableStringArray');
     
     class T3 is repr('P6str') { }
     my $v := nqp::box_s('dugong', T3);
@@ -80,7 +80,7 @@ plan(66);
 # Serializing an SC with a P6opaque containing a P6int, P6num and P6str.
 {
     my $sc := pir::nqp_create_sc__Ps('TEST_SC_5_IN');
-    my $sh := nqp::new('ResizableStringArray');
+    my $sh := pir::new__Ps('ResizableStringArray');
     
     class T4 {
         has int $!a;
@@ -119,7 +119,7 @@ plan(66);
 # Serializing an SC with P6opaues and circular references
 {
     my $sc := pir::nqp_create_sc__Ps('TEST_SC_6_IN');
-    my $sh := nqp::new('ResizableStringArray');
+    my $sh := pir::new__Ps('ResizableStringArray');
     
     class T5 {
         has $!x;
@@ -151,7 +151,7 @@ plan(66);
 # Tracing an object graph.
 {
     my $sc := pir::nqp_create_sc__Ps('TEST_SC_7_IN');
-    my $sh := nqp::new('ResizableStringArray');
+    my $sh := pir::new__Ps('ResizableStringArray');
     
     class T6 {
         has $!x;
@@ -194,7 +194,7 @@ plan(66);
 # Serializing an SC with a P6opaque containing VM Integer/Float/String
 {
     my $sc := pir::nqp_create_sc__Ps('TEST_SC_8_IN');
-    my $sh := nqp::new('ResizableStringArray');
+    my $sh := pir::new__Ps('ResizableStringArray');
     
     class T7 {
         has $!a;
@@ -232,7 +232,7 @@ plan(66);
 # Array in an object attribute
 {
     my $sc := pir::nqp_create_sc__Ps('TEST_SC_9_IN');
-    my $sh := nqp::new('ResizableStringArray');
+    my $sh := pir::new__Ps('ResizableStringArray');
     
     class T8 {
         has $!a;
@@ -273,7 +273,7 @@ plan(66);
 # Hash in an object attribute.
 {
     my $sc := pir::nqp_create_sc__Ps('TEST_SC_10_IN');
-    my $sh := nqp::new('ResizableStringArray');
+    my $sh := pir::new__Ps('ResizableStringArray');
     
     class T9 {
         has $!a;
@@ -307,7 +307,7 @@ plan(66);
 # Integer array (probably needed for NFA serialization).
 {
     my $sc := pir::nqp_create_sc__Ps('TEST_SC_11_IN');
-    my $sh := nqp::new('ResizableStringArray');
+    my $sh := pir::new__Ps('ResizableStringArray');
     
     class T10 {
         has $!a;
@@ -317,7 +317,7 @@ plan(66);
             $obj;
         }
         method BUILD() {
-            my @a := nqp::new('ResizableIntegerArray');
+            my @a := pir::new__Ps('ResizableIntegerArray');
             @a[0] := 101;
             @a[1] := 102;
             @a[2] := 103;
@@ -343,7 +343,7 @@ plan(66);
 # String array (used by Rakudo in signatures)
 {
     my $sc := pir::nqp_create_sc__Ps('TEST_SC_12_IN');
-    my $sh := nqp::new('ResizableStringArray');
+    my $sh := pir::new__Ps('ResizableStringArray');
     
     class T11 {
         has $!a;
@@ -353,7 +353,7 @@ plan(66);
             $obj;
         }
         method BUILD() {
-            my @a := nqp::new('ResizableStringArray');
+            my @a := pir::new__Ps('ResizableStringArray');
             @a[0] := 'cow';
             @a[1] := 'sheep';
             @a[2] := 'pig';
