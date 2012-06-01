@@ -86,10 +86,10 @@ General notes:
     nqp::clone                     pir::clone__PP
     nqp::typecheck or ::isa        pir::type_check__IPP
                    or ::istype
-    nqp::??                        pir::isa__IPs                (?)
-    nqp::??                        pir::typeof__SP              (?)
-    nqp::??                        pir::does__IPs               (?)
-    nqp::create                    pir::repr_instance_of__PP    (?)
+    nqp::??                        pir::isa__IPs                (reject)
+    nqp::??                        pir::typeof__SP              (reject)
+    nqp::??                        pir::does__IPs               (reject)
+    nqp::create                    pir::repr_instance_of__PP
 
     nqp::unbox_i                   pir::repr_unbox_int__IP
     nqp::unbox_n                   pir::repr_unbox_num__NP
@@ -97,10 +97,10 @@ General notes:
     nqp::box_i                     pir::repr_box_int__PPi
     nqp::box_n                     pir::repr_box_num__PPn
     nqp::box_s                     pir::repr_box_str__PPs
-    nqp::what  or nqp::getwhat     pir::get_what__PP            (?)
-    nqp::how   or nqp::gethow      pir::get_how__PP             (?)
-    nqp::who   or nqp::getwho      pir::get_who__PP             (?)
-    nqp::where or nqp::getwhere    pir::get_id__IP              (?)
+    nqp::what  or nqp::getwhat     pir::get_what__PP
+    nqp::how   or nqp::gethow      pir::get_how__PP
+    nqp::who   or nqp::getwho      pir::get_who__PP
+    nqp::where                     pir::get_id__IP
 
   Rakudo-specific:
     nqp::p6box_i                   pir::perl6_box_int__Pi

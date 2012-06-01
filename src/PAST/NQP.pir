@@ -430,11 +430,22 @@ entry to produce the node to be returned.
     .local pmc maphash
     maphash = new ['Hash']
 
+    # See also docs/nqp-opcode.txt before adding opcodes to this list.
+    # Opcodes marked (?) may be rejected at some point.
+
+    # Explicitly rejected opcodes.  See also docs/nqp-opcode.txt.
+    # Use the pir:: form of these Parrot-specific operations.
+    # maphash['new']                             # or use nqp::create
+    # maphash['does']
+    # maphash['isa']                             # or use nqp::istype
+    # maphash['typeof']                          # or use nqp::what
+    maphash['defined']  = 'defined__IP'          # or use nqp::isconcrete
+
     # I/O opcodes
     maphash['print'] = 'print'
     maphash['say']   = 'say'
-    maphash['stat']   = 'stat__Isi'
-    maphash['open']   = 'open__Pss'
+    maphash['stat']   = 'stat__Isi'              # (?)
+    maphash['open']   = 'open__Pss'              # (?)
 
     # terms
     maphash['time_i'] = 'time__I'
@@ -532,8 +543,8 @@ entry to produce the node to be returned.
     maphash['uc']       = 'upcase__Ss'
     maphash['substr']   = 'substr__Ssii'
     maphash['x']        = 'repeat__Ssi'
-    maphash['iscclass'] = 'is_cclass__Iisi'
-    maphash['findnotcclass'] = 'find_not_cclass__Iisii'
+    maphash['iscclass'] = 'is_cclass__Iisi'                # (?)
+    maphash['findnotcclass'] = 'find_not_cclass__Iisii'    # (?)
     maphash['sprintf']  = 'sprintf__SsP'
 
     # relational opcodes
@@ -687,7 +698,6 @@ entry to produce the node to be returned.
     maphash['sleep']    = 'sleep__vn'
     maphash['throw']    = 'throw__0P'
     maphash['rethrow']  = 'rethrow__0P'
-    maphash['defined']  = 'defined__IP'
 
     .return (maphash)
 .end
