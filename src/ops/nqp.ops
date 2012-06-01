@@ -2058,6 +2058,12 @@ Commit all captures and backtracking on stack $1 up to mark frame $2.
 
 =cut
 
+=item nqp_push_label(list, label)
+
+Pushes a label onto a list.
+
+=cut
+
 =item nqp_nfa_run(fatepos, states, target, offset)
 
 Takes a set of states in $2, a target string in $3 and an offset in $4.
@@ -2114,6 +2120,10 @@ inline op nqp_rxcommit(in PMC, in LABEL) :base_core {
             VTABLE_push_integer(interp, bstack, caps);
         }
     }
+}
+
+inline op nqp_push_label(in PMC, in LABEL) :base_core {
+    VTABLE_push_integer(interp, $1, PTR2INTVAL(CUR_OPCODE + $2));
 }
 
 inline op nqp_nfa_run(out PMC, in PMC, in STR, in INT) :base_core {
