@@ -691,6 +691,7 @@ entry to produce the node to be returned.
     maphash['sleep']    = 'sleep__vn'
     maphash['throw']    = 'throw__0P'
     maphash['rethrow']  = 'rethrow__0P'
+    maphash['defined']  = 'defined__IP'
 
     .return (maphash)
 .end
