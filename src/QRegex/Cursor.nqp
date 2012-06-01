@@ -99,7 +99,7 @@ role NQPCursorRole {
             nqp::bindattr_s($new, $?CLASS, '$!target', $!target),
             nqp::bindattr_i($new, $?CLASS, '$!from', $!pos),
             $?CLASS,
-            nqp::bindattr($new, $?CLASS, '$!bstack', pir::new__Ps('ResizableIntegerArray')),
+            nqp::bindattr($new, $?CLASS, '$!bstack', nqp::new('ResizableIntegerArray')),
             0
         )
     }
@@ -458,7 +458,7 @@ class NQPCursor does NQPCursorRole {
     my $EMPTY_MATCH_HASH := nqp::hash();
     method MATCH() {
         my $match := nqp::getattr(self, NQPCursor, '$!match');
-        unless nqp::istype($match, NQPMatch) || pir::isa($match, 'Hash') {
+        unless nqp::istype($match, NQPMatch) || nqp::isa($match, 'Hash') {
             my $list := $EMPTY_MATCH_LIST;
             my $hash := $EMPTY_MATCH_HASH;
             $match := nqp::create(NQPMatch);
@@ -501,7 +501,7 @@ class NQPCursor does NQPCursorRole {
     }
 
     method !INTERPOLATE($var) {
-        if pir::does($var, 'array') {
+        if nqp::does($var, 'array') {
             my $maxlen := -1;
             my $cur := self.'!cursor_start'();
             my $pos := nqp::getattr_i($cur, $?CLASS, '$!from');
@@ -542,7 +542,7 @@ class NQPCursor does NQPCursorRole {
     method !INTERPOLATE_REGEX($var) {
         unless pir::is_invokable__IP($var) {
             my $rxcompiler := pir::compreg__Ps('QRegex::P6Regex');
-            if pir::does($var, 'array') {
+            if nqp::does($var, 'array') {
                 my $res := [];
                 for $var {
                     my $elem := $_;

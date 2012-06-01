@@ -8,7 +8,7 @@ plan(31);
 # (very simple REPR).
 {
     my $sc := pir::nqp_create_sc__Ps('TEST_SC_1_IN');
-    my $sh := pir::new__Ps('ResizableStringArray');
+    my $sh := nqp::new('ResizableStringArray');
     
     my $type := pir::get_knowhow__P().new_type(:name('Badger'), :repr('P6int'));
     $type.HOW.compose($type);
@@ -32,7 +32,7 @@ plan(31);
 # with an instance of it.
 {
     my $sc := pir::nqp_create_sc__Ps('TEST_SC_2_IN');
-    my $sh := pir::new__Ps('ResizableStringArray');
+    my $sh := nqp::new('ResizableStringArray');
     
     my $type := pir::get_knowhow__P().new_type(:name('Dugong'), :repr('P6opaque'));
     $type.HOW.add_attribute($type, pir::get_knowhow_attribute__P().new(name => '$!home'));
@@ -62,7 +62,7 @@ plan(31);
 # with an instance of it.
 {
     my $sc := pir::nqp_create_sc__Ps('TEST_SC_3_IN');
-    my $sh := pir::new__Ps('ResizableStringArray');
+    my $sh := nqp::new('ResizableStringArray');
     
     my $type := pir::get_knowhow__P().new_type(:name('Badger'), :repr('P6opaque'));
     $type.HOW.add_attribute($type, NQPAttribute.new(name => '$!eats', type => str));
@@ -111,7 +111,7 @@ plan(31);
 # Serializing a type with methods (P6opaque REPR, knowhow)
 {
     my $sc := pir::nqp_create_sc__Ps('TEST_SC_4_IN');
-    my $sh := pir::new__Ps('ResizableStringArray');
+    my $sh := nqp::new('ResizableStringArray');
     
     my $m1 := method () { "awful" };
     my $m2 := method () { "Hi, I'm " ~ nqp::getattr(self, self.WHAT, '$!name') };

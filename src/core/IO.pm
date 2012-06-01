@@ -10,7 +10,7 @@ Open file.
 
 sub open($filename, :$r, :$w, :$a, :$bin) {
     my $mode := $w ?? 'w' !! ($a ?? 'wa' !! 'r');
-    my $handle := pir::new__Ps('FileHandle');
+    my $handle := nqp::new('FileHandle');
     $handle.open($filename, $mode);
     $handle.encoding($bin ?? 'binary' !! 'utf8');
     $handle;
@@ -41,7 +41,7 @@ Write the string value of C<$contents> to C<$filename>.
 =end item
 
 sub spew($filename, $contents) {
-    my $handle := pir::new__Ps('FileHandle');
+    my $handle := nqp::new('FileHandle');
     $handle.open($filename, 'w');
     $handle.print($contents);
     $handle.close();

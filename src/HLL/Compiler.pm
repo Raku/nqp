@@ -43,14 +43,14 @@ class HLL::Compiler {
     }
     
     my sub value_type($value) {
-        pir::isa($value, 'NameSpace')
+        nqp::isa($value, 'NameSpace')
             ?? 'namespace'
-            !! (pir::isa($value, 'Sub') ?? 'sub' !! 'var')
+            !! (nqp::isa($value, 'Sub') ?? 'sub' !! 'var')
     }
         
     method get_exports($module, :$tagset, *@symbols) {
         # convert a module name to something hash-like, if needed
-        if (!pir::does($module, 'hash')) {
+        if (!nqp::does($module, 'hash')) {
             $module := self.get_module($module);
         }
 
@@ -209,7 +209,7 @@ class HLL::Compiler {
         }
         $output := self.compile($code, |%adverbs);
 
-        if !pir::isa($output, 'String')
+        if !nqp::isa($output, 'String')
                 && %adverbs<target> eq '' {
             my $outer_ctx := %adverbs<outer_ctx>;
             if nqp::defined($outer_ctx) {
@@ -335,7 +335,7 @@ class HLL::Compiler {
                 my $output := %adverbs<output>;
                 my $fh := ($output eq '' || $output eq '-')
                         ?? pir::getinterp__P().stdout_handle()
-                        !! pir::new__Ps('FileHandle').open($output, 'w');
+                        !! nqp::new('FileHandle').open($output, 'w');
                 self.panic("Cannot write to $output") unless $fh;
                 nqp::print($fh, $result);
                 $fh.close()
@@ -398,11 +398,11 @@ class HLL::Compiler {
     method evalfiles($files, *@args, *%adverbs) {
         my $target := nqp::lc(%adverbs<target>);
         my $encoding := %adverbs<encoding>;
-        my @files := pir::does($files, 'array') ?? $files !! [$files];
+        my @files := nqp::does($files, 'array') ?? $files !! [$files];
         $!user_progname := nqp::join(',', @files);
         my @codes;
         for @files {
-            my $in-handle := pir::new('FileHandle');
+            my $in-handle := nqp::new('FileHandle');
             my $err := 0;
             try {
                 # the PIR version checked for utf8 specifically...
@@ -468,7 +468,7 @@ class HLL::Compiler {
 
     method past($source, *%adverbs) {
         my $ast := $source.ast();
-        self.panic("Unable to obtain ast from " ~ pir::typeof($source))
+        self.panic("Unable to obtain ast from " ~ nqp::typeof($source))
             unless $ast ~~ PAST::Node;
         $ast;
     }
@@ -547,7 +547,7 @@ class HLL::Compiler {
             my $file := $spec[0];
             my $flags := $spec[1];
             if $file gt '' {
-                my $fh := pir::new('FileHandle');
+                my $fh := nqp::new('FileHandle');
                 $fh.open($file, 'w') || self.panic("Cannot write to $file");
                 pir::nqpevent_fh__PP($fh);
             }
@@ -560,7 +560,7 @@ class HLL::Compiler {
     }
 
     method removestage($stagename) {
-        my @new_stages := pir::new('ResizableStringArray');
+        my @new_stages := nqp::new('ResizableStringArray');
         for @!stages {
             if $_ ne $stagename {
                 @new_stages.push($_);
@@ -584,7 +584,7 @@ class HLL::Compiler {
             self.stages(@new-stages);
             return 1;
         }
-        my @new-stages := pir::new('ResizableStringArray');
+        my @new-stages := nqp::new('ResizableStringArray');
         for self.stages {
             if $_ eq $where {
                 if $position eq 'before' {

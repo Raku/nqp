@@ -48,7 +48,7 @@ knowhow ModuleLoader {
         my $path := nqp::join('/', nqp::split('::', $module_name)) ~ '.pbc';
         my @prefixes := self.search_path('module-path');
         for @prefixes -> $prefix {
-            if pir::stat__isi("$prefix/$path", 0) {
+            if nqp::stat("$prefix/$path", 0) {
                 $path := "$prefix/$path";
                 last;
             }
@@ -145,7 +145,7 @@ knowhow ModuleLoader {
             my $path := "$setting_name.setting.pbc";
             my @prefixes := self.search_path('setting-path');
             for @prefixes -> $prefix {
-                if pir::stat__isi("$prefix/$path", 0) {
+                if nqp::stat("$prefix/$path", 0) {
                     $path := "$prefix/$path";
                     last;
                 }
