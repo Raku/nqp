@@ -525,6 +525,7 @@ entry to produce the node to be returned.
     maphash['join']     = 'join__SsP'
     maphash['split']    = 'split__Pss'
     maphash['index']    = 'index__Issi'
+    maphash['rindex']   = 'rindex__ISSI'
     maphash['chr']      = 'chr__Si'
     maphash['ord']      = 'ord__Isi'
     maphash['lc']       = 'downcase__Ss'
