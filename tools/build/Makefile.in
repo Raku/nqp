@@ -15,7 +15,7 @@ NQP_LANG_DIR       = $(PARROT_LIB_DIR)/languages/nqp
 HAS_ICU            = @has_icu@
 
 CC            = @cc@
-CFLAGS        = @ccflags@ @cc_shared@ @cc_debug@ @ccwarn@ @gc_flag@
+CFLAGS        = @ccflags@ @cc_shared@ @cc_debug@ @ccwarn@ @gc_flag@ @optimize@
 EXE           = @exe@
 LD            = @ld@
 LDFLAGS       = @ldflags@ @ld_debug@
