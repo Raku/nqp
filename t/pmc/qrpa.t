@@ -19,12 +19,15 @@ out-of-bounds test. Checks INT and PMC keys.
 
 .include 'except_types.pasm'
 .loadlib 'nqp_group'
+.loadlib 'nqp_ops'
 
 .sub main :main
     .include 'fp_equality.pasm'
     .include 'test_more.pir'
 
-    plan(122)
+    nqp_dynop_setup
+
+    plan(125)
 
 #    init_tests()
     resize_tests()
@@ -55,6 +58,7 @@ out-of-bounds test. Checks INT and PMC keys.
     splice_replace1()
     splice_replace2()
     iterate_subclass_of_rpa()
+    nqp_islist_op()
 #    method_forms_of_unshift_etc()
 #    sort_with_broken_cmp()
 #    equality_tests()
@@ -1034,6 +1038,21 @@ too_low_end:
     splice $P1, $P2, 0, 2
     $S0 = join "", $P1
     is($S0, "A3", "replacement via splice works")
+.end
+
+
+.sub 'nqp_islist_op'
+    $P0 = new ['ResizablePMCArray']
+    $I0 = nqp_islist $P0
+    ok($I0, 'RPA is a nqp list')
+
+    $P0 = new ['QRPA']
+    $I0 = nqp_islist $P0
+    ok($I0, 'QRPA is a nqp list')
+
+    $P0 = new ['Integer']
+    $I0 = nqp_islist $P0
+    nok($I0, 'Integer isnt a nqp list')
 .end
 
 

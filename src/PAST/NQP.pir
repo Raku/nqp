@@ -612,6 +612,7 @@ entry to produce the node to be returned.
     maphash['existskey'] = 'exists__IQs'
     maphash['existspos'] = 'exists__IQi'
     maphash['elems']    = 'elements__IP'
+    maphash['islist']   = 'nqp_islist__IP'
     maphash['iterator'] = 'iter__PP'
     maphash['push']     = 'push__0PP'
     maphash['push_s']   = 'push__0Ps'
