@@ -399,40 +399,30 @@ position C<pos>.
         :my $*QUOTE_START;
         :my $*QUOTE_STOP;
         {
-            Q:PIR {            
-                .local pmc self, cur_class, args
-                self = find_lex 'self'
-                cur_class = find_lex '$cursor_class'
-                args = find_lex '@args'
-
-                .local pmc quotemod, true
-                quotemod = find_lex '%*QUOTEMOD'
-                true = box 1
-
-              args_loop:
-                unless args goto args_done
-                .local string mod
-                mod = shift args
-                mod = substr mod, 1
-                quotemod[mod] = true
-                if mod == 'qq' goto opt_qq
-                if mod == 'b' goto opt_b
-                goto args_loop
-              opt_qq:
-                quotemod['s'] = true
-                quotemod['a'] = true
-                quotemod['h'] = true
-                quotemod['f'] = true
-                quotemod['c'] = true
-                quotemod['b'] = true
-              opt_b:
-                quotemod['q'] = true
-                goto args_loop
-              args_done:
-
-                .local pmc start, stop
+            my $true := pir::box__Pi(1);
+            for @args {
+                my $mod := nqp::substr($_, 1);
+                %*QUOTEMOD{$mod} := $true;
+                
+                if $mod eq 'qq' {
+                    %*QUOTEMOD<s> := $true;
+                    %*QUOTEMOD<a> := $true;
+                    %*QUOTEMOD<h> := $true;
+                    %*QUOTEMOD<f> := $true;
+                    %*QUOTEMOD<c> := $true;
+                    %*QUOTEMOD<b> := $true;
+                }
+                elsif $mod eq 'b' {
+                    %*QUOTEMOD<q> := $true
+                }
+            }
+            
+            Q:PIR {
+                .local pmc self, cur_class, start, stop
                 .local string target
                 .local int pos
+                self = find_lex 'self'
+                cur_class = find_lex '$cursor_class'
                 target = repr_get_attr_str self, cur_class, '$!target'
                 pos = repr_get_attr_int self, cur_class, '$!pos'
                 (start, stop) = self.'peek_delimiters'(target, pos)
