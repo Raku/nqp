@@ -448,26 +448,18 @@ position C<pos>.
     }
 
     method starter() {
-        Q:PIR {
-            .local pmc self, cur
-            .local string target, start
-            .local int pos
-            self = find_lex 'self'
+        my $cur         := self.'!cursor_start'();
+        my $target      := nqp::getattr_s($cur, $cursor_class, '$!target');
+        my $pos         := nqp::getattr_i($cur, $cursor_class, '$!from');
+        my $quote_start := pir::find_dynamic_lex__Ps('$*QUOTE_START');
+        return $cur if $quote_start eq '';
 
-            (cur, target, pos) = self.'!cursor_start'()
+        my $i := nqp::chars($quote_start);
+        return $cur unless $quote_start eq nqp::substr($target, $pos, $i);
 
-            $P0 = find_dynamic_lex '$*QUOTE_START'
-            if null $P0 goto fail
-            start = $P0
+        $cur.'!cursor_pass'($pos + $i, 'starter');
+        return $cur;
 
-            $I0 = length start
-            $S0 = substr target, pos, $I0
-            unless $S0 == start goto fail
-            pos += $I0
-            cur.'!cursor_pass'(pos, 'starter')
-          fail:
-            .return (cur)
-        };
     }
 
     method stopper() {
