@@ -103,7 +103,7 @@ Resizes the array to C<n> elements.
         /* We need more slots.  If the current slot size is less
          * than 8K, use the larger of twice the current slot size
          * or the actual number of elements needed.  Otherwise,
-         * grow the slots to the next 4096 element boundary. */
+         * grow the slots to the next multiple of 4096 (0x1000). */
         if (ssize < 8192) {
             ssize *= 2;
             if (n > ssize) ssize = n;
