@@ -471,26 +471,17 @@ position C<pos>.
     }
 
     method stopper() {
-        Q:PIR {
-            .local pmc self, cur
-            .local string target, stop
-            .local int pos
-            self = find_lex 'self'
+        my $cur        := self.'!cursor_start'();
+        my $target     := nqp::getattr_s($cur, $cursor_class, '$!target');
+        my $pos        := nqp::getattr_i($cur, $cursor_class, '$!from');
+        my $quote_stop := pir::find_dynamic_lex__Ps('$*QUOTE_STOP');
+        return $cur if $quote_stop eq '';
 
-            (cur, target, pos) = self.'!cursor_start'()
+        my $i := nqp::chars($quote_stop);
+        return $cur unless $quote_stop eq nqp::substr($target, $pos, $i);
 
-            $P0 = find_dynamic_lex '$*QUOTE_STOP'
-            if null $P0 goto fail
-            stop = $P0
-
-            $I0 = length stop
-            $S0 = substr target, pos, $I0
-            unless $S0 == stop goto fail
-            pos += $I0
-            cur.'!cursor_pass'(pos, 'stopper')
-          fail:
-            .return (cur)
-        };
+        $cur.'!cursor_pass'($pos + $i, 'stopper');
+        return $cur;
     }
 
     our method split_words($words) {
