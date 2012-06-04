@@ -325,14 +325,16 @@ position C<pos>.
 
            # See if the opening bracket is repeated.
            my $len := 0;
-           while 1 {
-               $pos  := $pos + 1;
-               $len  := $len + 1;
-               my $s := nqp::substr($target, $pos, 1);
-               next if $s eq $start;
-               last if $len == 1;
-               $start := nqp::x($stop, $len);
-               $stop  := nqp::x($start, $len);
+           my $s;
+           repeat {
+               $pos := $pos + 1;
+               $len := $len + 1;
+               $s   := nqp::substr($target, $pos, 1);
+           } while $s eq $start;
+
+           unless $len == 1 {
+               $start := nqp::x($start, $len);
+               $stop  := nqp::x($stop, $len);
            }
         }
         pir::return__vssi($start, $stop, $pos);
