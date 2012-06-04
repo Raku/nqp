@@ -713,90 +713,41 @@ An operator precedence parser.
         };
     }
 
-    method EXPR_reduce($termstack, $opstack) {
-        Q:PIR {
-            .local pmc self, termstack, opstack
-            self = find_lex 'self'
-            termstack = find_lex '$termstack'
-            opstack = find_lex '$opstack'
+    method EXPR_reduce(@termstack, @opstack) { 
+        my $op := nqp::pop(@opstack);
+        # Give it a fresh capture list, since we'll have assumed it has
+        # no positional captures and not taken them.
+        nqp::bindattr($op, NQPCapture, '@!array', nqp::list());
+        my %opOPER  := $op<OPER>;
+        my %opO     := %opOPER<O>;
+        my $opassoc := ~%opO<assoc>;
+        my $key;
 
-            .local pmc op, opOPER, opO
-            .local string opassoc
-            op = pop opstack
-            
-            # Give it a fresh capture list, since we'll have assumed it has
-            # no positional captures and not taken them.
-            .local pmc cap_class
-            cap_class = find_lex 'NQPCapture'
-            $P0 = new ['ResizablePMCArray']
-            setattribute op, cap_class, '@!array', $P0
-            
-            opOPER = op['OPER']
-            opO = opOPER['O']
-            $P0 = opO['assoc']
-            opassoc = $P0
-            if opassoc == 'unary' goto op_unary
-            if opassoc == 'list' goto op_list
-          op_infix:
-            .local pmc right, left
-            right = pop termstack
-            left = pop termstack
-            op[0] = left
-            op[1] = right
-            $P0 = opO['reducecheck']
-            if null $P0 goto op_infix_1
-            $S0 = $P0
-            self.$S0(op)
-          op_infix_1:
-            self.'!reduce_with_match'('EXPR', 'INFIX', op)
-            goto done
-
-          op_unary:
-            .local pmc arg, afrom, ofrom
-            arg = pop termstack
-            op[0] = arg
-            afrom = arg.'from'()
-            ofrom = op.'from'()
-            if afrom < ofrom goto op_postfix
-          op_prefix:
-            self.'!reduce_with_match'('EXPR', 'PREFIX', op)
-            goto done
-          op_postfix:
-            self.'!reduce_with_match'('EXPR', 'POSTFIX', op)
-            goto done
-
-          op_list:
-            .local string sym
-            sym = ''
-            $P0 = opOPER['sym']
-            if null $P0 goto op_list_1
-            sym = $P0
-          op_list_1:
-            arg = pop termstack
-            unshift op, arg
-          op_sym_loop:
-            unless opstack goto op_sym_done
-            $S0 = ''
-            $P0 = opstack[-1]
-            $P0 = $P0['OPER']
-            $P0 = $P0['sym']
-            if null $P0 goto op_sym_1
-            $S0 = $P0
-          op_sym_1:
-            if sym != $S0 goto op_sym_done
-            arg = pop termstack
-            unshift op, arg
-            $P0 = pop opstack
-            goto op_sym_loop
-          op_sym_done:
-            arg = pop termstack
-            unshift op, arg
-            self.'!reduce_with_match'('EXPR', 'LIST', op)
-            goto done
-
-          done:
-            push termstack, op
-        };
+        if $opassoc eq 'unary' {
+            my $arg := nqp::pop(@termstack);
+            $op[0]  := $arg;
+            $key    := $arg.from() < $op.from() ?? 'POSTFIX' !! 'PREFIX';
+        }
+        elsif $opassoc eq 'list' {
+            my $sym := ~%opOPER<sym>;
+            nqp::unshift($op, nqp::pop(@termstack));
+            while @opstack {    
+                last if $sym ne @opstack[+@opstack-1]<OPER><sym>;
+                nqp::unshift($op, nqp::pop(@termstack));
+                nqp::pop(@opstack);
+            }
+            nqp::unshift($op, nqp::pop(@termstack));
+            $key := 'LIST';
+        }
+        else { # infix op assoc: left|right|ternary|...
+            $op[1] := nqp::pop(@termstack); # right
+            $op[0] := nqp::pop(@termstack); # left
+            my $reducecheck := %opO<reducecheck>;
+            self."$reducecheck"($op) if $reducecheck ne '';
+            $key := 'INFIX';
+        }
+        self.'!reduce_with_match'('EXPR', $key, $op);
+        nqp::push(@termstack, $op);
     }
 
     method ternary($match) {
