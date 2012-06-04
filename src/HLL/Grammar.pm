@@ -165,141 +165,110 @@ Currently the only pairs recognized have the form C< :pair >,
 C< :!pair >, and C<< :pair<strval> >>.
 
 =end
+
     method O($spec, $save?) {
-        Q:PIR {
-            .local pmc self, cur_class
-            .local string spec, save
-            .local int has_save
-            self = find_lex 'self'
-            cur_class = find_lex '$cursor_class'
-            $P0 = find_lex '$spec'
-            spec = $P0
-            has_save = 0
-            $P0 = find_lex '$save'
-            unless $P0 goto no_save
-            save = $P0
-            has_save = 1
-          no_save:
-
-            # First, get the hash cache.  Right now we have one
-            # cache for all grammars; eventually we may need a way to
-            # separate them out by cursor type.
-            .local pmc ohash
-            ohash = get_global '%!ohash'
-            unless null ohash goto have_ohash
-            ohash = new ['Hash']
-            set_global '%!ohash', ohash
-          have_ohash:
-
-            # See if we've already created a Hash for the current
-            # specification string -- if so, use that.
-            .local pmc hash
-            hash = ohash[spec]
-            unless null hash goto hash_done
-
+        # First, get the hash cache.  Right now we have one
+        # cache for all grammars; eventually we may need a way to
+        # separate them out by cursor type.
+        my %ohash := pir::get_global__Ps('%!ohash');
+        unless %ohash {
+            %ohash := nqp::hash();
+            pir::set_global__vsP('%!ohash', %ohash);
+        }
+        
+        # See if we've already created a Hash for the current
+        # specification string -- if so, use that.
+        my %hash := %ohash{$spec};
+        unless %hash {
             # Otherwise, we need to build a new one.
-            hash = new ['Hash']
-            .local int pos, eos
-            pos = 0
-            eos = length spec
-          spec_loop:
-            pos = find_not_cclass .CCLASS_WHITESPACE, spec, pos, eos
-            if pos >= eos goto spec_done
-            $S0 = substr spec, pos, 1
-            if $S0 == ',' goto spec_comma
-            if $S0 == ':' goto spec_pair
+            %hash := nqp::hash();
+            my $pos := 0;
+            my $eos := nqp::chars($spec);
+            while 1 {
+                $pos := nqp::findnotcclass(
+                    pir::const::CCLASS_WHITESPACE, $spec, $pos, $eos);
+                last if $pos >= $eos;
+                my $s := nqp::substr($spec, $pos, 1);
+                my $i;
+                my $lpos;
+                if $s eq ',' {
+                    # We just ignore commas between elements for now.
+                    $pos := $pos + 1;
+                    next;
+                }
+                elsif $s eq ':' {
+                    # If we see a colon, then we want to parse whatever
+                    # comes next like a pair.
+                    # eat colon
+                    $pos := $pos + 1;
+                    my $value := pir::new__Ps('Boolean');
+                  
+                    # If the pair is of the form :!name, then reverse the value
+                    # and skip the colon.
+                    if nqp::substr($spec, $pos, 1) eq '!' {
+                        $pos := $pos + 1;
+                        $value := 0;
+                    }
+                    else {
+                        $value := 1;
+                    }
+                    
+                    # Get the name of the pair.
+                    $lpos    := nqp::findnotcclass(
+                        pir::const::CCLASS_WORD, $spec, $pos, $eos);
+                    my $name := nqp::substr($spec, $pos, $lpos - $pos);
+                    $pos     := $lpos;
 
-            # If whatever we found doesn't start with a colon, treat it
-            # as a lookup of a previously saved hash to be merged in.
-            .local string lookup
-            .local int lpos
-            # Find the first whitespace or comma
-            lpos = find_cclass .CCLASS_WHITESPACE, spec, pos, eos
-            $I0 = index spec, ',', pos
-            if $I0 < 0 goto have_lookup_lpos
-            if $I0 >= lpos goto have_lookup_lpos
-            lpos = $I0
-          have_lookup_lpos:
-            $I0 = lpos - pos
-            lookup = substr spec, pos, $I0
-            .local pmc lhash, lhash_it
-            lhash = ohash[lookup]
-            if null lhash goto err_lookup
-            lhash_it = iter lhash
-          lhash_loop:
-            unless lhash_it goto lhash_done
-            $S0 = shift lhash_it
-            $P0 = lhash[$S0]
-            hash[$S0] = $P0
-            goto lhash_loop
-          lhash_done:
-            pos = lpos
-            goto spec_loop
-
-            # We just ignore commas between elements for now.
-          spec_comma:
-            inc pos
-            goto spec_loop
-
-            # If we see a colon, then we want to parse whatever
-            # comes next like a pair.
-          spec_pair:
-            # eat colon
-            inc pos
-            .local string name
-            .local pmc value
-            value = new ['Boolean']
-
-            # If the pair is of the form :!name, then reverse the value
-            # and skip the colon.
-            $S0 = substr spec, pos, 1
-            $I0 = iseq $S0, '!'
-            pos += $I0
-            $I0 = not $I0
-            value = $I0
-
-            # Get the name of the pair.
-            lpos = find_not_cclass .CCLASS_WORD, spec, pos, eos
-            $I0 = lpos - pos
-            name = substr spec, pos, $I0
-            pos = lpos
-
-            # Look for a <...> that follows.
-            $S0 = substr spec, pos, 1
-            unless $S0 == '<' goto have_value
-            inc pos
-            lpos = index spec, '>', pos
-            $I0 = lpos - pos
-            $S0 = substr spec, pos, $I0
-            value = box $S0
-            pos = lpos + 1
-          have_value:
-            # Done processing the pair, store it in the hash.
-            hash[name] = value
-            goto spec_loop
-          spec_done:
+                    # Look for a <...> that follows.
+                    if nqp::substr($spec, $pos, 1) eq '<' {
+                        $pos   := $pos + 1;
+                        $lpos  := nqp::index($spec, '>', $pos);
+                        $s     := nqp::substr($spec, $pos, $lpos - $pos);
+                        $value := pir::box__Ps($s);
+                        $pos   := $lpos + 1;
+                    }
+                    # Done processing the pair, store it in the hash.
+                    %hash{$name} := $value;
+                }
+                else {
+                    my $lookup;
+                    # If whatever we found doesn't start with a colon, treat it
+                    # as a lookup of a previously saved hash to be merged in.
+                    # Find the first whitespace or comma
+                    $lpos   := pir::find_cclass__Iisii(
+                        pir::const::CCLASS_WHITESPACE, $spec, $pos, $eos);
+                    $i      := nqp::index($spec, ',', $pos);
+                    $lpos   := $i unless $i < 0 || $i >= $lpos;
+                    $lookup := nqp::substr($spec, $pos, $lpos - $pos);
+                    my %lhash := %ohash{$lookup};
+                    self.'panic'('Unknown operator precedence specification "',
+                        $lookup, '"') unless %lhash;
+                    my $lhash_it := nqp::iterator(%lhash);
+                    while $lhash_it {
+                        $s := nqp::shift($lhash_it);
+                        %hash{$s} := %lhash{$s};
+                    }
+                    $pos := $lpos;
+                }
+            }
             # Done processing the spec string, cache the hash for later.
-            ohash[spec] = hash
-          hash_done:
+            %ohash{$spec} := %hash;
+        }
 
+        if $save {
+            %ohash{$save} := %hash;
+            return self;
+        }
+        else {
             # If we've been called as a subrule, then build a pass-cursor
             # to indicate success and set the hash as the subrule's match object.
-            if has_save goto save_hash
-            ($P0, $S0, $I0) = self.'!cursor_start'()
-            $P0.'!cursor_pass'($I0, '')
-            setattribute $P0, cur_class, '$!match', hash
-            .return ($P0)
-
-            # save the hash under a new entry
-          save_hash:
-            ohash[save] = hash
-            .return (self)
-
-          err_lookup:
-            self.'panic'('Unknown operator precedence specification "', lookup, '"')
-        };
+            my $cur := self.'!cursor_start'();
+            my $pos := nqp::getattr_i($cur, $cursor_class, '$!from');
+            $cur.'!cursor_pass'($pos);
+            nqp::bindattr($cur, $cursor_class, '$!match', %hash);
+            return $cur;
+        }
     }
-
 
 =begin
 
