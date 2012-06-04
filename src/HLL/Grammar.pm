@@ -333,65 +333,40 @@ position C<pos>.
 =end
 
     method peek_delimiters($target, $pos) {
-        Q:PIR {
-            .local pmc self
-            self = find_lex 'self'
-            .local string target
-            $P0 = find_lex '$target'
-            target = $P0
-            .local int pos
-            $P0 = find_lex '$pos'
-            pos = $P0
+        # Peek at the next character.
+        my $start := nqp::substr($target, $pos, 1);
 
-            .local string brackets, start, stop
-            $P0 = find_lex '$brackets'
-            brackets = $P0
+        self.'panic'('Colons may not be used to delimit quoting constructs')
+            if $start eq ':';
+        self.'panic'('Whitespace character is not allowed as a delimiter')
+            if nqp::iscclass(pir::const::CCLASS_WHITESPACE, $start, 0);
 
-            # peek at the next character
-            start = substr target, pos, 1
-            # colon and word characters aren't valid delimiters
-            if start == ':' goto err_colon_delim
-            $I0 = is_cclass .CCLASS_WORD, start, 0
-            if $I0 goto err_word_delim
-            $I0 = is_cclass .CCLASS_WHITESPACE, start, 0
-            if $I0 goto err_ws_delim
+        # assume stop delim is same as start, for the moment
+        my $stop := $start;
 
-            # assume stop delim is same as start, for the moment
-            stop = start
+        # see if we have an opener or closer
+        my $index := nqp::index($brackets, $start);
+        unless $index < 0 {
+           # If it's a closing bracket, that's an error also.
+           self.'panic'('Use of a closing delimiter for an opener is reserved')
+               if $index % 2;
+           
+           # It's an opener, so get the closing bracket.
+           $stop := nqp::substr($brackets, $index + 1, 1);
 
-            # see if we have an opener or closer
-            $I0 = index brackets, start
-            if $I0 < 0 goto bracket_end
-            # if it's a closing bracket, that's an error also
-            $I1 = $I0 % 2
-            if $I1 goto err_close
-            # it's an opener, so get the closing bracket
-            inc $I0
-            stop = substr brackets, $I0, 1
-
-            # see if the opening bracket is repeated
-            .local int len
-            len = 0
-          bracket_loop:
-            inc pos
-            inc len
-            $S0 = substr target, pos, 1
-            if $S0 == start goto bracket_loop
-            if len == 1 goto bracket_end
-            start = repeat start, len
-            stop = repeat stop, len
-          bracket_end:
-            .return (start, stop, pos)
-
-          err_colon_delim:
-            self.'panic'('Colons may not be used to delimit quoting constructs')
-          err_word_delim:
-            self.'panic'('Alphanumeric character is not allowed as a delimiter')
-          err_ws_delim:
-            self.'panic'('Whitespace character is not allowed as a delimiter')
-          err_close:
-            self.'panic'('Use of a closing delimiter for an opener is reserved')
-        };
+           # See if the opening bracket is repeated.
+           my $len := 0;
+           while 1 {
+               $pos  := $pos + 1;
+               $len  := $len + 1;
+               my $s := nqp::substr($target, $pos, 1);
+               next if $s eq $start;
+               last if $len == 1;
+               $start := nqp::x($stop, $len);
+               $stop  := nqp::x($start, $len);
+           }
+        }
+        pir::return__vssi($start, $stop, $pos);
     }
 
     token quote_EXPR(*@args) {
