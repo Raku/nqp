@@ -32,7 +32,6 @@ grammar HLL::Grammar {
     # Return <termish> if it matches, <nullterm_alt> otherwise.
     method nulltermish() { self.termish || self.nullterm_alt }
 
-    # token quote_EXPR is in src/cheats/hll-grammar.pir
     token quote_delimited {
         <starter> <quote_atom>* <stopper>
     }
@@ -575,26 +574,22 @@ An operator precedence parser.
     }
 
     method MARKER($markname) {
-        my %markhash := Q:PIR {
-            %r = get_global '%!MARKHASH'
-            unless null %r goto have_markhash
-            %r = new ['Hash']
-            set_global '%!MARKHASH', %r
-          have_markhash:
-        };
+        my %markhash := pir::get_global__Ps('%!MARKHASH');
+        unless %markhash {
+            %markhash := nqp::hash();
+            pir::set_global__vsP('%!MARKHASH', %markhash);
+        }
         my $cur := self."!cursor_start"();
         $cur."!cursor_pass"(self.pos());
         %markhash{$markname} := $cur;
     }
     
     method MARKED($markname) {
-        my %markhash := Q:PIR {
-            %r = get_global '%!MARKHASH'
-            unless null %r goto have_markhash
-            %r = new ['Hash']
-            set_global '%!MARKHASH', %r
-          have_markhash:
-        };
+        my %markhash := pir::get_global__Ps('%!MARKHASH');
+        unless %markhash {
+            %markhash := nqp::hash();
+            pir::set_global__vsP('%!MARKHASH', %markhash);
+        }
         my $cur := %markhash{$markname};
         unless nqp::istype($cur, NQPCursor) && $cur.pos() == self.pos() {
             $cur := self."!cursor_start"();
