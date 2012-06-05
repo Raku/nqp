@@ -2133,8 +2133,8 @@ inline op nqp_nfa_run_new(out PMC, in PMC, in STR, in INT) :base_core {
     done = mem_sys_allocate_zeroed(num_states * sizeof(INTVAL));
     
     /* Allocate fates array. */
-    fates = mem_sys_allocate(sizeof(INTVAL) * VTABLE_elements(interp,
-        VTABLE_get_pmc_keyed_int(interp, states, 0)));
+    fates = mem_sys_allocate(sizeof(INTVAL) * (1 + VTABLE_elements(interp,
+        VTABLE_get_pmc_keyed_int(interp, states, 0))));
     total_fates = 0;
     
     VTABLE_push_integer(interp, nextst, 1);
