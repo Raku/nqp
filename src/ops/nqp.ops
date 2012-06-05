@@ -2222,8 +2222,11 @@ inline op nqp_nfa_run_new(out PMC, in PMC, in STR, in INT) :base_core {
                     for (j = 0; j < total_fates; j++) {
                         if (found_fate)
                             fates[j - 1] = fates[j];
-                        if (fates[j] == arg)
+                        if (fates[j] == arg) {
                             found_fate = 1;
+                            if (j < prev_fates)
+                                prev_fates--;
+                        }
                     }
                     if (found_fate)
                         fates[total_fates - 1] = arg;
