@@ -2121,16 +2121,21 @@ inline op nqp_nfa_run_new(out PMC, in PMC, in STR, in INT) :base_core {
     STRING *target  = $3;
     INTVAL  offset  = $4;
     INTVAL  eos     = Parrot_str_length(interp, target);
-    PMC    *fates   = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
+    PMC    *fatepmc = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
     INTVAL  gen     = 1;
     PMC    *curst   = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
     PMC    *nextst  = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
-    INTVAL *done;
-    INTVAL  i, num_states;
+    INTVAL *done, *fates;
+    INTVAL  i, num_states, total_fates, char_fates;
     
     /* Zero out the done array; we don't get zeroed memory by default. */
     num_states = VTABLE_elements(interp, states);
     done = mem_sys_allocate_zeroed(num_states * sizeof(INTVAL));
+    
+    /* Allocate fates array. */
+    fates = mem_sys_allocate(sizeof(INTVAL) * VTABLE_elements(interp,
+        VTABLE_get_pmc_keyed_int(interp, states, 0)));
+    total_fates = 0;
     
     VTABLE_push_integer(interp, nextst, 1);
     while (VTABLE_elements(interp, nextst) && offset <= eos) {
@@ -2142,6 +2147,9 @@ inline op nqp_nfa_run_new(out PMC, in PMC, in STR, in INT) :base_core {
         curst = nextst;
         VTABLE_set_integer_native(interp, temp, 0);
         nextst = temp;
+        
+        /* Reset per character fate counter. */
+        char_fates = 0;
         
         while (VTABLE_elements(interp, curst)) {
             PMC    *edge_info;
@@ -2161,8 +2169,22 @@ inline op nqp_nfa_run_new(out PMC, in PMC, in STR, in INT) :base_core {
                 INTVAL to  = VTABLE_get_integer_keyed_int(interp, edge_info, i + 2);
                 
                 if (act == EDGE_FATE) {
+                    /* Crossed a fate edge. Check if we already saw this, and
+                     * if so bump the entry we already saw. */
                     INTVAL arg = VTABLE_get_integer_keyed_int(interp, edge_info, i + 1);
-                    VTABLE_push_integer(interp, fates, arg);
+                    INTVAL j;
+                    INTVAL found_fate = 0;
+                    for (j = 0; j < total_fates; j++) {
+                        if (found_fate)
+                            fates[j - 1] = fates[j];
+                        if (fates[j] == arg)
+                            found_fate = 1;
+                    }
+                    if (found_fate)
+                        fates[total_fates - 1] = arg;
+                    else
+                        fates[total_fates++] = arg;
+                    char_fates++;
                 }
                 else if (act == EDGE_EPSILON && to < num_states && done[to] != gen) {
                     VTABLE_push_integer(interp, curst, to);
@@ -2204,12 +2226,17 @@ inline op nqp_nfa_run_new(out PMC, in PMC, in STR, in INT) :base_core {
                 }
             }
         }
+        
+        /* Move to next character and generation. */
         offset++;
         gen++;
     }
-
-    mem_sys_free(done); 
-    $1 = fates;
+    mem_sys_free(done);
+    
+    /* Copy fates managed in C array into result PMC. */
+    for (i = 0; i < total_fates; i++)
+        VTABLE_set_integer_keyed_int(interp, fatepmc, i, fates[i]);
+    $1 = fatepmc;
 }
 
 
