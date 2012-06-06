@@ -254,7 +254,8 @@ class QRegex::NFA {
         my @substates;
         if nqp::can($cursor, $name) {
             if !%seen{$name} {
-                @substates := $cursor.HOW.find_method($cursor, $name, :no_trace(1)).nqpattr('nfa');
+                my $meth := $cursor.HOW.find_method($cursor, $name, :no_trace(1));
+                @substates := $meth.nqpattr('nfa') if nqp::can($meth, 'nqpattr');
             }
             if !@substates && !%seen{$name} {
                 # Maybe it's a protoregex, in which case states are an alternation
