@@ -127,8 +127,9 @@ class QRegex::NFA {
         elsif $subtype ne 'zerowidth' &&
                 ($node.name eq 'alpha' ||
                     $subtype eq 'method' && $node[0][0] eq 'alpha') {
-            self.addedge($from, $to, $EDGE_CHARCLASS + $node.negate,
-                pir::const::CCLASS_ALPHABETIC)
+            $to := self.addedge($from, $to, $EDGE_CHARCLASS + $node.negate,
+                pir::const::CCLASS_ALPHABETIC);
+            self.addedge($from, $to, $EDGE_CODEPOINT + $node.negate, 95);
         }
         elsif $subtype eq 'zerowidth' {
             if $node.negate {
