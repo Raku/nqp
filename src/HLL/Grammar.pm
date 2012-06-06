@@ -32,7 +32,6 @@ grammar HLL::Grammar {
     # Return <termish> if it matches, <nullterm_alt> otherwise.
     method nulltermish() { self.termish || self.nullterm_alt }
 
-    # token quote_EXPR is in src/cheats/hll-grammar.pir
     token quote_delimited {
         <starter> <quote_atom>* <stopper>
     }
@@ -140,7 +139,7 @@ invocation for the subrule might be:
 This says to add all of the attribute of the C<%additive> hash
 (described below) and a C<pirop> entry into the match object
 returned by the C<< infix:sym<+> >> token (as the C<O> named
-capture).  Note that this is a alphabetic 'O", not a digit zero.
+capture).  Note that this is a alphabetic "O", not a digit zero.
 
 Currently the C<O> subrule accepts a string argument describing
 the hash to be stored.  (Note the C< q{ ... } > above.  Eventually
@@ -165,141 +164,98 @@ Currently the only pairs recognized have the form C< :pair >,
 C< :!pair >, and C<< :pair<strval> >>.
 
 =end
+
     method O($spec, $save?) {
-        Q:PIR {
-            .local pmc self, cur_class
-            .local string spec, save
-            .local int has_save
-            self = find_lex 'self'
-            cur_class = find_lex '$cursor_class'
-            $P0 = find_lex '$spec'
-            spec = $P0
-            has_save = 0
-            $P0 = find_lex '$save'
-            unless $P0 goto no_save
-            save = $P0
-            has_save = 1
-          no_save:
-
-            # First, get the hash cache.  Right now we have one
-            # cache for all grammars; eventually we may need a way to
-            # separate them out by cursor type.
-            .local pmc ohash
-            ohash = get_global '%!ohash'
-            unless null ohash goto have_ohash
-            ohash = new ['Hash']
-            set_global '%!ohash', ohash
-          have_ohash:
-
-            # See if we've already created a Hash for the current
-            # specification string -- if so, use that.
-            .local pmc hash
-            hash = ohash[spec]
-            unless null hash goto hash_done
-
+        # First, get the hash cache.  Right now we have one
+        # cache for all grammars; eventually we may need a way to
+        # separate them out by cursor type.
+        my %ohash := pir::get_global__Ps('%!ohash');
+        unless %ohash {
+            %ohash := nqp::hash();
+            pir::set_global__vsP('%!ohash', %ohash);
+        }
+        
+        # See if we've already created a Hash for the current
+        # specification string -- if so, use that.
+        my %hash := %ohash{$spec};
+        unless %hash {
             # Otherwise, we need to build a new one.
-            hash = new ['Hash']
-            .local int pos, eos
-            pos = 0
-            eos = length spec
-          spec_loop:
-            pos = find_not_cclass .CCLASS_WHITESPACE, spec, pos, eos
-            if pos >= eos goto spec_done
-            $S0 = substr spec, pos, 1
-            if $S0 == ',' goto spec_comma
-            if $S0 == ':' goto spec_pair
+            %hash   := nqp::hash();
+            my $eos := nqp::chars($spec);
+            my $pos := 0;
+            while ($pos := nqp::findnotcclass(pir::const::CCLASS_WHITESPACE,
+                                              $spec, $pos, $eos)) < $eos
+            {
+                my $lpos;
+                my $s := nqp::substr($spec, $pos, 1);
+                if $s eq ',' { # Ignore commas between elements for now.
+                    $pos := $pos + 1;
+                }
+                elsif $s eq ':' { # Parse whatever comes next like a pair.
+                    $pos := $pos + 1;
+                  
+                    # If the pair is of the form :!name, then reverse the value
+                    # and skip the exclamation mark.
+                    my $value := 1;
+                    if nqp::substr($spec, $pos, 1) eq '!' {
+                        $pos := $pos + 1;
+                        $value := 0;
+                    }
 
-            # If whatever we found doesn't start with a colon, treat it
-            # as a lookup of a previously saved hash to be merged in.
-            .local string lookup
-            .local int lpos
-            # Find the first whitespace or comma
-            lpos = find_cclass .CCLASS_WHITESPACE, spec, pos, eos
-            $I0 = index spec, ',', pos
-            if $I0 < 0 goto have_lookup_lpos
-            if $I0 >= lpos goto have_lookup_lpos
-            lpos = $I0
-          have_lookup_lpos:
-            $I0 = lpos - pos
-            lookup = substr spec, pos, $I0
-            .local pmc lhash, lhash_it
-            lhash = ohash[lookup]
-            if null lhash goto err_lookup
-            lhash_it = iter lhash
-          lhash_loop:
-            unless lhash_it goto lhash_done
-            $S0 = shift lhash_it
-            $P0 = lhash[$S0]
-            hash[$S0] = $P0
-            goto lhash_loop
-          lhash_done:
-            pos = lpos
-            goto spec_loop
+                    # Get the name of the pair.
+                    $lpos    := nqp::findnotcclass(pir::const::CCLASS_WORD,
+                                                   $spec, $pos, $eos);
+                    my $name := nqp::substr($spec, $pos, $lpos - $pos);
+                    $pos     := $lpos;
 
-            # We just ignore commas between elements for now.
-          spec_comma:
-            inc pos
-            goto spec_loop
-
-            # If we see a colon, then we want to parse whatever
-            # comes next like a pair.
-          spec_pair:
-            # eat colon
-            inc pos
-            .local string name
-            .local pmc value
-            value = new ['Boolean']
-
-            # If the pair is of the form :!name, then reverse the value
-            # and skip the colon.
-            $S0 = substr spec, pos, 1
-            $I0 = iseq $S0, '!'
-            pos += $I0
-            $I0 = not $I0
-            value = $I0
-
-            # Get the name of the pair.
-            lpos = find_not_cclass .CCLASS_WORD, spec, pos, eos
-            $I0 = lpos - pos
-            name = substr spec, pos, $I0
-            pos = lpos
-
-            # Look for a <...> that follows.
-            $S0 = substr spec, pos, 1
-            unless $S0 == '<' goto have_value
-            inc pos
-            lpos = index spec, '>', pos
-            $I0 = lpos - pos
-            $S0 = substr spec, pos, $I0
-            value = box $S0
-            pos = lpos + 1
-          have_value:
-            # Done processing the pair, store it in the hash.
-            hash[name] = value
-            goto spec_loop
-          spec_done:
+                    # Look for a <...> that follows.
+                    if nqp::substr($spec, $pos, 1) eq '<' {
+                        $pos   := $pos + 1;
+                        $lpos  := nqp::index($spec, '>', $pos);
+                        $value := nqp::substr($spec, $pos, $lpos - $pos);
+                        $pos   := $lpos + 1;
+                    }
+                    # Done processing the pair, store it in the hash.
+                    %hash{$name} := $value;
+                }
+                else {
+                    # If whatever we found doesn't start with a colon, treat it
+                    # as a lookup of a previously saved hash to be merged in.
+                    # Find the first whitespace or comma
+                    $lpos      := pir::find_cclass__Iisii(pir::const::CCLASS_WHITESPACE,
+                                                          $spec, $pos, $eos);
+                    my $index  := nqp::index($spec, ',', $pos);
+                    $lpos      := $index unless $index < 0 || $index >= $lpos;
+                    my $lookup := nqp::substr($spec, $pos, $lpos - $pos);
+                    my %lhash  := %ohash{$lookup};
+                    self.'panic'('Unknown operator precedence specification "',
+                                 $lookup, '"') unless %lhash;
+                    my $lhash_it := nqp::iterator(%lhash);
+                    while $lhash_it {
+                        $s := nqp::shift($lhash_it);
+                        %hash{$s} := %lhash{$s};
+                    }
+                    $pos := $lpos;
+                }
+            }
             # Done processing the spec string, cache the hash for later.
-            ohash[spec] = hash
-          hash_done:
+            %ohash{$spec} := %hash;
+        }
 
+        if $save {
+            %ohash{$save} := %hash;
+            return self;
+        }
+        else {
             # If we've been called as a subrule, then build a pass-cursor
             # to indicate success and set the hash as the subrule's match object.
-            if has_save goto save_hash
-            ($P0, $S0, $I0) = self.'!cursor_start'()
-            $P0.'!cursor_pass'($I0, '')
-            setattribute $P0, cur_class, '$!match', hash
-            .return ($P0)
-
-            # save the hash under a new entry
-          save_hash:
-            ohash[save] = hash
-            .return (self)
-
-          err_lookup:
-            self.'panic'('Unknown operator precedence specification "', lookup, '"')
-        };
+            my $cur := self.'!cursor_start'();
+            my $pos := nqp::getattr_i($cur, $cursor_class, '$!from');
+            $cur.'!cursor_pass'($pos);
+            nqp::bindattr($cur, $cursor_class, '$!match', %hash);
+            return $cur;
+        }
     }
-
 
 =begin
 
@@ -312,7 +268,7 @@ of the match.
 =end
 
     method panic(*@args) {
-        my $pos := self.pos();
+        my $pos    := nqp::getattr_i(self, NQPCursor, '$!pos');
         my $target := nqp::getattr_s(self, NQPCursor, '$!target');
         @args.push(' at line ');
         @args.push(HLL::Compiler.lineof($target, $pos) + 1);
@@ -333,65 +289,42 @@ position C<pos>.
 =end
 
     method peek_delimiters($target, $pos) {
-        Q:PIR {
-            .local pmc self
-            self = find_lex 'self'
-            .local string target
-            $P0 = find_lex '$target'
-            target = $P0
-            .local int pos
-            $P0 = find_lex '$pos'
-            pos = $P0
+        # Peek at the next character.
+        my $start := nqp::substr($target, $pos, 1);
 
-            .local string brackets, start, stop
-            $P0 = find_lex '$brackets'
-            brackets = $P0
+        self.'panic'('Colons may not be used to delimit quoting constructs')
+            if $start eq ':';
+        self.'panic'('Whitespace character is not allowed as a delimiter')
+            if nqp::iscclass(pir::const::CCLASS_WHITESPACE, $start, 0);
 
-            # peek at the next character
-            start = substr target, pos, 1
-            # colon and word characters aren't valid delimiters
-            if start == ':' goto err_colon_delim
-            $I0 = is_cclass .CCLASS_WORD, start, 0
-            if $I0 goto err_word_delim
-            $I0 = is_cclass .CCLASS_WHITESPACE, start, 0
-            if $I0 goto err_ws_delim
+        # assume stop delim is same as start, for the moment
+        my $stop := $start;
 
-            # assume stop delim is same as start, for the moment
-            stop = start
+        # see if we have an opener or closer
+        my $index := nqp::index($brackets, $start);
+        unless $index < 0 {
+           # If it's a closing bracket, that's an error also.
+           self.'panic'('Use of a closing delimiter for an opener is reserved')
+               if $index % 2;
+           
+           # It's an opener, so get the closing bracket.
+           $stop := nqp::substr($brackets, $index + 1, 1);
 
-            # see if we have an opener or closer
-            $I0 = index brackets, start
-            if $I0 < 0 goto bracket_end
-            # if it's a closing bracket, that's an error also
-            $I1 = $I0 % 2
-            if $I1 goto err_close
-            # it's an opener, so get the closing bracket
-            inc $I0
-            stop = substr brackets, $I0, 1
+           # See if the opening bracket is repeated.
+           my $len := 0;
+           my $s;
+           repeat {
+               $pos := $pos + 1;
+               $len := $len + 1;
+               $s   := nqp::substr($target, $pos, 1);
+           } while $s eq $start;
 
-            # see if the opening bracket is repeated
-            .local int len
-            len = 0
-          bracket_loop:
-            inc pos
-            inc len
-            $S0 = substr target, pos, 1
-            if $S0 == start goto bracket_loop
-            if len == 1 goto bracket_end
-            start = repeat start, len
-            stop = repeat stop, len
-          bracket_end:
-            .return (start, stop, pos)
-
-          err_colon_delim:
-            self.'panic'('Colons may not be used to delimit quoting constructs')
-          err_word_delim:
-            self.'panic'('Alphanumeric character is not allowed as a delimiter')
-          err_ws_delim:
-            self.'panic'('Whitespace character is not allowed as a delimiter')
-          err_close:
-            self.'panic'('Use of a closing delimiter for an opener is reserved')
-        };
+           unless $len == 1 {
+               $start := nqp::x($start, $len);
+               $stop  := nqp::x($stop, $len);
+           }
+        }
+        pir::return__vssi($start, $stop, $pos);
     }
 
     token quote_EXPR(*@args) {
@@ -399,40 +332,29 @@ position C<pos>.
         :my $*QUOTE_START;
         :my $*QUOTE_STOP;
         {
-            Q:PIR {            
-                .local pmc self, cur_class, args
-                self = find_lex 'self'
-                cur_class = find_lex '$cursor_class'
-                args = find_lex '@args'
-
-                .local pmc quotemod, true
-                quotemod = find_lex '%*QUOTEMOD'
-                true = box 1
-
-              args_loop:
-                unless args goto args_done
-                .local string mod
-                mod = shift args
-                mod = substr mod, 1
-                quotemod[mod] = true
-                if mod == 'qq' goto opt_qq
-                if mod == 'b' goto opt_b
-                goto args_loop
-              opt_qq:
-                quotemod['s'] = true
-                quotemod['a'] = true
-                quotemod['h'] = true
-                quotemod['f'] = true
-                quotemod['c'] = true
-                quotemod['b'] = true
-              opt_b:
-                quotemod['q'] = true
-                goto args_loop
-              args_done:
-
-                .local pmc start, stop
+            for @args {
+                my $mod := nqp::substr($_, 1);
+                %*QUOTEMOD{$mod} := 1;
+                
+                if $mod eq 'qq' {
+                    %*QUOTEMOD<s> := 1;
+                    %*QUOTEMOD<a> := 1;
+                    %*QUOTEMOD<h> := 1;
+                    %*QUOTEMOD<f> := 1;
+                    %*QUOTEMOD<c> := 1;
+                    %*QUOTEMOD<b> := 1;
+                }
+                elsif $mod eq 'b' {
+                    %*QUOTEMOD<q> := 1;
+                }
+            }
+            
+            Q:PIR {
+                .local pmc self, cur_class, start, stop
                 .local string target
                 .local int pos
+                self = find_lex 'self'
+                cur_class = find_lex '$cursor_class'
                 target = repr_get_attr_str self, cur_class, '$!target'
                 pos = repr_get_attr_int self, cur_class, '$!pos'
                 (start, stop) = self.'peek_delimiters'(target, pos)
@@ -448,74 +370,47 @@ position C<pos>.
     }
 
     method starter() {
-        Q:PIR {
-            .local pmc self, cur
-            .local string target, start
-            .local int pos
-            self = find_lex 'self'
+        my $cur         := self.'!cursor_start'();
+        my $quote_start := pir::find_dynamic_lex__Ps('$*QUOTE_START');
+        return $cur if $quote_start eq '';
+        
+        my $target      := nqp::getattr_s($cur, $cursor_class, '$!target');
+        my $pos         := nqp::getattr_i($cur, $cursor_class, '$!from');
+        my $i           := nqp::chars($quote_start);
+        return $cur unless $quote_start eq nqp::substr($target, $pos, $i);
 
-            (cur, target, pos) = self.'!cursor_start'()
+        $cur.'!cursor_pass'($pos + $i, 'starter');
+        return $cur;
 
-            $P0 = find_dynamic_lex '$*QUOTE_START'
-            if null $P0 goto fail
-            start = $P0
-
-            $I0 = length start
-            $S0 = substr target, pos, $I0
-            unless $S0 == start goto fail
-            pos += $I0
-            cur.'!cursor_pass'(pos, 'starter')
-          fail:
-            .return (cur)
-        };
     }
 
     method stopper() {
-        Q:PIR {
-            .local pmc self, cur
-            .local string target, stop
-            .local int pos
-            self = find_lex 'self'
+        my $cur        := self.'!cursor_start'();
+        my $quote_stop := pir::find_dynamic_lex__Ps('$*QUOTE_STOP');
+        return $cur if $quote_stop eq '';
 
-            (cur, target, pos) = self.'!cursor_start'()
+        my $target     := nqp::getattr_s($cur, $cursor_class, '$!target');
+        my $pos        := nqp::getattr_i($cur, $cursor_class, '$!from');
+        my $i          := nqp::chars($quote_stop);
+        return $cur unless $quote_stop eq nqp::substr($target, $pos, $i);
 
-            $P0 = find_dynamic_lex '$*QUOTE_STOP'
-            if null $P0 goto fail
-            stop = $P0
-
-            $I0 = length stop
-            $S0 = substr target, pos, $I0
-            unless $S0 == stop goto fail
-            pos += $I0
-            cur.'!cursor_pass'(pos, 'stopper')
-          fail:
-            .return (cur)
-        };
+        $cur.'!cursor_pass'($pos + $i, 'stopper');
+        return $cur;
     }
 
     our method split_words($words) {
-        Q:PIR {
-            .include 'src/Regex/constants.pir'
-            .local string words
-            $P0 = find_lex '$words'
-            words = $P0
-            .local int pos, eos
-            .local pmc result
-            pos = 0
-            eos = length words
-            result = new ['ResizablePMCArray']
-          split_loop:
-            pos = find_not_cclass .CCLASS_WHITESPACE, words, pos, eos
-            unless pos < eos goto split_done
-            $I0 = find_cclass .CCLASS_WHITESPACE, words, pos, eos
-            $I1 = $I0 - pos
-            $S0 = substr words, pos, $I1
-            push result, $S0
-            pos = $I0
-            goto split_loop
-          split_done:
-            .return (result)
-        };
+        my @result := nqp::list();
+        my $eos    := nqp::chars($words);
+        my $pos    := 0; 
+        while ($pos := nqp::findnotcclass(pir::const::CCLASS_WHITESPACE,
+                                          $words, $pos, $eos)) < $eos
+        {
+            my $i := pir::find_cclass__Iisii(pir::const::CCLASS_WHITESPACE,
+                                             $words, $pos, $eos);
+            nqp::push(@result, nqp::substr($words, $pos, $i - $pos));
+            $pos := $i;
+        }
+        return @result;
     }
 
 =begin
@@ -527,316 +422,174 @@ An operator precedence parser.
 =end
 
     method EXPR($preclim = '') {
-        Q:PIR {
-            .local pmc self, cur_class
-            self = find_lex 'self'
-            cur_class = find_lex '$cursor_class'
+        my $here      := self.'!cursor_start'();
+        my $pos       := nqp::getattr_i($here, $cursor_class, '$!from');
+        my $termishrx := 'termish';
+        my @opstack   := nqp::list();
+        my @termstack := nqp::list();
 
-            .local string preclim
-            $P0 = find_lex '$preclim'
-            preclim = $P0
+        while 1 {
+            nqp::bindattr_i($here, $cursor_class, '$!pos', $pos);
+            my $termcur := $here."$termishrx"();
+            $pos := nqp::getattr_i($termcur, $cursor_class, '$!pos');
+            nqp::bindattr_i($here, $cursor_class, '$!pos', $pos);
+            return $here if $pos < 0;
             
-            .local pmc here
-            .local string tgt
-            .local int pos
-            (here, tgt, pos) = self.'!cursor_start'()
-
-            .local string termishrx
-            termishrx = 'termish'
-
-            .local pmc opstack, termstack
-            opstack = new ['ResizablePMCArray']
-            .lex '@opstack', opstack
-            termstack = new ['ResizablePMCArray']
-            .lex '@termstack', termstack
-
-          term_loop:
-            .local pmc termcur
-            repr_bind_attr_int here, cur_class, "$!pos", pos
-            termcur = here.termishrx()
-            pos = repr_get_attr_int termcur, cur_class, "$!pos"
-            repr_bind_attr_int here, cur_class, "$!pos", pos
-            if pos < 0 goto fail
-            .local pmc termish
-            termish = termcur.'MATCH'()
-
-            # interleave any prefix/postfix we might have found
-            .local pmc termOPER, prefixish, postfixish
-            termOPER = termish
-          termOPER_loop:
-            $I0 = exists termOPER['OPER']
-            unless $I0 goto termOPER_done
-            termOPER = termOPER['OPER']
-            goto termOPER_loop
-          termOPER_done:
-            prefixish = termOPER['prefixish']
-            postfixish = termOPER['postfixish']
-            if null prefixish goto prefix_done
-
-          prepostfix_loop:
-            unless prefixish goto prepostfix_done
-            unless postfixish goto prepostfix_done
-            .local pmc preO, postO
-            .local string preprec, postprec
-            $P0 = prefixish[0]
-            $P0 = $P0['OPER']
-            preO = $P0['O']
-            preprec = preO['prec']
-            $P0 = postfixish[-1]
-            $P0 = $P0['OPER']
-            postO = $P0['O']
-            postprec = postO['prec']
-            if postprec < preprec goto post_shift
-            if postprec > preprec goto pre_shift
-            $S0 = postO['uassoc']
-            if $S0 == 'right' goto pre_shift
-          post_shift:
-            $P0 = pop postfixish
-            push opstack, $P0
-            goto prepostfix_loop
-          pre_shift:
-            $P0 = shift prefixish
-            push opstack, $P0
-            goto prepostfix_loop
-          prepostfix_done:
-
-          prefix_loop:
-            unless prefixish goto prefix_done
-            $P0 = shift prefixish
-            push opstack, $P0
-            goto prefix_loop
-          prefix_done:
-            delete termish['prefixish']
-
-          postfix_loop:
-            if null postfixish goto postfix_done
-            unless postfixish goto postfix_done
-            $P0 = pop postfixish
-            push opstack, $P0
-            goto postfix_loop
-          postfix_done:
-            delete termish['postfixish']
-
-            $P0 = termish['term']
-            push termstack, $P0
-
+            my $termish := $termcur.MATCH();
+            # Interleave any prefix/postfix we might have found.
+            my %termOPER := $termish;
+            %termOPER := %termOPER<OPER> while nqp::existskey(%termOPER,'OPER');
+            my @prefixish  := %termOPER<prefixish>;
+            my @postfixish := %termOPER<postfixish>;
+ 
+            while @prefixish && @postfixish {
+                my %preO     := @prefixish[0]<OPER><O>;
+                my %postO    := @postfixish[+@postfixish-1]<OPER><O>;
+                my $preprec  := ~%preO<prec>;
+                my $postprec := ~%postO<prec>;
+                
+                if $postprec gt $preprec ||
+                   $postprec eq $preprec && %postO<uassoc> eq 'right'
+                {
+                    nqp::push(@opstack, nqp::shift(@prefixish));
+                }
+                else {
+                    nqp::push(@opstack, nqp::pop(@postfixish));
+                }
+            }
+            nqp::push(@opstack, nqp::shift(@prefixish)) while @prefixish;
+            nqp::deletekey($termish, 'prefixish');            
+            nqp::push(@opstack, nqp::pop(@postfixish)) while @postfixish;
+            nqp::deletekey($termish, 'postfixish');
+            nqp::push(@termstack, $termish<term>);
+            
             # Now see if we can fetch an infix operator
-            .local pmc wscur, infixcur, infix
-            
             # First, we need ws to match.
-            repr_bind_attr_int here, cur_class, "$!pos", pos
-            wscur = here.'ws'()
-            pos = repr_get_attr_int wscur, cur_class, '$!pos'
-            if pos < 0 goto term_done
-            repr_bind_attr_int here, cur_class, "$!pos", pos
+            nqp::bindattr_i($here, $cursor_class, '$!pos', $pos);
+            my $wscur := $here.ws();
+            $pos      := nqp::getattr_i($wscur, $cursor_class, '$!pos');
+            last if $pos < 0;
             
             # Next, try the infix itself.
-            infixcur = here.'infixish'()
-            pos = repr_get_attr_int infixcur, cur_class, '$!pos'
-            if pos < 0 goto term_done
-            infix = infixcur.'MATCH'()
+            nqp::bindattr_i($here, $cursor_class, '$!pos', $pos);
+            my $infixcur := $here.infixish();
+            $pos := nqp::getattr_i($infixcur, $cursor_class, '$!pos');
+            last if $pos < 0;
 
+            my $infix := $infixcur.MATCH();
             # We got an infix.
-            .local pmc inO
-            $P0 = infix['OPER']
-            inO = $P0['O']
-            termishrx = inO['nextterm']
-            if termishrx goto have_termishrx
-          nonextterm:
-            termishrx = 'termish'
-          have_termishrx:
+            my %inO := $infix<OPER><O>;
+            $termishrx := %inO<nextterm> // 'termish';
+            my $inprec := ~%inO<prec>;
+            $infixcur.'panic'('Missing infixish operator precedence')
+                unless $inprec;
+            last if $inprec lt $preclim;
 
-            .local string inprec, inassoc, opprec
-            inprec = inO['prec']
-            unless inprec goto err_inprec
-            if inprec < preclim goto term_done
-            inassoc = inO['assoc']
-
-            $P0 = inO['sub']
-            if null $P0 goto subprec_done
-            inO['prec'] = $P0
-          subprec_done:
-
-          reduce_loop:
-            unless opstack goto reduce_done
-            $P0 = opstack[-1]
-            $P0 = $P0['OPER']
-            $P0 = $P0['O']
-            opprec = $P0['prec']
-            unless opprec > inprec goto reduce_gt_done
-            self.'EXPR_reduce'(termstack, opstack)
-            goto reduce_loop
-          reduce_gt_done:
-
-            unless opprec == inprec goto reduce_done
-            # equal precedence, use associativity to decide
-            unless inassoc == 'left' goto reduce_done
-            # left associative, reduce immediately
-            self.'EXPR_reduce'(termstack, opstack)
-          reduce_done:
-
-            push opstack, infix        # The Shift
-            repr_bind_attr_int here, cur_class, "$!pos", pos
-            wscur = here.'ws'()
-            pos = repr_get_attr_int wscur, cur_class, '$!pos'
-            repr_bind_attr_int here, cur_class, "$!pos", pos
-            if pos < 0 goto fail
-            goto term_loop
-          term_done:
-
-          opstack_loop:
-            unless opstack goto opstack_done
-            self.'EXPR_reduce'(termstack, opstack)
-            goto opstack_loop
-          opstack_done:
-
-          expr_done:
-            .local pmc term
-            term = pop termstack
-            pos = here.'pos'()
-            here = self.'!cursor_start'()
-            here.'!cursor_pass'(pos)
-            repr_bind_attr_int here, cur_class, '$!pos', pos
-            setattribute here, cur_class, '$!match', term
-            here.'!reduce'('EXPR')
-            goto done
-
-          fail:
-          done:
-            .return (here)
-
-          err_internal:
-            $I0 = termstack
-            here.'panic'('Internal operator parser error, @termstack == ', $I0)
-          err_inprec:
-            infixcur.'panic'('Missing infixish operator precedence')
-        };
+            my $inassoc := ~%inO<assoc>;
+            my $subprec := ~%inO<sub>;
+            %inO<prec>  := $subprec if $subprec ne '';
+            
+            while @opstack {
+                my $opprec := ~@opstack[+@opstack-1]<OPER><O><prec>;
+                if $opprec gt $inprec {
+                    self.EXPR_reduce(@termstack, @opstack);
+                }
+                else {
+                    self.EXPR_reduce(@termstack, @opstack)
+                        if $opprec eq $inprec && $inassoc eq 'left';
+                    last;
+                }
+            }
+            nqp::push(@opstack, $infix); # The Shift
+            nqp::bindattr_i($here, $cursor_class, '$!pos', $pos);
+            $wscur := $here.ws();
+            $pos := nqp::getattr_i($wscur, $cursor_class, '$!pos');
+            nqp::bindattr_i($here, $cursor_class, '$!pos', $pos);
+            return $here if $pos < 0;
+        }
+        self.EXPR_reduce(@termstack, @opstack) while @opstack;
+        $pos := nqp::getattr_i($here, $cursor_class, '$!pos');
+        $here := self.'!cursor_start'();
+        $here.'!cursor_pass'($pos);
+        nqp::bindattr_i($here, $cursor_class, '$!pos', $pos);
+        nqp::bindattr($here, $cursor_class, '$!match', nqp::pop(@termstack));
+        $here.'!reduce'('EXPR');
+        return $here;
     }
 
-    method EXPR_reduce($termstack, $opstack) {
-        Q:PIR {
-            .local pmc self, termstack, opstack
-            self = find_lex 'self'
-            termstack = find_lex '$termstack'
-            opstack = find_lex '$opstack'
+    method EXPR_reduce(@termstack, @opstack) { 
+        my $op := nqp::pop(@opstack);
+        # Give it a fresh capture list, since we'll have assumed it has
+        # no positional captures and not taken them.
+        nqp::bindattr($op, NQPCapture, '@!array', nqp::list());
+        my %opOPER  := $op<OPER>;
+        my %opO     := %opOPER<O>;
+        my $opassoc := ~%opO<assoc>;
+        my $key;
 
-            .local pmc op, opOPER, opO
-            .local string opassoc
-            op = pop opstack
-            
-            # Give it a fresh capture list, since we'll have assumed it has
-            # no positional captures and not taken them.
-            .local pmc cap_class
-            cap_class = find_lex 'NQPCapture'
-            $P0 = new ['ResizablePMCArray']
-            setattribute op, cap_class, '@!array', $P0
-            
-            opOPER = op['OPER']
-            opO = opOPER['O']
-            $P0 = opO['assoc']
-            opassoc = $P0
-            if opassoc == 'unary' goto op_unary
-            if opassoc == 'list' goto op_list
-          op_infix:
-            .local pmc right, left
-            right = pop termstack
-            left = pop termstack
-            op[0] = left
-            op[1] = right
-            $P0 = opO['reducecheck']
-            if null $P0 goto op_infix_1
-            $S0 = $P0
-            self.$S0(op)
-          op_infix_1:
-            self.'!reduce_with_match'('EXPR', 'INFIX', op)
-            goto done
-
-          op_unary:
-            .local pmc arg, afrom, ofrom
-            arg = pop termstack
-            op[0] = arg
-            afrom = arg.'from'()
-            ofrom = op.'from'()
-            if afrom < ofrom goto op_postfix
-          op_prefix:
-            self.'!reduce_with_match'('EXPR', 'PREFIX', op)
-            goto done
-          op_postfix:
-            self.'!reduce_with_match'('EXPR', 'POSTFIX', op)
-            goto done
-
-          op_list:
-            .local string sym
-            sym = ''
-            $P0 = opOPER['sym']
-            if null $P0 goto op_list_1
-            sym = $P0
-          op_list_1:
-            arg = pop termstack
-            unshift op, arg
-          op_sym_loop:
-            unless opstack goto op_sym_done
-            $S0 = ''
-            $P0 = opstack[-1]
-            $P0 = $P0['OPER']
-            $P0 = $P0['sym']
-            if null $P0 goto op_sym_1
-            $S0 = $P0
-          op_sym_1:
-            if sym != $S0 goto op_sym_done
-            arg = pop termstack
-            unshift op, arg
-            $P0 = pop opstack
-            goto op_sym_loop
-          op_sym_done:
-            arg = pop termstack
-            unshift op, arg
-            self.'!reduce_with_match'('EXPR', 'LIST', op)
-            goto done
-
-          done:
-            push termstack, op
-        };
+        if $opassoc eq 'unary' {
+            my $arg := nqp::pop(@termstack);
+            $op[0]  := $arg;
+            $key    := nqp::getattr_i($arg, NQPMatch, '$!from') <
+                       nqp::getattr_i($op, NQPMatch, '$!from')
+                           ?? 'POSTFIX' !! 'PREFIX';
+        }
+        elsif $opassoc eq 'list' {
+            my $sym := ~%opOPER<sym>;
+            nqp::unshift($op, nqp::pop(@termstack));
+            while @opstack && $sym eq @opstack[+@opstack-1]<OPER><sym> {
+                nqp::unshift($op, nqp::pop(@termstack));
+                nqp::pop(@opstack);
+            }
+            nqp::unshift($op, nqp::pop(@termstack));
+            $key := 'LIST';
+        }
+        else { # infix op assoc: left|right|ternary|...
+            $op[1] := nqp::pop(@termstack); # right
+            $op[0] := nqp::pop(@termstack); # left
+            my $reducecheck := %opO<reducecheck>;
+            self."$reducecheck"($op) if $reducecheck ne '';
+            $key := 'INFIX';
+        }
+        self.'!reduce_with_match'('EXPR', $key, $op);
+        nqp::push(@termstack, $op);
     }
 
     method ternary($match) {
         $match[2] := $match[1];
-        $match[1] := $match{'infix'}{'EXPR'};
+        $match[1] := $match<infix><EXPR>;
     }
 
     method MARKER($markname) {
-        my %markhash := Q:PIR {
-            %r = get_global '%!MARKHASH'
-            unless null %r goto have_markhash
-            %r = new ['Hash']
-            set_global '%!MARKHASH', %r
-          have_markhash:
-        };
+        my %markhash := pir::get_global__Ps('%!MARKHASH');
+        unless %markhash {
+            %markhash := nqp::hash();
+            pir::set_global__vsP('%!MARKHASH', %markhash);
+        }
         my $cur := self."!cursor_start"();
-        $cur."!cursor_pass"(self.pos());
+        $cur."!cursor_pass"(nqp::getattr_i(self, $cursor_class, '$!pos'));
         %markhash{$markname} := $cur;
     }
     
     method MARKED($markname) {
-        my %markhash := Q:PIR {
-            %r = get_global '%!MARKHASH'
-            unless null %r goto have_markhash
-            %r = new ['Hash']
-            set_global '%!MARKHASH', %r
-          have_markhash:
-        };
-        my $cur := %markhash{$markname};
-        unless nqp::istype($cur, NQPCursor) && $cur.pos() == self.pos() {
-            $cur := self."!cursor_start"();
+        my %markhash := pir::get_global__Ps('%!MARKHASH');
+        unless %markhash {
+            %markhash := nqp::hash();
+            pir::set_global__vsP('%!MARKHASH', %markhash);
         }
+        my $cur := %markhash{$markname};
+        $cur := self."!cursor_start"() unless nqp::istype($cur, NQPCursor) && 
+            nqp::getattr_i($cur, $cursor_class, '$!pos') ==
+            nqp::getattr_i(self, $cursor_class, '$!pos');
         $cur
     }
 
     method LANG($lang, $regex) {
-        my $lang_cursor := %*LANG{$lang}.'!cursor_init'(self.target(), :p(self.pos()));
-        if self.HOW.traced(self) {
-            $lang_cursor.HOW.trace-on($lang_cursor, self.HOW.trace_depth(self));
-        }
+        my $lang_cursor := %*LANG{$lang}.'!cursor_init'(
+            nqp::getattr_s(self, $cursor_class, '$!target'), 
+            :p(nqp::getattr_i(self, $cursor_class, '$!pos')));
+        $lang_cursor.HOW.trace-on($lang_cursor, self.HOW.trace_depth(self))
+            if self.HOW.traced(self);
         my $*ACTIONS    := %*LANG{$lang ~ '-actions'};
         $lang_cursor."$regex"();  
     }
