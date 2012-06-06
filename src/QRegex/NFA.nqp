@@ -131,9 +131,14 @@ class QRegex::NFA {
                 pir::const::CCLASS_ALPHABETIC)
         }
         elsif $subtype eq 'zerowidth' {
-            $node.negate 
-                ?? self.fate($node, $from, $to)
-                !! self.addedge($from, 0, $EDGE_SUBRULE, $node.name)
+            if $node.negate {
+                self.fate($node, $from, $to)
+            }
+            else {
+                my $end := self.addstate();
+                self.addedge($from, $end, $EDGE_SUBRULE, $node.name);
+                self.fate($node, $end, $to);
+            }
         }
         else {
             $subtype eq 'capture' && $node[1]
