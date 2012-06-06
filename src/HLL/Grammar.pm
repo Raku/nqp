@@ -139,7 +139,7 @@ invocation for the subrule might be:
 This says to add all of the attribute of the C<%additive> hash
 (described below) and a C<pirop> entry into the match object
 returned by the C<< infix:sym<+> >> token (as the C<O> named
-capture).  Note that this is a alphabetic 'O", not a digit zero.
+capture).  Note that this is a alphabetic "O", not a digit zero.
 
 Currently the C<O> subrule accepts a string argument describing
 the hash to be stored.  (Note the C< q{ ... } > above.  Eventually
@@ -180,41 +180,31 @@ C< :!pair >, and C<< :pair<strval> >>.
         my %hash := %ohash{$spec};
         unless %hash {
             # Otherwise, we need to build a new one.
-            %hash := nqp::hash();
-            my $pos := 0;
+            %hash   := nqp::hash();
             my $eos := nqp::chars($spec);
-            while 1 {
-                $pos := nqp::findnotcclass(
-                    pir::const::CCLASS_WHITESPACE, $spec, $pos, $eos);
-                last if $pos >= $eos;
-                my $s := nqp::substr($spec, $pos, 1);
-                my $i;
+            my $pos := 0;
+            while ($pos := nqp::findnotcclass(pir::const::CCLASS_WHITESPACE,
+                                              $spec, $pos, $eos)) < $eos
+            {
                 my $lpos;
-                if $s eq ',' {
-                    # We just ignore commas between elements for now.
+                my $s := nqp::substr($spec, $pos, 1);
+                if $s eq ',' { # Ignore commas between elements for now.
                     $pos := $pos + 1;
-                    next;
                 }
-                elsif $s eq ':' {
-                    # If we see a colon, then we want to parse whatever
-                    # comes next like a pair.
-                    # eat colon
+                elsif $s eq ':' { # Parse whatever comes next like a pair.
                     $pos := $pos + 1;
-                    my $value := pir::new__Ps('Boolean');
                   
                     # If the pair is of the form :!name, then reverse the value
-                    # and skip the colon.
+                    # and skip the exclamation mark.
+                    my $value := 1;
                     if nqp::substr($spec, $pos, 1) eq '!' {
                         $pos := $pos + 1;
                         $value := 0;
                     }
-                    else {
-                        $value := 1;
-                    }
-                    
+
                     # Get the name of the pair.
-                    $lpos    := nqp::findnotcclass(
-                        pir::const::CCLASS_WORD, $spec, $pos, $eos);
+                    $lpos    := nqp::findnotcclass(pir::const::CCLASS_WORD,
+                                                   $spec, $pos, $eos);
                     my $name := nqp::substr($spec, $pos, $lpos - $pos);
                     $pos     := $lpos;
 
@@ -222,26 +212,24 @@ C< :!pair >, and C<< :pair<strval> >>.
                     if nqp::substr($spec, $pos, 1) eq '<' {
                         $pos   := $pos + 1;
                         $lpos  := nqp::index($spec, '>', $pos);
-                        $s     := nqp::substr($spec, $pos, $lpos - $pos);
-                        $value := pir::box__Ps($s);
+                        $value := nqp::substr($spec, $pos, $lpos - $pos);
                         $pos   := $lpos + 1;
                     }
                     # Done processing the pair, store it in the hash.
                     %hash{$name} := $value;
                 }
                 else {
-                    my $lookup;
                     # If whatever we found doesn't start with a colon, treat it
                     # as a lookup of a previously saved hash to be merged in.
                     # Find the first whitespace or comma
-                    $lpos   := pir::find_cclass__Iisii(
-                        pir::const::CCLASS_WHITESPACE, $spec, $pos, $eos);
-                    $i      := nqp::index($spec, ',', $pos);
-                    $lpos   := $i unless $i < 0 || $i >= $lpos;
-                    $lookup := nqp::substr($spec, $pos, $lpos - $pos);
-                    my %lhash := %ohash{$lookup};
+                    $lpos      := pir::find_cclass__Iisii(pir::const::CCLASS_WHITESPACE,
+                                                          $spec, $pos, $eos);
+                    my $index  := nqp::index($spec, ',', $pos);
+                    $lpos      := $index unless $index < 0 || $index >= $lpos;
+                    my $lookup := nqp::substr($spec, $pos, $lpos - $pos);
+                    my %lhash  := %ohash{$lookup};
                     self.'panic'('Unknown operator precedence specification "',
-                        $lookup, '"') unless %lhash;
+                                 $lookup, '"') unless %lhash;
                     my $lhash_it := nqp::iterator(%lhash);
                     while $lhash_it {
                         $s := nqp::shift($lhash_it);
@@ -280,7 +268,7 @@ of the match.
 =end
 
     method panic(*@args) {
-        my $pos := self.pos();
+        my $pos    := nqp::getattr_i(self, NQPCursor, '$!pos');
         my $target := nqp::getattr_s(self, NQPCursor, '$!target');
         @args.push(' at line ');
         @args.push(HLL::Compiler.lineof($target, $pos) + 1);
@@ -344,21 +332,20 @@ position C<pos>.
         :my $*QUOTE_START;
         :my $*QUOTE_STOP;
         {
-            my $true := pir::box__Pi(1);
             for @args {
                 my $mod := nqp::substr($_, 1);
-                %*QUOTEMOD{$mod} := $true;
+                %*QUOTEMOD{$mod} := 1;
                 
                 if $mod eq 'qq' {
-                    %*QUOTEMOD<s> := $true;
-                    %*QUOTEMOD<a> := $true;
-                    %*QUOTEMOD<h> := $true;
-                    %*QUOTEMOD<f> := $true;
-                    %*QUOTEMOD<c> := $true;
-                    %*QUOTEMOD<b> := $true;
+                    %*QUOTEMOD<s> := 1;
+                    %*QUOTEMOD<a> := 1;
+                    %*QUOTEMOD<h> := 1;
+                    %*QUOTEMOD<f> := 1;
+                    %*QUOTEMOD<c> := 1;
+                    %*QUOTEMOD<b> := 1;
                 }
                 elsif $mod eq 'b' {
-                    %*QUOTEMOD<q> := $true
+                    %*QUOTEMOD<q> := 1;
                 }
             }
             
@@ -384,12 +371,12 @@ position C<pos>.
 
     method starter() {
         my $cur         := self.'!cursor_start'();
-        my $target      := nqp::getattr_s($cur, $cursor_class, '$!target');
-        my $pos         := nqp::getattr_i($cur, $cursor_class, '$!from');
         my $quote_start := pir::find_dynamic_lex__Ps('$*QUOTE_START');
         return $cur if $quote_start eq '';
-
-        my $i := nqp::chars($quote_start);
+        
+        my $target      := nqp::getattr_s($cur, $cursor_class, '$!target');
+        my $pos         := nqp::getattr_i($cur, $cursor_class, '$!from');
+        my $i           := nqp::chars($quote_start);
         return $cur unless $quote_start eq nqp::substr($target, $pos, $i);
 
         $cur.'!cursor_pass'($pos + $i, 'starter');
@@ -399,12 +386,12 @@ position C<pos>.
 
     method stopper() {
         my $cur        := self.'!cursor_start'();
-        my $target     := nqp::getattr_s($cur, $cursor_class, '$!target');
-        my $pos        := nqp::getattr_i($cur, $cursor_class, '$!from');
         my $quote_stop := pir::find_dynamic_lex__Ps('$*QUOTE_STOP');
         return $cur if $quote_stop eq '';
 
-        my $i := nqp::chars($quote_stop);
+        my $target     := nqp::getattr_s($cur, $cursor_class, '$!target');
+        my $pos        := nqp::getattr_i($cur, $cursor_class, '$!from');
+        my $i          := nqp::chars($quote_stop);
         return $cur unless $quote_stop eq nqp::substr($target, $pos, $i);
 
         $cur.'!cursor_pass'($pos + $i, 'stopper');
@@ -412,16 +399,14 @@ position C<pos>.
     }
 
     our method split_words($words) {
-        my $pos    := 0;
-        my $eos    := nqp::chars($words);
         my @result := nqp::list();
-
-        while 1 {
-            $pos := nqp::findnotcclass(pir::const::CCLASS_WHITESPACE,
-                $words, $pos, $eos);
-            last unless $pos < $eos;
+        my $eos    := nqp::chars($words);
+        my $pos    := 0; 
+        while ($pos := nqp::findnotcclass(pir::const::CCLASS_WHITESPACE,
+                                          $words, $pos, $eos)) < $eos
+        {
             my $i := pir::find_cclass__Iisii(pir::const::CCLASS_WHITESPACE,
-                $words, $pos, $eos);
+                                             $words, $pos, $eos);
             nqp::push(@result, nqp::substr($words, $pos, $i - $pos));
             $pos := $i;
         }
@@ -523,12 +508,11 @@ An operator precedence parser.
             return $here if $pos < 0;
         }
         self.EXPR_reduce(@termstack, @opstack) while @opstack;
-        my $term := nqp::pop(@termstack);
-        $pos := $here.pos();
+        $pos := nqp::getattr_i($here, $cursor_class, '$!pos');
         $here := self.'!cursor_start'();
         $here.'!cursor_pass'($pos);
         nqp::bindattr_i($here, $cursor_class, '$!pos', $pos);
-        nqp::bindattr($here, $cursor_class, '$!match', $term);
+        nqp::bindattr($here, $cursor_class, '$!match', nqp::pop(@termstack));
         $here.'!reduce'('EXPR');
         return $here;
     }
@@ -546,13 +530,14 @@ An operator precedence parser.
         if $opassoc eq 'unary' {
             my $arg := nqp::pop(@termstack);
             $op[0]  := $arg;
-            $key    := $arg.from() < $op.from() ?? 'POSTFIX' !! 'PREFIX';
+            $key    := nqp::getattr_i($arg, NQPMatch, '$!from') <
+                       nqp::getattr_i($op, NQPMatch, '$!from')
+                           ?? 'POSTFIX' !! 'PREFIX';
         }
         elsif $opassoc eq 'list' {
             my $sym := ~%opOPER<sym>;
             nqp::unshift($op, nqp::pop(@termstack));
-            while @opstack {    
-                last if $sym ne @opstack[+@opstack-1]<OPER><sym>;
+            while @opstack && $sym eq @opstack[+@opstack-1]<OPER><sym> {
                 nqp::unshift($op, nqp::pop(@termstack));
                 nqp::pop(@opstack);
             }
@@ -572,7 +557,7 @@ An operator precedence parser.
 
     method ternary($match) {
         $match[2] := $match[1];
-        $match[1] := $match{'infix'}{'EXPR'};
+        $match[1] := $match<infix><EXPR>;
     }
 
     method MARKER($markname) {
@@ -582,7 +567,7 @@ An operator precedence parser.
             pir::set_global__vsP('%!MARKHASH', %markhash);
         }
         my $cur := self."!cursor_start"();
-        $cur."!cursor_pass"(self.pos());
+        $cur."!cursor_pass"(nqp::getattr_i(self, $cursor_class, '$!pos'));
         %markhash{$markname} := $cur;
     }
     
@@ -593,17 +578,18 @@ An operator precedence parser.
             pir::set_global__vsP('%!MARKHASH', %markhash);
         }
         my $cur := %markhash{$markname};
-        unless nqp::istype($cur, NQPCursor) && $cur.pos() == self.pos() {
-            $cur := self."!cursor_start"();
-        }
+        $cur := self."!cursor_start"() unless nqp::istype($cur, NQPCursor) && 
+            nqp::getattr_i($cur, $cursor_class, '$!pos') ==
+            nqp::getattr_i(self, $cursor_class, '$!pos');
         $cur
     }
 
     method LANG($lang, $regex) {
-        my $lang_cursor := %*LANG{$lang}.'!cursor_init'(self.target(), :p(self.pos()));
-        if self.HOW.traced(self) {
-            $lang_cursor.HOW.trace-on($lang_cursor, self.HOW.trace_depth(self));
-        }
+        my $lang_cursor := %*LANG{$lang}.'!cursor_init'(
+            nqp::getattr_s(self, $cursor_class, '$!target'), 
+            :p(nqp::getattr_i(self, $cursor_class, '$!pos')));
+        $lang_cursor.HOW.trace-on($lang_cursor, self.HOW.trace_depth(self))
+            if self.HOW.traced(self);
         my $*ACTIONS    := %*LANG{$lang ~ '-actions'};
         $lang_cursor."$regex"();  
     }
