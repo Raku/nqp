@@ -592,7 +592,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         my $rxtype := $ast.rxtype;
         if $rxtype eq 'alt' {
             my $nfapast := PAST::Op.new( :pasttype('list') );
-            $ast.name(PAST::Node.unique('alt_nfa_'));
+            $ast.name(PAST::Node.unique('alt_nfa_') ~ '_' ~ ~nqp::time_n());
             for $ast.list {
                 alt_nfas($_, $subid, $initpast);
                 $nfapast.push(QRegex::NFA.new.addnode($_).past(:non_empty));
