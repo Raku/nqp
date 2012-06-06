@@ -480,7 +480,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     QAST::Regex.new( :rxtype<concat>, :node($/),
                         QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, |@alts ), 
                         QAST::Regex.new( :rxtype<cclass>, :subtype<.> ) ) !!
-                    QAST::Regex.new( :rxtype<alt>, |@alts );
+                    QAST::Regex.new( :rxtype<altseq>, |@alts );
         }
         #$qast.negate( $<sign> eq '-' );
         make $qast;
