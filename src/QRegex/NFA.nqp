@@ -120,7 +120,9 @@ class QRegex::NFA {
     method subrule($node, $from, $to) {
         my $subtype := $node.subtype;
         if $node.name eq 'before' && !$node.negate {
-            self.regex_nfa($node[0][1]<orig_qast>, $from, 0);
+            my $end := self.addstate();
+            self.regex_nfa($node[0][1]<orig_qast>, $from, $end);
+            self.fate($node, $end, $to);
         }
         elsif $subtype ne 'zerowidth' &&
                 ($node.name eq 'alpha' ||
