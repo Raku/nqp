@@ -122,8 +122,9 @@ class QRegex::NFA {
         if $node.name eq 'before' && !$node.negate {
             self.regex_nfa($node[0][1]<orig_qast>, $from, 0);
         }
-        elsif $node.name eq 'alpha' ||
-              $subtype eq 'method' && $node[0][0] eq 'alpha' {
+        elsif $subtype ne 'zerowidth' &&
+                ($node.name eq 'alpha' ||
+                    $subtype eq 'method' && $node[0][0] eq 'alpha') {
             self.addedge($from, $to, $EDGE_CHARCLASS + $node.negate,
                 pir::const::CCLASS_ALPHABETIC)
         }
