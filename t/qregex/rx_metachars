@@ -80,6 +80,7 @@ $$ \n			\n		y	line beginnings and endings ($$)
 ^ [ <[a..d]>+ | <[b..e]>+ ] $	bcd		y	alternation (|)
 ^ [ <[a..c]>+ | <[b..e]>+ ] $	bcd		y	alternation (|)
 ^ [ <[a..d]>+ | <[c..e]>+ ] $	bcd		y	alternation (|)
+# todo :pge<feature>
 b|			bcd		<Null pattern>	alternation (|) - null right arg illegal
 |b			bcd		y	alternation (|) - null left arg ignored
 # todo :pge<feature>
