@@ -29,6 +29,7 @@ static INTVAL initialized = 0;
 static INTVAL stable_id = 0;
 static INTVAL smo_id    = 0;
 static INTVAL disp_id   = 0;
+static INTVAL qrpa_id   = 0;
 
 /* Built-in meta-objects. */
 static PMC *KnowHOW = NULL;
@@ -82,6 +83,16 @@ static void SC_write_barrier_st(PARROT_INTERP, STable *st) {
     }
 }
 
+
+/* Test for something being a list (RPA or QRPA).  This isn't
+ * declared 'static' because we want to be able to call it from
+ * other C functions (in both nqp and rakudo) as well. */
+INTVAL
+nqp_islist(PMC *pmc) {
+    INTVAL type = pmc->vtable->base_type;
+    return (INTVAL)(type == qrpa_id || type == enum_class_ResizablePMCArray);
+}
+
 END_OPS_PREAMBLE
 
 /*
@@ -101,6 +112,7 @@ inline op nqp_dynop_setup() :base_core {
         stable_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "STable", 0));
         smo_id    = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
         disp_id   = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "DispatcherSub", 0));
+        qrpa_id   = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "QRPA", 0));
 
         /* Initialize the object model. */
         SixModelObject_initialize(interp, &KnowHOW, &KnowHOWAttribute);
@@ -1850,6 +1862,19 @@ inline op repr_hint_for(out INT, in PMC, in PMC, in STR) :base_core {
         $1 = REPR($2)->attr_funcs->hint_for(interp, STABLE($2), $3, $4);
     else
         $1 = NO_HINT;
+}
+
+/*
+
+=item nqp_islist
+
+Checks if the type of thing in $2 is a nqp list (either QRPA or RPA).
+
+=cut
+
+*/
+inline op nqp_islist(out INT, in PMC) :base_core {
+    $1 = nqp_islist($2)
 }
 
 /*

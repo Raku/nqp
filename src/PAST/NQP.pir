@@ -612,6 +612,7 @@ entry to produce the node to be returned.
     maphash['existskey'] = 'exists__IQs'
     maphash['existspos'] = 'exists__IQi'
     maphash['elems']    = 'elements__IP'
+    maphash['islist']   = 'nqp_islist__IP'
     maphash['iterator'] = 'iter__PP'
     maphash['push']     = 'push__0PP'
     maphash['push_s']   = 'push__0Ps'
@@ -636,6 +637,14 @@ entry to produce the node to be returned.
     $P0 = new ['Hash']
     $P0['pasttype'] = 'hash'
     maphash['hash'] = $P0
+
+    # nqp::qlist is a temporary operation for creating QRPA lists
+    # instead of RPA lists.  Eventually we expect nqp::list to do the same,
+    # at which point nqp::qlist can go away.
+    $P0 = new ['Hash']
+    $P0['pasttype'] = 'list'
+    $P0['returns'] = 'QRPA'
+    maphash['qlist'] = $P0
 
     # repr-level aggregate operations
     maphash['r_atpos']     = 'repr_at_pos_obj__PPi'
