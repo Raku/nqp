@@ -101,7 +101,40 @@ class QAST::Compiler is HLL::Compiler {
         }
     }
 
-    method alt($node) { self.altseq($node) }
+    method alt($node) {
+        unless $node.name {
+            return self.altseq($node);
+        }
+
+        # Calculate all the branches to try, which populates the bstack
+        # with the options. Then immediately fail to start iterating it.
+        my $prefix   := self.unique('alt') ~ '_';
+        my $endlabel := self.post_new('Label', :result($prefix ~ 'end'));
+        my $label_list_ops := self.post_new('Ops', :result<$P11>);
+        $label_list_ops.push_pirop('new', '$P11', '"ResizableIntegerArray"');
+        my $ops := self.post_new('Ops', :result(%*REG<cur>));
+        $ops.push($label_list_ops);
+        self.regex_mark($ops, $endlabel, -1, 0);
+        $ops.push_pirop('callmethod', '"!alt"', %*REG<cur>, %*REG<pos>,
+            self.escape($node.name), $label_list_ops.result);
+        $ops.push_pirop('goto', %*REG<fail>);
+
+        # Emit all the possible alternations.
+        my $altcount := 0;
+        my $iter     := nqp::iterator($node.list);
+        while $iter {
+            my $altlabel := self.post_new('Label', :result($prefix ~ $altcount));
+            my $apost    := self.regex_post(nqp::shift($iter));
+            $ops.push($altlabel);
+            $ops.push($apost);
+            $ops.push_pirop('goto', $endlabel);
+            $label_list_ops.push_pirop('nqp_push_label', $label_list_ops.result, $altlabel.result);
+            $altcount++;
+        }
+        $ops.push($endlabel);
+        self.regex_commit($ops, $endlabel) if $node.backtrack eq 'r';
+        $ops;
+    }
 
     method altseq($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));

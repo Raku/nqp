@@ -480,7 +480,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     QAST::Regex.new( :rxtype<concat>, :node($/),
                         QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, |@alts ), 
                         QAST::Regex.new( :rxtype<cclass>, :subtype<.> ) ) !!
-                    QAST::Regex.new( :rxtype<alt>, |@alts );
+                    QAST::Regex.new( :rxtype<altseq>, |@alts );
         }
         #$qast.negate( $<sign> eq '-' );
         make $qast;
@@ -520,6 +520,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                                 :name($block.subid ~ '_nfa'), $nfapast);
             $initpast.push(PAST::Stmt.new($nfablock));
         }
+        alt_nfas($qast, $block.subid, $initpast);
 
         unless $block.symbol('$¢') {
             $initpast.push(PAST::Var.new(:name<$¢>, :scope<lexical>, :isdecl(1)));
@@ -585,6 +586,28 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         %capnames{''} := $count;
         %capnames;
+    }
+    
+    sub alt_nfas($ast, $subid, $initpast) {
+        my $rxtype := $ast.rxtype;
+        if $rxtype eq 'alt' {
+            my $nfapast := PAST::Op.new( :pasttype('list') );
+            $ast.name(PAST::Node.unique('alt_nfa_') ~ '_' ~ ~nqp::time_n());
+            for $ast.list {
+                alt_nfas($_, $subid, $initpast);
+                $nfapast.push(QRegex::NFA.new.addnode($_).past(:non_empty));
+            }
+            my $nfablock := PAST::Block.new(
+                                :hll<nqp>, :namespace(['Sub']), :lexical(0),
+                                :name($subid ~ '_' ~ $ast.name), $nfapast);
+            $initpast.push(PAST::Stmt.new($nfablock));
+        }
+        elsif $rxtype eq 'subcapture' || $rxtype eq 'quant' {
+            alt_nfas($ast[0], $subid, $initpast)
+        }
+        elsif $rxtype eq 'concat' || $rxtype eq 'altseq' || $rxtype eq 'conj' || $rxtype eq 'conjseq' {
+            for $ast.list { alt_nfas($_, $subid, $initpast) }
+        }
     }
 
     method subrule_alias($ast, $name) {

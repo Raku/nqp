@@ -13,6 +13,7 @@ knowhow NQPClassHOW {
     # Attributes, methods, parents and roles directly added.
     has %!attributes;
     has %!methods;
+    has @!method_order;
     has @!multi_methods_to_incorporate;
     has @!parents;
     has @!roles;
@@ -84,7 +85,7 @@ knowhow NQPClassHOW {
         }
         pir::set_method_cache_authoritativeness__vPi($obj, 0);
         %caches{nqp::where(self)} := {};
-        %!methods{$name} := $code_obj;
+        @!method_order[+@!method_order] := %!methods{$name} := $code_obj;
     }
 
     method add_multi_method($obj, $name, $code_obj) {
@@ -438,20 +439,18 @@ knowhow NQPClassHOW {
     }
 
     method methods($obj, :$local) {
-        my @meths;
         if $local {
-            for %!methods {
-                @meths.push($_.value)
-            }
+            @!method_order
         }
         else {
+            my @meths;
             for @!mro {
-                for $_.HOW.method_table($_) {
-                    @meths.push($_.value)
+                for $_.HOW.methods($_, :local) {
+                    @meths.push($_)
                 }
             }
+            @meths
         }
-        @meths
     }
 
     method method_table($obj) {

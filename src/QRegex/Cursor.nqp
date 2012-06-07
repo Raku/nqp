@@ -221,6 +221,40 @@ role NQPCursorRole {
         %protorx;
     }
 
+    method !alt($pos, $name, @labels = []) {
+        # Obtain and run NFA.
+        my $nfa   := self.HOW.cache(self, $name, { self.'!alt_nfa'($name, @labels) });
+        my @fates := $nfa.states[0];
+        my @order := $nfa.run($!target, $pos);
+
+        # Push points onto the bstack.
+        my $i := 0;
+        my $num_matched := nqp::elems(@order);
+        my $caps := $!cstack ?? nqp::elems($!cstack) !! 0;
+        while $i < $num_matched {
+            #say("Pushing fate " ~ @fates[@order[$i]]);
+            nqp::push_i($!bstack, @fates[@order[$i]]);
+            nqp::push_i($!bstack, $pos);
+            nqp::push_i($!bstack, 0);
+            nqp::push_i($!bstack, $caps);
+            $i := $i + 1;
+        }
+    }
+
+    method !alt_nfa($name, @labels) {
+        my $nfa := QRegex::NFA.new;
+        my @fates := $nfa.states[0];
+        my $start := 1;
+        my $fate := 0;
+        for $!regexsub.nqpattr($name) {
+            my $label := @labels[$fate];
+            $fate := $fate + 1;
+            @fates[$fate] := $label;
+            $nfa.mergesubstates($start, 0, $fate, $_, self);
+        }
+        $nfa
+    }
+
     method !BACKREF($name) {
         my $cur := self."!cursor_start"();
         my $n := $!cstack ?? nqp::elems($!cstack) - 1 !! -1;

@@ -120,16 +120,26 @@ class QRegex::NFA {
     method subrule($node, $from, $to) {
         my $subtype := $node.subtype;
         if $node.name eq 'before' && !$node.negate {
-            self.regex_nfa($node[0][1]<orig_qast>, $from, 0);
+            my $end := self.addstate();
+            self.regex_nfa($node[0][1]<orig_qast>, $from, $end);
+            self.fate($node, $end, $to);
         }
-        elsif $node.name eq 'alpha' {
-            self.addedge($from, $to, $EDGE_CHARCLASS + $node.negate,
-                pir::const::CCLASS_ALPHABETIC)
+        elsif $subtype ne 'zerowidth' &&
+                ($node.name eq 'alpha' ||
+                    $subtype eq 'method' && $node[0][0] eq 'alpha') {
+            $to := self.addedge($from, $to, $EDGE_CHARCLASS + $node.negate,
+                pir::const::CCLASS_ALPHABETIC);
+            self.addedge($from, $to, $EDGE_CODEPOINT + $node.negate, 95);
         }
         elsif $subtype eq 'zerowidth' {
-            $node.negate 
-                ?? self.fate($node, $from, $to)
-                !! self.addedge($from, 0, $EDGE_SUBRULE, $node.name)
+            if $node.negate {
+                self.fate($node, $from, $to)
+            }
+            else {
+                my $end := self.addstate();
+                self.addedge($from, $end, $EDGE_SUBRULE, $node.name);
+                self.fate($node, $end, $to);
+            }
         }
         else {
             $subtype eq 'capture' && $node[1]
@@ -226,8 +236,11 @@ class QRegex::NFA {
         self.regex_nfa($node[0], $from, $to);
     }
 
-    method past() {
-        return 0 unless $!edges;
+    method past(:$non_empty) {
+        unless $!edges {
+            return 0 unless $non_empty;
+            self.addedge(1, 0, $EDGE_FATE, 0, :newedge(1)) 
+        }
         my $past := PAST::Op.new(:pasttype<list>);
         for $!states {
             $past.push(PAST::Op.new(:pasttype<list>, |$_));
@@ -241,7 +254,8 @@ class QRegex::NFA {
         my @substates;
         if nqp::can($cursor, $name) {
             if !%seen{$name} {
-                @substates := $cursor.HOW.find_method($cursor, $name, :no_trace(1)).nqpattr('nfa');
+                my $meth := $cursor.HOW.find_method($cursor, $name, :no_trace(1));
+                @substates := $meth.nqpattr('nfa') if nqp::can($meth, 'nqpattr');
             }
             if !@substates && !%seen{$name} {
                 # Maybe it's a protoregex, in which case states are an alternation
@@ -259,6 +273,10 @@ class QRegex::NFA {
             }
         }
         %seen{$name} := 1;
+        self.mergesubstates($start, $to, $fate, @substates, $cursor, %seen);
+    }
+    
+    method mergesubstates($start, $to, $fate, @substates, $cursor, %seen?) {
         if @substates {
             # create an empty end state for the subrule's NFA
             my $substart := self.addstate();
