@@ -228,16 +228,12 @@ role NQPCursorRole {
         my @order := $nfa.run($!target, $pos);
 
         # Push points onto the bstack.
-        my $i := 0;
-        my $num_matched := nqp::elems(@order);
         my $caps := $!cstack ?? nqp::elems($!cstack) !! 0;
-        while $i < $num_matched {
-            #say("Pushing fate " ~ @fates[@order[$i]]);
-            nqp::push_i($!bstack, @fates[@order[$i]]);
+        while @order {
+            nqp::push_i($!bstack, nqp::atpos_i(@fates, nqp::shift_i(@order)));
             nqp::push_i($!bstack, $pos);
             nqp::push_i($!bstack, 0);
             nqp::push_i($!bstack, $caps);
-            $i := $i + 1;
         }
     }
 
