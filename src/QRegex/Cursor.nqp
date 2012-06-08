@@ -180,10 +180,8 @@ role NQPCursorRole {
         my @rxfate := $nfa.states[0];
         my $cur;
         my $rxname;
-        my $i := nqp::elems(@fates);
-        while $i > 0 {
-            $i := $i - 1;
-            $rxname := nqp::atpos(@rxfate, nqp::atpos_i(@fates, $i));
+        while @fates {
+            $rxname := nqp::atpos(@rxfate, nqp::pop_i(@fates));
             #nqp::say("invoking $rxname");
             $cur := self."$rxname"();
             last if nqp::getattr_i($cur, $?CLASS, '$!pos') >= 0;
