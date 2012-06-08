@@ -2342,20 +2342,6 @@ inline op nqp_push_label(in PMC, in LABEL) :base_core {
     VTABLE_push_integer(interp, $1, PTR2INTVAL(CUR_OPCODE + $2));
 }
 
-inline op nqp_nfa_run_new(out PMC, in PMC, in STR, in INT) :base_core {
-    /* Run the NFA. */
-    INTVAL  total_fates, i;
-    INTVAL *fates = nqp_nfa_run(interp, $2, $3, $4, &total_fates);
-    
-    /* Copy results into an RIA. */
-    PMC *fatepmc = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
-    for (i = 0; i < total_fates; i++)
-        VTABLE_set_integer_keyed_int(interp, fatepmc, i, fates[i]);
-    free(fates);
-    
-    $1 = fatepmc;
-}
-
 inline op nqp_nfa_run_protoregex(out PMC, in PMC, in STR, in INT) :base_core {
     /* Run the NFA. */
     INTVAL  total_fates, i;
