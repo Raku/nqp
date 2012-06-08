@@ -220,19 +220,8 @@ role NQPCursorRole {
     }
 
     method !alt($pos, $name, @labels = []) {
-        # Obtain and run NFA.
-        my $nfa   := self.HOW.cache(self, $name, { self.'!alt_nfa'($name, @labels) });
-        my @fates := $nfa.states[0];
-        my @order := $nfa.run($!target, $pos);
-
-        # Push points onto the bstack.
-        my $caps := $!cstack ?? nqp::elems($!cstack) !! 0;
-        while @order {
-            nqp::push_i($!bstack, nqp::atpos_i(@fates, nqp::shift_i(@order)));
-            nqp::push_i($!bstack, $pos);
-            nqp::push_i($!bstack, 0);
-            nqp::push_i($!bstack, $caps);
-        }
+        my $nfa := self.HOW.cache(self, $name, { self.'!alt_nfa'($name, @labels) });
+        $nfa.run_alt($!target, $pos, $!bstack, $!cstack);
     }
 
     method !alt_nfa($name, @labels) {

@@ -364,7 +364,11 @@ class QRegex::NFA {
         #    $gen := $gen + 1;
         #}
         #@fates;
-        pir::nqp_nfa_run_new__PPSI($!states, $target, $offset)
+        pir::nqp_nfa_run_protoregex__PPSI($!states, $target, $offset)
+    }
+    
+    method run_alt($target, $offset, $bstack, $cstack) {
+        pir::nqp_nfa_run_alternation__vPSIPP($!states, $target, $offset, $bstack, $cstack)
     }
 
     method __dump($dumper, $label) {
