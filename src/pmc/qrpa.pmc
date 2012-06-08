@@ -349,7 +349,13 @@ Resizes the array to C<n> elements.
             INTVAL n = elems1 - count;
             GET_ATTR_start(INTERP, SELF, start);
             if (n > start) n = start;
-            if (n != 0) {
+            if (n <= -elems0) {
+                elems0 = 0;
+                count = 0;
+                SET_ATTR_start(INTERP, SELF, 0);
+                SET_ATTR_elems(INTERP, SELF, elems0);
+            }
+            else if (n != 0) {
                 elems0 += n;
                 count += n;
                 SET_ATTR_start(INTERP, SELF, start - n);

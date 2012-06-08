@@ -27,7 +27,7 @@ out-of-bounds test. Checks INT and PMC keys.
 
     nqp_dynop_setup
 
-    plan(125)
+    plan(126)
 
 #    init_tests()
     resize_tests()
@@ -57,6 +57,7 @@ out-of-bounds test. Checks INT and PMC keys.
     splice_tests()
     splice_replace1()
     splice_replace2()
+    splice_replace3()
     iterate_subclass_of_rpa()
     nqp_islist_op()
 #    method_forms_of_unshift_etc()
@@ -1038,6 +1039,17 @@ too_low_end:
     splice $P1, $P2, 0, 2
     $S0 = join "", $P1
     is($S0, "A3", "replacement via splice works")
+.end
+
+
+.sub 'splice_replace3'
+    $P0 = new ['QRPA']
+    push $P0, 'one'
+
+    $P1 = new ['QRPA']
+    splice $P0, $P1, 0, 2
+    $I0 = elements $P0
+    is($I0, 0, 'splice with large count works')
 .end
 
 
