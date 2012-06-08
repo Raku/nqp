@@ -49,6 +49,11 @@ static INTVAL nqpdebflags_i = 0;
 #define EDGE_CHARLIST        6
 #define EDGE_CHARLIST_NEG    7
 
+/* Objects we use every time we run an NFA; since we always run one NFA
+ * at a time, we can re-use these. */
+static PMC *nfa_curst   = NULL;
+static PMC *nfa_nextst  = NULL;
+
 /* Serialization context upside-down stack (element 0 is the latest, new entries
  * unshifted). Tracks the SC (if any) that we are currently in; stack because we
  * may have multiple on the go due to compiling nested module dependencies. */
@@ -165,6 +170,12 @@ inline op nqp_dynop_setup() :base_core {
         VTABLE_set_pointer(interp, st_sc_barrier, SC_write_barrier_st);
         VTABLE_set_pmc_keyed_str(interp, interp->root_namespace,
             Parrot_str_new_constant(interp, "_ST_SC_BARRIER"), st_sc_barrier);
+        
+        /* Create and anchor NFA objects. */
+        nfa_curst = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
+        Parrot_pmc_gc_register(interp, nfa_curst);
+        nfa_nextst = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
+        Parrot_pmc_gc_register(interp, nfa_nextst);
         
         /* Mark initialized. */
         initialized = 1;
@@ -2192,14 +2203,18 @@ inline op nqp_nfa_run_new(out PMC, in PMC, in STR, in INT) :base_core {
     INTVAL  eos     = Parrot_str_length(interp, target);
     PMC    *fatepmc = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
     INTVAL  gen     = 1;
-    PMC    *curst   = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
-    PMC    *nextst  = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
+    PMC    *curst   = nfa_curst;
+    PMC    *nextst  = nfa_nextst;
     INTVAL *done, *fates;
     INTVAL  i, num_states, total_fates, prev_fates;
     
     /* Zero out the done array; we don't get zeroed memory by default. */
     num_states = VTABLE_elements(interp, states);
     done = mem_sys_allocate_zeroed(num_states * sizeof(INTVAL));
+    
+    /* Clear out other re-used arrays. */
+    VTABLE_set_integer_native(interp, curst, 0);
+    VTABLE_set_integer_native(interp, nextst, 0);
     
     /* Allocate fates array. */
     fates = mem_sys_allocate(sizeof(INTVAL) * (1 + VTABLE_elements(interp,
