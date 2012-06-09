@@ -15,28 +15,31 @@ class HLL::Compiler {
     has $!compiler_progname;
     has $!language;
     has %!config;
+    has $!user_progname;
+    has @!cli-arguments;
+    has %!cli-options;
 
     our %parrot_config;
 
     # XXX HACK!!! Need a Mu. :-)
     method new() {
-        my $obj := pir::repr_instance_of__PP(self);
+        my $obj := nqp::create(self);
         $obj.BUILD();
         $obj
     }
 
     method BUILD() {
         # Default stages.
-        @!stages     := pir::split(' ', 'parse past post pir evalpmc');
+        @!stages     := nqp::split(' ', 'parse past post pir evalpmc');
         
         # Command options and usage.
-        @!cmdoptions := pir::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config stagestats ll-exception nqpevent=s rxtrace profile profile-compile');
+        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config stagestats ll-exception rxtrace nqpevent=s profile profile-compile');
         $!usage := "This compiler is based on HLL::Compiler.\n\nOptions:\n";
         for @!cmdoptions {
             $!usage := $!usage ~ "    $_\n";
         }
         %parrot_config := pir::getinterp()[pir::const::IGLOBALS_CONFIG_HASH];
-        %!config     := pir::new('Hash');
+        %!config     := nqp::hash();
     }
     
     my sub value_type($value) {
@@ -54,7 +57,7 @@ class HLL::Compiler {
         $tagset := $tagset // (@symbols ?? 'ALL' !! 'DEFAULT');
         my %exports;
         my %source := $module{'EXPORT'}{~$tagset};
-        if !pir::defined(%source) {
+        if !nqp::defined(%source) {
             %source := $tagset eq 'ALL' ?? $module !! {};
         }
         if @symbols {
@@ -74,7 +77,7 @@ class HLL::Compiler {
 
     method get_module($name) {
         my @name := self.parse_name($name);
-        @name.unshift(pir::downcase($!language));
+        @name.unshift(nqp::lc($!language));
         pir::get_root_namespace__PP(@name);
     }
 
@@ -93,27 +96,11 @@ class HLL::Compiler {
     method config() { %!config };
 
     method load_module($name) {
-        my $base := pir::join('/', self.parse_name($name));
+        my $base := nqp::join('/', self.parse_name($name));
         my $loaded := 0;
         try { pir::load_bytecode("$base.pbc"); $loaded := 1 };
         unless $loaded { pir::load_bytecode("$base.pir"); $loaded := 1 }
         self.get_module($name);
-    }
-
-    method import($target, %exports) {
-        for %exports {
-            my $type := $_.key;
-            my %items := $_.value;
-            if pir::can(self, "import_$type") {
-                for %items { self."import_$type"($target, $_.key, $_.value); }
-            }
-            elsif pir::can($target, "add_$type") {
-                for %items { $target."add_$type"($_.key, $_.value); }
-            }
-            else {
-                for %items { $target{~$_.key} := $_.value; }
-            }
-        }
     }
 
     method autoprint($value) {
@@ -140,7 +127,7 @@ class HLL::Compiler {
         my %interactive_pad := 
             pir::getattribute__PPs($interactive_ctx, 'lex_pad');
      
-        my $target := pir::downcase(%adverbs<target>);
+        my $target := nqp::lc(%adverbs<target>);
 
         nqp::print(pir::getinterp__P().stderr_handle(), self.interactive_banner);
 
@@ -157,8 +144,8 @@ class HLL::Compiler {
             my $prompt := self.interactive_prompt // '> ';
             my $code := $stdin.readline_interactive(~$prompt);
 
-            last if pir::isnull($code);
-            unless pir::defined($code) {
+            last if nqp::isnull($code);
+            unless nqp::defined($code) {
                 nqp::print("\n");
                 last;
             }
@@ -178,13 +165,13 @@ class HLL::Compiler {
                         next;
                     }
                 };
-                if pir::defined($*MAIN_CTX) {
+                if nqp::defined($*MAIN_CTX) {
                     for $*MAIN_CTX.lexpad_full() {
                         %interactive_pad{$_.key} := $_.value;
                     }
                     $save_ctx := $interactive_ctx;
                 }
-                next if pir::isnull($output);
+                next if nqp::isnull($output);
 
                 if !$target {
                     self.autoprint($output);
@@ -209,7 +196,7 @@ class HLL::Compiler {
         if !pir::isa($output, 'String')
                 && %adverbs<target> eq '' {
             my $outer_ctx := %adverbs<outer_ctx>;
-            if pir::defined($outer_ctx) {
+            if nqp::defined($outer_ctx) {
                 $output[0].set_outer_ctx($outer_ctx);
             }
 
@@ -235,7 +222,7 @@ class HLL::Compiler {
     }
 
     method panic(*@args) {
-        pir::die(pir::join('', @args))
+        nqp::die(nqp::join('', @args))
     }
 
     method stages(@value?) {
@@ -264,11 +251,12 @@ class HLL::Compiler {
     method interactive_prompt() { '> ' }
     
     method compiler_progname($value?) {
-        if pir::defined($value) {
+        if nqp::defined($value) {
             $!compiler_progname := $value;
         }
         $!compiler_progname;
     }
+
     
     method commandline_options(@value?) {
         if +@value {
@@ -286,8 +274,8 @@ class HLL::Compiler {
         ## always passed to an initial run of the interpreter binary,
         ## whether you want it or not.)  We expect to remove this
         ## check eventually (or make it a lot smarter than it is here).
-        if pir::index(@args[2], '@INC') >= 0 {
-            pir::exit(0);
+        if nqp::index(@args[2], '@INC') >= 0 {
+            nqp::exit(0);
         }
 
         my $program-name := @args[0];
@@ -313,9 +301,10 @@ class HLL::Compiler {
         my $result;
         my $error;
         my $has_error := 0;
-        my $target := pir::downcase(%adverbs<target>);
+        my $target := nqp::lc(%adverbs<target>);
         try {
-            if pir::defined(%adverbs<e>) {
+            if nqp::defined(%adverbs<e>) {
+                $!user_progname := '-e';
                 my $?FILES := '-e';
                 $result := self.eval(%adverbs<e>, '-e', |@a, |%adverbs);
                 unless $target eq '' || $target eq 'pir' {
@@ -326,13 +315,13 @@ class HLL::Compiler {
             elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }
             else { $result := self.evalfiles(@a[0], |@a, |%adverbs) }
 
-            if !pir::isnull($result) && $target eq 'pir' {
+            if !nqp::isnull($result) && $target eq 'pir' {
                 my $output := %adverbs<output>;
                 my $fh := ($output eq '' || $output eq '-')
                         ?? pir::getinterp__P().stdout_handle()
                         !! pir::new__Ps('FileHandle').open($output, 'w');
                 self.panic("Cannot write to $output") unless $fh;
-                pir::print($fh, $result);
+                nqp::print($fh, $result);
                 $fh.close()
             }
             CATCH {
@@ -340,22 +329,22 @@ class HLL::Compiler {
                 $error     := $_;
             }
             CONTROL {
-                if pir::can(self, 'handle-control') {
+                if nqp::can(self, 'handle-control') {
                     self.handle-control($_);
                 } else {
-                    pir::rethrow__0P($_);
+                    nqp::rethrow($_);
                 }
                 $has_error := 1;
                 $error     := $_;
             }
         }
         if ($has_error) {
-            if %adverbs<ll-exception> || !pir::can(self, 'handle-exception') {
+            if %adverbs<ll-exception> || !nqp::can(self, 'handle-exception') {
                 my $err := pir::getstderr__P();
                 $err.print($error);
                 $err.print("\n");
-                $err.print(pir::join("\n", $error.backtrace_strings));
-                pir::exit(1);
+                $err.print(nqp::join("\n", $error.backtrace_strings));
+                nqp::exit(1);
             } else {
                 self.handle-exception($error);
             }
@@ -376,35 +365,44 @@ class HLL::Compiler {
             CATCH {
                 nqp::say($_);
                 self.usage;
-                pir::exit(1);
+                nqp::exit(1);
             }
+        }
+        if $res {
+            %!cli-options   := $res.options();
+            @!cli-arguments := $res.arguments();
+        }
+        else {
+            %!cli-options   := nqp::hash();
+            @!cli-arguments := [];
         }
         $res;
     }
 
     method evalfiles($files, *@args, *%adverbs) {
-        my $target := pir::downcase(%adverbs<target>);
+        my $target := nqp::lc(%adverbs<target>);
         my $encoding := %adverbs<encoding>;
         my @files := pir::does($files, 'array') ?? $files !! [$files];
+        $!user_progname := nqp::join(',', @files);
         my @codes;
         for @files {
-            my $in-handle := pir::new('FileHandle');
+            my $in-handle := pir::new__Ps('FileHandle');
             my $err := 0;
             try {
                 # the PIR version checked for utf8 specifically...
                 # dunno why it was this way, and why it doesn't work in nqp
 #                $in-handle.encoding($encoding) unless $encoding eq 'utf8';
                 $in-handle.encoding($encoding);
-                pir::push(@codes, $in-handle.readall($_));
+                nqp::push_s(@codes, $in-handle.readall($_));
                 $in-handle.close;
                 CATCH {
                     $err := "Error while reading from file: $_";
                 }
             }
-            pir::die($err) if $err;
+            nqp::die($err) if $err;
         }
-        my $code := pir::join('', @codes);
-        my $?FILES := pir::join(' ', @files);
+        my $code := nqp::join('', @codes);
+        my $?FILES := nqp::join(' ', @files);
         my $r := self.eval($code, |@args, |%adverbs);
         if $target eq '' || $target eq 'pir' {
             return $r;
@@ -416,13 +414,13 @@ class HLL::Compiler {
     method compile($source, *%adverbs) {
         my %*COMPILING<%?OPTIONS> := %adverbs;
 
-        my $target := pir::downcase(%adverbs<target>);
+        my $target := nqp::lc(%adverbs<target>);
         my $result := $source;
         my $stderr := pir::getinterp().stderr_handle;
         for self.stages() {
-            my $timestamp := pir::time__N();
+            my $timestamp := nqp::time_n();
             $result := self."$_"($result, |%adverbs);
-            my $diff := pir::time__N() - $timestamp;
+            my $diff := nqp::time_n() - $timestamp;
             if %adverbs<stagestats> {
                 my $difffmt := pir::sprintf__SsP("%.3f", [$diff]);
                 $stderr.print("Stage $_: $difffmt\n");
@@ -435,7 +433,7 @@ class HLL::Compiler {
     method parse($source, *%adverbs) {
         my $s := $source;
         if %adverbs<transcode> {
-            for pir::split(' ', %adverbs<transcode>) {
+            for nqp::split(' ', %adverbs<transcode>) {
                 try {
                     $s := pir::trans_encoding__ssi($s,
                             pir::find_encoding__is($_));
@@ -444,8 +442,10 @@ class HLL::Compiler {
         }
         my $grammar := self.parsegrammar;
         my $actions;
-        $actions    := self.parseactions unless pir::downcase(%adverbs<target>) eq 'parse';
-        my $match   := $grammar.parse($s, p => 0, actions => $actions, rxtrace => %adverbs<rxtrace>);
+        $actions    := self.parseactions unless %adverbs<target> eq 'parse';
+        $grammar.HOW.trace-on($grammar) if %adverbs<rxtrace>;
+        my $match   := $grammar.parse($s, p => 0, actions => $actions);
+        $grammar.HOW.trace-off($grammar) if %adverbs<rxtrace>;
         self.panic('Unable to parse source') unless $match;
         return $match;
     }
@@ -485,7 +485,7 @@ class HLL::Compiler {
     method dumper($obj, $name, *%options) {
         if %options<dumper> {
             pir::load_bytecode('PCT/Dumper.pbc');
-            my $dumper := PCT::Dumper{pir::downcase__SS(%options<dumper>)};
+            my $dumper := PCT::Dumper{nqp::lc(%options<dumper>)};
             $dumper($obj, $name)
         }
         else {
@@ -498,7 +498,7 @@ class HLL::Compiler {
             say($name);
         }
         nqp::say($!usage);
-        pir::exit__vi(0);
+        nqp::exit(0);
     }
 
     method version() {
@@ -506,7 +506,7 @@ class HLL::Compiler {
         my $parver  := %parrot_config<VERSION>;
         my $parrev  := %parrot_config<git_describe> // '(unknown)';
         nqp::say("This is $!language version $version built on parrot $parver revision $parrev");
-        pir::exit__vi(0);
+        nqp::exit(0);
     }
 
     method show-config() {
@@ -516,7 +516,7 @@ class HLL::Compiler {
         for %!config {
             nqp::say($!language ~ '::' ~ $_.key ~ '=' ~ $_.value);
         }
-        pir::exit__vi(0);
+        nqp::exit(0);
     }
 
     method nqpevent($spec?) {
@@ -531,7 +531,7 @@ class HLL::Compiler {
             my $file := $spec[0];
             my $flags := $spec[1];
             if $file gt '' {
-                my $fh := pir::new('FileHandle');
+                my $fh := pir::new__Ps('FileHandle');
                 $fh.open($file, 'w') || self.panic("Cannot write to $file");
                 pir::nqpevent_fh__PP($fh);
             }
@@ -544,7 +544,7 @@ class HLL::Compiler {
     }
 
     method removestage($stagename) {
-        my @new_stages := pir::new('ResizableStringArray');
+        my @new_stages := pir::new__Ps('ResizableStringArray');
         for @!stages {
             if $_ ne $stagename {
                 @new_stages.push($_);
@@ -563,36 +563,36 @@ class HLL::Compiler {
             $where    := %adverbs<after>;
             $position := 'after';
         } else {
-            my @new-stages := pir::clone(self.stages);
-            pir::push(@new-stages, $stagename);
+            my @new-stages := nqp::clone(self.stages);
+            nqp::push_s(@new-stages, $stagename);
             self.stages(@new-stages);
             return 1;
         }
-        my @new-stages := pir::new('ResizableStringArray');
+        my @new-stages := pir::new__Ps('ResizableStringArray');
         for self.stages {
             if $_ eq $where {
                 if $position eq 'before' {
-                    pir::push(@new-stages, $stagename);
-                    pir::push(@new-stages, $_);
+                    nqp::push_s(@new-stages, $stagename);
+                    nqp::push_s(@new-stages, $_);
                 } else {
-                    pir::push(@new-stages, $_);
-                    pir::push(@new-stages, $stagename);
+                    nqp::push_s(@new-stages, $_);
+                    nqp::push_s(@new-stages, $stagename);
                 }
             } else {
-                pir::push(@new-stages, $_)
+                nqp::push_s(@new-stages, $_)
             }
         }
         self.stages(@new-stages);
     }
 
     method parse_name($name) {
-        my @ns    := pir::split('::', $name);
-        my $sigil := pir::substr(@ns[0], 0, 1);
+        my @ns    := nqp::split('::', $name);
+        my $sigil := nqp::substr(@ns[0], 0, 1);
 
         # move any leading sigil to the last item
-        my $idx   := pir::index('$@%&', $sigil);
+        my $idx   := nqp::index('$@%&', $sigil);
         if $idx >= 0 {
-            @ns[0]  := pir::substr(@ns[0], 1);
+            @ns[0]  := nqp::substr(@ns[0], 1);
             @ns[-1] := $sigil ~ @ns[-1];
         }
 
@@ -600,7 +600,7 @@ class HLL::Compiler {
         # maybe replace with a grep() once we have the setting for sure
         my @actual_ns;
         for @ns {
-            pir::push(@actual_ns, $_) unless $_ eq '';
+            nqp::push_s(@actual_ns, $_) unless $_ eq '';
         }
         @actual_ns;
     }
@@ -669,6 +669,13 @@ class HLL::Compiler {
             .return (lo)
         };
     }
+
+    # the name of the file(s) that are executed, or -e  or 'interactive'
+    method user-progname() { $!user_progname // 'interactive' }
+
+    # command line options and arguments as provided by the user
+    method cli-options()   { %!cli-options   }
+    method cli-arguments() { @!cli-arguments }
 }
 
 my $compiler := HLL::Compiler.new();

@@ -1,4 +1,7 @@
+use QRegex;
 use NQPHLL;
+use QAST;
+use PASTRegex;
 
 grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
@@ -30,7 +33,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     }
 
     token nibbler {
-        :my %*RX := pir::clone(pir::find_dynamic_lex__Ps('%*RX'));
+        :my %*RX := nqp::clone(pir::find_dynamic_lex__Ps('%*RX'));
         [ <.ws> ['||'|'|'|'&&'|'&'] ]?
         <termaltseq>
     }
@@ -57,7 +60,10 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token termish {
         || <noun=.quantified_atom>+
-        || (\W) <.panic: "Unrecognized regex metacharacter (must be quoted to match literally)">
+        || (\W) {
+            my $char := ~$/[0];
+            $/.CURSOR.panic("Unrecognized regex metacharacter $char (must be quoted to match literally)")
+            }
     }
 
     token quantified_atom {
@@ -98,7 +104,6 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
                        || <.panic: "Only integers or '*' allowed as range quantifier endpoint"> 
                        ] 
             ]?
-        ||  <quantified_atom>
         ]
     }
 
@@ -177,6 +182,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token assertion:sym<?> { '?' [ <?before '>' > | <assertion> ] }
     token assertion:sym<!> { '!' [ <?before '>' > | <assertion> ] }
+    token assertion:sym<|> { '|' <identifier> }
 
     token assertion:sym<method> {
         '.' <assertion>

@@ -8,7 +8,7 @@ knowhow RoleToRoleApplier {
                 my $name := ~$_;
                 my $meth := $_;
                 my @meth_list;
-                if pir::defined(%meth_info{$name}) {
+                if nqp::defined(%meth_info{$name}) {
                     @meth_list := %meth_info{$name};
                 }
                 else {
@@ -40,7 +40,7 @@ knowhow RoleToRoleApplier {
 
             # Do we already have a method of this name? If so, ignore all of the
             # methods we have from elsewhere.
-            unless pir::defined(%target_meth_info{$name}) {
+            unless nqp::defined(%target_meth_info{$name}) {
                 # No methods in the target role. If only one, it's easy...
                 if +@add_meths == 1 {
                     $target.HOW.add_method($target, $name, @add_meths[0]);
@@ -69,7 +69,7 @@ knowhow RoleToRoleApplier {
                     }
                     else {
                         if $_.name eq $add_attr.name {
-                            pir::die("Attribute '" ~ $_.name ~ "' conflicts in role composition");
+                            nqp::die("Attribute '" ~ $_.name ~ "' conflicts in role composition");
                         }
                     }
                 }

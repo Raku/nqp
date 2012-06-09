@@ -41,8 +41,7 @@ Write the string value of C<$contents> to C<$filename>.
 =end item
 
 sub spew($filename, $contents) {
-    my $handle := pir::new__Ps('FileHandle');
-    $handle.open($filename, 'w');
+    my $handle := open($filename, :w);
     $handle.print($contents);
     $handle.close();
 }

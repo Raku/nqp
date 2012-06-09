@@ -11,6 +11,7 @@
 #include "pmc_serializationcontext.h"
 #include "pmc_nqplexinfo.h"
 #include "pmc_ownedhash.h"
+#include "pmc_ownedresizablepmcarray.h"
 #include "pmc/pmc_sub.h"
 #include "base64.h"
 
@@ -56,6 +57,7 @@ static INTVAL nqp_lexpad_id = 0;
 static INTVAL perl6_lexpad_id = 0;
 static INTVAL ctmthunk_id = 0;
 static INTVAL ownedhash_id = 0;
+static INTVAL ownedrpa_id = 0;
 
 /* ***************************************************************************
  * Serialization (writing related)
@@ -457,6 +459,9 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
         discrim = REFVAR_VM_STR;
     }
     else if (ref->vtable->base_type == enum_class_ResizablePMCArray) {
+        discrim = REFVAR_VM_ARR_VAR;
+    }
+    else if (ref->vtable->base_type == ownedrpa_id) {
         discrim = REFVAR_VM_ARR_VAR;
     }
     else if (ref->vtable->base_type == enum_class_ResizableIntegerArray) {
@@ -984,6 +989,7 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     perl6_lexpad_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "Perl6LexInfo", 0));
     ctmthunk_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "CTMThunk", 0));
     ownedhash_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "OwnedHash", 0));
+    ownedrpa_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "OwnedResizablePMCArray", 0));
     
     /* Initialize string heap so first entry is the NULL string. */
     VTABLE_push_string(interp, empty_string_heap, STRINGNULL);
@@ -1123,7 +1129,7 @@ PMC * read_obj_ref(PARROT_INTERP, SerializationReader *reader) {
 /* Reads in an array of variant references. */
 PMC * read_ref_func(PARROT_INTERP, SerializationReader *reader);
 static PMC * read_array_var(PARROT_INTERP, SerializationReader *reader) {
-    PMC *result = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+    PMC *result = Parrot_pmc_new(interp, ownedrpa_id);
     Parrot_Int4 elems, i;
 
     /* Read the element count. */
@@ -1134,6 +1140,9 @@ static PMC * read_array_var(PARROT_INTERP, SerializationReader *reader) {
     /* Read in the elements. */
     for (i = 0; i < elems; i++)
         VTABLE_set_pmc_keyed_int(interp, result, i, read_ref_func(interp, reader));
+
+    /* Set the owner. */
+    PARROT_OWNEDRESIZABLEPMCARRAY(result)->owner = reader->cur_object;
 
     return result;
 }
@@ -1735,6 +1744,7 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *st
     /* Other init. */
     smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
     ownedhash_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "OwnedHash", 0));
+    ownedrpa_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "OwnedResizablePMCArray", 0));
     
     /* Read header and disect the data into its parts. */
     check_and_disect_input(interp, reader, data);

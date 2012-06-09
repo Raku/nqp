@@ -10,11 +10,11 @@ class HLL::Actions {
         if pir::does($ints, 'array') {
             my $result := '';
             for $ints {
-                $result := $result ~ pir::chr($_.ast);
+                $result := $result ~ nqp::chr($_.ast);
             }
             $result;
         } else {
-            pir::chr($ints.ast);
+            nqp::chr($ints.ast);
         }
     }
 
@@ -35,7 +35,7 @@ class HLL::Actions {
 
     method SET_BLOCK_OUTER_CTX($block) {
         my $outer_ctx := %*COMPILING<%?OPTIONS><outer_ctx>;
-        if pir::defined($outer_ctx) {
+        if nqp::defined($outer_ctx) {
             my @ns := pir::getattribute__PPs($outer_ctx, 'current_namespace').get_name;
             @ns.shift;
             $block.namespace(@ns);
@@ -55,13 +55,13 @@ class HLL::Actions {
             elsif $<OPER><O><pirop>    { $past.pirop( ~$<OPER><O><pirop> ); }
             unless $past.name {
                 if $key eq 'LIST' { $key := 'infix'; }
-                my $name := pir::downcase($key) ~ ':<' ~ $<OPER><sym> ~ '>';
+                my $name := nqp::lc($key) ~ ':<' ~ $<OPER><sym> ~ '>';
                 $past.name('&' ~ $name);
             }
         }
         if $key eq 'POSTFIX' { $past.unshift($/[0].ast); }
         else {
-            for $/.list { if pir::defined__IP($_.ast) { $past.push($_.ast); } }
+            for $/.list { if nqp::defined($_.ast) { $past.push($_.ast); } }
         }
         make $past;
     }
@@ -69,7 +69,7 @@ class HLL::Actions {
     method term:sym<circumfix>($/) { make $<circumfix>.ast }
 
     method termish($/) { make $<term>.ast; }
-    method nullterm($/) { make pir::new('Undef') }
+    method nullterm($/) { make pir::new__Ps('Undef') }
     method nullterm_alt($/) { make $<term>.ast; }
 
     method integer($/) { make $<VALUE>.ast; }
@@ -83,7 +83,7 @@ class HLL::Actions {
 
     method quote_EXPR($/) {
         my $past := $<quote_delimited>.ast;
-        if $/.CURSOR.quotemod_check('w') {
+        if %*QUOTEMOD<w> {
             if PAST::Node.ACCEPTS($past) {
                 $/.CURSOR.panic("Can't form :w list from non-constant strings (yet)");
             }
@@ -166,9 +166,11 @@ class HLL::Actions {
     method charname($/) {
         my $codepoint := $<integer>
                          ?? $<integer>.ast
-                         !! pir::find_codepoint__Is( ~$/ );
+                         !! pir::find_codepoint__Is(
+                                pir::trans_encoding__Ssi(~$/,
+                                    pir::find_encoding__Is('utf8')) );
         $/.CURSOR.panic("Unrecognized character name $/") if $codepoint < 0;
-        make pir::chr($codepoint);
+        make nqp::chr($codepoint);
     }
 
     method charnames($/) {
@@ -178,6 +180,6 @@ class HLL::Actions {
     }
 
     method charspec($/) {
-        make $<charnames> ?? $<charnames>.ast !! pir::chr(string_to_int( $/, 10 ));
+        make $<charnames> ?? $<charnames>.ast !! nqp::chr(string_to_int( $/, 10 ));
     }
 }

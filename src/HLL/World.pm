@@ -73,8 +73,8 @@ class HLL::World {
     # Gets the slot for a given object. Dies if it is not in the context.
     method slot_for_object($obj) {
         my $slot := %!addr_to_slot{nqp::where($obj)};
-        unless pir::defined($slot) {
-            pir::die('slot_for_object called on object not in context');
+        unless nqp::defined($slot) {
+            nqp::die('slot_for_object called on object not in context');
         }
         $slot
     }
@@ -178,7 +178,7 @@ class HLL::World {
         # Get the object's serialization context; we're stuck if it
         # has none.
         my $sc := pir::nqp_get_sc_for_object__PP($obj);
-        unless pir::defined($sc) {
+        unless nqp::defined($sc) {
             self.add_object($obj);
             $sc := $!sc;
         }

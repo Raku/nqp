@@ -13,6 +13,7 @@ knowhow NQPClassHOW {
     # Attributes, methods, parents and roles directly added.
     has %!attributes;
     has %!methods;
+    has @!method_order;
     has @!multi_methods_to_incorporate;
     has @!parents;
     has @!roles;
@@ -32,11 +33,19 @@ knowhow NQPClassHOW {
     has @!done;
     
     # Cached values, which are thrown away if the class changes.
-    has %!cache;
+    # XXX Should be an attribute later, but we get into some trouble with
+    # the bootstrap for now since we end up with SC references back to the
+    # previous build due to a parse altering the cache, and the SC WB getting
+    # hit.
+    my %caches;
 
     # Parrot-specific vtable mapping hash. Maps vtable name to method.
     has %!parrot_vtable_mapping;
 	has %!parrot_vtable_handler_mapping;
+    
+    # Call tracing.
+    has $!trace;
+    has $!trace_depth;
     
     my $archetypes := Archetypes.new( :nominal(1), :inheritable(1) );
     method archetypes() {
@@ -49,7 +58,7 @@ knowhow NQPClassHOW {
 
     # Creates a new instance of this meta-class.
     method new(:$name) {
-        my $obj := pir::repr_instance_of__PP(self);
+        my $obj := nqp::create(self);
         $obj.BUILD(:name($name));
         $obj
     }
@@ -69,14 +78,14 @@ knowhow NQPClassHOW {
 
     method add_method($obj, $name, $code_obj) {
         if %!methods{$name} {
-            pir::die("This class already has a method named " ~ $name);
+            nqp::die("This class already has a method named " ~ $name);
         }
-        if pir::isnull__IP($code_obj) || pir::isa__IPs($code_obj, 'Undef') {
-            pir::die("Cannot add a null method '$name' to class '$!name'");
+        if nqp::isnull($code_obj) || pir::isa($code_obj, 'Undef') {
+            nqp::die("Cannot add a null method '$name' to class '$!name'");
         }
         pir::set_method_cache_authoritativeness__vPi($obj, 0);
-        %!cache := {};
-        %!methods{$name} := $code_obj;
+        %caches{nqp::where(self)} := {};
+        @!method_order[+@!method_order] := %!methods{$name} := $code_obj;
     }
 
     method add_multi_method($obj, $name, $code_obj) {
@@ -96,21 +105,21 @@ knowhow NQPClassHOW {
     method add_attribute($obj, $meta_attr) {
         my $name := $meta_attr.name;
         if %!attributes{$name} {
-            pir::die("This class already has an attribute named " ~ $name);
+            nqp::die("This class already has an attribute named " ~ $name);
         }
         %!attributes{$name} := $meta_attr;
     }
 
     method add_parent($obj, $parent) {
         if $!composed {
-            pir::die("NQPClassHOW does not support adding parents after being composed.");
+            nqp::die("NQPClassHOW does not support adding parents after being composed.");
         }
         if $obj =:= $parent {
-            pir::die("Class '$!name' cannot inherit from itself.");
+            nqp::die("Class '$!name' cannot inherit from itself.");
         }
         for @!parents {
             if $_ =:= $parent {
-                pir::die("Already have " ~ $parent ~ " as a parent class.");
+                nqp::die("Already have " ~ $parent ~ " as a parent class.");
             }
         }
         @!parents[+@!parents] := $parent;
@@ -123,15 +132,15 @@ knowhow NQPClassHOW {
     method add_role($obj, $role) {
         for @!roles {
             if $_ =:= $role {
-                pir::die("The role " ~ $role ~ " has already been added.");
+                nqp::die("The role " ~ $role ~ " has already been added.");
             }
         }
         @!roles[+@!roles] := $role;
     }
 
     method add_parrot_vtable_mapping($obj, $name, $meth) {
-        if pir::defined(%!parrot_vtable_mapping{$name}) {
-            pir::die("Class '" ~ $!name ~
+        if nqp::defined(%!parrot_vtable_mapping{$name}) {
+            nqp::die("Class '" ~ $!name ~
                 "' already has a Parrot v-table override for '" ~
                 $name ~ "'");
         }
@@ -139,8 +148,8 @@ knowhow NQPClassHOW {
     }
 
     method add_parrot_vtable_handler_mapping($obj, $name, $att_name) {
-        if pir::defined(%!parrot_vtable_handler_mapping{$name}) {
-            pir::die("Class '" ~ $!name ~
+        if nqp::defined(%!parrot_vtable_handler_mapping{$name}) {
+            nqp::die("Class '" ~ $!name ~
                 "' already has a Parrot v-table handler for '" ~
                 $name ~ "'");
         }
@@ -204,17 +213,17 @@ knowhow NQPClassHOW {
             # Do we have anything in the methods table already in
             # this class?
             my $dispatcher := %!methods{$name};
-            if pir::defined($dispatcher) {
+            if nqp::defined($dispatcher) {
                 # Yes. Only or dispatcher, though? If only, error. If
                 # dispatcher, simply add new dispatchee.
                 if pir::is_dispatcher__IP($dispatcher) {
                     pir::push_dispatchee__0PP($dispatcher, $code);
                 }
-                elsif pir::can($dispatcher, 'is_dispatcher') && $dispatcher.is_dispatcher {
+                elsif nqp::can($dispatcher, 'is_dispatcher') && $dispatcher.is_dispatcher {
                     $dispatcher.add_dispatchee($code);
                 }
                 else {
-                    pir::die("Cannot have a multi candidate for $name when an only method is also in the class");
+                    nqp::die("Cannot have a multi candidate for $name when an only method is also in the class");
                 }
             }
             else {
@@ -225,7 +234,7 @@ knowhow NQPClassHOW {
                     my $parent := @!mro[$j];
                     my %meths := $parent.HOW.method_table($parent);
                     my $dispatcher := %meths{$name};
-                    if pir::defined($dispatcher) {
+                    if nqp::defined($dispatcher) {
                         # Found a possible - make sure it's a dispatcher, not
                         # an only.
                         if pir::is_dispatcher__IP($dispatcher) {
@@ -234,26 +243,26 @@ knowhow NQPClassHOW {
                             @new_dispatchees[0] := $code;
                             my $new_disp := pir::create_dispatch_and_add_candidates__PPP($dispatcher, @new_dispatchees);
                             my $clone_callback := pir::getprop__PPs($dispatcher, 'CLONE_CALLBACK');
-                            if pir::defined($clone_callback) {
+                            if nqp::defined($clone_callback) {
                                 $clone_callback($dispatcher, $new_disp);
                             }
                             %!methods{$name} := $new_disp;
                             $found := 1;
                         }
-                        elsif pir::can($dispatcher, 'is_dispatcher') && $dispatcher.is_dispatcher {
+                        elsif nqp::can($dispatcher, 'is_dispatcher') && $dispatcher.is_dispatcher {
                             my $new_disp := $dispatcher.derive_dispatcher();
                             $new_disp.add_dispatchee($code);
                             %!methods{$name} := $new_disp;
                             $found := 1;
                         }
                         else {
-                            pir::die("Could not find a proto for multi $name (it may exist, but an only is hiding it if so)");
+                            nqp::die("Could not find a proto for multi $name (it may exist, but an only is hiding it if so)");
                         }
                     }
                     $j := $j + 1;
                 }
                 unless $found {
-                    pir::die("Could not find a proto for multi $name, and proto generation is NYI");
+                    nqp::die("Could not find a proto for multi $name, and proto generation is NYI");
                 }
             }
             $i := $i + 1;
@@ -330,7 +339,7 @@ knowhow NQPClassHOW {
 
         # If we didn't find anything to accept, error.
         unless $something_accepted {
-            pir::die("Could not build C3 linearization: ambiguous hierarchy");
+            nqp::die("Could not build C3 linearization: ambiguous hierarchy");
         }
 
         # Otherwise, remove what was accepted from the merge lists.
@@ -377,11 +386,11 @@ knowhow NQPClassHOW {
 
     method publish_boolification_spec($obj) {
         my $bool_meth := self.find_method($obj, 'Bool');
-        if pir::defined($bool_meth) {
+        if nqp::defined($bool_meth) {
             pir::set_boolification_spec__0PiP($obj, 0, $bool_meth)
         }
         else {
-            pir::set_boolification_spec__0PiP($obj, 5, pir::null__P())
+            pir::set_boolification_spec__0PiP($obj, 5, nqp::null())
         }
     }
 
@@ -429,12 +438,19 @@ knowhow NQPClassHOW {
         @!roles
     }
 
-    method methods($obj, :$local!) {
-        my @meths;
-        for %!methods {
-            @meths.push($_.value);
+    method methods($obj, :$local) {
+        if $local {
+            @!method_order
         }
-        @meths
+        else {
+            my @meths;
+            for @!mro {
+                for $_.HOW.methods($_, :local) {
+                    @meths.push($_)
+                }
+            }
+            @meths
+        }
     }
 
     method method_table($obj) {
@@ -443,6 +459,14 @@ knowhow NQPClassHOW {
 
     method name($obj) {
         $!name
+    }
+
+    method traced($obj) {
+        $!trace
+    }
+
+    method trace_depth($obj) {
+        $!trace_depth
     }
 
     method attributes($obj, :$local!) {
@@ -492,7 +516,7 @@ knowhow NQPClassHOW {
         for @!mro {
             my %meths := $_.HOW.method_table($obj);
             my $can := %meths{$name};
-            if pir::defined($can) {
+            if nqp::defined($can) {
                 return $can;
             }
         }
@@ -502,24 +526,45 @@ knowhow NQPClassHOW {
     ##
     ## Dispatchy
     ##
-    method find_method($obj, $name, :$no_fallback) {
+    method find_method($obj, $name, :$no_fallback, :$no_trace) {
         for @!mro {
             my %meths := $_.HOW.method_table($obj);
             my $found := %meths{$name};
-            if pir::defined($found) {
-                return $found;
+            if nqp::defined($found) {
+                return $!trace && !$no_trace && nqp::substr($name, 0, 1) ne '!' ??
+                    -> *@pos, *%named { 
+                        say(nqp::x('  ', $!trace_depth) ~ "Calling $name");
+                        $!trace_depth := $!trace_depth + 1;
+                        my $result := $found(|@pos, |%named);
+                        $!trace_depth := $!trace_depth - 1;
+                        $result
+                    } !!
+                    $found;
             }
         }
-        pir::null__P()
+        nqp::null()
     }
 
     ##
     ## Cache-related
     ##
     method cache($obj, $key, $value_generator) {
-        %!cache || (%!cache := {});
-        pir::exists(%!cache, $key) ??
-            %!cache{$key} !!
-            (%!cache{$key} := $value_generator())
+        nqp::existskey(%caches, nqp::where(self)) || (%caches{nqp::where(self)} := {});
+        nqp::existskey(%caches{nqp::where(self)}, $key) ??
+            %caches{nqp::where(self)}{$key} !!
+            (%caches{nqp::where(self)}{$key} := $value_generator())
+    }
+    
+    ##
+    ## Tracing
+    ##
+    method trace-on($obj, $depth?) {
+        $!trace := 1;
+        $!trace_depth := $depth // 0;
+        pir::set_method_cache_authoritativeness__0Pi($obj, 0);
+        pir::publish_method_cache($obj, nqp::hash());
+    }
+    method trace-off($obj) {
+        $!trace := 0;
     }
 }

@@ -7,21 +7,21 @@ my knowhow NQPRoutine {
         $!dispatchees.push($code);
     }
     method is_dispatcher() {
-        pir::defined($!dispatchees)
+        nqp::defined($!dispatchees)
     }
     method derive_dispatcher() {
         # Clone the underlying VM code ref.
-        my $do  := pir::clone__PP($!do);
+        my $do  := nqp::clone($!do);
         
         # Clone and attach the code object.
         my $der := pir::repr_clone__PP(self);
         nqp::bindattr($der, NQPRoutine, '$!do', $do);
-        nqp::bindattr($der, NQPRoutine, '$!dispatchees', pir::clone__PP($!dispatchees));
+        nqp::bindattr($der, NQPRoutine, '$!dispatchees', nqp::clone($!dispatchees));
         pir::set_sub_code_object__vPP($do, $der);
         
         # If needed, arrange for a fixup of the cloned code-ref.
         my $clone_callback := pir::getprop__PPs($!do, 'CLONE_CALLBACK');
-        if pir::defined($clone_callback) {
+        if nqp::defined($clone_callback) {
             $clone_callback($!do, $do, $der);
         }
         
@@ -29,7 +29,7 @@ my knowhow NQPRoutine {
     }
     method clone() {
         # Clone the underlying VM code ref.
-        my $do  := pir::clone__PP($!do);
+        my $do  := nqp::clone($!do);
         
         # Clone and attach the code object.
         my $der := pir::repr_clone__PP(self);
@@ -38,11 +38,14 @@ my knowhow NQPRoutine {
         
         # If needed, arrange for a fixup of the cloned code-ref.
         my $clone_callback := pir::getprop__PPs($!do, 'CLONE_CALLBACK');
-        if pir::defined($clone_callback) {
+        if nqp::defined($clone_callback) {
             $clone_callback($!do, $do, $der);
         }
         
         $der
+    }
+    method nqpattr($key) {
+        $!do.nqpattr($key)
     }
 }
 pir::stable_publish_vtable_handler_mapping__vPP(NQPRoutine,

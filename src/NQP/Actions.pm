@@ -35,7 +35,7 @@ class NQP::Actions is HLL::Actions {
 
     sub colonpair_str($ast) {
         PAST::Op.ACCEPTS($ast)
-        ?? pir::join(' ', $ast.list)
+        ?? nqp::join(' ', $ast.list)
         !! $ast.value;
     }
 
@@ -117,7 +117,7 @@ class NQP::Actions is HLL::Actions {
         if $<statement> {
             for $<statement> {
                 my $ast := $_.ast;
-                $ast := $ast<sink> if pir::defined($ast<sink>);
+                $ast := $ast<sink> if nqp::defined($ast<sink>);
                 if $ast<bareblock> { $ast := block_immediate($ast); }
                 $ast := PAST::Stmt.new($ast) if $ast ~~ PAST::Node;
                 $past.push( $ast );
@@ -189,7 +189,7 @@ class NQP::Actions is HLL::Actions {
     }
 
     method outerctx($/) {
-        unless pir::defined(%*COMPILING<%?OPTIONS><outer_ctx>) {
+        unless nqp::defined(%*COMPILING<%?OPTIONS><outer_ctx>) {
             # We haven't got a specified outer context already, so load a
             # setting.
             my $SETTING := $*W.load_setting(%*COMPILING<%?OPTIONS><setting> // 'NQPCORE');
@@ -199,7 +199,15 @@ class NQP::Actions is HLL::Actions {
             # this in the setting as Regex depends on the setting).
             unless %*COMPILING<%?OPTIONS><setting> eq 'NULL' {
                 import_HOW_exports($SETTING);
-                $*W.load_module('NQPRegex', $*GLOBALish);
+                if %*COMPILING<%?OPTIONS><old-regex-lib> {
+                    $*W.load_module('NQPRegex', $*GLOBALish);
+                }
+                unless %*COMPILING<%?OPTIONS><no-regex-lib> {
+                    $*W.load_module('QRegex', $*GLOBALish);
+                    unless %*COMPILING<%?OPTIONS><old-regex-lib> {
+                        $*W.load_module('NQPP6QRegex', $*GLOBALish);
+                    }
+                }
             }
         }
         self.SET_BLOCK_OUTER_CTX($*W.cur_lexpad());
@@ -207,7 +215,7 @@ class NQP::Actions is HLL::Actions {
     
     sub import_HOW_exports($UNIT) {    
         # See if we've exported any HOWs.
-        if pir::exists($UNIT, 'EXPORTHOW') {
+        if nqp::existskey($UNIT, 'EXPORTHOW') {
             for $UNIT<EXPORTHOW>.WHO {
                 %*HOW{$_.key} := $_.value;
             }
@@ -235,7 +243,7 @@ class NQP::Actions is HLL::Actions {
 
     method statement_control:sym<use>($/) {
         my $module := $*W.load_module(~$<name>, $*GLOBALish);
-        if pir::defined($module) {
+        if nqp::defined($module) {
             import_HOW_exports($module);
         }
         make PAST::Stmts.new();
@@ -312,7 +320,7 @@ class NQP::Actions is HLL::Actions {
 
     sub push_block_handler($/, $block) {
         my $BLOCK := $*W.cur_lexpad();
-        unless $BLOCK.handlers() {
+		unless $BLOCK.handlers() {
             $BLOCK.handlers([]);
         }
         unless $block.arity {
@@ -347,8 +355,8 @@ class NQP::Actions is HLL::Actions {
             )
         );
     }
-
-    method statement_prefix:sym<BEGIN>($/) {
+	
+	method statement_prefix:sym<BEGIN>($/) {
         make $*W.run_begin_block($<blorst>.ast);
     }
 
@@ -473,8 +481,8 @@ class NQP::Actions is HLL::Actions {
                             last;
                         }
                     }
-                    if pir::defined($attr) {
-                        if pir::can($attr, 'type') {
+                    if nqp::defined($attr) {
+                        if nqp::can($attr, 'type') {
                             $past.type($attr.type);
                         }
                     }
@@ -531,7 +539,7 @@ class NQP::Actions is HLL::Actions {
 
     method package_def($/) {
         # Get name and meta-object.
-        my @ns := pir::clone__PP($<name><identifier>);
+        my @ns := nqp::clone($<name><identifier>);
         my $name := ~@ns.pop;
         my $how := %*HOW{$*PKGDECL};
 
@@ -545,7 +553,7 @@ class NQP::Actions is HLL::Actions {
         # type in which case it needs delayed evaluation. Normally, $?CLASS is
         # a fixed lexical, but for generic types it becomes a parameter. Also
         # for parametric types, pass along the role body block.
-        if pir::can($how, 'parametric') && $how.parametric($how) {
+        if nqp::can($how, 'parametric') && $how.parametric($how) {
             $past.blocktype('declaration');
             $past.unshift(PAST::Var.new( :name('$?CLASS'), :scope('parameter'),
                 :directaccess(1) ));
@@ -565,7 +573,7 @@ class NQP::Actions is HLL::Actions {
             my $parent;
             my $parent_found;
             try {
-                $parent := $*W.find_sym(pir::clone__PP($<parent>[0]<identifier>));
+                $parent := $*W.find_sym(nqp::clone($<parent>[0]<identifier>));
                 $parent_found := 1;
             }
             if $parent_found {
@@ -575,8 +583,8 @@ class NQP::Actions is HLL::Actions {
                 $/.CURSOR.panic("Could not find parent class '" ~ ~$<parent>[0] ~ "'");
             }
         }
-        elsif pir::can($how, 'set_default_parent') {
-            my $default := $*PKGDECL eq 'grammar' ?? ['Regex', 'Cursor'] !! ['NQPMu'];
+        elsif nqp::can($how, 'set_default_parent') {
+            my $default := $*PKGDECL eq 'grammar' ?? ['NQPCursor'] !! ['NQPMu'];
             $*W.pkg_add_parent_or_role($*PACKAGE, "set_default_parent",
                 $*W.find_sym($default));
         }
@@ -587,7 +595,7 @@ class NQP::Actions is HLL::Actions {
                 my $role;
                 my $role_found;
                 try {
-                    $role := $*W.find_sym(pir::clone__PP($_<identifier>));
+                    $role := $*W.find_sym(nqp::clone($_<identifier>));
                     $role_found := 1;
                 }
                 if $role_found {
@@ -636,7 +644,7 @@ class NQP::Actions is HLL::Actions {
         }
         if $*SCOPE eq 'has' {
             # Locate the type of meta-attribute we need.
-            unless pir::exists(%*HOW, $*PKGDECL ~ '-attr') {
+            unless nqp::existskey(%*HOW, $*PKGDECL ~ '-attr') {
                 $/.CURSOR.panic("$*PKGDECL packages do not support attributes");
             }
             
@@ -706,7 +714,7 @@ class NQP::Actions is HLL::Actions {
             if $*SCOPE eq '' || $*SCOPE eq 'my' || $*SCOPE eq 'our' {
                 if $*MULTINESS eq 'multi' {
                     # Does the current block have a candidate holder in place?
-                    if $*SCOPE eq 'our' { pir::die('our-scoped multis not yet implemented') }
+                    if $*SCOPE eq 'our' { nqp::die('our-scoped multis not yet implemented') }
                     my $cholder;
                     my %sym := $*W.cur_lexpad().symbol($name);
                     if %sym<cholder> {
@@ -738,7 +746,7 @@ class NQP::Actions is HLL::Actions {
                         }
 
                         # Set up dispatch routine in this scope.
-                        my $BLOCK := $*W.cur_lexpad();
+						my $BLOCK := $*W.cur_lexpad();
                         $cholder := PAST::Op.new( :pasttype('list') );
                         my $dispatch_setup := PAST::Op.new(
                             :pirop('create_dispatch_and_add_candidates PPP'),
@@ -760,10 +768,10 @@ class NQP::Actions is HLL::Actions {
                     # Create a candidate list holder for the dispatchees
                     # this proto will work over, and install them along
                     # with the proto.
-                    if $*SCOPE eq 'our' { pir::die('our-scoped protos not yet implemented') }
+                    if $*SCOPE eq 'our' { nqp::die('our-scoped protos not yet implemented') }
                     my $cholder := PAST::Op.new( :pasttype('list') );
                     my $BLOCK := $*W.cur_lexpad();
-                    $BLOCK[0].push(PAST::Var.new( :name($name), :isdecl(1), :directaccess(1),
+					$BLOCK[0].push(PAST::Var.new( :name($name), :isdecl(1), :directaccess(1),
                                           :viviself($past), :scope('lexical') ) );
                     $BLOCK[0].push(PAST::Op.new(
                         :pirop('set_dispatchees 0PP'),
@@ -777,7 +785,7 @@ class NQP::Actions is HLL::Actions {
                 }
                 else {
                     my $BLOCK := $*W.cur_lexpad();
-                    $BLOCK[0].push(PAST::Var.new( :name($name), :isdecl(1), :directaccess(1),
+					$BLOCK[0].push(PAST::Var.new( :name($name), :isdecl(1), :directaccess(1),
                                           :viviself($past), :scope('lexical') ) );
                     $BLOCK.symbol($name, :scope('lexical') );
                     if $*SCOPE eq 'our' {
@@ -847,7 +855,7 @@ class NQP::Actions is HLL::Actions {
             # Set name.
             my $name := ~$<private> ~ ~$<deflongname>[0].ast;
             $past.name($name);
-            
+
             # Insert it into the method table.
             my $meta_meth := $*MULTINESS eq 'multi' ?? 'add_multi_method' !! 'add_method';
             my $is_dispatcher := $*MULTINESS eq 'proto';
@@ -883,7 +891,7 @@ class NQP::Actions is HLL::Actions {
         ));
         $past
     }
-    
+
     sub attach_multi_signature($code_obj, $routine) {
         my $types := nqp::list();
         my $definednesses := nqp::list();
@@ -914,7 +922,7 @@ class NQP::Actions is HLL::Actions {
     }
 
     method signature($/) {
-        my $BLOCK     := $*W.cur_lexpad();
+		my $BLOCK     := $*W.cur_lexpad();
         my $BLOCKINIT := $BLOCK[0];
         if $<invocant> {
             my $inv := $<invocant>[0].ast;
@@ -1040,7 +1048,6 @@ class NQP::Actions is HLL::Actions {
     }
 
     method regex_declarator($/, $key?) {
-        my @MODIFIERS := @Regex::P6Regex::Actions::MODIFIERS;
         my $name := ~$<deflongname>.ast;
         my $past;
         if $<proto> {
@@ -1057,62 +1064,35 @@ class NQP::Actions is HLL::Actions {
                         :lexical(0),
                         :node($/)
                     ),
-                    PAST::Block.new( :name('!PREFIX__' ~ $name),
-                        PAST::Op.new(
-                            PAST::Var.new( :name('self'), :scope('parameter') ),
-                            $name,
-                            :name('!PREFIX__!protoregex'),
-                            :pasttype('callmethod')
-                        ),
-                        :blocktype('declaration'),
-                        :lexical(0),
-                        :node($/)
-                    )
                 );
                 for @($past) {
                     $*W.pkg_add_method($*PACKAGE, 'add_method', $_.name(), $*W.create_code($_, $_.name(), 0));
                 }
         }
-        elsif $key eq 'open' {
-            my %h;
-            if $<sym> eq 'token' { %h<r> := 1; }
-            if $<sym> eq 'rule'  { %h<r> := 1;  %h<s> := 1; }
-            @MODIFIERS.unshift(%h);
-            $Regex::P6Regex::Actions::REGEXNAME := $name;
-            $*W.cur_lexpad().symbol('$¢', :scope('lexical'));
-            $*W.cur_lexpad().symbol('$/', :scope('lexical'));
-            return 0;
-        }
         else {
-            my $regex := 
-                Regex::P6Regex::Actions::buildsub($<p6regex>.ast, $*W.pop_lexpad());
+            my $block := $*W.pop_lexpad();
+            $block[0].unshift(PAST::Var.new(:name<self>, :scope<parameter>));
+            $block[0].push(
+                PAST::Var.new(:name<self>, :scope<register>, :isdecl(1),
+                              :viviself(PAST::Var.new( :name<self>, :scope('lexical_6model') ))));
+            $block[0].push(PAST::Var.new(:name<$¢>, :scope<lexical>, :isdecl(1)));
+            $block[0].push(PAST::Var.new(:name<$/>, :scope<lexical>, :isdecl(1)));
+            $block.symbol('$¢', :scope<lexical>);
+            $block.symbol('$/', :scope<lexical>);
+            my $regex := QRegex::P6Regex::Actions::buildsub($<p6regex>.ast, $block);
             $regex.name($name);
-            my $prefix_meth;
             
-            if $*PKGDECL && pir::can($*PACKAGE.HOW, 'add_method') {
+            if $*PKGDECL && nqp::can($*PACKAGE.HOW, 'add_method') {
                 # Add the actual method.
                 $*W.pkg_add_method($*PACKAGE, 'add_method', $name, $*W.create_code($regex, $name, 0));
-                
-                # Produce the prefixes method and add it.
-                my @prefixes := $<p6regex>.ast.prefix_list();
-                $prefix_meth := PAST::Block.new(
-                    :name('!PREFIX__' ~ $name), :blocktype('method'),
-                    PAST::Op.new( :pasttype('list'), |@prefixes )
-                );
-                $*W.pkg_add_method($*PACKAGE, 'add_method', $prefix_meth.name,
-                    $*W.create_code($prefix_meth, $prefix_meth.name, 0));
             }
             
             # In sink context, we don't need the Regex::Regex object.
             $past := PAST::Op.new(
                 :pasttype<callmethod>, :name<new>,
-                lexical_package_lookup(['Regex', 'Method'], $/),
-                $regex
-            );
-            $past<sink> := $prefix_meth ??
-                PAST::Stmts.new( $regex, $prefix_meth ) !!
-                $regex;
-            @MODIFIERS.shift;
+                lexical_package_lookup(['NQPRegexMethod'], $/),
+                $regex);
+            $past<sink> := $regex;
         }
         make $past;
     }
@@ -1163,7 +1143,7 @@ class NQP::Actions is HLL::Actions {
             $var := PAST::Var.new( :name(~$<name>), :scope('lexical') );
         }
         else {
-            my @ns := pir::clone__PP($<name><identifier>);
+            my @ns := nqp::clone($<name><identifier>);
             $var := lexical_package_lookup(@ns, $/);
         }
         
@@ -1179,7 +1159,7 @@ class NQP::Actions is HLL::Actions {
     method term:sym<pir::op>($/) {
         my $past := $<args> ?? $<args>[0].ast !! PAST::Op.new( :node($/) );
         my $pirop := ~$<op>;
-        $pirop := pir::join(' ', pir::split('__', $pirop));
+        $pirop := nqp::join(' ', nqp::split('__', $pirop));
         $past.pirop($pirop);
         $past.pasttype('pirop');
         make $past;
@@ -1195,7 +1175,7 @@ class NQP::Actions is HLL::Actions {
         my $past  := PAST::Node.'map_node'(|$args, :map<nqp>, :op($op), 
                                            :node($/));
 
-        pir::defined($past) ||
+        nqp::defined($past) ||
             $/.CURSOR.panic("Unrecognized nqp:: opcode 'nqp::$op'");
         make $past;
     }
@@ -1224,7 +1204,7 @@ class NQP::Actions is HLL::Actions {
                 $past[$i] := $past[$i][0];
                 $past[$i].flat(1);
                 if $past[$i].isa(PAST::Val)
-                    && pir::substr($past[$i].name, 0, 1) eq '%' {
+                    && nqp::substr($past[$i].name, 0, 1) eq '%' {
                         $past[$i].named(1);
                 }
             }
@@ -1313,7 +1293,9 @@ class NQP::Actions is HLL::Actions {
     method number($/) {
         my $value := $<dec_number> ?? $<dec_number>.ast !! $<integer>.ast;
         if ~$<sign> eq '-' { $value := -$value; }
-        make PAST::Val.new( :value($value) );
+        make $<dec_number> ??
+            PAST::Val.new( :value($value) ) !!
+            PAST::Want.new( PAST::Val.new( :value($value) ), 'Ii', $value );
     }
 
     method quote:sym<apos>($/) { make $<quote_EXPR>.ast; }
@@ -1327,21 +1309,23 @@ class NQP::Actions is HLL::Actions {
                            :node($/) );
     }
 
-    method quote:sym</ />($/, $key?) {
-        if $key eq 'open' {
-            $Regex::P6Regex::Actions::REGEXNAME := pir::null__P();
-            $*W.cur_lexpad().symbol('$¢', :scope('lexical'));
-            $*W.cur_lexpad().symbol('$/', :scope('lexical'));
-            return 0;
-        }
-        my $regex := 
-            Regex::P6Regex::Actions::buildsub($<p6regex>.ast, $*W.pop_lexpad());
-        my $past := 
-            PAST::Op.new(
-                :pasttype<callmethod>, :name<new>,
-                lexical_package_lookup(['Regex', 'Regex'], $/),
-                $regex
-            );
+    method quote:sym</ />($/) {
+        my $block := $*W.pop_lexpad();
+        $block[0].push(PAST::Var.new(:name<self>, :scope<parameter>));
+        $block[0].push(
+            PAST::Var.new(:name<self>, :scope<register>, :isdecl(1),
+                          :viviself(PAST::Var.new( :name<self>, :scope('lexical_6model') ))));
+        $block[0].push(PAST::Var.new(:name<$¢>, :scope<lexical>, :isdecl(1)));
+        $block[0].push(PAST::Var.new(:name<$/>, :scope<lexical>, :isdecl(1)));
+        $block.symbol('$¢', :scope<lexical>);
+        $block.symbol('$/', :scope<lexical>);
+
+        my $regex := QRegex::P6Regex::Actions::buildsub($<p6regex>.ast, $block);
+        my $past := PAST::Op.new(
+            :pasttype<callmethod>, :name<new>,
+            lexical_package_lookup(['NQPRegex'], $/),
+            $regex);
+
         # In sink context, we don't need the Regex::Regex object.
         $past<sink> := $regex;
         make $past;
@@ -1447,38 +1431,38 @@ class NQP::Actions is HLL::Actions {
     }
 }
 
-class NQP::RegexActions is Regex::P6Regex::Actions {
+class NQP::RegexActions is QRegex::P6Regex::Actions {
 
     method metachar:sym<:my>($/) {
         my $past := $<statement>.ast;
-        make PAST::Regex.new( $past, :pasttype('pastnode'),
-                              :subtype('declarative'), :node($/) );
+        make QAST::Regex.new( $past,
+                              :rxtype('pastnode'), :subtype('declarative'), :node($/) );
     }
 
     method metachar:sym<{ }>($/) { 
-        make PAST::Regex.new( $<codeblock>.ast, 
-                              :pasttype<pastnode>, :node($/) );
+        make QAST::Regex.new( $<codeblock>.ast, 
+                              :rxtype<pastnode>, :node($/) );
     }
 
     method metachar:sym<nqpvar>($/) {
-        make PAST::Regex.new( '!INTERPOLATE', $<var>.ast, 
-                              :pasttype<subrule>, :subtype<method>, :node($/));
+        make QAST::Regex.new( PAST::Node.new('!INTERPOLATE', $<var>.ast), 
+                              :rxtype<subrule>, :subtype<method>, :node($/));
     }
 
     method assertion:sym<{ }>($/) { 
-        make PAST::Regex.new( '!INTERPOLATE_REGEX', $<codeblock>.ast, 
-                              :pasttype<subrule>, :subtype<method>, :node($/));
+        make QAST::Regex.new( PAST::Node.new('!INTERPOLATE_REGEX', $<codeblock>.ast), 
+                              :rxtype<subrule>, :subtype<method>, :node($/));
     }
 
     method assertion:sym<?{ }>($/) { 
-        make PAST::Regex.new( $<codeblock>.ast, 
+        make QAST::Regex.new( $<codeblock>.ast, 
                               :subtype<zerowidth>, :negate( $<zw> eq '!' ),
-                              :pasttype<pastnode>, :node($/) );
+                              :rxtype<pastnode>, :node($/) );
     }
 
     method assertion:sym<var>($/) {
-        make PAST::Regex.new( '!INTERPOLATE_REGEX', $<var>.ast, 
-                              :pasttype<subrule>, :subtype<method>, :node($/));
+        make QAST::Regex.new( PAST::Node.new('!INTERPOLATE_REGEX', $<var>.ast), 
+                              :rxtype<subrule>, :subtype<method>, :node($/));
     }
 
     method codeblock($/) {

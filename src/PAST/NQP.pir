@@ -430,9 +430,22 @@ entry to produce the node to be returned.
     .local pmc maphash
     maphash = new ['Hash']
 
+    # See also docs/nqp-opcode.txt before adding opcodes to this list.
+    # Opcodes marked (?) may be rejected at some point.
+
+    # Explicitly rejected opcodes.  See also docs/nqp-opcode.txt.
+    # Use the pir:: form of these Parrot-specific operations.
+    # maphash['new']                             # or use nqp::create
+    # maphash['does']
+    # maphash['isa']                             # or use nqp::istype
+    # maphash['typeof']                          # or use nqp::what
+    maphash['defined']  = 'defined__IP'          # or use nqp::isconcrete
+
     # I/O opcodes
     maphash['print'] = 'print'
     maphash['say']   = 'say'
+    maphash['stat']   = 'stat__Isi'              # (?)
+    maphash['open']   = 'open__Pss'              # (?)
 
     # terms
     maphash['time_i'] = 'time__I'
@@ -523,13 +536,15 @@ entry to produce the node to be returned.
     maphash['join']     = 'join__SsP'
     maphash['split']    = 'split__Pss'
     maphash['index']    = 'index__Issi'
+    maphash['rindex']   = 'rindex__ISSI'
     maphash['chr']      = 'chr__Si'
     maphash['ord']      = 'ord__Isi'
     maphash['lc']       = 'downcase__Ss'
     maphash['uc']       = 'upcase__Ss'
     maphash['substr']   = 'substr__Ssii'
     maphash['x']        = 'repeat__Ssi'
-    maphash['iscclass'] = 'is_cclass__Iisi'
+    maphash['iscclass'] = 'is_cclass__Iisi'                # (?)
+    maphash['findnotcclass'] = 'find_not_cclass__Iisii'    # (?)
     maphash['sprintf']  = 'sprintf__SsP'
 
     # relational opcodes
@@ -597,6 +612,7 @@ entry to produce the node to be returned.
     maphash['existskey'] = 'exists__IQs'
     maphash['existspos'] = 'exists__IQi'
     maphash['elems']    = 'elements__IP'
+    maphash['islist']   = 'nqp_islist__IP'
     maphash['iterator'] = 'iter__PP'
     maphash['push']     = 'push__0PP'
     maphash['push_s']   = 'push__0Ps'
@@ -621,6 +637,14 @@ entry to produce the node to be returned.
     $P0 = new ['Hash']
     $P0['pasttype'] = 'hash'
     maphash['hash'] = $P0
+
+    # nqp::qlist is a temporary operation for creating QRPA lists
+    # instead of RPA lists.  Eventually we expect nqp::list to do the same,
+    # at which point nqp::qlist can go away.
+    $P0 = new ['Hash']
+    $P0['pasttype'] = 'list'
+    $P0['returns'] = 'QRPA'
+    maphash['qlist'] = $P0
 
     # repr-level aggregate operations
     maphash['r_atpos']     = 'repr_at_pos_obj__PPi'
@@ -655,6 +679,8 @@ entry to produce the node to be returned.
     maphash['box_n']      = 'repr_box_num__PnP'
     maphash['box_s']      = 'repr_box_str__PsP'
     maphash['where']      = 'get_id__IP'
+    maphash['can']        = 'can__IPs'
+    maphash['findmethod'] = 'find_method__pps'
 
     # serialization context related opcodes
     maphash['sha1']       = 'nqp_sha1__Ss'
@@ -677,6 +703,10 @@ entry to produce the node to be returned.
     maphash['deb'] = $P0
 
     maphash['die']      = 'die__vP'
+    maphash['exit']     = 'exit__vi'
+    maphash['sleep']    = 'sleep__vn'
+    maphash['throw']    = 'throw__0P'
+    maphash['rethrow']  = 'rethrow__0P'
 
     .return (maphash)
 .end

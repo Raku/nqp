@@ -1,4 +1,4 @@
-use NQPP6Regex;
+use NQPP6QRegex;
 
 class NQP::World is HLL::World {
     # The stack of lexical pads, actually as PAST::Block objects. The
@@ -122,7 +122,7 @@ class NQP::World is HLL::World {
     # Installs a symbol into the package. Does so immediately, and
     # makes sure this happens on deserialization also.
     method install_package_symbol($package, @sym, $obj) {
-        @sym := pir::clone__PP(@sym);
+        @sym := nqp::clone(@sym);
         my $name := ~@sym.pop();
         
         # Install symbol immediately.
@@ -203,14 +203,14 @@ class NQP::World is HLL::World {
             my $i := 0;
             while $i < $c {
                 my $subid := $compiled[$i].get_subid();
-                if pir::exists(%!code_objects_to_fix_up, $subid) {
+                if nqp::existskey(%!code_objects_to_fix_up, $subid) {
                     # First, go over the code objects. Update the $!do, and the
                     # entry in the SC. Make sure the newly compiled code is marked
                     # as a static code ref.
                     my $static := %!code_objects_to_fix_up{$subid}.shift();
                     nqp::bindattr($static, $code_type, '$!do', $compiled[$i]);
                     for %!code_objects_to_fix_up{$subid} {
-                        nqp::bindattr($_, $code_type, '$!do', pir::clone($compiled[$i]));
+                        nqp::bindattr($_, $code_type, '$!do', nqp::clone($compiled[$i]));
                     }
                     pir::setprop__vPsP($compiled[$i], 'STATIC_CODE_REF', $compiled[$i]);
                     self.update_root_code_ref(%!code_stub_sc_idx{$subid}, $compiled[$i]);
@@ -229,7 +229,7 @@ class NQP::World is HLL::World {
         my $fixups := PAST::Stmts.new();
         my $dummy;
         my $code_ref_idx;
-        if pir::defined($past<compile_time_dummy>) {
+        if nqp::defined($past<compile_time_dummy>) {
             $dummy := $past<compile_time_dummy>;
         }
         else {
@@ -336,8 +336,8 @@ class NQP::World is HLL::World {
     method pkg_create_mo($how, :$name, :$repr) {
         # Create the meta-object and add to root objects.
         my %args;
-        if pir::defined($name) { %args<name> := $name; }
-        if pir::defined($repr) { %args<repr> := $repr; }
+        if nqp::defined($name) { %args<name> := $name; }
+        if nqp::defined($repr) { %args<repr> := $repr; }
         my $mo := $how.new_type(|%args);
         my $slot := self.add_object($mo);
 
@@ -390,7 +390,7 @@ class NQP::World is HLL::World {
             # Fixup code depends on if we have the routine in the SC for
             # fixing up.
             my $fixup := PAST::Op.new( :pirop('set_sub_multisig vPP'), self.get_ref($sig_obj) );
-            if pir::defined($routine<compile_time_dummy>) {
+            if nqp::defined($routine<compile_time_dummy>) {
                 $fixup.unshift(self.get_slot_past_for_object($routine<compile_time_dummy>));
             }
             else {
@@ -436,7 +436,7 @@ class NQP::World is HLL::World {
             $i := $i - 1;
             my %symbols := @!BLOCKS[$i].symtable();
             for %symbols {
-                if !%seen{$_.key} && pir::exists($_.value, 'value') {
+                if !%seen{$_.key} && nqp::existskey($_.value, 'value') {
                     try {
                         $wrapper[0].push(PAST::Var.new(
                             :name($_.key), :scope('lexical_6model'), :isdecl(1),
@@ -466,7 +466,7 @@ class NQP::World is HLL::World {
         # Need to load the NQP dynops/dympmcs, plus any extras requested.
         my @loadlibs := ['nqp_group', 'nqp_ops', 'nqp_bigint_ops', 'trans_ops', 'io_ops'];
         if %*COMPILING<%?OPTIONS><vmlibs> {
-            for pir::split(',', %*COMPILING<%?OPTIONS><vmlibs>) {
+            for nqp::split(',', %*COMPILING<%?OPTIONS><vmlibs>) {
                 @loadlibs.push($_);
             }
         }
@@ -565,7 +565,7 @@ class NQP::World is HLL::World {
     # that fails tries package lookup.
     method find_sym(@name) {
         # Make sure it's not an empty name.
-        unless +@name { pir::die("Cannot look up empty name"); }
+        unless +@name { nqp::die("Cannot look up empty name"); }
         
         # If it's a single-part name, look through the lexical
         # scopes.
@@ -576,11 +576,11 @@ class NQP::World is HLL::World {
                 $i := $i - 1;
                 my %sym := @!BLOCKS[$i].symbol($final_name);
                 if +%sym {
-                    if pir::exists(%sym, 'value') {
+                    if nqp::existskey(%sym, 'value') {
                         return %sym<value>;
                     }
                     else {
-                        pir::die("No compile-time value for $final_name");
+                        nqp::die("No compile-time value for $final_name");
                     }
                 }
             }
@@ -597,13 +597,13 @@ class NQP::World is HLL::World {
                 $i := $i - 1;
                 my %sym := @!BLOCKS[$i].symbol($first);
                 if +%sym {
-                    if pir::exists(%sym, 'value') {
+                    if nqp::existskey(%sym, 'value') {
                         $result := %sym<value>;
                         @name.shift();
                         $i := 0;
                     }
                     else {
-                        pir::die("No compile-time value for $first");
+                        nqp::die("No compile-time value for $first");
                     }                    
                 }
             }
@@ -611,12 +611,12 @@ class NQP::World is HLL::World {
         
         # Try to chase down the parts of the name.
         for @name {
-            if pir::exists($result.WHO, ~$_) {
+            if nqp::existskey($result.WHO, ~$_) {
                 $result := ($result.WHO){$_};
             }
             else {
-                pir::die("Could not locate compile-time value for symbol " ~
-                    pir::join('::', @name));
+                nqp::die("Could not locate compile-time value for symbol " ~
+                    nqp::join('::', @name));
             }
         }
         

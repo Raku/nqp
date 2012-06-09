@@ -80,7 +80,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     QAST::Regex.new( :rxtype<quant>, :min(0), :max(1), $<separator>[0].ast ));
             }
         }
-        $qast.backtrack('r') if $qast && !$qast.backtrack && %*RX<r>;
+        $qast.backtrack('r') if $qast && !$qast.backtrack &&
+            (%*RX<r> || $<backmod> && ~$<backmod>[0] eq ':');
         make $qast;
     }
     
@@ -116,15 +117,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method quantifier:sym<**>($/) {
         my $qast;
-        if $<quantified_atom> { 
-            my $ast := $<quantified_atom>.ast;
-            $qast := QAST::Regex.new( :rxtype<quant>, :min(1), $ast);
-        }
-        else {
-            $qast := QAST::Regex.new( :rxtype<quant>, :min(+$<min>), :node($/) );
-            if ! $<max> { $qast.max(+$<min>) }
-            elsif $<max>[0] ne '*' { $qast.max(+$<max>[0]); }
-        }
+        $qast := QAST::Regex.new( :rxtype<quant>, :min(+$<min>), :node($/) );
+        if ! $<max> { $qast.max(+$<min>) }
+        elsif $<max>[0] ne '*' { $qast.max(+$<max>[0]); }
         make backmod($qast, $<backmod>);
     }
 
@@ -316,7 +311,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             $qast := $<assertion>.ast;
             $qast.subtype('zerowidth');
         }
-        else { $qast := 0; }
+        else {
+            $qast := QAST::Regex.new( :rxtype<anchor>, :subtype<pass>, :node($/) );
+        }
         make $qast;
     }
 
@@ -329,6 +326,22 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         else {
             $qast := QAST::Regex.new( :rxtype<anchor>, :subtype<fail>, :node($/) );
+        }
+        make $qast;
+    }
+
+    method assertion:sym<|>($/) {
+        my $qast;
+        my $name := ~$<identifier>;
+        if $name eq 'c' {
+            # codepoint boundaries alway match in
+            # our current Unicode abstraction level
+            $qast := 0;
+        }
+        elsif $name eq 'w' {
+            $qast := QAST::Regex.new(:rxtype<subrule>, :subtype<method>,
+                                     :node($/), PAST::Node.new('wb'), 
+                                     :name('') );
         }
         make $qast;
     }
@@ -348,10 +361,10 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             self.subrule_alias($qast, $name);
         }
         elsif $name eq 'sym' {
-            my $rxname := pir::chopn__Ssi( 
-                              nqp::substr(%*RX<name>,
-                                          nqp::index(%*RX<name>, ':sym<') + 5),
-                              1);
+            my $loc := nqp::index(%*RX<name>, ':sym<');
+            $loc := nqp::index(%*RX<name>, ':sym«')
+                if $loc < 0;
+            my $rxname := pir::chopn__Ssi(nqp::substr(%*RX<name>, $loc + 5), 1);
             $qast := QAST::Regex.new(:name('sym'), :rxtype<subcapture>, :node($/),
                 QAST::Regex.new(:rxtype<literal>, $rxname, :node($/)));
         }
@@ -467,7 +480,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     QAST::Regex.new( :rxtype<concat>, :node($/),
                         QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, |@alts ), 
                         QAST::Regex.new( :rxtype<cclass>, :subtype<.> ) ) !!
-                    QAST::Regex.new( :rxtype<alt>, |@alts );
+                    QAST::Regex.new( :rxtype<altseq>, |@alts );
         }
         #$qast.negate( $<sign> eq '-' );
         make $qast;
@@ -507,12 +520,15 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                                 :name($block.subid ~ '_nfa'), $nfapast);
             $initpast.push(PAST::Stmt.new($nfablock));
         }
+        alt_nfas($qast, $block.subid, $initpast);
 
         unless $block.symbol('$¢') {
             $initpast.push(PAST::Var.new(:name<$¢>, :scope<lexical>, :isdecl(1)));
             $block.symbol('$¢', :scope<lexical>);
         }
 
+        $block<orig_qast> := $qast;
+        
         $qast := QAST::Regex.new( :rxtype<concat>,
                      QAST::Regex.new( :rxtype<scan> ),
                      $qast,
@@ -570,6 +586,28 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         %capnames{''} := $count;
         %capnames;
+    }
+    
+    sub alt_nfas($ast, $subid, $initpast) {
+        my $rxtype := $ast.rxtype;
+        if $rxtype eq 'alt' {
+            my $nfapast := PAST::Op.new( :pasttype('list') );
+            $ast.name(PAST::Node.unique('alt_nfa_') ~ '_' ~ ~nqp::time_n());
+            for $ast.list {
+                alt_nfas($_, $subid, $initpast);
+                $nfapast.push(QRegex::NFA.new.addnode($_).past(:non_empty));
+            }
+            my $nfablock := PAST::Block.new(
+                                :hll<nqp>, :namespace(['Sub']), :lexical(0),
+                                :name($subid ~ '_' ~ $ast.name), $nfapast);
+            $initpast.push(PAST::Stmt.new($nfablock));
+        }
+        elsif $rxtype eq 'subcapture' || $rxtype eq 'quant' {
+            alt_nfas($ast[0], $subid, $initpast)
+        }
+        elsif $rxtype eq 'concat' || $rxtype eq 'altseq' || $rxtype eq 'conj' || $rxtype eq 'conjseq' {
+            for $ast.list { alt_nfas($_, $subid, $initpast) }
+        }
     }
 
     method subrule_alias($ast, $name) {

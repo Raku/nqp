@@ -1,6 +1,6 @@
 knowhow Foo {
     has $!bbq;
-    method new() { pir::repr_instance_of__pp(self) }
+    method new() { nqp::create(self) }
     method lol() {
         "yay, methods"
     }

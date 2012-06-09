@@ -23,8 +23,9 @@ General notes:
     nqp::unless(test, iffalse, iftrue)
     nqp::while(test, body)
     nqp::loop(init, test, next, body)
-    nqp::throw                     pir::throw__P
-    nqp::die                       pir::die
+    nqp::throw                     pir::throw__0P
+    nqp::rethrow                   pir::rethrow__0P
+    nqp::die                       pir::die__vP
     nqp::exit                      pir::exit__vi
     nqp::sleep                     pir::sleep__vn
     (need ops to fetch caller, outer, context, etc?)
@@ -50,8 +51,8 @@ General notes:
     nqp::chars                     pir::length__Is
     nqp::split                     pir::split__Pss
     nqp::iscclass                  pir::iscclass__Isii          (?)
-    nqp::findcclass                pir::find_cclass__Isii       (?)
-    nqp::findnotcclass             pir::find_not_cclass__Isii   (?)
+    nqp::findcclass                pir::find_cclass__Iisii      (?)
+    nqp::findnotcclass             pir::find_not_cclass__Iisii  (?)
 
   relational:
     nqp::iseq_i                    pir::iseq__Iii
@@ -75,25 +76,31 @@ General notes:
 
   object:
     nqp::bindattribute             pir::setattribute__0PPsP
-    nqp::getattribute              pir::getattribute__PPsP
+    nqp::getattribute              pir::getattribute__PPPs
     nqp::findmethod                pir::find_method__PPs        (?)
+    nqp::can                       pir::can__IPs                (?)
     nqp::null                      pir::null__P
     nqp::isnull                    pir::isnull__IP
     nqp::defined                   pir::defined__IP
-    nqp::??                        pir::istrue__IP
+    nqp::istrue                    pir::istrue__IP
     nqp::clone                     pir::clone__PP
     nqp::typecheck or ::isa        pir::type_check__IPP
                    or ::istype
-    nqp::??                        pir::repr_instance_of__PP    (?)
+    nqp::??                        pir::isa__IPs                (reject)
+    nqp::??                        pir::typeof__SP              (reject)
+    nqp::??                        pir::does__IPs               (reject)
+    nqp::create                    pir::repr_instance_of__PP
+
     nqp::unbox_i                   pir::repr_unbox_int__IP
     nqp::unbox_n                   pir::repr_unbox_num__NP
     nqp::unbox_s                   pir::repr_unbox_str__SP
     nqp::box_i                     pir::repr_box_int__PPi
     nqp::box_n                     pir::repr_box_num__PPn
     nqp::box_s                     pir::repr_box_str__PPs
-    nqp::what or nqp::getwhat                                   (?)
-    nqp::how  or nqp::gethow                                    (?)
-    nqp::??                        pir::can__IPs                (?)
+    nqp::what  or nqp::getwhat     pir::get_what__PP
+    nqp::how   or nqp::gethow      pir::get_how__PP
+    nqp::who   or nqp::getwho      pir::get_who__PP
+    nqp::where                     pir::get_id__IP
 
   Rakudo-specific:
     nqp::p6box_i                   pir::perl6_box_int__Pi
