@@ -321,6 +321,14 @@ of the match.
         @args.push('"');
         nqp::die(nqp::join('', @args))
     }
+    
+    method FAILGOAL($goal) {
+        my $sub := Q:PIR {
+            %r = getinterp
+            %r = %r['sub';1]
+        };
+        self.panic("Unable to parse ", ~$sub, ", couldn't find final $goal");
+    }
 
 
 =begin
