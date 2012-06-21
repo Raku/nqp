@@ -1001,5 +1001,9 @@ class QAST::Compiler is HLL::Compiler {
     method regex_commit($ops, $mark) {
         $ops.push_pirop('nqp_rxcommit', %*REG<bstack>, $mark);
     }
+
+    multi method as_post($unknown) {
+        nqp::die("Unknown QAST node type " ~ $unknown.HOW.name($unknown));
+    }
 }
 
