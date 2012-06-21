@@ -131,8 +131,11 @@ class QAST::Compiler is HLL::Compiler {
     INIT {
         $serno := 10; 
         Q:PIR {
+            $P0 = get_root_global ['parrot';'QAST'], 'Compiler'
+            unless null $P0 goto have_qastcomp
             $P0 = find_lex '$?CLASS'
             set_root_global ['parrot';'QAST'], 'Compiler', $P0
+          have_qastcomp:
         };
     }
     
