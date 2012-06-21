@@ -20,12 +20,12 @@ class QAST::Node is NQPCapture {
     }
 
     method node(*@value)       { $!node := @value[0] if @value; $!node }
-    method name(*@value)       { $!name := @value[0] if @value; $!name }
-    method named(*@value)      { $!named := @value[0] if @value; $!named }
+    method name(*@value)       { $!name := @value[0] if @value; $!name || "" }
+    method named(*@value)      { $!named := @value[0] if @value; $!named || "" }
     method returns(*@value)    { $!returns := @value[0] if @value; $!returns }
     method arity(*@value)      { $!arity := @value[0] if @value; $!arity }
     method flat(*@value)       { $!flat := @value[0] if @value; $!flat }
-    method childorder(*@value) { $!childorder := @value[0] if @value; $!childorder }
+    method childorder(*@value) { $!childorder := @value[0] if @value; $!childorder || "" }
     
     method pop()           { nqp::pop(self.list) }
     method push($value)    { nqp::push(self.list, $value) }
