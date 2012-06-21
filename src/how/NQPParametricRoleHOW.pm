@@ -50,9 +50,7 @@ knowhow NQPParametricRoleHOW {
     # to go with it, and return that.
     method new_type(:$name = '<anon>') {
         my $metarole := self.new(:name($name));
-        pir::set_who__0PP(
-            pir::repr_type_object_for__PPS($metarole, 'Uninstantiable'),
-            {});
+        nqp::setwho(nqp::newtype($metarole, 'Uninstantiable'), {});
     }
     
     method set_body_block($obj, $body_block) {
