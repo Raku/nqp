@@ -9,20 +9,39 @@ my class NQPMu {
         $instance
     }
 
-    method BUILDALL(NQPMu:D $self: *%attributes) {
-        for $self.HOW.parents($self) -> $class {
-            $self.BUILD_MAGIC($class, |%attributes);
-        }
-    }
-
-    method BUILD_MAGIC(NQPMu:D $self: $type, *%attributes) {
-        for $type.HOW.attributes($type, :local) {
-            my $name := $_.name;
-            my $shortname := nqp::substr($name, 2);
-            if nqp::existskey(%attributes, $shortname) {
-                nqp::bindattr($self, $type, $name, %attributes{$shortname});
+    method BUILDALL(NQPMu:D $self: *%attrinit) {
+        # Get the build plan. Note that we do this "low level" to
+        # avoid the NQP type getting mapped to a Rakudo one, which
+        # would get expensive.
+        my $build_plan := nqp::findmethod(self.HOW, 'BUILDALLPLAN')(self.HOW, self);
+        my $count      := nqp::elems($build_plan);
+        my $i          := 0;
+        while $i < $count {
+            my $task := nqp::atpos($build_plan, $i);
+            $i := $i + 1;
+            if nqp::iseq_i(nqp::atpos($task, 0), 0) {
+                # Custom BUILD call.
+                nqp::atpos($task, 1)(self, |%attrinit);
+            }
+            elsif nqp::iseq_i(nqp::atpos($task, 0), 1) {
+                # See if we have a value to initialize this attr with.
+                my $key_name := nqp::atpos($task, 2);
+                if nqp::existskey(%attrinit, $key_name) {
+                    nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos_s($task, 3), %attrinit{$key_name});
+                }
+            }
+            # Uncomment if we get attribute initialization closures in NQP.
+            #elsif nqp::iseq_i(nqp::atpos($task, 0), 2) {
+            #    unless nqp::attrinited(self, nqp::atpos($task, 1), nqp::atpos($task, 2)) {
+            #        nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos($task, 2),
+            #            nqp::atpos($task, 3)(self, $attr));
+            #    }
+            #}
+            else {
+                nqp::die("Invalid BUILDALLPLAN");
             }
         }
+        self
     }
 
     method new(*%attributes) {
