@@ -18,10 +18,7 @@ grammar NQP::Grammar is HLL::Grammar {
         # cross the compile-time/run-time boundary that are associated
         # with this compilation unit.
         my $file := pir::find_caller_lex__ps('$?FILES');
-        # XXX HACK - NQPCursor vs Regex::Cursor
-        my $source_id := nqp::sha1(nqp::istype(self, NQPCursor) ??
-                    nqp::getattr_s(self, NQPCursor, '$!target') !!
-                    nqp::getattr(self, Regex::Cursor, '$!target')) ~
+        my $source_id := nqp::sha1(nqp::getattr_s(self, NQPCursor, '$!target')) ~
             '-' ~ ~nqp::time_n();
         my $*W := nqp::isnull($file) ??
             NQP::World.new(:handle($source_id)) !!
