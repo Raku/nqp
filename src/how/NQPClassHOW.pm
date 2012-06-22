@@ -126,6 +126,32 @@ knowhow NQPClassHOW {
     method set_default_parent($obj, $parent) {
         $!default_parent := $parent;
     }
+    
+    # Changes the object's parent. Conditions: it has exactly one parent, and that
+    # parent has no attributes, and nor does the new one.
+    method reparent($obj, $new_parent) {
+        if +@!parents != 1 {
+            nqp::die("Can only re-parent a class with exactly one parent");
+        }
+        for @!parents[0].HOW.mro(@!parents[0]) {
+            if +$_.HOW.attributes($_, :local) {
+                nqp::die("Can only re-parent a class whose parent has no attributes");
+            }
+        }
+        for $new_parent.HOW.mro($new_parent) {
+            if +$_.HOW.attributes($_, :local) {
+                nqp::die("Can only re-parent to a class with no attributes");
+            }
+        }
+        @!parents[0] := $new_parent;
+        @!mro := compute_c3_mro($obj);
+        self.publish_type_cache($obj);
+        self.publish_method_cache($obj);
+        self.publish_boolification_spec($obj);
+        self.publish_parrot_vtable_mapping($obj);
+		self.publish_parrot_vtablee_handler_mapping($obj);
+        1;
+    }
 
     method add_role($obj, $role) {
         for @!roles {
