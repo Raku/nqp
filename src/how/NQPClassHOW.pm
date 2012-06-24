@@ -47,6 +47,10 @@ knowhow NQPClassHOW {
     has $!trace;
     has $!trace_depth;
     
+    # Build plan.
+    has @!BUILDALLPLAN;
+    has @!BUILDPLAN;
+    
     my $archetypes := Archetypes.new( :nominal(1), :inheritable(1) );
     method archetypes() {
         $archetypes
@@ -71,16 +75,14 @@ knowhow NQPClassHOW {
     # to go with it, and return that.
     method new_type(:$name = '<anon>', :$repr = 'P6opaque') {
         my $metaclass := self.new(:name($name));
-        pir::set_who__0PP(
-            pir::repr_type_object_for__PPS($metaclass, $repr),
-            {});
+        nqp::setwho(nqp::newtype($metaclass, $repr), {});
     }
 
     method add_method($obj, $name, $code_obj) {
         if %!methods{$name} {
             nqp::die("This class already has a method named " ~ $name);
         }
-        if nqp::isnull($code_obj) || pir::isa($code_obj, 'Undef') {
+        if nqp::isnull($code_obj) || !nqp::defined($code_obj) {
             nqp::die("Cannot add a null method '$name' to class '$!name'");
         }
         pir::set_method_cache_authoritativeness__vPi($obj, 0);
@@ -127,6 +129,32 @@ knowhow NQPClassHOW {
     
     method set_default_parent($obj, $parent) {
         $!default_parent := $parent;
+    }
+    
+    # Changes the object's parent. Conditions: it has exactly one parent, and that
+    # parent has no attributes, and nor does the new one.
+    method reparent($obj, $new_parent) {
+        if +@!parents != 1 {
+            nqp::die("Can only re-parent a class with exactly one parent");
+        }
+        for @!parents[0].HOW.mro(@!parents[0]) {
+            if +$_.HOW.attributes($_, :local) {
+                nqp::die("Can only re-parent a class whose parent has no attributes");
+            }
+        }
+        for $new_parent.HOW.mro($new_parent) {
+            if +$_.HOW.attributes($_, :local) {
+                nqp::die("Can only re-parent to a class with no attributes");
+            }
+        }
+        @!parents[0] := $new_parent;
+        @!mro := compute_c3_mro($obj);
+        self.publish_type_cache($obj);
+        self.publish_method_cache($obj);
+        self.publish_boolification_spec($obj);
+        self.publish_parrot_vtable_mapping($obj);
+		self.publish_parrot_vtablee_handler_mapping($obj);
+        1;
     }
 
     method add_role($obj, $role) {
@@ -198,6 +226,9 @@ knowhow NQPClassHOW {
         # Install Parrot v-table mapping.
         self.publish_parrot_vtable_mapping($obj);
 		self.publish_parrot_vtablee_handler_mapping($obj);
+        
+        # Create BUILDPLAN.
+        self.create_BUILDPLAN($obj);
 
         $obj
     }
@@ -421,6 +452,77 @@ knowhow NQPClassHOW {
             pir::stable_publish_vtable_handler_mapping__vPP($obj, %mapping);
         }
     }
+    
+    # Creates the plan for building up the object. This works
+    # out what we'll need to do up front, so we can just zip
+    # through the "todo list" each time we need to make an object.
+    # The plan is an array of arrays. The first element of each
+    # nested array is an "op" representing the task to perform:
+    #   0 code = call specified BUILD method
+    #   1 class name attr_name = try to find initialization value
+    #   2 class attr_name code = call default value closure if needed
+    method create_BUILDPLAN($obj) {
+        # Get MRO, then work from least derived to most derived.
+        my @all_plan;
+        my @plan;
+        my @mro := self.mro($obj);
+        my $i := +@mro;
+        while $i > 0 {
+            # Get current class to consider and its attrs.
+            $i := $i - 1;
+            my $class := @mro[$i];
+            my @attrs := $class.HOW.attributes($class, :local(1));
+            
+            # Does it have its own BUILD?
+            my $build := $class.HOW.find_method($class, 'BUILD', :no_fallback(1));
+            if nqp::defined($build) {
+                # We'll call the custom one.
+                my $entry := [0, $build];
+                @all_plan[+@all_plan] := $entry;
+                if $i == 0 {
+                    @plan[+@plan] := $entry;
+                }
+            }
+            else {
+                # No custom BUILD. Rather than having an actual BUILD
+                # in Mu, we produce ops here per attribute that may
+                # need initializing.
+                for @attrs {
+                    my $attr_name := $_.name;
+                    my $name      := nqp::substr($attr_name, 2);
+                    my $entry     := [1, $class, $name, $attr_name];
+                    @all_plan[+@all_plan] := $entry;
+                    if $i == 0 {
+                        @plan[+@plan] := $entry;
+                    }
+                }
+            }
+            
+            # Check if there's any default values to put in place.
+            for @attrs {
+                if nqp::can($_, 'build') {
+                    my $default := $_.build;
+                    if nqp::defined($default) {
+                        my $entry := [2, $class, $_.name, $default];
+                        @all_plan[+@all_plan] := $entry;
+                        if $i == 0 {
+                            @plan[+@plan] := $entry;
+                        }
+                    }
+                }
+            }
+        }
+        @!BUILDPLAN := @plan;
+        @!BUILDALLPLAN := @all_plan;
+    }
+    
+    method BUILDPLAN($obj) {
+        @!BUILDPLAN
+    }
+    
+    method BUILDALLPLAN($obj) {
+        @!BUILDALLPLAN
+    }
 
     ##
     ## Introspecty
@@ -469,10 +571,19 @@ knowhow NQPClassHOW {
         $!trace_depth
     }
 
-    method attributes($obj, :$local!) {
+    method attributes($obj, :$local) {
         my @attrs;
-        for %!attributes {
-            @attrs.push($_.value);
+        if $local {
+            for %!attributes {
+                @attrs.push($_.value);
+            }
+        }
+        else {
+            for @!mro {
+                for $_.HOW.attributes($_, :local) {
+                    @attrs.push($_);
+                }
+            }
         }
         @attrs
     }
