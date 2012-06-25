@@ -572,7 +572,7 @@ class QAST::Compiler is HLL::Compiler {
 
     method regex_post($node) {
         return $*PASTCOMPILER.as_post($node) if $node ~~ PAST::Node;
-        my $rxtype := $node.rxtype() // 'concat';
+        my $rxtype := $node.rxtype() || 'concat';
         self."$rxtype"($node);
     }
 
@@ -827,8 +827,8 @@ class QAST::Compiler is HLL::Compiler {
         my $prefix    := self.unique('rxquant' ~ $backtrack);
         my $looplabel := self.post_new('Label', :result($prefix ~ '_loop'));
         my $donelabel := self.post_new('Label', :result($prefix ~ '_done'));
-        my $min       := $node.min || 0;
-        my $max       := $node.max // -1;
+        my $min       := $node.min;
+        my $max       := $node.max;
         my $needrep   := $min > 1 || $max > 1;
         my $needmark  := $needrep || $backtrack eq 'r';
 

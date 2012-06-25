@@ -101,12 +101,12 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method quantifier:sym<*>($/) {
-        my $qast := QAST::Regex.new( :rxtype<quant>, :node($/) );
+        my $qast := QAST::Regex.new( :rxtype<quant>, :min(0), :max(-1), :node($/) );
         make backmod($qast, $<backmod>);
     }
 
     method quantifier:sym<+>($/) {
-        my $qast := QAST::Regex.new( :rxtype<quant>, :min(1), :node($/) );
+        my $qast := QAST::Regex.new( :rxtype<quant>, :min(1), :max(-1), :node($/) );
         make backmod($qast, $<backmod>);
     }
 
@@ -117,7 +117,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method quantifier:sym<**>($/) {
         my $qast;
-        $qast := QAST::Regex.new( :rxtype<quant>, :min(+$<min>), :node($/) );
+        $qast := QAST::Regex.new( :rxtype<quant>, :min(+$<min>), :max(-1), :node($/) );
         if ! $<max> { $qast.max(+$<min>) }
         elsif $<max>[0] ne '*' { $qast.max(+$<max>[0]); }
         make backmod($qast, $<backmod>);
