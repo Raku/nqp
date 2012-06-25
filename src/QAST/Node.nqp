@@ -2,7 +2,7 @@ use NQPHLL;
 
 class QAST::Node is NQPCapture {
     has $!node;
-    has str $!name;
+    has $!name;
     has str $!named;
     has $!returns;
     has int $!arity;
@@ -20,7 +20,7 @@ class QAST::Node is NQPCapture {
     }
 
     method node(*@value)       { $!node := @value[0] if @value; $!node }
-    method name(*@value)       { $!name := @value[0] if @value; $!name || "" }
+    method name(*@value)       { $!name := @value[0] if @value; $!name }
     method named(*@value)      { $!named := @value[0] if @value; $!named || "" }
     method returns(*@value)    { $!returns := @value[0] if @value; $!returns }
     method arity(*@value)      { $!arity := @value[0] if @value; $!arity }
