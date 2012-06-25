@@ -83,6 +83,7 @@ QAST_SOURCES = \
   src/QAST/Stmts.nqp \
   src/QAST/Stmt.nqp \
   src/QAST/Block.nqp \
+  src/QAST/CompUnit.nqp \
   src/QAST/Operations.nqp \
   src/QAST/Compiler.nqp \
 
