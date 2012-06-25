@@ -33,7 +33,7 @@ class HLL::Compiler {
         @!stages     := nqp::split(' ', 'parse past post pir evalpmc');
         
         # Command options and usage.
-        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config stagestats ll-exception rxtrace nqpevent=s profile profile-compile');
+        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config verbose-config|V stagestats ll-exception rxtrace nqpevent=s profile profile-compile');
         $!usage := "This compiler is based on HLL::Compiler.\n\nOptions:\n";
         for @!cmdoptions {
             $!usage := $!usage ~ "    $_\n";
@@ -295,7 +295,8 @@ class HLL::Compiler {
 
     method command_eval(*@a, *%adverbs) {
         self.version              if %adverbs<version> || %adverbs<v>;
-        self.show-config          if %adverbs<show-config>;
+        self.verbose-config       if %adverbs<verbose-config> || %adverbs<V>
+                                     || %adverbs<show-config>;
         self.nqpevent(%adverbs<nqpevent>) if %adverbs<nqpevent>;
 
         my $result;
@@ -509,7 +510,9 @@ class HLL::Compiler {
         nqp::exit(0);
     }
 
-    method show-config() {
+    method show-config() { self.verbose-config(); }
+
+    method verbose-config() {
         for %parrot_config {
             nqp::say('parrot::' ~ $_.key ~ '=' ~ $_.value);
         }
