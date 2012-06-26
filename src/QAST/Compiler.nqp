@@ -163,6 +163,23 @@ class QAST::Compiler is HLL::Compiler {
 
     proto method as_post(*@args, *%_) { * }
     
+    multi method as_post(QAST::CompUnit $cu) {
+        # Should have a single child which is the outer block.
+        if +@($cu) != 1 || !nqp::istype($cu[0], QAST::Block) {
+            nqp::die("QAST::CompUnit should have one child that is a QAST::Block");
+        }
+
+        # Compile the block.
+        my $block_post := self.as_post($cu[0]);
+
+        # Apply HLL if any.
+        if $cu.hll {
+            $block_post.hll($cu.hll);
+        }
+
+        $block_post
+    }
+
     multi method as_post(QAST::Block $node) {
         # Build the POST::Sub.
         my $sub;
