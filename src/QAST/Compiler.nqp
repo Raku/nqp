@@ -176,6 +176,18 @@ class QAST::Compiler is HLL::Compiler {
         if $cu.hll {
             $block_post.hll($cu.hll);
         }
+        
+        # Compile and include load-time logic, if any.
+        if nqp::defined($cu.load) {
+            my $load_post := self.as_post(QAST::Block.new($cu.load));
+            $load_post.pirflags(':load');
+        }
+        
+        # Compile and include main-time logic, if any.
+        if nqp::defined($cu.main) {
+            my $main_post := self.as_post(QAST::Block.new($cu.main));
+            $main_post.pirflags(':main');
+        }
 
         $block_post
     }
