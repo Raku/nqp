@@ -491,7 +491,7 @@ grammar NQP::Grammar is HLL::Grammar {
         ':' <param_var>
     }
 
-    rule default_value { '=' <EXPR('i=')> }
+    rule default_value { <?> '=' <EXPR('i=')> }
 
     rule trait { <trait_mod> }
 
@@ -613,7 +613,7 @@ grammar NQP::Grammar is HLL::Grammar {
     token circumfix:sym<{ }> { <?[{]> <pblock> }
     token circumfix:sym<sigil> { <sigil> '(' ~ ')' <semilist> }
 
-    rule semilist { <statement> }
+    rule semilist { <?> <statement> }
 
     ## Operators
 
