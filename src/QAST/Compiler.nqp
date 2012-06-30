@@ -361,6 +361,21 @@ class QAST::Compiler is HLL::Compiler {
         QAST::Operations.compile_op(self, '', $node)
     }
     
+    multi method as_post(QAST::VM $node) {
+        if $node.supports('parrot') {
+            return self.as_post($node.alternative('parrot'))
+        }
+        elsif $node.supports('pirop') {
+            nqp::die("QAST::VM pirop NYI");
+        }
+        elsif $node.supports('pir') {
+            nqp::die("QAST::VM pir NYI");
+        }
+        else {
+            nqp::die("To compile on the Parrot backend, QAST::VM must have an alternative 'paoort', 'pirop' or 'pir'");
+        }
+    }
+    
     multi method as_post(QAST::Var $node) {
         my $scope := $node.scope;
         my $decl  := $node.decl;
