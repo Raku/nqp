@@ -1,6 +1,6 @@
 use QAST;
 
-plan(59);
+plan(60);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -882,3 +882,11 @@ is_qast(
         'call with named flattened argument works');
 }
 
+is_qast(
+    QAST::CompUnit.new(
+        QAST::Block.new(
+            QAST::SVal.new( :value('La Trappe') )
+        )
+    ),
+    'La Trappe',
+    'QAST::CompUnit compiles the top level block inside of it');
