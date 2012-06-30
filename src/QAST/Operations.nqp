@@ -33,13 +33,19 @@ class QAST::Operations {
     
     # Adds a core op that maps to a PIR op.
     method add_core_pirop_mapping($op, $pirop, $sig) {
-        %core_ops{$op} := pirop_mapper($pirop, $sig);
+        my $pirop_mapper := pirop_mapper($pirop, $sig);
+        %core_ops{$op} := -> $qastcomp, $op {
+            $pirop_mapper($qastcomp, $op.op, $op.list)
+        };
     }
     
     # Adds a HLL op that maps to a PIR op.
     method add_hll_pirop_mapping($hll, $op, $pirop, $sig) {
+        my $pirop_mapper := pirop_mapper($pirop, $sig);
         %hll_ops{$hll} := {} unless %hll_ops{$hll};
-        %hll_ops{$hll}{$op} := pirop_mapper($pirop, $sig);
+        %hll_ops{$hll}{$op} := -> $qastcomp, $op {
+            $pirop_mapper($qastcomp, $op.op, $op.list)
+        };
     }
     
     # Returns a mapper closure for turning an operation into a PIR op.
@@ -55,7 +61,7 @@ class QAST::Operations {
         elsif $ret_type eq 'I' { $ret_meth := "fresh_i"; }
         elsif $ret_type eq 'N' { $ret_meth := "fresh_n"; }
         
-        -> $qastcomp, $op {
+        -> $qastcomp, $op_name, @op_args {
             my $ops := $qastcomp.post_new('Ops');
             
             # If we need a result register, create it and make it the
@@ -68,9 +74,9 @@ class QAST::Operations {
             }
             
             # Build the arguments list.
-            my $num_args := +$op.list;
+            my $num_args := +@op_args;
             if +@arg_types != $num_args {
-                pir::die("Operation '" ~ $op.op ~ "' requires " ~
+                pir::die("Operation '$op_name' requires " ~
                     +@arg_types ~ " operands, but got $num_args");
             }
             my $i := 0;
@@ -78,19 +84,19 @@ class QAST::Operations {
             my $aggregate := '';
             while $i < $num_args {
                 if @arg_types[$i] eq 'Q' {
-                    my $post := $qastcomp.coerce($qastcomp.as_post($op.list[$i]), 'p');
+                    my $post := $qastcomp.coerce($qastcomp.as_post(@op_args[$i]), 'p');
                     $ops.push($post);
                     $aggregate := $post.result;
                     $last_argtype_was_Q := 1;
                 }
                 elsif $last_argtype_was_Q {
-                    my $post := $qastcomp.coerce($qastcomp.as_post($op.list[$i]), @arg_types[$i]);
+                    my $post := $qastcomp.coerce($qastcomp.as_post(@op_args[$i]), @arg_types[$i]);
                     $ops.push($post);
                     @args.push("$aggregate[" ~ $post.result ~ "]");
                     $last_argtype_was_Q := 0;
                 }
                 else {
-                    my $post := $qastcomp.coerce($qastcomp.as_post($op.list[$i]), @arg_types[$i]);
+                    my $post := $qastcomp.coerce($qastcomp.as_post(@op_args[$i]), @arg_types[$i]);
                     $ops.push($post);
                     @args.push($post.result);
                 }
