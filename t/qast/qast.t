@@ -1,6 +1,6 @@
 use QAST;
 
-plan(64);
+plan(65);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -929,3 +929,13 @@ is_qast(
     ),
     42,
     'QAST::VM picks parrot alternative and ignores others');
+
+is_qast(
+    QAST::Block.new(
+        QAST::VM.new(
+            pir => ".return ('Leffe')",
+        ),
+        QAST::SVal.new( :value('Fosters') )
+    ),
+    'Leffe',
+    'QAST::VM with pir works');
