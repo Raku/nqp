@@ -369,7 +369,10 @@ class QAST::Compiler is HLL::Compiler {
             nqp::die("QAST::VM pirop NYI");
         }
         elsif $node.supports('pir') {
-            nqp::die("QAST::VM pir NYI");
+            my $ops := self.post_new('Ops');
+            my $pir := $node.alternative('pir');
+            $ops.push_pirop('inline', inline => $pir);
+            return $ops;
         }
         else {
             nqp::die("To compile on the Parrot backend, QAST::VM must have an alternative 'paoort', 'pirop' or 'pir'");
