@@ -30,10 +30,10 @@ class HLL::Compiler {
 
     method BUILD() {
         # Default stages.
-        @!stages     := nqp::split(' ', 'parse past post pir evalpmc');
+        @!stages     := nqp::split(' ', 'start parse past post pir evalpmc');
         
         # Command options and usage.
-        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config verbose-config|V stagestats ll-exception rxtrace nqpevent=s profile profile-compile');
+        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile profile-compile');
         $!usage := "This compiler is based on HLL::Compiler.\n\nOptions:\n";
         for @!cmdoptions {
             $!usage := $!usage ~ "    $_\n";
@@ -422,13 +422,19 @@ class HLL::Compiler {
             my $timestamp := nqp::time_n();
             $result := self."$_"($result, |%adverbs);
             my $diff := nqp::time_n() - $timestamp;
-            if %adverbs<stagestats> {
-                my $difffmt := pir::sprintf__SsP("%.3f", [$diff]);
-                $stderr.print("Stage $_: $difffmt\n");
+            if pir::defined__IP(%adverbs<stagestats>) {
+                $stderr.print(nqp::sprintf("Stage %-11s: %7.3f", [$_, $diff]));
+                $stderr.print(nqp::sprintf(" %11d %11d %9d %9d", self.vmstat()))
+                    if %adverbs<stagestats> > 1;
+                $stderr.print("\n");
             }
             last if $_ eq $target;
         }
         return $result;
+    }
+
+    method start($source, *%adverbs) {
+        $source;
     }
 
     method parse($source, *%adverbs) {
@@ -520,6 +526,14 @@ class HLL::Compiler {
             nqp::say($!language ~ '::' ~ $_.key ~ '=' ~ $_.value);
         }
         nqp::exit(0);
+    }
+
+    method vmstat() {
+        [ pir::interpinfo__Ii(pir::const::INTERPINFO_TOTAL_MEM_ALLOC),
+          pir::interpinfo__Ii(pir::const::INTERPINFO_TOTAL_MEM_USED),
+          pir::interpinfo__Ii(pir::const::INTERPINFO_TOTAL_PMCS),
+          pir::interpinfo__Ii(pir::const::INTERPINFO_ACTIVE_PMCS),
+        ];
     }
 
     method nqpevent($spec?) {
