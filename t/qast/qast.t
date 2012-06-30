@@ -1,6 +1,6 @@
 use QAST;
 
-plan(63);
+plan(64);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -919,3 +919,13 @@ test_qast_result(
         ok(SCTest.post, 'post-deserialize OK');
         ok(SCTest.main, 'mainline OK');
     });
+
+is_qast(
+    QAST::Block.new(
+        QAST::VM.new(
+            parrot => QAST::IVal.new( :value(42) ),
+            unknown => QAST::IVal.new( :value(69) )
+        )
+    ),
+    42,
+    'QAST::VM picks parrot alternative and ignores others');
