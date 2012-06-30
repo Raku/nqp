@@ -177,16 +177,50 @@ class QAST::Compiler is HLL::Compiler {
             $block_post.hll($cu.hll);
         }
         
+        # If we are in compilation mode, or have pre-deserialization or
+        # post-deserialization tasks, handle those. Overall, the process
+        # is to desugar this into simpler QAST nodes, then compile those.
+        my $comp_mode := $cu.compilation_mode;
+        my @pre_des   := $cu.pre_deserialize;
+        my @post_des  := $cu.post_deserialize;
+        if $comp_mode || @pre_des || @post_des {
+            # Create a block into which we'll install all of the other
+            # pieces.
+            my $block := QAST::Block.new( :blocktype('raw') );
+            
+            # Add pre-deserialization tasks, each as a QAST::Stmt.
+            for @pre_des {
+                $block.push(QAST::Stmt.new($_));
+            }
+            
+            # If we need to do deserializatin, emit code for that.
+            if $comp_mode {
+                $block.push(self.deserialization_code($cu.sc()));
+            }
+            
+            # Add post-deserialization tasks.
+            for @post_des {
+                $block.push(QAST::Stmt.new($_));
+            }
+            
+            # Compile to POST and add in the flags to load it.
+            my $sc_post := self.as_post($block);
+            $sc_post.pirflags(':load :init');
+            $block_post.push($sc_post);
+        }
+        
         # Compile and include load-time logic, if any.
         if nqp::defined($cu.load) {
-            my $load_post := self.as_post(QAST::Block.new($cu.load));
+            my $load_post := self.as_post(QAST::Block.new( :blocktype('raw'), $cu.load ));
             $load_post.pirflags(':load');
+            $block_post.push($load_post);
         }
         
         # Compile and include main-time logic, if any.
         if nqp::defined($cu.main) {
-            my $main_post := self.as_post(QAST::Block.new($cu.main));
+            my $main_post := self.as_post(QAST::Block.new( :blocktype('raw'), $cu.main ));
             $main_post.pirflags(':main');
+            $block_post.push($main_post);
         }
 
         $block_post
@@ -288,7 +322,7 @@ class QAST::Compiler is HLL::Compiler {
             $ops.push_pirop('call', $breg, :result($rreg));
             $ops.result($rreg);
         }
-        else {
+        elsif $node.blocktype eq 'declaration' {
             # Get the block and newclosure it.
             my $breg := $*REGALLOC.fresh_p();
             $ops.push_pirop(".const 'Sub' $breg = '" ~ $node.cuid() ~ "'");
