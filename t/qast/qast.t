@@ -1,6 +1,6 @@
 use QAST;
 
-plan(65);
+plan(66);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -939,3 +939,12 @@ is_qast(
     ),
     'Leffe',
     'QAST::VM with pir works');
+
+is_qast(
+    QAST::Block.new(
+        QAST::VM.new(
+            pir => "%r = box 'set'",
+        )
+    ),
+    'set',
+    'QAST::VM with pir and %r works');
