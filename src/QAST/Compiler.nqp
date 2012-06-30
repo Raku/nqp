@@ -371,7 +371,14 @@ class QAST::Compiler is HLL::Compiler {
         elsif $node.supports('pir') {
             my $ops := self.post_new('Ops');
             my $pir := $node.alternative('pir');
-            $ops.push_pirop('inline', inline => $pir);
+            if nqp::index($pir, '%r') >= 0 {
+                my $reg := $*REGALLOC.fresh_p();
+                $ops.push_pirop('inline', inline => $pir, result => $reg);
+                $ops.result($reg);
+            }
+            else {
+                $ops.push_pirop('inline', inline => $pir);
+            }
             return $ops;
         }
         else {
