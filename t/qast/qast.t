@@ -1,6 +1,6 @@
 use QAST;
 
-plan(60);
+plan(63);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -890,3 +890,32 @@ is_qast(
     ),
     'La Trappe',
     'QAST::CompUnit compiles the top level block inside of it');
+
+class SCTest {
+    my $pre := 0;
+    my $post := 0;
+    my $main := 0;
+    method set_pre() { $pre := 1; }
+    method set_post() { if $pre { $post := 1; } }
+    method set_main() { if $pre && $post { $main := 1 } }
+    method pre() { $pre }
+    method post() { $post }
+    method main() { $main }
+}
+test_qast_result(
+    QAST::CompUnit.new(
+        :pre_deserialize([
+            QAST::Op.new( :op('callmethod'), :name('set_pre'), QAST::WVal.new( :value(SCTest) ) )
+        ]),
+        :post_deserialize([
+            QAST::Op.new( :op('callmethod'), :name('set_post'), QAST::WVal.new( :value(SCTest) ) )
+        ]),
+        QAST::Block.new(
+            QAST::Op.new( :op('callmethod'), :name('set_main'), QAST::WVal.new( :value(SCTest) ) )
+        )
+    ),
+    -> $r {
+        ok(SCTest.pre, 'pre-deserialize OK');
+        ok(SCTest.post, 'post-deserialize OK');
+        ok(SCTest.main, 'mainline OK');
+    });
