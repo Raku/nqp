@@ -366,7 +366,7 @@ class QAST::Compiler is HLL::Compiler {
             return self.as_post($node.alternative('parrot'))
         }
         elsif $node.supports('pirop') {
-            nqp::die("QAST::VM pirop NYI");
+            QAST::Operations.compile_pirop(self, $node.alternative('pirop'), $node.list)
         }
         elsif $node.supports('pir') {
             my $ops := self.post_new('Ops');

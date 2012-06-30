@@ -6,6 +6,9 @@ class QAST::Operations {
     # Hash of hash of code.
     my %hll_ops;
     
+    # Cached pirop compilers.
+    my %cached_pirops;
+    
     # Compiles an operation to POST.
     method compile_op($qastcomp, $hll, $op) {
         my $name := $op.op;
@@ -18,6 +21,17 @@ class QAST::Operations {
             return $mapper($qastcomp, $op);
         }
         pir::die("No registered operation handler for '$name'");
+    }
+    
+    method compile_pirop($qastcomp, $op_name, @op_args) {
+        if nqp::index($op_name, ' ') {
+            $op_name := nqp::join('__', nqp::split(' ', $op_name));
+        }
+        unless nqp::existskey(%cached_pirops, $op_name) {
+            my @pieces := nqp::split('__', $op_name);
+            %cached_pirops{$op_name} := pirop_mapper(@pieces[0], @pieces[1]);
+        }
+        %cached_pirops{$op_name}($qastcomp, $op_name, @op_args)
     }
     
     # Adds a core op handler.
