@@ -496,7 +496,7 @@ class HLL::Compiler {
             $dumper($obj, $name)
         }
         else {
-            _dumper($obj, $name)
+            (Q:PIR { %r = get_root_global ['parrot'], '_dumper' })($obj, $name)
         }
     }
 
