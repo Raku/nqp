@@ -418,6 +418,7 @@ class HLL::Compiler {
         my $target := nqp::lc(%adverbs<target>);
         my $result := $source;
         my $stderr := pir::getinterp().stderr_handle;
+        my $stdin  := pir::getinterp().stdin_handle;
         for self.stages() {
             my $timestamp := nqp::time_n();
             $result := self."$_"($result, |%adverbs);
@@ -427,6 +428,10 @@ class HLL::Compiler {
                 $stderr.print(nqp::sprintf(" %11d %11d %9d %9d", self.vmstat()))
                     if %adverbs<stagestats> > 1;
                 $stderr.print("\n");
+                if %adverbs<stagestats> > 2 {
+                   $stderr.print("continue> ");
+                   $stdin.readline();
+                }
             }
             last if $_ eq $target;
         }
