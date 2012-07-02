@@ -39,7 +39,13 @@ knowhow NQPModuleHOW {
     }
 
     method compose($obj) {
+        pir::publish_method_cache($obj, my %empty);
+        pir::set_method_cache_authoritativeness__0Pi($obj, 1);
         $!composed := 1;
+    }
+    
+    method find_method($obj, $name, *%opts) {
+        nqp::null()
     }
 
     method name($obj) {

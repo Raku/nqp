@@ -30,10 +30,10 @@ class HLL::Compiler {
 
     method BUILD() {
         # Default stages.
-        @!stages     := nqp::split(' ', 'parse past post pir evalpmc');
+        @!stages     := nqp::split(' ', 'start parse past post pir evalpmc');
         
         # Command options and usage.
-        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config stagestats ll-exception rxtrace nqpevent=s profile profile-compile');
+        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile profile-compile');
         $!usage := "This compiler is based on HLL::Compiler.\n\nOptions:\n";
         for @!cmdoptions {
             $!usage := $!usage ~ "    $_\n";
@@ -295,7 +295,8 @@ class HLL::Compiler {
 
     method command_eval(*@a, *%adverbs) {
         self.version              if %adverbs<version> || %adverbs<v>;
-        self.show-config          if %adverbs<show-config>;
+        self.verbose-config       if %adverbs<verbose-config> || %adverbs<V>
+                                     || %adverbs<show-config>;
         self.nqpevent(%adverbs<nqpevent>) if %adverbs<nqpevent>;
 
         my $result;
@@ -417,17 +418,28 @@ class HLL::Compiler {
         my $target := nqp::lc(%adverbs<target>);
         my $result := $source;
         my $stderr := pir::getinterp().stderr_handle;
+        my $stdin  := pir::getinterp().stdin_handle;
         for self.stages() {
             my $timestamp := nqp::time_n();
             $result := self."$_"($result, |%adverbs);
             my $diff := nqp::time_n() - $timestamp;
-            if %adverbs<stagestats> {
-                my $difffmt := pir::sprintf__SsP("%.3f", [$diff]);
-                $stderr.print("Stage $_: $difffmt\n");
+            if pir::defined__IP(%adverbs<stagestats>) {
+                $stderr.print(nqp::sprintf("Stage %-11s: %7.3f", [$_, $diff]));
+                $stderr.print(nqp::sprintf(" %11d %11d %9d %9d", self.vmstat()))
+                    if %adverbs<stagestats> > 1;
+                $stderr.print("\n");
+                if %adverbs<stagestats> > 2 {
+                   $stderr.print("continue> ");
+                   $stdin.readline();
+                }
             }
             last if $_ eq $target;
         }
         return $result;
+    }
+
+    method start($source, *%adverbs) {
+        $source;
     }
 
     method parse($source, *%adverbs) {
@@ -491,7 +503,7 @@ class HLL::Compiler {
             $dumper($obj, $name)
         }
         else {
-            _dumper($obj, $name)
+            (Q:PIR { %r = get_root_global ['parrot'], '_dumper' })($obj, $name)
         }
     }
 
@@ -511,7 +523,9 @@ class HLL::Compiler {
         nqp::exit(0);
     }
 
-    method show-config() {
+    method show-config() { self.verbose-config(); }
+
+    method verbose-config() {
         for %parrot_config {
             nqp::say('parrot::' ~ $_.key ~ '=' ~ $_.value);
         }
@@ -519,6 +533,14 @@ class HLL::Compiler {
             nqp::say($!language ~ '::' ~ $_.key ~ '=' ~ $_.value);
         }
         nqp::exit(0);
+    }
+
+    method vmstat() {
+        [ pir::interpinfo__Ii(pir::const::INTERPINFO_TOTAL_MEM_ALLOC),
+          pir::interpinfo__Ii(pir::const::INTERPINFO_TOTAL_MEM_USED),
+          pir::interpinfo__Ii(pir::const::INTERPINFO_TOTAL_PMCS),
+          pir::interpinfo__Ii(pir::const::INTERPINFO_ACTIVE_PMCS),
+        ];
     }
 
     method nqpevent($spec?) {
