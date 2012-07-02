@@ -57,6 +57,7 @@ class QAST::Compiler is HLL::Compiler {
         has %!lexical_regs;     # Mapping of lexical names to registers
         has %!reg_types;        # Mapping of all registers to types
         has int $!param_idx;    # Current lexical parameter index
+        has @!loadlibs;         # Libraries to load for the target POST::Block.
         
         method new($qast, $outer) {
             my $obj := nqp::create(self);
@@ -125,6 +126,15 @@ class QAST::Compiler is HLL::Compiler {
         method lexical_type($name) { %!lexical_types{$name} }
         method lexical_type_long($name) { %longnames{%!lexical_types{$name}} }
         method reg_type($name) { %!reg_types{$name} }
+        
+        method add_loadlibs(@libs) {
+            for @libs {
+                @!loadlibs[+@!loadlibs] := $_;
+            }
+        }
+        method loadlibs() {
+            @!loadlibs
+        }
     }
     
     our $serno;
@@ -299,6 +309,10 @@ class QAST::Compiler is HLL::Compiler {
             else {
                 $sub.pirflags(':anon');
             }
+            
+            # Set loadlibs if applicable.
+            my @loadlibs := $block.loadlibs();
+            $sub.loadlibs(@loadlibs) if @loadlibs;
         }
         
         # If we are at the top level, we'll immediately return.
@@ -381,8 +395,11 @@ class QAST::Compiler is HLL::Compiler {
             }
             return $ops;
         }
+        elsif $node.supports('loadlibs') {
+            $*BLOCK.add_loadlibs($node.alternative('loadlibs'));
+        }
         else {
-            nqp::die("To compile on the Parrot backend, QAST::VM must have an alternative 'paoort', 'pirop' or 'pir'");
+            nqp::die("To compile on the Parrot backend, QAST::VM must have an alternative 'parrot', 'pirop', 'pir' or 'loadlibs'");
         }
     }
     
