@@ -1113,7 +1113,14 @@ class QAST::Compiler is HLL::Compiler {
     multi method as_post($unknown) {
         # XXX pir::typeof for now to catch accidental PAST nodes while we
         # transition stuff to 6model fully.
-        nqp::die("Unknown QAST node type " ~ pir::typeof__SP($unknown));
+        if $unknown ~~ PAST::Op {
+            nqp::die("Unknown QAST node type " ~ pir::typeof__SP($unknown) ~
+                " (name = '" ~ $unknown.name() ~
+                "', pirop = '" ~ $unknown.pirop ~ "')");
+        }
+        else {
+            nqp::die("Unknown QAST node type " ~ pir::typeof__SP($unknown));
+        }
     }
 }
 
