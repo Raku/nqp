@@ -329,7 +329,8 @@ class QAST::Compiler is HLL::Compiler {
         # immediate.
         my $ops := self.post_new('Ops');
         $ops.push($sub);
-        if $node.blocktype eq 'immediate' {
+        my $blocktype := $node.blocktype;
+        if $blocktype eq 'immediate' {
             # Look up and capture the block.
             my $breg := $*REGALLOC.fresh_p();
             $ops.push_pirop(".const 'Sub' $breg = '" ~ $node.cuid() ~ "'");
@@ -341,7 +342,7 @@ class QAST::Compiler is HLL::Compiler {
             $ops.push_pirop('call', $breg, :result($rreg));
             $ops.result($rreg);
         }
-        elsif $node.blocktype eq 'declaration' {
+        elsif $blocktype eq 'declaration' || $blocktype eq '' {
             # Get the block and newclosure it.
             my $breg := $*REGALLOC.fresh_p();
             $ops.push_pirop(".const 'Sub' $breg = '" ~ $node.cuid() ~ "'");
