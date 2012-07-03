@@ -235,6 +235,11 @@ class QAST::Compiler is HLL::Compiler {
 
         $block_post
     }
+    
+    method deserialization_code($sc) {
+        # XXX TODO: serialization context handling
+        QAST::Stmt.new()
+    }
 
     multi method as_post(QAST::Block $node) {
         # Build the POST::Sub.
