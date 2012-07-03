@@ -77,6 +77,7 @@ QAST_SOURCES = \
   src/QAST/SVal.nqp \
   src/QAST/BVal.nqp \
   src/QAST/WVal.nqp \
+  src/QAST/Want.nqp \
   src/QAST/Var.nqp \
   src/QAST/Op.nqp \
   src/QAST/VM.nqp \

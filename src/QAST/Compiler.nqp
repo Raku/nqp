@@ -528,6 +528,11 @@ class QAST::Compiler is HLL::Compiler {
         self.as_post($node)
     }
     
+    multi method as_post(QAST::Want $node) {
+        # If we're not in a coercive context, take the default.
+        self.as_post($node[0])
+    }
+    
     multi method as_post(QAST::IVal $node) {
         self.post_new('Ops', :result(~$node.value))
     }
