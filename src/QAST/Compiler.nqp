@@ -397,6 +397,7 @@ class QAST::Compiler is HLL::Compiler {
         }
         elsif $node.supports('loadlibs') {
             $*BLOCK.add_loadlibs($node.alternative('loadlibs'));
+            self.post_new('Ops');
         }
         else {
             nqp::die("To compile on the Parrot backend, QAST::VM must have an alternative 'parrot', 'pirop', 'pir' or 'loadlibs'");
