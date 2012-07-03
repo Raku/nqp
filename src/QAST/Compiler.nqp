@@ -145,6 +145,7 @@ class QAST::Compiler is HLL::Compiler {
             unless null $P0 goto have_qastcomp
             $P0 = find_lex '$?CLASS'
             set_root_global ['parrot';'QAST'], 'Compiler', $P0
+            compreg 'QAST', $P0
           have_qastcomp:
         };
     }
@@ -1134,5 +1135,7 @@ class QAST::Compiler is HLL::Compiler {
             nqp::die("Unknown QAST node type " ~ pir::typeof__SP($unknown));
         }
     }
+    
+    method operations() { QAST::Operations }
 }
 
