@@ -187,6 +187,48 @@ QAST::Operations.add_core_op('hash', -> $qastcomp, $op {
     $ops
 });
 
+# Chaining.
+QAST::Operations.add_core_op('chain', -> $qastcomp, $op {
+    # First, we build up the list of nodes in the chain
+    my @clist;
+    my $cpast := $op;
+    while $cpast ~~ QAST::Op && $cpast.op eq 'chain' {
+        nqp::push(@clist, $cpast);
+        $cpast := $cpast[0];
+    }
+    
+    my $ops := $qastcomp.post_new('Ops', :result($*REGALLOC.fresh_p()));
+    my $endlabel := $qastcomp.post_new('Label',
+        :name($qastcomp.unique('chain_end_')));
+    
+    $cpast := nqp::pop(@clist);
+    my $apast := $cpast[0];
+    my $apost := $qastcomp.coerce($qastcomp.as_post($apast), 'P');
+    $ops.push($apost);
+    
+    my $more := 1;
+    while $more {
+        my $bpast := $cpast[1];
+        my $bpost := $qastcomp.coerce($qastcomp.as_post($bpast), 'P');
+        $ops.push($bpost);
+        
+        my $name := $qastcomp.escape($cpast.name());
+        $ops.push_pirop('call', $name, $apost, $bpost, :result($ops));
+        
+        if @clist {
+            $ops.push_pirop('unless', $ops, $endlabel);
+            $cpast := nqp::pop(@clist);
+            $apost := $bpost;
+        }
+        else {
+            $more := 0;
+        }  
+    }
+    
+    $ops.push($endlabel);
+    $ops
+});
+
 # Conditionals.
 for <if unless> -> $op_name {
     QAST::Operations.add_core_op($op_name, -> $qastcomp, $op {
