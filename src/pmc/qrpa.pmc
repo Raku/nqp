@@ -49,6 +49,7 @@ pmclass QRPA
         if (elems > 0) {
             qrpa1->slots = mem_gc_allocate_n_typed(INTERP, elems, PMC *);
             qrpa1->elems = elems;
+            qrpa1->ssize = elems;
             mem_copy_n_typed(qrpa1->slots, qrpa0->slots + qrpa0->start,
                 elems, PMC *);
             PObj_custom_mark_destroy_SETALL(dest);
