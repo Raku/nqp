@@ -218,6 +218,12 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
                         cur_init_slot++;
                     }
                 }
+                else if(spec.can_box & STORAGE_SPEC_CAN_BOX_STR) {
+                    /* It's a string of some kind.  */
+                    repr_data->num_child_objs++;
+                    repr_data->attribute_locations[i] = (cur_obj_attr++ << CSTRUCT_ATTR_SHIFT) | CSTRUCT_ATTR_STRING;
+                    repr_data->member_types[i] = type;
+                }
                 else if(type_id == get_ca_repr_id()) {
                     /* It's a CArray of some kind.  */
                     repr_data->num_child_objs++;
@@ -356,7 +362,6 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
     obj->common.stable = st->stable_pmc;
     obj->common.sc = NULL;
     obj->body.child_objs = NULL;
-    obj->body.child_strs = NULL;
 
     /* Allocate child obj array. */
     if(repr_data->num_child_objs > 0) {
@@ -365,8 +370,6 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
         memset(obj->body.child_objs, 0, bytes);
     }
 
-    /* XXX allocate child str array if needed. */
-    
     return wrap_object_func(interp, obj);
 }
 
@@ -396,7 +399,7 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     CStructBody *src_body = (CStructBody *)src;
     CStructBody *dest_body = (CStructBody *)dest;
     /* XXX todo */
-    /* XXX also need to shallow copy the obj and str arrays */
+    /* XXX also need to shallow copy the obj array */
 }
 
 /* Helper for complaining about attribute access errors. */
@@ -426,35 +429,42 @@ static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
     slot = hint >= 0 ? hint :
         try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
-        INTVAL placement = repr_data->attribute_locations[slot] & CSTRUCT_ATTR_MASK;
+        INTVAL type      = repr_data->attribute_locations[slot] & CSTRUCT_ATTR_MASK;
         INTVAL real_slot = repr_data->attribute_locations[slot] >> CSTRUCT_ATTR_SHIFT;
 
-        if(placement == CSTRUCT_ATTR_IN_STRUCT)
+        if(type == CSTRUCT_ATTR_IN_STRUCT)
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                     "CStruct Can't perform boxed get on flattened attributes yet");
         else {
             PMC *obj = body->child_objs[real_slot];
-            PMC *type = repr_data->member_types[slot];
+            PMC *typeobj = repr_data->member_types[slot];
 
             if(!obj) {
                 void *cobj = get_ptr_at_offset(body->cstruct, repr_data->struct_offsets[slot]);
                 if(cobj) {
-                    INTVAL id = REPR(type)->ID;
-                    if(id == get_ca_repr_id()) {
-                        obj = make_carray_result(interp, type, cobj);
-                        body->child_objs[real_slot] = obj;
+                    if(type == CSTRUCT_ATTR_CARRAY) {
+                        obj = make_carray_result(interp, typeobj, cobj);
                     }
-                    else if(id == get_cs_repr_id()) {
-                        obj = make_cstruct_result(interp, type, cobj);
-                        body->child_objs[real_slot] = obj;
+                    else if(type == CSTRUCT_ATTR_CSTRUCT) {
+                        obj = make_cstruct_result(interp, typeobj, cobj);
                     }
-                    else if(id == get_cp_repr_id()) {
-                        obj = make_cpointer_result(interp, type, cobj);
-                        body->child_objs[real_slot] = obj;
+                    else if(type == CSTRUCT_ATTR_CPTR) {
+                        obj = make_cpointer_result(interp, typeobj, cobj);
                     }
+                    else if(type == CSTRUCT_ATTR_STRING) {
+                        char *cstr = (char *) cobj;
+                        STRING *str  = Parrot_str_new_init(interp, cstr, strlen(cstr), Parrot_utf8_encoding_ptr, 0);
+
+                        obj  = REPR(typeobj)->allocate(interp, STABLE(typeobj));
+                        REPR(obj)->initialize(interp, STABLE(obj), OBJECT_BODY(obj));
+                        REPR(obj)->box_funcs->set_str(interp, STABLE(obj), OBJECT_BODY(obj), str);
+                        PARROT_GC_WRITE_BARRIER(interp, obj);
+                    }
+
+                    body->child_objs[real_slot] = obj;
                 }
                 else {
-                    obj = type;
+                    obj = typeobj;
                 }
             }
             return obj;
@@ -497,24 +507,27 @@ static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                     "CStruct Can't perform boxed bind on flattened attributes yet");
         else {
-            INTVAL placement = repr_data->attribute_locations[slot] & CSTRUCT_ATTR_MASK;
+            INTVAL type = repr_data->attribute_locations[slot] & CSTRUCT_ATTR_MASK;
             INTVAL real_slot = repr_data->attribute_locations[slot] >> CSTRUCT_ATTR_SHIFT;
 
             if(IS_CONCRETE(value)) {
-                STRING *value_type = REPR(value)->ID;
                 void *cobj       = NULL;
 
                 body->child_objs[real_slot] = value;
 
                 /* Set cobj to correct pointer based on type of value. */
-                if(value_type == get_ca_repr_id()) {
+                if(type == CSTRUCT_ATTR_CARRAY) {
                     cobj = ((CArrayBody *) OBJECT_BODY(value))->storage;
                 }
-                else if(value_type == get_cs_repr_id()) {
+                else if(type == CSTRUCT_ATTR_CSTRUCT) {
                     cobj = ((CStructBody *) OBJECT_BODY(value))->cstruct;
                 }
-                else if(value_type == get_cp_repr_id()) {
+                else if(type == CSTRUCT_ATTR_CPTR) {
                     cobj = ((CPointerBody *) OBJECT_BODY(value))->ptr;
+                }
+                else if(type == CSTRUCT_ATTR_STRING) {
+                    STRING *str  = REPR(value)->box_funcs->get_str(interp, STABLE(value), OBJECT_BODY(value));
+                    cobj = Parrot_str_to_encoded_cstring(interp, str, Parrot_utf8_encoding_ptr);
                 }
 
                 set_ptr_at_offset(body->cstruct, repr_data->struct_offsets[slot], cobj);
