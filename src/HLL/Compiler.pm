@@ -419,16 +419,18 @@ class HLL::Compiler {
         my $result := $source;
         my $stderr := pir::getinterp().stderr_handle;
         my $stdin  := pir::getinterp().stdin_handle;
+        my $stagestats := %adverbs<stagestats>;
         for self.stages() {
             my $timestamp := nqp::time_n();
             $result := self."$_"($result, |%adverbs);
             my $diff := nqp::time_n() - $timestamp;
-            if pir::defined__IP(%adverbs<stagestats>) {
+            if pir::defined__IP($stagestats) {
                 $stderr.print(nqp::sprintf("Stage %-11s: %7.3f", [$_, $diff]));
+                pir::sweep__vi(1) if nqp::bitand_i($stagestats, 0x4);
                 $stderr.print(nqp::sprintf(" %11d %11d %9d %9d", self.vmstat()))
-                    if %adverbs<stagestats> > 1;
+                    if nqp::bitand_i($stagestats, 0x2);
                 $stderr.print("\n");
-                if %adverbs<stagestats> > 2 {
+                if nqp::bitand_i($stagestats, 0x8) {
                    $stderr.print("continue> ");
                    $stdin.readline();
                 }
