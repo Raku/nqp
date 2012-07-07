@@ -159,6 +159,17 @@ role NQPCursorRole {
         }
     }
 
+    method !cursor_more(:$ov, :$ex) {
+        return self."!cursor_next"() if $ex;
+        my $new := self.CREATE();
+        nqp::bindattr($new, $?CLASS, '$!orig', $!orig);
+        nqp::bindattr_s($new, $?CLASS, '$!target', $!target);
+        nqp::bindattr_i($new, $?CLASS, '$!from', -1);
+        nqp::bindattr_i($new, $?CLASS, '$!pos',
+            ($ov || $!from >= $!pos) ?? $!from+1 !! $!pos);
+        $!regexsub($new);
+    }
+
     method !reduce($name) {
         my $actions := pir::find_dynamic_lex__Ps('$*ACTIONS');
         nqp::findmethod($actions, $name)($actions, self.MATCH)
