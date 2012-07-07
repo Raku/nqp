@@ -11,7 +11,7 @@ class QAST::Compiler is HLL::Compiler {
             my $obj := nqp::create(self);
             $cur ??
                 $obj.BUILD($cur.cur_p, $cur.cur_s, $cur.cur_i, $cur.cur_n) !!
-                $obj.BUILD(10, 10, 10, 10);
+                $obj.BUILD(500, 500, 500, 500);
             $obj
         }
         
@@ -58,6 +58,10 @@ class QAST::Compiler is HLL::Compiler {
         has %!reg_types;        # Mapping of all registers to types
         has int $!param_idx;    # Current lexical parameter index
         has @!loadlibs;         # Libraries to load for the target POST::Block.
+        has int $!cur_lex_p;    # Current lexical register (P)
+        has int $!cur_lex_s;    # Current lexical register (S)
+        has int $!cur_lex_i;    # Current lexical register (I)
+        has int $!cur_lex_n;    # Current lexical register (N)
         
         method new($qast, $outer) {
             my $obj := nqp::create(self);
@@ -68,6 +72,10 @@ class QAST::Compiler is HLL::Compiler {
         method BUILD($qast, $outer) {
             $!qast := $qast;
             $!outer := $outer;
+            $!cur_lex_p := 10;
+            $!cur_lex_s := 10;
+            $!cur_lex_i := 10;
+            $!cur_lex_n := 10;
         }
         
         method add_param($var) {
@@ -99,7 +107,7 @@ class QAST::Compiler is HLL::Compiler {
                 pir::die("Lexical '$name' already declared");
             }
             %!lexical_types{$name} := $type;
-            %!lexical_regs{$name} := $reg ?? $reg !! $*BLOCKRA."fresh_{nqp::lc($type)}"();
+            %!lexical_regs{$name} := $reg ?? $reg !! self."fresh_lex_{nqp::lc($type)}"();
             %!reg_types{%!lexical_regs{$name}} := $type;
         }
         
@@ -134,6 +142,23 @@ class QAST::Compiler is HLL::Compiler {
         }
         method loadlibs() {
             @!loadlibs
+        }
+        
+        method fresh_lex_p() {
+            $!cur_lex_p := $!cur_lex_p + 1;
+            '$P' ~ $!cur_lex_p
+        }
+        method fresh_lex_s() {
+            $!cur_lex_s := $!cur_lex_s + 1;
+            '$S' ~ $!cur_lex_s
+        }
+        method fresh_lex_i() {
+            $!cur_lex_i := $!cur_lex_i + 1;
+            '$I' ~ $!cur_lex_i
+        }
+        method fresh_lex_n() {
+            $!cur_lex_n := $!cur_lex_n + 1;
+            '$N' ~ $!cur_lex_n
         }
     }
     
