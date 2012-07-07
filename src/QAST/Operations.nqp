@@ -716,6 +716,9 @@ QAST::Operations.add_core_pirop_mapping('unbox_s', 'repr_unbox_str', 'SP');
 QAST::Operations.add_core_pirop_mapping('box_i', 'repr_box_int', 'PiP');
 QAST::Operations.add_core_pirop_mapping('box_n', 'repr_box_num', 'PnP');
 QAST::Operations.add_core_pirop_mapping('box_s', 'repr_box_str', 'PsP');
+QAST::Operations.add_core_pirop_mapping('what', 'get_what', 'PP');
+QAST::Operations.add_core_pirop_mapping('how', 'get_how', 'PP');
+QAST::Operations.add_core_pirop_mapping('who', 'get_who', 'PP');
 QAST::Operations.add_core_pirop_mapping('where', 'get_id', 'IP');
 
 # serialization context related opcodes
