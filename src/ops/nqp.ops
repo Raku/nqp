@@ -88,17 +88,16 @@ static void SC_write_barrier_st(PARROT_INTERP, STable *st) {
     }
 }
 
-/* Test for something being a list (RPA or QRPA).  This isn't
- * declared 'static' because we want to be able to call it from
- * other C functions (in both nqp and rakudo) as well. */
-INTVAL
+/* Test for something being a list (RPA or QRPA).  */
+static INTVAL
 nqp_islist(PMC *pmc) {
     INTVAL type = pmc->vtable->base_type;
     return (INTVAL)(type == qrpa_id || type == enum_class_ResizablePMCArray);
 }
 
-// This public-domain C quick sort implementation by Darel Rex Finley.
-INTVAL quicksort(INTVAL *arr, INTVAL elements) {
+/* This public-domain C quick sort implementation by Darel Rex Finley. */
+static INTVAL
+quicksort(INTVAL *arr, INTVAL elements) {
     #define MAX_LEVELS 100
     INTVAL piv, beg[MAX_LEVELS], end[MAX_LEVELS], i = 0, L, R ;
     beg[0] = 0;
@@ -144,15 +143,16 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, PMC *states, STRING *target, INTVAL o
     
     /* Zero out the done array; we don't get zeroed memory by default. */
     num_states = VTABLE_elements(interp, states);
-    done = mem_sys_allocate_zeroed(num_states * sizeof(INTVAL));
+    done = (INTVAL *)mem_sys_allocate_zeroed(num_states * sizeof(INTVAL));
     
     /* Clear out other re-used arrays. */
     VTABLE_set_integer_native(interp, curst, 0);
     VTABLE_set_integer_native(interp, nextst, 0);
     
     /* Allocate fates array. */
-    fates = mem_sys_allocate(sizeof(INTVAL) * (1 + VTABLE_elements(interp,
-        VTABLE_get_pmc_keyed_int(interp, states, 0))));
+    fates = (INTVAL *)mem_sys_allocate(
+        sizeof(INTVAL) * (1 + VTABLE_elements(interp,
+            VTABLE_get_pmc_keyed_int(interp, states, 0))));
     total_fates = 0;
     
     VTABLE_push_integer(interp, nextst, 1);
@@ -2599,7 +2599,7 @@ inline op nqp_sha1(out STR, in STR) :base_core {
 
     /* Free the C-string and put result into a new string. */
     Parrot_str_free_cstring(cstr);
-    $1 = Parrot_str_new_init(interp, &output, 40, Parrot_utf8_encoding_ptr, 0);
+    $1 = Parrot_str_new_init(interp, output, 40, Parrot_utf8_encoding_ptr, 0);
 }
 
 
