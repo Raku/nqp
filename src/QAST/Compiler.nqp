@@ -346,10 +346,10 @@ class QAST::Compiler is HLL::Compiler {
             # Set compilation unit ID and, if applicable, outer.
             $sub.subid($node.cuid);
             if nqp::istype($block.outer, BlockInfo) {
-                $sub.pirflags(':anon :outer(' ~ self.escape($block.outer.qast.cuid) ~ ')');
+                $sub.pirflags(':anon :lex :outer(' ~ self.escape($block.outer.qast.cuid) ~ ')');
             }
             else {
-                $sub.pirflags(':anon');
+                $sub.pirflags(':anon :lex');
             }
             
             # Set loadlibs if applicable.
