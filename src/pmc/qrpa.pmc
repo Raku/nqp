@@ -288,7 +288,7 @@ Resizes the array to C<n> elements.
 
         if (qrpa->elems < 1) {
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_OUT_OF_BOUNDS,
-                    "QRPA: Can't pop from an empty array!");
+                    "QRPA: Can't shift from an empty array!");
         }
 
         value = qrpa->slots[qrpa->start];
