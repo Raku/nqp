@@ -499,6 +499,29 @@ QAST::Operations.add_core_op('callmethod', -> $qastcomp, $op {
     $ops
 });
 
+QAST::Operations.add_core_op('lexotic', -> $qastcomp, $op {
+    my $label1  := $qastcomp.post_new('Label', :name('lexotic_'));
+    my $label2  := $qastcomp.post_new('Label', :name('lexotic_'));
+    my $lexname := $qastcomp.escape($op.name);
+
+    my $ops := $qastcomp.post_new('Ops');
+    my $handler := $*REGALLOC.fresh_p();
+    $ops.push_pirop('root_new', $handler, "['parrot';'Continuation']");
+    $ops.push_pirop('set_label', $handler, $label1);
+    $ops.'push_pirop'('.lex', $lexname, $handler);
+    
+    my $cpost := $qastcomp.compile_all_the_stmts($op.list());
+    $ops.push($cpost);
+    $ops.result($cpost);
+    
+    $ops.push_pirop('goto', $label2);
+    $ops.push($label1);
+    $ops.push_pirop('.get_results', '(' ~ $ops.result() ~ ')');
+    $ops.push($label2);
+
+    $ops
+});
+
 # I/O opcodes
 QAST::Operations.add_core_pirop_mapping('print', 'print', '0s');
 QAST::Operations.add_core_pirop_mapping('say', 'say', '0s');
