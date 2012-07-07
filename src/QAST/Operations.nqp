@@ -391,6 +391,74 @@ for <repeat_while repeat_until> -> $op_name {
     });
 }
 
+QAST::Operations.add_core_op('xor', -> $qastcomp, $op {
+    my $ops := $qastcomp.post_new('Ops');
+    $ops.result($*REGALLOC.fresh_p());
+
+    my $falselabel := $qastcomp.post_new('Label', :name('xor_false'));
+    my $endlabel   := $qastcomp.post_new('Label', :name('xor_end'));
+    
+    my @childlist;
+    my $fpast;
+    for $op.list {
+        if $_.named eq 'false' {
+            $fpast := $_;
+        }
+        else {
+            nqp::push(@childlist, $_);
+        }
+    }
+    
+    my $i := $*REGALLOC.fresh_i();
+    my $t := $*REGALLOC.fresh_i();
+    my $u := $*REGALLOC.fresh_i();
+    
+    my $apast := nqp::shift(@childlist);
+    my $apost := $qastcomp.coerce($qastcomp.as_post($apast), 'P');
+    $ops.push($apost);
+    $ops.push_pirop('set', $ops, $apost);
+    $ops.push_pirop('istrue', $t, $apost);
+    
+    my $have_middle_child := 1;
+    my $bpost;
+    while $have_middle_child {
+        my $bpast := nqp::shift(@childlist);
+        $bpost := $qastcomp.coerce($qastcomp.as_post($bpast), 'P');
+        $ops.push($bpost);
+        $ops.push_pirop('istrue', $u, $bpost);
+        $ops.push_pirop('and', $i, $t, $u);
+        $ops.push_pirop('if', $i, $falselabel);
+        if @childlist {
+            my $truelabel := $qastcomp.post_new('Label', :name('xor_true'));
+            $ops.push_pirop('if', $t, $truelabel);
+            $ops.push_pirop('set', $ops, $bpost);
+            $ops.push_pirop('set', $t, $u);
+            $ops.push($truelabel);
+        }
+        else {
+            $have_middle_child := 0;
+        }
+    }
+    
+    $ops.push_pirop('if', $t, $endlabel);
+    $ops.push_pirop('set', $ops, $bpost);
+    $ops.push_pirop('goto', $endlabel);
+    $ops.push($falselabel);
+    
+    if $fpast {
+        my $fpost := $qastcomp.coerce($qastcomp.as_post($fpast), 'P');
+        $ops.push($fpost);
+        $ops.push_pirop('set', $ops, $fpost);
+    }
+    else {
+        $ops.'push_pirop'('new', $ops, '["Undef"]');
+    }
+    
+    $ops.push($endlabel);
+    
+    $ops
+});
+
 # Binding
 QAST::Operations.add_core_op('bind', -> $qastcomp, $op {
     # Sanity checks.
