@@ -358,7 +358,7 @@ class QAST::Compiler is HLL::Compiler {
             # Get the block and newclosure it.
             my $breg := $*REGALLOC.fresh_p();
             $ops.push_pirop(".const 'Sub' $breg = '" ~ $node.cuid() ~ "'");
-            $ops.push_pirop("newclosure", $breg, $breg, :result($breg));
+            $ops.push_pirop("capture_lex", $breg);
             $ops.result($breg);
         }
         $ops
