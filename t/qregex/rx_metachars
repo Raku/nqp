@@ -29,6 +29,15 @@ c>>			abc-def		y	right word boundary, end of word
 def>>			abc-def		y	right word boundary, EOS
 >>			-------		n	right word boundary, no word chars
 
+abc <( def		abcdefghi	<def @ 3>	from <( marker
+abc <( def		abcde		n		from <( marker in failed match
+abc )> def		abcdefghi	<abc @ 0>	to )> marker
+abc <( \d+ )> def	abc123def	<123 @ 3>	from <( and to >)
+abc <( \d+ def		abc456def	<456def @ 3>	from <( only
+abc \d+ )> def		abc789def	<abc789 @ 0>	to )> only
+abc <( def || .....	abc123def	<abc12 @ 0>	backtracked from <(
+abc <( \d+ <( def	abc123def	<def @ 6>	multiple <('s
+
 c \n d			abc\ndef	y	logical newline (\n)
 # todo :pugs<feature>
 c \n d			abc\rdef	y	logical newline matches \r
