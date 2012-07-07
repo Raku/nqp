@@ -1,6 +1,6 @@
 use QAST;
 
-plan(68);
+plan(70);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -970,3 +970,26 @@ is_qast(
     ),
     115,
     'QAST::VM with pirop and signature after a space');
+
+is_qast(
+    QAST::Block.new(
+        QAST::Stmts.new(
+            :resultchild(0),
+            QAST::IVal.new( :value(1) ),
+            QAST::IVal.new( :value(2) )
+        )
+    ),
+    1,
+    'resultchild works on QAST::Stmts');
+
+is_qast(
+    QAST::Block.new(
+        QAST::Stmt.new(
+            :resultchild(1),
+            QAST::IVal.new( :value(3) ),
+            QAST::IVal.new( :value(4) ),
+            QAST::IVal.new( :value(5) )
+        )
+    ),
+    4,
+    'resultchild works on QAST::Stmt');
