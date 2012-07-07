@@ -185,6 +185,18 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         make QAST::Regex.new( :rxtype<anchor>, :subtype<rwb>, :node($/) );
     }
 
+    method metachar:sym<from>($/) {
+        make QAST::Regex.new( :rxtype<subrule>, :subtype<capture>,
+            :backtrack<r>,
+            :name<$!from>, PAST::Node.new('!LITERAL', ''), :node($/) );
+    }
+
+    method metachar:sym<to>($/) {
+        make QAST::Regex.new( :rxtype<subrule>, :subtype<capture>,
+            :backtrack<r>,
+            :name<$!to>, PAST::Node.new('!LITERAL', ''), :node($/) );
+    }
+
     method metachar:sym<bs>($/) {
         make $<backslash>.ast;
     }
@@ -585,6 +597,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             $count := %astcap{''};
         }
         %capnames{''} := $count;
+        nqp::deletekey(%capnames, '$!from');
+        nqp::deletekey(%capnames, '$!to');
         %capnames;
     }
     

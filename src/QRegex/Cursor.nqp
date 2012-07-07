@@ -257,9 +257,9 @@ role NQPCursorRole {
         my $cur := self."!cursor_start"();
         my $litlen := nqp::chars($str);
         $cur."!cursor_pass"($!pos + $litlen)
-          if $i
-            ?? nqp::lc(nqp::substr($!target, $!pos, $litlen)) eq nqp::lc($str)
-            !! nqp::substr($!target, $!pos, $litlen) eq $str;
+          if $litlen < 1 
+              ||  ($i ?? nqp::lc(nqp::substr($!target, $!pos, $litlen)) eq nqp::lc($str)
+                      !! nqp::substr($!target, $!pos, $litlen) eq $str);
         $cur;
     }
 
@@ -489,7 +489,10 @@ class NQPCursor does NQPCursorRole {
             my $iter := nqp::iterator(%ch);
             while $iter {
                 $key := ~nqp::shift($iter);
-                if nqp::iscclass(pir::const::CCLASS_NUMERIC, $key, 0) {
+                if $key eq '$!from' || $key eq '$!to' {
+                    nqp::bindattr_i($match, NQPMatch, $key, %ch{$key}.from);
+                }
+                elsif nqp::iscclass(pir::const::CCLASS_NUMERIC, $key, 0) {
                     $list := nqp::list() unless $list;
                     nqp::bindpos($list, $key, %ch{$key});
                 }
