@@ -1,11 +1,13 @@
 class QAST::Block is QAST::Node {
     has str $!blocktype;
     has int $!lexical;
+    has int $!custom_args;
     has str $!cuid;
     has %!symbol;
     
-    method blocktype(*@value) { $!blocktype := @value[0] if @value; $!blocktype }
-    method lexical(*@value)   { $!lexical := @value[0] if @value; $!lexical }
+    method blocktype(*@value)   { $!blocktype := @value[0] if @value; $!blocktype }
+    method lexical(*@value)     { $!lexical := @value[0] if @value; $!lexical }
+    method custom_args(*@value) { $!custom_args := @value[0] if @value; $!custom_args }
     
     my $cur_cuid := 0;
     my $cuid_suffix := ~nqp::time_n();

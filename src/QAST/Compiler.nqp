@@ -269,33 +269,38 @@ class QAST::Compiler is HLL::Compiler {
             # Generate parameter handling code.
             my $decls := self.post_new('Ops');
             my %lex_params;
-            for $block.params {
-                my @param := ['.param'];
-                
-                if $_.scope eq 'local'{
-                    nqp::push(@param, $block.local_type_long($_.name));
-                    nqp::push(@param, $_.name);
-                }
-                else {
-                    my $reg := $block.lex_reg($_.name);
-                    nqp::push(@param, $block.lexical_type_long($_.name));
-                    nqp::push(@param, $reg);
-                    %lex_params{$_.name} := $reg;
-                }
-                
-                if $_.slurpy {
-                    nqp::push(@param, ':slurpy');
-                    if $_.named {
-                        nqp::push(@param, ':named');
-                    }
-                }
-                elsif $_.named {
-                    nqp::push(@param, ':named(' ~ self.escape($_.named) ~ ')');
-                }
-                
-                $decls.push_pirop(pir::join(' ', @param));
+            if $node.custom_args {
+                $decls.push_pirop('.param pmc CALL_SIG :call_sig');
             }
-            
+            else {
+                for $block.params {
+                    my @param := ['.param'];
+                    
+                    if $_.scope eq 'local'{
+                        nqp::push(@param, $block.local_type_long($_.name));
+                        nqp::push(@param, $_.name);
+                    }
+                    else {
+                        my $reg := $block.lex_reg($_.name);
+                        nqp::push(@param, $block.lexical_type_long($_.name));
+                        nqp::push(@param, $reg);
+                        %lex_params{$_.name} := $reg;
+                    }
+                    
+                    if $_.slurpy {
+                        nqp::push(@param, ':slurpy');
+                        if $_.named {
+                            nqp::push(@param, ':named');
+                        }
+                    }
+                    elsif $_.named {
+                        nqp::push(@param, ':named(' ~ self.escape($_.named) ~ ')');
+                    }
+                    
+                    $decls.push_pirop(pir::join(' ', @param));
+                }
+            }
+
             # Generate declarations.
             for $block.lexicals {
                 $decls.push_pirop('.lex ' ~ self.escape($_.name) ~ ', ' ~ $block.lex_reg($_.name));
