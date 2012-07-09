@@ -567,6 +567,19 @@ class QAST::Compiler is HLL::Compiler {
                 $ops.result($res_reg);
             }
         }
+        elsif $scope eq 'contextual' {
+            if $*BINDVAL {
+                my $valpost := self.coerce(self.as_post_clear_bindval($*BINDVAL), 'P');
+                $ops.push($valpost);
+                $ops.push_pirop('store_dynamic_lex', self.escape($name), $valpost.result);
+                $ops.result($valpost.result);
+            }
+            else {
+                my $res_reg := $*REGALLOC."fresh_p"();
+                $ops.push_pirop('find_dynamic_lex', $res_reg, self.escape($name));
+                $ops.result($res_reg);
+            }
+        }
         else {
             pir::die("QAST::Var with scope '$scope' NYI");
         }
