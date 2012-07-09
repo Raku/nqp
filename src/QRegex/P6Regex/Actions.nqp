@@ -500,6 +500,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     our sub buildsub($qast, $block = PAST::Block.new(:blocktype<method>), :$anon) {
+        my $blockid := $block.isa(QAST::Block) ?? $block.cuid !! $block.subid;
         my $hashpast := PAST::Op.new( :pasttype<hash> );
         for capnames($qast, 0) {
             if $_.key gt '' { 
@@ -510,17 +511,17 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         my $initpast := PAST::Stmts.new();
         my $capblock := PAST::Block.new( :hll<nqp>, :namespace(['Sub']), :lexical(0),
-                                         :name($block.subid ~ '_caps'),  $hashpast );
+                                         :name($blockid ~ '_caps'),  $hashpast );
         $initpast.push(PAST::Stmt.new($capblock));
 
         my $nfapast := QRegex::NFA.new.addnode($qast).past;
         if $nfapast {
             my $nfablock := PAST::Block.new( 
                                 :hll<nqp>, :namespace(['Sub']), :lexical(0),
-                                :name($block.subid ~ '_nfa'), $nfapast);
+                                :name($blockid ~ '_nfa'), $nfapast);
             $initpast.push(PAST::Stmt.new($nfablock));
         }
-        alt_nfas($qast, $block.subid, $initpast);
+        alt_nfas($qast, $blockid, $initpast);
 
         unless $block.symbol('$¢') {
             $initpast.push(PAST::Var.new(:name<$¢>, :scope<lexical>, :isdecl(1)));
