@@ -31,4 +31,12 @@ class QAST::Node is NQPCapture {
     method push($value)    { nqp::push(self.list, $value) }
     method shift()         { nqp::shift(self.list) }
     method unshift($value) { nqp::unshift(self.list, $value) }
+    
+    my %uniques;
+    method unique($prefix) {
+        my $id := nqp::existskey(%uniques, $prefix) ??
+            (%uniques{$prefix} := %uniques{$prefix} + 1) !!
+            (%uniques{$prefix} := 1);
+        $prefix ~ '_' ~ $id
+    }
 }
