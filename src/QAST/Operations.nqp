@@ -590,6 +590,24 @@ QAST::Operations.add_core_op('lexotic', -> $qastcomp, $op {
     $ops
 });
 
+# Context introspection
+QAST::Operations.add_core_op('curlexpad', -> $qastcomp, $op {
+    my $reg := $*REGALLOC.fresh_p();
+    my $ops := $qastcomp.post_new('Ops');
+    $ops.push_pirop('getinterp', $reg);
+    $ops.push_pirop('set', $reg, $reg ~ "['lexpad']");
+    $ops.result($reg);
+    $ops
+});
+QAST::Operations.add_core_op('curcode', -> $qastcomp, $op {
+    my $reg := $*REGALLOC.fresh_p();
+    my $ops := $qastcomp.post_new('Ops');
+    $ops.push_pirop('getinterp', $reg);
+    $ops.push_pirop('set', $reg, $reg ~ "['sub']");
+    $ops.result($reg);
+    $ops
+});
+
 # I/O opcodes
 QAST::Operations.add_core_pirop_mapping('print', 'print', '0s');
 QAST::Operations.add_core_pirop_mapping('say', 'say', '0s');
