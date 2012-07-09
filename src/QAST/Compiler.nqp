@@ -42,6 +42,7 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push_pirop('store_lex', 'unicode:"$\x{a2}"', %*REG<cur>);
         $ops.push_pirop('length', %*REG<eos>, %*REG<tgt>);
         $ops.push_pirop('eq', '$I19', 1, $restartlabel);
+        $ops.push_pirop('gt', %*REG<pos>, %*REG<eos>, %*REG<fail>);
         $ops.push(self.regex_post($node));
         $ops.push($restartlabel);
         $ops.push_pirop('repr_get_attr_obj', %*REG<cstack>, %*REG<cur>, %*REG<curclass>, '"$!cstack"');
