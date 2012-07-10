@@ -608,6 +608,107 @@ QAST::Operations.add_core_op('curcode', -> $qastcomp, $op {
     $ops
 });
 
+# Exception handling/munging.
+my $exc_exclude := 0;
+my $exc_include := 1;
+my %handler_names := nqp::hash(
+    'CATCH',   [$exc_exclude, '.CONTROL_ALL' ],
+    'CONTROL', [$exc_include, '.CONTROL_ALL' ],
+    'NEXT',    [$exc_include, '.CONTROL_LOOP_NEXT' ],
+    'LAST',    [$exc_include, '.CONTROL_LOOP_LAST' ],
+    'REDO',    [$exc_include, '.CONTROL_LOOP_REDO' ],
+    'TAKE',    [$exc_include, '.CONTROL_TAKE' ],
+    'SUCCEED', [$exc_include, '.CONTROL_BREAK' ],
+    'PROCEED', [$exc_include, '.CONTROL_CONTINUE' ]
+);
+QAST::Operations.add_core_op('handle', -> $qastcomp, $op {
+    my @children := nqp::clone($op.list());
+    if @children == 0 {
+        nqp::die("The 'handle' op requires at least one child");
+    }
+    
+    # Compile the protected statements. If we've no handlers at all
+    # then that's it.
+    my $protected := @children.shift();
+    my $procpost  := $qastcomp.as_post($protected);
+    unless @children {
+        return $procpost;
+    }
+    
+    nqp::die('handle compilation NYI');
+});
+QAST::Operations.add_core_op('exception', -> $qastcomp, $op {
+    my $exc_reg := try $*CUR_EXCEPTION;
+    unless $exc_reg {
+        nqp::die("Can only use 'exception' op in the context of an exception handler");
+    }
+    my $ops := $qastcomp.post_new('Ops');
+    $ops.result($exc_reg);
+    $ops
+});
+QAST::Operations.add_core_op('getpayload', -> $qastcomp, $op {
+    if +$op.list != 1 {
+        nqp::die("The 'getpayload' op expects one child");
+    }
+    my $exc := $qastcomp.coerce($qastcomp.as_post($op[0]), 'P');
+    my $reg := $*REGALLOC.fresh_p();
+    my $ops := $qastcomp.post_new('Ops');
+    $ops.push($exc);
+    $ops.push_pirop('getattribute', $reg, $exc.result, '"payload"');
+    $ops.result($reg);
+    $ops
+});
+QAST::Operations.add_core_op('setpayload', -> $qastcomp, $op {
+    if +$op.list != 2 {
+        nqp::die("The 'setpayload' op expects two children");
+    }
+    my $exc := $qastcomp.coerce($qastcomp.as_post($op[0]), 'P');
+    my $payload := $qastcomp.coerce($qastcomp.as_post($op[1]), 'P');
+    my $ops := $qastcomp.post_new('Ops');
+    $ops.push_pirop('setattribute', $exc, '"payload"', $payload);
+    $ops.result($payload.result);
+    $ops
+});
+QAST::Operations.add_core_op('getmessage', -> $qastcomp, $op {
+    if +$op.list != 1 {
+        nqp::die("The 'getmessage' op expects one child");
+    }
+    my $exc := $qastcomp.coerce($qastcomp.as_post($op[0]), 'P');
+    my $pmc := $*REGALLOC.fresh_p();
+    my $reg := $*REGALLOC.fresh_s();
+    my $ops := $qastcomp.post_new('Ops');
+    $ops.push($exc);
+    $ops.push_pirop('getattribute', $pmc, $exc.result, '"message"');
+    $ops.push_pirop('set', $reg, $pmc);
+    $ops.result($reg);
+    $ops
+});
+QAST::Operations.add_core_op('setmessage', -> $qastcomp, $op {
+    if +$op.list != 2 {
+        nqp::die("The 'setmessage' op expects two children");
+    }
+    my $exc := $qastcomp.coerce($qastcomp.as_post($op[0]), 'P');
+    my $message := $qastcomp.coerce($qastcomp.as_post($op[1]), 'S');
+    my $pmc := $*REGALLOC.fresh_p();
+    my $ops := $qastcomp.post_new('Ops');
+    $ops.push($exc);
+    $ops.push($message);
+    $ops.push_pirop('box', $pmc, $message);
+    $ops.push_pirop('setattribute', $exc, '"message"', $pmc);
+    $ops.result($message.result);
+    $ops
+});
+QAST::Operations.add_core_op('newexception', -> $qastcomp, $op {
+    if +$op.list != 0 {
+        nqp::die("The 'newexception' op expects no children");
+    }
+    my $reg := $*REGALLOC.fresh_p();
+    my $ops := $qastcomp.post_new('Ops');
+    $ops.push_pirop('new', $reg, '["Exception"]');
+    $ops.result($reg);
+    $ops
+});
+
 # I/O opcodes
 QAST::Operations.add_core_pirop_mapping('print', 'print', '0s');
 QAST::Operations.add_core_pirop_mapping('say', 'say', '0s');
