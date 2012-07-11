@@ -808,6 +808,7 @@ QAST::Operations.add_core_op('newexception', -> $qastcomp, $op {
     $ops.result($reg);
     $ops
 });
+QAST::Operations.add_core_pirop_mapping('die_s', 'die', 'vs');
 
 # I/O opcodes
 QAST::Operations.add_core_pirop_mapping('print', 'print', '0s');
