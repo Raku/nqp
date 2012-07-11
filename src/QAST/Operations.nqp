@@ -715,6 +715,8 @@ QAST::Operations.add_core_op('handle', -> $qastcomp, $op {
         $ops.push_pirop(".get_results ($reg)");
         $ops.push($handler_post);
         $ops.push_pirop('finalize', $reg);
+        $ops.push_pirop('pop_upto_eh', $reg);
+        $ops.push_pirop('pop_eh');
         $ops.push_pirop('set', $procpost.result, $handler_post.result);
         $ops.push_pirop('goto', $skip_handler_label);
     }
