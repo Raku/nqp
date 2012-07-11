@@ -612,14 +612,14 @@ QAST::Operations.add_core_op('curcode', -> $qastcomp, $op {
 my $exc_exclude := 0;
 my $exc_include := 1;
 my %handler_names := nqp::hash(
-    'CATCH',   [$exc_exclude, '.CONTROL_ALL' ],
-    'CONTROL', [$exc_include, '.CONTROL_ALL' ],
-    'NEXT',    [$exc_include, '.CONTROL_LOOP_NEXT' ],
-    'LAST',    [$exc_include, '.CONTROL_LOOP_LAST' ],
-    'REDO',    [$exc_include, '.CONTROL_LOOP_REDO' ],
-    'TAKE',    [$exc_include, '.CONTROL_TAKE' ],
-    'SUCCEED', [$exc_include, '.CONTROL_BREAK' ],
-    'PROCEED', [$exc_include, '.CONTROL_CONTINUE' ]
+    'CATCH',   '.CONTROL_ALL',
+    'CONTROL', '.CONTROL_ALL',
+    'NEXT',    '.CONTROL_LOOP_NEXT',
+    'LAST',    '.CONTROL_LOOP_LAST',
+    'REDO',    '.CONTROL_LOOP_REDO',
+    'TAKE',    '.CONTROL_TAKE',
+    'SUCCEED', '.CONTROL_BREAK',
+    'PROCEED', '.CONTROL_CONTINUE' 
 );
 QAST::Operations.add_core_op('handle', -> $qastcomp, $op {
     my @children := nqp::clone($op.list());
@@ -630,12 +630,112 @@ QAST::Operations.add_core_op('handle', -> $qastcomp, $op {
     # Compile the protected statements. If we've no handlers at all
     # then that's it.
     my $protected := @children.shift();
-    my $procpost  := $qastcomp.as_post($protected);
+    my $procpost  := $qastcomp.coerce($qastcomp.as_post($protected), 'P');
     unless @children {
         return $procpost;
     }
     
-    nqp::die('handle compilation NYI');
+    # Process handlers.
+    my %handlers;
+    my $catch;
+    my $control;
+    my @other;
+    for @children -> $name, $handler_code {
+        if nqp::existskey(%handler_names, $name) {
+            if nqp::existskey(%handlers, $name) {
+                nqp::die("Multiple handlers for $name");
+            }
+            %handlers{$name} := $handler_code;
+            if $name eq 'CATCH' {
+                $catch := 1;
+            }
+            elsif $name eq 'CONTROL' {
+                $control := 1;
+            }
+            else {
+                nqp::push(@other, $name);
+            }
+        }
+        else {
+            nqp::die("Invalid handler type '$name'");
+        }
+    }
+    
+    # Handler prelude.
+    my $catch_label;
+    my $control_label;
+    my $other_label;
+    my $num_pops := 0;
+    my $skip_handler_label := $qastcomp.post_new('Label',
+        :name($qastcomp.unique('skip_handler_')));
+    my $ops := $qastcomp.post_new('Ops');
+    my $reg := $*REGALLOC.fresh_p();
+    if $catch {
+        $catch_label := $qastcomp.post_new('Label',
+            :name($qastcomp.unique('catch_handler_')));
+        $ops.push_pirop('new', $reg, "'ExceptionHandler'");
+        $ops.push_pirop('set_label', $reg, $catch_label);
+        $ops.push_pirop('callmethod', "'handle_types_except'", $reg, ".CONTROL_ALL");
+        $ops.push_pirop('push_eh', $reg);
+        $num_pops := $num_pops + 1;
+    }
+    if $control {
+        $control_label := $qastcomp.post_new('Label',
+            :name($qastcomp.unique('catch_handler_')));
+        $ops.push_pirop('new', $reg, "'ExceptionHandler'", "[.CONTROL_ALL]");
+        $ops.push_pirop('set_label', $reg, $control_label);
+        $ops.push_pirop('push_eh', $reg);
+        $num_pops := $num_pops + 1;
+    }
+    if @other {
+        my @hnames;
+        for @other { nqp::push(@hnames, %handler_names{$_}); }
+        $other_label := $qastcomp.post_new('Label',
+            :name($qastcomp.unique('catch_handler_')));
+        $ops.push_pirop('new', $reg, "'ExceptionHandler'",
+            "[" ~ nqp::join(", ", @hnames) ~ "]");
+        $ops.push_pirop('set_label', $reg, $other_label);
+        $ops.push_pirop('push_eh', $reg);
+        $num_pops := $num_pops + 1;
+    }
+    
+    # Protected code.
+    $ops.push($procpost);
+    while $num_pops {
+        $ops.push_pirop('pop_eh');
+        $num_pops := $num_pops - 1;
+    }
+    $ops.push_pirop('goto', $skip_handler_label);
+    
+    # Now emit the handlers.
+    my $*CUR_EXCEPTION := $reg;
+    sub simple_handler($label, $handler_qast) {
+        my $handler_post := $qastcomp.coerce($qastcomp.as_post($handler_qast), 'P');
+        $ops.push($label);
+        $ops.push_pirop(".get_results ($reg)");
+        $ops.push($handler_post);
+        $ops.push_pirop('finalize', $reg);
+        $ops.push_pirop('set', $procpost.result, $handler_post.result);
+        $ops.push_pirop('goto', $skip_handler_label);
+    }
+    if $catch {
+        simple_handler($catch_label, %handlers<CATCH>);
+    }
+    if $control {
+        simple_handler($control_label, %handlers<CONTROL>);
+    }
+    if @other {
+        $ops.push($other_label);
+        $ops.push_pirop(".get_results ($reg)");
+        # XXX Need to emit type-selection ladder...
+        nqp::die("Only CATCH and CONTROL handlers implemented so far");
+    }
+    
+    # Postlude.
+    $ops.push($skip_handler_label);
+    $ops.result($procpost.result);
+    
+    $ops
 });
 QAST::Operations.add_core_op('exception', -> $qastcomp, $op {
     my $exc_reg := try $*CUR_EXCEPTION;
