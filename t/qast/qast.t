@@ -1,6 +1,6 @@
 use QAST;
 
-plan(70);
+plan(72);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -26,7 +26,7 @@ sub test_qast_result($qast, $tester) {
     try {
         my $code := compile_qast($qast);
         $tester($code());
-        CATCH { ok(0, 'Compilation failure in test_qast_result') }
+        CATCH { ok(0, 'Compilation failure in test_qast_result: ' ~ $!) }
     }
 }
 
@@ -993,3 +993,30 @@ is_qast(
     ),
     4,
     'resultchild works on QAST::Stmt');
+
+test_qast_result(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('handle'),
+            QAST::WVal.new( :value(A) ),
+            'CATCH', QAST::WVal.new( :value(B) )
+        )
+    ),
+    -> $r {
+        ok($r.m eq 'a', 'handles op with no exception evaluates to protected code');
+    });
+
+test_qast_result(
+    QAST::Block.new(
+        QAST::Op.new(
+            :op('handle'),
+            QAST::Stmt.new(
+                QAST::Op.new( :op('die_s'), QAST::SVal.new( :value('omg') ) ),
+                QAST::WVal.new( :value(A) )
+            ),
+            'CATCH', QAST::WVal.new( :value(B) )
+        )
+    ),
+    -> $r {
+        ok($r.m eq 'b', 'handles op runs exception handler and evaluates to its result');
+    });
