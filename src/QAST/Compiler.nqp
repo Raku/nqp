@@ -487,8 +487,27 @@ class QAST::Compiler is HLL::Compiler {
             }
         }
         
-        # Now go by scope.
+        # If there's no scope, figure it out from the symbol tables if
+        # possible.
         my $name := $node.name;
+        if $scope eq '' {
+            my $cur_block := $*BLOCK;
+            while nqp::istype($cur_block, BlockInfo) {
+                my %sym := $cur_block.qast.symbol($name);
+                if %sym {
+                    $scope := %sym<$scope>;
+                    $cur_block := NQPMu;
+                }
+                else {
+                    $cur_block := $cur_block.outer();
+                }
+            }
+            if $scope eq '' {
+                nqp::die("No scope specified or locatable in the symbol table for '$name'");
+            }
+        }
+        
+        # Now go by scope.
         my $ops := self.post_new('Ops');
         if $scope eq 'local' {
             if $*BLOCK.local_type($name) -> $type {
