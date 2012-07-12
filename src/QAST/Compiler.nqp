@@ -506,7 +506,8 @@ class QAST::Compiler is HLL::Compiler {
         elsif $scope eq 'lexical' {
             # If the lexical is directly declared in this block, we use the
             # register directly.
-            if $*BLOCK.lexical_type($name) -> $type {
+            my %sym := $*BLOCK.qast.symbol($name);
+            if (!%sym || !%sym<lazyinit>) && $*BLOCK.lexical_type($name) -> $type {
                 my $reg := $*BLOCK.lex_reg($name);
                 if $*BINDVAL {
                     my $valpost := self.coerce(self.as_post_clear_bindval($*BINDVAL), nqp::lc($type));
