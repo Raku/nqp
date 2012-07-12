@@ -45,11 +45,18 @@ endif
 
 # --- Assemble ----------------------------------------------------------------
 
-$(BUILD_DIR)/%.o: %.S
-	$(COMPILE.S) $(OUTPUT_OPTION) $<
+# FIXME:
+# Windows filenames are case-insensitive, ie %.s and %.S match the same files
+#
+# For now, just put the %.S rule after the %.s rule: apparently, GNU make will
+# execute the rule defined last, and $(COMPILE.S) works for .s files as well
+# (see dyncall/README-Developer.txt)
 
 $(BUILD_DIR)/%.o: %.s
 	$(COMPILE.s) $(OUTPUT_OPTION) $<
+
+$(BUILD_DIR)/%.o: %.S
+	$(COMPILE.S) $(OUTPUT_OPTION) $<
 
 #	auto-dependency: disabled, due to problems when including *.d files, see targets.gmake for details 
 #	$(CC) -MM -MT $@ $(CPPFLAGS) $< > $(BUILD_DIR)/$*.d
