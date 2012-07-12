@@ -46,16 +46,19 @@ endif
 # --- Assemble ----------------------------------------------------------------
 
 # FIXME:
-# Windows filenames are case-insensitive, ie %.s and %.S match the same files
+# Windows filenames are case-insensitive, ie %.s and %.S match the same files.
+# Additionally, mingw32-make 3.81 (which ships with older versions of
+# Strawberry Perl) is subtly different from gmake 3.82 (which ships with newer
+# ones).
 #
-# For now, just put the %.S rule after the %.s rule: apparently, GNU make will
-# execute the rule defined last, and $(COMPILE.S) works for .s files as well
-# (see dyncall/README-Developer.txt)
-
-$(BUILD_DIR)/%.o: %.s
-	$(COMPILE.s) $(OUTPUT_OPTION) $<
+# Putting the %.s rule after the %.S rule and using $(COMPILE.S) for both
+# .s and .S files (which should be ok - see dyncall/README-Developer.txt)
+# was the only combination I could get to work.
 
 $(BUILD_DIR)/%.o: %.S
+	$(COMPILE.S) $(OUTPUT_OPTION) $<
+
+$(BUILD_DIR)/%.o: %.s
 	$(COMPILE.S) $(OUTPUT_OPTION) $<
 
 #	auto-dependency: disabled, due to problems when including *.d files, see targets.gmake for details 
