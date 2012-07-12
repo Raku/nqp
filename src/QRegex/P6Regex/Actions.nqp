@@ -500,7 +500,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     our sub buildsub($qast, $block = PAST::Block.new(:blocktype<method>), :$anon) {
-        my $blockid := $block.isa(QAST::Block) ?? $block.cuid !! $block.subid;
+        my $blockid := $block.subid;
         my $hashpast := PAST::Op.new( :pasttype<hash> );
         for capnames($qast, 0) {
             if $_.key gt '' { 
@@ -538,6 +538,48 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                           QAST::Regex.new( :rxtype<pass>, :name(%*RX<name>) )));
         $block.push($initpast);
         $block.push(PAST::QAST.new($qast));
+        $block;
+    }
+    
+    our sub qbuildsub($qast, $block = QAST::Block.new(), :$anon) {
+        my $blockid := $block.cuid;
+        my $hashpast := QAST::Op.new( :op<hash> );
+        for capnames($qast, 0) {
+            if $_.key gt '' { 
+                $hashpast.push(QAST::SVal.new( :value($_.key) )); 
+                $hashpast.push(QAST::IVal.new( :value(
+                    nqp::iscclass(pir::const::CCLASS_NUMERIC, $_.key, 0) + ($_.value > 1) * 2) )); 
+            }
+        }
+        my $initpast := QAST::Stmts.new();
+        my $capblock := QAST::Block.new( :hll<nqp>, :namespace(['Sub']), :lexical(0),
+                                         :name($blockid ~ '_caps'),  $hashpast );
+        $initpast.push(QAST::Stmt.new($capblock));
+
+        my $nfapast := QRegex::NFA.new.addnode($qast).past;
+        if $nfapast {
+            my $nfablock := QAST::Block.new( 
+                                :hll<nqp>, :namespace(['Sub']), :lexical(0),
+                                :name($blockid ~ '_nfa'), $nfapast);
+            $initpast.push(QAST::Stmt.new($nfablock));
+        }
+        qalt_nfas($qast, $blockid, $initpast);
+
+        unless $block.symbol('$¢') {
+            $initpast.push(QAST::Var.new(:name<$¢>, :scope<lexical>, :decl('var')));
+            $block.symbol('$¢', :scope<lexical>);
+        }
+
+        $block<orig_qast> := $qast;
+        
+        $qast := QAST::Regex.new( :rxtype<concat>,
+                     QAST::Regex.new( :rxtype<scan> ),
+                     $qast,
+                     ($anon ??
+                          QAST::Regex.new( :rxtype<pass> ) !!
+                          QAST::Regex.new( :rxtype<pass>, :name(%*RX<name>) )));
+        $block.push($initpast);
+        $block.push($qast);
         $block;
     }
 
@@ -602,6 +644,28 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                                 :hll<nqp>, :namespace(['Sub']), :lexical(0),
                                 :name($subid ~ '_' ~ $ast.name), $nfapast);
             $initpast.push(PAST::Stmt.new($nfablock));
+        }
+        elsif $rxtype eq 'subcapture' || $rxtype eq 'quant' {
+            alt_nfas($ast[0], $subid, $initpast)
+        }
+        elsif $rxtype eq 'concat' || $rxtype eq 'altseq' || $rxtype eq 'conj' || $rxtype eq 'conjseq' {
+            for $ast.list { alt_nfas($_, $subid, $initpast) }
+        }
+    }
+    
+    sub qalt_nfas($ast, $subid, $initpast) {
+        my $rxtype := $ast.rxtype;
+        if $rxtype eq 'alt' {
+            my $nfapast := QAST::Op.new( :op('list') );
+            $ast.name(QAST::Node.unique('alt_nfa_') ~ '_' ~ ~nqp::time_n());
+            for $ast.list {
+                alt_nfas($_, $subid, $initpast);
+                $nfapast.push(QRegex::NFA.new.addnode($_).past(:non_empty));
+            }
+            my $nfablock := QAST::Block.new(
+                                :hll<nqp>, :namespace(['Sub']), :lexical(0),
+                                :name($subid ~ '_' ~ $ast.name), $nfapast);
+            $initpast.push(QAST::Stmt.new($nfablock));
         }
         elsif $rxtype eq 'subcapture' || $rxtype eq 'quant' {
             alt_nfas($ast[0], $subid, $initpast)
