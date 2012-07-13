@@ -424,6 +424,7 @@ class QAST::Compiler is HLL::Compiler {
             
             # Set compilation unit ID, namespace (forced to Sub) and
             # HLL (forced to NQP).
+            $sub.name($node.name);
             $sub.subid($node.cuid);
             $sub.namespace(['Sub']);
             $sub.hll('nqp');

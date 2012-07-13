@@ -16,7 +16,7 @@ class QAST::BlockMemo is QAST::Node {
         else {
             # Otherwise, generate one.
             $cur_cuid := $cur_cuid + 1;
-            $!cuid := 'cuid_' ~ $cur_cuid ~ '_' ~ $cuid_suffix;
+            $!cuid := 'cuid_memo_' ~ $cur_cuid ~ '_' ~ $cuid_suffix;
         }
     }
 }
