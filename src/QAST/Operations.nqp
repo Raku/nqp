@@ -293,6 +293,28 @@ for <if unless> -> $op_name {
     });
 }
 
+# XXX make 3-arg...
+QAST::Operations.add_core_op('ifnull', -> $qastcomp, $op {
+    if +$op.list != 2 {
+        nqp::die("The 'ifnull' op expects two children");
+    }
+    
+    my $exprpost := $qastcomp.as_post($op[0]);
+    my $vivipost := $qastcomp.coerce($qastcomp.as_post($op[1]),
+        $qastcomp.infer_type($exprpost));
+    my $vivlabel := $qastcomp.post_new('Label',
+        :name($qastcomp.unique('vivi_')));
+    
+    my $ops := $qastcomp.post_new('Ops');
+    $ops.push($exprpost);
+    $ops.push_pirop('unless_null', $exprpost, $vivlabel);
+    $ops.push($vivipost);
+    $ops.push_pirop('set', $exprpost, $vivipost);
+    $ops.push($vivlabel);
+    $ops.result($exprpost.result);
+    $ops
+});
+
 # Loops.
 for <while until> -> $op_name {
     QAST::Operations.add_core_op($op_name, -> $qastcomp, $op {
@@ -811,28 +833,6 @@ QAST::Operations.add_core_op('newexception', -> $qastcomp, $op {
     $ops
 });
 QAST::Operations.add_core_pirop_mapping('die_s', 'die', 'vs');
-
-# Vivification.
-QAST::Operations.add_core_op('vivify', -> $qastcomp, $op {
-    if +$op.list != 2 {
-        nqp::die("The 'vivify' op expects two children");
-    }
-    
-    my $exprpost := $qastcomp.as_post($op[0]);
-    my $vivipost := $qastcomp.coerce($qastcomp.as_post($op[1]),
-        $qastcomp.infer_type($exprpost));
-    my $vivlabel := $qastcomp.post_new('Label',
-        :name($qastcomp.unique('vivi_')));
-    
-    my $ops := $qastcomp.post_new('Ops');
-    $ops.push($exprpost);
-    $ops.push_pirop('unless_null', $exprpost, $vivlabel);
-    $ops.push($vivipost);
-    $ops.push_pirop('set', $exprpost, $vivipost);
-    $ops.push($vivlabel);
-    $ops.result($exprpost.result);
-    $ops
-});
 
 # I/O opcodes
 QAST::Operations.add_core_pirop_mapping('print', 'print', '0s');
