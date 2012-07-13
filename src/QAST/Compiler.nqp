@@ -399,10 +399,11 @@ class QAST::Compiler is HLL::Compiler {
             my $*BINDVAL  := 0;
             my $block     := BlockInfo.new($node, 0);
             
-            # First need to compile all of the statements.
+            # First need to compile all of the statements. Fake NQP HLL.
             my $stmts;
             {
                 my $*BLOCK := $block;
+                my $*HLL := 'nqp';
                 $stmts := self.compile_all_the_stmts($node.list);
             }
             
@@ -704,8 +705,26 @@ class QAST::Compiler is HLL::Compiler {
             return $post;
         }
         elsif $result eq 'p' && $desired eq 'P' {
-            # <jnthn> Hmm...lowercase p doesn't make any sense
+            # PMCs are always in a register anyway
             return $post;
+        }
+        elsif $result eq nqp::lc($desired) {
+            # Correct type, but we need a register.
+            my $ops := self.post_new('Ops');
+            my $reg := $*REGALLOC."fresh_$result"();
+            $ops.push($post);
+            $ops.push_pirop('set', $reg, $post);
+            return $ops;
+        }
+        elsif $desired eq 'P' || $desired eq 'p' {
+            my $hll := '';
+            try $hll := $*HLL;
+            return QAST::Operations.box(self, $hll, nqp::lc($result), $post);
+        }
+        elsif $result eq 'P' || $result eq 'p' {
+            my $hll := '';
+            try $hll := $*HLL;
+            return QAST::Operations.unbox(self, $hll, nqp::lc($desired), $post);
         }
         else {
             pir::die("Coercion from '$result' to '$desired' NYI");

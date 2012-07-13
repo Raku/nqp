@@ -9,6 +9,10 @@ class QAST::Operations {
     # Cached pirop compilers.
     my %cached_pirops;
     
+    # Mapping of how to box/unbox by HLL.
+    my %hll_box;
+    my %hll_unbox;
+    
     # Compiles an operation to POST.
     method compile_op($qastcomp, $hll, $op) {
         my $name := $op.op;
@@ -60,6 +64,34 @@ class QAST::Operations {
         %hll_ops{$hll}{$op} := -> $qastcomp, $op {
             $pirop_mapper($qastcomp, $op.op, $op.list)
         };
+    }
+
+    # Adds a HLL box handler.
+    method add_hll_box($hll, $type, $handler) {
+        unless $type eq 'i' || $type eq 'n' || $type eq 's' {
+            nqp::die("Unknown box type '$type'");
+        }
+        %hll_box{$hll} := {} unless %hll_box{$hll};
+        %hll_box{$hll}{$type} := $handler;
+    }
+
+    # Adds a HLL unbox handler.
+    method add_hll_unbox($hll, $type, $handler) {
+        unless $type eq 'i' || $type eq 'n' || $type eq 's' {
+            nqp::die("Unknown unbox type '$type'");
+        }
+        %hll_unbox{$hll} := {} unless %hll_unbox{$hll};
+        %hll_unbox{$hll}{$type} := $handler;
+    }
+    
+    # Generates a box. Takes a POST tree.
+    method box($qastcomp, $hll, $type, $post) {
+        %hll_box{$hll}{$type}($qastcomp, $post)
+    }
+    
+    # Generates an unbox. Takes a POST tree.
+    method unbox($qastcomp, $hll, $type, $post) {
+        %hll_unbox{$hll}{$type}($qastcomp, $post)
     }
     
     # Returns a mapper closure for turning an operation into a PIR op.
@@ -833,6 +865,42 @@ QAST::Operations.add_core_op('newexception', -> $qastcomp, $op {
     $ops
 });
 QAST::Operations.add_core_pirop_mapping('die_s', 'die', 'vs');
+
+# NQP box/unbox.
+for <i n s> {
+    QAST::Operations.add_hll_box('nqp', $_, -> $qastcomp, $post {
+        my $reg := $*REGALLOC.fresh_p();
+        my $ops := $qastcomp.post_new('Ops');
+        $ops.push($post);
+        $ops.push_pirop('box', $reg, $post);
+        $ops.result($reg);
+        $ops
+    });
+}
+QAST::Operations.add_hll_unbox('nqp', 'i', -> $qastcomp, $post {
+    my $reg := $*REGALLOC.fresh_i();
+    my $ops := $qastcomp.post_new('Ops');
+    $ops.push($post);
+    $ops.push_pirop('set', $reg, $post);
+    $ops.result($reg);
+    $ops
+});
+QAST::Operations.add_hll_unbox('nqp', 'n', -> $qastcomp, $post {
+    my $reg := $*REGALLOC.fresh_n();
+    my $ops := $qastcomp.post_new('Ops');
+    $ops.push($post);
+    $ops.push_pirop('set', $reg, $post);
+    $ops.result($reg);
+    $ops
+});
+QAST::Operations.add_hll_unbox('nqp', 's', -> $qastcomp, $post {
+    my $reg := $*REGALLOC.fresh_s();
+    my $ops := $qastcomp.post_new('Ops');
+    $ops.push($post);
+    $ops.push_pirop('set', $reg, $post);
+    $ops.result($reg);
+    $ops
+});
 
 # I/O opcodes
 QAST::Operations.add_core_pirop_mapping('print', 'print', '0s');
