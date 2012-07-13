@@ -1076,6 +1076,18 @@ class QAST::Compiler is HLL::Compiler {
         $ops;
     }
 
+    method qastnode($node) {
+        my $ops := self.post_new('Ops', :result(%*REG<cur>));
+        $ops.push_pirop('repr_bind_attr_int', %*REG<cur>, %*REG<curclass>, '"$!pos"', %*REG<pos>);
+        $ops.push_pirop('store_lex', 'unicode:"$\x{a2}"', %*REG<cur>);
+        my $cpost := self.coerce(self.as_post($node[0]), 'P');
+        $ops.push($cpost);
+        if $node.subtype eq 'zerowidth' {
+            $ops.push_pirop($node.negate ?? 'if' !! 'unless', $cpost, %*REG<fail>);
+        }
+        $ops;
+    }
+
     method quant($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
         my $backtrack := $node.backtrack || 'g';
