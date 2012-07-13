@@ -144,6 +144,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     method metachar:sym<'>($/) {
         my $quote := $<quote_EXPR>.ast;
         if PAST::Val.ACCEPTS($quote) { $quote := $quote.value; }
+        if QAST::SVal.ACCEPTS($quote) { $quote := $quote.value; }
         my $qast := QAST::Regex.new( $quote, :rxtype<literal>, :node($/) );
         $qast.subtype('ignorecase') if %*RX<i>;
         make $qast;
@@ -152,6 +153,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     method metachar:sym<">($/) {
         my $quote := $<quote_EXPR>.ast;
         if PAST::Val.ACCEPTS($quote) { $quote := $quote.value; }
+        if QAST::SVal.ACCEPTS($quote) { $quote := $quote.value; }
         my $qast := QAST::Regex.new( $quote, :rxtype<literal>, :node($/) );
         $qast.subtype('ignorecase') if %*RX<i>;
         make $qast;
@@ -541,7 +543,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         $block;
     }
     
-    our sub qbuildsub($qast, $block = QAST::Block.new(), :$anon) {
+    our sub qbuildsub($qast, $block = QAST::Block.new(), :$anon, :$addself) {
         my $blockid := $block.cuid;
         my $hashpast := QAST::Op.new( :op<hash> );
         for capnames($qast, 0) {
@@ -552,6 +554,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             }
         }
         my $initpast := QAST::Stmts.new();
+        if $addself {
+            $initpast.push(QAST::Var.new( :name('self'), :scope('local'), :decl('param') ));
+        }
         my $capblock := QAST::BlockMemo.new( :name($blockid ~ '_caps'),  $hashpast );
         $initpast.push(QAST::Stmt.new($capblock));
 
