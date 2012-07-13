@@ -472,8 +472,9 @@ class HLL::Compiler {
     }
 
     method post($source, *%adverbs) {
+        my $*PASTCOMPILER := pir::compreg__Ps('PAST');
         $source ~~ PAST::Node ??
-            pir::compreg__Ps('PAST').to_post($source, |%adverbs) !!
+            $*PASTCOMPILER.to_post($source, |%adverbs) !!
             QAST::Compiler.as_post($source)
     }
 
