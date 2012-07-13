@@ -37,4 +37,8 @@ class QAST::Block is QAST::Node {
         }
         %!symbol{$name}
     }
+    
+    method symtable() {
+        %!symbol
+    }
 }
