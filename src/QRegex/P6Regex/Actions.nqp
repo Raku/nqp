@@ -656,17 +656,17 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             my $nfapast := QAST::Op.new( :op('list') );
             $ast.name(QAST::Node.unique('alt_nfa_') ~ '_' ~ ~nqp::time_n());
             for $ast.list {
-                alt_nfas($_, $subid, $initpast);
+                qalt_nfas($_, $subid, $initpast);
                 $nfapast.push(QRegex::NFA.new.addnode($_).qast(:non_empty));
             }
             my $nfablock := QAST::BlockMemo.new( :name($subid ~ '_' ~ $ast.name), $nfapast);
             $initpast.push(QAST::Stmt.new($nfablock));
         }
         elsif $rxtype eq 'subcapture' || $rxtype eq 'quant' {
-            alt_nfas($ast[0], $subid, $initpast)
+            qalt_nfas($ast[0], $subid, $initpast)
         }
         elsif $rxtype eq 'concat' || $rxtype eq 'altseq' || $rxtype eq 'conj' || $rxtype eq 'conjseq' {
-            for $ast.list { alt_nfas($_, $subid, $initpast) }
+            for $ast.list { qalt_nfas($_, $subid, $initpast) }
         }
     }
 
