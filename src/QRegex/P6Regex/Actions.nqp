@@ -556,7 +556,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                                          :name($blockid ~ '_caps'),  $hashpast );
         $initpast.push(QAST::Stmt.new($capblock));
 
-        my $nfapast := QRegex::NFA.new.addnode($qast).past;
+        my $nfapast := QRegex::NFA.new.addnode($qast).qast;
         if $nfapast {
             my $nfablock := QAST::Block.new( 
                                 :hll<nqp>, :namespace(['Sub']), :lexical(0),
@@ -660,7 +660,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             $ast.name(QAST::Node.unique('alt_nfa_') ~ '_' ~ ~nqp::time_n());
             for $ast.list {
                 alt_nfas($_, $subid, $initpast);
-                $nfapast.push(QRegex::NFA.new.addnode($_).past(:non_empty));
+                $nfapast.push(QRegex::NFA.new.addnode($_).qast(:non_empty));
             }
             my $nfablock := QAST::Block.new(
                                 :hll<nqp>, :namespace(['Sub']), :lexical(0),

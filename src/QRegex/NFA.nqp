@@ -248,6 +248,27 @@ class QRegex::NFA {
         $past;
     }
 
+    method qast(:$non_empty) {
+        unless $!edges {
+            return 0 unless $non_empty;
+            self.addedge(1, 0, $EDGE_FATE, 0, :newedge(1)) 
+        }
+        my $past := QAST::Op.new(:op<list>);
+        for $!states -> @values {
+            my $list := QAST::Op.new(:op<list>);
+            for @values {
+                if +$_ eq $_ {
+                    $list.push(QAST::IVal.new( :value($_) ));
+                }
+                else {
+                    $list.push(QAST::SVal.new( :value($_) ));
+                }
+            }
+            $past.push($list);
+        }
+        $past;
+    }
+
     method mergesubrule($start, $to, $fate, $cursor, $name, %caller_seen?) {
         #nqp::say("adding $name");
         my %seen := nqp::clone(%caller_seen);
