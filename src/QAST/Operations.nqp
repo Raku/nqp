@@ -445,6 +445,27 @@ for <repeat_while repeat_until> -> $op_name {
     });
 }
 
+QAST::Operations.add_core_op('defor', -> $qastcomp, $op {
+    if +$op.list != 2 {
+        nqp::die("Operation 'defor' needs 2 operands");
+    }
+    my $ops := $qastcomp.post_new('Ops');
+    my $lbl := $qastcomp.post_new('Label', :name('defor'));
+    my $dreg := $*REGALLOC.fresh_i();
+    my $rreg := $*REGALLOC.fresh_p();
+    my $test := $qastcomp.coerce($qastcomp.as_post($op[0]), 'P');
+    my $then := $qastcomp.coerce($qastcomp.as_post($op[1]), 'P');
+    $ops.push($test);
+    $ops.push_pirop('set', $rreg, $test);
+    $ops.push_pirop('defined', $dreg, $rreg);
+    $ops.push_pirop('if', $dreg, $lbl);
+    $ops.push($then);
+    $ops.push_pirop('set', $rreg, $then);
+    $ops.push($lbl);
+    $ops.result($rreg);
+    $ops
+});
+
 QAST::Operations.add_core_op('xor', -> $qastcomp, $op {
     my $ops := $qastcomp.post_new('Ops');
     $ops.result($*REGALLOC.fresh_p());
