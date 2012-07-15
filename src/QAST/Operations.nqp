@@ -445,6 +445,58 @@ for <repeat_while repeat_until> -> $op_name {
     });
 }
 
+QAST::Operations.add_core_op('for', -> $qastcomp, $op {
+    if +$op.list != 2 {
+        nqp::die("Operation 'for' needs 2 operands");
+    }
+    unless nqp::istype($op[1], QAST::Block) {
+        nqp::die("Operation 'for' expects a block as its second operand");
+    }
+    if $op[1].blocktype eq 'immediate' {
+        $op[1].blocktype('declaration');
+    }
+    
+    # Evaluate the thing we'll iterate over and get an iterator.
+    # Also evaluate the block.
+    my $res       := $*REGALLOC.fresh_p();
+    my $curval    := $*REGALLOC.fresh_p();
+    my $iter      := $*REGALLOC.fresh_p();
+    my $ops       := $qastcomp.post_new('Ops');
+    my $listpost  := $qastcomp.coerce($qastcomp.as_post($op[0]), "P");
+    my $blockpost := $qastcomp.coerce($qastcomp.as_post($op[1]), "P");
+    $ops.push($listpost);
+    $ops.push($blockpost);
+    $ops.push_pirop('set', $res, $listpost);
+    $ops.push_pirop('iter', $iter, $listpost);
+    
+    # Loop while we still have values.
+    my $lbl_loop := $qastcomp.post_new('Label', :name('for_start'));
+    my $lbl_end := $qastcomp.post_new('Label', :name('for_end'));
+    $ops.push($lbl_loop);
+    $ops.push_pirop('unless', $iter, $lbl_end);
+    
+    # Fetch values.
+    my @valreg;
+    my $arity := $op[1].arity || 1;
+    while $arity > 0 {
+        my $reg := $*REGALLOC.fresh_p();
+        $ops.push_pirop('shift', $reg, $iter);
+        nqp::push(@valreg, $reg);
+        $arity := $arity - 1;
+    }
+    
+    # Emit call.
+    $ops.push_pirop('call', $blockpost, |@valreg, :result($res));
+    
+    # Loop.
+    $ops.push_pirop('goto', $lbl_loop);
+    $ops.push($lbl_end);
+    
+    # Set result.
+    $ops.result($res);
+    $ops
+});
+
 QAST::Operations.add_core_op('defor', -> $qastcomp, $op {
     if +$op.list != 2 {
         nqp::die("Operation 'defor' needs 2 operands");
