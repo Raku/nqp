@@ -33,7 +33,11 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     }
 
     token nibbler {
-        :my %*RX := nqp::clone(pir::find_dynamic_lex__Ps('%*RX'));
+        :my $OLDRX := pir::find_dynamic_lex__Ps('%*RX');
+        :my %*RX;
+        {
+            for $OLDRX { %*RX{$_.key} := $_.value; }
+        }
         [ <.ws> ['||'|'|'|'&&'|'&'] ]?
         <termaltseq>
     }
