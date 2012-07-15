@@ -552,7 +552,7 @@ QAST::Operations.add_core_op('bind', -> $qastcomp, $op {
 });
 
 # Calling.
-sub handle_arg($arg, $qastcomp, $ops, @arg_results) {
+sub handle_arg($arg, $qastcomp, $ops, @pos_arg_results, @named_arg_results) {
     my $arg_post := $qastcomp.as_post($arg);
     $ops.push($arg_post);
     my $result := $arg_post.result;
@@ -565,7 +565,12 @@ sub handle_arg($arg, $qastcomp, $ops, @arg_results) {
     elsif $arg.named -> $name {
         $result := "$result :named(" ~ $qastcomp.escape($name) ~ ")";
     }
-    @arg_results.push($result);
+    if $arg.named {
+        @named_arg_results.push($result);
+    }
+    else {
+        @pos_arg_results.push($result);
+    }
 }
 
 QAST::Operations.add_core_op('call', -> $qastcomp, $op {
@@ -584,9 +589,10 @@ QAST::Operations.add_core_op('call', -> $qastcomp, $op {
     
     # Process arguments.
     my $ops := $qastcomp.post_new('Ops');
-    my @arg_results;
+    my @pos_arg_results;
+    my @named_arg_results;
     for @args {
-        handle_arg($_, $qastcomp, $ops, @arg_results);
+        handle_arg($_, $qastcomp, $ops, @pos_arg_results, @named_arg_results);
     }
     
     # Figure out result register type and allocate a register for it.
@@ -595,7 +601,7 @@ QAST::Operations.add_core_op('call', -> $qastcomp, $op {
     
     # Generate call.
     $ops.push($callee);
-    $ops.push_pirop('call', $callee.result, |@arg_results, :result($res_reg));
+    $ops.push_pirop('call', $callee.result, |@pos_arg_results, |@named_arg_results, :result($res_reg));
     
     # Result is the result of the call.
     $ops.result($res_reg);
@@ -624,9 +630,10 @@ QAST::Operations.add_core_op('callmethod', -> $qastcomp, $op {
     
     # Process arguments.
     my $ops := $qastcomp.post_new('Ops');
-    my @arg_results;
+    my @pos_arg_results;
+    my @named_arg_results;
     for @args {
-        handle_arg($_, $qastcomp, $ops, @arg_results);
+        handle_arg($_, $qastcomp, $ops, @pos_arg_results, @named_arg_results);
     }
     
     # Figure out result register type and allocate a register for it.
@@ -635,7 +642,7 @@ QAST::Operations.add_core_op('callmethod', -> $qastcomp, $op {
     
     # Generate method call.
     $ops.push($name);
-    $ops.push_pirop('callmethod', $name.result, |@arg_results, :result($res_reg));
+    $ops.push_pirop('callmethod', $name.result, |@pos_arg_results, |@named_arg_results, :result($res_reg));
     
     # Result is the result of the call.
     $ops.result($res_reg);
