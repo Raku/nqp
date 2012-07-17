@@ -331,6 +331,8 @@ static void dyncall_wb_ca(PMC *obj) {
                 case CARRAY_ELEM_KIND_CSTRUCT:
                     objptr = (CStructBody *) OBJECT_BODY(body->child_objs[i]);
                     break;
+                default:
+                    objptr = NULL;
             }
         }
         else {
@@ -468,7 +470,7 @@ inline op nqp_native_call_build(in PMC, in STR, in STR, in STR, in PMC, in PMC) 
 
     /* Transform each of the args info structures into a flag. */
     body->num_args  = VTABLE_elements(interp, arg_info);
-    body->arg_types = mem_sys_allocate(sizeof(INTVAL) * (body->num_args ? body->num_args : 1));
+    body->arg_types = (INTVAL *) mem_sys_allocate(sizeof(INTVAL) * (body->num_args ? body->num_args : 1));
     for (i = 0; i < body->num_args; i++) {
         PMC *info = VTABLE_get_pmc_keyed_int(interp, arg_info, i);
         body->arg_types[i] = get_arg_type(interp, info, 0);
@@ -567,7 +569,7 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
                                                                         Parrot_utf8_encoding_ptr);
                         if (body->arg_types[i] & DYNCALL_ARG_FREE_STR_MASK) {
                             if (!free_strs)
-                                free_strs = mem_sys_allocate(body->num_args * sizeof(char *));
+                                free_strs = (char**) mem_sys_allocate(body->num_args * sizeof(char *));
                             free_strs[num_strs] = str;
                             num_strs++;
                         }
