@@ -9,6 +9,7 @@ BEGIN_OPS_PREAMBLE
 #include "../6model/reprs/CPointer.h"
 #include "../6model/reprs/CArray.h"
 #include "../6model/reprs/CStr.h"
+#include "../6model/reprs/dyncall_reprs.h"
 
 /* This library contains just three operations: one to initialize it,
  * one to look up a native function and build a handle to it, and
