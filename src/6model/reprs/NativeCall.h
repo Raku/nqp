@@ -7,7 +7,7 @@
 /* Body of a NativeCall. */
 typedef struct {
     char *lib_name;
-    void *lib_handle;
+    DLLib *lib_handle;
     void *entry_point;
     INTVAL convention;
     INTVAL num_args;
