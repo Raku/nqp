@@ -363,12 +363,14 @@ for <while until> -> $op_name {
         # Compile each of the children; we'll need to look at the result
         # types and pick an overall result type if in non-void context.
         my @comp_ops;
+        my @comp_types;
         for $op.list {
             my $comp := $qastcomp.as_post($_);
             @comp_ops.push($comp);
+            @comp_types.push($qastcomp.infer_type($comp));
         }
-        my $res_type := 'i';
-        my $res_reg := $*REGALLOC."fresh_$res_type"();
+        my $res_type := @comp_types[0] eq @comp_types[1] ?? nqp::lc(@comp_types[0]) !! 'p';
+        my $res_reg  := $*REGALLOC."fresh_$res_type"();
 
         # Evaluate the condition; store result if needed.
         my $ops := $qastcomp.post_new('Ops');
@@ -414,12 +416,14 @@ for <repeat_while repeat_until> -> $op_name {
         # Compile each of the children; we'll need to look at the result
         # types and pick an overall result type if in non-void context.
         my @comp_ops;
+        my @comp_types;
         for $op.list {
             my $comp := $qastcomp.as_post($_);
             @comp_ops.push($comp);
+            @comp_types.push($qastcomp.infer_type($comp));
         }
-        my $res_type := 'i';
-        my $res_reg := $*REGALLOC."fresh_$res_type"();
+        my $res_type := @comp_types[0] eq @comp_types[1] ?? nqp::lc(@comp_types[0]) !! 'p';
+        my $res_reg  := $*REGALLOC."fresh_$res_type"();
 
         # Evaluate the condition; store result if needed.
         my $ops := $qastcomp.post_new('Ops');
