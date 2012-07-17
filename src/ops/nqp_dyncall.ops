@@ -225,6 +225,8 @@ make_str_result(PARROT_INTERP, PMC *type, INTVAL ret_type, char *cstring) {
             case DYNCALL_ARG_UTF16STR:
                 value = Parrot_str_new_init(interp, cstring, strlen(cstring), Parrot_utf16_encoding_ptr, 0);
                 break;
+            default:
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION, "Internal error: unhandled encoding");
         }
         result = REPR(type)->allocate(interp, STABLE(type));
         REPR(result)->initialize(interp, STABLE(result), OBJECT_BODY(result));
@@ -610,6 +612,8 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
             case DYNCALL_ARG_CALLBACK:
                 /* XXX Above are all still todo. */
                 dcArgPointer(vm, NULL);
+            default:
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION, "Internal error: unhandled dyncall argument type");
         }
     }
 
@@ -659,6 +663,8 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
             /* XXX Above are all still todo. */
             dcCallPointer(vm, body->entry_point);
             result = $2;
+        default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION, "Internal error: unhandled dyncall return type");
     }
 
     for (i = 0; i < body->num_args; i++) {
