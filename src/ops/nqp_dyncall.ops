@@ -440,7 +440,7 @@ inline op nqp_native_call_setup() :base_core {
  * There's no need to manually release the handle; when it is no longer
  * referenced, it will be automatically garbage collected.
  */
-inline op nqp_native_call_build(in PMC, in STR, in STR, in STR, in PMC, in PMC) :base_core {
+inline op nqp_native_call_build(invar PMC, in STR, in STR, in STR, invar PMC, invar PMC) :base_core {
     char *lib_name    = Parrot_str_to_cstring(interp, $2);
     char *sym_name    = Parrot_str_to_cstring(interp, $3);
     PMC  *arg_info    = $5;
@@ -497,7 +497,7 @@ inline op nqp_native_call_build(in PMC, in STR, in STR, in STR, in PMC, in PMC) 
  * result comes back as NULL, then $1 will simply be $2 (which is
  * presumably a type object).
  */
-inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
+inline op nqp_native_call(out PMC, invar PMC, invar PMC, invar PMC) :base_core {
     PMC *args        = $4;
     PMC *result      = PMCNULL;
     char **free_strs = NULL;
