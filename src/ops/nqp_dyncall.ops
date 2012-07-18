@@ -9,6 +9,7 @@ BEGIN_OPS_PREAMBLE
 #include "../6model/reprs/CPointer.h"
 #include "../6model/reprs/CArray.h"
 #include "../6model/reprs/CStr.h"
+#include "../6model/reprs/dyncall_reprs.h"
 
 /* This library contains just three operations: one to initialize it,
  * one to look up a native function and build a handle to it, and
@@ -224,6 +225,8 @@ make_str_result(PARROT_INTERP, PMC *type, INTVAL ret_type, char *cstring) {
             case DYNCALL_ARG_UTF16STR:
                 value = Parrot_str_new_init(interp, cstring, strlen(cstring), Parrot_utf16_encoding_ptr, 0);
                 break;
+            default:
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION, "Internal error: unhandled encoding");
         }
         result = REPR(type)->allocate(interp, STABLE(type));
         REPR(result)->initialize(interp, STABLE(result), OBJECT_BODY(result));
@@ -330,6 +333,8 @@ static void dyncall_wb_ca(PMC *obj) {
                 case CARRAY_ELEM_KIND_CSTRUCT:
                     objptr = (CStructBody *) OBJECT_BODY(body->child_objs[i]);
                     break;
+                default:
+                    objptr = NULL;
             }
         }
         else {
@@ -467,7 +472,7 @@ inline op nqp_native_call_build(in PMC, in STR, in STR, in STR, in PMC, in PMC) 
 
     /* Transform each of the args info structures into a flag. */
     body->num_args  = VTABLE_elements(interp, arg_info);
-    body->arg_types = mem_sys_allocate(sizeof(INTVAL) * (body->num_args ? body->num_args : 1));
+    body->arg_types = (INTVAL *) mem_sys_allocate(sizeof(INTVAL) * (body->num_args ? body->num_args : 1));
     for (i = 0; i < body->num_args; i++) {
         PMC *info = VTABLE_get_pmc_keyed_int(interp, arg_info, i);
         body->arg_types[i] = get_arg_type(interp, info, 0);
@@ -566,7 +571,7 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
                                                                         Parrot_utf8_encoding_ptr);
                         if (body->arg_types[i] & DYNCALL_ARG_FREE_STR_MASK) {
                             if (!free_strs)
-                                free_strs = mem_sys_allocate(body->num_args * sizeof(char *));
+                                free_strs = (char**) mem_sys_allocate(body->num_args * sizeof(char *));
                             free_strs[num_strs] = str;
                             num_strs++;
                         }
@@ -607,6 +612,8 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
             case DYNCALL_ARG_CALLBACK:
                 /* XXX Above are all still todo. */
                 dcArgPointer(vm, NULL);
+            default:
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION, "Internal error: unhandled dyncall argument type");
         }
     }
 
@@ -656,6 +663,8 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
             /* XXX Above are all still todo. */
             dcCallPointer(vm, body->entry_point);
             result = $2;
+        default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION, "Internal error: unhandled dyncall return type");
     }
 
     for (i = 0; i < body->num_args; i++) {

@@ -49,8 +49,10 @@ sub test_line($line) {
         my $cursor := NQPCursor."!cursor_init"($target, :c(0));
         my $match  := $rxsub($cursor).MATCH;
         if $expect_substr {
-            my $m := nqp::index($match."!dump_str"('mob'), $expect_substr) >= 0;
+            my $got := ~$match."!dump_str"('mob');
+            my $m := nqp::index($got, $expect_substr) >= 0;
             ok($m, $desc);
+            say("#      got: $got\n# expected: $expect_substr") unless $m;
         }
         else {
             ok($expect eq 'y' ?? $match !! !$match, $desc);

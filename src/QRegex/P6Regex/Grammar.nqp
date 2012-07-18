@@ -128,6 +128,8 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token metachar:sym<::> { <sym> <.panic: ':: not yet implemented'> }
     token metachar:sym<lwb> { $<sym>=['<<'|'«'] }
     token metachar:sym<rwb> { $<sym>=['>>'|'»'] }
+    token metachar:sym<from> { '<(' }
+    token metachar:sym<to>   { ')>' }
     token metachar:sym<bs> { \\ <backslash> }
     token metachar:sym<mod> { <mod_internal> }
     token metachar:sym<quantifier> {

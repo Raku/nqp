@@ -418,7 +418,7 @@ static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *
 
 /* Deserializes the REPR data. */
 static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader *reader) {
-    CArrayREPRData *repr_data = st->REPR_data = mem_sys_allocate_zeroed(sizeof(CArrayREPRData));
+    CArrayREPRData *repr_data = st->REPR_data = (CArrayREPRData *) mem_sys_allocate_zeroed(sizeof(CArrayREPRData));
     repr_data->elem_size = reader->read_int(interp, reader);
     repr_data->elem_type = reader->read_ref(interp, reader);
     repr_data->elem_kind = reader->read_int(interp, reader);

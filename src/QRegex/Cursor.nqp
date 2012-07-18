@@ -159,6 +159,17 @@ role NQPCursorRole {
         }
     }
 
+    method !cursor_more(*%opts) {
+        return self."!cursor_next"() if %opts<ex>;
+        my $new := self.CREATE();
+        nqp::bindattr($new, $?CLASS, '$!orig', $!orig);
+        nqp::bindattr_s($new, $?CLASS, '$!target', $!target);
+        nqp::bindattr_i($new, $?CLASS, '$!from', -1);
+        nqp::bindattr_i($new, $?CLASS, '$!pos',
+            (%opts<ov> || $!from >= $!pos) ?? $!from+1 !! $!pos);
+        $!regexsub($new);
+    }
+
     method !reduce($name) {
         my $actions := pir::find_dynamic_lex__Ps('$*ACTIONS');
         nqp::findmethod($actions, $name)($actions, self.MATCH)
@@ -257,9 +268,9 @@ role NQPCursorRole {
         my $cur := self."!cursor_start"();
         my $litlen := nqp::chars($str);
         $cur."!cursor_pass"($!pos + $litlen)
-          if $i
-            ?? nqp::lc(nqp::substr($!target, $!pos, $litlen)) eq nqp::lc($str)
-            !! nqp::substr($!target, $!pos, $litlen) eq $str;
+          if $litlen < 1 
+              ||  ($i ?? nqp::lc(nqp::substr($!target, $!pos, $litlen)) eq nqp::lc($str)
+                      !! nqp::substr($!target, $!pos, $litlen) eq $str);
         $cur;
     }
 
@@ -489,7 +500,10 @@ class NQPCursor does NQPCursorRole {
             my $iter := nqp::iterator(%ch);
             while $iter {
                 $key := ~nqp::shift($iter);
-                if nqp::iscclass(pir::const::CCLASS_NUMERIC, $key, 0) {
+                if $key eq '$!from' || $key eq '$!to' {
+                    nqp::bindattr_i($match, NQPMatch, $key, %ch{$key}.from);
+                }
+                elsif nqp::iscclass(pir::const::CCLASS_NUMERIC, $key, 0) {
                     $list := nqp::list() unless $list;
                     nqp::bindpos($list, $key, %ch{$key});
                 }

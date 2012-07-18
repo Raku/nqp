@@ -105,7 +105,7 @@ static void compose(PARROT_INTERP, PMC *nci) {
     STABLE(obj)->method_cache            = ((KnowHOWREPRInstance *)PMC_data(self))->body.methods;
     STABLE(obj)->mode_flags              = METHOD_CACHE_AUTHORITATIVE;
     STABLE(obj)->type_check_cache_length = 1;
-    STABLE(obj)->type_check_cache        = mem_sys_allocate(sizeof(PMC *));
+    STABLE(obj)->type_check_cache        = (PMC **)mem_sys_allocate(sizeof(PMC *));
     STABLE(obj)->type_check_cache[0]     = obj;
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", obj);
 }

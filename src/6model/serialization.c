@@ -182,7 +182,7 @@ static void get_stable_ref_info(PARROT_INTERP, SerializationWriter *writer,
 }
 
 /* Expands current target storage as needed. */
-void expand_storage_if_needed(PARROT_INTERP, SerializationWriter *writer, INTVAL need) {
+static void expand_storage_if_needed(PARROT_INTERP, SerializationWriter *writer, INTVAL need) {
     if (*(writer->cur_write_offset) + need > *(writer->cur_write_limit)) {
         *(writer->cur_write_limit) *= 2;
         *(writer->cur_write_buffer) = (char *)mem_sys_realloc(*(writer->cur_write_buffer),
@@ -191,21 +191,21 @@ void expand_storage_if_needed(PARROT_INTERP, SerializationWriter *writer, INTVAL
 }
 
 /* Writing function for native integers. */
-void write_int_func(PARROT_INTERP, SerializationWriter *writer, INTVAL value) {
+static void write_int_func(PARROT_INTERP, SerializationWriter *writer, INTVAL value) {
     expand_storage_if_needed(interp, writer, 8);
     write_int64(*(writer->cur_write_buffer), *(writer->cur_write_offset), value);
     *(writer->cur_write_offset) += 8;
 }
 
 /* Writing function for native numbers. */
-void write_num_func(PARROT_INTERP, SerializationWriter *writer, FLOATVAL value) {
+static void write_num_func(PARROT_INTERP, SerializationWriter *writer, FLOATVAL value) {
     expand_storage_if_needed(interp, writer, 8);
     write_double(*(writer->cur_write_buffer), *(writer->cur_write_offset), value);
     *(writer->cur_write_offset) += 8;
 }
 
 /* Writing function for native strings. */
-void write_str_func(PARROT_INTERP, SerializationWriter *writer, STRING *value) {
+static void write_str_func(PARROT_INTERP, SerializationWriter *writer, STRING *value) {
     Parrot_Int4 heap_loc = add_string_to_heap(interp, writer, value);
     expand_storage_if_needed(interp, writer, 4);
     write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), heap_loc);
@@ -213,7 +213,7 @@ void write_str_func(PARROT_INTERP, SerializationWriter *writer, STRING *value) {
 }
 
 /* Writes an object reference. */
-void write_obj_ref(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
+static void write_obj_ref(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
     Parrot_Int4 sc_id, idx;
     
     if (PMC_IS_NULL(SC_PMC(ref))) {
@@ -578,7 +578,7 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
 }
 
 /* Writing function for references to STables. */
-void write_stable_ref_func(PARROT_INTERP, SerializationWriter *writer, STable *st) {
+static void write_stable_ref_func(PARROT_INTERP, SerializationWriter *writer, STable *st) {
     Parrot_Int4 sc_id, idx;
     get_stable_ref_info(interp, writer, st->stable_pmc, &sc_id, &idx);
     expand_storage_if_needed(interp, writer, 8);
@@ -1111,7 +1111,7 @@ static PMC * lookup_stable(PARROT_INTERP, SerializationReader *reader, Parrot_In
 }
 
 /* Ensure that we aren't going to read off the end of the buffer. */
-void assert_can_read(PARROT_INTERP, SerializationReader *reader, INTVAL amount) {
+static void assert_can_read(PARROT_INTERP, SerializationReader *reader, INTVAL amount) {
     char *read_end = *(reader->cur_read_buffer) + *(reader->cur_read_offset) + amount;
     if (read_end > *(reader->cur_read_end))
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -1119,7 +1119,7 @@ void assert_can_read(PARROT_INTERP, SerializationReader *reader, INTVAL amount) 
 }
 
 /* Reading function for native integers. */
-INTVAL read_int_func(PARROT_INTERP, SerializationReader *reader) {
+static INTVAL read_int_func(PARROT_INTERP, SerializationReader *reader) {
     INTVAL result;
     assert_can_read(interp, reader, 8);
     result = read_int64(*(reader->cur_read_buffer), *(reader->cur_read_offset));
@@ -1128,7 +1128,7 @@ INTVAL read_int_func(PARROT_INTERP, SerializationReader *reader) {
 }
 
 /* Reading function for native numbers. */
-FLOATVAL read_num_func(PARROT_INTERP, SerializationReader *reader) {
+static FLOATVAL read_num_func(PARROT_INTERP, SerializationReader *reader) {
     FLOATVAL result;
     assert_can_read(interp, reader, 8);
     result = read_double(*(reader->cur_read_buffer), *(reader->cur_read_offset));
@@ -1137,7 +1137,7 @@ FLOATVAL read_num_func(PARROT_INTERP, SerializationReader *reader) {
 }
 
 /* Reading function for native strings. */
-STRING * read_str_func(PARROT_INTERP, SerializationReader *reader) {
+static STRING * read_str_func(PARROT_INTERP, SerializationReader *reader) {
     STRING *result;
     assert_can_read(interp, reader, 4);
     result = read_string_from_heap(interp, reader,
@@ -1147,7 +1147,7 @@ STRING * read_str_func(PARROT_INTERP, SerializationReader *reader) {
 }
 
 /* Reads in and resolves an object references. */
-PMC * read_obj_ref(PARROT_INTERP, SerializationReader *reader) {
+static PMC * read_obj_ref(PARROT_INTERP, SerializationReader *reader) {
     Parrot_Int4 sc_id, idx;
 
     assert_can_read(interp, reader, 8);
@@ -1237,7 +1237,7 @@ static PMC * read_hash_str_var(PARROT_INTERP, SerializationReader *reader) {
 }
 
 /* Reads in a code reference. */
-PMC * read_code_ref(PARROT_INTERP, SerializationReader *reader) {
+static PMC * read_code_ref(PARROT_INTERP, SerializationReader *reader) {
     Parrot_Int4 sc_id, idx;
 
     assert_can_read(interp, reader, 8);
@@ -1297,7 +1297,7 @@ PMC * read_ref_func(PARROT_INTERP, SerializationReader *reader) {
 }
 
 /* Reading function for STable references. */
-STable * read_stable_ref_func(PARROT_INTERP, SerializationReader *reader) {
+static STable * read_stable_ref_func(PARROT_INTERP, SerializationReader *reader) {
     Parrot_Int4 sc_id, idx;
     
     assert_can_read(interp, reader, 8);
@@ -1684,7 +1684,7 @@ static void deserialize_object(PARROT_INTERP, SerializationReader *reader, INTVA
 }
 
 /* Repossess an object or STable. */
-void repossess(PARROT_INTERP, SerializationReader *reader, INTVAL i) {
+static void repossess(PARROT_INTERP, SerializationReader *reader, INTVAL i) {
     /* Calculate location of table row. */
     char *table_row = reader->root.repos_table + i * REPOS_TABLE_ENTRY_SIZE;
     

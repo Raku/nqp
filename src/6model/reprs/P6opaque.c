@@ -979,12 +979,12 @@ static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *
 
 /* Deserializes the data. */
 static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader *reader) {
-    P6opaqueREPRData *repr_data = st->REPR_data = mem_sys_allocate_zeroed(sizeof(P6opaqueREPRData));
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *) (st->REPR_data = mem_sys_allocate_zeroed(sizeof(P6opaqueREPRData)));
     INTVAL i, num_classes, cur_offset, cur_initialize_slot, cur_gc_mark_slot, cur_gc_cleanup_slot;
     
     repr_data->num_attributes = reader->read_int(interp, reader);
         
-    repr_data->flattened_stables = mem_sys_allocate(MAX(repr_data->num_attributes, 1) * sizeof(STable *));
+    repr_data->flattened_stables = (STable **)mem_sys_allocate(MAX(repr_data->num_attributes, 1) * sizeof(STable *));
     for (i = 0; i < repr_data->num_attributes; i++)
         if (reader->read_int(interp, reader))
             repr_data->flattened_stables[i] = reader->read_stable_ref(interp, reader);
@@ -994,7 +994,7 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
     repr_data->mi = reader->read_int(interp, reader);
     
     if (reader->read_int(interp, reader)) {
-        repr_data->auto_viv_values = mem_sys_allocate(MAX(repr_data->num_attributes, 1) * sizeof(PMC *));
+        repr_data->auto_viv_values = (PMC **)mem_sys_allocate(MAX(repr_data->num_attributes, 1) * sizeof(PMC *));
         for (i = 0; i < repr_data->num_attributes; i++)
             repr_data->auto_viv_values[i] = reader->read_ref(interp, reader);
     }
@@ -1004,7 +1004,7 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
     repr_data->unbox_str_slot = reader->read_int(interp, reader);
     
     if (reader->read_int(interp, reader)) {
-        repr_data->unbox_slots = mem_sys_allocate(MAX(repr_data->num_attributes, 1) * sizeof(P6opaqueBoxedTypeMap));
+        repr_data->unbox_slots = (P6opaqueBoxedTypeMap *)mem_sys_allocate(MAX(repr_data->num_attributes, 1) * sizeof(P6opaqueBoxedTypeMap));
         for (i = 0; i < repr_data->num_attributes; i++) {
             repr_data->unbox_slots[i].repr_id = reader->read_int(interp, reader);
             repr_data->unbox_slots[i].slot = reader->read_int(interp, reader);
@@ -1012,7 +1012,7 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
     }
     
     num_classes = reader->read_int(interp, reader);
-    repr_data->name_to_index_mapping = mem_sys_allocate_zeroed((num_classes + 1) * sizeof(P6opaqueNameMap));
+    repr_data->name_to_index_mapping = (P6opaqueNameMap *)mem_sys_allocate_zeroed((num_classes + 1) * sizeof(P6opaqueNameMap));
     for (i = 0; i < num_classes; i++) {
         repr_data->name_to_index_mapping[i].class_key = reader->read_ref(interp, reader);
         repr_data->name_to_index_mapping[i].name_map = reader->read_ref(interp, reader);
@@ -1020,11 +1020,11 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
     
     /* Re-calculate the remaining info, which is platform specific or
      * derived information. */
-    repr_data->attribute_offsets   = mem_sys_allocate(MAX(repr_data->num_attributes, 1) * sizeof(INTVAL));
-    repr_data->gc_pmc_mark_offsets = mem_sys_allocate(MAX(repr_data->num_attributes, 1) * sizeof(INTVAL));
-    repr_data->initialize_slots    = mem_sys_allocate((repr_data->num_attributes + 1) * sizeof(INTVAL));
-    repr_data->gc_mark_slots       = mem_sys_allocate((repr_data->num_attributes + 1) * sizeof(INTVAL));
-    repr_data->gc_cleanup_slots    = mem_sys_allocate((repr_data->num_attributes + 1) * sizeof(INTVAL));
+    repr_data->attribute_offsets   = (INTVAL *)mem_sys_allocate(MAX(repr_data->num_attributes, 1) * sizeof(INTVAL));
+    repr_data->gc_pmc_mark_offsets = (INTVAL *)mem_sys_allocate(MAX(repr_data->num_attributes, 1) * sizeof(INTVAL));
+    repr_data->initialize_slots    = (INTVAL *)mem_sys_allocate((repr_data->num_attributes + 1) * sizeof(INTVAL));
+    repr_data->gc_mark_slots       = (INTVAL *)mem_sys_allocate((repr_data->num_attributes + 1) * sizeof(INTVAL));
+    repr_data->gc_cleanup_slots    = (INTVAL *)mem_sys_allocate((repr_data->num_attributes + 1) * sizeof(INTVAL));
     repr_data->gc_pmc_mark_offsets_count = 0;
     cur_offset          = 0;
     cur_initialize_slot = 0;

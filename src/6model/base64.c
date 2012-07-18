@@ -80,7 +80,7 @@ static int POS(char c)
 //
 void* base64_decode(const char* s, size_t *data_len)
 {
-    char *p;
+    const char *p;
     unsigned char *q, *data;
     int n[4];
 
@@ -91,26 +91,26 @@ void* base64_decode(const char* s, size_t *data_len)
 	q = (unsigned char*) data;
 
 	for (p = s; *p; ) {
-		n[0] = POS(*p++);
-		n[1] = POS(*p++);
-		n[2] = POS(*p++);
-		n[3] = POS(*p++);
+	    n[0] = POS(*p++);
+	    n[1] = POS(*p++);
+	    n[2] = POS(*p++);
+	    n[3] = POS(*p++);
 
-        if (n[0] == -2 || n[1] == -2 || n[2] == -2 || n[3] == -2)
-            return NULL;
+            if (n[0] == -2 || n[1] == -2 || n[2] == -2 || n[3] == -2)
+                return NULL;
 
-		if (n[0] == -1 || n[1] == -1)
-			return NULL;
+	    if (n[0] == -1 || n[1] == -1)
+		return NULL;
 
-		if (n[2] == -1 && n[3] != -1)
-			return NULL;
+	    if (n[2] == -1 && n[3] != -1)
+		return NULL;
 
-		q[0] = (n[0] << 2) + (n[1] >> 4);
-		if (n[2] != -1)
-            q[1] = ((n[1] & 15) << 4) + (n[2] >> 2);
-		if (n[3] != -1)
-            q[2] = ((n[2] & 3) << 6) + n[3];
-		q += 3;
+            q[0] = (n[0] << 2) + (n[1] >> 4);
+	    if (n[2] != -1)
+                q[1] = ((n[1] & 15) << 4) + (n[2] >> 2);
+	    if (n[3] != -1)
+                q[2] = ((n[2] & 3) << 6) + n[3];
+	    q += 3;
 	}
 
 	*data_len = q-data - (n[2]==-1) - (n[3]==-1);

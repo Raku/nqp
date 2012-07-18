@@ -156,9 +156,9 @@ static void register_repr(PARROT_INTERP, STRING *name, REPROps *repr) {
     INTVAL ID = num_reprs;
     num_reprs++;
     if (repr_registry)
-        repr_registry = mem_sys_realloc(repr_registry, num_reprs * sizeof(REPROps *));
+        repr_registry = (REPROps **)mem_sys_realloc(repr_registry, num_reprs * sizeof(REPROps *));
     else
-        repr_registry = mem_sys_allocate(num_reprs * sizeof(REPROps *));
+        repr_registry = (REPROps **)mem_sys_allocate(num_reprs * sizeof(REPROps *));
     repr_registry[ID] = repr;
     VTABLE_set_integer_keyed_str(interp, repr_name_to_id_map, name, ID);
     repr->ID = ID;
@@ -173,7 +173,7 @@ static void register_repr(PARROT_INTERP, STRING *name, REPROps *repr) {
 
 /* Dynamically registers a representation (that is, one defined outside of
  * the 6model core). */
-INTVAL REPR_register_dynamic(PARROT_INTERP, STRING *name, REPROps * (*reg) (PARROT_INTERP, void *, void *)) {
+static INTVAL REPR_register_dynamic(PARROT_INTERP, STRING *name, REPROps * (*reg) (PARROT_INTERP, void *, void *)) {
     REPROps *repr = reg(interp, wrap_object, create_stable);
     register_repr(interp, name, repr);
     return repr->ID;

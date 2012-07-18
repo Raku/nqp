@@ -10,10 +10,6 @@ typedef struct {
     /* GC-marked objects that our C structure points into. */
     PMC **child_objs;
 
-    /* STRING* objects that we have converted to char arrays as well
-     * when we put them in the C structure. */
-    STRING **child_strs;
-    
     /* Pointer to the actual C structure memory; we don't inline it
      * directly in the body, since it doesn't work so well if we get
      * something returned and are wrapping it. */
@@ -38,9 +34,10 @@ typedef struct {
 #define CSTRUCT_ATTR_CSTRUCT   1
 #define CSTRUCT_ATTR_CARRAY    2
 #define CSTRUCT_ATTR_CPTR      3
-#define CSTRUCT_ATTR_MASK      3
+#define CSTRUCT_ATTR_STRING    4
+#define CSTRUCT_ATTR_MASK      7
 /* Bits to shift a slot position to make room for CSTRUCT_ATTR_*. */
-#define CSTRUCT_ATTR_SHIFT     2
+#define CSTRUCT_ATTR_SHIFT     3
 
 /* The CStruct REPR data contains info we need to do allocations, look up
  * attributes and so forth. */
