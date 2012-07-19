@@ -42,7 +42,7 @@ it must not be changed until after the Rakudo release.
 Change the C<VERSION> file in nqp:
 
     $ echo '2012.12' > VERSION
-    $ git commit -m 'bump VERSION to 2012' VERSION
+    $ git commit -m 'bump VERSION to 2012.12' VERSION
     $ git push
 
 =item 3.
