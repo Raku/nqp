@@ -195,6 +195,22 @@ QAST::Operations.add_core_op('list_i', -> $qastcomp, $op {
     $ops
 });
 
+QAST::Operations.add_core_op('list_s', -> $qastcomp, $op {
+    # Create register for the resulting list and make an empty one.
+    my $list_reg := $*REGALLOC.fresh_p();
+    my $ops := $qastcomp.post_new('Ops', :result($list_reg));
+    $ops.push_pirop('new', $list_reg, "'ResizableStringArray'");
+
+    # Push all the things.
+    for $op.list {
+        my $post := $qastcomp.coerce($qastcomp.as_post($_), 's');
+        $ops.push($post);
+        $ops.push_pirop('push', $list_reg, $post.result);
+    }
+
+    $ops
+});
+
 QAST::Operations.add_core_op('hash', -> $qastcomp, $op {
     # Create register for the resulting hash and make an empty one.
     my $hash_reg := $*REGALLOC.fresh_p();
@@ -1218,6 +1234,7 @@ QAST::Operations.add_core_pirop_mapping('isnull_s', 'isnull', 'IS');
 QAST::Operations.add_core_pirop_mapping('istrue', 'istrue', 'IP');
 QAST::Operations.add_core_pirop_mapping('istype', 'type_check', 'IPP');
 QAST::Operations.add_core_pirop_mapping('null', 'null', 'P');
+QAST::Operations.add_core_pirop_mapping('null_s', 'null', 'S');
 QAST::Operations.add_core_pirop_mapping('unbox_i', 'repr_unbox_int', 'IP');
 QAST::Operations.add_core_pirop_mapping('unbox_n', 'repr_unbox_num', 'NP');
 QAST::Operations.add_core_pirop_mapping('unbox_s', 'repr_unbox_str', 'SP');
@@ -1231,3 +1248,5 @@ QAST::Operations.add_core_pirop_mapping('where', 'get_id', 'IP');
 
 # serialization context related opcodes
 QAST::Operations.add_core_pirop_mapping('sha1', 'nqp_sha1', 'Ss');
+QAST::Operations.add_core_pirop_mapping('createsc', 'nqp_create_sc', 'Ps');
+QAST::Operations.add_core_pirop_mapping('deserialize', 'nqp_deserialize_sc', 'vsPPP');

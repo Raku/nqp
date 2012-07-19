@@ -237,7 +237,7 @@ class QAST::Compiler is HLL::Compiler {
             
             # If we need to do deserializatin, emit code for that.
             if $comp_mode {
-                $block.push(self.deserialization_code($cu.sc()));
+                $block.push(self.deserialization_code($cu.sc(), $cu.code_ref_blocks()));
             }
             
             # Add post-deserialization tasks.
@@ -268,9 +268,51 @@ class QAST::Compiler is HLL::Compiler {
         $block_post
     }
     
-    method deserialization_code($sc) {
-        # XXX TODO: serialization context handling
-        QAST::Stmt.new()
+    method deserialization_code($sc, $code_ref_blocks) {
+        # Serialize it.
+        my $sh := pir::new__Ps('ResizableStringArray');
+        my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+        
+        # Now it's serialized, pop this SC off the compiling SC stack.
+        pir::nqp_pop_compiling_sc__v();
+        
+        # String heap QAST.
+        my $sh_ast := QAST::Op.new( :op('list_s') );
+        my $sh_elems := nqp::elems($sh);
+        my $i := 0;
+        while $i < $sh_elems {
+            $sh_ast.push(nqp::isnull_s($sh[$i])
+                ?? QAST::Op.new( :op('null_s') )
+                !! QAST::SVal.new( :value($sh[$i]) ));
+            $i := $i + 1;
+        }
+        
+        # Code references.
+        my $cr_past := QAST::Op.new( :op('list') );
+        for $code_ref_blocks -> $block {
+            $cr_past.push(QAST::BVal.new( :value($block) ));
+        }
+        
+        # Overall deserialization QAST.
+        QAST::Stmt.new(
+            QAST::Op.new(
+                :op('bind'),
+                QAST::Var.new( :name('cur_sc'), :scope('local'), :decl('var') ),
+                QAST::Op.new( :op('createsc'), QAST::SVal.new( :value($sc.handle()) ) )
+            ),
+            QAST::Op.new(
+                :op('callmethod'), :name('set_description'),
+                QAST::Var.new( :name('cur_sc'), :scope('local') ),
+                QAST::SVal.new( :value($sc.description) )
+            ),
+            QAST::Op.new(
+                :op('deserialize'),
+                QAST::SVal.new( :value($serialized) ),
+                QAST::Var.new( :name('cur_sc'), :scope('local') ),
+                $sh_ast,
+                QAST::Block.new( :blocktype('immediate'), $cr_past )
+            )
+        )
     }
 
     multi method as_post(QAST::Block $node) {
@@ -716,6 +758,7 @@ class QAST::Compiler is HLL::Compiler {
             my $reg := $*REGALLOC."fresh_$result"();
             $ops.push($post);
             $ops.push_pirop('set', $reg, $post);
+            $ops.result($reg);
             return $ops;
         }
         elsif $desired eq 'P' || $desired eq 'p' {

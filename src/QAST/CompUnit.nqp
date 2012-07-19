@@ -2,6 +2,9 @@ class QAST::CompUnit is QAST::Node {
     # The serialization context for the compilation unit.
     has $!sc;
     
+    # Code reference block list for the serialization context.
+    has $!code_ref_blocks;
+    
     # Are we in compilation mode?
     has int $!compilation_mode;
     
@@ -35,5 +38,8 @@ class QAST::CompUnit is QAST::Node {
     }
     method post_deserialize(*@value) {
         @!post_deserialize := @value[0] if @value; @!post_deserialize
+    }
+    method code_ref_blocks(*@value) {
+        $!code_ref_blocks := @value[0] if @value; $!code_ref_blocks
     }
 }
