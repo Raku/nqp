@@ -632,7 +632,7 @@ sub handle_arg($arg, $qastcomp, $ops, @pos_arg_results, @named_arg_results) {
 QAST::Operations.add_core_op('call', -> $qastcomp, $op {
     # Work out what callee is.
     my $callee;
-    my @args := $op.list;
+    my @args := nqp::clone($op.list);
     if $op.name {
         $callee := $qastcomp.post_new('Ops', :result($qastcomp.escape($op.name)));
     }
@@ -665,7 +665,7 @@ QAST::Operations.add_core_op('call', -> $qastcomp, $op {
 });
 QAST::Operations.add_core_op('callmethod', -> $qastcomp, $op {
     # Ensure we at least have an invocant.
-    my @args := $op.list;
+    my @args := nqp::clone($op.list);
     if +@args == 0 {
         pir::die('Method call node requires at least one child');
     }
