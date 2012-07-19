@@ -62,6 +62,12 @@ the tag you just set on NQP.
 
 =item 5.
 
+Cut a release tarball (needed for the Rakudo Star release).
+
+    git archive --format=tar 2012.07 | gzip -9 > ~/nqp-2012.07.tar.gz
+
+=item 6.
+
 Continue with the Rakudo release since that's currently the only reason
 to have an NQP release.
 
