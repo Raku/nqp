@@ -15,8 +15,9 @@ immediately prior to the Rakudo release.
 
 =item 1.
 
-*Warning: Since 2012.07, this first step should only be done if you know
-of a reason the Parrot revision needs updating.*
+*Warning: Since 2012.07, this first step should only be done if the current
+revision is not a Parrot release. So this step may or may not apply,
+depending.*
 
 Edit NQP's F<tools/build/PARROT_REVISION> file to contain the latest tag
 of the Parrot repository corresponding to Parrot's monthly release.  For
