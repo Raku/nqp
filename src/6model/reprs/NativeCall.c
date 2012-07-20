@@ -77,6 +77,8 @@ static void gc_cleanup(PARROT_INTERP, STable *st, void *data) {
         dlFreeLibrary(body->lib_handle);
     if (body->arg_types)
         mem_sys_free(body->arg_types);
+    if (body->arg_info)
+        mem_sys_free(body->arg_info);
 }
 
 /* This Parrot-specific addition to the API is used to free an object. */
@@ -84,6 +86,18 @@ static void gc_free(PARROT_INTERP, PMC *obj) {
     gc_cleanup(interp, STABLE(obj), OBJECT_BODY(obj));
     mem_sys_free(PMC_data(obj));
     PMC_data(obj) = NULL;
+}
+
+static void gc_mark(PARROT_INTERP, STable *st, void *data) {
+    NativeCallBody *body = (NativeCallBody *)data;
+
+    if (body->arg_info) {
+        INTVAL i;
+        for (i = 0; i < body->num_args; i++) {
+            if (body->arg_info[i])
+                Parrot_gc_mark_PMC_alive(interp, body->arg_info[i]);
+        }
+    }
 }
 
 /* Gets the storage specification for this representation. */

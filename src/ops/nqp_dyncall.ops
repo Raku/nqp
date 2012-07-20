@@ -69,9 +69,20 @@ BEGIN_OPS_PREAMBLE
 #define DYNCALL_ARG_FREE_STR        1
 #define DYNCALL_ARG_FREE_STR_MASK   1
 
+typedef struct {
+    PMC **types;
+    INTVAL *typeinfos;
+    INTVAL length;
+    PARROT_INTERP;
+    PMC *sub;
+    DCCallback *cb;
+} CallbackData;
+
 /* Predeclare some mutually recursive functions. */
 static void dyncall_wb_ca(PMC *);
 static void dyncall_wb_cs(PMC *);
+
+static char callback_handler(DCCallback *cb, DCArgs *args, DCValue *result, CallbackData *data);
 
 /* The ID of the NativeCall, CPointer and CStruct REPRs. */
 static INTVAL nc_repr_id = 0;
@@ -155,6 +166,9 @@ get_arg_type(PARROT_INTERP, PMC *info, INTVAL is_return) {
     else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "carray"))) {
         return DYNCALL_ARG_CARRAY;
     }
+    else if (Parrot_str_equal(interp, type_name, Parrot_str_new_constant(interp, "callback"))) {
+        return DYNCALL_ARG_CALLBACK;
+    }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Unknown type '%Ss' used for native call", type_name);
@@ -182,6 +196,39 @@ get_calling_convention(PARROT_INTERP, STRING *name) {
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Unknown calling convention '%Ss' used for native call", name);
+    }
+}
+
+/* Map argument type id to dyncall character id. */
+static char
+get_signature_char(INTVAL typeid) {
+    switch (typeid & DYNCALL_ARG_TYPE_MASK) {
+        case DYNCALL_ARG_VOID:
+            return 'v';
+        case DYNCALL_ARG_CHAR:
+            return 'c';
+        case DYNCALL_ARG_SHORT:
+            return 's';
+        case DYNCALL_ARG_INT:
+            return 'i';
+        case DYNCALL_ARG_LONG:
+            return 'j';
+        case DYNCALL_ARG_LONGLONG:
+            return 'l';
+        case DYNCALL_ARG_FLOAT:
+            return 'f';
+        case DYNCALL_ARG_DOUBLE:
+            return 'd';
+        case DYNCALL_ARG_ASCIISTR:
+        case DYNCALL_ARG_UTF8STR:
+        case DYNCALL_ARG_UTF16STR:
+        case DYNCALL_ARG_CSTRUCT:
+        case DYNCALL_ARG_CPOINTER:
+        case DYNCALL_ARG_CARRAY:
+        case DYNCALL_ARG_CALLBACK:
+            return 'p';
+        default:
+            return '\0';
     }
 }
 
@@ -278,6 +325,168 @@ make_carray_result(PARROT_INTERP, PMC *type, void *carray) {
         ((CArrayInstance *)PMC_data(result))->body.storage = carray;
     }
     return result;
+}
+
+static DCchar
+unmarshal_char(PARROT_INTERP, PMC *value) {
+    return (DCchar)REPR(value)->box_funcs->get_int(interp, STABLE(value), OBJECT_BODY(value));
+}
+
+static DCshort
+unmarshal_short(PARROT_INTERP, PMC *value) {
+    return (DCshort)REPR(value)->box_funcs->get_int(interp, STABLE(value), OBJECT_BODY(value));
+}
+
+static DCint
+unmarshal_int(PARROT_INTERP, PMC *value) {
+    return (DCint)REPR(value)->box_funcs->get_int(interp, STABLE(value), OBJECT_BODY(value));
+}
+
+static DClong
+unmarshal_long(PARROT_INTERP, PMC *value) {
+    return (DClong)REPR(value)->box_funcs->get_int(interp, STABLE(value), OBJECT_BODY(value));
+}
+
+static DClonglong
+unmarshal_longlong(PARROT_INTERP, PMC *value) {
+    return (DClonglong)REPR(value)->box_funcs->get_int(interp, STABLE(value), OBJECT_BODY(value));
+}
+
+static DCfloat
+unmarshal_float(PARROT_INTERP, PMC *value) {
+    return (DCfloat)REPR(value)->box_funcs->get_num(interp, STABLE(value), OBJECT_BODY(value));
+}
+
+static DCdouble
+unmarshal_double(PARROT_INTERP, PMC *value) {
+    return (DCdouble)REPR(value)->box_funcs->get_num(interp, STABLE(value), OBJECT_BODY(value));
+}
+
+static char *
+unmarshal_string(PARROT_INTERP, PMC *value, INTVAL type, INTVAL *free) {
+    if (IS_CONCRETE(value)) {
+        char *str;
+        PMC *meth = VTABLE_find_method(interp, STABLE(value)->WHAT,
+            Parrot_str_new_constant(interp, "cstr"));
+
+        /* Initial assumption: string shouldn't be freed. */
+        if(free)
+            *free = 0;
+
+        if (!PMC_IS_NULL(meth)) {
+            PMC *obj;
+            PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+            PMC *cappy = Parrot_pmc_new(interp, enum_class_CallContext);
+
+            VTABLE_push_pmc(interp, cappy, value);
+            Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
+            cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+            Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
+            obj = decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, cappy, 0));
+
+            str = ((CStrInstance *)PMC_data(obj))->body.cstr;
+        }
+        else {
+            str = Parrot_str_to_encoded_cstring(interp,
+                REPR(value)->box_funcs->get_str(interp, STABLE(value), OBJECT_BODY(value)),
+                type & DYNCALL_ARG_TYPE_MASK == DYNCALL_ARG_ASCIISTR ? Parrot_ascii_encoding_ptr :
+                type & DYNCALL_ARG_TYPE_MASK == DYNCALL_ARG_UTF16STR ? Parrot_utf16_encoding_ptr :
+                                                            Parrot_utf8_encoding_ptr);
+
+            if (free && type & DYNCALL_ARG_FREE_STR_MASK) {
+                *free = 1;
+            }
+        }
+        return str;
+    }
+    else {
+        return NULL;
+    }
+return NULL;
+}
+
+static void *
+unmarshal_cstruct(PARROT_INTERP, PMC *value) {
+    if (!IS_CONCRETE(value))
+        return NULL;
+    else if (REPR(value)->ID == cs_repr_id)
+        return ((CStructInstance *)PMC_data(value))->body.cstruct;
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Native call expected object with CStruct representation, but got something else");
+}
+
+static void *
+unmarshal_carray(PARROT_INTERP, PMC *value) {
+    if (!IS_CONCRETE(value))
+        return NULL;
+    else if (REPR(value)->ID == ca_repr_id)
+        return ((CArrayInstance *)PMC_data(value))->body.storage;
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Native call expected object with CArray representation, but got something else");
+}
+
+static void *
+unmarshal_cpointer(PARROT_INTERP, PMC *value) {
+    if (!IS_CONCRETE(value))
+        return NULL;
+    else if (REPR(value)->ID == cp_repr_id)
+        return ((CPointerInstance *)PMC_data(value))->body.ptr;
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Native call expected object with CPointer representation, but got something else");
+}
+
+static void *
+unmarshal_callback(PARROT_INTERP, PMC *value, PMC *info) {
+    if (!IS_CONCRETE(value)) {
+        return NULL;
+    }
+    else {
+        /* TODO: Make sure it's a Callable? */
+        /* TODO: Store data in a hash so that we don't have to
+            * recreate it all the time.*/
+        char *signature;
+        CallbackData *data;
+        PMC *typehash;
+        INTVAL num_info = VTABLE_elements(interp, info);
+        INTVAL i;
+
+        data = (CallbackData *) mem_sys_allocate(sizeof(CallbackData));
+        data->typeinfos = (INTVAL *) mem_sys_allocate(num_info);
+        data->types = (PMC **) mem_sys_allocate(num_info*sizeof(PMC *));
+        /* A dyncall signature looks like this: xxx)x
+        * Argument types before the ) and return type after it. Thus,
+        * num_info+1 must be NULL (zero-terminated string) and num_info-1
+        * must be the ).
+        */
+        signature = (char *) mem_sys_allocate(num_info + 2);
+        signature[num_info+1] = '\0';
+        signature[num_info-1] = ')';
+        typehash = VTABLE_get_pmc_keyed_int(interp, info, 0);
+        data->types[0] = VTABLE_get_pmc_keyed_str(interp, typehash,
+                Parrot_str_new_constant(interp, "typeobj"));
+        data->typeinfos[0] = get_arg_type(interp, typehash, 1);
+        signature[num_info] = get_signature_char(data->typeinfos[0]);
+        for (i = 1; i < num_info; i++) {
+            typehash = VTABLE_get_pmc_keyed_int(interp, info, i);
+            data->types[i] = VTABLE_get_pmc_keyed_str(interp, typehash,
+                    Parrot_str_new_constant(interp, "typeobj"));
+            data->typeinfos[i] = get_arg_type(interp, typehash, 0);
+            signature[i-1] = get_signature_char(data->typeinfos[i]);
+        }
+
+        data->length = num_info;
+        data->interp = interp;
+        data->sub = value;
+
+        data->cb = dcbNewCallback(signature, &callback_handler, data);
+
+        mem_sys_free(signature); /* XXX: Not entirely sure if I can do this... */
+
+        return data->cb;
+    }
 }
 
 PMC * decontainerize(PARROT_INTERP, PMC *var) {
@@ -398,6 +607,126 @@ static void dyncall_wb_cs(PMC *obj) {
     }
 }
 
+/* Handle callback from C code. */
+static char
+callback_handler(DCCallback *cb, DCArgs *args, DCValue *result, CallbackData *data) {
+    PMC *old_ctx = Parrot_pcc_get_signature(data->interp, CURRENT_CONTEXT(data->interp));
+    PMC *cappy = Parrot_pmc_new(data->interp, enum_class_CallContext);
+    PMC *retval;
+    INTVAL i;
+
+    /* Unpack args into Parrot data structures. */
+    for (i = 1; i < data->length; i++) {
+        PMC *value;
+        /*PMC *type = decontainerize(data->interp, data->types[i]);*/
+        PMC *type = data->types[i];
+        INTVAL typeinfo = data->typeinfos[i];
+
+        switch (typeinfo & DYNCALL_ARG_TYPE_MASK) {
+            case DYNCALL_ARG_CHAR:
+                value = make_int_result(data->interp, type, dcbArgChar(args));
+                break;
+            case DYNCALL_ARG_SHORT:
+                value = make_int_result(data->interp, type, dcbArgShort(args));
+                break;
+            case DYNCALL_ARG_INT:
+                value = make_int_result(data->interp, type, dcbArgInt(args));
+                break;
+            case DYNCALL_ARG_LONG:
+                value = make_int_result(data->interp, type, dcbArgLong(args));
+                break;
+            case DYNCALL_ARG_LONGLONG:
+                value = make_int_result(data->interp, type, dcbArgLongLong(args));
+                break;
+            case DYNCALL_ARG_FLOAT:
+                value = make_num_result(data->interp, type, dcbArgFloat(args));
+                break;
+            case DYNCALL_ARG_DOUBLE:
+                value = make_num_result(data->interp, type, dcbArgDouble(args));
+                break;
+            case DYNCALL_ARG_ASCIISTR:
+            case DYNCALL_ARG_UTF8STR:
+            case DYNCALL_ARG_UTF16STR:
+                value = make_str_result(data->interp, type, typeinfo,
+                    (char *)dcbArgPointer(args));
+                break;
+            case DYNCALL_ARG_CSTRUCT:
+                value = make_cstruct_result(data->interp, type, dcbArgPointer(args));
+                break;
+            case DYNCALL_ARG_CPOINTER:
+                value = make_cpointer_result(data->interp, type, dcbArgPointer(args));
+                break;
+            case DYNCALL_ARG_CARRAY:
+                value = make_carray_result(data->interp, type, dcbArgPointer(args));
+                break;
+            case DYNCALL_ARG_CALLBACK:
+                /* TODO: A callback -return- value means that we have a C method
+                * that needs to be wrapped similarly to a is native(...) Perl 6
+                * sub. */
+                dcbArgPointer(args);
+                value = type;
+        default:
+            Parrot_ex_throw_from_c_args(data->interp, NULL, EXCEPTION_INVALID_OPERATION, "Internal error: unhandled dyncall callback argument type");
+        }
+
+        VTABLE_push_pmc(data->interp, cappy, value);
+    }
+
+    /* Set up the Parrot call and invoke the sub. */
+    Parrot_pcc_invoke_from_sig_object(data->interp, data->sub, cappy);
+    cappy = Parrot_pcc_get_signature(data->interp, CURRENT_CONTEXT(data->interp));
+    Parrot_pcc_set_signature(data->interp, CURRENT_CONTEXT(data->interp), old_ctx);
+    retval = VTABLE_get_pmc_keyed_int(data->interp, cappy, 0);
+
+    /* Unpack the return value and set the appropriate field in result and
+     * return signature char. */
+    switch (data->typeinfos[0] & DYNCALL_ARG_TYPE_MASK) {
+        case DYNCALL_ARG_VOID:
+            break;
+        case DYNCALL_ARG_CHAR:
+            result->c = unmarshal_char(data->interp, retval);
+            break;
+        case DYNCALL_ARG_SHORT:
+            result->s = unmarshal_short(data->interp, retval);
+            break;
+        case DYNCALL_ARG_INT:
+            result->i = unmarshal_int(data->interp, retval);
+            break;
+        case DYNCALL_ARG_LONG:
+            result->j = unmarshal_long(data->interp, retval);
+            break;
+        case DYNCALL_ARG_LONGLONG:
+            result->l = unmarshal_longlong(data->interp, retval);
+            break;
+        case DYNCALL_ARG_FLOAT:
+            result->f = unmarshal_float(data->interp, retval);
+            break;
+        case DYNCALL_ARG_DOUBLE:
+            result->d = unmarshal_double(data->interp, retval);
+            break;
+        case DYNCALL_ARG_ASCIISTR:
+        case DYNCALL_ARG_UTF8STR:
+        case DYNCALL_ARG_UTF16STR:
+            result->Z = unmarshal_string(data->interp, retval, data->typeinfos[0], NULL);
+            break;
+        case DYNCALL_ARG_CSTRUCT:
+            result->p = unmarshal_cstruct(data->interp, retval);
+            break;
+        case DYNCALL_ARG_CPOINTER:
+            result->p = unmarshal_cpointer(data->interp, retval);
+            break;
+        case DYNCALL_ARG_CARRAY:
+            result->p = unmarshal_carray(data->interp, retval);
+            break;
+        case DYNCALL_ARG_CALLBACK:
+            result->p = unmarshal_callback(data->interp, retval, data->types[0]);
+            break;
+        default:
+            Parrot_ex_throw_from_c_args(data->interp, NULL, EXCEPTION_INVALID_OPERATION, "Internal error: unhandled dyncall callback return type");
+    }
+
+    return get_signature_char(data->typeinfos[0]);
+}
 
 END_OPS_PREAMBLE
 
@@ -473,10 +802,19 @@ inline op nqp_native_call_build(in PMC, in STR, in STR, in STR, in PMC, in PMC) 
     /* Transform each of the args info structures into a flag. */
     body->num_args  = VTABLE_elements(interp, arg_info);
     body->arg_types = (INTVAL *) mem_sys_allocate(sizeof(INTVAL) * (body->num_args ? body->num_args : 1));
+    body->arg_info  = (PMC **) mem_sys_allocate(sizeof(PMC *) * (body->num_args ? body->num_args : 1));
     for (i = 0; i < body->num_args; i++) {
         PMC *info = VTABLE_get_pmc_keyed_int(interp, arg_info, i);
         body->arg_types[i] = get_arg_type(interp, info, 0);
+        body->arg_info[i]  = NULL;
+
+        if(body->arg_types[i] == DYNCALL_ARG_CALLBACK)
+            body->arg_info[i] = VTABLE_get_pmc_keyed_str(interp, info, Parrot_str_new_constant(interp, "callback_args"));
     }
+
+    /* If the function has any callback parameters we've added markables to
+     * it, so we have to write barrier. */
+    PARROT_GC_WRITE_BARRIER(interp, $1);
 
     /* Transform return argument type info a flag. */
     body->ret_type = get_arg_type(interp, ret_info, 1);
@@ -516,102 +854,53 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
         PMC *value = decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, args, i));
         switch (body->arg_types[i] & DYNCALL_ARG_TYPE_MASK) {
             case DYNCALL_ARG_CHAR:
-                dcArgChar(vm, (DCchar)REPR(value)->box_funcs->get_int(interp,
-                    STABLE(value), OBJECT_BODY(value)));
+                dcArgChar(vm, unmarshal_char(interp, value));
                 break;
             case DYNCALL_ARG_SHORT:
-                dcArgShort(vm, (DCshort)REPR(value)->box_funcs->get_int(interp,
-                    STABLE(value), OBJECT_BODY(value)));
+                dcArgShort(vm, unmarshal_short(interp, value));
                 break;
             case DYNCALL_ARG_INT:
-                dcArgInt(vm, (DCint)REPR(value)->box_funcs->get_int(interp,
-                    STABLE(value), OBJECT_BODY(value)));
+                dcArgInt(vm, unmarshal_int(interp, value));
                 break;
             case DYNCALL_ARG_LONG:
-                dcArgLong(vm, (DClong)REPR(value)->box_funcs->get_int(interp,
-                    STABLE(value), OBJECT_BODY(value)));
+                dcArgLong(vm, unmarshal_long(interp, value));
                 break;
             case DYNCALL_ARG_LONGLONG:
-                dcArgLongLong(vm, (DClonglong)REPR(value)->box_funcs->get_int(interp,
-                    STABLE(value), OBJECT_BODY(value)));
+                dcArgLongLong(vm, unmarshal_longlong(interp, value));
                 break;
             case DYNCALL_ARG_FLOAT:
-                dcArgFloat(vm, (DCfloat)REPR(value)->box_funcs->get_num(interp,
-                    STABLE(value), OBJECT_BODY(value)));
+                dcArgFloat(vm, unmarshal_float(interp, value));
                 break;
             case DYNCALL_ARG_DOUBLE:
-                dcArgDouble(vm, (DCdouble)REPR(value)->box_funcs->get_num(interp,
-                    STABLE(value), OBJECT_BODY(value)));
+                dcArgDouble(vm, unmarshal_double(interp, value));
                 break;
             case DYNCALL_ARG_ASCIISTR:
             case DYNCALL_ARG_UTF8STR:
             case DYNCALL_ARG_UTF16STR:
-                if (IS_CONCRETE(value)) {
-                    char *str;
-                    PMC *meth = VTABLE_find_method(interp, STABLE(value)->WHAT,
-                        Parrot_str_new_constant(interp, "cstr"));
-                    if (!PMC_IS_NULL(meth)) {
-                        PMC *obj;
-                        PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
-                        PMC *cappy = Parrot_pmc_new(interp, enum_class_CallContext);
-
-                        VTABLE_push_pmc(interp, cappy, value);
-                        Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
-                        cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
-                        Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
-                        obj = decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, cappy, 0));
-
-                        str = ((CStrInstance *)PMC_data(obj))->body.cstr;
-                    }
-                    else {
-                        str = Parrot_str_to_encoded_cstring(interp,
-                            REPR(value)->box_funcs->get_str(interp, STABLE(value), OBJECT_BODY(value)),
-                            body->arg_types[i] == DYNCALL_ARG_ASCIISTR ? Parrot_ascii_encoding_ptr :
-                            body->arg_types[i] == DYNCALL_ARG_UTF16STR ? Parrot_utf16_encoding_ptr :
-                                                                        Parrot_utf8_encoding_ptr);
-                        if (body->arg_types[i] & DYNCALL_ARG_FREE_STR_MASK) {
-                            if (!free_strs)
-                                free_strs = (char**) mem_sys_allocate(body->num_args * sizeof(char *));
-                            free_strs[num_strs] = str;
-                            num_strs++;
-                        }
+                {
+                    INTVAL free;
+                    char *str = unmarshal_string(interp, value, body->arg_types[i], &free);
+                    if(free) {
+                        if (!free_strs)
+                            free_strs = (char**) mem_sys_allocate(body->num_args * sizeof(char *));
+                        free_strs[num_strs] = str;
+                        num_strs++;
                     }
                     dcArgPointer(vm, str);
                 }
-                else {
-                    dcArgPointer(vm, NULL);
-                }
                 break;
             case DYNCALL_ARG_CSTRUCT:
-                if (!IS_CONCRETE(value))
-                    dcArgPointer(vm, NULL);
-                else if (REPR(value)->ID == cs_repr_id)
-                    dcArgPointer(vm, ((CStructInstance *)PMC_data(value))->body.cstruct);
-                else
-                    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                        "Native call expected object with CStruct representation, but got something else");
+                dcArgPointer(vm, unmarshal_cstruct(interp, value));
                 break;
             case DYNCALL_ARG_CPOINTER:
-                if (!IS_CONCRETE(value))
-                    dcArgPointer(vm, NULL);
-                else if (REPR(value)->ID == cp_repr_id)
-                    dcArgPointer(vm, ((CPointerInstance *)PMC_data(value))->body.ptr);
-                else
-                    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                        "Native call expected object with CPointer representation, but got something else");
+                dcArgPointer(vm, unmarshal_cpointer(interp, value));
                 break;
             case DYNCALL_ARG_CARRAY:
-                if (!IS_CONCRETE(value))
-                    dcArgPointer(vm, NULL);
-                else if (REPR(value)->ID == ca_repr_id)
-                    dcArgPointer(vm, ((CArrayInstance *)PMC_data(value))->body.storage);
-                else
-                    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                        "Native call expected object with CArray representation, but got something else");
+                dcArgPointer(vm, unmarshal_carray(interp, value));
                 break;
             case DYNCALL_ARG_CALLBACK:
-                /* XXX Above are all still todo. */
-                dcArgPointer(vm, NULL);
+                dcArgPointer(vm, unmarshal_callback(interp, value, body->arg_info[i]));
+                break;
             default:
                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION, "Internal error: unhandled dyncall argument type");
         }
@@ -661,6 +950,9 @@ inline op nqp_native_call(out PMC, in PMC, in PMC, in PMC) :base_core {
             break;
         case DYNCALL_ARG_CALLBACK:
             /* XXX Above are all still todo. */
+            /* TODO: A callback -return- value means that we have a C method
+             * that needs to be wrapped similarly to a is native(...) Perl 6
+             * sub. */
             dcCallPointer(vm, body->entry_point);
             result = $2;
         default:

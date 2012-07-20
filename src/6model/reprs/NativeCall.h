@@ -1,8 +1,9 @@
 #ifndef NATIVECALL_H_GUARD
 #define NATIVECALL_H_GUARD
 
-#include "dyncall/dyncall.h"
-#include "dynload/dynload.h"
+#include "dyncall.h"
+#include "dynload.h"
+#include "dyncall_callback.h"
 
 /* Body of a NativeCall. */
 typedef struct {
@@ -13,6 +14,7 @@ typedef struct {
     INTVAL num_args;
     INTVAL *arg_types;
     INTVAL ret_type;
+    PMC **arg_info;
 } NativeCallBody;
 
 /* This is how an instance with the NativeCall representation looks. */
