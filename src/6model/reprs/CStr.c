@@ -15,7 +15,7 @@ static void set_str(PARROT_INTERP, STable *st, void *data, STRING *value) {
     CStrBody *body = (CStrBody *) data;
     PMC *old_ctx, *cappy, *meth, *enc_pmc;
     STRING *enc;
-    void *encoding;
+    STR_VTABLE *encoding;
 
     if(body->cstr)
         mem_sys_free(body->cstr);
@@ -99,6 +99,7 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     spec.inlineable = STORAGE_SPEC_REFERENCE;
     spec.boxed_primitive = STORAGE_SPEC_BP_STR;
     spec.can_box = 0;
+    spec.bits = sizeof(void *) * 8;;
     return spec;
 }
 
