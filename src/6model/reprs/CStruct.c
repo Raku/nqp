@@ -366,7 +366,7 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
     /* Allocate child obj array. */
     if(repr_data->num_child_objs > 0) {
         size_t bytes = repr_data->num_child_objs*sizeof(PMC *);
-        obj->body.child_objs = mem_sys_allocate(bytes);
+        obj->body.child_objs = (PMC **) mem_sys_allocate(bytes);
         memset(obj->body.child_objs, 0, bytes);
     }
 
@@ -627,6 +627,7 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     spec.inlineable = STORAGE_SPEC_REFERENCE;
     spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
     spec.can_box = 0;
+    spec.bits = sizeof(void *) * 8;
     return spec;
 }
 
