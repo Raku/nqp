@@ -91,6 +91,8 @@ static INTVAL cp_repr_id = 0;
 static INTVAL ca_repr_id = 0;
 static INTVAL cstr_repr_id = 0;
 
+PMC *callback_cache = NULL;
+
 INTVAL get_nc_repr_id(void) { return nc_repr_id; }
 INTVAL get_cs_repr_id(void) { return cs_repr_id; }
 INTVAL get_cp_repr_id(void) { return cp_repr_id; }
@@ -440,16 +442,29 @@ unmarshal_cpointer(PARROT_INTERP, PMC *value) {
 
 static void *
 unmarshal_callback(PARROT_INTERP, PMC *value, PMC *info) {
+    PMC *callback_data;
+
     if (!IS_CONCRETE(value)) {
         return NULL;
     }
+
+    if(!callback_cache) {
+        callback_cache = Parrot_pmc_new(interp, enum_class_Hash);
+        Parrot_pmc_gc_register(interp, callback_cache);
+    }
+
+    callback_data = VTABLE_get_pmc_keyed(interp, callback_cache, value);
+
+    if(!PMC_IS_NULL(callback_data)) {
+        CallbackData *data = (CallbackData *) VTABLE_get_pointer(interp, callback_data);
+        return data->cb;
+    }
     else {
         /* TODO: Make sure it's a Callable? */
-        /* TODO: Store data in a hash so that we don't have to
-            * recreate it all the time.*/
         char *signature;
         CallbackData *data;
         PMC *typehash;
+        PMC *ptrpmc;
         INTVAL num_info = VTABLE_elements(interp, info);
         INTVAL i;
 
@@ -484,6 +499,11 @@ unmarshal_callback(PARROT_INTERP, PMC *value, PMC *info) {
         data->cb = dcbNewCallback(signature, &callback_handler, data);
 
         mem_sys_free(signature); /* XXX: Not entirely sure if I can do this... */
+
+        /* Stash data in a Pointer PMC and chuck that in callback_cache. */
+        ptrpmc = Parrot_pmc_new(interp, enum_class_Pointer);
+        VTABLE_set_pointer(interp, ptrpmc, data);
+        VTABLE_set_pmc_keyed(interp, callback_cache, value, ptrpmc);
 
         return data->cb;
     }
