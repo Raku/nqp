@@ -130,7 +130,7 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
     if (repr_data->elem_kind == CARRAY_ELEM_KIND_NUMERIC)
         body->child_objs = NULL;
     else
-        body->child_objs = mem_sys_allocate_zeroed(4*sizeof(PMC *));
+        body->child_objs = (PMC **) mem_sys_allocate_zeroed(4*sizeof(PMC *));
     body->allocated = 4;
     body->elems = 0;
 }
@@ -190,6 +190,7 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     spec.inlineable = STORAGE_SPEC_REFERENCE;
     spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
     spec.can_box = 0;
+    spec.bits = sizeof(void *) * 8;
     return spec;
 }
 
@@ -211,7 +212,7 @@ static void expand(PARROT_INTERP, CArrayREPRData *repr_data, CArrayBody *body, I
                || repr_data->elem_kind == CARRAY_ELEM_KIND_CSTRUCT
                || repr_data->elem_kind == CARRAY_ELEM_KIND_STRING);
     if (is_complex)
-        body->child_objs = mem_sys_realloc_zeroed(body->child_objs, next_size * sizeof(PMC *), body->allocated * sizeof(PMC *));
+        body->child_objs = (PMC **) mem_sys_realloc_zeroed(body->child_objs, next_size * sizeof(PMC *), body->allocated * sizeof(PMC *));
     body->allocated = next_size;
 }
 static void * at_pos_ref(PARROT_INTERP, STable *st, void *data, INTVAL index) {
@@ -230,6 +231,7 @@ static void * at_pos_ref(PARROT_INTERP, STable *st, void *data, INTVAL index) {
 static PMC * make_object(PARROT_INTERP, STable *st, void *data) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody     *body      = (CArrayBody *)data;
+    PMC            *retval;
 
     switch (repr_data->elem_kind) {
         case CARRAY_ELEM_KIND_STRING:
@@ -240,15 +242,24 @@ static PMC * make_object(PARROT_INTERP, STable *st, void *data) {
             REPR(obj)->initialize(interp, STABLE(obj), OBJECT_BODY(obj));
             REPR(obj)->box_funcs->set_str(interp, STABLE(obj), OBJECT_BODY(obj), str);
             PARROT_GC_WRITE_BARRIER(interp, obj);
-            return obj;
+            retval = obj;
+            break;
         }
         case CARRAY_ELEM_KIND_CARRAY:
-            return make_carray_result(interp, repr_data->elem_type, data);
+            retval = make_carray_result(interp, repr_data->elem_type, data);
+            break;
         case CARRAY_ELEM_KIND_CPOINTER:
-            return make_cpointer_result(interp, repr_data->elem_type, data);
+            retval = make_cpointer_result(interp, repr_data->elem_type, data);
+            break;
         case CARRAY_ELEM_KIND_CSTRUCT:
-            return make_cstruct_result(interp, repr_data->elem_type, data);
+            retval = make_cstruct_result(interp, repr_data->elem_type, data);
+            break;
+        default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Fatal error: unknown CArray elem_kind (%d) in make_object", repr_data->elem_kind);
     }
+
+    return retval;
 }
 static PMC * at_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
@@ -367,6 +378,9 @@ static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, 
             case CARRAY_ELEM_KIND_CPOINTER:
                 cptr = ((CPointerBody *) OBJECT_BODY(obj))->ptr;
                 break;
+            default:
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "Fatal error: unknown CArray elem_kind (%d) in bind_pos_boxed", repr_data->elem_kind);
         }
     }
     else {
@@ -418,7 +432,8 @@ static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *
 
 /* Deserializes the REPR data. */
 static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader *reader) {
-    CArrayREPRData *repr_data = st->REPR_data = (CArrayREPRData *) mem_sys_allocate_zeroed(sizeof(CArrayREPRData));
+    CArrayREPRData *repr_data = (CArrayREPRData *) mem_sys_allocate_zeroed(sizeof(CArrayREPRData));
+    st->REPR_data = (CArrayREPRData *) repr_data;
     repr_data->elem_size = reader->read_int(interp, reader);
     repr_data->elem_type = reader->read_ref(interp, reader);
     repr_data->elem_kind = reader->read_int(interp, reader);
