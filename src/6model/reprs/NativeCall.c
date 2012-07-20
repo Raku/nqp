@@ -51,7 +51,7 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     
     /* Need a fresh handle for resource management purposes. */
     if (src_body->lib_name) {
-        dest_body->lib_name = mem_sys_allocate(strlen(src_body->lib_name) + 1);
+        dest_body->lib_name = (char *) mem_sys_allocate(strlen(src_body->lib_name) + 1);
         strcpy(dest_body->lib_name, src_body->lib_name);
         dest_body->lib_handle = dlLoadLibrary(dest_body->lib_name);
     }
@@ -61,7 +61,7 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     dest_body->convention = src_body->convention;
     dest_body->num_args = src_body->num_args;
     if (src_body->arg_types) {
-        dest_body->arg_types = mem_sys_allocate(sizeof(INTVAL) * (src_body->num_args ? src_body->num_args : 1));
+        dest_body->arg_types = (INTVAL *) mem_sys_allocate(sizeof(INTVAL) * (src_body->num_args ? src_body->num_args : 1));
         memcpy(dest_body->arg_types, src_body->arg_types, src_body->num_args * sizeof(INTVAL));
     }
     dest_body->ret_type = src_body->ret_type;
@@ -92,6 +92,7 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     spec.inlineable = STORAGE_SPEC_INLINED;
     spec.bits = sizeof(NativeCallBody) * 8;
     spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
+    spec.can_box = 0;
     return spec;
 }
 
