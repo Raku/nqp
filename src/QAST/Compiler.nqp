@@ -330,7 +330,14 @@ class QAST::Compiler is HLL::Compiler {
             my $stmts;
             {
                 my $*BLOCK := $block;
-                $stmts := self.compile_all_the_stmts($node.list);
+                my $err;
+                try {
+                    $stmts := self.compile_all_the_stmts($node.list);
+                    CATCH { $err := $! }
+                }
+                if $err {
+                    nqp::die("Error while compiling block " ~ $node.name ~ ": $err");
+                }
             }
             
             # Generate parameter handling code.
