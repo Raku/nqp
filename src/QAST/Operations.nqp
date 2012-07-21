@@ -1059,6 +1059,8 @@ QAST::Operations.add_hll_unbox('nqp', 's', -> $qastcomp, $post {
 # I/O opcodes
 QAST::Operations.add_core_pirop_mapping('print', 'print', '0s');
 QAST::Operations.add_core_pirop_mapping('say', 'say', '0s');
+QAST::Operations.add_core_pirop_mapping('stat', 'stat', 'Isi'); # (?)
+QAST::Operations.add_core_pirop_mapping('open', 'open', 'Pss'); # (?)
 
 # terms
 QAST::Operations.add_core_pirop_mapping('time_i', 'time', 'I');
@@ -1124,23 +1126,23 @@ QAST::Operations.add_core_pirop_mapping('tanh_n', 'tanh', 'NN');
 QAST::Operations.add_core_pirop_mapping('sech_n', 'sech', 'NN');
 
 # bitwise ops
-QAST::Operations.add_core_pirop_mapping('bitor_i', 'bor', 'II');
+QAST::Operations.add_core_pirop_mapping('bitor_i', 'bor', 'Iii');
 QAST::Operations.add_core_pirop_mapping('bitor_I', 'nqp_bigint_bor', 'PPPP');
-QAST::Operations.add_core_pirop_mapping('bitxor_i', 'bxor', 'II');
+QAST::Operations.add_core_pirop_mapping('bitxor_i', 'bxor', 'Iii');
 QAST::Operations.add_core_pirop_mapping('bitxor_I', 'nqp_bigint_bxor', 'PPPP');
-QAST::Operations.add_core_pirop_mapping('bitand_i', 'band', 'II');
+QAST::Operations.add_core_pirop_mapping('bitand_i', 'band', 'Iii');
 QAST::Operations.add_core_pirop_mapping('bitand_I', 'nqp_bigint_band', 'PPPP');
-QAST::Operations.add_core_pirop_mapping('bitneg_i', 'bnot', 'II');
-QAST::Operations.add_core_pirop_mapping('bitneg_I', 'nqp_bigint_bnot', 'PP');
-QAST::Operations.add_core_pirop_mapping('bitshiftl_i', 'shl', 'III');
+QAST::Operations.add_core_pirop_mapping('bitneg_i', 'bnot', 'Ii');
+QAST::Operations.add_core_pirop_mapping('bitneg_I', 'nqp_bigint_bnot', 'PPP');
+QAST::Operations.add_core_pirop_mapping('bitshiftl_i', 'shl', 'Iii');
 QAST::Operations.add_core_pirop_mapping('bitshiftl_I', 'nqp_bigint_shl', 'PPIP');
-QAST::Operations.add_core_pirop_mapping('bitshiftr_i', 'shr', 'III');
+QAST::Operations.add_core_pirop_mapping('bitshiftr_i', 'shr', 'Iii');
 QAST::Operations.add_core_pirop_mapping('bitshiftr_I', 'nqp_bigint_shr', 'PPIP');
 
 # string bitwise ops
-QAST::Operations.add_core_pirop_mapping('bitor_s', 'bors', 'SS');
-QAST::Operations.add_core_pirop_mapping('bitxor_s', 'bxors', 'SS');
-QAST::Operations.add_core_pirop_mapping('bitand_s', 'bands', 'SS');
+QAST::Operations.add_core_pirop_mapping('bitor_s', 'bors', 'Sss');
+QAST::Operations.add_core_pirop_mapping('bitxor_s', 'bxors', 'Sss');
+QAST::Operations.add_core_pirop_mapping('bitand_s', 'bands', 'Sss');
 
 # string opcodes
 QAST::Operations.add_core_pirop_mapping('chars', 'length', 'Is');
@@ -1250,6 +1252,7 @@ QAST::Operations.add_core_pirop_mapping('unshift_s', 'unshift', '0Ps');
 QAST::Operations.add_core_pirop_mapping('unshift_i', 'unshift', '0Pi');
 QAST::Operations.add_core_pirop_mapping('unshift_n', 'unshift', '0Pn');
 QAST::Operations.add_core_pirop_mapping('splice', 'splice', '0PPii');
+QAST::Operations.add_core_pirop_mapping('islist', 'nqp_islist', 'IP');
 
 # repr-level aggregate operations
 QAST::Operations.add_core_pirop_mapping('r_atpos', 'repr_at_pos_obj', 'PPi');
