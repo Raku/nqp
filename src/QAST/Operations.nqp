@@ -1143,6 +1143,7 @@ QAST::Operations.add_core_pirop_mapping('bitand_s', 'bands', 'SS');
 # string opcodes
 QAST::Operations.add_core_pirop_mapping('chars', 'length', 'Is');
 QAST::Operations.add_core_pirop_mapping('concat', 'concat', 'Sss');
+QAST::Operations.add_core_pirop_mapping('concat_s', 'concat', 'Sss');
 QAST::Operations.add_core_pirop_mapping('join', 'join', 'SsP');
 QAST::Operations.add_core_pirop_mapping('split', 'split', 'Pss');
 QAST::Operations.add_core_pirop_mapping('index', 'index', 'Issi');
@@ -1286,6 +1287,7 @@ QAST::Operations.add_core_pirop_mapping('how', 'get_how', 'PP');
 QAST::Operations.add_core_pirop_mapping('who', 'get_who', 'PP');
 QAST::Operations.add_core_pirop_mapping('where', 'get_id', 'IP');
 QAST::Operations.add_core_pirop_mapping('findmethod', 'find_method', 'PPs');
+QAST::Operations.add_core_pirop_mapping('defined', 'defined', 'IP');
 
 # serialization context related opcodes
 QAST::Operations.add_core_pirop_mapping('sha1', 'nqp_sha1', 'Ss');
