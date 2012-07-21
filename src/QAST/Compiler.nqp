@@ -553,6 +553,12 @@ class QAST::Compiler is HLL::Compiler {
             }
             return $ops;
         }
+        elsif $node.supports('pirconst') {
+            my $ops := self.post_new('Ops');
+            my $name := $node.alternative('pirconst');
+            $ops.result('.' ~ $name);
+            return $ops;
+        }
         elsif $node.supports('loadlibs') {
             $*BLOCK.add_loadlibs($node.alternative('loadlibs'));
             self.post_new('Ops');
@@ -808,6 +814,9 @@ class QAST::Compiler is HLL::Compiler {
               || nqp::substr($inferee, 0, 6) eq 'ucs4:"'
               || nqp::substr($inferee, 0, 1) eq '"' {
             "s"
+        }
+        elsif nqp::substr($inferee, 0, 1) eq '.' {
+            "P"
         }
         elsif nqp::index($inferee, ".", 0) > 0 {
             "n"
