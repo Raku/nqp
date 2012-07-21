@@ -1202,7 +1202,7 @@ QAST::Operations.add_core_pirop_mapping('isle_i', 'isle', 'Iii');
 QAST::Operations.add_core_pirop_mapping('isgt_i', 'isgt', 'Iii');
 QAST::Operations.add_core_pirop_mapping('isge_i', 'isge', 'Iii');
 
-QAST::Operations.add_core_pirop_mapping('bool_I', 'nqp_bigint_bool', 'iP');
+QAST::Operations.add_core_pirop_mapping('bool_I', 'nqp_bigint_bool', 'IP');
 QAST::Operations.add_core_pirop_mapping('cmp_I', 'nqp_bigint_cmp', 'IPP');
 QAST::Operations.add_core_pirop_mapping('iseq_I', 'nqp_bigint_eq', 'IPP');
 QAST::Operations.add_core_pirop_mapping('isne_I', 'nqp_bigint_ne', 'IPP');
