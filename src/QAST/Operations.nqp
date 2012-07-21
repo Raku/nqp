@@ -187,6 +187,22 @@ QAST::Operations.add_core_op('list', -> $qastcomp, $op {
     $ops
 });
 
+QAST::Operations.add_core_op('qlist', -> $qastcomp, $op {
+    # Create register for the resulting list and make an empty one.
+    my $list_reg := $*REGALLOC.fresh_p();
+    my $ops := $qastcomp.post_new('Ops', :result($list_reg));
+    $ops.push_pirop('new', $list_reg, "'QRPA'");
+    
+    # Push all the things.
+    for $op.list {
+        my $post := $qastcomp.coerce($qastcomp.as_post($_), 'P');
+        $ops.push($post);
+        $ops.push_pirop('push', $list_reg, $post.result);
+    }
+    
+    $ops
+});
+
 QAST::Operations.add_core_op('list_i', -> $qastcomp, $op {
     # Create register for the resulting list and make an empty one.
     my $list_reg := $*REGALLOC.fresh_p();
@@ -1155,6 +1171,7 @@ QAST::Operations.add_core_pirop_mapping('lc', 'downcase', 'Ss');
 QAST::Operations.add_core_pirop_mapping('uc', 'upcase', 'Ss');
 QAST::Operations.add_core_pirop_mapping('x', 'repeat', 'Ssi');
 QAST::Operations.add_core_pirop_mapping('iscclass', 'is_cclass', 'Iisi');
+QAST::Operations.add_core_pirop_mapping('findnotcclass', 'find_not_cclass', 'Iisii');
 QAST::Operations.add_core_pirop_mapping('sprintf', 'sprintf', 'SsP');
 
 # substr can take 2 or 3 args, so needs special handling.
