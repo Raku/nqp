@@ -1008,6 +1008,7 @@ QAST::Operations.add_core_op('newexception', -> $qastcomp, $op {
     $ops
 });
 QAST::Operations.add_core_pirop_mapping('die_s', 'die', '0s');
+QAST::Operations.add_core_pirop_mapping('die', 'die', '0P');
 
 # NQP box/unbox.
 for <i n s> {
