@@ -510,11 +510,17 @@ class QAST::Compiler is HLL::Compiler {
         $ops
     }
     
+    method apply_context($node, $type) {
+        nqp::istype($node, QAST::Want) ??
+            want($node, $type) !!
+            $node
+    }
+    
     sub want($node, $type) {
         my @possibles := nqp::clone($node.list);
         my $best := @possibles.shift;
         for @possibles -> $sel, $ast {
-            if $sel eq $type {
+            if nqp::index($sel, $type) >= 0 {
                 $best := $ast;
             }
         }

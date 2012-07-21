@@ -129,20 +129,28 @@ class QAST::Operations {
             my $last_argtype_was_Q := 0;
             my $aggregate := '';
             while $i < $num_args {
-                if @arg_types[$i] eq 'Q' {
-                    my $post := $qastcomp.coerce($qastcomp.as_post(@op_args[$i]), 'p');
+                my $arg_type := @arg_types[$i];
+                my $operand  := @op_args[$i];
+                if $arg_type eq 'Q' {
+                    my $post := $qastcomp.coerce($qastcomp.as_post($operand), 'P');
                     $ops.push($post);
                     $aggregate := $post.result;
                     $last_argtype_was_Q := 1;
                 }
                 elsif $last_argtype_was_Q {
-                    my $post := $qastcomp.coerce($qastcomp.as_post(@op_args[$i]), @arg_types[$i]);
+                    if $arg_type ne 'P' {
+                        $operand := $qastcomp.apply_context($operand, $arg_type);
+                    }
+                    my $post := $qastcomp.coerce($qastcomp.as_post($operand), $arg_type);
                     $ops.push($post);
                     @args.push("$aggregate[" ~ $post.result ~ "]");
                     $last_argtype_was_Q := 0;
                 }
                 else {
-                    my $post := $qastcomp.coerce($qastcomp.as_post(@op_args[$i]), @arg_types[$i]);
+                    if $arg_type ne 'P' {
+                        $operand := $qastcomp.apply_context($operand, $arg_type);
+                    }
+                    my $post := $qastcomp.coerce($qastcomp.as_post($operand), $arg_type);
                     $ops.push($post);
                     @args.push($post.result);
                 }
