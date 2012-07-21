@@ -529,8 +529,17 @@ class QAST::Compiler is HLL::Compiler {
     
     multi method as_post(QAST::Op $node) {
         my $hll := '';
+        my $result;
+        my $err;
         try $hll := $*HLL;
-        QAST::Operations.compile_op(self, $hll, $node)
+        try {
+            $result := QAST::Operations.compile_op(self, $hll, $node);
+            CATCH { $err := $! }
+        }
+        if $err {
+            nqp::die("Error while compiling op " ~ $node.op ~ ": $err");
+        }
+        $result
     }
     
     multi method as_post(QAST::VM $node) {
