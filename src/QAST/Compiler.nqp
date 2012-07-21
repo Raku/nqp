@@ -798,6 +798,16 @@ class QAST::Compiler is HLL::Compiler {
             try $hll := $*HLL;
             return QAST::Operations.unbox(self, $hll, nqp::lc($desired), $post);
         }
+        elsif nqp::index('IiNnSs', $result) >= 0 && nqp::index('IiNnSs', $desired) >= 0 {
+            # Coercion that we have an op for
+            my $ops := self.post_new('Ops');
+            my $rtype := nqp::lc($result);
+            my $reg := $*REGALLOC."fresh_$rtype"();
+            $ops.push($post);
+            $ops.push_pirop('set', $reg, $post);
+            $ops.result($reg);
+            return $ops;
+        }
         else {
             pir::die("Coercion from '$result' to '$desired' NYI");
         }
