@@ -1185,6 +1185,13 @@ QAST::Operations.add_core_op('index', -> $qastcomp, $op {
         ?? QAST::Op.new( :op('indexfrom'), |@operands, QAST::IVal.new( :value(0) ) )
         !! QAST::Op.new( :op('indexfrom'), |@operands ));
 });
+QAST::Operations.add_core_pirop_mapping('rindexfrom', 'rindex', 'Issi');
+QAST::Operations.add_core_op('rindex', -> $qastcomp, $op {
+    my @operands := $op.list;
+    $qastcomp.as_post(+@operands == 2
+        ?? QAST::Op.new( :op('rindexfrom'), |@operands, QAST::IVal.new( :value(0) ) )
+        !! QAST::Op.new( :op('rindexfrom'), |@operands ));
+});
 
 # relational opcodes
 QAST::Operations.add_core_pirop_mapping('cmp_i', 'cmp', 'Iii');
@@ -1310,6 +1317,7 @@ QAST::Operations.add_core_pirop_mapping('who', 'get_who', 'PP');
 QAST::Operations.add_core_pirop_mapping('where', 'get_id', 'IP');
 QAST::Operations.add_core_pirop_mapping('findmethod', 'find_method', 'PPs');
 QAST::Operations.add_core_pirop_mapping('defined', 'defined', 'IP');
+QAST::Operations.add_core_pirop_mapping('can', 'can', 'IPs');
 
 # serialization context related opcodes
 QAST::Operations.add_core_pirop_mapping('sha1', 'nqp_sha1', 'Ss');
