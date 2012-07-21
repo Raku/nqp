@@ -1090,9 +1090,9 @@ QAST::Operations.add_core_pirop_mapping('abs_I', 'nqp_bigint_abs', 'PPP');
 QAST::Operations.add_core_pirop_mapping('abs_n', 'abs', 'Nn');
 
 QAST::Operations.add_core_pirop_mapping('gcd_i', 'gcd', 'Ii');
-QAST::Operations.add_core_pirop_mapping('gcd_I', 'nqp_bigint_gcd', 'PPP');
+QAST::Operations.add_core_pirop_mapping('gcd_I', 'nqp_bigint_gcd', 'PPPP');
 QAST::Operations.add_core_pirop_mapping('lcm_i', 'lcm', 'Ii');
-QAST::Operations.add_core_pirop_mapping('lcm_I', 'nqp_bigint_lcm', 'PPP');
+QAST::Operations.add_core_pirop_mapping('lcm_I', 'nqp_bigint_lcm', 'PPPP');
 
 QAST::Operations.add_core_pirop_mapping('ceil_n', 'ceil', 'Nn');
 QAST::Operations.add_core_pirop_mapping('floor_n', 'floor', 'NN');
