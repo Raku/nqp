@@ -1297,5 +1297,5 @@ QAST::Operations.add_core_pirop_mapping('createsc', 'nqp_create_sc', 'Ps');
 QAST::Operations.add_core_pirop_mapping('deserialize', 'nqp_deserialize_sc', 'vsPPP');
 
 # process related opcodes
-QAST::Operations.add_core_pirop_mapping('exit', 'exit', 'vi');
-QAST::Operations.add_core_pirop_mapping('sleep', 'sleep', 'vn');
+QAST::Operations.add_core_pirop_mapping('exit', 'exit', '0i');
+QAST::Operations.add_core_pirop_mapping('sleep', 'sleep', '0n');
