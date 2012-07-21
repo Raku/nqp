@@ -1150,9 +1150,7 @@ QAST::Operations.add_core_pirop_mapping('concat', 'concat', 'Sss');
 QAST::Operations.add_core_pirop_mapping('concat_s', 'concat', 'Sss');
 QAST::Operations.add_core_pirop_mapping('join', 'join', 'SsP');
 QAST::Operations.add_core_pirop_mapping('split', 'split', 'Pss');
-QAST::Operations.add_core_pirop_mapping('index', 'index', 'Issi');
 QAST::Operations.add_core_pirop_mapping('chr', 'chr', 'Si');
-QAST::Operations.add_core_pirop_mapping('ord', 'ord', 'Isi');
 QAST::Operations.add_core_pirop_mapping('lc', 'downcase', 'Ss');
 QAST::Operations.add_core_pirop_mapping('uc', 'upcase', 'Ss');
 QAST::Operations.add_core_pirop_mapping('x', 'repeat', 'Ssi');
@@ -1167,6 +1165,25 @@ QAST::Operations.add_core_op('substr', -> $qastcomp, $op {
     $qastcomp.as_post(+@operands == 2
         ?? QAST::Op.new( :op('substr2'), |@operands )
         !! QAST::Op.new( :op('substr3'), |@operands ));
+});
+
+# ord can be on a the first char in a string or at a particular char.
+QAST::Operations.add_core_pirop_mapping('ordfirst', 'ord', 'Is');
+QAST::Operations.add_core_pirop_mapping('ordat', 'ord', 'Isi');
+QAST::Operations.add_core_op('ord', -> $qastcomp, $op {
+    my @operands := $op.list;
+    $qastcomp.as_post(+@operands == 1
+        ?? QAST::Op.new( :op('ordfirst'), |@operands )
+        !! QAST::Op.new( :op('ordat'), |@operands ));
+});
+
+# index may or may not take a starting position
+QAST::Operations.add_core_pirop_mapping('indexfrom', 'index', 'Issi');
+QAST::Operations.add_core_op('index', -> $qastcomp, $op {
+    my @operands := $op.list;
+    $qastcomp.as_post(+@operands == 2
+        ?? QAST::Op.new( :op('indexfrom'), |@operands, QAST::IVal.new( :value(0) ) )
+        !! QAST::Op.new( :op('indexfrom'), |@operands ));
 });
 
 # relational opcodes
