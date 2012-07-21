@@ -1277,6 +1277,7 @@ QAST::Operations.add_core_pirop_mapping('what', 'get_what', 'PP');
 QAST::Operations.add_core_pirop_mapping('how', 'get_how', 'PP');
 QAST::Operations.add_core_pirop_mapping('who', 'get_who', 'PP');
 QAST::Operations.add_core_pirop_mapping('where', 'get_id', 'IP');
+QAST::Operations.add_core_pirop_mapping('findmethod', 'find_method', 'PPs');
 
 # serialization context related opcodes
 QAST::Operations.add_core_pirop_mapping('sha1', 'nqp_sha1', 'Ss');
