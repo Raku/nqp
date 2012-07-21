@@ -492,7 +492,11 @@ class QAST::Compiler is HLL::Compiler {
         my $last;
         my $ops := self.post_new('Ops');
         my $i := 0;
+        my $n := +@stmts;
         for @stmts {
+            if nqp::istype($_, QAST::Want) && $i + 1 < $n {
+                $_ := want($_, 'v');
+            }
             $last := self.as_post($_);
             $ops.push($last);
             if nqp::defined($resultchild) && $resultchild == $i {
@@ -504,6 +508,17 @@ class QAST::Compiler is HLL::Compiler {
             $ops.result($last.result);
         }
         $ops
+    }
+    
+    sub want($node, $type) {
+        my @possibles := nqp::clone($node.list);
+        my $best := @possibles.shift;
+        for @possibles -> $sel, $ast {
+            if $sel eq $type {
+                $best := $ast;
+            }
+        }
+        $best
     }
     
     multi method as_post(QAST::Op $node) {
