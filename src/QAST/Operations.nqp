@@ -1017,6 +1017,8 @@ QAST::Operations.add_core_op('newexception', -> $qastcomp, $op {
 });
 QAST::Operations.add_core_pirop_mapping('die_s', 'die', '0s');
 QAST::Operations.add_core_pirop_mapping('die', 'die', '0P');
+QAST::Operations.add_core_pirop_mapping('throw', 'throw', '0P');
+QAST::Operations.add_core_pirop_mapping('rethrow', 'rethrow', '0P');
 
 # NQP box/unbox.
 for <i n s> {
@@ -1293,3 +1295,7 @@ QAST::Operations.add_core_pirop_mapping('defined', 'defined', 'IP');
 QAST::Operations.add_core_pirop_mapping('sha1', 'nqp_sha1', 'Ss');
 QAST::Operations.add_core_pirop_mapping('createsc', 'nqp_create_sc', 'Ps');
 QAST::Operations.add_core_pirop_mapping('deserialize', 'nqp_deserialize_sc', 'vsPPP');
+
+# process related opcodes
+QAST::Operations.add_core_pirop_mapping('exit', 'exit', 'vi');
+QAST::Operations.add_core_pirop_mapping('sleep', 'sleep', 'vn');
