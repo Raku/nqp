@@ -1141,10 +1141,19 @@ QAST::Operations.add_core_pirop_mapping('chr', 'chr', 'Si');
 QAST::Operations.add_core_pirop_mapping('ord', 'ord', 'Isi');
 QAST::Operations.add_core_pirop_mapping('lc', 'downcase', 'Ss');
 QAST::Operations.add_core_pirop_mapping('uc', 'upcase', 'Ss');
-QAST::Operations.add_core_pirop_mapping('substr', 'substr', 'Ssii');
 QAST::Operations.add_core_pirop_mapping('x', 'repeat', 'Ssi');
 QAST::Operations.add_core_pirop_mapping('iscclass', 'is_cclass', 'Iisi');
 QAST::Operations.add_core_pirop_mapping('sprintf', 'sprintf', 'SsP');
+
+# substr can take 2 or 3 args, so needs special handling.
+QAST::Operations.add_core_pirop_mapping('substr2', 'substr', 'Ssi');
+QAST::Operations.add_core_pirop_mapping('substr3', 'substr', 'Ssii');
+QAST::Operations.add_core_op('substr', -> $qastcomp, $op {
+    my @operands := $op.list;
+    $qastcomp.as_post(+@operands == 2
+        ?? QAST::Op.new( :op('substr2'), |@operands )
+        !! QAST::Op.new( :op('substr3'), |@operands ));
+});
 
 # relational opcodes
 QAST::Operations.add_core_pirop_mapping('cmp_i', 'cmp', 'Iii');
