@@ -232,6 +232,12 @@ class QRegex::NFA {
             self.fate($node, $from, $to);
     }
     
+    method qastnode($node, $from, $to) {
+        $node.subtype eq 'zerowidth' || $node.subtype eq 'declarative' ??
+            self.addedge($from, $to, $EDGE_EPSILON, 0) !!
+            self.fate($node, $from, $to);
+    }
+    
     method subcapture($node, $from, $to) {
         self.regex_nfa($node[0], $from, $to);
     }
