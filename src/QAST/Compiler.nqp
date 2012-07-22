@@ -334,6 +334,7 @@ class QAST::Compiler is HLL::Compiler {
             {
                 my $*BLOCK := $block;
                 my @*INNERS := @inners;
+                my $*HAVE_IMM_ARG := 0;
                 my $err;
                 try {
                     $stmts := self.compile_all_the_stmts($node.list);
@@ -438,7 +439,19 @@ class QAST::Compiler is HLL::Compiler {
             # Pick a result register.
             my $rtype := nqp::lc(type_to_register_type($node.returns));
             my $rreg := $*REGALLOC."fresh_$rtype"();
-            $ops.push_pirop('call', $breg, :result($rreg));
+            
+            # Emit call now, unless something else wants to emit with an
+            # argument.
+            my $im_arg := 0;
+            try $im_arg := $*HAVE_IMM_ARG;
+            if $im_arg {
+                $*IMM_ARG := -> $arg {
+                    $ops.push_pirop('call', $breg, $arg, :result($rreg));
+                };
+            }
+            else {
+                $ops.push_pirop('call', $breg, :result($rreg));
+            }
             $ops.result($rreg);
         }
         elsif $blocktype eq 'declaration' || $blocktype eq '' {

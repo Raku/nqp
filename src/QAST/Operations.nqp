@@ -318,10 +318,21 @@ for <if unless> -> $op_name {
         # types and pick an overall result type if in non-void context.
         my @comp_ops;
         my @op_types;
+        my @im_args;
         for $op.list {
+            my $*HAVE_IMM_ARG := $_.arity > 0 && !($_ =:= $op[0]);
+            my $*IMM_ARG;
             my $comp := $qastcomp.as_post($_);
             @comp_ops.push($comp);
             @op_types.push(nqp::uc($qastcomp.infer_type($comp.result)));
+            if $*HAVE_IMM_ARG {
+                if $*IMM_ARG {
+                    @im_args.push($*IMM_ARG);
+                }
+                else {
+                    nqp::die("$op_name block expects an argument, but there's no immediate block to take it");
+                }
+            }
         }
         my $res_type := $operands == 3 ??
             (@op_types[1] eq @op_types[2] ?? nqp::lc(@op_types[1]) !! 'p') !!
@@ -330,13 +341,21 @@ for <if unless> -> $op_name {
         
         # Evaluate the condition first; store result if needed.
         my $ops := $qastcomp.post_new('Ops');
+        my $cond_result;
         if $operands == 2 {
             my $coerced := $qastcomp.coerce(@comp_ops[0], $res_type);
             $ops.push($coerced);
             $ops.push_pirop('set', $res_reg, $coerced.result);
+            $cond_result := $coerced;
         }
         else {
             $ops.push(@comp_ops[0]);
+            $cond_result := @comp_ops[0];
+        }
+        
+        # If needed, set up passing condition value to blocks.
+        for @im_args {
+            $_($cond_result.result);
         }
         
         # Emit the jump.
