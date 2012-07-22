@@ -327,11 +327,13 @@ class QAST::Compiler is HLL::Compiler {
             my $*BINDVAL  := 0;
             my $outer     := try $*BLOCK;
             my $block     := BlockInfo.new($node, $outer);
+            my @inners;
             
             # First need to compile all of the statements.
             my $stmts;
             {
                 my $*BLOCK := $block;
+                my @*INNERS := @inners;
                 my $err;
                 try {
                     $stmts := self.compile_all_the_stmts($node.list);
@@ -375,6 +377,13 @@ class QAST::Compiler is HLL::Compiler {
                     
                     $decls.push_pirop(pir::join(' ', @param));
                 }
+            }
+            
+            # Capture lexicals.
+            my $cap_lex_reg := $*REGALLOC.fresh_p();
+            for @inners {
+                $decls.push_pirop(".const 'Sub' $cap_lex_reg = '$_'");
+                $decls.push_pirop("capture_lex $cap_lex_reg");
             }
 
             # Generate declarations.
@@ -421,6 +430,7 @@ class QAST::Compiler is HLL::Compiler {
         my $blocktype := $node.blocktype;
         if $blocktype eq 'immediate' {
             # Look up and capture the block.
+            try @*INNERS.push($node.cuid());
             my $breg := $*REGALLOC.fresh_p();
             $ops.push_pirop(".const 'Sub' $breg = '" ~ $node.cuid() ~ "'");
             $ops.push_pirop("capture_lex", $breg);
@@ -433,6 +443,7 @@ class QAST::Compiler is HLL::Compiler {
         }
         elsif $blocktype eq 'declaration' || $blocktype eq '' {
             # Get the block and newclosure it.
+            try @*INNERS.push($node.cuid());
             my $breg := $*REGALLOC.fresh_p();
             $ops.push_pirop(".const 'Sub' $breg = '" ~ $node.cuid() ~ "'");
             $ops.push_pirop("capture_lex", $breg);
