@@ -1203,10 +1203,11 @@ QAST::Operations.add_core_op('index', -> $qastcomp, $op {
         !! QAST::Op.new( :op('indexfrom'), |@operands ));
 });
 QAST::Operations.add_core_pirop_mapping('rindexfrom', 'rindex', 'Issi');
+QAST::Operations.add_core_pirop_mapping('rindexfromend', 'rindex', 'Iss');
 QAST::Operations.add_core_op('rindex', -> $qastcomp, $op {
     my @operands := $op.list;
     $qastcomp.as_post(+@operands == 2
-        ?? QAST::Op.new( :op('rindexfrom'), |@operands, QAST::IVal.new( :value(0) ) )
+        ?? QAST::Op.new( :op('rindexfromend'), |@operands )
         !! QAST::Op.new( :op('rindexfrom'), |@operands ));
 });
 
