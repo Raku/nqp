@@ -426,10 +426,15 @@ for <while until> -> $op_name {
         # types and pick an overall result type if in non-void context.
         my @comp_ops;
         my @comp_types;
+        my $*IMM_ARG;
         for $op.list {
+            my $*HAVE_IMM_ARG := $_.arity > 0 && $_ =:= $op.list[1];
             my $comp := $qastcomp.as_post($_);
             @comp_ops.push($comp);
             @comp_types.push($qastcomp.infer_type($comp));
+            if $*HAVE_IMM_ARG && !$*IMM_ARG {
+                nqp::die("$op_name block expects an argument, but there's no immediate block to take it");
+            }
         }
         my $res_type := @comp_types[0] eq @comp_types[1] ?? nqp::lc(@comp_types[0]) !! 'p';
         my $res_reg  := $*REGALLOC."fresh_$res_type"();
@@ -451,6 +456,11 @@ for <while until> -> $op_name {
         $ops.push_pirop('set', $res_reg, $coerced.result);
         $ops.push_pirop(($op_name eq 'while' ?? 'unless ' !! 'if ') ~
             @comp_ops[0].result ~ ' goto ' ~ $done_lbl.result);
+
+        # Handle immediate blocks wanting the value as an arg.
+        if $*IMM_ARG {
+            $*IMM_ARG($coerced.result);
+        }
 
         # Emit the loop body; stash the result.
         my $body := $qastcomp.coerce(@comp_ops[1], $res_type);
