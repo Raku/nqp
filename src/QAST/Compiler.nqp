@@ -753,7 +753,8 @@ class QAST::Compiler is HLL::Compiler {
     
     multi method as_post(QAST::NVal $node) {
         my $val := ~$node.value;
-        $val := $val ~ '.0' unless nqp::index($val, '.', 0) >= 0;
+        $val := $val ~ '.0' unless nqp::index($val, '.', 0) >= 0 ||
+                                   nqp::index($val, 'e', 0) > 0;
         self.post_new('Ops', :result($val))
     }
     
@@ -817,7 +818,7 @@ class QAST::Compiler is HLL::Compiler {
         elsif nqp::index('IiNnSs', $result) >= 0 && nqp::index('IiNnSs', $desired) >= 0 {
             # Coercion that we have an op for
             my $ops := self.post_new('Ops');
-            my $rtype := nqp::lc($result);
+            my $rtype := nqp::lc($desired);
             my $reg := $*REGALLOC."fresh_$rtype"();
             $ops.push($post);
             $ops.push_pirop('set', $reg, $post);
