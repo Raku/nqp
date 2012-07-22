@@ -191,9 +191,11 @@ class QAST::Compiler is HLL::Compiler {
     method unique($prefix = '') { $prefix ~ $serno++ }
     method escape($str) {
         my $esc := pir::escape__Ss($str);
-        nqp::index($esc, '\x', 0) > 0 ??
+        nqp::index($esc, '\x', 0) >= 0 ??
             'utf8:"' ~ $esc ~ '"' !!
-            '"' ~ $esc ~ '"'
+                (nqp::index($esc, '\u', 0) >= 0 ??
+                 'unicode:"' ~ $esc ~ '"' !!
+                 '"' ~ $esc ~ '"')
     }
     method rxescape($str) { 'ucs4:"' ~ pir::escape__Ss($str) ~ '"' }
 
@@ -837,9 +839,10 @@ class QAST::Compiler is HLL::Compiler {
         elsif $*BLOCK.reg_type($inferee) -> $type {
             nqp::lc($type)
         }
-        elsif nqp::substr($inferee, 0, 6) eq 'utf8:"'
+        elsif nqp::substr($inferee, 0, 1) eq '"'
+              || nqp::substr($inferee, 0, 6) eq 'utf8:"'
               || nqp::substr($inferee, 0, 6) eq 'ucs4:"'
-              || nqp::substr($inferee, 0, 1) eq '"' {
+              || nqp::substr($inferee, 0, 9) eq 'unicode:"' {
             "s"
         }
         elsif nqp::substr($inferee, 0, 1) eq '.' {
