@@ -70,8 +70,8 @@ BEGIN_OPS_PREAMBLE
 #define DYNCALL_ARG_FREE_STR_MASK   1
 
 /* Predeclare some mutually recursive functions. */
-static void dyncall_wb_ca(PMC *);
-static void dyncall_wb_cs(PMC *);
+static void dyncall_wb_ca(PARROT_INTERP, PMC *);
+static void dyncall_wb_cs(PARROT_INTERP, PMC *);
 
 /* The ID of the NativeCall, CPointer and CStruct REPRs. */
 static INTVAL nc_repr_id = 0;
@@ -303,7 +303,7 @@ PMC * decontainerize(PARROT_INTERP, PMC *var) {
     return var;
 }
 
-static void dyncall_wb_ca(PMC *obj) {
+static void dyncall_wb_ca(PARROT_INTERP, PMC *obj) {
     CArrayBody      *body      = (CArrayBody *) OBJECT_BODY(obj);
     CArrayREPRData  *repr_data = (CArrayREPRData *) STABLE(obj)->REPR_data;
     void           **storage   = (void **) body->storage;
@@ -333,8 +333,12 @@ static void dyncall_wb_ca(PMC *obj) {
                 case CARRAY_ELEM_KIND_CSTRUCT:
                     objptr = (CStructBody *) OBJECT_BODY(body->child_objs[i]);
                     break;
+                case CARRAY_ELEM_KIND_STRING:
+                    objptr = NULL; /* TODO */
+                    break;
                 default:
-                    objptr = NULL;
+                    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                        "Fatal error: bad elem_kind (%d) in dyncall_wb_ca", repr_data->elem_kind);
             }
         }
         else {
@@ -345,15 +349,15 @@ static void dyncall_wb_ca(PMC *obj) {
             body->child_objs[i] = NULL;
         }
         else if (repr_data->elem_kind == CARRAY_ELEM_KIND_CARRAY) {
-            dyncall_wb_ca(body->child_objs[i]);
+            dyncall_wb_ca(interp, body->child_objs[i]);
         }
         else if (repr_data->elem_kind == CARRAY_ELEM_KIND_CSTRUCT) {
-            dyncall_wb_cs(body->child_objs[i]);
+            dyncall_wb_cs(interp, body->child_objs[i]);
         }
     }
 }
 
-static void dyncall_wb_cs(PMC *obj) {
+static void dyncall_wb_cs(PARROT_INTERP, PMC *obj) {
     CStructBody     *body      = (CStructBody *) OBJECT_BODY(obj);
     CStructREPRData *repr_data = (CStructREPRData *) STABLE(obj)->REPR_data;
     char            *storage   = (char *) body->cstruct;
@@ -380,6 +384,12 @@ static void dyncall_wb_cs(PMC *obj) {
                 case CSTRUCT_ATTR_CSTRUCT:
                     objptr = (CStructBody *) OBJECT_BODY(body->child_objs[slot]);
                     break;
+                case CSTRUCT_ATTR_STRING:
+                    objptr = NULL;
+                    break;
+                default:
+                    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                        "Fatal error: bad kind (%d) in dyncall_wb_cs", kind);
             }
         }
         else {
@@ -390,10 +400,10 @@ static void dyncall_wb_cs(PMC *obj) {
             body->child_objs[slot] = NULL;
         }
         else if (kind == CSTRUCT_ATTR_CARRAY) {
-            dyncall_wb_ca(body->child_objs[slot]);
+            dyncall_wb_ca(interp, body->child_objs[slot]);
         }
         else if (kind == CSTRUCT_ATTR_CSTRUCT) {
-            dyncall_wb_cs(body->child_objs[slot]);
+            dyncall_wb_cs(interp, body->child_objs[slot]);
         }
     }
 }
@@ -674,11 +684,12 @@ inline op nqp_native_call(out PMC, invar PMC, invar PMC, invar PMC) :base_core {
 
         switch (body->arg_types[i]) {
             case DYNCALL_ARG_CARRAY:
-                dyncall_wb_ca(value);
+                dyncall_wb_ca(interp, value);
                 break;
             case DYNCALL_ARG_CSTRUCT:
-                dyncall_wb_cs(value);
+                dyncall_wb_cs(interp, value);
                 break;
+            default: /* Noop to eliminate warning. */
         }
     }
     
