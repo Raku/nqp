@@ -12,8 +12,8 @@
 static REPROps *this_repr;
 
 /* Some functions we have to get references to. */
-static PMC * (* wrap_object_func) (PARROT_INTERP, void *obj);
-static PMC * (* create_stable_func) (PARROT_INTERP, REPROps *REPR, PMC *HOW);
+static wrap_object_t   wrap_object_func;
+static create_stable_t create_stable_func;
 
 /* Gets size and type information to put it into the REPR data. */
 static void fill_repr_data(PARROT_INTERP, STable *st) {
@@ -441,8 +441,8 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
 
 /* Initializes the CArray representation. */
 REPROps * CArray_initialize(PARROT_INTERP,
-        PMC * (* wrap_object_func_ptr) (PARROT_INTERP, void *obj),
-        PMC * (* create_stable_func_ptr) (PARROT_INTERP, REPROps *REPR, PMC *HOW)) {
+        wrap_object_t wrap_object_func_ptr,
+        create_stable_t create_stable_func_ptr) {
     /* Stash away functions passed wrapping functions. */
     wrap_object_func = wrap_object_func_ptr;
     create_stable_func = create_stable_func_ptr;
