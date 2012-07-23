@@ -449,17 +449,16 @@ for ('', 'repeat_') -> $repness {
             $ops.push_pirop('set_label', $exc_reg, $hand_lbl);
             $ops.push_pirop('push_eh', $exc_reg);
             
-            # If it's a repeat_ variant, need to go straight into the
-            # loop body unconditionally.
-            if $repness {
-                $ops.push_pirop('null', $res_reg);
-                $ops.push_pirop('goto', $redo_lbl);
-            }
-
             # Test the condition and jump to the loop end if it's
             # not met.
-            $ops.push($test_lbl);
             my $coerced := $qastcomp.coerce(@comp_ops[0], $res_type);
+            if $repness {
+                # It's a repeat_ variant, need to go straight into the
+                # loop body unconditionally.
+                $ops.push_pirop('null', $coerced.result);
+                $ops.push_pirop('goto', $redo_lbl);
+            }
+            $ops.push($test_lbl);
             $ops.push($coerced);
             $ops.push_pirop('set', $res_reg, $coerced.result);
             $ops.push_pirop(($op_name eq 'while' ?? 'unless ' !! 'if ') ~
