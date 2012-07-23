@@ -263,7 +263,7 @@ inline op nqp_bigint_lcm(out PMC, in PMC, in PMC, in PMC) :base_core {
 }
 
 inline op nqp_bigint_from_str(out PMC, in STR, in PMC) :base_core {
-    char *buf = Parrot_str_cstring(interp, $2);
+    const char *buf = Parrot_str_cstring(interp, $2);
     $1 = REPR($3)->allocate(interp, STABLE($3));
     REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
     mp_read_radix(get_bigint(interp, $1), buf, 10);
@@ -274,7 +274,7 @@ inline op nqp_bigint_to_str(out STR, in PMC) :base_core {
     int len;
     char *buf;
     mp_radix_size(i, 10, &len);
-    buf = mem_sys_allocate(len);
+    buf = (char *) mem_sys_allocate(len);
     mp_toradix_n(i, buf, 10, len);
     /* len - 1 because buf is \0-terminated */
     $1 = Parrot_str_new(interp, buf, len - 1);
@@ -286,7 +286,7 @@ inline op nqp_bigint_to_str_base(out STR, in PMC, in INT) :base_core {
     int len;
     char *buf;
     mp_radix_size(i, $3, &len);
-    buf = mem_sys_allocate(len);
+    buf = (char *) mem_sys_allocate(len);
     mp_toradix_n(i, buf, $3, len);
     /* len - 1 because buf is \0-terminated */
     $1 = Parrot_str_new(interp, buf, len - 1);

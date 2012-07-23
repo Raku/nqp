@@ -378,7 +378,9 @@ PMC * create_stable(PARROT_INTERP, REPROps *REPR, PMC *HOW);
 PMC * decontainerize(PARROT_INTERP, PMC *var);
 
 /* Dynamic representation registration. */
-typedef INTVAL (* rf) (PARROT_INTERP, STRING *name, REPROps * (*reg) (PARROT_INTERP, void *, void *));
+typedef PMC * (*wrap_object_t)(PARROT_INTERP, void *obj);
+typedef PMC * (*create_stable_t)(PARROT_INTERP, REPROps *REPR, PMC *HOW);
+typedef INTVAL (* rf) (PARROT_INTERP, STRING *name, REPROps * (*reg) (PARROT_INTERP, wrap_object_t, create_stable_t));
 #define REGISTER_DYNAMIC_REPR(interp, name, reg_func) \
     ((rf) \
         VTABLE_get_pointer(interp, \
