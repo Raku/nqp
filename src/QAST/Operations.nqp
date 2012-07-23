@@ -407,137 +407,99 @@ QAST::Operations.add_core_op('ifnull', -> $qastcomp, $op {
 });
 
 # Loops.
-for <while until> -> $op_name {
-    QAST::Operations.add_core_op($op_name, -> $qastcomp, $op {
-        # Check operand count.
-        my $operands := +$op.list;
-        pir::die("Operation '$op_name' needs 2 or  operands")
-            if $operands != 2 && $operands != 3;
+for ('', 'repeat_') -> $repness {
+    for <while until> -> $op_name {
+        QAST::Operations.add_core_op("$repness$op_name", -> $qastcomp, $op {
+            # Check operand count.
+            my $operands := +$op.list;
+            pir::die("Operation '$repness$op_name' needs 2 or  operands")
+                if $operands != 2 && $operands != 3;
 
-        # Create labels.
-        my $while_id := $qastcomp.unique($op_name);
-        my $test_lbl := $qastcomp.post_new('Label', :result($while_id ~ '_test'));
-        my $next_lbl := $qastcomp.post_new('Label', :result($while_id ~ '_next'));
-        my $redo_lbl := $qastcomp.post_new('Label', :result($while_id ~ '_redo'));
-        my $hand_lbl := $qastcomp.post_new('Label', :result($while_id ~ '_handlers'));
-        my $done_lbl := $qastcomp.post_new('Label', :result($while_id ~ '_done'));
+            # Create labels.
+            my $while_id := $qastcomp.unique($op_name);
+            my $test_lbl := $qastcomp.post_new('Label', :result($while_id ~ '_test'));
+            my $next_lbl := $qastcomp.post_new('Label', :result($while_id ~ '_next'));
+            my $redo_lbl := $qastcomp.post_new('Label', :result($while_id ~ '_redo'));
+            my $hand_lbl := $qastcomp.post_new('Label', :result($while_id ~ '_handlers'));
+            my $done_lbl := $qastcomp.post_new('Label', :result($while_id ~ '_done'));
 
-        # Compile each of the children; we'll need to look at the result
-        # types and pick an overall result type if in non-void context.
-        my @comp_ops;
-        my @comp_types;
-        my $*IMM_ARG;
-        for $op.list {
-            my $*HAVE_IMM_ARG := $_.arity > 0 && $_ =:= $op.list[1];
-            my $comp := $qastcomp.as_post($_);
-            @comp_ops.push($comp);
-            @comp_types.push($qastcomp.infer_type($comp));
-            if $*HAVE_IMM_ARG && !$*IMM_ARG {
-                nqp::die("$op_name block expects an argument, but there's no immediate block to take it");
+            # Compile each of the children; we'll need to look at the result
+            # types and pick an overall result type if in non-void context.
+            my @comp_ops;
+            my @comp_types;
+            my $*IMM_ARG;
+            for $op.list {
+                my $*HAVE_IMM_ARG := $_.arity > 0 && $_ =:= $op.list[1];
+                my $comp := $qastcomp.as_post($_);
+                @comp_ops.push($comp);
+                @comp_types.push($qastcomp.infer_type($comp));
+                if $*HAVE_IMM_ARG && !$*IMM_ARG {
+                    nqp::die("$op_name block expects an argument, but there's no immediate block to take it");
+                }
             }
-        }
-        my $res_type := @comp_types[0] eq @comp_types[1] ?? nqp::lc(@comp_types[0]) !! 'p';
-        my $res_reg  := $*REGALLOC."fresh_$res_type"();
+            my $res_type := @comp_types[0] eq @comp_types[1] ?? nqp::lc(@comp_types[0]) !! 'p';
+            my $res_reg  := $*REGALLOC."fresh_$res_type"();
 
-        # Emit the prelude.
-        my $ops := $qastcomp.post_new('Ops');
-        $ops.result($res_reg);
-        my $exc_reg := $*REGALLOC.fresh_p();
-        $ops.push_pirop('new', $exc_reg, "'ExceptionHandler'",
-            '[.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]');
-        $ops.push_pirop('set_label', $exc_reg, $hand_lbl);
-        $ops.push_pirop('push_eh', $exc_reg);
+            # Emit the prelude.
+            my $ops := $qastcomp.post_new('Ops');
+            $ops.result($res_reg);
+            my $exc_reg := $*REGALLOC.fresh_p();
+            $ops.push_pirop('new', $exc_reg, "'ExceptionHandler'",
+                '[.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]');
+            $ops.push_pirop('set_label', $exc_reg, $hand_lbl);
+            $ops.push_pirop('push_eh', $exc_reg);
+            
+            # If it's a repeat_ variant, need to go straight into the
+            # loop body unconditionally.
+            if $repness {
+                $ops.push_pirop('null', $res_reg);
+                $ops.push_pirop('goto', $redo_lbl);
+            }
 
-        # Test the condition and jump to the loop end if it's
-        # not met.
-        $ops.push($test_lbl);
-        my $coerced := $qastcomp.coerce(@comp_ops[0], $res_type);
-        $ops.push($coerced);
-        $ops.push_pirop('set', $res_reg, $coerced.result);
-        $ops.push_pirop(($op_name eq 'while' ?? 'unless ' !! 'if ') ~
-            @comp_ops[0].result ~ ' goto ' ~ $done_lbl.result);
+            # Test the condition and jump to the loop end if it's
+            # not met.
+            $ops.push($test_lbl);
+            my $coerced := $qastcomp.coerce(@comp_ops[0], $res_type);
+            $ops.push($coerced);
+            $ops.push_pirop('set', $res_reg, $coerced.result);
+            $ops.push_pirop(($op_name eq 'while' ?? 'unless ' !! 'if ') ~
+                @comp_ops[0].result ~ ' goto ' ~ $done_lbl.result);
 
-        # Handle immediate blocks wanting the value as an arg.
-        if $*IMM_ARG {
-            $*IMM_ARG($coerced.result);
-        }
+            # Handle immediate blocks wanting the value as an arg.
+            if $*IMM_ARG {
+                $*IMM_ARG($coerced.result);
+            }
 
-        # Emit the loop body; stash the result.
-        my $body := $qastcomp.coerce(@comp_ops[1], $res_type);
-        $ops.push($redo_lbl);
-        $ops.push($body);
-        $ops.push_pirop('set', $res_reg, $body.result);
-        
-        # If there's a third child, evaluate it as part of the
-        # "next".
-        if $operands == 3 {
-            $ops.push($next_lbl);
-            $ops.push(@comp_ops[2]);
-        }
+            # Emit the loop body; stash the result.
+            my $body := $qastcomp.coerce(@comp_ops[1], $res_type);
+            $ops.push($redo_lbl);
+            $ops.push($body);
+            $ops.push_pirop('set', $res_reg, $body.result);
+            
+            # If there's a third child, evaluate it as part of the
+            # "next".
+            if $operands == 3 {
+                $ops.push($next_lbl);
+                $ops.push(@comp_ops[2]);
+            }
 
-        # Emit the iteration jump.
-        $ops.push_pirop('goto ' ~ $test_lbl.result);
+            # Emit the iteration jump.
+            $ops.push_pirop('goto ' ~ $test_lbl.result);
 
-        # Emit postlude, with exception handlers.
-        $ops.push($hand_lbl);
-        $ops.push_pirop('.get_results', '(' ~ $exc_reg ~ ')');
-        $ops.push_pirop('pop_upto_eh', $exc_reg);
-        $ops.push_pirop('getattribute', $exc_reg, $exc_reg, "'type'");
-        $ops.push_pirop('eq', $exc_reg, '.CONTROL_LOOP_NEXT',
-            $operands == 3 ?? $next_lbl !! $test_lbl);
-        $ops.push_pirop('eq', $exc_reg, '.CONTROL_LOOP_REDO', $redo_lbl);
-        $ops.push($done_lbl);
-        $ops.push_pirop('pop_eh');
+            # Emit postlude, with exception handlers.
+            $ops.push($hand_lbl);
+            $ops.push_pirop('.get_results', '(' ~ $exc_reg ~ ')');
+            $ops.push_pirop('pop_upto_eh', $exc_reg);
+            $ops.push_pirop('getattribute', $exc_reg, $exc_reg, "'type'");
+            $ops.push_pirop('eq', $exc_reg, '.CONTROL_LOOP_NEXT',
+                $operands == 3 ?? $next_lbl !! $test_lbl);
+            $ops.push_pirop('eq', $exc_reg, '.CONTROL_LOOP_REDO', $redo_lbl);
+            $ops.push($done_lbl);
+            $ops.push_pirop('pop_eh');
 
-        $ops;
-    });
-}
-
-for <repeat_while repeat_until> -> $op_name {
-    QAST::Operations.add_core_op($op_name, -> $qastcomp, $op {
-        # Check operand count.
-        my $operands := +$op.list;
-        pir::die("Operation '$op_name' needs 2 operands")
-            if $operands != 2;
-
-        # Create labels.
-        my $while_id := $qastcomp.unique($op_name);
-        my $loop_lbl := $qastcomp.post_new('Label', :result($while_id ~ '_loop'));
-
-        # Compile each of the children; we'll need to look at the result
-        # types and pick an overall result type if in non-void context.
-        my @comp_ops;
-        my @comp_types;
-        for $op.list {
-            my $comp := $qastcomp.as_post($_);
-            @comp_ops.push($comp);
-            @comp_types.push($qastcomp.infer_type($comp));
-        }
-        my $res_type := @comp_types[0] eq @comp_types[1] ?? nqp::lc(@comp_types[0]) !! 'p';
-        my $res_reg  := $*REGALLOC."fresh_$res_type"();
-
-        # Evaluate the condition; store result if needed.
-        my $ops := $qastcomp.post_new('Ops');
-
-        # Emit loop label.
-        $ops.push($loop_lbl);
-        $ops.result($res_reg);
-
-        my $coerced := $qastcomp.coerce(@comp_ops[0], $res_type);
-        $ops.push($coerced);
-        $ops.push_pirop('set', $res_reg, $coerced.result);
-
-        # Emit the loop body; stash the result.
-        my $body := $qastcomp.coerce(@comp_ops[1], $res_type);
-        $ops.push($body);
-        $ops.push_pirop('set', $res_reg, $body.result);
-
-        # Emit the conditional iteration jump.
-        $ops.push_pirop(($op_name eq 'repeat_while' ?? 'if ' !! 'unless ') ~
-            @comp_ops[0].result ~ ' goto ' ~ $loop_lbl.result);
-
-        $ops;
-    });
+            $ops;
+        });
+    }
 }
 
 QAST::Operations.add_core_op('for', -> $qastcomp, $op {
