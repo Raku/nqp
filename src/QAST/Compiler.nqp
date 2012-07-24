@@ -529,11 +529,13 @@ class QAST::Compiler is HLL::Compiler {
         my $i := 0;
         my $n := +@stmts;
         for @stmts {
-            if nqp::istype($_, QAST::Want) && $i + 1 < $n {
+            my $void := $i + 1 < $n;
+            if nqp::istype($_, QAST::Want) && $void {
                 $_ := want($_, 'v');
             }
             $last := self.as_post($_);
-            $ops.push($last);
+            $ops.push($last)
+                unless $void && nqp::istype($_, QAST::Var);
             if nqp::defined($resultchild) && $resultchild == $i {
                 $ops.result($last.result);
             }
