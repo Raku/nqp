@@ -1,5 +1,8 @@
 class QAST::BlockMemo is QAST::Node {
+    has str $!name;
     has str $!cuid;
+    
+    method name(*@value)    { $!name := @value[0] if @value; $!name || "" }
     
     my $cur_cuid := 0;
     my $cuid_suffix := ~nqp::time_n();

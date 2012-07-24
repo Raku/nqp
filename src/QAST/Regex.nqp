@@ -1,4 +1,5 @@
 class QAST::Regex is QAST::Node {
+    has $!name;
     has str $!rxtype;
     has str $!subtype;
     has str $!backtrack;
@@ -6,6 +7,7 @@ class QAST::Regex is QAST::Node {
     has int $!min;
     has int $!max;
 
+    method name(*@value)      { $!name := @value[0] if @value; $!name }
     method rxtype(*@value)    { $!rxtype := @value[0] if @value; $!rxtype || "" }
     method subtype(*@value)   { $!subtype := @value[0] if @value; $!subtype || "" }
     method backtrack(*@value) { $!backtrack := @value[0] if @value; $!backtrack || "" }
