@@ -15,6 +15,10 @@ immediately prior to the Rakudo release.
 
 =item 1.
 
+*Warning: Since 2012.07, this first step should only be done if the current
+revision is not a Parrot release. So this step may or may not apply,
+depending.*
+
 Edit NQP's F<tools/build/PARROT_REVISION> file to contain the latest tag
 of the Parrot repository corresponding to Parrot's monthly release.  For
 Instance, running C<git tag> on an up-to-date Parrot repository will
@@ -31,23 +35,21 @@ In this example the latest release of Parrot is 3.9.0, so the string
 RELEASE_3_9_0 should be placed in F<tools/build/PARROT_REVISION>
 
 Once F<tools/build/PARROT_REVISION> has been set to the Parrot release,
-it must not be changed until after the Rakudo release.  In other words,
-we want each monthly release of Rakudo to be able to be built using the
-immediately prior release of Parrot.
+it must not be changed until after the Rakudo release.
 
 =item 2.
 
 Change the C<VERSION> file in nqp:
 
     $ echo '2012.12' > VERSION
-    $ git commit -m 'bump VERSION to 2012' VERSION
+    $ git commit -m 'bump VERSION to 2012.12' VERSION
     $ git push
 
 =item 3.
 
 Tag NQP by its release month ("YYYY.MM")
 
-  $ git tag -a -m"tag release YYYY.MM" YYYY.MM    # e.g., 2011.10
+  $ git tag -a -m"tag release YYYY.MM" YYYY.MM    # e.g., 2012.12
   $ git push --tags
 
 =item 4.
@@ -56,9 +58,16 @@ Update F<tools/build/NQP_REVISION> in your Rakudo repository to contain
 the tag you just set on NQP.
 
     $ cd ~/git/rakudo
-    $ echo "2011.10" > tools/build/NQP_REVISION
+    $ echo "2012.12" > tools/build/NQP_REVISION
 
 =item 5.
+
+Cut a release tarball (needed for the Rakudo Star release).
+
+    $ git clean -xdf
+    $ git archive --format=tar 2012.12 | gzip -9 > ~/nqp-2012.12.tar.gz
+
+=item 6.
 
 Continue with the Rakudo release since that's currently the only reason
 to have an NQP release.

@@ -541,6 +541,7 @@ entry to produce the node to be returned.
     maphash['ord']      = 'ord__Isi'
     maphash['lc']       = 'downcase__Ss'
     maphash['uc']       = 'upcase__Ss'
+    maphash['tclc']     = 'titlecase__Ss'
     maphash['substr']   = 'substr__Ssii'
     maphash['x']        = 'repeat__Ssi'
     maphash['iscclass'] = 'is_cclass__Iisi'                # (?)
