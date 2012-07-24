@@ -347,6 +347,7 @@ class QAST::Compiler is HLL::Compiler {
             
             # Generate parameter handling code.
             my $decls := self.post_new('Ops');
+            $decls.node($node.node) if $node.node;
             my %lex_params;
             if $node.custom_args {
                 $decls.push_pirop('.param pmc CALL_SIG :call_sig');
@@ -510,20 +511,21 @@ class QAST::Compiler is HLL::Compiler {
     }
     
     multi method as_post(QAST::Stmts $node) {
-        self.compile_all_the_stmts($node.list, $node.resultchild)
+        self.compile_all_the_stmts($node.list, $node.resultchild, :node($node.node))
     }
     
     multi method as_post(QAST::Stmt $node) {
         my $orig_reg := $*REGALLOC;
         {
             my $*REGALLOC := RegAlloc.new($orig_reg);
-            self.compile_all_the_stmts($node.list, $node.resultchild)
+            self.compile_all_the_stmts($node.list, $node.resultchild, :node($node.node))
         }
     }
     
-    method compile_all_the_stmts(@stmts, $resultchild?) {
+    method compile_all_the_stmts(@stmts, $resultchild?, :$node) {
         my $last;
         my $ops := self.post_new('Ops');
+        $ops.node($node) if $node;
         my $i := 0;
         my $n := +@stmts;
         for @stmts {
@@ -584,6 +586,7 @@ class QAST::Compiler is HLL::Compiler {
         }
         elsif $node.supports('pir') {
             my $ops := self.post_new('Ops');
+            $ops.node($node.node) if $node.node;
             my $pir := $node.alternative('pir');
             if nqp::index($pir, '%r') >= 0 {
                 my $reg := $*REGALLOC.fresh_p();
@@ -597,6 +600,7 @@ class QAST::Compiler is HLL::Compiler {
         }
         elsif $node.supports('pirconst') {
             my $ops := self.post_new('Ops');
+            $ops.node($node.node) if $node.node;
             my $name := $node.alternative('pirconst');
             $ops.result('.' ~ $name);
             return $ops;
@@ -665,6 +669,7 @@ class QAST::Compiler is HLL::Compiler {
         
         # Now go by scope.
         my $ops := self.post_new('Ops');
+        $ops.node($node.node) if $node.node;
         if $scope eq 'local' {
             if $*BLOCK.local_type($name) -> $type {
                 if $*BINDVAL {
@@ -885,6 +890,7 @@ class QAST::Compiler is HLL::Compiler {
     
     multi method as_post(QAST::Regex $node) {
         my $ops := self.post_new('Ops');
+        $ops.node($node.node) if $node.node;
         my $prefix := self.unique('rx') ~ '_';
         my %*REG;
 

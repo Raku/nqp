@@ -697,6 +697,7 @@ QAST::Operations.add_core_op('call', -> $qastcomp, $op {
     
     # Process arguments.
     my $ops := $qastcomp.post_new('Ops');
+    $ops.node($op.node) if $op.node;
     my @pos_arg_results;
     my @named_arg_results;
     for @args {
@@ -738,6 +739,7 @@ QAST::Operations.add_core_op('callmethod', -> $qastcomp, $op {
     
     # Process arguments.
     my $ops := $qastcomp.post_new('Ops');
+    $ops.node($op.node) if $op.node;
     my @pos_arg_results;
     my @named_arg_results;
     for @args {
