@@ -660,8 +660,11 @@ QAST::Operations.add_core_op('bind', -> $qastcomp, $op {
 });
 
 # Calling.
-sub handle_arg($arg, $qastcomp, $ops, @pos_arg_results, @named_arg_results) {
+sub handle_arg($arg, $qastcomp, $ops, @pos_arg_results, @named_arg_results, :$coerce) {
     my $arg_post := $qastcomp.as_post($arg);
+    if $coerce {
+        $arg_post := $qastcomp.coerce($arg_post, $coerce);
+    }
     $ops.push($arg_post);
     my $result := $arg_post.result;
     if $arg.flat {
@@ -742,8 +745,15 @@ QAST::Operations.add_core_op('callmethod', -> $qastcomp, $op {
     $ops.node($op.node) if $op.node;
     my @pos_arg_results;
     my @named_arg_results;
+    my $inv := 1;
     for @args {
-        handle_arg($_, $qastcomp, $ops, @pos_arg_results, @named_arg_results);
+        if $inv {
+            handle_arg($_, $qastcomp, $ops, @pos_arg_results, @named_arg_results, :coerce('P'));
+            $inv := 0;
+        }
+        else {
+            handle_arg($_, $qastcomp, $ops, @pos_arg_results, @named_arg_results);
+        }
     }
     
     # Figure out result register type and allocate a register for it.
