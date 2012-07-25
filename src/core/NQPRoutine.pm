@@ -4,6 +4,7 @@ my knowhow NQPRoutine {
     has $!dispatchees;
     has $!dispatch_cache;
     method add_dispatchee($code) {
+        $!dispatch_cache := nqp::null();
         $!dispatchees.push($code);
     }
     method is_dispatcher() {
