@@ -270,7 +270,7 @@ class QAST::Compiler is HLL::Compiler {
         $block_post
     }
     
-    method deserialization_code($sc, $code_ref_blocks) {
+    method deserialization_code($sc, @code_ref_blocks) {
         # Serialize it.
         my $sh := pir::new__Ps('ResizableStringArray');
         my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
@@ -290,10 +290,7 @@ class QAST::Compiler is HLL::Compiler {
         }
         
         # Code references.
-        my $cr_past := QAST::Op.new( :op('list') );
-        for $code_ref_blocks -> $block {
-            $cr_past.push(QAST::BVal.new( :value($block) ));
-        }
+        my $cr_past := QAST::Op.new( :op('list_b'), |@code_ref_blocks );
         
         # Overall deserialization QAST.
         QAST::Stmt.new(

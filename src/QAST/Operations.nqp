@@ -235,6 +235,23 @@ QAST::Operations.add_core_op('list_s', -> $qastcomp, $op {
     $ops
 });
 
+QAST::Operations.add_core_op('list_b', -> $qastcomp, $op {
+    # Create register for the resulting list and make an empty one.
+    my $list_reg := $*REGALLOC.fresh_p();
+    my $ops := $qastcomp.post_new('Ops', :result($list_reg));
+    $ops.push_pirop('new', $list_reg, "'ResizablePMCArray'");
+    
+    # Push all the things.
+    my $block_reg := $*REGALLOC.fresh_p();
+    for $op.list {
+        my $cuid := $_.cuid;
+        $ops.push_pirop(".const 'Sub' $block_reg = \"$cuid\"");
+        $ops.push_pirop('push', $list_reg, $block_reg);
+    }
+    
+    $ops
+});
+
 QAST::Operations.add_core_op('hash', -> $qastcomp, $op {
     # Create register for the resulting hash and make an empty one.
     my $hash_reg := $*REGALLOC.fresh_p();
