@@ -1,41 +1,7 @@
 # QAST Roadmap
 
 This is an overall list of things that need doing and problems that need
-solving on the way to having a QAST-based Rakudo and NQP.
-
-## QAST Issues
-
-### Fix NQP regressions
-The toqast branch, even though QAST is only being used for regexes still,
-has some regressions over master. Fix them.
-
-### Finish lexical lookup handling
-Always-by-name lookups (for things like $_ that are lazy in Rakudo). Also
-handle looking at symbol table to find that things are lexical.
-
-### Register Type Coercions
-Get the various coercions in place, with the appropriate ones as HLL-level
-configurable operations.
-
-### Exceptions
-Design whatever mechanism is going to replace the PAST::Control and related
-machinery. Implement it.
-
-### Serialization Context
-Add some QAST handling for serialization contexts, so as to replace laodinit.
-
-### :op('for')
-Implement it
-
-### loop handling of various phasers
-Need to figure out the REDO bits, etc. Try and make it so we've a way to avoid
-the PIR code in MapIter and so getting while loop phasers in place in Rakudo is
-easy also.
-
-## Rakudo
-
-Overall plan: create a branch, start changing stuff to QAST, see what happens.
-List any design level issues here.
+solving on the way to having a QAST-based NQP.
 
 ## NQP
 
