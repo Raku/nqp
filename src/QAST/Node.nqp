@@ -15,10 +15,8 @@ class QAST::Node {
     has %!hash;
     
     has $!node;
-    has str $!named;
     has $!returns;
     has int $!arity;
-    has int $!flat;
     has str $!childorder;
 
     method new(*@children, *%options) {
@@ -31,11 +29,28 @@ class QAST::Node {
     }
 
     method node(*@value)       { $!node := @value[0] if @value; $!node }
-    method named(*@value)      { $!named := @value[0] if @value; $!named || "" }
     method returns(*@value)    { $!returns := @value[0] if @value; $!returns }
-    method arity(*@value)      { $!arity := @value[0] if @value; $!arity }
-    method flat(*@value)       { $!flat := @value[0] if @value; $!flat }
     method childorder(*@value) { $!childorder := @value[0] if @value; $!childorder || "" }
+    method arity(*@value)      { $!arity := @value[0] if @value; $!arity }
+    
+    method named(*@value) {
+        if @value {
+            self.HOW.mixin(self, QAST::SpecialArg);
+            self.named(@value[0]);
+        }
+        else {
+            ""
+        }
+    }
+    method flat(*@value) {
+        if @value {
+            self.HOW.mixin(self, QAST::SpecialArg);
+            self.flat(@value[0]);
+        }
+        else {
+            0
+        }
+    }
     
     method list()          { @!array }
     method pop()           { nqp::pop(self.list) }
