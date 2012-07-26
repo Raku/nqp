@@ -50,6 +50,15 @@ class QAST::Node {
         }
     }
     
+    method has_compile_time_value() {
+        0
+    }
+    
+    method set_compile_time_value($value) {
+        self.HOW.mixin(self, QAST::CompileTimeValue);
+        self.set_compile_time_value($value);
+    }
+    
     method list()          { @!array }
     method pop()           { nqp::pop(self.list) }
     method push($value)    { nqp::push(self.list, $value) }
