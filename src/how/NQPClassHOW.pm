@@ -666,6 +666,47 @@ knowhow NQPClassHOW {
             (%caches{nqp::where(self)}{$key} := $value_generator())
     }
     
+    
+    ##
+    ## Mix-ins
+    ## 
+    has @!mixin_cache;
+    method mixin($obj, $role) {
+        # See if we mixed in before.
+        my $found := 0;
+        my $new_type;
+        for @!mixin_cache -> $c_role, $c_type {
+            if $c_role =:= $role {
+                $new_type := $c_type;
+                $found := 1;
+                last;
+            }
+        }
+        
+        # Create and cache mixin-type if needed.
+        unless $found {
+            # Work out a type name for the post-mixed-in role.
+            my $new_name := self.name($obj) ~ '+{' ~ $role.HOW.name($role) ~ '}';
+            
+            # Create new type, derive it from ourself and then add
+            # all the roles we're mixing it.
+            $new_type := self.new_type(:name($new_name), :repr($obj.REPR));
+            $new_type.HOW.add_parent($new_type, $obj.WHAT);
+            $new_type.HOW.add_role($new_type, $role);
+            $new_type.HOW.compose($new_type);
+            
+            # Store the type.
+            @!mixin_cache[+@!mixin_cache] := $role;
+            @!mixin_cache[+@!mixin_cache] := $new_type;
+        }
+        
+        # If the original object was concrete, change its type by calling a
+        # low level op. Otherwise, we just return the new type object
+        nqp::isconcrete($obj) ??
+            pir::repr_change_type__0PP($obj, $new_type) !!
+            $new_type
+    }
+    
     ##
     ## Tracing
     ##
