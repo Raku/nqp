@@ -215,11 +215,6 @@ class QAST::Compiler is HLL::Compiler {
 
         # Compile the block.
         my $block_post := self.as_post($cu[0]);
-
-        # Apply HLL if any.
-        if $*HLL {
-            $block_post.hll($*HLL);
-        }
         
         # If we are in compilation mode, or have pre-deserialization or
         # post-deserialization tasks, handle those. Overall, the process
@@ -401,6 +396,13 @@ class QAST::Compiler is HLL::Compiler {
             $sub.push($decls);
             $sub.push($stmts);
             $sub.push_pirop(".return (" ~ $stmts.result ~ ")");
+            
+            # Apply HLL if any.
+            my $hll := '';
+            try $hll := $*HLL;
+            if $hll {
+                $sub.hll($hll);
+            }
             
             # Set compilation unit ID, name and, if applicable, outer.
             $sub.subid($node.cuid);

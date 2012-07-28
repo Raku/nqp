@@ -112,6 +112,8 @@ class PIRT::Sub is PIRT::Node {
     has str $!subid;
     has str $!pirflags;
     has str $!name;
+    has str $!hll;
+    has @!namespace;
     has @!loadlibs;
     
     has @!nested_blocks;
@@ -159,6 +161,14 @@ class PIRT::Sub is PIRT::Node {
         @libs ?? (@!loadlibs := @libs) !! @!loadlibs
     }
     
+    method hll(*@value) {
+        @value ?? ($!hll := @value[0]) !! $!hll
+    }
+    
+    method namespace(@namespace?) {
+        @namespace ?? (@!namespace := @namespace) !! @!namespace
+    }
+    
     method result() {
         nqp::die("Cannot use a PIRT::Sub in a context expecting a result");
     }
@@ -169,6 +179,19 @@ class PIRT::Sub is PIRT::Node {
         # Sub prelude.
         for @!loadlibs {
             nqp::push(@parts, ".loadlib " ~ self.escape($_));
+        }
+        if $!hll {
+            nqp::push(@parts, ".HLL " ~ self.escape($!hll));
+        }
+        if @!namespace {
+            my @ns;
+            for @!namespace {
+                nqp::push(@ns, self.escape($_));
+            }
+            nqp::push(@parts, '.namespace [' ~ nqp::join(';', @ns) ~ ']');
+        }
+        else {
+            nqp::push(@parts, ".namespace []");
         }
         my $sub_decl := ".sub " ~ self.escape($!name || '');
         if $!subid {
