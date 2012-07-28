@@ -955,11 +955,34 @@ class QAST::Compiler is HLL::Compiler {
     }
 
     method post_children($node) {
-        Q:PIR {
-            $P0 = find_dynamic_lex '$*PASTCOMPILER'
-            $P1 = find_lex '$node'
-            (%r :slurpy) = $P0.'post_children'($P1)
+        if $*PIRT {
+            my $posts := PIRT::Ops.new();
+            my @results;
+            for @($node) {
+                my $sval := self.as_post(QAST::SVal.new( :value(~$_) ));
+                $posts.push($sval);
+                nqp::push(@results, $sval.result);
+            }
+            [$posts, @results]
         }
+        else {
+            Q:PIR {
+                $P0 = find_dynamic_lex '$*PASTCOMPILER'
+                $P1 = find_lex '$node'
+                (%r :slurpy) = $P0.'post_children'($P1)
+            }
+        }
+    }
+    
+    method children($node) {
+        my $posts := PIRT::Ops.new();
+        my @results;
+        for @($node) {
+            my $post := self.as_post($_);
+            $posts.push($post);
+            @results.push($post.result);
+        }
+        [$posts, @results, []]
     }
 
     method regex_post($node) {
@@ -1241,7 +1264,7 @@ class QAST::Compiler is HLL::Compiler {
         my $needrep   := $min > 1 || $max > 1;
         my $needmark  := $needrep || $backtrack eq 'r';
 
-        $ops.push_pirop('inline', :inline('  # rx %0 ** %1..%2'), $prefix, $min, $max);
+        #$ops.push_pirop('inline', '  # rx %0 ** %1..%2', $prefix, $min, $max);
 
         if $backtrack eq 'f' {
             my $seplabel  := self.post_new('Label', :name($prefix ~ '_sep'));
@@ -1332,7 +1355,7 @@ class QAST::Compiler is HLL::Compiler {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
         my $name := $*PASTCOMPILER.as_post($node.name, :rtype<*>);
         my $subtype := $node.subtype;
-        my $cpn := self.post_children($node[0]);
+        my $cpn := $node[0] ~~ QAST::Node ?? self.children($node[0]) !! self.post_children($node[0]);
         my @pargs := $cpn[1] // [];
         my @nargs := $cpn[2] // [];
         my $subpost := nqp::shift(@pargs);
