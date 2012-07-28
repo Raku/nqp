@@ -1339,7 +1339,6 @@ class QAST::Compiler is HLL::Compiler {
         self.regex_mark($ops, $faillabel, %*REG<pos>, 0);
         $ops.push(self.regex_post($node[0]));
         self.regex_peek($ops, $faillabel, '$I11');
-        $ops.push($name);
         $ops.push_pirop('callmethod', '"!cursor_start_subcapture"', %*REG<cur>, '$I11', :result<$P11>);
         $ops.push_pirop('callmethod', '"!cursor_pass"', '$P11', %*REG<pos>);
         $ops.push_pirop('callmethod', '"!cursor_capture"', %*REG<cur>, 
