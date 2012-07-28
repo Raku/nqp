@@ -328,8 +328,8 @@ for <if unless> -> $op_name {
         
         # Create labels.
         my $if_id    := $qastcomp.unique($op_name);
-        my $else_lbl := $qastcomp.post_new('Label', :result($if_id ~ '_else'));
-        my $end_lbl  := $qastcomp.post_new('Label', :result($if_id ~ '_end'));
+        my $else_lbl := $qastcomp.post_new('Label', :name($if_id ~ '_else'));
+        my $end_lbl  := $qastcomp.post_new('Label', :name($if_id ~ '_end'));
         
         # Compile each of the children; we'll need to look at the result
         # types and pick an overall result type if in non-void context.
@@ -434,11 +434,11 @@ for ('', 'repeat_') -> $repness {
 
             # Create labels.
             my $while_id := $qastcomp.unique($op_name);
-            my $test_lbl := $qastcomp.post_new('Label', :result($while_id ~ '_test'));
-            my $next_lbl := $qastcomp.post_new('Label', :result($while_id ~ '_next'));
-            my $redo_lbl := $qastcomp.post_new('Label', :result($while_id ~ '_redo'));
-            my $hand_lbl := $qastcomp.post_new('Label', :result($while_id ~ '_handlers'));
-            my $done_lbl := $qastcomp.post_new('Label', :result($while_id ~ '_done'));
+            my $test_lbl := $qastcomp.post_new('Label', :name($while_id ~ '_test'));
+            my $next_lbl := $qastcomp.post_new('Label', :name($while_id ~ '_next'));
+            my $redo_lbl := $qastcomp.post_new('Label', :name($while_id ~ '_redo'));
+            my $hand_lbl := $qastcomp.post_new('Label', :name($while_id ~ '_handlers'));
+            my $done_lbl := $qastcomp.post_new('Label', :name($while_id ~ '_done'));
 
             # Compile each of the children; we'll need to look at the result
             # types and pick an overall result type if in non-void context.

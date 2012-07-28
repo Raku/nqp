@@ -902,13 +902,13 @@ class QAST::Compiler is HLL::Compiler {
         }
 
         # create our labels
-        my $startlabel   := self.post_new('Label', :result($prefix ~ 'start'));
-        my $donelabel    := self.post_new('Label', :result($prefix ~ 'done'));
-        my $restartlabel := self.post_new('Label', :result($prefix ~ 'restart'));
-        my $faillabel    := self.post_new('Label', :result($prefix ~ 'fail'));
-        my $jumplabel    := self.post_new('Label', :result($prefix ~ 'jump'));
-        my $cutlabel     := self.post_new('Label', :result($prefix ~ 'cut'));
-        my $cstacklabel  := self.post_new('Label', :result($prefix ~ 'cstack_done'));
+        my $startlabel   := self.post_new('Label', :name($prefix ~ 'start'));
+        my $donelabel    := self.post_new('Label', :name($prefix ~ 'done'));
+        my $restartlabel := self.post_new('Label', :name($prefix ~ 'restart'));
+        my $faillabel    := self.post_new('Label', :name($prefix ~ 'fail'));
+        my $jumplabel    := self.post_new('Label', :name($prefix ~ 'jump'));
+        my $cutlabel     := self.post_new('Label', :name($prefix ~ 'cut'));
+        my $cstacklabel  := self.post_new('Label', :name($prefix ~ 'cstack_done'));
         %*REG<fail>      := $faillabel;
 
         # common prologue
@@ -985,7 +985,7 @@ class QAST::Compiler is HLL::Compiler {
         # Calculate all the branches to try, which populates the bstack
         # with the options. Then immediately fail to start iterating it.
         my $prefix   := self.unique('alt') ~ '_';
-        my $endlabel := self.post_new('Label', :result($prefix ~ 'end'));
+        my $endlabel := self.post_new('Label', :name($prefix ~ 'end'));
         my $label_list_ops := self.post_new('Ops', :result<$P11>);
         $label_list_ops.push_pirop('new', '$P11', '"ResizableIntegerArray"');
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
@@ -999,7 +999,7 @@ class QAST::Compiler is HLL::Compiler {
         my $altcount := 0;
         my $iter     := nqp::iterator($node.list);
         while $iter {
-            my $altlabel := self.post_new('Label', :result($prefix ~ $altcount));
+            my $altlabel := self.post_new('Label', :name($prefix ~ $altcount));
             my $apost    := self.regex_post(nqp::shift($iter));
             $ops.push($altlabel);
             $ops.push($apost);
@@ -1017,13 +1017,13 @@ class QAST::Compiler is HLL::Compiler {
         my $prefix := self.unique('alt') ~ '_';
         my $altcount := 0;
         my $iter     := nqp::iterator($node.list);
-        my $endlabel := self.post_new('Label', :result($prefix ~ 'end'));
-        my $altlabel := self.post_new('Label', :result($prefix ~ $altcount));
+        my $endlabel := self.post_new('Label', :name($prefix ~ 'end'));
+        my $altlabel := self.post_new('Label', :name($prefix ~ $altcount));
         my $apost    := self.regex_post(nqp::shift($iter));
         while $iter {
             $ops.push($altlabel);
             $altcount++;
-            $altlabel := self.post_new('Label', :result($prefix ~ $altcount));
+            $altlabel := self.post_new('Label', :name($prefix ~ $altcount));
             self.regex_mark($ops, $altlabel, %*REG<pos>, 0);
             $ops.push($apost);
             $ops.push_pirop('goto', $endlabel);
@@ -1038,7 +1038,7 @@ class QAST::Compiler is HLL::Compiler {
     method anchor($node) {
         my $ops       := self.post_new('Ops', :result(%*REG<cur>));
         my $subtype   := $node.subtype;
-        my $donelabel := self.post_new('Label', :result(self.unique('rxanchor') ~ '_done'));
+        my $donelabel := self.post_new('Label', :name(self.unique('rxanchor') ~ '_done'));
         if $subtype eq 'bos' {
             $ops.push_pirop('ne', %*REG<pos>, 0, %*REG<fail>);
         }
@@ -1128,8 +1128,8 @@ class QAST::Compiler is HLL::Compiler {
     method conjseq($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
         my $prefix := self.unique('rxconj') ~ '_';
-        my $conjlabel := self.post_new('Label', :result($prefix ~ 'fail'));
-        my $firstlabel := self.post_new('Label', :result($prefix ~ 'first'));
+        my $conjlabel := self.post_new('Label', :name($prefix ~ 'fail'));
+        my $firstlabel := self.post_new('Label', :name($prefix ~ 'first'));
         my $iter := nqp::iterator($node.list);
         # make a mark that holds our starting position in the pos slot
         self.regex_mark($ops, $conjlabel, %*REG<pos>, 0);
@@ -1227,8 +1227,8 @@ class QAST::Compiler is HLL::Compiler {
         my $backtrack := $node.backtrack || 'g';
         my $sep       := $node[1];
         my $prefix    := self.unique('rxquant' ~ $backtrack);
-        my $looplabel := self.post_new('Label', :result($prefix ~ '_loop'));
-        my $donelabel := self.post_new('Label', :result($prefix ~ '_done'));
+        my $looplabel := self.post_new('Label', :name($prefix ~ '_loop'));
+        my $donelabel := self.post_new('Label', :name($prefix ~ '_done'));
         my $min       := $node.min;
         my $max       := $node.max;
         my $needrep   := $min > 1 || $max > 1;
@@ -1237,7 +1237,7 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push_pirop('inline', :inline('  # rx %0 ** %1..%2'), $prefix, $min, $max);
 
         if $backtrack eq 'f' {
-            my $seplabel  := self.post_new('Label', :result($prefix ~ '_sep'));
+            my $seplabel  := self.post_new('Label', :name($prefix ~ '_sep'));
             my $ireg := '$I12';
             $ops.push_pirop('set', %*REG<rep>, 0);
             if $min < 1 {
@@ -1284,9 +1284,9 @@ class QAST::Compiler is HLL::Compiler {
     method scan($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
         my $prefix := self.unique('rxscan');
-        my $looplabel := self.post_new('Label', :result($prefix ~ '_loop'));
-        my $scanlabel := self.post_new('Label', :result($prefix ~ '_scan'));
-        my $donelabel := self.post_new('Label', :result($prefix ~ '_done'));
+        my $looplabel := self.post_new('Label', :name($prefix ~ '_loop'));
+        my $scanlabel := self.post_new('Label', :name($prefix ~ '_scan'));
+        my $donelabel := self.post_new('Label', :name($prefix ~ '_done'));
         $ops.push_pirop('repr_get_attr_int', '$I11', 'self', %*REG<curclass>, '"$!from"');
         $ops.push_pirop('ne', '$I11', -1, $donelabel);
         $ops.push_pirop('goto', $scanlabel);
@@ -1303,8 +1303,8 @@ class QAST::Compiler is HLL::Compiler {
     method subcapture($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
         my $prefix := self.unique('rxcap');
-        my $donelabel := self.post_new('Label', :result($prefix ~ '_done'));
-        my $faillabel := self.post_new('Label', :result($prefix ~ '_fail'));
+        my $donelabel := self.post_new('Label', :name($prefix ~ '_done'));
+        my $faillabel := self.post_new('Label', :name($prefix ~ '_fail'));
         my $name := $*PASTCOMPILER.as_post($node.name, :rtype<*>);
         self.regex_mark($ops, $faillabel, %*REG<pos>, 0);
         $ops.push(self.regex_post($node[0]));
@@ -1338,7 +1338,7 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push_pirop($testop, '$I11', '0', %*REG<fail>);
         if $subtype ne 'zerowidth' {
             my $rxname := self.unique('rxsubrule');
-            my $passlabel := self.post_new('Label', :result($rxname ~ '_pass'));
+            my $passlabel := self.post_new('Label', :name($rxname ~ '_pass'));
             if $node.backtrack eq 'r' {
                 unless $subtype eq 'method' {
                     self.regex_mark($ops, $passlabel, -1, 0);
@@ -1346,7 +1346,7 @@ class QAST::Compiler is HLL::Compiler {
                 }
             }
             else {
-                my $backlabel := self.post_new('Label', :result($rxname ~ '_back'));
+                my $backlabel := self.post_new('Label', :name($rxname ~ '_back'));
                 $ops.push_pirop('goto', $passlabel);
                 $ops.push($backlabel);
                 $ops.push_pirop('callmethod', '"!cursor_next"', '$P11', :result('$P11'));
