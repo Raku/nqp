@@ -491,7 +491,9 @@ class HLL::Compiler {
     }
   
     method pir($source, *%adverbs) {
-        self.pirbegin() ~ pir::compreg__Ps('POST').to_pir($source, |%adverbs)
+        self.pirbegin() ~ (pir::can($source, 'pir')
+            ?? $source.pir()
+            !! pir::compreg__Ps('POST').to_pir($source, |%adverbs))
     }
 
     method evalpmc($source, *%adverbs) {
