@@ -214,6 +214,7 @@ class QAST::Compiler is HLL::Compiler {
         }
 
         # Compile the block.
+        my $*QAST_BLOCK_NO_CLOSE := 1;
         my $block_post := self.as_post($cu[0]);
         
         # If we are in compilation mode, or have pre-deserialization or
@@ -327,6 +328,7 @@ class QAST::Compiler is HLL::Compiler {
                 my $*BLOCK := $block;
                 my @*INNERS := @inners;
                 my $*HAVE_IMM_ARG := 0;
+                my $*QAST_BLOCK_NO_CLOSE := 0;
                 my $err;
                 try {
                     $stmts := self.compile_all_the_stmts($node.list);
@@ -417,6 +419,11 @@ class QAST::Compiler is HLL::Compiler {
             # Set loadlibs if applicable.
             my @loadlibs := $block.loadlibs();
             $sub.loadlibs(@loadlibs) if @loadlibs;
+            
+            # Close it to further modifications.
+            unless $*QAST_BLOCK_NO_CLOSE {
+                $sub.close_sub();
+            }
         }
         
         # If we are at the top level, we'll immediately return.
