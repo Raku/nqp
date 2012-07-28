@@ -86,6 +86,7 @@ QAST_SOURCES = \
   src/QAST/Stmt.nqp \
   src/QAST/Block.nqp \
   src/QAST/BlockMemo.nqp \
+  src/QAST/Unquote.nqp \
   src/QAST/CompUnit.nqp \
   src/QAST/Operations.nqp \
   src/QAST/Compiler.nqp \
