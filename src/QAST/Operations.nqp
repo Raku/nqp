@@ -408,7 +408,7 @@ QAST::Operations.add_core_op('ifnull', -> $qastcomp, $op {
     
     my $exprpost := $qastcomp.as_post($op[0]);
     my $vivipost := $qastcomp.coerce($qastcomp.as_post($op[1]),
-        $qastcomp.infer_type($exprpost));
+        $qastcomp.infer_type($exprpost.result));
     my $vivlabel := PIRT::Label.new(:name($qastcomp.unique('vivi_')));
     
     my $ops := PIRT::Ops.new();
@@ -427,7 +427,7 @@ for ('', 'repeat_') -> $repness {
         QAST::Operations.add_core_op("$repness$op_name", -> $qastcomp, $op {
             # Check operand count.
             my $operands := +$op.list;
-            pir::die("Operation '$repness$op_name' needs 2 or  operands")
+            pir::die("Operation '$repness$op_name' needs 2 or 3 operands")
                 if $operands != 2 && $operands != 3;
 
             # Create labels.
@@ -447,7 +447,7 @@ for ('', 'repeat_') -> $repness {
                 my $*HAVE_IMM_ARG := $_.arity > 0 && $_ =:= $op.list[1];
                 my $comp := $qastcomp.as_post($_);
                 @comp_ops.push($comp);
-                @comp_types.push($qastcomp.infer_type($comp));
+                @comp_types.push($qastcomp.infer_type($comp.result));
                 if $*HAVE_IMM_ARG && !$*IMM_ARG {
                     nqp::die("$op_name block expects an argument, but there's no immediate block to take it");
                 }
