@@ -69,6 +69,7 @@ QAST_COMBINED = QAST.nqp
 QAST_PIR = QAST.pir
 QAST_PBC = QAST.pbc
 QAST_SOURCES = \
+  src/QAST/PIRT.nqp \
   src/QAST/CompileTimeValue.nqp \
   src/QAST/SpecialArg.nqp \
   src/QAST/Node.nqp \
