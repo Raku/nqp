@@ -26,7 +26,10 @@ class PIRT::Node {
                 @args.shift() ~ "(" ~ nqp::join(", ", @args) ~ ")"
         },
         'callmethod', sub (@args) {
-            nqp::die("NYI");
+            my $pir := "    " ~ ($*HAS_RESULT ?? @args.shift() ~ " = " !! '');
+            my $name := @args.shift;
+            my $invocant := @args.shift;
+            "$pir$invocant.$name(" ~ nqp::join(", ", @args) ~ ")"
         },
         'return', sub (@args) {
             "    .return (" ~ nqp::join(", ", @args) ~ ")"
