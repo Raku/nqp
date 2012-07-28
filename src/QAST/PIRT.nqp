@@ -35,13 +35,26 @@ class PIRT::Node {
             "    .return (" ~ nqp::join(", ", @args) ~ ")"
         },
         'yield', sub (@args) {
-            nqp::die("NYI");
+            nqp::die("yield compilation NYI");
         },
         'tailcall', sub (@args) {
-            nqp::die("NYI");
+            nqp::die("tailcall compilation NYI");
         },
         'inline', sub (@args) {
-            nqp::die("NYI");
+            my $pir;
+            if $*HAS_RESULT {
+                my $result := @args.shift();
+                $pir := subst(@args.shift(), /'%r'/, $result, :global);
+            }
+            else {
+                $pir := @args.shift();
+            }
+            my $i := 0;
+            for @args {
+                $pir := subst($pir, /'%'$i/, $_, :global);
+                $i := $i + 1;
+            }
+            $pir
         });
     
     method children_pir(@children) {
