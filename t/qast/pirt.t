@@ -1,6 +1,6 @@
 use QAST;
 
-plan(3);
+plan(5);
 
 sub is_pirt_result($producer, $expected, $desc) {
     my $pirt := $producer();
@@ -54,3 +54,54 @@ is_pirt_result({
     },
     "c'est l'awesome",
     "Basic use of labels");
+
+is_pirt_result({
+        # Create a nested sub.
+        my $n_ops := PIRT::Ops.new();
+        $n_ops.push_pirop('return', '"nested sub"');
+        my $n_sub := PIRT::Sub.new();
+        $n_sub.push($n_ops);
+        $n_sub.subid('n_sub');
+        
+        # Create the outer sub that looks it up and calls it.
+        my $ops := PIRT::Ops.new();
+        $ops.push($n_sub);
+        $ops.push_pirop(".const 'Sub' \$P0 = 'n_sub'");
+        $ops.push_pirop('call', '$P0', :result('$S0'));
+        $ops.push_pirop('concat', '$S1', '$S0', '" outer sub"');
+        $ops.push_pirop('return', '$S1');
+        my $sub := PIRT::Sub.new();
+        $sub.push($ops);
+        
+        $sub
+    },
+    "nested sub outer sub",
+    "Calling subs");
+
+is_pirt_result({
+        # Create a nested sub that looks up a lexical.
+        my $n_ops := PIRT::Ops.new();
+        $n_ops.push_pirop('find_lex', '$P0', '"$foo"');
+        $n_ops.push_pirop('return', '$P0');
+        my $n_sub := PIRT::Sub.new();
+        $n_sub.push($n_ops);
+        $n_sub.subid('n_sub');
+        $n_sub.pirflags(':outer("o_sub")');
+        
+        # Create the outer sub that looks it up and calls it.
+        my $ops := PIRT::Ops.new();
+        $ops.push($n_sub);
+        $ops.push_pirop('box', '$P1', '"lexicals work!"');
+        $ops.push_pirop('.lex', '"$foo"', '$P1');
+        $ops.push_pirop(".const 'Sub' \$P0 = 'n_sub'");
+        $ops.push_pirop('capture_lex', '$P0');
+        $ops.push_pirop('call', '$P0', :result('$S0'));
+        $ops.push_pirop('return', '$S0');
+        my $sub := PIRT::Sub.new();
+        $sub.push($ops);
+        $sub.subid('o_sub');
+        
+        $sub
+    },
+    'lexicals work!',
+    "pirflags emitted correctly");

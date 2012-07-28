@@ -3,10 +3,27 @@
 # in QAST::Compiler. Since the mapping is pretty close, the nodes themselves
 # know how to become PIR.
 
+class PIRT::CallResult {
+    has str $!result;
+    
+    method new(:$result!) {
+        my $obj := nqp::create(self);
+        nqp::bindattr_s($obj, PIRT::CallResult, '$!result',
+            $result ~~ PIRT::Node ?? $result.result !! $result);
+        $obj
+    }
+    
+    method result() {
+        $!result
+    }
+}
+
 class PIRT::Node {
     my %op_compilers := nqp::hash(
         'call', sub (@args) {
-            nqp::die("NYI");
+            "    " ~
+                ($*HAS_RESULT ?? @args.shift() ~ " = " !! '') ~
+                @args.shift() ~ "(" ~ nqp::join(", ", @args) ~ ")"
         },
         'callmethod', sub (@args) {
             nqp::die("NYI");
@@ -33,15 +50,24 @@ class PIRT::Node {
                 my $i := 1;
                 my $c := nqp::elems($_);
                 my $arg;
+                my $*HAS_RESULT := 0;
+                my $result;
                 while $i < $c {
                     $arg := $_[$i];
                     if $arg ~~ PIRT::Node {
                         nqp::push(@op_args, $arg.result);
                     }
+                    elsif $arg ~~ PIRT::CallResult {
+                        $result := $arg.result;
+                        $*HAS_RESULT := 1;
+                    }
                     else {
                         nqp::push(@op_args, $arg);
                     }
                     $i := $i + 1;
+                }
+                if $*HAS_RESULT {
+                    nqp::unshift(@op_args, $result);
                 }
                 if nqp::existskey(%op_compilers, $op_name) {
                     nqp::push(@parts, %op_compilers{$op_name}(@op_args));
@@ -67,8 +93,22 @@ class PIRT::Node {
 
 class PIRT::Sub is PIRT::Node {
     has @!children;
+    has str $!subid;
+    has str $!pirflags;
+    has str $!name;
+    has @!loadlibs;
+    
     has @!nested_blocks;
     has str $!cached_pir;
+    
+    method escape($str) {
+        my $esc := pir::escape__Ss($str);
+        nqp::index($esc, '\x', 0) >= 0 ??
+            'utf8:"' ~ $esc ~ '"' !!
+                (nqp::index($esc, '\u', 0) >= 0 ??
+                 'unicode:"' ~ $esc ~ '"' !!
+                 '"' ~ $esc ~ '"')
+    }
     
     method new() {
         my $obj := nqp::create(self);
@@ -80,8 +120,27 @@ class PIRT::Sub is PIRT::Node {
         nqp::push(@!children, $node);
     }
     
-    method push_pirop(*@opbits) {
+    method push_pirop(*@opbits, :$result) {
+        if $result {
+            nqp::push(@opbits, PIRT::CallResult.new($result));
+        }
         nqp::push(@!children, @opbits)
+    }
+    
+    method subid(*@value) {
+        @value ?? ($!subid := @value[0]) !! $!subid
+    }
+    
+    method pirflags(*@value) {
+        @value ?? ($!pirflags := @value[0]) !! $!pirflags
+    }
+    
+    method name(*@value) {
+        @value ?? ($!name := @value[0]) !! $!name
+    }
+    
+    method loadlibs(@libs?) {
+        @libs ?? (@!loadlibs := @libs) !! @!loadlibs
     }
     
     method result() {
@@ -92,7 +151,17 @@ class PIRT::Sub is PIRT::Node {
         my @parts;
         
         # Sub prelude.
-        nqp::push(@parts, ".sub ''");
+        for @!loadlibs {
+            nqp::push(@parts, ".loadlib " ~ self.escape($_));
+        }
+        my $sub_decl := ".sub " ~ self.escape($!name || '');
+        if $!subid {
+            $sub_decl := $sub_decl ~ " :subid(" ~ self.escape($!subid) ~ ")";
+        }
+        if $!pirflags {
+            $sub_decl := $sub_decl ~ ' ' ~ $!pirflags
+        }
+        nqp::push(@parts, $sub_decl);
         
         # Compile sub contents, collecting any nested blocks.
         my @*PIRT_BLOCKS;
@@ -138,7 +207,10 @@ class PIRT::Ops is PIRT::Node {
         nqp::push(@!children, $node)
     }
     
-    method push_pirop(*@opbits) {
+    method push_pirop(*@opbits, :$result) {
+        if $result {
+            nqp::push(@opbits, PIRT::CallResult.new($result));
+        }
         nqp::push(@!children, @opbits)
     }
     
