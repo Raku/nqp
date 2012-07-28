@@ -969,13 +969,18 @@ class QAST::Compiler is HLL::Compiler {
     }
 
     method post_new($type, *@args, *%options) {
-        Q:PIR {
-            $P0 = find_lex '$type'
-            $S0 = $P0
-            $P0 = get_root_global ['parrot';'POST'], $S0
-            $P1 = find_lex '@args'
-            $P2 = find_lex '%options'
-            %r = $P0.'new'($P1 :flat, $P2 :flat :named)
+        if $*PIRT {
+            (PIRT.WHO){$type}.new(|@args, |%options)
+        }
+        else {
+            Q:PIR {
+                $P0 = find_lex '$type'
+                $S0 = $P0
+                $P0 = get_root_global ['parrot';'POST'], $S0
+                $P1 = find_lex '@args'
+                $P2 = find_lex '%options'
+                %r = $P0.'new'($P1 :flat, $P2 :flat :named)
+            }
         }
     }
 

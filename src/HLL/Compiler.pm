@@ -473,9 +473,14 @@ class HLL::Compiler {
 
     method post($source, *%adverbs) {
         my $*PASTCOMPILER := pir::compreg__Ps('PAST');
-        $source ~~ PAST::Node ??
-            $*PASTCOMPILER.to_post($source, |%adverbs) !!
+        if $source ~~ PAST::Node {
+            my $*PIRT := 0;
+            $*PASTCOMPILER.to_post($source, |%adverbs)
+        }
+        else {
+            my $*PIRT := 1;
             QAST::Compiler.as_post($source)
+        }
     }
 
     method pirbegin() {
@@ -491,9 +496,14 @@ class HLL::Compiler {
     }
   
     method pir($source, *%adverbs) {
-        self.pirbegin() ~ (pir::can($source, 'pir')
-            ?? $source.pir()
-            !! pir::compreg__Ps('POST').to_pir($source, |%adverbs))
+        if pir::can($source, 'pir') {
+            my $*PIRT := 1;
+            self.pirbegin() ~ $source.pir()
+        }
+        else {
+            my $*PIRT := 0;
+            self.pirbegin() ~ pir::compreg__Ps('POST').to_pir($source, |%adverbs)
+        }
     }
 
     method evalpmc($source, *%adverbs) {
