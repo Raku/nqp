@@ -234,6 +234,7 @@ class PIRT::Sub is PIRT::Node {
 class PIRT::Ops is PIRT::Node {
     has @!children;
     has str $!result;
+    has $!node;
     
     method new(:$result = '') {
         my $obj := nqp::create(self);
@@ -261,6 +262,10 @@ class PIRT::Ops is PIRT::Node {
         else {
             $!result
         }
+    }
+    
+    method node(*@value) {
+        @value ?? ($!node := @value[0]) !! $!node
     }
     
     method pir() {
