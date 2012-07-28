@@ -213,6 +213,7 @@ class PIRT::Sub is PIRT::Node {
         # the children array, to free up memory.
         $!cached_pir := nqp::join("\n", @parts);
         @!nested_blocks := @*PIRT_BLOCKS;
+        @!children := nqp::null();
     }
 
     method pir() {
