@@ -13,7 +13,7 @@ class PIRT::CallResult {
         $obj
     }
     
-    method result() {
+    method result() is parrot_vtable('get_string') {
         $!result
     }
 }
@@ -169,8 +169,8 @@ class PIRT::Sub is PIRT::Node {
         @namespace ?? (@!namespace := @namespace) !! @!namespace
     }
     
-    method result() {
-        nqp::die("Cannot use a PIRT::Sub in a context expecting a result");
+    method result() is parrot_vtable('get_string') {
+        ""
     }
     
     method close_sub() {
@@ -255,7 +255,7 @@ class PIRT::Ops is PIRT::Node {
         nqp::push(@!children, @opbits)
     }
     
-    method result(*@value) {
+    method result(*@value) is parrot_vtable('get_string') {
         if @value {
             $!result := @value[0] ~~ PIRT::Node ?? @value[0].result !! @value[0];
         }
@@ -289,7 +289,7 @@ class PIRT::Label is PIRT::Node {
         @value ?? ($!name := unique(@value[0])) !! $!name
     }
     
-    method result() {
+    method result() is parrot_vtable('get_string') {
         $!name
     }
     
