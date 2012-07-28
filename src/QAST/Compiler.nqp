@@ -343,7 +343,7 @@ class QAST::Compiler is HLL::Compiler {
             }
             
             # Generate parameter handling code.
-            my $decls := self.post_new('Ops');
+            my $decls := PIRT::Ops.new();
             $decls.node($node.node) if $node.node;
             my %lex_params;
             if $node.custom_args {
@@ -397,7 +397,7 @@ class QAST::Compiler is HLL::Compiler {
             }
             
             # Wrap all up in a POST::Sub.
-            $sub := self.post_new('Sub');
+            $sub := PIRT::Sub.new();
             $sub.push($decls);
             $sub.push($stmts);
             $sub.push_pirop(".return (" ~ $stmts.result ~ ")");
@@ -424,7 +424,7 @@ class QAST::Compiler is HLL::Compiler {
         
         # What we evaluate to depends on whether it's a declaration or an
         # immediate.
-        my $ops := self.post_new('Ops');
+        my $ops := PIRT::Ops.new();
         $ops.push($sub);
         my $blocktype := $node.blocktype;
         if $blocktype eq 'immediate' {
@@ -482,7 +482,7 @@ class QAST::Compiler is HLL::Compiler {
             }
             
             # Generate declarations.
-            my $decls := self.post_new('Ops');
+            my $decls := PIRT::Ops.new();
             for $block.lexicals {
                 $decls.push_pirop('.lex ' ~ self.escape($_.name) ~ ', ' ~ $block.lex_reg($_.name));
             }
@@ -491,7 +491,7 @@ class QAST::Compiler is HLL::Compiler {
             }
             
             # Wrap all up in a POST::Sub.
-            $sub := self.post_new('Sub');
+            $sub := PIRT::Sub.new();
             $sub.push($decls);
             $sub.push($stmts);
             $sub.push_pirop(".return (" ~ $stmts.result ~ ")");
@@ -521,7 +521,7 @@ class QAST::Compiler is HLL::Compiler {
     
     method compile_all_the_stmts(@stmts, $resultchild?, :$node) {
         my $last;
-        my $ops := self.post_new('Ops');
+        my $ops := PIRT::Ops.new();
         $ops.node($node) if $node;
         my $i := 0;
         my $n := +@stmts;
@@ -584,7 +584,7 @@ class QAST::Compiler is HLL::Compiler {
             QAST::Operations.compile_pirop(self, $node.alternative('pirop'), $node.list)
         }
         elsif $node.supports('pir') {
-            my $ops := self.post_new('Ops');
+            my $ops := PIRT::Ops.new();
             $ops.node($node.node) if $node.node;
             my $pir := $node.alternative('pir');
             if nqp::index($pir, '%r') >= 0 {
@@ -598,7 +598,7 @@ class QAST::Compiler is HLL::Compiler {
             return $ops;
         }
         elsif $node.supports('pirconst') {
-            my $ops := self.post_new('Ops');
+            my $ops := PIRT::Ops.new();
             $ops.node($node.node) if $node.node;
             my $name := $node.alternative('pirconst');
             $ops.result('.' ~ $name);
@@ -606,7 +606,7 @@ class QAST::Compiler is HLL::Compiler {
         }
         elsif $node.supports('loadlibs') {
             $*BLOCK.add_loadlibs($node.alternative('loadlibs'));
-            self.post_new('Ops');
+            PIRT::Ops.new();
         }
         else {
             nqp::die("To compile on the Parrot backend, QAST::VM must have an alternative 'parrot', 'pirop', 'pir' or 'loadlibs'");
@@ -667,7 +667,7 @@ class QAST::Compiler is HLL::Compiler {
         }
         
         # Now go by scope.
-        my $ops := self.post_new('Ops');
+        my $ops := PIRT::Ops.new();
         $ops.node($node.node) if $node.node;
         if $scope eq 'local' {
             if $*BLOCK.local_type($name) -> $type {
@@ -778,24 +778,24 @@ class QAST::Compiler is HLL::Compiler {
     }
     
     multi method as_post(QAST::IVal $node) {
-        self.post_new('Ops', :result(~$node.value))
+        PIRT::Ops.new(:result(~$node.value))
     }
     
     multi method as_post(QAST::NVal $node) {
         my $val := ~$node.value;
         $val := $val ~ '.0' unless nqp::index($val, '.', 0) >= 0 ||
                                    nqp::index($val, 'e', 0) > 0;
-        self.post_new('Ops', :result($val))
+        PIRT::Ops.new(:result($val))
     }
     
     multi method as_post(QAST::SVal $node) {
-        self.post_new('Ops', :result(self.escape($node.value)))
+        PIRT::Ops.new(:result(self.escape($node.value)))
     }
     
     multi method as_post(QAST::BVal $node) {
         my $cuid := self.escape($node.value.cuid);
         my $reg  := $*REGALLOC.fresh_p();
-        my $ops  := self.post_new('Ops', :result($reg));
+        my $ops  := PIRT::Ops.new(:result($reg));
         $ops.push_pirop(".const 'Sub' $reg = $cuid");
         $ops;
     }
@@ -806,7 +806,7 @@ class QAST::Compiler is HLL::Compiler {
         my $handle := $sc.handle;
         my $idx    := $sc.slot_index_for($val);
         my $reg    := $*REGALLOC.fresh_p();
-        my $ops    := self.post_new('Ops', :result($reg));
+        my $ops    := PIRT::Ops.new(:result($reg));
         $ops.push_pirop('nqp_get_sc_object', $reg, self.escape($handle), ~$idx);
         $ops;
     }
@@ -828,7 +828,7 @@ class QAST::Compiler is HLL::Compiler {
         }
         elsif $result eq nqp::lc($desired) {
             # Correct type, but we need a register.
-            my $ops := self.post_new('Ops');
+            my $ops := PIRT::Ops.new();
             my $reg := $*REGALLOC."fresh_$result"();
             $ops.push($post);
             $ops.push_pirop('set', $reg, $post);
@@ -847,7 +847,7 @@ class QAST::Compiler is HLL::Compiler {
         }
         elsif nqp::index('IiNnSs', $result) >= 0 && nqp::index('IiNnSs', $desired) >= 0 {
             # Coercion that we have an op for
-            my $ops := self.post_new('Ops');
+            my $ops := PIRT::Ops.new();
             my $rtype := nqp::lc($desired);
             my $reg := $*REGALLOC."fresh_$rtype"();
             $ops.push($post);
