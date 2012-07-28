@@ -276,14 +276,17 @@ class PIRT::Ops is PIRT::Node {
 class PIRT::Label is PIRT::Node {
     has str $!name;
     
+    my $serno := 10;
+    sub unique($prefix) { $prefix ~ $serno++ }
+    
     method new(:$name!) {
         my $obj := nqp::create(self);
-        nqp::bindattr_s($obj, PIRT::Label, '$!name', $name);
+        nqp::bindattr_s($obj, PIRT::Label, '$!name', unique($name));
         $obj
     }
     
     method name(*@value) {
-        @value ?? ($!name := @value[0]) !! $!name
+        @value ?? ($!name := unique(@value[0])) !! $!name
     }
     
     method result() {
