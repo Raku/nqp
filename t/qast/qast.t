@@ -4,8 +4,8 @@ plan(72);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
-    my $post := QAST::Compiler.as_post($qast);
-    my $pir := QAST::Compiler.pir($post);
+    my $pirt := QAST::Compiler.as_post($qast);
+    my $pir := $pirt.pir();
     QAST::Compiler.evalpmc($pir);
 }
 sub is_qast($qast, $value, $desc) {
