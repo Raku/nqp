@@ -217,17 +217,22 @@ class PIRT::Sub is PIRT::Node {
     }
 
     method pir() {
+        my @parts;
+        self.collect_sub_pir_into(@parts);
+        nqp::join("\n", @parts)
+    }
+    
+    method collect_sub_pir_into(@result) {
         # If we don't already have the sub body, then close the sub now.
         unless $!cached_pir {
             self.close_sub();
         }
         
-        # Our PIR is ourselve plus the PIR of any nested blocks.
-        my @parts := [$!cached_pir];
+        # Add our PIR followed by that of any nested blocks.
+        @result.push($!cached_pir);
         for @!nested_blocks {
-            nqp::push(@parts, $_.pir());
+            $_.collect_sub_pir_into(@result);
         }
-        nqp::join("\n", @parts)
     }
 }
 
