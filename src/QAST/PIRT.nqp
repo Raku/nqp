@@ -210,6 +210,7 @@ class PIRT::Sub is PIRT::Node {
         
         # Compile sub contents, collecting any nested blocks.
         my @*PIRT_BLOCKS;
+        my $*SUB_LINE := -1;
         nqp::push(@parts, self.children_pir(@!children));
         
         # Sub postlude.
@@ -280,12 +281,15 @@ class PIRT::Ops is PIRT::Node {
     }
     
     method pir() {
-        my $pir := self.children_pir(@!children);
+        my $ann := '';
         if $!node {
             my $line := HLL::Compiler.lineof($!node.orig(), $!node.from(), :cache(1));
-            $pir := ".annotate 'line', $line\n$pir";
+            if $line != $*SUB_LINE {
+                $ann := ".annotate 'line', $line\n";
+                $*SUB_LINE := $line;
+            }
         }
-        $pir
+        $ann ~ self.children_pir(@!children);
     }
 }
 
