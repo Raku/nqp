@@ -1252,7 +1252,7 @@ QAST::Operations.add_core_pirop_mapping('iseq_n', 'iseq', 'Inn', :pure(1));
 QAST::Operations.add_core_pirop_mapping('isne_n', 'isne', 'Inn', :pure(1));
 QAST::Operations.add_core_pirop_mapping('islt_n', 'islt', 'Inn', :pure(1));
 QAST::Operations.add_core_pirop_mapping('isle_n', 'isle', 'Inn', :pure(1));
-QAST::Operations.add_core_pirop_mapping('isgt_n', 'isgt', 'Inn, :pure(1)');
+QAST::Operations.add_core_pirop_mapping('isgt_n', 'isgt', 'Inn', :pure(1));
 QAST::Operations.add_core_pirop_mapping('isge_n', 'isge', 'Inn', :pure(1));
 
 QAST::Operations.add_core_pirop_mapping('cmp_s', 'cmp', 'Iss', :pure(1));
