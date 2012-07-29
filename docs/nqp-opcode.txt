@@ -17,31 +17,49 @@ General notes:
   * Items marked (?) mean that the opcode itself might be questionable
     for inclusion in the set.
 
+(Updated for QAST, 2012-07-29 by pmichaud)
 
   control opcodes:
     nqp::if(test, iftrue, iffalse)
     nqp::unless(test, iffalse, iftrue)
+    nqp::ifnull(val, valifnull)
+    nqp::defor(val, valifundef)
     nqp::while(test, body)
+    nqp::until(test, body)
+    nqp::repeat_while(test, body)
+    nqp::repeat_until(test, body)
     nqp::loop(init, test, next, body)
+    nqp::for(list, body [, next])
     nqp::throw                     pir::throw__0P
     nqp::rethrow                   pir::rethrow__0P
-    nqp::die                       pir::die__vP
+    nqp::die                       pir::die__0P
+    nqp::die_s                     pir::die__0s
     nqp::exit                      pir::exit__vi
     nqp::sleep                     pir::sleep__vn
     (need ops to fetch caller, outer, context, etc?)
 
+  binding opcodes:
+    nqp::bind(var, value)
+
   I/O:
     nqp::print                     pir::print
     nqp::say                       pir::say
+    nqp::stat                      pir::stat__Isi
+    nqp::open                      pir::open__Pss
 
   arithmetic:
     nqp::add_i                     pir::add__Iii
     nqp::add_n                     pir::add__Nnn
+    nqp::add_I
     ...etc...
+    nqp::isnanorinf
 
   string:
+    nqp::chars                     pir::length__Is
     nqp::concat                    pir::concat__Sss
+    nqp::concat_s                  pir::concat__Sss
     nqp::join                      pir::join__SsP
+    nqp::x                         pir::repeat__Ssi
     nqp::substr                    pir::substr__Ssii
     nqp::lc                        pir::downcase__Ss
     nqp::uc                        pir::upcase__Ss
@@ -58,9 +76,16 @@ General notes:
     nqp::iseq_i                    pir::iseq__Iii
     nqp::iseq_n                    pir::iseq__Inn
     nqp::iseq_s                    pir::iseq__Iss
+    nqp::iseq_I
     ...etc...
 
   aggregate:
+    nqp::list(item0, item1, ...)   create a low-level list
+    nqp::qlist(item0, item1, ...)  temporary for QRPA
+    nqp::list_i(int0, int1, ...)   create a low-level integer list
+    nqp::list_s(str0, str1, ...)   create a low-level string list
+    nqp::hash(key0, val0, ...)     create a low-level hash
+
     nqp::pop                       pir::pop__PP
     nqp::push                      pir::push__0PP
     nqp::shift                     pir::shift__PP
@@ -112,12 +137,6 @@ General notes:
     nqp::p6bool or ::p6box_b       pir::perl6_booleanize__PI
     nqp::p6list_a                  pir::perl6_list_from_rpa__PPPP
     nqp::p6iter_a                  pir::perl6_iter_from_rpa__PPP
-
-  Lexical and variable ops (?)
-    nqp::bindlex                   pir::store_lex__1sP
-    nqp::getlex    or ::lex        pir::find_lex__Ps
-    nqp::getdynlex or ::dynlex     pir::find_dynamic_lex__Ps
-    nqp::binddynlex                pir::store_dynamic_lex__Ps
 
   STable ops (?)
     ...??...
