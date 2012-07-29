@@ -317,6 +317,12 @@ QAST::Operations.add_core_op('chain', :pure(1), -> $qastcomp, $op {
     $ops
 });
 
+
+# Set of sequential statements
+QAST::Operations.add_core_op('stmts', :pure(1), -> $qastcomp, $op {
+    $qastcomp.as_post(QAST::Stmts.new( |@($op) ))
+});
+
 # Conditionals.
 for <if unless> -> $op_name {
     QAST::Operations.add_core_op($op_name, :pure(1), -> $qastcomp, $op {

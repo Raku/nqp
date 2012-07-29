@@ -30,6 +30,7 @@ General notes:
     nqp::repeat_until(test, body)
     nqp::loop(init, test, next, body)
     nqp::for(list, body [, next])
+    nqp::stmts(stmt0, stmt1, ...)
     nqp::throw                     pir::throw__0P
     nqp::rethrow                   pir::rethrow__0P
     nqp::die                       pir::die__0P
