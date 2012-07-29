@@ -282,7 +282,7 @@ class PIRT::Ops is PIRT::Node {
     method pir() {
         my $pir := self.children_pir(@!children);
         if $!node {
-            my $line := HLL::Compiler.lineof($!node.orig(), $!node.from(), :cache(1)) + 1;
+            my $line := HLL::Compiler.lineof($!node.orig(), $!node.from(), :cache(1));
             $pir := ".annotate 'line', $line\n$pir";
         }
         $pir
