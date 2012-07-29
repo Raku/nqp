@@ -202,6 +202,12 @@ class PIRT::Sub is PIRT::Node {
         }
         nqp::push(@parts, $sub_decl);
         
+        # File annotation, if there is one.
+        my $file := pir::find_caller_lex__Ps('$?FILES');
+        if $file {
+            nqp::push(@parts, ".annotate 'file', " ~ self.escape($file));
+        }
+        
         # Compile sub contents, collecting any nested blocks.
         my @*PIRT_BLOCKS;
         nqp::push(@parts, self.children_pir(@!children));
@@ -274,7 +280,12 @@ class PIRT::Ops is PIRT::Node {
     }
     
     method pir() {
-        self.children_pir(@!children)
+        my $pir := self.children_pir(@!children);
+        if $!node {
+            my $line := HLL::Compiler.lineof($!node.orig(), $!node.from(), :cache(1)) + 1;
+            $pir := ".annotate 'line', $line\n$pir";
+        }
+        $pir
     }
 }
 
