@@ -1361,7 +1361,9 @@ class QAST::Compiler is HLL::Compiler {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
         my $name := $*PASTCOMPILER.as_post($node.name, :rtype<*>);
         my $subtype := $node.subtype;
-        my $cpn := $node[0] ~~ QAST::Node ?? self.children($node[0]) !! self.post_children($node[0]);
+        my $cpn := nqp::istype($node[0], QAST::Node)
+            ?? self.children($node[0])
+            !! self.post_children($node[0]);
         my @pargs := $cpn[1] // [];
         my @nargs := $cpn[2] // [];
         my $subpost := nqp::shift(@pargs);

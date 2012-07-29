@@ -9,7 +9,7 @@ class PIRT::CallResult {
     method new(:$result!) {
         my $obj := nqp::create(self);
         nqp::bindattr_s($obj, PIRT::CallResult, '$!result',
-            $result ~~ PIRT::Node ?? $result.result !! $result);
+            nqp::istype($result, PIRT::Node) ?? $result.result !! $result);
         $obj
     }
     
@@ -70,10 +70,10 @@ class PIRT::Node {
                 my $result;
                 while $i < $c {
                     $arg := $_[$i];
-                    if $arg ~~ PIRT::Node {
+                    if nqp::istype($arg, PIRT::Node) {
                         nqp::push(@op_args, $arg.result);
                     }
-                    elsif $arg ~~ PIRT::CallResult {
+                    elsif nqp::istype($arg, PIRT::CallResult) {
                         $result := $arg.result;
                         $*HAS_RESULT := 1;
                     }
@@ -92,10 +92,10 @@ class PIRT::Node {
                     nqp::push(@parts, '    ' ~ $op_name ~ ' ' ~ nqp::join(", ", @op_args));
                 }
             }
-            elsif $_ ~~ PIRT::Sub {
+            elsif nqp::istype($_, PIRT::Sub) {
                 nqp::push(@*PIRT_BLOCKS, $_);
             }
-            elsif $_ ~~ PIRT::Node {
+            elsif nqp::istype($_, PIRT::Node) {
                 my $pir := $_.pir;
                 nqp::push(@parts, $pir) unless $pir eq '';
             }
@@ -252,7 +252,7 @@ class PIRT::Ops is PIRT::Node {
         my $obj := nqp::create(self);
         nqp::bindattr($obj, PIRT::Ops, '@!children', nqp::list());
         nqp::bindattr_s($obj, PIRT::Ops, '$!result',
-            $result ~~ PIRT::Node ?? $result.result !! $result);
+            nqp::istype($result, PIRT::Node) ?? $result.result !! $result);
         $obj
     }
     
@@ -269,7 +269,7 @@ class PIRT::Ops is PIRT::Node {
     
     method result(*@value) is parrot_vtable('get_string') {
         if @value {
-            $!result := @value[0] ~~ PIRT::Node ?? @value[0].result !! @value[0];
+            $!result := nqp::istype(@value[0], PIRT::Node) ?? @value[0].result !! @value[0];
         }
         else {
             $!result
