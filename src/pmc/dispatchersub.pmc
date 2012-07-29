@@ -12,10 +12,12 @@ pmclass DispatcherSub extends Sub auto_attrs dynpmc group nqp {
     }
     
     VTABLE void mark() {
-        PMC *dispatchees;
+        PMC *dispatchees, *dispatch_cache;
         SUPER();
         GET_ATTR_dispatchees(interp, SELF, dispatchees);
         Parrot_gc_mark_PMC_alive(INTERP, dispatchees);
+        GET_ATTR_dispatch_cache(interp, SELF, dispatch_cache);
+        Parrot_gc_mark_PMC_alive(INTERP, dispatch_cache);
     }
 
     VTABLE PMC * clone() {
@@ -23,8 +25,6 @@ pmclass DispatcherSub extends Sub auto_attrs dynpmc group nqp {
         PMC *cloned = SUPER();
         GET_ATTR_dispatchees(interp, SELF, dispatchees);
         SET_ATTR_dispatchees(interp, cloned, dispatchees);
-        GET_ATTR_dispatch_cache(interp, SELF, dispatch_cache);
-        SET_ATTR_dispatch_cache(interp, cloned, dispatch_cache);
         return cloned;
     }
     

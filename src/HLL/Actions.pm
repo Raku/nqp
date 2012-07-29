@@ -36,9 +36,6 @@ class HLL::Actions {
     method SET_BLOCK_OUTER_CTX($block) {
         my $outer_ctx := %*COMPILING<%?OPTIONS><outer_ctx>;
         if nqp::defined($outer_ctx) {
-            my @ns := pir::getattribute__PPs($outer_ctx, 'current_namespace').get_name;
-            @ns.shift;
-            $block.namespace(@ns);
             for $outer_ctx.lexpad_full {
                 $block.symbol($_.key, :scope<lexical>, :value($_.value));
             }

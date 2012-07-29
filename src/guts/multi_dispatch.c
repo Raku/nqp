@@ -43,6 +43,8 @@ static INTVAL smo_id = 0;
 #define DEFINED_ONLY    1
 #define UNDEFINED_ONLY  2
 
+/* Register type. */
+#define BIND_VAL_OBJ 4
 
 /* Compares two types to see if the first is narrower than the second. */
 static INTVAL is_narrower_type(PARROT_INTERP, PMC *a, PMC *b) {
@@ -262,26 +264,182 @@ static PMC *get_dispatchees(PARROT_INTERP, PMC *dispatcher) {
     }
 }
 
+/* Gets (creating if needed) a multi-dispatch cache. */
+static NQP_md_cache *get_dispatch_cache(PARROT_INTERP, PMC *dispatcher) {
+    PMC *cache_ptr;
+    if (!smo_id)
+        smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
+    if (dispatcher->vtable->base_type == enum_class_Sub && PARROT_SUB(dispatcher)->multi_signature->vtable->base_type == smo_id) {
+        NQP_Routine *r = (NQP_Routine *)PMC_data(PARROT_SUB(dispatcher)->multi_signature);
+        if (PMC_IS_NULL(r->dispatch_cache)) {
+            NQP_md_cache *c = mem_sys_allocate_zeroed(sizeof(NQP_md_cache));
+            cache_ptr = Parrot_pmc_new(interp, enum_class_Pointer);
+            VTABLE_set_pointer(interp, cache_ptr, c);
+            r->dispatch_cache = cache_ptr;
+            PARROT_GC_WRITE_BARRIER(interp, PARROT_SUB(dispatcher)->multi_signature);
+        }
+        else {
+            cache_ptr = r->dispatch_cache;
+        }
+    }
+    else {
+        if (PMC_IS_NULL(PARROT_DISPATCHERSUB(dispatcher)->dispatch_cache)) {
+            NQP_md_cache *c = mem_sys_allocate_zeroed(sizeof(NQP_md_cache));
+            cache_ptr = Parrot_pmc_new(interp, enum_class_Pointer);
+            VTABLE_set_pointer(interp, cache_ptr, c);
+            PARROT_DISPATCHERSUB(dispatcher)->dispatch_cache = cache_ptr;
+            PARROT_GC_WRITE_BARRIER(interp, dispatcher);
+        }
+        else {
+            cache_ptr = PARROT_DISPATCHERSUB(dispatcher)->dispatch_cache;
+        }
+    }
+    return (NQP_md_cache *)VTABLE_get_pointer(interp, cache_ptr);
+}
+
+/*
+
+=item C<static PMC * find_in_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num_args)>
+
+Looks for an entry in the multi-dispatch cache.
+
+=cut
+
+*/
+static PMC *
+find_in_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num_args) {
+    INTVAL arg_tup[MD_CACHE_MAX_ARITY];
+    INTVAL i, j, entries, t_pos;
+    struct Pcc_cell * pc_positionals;
+    
+    /* If it's zero-arity, return result right off. */
+    if (num_args == 0)
+        return cache->zero_arity;
+
+    /* Create arg tuple. */
+    if (capture->vtable->base_type == enum_class_CallContext)
+        GETATTR_CallContext_positionals(interp, capture, pc_positionals);
+    else
+        return NULL;
+    for (i = 0; i < num_args; i++) {
+        if (pc_positionals[i].type == BIND_VAL_OBJ) {
+            PMC *arg = pc_positionals[i].u.p;
+            if (arg->vtable->base_type != smo_id)
+                return NULL;
+            arg_tup[i] = STABLE(arg)->type_cache_id | (IS_CONCRETE(arg) ? 1 : 0);
+        }
+        else {
+            arg_tup[i] = (pc_positionals[i].type << 1) | 1;
+        }
+    }
+
+    /* Look through entries. */
+    entries = cache->arity_caches[num_args - 1].num_entries;
+    t_pos = 0;
+    for (i = 0; i < entries; i++) {
+        INTVAL match = 1;
+        for (j = 0; j < num_args; j++) {
+            if (cache->arity_caches[num_args - 1].type_ids[t_pos + j] != arg_tup[j]) {
+                match = 0;
+                break;
+            }
+        }
+        if (match)
+            return cache->arity_caches[num_args - 1].results[i];
+        t_pos += num_args;
+    }
+
+    return NULL;
+}
+
+
+/*
+
+=item C<static void add_to_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num_args)>
+
+Adds an entry to the multi-dispatch cache.
+
+=cut
+
+*/
+static void
+add_to_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num_args, PMC *result) {
+    INTVAL arg_tup[MD_CACHE_MAX_ARITY];
+    INTVAL i, entries, ins_type;
+    struct Pcc_cell * pc_positionals;
+    
+    /* If it's zero arity, just stick it in that slot. */
+    if (num_args == 0) {
+        cache->zero_arity = result;
+        return;
+    }
+    
+    /* If the cache is saturated, don't do anything (we could instead do a random
+     * replacement). */
+    entries = cache->arity_caches[num_args - 1].num_entries;
+    if (entries == MD_CACHE_MAX_ENTRIES)
+        return;
+    
+    /* Create arg tuple. */
+    if (capture->vtable->base_type == enum_class_CallContext)
+        GETATTR_CallContext_positionals(interp, capture, pc_positionals);
+    else
+        return;
+    for (i = 0; i < num_args; i++) {
+        if (pc_positionals[i].type == BIND_VAL_OBJ) {
+            PMC *arg = pc_positionals[i].u.p;
+            if (arg->vtable->base_type != smo_id)
+                return;
+            arg_tup[i] = STABLE(arg)->type_cache_id | (IS_CONCRETE(arg) ? 1 : 0);
+        }
+        else {
+            arg_tup[i] = (pc_positionals[i].type << 1) | 1;
+        }
+    }
+
+    /* If there's no entries yet, need to do some allocation. */
+    if (entries == 0) {
+        cache->arity_caches[num_args - 1].type_ids = mem_sys_allocate(num_args * sizeof(INTVAL) * MD_CACHE_MAX_ENTRIES);
+        cache->arity_caches[num_args - 1].results  = mem_sys_allocate(sizeof(PMC *) * MD_CACHE_MAX_ENTRIES);
+    }
+
+    /* Add entry. */
+    ins_type = entries * num_args;
+    for (i = 0; i < num_args; i++)
+        cache->arity_caches[num_args - 1].type_ids[ins_type + i] = arg_tup[i];
+    cache->arity_caches[num_args - 1].results[entries] = result;
+    cache->arity_caches[num_args - 1].num_entries = entries + 1;
+}
+
 /* Performs a multiple dispatch using the candidates held in the passed
  * dispatcher and using the arguments in the passed capture. */
 PMC *nqp_multi_dispatch(PARROT_INTERP, PMC *dispatcher, PMC *capture) {
-    /* Get list and number of dispatchees. */
-    PMC *dispatchees = get_dispatchees(interp, dispatcher);
-    const INTVAL num_candidates = VTABLE_elements(interp, dispatchees);
+    NQP_md_cache    *disp_cache;
+    PMC             *dispatchees, *cache_result;
+    INTVAL           type_mismatch, possibles_count, type_check_count,
+                     num_candidates, num_args;
+    candidate_info **possibles, **candidates, **cur_candidate;
 
     /* Count arguments. */
-    const INTVAL num_args = VTABLE_elements(interp, capture);
+    num_args = VTABLE_elements(interp, capture);
+
+    /* See if the dispatcher cache will resolve it right off. */
+    disp_cache = get_dispatch_cache(interp, dispatcher);
+    cache_result = find_in_cache(interp, disp_cache, capture, num_args);
+    if (!PMC_IS_NULL(cache_result))
+        return cache_result;
+    
+    /* Get list and number of dispatchees. */
+    dispatchees = get_dispatchees(interp, dispatcher);
+    num_candidates = VTABLE_elements(interp, dispatchees);
 
     /* Initialize dispatcher state. */
-    INTVAL type_mismatch;
-    INTVAL possibles_count = 0;
-    candidate_info **possibles = mem_allocate_n_typed(num_candidates, candidate_info *);
-    INTVAL type_check_count;
+    possibles_count = 0;
+    possibles = mem_allocate_n_typed(num_candidates, candidate_info *);
 
-    /* Get sorted candidate list.
-     * XXX We'll cache this in the future. */
-    candidate_info** candidates    = sort_candidates(interp, dispatchees);
-    candidate_info** cur_candidate = candidates;
+    /* Get sorted candidate list. */
+    candidates    = sort_candidates(interp, dispatchees);
+    cur_candidate = candidates;
 
     /* Iterate over the candidates and collect best ones; terminate
      * when we see two nulls (may break out earlier). */
@@ -350,12 +508,13 @@ PMC *nqp_multi_dispatch(PARROT_INTERP, PMC *dispatcher, PMC *capture) {
 
     /* Cache the result if there's a single chosen one. */
     if (possibles_count == 1) {
-        /* XXX TODO: Cache entry. */
+        add_to_cache(interp, disp_cache, capture, num_args, possibles[0]->sub);
     }
 
     /* Need a unique candidate. */
     if (possibles_count == 1) {
         PMC *result = possibles[0]->sub;
+        mem_sys_free(candidates);
         mem_sys_free(possibles);
         return result;
     }
@@ -373,6 +532,7 @@ PMC *nqp_multi_dispatch(PARROT_INTERP, PMC *dispatcher, PMC *capture) {
             cur_candidate++;
         }
 
+        mem_sys_free(candidates);
         mem_sys_free(possibles);
         Parrot_ex_throw_from_c_args(interp, NULL, 1,
             "No applicable candidates found to dispatch to for '%Ss'. Available candidates are:\n%Ss",
@@ -386,6 +546,7 @@ PMC *nqp_multi_dispatch(PARROT_INTERP, PMC *dispatcher, PMC *capture) {
         /* XXX TODO: sig dumping
         for (i = 0; i < possibles_count; i++)
             signatures = dump_signature(interp, signatures, possibles[i]->sub); */
+        mem_sys_free(candidates);
         mem_sys_free(possibles);
         Parrot_ex_throw_from_c_args(interp, NULL, 1,
             "Ambiguous dispatch to multi '%Ss'. Ambiguous candidates had signatures:\n%Ss",

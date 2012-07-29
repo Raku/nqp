@@ -70,8 +70,26 @@ QAST_COMBINED = QAST.nqp
 QAST_PIR = QAST.pir
 QAST_PBC = QAST.pbc
 QAST_SOURCES = \
+  src/QAST/CompileTimeValue.nqp \
+  src/QAST/SpecialArg.nqp \
   src/QAST/Node.nqp \
   src/QAST/Regex.nqp \
+  src/QAST/IVal.nqp \
+  src/QAST/NVal.nqp \
+  src/QAST/SVal.nqp \
+  src/QAST/BVal.nqp \
+  src/QAST/WVal.nqp \
+  src/QAST/Want.nqp \
+  src/QAST/Var.nqp \
+  src/QAST/Op.nqp \
+  src/QAST/VM.nqp \
+  src/QAST/Stmts.nqp \
+  src/QAST/Stmt.nqp \
+  src/QAST/Block.nqp \
+  src/QAST/BlockMemo.nqp \
+  src/QAST/Unquote.nqp \
+  src/QAST/CompUnit.nqp \
+  src/QAST/Operations.nqp \
   src/QAST/Compiler.nqp \
 
 P6QREGEX_SOURCES = \

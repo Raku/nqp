@@ -1,20 +1,895 @@
-class QAST::Compiler is HLL::Compiler { 
+class QAST::Compiler is HLL::Compiler {
+    # Holds information about the current register usage, for when
+    # we're allocating tempories.
+    my class RegAlloc {
+        has int $!cur_p;
+        has int $!cur_s;
+        has int $!cur_i;
+        has int $!cur_n;
+        
+        method new($cur?) {
+            my $obj := nqp::create(self);
+            $cur ??
+                $obj.BUILD($cur.cur_p, $cur.cur_s, $cur.cur_i, $cur.cur_n) !!
+                $obj.BUILD(500, 500, 500, 500);
+            $obj
+        }
+        
+        method BUILD($p, $s, $i, $n) {
+            $!cur_p := $p;
+            $!cur_s := $s;
+            $!cur_i := $i;
+            $!cur_n := $n;
+        }
+        
+        method fresh_p() {
+            $!cur_p := $!cur_p + 1;
+            '$P' ~ $!cur_p
+        }
+        method fresh_s() {
+            $!cur_s := $!cur_s + 1;
+            '$S' ~ $!cur_s
+        }
+        method fresh_i() {
+            $!cur_i := $!cur_i + 1;
+            '$I' ~ $!cur_i
+        }
+        method fresh_n() {
+            $!cur_n := $!cur_n + 1;
+            '$N' ~ $!cur_n
+        }
+        
+        method cur_p() { $!cur_p }
+        method cur_s() { $!cur_s }
+        method cur_i() { $!cur_i }
+        method cur_n() { $!cur_n }
+    }
+    
+    # Holds information about the QAST::Block we're currently compiling.
+    my class BlockInfo {
+        has $!qast;             # The QAST::Block
+        has $!outer;            # Outer block's BlockInfo
+        has @!params;           # QAST::Var nodes of params
+        has @!locals;           # QAST::Var nodes of declared locals
+        has @!lexicals;         # QAST::Var nodes of declared lexicals
+        has %!local_types;      # Mapping of local registers to type names
+        has %!lexical_types;    # Mapping of lexical names to types
+        has %!lexical_regs;     # Mapping of lexical names to registers
+        has %!reg_types;        # Mapping of all registers to types
+        has int $!param_idx;    # Current lexical parameter index
+        has @!loadlibs;         # Libraries to load for the target POST::Block.
+        has int $!cur_lex_p;    # Current lexical register (P)
+        has int $!cur_lex_s;    # Current lexical register (S)
+        has int $!cur_lex_i;    # Current lexical register (I)
+        has int $!cur_lex_n;    # Current lexical register (N)
+        
+        method new($qast, $outer) {
+            my $obj := nqp::create(self);
+            $obj.BUILD($qast, $outer);
+            $obj
+        }
+        
+        method BUILD($qast, $outer) {
+            $!qast := $qast;
+            $!outer := $outer;
+            $!cur_lex_p := 10;
+            $!cur_lex_s := 10;
+            $!cur_lex_i := 10;
+            $!cur_lex_n := 10;
+        }
+        
+        method add_param($var) {
+            if $var.scope eq 'local' {
+                self.register_local($var);
+            }
+            else {
+                my $reg := '_lex_param_' ~ $!param_idx;
+                $!param_idx := $!param_idx + 1;
+                self.register_lexical($var, $reg);
+            }
+            @!params[+@!params] := $var;
+        }
+        
+        method add_lexical($var) {
+            self.register_lexical($var);
+            @!lexicals[+@!lexicals] := $var;
+        }
+        
+        method add_local($var) {
+            self.register_local($var);
+            @!locals[+@!locals] := $var;
+        }
+        
+        method register_lexical($var, $reg?) {
+            my $name := $var.name;
+            my $type := type_to_register_type($var.returns);
+            if nqp::existskey(%!lexical_types, $name) {
+                pir::die("Lexical '$name' already declared");
+            }
+            %!lexical_types{$name} := $type;
+            %!lexical_regs{$name} := $reg ?? $reg !! self."fresh_lex_{nqp::lc($type)}"();
+            %!reg_types{%!lexical_regs{$name}} := $type;
+        }
+        
+        method register_local($var) {
+            my $name := $var.name;
+            if nqp::existskey(%!local_types, $name) {
+                pir::die("Local '$name' already declared");
+            }
+            %!local_types{$name} := type_to_register_type($var.returns);
+            %!reg_types{$name} := %!local_types{$name};
+        }
+        
+        method qast() { $!qast }
+        method outer() { $!outer }
+        method params() { @!params }
+        method lexicals() { @!lexicals }
+        method locals() { @!locals }
+        
+        method lex_reg($name) { %!lexical_regs{$name} }
+        
+        my %longnames := nqp::hash('P', 'pmc', 'I', 'int', 'N', 'num', 'S', 'string');
+        method local_type($name) { %!local_types{$name} }
+        method local_type_long($name) { %longnames{%!local_types{$name}} }
+        method lexical_type($name) { %!lexical_types{$name} }
+        method lexical_type_long($name) { %longnames{%!lexical_types{$name}} }
+        method reg_type($name) { %!reg_types{$name} }
+        
+        method add_loadlibs(@libs) {
+            for @libs {
+                @!loadlibs[+@!loadlibs] := $_;
+            }
+        }
+        method loadlibs() {
+            @!loadlibs
+        }
+        
+        method fresh_lex_p() {
+            $!cur_lex_p := $!cur_lex_p + 1;
+            '$P' ~ $!cur_lex_p
+        }
+        method fresh_lex_s() {
+            $!cur_lex_s := $!cur_lex_s + 1;
+            '$S' ~ $!cur_lex_s
+        }
+        method fresh_lex_i() {
+            $!cur_lex_i := $!cur_lex_i + 1;
+            '$I' ~ $!cur_lex_i
+        }
+        method fresh_lex_n() {
+            $!cur_lex_n := $!cur_lex_n + 1;
+            '$N' ~ $!cur_lex_n
+        }
+    }
+    
     our $serno;
-    INIT { 
+    INIT {
         $serno := 10; 
         Q:PIR {
+            $P0 = get_root_global ['parrot';'QAST'], 'Compiler'
+            unless null $P0 goto have_qastcomp
             $P0 = find_lex '$?CLASS'
             set_root_global ['parrot';'QAST'], 'Compiler', $P0
+            compreg 'QAST', $P0
+          have_qastcomp:
         };
+    }
+    
+    my @prim_to_reg := ['P', 'I', 'N', 'S'];
+    sub type_to_register_type($type) {
+        @prim_to_reg[pir::repr_get_primitive_type_spec__IP($type)]
+    }
+    method type_to_register_type($type) {
+        type_to_register_type($type)
+    }
+    
+    my @prim_to_lookup_name := ['obj', 'int', 'num', 'str'];
+    sub type_to_lookup_name($type) {
+        @prim_to_lookup_name[pir::repr_get_primitive_type_spec__IP($type)]
     }
 
     method unique($prefix = '') { $prefix ~ $serno++ }
-    method escape($str) { 'ucs4:"' ~ pir::escape__Ss($str) ~ '"' }
+    method escape($str) {
+        my $esc := pir::escape__Ss($str);
+        nqp::index($esc, '\x', 0) >= 0 ??
+            'utf8:"' ~ $esc ~ '"' !!
+                (nqp::index($esc, '\u', 0) >= 0 ??
+                 'unicode:"' ~ $esc ~ '"' !!
+                 '"' ~ $esc ~ '"')
+    }
+    method rxescape($str) { 'ucs4:"' ~ pir::escape__Ss($str) ~ '"' }
 
-    #proto method as_post(*@args, *%_) { * }
-    #multi method as_post(QAST::Regex $node) {
-    method as_post(QAST::Regex $node) {
+    proto method as_post(*@args, *%_) { * }
+    
+    multi method as_post(QAST::CompUnit $cu) {
+        # Set HLL.
+        my $*HLL := '';
+        if $cu.hll {
+            $*HLL := $cu.hll;
+        }
+        
+        # Should have a single child which is the outer block.
+        if +@($cu) != 1 || !nqp::istype($cu[0], QAST::Block) {
+            nqp::die("QAST::CompUnit should have one child that is a QAST::Block");
+        }
+
+        # Compile the block.
+        my $block_post := self.as_post($cu[0]);
+
+        # Apply HLL if any.
+        if $*HLL {
+            $block_post.hll($*HLL);
+        }
+        
+        # If we are in compilation mode, or have pre-deserialization or
+        # post-deserialization tasks, handle those. Overall, the process
+        # is to desugar this into simpler QAST nodes, then compile those.
+        my $comp_mode := $cu.compilation_mode;
+        my @pre_des   := $cu.pre_deserialize;
+        my @post_des  := $cu.post_deserialize;
+        if $comp_mode || @pre_des || @post_des {
+            # Create a block into which we'll install all of the other
+            # pieces.
+            my $block := QAST::Block.new( :blocktype('raw') );
+            
+            # Add pre-deserialization tasks, each as a QAST::Stmt.
+            for @pre_des {
+                $block.push(QAST::Stmt.new($_));
+            }
+            
+            # If we need to do deserializatin, emit code for that.
+            if $comp_mode {
+                $block.push(self.deserialization_code($cu.sc(), $cu.code_ref_blocks()));
+            }
+            
+            # Add post-deserialization tasks.
+            for @post_des {
+                $block.push(QAST::Stmt.new($_));
+            }
+            
+            # Compile to POST and add in the flags to load it.
+            my $sc_post := self.as_post($block);
+            $sc_post.pirflags(':load :init');
+            $block_post.push($sc_post);
+        }
+        
+        # Compile and include load-time logic, if any.
+        if nqp::defined($cu.load) {
+            my $load_post := self.as_post(QAST::Block.new( :blocktype('raw'), $cu.load ));
+            $load_post.pirflags(':load');
+            $block_post.push($load_post);
+        }
+        
+        # Compile and include main-time logic, if any.
+        if nqp::defined($cu.main) {
+            my $main_post := self.as_post(QAST::Block.new( :blocktype('raw'), $cu.main ));
+            $main_post.pirflags(':main');
+            $block_post.push($main_post);
+        }
+
+        $block_post
+    }
+    
+    method deserialization_code($sc, @code_ref_blocks) {
+        # Serialize it.
+        my $sh := pir::new__Ps('ResizableStringArray');
+        my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+        
+        # Now it's serialized, pop this SC off the compiling SC stack.
+        pir::nqp_pop_compiling_sc__v();
+        
+        # String heap QAST.
+        my $sh_ast := QAST::Op.new( :op('list_s') );
+        my $sh_elems := nqp::elems($sh);
+        my $i := 0;
+        while $i < $sh_elems {
+            $sh_ast.push(nqp::isnull_s($sh[$i])
+                ?? QAST::Op.new( :op('null_s') )
+                !! QAST::SVal.new( :value($sh[$i]) ));
+            $i := $i + 1;
+        }
+        
+        # Code references.
+        my $cr_past := QAST::Op.new( :op('list_b'), |@code_ref_blocks );
+        
+        # Overall deserialization QAST.
+        QAST::Stmt.new(
+            QAST::Op.new(
+                :op('bind'),
+                QAST::Var.new( :name('cur_sc'), :scope('local'), :decl('var') ),
+                QAST::Op.new( :op('createsc'), QAST::SVal.new( :value($sc.handle()) ) )
+            ),
+            QAST::Op.new(
+                :op('callmethod'), :name('set_description'),
+                QAST::Var.new( :name('cur_sc'), :scope('local') ),
+                QAST::SVal.new( :value($sc.description) )
+            ),
+            QAST::Op.new(
+                :op('deserialize'),
+                QAST::SVal.new( :value($serialized) ),
+                QAST::Var.new( :name('cur_sc'), :scope('local') ),
+                $sh_ast,
+                QAST::Block.new( :blocktype('immediate'), $cr_past )
+            )
+        )
+    }
+
+    multi method as_post(QAST::Block $node) {
+        # Build the POST::Sub.
+        my $sub;
+        {
+            # Block gets completely fresh registers, and fresh BlockInfo.
+            my $*REGALLOC := RegAlloc.new();
+            my $*BLOCKRA  := $*REGALLOC;
+            my $*BINDVAL  := 0;
+            my $outer     := try $*BLOCK;
+            my $block     := BlockInfo.new($node, $outer);
+            my @inners;
+            
+            # First need to compile all of the statements.
+            my $stmts;
+            {
+                my $*BLOCK := $block;
+                my @*INNERS := @inners;
+                my $*HAVE_IMM_ARG := 0;
+                my $err;
+                try {
+                    $stmts := self.compile_all_the_stmts($node.list);
+                    CATCH { $err := $! }
+                }
+                if $err {
+                    nqp::die("Error while compiling block " ~ $node.name ~ ": $err");
+                }
+            }
+            
+            # Generate parameter handling code.
+            my $decls := self.post_new('Ops');
+            $decls.node($node.node) if $node.node;
+            my %lex_params;
+            if $node.custom_args {
+                $decls.push_pirop('.param pmc CALL_SIG :call_sig');
+            }
+            else {
+                for $block.params {
+                    my @param := ['.param'];
+                    
+                    if $_.scope eq 'local'{
+                        nqp::push(@param, $block.local_type_long($_.name));
+                        nqp::push(@param, $_.name);
+                    }
+                    else {
+                        my $reg := $block.lex_reg($_.name);
+                        nqp::push(@param, $block.lexical_type_long($_.name));
+                        nqp::push(@param, $reg);
+                        %lex_params{$_.name} := $reg;
+                    }
+                    
+                    if $_.slurpy {
+                        nqp::push(@param, ':slurpy');
+                        if $_.named {
+                            nqp::push(@param, ':named');
+                        }
+                    }
+                    elsif $_.named {
+                        nqp::push(@param, ':named(' ~ self.escape($_.named) ~ ')');
+                    }
+                    
+                    $decls.push_pirop(pir::join(' ', @param));
+                }
+            }
+            
+            # Capture lexicals.
+            my $cap_lex_reg := $*REGALLOC.fresh_p();
+            for @inners {
+                $decls.push_pirop(".const 'Sub' $cap_lex_reg = '$_'");
+                $decls.push_pirop("capture_lex $cap_lex_reg");
+            }
+
+            # Generate declarations.
+            for $block.lexicals {
+                $decls.push_pirop('.lex ' ~ self.escape($_.name) ~ ', ' ~ $block.lex_reg($_.name));
+            }
+            for %lex_params {
+                $decls.push_pirop('.lex ' ~ self.escape($_.key) ~ ', ' ~ $_.value);
+            }
+            for $block.locals {
+                $decls.push_pirop('.local ' ~ $block.local_type_long($_.name) ~ ' ' ~ $_.name);
+            }
+            
+            # Wrap all up in a POST::Sub.
+            $sub := self.post_new('Sub');
+            $sub.push($decls);
+            $sub.push($stmts);
+            $sub.push_pirop(".return (" ~ $stmts.result ~ ")");
+            
+            # Set compilation unit ID, name and, if applicable, outer.
+            $sub.subid($node.cuid);
+            if nqp::istype($block.outer, BlockInfo) {
+                $sub.pirflags(':anon :lex :outer(' ~ self.escape($block.outer.qast.cuid) ~ ')');
+            }
+            else {
+                $sub.pirflags(':anon :lex');
+            }
+            $sub.name($node.name);
+            
+            # Set loadlibs if applicable.
+            my @loadlibs := $block.loadlibs();
+            $sub.loadlibs(@loadlibs) if @loadlibs;
+        }
+        
+        # If we are at the top level, we'll immediately return.
+        unless nqp::istype((try $*BLOCK), BlockInfo) {
+            return $sub;
+        }
+        
+        # What we evaluate to depends on whether it's a declaration or an
+        # immediate.
         my $ops := self.post_new('Ops');
+        $ops.push($sub);
+        my $blocktype := $node.blocktype;
+        if $blocktype eq 'immediate' {
+            # Look up and capture the block.
+            try @*INNERS.push($node.cuid());
+            my $breg := $*REGALLOC.fresh_p();
+            $ops.push_pirop(".const 'Sub' $breg = '" ~ $node.cuid() ~ "'");
+            $ops.push_pirop("capture_lex", $breg);
+            
+            # Pick a result register.
+            my $rtype := nqp::lc(type_to_register_type($node.returns));
+            my $rreg := $*REGALLOC."fresh_$rtype"();
+            
+            # Emit call now, unless something else wants to emit with an
+            # argument.
+            my $im_arg := 0;
+            try $im_arg := $*HAVE_IMM_ARG;
+            if $im_arg {
+                $*IMM_ARG := -> $arg {
+                    $ops.push_pirop('call', $breg, $arg, :result($rreg));
+                };
+            }
+            else {
+                $ops.push_pirop('call', $breg, :result($rreg));
+            }
+            $ops.result($rreg);
+        }
+        elsif $blocktype eq 'declaration' || $blocktype eq '' {
+            # Get the block and newclosure it.
+            try @*INNERS.push($node.cuid());
+            my $breg := $*REGALLOC.fresh_p();
+            $ops.push_pirop(".const 'Sub' $breg = '" ~ $node.cuid() ~ "'");
+            $ops.push_pirop("capture_lex", $breg);
+            $ops.result($breg);
+        }
+        $ops
+    }
+    
+    multi method as_post(QAST::BlockMemo $node) {
+        # Build the POST::Sub.
+        my $sub;
+        {
+            # Block gets completely fresh registers, and fresh BlockInfo.
+            my $*REGALLOC := RegAlloc.new();
+            my $*BLOCKRA  := $*REGALLOC;
+            my $*BINDVAL  := 0;
+            my $block     := BlockInfo.new($node, 0);
+            
+            # First need to compile all of the statements. Fake NQP HLL.
+            my $stmts;
+            {
+                my $*BLOCK := $block;
+                my $*HLL := 'nqp';
+                $stmts := self.compile_all_the_stmts($node.list);
+            }
+            
+            # Generate declarations.
+            my $decls := self.post_new('Ops');
+            for $block.lexicals {
+                $decls.push_pirop('.lex ' ~ self.escape($_.name) ~ ', ' ~ $block.lex_reg($_.name));
+            }
+            for $block.locals {
+                $decls.push_pirop('.local ' ~ $block.local_type_long($_.name) ~ ' ' ~ $_.name);
+            }
+            
+            # Wrap all up in a POST::Sub.
+            $sub := self.post_new('Sub');
+            $sub.push($decls);
+            $sub.push($stmts);
+            $sub.push_pirop(".return (" ~ $stmts.result ~ ")");
+            
+            # Set compilation unit ID, namespace (forced to Sub) and
+            # HLL (forced to NQP).
+            $sub.name($node.name);
+            $sub.subid($node.cuid);
+            $sub.namespace(['Sub']);
+            $sub.hll('nqp');
+        }
+        
+        return $sub;
+    }
+    
+    multi method as_post(QAST::Stmts $node) {
+        self.compile_all_the_stmts($node.list, $node.resultchild, :node($node.node))
+    }
+    
+    multi method as_post(QAST::Stmt $node) {
+        my $orig_reg := $*REGALLOC;
+        {
+            my $*REGALLOC := RegAlloc.new($orig_reg);
+            self.compile_all_the_stmts($node.list, $node.resultchild, :node($node.node))
+        }
+    }
+    
+    method compile_all_the_stmts(@stmts, $resultchild?, :$node) {
+        my $last;
+        my $ops := self.post_new('Ops');
+        $ops.node($node) if $node;
+        my $i := 0;
+        my $n := +@stmts;
+        for @stmts {
+            my $void := $i + 1 < $n;
+            if nqp::istype($_, QAST::Want) && $void {
+                $_ := want($_, 'v');
+            }
+            $last := self.as_post($_);
+            $ops.push($last)
+                unless $void && nqp::istype($_, QAST::Var);
+            if nqp::defined($resultchild) && $resultchild == $i {
+                $ops.result($last.result);
+            }
+            $i := $i + 1;
+        }
+        if $last && !nqp::defined($resultchild) {
+            $ops.result($last.result);
+        }
+        $ops
+    }
+    
+    method apply_context($node, $type) {
+        nqp::istype($node, QAST::Want) ??
+            want($node, $type) !!
+            $node
+    }
+    
+    sub want($node, $type) {
+        my @possibles := nqp::clone($node.list);
+        my $best := @possibles.shift;
+        for @possibles -> $sel, $ast {
+            if nqp::index($sel, $type) >= 0 {
+                $best := $ast;
+            }
+        }
+        $best
+    }
+    
+    multi method as_post(QAST::Op $node) {
+        my $hll := '';
+        my $result;
+        my $err;
+        try $hll := $*HLL;
+        try {
+            $result := QAST::Operations.compile_op(self, $hll, $node);
+            CATCH { $err := $! }
+        }
+        if $err {
+            nqp::die("Error while compiling op " ~ $node.op ~ ": $err");
+        }
+        $result
+    }
+    
+    multi method as_post(QAST::VM $node) {
+        if $node.supports('parrot') {
+            return self.as_post($node.alternative('parrot'))
+        }
+        elsif $node.supports('pirop') {
+            QAST::Operations.compile_pirop(self, $node.alternative('pirop'), $node.list)
+        }
+        elsif $node.supports('pir') {
+            my $ops := self.post_new('Ops');
+            $ops.node($node.node) if $node.node;
+            my $pir := $node.alternative('pir');
+            if nqp::index($pir, '%r') >= 0 {
+                my $reg := $*REGALLOC.fresh_p();
+                $ops.push_pirop('inline', inline => $pir, result => $reg);
+                $ops.result($reg);
+            }
+            else {
+                $ops.push_pirop('inline', inline => $pir);
+            }
+            return $ops;
+        }
+        elsif $node.supports('pirconst') {
+            my $ops := self.post_new('Ops');
+            $ops.node($node.node) if $node.node;
+            my $name := $node.alternative('pirconst');
+            $ops.result('.' ~ $name);
+            return $ops;
+        }
+        elsif $node.supports('loadlibs') {
+            $*BLOCK.add_loadlibs($node.alternative('loadlibs'));
+            self.post_new('Ops');
+        }
+        else {
+            nqp::die("To compile on the Parrot backend, QAST::VM must have an alternative 'parrot', 'pirop', 'pir' or 'loadlibs'");
+        }
+    }
+    
+    multi method as_post(QAST::Var $node) {
+        my $scope := $node.scope;
+        my $decl  := $node.decl;
+        
+        # Handle any declarations; after this, we call through to the
+        # lookup code.
+        if $decl {
+            # If it's a parameter, add it to the things we should bind
+            # at block entry.
+            if $decl eq 'param' {
+                if $scope eq 'local' || $scope eq 'lexical' {
+                    $*BLOCK.add_param($node);
+                }
+                else {
+                    pir::die("Parameter cannot have scope '$scope'; use 'local' or 'lexical'");
+                }
+            }
+            elsif $decl eq 'var' {
+                if $scope eq 'local' {
+                    $*BLOCK.add_local($node);
+                }
+                elsif $scope eq 'lexical' {
+                    $*BLOCK.add_lexical($node);
+                }
+                else {
+                    pir::die("Cannot declare variable with scope '$scope'; use 'local' or 'lexical'");
+                }
+            }
+            else {
+                pir::die("Don't understand declaration type '$decl'");
+            }
+        }
+        
+        # If there's no scope, figure it out from the symbol tables if
+        # possible.
+        my $name := $node.name;
+        if $scope eq '' {
+            my $cur_block := $*BLOCK;
+            while nqp::istype($cur_block, BlockInfo) {
+                my %sym := $cur_block.qast.symbol($name);
+                if %sym {
+                    $scope := %sym<$scope>;
+                    $cur_block := NQPMu;
+                }
+                else {
+                    $cur_block := $cur_block.outer();
+                }
+            }
+            if $scope eq '' {
+                nqp::die("No scope specified or locatable in the symbol table for '$name'");
+            }
+        }
+        
+        # Now go by scope.
+        my $ops := self.post_new('Ops');
+        $ops.node($node.node) if $node.node;
+        if $scope eq 'local' {
+            if $*BLOCK.local_type($name) -> $type {
+                if $*BINDVAL {
+                    my $valpost := self.coerce(self.as_post_clear_bindval($*BINDVAL), nqp::lc($type));
+                    $ops.push($valpost);
+                    $ops.push_pirop('set', $name, $valpost.result);
+                }
+                $ops.result($name);
+            }
+            else {
+                pir::die("Cannot reference undeclared local '$name'");
+            }
+        }
+        elsif $scope eq 'lexical' {
+            # If the lexical is directly declared in this block, we use the
+            # register directly.
+            my %sym := $*BLOCK.qast.symbol($name);
+            if (!%sym || !%sym<lazyinit>) && $*BLOCK.lexical_type($name) -> $type {
+                my $reg := $*BLOCK.lex_reg($name);
+                if $*BINDVAL {
+                    my $valpost := self.coerce(self.as_post_clear_bindval($*BINDVAL), nqp::lc($type));
+                    $ops.push($valpost);
+                    $ops.push_pirop('set', $reg, $valpost.result);
+                }
+                $ops.result($reg);
+            }
+            else {
+                # Does the node have a native type marked on it?
+                my $type := type_to_register_type($node.returns);
+                if $type eq 'P' {
+                    # Consider the blocks for a declared native type.
+                    # XXX TODO
+                }
+                
+                # Emit the lookup or bind.
+                if $*BINDVAL {
+                    my $valpost := self.coerce(self.as_post_clear_bindval($*BINDVAL), nqp::lc($type));
+                    $ops.push($valpost);
+                    $ops.push_pirop('store_lex', self.escape($node.name), $valpost.result);
+                    $ops.result($valpost.result);
+                }
+                else {
+                    my $res_reg := $*REGALLOC."fresh_{nqp::lc($type)}"();
+                    $ops.push_pirop('find_lex', $res_reg, self.escape($node.name));
+                    $ops.result($res_reg);
+                }
+            }
+        }
+        elsif $scope eq 'attribute' {
+            # Ensure we have object and class handle.
+            my @args := $node.list();
+            if +@args != 2 {
+                pir::die("An attribute lookup needs an object and a class handle");
+            }
+            
+            # Compile object and handle.
+            my $obj := self.coerce(self.as_post_clear_bindval(@args[0]), 'p');
+            my $han := self.coerce(self.as_post_clear_bindval(@args[1]), 'p');
+            $ops.push($obj);
+            $ops.push($han);
+            
+            # Go by whether it's a bind or lookup.
+            my $type    := type_to_register_type($node.returns);
+            my $op_type := type_to_lookup_name($node.returns);
+            if $*BINDVAL {
+                my $valpost := self.coerce(self.as_post_clear_bindval($*BINDVAL), nqp::lc($type));
+                $ops.push($valpost);
+                $ops.push_pirop("repr_bind_attr_$op_type", $obj.result, $han.result,
+                    self.escape($name), $valpost.result);
+                $ops.result($valpost.result);
+            }
+            else {
+                my $res_reg := $*REGALLOC."fresh_{nqp::lc($type)}"();
+                $ops.push_pirop("repr_get_attr_$op_type", $res_reg, $obj.result, $han.result,
+                    self.escape($name));
+                $ops.result($res_reg);
+            }
+        }
+        elsif $scope eq 'contextual' {
+            if $*BINDVAL {
+                my $valpost := self.coerce(self.as_post_clear_bindval($*BINDVAL), 'P');
+                $ops.push($valpost);
+                $ops.push_pirop('store_dynamic_lex', self.escape($name), $valpost.result);
+                $ops.result($valpost.result);
+            }
+            else {
+                my $res_reg := $*REGALLOC."fresh_p"();
+                $ops.push_pirop('find_dynamic_lex', $res_reg, self.escape($name));
+                $ops.result($res_reg);
+            }
+        }
+        else {
+            pir::die("QAST::Var with scope '$scope' NYI");
+        }
+        
+        $ops
+    }
+    
+    method as_post_clear_bindval($node) {
+        my $*BINDVAL := 0;
+        self.as_post($node)
+    }
+    
+    multi method as_post(QAST::Want $node) {
+        # If we're not in a coercive context, take the default.
+        self.as_post($node[0])
+    }
+    
+    multi method as_post(QAST::IVal $node) {
+        self.post_new('Ops', :result(~$node.value))
+    }
+    
+    multi method as_post(QAST::NVal $node) {
+        my $val := ~$node.value;
+        $val := $val ~ '.0' unless nqp::index($val, '.', 0) >= 0 ||
+                                   nqp::index($val, 'e', 0) > 0;
+        self.post_new('Ops', :result($val))
+    }
+    
+    multi method as_post(QAST::SVal $node) {
+        self.post_new('Ops', :result(self.escape($node.value)))
+    }
+    
+    multi method as_post(QAST::BVal $node) {
+        my $cuid := self.escape($node.value.cuid);
+        my $reg  := $*REGALLOC.fresh_p();
+        my $ops  := self.post_new('Ops', :result($reg));
+        $ops.push_pirop(".const 'Sub' $reg = $cuid");
+        $ops;
+    }
+    
+    multi method as_post(QAST::WVal $node) {
+        my $val    := $node.value;
+        my $sc     := pir::nqp_get_sc_for_object__PP($val);
+        my $handle := $sc.handle;
+        my $idx    := $sc.slot_index_for($val);
+        my $reg    := $*REGALLOC.fresh_p();
+        my $ops    := self.post_new('Ops', :result($reg));
+        $ops.push_pirop('nqp_get_sc_object', $reg, self.escape($handle), ~$idx);
+        $ops;
+    }
+    
+    method coerce($post, $desired) {
+        my $result := self.infer_type($post.result());
+        if $result eq $desired {
+            # Exact match
+            return $post;
+        }
+        elsif nqp::lc($result) eq $desired {
+            # The result is in a register, and our desired type allows
+            # both registers and literals.
+            return $post;
+        }
+        elsif $result eq 'p' && $desired eq 'P' {
+            # PMCs are always in a register anyway
+            return $post;
+        }
+        elsif $result eq nqp::lc($desired) {
+            # Correct type, but we need a register.
+            my $ops := self.post_new('Ops');
+            my $reg := $*REGALLOC."fresh_$result"();
+            $ops.push($post);
+            $ops.push_pirop('set', $reg, $post);
+            $ops.result($reg);
+            return $ops;
+        }
+        elsif $desired eq 'P' || $desired eq 'p' {
+            my $hll := '';
+            try $hll := $*HLL;
+            return QAST::Operations.box(self, $hll, nqp::lc($result), $post);
+        }
+        elsif $result eq 'P' || $result eq 'p' {
+            my $hll := '';
+            try $hll := $*HLL;
+            return QAST::Operations.unbox(self, $hll, nqp::lc($desired), $post);
+        }
+        elsif nqp::index('IiNnSs', $result) >= 0 && nqp::index('IiNnSs', $desired) >= 0 {
+            # Coercion that we have an op for
+            my $ops := self.post_new('Ops');
+            my $rtype := nqp::lc($desired);
+            my $reg := $*REGALLOC."fresh_$rtype"();
+            $ops.push($post);
+            $ops.push_pirop('set', $reg, $post);
+            $ops.result($reg);
+            return $ops;
+        }
+        else {
+            pir::die("Coercion from '$result' to '$desired' NYI");
+        }
+    }
+    
+    method infer_type($inferee) {
+        if nqp::substr($inferee, 0, 1) eq '$' {
+            nqp::substr($inferee, 1, 1)
+        }
+        elsif $*BLOCK.reg_type($inferee) -> $type {
+            nqp::lc($type)
+        }
+        elsif nqp::substr($inferee, 0, 1) eq '"'
+              || nqp::substr($inferee, 0, 6) eq 'utf8:"'
+              || nqp::substr($inferee, 0, 6) eq 'ucs4:"'
+              || nqp::substr($inferee, 0, 9) eq 'unicode:"' {
+            "s"
+        }
+        elsif nqp::substr($inferee, 0, 1) eq '.' {
+            "P"
+        }
+        elsif nqp::index($inferee, ".", 0) > 0 {
+            "n"
+        }
+        elsif +$inferee eq $inferee {
+            "i"
+        }
+        else {
+            pir::die("Cannot infer type from '$inferee'");
+        }
+    }
+    
+    multi method as_post(QAST::Regex $node) {
+        my $ops := self.post_new('Ops');
+        $ops.node($node.node) if $node.node;
         my $prefix := self.unique('rx') ~ '_';
         my %*REG;
 
@@ -87,7 +962,7 @@ class QAST::Compiler is HLL::Compiler {
 
     method regex_post($node) {
         return $*PASTCOMPILER.as_post($node) if $node ~~ PAST::Node;
-        my $rxtype := $node.rxtype() // 'concat';
+        my $rxtype := $node.rxtype() || 'concat';
         self."$rxtype"($node);
     }
 
@@ -280,7 +1155,7 @@ class QAST::Compiler is HLL::Compiler {
 
     method enumcharlist($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
-        my $charlist := self.escape($node[0]);
+        my $charlist := self.rxescape($node[0]);
         my $testop := $node.negate ?? 'ge' !! 'lt';
         $ops.push_pirop('ge', %*REG<pos>, %*REG<eos>, %*REG<fail>);
         $ops.push_pirop('substr', '$S11', %*REG<tgt>, %*REG<pos>, 1);
@@ -296,7 +1171,7 @@ class QAST::Compiler is HLL::Compiler {
         $litconst := nqp::lc($litconst)
             if $node.subtype eq 'ignorecase';
         my $litlen := nqp::chars($litconst);
-        my $litpost := self.escape($litconst);
+        my $litpost := self.rxescape($litconst);
         my $cmpop := $node.negate ?? 'eq' !! 'ne';
         $ops.push_pirop('add',    '$I11', %*REG<pos>, $litlen);
         $ops.push_pirop('gt',     '$I11', %*REG<eos>, %*REG<fail>);
@@ -335,6 +1210,18 @@ class QAST::Compiler is HLL::Compiler {
         $ops;
     }
 
+    method qastnode($node) {
+        my $ops := self.post_new('Ops', :result(%*REG<cur>));
+        $ops.push_pirop('repr_bind_attr_int', %*REG<cur>, %*REG<curclass>, '"$!pos"', %*REG<pos>);
+        $ops.push_pirop('store_lex', 'unicode:"$\x{a2}"', %*REG<cur>);
+        my $cpost := self.coerce(self.as_post($node[0]), 'P');
+        $ops.push($cpost);
+        if $node.subtype eq 'zerowidth' {
+            $ops.push_pirop($node.negate ?? 'if' !! 'unless', $cpost, %*REG<fail>);
+        }
+        $ops;
+    }
+
     method quant($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
         my $backtrack := $node.backtrack || 'g';
@@ -342,8 +1229,8 @@ class QAST::Compiler is HLL::Compiler {
         my $prefix    := self.unique('rxquant' ~ $backtrack);
         my $looplabel := self.post_new('Label', :result($prefix ~ '_loop'));
         my $donelabel := self.post_new('Label', :result($prefix ~ '_done'));
-        my $min       := $node.min || 0;
-        my $max       := $node.max // -1;
+        my $min       := $node.min;
+        my $max       := $node.max;
         my $needrep   := $min > 1 || $max > 1;
         my $needmark  := $needrep || $backtrack eq 'r';
 
@@ -519,5 +1406,20 @@ class QAST::Compiler is HLL::Compiler {
     method regex_commit($ops, $mark) {
         $ops.push_pirop('nqp_rxcommit', %*REG<bstack>, $mark);
     }
+
+    multi method as_post($unknown) {
+        # XXX pir::typeof for now to catch accidental PAST nodes while we
+        # transition stuff to 6model fully.
+        if $unknown ~~ PAST::Op {
+            nqp::die("Unknown QAST node type " ~ pir::typeof__SP($unknown) ~
+                " (name = '" ~ $unknown.name() ~
+                "', pirop = '" ~ $unknown.pirop ~ "')");
+        }
+        else {
+            nqp::die("Unknown QAST node type " ~ pir::typeof__SP($unknown));
+        }
+    }
+    
+    method operations() { QAST::Operations }
 }
 

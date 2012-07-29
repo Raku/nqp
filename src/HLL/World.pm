@@ -209,6 +209,10 @@ class HLL::World {
          $!handle
     }
     
+    method code_ref_blocks() {
+        $!code_ref_blocks
+    }
+    
     # Gets the list of load dependency tasks to do.
     method load_dependency_tasks() {
         @!load_dependency_tasks

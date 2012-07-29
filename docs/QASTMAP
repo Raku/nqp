@@ -1,0 +1,16 @@
+# QAST Roadmap
+
+This is an overall list of things that need doing and problems that need
+solving on the way to having a QAST-based NQP.
+
+## NQP
+
+NQP is currently somewhat half-Parroty, half-6modely. This causes various issues
+that will need to be addresses for portability reasons, and moving NQP to QAST is
+a good chance to do so.
+
+### Integer/Float/String and the ops
+Need to work out an approach to handling these.
+
+### Native types
+NQP should get natively typed lexicals and arguments.
