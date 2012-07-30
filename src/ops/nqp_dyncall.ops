@@ -706,7 +706,7 @@ callback_handler(DCCallback *cb, DCArgs *args, DCValue *result, CallbackData *da
     Parrot_pcc_invoke_from_sig_object(data->interp, data->sub, cappy);
     cappy = Parrot_pcc_get_signature(data->interp, CURRENT_CONTEXT(data->interp));
     Parrot_pcc_set_signature(data->interp, CURRENT_CONTEXT(data->interp), old_ctx);
-    retval = VTABLE_get_pmc_keyed_int(data->interp, cappy, 0);
+    retval = decontainerize(data->interp, VTABLE_get_pmc_keyed_int(data->interp, cappy, 0));
 
     /* Unpack the return value and set the appropriate field in result and
      * return signature char. */
