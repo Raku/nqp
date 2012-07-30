@@ -13,6 +13,10 @@ class QAST::Operations {
     my %hll_box;
     my %hll_unbox;
     
+    # What we know about inlinability.
+    my %core_inlinability;
+    my %hll_inlinability;
+    
     # Compiles an operation to POST.
     method compile_op($qastcomp, $hll, $op) {
         my $name := $op.op;
@@ -27,6 +31,7 @@ class QAST::Operations {
         pir::die("No registered operation handler for '$name'");
     }
     
+    # Compiles a PIR operation.
     method compile_pirop($qastcomp, $op_name, @op_args) {
         if nqp::index($op_name, ' ') {
             $op_name := nqp::join('__', nqp::split(' ', $op_name));
@@ -39,31 +44,57 @@ class QAST::Operations {
     }
     
     # Adds a core op handler.
-    method add_core_op($op, $handler, :$inlinable) {
+    method add_core_op($op, $handler, :$inlinable = 0) {
         %core_ops{$op} := $handler;
+        self.set_core_op_inlinability($op, $inlinable);
     }
     
     # Adds a HLL op handler.
-    method add_hll_op($hll, $op, $handler, :$inlinable) {
+    method add_hll_op($hll, $op, $handler, :$inlinable = 0) {
         %hll_ops{$hll} := {} unless %hll_ops{$hll};
         %hll_ops{$hll}{$op} := $handler;
+        self.set_hll_op_inlinability($hll, $op, $inlinable);
     }
     
     # Adds a core op that maps to a PIR op.
-    method add_core_pirop_mapping($op, $pirop, $sig, :$inlinable) {
+    method add_core_pirop_mapping($op, $pirop, $sig, :$inlinable = 0) {
         my $pirop_mapper := pirop_mapper($pirop, $sig);
         %core_ops{$op} := -> $qastcomp, $op {
             $pirop_mapper($qastcomp, $op.op, $op.list)
         };
+        self.set_core_op_inlinability($op, $inlinable);
     }
     
     # Adds a HLL op that maps to a PIR op.
-    method add_hll_pirop_mapping($hll, $op, $pirop, $sig, :$inlinable) {
+    method add_hll_pirop_mapping($hll, $op, $pirop, $sig, :$inlinable = 0) {
         my $pirop_mapper := pirop_mapper($pirop, $sig);
         %hll_ops{$hll} := {} unless %hll_ops{$hll};
         %hll_ops{$hll}{$op} := -> $qastcomp, $op {
             $pirop_mapper($qastcomp, $op.op, $op.list)
         };
+        self.set_hll_op_inlinability($hll, $op, $inlinable);
+    }
+    
+    # Sets op inlinability at a core level.
+    method set_core_op_inlinability($op, $inlinable) {
+        %core_inlinability{$op} := $inlinable;
+    }
+    
+    # Sets op inlinability at a HLL level. (Can override at HLL level whether
+    # or not the HLL overrides the op itself.)
+    method set_hll_op_inlinability($hll, $op, $inlinable) {
+        %hll_inlinability{$hll} := {} unless %hll_inlinability{$hll};
+        %hll_inlinability{$hll}{$op} := $inlinable;
+    }
+    
+    # Checks if an op is consdiered inlinable.
+    method is_inlinable($hll, $op) {
+        if nqp::existskey(%hll_inlinability, $hll) {
+            if nqp::existskey(%hll_inlinability{$hll}, $op) {
+                return %hll_inlinability{$hll}{$op};
+            }
+        }
+        return %core_inlinability{$op} // 0;
     }
 
     # Adds a HLL box handler.
