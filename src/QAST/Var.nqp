@@ -10,4 +10,8 @@ class QAST::Var is QAST::Node {
     method decl(*@value)    { $!decl := @value[0] if @value; $!decl }
     method slurpy(*@value)  { $!slurpy := @value[0] if @value; $!slurpy }
     method default(*@value) { $!default := @value[0] if @value; $!default }
+    
+    method substitute_inline_placeholders(@fillers) {
+        self
+    }
 }

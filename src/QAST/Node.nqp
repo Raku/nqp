@@ -100,4 +100,8 @@ class QAST::Node {
             (%uniques{$prefix} := 1);
         $prefix ~ '_' ~ $id
     }
+    
+    method substitute_inline_placeholders(@fillers) {
+        nqp::die(self.HOW.name(self) ~ " does not support inlining");
+    }
 }
