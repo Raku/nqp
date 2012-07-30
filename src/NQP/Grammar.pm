@@ -118,8 +118,8 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     rule statementlist {
-        | $
-        | [<statement><.eat_terminator> ]*
+        | <?> $
+        | <?> [<statement><.eat_terminator> ]*
     }
 
     token statement {
@@ -388,10 +388,13 @@ grammar NQP::Grammar is HLL::Grammar {
     token scope_declarator:sym<our> { <sym> <scoped('our')> }
     token scope_declarator:sym<has> { <sym> <scoped('has')> }
 
-    rule scoped($*SCOPE) {
+    token scoped($*SCOPE) {
+        <.ws>
+        [
         | <declarator>
         | <multi_declarator>
         | <package_declarator>
+        ]
     }
 
     token typename {
@@ -491,7 +494,7 @@ grammar NQP::Grammar is HLL::Grammar {
         ':' <param_var>
     }
 
-    rule default_value { '=' <EXPR('i=')> }
+    rule default_value { <?> '=' <EXPR('i=')> }
 
     rule trait { <trait_mod> }
 
@@ -613,7 +616,7 @@ grammar NQP::Grammar is HLL::Grammar {
     token circumfix:sym<{ }> { <?[{]> <pblock> }
     token circumfix:sym<sigil> { <sigil> '(' ~ ')' <semilist> }
 
-    rule semilist { <statement> }
+    rule semilist { <?> <statement> }
 
     ## Operators
 
