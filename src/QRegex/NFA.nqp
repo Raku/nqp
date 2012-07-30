@@ -126,7 +126,8 @@ class QRegex::NFA {
         }
         elsif $subtype ne 'zerowidth' &&
                 ($node.name eq 'alpha' ||
-                    $subtype eq 'method' && $node[0][0] eq 'alpha') {
+                    $subtype eq 'method' &&
+                    ($node[0][0] ~~ QAST::SVal ?? $node[0][0].value !! $node[0][0]) eq 'alpha') {
             $to := self.addedge($from, $to, $EDGE_CHARCLASS + $node.negate,
                 pir::const::CCLASS_ALPHABETIC);
             self.addedge($from, $to, $EDGE_CODEPOINT + $node.negate, 95);
@@ -263,7 +264,10 @@ class QRegex::NFA {
         for $!states -> @values {
             my $list := QAST::Op.new(:op<list>);
             for @values {
-                if +$_ eq $_ {
+                if $_ ~~ QAST::SVal {
+                    $list.push($_);
+                }
+                elsif +$_ eq $_ {
                     $list.push(QAST::IVal.new( :value($_) ));
                 }
                 else {

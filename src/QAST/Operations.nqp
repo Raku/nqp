@@ -39,18 +39,18 @@ class QAST::Operations {
     }
     
     # Adds a core op handler.
-    method add_core_op($op, $handler) {
+    method add_core_op($op, $handler, :$pure) {
         %core_ops{$op} := $handler;
     }
     
     # Adds a HLL op handler.
-    method add_hll_op($hll, $op, $handler) {
+    method add_hll_op($hll, $op, $handler, :$pure) {
         %hll_ops{$hll} := {} unless %hll_ops{$hll};
         %hll_ops{$hll}{$op} := $handler;
     }
     
     # Adds a core op that maps to a PIR op.
-    method add_core_pirop_mapping($op, $pirop, $sig) {
+    method add_core_pirop_mapping($op, $pirop, $sig, :$pure) {
         my $pirop_mapper := pirop_mapper($pirop, $sig);
         %core_ops{$op} := -> $qastcomp, $op {
             $pirop_mapper($qastcomp, $op.op, $op.list)
@@ -58,7 +58,7 @@ class QAST::Operations {
     }
     
     # Adds a HLL op that maps to a PIR op.
-    method add_hll_pirop_mapping($hll, $op, $pirop, $sig) {
+    method add_hll_pirop_mapping($hll, $op, $pirop, $sig, :$pure) {
         my $pirop_mapper := pirop_mapper($pirop, $sig);
         %hll_ops{$hll} := {} unless %hll_ops{$hll};
         %hll_ops{$hll}{$op} := -> $qastcomp, $op {
@@ -108,7 +108,7 @@ class QAST::Operations {
         elsif $ret_type eq 'N' { $ret_meth := "fresh_n"; }
         
         -> $qastcomp, $op_name, @op_args {
-            my $ops := $qastcomp.post_new('Ops');
+            my $ops := PIRT::Ops.new();
             
             # If we need a result register, create it and make it the
             # first argument.
@@ -171,10 +171,10 @@ class QAST::Operations {
 }
 
 # Data structures
-QAST::Operations.add_core_op('list', -> $qastcomp, $op {
+QAST::Operations.add_core_op('list', :pure(1), -> $qastcomp, $op {
     # Create register for the resulting list and make an empty one.
     my $list_reg := $*REGALLOC.fresh_p();
-    my $ops := $qastcomp.post_new('Ops', :result($list_reg));
+    my $ops := PIRT::Ops.new(:result($list_reg));
     $ops.push_pirop('new', $list_reg, "'ResizablePMCArray'");
     
     # Push all the things.
@@ -187,10 +187,10 @@ QAST::Operations.add_core_op('list', -> $qastcomp, $op {
     $ops
 });
 
-QAST::Operations.add_core_op('qlist', -> $qastcomp, $op {
+QAST::Operations.add_core_op('qlist', :pure(1), -> $qastcomp, $op {
     # Create register for the resulting list and make an empty one.
     my $list_reg := $*REGALLOC.fresh_p();
-    my $ops := $qastcomp.post_new('Ops', :result($list_reg));
+    my $ops := PIRT::Ops.new(:result($list_reg));
     $ops.push_pirop('new', $list_reg, "'QRPA'");
     
     # Push all the things.
@@ -203,10 +203,10 @@ QAST::Operations.add_core_op('qlist', -> $qastcomp, $op {
     $ops
 });
 
-QAST::Operations.add_core_op('list_i', -> $qastcomp, $op {
+QAST::Operations.add_core_op('list_i', :pure(1), -> $qastcomp, $op {
     # Create register for the resulting list and make an empty one.
     my $list_reg := $*REGALLOC.fresh_p();
-    my $ops := $qastcomp.post_new('Ops', :result($list_reg));
+    my $ops := PIRT::Ops.new(:result($list_reg));
     $ops.push_pirop('new', $list_reg, "'ResizableIntegerArray'");
 
     # Push all the things.
@@ -219,10 +219,10 @@ QAST::Operations.add_core_op('list_i', -> $qastcomp, $op {
     $ops
 });
 
-QAST::Operations.add_core_op('list_s', -> $qastcomp, $op {
+QAST::Operations.add_core_op('list_s', :pure(1), -> $qastcomp, $op {
     # Create register for the resulting list and make an empty one.
     my $list_reg := $*REGALLOC.fresh_p();
-    my $ops := $qastcomp.post_new('Ops', :result($list_reg));
+    my $ops := PIRT::Ops.new(:result($list_reg));
     $ops.push_pirop('new', $list_reg, "'ResizableStringArray'");
 
     # Push all the things.
@@ -235,10 +235,10 @@ QAST::Operations.add_core_op('list_s', -> $qastcomp, $op {
     $ops
 });
 
-QAST::Operations.add_core_op('list_b', -> $qastcomp, $op {
+QAST::Operations.add_core_op('list_b', :pure(1), -> $qastcomp, $op {
     # Create register for the resulting list and make an empty one.
     my $list_reg := $*REGALLOC.fresh_p();
-    my $ops := $qastcomp.post_new('Ops', :result($list_reg));
+    my $ops := PIRT::Ops.new(:result($list_reg));
     $ops.push_pirop('new', $list_reg, "'ResizablePMCArray'");
     
     # Push all the things.
@@ -252,10 +252,10 @@ QAST::Operations.add_core_op('list_b', -> $qastcomp, $op {
     $ops
 });
 
-QAST::Operations.add_core_op('hash', -> $qastcomp, $op {
+QAST::Operations.add_core_op('hash', :pure(1), -> $qastcomp, $op {
     # Create register for the resulting hash and make an empty one.
     my $hash_reg := $*REGALLOC.fresh_p();
-    my $ops := $qastcomp.post_new('Ops', :result($hash_reg));
+    my $ops := PIRT::Ops.new(:result($hash_reg));
     $ops.push_pirop('new', $hash_reg, "'Hash'");
 
     # Set all the values by key on the hash.
@@ -277,7 +277,7 @@ QAST::Operations.add_core_op('hash', -> $qastcomp, $op {
 });
 
 # Chaining.
-QAST::Operations.add_core_op('chain', -> $qastcomp, $op {
+QAST::Operations.add_core_op('chain', :pure(1), -> $qastcomp, $op {
     # First, we build up the list of nodes in the chain
     my @clist;
     my $cpast := $op;
@@ -286,9 +286,8 @@ QAST::Operations.add_core_op('chain', -> $qastcomp, $op {
         $cpast := $cpast[0];
     }
     
-    my $ops := $qastcomp.post_new('Ops', :result($*REGALLOC.fresh_p()));
-    my $endlabel := $qastcomp.post_new('Label',
-        :name($qastcomp.unique('chain_end_')));
+    my $ops := PIRT::Ops.new(:result($*REGALLOC.fresh_p()));
+    my $endlabel := PIRT::Label.new(:name($qastcomp.unique('chain_end_')));
     
     $cpast := nqp::pop(@clist);
     my $apast := $cpast[0];
@@ -318,9 +317,15 @@ QAST::Operations.add_core_op('chain', -> $qastcomp, $op {
     $ops
 });
 
+
+# Set of sequential statements
+QAST::Operations.add_core_op('stmts', :pure(1), -> $qastcomp, $op {
+    $qastcomp.as_post(QAST::Stmts.new( |@($op) ))
+});
+
 # Conditionals.
 for <if unless> -> $op_name {
-    QAST::Operations.add_core_op($op_name, -> $qastcomp, $op {
+    QAST::Operations.add_core_op($op_name, :pure(1), -> $qastcomp, $op {
         # Check operand count.
         my $operands := +$op.list;
         pir::die("Operation '$op_name' needs either 2 or 3 operands")
@@ -328,8 +333,8 @@ for <if unless> -> $op_name {
         
         # Create labels.
         my $if_id    := $qastcomp.unique($op_name);
-        my $else_lbl := $qastcomp.post_new('Label', :result($if_id ~ '_else'));
-        my $end_lbl  := $qastcomp.post_new('Label', :result($if_id ~ '_end'));
+        my $else_lbl := PIRT::Label.new(:name($if_id ~ '_else'));
+        my $end_lbl  := PIRT::Label.new(:name($if_id ~ '_end'));
         
         # Compile each of the children; we'll need to look at the result
         # types and pick an overall result type if in non-void context.
@@ -357,7 +362,7 @@ for <if unless> -> $op_name {
         my $res_reg := $*REGALLOC."fresh_$res_type"();
         
         # Evaluate the condition first; store result if needed.
-        my $ops := $qastcomp.post_new('Ops');
+        my $ops := PIRT::Ops.new();
         my $cond_result;
         if $operands == 2 {
             my $coerced := $qastcomp.coerce(@comp_ops[0], $res_type);
@@ -402,18 +407,17 @@ for <if unless> -> $op_name {
 }
 
 # XXX make 3-arg...
-QAST::Operations.add_core_op('ifnull', -> $qastcomp, $op {
+QAST::Operations.add_core_op('ifnull', :pure(1), -> $qastcomp, $op {
     if +$op.list != 2 {
         nqp::die("The 'ifnull' op expects two children");
     }
     
     my $exprpost := $qastcomp.as_post($op[0]);
     my $vivipost := $qastcomp.coerce($qastcomp.as_post($op[1]),
-        $qastcomp.infer_type($exprpost));
-    my $vivlabel := $qastcomp.post_new('Label',
-        :name($qastcomp.unique('vivi_')));
+        $qastcomp.infer_type($exprpost.result));
+    my $vivlabel := PIRT::Label.new(:name($qastcomp.unique('vivi_')));
     
-    my $ops := $qastcomp.post_new('Ops');
+    my $ops := PIRT::Ops.new();
     $ops.push($exprpost);
     $ops.push_pirop('unless_null', $exprpost, $vivlabel);
     $ops.push($vivipost);
@@ -426,19 +430,19 @@ QAST::Operations.add_core_op('ifnull', -> $qastcomp, $op {
 # Loops.
 for ('', 'repeat_') -> $repness {
     for <while until> -> $op_name {
-        QAST::Operations.add_core_op("$repness$op_name", -> $qastcomp, $op {
+        QAST::Operations.add_core_op("$repness$op_name", :pure(1), -> $qastcomp, $op {
             # Check operand count.
             my $operands := +$op.list;
-            pir::die("Operation '$repness$op_name' needs 2 or  operands")
+            pir::die("Operation '$repness$op_name' needs 2 or 3 operands")
                 if $operands != 2 && $operands != 3;
 
             # Create labels.
             my $while_id := $qastcomp.unique($op_name);
-            my $test_lbl := $qastcomp.post_new('Label', :result($while_id ~ '_test'));
-            my $next_lbl := $qastcomp.post_new('Label', :result($while_id ~ '_next'));
-            my $redo_lbl := $qastcomp.post_new('Label', :result($while_id ~ '_redo'));
-            my $hand_lbl := $qastcomp.post_new('Label', :result($while_id ~ '_handlers'));
-            my $done_lbl := $qastcomp.post_new('Label', :result($while_id ~ '_done'));
+            my $test_lbl := PIRT::Label.new(:name($while_id ~ '_test'));
+            my $next_lbl := PIRT::Label.new(:name($while_id ~ '_next'));
+            my $redo_lbl := PIRT::Label.new(:name($while_id ~ '_redo'));
+            my $hand_lbl := PIRT::Label.new(:name($while_id ~ '_handlers'));
+            my $done_lbl := PIRT::Label.new(:name($while_id ~ '_done'));
 
             # Compile each of the children; we'll need to look at the result
             # types and pick an overall result type if in non-void context.
@@ -449,7 +453,7 @@ for ('', 'repeat_') -> $repness {
                 my $*HAVE_IMM_ARG := $_.arity > 0 && $_ =:= $op.list[1];
                 my $comp := $qastcomp.as_post($_);
                 @comp_ops.push($comp);
-                @comp_types.push($qastcomp.infer_type($comp));
+                @comp_types.push($qastcomp.infer_type($comp.result));
                 if $*HAVE_IMM_ARG && !$*IMM_ARG {
                     nqp::die("$op_name block expects an argument, but there's no immediate block to take it");
                 }
@@ -458,7 +462,7 @@ for ('', 'repeat_') -> $repness {
             my $res_reg  := $*REGALLOC."fresh_$res_type"();
 
             # Emit the prelude.
-            my $ops := $qastcomp.post_new('Ops');
+            my $ops := PIRT::Ops.new();
             $ops.result($res_reg);
             my $exc_reg := $*REGALLOC.fresh_p();
             $ops.push_pirop('new', $exc_reg, "'ExceptionHandler'",
@@ -518,7 +522,7 @@ for ('', 'repeat_') -> $repness {
     }
 }
 
-QAST::Operations.add_core_op('for', -> $qastcomp, $op {
+QAST::Operations.add_core_op('for', :pure(1), -> $qastcomp, $op {
     if +$op.list != 2 {
         nqp::die("Operation 'for' needs 2 operands");
     }
@@ -534,7 +538,7 @@ QAST::Operations.add_core_op('for', -> $qastcomp, $op {
     my $res       := $*REGALLOC.fresh_p();
     my $curval    := $*REGALLOC.fresh_p();
     my $iter      := $*REGALLOC.fresh_p();
-    my $ops       := $qastcomp.post_new('Ops');
+    my $ops       := PIRT::Ops.new();
     my $listpost  := $qastcomp.coerce($qastcomp.as_post($op[0]), "P");
     my $blockpost := $qastcomp.coerce($qastcomp.as_post($op[1]), "P");
     $ops.push($listpost);
@@ -543,8 +547,8 @@ QAST::Operations.add_core_op('for', -> $qastcomp, $op {
     $ops.push_pirop('iter', $iter, $listpost);
     
     # Loop while we still have values.
-    my $lbl_loop := $qastcomp.post_new('Label', :name('for_start'));
-    my $lbl_end := $qastcomp.post_new('Label', :name('for_end'));
+    my $lbl_loop := PIRT::Label.new(:name('for_start'));
+    my $lbl_end := PIRT::Label.new(:name('for_end'));
     $ops.push($lbl_loop);
     $ops.push_pirop('unless', $iter, $lbl_end);
     
@@ -570,12 +574,12 @@ QAST::Operations.add_core_op('for', -> $qastcomp, $op {
     $ops
 });
 
-QAST::Operations.add_core_op('defor', -> $qastcomp, $op {
+QAST::Operations.add_core_op('defor', :pure(1), -> $qastcomp, $op {
     if +$op.list != 2 {
         nqp::die("Operation 'defor' needs 2 operands");
     }
-    my $ops := $qastcomp.post_new('Ops');
-    my $lbl := $qastcomp.post_new('Label', :name('defor'));
+    my $ops := PIRT::Ops.new();
+    my $lbl := PIRT::Label.new(:name('defor'));
     my $dreg := $*REGALLOC.fresh_i();
     my $rreg := $*REGALLOC.fresh_p();
     my $test := $qastcomp.coerce($qastcomp.as_post($op[0]), 'P');
@@ -591,12 +595,12 @@ QAST::Operations.add_core_op('defor', -> $qastcomp, $op {
     $ops
 });
 
-QAST::Operations.add_core_op('xor', -> $qastcomp, $op {
-    my $ops := $qastcomp.post_new('Ops');
+QAST::Operations.add_core_op('xor', :pure(1), -> $qastcomp, $op {
+    my $ops := PIRT::Ops.new();
     $ops.result($*REGALLOC.fresh_p());
 
-    my $falselabel := $qastcomp.post_new('Label', :name('xor_false'));
-    my $endlabel   := $qastcomp.post_new('Label', :name('xor_end'));
+    my $falselabel := PIRT::Label.new(:name('xor_false'));
+    my $endlabel   := PIRT::Label.new(:name('xor_end'));
     
     my @childlist;
     my $fpast;
@@ -629,7 +633,7 @@ QAST::Operations.add_core_op('xor', -> $qastcomp, $op {
         $ops.push_pirop('and', $i, $t, $u);
         $ops.push_pirop('if', $i, $falselabel);
         if @childlist {
-            my $truelabel := $qastcomp.post_new('Label', :name('xor_true'));
+            my $truelabel := PIRT::Label.new(:name('xor_true'));
             $ops.push_pirop('if', $t, $truelabel);
             $ops.push_pirop('set', $ops, $bpost);
             $ops.push_pirop('set', $t, $u);
@@ -660,7 +664,7 @@ QAST::Operations.add_core_op('xor', -> $qastcomp, $op {
 });
 
 # Binding
-QAST::Operations.add_core_op('bind', -> $qastcomp, $op {
+QAST::Operations.add_core_op('bind', :pure(1), -> $qastcomp, $op {
     # Sanity checks.
     my @children := $op.list;
     if +@children != 2 {
@@ -706,7 +710,7 @@ QAST::Operations.add_core_op('call', -> $qastcomp, $op {
     my $callee;
     my @args := nqp::clone($op.list);
     if $op.name {
-        $callee := $qastcomp.post_new('Ops', :result($qastcomp.escape($op.name)));
+        $callee := PIRT::Ops.new(:result($qastcomp.escape($op.name)));
     }
     elsif +@args {
         $callee := $qastcomp.as_post(@args.shift());
@@ -716,7 +720,7 @@ QAST::Operations.add_core_op('call', -> $qastcomp, $op {
     }
     
     # Process arguments.
-    my $ops := $qastcomp.post_new('Ops');
+    my $ops := PIRT::Ops.new();
     $ops.node($op.node) if $op.node;
     my @pos_arg_results;
     my @named_arg_results;
@@ -736,7 +740,7 @@ QAST::Operations.add_core_op('call', -> $qastcomp, $op {
     $ops.result($res_reg);
     $ops
 });
-QAST::Operations.add_core_op('callmethod', -> $qastcomp, $op {
+QAST::Operations.add_core_op('callmethod', :pure(1), -> $qastcomp, $op {
     # Ensure we at least have an invocant.
     my @args := nqp::clone($op.list);
     if +@args == 0 {
@@ -746,7 +750,7 @@ QAST::Operations.add_core_op('callmethod', -> $qastcomp, $op {
     # Where is the name coming from?
     my $name;
     if $op.name {
-        $name := $qastcomp.post_new('Ops', :result($qastcomp.escape($op.name)));
+        $name := PIRT::Ops.new(:result($qastcomp.escape($op.name)));
     }
     elsif +@args >= 2 {
         my $invocant := @args.shift();
@@ -758,7 +762,7 @@ QAST::Operations.add_core_op('callmethod', -> $qastcomp, $op {
     }
     
     # Process arguments.
-    my $ops := $qastcomp.post_new('Ops');
+    my $ops := PIRT::Ops.new();
     $ops.node($op.node) if $op.node;
     my @pos_arg_results;
     my @named_arg_results;
@@ -787,11 +791,11 @@ QAST::Operations.add_core_op('callmethod', -> $qastcomp, $op {
 });
 
 QAST::Operations.add_core_op('lexotic', -> $qastcomp, $op {
-    my $label1  := $qastcomp.post_new('Label', :name('lexotic_'));
-    my $label2  := $qastcomp.post_new('Label', :name('lexotic_'));
+    my $label1  := PIRT::Label.new(:name('lexotic_'));
+    my $label2  := PIRT::Label.new(:name('lexotic_'));
     my $lexname := $qastcomp.escape($op.name);
 
-    my $ops := $qastcomp.post_new('Ops');
+    my $ops := PIRT::Ops.new();
     my $handler := $*BLOCK.fresh_lex_p();
     $ops.push_pirop('root_new', $handler, "['parrot';'Continuation']");
     $ops.push_pirop('set_label', $handler, $label1);
@@ -812,7 +816,7 @@ QAST::Operations.add_core_op('lexotic', -> $qastcomp, $op {
 # Context introspection
 QAST::Operations.add_core_op('curlexpad', -> $qastcomp, $op {
     my $reg := $*REGALLOC.fresh_p();
-    my $ops := $qastcomp.post_new('Ops');
+    my $ops := PIRT::Ops.new();
     $ops.push_pirop('getinterp', $reg);
     $ops.push_pirop('set', $reg, $reg ~ "['lexpad']");
     $ops.result($reg);
@@ -820,7 +824,7 @@ QAST::Operations.add_core_op('curlexpad', -> $qastcomp, $op {
 });
 QAST::Operations.add_core_op('curcode', -> $qastcomp, $op {
     my $reg := $*REGALLOC.fresh_p();
-    my $ops := $qastcomp.post_new('Ops');
+    my $ops := PIRT::Ops.new();
     $ops.push_pirop('getinterp', $reg);
     $ops.push_pirop('set', $reg, $reg ~ "['sub']");
     $ops.result($reg);
@@ -885,13 +889,11 @@ QAST::Operations.add_core_op('handle', -> $qastcomp, $op {
     my $control_label;
     my $other_label;
     my $num_pops := 0;
-    my $skip_handler_label := $qastcomp.post_new('Label',
-        :name($qastcomp.unique('skip_handler_')));
-    my $ops := $qastcomp.post_new('Ops');
+    my $skip_handler_label := PIRT::Label.new(:name($qastcomp.unique('skip_handler_')));
+    my $ops := PIRT::Ops.new();
     my $reg := $*REGALLOC.fresh_p();
     if $catch {
-        $catch_label := $qastcomp.post_new('Label',
-            :name($qastcomp.unique('catch_handler_')));
+        $catch_label := PIRT::Label.new(:name($qastcomp.unique('catch_handler_')));
         $ops.push_pirop('new', $reg, "'ExceptionHandler'");
         $ops.push_pirop('set_label', $reg, $catch_label);
         $ops.push_pirop('callmethod', "'handle_types_except'", $reg, ".CONTROL_ALL");
@@ -899,8 +901,7 @@ QAST::Operations.add_core_op('handle', -> $qastcomp, $op {
         $num_pops := $num_pops + 1;
     }
     if $control {
-        $control_label := $qastcomp.post_new('Label',
-            :name($qastcomp.unique('catch_handler_')));
+        $control_label := PIRT::Label.new(:name($qastcomp.unique('catch_handler_')));
         $ops.push_pirop('new', $reg, "'ExceptionHandler'", "[.CONTROL_ALL]");
         $ops.push_pirop('set_label', $reg, $control_label);
         $ops.push_pirop('push_eh', $reg);
@@ -909,8 +910,7 @@ QAST::Operations.add_core_op('handle', -> $qastcomp, $op {
     if @other {
         my @hnames;
         for @other { nqp::push(@hnames, %handler_names{$_}); }
-        $other_label := $qastcomp.post_new('Label',
-            :name($qastcomp.unique('catch_handler_')));
+        $other_label := PIRT::Label.new(:name($qastcomp.unique('catch_handler_')));
         $ops.push_pirop('new', $reg, "'ExceptionHandler'",
             "[" ~ nqp::join(", ", @hnames) ~ "]");
         $ops.push_pirop('set_label', $reg, $other_label);
@@ -954,8 +954,7 @@ QAST::Operations.add_core_op('handle', -> $qastcomp, $op {
         my %type_labels;
         $ops.push_pirop('set', $type_reg, $reg ~ '["type"]');
         for @other {
-            my $lbl := $qastcomp.post_new('Label',
-                :name($qastcomp.unique('handle_type_')));
+            my $lbl := PIRT::Label.new(:name($qastcomp.unique('handle_type_')));
             $ops.push_pirop('eq', $type_reg, %handler_names{$_}, $lbl);
             %type_labels{$_} := $lbl;
         }
@@ -984,7 +983,7 @@ QAST::Operations.add_core_op('exception', -> $qastcomp, $op {
     unless $exc_reg {
         nqp::die("Can only use 'exception' op in the context of an exception handler");
     }
-    my $ops := $qastcomp.post_new('Ops');
+    my $ops := PIRT::Ops.new();
     $ops.result($exc_reg);
     $ops
 });
@@ -994,7 +993,7 @@ QAST::Operations.add_core_op('getpayload', -> $qastcomp, $op {
     }
     my $exc := $qastcomp.coerce($qastcomp.as_post($op[0]), 'P');
     my $reg := $*REGALLOC.fresh_p();
-    my $ops := $qastcomp.post_new('Ops');
+    my $ops := PIRT::Ops.new();
     $ops.push($exc);
     $ops.push_pirop('getattribute', $reg, $exc.result, '"payload"');
     $ops.result($reg);
@@ -1006,7 +1005,7 @@ QAST::Operations.add_core_op('setpayload', -> $qastcomp, $op {
     }
     my $exc := $qastcomp.coerce($qastcomp.as_post($op[0]), 'P');
     my $payload := $qastcomp.coerce($qastcomp.as_post($op[1]), 'P');
-    my $ops := $qastcomp.post_new('Ops');
+    my $ops := PIRT::Ops.new();
     $ops.push_pirop('setattribute', $exc, '"payload"', $payload);
     $ops.result($payload.result);
     $ops
@@ -1018,7 +1017,7 @@ QAST::Operations.add_core_op('getmessage', -> $qastcomp, $op {
     my $exc := $qastcomp.coerce($qastcomp.as_post($op[0]), 'P');
     my $pmc := $*REGALLOC.fresh_p();
     my $reg := $*REGALLOC.fresh_s();
-    my $ops := $qastcomp.post_new('Ops');
+    my $ops := PIRT::Ops.new();
     $ops.push($exc);
     $ops.push_pirop('getattribute', $pmc, $exc.result, '"message"');
     $ops.push_pirop('set', $reg, $pmc);
@@ -1032,7 +1031,7 @@ QAST::Operations.add_core_op('setmessage', -> $qastcomp, $op {
     my $exc := $qastcomp.coerce($qastcomp.as_post($op[0]), 'P');
     my $message := $qastcomp.coerce($qastcomp.as_post($op[1]), 'S');
     my $pmc := $*REGALLOC.fresh_p();
-    my $ops := $qastcomp.post_new('Ops');
+    my $ops := PIRT::Ops.new();
     $ops.push($exc);
     $ops.push($message);
     $ops.push_pirop('box', $pmc, $message);
@@ -1045,7 +1044,7 @@ QAST::Operations.add_core_op('newexception', -> $qastcomp, $op {
         nqp::die("The 'newexception' op expects no children");
     }
     my $reg := $*REGALLOC.fresh_p();
-    my $ops := $qastcomp.post_new('Ops');
+    my $ops := PIRT::Ops.new();
     $ops.push_pirop('new', $reg, '["Exception"]');
     $ops.result($reg);
     $ops
@@ -1059,7 +1058,7 @@ QAST::Operations.add_core_pirop_mapping('rethrow', 'rethrow', '0P');
 for <i n s> {
     QAST::Operations.add_hll_box('nqp', $_, -> $qastcomp, $post {
         my $reg := $*REGALLOC.fresh_p();
-        my $ops := $qastcomp.post_new('Ops');
+        my $ops := PIRT::Ops.new();
         $ops.push($post);
         $ops.push_pirop('box', $reg, $post);
         $ops.result($reg);
@@ -1068,7 +1067,7 @@ for <i n s> {
 }
 QAST::Operations.add_hll_unbox('nqp', 'i', -> $qastcomp, $post {
     my $reg := $*REGALLOC.fresh_i();
-    my $ops := $qastcomp.post_new('Ops');
+    my $ops := PIRT::Ops.new();
     $ops.push($post);
     $ops.push_pirop('set', $reg, $post);
     $ops.result($reg);
@@ -1076,7 +1075,7 @@ QAST::Operations.add_hll_unbox('nqp', 'i', -> $qastcomp, $post {
 });
 QAST::Operations.add_hll_unbox('nqp', 'n', -> $qastcomp, $post {
     my $reg := $*REGALLOC.fresh_n();
-    my $ops := $qastcomp.post_new('Ops');
+    my $ops := PIRT::Ops.new();
     $ops.push($post);
     $ops.push_pirop('set', $reg, $post);
     $ops.result($reg);
@@ -1084,7 +1083,7 @@ QAST::Operations.add_hll_unbox('nqp', 'n', -> $qastcomp, $post {
 });
 QAST::Operations.add_hll_unbox('nqp', 's', -> $qastcomp, $post {
     my $reg := $*REGALLOC.fresh_s();
-    my $ops := $qastcomp.post_new('Ops');
+    my $ops := PIRT::Ops.new();
     $ops.push($post);
     $ops.push_pirop('set', $reg, $post);
     $ops.result($reg);
@@ -1092,111 +1091,111 @@ QAST::Operations.add_hll_unbox('nqp', 's', -> $qastcomp, $post {
 });
 
 # I/O opcodes
-QAST::Operations.add_core_pirop_mapping('print', 'print', '0s');
-QAST::Operations.add_core_pirop_mapping('say', 'say', '0s');
-QAST::Operations.add_core_pirop_mapping('stat', 'stat', 'Isi'); # (?)
-QAST::Operations.add_core_pirop_mapping('open', 'open', 'Pss'); # (?)
+QAST::Operations.add_core_pirop_mapping('print', 'print', '0s', :pure(1));
+QAST::Operations.add_core_pirop_mapping('say', 'say', '0s', :pure(1));
+QAST::Operations.add_core_pirop_mapping('stat', 'stat', 'Isi', :pure(1)); # (?)
+QAST::Operations.add_core_pirop_mapping('open', 'open', 'Pss', :pure(1)); # (?)
 
 # terms
-QAST::Operations.add_core_pirop_mapping('time_i', 'time', 'I');
-QAST::Operations.add_core_pirop_mapping('time_n', 'time', 'N');
+QAST::Operations.add_core_pirop_mapping('time_i', 'time', 'I', :pure(1));
+QAST::Operations.add_core_pirop_mapping('time_n', 'time', 'N', :pure(1));
 
 # arithmetic opcodes
-QAST::Operations.add_core_pirop_mapping('add_i', 'add', 'Iii');
-QAST::Operations.add_core_pirop_mapping('add_I', 'nqp_bigint_add', 'PPPP');
-QAST::Operations.add_core_pirop_mapping('add_n', 'add', 'Nnn');
-QAST::Operations.add_core_pirop_mapping('sub_i', 'sub', 'Iii');
-QAST::Operations.add_core_pirop_mapping('sub_I', 'nqp_bigint_sub', 'PPPP');
-QAST::Operations.add_core_pirop_mapping('sub_n', 'sub', 'Nnn');
-QAST::Operations.add_core_pirop_mapping('mul_i', 'mul', 'Iii');
-QAST::Operations.add_core_pirop_mapping('mul_I', 'nqp_bigint_mul', 'PPPP');
-QAST::Operations.add_core_pirop_mapping('mul_n', 'mul', 'Nnn');
-QAST::Operations.add_core_pirop_mapping('div_i', 'div', 'Iii');
-QAST::Operations.add_core_pirop_mapping('div_I', 'nqp_bigint_div', 'PPPP');
-QAST::Operations.add_core_pirop_mapping('div_In', 'nqp_bigint_div_num', 'NPP');
-QAST::Operations.add_core_pirop_mapping('div_n', 'div', 'Nnn');
-QAST::Operations.add_core_pirop_mapping('mod_i', 'mod', 'Iii');
-QAST::Operations.add_core_pirop_mapping('mod_I', 'nqp_bigint_mod', 'PPPP');
-QAST::Operations.add_core_pirop_mapping('expmod_I', 'nqp_bigint_exp_mod', 'PPPPP');
-QAST::Operations.add_core_pirop_mapping('mod_n', 'mod', 'Nnn');
-QAST::Operations.add_core_pirop_mapping('pow_n', 'pow', 'Nnn');
-QAST::Operations.add_core_pirop_mapping('pow_I', 'nqp_bigint_pow', 'PPPPP');
-QAST::Operations.add_core_pirop_mapping('neg_i', 'neg', 'Ii');
-QAST::Operations.add_core_pirop_mapping('neg_I', 'nqp_bigint_neg', 'PPP');
-QAST::Operations.add_core_pirop_mapping('neg_n', 'neg', 'Nn');
-QAST::Operations.add_core_pirop_mapping('abs_i', 'abs', 'Ii');
-QAST::Operations.add_core_pirop_mapping('abs_I', 'nqp_bigint_abs', 'PPP');
-QAST::Operations.add_core_pirop_mapping('abs_n', 'abs', 'Nn');
+QAST::Operations.add_core_pirop_mapping('add_i', 'add', 'Iii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('add_I', 'nqp_bigint_add', 'PPPP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('add_n', 'add', 'Nnn', :pure(1));
+QAST::Operations.add_core_pirop_mapping('sub_i', 'sub', 'Iii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('sub_I', 'nqp_bigint_sub', 'PPPP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('sub_n', 'sub', 'Nnn', :pure(1));
+QAST::Operations.add_core_pirop_mapping('mul_i', 'mul', 'Iii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('mul_I', 'nqp_bigint_mul', 'PPPP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('mul_n', 'mul', 'Nnn', :pure(1));
+QAST::Operations.add_core_pirop_mapping('div_i', 'div', 'Iii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('div_I', 'nqp_bigint_div', 'PPPP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('div_In', 'nqp_bigint_div_num', 'NPP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('div_n', 'div', 'Nnn', :pure(1));
+QAST::Operations.add_core_pirop_mapping('mod_i', 'mod', 'Iii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('mod_I', 'nqp_bigint_mod', 'PPPP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('expmod_I', 'nqp_bigint_exp_mod', 'PPPPP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('mod_n', 'mod', 'Nnn', :pure(1));
+QAST::Operations.add_core_pirop_mapping('pow_n', 'pow', 'Nnn', :pure(1));
+QAST::Operations.add_core_pirop_mapping('pow_I', 'nqp_bigint_pow', 'PPPPP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('neg_i', 'neg', 'Ii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('neg_I', 'nqp_bigint_neg', 'PPP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('neg_n', 'neg', 'Nn', :pure(1));
+QAST::Operations.add_core_pirop_mapping('abs_i', 'abs', 'Ii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('abs_I', 'nqp_bigint_abs', 'PPP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('abs_n', 'abs', 'Nn', :pure(1));
 
-QAST::Operations.add_core_pirop_mapping('gcd_i', 'gcd', 'Ii');
-QAST::Operations.add_core_pirop_mapping('gcd_I', 'nqp_bigint_gcd', 'PPPP');
-QAST::Operations.add_core_pirop_mapping('lcm_i', 'lcm', 'Ii');
-QAST::Operations.add_core_pirop_mapping('lcm_I', 'nqp_bigint_lcm', 'PPPP');
+QAST::Operations.add_core_pirop_mapping('gcd_i', 'gcd', 'Ii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('gcd_I', 'nqp_bigint_gcd', 'PPPP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('lcm_i', 'lcm', 'Ii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('lcm_I', 'nqp_bigint_lcm', 'PPPP', :pure(1));
 
-QAST::Operations.add_core_pirop_mapping('ceil_n', 'ceil', 'Nn');
-QAST::Operations.add_core_pirop_mapping('floor_n', 'floor', 'NN');
-QAST::Operations.add_core_pirop_mapping('ln_n', 'ln', 'Nn');
-QAST::Operations.add_core_pirop_mapping('sqrt_n', 'sqrt', 'Nn');
-QAST::Operations.add_core_pirop_mapping('radix', 'nqp_radix', 'Pisii');
-QAST::Operations.add_core_pirop_mapping('radix_I', 'nqp_bigint_radix', 'PisiiP');
-QAST::Operations.add_core_pirop_mapping('log_n', 'ln', 'NN');
-QAST::Operations.add_core_pirop_mapping('exp_n', 'exp', 'Nn');
-QAST::Operations.add_core_pirop_mapping('isnanorinf', 'is_inf_or_nan', 'In');
+QAST::Operations.add_core_pirop_mapping('ceil_n', 'ceil', 'Nn', :pure(1));
+QAST::Operations.add_core_pirop_mapping('floor_n', 'floor', 'NN', :pure(1));
+QAST::Operations.add_core_pirop_mapping('ln_n', 'ln', 'Nn', :pure(1));
+QAST::Operations.add_core_pirop_mapping('sqrt_n', 'sqrt', 'Nn', :pure(1));
+QAST::Operations.add_core_pirop_mapping('radix', 'nqp_radix', 'Pisii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('radix_I', 'nqp_bigint_radix', 'PisiiP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('log_n', 'ln', 'NN', :pure(1));
+QAST::Operations.add_core_pirop_mapping('exp_n', 'exp', 'Nn', :pure(1));
+QAST::Operations.add_core_pirop_mapping('isnanorinf', 'is_inf_or_nan', 'In', :pure(1));
 
 # trig opcodes
-QAST::Operations.add_core_pirop_mapping('sin_n', 'sin', 'NN');
-QAST::Operations.add_core_pirop_mapping('asin_n', 'asin', 'NN');
-QAST::Operations.add_core_pirop_mapping('cos_n', 'cos', 'NN');
-QAST::Operations.add_core_pirop_mapping('acos_n', 'acos', 'NN');
-QAST::Operations.add_core_pirop_mapping('tan_n', 'tan', 'NN');
-QAST::Operations.add_core_pirop_mapping('atan_n', 'atan', 'NN');
-QAST::Operations.add_core_pirop_mapping('atan2_n', 'atan', 'NNN');
-QAST::Operations.add_core_pirop_mapping('sec_n', 'sec', 'NN');
-QAST::Operations.add_core_pirop_mapping('asec_n', 'asec', 'NN');
-QAST::Operations.add_core_pirop_mapping('sin_n', 'sin', 'NN');
-QAST::Operations.add_core_pirop_mapping('asin_n', 'asin', 'NN');
-QAST::Operations.add_core_pirop_mapping('sinh_n', 'sinh', 'NN');
-QAST::Operations.add_core_pirop_mapping('cosh_n', 'cosh', 'NN');
-QAST::Operations.add_core_pirop_mapping('tanh_n', 'tanh', 'NN');
-QAST::Operations.add_core_pirop_mapping('sech_n', 'sech', 'NN');
+QAST::Operations.add_core_pirop_mapping('sin_n', 'sin', 'NN', :pure(1));
+QAST::Operations.add_core_pirop_mapping('asin_n', 'asin', 'NN', :pure(1));
+QAST::Operations.add_core_pirop_mapping('cos_n', 'cos', 'NN', :pure(1));
+QAST::Operations.add_core_pirop_mapping('acos_n', 'acos', 'NN', :pure(1));
+QAST::Operations.add_core_pirop_mapping('tan_n', 'tan', 'NN', :pure(1));
+QAST::Operations.add_core_pirop_mapping('atan_n', 'atan', 'NN', :pure(1));
+QAST::Operations.add_core_pirop_mapping('atan2_n', 'atan', 'NNN', :pure(1));
+QAST::Operations.add_core_pirop_mapping('sec_n', 'sec', 'NN', :pure(1));
+QAST::Operations.add_core_pirop_mapping('asec_n', 'asec', 'NN', :pure(1));
+QAST::Operations.add_core_pirop_mapping('sin_n', 'sin', 'NN', :pure(1));
+QAST::Operations.add_core_pirop_mapping('asin_n', 'asin', 'NN', :pure(1));
+QAST::Operations.add_core_pirop_mapping('sinh_n', 'sinh', 'NN', :pure(1));
+QAST::Operations.add_core_pirop_mapping('cosh_n', 'cosh', 'NN', :pure(1));
+QAST::Operations.add_core_pirop_mapping('tanh_n', 'tanh', 'NN', :pure(1));
+QAST::Operations.add_core_pirop_mapping('sech_n', 'sech', 'NN', :pure(1));
 
 # bitwise ops
-QAST::Operations.add_core_pirop_mapping('bitor_i', 'bor', 'Iii');
-QAST::Operations.add_core_pirop_mapping('bitor_I', 'nqp_bigint_bor', 'PPPP');
-QAST::Operations.add_core_pirop_mapping('bitxor_i', 'bxor', 'Iii');
-QAST::Operations.add_core_pirop_mapping('bitxor_I', 'nqp_bigint_bxor', 'PPPP');
-QAST::Operations.add_core_pirop_mapping('bitand_i', 'band', 'Iii');
-QAST::Operations.add_core_pirop_mapping('bitand_I', 'nqp_bigint_band', 'PPPP');
-QAST::Operations.add_core_pirop_mapping('bitneg_i', 'bnot', 'Ii');
-QAST::Operations.add_core_pirop_mapping('bitneg_I', 'nqp_bigint_bnot', 'PPP');
-QAST::Operations.add_core_pirop_mapping('bitshiftl_i', 'shl', 'Iii');
-QAST::Operations.add_core_pirop_mapping('bitshiftl_I', 'nqp_bigint_shl', 'PPIP');
-QAST::Operations.add_core_pirop_mapping('bitshiftr_i', 'shr', 'Iii');
-QAST::Operations.add_core_pirop_mapping('bitshiftr_I', 'nqp_bigint_shr', 'PPIP');
+QAST::Operations.add_core_pirop_mapping('bitor_i', 'bor', 'Iii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('bitor_I', 'nqp_bigint_bor', 'PPPP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('bitxor_i', 'bxor', 'Iii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('bitxor_I', 'nqp_bigint_bxor', 'PPPP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('bitand_i', 'band', 'Iii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('bitand_I', 'nqp_bigint_band', 'PPPP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('bitneg_i', 'bnot', 'Ii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('bitneg_I', 'nqp_bigint_bnot', 'PPP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('bitshiftl_i', 'shl', 'Iii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('bitshiftl_I', 'nqp_bigint_shl', 'PPIP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('bitshiftr_i', 'shr', 'Iii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('bitshiftr_I', 'nqp_bigint_shr', 'PPIP', :pure(1));
 
 # string bitwise ops
-QAST::Operations.add_core_pirop_mapping('bitor_s', 'bors', 'Sss');
-QAST::Operations.add_core_pirop_mapping('bitxor_s', 'bxors', 'Sss');
-QAST::Operations.add_core_pirop_mapping('bitand_s', 'bands', 'Sss');
+QAST::Operations.add_core_pirop_mapping('bitor_s', 'bors', 'Sss', :pure(1));
+QAST::Operations.add_core_pirop_mapping('bitxor_s', 'bxors', 'Sss', :pure(1));
+QAST::Operations.add_core_pirop_mapping('bitand_s', 'bands', 'Sss', :pure(1));
 
 # string opcodes
-QAST::Operations.add_core_pirop_mapping('chars', 'length', 'Is');
-QAST::Operations.add_core_pirop_mapping('concat', 'concat', 'Sss');
-QAST::Operations.add_core_pirop_mapping('concat_s', 'concat', 'Sss');
-QAST::Operations.add_core_pirop_mapping('join', 'join', 'SsP');
-QAST::Operations.add_core_pirop_mapping('split', 'split', 'Pss');
-QAST::Operations.add_core_pirop_mapping('chr', 'chr', 'Si');
-QAST::Operations.add_core_pirop_mapping('lc', 'downcase', 'Ss');
-QAST::Operations.add_core_pirop_mapping('uc', 'upcase', 'Ss');
-QAST::Operations.add_core_pirop_mapping('x', 'repeat', 'Ssi');
-QAST::Operations.add_core_pirop_mapping('iscclass', 'is_cclass', 'Iisi');
-QAST::Operations.add_core_pirop_mapping('findnotcclass', 'find_not_cclass', 'Iisii');
-QAST::Operations.add_core_pirop_mapping('sprintf', 'sprintf', 'SsP');
+QAST::Operations.add_core_pirop_mapping('chars', 'length', 'Is', :pure(1));
+QAST::Operations.add_core_pirop_mapping('concat', 'concat', 'Sss', :pure(1));
+QAST::Operations.add_core_pirop_mapping('concat_s', 'concat', 'Sss', :pure(1));
+QAST::Operations.add_core_pirop_mapping('join', 'join', 'SsP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('split', 'split', 'Pss', :pure(1));
+QAST::Operations.add_core_pirop_mapping('chr', 'chr', 'Si', :pure(1));
+QAST::Operations.add_core_pirop_mapping('lc', 'downcase', 'Ss', :pure(1));
+QAST::Operations.add_core_pirop_mapping('uc', 'upcase', 'Ss', :pure(1));
+QAST::Operations.add_core_pirop_mapping('x', 'repeat', 'Ssi', :pure(1));
+QAST::Operations.add_core_pirop_mapping('iscclass', 'is_cclass', 'Iisi', :pure(1));
+QAST::Operations.add_core_pirop_mapping('findnotcclass', 'find_not_cclass', 'Iisii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('sprintf', 'sprintf', 'SsP', :pure(1));
 
 # substr can take 2 or 3 args, so needs special handling.
-QAST::Operations.add_core_pirop_mapping('substr2', 'substr', 'Ssi');
-QAST::Operations.add_core_pirop_mapping('substr3', 'substr', 'Ssii');
-QAST::Operations.add_core_op('substr', -> $qastcomp, $op {
+QAST::Operations.add_core_pirop_mapping('substr2', 'substr', 'Ssi', :pure(1));
+QAST::Operations.add_core_pirop_mapping('substr3', 'substr', 'Ssii', :pure(1));
+QAST::Operations.add_core_op('substr', :pure(1), -> $qastcomp, $op {
     my @operands := $op.list;
     $qastcomp.as_post(+@operands == 2
         ?? QAST::Op.new( :op('substr2'), |@operands )
@@ -1204,9 +1203,9 @@ QAST::Operations.add_core_op('substr', -> $qastcomp, $op {
 });
 
 # ord can be on a the first char in a string or at a particular char.
-QAST::Operations.add_core_pirop_mapping('ordfirst', 'ord', 'Is');
-QAST::Operations.add_core_pirop_mapping('ordat', 'ord', 'Isi');
-QAST::Operations.add_core_op('ord', -> $qastcomp, $op {
+QAST::Operations.add_core_pirop_mapping('ordfirst', 'ord', 'Is', :pure(1));
+QAST::Operations.add_core_pirop_mapping('ordat', 'ord', 'Isi', :pure(1));
+QAST::Operations.add_core_op('ord', :pure(1), -> $qastcomp, $op {
     my @operands := $op.list;
     $qastcomp.as_post(+@operands == 1
         ?? QAST::Op.new( :op('ordfirst'), |@operands )
@@ -1214,16 +1213,16 @@ QAST::Operations.add_core_op('ord', -> $qastcomp, $op {
 });
 
 # index may or may not take a starting position
-QAST::Operations.add_core_pirop_mapping('indexfrom', 'index', 'Issi');
-QAST::Operations.add_core_op('index', -> $qastcomp, $op {
+QAST::Operations.add_core_pirop_mapping('indexfrom', 'index', 'Issi', :pure(1));
+QAST::Operations.add_core_op('index', :pure(1), -> $qastcomp, $op {
     my @operands := $op.list;
     $qastcomp.as_post(+@operands == 2
         ?? QAST::Op.new( :op('indexfrom'), |@operands, QAST::IVal.new( :value(0) ) )
         !! QAST::Op.new( :op('indexfrom'), |@operands ));
 });
-QAST::Operations.add_core_pirop_mapping('rindexfrom', 'rindex', 'Issi');
-QAST::Operations.add_core_pirop_mapping('rindexfromend', 'rindex', 'Iss');
-QAST::Operations.add_core_op('rindex', -> $qastcomp, $op {
+QAST::Operations.add_core_pirop_mapping('rindexfrom', 'rindex', 'Issi', :pure(1));
+QAST::Operations.add_core_pirop_mapping('rindexfromend', 'rindex', 'Iss', :pure(1));
+QAST::Operations.add_core_op('rindex', :pure(1), -> $qastcomp, $op {
     my @operands := $op.list;
     $qastcomp.as_post(+@operands == 2
         ?? QAST::Op.new( :op('rindexfromend'), |@operands )
@@ -1231,130 +1230,130 @@ QAST::Operations.add_core_op('rindex', -> $qastcomp, $op {
 });
 
 # relational opcodes
-QAST::Operations.add_core_pirop_mapping('cmp_i', 'cmp', 'Iii');
-QAST::Operations.add_core_pirop_mapping('iseq_i', 'iseq', 'Iii');
-QAST::Operations.add_core_pirop_mapping('isne_i', 'isne', 'Iii');
-QAST::Operations.add_core_pirop_mapping('islt_i', 'islt', 'Iii');
-QAST::Operations.add_core_pirop_mapping('isle_i', 'isle', 'Iii');
-QAST::Operations.add_core_pirop_mapping('isgt_i', 'isgt', 'Iii');
-QAST::Operations.add_core_pirop_mapping('isge_i', 'isge', 'Iii');
+QAST::Operations.add_core_pirop_mapping('cmp_i', 'cmp', 'Iii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('iseq_i', 'iseq', 'Iii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('isne_i', 'isne', 'Iii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('islt_i', 'islt', 'Iii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('isle_i', 'isle', 'Iii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('isgt_i', 'isgt', 'Iii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('isge_i', 'isge', 'Iii', :pure(1));
 
-QAST::Operations.add_core_pirop_mapping('bool_I', 'nqp_bigint_bool', 'IP');
-QAST::Operations.add_core_pirop_mapping('cmp_I', 'nqp_bigint_cmp', 'IPP');
-QAST::Operations.add_core_pirop_mapping('iseq_I', 'nqp_bigint_eq', 'IPP');
-QAST::Operations.add_core_pirop_mapping('isne_I', 'nqp_bigint_ne', 'IPP');
-QAST::Operations.add_core_pirop_mapping('islt_I', 'nqp_bigint_lt', 'IPP');
-QAST::Operations.add_core_pirop_mapping('isle_I', 'nqp_bigint_le', 'IPP');
-QAST::Operations.add_core_pirop_mapping('isgt_I', 'nqp_bigint_gt', 'IPP');
-QAST::Operations.add_core_pirop_mapping('isge_I', 'nqp_bigint_ge', 'IPP');
+QAST::Operations.add_core_pirop_mapping('bool_I', 'nqp_bigint_bool', 'IP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('cmp_I', 'nqp_bigint_cmp', 'IPP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('iseq_I', 'nqp_bigint_eq', 'IPP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('isne_I', 'nqp_bigint_ne', 'IPP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('islt_I', 'nqp_bigint_lt', 'IPP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('isle_I', 'nqp_bigint_le', 'IPP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('isgt_I', 'nqp_bigint_gt', 'IPP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('isge_I', 'nqp_bigint_ge', 'IPP', :pure(1));
 
-QAST::Operations.add_core_pirop_mapping('cmp_n', 'cmp', 'Inn');
-QAST::Operations.add_core_pirop_mapping('iseq_n', 'iseq', 'Inn');
-QAST::Operations.add_core_pirop_mapping('isne_n', 'isne', 'Inn');
-QAST::Operations.add_core_pirop_mapping('islt_n', 'islt', 'Inn');
-QAST::Operations.add_core_pirop_mapping('isle_n', 'isle', 'Inn');
-QAST::Operations.add_core_pirop_mapping('isgt_n', 'isgt', 'Inn');
-QAST::Operations.add_core_pirop_mapping('isge_n', 'isge', 'Inn');
+QAST::Operations.add_core_pirop_mapping('cmp_n', 'cmp', 'Inn', :pure(1));
+QAST::Operations.add_core_pirop_mapping('iseq_n', 'iseq', 'Inn', :pure(1));
+QAST::Operations.add_core_pirop_mapping('isne_n', 'isne', 'Inn', :pure(1));
+QAST::Operations.add_core_pirop_mapping('islt_n', 'islt', 'Inn', :pure(1));
+QAST::Operations.add_core_pirop_mapping('isle_n', 'isle', 'Inn', :pure(1));
+QAST::Operations.add_core_pirop_mapping('isgt_n', 'isgt', 'Inn', :pure(1));
+QAST::Operations.add_core_pirop_mapping('isge_n', 'isge', 'Inn', :pure(1));
 
-QAST::Operations.add_core_pirop_mapping('cmp_s', 'cmp', 'Iss');
-QAST::Operations.add_core_pirop_mapping('iseq_s', 'iseq', 'Iss');
-QAST::Operations.add_core_pirop_mapping('isne_s', 'isne', 'Iss');
-QAST::Operations.add_core_pirop_mapping('islt_s', 'islt', 'Iss');
-QAST::Operations.add_core_pirop_mapping('isle_s', 'isle', 'Iss');
-QAST::Operations.add_core_pirop_mapping('isgt_s', 'isgt', 'Iss');
-QAST::Operations.add_core_pirop_mapping('isge_s', 'isge', 'Iss');
+QAST::Operations.add_core_pirop_mapping('cmp_s', 'cmp', 'Iss', :pure(1));
+QAST::Operations.add_core_pirop_mapping('iseq_s', 'iseq', 'Iss', :pure(1));
+QAST::Operations.add_core_pirop_mapping('isne_s', 'isne', 'Iss', :pure(1));
+QAST::Operations.add_core_pirop_mapping('islt_s', 'islt', 'Iss', :pure(1));
+QAST::Operations.add_core_pirop_mapping('isle_s', 'isle', 'Iss', :pure(1));
+QAST::Operations.add_core_pirop_mapping('isgt_s', 'isgt', 'Iss', :pure(1));
+QAST::Operations.add_core_pirop_mapping('isge_s', 'isge', 'Iss', :pure(1));
 
 # bigint ops
-QAST::Operations.add_core_pirop_mapping('fromstr_I', 'nqp_bigint_from_str', 'PsP');
-QAST::Operations.add_core_pirop_mapping('tostr_I', 'nqp_bigint_to_str', 'SP');
-QAST::Operations.add_core_pirop_mapping('base_I', 'nqp_bigint_to_str_base', 'SPI');
-QAST::Operations.add_core_pirop_mapping('isbig_I', 'nqp_bigint_is_big', 'IP');
-QAST::Operations.add_core_pirop_mapping('fromnum_I', 'nqp_bigint_from_num', 'PNP');
-QAST::Operations.add_core_pirop_mapping('tonum_I', 'nqp_bigint_to_num', 'NP');
+QAST::Operations.add_core_pirop_mapping('fromstr_I', 'nqp_bigint_from_str', 'PsP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('tostr_I', 'nqp_bigint_to_str', 'SP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('base_I', 'nqp_bigint_to_str_base', 'SPI', :pure(1));
+QAST::Operations.add_core_pirop_mapping('isbig_I', 'nqp_bigint_is_big', 'IP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('fromnum_I', 'nqp_bigint_from_num', 'PNP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('tonum_I', 'nqp_bigint_to_num', 'NP', :pure(1));
 
 # native call ops
 QAST::Operations.add_core_pirop_mapping('buildnativecall', 'nqp_native_call_build', 'vPsssPP');
 QAST::Operations.add_core_pirop_mapping('nativecall', 'nqp_native_call', 'PPPP');
 
 # boolean opcodes
-QAST::Operations.add_core_pirop_mapping('not_i', 'not', 'Ii');
+QAST::Operations.add_core_pirop_mapping('not_i', 'not', 'Ii', :pure(1));
 
 # aggregate opcodes, mapping to the Parrot v-table functions
-QAST::Operations.add_core_pirop_mapping('atkey', 'set', 'PQs');
-QAST::Operations.add_core_pirop_mapping('atpos', 'set', 'PQi');
-QAST::Operations.add_core_pirop_mapping('atpos_i', 'set', 'IQi');
-QAST::Operations.add_core_pirop_mapping('atpos_n', 'set', 'NQi');
-QAST::Operations.add_core_pirop_mapping('atpos_s', 'set', 'SQi');
-QAST::Operations.add_core_pirop_mapping('bindkey', 'set', '1QsP');
-QAST::Operations.add_core_pirop_mapping('bindpos', 'set', '1QiP');
-QAST::Operations.add_core_pirop_mapping('bindpos_i', 'set', '1Qii');
-QAST::Operations.add_core_pirop_mapping('bindpos_n', 'set', '1Qin');
-QAST::Operations.add_core_pirop_mapping('bindpos_s', 'set', '1Qis');
-QAST::Operations.add_core_pirop_mapping('deletekey', 'delete', '0Qs');
-QAST::Operations.add_core_pirop_mapping('deletepos', 'delete', '0Qi');
-QAST::Operations.add_core_pirop_mapping('existskey', 'exists', 'IQs');
-QAST::Operations.add_core_pirop_mapping('existspos', 'exists', 'IQi');
-QAST::Operations.add_core_pirop_mapping('elems', 'elements', 'IP');
-QAST::Operations.add_core_pirop_mapping('iterator', 'iter', 'PP');
-QAST::Operations.add_core_pirop_mapping('push', 'push', '0PP');
-QAST::Operations.add_core_pirop_mapping('push_s', 'push', '0Ps');
-QAST::Operations.add_core_pirop_mapping('push_i', 'push', '0Pi');
-QAST::Operations.add_core_pirop_mapping('push_n', 'push', '0Pn');
-QAST::Operations.add_core_pirop_mapping('pop', 'pop', 'PP');
-QAST::Operations.add_core_pirop_mapping('pop_s', 'pop', 'SP');
-QAST::Operations.add_core_pirop_mapping('pop_i', 'pop', 'IP');
-QAST::Operations.add_core_pirop_mapping('pop_n', 'pop', 'NP');
-QAST::Operations.add_core_pirop_mapping('shift', 'shift', 'PP');
-QAST::Operations.add_core_pirop_mapping('shift_s', 'shift', 'SP');
-QAST::Operations.add_core_pirop_mapping('shift_i', 'shift', 'IP');
-QAST::Operations.add_core_pirop_mapping('shift_n', 'shift', 'NP');
-QAST::Operations.add_core_pirop_mapping('unshift', 'unshift', '0PP');
-QAST::Operations.add_core_pirop_mapping('unshift_s', 'unshift', '0Ps');
-QAST::Operations.add_core_pirop_mapping('unshift_i', 'unshift', '0Pi');
-QAST::Operations.add_core_pirop_mapping('unshift_n', 'unshift', '0Pn');
-QAST::Operations.add_core_pirop_mapping('splice', 'splice', '0PPii');
-QAST::Operations.add_core_pirop_mapping('islist', 'nqp_islist', 'IP');
+QAST::Operations.add_core_pirop_mapping('atkey', 'set', 'PQs', :pure(1));
+QAST::Operations.add_core_pirop_mapping('atpos', 'set', 'PQi', :pure(1));
+QAST::Operations.add_core_pirop_mapping('atpos_i', 'set', 'IQi', :pure(1));
+QAST::Operations.add_core_pirop_mapping('atpos_n', 'set', 'NQi', :pure(1));
+QAST::Operations.add_core_pirop_mapping('atpos_s', 'set', 'SQi', :pure(1));
+QAST::Operations.add_core_pirop_mapping('bindkey', 'set', '1QsP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('bindpos', 'set', '1QiP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('bindpos_i', 'set', '1Qii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('bindpos_n', 'set', '1Qin', :pure(1));
+QAST::Operations.add_core_pirop_mapping('bindpos_s', 'set', '1Qis', :pure(1));
+QAST::Operations.add_core_pirop_mapping('deletekey', 'delete', '0Qs', :pure(1));
+QAST::Operations.add_core_pirop_mapping('deletepos', 'delete', '0Qi', :pure(1));
+QAST::Operations.add_core_pirop_mapping('existskey', 'exists', 'IQs', :pure(1));
+QAST::Operations.add_core_pirop_mapping('existspos', 'exists', 'IQi', :pure(1));
+QAST::Operations.add_core_pirop_mapping('elems', 'elements', 'IP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('iterator', 'iter', 'PP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('push', 'push', '0PP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('push_s', 'push', '0Ps', :pure(1));
+QAST::Operations.add_core_pirop_mapping('push_i', 'push', '0Pi', :pure(1));
+QAST::Operations.add_core_pirop_mapping('push_n', 'push', '0Pn', :pure(1));
+QAST::Operations.add_core_pirop_mapping('pop', 'pop', 'PP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('pop_s', 'pop', 'SP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('pop_i', 'pop', 'IP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('pop_n', 'pop', 'NP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('shift', 'shift', 'PP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('shift_s', 'shift', 'SP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('shift_i', 'shift', 'IP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('shift_n', 'shift', 'NP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('unshift', 'unshift', '0PP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('unshift_s', 'unshift', '0Ps', :pure(1));
+QAST::Operations.add_core_pirop_mapping('unshift_i', 'unshift', '0Pi', :pure(1));
+QAST::Operations.add_core_pirop_mapping('unshift_n', 'unshift', '0Pn', :pure(1));
+QAST::Operations.add_core_pirop_mapping('splice', 'splice', '0PPii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('islist', 'nqp_islist', 'IP', :pure(1));
 
 # repr-level aggregate operations
-QAST::Operations.add_core_pirop_mapping('r_atpos', 'repr_at_pos_obj', 'PPi');
-QAST::Operations.add_core_pirop_mapping('r_atpos_i', 'repr_at_pos_int', 'IPi');
-QAST::Operations.add_core_pirop_mapping('r_atpos_n', 'repr_at_pos_num', 'NPi');
-QAST::Operations.add_core_pirop_mapping('r_bindpos', 'repr_bind_pos_obj', '2PiP');
-QAST::Operations.add_core_pirop_mapping('r_bindpos_i', 'repr_bind_pos_int', '2Pii');
-QAST::Operations.add_core_pirop_mapping('r_bindpos_n', 'repr_bind_pos_num', '2Pin');
+QAST::Operations.add_core_pirop_mapping('r_atpos', 'repr_at_pos_obj', 'PPi', :pure(1));
+QAST::Operations.add_core_pirop_mapping('r_atpos_i', 'repr_at_pos_int', 'IPi', :pure(1));
+QAST::Operations.add_core_pirop_mapping('r_atpos_n', 'repr_at_pos_num', 'NPi', :pure(1));
+QAST::Operations.add_core_pirop_mapping('r_bindpos', 'repr_bind_pos_obj', '2PiP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('r_bindpos_i', 'repr_bind_pos_int', '2Pii', :pure(1));
+QAST::Operations.add_core_pirop_mapping('r_bindpos_n', 'repr_bind_pos_num', '2Pin', :pure(1));
 
 # object opcodes
-QAST::Operations.add_core_pirop_mapping('bindattr', 'setattribute', '3PPsP');
-QAST::Operations.add_core_pirop_mapping('bindattr_i', 'repr_bind_attr_int', '3PPsi');
-QAST::Operations.add_core_pirop_mapping('bindattr_n', 'repr_bind_attr_num', '3PPsn');
-QAST::Operations.add_core_pirop_mapping('bindattr_s', 'repr_bind_attr_str', '3PPss');
-QAST::Operations.add_core_pirop_mapping('getattr', 'getattribute', 'PPPs');
-QAST::Operations.add_core_pirop_mapping('getattr_i', 'repr_get_attr_int', 'IPPs');
-QAST::Operations.add_core_pirop_mapping('getattr_n', 'repr_get_attr_num', 'NPPs');
-QAST::Operations.add_core_pirop_mapping('getattr_s', 'repr_get_attr_str', 'SPPs');
-QAST::Operations.add_core_pirop_mapping('create', 'repr_instance_of', 'PP');
-QAST::Operations.add_core_pirop_mapping('clone', 'clone', 'PP');
-QAST::Operations.add_core_pirop_mapping('isconcrete', 'repr_defined', 'IP');
-QAST::Operations.add_core_pirop_mapping('iscont', 'is_container', 'IP');
-QAST::Operations.add_core_pirop_mapping('isnull', 'isnull', 'IP');
-QAST::Operations.add_core_pirop_mapping('isnull_s', 'isnull', 'IS');
-QAST::Operations.add_core_pirop_mapping('istrue', 'istrue', 'IP');
-QAST::Operations.add_core_pirop_mapping('istype', 'type_check', 'IPP');
-QAST::Operations.add_core_pirop_mapping('null', 'null', 'P');
-QAST::Operations.add_core_pirop_mapping('null_s', 'null', 'S');
-QAST::Operations.add_core_pirop_mapping('unbox_i', 'repr_unbox_int', 'IP');
-QAST::Operations.add_core_pirop_mapping('unbox_n', 'repr_unbox_num', 'NP');
-QAST::Operations.add_core_pirop_mapping('unbox_s', 'repr_unbox_str', 'SP');
-QAST::Operations.add_core_pirop_mapping('box_i', 'repr_box_int', 'PiP');
-QAST::Operations.add_core_pirop_mapping('box_n', 'repr_box_num', 'PnP');
-QAST::Operations.add_core_pirop_mapping('box_s', 'repr_box_str', 'PsP');
-QAST::Operations.add_core_pirop_mapping('what', 'get_what', 'PP');
-QAST::Operations.add_core_pirop_mapping('how', 'get_how', 'PP');
-QAST::Operations.add_core_pirop_mapping('who', 'get_who', 'PP');
-QAST::Operations.add_core_pirop_mapping('where', 'get_id', 'IP');
-QAST::Operations.add_core_pirop_mapping('findmethod', 'find_method', 'PPs');
-QAST::Operations.add_core_pirop_mapping('defined', 'defined', 'IP');
-QAST::Operations.add_core_pirop_mapping('can', 'can', 'IPs');
+QAST::Operations.add_core_pirop_mapping('bindattr', 'setattribute', '3PPsP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('bindattr_i', 'repr_bind_attr_int', '3PPsi', :pure(1));
+QAST::Operations.add_core_pirop_mapping('bindattr_n', 'repr_bind_attr_num', '3PPsn', :pure(1));
+QAST::Operations.add_core_pirop_mapping('bindattr_s', 'repr_bind_attr_str', '3PPss', :pure(1));
+QAST::Operations.add_core_pirop_mapping('getattr', 'getattribute', 'PPPs', :pure(1));
+QAST::Operations.add_core_pirop_mapping('getattr_i', 'repr_get_attr_int', 'IPPs', :pure(1));
+QAST::Operations.add_core_pirop_mapping('getattr_n', 'repr_get_attr_num', 'NPPs', :pure(1));
+QAST::Operations.add_core_pirop_mapping('getattr_s', 'repr_get_attr_str', 'SPPs', :pure(1));
+QAST::Operations.add_core_pirop_mapping('create', 'repr_instance_of', 'PP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('clone', 'clone', 'PP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('isconcrete', 'repr_defined', 'IP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('iscont', 'is_container', 'IP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('isnull', 'isnull', 'IP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('isnull_s', 'isnull', 'IS', :pure(1));
+QAST::Operations.add_core_pirop_mapping('istrue', 'istrue', 'IP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('istype', 'type_check', 'IPP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('null', 'null', 'P', :pure(1));
+QAST::Operations.add_core_pirop_mapping('null_s', 'null', 'S', :pure(1));
+QAST::Operations.add_core_pirop_mapping('unbox_i', 'repr_unbox_int', 'IP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('unbox_n', 'repr_unbox_num', 'NP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('unbox_s', 'repr_unbox_str', 'SP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('box_i', 'repr_box_int', 'PiP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('box_n', 'repr_box_num', 'PnP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('box_s', 'repr_box_str', 'PsP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('what', 'get_what', 'PP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('how', 'get_how', 'PP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('who', 'get_who', 'PP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('where', 'get_id', 'IP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('findmethod', 'find_method', 'PPs', :pure(1));
+QAST::Operations.add_core_pirop_mapping('defined', 'defined', 'IP', :pure(1));
+QAST::Operations.add_core_pirop_mapping('can', 'can', 'IPs', :pure(1));
 
 # serialization context related opcodes
 QAST::Operations.add_core_pirop_mapping('sha1', 'nqp_sha1', 'Ss');
@@ -1362,5 +1361,5 @@ QAST::Operations.add_core_pirop_mapping('createsc', 'nqp_create_sc', 'Ps');
 QAST::Operations.add_core_pirop_mapping('deserialize', 'nqp_deserialize_sc', 'vsPPP');
 
 # process related opcodes
-QAST::Operations.add_core_pirop_mapping('exit', 'exit', '0i');
-QAST::Operations.add_core_pirop_mapping('sleep', 'sleep', '0n');
+QAST::Operations.add_core_pirop_mapping('exit', 'exit', '0i', :pure(1));
+QAST::Operations.add_core_pirop_mapping('sleep', 'sleep', '0n', :pure(1));

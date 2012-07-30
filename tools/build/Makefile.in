@@ -70,6 +70,7 @@ QAST_COMBINED = QAST.nqp
 QAST_PIR = QAST.pir
 QAST_PBC = QAST.pbc
 QAST_SOURCES = \
+  src/QAST/PIRT.nqp \
   src/QAST/CompileTimeValue.nqp \
   src/QAST/SpecialArg.nqp \
   src/QAST/Node.nqp \
@@ -1032,10 +1033,10 @@ test: all core-test setting-test qregex-test
 test-loud: all core-test-loud setting-test-loud
 
 core-test: $(NQP_EXE)
-	prove -r --exec ./$(NQP_EXE) t/nqp t/hll
+	prove -r --exec ./$(NQP_EXE) t/nqp t/qast t/hll
 
 core-test-loud: $(NQP_EXE)
-	prove -r -v --exec ./$(NQP_EXE) t/nqp t/hll
+	prove -r -v --exec ./$(NQP_EXE) t/nqp t/qast t/hll
 
 qregex-test: $(NQP_EXE)
 	prove -r --exec ./$(NQP_EXE) t/qregex

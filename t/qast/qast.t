@@ -1,11 +1,12 @@
 use QAST;
 
-plan(72);
+plan(73);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
-    my $post := QAST::Compiler.as_post($qast);
-    my $pir := QAST::Compiler.pir($post);
+    my $*QAST_BLOCK_NO_CLOSE := 1;
+    my $pirt := QAST::Compiler.as_post($qast);
+    my $pir := $pirt.pir();
     QAST::Compiler.evalpmc($pir);
 }
 sub is_qast($qast, $value, $desc) {
@@ -1019,4 +1020,25 @@ test_qast_result(
     ),
     -> $r {
         ok($r.m eq 'b', 'handles op runs exception handler and evaluates to its result');
+    });
+
+test_qast_result(
+    QAST::Block.new(
+        QAST::Op.new( :op('stmts'),
+            QAST::Op.new(
+                :op('bind'),
+                QAST::Var.new( :name('hash'), :scope('local'), :decl('var') ),
+                QAST::Op.new( :op('hash') ),
+            ),
+            QAST::Op.new(
+                :op('bindkey'),
+                QAST::Var.new( :name('hash'), :scope('local') ),
+                QAST::SVal.new(:value("pineapples")),
+                QAST::WVal.new(:value(D))
+            ),
+            QAST::Var.new( :name('hash'), :scope('local') )
+        )
+    ),
+    -> $r {
+        ok($r<pineapples>.m == 206, 'bindkey operation (int)');
     });
