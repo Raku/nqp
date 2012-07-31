@@ -693,7 +693,7 @@ class QAST::Compiler is HLL::Compiler {
         if $scope eq 'local' {
             if $*BLOCK.local_type($name) -> $type {
                 if $*BINDVAL {
-                    my $valpost := self.coerce(self.as_post_clear_bindval($*BINDVAL), nqp::lc($type));
+                    my $valpost := self.as_post_clear_bindval($*BINDVAL, :want(nqp::lc($type)));
                     $ops.push($valpost);
                     $ops.push_pirop('set', $name, $valpost.result);
                 }
@@ -710,7 +710,7 @@ class QAST::Compiler is HLL::Compiler {
             if (!%sym || !%sym<lazyinit>) && $*BLOCK.lexical_type($name) -> $type {
                 my $reg := $*BLOCK.lex_reg($name);
                 if $*BINDVAL {
-                    my $valpost := self.coerce(self.as_post_clear_bindval($*BINDVAL), nqp::lc($type));
+                    my $valpost := self.as_post_clear_bindval($*BINDVAL, :want(nqp::lc($type)));
                     $ops.push($valpost);
                     $ops.push_pirop('set', $reg, $valpost.result);
                 }
@@ -726,7 +726,7 @@ class QAST::Compiler is HLL::Compiler {
                 
                 # Emit the lookup or bind.
                 if $*BINDVAL {
-                    my $valpost := self.coerce(self.as_post_clear_bindval($*BINDVAL), nqp::lc($type));
+                    my $valpost := self.as_post_clear_bindval($*BINDVAL, :want(nqp::lc($type)));
                     $ops.push($valpost);
                     $ops.push_pirop('store_lex', self.escape($node.name), $valpost.result);
                     $ops.result($valpost.result);
@@ -746,8 +746,8 @@ class QAST::Compiler is HLL::Compiler {
             }
             
             # Compile object and handle.
-            my $obj := self.coerce(self.as_post_clear_bindval(@args[0]), 'p');
-            my $han := self.coerce(self.as_post_clear_bindval(@args[1]), 'p');
+            my $obj := self.as_post_clear_bindval(@args[0], :want('P'));
+            my $han := self.as_post_clear_bindval(@args[1], :want('P'));
             $ops.push($obj);
             $ops.push($han);
             
@@ -755,7 +755,7 @@ class QAST::Compiler is HLL::Compiler {
             my $type    := type_to_register_type($node.returns);
             my $op_type := type_to_lookup_name($node.returns);
             if $*BINDVAL {
-                my $valpost := self.coerce(self.as_post_clear_bindval($*BINDVAL), nqp::lc($type));
+                my $valpost := self.as_post_clear_bindval($*BINDVAL, :want(nqp::lc($type)));
                 $ops.push($valpost);
                 $ops.push_pirop("repr_bind_attr_$op_type", $obj.result, $han.result,
                     self.escape($name), $valpost.result);
@@ -770,7 +770,7 @@ class QAST::Compiler is HLL::Compiler {
         }
         elsif $scope eq 'contextual' {
             if $*BINDVAL {
-                my $valpost := self.coerce(self.as_post_clear_bindval($*BINDVAL), 'P');
+                my $valpost := self.as_post_clear_bindval($*BINDVAL, :want('P'));
                 $ops.push($valpost);
                 $ops.push_pirop('store_dynamic_lex', self.escape($name), $valpost.result);
                 $ops.result($valpost.result);
@@ -788,9 +788,9 @@ class QAST::Compiler is HLL::Compiler {
         $ops
     }
     
-    method as_post_clear_bindval($node) {
+    method as_post_clear_bindval($node, :$want) {
         my $*BINDVAL := 0;
-        self.as_post($node)
+        $want ?? self.as_post($node, :$want) !! self.as_post($node)
     }
     
     multi method as_post(QAST::Want $node) {
