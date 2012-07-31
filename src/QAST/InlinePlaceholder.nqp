@@ -8,8 +8,21 @@ class QAST::InlinePlaceholder is QAST::Node {
     }
     
     method substitute_inline_placeholders(@fillers) {
-        $!position < +@fillers
-            ?? @fillers[$!position]
-            !! nqp::die("Inline placeholder index out of range")
+        if $!position < +@fillers {
+            my $result := @fillers[$!position];
+            if self.named || self.flat {
+                $result := $result.shallow_clone();
+                if self.named -> $name {
+                    $result.named($name);
+                }
+                if self.flat {
+                    $result.flat(1);
+                }
+            }
+            $result
+        }
+        else {
+            nqp::die("Inline placeholder index out of range")
+        }
     }
 }
