@@ -199,7 +199,19 @@ class QAST::Compiler is HLL::Compiler {
     }
     method rxescape($str) { 'ucs4:"' ~ pir::escape__Ss($str) ~ '"' }
 
-    proto method as_post(*@args, *%_) { * }
+    proto method as_post($node, :$want) {
+        if $want {
+            if nqp::istype($node, QAST::Want) {
+                self.coerce(self.as_post(want($node, $want)), $want)
+            }
+            else {
+                self.coerce(self.as_post($node), $want)
+            }
+        }
+        else {
+            {*}
+        }
+    }
     
     multi method as_post(QAST::CompUnit $cu) {
         # Set HLL.
