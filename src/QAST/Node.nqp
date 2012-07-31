@@ -101,6 +101,12 @@ class QAST::Node {
         $prefix ~ '_' ~ $id
     }
     
+    method shallow_clone() {
+        my $clone := pir::repr_clone__PP(self);
+        nqp::bindattr($clone, QAST::Node, '@!array', nqp::clone(@!array));
+        $clone
+    }
+    
     method substitute_inline_placeholders(@fillers) {
         nqp::die(self.HOW.name(self) ~ " does not support inlining");
     }

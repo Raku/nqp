@@ -4,7 +4,7 @@ class QAST::Stmts is QAST::Node {
     method resultchild(*@value) { $!resultchild := @value[0] if @value; $!resultchild }
     
     method substitute_inline_placeholders(@fillers) {
-        my $result := pir::repr_clone__PP(self);
+        my $result := self.shallow_clone();
         my $i := 0;
         my $elems := +@(self);
         while $i < $elems {
