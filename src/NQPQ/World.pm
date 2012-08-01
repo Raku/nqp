@@ -1,4 +1,5 @@
 use NQPP6QRegex;
+use QAST;
 
 class NQP::World is HLL::World {
     # The stack of lexical pads, actually as PAST::Block objects. The
@@ -11,7 +12,7 @@ class NQP::World is HLL::World {
     # to a list of code objects.
     has %!code_objects_to_fix_up;
     
-    # Mapping of PAST::Stmts node containing fixups, keyed by sub ID. If
+    # Mapping of QAST::Stmts node containing fixups, keyed by sub ID. If
     # we do dynamic compilation then we do the fixups immediately and
     # then clear this list.
     has %!code_object_fixup_list;
@@ -22,7 +23,7 @@ class NQP::World is HLL::World {
     # Creates a new lexical scope and puts it on top of the stack.
     method push_lexpad($/) {
         # Create pad, link to outer and add to stack.
-        my $pad := PAST::Block.new( PAST::Stmts.new(), :node($/) );
+        my $pad := PAST::Block.new( QAST::Stmts.new(), :node($/) );
         if +@!BLOCKS {
             $pad<outer> := @!BLOCKS[+@!BLOCKS - 1];
         }
@@ -65,7 +66,7 @@ class NQP::World is HLL::World {
             
             # Do load for pre-compiled situation.
             if self.is_precompilation_mode() {
-                self.add_load_dependency_task(:deserialize_past(PAST::Stmts.new(
+                self.add_load_dependency_task(:deserialize_past(QAST::Stmts.new(
                     PAST::Op.new(
                         :pirop('load_bytecode vs'), 'ModuleLoader.pbc'
                     ),
@@ -105,7 +106,7 @@ class NQP::World is HLL::World {
         
         # Make sure we do the loading during deserialization.
         if self.is_precompilation_mode() {
-            self.add_load_dependency_task(:deserialize_past(PAST::Stmts.new(
+            self.add_load_dependency_task(:deserialize_past(QAST::Stmts.new(
                 PAST::Op.new(
                     :pirop('load_bytecode vs'), 'ModuleLoader.pbc'
                 ),
@@ -144,7 +145,7 @@ class NQP::World is HLL::World {
             :directaccess(1) ));
         
         # Fixup and deserialization task is the same.
-        my $fixup := PAST::Stmts.new(
+        my $fixup := QAST::Stmts.new(
             PAST::Op.new(
                 :pasttype('callmethod'), :name('set_static_lexpad_value'),
                 PAST::Val.new( :value($block), :returns('LexInfo')),
@@ -226,7 +227,7 @@ class NQP::World is HLL::World {
         };
         
         # See if we already have our compile-time dummy. If not, create it.
-        my $fixups := PAST::Stmts.new();
+        my $fixups := QAST::Stmts.new();
         my $dummy;
         my $code_ref_idx;
         if nqp::defined($past<compile_time_dummy>) {
@@ -427,7 +428,7 @@ class NQP::World is HLL::World {
     method run_begin_block($past) {
         # Create a wrapper that makes all outer symbols visible.
         my $wrapper := PAST::Block.new(
-            PAST::Stmts.new(),
+            QAST::Stmts.new(),
             $past
         );
         my %seen;
@@ -480,15 +481,15 @@ class NQP::World is HLL::World {
     # it doesn't exist, and fix it up if it already does.
     method to_past() {
         if self.is_precompilation_mode() {
-            my $load_tasks := PAST::Stmts.new();
+            my $load_tasks := QAST::Stmts.new();
             for self.load_dependency_tasks() {
-                $load_tasks.push(PAST::Stmt.new($_));
+                $load_tasks.push(QAST::Stmt.new($_));
             }
-            my $fixup_tasks := PAST::Stmts.new();
+            my $fixup_tasks := QAST::Stmts.new();
             for self.fixup_tasks() {
-                $fixup_tasks.push(PAST::Stmt.new($_));
+                $fixup_tasks.push(QAST::Stmt.new($_));
             }
-            return PAST::Stmts.new(
+            return QAST::Stmts.new(
                 PAST::Op.new( :pirop('nqp_dynop_setup v') ),
                 PAST::Op.new( :pirop('nqp_bigint_setup v') ),
                 PAST::Op.new(
@@ -513,12 +514,12 @@ class NQP::World is HLL::World {
             );
         }
         else {
-            my $tasks := PAST::Stmts.new();
+            my $tasks := QAST::Stmts.new();
             for self.load_dependency_tasks() {
-                $tasks.push(PAST::Stmt.new($_));
+                $tasks.push(QAST::Stmt.new($_));
             }
             for self.fixup_tasks() {
-                $tasks.push(PAST::Stmt.new($_));
+                $tasks.push(QAST::Stmt.new($_));
             }
             return $tasks
         }

@@ -6,8 +6,8 @@ class NQP::Actions is HLL::Actions {
 
     sub block_immediate($block) {
         $block.blocktype('immediate');
-        unless $block.symtable() || $block.handlers() {
-            my $stmts := PAST::Stmts.new( :node($block) );
+        unless $block.symtable() {
+            my $stmts := QAST::Stmts.new( :node($block) );
             for $block.list { $stmts.push($_); }
             $block := $stmts;
         }
@@ -69,7 +69,7 @@ class NQP::Actions is HLL::Actions {
         # mainline.
         $unit.unshift(PAST::Var.new( :scope('parameter'), :name('@ARGS'), :slurpy(1),
             :directaccess(1) ));
-        my $main_tasks := PAST::Stmts.new(
+        my $main_tasks := QAST::Stmts.new(
             PAST::Op.new( :pirop('load_bytecode vs'), 'ModuleLoader.pbc' ),
             PAST::Op.new(
                 :pasttype('callmethod'), :name('set_mainline_module'),
@@ -113,13 +113,13 @@ class NQP::Actions is HLL::Actions {
     }
 
     method statementlist($/) {
-        my $past := PAST::Stmts.new( :node($/) );
+        my $past := QAST::Stmts.new( :node($/) );
         if $<statement> {
             for $<statement> {
                 my $ast := $_.ast;
                 $ast := $ast<sink> if nqp::defined($ast<sink>);
                 if $ast<bareblock> { $ast := block_immediate($ast); }
-                $ast := PAST::Stmt.new($ast) if $ast ~~ PAST::Node;
+                $ast := QAST::Stmt.new($ast) if nqp::istype($ast, QAST::Node);
                 $past.push( $ast );
             }
         }
@@ -246,7 +246,7 @@ class NQP::Actions is HLL::Actions {
         if nqp::defined($module) {
             import_HOW_exports($module);
         }
-        make PAST::Stmts.new();
+        make QAST::Stmts.new();
     }
 
     method statement_control:sym<if>($/) {
@@ -308,14 +308,14 @@ class NQP::Actions is HLL::Actions {
         my $block := $<block>.ast;
         push_block_handler($/, $block);
         $*W.cur_lexpad().handlers()[0].handle_types_except('CONTROL');
-        make PAST::Stmts.new(:node($/));
+        make QAST::Stmts.new(:node($/));
     }
 
     method statement_control:sym<CONTROL>($/) {
         my $block := $<block>.ast;
         push_block_handler($/, $block);
         $*W.cur_lexpad().handlers()[0].handle_types('CONTROL');
-        make PAST::Stmts.new(:node($/));
+        make QAST::Stmts.new(:node($/));
     }
 
     sub push_block_handler($/, $block) {
@@ -339,7 +339,7 @@ class NQP::Actions is HLL::Actions {
         $BLOCK.handlers.unshift(
             PAST::Control.new(
                 :node($/),
-                PAST::Stmts.new(
+                QAST::Stmts.new(
                     PAST::Op.new( :pasttype('call'),
                         $block,
                         PAST::Var.new( :scope('register'), :name('exception')),
@@ -362,7 +362,7 @@ class NQP::Actions is HLL::Actions {
 
     method statement_prefix:sym<INIT>($/) {
         $*W.cur_lexpad().push($<blorst>.ast);
-        make PAST::Stmts.new();
+        make QAST::Stmts.new();
     }
 
     method statement_prefix:sym<try>($/) {
@@ -373,7 +373,7 @@ class NQP::Actions is HLL::Actions {
         unless $past.handlers() {
             $past.handlers([PAST::Control.new(
                     :handle_types_except('CONTROL'),
-                    PAST::Stmts.new(
+                    QAST::Stmts.new(
                         PAST::Op.new( :pasttype('bind_6model'),
                             PAST::Var.new( :scope('keyed'),
                                 PAST::Var.new( :scope('register'), :name('exception')),
@@ -534,7 +534,7 @@ class NQP::Actions is HLL::Actions {
             $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
         }
         
-        make PAST::Stmts.new();
+        make QAST::Stmts.new();
     }
 
     method package_def($/) {
@@ -660,7 +660,7 @@ class NQP::Actions is HLL::Actions {
             $*W.pkg_add_attribute($*PACKAGE, %*HOW{$*PKGDECL ~ '-attr'},
                 %lit_args, %obj_args);
 
-            $past := PAST::Stmts.new();
+            $past := QAST::Stmts.new();
         }
         elsif $*SCOPE eq 'our' {
             # Depending on if this was already considered our scoped,
@@ -1052,7 +1052,7 @@ class NQP::Actions is HLL::Actions {
         my $past;
         if $<proto> {
             $past :=
-                PAST::Stmts.new(
+                QAST::Stmts.new(
                     PAST::Block.new( :name($name),
                         PAST::Op.new(
                             PAST::Var.new( :name('self'), :scope('parameter') ),
@@ -1469,7 +1469,7 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
         my $block := $<block>.ast;
         $block.blocktype('immediate');
         my $past :=
-            PAST::Stmts.new(
+            QAST::Stmts.new(
                 PAST::Op.new(
                     PAST::Var.new( :name('$/') ),
                     PAST::Op.new(
