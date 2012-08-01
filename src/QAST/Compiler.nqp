@@ -187,6 +187,11 @@ class QAST::Compiler is HLL::Compiler {
     sub type_to_lookup_name($type) {
         @prim_to_lookup_name[pir::repr_get_primitive_type_spec__IP($type)]
     }
+    
+    my %hll_force_return_boxing;
+    method force_return_boxing_for_hll($hll) {
+        %hll_force_return_boxing{$hll} := 1;
+    }
 
     method unique($prefix = '') { $prefix ~ $serno++ }
     method escape($str) {
@@ -405,17 +410,29 @@ class QAST::Compiler is HLL::Compiler {
                 $decls.push_pirop('.local ' ~ $block.local_type_long($_.name) ~ ' ' ~ $_.name);
             }
             
-            # Wrap all up in a POST::Sub.
+            # Create a PIRT::Sub and apply HLL if any.
             $sub := PIRT::Sub.new();
-            $sub.push($decls);
-            $sub.push($stmts);
-            $sub.push_pirop(".return (" ~ $stmts.result ~ ")");
-            
-            # Apply HLL if any.
             my $hll := '';
             try $hll := $*HLL;
             if $hll {
                 $sub.hll($hll);
+            }
+            
+            # Emit declarations, statements and and emit return instruction.
+            $sub.push($decls);
+            {
+                my $*BLOCK := $block;
+                my $ret_type := 'P';
+                try $ret_type := self.infer_type($stmts.result);
+                if $ret_type ne 'P' && %hll_force_return_boxing{$hll} {
+                    my $boxed := self.coerce($stmts, 'P');
+                    $sub.push($boxed);
+                    $sub.push_pirop(".return (" ~ $boxed.result ~ ")");
+                }
+                else {
+                    $sub.push($stmts);
+                    $sub.push_pirop(".return (" ~ $stmts.result ~ ")");
+                }
             }
             
             # Set compilation unit ID, name and, if applicable, outer.
