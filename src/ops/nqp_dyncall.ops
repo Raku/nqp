@@ -1017,3 +1017,21 @@ inline op nqp_native_call(out PMC, invar PMC, invar PMC, invar PMC) :base_core {
     
     $1 = result;
 }
+
+/* Write-barrier a dyncall object so that delayed changes to the C-side of
+ * objects are propagated to the HLL side. All CArray and CStruct arguments to
+ * C functions are write-barriered automatically, so this should be necessary
+ * only in the rarest of cases.
+ *
+ * $1 is the object to write barrier.
+ */
+inline op nqp_native_call_wb(invar PMC) :base_core {
+    PMC *obj = decontainerize(interp, $1);
+
+    if(REPR(obj)->ID == ca_repr_id) {
+        dyncall_wb_ca(interp, obj);
+    }
+    else if(REPR(obj)->ID == cs_repr_id) {
+        dyncall_wb_cs(interp, obj);
+    }
+}

@@ -1305,6 +1305,7 @@ QAST::Operations.add_core_pirop_mapping('tonum_I', 'nqp_bigint_to_num', 'NP', :i
 # native call ops
 QAST::Operations.add_core_pirop_mapping('buildnativecall', 'nqp_native_call_build', 'vPsssPP');
 QAST::Operations.add_core_pirop_mapping('nativecall', 'nqp_native_call', 'PPPP');
+QAST::Operations.add_core_pirop_mapping('nativecallrefresh', 'nqp_native_call_wb', 'vP');
 
 # boolean opcodes
 QAST::Operations.add_core_pirop_mapping('not_i', 'not', 'Ii', :inlinable(1));
