@@ -707,7 +707,7 @@ grammar NQP::Grammar is HLL::Grammar {
     token infix:sym<&&>   { <sym>  <O('%tight_and, :op<if>')> }
 
     token infix:sym<||>   { <sym>  <O('%tight_or, :op<unless>')> }
-    token infix:sym<//>   { <sym>  <O('%tight_or, :op<def_or>')> }
+    token infix:sym<//>   { <sym>  <O('%tight_or, :op<defor>')> }
 
     token infix:sym<?? !!> {
         '??'
