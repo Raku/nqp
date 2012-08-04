@@ -137,7 +137,7 @@ class NQP::Actions is HLL::Actions {
             }
             if $ml {
                 if ~$ml<sym> eq 'for' {
-                    $past := PAST::Block.new( :blocktype('immediate'),
+                    $past := QAST::Block.new( :blocktype('immediate'),
                         PAST::Var.new( :name('$_'), :scope('parameter'), :isdecl(1) ),
                         $past);
                     $past.symbol('$_', :scope('lexical') );
@@ -368,7 +368,7 @@ class NQP::Actions is HLL::Actions {
     method statement_prefix:sym<try>($/) {
         my $past := $<blorst>.ast;
         unless nqp::istype($past, QAST::Block) {
-            $past := PAST::Block.new($past, :blocktype('immediate'), :node($/));
+            $past := QAST::Block.new($past, :blocktype('immediate'), :node($/));
         }
         unless $past.handlers() {
             $past.handlers([PAST::Control.new(
