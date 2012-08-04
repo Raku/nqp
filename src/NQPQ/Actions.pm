@@ -1001,9 +1001,10 @@ class NQP::Actions is HLL::Actions {
         if $<invocant> {
             my $inv := $<invocant>[0].ast;
             $BLOCKINIT.push($inv);
-            $BLOCKINIT.push(QAST::Var.new(
-                :name('self'), :scope('lexical'), :decl('var'),
-                :viviself(PAST::Var.new( :scope('lexical'), :name($inv.name) ))
+            $BLOCKINIT.push(QAST::Op.new(
+                :op('bind'),
+                QAST::Var.new( :name('self'), :scope('lexical'), :decl('var') ),
+                QAST::Var.new( :scope('lexical'), :name($inv.name) )
             ));
             $BLOCK<signature_has_invocant> := 1
         }
@@ -1016,7 +1017,7 @@ class NQP::Actions is HLL::Actions {
         if $<named_param> {
             $past := $<named_param>.ast;
             if $quant ne '!' {
-                $past.viviself( vivitype($<named_param><param_var><sigil>) );
+                $past.default( default_for($<named_param><param_var><sigil>) );
             }
         }
         else {
@@ -1026,7 +1027,7 @@ class NQP::Actions is HLL::Actions {
                 $past.named( $<param_var><sigil> eq '%' );
             }
             elsif $quant eq '?' {
-                $past.viviself( vivitype($<param_var><sigil>) );
+                $past.default( default_for($<param_var><sigil>) );
             }
         }
         if $<default_value> {
@@ -1036,14 +1037,13 @@ class NQP::Actions is HLL::Actions {
             if $quant eq '!' {
                 $/.CURSOR.panic("Can't put default on required parameter");
             }
-            $past.viviself( $<default_value>[0]<EXPR>.ast );
+            $past.default( $<default_value>[0]<EXPR>.ast );
         }
-        unless $past.viviself { $*W.cur_lexpad().arity( +$*W.cur_lexpad().arity + 1 ); }
+        unless $past.default { $*W.cur_lexpad().arity( +$*W.cur_lexpad().arity + 1 ); }
 
-        # Note: this is hijacking multitype a bit here comapred to what it was
-        # originally used for (a textual name). But it's ignored 
+        # Set the type of the parameter.
         if $<typename> {
-            $past.multitype($<typename>[0].ast);
+            $past.returns($<typename>[0].ast.value);
         }
 
         # Set definedness flag (XXX want a better way to do this).
@@ -1143,9 +1143,10 @@ class NQP::Actions is HLL::Actions {
         else {
             my $block := $*W.pop_lexpad();
             $block[0].unshift(QAST::Var.new(:name<self>, :scope<lexical>, :decl<param>));
-            $block[0].push(
-                QAST::Var.new(:name<self>, :scope<local>, :decl<var>,
-                              :viviself(PAST::Var.new( :name<self>, :scope('lexical_6model') ))));
+            $block[0].push(QAST::Op.new(
+                :op('bind'),
+                QAST::Var.new(:name<self>, :scope<local>, :decl<var> ),
+                QAST::Var.new( :name<self>, :scope('lexical') )));
             $block[0].push(QAST::Var.new(:name<$¢>, :scope<lexical>, :decl<var>));
             $block[0].push(QAST::Var.new(:name<$/>, :scope<lexical>, :decl<var>));
             $block.symbol('$¢', :scope<lexical>);
@@ -1330,21 +1331,15 @@ class NQP::Actions is HLL::Actions {
     method semilist($/) { make $<statement>.ast }
 
     method postcircumfix:sym<[ ]>($/) {
-        make PAST::Var.new( $<EXPR>.ast , :scope('keyed_int'),
-                            :viviself('Undef'),
-                            :vivibase(vivitype('@')) );
+        make QAST::Op.new( :op('atpos'), $<EXPR>.ast );
     }
 
     method postcircumfix:sym<{ }>($/) {
-        make PAST::Var.new( $<EXPR>.ast , :scope('keyed'),
-                            :viviself('Undef'),
-                            :vivibase(vivitype('%')) );
+        make QAST::Op.new( :op('atkey'), $<EXPR>.ast );
     }
 
     method postcircumfix:sym<ang>($/) {
-        make PAST::Var.new( $<quote_EXPR>.ast, :scope('keyed'),
-                            :viviself('Undef'),
-                            :vivibase(vivitype('%')) );
+        make QAST::Op.new( :op('atkey'), $<EXPR>.ast );
     }
 
     method postcircumfix:sym<( )>($/) {
@@ -1424,9 +1419,10 @@ class NQP::Actions is HLL::Actions {
     method quote:sym</ />($/) {
         my $block := $*W.pop_lexpad();
         $block[0].push(PAST::Var.new(:name<self>, :scope<parameter>));
-        $block[0].push(
-            PAST::Var.new(:name<self>, :scope<register>, :isdecl(1),
-                          :viviself(PAST::Var.new( :name<self>, :scope('lexical_6model') ))));
+        $block[0].push(QAST::Op.new(
+            :op('bind'),
+            QAST::Var.new(:name<self>, :scope<register>, :isdecl(1) ),
+            QAST::Var.new( :name<self>, :scope('lexical') )));
         $block[0].push(PAST::Var.new(:name<$¢>, :scope<lexical>, :isdecl(1)));
         $block[0].push(PAST::Var.new(:name<$/>, :scope<lexical>, :isdecl(1)));
         $block.symbol('$¢', :scope<lexical>);
