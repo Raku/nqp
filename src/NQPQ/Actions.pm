@@ -1076,7 +1076,7 @@ class NQP::Actions is HLL::Actions {
             # XXX This should be in Parrot-specific module and need a pragma.
             my $cpast := $<circumfix>[0].ast;
             $/.CURSOR.panic("Trait 'parrot_vtable' requires constant scalar argument")
-                unless $cpast ~~ PAST::Val;
+                unless $cpast ~~ QAST::SVal;
             my $name := $cpast.value;
             my $package := $*PACKAGE;
             my $is_dispatcher := $*SCOPE eq 'proto';
@@ -1089,7 +1089,7 @@ class NQP::Actions is HLL::Actions {
             # XXX This should be in Parrot-specific module and need a pragma.
             my $cpast := $<circumfix>[0].ast;
             $/.CURSOR.panic("Trait 'parrot_vtable_handler' requires constant scalar argument")
-                unless $cpast ~~ PAST::Val;
+                unless $cpast ~~ QAST::SVal;
             my $name := $cpast.value;
             my $package := $*PACKAGE;
             make -> $match {
@@ -1344,6 +1344,53 @@ class NQP::Actions is HLL::Actions {
         make $<dec_number> ??
             QAST::NVal.new( :value($value) ) !!
             QAST::IVal.new( :value($value) );
+    }
+    
+    method quote_EXPR($/) {
+        my $past := $<quote_delimited>.ast;
+        if %*QUOTEMOD<w> {
+            if nqp::istype($past, QAST::SVal) {
+                my @words := HLL::Grammar::split_words($/, $past.value);
+                if +@words != 1 {
+                    $past := QAST::Op.new( :op('list'), :node($/) );
+                    for @words { $past.push($_); }
+                }
+                else {
+                    $past := ~@words[0];
+                }
+            }
+            else {            
+                $/.CURSOR.panic("Can't form :w list from non-constant strings (yet)");
+            }
+        }
+        make $past;
+    }
+
+    method quote_delimited($/) {
+        my @parts;
+        my $lastlit := '';
+        for $<quote_atom> {
+            my $ast := $_.ast;
+            if !nqp::istype($ast, QAST::Node) {
+                $lastlit := $lastlit ~ $ast;
+            }
+            elsif nqp::istype($ast, QAST::SVal) {
+                $lastlit := $lastlit ~ $ast.value;
+            }
+            else {
+                if $lastlit gt '' {
+                    @parts.push(QAST::SVal.new( :value($lastlit) ));
+                }
+                @parts.push($ast);
+                $lastlit := '';
+            }
+        }
+        if $lastlit gt '' { @parts.push(QAST::SVal.new( :value($lastlit) )); }
+        my $past := @parts ?? @parts.shift !! QAST::SVal.new( :value('') );
+        while @parts {
+            $past := QAST::Op.new( $past, @parts.shift, :op('concat') );
+        }
+        make $past;
     }
 
     method quote:sym<apos>($/) { make $<quote_EXPR>.ast; }
