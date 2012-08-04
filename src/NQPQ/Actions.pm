@@ -1217,7 +1217,7 @@ class NQP::Actions is HLL::Actions {
         my $past := QAST::Op.new( :op('call'), :node($/) );
         if $<EXPR> {
             my $expr := $<EXPR>.ast;
-            if $expr.name eq '&infix:<,>' && !$expr.named {
+            if nqp::istype($expr, QAST::Op) && $expr.name eq '&infix:<,>' && !$expr.named {
                 for $expr.list { $past.push($_); }
             }
             else { $past.push($expr); }
@@ -1225,13 +1225,11 @@ class NQP::Actions is HLL::Actions {
         my $i := 0;
         my $n := +$past.list;
         while $i < $n {
-            if $past[$i].name eq '&prefix:<|>' {
+            if nqp::istype($past[$i], QAST::Op) && $past[$i].name eq '&prefix:<|>' {
                 $past[$i] := $past[$i][0];
                 $past[$i].flat(1);
-                if $past[$i].isa(PAST::Val)
-                    && nqp::substr($past[$i].name, 0, 1) eq '%' {
-                        $past[$i].named(1);
-                }
+                $past[$i].named(1) if nqp::istype($past[$i], QAST::Var)
+                    && nqp::substr($past[$i].name, 0, 1) eq '%';
             }
             $i++;
         }
