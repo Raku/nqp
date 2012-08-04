@@ -551,8 +551,8 @@ class NQP::Actions is HLL::Actions {
                 }
                 $past := QAST::Var.new(
                     :name($name), :scope('attribute'),
-                    :viviself( vivitype( $<sigil> ) ),
-                    PAST::Op.new( :pirop('nqp_decontainerize PP'), QAST::Var.new( :name('self') ) ),
+                    QAST::VM.new( :pirop('nqp_decontainerize PP'),
+                        QAST::Var.new( :name('self'), :scope('lexical') ) ),
                     $ch
                 );
                 
@@ -567,7 +567,7 @@ class NQP::Actions is HLL::Actions {
                     }
                     if nqp::defined($attr) {
                         if nqp::can($attr, 'type') {
-                            $past.type($attr.type);
+                            $past.returns($attr.type);
                         }
                     }
                     else {
@@ -1198,8 +1198,8 @@ class NQP::Actions is HLL::Actions {
     ## Terms
 
     method term:sym<self>($/) {
-        make PAST::Op.new( :pirop('nqp_decontainerize PP'),
-            QAST::Var.new( :name('self') ) );
+        make QAST::VM.new( :pirop('nqp_decontainerize PP'),
+            QAST::Var.new( :name('self'), :scope('lexical') ) );
     }
 
     method term:sym<identifier>($/) {
