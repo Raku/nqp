@@ -8,8 +8,8 @@ class NQP::World is HLL::World {
     
     # Set of code objects that need to be fixed up if dynamic compilation
     # takes place (that is, compiling parts of the program early during
-    # compile time because they're needed at a BEGIN phase). Maps subid
-    # to a list of code objects.
+    # compile time because they're needed at a BEGIN phase). Maps per-
+    # compilation unit ID to a list of code objects.
     has %!code_objects_to_fix_up;
     
     # Mapping of QAST::Stmts node containing fixups, keyed by sub ID. If
@@ -253,7 +253,7 @@ class NQP::World is HLL::World {
             # Tag it as a static code ref and add it to the root code refs set.
             pir::setprop__vPsP($dummy, 'STATIC_CODE_REF', $dummy);
             $code_ref_idx := self.add_root_code_ref($dummy, $past);
-            %!code_stub_sc_idx{$past.subid()} := $code_ref_idx;
+            %!code_stub_sc_idx{$past.cuid()} := $code_ref_idx;
             $past<compile_time_dummy> := $dummy;
             
             # Attach PAST as a property to the stub code.
@@ -263,10 +263,10 @@ class NQP::World is HLL::World {
             # routines. We need to handle their cloning and maintain the fixup
             # list.
             if $have_code_type {
-                %!code_object_fixup_list{$past.subid()} := $fixups;
+                %!code_object_fixup_list{$past.cuid()} := $fixups;
                 if self.is_precompilation_mode() {
                     pir::setprop__vPsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone, $code_obj) {
-                        %!code_objects_to_fix_up{$past.subid()}.push($code_obj);
+                        %!code_objects_to_fix_up{$past.cuid()}.push($code_obj);
                     });
                 }
                 else {
@@ -286,7 +286,7 @@ class NQP::World is HLL::World {
                         ));
                             
                         # Add to dynamic compilation fixup list.
-                        %!code_objects_to_fix_up{$past.subid()}.push($code_obj);
+                        %!code_objects_to_fix_up{$past.cuid()}.push($code_obj);
                     });
                 }
             }
@@ -328,7 +328,7 @@ class NQP::World is HLL::World {
             ));
             
             # Add it to the dynamic compilation fixup todo list.
-            %!code_objects_to_fix_up{$past.subid()} := [$code_obj];
+            %!code_objects_to_fix_up{$past.cuid()} := [$code_obj];
             
             $code_obj
         }
