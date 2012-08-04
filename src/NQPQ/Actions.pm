@@ -147,6 +147,9 @@ class NQP::Actions is HLL::Actions {
                 $past.push( $ast );
             }
         }
+        else {
+            $past.push(default_for('$'));
+        }
         make $past;
     }
 
