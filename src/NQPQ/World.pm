@@ -2,7 +2,7 @@ use NQPP6QRegex;
 use QAST;
 
 class NQP::World is HLL::World {
-    # The stack of lexical pads, actually as PAST::Block objects. The
+    # The stack of lexical pads, actually as QAST::Block objects. The
     # outermost frame is at the bottom, the latest frame is on top.
     has @!BLOCKS;
     
@@ -23,7 +23,7 @@ class NQP::World is HLL::World {
     # Creates a new lexical scope and puts it on top of the stack.
     method push_lexpad($/) {
         # Create pad, link to outer and add to stack.
-        my $pad := PAST::Block.new( QAST::Stmts.new(), :node($/) );
+        my $pad := QAST::Block.new( QAST::Stmts.new(), :node($/) );
         if +@!BLOCKS {
             $pad<outer> := @!BLOCKS[+@!BLOCKS - 1];
         }
@@ -134,7 +134,7 @@ class NQP::World is HLL::World {
         ($target.WHO){$name} := $obj;
     }
     
-    # Installs a lexical symbol. Takes a PAST::Block object, name and
+    # Installs a lexical symbol. Takes a QAST::Block object, name and
     # the object to install. Does an immediate installation in the
     # compile-time block symbol table, and ensures that the installation
     # gets fixed up at runtime too.
@@ -161,7 +161,7 @@ class NQP::World is HLL::World {
         self.add_fixup_task(:deserialize_past($fixup), :fixup_past($fixup));
     }
     
-    # Adds a fixup to install a specified PAST::Block in a package under the
+    # Adds a fixup to install a specified QAST::Block in a package under the
     # specified name.
     method install_package_routine($package, $name, $past_block) {
         my $fixup := PAST::Op.new(
@@ -427,7 +427,7 @@ class NQP::World is HLL::World {
     # Runs a block at BEGIN time.
     method run_begin_block($past) {
         # Create a wrapper that makes all outer symbols visible.
-        my $wrapper := PAST::Block.new(
+        my $wrapper := QAST::Block.new(
             QAST::Stmts.new(),
             $past
         );
