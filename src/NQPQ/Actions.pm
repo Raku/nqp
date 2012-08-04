@@ -7,7 +7,7 @@ class NQP::Actions is HLL::Actions {
     sub block_immediate($block) {
         $block.blocktype('immediate');
         unless $block.symtable() {
-            my $stmts := QAST::Stmts.new( :node($block) );
+            my $stmts := QAST::Stmts.new( :node($block.node) );
             for $block.list { $stmts.push($_); }
             $block := $stmts;
         }
@@ -180,7 +180,6 @@ class NQP::Actions is HLL::Actions {
             my $past := $<statementlist>.ast;
             $BLOCK.push($past);
             $BLOCK.node($/);
-            $BLOCK.closure(1);
             make $BLOCK;
         }
         else {
