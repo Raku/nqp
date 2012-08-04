@@ -105,7 +105,7 @@ grammar NQP::Grammar is HLL::Grammar {
 
         :my $*HAS_YOU_ARE_HERE := 0;
         :my $*MAIN_SUB;
-        <.newpad>
+        :my $*UNIT := $*W.push_lexpad($/);
         
         :my $*PACKAGE;
         :my $*GLOBALish;

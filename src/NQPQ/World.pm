@@ -67,30 +67,37 @@ class NQP::World is HLL::World {
             # Do load for pre-compiled situation.
             if self.is_precompilation_mode() {
                 self.add_load_dependency_task(:deserialize_past(QAST::Stmts.new(
-                    PAST::Op.new(
-                        :pirop('load_bytecode vs'), 'ModuleLoader.pbc'
+                    QAST::VM.new(
+                        :pirop('load_bytecode vs'),
+                        QAST::SVal.new( :value('ModuleLoader.pbc') )
                     ),
-                    PAST::Op.new(
-                        :pasttype('callmethod'), :name('set_outer_ctx'),
-                           PAST::Var.new( :name('block'), :scope('register') ),
-                           PAST::Op.new(
-                               :pasttype('callmethod'), :name('load_setting'),
-                               PAST::Var.new( :name('ModuleLoader'), :namespace([]), :scope('package') ),
-                               $setting_name
-                           )
+                    QAST::Op.new(
+                        :op('callmethod'), :name('set_outer_ctx'),
+                        QAST::BVal.new( :value($*UNIT) ),
+                        QAST::Op.new(
+                            :op('callmethod'), :name('load_setting'),
+                            QAST::VM.new(
+                                pirop => 'get_hll_global Ps',
+                                QAST::SVal.new( :value('ModuleLoader') )
+                            ),
+                            QAST::SVal.new( :value($setting_name) )
+                        )
                     )
                 )));
             }
             else {
                 # Needs fixup.
-                self.add_fixup_task(:fixup_past(PAST::Op.new(
-                    :pasttype('callmethod'), :name('set_outer_ctx'),
-                       PAST::Var.new( :name('block'), :scope('register') ),
-                       PAST::Op.new(
-                           :pasttype('callmethod'), :name('load_setting'),
-                           PAST::Var.new( :name('ModuleLoader'), :namespace([]), :scope('package') ),
-                           $setting_name
-                       )
+                self.add_fixup_task(:fixup_past(QAST::Op.new(
+                    :op('callmethod'), :name('set_outer_ctx'),
+                    QAST::BVal.new( :value($*UNIT) ),
+                    QAST::Op.new(
+                        :op('callmethod'), :name('load_setting'),
+                        QAST::VM.new(
+                            pirop => 'get_hll_global Ps',
+                            QAST::SVal.new( :value('ModuleLoader') )
+                        ),
+                        QAST::SVal.new( :value($setting_name) )
+                    )
                 )));
             }
             
@@ -107,13 +114,17 @@ class NQP::World is HLL::World {
         # Make sure we do the loading during deserialization.
         if self.is_precompilation_mode() {
             self.add_load_dependency_task(:deserialize_past(QAST::Stmts.new(
-                PAST::Op.new(
-                    :pirop('load_bytecode vs'), 'ModuleLoader.pbc'
+                QAST::VM.new(
+                    :pirop('load_bytecode vs'),
+                    QAST::SVal.new( :value('ModuleLoader.pbc') )
                 ),
-                PAST::Op.new(
-                   :pasttype('callmethod'), :name('load_module'),
-                   PAST::Var.new( :name('ModuleLoader'), :namespace([]), :scope('package') ),
-                   $module_name
+                QAST::Op.new(
+                   :op('callmethod'), :name('load_module'),
+                   QAST::VM.new(
+                        pirop => 'get_hll_global Ps',
+                        QAST::SVal.new( :value('ModuleLoader') )
+                    ),
+                    QAST::SVal.new( :value($module_name) )
                 ))));
         }
 
