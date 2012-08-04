@@ -307,24 +307,24 @@ class NQP::World is HLL::World {
 
             # Add deserialization fixup task.
             self.add_fixup_task(
-                :deserialize_past(PAST::Op.new(
+                :deserialize_past(QAST::VM.new(
                     :pirop('set_sub_code_object vPP'),
-                    PAST::Val.new( :value($past) ),
-                    self.get_ref($code_obj)
+                    QAST::BVal.new( :value($past) ),
+                    QAST::WVal.new( :value($code_obj) )
                 )));
             
             # Add fixup of the code object and the $!do attribute.
-            $fixups.push(PAST::Op.new(
-                :pirop('setattribute vPPsP'),
-                self.get_ref($code_obj),
-                self.get_ref($code_type),
-                '$!do',
-                PAST::Val.new( :value($past) )
+            $fixups.push(QAST::Op.new(
+                :op('bindattr'),
+                QAST::WVal.new( :value($code_obj) ),
+                QAST::WVal.new( :value($code_type) ),
+                QAST::SVal.new( :value('$!do') ),
+                QAST::BVal.new( :value($past) )
             ));
-            $fixups.push(PAST::Op.new(
+            $fixups.push(QAST::VM.new(
                 :pirop('set_sub_code_object vPP'),
-                PAST::Val.new( :value($past) ),
-                self.get_ref($code_obj)
+                QAST::BVal.new( :value($past) ),
+                QAST::WVal.new( :value($code_obj) )
             ));
             
             # Add it to the dynamic compilation fixup todo list.
