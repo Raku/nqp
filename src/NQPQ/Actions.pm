@@ -437,6 +437,32 @@ class NQP::Actions is HLL::Actions {
     method statement_mod_loop:sym<while>($/)  { make $<cond>.ast; }
     method statement_mod_loop:sym<until>($/)  { make $<cond>.ast; }
 
+    ## Expression handling.
+    
+    method EXPR($/, $key?) {
+        unless $key { return 0; }
+        my $past := $/.ast // $<OPER>.ast;
+        unless $past {
+            $past := QAST::Op.new( :node($/) );
+            if $<OPER><O><op> {
+                $past.op( ~$<OPER><O><op> );
+            }
+            unless $past.op {
+                if $key eq 'LIST' { $key := 'infix'; }
+                my $name := nqp::lc($key) ~ ':<' ~ $<OPER><sym> ~ '>';
+                $past.op('call'),
+                $past.name('&' ~ $name);
+            }
+        }
+        if $key eq 'POSTFIX' {
+            $past.unshift($/[0].ast);
+        }
+        else {
+            for $/.list { if nqp::defined($_.ast) { $past.push($_.ast); } }
+        }
+        make $past;
+    }
+    
     ## Terms
 
     method term:sym<fatarrow>($/)           { make $<fatarrow>.ast; }
