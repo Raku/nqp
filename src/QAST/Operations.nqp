@@ -1369,6 +1369,7 @@ QAST::Operations.add_core_pirop_mapping('iscont', 'is_container', 'IP', :inlinab
 QAST::Operations.add_core_pirop_mapping('isnull', 'isnull', 'IP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('isnull_s', 'isnull', 'IS', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('istrue', 'istrue', 'IP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('isfalse', 'isfalse', 'IP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('istype', 'type_check', 'IPP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('null', 'null', 'P', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('null_s', 'null', 'S', :inlinable(1));
