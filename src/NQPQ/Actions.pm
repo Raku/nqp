@@ -929,7 +929,7 @@ class NQP::Actions is HLL::Actions {
         unless $past<signature_has_invocant> {
             $past[0].unshift(QAST::Var.new(
                 :name('self'), :scope('lexical'), :decl('param'),
-                :multitype($*W.get_ref($*PACKAGE))
+                :returns($*PACKAGE)
             ));
         }
         $past.symbol('self', :scope('lexical') );
@@ -974,7 +974,7 @@ class NQP::Actions is HLL::Actions {
         my $definednesses := nqp::list();
         for @($routine[0]) {
             if nqp::istype($_, QAST::Var) && $_.decl eq 'param' {
-                $types.push($_.multitype ?? ($_.multitype())<compile_time_value> !! nqp::null() );
+                $types.push($_.returns);
                 $definednesses.push($_<definedness> eq 'D' ?? 1 !!
                                     $_<definedness> eq 'U' ?? 2 !! 0);
             }
@@ -990,7 +990,7 @@ class NQP::Actions is HLL::Actions {
         my $definednesses := nqp::list();
         for @($routine[0]) {
             if nqp::istype($_, QAST::Var) && $_.decl eq 'param' {
-                $types.push($_.multitype ?? ($_.multitype())<compile_time_value> !! nqp::null() );
+                $types.push($_.returns);
                 $definednesses.push($_<definedness> eq 'D' ?? 1 !!
                                     $_<definedness> eq 'U' ?? 2 !! 0);
             }
