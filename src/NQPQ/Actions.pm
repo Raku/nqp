@@ -165,7 +165,7 @@ class NQP::Actions is HLL::Actions {
             if $ml {
                 if ~$ml<sym> eq 'for' {
                     $past := QAST::Block.new( :blocktype('immediate'),
-                        PAST::Var.new( :name('$_'), :scope('parameter'), :isdecl(1) ),
+                        QAST::Var.new( :name('$_'), :scope('lexical'), :decl('param') ),
                         $past);
                     $past.symbol('$_', :scope('lexical') );
                     $past.arity(1);
@@ -349,7 +349,7 @@ class NQP::Actions is HLL::Actions {
         $past.op('for');
         my $block := $past[1];
         unless $block.arity {
-            $block[0].push( PAST::Var.new( :name('$_'), :scope('parameter') ) );
+            $block[0].push( QAST::Var.new( :name('$_'), :scope('lexical'), :decl('param') ) );
             $block.symbol('$_', :scope('lexical') );
             $block.arity(1);
         }
@@ -866,9 +866,12 @@ class NQP::Actions is HLL::Actions {
                 }
                 else {
                     my $BLOCK := $*W.cur_lexpad();
-					$BLOCK[0].push(PAST::Var.new( :name($name), :isdecl(1), :directaccess(1),
-                                          :viviself($past), :scope('lexical') ) );
-                    $BLOCK.symbol($name, :scope('lexical') );
+					$BLOCK[0].push(QAST::Op.new(
+                        :op('bind'),
+                        QAST::Var.new( :name($name), :scope('lexical'), :decl('var') ),
+                        $past
+                    ));
+                    $BLOCK.symbol($name, :scope('lexical'));
                     if $*SCOPE eq 'our' {
                         # Need to install it at loadinit time but also re-bind
                         # it per invocation.
@@ -880,7 +883,7 @@ class NQP::Actions is HLL::Actions {
                         ));
                     }
                 }
-                $past := QAST::Var.new( :name($name) );
+                $past := QAST::Var.new( :name($name), :scope('lexical') );
             }
             else {
                 $/.CURSOR.panic("$*SCOPE scoped routines are not supported yet");
@@ -1418,13 +1421,13 @@ class NQP::Actions is HLL::Actions {
 
     method quote:sym</ />($/) {
         my $block := $*W.pop_lexpad();
-        $block[0].push(PAST::Var.new(:name<self>, :scope<parameter>));
+        $block[0].push(QAST::Var.new(:name<self>, :scope<lexical>, :decl<param>));
         $block[0].push(QAST::Op.new(
             :op('bind'),
             QAST::Var.new(:name<self>, :scope<register>, :isdecl(1) ),
             QAST::Var.new( :name<self>, :scope('lexical') )));
-        $block[0].push(PAST::Var.new(:name<$¢>, :scope<lexical>, :isdecl(1)));
-        $block[0].push(PAST::Var.new(:name<$/>, :scope<lexical>, :isdecl(1)));
+        $block[0].push(QAST::Var.new(:name<$¢>, :scope<lexical>, :isdecl(1)));
+        $block[0].push(QAST::Var.new(:name<$/>, :scope<lexical>, :isdecl(1)));
         $block.symbol('$¢', :scope<lexical>);
         $block.symbol('$/', :scope<lexical>);
 

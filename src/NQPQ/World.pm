@@ -179,14 +179,11 @@ class NQP::World is HLL::World {
     # Adds a fixup to install a specified QAST::Block in a package under the
     # specified name.
     method install_package_routine($package, $name, $past_block) {
-        my $fixup := PAST::Op.new(
-            :pasttype('bind_6model'),
-            PAST::Var.new(
-                :scope('keyed'),
-                PAST::Op.new( :pirop('get_who PP'), self.get_slot_past_for_object($package) ),
-                ~$name
-            ),
-            PAST::Val.new( :value($past_block) )
+        my $fixup := QAST::Op.new(
+            :op('bindkey'),
+            QAST::Op.new( :op('getwho'), QAST::WVal.new( :value($package) ) ),
+            QAST::SVal.new( :value(~$name) ),
+            QAST::BVal.new( :value($past_block) )
         );
         self.add_fixup_task(:deserialize_past($fixup), :fixup_past($fixup));
     }
@@ -454,9 +451,10 @@ class NQP::World is HLL::World {
             for %symbols {
                 if !%seen{$_.key} && nqp::existskey($_.value, 'value') {
                     try {
-                        $wrapper[0].push(PAST::Var.new(
-                            :name($_.key), :scope('lexical_6model'), :isdecl(1),
-                            :viviself(self.get_ref(($_.value)<value>))
+                        $wrapper[0].push(QAST::Op.new(
+                            :op('bind'),
+                            QAST::Var.new( :name($_.key), :scope('lexical'), :isdecl('var') ),
+                            QAST::WVal.new( :value(($_.value)<value>) )
                         ));
                     };
                     %seen{$_.key} := 1;
