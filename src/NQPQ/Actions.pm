@@ -95,7 +95,7 @@ class NQP::Actions is HLL::Actions {
         
         # Wrap everything in a QAST::CompUnit.
         my $compunit := QAST::CompUnit.new(
-            :hll('perl6'),
+            :hll('nqp'),
             
             # Serialization related bits.
             :sc($*W.sc()),
