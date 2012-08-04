@@ -43,18 +43,15 @@ class NQP::Actions is HLL::Actions {
         my $mainline := $<statementlist>.ast;
         my $unit     := $*W.pop_lexpad();
         
-        # Unit needs to have a load-init holding the deserialization or
-        # fixup code for this compilation unit.
-        $unit.loadinit().push($*W.to_past());
-        
         # We'll install our view of GLOBAL as the main one; any other
         # compilation unit that is using this one will then replace it
         # with its view later (or be in a position to restore it).
-        $unit.loadinit().push(PAST::Op.new(
-            :pasttype('bind_6model'),
-            PAST::Var.new( :name('GLOBAL'), :namespace([]), :scope('package') ),
-            $*W.get_slot_past_for_object($*PACKAGE)
-        ));
+        my $global_install := QAST::VM.new(
+            pirop => 'set_hll_global vsP',
+            QAST::SVal.new( :value('GLOBAL') ),
+            QAST::WVal.new( :value($*PACKAGE) )
+        );
+        $*W.add_fixup_task(:deserialize_past($global_install), :fixup_past($global_install));
 
         # If our caller wants to know the mainline ctx, provide it here.
         # (CTXSAVE is inherited from HLL::Actions.) Don't do this when
@@ -67,49 +64,60 @@ class NQP::Actions is HLL::Actions {
         # register the mainline as a module (so trying to use ourself in the
         # program will not explode). If we have a MAIN sub, call it at end of
         # mainline.
-        $unit.unshift(PAST::Var.new( :scope('parameter'), :name('@ARGS'), :slurpy(1),
-            :directaccess(1) ));
-        my $main_tasks := QAST::Stmts.new(
-            PAST::Op.new( :pirop('load_bytecode vs'), 'ModuleLoader.pbc' ),
-            QAST::Op.new(
-                :op('callmethod'), :name('set_mainline_module'),
-                PAST::Var.new( :name('ModuleLoader'), :namespace([]), :scope('package') ),
-                PAST::Var.new( :scope('keyed'), PAST::Op.new( :pirop('getinterp P') ), 'context' )
-            )
-        );
-        if $*MAIN_SUB {
-            $main_tasks.push(QAST::Op.new(
-                :op('call'), QAST::BVal.new( :value($*MAIN_SUB) ),
-                QAST::Var.new( :scope('lexical'), :name('@ARGS'), :flat(1) )
-            ));
-        }
-        $mainline.push(QAST::Op.new(
-            :op('if'),
-            QAST::Var.new( :scope('lexical'), :name('@ARGS') ),
-            $main_tasks
-        ));
-
-        # We force a return here, because we have other
-        # :load/:init blocks to execute that we don't want
-        # to include as part of the mainline.
-        $unit.push(
-            PAST::Op.new( :pirop<return>, $mainline )
-        );
-
-        # If this code is loaded via load_bytecode, we want the unit mainline 
-        # to be executed after all other loadinits have taken place.
-        $unit.push(
-            PAST::Block.new(
-                :pirflags(':load'), :lexical(0), :namespace(''),
-                QAST::Op.new( :op<call>, QAST::BVal.new( :value($unit) ) )
-            )
-        );
-        $unit.node($/);
+        # XXX Needs QAST update.
+        #$unit.unshift(PAST::Var.new( :scope('parameter'), :name('@ARGS'), :slurpy(1),
+        #    :directaccess(1) ));
+        #my $main_tasks := QAST::Stmts.new(
+        #    PAST::Op.new( :pirop('load_bytecode vs'), 'ModuleLoader.pbc' ),
+        #    QAST::Op.new(
+        #        :op('callmethod'), :name('set_mainline_module'),
+        #        PAST::Var.new( :name('ModuleLoader'), :namespace([]), :scope('package') ),
+        #        PAST::Var.new( :scope('keyed'), PAST::Op.new( :pirop('getinterp P') ), 'context' )
+        #    )
+        #);
+        #if $*MAIN_SUB {
+        #    $main_tasks.push(QAST::Op.new(
+        #        :op('call'), QAST::BVal.new( :value($*MAIN_SUB) ),
+        #        QAST::Var.new( :scope('lexical'), :name('@ARGS'), :flat(1) )
+        #    ));
+        #}
+        #$mainline.push(QAST::Op.new(
+        #    :op('if'),
+        #    QAST::Var.new( :scope('lexical'), :name('@ARGS') ),
+        #    $main_tasks
+        #));
         
-        # Set NQP defaults.
-        $*W.set_nqp_language_defaults($unit);
+        # Push mainline statements into UNIT.
+        $unit.push($mainline);
+
+        # Load the needed libraries.
+        $*W.add_libs($unit);
         
-        make $unit;
+        # Wrap everything in a QAST::CompUnit.
+        my $compunit := QAST::CompUnit.new(
+            :hll('perl6'),
+            
+            # Serialization related bits.
+            :sc($*W.sc()),
+            :code_ref_blocks($*W.code_ref_blocks()),
+            :compilation_mode($*W.is_precompilation_mode()),
+            :pre_deserialize($*W.load_dependency_tasks()),
+            :post_deserialize($*W.fixup_tasks()),
+
+            # If this unit is loaded as a module, we want it to automatically
+            # execute the mainline code above after all other initializations
+            # have occurred.
+            :load(QAST::Op.new(
+                :op('call'),
+                QAST::BVal.new( :value($unit) )
+            )),
+
+            # Finally, UNIT, which in turn contains all of the other program
+            # elements.
+            $unit
+        );
+        
+        make $compunit;
     }
 
     method statementlist($/) {
