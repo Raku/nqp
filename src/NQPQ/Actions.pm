@@ -627,9 +627,6 @@ class NQP::Actions is HLL::Actions {
 
         # Get the body code.
         my $past := $<block> ?? $<block>.ast !! $<comp_unit>.ast;
-        if $*SCOPE eq 'our' || $*SCOPE eq '' {
-            $past.namespace( $<name><identifier> );
-        }
 
         # Evaluate everything in the package in-line unless this is a generic
         # type in which case it needs delayed evaluation. Normally, $?CLASS is
