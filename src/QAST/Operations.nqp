@@ -17,6 +17,10 @@ class QAST::Operations {
     my %core_inlinability;
     my %hll_inlinability;
     
+    # What we know about op native results types.
+    my %core_result_type;
+    my %hll_result_type;
+    
     # Compiles an operation to POST.
     method compile_op($qastcomp, $hll, $op) {
         my $name := $op.op;
@@ -63,6 +67,7 @@ class QAST::Operations {
             $pirop_mapper($qastcomp, $op.op, $op.list)
         };
         self.set_core_op_inlinability($op, $inlinable);
+        self.set_core_op_result_type($op, nqp::substr($sig, 0, 1));
     }
     
     # Adds a HLL op that maps to a PIR op.
@@ -73,6 +78,7 @@ class QAST::Operations {
             $pirop_mapper($qastcomp, $op.op, $op.list)
         };
         self.set_hll_op_inlinability($hll, $op, $inlinable);
+        self.set_hll_op_result_type($hll, $op, nqp::substr($sig, 0, 1));
     }
     
     # Sets op inlinability at a core level.
@@ -95,6 +101,48 @@ class QAST::Operations {
             }
         }
         return %core_inlinability{$op} // 0;
+    }
+    
+    # Sets op native result type at a core level.
+    method set_core_op_result_type($op, $type_char) {
+        if $type_char eq 'I' {
+            %core_result_type{$op} := int;
+        }
+        elsif $type_char eq 'N' {
+            %core_result_type{$op} := num;
+        }
+        elsif $type_char eq 'S' {
+            %core_result_type{$op} := str;
+        }
+    }
+    
+    # Sets op inlinability at a HLL level. (Can override at HLL level whether
+    # or not the HLL overrides the op itself.)
+    method set_hll_op_result_type($hll, $op, $type_char) {
+        %hll_result_type{$hll} := {} unless %hll_result_type{$hll};
+        if $type_char eq 'I' {
+            %hll_result_type{$hll}{$op} := int;
+        }
+        elsif $type_char eq 'N' {
+            %hll_result_type{$hll}{$op} := num;
+        }
+        elsif $type_char eq 'S' {
+            %hll_result_type{$hll}{$op} := str;
+        }
+    }
+    
+    # Sets returns on an op node if we it has a native result type.
+    method attach_result_type($hll, $node) {
+        my $op := $node.op;
+        if nqp::existskey(%hll_result_type, $hll) {
+            if nqp::existskey(%hll_result_type{$hll}, $op) {
+                $node.returns(%hll_result_type{$hll}{$op});
+                return 1;
+            }
+        }
+        if nqp::existskey(%core_result_type, $op) {
+            $node.returns(%core_result_type{$op});
+        }
     }
 
     # Adds a HLL box handler.
