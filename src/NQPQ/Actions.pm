@@ -21,7 +21,23 @@ class NQP::Actions is HLL::Actions {
             ?? PAST::Op.new(:inline("    %r = root_new ['parrot';'ResizablePMCArray']"))
             !! 'Undef');
     }
-
+    
+    sub default_for($sigil) {
+        if $sigil eq '@' {
+            QAST::Op.new( :op('list') )
+        }
+        elsif $sigil eq '%' {
+            QAST::Op.new( :op('hash') )
+        }
+        else {
+            my $default;
+            try {
+                $default := QAST::WVal.new( :value($*W.find_sym(['NQPMu'])) );
+                CATCH { $default := QAST::Op.new( :op('null') ) }
+            }
+            $default
+        }
+    }
 
     method TOP($/) { make $<comp_unit>.ast; }
 
@@ -561,9 +577,7 @@ class NQP::Actions is HLL::Actions {
                 $past.viviself( vivitype( $<sigil> ) );
             }
             else {
-                $past := QAST::Var.new(
-                    :name(~@name.pop), :viviself( vivitype( $<sigil> ) )
-                );
+                $past := QAST::Var.new( :name(~@name.pop), :scope('lexical') );
             }
         }
         make $past;
@@ -737,20 +751,20 @@ class NQP::Actions is HLL::Actions {
             $BLOCK.symbol($name, :scope('package') );
         }
         else {
-            $BLOCK[0].push(QAST::Var.new(
-                :name($name), :scope('lexical'), :decl('var'),
-                :viviself( vivitype($sigil) ), :node($/)
+            $BLOCK[0].push(QAST::Op.new(
+                :op('bind'), :node($/),
+                QAST::Var.new( :name($name), :scope('lexical'), :decl('var') ),
+                default_for($sigil)
             ));
             $BLOCK.symbol($name, :scope('lexical') );
         }
 
         # Apply traits.
-        make $past;
-
         if $<trait> {
             for $<trait> { $_.ast()($/); }
         }
 
+        make $past;
     }
 
     method routine_declarator:sym<sub>($/) { make $<routine_def>.ast; }
