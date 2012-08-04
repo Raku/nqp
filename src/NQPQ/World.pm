@@ -141,21 +141,25 @@ class NQP::World is HLL::World {
     method install_lexical_symbol($block, $name, $obj) {
         # Install the object directly as a block symbol.
         $block.symbol($name, :scope('lexical'), :value($obj));
-        $block[0].push(PAST::Var.new( :scope('lexical'), :name($name), :isdecl(1),
-            :directaccess(1) ));
+        $block[0].push(QAST::Var.new( :scope('lexical'), :name($name), :decl('var') ));
         
         # Fixup and deserialization task is the same.
         my $fixup := QAST::Stmts.new(
-            PAST::Op.new(
-                :pasttype('callmethod'), :name('set_static_lexpad_value'),
-                PAST::Val.new( :value($block), :returns('LexInfo')),
-                ~$name, self.get_slot_past_for_object($obj)
+            QAST::Op.new(
+                :op('callmethod'), :name('set_static_lexpad_value'),
+                QAST::VM.new(
+                    pir => '    .const "LexInfo" %r = "' ~ $block.cuid() ~ '"'
+                ),
+                QAST::SVal.new( :value($name) ),
+                QAST::WVal.new( :value($obj) )
             ),
             # XXX Should only do this once per block we put static stuff
             # in...or find a way to not do it at all.
-            PAST::Op.new(
-                :pasttype('callmethod'), :name('finish_static_lexpad'),
-                PAST::Val.new( :value($block), :returns('LexInfo' ))
+            QAST::Op.new(
+                :op('callmethod'), :name('finish_static_lexpad'),
+                QAST::VM.new(
+                    pir => '    .const "LexInfo" %r = "' ~ $block.cuid() ~ '"'
+                ),
             )
         );
         self.add_fixup_task(:deserialize_past($fixup), :fixup_past($fixup));
@@ -340,7 +344,7 @@ class NQP::World is HLL::World {
         if nqp::defined($name) { %args<name> := $name; }
         if nqp::defined($repr) { %args<repr> := $repr; }
         my $mo := $how.new_type(|%args);
-        my $slot := self.add_object($mo);
+        self.add_object($mo);
 
         # Result is just the object.
         return $mo;
