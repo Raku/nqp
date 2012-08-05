@@ -520,7 +520,7 @@ class NQP::Actions is HLL::Actions {
         my $past;
         if $<postcircumfix> {
             $past := $<postcircumfix>.ast;
-            $past.unshift( QAST::Var.new( :name('$/') ) );
+            $past.unshift( QAST::Var.new( :name('$/'), :scope('lexical') ) );
         }
         else {
             my @name := NQP::Compiler.parse_name(~$/);
@@ -1589,9 +1589,9 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
             QAST::Stmts.new(
                 PAST::Op.new(
                     :op('bind'),
-                    QAST::Var.new( :name('$/') ),
+                    QAST::Var.new( :name('$/'), :scope('contextual') ),
                     QAST::Op.new(
-                        QAST::Var.new( :name('$¢') ),
+                        QAST::Var.new( :name('$¢'), :scope('contextual') ),
                         :name('MATCH'),
                         :op('callmethod')
                     )
