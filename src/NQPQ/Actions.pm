@@ -1155,7 +1155,7 @@ class NQP::Actions is HLL::Actions {
             $block[0].push(QAST::Var.new(:name<$/>, :scope<lexical>, :decl<var>));
             $block.symbol('$¢', :scope<lexical>);
             $block.symbol('$/', :scope<lexical>);
-            my $regex := QRegex::P6Regex::Actions::buildsub($<p6regex>.ast, $block);
+            my $regex := QRegex::P6Regex::Actions::qbuildsub($<p6regex>.ast, $block);
             $regex.name($name);
             
             if $*PKGDECL && nqp::can($*PACKAGE.HOW, 'add_method') {
@@ -1430,7 +1430,7 @@ class NQP::Actions is HLL::Actions {
         $block.symbol('$¢', :scope<lexical>);
         $block.symbol('$/', :scope<lexical>);
 
-        my $regex := QRegex::P6Regex::Actions::buildsub($<p6regex>.ast, $block);
+        my $regex := QRegex::P6Regex::Actions::qbuildsub($<p6regex>.ast, $block);
         my $past := QAST::Op.new(
             :op<callmethod>, :name<new>,
             lexical_package_lookup(['NQPRegex'], $/),
