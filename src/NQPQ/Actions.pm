@@ -465,11 +465,11 @@ class NQP::Actions is HLL::Actions {
             if $<OPER><O><op> {
                 $past.op( ~$<OPER><O><op> );
             }
+            if $key eq 'LIST' { $key := 'infix'; }
+            my $name := nqp::lc($key) ~ ':<' ~ $<OPER><sym> ~ '>';
+            $past.name('&' ~ $name);
             unless $past.op {
-                if $key eq 'LIST' { $key := 'infix'; }
-                my $name := nqp::lc($key) ~ ':<' ~ $<OPER><sym> ~ '>';
-                $past.op('call'),
-                $past.name('&' ~ $name);
+                $past.op('call');
             }
         }
         if $key eq 'POSTFIX' {
