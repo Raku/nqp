@@ -205,9 +205,8 @@ class NQP::World is HLL::World {
         # XXX Lexical environment.
         my $stub_code := sub (*@args, *%named) {
             # Do the compilation.
-            self.set_nqp_language_defaults($past);
             my $nqpcomp  := pir::compreg__Ps('nqp');
-            my $post     := $nqpcomp.post($past);
+            my $post     := $nqpcomp.post(QAST::CompUnit.new( :hll('nqp'), $past ));
             my $pir      := $nqpcomp.pir($post);
             my $compiled := $nqpcomp.evalpmc($pir);
 
