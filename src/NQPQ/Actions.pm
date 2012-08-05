@@ -1341,7 +1341,7 @@ class NQP::Actions is HLL::Actions {
     }
 
     method postcircumfix:sym<ang>($/) {
-        make QAST::Op.new( :op('atkey'), $<EXPR>.ast );
+        make QAST::Op.new( :op('atkey'), $<quote_EXPR>.ast );
     }
 
     method postcircumfix:sym<( )>($/) {
