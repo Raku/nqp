@@ -1423,7 +1423,7 @@ class NQP::Actions is HLL::Actions {
         $block[0].push(QAST::Var.new(:name<self>, :scope<lexical>, :decl<param>));
         $block[0].push(QAST::Op.new(
             :op('bind'),
-            QAST::Var.new(:name<self>, :scope<register>, :decl('var') ),
+            QAST::Var.new(:name<self>, :scope<local>, :decl('var') ),
             QAST::Var.new( :name<self>, :scope('lexical') )));
         $block[0].push(QAST::Var.new(:name<$¢>, :scope<lexical>, :decl('var')));
         $block[0].push(QAST::Var.new(:name<$/>, :scope<lexical>, :decl('var')));
@@ -1500,23 +1500,30 @@ class NQP::Actions is HLL::Actions {
         # The final lookup will always be just a keyed access to a
         # symbol table.
         my $final_name := @name.pop();
-        my $lookup := PAST::Var.new( :scope('keyed'), ~$final_name);
+        my $lookup := QAST::Op.new(
+            :op('atkey'),
+            QAST::SVal.new( :value(~$final_name) )
+        );
         
         # If there's no explicit qualification, then look it up in the
         # current package, and fall back to looking in GLOBAL.
         if +@name == 0 {
-            $lookup.unshift(PAST::Op.new(
-                :pirop('get_who PP'),
-                PAST::Var.new( :name('$?PACKAGE'), :scope('lexical') )
+            $lookup.unshift(QAST::Op.new(
+                :op('who'),
+                QAST::Var.new( :name('$?PACKAGE'), :scope('lexical') )
             ));
-            $lookup.viviself(PAST::Var.new(
-                :scope('keyed'),
-                PAST::Op.new(
-                    :pirop('get_who PP'),
-                    PAST::Var.new( :name('GLOBAL'), :namespace([]), :scope('package') )
-                ),
-                ~$final_name
-            ));
+            $lookup := QAST::Op.new(
+                :op('ifnull'),
+                $lookup,
+                QAST::Op.new(
+                    :op('atkey'),
+                    QAST::Op.new(
+                        :op('who'),
+                        QAST::VM.new( pirop => 'get_hll_global Ps',
+                            QAST::SVal.new( :value('GLOBAL') ) )
+                    ),
+                    QAST::SVal.new( :value(~$final_name) )
+                ));
         }
         
         # Otherwise, see if the first part of the name is lexically
