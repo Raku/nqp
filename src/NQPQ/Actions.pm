@@ -1558,27 +1558,33 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
 
     method metachar:sym<{ }>($/) { 
         make QAST::Regex.new( $<codeblock>.ast, 
-                              :rxtype<pastnode>, :node($/) );
+                              :rxtype<qastnode>, :node($/) );
     }
 
     method metachar:sym<nqpvar>($/) {
-        make QAST::Regex.new( PAST::Node.new('!INTERPOLATE', $<var>.ast), 
+        make QAST::Regex.new( QAST::Node.new(
+                                  QAST::SVal.new( :value('!INTERPOLATE') ),
+                                  $<var>.ast), 
                               :rxtype<subrule>, :subtype<method>, :node($/));
     }
 
     method assertion:sym<{ }>($/) { 
-        make QAST::Regex.new( PAST::Node.new('!INTERPOLATE_REGEX', $<codeblock>.ast), 
+        make QAST::Regex.new( QAST::Node.new(
+                                  QAST::SVal.new( :value('!INTERPOLATE_REGEX') ),
+                                  $<codeblock>.ast),
                               :rxtype<subrule>, :subtype<method>, :node($/));
     }
 
     method assertion:sym<?{ }>($/) { 
         make QAST::Regex.new( $<codeblock>.ast, 
                               :subtype<zerowidth>, :negate( $<zw> eq '!' ),
-                              :rxtype<pastnode>, :node($/) );
+                              :rxtype<qastnode>, :node($/) );
     }
 
     method assertion:sym<var>($/) {
-        make QAST::Regex.new( PAST::Node.new('!INTERPOLATE_REGEX', $<var>.ast), 
+        make QAST::Regex.new( QAST::Node.new(
+                                  QAST::SVal.new( :value('!INTERPOLATE_REGEX') ),
+                                  $<var>.ast), 
                               :rxtype<subrule>, :subtype<method>, :node($/));
     }
 
@@ -1587,7 +1593,7 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
         $block.blocktype('immediate');
         my $past :=
             QAST::Stmts.new(
-                PAST::Op.new(
+                QAST::Op.new(
                     :op('bind'),
                     QAST::Var.new( :name('$/'), :scope('contextual') ),
                     QAST::Op.new(
