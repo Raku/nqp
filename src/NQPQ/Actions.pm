@@ -50,9 +50,13 @@ class NQP::Actions is HLL::Actions {
     }
 
     sub colonpair_str($ast) {
-        PAST::Op.ACCEPTS($ast)
-        ?? nqp::join(' ', $ast.list)
-        !! $ast.value;
+        if nqp::istype($ast, QAST::Op) {
+            my @parts;
+            for $ast.list { @parts.push($_.value) }
+            nqp::join(' ', @parts)
+        } else {
+            $ast.value
+        }
     }
 
     method comp_unit($/) {
@@ -1365,10 +1369,10 @@ class NQP::Actions is HLL::Actions {
                 my @words := HLL::Grammar::split_words($/, $past.value);
                 if +@words != 1 {
                     $past := QAST::Op.new( :op('list'), :node($/) );
-                    for @words { $past.push($_); }
+                    for @words { $past.push(QAST::SVal.new( :value($_) )); }
                 }
                 else {
-                    $past := ~@words[0];
+                    $past := QAST::SVal.new( :value(~@words[0]) );
                 }
             }
             else {            
@@ -1393,7 +1397,9 @@ class NQP::Actions is HLL::Actions {
                 if $lastlit gt '' {
                     @parts.push(QAST::SVal.new( :value($lastlit) ));
                 }
-                @parts.push($ast);
+                @parts.push(nqp::istype($ast, QAST::Node)
+                    ?? $ast
+                    !! QAST::SVal.new( :value($ast) ));
                 $lastlit := '';
             }
         }
