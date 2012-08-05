@@ -335,10 +335,14 @@ class NQP::World is HLL::World {
         else {
             # For fixup, if we have no code body, we need to assign the method body
             # we actually compiled into the one that went into the SC.
-            $fixups.push(PAST::Op.new(
+            $fixups.push(QAST::VM.new(
                 :pirop('assign vPP'),
-                self.get_slot_past_for_code_ref_at($code_ref_idx),
-                PAST::Val.new( :value($past) )
+                QAST::VM.new(
+                    :pirop('nqp_get_sc_code_ref Psi'),
+                    QAST::SVal.new( :value(self.handle()) ),
+                    QAST::IVal.new( :value($code_ref_idx) )
+                ),
+                QAST::BVal.new( :value($past) )
             ));
             return $dummy;
         }
