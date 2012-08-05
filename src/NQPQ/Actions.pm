@@ -1233,12 +1233,10 @@ class NQP::Actions is HLL::Actions {
     }
 
     method term:sym<pir::op>($/) {
-        my $past := $<args> ?? $<args>[0].ast !! PAST::Op.new( :node($/) );
+        my @args := $<args> ?? $<args>[0].ast.list !! [];
         my $pirop := ~$<op>;
         $pirop := nqp::join(' ', nqp::split('__', $pirop));
-        $past.pirop($pirop);
-        $past.pasttype('pirop');
-        make $past;
+        make QAST::VM.new( :pirop($pirop), :node($/), |@args );
     }
 
     method term:sym<pir::const>($/) {
@@ -1417,9 +1415,7 @@ class NQP::Actions is HLL::Actions {
     method quote:sym<q>($/)    { make $<quote_EXPR>.ast; }
     method quote:sym<Q>($/)    { make $<quote_EXPR>.ast; }
     method quote:sym<Q:PIR>($/) {
-        make PAST::Op.new( :inline( $<quote_EXPR>.ast.value ),
-                           :pasttype('inline'),
-                           :node($/) );
+        make QAST::VM.new( :pir( $<quote_EXPR>.ast.value ), :node($/) );
     }
 
     method quote:sym</ />($/) {
