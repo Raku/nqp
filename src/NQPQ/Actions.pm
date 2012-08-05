@@ -1423,10 +1423,10 @@ class NQP::Actions is HLL::Actions {
         $block[0].push(QAST::Var.new(:name<self>, :scope<lexical>, :decl<param>));
         $block[0].push(QAST::Op.new(
             :op('bind'),
-            QAST::Var.new(:name<self>, :scope<register>, :isdecl(1) ),
+            QAST::Var.new(:name<self>, :scope<register>, :decl('var') ),
             QAST::Var.new( :name<self>, :scope('lexical') )));
-        $block[0].push(QAST::Var.new(:name<$¢>, :scope<lexical>, :isdecl(1)));
-        $block[0].push(QAST::Var.new(:name<$/>, :scope<lexical>, :isdecl(1)));
+        $block[0].push(QAST::Var.new(:name<$¢>, :scope<lexical>, :decl('var')));
+        $block[0].push(QAST::Var.new(:name<$/>, :scope<lexical>, :decl('var')));
         $block.symbol('$¢', :scope<lexical>);
         $block.symbol('$/', :scope<lexical>);
 
