@@ -598,7 +598,7 @@ static void dyncall_wb_cs(PARROT_INTERP, PMC *obj) {
         void *cptr;   /* The pointer in the C storage. */
         void *objptr; /* The pointer in the object representing the C object. */
 
-        if (kind == CSTRUCT_ATTR_IN_STRUCT)
+        if (kind == CSTRUCT_ATTR_IN_STRUCT || !body->child_objs[slot])
             continue;
 
         cptr = *((void **) (storage + repr_data->struct_offsets[i]));
