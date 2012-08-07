@@ -1337,15 +1337,15 @@ class NQP::Actions is HLL::Actions {
     method semilist($/) { make $<statement>.ast }
 
     method postcircumfix:sym<[ ]>($/) {
-        make QAST::Op.new( :op('atpos'), $<EXPR>.ast );
+        make QAST::Var.new( :scope('positional'), $<EXPR>.ast );
     }
 
     method postcircumfix:sym<{ }>($/) {
-        make QAST::Op.new( :op('atkey'), $<EXPR>.ast );
+        make QAST::Var.new( :scope('associative'), $<EXPR>.ast );
     }
 
     method postcircumfix:sym<ang>($/) {
-        make QAST::Op.new( :op('atkey'), $<quote_EXPR>.ast );
+        make QAST::Var.new( :scope('associative'), $<quote_EXPR>.ast );
     }
 
     method postcircumfix:sym<( )>($/) {
