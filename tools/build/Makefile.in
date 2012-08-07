@@ -82,6 +82,7 @@ QAST_SOURCES = \
   src/QAST/WVal.nqp \
   src/QAST/Want.nqp \
   src/QAST/Var.nqp \
+  src/QAST/VarWithFallback.nqp \
   src/QAST/Op.nqp \
   src/QAST/VM.nqp \
   src/QAST/Stmts.nqp \
