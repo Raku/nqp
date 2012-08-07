@@ -661,12 +661,11 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token postfix:sym<.>  { <dotty> <O('%methodop')> }
 
-    token prefix:sym<++>  { <sym>  <O('%autoincrement, :pirop<inc>')> }
-    token prefix:sym<-->  { <sym>  <O('%autoincrement, :pirop<dec>')> }
+    token prefix:sym<++>  { <sym>  <O('%autoincrement, :op<preinc>')> }
+    token prefix:sym<-->  { <sym>  <O('%autoincrement, :op<predec>')> }
 
-    # see Actions.pm for postfix:<++> and postfix:<-->
-    token postfix:sym<++> { <sym>  <O('%autoincrement')> }
-    token postfix:sym<--> { <sym>  <O('%autoincrement')> }
+    token postfix:sym<++> { <sym>  <O('%autoincrement, :op<postinc>')> }
+    token postfix:sym<--> { <sym>  <O('%autoincrement, :op<postdec>')> }
 
     token infix:sym<**>   { <sym>  <O('%exponentiation, :op<pow_n>')> }
 

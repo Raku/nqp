@@ -1449,18 +1449,6 @@ class NQP::Actions is HLL::Actions {
 
     method postfix:sym<.>($/) { make $<dotty>.ast; }
 
-    method postfix:sym<++>($/) {
-        make PAST::Op.new( :name('postfix:<++>'),
-                           :inline('    clone %r, %0', '    inc %0'),
-                           :pasttype('inline') );
-    }
-
-    method postfix:sym<-->($/) {
-        make PAST::Op.new( :name('postfix:<-->'),
-                           :inline('    clone %r, %0', '    dec %0'),
-                           :pasttype('inline') );
-    }
-
     method prefix:sym<make>($/) {
         make QAST::Op.new(
                  QAST::Var.new( :name('$/'), :scope('contextual') ),

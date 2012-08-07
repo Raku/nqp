@@ -175,6 +175,7 @@ NQPQ_EXE          = nqpq$(EXE)
 NQPQ_SOURCES = \
   src/NQPQ/World.pm \
   src/NQPQ/Grammar.pm \
+  src/NQPQ/Ops.pm \
   src/NQPQ/Actions.pm \
   src/NQPQ/Compiler.pm \
 
