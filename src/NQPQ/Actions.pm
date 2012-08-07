@@ -1291,7 +1291,7 @@ class NQP::Actions is HLL::Actions {
         my $past;
         if $<EXPR> {
             $past := $<EXPR>[0].ast;
-            if $past.name ne '&infix:<,>' {
+            unless nqp::istype($past, QAST::Op) && $past.name eq '&infix:<,>' {
                 $past := QAST::Op.new( $past, :op('list') );
             }
         }
