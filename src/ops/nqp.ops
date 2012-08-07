@@ -95,6 +95,13 @@ nqp_islist(PMC *pmc) {
     return (INTVAL)(type == qrpa_id || type == enum_class_ResizablePMCArray);
 }
 
+/* Test for something being a list (RPA or QRPA).  */
+static INTVAL
+nqp_ishash(PMC *pmc) {
+    INTVAL type = pmc->vtable->base_type;
+    return (INTVAL)(type == enum_class_Hash);
+}
+
 /* This public-domain C quick sort implementation by Darel Rex Finley. */
 static INTVAL
 quicksort(INTVAL *arr, INTVAL elements) {
@@ -2051,6 +2058,19 @@ Checks if the type of thing in $2 is a nqp list (either QRPA or RPA).
 */
 inline op nqp_islist(out INT, invar PMC) :base_core {
     $1 = nqp_islist($2)
+}
+
+/*
+
+=item nqp_ishash
+
+Checks if the type of thing in $2 is a nqp hash.
+
+=cut
+
+*/
+inline op nqp_ishash(out INT, invar PMC) :base_core {
+    $1 = nqp_ishash($2)
 }
 
 /*
