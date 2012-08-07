@@ -652,6 +652,31 @@ class QAST::Compiler is HLL::Compiler {
     }
     
     multi method as_post(QAST::Var $node) {
+        self.compile_var($node)
+    }
+    
+    multi method as_post(QAST::VarWithFallback $node) {
+        my $post := self.compile_var($node);
+        my $result;
+        if $*BINDVAL {
+            $result := $post;
+        }
+        else {
+            my $lbl := PIRT::Label.new(:name('fallback'));
+            $result := PIRT::Ops.new(:result($post));
+            $result.push($post);
+            if nqp::lc(self.infer_type($post)) eq 'p' {
+                my $fbpost := self.as_post($node.fallback, :want('P'));
+                $result.push_pirop('unless_null', $post, $lbl);
+                $result.push($fbpost);
+                $result.push_pirop('set', $post, $fbpost);
+                $result.push($lbl);
+            }
+        }
+        $result
+    }
+    
+    method compile_var($node) {
         my $scope := $node.scope;
         my $decl  := $node.decl;
         
