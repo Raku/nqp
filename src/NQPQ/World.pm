@@ -181,7 +181,7 @@ class NQP::World is HLL::World {
     method install_package_routine($package, $name, $past_block) {
         my $fixup := QAST::Op.new(
             :op('bindkey'),
-            QAST::Op.new( :op('getwho'), QAST::WVal.new( :value($package) ) ),
+            QAST::Op.new( :op('who'), QAST::WVal.new( :value($package) ) ),
             QAST::SVal.new( :value(~$name) ),
             QAST::BVal.new( :value($past_block) )
         );

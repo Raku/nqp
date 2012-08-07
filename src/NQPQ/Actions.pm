@@ -881,10 +881,10 @@ class NQP::Actions is HLL::Actions {
                         # Need to install it at loadinit time but also re-bind
                         # it per invocation.
                         $*W.install_package_routine($*PACKAGE, $name, $past);
-                        $BLOCK[0].push(PAST::Op.new(
-                            :pasttype('bind_6model'),
+                        $BLOCK[0].push(QAST::Op.new(
+                            :op('bind'),
                             lexical_package_lookup([$name], $/),
-                            PAST::Var.new( :name($name), :scope('lexical') )
+                            QAST::Var.new( :name($name), :scope('lexical') )
                         ));
                     }
                 }
@@ -1504,8 +1504,8 @@ class NQP::Actions is HLL::Actions {
         # The final lookup will always be just a keyed access to a
         # symbol table.
         my $final_name := @name.pop();
-        my $lookup := QAST::Op.new(
-            :op('atkey'),
+        my $lookup := QAST::VarWithFallback.new(
+            :scope('associative'),
             QAST::SVal.new( :value(~$final_name) )
         );
         
@@ -1516,9 +1516,8 @@ class NQP::Actions is HLL::Actions {
                 :op('who'),
                 QAST::Var.new( :name('$?PACKAGE'), :scope('lexical') )
             ));
-            $lookup := QAST::Op.new(
+            $lookup.fallback(QAST::Op.new(
                 :op('ifnull'),
-                $lookup,
                 QAST::Op.new(
                     :op('atkey'),
                     QAST::Op.new(
@@ -1527,7 +1526,8 @@ class NQP::Actions is HLL::Actions {
                             QAST::SVal.new( :value('GLOBAL') ) )
                     ),
                     QAST::SVal.new( :value(~$final_name) )
-                ));
+                ),
+                default_for('$')));
         }
         
         # Otherwise, see if the first part of the name is lexically
@@ -1535,17 +1535,19 @@ class NQP::Actions is HLL::Actions {
         # then strip it off.
         else {
             my $path := $*W.is_lexical(@name[0]) ??
-                PAST::Var.new( :name(@name.shift()), :scope('lexical') ) !!
-                PAST::Var.new( :name('GLOBAL'), :namespace([]), :scope('package') );
+                QAST::Var.new( :name(@name.shift()), :scope('lexical') ) !!
+                QAST::VM.new( pirop => 'get_hll_global Ps',
+                    QAST::SVal.new( :value('GLOBAL') ) );
             if @name[0] eq 'GLOBAL' {
                 @name.shift();
             }
             for @name {
-                $path := PAST::Op.new(
+                $path := QAST::VM.new(
                     :pirop('nqp_get_package_through_who PPs'),
-                    $path, ~$_);
+                    $path, QAST::SVal.new( :value(~$_) ));
             }
-            $lookup.unshift(PAST::Op.new(:pirop('get_who PP'), $path));
+            $lookup.unshift(QAST::Op.new(:op('who'), $path));
+            $lookup.fallback(default_for('$'));
         }
         
         return $lookup;
