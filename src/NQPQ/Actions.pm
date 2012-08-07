@@ -13,14 +13,6 @@ class NQP::Actions is HLL::Actions {
         }
         $block;
     }
-
-    sub vivitype($sigil) {
-        $sigil eq '%'
-        ?? PAST::Op.new(:inline("    %r = root_new ['parrot';'Hash']"))
-        !! ($sigil eq '@'
-            ?? PAST::Op.new(:inline("    %r = root_new ['parrot';'ResizablePMCArray']"))
-            !! 'Undef');
-    }
     
     sub default_for($sigil) {
         if $sigil eq '@' {
@@ -529,7 +521,7 @@ class NQP::Actions is HLL::Actions {
                     $/.CURSOR.panic("Twigil not allowed on multi-part name");
                 }
                 $past := lexical_package_lookup(@name, $/);
-                $past.viviself( vivitype( $<sigil> ) );
+                $past.fallback( default_for( $<sigil> ) );
             }
             elsif $<twigil>[0] eq '*' {
                 #my $global_fallback := lexical_package_lookup(['GLOBAL',  ~$<sigil> ~ $<desigilname>], $/);
@@ -585,7 +577,7 @@ class NQP::Actions is HLL::Actions {
             }
             elsif $*W.is_package(~@name[0]) {
                 $past := lexical_package_lookup(@name, $/);
-                $past.viviself( vivitype( $<sigil> ) );
+                $past.fallback( default_for( $<sigil> ) );
             }
             else {
                 $past := QAST::Var.new( :name(~@name.pop), :scope('lexical') );
@@ -755,7 +747,7 @@ class NQP::Actions is HLL::Actions {
             # right already. We build it here just to be sure.
             $name := ~$<variable>;
             $past := lexical_package_lookup([$name], $/);
-            $past.viviself( vivitype($sigil) );
+            $past.fallback( default_for($sigil) );
             $BLOCK.symbol($name, :scope('package') );
         }
         else {
@@ -1323,7 +1315,7 @@ class NQP::Actions is HLL::Actions {
             make $<pblock>.ast;
         }
         else {
-            make vivitype('%');
+            make default_for('%');
         }
     }
 
