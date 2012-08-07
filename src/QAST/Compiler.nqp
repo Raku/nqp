@@ -745,7 +745,7 @@ class QAST::Compiler is HLL::Compiler {
                 pir::die("Cannot reference undeclared local '$name'");
             }
         }
-        elsif $scope eq 'lexical' {
+        elsif $scope eq 'lexical' || $scope eq 'contextual' {
             # If the lexical is directly declared in this block, we use the
             # register directly.
             my %sym := $*BLOCK.qast.symbol($name);
@@ -767,16 +767,31 @@ class QAST::Compiler is HLL::Compiler {
                 }
                 
                 # Emit the lookup or bind.
-                if $*BINDVAL {
-                    my $valpost := self.as_post_clear_bindval($*BINDVAL, :want(nqp::lc($type)));
-                    $ops.push($valpost);
-                    $ops.push_pirop('store_lex', self.escape($node.name), $valpost.result);
-                    $ops.result($valpost.result);
+                if $scope eq 'lexical' {
+                    if $*BINDVAL {
+                        my $valpost := self.as_post_clear_bindval($*BINDVAL, :want(nqp::lc($type)));
+                        $ops.push($valpost);
+                        $ops.push_pirop('store_lex', self.escape($node.name), $valpost.result);
+                        $ops.result($valpost.result);
+                    }
+                    else {
+                        my $res_reg := $*REGALLOC."fresh_{nqp::lc($type)}"();
+                        $ops.push_pirop('find_lex', $res_reg, self.escape($node.name));
+                        $ops.result($res_reg);
+                    }
                 }
                 else {
-                    my $res_reg := $*REGALLOC."fresh_{nqp::lc($type)}"();
-                    $ops.push_pirop('find_lex', $res_reg, self.escape($node.name));
-                    $ops.result($res_reg);
+                    if $*BINDVAL {
+                        my $valpost := self.as_post_clear_bindval($*BINDVAL, :want('P'));
+                        $ops.push($valpost);
+                        $ops.push_pirop('store_dynamic_lex', self.escape($name), $valpost.result);
+                        $ops.result($valpost.result);
+                    }
+                    else {
+                        my $res_reg := $*REGALLOC."fresh_p"();
+                        $ops.push_pirop('find_dynamic_lex', $res_reg, self.escape($name));
+                        $ops.result($res_reg);
+                    }
                 }
             }
         }
@@ -807,19 +822,6 @@ class QAST::Compiler is HLL::Compiler {
                 my $res_reg := $*REGALLOC."fresh_{nqp::lc($type)}"();
                 $ops.push_pirop("repr_get_attr_$op_type", $res_reg, $obj.result, $han.result,
                     self.escape($name));
-                $ops.result($res_reg);
-            }
-        }
-        elsif $scope eq 'contextual' {
-            if $*BINDVAL {
-                my $valpost := self.as_post_clear_bindval($*BINDVAL, :want('P'));
-                $ops.push($valpost);
-                $ops.push_pirop('store_dynamic_lex', self.escape($name), $valpost.result);
-                $ops.result($valpost.result);
-            }
-            else {
-                my $res_reg := $*REGALLOC."fresh_p"();
-                $ops.push_pirop('find_dynamic_lex', $res_reg, self.escape($name));
                 $ops.result($res_reg);
             }
         }
