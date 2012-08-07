@@ -825,6 +825,16 @@ class QAST::Compiler is HLL::Compiler {
                 $ops.result($res_reg);
             }
         }
+        elsif $scope eq 'positional' {
+            $ops := self.as_post_clear_bindval($*BINDVAL
+                ?? QAST::Op.new( :op('positional_bind'), |$node.list, $*BINDVAL)
+                !! QAST::Op.new( :op('positional_get'), |$node.list));
+        }
+        elsif $scope eq 'associative' {
+            $ops := self.as_post_clear_bindval($*BINDVAL
+                ?? QAST::Op.new( :op('associative_bind'), |$node.list, $*BINDVAL)
+                !! QAST::Op.new( :op('associative_get'), |$node.list));
+        }
         else {
             pir::die("QAST::Var with scope '$scope' NYI");
         }

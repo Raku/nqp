@@ -1121,6 +1121,12 @@ QAST::Operations.add_hll_unbox('nqp', 's', -> $qastcomp, $post {
     $ops
 });
 
+# Default way to do positional and associative lookups.
+QAST::Operations.add_core_pirop_mapping('positional_get', 'set', 'PQi', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('positional_bind', 'set', '1QiP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('associative_get', 'set', 'PQs', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('associative_bind', 'set', '1QsP', :inlinable(1));
+
 # I/O opcodes
 QAST::Operations.add_core_pirop_mapping('print', 'print', '0s', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('say', 'say', '0s', :inlinable(1));
