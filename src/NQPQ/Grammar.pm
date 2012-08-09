@@ -669,8 +669,8 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token infix:sym<**>   { <sym>  <O('%exponentiation, :op<pow_n>')> }
 
-    token prefix:sym<+>   { <sym>  <O('%symbolic_unary, :pirop<set N*>')> }
-    token prefix:sym<~>   { <sym>  <O('%symbolic_unary, :pirop<set S*>')> }
+    token prefix:sym<+>   { <sym>  <O('%symbolic_unary, :op<numify>')> }
+    token prefix:sym<~>   { <sym>  <O('%symbolic_unary, :op<stringify>')> }
     token prefix:sym<->   { <sym>  <![>]> <!number> <O('%symbolic_unary, :op<neg_n>')> }
     token prefix:sym<?>   { <sym>  <O('%symbolic_unary, :op<istrue>')> }
     token prefix:sym<!>   { <sym>  <O('%symbolic_unary, :op<isfalse>')> }

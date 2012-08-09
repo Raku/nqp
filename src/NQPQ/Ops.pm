@@ -77,3 +77,11 @@ $ops.add_hll_op('nqp', 'postdec', -> $qastcomp, $op {
             )
         )));
 });
+
+$ops.add_hll_op('nqp', 'numify', -> $qastcomp, $op {
+    $qastcomp.as_post($op[0], :want('n'))
+});
+
+$ops.add_hll_op('nqp', 'stringify', -> $qastcomp, $op {
+    $qastcomp.as_post($op[0], :want('s'))
+});
