@@ -1459,19 +1459,10 @@ class NQP::Actions is HLL::Actions {
                  :node($/)
         );
     }
-
-    sub control($/, $type) {
-        make PAST::Op.new(
-            :node($/),
-            :pirop('die__vii'),
-            0,
-            PAST::Val.new( :value($type), :returns<!macro_const> )
-        );
-    }
-
-    method term:sym<next>($/) { control($/, 'CONTROL_LOOP_NEXT') }
-    method term:sym<last>($/) { control($/, 'CONTROL_LOOP_LAST') }
-    method term:sym<redo>($/) { control($/, 'CONTROL_LOOP_REDO') }
+    
+    method term:sym<next>($/) { make QAST::Op.new( :op('control'), :name('next') ) }
+    method term:sym<last>($/) { make QAST::Op.new( :op('control'), :name('last') ) }
+    method term:sym<redo>($/) { make QAST::Op.new( :op('control'), :name('redo') ) }
 
     method infix:sym<~~>($/) {
         make QAST::Op.new( :op<callmethod>, :name<ACCEPTS>, :node($/) );
