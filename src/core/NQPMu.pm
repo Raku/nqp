@@ -52,6 +52,18 @@ my class NQPMu {
     multi method Str(NQPMu:U $self:) {
         self.HOW.name(self) ~ '()'
     }
+    multi method Str(NQPMu:D $self:) {
+        self.HOW.name(self) ~ '<' ~ nqp::where(self) ~ '>'
+    }
+    
+    proto method Numeric() is parrot_vtable('get_number') { * }
+    multi method Numeric(NQPMu:U $self:) {
+        0.0
+    }
+    
+    method defined() is parrot_vtable('defined') {
+        nqp::isconcrete(self)
+    }
 
     proto method ACCEPTS($topic) { * }
     multi method ACCEPTS(NQPMu:U $self: $topic) {
