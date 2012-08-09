@@ -943,6 +943,7 @@ class NQP::Actions is HLL::Actions {
             my $code := $*W.create_code($past, $name, $is_dispatcher);
             if $*MULTINESS eq 'multi' { attach_multi_signature($code, $past); }
             $*W.pkg_add_method($*PACKAGE, $meta_meth, $name, $code);
+            $past<code_obj> := $code;
             
             # Install it in the package also if needed.
             if $*SCOPE eq 'our' {
@@ -1099,7 +1100,8 @@ class NQP::Actions is HLL::Actions {
             my $is_dispatcher := $*SCOPE eq 'proto';
             make -> $match {
                 $*W.pkg_add_method($package, 'add_parrot_vtable_mapping', $name, 
-                    $*W.create_code($match.ast<block_past>, $name, $is_dispatcher));
+                    $match.ast<code_obj> //
+                        $*W.create_code($match.ast<block_past>, $name, $is_dispatcher));
             };
         }
         elsif $<longname> eq 'parrot_vtable_handler' {
