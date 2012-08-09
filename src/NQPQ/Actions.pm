@@ -781,7 +781,7 @@ class NQP::Actions is HLL::Actions {
             $past := $<blockoid>.ast;
             $past.blocktype('declaration');
             if $*RETURN_USED {
-                $past.control('return_pir');
+                $past[1] := wrap_return_handler($past[1]);
             }
         }
         my $block := $past;
@@ -918,7 +918,7 @@ class NQP::Actions is HLL::Actions {
             $past := $<blockoid>.ast;
             $past.blocktype('declaration');
             if $*RETURN_USED {
-                $past.control('return_pir');
+                $past[1] := wrap_return_handler($past[1]);
             }
         }
 
@@ -992,6 +992,13 @@ class NQP::Actions is HLL::Actions {
             }
         }
         $*W.set_routine_signature_on_parrot_sub($routine, $types, $definednesses);
+    }
+    
+    sub wrap_return_handler($past) {
+        QAST::Op.new(
+            :op<lexotic>, :name<RETURN>,
+            $past
+        )
     }
 
     method signature($/) {
@@ -1446,6 +1453,13 @@ class NQP::Actions is HLL::Actions {
     ## Operators
 
     method postfix:sym<.>($/) { make $<dotty>.ast; }
+
+    method prefix:sym<return>($/) {
+        make QAST::Op.new(
+            :op('call'),
+            QAST::Var.new( :name('RETURN'), :scope('lexical') )
+        );
+    }
 
     method prefix:sym<make>($/) {
         make QAST::Op.new(
