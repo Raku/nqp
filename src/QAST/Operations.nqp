@@ -191,7 +191,12 @@ class QAST::Operations {
             # If we have an integer as the return type, find the arg that
             # becomes the result.
             if !$ret_meth && $ret_type ne 'v' && +$ret_type eq $ret_type {
-                $ops.result(@args[+$ret_type]);
+                my $rreg := @args[+$ret_type];
+                my $brak := nqp::index($rreg, '[');
+                if $brak > 0 {
+                    $rreg := nqp::substr($rreg, $brak + 1, nqp::chars($rreg) - ($brak + 2));
+                }
+                $ops.result($rreg);
             }
             
             # Construct and return the op.
