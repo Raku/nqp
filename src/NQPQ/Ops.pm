@@ -85,3 +85,11 @@ $ops.add_hll_op('nqp', 'numify', -> $qastcomp, $op {
 $ops.add_hll_op('nqp', 'stringify', -> $qastcomp, $op {
     $qastcomp.as_post($op[0], :want('s'))
 });
+
+$ops.add_hll_op('nqp', 'eqaddr', -> $qastcomp, $op {
+    $qastcomp.as_post(QAST::Op.new(
+        :op('iseq_i'),
+        QAST::Op.new( :op('where'), $op[0] ),
+        QAST::Op.new( :op('where'), $op[1] )
+    ))
+});
