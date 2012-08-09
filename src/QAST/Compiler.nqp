@@ -358,6 +358,7 @@ class QAST::Compiler is HLL::Compiler {
             
             # Generate parameter handling code.
             my $decls := PIRT::Ops.new();
+            my $opts := PIRT::Ops.new();
             $decls.node($node.node) if $node.node;
             my %lex_params;
             if $node.custom_args {
@@ -367,15 +368,18 @@ class QAST::Compiler is HLL::Compiler {
                 for $block.params {
                     my @param := ['.param'];
                     
+                    my $reg_type;
                     if $_.scope eq 'local'{
                         nqp::push(@param, $block.local_type_long($_.name));
                         nqp::push(@param, $_.name);
+                        $reg_type := $block.local_type($_.name);
                     }
                     else {
                         my $reg := $block.lex_reg($_.name);
                         nqp::push(@param, $block.lexical_type_long($_.name));
                         nqp::push(@param, $reg);
                         %lex_params{$_.name} := $reg;
+                        $reg_type := $block.lexical_type($_.name);
                     }
                     
                     if $_.slurpy {
@@ -388,7 +392,26 @@ class QAST::Compiler is HLL::Compiler {
                         nqp::push(@param, ':named(' ~ self.escape($_.named) ~ ')');
                     }
                     
-                    $decls.push_pirop(pir::join(' ', @param));
+                    if $_.default {
+                        # Add an optional to the parameter and add it.
+                        nqp::push(@param, ':optional');
+                        $decls.push_pirop(pir::join(' ', @param));
+                        
+                        # Add an optional flag.
+                        my $o_flag := QAST::Node.unique('haz_param');
+                        $decls.push_pirop('.param int ' ~ $o_flag ~ ' :opt_flag');
+                        
+                        # Generate code to set the default if nothing was passed.
+                        my $lbl := PIRT::Label.new( :name('default') );
+                        my $def := self.as_post($_.default, :want($reg_type));
+                        $opts.push_pirop('if', $o_flag, $lbl);
+                        $opts.push($def);
+                        $opts.push_pirop('set', @param[2], $def.result);
+                        $opts.push($lbl);
+                    }
+                    else {
+                        $decls.push_pirop(pir::join(' ', @param));
+                    }
                 }
             }
             
@@ -398,6 +421,9 @@ class QAST::Compiler is HLL::Compiler {
                 $decls.push_pirop(".const 'Sub' $cap_lex_reg = '$_'");
                 $decls.push_pirop("capture_lex $cap_lex_reg");
             }
+            
+            # Add optionals handling code.
+            $decls.push($opts);
 
             # Generate declarations.
             for $block.lexicals {
