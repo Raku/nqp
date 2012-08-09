@@ -961,9 +961,7 @@ class NQP::Actions is HLL::Actions {
 
     sub only_star_block() {
         my $past := $*W.pop_lexpad();
-        $past.push(PAST::Op.new(
-            :pirop('multi_dispatch_over_lexical_candidates P')
-        ));
+        $past.push(QAST::Op.new( :op('nqpmultidispatch') ));
         $past
     }
 
@@ -1249,9 +1247,7 @@ class NQP::Actions is HLL::Actions {
     }
 
     method term:sym<onlystar>($/) {
-        make PAST::Op.new(
-            :pirop('multi_dispatch_over_lexical_candidates P')
-        );
+        make QAST::Op.new( :op('nqpmultidispatch') );
     }
 
     method args($/) { make $<arglist>.ast; }

@@ -1,5 +1,7 @@
 my $ops := QAST::Compiler.operations();
 
+$ops.add_hll_pirop_mapping('nqp', 'nqpmultidispatch', 'multi_dispatch_over_lexical_candidates', 'P');
+
 $ops.add_hll_op('nqp', 'preinc', -> $qastcomp, $op {
     my $var := $op[0];
     unless nqp::istype($var, QAST::Var) {

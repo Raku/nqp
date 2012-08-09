@@ -272,15 +272,15 @@ class NQP::World is HLL::World {
                     pir::setprop__vPsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone, $code_obj) {
                         # Emit fixup code.
                         self.add_object($code_obj);
-                        $fixups.push(PAST::Op.new(
-                            :pirop('setattribute vPPsP'),
-                            self.get_ref($code_obj),
-                            self.get_ref($code_type),
-                            '$!do',
-                            PAST::Op.new(
+                        $fixups.push(QAST::Op.new(
+                            :op('bindattr'),
+                            QAST::WVal.new( :value($code_obj) ),
+                            QAST::WVal.new( :value($code_type) ),
+                            QAST::SVal.new( :value('$!do') ),
+                            QAST::VM.new(
                                 :pirop('set_sub_code_object 0PP'),
-                                PAST::Op.new( :pirop('clone PP'), PAST::Val.new( :value($past) ) ),
-                                self.get_ref($code_obj)
+                                QAST::Op.new( :op('clone'), QAST::BVal.new( :value($past) ) ),
+                                QAST::WVal.new( :value($code_obj) )
                             )
                         ));
                             
