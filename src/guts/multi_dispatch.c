@@ -521,6 +521,7 @@ PMC *nqp_multi_dispatch(PARROT_INTERP, PMC *dispatcher, PMC *capture) {
     else if (possibles_count == 0) {
         /* Get signatures of all possible candidates. We dump them in the
          * order in which we search for them. */
+        PMC    *fail_cand  = candidates[0]->sub;
         STRING *signatures = Parrot_str_new(interp, "", 0);
         cur_candidate = candidates;
         while (1) {
@@ -536,7 +537,7 @@ PMC *nqp_multi_dispatch(PARROT_INTERP, PMC *dispatcher, PMC *capture) {
         mem_sys_free(possibles);
         Parrot_ex_throw_from_c_args(interp, NULL, 1,
             "No applicable candidates found to dispatch to for '%Ss'. Available candidates are:\n%Ss",
-                VTABLE_get_string(interp, candidates[0]->sub),
+                VTABLE_get_string(interp, fail_cand),
                 signatures);
     }
     else {
