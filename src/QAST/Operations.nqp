@@ -837,7 +837,7 @@ QAST::Operations.add_core_op('lexotic', -> $qastcomp, $op {
     $ops.push_pirop('set_label', $handler, $label1);
     $ops.'push_pirop'('.lex', $lexname, $handler);
     
-    my $cpost := $qastcomp.compile_all_the_stmts($op.list());
+    my $cpost := $qastcomp.coerce($qastcomp.compile_all_the_stmts($op.list()), 'P');
     $ops.push($cpost);
     $ops.result($cpost);
     
