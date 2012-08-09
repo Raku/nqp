@@ -1085,6 +1085,24 @@ QAST::Operations.add_core_pirop_mapping('die', 'die', '0P');
 QAST::Operations.add_core_pirop_mapping('throw', 'throw', '0P');
 QAST::Operations.add_core_pirop_mapping('rethrow', 'rethrow', '0P');
 
+# Control exception throwing.
+my %control_map := nqp::hash(
+    'next', '.CONTROL_LOOP_NEXT',
+    'last', '.CONTROL_LOOP_LAST',
+    'redo', '.CONTROL_LOOP_REDO'
+);
+QAST::Operations.add_core_op('control', -> $qastcomp, $op {
+    my $name := $op.name;
+    if nqp::existskey(%control_map, $name) {
+        my $ops := PIRT::Ops.new(:result('0'));
+        $ops.push_pirop('die', '0', %control_map{$name});
+        $ops
+    }
+    else {
+        nqp::die("Unknown control exception type '$name'");
+    }
+});
+
 # NQP box/unbox.
 for <i n s> {
     QAST::Operations.add_hll_box('nqp', $_, -> $qastcomp, $post {
