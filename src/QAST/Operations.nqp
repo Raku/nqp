@@ -1360,11 +1360,17 @@ QAST::Operations.add_core_pirop_mapping('not_i', 'not', 'Ii', :inlinable(1));
 
 # aggregate opcodes, mapping to the Parrot v-table functions
 QAST::Operations.add_core_pirop_mapping('atkey', 'set', 'PQs', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('atkey_i', 'set', 'IQs', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('atkey_n', 'set', 'NQs', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('atkey_s', 'set', 'SQs', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('atpos', 'set', 'PQi', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('atpos_i', 'set', 'IQi', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('atpos_n', 'set', 'NQi', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('atpos_s', 'set', 'SQi', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('bindkey', 'set', '1QsP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('bindkey_i', 'set', '1QsI', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('bindkey_n', 'set', '1QsN', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('bindkey_s', 'set', '1QsS', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('bindpos', 'set', '1QiP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('bindpos_i', 'set', '1Qii', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('bindpos_n', 'set', '1Qin', :inlinable(1));
