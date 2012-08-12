@@ -7,6 +7,10 @@
 #include "CArray.h"
 #include "CPointer.h"
 
+#include <stddef.h> /* offsetof() */
+
+#define ALIGNOF(type) offsetof (struct { char c; type member; }, member)
+
 /* This representation's function pointer table. */
 static REPROps *this_repr;
 
@@ -198,6 +202,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
             PMC    *type         = accessor_call(interp, attr, type_str);
             INTVAL  type_id      = REPR(type)->ID;
             INTVAL  bits         = sizeof(void *) * 8;
+            INTVAL  align;
             if (!PMC_IS_NULL(type)) {
                 /* See if it's a type that we know how to handle in a C struct. */
                 storage_spec spec = REPR(type)->get_storage_spec(interp, STABLE(type));
@@ -205,11 +210,12 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
                         (spec.boxed_primitive == STORAGE_SPEC_BP_INT ||
                          spec.boxed_primitive == STORAGE_SPEC_BP_NUM)) {
                     /* It's a boxed int or num; pretty easy. It'll just live in the
-                     * body of the struct. */
-                    /* XXX: We could mask in i here as well, but it's not
-                     * really necessary. */
-                    repr_data->attribute_locations[i] = CSTRUCT_ATTR_IN_STRUCT;
+                     * body of the struct. Instead of masking in i here (which
+                     * would be the parallel to how we handle boxed types) we
+                     * repurpose it to store the bit-width of the type, so
+                     * that get_attribute_ref can find it later. */
                     bits = spec.bits;
+                    repr_data->attribute_locations[i] = (bits << CSTRUCT_ATTR_SHIFT) | CSTRUCT_ATTR_IN_STRUCT;
                     repr_data->flattened_stables[i] = STABLE(type);
                     if (REPR(type)->initialize) {
                         if (!repr_data->initialize_slots)
@@ -253,7 +259,18 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
             }
             
             /* Do allocation. */
-            /* XXX TODO C structure needs careful alignment */
+            /* C structure needs careful alignment */
+            if(bits == 8)       { align = ALIGNOF(Parrot_Int1); }
+            else if(bits == 16) { align = ALIGNOF(Parrot_Int2); }
+            else if(bits == 32) { align = ALIGNOF(Parrot_Int4); }
+            else if(bits == 64) { align = ALIGNOF(Parrot_Int8); }
+            else {
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "CStruct representation can only handle 8, 16, 32 or 64 bit sized types");
+            }
+
+            cur_size += cur_size % align;
+
             repr_data->struct_offsets[i] = cur_size;
             cur_size += bits / 8;
         }
@@ -484,7 +501,7 @@ static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *clas
         try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
         if(bits)
-            *bits = 8*sizeof(void *);
+            *bits = repr_data->attribute_locations[slot] >> CSTRUCT_ATTR_SHIFT;
         return ((char *)body->cstruct) + repr_data->struct_offsets[slot];
     }
     
