@@ -552,7 +552,24 @@ inline op repr_get_attr_int(out INT, invar PMC, invar PMC, in STR) :base_core {
     if ($2->vtable->base_type == smo_id) {
         if (IS_CONCRETE($2)) {
             INTVAL bits = 0;
-            $1 = *((INTVAL *)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, &bits, NO_HINT));
+            void *ptr = REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, &bits, NO_HINT);
+            switch(bits) {
+            case 8:
+                $1 = (INTVAL) *((Parrot_Int1 *) ptr);
+                break;
+            case 16:
+                $1 = (INTVAL) *((Parrot_Int2 *) ptr);
+                break;
+            case 32:
+                $1 = (INTVAL) *((Parrot_Int4 *) ptr);
+                break;
+            case 64:
+                $1 = (INTVAL) *((Parrot_Int8 *) ptr);
+                break;
+            default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "repr_get_attr_int can only handle 8, 16, 32 and 64 bit ints");
+            }
         }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -578,7 +595,18 @@ inline op repr_get_attr_num(out NUM, invar PMC, invar PMC, in STR) :base_core {
     if ($2->vtable->base_type == smo_id) {
         if (IS_CONCRETE($2)) {
             INTVAL bits = 0;
-            $1 = *((FLOATVAL *)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, &bits, NO_HINT));
+            void *ptr = REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, &bits, NO_HINT);
+            switch(bits) {
+            case 32:
+                $1 = (FLOATVAL) *((Parrot_Float4 *) ptr);
+                break;
+            case 64:
+                $1 = (FLOATVAL) *((Parrot_Float8 *) ptr);
+                break;
+            default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "repr_get_attr_num can only handle 32 and 64 bit ints");
+            }
         }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -764,7 +792,24 @@ inline op repr_get_attr_int(out INT, invar PMC, invar PMC, in STR, in INT) :base
     if ($2->vtable->base_type == smo_id) {
         if (IS_CONCRETE($2)) {
             INTVAL bits = 0;
-            $1 = *((INTVAL *)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, &bits, $5));
+            void *ptr = REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, &bits, NO_HINT);
+            switch(bits) {
+            case 8:
+                $1 = (INTVAL) *((Parrot_Int1 *) ptr);
+                break;
+            case 16:
+                $1 = (INTVAL) *((Parrot_Int2 *) ptr);
+                break;
+            case 32:
+                $1 = (INTVAL) *((Parrot_Int4 *) ptr);
+                break;
+            case 64:
+                $1 = (INTVAL) *((Parrot_Int8 *) ptr);
+                break;
+            default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "repr_get_attr_int can only handle 8, 16, 32 and 64 bit ints");
+            }
         }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -791,7 +836,18 @@ inline op repr_get_attr_num(out NUM, invar PMC, invar PMC, in STR, in INT) :base
     if ($2->vtable->base_type == smo_id) {
         if (IS_CONCRETE($2)) {
             INTVAL bits = 0;
-            $1 = *((FLOATVAL *)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, &bits, $5));
+            void *ptr = REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, &bits, NO_HINT);
+            switch(bits) {
+            case 32:
+                $1 = (FLOATVAL) *((Parrot_Float4 *) ptr);
+                break;
+            case 64:
+                $1 = (FLOATVAL) *((Parrot_Float8 *) ptr);
+                break;
+            default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "repr_get_attr_num can only handle 32 and 64 bit ints");
+            }
         }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
