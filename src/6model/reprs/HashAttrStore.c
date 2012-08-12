@@ -58,7 +58,7 @@ static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
     HashAttrStoreBody *body = (HashAttrStoreBody *)data;
     return VTABLE_get_pmc_keyed_str(interp, body->store, name);
 }
-static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
+static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL *bits, INTVAL hint) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "HashAttrStore representation does not support value type attributes");
 }

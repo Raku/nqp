@@ -551,7 +551,7 @@ inline op repr_get_attr_int(out INT, invar PMC, invar PMC, in STR) :base_core {
     PMC *ch = decontainerize(interp, $3);
     if ($2->vtable->base_type == smo_id) {
         if (IS_CONCRETE($2))
-            $1 = *((INTVAL *)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, NO_HINT));
+            $1 = *((INTVAL *)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, NULL, NO_HINT));
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot look up attributes in a type object");
@@ -575,7 +575,7 @@ inline op repr_get_attr_num(out NUM, invar PMC, invar PMC, in STR) :base_core {
     PMC *ch = decontainerize(interp, $3);
     if ($2->vtable->base_type == smo_id) {
         if (IS_CONCRETE($2))
-            $1 = *((FLOATVAL *)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, NO_HINT));
+            $1 = *((FLOATVAL *)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, NULL, NO_HINT));
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot look up attributes in a type object");
@@ -600,7 +600,7 @@ inline op repr_get_attr_str(out STR, invar PMC, invar PMC, in STR) :base_core {
     PMC *ch = decontainerize(interp, $3);
     if ($2->vtable->base_type == smo_id) {
         if (IS_CONCRETE($2))
-            $1 = *((STRING **)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, NO_HINT));
+            $1 = *((STRING **)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, NULL, NO_HINT));
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot look up attributes in a type object");
@@ -757,7 +757,7 @@ inline op repr_get_attr_int(out INT, invar PMC, invar PMC, in STR, in INT) :base
     PMC *ch = decontainerize(interp, $3);
     if ($2->vtable->base_type == smo_id) {
         if (IS_CONCRETE($2))
-            $1 = *((INTVAL *)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, $5));
+            $1 = *((INTVAL *)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, NULL, $5));
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot look up attributes in a type object");
@@ -782,7 +782,7 @@ inline op repr_get_attr_num(out NUM, invar PMC, invar PMC, in STR, in INT) :base
     PMC *ch = decontainerize(interp, $3);
     if ($2->vtable->base_type == smo_id) {
         if (IS_CONCRETE($2))
-            $1 = *((FLOATVAL *)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, $5));
+            $1 = *((FLOATVAL *)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, NULL, $5));
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot look up attributes in a type object");
@@ -807,7 +807,7 @@ inline op repr_get_attr_str(out STR, invar PMC, invar PMC, in STR, in INT) :base
     PMC *ch = decontainerize(interp, $3);
     if ($2->vtable->base_type == smo_id) {
         if (IS_CONCRETE($2))
-            $1 = *((STRING **)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, $5));
+            $1 = *((STRING **)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, NULL, $5));
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot look up attributes in a type object");
