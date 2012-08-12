@@ -527,8 +527,11 @@ static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *clas
     /* Look up slot, then offset and compute address. */
     slot = hint >= 0 && !(repr_data->mi) ? hint :
         try_get_slot(interp, repr_data, class_handle, name);
-    if (slot >= 0)
+    if (slot >= 0) {
+        if (bits)
+            *bits = 8*sizeof(void *);
         return ((char *)data) + repr_data->attribute_offsets[slot];
+    }
     
     /* Otherwise, complain that the attribute doesn't exist. */
     no_such_attribute(interp, "get", class_handle, name);
