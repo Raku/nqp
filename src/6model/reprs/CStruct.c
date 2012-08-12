@@ -7,10 +7,6 @@
 #include "CArray.h"
 #include "CPointer.h"
 
-#include <stddef.h> /* offsetof() */
-
-#define ALIGNOF(type) offsetof (struct { char c; type member; }, member)
-
 /* This representation's function pointer table. */
 static REPROps *this_repr;
 
