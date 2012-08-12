@@ -108,6 +108,7 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     storage_spec spec;
     spec.inlineable = STORAGE_SPEC_INLINED;
     spec.bits = sizeof(FLOATVAL) * 8;
+    spec.align = ALIGNOF(void *);
     spec.boxed_primitive = STORAGE_SPEC_BP_NUM;
     spec.can_box = STORAGE_SPEC_CAN_BOX_NUM;
     return spec;

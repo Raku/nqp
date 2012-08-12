@@ -100,6 +100,7 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     spec.boxed_primitive = STORAGE_SPEC_BP_STR;
     spec.can_box = 0;
     spec.bits = sizeof(void *) * 8;;
+    spec.align = ALIGNOF(void *);
     return spec;
 }
 

@@ -808,6 +808,8 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     spec.inlineable = STORAGE_SPEC_REFERENCE;
     spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
     spec.can_box = 0;
+    spec.bits = sizeof(void *);
+    spec.align = ALIGNOF(void *);
     if (repr_data->unbox_int_slot >= 0)
         spec.can_box += STORAGE_SPEC_CAN_BOX_INT;
     if (repr_data->unbox_num_slot >= 0)
