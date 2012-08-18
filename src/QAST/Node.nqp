@@ -100,4 +100,8 @@ class QAST::Node {
             (%uniques{$prefix} := 1);
         $prefix ~ '_' ~ $id
     }
+
+    method evaluate_unquotes(@unquotes) {
+        nqp::die(self.HOW.name(self) ~ " does not support evaluating unquotes");
+    }
 }

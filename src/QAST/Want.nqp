@@ -8,4 +8,16 @@ class QAST::Want is QAST::Node {
     method compile_time_value() {
         self[0].compile_time_value()
     }
+
+    method evaluate_unquotes(@unquotes) {
+        say('want');
+        my $result := pir::repr_clone__PP(self);
+        my $i := 0;
+        my $elems := +@(self);
+        while $i < $elems {
+            $result[$i] := self[$i].evaluate_unquotes(@unquotes);
+            $i := $i + 2;
+        }
+        $result
+    }
 }

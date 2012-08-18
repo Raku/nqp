@@ -4,4 +4,8 @@ class QAST::WVal is QAST::Node does QAST::CompileTimeValue {
             ?? self.set_compile_time_value(@value[0])
             !! self.compile_time_value()
     }
+
+    method evaluate_unquotes(@unquotes) {
+        self
+    }
 }
