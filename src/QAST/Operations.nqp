@@ -547,11 +547,15 @@ for ('', 'repeat_') -> $repness {
             # Emit the prelude.
             my $ops := PIRT::Ops.new();
             $ops.result($res_reg);
-            my $exc_reg := $*REGALLOC.fresh_p();
-            $ops.push_pirop('new', $exc_reg, "'ExceptionHandler'",
-                '[.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]');
-            $ops.push_pirop('set_label', $exc_reg, $hand_lbl);
-            $ops.push_pirop('push_eh', $exc_reg);
+
+            my $exc_reg;
+            if $handler {
+                $exc_reg := $*REGALLOC.fresh_p();
+                $ops.push_pirop('new', $exc_reg, "'ExceptionHandler'",
+                    '[.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]');
+                $ops.push_pirop('set_label', $exc_reg, $hand_lbl);
+                $ops.push_pirop('push_eh', $exc_reg);
+            }
             
             # Test the condition and jump to the loop end if it's
             # not met.
@@ -590,15 +594,17 @@ for ('', 'repeat_') -> $repness {
             $ops.push_pirop('goto ' ~ $test_lbl.result);
 
             # Emit postlude, with exception handlers.
-            $ops.push($hand_lbl);
-            $ops.push_pirop('.get_results', '(' ~ $exc_reg ~ ')');
-            $ops.push_pirop('pop_upto_eh', $exc_reg);
-            $ops.push_pirop('getattribute', $exc_reg, $exc_reg, "'type'");
-            $ops.push_pirop('eq', $exc_reg, '.CONTROL_LOOP_NEXT',
-                $operands == 3 ?? $next_lbl !! $test_lbl);
-            $ops.push_pirop('eq', $exc_reg, '.CONTROL_LOOP_REDO', $redo_lbl);
-            $ops.push($done_lbl);
-            $ops.push_pirop('pop_eh');
+            if $handler {
+                $ops.push($hand_lbl);
+                $ops.push_pirop('.get_results', '(' ~ $exc_reg ~ ')');
+                $ops.push_pirop('pop_upto_eh', $exc_reg);
+                $ops.push_pirop('getattribute', $exc_reg, $exc_reg, "'type'");
+                $ops.push_pirop('eq', $exc_reg, '.CONTROL_LOOP_NEXT',
+                    $operands == 3 ?? $next_lbl !! $test_lbl);
+                $ops.push_pirop('eq', $exc_reg, '.CONTROL_LOOP_REDO', $redo_lbl);
+                $ops.push($done_lbl);
+                $ops.push_pirop('pop_eh');
+            }
 
             $ops;
         });
