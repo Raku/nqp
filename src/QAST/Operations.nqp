@@ -510,11 +510,6 @@ QAST::Operations.add_core_op('ifnull', :inlinable(1), -> $qastcomp, $op {
 for ('', 'repeat_') -> $repness {
     for <while until> -> $op_name {
         QAST::Operations.add_core_op("$repness$op_name", :inlinable(1), -> $qastcomp, $op {
-            # Check operand count.
-            my $operands := +$op.list;
-            pir::die("Operation '$repness$op_name' needs 2 or 3 operands")
-                if $operands != 2 && $operands != 3;
-
             # Create labels.
             my $while_id := $qastcomp.unique($op_name);
             my $test_lbl := PIRT::Label.new(:name($while_id ~ '_test'));
@@ -527,18 +522,27 @@ for ('', 'repeat_') -> $repness {
             # types and pick an overall result type if in non-void context.
             my @comp_ops;
             my @comp_types;
+            my $handler := 1;
             my $*IMM_ARG;
             for $op.list {
-                my $*HAVE_IMM_ARG := $_.arity > 0 && $_ =:= $op.list[1];
-                my $comp := $qastcomp.as_post($_);
-                @comp_ops.push($comp);
-                @comp_types.push($qastcomp.infer_type($comp.result));
-                if $*HAVE_IMM_ARG && !$*IMM_ARG {
-                    nqp::die("$op_name block expects an argument, but there's no immediate block to take it");
+                if $_.named eq 'nohandler' { $handler := 0; }
+                else {
+                    my $*HAVE_IMM_ARG := $_.arity > 0 && $_ =:= $op.list[1];
+                    my $comp := $qastcomp.as_post($_);
+                    @comp_ops.push($comp);
+                    @comp_types.push($qastcomp.infer_type($comp.result));
+                    if $*HAVE_IMM_ARG && !$*IMM_ARG {
+                        nqp::die("$op_name block expects an argument, but there's no immediate block to take it");
+                    }
                 }
             }
             my $res_type := @comp_types[0] eq @comp_types[1] ?? nqp::lc(@comp_types[0]) !! 'p';
             my $res_reg  := $*REGALLOC."fresh_$res_type"();
+
+            # Check operand count.
+            my $operands := +@comp_ops;
+            pir::die("Operation '$repness$op_name' needs 2 or 3 operands")
+                if $operands != 2 && $operands != 3;
 
             # Emit the prelude.
             my $ops := PIRT::Ops.new();
