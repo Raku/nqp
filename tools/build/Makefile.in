@@ -120,7 +120,7 @@ CORE_SETTING_SOURCES = \
 CORE_SETTING_NQP = NQPCORE.setting
 
 STAGE0_SOURCES = \
-  	src/stage0/NQPMO-s0.pir \
+	src/stage0/NQPMO-s0.pir \
 	src/stage0/ModuleLoader-s0.pir \
 	src/stage0/NQPCORE.setting-s0.pir \
 	src/stage0/QRegex-s0.pir \
@@ -128,8 +128,7 @@ STAGE0_SOURCES = \
 	src/stage0/QAST-s0.pir \
 	src/stage0/P6QRegex-s0.pir \
 	src/stage0/NQP-s0.pir
-  
-  
+
 STAGE0 = src/stage0
 STAGE1 = src/stage1
 STAGE2 = src/stage2
