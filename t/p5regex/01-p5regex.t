@@ -64,7 +64,7 @@ sub test_line($line) {
 my $tests := 0;
 for @files -> $fn {
     say("# file: $fn");
-    my $contents := slurp('t/qregex/' ~ $fn);
+    my $contents := slurp('t/p5regex/' ~ $fn);
     my @lines    := nqp::split("\n", $contents);
 
     for @lines -> $l {
