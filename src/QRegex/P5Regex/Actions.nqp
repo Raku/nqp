@@ -140,7 +140,19 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                 QAST::Regex.new( :rxtype<altseq>, |@alts );
         make $qast;
     }
+    
+    method p5backslash:sym<s>($/) {
+        make QAST::Regex.new(:rxtype<cclass>, '.CCLASS_WHITESPACE', 
+                             :subtype($<sym> eq 'n' ?? 'nl' !! ~$<sym>),
+                             :negate($<sym> le 'Z'), :node($/));
+    }
 
+    method p5backslash:sym<b>($/) {
+        make QAST::Regex.new(:rxtype<subrule>, :subtype<method>,
+                             :node($/), PAST::Node.new('wb'), 
+                             :negate($<sym> eq 'B'), :name('') );
+    }
+    
     method p5backslash:sym<misc>($/) {
         my $qast := QAST::Regex.new( ~$/ , :rxtype('literal'), :node($/) );
         make $qast;
@@ -262,18 +274,6 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         make $qast;
     }
 
-    method backslash:sym<s>($/) {
-        make QAST::Regex.new(:rxtype<cclass>, '.CCLASS_WHITESPACE', 
-                             :subtype($<sym> eq 'n' ?? 'nl' !! ~$<sym>), 
-                             :negate($<sym> le 'Z'), :node($/));
-    }
-
-    method backslash:sym<b>($/) {
-        my $qast := QAST::Regex.new( "\b", :rxtype('enumcharlist'),
-                        :negate($<sym> eq 'B'), :node($/) );
-        make $qast;
-    }
-
     method backslash:sym<e>($/) {
         my $qast := QAST::Regex.new( "\c[27]", :rxtype('enumcharlist'),
                         :negate($<sym> eq 'E'), :node($/) );
@@ -333,11 +333,6 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         make QAST::Regex.new( $<charspec>.ast, :rxtype('literal'), :node($/) );
     }
 
-    method backslash:sym<misc>($/) {
-        my $qast := QAST::Regex.new( ~$/ , :rxtype('literal'), :node($/) );
-        make $qast;
-    }
-
     method assertion:sym<?>($/) {
         my $qast;
         if $<assertion> {
@@ -359,22 +354,6 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         }
         else {
             $qast := QAST::Regex.new( :rxtype<anchor>, :subtype<fail>, :node($/) );
-        }
-        make $qast;
-    }
-
-    method assertion:sym<|>($/) {
-        my $qast;
-        my $name := ~$<identifier>;
-        if $name eq 'c' {
-            # codepoint boundaries alway match in
-            # our current Unicode abstraction level
-            $qast := 0;
-        }
-        elsif $name eq 'w' {
-            $qast := QAST::Regex.new(:rxtype<subrule>, :subtype<method>,
-                                     :node($/), PAST::Node.new('wb'), 
-                                     :name('') );
         }
         make $qast;
     }

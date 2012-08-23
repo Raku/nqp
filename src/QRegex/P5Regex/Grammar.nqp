@@ -40,7 +40,6 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
         [
         | \w
         | <metachar=p5metachar>
-        | '\\' {} $<esc>=.
         ]
     }
 
@@ -50,7 +49,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
         <quantifier=p5quantifier>
         <.panic: "quantifier quantifies nothing">
     }
-    token p5metachar:sym<bs> { <sym> <backslash=p5backslash> }
+    token p5metachar:sym<bs> { \\ <backslash=p5backslash> }
     token p5metachar:sym<.>  { <sym> }
     token p5metachar:sym<^>  { <sym> }
     token p5metachar:sym<$>  {
@@ -77,7 +76,11 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     }
 
     proto token p5backslash { <...> }
+    
+    token p5backslash:sym<b> { $<sym>=[<[bB]>] }
+    token p5backslash:sym<s> { $<sym>=[<[dDnNsSwW]>] }
     token p5backslash:sym<misc> { \W }
+    token p5backslash:sym<oops> { <.panic: "Unrecognized Perl 5 regex backslash sequence"> }
 
     proto token p5assertion { <...> }
 
@@ -142,8 +145,6 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     }
 
     proto token backslash { <...> }
-    token backslash:sym<s> { $<sym>=[<[dDnNsSwW]>] }
-    token backslash:sym<b> { $<sym>=[<[bB]>] }
     token backslash:sym<e> { $<sym>=[<[eE]>] }
     token backslash:sym<f> { $<sym>=[<[fF]>] }
     token backslash:sym<h> { $<sym>=[<[hH]>] }
@@ -158,13 +159,11 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     token backslash:sym<Z> { 'Z' <.obs: '\\Z as end-of-string matcher', '\\n?$'> }
     token backslash:sym<Q> { 'Q' <.obs: '\\Q as quotemeta', 'quotes or literal variable match'> }
     token backslash:sym<unrec> { {} \w <.panic: 'Unrecognized backslash sequence'> }
-    token backslash:sym<misc> { \W }
 
     proto token assertion { <...> }
 
     token assertion:sym<?> { '?' [ <?before '>' > | <assertion> ] }
     token assertion:sym<!> { '!' [ <?before '>' > | <assertion> ] }
-    token assertion:sym<|> { '|' <identifier> }
 
     token assertion:sym<method> {
         '.' <assertion>
