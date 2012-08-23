@@ -59,19 +59,25 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     token p5metachar:sym<[ ]> { <?before '['> <cclass> }
     
     token cclass {
+        :my $pastfirst := 0;
         '['
         $<sign>=['^'|<?>]
-        $<charspec>=(
-            \s* ( '\\' <backslash> || (<-[\]\\]>) )
-            [
-                \s* '-' \s*
-                ( '\\' <backslash> || (<-[\]\\]>) )
-            ]?
-        )*
-        \s* ']'
+        [
+        || $<charspec>=(
+               \s* ( '\\' <backslash=p5backslash> || (<?{ $pastfirst == 0 }> <-[\\]> || <-[\]\\]>) )
+               [
+                   \s* '-' \s*
+                   ( '\\' <backslash=p5backslash> || (<-[\]\\]>) )
+               ]?
+               { $pastfirst++ }
+           )+
+           \s* ']'
+        || <.panic: "failed to parse character class; unescaped ']'?">
+        ]
     }
 
     proto token p5backslash { <...> }
+    token p5backslash:sym<misc> { \W }
 
     proto token p5assertion { <...> }
 

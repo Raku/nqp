@@ -35,3 +35,7 @@
 [\]]			]			y	escaped close bracket
 [A-Z0-9]		abcdef		n	two enumerated ranges
 [A-Z0-9]		abcDef		y	two enumerated ranges
+a[[]b		a[b		y	first char of charclass special
+a[[]b		ab		n	first char of charclass special
+a[]]b		a]b		y	first char of charclass special
+a[]]b		ab		n	first char of charclass special

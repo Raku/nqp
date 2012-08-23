@@ -141,6 +141,10 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         make $qast;
     }
 
+    method p5backslash:sym<misc>($/) {
+        my $qast := QAST::Regex.new( ~$/ , :rxtype('literal'), :node($/) );
+        make $qast;
+    }
     
     method p5quantifier:sym<*>($/) {
         my $qast := QAST::Regex.new( :rxtype<quant>, :min(0), :max(-1), :node($/) );
