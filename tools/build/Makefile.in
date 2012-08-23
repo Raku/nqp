@@ -99,6 +99,11 @@ P6QREGEX_SOURCES = \
   src/QRegex/P6Regex/Actions.nqp \
   src/QRegex/P6Regex/Compiler.nqp \
 
+P5QREGEX_SOURCES = \
+  src/QRegex/P5Regex/Grammar.nqp \
+  src/QRegex/P5Regex/Actions.nqp \
+  src/QRegex/P5Regex/Compiler.nqp \
+
 QREGEX_COMBINED = QRegex.nqp
 QREGEX_PIR = QRegex.pir
 QREGEX_PBC = QRegex.pbc
@@ -150,6 +155,10 @@ P6REGEX_COMBINED_PIR = gen/NQPP6Regex.pir
 P6QREGEX_PBC          = NQPP6QRegex.pbc
 P6QREGEX_COMBINED     = gen/NQPP6QRegex.pm
 P6QREGEX_COMBINED_PIR = gen/NQPP6QRegex.pir
+
+P5QREGEX_PBC          = NQPP5QRegex.pbc
+P5QREGEX_COMBINED     = gen/NQPP5QRegex.pm
+P5QREGEX_COMBINED_PIR = gen/NQPP5QRegex.pir
 
 NQP_COMBINED     = gen/NQP.pm
 NQP_COMBINED_PIR = gen/NQP.pir
@@ -518,7 +527,7 @@ CLEANUPS = \
   3rdparty/sha1/*$(O) \
   $(DYNEXT_DIR)/*$(LOAD_EXT) \
 
-all: $(NQP_EXE)
+all: $(NQP_EXE) $(P5QREGEX_PBC)
 
 install: all
 	$(MKPATH)                   $(DESTDIR)$(PARROT_LIBRARY_DIR)
@@ -527,6 +536,7 @@ install: all
 	$(MKPATH)                   $(DESTDIR)$(NQP_LANG_DIR)/lib
 	$(CP)  $(QAST_PBC)          $(DESTDIR)$(NQP_LANG_DIR)/lib/$(QAST_PBC)
 	$(CP)  $(P6QREGEX_PBC)      $(DESTDIR)$(NQP_LANG_DIR)/lib/$(P6QREGEX_PBC)
+	$(CP)  $(P5QREGEX_PBC)      $(DESTDIR)$(NQP_LANG_DIR)/lib/$(P5QREGEX_PBC)
 	$(CP)  $(HLL_PBC)           $(DESTDIR)$(NQP_LANG_DIR)/lib/$(HLL_PBC)
 	$(CP)  $(CORE_SETTING_PBC)  $(DESTDIR)$(NQP_LANG_DIR)/lib/$(CORE_SETTING_PBC)
 	$(CP)  $(NQP_MO_PBC)        $(DESTDIR)$(NQP_LANG_DIR)/lib/$(NQP_MO_PBC)
@@ -714,6 +724,13 @@ $(ALL_PBCS): $(STAGE2_PBCS)
 
 $(NQP_EXE): $(NQP_PBC) $(PARROT_DLL_COPY)
 	$(PBC_TO_EXE) $(NQP_PBC)
+
+$(P5QREGEX_PBC): $(NQP_EXE) $(P5QREGEX_SOURCES)
+	$(MKPATH) $(STAGE2)/gen
+	$(PERL) tools/build/gen-cat.pl $(P5QREGEX_SOURCES) > $(STAGE2)/$(P5QREGEX_COMBINED)
+	$(NQP_EXE) --target=pir --output=$(STAGE2)/$(P5QREGEX_COMBINED_PIR) \
+	    $(STAGE2)/$(P5QREGEX_COMBINED)
+	$(PARROT) -o $(P5QREGEX_PBC) $(STAGE2)/$(P5QREGEX_COMBINED_PIR)
 
 @make_dllcopy@
 
