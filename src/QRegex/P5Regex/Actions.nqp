@@ -83,32 +83,39 @@ class QRegex::P5Regex::Actions is HLL::Actions {
             QAST::Regex.new( :rxtype<anchor>, :subtype<eos>, :node($/) )
         );
     }
-
     
-    # XXX Below here copied from p6regex; needs review
-    
-    method quantifier:sym<*>($/) {
+    method p5quantifier:sym<*>($/) {
         my $qast := QAST::Regex.new( :rxtype<quant>, :min(0), :max(-1), :node($/) );
-        make backmod($qast, $<backmod>);
+        make quantmod($qast, $<quantmod>);
     }
 
-    method quantifier:sym<+>($/) {
+    method p5quantifier:sym<+>($/) {
         my $qast := QAST::Regex.new( :rxtype<quant>, :min(1), :max(-1), :node($/) );
-        make backmod($qast, $<backmod>);
+        make quantmod($qast, $<quantmod>);
     }
 
-    method quantifier:sym<?>($/) {
+    method p5quantifier:sym<?>($/) {
         my $qast := QAST::Regex.new( :rxtype<quant>, :min(0), :max(1), :node($/) );
-        make backmod($qast, $<backmod>);
+        make quantmod($qast, ~$<quantmod>);
+    }
+    
+    method p5quantifier:sym<{ }>($/) {
+        my $qast;
+        $qast := QAST::Regex.new( :rxtype<quant>, :min(+$<start>), :node($/) );
+        if $<end>      { $qast.max(+$<end>[0]); }
+        elsif $<comma> { $qast.max(-1); }
+        else           { $qast.max($qast.min); }
+        make quantmod($qast, $<quantmod>);
+    }
+    
+    sub quantmod($ast, $mod) {
+        if    $mod eq '?' { $ast.backtrack('f') }
+        elsif $mod eq '+' { $ast.backtrack('g') }
+        $ast;
     }
 
-    method quantifier:sym<**>($/) {
-        my $qast;
-        $qast := QAST::Regex.new( :rxtype<quant>, :min(+$<min>), :max(-1), :node($/) );
-        if ! $<max> { $qast.max(+$<min>) }
-        elsif $<max>[0] ne '*' { $qast.max(+$<max>[0]); }
-        make backmod($qast, $<backmod>);
-    }
+
+    # XXX Below here copied from p6regex; needs review
 
     method metachar:sym<ws>($/) {
         my $qast := %*RX<s>
@@ -467,13 +474,6 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         my $n := $<n>[0] gt '' ?? +$<n>[0] !! 1;
         %*RX{ ~$<mod_ident><sym> } := $n;
         make 0;
-    }
-
-    sub backmod($ast, $backmod) {
-        if $backmod eq ':' { $ast.backtrack('r') }
-        elsif $backmod eq ':?' || $backmod eq '?' { $ast.backtrack('f') }
-        elsif $backmod eq ':!' || $backmod eq '!' { $ast.backtrack('g') }
-        $ast;
     }
 
     our sub buildsub($qast, $block = PAST::Block.new(:blocktype<method>), :$anon) {

@@ -62,6 +62,18 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     proto token p5assertion { <...> }
 
     proto token p5quantifier { <...> }
+    
+    token p5quantifier:sym<*>  { <sym> <quantmod> }
+    token p5quantifier:sym<+>  { <sym> <quantmod> }
+    token p5quantifier:sym<?>  { <sym> <quantmod> }
+    token p5quantifier:sym<{ }> {
+        '{' 
+        $<start>=[\d+] 
+        [ $<comma>=',' $<end>=[\d*] ]?
+        '}' <quantmod>
+    }
+    
+    token quantmod { [ '?' | '+' ]? }
 
     proto token p5mod_internal { <...> }
 
@@ -82,29 +94,6 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     }
 
     rule arglist { <arg> [ ',' <arg>]* }
-
-    proto token quantifier { <...> }
-    token quantifier:sym<*> { <sym> <backmod> }
-    token quantifier:sym<+> { <sym> <backmod> }
-    token quantifier:sym<?> { <sym> <backmod> }
-    token quantifier:sym<{N,M}> { {} '{' (\d+) (','?) (\d*) '}'
-        <.obs: '{N,M} as general quantifier', '** N..M (or ** N..*)'>
-    }
-    token quantifier:sym<**> {
-        <sym> <normspace>? <backmod> <normspace>?
-        [
-        ||  $<min>=[\d+] 
-            [   '..' 
-                $<max>=[ 
-                       || \d+ 
-                       || '*' 
-                       || <.panic: "Only integers or '*' allowed as range quantifier endpoint"> 
-                       ] 
-            ]?
-        ]
-    }
-
-    token backmod { ':'? [ '?' | '!' | <!before ':'> ] }
 
     proto token metachar { <...> }
     token metachar:sym<ws> { <.normspace> }
