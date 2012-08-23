@@ -107,17 +107,6 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     token metachar:sym<to>   { ')>' }
     token metachar:sym<mod> { <mod_internal> }
 
-    ## we cheat here, really should be regex_infix:sym<~>
-    token metachar:sym<~> {
-        <sym>
-        <.ws> <GOAL=.quantified_atom>
-        <.ws> <EXPR=.quantified_atom>
-    }
-
-    token metachar:sym<{*}> {
-        <sym>
-        [ \h* '#= ' \h* $<key>=[\S+ [\h+ \S+]*] ]?
-    }
     token metachar:sym<assert> {
         '<' <assertion>
         [ '>' || <.panic: 'regex assertion not terminated by angle bracket'> ]
@@ -130,10 +119,6 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
         ]
 
         [ <.ws> '=' <.ws> <quantified_atom> ]?
-    }
-
-    token metachar:sym<PIR> {
-        ':PIR{{' $<pir>=[.*?] '}}'
     }
 
     proto token backslash { <...> }
