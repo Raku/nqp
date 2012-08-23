@@ -527,7 +527,7 @@ CLEANUPS = \
   3rdparty/sha1/*$(O) \
   $(DYNEXT_DIR)/*$(LOAD_EXT) \
 
-all: $(NQP_EXE) $(P5QREGEX_PBC)
+all: $(NQP_EXE)
 
 install: all
 	$(MKPATH)                   $(DESTDIR)$(PARROT_LIBRARY_DIR)
