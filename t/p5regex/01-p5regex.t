@@ -5,7 +5,8 @@ use NQPP5QRegex;
 my @files := [
     'rx_basic',
     'rx_quantifiers',
-    'rx_charclass'
+    'rx_charclass',
+    'rx_metachars'
 ];
 
 my %expansions;
