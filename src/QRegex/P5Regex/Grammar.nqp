@@ -56,6 +56,20 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     token p5metachar:sym<$>  {
         '$' <?before \W | $>
     }
+    token p5metachar:sym<[ ]> { <?before '['> <cclass> }
+    
+    token cclass {
+        '['
+        $<sign>=['^'|<?>]
+        $<charspec>=(
+            \s* ( '\\' <backslash> || (<-[\]\\]>) )
+            [
+                \s* '-' \s*
+                ( '\\' <backslash> || (<-[\]\\]>) )
+            ]?
+        )*
+        \s* ']'
+    }
 
     proto token p5backslash { <...> }
 
@@ -159,27 +173,6 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
             | '(' <arglist> ')'
             | <.normspace> <nibbler>
             ]?
-    }
-
-    token assertion:sym<[> { <?before '['|'+'|'-'|':'> <cclass_elem>+ }
-
-    token cclass_elem {
-        $<sign>=['+'|'-'|<?>]
-        <.normspace>?
-        [
-        | '[' $<charspec>=(
-                  || \s* '-' <!before \s* ']'> <.obs: '- as character range','.. for range, for explicit - in character class, escape it or place as last thing'>
-                  || \s* ( '\\' <backslash> || (<-[\]\\]>) )
-                     [
-                         \s* '..' \s*
-                         ( '\\' <backslash> || (<-[\]\\]>) )
-                     ]?
-              )*
-          \s* ']'
-        | $<name>=[\w+]
-        | ':' $<invert>=['!'|<?>] $<uniprop>=[\w+]
-        ]
-        <.normspace>?
     }
 
     token mod_internal {

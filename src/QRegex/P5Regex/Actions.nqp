@@ -84,6 +84,64 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         );
     }
     
+    method p5metachar:sym<[ ]>($/) {
+        make $<cclass>.ast;
+    }
+    
+    method cclass($/) {
+        my $str := '';
+        my $qast;
+        my @alts;
+        for $<charspec> {
+            if $_[1] {
+                my $node;
+                my $lhs;
+                my $rhs;
+                if $_[0]<backslash> {
+                    $node := $_[0]<backslash>.ast;
+                    $/.CURSOR.panic("Illegal range endpoint in regex: " ~ ~$_)
+                        if $node.rxtype ne 'literal' && $node.rxtype ne 'enumcharlist'
+                            || $node.negate || nqp::chars($node[0]) != 1;
+                    $lhs := $node[0];
+                }
+                else {
+                    $lhs := ~$_[0][0];
+                }
+                if $_[1][0]<backslash> {
+                    $node := $_[1][0]<backslash>.ast;
+                    $/.CURSOR.panic("Illegal range endpoint in regex: " ~ ~$_)
+                        if $node.rxtype ne 'literal' && $node.rxtype ne 'enumcharlist'
+                            || $node.negate || nqp::chars($node[0]) != 1;
+                    $rhs := $node[0];
+                }
+                else {
+                    $rhs := ~$_[1][0][0];
+                }
+                my $ord0 := nqp::ord($lhs);
+                my $ord1 := nqp::ord($rhs);
+                $/.CURSOR.panic("Illegal reversed character range in regex: " ~ ~$_)
+                    if $ord0 > $ord1;
+                $str := nqp::concat($str, nqp::chr($ord0++)) while $ord0 <= $ord1;
+            }
+            elsif $_[0]<backslash> {
+                my $bs := $_[0]<backslash>.ast;
+                $bs.negate(!$bs.negate) if $<sign> eq '^';
+                @alts.push($bs);
+            }
+            else { $str := $str ~ ~$_[0]; }
+        }
+        @alts.push(QAST::Regex.new( $str, :rxtype<enumcharlist>, :node($/), :negate( $<sign> eq '^' ) ))
+            if nqp::chars($str);
+        $qast := +@alts == 1 ?? @alts[0] !!
+            $<sign> eq '^' ??
+                QAST::Regex.new( :rxtype<concat>, :node($/),
+                    QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, |@alts ), 
+                    QAST::Regex.new( :rxtype<cclass>, :subtype<.> ) ) !!
+                QAST::Regex.new( :rxtype<altseq>, |@alts );
+        make $qast;
+    }
+
+    
     method p5quantifier:sym<*>($/) {
         my $qast := QAST::Regex.new( :rxtype<quant>, :min(0), :max(-1), :node($/) );
         make quantmod($qast, $<quantmod>);
@@ -354,31 +412,6 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         }
         make $qast;
     }
-
-    method assertion:sym<[>($/) {
-        my $clist := $<cclass_elem>;
-        my $qast  := $clist[0].ast;
-        if $qast.negate && $qast.rxtype eq 'subrule' {
-            $qast.subtype('zerowidth');
-            $qast := QAST::Regex.new(:rxtype<concat>, :node($/),
-                                     $qast, 
-                                     QAST::Regex.new( :rxtype<cclass>, :subtype<.> ));
-        }
-        my $i := 1;
-        my $n := +$clist;
-        while $i < $n {
-            my $ast := $clist[$i].ast;
-            if $ast.negate {
-                $ast.subtype('zerowidth');
-                $qast := QAST::Regex.new( $ast, $qast, :rxtype<concat>, :node($/));
-            }
-            else {
-                $qast := QAST::Regex.new( $qast, $ast, :rxtype<altseq>, :node($/));
-            }
-            $i++;
-        }
-        make $qast;
-    }
     
     method arg($/) {
         make $<quote_EXPR> ?? $<quote_EXPR>.ast !! +$<val>;
@@ -388,73 +421,6 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         my $past := PAST::Op.new( :pasttype('list') );
         for $<arg> { $past.push( $_.ast ); }
         make $past;
-    }
-
-    method cclass_elem($/) {
-        my $str := '';
-        my $qast;
-        if $<name> {
-            my $name := ~$<name>;
-            $qast := QAST::Regex.new( PAST::Node.new($name), :rxtype<subrule>, :subtype<method>,
-                                      :negate( $<sign> eq '-' ), :node($/) );
-        }
-        elsif $<uniprop> {
-            my $uniprop := ~$<uniprop>;
-            $qast := QAST::Regex.new( $uniprop, :rxtype<uniprop>,
-                                      :negate( $<sign> eq '-' && $<invert> ne '!' # $<sign> ^^ $<invert>
-                                        || $<sign> ne '-' && $<invert> eq '!' ), :node($/) );
-        }
-        else {
-            my @alts;
-            for $<charspec> {
-                if $_[1] {
-                    my $node;
-                    my $lhs;
-                    my $rhs;
-                    if $_[0]<backslash> {
-                        $node := $_[0]<backslash>.ast;
-                        $/.CURSOR.panic("Illegal range endpoint in regex: " ~ ~$_)
-                            if $node.rxtype ne 'literal' && $node.rxtype ne 'enumcharlist'
-                                || $node.negate || nqp::chars($node[0]) != 1;
-                        $lhs := $node[0];
-                    }
-                    else {
-                        $lhs := ~$_[0][0];
-                    }
-                    if $_[1][0]<backslash> {
-                        $node := $_[1][0]<backslash>.ast;
-                        $/.CURSOR.panic("Illegal range endpoint in regex: " ~ ~$_)
-                            if $node.rxtype ne 'literal' && $node.rxtype ne 'enumcharlist'
-                                || $node.negate || nqp::chars($node[0]) != 1;
-                        $rhs := $node[0];
-                    }
-                    else {
-                        $rhs := ~$_[1][0][0];
-                    }
-                    my $ord0 := nqp::ord($lhs);
-                    my $ord1 := nqp::ord($rhs);
-                    $/.CURSOR.panic("Illegal reversed character range in regex: " ~ ~$_)
-                        if $ord0 > $ord1;
-                    $str := nqp::concat($str, nqp::chr($ord0++)) while $ord0 <= $ord1;
-                }
-                elsif $_[0]<backslash> {
-                    my $bs := $_[0]<backslash>.ast;
-                    $bs.negate(!$bs.negate) if $<sign> eq '-';
-                    @alts.push($bs);
-                }
-                else { $str := $str ~ ~$_[0]; }
-            }
-            @alts.push(QAST::Regex.new( $str, :rxtype<enumcharlist>, :node($/), :negate( $<sign> eq '-' ) ))
-                if nqp::chars($str);
-            $qast := +@alts == 1 ?? @alts[0] !!
-                $<sign> eq '-' ??
-                    QAST::Regex.new( :rxtype<concat>, :node($/),
-                        QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, |@alts ), 
-                        QAST::Regex.new( :rxtype<cclass>, :subtype<.> ) ) !!
-                    QAST::Regex.new( :rxtype<altseq>, |@alts );
-        }
-        #$qast.negate( $<sign> eq '-' );
-        make $qast;
     }
 
     method mod_internal($/) {
