@@ -35,8 +35,27 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
         [ <.ws> <quantifier=p5quantifier> ]?
         <.ws>
     }
+    
+    token atom {
+        [
+        | \w
+        | <metachar=p5metachar>
+        | '\\' {} $<esc>=.
+        ]
+    }
 
     proto token p5metachar { <...> }
+    
+    token p5metachar:sym<quant> {
+        <quantifier=p5quantifier>
+        <.panic: "quantifier quantifies nothing">
+    }
+    token p5metachar:sym<bs> { <sym> <backslash=p5backslash> }
+    token p5metachar:sym<.>  { <sym> }
+    token p5metachar:sym<^>  { <sym> }
+    token p5metachar:sym<$>  {
+        '$' <?before \W | $>
+    }
 
     proto token p5backslash { <...> }
 
@@ -63,14 +82,6 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     }
 
     rule arglist { <arg> [ ',' <arg>]* }
-    
-    token atom {
-        # :dba('regex atom')
-        [
-        | \w [ \w+! <?before \w> ]?
-        | <metachar>
-        ]
-    }
 
     proto token quantifier { <...> }
     token quantifier:sym<*> { <sym> <backmod> }
@@ -101,22 +112,11 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     token metachar:sym<( )> { '(' <nibbler> ')' }
     token metachar:sym<'> { <?[']> <quote_EXPR: ':q'> }
     token metachar:sym<"> { <?["]> <quote_EXPR: ':qq'> }
-    token metachar:sym<.> { <sym> }
-    token metachar:sym<^> { <sym> }
-    token metachar:sym<^^> { <sym> }
-    token metachar:sym<$> { <sym> }
-    token metachar:sym<$$> { <sym> }
-    token metachar:sym<:::> { <sym> <.panic: '::: not yet implemented'> }
-    token metachar:sym<::> { <sym> <.panic: ':: not yet implemented'> }
     token metachar:sym<lwb> { $<sym>=['<<'|'«'] }
     token metachar:sym<rwb> { $<sym>=['>>'|'»'] }
     token metachar:sym<from> { '<(' }
     token metachar:sym<to>   { ')>' }
-    token metachar:sym<bs> { \\ <backslash> }
     token metachar:sym<mod> { <mod_internal> }
-    token metachar:sym<quantifier> {
-        <quantifier> <.panic: 'Quantifier quantifies nothing'>
-    }
 
     ## we cheat here, really should be regex_infix:sym<~>
     token metachar:sym<~> {

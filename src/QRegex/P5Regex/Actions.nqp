@@ -42,8 +42,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
             $ast.unshift($qast);
             $qast := $ast;
         }
-        $qast.backtrack('r') if $qast && !$qast.backtrack &&
-            (%*RX<r> || $<backmod> && ~$<backmod>[0] eq ':');
+        $qast.backtrack('r') if $qast && !$qast.backtrack && %*RX<r>;
         make $qast;
     }
 
@@ -51,13 +50,43 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         if $<metachar> {
             make $<metachar>.ast;
         }
+        elsif $<esc> {
+            my $qast := QAST::Regex.new( ~$<esc>, :rxtype<literal>, :node($/));
+            make $qast;
+        }
         else {
             my $qast := QAST::Regex.new( ~$/, :rxtype<literal>, :node($/));
             $qast.subtype('ignorecase') if %*RX<i>;
             make $qast;
         }
     }
+    
+    method p5metachar:sym<bs>($/) {
+        make $<backslash>.ast;
+    }
+    
+    method p5metachar:sym<.>($/) {
+        make QAST::Regex.new( :rxtype<cclass>, :subtype<.>, :node($/) );
+    }
 
+    method p5metachar:sym<^>($/) {
+        make QAST::Regex.new( :rxtype<anchor>, :subtype<bos>, :node($/) );
+    }
+
+    method p5metachar:sym<$>($/) {
+        make QAST::Regex.new(
+            :rxtype('concat'),
+            QAST::Regex.new(
+                :rxtype('quant'), :min(0), :max(1),
+                QAST::Regex.new( :rxtype('literal'), "\n" )
+            ),
+            QAST::Regex.new( :rxtype<anchor>, :subtype<eos>, :node($/) )
+        );
+    }
+
+    
+    # XXX Below here copied from p6regex; needs review
+    
     method quantifier:sym<*>($/) {
         my $qast := QAST::Regex.new( :rxtype<quant>, :min(0), :max(-1), :node($/) );
         make backmod($qast, $<backmod>);
@@ -117,26 +146,6 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         make $qast;
     }
 
-    method metachar:sym<.>($/) {
-        make QAST::Regex.new( :rxtype<cclass>, :subtype<.>, :node($/) );
-    }
-
-    method metachar:sym<^>($/) {
-        make QAST::Regex.new( :rxtype<anchor>, :subtype<bos>, :node($/) );
-    }
-
-    method metachar:sym<^^>($/) {
-        make QAST::Regex.new( :rxtype<anchor>, :subtype<bol>, :node($/) );
-    }
-
-    method metachar:sym<$>($/) {
-        make QAST::Regex.new( :rxtype<anchor>, :subtype<eos>, :node($/) );
-    }
-
-    method metachar:sym<$$>($/) {
-        make QAST::Regex.new( :rxtype<anchor>, :subtype<eol>, :node($/) );
-    }
-
     method metachar:sym<lwb>($/) {
         make QAST::Regex.new( :rxtype<anchor>, :subtype<lwb>, :node($/) );
     }
@@ -155,10 +164,6 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         make QAST::Regex.new( :rxtype<subrule>, :subtype<capture>,
             :backtrack<r>,
             :name<$!to>, PAST::Node.new('!LITERAL', ''), :node($/) );
-    }
-
-    method metachar:sym<bs>($/) {
-        make $<backslash>.ast;
     }
 
     method metachar:sym<assert>($/) {
