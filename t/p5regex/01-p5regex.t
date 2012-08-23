@@ -3,7 +3,8 @@
 use NQPP5QRegex;
 
 my @files := [
-    'rx_basic'
+    'rx_basic',
+    'rx_quantifiers'
 ];
 
 my %expansions;
