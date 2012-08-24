@@ -527,7 +527,7 @@ CLEANUPS = \
   3rdparty/sha1/*$(O) \
   $(DYNEXT_DIR)/*$(LOAD_EXT) \
 
-all: $(NQP_EXE)
+all: $(NQP_EXE) $(P5QREGEX_PBC)
 
 install: all
 	$(MKPATH)                   $(DESTDIR)$(PARROT_LIBRARY_DIR)
@@ -728,7 +728,7 @@ $(NQP_EXE): $(NQP_PBC) $(PARROT_DLL_COPY)
 $(P5QREGEX_PBC): $(NQP_EXE) $(P5QREGEX_SOURCES)
 	$(MKPATH) $(STAGE2)/gen
 	$(PERL) tools/build/gen-cat.pl $(P5QREGEX_SOURCES) > $(STAGE2)/$(P5QREGEX_COMBINED)
-	$(NQP_EXE) --target=pir --output=$(STAGE2)/$(P5QREGEX_COMBINED_PIR) \
+	./$(NQP_EXE) --target=pir --output=$(STAGE2)/$(P5QREGEX_COMBINED_PIR) \
 	    $(STAGE2)/$(P5QREGEX_COMBINED)
 	$(PARROT) -o $(P5QREGEX_PBC) $(STAGE2)/$(P5QREGEX_COMBINED_PIR)
 
