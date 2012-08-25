@@ -5,4 +5,8 @@ class QAST::SVal is QAST::Node {
     method substitute_inline_placeholders(@fillers) {
         self
     }
+
+    method evaluate_unquotes(@unquotes) {
+        self
+    }
 }

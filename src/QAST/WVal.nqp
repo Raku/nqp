@@ -8,4 +8,8 @@ class QAST::WVal is QAST::Node does QAST::CompileTimeValue {
     method substitute_inline_placeholders(@fillers) {
         self
     }
+
+    method evaluate_unquotes(@unquotes) {
+        self
+    }
 }
