@@ -29,6 +29,7 @@ grammar NQP::Grammar is HLL::Grammar {
         my $*PKGDECL     := '';
         my $*INVOCANT_OK := 0;
         my $*RETURN_USED := 0;
+        my %*HANDLERS;
         self.comp_unit;
     }
 
@@ -166,6 +167,7 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     token blockoid {
+        :my %*HANDLERS;
         <.finishpad>
         [
         || '{YOU_ARE_HERE}' <you_are_here>

@@ -193,8 +193,16 @@ class NQP::Actions is HLL::Actions {
         my $BLOCK := $*W.pop_lexpad();
         if $<statementlist> {
             my $past := $<statementlist>.ast;
+            if %*HANDLERS {
+                $past := QAST::Op.new( :op('handle'), $past );
+                for %*HANDLERS {
+                    $past.push($_.key);
+                    $past.push($_.value);
+                }
+            }
             $BLOCK.push($past);
             $BLOCK.node($/);
+            $BLOCK<handlers> := %*HANDLERS if %*HANDLERS;
             make $BLOCK;
         }
         else {
@@ -355,22 +363,19 @@ class NQP::Actions is HLL::Actions {
 
     method statement_control:sym<CATCH>($/) {
         my $block := $<block>.ast;
-        push_block_handler($/, $block);
-        $*W.cur_lexpad().handlers()[0].handle_types_except('CONTROL');
-        make QAST::Stmts.new(:node($/));
+        set_block_handler($/, $block, 'CATCH');
+        make default_for('$');
     }
 
     method statement_control:sym<CONTROL>($/) {
         my $block := $<block>.ast;
-        push_block_handler($/, $block);
-        $*W.cur_lexpad().handlers()[0].handle_types('CONTROL');
-        make QAST::Stmts.new(:node($/));
+        set_block_handler($/, $block, 'CONTROL');
+        make default_for('$');
     }
 
-    sub push_block_handler($/, $block) {
-        my $BLOCK := $*W.cur_lexpad();
-		unless $BLOCK.handlers() {
-            $BLOCK.handlers([]);
+    sub set_block_handler($/, $block, $type) {
+        if nqp::existskey(%*HANDLERS, $type) {
+            nqp::die("Duplicate $type handler in block");
         }
         unless $block.arity {
             $block.unshift(
@@ -379,30 +384,24 @@ class NQP::Actions is HLL::Actions {
                     QAST::Var.new( :scope('lexical'), :name('$_')),
                 ),
             );
-            $block.unshift( QAST::Var.new( :name('$_'), :scope('lexical'), :decl('param') ) );
+            $block.unshift(QAST::Var.new( :name('$_'), :scope('lexical'), :decl('param') ));
             $block.symbol('$_', :scope('lexical') );
             $block.symbol('$!', :scope('lexical') );
             $block.arity(1);
         }
         $block.blocktype('declaration');
-        $BLOCK.handlers.unshift(
-            PAST::Control.new(
-                :node($/),
-                QAST::Stmts.new(
-                    QAST::Op.new( :op('call'),
-                        $block,
-                        PAST::Var.new( :scope('register'), :name('exception')),
-                    ),
-                    PAST::Op.new( :pasttype('bind_6model'),
-                        PAST::Var.new( :scope('keyed'),
-                            PAST::Var.new( :scope('register'), :name('exception')),
-                            'handled'
-                        ),
-                        1
-                    )
-                ),
-            )
-        );
+        %*HANDLERS{$type} := QAST::Stmts.new(
+            QAST::Op.new( :op('call'),
+                $block,
+                QAST::Op.new( :op('exception') ),
+            ),
+            QAST::Op.new(
+                :op('bindkey_i'),
+                QAST::Op.new( :op('exception') ),
+                QAST::SVal.new( :value('handled') ),
+                QAST::IVal.new( :value(1) )
+            ),
+            default_for('$'));
     }
 	
 	method statement_prefix:sym<BEGIN>($/) {
@@ -416,25 +415,28 @@ class NQP::Actions is HLL::Actions {
 
     method statement_prefix:sym<try>($/) {
         my $past := $<blorst>.ast;
-        unless nqp::istype($past, QAST::Block) {
-            $past := QAST::Block.new($past, :blocktype('immediate'), :node($/));
+        if nqp::istype($past, QAST::Block) {
+            if $past<handlers> && nqp::existskey($past<handlers>, 'CATCH') {
+                make $past;
+                return 1;
+            }
+            else {
+                $past.blocktype('immediate');
+            }
         }
-        unless $past.handlers() {
-            $past.handlers([PAST::Control.new(
-                    :handle_types_except('CONTROL'),
-                    QAST::Stmts.new(
-                        PAST::Op.new( :pasttype('bind_6model'),
-                            PAST::Var.new( :scope('keyed'),
-                                PAST::Var.new( :scope('register'), :name('exception')),
-                                'handled'
-                            ),
-                            1
-                        )
-                    )
-                )]
-            );
-        }
-        make $past;
+        make QAST::Op.new(
+            :op('handle'),
+            $past,
+            'CATCH',
+            QAST::Stmts.new(
+                QAST::Op.new(
+                    :op('bindkey_i'),
+                    QAST::Op.new( :op('exception') ),
+                    QAST::SVal.new( :value('handled') ),
+                    QAST::IVal.new( :value(1) )
+                ),
+                default_for('$')
+            ));
     }
 
     method blorst($/) {
