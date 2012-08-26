@@ -1013,7 +1013,10 @@ QAST::Operations.add_core_op('handle', -> $qastcomp, $op {
     }
     
     # Protected code.
+    my $res_type := nqp::lc($qastcomp.infer_type($procpost.result));
+    my $res_reg := $*REGALLOC."fresh_$res_type"();
     $ops.push($procpost);
+    $ops.push_pirop('set', $res_reg, $procpost.result);
     while $num_pops {
         $ops.push_pirop('pop_eh');
         $num_pops := $num_pops - 1;
@@ -1030,7 +1033,7 @@ QAST::Operations.add_core_op('handle', -> $qastcomp, $op {
         $ops.push_pirop('finalize', $reg);
         $ops.push_pirop('pop_upto_eh', $reg);
         $ops.push_pirop('pop_eh');
-        $ops.push_pirop('set', $procpost.result, $handler_post.result);
+        $ops.push_pirop('set', $res_reg, $handler_post.result);
         $ops.push_pirop('goto', $skip_handler_label);
     }
     if $catch {
@@ -1061,14 +1064,14 @@ QAST::Operations.add_core_op('handle', -> $qastcomp, $op {
             $ops.push_pirop('finalize', $reg);
             $ops.push_pirop('pop_upto_eh', $reg);
             $ops.push_pirop('pop_eh');
-            $ops.push_pirop('set', $procpost.result, $handler_post.result);
+            $ops.push_pirop('set', $res_reg, $handler_post.result);
             $ops.push_pirop('goto', $skip_handler_label);
         }
     }
     
     # Postlude.
     $ops.push($skip_handler_label);
-    $ops.result($procpost.result);
+    $ops.result($res_reg);
     
     $ops
 });
