@@ -1024,42 +1024,14 @@ QAST::Operations.add_core_op('handle', -> $qastcomp, $op {
     $ops.push_pirop('goto', $skip_handler_label);
     
     # Now emit the handlers.
-    my $*CUR_EXCEPTION := $reg;
-    sub simple_handler($label, $handler_qast) {
-        my $handler_post := $qastcomp.coerce($qastcomp.as_post($handler_qast), 'P');
-        $ops.push($label);
-        $ops.push_pirop(".get_results ($reg)");
-        $ops.push($handler_post);
-        $ops.push_pirop('finalize', $reg);
-        $ops.push_pirop('pop_upto_eh', $reg);
-        $ops.push_pirop('pop_eh');
-        $ops.push_pirop('set', $res_reg, $handler_post.result);
-        $ops.push_pirop('goto', $skip_handler_label);
-    }
-    if $catch {
-        simple_handler($catch_label, %handlers<CATCH>);
-    }
-    if $control {
-        simple_handler($control_label, %handlers<CONTROL>);
-    }
-    if @other {
-        my $type_reg := $*REGALLOC.fresh_i();
-        $ops.push($other_label);
-        $ops.push_pirop(".get_results ($reg)");
-        
-        # Create labels for each type and emit type selection ladder.
-        my %type_labels;
-        $ops.push_pirop('set', $type_reg, $reg ~ '["type"]');
-        for @other {
-            my $lbl := PIRT::Label.new(:name($qastcomp.unique('handle_type_')));
-            $ops.push_pirop('eq', $type_reg, %handler_names{$_}, $lbl);
-            %type_labels{$_} := $lbl;
-        }
-        
-        # Emit handler for each type.
-        for @other {
-            my $handler_post := $qastcomp.coerce($qastcomp.as_post(%handlers{$_}), 'P');
-            $ops.push(%type_labels{$_});
+    my $orig_alloc := $*REGALLOC;
+    {
+        my $*CUR_EXCEPTION := $reg;
+        my $*REGALLOC := $orig_alloc.handler_allocator();
+        sub simple_handler($label, $handler_qast) {
+            my $handler_post := $qastcomp.coerce($qastcomp.as_post($handler_qast), 'P');
+            $ops.push($label);
+            $ops.push_pirop(".get_results ($reg)");
             $ops.push($handler_post);
             $ops.push_pirop('finalize', $reg);
             $ops.push_pirop('pop_upto_eh', $reg);
@@ -1067,8 +1039,40 @@ QAST::Operations.add_core_op('handle', -> $qastcomp, $op {
             $ops.push_pirop('set', $res_reg, $handler_post.result);
             $ops.push_pirop('goto', $skip_handler_label);
         }
+        if $catch {
+            simple_handler($catch_label, %handlers<CATCH>);
+        }
+        if $control {
+            simple_handler($control_label, %handlers<CONTROL>);
+        }
+        if @other {
+            my $type_reg := $*REGALLOC.fresh_i();
+            $ops.push($other_label);
+            $ops.push_pirop(".get_results ($reg)");
+            
+            # Create labels for each type and emit type selection ladder.
+            my %type_labels;
+            $ops.push_pirop('set', $type_reg, $reg ~ '["type"]');
+            for @other {
+                my $lbl := PIRT::Label.new(:name($qastcomp.unique('handle_type_')));
+                $ops.push_pirop('eq', $type_reg, %handler_names{$_}, $lbl);
+                %type_labels{$_} := $lbl;
+            }
+            
+            # Emit handler for each type.
+            for @other {
+                my $handler_post := $qastcomp.coerce($qastcomp.as_post(%handlers{$_}), 'P');
+                $ops.push(%type_labels{$_});
+                $ops.push($handler_post);
+                $ops.push_pirop('finalize', $reg);
+                $ops.push_pirop('pop_upto_eh', $reg);
+                $ops.push_pirop('pop_eh');
+                $ops.push_pirop('set', $res_reg, $handler_post.result);
+                $ops.push_pirop('goto', $skip_handler_label);
+            }
+        }
     }
-    
+
     # Postlude.
     $ops.push($skip_handler_label);
     $ops.result($res_reg);

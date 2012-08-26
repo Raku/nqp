@@ -15,6 +15,12 @@ class QAST::Compiler is HLL::Compiler {
             $obj
         }
         
+        method handler_allocator() {
+            my $obj := nqp::create(self);
+            $obj.BUILD(10000, 10000, 10000, 10000);
+            $obj
+        }
+        
         method BUILD($p, $s, $i, $n) {
             $!cur_p := $p;
             $!cur_s := $s;
