@@ -1446,8 +1446,8 @@ class NQP::Actions is HLL::Actions {
 
     method quote_escape:sym<$>($/) { make $<variable>.ast; }
     method quote_escape:sym<{ }>($/) {
-        make PAST::Op.new(
-            :pirop('set S*'), block_immediate($<block>.ast), :node($/)
+        make QAST::Op.new(
+            :op('stringify'), block_immediate($<block>.ast), :node($/)
         );
     }
     method quote_escape:sym<esc>($/) { make "\c[27]"; }
