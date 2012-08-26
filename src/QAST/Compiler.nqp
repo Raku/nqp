@@ -974,8 +974,11 @@ class QAST::Compiler is HLL::Compiler {
               || nqp::substr($inferee, 0, 9) eq 'unicode:"' {
             "s"
         }
-        elsif nqp::substr($inferee, 0, 1) eq '.' {
+        elsif nqp::substr($inferee, 0, 6) eq '.const' {
             "P"
+        }
+        elsif nqp::substr($inferee, 0, 1) eq '.' {
+            "i"
         }
         elsif nqp::index($inferee, ".", 0) > 0 {
             "n"

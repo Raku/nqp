@@ -366,7 +366,7 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
     /* Allocate child obj array. */
     if(repr_data->num_child_objs > 0) {
         size_t bytes = repr_data->num_child_objs*sizeof(PMC *);
-        obj->body.child_objs = (PMC **) mem_sys_allocate(bytes);
+        obj->body.child_objs = (PMC **) mem_sys_allocate_zeroed(bytes);
         memset(obj->body.child_objs, 0, bytes);
     }
 

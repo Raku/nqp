@@ -110,4 +110,8 @@ class QAST::Node {
     method substitute_inline_placeholders(@fillers) {
         nqp::die(self.HOW.name(self) ~ " does not support inlining");
     }
+
+    method evaluate_unquotes(@unquotes) {
+        nqp::die(self.HOW.name(self) ~ " does not support evaluating unquotes");
+    }
 }

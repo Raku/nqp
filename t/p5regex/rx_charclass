@@ -1,0 +1,41 @@
+##   Enumerated character lists
+[c]			abcdef		y	character class
+[dcb]{3}		abcdef		y	repeated character class
+^[a]			abcdef		y	anchored character class
+[^e]			abcdef		y	negated character class
+^[a]?			abcdef		y	anchored optional character class
+[^e]?			abcdef		y	negated optional character class
+[^dcb]{3}		abcdef		n	repeated negated character class
+^[^e]			abcdef		y	anchored negated character class
+^[^a]			abcdef		n	anchored negated character class
+[b-d]		abcdef		y	character range
+[b-d]		abxxef		y	character range
+[b-d]		axcxef		y	character range
+[b-d]		axxdef		y	character range
+[b-d]		axxxef		n	character range
+[^b-d]		abcdef		y	negated character range
+[-]			ab-def		y	unescaped hyphen, the only thing
+[x-]			ab-def		y	unescaped hyphen, at the end
+[-x]			ab-def		y	unescaped hyphen, at the beginning
+[\-]			ab-def		y	escaped hyphen
+[\-]			abcdef		n	escaped hyphen
+[^\-]			---x--		y	negated escaped hyphen
+[^\-]			------		n	negated escaped hyphen
+[\-+]			ab-def		y	escaped hyphen in range
+[\-+]			ab+def		y	escaped hyphen in range
+[\-+]			abcdef		n	escaped hyphen in range
+[+\-]			ab-def		y	escaped hyphen in range
+[+\-]			ab+def		y	escaped hyphen in range
+[+\-]			abcdef		n	escaped hyphen in range
+[^\-+]		---x--		y	negated escaped hyphen in range
+[^\-+]		------		n	negated escaped hyphen in range
+[^+\-]		---x--		y	negated escaped hyphen in range
+[^+\-]		------		n	negated escaped hyphen in range
+["\\]			\\			y	escaped backslash
+[\]]			]			y	escaped close bracket
+[A-Z0-9]		abcdef		n	two enumerated ranges
+[A-Z0-9]		abcDef		y	two enumerated ranges
+a[[]b		a[b		y	first char of charclass special
+a[[]b		ab		n	first char of charclass special
+a[]]b		a]b		y	first char of charclass special
+a[]]b		ab		n	first char of charclass special

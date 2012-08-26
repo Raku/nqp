@@ -1,0 +1,48 @@
+##   Metacharacter tests
+.			a		y	dot (.)
+.			\n		y	dot (.)
+.			''		n	dot (.)
+a\s+f			abcdef		n	whitespace (\s)
+ab\s+cdef		ab  cdef	y	whitespace (\s)
+a\S+f			abcdef		y	not whitespace (\S)
+a\S+f			ab cdef		n	not whitespace (\S)
+^ abc			abcdef		y	start and end of string (^)
+^ abc			abc\ndef	y	start and end of string (^)
+^ abc			def\nabc	n	start and end of string (^)
+def \n ^ abc		def\nabc	n	start and end of string (^)
+def $			abcdef		y	start and end of string ($)
+def $			abc\ndef	y	start and end of string ($)
+def $			def\nabc	n	start and end of string ($)
+def $ \n abc		def\nabc	n	start and end of string (^)
+abc \n $		abc\n		y	end of string ($)
+abc $			abc\n		y	end of string with newline ($)
+c \n d			abc\ndef	y	logical newline (\n)
+c \n d			abc\rdef	y	logical newline matches \r
+c \n+ d			abc\n\ndef	y	logical newline quantified
+a\n+f			abcdef		n	logical newline (\n)
+c \n d			abc\n\rdef	n	logical newline matches \n\r
+c \n d			abc\r\ndef	y	logical newline matches \r\n
+b \n c			abc\ndef	n	logical newline (\n)
+\N			a		y	not logical newline (\N)
+a \N c			abc		y	not logical newline (\N)
+\N			''		n	not logical newline (\N)
+c \N d			abc\ndef	n	not logical newline (\N)
+c \N d			abc\rdef	n	not logical newline (\N)
+c \N+ d			abc\n\ndef	n	not logical newline (\N)
+a\N+f			abcdef		y	not logical newline (\N)
+c \N d			abc\n\rdef	n	not logical newline (\N)
+c \N d			abc\r\ndef	n	not logical newline (\N)
+b \N \n			abc\ndef	y	not logical newline (\N)
+[a-d] | [b-e]	c		y	alternation (|)
+[a-d] | [d-e]	c		y	alternation (|)
+[a-b] | [b-e]	c		y	alternation (|)
+[a-b] | [d-e]	c		n	alternation (|)
+[a-d]+ | [b-e]+	bcd		y	alternation (|)
+a\w+f			a=[ *f		n	word character
+a\w+f			abcdef		y	word character
+a\W+f			a&%- f		y	not word character
+a\W+f			abcdef		n	not word character
+a\d+f			abcdef		n	digit
+ab\d+cdef		ab42cdef	y	digit
+a\D+f			abcdef		y	not digit
+a\D+f			ab0cdef		n	not digit

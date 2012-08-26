@@ -17,6 +17,10 @@ class QAST::Operations {
     my %core_inlinability;
     my %hll_inlinability;
     
+    # What we know about op native results types.
+    my %core_result_type;
+    my %hll_result_type;
+    
     # Compiles an operation to POST.
     method compile_op($qastcomp, $hll, $op) {
         my $name := $op.op;
@@ -63,6 +67,7 @@ class QAST::Operations {
             $pirop_mapper($qastcomp, $op.op, $op.list)
         };
         self.set_core_op_inlinability($op, $inlinable);
+        self.set_core_op_result_type($op, nqp::substr($sig, 0, 1));
     }
     
     # Adds a HLL op that maps to a PIR op.
@@ -73,6 +78,7 @@ class QAST::Operations {
             $pirop_mapper($qastcomp, $op.op, $op.list)
         };
         self.set_hll_op_inlinability($hll, $op, $inlinable);
+        self.set_hll_op_result_type($hll, $op, nqp::substr($sig, 0, 1));
     }
     
     # Sets op inlinability at a core level.
@@ -95,6 +101,48 @@ class QAST::Operations {
             }
         }
         return %core_inlinability{$op} // 0;
+    }
+    
+    # Sets op native result type at a core level.
+    method set_core_op_result_type($op, $type_char) {
+        if $type_char eq 'I' {
+            %core_result_type{$op} := int;
+        }
+        elsif $type_char eq 'N' {
+            %core_result_type{$op} := num;
+        }
+        elsif $type_char eq 'S' {
+            %core_result_type{$op} := str;
+        }
+    }
+    
+    # Sets op inlinability at a HLL level. (Can override at HLL level whether
+    # or not the HLL overrides the op itself.)
+    method set_hll_op_result_type($hll, $op, $type_char) {
+        %hll_result_type{$hll} := {} unless %hll_result_type{$hll};
+        if $type_char eq 'I' {
+            %hll_result_type{$hll}{$op} := int;
+        }
+        elsif $type_char eq 'N' {
+            %hll_result_type{$hll}{$op} := num;
+        }
+        elsif $type_char eq 'S' {
+            %hll_result_type{$hll}{$op} := str;
+        }
+    }
+    
+    # Sets returns on an op node if we it has a native result type.
+    method attach_result_type($hll, $node) {
+        my $op := $node.op;
+        if nqp::existskey(%hll_result_type, $hll) {
+            if nqp::existskey(%hll_result_type{$hll}, $op) {
+                $node.returns(%hll_result_type{$hll}{$op});
+                return 1;
+            }
+        }
+        if nqp::existskey(%core_result_type, $op) {
+            $node.returns(%core_result_type{$op});
+        }
     }
 
     # Adds a HLL box handler.
@@ -467,11 +515,6 @@ QAST::Operations.add_core_op('ifnull', :inlinable(1), -> $qastcomp, $op {
 for ('', 'repeat_') -> $repness {
     for <while until> -> $op_name {
         QAST::Operations.add_core_op("$repness$op_name", :inlinable(1), -> $qastcomp, $op {
-            # Check operand count.
-            my $operands := +$op.list;
-            pir::die("Operation '$repness$op_name' needs 2 or 3 operands")
-                if $operands != 2 && $operands != 3;
-
             # Create labels.
             my $while_id := $qastcomp.unique($op_name);
             my $test_lbl := PIRT::Label.new(:name($while_id ~ '_test'));
@@ -484,27 +527,40 @@ for ('', 'repeat_') -> $repness {
             # types and pick an overall result type if in non-void context.
             my @comp_ops;
             my @comp_types;
+            my $handler := 1;
             my $*IMM_ARG;
             for $op.list {
-                my $*HAVE_IMM_ARG := $_.arity > 0 && $_ =:= $op.list[1];
-                my $comp := $qastcomp.as_post($_);
-                @comp_ops.push($comp);
-                @comp_types.push($qastcomp.infer_type($comp.result));
-                if $*HAVE_IMM_ARG && !$*IMM_ARG {
-                    nqp::die("$op_name block expects an argument, but there's no immediate block to take it");
+                if $_.named eq 'nohandler' { $handler := 0; }
+                else {
+                    my $*HAVE_IMM_ARG := $_.arity > 0 && $_ =:= $op.list[1];
+                    my $comp := $qastcomp.as_post($_);
+                    @comp_ops.push($comp);
+                    @comp_types.push($qastcomp.infer_type($comp.result));
+                    if $*HAVE_IMM_ARG && !$*IMM_ARG {
+                        nqp::die("$op_name block expects an argument, but there's no immediate block to take it");
+                    }
                 }
             }
             my $res_type := @comp_types[0] eq @comp_types[1] ?? nqp::lc(@comp_types[0]) !! 'p';
             my $res_reg  := $*REGALLOC."fresh_$res_type"();
 
+            # Check operand count.
+            my $operands := +@comp_ops;
+            pir::die("Operation '$repness$op_name' needs 2 or 3 operands")
+                if $operands != 2 && $operands != 3;
+
             # Emit the prelude.
             my $ops := PIRT::Ops.new();
             $ops.result($res_reg);
-            my $exc_reg := $*REGALLOC.fresh_p();
-            $ops.push_pirop('new', $exc_reg, "'ExceptionHandler'",
-                '[.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]');
-            $ops.push_pirop('set_label', $exc_reg, $hand_lbl);
-            $ops.push_pirop('push_eh', $exc_reg);
+
+            my $exc_reg;
+            if $handler {
+                $exc_reg := $*REGALLOC.fresh_p();
+                $ops.push_pirop('new', $exc_reg, "'ExceptionHandler'",
+                    '[.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]');
+                $ops.push_pirop('set_label', $exc_reg, $hand_lbl);
+                $ops.push_pirop('push_eh', $exc_reg);
+            }
             
             # Test the condition and jump to the loop end if it's
             # not met.
@@ -543,15 +599,17 @@ for ('', 'repeat_') -> $repness {
             $ops.push_pirop('goto ' ~ $test_lbl.result);
 
             # Emit postlude, with exception handlers.
-            $ops.push($hand_lbl);
-            $ops.push_pirop('.get_results', '(' ~ $exc_reg ~ ')');
-            $ops.push_pirop('pop_upto_eh', $exc_reg);
-            $ops.push_pirop('getattribute', $exc_reg, $exc_reg, "'type'");
-            $ops.push_pirop('eq', $exc_reg, '.CONTROL_LOOP_NEXT',
-                $operands == 3 ?? $next_lbl !! $test_lbl);
-            $ops.push_pirop('eq', $exc_reg, '.CONTROL_LOOP_REDO', $redo_lbl);
-            $ops.push($done_lbl);
-            $ops.push_pirop('pop_eh');
+            if $handler {
+                $ops.push($hand_lbl);
+                $ops.push_pirop('.get_results', '(' ~ $exc_reg ~ ')');
+                $ops.push_pirop('pop_upto_eh', $exc_reg);
+                $ops.push_pirop('getattribute', $exc_reg, $exc_reg, "'type'");
+                $ops.push_pirop('eq', $exc_reg, '.CONTROL_LOOP_NEXT',
+                    $operands == 3 ?? $next_lbl !! $test_lbl);
+                $ops.push_pirop('eq', $exc_reg, '.CONTROL_LOOP_REDO', $redo_lbl);
+                $ops.push($done_lbl);
+                $ops.push_pirop('pop_eh');
+            }
 
             $ops;
         });
@@ -1334,17 +1392,24 @@ QAST::Operations.add_core_pirop_mapping('tonum_I', 'nqp_bigint_to_num', 'NP', :i
 # native call ops
 QAST::Operations.add_core_pirop_mapping('buildnativecall', 'nqp_native_call_build', 'vPsssPP');
 QAST::Operations.add_core_pirop_mapping('nativecall', 'nqp_native_call', 'PPPP');
+QAST::Operations.add_core_pirop_mapping('nativecallrefresh', 'nqp_native_call_wb', 'vP');
 
 # boolean opcodes
 QAST::Operations.add_core_pirop_mapping('not_i', 'not', 'Ii', :inlinable(1));
 
 # aggregate opcodes, mapping to the Parrot v-table functions
 QAST::Operations.add_core_pirop_mapping('atkey', 'set', 'PQs', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('atkey_i', 'set', 'IQs', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('atkey_n', 'set', 'NQs', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('atkey_s', 'set', 'SQs', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('atpos', 'set', 'PQi', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('atpos_i', 'set', 'IQi', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('atpos_n', 'set', 'NQi', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('atpos_s', 'set', 'SQi', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('bindkey', 'set', '1QsP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('bindkey_i', 'set', '1QsI', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('bindkey_n', 'set', '1QsN', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('bindkey_s', 'set', '1QsS', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('bindpos', 'set', '1QiP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('bindpos_i', 'set', '1Qii', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('bindpos_n', 'set', '1Qin', :inlinable(1));

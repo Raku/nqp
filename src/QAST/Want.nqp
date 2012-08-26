@@ -19,4 +19,15 @@ class QAST::Want is QAST::Node {
         }
         $result
     }
+
+    method evaluate_unquotes(@unquotes) {
+        my $result := pir::repr_clone__PP(self);
+        my $i := 0;
+        my $elems := +@(self);
+        while $i < $elems {
+            $result[$i] := self[$i].evaluate_unquotes(@unquotes);
+            $i := $i + 2;
+        }
+        $result
+    }
 }
