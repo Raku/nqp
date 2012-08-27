@@ -264,12 +264,12 @@ class NQP::World is HLL::World {
             if $have_code_type {
                 %!code_object_fixup_list{$past.cuid()} := $fixups;
                 if self.is_precompilation_mode() {
-                    pir::setprop__vPsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone, $code_obj) {
+                    pir::setprop__0PsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone, $code_obj) {
                         %!code_objects_to_fix_up{$past.cuid()}.push($code_obj);
                     });
                 }
                 else {
-                    pir::setprop__vPsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone, $code_obj) {
+                    pir::setprop__0PsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone, $code_obj) {
                         # Emit fixup code.
                         self.add_object($code_obj);
                         $fixups.push(QAST::Op.new(
