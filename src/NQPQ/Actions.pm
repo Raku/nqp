@@ -1226,7 +1226,7 @@ class NQP::Actions is HLL::Actions {
     }
 
     method term:sym<pir::const>($/) {
-        make PAST::Val.new( :value(~$<const>), :returns<!macro_const>, :node($/) );
+        make QAST::VM.new( :pirconst(~$<const>) );
     }
 
     method term:sym<nqp::op>($/) {
