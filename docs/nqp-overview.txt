@@ -2,6 +2,11 @@
 
 Overview of nqp repository directory structure:
 
+    3rdparty/  - 3rd-party C libraries
+      dyncall/ - dyncall library
+      libtommath/ - bigint support
+      sha1/    - sha hash library
+
     docs/      - documentation for NQP
 
     examples/  - NQP examples (some obsolete)
