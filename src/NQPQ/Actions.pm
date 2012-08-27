@@ -744,9 +744,12 @@ class NQP::Actions is HLL::Actions {
                 %obj_args<type> := $*W.find_sym([~$<typename>[0]]);
             }
             if $sigil eq '$' || $sigil eq '&' {
-                %obj_args<default> := $<typename>
-                    ?? %obj_args<type>
-                    !! default_for('$');
+                if $<typename> {
+                    %obj_args<default> := %obj_args<type>;
+                }
+                else {
+                    try %obj_args<default> := $*W.find_sym(['NQPMu']);
+                }
             }
             
             # Add it.
