@@ -627,8 +627,7 @@ QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
         $op[1].blocktype('declaration');
     }
     
-    # Evaluate the thing we'll iterate over and get an iterator.
-    # Also evaluate the block.
+    # Evaluate the thing we'll iterate over and the block.
     my $res       := $*REGALLOC.fresh_p();
     my $curval    := $*REGALLOC.fresh_p();
     my $iter      := $*REGALLOC.fresh_p();
@@ -637,14 +636,31 @@ QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
     my $blockpost := $qastcomp.coerce($qastcomp.as_post($op[1]), "P");
     $ops.push($listpost);
     $ops.push($blockpost);
+    
+    # Set up exception handler.
+    my $handler := 1;
+    my $exc_reg;
+    my $hand_lbl;
+    if $handler {
+        $exc_reg  := $*REGALLOC.fresh_p();
+        $hand_lbl := PIRT::Label.new(:name('for_handlers'));
+        $ops.push_pirop('new', $exc_reg, "'ExceptionHandler'",
+            '[.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]');
+        $ops.push_pirop('set_label', $exc_reg, $hand_lbl);
+        $ops.push_pirop('push_eh', $exc_reg);
+    }
+    
+    # Get the iterator.
     $ops.push_pirop('set', $res, $listpost);
     $ops.push_pirop('iter', $iter, $listpost);
     
     # Loop while we still have values.
-    my $lbl_loop := PIRT::Label.new(:name('for_start'));
-    my $lbl_end := PIRT::Label.new(:name('for_end'));
-    $ops.push($lbl_loop);
-    $ops.push_pirop('unless', $iter, $lbl_end);
+    my $lbl_next := PIRT::Label.new(:name('for_next'));
+    my $lbl_redo := PIRT::Label.new(:name('for_redo'));
+    my $lbl_done := PIRT::Label.new(:name('for_done'));
+    $ops.push($lbl_next);
+    $ops.push_pirop('unless', $iter, $lbl_done);
+    $ops.push($lbl_redo);
     
     # Fetch values.
     my @valreg;
@@ -660,8 +676,22 @@ QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
     $ops.push_pirop('call', $blockpost, |@valreg, :result($res));
     
     # Loop.
-    $ops.push_pirop('goto', $lbl_loop);
-    $ops.push($lbl_end);
+    $ops.push_pirop('goto', $lbl_next);
+
+    # Handlers.
+    if $handler {
+        $ops.push($hand_lbl);
+        $ops.push_pirop('.get_results', '(' ~ $exc_reg ~ ')');
+        $ops.push_pirop('pop_upto_eh', $exc_reg);
+        $ops.push_pirop('getattribute', $exc_reg, $exc_reg, "'type'");
+        $ops.push_pirop('eq', $exc_reg, '.CONTROL_LOOP_NEXT', $lbl_next);
+        $ops.push_pirop('eq', $exc_reg, '.CONTROL_LOOP_REDO', $lbl_redo);
+        $ops.push($lbl_done);
+        $ops.push_pirop('pop_eh');
+    }
+    else {
+        $ops.push($lbl_done);
+    }
     
     # Set result.
     $ops.result($res);
