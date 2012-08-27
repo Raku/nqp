@@ -1598,4 +1598,39 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
                                      :subtype('capture'), :node($/) );
         make $qast;
     }
+    
+    method assertion:sym<name>($/) {
+        my $name := ~$<longname>;
+        my $qast;
+        if $<assertion> {
+            $qast := $<assertion>[0].ast;
+            self.subrule_alias($qast, $name);
+        }
+        elsif $name eq 'sym' {
+            my $loc := nqp::index(%*RX<name>, ':sym<');
+            $loc := nqp::index(%*RX<name>, ':sym«')
+                if $loc < 0;
+            my $rxname := pir::chopn__Ssi(nqp::substr(%*RX<name>, $loc + 5), 1);
+            $qast := QAST::Regex.new(:name('sym'), :rxtype<subcapture>, :node($/),
+                QAST::Regex.new(:rxtype<literal>, $rxname, :node($/)));
+        }
+        else {
+            $qast := QAST::Regex.new(:rxtype<subrule>, :subtype<capture>,
+                                     :node($/), :name($name),
+                                     QAST::Node.new( QAST::SVal.new( :value($name) ) ) );
+            if $<arglist> {
+                for $<arglist>[0].ast.list { $qast[0].push( $_ ) }
+            }
+            elsif $<nibbler> {
+                $name eq 'after' ??
+                    $qast[0].push(QRegex::P6Regex::Actions::qbuildsub(self.flip_ast($<nibbler>[0].ast), :anon(1))) !!
+                    $qast[0].push(QRegex::P6Regex::Actions::qbuildsub($<nibbler>[0].ast, :anon(1)));
+            }
+        }
+        make $qast;
+    }
+    
+    method arg($/) {
+        make $<quote_EXPR>.ast;
+    }
 }

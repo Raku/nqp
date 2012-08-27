@@ -780,5 +780,9 @@ grammar NQP::Regex is QRegex::P6Regex::Grammar {
     token codeblock {
         <block=.LANG('MAIN','pblock')>
     }
+    
+    token arg {
+        <quote_EXPR=.LANG('MAIN','quote_EXPR')>
+    }
 }
 
