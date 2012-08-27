@@ -15,7 +15,7 @@ class QRegex::NFA {
     has $!edges;
 
     method new() {
-        my $new := self.bless(:state(nqp::list()));
+        my $new := self.bless(:states(nqp::list()), :edges(nqp::list()));
         $new.addstate();
         $new.addstate();
         $new;
@@ -286,11 +286,12 @@ class QRegex::NFA {
         my %seen := nqp::clone(%caller_seen);
         my @substates;
         if nqp::can($cursor, $name) {
-            if !%seen{$name} {
+            if !nqp::existskey(%seen, $name) {
                 my $meth := $cursor.HOW.find_method($cursor, $name, :no_trace(1));
                 @substates := $meth.nqpattr('nfa') if nqp::can($meth, 'nqpattr');
+                @substates := [] if nqp::isnull(@substates);
             }
-            if !@substates && !%seen{$name} {
+            if !@substates && !nqp::existskey(%seen, $name) {
                 # Maybe it's a protoregex, in which case states are an alternation
                 # of all of the possible rules.
                 my %protorx     := $cursor.HOW.cache($cursor, "!protoregex_table", { $cursor."!protoregex_table"() });
