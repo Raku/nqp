@@ -64,31 +64,33 @@ class QAST::Node {
     method unshift($value) { nqp::unshift(self.list, $value) }
     
     method hash() {
-        %!hash
+        nqp::isnull(%!hash) ?? %!hash !! nqp::hash()
     }
     method ($key) is parrot_vtable('get_pmc_keyed_str') {
-        %!hash{$key}
+        nqp::isnull(%!hash) ?? NQPMu !! %!hash{$key}
     }
     method ($key) is parrot_vtable('get_pmc_keyed') {
-        %!hash{$key}
+        nqp::isnull(%!hash) ?? NQPMu !! %!hash{$key}
     }
     method ($key, $value) is parrot_vtable('set_pmc_keyed_str') {
+        %!hash := nqp::hash() if nqp::isnull(%!hash);
         %!hash{$key} := $value;
     }
     method ($key, $value) is parrot_vtable('set_pmc_keyed') {
+        %!hash := nqp::hash() if nqp::isnull(%!hash);
         %!hash{$key} := $value;
     }
     method ($key) is parrot_vtable('exists_keyed_str') {
-        nqp::existskey(%!hash, $key)
+        nqp::isnull(%!hash) ?? 0 !! nqp::existskey(%!hash, $key)
     }
     method ($key) is parrot_vtable('exists_keyed') {
-        nqp::existskey(%!hash, $key)
+        nqp::isnull(%!hash) ?? 0 !! nqp::existskey(%!hash, $key)
     }
     method ($key) is parrot_vtable('delete_keyed_str') {
-        nqp::deletekey(%!hash, $key)
+        nqp::deletekey(%!hash, $key) unless nqp::isnull(%!hash)
     }
     method ($key) is parrot_vtable('delete_keyed') {
-        nqp::deletekey(%!hash, $key)
+        nqp::deletekey(%!hash, $key) unless nqp::isnull(%!hash)
     }
     
     my %uniques;
