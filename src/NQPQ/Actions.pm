@@ -795,26 +795,22 @@ class NQP::Actions is HLL::Actions {
             $past.name($name);
             if $*SCOPE eq '' || $*SCOPE eq 'my' || $*SCOPE eq 'our' {
                 if $*MULTINESS eq 'multi' {
-                    # Does the current block have a candidate holder in place?
-                    if $*SCOPE eq 'our' { nqp::die('our-scoped multis not yet implemented') }
-                    my $cholder;
+                    # Does the current block have a proto?
+                    if $*SCOPE eq 'our' { nqp::die('a multi can not be our-scoped') }
+                    my $proto;
                     my %sym := $*W.cur_lexpad().symbol($name);
-                    if %sym<cholder> {
-                        $cholder := %sym<cholder>;
+                    if %sym<proto> {
+                        $proto := %sym<value>;
                     }
                     
                     # Otherwise, no candidate holder, so add one.
                     else {
                         # Check we have a proto in scope.
-                        if %sym<proto> {
-                            # WTF, a proto is in this scope, but didn't set up a
-                            # candidate holder?!
-                            $/.CURSOR.panic('Internal Error: Current scope has a proto, but no candidate list holder was set up. (This should never happen.)');
-                        }
                         my $found_proto;
                         for $*W.get_legacy_block_list() {
                             my %sym := $_.symbol($name);
-                            if %sym<proto> || %sym<cholder> {
+                            if %sym<proto> {
+                                $proto := %sym<value>;
                                 $found_proto := 1;
                             }
                             elsif %sym {
@@ -828,42 +824,33 @@ class NQP::Actions is HLL::Actions {
                         }
 
                         # Set up dispatch routine in this scope.
-						my $BLOCK := $*W.cur_lexpad();
-                        $cholder := QAST::Op.new( :op('list') );
-                        my $dispatch_setup := PAST::Op.new(
-                            :pirop('create_dispatch_and_add_candidates PPP'),
-                            PAST::Var.new( :name($name), :scope('outer') ),
-                            $cholder
-                        );
-                        $BLOCK[0].push(PAST::Var.new( :name($name), :isdecl(1), :directaccess(1),
-                                          :viviself($dispatch_setup), :scope('lexical') ) );
-                        $BLOCK.symbol($name, :scope('lexical'), :cholder($cholder) );
+						nqp::die("Dispatcher derivation NYI");
                     }
+                    
+                    # Create a code object and attach the signature.
+                    my $code := $*W.create_code($past, $name, 0);
+                    attach_multi_signature($code, $past);
 
-                    # Add this candidate to the holder.
-                    $cholder.push($past);
-
-                    # Build a type signature object for the multi-dispatcher to use.
-                    attach_multi_signature_to_parrot_sub($past);
+                    # Add this candidate to the proto.
+                    $proto.add_dispatchee($code);
+                    
+                    # Ensure we emit the code block.
+                    my $BLOCK := $*W.cur_lexpad();
+					$BLOCK[0].push($past);
                 }
                 elsif $*MULTINESS eq 'proto' {
                     # Create a candidate list holder for the dispatchees
                     # this proto will work over, and install them along
                     # with the proto.
                     if $*SCOPE eq 'our' { nqp::die('our-scoped protos not yet implemented') }
-                    my $cholder := QAST::Op.new( :op('list') );
+                    my $code := $*W.create_code($past, $name, 1);
                     my $BLOCK := $*W.cur_lexpad();
-					$BLOCK[0].push(PAST::Var.new( :name($name), :isdecl(1), :directaccess(1),
-                                          :viviself($past), :scope('lexical') ) );
-                    $BLOCK[0].push(PAST::Op.new(
-                        :pirop('set_dispatchees 0PP'),
-                        PAST::Var.new( :name($name) ),
-                        $cholder
+					$BLOCK[0].push(QAST::Op.new(
+                        :op('bind'),
+                        QAST::Var.new( :name($name), :scope('lexical'), :decl('var') ),
+                        $past
                     ));
-                    $BLOCK.symbol($name, :scope('lexical'), :proto(1), :cholder($cholder) );
-
-                    # Need it to be a DispatcherSub.
-                    $past.pirflags(':instanceof("DispatcherSub")');
+                    $BLOCK.symbol($name, :scope('lexical'), :proto(1), :value($code) );
                 }
                 else {
                     my $BLOCK := $*W.cur_lexpad();
