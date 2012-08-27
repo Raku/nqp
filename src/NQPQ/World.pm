@@ -20,6 +20,13 @@ class NQP::World is HLL::World {
     # Mapping of sub IDs to SC indexes of code stubs.
     has %!code_stub_sc_idx;
     
+    method BUILD(*%opts) {
+        @!BLOCKS := nqp::list();
+        %!code_objects_to_fix_up := nqp::hash();
+        %!code_object_fixup_list := nqp::hash();
+        %!code_stub_sc_idx := nqp::hash();
+    }
+    
     # Creates a new lexical scope and puts it on top of the stack.
     method push_lexpad($/) {
         # Create pad, link to outer and add to stack.

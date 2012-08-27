@@ -29,6 +29,7 @@ class QAST::Block is QAST::Node {
     }
 
     method symbol($name, *%attrs) {
+        %!symbol := nqp::hash() if nqp::isnull(%!symbol);
         if %attrs {
             %!symbol{$name} := %!symbol{$name} // {};
             for %attrs {
@@ -39,6 +40,7 @@ class QAST::Block is QAST::Node {
     }
     
     method symtable() {
+        %!symbol := nqp::hash() if nqp::isnull(%!symbol);
         %!symbol
     }
 }
