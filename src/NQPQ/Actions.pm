@@ -138,7 +138,7 @@ class NQP::Actions is HLL::Actions {
             for $<statement> {
                 my $ast := $_.ast;
                 $ast := $ast<sink> if nqp::defined($ast<sink>);
-                if $ast<bareblock> { $ast := block_immediate($ast); }
+                if $ast<bareblock> { $ast := block_immediate($ast[0]); }
                 $ast := QAST::Stmt.new($ast) if nqp::istype($ast, QAST::Node);
                 $past.push( $ast );
             }
@@ -489,7 +489,9 @@ class NQP::Actions is HLL::Actions {
     method term:sym<routine_declarator>($/) { make $<routine_declarator>.ast; }
     method term:sym<regex_declarator>($/)   { make $<regex_declarator>.ast; }
     method term:sym<statement_prefix>($/)   { make $<statement_prefix>.ast; }
-    method term:sym<lambda>($/)             { make $<pblock>.ast; }
+    method term:sym<lambda>($/) {
+        make QAST::Op.new( :op('takeclosure'), $<pblock>.ast );
+    }
 
     method fatarrow($/) {
         my $past := $<val>.ast;
@@ -1317,7 +1319,7 @@ class NQP::Actions is HLL::Actions {
 
     method circumfix:sym<{ }>($/) {
         if +$<pblock><blockoid><statementlist><statement> > 0 {
-            my $past := $<pblock>.ast;
+            my $past := QAST::Op.new( :op('takeclosure'), $<pblock>.ast );
             $past<bareblock> := 1;
             make $past;
         }

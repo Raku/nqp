@@ -1489,6 +1489,9 @@ QAST::Operations.add_core_pirop_mapping('findmethod', 'find_method', 'PPs', :inl
 QAST::Operations.add_core_pirop_mapping('defined', 'defined', 'IP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('can', 'can', 'IPs', :inlinable(1));
 
+# code object related opcodes
+QAST::Operations.add_core_pirop_mapping('takeclosure', 'newclosure', 'PP');
+
 # serialization context related opcodes
 QAST::Operations.add_core_pirop_mapping('sha1', 'nqp_sha1', 'Ss');
 QAST::Operations.add_core_pirop_mapping('createsc', 'nqp_create_sc', 'Ps');
