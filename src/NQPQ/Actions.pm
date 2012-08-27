@@ -889,13 +889,15 @@ class NQP::Actions is HLL::Actions {
             }
         }
 
-        # Apply traits.
-        $past<block_past> := $block;
+        my $lexpast := QAST::Op.new( :op('takeclosure'), $past );
+        $lexpast<sink> := $past;
+        $lexpast<block_past> := $block;
+        make $lexpast;
+
+        # Apply traits.        
         if $<trait> {
             for $<trait> { $_.ast()($/); }
         }
-
-        make $past;
     }
 
 
@@ -944,8 +946,10 @@ class NQP::Actions is HLL::Actions {
         }
 
         # Install AST node in match object, then apply traits.
-        make $past;
-        $past<block_past> := $past;
+        my $lexpast := QAST::Op.new( :op('takeclosure'), $past );
+        $lexpast<sink> := $past;
+        $lexpast<block_past> := $past;
+        make $lexpast;
         if $<trait> {
             for $<trait> { $_.ast()($/); }
         }
