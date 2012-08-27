@@ -397,7 +397,7 @@ knowhow NQPClassHOW {
         my @tc;
         for @!mro { @tc.push($_); }
         for @!done { @tc.push($_); }
-        pir::publish_type_check_cache($obj, @tc)
+        pir::publish_type_check_cache__0PP($obj, @tc)
     }
 
     method publish_method_cache($obj) {
@@ -411,7 +411,7 @@ knowhow NQPClassHOW {
                 %cache{$_.key} := $_.value;
             }
         }
-        pir::publish_method_cache($obj, %cache);
+        pir::publish_method_cache__0PP($obj, %cache);
         pir::set_method_cache_authoritativeness__0Pi($obj, 1);
     }
 
@@ -717,7 +717,7 @@ knowhow NQPClassHOW {
         $!trace := 1;
         $!trace_depth := $depth // 0;
         pir::set_method_cache_authoritativeness__0Pi($obj, 0);
-        pir::publish_method_cache($obj, nqp::hash());
+        pir::publish_method_cache__0PP($obj, nqp::hash());
     }
     method trace-off($obj) {
         $!trace := 0;

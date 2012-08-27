@@ -99,7 +99,7 @@ class HLL::Compiler {
         my $base := nqp::join('/', self.parse_name($name));
         my $loaded := 0;
         try { pir::load_bytecode__vS("$base.pbc"); $loaded := 1 };
-        unless $loaded { pir::load_bytecode("$base.pir"); $loaded := 1 }
+        unless $loaded { pir::load_bytecode__vS("$base.pir"); $loaded := 1 }
         self.get_module($name);
     }
 
