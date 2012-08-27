@@ -122,11 +122,11 @@ contains the following items.
     |    32-bit integer                                       |
     +---------------------------------------------------------+
 
-The extact data stored for an object is up to its representation.
+The exact data stored for an object is up to its representation.
 
 ## Closures Table
 This table describes the closures we have taken during compilation and
-that need to be re-instnated during deserialization, along with
+that need to be re-instated during deserialization, along with
 references to their relevant outer contexts.
 
     +---------------------------------------------------------+
@@ -283,7 +283,7 @@ We make an entry in the closures table indicating the static code ref that needs
 be cloned in order to start recreating the closure.
 
 Next, we consider the outer. There are two things involved here. One is the context,
-which represents the leixcals declared in that context. The second is the code object
+which represents the lexicals declared in that context. The second is the code object
 that is associated with the outer. There are some options for this.
 
 1) The outer points to a dynamic compilation boundary (tagged DYN_COMP_BOUNDARY).
