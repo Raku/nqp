@@ -1,0 +1,40 @@
+
+
+Overview of nqp repository directory structure:
+
+    docs/      - documentation for NQP
+
+    examples/  - NQP examples (some obsolete)
+
+    src/
+      6model   - 6model C sources
+      cheats   - obsolete
+      core     - NQP core runtime types
+      gen      - work directory for build
+      guts     - multidispatch routines
+      HLL      - base classes for building HLL compilers
+      NQP      - NQP compiler sources
+      ops      - NQP-specific Parrot opcode sources
+      pmc      - NQP-specific Parrot object types
+      PAST     - obsolete (but not removable yet)
+
+      QAST     - code for QAST types, QAST to VM compiler
+
+      QRegex   - P6Regex to QAST compiler
+
+      Regex    - obsolete (but not removable yet)
+      stage?   - build directories
+
+    t/         - tests
+      hll/     - HLL library tests (?)
+      nqp/     - NQP language tests
+      qregex/  - QRegex tests
+      qast/    - QAST tests
+      p5regex/ - P5 regex tests
+      pmc/     - Parrot PMC regression tests
+      setting/ - ???
+      serialization/ - NQP serializer tests
+
+    tools/     - scripts and Perl 5 libraries for configure+build NQP
+
+
