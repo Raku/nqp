@@ -460,51 +460,17 @@ class NQP::World is HLL::World {
         $block.push(QAST::VM.new( loadlibs => @loadlibs ));
     }
     
-    # Generates a series of PAST operations that will build this context if
-    # it doesn't exist, and fix it up if it already does.
-    method to_past() {
-        if self.is_precompilation_mode() {
-            my $load_tasks := QAST::Stmts.new();
-            for self.load_dependency_tasks() {
-                $load_tasks.push(QAST::Stmt.new($_));
-            }
-            my $fixup_tasks := QAST::Stmts.new();
-            for self.fixup_tasks() {
-                $fixup_tasks.push(QAST::Stmt.new($_));
-            }
-            return QAST::Stmts.new(
-                PAST::Op.new( :pirop('nqp_dynop_setup v') ),
-                PAST::Op.new( :pirop('nqp_bigint_setup v') ),
-                PAST::Op.new(
-                    :pasttype('callmethod'), :name('hll_map'),
-                    PAST::Op.new( :pirop('getinterp P') ),
-                    PAST::Op.new( :pirop('get_class Ps'), 'LexPad' ),
-                    PAST::Op.new( :pirop('get_class Ps'), 'NQPLexPad' )
-                ),
-                PAST::Op.new(
-                    :pasttype('bind_6model'),
-                    PAST::Var.new( :name('cur_sc'), :scope('register'), :isdecl(1) ),
-                    PAST::Op.new( :pirop('nqp_create_sc Ps'), self.handle() )
-                ),
-                PAST::Op.new(
-                    :pasttype('callmethod'), :name('set_description'),
-                    PAST::Var.new( :name('cur_sc'), :scope('register') ),
-                    self.sc.description
-                ),
-                $load_tasks,
-                self.serialize_and_produce_deserialization_past('cur_sc'),
-                $fixup_tasks
-            );
-        }
-        else {
-            my $tasks := QAST::Stmts.new();
-            for self.load_dependency_tasks() {
-                $tasks.push(QAST::Stmt.new($_));
-            }
-            for self.fixup_tasks() {
-                $tasks.push(QAST::Stmt.new($_));
-            }
-            return $tasks
+    # Adds some initial tasks.
+    method add_initializations() {
+        self.add_load_dependency_task(:deserialize_past(QAST::Stmts.new(
+            QAST::VM.new( :pirop('nqp_dynop_setup v') ),
+            QAST::VM.new( :pirop('nqp_bigint_setup v') ),
+            QAST::Op.new(
+                :op('callmethod'), :name('hll_map'),
+                QAST::VM.new( :pirop('getinterp P') ),
+                QAST::VM.new( :pirop('get_class Ps'), QAST::SVal.new( :value('LexPad') ) ),
+                QAST::VM.new( :pirop('get_class Ps'), QAST::SVal.new( :value('NQPLexPad') ) )
+            ));
         }
     }
     

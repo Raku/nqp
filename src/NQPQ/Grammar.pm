@@ -112,6 +112,8 @@ grammar NQP::Grammar is HLL::Grammar {
         :my $*GLOBALish;
         <.GLOBALish>
         
+        { $*W.add_initializations(); }
+        
         <.outerctx>
         
         <statementlist>
