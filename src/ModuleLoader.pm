@@ -7,7 +7,7 @@ knowhow ModuleLoader {
         
         # Put any explicitly specified path on the start of the list.
         # Otherwise see if --library was passed.
-        my $explicit;
+        my $explicit := 0;
         try { $explicit := %*COMPILING<%?OPTIONS>{$explicit_path}; }
         if $explicit {
             @search_paths.push($explicit);
@@ -53,12 +53,12 @@ knowhow ModuleLoader {
                 last;
             }
         }
-        if nqp::defined(%modules_loaded{$path}) {
+        if nqp::existskey(%modules_loaded, $path) {
             $module_ctx := %modules_loaded{$path};
         }
         else {
             my $*CTXSAVE := self;
-            my $*MAIN_CTX;
+            my $*MAIN_CTX := ModuleLoader;
             my $preserve_global := pir::get_hll_global__Ps('GLOBAL');
             pir::load_bytecode__vs($path);
             pir::set_hll_global__vsP('GLOBAL', $preserve_global);
@@ -152,9 +152,10 @@ knowhow ModuleLoader {
             }
 
             # Unless we already did so, load the setting.
+            unless nqp::existskey(%settings_loaded, $path) {
             unless nqp::defined(%settings_loaded{$path}) {
                 my $*CTXSAVE := self;
-                my $*MAIN_CTX;
+                my $*MAIN_CTX := ModuleLoader;
                 my $preserve_global := pir::get_hll_global__Ps('GLOBAL');
                 pir::load_bytecode__vs($path);
                 pir::set_hll_global__vsP('GLOBAL', $preserve_global);
