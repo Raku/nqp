@@ -1518,6 +1518,7 @@ QAST::Operations.add_core_pirop_mapping('where', 'get_id', 'IP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('findmethod', 'find_method', 'PPs', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('defined', 'defined', 'IP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('can', 'can', 'IPs', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('reprname', 'repr_name', 'SP', :inlinable(1));
 
 # code object related opcodes
 QAST::Operations.add_core_pirop_mapping('takeclosure', 'newclosure', 'PP');

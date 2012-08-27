@@ -1176,7 +1176,7 @@ class NQP::Actions is HLL::Actions {
             $past.op('who');
         }
         elsif $<longname> eq 'REPR' {
-            $past.pirop('repr_name SP');
+            $past.op('reprname');
         }
         else {
             $past.name(~$<longname>);
