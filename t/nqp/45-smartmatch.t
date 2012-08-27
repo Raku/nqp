@@ -1,19 +1,6 @@
 #! nqp
 
-#P6metaclass.register('Integer');
-#P6metaclass.register('ResizablePMCArray');
-
-plan(14);
-
-skip('boxing');
-#ok(3 ~~ Integer, "smartmatch of Integer works");
-skip('boxing');
-#ok(!(4.5 ~~ Integer), "negative smartmatch of Integer works");
-
-skip('boxing');
-#ok(<a b c> ~~ ResizablePMCArray, "smartmatch of RPA works");
-skip('boxing');
-#ok(!(3 ~~ ResizablePMCArray), "negative smartmatch of RPA works");
+plan(10);
 
 my $match := 'cde' ~~ regex abc { c(.)e };
 
