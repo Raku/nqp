@@ -177,21 +177,23 @@ class PIRT::Sub is PIRT::Node {
         my @parts;
         
         # Sub prelude.
-        for @!loadlibs {
-            nqp::push(@parts, ".loadlib " ~ self.escape($_));
+        unless nqp::isnull(@!loadlibs) {
+            for @!loadlibs {
+                nqp::push(@parts, ".loadlib " ~ self.escape($_));
+            }
         }
         if $!hll {
             nqp::push(@parts, ".HLL " ~ self.escape($!hll));
         }
-        if @!namespace {
+        if nqp::isnull(@!namespace) {
+            nqp::push(@parts, ".namespace []");
+        }
+        else {
             my @ns;
             for @!namespace {
                 nqp::push(@ns, self.escape($_));
             }
             nqp::push(@parts, '.namespace [' ~ nqp::join(';', @ns) ~ ']');
-        }
-        else {
-            nqp::push(@parts, ".namespace []");
         }
         my $sub_decl := ".sub " ~ self.escape($!name || '');
         if $!subid {
