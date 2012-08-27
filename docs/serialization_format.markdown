@@ -55,9 +55,9 @@ data blob) where various tables can be located.
     +---------------------------------------------------------+
 
 ## Dependencies Table
-This table describes the SCs that are required to already be loaded in
-order to load this one. The number of entries this table has is supplied
-by the header. Each entry looks as follows.
+This table describes the Serialization Contexts (SC) that are required to
+already be loaded in order to load this one. The number of entries this table
+has, is supplied by the header. Each entry looks as follows.
 
     +---------------------------------------------------------+
     | Index into the string heap of the SC unique ID          |
@@ -68,12 +68,12 @@ by the header. Each entry looks as follows.
     +---------------------------------------------------------+
 
 ## STables Table
-This table describes the STables that have been serialized. Each entry
+This table describes the 6model STables that have been serialized. Each entry
 contains the following items.
 
     +---------------------------------------------------------+
     | Index into the string heap a string holding the name of |
-    | the REPR that this STable points to.                    |
+    | the representation (REPR) that this STable points to.   |
     |    32-bit integer                                       |
     +---------------------------------------------------------+
     | Offset from the start of the STable data chunk where    |
@@ -262,7 +262,7 @@ code objects, pointing to the compiled code refs. These are indexed just as
 the dynamic compilation stubs were, so references to them can be resolved.
 This also works out in the cross-context case.
 
-### Dynaic Compilation
+### Dynamic Compilation
 When dynamic compilation is performed, the SC should be updated with the
 code ref to the now-compiled code. Additionally, this needs to be tagged
 as a static code reference (and will also be tagged with the SC in question).
