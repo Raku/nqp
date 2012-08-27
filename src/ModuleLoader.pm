@@ -153,7 +153,6 @@ knowhow ModuleLoader {
 
             # Unless we already did so, load the setting.
             unless nqp::existskey(%settings_loaded, $path) {
-            unless nqp::defined(%settings_loaded{$path}) {
                 my $*CTXSAVE := self;
                 my $*MAIN_CTX := ModuleLoader;
                 my $preserve_global := pir::get_hll_global__Ps('GLOBAL');
