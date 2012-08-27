@@ -1458,7 +1458,8 @@ inline op multi_dispatch_over_lexical_candidates(out PMC) :base_core {
     }
     if (!done)
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "multi_dispatch_over_lexical_candidates was unable to find a candidate list");
+            "multi_dispatch_over_lexical_candidates was unable to find a candidate list (probable sub: %Ss)",
+            VTABLE_get_string(interp, CONTEXT_STRUCT(CURRENT_CONTEXT(interp))->current_sub));
 }
 
 /*
