@@ -1328,15 +1328,15 @@ class NQP::Actions is HLL::Actions {
     method semilist($/) { make $<statement>.ast }
 
     method postcircumfix:sym<[ ]>($/) {
-        make QAST::Var.new( :scope('positional'), $<EXPR>.ast );
+        make QAST::VarWithFallback.new( :scope('positional'), $<EXPR>.ast, :fallback(default_for('$')) );
     }
 
     method postcircumfix:sym<{ }>($/) {
-        make QAST::Var.new( :scope('associative'), $<EXPR>.ast );
+        make QAST::VarWithFallback.new( :scope('associative'), $<EXPR>.ast, :fallback(default_for('$')) );
     }
 
     method postcircumfix:sym<ang>($/) {
-        make QAST::Var.new( :scope('associative'), $<quote_EXPR>.ast );
+        make QAST::VarWithFallback.new( :scope('associative'), $<quote_EXPR>.ast, :fallback(default_for('$')) );
     }
 
     method postcircumfix:sym<( )>($/) {
