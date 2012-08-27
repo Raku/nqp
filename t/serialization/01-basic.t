@@ -12,7 +12,7 @@ plan(66);
     ok(nqp::chars($serialized) >= 36, 'output is at least as long as the header');
 
     my $dsc := pir::nqp_create_sc__Ps('TEST_SC_1_OUT');
-    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh, nqp::list());
+    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, nqp::list());
     
     ok(nqp::elems($dsc) == 0, 'deserialized SC is also empty');
 }
@@ -30,7 +30,7 @@ plan(66);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6int output longer than a header');
     
     my $dsc := pir::nqp_create_sc__Ps('TEST_SC_2_OUT');
-    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh, nqp::list());
+    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, nqp::list());
     
     ok(nqp::elems($dsc) == 1,       'deserialized SC has a single element');
     ok(nqp::istype($dsc[0], T1),    'deserialized object has correct type');
@@ -50,7 +50,7 @@ plan(66);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6num output longer than a header');
     
     my $dsc := pir::nqp_create_sc__Ps('TEST_SC_3_OUT');
-    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh, nqp::list());
+    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, nqp::list());
     
     ok(nqp::elems($dsc) == 1,        'deserialized SC has a single element');
     ok(nqp::istype($dsc[0], T2),     'deserialized object has correct type');
@@ -70,7 +70,7 @@ plan(66);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6str output longer than a header');
     
     my $dsc := pir::nqp_create_sc__Ps('TEST_SC_4_OUT');
-    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh, nqp::list());
+    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, nqp::list());
     
     ok(nqp::elems($dsc) == 1,             'deserialized SC has a single element');
     ok(nqp::istype($dsc[0], T3),          'deserialized object has correct type');
@@ -107,7 +107,7 @@ plan(66);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6opaque output longer than a header');
     
     my $dsc := pir::nqp_create_sc__Ps('TEST_SC_5_OUT');
-    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh, nqp::list());
+    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, nqp::list());
 
     ok(nqp::elems($dsc) == 1,             'deserialized SC has a single element');
     ok(nqp::istype($dsc[0], T4),          'deserialized object has correct type');
@@ -139,7 +139,7 @@ plan(66);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6opaque output longer than a header');
     
     my $dsc := pir::nqp_create_sc__Ps('TEST_SC_6_OUT');
-    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh, nqp::list());
+    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, nqp::list());
     
     ok(nqp::elems($dsc) == 2,       'deserialized SC has 2 element');
     ok(nqp::istype($dsc[0], T5),    'first deserialized object has correct type');
@@ -178,7 +178,7 @@ plan(66);
     my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
     
     my $dsc := pir::nqp_create_sc__Ps('TEST_SC_7_OUT');
-    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh, nqp::list());
+    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, nqp::list());
     
     ok(nqp::elems($dsc) == 3,       'deserialized SC has 3 elements - the one we added and two discovered');
     ok(nqp::istype($dsc[0], T6),    'first deserialized object has correct type');
@@ -220,7 +220,7 @@ plan(66);
     my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
     
     my $dsc := pir::nqp_create_sc__Ps('TEST_SC_8_OUT');
-    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh, nqp::list());
+    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, nqp::list());
 
     ok(nqp::elems($dsc) == 1,             'deserialized SC has a single element');
     ok(nqp::istype($dsc[0], T7),          'deserialized object has correct type');
@@ -255,7 +255,7 @@ plan(66);
     my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
     
     my $dsc := pir::nqp_create_sc__Ps('TEST_SC_9_OUT');
-    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh, nqp::list());
+    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, nqp::list());
 
     ok(nqp::istype($dsc[0], T8),          'deserialized object has correct type');
     ok(nqp::elems($dsc[0].a) == 3,        'array a came back with correct element count');
@@ -296,7 +296,7 @@ plan(66);
     my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
     
     my $dsc := pir::nqp_create_sc__Ps('TEST_SC_10_OUT');
-    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh, nqp::list());
+    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, nqp::list());
 
     ok(nqp::istype($dsc[0], T9),          'deserialized object has correct type');
     ok(nqp::elems($dsc[0].a) == 2,        'hash came back with correct element count');
@@ -331,7 +331,7 @@ plan(66);
     my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
     
     my $dsc := pir::nqp_create_sc__Ps('TEST_SC_11_OUT');
-    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh, nqp::list());
+    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, nqp::list());
 
     ok(nqp::istype($dsc[0], T10),          'deserialized object has correct type');
     ok(nqp::elems($dsc[0].a) == 3,         'integer array came back with correct element count');
@@ -367,7 +367,7 @@ plan(66);
     my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
     
     my $dsc := pir::nqp_create_sc__Ps('TEST_SC_12_OUT');
-    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh, nqp::list());
+    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, nqp::list());
 
     ok(nqp::istype($dsc[0], T11),          'deserialized object has correct type');
     ok(nqp::elems($dsc[0].a) == 3,         'string array came back with correct element count');

@@ -27,7 +27,7 @@ plan(9);
 
     my $dsc := pir::nqp_create_sc__Ps('TEST_SC_1_OUT');
     my $cr := nqp::list($m1);
-    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh, $cr);
+    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, $cr);
     
     ok(nqp::elems($dsc) >= 1,                 'deserialized SC has at least the type');
     ok(!nqp::isconcrete($dsc[0]),             'type object deserialized and is not concrete');
@@ -73,7 +73,7 @@ plan(9);
 
     my $dsc := pir::nqp_create_sc__Ps('TEST_SC_2_OUT');
     my $cr := nqp::list($raw_sub, $raw_meth);
-    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh, $cr);
+    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, $cr);
     
     ok(nqp::elems($dsc) >= 2,                 'deserialized SC has at least the two type');
     ok(!nqp::isconcrete($dsc[0]),             'first type object deserialized and is not concrete');
