@@ -1,5 +1,5 @@
 INIT {
-    pir::load_bytecode('Parrot/Exception.pbc');
+    pir::load_bytecode__vS('Parrot/Exception.pbc');
 }
 
 # This incorporates both the code that used to be in PCT::HLLCompiler as well
@@ -38,19 +38,19 @@ class HLL::Compiler {
         for @!cmdoptions {
             $!usage := $!usage ~ "    $_\n";
         }
-        %parrot_config := pir::getinterp()[pir::const::IGLOBALS_CONFIG_HASH];
+        %parrot_config := pir::getinterp__P()[pir::const::IGLOBALS_CONFIG_HASH];
         %!config     := nqp::hash();
     }
     
     my sub value_type($value) {
-        pir::isa($value, 'NameSpace')
+        pir::isa__IPs($value, 'NameSpace')
             ?? 'namespace'
             !! (pir::isa($value, 'Sub') ?? 'sub' !! 'var')
     }
         
     method get_exports($module, :$tagset, *@symbols) {
         # convert a module name to something hash-like, if needed
-        if (!pir::does($module, 'hash')) {
+        if (!pir::does__IPs($module, 'hash')) {
             $module := self.get_module($module);
         }
 
@@ -98,7 +98,7 @@ class HLL::Compiler {
     method load_module($name) {
         my $base := nqp::join('/', self.parse_name($name));
         my $loaded := 0;
-        try { pir::load_bytecode("$base.pbc"); $loaded := 1 };
+        try { pir::load_bytecode__vS("$base.pbc"); $loaded := 1 };
         unless $loaded { pir::load_bytecode("$base.pir"); $loaded := 1 }
         self.get_module($name);
     }
@@ -187,13 +187,13 @@ class HLL::Compiler {
     method eval($code, *@args, *%adverbs) {
         my $output;
 
-        my $old_runcore := pir::interpinfo__si(pir::const::INTERPINFO_CURRENT_RUNCORE);
+        my $old_runcore := pir::interpinfo__Si(pir::const::INTERPINFO_CURRENT_RUNCORE);
         if (%adverbs<profile-compile>) {
             pir::set_runcore__vs("subprof_hll");
         }
         $output := self.compile($code, |%adverbs);
 
-        if !pir::isa($output, 'String')
+        if !pir::isa__IPs($output, 'String')
                 && %adverbs<target> eq '' {
             my $outer_ctx := %adverbs<outer_ctx>;
             if nqp::defined($outer_ctx) {
@@ -286,8 +286,8 @@ class HLL::Compiler {
         %adverbs.update(%opts);
         self.usage($program-name) if %adverbs<help>  || %adverbs<h>;
 
-        pir::load_bytecode('dumper.pbc');
-        pir::load_bytecode('PGE/Dumper.pbc');
+        pir::load_bytecode__vs('dumper.pbc');
+        pir::load_bytecode__vs('PGE/Dumper.pbc');
 
         self.command_eval(|@a, |%adverbs);
     }
@@ -383,7 +383,7 @@ class HLL::Compiler {
     method evalfiles($files, *@args, *%adverbs) {
         my $target := nqp::lc(%adverbs<target>);
         my $encoding := %adverbs<encoding>;
-        my @files := pir::does($files, 'array') ?? $files !! [$files];
+        my @files := pir::does__IPs($files, 'array') ?? $files !! [$files];
         $!user_progname := nqp::join(',', @files);
         my @codes;
         for @files {
@@ -449,8 +449,8 @@ class HLL::Compiler {
         if %adverbs<transcode> {
             for nqp::split(' ', %adverbs<transcode>) {
                 try {
-                    $s := pir::trans_encoding__ssi($s,
-                            pir::find_encoding__is($_));
+                    $s := pir::trans_encoding__Ssi($s,
+                            pir::find_encoding__Is($_));
                 }
             }
         }
@@ -466,7 +466,7 @@ class HLL::Compiler {
 
     method past($source, *%adverbs) {
         my $ast := $source.ast();
-        self.panic("Unable to obtain ast from " ~ pir::typeof($source))
+        self.panic("Unable to obtain ast from " ~ pir::typeof__SP($source))
             unless $ast ~~ PAST::Node || $ast ~~ QAST::Node;
         $ast;
     }
@@ -513,7 +513,7 @@ class HLL::Compiler {
 
     method dumper($obj, $name, *%options) {
         if %options<dumper> {
-            pir::load_bytecode('PCT/Dumper.pbc');
+            pir::load_bytecode__vs('PCT/Dumper.pbc');
             my $dumper := PCT::Dumper{nqp::lc(%options<dumper>)};
             $dumper($obj, $name)
         }

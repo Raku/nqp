@@ -17,7 +17,7 @@ grammar NQP::Grammar is HLL::Grammar {
         # Serialization context builder - keeps track of objects that
         # cross the compile-time/run-time boundary that are associated
         # with this compilation unit.
-        my $file := pir::find_caller_lex__ps('$?FILES');
+        my $file := pir::find_caller_lex__Ps('$?FILES');
         my $source_id := nqp::sha1(nqp::getattr_s(self, NQPCursor, '$!target')) ~
             '-' ~ ~nqp::time_n();
         my $*W := nqp::isnull($file) ??

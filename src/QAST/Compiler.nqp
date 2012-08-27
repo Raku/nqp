@@ -110,7 +110,7 @@ class QAST::Compiler is HLL::Compiler {
             my $name := $var.name;
             my $type := type_to_register_type($var.returns);
             if nqp::existskey(%!lexical_types, $name) {
-                pir::die("Lexical '$name' already declared");
+                nqp::die("Lexical '$name' already declared");
             }
             %!lexical_types{$name} := $type;
             %!lexical_regs{$name} := $reg ?? $reg !! self."fresh_lex_{nqp::lc($type)}"();
@@ -120,7 +120,7 @@ class QAST::Compiler is HLL::Compiler {
         method register_local($var) {
             my $name := $var.name;
             if nqp::existskey(%!local_types, $name) {
-                pir::die("Local '$name' already declared");
+                nqp::die("Local '$name' already declared");
             }
             %!local_types{$name} := type_to_register_type($var.returns);
             %!reg_types{$name} := %!local_types{$name};
@@ -401,7 +401,7 @@ class QAST::Compiler is HLL::Compiler {
                     if $_.default {
                         # Add an optional to the parameter and add it.
                         nqp::push(@param, ':optional');
-                        $decls.push_pirop(pir::join(' ', @param));
+                        $decls.push_pirop(nqp::join(' ', @param));
                         
                         # Add an optional flag.
                         my $o_flag := QAST::Node.unique('haz_param');
@@ -416,7 +416,7 @@ class QAST::Compiler is HLL::Compiler {
                         $opts.push($lbl);
                     }
                     else {
-                        $decls.push_pirop(pir::join(' ', @param));
+                        $decls.push_pirop(nqp::join(' ', @param));
                     }
                 }
             }
@@ -722,7 +722,7 @@ class QAST::Compiler is HLL::Compiler {
                     $*BLOCK.add_param($node);
                 }
                 else {
-                    pir::die("Parameter cannot have scope '$scope'; use 'local' or 'lexical'");
+                    nqp::die("Parameter cannot have scope '$scope'; use 'local' or 'lexical'");
                 }
             }
             elsif $decl eq 'var' {
@@ -733,11 +733,11 @@ class QAST::Compiler is HLL::Compiler {
                     $*BLOCK.add_lexical($node);
                 }
                 else {
-                    pir::die("Cannot declare variable with scope '$scope'; use 'local' or 'lexical'");
+                    nqp::die("Cannot declare variable with scope '$scope'; use 'local' or 'lexical'");
                 }
             }
             else {
-                pir::die("Don't understand declaration type '$decl'");
+                nqp::die("Don't understand declaration type '$decl'");
             }
         }
         
@@ -774,7 +774,7 @@ class QAST::Compiler is HLL::Compiler {
                 $ops.result($name);
             }
             else {
-                pir::die("Cannot reference undeclared local '$name'");
+                nqp::die("Cannot reference undeclared local '$name'");
             }
         }
         elsif $scope eq 'lexical' || $scope eq 'contextual' {
@@ -831,7 +831,7 @@ class QAST::Compiler is HLL::Compiler {
             # Ensure we have object and class handle.
             my @args := $node.list();
             if +@args != 2 {
-                pir::die("An attribute lookup needs an object and a class handle");
+                nqp::die("An attribute lookup needs an object and a class handle");
             }
             
             # Compile object and handle.
@@ -868,7 +868,7 @@ class QAST::Compiler is HLL::Compiler {
                 !! QAST::Op.new( :op('associative_get'), |$node.list));
         }
         else {
-            pir::die("QAST::Var with scope '$scope' NYI");
+            nqp::die("QAST::Var with scope '$scope' NYI");
         }
         
         $ops
@@ -963,7 +963,7 @@ class QAST::Compiler is HLL::Compiler {
             return $ops;
         }
         else {
-            pir::die("Coercion from '$result' to '$desired' NYI");
+            nqp::die("Coercion from '$result' to '$desired' NYI");
         }
     }
     
@@ -993,7 +993,7 @@ class QAST::Compiler is HLL::Compiler {
             "i"
         }
         else {
-            pir::die("Cannot infer type from '$inferee'");
+            nqp::die("Cannot infer type from '$inferee'");
         }
     }
     

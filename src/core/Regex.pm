@@ -34,7 +34,7 @@ perform the replacement on all matches of C<$text>.
 sub subst ($text, $regex, $repl, :$global?) {
     my @matches := $global ?? match($text, $regex, :global)
                            !! [ $text ~~ $regex ];
-    my $is_code := pir::isa($repl, 'Sub');
+    my $is_code := pir::isa__IPs($repl, 'Sub');
     my $offset  := 0;
     my $result  := pir::new__Ps('StringBuilder');
 

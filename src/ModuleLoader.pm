@@ -156,7 +156,7 @@ knowhow ModuleLoader {
                 my $*CTXSAVE := self;
                 my $*MAIN_CTX;
                 my $preserve_global := pir::get_hll_global__Ps('GLOBAL');
-                pir::load_bytecode($path);
+                pir::load_bytecode__vs($path);
                 pir::set_hll_global__vsP('GLOBAL', $preserve_global);
                 unless nqp::defined($*MAIN_CTX) {
                     nqp::die("Unable to load setting $setting_name; maybe it is missing a YOU_ARE_HERE?");
