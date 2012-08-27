@@ -1511,7 +1511,18 @@ class NQP::Actions is HLL::Actions {
                     $path, QAST::SVal.new( :value(~$_) ));
             }
             $lookup.unshift(QAST::Op.new(:op('who'), $path));
-            $lookup.fallback(default_for(nqp::substr(~$final_name, 0, 1)));
+            my $sigil := nqp::substr(~$final_name, 0, 1);
+            if $sigil eq '@' || $sigil eq '%' {
+                $lookup.fallback(QAST::Op.new(
+                    :op('bindkey'),
+                    $lookup[0],
+                    $lookup[1],
+                    default_for($sigil)
+                ));
+            }
+            else {
+                $lookup.fallback(default_for($sigil));
+            }
         }
         
         return $lookup;
