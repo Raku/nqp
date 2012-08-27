@@ -1623,8 +1623,8 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
             }
             elsif $<nibbler> {
                 $name eq 'after' ??
-                    $qast[0].push(QRegex::P6Regex::Actions::qbuildsub(self.flip_ast($<nibbler>[0].ast), :anon(1))) !!
-                    $qast[0].push(QRegex::P6Regex::Actions::qbuildsub($<nibbler>[0].ast, :anon(1)));
+                    $qast[0].push(QRegex::P6Regex::Actions::qbuildsub(self.flip_ast($<nibbler>[0].ast), :anon(1), :addself(1))) !!
+                    $qast[0].push(QRegex::P6Regex::Actions::qbuildsub($<nibbler>[0].ast, :anon(1), :addself(1)));
             }
         }
         make $qast;
