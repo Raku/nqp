@@ -129,7 +129,7 @@ class HLL::Compiler {
      
         my $target := nqp::lc(%adverbs<target>);
 
-        nqp::print(pir::getinterp__P().stderr_handle(), self.interactive_banner);
+        pir::getinterp__P().stderr_handle().print(self.interactive_banner);
 
         my $stdin    := pir::getinterp__P().stdin_handle();
         my $encoding := ~%adverbs<encoding>;
@@ -189,7 +189,7 @@ class HLL::Compiler {
 
         my $old_runcore := pir::interpinfo__Si(pir::const::INTERPINFO_CURRENT_RUNCORE);
         if (%adverbs<profile-compile>) {
-            pir::set_runcore__vs("subprof_hll");
+            pir::set_runcore__0s("subprof_hll");
         }
         $output := self.compile($code, |%adverbs);
 
@@ -201,7 +201,7 @@ class HLL::Compiler {
             }
 
             if (%adverbs<profile>) {
-                pir::set_runcore__vs("subprof_hll");
+                pir::set_runcore__0s("subprof_hll");
             }
             pir::trace__vI(%adverbs<trace>);
             $output := $output(|@args);
@@ -322,7 +322,7 @@ class HLL::Compiler {
                         ?? pir::getinterp__P().stdout_handle()
                         !! pir::new__Ps('FileHandle').open($output, 'w');
                 self.panic("Cannot write to $output") unless $fh;
-                nqp::print($fh, $result);
+                $fh.print($result);
                 $fh.close()
             }
             CATCH {
@@ -426,7 +426,7 @@ class HLL::Compiler {
             my $diff := nqp::time_n() - $timestamp;
             if pir::defined__IP($stagestats) {
                 $stderr.print(nqp::sprintf("Stage %-11s: %7.3f", [$_, $diff]));
-                pir::sweep__vi(1) if nqp::bitand_i($stagestats, 0x4);
+                pir::sweep__0i(1) if nqp::bitand_i($stagestats, 0x4);
                 $stderr.print(nqp::sprintf(" %11d %11d %9d %9d", self.vmstat()))
                     if nqp::bitand_i($stagestats, 0x2);
                 $stderr.print("\n");
@@ -578,7 +578,7 @@ class HLL::Compiler {
                 pir::nqpevent_fh__PP(pir::getinterp__P().stderr_handle());
             }
             pir::nqpdebflags__Ii($flags eq '' ?? 0x1f !! $flags);
-            pir::nqpevent__vs("nqpevent: log started");
+            pir::nqpevent__0s("nqpevent: log started");
         }
     }
 
