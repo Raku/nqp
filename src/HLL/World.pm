@@ -48,7 +48,7 @@ class HLL::World {
     # XXX LEGACY
     has %!addr_to_slot;
     
-    method BUILD(:$handle!, :$description!) {
+    method BUILD(:$handle!, :$description = '<unknown>') {
         # Initialize attributes.
         $!sc              := pir::nqp_create_sc__PS($handle);
         $!handle          := $handle;
