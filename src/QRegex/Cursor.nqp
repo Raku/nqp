@@ -85,7 +85,7 @@ role NQPCursorRole {
         if $!restart {
             nqp::bindattr_i($new, $?CLASS, '$!pos', $!pos);
             nqp::bindattr($new, $?CLASS, '$!cstack', nqp::clone($!cstack)) if $!cstack;
-            pir::return__vPsiPPi(
+            pir::return__0PsiPPi(
                 $new,
                 nqp::bindattr_s($new, $?CLASS, '$!target', $!target),
                 nqp::bindattr_i($new, $?CLASS, '$!from', $!from),
@@ -94,7 +94,7 @@ role NQPCursorRole {
                 1);
         }
         nqp::bindattr_i($new, $?CLASS, '$!pos', -3);
-        pir::return__vPsiPPi(
+        pir::return__0PsiPPi(
             $new, 
             nqp::bindattr_s($new, $?CLASS, '$!target', $!target),
             nqp::bindattr_i($new, $?CLASS, '$!from', $!pos),
