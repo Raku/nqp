@@ -65,7 +65,7 @@ class QRegex::NFA {
         self.addedge($from, $to, $EDGE_EPSILON, 0);
     }
 
-    our %cclass_code;
+    my %cclass_code;
     INIT {
         %cclass_code<.>  := pir::box__Pi(pir::const::CCLASS_ANY);
         %cclass_code<d>  := pir::box__Pi(pir::const::CCLASS_NUMERIC);
