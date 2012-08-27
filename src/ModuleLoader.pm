@@ -7,9 +7,9 @@ knowhow ModuleLoader {
         
         # Put any explicitly specified path on the start of the list.
         # Otherwise see if --library was passed.
-        my $explicit := 0;
+        my $explicit;
         try { $explicit := %*COMPILING<%?OPTIONS>{$explicit_path}; }
-        if $explicit {
+        if !nqp::isnull($explicit) && $explicit {
             @search_paths.push($explicit);
         }
         else {
@@ -95,7 +95,7 @@ knowhow ModuleLoader {
         }
         for $source.WHO {
             my $sym := $_.key;
-            if !%known_symbols{$sym} {
+            if !nqp::existskey(%known_symbols, $sym) {
                 my $source_is_stub := 0;
                 try {
                     my $source_mo := $_.value.HOW;
