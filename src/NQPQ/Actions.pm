@@ -960,6 +960,7 @@ class NQP::Actions is HLL::Actions {
         my $lexpast := QAST::Op.new( :op('takeclosure'), $past );
         $lexpast<sink> := $past;
         $lexpast<block_past> := $past;
+        $lexpast<code_obj> := $past<code_obj>;
         make $lexpast;
         if $<trait> {
             for $<trait> { $_.ast()($/); }
