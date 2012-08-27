@@ -67,7 +67,7 @@ knowhow NQPClassHOW {
         $obj
     }
 
-    method BUILD(:$name) {
+    method BUILD(:$name = '<anon>') {
         $!name := $name;
         %!attributes := nqp::hash();
         %!methods := nqp::hash();
@@ -548,7 +548,7 @@ knowhow NQPClassHOW {
     ## Introspecty
     ##
 
-    method parents($obj, :$local) {
+    method parents($obj, :$local = 0) {
         $local ?? @!parents !! @!mro
     }
     
@@ -560,7 +560,7 @@ knowhow NQPClassHOW {
         @!roles
     }
 
-    method methods($obj, :$local) {
+    method methods($obj, :$local = 0) {
         if $local {
             @!method_order
         }
@@ -657,7 +657,7 @@ knowhow NQPClassHOW {
     ##
     ## Dispatchy
     ##
-    method find_method($obj, $name, :$no_fallback, :$no_trace) {
+    method find_method($obj, $name, :$no_fallback = 0, :$no_trace = 0) {
         for @!mro {
             my %meths := $_.HOW.method_table($obj);
             if nqp::existskey(%meths, $name) {
