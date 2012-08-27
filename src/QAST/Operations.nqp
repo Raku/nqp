@@ -1,3 +1,5 @@
+use NQPHLL;
+
 class QAST::Operations {
     # Maps operations to code that will handle them. Hash of code.
     my %core_ops;

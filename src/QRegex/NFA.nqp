@@ -1,3 +1,5 @@
+use QASTNode;
+
 class QRegex::NFA {
     our $EDGE_FATE          := 0;
     our $EDGE_EPSILON       := 1;

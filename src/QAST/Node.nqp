@@ -1,5 +1,3 @@
-use NQPHLL;
-
 class QAST::Node {
     # For children.
     has @!array
