@@ -45,6 +45,13 @@ knowhow NQPConcreteRoleHOW {
     method BUILD(:$name!, :$instance_of!) {
         $!name := $name;
         $!instance_of := $instance_of;
+        %!attributes := nqp::hash();
+        %!methods := nqp::hash();
+        @!multi_methods_to_incorporate := nqp::list();
+        @!collisions := nqp::list();
+        @!roles := nqp::list();
+        @!role_typecheck_list := nqp::list();
+        $!composed := 0;
     }
 
     # Create a new meta-object instance, and then a new type object
@@ -55,7 +62,7 @@ knowhow NQPConcreteRoleHOW {
     }
 
     method add_method($obj, $name, $code_obj) {
-        if %!methods{$name} {
+        if nqp::existskey(%!methods, $name) {
             nqp::die("This role already has a method named " ~ $name);
         }
         %!methods{$name} := $code_obj;
@@ -71,7 +78,7 @@ knowhow NQPConcreteRoleHOW {
 
     method add_attribute($obj, $meta_attr) {
         my $name := $meta_attr.name;
-        if %!attributes{$name} {
+        if nqp::existskey(%!attributes, $name) {
             nqp::die("This role already has an attribute named " ~ $name);
         }
         %!attributes{$name} := $meta_attr;

@@ -44,6 +44,11 @@ knowhow NQPParametricRoleHOW {
 
     method BUILD(:$name!) {
         $!name := $name;
+        %!attributes := nqp::hash();
+        %!methods := nqp::hash();
+        @!multi_methods_to_incorporate := nqp::list();
+        @!roles := nqp::list();
+        $!composed := 0;
     }
 
     # Create a new meta-class instance, and then a new type object
@@ -58,7 +63,7 @@ knowhow NQPParametricRoleHOW {
     }
 
     method add_method($obj, $name, $code_obj) {
-        if %!methods{$name} {
+        if nqp::existskey(%!methods, $name) {
             nqp::die("This role already has a method named " ~ $name);
         }
         %!methods{$name} := $code_obj;
@@ -74,7 +79,7 @@ knowhow NQPParametricRoleHOW {
 
     method add_attribute($obj, $meta_attr) {
         my $name := $meta_attr.name;
-        if %!attributes{$name} {
+        if nqp::existskey(%!attributes, $name) {
             nqp::die("This role already has an attribute named " ~ $name);
         }
         %!attributes{$name} := $meta_attr;

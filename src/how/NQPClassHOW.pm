@@ -69,6 +69,23 @@ knowhow NQPClassHOW {
 
     method BUILD(:$name) {
         $!name := $name;
+        %!attributes := nqp::hash();
+        %!methods := nqp::hash();
+        @!method_order := nqp::list();
+        @!multi_methods_to_incorporate := nqp::list();
+        @!parents := nqp::list();
+        @!roles := nqp::list();
+        @!vtable := nqp::list();
+        %!method-vtable-slots := nqp::hash();
+        @!mro := nqp::list();
+        @!done := nqp::list();
+        %!parrot_vtable_mapping := nqp::hash();
+        %!parrot_vtable_handler_mapping := nqp::hash();
+        @!BUILDALLPLAN := nqp::list();
+        @!BUILDPLAN := nqp::list();
+        $!trace := 0;
+        $!trace_depth := 0;
+        $!composed := 0;
     }
 
     # Create a new meta-class instance, and then a new type object
@@ -79,7 +96,7 @@ knowhow NQPClassHOW {
     }
 
     method add_method($obj, $name, $code_obj) {
-        if %!methods{$name} {
+        if nqp::existskey(%!methods, $name) {
             nqp::die("This class already has a method named " ~ $name);
         }
         if nqp::isnull($code_obj) || !nqp::defined($code_obj) {
@@ -106,7 +123,7 @@ knowhow NQPClassHOW {
 
     method add_attribute($obj, $meta_attr) {
         my $name := $meta_attr.name;
-        if %!attributes{$name} {
+        if nqp::existskey(%!attributes, $name) {
             nqp::die("This class already has an attribute named " ~ $name);
         }
         %!attributes{$name} := $meta_attr;
@@ -643,8 +660,8 @@ knowhow NQPClassHOW {
     method find_method($obj, $name, :$no_fallback, :$no_trace) {
         for @!mro {
             my %meths := $_.HOW.method_table($obj);
-            my $found := %meths{$name};
-            if nqp::defined($found) {
+            if nqp::existskey(%meths, $name) {
+                my $found := %meths{$name};
                 return $!trace && !$no_trace && nqp::substr($name, 0, 1) ne '!' ??
                     -> *@pos, *%named { 
                         say(nqp::x('  ', $!trace_depth) ~ "Calling $name");

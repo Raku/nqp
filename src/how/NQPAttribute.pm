@@ -40,7 +40,7 @@ knowhow NQPAttribute {
     }
 
     method box_target() {
-        $!box_target ?? 1 !! 0
+        !nqp::isnull($!box_target) && $!box_target ?? 1 !! 0
     }
     
     method auto_viv_container() {
