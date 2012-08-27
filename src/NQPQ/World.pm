@@ -470,8 +470,7 @@ class NQP::World is HLL::World {
                 QAST::VM.new( :pirop('getinterp P') ),
                 QAST::VM.new( :pirop('get_class Ps'), QAST::SVal.new( :value('LexPad') ) ),
                 QAST::VM.new( :pirop('get_class Ps'), QAST::SVal.new( :value('NQPLexPad') ) )
-            ));
-        }
+            ))));
     }
     
     # Checks if the given name is known anywhere in the lexpad
