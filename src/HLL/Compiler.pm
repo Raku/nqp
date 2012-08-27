@@ -45,7 +45,7 @@ class HLL::Compiler {
     my sub value_type($value) {
         pir::isa__IPs($value, 'NameSpace')
             ?? 'namespace'
-            !! (pir::isa($value, 'Sub') ?? 'sub' !! 'var')
+            !! (pir::isa__IPs($value, 'Sub') ?? 'sub' !! 'var')
     }
         
     method get_exports($module, :$tagset, *@symbols) {
@@ -203,9 +203,9 @@ class HLL::Compiler {
             if (%adverbs<profile>) {
                 pir::set_runcore__vs("subprof_hll");
             }
-            pir::trace(%adverbs<trace>);
+            pir::trace__vI(%adverbs<trace>);
             $output := $output(|@args);
-            pir::trace(0);
+            pir::trace__0i(0);
         }
         pir::set_runcore__vs($old_runcore);
 
@@ -417,8 +417,8 @@ class HLL::Compiler {
 
         my $target := nqp::lc(%adverbs<target>);
         my $result := $source;
-        my $stderr := pir::getinterp().stderr_handle;
-        my $stdin  := pir::getinterp().stdin_handle;
+        my $stderr := pir::getinterp__P().stderr_handle;
+        my $stdin  := pir::getinterp__P().stdin_handle;
         my $stagestats := %adverbs<stagestats>;
         for self.stages() {
             my $timestamp := nqp::time_n();
@@ -496,7 +496,7 @@ class HLL::Compiler {
     }
   
     method pir($source, *%adverbs) {
-        if pir::can($source, 'pir') {
+        if nqp::can($source, 'pir') {
             my $*PIRT := 1;
             self.pirbegin() ~ $source.pir()
         }

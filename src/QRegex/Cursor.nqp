@@ -486,7 +486,7 @@ class NQPCursor does NQPCursorRole {
     my $EMPTY_MATCH_HASH := nqp::hash();
     method MATCH() {
         my $match := nqp::getattr(self, NQPCursor, '$!match');
-        unless nqp::istype($match, NQPMatch) || pir::isa($match, 'Hash') {
+        unless nqp::istype($match, NQPMatch) || pir::isa__IPs($match, 'Hash') {
             my $list := $EMPTY_MATCH_LIST;
             my $hash := $EMPTY_MATCH_HASH;
             $match := nqp::create(NQPMatch);
