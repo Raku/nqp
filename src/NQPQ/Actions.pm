@@ -971,22 +971,6 @@ class NQP::Actions is HLL::Actions {
         }
         $*W.set_routine_signature($code_obj, $types, $definednesses);
     }
-
-    sub attach_multi_signature_to_parrot_sub($routine) {
-        # Use set_sub_multisig op to set up a multi sig. Note that we stick
-        # it in the same slot Parrot multis use for their multi signature,
-        # this is just a bit more complex than what Parrot needs.
-        my $types := nqp::list();
-        my $definednesses := nqp::list();
-        for @($routine[0]) {
-            if nqp::istype($_, QAST::Var) && $_.decl eq 'param' {
-                $types.push($_.returns);
-                $definednesses.push($_<definedness> eq 'D' ?? 1 !!
-                                    $_<definedness> eq 'U' ?? 2 !! 0);
-            }
-        }
-        $*W.set_routine_signature_on_parrot_sub($routine, $types, $definednesses);
-    }
     
     sub wrap_return_handler($past) {
         QAST::Op.new(

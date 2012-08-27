@@ -386,36 +386,6 @@ class NQP::World is HLL::World {
         nqp::bindattr($code_obj, $code_type, '$!signature', $sig_obj);
     }
     
-    # Associates a signature with a Parrot sub.
-    method set_routine_signature_on_parrot_sub($routine, $types, $definednesses) {
-        # Build signature object and put it in place now.
-        my $sig_type := self.find_sym(['NQPSignature']);
-        my $sig_obj  := nqp::create($sig_type);
-        nqp::bindattr($sig_obj, $sig_type, '$!types', $types);
-        nqp::bindattr($sig_obj, $sig_type, '$!definednesses', $definednesses);
-        my $slot := self.add_object($sig_obj);
-        
-        if self.is_precompilation_mode() {
-            self.add_fixup_task(:deserialize_past(PAST::Op.new(
-                :pirop('set_sub_multisig vPP'),
-                PAST::Val.new( :value($routine) ),
-                self.get_ref($sig_obj)
-            )));
-        }
-        else {
-            # Fixup code depends on if we have the routine in the SC for
-            # fixing up.
-            my $fixup := PAST::Op.new( :pirop('set_sub_multisig vPP'), self.get_ref($sig_obj) );
-            if nqp::defined($routine<compile_time_dummy>) {
-                $fixup.unshift(self.get_slot_past_for_object($routine<compile_time_dummy>));
-            }
-            else {
-                $fixup.unshift(PAST::Val.new( :value($routine) ));
-            }
-            self.add_fixup_task(:fixup_past($fixup));
-        }
-    }
-    
     # This handles associating the role body with a role declaration.
     method pkg_set_body_block($obj, $body_past) {
         # Get a code object for the body block.
