@@ -525,7 +525,6 @@ class NQP::Actions is HLL::Actions {
                     $/.CURSOR.panic("Twigil not allowed on multi-part name");
                 }
                 $past := lexical_package_lookup(@name, $/);
-                $past.fallback( default_for( $<sigil> ) );
             }
             elsif $<twigil>[0] eq '*' {
                 #my $global_fallback := lexical_package_lookup(['GLOBAL',  ~$<sigil> ~ $<desigilname>], $/);
@@ -756,7 +755,6 @@ class NQP::Actions is HLL::Actions {
             # right already. We build it here just to be sure.
             $name := ~$<variable>;
             $past := lexical_package_lookup([$name], $/);
-            $past.fallback( default_for($sigil) );
             $BLOCK.symbol($name, :scope('package') );
         }
         else {
@@ -1493,7 +1491,7 @@ class NQP::Actions is HLL::Actions {
                     ),
                     QAST::SVal.new( :value(~$final_name) )
                 ),
-                default_for('$')));
+                default_for(nqp::substr(~$final_name, 0, 1))));
         }
         
         # Otherwise, see if the first part of the name is lexically
@@ -1513,7 +1511,7 @@ class NQP::Actions is HLL::Actions {
                     $path, QAST::SVal.new( :value(~$_) ));
             }
             $lookup.unshift(QAST::Op.new(:op('who'), $path));
-            $lookup.fallback(default_for('$'));
+            $lookup.fallback(default_for(nqp::substr(~$final_name, 0, 1)));
         }
         
         return $lookup;
