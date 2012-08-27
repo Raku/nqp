@@ -10,10 +10,8 @@ my class NQPMu {
     }
 
     method BUILDALL(NQPMu:D $self: *%attrinit) {
-        # Get the build plan. Note that we do this "low level" to
-        # avoid the NQP type getting mapped to a Rakudo one, which
-        # would get expensive.
-        my $build_plan := nqp::findmethod(self.HOW, 'BUILDALLPLAN')(self.HOW, self);
+        # Get the build plan.
+        my $build_plan := self.HOW.BUILDALLPLAN(self);
         my $count      := nqp::elems($build_plan);
         my $i          := 0;
         while $i < $count {
@@ -30,8 +28,30 @@ my class NQPMu {
                     nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos_s($task, 3), %attrinit{$key_name});
                 }
             }
+            elsif nqp::iseq_i(nqp::atpos($task, 0), 2) {
+                # See if we have a value to initialize this attr with;
+                # if not, set it to an empty array.
+                my $key_name := nqp::atpos($task, 2);
+                if nqp::existskey(%attrinit, $key_name) {
+                    nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos_s($task, 3), %attrinit{$key_name});
+                }
+                else {
+                    nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos_s($task, 3), nqp::list());
+                }
+            }
+            elsif nqp::iseq_i(nqp::atpos($task, 0), 3) {
+                # See if we have a value to initialize this attr with;
+                # if not, set it to an empty array.
+                my $key_name := nqp::atpos($task, 2);
+                if nqp::existskey(%attrinit, $key_name) {
+                    nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos_s($task, 3), %attrinit{$key_name});
+                }
+                else {
+                    nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos_s($task, 3), nqp::hash());
+                }
+            }
             # Uncomment if we get attribute initialization closures in NQP.
-            #elsif nqp::iseq_i(nqp::atpos($task, 0), 2) {
+            #elsif nqp::iseq_i(nqp::atpos($task, 0), 4) {
             #    unless nqp::attrinited(self, nqp::atpos($task, 1), nqp::atpos($task, 2)) {
             #        nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos($task, 2),
             #            nqp::atpos($task, 3)(self, $attr));

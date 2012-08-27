@@ -738,6 +738,11 @@ class NQP::Actions is HLL::Actions {
             if $<typename> {
                 %obj_args<type> := $*W.find_sym([~$<typename>[0]]);
             }
+            if $sigil eq '$' || $sigil eq '&' {
+                %obj_args<default> := $<typename>
+                    ?? %obj_args<type>
+                    !! $*W.find_sym(['NQPMu']);
+            }
             
             # Add it.
             $*W.pkg_add_attribute($*PACKAGE, %*HOW{$*PKGDECL ~ '-attr'},

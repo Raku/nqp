@@ -460,6 +460,7 @@ knowhow NQPClassHOW {
     # nested array is an "op" representing the task to perform:
     #   0 code = call specified BUILD method
     #   1 class name attr_name = try to find initialization value
+    #   
     #   2 class attr_name code = call default value closure if needed
     method create_BUILDPLAN($obj) {
         # Get MRO, then work from least derived to most derived.
@@ -490,6 +491,8 @@ knowhow NQPClassHOW {
                 for @attrs {
                     my $attr_name := $_.name;
                     my $name      := nqp::substr($attr_name, 2);
+                    my $sigil     := nqp::substr($attr_name, 0, 1);
+                    my $sigop     := $sigil eq '@' ?? 2 !! $sigil eq '%' ?? 3 !! 1;
                     my $entry     := [1, $class, $name, $attr_name];
                     @all_plan[+@all_plan] := $entry;
                     if $i == 0 {
@@ -503,7 +506,7 @@ knowhow NQPClassHOW {
                 if nqp::can($_, 'build') {
                     my $default := $_.build;
                     if nqp::defined($default) {
-                        my $entry := [2, $class, $_.name, $default];
+                        my $entry := [4, $class, $_.name, $default];
                         @all_plan[+@all_plan] := $entry;
                         if $i == 0 {
                             @plan[+@plan] := $entry;

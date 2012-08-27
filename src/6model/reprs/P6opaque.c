@@ -494,11 +494,17 @@ static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
                 if (repr_data->auto_viv_values) {
                     PMC *value = repr_data->auto_viv_values[slot];
                     if (value != NULL) {
-                        PMC *cloned = REPR(value)->allocate(interp, STABLE(value));
-                        REPR(value)->copy_to(interp, STABLE(value), OBJECT_BODY(value), OBJECT_BODY(cloned));
-                        PARROT_GC_WRITE_BARRIER(interp, cloned);
-                        set_pmc_at_offset(data, repr_data->attribute_offsets[slot], cloned);
-                        return cloned;
+                        if (IS_CONCRETE(value)) {
+                            PMC *cloned = REPR(value)->allocate(interp, STABLE(value));
+                            REPR(value)->copy_to(interp, STABLE(value), OBJECT_BODY(value), OBJECT_BODY(cloned));
+                            PARROT_GC_WRITE_BARRIER(interp, cloned);
+                            set_pmc_at_offset(data, repr_data->attribute_offsets[slot], cloned);
+                            return cloned;
+                        }
+                        else {
+                            set_pmc_at_offset(data, repr_data->attribute_offsets[slot], value);
+                            return value;
+                        }
                     }
                 }
                 return PMCNULL;
