@@ -527,15 +527,13 @@ class NQP::Actions is HLL::Actions {
                 $past := lexical_package_lookup(@name, $/);
             }
             elsif $<twigil>[0] eq '*' {
-                #my $global_fallback := lexical_package_lookup(['GLOBAL',  ~$<sigil> ~ $<desigilname>], $/);
-                #$global_fallback.viviself(PAST::Op.new(
-                #    'Contextual ' ~ ~$/ ~ ' not found',
-                #    :pirop('die')
-                #));
-                # XXX Should try looking in global before dieing.
                 my $global_fallback := QAST::Op.new(
-                    :op('die_s'),
-                    QAST::SVal.new( :value('Contextual ' ~ ~$/ ~ ' not found') ));
+                    :op('ifnull'),
+                    lexical_package_lookup(['GLOBAL',  ~$<sigil> ~ $<desigilname>], $/),
+                    QAST::Op.new(
+                        :op('die_s'),
+                        QAST::SVal.new( :value('Contextual ' ~ ~$/ ~ ' not found') )
+                    ));
                 $past := QAST::VarWithFallback.new(
                     :name(~@name.pop), :scope('contextual'),
                     :fallback($global_fallback)
