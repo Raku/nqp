@@ -435,7 +435,7 @@ knowhow NQPClassHOW {
             }
         }
         if +%mapping {
-            pir::stable_publish_vtable_mapping__vPP($obj, %mapping);
+            pir::stable_publish_vtable_mapping__0PP($obj, %mapping);
         }
     }
 
@@ -449,7 +449,7 @@ knowhow NQPClassHOW {
             }
         }
         if +%mapping {
-            pir::stable_publish_vtable_handler_mapping__vPP($obj, %mapping);
+            pir::stable_publish_vtable_handler_mapping__0PP($obj, %mapping);
         }
     }
     
