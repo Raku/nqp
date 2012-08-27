@@ -716,8 +716,11 @@ knowhow NQPClassHOW {
             $new_type.HOW.compose($new_type);
             
             # Store the type.
+            pir::nqp_disable_sc_write_barrier__v();
             @!mixin_cache[+@!mixin_cache] := $role;
             @!mixin_cache[+@!mixin_cache] := $new_type;
+            pir::nqp_enable_sc_write_barrier__v();
+            1;
         }
         
         # If the original object was concrete, change its type by calling a
