@@ -12,10 +12,7 @@
 #   $ cp json.pbc <installroot>/lib/<version>/languages
 #
 
-INIT {
-    pir::load_bytecode('P6Regex.pbc');
-    pir::load_bytecode('dumper.pbc');
-}
+use NQPHLL;
 
 grammar JSON::Grammar is HLL::Grammar {
     rule TOP { <value> }
@@ -32,12 +29,12 @@ grammar JSON::Grammar is HLL::Grammar {
     }
 
     rule value:sym<array> {
-        '[' [ <value> ** ',' ]? ']'
+        '[' [ <value>+ %',' ]? ']'
     }
 
     rule value:sym<object> {
         '{'
-        [ [ <string> ':' <value> ] ** ',' ]?
+        [ [ <string> ':' <value> ]+ %',' ]?
         '}'
     }
 
@@ -88,19 +85,18 @@ class JSON::Actions is HLL::Actions {
 
 
 class JSON::Compiler is HLL::Compiler {
-    INIT {
-        JSON::Compiler.language('json');
-        JSON::Compiler.parsegrammar(JSON::Grammar);
-        JSON::Compiler.parseactions(JSON::Actions);
-    }
 
     method autoprint($value) {
         _dumper($value, 'JSON')
             unless (pir::getinterp__P()).stdhandle(1).tell > $*AUTOPRINTPOS;
     }
 
-    our sub MAIN(@ARGS) is pirflags<:main> {
-        JSON::Compiler.command_line(@ARGS);
-    }
 }
 
+sub MAIN(*@ARGS) {
+    my $json := JSON::Compiler.new;
+    $json.language('json');
+    $json.parsegrammar(JSON::Grammar);
+    $json.parseactions(JSON::Actions);
+    $json.command_line(@ARGS);
+}
