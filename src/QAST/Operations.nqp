@@ -55,7 +55,7 @@ class QAST::Operations {
     
     # Adds a HLL op handler.
     method add_hll_op($hll, $op, $handler, :$inlinable = 0) {
-        %hll_ops{$hll} := {} unless %hll_ops{$hll};
+        %hll_ops{$hll} := {} unless nqp::existskey(%hll_ops, $hll);
         %hll_ops{$hll}{$op} := $handler;
         self.set_hll_op_inlinability($hll, $op, $inlinable);
     }
@@ -73,7 +73,7 @@ class QAST::Operations {
     # Adds a HLL op that maps to a PIR op.
     method add_hll_pirop_mapping($hll, $op, $pirop, $sig, :$inlinable = 0) {
         my $pirop_mapper := pirop_mapper($pirop, $sig);
-        %hll_ops{$hll} := {} unless %hll_ops{$hll};
+        %hll_ops{$hll} := {} unless nqp::existskey(%hll_ops, $hll);
         %hll_ops{$hll}{$op} := -> $qastcomp, $op {
             $pirop_mapper($qastcomp, $op.op, $op.list)
         };
@@ -89,7 +89,7 @@ class QAST::Operations {
     # Sets op inlinability at a HLL level. (Can override at HLL level whether
     # or not the HLL overrides the op itself.)
     method set_hll_op_inlinability($hll, $op, $inlinable) {
-        %hll_inlinability{$hll} := {} unless %hll_inlinability{$hll};
+        %hll_inlinability{$hll} := {} unless nqp::existskey(%hll_inlinability, $hll);
         %hll_inlinability{$hll}{$op} := $inlinable;
     }
     
@@ -119,7 +119,7 @@ class QAST::Operations {
     # Sets op inlinability at a HLL level. (Can override at HLL level whether
     # or not the HLL overrides the op itself.)
     method set_hll_op_result_type($hll, $op, $type_char) {
-        %hll_result_type{$hll} := {} unless %hll_result_type{$hll};
+        %hll_result_type{$hll} := {} unless nqp::existskey(%hll_result_type, $hll);
         if $type_char eq 'I' {
             %hll_result_type{$hll}{$op} := int;
         }
@@ -150,7 +150,7 @@ class QAST::Operations {
         unless $type eq 'i' || $type eq 'n' || $type eq 's' {
             nqp::die("Unknown box type '$type'");
         }
-        %hll_box{$hll} := {} unless %hll_box{$hll};
+        %hll_box{$hll} := {} unless nqp::existskey(%hll_box, $hll);
         %hll_box{$hll}{$type} := $handler;
     }
 
@@ -159,7 +159,7 @@ class QAST::Operations {
         unless $type eq 'i' || $type eq 'n' || $type eq 's' {
             nqp::die("Unknown unbox type '$type'");
         }
-        %hll_unbox{$hll} := {} unless %hll_unbox{$hll};
+        %hll_unbox{$hll} := {} unless nqp::existskey(%hll_unbox, $hll);
         %hll_unbox{$hll}{$type} := $handler;
     }
     
