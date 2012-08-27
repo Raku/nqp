@@ -2638,3 +2638,16 @@ inline op nqp_fresh_stub(out PMC, invar PMC) :base_core {
             "nqp_fresh_sub can only operate on a Parrot Sub");
     }
 }
+
+/*
+
+=item nqp_set_nqpmu
+
+Sets the NQPMu.
+
+=cut
+
+*/
+inline op nqp_set_nqpmu(invar PMC) :base_core {
+    nqp_set_nqpmu($1);
+}

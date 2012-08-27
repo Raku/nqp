@@ -46,11 +46,21 @@ static INTVAL smo_id = 0;
 /* Register type. */
 #define BIND_VAL_OBJ 4
 
+/* The NQPMu. */
+static PMC *NQPMu;
+
+/* Sets the NQPMu object. */
+void nqp_set_nqpmu(PMC *nqpmu) {
+    NQPMu = nqpmu;
+}
+
 /* Compares two types to see if the first is narrower than the second. */
 static INTVAL is_narrower_type(PARROT_INTERP, PMC *a, PMC *b) {
     /* If one of the types is null, then we know that's automatically
      * wider than anything. Even wider than your mom! */
     if (PMC_IS_NULL(b) && !PMC_IS_NULL(a))
+        return 1;
+    else if (PMC_IS_NULL(a) && b == NQPMu)
         return 1;
     else if (PMC_IS_NULL(a) || PMC_IS_NULL(b))
         return 0;
