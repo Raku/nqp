@@ -695,11 +695,13 @@ knowhow NQPClassHOW {
         # See if we mixed in before.
         my $found := 0;
         my $new_type;
-        for @!mixin_cache -> $c_role, $c_type {
-            if $c_role =:= $role {
-                $new_type := $c_type;
-                $found := 1;
-                last;
+        unless nqp::isnull(@!mixin_cache) {
+            for @!mixin_cache -> $c_role, $c_type {
+                if $c_role =:= $role {
+                    $new_type := $c_type;
+                    $found := 1;
+                    last;
+                }
             }
         }
         
@@ -717,6 +719,7 @@ knowhow NQPClassHOW {
             
             # Store the type.
             pir::nqp_disable_sc_write_barrier__v();
+            @!mixin_cache := [] if nqp::isnull(@!mixin_cache);
             @!mixin_cache[+@!mixin_cache] := $role;
             @!mixin_cache[+@!mixin_cache] := $new_type;
             pir::nqp_enable_sc_write_barrier__v();
