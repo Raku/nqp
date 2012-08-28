@@ -388,7 +388,7 @@ class QAST::Compiler is HLL::Compiler {
                         nqp::push(@param, ':named(' ~ self.escape($_.named) ~ ')');
                     }
                     
-                    $decls.push_pirop(pir::join(' ', @param));
+                    $decls.push_pirop(nqp::join(' ', @param));
                 }
             }
             
