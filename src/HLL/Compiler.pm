@@ -562,7 +562,7 @@ class HLL::Compiler {
         ## close out the current event log, if any
         pir::nqpevent__vs('nqpevent: log finished');
         my $fh := pir::nqpevent_fh__PP(nqp::null());
-        $fh.flush() if $fh;
+        $fh.flush() if !nqp::isnull($fh) && $fh;
 
         ## start a new event log
         if $spec {

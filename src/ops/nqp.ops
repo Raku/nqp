@@ -2201,7 +2201,7 @@ Logs an event.
 
 */
 inline op nqpevent_fh(out PMC, invar PMC) :base_core {
-    $1 = nqpevent_fh;
+    $1 = nqpevent_fh ? nqpevent_fh : PMCNULL;
     nqpevent_fh = $2;
 }
 inline op nqpevent(in STR) :base_core {
