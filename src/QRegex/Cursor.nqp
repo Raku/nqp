@@ -24,9 +24,9 @@ role NQPCursorRole {
         my $submatch;
         my $name;
         
-        if $!regexsub {
+        if !nqp::isnull($!regexsub) && $!regexsub {
             %caplist := $!regexsub.nqpattr('caps');
-            if %caplist {
+            if !nqp::isnull(%caplist) && %caplist {
                 $iter := nqp::iterator(%caplist);
                 while $iter {
                     $curcap := ~nqp::shift($iter);
@@ -34,13 +34,13 @@ role NQPCursorRole {
                 }
             }
         }
-        if $!cstack {
+        if !nqp::isnull($!cstack) && $!cstack {
             $iter := nqp::iterator($!cstack);
             while $iter {
                 $subcur := nqp::shift($iter);
                 $submatch := $subcur.MATCH;
                 $name := nqp::getattr($subcur, $?CLASS, '$!name');
-                if nqp::defined($name) {
+                if !nqp::isnull($name) && nqp::defined($name) {
                     if nqp::index($name, '=') < 0 {
                         %caplist{$name} >= 2
                             ?? nqp::push($caps{$name}, $submatch)
