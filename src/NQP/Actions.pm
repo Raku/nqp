@@ -883,7 +883,7 @@ class NQP::Actions is HLL::Actions {
                         ));
                     }
                 }
-                $past := QAST::Var.new( :name($name), :scope('lexical') );
+                $past := QAST::Var.new( :name('&' ~ $name), :scope('lexical') );
             }
             else {
                 $/.CURSOR.panic("$*SCOPE scoped routines are not supported yet");
