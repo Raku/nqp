@@ -34,10 +34,12 @@ class QAST::CompUnit is QAST::Node {
         $!compilation_mode := @value[0] if @value; $!compilation_mode
     }
     method pre_deserialize(*@value) {
-        @!pre_deserialize := @value[0] if @value; @!pre_deserialize
+        @!pre_deserialize := @value[0] if @value;
+        nqp::isnull(@!pre_deserialize) ?? [] !! @!pre_deserialize
     }
     method post_deserialize(*@value) {
-        @!post_deserialize := @value[0] if @value; @!post_deserialize
+        @!post_deserialize := @value[0] if @value;
+        nqp::isnull(@!post_deserialize) ?? [] !! @!post_deserialize
     }
     method code_ref_blocks(*@value) {
         $!code_ref_blocks := @value[0] if @value; $!code_ref_blocks
