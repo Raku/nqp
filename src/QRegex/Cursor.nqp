@@ -173,13 +173,13 @@ role NQPCursorRole {
     method !reduce($name) {
         my $actions := pir::find_dynamic_lex__Ps('$*ACTIONS');
         nqp::findmethod($actions, $name)($actions, self.MATCH)
-            if nqp::can($actions, $name);
+            if !nqp::isnull($actions) && nqp::can($actions, $name);
     }
 
     method !reduce_with_match($name, $key, $match) {
         my $actions := pir::find_dynamic_lex__Ps('$*ACTIONS');
         nqp::findmethod($actions, $name)($actions, $match, $key)
-            if nqp::can($actions, $name);
+            if !nqp::isnull($actions) && nqp::can($actions, $name);
     }
 
     method !protoregex($name) {
