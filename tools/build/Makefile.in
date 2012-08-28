@@ -178,24 +178,6 @@ NQP_SOURCES = \
   src/NQP/Actions.pm \
   src/NQP/Compiler.pm \
 
-  
-## XXX NQPQ
-
-NQPQ_COMBINED     = NQPQ.pm
-NQPQ_COMBINED_PIR = NQPQ.pir
-NQPQ_PBC          = nqpq.pbc
-NQPQ_EXE          = nqpq$(EXE)  
-
-NQPQ_SOURCES = \
-  src/NQPQ/World.pm \
-  src/NQPQ/Grammar.pm \
-  src/NQPQ/Ops.pm \
-  src/NQPQ/Actions.pm \
-  src/NQPQ/Compiler.pm \
-
-## XXX NQPQ
-  
-
 NQP_MO_SOURCES = src/how/Archetypes.pm src/how/RoleToRoleApplier.pm \
                  src/how/NQPConcreteRoleHOW.pm src/how/RoleToClassApplier.pm \
                  src/how/NQPParametricRoleHOW.pm src/how/NQPClassHOW.pm \
@@ -1132,11 +1114,3 @@ release: manifest
 
 # nqp::makefile <-- tells Configure.pm to convert / to \ in the above
 #                   template for Win32 systems
-
-$(NQPQ_EXE): $(NQPQ_PBC)
-	$(PBC_TO_EXE) $(NQPQ_PBC)
-
-$(NQPQ_PBC): $(NQPQ_SOURCES)
-	$(PERL) tools/build/gen-cat.pl $(NQPQ_SOURCES) src/gen/nqp-config.pm > $(NQPQ_COMBINED)
-	$(NQP_EXE) --target=pir --output=$(NQPQ_COMBINED_PIR) $(NQPQ_COMBINED)
-	$(PARROT) -o $(NQPQ_PBC) $(NQPQ_COMBINED_PIR)
