@@ -70,7 +70,7 @@ my class NQPMu {
 
     proto method Str() is parrot_vtable('get_string') { * }
     multi method Str(NQPMu:U $self:) {
-        self.HOW.name(self) ~ '()'
+        ''
     }
     multi method Str(NQPMu:D $self:) {
         self.HOW.name(self) ~ '<' ~ nqp::where(self) ~ '>'
