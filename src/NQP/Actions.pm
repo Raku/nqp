@@ -810,7 +810,7 @@ class NQP::Actions is HLL::Actions {
                     # Does the current block have a proto?
                     if $*SCOPE eq 'our' { nqp::die('a multi can not be our-scoped') }
                     my $proto;
-                    my %sym := $*W.cur_lexpad().symbol($name);
+                    my %sym := $*W.cur_lexpad().symbol('&' ~ $name);
                     if %sym<proto> {
                         $proto := %sym<value>;
                     }
@@ -820,7 +820,7 @@ class NQP::Actions is HLL::Actions {
                         # Check we have a proto in scope.
                         my $found_proto;
                         for $*W.get_legacy_block_list() {
-                            my %sym := $_.symbol($name);
+                            my %sym := $_.symbol('&' ~ $name);
                             if %sym<proto> {
                                 $proto := %sym<value>;
                                 $found_proto := 1;
@@ -859,19 +859,19 @@ class NQP::Actions is HLL::Actions {
                     my $BLOCK := $*W.cur_lexpad();
 					$BLOCK[0].push(QAST::Op.new(
                         :op('bind'),
-                        QAST::Var.new( :name($name), :scope('lexical'), :decl('var') ),
+                        QAST::Var.new( :name('&' ~ $name), :scope('lexical'), :decl('var') ),
                         $past
                     ));
-                    $BLOCK.symbol($name, :scope('lexical'), :proto(1), :value($code) );
+                    $BLOCK.symbol('&' ~ $name, :scope('lexical'), :proto(1), :value($code) );
                 }
                 else {
                     my $BLOCK := $*W.cur_lexpad();
 					$BLOCK[0].push(QAST::Op.new(
                         :op('bind'),
-                        QAST::Var.new( :name($name), :scope('lexical'), :decl('var') ),
+                        QAST::Var.new( :name('&' ~ $name), :scope('lexical'), :decl('var') ),
                         $past
                     ));
-                    $BLOCK.symbol($name, :scope('lexical'));
+                    $BLOCK.symbol('&' ~ $name, :scope('lexical'));
                     if $*SCOPE eq 'our' {
                         # Need to install it at loadinit time but also re-bind
                         # it per invocation.
@@ -879,7 +879,7 @@ class NQP::Actions is HLL::Actions {
                         $BLOCK[0].push(QAST::Op.new(
                             :op('bind'),
                             lexical_package_lookup([$name], $/),
-                            QAST::Var.new( :name($name), :scope('lexical') )
+                            QAST::Var.new( :name('&' ~ $name), :scope('lexical') )
                         ));
                     }
                 }
@@ -1206,7 +1206,7 @@ class NQP::Actions is HLL::Actions {
 
     method term:sym<identifier>($/) {
         my $past := $<args>.ast;
-        $past.name(~$<deflongname>);
+        $past.name('&' ~ ~$<deflongname>);
         make $past;
     }
 
