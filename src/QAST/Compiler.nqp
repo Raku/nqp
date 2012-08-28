@@ -1468,7 +1468,7 @@ class QAST::Compiler is HLL::Compiler {
 
     method subrule($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
-        my $name := $*PASTCOMPILER.as_post($node.name, :rtype<*>);
+        my $name := nqp::defined($node.name) ?? $*PASTCOMPILER.as_post($node.name, :rtype<*>) !! '';
         my $subtype := $node.subtype;
         my $cpn := nqp::istype($node[0], QAST::Node)
             ?? self.children($node[0])
