@@ -89,6 +89,7 @@ General notes:
 
     nqp::pop                       pir::pop__PP
     nqp::push                      pir::push__0PP
+    nqp::push_s                    pir::push__0Ps
     nqp::shift                     pir::shift__PP
     nqp::unshift                   pir::unshift__0PP
     nqp::splice                    pir::splice__0PPii
