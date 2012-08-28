@@ -13,7 +13,7 @@ class QAST::CompUnit is QAST::Node {
     has @!pre_deserialize;
 
     # Taks we should run after deserialization (or, in the non-precompiled
-    # csae, right after the pre-deserialize tasks).
+    # case, right after the pre-deserialize tasks).
     has @!post_deserialize;
     
     # The HLL name.

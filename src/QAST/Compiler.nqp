@@ -250,7 +250,7 @@ class QAST::Compiler is HLL::Compiler {
                 $block.push(QAST::Stmt.new($_));
             }
             
-            # If we need to do deserializatin, emit code for that.
+            # If we need to do deserialization, emit code for that.
             if $comp_mode {
                 $block.push(self.deserialization_code($cu.sc(), $cu.code_ref_blocks()));
             }

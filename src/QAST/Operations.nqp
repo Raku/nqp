@@ -93,7 +93,7 @@ class QAST::Operations {
         %hll_inlinability{$hll}{$op} := $inlinable;
     }
     
-    # Checks if an op is consdiered inlinable.
+    # Checks if an op is considered inlinable.
     method is_inlinable($hll, $op) {
         if nqp::existskey(%hll_inlinability, $hll) {
             if nqp::existskey(%hll_inlinability{$hll}, $op) {
