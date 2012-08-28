@@ -81,6 +81,11 @@ my class NQPMu {
         0.0
     }
     
+    proto method Int() is parrot_vtable('get_integer') { * }
+    multi method Int(NQPMu:U $self:) {
+        0
+    }
+    
     method defined() is parrot_vtable('defined') {
         nqp::isconcrete(self)
     }
