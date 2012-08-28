@@ -637,7 +637,6 @@ QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
     my $listpost  := $qastcomp.coerce($qastcomp.as_post($op[0]), "P");
     my $blockpost := $qastcomp.coerce($qastcomp.as_post($op[1]), "P");
     $ops.push($listpost);
-    $ops.push($blockpost);
     
     # Get the iterator.
     $ops.push_pirop('set', $res, $listpost);
@@ -675,6 +674,7 @@ QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
     
     # Emit call.
     $ops.push($lbl_redo);
+    $ops.push($blockpost);
     $ops.push_pirop('call', $blockpost, |@valreg, :result($res));
     
     # Loop.
