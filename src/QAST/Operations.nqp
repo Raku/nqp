@@ -1417,6 +1417,7 @@ QAST::Operations.add_core_pirop_mapping('r_atpos_n', 'repr_at_pos_num', 'NPi', :
 QAST::Operations.add_core_pirop_mapping('r_bindpos', 'repr_bind_pos_obj', '2PiP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('r_bindpos_i', 'repr_bind_pos_int', '2Pii', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('r_bindpos_n', 'repr_bind_pos_num', '2Pin', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('r_elems', 'repr_elems', 'IP', :inlinable(1));
 
 # object opcodes
 QAST::Operations.add_core_pirop_mapping('bindattr', 'setattribute', '3PPsP', :inlinable(1));

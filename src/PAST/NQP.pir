@@ -648,6 +648,7 @@ entry to produce the node to be returned.
     maphash['qlist'] = $P0
 
     # repr-level aggregate operations
+    maphash['r_elems']     = 'repr_elems__IP'
     maphash['r_atpos']     = 'repr_at_pos_obj__PPi'
     maphash['r_atpos_i']   = 'repr_at_pos_int__IPi'
     maphash['r_atpos_n']   = 'repr_at_pos_num__NPi'
