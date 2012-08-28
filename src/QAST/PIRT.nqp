@@ -59,10 +59,7 @@ class PIRT::Node {
     
     method children_pir(@children) {
         my @parts;
-        my $count := 0;
-        while $count < @children {
-            my $_ := @children[$count];
-            $count := $count + 1;
+        for @children {
             if nqp::islist($_) {
                 my $op_name := $_[0];
                 my @op_args;
