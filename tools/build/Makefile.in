@@ -542,6 +542,7 @@ install: all
 	$(CP)  $(PAST_PBC)          $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(PAST_PBC)
 	$(MKPATH)                   $(DESTDIR)$(NQP_LANG_DIR)/lib
 	$(CP)  $(QAST_PBC)          $(DESTDIR)$(NQP_LANG_DIR)/lib/$(QAST_PBC)
+	$(CP)  $(QASTNODE_PBC)      $(DESTDIR)$(NQP_LANG_DIR)/lib/$(QASTNODE_PBC)
 	$(CP)  $(P6QREGEX_PBC)      $(DESTDIR)$(NQP_LANG_DIR)/lib/$(P6QREGEX_PBC)
 	$(CP)  $(P5QREGEX_PBC)      $(DESTDIR)$(NQP_LANG_DIR)/lib/$(P5QREGEX_PBC)
 	$(CP)  $(HLL_PBC)           $(DESTDIR)$(NQP_LANG_DIR)/lib/$(HLL_PBC)
