@@ -86,10 +86,10 @@ class QAST::Compiler is HLL::Compiler {
             %!lexical_regs := nqp::hash();
             %!reg_types := nqp::hash();
             @!loadlibs := nqp::list();
-            $!cur_lex_p := 10;
-            $!cur_lex_s := 10;
-            $!cur_lex_i := 10;
-            $!cur_lex_n := 10;
+            $!cur_lex_p := 100;
+            $!cur_lex_s := 100;
+            $!cur_lex_i := 100;
+            $!cur_lex_n := 100;
         }
         
         method add_param($var) {
