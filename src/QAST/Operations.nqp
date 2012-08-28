@@ -32,7 +32,7 @@ class QAST::Operations {
         if %core_ops{$name} -> $mapper {
             return $mapper($qastcomp, $op);
         }
-        pir::die("No registered operation handler for '$name'");
+        nqp::die("No registered operation handler for '$name'");
     }
     
     # Compiles a PIR operation.
@@ -93,7 +93,7 @@ class QAST::Operations {
         %hll_inlinability{$hll}{$op} := $inlinable;
     }
     
-    # Checks if an op is consdiered inlinable.
+    # Checks if an op is considered inlinable.
     method is_inlinable($hll, $op) {
         if nqp::existskey(%hll_inlinability, $hll) {
             if nqp::existskey(%hll_inlinability{$hll}, $op) {
@@ -201,7 +201,7 @@ class QAST::Operations {
             # Build the arguments list.
             my $num_args := +@op_args;
             if +@arg_types != $num_args {
-                pir::die("Operation '$op_name' requires " ~
+                nqp::die("Operation '$op_name' requires " ~
                     +@arg_types ~ " operands, but got $num_args");
             }
             my $i := 0;
@@ -407,7 +407,7 @@ for <if unless> -> $op_name {
     QAST::Operations.add_core_op($op_name, :inlinable(1), -> $qastcomp, $op {
         # Check operand count.
         my $operands := +$op.list;
-        pir::die("Operation '$op_name' needs either 2 or 3 operands")
+        nqp::die("Operation '$op_name' needs either 2 or 3 operands")
             if $operands < 2 || $operands > 3;
         
         # Create labels.
@@ -541,7 +541,7 @@ for ('', 'repeat_') -> $repness {
 
             # Check operand count.
             my $operands := +@comp_ops;
-            pir::die("Operation '$repness$op_name' needs 2 or 3 operands")
+            nqp::die("Operation '$repness$op_name' needs 2 or 3 operands")
                 if $operands != 2 && $operands != 3;
 
             # Emit the prelude.
@@ -757,10 +757,10 @@ QAST::Operations.add_core_op('bind', :inlinable(1), -> $qastcomp, $op {
     # Sanity checks.
     my @children := $op.list;
     if +@children != 2 {
-        pir::die("A 'bind' op must have exactly two children");
+        nqp::die("A 'bind' op must have exactly two children");
     }
     unless nqp::istype(@children[0], QAST::Var) {
-        pir::die("First child of a 'bind' op must be a QAST::Var");
+        nqp::die("First child of a 'bind' op must be a QAST::Var");
     }
     
     # Set the QAST of the think we're to bind, then delegate to
@@ -805,7 +805,7 @@ QAST::Operations.add_core_op('call', -> $qastcomp, $op {
         $callee := $qastcomp.as_post(@args.shift());
     }
     else {
-        pir::die("No name for call and empty children list");
+        nqp::die("No name for call and empty children list");
     }
     
     # Process arguments.
@@ -833,7 +833,7 @@ QAST::Operations.add_core_op('callmethod', :inlinable(1), -> $qastcomp, $op {
     # Ensure we at least have an invocant.
     my @args := nqp::clone($op.list);
     if +@args == 0 {
-        pir::die('Method call node requires at least one child');
+        nqp::die('Method call node requires at least one child');
     }
     
     # Where is the name coming from?
@@ -847,7 +847,7 @@ QAST::Operations.add_core_op('callmethod', :inlinable(1), -> $qastcomp, $op {
         @args.unshift($invocant);
     }
     else {
-        pir::die("Method call must either supply a name or have a child node that evaluates to the name");
+        nqp::die("Method call must either supply a name or have a child node that evaluates to the name");
     }
     
     # Process arguments.
@@ -1417,6 +1417,7 @@ QAST::Operations.add_core_pirop_mapping('r_atpos_n', 'repr_at_pos_num', 'NPi', :
 QAST::Operations.add_core_pirop_mapping('r_bindpos', 'repr_bind_pos_obj', '2PiP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('r_bindpos_i', 'repr_bind_pos_int', '2Pii', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('r_bindpos_n', 'repr_bind_pos_num', '2Pin', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('r_elems', 'repr_elems', 'IP', :inlinable(1));
 
 # object opcodes
 QAST::Operations.add_core_pirop_mapping('bindattr', 'setattribute', '3PPsP', :inlinable(1));
