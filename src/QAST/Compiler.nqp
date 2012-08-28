@@ -78,6 +78,14 @@ class QAST::Compiler is HLL::Compiler {
         method BUILD($qast, $outer) {
             $!qast := $qast;
             $!outer := $outer;
+            @!params := nqp::list();
+            @!locals := nqp::list();
+            @!lexicals := nqp::list();
+            %!local_types := nqp::hash();
+            %!lexical_types := nqp::hash();
+            %!lexical_regs := nqp::hash();
+            %!reg_types := nqp::hash();
+            @!loadlibs := nqp::list();
             $!cur_lex_p := 10;
             $!cur_lex_s := 10;
             $!cur_lex_i := 10;
@@ -1224,7 +1232,7 @@ class QAST::Compiler is HLL::Compiler {
         $ops;
     }
 
-    our %cclass_code;
+    my %cclass_code;
     INIT {
         %cclass_code<.>  := '.CCLASS_ANY';
         %cclass_code<d>  := '.CCLASS_NUMERIC';
