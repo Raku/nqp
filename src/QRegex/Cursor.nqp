@@ -468,7 +468,7 @@ class NQPMatch is NQPCapture {
             if $item ~~ NQPCapture {
                 $str := $str ~ $item."!dump_str"($key)
             }
-            else {
+            elsif !nqp::isnull($item) {
                 my $n := 0;
                 for $item { $str := $str ~ dump_array($key ~ "[$n]", $_); $n++ }
             }

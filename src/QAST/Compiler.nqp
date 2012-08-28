@@ -1054,7 +1054,8 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push_pirop('lt', %*REG<pos>, 0, $faillabel);
         $ops.push_pirop('eq', '$I19', 0, $faillabel);
         # backtrack the cursor stack
-        $ops.push_pirop('if_null', %*REG<cstack>, $jumplabel);
+        $ops.push_pirop('nqp_islist', '$I20', %*REG<cstack>);
+        $ops.push_pirop('unless', '$I20', $jumplabel);
         $ops.push_pirop('elements', '$I18', %*REG<bstack>);
         $ops.push_pirop('le', '$I18', 0, $cutlabel);
         $ops.push_pirop('dec', '$I18');
