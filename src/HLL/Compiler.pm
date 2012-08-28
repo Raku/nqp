@@ -496,7 +496,7 @@ class HLL::Compiler {
     }
   
     method pir($source, *%adverbs) {
-        if pir::can($source, 'pir') {
+        if nqp::can($source, 'pir') {
             my $*PIRT := 1;
             self.pirbegin() ~ $source.pir()
         }
