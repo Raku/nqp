@@ -639,6 +639,10 @@ QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
     $ops.push($listpost);
     $ops.push($blockpost);
     
+    # Get the iterator.
+    $ops.push_pirop('set', $res, $listpost);
+    $ops.push_pirop('iter', $iter, $listpost);
+    
     # Set up exception handler.
     my $handler := 1;
     my $exc_reg;
@@ -652,17 +656,12 @@ QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
         $ops.push_pirop('push_eh', $exc_reg);
     }
     
-    # Get the iterator.
-    $ops.push_pirop('set', $res, $listpost);
-    $ops.push_pirop('iter', $iter, $listpost);
-    
     # Loop while we still have values.
     my $lbl_next := PIRT::Label.new(:name('for_next'));
     my $lbl_redo := PIRT::Label.new(:name('for_redo'));
     my $lbl_done := PIRT::Label.new(:name('for_done'));
     $ops.push($lbl_next);
     $ops.push_pirop('unless', $iter, $lbl_done);
-    $ops.push($lbl_redo);
     
     # Fetch values.
     my @valreg;
@@ -675,6 +674,7 @@ QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
     }
     
     # Emit call.
+    $ops.push($lbl_redo);
     $ops.push_pirop('call', $blockpost, |@valreg, :result($res));
     
     # Loop.
