@@ -444,11 +444,16 @@ knowhow NQPClassHOW {
 
     method publish_parrot_vtable_mapping($obj) {
         my %mapping;
-        my @mro_reversed := nqp::clone(@!mro);
-        @mro_reversed.reverse();
-        for @mro_reversed {
+        my %seen_handlers;
+        for @!mro {
+            for $_.HOW.parrot_vtable_handler_mappings($_, :local(1)) {
+                %seen_handlers{$_.key} := 1;
+            }
             for $_.HOW.parrot_vtable_mappings($_, :local(1)) {
-                %mapping{$_.key} := $_.value;
+                unless nqp::existskey(%mapping, $_.key)
+                        || nqp::existskey(%seen_handlers, $_.key) {
+                    %mapping{$_.key} := $_.value;
+                }
             }
         }
         if +%mapping {
