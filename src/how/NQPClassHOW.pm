@@ -264,10 +264,7 @@ knowhow NQPClassHOW {
             if nqp::defined($dispatcher) {
                 # Yes. Only or dispatcher, though? If only, error. If
                 # dispatcher, simply add new dispatchee.
-                if pir::is_dispatcher__IP($dispatcher) {
-                    pir::push_dispatchee__0PP($dispatcher, $code);
-                }
-                elsif nqp::can($dispatcher, 'is_dispatcher') && $dispatcher.is_dispatcher {
+                if nqp::can($dispatcher, 'is_dispatcher') && $dispatcher.is_dispatcher {
                     $dispatcher.add_dispatchee($code);
                 }
                 else {
