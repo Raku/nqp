@@ -1464,26 +1464,6 @@ inline op multi_dispatch_over_lexical_candidates(out PMC) :base_core {
 
 /*
 
-=item set_dispatchees()
-
-Sets the dispatchees of the code object in $1, which must be a DispatcherSub,
-to the array in $2.
-
-=cut
-
-*/
-inline op set_dispatchees(in PMC, in PMC) :base_core {
-    if ($1->vtable->base_type == disp_id) {
-        PARROT_DISPATCHERSUB($1)->dispatchees = $2;
-        PARROT_GC_WRITE_BARRIER(interp, $1);
-    }
-    else
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Can only use set_dispatchees if first operand is a DispatcherSub.");
-}
-
-/*
-
 =item create_dispatch_and_add_candidates()
 
 Creates an instantiation of the dispatch routine (or proto, which may
