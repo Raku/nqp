@@ -11,7 +11,7 @@ class QAST::Compiler is HLL::Compiler {
             my $obj := nqp::create(self);
             $cur ??
                 $obj.BUILD($cur.cur_p, $cur.cur_s, $cur.cur_i, $cur.cur_n) !!
-                $obj.BUILD(500, 500, 500, 500);
+                $obj.BUILD(5000, 5000, 5000, 5000);
             $obj
         }
         
