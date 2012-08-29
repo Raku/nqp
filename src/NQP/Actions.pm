@@ -1517,10 +1517,20 @@ class NQP::Actions is HLL::Actions {
         # known. If not, it's in GLOBAL. Also, if first part is GLOBAL
         # then strip it off.
         else {
-            my $path := $*W.is_lexical(@name[0]) ??
-                QAST::Var.new( :name(@name.shift()), :scope('lexical') ) !!
-                QAST::VM.new( pirop => 'get_hll_global Ps',
+            my $path;
+            if $*W.is_lexical(@name[0]) {
+                try {
+                    my $first := @name.shift();
+                    $path := QAST::WVal.new( :value($*W.find_sym([$first])) );
+                    CATCH {
+                        $path := QAST::Var.new( :name($first), :scope('lexical') );
+                    }
+                }
+            }
+            else {
+                $path := QAST::VM.new( pirop => 'get_hll_global Ps',
                     QAST::SVal.new( :value('GLOBAL') ) );
+            }
             if @name[0] eq 'GLOBAL' {
                 @name.shift();
             }
