@@ -379,7 +379,30 @@ class QAST::Compiler is HLL::Compiler {
                 $decls.push_pirop('.param pmc CALL_SIG :call_sig');
             }
             else {
+                my @pos_params;
+                my @named_params;
+                my $slurpy_pos;
+                my $slurpy_named;
                 for $block.params {
+                    if $_.slurpy && $_.named {
+                        $slurpy_named := $_;
+                    }
+                    elsif $_.slurpy {
+                        $slurpy_pos := $_;
+                    }
+                    elsif $_.named {
+                        nqp::push(@named_params, $_);
+                    }
+                    else {
+                        nqp::push(@pos_params, $_);
+                    }
+                }
+                my @sorted_params;
+                nqp::push(@sorted_params, $_) for @pos_params;
+                nqp::push(@sorted_params, $slurpy_pos) if $slurpy_pos;
+                nqp::push(@sorted_params, $_) for @named_params;
+                nqp::push(@sorted_params, $slurpy_named) if $slurpy_named;
+                for @sorted_params {
                     my @param := ['.param'];
                     
                     my $reg_type;
