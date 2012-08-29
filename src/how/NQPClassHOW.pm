@@ -515,7 +515,7 @@ knowhow NQPClassHOW {
                     my $name      := nqp::substr($attr_name, 2);
                     my $sigil     := nqp::substr($attr_name, 0, 1);
                     my $sigop     := $sigil eq '@' ?? 2 !! $sigil eq '%' ?? 3 !! 1;
-                    my $entry     := [1, $class, $name, $attr_name];
+                    my $entry     := [$sigop, $class, $name, $attr_name];
                     @all_plan[+@all_plan] := $entry;
                     if $i == 0 {
                         @plan[+@plan] := $entry;
