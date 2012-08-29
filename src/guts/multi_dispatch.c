@@ -2,7 +2,6 @@
 #include "parrot/parrot.h"
 #include "parrot/extend.h"
 #include "../6model/sixmodelobject.h"
-#include "../pmc/pmc_dispatchersub.h"
 #include "pmc_sub.h"
 #include "multi_dispatch.h"
 
@@ -270,7 +269,8 @@ static PMC *get_dispatchees(PARROT_INTERP, PMC *dispatcher) {
         return r->dispatchees;
     }
     else {
-        return PARROT_DISPATCHERSUB(dispatcher)->dispatchees;
+        Parrot_ex_throw_from_c_args(interp, 0, 1,
+            "Could not find multi-dispatch list");
     }
 }
 
@@ -293,16 +293,8 @@ static NQP_md_cache *get_dispatch_cache(PARROT_INTERP, PMC *dispatcher) {
         }
     }
     else {
-        if (PMC_IS_NULL(PARROT_DISPATCHERSUB(dispatcher)->dispatch_cache)) {
-            NQP_md_cache *c = mem_sys_allocate_zeroed(sizeof(NQP_md_cache));
-            cache_ptr = Parrot_pmc_new(interp, enum_class_Pointer);
-            VTABLE_set_pointer(interp, cache_ptr, c);
-            PARROT_DISPATCHERSUB(dispatcher)->dispatch_cache = cache_ptr;
-            PARROT_GC_WRITE_BARRIER(interp, dispatcher);
-        }
-        else {
-            cache_ptr = PARROT_DISPATCHERSUB(dispatcher)->dispatch_cache;
-        }
+        Parrot_ex_throw_from_c_args(interp, 0, 1,
+            "Could not find multi-dispatch list");
     }
     return (NQP_md_cache *)VTABLE_get_pointer(interp, cache_ptr);
 }
