@@ -705,9 +705,6 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             while +@($qast) { @tmp.push(@($qast).shift) }
             while @tmp      { @($qast).push(self.flip_ast(@tmp.pop)) }
         }
-        elsif $qast.rxtype eq 'pastnode' {
-            # Don't go exploring these
-        }
         else {
             for @($qast) { self.flip_ast($_) }
         }
