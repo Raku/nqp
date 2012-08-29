@@ -134,6 +134,7 @@ STAGE0_SOURCES = \
 	src/stage0/NQPMO-s0.pir \
 	src/stage0/ModuleLoader-s0.pir \
 	src/stage0/NQPCORE.setting-s0.pir \
+	src/stage0/QASTNode-s0.pir \
 	src/stage0/QRegex-s0.pir \
 	src/stage0/HLL-s0.pir \
 	src/stage0/QAST-s0.pir \
@@ -191,7 +192,7 @@ NQP_MO_COMBINED = gen/nqp-mo.pm
 CORE_SETTING_PBC = NQPCORE.setting.pbc
 CORE_SETTING_PIR = gen/NQPCORE.setting.pir
 
-STAGE0_PBCS     = $(STAGE0)/$(NQP_MO_PBC) $(STAGE0)/$(MODULE_LOADER_PBC) $(STAGE0)/$(CORE_SETTING_PBC) $(STAGE0)/$(QREGEX_PBC) $(STAGE0)/$(HLL_PBC) $(STAGE0)/$(QAST_PBC) $(STAGE0)/$(P6QREGEX_PBC) $(STAGE0)/$(NQP_PBC)
+STAGE0_PBCS     = $(STAGE0)/$(NQP_MO_PBC) $(STAGE0)/$(MODULE_LOADER_PBC) $(STAGE0)/$(CORE_SETTING_PBC) $(STAGE0)/$(QASTNODE_PBC) $(STAGE0)/$(QREGEX_PBC) $(STAGE0)/$(HLL_PBC) $(STAGE0)/$(QAST_PBC) $(STAGE0)/$(P6QREGEX_PBC) $(STAGE0)/$(NQP_PBC)
 STAGE1_PBCS     = $(STAGE1)/$(NQP_MO_PBC) $(STAGE1)/$(MODULE_LOADER_PBC) $(STAGE1)/$(CORE_SETTING_PBC) $(STAGE1)/$(QASTNODE_PBC) $(STAGE1)/$(QREGEX_PBC) $(STAGE1)/$(HLL_PBC) $(STAGE1)/$(QAST_PBC) $(STAGE1)/$(P6QREGEX_PBC) $(STAGE1)/$(NQP_PBC)
 STAGE2_PBCS     = $(STAGE2)/$(NQP_MO_PBC) $(STAGE2)/$(MODULE_LOADER_PBC) $(STAGE2)/$(CORE_SETTING_PBC) $(STAGE2)/$(QASTNODE_PBC) $(STAGE2)/$(QREGEX_PBC) $(STAGE2)/$(HLL_PBC) $(STAGE2)/$(QAST_PBC) $(STAGE2)/$(P6QREGEX_PBC) $(STAGE2)/$(NQP_PBC)
 ALL_PBCS        = $(NQP_MO_PBC) $(MODULE_LOADER_PBC) $(CORE_SETTING_PBC) $(QASTNODE_PBC) $(QREGEX_PBC) $(HLL_PBC) $(QAST_PBC) $(P6QREGEX_PBC) $(NQP_PBC)
@@ -569,6 +570,7 @@ $(STAGE0_PBCS): $(DYNEXT_TARGET) $(PAST_PBC) $(STAGE0_SOURCES)
 	$(PARROT) -o $(STAGE0)/$(NQP_MO_PBC)       src/stage0/NQPMO-s0.pir
 	$(PARROT) -o $(STAGE0)/$(MODULE_LOADER_PBC) src/stage0/ModuleLoader-s0.pir
 	$(PARROT) -o $(STAGE0)/$(CORE_SETTING_PBC) src/stage0/NQPCORE.setting-s0.pir
+	$(PARROT) -o $(STAGE0)/$(QASTNODE_PBC)     src/stage0/QASTNode-s0.pir
 	$(PARROT) -o $(STAGE0)/$(QREGEX_PBC)       src/stage0/QRegex-s0.pir
 	$(PARROT) -o $(STAGE0)/$(HLL_PBC)          src/stage0/HLL-s0.pir
 	$(PARROT) -o $(STAGE0)/$(QAST_PBC)         src/stage0/QAST-s0.pir
@@ -1063,6 +1065,7 @@ bootstrap-files: $(STAGE2_PBCS) src/stage2/$(CORE_SETTING_NQP)
 	$(PERL) tools/build/gen-bootstrap.pl src/stage2/$(NQP_MO_PIR) >src/stage0/NQPMO-s0.pir
 	$(PERL) tools/build/gen-bootstrap.pl src/stage2/gen/module_loader.pir >src/stage0/ModuleLoader-s0.pir
 	$(PERL) tools/build/gen-bootstrap.pl src/stage2/$(CORE_SETTING_PIR) >src/stage0/NQPCORE.setting-s0.pir
+	$(PERL) tools/build/gen-bootstrap.pl src/stage2/$(QASTNODE_PIR) >src/stage0/QASTNode-s0.pir
 	$(PERL) tools/build/gen-bootstrap.pl src/stage2/$(QREGEX_PIR) >src/stage0/QRegex-s0.pir
 	$(PERL) tools/build/gen-bootstrap.pl src/stage2/$(HLL_COMBINED_PIR) >src/stage0/HLL-s0.pir
 	$(PERL) tools/build/gen-bootstrap.pl src/stage2/$(QAST_PIR) >src/stage0/QAST-s0.pir
