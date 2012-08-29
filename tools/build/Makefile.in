@@ -54,7 +54,6 @@ OPS_DIR          = src/ops
 
 PAST_SOURCES = \
   src/PASTRegex.pir \
-  src/PAST/SixModelPASTExtensions.pir \
   src/PAST/NQP.pir \
   src/cheats/parrot-callcontext.pir \
   src/cheats/parrot-sub.pir \
