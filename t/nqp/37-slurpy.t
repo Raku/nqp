@@ -2,7 +2,7 @@
 
 # slurpy args
 
-plan(5);
+plan(6);
 
 sub slurpy_pos(*@pos) {
     for @pos {
@@ -18,3 +18,9 @@ sub slurpy_named(*%named) {
 }
 
 slurpy_named(:pivo("ok 4"), :slanina("ok 5"));
+
+sub named_and_slurpy(:$x, *@foo) {
+    say($x);
+};
+
+named_and_slurpy(1, :x('ok 6'));
