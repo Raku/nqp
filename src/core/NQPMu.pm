@@ -136,5 +136,3 @@ my class NQPMu {
         print("\n", $dumper.indent, '}');
     }
 }
-
-pir::nqp_set_nqpmu__vP(NQPMu);
