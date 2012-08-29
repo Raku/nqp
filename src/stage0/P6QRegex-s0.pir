@@ -14,442 +14,442 @@
 .loadlib "io_ops"
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_1_1346233469.934") :anon :lex
+.sub "" :subid("cuid_1_1346277621.774") :anon :lex
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
     .param pmc _lex_param_0 :slurpy 
-    .const 'Sub' $P544 = 'cuid_159_1346233469.934' 
-    capture_lex $P544 
-    .const 'Sub' $P544 = 'cuid_100_1346233469.934' 
-    capture_lex $P544 
-    .const 'Sub' $P544 = 'cuid_157_1346233469.934' 
-    capture_lex $P544 
-    .const 'Sub' $P544 = 'cuid_158_1346233469.934' 
-    capture_lex $P544 
+    .const 'Sub' $P5044 = 'cuid_159_1346277621.774' 
+    capture_lex $P5044 
+    .const 'Sub' $P5044 = 'cuid_100_1346277621.774' 
+    capture_lex $P5044 
+    .const 'Sub' $P5044 = 'cuid_157_1346277621.774' 
+    capture_lex $P5044 
+    .const 'Sub' $P5044 = 'cuid_158_1346277621.774' 
+    capture_lex $P5044 
     .lex "GLOBALish", $P101 
     .lex "$?PACKAGE", $P102 
     .lex "$p6regex", $P103 
     .lex "&MAIN", $P104 
     .lex "@ARGS", _lex_param_0 
     .local pmc ctxsave 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P103, $P501
-    .const 'Sub' $P502 = 'cuid_159_1346233469.934' 
-    capture_lex $P502
-    set $P104, $P502
-    find_dynamic_lex $P503, "$*CTXSAVE"
-    set ctxsave, $P503
-    isnull $I501, ctxsave
-    box $P508, $I501
-    set $P507, $P508
-    if $I501 goto unless10_end11 
-    can $I502, ctxsave, "ctxsave"
-    box $P506, $I502
-    set $P505, $P506
-    unless $I502 goto if11_end13 
-    $P504 = ctxsave."ctxsave"()
-    set $P505, $P504
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P103, $P5001
+    .const 'Sub' $P5002 = 'cuid_159_1346277621.774' 
+    capture_lex $P5002
+    set $P104, $P5002
+    find_dynamic_lex $P5003, "$*CTXSAVE"
+    set ctxsave, $P5003
+    isnull $I5001, ctxsave
+    box $P5008, $I5001
+    set $P5007, $P5008
+    if $I5001 goto unless10_end11 
+    can $I5002, ctxsave, "ctxsave"
+    box $P5006, $I5002
+    set $P5005, $P5006
+    unless $I5002 goto if11_end13 
+    $P5004 = ctxsave."ctxsave"()
+    set $P5005, $P5004
   if11_end13:
-    set $P507, $P505
+    set $P5007, $P5005
   unless10_end11:
 .annotate 'line', 1
-    .const 'Sub' $P509 = 'cuid_100_1346233469.934' 
-    capture_lex $P509
-    $P510 = $P509()
-    .const 'Sub' $P511 = 'cuid_157_1346233469.934' 
-    capture_lex $P511
-    $P512 = $P511()
-    .const 'Sub' $P513 = 'cuid_158_1346233469.934' 
-    capture_lex $P513
-    $P514 = $P513()
+    .const 'Sub' $P5009 = 'cuid_100_1346277621.774' 
+    capture_lex $P5009
+    $P5010 = $P5009()
+    .const 'Sub' $P5011 = 'cuid_157_1346277621.774' 
+    capture_lex $P5011
+    $P5012 = $P5011()
+    .const 'Sub' $P5013 = 'cuid_158_1346277621.774' 
+    capture_lex $P5013
+    $P5014 = $P5013()
+.annotate 'line', 965
+    get_hll_global $P5019, "GLOBAL"
+    nqp_get_package_through_who $P5018, $P5019, "QRegex"
+    nqp_get_package_through_who $P5017, $P5018, "P6Regex"
+    get_who $P5016, $P5017
+    set $P5015, $P5016["Compiler"]
+    unless_null $P5015, fallback2094
+    nqp_get_sc_object $P5020, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5015, $P5020
+  fallback2094:
+    $P5021 = $P5015."new"()
+    set $P103, $P5021
+.annotate 'line', 966
+    $P5022 = $P103."language"("QRegex::P6Regex")
+.annotate 'line', 967
+    get_hll_global $P5027, "GLOBAL"
+    nqp_get_package_through_who $P5026, $P5027, "QRegex"
+    nqp_get_package_through_who $P5025, $P5026, "P6Regex"
+    get_who $P5024, $P5025
+    set $P5023, $P5024["Grammar"]
+    unless_null $P5023, fallback2095
+    nqp_get_sc_object $P5028, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5023, $P5028
+  fallback2095:
+    $P5029 = $P103."parsegrammar"($P5023)
 .annotate 'line', 968
-    get_hll_global $P519, "GLOBAL"
-    nqp_get_package_through_who $P518, $P519, "QRegex"
-    nqp_get_package_through_who $P517, $P518, "P6Regex"
-    get_who $P516, $P517
-    set $P515, $P516["Compiler"]
-    unless_null $P515, fallback2096
-    nqp_get_sc_object $P520, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P515, $P520
+    get_hll_global $P5034, "GLOBAL"
+    nqp_get_package_through_who $P5033, $P5034, "QRegex"
+    nqp_get_package_through_who $P5032, $P5033, "P6Regex"
+    get_who $P5031, $P5032
+    set $P5030, $P5031["Actions"]
+    unless_null $P5030, fallback2096
+    nqp_get_sc_object $P5035, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5030, $P5035
   fallback2096:
-    $P521 = $P515."new"()
-    set $P103, $P521
-.annotate 'line', 969
-    $P522 = $P103."language"("QRegex::P6Regex")
-.annotate 'line', 970
-    get_hll_global $P527, "GLOBAL"
-    nqp_get_package_through_who $P526, $P527, "QRegex"
-    nqp_get_package_through_who $P525, $P526, "P6Regex"
-    get_who $P524, $P525
-    set $P523, $P524["Grammar"]
-    unless_null $P523, fallback2097
-    nqp_get_sc_object $P528, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P523, $P528
-  fallback2097:
-    $P529 = $P103."parsegrammar"($P523)
-.annotate 'line', 971
-    get_hll_global $P534, "GLOBAL"
-    nqp_get_package_through_who $P533, $P534, "QRegex"
-    nqp_get_package_through_who $P532, $P533, "P6Regex"
-    get_who $P531, $P532
-    set $P530, $P531["Actions"]
-    unless_null $P530, fallback2098
-    nqp_get_sc_object $P535, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P530, $P535
-  fallback2098:
-    $P536 = $P103."parseactions"($P530)
-    set $P543, _lex_param_0
-    unless _lex_param_0 goto if583_end2100 
+    $P5036 = $P103."parseactions"($P5030)
+    set $P5043, _lex_param_0
+    unless _lex_param_0 goto if582_end2098 
     load_bytecode "ModuleLoader.pbc"
-    get_hll_global $P537, "ModuleLoader"
-    getinterp $P539
-    set $P538, $P539["context"]
-    $P540 = $P537."set_mainline_module"($P538)
-    .const 'Sub' $P541 = "cuid_159_1346233469.934" 
-    $P542 = $P541(_lex_param_0 :flat)
-    set $P543, $P542
-  if583_end2100:
+    get_hll_global $P5037, "ModuleLoader"
+    getinterp $P5039
+    set $P5038, $P5039["context"]
+    $P5040 = $P5037."set_mainline_module"($P5038)
+    .const 'Sub' $P5041 = "cuid_159_1346277621.774" 
+    $P5042 = $P5041(_lex_param_0 :flat)
+    set $P5043, $P5042
+  if582_end2098:
     .return () 
 .end
 .HLL "nqp"
 .namespace []
-.sub "MAIN" :subid("cuid_159_1346233469.934") :anon :lex :outer("cuid_1_1346233469.934")
+.sub "MAIN" :subid("cuid_159_1346277621.774") :anon :lex :outer("cuid_1_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-.annotate 'line', 973
+.annotate 'line', 970
     .param pmc _lex_param_0 
     .lex "@ARGS", _lex_param_0 
-.annotate 'line', 974
-    find_lex $P501, "$p6regex"
-    $P502 = $P501."command_line"(_lex_param_0, "utf8" :named("encoding"), "ucs4" :named("transcode"))
-    .return ($P502) 
+.annotate 'line', 971
+    find_lex $P5001, "$p6regex"
+    $P5002 = $P5001."command_line"(_lex_param_0, "utf8" :named("encoding"), "ucs4" :named("transcode"))
+    .return ($P5002) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_100_1346233469.934") :anon :lex :outer("cuid_1_1346233469.934")
+.sub "" :subid("cuid_100_1346277621.774") :anon :lex :outer("cuid_1_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 10
-    .const 'Sub' $P580 = 'cuid_2_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_3_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_5_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_6_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_7_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_8_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_9_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_10_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_11_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_12_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_13_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_14_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_16_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_18_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_19_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_21_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_22_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_23_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_24_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_25_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_29_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_30_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_32_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_33_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_34_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_35_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_36_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_37_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_38_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_39_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_40_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_41_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_42_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_43_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_44_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_45_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_46_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_47_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_48_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_49_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_50_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_51_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_52_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_53_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_54_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_55_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_56_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_57_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_58_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_59_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_60_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_61_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_62_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_63_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_64_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_65_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_66_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_67_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_68_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_69_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_70_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_71_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_72_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_73_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_74_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_75_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_76_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_78_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_80_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_81_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_82_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_84_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_86_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_93_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_95_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_96_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_97_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_98_1346233469.934' 
-    capture_lex $P580 
-    .const 'Sub' $P580 = 'cuid_99_1346233469.934' 
-    capture_lex $P580 
+    .const 'Sub' $P5080 = 'cuid_2_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_3_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_5_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_6_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_7_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_8_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_9_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_10_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_11_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_12_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_13_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_14_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_16_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_18_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_19_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_21_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_22_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_23_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_24_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_25_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_29_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_30_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_32_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_33_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_34_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_35_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_36_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_37_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_38_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_39_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_40_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_41_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_42_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_43_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_44_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_45_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_46_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_47_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_48_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_49_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_50_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_51_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_52_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_53_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_54_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_55_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_56_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_57_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_58_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_59_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_60_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_61_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_62_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_63_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_64_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_65_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_66_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_67_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_68_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_69_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_70_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_71_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_72_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_73_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_74_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_75_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_76_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_78_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_80_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_81_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_82_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_84_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_86_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_93_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_95_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_96_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_97_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_98_1346277621.774' 
+    capture_lex $P5080 
+    .const 'Sub' $P5080 = 'cuid_99_1346277621.774' 
+    capture_lex $P5080 
     .lex "$?PACKAGE", $P101 
     .lex "$?CLASS", $P102 
-    .const 'Sub' $P501 = 'cuid_2_1346233469.934' 
-    capture_lex $P501
-    .const 'Sub' $P502 = 'cuid_3_1346233469.934' 
-    capture_lex $P502
-    .const 'Sub' $P503 = 'cuid_5_1346233469.934' 
-    capture_lex $P503
-    .const 'Sub' $P504 = 'cuid_6_1346233469.934' 
-    capture_lex $P504
-    .const 'Sub' $P505 = 'cuid_7_1346233469.934' 
-    capture_lex $P505
-    .const 'Sub' $P506 = 'cuid_8_1346233469.934' 
-    capture_lex $P506
-    .const 'Sub' $P507 = 'cuid_9_1346233469.934' 
-    capture_lex $P507
-    .const 'Sub' $P508 = 'cuid_10_1346233469.934' 
-    capture_lex $P508
-    .const 'Sub' $P509 = 'cuid_11_1346233469.934' 
-    capture_lex $P509
-    .const 'Sub' $P510 = 'cuid_12_1346233469.934' 
-    capture_lex $P510
-    .const 'Sub' $P511 = 'cuid_13_1346233469.934' 
-    capture_lex $P511
-    .const 'Sub' $P512 = 'cuid_14_1346233469.934' 
-    capture_lex $P512
-    .const 'Sub' $P513 = 'cuid_16_1346233469.934' 
-    capture_lex $P513
-    .const 'Sub' $P514 = 'cuid_18_1346233469.934' 
-    capture_lex $P514
-    .const 'Sub' $P515 = 'cuid_19_1346233469.934' 
-    capture_lex $P515
-    .const 'Sub' $P516 = 'cuid_21_1346233469.934' 
-    capture_lex $P516
-    .const 'Sub' $P517 = 'cuid_22_1346233469.934' 
-    capture_lex $P517
-    .const 'Sub' $P518 = 'cuid_23_1346233469.934' 
-    capture_lex $P518
-    .const 'Sub' $P519 = 'cuid_24_1346233469.934' 
-    capture_lex $P519
-    .const 'Sub' $P520 = 'cuid_25_1346233469.934' 
-    capture_lex $P520
-    .const 'Sub' $P521 = 'cuid_29_1346233469.934' 
-    capture_lex $P521
-    .const 'Sub' $P522 = 'cuid_30_1346233469.934' 
-    capture_lex $P522
-    .const 'Sub' $P523 = 'cuid_32_1346233469.934' 
-    capture_lex $P523
-    .const 'Sub' $P524 = 'cuid_33_1346233469.934' 
-    capture_lex $P524
-    .const 'Sub' $P525 = 'cuid_34_1346233469.934' 
-    capture_lex $P525
-    .const 'Sub' $P526 = 'cuid_35_1346233469.934' 
-    capture_lex $P526
-    .const 'Sub' $P527 = 'cuid_36_1346233469.934' 
-    capture_lex $P527
-    .const 'Sub' $P528 = 'cuid_37_1346233469.934' 
-    capture_lex $P528
-    .const 'Sub' $P529 = 'cuid_38_1346233469.934' 
-    capture_lex $P529
-    .const 'Sub' $P530 = 'cuid_39_1346233469.934' 
-    capture_lex $P530
-    .const 'Sub' $P531 = 'cuid_40_1346233469.934' 
-    capture_lex $P531
-    .const 'Sub' $P532 = 'cuid_41_1346233469.934' 
-    capture_lex $P532
-    .const 'Sub' $P533 = 'cuid_42_1346233469.934' 
-    capture_lex $P533
-    .const 'Sub' $P534 = 'cuid_43_1346233469.934' 
-    capture_lex $P534
-    .const 'Sub' $P535 = 'cuid_44_1346233469.934' 
-    capture_lex $P535
-    .const 'Sub' $P536 = 'cuid_45_1346233469.934' 
-    capture_lex $P536
-    .const 'Sub' $P537 = 'cuid_46_1346233469.934' 
-    capture_lex $P537
-    .const 'Sub' $P538 = 'cuid_47_1346233469.934' 
-    capture_lex $P538
-    .const 'Sub' $P539 = 'cuid_48_1346233469.934' 
-    capture_lex $P539
-    .const 'Sub' $P540 = 'cuid_49_1346233469.934' 
-    capture_lex $P540
-    .const 'Sub' $P541 = 'cuid_50_1346233469.934' 
-    capture_lex $P541
-    .const 'Sub' $P542 = 'cuid_51_1346233469.934' 
-    capture_lex $P542
-    .const 'Sub' $P543 = 'cuid_52_1346233469.934' 
-    capture_lex $P543
-    .const 'Sub' $P544 = 'cuid_53_1346233469.934' 
-    capture_lex $P544
-    .const 'Sub' $P545 = 'cuid_54_1346233469.934' 
-    capture_lex $P545
-    .const 'Sub' $P546 = 'cuid_55_1346233469.934' 
-    capture_lex $P546
-    .const 'Sub' $P547 = 'cuid_56_1346233469.934' 
-    capture_lex $P547
-    .const 'Sub' $P548 = 'cuid_57_1346233469.934' 
-    capture_lex $P548
-    .const 'Sub' $P549 = 'cuid_58_1346233469.934' 
-    capture_lex $P549
-    .const 'Sub' $P550 = 'cuid_59_1346233469.934' 
-    capture_lex $P550
-    .const 'Sub' $P551 = 'cuid_60_1346233469.934' 
-    capture_lex $P551
-    .const 'Sub' $P552 = 'cuid_61_1346233469.934' 
-    capture_lex $P552
-    .const 'Sub' $P553 = 'cuid_62_1346233469.934' 
-    capture_lex $P553
-    .const 'Sub' $P554 = 'cuid_63_1346233469.934' 
-    capture_lex $P554
-    .const 'Sub' $P555 = 'cuid_64_1346233469.934' 
-    capture_lex $P555
-    .const 'Sub' $P556 = 'cuid_65_1346233469.934' 
-    capture_lex $P556
-    .const 'Sub' $P557 = 'cuid_66_1346233469.934' 
-    capture_lex $P557
-    .const 'Sub' $P558 = 'cuid_67_1346233469.934' 
-    capture_lex $P558
-    .const 'Sub' $P559 = 'cuid_68_1346233469.934' 
-    capture_lex $P559
-    .const 'Sub' $P560 = 'cuid_69_1346233469.934' 
-    capture_lex $P560
-    .const 'Sub' $P561 = 'cuid_70_1346233469.934' 
-    capture_lex $P561
-    .const 'Sub' $P562 = 'cuid_71_1346233469.934' 
-    capture_lex $P562
-    .const 'Sub' $P563 = 'cuid_72_1346233469.934' 
-    capture_lex $P563
-    .const 'Sub' $P564 = 'cuid_73_1346233469.934' 
-    capture_lex $P564
-    .const 'Sub' $P565 = 'cuid_74_1346233469.934' 
-    capture_lex $P565
-    .const 'Sub' $P566 = 'cuid_75_1346233469.934' 
-    capture_lex $P566
-    .const 'Sub' $P567 = 'cuid_76_1346233469.934' 
-    capture_lex $P567
-    .const 'Sub' $P568 = 'cuid_78_1346233469.934' 
-    capture_lex $P568
-    .const 'Sub' $P569 = 'cuid_80_1346233469.934' 
-    capture_lex $P569
-    .const 'Sub' $P570 = 'cuid_81_1346233469.934' 
-    capture_lex $P570
-    .const 'Sub' $P571 = 'cuid_82_1346233469.934' 
-    capture_lex $P571
-    .const 'Sub' $P572 = 'cuid_84_1346233469.934' 
-    capture_lex $P572
-    .const 'Sub' $P573 = 'cuid_86_1346233469.934' 
-    capture_lex $P573
-    .const 'Sub' $P574 = 'cuid_93_1346233469.934' 
-    capture_lex $P574
-    .const 'Sub' $P575 = 'cuid_95_1346233469.934' 
-    capture_lex $P575
-    .const 'Sub' $P576 = 'cuid_96_1346233469.934' 
-    capture_lex $P576
-    .const 'Sub' $P577 = 'cuid_97_1346233469.934' 
-    capture_lex $P577
-    .const 'Sub' $P578 = 'cuid_98_1346233469.934' 
-    capture_lex $P578
-    .const 'Sub' $P579 = 'cuid_99_1346233469.934' 
-    capture_lex $P579
-    .return ($P579) 
+    .const 'Sub' $P5001 = 'cuid_2_1346277621.774' 
+    capture_lex $P5001
+    .const 'Sub' $P5002 = 'cuid_3_1346277621.774' 
+    capture_lex $P5002
+    .const 'Sub' $P5003 = 'cuid_5_1346277621.774' 
+    capture_lex $P5003
+    .const 'Sub' $P5004 = 'cuid_6_1346277621.774' 
+    capture_lex $P5004
+    .const 'Sub' $P5005 = 'cuid_7_1346277621.774' 
+    capture_lex $P5005
+    .const 'Sub' $P5006 = 'cuid_8_1346277621.774' 
+    capture_lex $P5006
+    .const 'Sub' $P5007 = 'cuid_9_1346277621.774' 
+    capture_lex $P5007
+    .const 'Sub' $P5008 = 'cuid_10_1346277621.774' 
+    capture_lex $P5008
+    .const 'Sub' $P5009 = 'cuid_11_1346277621.774' 
+    capture_lex $P5009
+    .const 'Sub' $P5010 = 'cuid_12_1346277621.774' 
+    capture_lex $P5010
+    .const 'Sub' $P5011 = 'cuid_13_1346277621.774' 
+    capture_lex $P5011
+    .const 'Sub' $P5012 = 'cuid_14_1346277621.774' 
+    capture_lex $P5012
+    .const 'Sub' $P5013 = 'cuid_16_1346277621.774' 
+    capture_lex $P5013
+    .const 'Sub' $P5014 = 'cuid_18_1346277621.774' 
+    capture_lex $P5014
+    .const 'Sub' $P5015 = 'cuid_19_1346277621.774' 
+    capture_lex $P5015
+    .const 'Sub' $P5016 = 'cuid_21_1346277621.774' 
+    capture_lex $P5016
+    .const 'Sub' $P5017 = 'cuid_22_1346277621.774' 
+    capture_lex $P5017
+    .const 'Sub' $P5018 = 'cuid_23_1346277621.774' 
+    capture_lex $P5018
+    .const 'Sub' $P5019 = 'cuid_24_1346277621.774' 
+    capture_lex $P5019
+    .const 'Sub' $P5020 = 'cuid_25_1346277621.774' 
+    capture_lex $P5020
+    .const 'Sub' $P5021 = 'cuid_29_1346277621.774' 
+    capture_lex $P5021
+    .const 'Sub' $P5022 = 'cuid_30_1346277621.774' 
+    capture_lex $P5022
+    .const 'Sub' $P5023 = 'cuid_32_1346277621.774' 
+    capture_lex $P5023
+    .const 'Sub' $P5024 = 'cuid_33_1346277621.774' 
+    capture_lex $P5024
+    .const 'Sub' $P5025 = 'cuid_34_1346277621.774' 
+    capture_lex $P5025
+    .const 'Sub' $P5026 = 'cuid_35_1346277621.774' 
+    capture_lex $P5026
+    .const 'Sub' $P5027 = 'cuid_36_1346277621.774' 
+    capture_lex $P5027
+    .const 'Sub' $P5028 = 'cuid_37_1346277621.774' 
+    capture_lex $P5028
+    .const 'Sub' $P5029 = 'cuid_38_1346277621.774' 
+    capture_lex $P5029
+    .const 'Sub' $P5030 = 'cuid_39_1346277621.774' 
+    capture_lex $P5030
+    .const 'Sub' $P5031 = 'cuid_40_1346277621.774' 
+    capture_lex $P5031
+    .const 'Sub' $P5032 = 'cuid_41_1346277621.774' 
+    capture_lex $P5032
+    .const 'Sub' $P5033 = 'cuid_42_1346277621.774' 
+    capture_lex $P5033
+    .const 'Sub' $P5034 = 'cuid_43_1346277621.774' 
+    capture_lex $P5034
+    .const 'Sub' $P5035 = 'cuid_44_1346277621.774' 
+    capture_lex $P5035
+    .const 'Sub' $P5036 = 'cuid_45_1346277621.774' 
+    capture_lex $P5036
+    .const 'Sub' $P5037 = 'cuid_46_1346277621.774' 
+    capture_lex $P5037
+    .const 'Sub' $P5038 = 'cuid_47_1346277621.774' 
+    capture_lex $P5038
+    .const 'Sub' $P5039 = 'cuid_48_1346277621.774' 
+    capture_lex $P5039
+    .const 'Sub' $P5040 = 'cuid_49_1346277621.774' 
+    capture_lex $P5040
+    .const 'Sub' $P5041 = 'cuid_50_1346277621.774' 
+    capture_lex $P5041
+    .const 'Sub' $P5042 = 'cuid_51_1346277621.774' 
+    capture_lex $P5042
+    .const 'Sub' $P5043 = 'cuid_52_1346277621.774' 
+    capture_lex $P5043
+    .const 'Sub' $P5044 = 'cuid_53_1346277621.774' 
+    capture_lex $P5044
+    .const 'Sub' $P5045 = 'cuid_54_1346277621.774' 
+    capture_lex $P5045
+    .const 'Sub' $P5046 = 'cuid_55_1346277621.774' 
+    capture_lex $P5046
+    .const 'Sub' $P5047 = 'cuid_56_1346277621.774' 
+    capture_lex $P5047
+    .const 'Sub' $P5048 = 'cuid_57_1346277621.774' 
+    capture_lex $P5048
+    .const 'Sub' $P5049 = 'cuid_58_1346277621.774' 
+    capture_lex $P5049
+    .const 'Sub' $P5050 = 'cuid_59_1346277621.774' 
+    capture_lex $P5050
+    .const 'Sub' $P5051 = 'cuid_60_1346277621.774' 
+    capture_lex $P5051
+    .const 'Sub' $P5052 = 'cuid_61_1346277621.774' 
+    capture_lex $P5052
+    .const 'Sub' $P5053 = 'cuid_62_1346277621.774' 
+    capture_lex $P5053
+    .const 'Sub' $P5054 = 'cuid_63_1346277621.774' 
+    capture_lex $P5054
+    .const 'Sub' $P5055 = 'cuid_64_1346277621.774' 
+    capture_lex $P5055
+    .const 'Sub' $P5056 = 'cuid_65_1346277621.774' 
+    capture_lex $P5056
+    .const 'Sub' $P5057 = 'cuid_66_1346277621.774' 
+    capture_lex $P5057
+    .const 'Sub' $P5058 = 'cuid_67_1346277621.774' 
+    capture_lex $P5058
+    .const 'Sub' $P5059 = 'cuid_68_1346277621.774' 
+    capture_lex $P5059
+    .const 'Sub' $P5060 = 'cuid_69_1346277621.774' 
+    capture_lex $P5060
+    .const 'Sub' $P5061 = 'cuid_70_1346277621.774' 
+    capture_lex $P5061
+    .const 'Sub' $P5062 = 'cuid_71_1346277621.774' 
+    capture_lex $P5062
+    .const 'Sub' $P5063 = 'cuid_72_1346277621.774' 
+    capture_lex $P5063
+    .const 'Sub' $P5064 = 'cuid_73_1346277621.774' 
+    capture_lex $P5064
+    .const 'Sub' $P5065 = 'cuid_74_1346277621.774' 
+    capture_lex $P5065
+    .const 'Sub' $P5066 = 'cuid_75_1346277621.774' 
+    capture_lex $P5066
+    .const 'Sub' $P5067 = 'cuid_76_1346277621.774' 
+    capture_lex $P5067
+    .const 'Sub' $P5068 = 'cuid_78_1346277621.774' 
+    capture_lex $P5068
+    .const 'Sub' $P5069 = 'cuid_80_1346277621.774' 
+    capture_lex $P5069
+    .const 'Sub' $P5070 = 'cuid_81_1346277621.774' 
+    capture_lex $P5070
+    .const 'Sub' $P5071 = 'cuid_82_1346277621.774' 
+    capture_lex $P5071
+    .const 'Sub' $P5072 = 'cuid_84_1346277621.774' 
+    capture_lex $P5072
+    .const 'Sub' $P5073 = 'cuid_86_1346277621.774' 
+    capture_lex $P5073
+    .const 'Sub' $P5074 = 'cuid_93_1346277621.774' 
+    capture_lex $P5074
+    .const 'Sub' $P5075 = 'cuid_95_1346277621.774' 
+    capture_lex $P5075
+    .const 'Sub' $P5076 = 'cuid_96_1346277621.774' 
+    capture_lex $P5076
+    .const 'Sub' $P5077 = 'cuid_97_1346277621.774' 
+    capture_lex $P5077
+    .const 'Sub' $P5078 = 'cuid_98_1346277621.774' 
+    capture_lex $P5078
+    .const 'Sub' $P5079 = 'cuid_99_1346277621.774' 
+    capture_lex $P5079
+    .return ($P5079) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "obs" :subid("cuid_2_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "obs" :subid("cuid_2_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 12
     .param pmc _lex_param_0 
@@ -458,29 +458,29 @@
     .param pmc _lex_param_3 :optional 
     .param int haz_param_1 :opt_flag 
     if haz_param_1, default14
-    box $P503, " in Perl 6"
-    set _lex_param_3, $P503
+    box $P5003, " in Perl 6"
+    set _lex_param_3, $P5003
   default14:
     .lex "self", _lex_param_0 
     .lex "$old", _lex_param_1 
     .lex "$new", _lex_param_2 
     .lex "$when", _lex_param_3 
 .annotate 'line', 13
-    nqp_decontainerize $P501, _lex_param_0
-    set $S506, _lex_param_1
-    concat $S505, "Unsupported use of ", $S506
-    concat $S504, $S505, ";"
-    set $S507, _lex_param_3
-    concat $S503, $S504, $S507
-    concat $S502, $S503, " please use "
-    set $S508, _lex_param_2
-    concat $S501, $S502, $S508
-    $P502 = $P501."panic"($S501)
-    .return ($P502) 
+    nqp_decontainerize $P5001, _lex_param_0
+    set $S5006, _lex_param_1
+    concat $S5005, "Unsupported use of ", $S5006
+    concat $S5004, $S5005, ";"
+    set $S5007, _lex_param_3
+    concat $S5003, $S5004, $S5007
+    concat $S5002, $S5003, " please use "
+    set $S5008, _lex_param_2
+    concat $S5001, $S5002, $S5008
+    $P5002 = $P5001."panic"($S5001)
+    .return ($P5002) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "ws" :subid("cuid_3_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "ws" :subid("cuid_3_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 17
     .param pmc _lex_param_0 
@@ -519,7 +519,7 @@
     nqp_push_label $P11, alt15_028
     nqp_push_label $P11, alt15_131
     nqp_rxmark rx12_bstack, alt15_end27, -1, 0
-    rx12_cur."!alt"(rx12_pos, "alt_nfa__1_1346233470.236", $P11)
+    rx12_cur."!alt"(rx12_pos, "alt_nfa__1_1346277622.046", $P11)
     goto rx12_fail18
   alt15_028:
     nqp_rxmark rx12_bstack, rxquantr16_done30, -1, 0
@@ -604,151 +604,151 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_3_1346233469.934_caps" :subid("cuid_memo_1_1346233469.935")
+.sub "cuid_3_1346277621.774_caps" :subid("cuid_memo_1_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_3_1346233469.934_nfa" :subid("cuid_memo_2_1346233469.935")
+.sub "cuid_3_1346277621.774_nfa" :subid("cuid_memo_2_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 1
-    push $P503, $P504
-    box $P505, 0
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    box $P507, 2
-    push $P503, $P507
-    box $P508, 35
-    push $P503, $P508
-    box $P509, 4
-    push $P503, $P509
-    box $P510, 1
-    push $P503, $P510
-    box $P511, 0
-    push $P503, $P511
-    box $P512, 0
-    push $P503, $P512
-    push $P501, $P503
-    new $P513, 'ResizablePMCArray'
-    box $P514, 4
-    push $P513, $P514
-    box $P515, 32
-    push $P513, $P515
-    box $P516, 3
-    push $P513, $P516
-    push $P501, $P513
-    new $P517, 'ResizablePMCArray'
-    box $P518, 1
-    push $P517, $P518
-    box $P519, 0
-    push $P517, $P519
-    box $P520, 2
-    push $P517, $P520
-    box $P521, 1
-    push $P517, $P521
-    box $P522, 0
-    push $P517, $P522
-    box $P523, 1
-    push $P517, $P523
-    push $P501, $P517
-    new $P524, 'ResizablePMCArray'
-    box $P525, 5
-    push $P524, $P525
-    box $P526, 4096
-    push $P524, $P526
-    box $P527, 4
-    push $P524, $P527
-    box $P528, 1
-    push $P524, $P528
-    box $P529, 0
-    push $P524, $P529
-    box $P530, 1
-    push $P524, $P530
-    push $P501, $P524
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 1
+    push $P5003, $P5004
+    box $P5005, 0
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    box $P5007, 2
+    push $P5003, $P5007
+    box $P5008, 35
+    push $P5003, $P5008
+    box $P5009, 4
+    push $P5003, $P5009
+    box $P5010, 1
+    push $P5003, $P5010
+    box $P5011, 0
+    push $P5003, $P5011
+    box $P5012, 0
+    push $P5003, $P5012
+    push $P5001, $P5003
+    new $P5013, 'ResizablePMCArray'
+    box $P5014, 4
+    push $P5013, $P5014
+    box $P5015, 32
+    push $P5013, $P5015
+    box $P5016, 3
+    push $P5013, $P5016
+    push $P5001, $P5013
+    new $P5017, 'ResizablePMCArray'
+    box $P5018, 1
+    push $P5017, $P5018
+    box $P5019, 0
+    push $P5017, $P5019
+    box $P5020, 2
+    push $P5017, $P5020
+    box $P5021, 1
+    push $P5017, $P5021
+    box $P5022, 0
+    push $P5017, $P5022
+    box $P5023, 1
+    push $P5017, $P5023
+    push $P5001, $P5017
+    new $P5024, 'ResizablePMCArray'
+    box $P5025, 5
+    push $P5024, $P5025
+    box $P5026, 4096
+    push $P5024, $P5026
+    box $P5027, 4
+    push $P5024, $P5027
+    box $P5028, 1
+    push $P5024, $P5028
+    box $P5029, 0
+    push $P5024, $P5029
+    box $P5030, 1
+    push $P5024, $P5030
+    push $P5001, $P5024
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_3_1346233469.934_alt_nfa__1_1346233470.236" :subid("cuid_memo_3_1346233469.935")
+.sub "cuid_3_1346277621.774_alt_nfa__1_1346277622.046" :subid("cuid_memo_3_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    new $P503, 'ResizablePMCArray'
-    push $P502, $P503
-    new $P504, 'ResizablePMCArray'
-    box $P505, 1
-    push $P504, $P505
-    box $P506, 0
-    push $P504, $P506
-    box $P507, 2
-    push $P504, $P507
-    push $P502, $P504
-    new $P508, 'ResizablePMCArray'
-    box $P509, 4
-    push $P508, $P509
-    box $P510, 32
-    push $P508, $P510
-    box $P511, 3
-    push $P508, $P511
-    push $P502, $P508
-    new $P512, 'ResizablePMCArray'
-    box $P513, 1
-    push $P512, $P513
-    box $P514, 0
-    push $P512, $P514
-    box $P515, 2
-    push $P512, $P515
-    box $P516, 1
-    push $P512, $P516
-    box $P517, 0
-    push $P512, $P517
-    box $P518, 0
-    push $P512, $P518
-    push $P502, $P512
-    push $P501, $P502
-    new $P519, 'ResizablePMCArray'
-    new $P520, 'ResizablePMCArray'
-    push $P519, $P520
-    new $P521, 'ResizablePMCArray'
-    box $P522, 2
-    push $P521, $P522
-    box $P523, 35
-    push $P521, $P523
-    box $P524, 2
-    push $P521, $P524
-    push $P519, $P521
-    new $P525, 'ResizablePMCArray'
-    box $P526, 5
-    push $P525, $P526
-    box $P527, 4096
-    push $P525, $P527
-    box $P528, 2
-    push $P525, $P528
-    box $P529, 1
-    push $P525, $P529
-    box $P530, 0
-    push $P525, $P530
-    box $P531, 0
-    push $P525, $P531
-    push $P519, $P525
-    push $P501, $P519
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    new $P5003, 'ResizablePMCArray'
+    push $P5002, $P5003
+    new $P5004, 'ResizablePMCArray'
+    box $P5005, 1
+    push $P5004, $P5005
+    box $P5006, 0
+    push $P5004, $P5006
+    box $P5007, 2
+    push $P5004, $P5007
+    push $P5002, $P5004
+    new $P5008, 'ResizablePMCArray'
+    box $P5009, 4
+    push $P5008, $P5009
+    box $P5010, 32
+    push $P5008, $P5010
+    box $P5011, 3
+    push $P5008, $P5011
+    push $P5002, $P5008
+    new $P5012, 'ResizablePMCArray'
+    box $P5013, 1
+    push $P5012, $P5013
+    box $P5014, 0
+    push $P5012, $P5014
+    box $P5015, 2
+    push $P5012, $P5015
+    box $P5016, 1
+    push $P5012, $P5016
+    box $P5017, 0
+    push $P5012, $P5017
+    box $P5018, 0
+    push $P5012, $P5018
+    push $P5002, $P5012
+    push $P5001, $P5002
+    new $P5019, 'ResizablePMCArray'
+    new $P5020, 'ResizablePMCArray'
+    push $P5019, $P5020
+    new $P5021, 'ResizablePMCArray'
+    box $P5022, 2
+    push $P5021, $P5022
+    box $P5023, 35
+    push $P5021, $P5023
+    box $P5024, 2
+    push $P5021, $P5024
+    push $P5019, $P5021
+    new $P5025, 'ResizablePMCArray'
+    box $P5026, 5
+    push $P5025, $P5026
+    box $P5027, 4096
+    push $P5025, $P5027
+    box $P5028, 2
+    push $P5025, $P5028
+    box $P5029, 1
+    push $P5025, $P5029
+    box $P5030, 0
+    push $P5025, $P5030
+    box $P5031, 0
+    push $P5025, $P5031
+    push $P5019, $P5025
+    push $P5001, $P5019
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "normspace" :subid("cuid_5_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "normspace" :subid("cuid_5_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 19
     .param pmc _lex_param_0 
-    .const 'Sub' $P502 = 'cuid_4_1346233469.934' 
-    capture_lex $P502 
+    .const 'Sub' $P5002 = 'cuid_4_1346277621.774' 
+    capture_lex $P5002 
     .lex utf8:"$\x{a2}", $P101 
     .lex "$/", $P102 
     .lex "self", _lex_param_0 
@@ -778,10 +778,10 @@
   rxscan19_scan42:
     nqp_rxmark rx18_bstack, rxscan19_loop41, rx18_pos, 0
   rxscan19_done43:
-    .const 'Sub' $P501 = 'cuid_4_1346233469.934' 
-    capture_lex $P501
+    .const 'Sub' $P5001 = 'cuid_4_1346277621.774' 
+    capture_lex $P5001
     repr_bind_attr_int rx18_cur, rx18_curclass, "$!pos", rx18_pos
-    $P11 = rx18_cur."before"($P501)
+    $P11 = rx18_cur."before"($P5001)
     repr_get_attr_int $I11, $P11, rx18_curclass, "$!pos"
     lt $I11, 0, rx18_fail37
     repr_bind_attr_int rx18_cur, rx18_curclass, "$!pos", rx18_pos
@@ -823,45 +823,45 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_5_1346233469.934_caps" :subid("cuid_memo_4_1346233469.935")
+.sub "cuid_5_1346277621.774_caps" :subid("cuid_memo_4_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_5_1346233469.934_nfa" :subid("cuid_memo_5_1346233469.935")
+.sub "cuid_5_1346277621.774_nfa" :subid("cuid_memo_5_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 4
-    push $P503, $P504
-    box $P505, 32
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    box $P507, 2
-    push $P503, $P507
-    box $P508, 35
-    push $P503, $P508
-    box $P509, 2
-    push $P503, $P509
-    push $P501, $P503
-    new $P510, 'ResizablePMCArray'
-    box $P511, 0
-    push $P510, $P511
-    box $P512, 0
-    push $P510, $P512
-    box $P513, 0
-    push $P510, $P513
-    push $P501, $P510
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 4
+    push $P5003, $P5004
+    box $P5005, 32
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    box $P5007, 2
+    push $P5003, $P5007
+    box $P5008, 35
+    push $P5003, $P5008
+    box $P5009, 2
+    push $P5003, $P5009
+    push $P5001, $P5003
+    new $P5010, 'ResizablePMCArray'
+    box $P5011, 0
+    push $P5010, $P5011
+    box $P5012, 0
+    push $P5010, $P5012
+    box $P5013, 0
+    push $P5010, $P5013
+    push $P5001, $P5010
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_4_1346233469.934") :anon :lex :outer("cuid_5_1346233469.934")
+.sub "" :subid("cuid_4_1346277621.774") :anon :lex :outer("cuid_5_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
     .param pmc self 
     .lex utf8:"$\x{a2}", $P101 
@@ -893,7 +893,7 @@
     nqp_push_label $P11, alt22_055
     nqp_push_label $P11, alt22_156
     nqp_rxmark rx20_bstack, alt22_end54, -1, 0
-    rx20_cur."!alt"(rx20_pos, "alt_nfa__2_1346233470.261", $P11)
+    rx20_cur."!alt"(rx20_pos, "alt_nfa__2_1346277622.069", $P11)
     goto rx20_fail47
   alt22_055:
     ge rx20_pos, rx20_eos, rx20_fail47
@@ -943,68 +943,68 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_4_1346233469.934_caps" :subid("cuid_memo_6_1346233469.935")
+.sub "cuid_4_1346277621.774_caps" :subid("cuid_memo_6_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_4_1346233469.934_nfa" :subid("cuid_memo_7_1346233469.935")
+.sub "cuid_4_1346277621.774_nfa" :subid("cuid_memo_7_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 4
-    push $P503, $P504
-    box $P505, 32
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    box $P507, 2
-    push $P503, $P507
-    box $P508, 35
-    push $P503, $P508
-    box $P509, 0
-    push $P503, $P509
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 4
+    push $P5003, $P5004
+    box $P5005, 32
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    box $P5007, 2
+    push $P5003, $P5007
+    box $P5008, 35
+    push $P5003, $P5008
+    box $P5009, 0
+    push $P5003, $P5009
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_4_1346233469.934_alt_nfa__2_1346233470.261" :subid("cuid_memo_8_1346233469.935")
+.sub "cuid_4_1346277621.774_alt_nfa__2_1346277622.069" :subid("cuid_memo_8_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    new $P503, 'ResizablePMCArray'
-    push $P502, $P503
-    new $P504, 'ResizablePMCArray'
-    box $P505, 4
-    push $P504, $P505
-    box $P506, 32
-    push $P504, $P506
-    box $P507, 0
-    push $P504, $P507
-    push $P502, $P504
-    push $P501, $P502
-    new $P508, 'ResizablePMCArray'
-    new $P509, 'ResizablePMCArray'
-    push $P508, $P509
-    new $P510, 'ResizablePMCArray'
-    box $P511, 2
-    push $P510, $P511
-    box $P512, 35
-    push $P510, $P512
-    box $P513, 0
-    push $P510, $P513
-    push $P508, $P510
-    push $P501, $P508
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    new $P5003, 'ResizablePMCArray'
+    push $P5002, $P5003
+    new $P5004, 'ResizablePMCArray'
+    box $P5005, 4
+    push $P5004, $P5005
+    box $P5006, 32
+    push $P5004, $P5006
+    box $P5007, 0
+    push $P5004, $P5007
+    push $P5002, $P5004
+    push $P5001, $P5002
+    new $P5008, 'ResizablePMCArray'
+    new $P5009, 'ResizablePMCArray'
+    push $P5008, $P5009
+    new $P5010, 'ResizablePMCArray'
+    box $P5011, 2
+    push $P5010, $P5011
+    box $P5012, 35
+    push $P5010, $P5012
+    box $P5013, 0
+    push $P5010, $P5013
+    push $P5008, $P5010
+    push $P5001, $P5008
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "identifier" :subid("cuid_6_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "identifier" :subid("cuid_6_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 21
     .param pmc _lex_param_0 
@@ -1107,45 +1107,45 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_6_1346233469.934_caps" :subid("cuid_memo_9_1346233469.935")
+.sub "cuid_6_1346277621.774_caps" :subid("cuid_memo_9_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_6_1346233469.934_nfa" :subid("cuid_memo_10_1346233469.935")
+.sub "cuid_6_1346277621.774_nfa" :subid("cuid_memo_10_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 8
-    push $P503, $P504
-    box $P505, "ident"
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 0
-    push $P507, $P508
-    box $P509, 0
-    push $P507, $P509
-    box $P510, 0
-    push $P507, $P510
-    box $P511, 1
-    push $P507, $P511
-    box $P512, 0
-    push $P507, $P512
-    box $P513, 0
-    push $P507, $P513
-    push $P501, $P507
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 8
+    push $P5003, $P5004
+    box $P5005, "ident"
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 0
+    push $P5007, $P5008
+    box $P5009, 0
+    push $P5007, $P5009
+    box $P5010, 0
+    push $P5007, $P5010
+    box $P5011, 1
+    push $P5007, $P5011
+    box $P5012, 0
+    push $P5007, $P5012
+    box $P5013, 0
+    push $P5007, $P5013
+    push $P5001, $P5007
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "arg" :subid("cuid_7_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "arg" :subid("cuid_7_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 23
     .param pmc _lex_param_0 
@@ -1183,7 +1183,7 @@
     nqp_push_label $P11, alt32_188
     nqp_push_label $P11, alt32_290
     nqp_rxmark rx30_bstack, alt32_end85, -1, 0
-    rx30_cur."!alt"(rx30_pos, "alt_nfa__3_1346233470.309", $P11)
+    rx30_cur."!alt"(rx30_pos, "alt_nfa__3_1346277622.114", $P11)
     goto rx30_fail78
   alt32_086:
     ge rx30_pos, rx30_eos, rx30_fail78
@@ -1277,166 +1277,166 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_7_1346233469.934_caps" :subid("cuid_memo_11_1346233469.935")
+.sub "cuid_7_1346277621.774_caps" :subid("cuid_memo_11_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["quote_EXPR"], $P502
-    box $P503, 0
-    set $P501["val"], $P503
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["quote_EXPR"], $P5002
+    box $P5003, 0
+    set $P5001["val"], $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_7_1346233469.934_nfa" :subid("cuid_memo_12_1346233469.935")
+.sub "cuid_7_1346277621.774_nfa" :subid("cuid_memo_12_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 6
-    push $P503, $P504
-    box $P505, "'"
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    box $P507, 6
-    push $P503, $P507
-    box $P508, "\""
-    push $P503, $P508
-    box $P509, 3
-    push $P503, $P509
-    box $P510, 1
-    push $P503, $P510
-    box $P511, 0
-    push $P503, $P511
-    box $P512, 4
-    push $P503, $P512
-    push $P501, $P503
-    new $P513, 'ResizablePMCArray'
-    box $P514, 0
-    push $P513, $P514
-    box $P515, 0
-    push $P513, $P515
-    box $P516, 0
-    push $P513, $P516
-    push $P501, $P513
-    new $P517, 'ResizablePMCArray'
-    box $P518, 0
-    push $P517, $P518
-    box $P519, 0
-    push $P517, $P519
-    box $P520, 0
-    push $P517, $P520
-    push $P501, $P517
-    new $P521, 'ResizablePMCArray'
-    box $P522, 4
-    push $P521, $P522
-    box $P523, 8
-    push $P521, $P523
-    box $P524, 5
-    push $P521, $P524
-    push $P501, $P521
-    new $P525, 'ResizablePMCArray'
-    box $P526, 1
-    push $P525, $P526
-    box $P527, 0
-    push $P525, $P527
-    box $P528, 4
-    push $P525, $P528
-    box $P529, 1
-    push $P525, $P529
-    box $P530, 0
-    push $P525, $P530
-    box $P531, 0
-    push $P525, $P531
-    push $P501, $P525
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 6
+    push $P5003, $P5004
+    box $P5005, "'"
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    box $P5007, 6
+    push $P5003, $P5007
+    box $P5008, "\""
+    push $P5003, $P5008
+    box $P5009, 3
+    push $P5003, $P5009
+    box $P5010, 1
+    push $P5003, $P5010
+    box $P5011, 0
+    push $P5003, $P5011
+    box $P5012, 4
+    push $P5003, $P5012
+    push $P5001, $P5003
+    new $P5013, 'ResizablePMCArray'
+    box $P5014, 0
+    push $P5013, $P5014
+    box $P5015, 0
+    push $P5013, $P5015
+    box $P5016, 0
+    push $P5013, $P5016
+    push $P5001, $P5013
+    new $P5017, 'ResizablePMCArray'
+    box $P5018, 0
+    push $P5017, $P5018
+    box $P5019, 0
+    push $P5017, $P5019
+    box $P5020, 0
+    push $P5017, $P5020
+    push $P5001, $P5017
+    new $P5021, 'ResizablePMCArray'
+    box $P5022, 4
+    push $P5021, $P5022
+    box $P5023, 8
+    push $P5021, $P5023
+    box $P5024, 5
+    push $P5021, $P5024
+    push $P5001, $P5021
+    new $P5025, 'ResizablePMCArray'
+    box $P5026, 1
+    push $P5025, $P5026
+    box $P5027, 0
+    push $P5025, $P5027
+    box $P5028, 4
+    push $P5025, $P5028
+    box $P5029, 1
+    push $P5025, $P5029
+    box $P5030, 0
+    push $P5025, $P5030
+    box $P5031, 0
+    push $P5025, $P5031
+    push $P5001, $P5025
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_7_1346233469.934_alt_nfa__3_1346233470.309" :subid("cuid_memo_13_1346233469.935")
+.sub "cuid_7_1346277621.774_alt_nfa__3_1346277622.114" :subid("cuid_memo_13_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    new $P503, 'ResizablePMCArray'
-    push $P502, $P503
-    new $P504, 'ResizablePMCArray'
-    box $P505, 6
-    push $P504, $P505
-    box $P506, "'"
-    push $P504, $P506
-    box $P507, 2
-    push $P504, $P507
-    push $P502, $P504
-    new $P508, 'ResizablePMCArray'
-    box $P509, 0
-    push $P508, $P509
-    box $P510, 0
-    push $P508, $P510
-    box $P511, 0
-    push $P508, $P511
-    push $P502, $P508
-    push $P501, $P502
-    new $P512, 'ResizablePMCArray'
-    new $P513, 'ResizablePMCArray'
-    push $P512, $P513
-    new $P514, 'ResizablePMCArray'
-    box $P515, 6
-    push $P514, $P515
-    box $P516, "\""
-    push $P514, $P516
-    box $P517, 2
-    push $P514, $P517
-    push $P512, $P514
-    new $P518, 'ResizablePMCArray'
-    box $P519, 0
-    push $P518, $P519
-    box $P520, 0
-    push $P518, $P520
-    box $P521, 0
-    push $P518, $P521
-    push $P512, $P518
-    push $P501, $P512
-    new $P522, 'ResizablePMCArray'
-    new $P523, 'ResizablePMCArray'
-    push $P522, $P523
-    new $P524, 'ResizablePMCArray'
-    box $P525, 1
-    push $P524, $P525
-    box $P526, 0
-    push $P524, $P526
-    box $P527, 2
-    push $P524, $P527
-    push $P522, $P524
-    new $P528, 'ResizablePMCArray'
-    box $P529, 4
-    push $P528, $P529
-    box $P530, 8
-    push $P528, $P530
-    box $P531, 3
-    push $P528, $P531
-    push $P522, $P528
-    new $P532, 'ResizablePMCArray'
-    box $P533, 1
-    push $P532, $P533
-    box $P534, 0
-    push $P532, $P534
-    box $P535, 2
-    push $P532, $P535
-    box $P536, 1
-    push $P532, $P536
-    box $P537, 0
-    push $P532, $P537
-    box $P538, 0
-    push $P532, $P538
-    push $P522, $P532
-    push $P501, $P522
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    new $P5003, 'ResizablePMCArray'
+    push $P5002, $P5003
+    new $P5004, 'ResizablePMCArray'
+    box $P5005, 6
+    push $P5004, $P5005
+    box $P5006, "'"
+    push $P5004, $P5006
+    box $P5007, 2
+    push $P5004, $P5007
+    push $P5002, $P5004
+    new $P5008, 'ResizablePMCArray'
+    box $P5009, 0
+    push $P5008, $P5009
+    box $P5010, 0
+    push $P5008, $P5010
+    box $P5011, 0
+    push $P5008, $P5011
+    push $P5002, $P5008
+    push $P5001, $P5002
+    new $P5012, 'ResizablePMCArray'
+    new $P5013, 'ResizablePMCArray'
+    push $P5012, $P5013
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 6
+    push $P5014, $P5015
+    box $P5016, "\""
+    push $P5014, $P5016
+    box $P5017, 2
+    push $P5014, $P5017
+    push $P5012, $P5014
+    new $P5018, 'ResizablePMCArray'
+    box $P5019, 0
+    push $P5018, $P5019
+    box $P5020, 0
+    push $P5018, $P5020
+    box $P5021, 0
+    push $P5018, $P5021
+    push $P5012, $P5018
+    push $P5001, $P5012
+    new $P5022, 'ResizablePMCArray'
+    new $P5023, 'ResizablePMCArray'
+    push $P5022, $P5023
+    new $P5024, 'ResizablePMCArray'
+    box $P5025, 1
+    push $P5024, $P5025
+    box $P5026, 0
+    push $P5024, $P5026
+    box $P5027, 2
+    push $P5024, $P5027
+    push $P5022, $P5024
+    new $P5028, 'ResizablePMCArray'
+    box $P5029, 4
+    push $P5028, $P5029
+    box $P5030, 8
+    push $P5028, $P5030
+    box $P5031, 3
+    push $P5028, $P5031
+    push $P5022, $P5028
+    new $P5032, 'ResizablePMCArray'
+    box $P5033, 1
+    push $P5032, $P5033
+    box $P5034, 0
+    push $P5032, $P5034
+    box $P5035, 2
+    push $P5032, $P5035
+    box $P5036, 1
+    push $P5032, $P5036
+    box $P5037, 0
+    push $P5032, $P5037
+    box $P5038, 0
+    push $P5032, $P5038
+    push $P5022, $P5032
+    push $P5001, $P5022
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "arglist" :subid("cuid_8_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "arglist" :subid("cuid_8_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 31
     .param pmc _lex_param_0 
@@ -1560,16 +1560,16 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_8_1346233469.934_caps" :subid("cuid_memo_14_1346233469.935")
+.sub "cuid_8_1346277621.774_caps" :subid("cuid_memo_14_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 2
-    set $P501["arg"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 2
+    set $P5001["arg"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "TOP" :subid("cuid_9_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "TOP" :subid("cuid_9_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 33
     .param pmc _lex_param_0 
@@ -1578,8 +1578,8 @@
     .lex "$/", $P103 
     .lex "self", _lex_param_0 
     .local pmc self 
-    new $P501, 'Hash'
-    set $P101, $P501
+    new $P5001, 'Hash'
+    set $P101, $P5001
     set self, _lex_param_0
     .local string rx47_tgt
     .local int rx47_pos
@@ -1608,22 +1608,22 @@
     repr_bind_attr_int rx47_cur, rx47_curclass, "$!pos", rx47_pos
     store_lex unicode:"$\x{a2}", rx47_cur
     unless_null $P101, fallback124
-    get_hll_global $P504, "GLOBAL"
-    get_who $P503, $P504
-    set $P502, $P503["%RX"]
-    unless_null $P502, fallback125
-    get_hll_global $P506, "GLOBAL"
-    get_who $P505, $P506
-    new $P507, 'Hash'
-    set $P505["%RX"], $P507
-    set $P502, $P507
+    get_hll_global $P5004, "GLOBAL"
+    get_who $P5003, $P5004
+    set $P5002, $P5003["%RX"]
+    unless_null $P5002, fallback125
+    get_hll_global $P5006, "GLOBAL"
+    get_who $P5005, $P5006
+    new $P5007, 'Hash'
+    set $P5005["%RX"], $P5007
+    set $P5002, $P5007
   fallback125:
-    unless_null $P502, vivi_49126
+    unless_null $P5002, vivi_49126
     die "Contextual %*RX not found"
-    box $P508, "Contextual %*RX not found"
-    set $P502, $P508
+    box $P5008, "Contextual %*RX not found"
+    set $P5002, $P5008
   vivi_49126:
-    set $P101, $P502
+    set $P101, $P5002
   fallback124:
     repr_bind_attr_int rx47_cur, rx47_curclass, "$!pos", rx47_pos
     $P11 = rx47_cur."nibbler"()
@@ -1678,64 +1678,64 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_9_1346233469.934_caps" :subid("cuid_memo_15_1346233469.935")
+.sub "cuid_9_1346277621.774_caps" :subid("cuid_memo_15_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["nibbler"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["nibbler"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_9_1346233469.934_nfa" :subid("cuid_memo_16_1346233469.935")
+.sub "cuid_9_1346277621.774_nfa" :subid("cuid_memo_16_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 1
-    push $P503, $P504
-    box $P505, 0
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 8
-    push $P507, $P508
-    box $P509, "nibbler"
-    push $P507, $P509
-    box $P510, 3
-    push $P507, $P510
-    push $P501, $P507
-    new $P511, 'ResizablePMCArray'
-    box $P512, 0
-    push $P511, $P512
-    box $P513, 0
-    push $P511, $P513
-    box $P514, 0
-    push $P511, $P514
-    push $P501, $P511
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 1
+    push $P5003, $P5004
+    box $P5005, 0
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 8
+    push $P5007, $P5008
+    box $P5009, "nibbler"
+    push $P5007, $P5009
+    box $P5010, 3
+    push $P5007, $P5010
+    push $P5001, $P5007
+    new $P5011, 'ResizablePMCArray'
+    box $P5012, 0
+    push $P5011, $P5012
+    box $P5013, 0
+    push $P5011, $P5013
+    box $P5014, 0
+    push $P5011, $P5014
+    push $P5001, $P5011
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "nibbler" :subid("cuid_10_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "nibbler" :subid("cuid_10_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 39
     .param pmc _lex_param_0 
-    .const 'Sub' $P514 = 'cuid_161_1346233469.934' 
-    capture_lex $P514 
+    .const 'Sub' $P5014 = 'cuid_161_1346277621.774' 
+    capture_lex $P5014 
     .lex "$OLDRX", $P101 
     .lex "%*RX", $P102 
     .lex utf8:"$\x{a2}", $P103 
     .lex "$/", $P104 
     .lex "self", _lex_param_0 
     .local pmc self 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    new $P502, 'Hash'
-    set $P102, $P502
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    new $P5002, 'Hash'
+    set $P102, $P5002
     set self, _lex_param_0
     .local string rx54_tgt
     .local int rx54_pos
@@ -1763,35 +1763,35 @@
   rxscan55_done142:
     repr_bind_attr_int rx54_cur, rx54_curclass, "$!pos", rx54_pos
     store_lex unicode:"$\x{a2}", rx54_cur
-    find_dynamic_lex $P503, "%*RX"
-    set $P101, $P503
+    find_dynamic_lex $P5003, "%*RX"
+    set $P101, $P5003
     repr_bind_attr_int rx54_cur, rx54_curclass, "$!pos", rx54_pos
     store_lex unicode:"$\x{a2}", rx54_cur
     unless_null $P102, fallback143
-    get_hll_global $P506, "GLOBAL"
-    get_who $P505, $P506
-    set $P504, $P505["%RX"]
-    unless_null $P504, fallback144
-    get_hll_global $P508, "GLOBAL"
-    get_who $P507, $P508
-    new $P509, 'Hash'
-    set $P507["%RX"], $P509
-    set $P504, $P509
+    get_hll_global $P5006, "GLOBAL"
+    get_who $P5005, $P5006
+    set $P5004, $P5005["%RX"]
+    unless_null $P5004, fallback144
+    get_hll_global $P5008, "GLOBAL"
+    get_who $P5007, $P5008
+    new $P5009, 'Hash'
+    set $P5007["%RX"], $P5009
+    set $P5004, $P5009
   fallback144:
-    unless_null $P504, vivi_56145
+    unless_null $P5004, vivi_56145
     die "Contextual %*RX not found"
-    box $P510, "Contextual %*RX not found"
-    set $P504, $P510
+    box $P5010, "Contextual %*RX not found"
+    set $P5004, $P5010
   vivi_56145:
-    set $P102, $P504
+    set $P102, $P5004
   fallback143:
     repr_bind_attr_int rx54_cur, rx54_curclass, "$!pos", rx54_pos
     store_lex unicode:"$\x{a2}", rx54_cur
-    $P511 = $P103."MATCH"()
-    set $P104, $P511
-    .const 'Sub' $P512 = 'cuid_161_1346233469.934' 
-    capture_lex $P512
-    $P513 = $P512()
+    $P5011 = $P103."MATCH"()
+    set $P104, $P5011
+    .const 'Sub' $P5012 = 'cuid_161_1346277621.774' 
+    capture_lex $P5012
+    $P5013 = $P5012()
     nqp_rxmark rx54_bstack, rxquantr58_done154, rx54_pos, 0
   rxquantr58_loop153:
     repr_bind_attr_int rx54_cur, rx54_curclass, "$!pos", rx54_pos
@@ -1805,7 +1805,7 @@
     nqp_push_label $P11, alt60_2159
     nqp_push_label $P11, alt60_3160
     nqp_rxmark rx54_bstack, alt60_end156, -1, 0
-    rx54_cur."!alt"(rx54_pos, "alt_nfa__4_1346233470.397", $P11)
+    rx54_cur."!alt"(rx54_pos, "alt_nfa__4_1346277622.196", $P11)
     goto rx54_fail136
   alt60_0157:
     add $I11, rx54_pos, 2
@@ -1886,183 +1886,183 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_10_1346233469.934_caps" :subid("cuid_memo_17_1346233469.935")
+.sub "cuid_10_1346277621.774_caps" :subid("cuid_memo_17_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["termaltseq"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["termaltseq"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_10_1346233469.934_nfa" :subid("cuid_memo_18_1346233469.935")
+.sub "cuid_10_1346277621.774_nfa" :subid("cuid_memo_18_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 1
-    push $P503, $P504
-    box $P505, 0
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 1
-    push $P507, $P508
-    box $P509, 0
-    push $P507, $P509
-    box $P510, 3
-    push $P507, $P510
-    push $P501, $P507
-    new $P511, 'ResizablePMCArray'
-    box $P512, 0
-    push $P511, $P512
-    box $P513, 0
-    push $P511, $P513
-    box $P514, 0
-    push $P511, $P514
-    push $P501, $P511
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 1
+    push $P5003, $P5004
+    box $P5005, 0
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 1
+    push $P5007, $P5008
+    box $P5009, 0
+    push $P5007, $P5009
+    box $P5010, 3
+    push $P5007, $P5010
+    push $P5001, $P5007
+    new $P5011, 'ResizablePMCArray'
+    box $P5012, 0
+    push $P5011, $P5012
+    box $P5013, 0
+    push $P5011, $P5013
+    box $P5014, 0
+    push $P5011, $P5014
+    push $P5001, $P5011
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_10_1346233469.934_alt_nfa__4_1346233470.397" :subid("cuid_memo_19_1346233469.935")
+.sub "cuid_10_1346277621.774_alt_nfa__4_1346277622.196" :subid("cuid_memo_19_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    new $P503, 'ResizablePMCArray'
-    push $P502, $P503
-    new $P504, 'ResizablePMCArray'
-    box $P505, 2
-    push $P504, $P505
-    box $P506, 124
-    push $P504, $P506
-    box $P507, 2
-    push $P504, $P507
-    push $P502, $P504
-    new $P508, 'ResizablePMCArray'
-    box $P509, 2
-    push $P508, $P509
-    box $P510, 124
-    push $P508, $P510
-    box $P511, 0
-    push $P508, $P511
-    push $P502, $P508
-    push $P501, $P502
-    new $P512, 'ResizablePMCArray'
-    new $P513, 'ResizablePMCArray'
-    push $P512, $P513
-    new $P514, 'ResizablePMCArray'
-    box $P515, 2
-    push $P514, $P515
-    box $P516, 124
-    push $P514, $P516
-    box $P517, 0
-    push $P514, $P517
-    push $P512, $P514
-    push $P501, $P512
-    new $P518, 'ResizablePMCArray'
-    new $P519, 'ResizablePMCArray'
-    push $P518, $P519
-    new $P520, 'ResizablePMCArray'
-    box $P521, 2
-    push $P520, $P521
-    box $P522, 38
-    push $P520, $P522
-    box $P523, 2
-    push $P520, $P523
-    push $P518, $P520
-    new $P524, 'ResizablePMCArray'
-    box $P525, 2
-    push $P524, $P525
-    box $P526, 38
-    push $P524, $P526
-    box $P527, 0
-    push $P524, $P527
-    push $P518, $P524
-    push $P501, $P518
-    new $P528, 'ResizablePMCArray'
-    new $P529, 'ResizablePMCArray'
-    push $P528, $P529
-    new $P530, 'ResizablePMCArray'
-    box $P531, 2
-    push $P530, $P531
-    box $P532, 38
-    push $P530, $P532
-    box $P533, 0
-    push $P530, $P533
-    push $P528, $P530
-    push $P501, $P528
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    new $P5003, 'ResizablePMCArray'
+    push $P5002, $P5003
+    new $P5004, 'ResizablePMCArray'
+    box $P5005, 2
+    push $P5004, $P5005
+    box $P5006, 124
+    push $P5004, $P5006
+    box $P5007, 2
+    push $P5004, $P5007
+    push $P5002, $P5004
+    new $P5008, 'ResizablePMCArray'
+    box $P5009, 2
+    push $P5008, $P5009
+    box $P5010, 124
+    push $P5008, $P5010
+    box $P5011, 0
+    push $P5008, $P5011
+    push $P5002, $P5008
+    push $P5001, $P5002
+    new $P5012, 'ResizablePMCArray'
+    new $P5013, 'ResizablePMCArray'
+    push $P5012, $P5013
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 2
+    push $P5014, $P5015
+    box $P5016, 124
+    push $P5014, $P5016
+    box $P5017, 0
+    push $P5014, $P5017
+    push $P5012, $P5014
+    push $P5001, $P5012
+    new $P5018, 'ResizablePMCArray'
+    new $P5019, 'ResizablePMCArray'
+    push $P5018, $P5019
+    new $P5020, 'ResizablePMCArray'
+    box $P5021, 2
+    push $P5020, $P5021
+    box $P5022, 38
+    push $P5020, $P5022
+    box $P5023, 2
+    push $P5020, $P5023
+    push $P5018, $P5020
+    new $P5024, 'ResizablePMCArray'
+    box $P5025, 2
+    push $P5024, $P5025
+    box $P5026, 38
+    push $P5024, $P5026
+    box $P5027, 0
+    push $P5024, $P5027
+    push $P5018, $P5024
+    push $P5001, $P5018
+    new $P5028, 'ResizablePMCArray'
+    new $P5029, 'ResizablePMCArray'
+    push $P5028, $P5029
+    new $P5030, 'ResizablePMCArray'
+    box $P5031, 2
+    push $P5030, $P5031
+    box $P5032, 38
+    push $P5030, $P5032
+    box $P5033, 0
+    push $P5030, $P5033
+    push $P5028, $P5030
+    push $P5001, $P5028
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_161_1346233469.934") :anon :lex :outer("cuid_10_1346233469.934")
+.sub "" :subid("cuid_161_1346277621.774") :anon :lex :outer("cuid_10_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 42
-    .const 'Sub' $P508 = 'cuid_160_1346233469.934' 
-    capture_lex $P508 
-    find_lex $P504, "$OLDRX"
-    set $P501, $P504
-    iter $P503, $P504
-    new $P506, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P506, for_handlers149
-    push_eh $P506
+    .const 'Sub' $P5008 = 'cuid_160_1346277621.774' 
+    capture_lex $P5008 
+    find_lex $P5004, "$OLDRX"
+    set $P5001, $P5004
+    iter $P5003, $P5004
+    new $P5006, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5006, for_handlers149
+    push_eh $P5006
   for_next150:
-    unless $P503, for_done152
-    shift $P507, $P503
+    unless $P5003, for_done152
+    shift $P5007, $P5003
   for_redo151:
-    .const 'Sub' $P505 = 'cuid_160_1346233469.934' 
-    capture_lex $P505
-    $P501 = $P505($P507)
+    .const 'Sub' $P5005 = 'cuid_160_1346277621.774' 
+    capture_lex $P5005
+    $P5001 = $P5005($P5007)
     goto for_next150
   for_handlers149:
-    .get_results ($P506)
-    pop_upto_eh $P506
-    getattribute $P506, $P506, 'type'
-    eq $P506, .CONTROL_LOOP_NEXT, for_next150
-    eq $P506, .CONTROL_LOOP_REDO, for_redo151
+    .get_results ($P5006)
+    pop_upto_eh $P5006
+    getattribute $P5006, $P5006, 'type'
+    eq $P5006, .CONTROL_LOOP_NEXT, for_next150
+    eq $P5006, .CONTROL_LOOP_REDO, for_redo151
   for_done152:
     pop_eh 
-    .return ($P501) 
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_160_1346233469.934") :anon :lex :outer("cuid_161_1346233469.934")
+.sub "" :subid("cuid_160_1346277621.774") :anon :lex :outer("cuid_161_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 43
     .param pmc _lex_param_0 
     .lex "$_", _lex_param_0 
-    find_dynamic_lex $P501, "%*RX"
-    unless_null $P501, fallback146
-    get_hll_global $P504, "GLOBAL"
-    get_who $P503, $P504
-    set $P502, $P503["%RX"]
-    unless_null $P502, fallback147
-    get_hll_global $P506, "GLOBAL"
-    get_who $P505, $P506
-    new $P507, 'Hash'
-    set $P505["%RX"], $P507
-    set $P502, $P507
+    find_dynamic_lex $P5001, "%*RX"
+    unless_null $P5001, fallback146
+    get_hll_global $P5004, "GLOBAL"
+    get_who $P5003, $P5004
+    set $P5002, $P5003["%RX"]
+    unless_null $P5002, fallback147
+    get_hll_global $P5006, "GLOBAL"
+    get_who $P5005, $P5006
+    new $P5007, 'Hash'
+    set $P5005["%RX"], $P5007
+    set $P5002, $P5007
   fallback147:
-    unless_null $P502, vivi_57148
+    unless_null $P5002, vivi_57148
     die "Contextual %*RX not found"
-    box $P508, "Contextual %*RX not found"
-    set $P502, $P508
+    box $P5008, "Contextual %*RX not found"
+    set $P5002, $P5008
   vivi_57148:
-    set $P501, $P502
+    set $P5001, $P5002
   fallback146:
-    $P509 = _lex_param_0."key"()
-    set $S501, $P509
-    $P510 = _lex_param_0."value"()
-    set $P501[$S501], $P510
-    .return ($P510) 
+    $P5009 = _lex_param_0."key"()
+    set $S5001, $P5009
+    $P5010 = _lex_param_0."value"()
+    set $P5001[$S5001], $P5010
+    .return ($P5010) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "termaltseq" :subid("cuid_11_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "termaltseq" :subid("cuid_11_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 49
     .param pmc _lex_param_0 
@@ -2171,63 +2171,63 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_11_1346233469.934_caps" :subid("cuid_memo_20_1346233469.935")
+.sub "cuid_11_1346277621.774_caps" :subid("cuid_memo_20_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 2
-    set $P501["termconjseq"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 2
+    set $P5001["termconjseq"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_11_1346233469.934_nfa" :subid("cuid_memo_21_1346233469.935")
+.sub "cuid_11_1346277621.774_nfa" :subid("cuid_memo_21_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 8
-    push $P503, $P504
-    box $P505, "termconjseq"
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 2
-    push $P507, $P508
-    box $P509, 124
-    push $P507, $P509
-    box $P510, 3
-    push $P507, $P510
-    box $P511, 1
-    push $P507, $P511
-    box $P512, 0
-    push $P507, $P512
-    box $P513, 0
-    push $P507, $P513
-    push $P501, $P507
-    new $P514, 'ResizablePMCArray'
-    box $P515, 2
-    push $P514, $P515
-    box $P516, 124
-    push $P514, $P516
-    box $P517, 4
-    push $P514, $P517
-    push $P501, $P514
-    new $P518, 'ResizablePMCArray'
-    box $P519, 0
-    push $P518, $P519
-    box $P520, 0
-    push $P518, $P520
-    box $P521, 0
-    push $P518, $P521
-    push $P501, $P518
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 8
+    push $P5003, $P5004
+    box $P5005, "termconjseq"
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 2
+    push $P5007, $P5008
+    box $P5009, 124
+    push $P5007, $P5009
+    box $P5010, 3
+    push $P5007, $P5010
+    box $P5011, 1
+    push $P5007, $P5011
+    box $P5012, 0
+    push $P5007, $P5012
+    box $P5013, 0
+    push $P5007, $P5013
+    push $P5001, $P5007
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 2
+    push $P5014, $P5015
+    box $P5016, 124
+    push $P5014, $P5016
+    box $P5017, 4
+    push $P5014, $P5017
+    push $P5001, $P5014
+    new $P5018, 'ResizablePMCArray'
+    box $P5019, 0
+    push $P5018, $P5019
+    box $P5020, 0
+    push $P5018, $P5020
+    box $P5021, 0
+    push $P5018, $P5021
+    push $P5001, $P5018
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "termconjseq" :subid("cuid_12_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "termconjseq" :subid("cuid_12_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 54
     .param pmc _lex_param_0 
@@ -2336,63 +2336,63 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_12_1346233469.934_caps" :subid("cuid_memo_22_1346233469.935")
+.sub "cuid_12_1346277621.774_caps" :subid("cuid_memo_22_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 2
-    set $P501["termalt"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 2
+    set $P5001["termalt"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_12_1346233469.934_nfa" :subid("cuid_memo_23_1346233469.935")
+.sub "cuid_12_1346277621.774_nfa" :subid("cuid_memo_23_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 8
-    push $P503, $P504
-    box $P505, "termalt"
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 2
-    push $P507, $P508
-    box $P509, 38
-    push $P507, $P509
-    box $P510, 3
-    push $P507, $P510
-    box $P511, 1
-    push $P507, $P511
-    box $P512, 0
-    push $P507, $P512
-    box $P513, 0
-    push $P507, $P513
-    push $P501, $P507
-    new $P514, 'ResizablePMCArray'
-    box $P515, 2
-    push $P514, $P515
-    box $P516, 38
-    push $P514, $P516
-    box $P517, 4
-    push $P514, $P517
-    push $P501, $P514
-    new $P518, 'ResizablePMCArray'
-    box $P519, 0
-    push $P518, $P519
-    box $P520, 0
-    push $P518, $P520
-    box $P521, 0
-    push $P518, $P521
-    push $P501, $P518
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 8
+    push $P5003, $P5004
+    box $P5005, "termalt"
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 2
+    push $P5007, $P5008
+    box $P5009, 38
+    push $P5007, $P5009
+    box $P5010, 3
+    push $P5007, $P5010
+    box $P5011, 1
+    push $P5007, $P5011
+    box $P5012, 0
+    push $P5007, $P5012
+    box $P5013, 0
+    push $P5007, $P5013
+    push $P5001, $P5007
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 2
+    push $P5014, $P5015
+    box $P5016, 38
+    push $P5014, $P5016
+    box $P5017, 4
+    push $P5014, $P5017
+    push $P5001, $P5014
+    new $P5018, 'ResizablePMCArray'
+    box $P5019, 0
+    push $P5018, $P5019
+    box $P5020, 0
+    push $P5018, $P5020
+    box $P5021, 0
+    push $P5018, $P5021
+    push $P5001, $P5018
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "termalt" :subid("cuid_13_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "termalt" :subid("cuid_13_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 59
     .param pmc _lex_param_0 
@@ -2505,63 +2505,63 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_13_1346233469.934_caps" :subid("cuid_memo_24_1346233469.935")
+.sub "cuid_13_1346277621.774_caps" :subid("cuid_memo_24_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 2
-    set $P501["termconj"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 2
+    set $P5001["termconj"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_13_1346233469.934_nfa" :subid("cuid_memo_25_1346233469.935")
+.sub "cuid_13_1346277621.774_nfa" :subid("cuid_memo_25_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 8
-    push $P503, $P504
-    box $P505, "termconj"
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 2
-    push $P507, $P508
-    box $P509, 124
-    push $P507, $P509
-    box $P510, 3
-    push $P507, $P510
-    box $P511, 1
-    push $P507, $P511
-    box $P512, 0
-    push $P507, $P512
-    box $P513, 0
-    push $P507, $P513
-    push $P501, $P507
-    new $P514, 'ResizablePMCArray'
-    box $P515, 7
-    push $P514, $P515
-    box $P516, "|"
-    push $P514, $P516
-    box $P517, 4
-    push $P514, $P517
-    push $P501, $P514
-    new $P518, 'ResizablePMCArray'
-    box $P519, 0
-    push $P518, $P519
-    box $P520, 0
-    push $P518, $P520
-    box $P521, 0
-    push $P518, $P521
-    push $P501, $P518
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 8
+    push $P5003, $P5004
+    box $P5005, "termconj"
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 2
+    push $P5007, $P5008
+    box $P5009, 124
+    push $P5007, $P5009
+    box $P5010, 3
+    push $P5007, $P5010
+    box $P5011, 1
+    push $P5007, $P5011
+    box $P5012, 0
+    push $P5007, $P5012
+    box $P5013, 0
+    push $P5007, $P5013
+    push $P5001, $P5007
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 7
+    push $P5014, $P5015
+    box $P5016, "|"
+    push $P5014, $P5016
+    box $P5017, 4
+    push $P5014, $P5017
+    push $P5001, $P5014
+    new $P5018, 'ResizablePMCArray'
+    box $P5019, 0
+    push $P5018, $P5019
+    box $P5020, 0
+    push $P5018, $P5020
+    box $P5021, 0
+    push $P5018, $P5021
+    push $P5001, $P5018
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "termconj" :subid("cuid_14_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "termconj" :subid("cuid_14_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 64
     .param pmc _lex_param_0 
@@ -2674,70 +2674,70 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_14_1346233469.934_caps" :subid("cuid_memo_26_1346233469.935")
+.sub "cuid_14_1346277621.774_caps" :subid("cuid_memo_26_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 2
-    set $P501["termish"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 2
+    set $P5001["termish"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_14_1346233469.934_nfa" :subid("cuid_memo_27_1346233469.935")
+.sub "cuid_14_1346277621.774_nfa" :subid("cuid_memo_27_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 8
-    push $P503, $P504
-    box $P505, "termish"
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 2
-    push $P507, $P508
-    box $P509, 38
-    push $P507, $P509
-    box $P510, 3
-    push $P507, $P510
-    box $P511, 1
-    push $P507, $P511
-    box $P512, 0
-    push $P507, $P512
-    box $P513, 0
-    push $P507, $P513
-    push $P501, $P507
-    new $P514, 'ResizablePMCArray'
-    box $P515, 7
-    push $P514, $P515
-    box $P516, "&"
-    push $P514, $P516
-    box $P517, 4
-    push $P514, $P517
-    push $P501, $P514
-    new $P518, 'ResizablePMCArray'
-    box $P519, 0
-    push $P518, $P519
-    box $P520, 0
-    push $P518, $P520
-    box $P521, 0
-    push $P518, $P521
-    push $P501, $P518
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 8
+    push $P5003, $P5004
+    box $P5005, "termish"
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 2
+    push $P5007, $P5008
+    box $P5009, 38
+    push $P5007, $P5009
+    box $P5010, 3
+    push $P5007, $P5010
+    box $P5011, 1
+    push $P5007, $P5011
+    box $P5012, 0
+    push $P5007, $P5012
+    box $P5013, 0
+    push $P5007, $P5013
+    push $P5001, $P5007
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 7
+    push $P5014, $P5015
+    box $P5016, "&"
+    push $P5014, $P5016
+    box $P5017, 4
+    push $P5014, $P5017
+    push $P5001, $P5014
+    new $P5018, 'ResizablePMCArray'
+    box $P5019, 0
+    push $P5018, $P5019
+    box $P5020, 0
+    push $P5018, $P5020
+    box $P5021, 0
+    push $P5018, $P5021
+    push $P5001, $P5018
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "termish" :subid("cuid_16_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "termish" :subid("cuid_16_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 69
     .param pmc _lex_param_0 
-    .const 'Sub' $P505 = 'cuid_15_1346233469.934' 
-    capture_lex $P505 
-    .const 'Sub' $P505 = 'cuid_162_1346233469.934' 
-    capture_lex $P505 
+    .const 'Sub' $P5005 = 'cuid_15_1346277621.774' 
+    capture_lex $P5005 
+    .const 'Sub' $P5005 = 'cuid_162_1346277621.774' 
+    capture_lex $P5005 
     .lex utf8:"$\x{a2}", $P101 
     .lex "$/", $P102 
     .lex "self", _lex_param_0 
@@ -2800,10 +2800,10 @@
   rxquantr93_done247:
     goto alt92_end244
   alt92_1250:
-    .const 'Sub' $P501 = 'cuid_15_1346233469.934' 
-    capture_lex $P501
+    .const 'Sub' $P5001 = 'cuid_15_1346277621.774' 
+    capture_lex $P5001
     repr_bind_attr_int rx90_cur, rx90_curclass, "$!pos", rx90_pos
-    $P11 = rx90_cur.$P501()
+    $P11 = rx90_cur.$P5001()
     repr_get_attr_int $I11, $P11, rx90_curclass, "$!pos"
     lt $I11, 0, rx90_fail237
     nqp_rxmark rx90_bstack, rxsubrule97_pass261, -1, 0
@@ -2812,11 +2812,11 @@
     repr_get_attr_int rx90_pos, $P11, rx90_curclass, "$!pos"
     repr_bind_attr_int rx90_cur, rx90_curclass, "$!pos", rx90_pos
     store_lex unicode:"$\x{a2}", rx90_cur
-    $P502 = $P101."MATCH"()
-    set $P102, $P502
-    .const 'Sub' $P503 = 'cuid_162_1346233469.934' 
-    capture_lex $P503
-    $P504 = $P503()
+    $P5002 = $P101."MATCH"()
+    set $P102, $P5002
+    .const 'Sub' $P5003 = 'cuid_162_1346277621.774' 
+    capture_lex $P5003
+    $P5004 = $P5003()
   alt92_end244:
     rx90_cur."!cursor_pass"(rx90_pos, "termish", 'backtrack'=>1)
     .return (rx90_cur)
@@ -2852,18 +2852,18 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_16_1346233469.934_caps" :subid("cuid_memo_28_1346233469.935")
+.sub "cuid_16_1346277621.774_caps" :subid("cuid_memo_28_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 2
-    set $P501["noun"], $P502
-    box $P503, 1
-    set $P501["0"], $P503
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 2
+    set $P5001["noun"], $P5002
+    box $P5003, 1
+    set $P5001["0"], $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_15_1346233469.934") :anon :lex :outer("cuid_16_1346233469.934")
+.sub "" :subid("cuid_15_1346277621.774") :anon :lex :outer("cuid_16_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
     .param pmc self 
     .lex utf8:"$\x{a2}", $P101 
@@ -2929,62 +2929,62 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_15_1346233469.934_caps" :subid("cuid_memo_29_1346233469.935")
+.sub "cuid_15_1346277621.774_caps" :subid("cuid_memo_29_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_15_1346233469.934_nfa" :subid("cuid_memo_30_1346233469.935")
+.sub "cuid_15_1346277621.774_nfa" :subid("cuid_memo_30_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 5
-    push $P503, $P504
-    box $P505, 8192
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 5
+    push $P5003, $P5004
+    box $P5005, 8192
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_162_1346233469.934") :anon :lex :outer("cuid_16_1346233469.934")
+.sub "" :subid("cuid_162_1346277621.774") :anon :lex :outer("cuid_16_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 71
     .lex "$char", $P101 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    find_lex $P503, "$/"
-    set $P502, $P503[0]
-    unless_null $P502, fallback262
-    nqp_get_sc_object $P504, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P504
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    find_lex $P5003, "$/"
+    set $P5002, $P5003[0]
+    unless_null $P5002, fallback262
+    nqp_get_sc_object $P5004, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5004
   fallback262:
-    set $S501, $P502
-    box $P505, $S501
-    set $P101, $P505
+    set $S5001, $P5002
+    box $P5005, $S5001
+    set $P101, $P5005
 .annotate 'line', 73
-    find_lex $P506, "$/"
-    $P507 = $P506."CURSOR"()
-    set $S504, $P101
-    concat $S503, "Unrecognized regex metacharacter ", $S504
-    concat $S502, $S503, " (must be quoted to match literally)"
-    $P508 = $P507."panic"($S502)
-    .return ($P508) 
+    find_lex $P5006, "$/"
+    $P5007 = $P5006."CURSOR"()
+    set $S5004, $P101
+    concat $S5003, "Unrecognized regex metacharacter ", $S5004
+    concat $S5002, $S5003, " (must be quoted to match literally)"
+    $P5008 = $P5007."panic"($S5002)
+    .return ($P5008) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "quantified_atom" :subid("cuid_18_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "quantified_atom" :subid("cuid_18_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 77
     .param pmc _lex_param_0 
-    .const 'Sub' $P502 = 'cuid_17_1346233469.934' 
-    capture_lex $P502 
+    .const 'Sub' $P5002 = 'cuid_17_1346277621.774' 
+    capture_lex $P5002 
     .lex utf8:"$\x{a2}", $P101 
     .lex "$/", $P102 
     .lex "self", _lex_param_0 
@@ -3033,7 +3033,7 @@
     nqp_push_label $P11, alt103_0278
     nqp_push_label $P11, alt103_1280
     nqp_rxmark rx98_bstack, alt103_end277, -1, 0
-    rx98_cur."!alt"(rx98_pos, "alt_nfa__5_1346233470.636", $P11)
+    rx98_cur."!alt"(rx98_pos, "alt_nfa__5_1346277622.418", $P11)
     goto rx98_fail266
   alt103_0278:
     repr_bind_attr_int rx98_cur, rx98_curclass, "$!pos", rx98_pos
@@ -3046,10 +3046,10 @@
     repr_get_attr_int rx98_pos, $P11, rx98_curclass, "$!pos"
     goto alt103_end277
   alt103_1280:
-    .const 'Sub' $P501 = 'cuid_17_1346233469.934' 
-    capture_lex $P501
+    .const 'Sub' $P5001 = 'cuid_17_1346277621.774' 
+    capture_lex $P5001
     repr_bind_attr_int rx98_cur, rx98_curclass, "$!pos", rx98_pos
-    $P11 = rx98_cur."before"($P501)
+    $P11 = rx98_cur."before"($P5001)
     repr_get_attr_int $I11, $P11, rx98_curclass, "$!pos"
     lt $I11, 0, rx98_fail266
     repr_bind_attr_int rx98_cur, rx98_curclass, "$!pos", rx98_pos
@@ -3130,136 +3130,136 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_18_1346233469.934_caps" :subid("cuid_memo_31_1346233469.935")
+.sub "cuid_18_1346277621.774_caps" :subid("cuid_memo_31_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["atom"], $P502
-    box $P503, 2
-    set $P501["quantifier"], $P503
-    box $P504, 2
-    set $P501["backmod"], $P504
-    box $P505, 2
-    set $P501["separator"], $P505
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["atom"], $P5002
+    box $P5003, 2
+    set $P5001["quantifier"], $P5003
+    box $P5004, 2
+    set $P5001["backmod"], $P5004
+    box $P5005, 2
+    set $P5001["separator"], $P5005
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_18_1346233469.934_nfa" :subid("cuid_memo_32_1346233469.935")
+.sub "cuid_18_1346277621.774_nfa" :subid("cuid_memo_32_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 8
-    push $P503, $P504
-    box $P505, "atom"
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 8
-    push $P507, $P508
-    box $P509, "ws"
-    push $P507, $P509
-    box $P510, 3
-    push $P507, $P510
-    box $P511, 1
-    push $P507, $P511
-    box $P512, 0
-    push $P507, $P512
-    box $P513, 0
-    push $P507, $P513
-    push $P501, $P507
-    new $P514, 'ResizablePMCArray'
-    box $P515, 8
-    push $P514, $P515
-    box $P516, "quantifier"
-    push $P514, $P516
-    box $P517, 4
-    push $P514, $P517
-    box $P518, 2
-    push $P514, $P518
-    box $P519, 58
-    push $P514, $P519
-    box $P520, 5
-    push $P514, $P520
-    push $P501, $P514
-    new $P521, 'ResizablePMCArray'
-    box $P522, 8
-    push $P521, $P522
-    box $P523, "ws"
-    push $P521, $P523
-    box $P524, 6
-    push $P521, $P524
-    box $P525, 1
-    push $P521, $P525
-    box $P526, 0
-    push $P521, $P526
-    box $P527, 0
-    push $P521, $P527
-    push $P501, $P521
-    new $P528, 'ResizablePMCArray'
-    box $P529, 0
-    push $P528, $P529
-    box $P530, 0
-    push $P528, $P530
-    box $P531, 0
-    push $P528, $P531
-    push $P501, $P528
-    new $P532, 'ResizablePMCArray'
-    box $P533, 8
-    push $P532, $P533
-    box $P534, "separator"
-    push $P532, $P534
-    box $P535, 0
-    push $P532, $P535
-    push $P501, $P532
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 8
+    push $P5003, $P5004
+    box $P5005, "atom"
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 8
+    push $P5007, $P5008
+    box $P5009, "ws"
+    push $P5007, $P5009
+    box $P5010, 3
+    push $P5007, $P5010
+    box $P5011, 1
+    push $P5007, $P5011
+    box $P5012, 0
+    push $P5007, $P5012
+    box $P5013, 0
+    push $P5007, $P5013
+    push $P5001, $P5007
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 8
+    push $P5014, $P5015
+    box $P5016, "quantifier"
+    push $P5014, $P5016
+    box $P5017, 4
+    push $P5014, $P5017
+    box $P5018, 2
+    push $P5014, $P5018
+    box $P5019, 58
+    push $P5014, $P5019
+    box $P5020, 5
+    push $P5014, $P5020
+    push $P5001, $P5014
+    new $P5021, 'ResizablePMCArray'
+    box $P5022, 8
+    push $P5021, $P5022
+    box $P5023, "ws"
+    push $P5021, $P5023
+    box $P5024, 6
+    push $P5021, $P5024
+    box $P5025, 1
+    push $P5021, $P5025
+    box $P5026, 0
+    push $P5021, $P5026
+    box $P5027, 0
+    push $P5021, $P5027
+    push $P5001, $P5021
+    new $P5028, 'ResizablePMCArray'
+    box $P5029, 0
+    push $P5028, $P5029
+    box $P5030, 0
+    push $P5028, $P5030
+    box $P5031, 0
+    push $P5028, $P5031
+    push $P5001, $P5028
+    new $P5032, 'ResizablePMCArray'
+    box $P5033, 8
+    push $P5032, $P5033
+    box $P5034, "separator"
+    push $P5032, $P5034
+    box $P5035, 0
+    push $P5032, $P5035
+    push $P5001, $P5032
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_18_1346233469.934_alt_nfa__5_1346233470.636" :subid("cuid_memo_33_1346233469.935")
+.sub "cuid_18_1346277621.774_alt_nfa__5_1346277622.418" :subid("cuid_memo_33_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    new $P503, 'ResizablePMCArray'
-    push $P502, $P503
-    new $P504, 'ResizablePMCArray'
-    box $P505, 8
-    push $P504, $P505
-    box $P506, "quantifier"
-    push $P504, $P506
-    box $P507, 0
-    push $P504, $P507
-    push $P502, $P504
-    push $P501, $P502
-    new $P508, 'ResizablePMCArray'
-    new $P509, 'ResizablePMCArray'
-    push $P508, $P509
-    new $P510, 'ResizablePMCArray'
-    box $P511, 2
-    push $P510, $P511
-    box $P512, 58
-    push $P510, $P512
-    box $P513, 2
-    push $P510, $P513
-    push $P508, $P510
-    new $P514, 'ResizablePMCArray'
-    box $P515, 0
-    push $P514, $P515
-    box $P516, 0
-    push $P514, $P516
-    box $P517, 0
-    push $P514, $P517
-    push $P508, $P514
-    push $P501, $P508
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    new $P5003, 'ResizablePMCArray'
+    push $P5002, $P5003
+    new $P5004, 'ResizablePMCArray'
+    box $P5005, 8
+    push $P5004, $P5005
+    box $P5006, "quantifier"
+    push $P5004, $P5006
+    box $P5007, 0
+    push $P5004, $P5007
+    push $P5002, $P5004
+    push $P5001, $P5002
+    new $P5008, 'ResizablePMCArray'
+    new $P5009, 'ResizablePMCArray'
+    push $P5008, $P5009
+    new $P5010, 'ResizablePMCArray'
+    box $P5011, 2
+    push $P5010, $P5011
+    box $P5012, 58
+    push $P5010, $P5012
+    box $P5013, 2
+    push $P5010, $P5013
+    push $P5008, $P5010
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 0
+    push $P5014, $P5015
+    box $P5016, 0
+    push $P5014, $P5016
+    box $P5017, 0
+    push $P5014, $P5017
+    push $P5008, $P5014
+    push $P5001, $P5008
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_17_1346233469.934") :anon :lex :outer("cuid_18_1346233469.934")
+.sub "" :subid("cuid_17_1346277621.774") :anon :lex :outer("cuid_18_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
     .param pmc self 
     .lex utf8:"$\x{a2}", $P101 
@@ -3326,31 +3326,31 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_17_1346233469.934_caps" :subid("cuid_memo_34_1346233469.935")
+.sub "cuid_17_1346277621.774_caps" :subid("cuid_memo_34_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_17_1346233469.934_nfa" :subid("cuid_memo_35_1346233469.935")
+.sub "cuid_17_1346277621.774_nfa" :subid("cuid_memo_35_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 58
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 58
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "separator" :subid("cuid_19_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "separator" :subid("cuid_19_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 85
     .param pmc _lex_param_0 
@@ -3482,78 +3482,78 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_19_1346233469.934_caps" :subid("cuid_memo_36_1346233469.935")
+.sub "cuid_19_1346277621.774_caps" :subid("cuid_memo_36_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["septype"], $P502
-    box $P503, 2
-    set $P501["normspace"], $P503
-    box $P504, 0
-    set $P501["quantified_atom"], $P504
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["septype"], $P5002
+    box $P5003, 2
+    set $P5001["normspace"], $P5003
+    box $P5004, 0
+    set $P5001["quantified_atom"], $P5004
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_19_1346233469.934_nfa" :subid("cuid_memo_37_1346233469.935")
+.sub "cuid_19_1346277621.774_nfa" :subid("cuid_memo_37_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 37
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 2
-    push $P507, $P508
-    box $P509, 37
-    push $P507, $P509
-    box $P510, 3
-    push $P507, $P510
-    box $P511, 1
-    push $P507, $P511
-    box $P512, 0
-    push $P507, $P512
-    box $P513, 3
-    push $P507, $P513
-    push $P501, $P507
-    new $P514, 'ResizablePMCArray'
-    box $P515, 8
-    push $P514, $P515
-    box $P516, "normspace"
-    push $P514, $P516
-    box $P517, 4
-    push $P514, $P517
-    box $P518, 1
-    push $P514, $P518
-    box $P519, 0
-    push $P514, $P519
-    box $P520, 4
-    push $P514, $P520
-    push $P501, $P514
-    new $P521, 'ResizablePMCArray'
-    box $P522, 8
-    push $P521, $P522
-    box $P523, "quantified_atom"
-    push $P521, $P523
-    box $P524, 0
-    push $P521, $P524
-    push $P501, $P521
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 37
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 2
+    push $P5007, $P5008
+    box $P5009, 37
+    push $P5007, $P5009
+    box $P5010, 3
+    push $P5007, $P5010
+    box $P5011, 1
+    push $P5007, $P5011
+    box $P5012, 0
+    push $P5007, $P5012
+    box $P5013, 3
+    push $P5007, $P5013
+    push $P5001, $P5007
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 8
+    push $P5014, $P5015
+    box $P5016, "normspace"
+    push $P5014, $P5016
+    box $P5017, 4
+    push $P5014, $P5017
+    box $P5018, 1
+    push $P5014, $P5018
+    box $P5019, 0
+    push $P5014, $P5019
+    box $P5020, 4
+    push $P5014, $P5020
+    push $P5001, $P5014
+    new $P5021, 'ResizablePMCArray'
+    box $P5022, 8
+    push $P5021, $P5022
+    box $P5023, "quantified_atom"
+    push $P5021, $P5023
+    box $P5024, 0
+    push $P5021, $P5024
+    push $P5001, $P5021
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "atom" :subid("cuid_21_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "atom" :subid("cuid_21_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 89
     .param pmc _lex_param_0 
-    .const 'Sub' $P502 = 'cuid_20_1346233469.934' 
-    capture_lex $P502 
+    .const 'Sub' $P5002 = 'cuid_20_1346277621.774' 
+    capture_lex $P5002 
     .lex utf8:"$\x{a2}", $P101 
     .lex "$/", $P102 
     .lex "self", _lex_param_0 
@@ -3587,7 +3587,7 @@
     nqp_push_label $P11, alt120_0326
     nqp_push_label $P11, alt120_1341
     nqp_rxmark rx118_bstack, alt120_end325, -1, 0
-    rx118_cur."!alt"(rx118_pos, "alt_nfa__6_1346233470.675", $P11)
+    rx118_cur."!alt"(rx118_pos, "alt_nfa__6_1346277622.454", $P11)
     goto rx118_fail318
   alt120_0326:
     ge rx118_pos, rx118_eos, rx118_fail318
@@ -3604,10 +3604,10 @@
     nqp_rxmark rx118_bstack, rxquantg122_done330, rx118_pos, rx118_rep
     goto rxquantg122_loop329
   rxquantg122_done330:
-    .const 'Sub' $P501 = 'cuid_20_1346233469.934' 
-    capture_lex $P501
+    .const 'Sub' $P5001 = 'cuid_20_1346277621.774' 
+    capture_lex $P5001
     repr_bind_attr_int rx118_cur, rx118_curclass, "$!pos", rx118_pos
-    $P11 = rx118_cur."before"($P501)
+    $P11 = rx118_cur."before"($P5001)
     repr_get_attr_int $I11, $P11, rx118_curclass, "$!pos"
     lt $I11, 0, rx118_fail318
     nqp_rxpeek $I19, rx118_bstack, rxquantr121_done328
@@ -3664,174 +3664,174 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_21_1346233469.934_caps" :subid("cuid_memo_38_1346233469.935")
+.sub "cuid_21_1346277621.774_caps" :subid("cuid_memo_38_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["metachar"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["metachar"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_21_1346233469.934_nfa" :subid("cuid_memo_39_1346233469.935")
+.sub "cuid_21_1346277621.774_nfa" :subid("cuid_memo_39_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 4
-    push $P503, $P504
-    box $P505, 8192
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    box $P507, 8
-    push $P503, $P507
-    box $P508, "metachar"
-    push $P503, $P508
-    box $P509, 0
-    push $P503, $P509
-    push $P501, $P503
-    new $P510, 'ResizablePMCArray'
-    box $P511, 1
-    push $P510, $P511
-    box $P512, 0
-    push $P510, $P512
-    box $P513, 3
-    push $P510, $P513
-    box $P514, 1
-    push $P510, $P514
-    box $P515, 0
-    push $P510, $P515
-    box $P516, 0
-    push $P510, $P516
-    push $P501, $P510
-    new $P517, 'ResizablePMCArray'
-    box $P518, 4
-    push $P517, $P518
-    box $P519, 8192
-    push $P517, $P519
-    box $P520, 4
-    push $P517, $P520
-    push $P501, $P517
-    new $P521, 'ResizablePMCArray'
-    box $P522, 1
-    push $P521, $P522
-    box $P523, 0
-    push $P521, $P523
-    box $P524, 3
-    push $P521, $P524
-    box $P525, 1
-    push $P521, $P525
-    box $P526, 0
-    push $P521, $P526
-    box $P527, 5
-    push $P521, $P527
-    box $P528, 4
-    push $P521, $P528
-    box $P529, 8192
-    push $P521, $P529
-    box $P530, 6
-    push $P521, $P530
-    push $P501, $P521
-    new $P531, 'ResizablePMCArray'
-    push $P501, $P531
-    new $P532, 'ResizablePMCArray'
-    box $P533, 0
-    push $P532, $P533
-    box $P534, 0
-    push $P532, $P534
-    box $P535, 0
-    push $P532, $P535
-    push $P501, $P532
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 4
+    push $P5003, $P5004
+    box $P5005, 8192
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    box $P5007, 8
+    push $P5003, $P5007
+    box $P5008, "metachar"
+    push $P5003, $P5008
+    box $P5009, 0
+    push $P5003, $P5009
+    push $P5001, $P5003
+    new $P5010, 'ResizablePMCArray'
+    box $P5011, 1
+    push $P5010, $P5011
+    box $P5012, 0
+    push $P5010, $P5012
+    box $P5013, 3
+    push $P5010, $P5013
+    box $P5014, 1
+    push $P5010, $P5014
+    box $P5015, 0
+    push $P5010, $P5015
+    box $P5016, 0
+    push $P5010, $P5016
+    push $P5001, $P5010
+    new $P5017, 'ResizablePMCArray'
+    box $P5018, 4
+    push $P5017, $P5018
+    box $P5019, 8192
+    push $P5017, $P5019
+    box $P5020, 4
+    push $P5017, $P5020
+    push $P5001, $P5017
+    new $P5021, 'ResizablePMCArray'
+    box $P5022, 1
+    push $P5021, $P5022
+    box $P5023, 0
+    push $P5021, $P5023
+    box $P5024, 3
+    push $P5021, $P5024
+    box $P5025, 1
+    push $P5021, $P5025
+    box $P5026, 0
+    push $P5021, $P5026
+    box $P5027, 5
+    push $P5021, $P5027
+    box $P5028, 4
+    push $P5021, $P5028
+    box $P5029, 8192
+    push $P5021, $P5029
+    box $P5030, 6
+    push $P5021, $P5030
+    push $P5001, $P5021
+    new $P5031, 'ResizablePMCArray'
+    push $P5001, $P5031
+    new $P5032, 'ResizablePMCArray'
+    box $P5033, 0
+    push $P5032, $P5033
+    box $P5034, 0
+    push $P5032, $P5034
+    box $P5035, 0
+    push $P5032, $P5035
+    push $P5001, $P5032
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_21_1346233469.934_alt_nfa__6_1346233470.675" :subid("cuid_memo_40_1346233469.935")
+.sub "cuid_21_1346277621.774_alt_nfa__6_1346277622.454" :subid("cuid_memo_40_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    new $P503, 'ResizablePMCArray'
-    push $P502, $P503
-    new $P504, 'ResizablePMCArray'
-    box $P505, 4
-    push $P504, $P505
-    box $P506, 8192
-    push $P504, $P506
-    box $P507, 2
-    push $P504, $P507
-    push $P502, $P504
-    new $P508, 'ResizablePMCArray'
-    box $P509, 1
-    push $P508, $P509
-    box $P510, 0
-    push $P508, $P510
-    box $P511, 3
-    push $P508, $P511
-    box $P512, 1
-    push $P508, $P512
-    box $P513, 0
-    push $P508, $P513
-    box $P514, 0
-    push $P508, $P514
-    push $P502, $P508
-    new $P515, 'ResizablePMCArray'
-    box $P516, 4
-    push $P515, $P516
-    box $P517, 8192
-    push $P515, $P517
-    box $P518, 4
-    push $P515, $P518
-    push $P502, $P515
-    new $P519, 'ResizablePMCArray'
-    box $P520, 1
-    push $P519, $P520
-    box $P521, 0
-    push $P519, $P521
-    box $P522, 3
-    push $P519, $P522
-    box $P523, 1
-    push $P519, $P523
-    box $P524, 0
-    push $P519, $P524
-    box $P525, 5
-    push $P519, $P525
-    box $P526, 4
-    push $P519, $P526
-    box $P527, 8192
-    push $P519, $P527
-    box $P528, 6
-    push $P519, $P528
-    push $P502, $P519
-    new $P529, 'ResizablePMCArray'
-    push $P502, $P529
-    new $P530, 'ResizablePMCArray'
-    box $P531, 0
-    push $P530, $P531
-    box $P532, 0
-    push $P530, $P532
-    box $P533, 0
-    push $P530, $P533
-    push $P502, $P530
-    push $P501, $P502
-    new $P534, 'ResizablePMCArray'
-    new $P535, 'ResizablePMCArray'
-    push $P534, $P535
-    new $P536, 'ResizablePMCArray'
-    box $P537, 8
-    push $P536, $P537
-    box $P538, "metachar"
-    push $P536, $P538
-    box $P539, 0
-    push $P536, $P539
-    push $P534, $P536
-    push $P501, $P534
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    new $P5003, 'ResizablePMCArray'
+    push $P5002, $P5003
+    new $P5004, 'ResizablePMCArray'
+    box $P5005, 4
+    push $P5004, $P5005
+    box $P5006, 8192
+    push $P5004, $P5006
+    box $P5007, 2
+    push $P5004, $P5007
+    push $P5002, $P5004
+    new $P5008, 'ResizablePMCArray'
+    box $P5009, 1
+    push $P5008, $P5009
+    box $P5010, 0
+    push $P5008, $P5010
+    box $P5011, 3
+    push $P5008, $P5011
+    box $P5012, 1
+    push $P5008, $P5012
+    box $P5013, 0
+    push $P5008, $P5013
+    box $P5014, 0
+    push $P5008, $P5014
+    push $P5002, $P5008
+    new $P5015, 'ResizablePMCArray'
+    box $P5016, 4
+    push $P5015, $P5016
+    box $P5017, 8192
+    push $P5015, $P5017
+    box $P5018, 4
+    push $P5015, $P5018
+    push $P5002, $P5015
+    new $P5019, 'ResizablePMCArray'
+    box $P5020, 1
+    push $P5019, $P5020
+    box $P5021, 0
+    push $P5019, $P5021
+    box $P5022, 3
+    push $P5019, $P5022
+    box $P5023, 1
+    push $P5019, $P5023
+    box $P5024, 0
+    push $P5019, $P5024
+    box $P5025, 5
+    push $P5019, $P5025
+    box $P5026, 4
+    push $P5019, $P5026
+    box $P5027, 8192
+    push $P5019, $P5027
+    box $P5028, 6
+    push $P5019, $P5028
+    push $P5002, $P5019
+    new $P5029, 'ResizablePMCArray'
+    push $P5002, $P5029
+    new $P5030, 'ResizablePMCArray'
+    box $P5031, 0
+    push $P5030, $P5031
+    box $P5032, 0
+    push $P5030, $P5032
+    box $P5033, 0
+    push $P5030, $P5033
+    push $P5002, $P5030
+    push $P5001, $P5002
+    new $P5034, 'ResizablePMCArray'
+    new $P5035, 'ResizablePMCArray'
+    push $P5034, $P5035
+    new $P5036, 'ResizablePMCArray'
+    box $P5037, 8
+    push $P5036, $P5037
+    box $P5038, "metachar"
+    push $P5036, $P5038
+    box $P5039, 0
+    push $P5036, $P5039
+    push $P5034, $P5036
+    push $P5001, $P5034
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_20_1346233469.934") :anon :lex :outer("cuid_21_1346233469.934")
+.sub "" :subid("cuid_20_1346277621.774") :anon :lex :outer("cuid_21_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
     .param pmc self 
     .lex utf8:"$\x{a2}", $P101 
@@ -3897,40 +3897,40 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_20_1346233469.934_caps" :subid("cuid_memo_41_1346233469.935")
+.sub "cuid_20_1346277621.774_caps" :subid("cuid_memo_41_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_20_1346233469.934_nfa" :subid("cuid_memo_42_1346233469.935")
+.sub "cuid_20_1346277621.774_nfa" :subid("cuid_memo_42_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 4
-    push $P503, $P504
-    box $P505, 8192
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 4
+    push $P5003, $P5004
+    box $P5005, 8192
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "quantifier" :subid("cuid_22_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "quantifier" :subid("cuid_22_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 97
     .param pmc self 
-    $P501 = self."!protoregex"("quantifier")
-    .return ($P501) 
+    $P5001 = self."!protoregex"("quantifier")
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "quantifier:sym<*>" :subid("cuid_23_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "quantifier:sym<*>" :subid("cuid_23_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 98
     .param pmc _lex_param_0 
@@ -4021,43 +4021,43 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_23_1346233469.934_caps" :subid("cuid_memo_43_1346233469.935")
+.sub "cuid_23_1346277621.774_caps" :subid("cuid_memo_43_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    box $P503, 0
-    set $P501["backmod"], $P503
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    box $P5003, 0
+    set $P5001["backmod"], $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_23_1346233469.934_nfa" :subid("cuid_memo_44_1346233469.935")
+.sub "cuid_23_1346277621.774_nfa" :subid("cuid_memo_44_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 42
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 8
-    push $P507, $P508
-    box $P509, "backmod"
-    push $P507, $P509
-    box $P510, 0
-    push $P507, $P510
-    push $P501, $P507
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 42
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 8
+    push $P5007, $P5008
+    box $P5009, "backmod"
+    push $P5007, $P5009
+    box $P5010, 0
+    push $P5007, $P5010
+    push $P5001, $P5007
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "quantifier:sym<+>" :subid("cuid_24_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "quantifier:sym<+>" :subid("cuid_24_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 99
     .param pmc _lex_param_0 
@@ -4148,43 +4148,43 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_24_1346233469.934_caps" :subid("cuid_memo_45_1346233469.935")
+.sub "cuid_24_1346277621.774_caps" :subid("cuid_memo_45_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    box $P503, 0
-    set $P501["backmod"], $P503
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    box $P5003, 0
+    set $P5001["backmod"], $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_24_1346233469.934_nfa" :subid("cuid_memo_46_1346233469.935")
+.sub "cuid_24_1346277621.774_nfa" :subid("cuid_memo_46_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 43
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 8
-    push $P507, $P508
-    box $P509, "backmod"
-    push $P507, $P509
-    box $P510, 0
-    push $P507, $P510
-    push $P501, $P507
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 43
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 8
+    push $P5007, $P5008
+    box $P5009, "backmod"
+    push $P5007, $P5009
+    box $P5010, 0
+    push $P5007, $P5010
+    push $P5001, $P5007
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "quantifier:sym<?>" :subid("cuid_25_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "quantifier:sym<?>" :subid("cuid_25_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 100
     .param pmc _lex_param_0 
@@ -4275,54 +4275,54 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_25_1346233469.934_caps" :subid("cuid_memo_47_1346233469.935")
+.sub "cuid_25_1346277621.774_caps" :subid("cuid_memo_47_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    box $P503, 0
-    set $P501["backmod"], $P503
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    box $P5003, 0
+    set $P5001["backmod"], $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_25_1346233469.934_nfa" :subid("cuid_memo_48_1346233469.935")
+.sub "cuid_25_1346277621.774_nfa" :subid("cuid_memo_48_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 63
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 8
-    push $P507, $P508
-    box $P509, "backmod"
-    push $P507, $P509
-    box $P510, 0
-    push $P507, $P510
-    push $P501, $P507
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 63
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 8
+    push $P5007, $P5008
+    box $P5009, "backmod"
+    push $P5007, $P5009
+    box $P5010, 0
+    push $P5007, $P5010
+    push $P5001, $P5007
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "quantifier:sym<{N,M}>" :subid("cuid_29_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "quantifier:sym<{N,M}>" :subid("cuid_29_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 101
     .param pmc _lex_param_0 
-    .const 'Sub' $P507 = 'cuid_163_1346233469.934' 
-    capture_lex $P507 
-    .const 'Sub' $P507 = 'cuid_26_1346233469.934' 
-    capture_lex $P507 
-    .const 'Sub' $P507 = 'cuid_27_1346233469.934' 
-    capture_lex $P507 
-    .const 'Sub' $P507 = 'cuid_28_1346233469.934' 
-    capture_lex $P507 
+    .const 'Sub' $P5007 = 'cuid_163_1346277621.774' 
+    capture_lex $P5007 
+    .const 'Sub' $P5007 = 'cuid_26_1346277621.774' 
+    capture_lex $P5007 
+    .const 'Sub' $P5007 = 'cuid_27_1346277621.774' 
+    capture_lex $P5007 
+    .const 'Sub' $P5007 = 'cuid_28_1346277621.774' 
+    capture_lex $P5007 
     .lex utf8:"$\x{a2}", $P101 
     .lex "$/", $P102 
     .lex "self", _lex_param_0 
@@ -4354,45 +4354,45 @@
   rxscan139_done391:
     repr_bind_attr_int rx138_cur, rx138_curclass, "$!pos", rx138_pos
     store_lex unicode:"$\x{a2}", rx138_cur
-    $P501 = $P101."MATCH"()
-    set $P102, $P501
-    .const 'Sub' $P502 = 'cuid_163_1346233469.934' 
-    capture_lex $P502
-    $P503 = $P502()
+    $P5001 = $P101."MATCH"()
+    set $P102, $P5001
+    .const 'Sub' $P5002 = 'cuid_163_1346277621.774' 
+    capture_lex $P5002
+    $P5003 = $P5002()
     add $I11, rx138_pos, 1
     gt $I11, rx138_eos, rx138_fail385
     substr $S10, rx138_tgt, rx138_pos, 1
     ne $S10, ucs4:"{", rx138_fail385
     add rx138_pos, 1
-    .const 'Sub' $P504 = 'cuid_26_1346233469.934' 
-    capture_lex $P504
+    .const 'Sub' $P5004 = 'cuid_26_1346277621.774' 
+    capture_lex $P5004
     repr_bind_attr_int rx138_cur, rx138_curclass, "$!pos", rx138_pos
-    $P11 = rx138_cur.$P504()
+    $P11 = rx138_cur.$P5004()
     repr_get_attr_int $I11, $P11, rx138_curclass, "$!pos"
     lt $I11, 0, rx138_fail385
     nqp_rxmark rx138_bstack, rxsubrule143_pass404, -1, 0
   rxsubrule143_pass404:
     rx138_cstack = rx138_cur."!cursor_capture"($P11, 0)
     repr_get_attr_int rx138_pos, $P11, rx138_curclass, "$!pos"
-    .const 'Sub' $P505 = 'cuid_27_1346233469.934' 
-    capture_lex $P505
+    .const 'Sub' $P5005 = 'cuid_27_1346277621.774' 
+    capture_lex $P5005
     repr_bind_attr_int rx138_cur, rx138_curclass, "$!pos", rx138_pos
-    $P11 = rx138_cur.$P505()
+    $P11 = rx138_cur.$P5005()
     repr_get_attr_int $I11, $P11, rx138_curclass, "$!pos"
     lt $I11, 0, rx138_fail385
     nqp_rxmark rx138_bstack, rxsubrule147_pass417, -1, 0
   rxsubrule147_pass417:
-    rx138_cstack = rx138_cur."!cursor_capture"($P11, "1")
+    rx138_cstack = rx138_cur."!cursor_capture"($P11, 1)
     repr_get_attr_int rx138_pos, $P11, rx138_curclass, "$!pos"
-    .const 'Sub' $P506 = 'cuid_28_1346233469.934' 
-    capture_lex $P506
+    .const 'Sub' $P5006 = 'cuid_28_1346277621.774' 
+    capture_lex $P5006
     repr_bind_attr_int rx138_cur, rx138_curclass, "$!pos", rx138_pos
-    $P11 = rx138_cur.$P506()
+    $P11 = rx138_cur.$P5006()
     repr_get_attr_int $I11, $P11, rx138_curclass, "$!pos"
     lt $I11, 0, rx138_fail385
     nqp_rxmark rx138_bstack, rxsubrule151_pass430, -1, 0
   rxsubrule151_pass430:
-    rx138_cstack = rx138_cur."!cursor_capture"($P11, "2")
+    rx138_cstack = rx138_cur."!cursor_capture"($P11, 2)
     repr_get_attr_int rx138_pos, $P11, rx138_curclass, "$!pos"
     add $I11, rx138_pos, 1
     gt $I11, rx138_eos, rx138_fail385
@@ -4438,29 +4438,29 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_29_1346233469.934_caps" :subid("cuid_memo_49_1346233469.935")
+.sub "cuid_29_1346277621.774_caps" :subid("cuid_memo_49_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 1
-    set $P501["0"], $P502
-    box $P503, 1
-    set $P501["1"], $P503
-    box $P504, 1
-    set $P501["2"], $P504
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 1
+    set $P5001["0"], $P5002
+    box $P5003, 1
+    set $P5001["1"], $P5003
+    box $P5004, 1
+    set $P5001["2"], $P5004
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_163_1346233469.934") :anon :lex :outer("cuid_29_1346233469.934")
+.sub "" :subid("cuid_163_1346277621.774") :anon :lex :outer("cuid_29_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 101
 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    .return ($P501) 
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_26_1346233469.934") :anon :lex :outer("cuid_29_1346233469.934")
+.sub "" :subid("cuid_26_1346277621.774") :anon :lex :outer("cuid_29_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
     .param pmc self 
     .lex utf8:"$\x{a2}", $P101 
@@ -4537,53 +4537,53 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_26_1346233469.934_caps" :subid("cuid_memo_50_1346233469.935")
+.sub "cuid_26_1346277621.774_caps" :subid("cuid_memo_50_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_26_1346233469.934_nfa" :subid("cuid_memo_51_1346233469.935")
+.sub "cuid_26_1346277621.774_nfa" :subid("cuid_memo_51_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 1
-    push $P503, $P504
-    box $P505, 0
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 4
-    push $P507, $P508
-    box $P509, 8
-    push $P507, $P509
-    box $P510, 3
-    push $P507, $P510
-    push $P501, $P507
-    new $P511, 'ResizablePMCArray'
-    box $P512, 1
-    push $P511, $P512
-    box $P513, 0
-    push $P511, $P513
-    box $P514, 2
-    push $P511, $P514
-    box $P515, 1
-    push $P511, $P515
-    box $P516, 0
-    push $P511, $P516
-    box $P517, 0
-    push $P511, $P517
-    push $P501, $P511
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 1
+    push $P5003, $P5004
+    box $P5005, 0
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 4
+    push $P5007, $P5008
+    box $P5009, 8
+    push $P5007, $P5009
+    box $P5010, 3
+    push $P5007, $P5010
+    push $P5001, $P5007
+    new $P5011, 'ResizablePMCArray'
+    box $P5012, 1
+    push $P5011, $P5012
+    box $P5013, 0
+    push $P5011, $P5013
+    box $P5014, 2
+    push $P5011, $P5014
+    box $P5015, 1
+    push $P5011, $P5015
+    box $P5016, 0
+    push $P5011, $P5016
+    box $P5017, 0
+    push $P5011, $P5017
+    push $P5001, $P5011
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_27_1346233469.934") :anon :lex :outer("cuid_29_1346233469.934")
+.sub "" :subid("cuid_27_1346277621.774") :anon :lex :outer("cuid_29_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
     .param pmc self 
     .lex utf8:"$\x{a2}", $P101 
@@ -4659,37 +4659,37 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_27_1346233469.934_caps" :subid("cuid_memo_52_1346233469.935")
+.sub "cuid_27_1346277621.774_caps" :subid("cuid_memo_52_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_27_1346233469.934_nfa" :subid("cuid_memo_53_1346233469.935")
+.sub "cuid_27_1346277621.774_nfa" :subid("cuid_memo_53_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 44
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    box $P507, 1
-    push $P503, $P507
-    box $P508, 0
-    push $P503, $P508
-    box $P509, 0
-    push $P503, $P509
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 44
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    box $P5007, 1
+    push $P5003, $P5007
+    box $P5008, 0
+    push $P5003, $P5008
+    box $P5009, 0
+    push $P5003, $P5009
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_28_1346233469.934") :anon :lex :outer("cuid_29_1346233469.934")
+.sub "" :subid("cuid_28_1346277621.774") :anon :lex :outer("cuid_29_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
     .param pmc self 
     .lex utf8:"$\x{a2}", $P101 
@@ -4766,37 +4766,37 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_28_1346233469.934_caps" :subid("cuid_memo_54_1346233469.935")
+.sub "cuid_28_1346277621.774_caps" :subid("cuid_memo_54_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_28_1346233469.934_nfa" :subid("cuid_memo_55_1346233469.935")
+.sub "cuid_28_1346277621.774_nfa" :subid("cuid_memo_55_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 4
-    push $P503, $P504
-    box $P505, 8
-    push $P503, $P505
-    box $P506, 1
-    push $P503, $P506
-    box $P507, 1
-    push $P503, $P507
-    box $P508, 0
-    push $P503, $P508
-    box $P509, 0
-    push $P503, $P509
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 4
+    push $P5003, $P5004
+    box $P5005, 8
+    push $P5003, $P5005
+    box $P5006, 1
+    push $P5003, $P5006
+    box $P5007, 1
+    push $P5003, $P5007
+    box $P5008, 0
+    push $P5003, $P5008
+    box $P5009, 0
+    push $P5003, $P5009
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "quantifier:sym<**>" :subid("cuid_30_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "quantifier:sym<**>" :subid("cuid_30_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 104
     .param pmc _lex_param_0 
@@ -5025,150 +5025,150 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_30_1346233469.934_caps" :subid("cuid_memo_56_1346233469.935")
+.sub "cuid_30_1346277621.774_caps" :subid("cuid_memo_56_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    box $P503, 2
-    set $P501["normspace"], $P503
-    box $P504, 0
-    set $P501["backmod"], $P504
-    box $P505, 0
-    set $P501["min"], $P505
-    box $P506, 2
-    set $P501["max"], $P506
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    box $P5003, 2
+    set $P5001["normspace"], $P5003
+    box $P5004, 0
+    set $P5001["backmod"], $P5004
+    box $P5005, 0
+    set $P5001["min"], $P5005
+    box $P5006, 2
+    set $P5001["max"], $P5006
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_30_1346233469.934_nfa" :subid("cuid_memo_57_1346233469.935")
+.sub "cuid_30_1346277621.774_nfa" :subid("cuid_memo_57_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 42
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 2
-    push $P507, $P508
-    box $P509, 42
-    push $P507, $P509
-    box $P510, 3
-    push $P507, $P510
-    push $P501, $P507
-    new $P511, 'ResizablePMCArray'
-    box $P512, 8
-    push $P511, $P512
-    box $P513, "normspace"
-    push $P511, $P513
-    box $P514, 4
-    push $P511, $P514
-    box $P515, 1
-    push $P511, $P515
-    box $P516, 0
-    push $P511, $P516
-    box $P517, 4
-    push $P511, $P517
-    push $P501, $P511
-    new $P518, 'ResizablePMCArray'
-    box $P519, 8
-    push $P518, $P519
-    box $P520, "backmod"
-    push $P518, $P520
-    box $P521, 5
-    push $P518, $P521
-    push $P501, $P518
-    new $P522, 'ResizablePMCArray'
-    box $P523, 8
-    push $P522, $P523
-    box $P524, "normspace"
-    push $P522, $P524
-    box $P525, 6
-    push $P522, $P525
-    box $P526, 1
-    push $P522, $P526
-    box $P527, 0
-    push $P522, $P527
-    box $P528, 6
-    push $P522, $P528
-    push $P501, $P522
-    new $P529, 'ResizablePMCArray'
-    box $P530, 1
-    push $P529, $P530
-    box $P531, 0
-    push $P529, $P531
-    box $P532, 7
-    push $P529, $P532
-    push $P501, $P529
-    new $P533, 'ResizablePMCArray'
-    box $P534, 4
-    push $P533, $P534
-    box $P535, 8
-    push $P533, $P535
-    box $P536, 8
-    push $P533, $P536
-    push $P501, $P533
-    new $P537, 'ResizablePMCArray'
-    box $P538, 1
-    push $P537, $P538
-    box $P539, 0
-    push $P537, $P539
-    box $P540, 7
-    push $P537, $P540
-    box $P541, 1
-    push $P537, $P541
-    box $P542, 0
-    push $P537, $P542
-    box $P543, 9
-    push $P537, $P543
-    box $P544, 2
-    push $P537, $P544
-    box $P545, 46
-    push $P537, $P545
-    box $P546, 10
-    push $P537, $P546
-    box $P547, 1
-    push $P537, $P547
-    box $P548, 0
-    push $P537, $P548
-    box $P549, 0
-    push $P537, $P549
-    push $P501, $P537
-    new $P550, 'ResizablePMCArray'
-    push $P501, $P550
-    new $P551, 'ResizablePMCArray'
-    box $P552, 2
-    push $P551, $P552
-    box $P553, 46
-    push $P551, $P553
-    box $P554, 11
-    push $P551, $P554
-    push $P501, $P551
-    new $P555, 'ResizablePMCArray'
-    box $P556, 0
-    push $P555, $P556
-    box $P557, 0
-    push $P555, $P557
-    box $P558, 0
-    push $P555, $P558
-    push $P501, $P555
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 42
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 2
+    push $P5007, $P5008
+    box $P5009, 42
+    push $P5007, $P5009
+    box $P5010, 3
+    push $P5007, $P5010
+    push $P5001, $P5007
+    new $P5011, 'ResizablePMCArray'
+    box $P5012, 8
+    push $P5011, $P5012
+    box $P5013, "normspace"
+    push $P5011, $P5013
+    box $P5014, 4
+    push $P5011, $P5014
+    box $P5015, 1
+    push $P5011, $P5015
+    box $P5016, 0
+    push $P5011, $P5016
+    box $P5017, 4
+    push $P5011, $P5017
+    push $P5001, $P5011
+    new $P5018, 'ResizablePMCArray'
+    box $P5019, 8
+    push $P5018, $P5019
+    box $P5020, "backmod"
+    push $P5018, $P5020
+    box $P5021, 5
+    push $P5018, $P5021
+    push $P5001, $P5018
+    new $P5022, 'ResizablePMCArray'
+    box $P5023, 8
+    push $P5022, $P5023
+    box $P5024, "normspace"
+    push $P5022, $P5024
+    box $P5025, 6
+    push $P5022, $P5025
+    box $P5026, 1
+    push $P5022, $P5026
+    box $P5027, 0
+    push $P5022, $P5027
+    box $P5028, 6
+    push $P5022, $P5028
+    push $P5001, $P5022
+    new $P5029, 'ResizablePMCArray'
+    box $P5030, 1
+    push $P5029, $P5030
+    box $P5031, 0
+    push $P5029, $P5031
+    box $P5032, 7
+    push $P5029, $P5032
+    push $P5001, $P5029
+    new $P5033, 'ResizablePMCArray'
+    box $P5034, 4
+    push $P5033, $P5034
+    box $P5035, 8
+    push $P5033, $P5035
+    box $P5036, 8
+    push $P5033, $P5036
+    push $P5001, $P5033
+    new $P5037, 'ResizablePMCArray'
+    box $P5038, 1
+    push $P5037, $P5038
+    box $P5039, 0
+    push $P5037, $P5039
+    box $P5040, 7
+    push $P5037, $P5040
+    box $P5041, 1
+    push $P5037, $P5041
+    box $P5042, 0
+    push $P5037, $P5042
+    box $P5043, 9
+    push $P5037, $P5043
+    box $P5044, 2
+    push $P5037, $P5044
+    box $P5045, 46
+    push $P5037, $P5045
+    box $P5046, 10
+    push $P5037, $P5046
+    box $P5047, 1
+    push $P5037, $P5047
+    box $P5048, 0
+    push $P5037, $P5048
+    box $P5049, 0
+    push $P5037, $P5049
+    push $P5001, $P5037
+    new $P5050, 'ResizablePMCArray'
+    push $P5001, $P5050
+    new $P5051, 'ResizablePMCArray'
+    box $P5052, 2
+    push $P5051, $P5052
+    box $P5053, 46
+    push $P5051, $P5053
+    box $P5054, 11
+    push $P5051, $P5054
+    push $P5001, $P5051
+    new $P5055, 'ResizablePMCArray'
+    box $P5056, 0
+    push $P5055, $P5056
+    box $P5057, 0
+    push $P5055, $P5057
+    box $P5058, 0
+    push $P5055, $P5058
+    push $P5001, $P5055
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backmod" :subid("cuid_32_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "backmod" :subid("cuid_32_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 118
     .param pmc _lex_param_0 
-    .const 'Sub' $P502 = 'cuid_31_1346233469.934' 
-    capture_lex $P502 
+    .const 'Sub' $P5002 = 'cuid_31_1346277621.774' 
+    capture_lex $P5002 
     .lex utf8:"$\x{a2}", $P101 
     .lex "$/", $P102 
     .lex "self", _lex_param_0 
@@ -5217,7 +5217,7 @@
     nqp_push_label $P11, alt171_1482
     nqp_push_label $P11, alt171_2483
     nqp_rxmark rx168_bstack, alt171_end480, -1, 0
-    rx168_cur."!alt"(rx168_pos, "alt_nfa__7_1346233470.82", $P11)
+    rx168_cur."!alt"(rx168_pos, "alt_nfa__7_1346277622.582", $P11)
     goto rx168_fail471
   alt171_0481:
     add $I11, rx168_pos, 1
@@ -5234,10 +5234,10 @@
     add rx168_pos, 1
     goto alt171_end480
   alt171_2483:
-    .const 'Sub' $P501 = 'cuid_31_1346233469.934' 
-    capture_lex $P501
+    .const 'Sub' $P5001 = 'cuid_31_1346277621.774' 
+    capture_lex $P5001
     repr_bind_attr_int rx168_cur, rx168_curclass, "$!pos", rx168_pos
-    $P11 = rx168_cur."before"($P501)
+    $P11 = rx168_cur."before"($P5001)
     repr_get_attr_int $I11, $P11, rx168_curclass, "$!pos"
     ge $I11, 0, rx168_fail471
     goto alt171_end480
@@ -5277,106 +5277,106 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_32_1346233469.934_caps" :subid("cuid_memo_58_1346233469.935")
+.sub "cuid_32_1346277621.774_caps" :subid("cuid_memo_58_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_32_1346233469.934_nfa" :subid("cuid_memo_59_1346233469.935")
+.sub "cuid_32_1346277621.774_nfa" :subid("cuid_memo_59_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 58
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    box $P507, 1
-    push $P503, $P507
-    box $P508, 0
-    push $P503, $P508
-    box $P509, 2
-    push $P503, $P509
-    push $P501, $P503
-    new $P510, 'ResizablePMCArray'
-    box $P511, 2
-    push $P510, $P511
-    box $P512, 63
-    push $P510, $P512
-    box $P513, 0
-    push $P510, $P513
-    box $P514, 2
-    push $P510, $P514
-    box $P515, 33
-    push $P510, $P515
-    box $P516, 0
-    push $P510, $P516
-    box $P517, 0
-    push $P510, $P517
-    box $P518, 0
-    push $P510, $P518
-    box $P519, 0
-    push $P510, $P519
-    push $P501, $P510
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 58
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    box $P5007, 1
+    push $P5003, $P5007
+    box $P5008, 0
+    push $P5003, $P5008
+    box $P5009, 2
+    push $P5003, $P5009
+    push $P5001, $P5003
+    new $P5010, 'ResizablePMCArray'
+    box $P5011, 2
+    push $P5010, $P5011
+    box $P5012, 63
+    push $P5010, $P5012
+    box $P5013, 0
+    push $P5010, $P5013
+    box $P5014, 2
+    push $P5010, $P5014
+    box $P5015, 33
+    push $P5010, $P5015
+    box $P5016, 0
+    push $P5010, $P5016
+    box $P5017, 0
+    push $P5010, $P5017
+    box $P5018, 0
+    push $P5010, $P5018
+    box $P5019, 0
+    push $P5010, $P5019
+    push $P5001, $P5010
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_32_1346233469.934_alt_nfa__7_1346233470.82" :subid("cuid_memo_60_1346233469.935")
+.sub "cuid_32_1346277621.774_alt_nfa__7_1346277622.582" :subid("cuid_memo_60_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    new $P503, 'ResizablePMCArray'
-    push $P502, $P503
-    new $P504, 'ResizablePMCArray'
-    box $P505, 2
-    push $P504, $P505
-    box $P506, 63
-    push $P504, $P506
-    box $P507, 0
-    push $P504, $P507
-    push $P502, $P504
-    push $P501, $P502
-    new $P508, 'ResizablePMCArray'
-    new $P509, 'ResizablePMCArray'
-    push $P508, $P509
-    new $P510, 'ResizablePMCArray'
-    box $P511, 2
-    push $P510, $P511
-    box $P512, 33
-    push $P510, $P512
-    box $P513, 0
-    push $P510, $P513
-    push $P508, $P510
-    push $P501, $P508
-    new $P514, 'ResizablePMCArray'
-    new $P515, 'ResizablePMCArray'
-    push $P514, $P515
-    new $P516, 'ResizablePMCArray'
-    box $P517, 0
-    push $P516, $P517
-    box $P518, 0
-    push $P516, $P518
-    box $P519, 0
-    push $P516, $P519
-    box $P520, 0
-    push $P516, $P520
-    box $P521, 0
-    push $P516, $P521
-    box $P522, 0
-    push $P516, $P522
-    push $P514, $P516
-    push $P501, $P514
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    new $P5003, 'ResizablePMCArray'
+    push $P5002, $P5003
+    new $P5004, 'ResizablePMCArray'
+    box $P5005, 2
+    push $P5004, $P5005
+    box $P5006, 63
+    push $P5004, $P5006
+    box $P5007, 0
+    push $P5004, $P5007
+    push $P5002, $P5004
+    push $P5001, $P5002
+    new $P5008, 'ResizablePMCArray'
+    new $P5009, 'ResizablePMCArray'
+    push $P5008, $P5009
+    new $P5010, 'ResizablePMCArray'
+    box $P5011, 2
+    push $P5010, $P5011
+    box $P5012, 33
+    push $P5010, $P5012
+    box $P5013, 0
+    push $P5010, $P5013
+    push $P5008, $P5010
+    push $P5001, $P5008
+    new $P5014, 'ResizablePMCArray'
+    new $P5015, 'ResizablePMCArray'
+    push $P5014, $P5015
+    new $P5016, 'ResizablePMCArray'
+    box $P5017, 0
+    push $P5016, $P5017
+    box $P5018, 0
+    push $P5016, $P5018
+    box $P5019, 0
+    push $P5016, $P5019
+    box $P5020, 0
+    push $P5016, $P5020
+    box $P5021, 0
+    push $P5016, $P5021
+    box $P5022, 0
+    push $P5016, $P5022
+    push $P5014, $P5016
+    push $P5001, $P5014
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_31_1346233469.934") :anon :lex :outer("cuid_32_1346233469.934")
+.sub "" :subid("cuid_31_1346277621.774") :anon :lex :outer("cuid_32_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
     .param pmc self 
     .lex utf8:"$\x{a2}", $P101 
@@ -5443,40 +5443,40 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_31_1346233469.934_caps" :subid("cuid_memo_61_1346233469.935")
+.sub "cuid_31_1346277621.774_caps" :subid("cuid_memo_61_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_31_1346233469.934_nfa" :subid("cuid_memo_62_1346233469.935")
+.sub "cuid_31_1346277621.774_nfa" :subid("cuid_memo_62_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 58
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 58
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar" :subid("cuid_33_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar" :subid("cuid_33_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 120
     .param pmc self 
-    $P501 = self."!protoregex"("metachar")
-    .return ($P501) 
+    $P5001 = self."!protoregex"("metachar")
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<ws>" :subid("cuid_34_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar:sym<ws>" :subid("cuid_34_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 121
     .param pmc _lex_param_0 
@@ -5548,31 +5548,31 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_34_1346233469.934_caps" :subid("cuid_memo_63_1346233469.935")
+.sub "cuid_34_1346277621.774_caps" :subid("cuid_memo_63_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_34_1346233469.934_nfa" :subid("cuid_memo_64_1346233469.935")
+.sub "cuid_34_1346277621.774_nfa" :subid("cuid_memo_64_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 8
-    push $P503, $P504
-    box $P505, "normspace"
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 8
+    push $P5003, $P5004
+    box $P5005, "normspace"
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<[ ]>" :subid("cuid_35_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar:sym<[ ]>" :subid("cuid_35_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 122
     .param pmc _lex_param_0 
@@ -5657,49 +5657,49 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_35_1346233469.934_caps" :subid("cuid_memo_65_1346233469.935")
+.sub "cuid_35_1346277621.774_caps" :subid("cuid_memo_65_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["nibbler"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["nibbler"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_35_1346233469.934_nfa" :subid("cuid_memo_66_1346233469.935")
+.sub "cuid_35_1346277621.774_nfa" :subid("cuid_memo_66_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 91
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 8
-    push $P507, $P508
-    box $P509, "nibbler"
-    push $P507, $P509
-    box $P510, 3
-    push $P507, $P510
-    push $P501, $P507
-    new $P511, 'ResizablePMCArray'
-    box $P512, 2
-    push $P511, $P512
-    box $P513, 93
-    push $P511, $P513
-    box $P514, 0
-    push $P511, $P514
-    push $P501, $P511
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 91
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 8
+    push $P5007, $P5008
+    box $P5009, "nibbler"
+    push $P5007, $P5009
+    box $P5010, 3
+    push $P5007, $P5010
+    push $P5001, $P5007
+    new $P5011, 'ResizablePMCArray'
+    box $P5012, 2
+    push $P5011, $P5012
+    box $P5013, 93
+    push $P5011, $P5013
+    box $P5014, 0
+    push $P5011, $P5014
+    push $P5001, $P5011
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<( )>" :subid("cuid_36_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar:sym<( )>" :subid("cuid_36_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 123
     .param pmc _lex_param_0 
@@ -5784,49 +5784,49 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_36_1346233469.934_caps" :subid("cuid_memo_67_1346233469.935")
+.sub "cuid_36_1346277621.774_caps" :subid("cuid_memo_67_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["nibbler"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["nibbler"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_36_1346233469.934_nfa" :subid("cuid_memo_68_1346233469.935")
+.sub "cuid_36_1346277621.774_nfa" :subid("cuid_memo_68_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 40
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 8
-    push $P507, $P508
-    box $P509, "nibbler"
-    push $P507, $P509
-    box $P510, 3
-    push $P507, $P510
-    push $P501, $P507
-    new $P511, 'ResizablePMCArray'
-    box $P512, 2
-    push $P511, $P512
-    box $P513, 41
-    push $P511, $P513
-    box $P514, 0
-    push $P511, $P514
-    push $P501, $P511
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 40
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 8
+    push $P5007, $P5008
+    box $P5009, "nibbler"
+    push $P5007, $P5009
+    box $P5010, 3
+    push $P5007, $P5010
+    push $P5001, $P5007
+    new $P5011, 'ResizablePMCArray'
+    box $P5012, 2
+    push $P5011, $P5012
+    box $P5013, 41
+    push $P5011, $P5013
+    box $P5014, 0
+    push $P5011, $P5014
+    push $P5001, $P5011
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<'>" :subid("cuid_37_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar:sym<'>" :subid("cuid_37_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 124
     .param pmc _lex_param_0 
@@ -5905,41 +5905,41 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_37_1346233469.934_caps" :subid("cuid_memo_69_1346233469.935")
+.sub "cuid_37_1346277621.774_caps" :subid("cuid_memo_69_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["quote_EXPR"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["quote_EXPR"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_37_1346233469.934_nfa" :subid("cuid_memo_70_1346233469.935")
+.sub "cuid_37_1346277621.774_nfa" :subid("cuid_memo_70_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 6
-    push $P503, $P504
-    box $P505, "'"
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 0
-    push $P507, $P508
-    box $P509, 0
-    push $P507, $P509
-    box $P510, 0
-    push $P507, $P510
-    push $P501, $P507
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 6
+    push $P5003, $P5004
+    box $P5005, "'"
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 0
+    push $P5007, $P5008
+    box $P5009, 0
+    push $P5007, $P5009
+    box $P5010, 0
+    push $P5007, $P5010
+    push $P5001, $P5007
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<\">" :subid("cuid_38_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar:sym<\">" :subid("cuid_38_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 125
     .param pmc _lex_param_0 
@@ -6018,41 +6018,41 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_38_1346233469.934_caps" :subid("cuid_memo_71_1346233469.935")
+.sub "cuid_38_1346277621.774_caps" :subid("cuid_memo_71_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["quote_EXPR"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["quote_EXPR"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_38_1346233469.934_nfa" :subid("cuid_memo_72_1346233469.935")
+.sub "cuid_38_1346277621.774_nfa" :subid("cuid_memo_72_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 6
-    push $P503, $P504
-    box $P505, "\""
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 0
-    push $P507, $P508
-    box $P509, 0
-    push $P507, $P509
-    box $P510, 0
-    push $P507, $P510
-    push $P501, $P507
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 6
+    push $P5003, $P5004
+    box $P5005, "\""
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 0
+    push $P5007, $P5008
+    box $P5009, 0
+    push $P5007, $P5009
+    box $P5010, 0
+    push $P5007, $P5010
+    push $P5001, $P5007
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<.>" :subid("cuid_39_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar:sym<.>" :subid("cuid_39_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 126
     .param pmc _lex_param_0 
@@ -6135,33 +6135,33 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_39_1346233469.934_caps" :subid("cuid_memo_73_1346233469.935")
+.sub "cuid_39_1346277621.774_caps" :subid("cuid_memo_73_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_39_1346233469.934_nfa" :subid("cuid_memo_74_1346233469.935")
+.sub "cuid_39_1346277621.774_nfa" :subid("cuid_memo_74_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 46
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 46
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<^>" :subid("cuid_40_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar:sym<^>" :subid("cuid_40_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 127
     .param pmc _lex_param_0 
@@ -6244,33 +6244,33 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_40_1346233469.934_caps" :subid("cuid_memo_75_1346233469.935")
+.sub "cuid_40_1346277621.774_caps" :subid("cuid_memo_75_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_40_1346233469.934_nfa" :subid("cuid_memo_76_1346233469.935")
+.sub "cuid_40_1346277621.774_nfa" :subid("cuid_memo_76_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 94
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 94
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<^^>" :subid("cuid_41_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar:sym<^^>" :subid("cuid_41_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 128
     .param pmc _lex_param_0 
@@ -6353,41 +6353,41 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_41_1346233469.934_caps" :subid("cuid_memo_77_1346233469.935")
+.sub "cuid_41_1346277621.774_caps" :subid("cuid_memo_77_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_41_1346233469.934_nfa" :subid("cuid_memo_78_1346233469.935")
+.sub "cuid_41_1346277621.774_nfa" :subid("cuid_memo_78_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 94
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 2
-    push $P507, $P508
-    box $P509, 94
-    push $P507, $P509
-    box $P510, 0
-    push $P507, $P510
-    push $P501, $P507
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 94
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 2
+    push $P5007, $P5008
+    box $P5009, 94
+    push $P5007, $P5009
+    box $P5010, 0
+    push $P5007, $P5010
+    push $P5001, $P5007
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<$>" :subid("cuid_42_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar:sym<$>" :subid("cuid_42_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 129
     .param pmc _lex_param_0 
@@ -6470,33 +6470,33 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_42_1346233469.934_caps" :subid("cuid_memo_79_1346233469.935")
+.sub "cuid_42_1346277621.774_caps" :subid("cuid_memo_79_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_42_1346233469.934_nfa" :subid("cuid_memo_80_1346233469.935")
+.sub "cuid_42_1346277621.774_nfa" :subid("cuid_memo_80_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 36
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 36
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<$$>" :subid("cuid_43_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar:sym<$$>" :subid("cuid_43_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 130
     .param pmc _lex_param_0 
@@ -6579,41 +6579,41 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_43_1346233469.934_caps" :subid("cuid_memo_81_1346233469.935")
+.sub "cuid_43_1346277621.774_caps" :subid("cuid_memo_81_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_43_1346233469.934_nfa" :subid("cuid_memo_82_1346233469.935")
+.sub "cuid_43_1346277621.774_nfa" :subid("cuid_memo_82_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 36
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 2
-    push $P507, $P508
-    box $P509, 36
-    push $P507, $P509
-    box $P510, 0
-    push $P507, $P510
-    push $P501, $P507
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 36
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 2
+    push $P5007, $P5008
+    box $P5009, 36
+    push $P5007, $P5009
+    box $P5010, 0
+    push $P5007, $P5010
+    push $P5001, $P5007
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<:::>" :subid("cuid_44_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar:sym<:::>" :subid("cuid_44_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 131
     .param pmc _lex_param_0 
@@ -6701,57 +6701,57 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_44_1346233469.934_caps" :subid("cuid_memo_83_1346233469.935")
+.sub "cuid_44_1346277621.774_caps" :subid("cuid_memo_83_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_44_1346233469.934_nfa" :subid("cuid_memo_84_1346233469.935")
+.sub "cuid_44_1346277621.774_nfa" :subid("cuid_memo_84_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 58
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 2
-    push $P507, $P508
-    box $P509, 58
-    push $P507, $P509
-    box $P510, 3
-    push $P507, $P510
-    push $P501, $P507
-    new $P511, 'ResizablePMCArray'
-    box $P512, 2
-    push $P511, $P512
-    box $P513, 58
-    push $P511, $P513
-    box $P514, 4
-    push $P511, $P514
-    push $P501, $P511
-    new $P515, 'ResizablePMCArray'
-    box $P516, 8
-    push $P515, $P516
-    box $P517, "panic"
-    push $P515, $P517
-    box $P518, 0
-    push $P515, $P518
-    push $P501, $P515
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 58
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 2
+    push $P5007, $P5008
+    box $P5009, 58
+    push $P5007, $P5009
+    box $P5010, 3
+    push $P5007, $P5010
+    push $P5001, $P5007
+    new $P5011, 'ResizablePMCArray'
+    box $P5012, 2
+    push $P5011, $P5012
+    box $P5013, 58
+    push $P5011, $P5013
+    box $P5014, 4
+    push $P5011, $P5014
+    push $P5001, $P5011
+    new $P5015, 'ResizablePMCArray'
+    box $P5016, 8
+    push $P5015, $P5016
+    box $P5017, "panic"
+    push $P5015, $P5017
+    box $P5018, 0
+    push $P5015, $P5018
+    push $P5001, $P5015
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<::>" :subid("cuid_45_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar:sym<::>" :subid("cuid_45_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 132
     .param pmc _lex_param_0 
@@ -6839,49 +6839,49 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_45_1346233469.934_caps" :subid("cuid_memo_85_1346233469.935")
+.sub "cuid_45_1346277621.774_caps" :subid("cuid_memo_85_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_45_1346233469.934_nfa" :subid("cuid_memo_86_1346233469.935")
+.sub "cuid_45_1346277621.774_nfa" :subid("cuid_memo_86_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 58
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 2
-    push $P507, $P508
-    box $P509, 58
-    push $P507, $P509
-    box $P510, 3
-    push $P507, $P510
-    push $P501, $P507
-    new $P511, 'ResizablePMCArray'
-    box $P512, 8
-    push $P511, $P512
-    box $P513, "panic"
-    push $P511, $P513
-    box $P514, 0
-    push $P511, $P514
-    push $P501, $P511
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 58
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 2
+    push $P5007, $P5008
+    box $P5009, 58
+    push $P5007, $P5009
+    box $P5010, 3
+    push $P5007, $P5010
+    push $P5001, $P5007
+    new $P5011, 'ResizablePMCArray'
+    box $P5012, 8
+    push $P5011, $P5012
+    box $P5013, "panic"
+    push $P5011, $P5013
+    box $P5014, 0
+    push $P5011, $P5014
+    push $P5001, $P5011
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<lwb>" :subid("cuid_46_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar:sym<lwb>" :subid("cuid_46_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 133
     .param pmc _lex_param_0 
@@ -6919,7 +6919,7 @@
     nqp_push_label $P11, alt215_0648
     nqp_push_label $P11, alt215_1649
     nqp_rxmark rx212_bstack, alt215_end647, -1, 0
-    rx212_cur."!alt"(rx212_pos, "alt_nfa__8_1346233470.961", $P11)
+    rx212_cur."!alt"(rx212_pos, "alt_nfa__8_1346277622.714", $P11)
     goto rx212_fail638
   alt215_0648:
     add $I11, rx212_pos, 2
@@ -6981,86 +6981,86 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_46_1346233469.934_caps" :subid("cuid_memo_87_1346233469.935")
+.sub "cuid_46_1346277621.774_caps" :subid("cuid_memo_87_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_46_1346233469.934_nfa" :subid("cuid_memo_88_1346233469.935")
+.sub "cuid_46_1346277621.774_nfa" :subid("cuid_memo_88_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 60
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    box $P507, 2
-    push $P503, $P507
-    box $P508, 171
-    push $P503, $P508
-    box $P509, 0
-    push $P503, $P509
-    push $P501, $P503
-    new $P510, 'ResizablePMCArray'
-    box $P511, 2
-    push $P510, $P511
-    box $P512, 60
-    push $P510, $P512
-    box $P513, 0
-    push $P510, $P513
-    push $P501, $P510
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 60
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    box $P5007, 2
+    push $P5003, $P5007
+    box $P5008, 171
+    push $P5003, $P5008
+    box $P5009, 0
+    push $P5003, $P5009
+    push $P5001, $P5003
+    new $P5010, 'ResizablePMCArray'
+    box $P5011, 2
+    push $P5010, $P5011
+    box $P5012, 60
+    push $P5010, $P5012
+    box $P5013, 0
+    push $P5010, $P5013
+    push $P5001, $P5010
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_46_1346233469.934_alt_nfa__8_1346233470.961" :subid("cuid_memo_89_1346233469.935")
+.sub "cuid_46_1346277621.774_alt_nfa__8_1346277622.714" :subid("cuid_memo_89_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    new $P503, 'ResizablePMCArray'
-    push $P502, $P503
-    new $P504, 'ResizablePMCArray'
-    box $P505, 2
-    push $P504, $P505
-    box $P506, 60
-    push $P504, $P506
-    box $P507, 2
-    push $P504, $P507
-    push $P502, $P504
-    new $P508, 'ResizablePMCArray'
-    box $P509, 2
-    push $P508, $P509
-    box $P510, 60
-    push $P508, $P510
-    box $P511, 0
-    push $P508, $P511
-    push $P502, $P508
-    push $P501, $P502
-    new $P512, 'ResizablePMCArray'
-    new $P513, 'ResizablePMCArray'
-    push $P512, $P513
-    new $P514, 'ResizablePMCArray'
-    box $P515, 2
-    push $P514, $P515
-    box $P516, 171
-    push $P514, $P516
-    box $P517, 0
-    push $P514, $P517
-    push $P512, $P514
-    push $P501, $P512
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    new $P5003, 'ResizablePMCArray'
+    push $P5002, $P5003
+    new $P5004, 'ResizablePMCArray'
+    box $P5005, 2
+    push $P5004, $P5005
+    box $P5006, 60
+    push $P5004, $P5006
+    box $P5007, 2
+    push $P5004, $P5007
+    push $P5002, $P5004
+    new $P5008, 'ResizablePMCArray'
+    box $P5009, 2
+    push $P5008, $P5009
+    box $P5010, 60
+    push $P5008, $P5010
+    box $P5011, 0
+    push $P5008, $P5011
+    push $P5002, $P5008
+    push $P5001, $P5002
+    new $P5012, 'ResizablePMCArray'
+    new $P5013, 'ResizablePMCArray'
+    push $P5012, $P5013
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 2
+    push $P5014, $P5015
+    box $P5016, 171
+    push $P5014, $P5016
+    box $P5017, 0
+    push $P5014, $P5017
+    push $P5012, $P5014
+    push $P5001, $P5012
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<rwb>" :subid("cuid_47_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar:sym<rwb>" :subid("cuid_47_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 134
     .param pmc _lex_param_0 
@@ -7098,7 +7098,7 @@
     nqp_push_label $P11, alt219_0663
     nqp_push_label $P11, alt219_1664
     nqp_rxmark rx216_bstack, alt219_end662, -1, 0
-    rx216_cur."!alt"(rx216_pos, "alt_nfa__9_1346233470.975", $P11)
+    rx216_cur."!alt"(rx216_pos, "alt_nfa__9_1346277622.726", $P11)
     goto rx216_fail653
   alt219_0663:
     add $I11, rx216_pos, 2
@@ -7160,86 +7160,86 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_47_1346233469.934_caps" :subid("cuid_memo_90_1346233469.935")
+.sub "cuid_47_1346277621.774_caps" :subid("cuid_memo_90_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_47_1346233469.934_nfa" :subid("cuid_memo_91_1346233469.935")
+.sub "cuid_47_1346277621.774_nfa" :subid("cuid_memo_91_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 62
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    box $P507, 2
-    push $P503, $P507
-    box $P508, 187
-    push $P503, $P508
-    box $P509, 0
-    push $P503, $P509
-    push $P501, $P503
-    new $P510, 'ResizablePMCArray'
-    box $P511, 2
-    push $P510, $P511
-    box $P512, 62
-    push $P510, $P512
-    box $P513, 0
-    push $P510, $P513
-    push $P501, $P510
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 62
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    box $P5007, 2
+    push $P5003, $P5007
+    box $P5008, 187
+    push $P5003, $P5008
+    box $P5009, 0
+    push $P5003, $P5009
+    push $P5001, $P5003
+    new $P5010, 'ResizablePMCArray'
+    box $P5011, 2
+    push $P5010, $P5011
+    box $P5012, 62
+    push $P5010, $P5012
+    box $P5013, 0
+    push $P5010, $P5013
+    push $P5001, $P5010
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_47_1346233469.934_alt_nfa__9_1346233470.975" :subid("cuid_memo_92_1346233469.935")
+.sub "cuid_47_1346277621.774_alt_nfa__9_1346277622.726" :subid("cuid_memo_92_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    new $P503, 'ResizablePMCArray'
-    push $P502, $P503
-    new $P504, 'ResizablePMCArray'
-    box $P505, 2
-    push $P504, $P505
-    box $P506, 62
-    push $P504, $P506
-    box $P507, 2
-    push $P504, $P507
-    push $P502, $P504
-    new $P508, 'ResizablePMCArray'
-    box $P509, 2
-    push $P508, $P509
-    box $P510, 62
-    push $P508, $P510
-    box $P511, 0
-    push $P508, $P511
-    push $P502, $P508
-    push $P501, $P502
-    new $P512, 'ResizablePMCArray'
-    new $P513, 'ResizablePMCArray'
-    push $P512, $P513
-    new $P514, 'ResizablePMCArray'
-    box $P515, 2
-    push $P514, $P515
-    box $P516, 187
-    push $P514, $P516
-    box $P517, 0
-    push $P514, $P517
-    push $P512, $P514
-    push $P501, $P512
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    new $P5003, 'ResizablePMCArray'
+    push $P5002, $P5003
+    new $P5004, 'ResizablePMCArray'
+    box $P5005, 2
+    push $P5004, $P5005
+    box $P5006, 62
+    push $P5004, $P5006
+    box $P5007, 2
+    push $P5004, $P5007
+    push $P5002, $P5004
+    new $P5008, 'ResizablePMCArray'
+    box $P5009, 2
+    push $P5008, $P5009
+    box $P5010, 62
+    push $P5008, $P5010
+    box $P5011, 0
+    push $P5008, $P5011
+    push $P5002, $P5008
+    push $P5001, $P5002
+    new $P5012, 'ResizablePMCArray'
+    new $P5013, 'ResizablePMCArray'
+    push $P5012, $P5013
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 2
+    push $P5014, $P5015
+    box $P5016, 187
+    push $P5014, $P5016
+    box $P5017, 0
+    push $P5014, $P5017
+    push $P5012, $P5014
+    push $P5001, $P5012
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<from>" :subid("cuid_48_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar:sym<from>" :subid("cuid_48_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 135
     .param pmc _lex_param_0 
@@ -7311,39 +7311,39 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_48_1346233469.934_caps" :subid("cuid_memo_93_1346233469.935")
+.sub "cuid_48_1346277621.774_caps" :subid("cuid_memo_93_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_48_1346233469.934_nfa" :subid("cuid_memo_94_1346233469.935")
+.sub "cuid_48_1346277621.774_nfa" :subid("cuid_memo_94_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 60
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 2
-    push $P507, $P508
-    box $P509, 40
-    push $P507, $P509
-    box $P510, 0
-    push $P507, $P510
-    push $P501, $P507
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 60
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 2
+    push $P5007, $P5008
+    box $P5009, 40
+    push $P5007, $P5009
+    box $P5010, 0
+    push $P5007, $P5010
+    push $P5001, $P5007
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<to>" :subid("cuid_49_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar:sym<to>" :subid("cuid_49_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 136
     .param pmc _lex_param_0 
@@ -7415,39 +7415,39 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_49_1346233469.934_caps" :subid("cuid_memo_95_1346233469.935")
+.sub "cuid_49_1346277621.774_caps" :subid("cuid_memo_95_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_49_1346233469.934_nfa" :subid("cuid_memo_96_1346233469.935")
+.sub "cuid_49_1346277621.774_nfa" :subid("cuid_memo_96_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 41
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 2
-    push $P507, $P508
-    box $P509, 62
-    push $P507, $P509
-    box $P510, 0
-    push $P507, $P510
-    push $P501, $P507
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 41
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 2
+    push $P5007, $P5008
+    box $P5009, 62
+    push $P5007, $P5009
+    box $P5010, 0
+    push $P5007, $P5010
+    push $P5001, $P5007
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<bs>" :subid("cuid_50_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar:sym<bs>" :subid("cuid_50_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 137
     .param pmc _lex_param_0 
@@ -7527,41 +7527,41 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_50_1346233469.934_caps" :subid("cuid_memo_97_1346233469.935")
+.sub "cuid_50_1346277621.774_caps" :subid("cuid_memo_97_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["backslash"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["backslash"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_50_1346233469.934_nfa" :subid("cuid_memo_98_1346233469.935")
+.sub "cuid_50_1346277621.774_nfa" :subid("cuid_memo_98_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 92
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 8
-    push $P507, $P508
-    box $P509, "backslash"
-    push $P507, $P509
-    box $P510, 0
-    push $P507, $P510
-    push $P501, $P507
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 92
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 8
+    push $P5007, $P5008
+    box $P5009, "backslash"
+    push $P5007, $P5009
+    box $P5010, 0
+    push $P5007, $P5010
+    push $P5001, $P5007
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<mod>" :subid("cuid_51_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar:sym<mod>" :subid("cuid_51_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 138
     .param pmc _lex_param_0 
@@ -7636,33 +7636,33 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_51_1346233469.934_caps" :subid("cuid_memo_99_1346233469.935")
+.sub "cuid_51_1346277621.774_caps" :subid("cuid_memo_99_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["mod_internal"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["mod_internal"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_51_1346233469.934_nfa" :subid("cuid_memo_100_1346233469.935")
+.sub "cuid_51_1346277621.774_nfa" :subid("cuid_memo_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 8
-    push $P503, $P504
-    box $P505, "mod_internal"
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 8
+    push $P5003, $P5004
+    box $P5005, "mod_internal"
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<quantifier>" :subid("cuid_52_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar:sym<quantifier>" :subid("cuid_52_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 139
     .param pmc _lex_param_0 
@@ -7742,41 +7742,41 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_52_1346233469.934_caps" :subid("cuid_memo_101_1346233469.935")
+.sub "cuid_52_1346277621.774_caps" :subid("cuid_memo_101_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["quantifier"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["quantifier"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_52_1346233469.934_nfa" :subid("cuid_memo_102_1346233469.935")
+.sub "cuid_52_1346277621.774_nfa" :subid("cuid_memo_102_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 8
-    push $P503, $P504
-    box $P505, "quantifier"
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 8
-    push $P507, $P508
-    box $P509, "panic"
-    push $P507, $P509
-    box $P510, 0
-    push $P507, $P510
-    push $P501, $P507
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 8
+    push $P5003, $P5004
+    box $P5005, "quantifier"
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 8
+    push $P5007, $P5008
+    box $P5009, "panic"
+    push $P5007, $P5009
+    box $P5010, 0
+    push $P5007, $P5010
+    push $P5001, $P5007
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<~>" :subid("cuid_53_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar:sym<~>" :subid("cuid_53_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 144
     .param pmc _lex_param_0 
@@ -7885,69 +7885,69 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_53_1346233469.934_caps" :subid("cuid_memo_103_1346233469.935")
+.sub "cuid_53_1346277621.774_caps" :subid("cuid_memo_103_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    box $P503, 0
-    set $P501["GOAL"], $P503
-    box $P504, 0
-    set $P501["EXPR"], $P504
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    box $P5003, 0
+    set $P5001["GOAL"], $P5003
+    box $P5004, 0
+    set $P5001["EXPR"], $P5004
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_53_1346233469.934_nfa" :subid("cuid_memo_104_1346233469.935")
+.sub "cuid_53_1346277621.774_nfa" :subid("cuid_memo_104_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 126
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 8
-    push $P507, $P508
-    box $P509, "ws"
-    push $P507, $P509
-    box $P510, 3
-    push $P507, $P510
-    push $P501, $P507
-    new $P511, 'ResizablePMCArray'
-    box $P512, 8
-    push $P511, $P512
-    box $P513, "quantified_atom"
-    push $P511, $P513
-    box $P514, 4
-    push $P511, $P514
-    push $P501, $P511
-    new $P515, 'ResizablePMCArray'
-    box $P516, 8
-    push $P515, $P516
-    box $P517, "ws"
-    push $P515, $P517
-    box $P518, 5
-    push $P515, $P518
-    push $P501, $P515
-    new $P519, 'ResizablePMCArray'
-    box $P520, 8
-    push $P519, $P520
-    box $P521, "quantified_atom"
-    push $P519, $P521
-    box $P522, 0
-    push $P519, $P522
-    push $P501, $P519
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 126
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 8
+    push $P5007, $P5008
+    box $P5009, "ws"
+    push $P5007, $P5009
+    box $P5010, 3
+    push $P5007, $P5010
+    push $P5001, $P5007
+    new $P5011, 'ResizablePMCArray'
+    box $P5012, 8
+    push $P5011, $P5012
+    box $P5013, "quantified_atom"
+    push $P5011, $P5013
+    box $P5014, 4
+    push $P5011, $P5014
+    push $P5001, $P5011
+    new $P5015, 'ResizablePMCArray'
+    box $P5016, 8
+    push $P5015, $P5016
+    box $P5017, "ws"
+    push $P5015, $P5017
+    box $P5018, 5
+    push $P5015, $P5018
+    push $P5001, $P5015
+    new $P5019, 'ResizablePMCArray'
+    box $P5020, 8
+    push $P5019, $P5020
+    box $P5021, "quantified_atom"
+    push $P5019, $P5021
+    box $P5022, 0
+    push $P5019, $P5022
+    push $P5001, $P5019
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<{*}>" :subid("cuid_54_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar:sym<{*}>" :subid("cuid_54_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 150
     .param pmc _lex_param_0 
@@ -8144,205 +8144,205 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_54_1346233469.934_caps" :subid("cuid_memo_105_1346233469.935")
+.sub "cuid_54_1346277621.774_caps" :subid("cuid_memo_105_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    box $P503, 2
-    set $P501["key"], $P503
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    box $P5003, 2
+    set $P5001["key"], $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_54_1346233469.934_nfa" :subid("cuid_memo_106_1346233469.935")
+.sub "cuid_54_1346277621.774_nfa" :subid("cuid_memo_106_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 123
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 2
-    push $P507, $P508
-    box $P509, 42
-    push $P507, $P509
-    box $P510, 3
-    push $P507, $P510
-    push $P501, $P507
-    new $P511, 'ResizablePMCArray'
-    box $P512, 2
-    push $P511, $P512
-    box $P513, 125
-    push $P511, $P513
-    box $P514, 4
-    push $P511, $P514
-    push $P501, $P511
-    new $P515, 'ResizablePMCArray'
-    box $P516, 6
-    push $P515, $P516
-    box $P517, utf8:"\t \x{a0}\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000"
-    push $P515, $P517
-    box $P518, 4
-    push $P515, $P518
-    box $P519, 1
-    push $P515, $P519
-    box $P520, 0
-    push $P515, $P520
-    box $P521, 5
-    push $P515, $P521
-    box $P522, 1
-    push $P515, $P522
-    box $P523, 0
-    push $P515, $P523
-    box $P524, 0
-    push $P515, $P524
-    push $P501, $P515
-    new $P525, 'ResizablePMCArray'
-    box $P526, 2
-    push $P525, $P526
-    box $P527, 35
-    push $P525, $P527
-    box $P528, 6
-    push $P525, $P528
-    push $P501, $P525
-    new $P529, 'ResizablePMCArray'
-    box $P530, 2
-    push $P529, $P530
-    box $P531, 61
-    push $P529, $P531
-    box $P532, 7
-    push $P529, $P532
-    push $P501, $P529
-    new $P533, 'ResizablePMCArray'
-    box $P534, 2
-    push $P533, $P534
-    box $P535, 32
-    push $P533, $P535
-    box $P536, 8
-    push $P533, $P536
-    push $P501, $P533
-    new $P537, 'ResizablePMCArray'
-    box $P538, 6
-    push $P537, $P538
-    box $P539, utf8:"\t \x{a0}\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000"
-    push $P537, $P539
-    box $P540, 8
-    push $P537, $P540
-    box $P541, 1
-    push $P537, $P541
-    box $P542, 0
-    push $P537, $P542
-    box $P543, 9
-    push $P537, $P543
-    push $P501, $P537
-    new $P544, 'ResizablePMCArray'
-    box $P545, 1
-    push $P544, $P545
-    box $P546, 0
-    push $P544, $P546
-    box $P547, 10
-    push $P544, $P547
-    push $P501, $P544
-    new $P548, 'ResizablePMCArray'
-    box $P549, 5
-    push $P548, $P549
-    box $P550, 32
-    push $P548, $P550
-    box $P551, 11
-    push $P548, $P551
-    push $P501, $P548
-    new $P552, 'ResizablePMCArray'
-    box $P553, 1
-    push $P552, $P553
-    box $P554, 0
-    push $P552, $P554
-    box $P555, 10
-    push $P552, $P555
-    box $P556, 1
-    push $P552, $P556
-    box $P557, 0
-    push $P552, $P557
-    box $P558, 12
-    push $P552, $P558
-    box $P559, 1
-    push $P552, $P559
-    box $P560, 0
-    push $P552, $P560
-    box $P561, 13
-    push $P552, $P561
-    box $P562, 1
-    push $P552, $P562
-    box $P563, 0
-    push $P552, $P563
-    box $P564, 0
-    push $P552, $P564
-    push $P501, $P552
-    new $P565, 'ResizablePMCArray'
-    push $P501, $P565
-    new $P566, 'ResizablePMCArray'
-    box $P567, 6
-    push $P566, $P567
-    box $P568, utf8:"\t \x{a0}\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000"
-    push $P566, $P568
-    box $P569, 14
-    push $P566, $P569
-    push $P501, $P566
-    new $P570, 'ResizablePMCArray'
-    box $P571, 1
-    push $P570, $P571
-    box $P572, 0
-    push $P570, $P572
-    box $P573, 13
-    push $P570, $P573
-    box $P574, 1
-    push $P570, $P574
-    box $P575, 0
-    push $P570, $P575
-    box $P576, 15
-    push $P570, $P576
-    box $P577, 1
-    push $P570, $P577
-    box $P578, 0
-    push $P570, $P578
-    box $P579, 16
-    push $P570, $P579
-    push $P501, $P570
-    new $P580, 'ResizablePMCArray'
-    push $P501, $P580
-    new $P581, 'ResizablePMCArray'
-    box $P582, 5
-    push $P581, $P582
-    box $P583, 32
-    push $P581, $P583
-    box $P584, 17
-    push $P581, $P584
-    push $P501, $P581
-    new $P585, 'ResizablePMCArray'
-    box $P586, 1
-    push $P585, $P586
-    box $P587, 0
-    push $P585, $P587
-    box $P588, 16
-    push $P585, $P588
-    box $P589, 1
-    push $P585, $P589
-    box $P590, 0
-    push $P585, $P590
-    box $P591, 11
-    push $P585, $P591
-    push $P501, $P585
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 123
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 2
+    push $P5007, $P5008
+    box $P5009, 42
+    push $P5007, $P5009
+    box $P5010, 3
+    push $P5007, $P5010
+    push $P5001, $P5007
+    new $P5011, 'ResizablePMCArray'
+    box $P5012, 2
+    push $P5011, $P5012
+    box $P5013, 125
+    push $P5011, $P5013
+    box $P5014, 4
+    push $P5011, $P5014
+    push $P5001, $P5011
+    new $P5015, 'ResizablePMCArray'
+    box $P5016, 6
+    push $P5015, $P5016
+    box $P5017, utf8:"\t \x{a0}\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000"
+    push $P5015, $P5017
+    box $P5018, 4
+    push $P5015, $P5018
+    box $P5019, 1
+    push $P5015, $P5019
+    box $P5020, 0
+    push $P5015, $P5020
+    box $P5021, 5
+    push $P5015, $P5021
+    box $P5022, 1
+    push $P5015, $P5022
+    box $P5023, 0
+    push $P5015, $P5023
+    box $P5024, 0
+    push $P5015, $P5024
+    push $P5001, $P5015
+    new $P5025, 'ResizablePMCArray'
+    box $P5026, 2
+    push $P5025, $P5026
+    box $P5027, 35
+    push $P5025, $P5027
+    box $P5028, 6
+    push $P5025, $P5028
+    push $P5001, $P5025
+    new $P5029, 'ResizablePMCArray'
+    box $P5030, 2
+    push $P5029, $P5030
+    box $P5031, 61
+    push $P5029, $P5031
+    box $P5032, 7
+    push $P5029, $P5032
+    push $P5001, $P5029
+    new $P5033, 'ResizablePMCArray'
+    box $P5034, 2
+    push $P5033, $P5034
+    box $P5035, 32
+    push $P5033, $P5035
+    box $P5036, 8
+    push $P5033, $P5036
+    push $P5001, $P5033
+    new $P5037, 'ResizablePMCArray'
+    box $P5038, 6
+    push $P5037, $P5038
+    box $P5039, utf8:"\t \x{a0}\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000"
+    push $P5037, $P5039
+    box $P5040, 8
+    push $P5037, $P5040
+    box $P5041, 1
+    push $P5037, $P5041
+    box $P5042, 0
+    push $P5037, $P5042
+    box $P5043, 9
+    push $P5037, $P5043
+    push $P5001, $P5037
+    new $P5044, 'ResizablePMCArray'
+    box $P5045, 1
+    push $P5044, $P5045
+    box $P5046, 0
+    push $P5044, $P5046
+    box $P5047, 10
+    push $P5044, $P5047
+    push $P5001, $P5044
+    new $P5048, 'ResizablePMCArray'
+    box $P5049, 5
+    push $P5048, $P5049
+    box $P5050, 32
+    push $P5048, $P5050
+    box $P5051, 11
+    push $P5048, $P5051
+    push $P5001, $P5048
+    new $P5052, 'ResizablePMCArray'
+    box $P5053, 1
+    push $P5052, $P5053
+    box $P5054, 0
+    push $P5052, $P5054
+    box $P5055, 10
+    push $P5052, $P5055
+    box $P5056, 1
+    push $P5052, $P5056
+    box $P5057, 0
+    push $P5052, $P5057
+    box $P5058, 12
+    push $P5052, $P5058
+    box $P5059, 1
+    push $P5052, $P5059
+    box $P5060, 0
+    push $P5052, $P5060
+    box $P5061, 13
+    push $P5052, $P5061
+    box $P5062, 1
+    push $P5052, $P5062
+    box $P5063, 0
+    push $P5052, $P5063
+    box $P5064, 0
+    push $P5052, $P5064
+    push $P5001, $P5052
+    new $P5065, 'ResizablePMCArray'
+    push $P5001, $P5065
+    new $P5066, 'ResizablePMCArray'
+    box $P5067, 6
+    push $P5066, $P5067
+    box $P5068, utf8:"\t \x{a0}\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000"
+    push $P5066, $P5068
+    box $P5069, 14
+    push $P5066, $P5069
+    push $P5001, $P5066
+    new $P5070, 'ResizablePMCArray'
+    box $P5071, 1
+    push $P5070, $P5071
+    box $P5072, 0
+    push $P5070, $P5072
+    box $P5073, 13
+    push $P5070, $P5073
+    box $P5074, 1
+    push $P5070, $P5074
+    box $P5075, 0
+    push $P5070, $P5075
+    box $P5076, 15
+    push $P5070, $P5076
+    box $P5077, 1
+    push $P5070, $P5077
+    box $P5078, 0
+    push $P5070, $P5078
+    box $P5079, 16
+    push $P5070, $P5079
+    push $P5001, $P5070
+    new $P5080, 'ResizablePMCArray'
+    push $P5001, $P5080
+    new $P5081, 'ResizablePMCArray'
+    box $P5082, 5
+    push $P5081, $P5082
+    box $P5083, 32
+    push $P5081, $P5083
+    box $P5084, 17
+    push $P5081, $P5084
+    push $P5001, $P5081
+    new $P5085, 'ResizablePMCArray'
+    box $P5086, 1
+    push $P5085, $P5086
+    box $P5087, 0
+    push $P5085, $P5087
+    box $P5088, 16
+    push $P5085, $P5088
+    box $P5089, 1
+    push $P5085, $P5089
+    box $P5090, 0
+    push $P5085, $P5090
+    box $P5091, 11
+    push $P5085, $P5091
+    push $P5001, $P5085
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<assert>" :subid("cuid_55_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar:sym<assert>" :subid("cuid_55_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 154
     .param pmc _lex_param_0 
@@ -8437,49 +8437,49 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_55_1346233469.934_caps" :subid("cuid_memo_107_1346233469.935")
+.sub "cuid_55_1346277621.774_caps" :subid("cuid_memo_107_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["assertion"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["assertion"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_55_1346233469.934_nfa" :subid("cuid_memo_108_1346233469.935")
+.sub "cuid_55_1346277621.774_nfa" :subid("cuid_memo_108_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 60
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 8
-    push $P507, $P508
-    box $P509, "assertion"
-    push $P507, $P509
-    box $P510, 3
-    push $P507, $P510
-    push $P501, $P507
-    new $P511, 'ResizablePMCArray'
-    box $P512, 0
-    push $P511, $P512
-    box $P513, 0
-    push $P511, $P513
-    box $P514, 0
-    push $P511, $P514
-    push $P501, $P511
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 60
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 8
+    push $P5007, $P5008
+    box $P5009, "assertion"
+    push $P5007, $P5009
+    box $P5010, 3
+    push $P5007, $P5010
+    push $P5001, $P5007
+    new $P5011, 'ResizablePMCArray'
+    box $P5012, 0
+    push $P5011, $P5012
+    box $P5013, 0
+    push $P5011, $P5013
+    box $P5014, 0
+    push $P5011, $P5014
+    push $P5001, $P5011
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<var>" :subid("cuid_56_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar:sym<var>" :subid("cuid_56_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 159
     .param pmc _lex_param_0 
@@ -8516,7 +8516,7 @@
     nqp_push_label $P11, alt259_0789
     nqp_push_label $P11, alt259_1794
     nqp_rxmark rx257_bstack, alt259_end788, -1, 0
-    rx257_cur."!alt"(rx257_pos, "alt_nfa__10_1346233471.132", $P11)
+    rx257_cur."!alt"(rx257_pos, "alt_nfa__10_1346277622.93", $P11)
     goto rx257_fail781
   alt259_0789:
     add $I11, rx257_pos, 2
@@ -8658,264 +8658,264 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_56_1346233469.934_caps" :subid("cuid_memo_109_1346233469.935")
+.sub "cuid_56_1346277621.774_caps" :subid("cuid_memo_109_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["name"], $P502
-    box $P503, 0
-    set $P501["pos"], $P503
-    box $P504, 2
-    set $P501["quantified_atom"], $P504
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["name"], $P5002
+    box $P5003, 0
+    set $P5001["pos"], $P5003
+    box $P5004, 2
+    set $P5001["quantified_atom"], $P5004
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_56_1346233469.934_nfa" :subid("cuid_memo_110_1346233469.935")
+.sub "cuid_56_1346277621.774_nfa" :subid("cuid_memo_110_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 36
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    box $P507, 2
-    push $P503, $P507
-    box $P508, 36
-    push $P503, $P508
-    box $P509, 8
-    push $P503, $P509
-    push $P501, $P503
-    new $P510, 'ResizablePMCArray'
-    box $P511, 2
-    push $P510, $P511
-    box $P512, 60
-    push $P510, $P512
-    box $P513, 3
-    push $P510, $P513
-    push $P501, $P510
-    new $P514, 'ResizablePMCArray'
-    box $P515, 1
-    push $P514, $P515
-    box $P516, 0
-    push $P514, $P516
-    box $P517, 4
-    push $P514, $P517
-    push $P501, $P514
-    new $P518, 'ResizablePMCArray'
-    box $P519, 7
-    push $P518, $P519
-    box $P520, ">"
-    push $P518, $P520
-    box $P521, 5
-    push $P518, $P521
-    push $P501, $P518
-    new $P522, 'ResizablePMCArray'
-    box $P523, 1
-    push $P522, $P523
-    box $P524, 0
-    push $P522, $P524
-    box $P525, 4
-    push $P522, $P525
-    box $P526, 1
-    push $P522, $P526
-    box $P527, 0
-    push $P522, $P527
-    box $P528, 6
-    push $P522, $P528
-    box $P529, 2
-    push $P522, $P529
-    box $P530, 62
-    push $P522, $P530
-    box $P531, 7
-    push $P522, $P531
-    push $P501, $P522
-    new $P532, 'ResizablePMCArray'
-    push $P501, $P532
-    new $P533, 'ResizablePMCArray'
-    box $P534, 8
-    push $P533, $P534
-    box $P535, "ws"
-    push $P533, $P535
-    box $P536, 11
-    push $P533, $P536
-    box $P537, 1
-    push $P533, $P537
-    box $P538, 0
-    push $P533, $P538
-    box $P539, 0
-    push $P533, $P539
-    push $P501, $P533
-    new $P540, 'ResizablePMCArray'
-    box $P541, 1
-    push $P540, $P541
-    box $P542, 0
-    push $P540, $P542
-    box $P543, 9
-    push $P540, $P543
-    push $P501, $P540
-    new $P544, 'ResizablePMCArray'
-    box $P545, 4
-    push $P544, $P545
-    box $P546, 8
-    push $P544, $P546
-    box $P547, 10
-    push $P544, $P547
-    push $P501, $P544
-    new $P548, 'ResizablePMCArray'
-    box $P549, 1
-    push $P548, $P549
-    box $P550, 0
-    push $P548, $P550
-    box $P551, 9
-    push $P548, $P551
-    box $P552, 1
-    push $P548, $P552
-    box $P553, 0
-    push $P548, $P553
-    box $P554, 7
-    push $P548, $P554
-    push $P501, $P548
-    new $P555, 'ResizablePMCArray'
-    box $P556, 2
-    push $P555, $P556
-    box $P557, 61
-    push $P555, $P557
-    box $P558, 12
-    push $P555, $P558
-    push $P501, $P555
-    new $P559, 'ResizablePMCArray'
-    box $P560, 8
-    push $P559, $P560
-    box $P561, "ws"
-    push $P559, $P561
-    box $P562, 13
-    push $P559, $P562
-    push $P501, $P559
-    new $P563, 'ResizablePMCArray'
-    box $P564, 8
-    push $P563, $P564
-    box $P565, "quantified_atom"
-    push $P563, $P565
-    box $P566, 0
-    push $P563, $P566
-    push $P501, $P563
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 36
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    box $P5007, 2
+    push $P5003, $P5007
+    box $P5008, 36
+    push $P5003, $P5008
+    box $P5009, 8
+    push $P5003, $P5009
+    push $P5001, $P5003
+    new $P5010, 'ResizablePMCArray'
+    box $P5011, 2
+    push $P5010, $P5011
+    box $P5012, 60
+    push $P5010, $P5012
+    box $P5013, 3
+    push $P5010, $P5013
+    push $P5001, $P5010
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 1
+    push $P5014, $P5015
+    box $P5016, 0
+    push $P5014, $P5016
+    box $P5017, 4
+    push $P5014, $P5017
+    push $P5001, $P5014
+    new $P5018, 'ResizablePMCArray'
+    box $P5019, 7
+    push $P5018, $P5019
+    box $P5020, ">"
+    push $P5018, $P5020
+    box $P5021, 5
+    push $P5018, $P5021
+    push $P5001, $P5018
+    new $P5022, 'ResizablePMCArray'
+    box $P5023, 1
+    push $P5022, $P5023
+    box $P5024, 0
+    push $P5022, $P5024
+    box $P5025, 4
+    push $P5022, $P5025
+    box $P5026, 1
+    push $P5022, $P5026
+    box $P5027, 0
+    push $P5022, $P5027
+    box $P5028, 6
+    push $P5022, $P5028
+    box $P5029, 2
+    push $P5022, $P5029
+    box $P5030, 62
+    push $P5022, $P5030
+    box $P5031, 7
+    push $P5022, $P5031
+    push $P5001, $P5022
+    new $P5032, 'ResizablePMCArray'
+    push $P5001, $P5032
+    new $P5033, 'ResizablePMCArray'
+    box $P5034, 8
+    push $P5033, $P5034
+    box $P5035, "ws"
+    push $P5033, $P5035
+    box $P5036, 11
+    push $P5033, $P5036
+    box $P5037, 1
+    push $P5033, $P5037
+    box $P5038, 0
+    push $P5033, $P5038
+    box $P5039, 0
+    push $P5033, $P5039
+    push $P5001, $P5033
+    new $P5040, 'ResizablePMCArray'
+    box $P5041, 1
+    push $P5040, $P5041
+    box $P5042, 0
+    push $P5040, $P5042
+    box $P5043, 9
+    push $P5040, $P5043
+    push $P5001, $P5040
+    new $P5044, 'ResizablePMCArray'
+    box $P5045, 4
+    push $P5044, $P5045
+    box $P5046, 8
+    push $P5044, $P5046
+    box $P5047, 10
+    push $P5044, $P5047
+    push $P5001, $P5044
+    new $P5048, 'ResizablePMCArray'
+    box $P5049, 1
+    push $P5048, $P5049
+    box $P5050, 0
+    push $P5048, $P5050
+    box $P5051, 9
+    push $P5048, $P5051
+    box $P5052, 1
+    push $P5048, $P5052
+    box $P5053, 0
+    push $P5048, $P5053
+    box $P5054, 7
+    push $P5048, $P5054
+    push $P5001, $P5048
+    new $P5055, 'ResizablePMCArray'
+    box $P5056, 2
+    push $P5055, $P5056
+    box $P5057, 61
+    push $P5055, $P5057
+    box $P5058, 12
+    push $P5055, $P5058
+    push $P5001, $P5055
+    new $P5059, 'ResizablePMCArray'
+    box $P5060, 8
+    push $P5059, $P5060
+    box $P5061, "ws"
+    push $P5059, $P5061
+    box $P5062, 13
+    push $P5059, $P5062
+    push $P5001, $P5059
+    new $P5063, 'ResizablePMCArray'
+    box $P5064, 8
+    push $P5063, $P5064
+    box $P5065, "quantified_atom"
+    push $P5063, $P5065
+    box $P5066, 0
+    push $P5063, $P5066
+    push $P5001, $P5063
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_56_1346233469.934_alt_nfa__10_1346233471.132" :subid("cuid_memo_111_1346233469.935")
+.sub "cuid_56_1346277621.774_alt_nfa__10_1346277622.93" :subid("cuid_memo_111_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    new $P503, 'ResizablePMCArray'
-    push $P502, $P503
-    new $P504, 'ResizablePMCArray'
-    box $P505, 2
-    push $P504, $P505
-    box $P506, 36
-    push $P504, $P506
-    box $P507, 2
-    push $P504, $P507
-    push $P502, $P504
-    new $P508, 'ResizablePMCArray'
-    box $P509, 2
-    push $P508, $P509
-    box $P510, 60
-    push $P508, $P510
-    box $P511, 3
-    push $P508, $P511
-    push $P502, $P508
-    new $P512, 'ResizablePMCArray'
-    box $P513, 1
-    push $P512, $P513
-    box $P514, 0
-    push $P512, $P514
-    box $P515, 4
-    push $P512, $P515
-    push $P502, $P512
-    new $P516, 'ResizablePMCArray'
-    box $P517, 7
-    push $P516, $P517
-    box $P518, ">"
-    push $P516, $P518
-    box $P519, 5
-    push $P516, $P519
-    push $P502, $P516
-    new $P520, 'ResizablePMCArray'
-    box $P521, 1
-    push $P520, $P521
-    box $P522, 0
-    push $P520, $P522
-    box $P523, 4
-    push $P520, $P523
-    box $P524, 1
-    push $P520, $P524
-    box $P525, 0
-    push $P520, $P525
-    box $P526, 6
-    push $P520, $P526
-    box $P527, 2
-    push $P520, $P527
-    box $P528, 62
-    push $P520, $P528
-    box $P529, 0
-    push $P520, $P529
-    push $P502, $P520
-    new $P530, 'ResizablePMCArray'
-    push $P502, $P530
-    push $P501, $P502
-    new $P531, 'ResizablePMCArray'
-    new $P532, 'ResizablePMCArray'
-    push $P531, $P532
-    new $P533, 'ResizablePMCArray'
-    box $P534, 2
-    push $P533, $P534
-    box $P535, 36
-    push $P533, $P535
-    box $P536, 2
-    push $P533, $P536
-    push $P531, $P533
-    new $P537, 'ResizablePMCArray'
-    box $P538, 1
-    push $P537, $P538
-    box $P539, 0
-    push $P537, $P539
-    box $P540, 3
-    push $P537, $P540
-    push $P531, $P537
-    new $P541, 'ResizablePMCArray'
-    box $P542, 4
-    push $P541, $P542
-    box $P543, 8
-    push $P541, $P543
-    box $P544, 4
-    push $P541, $P544
-    push $P531, $P541
-    new $P545, 'ResizablePMCArray'
-    box $P546, 1
-    push $P545, $P546
-    box $P547, 0
-    push $P545, $P547
-    box $P548, 3
-    push $P545, $P548
-    box $P549, 1
-    push $P545, $P549
-    box $P550, 0
-    push $P545, $P550
-    box $P551, 0
-    push $P545, $P551
-    push $P531, $P545
-    push $P501, $P531
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    new $P5003, 'ResizablePMCArray'
+    push $P5002, $P5003
+    new $P5004, 'ResizablePMCArray'
+    box $P5005, 2
+    push $P5004, $P5005
+    box $P5006, 36
+    push $P5004, $P5006
+    box $P5007, 2
+    push $P5004, $P5007
+    push $P5002, $P5004
+    new $P5008, 'ResizablePMCArray'
+    box $P5009, 2
+    push $P5008, $P5009
+    box $P5010, 60
+    push $P5008, $P5010
+    box $P5011, 3
+    push $P5008, $P5011
+    push $P5002, $P5008
+    new $P5012, 'ResizablePMCArray'
+    box $P5013, 1
+    push $P5012, $P5013
+    box $P5014, 0
+    push $P5012, $P5014
+    box $P5015, 4
+    push $P5012, $P5015
+    push $P5002, $P5012
+    new $P5016, 'ResizablePMCArray'
+    box $P5017, 7
+    push $P5016, $P5017
+    box $P5018, ">"
+    push $P5016, $P5018
+    box $P5019, 5
+    push $P5016, $P5019
+    push $P5002, $P5016
+    new $P5020, 'ResizablePMCArray'
+    box $P5021, 1
+    push $P5020, $P5021
+    box $P5022, 0
+    push $P5020, $P5022
+    box $P5023, 4
+    push $P5020, $P5023
+    box $P5024, 1
+    push $P5020, $P5024
+    box $P5025, 0
+    push $P5020, $P5025
+    box $P5026, 6
+    push $P5020, $P5026
+    box $P5027, 2
+    push $P5020, $P5027
+    box $P5028, 62
+    push $P5020, $P5028
+    box $P5029, 0
+    push $P5020, $P5029
+    push $P5002, $P5020
+    new $P5030, 'ResizablePMCArray'
+    push $P5002, $P5030
+    push $P5001, $P5002
+    new $P5031, 'ResizablePMCArray'
+    new $P5032, 'ResizablePMCArray'
+    push $P5031, $P5032
+    new $P5033, 'ResizablePMCArray'
+    box $P5034, 2
+    push $P5033, $P5034
+    box $P5035, 36
+    push $P5033, $P5035
+    box $P5036, 2
+    push $P5033, $P5036
+    push $P5031, $P5033
+    new $P5037, 'ResizablePMCArray'
+    box $P5038, 1
+    push $P5037, $P5038
+    box $P5039, 0
+    push $P5037, $P5039
+    box $P5040, 3
+    push $P5037, $P5040
+    push $P5031, $P5037
+    new $P5041, 'ResizablePMCArray'
+    box $P5042, 4
+    push $P5041, $P5042
+    box $P5043, 8
+    push $P5041, $P5043
+    box $P5044, 4
+    push $P5041, $P5044
+    push $P5031, $P5041
+    new $P5045, 'ResizablePMCArray'
+    box $P5046, 1
+    push $P5045, $P5046
+    box $P5047, 0
+    push $P5045, $P5047
+    box $P5048, 3
+    push $P5045, $P5048
+    box $P5049, 1
+    push $P5045, $P5049
+    box $P5050, 0
+    push $P5045, $P5050
+    box $P5051, 0
+    push $P5045, $P5051
+    push $P5031, $P5045
+    push $P5001, $P5031
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<PIR>" :subid("cuid_57_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "metachar:sym<PIR>" :subid("cuid_57_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 168
     .param pmc _lex_param_0 
@@ -9014,112 +9014,112 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_57_1346233469.934_caps" :subid("cuid_memo_112_1346233469.935")
+.sub "cuid_57_1346277621.774_caps" :subid("cuid_memo_112_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["pir"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["pir"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_57_1346233469.934_nfa" :subid("cuid_memo_113_1346233469.935")
+.sub "cuid_57_1346277621.774_nfa" :subid("cuid_memo_113_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 58
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 2
-    push $P507, $P508
-    box $P509, 80
-    push $P507, $P509
-    box $P510, 3
-    push $P507, $P510
-    push $P501, $P507
-    new $P511, 'ResizablePMCArray'
-    box $P512, 2
-    push $P511, $P512
-    box $P513, 73
-    push $P511, $P513
-    box $P514, 4
-    push $P511, $P514
-    push $P501, $P511
-    new $P515, 'ResizablePMCArray'
-    box $P516, 2
-    push $P515, $P516
-    box $P517, 82
-    push $P515, $P517
-    box $P518, 5
-    push $P515, $P518
-    push $P501, $P515
-    new $P519, 'ResizablePMCArray'
-    box $P520, 2
-    push $P519, $P520
-    box $P521, 123
-    push $P519, $P521
-    box $P522, 6
-    push $P519, $P522
-    push $P501, $P519
-    new $P523, 'ResizablePMCArray'
-    box $P524, 2
-    push $P523, $P524
-    box $P525, 123
-    push $P523, $P525
-    box $P526, 7
-    push $P523, $P526
-    push $P501, $P523
-    new $P527, 'ResizablePMCArray'
-    box $P528, 4
-    push $P527, $P528
-    box $P529, 65535
-    push $P527, $P529
-    box $P530, 7
-    push $P527, $P530
-    box $P531, 1
-    push $P527, $P531
-    box $P532, 0
-    push $P527, $P532
-    box $P533, 8
-    push $P527, $P533
-    push $P501, $P527
-    new $P534, 'ResizablePMCArray'
-    box $P535, 2
-    push $P534, $P535
-    box $P536, 125
-    push $P534, $P536
-    box $P537, 9
-    push $P534, $P537
-    push $P501, $P534
-    new $P538, 'ResizablePMCArray'
-    box $P539, 2
-    push $P538, $P539
-    box $P540, 125
-    push $P538, $P540
-    box $P541, 0
-    push $P538, $P541
-    push $P501, $P538
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 58
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 2
+    push $P5007, $P5008
+    box $P5009, 80
+    push $P5007, $P5009
+    box $P5010, 3
+    push $P5007, $P5010
+    push $P5001, $P5007
+    new $P5011, 'ResizablePMCArray'
+    box $P5012, 2
+    push $P5011, $P5012
+    box $P5013, 73
+    push $P5011, $P5013
+    box $P5014, 4
+    push $P5011, $P5014
+    push $P5001, $P5011
+    new $P5015, 'ResizablePMCArray'
+    box $P5016, 2
+    push $P5015, $P5016
+    box $P5017, 82
+    push $P5015, $P5017
+    box $P5018, 5
+    push $P5015, $P5018
+    push $P5001, $P5015
+    new $P5019, 'ResizablePMCArray'
+    box $P5020, 2
+    push $P5019, $P5020
+    box $P5021, 123
+    push $P5019, $P5021
+    box $P5022, 6
+    push $P5019, $P5022
+    push $P5001, $P5019
+    new $P5023, 'ResizablePMCArray'
+    box $P5024, 2
+    push $P5023, $P5024
+    box $P5025, 123
+    push $P5023, $P5025
+    box $P5026, 7
+    push $P5023, $P5026
+    push $P5001, $P5023
+    new $P5027, 'ResizablePMCArray'
+    box $P5028, 4
+    push $P5027, $P5028
+    box $P5029, 65535
+    push $P5027, $P5029
+    box $P5030, 7
+    push $P5027, $P5030
+    box $P5031, 1
+    push $P5027, $P5031
+    box $P5032, 0
+    push $P5027, $P5032
+    box $P5033, 8
+    push $P5027, $P5033
+    push $P5001, $P5027
+    new $P5034, 'ResizablePMCArray'
+    box $P5035, 2
+    push $P5034, $P5035
+    box $P5036, 125
+    push $P5034, $P5036
+    box $P5037, 9
+    push $P5034, $P5037
+    push $P5001, $P5034
+    new $P5038, 'ResizablePMCArray'
+    box $P5039, 2
+    push $P5038, $P5039
+    box $P5040, 125
+    push $P5038, $P5040
+    box $P5041, 0
+    push $P5038, $P5041
+    push $P5001, $P5038
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash" :subid("cuid_58_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "backslash" :subid("cuid_58_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 172
     .param pmc self 
-    $P501 = self."!protoregex"("backslash")
-    .return ($P501) 
+    $P5001 = self."!protoregex"("backslash")
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<s>" :subid("cuid_59_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "backslash:sym<s>" :subid("cuid_59_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 173
     .param pmc _lex_param_0 
@@ -9202,33 +9202,33 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_59_1346233469.934_caps" :subid("cuid_memo_114_1346233469.935")
+.sub "cuid_59_1346277621.774_caps" :subid("cuid_memo_114_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_59_1346233469.934_nfa" :subid("cuid_memo_115_1346233469.935")
+.sub "cuid_59_1346277621.774_nfa" :subid("cuid_memo_115_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 6
-    push $P503, $P504
-    box $P505, "dDnNsSwW"
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 6
+    push $P5003, $P5004
+    box $P5005, "dDnNsSwW"
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<b>" :subid("cuid_60_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "backslash:sym<b>" :subid("cuid_60_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 174
     .param pmc _lex_param_0 
@@ -9311,33 +9311,33 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_60_1346233469.934_caps" :subid("cuid_memo_116_1346233469.935")
+.sub "cuid_60_1346277621.774_caps" :subid("cuid_memo_116_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_60_1346233469.934_nfa" :subid("cuid_memo_117_1346233469.935")
+.sub "cuid_60_1346277621.774_nfa" :subid("cuid_memo_117_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 6
-    push $P503, $P504
-    box $P505, "bB"
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 6
+    push $P5003, $P5004
+    box $P5005, "bB"
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<e>" :subid("cuid_61_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "backslash:sym<e>" :subid("cuid_61_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 175
     .param pmc _lex_param_0 
@@ -9420,33 +9420,33 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_61_1346233469.934_caps" :subid("cuid_memo_118_1346233469.935")
+.sub "cuid_61_1346277621.774_caps" :subid("cuid_memo_118_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_61_1346233469.934_nfa" :subid("cuid_memo_119_1346233469.935")
+.sub "cuid_61_1346277621.774_nfa" :subid("cuid_memo_119_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 6
-    push $P503, $P504
-    box $P505, "eE"
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 6
+    push $P5003, $P5004
+    box $P5005, "eE"
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<f>" :subid("cuid_62_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "backslash:sym<f>" :subid("cuid_62_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 176
     .param pmc _lex_param_0 
@@ -9529,33 +9529,33 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_62_1346233469.934_caps" :subid("cuid_memo_120_1346233469.935")
+.sub "cuid_62_1346277621.774_caps" :subid("cuid_memo_120_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_62_1346233469.934_nfa" :subid("cuid_memo_121_1346233469.935")
+.sub "cuid_62_1346277621.774_nfa" :subid("cuid_memo_121_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 6
-    push $P503, $P504
-    box $P505, "fF"
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 6
+    push $P5003, $P5004
+    box $P5005, "fF"
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<h>" :subid("cuid_63_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "backslash:sym<h>" :subid("cuid_63_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 177
     .param pmc _lex_param_0 
@@ -9638,33 +9638,33 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_63_1346233469.934_caps" :subid("cuid_memo_122_1346233469.935")
+.sub "cuid_63_1346277621.774_caps" :subid("cuid_memo_122_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_63_1346233469.934_nfa" :subid("cuid_memo_123_1346233469.935")
+.sub "cuid_63_1346277621.774_nfa" :subid("cuid_memo_123_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 6
-    push $P503, $P504
-    box $P505, "hH"
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 6
+    push $P5003, $P5004
+    box $P5005, "hH"
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<r>" :subid("cuid_64_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "backslash:sym<r>" :subid("cuid_64_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 178
     .param pmc _lex_param_0 
@@ -9747,33 +9747,33 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_64_1346233469.934_caps" :subid("cuid_memo_124_1346233469.935")
+.sub "cuid_64_1346277621.774_caps" :subid("cuid_memo_124_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_64_1346233469.934_nfa" :subid("cuid_memo_125_1346233469.935")
+.sub "cuid_64_1346277621.774_nfa" :subid("cuid_memo_125_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 6
-    push $P503, $P504
-    box $P505, "rR"
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 6
+    push $P5003, $P5004
+    box $P5005, "rR"
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<t>" :subid("cuid_65_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "backslash:sym<t>" :subid("cuid_65_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 179
     .param pmc _lex_param_0 
@@ -9856,33 +9856,33 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_65_1346233469.934_caps" :subid("cuid_memo_126_1346233469.935")
+.sub "cuid_65_1346277621.774_caps" :subid("cuid_memo_126_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_65_1346233469.934_nfa" :subid("cuid_memo_127_1346233469.935")
+.sub "cuid_65_1346277621.774_nfa" :subid("cuid_memo_127_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 6
-    push $P503, $P504
-    box $P505, "tT"
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 6
+    push $P5003, $P5004
+    box $P5005, "tT"
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<v>" :subid("cuid_66_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "backslash:sym<v>" :subid("cuid_66_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 180
     .param pmc _lex_param_0 
@@ -9965,33 +9965,33 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_66_1346233469.934_caps" :subid("cuid_memo_128_1346233469.935")
+.sub "cuid_66_1346277621.774_caps" :subid("cuid_memo_128_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_66_1346233469.934_nfa" :subid("cuid_memo_129_1346233469.935")
+.sub "cuid_66_1346277621.774_nfa" :subid("cuid_memo_129_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 6
-    push $P503, $P504
-    box $P505, "vV"
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 6
+    push $P5003, $P5004
+    box $P5005, "vV"
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<o>" :subid("cuid_67_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "backslash:sym<o>" :subid("cuid_67_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 181
     .param pmc _lex_param_0 
@@ -10044,7 +10044,7 @@
     nqp_push_label $P11, alt299_0928
     nqp_push_label $P11, alt299_1930
     nqp_rxmark rx296_bstack, alt299_end927, -1, 0
-    rx296_cur."!alt"(rx296_pos, "alt_nfa__11_1346233471.33", $P11)
+    rx296_cur."!alt"(rx296_pos, "alt_nfa__11_1346277623.051", $P11)
     goto rx296_fail918
   alt299_0928:
     repr_bind_attr_int rx296_cur, rx296_curclass, "$!pos", rx296_pos
@@ -10112,114 +10112,114 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_67_1346233469.934_caps" :subid("cuid_memo_130_1346233469.935")
+.sub "cuid_67_1346277621.774_caps" :subid("cuid_memo_130_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    box $P503, 0
-    set $P501["octint"], $P503
-    box $P504, 0
-    set $P501["octints"], $P504
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    box $P5003, 0
+    set $P5001["octint"], $P5003
+    box $P5004, 0
+    set $P5001["octints"], $P5004
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_67_1346233469.934_nfa" :subid("cuid_memo_131_1346233469.935")
+.sub "cuid_67_1346277621.774_nfa" :subid("cuid_memo_131_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 6
-    push $P503, $P504
-    box $P505, "oO"
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 8
-    push $P507, $P508
-    box $P509, "octint"
-    push $P507, $P509
-    box $P510, 0
-    push $P507, $P510
-    box $P511, 2
-    push $P507, $P511
-    box $P512, 91
-    push $P507, $P512
-    box $P513, 3
-    push $P507, $P513
-    push $P501, $P507
-    new $P514, 'ResizablePMCArray'
-    box $P515, 8
-    push $P514, $P515
-    box $P516, "octints"
-    push $P514, $P516
-    box $P517, 4
-    push $P514, $P517
-    push $P501, $P514
-    new $P518, 'ResizablePMCArray'
-    box $P519, 2
-    push $P518, $P519
-    box $P520, 93
-    push $P518, $P520
-    box $P521, 0
-    push $P518, $P521
-    push $P501, $P518
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 6
+    push $P5003, $P5004
+    box $P5005, "oO"
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 8
+    push $P5007, $P5008
+    box $P5009, "octint"
+    push $P5007, $P5009
+    box $P5010, 0
+    push $P5007, $P5010
+    box $P5011, 2
+    push $P5007, $P5011
+    box $P5012, 91
+    push $P5007, $P5012
+    box $P5013, 3
+    push $P5007, $P5013
+    push $P5001, $P5007
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 8
+    push $P5014, $P5015
+    box $P5016, "octints"
+    push $P5014, $P5016
+    box $P5017, 4
+    push $P5014, $P5017
+    push $P5001, $P5014
+    new $P5018, 'ResizablePMCArray'
+    box $P5019, 2
+    push $P5018, $P5019
+    box $P5020, 93
+    push $P5018, $P5020
+    box $P5021, 0
+    push $P5018, $P5021
+    push $P5001, $P5018
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_67_1346233469.934_alt_nfa__11_1346233471.33" :subid("cuid_memo_132_1346233469.935")
+.sub "cuid_67_1346277621.774_alt_nfa__11_1346277623.051" :subid("cuid_memo_132_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    new $P503, 'ResizablePMCArray'
-    push $P502, $P503
-    new $P504, 'ResizablePMCArray'
-    box $P505, 8
-    push $P504, $P505
-    box $P506, "octint"
-    push $P504, $P506
-    box $P507, 0
-    push $P504, $P507
-    push $P502, $P504
-    push $P501, $P502
-    new $P508, 'ResizablePMCArray'
-    new $P509, 'ResizablePMCArray'
-    push $P508, $P509
-    new $P510, 'ResizablePMCArray'
-    box $P511, 2
-    push $P510, $P511
-    box $P512, 91
-    push $P510, $P512
-    box $P513, 2
-    push $P510, $P513
-    push $P508, $P510
-    new $P514, 'ResizablePMCArray'
-    box $P515, 8
-    push $P514, $P515
-    box $P516, "octints"
-    push $P514, $P516
-    box $P517, 3
-    push $P514, $P517
-    push $P508, $P514
-    new $P518, 'ResizablePMCArray'
-    box $P519, 2
-    push $P518, $P519
-    box $P520, 93
-    push $P518, $P520
-    box $P521, 0
-    push $P518, $P521
-    push $P508, $P518
-    push $P501, $P508
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    new $P5003, 'ResizablePMCArray'
+    push $P5002, $P5003
+    new $P5004, 'ResizablePMCArray'
+    box $P5005, 8
+    push $P5004, $P5005
+    box $P5006, "octint"
+    push $P5004, $P5006
+    box $P5007, 0
+    push $P5004, $P5007
+    push $P5002, $P5004
+    push $P5001, $P5002
+    new $P5008, 'ResizablePMCArray'
+    new $P5009, 'ResizablePMCArray'
+    push $P5008, $P5009
+    new $P5010, 'ResizablePMCArray'
+    box $P5011, 2
+    push $P5010, $P5011
+    box $P5012, 91
+    push $P5010, $P5012
+    box $P5013, 2
+    push $P5010, $P5013
+    push $P5008, $P5010
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 8
+    push $P5014, $P5015
+    box $P5016, "octints"
+    push $P5014, $P5016
+    box $P5017, 3
+    push $P5014, $P5017
+    push $P5008, $P5014
+    new $P5018, 'ResizablePMCArray'
+    box $P5019, 2
+    push $P5018, $P5019
+    box $P5020, 93
+    push $P5018, $P5020
+    box $P5021, 0
+    push $P5018, $P5021
+    push $P5008, $P5018
+    push $P5001, $P5008
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<x>" :subid("cuid_68_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "backslash:sym<x>" :subid("cuid_68_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 182
     .param pmc _lex_param_0 
@@ -10272,7 +10272,7 @@
     nqp_push_label $P11, alt305_0945
     nqp_push_label $P11, alt305_1947
     nqp_rxmark rx302_bstack, alt305_end944, -1, 0
-    rx302_cur."!alt"(rx302_pos, "alt_nfa__12_1346233471.353", $P11)
+    rx302_cur."!alt"(rx302_pos, "alt_nfa__12_1346277623.073", $P11)
     goto rx302_fail935
   alt305_0945:
     repr_bind_attr_int rx302_cur, rx302_curclass, "$!pos", rx302_pos
@@ -10340,114 +10340,114 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_68_1346233469.934_caps" :subid("cuid_memo_133_1346233469.935")
+.sub "cuid_68_1346277621.774_caps" :subid("cuid_memo_133_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    box $P503, 0
-    set $P501["hexint"], $P503
-    box $P504, 0
-    set $P501["hexints"], $P504
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    box $P5003, 0
+    set $P5001["hexint"], $P5003
+    box $P5004, 0
+    set $P5001["hexints"], $P5004
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_68_1346233469.934_nfa" :subid("cuid_memo_134_1346233469.935")
+.sub "cuid_68_1346277621.774_nfa" :subid("cuid_memo_134_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 6
-    push $P503, $P504
-    box $P505, "xX"
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 8
-    push $P507, $P508
-    box $P509, "hexint"
-    push $P507, $P509
-    box $P510, 0
-    push $P507, $P510
-    box $P511, 2
-    push $P507, $P511
-    box $P512, 91
-    push $P507, $P512
-    box $P513, 3
-    push $P507, $P513
-    push $P501, $P507
-    new $P514, 'ResizablePMCArray'
-    box $P515, 8
-    push $P514, $P515
-    box $P516, "hexints"
-    push $P514, $P516
-    box $P517, 4
-    push $P514, $P517
-    push $P501, $P514
-    new $P518, 'ResizablePMCArray'
-    box $P519, 2
-    push $P518, $P519
-    box $P520, 93
-    push $P518, $P520
-    box $P521, 0
-    push $P518, $P521
-    push $P501, $P518
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 6
+    push $P5003, $P5004
+    box $P5005, "xX"
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 8
+    push $P5007, $P5008
+    box $P5009, "hexint"
+    push $P5007, $P5009
+    box $P5010, 0
+    push $P5007, $P5010
+    box $P5011, 2
+    push $P5007, $P5011
+    box $P5012, 91
+    push $P5007, $P5012
+    box $P5013, 3
+    push $P5007, $P5013
+    push $P5001, $P5007
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 8
+    push $P5014, $P5015
+    box $P5016, "hexints"
+    push $P5014, $P5016
+    box $P5017, 4
+    push $P5014, $P5017
+    push $P5001, $P5014
+    new $P5018, 'ResizablePMCArray'
+    box $P5019, 2
+    push $P5018, $P5019
+    box $P5020, 93
+    push $P5018, $P5020
+    box $P5021, 0
+    push $P5018, $P5021
+    push $P5001, $P5018
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_68_1346233469.934_alt_nfa__12_1346233471.353" :subid("cuid_memo_135_1346233469.935")
+.sub "cuid_68_1346277621.774_alt_nfa__12_1346277623.073" :subid("cuid_memo_135_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    new $P503, 'ResizablePMCArray'
-    push $P502, $P503
-    new $P504, 'ResizablePMCArray'
-    box $P505, 8
-    push $P504, $P505
-    box $P506, "hexint"
-    push $P504, $P506
-    box $P507, 0
-    push $P504, $P507
-    push $P502, $P504
-    push $P501, $P502
-    new $P508, 'ResizablePMCArray'
-    new $P509, 'ResizablePMCArray'
-    push $P508, $P509
-    new $P510, 'ResizablePMCArray'
-    box $P511, 2
-    push $P510, $P511
-    box $P512, 91
-    push $P510, $P512
-    box $P513, 2
-    push $P510, $P513
-    push $P508, $P510
-    new $P514, 'ResizablePMCArray'
-    box $P515, 8
-    push $P514, $P515
-    box $P516, "hexints"
-    push $P514, $P516
-    box $P517, 3
-    push $P514, $P517
-    push $P508, $P514
-    new $P518, 'ResizablePMCArray'
-    box $P519, 2
-    push $P518, $P519
-    box $P520, 93
-    push $P518, $P520
-    box $P521, 0
-    push $P518, $P521
-    push $P508, $P518
-    push $P501, $P508
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    new $P5003, 'ResizablePMCArray'
+    push $P5002, $P5003
+    new $P5004, 'ResizablePMCArray'
+    box $P5005, 8
+    push $P5004, $P5005
+    box $P5006, "hexint"
+    push $P5004, $P5006
+    box $P5007, 0
+    push $P5004, $P5007
+    push $P5002, $P5004
+    push $P5001, $P5002
+    new $P5008, 'ResizablePMCArray'
+    new $P5009, 'ResizablePMCArray'
+    push $P5008, $P5009
+    new $P5010, 'ResizablePMCArray'
+    box $P5011, 2
+    push $P5010, $P5011
+    box $P5012, 91
+    push $P5010, $P5012
+    box $P5013, 2
+    push $P5010, $P5013
+    push $P5008, $P5010
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 8
+    push $P5014, $P5015
+    box $P5016, "hexints"
+    push $P5014, $P5016
+    box $P5017, 3
+    push $P5014, $P5017
+    push $P5008, $P5014
+    new $P5018, 'ResizablePMCArray'
+    box $P5019, 2
+    push $P5018, $P5019
+    box $P5020, 93
+    push $P5018, $P5020
+    box $P5021, 0
+    push $P5018, $P5021
+    push $P5008, $P5018
+    push $P5001, $P5008
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<c>" :subid("cuid_69_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "backslash:sym<c>" :subid("cuid_69_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 183
     .param pmc _lex_param_0 
@@ -10538,43 +10538,43 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_69_1346233469.934_caps" :subid("cuid_memo_136_1346233469.935")
+.sub "cuid_69_1346277621.774_caps" :subid("cuid_memo_136_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    box $P503, 0
-    set $P501["charspec"], $P503
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    box $P5003, 0
+    set $P5001["charspec"], $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_69_1346233469.934_nfa" :subid("cuid_memo_137_1346233469.935")
+.sub "cuid_69_1346277621.774_nfa" :subid("cuid_memo_137_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 6
-    push $P503, $P504
-    box $P505, "cC"
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 8
-    push $P507, $P508
-    box $P509, "charspec"
-    push $P507, $P509
-    box $P510, 0
-    push $P507, $P510
-    push $P501, $P507
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 6
+    push $P5003, $P5004
+    box $P5005, "cC"
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 8
+    push $P5007, $P5008
+    box $P5009, "charspec"
+    push $P5007, $P5009
+    box $P5010, 0
+    push $P5007, $P5010
+    push $P5001, $P5007
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<A>" :subid("cuid_70_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "backslash:sym<A>" :subid("cuid_70_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 184
     .param pmc _lex_param_0 
@@ -10651,39 +10651,39 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_70_1346233469.934_caps" :subid("cuid_memo_138_1346233469.935")
+.sub "cuid_70_1346277621.774_caps" :subid("cuid_memo_138_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_70_1346233469.934_nfa" :subid("cuid_memo_139_1346233469.935")
+.sub "cuid_70_1346277621.774_nfa" :subid("cuid_memo_139_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 65
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 8
-    push $P507, $P508
-    box $P509, "obs"
-    push $P507, $P509
-    box $P510, 0
-    push $P507, $P510
-    push $P501, $P507
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 65
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 8
+    push $P5007, $P5008
+    box $P5009, "obs"
+    push $P5007, $P5009
+    box $P5010, 0
+    push $P5007, $P5010
+    push $P5001, $P5007
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<z>" :subid("cuid_71_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "backslash:sym<z>" :subid("cuid_71_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 185
     .param pmc _lex_param_0 
@@ -10760,39 +10760,39 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_71_1346233469.934_caps" :subid("cuid_memo_140_1346233469.935")
+.sub "cuid_71_1346277621.774_caps" :subid("cuid_memo_140_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_71_1346233469.934_nfa" :subid("cuid_memo_141_1346233469.935")
+.sub "cuid_71_1346277621.774_nfa" :subid("cuid_memo_141_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 122
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 8
-    push $P507, $P508
-    box $P509, "obs"
-    push $P507, $P509
-    box $P510, 0
-    push $P507, $P510
-    push $P501, $P507
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 122
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 8
+    push $P5007, $P5008
+    box $P5009, "obs"
+    push $P5007, $P5009
+    box $P5010, 0
+    push $P5007, $P5010
+    push $P5001, $P5007
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<Z>" :subid("cuid_72_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "backslash:sym<Z>" :subid("cuid_72_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 186
     .param pmc _lex_param_0 
@@ -10869,39 +10869,39 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_72_1346233469.934_caps" :subid("cuid_memo_142_1346233469.935")
+.sub "cuid_72_1346277621.774_caps" :subid("cuid_memo_142_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_72_1346233469.934_nfa" :subid("cuid_memo_143_1346233469.935")
+.sub "cuid_72_1346277621.774_nfa" :subid("cuid_memo_143_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 90
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 8
-    push $P507, $P508
-    box $P509, "obs"
-    push $P507, $P509
-    box $P510, 0
-    push $P507, $P510
-    push $P501, $P507
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 90
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 8
+    push $P5007, $P5008
+    box $P5009, "obs"
+    push $P5007, $P5009
+    box $P5010, 0
+    push $P5007, $P5010
+    push $P5001, $P5007
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<Q>" :subid("cuid_73_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "backslash:sym<Q>" :subid("cuid_73_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 187
     .param pmc _lex_param_0 
@@ -10978,44 +10978,44 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_73_1346233469.934_caps" :subid("cuid_memo_144_1346233469.935")
+.sub "cuid_73_1346277621.774_caps" :subid("cuid_memo_144_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_73_1346233469.934_nfa" :subid("cuid_memo_145_1346233469.935")
+.sub "cuid_73_1346277621.774_nfa" :subid("cuid_memo_145_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 81
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 8
-    push $P507, $P508
-    box $P509, "obs"
-    push $P507, $P509
-    box $P510, 0
-    push $P507, $P510
-    push $P501, $P507
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 81
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 8
+    push $P5007, $P5008
+    box $P5009, "obs"
+    push $P5007, $P5009
+    box $P5010, 0
+    push $P5007, $P5010
+    push $P5001, $P5007
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<unrec>" :subid("cuid_74_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "backslash:sym<unrec>" :subid("cuid_74_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 188
     .param pmc _lex_param_0 
-    .const 'Sub' $P504 = 'cuid_164_1346233469.934' 
-    capture_lex $P504 
+    .const 'Sub' $P5004 = 'cuid_164_1346277621.774' 
+    capture_lex $P5004 
     .lex utf8:"$\x{a2}", $P101 
     .lex "$/", $P102 
     .lex "self", _lex_param_0 
@@ -11047,11 +11047,11 @@
   rxscan325_done1015:
     repr_bind_attr_int rx324_cur, rx324_curclass, "$!pos", rx324_pos
     store_lex unicode:"$\x{a2}", rx324_cur
-    $P501 = $P101."MATCH"()
-    set $P102, $P501
-    .const 'Sub' $P502 = 'cuid_164_1346233469.934' 
-    capture_lex $P502
-    $P503 = $P502()
+    $P5001 = $P101."MATCH"()
+    set $P102, $P5001
+    .const 'Sub' $P5002 = 'cuid_164_1346277621.774' 
+    capture_lex $P5002
+    $P5003 = $P5002()
     ge rx324_pos, rx324_eos, rx324_fail1009
     is_cclass $I11, .CCLASS_WORD, rx324_tgt, rx324_pos
     unless $I11, rx324_fail1009
@@ -11095,23 +11095,23 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_74_1346233469.934_caps" :subid("cuid_memo_146_1346233469.935")
+.sub "cuid_74_1346277621.774_caps" :subid("cuid_memo_146_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_164_1346233469.934") :anon :lex :outer("cuid_74_1346233469.934")
+.sub "" :subid("cuid_164_1346277621.774") :anon :lex :outer("cuid_74_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 188
 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    .return ($P501) 
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<misc>" :subid("cuid_75_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "backslash:sym<misc>" :subid("cuid_75_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 189
     .param pmc _lex_param_0 
@@ -11182,45 +11182,45 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_75_1346233469.934_caps" :subid("cuid_memo_147_1346233469.935")
+.sub "cuid_75_1346277621.774_caps" :subid("cuid_memo_147_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_75_1346233469.934_nfa" :subid("cuid_memo_148_1346233469.935")
+.sub "cuid_75_1346277621.774_nfa" :subid("cuid_memo_148_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 5
-    push $P503, $P504
-    box $P505, 8192
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 5
+    push $P5003, $P5004
+    box $P5005, 8192
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "assertion" :subid("cuid_76_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "assertion" :subid("cuid_76_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 191
     .param pmc self 
-    $P501 = self."!protoregex"("assertion")
-    .return ($P501) 
+    $P5001 = self."!protoregex"("assertion")
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "assertion:sym<?>" :subid("cuid_78_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "assertion:sym<?>" :subid("cuid_78_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 193
     .param pmc _lex_param_0 
-    .const 'Sub' $P502 = 'cuid_77_1346233469.934' 
-    capture_lex $P502 
+    .const 'Sub' $P5002 = 'cuid_77_1346277621.774' 
+    capture_lex $P5002 
     .lex utf8:"$\x{a2}", $P101 
     .lex "$/", $P102 
     .lex "self", _lex_param_0 
@@ -11259,13 +11259,13 @@
     nqp_push_label $P11, alt331_01038
     nqp_push_label $P11, alt331_11049
     nqp_rxmark rx329_bstack, alt331_end1037, -1, 0
-    rx329_cur."!alt"(rx329_pos, "alt_nfa__13_1346233471.474", $P11)
+    rx329_cur."!alt"(rx329_pos, "alt_nfa__13_1346277623.189", $P11)
     goto rx329_fail1030
   alt331_01038:
-    .const 'Sub' $P501 = 'cuid_77_1346233469.934' 
-    capture_lex $P501
+    .const 'Sub' $P5001 = 'cuid_77_1346277621.774' 
+    capture_lex $P5001
     repr_bind_attr_int rx329_cur, rx329_curclass, "$!pos", rx329_pos
-    $P11 = rx329_cur."before"($P501)
+    $P11 = rx329_cur."before"($P5001)
     repr_get_attr_int $I11, $P11, rx329_curclass, "$!pos"
     lt $I11, 0, rx329_fail1030
     goto alt331_end1037
@@ -11315,94 +11315,94 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_78_1346233469.934_caps" :subid("cuid_memo_149_1346233469.935")
+.sub "cuid_78_1346277621.774_caps" :subid("cuid_memo_149_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["assertion"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["assertion"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_78_1346233469.934_nfa" :subid("cuid_memo_150_1346233469.935")
+.sub "cuid_78_1346277621.774_nfa" :subid("cuid_memo_150_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 63
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 2
-    push $P507, $P508
-    box $P509, 62
-    push $P507, $P509
-    box $P510, 3
-    push $P507, $P510
-    box $P511, 8
-    push $P507, $P511
-    box $P512, "assertion"
-    push $P507, $P512
-    box $P513, 0
-    push $P507, $P513
-    push $P501, $P507
-    new $P514, 'ResizablePMCArray'
-    box $P515, 0
-    push $P514, $P515
-    box $P516, 0
-    push $P514, $P516
-    box $P517, 0
-    push $P514, $P517
-    push $P501, $P514
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 63
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 2
+    push $P5007, $P5008
+    box $P5009, 62
+    push $P5007, $P5009
+    box $P5010, 3
+    push $P5007, $P5010
+    box $P5011, 8
+    push $P5007, $P5011
+    box $P5012, "assertion"
+    push $P5007, $P5012
+    box $P5013, 0
+    push $P5007, $P5013
+    push $P5001, $P5007
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 0
+    push $P5014, $P5015
+    box $P5016, 0
+    push $P5014, $P5016
+    box $P5017, 0
+    push $P5014, $P5017
+    push $P5001, $P5014
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_78_1346233469.934_alt_nfa__13_1346233471.474" :subid("cuid_memo_151_1346233469.935")
+.sub "cuid_78_1346277621.774_alt_nfa__13_1346277623.189" :subid("cuid_memo_151_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    new $P503, 'ResizablePMCArray'
-    push $P502, $P503
-    new $P504, 'ResizablePMCArray'
-    box $P505, 2
-    push $P504, $P505
-    box $P506, 62
-    push $P504, $P506
-    box $P507, 2
-    push $P504, $P507
-    push $P502, $P504
-    new $P508, 'ResizablePMCArray'
-    box $P509, 0
-    push $P508, $P509
-    box $P510, 0
-    push $P508, $P510
-    box $P511, 0
-    push $P508, $P511
-    push $P502, $P508
-    push $P501, $P502
-    new $P512, 'ResizablePMCArray'
-    new $P513, 'ResizablePMCArray'
-    push $P512, $P513
-    new $P514, 'ResizablePMCArray'
-    box $P515, 8
-    push $P514, $P515
-    box $P516, "assertion"
-    push $P514, $P516
-    box $P517, 0
-    push $P514, $P517
-    push $P512, $P514
-    push $P501, $P512
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    new $P5003, 'ResizablePMCArray'
+    push $P5002, $P5003
+    new $P5004, 'ResizablePMCArray'
+    box $P5005, 2
+    push $P5004, $P5005
+    box $P5006, 62
+    push $P5004, $P5006
+    box $P5007, 2
+    push $P5004, $P5007
+    push $P5002, $P5004
+    new $P5008, 'ResizablePMCArray'
+    box $P5009, 0
+    push $P5008, $P5009
+    box $P5010, 0
+    push $P5008, $P5010
+    box $P5011, 0
+    push $P5008, $P5011
+    push $P5002, $P5008
+    push $P5001, $P5002
+    new $P5012, 'ResizablePMCArray'
+    new $P5013, 'ResizablePMCArray'
+    push $P5012, $P5013
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 8
+    push $P5014, $P5015
+    box $P5016, "assertion"
+    push $P5014, $P5016
+    box $P5017, 0
+    push $P5014, $P5017
+    push $P5012, $P5014
+    push $P5001, $P5012
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_77_1346233469.934") :anon :lex :outer("cuid_78_1346233469.934")
+.sub "" :subid("cuid_77_1346277621.774") :anon :lex :outer("cuid_78_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
     .param pmc self 
     .lex utf8:"$\x{a2}", $P101 
@@ -11469,36 +11469,36 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_77_1346233469.934_caps" :subid("cuid_memo_152_1346233469.935")
+.sub "cuid_77_1346277621.774_caps" :subid("cuid_memo_152_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_77_1346233469.934_nfa" :subid("cuid_memo_153_1346233469.935")
+.sub "cuid_77_1346277621.774_nfa" :subid("cuid_memo_153_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 62
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 62
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "assertion:sym<!>" :subid("cuid_80_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "assertion:sym<!>" :subid("cuid_80_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 194
     .param pmc _lex_param_0 
-    .const 'Sub' $P502 = 'cuid_79_1346233469.934' 
-    capture_lex $P502 
+    .const 'Sub' $P5002 = 'cuid_79_1346277621.774' 
+    capture_lex $P5002 
     .lex utf8:"$\x{a2}", $P101 
     .lex "$/", $P102 
     .lex "self", _lex_param_0 
@@ -11537,13 +11537,13 @@
     nqp_push_label $P11, alt337_01062
     nqp_push_label $P11, alt337_11073
     nqp_rxmark rx335_bstack, alt337_end1061, -1, 0
-    rx335_cur."!alt"(rx335_pos, "alt_nfa__14_1346233471.494", $P11)
+    rx335_cur."!alt"(rx335_pos, "alt_nfa__14_1346277623.207", $P11)
     goto rx335_fail1054
   alt337_01062:
-    .const 'Sub' $P501 = 'cuid_79_1346233469.934' 
-    capture_lex $P501
+    .const 'Sub' $P5001 = 'cuid_79_1346277621.774' 
+    capture_lex $P5001
     repr_bind_attr_int rx335_cur, rx335_curclass, "$!pos", rx335_pos
-    $P11 = rx335_cur."before"($P501)
+    $P11 = rx335_cur."before"($P5001)
     repr_get_attr_int $I11, $P11, rx335_curclass, "$!pos"
     lt $I11, 0, rx335_fail1054
     goto alt337_end1061
@@ -11593,94 +11593,94 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_80_1346233469.934_caps" :subid("cuid_memo_154_1346233469.935")
+.sub "cuid_80_1346277621.774_caps" :subid("cuid_memo_154_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["assertion"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["assertion"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_80_1346233469.934_nfa" :subid("cuid_memo_155_1346233469.935")
+.sub "cuid_80_1346277621.774_nfa" :subid("cuid_memo_155_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 33
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 2
-    push $P507, $P508
-    box $P509, 62
-    push $P507, $P509
-    box $P510, 3
-    push $P507, $P510
-    box $P511, 8
-    push $P507, $P511
-    box $P512, "assertion"
-    push $P507, $P512
-    box $P513, 0
-    push $P507, $P513
-    push $P501, $P507
-    new $P514, 'ResizablePMCArray'
-    box $P515, 0
-    push $P514, $P515
-    box $P516, 0
-    push $P514, $P516
-    box $P517, 0
-    push $P514, $P517
-    push $P501, $P514
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 33
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 2
+    push $P5007, $P5008
+    box $P5009, 62
+    push $P5007, $P5009
+    box $P5010, 3
+    push $P5007, $P5010
+    box $P5011, 8
+    push $P5007, $P5011
+    box $P5012, "assertion"
+    push $P5007, $P5012
+    box $P5013, 0
+    push $P5007, $P5013
+    push $P5001, $P5007
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 0
+    push $P5014, $P5015
+    box $P5016, 0
+    push $P5014, $P5016
+    box $P5017, 0
+    push $P5014, $P5017
+    push $P5001, $P5014
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_80_1346233469.934_alt_nfa__14_1346233471.494" :subid("cuid_memo_156_1346233469.935")
+.sub "cuid_80_1346277621.774_alt_nfa__14_1346277623.207" :subid("cuid_memo_156_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    new $P503, 'ResizablePMCArray'
-    push $P502, $P503
-    new $P504, 'ResizablePMCArray'
-    box $P505, 2
-    push $P504, $P505
-    box $P506, 62
-    push $P504, $P506
-    box $P507, 2
-    push $P504, $P507
-    push $P502, $P504
-    new $P508, 'ResizablePMCArray'
-    box $P509, 0
-    push $P508, $P509
-    box $P510, 0
-    push $P508, $P510
-    box $P511, 0
-    push $P508, $P511
-    push $P502, $P508
-    push $P501, $P502
-    new $P512, 'ResizablePMCArray'
-    new $P513, 'ResizablePMCArray'
-    push $P512, $P513
-    new $P514, 'ResizablePMCArray'
-    box $P515, 8
-    push $P514, $P515
-    box $P516, "assertion"
-    push $P514, $P516
-    box $P517, 0
-    push $P514, $P517
-    push $P512, $P514
-    push $P501, $P512
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    new $P5003, 'ResizablePMCArray'
+    push $P5002, $P5003
+    new $P5004, 'ResizablePMCArray'
+    box $P5005, 2
+    push $P5004, $P5005
+    box $P5006, 62
+    push $P5004, $P5006
+    box $P5007, 2
+    push $P5004, $P5007
+    push $P5002, $P5004
+    new $P5008, 'ResizablePMCArray'
+    box $P5009, 0
+    push $P5008, $P5009
+    box $P5010, 0
+    push $P5008, $P5010
+    box $P5011, 0
+    push $P5008, $P5011
+    push $P5002, $P5008
+    push $P5001, $P5002
+    new $P5012, 'ResizablePMCArray'
+    new $P5013, 'ResizablePMCArray'
+    push $P5012, $P5013
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 8
+    push $P5014, $P5015
+    box $P5016, "assertion"
+    push $P5014, $P5016
+    box $P5017, 0
+    push $P5014, $P5017
+    push $P5012, $P5014
+    push $P5001, $P5012
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_79_1346233469.934") :anon :lex :outer("cuid_80_1346233469.934")
+.sub "" :subid("cuid_79_1346277621.774") :anon :lex :outer("cuid_80_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
     .param pmc self 
     .lex utf8:"$\x{a2}", $P101 
@@ -11747,31 +11747,31 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_79_1346233469.934_caps" :subid("cuid_memo_157_1346233469.935")
+.sub "cuid_79_1346277621.774_caps" :subid("cuid_memo_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_79_1346233469.934_nfa" :subid("cuid_memo_158_1346233469.935")
+.sub "cuid_79_1346277621.774_nfa" :subid("cuid_memo_158_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 62
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 62
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "assertion:sym<|>" :subid("cuid_81_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "assertion:sym<|>" :subid("cuid_81_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 195
     .param pmc _lex_param_0 
@@ -11851,41 +11851,41 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_81_1346233469.934_caps" :subid("cuid_memo_159_1346233469.935")
+.sub "cuid_81_1346277621.774_caps" :subid("cuid_memo_159_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["identifier"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["identifier"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_81_1346233469.934_nfa" :subid("cuid_memo_160_1346233469.935")
+.sub "cuid_81_1346277621.774_nfa" :subid("cuid_memo_160_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 124
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 8
-    push $P507, $P508
-    box $P509, "identifier"
-    push $P507, $P509
-    box $P510, 0
-    push $P507, $P510
-    push $P501, $P507
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 124
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 8
+    push $P5007, $P5008
+    box $P5009, "identifier"
+    push $P5007, $P5009
+    box $P5010, 0
+    push $P5007, $P5010
+    push $P5001, $P5007
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "assertion:sym<method>" :subid("cuid_82_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "assertion:sym<method>" :subid("cuid_82_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 197
     .param pmc _lex_param_0 
@@ -11965,46 +11965,46 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_82_1346233469.934_caps" :subid("cuid_memo_161_1346233469.935")
+.sub "cuid_82_1346277621.774_caps" :subid("cuid_memo_161_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["assertion"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["assertion"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_82_1346233469.934_nfa" :subid("cuid_memo_162_1346233469.935")
+.sub "cuid_82_1346277621.774_nfa" :subid("cuid_memo_162_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 46
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 8
-    push $P507, $P508
-    box $P509, "assertion"
-    push $P507, $P509
-    box $P510, 0
-    push $P507, $P510
-    push $P501, $P507
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 46
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 8
+    push $P5007, $P5008
+    box $P5009, "assertion"
+    push $P5007, $P5009
+    box $P5010, 0
+    push $P5007, $P5010
+    push $P5001, $P5007
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "assertion:sym<name>" :subid("cuid_84_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "assertion:sym<name>" :subid("cuid_84_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 201
     .param pmc _lex_param_0 
-    .const 'Sub' $P502 = 'cuid_83_1346233469.934' 
-    capture_lex $P502 
+    .const 'Sub' $P5002 = 'cuid_83_1346277621.774' 
+    capture_lex $P5002 
     .lex utf8:"$\x{a2}", $P101 
     .lex "$/", $P102 
     .lex "self", _lex_param_0 
@@ -12051,13 +12051,13 @@
     nqp_push_label $P11, alt351_31126
     nqp_push_label $P11, alt351_41128
     nqp_rxmark rx347_bstack, alt351_end1110, -1, 0
-    rx347_cur."!alt"(rx347_pos, "alt_nfa__15_1346233471.553", $P11)
+    rx347_cur."!alt"(rx347_pos, "alt_nfa__15_1346277623.262", $P11)
     goto rx347_fail1100
   alt351_01111:
-    .const 'Sub' $P501 = 'cuid_83_1346233469.934' 
-    capture_lex $P501
+    .const 'Sub' $P5001 = 'cuid_83_1346277621.774' 
+    capture_lex $P5001
     repr_bind_attr_int rx347_cur, rx347_curclass, "$!pos", rx347_pos
-    $P11 = rx347_cur."before"($P501)
+    $P11 = rx347_cur."before"($P5001)
     repr_get_attr_int $I11, $P11, rx347_curclass, "$!pos"
     lt $I11, 0, rx347_fail1100
     goto alt351_end1110
@@ -12168,240 +12168,240 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_84_1346233469.934_caps" :subid("cuid_memo_163_1346233469.935")
+.sub "cuid_84_1346277621.774_caps" :subid("cuid_memo_163_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["longname"], $P502
-    box $P503, 2
-    set $P501["assertion"], $P503
-    box $P504, 2
-    set $P501["arglist"], $P504
-    box $P505, 2
-    set $P501["nibbler"], $P505
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["longname"], $P5002
+    box $P5003, 2
+    set $P5001["assertion"], $P5003
+    box $P5004, 2
+    set $P5001["arglist"], $P5004
+    box $P5005, 2
+    set $P5001["nibbler"], $P5005
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_84_1346233469.934_nfa" :subid("cuid_memo_164_1346233469.935")
+.sub "cuid_84_1346277621.774_nfa" :subid("cuid_memo_164_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 8
-    push $P503, $P504
-    box $P505, "identifier"
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 2
-    push $P507, $P508
-    box $P509, 62
-    push $P507, $P509
-    box $P510, 3
-    push $P507, $P510
-    box $P511, 2
-    push $P507, $P511
-    box $P512, 61
-    push $P507, $P512
-    box $P513, 4
-    push $P507, $P513
-    box $P514, 2
-    push $P507, $P514
-    box $P515, 58
-    push $P507, $P515
-    box $P516, 5
-    push $P507, $P516
-    box $P517, 2
-    push $P507, $P517
-    box $P518, 40
-    push $P507, $P518
-    box $P519, 6
-    push $P507, $P519
-    box $P520, 8
-    push $P507, $P520
-    box $P521, "normspace"
-    push $P507, $P521
-    box $P522, 8
-    push $P507, $P522
-    box $P523, 1
-    push $P507, $P523
-    box $P524, 0
-    push $P507, $P524
-    box $P525, 0
-    push $P507, $P525
-    push $P501, $P507
-    new $P526, 'ResizablePMCArray'
-    box $P527, 0
-    push $P526, $P527
-    box $P528, 0
-    push $P526, $P528
-    box $P529, 0
-    push $P526, $P529
-    push $P501, $P526
-    new $P530, 'ResizablePMCArray'
-    box $P531, 8
-    push $P530, $P531
-    box $P532, "assertion"
-    push $P530, $P532
-    box $P533, 0
-    push $P530, $P533
-    push $P501, $P530
-    new $P534, 'ResizablePMCArray'
-    box $P535, 8
-    push $P534, $P535
-    box $P536, "arglist"
-    push $P534, $P536
-    box $P537, 0
-    push $P534, $P537
-    push $P501, $P534
-    new $P538, 'ResizablePMCArray'
-    box $P539, 8
-    push $P538, $P539
-    box $P540, "arglist"
-    push $P538, $P540
-    box $P541, 7
-    push $P538, $P541
-    push $P501, $P538
-    new $P542, 'ResizablePMCArray'
-    box $P543, 2
-    push $P542, $P543
-    box $P544, 41
-    push $P542, $P544
-    box $P545, 0
-    push $P542, $P545
-    push $P501, $P542
-    new $P546, 'ResizablePMCArray'
-    box $P547, 8
-    push $P546, $P547
-    box $P548, "nibbler"
-    push $P546, $P548
-    box $P549, 0
-    push $P546, $P549
-    push $P501, $P546
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 8
+    push $P5003, $P5004
+    box $P5005, "identifier"
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 2
+    push $P5007, $P5008
+    box $P5009, 62
+    push $P5007, $P5009
+    box $P5010, 3
+    push $P5007, $P5010
+    box $P5011, 2
+    push $P5007, $P5011
+    box $P5012, 61
+    push $P5007, $P5012
+    box $P5013, 4
+    push $P5007, $P5013
+    box $P5014, 2
+    push $P5007, $P5014
+    box $P5015, 58
+    push $P5007, $P5015
+    box $P5016, 5
+    push $P5007, $P5016
+    box $P5017, 2
+    push $P5007, $P5017
+    box $P5018, 40
+    push $P5007, $P5018
+    box $P5019, 6
+    push $P5007, $P5019
+    box $P5020, 8
+    push $P5007, $P5020
+    box $P5021, "normspace"
+    push $P5007, $P5021
+    box $P5022, 8
+    push $P5007, $P5022
+    box $P5023, 1
+    push $P5007, $P5023
+    box $P5024, 0
+    push $P5007, $P5024
+    box $P5025, 0
+    push $P5007, $P5025
+    push $P5001, $P5007
+    new $P5026, 'ResizablePMCArray'
+    box $P5027, 0
+    push $P5026, $P5027
+    box $P5028, 0
+    push $P5026, $P5028
+    box $P5029, 0
+    push $P5026, $P5029
+    push $P5001, $P5026
+    new $P5030, 'ResizablePMCArray'
+    box $P5031, 8
+    push $P5030, $P5031
+    box $P5032, "assertion"
+    push $P5030, $P5032
+    box $P5033, 0
+    push $P5030, $P5033
+    push $P5001, $P5030
+    new $P5034, 'ResizablePMCArray'
+    box $P5035, 8
+    push $P5034, $P5035
+    box $P5036, "arglist"
+    push $P5034, $P5036
+    box $P5037, 0
+    push $P5034, $P5037
+    push $P5001, $P5034
+    new $P5038, 'ResizablePMCArray'
+    box $P5039, 8
+    push $P5038, $P5039
+    box $P5040, "arglist"
+    push $P5038, $P5040
+    box $P5041, 7
+    push $P5038, $P5041
+    push $P5001, $P5038
+    new $P5042, 'ResizablePMCArray'
+    box $P5043, 2
+    push $P5042, $P5043
+    box $P5044, 41
+    push $P5042, $P5044
+    box $P5045, 0
+    push $P5042, $P5045
+    push $P5001, $P5042
+    new $P5046, 'ResizablePMCArray'
+    box $P5047, 8
+    push $P5046, $P5047
+    box $P5048, "nibbler"
+    push $P5046, $P5048
+    box $P5049, 0
+    push $P5046, $P5049
+    push $P5001, $P5046
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_84_1346233469.934_alt_nfa__15_1346233471.553" :subid("cuid_memo_165_1346233469.935")
+.sub "cuid_84_1346277621.774_alt_nfa__15_1346277623.262" :subid("cuid_memo_165_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    new $P503, 'ResizablePMCArray'
-    push $P502, $P503
-    new $P504, 'ResizablePMCArray'
-    box $P505, 2
-    push $P504, $P505
-    box $P506, 62
-    push $P504, $P506
-    box $P507, 2
-    push $P504, $P507
-    push $P502, $P504
-    new $P508, 'ResizablePMCArray'
-    box $P509, 0
-    push $P508, $P509
-    box $P510, 0
-    push $P508, $P510
-    box $P511, 0
-    push $P508, $P511
-    push $P502, $P508
-    push $P501, $P502
-    new $P512, 'ResizablePMCArray'
-    new $P513, 'ResizablePMCArray'
-    push $P512, $P513
-    new $P514, 'ResizablePMCArray'
-    box $P515, 2
-    push $P514, $P515
-    box $P516, 61
-    push $P514, $P516
-    box $P517, 2
-    push $P514, $P517
-    push $P512, $P514
-    new $P518, 'ResizablePMCArray'
-    box $P519, 8
-    push $P518, $P519
-    box $P520, "assertion"
-    push $P518, $P520
-    box $P521, 0
-    push $P518, $P521
-    push $P512, $P518
-    push $P501, $P512
-    new $P522, 'ResizablePMCArray'
-    new $P523, 'ResizablePMCArray'
-    push $P522, $P523
-    new $P524, 'ResizablePMCArray'
-    box $P525, 2
-    push $P524, $P525
-    box $P526, 58
-    push $P524, $P526
-    box $P527, 2
-    push $P524, $P527
-    push $P522, $P524
-    new $P528, 'ResizablePMCArray'
-    box $P529, 8
-    push $P528, $P529
-    box $P530, "arglist"
-    push $P528, $P530
-    box $P531, 0
-    push $P528, $P531
-    push $P522, $P528
-    push $P501, $P522
-    new $P532, 'ResizablePMCArray'
-    new $P533, 'ResizablePMCArray'
-    push $P532, $P533
-    new $P534, 'ResizablePMCArray'
-    box $P535, 2
-    push $P534, $P535
-    box $P536, 40
-    push $P534, $P536
-    box $P537, 2
-    push $P534, $P537
-    push $P532, $P534
-    new $P538, 'ResizablePMCArray'
-    box $P539, 8
-    push $P538, $P539
-    box $P540, "arglist"
-    push $P538, $P540
-    box $P541, 3
-    push $P538, $P541
-    push $P532, $P538
-    new $P542, 'ResizablePMCArray'
-    box $P543, 2
-    push $P542, $P543
-    box $P544, 41
-    push $P542, $P544
-    box $P545, 0
-    push $P542, $P545
-    push $P532, $P542
-    push $P501, $P532
-    new $P546, 'ResizablePMCArray'
-    new $P547, 'ResizablePMCArray'
-    push $P546, $P547
-    new $P548, 'ResizablePMCArray'
-    box $P549, 8
-    push $P548, $P549
-    box $P550, "normspace"
-    push $P548, $P550
-    box $P551, 2
-    push $P548, $P551
-    push $P546, $P548
-    new $P552, 'ResizablePMCArray'
-    box $P553, 8
-    push $P552, $P553
-    box $P554, "nibbler"
-    push $P552, $P554
-    box $P555, 0
-    push $P552, $P555
-    push $P546, $P552
-    push $P501, $P546
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    new $P5003, 'ResizablePMCArray'
+    push $P5002, $P5003
+    new $P5004, 'ResizablePMCArray'
+    box $P5005, 2
+    push $P5004, $P5005
+    box $P5006, 62
+    push $P5004, $P5006
+    box $P5007, 2
+    push $P5004, $P5007
+    push $P5002, $P5004
+    new $P5008, 'ResizablePMCArray'
+    box $P5009, 0
+    push $P5008, $P5009
+    box $P5010, 0
+    push $P5008, $P5010
+    box $P5011, 0
+    push $P5008, $P5011
+    push $P5002, $P5008
+    push $P5001, $P5002
+    new $P5012, 'ResizablePMCArray'
+    new $P5013, 'ResizablePMCArray'
+    push $P5012, $P5013
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 2
+    push $P5014, $P5015
+    box $P5016, 61
+    push $P5014, $P5016
+    box $P5017, 2
+    push $P5014, $P5017
+    push $P5012, $P5014
+    new $P5018, 'ResizablePMCArray'
+    box $P5019, 8
+    push $P5018, $P5019
+    box $P5020, "assertion"
+    push $P5018, $P5020
+    box $P5021, 0
+    push $P5018, $P5021
+    push $P5012, $P5018
+    push $P5001, $P5012
+    new $P5022, 'ResizablePMCArray'
+    new $P5023, 'ResizablePMCArray'
+    push $P5022, $P5023
+    new $P5024, 'ResizablePMCArray'
+    box $P5025, 2
+    push $P5024, $P5025
+    box $P5026, 58
+    push $P5024, $P5026
+    box $P5027, 2
+    push $P5024, $P5027
+    push $P5022, $P5024
+    new $P5028, 'ResizablePMCArray'
+    box $P5029, 8
+    push $P5028, $P5029
+    box $P5030, "arglist"
+    push $P5028, $P5030
+    box $P5031, 0
+    push $P5028, $P5031
+    push $P5022, $P5028
+    push $P5001, $P5022
+    new $P5032, 'ResizablePMCArray'
+    new $P5033, 'ResizablePMCArray'
+    push $P5032, $P5033
+    new $P5034, 'ResizablePMCArray'
+    box $P5035, 2
+    push $P5034, $P5035
+    box $P5036, 40
+    push $P5034, $P5036
+    box $P5037, 2
+    push $P5034, $P5037
+    push $P5032, $P5034
+    new $P5038, 'ResizablePMCArray'
+    box $P5039, 8
+    push $P5038, $P5039
+    box $P5040, "arglist"
+    push $P5038, $P5040
+    box $P5041, 3
+    push $P5038, $P5041
+    push $P5032, $P5038
+    new $P5042, 'ResizablePMCArray'
+    box $P5043, 2
+    push $P5042, $P5043
+    box $P5044, 41
+    push $P5042, $P5044
+    box $P5045, 0
+    push $P5042, $P5045
+    push $P5032, $P5042
+    push $P5001, $P5032
+    new $P5046, 'ResizablePMCArray'
+    new $P5047, 'ResizablePMCArray'
+    push $P5046, $P5047
+    new $P5048, 'ResizablePMCArray'
+    box $P5049, 8
+    push $P5048, $P5049
+    box $P5050, "normspace"
+    push $P5048, $P5050
+    box $P5051, 2
+    push $P5048, $P5051
+    push $P5046, $P5048
+    new $P5052, 'ResizablePMCArray'
+    box $P5053, 8
+    push $P5052, $P5053
+    box $P5054, "nibbler"
+    push $P5052, $P5054
+    box $P5055, 0
+    push $P5052, $P5055
+    push $P5046, $P5052
+    push $P5001, $P5046
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_83_1346233469.934") :anon :lex :outer("cuid_84_1346233469.934")
+.sub "" :subid("cuid_83_1346277621.774") :anon :lex :outer("cuid_84_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
     .param pmc self 
     .lex utf8:"$\x{a2}", $P101 
@@ -12468,36 +12468,36 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_83_1346233469.934_caps" :subid("cuid_memo_166_1346233469.935")
+.sub "cuid_83_1346277621.774_caps" :subid("cuid_memo_166_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_83_1346233469.934_nfa" :subid("cuid_memo_167_1346233469.935")
+.sub "cuid_83_1346277621.774_nfa" :subid("cuid_memo_167_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 62
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 62
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "assertion:sym<[>" :subid("cuid_86_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "assertion:sym<[>" :subid("cuid_86_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 212
     .param pmc _lex_param_0 
-    .const 'Sub' $P502 = 'cuid_85_1346233469.934' 
-    capture_lex $P502 
+    .const 'Sub' $P5002 = 'cuid_85_1346277621.774' 
+    capture_lex $P5002 
     .lex utf8:"$\x{a2}", $P101 
     .lex "$/", $P102 
     .lex "self", _lex_param_0 
@@ -12527,10 +12527,10 @@
   rxscan360_scan1139:
     nqp_rxmark rx359_bstack, rxscan360_loop1138, rx359_pos, 0
   rxscan360_done1140:
-    .const 'Sub' $P501 = 'cuid_85_1346233469.934' 
-    capture_lex $P501
+    .const 'Sub' $P5001 = 'cuid_85_1346277621.774' 
+    capture_lex $P5001
     repr_bind_attr_int rx359_cur, rx359_curclass, "$!pos", rx359_pos
-    $P11 = rx359_cur."before"($P501)
+    $P11 = rx359_cur."before"($P5001)
     repr_get_attr_int $I11, $P11, rx359_curclass, "$!pos"
     lt $I11, 0, rx359_fail1134
     nqp_rxmark rx359_bstack, rxquantr364_done1157, -1, 0
@@ -12596,59 +12596,59 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_86_1346233469.934_caps" :subid("cuid_memo_168_1346233469.935")
+.sub "cuid_86_1346277621.774_caps" :subid("cuid_memo_168_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 2
-    set $P501["cclass_elem"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 2
+    set $P5001["cclass_elem"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_86_1346233469.934_nfa" :subid("cuid_memo_169_1346233469.935")
+.sub "cuid_86_1346277621.774_nfa" :subid("cuid_memo_169_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 91
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    box $P507, 2
-    push $P503, $P507
-    box $P508, 43
-    push $P503, $P508
-    box $P509, 2
-    push $P503, $P509
-    box $P510, 2
-    push $P503, $P510
-    box $P511, 45
-    push $P503, $P511
-    box $P512, 2
-    push $P503, $P512
-    box $P513, 2
-    push $P503, $P513
-    box $P514, 58
-    push $P503, $P514
-    box $P515, 2
-    push $P503, $P515
-    push $P501, $P503
-    new $P516, 'ResizablePMCArray'
-    box $P517, 0
-    push $P516, $P517
-    box $P518, 0
-    push $P516, $P518
-    box $P519, 0
-    push $P516, $P519
-    push $P501, $P516
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 91
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    box $P5007, 2
+    push $P5003, $P5007
+    box $P5008, 43
+    push $P5003, $P5008
+    box $P5009, 2
+    push $P5003, $P5009
+    box $P5010, 2
+    push $P5003, $P5010
+    box $P5011, 45
+    push $P5003, $P5011
+    box $P5012, 2
+    push $P5003, $P5012
+    box $P5013, 2
+    push $P5003, $P5013
+    box $P5014, 58
+    push $P5003, $P5014
+    box $P5015, 2
+    push $P5003, $P5015
+    push $P5001, $P5003
+    new $P5016, 'ResizablePMCArray'
+    box $P5017, 0
+    push $P5016, $P5017
+    box $P5018, 0
+    push $P5016, $P5018
+    box $P5019, 0
+    push $P5016, $P5019
+    push $P5001, $P5016
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_85_1346233469.934") :anon :lex :outer("cuid_86_1346233469.934")
+.sub "" :subid("cuid_85_1346277621.774") :anon :lex :outer("cuid_86_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
     .param pmc self 
     .lex utf8:"$\x{a2}", $P101 
@@ -12682,7 +12682,7 @@
     nqp_push_label $P11, alt363_21154
     nqp_push_label $P11, alt363_31155
     nqp_rxmark rx361_bstack, alt363_end1151, -1, 0
-    rx361_cur."!alt"(rx361_pos, "alt_nfa__16_1346233471.569", $P11)
+    rx361_cur."!alt"(rx361_pos, "alt_nfa__16_1346277623.277", $P11)
     goto rx361_fail1144
   alt363_01152:
     add $I11, rx361_pos, 1
@@ -12747,109 +12747,109 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_85_1346233469.934_caps" :subid("cuid_memo_170_1346233469.935")
+.sub "cuid_85_1346277621.774_caps" :subid("cuid_memo_170_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_85_1346233469.934_nfa" :subid("cuid_memo_171_1346233469.935")
+.sub "cuid_85_1346277621.774_nfa" :subid("cuid_memo_171_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 91
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    box $P507, 2
-    push $P503, $P507
-    box $P508, 43
-    push $P503, $P508
-    box $P509, 0
-    push $P503, $P509
-    box $P510, 2
-    push $P503, $P510
-    box $P511, 45
-    push $P503, $P511
-    box $P512, 0
-    push $P503, $P512
-    box $P513, 2
-    push $P503, $P513
-    box $P514, 58
-    push $P503, $P514
-    box $P515, 0
-    push $P503, $P515
-    push $P501, $P503
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 91
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    box $P5007, 2
+    push $P5003, $P5007
+    box $P5008, 43
+    push $P5003, $P5008
+    box $P5009, 0
+    push $P5003, $P5009
+    box $P5010, 2
+    push $P5003, $P5010
+    box $P5011, 45
+    push $P5003, $P5011
+    box $P5012, 0
+    push $P5003, $P5012
+    box $P5013, 2
+    push $P5003, $P5013
+    box $P5014, 58
+    push $P5003, $P5014
+    box $P5015, 0
+    push $P5003, $P5015
+    push $P5001, $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_85_1346233469.934_alt_nfa__16_1346233471.569" :subid("cuid_memo_172_1346233469.935")
+.sub "cuid_85_1346277621.774_alt_nfa__16_1346277623.277" :subid("cuid_memo_172_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    new $P503, 'ResizablePMCArray'
-    push $P502, $P503
-    new $P504, 'ResizablePMCArray'
-    box $P505, 2
-    push $P504, $P505
-    box $P506, 91
-    push $P504, $P506
-    box $P507, 0
-    push $P504, $P507
-    push $P502, $P504
-    push $P501, $P502
-    new $P508, 'ResizablePMCArray'
-    new $P509, 'ResizablePMCArray'
-    push $P508, $P509
-    new $P510, 'ResizablePMCArray'
-    box $P511, 2
-    push $P510, $P511
-    box $P512, 43
-    push $P510, $P512
-    box $P513, 0
-    push $P510, $P513
-    push $P508, $P510
-    push $P501, $P508
-    new $P514, 'ResizablePMCArray'
-    new $P515, 'ResizablePMCArray'
-    push $P514, $P515
-    new $P516, 'ResizablePMCArray'
-    box $P517, 2
-    push $P516, $P517
-    box $P518, 45
-    push $P516, $P518
-    box $P519, 0
-    push $P516, $P519
-    push $P514, $P516
-    push $P501, $P514
-    new $P520, 'ResizablePMCArray'
-    new $P521, 'ResizablePMCArray'
-    push $P520, $P521
-    new $P522, 'ResizablePMCArray'
-    box $P523, 2
-    push $P522, $P523
-    box $P524, 58
-    push $P522, $P524
-    box $P525, 0
-    push $P522, $P525
-    push $P520, $P522
-    push $P501, $P520
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    new $P5003, 'ResizablePMCArray'
+    push $P5002, $P5003
+    new $P5004, 'ResizablePMCArray'
+    box $P5005, 2
+    push $P5004, $P5005
+    box $P5006, 91
+    push $P5004, $P5006
+    box $P5007, 0
+    push $P5004, $P5007
+    push $P5002, $P5004
+    push $P5001, $P5002
+    new $P5008, 'ResizablePMCArray'
+    new $P5009, 'ResizablePMCArray'
+    push $P5008, $P5009
+    new $P5010, 'ResizablePMCArray'
+    box $P5011, 2
+    push $P5010, $P5011
+    box $P5012, 43
+    push $P5010, $P5012
+    box $P5013, 0
+    push $P5010, $P5013
+    push $P5008, $P5010
+    push $P5001, $P5008
+    new $P5014, 'ResizablePMCArray'
+    new $P5015, 'ResizablePMCArray'
+    push $P5014, $P5015
+    new $P5016, 'ResizablePMCArray'
+    box $P5017, 2
+    push $P5016, $P5017
+    box $P5018, 45
+    push $P5016, $P5018
+    box $P5019, 0
+    push $P5016, $P5019
+    push $P5014, $P5016
+    push $P5001, $P5014
+    new $P5020, 'ResizablePMCArray'
+    new $P5021, 'ResizablePMCArray'
+    push $P5020, $P5021
+    new $P5022, 'ResizablePMCArray'
+    box $P5023, 2
+    push $P5022, $P5023
+    box $P5024, 58
+    push $P5022, $P5024
+    box $P5025, 0
+    push $P5022, $P5025
+    push $P5020, $P5022
+    push $P5001, $P5020
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "cclass_elem" :subid("cuid_93_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "cclass_elem" :subid("cuid_93_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 214
     .param pmc _lex_param_0 
-    .const 'Sub' $P502 = 'cuid_92_1346233469.934' 
-    capture_lex $P502 
+    .const 'Sub' $P5002 = 'cuid_92_1346277621.774' 
+    capture_lex $P5002 
     .lex utf8:"$\x{a2}", $P101 
     .lex "$/", $P102 
     .lex "self", _lex_param_0 
@@ -12885,7 +12885,7 @@
     nqp_push_label $P11, alt369_11174
     nqp_push_label $P11, alt369_21175
     nqp_rxmark rx366_bstack, alt369_end1172, -1, 0
-    rx366_cur."!alt"(rx366_pos, "alt_nfa__17_1346233471.683", $P11)
+    rx366_cur."!alt"(rx366_pos, "alt_nfa__17_1346277623.383", $P11)
     goto rx366_fail1163
   alt369_01173:
     add $I11, rx366_pos, 1
@@ -12947,7 +12947,7 @@
     nqp_push_label $P11, alt373_11281
     nqp_push_label $P11, alt373_21286
     nqp_rxmark rx366_bstack, alt373_end1181, -1, 0
-    rx366_cur."!alt"(rx366_pos, "alt_nfa__18_1346233471.684", $P11)
+    rx366_cur."!alt"(rx366_pos, "alt_nfa__18_1346277623.384", $P11)
     goto rx366_fail1163
   alt373_01182:
     add $I11, rx366_pos, 1
@@ -12957,10 +12957,10 @@
     add rx366_pos, 1
     nqp_rxmark rx366_bstack, rxquantr374_done1184, rx366_pos, 0
   rxquantr374_loop1183:
-    .const 'Sub' $P501 = 'cuid_92_1346233469.934' 
-    capture_lex $P501
+    .const 'Sub' $P5001 = 'cuid_92_1346277621.774' 
+    capture_lex $P5001
     repr_bind_attr_int rx366_cur, rx366_curclass, "$!pos", rx366_pos
-    $P11 = rx366_cur.$P501()
+    $P11 = rx366_cur.$P5001()
     repr_get_attr_int $I11, $P11, rx366_curclass, "$!pos"
     lt $I11, 0, rx366_fail1163
     goto rxsubrule405_pass1277
@@ -13046,7 +13046,7 @@
     nqp_push_label $P11, alt410_01290
     nqp_push_label $P11, alt410_11291
     nqp_rxmark rx366_bstack, alt410_end1289, -1, 0
-    rx366_cur."!alt"(rx366_pos, "alt_nfa__19_1346233471.687", $P11)
+    rx366_cur."!alt"(rx366_pos, "alt_nfa__19_1346277623.386", $P11)
     goto rx366_fail1163
   alt410_01290:
     add $I11, rx366_pos, 1
@@ -13159,430 +13159,430 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_93_1346233469.934_caps" :subid("cuid_memo_173_1346233469.935")
+.sub "cuid_93_1346277621.774_caps" :subid("cuid_memo_173_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sign"], $P502
-    box $P503, 2
-    set $P501["charspec"], $P503
-    box $P504, 0
-    set $P501["name"], $P504
-    box $P505, 0
-    set $P501["invert"], $P505
-    box $P506, 0
-    set $P501["uniprop"], $P506
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sign"], $P5002
+    box $P5003, 2
+    set $P5001["charspec"], $P5003
+    box $P5004, 0
+    set $P5001["name"], $P5004
+    box $P5005, 0
+    set $P5001["invert"], $P5005
+    box $P5006, 0
+    set $P5001["uniprop"], $P5006
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_93_1346233469.934_nfa" :subid("cuid_memo_174_1346233469.935")
+.sub "cuid_93_1346277621.774_nfa" :subid("cuid_memo_174_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 43
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    box $P507, 2
-    push $P503, $P507
-    box $P508, 45
-    push $P503, $P508
-    box $P509, 2
-    push $P503, $P509
-    box $P510, 1
-    push $P503, $P510
-    box $P511, 0
-    push $P503, $P511
-    box $P512, 2
-    push $P503, $P512
-    push $P501, $P503
-    new $P513, 'ResizablePMCArray'
-    box $P514, 8
-    push $P513, $P514
-    box $P515, "normspace"
-    push $P513, $P515
-    box $P516, 3
-    push $P513, $P516
-    box $P517, 1
-    push $P513, $P517
-    box $P518, 0
-    push $P513, $P518
-    box $P519, 3
-    push $P513, $P519
-    push $P501, $P513
-    new $P520, 'ResizablePMCArray'
-    box $P521, 2
-    push $P520, $P521
-    box $P522, 91
-    push $P520, $P522
-    box $P523, 4
-    push $P520, $P523
-    box $P524, 1
-    push $P520, $P524
-    box $P525, 0
-    push $P520, $P525
-    box $P526, 8
-    push $P520, $P526
-    box $P527, 2
-    push $P520, $P527
-    box $P528, 58
-    push $P520, $P528
-    box $P529, 10
-    push $P520, $P529
-    push $P501, $P520
-    new $P530, 'ResizablePMCArray'
-    box $P531, 0
-    push $P530, $P531
-    box $P532, 0
-    push $P530, $P532
-    box $P533, 0
-    push $P530, $P533
-    box $P534, 1
-    push $P530, $P534
-    box $P535, 0
-    push $P530, $P535
-    box $P536, 5
-    push $P530, $P536
-    push $P501, $P530
-    new $P537, 'ResizablePMCArray'
-    box $P538, 4
-    push $P537, $P538
-    box $P539, 32
-    push $P537, $P539
-    box $P540, 5
-    push $P537, $P540
-    box $P541, 1
-    push $P537, $P541
-    box $P542, 0
-    push $P537, $P542
-    box $P543, 6
-    push $P537, $P543
-    push $P501, $P537
-    new $P544, 'ResizablePMCArray'
-    box $P545, 2
-    push $P544, $P545
-    box $P546, 93
-    push $P544, $P546
-    box $P547, 7
-    push $P544, $P547
-    push $P501, $P544
-    new $P548, 'ResizablePMCArray'
-    box $P549, 8
-    push $P548, $P549
-    box $P550, "normspace"
-    push $P548, $P550
-    box $P551, 0
-    push $P548, $P551
-    box $P552, 1
-    push $P548, $P552
-    box $P553, 0
-    push $P548, $P553
-    box $P554, 0
-    push $P548, $P554
-    push $P501, $P548
-    new $P555, 'ResizablePMCArray'
-    box $P556, 4
-    push $P555, $P556
-    box $P557, 8192
-    push $P555, $P557
-    box $P558, 9
-    push $P555, $P558
-    push $P501, $P555
-    new $P559, 'ResizablePMCArray'
-    box $P560, 1
-    push $P559, $P560
-    box $P561, 0
-    push $P559, $P561
-    box $P562, 8
-    push $P559, $P562
-    box $P563, 1
-    push $P559, $P563
-    box $P564, 0
-    push $P559, $P564
-    box $P565, 7
-    push $P559, $P565
-    push $P501, $P559
-    new $P566, 'ResizablePMCArray'
-    box $P567, 2
-    push $P566, $P567
-    box $P568, 33
-    push $P566, $P568
-    box $P569, 11
-    push $P566, $P569
-    box $P570, 1
-    push $P566, $P570
-    box $P571, 0
-    push $P566, $P571
-    box $P572, 11
-    push $P566, $P572
-    push $P501, $P566
-    new $P573, 'ResizablePMCArray'
-    box $P574, 1
-    push $P573, $P574
-    box $P575, 0
-    push $P573, $P575
-    box $P576, 12
-    push $P573, $P576
-    push $P501, $P573
-    new $P577, 'ResizablePMCArray'
-    box $P578, 4
-    push $P577, $P578
-    box $P579, 8192
-    push $P577, $P579
-    box $P580, 13
-    push $P577, $P580
-    push $P501, $P577
-    new $P581, 'ResizablePMCArray'
-    box $P582, 1
-    push $P581, $P582
-    box $P583, 0
-    push $P581, $P583
-    box $P584, 12
-    push $P581, $P584
-    box $P585, 1
-    push $P581, $P585
-    box $P586, 0
-    push $P581, $P586
-    box $P587, 7
-    push $P581, $P587
-    push $P501, $P581
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 43
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    box $P5007, 2
+    push $P5003, $P5007
+    box $P5008, 45
+    push $P5003, $P5008
+    box $P5009, 2
+    push $P5003, $P5009
+    box $P5010, 1
+    push $P5003, $P5010
+    box $P5011, 0
+    push $P5003, $P5011
+    box $P5012, 2
+    push $P5003, $P5012
+    push $P5001, $P5003
+    new $P5013, 'ResizablePMCArray'
+    box $P5014, 8
+    push $P5013, $P5014
+    box $P5015, "normspace"
+    push $P5013, $P5015
+    box $P5016, 3
+    push $P5013, $P5016
+    box $P5017, 1
+    push $P5013, $P5017
+    box $P5018, 0
+    push $P5013, $P5018
+    box $P5019, 3
+    push $P5013, $P5019
+    push $P5001, $P5013
+    new $P5020, 'ResizablePMCArray'
+    box $P5021, 2
+    push $P5020, $P5021
+    box $P5022, 91
+    push $P5020, $P5022
+    box $P5023, 4
+    push $P5020, $P5023
+    box $P5024, 1
+    push $P5020, $P5024
+    box $P5025, 0
+    push $P5020, $P5025
+    box $P5026, 8
+    push $P5020, $P5026
+    box $P5027, 2
+    push $P5020, $P5027
+    box $P5028, 58
+    push $P5020, $P5028
+    box $P5029, 10
+    push $P5020, $P5029
+    push $P5001, $P5020
+    new $P5030, 'ResizablePMCArray'
+    box $P5031, 0
+    push $P5030, $P5031
+    box $P5032, 0
+    push $P5030, $P5032
+    box $P5033, 0
+    push $P5030, $P5033
+    box $P5034, 1
+    push $P5030, $P5034
+    box $P5035, 0
+    push $P5030, $P5035
+    box $P5036, 5
+    push $P5030, $P5036
+    push $P5001, $P5030
+    new $P5037, 'ResizablePMCArray'
+    box $P5038, 4
+    push $P5037, $P5038
+    box $P5039, 32
+    push $P5037, $P5039
+    box $P5040, 5
+    push $P5037, $P5040
+    box $P5041, 1
+    push $P5037, $P5041
+    box $P5042, 0
+    push $P5037, $P5042
+    box $P5043, 6
+    push $P5037, $P5043
+    push $P5001, $P5037
+    new $P5044, 'ResizablePMCArray'
+    box $P5045, 2
+    push $P5044, $P5045
+    box $P5046, 93
+    push $P5044, $P5046
+    box $P5047, 7
+    push $P5044, $P5047
+    push $P5001, $P5044
+    new $P5048, 'ResizablePMCArray'
+    box $P5049, 8
+    push $P5048, $P5049
+    box $P5050, "normspace"
+    push $P5048, $P5050
+    box $P5051, 0
+    push $P5048, $P5051
+    box $P5052, 1
+    push $P5048, $P5052
+    box $P5053, 0
+    push $P5048, $P5053
+    box $P5054, 0
+    push $P5048, $P5054
+    push $P5001, $P5048
+    new $P5055, 'ResizablePMCArray'
+    box $P5056, 4
+    push $P5055, $P5056
+    box $P5057, 8192
+    push $P5055, $P5057
+    box $P5058, 9
+    push $P5055, $P5058
+    push $P5001, $P5055
+    new $P5059, 'ResizablePMCArray'
+    box $P5060, 1
+    push $P5059, $P5060
+    box $P5061, 0
+    push $P5059, $P5061
+    box $P5062, 8
+    push $P5059, $P5062
+    box $P5063, 1
+    push $P5059, $P5063
+    box $P5064, 0
+    push $P5059, $P5064
+    box $P5065, 7
+    push $P5059, $P5065
+    push $P5001, $P5059
+    new $P5066, 'ResizablePMCArray'
+    box $P5067, 2
+    push $P5066, $P5067
+    box $P5068, 33
+    push $P5066, $P5068
+    box $P5069, 11
+    push $P5066, $P5069
+    box $P5070, 1
+    push $P5066, $P5070
+    box $P5071, 0
+    push $P5066, $P5071
+    box $P5072, 11
+    push $P5066, $P5072
+    push $P5001, $P5066
+    new $P5073, 'ResizablePMCArray'
+    box $P5074, 1
+    push $P5073, $P5074
+    box $P5075, 0
+    push $P5073, $P5075
+    box $P5076, 12
+    push $P5073, $P5076
+    push $P5001, $P5073
+    new $P5077, 'ResizablePMCArray'
+    box $P5078, 4
+    push $P5077, $P5078
+    box $P5079, 8192
+    push $P5077, $P5079
+    box $P5080, 13
+    push $P5077, $P5080
+    push $P5001, $P5077
+    new $P5081, 'ResizablePMCArray'
+    box $P5082, 1
+    push $P5081, $P5082
+    box $P5083, 0
+    push $P5081, $P5083
+    box $P5084, 12
+    push $P5081, $P5084
+    box $P5085, 1
+    push $P5081, $P5085
+    box $P5086, 0
+    push $P5081, $P5086
+    box $P5087, 7
+    push $P5081, $P5087
+    push $P5001, $P5081
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_93_1346233469.934_alt_nfa__17_1346233471.683" :subid("cuid_memo_175_1346233469.935")
+.sub "cuid_93_1346277621.774_alt_nfa__17_1346277623.383" :subid("cuid_memo_175_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    new $P503, 'ResizablePMCArray'
-    push $P502, $P503
-    new $P504, 'ResizablePMCArray'
-    box $P505, 2
-    push $P504, $P505
-    box $P506, 43
-    push $P504, $P506
-    box $P507, 0
-    push $P504, $P507
-    push $P502, $P504
-    push $P501, $P502
-    new $P508, 'ResizablePMCArray'
-    new $P509, 'ResizablePMCArray'
-    push $P508, $P509
-    new $P510, 'ResizablePMCArray'
-    box $P511, 2
-    push $P510, $P511
-    box $P512, 45
-    push $P510, $P512
-    box $P513, 0
-    push $P510, $P513
-    push $P508, $P510
-    push $P501, $P508
-    new $P514, 'ResizablePMCArray'
-    new $P515, 'ResizablePMCArray'
-    push $P514, $P515
-    new $P516, 'ResizablePMCArray'
-    box $P517, 1
-    push $P516, $P517
-    box $P518, 0
-    push $P516, $P518
-    box $P519, 0
-    push $P516, $P519
-    push $P514, $P516
-    push $P501, $P514
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    new $P5003, 'ResizablePMCArray'
+    push $P5002, $P5003
+    new $P5004, 'ResizablePMCArray'
+    box $P5005, 2
+    push $P5004, $P5005
+    box $P5006, 43
+    push $P5004, $P5006
+    box $P5007, 0
+    push $P5004, $P5007
+    push $P5002, $P5004
+    push $P5001, $P5002
+    new $P5008, 'ResizablePMCArray'
+    new $P5009, 'ResizablePMCArray'
+    push $P5008, $P5009
+    new $P5010, 'ResizablePMCArray'
+    box $P5011, 2
+    push $P5010, $P5011
+    box $P5012, 45
+    push $P5010, $P5012
+    box $P5013, 0
+    push $P5010, $P5013
+    push $P5008, $P5010
+    push $P5001, $P5008
+    new $P5014, 'ResizablePMCArray'
+    new $P5015, 'ResizablePMCArray'
+    push $P5014, $P5015
+    new $P5016, 'ResizablePMCArray'
+    box $P5017, 1
+    push $P5016, $P5017
+    box $P5018, 0
+    push $P5016, $P5018
+    box $P5019, 0
+    push $P5016, $P5019
+    push $P5014, $P5016
+    push $P5001, $P5014
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_93_1346233469.934_alt_nfa__19_1346233471.687" :subid("cuid_memo_176_1346233469.935")
+.sub "cuid_93_1346277621.774_alt_nfa__19_1346277623.386" :subid("cuid_memo_176_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    new $P503, 'ResizablePMCArray'
-    push $P502, $P503
-    new $P504, 'ResizablePMCArray'
-    box $P505, 2
-    push $P504, $P505
-    box $P506, 33
-    push $P504, $P506
-    box $P507, 0
-    push $P504, $P507
-    push $P502, $P504
-    push $P501, $P502
-    new $P508, 'ResizablePMCArray'
-    new $P509, 'ResizablePMCArray'
-    push $P508, $P509
-    new $P510, 'ResizablePMCArray'
-    box $P511, 1
-    push $P510, $P511
-    box $P512, 0
-    push $P510, $P512
-    box $P513, 0
-    push $P510, $P513
-    push $P508, $P510
-    push $P501, $P508
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    new $P5003, 'ResizablePMCArray'
+    push $P5002, $P5003
+    new $P5004, 'ResizablePMCArray'
+    box $P5005, 2
+    push $P5004, $P5005
+    box $P5006, 33
+    push $P5004, $P5006
+    box $P5007, 0
+    push $P5004, $P5007
+    push $P5002, $P5004
+    push $P5001, $P5002
+    new $P5008, 'ResizablePMCArray'
+    new $P5009, 'ResizablePMCArray'
+    push $P5008, $P5009
+    new $P5010, 'ResizablePMCArray'
+    box $P5011, 1
+    push $P5010, $P5011
+    box $P5012, 0
+    push $P5010, $P5012
+    box $P5013, 0
+    push $P5010, $P5013
+    push $P5008, $P5010
+    push $P5001, $P5008
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_93_1346233469.934_alt_nfa__18_1346233471.684" :subid("cuid_memo_177_1346233469.935")
+.sub "cuid_93_1346277621.774_alt_nfa__18_1346277623.384" :subid("cuid_memo_177_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    new $P503, 'ResizablePMCArray'
-    push $P502, $P503
-    new $P504, 'ResizablePMCArray'
-    box $P505, 2
-    push $P504, $P505
-    box $P506, 91
-    push $P504, $P506
-    box $P507, 2
-    push $P504, $P507
-    push $P502, $P504
-    new $P508, 'ResizablePMCArray'
-    box $P509, 0
-    push $P508, $P509
-    box $P510, 0
-    push $P508, $P510
-    box $P511, 0
-    push $P508, $P511
-    box $P512, 1
-    push $P508, $P512
-    box $P513, 0
-    push $P508, $P513
-    box $P514, 3
-    push $P508, $P514
-    push $P502, $P508
-    new $P515, 'ResizablePMCArray'
-    box $P516, 4
-    push $P515, $P516
-    box $P517, 32
-    push $P515, $P517
-    box $P518, 3
-    push $P515, $P518
-    box $P519, 1
-    push $P515, $P519
-    box $P520, 0
-    push $P515, $P520
-    box $P521, 4
-    push $P515, $P521
-    push $P502, $P515
-    new $P522, 'ResizablePMCArray'
-    box $P523, 2
-    push $P522, $P523
-    box $P524, 93
-    push $P522, $P524
-    box $P525, 0
-    push $P522, $P525
-    push $P502, $P522
-    push $P501, $P502
-    new $P526, 'ResizablePMCArray'
-    new $P527, 'ResizablePMCArray'
-    push $P526, $P527
-    new $P528, 'ResizablePMCArray'
-    box $P529, 1
-    push $P528, $P529
-    box $P530, 0
-    push $P528, $P530
-    box $P531, 2
-    push $P528, $P531
-    push $P526, $P528
-    new $P532, 'ResizablePMCArray'
-    box $P533, 4
-    push $P532, $P533
-    box $P534, 8192
-    push $P532, $P534
-    box $P535, 3
-    push $P532, $P535
-    push $P526, $P532
-    new $P536, 'ResizablePMCArray'
-    box $P537, 1
-    push $P536, $P537
-    box $P538, 0
-    push $P536, $P538
-    box $P539, 2
-    push $P536, $P539
-    box $P540, 1
-    push $P536, $P540
-    box $P541, 0
-    push $P536, $P541
-    box $P542, 0
-    push $P536, $P542
-    push $P526, $P536
-    push $P501, $P526
-    new $P543, 'ResizablePMCArray'
-    new $P544, 'ResizablePMCArray'
-    push $P543, $P544
-    new $P545, 'ResizablePMCArray'
-    box $P546, 2
-    push $P545, $P546
-    box $P547, 58
-    push $P545, $P547
-    box $P548, 2
-    push $P545, $P548
-    push $P543, $P545
-    new $P549, 'ResizablePMCArray'
-    box $P550, 2
-    push $P549, $P550
-    box $P551, 33
-    push $P549, $P551
-    box $P552, 3
-    push $P549, $P552
-    box $P553, 1
-    push $P549, $P553
-    box $P554, 0
-    push $P549, $P554
-    box $P555, 3
-    push $P549, $P555
-    push $P543, $P549
-    new $P556, 'ResizablePMCArray'
-    box $P557, 1
-    push $P556, $P557
-    box $P558, 0
-    push $P556, $P558
-    box $P559, 4
-    push $P556, $P559
-    push $P543, $P556
-    new $P560, 'ResizablePMCArray'
-    box $P561, 4
-    push $P560, $P561
-    box $P562, 8192
-    push $P560, $P562
-    box $P563, 5
-    push $P560, $P563
-    push $P543, $P560
-    new $P564, 'ResizablePMCArray'
-    box $P565, 1
-    push $P564, $P565
-    box $P566, 0
-    push $P564, $P566
-    box $P567, 4
-    push $P564, $P567
-    box $P568, 1
-    push $P564, $P568
-    box $P569, 0
-    push $P564, $P569
-    box $P570, 0
-    push $P564, $P570
-    push $P543, $P564
-    push $P501, $P543
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    new $P5003, 'ResizablePMCArray'
+    push $P5002, $P5003
+    new $P5004, 'ResizablePMCArray'
+    box $P5005, 2
+    push $P5004, $P5005
+    box $P5006, 91
+    push $P5004, $P5006
+    box $P5007, 2
+    push $P5004, $P5007
+    push $P5002, $P5004
+    new $P5008, 'ResizablePMCArray'
+    box $P5009, 0
+    push $P5008, $P5009
+    box $P5010, 0
+    push $P5008, $P5010
+    box $P5011, 0
+    push $P5008, $P5011
+    box $P5012, 1
+    push $P5008, $P5012
+    box $P5013, 0
+    push $P5008, $P5013
+    box $P5014, 3
+    push $P5008, $P5014
+    push $P5002, $P5008
+    new $P5015, 'ResizablePMCArray'
+    box $P5016, 4
+    push $P5015, $P5016
+    box $P5017, 32
+    push $P5015, $P5017
+    box $P5018, 3
+    push $P5015, $P5018
+    box $P5019, 1
+    push $P5015, $P5019
+    box $P5020, 0
+    push $P5015, $P5020
+    box $P5021, 4
+    push $P5015, $P5021
+    push $P5002, $P5015
+    new $P5022, 'ResizablePMCArray'
+    box $P5023, 2
+    push $P5022, $P5023
+    box $P5024, 93
+    push $P5022, $P5024
+    box $P5025, 0
+    push $P5022, $P5025
+    push $P5002, $P5022
+    push $P5001, $P5002
+    new $P5026, 'ResizablePMCArray'
+    new $P5027, 'ResizablePMCArray'
+    push $P5026, $P5027
+    new $P5028, 'ResizablePMCArray'
+    box $P5029, 1
+    push $P5028, $P5029
+    box $P5030, 0
+    push $P5028, $P5030
+    box $P5031, 2
+    push $P5028, $P5031
+    push $P5026, $P5028
+    new $P5032, 'ResizablePMCArray'
+    box $P5033, 4
+    push $P5032, $P5033
+    box $P5034, 8192
+    push $P5032, $P5034
+    box $P5035, 3
+    push $P5032, $P5035
+    push $P5026, $P5032
+    new $P5036, 'ResizablePMCArray'
+    box $P5037, 1
+    push $P5036, $P5037
+    box $P5038, 0
+    push $P5036, $P5038
+    box $P5039, 2
+    push $P5036, $P5039
+    box $P5040, 1
+    push $P5036, $P5040
+    box $P5041, 0
+    push $P5036, $P5041
+    box $P5042, 0
+    push $P5036, $P5042
+    push $P5026, $P5036
+    push $P5001, $P5026
+    new $P5043, 'ResizablePMCArray'
+    new $P5044, 'ResizablePMCArray'
+    push $P5043, $P5044
+    new $P5045, 'ResizablePMCArray'
+    box $P5046, 2
+    push $P5045, $P5046
+    box $P5047, 58
+    push $P5045, $P5047
+    box $P5048, 2
+    push $P5045, $P5048
+    push $P5043, $P5045
+    new $P5049, 'ResizablePMCArray'
+    box $P5050, 2
+    push $P5049, $P5050
+    box $P5051, 33
+    push $P5049, $P5051
+    box $P5052, 3
+    push $P5049, $P5052
+    box $P5053, 1
+    push $P5049, $P5053
+    box $P5054, 0
+    push $P5049, $P5054
+    box $P5055, 3
+    push $P5049, $P5055
+    push $P5043, $P5049
+    new $P5056, 'ResizablePMCArray'
+    box $P5057, 1
+    push $P5056, $P5057
+    box $P5058, 0
+    push $P5056, $P5058
+    box $P5059, 4
+    push $P5056, $P5059
+    push $P5043, $P5056
+    new $P5060, 'ResizablePMCArray'
+    box $P5061, 4
+    push $P5060, $P5061
+    box $P5062, 8192
+    push $P5060, $P5062
+    box $P5063, 5
+    push $P5060, $P5063
+    push $P5043, $P5060
+    new $P5064, 'ResizablePMCArray'
+    box $P5065, 1
+    push $P5064, $P5065
+    box $P5066, 0
+    push $P5064, $P5066
+    box $P5067, 4
+    push $P5064, $P5067
+    box $P5068, 1
+    push $P5064, $P5068
+    box $P5069, 0
+    push $P5064, $P5069
+    box $P5070, 0
+    push $P5064, $P5070
+    push $P5043, $P5064
+    push $P5001, $P5043
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_92_1346233469.934") :anon :lex :outer("cuid_93_1346233469.934")
+.sub "" :subid("cuid_92_1346277621.774") :anon :lex :outer("cuid_93_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
     .param pmc self 
-    .const 'Sub' $P504 = 'cuid_87_1346233469.934' 
-    capture_lex $P504 
-    .const 'Sub' $P504 = 'cuid_89_1346233469.934' 
-    capture_lex $P504 
-    .const 'Sub' $P504 = 'cuid_91_1346233469.934' 
-    capture_lex $P504 
+    .const 'Sub' $P5004 = 'cuid_87_1346277621.774' 
+    capture_lex $P5004 
+    .const 'Sub' $P5004 = 'cuid_89_1346277621.774' 
+    capture_lex $P5004 
+    .const 'Sub' $P5004 = 'cuid_91_1346277621.774' 
+    capture_lex $P5004 
     .lex utf8:"$\x{a2}", $P101 
     .local string rx375_tgt
     .local int rx375_pos
@@ -13630,10 +13630,10 @@
     substr $S10, rx375_tgt, rx375_pos, 1
     ne $S10, ucs4:"-", rx375_fail1188
     add rx375_pos, 1
-    .const 'Sub' $P501 = 'cuid_87_1346233469.934' 
-    capture_lex $P501
+    .const 'Sub' $P5001 = 'cuid_87_1346277621.774' 
+    capture_lex $P5001
     repr_bind_attr_int rx375_cur, rx375_curclass, "$!pos", rx375_pos
-    $P11 = rx375_cur."before"($P501)
+    $P11 = rx375_cur."before"($P5001)
     repr_get_attr_int $I11, $P11, rx375_curclass, "$!pos"
     ge $I11, 0, rx375_fail1188
     repr_bind_attr_int rx375_cur, rx375_curclass, "$!pos", rx375_pos
@@ -13658,10 +13658,10 @@
     nqp_rxmark rx375_bstack, rxquantr383_done1214, rx375_pos, rx375_rep
     goto rxquantr383_loop1213
   rxquantr383_done1214:
-    .const 'Sub' $P502 = 'cuid_89_1346233469.934' 
-    capture_lex $P502
+    .const 'Sub' $P5002 = 'cuid_89_1346277621.774' 
+    capture_lex $P5002
     repr_bind_attr_int rx375_cur, rx375_curclass, "$!pos", rx375_pos
-    $P11 = rx375_cur.$P502()
+    $P11 = rx375_cur.$P5002()
     repr_get_attr_int $I11, $P11, rx375_curclass, "$!pos"
     lt $I11, 0, rx375_fail1188
     nqp_rxmark rx375_bstack, rxsubrule392_pass1242, -1, 0
@@ -13705,15 +13705,15 @@
     nqp_rxmark rx375_bstack, rxquantr395_done1248, rx375_pos, rx375_rep
     goto rxquantr395_loop1247
   rxquantr395_done1248:
-    .const 'Sub' $P503 = 'cuid_91_1346233469.934' 
-    capture_lex $P503
+    .const 'Sub' $P5003 = 'cuid_91_1346277621.774' 
+    capture_lex $P5003
     repr_bind_attr_int rx375_cur, rx375_curclass, "$!pos", rx375_pos
-    $P11 = rx375_cur.$P503()
+    $P11 = rx375_cur.$P5003()
     repr_get_attr_int $I11, $P11, rx375_curclass, "$!pos"
     lt $I11, 0, rx375_fail1188
     nqp_rxmark rx375_bstack, rxsubrule404_pass1276, -1, 0
   rxsubrule404_pass1276:
-    rx375_cstack = rx375_cur."!cursor_capture"($P11, "1")
+    rx375_cstack = rx375_cur."!cursor_capture"($P11, 1)
     repr_get_attr_int rx375_pos, $P11, rx375_curclass, "$!pos"
     nqp_rxpeek $I19, rx375_bstack, rxquantr393_done1244
     inc $I19
@@ -13757,18 +13757,18 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_92_1346233469.934_caps" :subid("cuid_memo_178_1346233469.935")
+.sub "cuid_92_1346277621.774_caps" :subid("cuid_memo_178_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 1
-    set $P501["0"], $P502
-    box $P503, 3
-    set $P501["1"], $P503
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 1
+    set $P5001["0"], $P5002
+    box $P5003, 3
+    set $P5001["1"], $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_87_1346233469.934") :anon :lex :outer("cuid_92_1346233469.934")
+.sub "" :subid("cuid_87_1346277621.774") :anon :lex :outer("cuid_92_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
     .param pmc self 
     .lex utf8:"$\x{a2}", $P101 
@@ -13850,49 +13850,49 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_87_1346233469.934_caps" :subid("cuid_memo_179_1346233469.935")
+.sub "cuid_87_1346277621.774_caps" :subid("cuid_memo_179_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_87_1346233469.934_nfa" :subid("cuid_memo_180_1346233469.935")
+.sub "cuid_87_1346277621.774_nfa" :subid("cuid_memo_180_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 4
-    push $P503, $P504
-    box $P505, 32
-    push $P503, $P505
-    box $P506, 1
-    push $P503, $P506
-    box $P507, 1
-    push $P503, $P507
-    box $P508, 0
-    push $P503, $P508
-    box $P509, 2
-    push $P503, $P509
-    push $P501, $P503
-    new $P510, 'ResizablePMCArray'
-    box $P511, 2
-    push $P510, $P511
-    box $P512, 93
-    push $P510, $P512
-    box $P513, 0
-    push $P510, $P513
-    push $P501, $P510
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 4
+    push $P5003, $P5004
+    box $P5005, 32
+    push $P5003, $P5005
+    box $P5006, 1
+    push $P5003, $P5006
+    box $P5007, 1
+    push $P5003, $P5007
+    box $P5008, 0
+    push $P5003, $P5008
+    box $P5009, 2
+    push $P5003, $P5009
+    push $P5001, $P5003
+    new $P5010, 'ResizablePMCArray'
+    box $P5011, 2
+    push $P5010, $P5011
+    box $P5012, 93
+    push $P5010, $P5012
+    box $P5013, 0
+    push $P5010, $P5013
+    push $P5001, $P5010
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_89_1346233469.934") :anon :lex :outer("cuid_92_1346233469.934")
+.sub "" :subid("cuid_89_1346277621.774") :anon :lex :outer("cuid_92_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
     .param pmc self 
-    .const 'Sub' $P502 = 'cuid_88_1346233469.934' 
-    capture_lex $P502 
+    .const 'Sub' $P5002 = 'cuid_88_1346277621.774' 
+    capture_lex $P5002 
     .lex utf8:"$\x{a2}", $P101 
     .local string rx384_tgt
     .local int rx384_pos
@@ -13935,10 +13935,10 @@
     repr_get_attr_int rx384_pos, $P11, rx384_curclass, "$!pos"
     goto alt386_end1225
   alt386_11228:
-    .const 'Sub' $P501 = 'cuid_88_1346233469.934' 
-    capture_lex $P501
+    .const 'Sub' $P5001 = 'cuid_88_1346277621.774' 
+    capture_lex $P5001
     repr_bind_attr_int rx384_cur, rx384_curclass, "$!pos", rx384_pos
-    $P11 = rx384_cur.$P501()
+    $P11 = rx384_cur.$P5001()
     repr_get_attr_int $I11, $P11, rx384_curclass, "$!pos"
     lt $I11, 0, rx384_fail1218
     nqp_rxmark rx384_bstack, rxsubrule391_pass1241, -1, 0
@@ -13980,18 +13980,18 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_89_1346233469.934_caps" :subid("cuid_memo_181_1346233469.935")
+.sub "cuid_89_1346277621.774_caps" :subid("cuid_memo_181_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["backslash"], $P502
-    box $P503, 1
-    set $P501["0"], $P503
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["backslash"], $P5002
+    box $P5003, 1
+    set $P5001["0"], $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_88_1346233469.934") :anon :lex :outer("cuid_89_1346233469.934")
+.sub "" :subid("cuid_88_1346277621.774") :anon :lex :outer("cuid_89_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
     .param pmc self 
     .lex utf8:"$\x{a2}", $P101 
@@ -14082,18 +14082,18 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_88_1346233469.934_caps" :subid("cuid_memo_182_1346233469.935")
+.sub "cuid_88_1346277621.774_caps" :subid("cuid_memo_182_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_91_1346233469.934") :anon :lex :outer("cuid_92_1346233469.934")
+.sub "" :subid("cuid_91_1346277621.774") :anon :lex :outer("cuid_92_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
     .param pmc self 
-    .const 'Sub' $P502 = 'cuid_90_1346233469.934' 
-    capture_lex $P502 
+    .const 'Sub' $P5002 = 'cuid_90_1346277621.774' 
+    capture_lex $P5002 
     .lex utf8:"$\x{a2}", $P101 
     .local string rx396_tgt
     .local int rx396_pos
@@ -14136,10 +14136,10 @@
     repr_get_attr_int rx396_pos, $P11, rx396_curclass, "$!pos"
     goto alt398_end1259
   alt398_11262:
-    .const 'Sub' $P501 = 'cuid_90_1346233469.934' 
-    capture_lex $P501
+    .const 'Sub' $P5001 = 'cuid_90_1346277621.774' 
+    capture_lex $P5001
     repr_bind_attr_int rx396_cur, rx396_curclass, "$!pos", rx396_pos
-    $P11 = rx396_cur.$P501()
+    $P11 = rx396_cur.$P5001()
     repr_get_attr_int $I11, $P11, rx396_curclass, "$!pos"
     lt $I11, 0, rx396_fail1252
     nqp_rxmark rx396_bstack, rxsubrule403_pass1275, -1, 0
@@ -14181,18 +14181,18 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_91_1346233469.934_caps" :subid("cuid_memo_183_1346233469.935")
+.sub "cuid_91_1346277621.774_caps" :subid("cuid_memo_183_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["backslash"], $P502
-    box $P503, 1
-    set $P501["0"], $P503
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["backslash"], $P5002
+    box $P5003, 1
+    set $P5001["0"], $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_90_1346233469.934") :anon :lex :outer("cuid_91_1346233469.934")
+.sub "" :subid("cuid_90_1346277621.774") :anon :lex :outer("cuid_91_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
     .param pmc self 
     .lex utf8:"$\x{a2}", $P101 
@@ -14283,19 +14283,19 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_90_1346233469.934_caps" :subid("cuid_memo_184_1346233469.935")
+.sub "cuid_90_1346277621.774_caps" :subid("cuid_memo_184_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "mod_internal" :subid("cuid_95_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "mod_internal" :subid("cuid_95_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 233
     .param pmc _lex_param_0 
-    .const 'Sub' $P502 = 'cuid_94_1346233469.934' 
-    capture_lex $P502 
+    .const 'Sub' $P5002 = 'cuid_94_1346277621.774' 
+    capture_lex $P5002 
     .lex utf8:"$\x{a2}", $P101 
     .lex "$/", $P102 
     .lex "self", _lex_param_0 
@@ -14329,7 +14329,7 @@
     nqp_push_label $P11, alt418_01312
     nqp_push_label $P11, alt418_11334
     nqp_rxmark rx416_bstack, alt418_end1311, -1, 0
-    rx416_cur."!alt"(rx416_pos, "alt_nfa__21_1346233471.73", $P11)
+    rx416_cur."!alt"(rx416_pos, "alt_nfa__21_1346277623.423", $P11)
     goto rx416_fail1304
   alt418_01312:
     add $I11, rx416_pos, 1
@@ -14339,10 +14339,10 @@
     add rx416_pos, 1
     nqp_rxmark rx416_bstack, rxquantr419_done1314, -1, 0
   rxquantr419_loop1313:
-    .const 'Sub' $P501 = 'cuid_94_1346233469.934' 
-    capture_lex $P501
+    .const 'Sub' $P5001 = 'cuid_94_1346277621.774' 
+    capture_lex $P5001
     repr_bind_attr_int rx416_cur, rx416_curclass, "$!pos", rx416_pos
-    $P11 = rx416_cur.$P501()
+    $P11 = rx416_cur.$P5001()
     repr_get_attr_int $I11, $P11, rx416_curclass, "$!pos"
     lt $I11, 0, rx416_fail1304
     goto rxsubrule424_pass1330
@@ -14477,208 +14477,208 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_95_1346233469.934_caps" :subid("cuid_memo_185_1346233469.935")
+.sub "cuid_95_1346277621.774_caps" :subid("cuid_memo_185_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 2
-    set $P501["n"], $P502
-    box $P503, 0
-    set $P501["mod_ident"], $P503
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 2
+    set $P5001["n"], $P5002
+    box $P5003, 0
+    set $P5001["mod_ident"], $P5003
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_95_1346233469.934_nfa" :subid("cuid_memo_186_1346233469.935")
+.sub "cuid_95_1346277621.774_nfa" :subid("cuid_memo_186_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 58
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    box $P507, 2
-    push $P503, $P507
-    box $P508, 58
-    push $P503, $P508
-    box $P509, 3
-    push $P503, $P509
-    push $P501, $P503
-    new $P510, 'ResizablePMCArray'
-    box $P511, 0
-    push $P510, $P511
-    box $P512, 0
-    push $P510, $P512
-    box $P513, 0
-    push $P510, $P513
-    push $P501, $P510
-    new $P514, 'ResizablePMCArray'
-    box $P515, 8
-    push $P514, $P515
-    box $P516, "mod_ident"
-    push $P514, $P516
-    box $P517, 4
-    push $P514, $P517
-    push $P501, $P514
-    new $P518, 'ResizablePMCArray'
-    box $P519, 2
-    push $P518, $P519
-    box $P520, 40
-    push $P518, $P520
-    box $P521, 5
-    push $P518, $P521
-    box $P522, 1
-    push $P518, $P522
-    box $P523, 0
-    push $P518, $P523
-    box $P524, 0
-    push $P518, $P524
-    push $P501, $P518
-    new $P525, 'ResizablePMCArray'
-    box $P526, 1
-    push $P525, $P526
-    box $P527, 0
-    push $P525, $P527
-    box $P528, 6
-    push $P525, $P528
-    push $P501, $P525
-    new $P529, 'ResizablePMCArray'
-    box $P530, 4
-    push $P529, $P530
-    box $P531, 8
-    push $P529, $P531
-    box $P532, 7
-    push $P529, $P532
-    push $P501, $P529
-    new $P533, 'ResizablePMCArray'
-    box $P534, 1
-    push $P533, $P534
-    box $P535, 0
-    push $P533, $P535
-    box $P536, 6
-    push $P533, $P536
-    box $P537, 1
-    push $P533, $P537
-    box $P538, 0
-    push $P533, $P538
-    box $P539, 8
-    push $P533, $P539
-    box $P540, 2
-    push $P533, $P540
-    box $P541, 41
-    push $P533, $P541
-    box $P542, 0
-    push $P533, $P542
-    push $P501, $P533
-    new $P543, 'ResizablePMCArray'
-    push $P501, $P543
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 58
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    box $P5007, 2
+    push $P5003, $P5007
+    box $P5008, 58
+    push $P5003, $P5008
+    box $P5009, 3
+    push $P5003, $P5009
+    push $P5001, $P5003
+    new $P5010, 'ResizablePMCArray'
+    box $P5011, 0
+    push $P5010, $P5011
+    box $P5012, 0
+    push $P5010, $P5012
+    box $P5013, 0
+    push $P5010, $P5013
+    push $P5001, $P5010
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 8
+    push $P5014, $P5015
+    box $P5016, "mod_ident"
+    push $P5014, $P5016
+    box $P5017, 4
+    push $P5014, $P5017
+    push $P5001, $P5014
+    new $P5018, 'ResizablePMCArray'
+    box $P5019, 2
+    push $P5018, $P5019
+    box $P5020, 40
+    push $P5018, $P5020
+    box $P5021, 5
+    push $P5018, $P5021
+    box $P5022, 1
+    push $P5018, $P5022
+    box $P5023, 0
+    push $P5018, $P5023
+    box $P5024, 0
+    push $P5018, $P5024
+    push $P5001, $P5018
+    new $P5025, 'ResizablePMCArray'
+    box $P5026, 1
+    push $P5025, $P5026
+    box $P5027, 0
+    push $P5025, $P5027
+    box $P5028, 6
+    push $P5025, $P5028
+    push $P5001, $P5025
+    new $P5029, 'ResizablePMCArray'
+    box $P5030, 4
+    push $P5029, $P5030
+    box $P5031, 8
+    push $P5029, $P5031
+    box $P5032, 7
+    push $P5029, $P5032
+    push $P5001, $P5029
+    new $P5033, 'ResizablePMCArray'
+    box $P5034, 1
+    push $P5033, $P5034
+    box $P5035, 0
+    push $P5033, $P5035
+    box $P5036, 6
+    push $P5033, $P5036
+    box $P5037, 1
+    push $P5033, $P5037
+    box $P5038, 0
+    push $P5033, $P5038
+    box $P5039, 8
+    push $P5033, $P5039
+    box $P5040, 2
+    push $P5033, $P5040
+    box $P5041, 41
+    push $P5033, $P5041
+    box $P5042, 0
+    push $P5033, $P5042
+    push $P5001, $P5033
+    new $P5043, 'ResizablePMCArray'
+    push $P5001, $P5043
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_95_1346233469.934_alt_nfa__21_1346233471.73" :subid("cuid_memo_187_1346233469.935")
+.sub "cuid_95_1346277621.774_alt_nfa__21_1346277623.423" :subid("cuid_memo_187_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    new $P503, 'ResizablePMCArray'
-    push $P502, $P503
-    new $P504, 'ResizablePMCArray'
-    box $P505, 2
-    push $P504, $P505
-    box $P506, 58
-    push $P504, $P506
-    box $P507, 2
-    push $P504, $P507
-    push $P502, $P504
-    new $P508, 'ResizablePMCArray'
-    box $P509, 0
-    push $P508, $P509
-    box $P510, 0
-    push $P508, $P510
-    box $P511, 0
-    push $P508, $P511
-    push $P502, $P508
-    push $P501, $P502
-    new $P512, 'ResizablePMCArray'
-    new $P513, 'ResizablePMCArray'
-    push $P512, $P513
-    new $P514, 'ResizablePMCArray'
-    box $P515, 2
-    push $P514, $P515
-    box $P516, 58
-    push $P514, $P516
-    box $P517, 2
-    push $P514, $P517
-    push $P512, $P514
-    new $P518, 'ResizablePMCArray'
-    box $P519, 8
-    push $P518, $P519
-    box $P520, "mod_ident"
-    push $P518, $P520
-    box $P521, 3
-    push $P518, $P521
-    push $P512, $P518
-    new $P522, 'ResizablePMCArray'
-    box $P523, 2
-    push $P522, $P523
-    box $P524, 40
-    push $P522, $P524
-    box $P525, 4
-    push $P522, $P525
-    box $P526, 1
-    push $P522, $P526
-    box $P527, 0
-    push $P522, $P527
-    box $P528, 0
-    push $P522, $P528
-    push $P512, $P522
-    new $P529, 'ResizablePMCArray'
-    box $P530, 1
-    push $P529, $P530
-    box $P531, 0
-    push $P529, $P531
-    box $P532, 5
-    push $P529, $P532
-    push $P512, $P529
-    new $P533, 'ResizablePMCArray'
-    box $P534, 4
-    push $P533, $P534
-    box $P535, 8
-    push $P533, $P535
-    box $P536, 6
-    push $P533, $P536
-    push $P512, $P533
-    new $P537, 'ResizablePMCArray'
-    box $P538, 1
-    push $P537, $P538
-    box $P539, 0
-    push $P537, $P539
-    box $P540, 5
-    push $P537, $P540
-    box $P541, 1
-    push $P537, $P541
-    box $P542, 0
-    push $P537, $P542
-    box $P543, 7
-    push $P537, $P543
-    box $P544, 2
-    push $P537, $P544
-    box $P545, 41
-    push $P537, $P545
-    box $P546, 0
-    push $P537, $P546
-    push $P512, $P537
-    new $P547, 'ResizablePMCArray'
-    push $P512, $P547
-    push $P501, $P512
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    new $P5003, 'ResizablePMCArray'
+    push $P5002, $P5003
+    new $P5004, 'ResizablePMCArray'
+    box $P5005, 2
+    push $P5004, $P5005
+    box $P5006, 58
+    push $P5004, $P5006
+    box $P5007, 2
+    push $P5004, $P5007
+    push $P5002, $P5004
+    new $P5008, 'ResizablePMCArray'
+    box $P5009, 0
+    push $P5008, $P5009
+    box $P5010, 0
+    push $P5008, $P5010
+    box $P5011, 0
+    push $P5008, $P5011
+    push $P5002, $P5008
+    push $P5001, $P5002
+    new $P5012, 'ResizablePMCArray'
+    new $P5013, 'ResizablePMCArray'
+    push $P5012, $P5013
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 2
+    push $P5014, $P5015
+    box $P5016, 58
+    push $P5014, $P5016
+    box $P5017, 2
+    push $P5014, $P5017
+    push $P5012, $P5014
+    new $P5018, 'ResizablePMCArray'
+    box $P5019, 8
+    push $P5018, $P5019
+    box $P5020, "mod_ident"
+    push $P5018, $P5020
+    box $P5021, 3
+    push $P5018, $P5021
+    push $P5012, $P5018
+    new $P5022, 'ResizablePMCArray'
+    box $P5023, 2
+    push $P5022, $P5023
+    box $P5024, 40
+    push $P5022, $P5024
+    box $P5025, 4
+    push $P5022, $P5025
+    box $P5026, 1
+    push $P5022, $P5026
+    box $P5027, 0
+    push $P5022, $P5027
+    box $P5028, 0
+    push $P5022, $P5028
+    push $P5012, $P5022
+    new $P5029, 'ResizablePMCArray'
+    box $P5030, 1
+    push $P5029, $P5030
+    box $P5031, 0
+    push $P5029, $P5031
+    box $P5032, 5
+    push $P5029, $P5032
+    push $P5012, $P5029
+    new $P5033, 'ResizablePMCArray'
+    box $P5034, 4
+    push $P5033, $P5034
+    box $P5035, 8
+    push $P5033, $P5035
+    box $P5036, 6
+    push $P5033, $P5036
+    push $P5012, $P5033
+    new $P5037, 'ResizablePMCArray'
+    box $P5038, 1
+    push $P5037, $P5038
+    box $P5039, 0
+    push $P5037, $P5039
+    box $P5040, 5
+    push $P5037, $P5040
+    box $P5041, 1
+    push $P5037, $P5041
+    box $P5042, 0
+    push $P5037, $P5042
+    box $P5043, 7
+    push $P5037, $P5043
+    box $P5044, 2
+    push $P5037, $P5044
+    box $P5045, 41
+    push $P5037, $P5045
+    box $P5046, 0
+    push $P5037, $P5046
+    push $P5012, $P5037
+    new $P5047, 'ResizablePMCArray'
+    push $P5012, $P5047
+    push $P5001, $P5012
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_94_1346233469.934") :anon :lex :outer("cuid_95_1346233469.934")
+.sub "" :subid("cuid_94_1346277621.774") :anon :lex :outer("cuid_95_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
     .param pmc self 
     .lex utf8:"$\x{a2}", $P101 
@@ -14710,7 +14710,7 @@
     nqp_push_label $P11, alt422_01326
     nqp_push_label $P11, alt422_11327
     nqp_rxmark rx420_bstack, alt422_end1325, -1, 0
-    rx420_cur."!alt"(rx420_pos, "alt_nfa__20_1346233471.703", $P11)
+    rx420_cur."!alt"(rx420_pos, "alt_nfa__20_1346277623.399", $P11)
     goto rx420_fail1318
   alt422_01326:
     add $I11, rx420_pos, 1
@@ -14771,121 +14771,121 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_94_1346233469.934_caps" :subid("cuid_memo_188_1346233469.935")
+.sub "cuid_94_1346277621.774_caps" :subid("cuid_memo_188_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    .return ($P501) 
+    new $P5001, 'Hash'
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_94_1346233469.934_nfa" :subid("cuid_memo_189_1346233469.935")
+.sub "cuid_94_1346277621.774_nfa" :subid("cuid_memo_189_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 33
-    push $P503, $P505
-    box $P506, 0
-    push $P503, $P506
-    box $P507, 1
-    push $P503, $P507
-    box $P508, 0
-    push $P503, $P508
-    box $P509, 2
-    push $P503, $P509
-    push $P501, $P503
-    new $P510, 'ResizablePMCArray'
-    box $P511, 4
-    push $P510, $P511
-    box $P512, 8
-    push $P510, $P512
-    box $P513, 3
-    push $P510, $P513
-    push $P501, $P510
-    new $P514, 'ResizablePMCArray'
-    box $P515, 1
-    push $P514, $P515
-    box $P516, 0
-    push $P514, $P516
-    box $P517, 2
-    push $P514, $P517
-    box $P518, 1
-    push $P514, $P518
-    box $P519, 0
-    push $P514, $P519
-    box $P520, 0
-    push $P514, $P520
-    push $P501, $P514
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 33
+    push $P5003, $P5005
+    box $P5006, 0
+    push $P5003, $P5006
+    box $P5007, 1
+    push $P5003, $P5007
+    box $P5008, 0
+    push $P5003, $P5008
+    box $P5009, 2
+    push $P5003, $P5009
+    push $P5001, $P5003
+    new $P5010, 'ResizablePMCArray'
+    box $P5011, 4
+    push $P5010, $P5011
+    box $P5012, 8
+    push $P5010, $P5012
+    box $P5013, 3
+    push $P5010, $P5013
+    push $P5001, $P5010
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 1
+    push $P5014, $P5015
+    box $P5016, 0
+    push $P5014, $P5016
+    box $P5017, 2
+    push $P5014, $P5017
+    box $P5018, 1
+    push $P5014, $P5018
+    box $P5019, 0
+    push $P5014, $P5019
+    box $P5020, 0
+    push $P5014, $P5020
+    push $P5001, $P5014
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_94_1346233469.934_alt_nfa__20_1346233471.703" :subid("cuid_memo_190_1346233469.935")
+.sub "cuid_94_1346277621.774_alt_nfa__20_1346277623.399" :subid("cuid_memo_190_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    new $P503, 'ResizablePMCArray'
-    push $P502, $P503
-    new $P504, 'ResizablePMCArray'
-    box $P505, 2
-    push $P504, $P505
-    box $P506, 33
-    push $P504, $P506
-    box $P507, 0
-    push $P504, $P507
-    push $P502, $P504
-    push $P501, $P502
-    new $P508, 'ResizablePMCArray'
-    new $P509, 'ResizablePMCArray'
-    push $P508, $P509
-    new $P510, 'ResizablePMCArray'
-    box $P511, 1
-    push $P510, $P511
-    box $P512, 0
-    push $P510, $P512
-    box $P513, 2
-    push $P510, $P513
-    push $P508, $P510
-    new $P514, 'ResizablePMCArray'
-    box $P515, 4
-    push $P514, $P515
-    box $P516, 8
-    push $P514, $P516
-    box $P517, 3
-    push $P514, $P517
-    push $P508, $P514
-    new $P518, 'ResizablePMCArray'
-    box $P519, 1
-    push $P518, $P519
-    box $P520, 0
-    push $P518, $P520
-    box $P521, 2
-    push $P518, $P521
-    box $P522, 1
-    push $P518, $P522
-    box $P523, 0
-    push $P518, $P523
-    box $P524, 0
-    push $P518, $P524
-    push $P508, $P518
-    push $P501, $P508
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    new $P5003, 'ResizablePMCArray'
+    push $P5002, $P5003
+    new $P5004, 'ResizablePMCArray'
+    box $P5005, 2
+    push $P5004, $P5005
+    box $P5006, 33
+    push $P5004, $P5006
+    box $P5007, 0
+    push $P5004, $P5007
+    push $P5002, $P5004
+    push $P5001, $P5002
+    new $P5008, 'ResizablePMCArray'
+    new $P5009, 'ResizablePMCArray'
+    push $P5008, $P5009
+    new $P5010, 'ResizablePMCArray'
+    box $P5011, 1
+    push $P5010, $P5011
+    box $P5012, 0
+    push $P5010, $P5012
+    box $P5013, 2
+    push $P5010, $P5013
+    push $P5008, $P5010
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 4
+    push $P5014, $P5015
+    box $P5016, 8
+    push $P5014, $P5016
+    box $P5017, 3
+    push $P5014, $P5017
+    push $P5008, $P5014
+    new $P5018, 'ResizablePMCArray'
+    box $P5019, 1
+    push $P5018, $P5019
+    box $P5020, 0
+    push $P5018, $P5020
+    box $P5021, 2
+    push $P5018, $P5021
+    box $P5022, 1
+    push $P5018, $P5022
+    box $P5023, 0
+    push $P5018, $P5023
+    box $P5024, 0
+    push $P5018, $P5024
+    push $P5008, $P5018
+    push $P5001, $P5008
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "mod_ident" :subid("cuid_96_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "mod_ident" :subid("cuid_96_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 240
     .param pmc self 
-    $P501 = self."!protoregex"("mod_ident")
-    .return ($P501) 
+    $P5001 = self."!protoregex"("mod_ident")
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "mod_ident:sym<ignorecase>" :subid("cuid_97_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "mod_ident:sym<ignorecase>" :subid("cuid_97_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 241
     .param pmc _lex_param_0 
@@ -14982,111 +14982,111 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_97_1346233469.934_caps" :subid("cuid_memo_191_1346233469.935")
+.sub "cuid_97_1346277621.774_caps" :subid("cuid_memo_191_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_97_1346233469.934_nfa" :subid("cuid_memo_192_1346233469.935")
+.sub "cuid_97_1346277621.774_nfa" :subid("cuid_memo_192_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 105
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 2
-    push $P507, $P508
-    box $P509, 103
-    push $P507, $P509
-    box $P510, 3
-    push $P507, $P510
-    box $P511, 1
-    push $P507, $P511
-    box $P512, 0
-    push $P507, $P512
-    box $P513, 0
-    push $P507, $P513
-    push $P501, $P507
-    new $P514, 'ResizablePMCArray'
-    box $P515, 2
-    push $P514, $P515
-    box $P516, 110
-    push $P514, $P516
-    box $P517, 4
-    push $P514, $P517
-    push $P501, $P514
-    new $P518, 'ResizablePMCArray'
-    box $P519, 2
-    push $P518, $P519
-    box $P520, 111
-    push $P518, $P520
-    box $P521, 5
-    push $P518, $P521
-    push $P501, $P518
-    new $P522, 'ResizablePMCArray'
-    box $P523, 2
-    push $P522, $P523
-    box $P524, 114
-    push $P522, $P524
-    box $P525, 6
-    push $P522, $P525
-    push $P501, $P522
-    new $P526, 'ResizablePMCArray'
-    box $P527, 2
-    push $P526, $P527
-    box $P528, 101
-    push $P526, $P528
-    box $P529, 7
-    push $P526, $P529
-    push $P501, $P526
-    new $P530, 'ResizablePMCArray'
-    box $P531, 2
-    push $P530, $P531
-    box $P532, 99
-    push $P530, $P532
-    box $P533, 8
-    push $P530, $P533
-    push $P501, $P530
-    new $P534, 'ResizablePMCArray'
-    box $P535, 2
-    push $P534, $P535
-    box $P536, 97
-    push $P534, $P536
-    box $P537, 9
-    push $P534, $P537
-    push $P501, $P534
-    new $P538, 'ResizablePMCArray'
-    box $P539, 2
-    push $P538, $P539
-    box $P540, 115
-    push $P538, $P540
-    box $P541, 10
-    push $P538, $P541
-    push $P501, $P538
-    new $P542, 'ResizablePMCArray'
-    box $P543, 2
-    push $P542, $P543
-    box $P544, 101
-    push $P542, $P544
-    box $P545, 0
-    push $P542, $P545
-    push $P501, $P542
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 105
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 2
+    push $P5007, $P5008
+    box $P5009, 103
+    push $P5007, $P5009
+    box $P5010, 3
+    push $P5007, $P5010
+    box $P5011, 1
+    push $P5007, $P5011
+    box $P5012, 0
+    push $P5007, $P5012
+    box $P5013, 0
+    push $P5007, $P5013
+    push $P5001, $P5007
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 2
+    push $P5014, $P5015
+    box $P5016, 110
+    push $P5014, $P5016
+    box $P5017, 4
+    push $P5014, $P5017
+    push $P5001, $P5014
+    new $P5018, 'ResizablePMCArray'
+    box $P5019, 2
+    push $P5018, $P5019
+    box $P5020, 111
+    push $P5018, $P5020
+    box $P5021, 5
+    push $P5018, $P5021
+    push $P5001, $P5018
+    new $P5022, 'ResizablePMCArray'
+    box $P5023, 2
+    push $P5022, $P5023
+    box $P5024, 114
+    push $P5022, $P5024
+    box $P5025, 6
+    push $P5022, $P5025
+    push $P5001, $P5022
+    new $P5026, 'ResizablePMCArray'
+    box $P5027, 2
+    push $P5026, $P5027
+    box $P5028, 101
+    push $P5026, $P5028
+    box $P5029, 7
+    push $P5026, $P5029
+    push $P5001, $P5026
+    new $P5030, 'ResizablePMCArray'
+    box $P5031, 2
+    push $P5030, $P5031
+    box $P5032, 99
+    push $P5030, $P5032
+    box $P5033, 8
+    push $P5030, $P5033
+    push $P5001, $P5030
+    new $P5034, 'ResizablePMCArray'
+    box $P5035, 2
+    push $P5034, $P5035
+    box $P5036, 97
+    push $P5034, $P5036
+    box $P5037, 9
+    push $P5034, $P5037
+    push $P5001, $P5034
+    new $P5038, 'ResizablePMCArray'
+    box $P5039, 2
+    push $P5038, $P5039
+    box $P5040, 115
+    push $P5038, $P5040
+    box $P5041, 10
+    push $P5038, $P5041
+    push $P5001, $P5038
+    new $P5042, 'ResizablePMCArray'
+    box $P5043, 2
+    push $P5042, $P5043
+    box $P5044, 101
+    push $P5042, $P5044
+    box $P5045, 0
+    push $P5042, $P5045
+    push $P5001, $P5042
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "mod_ident:sym<ratchet>" :subid("cuid_98_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "mod_ident:sym<ratchet>" :subid("cuid_98_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 242
     .param pmc _lex_param_0 
@@ -15183,87 +15183,87 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_98_1346233469.934_caps" :subid("cuid_memo_193_1346233469.935")
+.sub "cuid_98_1346277621.774_caps" :subid("cuid_memo_193_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_98_1346233469.934_nfa" :subid("cuid_memo_194_1346233469.935")
+.sub "cuid_98_1346277621.774_nfa" :subid("cuid_memo_194_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 114
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 2
-    push $P507, $P508
-    box $P509, 97
-    push $P507, $P509
-    box $P510, 3
-    push $P507, $P510
-    box $P511, 1
-    push $P507, $P511
-    box $P512, 0
-    push $P507, $P512
-    box $P513, 0
-    push $P507, $P513
-    push $P501, $P507
-    new $P514, 'ResizablePMCArray'
-    box $P515, 2
-    push $P514, $P515
-    box $P516, 116
-    push $P514, $P516
-    box $P517, 4
-    push $P514, $P517
-    push $P501, $P514
-    new $P518, 'ResizablePMCArray'
-    box $P519, 2
-    push $P518, $P519
-    box $P520, 99
-    push $P518, $P520
-    box $P521, 5
-    push $P518, $P521
-    push $P501, $P518
-    new $P522, 'ResizablePMCArray'
-    box $P523, 2
-    push $P522, $P523
-    box $P524, 104
-    push $P522, $P524
-    box $P525, 6
-    push $P522, $P525
-    push $P501, $P522
-    new $P526, 'ResizablePMCArray'
-    box $P527, 2
-    push $P526, $P527
-    box $P528, 101
-    push $P526, $P528
-    box $P529, 7
-    push $P526, $P529
-    push $P501, $P526
-    new $P530, 'ResizablePMCArray'
-    box $P531, 2
-    push $P530, $P531
-    box $P532, 116
-    push $P530, $P532
-    box $P533, 0
-    push $P530, $P533
-    push $P501, $P530
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 114
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 2
+    push $P5007, $P5008
+    box $P5009, 97
+    push $P5007, $P5009
+    box $P5010, 3
+    push $P5007, $P5010
+    box $P5011, 1
+    push $P5007, $P5011
+    box $P5012, 0
+    push $P5007, $P5012
+    box $P5013, 0
+    push $P5007, $P5013
+    push $P5001, $P5007
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 2
+    push $P5014, $P5015
+    box $P5016, 116
+    push $P5014, $P5016
+    box $P5017, 4
+    push $P5014, $P5017
+    push $P5001, $P5014
+    new $P5018, 'ResizablePMCArray'
+    box $P5019, 2
+    push $P5018, $P5019
+    box $P5020, 99
+    push $P5018, $P5020
+    box $P5021, 5
+    push $P5018, $P5021
+    push $P5001, $P5018
+    new $P5022, 'ResizablePMCArray'
+    box $P5023, 2
+    push $P5022, $P5023
+    box $P5024, 104
+    push $P5022, $P5024
+    box $P5025, 6
+    push $P5022, $P5025
+    push $P5001, $P5022
+    new $P5026, 'ResizablePMCArray'
+    box $P5027, 2
+    push $P5026, $P5027
+    box $P5028, 101
+    push $P5026, $P5028
+    box $P5029, 7
+    push $P5026, $P5029
+    push $P5001, $P5026
+    new $P5030, 'ResizablePMCArray'
+    box $P5031, 2
+    push $P5030, $P5031
+    box $P5032, 116
+    push $P5030, $P5032
+    box $P5033, 0
+    push $P5030, $P5033
+    push $P5001, $P5030
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "mod_ident:sym<sigspace>" :subid("cuid_99_1346233469.934") :anon :lex :outer("cuid_100_1346233469.934")
+.sub "mod_ident:sym<sigspace>" :subid("cuid_99_1346277621.774") :anon :lex :outer("cuid_100_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 243
     .param pmc _lex_param_0 
@@ -15360,221 +15360,221 @@
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_99_1346233469.934_caps" :subid("cuid_memo_195_1346233469.935")
+.sub "cuid_99_1346277621.774_caps" :subid("cuid_memo_195_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'Hash'
-    box $P502, 0
-    set $P501["sym"], $P502
-    .return ($P501) 
+    new $P5001, 'Hash'
+    box $P5002, 0
+    set $P5001["sym"], $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace ["Sub"]
-.sub "cuid_99_1346233469.934_nfa" :subid("cuid_memo_196_1346233469.935")
+.sub "cuid_99_1346277621.774_nfa" :subid("cuid_memo_196_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    new $P502, 'ResizablePMCArray'
-    push $P501, $P502
-    new $P503, 'ResizablePMCArray'
-    box $P504, 2
-    push $P503, $P504
-    box $P505, 115
-    push $P503, $P505
-    box $P506, 2
-    push $P503, $P506
-    push $P501, $P503
-    new $P507, 'ResizablePMCArray'
-    box $P508, 2
-    push $P507, $P508
-    box $P509, 105
-    push $P507, $P509
-    box $P510, 3
-    push $P507, $P510
-    box $P511, 1
-    push $P507, $P511
-    box $P512, 0
-    push $P507, $P512
-    box $P513, 0
-    push $P507, $P513
-    push $P501, $P507
-    new $P514, 'ResizablePMCArray'
-    box $P515, 2
-    push $P514, $P515
-    box $P516, 103
-    push $P514, $P516
-    box $P517, 4
-    push $P514, $P517
-    push $P501, $P514
-    new $P518, 'ResizablePMCArray'
-    box $P519, 2
-    push $P518, $P519
-    box $P520, 115
-    push $P518, $P520
-    box $P521, 5
-    push $P518, $P521
-    push $P501, $P518
-    new $P522, 'ResizablePMCArray'
-    box $P523, 2
-    push $P522, $P523
-    box $P524, 112
-    push $P522, $P524
-    box $P525, 6
-    push $P522, $P525
-    push $P501, $P522
-    new $P526, 'ResizablePMCArray'
-    box $P527, 2
-    push $P526, $P527
-    box $P528, 97
-    push $P526, $P528
-    box $P529, 7
-    push $P526, $P529
-    push $P501, $P526
-    new $P530, 'ResizablePMCArray'
-    box $P531, 2
-    push $P530, $P531
-    box $P532, 99
-    push $P530, $P532
-    box $P533, 8
-    push $P530, $P533
-    push $P501, $P530
-    new $P534, 'ResizablePMCArray'
-    box $P535, 2
-    push $P534, $P535
-    box $P536, 101
-    push $P534, $P536
-    box $P537, 0
-    push $P534, $P537
-    push $P501, $P534
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    new $P5002, 'ResizablePMCArray'
+    push $P5001, $P5002
+    new $P5003, 'ResizablePMCArray'
+    box $P5004, 2
+    push $P5003, $P5004
+    box $P5005, 115
+    push $P5003, $P5005
+    box $P5006, 2
+    push $P5003, $P5006
+    push $P5001, $P5003
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, 2
+    push $P5007, $P5008
+    box $P5009, 105
+    push $P5007, $P5009
+    box $P5010, 3
+    push $P5007, $P5010
+    box $P5011, 1
+    push $P5007, $P5011
+    box $P5012, 0
+    push $P5007, $P5012
+    box $P5013, 0
+    push $P5007, $P5013
+    push $P5001, $P5007
+    new $P5014, 'ResizablePMCArray'
+    box $P5015, 2
+    push $P5014, $P5015
+    box $P5016, 103
+    push $P5014, $P5016
+    box $P5017, 4
+    push $P5014, $P5017
+    push $P5001, $P5014
+    new $P5018, 'ResizablePMCArray'
+    box $P5019, 2
+    push $P5018, $P5019
+    box $P5020, 115
+    push $P5018, $P5020
+    box $P5021, 5
+    push $P5018, $P5021
+    push $P5001, $P5018
+    new $P5022, 'ResizablePMCArray'
+    box $P5023, 2
+    push $P5022, $P5023
+    box $P5024, 112
+    push $P5022, $P5024
+    box $P5025, 6
+    push $P5022, $P5025
+    push $P5001, $P5022
+    new $P5026, 'ResizablePMCArray'
+    box $P5027, 2
+    push $P5026, $P5027
+    box $P5028, 97
+    push $P5026, $P5028
+    box $P5029, 7
+    push $P5026, $P5029
+    push $P5001, $P5026
+    new $P5030, 'ResizablePMCArray'
+    box $P5031, 2
+    push $P5030, $P5031
+    box $P5032, 99
+    push $P5030, $P5032
+    box $P5033, 8
+    push $P5030, $P5033
+    push $P5001, $P5030
+    new $P5034, 'ResizablePMCArray'
+    box $P5035, 2
+    push $P5034, $P5035
+    box $P5036, 101
+    push $P5034, $P5036
+    box $P5037, 0
+    push $P5034, $P5037
+    push $P5001, $P5034
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_157_1346233469.934") :anon :lex :outer("cuid_1_1346233469.934")
+.sub "" :subid("cuid_157_1346277621.774") :anon :lex :outer("cuid_1_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 247
-    .const 'Sub' $P567 = 'cuid_165_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_167_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_170_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_174_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_187_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_191_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_101_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_102_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_103_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_104_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_105_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_106_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_107_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_108_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_109_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_110_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_111_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_112_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_113_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_114_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_115_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_116_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_117_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_118_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_119_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_120_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_121_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_122_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_123_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_124_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_125_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_126_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_127_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_128_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_129_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_130_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_131_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_132_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_133_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_134_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_135_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_136_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_137_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_138_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_139_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_140_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_141_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_142_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_143_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_144_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_145_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_146_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_147_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_148_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_149_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_150_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_151_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_152_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_153_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_154_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_155_1346233469.934' 
-    capture_lex $P567 
-    .const 'Sub' $P567 = 'cuid_156_1346233469.934' 
-    capture_lex $P567 
+    .const 'Sub' $P5067 = 'cuid_165_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_167_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_170_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_174_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_187_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_191_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_101_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_102_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_103_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_104_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_105_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_106_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_107_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_108_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_109_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_110_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_111_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_112_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_113_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_114_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_115_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_116_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_117_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_118_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_119_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_120_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_121_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_122_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_123_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_124_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_125_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_126_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_127_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_128_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_129_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_130_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_131_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_132_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_133_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_134_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_135_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_136_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_137_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_138_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_139_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_140_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_141_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_142_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_143_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_144_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_145_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_146_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_147_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_148_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_149_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_150_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_151_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_152_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_153_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_154_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_155_1346277621.774' 
+    capture_lex $P5067 
+    .const 'Sub' $P5067 = 'cuid_156_1346277621.774' 
+    capture_lex $P5067 
     .lex "&backmod", $P101 
     .lex "&buildsub", $P102 
     .lex "&qbuildsub", $P103 
@@ -15583,199 +15583,199 @@
     .lex "&qalt_nfas", $P106 
     .lex "$?PACKAGE", $P107 
     .lex "$?CLASS", $P108 
-    .const 'Sub' $P501 = 'cuid_165_1346233469.934' 
-    capture_lex $P501
-    set $P101, $P501
-    .const 'Sub' $P502 = 'cuid_167_1346233469.934' 
-    capture_lex $P502
-    set $P102, $P502
-    find_lex $P504, "$?PACKAGE"
-    get_who $P503, $P504
-    set $P503["buildsub"], $P102
-    .const 'Sub' $P505 = 'cuid_170_1346233469.934' 
-    capture_lex $P505
-    set $P103, $P505
-    find_lex $P507, "$?PACKAGE"
-    get_who $P506, $P507
-    set $P506["qbuildsub"], $P103
-    .const 'Sub' $P508 = 'cuid_174_1346233469.934' 
-    capture_lex $P508
-    set $P104, $P508
-    .const 'Sub' $P509 = 'cuid_187_1346233469.934' 
-    capture_lex $P509
-    set $P105, $P509
-    .const 'Sub' $P510 = 'cuid_191_1346233469.934' 
-    capture_lex $P510
-    set $P106, $P510
-    .const 'Sub' $P511 = 'cuid_101_1346233469.934' 
-    capture_lex $P511
-    .const 'Sub' $P512 = 'cuid_102_1346233469.934' 
-    capture_lex $P512
-    .const 'Sub' $P513 = 'cuid_103_1346233469.934' 
-    capture_lex $P513
-    .const 'Sub' $P514 = 'cuid_104_1346233469.934' 
-    capture_lex $P514
-    .const 'Sub' $P515 = 'cuid_105_1346233469.934' 
-    capture_lex $P515
-    .const 'Sub' $P516 = 'cuid_106_1346233469.934' 
-    capture_lex $P516
-    .const 'Sub' $P517 = 'cuid_107_1346233469.934' 
-    capture_lex $P517
-    .const 'Sub' $P518 = 'cuid_108_1346233469.934' 
-    capture_lex $P518
-    .const 'Sub' $P519 = 'cuid_109_1346233469.934' 
-    capture_lex $P519
-    .const 'Sub' $P520 = 'cuid_110_1346233469.934' 
-    capture_lex $P520
-    .const 'Sub' $P521 = 'cuid_111_1346233469.934' 
-    capture_lex $P521
-    .const 'Sub' $P522 = 'cuid_112_1346233469.934' 
-    capture_lex $P522
-    .const 'Sub' $P523 = 'cuid_113_1346233469.934' 
-    capture_lex $P523
-    .const 'Sub' $P524 = 'cuid_114_1346233469.934' 
-    capture_lex $P524
-    .const 'Sub' $P525 = 'cuid_115_1346233469.934' 
-    capture_lex $P525
-    .const 'Sub' $P526 = 'cuid_116_1346233469.934' 
-    capture_lex $P526
-    .const 'Sub' $P527 = 'cuid_117_1346233469.934' 
-    capture_lex $P527
-    .const 'Sub' $P528 = 'cuid_118_1346233469.934' 
-    capture_lex $P528
-    .const 'Sub' $P529 = 'cuid_119_1346233469.934' 
-    capture_lex $P529
-    .const 'Sub' $P530 = 'cuid_120_1346233469.934' 
-    capture_lex $P530
-    .const 'Sub' $P531 = 'cuid_121_1346233469.934' 
-    capture_lex $P531
-    .const 'Sub' $P532 = 'cuid_122_1346233469.934' 
-    capture_lex $P532
-    .const 'Sub' $P533 = 'cuid_123_1346233469.934' 
-    capture_lex $P533
-    .const 'Sub' $P534 = 'cuid_124_1346233469.934' 
-    capture_lex $P534
-    .const 'Sub' $P535 = 'cuid_125_1346233469.934' 
-    capture_lex $P535
-    .const 'Sub' $P536 = 'cuid_126_1346233469.934' 
-    capture_lex $P536
-    .const 'Sub' $P537 = 'cuid_127_1346233469.934' 
-    capture_lex $P537
-    .const 'Sub' $P538 = 'cuid_128_1346233469.934' 
-    capture_lex $P538
-    .const 'Sub' $P539 = 'cuid_129_1346233469.934' 
-    capture_lex $P539
-    .const 'Sub' $P540 = 'cuid_130_1346233469.934' 
-    capture_lex $P540
-    .const 'Sub' $P541 = 'cuid_131_1346233469.934' 
-    capture_lex $P541
-    .const 'Sub' $P542 = 'cuid_132_1346233469.934' 
-    capture_lex $P542
-    .const 'Sub' $P543 = 'cuid_133_1346233469.934' 
-    capture_lex $P543
-    .const 'Sub' $P544 = 'cuid_134_1346233469.934' 
-    capture_lex $P544
-    .const 'Sub' $P545 = 'cuid_135_1346233469.934' 
-    capture_lex $P545
-    .const 'Sub' $P546 = 'cuid_136_1346233469.934' 
-    capture_lex $P546
-    .const 'Sub' $P547 = 'cuid_137_1346233469.934' 
-    capture_lex $P547
-    .const 'Sub' $P548 = 'cuid_138_1346233469.934' 
-    capture_lex $P548
-    .const 'Sub' $P549 = 'cuid_139_1346233469.934' 
-    capture_lex $P549
-    .const 'Sub' $P550 = 'cuid_140_1346233469.934' 
-    capture_lex $P550
-    .const 'Sub' $P551 = 'cuid_141_1346233469.934' 
-    capture_lex $P551
-    .const 'Sub' $P552 = 'cuid_142_1346233469.934' 
-    capture_lex $P552
-    .const 'Sub' $P553 = 'cuid_143_1346233469.934' 
-    capture_lex $P553
-    .const 'Sub' $P554 = 'cuid_144_1346233469.934' 
-    capture_lex $P554
-    .const 'Sub' $P555 = 'cuid_145_1346233469.934' 
-    capture_lex $P555
-    .const 'Sub' $P556 = 'cuid_146_1346233469.934' 
-    capture_lex $P556
-    .const 'Sub' $P557 = 'cuid_147_1346233469.934' 
-    capture_lex $P557
-    .const 'Sub' $P558 = 'cuid_148_1346233469.934' 
-    capture_lex $P558
-    .const 'Sub' $P559 = 'cuid_149_1346233469.934' 
-    capture_lex $P559
-    .const 'Sub' $P560 = 'cuid_150_1346233469.934' 
-    capture_lex $P560
-    .const 'Sub' $P561 = 'cuid_151_1346233469.934' 
-    capture_lex $P561
-    .const 'Sub' $P562 = 'cuid_152_1346233469.934' 
-    capture_lex $P562
-    .const 'Sub' $P563 = 'cuid_153_1346233469.934' 
-    capture_lex $P563
-    .const 'Sub' $P564 = 'cuid_154_1346233469.934' 
-    capture_lex $P564
-    .const 'Sub' $P565 = 'cuid_155_1346233469.934' 
-    capture_lex $P565
-    .const 'Sub' $P566 = 'cuid_156_1346233469.934' 
-    capture_lex $P566
-    .return ($P566) 
+    .const 'Sub' $P5001 = 'cuid_165_1346277621.774' 
+    capture_lex $P5001
+    set $P101, $P5001
+    .const 'Sub' $P5002 = 'cuid_167_1346277621.774' 
+    capture_lex $P5002
+    set $P102, $P5002
+    find_lex $P5004, "$?PACKAGE"
+    get_who $P5003, $P5004
+    set $P5003["buildsub"], $P102
+    .const 'Sub' $P5005 = 'cuid_170_1346277621.774' 
+    capture_lex $P5005
+    set $P103, $P5005
+    find_lex $P5007, "$?PACKAGE"
+    get_who $P5006, $P5007
+    set $P5006["qbuildsub"], $P103
+    .const 'Sub' $P5008 = 'cuid_174_1346277621.774' 
+    capture_lex $P5008
+    set $P104, $P5008
+    .const 'Sub' $P5009 = 'cuid_187_1346277621.774' 
+    capture_lex $P5009
+    set $P105, $P5009
+    .const 'Sub' $P5010 = 'cuid_191_1346277621.774' 
+    capture_lex $P5010
+    set $P106, $P5010
+    .const 'Sub' $P5011 = 'cuid_101_1346277621.774' 
+    capture_lex $P5011
+    .const 'Sub' $P5012 = 'cuid_102_1346277621.774' 
+    capture_lex $P5012
+    .const 'Sub' $P5013 = 'cuid_103_1346277621.774' 
+    capture_lex $P5013
+    .const 'Sub' $P5014 = 'cuid_104_1346277621.774' 
+    capture_lex $P5014
+    .const 'Sub' $P5015 = 'cuid_105_1346277621.774' 
+    capture_lex $P5015
+    .const 'Sub' $P5016 = 'cuid_106_1346277621.774' 
+    capture_lex $P5016
+    .const 'Sub' $P5017 = 'cuid_107_1346277621.774' 
+    capture_lex $P5017
+    .const 'Sub' $P5018 = 'cuid_108_1346277621.774' 
+    capture_lex $P5018
+    .const 'Sub' $P5019 = 'cuid_109_1346277621.774' 
+    capture_lex $P5019
+    .const 'Sub' $P5020 = 'cuid_110_1346277621.774' 
+    capture_lex $P5020
+    .const 'Sub' $P5021 = 'cuid_111_1346277621.774' 
+    capture_lex $P5021
+    .const 'Sub' $P5022 = 'cuid_112_1346277621.774' 
+    capture_lex $P5022
+    .const 'Sub' $P5023 = 'cuid_113_1346277621.774' 
+    capture_lex $P5023
+    .const 'Sub' $P5024 = 'cuid_114_1346277621.774' 
+    capture_lex $P5024
+    .const 'Sub' $P5025 = 'cuid_115_1346277621.774' 
+    capture_lex $P5025
+    .const 'Sub' $P5026 = 'cuid_116_1346277621.774' 
+    capture_lex $P5026
+    .const 'Sub' $P5027 = 'cuid_117_1346277621.774' 
+    capture_lex $P5027
+    .const 'Sub' $P5028 = 'cuid_118_1346277621.774' 
+    capture_lex $P5028
+    .const 'Sub' $P5029 = 'cuid_119_1346277621.774' 
+    capture_lex $P5029
+    .const 'Sub' $P5030 = 'cuid_120_1346277621.774' 
+    capture_lex $P5030
+    .const 'Sub' $P5031 = 'cuid_121_1346277621.774' 
+    capture_lex $P5031
+    .const 'Sub' $P5032 = 'cuid_122_1346277621.774' 
+    capture_lex $P5032
+    .const 'Sub' $P5033 = 'cuid_123_1346277621.774' 
+    capture_lex $P5033
+    .const 'Sub' $P5034 = 'cuid_124_1346277621.774' 
+    capture_lex $P5034
+    .const 'Sub' $P5035 = 'cuid_125_1346277621.774' 
+    capture_lex $P5035
+    .const 'Sub' $P5036 = 'cuid_126_1346277621.774' 
+    capture_lex $P5036
+    .const 'Sub' $P5037 = 'cuid_127_1346277621.774' 
+    capture_lex $P5037
+    .const 'Sub' $P5038 = 'cuid_128_1346277621.774' 
+    capture_lex $P5038
+    .const 'Sub' $P5039 = 'cuid_129_1346277621.774' 
+    capture_lex $P5039
+    .const 'Sub' $P5040 = 'cuid_130_1346277621.774' 
+    capture_lex $P5040
+    .const 'Sub' $P5041 = 'cuid_131_1346277621.774' 
+    capture_lex $P5041
+    .const 'Sub' $P5042 = 'cuid_132_1346277621.774' 
+    capture_lex $P5042
+    .const 'Sub' $P5043 = 'cuid_133_1346277621.774' 
+    capture_lex $P5043
+    .const 'Sub' $P5044 = 'cuid_134_1346277621.774' 
+    capture_lex $P5044
+    .const 'Sub' $P5045 = 'cuid_135_1346277621.774' 
+    capture_lex $P5045
+    .const 'Sub' $P5046 = 'cuid_136_1346277621.774' 
+    capture_lex $P5046
+    .const 'Sub' $P5047 = 'cuid_137_1346277621.774' 
+    capture_lex $P5047
+    .const 'Sub' $P5048 = 'cuid_138_1346277621.774' 
+    capture_lex $P5048
+    .const 'Sub' $P5049 = 'cuid_139_1346277621.774' 
+    capture_lex $P5049
+    .const 'Sub' $P5050 = 'cuid_140_1346277621.774' 
+    capture_lex $P5050
+    .const 'Sub' $P5051 = 'cuid_141_1346277621.774' 
+    capture_lex $P5051
+    .const 'Sub' $P5052 = 'cuid_142_1346277621.774' 
+    capture_lex $P5052
+    .const 'Sub' $P5053 = 'cuid_143_1346277621.774' 
+    capture_lex $P5053
+    .const 'Sub' $P5054 = 'cuid_144_1346277621.774' 
+    capture_lex $P5054
+    .const 'Sub' $P5055 = 'cuid_145_1346277621.774' 
+    capture_lex $P5055
+    .const 'Sub' $P5056 = 'cuid_146_1346277621.774' 
+    capture_lex $P5056
+    .const 'Sub' $P5057 = 'cuid_147_1346277621.774' 
+    capture_lex $P5057
+    .const 'Sub' $P5058 = 'cuid_148_1346277621.774' 
+    capture_lex $P5058
+    .const 'Sub' $P5059 = 'cuid_149_1346277621.774' 
+    capture_lex $P5059
+    .const 'Sub' $P5060 = 'cuid_150_1346277621.774' 
+    capture_lex $P5060
+    .const 'Sub' $P5061 = 'cuid_151_1346277621.774' 
+    capture_lex $P5061
+    .const 'Sub' $P5062 = 'cuid_152_1346277621.774' 
+    capture_lex $P5062
+    .const 'Sub' $P5063 = 'cuid_153_1346277621.774' 
+    capture_lex $P5063
+    .const 'Sub' $P5064 = 'cuid_154_1346277621.774' 
+    capture_lex $P5064
+    .const 'Sub' $P5065 = 'cuid_155_1346277621.774' 
+    capture_lex $P5065
+    .const 'Sub' $P5066 = 'cuid_156_1346277621.774' 
+    capture_lex $P5066
+    .return ($P5066) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backmod" :subid("cuid_165_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "backmod" :subid("cuid_165_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 755
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
     .lex "$ast", _lex_param_0 
     .lex "$backmod", _lex_param_1 
-    set $S501, _lex_param_1
-    iseq $I501, $S501, ":"
-    unless $I501 goto if443_else1384 
+    set $S5001, _lex_param_1
+    iseq $I5001, $S5001, ":"
+    unless $I5001 goto if443_else1384 
 .annotate 'line', 756
-    $P501 = _lex_param_0."backtrack"("r")
-    set $P507, $P501
+    $P5001 = _lex_param_0."backtrack"("r")
+    set $P5007, $P5001
     goto if443_end1385
   if443_else1384:
-    set $S502, _lex_param_1
-    iseq $I502, $S502, ":?"
-    set $I504, $I502
-    if $I502 goto unless445_end1389 
-    set $S503, _lex_param_1
-    iseq $I503, $S503, "?"
-    set $I504, $I503
+    set $S5002, _lex_param_1
+    iseq $I5002, $S5002, ":?"
+    set $I5004, $I5002
+    if $I5002 goto unless445_end1389 
+    set $S5003, _lex_param_1
+    iseq $I5003, $S5003, "?"
+    set $I5004, $I5003
   unless445_end1389:
-    unless $I504 goto if444_else1386 
+    unless $I5004 goto if444_else1386 
 .annotate 'line', 757
-    $P502 = _lex_param_0."backtrack"("f")
-    set $P506, $P502
+    $P5002 = _lex_param_0."backtrack"("f")
+    set $P5006, $P5002
     goto if444_end1387
   if444_else1386:
-    set $S504, _lex_param_1
-    iseq $I505, $S504, ":!"
-    set $I507, $I505
-    if $I505 goto unless447_end1393 
-    set $S505, _lex_param_1
-    iseq $I506, $S505, "!"
-    set $I507, $I506
+    set $S5004, _lex_param_1
+    iseq $I5005, $S5004, ":!"
+    set $I5007, $I5005
+    if $I5005 goto unless447_end1393 
+    set $S5005, _lex_param_1
+    iseq $I5006, $S5005, "!"
+    set $I5007, $I5006
   unless447_end1393:
-    box $P505, $I507
-    set $P504, $P505
-    unless $I507 goto if446_end1391 
+    box $P5005, $I5007
+    set $P5004, $P5005
+    unless $I5007 goto if446_end1391 
 .annotate 'line', 758
-    $P503 = _lex_param_0."backtrack"("g")
-    set $P504, $P503
+    $P5003 = _lex_param_0."backtrack"("g")
+    set $P5004, $P5003
   if446_end1391:
-    set $P506, $P504
+    set $P5006, $P5004
   if444_end1387:
-    set $P507, $P506
+    set $P5007, $P5006
   if443_end1385:
     .return (_lex_param_0) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "buildsub" :subid("cuid_167_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "buildsub" :subid("cuid_167_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 762
     .param pmc _lex_param_0 
@@ -15783,25 +15783,25 @@
     .param int haz_param_2 :opt_flag 
     .param pmc _lex_param_2 :named("anon") :optional 
     .param int haz_param_3 :opt_flag 
-    .const 'Sub' $P613 = 'cuid_166_1346233469.934' 
-    capture_lex $P613 
-    .const 'Sub' $P613 = 'cuid_168_1346233469.934' 
-    capture_lex $P613 
+    .const 'Sub' $P5113 = 'cuid_166_1346277621.774' 
+    capture_lex $P5113 
+    .const 'Sub' $P5113 = 'cuid_168_1346277621.774' 
+    capture_lex $P5113 
     if haz_param_2, default1423
-    get_hll_global $P609, "GLOBAL"
-    nqp_get_package_through_who $P608, $P609, "PAST"
-    get_who $P607, $P608
-    set $P606, $P607["Block"]
-    unless_null $P606, fallback1424
-    nqp_get_sc_object $P610, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P606, $P610
+    get_hll_global $P5109, "GLOBAL"
+    nqp_get_package_through_who $P5108, $P5109, "PAST"
+    get_who $P5107, $P5108
+    set $P5106, $P5107["Block"]
+    unless_null $P5106, fallback1424
+    nqp_get_sc_object $P5110, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5106, $P5110
   fallback1424:
-    $P611 = $P606."new"("method" :named("blocktype"))
-    set _lex_param_1, $P611
+    $P5111 = $P5106."new"("method" :named("blocktype"))
+    set _lex_param_1, $P5111
   default1423:
     if haz_param_3, default1425
-    nqp_get_sc_object $P612, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set _lex_param_2, $P612
+    nqp_get_sc_object $P5112, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set _lex_param_2, $P5112
   default1425:
     .lex "$blockid", $P101 
     .lex "$hashpast", $P102 
@@ -15811,300 +15811,300 @@
     .lex "$qast", _lex_param_0 
     .lex "$block", _lex_param_1 
     .lex "$anon", _lex_param_2 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P102, $P502
-    nqp_get_sc_object $P503, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P103, $P503
-    nqp_get_sc_object $P504, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P104, $P504
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P105, $P505
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P102, $P5002
+    nqp_get_sc_object $P5003, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P103, $P5003
+    nqp_get_sc_object $P5004, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P104, $P5004
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P105, $P5005
 .annotate 'line', 763
-    $P506 = _lex_param_1."subid"()
-    set $P101, $P506
+    $P5006 = _lex_param_1."subid"()
+    set $P101, $P5006
 .annotate 'line', 764
-    get_hll_global $P510, "GLOBAL"
-    nqp_get_package_through_who $P509, $P510, "PAST"
-    get_who $P508, $P509
-    set $P507, $P508["Op"]
-    unless_null $P507, fallback1394
-    nqp_get_sc_object $P511, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P507, $P511
+    get_hll_global $P5010, "GLOBAL"
+    nqp_get_package_through_who $P5009, $P5010, "PAST"
+    get_who $P5008, $P5009
+    set $P5007, $P5008["Op"]
+    unless_null $P5007, fallback1394
+    nqp_get_sc_object $P5011, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5007, $P5011
   fallback1394:
-    $P512 = $P507."new"("hash" :named("pasttype"))
-    set $P102, $P512
+    $P5012 = $P5007."new"("hash" :named("pasttype"))
+    set $P102, $P5012
 .annotate 'line', 765
-    $P516 = "&capnames"(_lex_param_0, 0)
-    set $P513, $P516
-    iter $P515, $P516
-    new $P518, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P518, for_handlers1397
-    push_eh $P518
+    $P5016 = "&capnames"(_lex_param_0, 0)
+    set $P5013, $P5016
+    iter $P5015, $P5016
+    new $P5018, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5018, for_handlers1397
+    push_eh $P5018
   for_next1398:
-    unless $P515, for_done1400
-    shift $P519, $P515
+    unless $P5015, for_done1400
+    shift $P5019, $P5015
   for_redo1399:
-    .const 'Sub' $P517 = 'cuid_166_1346233469.934' 
-    capture_lex $P517
-    $P513 = $P517($P519)
+    .const 'Sub' $P5017 = 'cuid_166_1346277621.774' 
+    capture_lex $P5017
+    $P5013 = $P5017($P5019)
     goto for_next1398
   for_handlers1397:
-    .get_results ($P518)
-    pop_upto_eh $P518
-    getattribute $P518, $P518, 'type'
-    eq $P518, .CONTROL_LOOP_NEXT, for_next1398
-    eq $P518, .CONTROL_LOOP_REDO, for_redo1399
+    .get_results ($P5018)
+    pop_upto_eh $P5018
+    getattribute $P5018, $P5018, 'type'
+    eq $P5018, .CONTROL_LOOP_NEXT, for_next1398
+    eq $P5018, .CONTROL_LOOP_REDO, for_redo1399
   for_done1400:
     pop_eh 
 .annotate 'line', 772
-    get_hll_global $P523, "GLOBAL"
-    nqp_get_package_through_who $P522, $P523, "PAST"
-    get_who $P521, $P522
-    set $P520, $P521["Stmts"]
-    unless_null $P520, fallback1401
-    nqp_get_sc_object $P524, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P520, $P524
+    get_hll_global $P5023, "GLOBAL"
+    nqp_get_package_through_who $P5022, $P5023, "PAST"
+    get_who $P5021, $P5022
+    set $P5020, $P5021["Stmts"]
+    unless_null $P5020, fallback1401
+    nqp_get_sc_object $P5024, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5020, $P5024
   fallback1401:
-    $P525 = $P520."new"()
-    set $P103, $P525
+    $P5025 = $P5020."new"()
+    set $P103, $P5025
 .annotate 'line', 773
-    get_hll_global $P529, "GLOBAL"
-    nqp_get_package_through_who $P528, $P529, "PAST"
-    get_who $P527, $P528
-    set $P526, $P527["Block"]
-    unless_null $P526, fallback1402
-    nqp_get_sc_object $P530, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P526, $P530
+    get_hll_global $P5029, "GLOBAL"
+    nqp_get_package_through_who $P5028, $P5029, "PAST"
+    get_who $P5027, $P5028
+    set $P5026, $P5027["Block"]
+    unless_null $P5026, fallback1402
+    nqp_get_sc_object $P5030, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5026, $P5030
   fallback1402:
-    new $P531, 'ResizablePMCArray'
-    box $P532, "Sub"
-    push $P531, $P532
-    set $S502, $P101
-    concat $S501, $S502, "_caps"
-    $P533 = $P526."new"($P102, "nqp" :named("hll"), $P531 :named("namespace"), 0 :named("lexical"), $S501 :named("name"))
-    set $P104, $P533
+    new $P5031, 'ResizablePMCArray'
+    box $P5032, "Sub"
+    push $P5031, $P5032
+    set $S5002, $P101
+    concat $S5001, $S5002, "_caps"
+    $P5033 = $P5026."new"($P102, "nqp" :named("hll"), $P5031 :named("namespace"), 0 :named("lexical"), $S5001 :named("name"))
+    set $P104, $P5033
 .annotate 'line', 775
-    get_hll_global $P537, "GLOBAL"
-    nqp_get_package_through_who $P536, $P537, "PAST"
-    get_who $P535, $P536
-    set $P534, $P535["Stmt"]
-    unless_null $P534, fallback1403
-    nqp_get_sc_object $P538, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P534, $P538
+    get_hll_global $P5037, "GLOBAL"
+    nqp_get_package_through_who $P5036, $P5037, "PAST"
+    get_who $P5035, $P5036
+    set $P5034, $P5035["Stmt"]
+    unless_null $P5034, fallback1403
+    nqp_get_sc_object $P5038, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5034, $P5038
   fallback1403:
-    $P539 = $P534."new"($P104)
-    $P540 = $P103."push"($P539)
+    $P5039 = $P5034."new"($P104)
+    $P5040 = $P103."push"($P5039)
 .annotate 'line', 777
-    get_hll_global $P544, "GLOBAL"
-    nqp_get_package_through_who $P543, $P544, "QRegex"
-    get_who $P542, $P543
-    set $P541, $P542["NFA"]
-    unless_null $P541, fallback1404
-    nqp_get_sc_object $P545, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P541, $P545
+    get_hll_global $P5044, "GLOBAL"
+    nqp_get_package_through_who $P5043, $P5044, "QRegex"
+    get_who $P5042, $P5043
+    set $P5041, $P5042["NFA"]
+    unless_null $P5041, fallback1404
+    nqp_get_sc_object $P5045, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5041, $P5045
   fallback1404:
-    $P546 = $P541."new"()
-    $P547 = $P546."addnode"(_lex_param_0)
-    $P548 = $P547."past"()
-    set $P105, $P548
-    set $P551, $P105
+    $P5046 = $P5041."new"()
+    $P5047 = $P5046."addnode"(_lex_param_0)
+    $P5048 = $P5047."past"()
+    set $P105, $P5048
+    set $P5051, $P105
     unless $P105 goto if449_end1406 
-    .const 'Sub' $P549 = 'cuid_168_1346233469.934' 
-    capture_lex $P549
-    $P550 = $P549()
-    set $P551, $P550
+    .const 'Sub' $P5049 = 'cuid_168_1346277621.774' 
+    capture_lex $P5049
+    $P5050 = $P5049()
+    set $P5051, $P5050
   if449_end1406:
 .annotate 'line', 784
-    $P552 = "&alt_nfas"(_lex_param_0, $P101, $P103)
+    $P5052 = "&alt_nfas"(_lex_param_0, $P101, $P103)
 .annotate 'line', 786
-    $P553 = _lex_param_1."symbol"(utf8:"$\x{a2}")
-    set $P562, $P553
-    if $P553 goto unless450_end1410 
+    $P5053 = _lex_param_1."symbol"(utf8:"$\x{a2}")
+    set $P5062, $P5053
+    if $P5053 goto unless450_end1410 
 .annotate 'line', 787
-    get_hll_global $P557, "GLOBAL"
-    nqp_get_package_through_who $P556, $P557, "PAST"
-    get_who $P555, $P556
-    set $P554, $P555["Var"]
-    unless_null $P554, fallback1411
-    nqp_get_sc_object $P558, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P554, $P558
+    get_hll_global $P5057, "GLOBAL"
+    nqp_get_package_through_who $P5056, $P5057, "PAST"
+    get_who $P5055, $P5056
+    set $P5054, $P5055["Var"]
+    unless_null $P5054, fallback1411
+    nqp_get_sc_object $P5058, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5054, $P5058
   fallback1411:
-    $P559 = $P554."new"(utf8:"$\x{a2}" :named("name"), "lexical" :named("scope"), 1 :named("isdecl"))
-    $P560 = $P103."push"($P559)
+    $P5059 = $P5054."new"(utf8:"$\x{a2}" :named("name"), "lexical" :named("scope"), 1 :named("isdecl"))
+    $P5060 = $P103."push"($P5059)
 .annotate 'line', 788
-    $P561 = _lex_param_1."symbol"(utf8:"$\x{a2}", "lexical" :named("scope"))
-    set $P562, $P561
+    $P5061 = _lex_param_1."symbol"(utf8:"$\x{a2}", "lexical" :named("scope"))
+    set $P5062, $P5061
   unless450_end1410:
     set _lex_param_1["orig_qast"], _lex_param_0
 .annotate 'line', 793
-    get_hll_global $P566, "GLOBAL"
-    nqp_get_package_through_who $P565, $P566, "QAST"
-    get_who $P564, $P565
-    set $P563, $P564["Regex"]
-    unless_null $P563, fallback1412
-    nqp_get_sc_object $P567, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P563, $P567
+    get_hll_global $P5066, "GLOBAL"
+    nqp_get_package_through_who $P5065, $P5066, "QAST"
+    get_who $P5064, $P5065
+    set $P5063, $P5064["Regex"]
+    unless_null $P5063, fallback1412
+    nqp_get_sc_object $P5067, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5063, $P5067
   fallback1412:
 .annotate 'line', 794
-    get_hll_global $P571, "GLOBAL"
-    nqp_get_package_through_who $P570, $P571, "QAST"
-    get_who $P569, $P570
-    set $P568, $P569["Regex"]
-    unless_null $P568, fallback1413
-    nqp_get_sc_object $P572, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P568, $P572
+    get_hll_global $P5071, "GLOBAL"
+    nqp_get_package_through_who $P5070, $P5071, "QAST"
+    get_who $P5069, $P5070
+    set $P5068, $P5069["Regex"]
+    unless_null $P5068, fallback1413
+    nqp_get_sc_object $P5072, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5068, $P5072
   fallback1413:
-    $P573 = $P568."new"("scan" :named("rxtype"))
+    $P5073 = $P5068."new"("scan" :named("rxtype"))
     unless _lex_param_2 goto if451_else1414 
 .annotate 'line', 797
-    get_hll_global $P577, "GLOBAL"
-    nqp_get_package_through_who $P576, $P577, "QAST"
-    get_who $P575, $P576
-    set $P574, $P575["Regex"]
-    unless_null $P574, fallback1416
-    nqp_get_sc_object $P578, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P574, $P578
+    get_hll_global $P5077, "GLOBAL"
+    nqp_get_package_through_who $P5076, $P5077, "QAST"
+    get_who $P5075, $P5076
+    set $P5074, $P5075["Regex"]
+    unless_null $P5074, fallback1416
+    nqp_get_sc_object $P5078, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5074, $P5078
   fallback1416:
-    $P579 = $P574."new"("pass" :named("rxtype"))
-    set $P596, $P579
+    $P5079 = $P5074."new"("pass" :named("rxtype"))
+    set $P5096, $P5079
     goto if451_end1415
   if451_else1414:
 .annotate 'line', 798
-    get_hll_global $P583, "GLOBAL"
-    nqp_get_package_through_who $P582, $P583, "QAST"
-    get_who $P581, $P582
-    set $P580, $P581["Regex"]
-    unless_null $P580, fallback1417
-    nqp_get_sc_object $P584, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P580, $P584
+    get_hll_global $P5083, "GLOBAL"
+    nqp_get_package_through_who $P5082, $P5083, "QAST"
+    get_who $P5081, $P5082
+    set $P5080, $P5081["Regex"]
+    unless_null $P5080, fallback1417
+    nqp_get_sc_object $P5084, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5080, $P5084
   fallback1417:
-    find_dynamic_lex $P586, "%*RX"
-    unless_null $P586, fallback1418
-    get_hll_global $P589, "GLOBAL"
-    get_who $P588, $P589
-    set $P587, $P588["%RX"]
-    unless_null $P587, fallback1419
-    get_hll_global $P591, "GLOBAL"
-    get_who $P590, $P591
-    new $P592, 'Hash'
-    set $P590["%RX"], $P592
-    set $P587, $P592
+    find_dynamic_lex $P5086, "%*RX"
+    unless_null $P5086, fallback1418
+    get_hll_global $P5089, "GLOBAL"
+    get_who $P5088, $P5089
+    set $P5087, $P5088["%RX"]
+    unless_null $P5087, fallback1419
+    get_hll_global $P5091, "GLOBAL"
+    get_who $P5090, $P5091
+    new $P5092, 'Hash'
+    set $P5090["%RX"], $P5092
+    set $P5087, $P5092
   fallback1419:
-    unless_null $P587, vivi_4521420
+    unless_null $P5087, vivi_4521420
     die "Contextual %*RX not found"
-    box $P593, "Contextual %*RX not found"
-    set $P587, $P593
+    box $P5093, "Contextual %*RX not found"
+    set $P5087, $P5093
   vivi_4521420:
-    set $P586, $P587
+    set $P5086, $P5087
   fallback1418:
-    set $P585, $P586["name"]
-    unless_null $P585, fallback1421
-    nqp_get_sc_object $P594, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P585, $P594
+    set $P5085, $P5086["name"]
+    unless_null $P5085, fallback1421
+    nqp_get_sc_object $P5094, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5085, $P5094
   fallback1421:
-    $P595 = $P580."new"("pass" :named("rxtype"), $P585 :named("name"))
-    set $P596, $P595
+    $P5095 = $P5080."new"("pass" :named("rxtype"), $P5085 :named("name"))
+    set $P5096, $P5095
   if451_end1415:
-    $P597 = $P563."new"($P573, _lex_param_0, $P596, "concat" :named("rxtype"))
-    set _lex_param_0, $P597
+    $P5097 = $P5063."new"($P5073, _lex_param_0, $P5096, "concat" :named("rxtype"))
+    set _lex_param_0, $P5097
 .annotate 'line', 799
-    $P598 = _lex_param_1."push"($P103)
+    $P5098 = _lex_param_1."push"($P103)
 .annotate 'line', 800
-    get_hll_global $P602, "GLOBAL"
-    nqp_get_package_through_who $P601, $P602, "PAST"
-    get_who $P600, $P601
-    set $P599, $P600["QAST"]
-    unless_null $P599, fallback1422
-    nqp_get_sc_object $P603, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P599, $P603
+    get_hll_global $P5102, "GLOBAL"
+    nqp_get_package_through_who $P5101, $P5102, "PAST"
+    get_who $P5100, $P5101
+    set $P5099, $P5100["QAST"]
+    unless_null $P5099, fallback1422
+    nqp_get_sc_object $P5103, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5099, $P5103
   fallback1422:
-    $P604 = $P599."new"(_lex_param_0)
-    $P605 = _lex_param_1."push"($P604)
+    $P5104 = $P5099."new"(_lex_param_0)
+    $P5105 = _lex_param_1."push"($P5104)
     .return (_lex_param_1) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_166_1346233469.934") :anon :lex :outer("cuid_167_1346233469.934")
+.sub "" :subid("cuid_166_1346277621.774") :anon :lex :outer("cuid_167_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 765
     .param pmc _lex_param_0 
     .lex "$_", _lex_param_0 
 .annotate 'line', 766
-    $P501 = _lex_param_0."key"()
-    set $S501, $P501
-    isgt $I501, $S501, ""
-    box $P510, $I501
-    set $P509, $P510
-    unless $I501 goto if448_end1396 
+    $P5001 = _lex_param_0."key"()
+    set $S5001, $P5001
+    isgt $I5001, $S5001, ""
+    box $P5010, $I5001
+    set $P5009, $P5010
+    unless $I5001 goto if448_end1396 
 .annotate 'line', 767
-    find_lex $P502, "$hashpast"
-    $P503 = _lex_param_0."key"()
-    $P504 = $P502."push"($P503)
+    find_lex $P5002, "$hashpast"
+    $P5003 = _lex_param_0."key"()
+    $P5004 = $P5002."push"($P5003)
 .annotate 'line', 768
-    find_lex $P505, "$hashpast"
+    find_lex $P5005, "$hashpast"
 .annotate 'line', 769
-    $P506 = _lex_param_0."key"()
-    set $S502, $P506
-    is_cclass $I502, .CCLASS_NUMERIC, $S502, 0
-    set $N502, $I502
-    $P507 = _lex_param_0."value"()
-    set $N504, $P507
-    set $N505, 1
-    isgt $I503, $N504, $N505
-    set $N506, $I503
-    set $N507, 2
-    mul $N503, $N506, $N507
-    add $N501, $N502, $N503
-    $P508 = $P505."push"($N501)
-    set $P509, $P508
+    $P5006 = _lex_param_0."key"()
+    set $S5002, $P5006
+    is_cclass $I5002, .CCLASS_NUMERIC, $S5002, 0
+    set $N5002, $I5002
+    $P5007 = _lex_param_0."value"()
+    set $N5004, $P5007
+    set $N5005, 1
+    isgt $I5003, $N5004, $N5005
+    set $N5006, $I5003
+    set $N5007, 2
+    mul $N5003, $N5006, $N5007
+    add $N5001, $N5002, $N5003
+    $P5008 = $P5005."push"($N5001)
+    set $P5009, $P5008
   if448_end1396:
-    .return ($P509) 
+    .return ($P5009) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_168_1346233469.934") :anon :lex :outer("cuid_167_1346233469.934")
+.sub "" :subid("cuid_168_1346277621.774") :anon :lex :outer("cuid_167_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 778
     .lex "$nfablock", $P101 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 779
-    get_hll_global $P505, "GLOBAL"
-    nqp_get_package_through_who $P504, $P505, "PAST"
-    get_who $P503, $P504
-    set $P502, $P503["Block"]
-    unless_null $P502, fallback1407
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P506
+    get_hll_global $P5005, "GLOBAL"
+    nqp_get_package_through_who $P5004, $P5005, "PAST"
+    get_who $P5003, $P5004
+    set $P5002, $P5003["Block"]
+    unless_null $P5002, fallback1407
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5006
   fallback1407:
-    new $P507, 'ResizablePMCArray'
-    box $P508, "Sub"
-    push $P507, $P508
-    find_lex $P509, "$blockid"
-    set $S502, $P509
-    concat $S501, $S502, "_nfa"
-    find_lex $P510, "$nfapast"
-    $P511 = $P502."new"($P510, "nqp" :named("hll"), $P507 :named("namespace"), 0 :named("lexical"), $S501 :named("name"))
-    set $P101, $P511
+    new $P5007, 'ResizablePMCArray'
+    box $P5008, "Sub"
+    push $P5007, $P5008
+    find_lex $P5009, "$blockid"
+    set $S5002, $P5009
+    concat $S5001, $S5002, "_nfa"
+    find_lex $P5010, "$nfapast"
+    $P5011 = $P5002."new"($P5010, "nqp" :named("hll"), $P5007 :named("namespace"), 0 :named("lexical"), $S5001 :named("name"))
+    set $P101, $P5011
 .annotate 'line', 782
-    find_lex $P512, "$initpast"
-    get_hll_global $P516, "GLOBAL"
-    nqp_get_package_through_who $P515, $P516, "PAST"
-    get_who $P514, $P515
-    set $P513, $P514["Stmt"]
-    unless_null $P513, fallback1408
-    nqp_get_sc_object $P517, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P513, $P517
+    find_lex $P5012, "$initpast"
+    get_hll_global $P5016, "GLOBAL"
+    nqp_get_package_through_who $P5015, $P5016, "PAST"
+    get_who $P5014, $P5015
+    set $P5013, $P5014["Stmt"]
+    unless_null $P5013, fallback1408
+    nqp_get_sc_object $P5017, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5013, $P5017
   fallback1408:
-    $P518 = $P513."new"($P101)
-    $P519 = $P512."push"($P518)
-    .return ($P519) 
+    $P5018 = $P5013."new"($P101)
+    $P5019 = $P5012."push"($P5018)
+    .return ($P5019) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "qbuildsub" :subid("cuid_170_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "qbuildsub" :subid("cuid_170_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 804
     .param pmc _lex_param_0 
@@ -16114,29 +16114,29 @@
     .param int haz_param_5 :opt_flag 
     .param pmc _lex_param_3 :named("addself") :optional 
     .param int haz_param_6 :opt_flag 
-    .const 'Sub' $P614 = 'cuid_169_1346233469.934' 
-    capture_lex $P614 
-    .const 'Sub' $P614 = 'cuid_171_1346233469.934' 
-    capture_lex $P614 
+    .const 'Sub' $P5114 = 'cuid_169_1346277621.774' 
+    capture_lex $P5114 
+    .const 'Sub' $P5114 = 'cuid_171_1346277621.774' 
+    capture_lex $P5114 
     if haz_param_4, default1459
-    get_hll_global $P609, "GLOBAL"
-    nqp_get_package_through_who $P608, $P609, "QAST"
-    get_who $P607, $P608
-    set $P606, $P607["Block"]
-    unless_null $P606, fallback1460
-    nqp_get_sc_object $P610, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P606, $P610
+    get_hll_global $P5109, "GLOBAL"
+    nqp_get_package_through_who $P5108, $P5109, "QAST"
+    get_who $P5107, $P5108
+    set $P5106, $P5107["Block"]
+    unless_null $P5106, fallback1460
+    nqp_get_sc_object $P5110, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5106, $P5110
   fallback1460:
-    $P611 = $P606."new"()
-    set _lex_param_1, $P611
+    $P5111 = $P5106."new"()
+    set _lex_param_1, $P5111
   default1459:
     if haz_param_5, default1461
-    nqp_get_sc_object $P612, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set _lex_param_2, $P612
+    nqp_get_sc_object $P5112, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set _lex_param_2, $P5112
   default1461:
     if haz_param_6, default1462
-    nqp_get_sc_object $P613, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set _lex_param_3, $P613
+    nqp_get_sc_object $P5113, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set _lex_param_3, $P5113
   default1462:
     .lex "$blockid", $P101 
     .lex "$hashpast", $P102 
@@ -16147,432 +16147,432 @@
     .lex "$block", _lex_param_1 
     .lex "$anon", _lex_param_2 
     .lex "$addself", _lex_param_3 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P102, $P502
-    nqp_get_sc_object $P503, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P103, $P503
-    nqp_get_sc_object $P504, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P104, $P504
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P105, $P505
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P102, $P5002
+    nqp_get_sc_object $P5003, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P103, $P5003
+    nqp_get_sc_object $P5004, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P104, $P5004
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P105, $P5005
 .annotate 'line', 805
-    $P506 = _lex_param_1."cuid"()
-    set $P101, $P506
+    $P5006 = _lex_param_1."cuid"()
+    set $P101, $P5006
 .annotate 'line', 806
-    get_hll_global $P510, "GLOBAL"
-    nqp_get_package_through_who $P509, $P510, "QAST"
-    get_who $P508, $P509
-    set $P507, $P508["Op"]
-    unless_null $P507, fallback1426
-    nqp_get_sc_object $P511, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P507, $P511
+    get_hll_global $P5010, "GLOBAL"
+    nqp_get_package_through_who $P5009, $P5010, "QAST"
+    get_who $P5008, $P5009
+    set $P5007, $P5008["Op"]
+    unless_null $P5007, fallback1426
+    nqp_get_sc_object $P5011, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5007, $P5011
   fallback1426:
-    $P512 = $P507."new"("hash" :named("op"))
-    set $P102, $P512
+    $P5012 = $P5007."new"("hash" :named("op"))
+    set $P102, $P5012
 .annotate 'line', 807
-    $P516 = "&capnames"(_lex_param_0, 0)
-    set $P513, $P516
-    iter $P515, $P516
-    new $P518, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P518, for_handlers1431
-    push_eh $P518
+    $P5016 = "&capnames"(_lex_param_0, 0)
+    set $P5013, $P5016
+    iter $P5015, $P5016
+    new $P5018, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5018, for_handlers1431
+    push_eh $P5018
   for_next1432:
-    unless $P515, for_done1434
-    shift $P519, $P515
+    unless $P5015, for_done1434
+    shift $P5019, $P5015
   for_redo1433:
-    .const 'Sub' $P517 = 'cuid_169_1346233469.934' 
-    capture_lex $P517
-    $P513 = $P517($P519)
+    .const 'Sub' $P5017 = 'cuid_169_1346277621.774' 
+    capture_lex $P5017
+    $P5013 = $P5017($P5019)
     goto for_next1432
   for_handlers1431:
-    .get_results ($P518)
-    pop_upto_eh $P518
-    getattribute $P518, $P518, 'type'
-    eq $P518, .CONTROL_LOOP_NEXT, for_next1432
-    eq $P518, .CONTROL_LOOP_REDO, for_redo1433
+    .get_results ($P5018)
+    pop_upto_eh $P5018
+    getattribute $P5018, $P5018, 'type'
+    eq $P5018, .CONTROL_LOOP_NEXT, for_next1432
+    eq $P5018, .CONTROL_LOOP_REDO, for_redo1433
   for_done1434:
     pop_eh 
 .annotate 'line', 814
-    get_hll_global $P523, "GLOBAL"
-    nqp_get_package_through_who $P522, $P523, "QAST"
-    get_who $P521, $P522
-    set $P520, $P521["Stmts"]
-    unless_null $P520, fallback1435
-    nqp_get_sc_object $P524, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P520, $P524
+    get_hll_global $P5023, "GLOBAL"
+    nqp_get_package_through_who $P5022, $P5023, "QAST"
+    get_who $P5021, $P5022
+    set $P5020, $P5021["Stmts"]
+    unless_null $P5020, fallback1435
+    nqp_get_sc_object $P5024, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5020, $P5024
   fallback1435:
-    $P525 = $P520."new"()
-    set $P103, $P525
-    set $P533, _lex_param_3
+    $P5025 = $P5020."new"()
+    set $P103, $P5025
+    set $P5033, _lex_param_3
     unless _lex_param_3 goto if454_end1437 
 .annotate 'line', 815
 .annotate 'line', 816
-    get_hll_global $P529, "GLOBAL"
-    nqp_get_package_through_who $P528, $P529, "QAST"
-    get_who $P527, $P528
-    set $P526, $P527["Var"]
-    unless_null $P526, fallback1438
-    nqp_get_sc_object $P530, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P526, $P530
+    get_hll_global $P5029, "GLOBAL"
+    nqp_get_package_through_who $P5028, $P5029, "QAST"
+    get_who $P5027, $P5028
+    set $P5026, $P5027["Var"]
+    unless_null $P5026, fallback1438
+    nqp_get_sc_object $P5030, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5026, $P5030
   fallback1438:
-    $P531 = $P526."new"("self" :named("name"), "local" :named("scope"), "param" :named("decl"))
-    $P532 = $P103."push"($P531)
-    set $P533, $P532
+    $P5031 = $P5026."new"("self" :named("name"), "local" :named("scope"), "param" :named("decl"))
+    $P5032 = $P103."push"($P5031)
+    set $P5033, $P5032
   if454_end1437:
 .annotate 'line', 818
-    get_hll_global $P537, "GLOBAL"
-    nqp_get_package_through_who $P536, $P537, "QAST"
-    get_who $P535, $P536
-    set $P534, $P535["BlockMemo"]
-    unless_null $P534, fallback1439
-    nqp_get_sc_object $P538, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P534, $P538
+    get_hll_global $P5037, "GLOBAL"
+    nqp_get_package_through_who $P5036, $P5037, "QAST"
+    get_who $P5035, $P5036
+    set $P5034, $P5035["BlockMemo"]
+    unless_null $P5034, fallback1439
+    nqp_get_sc_object $P5038, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5034, $P5038
   fallback1439:
-    set $S502, $P101
-    concat $S501, $S502, "_caps"
-    $P539 = $P534."new"($P102, $S501 :named("name"))
-    set $P104, $P539
+    set $S5002, $P101
+    concat $S5001, $S5002, "_caps"
+    $P5039 = $P5034."new"($P102, $S5001 :named("name"))
+    set $P104, $P5039
 .annotate 'line', 819
-    get_hll_global $P543, "GLOBAL"
-    nqp_get_package_through_who $P542, $P543, "QAST"
-    get_who $P541, $P542
-    set $P540, $P541["Stmt"]
-    unless_null $P540, fallback1440
-    nqp_get_sc_object $P544, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P540, $P544
+    get_hll_global $P5043, "GLOBAL"
+    nqp_get_package_through_who $P5042, $P5043, "QAST"
+    get_who $P5041, $P5042
+    set $P5040, $P5041["Stmt"]
+    unless_null $P5040, fallback1440
+    nqp_get_sc_object $P5044, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5040, $P5044
   fallback1440:
-    $P545 = $P540."new"($P104)
-    $P546 = $P103."push"($P545)
+    $P5045 = $P5040."new"($P104)
+    $P5046 = $P103."push"($P5045)
 .annotate 'line', 821
-    get_hll_global $P550, "GLOBAL"
-    nqp_get_package_through_who $P549, $P550, "QRegex"
-    get_who $P548, $P549
-    set $P547, $P548["NFA"]
-    unless_null $P547, fallback1441
-    nqp_get_sc_object $P551, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P547, $P551
+    get_hll_global $P5050, "GLOBAL"
+    nqp_get_package_through_who $P5049, $P5050, "QRegex"
+    get_who $P5048, $P5049
+    set $P5047, $P5048["NFA"]
+    unless_null $P5047, fallback1441
+    nqp_get_sc_object $P5051, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5047, $P5051
   fallback1441:
-    $P552 = $P547."new"()
-    $P553 = $P552."addnode"(_lex_param_0)
-    $P554 = $P553."qast"()
-    set $P105, $P554
-    set $P557, $P105
+    $P5052 = $P5047."new"()
+    $P5053 = $P5052."addnode"(_lex_param_0)
+    $P5054 = $P5053."qast"()
+    set $P105, $P5054
+    set $P5057, $P105
     unless $P105 goto if455_end1443 
-    .const 'Sub' $P555 = 'cuid_171_1346233469.934' 
-    capture_lex $P555
-    $P556 = $P555()
-    set $P557, $P556
+    .const 'Sub' $P5055 = 'cuid_171_1346277621.774' 
+    capture_lex $P5055
+    $P5056 = $P5055()
+    set $P5057, $P5056
   if455_end1443:
 .annotate 'line', 826
-    $P558 = "&qalt_nfas"(_lex_param_0, $P101, $P103)
+    $P5058 = "&qalt_nfas"(_lex_param_0, $P101, $P103)
 .annotate 'line', 828
-    $P559 = _lex_param_1."symbol"(utf8:"$\x{a2}")
-    set $P568, $P559
-    if $P559 goto unless456_end1447 
+    $P5059 = _lex_param_1."symbol"(utf8:"$\x{a2}")
+    set $P5068, $P5059
+    if $P5059 goto unless456_end1447 
 .annotate 'line', 829
-    get_hll_global $P563, "GLOBAL"
-    nqp_get_package_through_who $P562, $P563, "QAST"
-    get_who $P561, $P562
-    set $P560, $P561["Var"]
-    unless_null $P560, fallback1448
-    nqp_get_sc_object $P564, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P560, $P564
+    get_hll_global $P5063, "GLOBAL"
+    nqp_get_package_through_who $P5062, $P5063, "QAST"
+    get_who $P5061, $P5062
+    set $P5060, $P5061["Var"]
+    unless_null $P5060, fallback1448
+    nqp_get_sc_object $P5064, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5060, $P5064
   fallback1448:
-    $P565 = $P560."new"(utf8:"$\x{a2}" :named("name"), "lexical" :named("scope"), "var" :named("decl"))
-    $P566 = $P103."push"($P565)
+    $P5065 = $P5060."new"(utf8:"$\x{a2}" :named("name"), "lexical" :named("scope"), "var" :named("decl"))
+    $P5066 = $P103."push"($P5065)
 .annotate 'line', 830
-    $P567 = _lex_param_1."symbol"(utf8:"$\x{a2}", "lexical" :named("scope"))
-    set $P568, $P567
+    $P5067 = _lex_param_1."symbol"(utf8:"$\x{a2}", "lexical" :named("scope"))
+    set $P5068, $P5067
   unless456_end1447:
     set _lex_param_1["orig_qast"], _lex_param_0
 .annotate 'line', 835
-    get_hll_global $P572, "GLOBAL"
-    nqp_get_package_through_who $P571, $P572, "QAST"
-    get_who $P570, $P571
-    set $P569, $P570["Regex"]
-    unless_null $P569, fallback1449
-    nqp_get_sc_object $P573, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P569, $P573
+    get_hll_global $P5072, "GLOBAL"
+    nqp_get_package_through_who $P5071, $P5072, "QAST"
+    get_who $P5070, $P5071
+    set $P5069, $P5070["Regex"]
+    unless_null $P5069, fallback1449
+    nqp_get_sc_object $P5073, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5069, $P5073
   fallback1449:
 .annotate 'line', 836
-    get_hll_global $P577, "GLOBAL"
-    nqp_get_package_through_who $P576, $P577, "QAST"
-    get_who $P575, $P576
-    set $P574, $P575["Regex"]
-    unless_null $P574, fallback1450
-    nqp_get_sc_object $P578, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P574, $P578
+    get_hll_global $P5077, "GLOBAL"
+    nqp_get_package_through_who $P5076, $P5077, "QAST"
+    get_who $P5075, $P5076
+    set $P5074, $P5075["Regex"]
+    unless_null $P5074, fallback1450
+    nqp_get_sc_object $P5078, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5074, $P5078
   fallback1450:
-    $P579 = $P574."new"("scan" :named("rxtype"))
+    $P5079 = $P5074."new"("scan" :named("rxtype"))
     unless _lex_param_2 goto if457_else1451 
 .annotate 'line', 839
-    get_hll_global $P583, "GLOBAL"
-    nqp_get_package_through_who $P582, $P583, "QAST"
-    get_who $P581, $P582
-    set $P580, $P581["Regex"]
-    unless_null $P580, fallback1453
-    nqp_get_sc_object $P584, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P580, $P584
+    get_hll_global $P5083, "GLOBAL"
+    nqp_get_package_through_who $P5082, $P5083, "QAST"
+    get_who $P5081, $P5082
+    set $P5080, $P5081["Regex"]
+    unless_null $P5080, fallback1453
+    nqp_get_sc_object $P5084, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5080, $P5084
   fallback1453:
-    $P585 = $P580."new"("pass" :named("rxtype"))
-    set $P602, $P585
+    $P5085 = $P5080."new"("pass" :named("rxtype"))
+    set $P5102, $P5085
     goto if457_end1452
   if457_else1451:
 .annotate 'line', 840
-    get_hll_global $P589, "GLOBAL"
-    nqp_get_package_through_who $P588, $P589, "QAST"
-    get_who $P587, $P588
-    set $P586, $P587["Regex"]
-    unless_null $P586, fallback1454
-    nqp_get_sc_object $P590, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P586, $P590
+    get_hll_global $P5089, "GLOBAL"
+    nqp_get_package_through_who $P5088, $P5089, "QAST"
+    get_who $P5087, $P5088
+    set $P5086, $P5087["Regex"]
+    unless_null $P5086, fallback1454
+    nqp_get_sc_object $P5090, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5086, $P5090
   fallback1454:
-    find_dynamic_lex $P592, "%*RX"
-    unless_null $P592, fallback1455
-    get_hll_global $P595, "GLOBAL"
-    get_who $P594, $P595
-    set $P593, $P594["%RX"]
-    unless_null $P593, fallback1456
-    get_hll_global $P597, "GLOBAL"
-    get_who $P596, $P597
-    new $P598, 'Hash'
-    set $P596["%RX"], $P598
-    set $P593, $P598
+    find_dynamic_lex $P5092, "%*RX"
+    unless_null $P5092, fallback1455
+    get_hll_global $P5095, "GLOBAL"
+    get_who $P5094, $P5095
+    set $P5093, $P5094["%RX"]
+    unless_null $P5093, fallback1456
+    get_hll_global $P5097, "GLOBAL"
+    get_who $P5096, $P5097
+    new $P5098, 'Hash'
+    set $P5096["%RX"], $P5098
+    set $P5093, $P5098
   fallback1456:
-    unless_null $P593, vivi_4581457
+    unless_null $P5093, vivi_4581457
     die "Contextual %*RX not found"
-    box $P599, "Contextual %*RX not found"
-    set $P593, $P599
+    box $P5099, "Contextual %*RX not found"
+    set $P5093, $P5099
   vivi_4581457:
-    set $P592, $P593
+    set $P5092, $P5093
   fallback1455:
-    set $P591, $P592["name"]
-    unless_null $P591, fallback1458
-    nqp_get_sc_object $P600, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P591, $P600
+    set $P5091, $P5092["name"]
+    unless_null $P5091, fallback1458
+    nqp_get_sc_object $P5100, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5091, $P5100
   fallback1458:
-    $P601 = $P586."new"("pass" :named("rxtype"), $P591 :named("name"))
-    set $P602, $P601
+    $P5101 = $P5086."new"("pass" :named("rxtype"), $P5091 :named("name"))
+    set $P5102, $P5101
   if457_end1452:
-    $P603 = $P569."new"($P579, _lex_param_0, $P602, "concat" :named("rxtype"))
-    set _lex_param_0, $P603
+    $P5103 = $P5069."new"($P5079, _lex_param_0, $P5102, "concat" :named("rxtype"))
+    set _lex_param_0, $P5103
 .annotate 'line', 841
-    $P604 = _lex_param_1."push"($P103)
+    $P5104 = _lex_param_1."push"($P103)
 .annotate 'line', 842
-    $P605 = _lex_param_1."push"(_lex_param_0)
+    $P5105 = _lex_param_1."push"(_lex_param_0)
     .return (_lex_param_1) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_169_1346233469.934") :anon :lex :outer("cuid_170_1346233469.934")
+.sub "" :subid("cuid_169_1346277621.774") :anon :lex :outer("cuid_170_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 807
     .param pmc _lex_param_0 
     .lex "$_", _lex_param_0 
 .annotate 'line', 808
-    $P501 = _lex_param_0."key"()
-    set $S501, $P501
-    isgt $I501, $S501, ""
-    box $P522, $I501
-    set $P521, $P522
-    unless $I501 goto if453_end1428 
+    $P5001 = _lex_param_0."key"()
+    set $S5001, $P5001
+    isgt $I5001, $S5001, ""
+    box $P5022, $I5001
+    set $P5021, $P5022
+    unless $I5001 goto if453_end1428 
 .annotate 'line', 809
-    find_lex $P502, "$hashpast"
-    get_hll_global $P506, "GLOBAL"
-    nqp_get_package_through_who $P505, $P506, "QAST"
-    get_who $P504, $P505
-    set $P503, $P504["SVal"]
-    unless_null $P503, fallback1429
-    nqp_get_sc_object $P507, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P503, $P507
+    find_lex $P5002, "$hashpast"
+    get_hll_global $P5006, "GLOBAL"
+    nqp_get_package_through_who $P5005, $P5006, "QAST"
+    get_who $P5004, $P5005
+    set $P5003, $P5004["SVal"]
+    unless_null $P5003, fallback1429
+    nqp_get_sc_object $P5007, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5003, $P5007
   fallback1429:
-    $P508 = _lex_param_0."key"()
-    $P509 = $P503."new"($P508 :named("value"))
-    $P510 = $P502."push"($P509)
+    $P5008 = _lex_param_0."key"()
+    $P5009 = $P5003."new"($P5008 :named("value"))
+    $P5010 = $P5002."push"($P5009)
 .annotate 'line', 810
-    find_lex $P511, "$hashpast"
-    get_hll_global $P515, "GLOBAL"
-    nqp_get_package_through_who $P514, $P515, "QAST"
-    get_who $P513, $P514
-    set $P512, $P513["IVal"]
-    unless_null $P512, fallback1430
-    nqp_get_sc_object $P516, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P512, $P516
+    find_lex $P5011, "$hashpast"
+    get_hll_global $P5015, "GLOBAL"
+    nqp_get_package_through_who $P5014, $P5015, "QAST"
+    get_who $P5013, $P5014
+    set $P5012, $P5013["IVal"]
+    unless_null $P5012, fallback1430
+    nqp_get_sc_object $P5016, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5012, $P5016
   fallback1430:
 .annotate 'line', 811
-    $P517 = _lex_param_0."key"()
-    set $S502, $P517
-    is_cclass $I502, .CCLASS_NUMERIC, $S502, 0
-    set $N502, $I502
-    $P518 = _lex_param_0."value"()
-    set $N504, $P518
-    set $N505, 1
-    isgt $I503, $N504, $N505
-    set $N506, $I503
-    set $N507, 2
-    mul $N503, $N506, $N507
-    add $N501, $N502, $N503
-    $P519 = $P512."new"($N501 :named("value"))
-    $P520 = $P511."push"($P519)
-    set $P521, $P520
+    $P5017 = _lex_param_0."key"()
+    set $S5002, $P5017
+    is_cclass $I5002, .CCLASS_NUMERIC, $S5002, 0
+    set $N5002, $I5002
+    $P5018 = _lex_param_0."value"()
+    set $N5004, $P5018
+    set $N5005, 1
+    isgt $I5003, $N5004, $N5005
+    set $N5006, $I5003
+    set $N5007, 2
+    mul $N5003, $N5006, $N5007
+    add $N5001, $N5002, $N5003
+    $P5019 = $P5012."new"($N5001 :named("value"))
+    $P5020 = $P5011."push"($P5019)
+    set $P5021, $P5020
   if453_end1428:
-    .return ($P521) 
+    .return ($P5021) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_171_1346233469.934") :anon :lex :outer("cuid_170_1346233469.934")
+.sub "" :subid("cuid_171_1346277621.774") :anon :lex :outer("cuid_170_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 822
     .lex "$nfablock", $P101 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 823
-    get_hll_global $P505, "GLOBAL"
-    nqp_get_package_through_who $P504, $P505, "QAST"
-    get_who $P503, $P504
-    set $P502, $P503["BlockMemo"]
-    unless_null $P502, fallback1444
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P506
+    get_hll_global $P5005, "GLOBAL"
+    nqp_get_package_through_who $P5004, $P5005, "QAST"
+    get_who $P5003, $P5004
+    set $P5002, $P5003["BlockMemo"]
+    unless_null $P5002, fallback1444
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5006
   fallback1444:
-    find_lex $P507, "$blockid"
-    set $S502, $P507
-    concat $S501, $S502, "_nfa"
-    find_lex $P508, "$nfapast"
-    $P509 = $P502."new"($P508, $S501 :named("name"))
-    set $P101, $P509
+    find_lex $P5007, "$blockid"
+    set $S5002, $P5007
+    concat $S5001, $S5002, "_nfa"
+    find_lex $P5008, "$nfapast"
+    $P5009 = $P5002."new"($P5008, $S5001 :named("name"))
+    set $P101, $P5009
 .annotate 'line', 824
-    find_lex $P510, "$initpast"
-    get_hll_global $P514, "GLOBAL"
-    nqp_get_package_through_who $P513, $P514, "QAST"
-    get_who $P512, $P513
-    set $P511, $P512["Stmt"]
-    unless_null $P511, fallback1445
-    nqp_get_sc_object $P515, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P511, $P515
+    find_lex $P5010, "$initpast"
+    get_hll_global $P5014, "GLOBAL"
+    nqp_get_package_through_who $P5013, $P5014, "QAST"
+    get_who $P5012, $P5013
+    set $P5011, $P5012["Stmt"]
+    unless_null $P5011, fallback1445
+    nqp_get_sc_object $P5015, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5011, $P5015
   fallback1445:
-    $P516 = $P511."new"($P101)
-    $P517 = $P510."push"($P516)
-    .return ($P517) 
+    $P5016 = $P5011."new"($P101)
+    $P5017 = $P5010."push"($P5016)
+    .return ($P5017) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "capnames" :subid("cuid_174_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "capnames" :subid("cuid_174_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 846
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
-    .const 'Sub' $P526 = 'cuid_173_1346233469.934' 
-    capture_lex $P526 
-    .const 'Sub' $P526 = 'cuid_177_1346233469.934' 
-    capture_lex $P526 
-    .const 'Sub' $P526 = 'cuid_179_1346233469.934' 
-    capture_lex $P526 
-    .const 'Sub' $P526 = 'cuid_181_1346233469.934' 
-    capture_lex $P526 
-    .const 'Sub' $P526 = 'cuid_184_1346233469.934' 
-    capture_lex $P526 
+    .const 'Sub' $P5026 = 'cuid_173_1346277621.774' 
+    capture_lex $P5026 
+    .const 'Sub' $P5026 = 'cuid_177_1346277621.774' 
+    capture_lex $P5026 
+    .const 'Sub' $P5026 = 'cuid_179_1346277621.774' 
+    capture_lex $P5026 
+    .const 'Sub' $P5026 = 'cuid_181_1346277621.774' 
+    capture_lex $P5026 
+    .const 'Sub' $P5026 = 'cuid_184_1346277621.774' 
+    capture_lex $P5026 
     .lex "%capnames", $P101 
     .lex "$rxtype", $P102 
     .lex "$ast", _lex_param_0 
     .lex "$count", _lex_param_1 
-    new $P501, 'Hash'
-    set $P101, $P501
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P102, $P502
+    new $P5001, 'Hash'
+    set $P101, $P5001
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P102, $P5002
 .annotate 'line', 848
-    $P503 = _lex_param_0."rxtype"()
-    set $P102, $P503
-    set $S501, $P102
-    iseq $I501, $S501, "concat"
-    unless $I501 goto if459_else1463 
+    $P5003 = _lex_param_0."rxtype"()
+    set $P102, $P5003
+    set $S5001, $P102
+    iseq $I5001, $S5001, "concat"
+    unless $I5001 goto if459_else1463 
 .annotate 'line', 849
 .annotate 'line', 850
-    $P507 = _lex_param_0."list"()
-    set $P504, $P507
-    iter $P506, $P507
-    new $P509, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P509, for_handlers1471
-    push_eh $P509
+    $P5007 = _lex_param_0."list"()
+    set $P5004, $P5007
+    iter $P5006, $P5007
+    new $P5009, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5009, for_handlers1471
+    push_eh $P5009
   for_next1472:
-    unless $P506, for_done1474
-    shift $P510, $P506
+    unless $P5006, for_done1474
+    shift $P5010, $P5006
   for_redo1473:
-    .const 'Sub' $P508 = 'cuid_173_1346233469.934' 
-    capture_lex $P508
-    $P504 = $P508($P510)
+    .const 'Sub' $P5008 = 'cuid_173_1346277621.774' 
+    capture_lex $P5008
+    $P5004 = $P5008($P5010)
     goto for_next1472
   for_handlers1471:
-    .get_results ($P509)
-    pop_upto_eh $P509
-    getattribute $P509, $P509, 'type'
-    eq $P509, .CONTROL_LOOP_NEXT, for_next1472
-    eq $P509, .CONTROL_LOOP_REDO, for_redo1473
+    .get_results ($P5009)
+    pop_upto_eh $P5009
+    getattribute $P5009, $P5009, 'type'
+    eq $P5009, .CONTROL_LOOP_NEXT, for_next1472
+    eq $P5009, .CONTROL_LOOP_REDO, for_redo1473
   for_done1474:
     pop_eh 
-    set $P525, $P504
+    set $P5025, $P5004
     goto if459_end1464
   if459_else1463:
-    set $S502, $P102
-    iseq $I502, $S502, "altseq"
-    set $I504, $I502
-    if $I502 goto unless461_end1478 
-    set $S503, $P102
-    iseq $I503, $S503, "alt"
-    set $I504, $I503
+    set $S5002, $P102
+    iseq $I5002, $S5002, "altseq"
+    set $I5004, $I5002
+    if $I5002 goto unless461_end1478 
+    set $S5003, $P102
+    iseq $I5003, $S5003, "alt"
+    set $I5004, $I5003
   unless461_end1478:
-    unless $I504 goto if460_else1475 
-    .const 'Sub' $P511 = 'cuid_177_1346233469.934' 
-    capture_lex $P511
-    $P512 = $P511()
-    set $P524, $P512
+    unless $I5004 goto if460_else1475 
+    .const 'Sub' $P5011 = 'cuid_177_1346277621.774' 
+    capture_lex $P5011
+    $P5012 = $P5011()
+    set $P5024, $P5012
     goto if460_end1476
   if460_else1475:
-    set $S504, $P102
-    iseq $I505, $S504, "subrule"
-    set $I507, $I505
-    unless $I505 goto if466_end1500 
+    set $S5004, $P102
+    iseq $I5005, $S5004, "subrule"
+    set $I5007, $I5005
+    unless $I5005 goto if466_end1500 
 .annotate 'line', 867
-    $P513 = _lex_param_0."subtype"()
-    set $S505, $P513
-    iseq $I506, $S505, "capture"
-    set $I507, $I506
+    $P5013 = _lex_param_0."subtype"()
+    set $S5005, $P5013
+    iseq $I5006, $S5005, "capture"
+    set $I5007, $I5006
   if466_end1500:
-    unless $I507 goto if465_else1497 
-    .const 'Sub' $P514 = 'cuid_179_1346233469.934' 
-    capture_lex $P514
-    $P515 = $P514()
-    set $P523, $P515
+    unless $I5007 goto if465_else1497 
+    .const 'Sub' $P5014 = 'cuid_179_1346277621.774' 
+    capture_lex $P5014
+    $P5015 = $P5014()
+    set $P5023, $P5015
     goto if465_end1498
   if465_else1497:
-    set $S506, $P102
-    iseq $I508, $S506, "subcapture"
-    unless $I508 goto if470_else1511 
-    .const 'Sub' $P516 = 'cuid_181_1346233469.934' 
-    capture_lex $P516
-    $P517 = $P516()
-    set $P522, $P517
+    set $S5006, $P102
+    iseq $I5008, $S5006, "subcapture"
+    unless $I5008 goto if470_else1511 
+    .const 'Sub' $P5016 = 'cuid_181_1346277621.774' 
+    capture_lex $P5016
+    $P5017 = $P5016()
+    set $P5022, $P5017
     goto if470_end1512
   if470_else1511:
-    set $S507, $P102
-    iseq $I509, $S507, "quant"
-    box $P521, $I509
-    set $P520, $P521
-    unless $I509 goto if473_end1530 
-    .const 'Sub' $P518 = 'cuid_184_1346233469.934' 
-    capture_lex $P518
-    $P519 = $P518()
-    set $P520, $P519
+    set $S5007, $P102
+    iseq $I5009, $S5007, "quant"
+    box $P5021, $I5009
+    set $P5020, $P5021
+    unless $I5009 goto if473_end1530 
+    .const 'Sub' $P5018 = 'cuid_184_1346277621.774' 
+    capture_lex $P5018
+    $P5019 = $P5018()
+    set $P5020, $P5019
   if473_end1530:
-    set $P522, $P520
+    set $P5022, $P5020
   if470_end1512:
-    set $P523, $P522
+    set $P5023, $P5022
   if465_end1498:
-    set $P524, $P523
+    set $P5024, $P5023
   if460_end1476:
-    set $P525, $P524
+    set $P5025, $P5024
   if459_end1464:
     set $P101[""], _lex_param_1
     delete $P101["$!from"]
@@ -16581,109 +16581,109 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_173_1346233469.934") :anon :lex :outer("cuid_174_1346233469.934")
+.sub "" :subid("cuid_173_1346277621.774") :anon :lex :outer("cuid_174_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 850
     .param pmc _lex_param_0 
-    .const 'Sub' $P512 = 'cuid_172_1346233469.934' 
-    capture_lex $P512 
+    .const 'Sub' $P5012 = 'cuid_172_1346277621.774' 
+    capture_lex $P5012 
     .lex "%x", $P101 
     .lex "$_", _lex_param_0 
-    new $P501, 'Hash'
-    set $P101, $P501
+    new $P5001, 'Hash'
+    set $P101, $P5001
 .annotate 'line', 851
-    find_lex $P502, "$count"
-    $P503 = "&capnames"(_lex_param_0, $P502)
-    set $P101, $P503
-    set $P504, $P101
-    iter $P506, $P101
-    new $P508, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P508, for_handlers1466
-    push_eh $P508
+    find_lex $P5002, "$count"
+    $P5003 = "&capnames"(_lex_param_0, $P5002)
+    set $P101, $P5003
+    set $P5004, $P101
+    iter $P5006, $P101
+    new $P5008, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5008, for_handlers1466
+    push_eh $P5008
   for_next1467:
-    unless $P506, for_done1469
-    shift $P509, $P506
+    unless $P5006, for_done1469
+    shift $P5009, $P5006
   for_redo1468:
-    .const 'Sub' $P507 = 'cuid_172_1346233469.934' 
-    capture_lex $P507
-    $P504 = $P507($P509)
+    .const 'Sub' $P5007 = 'cuid_172_1346277621.774' 
+    capture_lex $P5007
+    $P5004 = $P5007($P5009)
     goto for_next1467
   for_handlers1466:
-    .get_results ($P508)
-    pop_upto_eh $P508
-    getattribute $P508, $P508, 'type'
-    eq $P508, .CONTROL_LOOP_NEXT, for_next1467
-    eq $P508, .CONTROL_LOOP_REDO, for_redo1468
+    .get_results ($P5008)
+    pop_upto_eh $P5008
+    getattribute $P5008, $P5008, 'type'
+    eq $P5008, .CONTROL_LOOP_NEXT, for_next1467
+    eq $P5008, .CONTROL_LOOP_REDO, for_redo1468
   for_done1469:
     pop_eh 
-    set $P510, $P101[""]
-    unless_null $P510, fallback1470
-    nqp_get_sc_object $P511, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P510, $P511
+    set $P5010, $P101[""]
+    unless_null $P5010, fallback1470
+    nqp_get_sc_object $P5011, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5010, $P5011
   fallback1470:
-    store_lex "$count", $P510
-    .return ($P510) 
+    store_lex "$count", $P5010
+    .return ($P5010) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_172_1346233469.934") :anon :lex :outer("cuid_173_1346233469.934")
+.sub "" :subid("cuid_172_1346277621.774") :anon :lex :outer("cuid_173_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 852
     .param pmc _lex_param_0 
     .lex "$_", _lex_param_0 
-    find_lex $P501, "%capnames"
-    $P502 = _lex_param_0."key"()
-    set $S501, $P502
-    find_lex $P504, "%capnames"
-    $P505 = _lex_param_0."key"()
-    set $S502, $P505
-    set $P503, $P504[$S502]
-    unless_null $P503, fallback1465
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P503, $P506
+    find_lex $P5001, "%capnames"
+    $P5002 = _lex_param_0."key"()
+    set $S5001, $P5002
+    find_lex $P5004, "%capnames"
+    $P5005 = _lex_param_0."key"()
+    set $S5002, $P5005
+    set $P5003, $P5004[$S5002]
+    unless_null $P5003, fallback1465
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5003, $P5006
   fallback1465:
-    set $N502, $P503
-    $P507 = _lex_param_0."value"()
-    set $N503, $P507
-    add $N501, $N502, $N503
-    box $P508, $N501
-    set $P501[$S501], $P508
-    .return ($P508) 
+    set $N5002, $P5003
+    $P5007 = _lex_param_0."value"()
+    set $N5003, $P5007
+    add $N5001, $N5002, $N5003
+    box $P5008, $N5001
+    set $P5001[$S5001], $P5008
+    .return ($P5008) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_177_1346233469.934") :anon :lex :outer("cuid_174_1346233469.934")
+.sub "" :subid("cuid_177_1346277621.774") :anon :lex :outer("cuid_174_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 856
-    .const 'Sub' $P511 = 'cuid_176_1346233469.934' 
-    capture_lex $P511 
+    .const 'Sub' $P5011 = 'cuid_176_1346277621.774' 
+    capture_lex $P5011 
     .lex "$max", $P101 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    find_lex $P502, "$count"
-    set $P101, $P502
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    find_lex $P5002, "$count"
+    set $P101, $P5002
 .annotate 'line', 858
-    find_lex $P506, "$ast"
-    $P507 = $P506."list"()
-    set $P503, $P507
-    iter $P505, $P507
-    new $P509, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P509, for_handlers1493
-    push_eh $P509
+    find_lex $P5006, "$ast"
+    $P5007 = $P5006."list"()
+    set $P5003, $P5007
+    iter $P5005, $P5007
+    new $P5009, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5009, for_handlers1493
+    push_eh $P5009
   for_next1494:
-    unless $P505, for_done1496
-    shift $P510, $P505
+    unless $P5005, for_done1496
+    shift $P5010, $P5005
   for_redo1495:
-    .const 'Sub' $P508 = 'cuid_176_1346233469.934' 
-    capture_lex $P508
-    $P503 = $P508($P510)
+    .const 'Sub' $P5008 = 'cuid_176_1346277621.774' 
+    capture_lex $P5008
+    $P5003 = $P5008($P5010)
     goto for_next1494
   for_handlers1493:
-    .get_results ($P509)
-    pop_upto_eh $P509
-    getattribute $P509, $P509, 'type'
-    eq $P509, .CONTROL_LOOP_NEXT, for_next1494
-    eq $P509, .CONTROL_LOOP_REDO, for_redo1495
+    .get_results ($P5009)
+    pop_upto_eh $P5009
+    getattribute $P5009, $P5009, 'type'
+    eq $P5009, .CONTROL_LOOP_NEXT, for_next1494
+    eq $P5009, .CONTROL_LOOP_REDO, for_redo1495
   for_done1496:
     pop_eh 
     store_lex "$count", $P101
@@ -16691,892 +16691,892 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_176_1346233469.934") :anon :lex :outer("cuid_177_1346233469.934")
+.sub "" :subid("cuid_176_1346277621.774") :anon :lex :outer("cuid_177_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 858
     .param pmc _lex_param_0 
-    .const 'Sub' $P517 = 'cuid_175_1346233469.934' 
-    capture_lex $P517 
+    .const 'Sub' $P5017 = 'cuid_175_1346277621.774' 
+    capture_lex $P5017 
     .lex "%x", $P101 
     .lex "$_", _lex_param_0 
-    new $P501, 'Hash'
-    set $P101, $P501
+    new $P5001, 'Hash'
+    set $P101, $P5001
 .annotate 'line', 859
-    find_lex $P502, "$count"
-    $P503 = "&capnames"(_lex_param_0, $P502)
-    set $P101, $P503
-    set $P504, $P101
-    iter $P506, $P101
-    new $P508, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P508, for_handlers1485
-    push_eh $P508
+    find_lex $P5002, "$count"
+    $P5003 = "&capnames"(_lex_param_0, $P5002)
+    set $P101, $P5003
+    set $P5004, $P101
+    iter $P5006, $P101
+    new $P5008, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5008, for_handlers1485
+    push_eh $P5008
   for_next1486:
-    unless $P506, for_done1488
-    shift $P509, $P506
+    unless $P5006, for_done1488
+    shift $P5009, $P5006
   for_redo1487:
-    .const 'Sub' $P507 = 'cuid_175_1346233469.934' 
-    capture_lex $P507
-    $P504 = $P507($P509)
+    .const 'Sub' $P5007 = 'cuid_175_1346277621.774' 
+    capture_lex $P5007
+    $P5004 = $P5007($P5009)
     goto for_next1486
   for_handlers1485:
-    .get_results ($P508)
-    pop_upto_eh $P508
-    getattribute $P508, $P508, 'type'
-    eq $P508, .CONTROL_LOOP_NEXT, for_next1486
-    eq $P508, .CONTROL_LOOP_REDO, for_redo1487
+    .get_results ($P5008)
+    pop_upto_eh $P5008
+    getattribute $P5008, $P5008, 'type'
+    eq $P5008, .CONTROL_LOOP_NEXT, for_next1486
+    eq $P5008, .CONTROL_LOOP_REDO, for_redo1487
   for_done1488:
     pop_eh 
-    set $P510, $P101[""]
-    unless_null $P510, fallback1491
-    nqp_get_sc_object $P511, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P510, $P511
+    set $P5010, $P101[""]
+    unless_null $P5010, fallback1491
+    nqp_get_sc_object $P5011, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5010, $P5011
   fallback1491:
-    set $N501, $P510
-    find_lex $P512, "$max"
-    set $N502, $P512
-    isgt $I501, $N501, $N502
-    box $P516, $I501
-    set $P515, $P516
-    unless $I501 goto if464_end1490 
-    set $P513, $P101[""]
-    unless_null $P513, fallback1492
-    nqp_get_sc_object $P514, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P513, $P514
+    set $N5001, $P5010
+    find_lex $P5012, "$max"
+    set $N5002, $P5012
+    isgt $I5001, $N5001, $N5002
+    box $P5016, $I5001
+    set $P5015, $P5016
+    unless $I5001 goto if464_end1490 
+    set $P5013, $P101[""]
+    unless_null $P5013, fallback1492
+    nqp_get_sc_object $P5014, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5013, $P5014
   fallback1492:
-    store_lex "$max", $P513
-    set $P515, $P513
+    store_lex "$max", $P5013
+    set $P5015, $P5013
   if464_end1490:
-    .return ($P515) 
+    .return ($P5015) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_175_1346233469.934") :anon :lex :outer("cuid_176_1346233469.934")
+.sub "" :subid("cuid_175_1346277621.774") :anon :lex :outer("cuid_176_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 860
     .param pmc _lex_param_0 
     .lex "$_", _lex_param_0 
-    find_lex $P501, "%capnames"
+    find_lex $P5001, "%capnames"
 .annotate 'line', 861
-    $P502 = _lex_param_0."key"()
-    set $S501, $P502
-    find_lex $P504, "%capnames"
-    $P505 = _lex_param_0."key"()
-    set $S502, $P505
-    set $P503, $P504[$S502]
-    unless_null $P503, fallback1483
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P503, $P506
+    $P5002 = _lex_param_0."key"()
+    set $S5001, $P5002
+    find_lex $P5004, "%capnames"
+    $P5005 = _lex_param_0."key"()
+    set $S5002, $P5005
+    set $P5003, $P5004[$S5002]
+    unless_null $P5003, fallback1483
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5003, $P5006
   fallback1483:
-    set $N501, $P503
-    set $N502, 2
-    islt $I501, $N501, $N502
-    set $I503, $I501
-    unless $I501 goto if463_end1482 
-    find_lex $P508, "%x"
-    $P509 = _lex_param_0."key"()
-    set $S503, $P509
-    set $P507, $P508[$S503]
-    unless_null $P507, fallback1484
-    nqp_get_sc_object $P510, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P507, $P510
+    set $N5001, $P5003
+    set $N5002, 2
+    islt $I5001, $N5001, $N5002
+    set $I5003, $I5001
+    unless $I5001 goto if463_end1482 
+    find_lex $P5008, "%x"
+    $P5009 = _lex_param_0."key"()
+    set $S5003, $P5009
+    set $P5007, $P5008[$S5003]
+    unless_null $P5007, fallback1484
+    nqp_get_sc_object $P5010, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5007, $P5010
   fallback1484:
-    set $N503, $P507
-    set $N504, 1
-    iseq $I502, $N503, $N504
-    set $I503, $I502
+    set $N5003, $P5007
+    set $N5004, 1
+    iseq $I5002, $N5003, $N5004
+    set $I5003, $I5002
   if463_end1482:
-    unless $I503 goto if462_else1479 
-    set $I504, 1
+    unless $I5003 goto if462_else1479 
+    set $I5004, 1
     goto if462_end1480
   if462_else1479:
-    set $I504, 2
+    set $I5004, 2
   if462_end1480:
-    box $P511, $I504
-    set $P501[$S501], $P511
-    .return ($P511) 
+    box $P5011, $I5004
+    set $P5001[$S5001], $P5011
+    .return ($P5011) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_179_1346233469.934") :anon :lex :outer("cuid_174_1346233469.934")
+.sub "" :subid("cuid_179_1346277621.774") :anon :lex :outer("cuid_174_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 867
-    .const 'Sub' $P517 = 'cuid_178_1346233469.934' 
-    capture_lex $P517 
+    .const 'Sub' $P5017 = 'cuid_178_1346277621.774' 
+    capture_lex $P5017 
     .lex "$name", $P101 
     .lex "@names", $P102 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    new $P502, 'ResizablePMCArray'
-    set $P102, $P502
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    new $P5002, 'ResizablePMCArray'
+    set $P102, $P5002
 .annotate 'line', 868
-    find_lex $P503, "$ast"
-    $P504 = $P503."name"()
-    set $P101, $P504
-    set $S501, $P101
-    iseq $I501, $S501, ""
-    box $P509, $I501
-    set $P508, $P509
-    unless $I501 goto if467_end1502 
+    find_lex $P5003, "$ast"
+    $P5004 = $P5003."name"()
+    set $P101, $P5004
+    set $S5001, $P101
+    iseq $I5001, $S5001, ""
+    box $P5009, $I5001
+    set $P5008, $P5009
+    unless $I5001 goto if467_end1502 
 .annotate 'line', 869
-    find_lex $P505, "$count"
-    set $P101, $P505
-    find_lex $P506, "$ast"
-    $P507 = $P506."name"($P101)
-    set $P508, $P507
+    find_lex $P5005, "$count"
+    set $P101, $P5005
+    find_lex $P5006, "$ast"
+    $P5007 = $P5006."name"($P101)
+    set $P5008, $P5007
   if467_end1502:
-    set $S502, $P101
-    split $P510, "=", $S502
-    set $P102, $P510
-    set $P511, $P102
-    iter $P513, $P102
-    new $P515, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P515, for_handlers1507
-    push_eh $P515
+    set $S5002, $P101
+    split $P5010, "=", $S5002
+    set $P102, $P5010
+    set $P5011, $P102
+    iter $P5013, $P102
+    new $P5015, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5015, for_handlers1507
+    push_eh $P5015
   for_next1508:
-    unless $P513, for_done1510
-    shift $P516, $P513
+    unless $P5013, for_done1510
+    shift $P5016, $P5013
   for_redo1509:
-    .const 'Sub' $P514 = 'cuid_178_1346233469.934' 
-    capture_lex $P514
-    $P511 = $P514($P516)
+    .const 'Sub' $P5014 = 'cuid_178_1346277621.774' 
+    capture_lex $P5014
+    $P5011 = $P5014($P5016)
     goto for_next1508
   for_handlers1507:
-    .get_results ($P515)
-    pop_upto_eh $P515
-    getattribute $P515, $P515, 'type'
-    eq $P515, .CONTROL_LOOP_NEXT, for_next1508
-    eq $P515, .CONTROL_LOOP_REDO, for_redo1509
+    .get_results ($P5015)
+    pop_upto_eh $P5015
+    getattribute $P5015, $P5015, 'type'
+    eq $P5015, .CONTROL_LOOP_NEXT, for_next1508
+    eq $P5015, .CONTROL_LOOP_REDO, for_redo1509
   for_done1510:
     pop_eh 
-    .return ($P511) 
+    .return ($P5011) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_178_1346233469.934") :anon :lex :outer("cuid_179_1346233469.934")
+.sub "" :subid("cuid_178_1346277621.774") :anon :lex :outer("cuid_179_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 871
     .param pmc _lex_param_0 
     .lex "$_", _lex_param_0 
-    set $S501, _lex_param_0
-    iseq $I501, $S501, "0"
-    set $I503, $I501
-    if $I501 goto unless469_end1506 
-    set $N501, _lex_param_0
-    set $N502, 0
-    isgt $I502, $N501, $N502
-    set $I503, $I502
+    set $S5001, _lex_param_0
+    iseq $I5001, $S5001, "0"
+    set $I5003, $I5001
+    if $I5001 goto unless469_end1506 
+    set $N5001, _lex_param_0
+    set $N5002, 0
+    isgt $I5002, $N5001, $N5002
+    set $I5003, $I5002
   unless469_end1506:
-    box $P503, $I503
-    set $P502, $P503
-    unless $I503 goto if468_end1504 
+    box $P5003, $I5003
+    set $P5002, $P5003
+    unless $I5003 goto if468_end1504 
 .annotate 'line', 872
-    set $N504, _lex_param_0
-    set $N505, 1
-    add $N503, $N504, $N505
-    box $P501, $N503
-    store_lex "$count", $P501
-    set $P502, $P501
+    set $N5004, _lex_param_0
+    set $N5005, 1
+    add $N5003, $N5004, $N5005
+    box $P5001, $N5003
+    store_lex "$count", $P5001
+    set $P5002, $P5001
   if468_end1504:
-    find_lex $P504, "%capnames"
-    set $S502, _lex_param_0
-    box $P505, 1
-    set $P504[$S502], $P505
-    .return ($P505) 
+    find_lex $P5004, "%capnames"
+    set $S5002, _lex_param_0
+    box $P5005, 1
+    set $P5004[$S5002], $P5005
+    .return ($P5005) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_181_1346233469.934") :anon :lex :outer("cuid_174_1346233469.934")
+.sub "" :subid("cuid_181_1346277621.774") :anon :lex :outer("cuid_174_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 876
-    .const 'Sub' $P524 = 'cuid_180_1346233469.934' 
-    capture_lex $P524 
-    .const 'Sub' $P524 = 'cuid_182_1346233469.934' 
-    capture_lex $P524 
+    .const 'Sub' $P5024 = 'cuid_180_1346277621.774' 
+    capture_lex $P5024 
+    .const 'Sub' $P5024 = 'cuid_182_1346277621.774' 
+    capture_lex $P5024 
     .lex "%x", $P101 
-    new $P501, 'Hash'
-    set $P101, $P501
+    new $P5001, 'Hash'
+    set $P101, $P5001
 .annotate 'line', 877
-    find_lex $P506, "$ast"
-    $P507 = $P506."name"()
-    set $S501, $P507
-    split $P505, " ", $S501
-    set $P502, $P505
-    iter $P504, $P505
-    new $P509, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P509, for_handlers1517
-    push_eh $P509
+    find_lex $P5006, "$ast"
+    $P5007 = $P5006."name"()
+    set $S5001, $P5007
+    split $P5005, " ", $S5001
+    set $P5002, $P5005
+    iter $P5004, $P5005
+    new $P5009, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5009, for_handlers1517
+    push_eh $P5009
   for_next1518:
-    unless $P504, for_done1520
-    shift $P510, $P504
+    unless $P5004, for_done1520
+    shift $P5010, $P5004
   for_redo1519:
-    .const 'Sub' $P508 = 'cuid_180_1346233469.934' 
-    capture_lex $P508
-    $P502 = $P508($P510)
+    .const 'Sub' $P5008 = 'cuid_180_1346277621.774' 
+    capture_lex $P5008
+    $P5002 = $P5008($P5010)
     goto for_next1518
   for_handlers1517:
-    .get_results ($P509)
-    pop_upto_eh $P509
-    getattribute $P509, $P509, 'type'
-    eq $P509, .CONTROL_LOOP_NEXT, for_next1518
-    eq $P509, .CONTROL_LOOP_REDO, for_redo1519
+    .get_results ($P5009)
+    pop_upto_eh $P5009
+    getattribute $P5009, $P5009, 'type'
+    eq $P5009, .CONTROL_LOOP_NEXT, for_next1518
+    eq $P5009, .CONTROL_LOOP_REDO, for_redo1519
   for_done1520:
     pop_eh 
 .annotate 'line', 881
-    find_lex $P512, "$ast"
-    set $P511, $P512[0]
-    unless_null $P511, fallback1521
-    nqp_get_sc_object $P513, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P511, $P513
+    find_lex $P5012, "$ast"
+    set $P5011, $P5012[0]
+    unless_null $P5011, fallback1521
+    nqp_get_sc_object $P5013, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5011, $P5013
   fallback1521:
-    find_lex $P514, "$count"
-    $P515 = "&capnames"($P511, $P514)
-    set $P101, $P515
-    set $P516, $P101
-    iter $P518, $P101
-    new $P520, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P520, for_handlers1524
-    push_eh $P520
+    find_lex $P5014, "$count"
+    $P5015 = "&capnames"($P5011, $P5014)
+    set $P101, $P5015
+    set $P5016, $P101
+    iter $P5018, $P101
+    new $P5020, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5020, for_handlers1524
+    push_eh $P5020
   for_next1525:
-    unless $P518, for_done1527
-    shift $P521, $P518
+    unless $P5018, for_done1527
+    shift $P5021, $P5018
   for_redo1526:
-    .const 'Sub' $P519 = 'cuid_182_1346233469.934' 
-    capture_lex $P519
-    $P516 = $P519($P521)
+    .const 'Sub' $P5019 = 'cuid_182_1346277621.774' 
+    capture_lex $P5019
+    $P5016 = $P5019($P5021)
     goto for_next1525
   for_handlers1524:
-    .get_results ($P520)
-    pop_upto_eh $P520
-    getattribute $P520, $P520, 'type'
-    eq $P520, .CONTROL_LOOP_NEXT, for_next1525
-    eq $P520, .CONTROL_LOOP_REDO, for_redo1526
+    .get_results ($P5020)
+    pop_upto_eh $P5020
+    getattribute $P5020, $P5020, 'type'
+    eq $P5020, .CONTROL_LOOP_NEXT, for_next1525
+    eq $P5020, .CONTROL_LOOP_REDO, for_redo1526
   for_done1527:
     pop_eh 
-    set $P522, $P101[""]
-    unless_null $P522, fallback1528
-    nqp_get_sc_object $P523, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P522, $P523
+    set $P5022, $P101[""]
+    unless_null $P5022, fallback1528
+    nqp_get_sc_object $P5023, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5022, $P5023
   fallback1528:
-    store_lex "$count", $P522
-    .return ($P522) 
+    store_lex "$count", $P5022
+    .return ($P5022) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_180_1346233469.934") :anon :lex :outer("cuid_181_1346233469.934")
+.sub "" :subid("cuid_180_1346277621.774") :anon :lex :outer("cuid_181_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 877
     .param pmc _lex_param_0 
     .lex "$_", _lex_param_0 
-    set $S501, _lex_param_0
-    iseq $I501, $S501, "0"
-    set $I503, $I501
-    if $I501 goto unless472_end1516 
-    set $N501, _lex_param_0
-    set $N502, 0
-    isgt $I502, $N501, $N502
-    set $I503, $I502
+    set $S5001, _lex_param_0
+    iseq $I5001, $S5001, "0"
+    set $I5003, $I5001
+    if $I5001 goto unless472_end1516 
+    set $N5001, _lex_param_0
+    set $N5002, 0
+    isgt $I5002, $N5001, $N5002
+    set $I5003, $I5002
   unless472_end1516:
-    box $P503, $I503
-    set $P502, $P503
-    unless $I503 goto if471_end1514 
+    box $P5003, $I5003
+    set $P5002, $P5003
+    unless $I5003 goto if471_end1514 
 .annotate 'line', 878
-    set $N504, _lex_param_0
-    set $N505, 1
-    add $N503, $N504, $N505
-    box $P501, $N503
-    store_lex "$count", $P501
-    set $P502, $P501
+    set $N5004, _lex_param_0
+    set $N5005, 1
+    add $N5003, $N5004, $N5005
+    box $P5001, $N5003
+    store_lex "$count", $P5001
+    set $P5002, $P5001
   if471_end1514:
-    find_lex $P504, "%capnames"
-    set $S502, _lex_param_0
-    box $P505, 1
-    set $P504[$S502], $P505
-    .return ($P505) 
+    find_lex $P5004, "%capnames"
+    set $S5002, _lex_param_0
+    box $P5005, 1
+    set $P5004[$S5002], $P5005
+    .return ($P5005) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_182_1346233469.934") :anon :lex :outer("cuid_181_1346233469.934")
+.sub "" :subid("cuid_182_1346277621.774") :anon :lex :outer("cuid_181_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 882
     .param pmc _lex_param_0 
     .lex "$_", _lex_param_0 
-    find_lex $P501, "%capnames"
-    $P502 = _lex_param_0."key"()
-    set $S501, $P502
-    find_lex $P504, "%capnames"
-    $P505 = _lex_param_0."key"()
-    set $S502, $P505
-    set $P503, $P504[$S502]
-    unless_null $P503, fallback1522
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P503, $P506
+    find_lex $P5001, "%capnames"
+    $P5002 = _lex_param_0."key"()
+    set $S5001, $P5002
+    find_lex $P5004, "%capnames"
+    $P5005 = _lex_param_0."key"()
+    set $S5002, $P5005
+    set $P5003, $P5004[$S5002]
+    unless_null $P5003, fallback1522
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5003, $P5006
   fallback1522:
-    set $N502, $P503
-    find_lex $P508, "%x"
-    $P509 = _lex_param_0."key"()
-    set $S503, $P509
-    set $P507, $P508[$S503]
-    unless_null $P507, fallback1523
-    nqp_get_sc_object $P510, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P507, $P510
+    set $N5002, $P5003
+    find_lex $P5008, "%x"
+    $P5009 = _lex_param_0."key"()
+    set $S5003, $P5009
+    set $P5007, $P5008[$S5003]
+    unless_null $P5007, fallback1523
+    nqp_get_sc_object $P5010, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5007, $P5010
   fallback1523:
-    set $N503, $P507
-    add $N501, $N502, $N503
-    box $P511, $N501
-    set $P501[$S501], $P511
-    .return ($P511) 
+    set $N5003, $P5007
+    add $N5001, $N5002, $N5003
+    box $P5011, $N5001
+    set $P5001[$S5001], $P5011
+    .return ($P5011) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_184_1346233469.934") :anon :lex :outer("cuid_174_1346233469.934")
+.sub "" :subid("cuid_184_1346277621.774") :anon :lex :outer("cuid_174_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 885
-    .const 'Sub' $P515 = 'cuid_183_1346233469.934' 
-    capture_lex $P515 
+    .const 'Sub' $P5015 = 'cuid_183_1346277621.774' 
+    capture_lex $P5015 
     .lex "%astcap", $P101 
-    new $P501, 'Hash'
-    set $P101, $P501
+    new $P5001, 'Hash'
+    set $P101, $P5001
 .annotate 'line', 886
-    find_lex $P503, "$ast"
-    set $P502, $P503[0]
-    unless_null $P502, fallback1531
-    nqp_get_sc_object $P504, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P504
+    find_lex $P5003, "$ast"
+    set $P5002, $P5003[0]
+    unless_null $P5002, fallback1531
+    nqp_get_sc_object $P5004, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5004
   fallback1531:
-    find_lex $P505, "$count"
-    $P506 = "&capnames"($P502, $P505)
-    set $P101, $P506
-    set $P507, $P101
-    iter $P509, $P101
-    new $P511, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P511, for_handlers1532
-    push_eh $P511
+    find_lex $P5005, "$count"
+    $P5006 = "&capnames"($P5002, $P5005)
+    set $P101, $P5006
+    set $P5007, $P101
+    iter $P5009, $P101
+    new $P5011, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5011, for_handlers1532
+    push_eh $P5011
   for_next1533:
-    unless $P509, for_done1535
-    shift $P512, $P509
+    unless $P5009, for_done1535
+    shift $P5012, $P5009
   for_redo1534:
-    .const 'Sub' $P510 = 'cuid_183_1346233469.934' 
-    capture_lex $P510
-    $P507 = $P510($P512)
+    .const 'Sub' $P5010 = 'cuid_183_1346277621.774' 
+    capture_lex $P5010
+    $P5007 = $P5010($P5012)
     goto for_next1533
   for_handlers1532:
-    .get_results ($P511)
-    pop_upto_eh $P511
-    getattribute $P511, $P511, 'type'
-    eq $P511, .CONTROL_LOOP_NEXT, for_next1533
-    eq $P511, .CONTROL_LOOP_REDO, for_redo1534
+    .get_results ($P5011)
+    pop_upto_eh $P5011
+    getattribute $P5011, $P5011, 'type'
+    eq $P5011, .CONTROL_LOOP_NEXT, for_next1533
+    eq $P5011, .CONTROL_LOOP_REDO, for_redo1534
   for_done1535:
     pop_eh 
-    set $P513, $P101[""]
-    unless_null $P513, fallback1536
-    nqp_get_sc_object $P514, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P513, $P514
+    set $P5013, $P101[""]
+    unless_null $P5013, fallback1536
+    nqp_get_sc_object $P5014, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5013, $P5014
   fallback1536:
-    store_lex "$count", $P513
-    .return ($P513) 
+    store_lex "$count", $P5013
+    .return ($P5013) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_183_1346233469.934") :anon :lex :outer("cuid_184_1346233469.934")
+.sub "" :subid("cuid_183_1346277621.774") :anon :lex :outer("cuid_184_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 887
     .param pmc _lex_param_0 
     .lex "$_", _lex_param_0 
-    find_lex $P501, "%capnames"
-    set $S501, _lex_param_0
-    box $P502, 2
-    set $P501[$S501], $P502
-    .return ($P502) 
+    find_lex $P5001, "%capnames"
+    set $S5001, _lex_param_0
+    box $P5002, 2
+    set $P5001[$S5001], $P5002
+    .return ($P5002) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "alt_nfas" :subid("cuid_187_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "alt_nfas" :subid("cuid_187_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 896
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
     .param pmc _lex_param_2 
-    .const 'Sub' $P519 = 'cuid_186_1346233469.934' 
-    capture_lex $P519 
-    .const 'Sub' $P519 = 'cuid_188_1346233469.934' 
-    capture_lex $P519 
+    .const 'Sub' $P5019 = 'cuid_186_1346277621.774' 
+    capture_lex $P5019 
+    .const 'Sub' $P5019 = 'cuid_188_1346277621.774' 
+    capture_lex $P5019 
     .lex "$rxtype", $P101 
     .lex "$ast", _lex_param_0 
     .lex "$subid", _lex_param_1 
     .lex "$initpast", _lex_param_2 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 897
-    $P502 = _lex_param_0."rxtype"()
-    set $P101, $P502
-    set $S501, $P101
-    iseq $I501, $S501, "alt"
-    unless $I501 goto if474_else1537 
-    .const 'Sub' $P503 = 'cuid_186_1346233469.934' 
-    capture_lex $P503
-    $P504 = $P503()
-    set $P518, $P504
+    $P5002 = _lex_param_0."rxtype"()
+    set $P101, $P5002
+    set $S5001, $P101
+    iseq $I5001, $S5001, "alt"
+    unless $I5001 goto if474_else1537 
+    .const 'Sub' $P5003 = 'cuid_186_1346277621.774' 
+    capture_lex $P5003
+    $P5004 = $P5003()
+    set $P5018, $P5004
     goto if474_end1538
   if474_else1537:
-    set $S502, $P101
-    iseq $I502, $S502, "subcapture"
-    set $I504, $I502
-    if $I502 goto unless476_end1551 
-    set $S503, $P101
-    iseq $I503, $S503, "quant"
-    set $I504, $I503
+    set $S5002, $P101
+    iseq $I5002, $S5002, "subcapture"
+    set $I5004, $I5002
+    if $I5002 goto unless476_end1551 
+    set $S5003, $P101
+    iseq $I5003, $S5003, "quant"
+    set $I5004, $I5003
   unless476_end1551:
-    unless $I504 goto if475_else1548 
+    unless $I5004 goto if475_else1548 
 .annotate 'line', 910
 .annotate 'line', 911
-    set $P505, _lex_param_0[0]
-    unless_null $P505, fallback1552
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P505, $P506
+    set $P5005, _lex_param_0[0]
+    unless_null $P5005, fallback1552
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5005, $P5006
   fallback1552:
-    $P507 = "&alt_nfas"($P505, _lex_param_1, _lex_param_2)
-    set $P517, $P507
+    $P5007 = "&alt_nfas"($P5005, _lex_param_1, _lex_param_2)
+    set $P5017, $P5007
     goto if475_end1549
   if475_else1548:
-    set $S504, $P101
-    iseq $I505, $S504, "concat"
-    set $I507, $I505
-    if $I505 goto unless480_end1560 
-    set $S505, $P101
-    iseq $I506, $S505, "altseq"
-    set $I507, $I506
+    set $S5004, $P101
+    iseq $I5005, $S5004, "concat"
+    set $I5007, $I5005
+    if $I5005 goto unless480_end1560 
+    set $S5005, $P101
+    iseq $I5006, $S5005, "altseq"
+    set $I5007, $I5006
   unless480_end1560:
-    set $I509, $I507
-    if $I507 goto unless479_end1558 
-    set $S506, $P101
-    iseq $I508, $S506, "conj"
-    set $I509, $I508
+    set $I5009, $I5007
+    if $I5007 goto unless479_end1558 
+    set $S5006, $P101
+    iseq $I5008, $S5006, "conj"
+    set $I5009, $I5008
   unless479_end1558:
-    set $I511, $I509
-    if $I509 goto unless478_end1556 
-    set $S507, $P101
-    iseq $I510, $S507, "conjseq"
-    set $I511, $I510
+    set $I5011, $I5009
+    if $I5009 goto unless478_end1556 
+    set $S5007, $P101
+    iseq $I5010, $S5007, "conjseq"
+    set $I5011, $I5010
   unless478_end1556:
-    box $P516, $I511
-    set $P515, $P516
-    unless $I511 goto if477_end1554 
+    box $P5016, $I5011
+    set $P5015, $P5016
+    unless $I5011 goto if477_end1554 
 .annotate 'line', 913
 .annotate 'line', 914
-    $P511 = _lex_param_0."list"()
-    set $P508, $P511
-    iter $P510, $P511
-    new $P513, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P513, for_handlers1561
-    push_eh $P513
+    $P5011 = _lex_param_0."list"()
+    set $P5008, $P5011
+    iter $P5010, $P5011
+    new $P5013, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5013, for_handlers1561
+    push_eh $P5013
   for_next1562:
-    unless $P510, for_done1564
-    shift $P514, $P510
+    unless $P5010, for_done1564
+    shift $P5014, $P5010
   for_redo1563:
-    .const 'Sub' $P512 = 'cuid_188_1346233469.934' 
-    capture_lex $P512
-    $P508 = $P512($P514)
+    .const 'Sub' $P5012 = 'cuid_188_1346277621.774' 
+    capture_lex $P5012
+    $P5008 = $P5012($P5014)
     goto for_next1562
   for_handlers1561:
-    .get_results ($P513)
-    pop_upto_eh $P513
-    getattribute $P513, $P513, 'type'
-    eq $P513, .CONTROL_LOOP_NEXT, for_next1562
-    eq $P513, .CONTROL_LOOP_REDO, for_redo1563
+    .get_results ($P5013)
+    pop_upto_eh $P5013
+    getattribute $P5013, $P5013, 'type'
+    eq $P5013, .CONTROL_LOOP_NEXT, for_next1562
+    eq $P5013, .CONTROL_LOOP_REDO, for_redo1563
   for_done1564:
     pop_eh 
-    set $P515, $P508
+    set $P5015, $P5008
   if477_end1554:
-    set $P517, $P515
+    set $P5017, $P5015
   if475_end1549:
-    set $P518, $P517
+    set $P5018, $P5017
   if474_end1538:
-    .return ($P518) 
+    .return ($P5018) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_186_1346233469.934") :anon :lex :outer("cuid_187_1346233469.934")
+.sub "" :subid("cuid_186_1346277621.774") :anon :lex :outer("cuid_187_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 898
-    .const 'Sub' $P544 = 'cuid_185_1346233469.934' 
-    capture_lex $P544 
+    .const 'Sub' $P5044 = 'cuid_185_1346277621.774' 
+    capture_lex $P5044 
     .lex "$nfapast", $P101 
     .lex "$nfablock", $P102 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P102, $P502
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P102, $P5002
 .annotate 'line', 899
-    get_hll_global $P506, "GLOBAL"
-    nqp_get_package_through_who $P505, $P506, "PAST"
-    get_who $P504, $P505
-    set $P503, $P504["Op"]
-    unless_null $P503, fallback1539
-    nqp_get_sc_object $P507, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P503, $P507
+    get_hll_global $P5006, "GLOBAL"
+    nqp_get_package_through_who $P5005, $P5006, "PAST"
+    get_who $P5004, $P5005
+    set $P5003, $P5004["Op"]
+    unless_null $P5003, fallback1539
+    nqp_get_sc_object $P5007, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5003, $P5007
   fallback1539:
-    $P508 = $P503."new"("list" :named("pasttype"))
-    set $P101, $P508
+    $P5008 = $P5003."new"("list" :named("pasttype"))
+    set $P101, $P5008
 .annotate 'line', 900
-    find_lex $P509, "$ast"
-    get_hll_global $P513, "GLOBAL"
-    nqp_get_package_through_who $P512, $P513, "PAST"
-    get_who $P511, $P512
-    set $P510, $P511["Node"]
-    unless_null $P510, fallback1540
-    nqp_get_sc_object $P514, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P510, $P514
+    find_lex $P5009, "$ast"
+    get_hll_global $P5013, "GLOBAL"
+    nqp_get_package_through_who $P5012, $P5013, "PAST"
+    get_who $P5011, $P5012
+    set $P5010, $P5011["Node"]
+    unless_null $P5010, fallback1540
+    nqp_get_sc_object $P5014, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5010, $P5014
   fallback1540:
-    $P515 = $P510."unique"("alt_nfa_")
-    set $S503, $P515
-    concat $S502, $S503, "_"
-    time $N501
-    set $S504, $N501
-    concat $S501, $S502, $S504
-    $P516 = $P509."name"($S501)
+    $P5015 = $P5010."unique"("alt_nfa_")
+    set $S5003, $P5015
+    concat $S5002, $S5003, "_"
+    time $N5001
+    set $S5004, $N5001
+    concat $S5001, $S5002, $S5004
+    $P5016 = $P5009."name"($S5001)
 .annotate 'line', 901
-    find_lex $P520, "$ast"
-    $P521 = $P520."list"()
-    set $P517, $P521
-    iter $P519, $P521
-    new $P523, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P523, for_handlers1542
-    push_eh $P523
+    find_lex $P5020, "$ast"
+    $P5021 = $P5020."list"()
+    set $P5017, $P5021
+    iter $P5019, $P5021
+    new $P5023, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5023, for_handlers1542
+    push_eh $P5023
   for_next1543:
-    unless $P519, for_done1545
-    shift $P524, $P519
+    unless $P5019, for_done1545
+    shift $P5024, $P5019
   for_redo1544:
-    .const 'Sub' $P522 = 'cuid_185_1346233469.934' 
-    capture_lex $P522
-    $P517 = $P522($P524)
+    .const 'Sub' $P5022 = 'cuid_185_1346277621.774' 
+    capture_lex $P5022
+    $P5017 = $P5022($P5024)
     goto for_next1543
   for_handlers1542:
-    .get_results ($P523)
-    pop_upto_eh $P523
-    getattribute $P523, $P523, 'type'
-    eq $P523, .CONTROL_LOOP_NEXT, for_next1543
-    eq $P523, .CONTROL_LOOP_REDO, for_redo1544
+    .get_results ($P5023)
+    pop_upto_eh $P5023
+    getattribute $P5023, $P5023, 'type'
+    eq $P5023, .CONTROL_LOOP_NEXT, for_next1543
+    eq $P5023, .CONTROL_LOOP_REDO, for_redo1544
   for_done1545:
     pop_eh 
 .annotate 'line', 905
-    get_hll_global $P528, "GLOBAL"
-    nqp_get_package_through_who $P527, $P528, "PAST"
-    get_who $P526, $P527
-    set $P525, $P526["Block"]
-    unless_null $P525, fallback1546
-    nqp_get_sc_object $P529, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P525, $P529
+    get_hll_global $P5028, "GLOBAL"
+    nqp_get_package_through_who $P5027, $P5028, "PAST"
+    get_who $P5026, $P5027
+    set $P5025, $P5026["Block"]
+    unless_null $P5025, fallback1546
+    nqp_get_sc_object $P5029, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5025, $P5029
   fallback1546:
-    new $P530, 'ResizablePMCArray'
-    box $P531, "Sub"
-    push $P530, $P531
-    find_lex $P532, "$subid"
-    set $S507, $P532
-    concat $S506, $S507, "_"
+    new $P5030, 'ResizablePMCArray'
+    box $P5031, "Sub"
+    push $P5030, $P5031
+    find_lex $P5032, "$subid"
+    set $S5007, $P5032
+    concat $S5006, $S5007, "_"
 .annotate 'line', 907
-    find_lex $P533, "$ast"
-    $P534 = $P533."name"()
-    set $S508, $P534
-    concat $S505, $S506, $S508
-    $P535 = $P525."new"($P101, "nqp" :named("hll"), $P530 :named("namespace"), 0 :named("lexical"), $S505 :named("name"))
-    set $P102, $P535
+    find_lex $P5033, "$ast"
+    $P5034 = $P5033."name"()
+    set $S5008, $P5034
+    concat $S5005, $S5006, $S5008
+    $P5035 = $P5025."new"($P101, "nqp" :named("hll"), $P5030 :named("namespace"), 0 :named("lexical"), $S5005 :named("name"))
+    set $P102, $P5035
 .annotate 'line', 908
-    find_lex $P536, "$initpast"
-    get_hll_global $P540, "GLOBAL"
-    nqp_get_package_through_who $P539, $P540, "PAST"
-    get_who $P538, $P539
-    set $P537, $P538["Stmt"]
-    unless_null $P537, fallback1547
-    nqp_get_sc_object $P541, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P537, $P541
+    find_lex $P5036, "$initpast"
+    get_hll_global $P5040, "GLOBAL"
+    nqp_get_package_through_who $P5039, $P5040, "PAST"
+    get_who $P5038, $P5039
+    set $P5037, $P5038["Stmt"]
+    unless_null $P5037, fallback1547
+    nqp_get_sc_object $P5041, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5037, $P5041
   fallback1547:
-    $P542 = $P537."new"($P102)
-    $P543 = $P536."push"($P542)
-    .return ($P543) 
+    $P5042 = $P5037."new"($P102)
+    $P5043 = $P5036."push"($P5042)
+    .return ($P5043) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_185_1346233469.934") :anon :lex :outer("cuid_186_1346233469.934")
+.sub "" :subid("cuid_185_1346277621.774") :anon :lex :outer("cuid_186_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 901
     .param pmc _lex_param_0 
     .lex "$_", _lex_param_0 
 .annotate 'line', 902
-    find_lex $P501, "$subid"
-    find_lex $P502, "$initpast"
-    $P503 = "&alt_nfas"(_lex_param_0, $P501, $P502)
+    find_lex $P5001, "$subid"
+    find_lex $P5002, "$initpast"
+    $P5003 = "&alt_nfas"(_lex_param_0, $P5001, $P5002)
 .annotate 'line', 903
-    find_lex $P504, "$nfapast"
-    get_hll_global $P508, "GLOBAL"
-    nqp_get_package_through_who $P507, $P508, "QRegex"
-    get_who $P506, $P507
-    set $P505, $P506["NFA"]
-    unless_null $P505, fallback1541
-    nqp_get_sc_object $P509, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P505, $P509
+    find_lex $P5004, "$nfapast"
+    get_hll_global $P5008, "GLOBAL"
+    nqp_get_package_through_who $P5007, $P5008, "QRegex"
+    get_who $P5006, $P5007
+    set $P5005, $P5006["NFA"]
+    unless_null $P5005, fallback1541
+    nqp_get_sc_object $P5009, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5005, $P5009
   fallback1541:
-    $P510 = $P505."new"()
-    $P511 = $P510."addnode"(_lex_param_0)
-    $P512 = $P511."past"(1 :named("non_empty"))
-    $P513 = $P504."push"($P512)
-    .return ($P513) 
+    $P5010 = $P5005."new"()
+    $P5011 = $P5010."addnode"(_lex_param_0)
+    $P5012 = $P5011."past"(1 :named("non_empty"))
+    $P5013 = $P5004."push"($P5012)
+    .return ($P5013) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_188_1346233469.934") :anon :lex :outer("cuid_187_1346233469.934")
+.sub "" :subid("cuid_188_1346277621.774") :anon :lex :outer("cuid_187_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 914
     .param pmc _lex_param_0 
     .lex "$_", _lex_param_0 
-    find_lex $P501, "$subid"
-    find_lex $P502, "$initpast"
-    $P503 = "&alt_nfas"(_lex_param_0, $P501, $P502)
-    .return ($P503) 
+    find_lex $P5001, "$subid"
+    find_lex $P5002, "$initpast"
+    $P5003 = "&alt_nfas"(_lex_param_0, $P5001, $P5002)
+    .return ($P5003) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "qalt_nfas" :subid("cuid_191_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "qalt_nfas" :subid("cuid_191_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 918
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
     .param pmc _lex_param_2 
-    .const 'Sub' $P519 = 'cuid_190_1346233469.934' 
-    capture_lex $P519 
-    .const 'Sub' $P519 = 'cuid_192_1346233469.934' 
-    capture_lex $P519 
+    .const 'Sub' $P5019 = 'cuid_190_1346277621.774' 
+    capture_lex $P5019 
+    .const 'Sub' $P5019 = 'cuid_192_1346277621.774' 
+    capture_lex $P5019 
     .lex "$rxtype", $P101 
     .lex "$ast", _lex_param_0 
     .lex "$subid", _lex_param_1 
     .lex "$initpast", _lex_param_2 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 919
-    $P502 = _lex_param_0."rxtype"()
-    set $P101, $P502
-    set $S501, $P101
-    iseq $I501, $S501, "alt"
-    unless $I501 goto if481_else1565 
-    .const 'Sub' $P503 = 'cuid_190_1346233469.934' 
-    capture_lex $P503
-    $P504 = $P503()
-    set $P518, $P504
+    $P5002 = _lex_param_0."rxtype"()
+    set $P101, $P5002
+    set $S5001, $P101
+    iseq $I5001, $S5001, "alt"
+    unless $I5001 goto if481_else1565 
+    .const 'Sub' $P5003 = 'cuid_190_1346277621.774' 
+    capture_lex $P5003
+    $P5004 = $P5003()
+    set $P5018, $P5004
     goto if481_end1566
   if481_else1565:
-    set $S502, $P101
-    iseq $I502, $S502, "subcapture"
-    set $I504, $I502
-    if $I502 goto unless483_end1579 
-    set $S503, $P101
-    iseq $I503, $S503, "quant"
-    set $I504, $I503
+    set $S5002, $P101
+    iseq $I5002, $S5002, "subcapture"
+    set $I5004, $I5002
+    if $I5002 goto unless483_end1579 
+    set $S5003, $P101
+    iseq $I5003, $S5003, "quant"
+    set $I5004, $I5003
   unless483_end1579:
-    unless $I504 goto if482_else1576 
+    unless $I5004 goto if482_else1576 
 .annotate 'line', 930
 .annotate 'line', 931
-    set $P505, _lex_param_0[0]
-    unless_null $P505, fallback1580
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P505, $P506
+    set $P5005, _lex_param_0[0]
+    unless_null $P5005, fallback1580
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5005, $P5006
   fallback1580:
-    $P507 = "&qalt_nfas"($P505, _lex_param_1, _lex_param_2)
-    set $P517, $P507
+    $P5007 = "&qalt_nfas"($P5005, _lex_param_1, _lex_param_2)
+    set $P5017, $P5007
     goto if482_end1577
   if482_else1576:
-    set $S504, $P101
-    iseq $I505, $S504, "concat"
-    set $I507, $I505
-    if $I505 goto unless487_end1588 
-    set $S505, $P101
-    iseq $I506, $S505, "altseq"
-    set $I507, $I506
+    set $S5004, $P101
+    iseq $I5005, $S5004, "concat"
+    set $I5007, $I5005
+    if $I5005 goto unless487_end1588 
+    set $S5005, $P101
+    iseq $I5006, $S5005, "altseq"
+    set $I5007, $I5006
   unless487_end1588:
-    set $I509, $I507
-    if $I507 goto unless486_end1586 
-    set $S506, $P101
-    iseq $I508, $S506, "conj"
-    set $I509, $I508
+    set $I5009, $I5007
+    if $I5007 goto unless486_end1586 
+    set $S5006, $P101
+    iseq $I5008, $S5006, "conj"
+    set $I5009, $I5008
   unless486_end1586:
-    set $I511, $I509
-    if $I509 goto unless485_end1584 
-    set $S507, $P101
-    iseq $I510, $S507, "conjseq"
-    set $I511, $I510
+    set $I5011, $I5009
+    if $I5009 goto unless485_end1584 
+    set $S5007, $P101
+    iseq $I5010, $S5007, "conjseq"
+    set $I5011, $I5010
   unless485_end1584:
-    box $P516, $I511
-    set $P515, $P516
-    unless $I511 goto if484_end1582 
+    box $P5016, $I5011
+    set $P5015, $P5016
+    unless $I5011 goto if484_end1582 
 .annotate 'line', 933
 .annotate 'line', 934
-    $P511 = _lex_param_0."list"()
-    set $P508, $P511
-    iter $P510, $P511
-    new $P513, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P513, for_handlers1589
-    push_eh $P513
+    $P5011 = _lex_param_0."list"()
+    set $P5008, $P5011
+    iter $P5010, $P5011
+    new $P5013, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5013, for_handlers1589
+    push_eh $P5013
   for_next1590:
-    unless $P510, for_done1592
-    shift $P514, $P510
+    unless $P5010, for_done1592
+    shift $P5014, $P5010
   for_redo1591:
-    .const 'Sub' $P512 = 'cuid_192_1346233469.934' 
-    capture_lex $P512
-    $P508 = $P512($P514)
+    .const 'Sub' $P5012 = 'cuid_192_1346277621.774' 
+    capture_lex $P5012
+    $P5008 = $P5012($P5014)
     goto for_next1590
   for_handlers1589:
-    .get_results ($P513)
-    pop_upto_eh $P513
-    getattribute $P513, $P513, 'type'
-    eq $P513, .CONTROL_LOOP_NEXT, for_next1590
-    eq $P513, .CONTROL_LOOP_REDO, for_redo1591
+    .get_results ($P5013)
+    pop_upto_eh $P5013
+    getattribute $P5013, $P5013, 'type'
+    eq $P5013, .CONTROL_LOOP_NEXT, for_next1590
+    eq $P5013, .CONTROL_LOOP_REDO, for_redo1591
   for_done1592:
     pop_eh 
-    set $P515, $P508
+    set $P5015, $P5008
   if484_end1582:
-    set $P517, $P515
+    set $P5017, $P5015
   if482_end1577:
-    set $P518, $P517
+    set $P5018, $P5017
   if481_end1566:
-    .return ($P518) 
+    .return ($P5018) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_190_1346233469.934") :anon :lex :outer("cuid_191_1346233469.934")
+.sub "" :subid("cuid_190_1346277621.774") :anon :lex :outer("cuid_191_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 920
-    .const 'Sub' $P542 = 'cuid_189_1346233469.934' 
-    capture_lex $P542 
+    .const 'Sub' $P5042 = 'cuid_189_1346277621.774' 
+    capture_lex $P5042 
     .lex "$nfapast", $P101 
     .lex "$nfablock", $P102 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P102, $P502
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P102, $P5002
 .annotate 'line', 921
-    get_hll_global $P506, "GLOBAL"
-    nqp_get_package_through_who $P505, $P506, "QAST"
-    get_who $P504, $P505
-    set $P503, $P504["Op"]
-    unless_null $P503, fallback1567
-    nqp_get_sc_object $P507, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P503, $P507
+    get_hll_global $P5006, "GLOBAL"
+    nqp_get_package_through_who $P5005, $P5006, "QAST"
+    get_who $P5004, $P5005
+    set $P5003, $P5004["Op"]
+    unless_null $P5003, fallback1567
+    nqp_get_sc_object $P5007, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5003, $P5007
   fallback1567:
-    $P508 = $P503."new"("list" :named("op"))
-    set $P101, $P508
+    $P5008 = $P5003."new"("list" :named("op"))
+    set $P101, $P5008
 .annotate 'line', 922
-    find_lex $P509, "$ast"
-    get_hll_global $P513, "GLOBAL"
-    nqp_get_package_through_who $P512, $P513, "QAST"
-    get_who $P511, $P512
-    set $P510, $P511["Node"]
-    unless_null $P510, fallback1568
-    nqp_get_sc_object $P514, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P510, $P514
+    find_lex $P5009, "$ast"
+    get_hll_global $P5013, "GLOBAL"
+    nqp_get_package_through_who $P5012, $P5013, "QAST"
+    get_who $P5011, $P5012
+    set $P5010, $P5011["Node"]
+    unless_null $P5010, fallback1568
+    nqp_get_sc_object $P5014, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5010, $P5014
   fallback1568:
-    $P515 = $P510."unique"("alt_nfa_")
-    set $S503, $P515
-    concat $S502, $S503, "_"
-    time $N501
-    set $S504, $N501
-    concat $S501, $S502, $S504
-    $P516 = $P509."name"($S501)
+    $P5015 = $P5010."unique"("alt_nfa_")
+    set $S5003, $P5015
+    concat $S5002, $S5003, "_"
+    time $N5001
+    set $S5004, $N5001
+    concat $S5001, $S5002, $S5004
+    $P5016 = $P5009."name"($S5001)
 .annotate 'line', 923
-    find_lex $P520, "$ast"
-    $P521 = $P520."list"()
-    set $P517, $P521
-    iter $P519, $P521
-    new $P523, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P523, for_handlers1570
-    push_eh $P523
+    find_lex $P5020, "$ast"
+    $P5021 = $P5020."list"()
+    set $P5017, $P5021
+    iter $P5019, $P5021
+    new $P5023, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5023, for_handlers1570
+    push_eh $P5023
   for_next1571:
-    unless $P519, for_done1573
-    shift $P524, $P519
+    unless $P5019, for_done1573
+    shift $P5024, $P5019
   for_redo1572:
-    .const 'Sub' $P522 = 'cuid_189_1346233469.934' 
-    capture_lex $P522
-    $P517 = $P522($P524)
+    .const 'Sub' $P5022 = 'cuid_189_1346277621.774' 
+    capture_lex $P5022
+    $P5017 = $P5022($P5024)
     goto for_next1571
   for_handlers1570:
-    .get_results ($P523)
-    pop_upto_eh $P523
-    getattribute $P523, $P523, 'type'
-    eq $P523, .CONTROL_LOOP_NEXT, for_next1571
-    eq $P523, .CONTROL_LOOP_REDO, for_redo1572
+    .get_results ($P5023)
+    pop_upto_eh $P5023
+    getattribute $P5023, $P5023, 'type'
+    eq $P5023, .CONTROL_LOOP_NEXT, for_next1571
+    eq $P5023, .CONTROL_LOOP_REDO, for_redo1572
   for_done1573:
     pop_eh 
 .annotate 'line', 927
-    get_hll_global $P528, "GLOBAL"
-    nqp_get_package_through_who $P527, $P528, "QAST"
-    get_who $P526, $P527
-    set $P525, $P526["BlockMemo"]
-    unless_null $P525, fallback1574
-    nqp_get_sc_object $P529, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P525, $P529
+    get_hll_global $P5028, "GLOBAL"
+    nqp_get_package_through_who $P5027, $P5028, "QAST"
+    get_who $P5026, $P5027
+    set $P5025, $P5026["BlockMemo"]
+    unless_null $P5025, fallback1574
+    nqp_get_sc_object $P5029, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5025, $P5029
   fallback1574:
-    find_lex $P530, "$subid"
-    set $S507, $P530
-    concat $S506, $S507, "_"
-    find_lex $P531, "$ast"
-    $P532 = $P531."name"()
-    set $S508, $P532
-    concat $S505, $S506, $S508
-    $P533 = $P525."new"($P101, $S505 :named("name"))
-    set $P102, $P533
+    find_lex $P5030, "$subid"
+    set $S5007, $P5030
+    concat $S5006, $S5007, "_"
+    find_lex $P5031, "$ast"
+    $P5032 = $P5031."name"()
+    set $S5008, $P5032
+    concat $S5005, $S5006, $S5008
+    $P5033 = $P5025."new"($P101, $S5005 :named("name"))
+    set $P102, $P5033
 .annotate 'line', 928
-    find_lex $P534, "$initpast"
-    get_hll_global $P538, "GLOBAL"
-    nqp_get_package_through_who $P537, $P538, "QAST"
-    get_who $P536, $P537
-    set $P535, $P536["Stmt"]
-    unless_null $P535, fallback1575
-    nqp_get_sc_object $P539, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P535, $P539
+    find_lex $P5034, "$initpast"
+    get_hll_global $P5038, "GLOBAL"
+    nqp_get_package_through_who $P5037, $P5038, "QAST"
+    get_who $P5036, $P5037
+    set $P5035, $P5036["Stmt"]
+    unless_null $P5035, fallback1575
+    nqp_get_sc_object $P5039, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5035, $P5039
   fallback1575:
-    $P540 = $P535."new"($P102)
-    $P541 = $P534."push"($P540)
-    .return ($P541) 
+    $P5040 = $P5035."new"($P102)
+    $P5041 = $P5034."push"($P5040)
+    .return ($P5041) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_189_1346233469.934") :anon :lex :outer("cuid_190_1346233469.934")
+.sub "" :subid("cuid_189_1346277621.774") :anon :lex :outer("cuid_190_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 923
     .param pmc _lex_param_0 
     .lex "$_", _lex_param_0 
 .annotate 'line', 924
-    find_lex $P501, "$subid"
-    find_lex $P502, "$initpast"
-    $P503 = "&qalt_nfas"(_lex_param_0, $P501, $P502)
+    find_lex $P5001, "$subid"
+    find_lex $P5002, "$initpast"
+    $P5003 = "&qalt_nfas"(_lex_param_0, $P5001, $P5002)
 .annotate 'line', 925
-    find_lex $P504, "$nfapast"
-    get_hll_global $P508, "GLOBAL"
-    nqp_get_package_through_who $P507, $P508, "QRegex"
-    get_who $P506, $P507
-    set $P505, $P506["NFA"]
-    unless_null $P505, fallback1569
-    nqp_get_sc_object $P509, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P505, $P509
+    find_lex $P5004, "$nfapast"
+    get_hll_global $P5008, "GLOBAL"
+    nqp_get_package_through_who $P5007, $P5008, "QRegex"
+    get_who $P5006, $P5007
+    set $P5005, $P5006["NFA"]
+    unless_null $P5005, fallback1569
+    nqp_get_sc_object $P5009, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5005, $P5009
   fallback1569:
-    $P510 = $P505."new"()
-    $P511 = $P510."addnode"(_lex_param_0)
-    $P512 = $P511."qast"(1 :named("non_empty"))
-    $P513 = $P504."push"($P512)
-    .return ($P513) 
+    $P5010 = $P5005."new"()
+    $P5011 = $P5010."addnode"(_lex_param_0)
+    $P5012 = $P5011."qast"(1 :named("non_empty"))
+    $P5013 = $P5004."push"($P5012)
+    .return ($P5013) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_192_1346233469.934") :anon :lex :outer("cuid_191_1346233469.934")
+.sub "" :subid("cuid_192_1346277621.774") :anon :lex :outer("cuid_191_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 934
     .param pmc _lex_param_0 
     .lex "$_", _lex_param_0 
-    find_lex $P501, "$subid"
-    find_lex $P502, "$initpast"
-    $P503 = "&qalt_nfas"(_lex_param_0, $P501, $P502)
-    .return ($P503) 
+    find_lex $P5001, "$subid"
+    find_lex $P5002, "$initpast"
+    $P5003 = "&qalt_nfas"(_lex_param_0, $P5001, $P5002)
+    .return ($P5003) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "TOP" :subid("cuid_101_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "TOP" :subid("cuid_101_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 248
     .param pmc _lex_param_0 
@@ -17584,825 +17584,825 @@
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
 .annotate 'line', 249
-    set $P501, _lex_param_1["nibbler"]
-    unless_null $P501, fallback1593
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P501, $P502
+    set $P5001, _lex_param_1["nibbler"]
+    unless_null $P5001, fallback1593
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5001, $P5002
   fallback1593:
-    $P503 = $P501."ast"()
-    $P504 = "&buildsub"($P503)
-    $P505 = _lex_param_1."!make"($P504)
-    .return ($P505) 
+    $P5003 = $P5001."ast"()
+    $P5004 = "&buildsub"($P5003)
+    $P5005 = _lex_param_1."!make"($P5004)
+    .return ($P5005) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "nibbler" :subid("cuid_102_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "nibbler" :subid("cuid_102_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 252
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    set $P501, _lex_param_1["termaltseq"]
-    unless_null $P501, fallback1594
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P501, $P502
+    set $P5001, _lex_param_1["termaltseq"]
+    unless_null $P5001, fallback1594
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5001, $P5002
   fallback1594:
-    $P503 = $P501."ast"()
-    $P504 = _lex_param_1."!make"($P503)
-    .return ($P504) 
+    $P5003 = $P5001."ast"()
+    $P5004 = _lex_param_1."!make"($P5003)
+    .return ($P5004) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "termaltseq" :subid("cuid_103_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "termaltseq" :subid("cuid_103_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 254
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
-    .const 'Sub' $P526 = 'cuid_193_1346233469.934' 
-    capture_lex $P526 
+    .const 'Sub' $P5026 = 'cuid_193_1346277621.774' 
+    capture_lex $P5026 
     .lex "$qast", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 255
-    set $P503, _lex_param_1["termconjseq"]
-    unless_null $P503, fallback1595
-    nqp_get_sc_object $P504, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P503, $P504
+    set $P5003, _lex_param_1["termconjseq"]
+    unless_null $P5003, fallback1595
+    nqp_get_sc_object $P5004, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5003, $P5004
   fallback1595:
-    set $P502, $P503[0]
-    unless_null $P502, fallback1596
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P505
+    set $P5002, $P5003[0]
+    unless_null $P5002, fallback1596
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5005
   fallback1596:
-    $P506 = $P502."ast"()
-    set $P101, $P506
-    set $P507, _lex_param_1["termconjseq"]
-    unless_null $P507, fallback1599
-    nqp_get_sc_object $P508, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P507, $P508
+    $P5006 = $P5002."ast"()
+    set $P101, $P5006
+    set $P5007, _lex_param_1["termconjseq"]
+    unless_null $P5007, fallback1599
+    nqp_get_sc_object $P5008, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5007, $P5008
   fallback1599:
-    set $N501, $P507
-    set $N502, 1
-    isgt $I501, $N501, $N502
-    box $P524, $I501
-    set $P523, $P524
-    unless $I501 goto if488_end1598 
+    set $N5001, $P5007
+    set $N5002, 1
+    isgt $I5001, $N5001, $N5002
+    box $P5024, $I5001
+    set $P5023, $P5024
+    unless $I5001 goto if488_end1598 
 .annotate 'line', 256
 .annotate 'line', 257
-    get_hll_global $P512, "GLOBAL"
-    nqp_get_package_through_who $P511, $P512, "QAST"
-    get_who $P510, $P511
-    set $P509, $P510["Regex"]
-    unless_null $P509, fallback1600
-    nqp_get_sc_object $P513, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P509, $P513
+    get_hll_global $P5012, "GLOBAL"
+    nqp_get_package_through_who $P5011, $P5012, "QAST"
+    get_who $P5010, $P5011
+    set $P5009, $P5010["Regex"]
+    unless_null $P5009, fallback1600
+    nqp_get_sc_object $P5013, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5009, $P5013
   fallback1600:
-    $P514 = $P509."new"("altseq" :named("rxtype"), _lex_param_1 :named("node"))
-    set $P101, $P514
-    set $P518, _lex_param_1["termconjseq"]
-    unless_null $P518, fallback1601
-    nqp_get_sc_object $P519, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P518, $P519
+    $P5014 = $P5009."new"("altseq" :named("rxtype"), _lex_param_1 :named("node"))
+    set $P101, $P5014
+    set $P5018, _lex_param_1["termconjseq"]
+    unless_null $P5018, fallback1601
+    nqp_get_sc_object $P5019, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5018, $P5019
   fallback1601:
-    set $P515, $P518
-    iter $P517, $P518
-    new $P521, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P521, for_handlers1602
-    push_eh $P521
+    set $P5015, $P5018
+    iter $P5017, $P5018
+    new $P5021, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5021, for_handlers1602
+    push_eh $P5021
   for_next1603:
-    unless $P517, for_done1605
-    shift $P522, $P517
+    unless $P5017, for_done1605
+    shift $P5022, $P5017
   for_redo1604:
-    .const 'Sub' $P520 = 'cuid_193_1346233469.934' 
-    capture_lex $P520
-    $P515 = $P520($P522)
+    .const 'Sub' $P5020 = 'cuid_193_1346277621.774' 
+    capture_lex $P5020
+    $P5015 = $P5020($P5022)
     goto for_next1603
   for_handlers1602:
-    .get_results ($P521)
-    pop_upto_eh $P521
-    getattribute $P521, $P521, 'type'
-    eq $P521, .CONTROL_LOOP_NEXT, for_next1603
-    eq $P521, .CONTROL_LOOP_REDO, for_redo1604
+    .get_results ($P5021)
+    pop_upto_eh $P5021
+    getattribute $P5021, $P5021, 'type'
+    eq $P5021, .CONTROL_LOOP_NEXT, for_next1603
+    eq $P5021, .CONTROL_LOOP_REDO, for_redo1604
   for_done1605:
     pop_eh 
-    set $P523, $P515
+    set $P5023, $P5015
   if488_end1598:
 .annotate 'line', 260
-    $P525 = _lex_param_1."!make"($P101)
-    .return ($P525) 
+    $P5025 = _lex_param_1."!make"($P101)
+    .return ($P5025) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_193_1346233469.934") :anon :lex :outer("cuid_103_1346233469.934")
+.sub "" :subid("cuid_193_1346277621.774") :anon :lex :outer("cuid_103_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 258
     .param pmc _lex_param_0 
     .lex "$_", _lex_param_0 
-    find_lex $P501, "$qast"
-    $P502 = _lex_param_0."ast"()
-    $P503 = $P501."push"($P502)
-    .return ($P503) 
+    find_lex $P5001, "$qast"
+    $P5002 = _lex_param_0."ast"()
+    $P5003 = $P5001."push"($P5002)
+    .return ($P5003) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "termconjseq" :subid("cuid_104_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "termconjseq" :subid("cuid_104_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 263
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
-    .const 'Sub' $P526 = 'cuid_194_1346233469.934' 
-    capture_lex $P526 
+    .const 'Sub' $P5026 = 'cuid_194_1346277621.774' 
+    capture_lex $P5026 
     .lex "$qast", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 264
-    set $P503, _lex_param_1["termalt"]
-    unless_null $P503, fallback1606
-    nqp_get_sc_object $P504, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P503, $P504
+    set $P5003, _lex_param_1["termalt"]
+    unless_null $P5003, fallback1606
+    nqp_get_sc_object $P5004, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5003, $P5004
   fallback1606:
-    set $P502, $P503[0]
-    unless_null $P502, fallback1607
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P505
+    set $P5002, $P5003[0]
+    unless_null $P5002, fallback1607
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5005
   fallback1607:
-    $P506 = $P502."ast"()
-    set $P101, $P506
-    set $P507, _lex_param_1["termalt"]
-    unless_null $P507, fallback1610
-    nqp_get_sc_object $P508, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P507, $P508
+    $P5006 = $P5002."ast"()
+    set $P101, $P5006
+    set $P5007, _lex_param_1["termalt"]
+    unless_null $P5007, fallback1610
+    nqp_get_sc_object $P5008, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5007, $P5008
   fallback1610:
-    set $N501, $P507
-    set $N502, 1
-    isgt $I501, $N501, $N502
-    box $P524, $I501
-    set $P523, $P524
-    unless $I501 goto if489_end1609 
+    set $N5001, $P5007
+    set $N5002, 1
+    isgt $I5001, $N5001, $N5002
+    box $P5024, $I5001
+    set $P5023, $P5024
+    unless $I5001 goto if489_end1609 
 .annotate 'line', 265
 .annotate 'line', 266
-    get_hll_global $P512, "GLOBAL"
-    nqp_get_package_through_who $P511, $P512, "QAST"
-    get_who $P510, $P511
-    set $P509, $P510["Regex"]
-    unless_null $P509, fallback1611
-    nqp_get_sc_object $P513, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P509, $P513
+    get_hll_global $P5012, "GLOBAL"
+    nqp_get_package_through_who $P5011, $P5012, "QAST"
+    get_who $P5010, $P5011
+    set $P5009, $P5010["Regex"]
+    unless_null $P5009, fallback1611
+    nqp_get_sc_object $P5013, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5009, $P5013
   fallback1611:
-    $P514 = $P509."new"("conjseq" :named("rxtype"), _lex_param_1 :named("node"))
-    set $P101, $P514
-    set $P518, _lex_param_1["termalt"]
-    unless_null $P518, fallback1612
-    nqp_get_sc_object $P519, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P518, $P519
+    $P5014 = $P5009."new"("conjseq" :named("rxtype"), _lex_param_1 :named("node"))
+    set $P101, $P5014
+    set $P5018, _lex_param_1["termalt"]
+    unless_null $P5018, fallback1612
+    nqp_get_sc_object $P5019, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5018, $P5019
   fallback1612:
-    set $P515, $P518
-    iter $P517, $P518
-    new $P521, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P521, for_handlers1613
-    push_eh $P521
+    set $P5015, $P5018
+    iter $P5017, $P5018
+    new $P5021, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5021, for_handlers1613
+    push_eh $P5021
   for_next1614:
-    unless $P517, for_done1616
-    shift $P522, $P517
+    unless $P5017, for_done1616
+    shift $P5022, $P5017
   for_redo1615:
-    .const 'Sub' $P520 = 'cuid_194_1346233469.934' 
-    capture_lex $P520
-    $P515 = $P520($P522)
+    .const 'Sub' $P5020 = 'cuid_194_1346277621.774' 
+    capture_lex $P5020
+    $P5015 = $P5020($P5022)
     goto for_next1614
   for_handlers1613:
-    .get_results ($P521)
-    pop_upto_eh $P521
-    getattribute $P521, $P521, 'type'
-    eq $P521, .CONTROL_LOOP_NEXT, for_next1614
-    eq $P521, .CONTROL_LOOP_REDO, for_redo1615
+    .get_results ($P5021)
+    pop_upto_eh $P5021
+    getattribute $P5021, $P5021, 'type'
+    eq $P5021, .CONTROL_LOOP_NEXT, for_next1614
+    eq $P5021, .CONTROL_LOOP_REDO, for_redo1615
   for_done1616:
     pop_eh 
-    set $P523, $P515
+    set $P5023, $P5015
   if489_end1609:
 .annotate 'line', 269
-    $P525 = _lex_param_1."!make"($P101)
-    .return ($P525) 
+    $P5025 = _lex_param_1."!make"($P101)
+    .return ($P5025) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_194_1346233469.934") :anon :lex :outer("cuid_104_1346233469.934")
+.sub "" :subid("cuid_194_1346277621.774") :anon :lex :outer("cuid_104_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 267
     .param pmc _lex_param_0 
     .lex "$_", _lex_param_0 
-    find_lex $P501, "$qast"
-    $P502 = _lex_param_0."ast"()
-    $P503 = $P501."push"($P502)
-    .return ($P503) 
+    find_lex $P5001, "$qast"
+    $P5002 = _lex_param_0."ast"()
+    $P5003 = $P5001."push"($P5002)
+    .return ($P5003) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "termalt" :subid("cuid_105_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "termalt" :subid("cuid_105_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 272
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
-    .const 'Sub' $P526 = 'cuid_195_1346233469.934' 
-    capture_lex $P526 
+    .const 'Sub' $P5026 = 'cuid_195_1346277621.774' 
+    capture_lex $P5026 
     .lex "$qast", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 273
-    set $P503, _lex_param_1["termconj"]
-    unless_null $P503, fallback1617
-    nqp_get_sc_object $P504, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P503, $P504
+    set $P5003, _lex_param_1["termconj"]
+    unless_null $P5003, fallback1617
+    nqp_get_sc_object $P5004, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5003, $P5004
   fallback1617:
-    set $P502, $P503[0]
-    unless_null $P502, fallback1618
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P505
+    set $P5002, $P5003[0]
+    unless_null $P5002, fallback1618
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5005
   fallback1618:
-    $P506 = $P502."ast"()
-    set $P101, $P506
-    set $P507, _lex_param_1["termconj"]
-    unless_null $P507, fallback1621
-    nqp_get_sc_object $P508, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P507, $P508
+    $P5006 = $P5002."ast"()
+    set $P101, $P5006
+    set $P5007, _lex_param_1["termconj"]
+    unless_null $P5007, fallback1621
+    nqp_get_sc_object $P5008, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5007, $P5008
   fallback1621:
-    set $N501, $P507
-    set $N502, 1
-    isgt $I501, $N501, $N502
-    box $P524, $I501
-    set $P523, $P524
-    unless $I501 goto if490_end1620 
+    set $N5001, $P5007
+    set $N5002, 1
+    isgt $I5001, $N5001, $N5002
+    box $P5024, $I5001
+    set $P5023, $P5024
+    unless $I5001 goto if490_end1620 
 .annotate 'line', 274
 .annotate 'line', 275
-    get_hll_global $P512, "GLOBAL"
-    nqp_get_package_through_who $P511, $P512, "QAST"
-    get_who $P510, $P511
-    set $P509, $P510["Regex"]
-    unless_null $P509, fallback1622
-    nqp_get_sc_object $P513, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P509, $P513
+    get_hll_global $P5012, "GLOBAL"
+    nqp_get_package_through_who $P5011, $P5012, "QAST"
+    get_who $P5010, $P5011
+    set $P5009, $P5010["Regex"]
+    unless_null $P5009, fallback1622
+    nqp_get_sc_object $P5013, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5009, $P5013
   fallback1622:
-    $P514 = $P509."new"("alt" :named("rxtype"), _lex_param_1 :named("node"))
-    set $P101, $P514
-    set $P518, _lex_param_1["termconj"]
-    unless_null $P518, fallback1623
-    nqp_get_sc_object $P519, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P518, $P519
+    $P5014 = $P5009."new"("alt" :named("rxtype"), _lex_param_1 :named("node"))
+    set $P101, $P5014
+    set $P5018, _lex_param_1["termconj"]
+    unless_null $P5018, fallback1623
+    nqp_get_sc_object $P5019, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5018, $P5019
   fallback1623:
-    set $P515, $P518
-    iter $P517, $P518
-    new $P521, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P521, for_handlers1624
-    push_eh $P521
+    set $P5015, $P5018
+    iter $P5017, $P5018
+    new $P5021, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5021, for_handlers1624
+    push_eh $P5021
   for_next1625:
-    unless $P517, for_done1627
-    shift $P522, $P517
+    unless $P5017, for_done1627
+    shift $P5022, $P5017
   for_redo1626:
-    .const 'Sub' $P520 = 'cuid_195_1346233469.934' 
-    capture_lex $P520
-    $P515 = $P520($P522)
+    .const 'Sub' $P5020 = 'cuid_195_1346277621.774' 
+    capture_lex $P5020
+    $P5015 = $P5020($P5022)
     goto for_next1625
   for_handlers1624:
-    .get_results ($P521)
-    pop_upto_eh $P521
-    getattribute $P521, $P521, 'type'
-    eq $P521, .CONTROL_LOOP_NEXT, for_next1625
-    eq $P521, .CONTROL_LOOP_REDO, for_redo1626
+    .get_results ($P5021)
+    pop_upto_eh $P5021
+    getattribute $P5021, $P5021, 'type'
+    eq $P5021, .CONTROL_LOOP_NEXT, for_next1625
+    eq $P5021, .CONTROL_LOOP_REDO, for_redo1626
   for_done1627:
     pop_eh 
-    set $P523, $P515
+    set $P5023, $P5015
   if490_end1620:
 .annotate 'line', 278
-    $P525 = _lex_param_1."!make"($P101)
-    .return ($P525) 
+    $P5025 = _lex_param_1."!make"($P101)
+    .return ($P5025) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_195_1346233469.934") :anon :lex :outer("cuid_105_1346233469.934")
+.sub "" :subid("cuid_195_1346277621.774") :anon :lex :outer("cuid_105_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 276
     .param pmc _lex_param_0 
     .lex "$_", _lex_param_0 
-    find_lex $P501, "$qast"
-    $P502 = _lex_param_0."ast"()
-    $P503 = $P501."push"($P502)
-    .return ($P503) 
+    find_lex $P5001, "$qast"
+    $P5002 = _lex_param_0."ast"()
+    $P5003 = $P5001."push"($P5002)
+    .return ($P5003) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "termconj" :subid("cuid_106_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "termconj" :subid("cuid_106_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 281
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
-    .const 'Sub' $P526 = 'cuid_196_1346233469.934' 
-    capture_lex $P526 
+    .const 'Sub' $P5026 = 'cuid_196_1346277621.774' 
+    capture_lex $P5026 
     .lex "$qast", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 282
-    set $P503, _lex_param_1["termish"]
-    unless_null $P503, fallback1628
-    nqp_get_sc_object $P504, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P503, $P504
+    set $P5003, _lex_param_1["termish"]
+    unless_null $P5003, fallback1628
+    nqp_get_sc_object $P5004, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5003, $P5004
   fallback1628:
-    set $P502, $P503[0]
-    unless_null $P502, fallback1629
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P505
+    set $P5002, $P5003[0]
+    unless_null $P5002, fallback1629
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5005
   fallback1629:
-    $P506 = $P502."ast"()
-    set $P101, $P506
-    set $P507, _lex_param_1["termish"]
-    unless_null $P507, fallback1632
-    nqp_get_sc_object $P508, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P507, $P508
+    $P5006 = $P5002."ast"()
+    set $P101, $P5006
+    set $P5007, _lex_param_1["termish"]
+    unless_null $P5007, fallback1632
+    nqp_get_sc_object $P5008, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5007, $P5008
   fallback1632:
-    set $N501, $P507
-    set $N502, 1
-    isgt $I501, $N501, $N502
-    box $P524, $I501
-    set $P523, $P524
-    unless $I501 goto if491_end1631 
+    set $N5001, $P5007
+    set $N5002, 1
+    isgt $I5001, $N5001, $N5002
+    box $P5024, $I5001
+    set $P5023, $P5024
+    unless $I5001 goto if491_end1631 
 .annotate 'line', 283
 .annotate 'line', 284
-    get_hll_global $P512, "GLOBAL"
-    nqp_get_package_through_who $P511, $P512, "QAST"
-    get_who $P510, $P511
-    set $P509, $P510["Regex"]
-    unless_null $P509, fallback1633
-    nqp_get_sc_object $P513, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P509, $P513
+    get_hll_global $P5012, "GLOBAL"
+    nqp_get_package_through_who $P5011, $P5012, "QAST"
+    get_who $P5010, $P5011
+    set $P5009, $P5010["Regex"]
+    unless_null $P5009, fallback1633
+    nqp_get_sc_object $P5013, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5009, $P5013
   fallback1633:
-    $P514 = $P509."new"("conj" :named("rxtype"), _lex_param_1 :named("node"))
-    set $P101, $P514
-    set $P518, _lex_param_1["termish"]
-    unless_null $P518, fallback1634
-    nqp_get_sc_object $P519, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P518, $P519
+    $P5014 = $P5009."new"("conj" :named("rxtype"), _lex_param_1 :named("node"))
+    set $P101, $P5014
+    set $P5018, _lex_param_1["termish"]
+    unless_null $P5018, fallback1634
+    nqp_get_sc_object $P5019, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5018, $P5019
   fallback1634:
-    set $P515, $P518
-    iter $P517, $P518
-    new $P521, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P521, for_handlers1635
-    push_eh $P521
+    set $P5015, $P5018
+    iter $P5017, $P5018
+    new $P5021, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5021, for_handlers1635
+    push_eh $P5021
   for_next1636:
-    unless $P517, for_done1638
-    shift $P522, $P517
+    unless $P5017, for_done1638
+    shift $P5022, $P5017
   for_redo1637:
-    .const 'Sub' $P520 = 'cuid_196_1346233469.934' 
-    capture_lex $P520
-    $P515 = $P520($P522)
+    .const 'Sub' $P5020 = 'cuid_196_1346277621.774' 
+    capture_lex $P5020
+    $P5015 = $P5020($P5022)
     goto for_next1636
   for_handlers1635:
-    .get_results ($P521)
-    pop_upto_eh $P521
-    getattribute $P521, $P521, 'type'
-    eq $P521, .CONTROL_LOOP_NEXT, for_next1636
-    eq $P521, .CONTROL_LOOP_REDO, for_redo1637
+    .get_results ($P5021)
+    pop_upto_eh $P5021
+    getattribute $P5021, $P5021, 'type'
+    eq $P5021, .CONTROL_LOOP_NEXT, for_next1636
+    eq $P5021, .CONTROL_LOOP_REDO, for_redo1637
   for_done1638:
     pop_eh 
-    set $P523, $P515
+    set $P5023, $P5015
   if491_end1631:
 .annotate 'line', 287
-    $P525 = _lex_param_1."!make"($P101)
-    .return ($P525) 
+    $P5025 = _lex_param_1."!make"($P101)
+    .return ($P5025) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_196_1346233469.934") :anon :lex :outer("cuid_106_1346233469.934")
+.sub "" :subid("cuid_196_1346277621.774") :anon :lex :outer("cuid_106_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 285
     .param pmc _lex_param_0 
     .lex "$_", _lex_param_0 
-    find_lex $P501, "$qast"
-    $P502 = _lex_param_0."ast"()
-    $P503 = $P501."push"($P502)
-    .return ($P503) 
+    find_lex $P5001, "$qast"
+    $P5002 = _lex_param_0."ast"()
+    $P5003 = $P5001."push"($P5002)
+    .return ($P5003) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "termish" :subid("cuid_107_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "termish" :subid("cuid_107_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 290
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
-    .const 'Sub' $P519 = 'cuid_197_1346233469.934' 
-    capture_lex $P519 
+    .const 'Sub' $P5019 = 'cuid_197_1346277621.774' 
+    capture_lex $P5019 
     .lex "$qast", $P101 
     .lex "$lastlit", $P102 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P102, $P502
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P102, $P5002
 .annotate 'line', 291
-    get_hll_global $P506, "GLOBAL"
-    nqp_get_package_through_who $P505, $P506, "QAST"
-    get_who $P504, $P505
-    set $P503, $P504["Regex"]
-    unless_null $P503, fallback1639
-    nqp_get_sc_object $P507, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P503, $P507
+    get_hll_global $P5006, "GLOBAL"
+    nqp_get_package_through_who $P5005, $P5006, "QAST"
+    get_who $P5004, $P5005
+    set $P5003, $P5004["Regex"]
+    unless_null $P5003, fallback1639
+    nqp_get_sc_object $P5007, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5003, $P5007
   fallback1639:
-    $P508 = $P503."new"("concat" :named("rxtype"), _lex_param_1 :named("node"))
-    set $P101, $P508
-    box $P509, 0
-    set $P102, $P509
-    set $P513, _lex_param_1["noun"]
-    unless_null $P513, fallback1640
-    nqp_get_sc_object $P514, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P513, $P514
+    $P5008 = $P5003."new"("concat" :named("rxtype"), _lex_param_1 :named("node"))
+    set $P101, $P5008
+    box $P5009, 0
+    set $P102, $P5009
+    set $P5013, _lex_param_1["noun"]
+    unless_null $P5013, fallback1640
+    nqp_get_sc_object $P5014, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5013, $P5014
   fallback1640:
-    set $P510, $P513
-    iter $P512, $P513
-    new $P516, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P516, for_handlers1659
-    push_eh $P516
+    set $P5010, $P5013
+    iter $P5012, $P5013
+    new $P5016, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5016, for_handlers1659
+    push_eh $P5016
   for_next1660:
-    unless $P512, for_done1662
-    shift $P517, $P512
+    unless $P5012, for_done1662
+    shift $P5017, $P5012
   for_redo1661:
-    .const 'Sub' $P515 = 'cuid_197_1346233469.934' 
-    capture_lex $P515
-    $P510 = $P515($P517)
+    .const 'Sub' $P5015 = 'cuid_197_1346277621.774' 
+    capture_lex $P5015
+    $P5010 = $P5015($P5017)
     goto for_next1660
   for_handlers1659:
-    .get_results ($P516)
-    pop_upto_eh $P516
-    getattribute $P516, $P516, 'type'
-    eq $P516, .CONTROL_LOOP_NEXT, for_next1660
-    eq $P516, .CONTROL_LOOP_REDO, for_redo1661
+    .get_results ($P5016)
+    pop_upto_eh $P5016
+    getattribute $P5016, $P5016, 'type'
+    eq $P5016, .CONTROL_LOOP_NEXT, for_next1660
+    eq $P5016, .CONTROL_LOOP_REDO, for_redo1661
   for_done1662:
     pop_eh 
 .annotate 'line', 308
-    $P518 = _lex_param_1."!make"($P101)
-    .return ($P518) 
+    $P5018 = _lex_param_1."!make"($P101)
+    .return ($P5018) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_197_1346233469.934") :anon :lex :outer("cuid_107_1346233469.934")
+.sub "" :subid("cuid_197_1346277621.774") :anon :lex :outer("cuid_107_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 293
     .param pmc _lex_param_0 
     .lex "$ast", $P101 
     .lex "$_", _lex_param_0 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 294
-    $P502 = _lex_param_0."ast"()
-    set $P101, $P502
-    set $P539, $P101
+    $P5002 = _lex_param_0."ast"()
+    set $P101, $P5002
+    set $P5039, $P101
     unless $P101 goto if492_end1642 
 .annotate 'line', 295
-    find_lex $P503, "$lastlit"
-    set $P505, $P503
-    unless $P503 goto if495_end1648 
+    find_lex $P5003, "$lastlit"
+    set $P5005, $P5003
+    unless $P5003 goto if495_end1648 
 .annotate 'line', 296
-    $P504 = $P101."rxtype"()
-    set $S501, $P504
-    iseq $I501, $S501, "literal"
-    box $P506, $I501
-    set $P505, $P506
+    $P5004 = $P101."rxtype"()
+    set $S5001, $P5004
+    iseq $I5001, $S5001, "literal"
+    box $P5006, $I5001
+    set $P5005, $P5006
   if495_end1648:
-    set $P515, $P505
-    unless $P505 goto if494_end1646 
+    set $P5015, $P5005
+    unless $P5005 goto if494_end1646 
 .annotate 'line', 297
-    get_hll_global $P510, "GLOBAL"
-    nqp_get_package_through_who $P509, $P510, "QAST"
-    get_who $P508, $P509
-    set $P507, $P508["Node"]
-    unless_null $P507, fallback1649
-    nqp_get_sc_object $P511, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P507, $P511
+    get_hll_global $P5010, "GLOBAL"
+    nqp_get_package_through_who $P5009, $P5010, "QAST"
+    get_who $P5008, $P5009
+    set $P5007, $P5008["Node"]
+    unless_null $P5007, fallback1649
+    nqp_get_sc_object $P5011, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5007, $P5011
   fallback1649:
-    set $P512, $P101[0]
-    unless_null $P512, fallback1650
-    nqp_get_sc_object $P513, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P512, $P513
+    set $P5012, $P101[0]
+    unless_null $P5012, fallback1650
+    nqp_get_sc_object $P5013, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5012, $P5013
   fallback1650:
-    $P514 = $P507."ACCEPTS"($P512)
-    isfalse $I502, $P514
-    box $P516, $I502
-    set $P515, $P516
+    $P5014 = $P5007."ACCEPTS"($P5012)
+    isfalse $I5002, $P5014
+    box $P5016, $I5002
+    set $P5015, $P5016
   if494_end1646:
-    unless $P515 goto if493_else1643 
-    find_lex $P517, "$lastlit"
-    find_lex $P519, "$lastlit"
-    set $P518, $P519[0]
-    unless_null $P518, fallback1651
-    nqp_get_sc_object $P520, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P518, $P520
+    unless $P5015 goto if493_else1643 
+    find_lex $P5017, "$lastlit"
+    find_lex $P5019, "$lastlit"
+    set $P5018, $P5019[0]
+    unless_null $P5018, fallback1651
+    nqp_get_sc_object $P5020, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5018, $P5020
   fallback1651:
-    set $S503, $P518
-    set $P521, $P101[0]
-    unless_null $P521, fallback1652
-    nqp_get_sc_object $P522, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P521, $P522
+    set $S5003, $P5018
+    set $P5021, $P101[0]
+    unless_null $P5021, fallback1652
+    nqp_get_sc_object $P5022, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5021, $P5022
   fallback1652:
-    set $S504, $P521
-    concat $S502, $S503, $S504
-    box $P523, $S502
-    set $P517[0], $P523
-    set $P538, $P523
+    set $S5004, $P5021
+    concat $S5002, $S5003, $S5004
+    box $P5023, $S5002
+    set $P5017[0], $P5023
+    set $P5038, $P5023
     goto if493_end1644
   if493_else1643:
 .annotate 'line', 300
 .annotate 'line', 301
-    find_lex $P524, "$qast"
-    $P525 = _lex_param_0."ast"()
-    $P526 = $P524."push"($P525)
+    find_lex $P5024, "$qast"
+    $P5025 = _lex_param_0."ast"()
+    $P5026 = $P5024."push"($P5025)
 .annotate 'line', 302
-    $P527 = $P101."rxtype"()
-    set $S505, $P527
-    iseq $I503, $S505, "literal"
-    set $I505, $I503
-    unless $I503 goto if497_end1656 
+    $P5027 = $P101."rxtype"()
+    set $S5005, $P5027
+    iseq $I5003, $S5005, "literal"
+    set $I5005, $I5003
+    unless $I5003 goto if497_end1656 
 .annotate 'line', 303
-    get_hll_global $P531, "GLOBAL"
-    nqp_get_package_through_who $P530, $P531, "QAST"
-    get_who $P529, $P530
-    set $P528, $P529["Node"]
-    unless_null $P528, fallback1657
-    nqp_get_sc_object $P532, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P528, $P532
+    get_hll_global $P5031, "GLOBAL"
+    nqp_get_package_through_who $P5030, $P5031, "QAST"
+    get_who $P5029, $P5030
+    set $P5028, $P5029["Node"]
+    unless_null $P5028, fallback1657
+    nqp_get_sc_object $P5032, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5028, $P5032
   fallback1657:
-    set $P533, $P101[0]
-    unless_null $P533, fallback1658
-    nqp_get_sc_object $P534, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P533, $P534
+    set $P5033, $P101[0]
+    unless_null $P5033, fallback1658
+    nqp_get_sc_object $P5034, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5033, $P5034
   fallback1658:
-    $P535 = $P528."ACCEPTS"($P533)
-    isfalse $I504, $P535
-    set $I505, $I504
+    $P5035 = $P5028."ACCEPTS"($P5033)
+    isfalse $I5004, $P5035
+    set $I5005, $I5004
   if497_end1656:
-    unless $I505 goto if496_else1653 
-    set $P536, $P101
+    unless $I5005 goto if496_else1653 
+    set $P5036, $P101
     goto if496_end1654
   if496_else1653:
-    box $P537, 0
-    set $P536, $P537
+    box $P5037, 0
+    set $P5036, $P5037
   if496_end1654:
-    store_lex "$lastlit", $P536
-    set $P538, $P536
+    store_lex "$lastlit", $P5036
+    set $P5038, $P5036
   if493_end1644:
-    set $P539, $P538
+    set $P5039, $P5038
   if492_end1642:
-    .return ($P539) 
+    .return ($P5039) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "quantified_atom" :subid("cuid_108_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "quantified_atom" :subid("cuid_108_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 311
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
-    .const 'Sub' $P581 = 'cuid_198_1346233469.934' 
-    capture_lex $P581 
+    .const 'Sub' $P5081 = 'cuid_198_1346277621.774' 
+    capture_lex $P5081 
     .lex "$qast", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 312
-    set $P502, _lex_param_1["atom"]
-    unless_null $P502, fallback1663
-    nqp_get_sc_object $P503, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P503
+    set $P5002, _lex_param_1["atom"]
+    unless_null $P5002, fallback1663
+    nqp_get_sc_object $P5003, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5003
   fallback1663:
-    $P504 = $P502."ast"()
-    set $P101, $P504
-    set $P505, _lex_param_1["quantifier"]
-    unless_null $P505, fallback1666
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P505, $P506
+    $P5004 = $P5002."ast"()
+    set $P101, $P5004
+    set $P5005, _lex_param_1["quantifier"]
+    unless_null $P5005, fallback1666
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5005, $P5006
   fallback1666:
-    set $P509, $P505
-    unless $P505 goto if498_end1665 
-    .const 'Sub' $P507 = 'cuid_198_1346233469.934' 
-    capture_lex $P507
-    $P508 = $P507()
-    set $P509, $P508
+    set $P5009, $P5005
+    unless $P5005 goto if498_end1665 
+    .const 'Sub' $P5007 = 'cuid_198_1346277621.774' 
+    capture_lex $P5007
+    $P5008 = $P5007()
+    set $P5009, $P5008
   if498_end1665:
-    set $P510, _lex_param_1["separator"]
-    unless_null $P510, fallback1671
-    nqp_get_sc_object $P511, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P510, $P511
+    set $P5010, _lex_param_1["separator"]
+    unless_null $P5010, fallback1671
+    nqp_get_sc_object $P5011, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5010, $P5011
   fallback1671:
-    set $P554, $P510
-    unless $P510 goto if499_end1670 
+    set $P5054, $P5010
+    unless $P5010 goto if499_end1670 
 .annotate 'line', 318
 .annotate 'line', 319
-    $P512 = $P101."rxtype"()
-    set $S501, $P512
-    iseq $I501, $S501, "quant"
-    box $P522, $I501
-    set $P521, $P522
-    if $I501 goto unless500_end1673 
+    $P5012 = $P101."rxtype"()
+    set $S5001, $P5012
+    iseq $I5001, $S5001, "quant"
+    box $P5022, $I5001
+    set $P5021, $P5022
+    if $I5001 goto unless500_end1673 
 .annotate 'line', 320
-    $P513 = _lex_param_1."CURSOR"()
-    set $P516, _lex_param_1["separator"]
-    unless_null $P516, fallback1674
-    nqp_get_sc_object $P517, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P516, $P517
+    $P5013 = _lex_param_1."CURSOR"()
+    set $P5016, _lex_param_1["separator"]
+    unless_null $P5016, fallback1674
+    nqp_get_sc_object $P5017, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5016, $P5017
   fallback1674:
-    set $P515, $P516[0]
-    unless_null $P515, fallback1675
-    nqp_get_sc_object $P518, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P515, $P518
+    set $P5015, $P5016[0]
+    unless_null $P5015, fallback1675
+    nqp_get_sc_object $P5018, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5015, $P5018
   fallback1675:
-    set $P514, $P515["septype"]
-    unless_null $P514, fallback1676
-    nqp_get_sc_object $P519, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P514, $P519
+    set $P5014, $P5015["septype"]
+    unless_null $P5014, fallback1676
+    nqp_get_sc_object $P5019, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5014, $P5019
   fallback1676:
-    set $S504, $P514
-    concat $S503, "'", $S504
-    concat $S502, $S503, "' many only be used immediately following a quantifier"
-    $P520 = $P513."panic"($S502)
-    set $P521, $P520
+    set $S5004, $P5014
+    concat $S5003, "'", $S5004
+    concat $S5002, $S5003, "' many only be used immediately following a quantifier"
+    $P5020 = $P5013."panic"($S5002)
+    set $P5021, $P5020
   unless500_end1673:
 .annotate 'line', 323
-    set $P524, _lex_param_1["separator"]
-    unless_null $P524, fallback1677
-    nqp_get_sc_object $P525, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P524, $P525
+    set $P5024, _lex_param_1["separator"]
+    unless_null $P5024, fallback1677
+    nqp_get_sc_object $P5025, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5024, $P5025
   fallback1677:
-    set $P523, $P524[0]
-    unless_null $P523, fallback1678
-    nqp_get_sc_object $P526, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P523, $P526
+    set $P5023, $P5024[0]
+    unless_null $P5023, fallback1678
+    nqp_get_sc_object $P5026, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5023, $P5026
   fallback1678:
-    $P527 = $P523."ast"()
-    $P528 = $P101."push"($P527)
-    set $P531, _lex_param_1["separator"]
-    unless_null $P531, fallback1681
-    nqp_get_sc_object $P532, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P531, $P532
+    $P5027 = $P5023."ast"()
+    $P5028 = $P101."push"($P5027)
+    set $P5031, _lex_param_1["separator"]
+    unless_null $P5031, fallback1681
+    nqp_get_sc_object $P5032, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5031, $P5032
   fallback1681:
-    set $P530, $P531[0]
-    unless_null $P530, fallback1682
-    nqp_get_sc_object $P533, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P530, $P533
+    set $P5030, $P5031[0]
+    unless_null $P5030, fallback1682
+    nqp_get_sc_object $P5033, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5030, $P5033
   fallback1682:
-    set $P529, $P530["septype"]
-    unless_null $P529, fallback1683
-    nqp_get_sc_object $P534, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P529, $P534
+    set $P5029, $P5030["septype"]
+    unless_null $P5029, fallback1683
+    nqp_get_sc_object $P5034, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5029, $P5034
   fallback1683:
-    set $S505, $P529
-    iseq $I502, $S505, "%%"
-    box $P553, $I502
-    set $P552, $P553
-    unless $I502 goto if501_end1680 
+    set $S5005, $P5029
+    iseq $I5002, $S5005, "%%"
+    box $P5053, $I5002
+    set $P5052, $P5053
+    unless $I5002 goto if501_end1680 
 .annotate 'line', 324
 .annotate 'line', 325
-    get_hll_global $P538, "GLOBAL"
-    nqp_get_package_through_who $P537, $P538, "QAST"
-    get_who $P536, $P537
-    set $P535, $P536["Regex"]
-    unless_null $P535, fallback1684
-    nqp_get_sc_object $P539, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P535, $P539
+    get_hll_global $P5038, "GLOBAL"
+    nqp_get_package_through_who $P5037, $P5038, "QAST"
+    get_who $P5036, $P5037
+    set $P5035, $P5036["Regex"]
+    unless_null $P5035, fallback1684
+    nqp_get_sc_object $P5039, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5035, $P5039
   fallback1684:
 .annotate 'line', 326
-    get_hll_global $P543, "GLOBAL"
-    nqp_get_package_through_who $P542, $P543, "QAST"
-    get_who $P541, $P542
-    set $P540, $P541["Regex"]
-    unless_null $P540, fallback1685
-    nqp_get_sc_object $P544, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P540, $P544
+    get_hll_global $P5043, "GLOBAL"
+    nqp_get_package_through_who $P5042, $P5043, "QAST"
+    get_who $P5041, $P5042
+    set $P5040, $P5041["Regex"]
+    unless_null $P5040, fallback1685
+    nqp_get_sc_object $P5044, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5040, $P5044
   fallback1685:
-    set $P546, _lex_param_1["separator"]
-    unless_null $P546, fallback1686
-    nqp_get_sc_object $P547, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P546, $P547
+    set $P5046, _lex_param_1["separator"]
+    unless_null $P5046, fallback1686
+    nqp_get_sc_object $P5047, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5046, $P5047
   fallback1686:
-    set $P545, $P546[0]
-    unless_null $P545, fallback1687
-    nqp_get_sc_object $P548, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P545, $P548
+    set $P5045, $P5046[0]
+    unless_null $P5045, fallback1687
+    nqp_get_sc_object $P5048, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5045, $P5048
   fallback1687:
-    $P549 = $P545."ast"()
-    $P550 = $P540."new"($P549, "quant" :named("rxtype"), 0 :named("min"), 1 :named("max"))
-    $P551 = $P535."new"($P101, $P550, "concat" :named("rxtype"))
-    set $P101, $P551
-    set $P552, $P101
+    $P5049 = $P5045."ast"()
+    $P5050 = $P5040."new"($P5049, "quant" :named("rxtype"), 0 :named("min"), 1 :named("max"))
+    $P5051 = $P5035."new"($P101, $P5050, "concat" :named("rxtype"))
+    set $P101, $P5051
+    set $P5052, $P101
   if501_end1680:
-    set $P554, $P552
+    set $P5054, $P5052
   if499_end1670:
-    set $P556, $P101
+    set $P5056, $P101
     unless $P101 goto if504_end1693 
 .annotate 'line', 329
-    $P555 = $P101."backtrack"()
-    isfalse $I503, $P555
-    box $P557, $I503
-    set $P556, $P557
+    $P5055 = $P101."backtrack"()
+    isfalse $I5003, $P5055
+    box $P5057, $I5003
+    set $P5056, $P5057
   if504_end1693:
-    set $P577, $P556
-    unless $P556 goto if503_end1691 
-    find_dynamic_lex $P559, "%*RX"
-    unless_null $P559, fallback1696
-    get_hll_global $P562, "GLOBAL"
-    get_who $P561, $P562
-    set $P560, $P561["%RX"]
-    unless_null $P560, fallback1697
-    get_hll_global $P564, "GLOBAL"
-    get_who $P563, $P564
-    new $P565, 'Hash'
-    set $P563["%RX"], $P565
-    set $P560, $P565
+    set $P5077, $P5056
+    unless $P5056 goto if503_end1691 
+    find_dynamic_lex $P5059, "%*RX"
+    unless_null $P5059, fallback1696
+    get_hll_global $P5062, "GLOBAL"
+    get_who $P5061, $P5062
+    set $P5060, $P5061["%RX"]
+    unless_null $P5060, fallback1697
+    get_hll_global $P5064, "GLOBAL"
+    get_who $P5063, $P5064
+    new $P5065, 'Hash'
+    set $P5063["%RX"], $P5065
+    set $P5060, $P5065
   fallback1697:
-    unless_null $P560, vivi_5061698
+    unless_null $P5060, vivi_5061698
     die "Contextual %*RX not found"
-    box $P566, "Contextual %*RX not found"
-    set $P560, $P566
+    box $P5066, "Contextual %*RX not found"
+    set $P5060, $P5066
   vivi_5061698:
-    set $P559, $P560
+    set $P5059, $P5060
   fallback1696:
-    set $P558, $P559["r"]
-    unless_null $P558, fallback1699
-    nqp_get_sc_object $P567, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P558, $P567
+    set $P5058, $P5059["r"]
+    unless_null $P5058, fallback1699
+    nqp_get_sc_object $P5067, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5058, $P5067
   fallback1699:
-    set $P576, $P558
-    if $P558 goto unless505_end1695 
-    set $P568, _lex_param_1["backmod"]
-    unless_null $P568, fallback1702
-    nqp_get_sc_object $P569, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P568, $P569
+    set $P5076, $P5058
+    if $P5058 goto unless505_end1695 
+    set $P5068, _lex_param_1["backmod"]
+    unless_null $P5068, fallback1702
+    nqp_get_sc_object $P5069, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5068, $P5069
   fallback1702:
-    set $P574, $P568
-    unless $P568 goto if507_end1701 
-    set $P571, _lex_param_1["backmod"]
-    unless_null $P571, fallback1703
-    nqp_get_sc_object $P572, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P571, $P572
+    set $P5074, $P5068
+    unless $P5068 goto if507_end1701 
+    set $P5071, _lex_param_1["backmod"]
+    unless_null $P5071, fallback1703
+    nqp_get_sc_object $P5072, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5071, $P5072
   fallback1703:
-    set $P570, $P571[0]
-    unless_null $P570, fallback1704
-    nqp_get_sc_object $P573, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P570, $P573
+    set $P5070, $P5071[0]
+    unless_null $P5070, fallback1704
+    nqp_get_sc_object $P5073, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5070, $P5073
   fallback1704:
-    set $S506, $P570
-    iseq $I504, $S506, ":"
-    box $P575, $I504
-    set $P574, $P575
+    set $S5006, $P5070
+    iseq $I5004, $S5006, ":"
+    box $P5075, $I5004
+    set $P5074, $P5075
   if507_end1701:
-    set $P576, $P574
+    set $P5076, $P5074
   unless505_end1695:
-    set $P577, $P576
+    set $P5077, $P5076
   if503_end1691:
-    set $P579, $P577
-    unless $P577 goto if502_end1689 
-    $P578 = $P101."backtrack"("r")
-    set $P579, $P578
+    set $P5079, $P5077
+    unless $P5077 goto if502_end1689 
+    $P5078 = $P101."backtrack"("r")
+    set $P5079, $P5078
   if502_end1689:
 .annotate 'line', 331
-    $P580 = _lex_param_1."!make"($P101)
-    .return ($P580) 
+    $P5080 = _lex_param_1."!make"($P101)
+    .return ($P5080) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_198_1346233469.934") :anon :lex :outer("cuid_108_1346233469.934")
+.sub "" :subid("cuid_198_1346277621.774") :anon :lex :outer("cuid_108_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 313
     .lex "$ast", $P101 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 314
-    find_lex $P504, "$/"
-    set $P503, $P504["quantifier"]
-    unless_null $P503, fallback1667
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P503, $P505
+    find_lex $P5004, "$/"
+    set $P5003, $P5004["quantifier"]
+    unless_null $P5003, fallback1667
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5003, $P5005
   fallback1667:
-    set $P502, $P503[0]
-    unless_null $P502, fallback1668
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P506
+    set $P5002, $P5003[0]
+    unless_null $P5002, fallback1668
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5006
   fallback1668:
-    $P507 = $P502."ast"()
-    set $P101, $P507
+    $P5007 = $P5002."ast"()
+    set $P101, $P5007
 .annotate 'line', 315
-    find_lex $P508, "$qast"
-    $P509 = $P101."unshift"($P508)
+    find_lex $P5008, "$qast"
+    $P5009 = $P101."unshift"($P5008)
     store_lex "$qast", $P101
     .return ($P101) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "separator" :subid("cuid_109_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "separator" :subid("cuid_109_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 334
     .param pmc _lex_param_0 
@@ -18410,111 +18410,111 @@
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
 .annotate 'line', 335
-    set $P501, _lex_param_1["quantified_atom"]
-    unless_null $P501, fallback1705
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P501, $P502
+    set $P5001, _lex_param_1["quantified_atom"]
+    unless_null $P5001, fallback1705
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5001, $P5002
   fallback1705:
-    $P503 = $P501."ast"()
-    $P504 = _lex_param_1."!make"($P503)
-    .return ($P504) 
+    $P5003 = $P5001."ast"()
+    $P5004 = _lex_param_1."!make"($P5003)
+    .return ($P5004) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "atom" :subid("cuid_110_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "atom" :subid("cuid_110_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 338
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
-    .const 'Sub' $P510 = 'cuid_199_1346233469.934' 
-    capture_lex $P510 
+    .const 'Sub' $P5010 = 'cuid_199_1346277621.774' 
+    capture_lex $P5010 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    set $P501, _lex_param_1["metachar"]
-    unless_null $P501, fallback1708
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P501, $P502
+    set $P5001, _lex_param_1["metachar"]
+    unless_null $P5001, fallback1708
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5001, $P5002
   fallback1708:
-    unless $P501 goto if508_else1706 
+    unless $P5001 goto if508_else1706 
 .annotate 'line', 339
 .annotate 'line', 340
-    set $P503, _lex_param_1["metachar"]
-    unless_null $P503, fallback1709
-    nqp_get_sc_object $P504, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P503, $P504
+    set $P5003, _lex_param_1["metachar"]
+    unless_null $P5003, fallback1709
+    nqp_get_sc_object $P5004, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5003, $P5004
   fallback1709:
-    $P505 = $P503."ast"()
-    $P506 = _lex_param_1."!make"($P505)
-    set $P509, $P506
+    $P5005 = $P5003."ast"()
+    $P5006 = _lex_param_1."!make"($P5005)
+    set $P5009, $P5006
     goto if508_end1707
   if508_else1706:
-    .const 'Sub' $P507 = 'cuid_199_1346233469.934' 
-    capture_lex $P507
-    $P508 = $P507()
-    set $P509, $P508
+    .const 'Sub' $P5007 = 'cuid_199_1346277621.774' 
+    capture_lex $P5007
+    $P5008 = $P5007()
+    set $P5009, $P5008
   if508_end1707:
-    .return ($P509) 
+    .return ($P5009) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_199_1346233469.934") :anon :lex :outer("cuid_110_1346233469.934")
+.sub "" :subid("cuid_199_1346277621.774") :anon :lex :outer("cuid_110_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 342
     .lex "$qast", $P101 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 343
-    get_hll_global $P505, "GLOBAL"
-    nqp_get_package_through_who $P504, $P505, "QAST"
-    get_who $P503, $P504
-    set $P502, $P503["Regex"]
-    unless_null $P502, fallback1710
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P506
+    get_hll_global $P5005, "GLOBAL"
+    nqp_get_package_through_who $P5004, $P5005, "QAST"
+    get_who $P5003, $P5004
+    set $P5002, $P5003["Regex"]
+    unless_null $P5002, fallback1710
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5006
   fallback1710:
-    find_lex $P507, "$/"
-    set $S501, $P507
-    find_lex $P508, "$/"
-    $P509 = $P502."new"($S501, "literal" :named("rxtype"), $P508 :named("node"))
-    set $P101, $P509
-    find_dynamic_lex $P511, "%*RX"
-    unless_null $P511, fallback1713
-    get_hll_global $P514, "GLOBAL"
-    get_who $P513, $P514
-    set $P512, $P513["%RX"]
-    unless_null $P512, fallback1714
-    get_hll_global $P516, "GLOBAL"
-    get_who $P515, $P516
-    new $P517, 'Hash'
-    set $P515["%RX"], $P517
-    set $P512, $P517
+    find_lex $P5007, "$/"
+    set $S5001, $P5007
+    find_lex $P5008, "$/"
+    $P5009 = $P5002."new"($S5001, "literal" :named("rxtype"), $P5008 :named("node"))
+    set $P101, $P5009
+    find_dynamic_lex $P5011, "%*RX"
+    unless_null $P5011, fallback1713
+    get_hll_global $P5014, "GLOBAL"
+    get_who $P5013, $P5014
+    set $P5012, $P5013["%RX"]
+    unless_null $P5012, fallback1714
+    get_hll_global $P5016, "GLOBAL"
+    get_who $P5015, $P5016
+    new $P5017, 'Hash'
+    set $P5015["%RX"], $P5017
+    set $P5012, $P5017
   fallback1714:
-    unless_null $P512, vivi_5101715
+    unless_null $P5012, vivi_5101715
     die "Contextual %*RX not found"
-    box $P518, "Contextual %*RX not found"
-    set $P512, $P518
+    box $P5018, "Contextual %*RX not found"
+    set $P5012, $P5018
   vivi_5101715:
-    set $P511, $P512
+    set $P5011, $P5012
   fallback1713:
-    set $P510, $P511["i"]
-    unless_null $P510, fallback1716
-    nqp_get_sc_object $P519, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P510, $P519
+    set $P5010, $P5011["i"]
+    unless_null $P5010, fallback1716
+    nqp_get_sc_object $P5019, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5010, $P5019
   fallback1716:
-    set $P521, $P510
-    unless $P510 goto if509_end1712 
+    set $P5021, $P5010
+    unless $P5010 goto if509_end1712 
 .annotate 'line', 344
-    $P520 = $P101."subtype"("ignorecase")
-    set $P521, $P520
+    $P5020 = $P101."subtype"("ignorecase")
+    set $P5021, $P5020
   if509_end1712:
 .annotate 'line', 345
-    find_dynamic_lex $P522, "$/"
-    $P523 = $P522."!make"($P101)
-    .return ($P523) 
+    find_dynamic_lex $P5022, "$/"
+    $P5023 = $P5022."!make"($P101)
+    .return ($P5023) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "quantifier:sym<*>" :subid("cuid_111_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "quantifier:sym<*>" :subid("cuid_111_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 349
     .param pmc _lex_param_0 
@@ -18522,32 +18522,32 @@
     .lex "$qast", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 350
-    get_hll_global $P505, "GLOBAL"
-    nqp_get_package_through_who $P504, $P505, "QAST"
-    get_who $P503, $P504
-    set $P502, $P503["Regex"]
-    unless_null $P502, fallback1717
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P506
+    get_hll_global $P5005, "GLOBAL"
+    nqp_get_package_through_who $P5004, $P5005, "QAST"
+    get_who $P5003, $P5004
+    set $P5002, $P5003["Regex"]
+    unless_null $P5002, fallback1717
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5006
   fallback1717:
-    $P507 = $P502."new"("quant" :named("rxtype"), 0 :named("min"), -1 :named("max"), _lex_param_1 :named("node"))
-    set $P101, $P507
+    $P5007 = $P5002."new"("quant" :named("rxtype"), 0 :named("min"), -1 :named("max"), _lex_param_1 :named("node"))
+    set $P101, $P5007
 .annotate 'line', 351
-    set $P508, _lex_param_1["backmod"]
-    unless_null $P508, fallback1718
-    nqp_get_sc_object $P509, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P508, $P509
+    set $P5008, _lex_param_1["backmod"]
+    unless_null $P5008, fallback1718
+    nqp_get_sc_object $P5009, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5008, $P5009
   fallback1718:
-    $P510 = "&backmod"($P101, $P508)
-    $P511 = _lex_param_1."!make"($P510)
-    .return ($P511) 
+    $P5010 = "&backmod"($P101, $P5008)
+    $P5011 = _lex_param_1."!make"($P5010)
+    .return ($P5011) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "quantifier:sym<+>" :subid("cuid_112_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "quantifier:sym<+>" :subid("cuid_112_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 354
     .param pmc _lex_param_0 
@@ -18555,32 +18555,32 @@
     .lex "$qast", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 355
-    get_hll_global $P505, "GLOBAL"
-    nqp_get_package_through_who $P504, $P505, "QAST"
-    get_who $P503, $P504
-    set $P502, $P503["Regex"]
-    unless_null $P502, fallback1719
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P506
+    get_hll_global $P5005, "GLOBAL"
+    nqp_get_package_through_who $P5004, $P5005, "QAST"
+    get_who $P5003, $P5004
+    set $P5002, $P5003["Regex"]
+    unless_null $P5002, fallback1719
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5006
   fallback1719:
-    $P507 = $P502."new"("quant" :named("rxtype"), 1 :named("min"), -1 :named("max"), _lex_param_1 :named("node"))
-    set $P101, $P507
+    $P5007 = $P5002."new"("quant" :named("rxtype"), 1 :named("min"), -1 :named("max"), _lex_param_1 :named("node"))
+    set $P101, $P5007
 .annotate 'line', 356
-    set $P508, _lex_param_1["backmod"]
-    unless_null $P508, fallback1720
-    nqp_get_sc_object $P509, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P508, $P509
+    set $P5008, _lex_param_1["backmod"]
+    unless_null $P5008, fallback1720
+    nqp_get_sc_object $P5009, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5008, $P5009
   fallback1720:
-    $P510 = "&backmod"($P101, $P508)
-    $P511 = _lex_param_1."!make"($P510)
-    .return ($P511) 
+    $P5010 = "&backmod"($P101, $P5008)
+    $P5011 = _lex_param_1."!make"($P5010)
+    .return ($P5011) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "quantifier:sym<?>" :subid("cuid_113_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "quantifier:sym<?>" :subid("cuid_113_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 359
     .param pmc _lex_param_0 
@@ -18588,32 +18588,32 @@
     .lex "$qast", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 360
-    get_hll_global $P505, "GLOBAL"
-    nqp_get_package_through_who $P504, $P505, "QAST"
-    get_who $P503, $P504
-    set $P502, $P503["Regex"]
-    unless_null $P502, fallback1721
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P506
+    get_hll_global $P5005, "GLOBAL"
+    nqp_get_package_through_who $P5004, $P5005, "QAST"
+    get_who $P5003, $P5004
+    set $P5002, $P5003["Regex"]
+    unless_null $P5002, fallback1721
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5006
   fallback1721:
-    $P507 = $P502."new"("quant" :named("rxtype"), 0 :named("min"), 1 :named("max"), _lex_param_1 :named("node"))
-    set $P101, $P507
+    $P5007 = $P5002."new"("quant" :named("rxtype"), 0 :named("min"), 1 :named("max"), _lex_param_1 :named("node"))
+    set $P101, $P5007
 .annotate 'line', 361
-    set $P508, _lex_param_1["backmod"]
-    unless_null $P508, fallback1722
-    nqp_get_sc_object $P509, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P508, $P509
+    set $P5008, _lex_param_1["backmod"]
+    unless_null $P5008, fallback1722
+    nqp_get_sc_object $P5009, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5008, $P5009
   fallback1722:
-    $P510 = "&backmod"($P101, $P508)
-    $P511 = _lex_param_1."!make"($P510)
-    .return ($P511) 
+    $P5010 = "&backmod"($P101, $P5008)
+    $P5011 = _lex_param_1."!make"($P5010)
+    .return ($P5011) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "quantifier:sym<**>" :subid("cuid_114_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "quantifier:sym<**>" :subid("cuid_114_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 364
     .param pmc _lex_param_0 
@@ -18621,88 +18621,88 @@
     .lex "$qast", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 366
-    get_hll_global $P505, "GLOBAL"
-    nqp_get_package_through_who $P504, $P505, "QAST"
-    get_who $P503, $P504
-    set $P502, $P503["Regex"]
-    unless_null $P502, fallback1723
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P506
+    get_hll_global $P5005, "GLOBAL"
+    nqp_get_package_through_who $P5004, $P5005, "QAST"
+    get_who $P5003, $P5004
+    set $P5002, $P5003["Regex"]
+    unless_null $P5002, fallback1723
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5006
   fallback1723:
-    set $P507, _lex_param_1["min"]
-    unless_null $P507, fallback1724
-    nqp_get_sc_object $P508, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P507, $P508
+    set $P5007, _lex_param_1["min"]
+    unless_null $P5007, fallback1724
+    nqp_get_sc_object $P5008, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5007, $P5008
   fallback1724:
-    set $N501, $P507
-    $P509 = $P502."new"("quant" :named("rxtype"), $N501 :named("min"), -1 :named("max"), _lex_param_1 :named("node"))
-    set $P101, $P509
-    set $P510, _lex_param_1["max"]
-    unless_null $P510, fallback1727
-    nqp_get_sc_object $P511, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P510, $P511
+    set $N5001, $P5007
+    $P5009 = $P5002."new"("quant" :named("rxtype"), $N5001 :named("min"), -1 :named("max"), _lex_param_1 :named("node"))
+    set $P101, $P5009
+    set $P5010, _lex_param_1["max"]
+    unless_null $P5010, fallback1727
+    nqp_get_sc_object $P5011, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5010, $P5011
   fallback1727:
-    isfalse $I501, $P510
-    unless $I501 goto if511_else1725 
+    isfalse $I5001, $P5010
+    unless $I5001 goto if511_else1725 
 .annotate 'line', 367
-    set $P512, _lex_param_1["min"]
-    unless_null $P512, fallback1728
-    nqp_get_sc_object $P513, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P512, $P513
+    set $P5012, _lex_param_1["min"]
+    unless_null $P5012, fallback1728
+    nqp_get_sc_object $P5013, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5012, $P5013
   fallback1728:
-    set $N502, $P512
-    $P514 = $P101."max"($N502)
-    set $P526, $P514
+    set $N5002, $P5012
+    $P5014 = $P101."max"($N5002)
+    set $P5026, $P5014
     goto if511_end1726
   if511_else1725:
-    set $P516, _lex_param_1["max"]
-    unless_null $P516, fallback1731
-    nqp_get_sc_object $P517, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P516, $P517
+    set $P5016, _lex_param_1["max"]
+    unless_null $P5016, fallback1731
+    nqp_get_sc_object $P5017, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5016, $P5017
   fallback1731:
-    set $P515, $P516[0]
-    unless_null $P515, fallback1732
-    nqp_get_sc_object $P518, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P515, $P518
+    set $P5015, $P5016[0]
+    unless_null $P5015, fallback1732
+    nqp_get_sc_object $P5018, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5015, $P5018
   fallback1732:
-    set $S501, $P515
-    isne $I502, $S501, "*"
-    box $P525, $I502
-    set $P524, $P525
-    unless $I502 goto if512_end1730 
+    set $S5001, $P5015
+    isne $I5002, $S5001, "*"
+    box $P5025, $I5002
+    set $P5024, $P5025
+    unless $I5002 goto if512_end1730 
 .annotate 'line', 368
-    set $P520, _lex_param_1["max"]
-    unless_null $P520, fallback1733
-    nqp_get_sc_object $P521, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P520, $P521
+    set $P5020, _lex_param_1["max"]
+    unless_null $P5020, fallback1733
+    nqp_get_sc_object $P5021, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5020, $P5021
   fallback1733:
-    set $P519, $P520[0]
-    unless_null $P519, fallback1734
-    nqp_get_sc_object $P522, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P519, $P522
+    set $P5019, $P5020[0]
+    unless_null $P5019, fallback1734
+    nqp_get_sc_object $P5022, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5019, $P5022
   fallback1734:
-    set $N503, $P519
-    $P523 = $P101."max"($N503)
-    set $P524, $P523
+    set $N5003, $P5019
+    $P5023 = $P101."max"($N5003)
+    set $P5024, $P5023
   if512_end1730:
-    set $P526, $P524
+    set $P5026, $P5024
   if511_end1726:
 .annotate 'line', 369
-    set $P527, _lex_param_1["backmod"]
-    unless_null $P527, fallback1735
-    nqp_get_sc_object $P528, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P527, $P528
+    set $P5027, _lex_param_1["backmod"]
+    unless_null $P5027, fallback1735
+    nqp_get_sc_object $P5028, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5027, $P5028
   fallback1735:
-    $P529 = "&backmod"($P101, $P527)
-    $P530 = _lex_param_1."!make"($P529)
-    .return ($P530) 
+    $P5029 = "&backmod"($P101, $P5027)
+    $P5030 = _lex_param_1."!make"($P5029)
+    .return ($P5030) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<ws>" :subid("cuid_115_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "metachar:sym<ws>" :subid("cuid_115_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 372
     .param pmc _lex_param_0 
@@ -18710,66 +18710,66 @@
     .lex "$qast", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    find_dynamic_lex $P503, "%*RX"
-    unless_null $P503, fallback1738
-    get_hll_global $P506, "GLOBAL"
-    get_who $P505, $P506
-    set $P504, $P505["%RX"]
-    unless_null $P504, fallback1739
-    get_hll_global $P508, "GLOBAL"
-    get_who $P507, $P508
-    new $P509, 'Hash'
-    set $P507["%RX"], $P509
-    set $P504, $P509
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    find_dynamic_lex $P5003, "%*RX"
+    unless_null $P5003, fallback1738
+    get_hll_global $P5006, "GLOBAL"
+    get_who $P5005, $P5006
+    set $P5004, $P5005["%RX"]
+    unless_null $P5004, fallback1739
+    get_hll_global $P5008, "GLOBAL"
+    get_who $P5007, $P5008
+    new $P5009, 'Hash'
+    set $P5007["%RX"], $P5009
+    set $P5004, $P5009
   fallback1739:
-    unless_null $P504, vivi_5141740
+    unless_null $P5004, vivi_5141740
     die "Contextual %*RX not found"
-    box $P510, "Contextual %*RX not found"
-    set $P504, $P510
+    box $P5010, "Contextual %*RX not found"
+    set $P5004, $P5010
   vivi_5141740:
-    set $P503, $P504
+    set $P5003, $P5004
   fallback1738:
-    set $P502, $P503["s"]
-    unless_null $P502, fallback1741
-    nqp_get_sc_object $P511, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P511
+    set $P5002, $P5003["s"]
+    unless_null $P5002, fallback1741
+    nqp_get_sc_object $P5011, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5011
   fallback1741:
-    unless $P502 goto if513_else1736 
+    unless $P5002 goto if513_else1736 
 .annotate 'line', 374
-    get_hll_global $P515, "GLOBAL"
-    nqp_get_package_through_who $P514, $P515, "QAST"
-    get_who $P513, $P514
-    set $P512, $P513["Regex"]
-    unless_null $P512, fallback1742
-    nqp_get_sc_object $P516, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P512, $P516
+    get_hll_global $P5015, "GLOBAL"
+    nqp_get_package_through_who $P5014, $P5015, "QAST"
+    get_who $P5013, $P5014
+    set $P5012, $P5013["Regex"]
+    unless_null $P5012, fallback1742
+    nqp_get_sc_object $P5016, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5012, $P5016
   fallback1742:
-    get_hll_global $P520, "GLOBAL"
-    nqp_get_package_through_who $P519, $P520, "PAST"
-    get_who $P518, $P519
-    set $P517, $P518["Node"]
-    unless_null $P517, fallback1743
-    nqp_get_sc_object $P521, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P517, $P521
+    get_hll_global $P5020, "GLOBAL"
+    nqp_get_package_through_who $P5019, $P5020, "PAST"
+    get_who $P5018, $P5019
+    set $P5017, $P5018["Node"]
+    unless_null $P5017, fallback1743
+    nqp_get_sc_object $P5021, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5017, $P5021
   fallback1743:
-    $P522 = $P517."new"("ws")
-    $P523 = $P512."new"($P522, "ws" :named("rxtype"), "method" :named("subtype"), _lex_param_1 :named("node"))
-    set $P524, $P523
+    $P5022 = $P5017."new"("ws")
+    $P5023 = $P5012."new"($P5022, "ws" :named("rxtype"), "method" :named("subtype"), _lex_param_1 :named("node"))
+    set $P5024, $P5023
     goto if513_end1737
   if513_else1736:
-    box $P525, 0
-    set $P524, $P525
+    box $P5025, 0
+    set $P5024, $P5025
   if513_end1737:
-    set $P101, $P524
+    set $P101, $P5024
 .annotate 'line', 376
-    $P526 = _lex_param_1."!make"($P101)
-    .return ($P526) 
+    $P5026 = _lex_param_1."!make"($P101)
+    .return ($P5026) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<[ ]>" :subid("cuid_116_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "metachar:sym<[ ]>" :subid("cuid_116_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 379
     .param pmc _lex_param_0 
@@ -18777,18 +18777,18 @@
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
 .annotate 'line', 380
-    set $P501, _lex_param_1["nibbler"]
-    unless_null $P501, fallback1744
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P501, $P502
+    set $P5001, _lex_param_1["nibbler"]
+    unless_null $P5001, fallback1744
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5001, $P5002
   fallback1744:
-    $P503 = $P501."ast"()
-    $P504 = _lex_param_1."!make"($P503)
-    .return ($P504) 
+    $P5003 = $P5001."ast"()
+    $P5004 = _lex_param_1."!make"($P5003)
+    .return ($P5004) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<( )>" :subid("cuid_117_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "metachar:sym<( )>" :subid("cuid_117_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 383
     .param pmc _lex_param_0 
@@ -18797,52 +18797,52 @@
     .lex "$qast", $P102 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P102, $P502
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P102, $P5002
 .annotate 'line', 384
-    get_hll_global $P506, "GLOBAL"
-    nqp_get_package_through_who $P505, $P506, "PAST"
-    get_who $P504, $P505
-    set $P503, $P504["Node"]
-    unless_null $P503, fallback1745
-    nqp_get_sc_object $P507, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P503, $P507
+    get_hll_global $P5006, "GLOBAL"
+    nqp_get_package_through_who $P5005, $P5006, "PAST"
+    get_who $P5004, $P5005
+    set $P5003, $P5004["Node"]
+    unless_null $P5003, fallback1745
+    nqp_get_sc_object $P5007, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5003, $P5007
   fallback1745:
-    set $P508, _lex_param_1["nibbler"]
-    unless_null $P508, fallback1746
-    nqp_get_sc_object $P509, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P508, $P509
+    set $P5008, _lex_param_1["nibbler"]
+    unless_null $P5008, fallback1746
+    nqp_get_sc_object $P5009, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5008, $P5009
   fallback1746:
-    $P510 = $P508."ast"()
-    $P511 = "&buildsub"($P510, 1 :named("anon"))
-    $P512 = $P503."new"($P511)
-    set $P101, $P512
+    $P5010 = $P5008."ast"()
+    $P5011 = "&buildsub"($P5010, 1 :named("anon"))
+    $P5012 = $P5003."new"($P5011)
+    set $P101, $P5012
 .annotate 'line', 385
-    get_hll_global $P516, "GLOBAL"
-    nqp_get_package_through_who $P515, $P516, "QAST"
-    get_who $P514, $P515
-    set $P513, $P514["Regex"]
-    unless_null $P513, fallback1747
-    nqp_get_sc_object $P517, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P513, $P517
+    get_hll_global $P5016, "GLOBAL"
+    nqp_get_package_through_who $P5015, $P5016, "QAST"
+    get_who $P5014, $P5015
+    set $P5013, $P5014["Regex"]
+    unless_null $P5013, fallback1747
+    nqp_get_sc_object $P5017, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5013, $P5017
   fallback1747:
-    set $P518, _lex_param_1["nibbler"]
-    unless_null $P518, fallback1748
-    nqp_get_sc_object $P519, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P518, $P519
+    set $P5018, _lex_param_1["nibbler"]
+    unless_null $P5018, fallback1748
+    nqp_get_sc_object $P5019, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5018, $P5019
   fallback1748:
-    $P520 = $P518."ast"()
-    $P521 = $P513."new"($P101, $P520, "subrule" :named("rxtype"), "capture" :named("subtype"), _lex_param_1 :named("node"))
-    set $P102, $P521
+    $P5020 = $P5018."ast"()
+    $P5021 = $P5013."new"($P101, $P5020, "subrule" :named("rxtype"), "capture" :named("subtype"), _lex_param_1 :named("node"))
+    set $P102, $P5021
 .annotate 'line', 387
-    $P522 = _lex_param_1."!make"($P102)
-    .return ($P522) 
+    $P5022 = _lex_param_1."!make"($P102)
+    .return ($P5022) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<'>" :subid("cuid_118_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "metachar:sym<'>" :subid("cuid_118_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 390
     .param pmc _lex_param_0 
@@ -18851,98 +18851,98 @@
     .lex "$qast", $P102 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P102, $P502
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P102, $P5002
 .annotate 'line', 391
-    set $P503, _lex_param_1["quote_EXPR"]
-    unless_null $P503, fallback1749
-    nqp_get_sc_object $P504, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P503, $P504
+    set $P5003, _lex_param_1["quote_EXPR"]
+    unless_null $P5003, fallback1749
+    nqp_get_sc_object $P5004, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5003, $P5004
   fallback1749:
-    $P505 = $P503."ast"()
-    set $P101, $P505
+    $P5005 = $P5003."ast"()
+    set $P101, $P5005
 .annotate 'line', 392
-    get_hll_global $P509, "GLOBAL"
-    nqp_get_package_through_who $P508, $P509, "PAST"
-    get_who $P507, $P508
-    set $P506, $P507["Val"]
-    unless_null $P506, fallback1752
-    nqp_get_sc_object $P510, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P506, $P510
+    get_hll_global $P5009, "GLOBAL"
+    nqp_get_package_through_who $P5008, $P5009, "PAST"
+    get_who $P5007, $P5008
+    set $P5006, $P5007["Val"]
+    unless_null $P5006, fallback1752
+    nqp_get_sc_object $P5010, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5006, $P5010
   fallback1752:
-    $P511 = $P506."ACCEPTS"($P101)
-    set $P513, $P511
-    unless $P511 goto if515_end1751 
-    $P512 = $P101."value"()
-    set $P101, $P512
-    set $P513, $P101
+    $P5011 = $P5006."ACCEPTS"($P101)
+    set $P5013, $P5011
+    unless $P5011 goto if515_end1751 
+    $P5012 = $P101."value"()
+    set $P101, $P5012
+    set $P5013, $P101
   if515_end1751:
 .annotate 'line', 393
-    get_hll_global $P517, "GLOBAL"
-    nqp_get_package_through_who $P516, $P517, "QAST"
-    get_who $P515, $P516
-    set $P514, $P515["SVal"]
-    unless_null $P514, fallback1755
-    nqp_get_sc_object $P518, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P514, $P518
+    get_hll_global $P5017, "GLOBAL"
+    nqp_get_package_through_who $P5016, $P5017, "QAST"
+    get_who $P5015, $P5016
+    set $P5014, $P5015["SVal"]
+    unless_null $P5014, fallback1755
+    nqp_get_sc_object $P5018, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5014, $P5018
   fallback1755:
-    $P519 = $P514."ACCEPTS"($P101)
-    set $P521, $P519
-    unless $P519 goto if516_end1754 
-    $P520 = $P101."value"()
-    set $P101, $P520
-    set $P521, $P101
+    $P5019 = $P5014."ACCEPTS"($P101)
+    set $P5021, $P5019
+    unless $P5019 goto if516_end1754 
+    $P5020 = $P101."value"()
+    set $P101, $P5020
+    set $P5021, $P101
   if516_end1754:
 .annotate 'line', 394
-    get_hll_global $P525, "GLOBAL"
-    nqp_get_package_through_who $P524, $P525, "QAST"
-    get_who $P523, $P524
-    set $P522, $P523["Regex"]
-    unless_null $P522, fallback1756
-    nqp_get_sc_object $P526, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P522, $P526
+    get_hll_global $P5025, "GLOBAL"
+    nqp_get_package_through_who $P5024, $P5025, "QAST"
+    get_who $P5023, $P5024
+    set $P5022, $P5023["Regex"]
+    unless_null $P5022, fallback1756
+    nqp_get_sc_object $P5026, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5022, $P5026
   fallback1756:
-    $P527 = $P522."new"($P101, "literal" :named("rxtype"), _lex_param_1 :named("node"))
-    set $P102, $P527
-    find_dynamic_lex $P529, "%*RX"
-    unless_null $P529, fallback1759
-    get_hll_global $P532, "GLOBAL"
-    get_who $P531, $P532
-    set $P530, $P531["%RX"]
-    unless_null $P530, fallback1760
-    get_hll_global $P534, "GLOBAL"
-    get_who $P533, $P534
-    new $P535, 'Hash'
-    set $P533["%RX"], $P535
-    set $P530, $P535
+    $P5027 = $P5022."new"($P101, "literal" :named("rxtype"), _lex_param_1 :named("node"))
+    set $P102, $P5027
+    find_dynamic_lex $P5029, "%*RX"
+    unless_null $P5029, fallback1759
+    get_hll_global $P5032, "GLOBAL"
+    get_who $P5031, $P5032
+    set $P5030, $P5031["%RX"]
+    unless_null $P5030, fallback1760
+    get_hll_global $P5034, "GLOBAL"
+    get_who $P5033, $P5034
+    new $P5035, 'Hash'
+    set $P5033["%RX"], $P5035
+    set $P5030, $P5035
   fallback1760:
-    unless_null $P530, vivi_5181761
+    unless_null $P5030, vivi_5181761
     die "Contextual %*RX not found"
-    box $P536, "Contextual %*RX not found"
-    set $P530, $P536
+    box $P5036, "Contextual %*RX not found"
+    set $P5030, $P5036
   vivi_5181761:
-    set $P529, $P530
+    set $P5029, $P5030
   fallback1759:
-    set $P528, $P529["i"]
-    unless_null $P528, fallback1762
-    nqp_get_sc_object $P537, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P528, $P537
+    set $P5028, $P5029["i"]
+    unless_null $P5028, fallback1762
+    nqp_get_sc_object $P5037, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5028, $P5037
   fallback1762:
-    set $P539, $P528
-    unless $P528 goto if517_end1758 
+    set $P5039, $P5028
+    unless $P5028 goto if517_end1758 
 .annotate 'line', 395
-    $P538 = $P102."subtype"("ignorecase")
-    set $P539, $P538
+    $P5038 = $P102."subtype"("ignorecase")
+    set $P5039, $P5038
   if517_end1758:
 .annotate 'line', 396
-    $P540 = _lex_param_1."!make"($P102)
-    .return ($P540) 
+    $P5040 = _lex_param_1."!make"($P102)
+    .return ($P5040) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<\">" :subid("cuid_119_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "metachar:sym<\">" :subid("cuid_119_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 399
     .param pmc _lex_param_0 
@@ -18951,98 +18951,98 @@
     .lex "$qast", $P102 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P102, $P502
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P102, $P5002
 .annotate 'line', 400
-    set $P503, _lex_param_1["quote_EXPR"]
-    unless_null $P503, fallback1763
-    nqp_get_sc_object $P504, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P503, $P504
+    set $P5003, _lex_param_1["quote_EXPR"]
+    unless_null $P5003, fallback1763
+    nqp_get_sc_object $P5004, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5003, $P5004
   fallback1763:
-    $P505 = $P503."ast"()
-    set $P101, $P505
+    $P5005 = $P5003."ast"()
+    set $P101, $P5005
 .annotate 'line', 401
-    get_hll_global $P509, "GLOBAL"
-    nqp_get_package_through_who $P508, $P509, "PAST"
-    get_who $P507, $P508
-    set $P506, $P507["Val"]
-    unless_null $P506, fallback1766
-    nqp_get_sc_object $P510, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P506, $P510
+    get_hll_global $P5009, "GLOBAL"
+    nqp_get_package_through_who $P5008, $P5009, "PAST"
+    get_who $P5007, $P5008
+    set $P5006, $P5007["Val"]
+    unless_null $P5006, fallback1766
+    nqp_get_sc_object $P5010, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5006, $P5010
   fallback1766:
-    $P511 = $P506."ACCEPTS"($P101)
-    set $P513, $P511
-    unless $P511 goto if519_end1765 
-    $P512 = $P101."value"()
-    set $P101, $P512
-    set $P513, $P101
+    $P5011 = $P5006."ACCEPTS"($P101)
+    set $P5013, $P5011
+    unless $P5011 goto if519_end1765 
+    $P5012 = $P101."value"()
+    set $P101, $P5012
+    set $P5013, $P101
   if519_end1765:
 .annotate 'line', 402
-    get_hll_global $P517, "GLOBAL"
-    nqp_get_package_through_who $P516, $P517, "QAST"
-    get_who $P515, $P516
-    set $P514, $P515["SVal"]
-    unless_null $P514, fallback1769
-    nqp_get_sc_object $P518, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P514, $P518
+    get_hll_global $P5017, "GLOBAL"
+    nqp_get_package_through_who $P5016, $P5017, "QAST"
+    get_who $P5015, $P5016
+    set $P5014, $P5015["SVal"]
+    unless_null $P5014, fallback1769
+    nqp_get_sc_object $P5018, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5014, $P5018
   fallback1769:
-    $P519 = $P514."ACCEPTS"($P101)
-    set $P521, $P519
-    unless $P519 goto if520_end1768 
-    $P520 = $P101."value"()
-    set $P101, $P520
-    set $P521, $P101
+    $P5019 = $P5014."ACCEPTS"($P101)
+    set $P5021, $P5019
+    unless $P5019 goto if520_end1768 
+    $P5020 = $P101."value"()
+    set $P101, $P5020
+    set $P5021, $P101
   if520_end1768:
 .annotate 'line', 403
-    get_hll_global $P525, "GLOBAL"
-    nqp_get_package_through_who $P524, $P525, "QAST"
-    get_who $P523, $P524
-    set $P522, $P523["Regex"]
-    unless_null $P522, fallback1770
-    nqp_get_sc_object $P526, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P522, $P526
+    get_hll_global $P5025, "GLOBAL"
+    nqp_get_package_through_who $P5024, $P5025, "QAST"
+    get_who $P5023, $P5024
+    set $P5022, $P5023["Regex"]
+    unless_null $P5022, fallback1770
+    nqp_get_sc_object $P5026, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5022, $P5026
   fallback1770:
-    $P527 = $P522."new"($P101, "literal" :named("rxtype"), _lex_param_1 :named("node"))
-    set $P102, $P527
-    find_dynamic_lex $P529, "%*RX"
-    unless_null $P529, fallback1773
-    get_hll_global $P532, "GLOBAL"
-    get_who $P531, $P532
-    set $P530, $P531["%RX"]
-    unless_null $P530, fallback1774
-    get_hll_global $P534, "GLOBAL"
-    get_who $P533, $P534
-    new $P535, 'Hash'
-    set $P533["%RX"], $P535
-    set $P530, $P535
+    $P5027 = $P5022."new"($P101, "literal" :named("rxtype"), _lex_param_1 :named("node"))
+    set $P102, $P5027
+    find_dynamic_lex $P5029, "%*RX"
+    unless_null $P5029, fallback1773
+    get_hll_global $P5032, "GLOBAL"
+    get_who $P5031, $P5032
+    set $P5030, $P5031["%RX"]
+    unless_null $P5030, fallback1774
+    get_hll_global $P5034, "GLOBAL"
+    get_who $P5033, $P5034
+    new $P5035, 'Hash'
+    set $P5033["%RX"], $P5035
+    set $P5030, $P5035
   fallback1774:
-    unless_null $P530, vivi_5221775
+    unless_null $P5030, vivi_5221775
     die "Contextual %*RX not found"
-    box $P536, "Contextual %*RX not found"
-    set $P530, $P536
+    box $P5036, "Contextual %*RX not found"
+    set $P5030, $P5036
   vivi_5221775:
-    set $P529, $P530
+    set $P5029, $P5030
   fallback1773:
-    set $P528, $P529["i"]
-    unless_null $P528, fallback1776
-    nqp_get_sc_object $P537, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P528, $P537
+    set $P5028, $P5029["i"]
+    unless_null $P5028, fallback1776
+    nqp_get_sc_object $P5037, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5028, $P5037
   fallback1776:
-    set $P539, $P528
-    unless $P528 goto if521_end1772 
+    set $P5039, $P5028
+    unless $P5028 goto if521_end1772 
 .annotate 'line', 404
-    $P538 = $P102."subtype"("ignorecase")
-    set $P539, $P538
+    $P5038 = $P102."subtype"("ignorecase")
+    set $P5039, $P5038
   if521_end1772:
 .annotate 'line', 405
-    $P540 = _lex_param_1."!make"($P102)
-    .return ($P540) 
+    $P5040 = _lex_param_1."!make"($P102)
+    .return ($P5040) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<.>" :subid("cuid_120_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "metachar:sym<.>" :subid("cuid_120_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 408
     .param pmc _lex_param_0 
@@ -19050,21 +19050,21 @@
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
 .annotate 'line', 409
-    get_hll_global $P504, "GLOBAL"
-    nqp_get_package_through_who $P503, $P504, "QAST"
-    get_who $P502, $P503
-    set $P501, $P502["Regex"]
-    unless_null $P501, fallback1777
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P501, $P505
+    get_hll_global $P5004, "GLOBAL"
+    nqp_get_package_through_who $P5003, $P5004, "QAST"
+    get_who $P5002, $P5003
+    set $P5001, $P5002["Regex"]
+    unless_null $P5001, fallback1777
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5001, $P5005
   fallback1777:
-    $P506 = $P501."new"("cclass" :named("rxtype"), "." :named("subtype"), _lex_param_1 :named("node"))
-    $P507 = _lex_param_1."!make"($P506)
-    .return ($P507) 
+    $P5006 = $P5001."new"("cclass" :named("rxtype"), "." :named("subtype"), _lex_param_1 :named("node"))
+    $P5007 = _lex_param_1."!make"($P5006)
+    .return ($P5007) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<^>" :subid("cuid_121_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "metachar:sym<^>" :subid("cuid_121_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 412
     .param pmc _lex_param_0 
@@ -19072,21 +19072,21 @@
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
 .annotate 'line', 413
-    get_hll_global $P504, "GLOBAL"
-    nqp_get_package_through_who $P503, $P504, "QAST"
-    get_who $P502, $P503
-    set $P501, $P502["Regex"]
-    unless_null $P501, fallback1778
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P501, $P505
+    get_hll_global $P5004, "GLOBAL"
+    nqp_get_package_through_who $P5003, $P5004, "QAST"
+    get_who $P5002, $P5003
+    set $P5001, $P5002["Regex"]
+    unless_null $P5001, fallback1778
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5001, $P5005
   fallback1778:
-    $P506 = $P501."new"("anchor" :named("rxtype"), "bos" :named("subtype"), _lex_param_1 :named("node"))
-    $P507 = _lex_param_1."!make"($P506)
-    .return ($P507) 
+    $P5006 = $P5001."new"("anchor" :named("rxtype"), "bos" :named("subtype"), _lex_param_1 :named("node"))
+    $P5007 = _lex_param_1."!make"($P5006)
+    .return ($P5007) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<^^>" :subid("cuid_122_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "metachar:sym<^^>" :subid("cuid_122_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 416
     .param pmc _lex_param_0 
@@ -19094,21 +19094,21 @@
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
 .annotate 'line', 417
-    get_hll_global $P504, "GLOBAL"
-    nqp_get_package_through_who $P503, $P504, "QAST"
-    get_who $P502, $P503
-    set $P501, $P502["Regex"]
-    unless_null $P501, fallback1779
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P501, $P505
+    get_hll_global $P5004, "GLOBAL"
+    nqp_get_package_through_who $P5003, $P5004, "QAST"
+    get_who $P5002, $P5003
+    set $P5001, $P5002["Regex"]
+    unless_null $P5001, fallback1779
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5001, $P5005
   fallback1779:
-    $P506 = $P501."new"("anchor" :named("rxtype"), "bol" :named("subtype"), _lex_param_1 :named("node"))
-    $P507 = _lex_param_1."!make"($P506)
-    .return ($P507) 
+    $P5006 = $P5001."new"("anchor" :named("rxtype"), "bol" :named("subtype"), _lex_param_1 :named("node"))
+    $P5007 = _lex_param_1."!make"($P5006)
+    .return ($P5007) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<$>" :subid("cuid_123_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "metachar:sym<$>" :subid("cuid_123_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 420
     .param pmc _lex_param_0 
@@ -19116,21 +19116,21 @@
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
 .annotate 'line', 421
-    get_hll_global $P504, "GLOBAL"
-    nqp_get_package_through_who $P503, $P504, "QAST"
-    get_who $P502, $P503
-    set $P501, $P502["Regex"]
-    unless_null $P501, fallback1780
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P501, $P505
+    get_hll_global $P5004, "GLOBAL"
+    nqp_get_package_through_who $P5003, $P5004, "QAST"
+    get_who $P5002, $P5003
+    set $P5001, $P5002["Regex"]
+    unless_null $P5001, fallback1780
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5001, $P5005
   fallback1780:
-    $P506 = $P501."new"("anchor" :named("rxtype"), "eos" :named("subtype"), _lex_param_1 :named("node"))
-    $P507 = _lex_param_1."!make"($P506)
-    .return ($P507) 
+    $P5006 = $P5001."new"("anchor" :named("rxtype"), "eos" :named("subtype"), _lex_param_1 :named("node"))
+    $P5007 = _lex_param_1."!make"($P5006)
+    .return ($P5007) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<$$>" :subid("cuid_124_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "metachar:sym<$$>" :subid("cuid_124_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 424
     .param pmc _lex_param_0 
@@ -19138,21 +19138,21 @@
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
 .annotate 'line', 425
-    get_hll_global $P504, "GLOBAL"
-    nqp_get_package_through_who $P503, $P504, "QAST"
-    get_who $P502, $P503
-    set $P501, $P502["Regex"]
-    unless_null $P501, fallback1781
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P501, $P505
+    get_hll_global $P5004, "GLOBAL"
+    nqp_get_package_through_who $P5003, $P5004, "QAST"
+    get_who $P5002, $P5003
+    set $P5001, $P5002["Regex"]
+    unless_null $P5001, fallback1781
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5001, $P5005
   fallback1781:
-    $P506 = $P501."new"("anchor" :named("rxtype"), "eol" :named("subtype"), _lex_param_1 :named("node"))
-    $P507 = _lex_param_1."!make"($P506)
-    .return ($P507) 
+    $P5006 = $P5001."new"("anchor" :named("rxtype"), "eol" :named("subtype"), _lex_param_1 :named("node"))
+    $P5007 = _lex_param_1."!make"($P5006)
+    .return ($P5007) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<lwb>" :subid("cuid_125_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "metachar:sym<lwb>" :subid("cuid_125_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 428
     .param pmc _lex_param_0 
@@ -19160,21 +19160,21 @@
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
 .annotate 'line', 429
-    get_hll_global $P504, "GLOBAL"
-    nqp_get_package_through_who $P503, $P504, "QAST"
-    get_who $P502, $P503
-    set $P501, $P502["Regex"]
-    unless_null $P501, fallback1782
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P501, $P505
+    get_hll_global $P5004, "GLOBAL"
+    nqp_get_package_through_who $P5003, $P5004, "QAST"
+    get_who $P5002, $P5003
+    set $P5001, $P5002["Regex"]
+    unless_null $P5001, fallback1782
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5001, $P5005
   fallback1782:
-    $P506 = $P501."new"("anchor" :named("rxtype"), "lwb" :named("subtype"), _lex_param_1 :named("node"))
-    $P507 = _lex_param_1."!make"($P506)
-    .return ($P507) 
+    $P5006 = $P5001."new"("anchor" :named("rxtype"), "lwb" :named("subtype"), _lex_param_1 :named("node"))
+    $P5007 = _lex_param_1."!make"($P5006)
+    .return ($P5007) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<rwb>" :subid("cuid_126_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "metachar:sym<rwb>" :subid("cuid_126_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 432
     .param pmc _lex_param_0 
@@ -19182,21 +19182,21 @@
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
 .annotate 'line', 433
-    get_hll_global $P504, "GLOBAL"
-    nqp_get_package_through_who $P503, $P504, "QAST"
-    get_who $P502, $P503
-    set $P501, $P502["Regex"]
-    unless_null $P501, fallback1783
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P501, $P505
+    get_hll_global $P5004, "GLOBAL"
+    nqp_get_package_through_who $P5003, $P5004, "QAST"
+    get_who $P5002, $P5003
+    set $P5001, $P5002["Regex"]
+    unless_null $P5001, fallback1783
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5001, $P5005
   fallback1783:
-    $P506 = $P501."new"("anchor" :named("rxtype"), "rwb" :named("subtype"), _lex_param_1 :named("node"))
-    $P507 = _lex_param_1."!make"($P506)
-    .return ($P507) 
+    $P5006 = $P5001."new"("anchor" :named("rxtype"), "rwb" :named("subtype"), _lex_param_1 :named("node"))
+    $P5007 = _lex_param_1."!make"($P5006)
+    .return ($P5007) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<from>" :subid("cuid_127_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "metachar:sym<from>" :subid("cuid_127_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 436
     .param pmc _lex_param_0 
@@ -19204,31 +19204,31 @@
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
 .annotate 'line', 437
-    get_hll_global $P504, "GLOBAL"
-    nqp_get_package_through_who $P503, $P504, "QAST"
-    get_who $P502, $P503
-    set $P501, $P502["Regex"]
-    unless_null $P501, fallback1784
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P501, $P505
+    get_hll_global $P5004, "GLOBAL"
+    nqp_get_package_through_who $P5003, $P5004, "QAST"
+    get_who $P5002, $P5003
+    set $P5001, $P5002["Regex"]
+    unless_null $P5001, fallback1784
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5001, $P5005
   fallback1784:
 .annotate 'line', 439
-    get_hll_global $P509, "GLOBAL"
-    nqp_get_package_through_who $P508, $P509, "PAST"
-    get_who $P507, $P508
-    set $P506, $P507["Node"]
-    unless_null $P506, fallback1785
-    nqp_get_sc_object $P510, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P506, $P510
+    get_hll_global $P5009, "GLOBAL"
+    nqp_get_package_through_who $P5008, $P5009, "PAST"
+    get_who $P5007, $P5008
+    set $P5006, $P5007["Node"]
+    unless_null $P5006, fallback1785
+    nqp_get_sc_object $P5010, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5006, $P5010
   fallback1785:
-    $P511 = $P506."new"("!LITERAL", "")
-    $P512 = $P501."new"($P511, "subrule" :named("rxtype"), "capture" :named("subtype"), "r" :named("backtrack"), "$!from" :named("name"), _lex_param_1 :named("node"))
-    $P513 = _lex_param_1."!make"($P512)
-    .return ($P513) 
+    $P5011 = $P5006."new"("!LITERAL", "")
+    $P5012 = $P5001."new"($P5011, "subrule" :named("rxtype"), "capture" :named("subtype"), "r" :named("backtrack"), "$!from" :named("name"), _lex_param_1 :named("node"))
+    $P5013 = _lex_param_1."!make"($P5012)
+    .return ($P5013) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<to>" :subid("cuid_128_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "metachar:sym<to>" :subid("cuid_128_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 442
     .param pmc _lex_param_0 
@@ -19236,31 +19236,31 @@
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
 .annotate 'line', 443
-    get_hll_global $P504, "GLOBAL"
-    nqp_get_package_through_who $P503, $P504, "QAST"
-    get_who $P502, $P503
-    set $P501, $P502["Regex"]
-    unless_null $P501, fallback1786
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P501, $P505
+    get_hll_global $P5004, "GLOBAL"
+    nqp_get_package_through_who $P5003, $P5004, "QAST"
+    get_who $P5002, $P5003
+    set $P5001, $P5002["Regex"]
+    unless_null $P5001, fallback1786
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5001, $P5005
   fallback1786:
 .annotate 'line', 445
-    get_hll_global $P509, "GLOBAL"
-    nqp_get_package_through_who $P508, $P509, "PAST"
-    get_who $P507, $P508
-    set $P506, $P507["Node"]
-    unless_null $P506, fallback1787
-    nqp_get_sc_object $P510, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P506, $P510
+    get_hll_global $P5009, "GLOBAL"
+    nqp_get_package_through_who $P5008, $P5009, "PAST"
+    get_who $P5007, $P5008
+    set $P5006, $P5007["Node"]
+    unless_null $P5006, fallback1787
+    nqp_get_sc_object $P5010, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5006, $P5010
   fallback1787:
-    $P511 = $P506."new"("!LITERAL", "")
-    $P512 = $P501."new"($P511, "subrule" :named("rxtype"), "capture" :named("subtype"), "r" :named("backtrack"), "$!to" :named("name"), _lex_param_1 :named("node"))
-    $P513 = _lex_param_1."!make"($P512)
-    .return ($P513) 
+    $P5011 = $P5006."new"("!LITERAL", "")
+    $P5012 = $P5001."new"($P5011, "subrule" :named("rxtype"), "capture" :named("subtype"), "r" :named("backtrack"), "$!to" :named("name"), _lex_param_1 :named("node"))
+    $P5013 = _lex_param_1."!make"($P5012)
+    .return ($P5013) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<bs>" :subid("cuid_129_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "metachar:sym<bs>" :subid("cuid_129_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 448
     .param pmc _lex_param_0 
@@ -19268,18 +19268,18 @@
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
 .annotate 'line', 449
-    set $P501, _lex_param_1["backslash"]
-    unless_null $P501, fallback1788
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P501, $P502
+    set $P5001, _lex_param_1["backslash"]
+    unless_null $P5001, fallback1788
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5001, $P5002
   fallback1788:
-    $P503 = $P501."ast"()
-    $P504 = _lex_param_1."!make"($P503)
-    .return ($P504) 
+    $P5003 = $P5001."ast"()
+    $P5004 = _lex_param_1."!make"($P5003)
+    .return ($P5004) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<assert>" :subid("cuid_130_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "metachar:sym<assert>" :subid("cuid_130_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 452
     .param pmc _lex_param_0 
@@ -19287,18 +19287,18 @@
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
 .annotate 'line', 453
-    set $P501, _lex_param_1["assertion"]
-    unless_null $P501, fallback1789
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P501, $P502
+    set $P5001, _lex_param_1["assertion"]
+    unless_null $P5001, fallback1789
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5001, $P5002
   fallback1789:
-    $P503 = $P501."ast"()
-    $P504 = _lex_param_1."!make"($P503)
-    .return ($P504) 
+    $P5003 = $P5001."ast"()
+    $P5004 = _lex_param_1."!make"($P5003)
+    .return ($P5004) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<var>" :subid("cuid_131_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "metachar:sym<var>" :subid("cuid_131_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 456
     .param pmc _lex_param_0 
@@ -19307,144 +19307,144 @@
     .lex "$name", $P102 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P102, $P502
-    set $P503, _lex_param_1["pos"]
-    unless_null $P503, fallback1792
-    nqp_get_sc_object $P504, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P503, $P504
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P102, $P5002
+    set $P5003, _lex_param_1["pos"]
+    unless_null $P5003, fallback1792
+    nqp_get_sc_object $P5004, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5003, $P5004
   fallback1792:
-    unless $P503 goto if523_else1790 
-    set $P505, _lex_param_1["pos"]
-    unless_null $P505, fallback1793
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P505, $P506
+    unless $P5003 goto if523_else1790 
+    set $P5005, _lex_param_1["pos"]
+    unless_null $P5005, fallback1793
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5005, $P5006
   fallback1793:
-    set $N501, $P505
-    box $P510, $N501
-    set $P509, $P510
+    set $N5001, $P5005
+    box $P5010, $N5001
+    set $P5009, $P5010
     goto if523_end1791
   if523_else1790:
-    set $P507, _lex_param_1["name"]
-    unless_null $P507, fallback1794
-    nqp_get_sc_object $P508, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P507, $P508
+    set $P5007, _lex_param_1["name"]
+    unless_null $P5007, fallback1794
+    nqp_get_sc_object $P5008, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5007, $P5008
   fallback1794:
-    set $S501, $P507
-    box $P511, $S501
-    set $P509, $P511
+    set $S5001, $P5007
+    box $P5011, $S5001
+    set $P5009, $P5011
   if523_end1791:
-    set $P102, $P509
-    set $P512, _lex_param_1["quantified_atom"]
-    unless_null $P512, fallback1797
-    nqp_get_sc_object $P513, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P512, $P513
+    set $P102, $P5009
+    set $P5012, _lex_param_1["quantified_atom"]
+    unless_null $P5012, fallback1797
+    nqp_get_sc_object $P5013, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5012, $P5013
   fallback1797:
-    unless $P512 goto if524_else1795 
+    unless $P5012 goto if524_else1795 
 .annotate 'line', 459
 .annotate 'line', 460
-    set $P515, _lex_param_1["quantified_atom"]
-    unless_null $P515, fallback1798
-    nqp_get_sc_object $P516, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P515, $P516
+    set $P5015, _lex_param_1["quantified_atom"]
+    unless_null $P5015, fallback1798
+    nqp_get_sc_object $P5016, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5015, $P5016
   fallback1798:
-    set $P514, $P515[0]
-    unless_null $P514, fallback1799
-    nqp_get_sc_object $P517, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P514, $P517
+    set $P5014, $P5015[0]
+    unless_null $P5014, fallback1799
+    nqp_get_sc_object $P5017, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5014, $P5017
   fallback1799:
-    $P518 = $P514."ast"()
-    set $P101, $P518
+    $P5018 = $P5014."ast"()
+    set $P101, $P5018
 .annotate 'line', 461
-    $P519 = $P101."rxtype"()
-    set $S502, $P519
-    iseq $I501, $S502, "quant"
-    set $I503, $I501
-    unless $I501 goto if526_end1803 
-    set $P520, $P101[0]
-    unless_null $P520, fallback1804
-    nqp_get_sc_object $P521, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P520, $P521
+    $P5019 = $P101."rxtype"()
+    set $S5002, $P5019
+    iseq $I5001, $S5002, "quant"
+    set $I5003, $I5001
+    unless $I5001 goto if526_end1803 
+    set $P5020, $P101[0]
+    unless_null $P5020, fallback1804
+    nqp_get_sc_object $P5021, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5020, $P5021
   fallback1804:
-    $P522 = $P520."rxtype"()
-    set $S503, $P522
-    iseq $I502, $S503, "subrule"
-    set $I503, $I502
+    $P5022 = $P5020."rxtype"()
+    set $S5003, $P5022
+    iseq $I5002, $S5003, "subrule"
+    set $I5003, $I5002
   if526_end1803:
-    unless $I503 goto if525_else1800 
+    unless $I5003 goto if525_else1800 
 .annotate 'line', 462
-    nqp_decontainerize $P523, _lex_param_0
-    set $P524, $P101[0]
-    unless_null $P524, fallback1805
-    nqp_get_sc_object $P525, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P524, $P525
+    nqp_decontainerize $P5023, _lex_param_0
+    set $P5024, $P101[0]
+    unless_null $P5024, fallback1805
+    nqp_get_sc_object $P5025, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5024, $P5025
   fallback1805:
-    $P526 = $P523."subrule_alias"($P524, $P102)
-    set $P537, $P526
+    $P5026 = $P5023."subrule_alias"($P5024, $P102)
+    set $P5037, $P5026
     goto if525_end1801
   if525_else1800:
 .annotate 'line', 464
-    $P527 = $P101."rxtype"()
-    set $S504, $P527
-    iseq $I504, $S504, "subrule"
-    unless $I504 goto if527_else1806 
+    $P5027 = $P101."rxtype"()
+    set $S5004, $P5027
+    iseq $I5004, $S5004, "subrule"
+    unless $I5004 goto if527_else1806 
 .annotate 'line', 465
-    nqp_decontainerize $P528, _lex_param_0
-    $P529 = $P528."subrule_alias"($P101, $P102)
-    set $P536, $P529
+    nqp_decontainerize $P5028, _lex_param_0
+    $P5029 = $P5028."subrule_alias"($P101, $P102)
+    set $P5036, $P5029
     goto if527_end1807
   if527_else1806:
 .annotate 'line', 467
 .annotate 'line', 468
-    get_hll_global $P533, "GLOBAL"
-    nqp_get_package_through_who $P532, $P533, "QAST"
-    get_who $P531, $P532
-    set $P530, $P531["Regex"]
-    unless_null $P530, fallback1808
-    nqp_get_sc_object $P534, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P530, $P534
+    get_hll_global $P5033, "GLOBAL"
+    nqp_get_package_through_who $P5032, $P5033, "QAST"
+    get_who $P5031, $P5032
+    set $P5030, $P5031["Regex"]
+    unless_null $P5030, fallback1808
+    nqp_get_sc_object $P5034, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5030, $P5034
   fallback1808:
-    $P535 = $P530."new"($P101, $P102 :named("name"), "subcapture" :named("rxtype"), _lex_param_1 :named("node"))
-    set $P101, $P535
-    set $P536, $P101
+    $P5035 = $P5030."new"($P101, $P102 :named("name"), "subcapture" :named("rxtype"), _lex_param_1 :named("node"))
+    set $P101, $P5035
+    set $P5036, $P101
   if527_end1807:
-    set $P537, $P536
+    set $P5037, $P5036
   if525_end1801:
-    set $P550, $P537
+    set $P5050, $P5037
     goto if524_end1796
   if524_else1795:
 .annotate 'line', 472
 .annotate 'line', 473
-    get_hll_global $P541, "GLOBAL"
-    nqp_get_package_through_who $P540, $P541, "QAST"
-    get_who $P539, $P540
-    set $P538, $P539["Regex"]
-    unless_null $P538, fallback1809
-    nqp_get_sc_object $P542, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P538, $P542
+    get_hll_global $P5041, "GLOBAL"
+    nqp_get_package_through_who $P5040, $P5041, "QAST"
+    get_who $P5039, $P5040
+    set $P5038, $P5039["Regex"]
+    unless_null $P5038, fallback1809
+    nqp_get_sc_object $P5042, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5038, $P5042
   fallback1809:
-    get_hll_global $P546, "GLOBAL"
-    nqp_get_package_through_who $P545, $P546, "PAST"
-    get_who $P544, $P545
-    set $P543, $P544["Node"]
-    unless_null $P543, fallback1810
-    nqp_get_sc_object $P547, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P543, $P547
+    get_hll_global $P5046, "GLOBAL"
+    nqp_get_package_through_who $P5045, $P5046, "PAST"
+    get_who $P5044, $P5045
+    set $P5043, $P5044["Node"]
+    unless_null $P5043, fallback1810
+    nqp_get_sc_object $P5047, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5043, $P5047
   fallback1810:
-    $P548 = $P543."new"("!BACKREF", $P102)
-    $P549 = $P538."new"($P548, "subrule" :named("rxtype"), "method" :named("subtype"), _lex_param_1 :named("node"))
-    set $P101, $P549
-    set $P550, $P101
+    $P5048 = $P5043."new"("!BACKREF", $P102)
+    $P5049 = $P5038."new"($P5048, "subrule" :named("rxtype"), "method" :named("subtype"), _lex_param_1 :named("node"))
+    set $P101, $P5049
+    set $P5050, $P101
   if524_end1796:
 .annotate 'line', 476
-    $P551 = _lex_param_1."!make"($P101)
-    .return ($P551) 
+    $P5051 = _lex_param_1."!make"($P101)
+    .return ($P5051) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "metachar:sym<~>" :subid("cuid_132_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "metachar:sym<~>" :subid("cuid_132_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 479
     .param pmc _lex_param_0 
@@ -19452,70 +19452,70 @@
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
 .annotate 'line', 480
-    get_hll_global $P504, "GLOBAL"
-    nqp_get_package_through_who $P503, $P504, "QAST"
-    get_who $P502, $P503
-    set $P501, $P502["Regex"]
-    unless_null $P501, fallback1811
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P501, $P505
+    get_hll_global $P5004, "GLOBAL"
+    nqp_get_package_through_who $P5003, $P5004, "QAST"
+    get_who $P5002, $P5003
+    set $P5001, $P5002["Regex"]
+    unless_null $P5001, fallback1811
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5001, $P5005
   fallback1811:
 .annotate 'line', 481
-    set $P506, _lex_param_1["EXPR"]
-    unless_null $P506, fallback1812
-    nqp_get_sc_object $P507, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P506, $P507
+    set $P5006, _lex_param_1["EXPR"]
+    unless_null $P5006, fallback1812
+    nqp_get_sc_object $P5007, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5006, $P5007
   fallback1812:
-    $P508 = $P506."ast"()
+    $P5008 = $P5006."ast"()
 .annotate 'line', 482
-    get_hll_global $P512, "GLOBAL"
-    nqp_get_package_through_who $P511, $P512, "QAST"
-    get_who $P510, $P511
-    set $P509, $P510["Regex"]
-    unless_null $P509, fallback1813
-    nqp_get_sc_object $P513, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P509, $P513
+    get_hll_global $P5012, "GLOBAL"
+    nqp_get_package_through_who $P5011, $P5012, "QAST"
+    get_who $P5010, $P5011
+    set $P5009, $P5010["Regex"]
+    unless_null $P5009, fallback1813
+    nqp_get_sc_object $P5013, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5009, $P5013
   fallback1813:
 .annotate 'line', 483
-    set $P514, _lex_param_1["GOAL"]
-    unless_null $P514, fallback1814
-    nqp_get_sc_object $P515, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P514, $P515
+    set $P5014, _lex_param_1["GOAL"]
+    unless_null $P5014, fallback1814
+    nqp_get_sc_object $P5015, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5014, $P5015
   fallback1814:
-    $P516 = $P514."ast"()
+    $P5016 = $P5014."ast"()
 .annotate 'line', 484
-    get_hll_global $P520, "GLOBAL"
-    nqp_get_package_through_who $P519, $P520, "QAST"
-    get_who $P518, $P519
-    set $P517, $P518["Regex"]
-    unless_null $P517, fallback1815
-    nqp_get_sc_object $P521, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P517, $P521
+    get_hll_global $P5020, "GLOBAL"
+    nqp_get_package_through_who $P5019, $P5020, "QAST"
+    get_who $P5018, $P5019
+    set $P5017, $P5018["Regex"]
+    unless_null $P5017, fallback1815
+    nqp_get_sc_object $P5021, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5017, $P5021
   fallback1815:
-    get_hll_global $P525, "GLOBAL"
-    nqp_get_package_through_who $P524, $P525, "PAST"
-    get_who $P523, $P524
-    set $P522, $P523["Node"]
-    unless_null $P522, fallback1816
-    nqp_get_sc_object $P526, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P522, $P526
+    get_hll_global $P5025, "GLOBAL"
+    nqp_get_package_through_who $P5024, $P5025, "PAST"
+    get_who $P5023, $P5024
+    set $P5022, $P5023["Node"]
+    unless_null $P5022, fallback1816
+    nqp_get_sc_object $P5026, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5022, $P5026
   fallback1816:
-    set $P527, _lex_param_1["GOAL"]
-    unless_null $P527, fallback1817
-    nqp_get_sc_object $P528, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P527, $P528
+    set $P5027, _lex_param_1["GOAL"]
+    unless_null $P5027, fallback1817
+    nqp_get_sc_object $P5028, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5027, $P5028
   fallback1817:
-    set $S501, $P527
-    $P529 = $P522."new"("FAILGOAL", $S501)
-    $P530 = $P517."new"($P529, "subrule" :named("rxtype"), "method" :named("subtype"))
-    $P531 = $P509."new"($P516, $P530, "altseq" :named("rxtype"))
-    $P532 = $P501."new"($P508, $P531, "concat" :named("rxtype"))
-    $P533 = _lex_param_1."!make"($P532)
-    .return ($P533) 
+    set $S5001, $P5027
+    $P5029 = $P5022."new"("FAILGOAL", $S5001)
+    $P5030 = $P5017."new"($P5029, "subrule" :named("rxtype"), "method" :named("subtype"))
+    $P5031 = $P5009."new"($P5016, $P5030, "altseq" :named("rxtype"))
+    $P5032 = $P5001."new"($P5008, $P5031, "concat" :named("rxtype"))
+    $P5033 = _lex_param_1."!make"($P5032)
+    .return ($P5033) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<s>" :subid("cuid_133_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "backslash:sym<s>" :subid("cuid_133_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 492
     .param pmc _lex_param_0 
@@ -19523,47 +19523,47 @@
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
 .annotate 'line', 493
-    get_hll_global $P504, "GLOBAL"
-    nqp_get_package_through_who $P503, $P504, "QAST"
-    get_who $P502, $P503
-    set $P501, $P502["Regex"]
-    unless_null $P501, fallback1818
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P501, $P505
+    get_hll_global $P5004, "GLOBAL"
+    nqp_get_package_through_who $P5003, $P5004, "QAST"
+    get_who $P5002, $P5003
+    set $P5001, $P5002["Regex"]
+    unless_null $P5001, fallback1818
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5001, $P5005
   fallback1818:
-    set $P506, _lex_param_1["sym"]
-    unless_null $P506, fallback1821
-    nqp_get_sc_object $P507, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P506, $P507
+    set $P5006, _lex_param_1["sym"]
+    unless_null $P5006, fallback1821
+    nqp_get_sc_object $P5007, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5006, $P5007
   fallback1821:
-    set $S501, $P506
-    iseq $I501, $S501, "n"
-    unless $I501 goto if528_else1819 
-    set $S503, "nl"
+    set $S5001, $P5006
+    iseq $I5001, $S5001, "n"
+    unless $I5001 goto if528_else1819 
+    set $S5003, "nl"
     goto if528_end1820
   if528_else1819:
-    set $P508, _lex_param_1["sym"]
-    unless_null $P508, fallback1822
-    nqp_get_sc_object $P509, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P508, $P509
+    set $P5008, _lex_param_1["sym"]
+    unless_null $P5008, fallback1822
+    nqp_get_sc_object $P5009, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5008, $P5009
   fallback1822:
-    set $S502, $P508
-    set $S503, $S502
+    set $S5002, $P5008
+    set $S5003, $S5002
   if528_end1820:
-    set $P510, _lex_param_1["sym"]
-    unless_null $P510, fallback1823
-    nqp_get_sc_object $P511, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P510, $P511
+    set $P5010, _lex_param_1["sym"]
+    unless_null $P5010, fallback1823
+    nqp_get_sc_object $P5011, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5010, $P5011
   fallback1823:
-    set $S504, $P510
-    isle $I502, $S504, "Z"
-    $P512 = $P501."new"(".CCLASS_WHITESPACE", "cclass" :named("rxtype"), $S503 :named("subtype"), $I502 :named("negate"), _lex_param_1 :named("node"))
-    $P513 = _lex_param_1."!make"($P512)
-    .return ($P513) 
+    set $S5004, $P5010
+    isle $I5002, $S5004, "Z"
+    $P5012 = $P5001."new"(".CCLASS_WHITESPACE", "cclass" :named("rxtype"), $S5003 :named("subtype"), $I5002 :named("negate"), _lex_param_1 :named("node"))
+    $P5013 = _lex_param_1."!make"($P5012)
+    .return ($P5013) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<b>" :subid("cuid_134_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "backslash:sym<b>" :subid("cuid_134_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 498
     .param pmc _lex_param_0 
@@ -19571,33 +19571,33 @@
     .lex "$qast", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 499
-    get_hll_global $P505, "GLOBAL"
-    nqp_get_package_through_who $P504, $P505, "QAST"
-    get_who $P503, $P504
-    set $P502, $P503["Regex"]
-    unless_null $P502, fallback1824
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P506
+    get_hll_global $P5005, "GLOBAL"
+    nqp_get_package_through_who $P5004, $P5005, "QAST"
+    get_who $P5003, $P5004
+    set $P5002, $P5003["Regex"]
+    unless_null $P5002, fallback1824
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5006
   fallback1824:
-    set $P507, _lex_param_1["sym"]
-    unless_null $P507, fallback1825
-    nqp_get_sc_object $P508, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P507, $P508
+    set $P5007, _lex_param_1["sym"]
+    unless_null $P5007, fallback1825
+    nqp_get_sc_object $P5008, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5007, $P5008
   fallback1825:
-    set $S501, $P507
-    iseq $I501, $S501, "B"
-    $P509 = $P502."new"("\b", "enumcharlist" :named("rxtype"), $I501 :named("negate"), _lex_param_1 :named("node"))
-    set $P101, $P509
+    set $S5001, $P5007
+    iseq $I5001, $S5001, "B"
+    $P5009 = $P5002."new"("\b", "enumcharlist" :named("rxtype"), $I5001 :named("negate"), _lex_param_1 :named("node"))
+    set $P101, $P5009
 .annotate 'line', 501
-    $P510 = _lex_param_1."!make"($P101)
-    .return ($P510) 
+    $P5010 = _lex_param_1."!make"($P101)
+    .return ($P5010) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<e>" :subid("cuid_135_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "backslash:sym<e>" :subid("cuid_135_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 504
     .param pmc _lex_param_0 
@@ -19605,33 +19605,33 @@
     .lex "$qast", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 505
-    get_hll_global $P505, "GLOBAL"
-    nqp_get_package_through_who $P504, $P505, "QAST"
-    get_who $P503, $P504
-    set $P502, $P503["Regex"]
-    unless_null $P502, fallback1826
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P506
+    get_hll_global $P5005, "GLOBAL"
+    nqp_get_package_through_who $P5004, $P5005, "QAST"
+    get_who $P5003, $P5004
+    set $P5002, $P5003["Regex"]
+    unless_null $P5002, fallback1826
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5006
   fallback1826:
-    set $P507, _lex_param_1["sym"]
-    unless_null $P507, fallback1827
-    nqp_get_sc_object $P508, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P507, $P508
+    set $P5007, _lex_param_1["sym"]
+    unless_null $P5007, fallback1827
+    nqp_get_sc_object $P5008, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5007, $P5008
   fallback1827:
-    set $S501, $P507
-    iseq $I501, $S501, "E"
-    $P509 = $P502."new"("\e", "enumcharlist" :named("rxtype"), $I501 :named("negate"), _lex_param_1 :named("node"))
-    set $P101, $P509
+    set $S5001, $P5007
+    iseq $I5001, $S5001, "E"
+    $P5009 = $P5002."new"("\e", "enumcharlist" :named("rxtype"), $I5001 :named("negate"), _lex_param_1 :named("node"))
+    set $P101, $P5009
 .annotate 'line', 507
-    $P510 = _lex_param_1."!make"($P101)
-    .return ($P510) 
+    $P5010 = _lex_param_1."!make"($P101)
+    .return ($P5010) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<f>" :subid("cuid_136_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "backslash:sym<f>" :subid("cuid_136_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 510
     .param pmc _lex_param_0 
@@ -19639,33 +19639,33 @@
     .lex "$qast", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 511
-    get_hll_global $P505, "GLOBAL"
-    nqp_get_package_through_who $P504, $P505, "QAST"
-    get_who $P503, $P504
-    set $P502, $P503["Regex"]
-    unless_null $P502, fallback1828
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P506
+    get_hll_global $P5005, "GLOBAL"
+    nqp_get_package_through_who $P5004, $P5005, "QAST"
+    get_who $P5003, $P5004
+    set $P5002, $P5003["Regex"]
+    unless_null $P5002, fallback1828
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5006
   fallback1828:
-    set $P507, _lex_param_1["sym"]
-    unless_null $P507, fallback1829
-    nqp_get_sc_object $P508, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P507, $P508
+    set $P5007, _lex_param_1["sym"]
+    unless_null $P5007, fallback1829
+    nqp_get_sc_object $P5008, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5007, $P5008
   fallback1829:
-    set $S501, $P507
-    iseq $I501, $S501, "F"
-    $P509 = $P502."new"("\f", "enumcharlist" :named("rxtype"), $I501 :named("negate"), _lex_param_1 :named("node"))
-    set $P101, $P509
+    set $S5001, $P5007
+    iseq $I5001, $S5001, "F"
+    $P5009 = $P5002."new"("\f", "enumcharlist" :named("rxtype"), $I5001 :named("negate"), _lex_param_1 :named("node"))
+    set $P101, $P5009
 .annotate 'line', 513
-    $P510 = _lex_param_1."!make"($P101)
-    .return ($P510) 
+    $P5010 = _lex_param_1."!make"($P101)
+    .return ($P5010) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<h>" :subid("cuid_137_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "backslash:sym<h>" :subid("cuid_137_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 516
     .param pmc _lex_param_0 
@@ -19673,33 +19673,33 @@
     .lex "$qast", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 517
-    get_hll_global $P505, "GLOBAL"
-    nqp_get_package_through_who $P504, $P505, "QAST"
-    get_who $P503, $P504
-    set $P502, $P503["Regex"]
-    unless_null $P502, fallback1830
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P506
+    get_hll_global $P5005, "GLOBAL"
+    nqp_get_package_through_who $P5004, $P5005, "QAST"
+    get_who $P5003, $P5004
+    set $P5002, $P5003["Regex"]
+    unless_null $P5002, fallback1830
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5006
   fallback1830:
-    set $P507, _lex_param_1["sym"]
-    unless_null $P507, fallback1831
-    nqp_get_sc_object $P508, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P507, $P508
+    set $P5007, _lex_param_1["sym"]
+    unless_null $P5007, fallback1831
+    nqp_get_sc_object $P5008, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5007, $P5008
   fallback1831:
-    set $S501, $P507
-    iseq $I501, $S501, "H"
-    $P509 = $P502."new"(utf8:"\t \x{a0}\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000", "enumcharlist" :named("rxtype"), $I501 :named("negate"), _lex_param_1 :named("node"))
-    set $P101, $P509
+    set $S5001, $P5007
+    iseq $I5001, $S5001, "H"
+    $P5009 = $P5002."new"(utf8:"\t \x{a0}\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000", "enumcharlist" :named("rxtype"), $I5001 :named("negate"), _lex_param_1 :named("node"))
+    set $P101, $P5009
 .annotate 'line', 519
-    $P510 = _lex_param_1."!make"($P101)
-    .return ($P510) 
+    $P5010 = _lex_param_1."!make"($P101)
+    .return ($P5010) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<r>" :subid("cuid_138_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "backslash:sym<r>" :subid("cuid_138_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 522
     .param pmc _lex_param_0 
@@ -19707,33 +19707,33 @@
     .lex "$qast", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 523
-    get_hll_global $P505, "GLOBAL"
-    nqp_get_package_through_who $P504, $P505, "QAST"
-    get_who $P503, $P504
-    set $P502, $P503["Regex"]
-    unless_null $P502, fallback1832
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P506
+    get_hll_global $P5005, "GLOBAL"
+    nqp_get_package_through_who $P5004, $P5005, "QAST"
+    get_who $P5003, $P5004
+    set $P5002, $P5003["Regex"]
+    unless_null $P5002, fallback1832
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5006
   fallback1832:
-    set $P507, _lex_param_1["sym"]
-    unless_null $P507, fallback1833
-    nqp_get_sc_object $P508, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P507, $P508
+    set $P5007, _lex_param_1["sym"]
+    unless_null $P5007, fallback1833
+    nqp_get_sc_object $P5008, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5007, $P5008
   fallback1833:
-    set $S501, $P507
-    iseq $I501, $S501, "R"
-    $P509 = $P502."new"("\r", "enumcharlist" :named("rxtype"), $I501 :named("negate"), _lex_param_1 :named("node"))
-    set $P101, $P509
+    set $S5001, $P5007
+    iseq $I5001, $S5001, "R"
+    $P5009 = $P5002."new"("\r", "enumcharlist" :named("rxtype"), $I5001 :named("negate"), _lex_param_1 :named("node"))
+    set $P101, $P5009
 .annotate 'line', 525
-    $P510 = _lex_param_1."!make"($P101)
-    .return ($P510) 
+    $P5010 = _lex_param_1."!make"($P101)
+    .return ($P5010) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<t>" :subid("cuid_139_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "backslash:sym<t>" :subid("cuid_139_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 528
     .param pmc _lex_param_0 
@@ -19741,33 +19741,33 @@
     .lex "$qast", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 529
-    get_hll_global $P505, "GLOBAL"
-    nqp_get_package_through_who $P504, $P505, "QAST"
-    get_who $P503, $P504
-    set $P502, $P503["Regex"]
-    unless_null $P502, fallback1834
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P506
+    get_hll_global $P5005, "GLOBAL"
+    nqp_get_package_through_who $P5004, $P5005, "QAST"
+    get_who $P5003, $P5004
+    set $P5002, $P5003["Regex"]
+    unless_null $P5002, fallback1834
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5006
   fallback1834:
-    set $P507, _lex_param_1["sym"]
-    unless_null $P507, fallback1835
-    nqp_get_sc_object $P508, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P507, $P508
+    set $P5007, _lex_param_1["sym"]
+    unless_null $P5007, fallback1835
+    nqp_get_sc_object $P5008, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5007, $P5008
   fallback1835:
-    set $S501, $P507
-    iseq $I501, $S501, "T"
-    $P509 = $P502."new"("\t", "enumcharlist" :named("rxtype"), $I501 :named("negate"), _lex_param_1 :named("node"))
-    set $P101, $P509
+    set $S5001, $P5007
+    iseq $I5001, $S5001, "T"
+    $P5009 = $P5002."new"("\t", "enumcharlist" :named("rxtype"), $I5001 :named("negate"), _lex_param_1 :named("node"))
+    set $P101, $P5009
 .annotate 'line', 531
-    $P510 = _lex_param_1."!make"($P101)
-    .return ($P510) 
+    $P5010 = _lex_param_1."!make"($P101)
+    .return ($P5010) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<v>" :subid("cuid_140_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "backslash:sym<v>" :subid("cuid_140_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 534
     .param pmc _lex_param_0 
@@ -19775,33 +19775,33 @@
     .lex "$qast", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 535
-    get_hll_global $P505, "GLOBAL"
-    nqp_get_package_through_who $P504, $P505, "QAST"
-    get_who $P503, $P504
-    set $P502, $P503["Regex"]
-    unless_null $P502, fallback1836
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P506
+    get_hll_global $P5005, "GLOBAL"
+    nqp_get_package_through_who $P5004, $P5005, "QAST"
+    get_who $P5003, $P5004
+    set $P5002, $P5003["Regex"]
+    unless_null $P5002, fallback1836
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5006
   fallback1836:
-    set $P507, _lex_param_1["sym"]
-    unless_null $P507, fallback1837
-    nqp_get_sc_object $P508, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P507, $P508
+    set $P5007, _lex_param_1["sym"]
+    unless_null $P5007, fallback1837
+    nqp_get_sc_object $P5008, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5007, $P5008
   fallback1837:
-    set $S501, $P507
-    iseq $I501, $S501, "V"
-    $P509 = $P502."new"(utf8:"\n\x{b}\f\r\x{85}\u2028\u2029", "enumcharlist" :named("rxtype"), $I501 :named("negate"), _lex_param_1 :named("node"))
-    set $P101, $P509
+    set $S5001, $P5007
+    iseq $I5001, $S5001, "V"
+    $P5009 = $P5002."new"(utf8:"\n\x{b}\f\r\x{85}\u2028\u2029", "enumcharlist" :named("rxtype"), $I5001 :named("negate"), _lex_param_1 :named("node"))
+    set $P101, $P5009
 .annotate 'line', 538
-    $P510 = _lex_param_1."!make"($P101)
-    .return ($P510) 
+    $P5010 = _lex_param_1."!make"($P101)
+    .return ($P5010) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<o>" :subid("cuid_141_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "backslash:sym<o>" :subid("cuid_141_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 541
     .param pmc _lex_param_0 
@@ -19809,78 +19809,78 @@
     .lex "$octlit", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 543
-    get_hll_global $P505, "GLOBAL"
-    nqp_get_package_through_who $P504, $P505, "HLL"
-    get_who $P503, $P504
-    set $P502, $P503["Actions"]
-    unless_null $P502, fallback1838
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P506
+    get_hll_global $P5005, "GLOBAL"
+    nqp_get_package_through_who $P5004, $P5005, "HLL"
+    get_who $P5003, $P5004
+    set $P5002, $P5003["Actions"]
+    unless_null $P5002, fallback1838
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5006
   fallback1838:
-    set $P507, _lex_param_1["octint"]
-    unless_null $P507, fallback1841
-    nqp_get_sc_object $P508, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P507, $P508
+    set $P5007, _lex_param_1["octint"]
+    unless_null $P5007, fallback1841
+    nqp_get_sc_object $P5008, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5007, $P5008
   fallback1841:
-    set $P513, $P507
-    if $P507 goto unless529_end1840 
-    set $P510, _lex_param_1["octints"]
-    unless_null $P510, fallback1842
-    nqp_get_sc_object $P511, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P510, $P511
+    set $P5013, $P5007
+    if $P5007 goto unless529_end1840 
+    set $P5010, _lex_param_1["octints"]
+    unless_null $P5010, fallback1842
+    nqp_get_sc_object $P5011, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5010, $P5011
   fallback1842:
-    set $P509, $P510["octint"]
-    unless_null $P509, fallback1843
-    nqp_get_sc_object $P512, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P509, $P512
+    set $P5009, $P5010["octint"]
+    unless_null $P5009, fallback1843
+    nqp_get_sc_object $P5012, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5009, $P5012
   fallback1843:
-    set $P513, $P509
+    set $P5013, $P5009
   unless529_end1840:
-    $P514 = $P502."ints_to_string"($P513)
-    set $P101, $P514
+    $P5014 = $P5002."ints_to_string"($P5013)
+    set $P101, $P5014
 .annotate 'line', 544
-    set $P515, _lex_param_1["sym"]
-    unless_null $P515, fallback1846
-    nqp_get_sc_object $P516, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P515, $P516
+    set $P5015, _lex_param_1["sym"]
+    unless_null $P5015, fallback1846
+    nqp_get_sc_object $P5016, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5015, $P5016
   fallback1846:
-    set $S501, $P515
-    iseq $I501, $S501, "O"
-    unless $I501 goto if530_else1844 
+    set $S5001, $P5015
+    iseq $I5001, $S5001, "O"
+    unless $I5001 goto if530_else1844 
 .annotate 'line', 545
-    get_hll_global $P520, "GLOBAL"
-    nqp_get_package_through_who $P519, $P520, "QAST"
-    get_who $P518, $P519
-    set $P517, $P518["Regex"]
-    unless_null $P517, fallback1847
-    nqp_get_sc_object $P521, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P517, $P521
+    get_hll_global $P5020, "GLOBAL"
+    nqp_get_package_through_who $P5019, $P5020, "QAST"
+    get_who $P5018, $P5019
+    set $P5017, $P5018["Regex"]
+    unless_null $P5017, fallback1847
+    nqp_get_sc_object $P5021, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5017, $P5021
   fallback1847:
-    $P522 = $P517."new"($P101, "enumcharlist" :named("rxtype"), 1 :named("negate"), _lex_param_1 :named("node"))
-    set $P529, $P522
+    $P5022 = $P5017."new"($P101, "enumcharlist" :named("rxtype"), 1 :named("negate"), _lex_param_1 :named("node"))
+    set $P5029, $P5022
     goto if530_end1845
   if530_else1844:
 .annotate 'line', 547
-    get_hll_global $P526, "GLOBAL"
-    nqp_get_package_through_who $P525, $P526, "QAST"
-    get_who $P524, $P525
-    set $P523, $P524["Regex"]
-    unless_null $P523, fallback1848
-    nqp_get_sc_object $P527, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P523, $P527
+    get_hll_global $P5026, "GLOBAL"
+    nqp_get_package_through_who $P5025, $P5026, "QAST"
+    get_who $P5024, $P5025
+    set $P5023, $P5024["Regex"]
+    unless_null $P5023, fallback1848
+    nqp_get_sc_object $P5027, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5023, $P5027
   fallback1848:
-    $P528 = $P523."new"($P101, "literal" :named("rxtype"), _lex_param_1 :named("node"))
-    set $P529, $P528
+    $P5028 = $P5023."new"($P101, "literal" :named("rxtype"), _lex_param_1 :named("node"))
+    set $P5029, $P5028
   if530_end1845:
-    $P530 = _lex_param_1."!make"($P529)
-    .return ($P530) 
+    $P5030 = _lex_param_1."!make"($P5029)
+    .return ($P5030) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<x>" :subid("cuid_142_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "backslash:sym<x>" :subid("cuid_142_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 550
     .param pmc _lex_param_0 
@@ -19888,78 +19888,78 @@
     .lex "$hexlit", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 552
-    get_hll_global $P505, "GLOBAL"
-    nqp_get_package_through_who $P504, $P505, "HLL"
-    get_who $P503, $P504
-    set $P502, $P503["Actions"]
-    unless_null $P502, fallback1849
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P506
+    get_hll_global $P5005, "GLOBAL"
+    nqp_get_package_through_who $P5004, $P5005, "HLL"
+    get_who $P5003, $P5004
+    set $P5002, $P5003["Actions"]
+    unless_null $P5002, fallback1849
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5006
   fallback1849:
-    set $P507, _lex_param_1["hexint"]
-    unless_null $P507, fallback1852
-    nqp_get_sc_object $P508, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P507, $P508
+    set $P5007, _lex_param_1["hexint"]
+    unless_null $P5007, fallback1852
+    nqp_get_sc_object $P5008, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5007, $P5008
   fallback1852:
-    set $P513, $P507
-    if $P507 goto unless531_end1851 
-    set $P510, _lex_param_1["hexints"]
-    unless_null $P510, fallback1853
-    nqp_get_sc_object $P511, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P510, $P511
+    set $P5013, $P5007
+    if $P5007 goto unless531_end1851 
+    set $P5010, _lex_param_1["hexints"]
+    unless_null $P5010, fallback1853
+    nqp_get_sc_object $P5011, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5010, $P5011
   fallback1853:
-    set $P509, $P510["hexint"]
-    unless_null $P509, fallback1854
-    nqp_get_sc_object $P512, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P509, $P512
+    set $P5009, $P5010["hexint"]
+    unless_null $P5009, fallback1854
+    nqp_get_sc_object $P5012, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5009, $P5012
   fallback1854:
-    set $P513, $P509
+    set $P5013, $P5009
   unless531_end1851:
-    $P514 = $P502."ints_to_string"($P513)
-    set $P101, $P514
+    $P5014 = $P5002."ints_to_string"($P5013)
+    set $P101, $P5014
 .annotate 'line', 553
-    set $P515, _lex_param_1["sym"]
-    unless_null $P515, fallback1857
-    nqp_get_sc_object $P516, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P515, $P516
+    set $P5015, _lex_param_1["sym"]
+    unless_null $P5015, fallback1857
+    nqp_get_sc_object $P5016, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5015, $P5016
   fallback1857:
-    set $S501, $P515
-    iseq $I501, $S501, "X"
-    unless $I501 goto if532_else1855 
+    set $S5001, $P5015
+    iseq $I5001, $S5001, "X"
+    unless $I5001 goto if532_else1855 
 .annotate 'line', 554
-    get_hll_global $P520, "GLOBAL"
-    nqp_get_package_through_who $P519, $P520, "QAST"
-    get_who $P518, $P519
-    set $P517, $P518["Regex"]
-    unless_null $P517, fallback1858
-    nqp_get_sc_object $P521, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P517, $P521
+    get_hll_global $P5020, "GLOBAL"
+    nqp_get_package_through_who $P5019, $P5020, "QAST"
+    get_who $P5018, $P5019
+    set $P5017, $P5018["Regex"]
+    unless_null $P5017, fallback1858
+    nqp_get_sc_object $P5021, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5017, $P5021
   fallback1858:
-    $P522 = $P517."new"($P101, "enumcharlist" :named("rxtype"), 1 :named("negate"), _lex_param_1 :named("node"))
-    set $P529, $P522
+    $P5022 = $P5017."new"($P101, "enumcharlist" :named("rxtype"), 1 :named("negate"), _lex_param_1 :named("node"))
+    set $P5029, $P5022
     goto if532_end1856
   if532_else1855:
 .annotate 'line', 556
-    get_hll_global $P526, "GLOBAL"
-    nqp_get_package_through_who $P525, $P526, "QAST"
-    get_who $P524, $P525
-    set $P523, $P524["Regex"]
-    unless_null $P523, fallback1859
-    nqp_get_sc_object $P527, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P523, $P527
+    get_hll_global $P5026, "GLOBAL"
+    nqp_get_package_through_who $P5025, $P5026, "QAST"
+    get_who $P5024, $P5025
+    set $P5023, $P5024["Regex"]
+    unless_null $P5023, fallback1859
+    nqp_get_sc_object $P5027, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5023, $P5027
   fallback1859:
-    $P528 = $P523."new"($P101, "literal" :named("rxtype"), _lex_param_1 :named("node"))
-    set $P529, $P528
+    $P5028 = $P5023."new"($P101, "literal" :named("rxtype"), _lex_param_1 :named("node"))
+    set $P5029, $P5028
   if532_end1856:
-    $P530 = _lex_param_1."!make"($P529)
-    .return ($P530) 
+    $P5030 = _lex_param_1."!make"($P5029)
+    .return ($P5030) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<c>" :subid("cuid_143_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "backslash:sym<c>" :subid("cuid_143_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 559
     .param pmc _lex_param_0 
@@ -19967,27 +19967,27 @@
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
 .annotate 'line', 560
-    get_hll_global $P504, "GLOBAL"
-    nqp_get_package_through_who $P503, $P504, "QAST"
-    get_who $P502, $P503
-    set $P501, $P502["Regex"]
-    unless_null $P501, fallback1860
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P501, $P505
+    get_hll_global $P5004, "GLOBAL"
+    nqp_get_package_through_who $P5003, $P5004, "QAST"
+    get_who $P5002, $P5003
+    set $P5001, $P5002["Regex"]
+    unless_null $P5001, fallback1860
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5001, $P5005
   fallback1860:
-    set $P506, _lex_param_1["charspec"]
-    unless_null $P506, fallback1861
-    nqp_get_sc_object $P507, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P506, $P507
+    set $P5006, _lex_param_1["charspec"]
+    unless_null $P5006, fallback1861
+    nqp_get_sc_object $P5007, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5006, $P5007
   fallback1861:
-    $P508 = $P506."ast"()
-    $P509 = $P501."new"($P508, "literal" :named("rxtype"), _lex_param_1 :named("node"))
-    $P510 = _lex_param_1."!make"($P509)
-    .return ($P510) 
+    $P5008 = $P5006."ast"()
+    $P5009 = $P5001."new"($P5008, "literal" :named("rxtype"), _lex_param_1 :named("node"))
+    $P5010 = _lex_param_1."!make"($P5009)
+    .return ($P5010) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "backslash:sym<misc>" :subid("cuid_144_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "backslash:sym<misc>" :subid("cuid_144_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 563
     .param pmc _lex_param_0 
@@ -19995,27 +19995,27 @@
     .lex "$qast", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 564
-    get_hll_global $P505, "GLOBAL"
-    nqp_get_package_through_who $P504, $P505, "QAST"
-    get_who $P503, $P504
-    set $P502, $P503["Regex"]
-    unless_null $P502, fallback1862
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P506
+    get_hll_global $P5005, "GLOBAL"
+    nqp_get_package_through_who $P5004, $P5005, "QAST"
+    get_who $P5003, $P5004
+    set $P5002, $P5003["Regex"]
+    unless_null $P5002, fallback1862
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5006
   fallback1862:
-    set $S501, _lex_param_1
-    $P507 = $P502."new"($S501, "literal" :named("rxtype"), _lex_param_1 :named("node"))
-    set $P101, $P507
+    set $S5001, _lex_param_1
+    $P5007 = $P5002."new"($S5001, "literal" :named("rxtype"), _lex_param_1 :named("node"))
+    set $P101, $P5007
 .annotate 'line', 565
-    $P508 = _lex_param_1."!make"($P101)
-    .return ($P508) 
+    $P5008 = _lex_param_1."!make"($P101)
+    .return ($P5008) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "assertion:sym<?>" :subid("cuid_145_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "assertion:sym<?>" :subid("cuid_145_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 568
     .param pmc _lex_param_0 
@@ -20023,49 +20023,49 @@
     .lex "$qast", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    set $P502, _lex_param_1["assertion"]
-    unless_null $P502, fallback1865
-    nqp_get_sc_object $P503, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P503
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    set $P5002, _lex_param_1["assertion"]
+    unless_null $P5002, fallback1865
+    nqp_get_sc_object $P5003, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5003
   fallback1865:
-    unless $P502 goto if533_else1863 
+    unless $P5002 goto if533_else1863 
 .annotate 'line', 570
 .annotate 'line', 571
-    set $P504, _lex_param_1["assertion"]
-    unless_null $P504, fallback1866
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P504, $P505
+    set $P5004, _lex_param_1["assertion"]
+    unless_null $P5004, fallback1866
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5004, $P5005
   fallback1866:
-    $P506 = $P504."ast"()
-    set $P101, $P506
+    $P5006 = $P5004."ast"()
+    set $P101, $P5006
 .annotate 'line', 572
-    $P507 = $P101."subtype"("zerowidth")
-    set $P514, $P507
+    $P5007 = $P101."subtype"("zerowidth")
+    set $P5014, $P5007
     goto if533_end1864
   if533_else1863:
 .annotate 'line', 574
 .annotate 'line', 575
-    get_hll_global $P511, "GLOBAL"
-    nqp_get_package_through_who $P510, $P511, "QAST"
-    get_who $P509, $P510
-    set $P508, $P509["Regex"]
-    unless_null $P508, fallback1867
-    nqp_get_sc_object $P512, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P508, $P512
+    get_hll_global $P5011, "GLOBAL"
+    nqp_get_package_through_who $P5010, $P5011, "QAST"
+    get_who $P5009, $P5010
+    set $P5008, $P5009["Regex"]
+    unless_null $P5008, fallback1867
+    nqp_get_sc_object $P5012, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5008, $P5012
   fallback1867:
-    $P513 = $P508."new"("anchor" :named("rxtype"), "pass" :named("subtype"), _lex_param_1 :named("node"))
-    set $P101, $P513
-    set $P514, $P101
+    $P5013 = $P5008."new"("anchor" :named("rxtype"), "pass" :named("subtype"), _lex_param_1 :named("node"))
+    set $P101, $P5013
+    set $P5014, $P101
   if533_end1864:
 .annotate 'line', 577
-    $P515 = _lex_param_1."!make"($P101)
-    .return ($P515) 
+    $P5015 = _lex_param_1."!make"($P101)
+    .return ($P5015) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "assertion:sym<!>" :subid("cuid_146_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "assertion:sym<!>" :subid("cuid_146_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 580
     .param pmc _lex_param_0 
@@ -20073,53 +20073,53 @@
     .lex "$qast", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    set $P502, _lex_param_1["assertion"]
-    unless_null $P502, fallback1870
-    nqp_get_sc_object $P503, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P503
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    set $P5002, _lex_param_1["assertion"]
+    unless_null $P5002, fallback1870
+    nqp_get_sc_object $P5003, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5003
   fallback1870:
-    unless $P502 goto if534_else1868 
+    unless $P5002 goto if534_else1868 
 .annotate 'line', 582
 .annotate 'line', 583
-    set $P504, _lex_param_1["assertion"]
-    unless_null $P504, fallback1871
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P504, $P505
+    set $P5004, _lex_param_1["assertion"]
+    unless_null $P5004, fallback1871
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5004, $P5005
   fallback1871:
-    $P506 = $P504."ast"()
-    set $P101, $P506
+    $P5006 = $P5004."ast"()
+    set $P101, $P5006
 .annotate 'line', 584
-    $P507 = $P101."negate"()
-    isfalse $I501, $P507
-    $P508 = $P101."negate"($I501)
+    $P5007 = $P101."negate"()
+    isfalse $I5001, $P5007
+    $P5008 = $P101."negate"($I5001)
 .annotate 'line', 585
-    $P509 = $P101."subtype"("zerowidth")
-    set $P516, $P509
+    $P5009 = $P101."subtype"("zerowidth")
+    set $P5016, $P5009
     goto if534_end1869
   if534_else1868:
 .annotate 'line', 587
 .annotate 'line', 588
-    get_hll_global $P513, "GLOBAL"
-    nqp_get_package_through_who $P512, $P513, "QAST"
-    get_who $P511, $P512
-    set $P510, $P511["Regex"]
-    unless_null $P510, fallback1872
-    nqp_get_sc_object $P514, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P510, $P514
+    get_hll_global $P5013, "GLOBAL"
+    nqp_get_package_through_who $P5012, $P5013, "QAST"
+    get_who $P5011, $P5012
+    set $P5010, $P5011["Regex"]
+    unless_null $P5010, fallback1872
+    nqp_get_sc_object $P5014, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5010, $P5014
   fallback1872:
-    $P515 = $P510."new"("anchor" :named("rxtype"), "fail" :named("subtype"), _lex_param_1 :named("node"))
-    set $P101, $P515
-    set $P516, $P101
+    $P5015 = $P5010."new"("anchor" :named("rxtype"), "fail" :named("subtype"), _lex_param_1 :named("node"))
+    set $P101, $P5015
+    set $P5016, $P101
   if534_end1869:
 .annotate 'line', 590
-    $P517 = _lex_param_1."!make"($P101)
-    .return ($P517) 
+    $P5017 = _lex_param_1."!make"($P101)
+    .return ($P5017) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "assertion:sym<|>" :subid("cuid_147_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "assertion:sym<|>" :subid("cuid_147_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 593
     .param pmc _lex_param_0 
@@ -20128,65 +20128,65 @@
     .lex "$name", $P102 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P102, $P502
-    set $P503, _lex_param_1["identifier"]
-    unless_null $P503, fallback1873
-    nqp_get_sc_object $P504, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P503, $P504
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P102, $P5002
+    set $P5003, _lex_param_1["identifier"]
+    unless_null $P5003, fallback1873
+    nqp_get_sc_object $P5004, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5003, $P5004
   fallback1873:
-    set $S501, $P503
-    box $P505, $S501
-    set $P102, $P505
-    set $S502, $P102
-    iseq $I501, $S502, "c"
-    unless $I501 goto if535_else1874 
+    set $S5001, $P5003
+    box $P5005, $S5001
+    set $P102, $P5005
+    set $S5002, $P102
+    iseq $I5001, $S5002, "c"
+    unless $I5001 goto if535_else1874 
 .annotate 'line', 596
-    box $P506, 0
-    set $P101, $P506
-    set $P521, $P101
+    box $P5006, 0
+    set $P101, $P5006
+    set $P5021, $P101
     goto if535_end1875
   if535_else1874:
-    set $S503, $P102
-    iseq $I502, $S503, "w"
-    box $P520, $I502
-    set $P519, $P520
-    unless $I502 goto if536_end1877 
+    set $S5003, $P102
+    iseq $I5002, $S5003, "w"
+    box $P5020, $I5002
+    set $P5019, $P5020
+    unless $I5002 goto if536_end1877 
 .annotate 'line', 601
 .annotate 'line', 602
-    get_hll_global $P510, "GLOBAL"
-    nqp_get_package_through_who $P509, $P510, "QAST"
-    get_who $P508, $P509
-    set $P507, $P508["Regex"]
-    unless_null $P507, fallback1878
-    nqp_get_sc_object $P511, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P507, $P511
+    get_hll_global $P5010, "GLOBAL"
+    nqp_get_package_through_who $P5009, $P5010, "QAST"
+    get_who $P5008, $P5009
+    set $P5007, $P5008["Regex"]
+    unless_null $P5007, fallback1878
+    nqp_get_sc_object $P5011, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5007, $P5011
   fallback1878:
 .annotate 'line', 603
-    get_hll_global $P515, "GLOBAL"
-    nqp_get_package_through_who $P514, $P515, "PAST"
-    get_who $P513, $P514
-    set $P512, $P513["Node"]
-    unless_null $P512, fallback1879
-    nqp_get_sc_object $P516, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P512, $P516
+    get_hll_global $P5015, "GLOBAL"
+    nqp_get_package_through_who $P5014, $P5015, "PAST"
+    get_who $P5013, $P5014
+    set $P5012, $P5013["Node"]
+    unless_null $P5012, fallback1879
+    nqp_get_sc_object $P5016, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5012, $P5016
   fallback1879:
-    $P517 = $P512."new"("wb")
-    $P518 = $P507."new"($P517, "subrule" :named("rxtype"), "method" :named("subtype"), _lex_param_1 :named("node"), "" :named("name"))
-    set $P101, $P518
-    set $P519, $P101
+    $P5017 = $P5012."new"("wb")
+    $P5018 = $P5007."new"($P5017, "subrule" :named("rxtype"), "method" :named("subtype"), _lex_param_1 :named("node"), "" :named("name"))
+    set $P101, $P5018
+    set $P5019, $P101
   if536_end1877:
-    set $P521, $P519
+    set $P5021, $P5019
   if535_end1875:
 .annotate 'line', 606
-    $P522 = _lex_param_1."!make"($P101)
-    .return ($P522) 
+    $P5022 = _lex_param_1."!make"($P101)
+    .return ($P5022) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "assertion:sym<method>" :subid("cuid_148_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "assertion:sym<method>" :subid("cuid_148_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 609
     .param pmc _lex_param_0 
@@ -20194,545 +20194,545 @@
     .lex "$qast", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 610
-    set $P502, _lex_param_1["assertion"]
-    unless_null $P502, fallback1880
-    nqp_get_sc_object $P503, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P503
+    set $P5002, _lex_param_1["assertion"]
+    unless_null $P5002, fallback1880
+    nqp_get_sc_object $P5003, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5003
   fallback1880:
-    $P504 = $P502."ast"()
-    set $P101, $P504
+    $P5004 = $P5002."ast"()
+    set $P101, $P5004
 .annotate 'line', 611
-    $P505 = $P101."subtype"("method")
+    $P5005 = $P101."subtype"("method")
 .annotate 'line', 612
-    $P506 = $P101."name"("")
+    $P5006 = $P101."name"("")
 .annotate 'line', 613
-    $P507 = _lex_param_1."!make"($P101)
-    .return ($P507) 
+    $P5007 = _lex_param_1."!make"($P101)
+    .return ($P5007) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "assertion:sym<name>" :subid("cuid_149_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "assertion:sym<name>" :subid("cuid_149_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 616
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
-    .const 'Sub' $P571 = 'cuid_200_1346233469.934' 
-    capture_lex $P571 
-    .const 'Sub' $P571 = 'cuid_201_1346233469.934' 
-    capture_lex $P571 
+    .const 'Sub' $P5071 = 'cuid_200_1346277621.774' 
+    capture_lex $P5071 
+    .const 'Sub' $P5071 = 'cuid_201_1346277621.774' 
+    capture_lex $P5071 
     .lex "$name", $P101 
     .lex "$qast", $P102 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P102, $P502
-    set $P503, _lex_param_1["longname"]
-    unless_null $P503, fallback1881
-    nqp_get_sc_object $P504, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P503, $P504
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P102, $P5002
+    set $P5003, _lex_param_1["longname"]
+    unless_null $P5003, fallback1881
+    nqp_get_sc_object $P5004, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5003, $P5004
   fallback1881:
-    set $S501, $P503
-    box $P505, $S501
-    set $P101, $P505
-    set $P506, _lex_param_1["assertion"]
-    unless_null $P506, fallback1884
-    nqp_get_sc_object $P507, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P506, $P507
+    set $S5001, $P5003
+    box $P5005, $S5001
+    set $P101, $P5005
+    set $P5006, _lex_param_1["assertion"]
+    unless_null $P5006, fallback1884
+    nqp_get_sc_object $P5007, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5006, $P5007
   fallback1884:
-    unless $P506 goto if537_else1882 
+    unless $P5006 goto if537_else1882 
 .annotate 'line', 619
 .annotate 'line', 620
-    set $P509, _lex_param_1["assertion"]
-    unless_null $P509, fallback1885
-    nqp_get_sc_object $P510, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P509, $P510
+    set $P5009, _lex_param_1["assertion"]
+    unless_null $P5009, fallback1885
+    nqp_get_sc_object $P5010, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5009, $P5010
   fallback1885:
-    set $P508, $P509[0]
-    unless_null $P508, fallback1886
-    nqp_get_sc_object $P511, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P508, $P511
+    set $P5008, $P5009[0]
+    unless_null $P5008, fallback1886
+    nqp_get_sc_object $P5011, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5008, $P5011
   fallback1886:
-    $P512 = $P508."ast"()
-    set $P102, $P512
+    $P5012 = $P5008."ast"()
+    set $P102, $P5012
 .annotate 'line', 621
-    nqp_decontainerize $P513, _lex_param_0
-    $P514 = $P513."subrule_alias"($P102, $P101)
-    set $P569, $P514
+    nqp_decontainerize $P5013, _lex_param_0
+    $P5014 = $P5013."subrule_alias"($P102, $P101)
+    set $P5069, $P5014
     goto if537_end1883
   if537_else1882:
-    set $S502, $P101
-    iseq $I501, $S502, "sym"
-    unless $I501 goto if538_else1887 
-    .const 'Sub' $P515 = 'cuid_200_1346233469.934' 
-    capture_lex $P515
-    $P516 = $P515()
-    set $P568, $P516
+    set $S5002, $P101
+    iseq $I5001, $S5002, "sym"
+    unless $I5001 goto if538_else1887 
+    .const 'Sub' $P5015 = 'cuid_200_1346277621.774' 
+    capture_lex $P5015
+    $P5016 = $P5015()
+    set $P5068, $P5016
     goto if538_end1888
   if538_else1887:
 .annotate 'line', 631
 .annotate 'line', 632
-    get_hll_global $P520, "GLOBAL"
-    nqp_get_package_through_who $P519, $P520, "QAST"
-    get_who $P518, $P519
-    set $P517, $P518["Regex"]
-    unless_null $P517, fallback1905
-    nqp_get_sc_object $P521, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P517, $P521
+    get_hll_global $P5020, "GLOBAL"
+    nqp_get_package_through_who $P5019, $P5020, "QAST"
+    get_who $P5018, $P5019
+    set $P5017, $P5018["Regex"]
+    unless_null $P5017, fallback1905
+    nqp_get_sc_object $P5021, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5017, $P5021
   fallback1905:
 .annotate 'line', 633
-    get_hll_global $P525, "GLOBAL"
-    nqp_get_package_through_who $P524, $P525, "PAST"
-    get_who $P523, $P524
-    set $P522, $P523["Node"]
-    unless_null $P522, fallback1906
-    nqp_get_sc_object $P526, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P522, $P526
+    get_hll_global $P5025, "GLOBAL"
+    nqp_get_package_through_who $P5024, $P5025, "PAST"
+    get_who $P5023, $P5024
+    set $P5022, $P5023["Node"]
+    unless_null $P5022, fallback1906
+    nqp_get_sc_object $P5026, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5022, $P5026
   fallback1906:
-    $P527 = $P522."new"($P101)
-    $P528 = $P517."new"($P527, "subrule" :named("rxtype"), "capture" :named("subtype"), _lex_param_1 :named("node"), $P101 :named("name"))
-    set $P102, $P528
-    set $P529, _lex_param_1["arglist"]
-    unless_null $P529, fallback1909
-    nqp_get_sc_object $P530, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P529, $P530
+    $P5027 = $P5022."new"($P101)
+    $P5028 = $P5017."new"($P5027, "subrule" :named("rxtype"), "capture" :named("subtype"), _lex_param_1 :named("node"), $P101 :named("name"))
+    set $P102, $P5028
+    set $P5029, _lex_param_1["arglist"]
+    unless_null $P5029, fallback1909
+    nqp_get_sc_object $P5030, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5029, $P5030
   fallback1909:
-    unless $P529 goto if543_else1907 
+    unless $P5029 goto if543_else1907 
 .annotate 'line', 635
 .annotate 'line', 636
-    set $P535, _lex_param_1["arglist"]
-    unless_null $P535, fallback1910
-    nqp_get_sc_object $P536, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P535, $P536
+    set $P5035, _lex_param_1["arglist"]
+    unless_null $P5035, fallback1910
+    nqp_get_sc_object $P5036, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5035, $P5036
   fallback1910:
-    set $P534, $P535[0]
-    unless_null $P534, fallback1911
-    nqp_get_sc_object $P537, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P534, $P537
+    set $P5034, $P5035[0]
+    unless_null $P5034, fallback1911
+    nqp_get_sc_object $P5037, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5034, $P5037
   fallback1911:
-    $P538 = $P534."ast"()
-    $P539 = $P538."list"()
-    set $P531, $P539
-    iter $P533, $P539
-    new $P541, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P541, for_handlers1913
-    push_eh $P541
+    $P5038 = $P5034."ast"()
+    $P5039 = $P5038."list"()
+    set $P5031, $P5039
+    iter $P5033, $P5039
+    new $P5041, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5041, for_handlers1913
+    push_eh $P5041
   for_next1914:
-    unless $P533, for_done1916
-    shift $P542, $P533
+    unless $P5033, for_done1916
+    shift $P5042, $P5033
   for_redo1915:
-    .const 'Sub' $P540 = 'cuid_201_1346233469.934' 
-    capture_lex $P540
-    $P531 = $P540($P542)
+    .const 'Sub' $P5040 = 'cuid_201_1346277621.774' 
+    capture_lex $P5040
+    $P5031 = $P5040($P5042)
     goto for_next1914
   for_handlers1913:
-    .get_results ($P541)
-    pop_upto_eh $P541
-    getattribute $P541, $P541, 'type'
-    eq $P541, .CONTROL_LOOP_NEXT, for_next1914
-    eq $P541, .CONTROL_LOOP_REDO, for_redo1915
+    .get_results ($P5041)
+    pop_upto_eh $P5041
+    getattribute $P5041, $P5041, 'type'
+    eq $P5041, .CONTROL_LOOP_NEXT, for_next1914
+    eq $P5041, .CONTROL_LOOP_REDO, for_redo1915
   for_done1916:
     pop_eh 
-    set $P567, $P531
+    set $P5067, $P5031
     goto if543_end1908
   if543_else1907:
-    set $P543, _lex_param_1["nibbler"]
-    unless_null $P543, fallback1919
-    nqp_get_sc_object $P544, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P543, $P544
+    set $P5043, _lex_param_1["nibbler"]
+    unless_null $P5043, fallback1919
+    nqp_get_sc_object $P5044, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5043, $P5044
   fallback1919:
-    set $P566, $P543
-    unless $P543 goto if544_end1918 
+    set $P5066, $P5043
+    unless $P5043 goto if544_end1918 
 .annotate 'line', 638
-    set $S503, $P101
-    iseq $I502, $S503, "after"
-    unless $I502 goto if545_else1920 
+    set $S5003, $P101
+    iseq $I5002, $S5003, "after"
+    unless $I5002 goto if545_else1920 
 .annotate 'line', 640
-    set $P545, $P102[0]
-    unless_null $P545, fallback1922
-    nqp_get_sc_object $P546, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P545, $P546
+    set $P5045, $P102[0]
+    unless_null $P5045, fallback1922
+    nqp_get_sc_object $P5046, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5045, $P5046
   fallback1922:
-    nqp_decontainerize $P547, _lex_param_0
-    set $P549, _lex_param_1["nibbler"]
-    unless_null $P549, fallback1923
-    nqp_get_sc_object $P550, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P549, $P550
+    nqp_decontainerize $P5047, _lex_param_0
+    set $P5049, _lex_param_1["nibbler"]
+    unless_null $P5049, fallback1923
+    nqp_get_sc_object $P5050, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5049, $P5050
   fallback1923:
-    set $P548, $P549[0]
-    unless_null $P548, fallback1924
-    nqp_get_sc_object $P551, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P548, $P551
+    set $P5048, $P5049[0]
+    unless_null $P5048, fallback1924
+    nqp_get_sc_object $P5051, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5048, $P5051
   fallback1924:
-    $P552 = $P548."ast"()
-    $P553 = $P547."flip_ast"($P552)
-    $P554 = "&buildsub"($P553, 1 :named("anon"))
-    $P555 = $P545."push"($P554)
-    set $P565, $P555
+    $P5052 = $P5048."ast"()
+    $P5053 = $P5047."flip_ast"($P5052)
+    $P5054 = "&buildsub"($P5053, 1 :named("anon"))
+    $P5055 = $P5045."push"($P5054)
+    set $P5065, $P5055
     goto if545_end1921
   if545_else1920:
 .annotate 'line', 641
-    set $P556, $P102[0]
-    unless_null $P556, fallback1925
-    nqp_get_sc_object $P557, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P556, $P557
+    set $P5056, $P102[0]
+    unless_null $P5056, fallback1925
+    nqp_get_sc_object $P5057, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5056, $P5057
   fallback1925:
-    set $P559, _lex_param_1["nibbler"]
-    unless_null $P559, fallback1926
-    nqp_get_sc_object $P560, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P559, $P560
+    set $P5059, _lex_param_1["nibbler"]
+    unless_null $P5059, fallback1926
+    nqp_get_sc_object $P5060, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5059, $P5060
   fallback1926:
-    set $P558, $P559[0]
-    unless_null $P558, fallback1927
-    nqp_get_sc_object $P561, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P558, $P561
+    set $P5058, $P5059[0]
+    unless_null $P5058, fallback1927
+    nqp_get_sc_object $P5061, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5058, $P5061
   fallback1927:
-    $P562 = $P558."ast"()
-    $P563 = "&buildsub"($P562, 1 :named("anon"))
-    $P564 = $P556."push"($P563)
-    set $P565, $P564
+    $P5062 = $P5058."ast"()
+    $P5063 = "&buildsub"($P5062, 1 :named("anon"))
+    $P5064 = $P5056."push"($P5063)
+    set $P5065, $P5064
   if545_end1921:
-    set $P566, $P565
+    set $P5066, $P5065
   if544_end1918:
-    set $P567, $P566
+    set $P5067, $P5066
   if543_end1908:
-    set $P568, $P567
+    set $P5068, $P5067
   if538_end1888:
-    set $P569, $P568
+    set $P5069, $P5068
   if537_end1883:
 .annotate 'line', 644
-    $P570 = _lex_param_1."!make"($P102)
-    .return ($P570) 
+    $P5070 = _lex_param_1."!make"($P102)
+    .return ($P5070) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_200_1346233469.934") :anon :lex :outer("cuid_149_1346233469.934")
+.sub "" :subid("cuid_200_1346277621.774") :anon :lex :outer("cuid_149_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 623
     .lex "$loc", $P101 
     .lex "$rxname", $P102 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P102, $P502
-    find_dynamic_lex $P504, "%*RX"
-    unless_null $P504, fallback1889
-    get_hll_global $P507, "GLOBAL"
-    get_who $P506, $P507
-    set $P505, $P506["%RX"]
-    unless_null $P505, fallback1890
-    get_hll_global $P509, "GLOBAL"
-    get_who $P508, $P509
-    new $P510, 'Hash'
-    set $P508["%RX"], $P510
-    set $P505, $P510
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P102, $P5002
+    find_dynamic_lex $P5004, "%*RX"
+    unless_null $P5004, fallback1889
+    get_hll_global $P5007, "GLOBAL"
+    get_who $P5006, $P5007
+    set $P5005, $P5006["%RX"]
+    unless_null $P5005, fallback1890
+    get_hll_global $P5009, "GLOBAL"
+    get_who $P5008, $P5009
+    new $P5010, 'Hash'
+    set $P5008["%RX"], $P5010
+    set $P5005, $P5010
   fallback1890:
-    unless_null $P505, vivi_5391891
+    unless_null $P5005, vivi_5391891
     die "Contextual %*RX not found"
-    box $P511, "Contextual %*RX not found"
-    set $P505, $P511
+    box $P5011, "Contextual %*RX not found"
+    set $P5005, $P5011
   vivi_5391891:
-    set $P504, $P505
+    set $P5004, $P5005
   fallback1889:
-    set $P503, $P504["name"]
-    unless_null $P503, fallback1892
-    nqp_get_sc_object $P512, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P503, $P512
+    set $P5003, $P5004["name"]
+    unless_null $P5003, fallback1892
+    nqp_get_sc_object $P5012, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5003, $P5012
   fallback1892:
-    set $S501, $P503
-    index $I501, $S501, ":sym<", 0
-    box $P513, $I501
-    set $P101, $P513
-    set $N501, $P101
-    set $N502, 0
-    islt $I502, $N501, $N502
-    box $P526, $I502
-    set $P525, $P526
-    unless $I502 goto if540_end1894 
-    find_dynamic_lex $P515, "%*RX"
-    unless_null $P515, fallback1895
-    get_hll_global $P518, "GLOBAL"
-    get_who $P517, $P518
-    set $P516, $P517["%RX"]
-    unless_null $P516, fallback1896
-    get_hll_global $P520, "GLOBAL"
-    get_who $P519, $P520
-    new $P521, 'Hash'
-    set $P519["%RX"], $P521
-    set $P516, $P521
+    set $S5001, $P5003
+    index $I5001, $S5001, ":sym<", 0
+    box $P5013, $I5001
+    set $P101, $P5013
+    set $N5001, $P101
+    set $N5002, 0
+    islt $I5002, $N5001, $N5002
+    box $P5026, $I5002
+    set $P5025, $P5026
+    unless $I5002 goto if540_end1894 
+    find_dynamic_lex $P5015, "%*RX"
+    unless_null $P5015, fallback1895
+    get_hll_global $P5018, "GLOBAL"
+    get_who $P5017, $P5018
+    set $P5016, $P5017["%RX"]
+    unless_null $P5016, fallback1896
+    get_hll_global $P5020, "GLOBAL"
+    get_who $P5019, $P5020
+    new $P5021, 'Hash'
+    set $P5019["%RX"], $P5021
+    set $P5016, $P5021
   fallback1896:
-    unless_null $P516, vivi_5411897
+    unless_null $P5016, vivi_5411897
     die "Contextual %*RX not found"
-    box $P522, "Contextual %*RX not found"
-    set $P516, $P522
+    box $P5022, "Contextual %*RX not found"
+    set $P5016, $P5022
   vivi_5411897:
-    set $P515, $P516
+    set $P5015, $P5016
   fallback1895:
-    set $P514, $P515["name"]
-    unless_null $P514, fallback1898
-    nqp_get_sc_object $P523, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P514, $P523
+    set $P5014, $P5015["name"]
+    unless_null $P5014, fallback1898
+    nqp_get_sc_object $P5023, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5014, $P5023
   fallback1898:
-    set $S502, $P514
-    index $I503, $S502, utf8:":sym\x{ab}", 0
-    box $P524, $I503
-    set $P101, $P524
-    set $P525, $P101
+    set $S5002, $P5014
+    index $I5003, $S5002, utf8:":sym\x{ab}", 0
+    box $P5024, $I5003
+    set $P101, $P5024
+    set $P5025, $P101
   if540_end1894:
-    find_dynamic_lex $P528, "%*RX"
-    unless_null $P528, fallback1899
-    get_hll_global $P531, "GLOBAL"
-    get_who $P530, $P531
-    set $P529, $P530["%RX"]
-    unless_null $P529, fallback1900
-    get_hll_global $P533, "GLOBAL"
-    get_who $P532, $P533
-    new $P534, 'Hash'
-    set $P532["%RX"], $P534
-    set $P529, $P534
+    find_dynamic_lex $P5028, "%*RX"
+    unless_null $P5028, fallback1899
+    get_hll_global $P5031, "GLOBAL"
+    get_who $P5030, $P5031
+    set $P5029, $P5030["%RX"]
+    unless_null $P5029, fallback1900
+    get_hll_global $P5033, "GLOBAL"
+    get_who $P5032, $P5033
+    new $P5034, 'Hash'
+    set $P5032["%RX"], $P5034
+    set $P5029, $P5034
   fallback1900:
-    unless_null $P529, vivi_5421901
+    unless_null $P5029, vivi_5421901
     die "Contextual %*RX not found"
-    box $P535, "Contextual %*RX not found"
-    set $P529, $P535
+    box $P5035, "Contextual %*RX not found"
+    set $P5029, $P5035
   vivi_5421901:
-    set $P528, $P529
+    set $P5028, $P5029
   fallback1899:
-    set $P527, $P528["name"]
-    unless_null $P527, fallback1902
-    nqp_get_sc_object $P536, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P527, $P536
+    set $P5027, $P5028["name"]
+    unless_null $P5027, fallback1902
+    nqp_get_sc_object $P5036, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5027, $P5036
   fallback1902:
-    set $S505, $P527
-    set $N504, $P101
-    set $N505, 5
-    add $N503, $N504, $N505
-    set $I504, $N503
-    substr $S504, $S505, $I504
-    chopn $S503, $S504, 1
-    box $P537, $S503
-    set $P102, $P537
+    set $S5005, $P5027
+    set $N5004, $P101
+    set $N5005, 5
+    add $N5003, $N5004, $N5005
+    set $I5004, $N5003
+    substr $S5004, $S5005, $I5004
+    chopn $S5003, $S5004, 1
+    box $P5037, $S5003
+    set $P102, $P5037
 .annotate 'line', 628
-    get_hll_global $P541, "GLOBAL"
-    nqp_get_package_through_who $P540, $P541, "QAST"
-    get_who $P539, $P540
-    set $P538, $P539["Regex"]
-    unless_null $P538, fallback1903
-    nqp_get_sc_object $P542, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P538, $P542
+    get_hll_global $P5041, "GLOBAL"
+    nqp_get_package_through_who $P5040, $P5041, "QAST"
+    get_who $P5039, $P5040
+    set $P5038, $P5039["Regex"]
+    unless_null $P5038, fallback1903
+    nqp_get_sc_object $P5042, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5038, $P5042
   fallback1903:
-    find_lex $P543, "$/"
+    find_lex $P5043, "$/"
 .annotate 'line', 629
-    get_hll_global $P547, "GLOBAL"
-    nqp_get_package_through_who $P546, $P547, "QAST"
-    get_who $P545, $P546
-    set $P544, $P545["Regex"]
-    unless_null $P544, fallback1904
-    nqp_get_sc_object $P548, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P544, $P548
+    get_hll_global $P5047, "GLOBAL"
+    nqp_get_package_through_who $P5046, $P5047, "QAST"
+    get_who $P5045, $P5046
+    set $P5044, $P5045["Regex"]
+    unless_null $P5044, fallback1904
+    nqp_get_sc_object $P5048, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5044, $P5048
   fallback1904:
-    find_lex $P549, "$/"
-    $P550 = $P544."new"($P102, "literal" :named("rxtype"), $P549 :named("node"))
-    $P551 = $P538."new"($P550, "sym" :named("name"), "subcapture" :named("rxtype"), $P543 :named("node"))
-    store_lex "$qast", $P551
-    .return ($P551) 
+    find_lex $P5049, "$/"
+    $P5050 = $P5044."new"($P102, "literal" :named("rxtype"), $P5049 :named("node"))
+    $P5051 = $P5038."new"($P5050, "sym" :named("name"), "subcapture" :named("rxtype"), $P5043 :named("node"))
+    store_lex "$qast", $P5051
+    .return ($P5051) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_201_1346233469.934") :anon :lex :outer("cuid_149_1346233469.934")
+.sub "" :subid("cuid_201_1346277621.774") :anon :lex :outer("cuid_149_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 636
     .param pmc _lex_param_0 
     .lex "$_", _lex_param_0 
-    find_lex $P502, "$qast"
-    set $P501, $P502[0]
-    unless_null $P501, fallback1912
-    nqp_get_sc_object $P503, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P501, $P503
+    find_lex $P5002, "$qast"
+    set $P5001, $P5002[0]
+    unless_null $P5001, fallback1912
+    nqp_get_sc_object $P5003, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5001, $P5003
   fallback1912:
-    $P504 = $P501."push"(_lex_param_0)
-    .return ($P504) 
+    $P5004 = $P5001."push"(_lex_param_0)
+    .return ($P5004) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "assertion:sym<[>" :subid("cuid_150_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "assertion:sym<[>" :subid("cuid_150_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 647
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
-    .const 'Sub' $P536 = 'cuid_202_1346233469.934' 
-    capture_lex $P536 
+    .const 'Sub' $P5036 = 'cuid_202_1346277621.774' 
+    capture_lex $P5036 
     .lex "$clist", $P101 
     .lex "$qast", $P102 
     .lex "$i", $P103 
     .lex "$n", $P104 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P102, $P502
-    nqp_get_sc_object $P503, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P103, $P503
-    nqp_get_sc_object $P504, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P104, $P504
-    set $P505, _lex_param_1["cclass_elem"]
-    unless_null $P505, fallback1928
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P505, $P506
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P102, $P5002
+    nqp_get_sc_object $P5003, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P103, $P5003
+    nqp_get_sc_object $P5004, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P104, $P5004
+    set $P5005, _lex_param_1["cclass_elem"]
+    unless_null $P5005, fallback1928
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5005, $P5006
   fallback1928:
-    set $P101, $P505
+    set $P101, $P5005
 .annotate 'line', 649
-    set $P507, $P101[0]
-    unless_null $P507, fallback1929
-    nqp_get_sc_object $P508, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P507, $P508
+    set $P5007, $P101[0]
+    unless_null $P5007, fallback1929
+    nqp_get_sc_object $P5008, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5007, $P5008
   fallback1929:
-    $P509 = $P507."ast"()
-    set $P102, $P509
+    $P5009 = $P5007."ast"()
+    set $P102, $P5009
 .annotate 'line', 650
-    $P510 = $P102."negate"()
-    set $P512, $P510
-    unless $P510 goto if547_end1933 
-    $P511 = $P102."rxtype"()
-    set $S501, $P511
-    iseq $I501, $S501, "subrule"
-    box $P513, $I501
-    set $P512, $P513
+    $P5010 = $P102."negate"()
+    set $P5012, $P5010
+    unless $P5010 goto if547_end1933 
+    $P5011 = $P102."rxtype"()
+    set $S5001, $P5011
+    iseq $I5001, $S5001, "subrule"
+    box $P5013, $I5001
+    set $P5012, $P5013
   if547_end1933:
-    set $P527, $P512
-    unless $P512 goto if546_end1931 
+    set $P5027, $P5012
+    unless $P5012 goto if546_end1931 
 .annotate 'line', 651
-    $P514 = $P102."subtype"("zerowidth")
+    $P5014 = $P102."subtype"("zerowidth")
 .annotate 'line', 652
-    get_hll_global $P518, "GLOBAL"
-    nqp_get_package_through_who $P517, $P518, "QAST"
-    get_who $P516, $P517
-    set $P515, $P516["Regex"]
-    unless_null $P515, fallback1934
-    nqp_get_sc_object $P519, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P515, $P519
+    get_hll_global $P5018, "GLOBAL"
+    nqp_get_package_through_who $P5017, $P5018, "QAST"
+    get_who $P5016, $P5017
+    set $P5015, $P5016["Regex"]
+    unless_null $P5015, fallback1934
+    nqp_get_sc_object $P5019, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5015, $P5019
   fallback1934:
 .annotate 'line', 654
-    get_hll_global $P523, "GLOBAL"
-    nqp_get_package_through_who $P522, $P523, "QAST"
-    get_who $P521, $P522
-    set $P520, $P521["Regex"]
-    unless_null $P520, fallback1935
-    nqp_get_sc_object $P524, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P520, $P524
+    get_hll_global $P5023, "GLOBAL"
+    nqp_get_package_through_who $P5022, $P5023, "QAST"
+    get_who $P5021, $P5022
+    set $P5020, $P5021["Regex"]
+    unless_null $P5020, fallback1935
+    nqp_get_sc_object $P5024, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5020, $P5024
   fallback1935:
-    $P525 = $P520."new"("cclass" :named("rxtype"), "." :named("subtype"))
-    $P526 = $P515."new"($P102, $P525, "concat" :named("rxtype"), _lex_param_1 :named("node"))
-    set $P102, $P526
-    set $P527, $P102
+    $P5025 = $P5020."new"("cclass" :named("rxtype"), "." :named("subtype"))
+    $P5026 = $P5015."new"($P102, $P5025, "concat" :named("rxtype"), _lex_param_1 :named("node"))
+    set $P102, $P5026
+    set $P5027, $P102
   if546_end1931:
-    box $P528, 1
-    set $P103, $P528
-    set $N501, $P101
-    box $P529, $N501
-    set $P104, $P529
-    new $P533, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P533, while548_handlers1939
-    push_eh $P533
+    box $P5028, 1
+    set $P103, $P5028
+    set $N5001, $P101
+    box $P5029, $N5001
+    set $P104, $P5029
+    new $P5033, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5033, while548_handlers1939
+    push_eh $P5033
   while548_test1936:
-    set $N502, $P103
-    set $N503, $P104
-    islt $I502, $N502, $N503
-    box $P534, $I502
-    set $P532, $P534
-    unless $I502 goto while548_done1940 
+    set $N5002, $P103
+    set $N5003, $P104
+    islt $I5002, $N5002, $N5003
+    box $P5034, $I5002
+    set $P5032, $P5034
+    unless $I5002 goto while548_done1940 
   while548_redo1938:
-    .const 'Sub' $P530 = 'cuid_202_1346233469.934' 
-    capture_lex $P530
-    $P531 = $P530()
-    set $P532, $P531
+    .const 'Sub' $P5030 = 'cuid_202_1346277621.774' 
+    capture_lex $P5030
+    $P5031 = $P5030()
+    set $P5032, $P5031
     goto while548_test1936 
   while548_handlers1939:
-    .get_results ($P533)
-    pop_upto_eh $P533
-    getattribute $P533, $P533, 'type'
-    eq $P533, .CONTROL_LOOP_NEXT, while548_test1936
-    eq $P533, .CONTROL_LOOP_REDO, while548_redo1938
+    .get_results ($P5033)
+    pop_upto_eh $P5033
+    getattribute $P5033, $P5033, 'type'
+    eq $P5033, .CONTROL_LOOP_NEXT, while548_test1936
+    eq $P5033, .CONTROL_LOOP_REDO, while548_redo1938
   while548_done1940:
     pop_eh 
 .annotate 'line', 669
-    $P535 = _lex_param_1."!make"($P102)
-    .return ($P535) 
+    $P5035 = _lex_param_1."!make"($P102)
+    .return ($P5035) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_202_1346233469.934") :anon :lex :outer("cuid_150_1346233469.934")
+.sub "" :subid("cuid_202_1346277621.774") :anon :lex :outer("cuid_150_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 658
     .lex "$ast", $P101 
     .local pmc tmp_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 659
-    find_lex $P503, "$clist"
-    find_lex $P504, "$i"
-    set $I501, $P504
-    set $P502, $P503[$I501]
-    unless_null $P502, fallback1941
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P505
+    find_lex $P5003, "$clist"
+    find_lex $P5004, "$i"
+    set $I5001, $P5004
+    set $P5002, $P5003[$I5001]
+    unless_null $P5002, fallback1941
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5005
   fallback1941:
-    $P506 = $P502."ast"()
-    set $P101, $P506
+    $P5006 = $P5002."ast"()
+    set $P101, $P5006
 .annotate 'line', 660
-    $P507 = $P101."negate"()
-    unless $P507 goto if549_else1942 
+    $P5007 = $P101."negate"()
+    unless $P5007 goto if549_else1942 
 .annotate 'line', 661
-    $P508 = $P101."subtype"("zerowidth")
+    $P5008 = $P101."subtype"("zerowidth")
 .annotate 'line', 662
-    get_hll_global $P512, "GLOBAL"
-    nqp_get_package_through_who $P511, $P512, "QAST"
-    get_who $P510, $P511
-    set $P509, $P510["Regex"]
-    unless_null $P509, fallback1944
-    nqp_get_sc_object $P513, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P509, $P513
+    get_hll_global $P5012, "GLOBAL"
+    nqp_get_package_through_who $P5011, $P5012, "QAST"
+    get_who $P5010, $P5011
+    set $P5009, $P5010["Regex"]
+    unless_null $P5009, fallback1944
+    nqp_get_sc_object $P5013, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5009, $P5013
   fallback1944:
-    find_lex $P514, "$qast"
-    find_lex $P515, "$/"
-    $P516 = $P509."new"($P101, $P514, "concat" :named("rxtype"), $P515 :named("node"))
-    store_lex "$qast", $P516
-    set $P525, $P516
+    find_lex $P5014, "$qast"
+    find_lex $P5015, "$/"
+    $P5016 = $P5009."new"($P101, $P5014, "concat" :named("rxtype"), $P5015 :named("node"))
+    store_lex "$qast", $P5016
+    set $P5025, $P5016
     goto if549_end1943
   if549_else1942:
 .annotate 'line', 664
 .annotate 'line', 665
-    get_hll_global $P520, "GLOBAL"
-    nqp_get_package_through_who $P519, $P520, "QAST"
-    get_who $P518, $P519
-    set $P517, $P518["Regex"]
-    unless_null $P517, fallback1945
-    nqp_get_sc_object $P521, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P517, $P521
+    get_hll_global $P5020, "GLOBAL"
+    nqp_get_package_through_who $P5019, $P5020, "QAST"
+    get_who $P5018, $P5019
+    set $P5017, $P5018["Regex"]
+    unless_null $P5017, fallback1945
+    nqp_get_sc_object $P5021, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5017, $P5021
   fallback1945:
-    find_lex $P522, "$qast"
-    find_lex $P523, "$/"
-    $P524 = $P517."new"($P522, $P101, "altseq" :named("rxtype"), $P523 :named("node"))
-    store_lex "$qast", $P524
-    set $P525, $P524
+    find_lex $P5022, "$qast"
+    find_lex $P5023, "$/"
+    $P5024 = $P5017."new"($P5022, $P101, "altseq" :named("rxtype"), $P5023 :named("node"))
+    store_lex "$qast", $P5024
+    set $P5025, $P5024
   if549_end1943:
-    find_lex $P526, "$i"
-    set tmp_1, $P526
-    set $N502, tmp_1
-    set $N503, 1
-    add $N501, $N502, $N503
-    box $P527, $N501
-    store_lex "$i", $P527
+    find_lex $P5026, "$i"
+    set tmp_1, $P5026
+    set $N5002, tmp_1
+    set $N5003, 1
+    add $N5001, $N5002, $N5003
+    box $P5027, $N5001
+    store_lex "$i", $P5027
     .return (tmp_1) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "arg" :subid("cuid_151_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "arg" :subid("cuid_151_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 672
     .param pmc _lex_param_0 
@@ -20740,480 +20740,480 @@
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
 .annotate 'line', 673
-    set $P501, _lex_param_1["quote_EXPR"]
-    unless_null $P501, fallback1948
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P501, $P502
+    set $P5001, _lex_param_1["quote_EXPR"]
+    unless_null $P5001, fallback1948
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5001, $P5002
   fallback1948:
-    unless $P501 goto if550_else1946 
-    set $P503, _lex_param_1["quote_EXPR"]
-    unless_null $P503, fallback1949
-    nqp_get_sc_object $P504, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P503, $P504
+    unless $P5001 goto if550_else1946 
+    set $P5003, _lex_param_1["quote_EXPR"]
+    unless_null $P5003, fallback1949
+    nqp_get_sc_object $P5004, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5003, $P5004
   fallback1949:
-    $P505 = $P503."ast"()
-    set $P508, $P505
+    $P5005 = $P5003."ast"()
+    set $P5008, $P5005
     goto if550_end1947
   if550_else1946:
-    set $P506, _lex_param_1["val"]
-    unless_null $P506, fallback1950
-    nqp_get_sc_object $P507, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P506, $P507
+    set $P5006, _lex_param_1["val"]
+    unless_null $P5006, fallback1950
+    nqp_get_sc_object $P5007, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5006, $P5007
   fallback1950:
-    set $N501, $P506
-    box $P509, $N501
-    set $P508, $P509
+    set $N5001, $P5006
+    box $P5009, $N5001
+    set $P5008, $P5009
   if550_end1947:
-    $P510 = _lex_param_1."!make"($P508)
-    .return ($P510) 
+    $P5010 = _lex_param_1."!make"($P5008)
+    .return ($P5010) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "arglist" :subid("cuid_152_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "arglist" :subid("cuid_152_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 676
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
-    .const 'Sub' $P517 = 'cuid_203_1346233469.934' 
-    capture_lex $P517 
+    .const 'Sub' $P5017 = 'cuid_203_1346277621.774' 
+    capture_lex $P5017 
     .lex "$past", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 677
-    get_hll_global $P505, "GLOBAL"
-    nqp_get_package_through_who $P504, $P505, "PAST"
-    get_who $P503, $P504
-    set $P502, $P503["Op"]
-    unless_null $P502, fallback1951
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P506
+    get_hll_global $P5005, "GLOBAL"
+    nqp_get_package_through_who $P5004, $P5005, "PAST"
+    get_who $P5003, $P5004
+    set $P5002, $P5003["Op"]
+    unless_null $P5002, fallback1951
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5006
   fallback1951:
-    $P507 = $P502."new"("list" :named("pasttype"))
-    set $P101, $P507
-    set $P511, _lex_param_1["arg"]
-    unless_null $P511, fallback1952
-    nqp_get_sc_object $P512, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P511, $P512
+    $P5007 = $P5002."new"("list" :named("pasttype"))
+    set $P101, $P5007
+    set $P5011, _lex_param_1["arg"]
+    unless_null $P5011, fallback1952
+    nqp_get_sc_object $P5012, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5011, $P5012
   fallback1952:
-    set $P508, $P511
-    iter $P510, $P511
-    new $P514, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P514, for_handlers1953
-    push_eh $P514
+    set $P5008, $P5011
+    iter $P5010, $P5011
+    new $P5014, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5014, for_handlers1953
+    push_eh $P5014
   for_next1954:
-    unless $P510, for_done1956
-    shift $P515, $P510
+    unless $P5010, for_done1956
+    shift $P5015, $P5010
   for_redo1955:
-    .const 'Sub' $P513 = 'cuid_203_1346233469.934' 
-    capture_lex $P513
-    $P508 = $P513($P515)
+    .const 'Sub' $P5013 = 'cuid_203_1346277621.774' 
+    capture_lex $P5013
+    $P5008 = $P5013($P5015)
     goto for_next1954
   for_handlers1953:
-    .get_results ($P514)
-    pop_upto_eh $P514
-    getattribute $P514, $P514, 'type'
-    eq $P514, .CONTROL_LOOP_NEXT, for_next1954
-    eq $P514, .CONTROL_LOOP_REDO, for_redo1955
+    .get_results ($P5014)
+    pop_upto_eh $P5014
+    getattribute $P5014, $P5014, 'type'
+    eq $P5014, .CONTROL_LOOP_NEXT, for_next1954
+    eq $P5014, .CONTROL_LOOP_REDO, for_redo1955
   for_done1956:
     pop_eh 
 .annotate 'line', 679
-    $P516 = _lex_param_1."!make"($P101)
-    .return ($P516) 
+    $P5016 = _lex_param_1."!make"($P101)
+    .return ($P5016) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_203_1346233469.934") :anon :lex :outer("cuid_152_1346233469.934")
+.sub "" :subid("cuid_203_1346277621.774") :anon :lex :outer("cuid_152_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 678
     .param pmc _lex_param_0 
     .lex "$_", _lex_param_0 
-    find_lex $P501, "$past"
-    $P502 = _lex_param_0."ast"()
-    $P503 = $P501."push"($P502)
-    .return ($P503) 
+    find_lex $P5001, "$past"
+    $P5002 = _lex_param_0."ast"()
+    $P5003 = $P5001."push"($P5002)
+    .return ($P5003) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "cclass_elem" :subid("cuid_153_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "cclass_elem" :subid("cuid_153_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 682
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
-    .const 'Sub' $P517 = 'cuid_204_1346233469.934' 
-    capture_lex $P517 
-    .const 'Sub' $P517 = 'cuid_205_1346233469.934' 
-    capture_lex $P517 
-    .const 'Sub' $P517 = 'cuid_209_1346233469.934' 
-    capture_lex $P517 
+    .const 'Sub' $P5017 = 'cuid_204_1346277621.774' 
+    capture_lex $P5017 
+    .const 'Sub' $P5017 = 'cuid_205_1346277621.774' 
+    capture_lex $P5017 
+    .const 'Sub' $P5017 = 'cuid_209_1346277621.774' 
+    capture_lex $P5017 
     .lex "$str", $P101 
     .lex "$qast", $P102 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P102, $P502
-    box $P503, ""
-    set $P101, $P503
-    set $P504, _lex_param_1["name"]
-    unless_null $P504, fallback1959
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P504, $P505
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P102, $P5002
+    box $P5003, ""
+    set $P101, $P5003
+    set $P5004, _lex_param_1["name"]
+    unless_null $P5004, fallback1959
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5004, $P5005
   fallback1959:
-    unless $P504 goto if551_else1957 
-    .const 'Sub' $P506 = 'cuid_204_1346233469.934' 
-    capture_lex $P506
-    $P507 = $P506()
-    set $P515, $P507
+    unless $P5004 goto if551_else1957 
+    .const 'Sub' $P5006 = 'cuid_204_1346277621.774' 
+    capture_lex $P5006
+    $P5007 = $P5006()
+    set $P5015, $P5007
     goto if551_end1958
   if551_else1957:
-    set $P508, _lex_param_1["uniprop"]
-    unless_null $P508, fallback1966
-    nqp_get_sc_object $P509, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P508, $P509
+    set $P5008, _lex_param_1["uniprop"]
+    unless_null $P5008, fallback1966
+    nqp_get_sc_object $P5009, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5008, $P5009
   fallback1966:
-    unless $P508 goto if552_else1964 
-    .const 'Sub' $P510 = 'cuid_205_1346233469.934' 
-    capture_lex $P510
-    $P511 = $P510()
-    set $P514, $P511
+    unless $P5008 goto if552_else1964 
+    .const 'Sub' $P5010 = 'cuid_205_1346277621.774' 
+    capture_lex $P5010
+    $P5011 = $P5010()
+    set $P5014, $P5011
     goto if552_end1965
   if552_else1964:
-    .const 'Sub' $P512 = 'cuid_209_1346233469.934' 
-    capture_lex $P512
-    $P513 = $P512()
-    set $P514, $P513
+    .const 'Sub' $P5012 = 'cuid_209_1346277621.774' 
+    capture_lex $P5012
+    $P5013 = $P5012()
+    set $P5014, $P5013
   if552_end1965:
-    set $P515, $P514
+    set $P5015, $P5014
   if551_end1958:
 .annotate 'line', 746
-    $P516 = _lex_param_1."!make"($P102)
-    .return ($P516) 
+    $P5016 = _lex_param_1."!make"($P102)
+    .return ($P5016) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_204_1346233469.934") :anon :lex :outer("cuid_153_1346233469.934")
+.sub "" :subid("cuid_204_1346277621.774") :anon :lex :outer("cuid_153_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 685
     .lex "$name", $P101 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    find_lex $P503, "$/"
-    set $P502, $P503["name"]
-    unless_null $P502, fallback1960
-    nqp_get_sc_object $P504, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P504
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    find_lex $P5003, "$/"
+    set $P5002, $P5003["name"]
+    unless_null $P5002, fallback1960
+    nqp_get_sc_object $P5004, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5004
   fallback1960:
-    set $S501, $P502
-    box $P505, $S501
-    set $P101, $P505
+    set $S5001, $P5002
+    box $P5005, $S5001
+    set $P101, $P5005
 .annotate 'line', 687
-    get_hll_global $P509, "GLOBAL"
-    nqp_get_package_through_who $P508, $P509, "QAST"
-    get_who $P507, $P508
-    set $P506, $P507["Regex"]
-    unless_null $P506, fallback1961
-    nqp_get_sc_object $P510, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P506, $P510
+    get_hll_global $P5009, "GLOBAL"
+    nqp_get_package_through_who $P5008, $P5009, "QAST"
+    get_who $P5007, $P5008
+    set $P5006, $P5007["Regex"]
+    unless_null $P5006, fallback1961
+    nqp_get_sc_object $P5010, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5006, $P5010
   fallback1961:
-    get_hll_global $P514, "GLOBAL"
-    nqp_get_package_through_who $P513, $P514, "PAST"
-    get_who $P512, $P513
-    set $P511, $P512["Node"]
-    unless_null $P511, fallback1962
-    nqp_get_sc_object $P515, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P511, $P515
+    get_hll_global $P5014, "GLOBAL"
+    nqp_get_package_through_who $P5013, $P5014, "PAST"
+    get_who $P5012, $P5013
+    set $P5011, $P5012["Node"]
+    unless_null $P5011, fallback1962
+    nqp_get_sc_object $P5015, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5011, $P5015
   fallback1962:
-    $P516 = $P511."new"($P101)
-    find_lex $P518, "$/"
-    set $P517, $P518["sign"]
-    unless_null $P517, fallback1963
-    nqp_get_sc_object $P519, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P517, $P519
+    $P5016 = $P5011."new"($P101)
+    find_lex $P5018, "$/"
+    set $P5017, $P5018["sign"]
+    unless_null $P5017, fallback1963
+    nqp_get_sc_object $P5019, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5017, $P5019
   fallback1963:
-    set $S502, $P517
-    iseq $I501, $S502, "-"
-    find_lex $P520, "$/"
-    $P521 = $P506."new"($P516, "subrule" :named("rxtype"), "method" :named("subtype"), $I501 :named("negate"), $P520 :named("node"))
-    store_lex "$qast", $P521
-    .return ($P521) 
+    set $S5002, $P5017
+    iseq $I5001, $S5002, "-"
+    find_lex $P5020, "$/"
+    $P5021 = $P5006."new"($P5016, "subrule" :named("rxtype"), "method" :named("subtype"), $I5001 :named("negate"), $P5020 :named("node"))
+    store_lex "$qast", $P5021
+    .return ($P5021) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_205_1346233469.934") :anon :lex :outer("cuid_153_1346233469.934")
+.sub "" :subid("cuid_205_1346277621.774") :anon :lex :outer("cuid_153_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 690
     .lex "$uniprop", $P101 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    find_lex $P503, "$/"
-    set $P502, $P503["uniprop"]
-    unless_null $P502, fallback1967
-    nqp_get_sc_object $P504, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P504
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    find_lex $P5003, "$/"
+    set $P5002, $P5003["uniprop"]
+    unless_null $P5002, fallback1967
+    nqp_get_sc_object $P5004, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5004
   fallback1967:
-    set $S501, $P502
-    box $P505, $S501
-    set $P101, $P505
+    set $S5001, $P5002
+    box $P5005, $S5001
+    set $P101, $P5005
 .annotate 'line', 692
-    get_hll_global $P509, "GLOBAL"
-    nqp_get_package_through_who $P508, $P509, "QAST"
-    get_who $P507, $P508
-    set $P506, $P507["Regex"]
-    unless_null $P506, fallback1968
-    nqp_get_sc_object $P510, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P506, $P510
+    get_hll_global $P5009, "GLOBAL"
+    nqp_get_package_through_who $P5008, $P5009, "QAST"
+    get_who $P5007, $P5008
+    set $P5006, $P5007["Regex"]
+    unless_null $P5006, fallback1968
+    nqp_get_sc_object $P5010, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5006, $P5010
   fallback1968:
-    find_lex $P512, "$/"
-    set $P511, $P512["sign"]
-    unless_null $P511, fallback1973
-    nqp_get_sc_object $P513, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P511, $P513
+    find_lex $P5012, "$/"
+    set $P5011, $P5012["sign"]
+    unless_null $P5011, fallback1973
+    nqp_get_sc_object $P5013, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5011, $P5013
   fallback1973:
-    set $S502, $P511
-    iseq $I501, $S502, "-"
-    set $I503, $I501
-    unless $I501 goto if554_end1972 
-    find_lex $P515, "$/"
-    set $P514, $P515["invert"]
-    unless_null $P514, fallback1974
-    nqp_get_sc_object $P516, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P514, $P516
+    set $S5002, $P5011
+    iseq $I5001, $S5002, "-"
+    set $I5003, $I5001
+    unless $I5001 goto if554_end1972 
+    find_lex $P5015, "$/"
+    set $P5014, $P5015["invert"]
+    unless_null $P5014, fallback1974
+    nqp_get_sc_object $P5016, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5014, $P5016
   fallback1974:
-    set $S503, $P514
-    isne $I502, $S503, "!"
-    set $I503, $I502
+    set $S5003, $P5014
+    isne $I5002, $S5003, "!"
+    set $I5003, $I5002
   if554_end1972:
-    set $I507, $I503
-    if $I503 goto unless553_end1970 
-    find_lex $P518, "$/"
-    set $P517, $P518["sign"]
-    unless_null $P517, fallback1977
-    nqp_get_sc_object $P519, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P517, $P519
+    set $I5007, $I5003
+    if $I5003 goto unless553_end1970 
+    find_lex $P5018, "$/"
+    set $P5017, $P5018["sign"]
+    unless_null $P5017, fallback1977
+    nqp_get_sc_object $P5019, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5017, $P5019
   fallback1977:
-    set $S504, $P517
-    isne $I504, $S504, "-"
-    set $I506, $I504
-    unless $I504 goto if555_end1976 
-    find_lex $P521, "$/"
-    set $P520, $P521["invert"]
-    unless_null $P520, fallback1978
-    nqp_get_sc_object $P522, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P520, $P522
+    set $S5004, $P5017
+    isne $I5004, $S5004, "-"
+    set $I5006, $I5004
+    unless $I5004 goto if555_end1976 
+    find_lex $P5021, "$/"
+    set $P5020, $P5021["invert"]
+    unless_null $P5020, fallback1978
+    nqp_get_sc_object $P5022, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5020, $P5022
   fallback1978:
-    set $S505, $P520
-    iseq $I505, $S505, "!"
-    set $I506, $I505
+    set $S5005, $P5020
+    iseq $I5005, $S5005, "!"
+    set $I5006, $I5005
   if555_end1976:
-    set $I507, $I506
+    set $I5007, $I5006
   unless553_end1970:
-    find_lex $P523, "$/"
-    $P524 = $P506."new"($P101, "uniprop" :named("rxtype"), $I507 :named("negate"), $P523 :named("node"))
-    store_lex "$qast", $P524
-    .return ($P524) 
+    find_lex $P5023, "$/"
+    $P5024 = $P5006."new"($P101, "uniprop" :named("rxtype"), $I5007 :named("negate"), $P5023 :named("node"))
+    store_lex "$qast", $P5024
+    .return ($P5024) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_209_1346233469.934") :anon :lex :outer("cuid_153_1346233469.934")
+.sub "" :subid("cuid_209_1346277621.774") :anon :lex :outer("cuid_153_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 696
-    .const 'Sub' $P558 = 'cuid_207_1346233469.934' 
-    capture_lex $P558 
+    .const 'Sub' $P5058 = 'cuid_207_1346277621.774' 
+    capture_lex $P5058 
     .lex "@alts", $P101 
-    new $P501, 'ResizablePMCArray'
-    set $P101, $P501
-    find_lex $P506, "$/"
-    set $P505, $P506["charspec"]
-    unless_null $P505, fallback1979
-    nqp_get_sc_object $P507, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P505, $P507
+    new $P5001, 'ResizablePMCArray'
+    set $P101, $P5001
+    find_lex $P5006, "$/"
+    set $P5005, $P5006["charspec"]
+    unless_null $P5005, fallback1979
+    nqp_get_sc_object $P5007, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5005, $P5007
   fallback1979:
-    set $P502, $P505
-    iter $P504, $P505
-    new $P509, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P509, for_handlers2039
-    push_eh $P509
+    set $P5002, $P5005
+    iter $P5004, $P5005
+    new $P5009, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5009, for_handlers2039
+    push_eh $P5009
   for_next2040:
-    unless $P504, for_done2042
-    shift $P510, $P504
+    unless $P5004, for_done2042
+    shift $P5010, $P5004
   for_redo2041:
-    .const 'Sub' $P508 = 'cuid_207_1346233469.934' 
-    capture_lex $P508
-    $P502 = $P508($P510)
+    .const 'Sub' $P5008 = 'cuid_207_1346277621.774' 
+    capture_lex $P5008
+    $P5002 = $P5008($P5010)
     goto for_next2040
   for_handlers2039:
-    .get_results ($P509)
-    pop_upto_eh $P509
-    getattribute $P509, $P509, 'type'
-    eq $P509, .CONTROL_LOOP_NEXT, for_next2040
-    eq $P509, .CONTROL_LOOP_REDO, for_redo2041
+    .get_results ($P5009)
+    pop_upto_eh $P5009
+    getattribute $P5009, $P5009, 'type'
+    eq $P5009, .CONTROL_LOOP_NEXT, for_next2040
+    eq $P5009, .CONTROL_LOOP_REDO, for_redo2041
   for_done2042:
     pop_eh 
-    find_lex $P511, "$str"
-    set $S501, $P511
-    length $I501, $S501
-    box $P525, $I501
-    set $P524, $P525
-    unless $I501 goto if571_end2044 
+    find_lex $P5011, "$str"
+    set $S5001, $P5011
+    length $I5001, $S5001
+    box $P5025, $I5001
+    set $P5024, $P5025
+    unless $I5001 goto if571_end2044 
 .annotate 'line', 736
-    get_hll_global $P515, "GLOBAL"
-    nqp_get_package_through_who $P514, $P515, "QAST"
-    get_who $P513, $P514
-    set $P512, $P513["Regex"]
-    unless_null $P512, fallback2045
-    nqp_get_sc_object $P516, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P512, $P516
+    get_hll_global $P5015, "GLOBAL"
+    nqp_get_package_through_who $P5014, $P5015, "QAST"
+    get_who $P5013, $P5014
+    set $P5012, $P5013["Regex"]
+    unless_null $P5012, fallback2045
+    nqp_get_sc_object $P5016, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5012, $P5016
   fallback2045:
-    find_lex $P517, "$str"
-    find_lex $P518, "$/"
-    find_lex $P520, "$/"
-    set $P519, $P520["sign"]
-    unless_null $P519, fallback2046
-    nqp_get_sc_object $P521, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P519, $P521
+    find_lex $P5017, "$str"
+    find_lex $P5018, "$/"
+    find_lex $P5020, "$/"
+    set $P5019, $P5020["sign"]
+    unless_null $P5019, fallback2046
+    nqp_get_sc_object $P5021, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5019, $P5021
   fallback2046:
-    set $S502, $P519
-    iseq $I502, $S502, "-"
-    $P522 = $P512."new"($P517, "enumcharlist" :named("rxtype"), $P518 :named("node"), $I502 :named("negate"))
-    $P523 = $P101."push"($P522)
-    set $P524, $P523
+    set $S5002, $P5019
+    iseq $I5002, $S5002, "-"
+    $P5022 = $P5012."new"($P5017, "enumcharlist" :named("rxtype"), $P5018 :named("node"), $I5002 :named("negate"))
+    $P5023 = $P101."push"($P5022)
+    set $P5024, $P5023
   if571_end2044:
-    set $N501, $P101
-    set $N502, 1
-    iseq $I503, $N501, $N502
-    unless $I503 goto if572_else2047 
-    set $P526, $P101[0]
-    unless_null $P526, fallback2049
-    nqp_get_sc_object $P527, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P526, $P527
+    set $N5001, $P101
+    set $N5002, 1
+    iseq $I5003, $N5001, $N5002
+    unless $I5003 goto if572_else2047 
+    set $P5026, $P101[0]
+    unless_null $P5026, fallback2049
+    nqp_get_sc_object $P5027, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5026, $P5027
   fallback2049:
-    set $P557, $P526
+    set $P5057, $P5026
     goto if572_end2048
   if572_else2047:
-    find_lex $P529, "$/"
-    set $P528, $P529["sign"]
-    unless_null $P528, fallback2052
-    nqp_get_sc_object $P530, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P528, $P530
+    find_lex $P5029, "$/"
+    set $P5028, $P5029["sign"]
+    unless_null $P5028, fallback2052
+    nqp_get_sc_object $P5030, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5028, $P5030
   fallback2052:
-    set $S503, $P528
-    iseq $I504, $S503, "-"
-    unless $I504 goto if573_else2050 
+    set $S5003, $P5028
+    iseq $I5004, $S5003, "-"
+    unless $I5004 goto if573_else2050 
 .annotate 'line', 740
-    get_hll_global $P534, "GLOBAL"
-    nqp_get_package_through_who $P533, $P534, "QAST"
-    get_who $P532, $P533
-    set $P531, $P532["Regex"]
-    unless_null $P531, fallback2053
-    nqp_get_sc_object $P535, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P531, $P535
+    get_hll_global $P5034, "GLOBAL"
+    nqp_get_package_through_who $P5033, $P5034, "QAST"
+    get_who $P5032, $P5033
+    set $P5031, $P5032["Regex"]
+    unless_null $P5031, fallback2053
+    nqp_get_sc_object $P5035, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5031, $P5035
   fallback2053:
-    find_lex $P536, "$/"
+    find_lex $P5036, "$/"
 .annotate 'line', 741
-    get_hll_global $P540, "GLOBAL"
-    nqp_get_package_through_who $P539, $P540, "QAST"
-    get_who $P538, $P539
-    set $P537, $P538["Regex"]
-    unless_null $P537, fallback2054
-    nqp_get_sc_object $P541, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P537, $P541
+    get_hll_global $P5040, "GLOBAL"
+    nqp_get_package_through_who $P5039, $P5040, "QAST"
+    get_who $P5038, $P5039
+    set $P5037, $P5038["Regex"]
+    unless_null $P5037, fallback2054
+    nqp_get_sc_object $P5041, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5037, $P5041
   fallback2054:
-    $P542 = $P537."new"($P101 :flat, "conj" :named("rxtype"), "zerowidth" :named("subtype"))
+    $P5042 = $P5037."new"($P101 :flat, "conj" :named("rxtype"), "zerowidth" :named("subtype"))
 .annotate 'line', 742
-    get_hll_global $P546, "GLOBAL"
-    nqp_get_package_through_who $P545, $P546, "QAST"
-    get_who $P544, $P545
-    set $P543, $P544["Regex"]
-    unless_null $P543, fallback2055
-    nqp_get_sc_object $P547, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P543, $P547
+    get_hll_global $P5046, "GLOBAL"
+    nqp_get_package_through_who $P5045, $P5046, "QAST"
+    get_who $P5044, $P5045
+    set $P5043, $P5044["Regex"]
+    unless_null $P5043, fallback2055
+    nqp_get_sc_object $P5047, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5043, $P5047
   fallback2055:
-    $P548 = $P543."new"("cclass" :named("rxtype"), "." :named("subtype"))
-    $P549 = $P531."new"($P542, $P548, "concat" :named("rxtype"), $P536 :named("node"))
-    set $P556, $P549
+    $P5048 = $P5043."new"("cclass" :named("rxtype"), "." :named("subtype"))
+    $P5049 = $P5031."new"($P5042, $P5048, "concat" :named("rxtype"), $P5036 :named("node"))
+    set $P5056, $P5049
     goto if573_end2051
   if573_else2050:
 .annotate 'line', 743
-    get_hll_global $P553, "GLOBAL"
-    nqp_get_package_through_who $P552, $P553, "QAST"
-    get_who $P551, $P552
-    set $P550, $P551["Regex"]
-    unless_null $P550, fallback2056
-    nqp_get_sc_object $P554, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P550, $P554
+    get_hll_global $P5053, "GLOBAL"
+    nqp_get_package_through_who $P5052, $P5053, "QAST"
+    get_who $P5051, $P5052
+    set $P5050, $P5051["Regex"]
+    unless_null $P5050, fallback2056
+    nqp_get_sc_object $P5054, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5050, $P5054
   fallback2056:
-    $P555 = $P550."new"($P101 :flat, "altseq" :named("rxtype"))
-    set $P556, $P555
+    $P5055 = $P5050."new"($P101 :flat, "altseq" :named("rxtype"))
+    set $P5056, $P5055
   if573_end2051:
-    set $P557, $P556
+    set $P5057, $P5056
   if572_end2048:
-    store_lex "$qast", $P557
-    .return ($P557) 
+    store_lex "$qast", $P5057
+    .return ($P5057) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_207_1346233469.934") :anon :lex :outer("cuid_209_1346233469.934")
+.sub "" :subid("cuid_207_1346277621.774") :anon :lex :outer("cuid_209_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 698
     .param pmc _lex_param_0 
-    .const 'Sub' $P517 = 'cuid_206_1346233469.934' 
-    capture_lex $P517 
-    .const 'Sub' $P517 = 'cuid_208_1346233469.934' 
-    capture_lex $P517 
+    .const 'Sub' $P5017 = 'cuid_206_1346277621.774' 
+    capture_lex $P5017 
+    .const 'Sub' $P5017 = 'cuid_208_1346277621.774' 
+    capture_lex $P5017 
     .lex "$_", _lex_param_0 
-    set $P501, _lex_param_0[1]
-    unless_null $P501, fallback1982
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P501, $P502
+    set $P5001, _lex_param_0[1]
+    unless_null $P5001, fallback1982
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5001, $P5002
   fallback1982:
-    unless $P501 goto if556_else1980 
-    .const 'Sub' $P503 = 'cuid_206_1346233469.934' 
-    capture_lex $P503
-    $P504 = $P503()
-    set $P516, $P504
+    unless $P5001 goto if556_else1980 
+    .const 'Sub' $P5003 = 'cuid_206_1346277621.774' 
+    capture_lex $P5003
+    $P5004 = $P5003()
+    set $P5016, $P5004
     goto if556_end1981
   if556_else1980:
-    set $P506, _lex_param_0[0]
-    unless_null $P506, fallback2031
-    nqp_get_sc_object $P507, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P506, $P507
+    set $P5006, _lex_param_0[0]
+    unless_null $P5006, fallback2031
+    nqp_get_sc_object $P5007, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5006, $P5007
   fallback2031:
-    set $P505, $P506["backslash"]
-    unless_null $P505, fallback2032
-    nqp_get_sc_object $P508, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P505, $P508
+    set $P5005, $P5006["backslash"]
+    unless_null $P5005, fallback2032
+    nqp_get_sc_object $P5008, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5005, $P5008
   fallback2032:
-    unless $P505 goto if569_else2029 
-    .const 'Sub' $P509 = 'cuid_208_1346233469.934' 
-    capture_lex $P509
-    $P510 = $P509()
-    set $P515, $P510
+    unless $P5005 goto if569_else2029 
+    .const 'Sub' $P5009 = 'cuid_208_1346277621.774' 
+    capture_lex $P5009
+    $P5010 = $P5009()
+    set $P5015, $P5010
     goto if569_end2030
   if569_else2029:
 .annotate 'line', 734
-    find_lex $P511, "$str"
-    set $S502, $P511
-    set $P512, _lex_param_0[0]
-    unless_null $P512, fallback2038
-    nqp_get_sc_object $P513, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P512, $P513
+    find_lex $P5011, "$str"
+    set $S5002, $P5011
+    set $P5012, _lex_param_0[0]
+    unless_null $P5012, fallback2038
+    nqp_get_sc_object $P5013, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5012, $P5013
   fallback2038:
-    set $S503, $P512
-    concat $S501, $S502, $S503
-    box $P514, $S501
-    store_lex "$str", $P514
-    set $P515, $P514
+    set $S5003, $P5012
+    concat $S5001, $S5002, $S5003
+    box $P5014, $S5001
+    store_lex "$str", $P5014
+    set $P5015, $P5014
   if569_end2030:
-    set $P516, $P515
+    set $P5016, $P5015
   if556_end1981:
-    .return ($P516) 
+    .return ($P5016) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_206_1346233469.934") :anon :lex :outer("cuid_207_1346233469.934")
+.sub "" :subid("cuid_206_1346277621.774") :anon :lex :outer("cuid_207_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 699
     .lex "$node", $P101 
@@ -21222,331 +21222,331 @@
     .lex "$ord0", $P104 
     .lex "$ord1", $P105 
     .local pmc tmp_2 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    nqp_get_sc_object $P502, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P102, $P502
-    nqp_get_sc_object $P503, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P103, $P503
-    nqp_get_sc_object $P504, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P104, $P504
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P105, $P505
-    find_lex $P508, "$_"
-    set $P507, $P508[0]
-    unless_null $P507, fallback1985
-    nqp_get_sc_object $P509, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P507, $P509
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    nqp_get_sc_object $P5002, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P102, $P5002
+    nqp_get_sc_object $P5003, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P103, $P5003
+    nqp_get_sc_object $P5004, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P104, $P5004
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P105, $P5005
+    find_lex $P5008, "$_"
+    set $P5007, $P5008[0]
+    unless_null $P5007, fallback1985
+    nqp_get_sc_object $P5009, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5007, $P5009
   fallback1985:
-    set $P506, $P507["backslash"]
-    unless_null $P506, fallback1986
-    nqp_get_sc_object $P510, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P506, $P510
+    set $P5006, $P5007["backslash"]
+    unless_null $P5006, fallback1986
+    nqp_get_sc_object $P5010, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5006, $P5010
   fallback1986:
-    unless $P506 goto if557_else1983 
+    unless $P5006 goto if557_else1983 
 .annotate 'line', 703
 .annotate 'line', 704
-    find_lex $P513, "$_"
-    set $P512, $P513[0]
-    unless_null $P512, fallback1987
-    nqp_get_sc_object $P514, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P512, $P514
+    find_lex $P5013, "$_"
+    set $P5012, $P5013[0]
+    unless_null $P5012, fallback1987
+    nqp_get_sc_object $P5014, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5012, $P5014
   fallback1987:
-    set $P511, $P512["backslash"]
-    unless_null $P511, fallback1988
-    nqp_get_sc_object $P515, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P511, $P515
+    set $P5011, $P5012["backslash"]
+    unless_null $P5011, fallback1988
+    nqp_get_sc_object $P5015, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5011, $P5015
   fallback1988:
-    $P516 = $P511."ast"()
-    set $P101, $P516
+    $P5016 = $P5011."ast"()
+    set $P101, $P5016
 .annotate 'line', 706
-    $P517 = $P101."rxtype"()
-    set $S501, $P517
-    isne $I501, $S501, "literal"
-    set $I503, $I501
-    unless $I501 goto if561_end1996 
-    $P518 = $P101."rxtype"()
-    set $S502, $P518
-    isne $I502, $S502, "enumcharlist"
-    set $I503, $I502
+    $P5017 = $P101."rxtype"()
+    set $S5001, $P5017
+    isne $I5001, $S5001, "literal"
+    set $I5003, $I5001
+    unless $I5001 goto if561_end1996 
+    $P5018 = $P101."rxtype"()
+    set $S5002, $P5018
+    isne $I5002, $S5002, "enumcharlist"
+    set $I5003, $I5002
   if561_end1996:
-    box $P521, $I503
-    set $P520, $P521
-    if $I503 goto unless560_end1994 
+    box $P5021, $I5003
+    set $P5020, $P5021
+    if $I5003 goto unless560_end1994 
 .annotate 'line', 707
-    $P519 = $P101."negate"()
-    set $P520, $P519
+    $P5019 = $P101."negate"()
+    set $P5020, $P5019
   unless560_end1994:
-    set $P524, $P520
-    if $P520 goto unless559_end1992 
-    set $P522, $P101[0]
-    unless_null $P522, fallback1997
-    nqp_get_sc_object $P523, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P522, $P523
+    set $P5024, $P5020
+    if $P5020 goto unless559_end1992 
+    set $P5022, $P101[0]
+    unless_null $P5022, fallback1997
+    nqp_get_sc_object $P5023, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5022, $P5023
   fallback1997:
-    set $S503, $P522
-    length $I505, $S503
-    set $N501, $I505
-    set $N502, 1
-    isne $I504, $N501, $N502
-    box $P525, $I504
-    set $P524, $P525
+    set $S5003, $P5022
+    length $I5005, $S5003
+    set $N5001, $I5005
+    set $N5002, 1
+    isne $I5004, $N5001, $N5002
+    box $P5025, $I5004
+    set $P5024, $P5025
   unless559_end1992:
-    set $P530, $P524
-    unless $P524 goto if558_end1990 
+    set $P5030, $P5024
+    unless $P5024 goto if558_end1990 
 .annotate 'line', 705
-    find_lex $P526, "$/"
-    $P527 = $P526."CURSOR"()
-    find_lex $P528, "$_"
-    set $S505, $P528
-    concat $S504, "Illegal range endpoint in regex: ", $S505
-    $P529 = $P527."panic"($S504)
-    set $P530, $P529
+    find_lex $P5026, "$/"
+    $P5027 = $P5026."CURSOR"()
+    find_lex $P5028, "$_"
+    set $S5005, $P5028
+    concat $S5004, "Illegal range endpoint in regex: ", $S5005
+    $P5029 = $P5027."panic"($S5004)
+    set $P5030, $P5029
   if558_end1990:
-    set $P531, $P101[0]
-    unless_null $P531, fallback1998
-    nqp_get_sc_object $P532, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P531, $P532
+    set $P5031, $P101[0]
+    unless_null $P5031, fallback1998
+    nqp_get_sc_object $P5032, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5031, $P5032
   fallback1998:
-    set $P102, $P531
-    set $P539, $P102
+    set $P102, $P5031
+    set $P5039, $P102
     goto if557_end1984
   if557_else1983:
 .annotate 'line', 710
-    find_lex $P535, "$_"
-    set $P534, $P535[0]
-    unless_null $P534, fallback1999
-    nqp_get_sc_object $P536, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P534, $P536
+    find_lex $P5035, "$_"
+    set $P5034, $P5035[0]
+    unless_null $P5034, fallback1999
+    nqp_get_sc_object $P5036, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5034, $P5036
   fallback1999:
-    set $P533, $P534[0]
-    unless_null $P533, fallback2000
-    nqp_get_sc_object $P537, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P533, $P537
+    set $P5033, $P5034[0]
+    unless_null $P5033, fallback2000
+    nqp_get_sc_object $P5037, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5033, $P5037
   fallback2000:
-    set $S506, $P533
-    box $P538, $S506
-    set $P102, $P538
-    set $P539, $P102
+    set $S5006, $P5033
+    box $P5038, $S5006
+    set $P102, $P5038
+    set $P5039, $P102
   if557_end1984:
-    find_lex $P543, "$_"
-    set $P542, $P543[1]
-    unless_null $P542, fallback2003
-    nqp_get_sc_object $P544, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P542, $P544
+    find_lex $P5043, "$_"
+    set $P5042, $P5043[1]
+    unless_null $P5042, fallback2003
+    nqp_get_sc_object $P5044, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5042, $P5044
   fallback2003:
-    set $P541, $P542[0]
-    unless_null $P541, fallback2004
-    nqp_get_sc_object $P545, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P541, $P545
+    set $P5041, $P5042[0]
+    unless_null $P5041, fallback2004
+    nqp_get_sc_object $P5045, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5041, $P5045
   fallback2004:
-    set $P540, $P541["backslash"]
-    unless_null $P540, fallback2005
-    nqp_get_sc_object $P546, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P540, $P546
+    set $P5040, $P5041["backslash"]
+    unless_null $P5040, fallback2005
+    nqp_get_sc_object $P5046, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5040, $P5046
   fallback2005:
-    unless $P540 goto if562_else2001 
+    unless $P5040 goto if562_else2001 
 .annotate 'line', 713
 .annotate 'line', 714
-    find_lex $P550, "$_"
-    set $P549, $P550[1]
-    unless_null $P549, fallback2006
-    nqp_get_sc_object $P551, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P549, $P551
+    find_lex $P5050, "$_"
+    set $P5049, $P5050[1]
+    unless_null $P5049, fallback2006
+    nqp_get_sc_object $P5051, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5049, $P5051
   fallback2006:
-    set $P548, $P549[0]
-    unless_null $P548, fallback2007
-    nqp_get_sc_object $P552, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P548, $P552
+    set $P5048, $P5049[0]
+    unless_null $P5048, fallback2007
+    nqp_get_sc_object $P5052, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5048, $P5052
   fallback2007:
-    set $P547, $P548["backslash"]
-    unless_null $P547, fallback2008
-    nqp_get_sc_object $P553, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P547, $P553
+    set $P5047, $P5048["backslash"]
+    unless_null $P5047, fallback2008
+    nqp_get_sc_object $P5053, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5047, $P5053
   fallback2008:
-    $P554 = $P547."ast"()
-    set $P101, $P554
+    $P5054 = $P5047."ast"()
+    set $P101, $P5054
 .annotate 'line', 716
-    $P555 = $P101."rxtype"()
-    set $S507, $P555
-    isne $I506, $S507, "literal"
-    set $I508, $I506
-    unless $I506 goto if566_end2016 
-    $P556 = $P101."rxtype"()
-    set $S508, $P556
-    isne $I507, $S508, "enumcharlist"
-    set $I508, $I507
+    $P5055 = $P101."rxtype"()
+    set $S5007, $P5055
+    isne $I5006, $S5007, "literal"
+    set $I5008, $I5006
+    unless $I5006 goto if566_end2016 
+    $P5056 = $P101."rxtype"()
+    set $S5008, $P5056
+    isne $I5007, $S5008, "enumcharlist"
+    set $I5008, $I5007
   if566_end2016:
-    box $P559, $I508
-    set $P558, $P559
-    if $I508 goto unless565_end2014 
+    box $P5059, $I5008
+    set $P5058, $P5059
+    if $I5008 goto unless565_end2014 
 .annotate 'line', 717
-    $P557 = $P101."negate"()
-    set $P558, $P557
+    $P5057 = $P101."negate"()
+    set $P5058, $P5057
   unless565_end2014:
-    set $P562, $P558
-    if $P558 goto unless564_end2012 
-    set $P560, $P101[0]
-    unless_null $P560, fallback2017
-    nqp_get_sc_object $P561, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P560, $P561
+    set $P5062, $P5058
+    if $P5058 goto unless564_end2012 
+    set $P5060, $P101[0]
+    unless_null $P5060, fallback2017
+    nqp_get_sc_object $P5061, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5060, $P5061
   fallback2017:
-    set $S509, $P560
-    length $I510, $S509
-    set $N503, $I510
-    set $N504, 1
-    isne $I509, $N503, $N504
-    box $P563, $I509
-    set $P562, $P563
+    set $S5009, $P5060
+    length $I5010, $S5009
+    set $N5003, $I5010
+    set $N5004, 1
+    isne $I5009, $N5003, $N5004
+    box $P5063, $I5009
+    set $P5062, $P5063
   unless564_end2012:
-    set $P568, $P562
-    unless $P562 goto if563_end2010 
+    set $P5068, $P5062
+    unless $P5062 goto if563_end2010 
 .annotate 'line', 715
-    find_lex $P564, "$/"
-    $P565 = $P564."CURSOR"()
-    find_lex $P566, "$_"
-    set $S511, $P566
-    concat $S510, "Illegal range endpoint in regex: ", $S511
-    $P567 = $P565."panic"($S510)
-    set $P568, $P567
+    find_lex $P5064, "$/"
+    $P5065 = $P5064."CURSOR"()
+    find_lex $P5066, "$_"
+    set $S5011, $P5066
+    concat $S5010, "Illegal range endpoint in regex: ", $S5011
+    $P5067 = $P5065."panic"($S5010)
+    set $P5068, $P5067
   if563_end2010:
-    set $P569, $P101[0]
-    unless_null $P569, fallback2018
-    nqp_get_sc_object $P570, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P569, $P570
+    set $P5069, $P101[0]
+    unless_null $P5069, fallback2018
+    nqp_get_sc_object $P5070, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5069, $P5070
   fallback2018:
-    set $P103, $P569
-    set $P579, $P103
+    set $P103, $P5069
+    set $P5079, $P103
     goto if562_end2002
   if562_else2001:
 .annotate 'line', 720
-    find_lex $P574, "$_"
-    set $P573, $P574[1]
-    unless_null $P573, fallback2019
-    nqp_get_sc_object $P575, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P573, $P575
+    find_lex $P5074, "$_"
+    set $P5073, $P5074[1]
+    unless_null $P5073, fallback2019
+    nqp_get_sc_object $P5075, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5073, $P5075
   fallback2019:
-    set $P572, $P573[0]
-    unless_null $P572, fallback2020
-    nqp_get_sc_object $P576, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P572, $P576
+    set $P5072, $P5073[0]
+    unless_null $P5072, fallback2020
+    nqp_get_sc_object $P5076, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5072, $P5076
   fallback2020:
-    set $P571, $P572[0]
-    unless_null $P571, fallback2021
-    nqp_get_sc_object $P577, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P571, $P577
+    set $P5071, $P5072[0]
+    unless_null $P5071, fallback2021
+    nqp_get_sc_object $P5077, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5071, $P5077
   fallback2021:
-    set $S512, $P571
-    box $P578, $S512
-    set $P103, $P578
-    set $P579, $P103
+    set $S5012, $P5071
+    box $P5078, $S5012
+    set $P103, $P5078
+    set $P5079, $P103
   if562_end2002:
-    set $S513, $P102
-    ord $I511, $S513
-    box $P580, $I511
-    set $P104, $P580
-    set $S514, $P103
-    ord $I512, $S514
-    box $P581, $I512
-    set $P105, $P581
-    set $N505, $P104
-    set $N506, $P105
-    isgt $I513, $N505, $N506
-    box $P587, $I513
-    set $P586, $P587
-    unless $I513 goto if567_end2023 
+    set $S5013, $P102
+    ord $I5011, $S5013
+    box $P5080, $I5011
+    set $P104, $P5080
+    set $S5014, $P103
+    ord $I5012, $S5014
+    box $P5081, $I5012
+    set $P105, $P5081
+    set $N5005, $P104
+    set $N5006, $P105
+    isgt $I5013, $N5005, $N5006
+    box $P5087, $I5013
+    set $P5086, $P5087
+    unless $I5013 goto if567_end2023 
 .annotate 'line', 725
-    find_lex $P582, "$/"
-    $P583 = $P582."CURSOR"()
-    find_lex $P584, "$_"
-    set $S516, $P584
-    concat $S515, "Illegal reversed character range in regex: ", $S516
-    $P585 = $P583."panic"($S515)
-    set $P586, $P585
+    find_lex $P5082, "$/"
+    $P5083 = $P5082."CURSOR"()
+    find_lex $P5084, "$_"
+    set $S5016, $P5084
+    concat $S5015, "Illegal reversed character range in regex: ", $S5016
+    $P5085 = $P5083."panic"($S5015)
+    set $P5086, $P5085
   if567_end2023:
-    new $P591, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P591, while568_handlers2027
-    push_eh $P591
+    new $P5091, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5091, while568_handlers2027
+    push_eh $P5091
   while568_test2024:
-    set $N507, $P104
-    set $N508, $P105
-    isle $I514, $N507, $N508
-    box $P592, $I514
-    set $P590, $P592
-    unless $I514 goto while568_done2028 
+    set $N5007, $P104
+    set $N5008, $P105
+    isle $I5014, $N5007, $N5008
+    box $P5092, $I5014
+    set $P5090, $P5092
+    unless $I5014 goto while568_done2028 
   while568_redo2026:
-    find_lex $P588, "$str"
-    set $S518, $P588
+    find_lex $P5088, "$str"
+    set $S5018, $P5088
     set tmp_2, $P104
-    set $N510, tmp_2
-    set $N511, 1
-    add $N509, $N510, $N511
-    box $P589, $N509
-    set $P104, $P589
-    set $I515, tmp_2
-    chr $S519, $I515
-    concat $S517, $S518, $S519
-    box $P589, $S517
-    store_lex "$str", $P589
-    set $P590, $P589
+    set $N5010, tmp_2
+    set $N5011, 1
+    add $N5009, $N5010, $N5011
+    box $P5089, $N5009
+    set $P104, $P5089
+    set $I5015, tmp_2
+    chr $S5019, $I5015
+    concat $S5017, $S5018, $S5019
+    box $P5089, $S5017
+    store_lex "$str", $P5089
+    set $P5090, $P5089
     goto while568_test2024 
   while568_handlers2027:
-    .get_results ($P591)
-    pop_upto_eh $P591
-    getattribute $P591, $P591, 'type'
-    eq $P591, .CONTROL_LOOP_NEXT, while568_test2024
-    eq $P591, .CONTROL_LOOP_REDO, while568_redo2026
+    .get_results ($P5091)
+    pop_upto_eh $P5091
+    getattribute $P5091, $P5091, 'type'
+    eq $P5091, .CONTROL_LOOP_NEXT, while568_test2024
+    eq $P5091, .CONTROL_LOOP_REDO, while568_redo2026
   while568_done2028:
     pop_eh 
-    .return ($P590) 
+    .return ($P5090) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_208_1346233469.934") :anon :lex :outer("cuid_207_1346233469.934")
+.sub "" :subid("cuid_208_1346277621.774") :anon :lex :outer("cuid_207_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 729
     .lex "$bs", $P101 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
 .annotate 'line', 730
-    find_lex $P504, "$_"
-    set $P503, $P504[0]
-    unless_null $P503, fallback2033
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P503, $P505
+    find_lex $P5004, "$_"
+    set $P5003, $P5004[0]
+    unless_null $P5003, fallback2033
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5003, $P5005
   fallback2033:
-    set $P502, $P503["backslash"]
-    unless_null $P502, fallback2034
-    nqp_get_sc_object $P506, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P506
+    set $P5002, $P5003["backslash"]
+    unless_null $P5002, fallback2034
+    nqp_get_sc_object $P5006, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5006
   fallback2034:
-    $P507 = $P502."ast"()
-    set $P101, $P507
-    find_lex $P509, "$/"
-    set $P508, $P509["sign"]
-    unless_null $P508, fallback2037
-    nqp_get_sc_object $P510, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P508, $P510
+    $P5007 = $P5002."ast"()
+    set $P101, $P5007
+    find_lex $P5009, "$/"
+    set $P5008, $P5009["sign"]
+    unless_null $P5008, fallback2037
+    nqp_get_sc_object $P5010, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5008, $P5010
   fallback2037:
-    set $S501, $P508
-    iseq $I501, $S501, "-"
-    box $P514, $I501
-    set $P513, $P514
-    unless $I501 goto if570_end2036 
+    set $S5001, $P5008
+    iseq $I5001, $S5001, "-"
+    box $P5014, $I5001
+    set $P5013, $P5014
+    unless $I5001 goto if570_end2036 
 .annotate 'line', 731
-    $P511 = $P101."negate"()
-    isfalse $I502, $P511
-    $P512 = $P101."negate"($I502)
-    set $P513, $P512
+    $P5011 = $P101."negate"()
+    isfalse $I5002, $P5011
+    $P5012 = $P101."negate"($I5002)
+    set $P5013, $P5012
   if570_end2036:
 .annotate 'line', 732
-    find_lex $P515, "@alts"
-    $P516 = $P515."push"($P101)
-    .return ($P516) 
+    find_lex $P5015, "@alts"
+    $P5016 = $P5015."push"($P101)
+    .return ($P5016) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "mod_internal" :subid("cuid_154_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "mod_internal" :subid("cuid_154_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 749
     .param pmc _lex_param_0 
@@ -21554,78 +21554,78 @@
     .lex "$n", $P101 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P101, $P501
-    set $P503, _lex_param_1["n"]
-    unless_null $P503, fallback2059
-    nqp_get_sc_object $P504, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P503, $P504
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P101, $P5001
+    set $P5003, _lex_param_1["n"]
+    unless_null $P5003, fallback2059
+    nqp_get_sc_object $P5004, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5003, $P5004
   fallback2059:
-    set $P502, $P503[0]
-    unless_null $P502, fallback2060
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P502, $P505
+    set $P5002, $P5003[0]
+    unless_null $P5002, fallback2060
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5002, $P5005
   fallback2060:
-    set $S501, $P502
-    isgt $I501, $S501, ""
-    unless $I501 goto if574_else2057 
-    set $P507, _lex_param_1["n"]
-    unless_null $P507, fallback2061
-    nqp_get_sc_object $P508, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P507, $P508
+    set $S5001, $P5002
+    isgt $I5001, $S5001, ""
+    unless $I5001 goto if574_else2057 
+    set $P5007, _lex_param_1["n"]
+    unless_null $P5007, fallback2061
+    nqp_get_sc_object $P5008, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5007, $P5008
   fallback2061:
-    set $P506, $P507[0]
-    unless_null $P506, fallback2062
-    nqp_get_sc_object $P509, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P506, $P509
+    set $P5006, $P5007[0]
+    unless_null $P5006, fallback2062
+    nqp_get_sc_object $P5009, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5006, $P5009
   fallback2062:
-    set $N501, $P506
-    box $P511, $N501
-    set $P510, $P511
+    set $N5001, $P5006
+    box $P5011, $N5001
+    set $P5010, $P5011
     goto if574_end2058
   if574_else2057:
-    box $P512, 1
-    set $P510, $P512
+    box $P5012, 1
+    set $P5010, $P5012
   if574_end2058:
-    set $P101, $P510
-    find_dynamic_lex $P513, "%*RX"
-    unless_null $P513, fallback2063
-    get_hll_global $P516, "GLOBAL"
-    get_who $P515, $P516
-    set $P514, $P515["%RX"]
-    unless_null $P514, fallback2064
-    get_hll_global $P518, "GLOBAL"
-    get_who $P517, $P518
-    new $P519, 'Hash'
-    set $P517["%RX"], $P519
-    set $P514, $P519
+    set $P101, $P5010
+    find_dynamic_lex $P5013, "%*RX"
+    unless_null $P5013, fallback2063
+    get_hll_global $P5016, "GLOBAL"
+    get_who $P5015, $P5016
+    set $P5014, $P5015["%RX"]
+    unless_null $P5014, fallback2064
+    get_hll_global $P5018, "GLOBAL"
+    get_who $P5017, $P5018
+    new $P5019, 'Hash'
+    set $P5017["%RX"], $P5019
+    set $P5014, $P5019
   fallback2064:
-    unless_null $P514, vivi_5752065
+    unless_null $P5014, vivi_5752065
     die "Contextual %*RX not found"
-    box $P520, "Contextual %*RX not found"
-    set $P514, $P520
+    box $P5020, "Contextual %*RX not found"
+    set $P5014, $P5020
   vivi_5752065:
-    set $P513, $P514
+    set $P5013, $P5014
   fallback2063:
-    set $P522, _lex_param_1["mod_ident"]
-    unless_null $P522, fallback2066
-    nqp_get_sc_object $P523, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P522, $P523
+    set $P5022, _lex_param_1["mod_ident"]
+    unless_null $P5022, fallback2066
+    nqp_get_sc_object $P5023, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5022, $P5023
   fallback2066:
-    set $P521, $P522["sym"]
-    unless_null $P521, fallback2067
-    nqp_get_sc_object $P524, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P521, $P524
+    set $P5021, $P5022["sym"]
+    unless_null $P5021, fallback2067
+    nqp_get_sc_object $P5024, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5021, $P5024
   fallback2067:
-    set $S502, $P521
-    set $P513[$S502], $P101
+    set $S5002, $P5021
+    set $P5013[$S5002], $P101
 .annotate 'line', 752
-    $P525 = _lex_param_1."!make"(0)
-    .return ($P525) 
+    $P5025 = _lex_param_1."!make"(0)
+    .return ($P5025) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "subrule_alias" :subid("cuid_155_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "subrule_alias" :subid("cuid_155_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 938
     .param pmc _lex_param_0 
@@ -21635,123 +21635,112 @@
     .lex "$ast", _lex_param_1 
     .lex "$name", _lex_param_2 
 .annotate 'line', 939
-    $P501 = _lex_param_1."name"()
-    set $S501, $P501
-    isgt $I501, $S501, ""
-    unless $I501 goto if576_else2068 
-    set $S504, _lex_param_2
-    concat $S503, $S504, "="
-    $P502 = _lex_param_1."name"()
-    set $S505, $P502
-    concat $S502, $S503, $S505
-    $P503 = _lex_param_1."name"($S502)
-    set $P505, $P503
+    $P5001 = _lex_param_1."name"()
+    set $S5001, $P5001
+    isgt $I5001, $S5001, ""
+    unless $I5001 goto if576_else2068 
+    set $S5004, _lex_param_2
+    concat $S5003, $S5004, "="
+    $P5002 = _lex_param_1."name"()
+    set $S5005, $P5002
+    concat $S5002, $S5003, $S5005
+    $P5003 = _lex_param_1."name"($S5002)
+    set $P5005, $P5003
     goto if576_end2069
   if576_else2068:
 .annotate 'line', 940
-    $P504 = _lex_param_1."name"(_lex_param_2)
-    set $P505, $P504
+    $P5004 = _lex_param_1."name"(_lex_param_2)
+    set $P5005, $P5004
   if576_end2069:
 .annotate 'line', 941
-    $P506 = _lex_param_1."subtype"("capture")
-    .return ($P506) 
+    $P5006 = _lex_param_1."subtype"("capture")
+    .return ($P5006) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "flip_ast" :subid("cuid_156_1346233469.934") :anon :lex :outer("cuid_157_1346233469.934")
+.sub "flip_ast" :subid("cuid_156_1346277621.774") :anon :lex :outer("cuid_157_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 944
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
-    .const 'Sub' $P529 = 'cuid_210_1346233469.934' 
-    capture_lex $P529 
-    .const 'Sub' $P529 = 'cuid_211_1346233469.934' 
-    capture_lex $P529 
+    .const 'Sub' $P5026 = 'cuid_210_1346277621.774' 
+    capture_lex $P5026 
+    .const 'Sub' $P5026 = 'cuid_211_1346277621.774' 
+    capture_lex $P5026 
     .lex "self", _lex_param_0 
     .lex "$qast", _lex_param_1 
     root_new $P101, ['parrot';'Continuation']
     set_label $P101, lexotic_2070
     .lex "RETURN", $P101
-    get_hll_global $P504, "GLOBAL"
-    nqp_get_package_through_who $P503, $P504, "QAST"
-    get_who $P502, $P503
-    set $P501, $P502["Regex"]
-    unless_null $P501, fallback2074
-    nqp_get_sc_object $P505, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P501, $P505
+    get_hll_global $P5004, "GLOBAL"
+    nqp_get_package_through_who $P5003, $P5004, "QAST"
+    get_who $P5002, $P5003
+    set $P5001, $P5002["Regex"]
+    unless_null $P5001, fallback2074
+    nqp_get_sc_object $P5005, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5001, $P5005
   fallback2074:
-    type_check $I501, _lex_param_1, $P501
-    box $P509, $I501
-    set $P508, $P509
-    if $I501 goto unless577_end2073 
-    find_lex $P506, "RETURN"
-    $P507 = $P506(_lex_param_1)
-    set $P508, $P507
+    type_check $I5001, _lex_param_1, $P5001
+    box $P5009, $I5001
+    set $P5008, $P5009
+    if $I5001 goto unless577_end2073 
+    find_lex $P5006, "RETURN"
+    $P5007 = $P5006(_lex_param_1)
+    set $P5008, $P5007
   unless577_end2073:
 .annotate 'line', 946
-    $P510 = _lex_param_1."rxtype"()
-    set $S501, $P510
-    iseq $I502, $S501, "literal"
-    unless $I502 goto if578_else2075 
+    $P5010 = _lex_param_1."rxtype"()
+    set $S5001, $P5010
+    iseq $I5002, $S5001, "literal"
+    unless $I5002 goto if578_else2075 
 .annotate 'line', 947
-    set $P511, _lex_param_1[0]
-    unless_null $P511, fallback2077
-    nqp_get_sc_object $P512, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P511, $P512
+    set $P5011, _lex_param_1[0]
+    unless_null $P5011, fallback2077
+    nqp_get_sc_object $P5012, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    set $P5011, $P5012
   fallback2077:
-    $P513 = $P511."reverse"()
-    set _lex_param_1[0], $P513
-    set $P528, $P513
+    $P5013 = $P5011."reverse"()
+    set _lex_param_1[0], $P5013
+    set $P5025, $P5013
     goto if578_end2076
   if578_else2075:
 .annotate 'line', 949
-    $P514 = _lex_param_1."rxtype"()
-    set $S502, $P514
-    iseq $I503, $S502, "concat"
-    unless $I503 goto if579_else2078 
-    .const 'Sub' $P515 = 'cuid_210_1346233469.934' 
-    capture_lex $P515
-    $P516 = $P515()
-    set $P527, $P516
+    $P5014 = _lex_param_1."rxtype"()
+    set $S5002, $P5014
+    iseq $I5003, $S5002, "concat"
+    unless $I5003 goto if579_else2078 
+    .const 'Sub' $P5015 = 'cuid_210_1346277621.774' 
+    capture_lex $P5015
+    $P5016 = $P5015()
+    set $P5024, $P5016
     goto if579_end2079
   if579_else2078:
 .annotate 'line', 954
-    $P517 = _lex_param_1."rxtype"()
-    set $S503, $P517
-    iseq $I504, $S503, "pastnode"
-    unless $I504 goto if582_else2090 
-    nqp_get_sc_object $P518, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    set $P526, $P518
-    goto if582_end2091
-  if582_else2090:
-.annotate 'line', 957
-    $P522 = _lex_param_1."list"()
-    set $P519, $P522
-    iter $P521, $P522
-    new $P524, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P524, for_handlers2092
-    push_eh $P524
-  for_next2093:
-    unless $P521, for_done2095
-    shift $P525, $P521
-  for_redo2094:
-    .const 'Sub' $P523 = 'cuid_211_1346233469.934' 
-    capture_lex $P523
-    $P519 = $P523($P525)
-    goto for_next2093
-  for_handlers2092:
-    .get_results ($P524)
-    pop_upto_eh $P524
-    getattribute $P524, $P524, 'type'
-    eq $P524, .CONTROL_LOOP_NEXT, for_next2093
-    eq $P524, .CONTROL_LOOP_REDO, for_redo2094
-  for_done2095:
+    $P5020 = _lex_param_1."list"()
+    set $P5017, $P5020
+    iter $P5019, $P5020
+    new $P5022, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5022, for_handlers2090
+    push_eh $P5022
+  for_next2091:
+    unless $P5019, for_done2093
+    shift $P5023, $P5019
+  for_redo2092:
+    .const 'Sub' $P5021 = 'cuid_211_1346277621.774' 
+    capture_lex $P5021
+    $P5017 = $P5021($P5023)
+    goto for_next2091
+  for_handlers2090:
+    .get_results ($P5022)
+    pop_upto_eh $P5022
+    getattribute $P5022, $P5022, 'type'
+    eq $P5022, .CONTROL_LOOP_NEXT, for_next2091
+    eq $P5022, .CONTROL_LOOP_REDO, for_redo2092
+  for_done2093:
     pop_eh 
-    set $P526, $P519
-  if582_end2091:
-    set $P527, $P526
+    set $P5024, $P5017
   if579_end2079:
-    set $P528, $P527
+    set $P5025, $P5024
   if578_end2076:
     goto lexotic_2071
   lexotic_2070:
@@ -21761,1197 +21750,1197 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_210_1346233469.934") :anon :lex :outer("cuid_156_1346233469.934")
+.sub "" :subid("cuid_210_1346277621.774") :anon :lex :outer("cuid_156_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 949
     .lex "@tmp", $P101 
-    new $P501, 'ResizablePMCArray'
-    set $P101, $P501
-    new $P509, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P509, while580_handlers2083
-    push_eh $P509
+    new $P5001, 'ResizablePMCArray'
+    set $P101, $P5001
+    new $P5009, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5009, while580_handlers2083
+    push_eh $P5009
   while580_test2080:
-    find_lex $P502, "$qast"
-    $P503 = $P502."list"()
-    set $N501, $P503
-    box $P510, $N501
-    set $P508, $P510
-    unless $N501 goto while580_done2084 
+    find_lex $P5002, "$qast"
+    $P5003 = $P5002."list"()
+    set $N5001, $P5003
+    box $P5010, $N5001
+    set $P5008, $P5010
+    unless $N5001 goto while580_done2084 
   while580_redo2082:
 .annotate 'line', 951
-    find_lex $P504, "$qast"
-    $P505 = $P504."list"()
-    $P506 = $P505."shift"()
-    $P507 = $P101."push"($P506)
-    set $P508, $P507
+    find_lex $P5004, "$qast"
+    $P5005 = $P5004."list"()
+    $P5006 = $P5005."shift"()
+    $P5007 = $P101."push"($P5006)
+    set $P5008, $P5007
     goto while580_test2080 
   while580_handlers2083:
-    .get_results ($P509)
-    pop_upto_eh $P509
-    getattribute $P509, $P509, 'type'
-    eq $P509, .CONTROL_LOOP_NEXT, while580_test2080
-    eq $P509, .CONTROL_LOOP_REDO, while580_redo2082
+    .get_results ($P5009)
+    pop_upto_eh $P5009
+    getattribute $P5009, $P5009, 'type'
+    eq $P5009, .CONTROL_LOOP_NEXT, while580_test2080
+    eq $P5009, .CONTROL_LOOP_REDO, while580_redo2082
   while580_done2084:
     pop_eh 
-    new $P519, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
-    set_label $P519, while581_handlers2088
-    push_eh $P519
+    new $P5019, 'ExceptionHandler', [.CONTROL_LOOP_NEXT;.CONTROL_LOOP_REDO;.CONTROL_LOOP_LAST]
+    set_label $P5019, while581_handlers2088
+    push_eh $P5019
   while581_test2085:
-    set $P518, $P101
+    set $P5018, $P101
     unless $P101 goto while581_done2089 
   while581_redo2087:
 .annotate 'line', 952
-    find_lex $P511, "$qast"
-    $P512 = $P511."list"()
-    find_lex $P514, "self"
-    nqp_decontainerize $P513, $P514
-    $P515 = $P101."pop"()
-    $P516 = $P513."flip_ast"($P515)
-    $P517 = $P512."push"($P516)
-    set $P518, $P517
+    find_lex $P5011, "$qast"
+    $P5012 = $P5011."list"()
+    find_lex $P5014, "self"
+    nqp_decontainerize $P5013, $P5014
+    $P5015 = $P101."pop"()
+    $P5016 = $P5013."flip_ast"($P5015)
+    $P5017 = $P5012."push"($P5016)
+    set $P5018, $P5017
     goto while581_test2085 
   while581_handlers2088:
-    .get_results ($P519)
-    pop_upto_eh $P519
-    getattribute $P519, $P519, 'type'
-    eq $P519, .CONTROL_LOOP_NEXT, while581_test2085
-    eq $P519, .CONTROL_LOOP_REDO, while581_redo2087
+    .get_results ($P5019)
+    pop_upto_eh $P5019
+    getattribute $P5019, $P5019, 'type'
+    eq $P5019, .CONTROL_LOOP_NEXT, while581_test2085
+    eq $P5019, .CONTROL_LOOP_REDO, while581_redo2087
   while581_done2089:
     pop_eh 
-    .return ($P518) 
+    .return ($P5018) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_211_1346233469.934") :anon :lex :outer("cuid_156_1346233469.934")
+.sub "" :subid("cuid_211_1346277621.774") :anon :lex :outer("cuid_156_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-.annotate 'line', 958
+.annotate 'line', 955
     .param pmc _lex_param_0 
     .lex "$_", _lex_param_0 
-    find_lex $P502, "self"
-    nqp_decontainerize $P501, $P502
-    $P503 = $P501."flip_ast"(_lex_param_0)
-    .return ($P503) 
+    find_lex $P5002, "self"
+    nqp_decontainerize $P5001, $P5002
+    $P5003 = $P5001."flip_ast"(_lex_param_0)
+    .return ($P5003) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_158_1346233469.934") :anon :lex :outer("cuid_1_1346233469.934")
+.sub "" :subid("cuid_158_1346277621.774") :anon :lex :outer("cuid_1_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-.annotate 'line', 965
+.annotate 'line', 962
     .lex "$?PACKAGE", $P101 
     .lex "$?CLASS", $P102 
-    nqp_get_sc_object $P501, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99", 7
-    .return ($P501) 
+    nqp_get_sc_object $P5001, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649", 7
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_213_1346233469.934") :load :init
+.sub "" :subid("cuid_213_1346277621.774") :load :init
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    .const 'Sub' $P501 = 'cuid_212_1346233469.934' 
-    capture_lex $P501 
+    .const 'Sub' $P5001 = 'cuid_212_1346277621.774' 
+    capture_lex $P5001 
     .local pmc cur_sc 
     nqp_dynop_setup 
     nqp_bigint_setup 
-    getinterp $P501
-    get_class $P502, "LexPad"
-    get_class $P503, "NQPLexPad"
-    $P504 = $P501."hll_map"($P502, $P503)
+    getinterp $P5001
+    get_class $P5002, "LexPad"
+    get_class $P5003, "NQPLexPad"
+    $P5004 = $P5001."hll_map"($P5002, $P5003)
     load_bytecode "ModuleLoader.pbc"
-    .const 'Sub' $P501 = "cuid_1_1346233469.934" 
-    get_hll_global $P502, "ModuleLoader"
-    $P503 = $P502."load_setting"("NQPCORE")
-    $P504 = $P501."set_outer_ctx"($P503)
+    .const 'Sub' $P5001 = "cuid_1_1346277621.774" 
+    get_hll_global $P5002, "ModuleLoader"
+    $P5003 = $P5002."load_setting"("NQPCORE")
+    $P5004 = $P5001."set_outer_ctx"($P5003)
     load_bytecode "ModuleLoader.pbc"
-    get_hll_global $P501, "ModuleLoader"
-    $P502 = $P501."load_module"("QRegex")
+    get_hll_global $P5001, "ModuleLoader"
+    $P5002 = $P5001."load_module"("QRegex")
     load_bytecode "ModuleLoader.pbc"
-    get_hll_global $P501, "ModuleLoader"
-    $P502 = $P501."load_module"("NQPHLL")
+    get_hll_global $P5001, "ModuleLoader"
+    $P5002 = $P5001."load_module"("NQPHLL")
     load_bytecode "ModuleLoader.pbc"
-    get_hll_global $P501, "ModuleLoader"
-    $P502 = $P501."load_module"("QAST")
+    get_hll_global $P5001, "ModuleLoader"
+    $P5002 = $P5001."load_module"("QAST")
     load_bytecode "ModuleLoader.pbc"
-    get_hll_global $P501, "ModuleLoader"
-    $P502 = $P501."load_module"("PASTRegex")
-    nqp_create_sc $P501, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971"
-    set cur_sc, $P501
-    $P502 = cur_sc."set_description"("src\\stage2\\gen\\NQPP6QRegex.pm")
-    new $P503, 'ResizableStringArray'
-    null $S501
-    push $P503, $S501
-    push $P503, "P6opaque"
-    push $P503, "QAST"
-    push $P503, "QRegex"
-    push $P503, "NQPCursorRole"
-    push $P503, "3F04B14CE2A0361857F90C7B424E866EF9110B88-1346233431.244"
-    push $P503, "src\\stage2\\QRegex.nqp"
-    push $P503, "NQPMatch"
-    push $P503, "NQPCursor"
-    push $P503, "NQPRegexMethod"
-    push $P503, "NQPRegex"
-    push $P503, "HLL"
-    push $P503, "PIRT"
-    push $P503, "PAST"
-    push $P503, "__PAST_CORE_SC__"
-    push $P503, "CREATE"
-    push $P503, "07D402AEDF5610FACB7346C622DDB1FFA6DD134D-1346233425.99"
-    push $P503, "src\\stage2\\NQPCORE.setting"
-    push $P503, "bless"
-    push $P503, "BUILDALL"
-    push $P503, "new"
-    push $P503, "Str"
-    push $P503, "Numeric"
-    push $P503, "Int"
-    push $P503, "at_pos"
-    push $P503, "at_key"
-    push $P503, "defined"
-    push $P503, "ACCEPTS"
-    push $P503, "isa"
-    push $P503, "__dump"
-    push $P503, "MATCH"
-    push $P503, "Bool"
-    push $P503, "parse"
-    push $P503, "!INTERPOLATE"
-    push $P503, "!INTERPOLATE_REGEX"
-    push $P503, "target"
-    push $P503, "from"
-    push $P503, "pos"
-    push $P503, "CAPHASH"
-    push $P503, "!cursor_init"
-    push $P503, "!cursor_start"
-    push $P503, "!cursor_start_subcapture"
-    push $P503, "!cursor_capture"
-    push $P503, "!cursor_push_cstack"
-    push $P503, "!cursor_pass"
-    push $P503, "!cursor_fail"
-    push $P503, "!cursor_next"
-    push $P503, "!cursor_more"
-    push $P503, "!reduce"
-    push $P503, "!reduce_with_match"
-    push $P503, "!protoregex"
-    push $P503, "!protoregex_nfa"
-    push $P503, "!protoregex_table"
-    push $P503, "!alt"
-    push $P503, "!alt_nfa"
-    push $P503, "!BACKREF"
-    push $P503, "!LITERAL"
-    push $P503, "at"
-    push $P503, "before"
-    push $P503, "after"
-    push $P503, "ws"
-    push $P503, "ww"
-    push $P503, "wb"
-    push $P503, "ident"
-    push $P503, "alpha"
-    push $P503, "alnum"
-    push $P503, "upper"
-    push $P503, "lower"
-    push $P503, "digit"
-    push $P503, "xdigit"
-    push $P503, "space"
-    push $P503, "blank"
-    push $P503, "cntrl"
-    push $P503, "punct"
-    push $P503, "FAILGOAL"
-    push $P503, "2BB67A389134BBAD0A6C35350CCD1D56BE456969-1346233437.664"
-    push $P503, "src\\stage2\\gen\\NQPHLL.pm"
-    push $P503, "termish"
-    push $P503, "term"
-    push $P503, "infix"
-    push $P503, "prefix"
-    push $P503, "postfix"
-    push $P503, "circumfix"
-    push $P503, "postcircumfix"
-    push $P503, "term:sym<circumfix>"
-    push $P503, "infixish"
-    push $P503, "prefixish"
-    push $P503, "postfixish"
-    push $P503, "nullterm"
-    push $P503, "nullterm_alt"
-    push $P503, "nulltermish"
-    push $P503, "quote_delimited"
-    push $P503, "quote_atom"
-    push $P503, "decint"
-    push $P503, "decints"
-    push $P503, "hexint"
-    push $P503, "hexints"
-    push $P503, "octint"
-    push $P503, "octints"
-    push $P503, "binint"
-    push $P503, "binints"
-    push $P503, "integer"
-    push $P503, "dec_number"
-    push $P503, "escale"
-    push $P503, "quote_escape"
-    push $P503, "quote_escape:sym<backslash>"
-    push $P503, "quote_escape:sym<stopper>"
-    push $P503, "quote_escape:sym<bs>"
-    push $P503, "quote_escape:sym<nl>"
-    push $P503, "quote_escape:sym<cr>"
-    push $P503, "quote_escape:sym<tab>"
-    push $P503, "quote_escape:sym<ff>"
-    push $P503, "quote_escape:sym<esc>"
-    push $P503, "quote_escape:sym<hex>"
-    push $P503, "quote_escape:sym<oct>"
-    push $P503, "quote_escape:sym<chr>"
-    push $P503, "quote_escape:sym<0>"
-    push $P503, "quote_escape:sym<misc>"
-    push $P503, "charname"
-    push $P503, "charnames"
-    push $P503, "charspec"
-    push $P503, "O"
-    push $P503, "panic"
-    push $P503, "peek_delimiters"
-    push $P503, "quote_EXPR"
-    push $P503, "quotemod_check"
-    push $P503, "starter"
-    push $P503, "stopper"
-    push $P503, "split_words"
-    push $P503, "EXPR"
-    push $P503, "EXPR_reduce"
-    push $P503, "ternary"
-    push $P503, "MARKER"
-    push $P503, "MARKED"
-    push $P503, "LANG"
-    push $P503, "obs"
-    push $P503, "normspace"
-    push $P503, "identifier"
-    push $P503, "arg"
-    push $P503, "arglist"
-    push $P503, "TOP"
-    push $P503, "nibbler"
-    push $P503, "termaltseq"
-    push $P503, "termconjseq"
-    push $P503, "termalt"
-    push $P503, "termconj"
-    push $P503, "quantified_atom"
-    push $P503, "separator"
-    push $P503, "atom"
-    push $P503, "quantifier"
-    push $P503, "quantifier:sym<*>"
-    push $P503, "quantifier:sym<+>"
-    push $P503, "quantifier:sym<?>"
-    push $P503, "quantifier:sym<{N,M}>"
-    push $P503, "quantifier:sym<**>"
-    push $P503, "backmod"
-    push $P503, "metachar"
-    push $P503, "metachar:sym<ws>"
-    push $P503, "metachar:sym<[ ]>"
-    push $P503, "metachar:sym<( )>"
-    push $P503, "metachar:sym<'>"
-    push $P503, "metachar:sym<\">"
-    push $P503, "metachar:sym<.>"
-    push $P503, "metachar:sym<^>"
-    push $P503, "metachar:sym<^^>"
-    push $P503, "metachar:sym<$>"
-    push $P503, "metachar:sym<$$>"
-    push $P503, "metachar:sym<:::>"
-    push $P503, "metachar:sym<::>"
-    push $P503, "metachar:sym<lwb>"
-    push $P503, "metachar:sym<rwb>"
-    push $P503, "metachar:sym<from>"
-    push $P503, "metachar:sym<to>"
-    push $P503, "metachar:sym<bs>"
-    push $P503, "metachar:sym<mod>"
-    push $P503, "metachar:sym<quantifier>"
-    push $P503, "metachar:sym<~>"
-    push $P503, "metachar:sym<{*}>"
-    push $P503, "metachar:sym<assert>"
-    push $P503, "metachar:sym<var>"
-    push $P503, "metachar:sym<PIR>"
-    push $P503, "backslash"
-    push $P503, "backslash:sym<s>"
-    push $P503, "backslash:sym<b>"
-    push $P503, "backslash:sym<e>"
-    push $P503, "backslash:sym<f>"
-    push $P503, "backslash:sym<h>"
-    push $P503, "backslash:sym<r>"
-    push $P503, "backslash:sym<t>"
-    push $P503, "backslash:sym<v>"
-    push $P503, "backslash:sym<o>"
-    push $P503, "backslash:sym<x>"
-    push $P503, "backslash:sym<c>"
-    push $P503, "backslash:sym<A>"
-    push $P503, "backslash:sym<z>"
-    push $P503, "backslash:sym<Z>"
-    push $P503, "backslash:sym<Q>"
-    push $P503, "backslash:sym<unrec>"
-    push $P503, "backslash:sym<misc>"
-    push $P503, "assertion"
-    push $P503, "assertion:sym<?>"
-    push $P503, "assertion:sym<!>"
-    push $P503, "assertion:sym<|>"
-    push $P503, "assertion:sym<method>"
-    push $P503, "assertion:sym<name>"
-    push $P503, "assertion:sym<[>"
-    push $P503, "cclass_elem"
-    push $P503, "mod_internal"
-    push $P503, "mod_ident"
-    push $P503, "mod_ident:sym<ignorecase>"
-    push $P503, "mod_ident:sym<ratchet>"
-    push $P503, "mod_ident:sym<sigspace>"
-    push $P503, "$!orig"
-    push $P503, "$!target"
-    push $P503, "$!from"
-    push $P503, "$!pos"
-    push $P503, "$!match"
-    push $P503, "$!name"
-    push $P503, "$!bstack"
-    push $P503, "$!cstack"
-    push $P503, "$!regexsub"
-    push $P503, "$!restart"
-    push $P503, "ints_to_string"
-    push $P503, "CTXSAVE"
-    push $P503, "SET_BLOCK_OUTER_CTX"
-    push $P503, "subrule_alias"
-    push $P503, "flip_ast"
-    push $P503, "BUILD"
-    push $P503, "get_exports"
-    push $P503, "get_module"
-    push $P503, "language"
-    push $P503, "compiler"
-    push $P503, "config"
-    push $P503, "load_module"
-    push $P503, "autoprint"
-    push $P503, "interactive"
-    push $P503, "eval"
-    push $P503, "ctxsave"
-    push $P503, "stages"
-    push $P503, "parsegrammar"
-    push $P503, "parseactions"
-    push $P503, "interactive_banner"
-    push $P503, "interactive_prompt"
-    push $P503, "compiler_progname"
-    push $P503, "commandline_options"
-    push $P503, "command_line"
-    push $P503, "command_eval"
-    push $P503, "process_args"
-    push $P503, "evalfiles"
-    push $P503, "compile"
-    push $P503, "start"
-    push $P503, "past"
-    push $P503, "post"
-    push $P503, "pirbegin"
-    push $P503, "pir"
-    push $P503, "evalpmc"
-    push $P503, "dumper"
-    push $P503, "usage"
-    push $P503, "version"
-    push $P503, "show-config"
-    push $P503, "verbose-config"
-    push $P503, "vmstat"
-    push $P503, "nqpevent"
-    push $P503, "removestage"
-    push $P503, "addstage"
-    push $P503, "parse_name"
-    push $P503, "lineof"
-    push $P503, "user-progname"
-    push $P503, "cli-options"
-    push $P503, "cli-arguments"
-    push $P503, "@!stages"
-    push $P503, "$!parsegrammar"
-    push $P503, "$!parseactions"
-    push $P503, "@!cmdoptions"
-    push $P503, "$!usage"
-    push $P503, "$!compiler_progname"
-    push $P503, "$!language"
-    push $P503, "%!config"
-    push $P503, "$!user_progname"
-    push $P503, "@!cli-arguments"
-    push $P503, "%!cli-options"
-    push $P503, "__6MODEL_CORE__"
-    push $P503, "GLOBALish"
-    push $P503, "9445C5406A048972164361D402A20067808C4578-1346233419.227"
-    push $P503, "src\\stage2\\gen\\nqp-mo.pm"
-    push $P503, "QRegex::P6Regex::Grammar"
-    push $P503, "orig"
-    push $P503, "match"
-    push $P503, "name"
-    push $P503, "bstack"
-    push $P503, "cstack"
-    push $P503, "regexsub"
-    push $P503, "restart"
-    push $P503, "QRegex::P6Regex::Actions"
-    push $P503, "QRegex::P6Regex::Compiler"
-    push $P503, "CompileTimeValue"
-    push $P503, "AA49D86054CDC686E34A37C6F89EC4059A76B342-1346233428.122"
-    push $P503, "src\\stage2\\QASTNode.nqp"
-    push $P503, "SpecialArg"
-    push $P503, "Node"
-    push $P503, "Regex"
-    push $P503, "IVal"
-    push $P503, "NVal"
-    push $P503, "SVal"
-    push $P503, "BVal"
-    push $P503, "WVal"
-    push $P503, "Want"
-    push $P503, "Var"
-    push $P503, "VarWithFallback"
-    push $P503, "Op"
-    push $P503, "VM"
-    push $P503, "Stmts"
-    push $P503, "Stmt"
-    push $P503, "Block"
-    push $P503, "BlockMemo"
-    push $P503, "Unquote"
-    push $P503, "CompUnit"
-    push $P503, "InlinePlaceholder"
-    push $P503, "Operations"
-    push $P503, "5B9F058D7D242FDD79B51D58DE66B682BE0865F8-1346233447.856"
-    push $P503, "src\\stage2\\QAST.nqp"
-    push $P503, "Compiler"
-    push $P503, "NFA"
-    push $P503, "P6Regex"
-    push $P503, "Grammar"
-    push $P503, "Actions"
-    push $P503, "CommandLine"
-    push $P503, "World"
-    push $P503, "CallResult"
-    push $P503, "Sub"
-    push $P503, "Ops"
-    push $P503, "Label"
-    .const 'Sub' $P504 = 'cuid_212_1346233469.934' 
-    capture_lex $P504
-    $P505 = $P504()
-    nqp_deserialize_sc "AQAAAEAAAAAIAAAAgAAAAAkAAADIAAAARB8AAJkAAADUKAAADEIAAAAAAAAMQgAAAAAAAAxCAAAMQgAAAAAAAAUAAAAGAAAADgAAAAAAAAAQAAAAEQAAAEsAAABMAAAAGQEAAAAAAAAbAQAAHAEAACgBAAApAQAAPwEAAEABAAABAAAAAAAAAAEAAAAmAQAAAQAAAOYNAAABAAAAPBQAAAEAAAB0GQAAAQAAAFAbAAABAAAABhwAAAEAAADmHAAAAQAAAMYdAAAAAAAAiwAAAAAAAAAAAAAACgAKAAAAAgAAAAIAAAAAAIwAAAADAAAAAgAAAAAAjQAAAAQAAAACAAEAAAAbAAAABwAAAAIAAQAAAEUAAAAIAAAAAgABAAAAUgAAAAkAAAACAAEAAABYAAAACgAAAAIAAQAAAFwAAAALAAAAAgAAAAAAjgAAAAwAAAACAAAAAACPAAAADQAAAAIAAgAAAAAAAAAKAAAAAAAAAAAAAAAAAAEAAAAAAAAAAgAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///////////////////////////////wAAAAAAAAAAAQAAAAAAAAACAAAAAAAAAAAAAwAAAAAAkAAAAAAAAAABAAAACgAAAAAACgDBAAAADwAAAAIAAwAAAAgAAAASAAAAAgADAAAACQAAABMAAAACAAMAAAAKAAAAFAAAAAIAAwAAAAsAAAAVAAAAAgADAAAADAAAABYAAAACAAMAAAAPAAAAFwAAAAIAAwAAABEAAAAYAAAAAgADAAAAEwAAABkAAAACAAMAAAAVAAAAGgAAAAIAAwAAABcAAAAbAAAAAgADAAAAGAAAABwAAAACAAMAAAAaAAAAHQAAAAIAAwAAABsAAAAeAAAAAgABAAAAUwAAAB8AAAACAAEAAABUAAAAIAAAAAIAAQAAAFUAAAAhAAAAAgABAAAAVgAAACIAAAACAAEAAABXAAAAIwAAAAIAAQAAAGcAAAAkAAAAAgABAAAAaAAAACUAAAACAAEAAABpAAAAJgAAAAIAAQAAAGoAAAAnAAAAAgABAAAAawAAACgAAAACAAEAAABsAAAAKQAAAAIAAQAAAG0AAAAqAAAAAgABAAAAbgAAACsAAAACAAEAAABvAAAALAAAAAIAAQAAAHAAAAAtAAAAAgABAAAAcQAAAC4AAAACAAEAAAByAAAALwAAAAIAAQAAAHMAAAAwAAAAAgABAAAAdAAAADEAAAACAAEAAAB1AAAAMgAAAAIAAQAAAHYAAAAzAAAAAgABAAAAdwAAADQAAAACAAEAAAB4AAAANQAAAAIAAQAAAHkAAAA2AAAAAgABAAAAegAAADcAAAACAAEAAAB7AAAAOAAAAAIAAQAAAHwAAAA5AAAAAgABAAAAfQAAADoAAAACAAEAAAB+AAAAOwAAAAIAAQAAAH8AAAA8AAAAAgAAAAAAAwAAAD0AAAACAAEAAACBAAAAPgAAAAIAAQAAAIIAAAA/AAAAAgABAAAAgwAAAEAAAAACAAEAAACEAAAAQQAAAAIAAQAAAIUAAABCAAAAAgABAAAAhgAAAEMAAAACAAEAAACHAAAARAAAAAIAAQAAAIgAAABFAAAAAgABAAAAiQAAAEYAAAACAAEAAACKAAAARwAAAAIAAQAAAIsAAABIAAAAAgABAAAAjAAAAEkAAAACAAEAAACNAAAASgAAAAIABAAAADAAAABNAAAAAgAAAAAADgAAAE4AAAACAAQAAAADAAAATwAAAAIABAAAAAQAAABQAAAAAgAEAAAABQAAAFEAAAACAAQAAAAGAAAAUgAAAAIABAAAAAcAAABTAAAAAgAEAAAACAAAAFQAAAACAAQAAAAJAAAAVQAAAAIABAAAAAoAAABWAAAAAgAEAAAACwAAAFcAAAACAAQAAAAMAAAAWAAAAAIABAAAAA0AAABZAAAAAgAEAAAADgAAAFoAAAACAAQAAAAPAAAAWwAAAAIABAAAABAAAABcAAAAAgAEAAAAEQAAAF0AAAACAAQAAAASAAAAXgAAAAIABAAAABMAAABfAAAAAgAEAAAAFAAAAGAAAAACAAQAAAAVAAAAYQAAAAIABAAAABYAAABiAAAAAgAEAAAAFwAAAGMAAAACAAQAAAAYAAAAZAAAAAIABAAAABkAAABlAAAAAgAEAAAAGgAAAGYAAAACAAQAAAAbAAAAZwAAAAIABAAAABwAAABoAAAAAgAEAAAAHQAAAGkAAAACAAQAAAAeAAAAagAAAAIABAAAAB8AAABrAAAAAgAEAAAAIAAAAGwAAAACAAQAAAAhAAAAbQAAAAIABAAAACIAAABuAAAAAgAEAAAAIwAAAG8AAAACAAQAAAAkAAAAcAAAAAIABAAAACUAAABxAAAAAgAEAAAAJgAAAHIAAAACAAQAAAAnAAAAcwAAAAIABAAAACgAAAB0AAAAAgAEAAAAKQAAAHUAAAACAAQAAAAqAAAAdgAAAAIABAAAACsAAAB3AAAAAgAEAAAALAAAAHgAAAACAAQAAAAtAAAAeQAAAAIABAAAAC4AAAB6AAAAAgAEAAAALwAAAHsAAAACAAQAAAAxAAAAfAAAAAIABAAAADIAAAB9AAAAAgAEAAAAMwAAAH4AAAACAAQAAAA0AAAAfwAAAAIABAAAADUAAACAAAAAAgAEAAAANgAAAIEAAAACAAQAAAA3AAAAggAAAAIABAAAADgAAACDAAAAAgAEAAAAOQAAAIQAAAACAAQAAAA6AAAAhQAAAAIABAAAADsAAACGAAAAAgAEAAAAPAAAAIcAAAACAAAAAAACAAAAiAAAAAIAAAAAAAQAAACJAAAAAgAAAAAABQAAAIoAAAACAAAAAAAGAAAAiwAAAAIAAAAAAAcAAACMAAAAAgAAAAAACAAAAI0AAAACAAAAAAAJAAAAjgAAAAIAAAAAAAoAAACPAAAAAgAAAAAACwAAAJAAAAACAAAAAAAMAAAAkQAAAAIAAAAAAA0AAACSAAAAAgAAAAAADwAAAJMAAAACAAAAAAAQAAAAlAAAAAIAAAAAABEAAACVAAAAAgAAAAAAEgAAAJYAAAACAAAAAAATAAAAlwAAAAIAAAAAABQAAACYAAAAAgAAAAAAFQAAAJkAAAACAAAAAAAWAAAAmgAAAAIAAAAAABcAAACbAAAAAgAAAAAAGAAAAJwAAAACAAAAAAAZAAAAnQAAAAIAAAAAABoAAACeAAAAAgAAAAAAGwAAAJ8AAAACAAAAAAAcAAAAoAAAAAIAAAAAAB0AAAChAAAAAgAAAAAAHgAAAKIAAAACAAAAAAAfAAAAowAAAAIAAAAAACAAAACkAAAAAgAAAAAAIQAAAKUAAAACAAAAAAAiAAAApgAAAAIAAAAAACMAAACnAAAAAgAAAAAAJAAAAKgAAAACAAAAAAAlAAAAqQAAAAIAAAAAACYAAACqAAAAAgAAAAAAJwAAAKsAAAACAAAAAAAoAAAArAAAAAIAAAAAACkAAACtAAAAAgAAAAAAKgAAAK4AAAACAAAAAAArAAAArwAAAAIAAAAAACwAAACwAAAAAgAAAAAALQAAALEAAAACAAAAAAAuAAAAsgAAAAIAAAAAAC8AAACzAAAAAgAAAAAAMAAAALQAAAACAAAAAAAxAAAAtQAAAAIAAAAAADIAAAC2AAAAAgAAAAAAMwAAALcAAAACAAAAAAA0AAAAuAAAAAIAAAAAADUAAAC5AAAAAgAAAAAANgAAALoAAAACAAAAAAA3AAAAuwAAAAIAAAAAADgAAAC8AAAAAgAAAAAAOQAAAL0AAAACAAAAAAA6AAAAvgAAAAIAAAAAADsAAAC/AAAAAgAAAAAAPAAAAMAAAAACAAAAAAA9AAAAwQAAAAIAAAAAAD4AAADCAAAAAgAAAAAAPwAAAMMAAAACAAAAAABAAAAAxAAAAAIAAAAAAEEAAADFAAAAAgAAAAAAQgAAAMYAAAACAAAAAABDAAAAxwAAAAIAAAAAAEQAAADIAAAAAgAAAAAARQAAAMkAAAACAAAAAABGAAAAygAAAAIAAAAAAEcAAADLAAAAAgAAAAAASAAAAMwAAAACAAAAAABJAAAAzQAAAAIAAAAAAEoAAADOAAAAAgAAAAAASwAAAM8AAAACAAAAAABMAAAA0AAAAAIAAAAAAE0AAADRAAAAAgAAAAAATgAAANIAAAACAAAAAABPAAAA0wAAAAIAAAAAAFAAAAAAAAAAAAAAAAQAAAAAAAAAAgAAAAAAAQAAAAIABAAAAAEAAAACAAEAAABSAAAAAgADAAAABwAAAAQAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAIAAQAAAFQAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAMAAAAEAAAAAQAAAAAAAAADAAAAAgAAAAEAAAAAAAAAAwAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAgADAAAABwAAAAEAAQABAAIAAwAAAAcAAAACAAMAAAAHAAAAAgADAAAABwAAAAIAAwAAAAcAAAACAAMAAAAHAAAAAgADAAAABwAAAP///////////////////////////////wAAAAAAAAAABAAAAAAAAAACAAMAAAAHAAAAAwACAAEAAABSAAAACgAKAAAA1AAAAAQAAAAAAAAAAADVAAAABAABAAAAAAAAANYAAAAEAAIAAAAAAAAA1wAAAAQAAwAAAAAAAADYAAAABAAEAAAAAAAAANkAAAAEAAUAAAAAAAAA2gAAAAQABgAAAAAAAADbAAAABAAHAAAAAAAAANwAAAAEAAgAAAAAAAAA3QAAAAQACQAAAAAAAAACAAQAAAABAAAAAwACAAAAAAABAAAAAwAAAAAAkQAAAAAAAABRAAAACgAAAAAACgBlAAAADwAAAAIAAwAAAAgAAAASAAAAAgADAAAACQAAABMAAAACAAMAAAAKAAAAFAAAAAIAAwAAAAsAAAAVAAAAAgADAAAADAAAABYAAAACAAMAAAAPAAAAFwAAAAIAAwAAABEAAAAYAAAAAgADAAAAEwAAABkAAAACAAMAAAAVAAAAGgAAAAIAAwAAABcAAAAbAAAAAgADAAAAGAAAABwAAAACAAMAAAAaAAAAHQAAAAIAAwAAABsAAADeAAAAAgAEAAAAPgAAAN8AAAACAAQAAAA/AAAA4AAAAAIABAAAAEAAAACBAAAAAgAEAAAAQQAAAFQAAAACAAQAAABCAAAATQAAAAIAAAAAAFgAAABYAAAAAgAEAAAARAAAAFkAAAACAAQAAABFAAAAZQAAAAIABAAAAEYAAABmAAAAAgAEAAAARwAAAF0AAAACAAQAAABIAAAAXwAAAAIABAAAAEkAAABhAAAAAgAEAAAASgAAAGMAAAACAAQAAABLAAAAfAAAAAIABAAAAEwAAABbAAAAAgAEAAAATQAAAFwAAAACAAQAAABOAAAAaQAAAAIABAAAAE8AAABqAAAAAgAEAAAAUAAAAGsAAAACAAQAAABRAAAAbAAAAAIABAAAAFIAAABtAAAAAgAEAAAAUwAAAG4AAAACAAQAAABUAAAAbwAAAAIABAAAAFUAAABwAAAAAgAEAAAAVgAAAHEAAAACAAQAAABXAAAAcgAAAAIABAAAAFgAAABzAAAAAgAEAAAAWQAAAHQAAAACAAQAAABaAAAAdQAAAAIABAAAAFsAAAB2AAAAAgAEAAAAXAAAAHcAAAACAAQAAABdAAAAeAAAAAIABAAAAF4AAACMAAAAAgAAAAAAUgAAAI0AAAACAAAAAABTAAAAjgAAAAIAAAAAAFQAAACPAAAAAgAAAAAAVQAAAJAAAAACAAAAAABWAAAAkQAAAAIAAAAAAFcAAACSAAAAAgAAAAAAWQAAAJMAAAACAAAAAABaAAAAlAAAAAIAAAAAAFsAAACWAAAAAgAAAAAAXAAAAJcAAAACAAAAAABdAAAAmAAAAAIAAAAAAF4AAACaAAAAAgAAAAAAXwAAAJ0AAAACAAAAAABgAAAAngAAAAIAAAAAAGEAAACfAAAAAgAAAAAAYgAAAKAAAAACAAAAAABjAAAAoQAAAAIAAAAAAGQAAACiAAAAAgAAAAAAZQAAAKMAAAACAAAAAABmAAAApAAAAAIAAAAAAGcAAAClAAAAAgAAAAAAaAAAAKYAAAACAAAAAABpAAAAqQAAAAIAAAAAAGoAAACqAAAAAgAAAAAAawAAAKsAAAACAAAAAABsAAAArAAAAAIAAAAAAG0AAACtAAAAAgAAAAAAbgAAALIAAAACAAAAAABvAAAAswAAAAIAAAAAAHAAAACwAAAAAgAAAAAAcQAAALYAAAACAAAAAAByAAAAtwAAAAIAAAAAAHMAAAC4AAAAAgAAAAAAdAAAALkAAAACAAAAAAB1AAAAugAAAAIAAAAAAHYAAAC7AAAAAgAAAAAAdwAAALwAAAACAAAAAAB4AAAAvQAAAAIAAAAAAHkAAAC+AAAAAgAAAAAAegAAAL8AAAACAAAAAAB7AAAAwAAAAAIAAAAAAHwAAADGAAAAAgAAAAAAfQAAAMgAAAACAAAAAAB+AAAAyQAAAAIAAAAAAH8AAADKAAAAAgAAAAAAgAAAAMsAAAACAAAAAACBAAAAzAAAAAIAAAAAAIIAAADNAAAAAgAAAAAAgwAAAIoAAAACAAAAAACEAAAAiwAAAAIAAAAAAIUAAADOAAAAAgAAAAAAhgAAAM8AAAACAAAAAACHAAAA4QAAAAIAAAAAAIgAAADiAAAAAgAAAAAAiQAAAAAAAAAAAAAAAwAAAAAAAAACAAAAAABRAAAAAgAEAAAAPQAAAAIAAwAAAAcAAAAEAAAAAAAAAAEAAAAAAAAABQAAAAAAAAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////////////////////////////////AAAAAAAAAAADAAAAAAAAAAIAAwAAAAcAAAADAAIABAAAAD0AAAADAAIAAAAAAFEAAAADAAAAAACSAAAAAAAAAIoAAAAKAAAAAAAKADoAAAAPAAAAAgADAAAACAAAABIAAAACAAMAAAAJAAAAEwAAAAIAAwAAAAoAAAAUAAAAAgAEAAAAYAAAABUAAAACAAMAAAAMAAAAFgAAAAIAAwAAAA8AAAAXAAAAAgADAAAAEQAAABgAAAACAAMAAAATAAAAGQAAAAIAAwAAABUAAAAaAAAAAgADAAAAFwAAABsAAAACAAMAAAAYAAAAHAAAAAIAAwAAABoAAAAdAAAAAgADAAAAGwAAAOMAAAACAAQAAABhAAAA5AAAAAIABAAAAGIAAADlAAAAAgAEAAAAYwAAAOYAAAACAAQAAABkAAAA5wAAAAIABAAAAGUAAADoAAAAAgAEAAAAZgAAAOkAAAACAAQAAABnAAAA6gAAAAIABAAAAGgAAADrAAAAAgAEAAAAaQAAAOwAAAACAAQAAABqAAAA7QAAAAIABAAAAGsAAAB6AAAAAgAEAAAAbAAAAO4AAAACAAQAAABtAAAA7wAAAAIABAAAAG4AAADwAAAAAgAEAAAAbwAAAPEAAAACAAQAAABwAAAA8gAAAAIABAAAAHEAAADzAAAAAgAEAAAAcgAAAPQAAAACAAQAAABzAAAA9QAAAAIABAAAAHQAAAD2AAAAAgAEAAAAdQAAAPcAAAACAAQAAAB2AAAA+AAAAAIABAAAAHcAAAD5AAAAAgAEAAAAeAAAAPoAAAACAAQAAAB5AAAAIAAAAAIABAAAAHoAAAD7AAAAAgAEAAAAewAAAPwAAAACAAQAAAB8AAAA/QAAAAIABAAAAH0AAAD+AAAAAgAEAAAAfgAAAP8AAAACAAQAAAB/AAAAAAEAAAIABAAAAIAAAAABAQAAAgAEAAAAgQAAAAIBAAACAAQAAACCAAAAAwEAAAIABAAAAIMAAAAEAQAAAgAEAAAAhAAAAAUBAAACAAQAAACFAAAABgEAAAIABAAAAIYAAAAHAQAAAgAEAAAAhwAAAAgBAAACAAQAAACIAAAACQEAAAIABAAAAIkAAAAKAQAAAgAEAAAAigAAAAsBAAACAAQAAACLAAAADAEAAAIABAAAAIwAAAANAQAAAgAEAAAAjQAAAAAAAAAAAAAAAwAAAAAAAAACAAAAAACKAAAAAgAEAAAAXwAAAAIAAwAAAAcAAAAEAAAAAAAAAAEAAAAAAAAABQAAAAAAAAADAAAAAAAAAAAACwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAgADAAAABwAAAAIAAwAAAAcAAAABAAIAAwAAAAcAAAACAAMAAAAHAAAAAgADAAAABwAAAAEAAgADAAAABwAAAAEAAQD///////////////////////////////8AAAAAAAAAAAMAAAAAAAAAAgADAAAABwAAAAMAAgAEAAAAXwAAAAoACwAAAA4BAAAEAAAAAAAAAAAADwEAAAQAAQAAAAAAAAAQAQAABAACAAAAAAAAABEBAAAEAAMAAAAAAAAAEgEAAAQABAAAAAAAAAATAQAABAAFAAAAAAAAABQBAAAEAAYAAAAAAAAAFQEAAAQABwAAAAAAAAAWAQAABAAIAAAAAAAAABcBAAAEAAkAAAAAAAAAGAEAAAQACgAAAAAAAAACAAAAAACKAAAAAwAAAAAAkwAAAAAAAACMAAAACgAXAAAAJwEAAAIABwAAAAEAAAAqAQAAAgAHAAAABgAAACsBAAACAAcAAAAKAAAALAEAAAIABwAAACUAAAAtAQAAAgAHAAAALQAAAC4BAAACAAcAAAAxAAAALwEAAAIABwAAADUAAAAwAQAAAgAHAAAAOQAAADEBAAACAAcAAAA7AAAAMgEAAAIABwAAAD8AAAAzAQAAAgAHAAAARAAAADQBAAACAAcAAABMAAAANQEAAAIABwAAAE4AAAA2AQAAAgAHAAAAVAAAADcBAAACAAcAAABYAAAAOAEAAAIABwAAAFwAAAA5AQAAAgAHAAAAYAAAADoBAAACAAcAAABnAAAAOwEAAAIABwAAAGoAAAA8AQAAAgAHAAAAbQAAAD0BAAACAAcAAAB2AAAAPgEAAAIACAAAACcAAABBAQAAAgAIAAAAOAAAAAoAAAAAAAAAAAAAAAAAAQAAAAAAAAACAAAAAACMAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////////////////////////////////AAAAAAAAAAABAAAAAAAAAAIAAAAAAIwAAAADAAAAAACUAAAAAAAAAI0AAAAKAAIAAABCAQAAAgABAAAAAQAAAEMBAAACAAAAAACVAAAACgAAAAAAAAAAAAAAAAABAAAAAAAAAAIAAAAAAI0AAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///////////////////////////////8AAAAAAAAAAAEAAAAAAAAAAgAAAAAAjQAAAAMAAAAAAJYAAAAAAAAAjgAAAAoABQAAAEQBAAACAAQAAAABAAAARQEAAAIABAAAAD0AAABBAQAAAgAEAAAAXwAAAEYBAAACAAQAAADaAAAARwEAAAIABAAAAJ8AAAAKAAAAAAAAAAAAAAAAAAEAAAAAAAAAAgAAAAAAjgAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///////////////////////////////wAAAAAAAAAAAQAAAAAAAAACAAAAAACOAAAAAwAAAAAAlwAAAAAAAACPAAAACgAFAAAASAEAAAIACAAAAAEAAAArAQAAAgAIAAAABAAAAEkBAAACAAgAAAAMAAAASgEAAAIACAAAABsAAABLAQAAAgAIAAAAIgAAAAoAAAAAAAAAAAAAAAAAAQAAAAAAAAACAAAAAACPAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////////////////////////////////AAAAAAAAAAABAAAAAAAAAAIAAAAAAI8AAAADAAAAAACYAAAAAAAAAJUAAAAKAAMAAABEAQAAAgAAAAAAAQAAAEUBAAACAAAAAABRAAAAQQEAAAIAAAAAAIoAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///////////////////////////////8AAAAAAAAAAAEAAAAAAAAAAgAAAAAAlQAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAADAAAABQAAAAAAAAABAAAAAwAAAAUAAAAQAAAAAQAAAAMAAAAFAAAAIAAAAAEAAAADAAAABQAAADAAAAABAAAAAwAAAAUAAABAAAAAAQAAAAMAAAAFAAAAUAAAAAEAAAADAAAABQAAAGAAAAABAAAAAwAAAAUAAABwAAAAAQAAAAMAAAAFAAAAgAAAAAEAAAADAAAABQAAAJAAAAABAAAAAwAAAAUAAACgAAAAAQAAAAMAAAAFAAAAsAAAAAEAAAADAAAABQAAAMAAAAABAAAAAwAAAAUAAADQAAAAAQAAAAMAAAAFAAAA4AAAAAEAAAADAAAABQAAAPAAAAABAAAAAwAAAAUAAAAAAQAAAQAAAAMAAAAFAAAAEAEAAAEAAAADAAAABQAAACABAAABAAAAAwAAAAUAAAAwAQAAAQAAAAMAAAAFAAAAQAEAAAEAAAADAAAABQAAAFABAAABAAAAAwAAAAUAAABgAQAAAQAAAAMAAAAFAAAAcAEAAAEAAAADAAAABQAAAIABAAABAAAAAwAAAAUAAACQAQAAAQAAAAMAAAAFAAAAoAEAAAEAAAADAAAABQAAALABAAABAAAAAwAAAAUAAADAAQAAAQAAAAMAAAAFAAAA0AEAAAEAAAADAAAABQAAAOABAAABAAAAAwAAAAUAAADwAQAAAQAAAAMAAAAFAAAAAAIAAAEAAAADAAAABQAAABACAAABAAAAAwAAAAUAAAAgAgAAAQAAAAMAAAAFAAAAMAIAAAEAAAADAAAABQAAAEACAAABAAAAAwAAAAUAAABQAgAAAQAAAAMAAAAFAAAAYAIAAAEAAAADAAAABQAAAHACAAABAAAAAwAAAAUAAACAAgAAAQAAAAMAAAAFAAAAkAIAAAEAAAADAAAABQAAAKACAAABAAAAAwAAAAUAAACwAgAAAQAAAAMAAAAFAAAAwAIAAAEAAAADAAAABQAAANACAAABAAAAAwAAAAUAAADgAgAAAQAAAAMAAAAFAAAA8AIAAAEAAAADAAAABQAAAAADAAABAAAAAwAAAAUAAAAQAwAAAQAAAAMAAAAFAAAAIAMAAAEAAAADAAAABQAAADADAAABAAAAAwAAAAUAAABAAwAAAQAAAAMAAAAFAAAAUAMAAAEAAAADAAAABQAAAGADAAABAAAAAwAAAAUAAABwAwAAAQAAAAMAAAAFAAAAgAMAAAEAAAADAAAABQAAAJADAAABAAAAAwAAAAUAAACgAwAAAQAAAAMAAAAFAAAAsAMAAAEAAAADAAAABQAAAMADAAABAAAAAwAAAAUAAADQAwAAAQAAAAMAAAAFAAAA4AMAAAEAAAADAAAABQAAAPADAAABAAAAAwAAAAUAAAAABAAAAQAAAAMAAAAFAAAAEAQAAAEAAAADAAAABQAAACAEAAABAAAAAwAAAAUAAAAwBAAAAQAAAAMAAAAFAAAAQAQAAAEAAAADAAAABQAAAFAEAAABAAAAAwAAAAUAAABgBAAAAQAAAAMAAAAFAAAAcAQAAAEAAAADAAAABQAAAIAEAAABAAAAAwAAAAUAAACQBAAAAQAAAAMAAAAFAAAAoAQAAAEAAAADAAAABQAAALAEAAABAAAAAwAAAAUAAADABAAAAQAAAAMAAAAFAAAA0AQAAAEAAAADAAAABQAAAOAEAAABAAAAAAAAAAIAAADwBAAAAAAAAAMAAAAFAAAA8AQAAAEAAAADAAAABQAAAAAFAAABAAAAAwAAAAUAAAAQBQAAAQAAAAMAAAAFAAAAIAUAAAEAAAADAAAABQAAADAFAAABAAAAAwAAAAUAAABABQAAAQAAAAMAAAAFAAAAUAUAAAEAAAADAAAABQAAAGAFAAABAAAAAwAAAAUAAABwBQAAAQAAAAMAAAAFAAAAgAUAAAEAAAADAAAABQAAAJAFAAABAAAAAwAAAAUAAACgBQAAAQAAAAMAAAAFAAAAsAUAAAEAAAADAAAABQAAAMAFAAABAAAAAwAAAAUAAADQBQAAAQAAAAMAAAAFAAAA4AUAAAEAAAADAAAABQAAAPAFAAABAAAAAwAAAAUAAAAABgAAAQAAAAMAAAAFAAAAEAYAAAEAAAADAAAABQAAACAGAAABAAAAAwAAAAUAAAAwBgAAAQAAAAMAAAAFAAAAQAYAAAEAAAADAAAABQAAAFAGAAABAAAAAwAAAAUAAABgBgAAAQAAAAMAAAAFAAAAcAYAAAEAAAADAAAABQAAAIAGAAABAAAAAwAAAAUAAACQBgAAAQAAAAMAAAAFAAAAoAYAAAEAAAADAAAABQAAALAGAAABAAAAAwAAAAUAAADABgAAAQAAAAMAAAAFAAAA0AYAAAEAAAADAAAABQAAAOAGAAABAAAAAwAAAAUAAADwBgAAAQAAAAMAAAAFAAAAAAcAAAEAAAADAAAABQAAABAHAAABAAAAAwAAAAUAAAAgBwAAAQAAAAMAAAAFAAAAMAcAAAEAAAADAAAABQAAAEAHAAABAAAAAwAAAAUAAABQBwAAAQAAAAMAAAAFAAAAYAcAAAEAAAADAAAABQAAAHAHAAABAAAAAwAAAAUAAACABwAAAQAAAAMAAAAFAAAAkAcAAAEAAAADAAAABQAAAKAHAAABAAAAAwAAAAUAAACwBwAAAQAAAAMAAAAFAAAAwAcAAAEAAAADAAAABQAAANAHAAABAAAAAwAAAAUAAADgBwAAAQAAAAMAAAAFAAAA8AcAAAEAAAADAAAABQAAAAAIAAABAAAAAwAAAAUAAAAQCAAAAQAAAAMAAAAFAAAAIAgAAAEAAAADAAAABQAAADAIAAABAAAAAwAAAAUAAABACAAAAQAAAAMAAAAFAAAAUAgAAAEAAAADAAAABQAAAGAIAAABAAAAAAAAAAMAAABwCAAAAAAAAAUAAAAAAAAAcAgAAAEAAAAAAAAABAAAAIAIAAAAAAAAAAAAAAUAAACACAAAAAAAAAAAAAAGAAAAgAgAAAAAAAAAAAAABwAAAIAIAAAAAAAABgAAAAYAAACACAAAAQAAAAYAAAAGAAAAEhIAAAEAAAAGAAAABgAAAPYXAAABAAAABQAAAAAAAADoGAAAAQAAAAUAAAAAAAAA+BgAAAEAAAAAAAAACAAAAAgZAAAAAAAABQAAAAAAAAAIGQAAAQAAAAUAAAAAAAAAGBkAAAEAAAAFAAAAAAAAACgZAAABAAAACwAAAAAAAAAAAAEAAQABAAsAAAAAAAEAAAABAAEAAQALAAAAAAACAAAAAQABAAEACwAAAAAAAwAAAAEAAQABAAsAAAAAAAQAAAABAAEAAQALAAAAAAAFAAAAAQABAAEACwAAAAAABgAAAAEAAQABAAsAAAAAAAcAAAABAAEAAQALAAAAAAAIAAAAAQABAAEACwAAAAAACQAAAAEAAQABAAsAAAAAAAoAAAABAAEAAQALAAAAAAALAAAAAQABAAEACwAAAAAADAAAAAEAAQABAAsAAAAAAA0AAAABAAEAAQALAAAAAAAOAAAAAQABAAEACwAAAAAADwAAAAEAAQABAAsAAAAAABAAAAABAAEAAQALAAAAAAARAAAAAQABAAEACwAAAAAAEgAAAAEAAQABAAsAAAAAABMAAAABAAEAAQALAAAAAAAUAAAAAQABAAEACwAAAAAAFQAAAAEAAQABAAsAAAAAABYAAAABAAEAAQALAAAAAAAXAAAAAQABAAEACwAAAAAAGAAAAAEAAQABAAsAAAAAABkAAAABAAEAAQALAAAAAAAaAAAAAQABAAEACwAAAAAAGwAAAAEAAQABAAsAAAAAABwAAAABAAEAAQALAAAAAAAdAAAAAQABAAEACwAAAAAAHgAAAAEAAQABAAsAAAAAAB8AAAABAAEAAQALAAAAAAAgAAAAAQABAAEACwAAAAAAIQAAAAEAAQABAAsAAAAAACIAAAABAAEAAQALAAAAAAAjAAAAAQABAAEACwAAAAAAJAAAAAEAAQABAAsAAAAAACUAAAABAAEAAQALAAAAAAAmAAAAAQABAAEACwAAAAAAJwAAAAEAAQABAAsAAAAAACgAAAABAAEAAQALAAAAAAApAAAAAQABAAEACwAAAAAAKgAAAAEAAQABAAsAAAAAACsAAAABAAEAAQALAAAAAAAsAAAAAQABAAEACwAAAAAALQAAAAEAAQABAAsAAAAAAC4AAAABAAEAAQALAAAAAAAvAAAAAQABAAEACwAAAAAAMAAAAAEAAQABAAsAAAAAADEAAAABAAEAAQALAAAAAAAyAAAAAQABAAEACwAAAAAAMwAAAAEAAQABAAsAAAAAADQAAAABAAEAAQALAAAAAAA1AAAAAQABAAEACwAAAAAANgAAAAEAAQABAAsAAAAAADcAAAABAAEAAQALAAAAAAA4AAAAAQABAAEACwAAAAAAOQAAAAEAAQABAAsAAAAAADoAAAABAAEAAQALAAAAAAA7AAAAAQABAAEACwAAAAAAPAAAAAEAAQABAAsAAAAAAD0AAAABAAEAAQALAAAAAAA+AAAAAQABAAEACwAAAAAAPwAAAAEAAQABAAsAAAAAAEAAAAABAAEAAQALAAAAAABBAAAAAQABAAEACwAAAAAAQgAAAAEAAQABAAsAAAAAAEMAAAABAAEAAQALAAAAAABEAAAAAQABAAEACwAAAAAARQAAAAEAAQABAAsAAAAAAEYAAAABAAEAAQALAAAAAABHAAAAAQABAAEACwAAAAAASAAAAAEAAQABAAsAAAAAAEkAAAABAAEAAQALAAAAAABKAAAAAQABAAEACwAAAAAASwAAAAEAAQABAAsAAAAAAEwAAAABAAEAAQALAAAAAABNAAAAAQABAAEACwAAAAAATgAAAAEAAQABAAsAAAAAAE8AAAABAAEAAQALAAAAAABQAAAAAQABAAEACwAAAAAAUQAAAAEAAQABAAsAAAAAAFIAAAABAAEAAQALAAAAAABTAAAAAQABAAEACwAAAAAAVAAAAAEAAQABAAsAAAAAAFUAAAABAAEAAQALAAAAAABWAAAAAQABAAEACwAAAAAAVwAAAAEAAQABAAsAAAAAAFgAAAABAAEAAQALAAAAAABZAAAAAQABAAEACwAAAAAAWgAAAAEAAQABAAsAAAAAAFsAAAABAAEAAQALAAAAAABcAAAAAQABAAEACwAAAAAAXQAAAAEAAQABAAsAAAAAAF4AAAABAAEAAQALAAAAAABfAAAAAQABAAEACwAAAAAAYAAAAAEAAQABAAsAAAAAAGEAAAABAAEAAQALAAAAAABiAAAAAQABAAEACwAAAAAAYwAAAAEAAQABAAsAAAAAAGQAAAABAAEAAQALAAAAAABlAAAAAQABAAEACwAAAAAAZgAAAAEAAQABAAsAAAAAAGcAAAABAAEAAQALAAAAAABoAAAAAQABAAEACwAAAAAAaQAAAAEAAQABAAsAAAAAAGoAAAABAAEAAQALAAAAAABrAAAAAQABAAEACwAAAAAAbAAAAAEAAQABAAsAAAAAAG0AAAABAAEAAQALAAAAAABuAAAAAQABAAEACwAAAAAAbwAAAAEAAQABAAsAAAAAAHAAAAABAAEAAQALAAAAAABxAAAAAQABAAEACwAAAAAAcgAAAAEAAQABAAsAAAAAAHMAAAABAAEAAQALAAAAAAB0AAAAAQABAAEACwAAAAAAdQAAAAEAAQABAAsAAAAAAHYAAAABAAEAAQALAAAAAAB3AAAAAQABAAEACwAAAAAAeAAAAAEAAQABAAsAAAAAAHkAAAABAAEAAQALAAAAAAB6AAAAAQABAAEACwAAAAAAewAAAAEAAQABAAsAAAAAAHwAAAABAAEAAQALAAAAAAB9AAAAAQABAAEACwAAAAAAfgAAAAEAAQABAAsAAAAAAH8AAAABAAEAAQALAAAAAACAAAAAAQABAAEACwAAAAAAgQAAAAEAAQABAAsAAAAAAIIAAAABAAEAAQALAAAAAACDAAAAAQABAAEACwAAAAAAhAAAAAEAAQABAAsAAAAAAIUAAAABAAEAAQALAAAAAACGAAAAAQABAAEAGgEAAAcAAAAAAAoAAAAAAAYAHQEAAAoAAAAAAAoATwAAAIcAAAACAAAAAAACAAAAPAAAAAIAAAAAAAMAAACIAAAAAgAAAAAABAAAAIkAAAACAAAAAAAFAAAAigAAAAIAAAAAAAYAAACLAAAAAgAAAAAABwAAAIwAAAACAAAAAAAIAAAAjQAAAAIAAAAAAAkAAACOAAAAAgAAAAAACgAAAI8AAAACAAAAAAALAAAAkAAAAAIAAAAAAAwAAACRAAAAAgAAAAAADQAAAE0AAAACAAAAAAAOAAAAkgAAAAIAAAAAAA8AAACTAAAAAgAAAAAAEAAAAJQAAAACAAAAAAARAAAAlQAAAAIAAAAAABIAAACWAAAAAgAAAAAAEwAAAJcAAAACAAAAAAAUAAAAmAAAAAIAAAAAABUAAACZAAAAAgAAAAAAFgAAAJoAAAACAAAAAAAXAAAAmwAAAAIAAAAAABgAAACcAAAAAgAAAAAAGQAAAJ0AAAACAAAAAAAaAAAAngAAAAIAAAAAABsAAACfAAAAAgAAAAAAHAAAAKAAAAACAAAAAAAdAAAAoQAAAAIAAAAAAB4AAACiAAAAAgAAAAAAHwAAAKMAAAACAAAAAAAgAAAApAAAAAIAAAAAACEAAAClAAAAAgAAAAAAIgAAAKYAAAACAAAAAAAjAAAApwAAAAIAAAAAACQAAACoAAAAAgAAAAAAJQAAAKkAAAACAAAAAAAmAAAAqgAAAAIAAAAAACcAAACrAAAAAgAAAAAAKAAAAKwAAAACAAAAAAApAAAArQAAAAIAAAAAACoAAACuAAAAAgAAAAAAKwAAAK8AAAACAAAAAAAsAAAAsAAAAAIAAAAAAC0AAACxAAAAAgAAAAAALgAAALIAAAACAAAAAAAvAAAAswAAAAIAAAAAADAAAAC0AAAAAgAAAAAAMQAAALUAAAACAAAAAAAyAAAAtgAAAAIAAAAAADMAAAC3AAAAAgAAAAAANAAAALgAAAACAAAAAAA1AAAAuQAAAAIAAAAAADYAAAC6AAAAAgAAAAAANwAAALsAAAACAAAAAAA4AAAAvAAAAAIAAAAAADkAAAC9AAAAAgAAAAAAOgAAAL4AAAACAAAAAAA7AAAAvwAAAAIAAAAAADwAAADAAAAAAgAAAAAAPQAAAMEAAAACAAAAAAA+AAAAwgAAAAIAAAAAAD8AAADDAAAAAgAAAAAAQAAAAMQAAAACAAAAAABBAAAAxQAAAAIAAAAAAEIAAADGAAAAAgAAAAAAQwAAAMcAAAACAAAAAABEAAAAyAAAAAIAAAAAAEUAAADJAAAAAgAAAAAARgAAAMoAAAACAAAAAABHAAAAywAAAAIAAAAAAEgAAADMAAAAAgAAAAAASQAAAM0AAAACAAAAAABKAAAAzgAAAAIAAAAAAEsAAADPAAAAAgAAAAAATAAAANAAAAACAAAAAABNAAAA0QAAAAIAAAAAAE4AAADSAAAAAgAAAAAATwAAANMAAAACAAAAAABQAAAABwBPAAAAAgAAAAAAAgAAAAIAAAAAAAMAAAACAAAAAAAEAAAAAgAAAAAABQAAAAIAAAAAAAYAAAACAAAAAAAHAAAAAgAAAAAACAAAAAIAAAAAAAkAAAACAAAAAAAKAAAAAgAAAAAACwAAAAIAAAAAAAwAAAACAAAAAAANAAAAAgAAAAAADgAAAAIAAAAAAA8AAAACAAAAAAAQAAAAAgAAAAAAEQAAAAIAAAAAABIAAAACAAAAAAATAAAAAgAAAAAAFAAAAAIAAAAAABUAAAACAAAAAAAWAAAAAgAAAAAAFwAAAAIAAAAAABgAAAACAAAAAAAZAAAAAgAAAAAAGgAAAAIAAAAAABsAAAACAAAAAAAcAAAAAgAAAAAAHQAAAAIAAAAAAB4AAAACAAAAAAAfAAAAAgAAAAAAIAAAAAIAAAAAACEAAAACAAAAAAAiAAAAAgAAAAAAIwAAAAIAAAAAACQAAAACAAAAAAAlAAAAAgAAAAAAJgAAAAIAAAAAACcAAAACAAAAAAAoAAAAAgAAAAAAKQAAAAIAAAAAACoAAAACAAAAAAArAAAAAgAAAAAALAAAAAIAAAAAAC0AAAACAAAAAAAuAAAAAgAAAAAALwAAAAIAAAAAADAAAAACAAAAAAAxAAAAAgAAAAAAMgAAAAIAAAAAADMAAAACAAAAAAA0AAAAAgAAAAAANQAAAAIAAAAAADYAAAACAAAAAAA3AAAAAgAAAAAAOAAAAAIAAAAAADkAAAACAAAAAAA6AAAAAgAAAAAAOwAAAAIAAAAAADwAAAACAAAAAAA9AAAAAgAAAAAAPgAAAAIAAAAAAD8AAAACAAAAAABAAAAAAgAAAAAAQQAAAAIAAAAAAEIAAAACAAAAAABDAAAAAgAAAAAARAAAAAIAAAAAAEUAAAACAAAAAABGAAAAAgAAAAAARwAAAAIAAAAAAEgAAAACAAAAAABJAAAAAgAAAAAASgAAAAIAAAAAAEsAAAACAAAAAABMAAAAAgAAAAAATQAAAAIAAAAAAE4AAAACAAAAAABPAAAAAgAAAAAAUAAAAAcAAAAAAAcAAQAAAAIABAAAAAEAAAAHAAAAAAABAAcAAAAAAAoAAAAAAAQAAQAAAAAAAAAHAAQAAAACAAAAAAABAAAAAgAEAAAAAQAAAAIAAQAAAFIAAAACAAMAAAAHAAAABwAAAAAACgAAAAAACgAAAAAABAAAAAAAAAAAAAQAAAAAAAAAAAAHAAoAAAAHAAQAAAAEAAEAAAAAAAAAAgABAAAAUgAAAAYAHgEAAAYA1AAAAAcABAAAAAQAAQAAAAAAAAACAAEAAABSAAAABgAjAAAABgDVAAAABwAEAAAABAABAAAAAAAAAAIAAQAAAFIAAAAGACQAAAAGANYAAAAHAAQAAAAEAAEAAAAAAAAAAgABAAAAUgAAAAYAJQAAAAYA1wAAAAcABAAAAAQAAQAAAAAAAAACAAEAAABSAAAABgAfAQAABgDYAAAABwAEAAAABAABAAAAAAAAAAIAAQAAAFIAAAAGACABAAAGANkAAAAHAAQAAAAEAAEAAAAAAAAAAgABAAAAUgAAAAYAIQEAAAYA2gAAAAcABAAAAAQAAQAAAAAAAAACAAEAAABSAAAABgAiAQAABgDbAAAABwAEAAAABAABAAAAAAAAAAIAAQAAAFIAAAAGACMBAAAGANwAAAAHAAQAAAAEAAEAAAAAAAAAAgABAAAAUgAAAAYAJAEAAAYA3QAAAAcAAAAAAAEABgAlAQAACgAAAAAACgA4AAAAjAAAAAIAAAAAAFIAAACNAAAAAgAAAAAAUwAAAI4AAAACAAAAAABUAAAAjwAAAAIAAAAAAFUAAACQAAAAAgAAAAAAVgAAAJEAAAACAAAAAABXAAAATQAAAAIAAAAAAFgAAACSAAAAAgAAAAAAWQAAAJMAAAACAAAAAABaAAAAlAAAAAIAAAAAAFsAAACWAAAAAgAAAAAAXAAAAJcAAAACAAAAAABdAAAAmAAAAAIAAAAAAF4AAACaAAAAAgAAAAAAXwAAAJ0AAAACAAAAAABgAAAAngAAAAIAAAAAAGEAAACfAAAAAgAAAAAAYgAAAKAAAAACAAAAAABjAAAAoQAAAAIAAAAAAGQAAACiAAAAAgAAAAAAZQAAAKMAAAACAAAAAABmAAAApAAAAAIAAAAAAGcAAAClAAAAAgAAAAAAaAAAAKYAAAACAAAAAABpAAAAqQAAAAIAAAAAAGoAAACqAAAAAgAAAAAAawAAAKsAAAACAAAAAABsAAAArAAAAAIAAAAAAG0AAACtAAAAAgAAAAAAbgAAALIAAAACAAAAAABvAAAAswAAAAIAAAAAAHAAAACwAAAAAgAAAAAAcQAAALYAAAACAAAAAAByAAAAtwAAAAIAAAAAAHMAAAC4AAAAAgAAAAAAdAAAALkAAAACAAAAAAB1AAAAugAAAAIAAAAAAHYAAAC7AAAAAgAAAAAAdwAAALwAAAACAAAAAAB4AAAAvQAAAAIAAAAAAHkAAAC+AAAAAgAAAAAAegAAAL8AAAACAAAAAAB7AAAAwAAAAAIAAAAAAHwAAADGAAAAAgAAAAAAfQAAAMgAAAACAAAAAAB+AAAAyQAAAAIAAAAAAH8AAADKAAAAAgAAAAAAgAAAAMsAAAACAAAAAACBAAAAzAAAAAIAAAAAAIIAAADNAAAAAgAAAAAAgwAAAIoAAAACAAAAAACEAAAAiwAAAAIAAAAAAIUAAADOAAAAAgAAAAAAhgAAAM8AAAACAAAAAACHAAAA4QAAAAIAAAAAAIgAAADiAAAAAgAAAAAAiQAAAAcAOAAAAAIAAAAAAFIAAAACAAAAAABTAAAAAgAAAAAAVAAAAAIAAAAAAFUAAAACAAAAAABWAAAAAgAAAAAAVwAAAAIAAAAAAFgAAAACAAAAAABZAAAAAgAAAAAAWgAAAAIAAAAAAFsAAAACAAAAAABcAAAAAgAAAAAAXQAAAAIAAAAAAF4AAAACAAAAAABfAAAAAgAAAAAAYAAAAAIAAAAAAGEAAAACAAAAAABiAAAAAgAAAAAAYwAAAAIAAAAAAGQAAAACAAAAAABlAAAAAgAAAAAAZgAAAAIAAAAAAGcAAAACAAAAAABoAAAAAgAAAAAAaQAAAAIAAAAAAGoAAAACAAAAAABrAAAAAgAAAAAAbAAAAAIAAAAAAG0AAAACAAAAAABuAAAAAgAAAAAAbwAAAAIAAAAAAHAAAAACAAAAAABxAAAAAgAAAAAAcgAAAAIAAAAAAHMAAAACAAAAAAB0AAAAAgAAAAAAdQAAAAIAAAAAAHYAAAACAAAAAAB3AAAAAgAAAAAAeAAAAAIAAAAAAHkAAAACAAAAAAB6AAAAAgAAAAAAewAAAAIAAAAAAHwAAAACAAAAAAB9AAAAAgAAAAAAfgAAAAIAAAAAAH8AAAACAAAAAACAAAAAAgAAAAAAgQAAAAIAAAAAAIIAAAACAAAAAACDAAAAAgAAAAAAhAAAAAIAAAAAAIUAAAACAAAAAACGAAAAAgAAAAAAhwAAAAIAAAAAAIgAAAACAAAAAACJAAAABwAAAAAABwABAAAAAgAEAAAAPQAAAAcAAAAAAAEABwAAAAAACgAAAAAABAABAAAAAAAAAAcAAwAAAAIAAAAAAFEAAAACAAQAAAA9AAAAAgADAAAABwAAAAcAAAAAAAoAAAAAAAoAAAAAAAQAAAAAAAAAAAAEAAAAAAAAAAAABwAAAAAABwAAAAAAAQAGACYBAAAKAAAAAAAKAAAAAAAHAAAAAAAHAAAAAAAHAAEAAAACAAQAAABfAAAABwAAAAAAAQAHAAAAAAAKAAAAAAAEAAEAAAAAAAAABwADAAAAAgAAAAAAigAAAAIABAAAAF8AAAACAAMAAAAHAAAABwAAAAAACgAAAAAACgAAAAAABAAAAAAAAAAAAAQAAAAAAAAAAAAHAAIAAAAHAAIAAAAEAAAAAAAAAAAAAgAEAAAAYQAAAAcAAgAAAAQAAAAAAAAAAAACAAQAAABhAAAABwABAAAABwACAAAABAAAAAAAAAAAAAIABAAAAGEAAAABAAIAAAAHAAAAAAAKAAAAAAADAAAABwAAAAAACgAAAAAACwAAAAcAAAAAAAoAAAAAAAwAAAAHAAAAAAAKAAAAAABDAQAABwAAAAAACgAAAAAA", cur_sc, $P503, $P505
-    .const "LexInfo" $P501 = "cuid_1_1346233469.934"
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 0
-    $P503 = $P501."set_static_lexpad_value"("GLOBALish", $P502)
-    .const "LexInfo" $P504 = "cuid_1_1346233469.934"
-    $P505 = $P504."finish_static_lexpad"()
-    .const "LexInfo" $P501 = "cuid_1_1346233469.934"
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 0
-    $P503 = $P501."set_static_lexpad_value"("$?PACKAGE", $P502)
-    .const "LexInfo" $P504 = "cuid_1_1346233469.934"
-    $P505 = $P504."finish_static_lexpad"()
-    .const 'Sub' $P501 = "cuid_2_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 2
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_3_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 3
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_5_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 4
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_6_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 5
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_7_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 6
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_8_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 7
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_9_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 8
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_10_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 9
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_11_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 10
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_12_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 11
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_13_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 12
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_14_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 13
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_16_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 14
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_18_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 15
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_19_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 16
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_21_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 17
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_22_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 18
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_23_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 19
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_24_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 20
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_25_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 21
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_29_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 22
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_30_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 23
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_32_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 24
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_33_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 25
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_34_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 26
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_35_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 27
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_36_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 28
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_37_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 29
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_38_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 30
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_39_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 31
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_40_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 32
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_41_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 33
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_42_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 34
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_43_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 35
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_44_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 36
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_45_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 37
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_46_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 38
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_47_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 39
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_48_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 40
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_49_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 41
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_50_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 42
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_51_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 43
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_52_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 44
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_53_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 45
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_54_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 46
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_55_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 47
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_56_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 48
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_57_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 49
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_58_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 50
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_59_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 51
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_60_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 52
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_61_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 53
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_62_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 54
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_63_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 55
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_64_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 56
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_65_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 57
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_66_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 58
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_67_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 59
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_68_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 60
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_69_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 61
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_70_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 62
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_71_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 63
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_72_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 64
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_73_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 65
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_74_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 66
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_75_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 67
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_76_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 68
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_78_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 69
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_80_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 70
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_81_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 71
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_82_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 72
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_84_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 73
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_86_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 74
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_93_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 75
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_95_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 76
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_96_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 77
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_97_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 78
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_98_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 79
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_99_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 80
-    set_sub_code_object $P501, $P502
-    .const "LexInfo" $P501 = "cuid_100_1346233469.934"
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 1
-    $P503 = $P501."set_static_lexpad_value"("$?PACKAGE", $P502)
-    .const "LexInfo" $P504 = "cuid_100_1346233469.934"
-    $P505 = $P504."finish_static_lexpad"()
-    .const "LexInfo" $P501 = "cuid_100_1346233469.934"
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 1
-    $P503 = $P501."set_static_lexpad_value"("$?CLASS", $P502)
-    .const "LexInfo" $P504 = "cuid_100_1346233469.934"
-    $P505 = $P504."finish_static_lexpad"()
-    .const 'Sub' $P501 = "cuid_101_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 82
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_102_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 83
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_103_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 84
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_104_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 85
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_105_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 86
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_106_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 87
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_107_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 88
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_108_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 89
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_109_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 90
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_110_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 91
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_111_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 92
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_112_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 93
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_113_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 94
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_114_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 95
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_115_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 96
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_116_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 97
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_117_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 98
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_118_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 99
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_119_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 100
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_120_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 101
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_121_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 102
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_122_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 103
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_123_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 104
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_124_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 105
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_125_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 106
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_126_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 107
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_127_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 108
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_128_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 109
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_129_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 110
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_130_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 111
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_131_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 112
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_132_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 113
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_133_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 114
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_134_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 115
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_135_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 116
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_136_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 117
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_137_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 118
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_138_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 119
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_139_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 120
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_140_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 121
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_141_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 122
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_142_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 123
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_143_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 124
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_144_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 125
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_145_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 126
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_146_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 127
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_147_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 128
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_148_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 129
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_149_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 130
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_150_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 131
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_151_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 132
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_152_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 133
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_153_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 134
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_154_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 135
-    set_sub_code_object $P501, $P502
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 81
-    get_who $P501, $P502
-    .const 'Sub' $P503 = "cuid_167_1346233469.934" 
-    set $P501["buildsub"], $P503
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 81
-    get_who $P501, $P502
-    .const 'Sub' $P503 = "cuid_170_1346233469.934" 
-    set $P501["qbuildsub"], $P503
-    .const 'Sub' $P501 = "cuid_155_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 136
-    set_sub_code_object $P501, $P502
-    .const 'Sub' $P501 = "cuid_156_1346233469.934" 
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 137
-    set_sub_code_object $P501, $P502
-    .const "LexInfo" $P501 = "cuid_157_1346233469.934"
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 81
-    $P503 = $P501."set_static_lexpad_value"("$?PACKAGE", $P502)
-    .const "LexInfo" $P504 = "cuid_157_1346233469.934"
-    $P505 = $P504."finish_static_lexpad"()
-    .const "LexInfo" $P501 = "cuid_157_1346233469.934"
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 81
-    $P503 = $P501."set_static_lexpad_value"("$?CLASS", $P502)
-    .const "LexInfo" $P504 = "cuid_157_1346233469.934"
-    $P505 = $P504."finish_static_lexpad"()
-    .const "LexInfo" $P501 = "cuid_158_1346233469.934"
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 138
-    $P503 = $P501."set_static_lexpad_value"("$?PACKAGE", $P502)
-    .const "LexInfo" $P504 = "cuid_158_1346233469.934"
-    $P505 = $P504."finish_static_lexpad"()
-    .const "LexInfo" $P501 = "cuid_158_1346233469.934"
-    nqp_get_sc_object $P502, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 138
-    $P503 = $P501."set_static_lexpad_value"("$?CLASS", $P502)
-    .const "LexInfo" $P504 = "cuid_158_1346233469.934"
-    $P505 = $P504."finish_static_lexpad"()
-    nqp_get_sc_object $P501, "5234B5A49DFB4F02BA7DCED030C35D4C271407E5-1346233469.971", 0
-    set_hll_global "GLOBAL", $P501
+    get_hll_global $P5001, "ModuleLoader"
+    $P5002 = $P5001."load_module"("PASTRegex")
+    nqp_create_sc $P5001, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81"
+    set cur_sc, $P5001
+    $P5002 = cur_sc."set_description"("src\\stage2\\gen\\NQPP6QRegex.pm")
+    new $P5003, 'ResizableStringArray'
+    null $S5001
+    push $P5003, $S5001
+    push $P5003, "P6opaque"
+    push $P5003, "QAST"
+    push $P5003, "QRegex"
+    push $P5003, "NQPCursorRole"
+    push $P5003, "C93A2896AF049E45B5F868F2B78F46945E34D3FC-1346277585.638"
+    push $P5003, "src\\stage2\\QRegex.nqp"
+    push $P5003, "NQPMatch"
+    push $P5003, "NQPCursor"
+    push $P5003, "NQPRegexMethod"
+    push $P5003, "NQPRegex"
+    push $P5003, "HLL"
+    push $P5003, "PIRT"
+    push $P5003, "PAST"
+    push $P5003, "__PAST_CORE_SC__"
+    push $P5003, "CREATE"
+    push $P5003, "1DCC61F2B3C9F696581992363C3E43733F596AA9-1346277580.649"
+    push $P5003, "src\\stage2\\NQPCORE.setting"
+    push $P5003, "bless"
+    push $P5003, "BUILDALL"
+    push $P5003, "new"
+    push $P5003, "Str"
+    push $P5003, "Numeric"
+    push $P5003, "Int"
+    push $P5003, "at_pos"
+    push $P5003, "at_key"
+    push $P5003, "defined"
+    push $P5003, "ACCEPTS"
+    push $P5003, "isa"
+    push $P5003, "__dump"
+    push $P5003, "MATCH"
+    push $P5003, "Bool"
+    push $P5003, "parse"
+    push $P5003, "!INTERPOLATE"
+    push $P5003, "!INTERPOLATE_REGEX"
+    push $P5003, "target"
+    push $P5003, "from"
+    push $P5003, "pos"
+    push $P5003, "CAPHASH"
+    push $P5003, "!cursor_init"
+    push $P5003, "!cursor_start"
+    push $P5003, "!cursor_start_subcapture"
+    push $P5003, "!cursor_capture"
+    push $P5003, "!cursor_push_cstack"
+    push $P5003, "!cursor_pass"
+    push $P5003, "!cursor_fail"
+    push $P5003, "!cursor_next"
+    push $P5003, "!cursor_more"
+    push $P5003, "!reduce"
+    push $P5003, "!reduce_with_match"
+    push $P5003, "!protoregex"
+    push $P5003, "!protoregex_nfa"
+    push $P5003, "!protoregex_table"
+    push $P5003, "!alt"
+    push $P5003, "!alt_nfa"
+    push $P5003, "!BACKREF"
+    push $P5003, "!LITERAL"
+    push $P5003, "at"
+    push $P5003, "before"
+    push $P5003, "after"
+    push $P5003, "ws"
+    push $P5003, "ww"
+    push $P5003, "wb"
+    push $P5003, "ident"
+    push $P5003, "alpha"
+    push $P5003, "alnum"
+    push $P5003, "upper"
+    push $P5003, "lower"
+    push $P5003, "digit"
+    push $P5003, "xdigit"
+    push $P5003, "space"
+    push $P5003, "blank"
+    push $P5003, "cntrl"
+    push $P5003, "punct"
+    push $P5003, "FAILGOAL"
+    push $P5003, "2BB67A389134BBAD0A6C35350CCD1D56BE456969-1346277591.613"
+    push $P5003, "src\\stage2\\gen\\NQPHLL.pm"
+    push $P5003, "termish"
+    push $P5003, "term"
+    push $P5003, "infix"
+    push $P5003, "prefix"
+    push $P5003, "postfix"
+    push $P5003, "circumfix"
+    push $P5003, "postcircumfix"
+    push $P5003, "term:sym<circumfix>"
+    push $P5003, "infixish"
+    push $P5003, "prefixish"
+    push $P5003, "postfixish"
+    push $P5003, "nullterm"
+    push $P5003, "nullterm_alt"
+    push $P5003, "nulltermish"
+    push $P5003, "quote_delimited"
+    push $P5003, "quote_atom"
+    push $P5003, "decint"
+    push $P5003, "decints"
+    push $P5003, "hexint"
+    push $P5003, "hexints"
+    push $P5003, "octint"
+    push $P5003, "octints"
+    push $P5003, "binint"
+    push $P5003, "binints"
+    push $P5003, "integer"
+    push $P5003, "dec_number"
+    push $P5003, "escale"
+    push $P5003, "quote_escape"
+    push $P5003, "quote_escape:sym<backslash>"
+    push $P5003, "quote_escape:sym<stopper>"
+    push $P5003, "quote_escape:sym<bs>"
+    push $P5003, "quote_escape:sym<nl>"
+    push $P5003, "quote_escape:sym<cr>"
+    push $P5003, "quote_escape:sym<tab>"
+    push $P5003, "quote_escape:sym<ff>"
+    push $P5003, "quote_escape:sym<esc>"
+    push $P5003, "quote_escape:sym<hex>"
+    push $P5003, "quote_escape:sym<oct>"
+    push $P5003, "quote_escape:sym<chr>"
+    push $P5003, "quote_escape:sym<0>"
+    push $P5003, "quote_escape:sym<misc>"
+    push $P5003, "charname"
+    push $P5003, "charnames"
+    push $P5003, "charspec"
+    push $P5003, "O"
+    push $P5003, "panic"
+    push $P5003, "peek_delimiters"
+    push $P5003, "quote_EXPR"
+    push $P5003, "quotemod_check"
+    push $P5003, "starter"
+    push $P5003, "stopper"
+    push $P5003, "split_words"
+    push $P5003, "EXPR"
+    push $P5003, "EXPR_reduce"
+    push $P5003, "ternary"
+    push $P5003, "MARKER"
+    push $P5003, "MARKED"
+    push $P5003, "LANG"
+    push $P5003, "obs"
+    push $P5003, "normspace"
+    push $P5003, "identifier"
+    push $P5003, "arg"
+    push $P5003, "arglist"
+    push $P5003, "TOP"
+    push $P5003, "nibbler"
+    push $P5003, "termaltseq"
+    push $P5003, "termconjseq"
+    push $P5003, "termalt"
+    push $P5003, "termconj"
+    push $P5003, "quantified_atom"
+    push $P5003, "separator"
+    push $P5003, "atom"
+    push $P5003, "quantifier"
+    push $P5003, "quantifier:sym<*>"
+    push $P5003, "quantifier:sym<+>"
+    push $P5003, "quantifier:sym<?>"
+    push $P5003, "quantifier:sym<{N,M}>"
+    push $P5003, "quantifier:sym<**>"
+    push $P5003, "backmod"
+    push $P5003, "metachar"
+    push $P5003, "metachar:sym<ws>"
+    push $P5003, "metachar:sym<[ ]>"
+    push $P5003, "metachar:sym<( )>"
+    push $P5003, "metachar:sym<'>"
+    push $P5003, "metachar:sym<\">"
+    push $P5003, "metachar:sym<.>"
+    push $P5003, "metachar:sym<^>"
+    push $P5003, "metachar:sym<^^>"
+    push $P5003, "metachar:sym<$>"
+    push $P5003, "metachar:sym<$$>"
+    push $P5003, "metachar:sym<:::>"
+    push $P5003, "metachar:sym<::>"
+    push $P5003, "metachar:sym<lwb>"
+    push $P5003, "metachar:sym<rwb>"
+    push $P5003, "metachar:sym<from>"
+    push $P5003, "metachar:sym<to>"
+    push $P5003, "metachar:sym<bs>"
+    push $P5003, "metachar:sym<mod>"
+    push $P5003, "metachar:sym<quantifier>"
+    push $P5003, "metachar:sym<~>"
+    push $P5003, "metachar:sym<{*}>"
+    push $P5003, "metachar:sym<assert>"
+    push $P5003, "metachar:sym<var>"
+    push $P5003, "metachar:sym<PIR>"
+    push $P5003, "backslash"
+    push $P5003, "backslash:sym<s>"
+    push $P5003, "backslash:sym<b>"
+    push $P5003, "backslash:sym<e>"
+    push $P5003, "backslash:sym<f>"
+    push $P5003, "backslash:sym<h>"
+    push $P5003, "backslash:sym<r>"
+    push $P5003, "backslash:sym<t>"
+    push $P5003, "backslash:sym<v>"
+    push $P5003, "backslash:sym<o>"
+    push $P5003, "backslash:sym<x>"
+    push $P5003, "backslash:sym<c>"
+    push $P5003, "backslash:sym<A>"
+    push $P5003, "backslash:sym<z>"
+    push $P5003, "backslash:sym<Z>"
+    push $P5003, "backslash:sym<Q>"
+    push $P5003, "backslash:sym<unrec>"
+    push $P5003, "backslash:sym<misc>"
+    push $P5003, "assertion"
+    push $P5003, "assertion:sym<?>"
+    push $P5003, "assertion:sym<!>"
+    push $P5003, "assertion:sym<|>"
+    push $P5003, "assertion:sym<method>"
+    push $P5003, "assertion:sym<name>"
+    push $P5003, "assertion:sym<[>"
+    push $P5003, "cclass_elem"
+    push $P5003, "mod_internal"
+    push $P5003, "mod_ident"
+    push $P5003, "mod_ident:sym<ignorecase>"
+    push $P5003, "mod_ident:sym<ratchet>"
+    push $P5003, "mod_ident:sym<sigspace>"
+    push $P5003, "$!orig"
+    push $P5003, "$!target"
+    push $P5003, "$!from"
+    push $P5003, "$!pos"
+    push $P5003, "$!match"
+    push $P5003, "$!name"
+    push $P5003, "$!bstack"
+    push $P5003, "$!cstack"
+    push $P5003, "$!regexsub"
+    push $P5003, "$!restart"
+    push $P5003, "ints_to_string"
+    push $P5003, "CTXSAVE"
+    push $P5003, "SET_BLOCK_OUTER_CTX"
+    push $P5003, "subrule_alias"
+    push $P5003, "flip_ast"
+    push $P5003, "BUILD"
+    push $P5003, "get_exports"
+    push $P5003, "get_module"
+    push $P5003, "language"
+    push $P5003, "compiler"
+    push $P5003, "config"
+    push $P5003, "load_module"
+    push $P5003, "autoprint"
+    push $P5003, "interactive"
+    push $P5003, "eval"
+    push $P5003, "ctxsave"
+    push $P5003, "stages"
+    push $P5003, "parsegrammar"
+    push $P5003, "parseactions"
+    push $P5003, "interactive_banner"
+    push $P5003, "interactive_prompt"
+    push $P5003, "compiler_progname"
+    push $P5003, "commandline_options"
+    push $P5003, "command_line"
+    push $P5003, "command_eval"
+    push $P5003, "process_args"
+    push $P5003, "evalfiles"
+    push $P5003, "compile"
+    push $P5003, "start"
+    push $P5003, "past"
+    push $P5003, "post"
+    push $P5003, "pirbegin"
+    push $P5003, "pir"
+    push $P5003, "evalpmc"
+    push $P5003, "dumper"
+    push $P5003, "usage"
+    push $P5003, "version"
+    push $P5003, "show-config"
+    push $P5003, "verbose-config"
+    push $P5003, "vmstat"
+    push $P5003, "nqpevent"
+    push $P5003, "removestage"
+    push $P5003, "addstage"
+    push $P5003, "parse_name"
+    push $P5003, "lineof"
+    push $P5003, "user-progname"
+    push $P5003, "cli-options"
+    push $P5003, "cli-arguments"
+    push $P5003, "@!stages"
+    push $P5003, "$!parsegrammar"
+    push $P5003, "$!parseactions"
+    push $P5003, "@!cmdoptions"
+    push $P5003, "$!usage"
+    push $P5003, "$!compiler_progname"
+    push $P5003, "$!language"
+    push $P5003, "%!config"
+    push $P5003, "$!user_progname"
+    push $P5003, "@!cli-arguments"
+    push $P5003, "%!cli-options"
+    push $P5003, "__6MODEL_CORE__"
+    push $P5003, "GLOBALish"
+    push $P5003, "737799CC9C4B888950184E8D92A500CE7A5E08DA-1346277574.503"
+    push $P5003, "src\\stage2\\gen\\nqp-mo.pm"
+    push $P5003, "QRegex::P6Regex::Grammar"
+    push $P5003, "orig"
+    push $P5003, "match"
+    push $P5003, "name"
+    push $P5003, "bstack"
+    push $P5003, "cstack"
+    push $P5003, "regexsub"
+    push $P5003, "restart"
+    push $P5003, "QRegex::P6Regex::Actions"
+    push $P5003, "QRegex::P6Regex::Compiler"
+    push $P5003, "CompileTimeValue"
+    push $P5003, "AA49D86054CDC686E34A37C6F89EC4059A76B342-1346277582.704"
+    push $P5003, "src\\stage2\\QASTNode.nqp"
+    push $P5003, "SpecialArg"
+    push $P5003, "Node"
+    push $P5003, "Regex"
+    push $P5003, "IVal"
+    push $P5003, "NVal"
+    push $P5003, "SVal"
+    push $P5003, "BVal"
+    push $P5003, "WVal"
+    push $P5003, "Want"
+    push $P5003, "Var"
+    push $P5003, "VarWithFallback"
+    push $P5003, "Op"
+    push $P5003, "VM"
+    push $P5003, "Stmts"
+    push $P5003, "Stmt"
+    push $P5003, "Block"
+    push $P5003, "BlockMemo"
+    push $P5003, "Unquote"
+    push $P5003, "CompUnit"
+    push $P5003, "InlinePlaceholder"
+    push $P5003, "Operations"
+    push $P5003, "41C17C7E374A7792284F461955403B04C8234C59-1346277601.013"
+    push $P5003, "src\\stage2\\QAST.nqp"
+    push $P5003, "Compiler"
+    push $P5003, "NFA"
+    push $P5003, "P6Regex"
+    push $P5003, "Grammar"
+    push $P5003, "Actions"
+    push $P5003, "CommandLine"
+    push $P5003, "World"
+    push $P5003, "CallResult"
+    push $P5003, "Sub"
+    push $P5003, "Ops"
+    push $P5003, "Label"
+    .const 'Sub' $P5004 = 'cuid_212_1346277621.774' 
+    capture_lex $P5004
+    $P5005 = $P5004()
+    nqp_deserialize_sc "AQAAAEAAAAAIAAAAgAAAAAkAAADIAAAARB8AAJkAAADUKAAADEIAAAAAAAAMQgAAAAAAAAxCAAAMQgAAAAAAAAUAAAAGAAAADgAAAAAAAAAQAAAAEQAAAEsAAABMAAAAGQEAAAAAAAAbAQAAHAEAACgBAAApAQAAPwEAAEABAAABAAAAAAAAAAEAAAAmAQAAAQAAAOYNAAABAAAAPBQAAAEAAAB0GQAAAQAAAFAbAAABAAAABhwAAAEAAADmHAAAAQAAAMYdAAAAAAAAiwAAAAAAAAAAAAAACgAKAAAAAgAAAAIAAAAAAIwAAAADAAAAAgAAAAAAjQAAAAQAAAACAAEAAAAaAAAABwAAAAIAAQAAAEQAAAAIAAAAAgABAAAAUQAAAAkAAAACAAEAAABXAAAACgAAAAIAAQAAAFsAAAALAAAAAgAAAAAAjgAAAAwAAAACAAAAAACPAAAADQAAAAIAAgAAAAAAAAAKAAAAAAAAAAAAAAAAAAEAAAAAAAAAAgAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///////////////////////////////wAAAAAAAAAAAQAAAAAAAAACAAAAAAAAAAAAAwAAAAAAkAAAAAAAAAABAAAACgAAAAAACgDBAAAADwAAAAIAAwAAAAgAAAASAAAAAgADAAAACQAAABMAAAACAAMAAAAKAAAAFAAAAAIAAwAAAAsAAAAVAAAAAgADAAAADAAAABYAAAACAAMAAAAPAAAAFwAAAAIAAwAAABEAAAAYAAAAAgADAAAAEwAAABkAAAACAAMAAAAVAAAAGgAAAAIAAwAAABcAAAAbAAAAAgADAAAAGAAAABwAAAACAAMAAAAaAAAAHQAAAAIAAwAAABsAAAAeAAAAAgABAAAAUgAAAB8AAAACAAEAAABTAAAAIAAAAAIAAQAAAFQAAAAhAAAAAgABAAAAVQAAACIAAAACAAEAAABWAAAAIwAAAAIAAQAAAGYAAAAkAAAAAgABAAAAZwAAACUAAAACAAEAAABoAAAAJgAAAAIAAQAAAGkAAAAnAAAAAgABAAAAagAAACgAAAACAAEAAABrAAAAKQAAAAIAAQAAAGwAAAAqAAAAAgABAAAAbQAAACsAAAACAAEAAABuAAAALAAAAAIAAQAAAG8AAAAtAAAAAgABAAAAcAAAAC4AAAACAAEAAABxAAAALwAAAAIAAQAAAHIAAAAwAAAAAgABAAAAcwAAADEAAAACAAEAAAB0AAAAMgAAAAIAAQAAAHUAAAAzAAAAAgABAAAAdgAAADQAAAACAAEAAAB3AAAANQAAAAIAAQAAAHgAAAA2AAAAAgABAAAAeQAAADcAAAACAAEAAAB6AAAAOAAAAAIAAQAAAHsAAAA5AAAAAgABAAAAfAAAADoAAAACAAEAAAB9AAAAOwAAAAIAAQAAAH4AAAA8AAAAAgAAAAAAAwAAAD0AAAACAAEAAACAAAAAPgAAAAIAAQAAAIEAAAA/AAAAAgABAAAAggAAAEAAAAACAAEAAACDAAAAQQAAAAIAAQAAAIQAAABCAAAAAgABAAAAhQAAAEMAAAACAAEAAACGAAAARAAAAAIAAQAAAIcAAABFAAAAAgABAAAAiAAAAEYAAAACAAEAAACJAAAARwAAAAIAAQAAAIoAAABIAAAAAgABAAAAiwAAAEkAAAACAAEAAACMAAAASgAAAAIABAAAADAAAABNAAAAAgAAAAAADgAAAE4AAAACAAQAAAADAAAATwAAAAIABAAAAAQAAABQAAAAAgAEAAAABQAAAFEAAAACAAQAAAAGAAAAUgAAAAIABAAAAAcAAABTAAAAAgAEAAAACAAAAFQAAAACAAQAAAAJAAAAVQAAAAIABAAAAAoAAABWAAAAAgAEAAAACwAAAFcAAAACAAQAAAAMAAAAWAAAAAIABAAAAA0AAABZAAAAAgAEAAAADgAAAFoAAAACAAQAAAAPAAAAWwAAAAIABAAAABAAAABcAAAAAgAEAAAAEQAAAF0AAAACAAQAAAASAAAAXgAAAAIABAAAABMAAABfAAAAAgAEAAAAFAAAAGAAAAACAAQAAAAVAAAAYQAAAAIABAAAABYAAABiAAAAAgAEAAAAFwAAAGMAAAACAAQAAAAYAAAAZAAAAAIABAAAABkAAABlAAAAAgAEAAAAGgAAAGYAAAACAAQAAAAbAAAAZwAAAAIABAAAABwAAABoAAAAAgAEAAAAHQAAAGkAAAACAAQAAAAeAAAAagAAAAIABAAAAB8AAABrAAAAAgAEAAAAIAAAAGwAAAACAAQAAAAhAAAAbQAAAAIABAAAACIAAABuAAAAAgAEAAAAIwAAAG8AAAACAAQAAAAkAAAAcAAAAAIABAAAACUAAABxAAAAAgAEAAAAJgAAAHIAAAACAAQAAAAnAAAAcwAAAAIABAAAACgAAAB0AAAAAgAEAAAAKQAAAHUAAAACAAQAAAAqAAAAdgAAAAIABAAAACsAAAB3AAAAAgAEAAAALAAAAHgAAAACAAQAAAAtAAAAeQAAAAIABAAAAC4AAAB6AAAAAgAEAAAALwAAAHsAAAACAAQAAAAxAAAAfAAAAAIABAAAADIAAAB9AAAAAgAEAAAAMwAAAH4AAAACAAQAAAA0AAAAfwAAAAIABAAAADUAAACAAAAAAgAEAAAANgAAAIEAAAACAAQAAAA3AAAAggAAAAIABAAAADgAAACDAAAAAgAEAAAAOQAAAIQAAAACAAQAAAA6AAAAhQAAAAIABAAAADsAAACGAAAAAgAEAAAAPAAAAIcAAAACAAAAAAACAAAAiAAAAAIAAAAAAAQAAACJAAAAAgAAAAAABQAAAIoAAAACAAAAAAAGAAAAiwAAAAIAAAAAAAcAAACMAAAAAgAAAAAACAAAAI0AAAACAAAAAAAJAAAAjgAAAAIAAAAAAAoAAACPAAAAAgAAAAAACwAAAJAAAAACAAAAAAAMAAAAkQAAAAIAAAAAAA0AAACSAAAAAgAAAAAADwAAAJMAAAACAAAAAAAQAAAAlAAAAAIAAAAAABEAAACVAAAAAgAAAAAAEgAAAJYAAAACAAAAAAATAAAAlwAAAAIAAAAAABQAAACYAAAAAgAAAAAAFQAAAJkAAAACAAAAAAAWAAAAmgAAAAIAAAAAABcAAACbAAAAAgAAAAAAGAAAAJwAAAACAAAAAAAZAAAAnQAAAAIAAAAAABoAAACeAAAAAgAAAAAAGwAAAJ8AAAACAAAAAAAcAAAAoAAAAAIAAAAAAB0AAAChAAAAAgAAAAAAHgAAAKIAAAACAAAAAAAfAAAAowAAAAIAAAAAACAAAACkAAAAAgAAAAAAIQAAAKUAAAACAAAAAAAiAAAApgAAAAIAAAAAACMAAACnAAAAAgAAAAAAJAAAAKgAAAACAAAAAAAlAAAAqQAAAAIAAAAAACYAAACqAAAAAgAAAAAAJwAAAKsAAAACAAAAAAAoAAAArAAAAAIAAAAAACkAAACtAAAAAgAAAAAAKgAAAK4AAAACAAAAAAArAAAArwAAAAIAAAAAACwAAACwAAAAAgAAAAAALQAAALEAAAACAAAAAAAuAAAAsgAAAAIAAAAAAC8AAACzAAAAAgAAAAAAMAAAALQAAAACAAAAAAAxAAAAtQAAAAIAAAAAADIAAAC2AAAAAgAAAAAAMwAAALcAAAACAAAAAAA0AAAAuAAAAAIAAAAAADUAAAC5AAAAAgAAAAAANgAAALoAAAACAAAAAAA3AAAAuwAAAAIAAAAAADgAAAC8AAAAAgAAAAAAOQAAAL0AAAACAAAAAAA6AAAAvgAAAAIAAAAAADsAAAC/AAAAAgAAAAAAPAAAAMAAAAACAAAAAAA9AAAAwQAAAAIAAAAAAD4AAADCAAAAAgAAAAAAPwAAAMMAAAACAAAAAABAAAAAxAAAAAIAAAAAAEEAAADFAAAAAgAAAAAAQgAAAMYAAAACAAAAAABDAAAAxwAAAAIAAAAAAEQAAADIAAAAAgAAAAAARQAAAMkAAAACAAAAAABGAAAAygAAAAIAAAAAAEcAAADLAAAAAgAAAAAASAAAAMwAAAACAAAAAABJAAAAzQAAAAIAAAAAAEoAAADOAAAAAgAAAAAASwAAAM8AAAACAAAAAABMAAAA0AAAAAIAAAAAAE0AAADRAAAAAgAAAAAATgAAANIAAAACAAAAAABPAAAA0wAAAAIAAAAAAFAAAAAAAAAAAAAAAAQAAAAAAAAAAgAAAAAAAQAAAAIABAAAAAEAAAACAAEAAABRAAAAAgADAAAABwAAAAQAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAIAAQAAAFMAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAMAAAAEAAAAAQAAAAAAAAADAAAAAgAAAAEAAAAAAAAAAwAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAgADAAAABwAAAAEAAQABAAIAAwAAAAcAAAACAAMAAAAHAAAAAgADAAAABwAAAAIAAwAAAAcAAAACAAMAAAAHAAAAAgADAAAABwAAAP///////////////////////////////wAAAAAAAAAABAAAAAAAAAACAAMAAAAHAAAAAwACAAEAAABRAAAACgAKAAAA1AAAAAQAAAAAAAAAAADVAAAABAABAAAAAAAAANYAAAAEAAIAAAAAAAAA1wAAAAQAAwAAAAAAAADYAAAABAAEAAAAAAAAANkAAAAEAAUAAAAAAAAA2gAAAAQABgAAAAAAAADbAAAABAAHAAAAAAAAANwAAAAEAAgAAAAAAAAA3QAAAAQACQAAAAAAAAACAAQAAAABAAAAAwACAAAAAAABAAAAAwAAAAAAkQAAAAAAAABRAAAACgAAAAAACgBlAAAADwAAAAIAAwAAAAgAAAASAAAAAgADAAAACQAAABMAAAACAAMAAAAKAAAAFAAAAAIAAwAAAAsAAAAVAAAAAgADAAAADAAAABYAAAACAAMAAAAPAAAAFwAAAAIAAwAAABEAAAAYAAAAAgADAAAAEwAAABkAAAACAAMAAAAVAAAAGgAAAAIAAwAAABcAAAAbAAAAAgADAAAAGAAAABwAAAACAAMAAAAaAAAAHQAAAAIAAwAAABsAAADeAAAAAgAEAAAAPgAAAN8AAAACAAQAAAA/AAAA4AAAAAIABAAAAEAAAACBAAAAAgAEAAAAQQAAAFQAAAACAAQAAABCAAAATQAAAAIAAAAAAFgAAABYAAAAAgAEAAAARAAAAFkAAAACAAQAAABFAAAAZQAAAAIABAAAAEYAAABmAAAAAgAEAAAARwAAAF0AAAACAAQAAABIAAAAXwAAAAIABAAAAEkAAABhAAAAAgAEAAAASgAAAGMAAAACAAQAAABLAAAAfAAAAAIABAAAAEwAAABbAAAAAgAEAAAATQAAAFwAAAACAAQAAABOAAAAaQAAAAIABAAAAE8AAABqAAAAAgAEAAAAUAAAAGsAAAACAAQAAABRAAAAbAAAAAIABAAAAFIAAABtAAAAAgAEAAAAUwAAAG4AAAACAAQAAABUAAAAbwAAAAIABAAAAFUAAABwAAAAAgAEAAAAVgAAAHEAAAACAAQAAABXAAAAcgAAAAIABAAAAFgAAABzAAAAAgAEAAAAWQAAAHQAAAACAAQAAABaAAAAdQAAAAIABAAAAFsAAAB2AAAAAgAEAAAAXAAAAHcAAAACAAQAAABdAAAAeAAAAAIABAAAAF4AAACMAAAAAgAAAAAAUgAAAI0AAAACAAAAAABTAAAAjgAAAAIAAAAAAFQAAACPAAAAAgAAAAAAVQAAAJAAAAACAAAAAABWAAAAkQAAAAIAAAAAAFcAAACSAAAAAgAAAAAAWQAAAJMAAAACAAAAAABaAAAAlAAAAAIAAAAAAFsAAACWAAAAAgAAAAAAXAAAAJcAAAACAAAAAABdAAAAmAAAAAIAAAAAAF4AAACaAAAAAgAAAAAAXwAAAJ0AAAACAAAAAABgAAAAngAAAAIAAAAAAGEAAACfAAAAAgAAAAAAYgAAAKAAAAACAAAAAABjAAAAoQAAAAIAAAAAAGQAAACiAAAAAgAAAAAAZQAAAKMAAAACAAAAAABmAAAApAAAAAIAAAAAAGcAAAClAAAAAgAAAAAAaAAAAKYAAAACAAAAAABpAAAAqQAAAAIAAAAAAGoAAACqAAAAAgAAAAAAawAAAKsAAAACAAAAAABsAAAArAAAAAIAAAAAAG0AAACtAAAAAgAAAAAAbgAAALIAAAACAAAAAABvAAAAswAAAAIAAAAAAHAAAACwAAAAAgAAAAAAcQAAALYAAAACAAAAAAByAAAAtwAAAAIAAAAAAHMAAAC4AAAAAgAAAAAAdAAAALkAAAACAAAAAAB1AAAAugAAAAIAAAAAAHYAAAC7AAAAAgAAAAAAdwAAALwAAAACAAAAAAB4AAAAvQAAAAIAAAAAAHkAAAC+AAAAAgAAAAAAegAAAL8AAAACAAAAAAB7AAAAwAAAAAIAAAAAAHwAAADGAAAAAgAAAAAAfQAAAMgAAAACAAAAAAB+AAAAyQAAAAIAAAAAAH8AAADKAAAAAgAAAAAAgAAAAMsAAAACAAAAAACBAAAAzAAAAAIAAAAAAIIAAADNAAAAAgAAAAAAgwAAAIoAAAACAAAAAACEAAAAiwAAAAIAAAAAAIUAAADOAAAAAgAAAAAAhgAAAM8AAAACAAAAAACHAAAA4QAAAAIAAAAAAIgAAADiAAAAAgAAAAAAiQAAAAAAAAAAAAAAAwAAAAAAAAACAAAAAABRAAAAAgAEAAAAPQAAAAIAAwAAAAcAAAAEAAAAAAAAAAEAAAAAAAAABQAAAAAAAAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////////////////////////////////AAAAAAAAAAADAAAAAAAAAAIAAwAAAAcAAAADAAIABAAAAD0AAAADAAIAAAAAAFEAAAADAAAAAACSAAAAAAAAAIoAAAAKAAAAAAAKADoAAAAPAAAAAgADAAAACAAAABIAAAACAAMAAAAJAAAAEwAAAAIAAwAAAAoAAAAUAAAAAgAEAAAAYAAAABUAAAACAAMAAAAMAAAAFgAAAAIAAwAAAA8AAAAXAAAAAgADAAAAEQAAABgAAAACAAMAAAATAAAAGQAAAAIAAwAAABUAAAAaAAAAAgADAAAAFwAAABsAAAACAAMAAAAYAAAAHAAAAAIAAwAAABoAAAAdAAAAAgADAAAAGwAAAOMAAAACAAQAAABhAAAA5AAAAAIABAAAAGIAAADlAAAAAgAEAAAAYwAAAOYAAAACAAQAAABkAAAA5wAAAAIABAAAAGUAAADoAAAAAgAEAAAAZgAAAOkAAAACAAQAAABnAAAA6gAAAAIABAAAAGgAAADrAAAAAgAEAAAAaQAAAOwAAAACAAQAAABqAAAA7QAAAAIABAAAAGsAAAB6AAAAAgAEAAAAbAAAAO4AAAACAAQAAABtAAAA7wAAAAIABAAAAG4AAADwAAAAAgAEAAAAbwAAAPEAAAACAAQAAABwAAAA8gAAAAIABAAAAHEAAADzAAAAAgAEAAAAcgAAAPQAAAACAAQAAABzAAAA9QAAAAIABAAAAHQAAAD2AAAAAgAEAAAAdQAAAPcAAAACAAQAAAB2AAAA+AAAAAIABAAAAHcAAAD5AAAAAgAEAAAAeAAAAPoAAAACAAQAAAB5AAAAIAAAAAIABAAAAHoAAAD7AAAAAgAEAAAAewAAAPwAAAACAAQAAAB8AAAA/QAAAAIABAAAAH0AAAD+AAAAAgAEAAAAfgAAAP8AAAACAAQAAAB/AAAAAAEAAAIABAAAAIAAAAABAQAAAgAEAAAAgQAAAAIBAAACAAQAAACCAAAAAwEAAAIABAAAAIMAAAAEAQAAAgAEAAAAhAAAAAUBAAACAAQAAACFAAAABgEAAAIABAAAAIYAAAAHAQAAAgAEAAAAhwAAAAgBAAACAAQAAACIAAAACQEAAAIABAAAAIkAAAAKAQAAAgAEAAAAigAAAAsBAAACAAQAAACLAAAADAEAAAIABAAAAIwAAAANAQAAAgAEAAAAjQAAAAAAAAAAAAAAAwAAAAAAAAACAAAAAACKAAAAAgAEAAAAXwAAAAIAAwAAAAcAAAAEAAAAAAAAAAEAAAAAAAAABQAAAAAAAAADAAAAAAAAAAAACwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAgADAAAABwAAAAIAAwAAAAcAAAABAAIAAwAAAAcAAAACAAMAAAAHAAAAAgADAAAABwAAAAEAAgADAAAABwAAAAEAAQD///////////////////////////////8AAAAAAAAAAAMAAAAAAAAAAgADAAAABwAAAAMAAgAEAAAAXwAAAAoACwAAAA4BAAAEAAAAAAAAAAAADwEAAAQAAQAAAAAAAAAQAQAABAACAAAAAAAAABEBAAAEAAMAAAAAAAAAEgEAAAQABAAAAAAAAAATAQAABAAFAAAAAAAAABQBAAAEAAYAAAAAAAAAFQEAAAQABwAAAAAAAAAWAQAABAAIAAAAAAAAABcBAAAEAAkAAAAAAAAAGAEAAAQACgAAAAAAAAACAAAAAACKAAAAAwAAAAAAkwAAAAAAAACMAAAACgAXAAAAJwEAAAIABwAAAAEAAAAqAQAAAgAHAAAABgAAACsBAAACAAcAAAAKAAAALAEAAAIABwAAACUAAAAtAQAAAgAHAAAALQAAAC4BAAACAAcAAAAxAAAALwEAAAIABwAAADUAAAAwAQAAAgAHAAAAOQAAADEBAAACAAcAAAA7AAAAMgEAAAIABwAAAD8AAAAzAQAAAgAHAAAARAAAADQBAAACAAcAAABMAAAANQEAAAIABwAAAE4AAAA2AQAAAgAHAAAAVAAAADcBAAACAAcAAABYAAAAOAEAAAIABwAAAFwAAAA5AQAAAgAHAAAAYAAAADoBAAACAAcAAABnAAAAOwEAAAIABwAAAGoAAAA8AQAAAgAHAAAAbQAAAD0BAAACAAcAAAB2AAAAPgEAAAIACAAAACcAAABBAQAAAgAIAAAAOAAAAAoAAAAAAAAAAAAAAAAAAQAAAAAAAAACAAAAAACMAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////////////////////////////////AAAAAAAAAAABAAAAAAAAAAIAAAAAAIwAAAADAAAAAACUAAAAAAAAAI0AAAAKAAIAAABCAQAAAgABAAAAAQAAAEMBAAACAAAAAACVAAAACgAAAAAAAAAAAAAAAAABAAAAAAAAAAIAAAAAAI0AAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///////////////////////////////8AAAAAAAAAAAEAAAAAAAAAAgAAAAAAjQAAAAMAAAAAAJYAAAAAAAAAjgAAAAoABQAAAEQBAAACAAQAAAABAAAARQEAAAIABAAAAD0AAABBAQAAAgAEAAAAXwAAAEYBAAACAAQAAADaAAAARwEAAAIABAAAAJ8AAAAKAAAAAAAAAAAAAAAAAAEAAAAAAAAAAgAAAAAAjgAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///////////////////////////////wAAAAAAAAAAAQAAAAAAAAACAAAAAACOAAAAAwAAAAAAlwAAAAAAAACPAAAACgAFAAAASAEAAAIACAAAAAEAAAArAQAAAgAIAAAABAAAAEkBAAACAAgAAAAMAAAASgEAAAIACAAAABsAAABLAQAAAgAIAAAAIgAAAAoAAAAAAAAAAAAAAAAAAQAAAAAAAAACAAAAAACPAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////////////////////////////////AAAAAAAAAAABAAAAAAAAAAIAAAAAAI8AAAADAAAAAACYAAAAAAAAAJUAAAAKAAMAAABEAQAAAgAAAAAAAQAAAEUBAAACAAAAAABRAAAAQQEAAAIAAAAAAIoAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///////////////////////////////8AAAAAAAAAAAEAAAAAAAAAAgAAAAAAlQAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAADAAAABQAAAAAAAAABAAAAAwAAAAUAAAAQAAAAAQAAAAMAAAAFAAAAIAAAAAEAAAADAAAABQAAADAAAAABAAAAAwAAAAUAAABAAAAAAQAAAAMAAAAFAAAAUAAAAAEAAAADAAAABQAAAGAAAAABAAAAAwAAAAUAAABwAAAAAQAAAAMAAAAFAAAAgAAAAAEAAAADAAAABQAAAJAAAAABAAAAAwAAAAUAAACgAAAAAQAAAAMAAAAFAAAAsAAAAAEAAAADAAAABQAAAMAAAAABAAAAAwAAAAUAAADQAAAAAQAAAAMAAAAFAAAA4AAAAAEAAAADAAAABQAAAPAAAAABAAAAAwAAAAUAAAAAAQAAAQAAAAMAAAAFAAAAEAEAAAEAAAADAAAABQAAACABAAABAAAAAwAAAAUAAAAwAQAAAQAAAAMAAAAFAAAAQAEAAAEAAAADAAAABQAAAFABAAABAAAAAwAAAAUAAABgAQAAAQAAAAMAAAAFAAAAcAEAAAEAAAADAAAABQAAAIABAAABAAAAAwAAAAUAAACQAQAAAQAAAAMAAAAFAAAAoAEAAAEAAAADAAAABQAAALABAAABAAAAAwAAAAUAAADAAQAAAQAAAAMAAAAFAAAA0AEAAAEAAAADAAAABQAAAOABAAABAAAAAwAAAAUAAADwAQAAAQAAAAMAAAAFAAAAAAIAAAEAAAADAAAABQAAABACAAABAAAAAwAAAAUAAAAgAgAAAQAAAAMAAAAFAAAAMAIAAAEAAAADAAAABQAAAEACAAABAAAAAwAAAAUAAABQAgAAAQAAAAMAAAAFAAAAYAIAAAEAAAADAAAABQAAAHACAAABAAAAAwAAAAUAAACAAgAAAQAAAAMAAAAFAAAAkAIAAAEAAAADAAAABQAAAKACAAABAAAAAwAAAAUAAACwAgAAAQAAAAMAAAAFAAAAwAIAAAEAAAADAAAABQAAANACAAABAAAAAwAAAAUAAADgAgAAAQAAAAMAAAAFAAAA8AIAAAEAAAADAAAABQAAAAADAAABAAAAAwAAAAUAAAAQAwAAAQAAAAMAAAAFAAAAIAMAAAEAAAADAAAABQAAADADAAABAAAAAwAAAAUAAABAAwAAAQAAAAMAAAAFAAAAUAMAAAEAAAADAAAABQAAAGADAAABAAAAAwAAAAUAAABwAwAAAQAAAAMAAAAFAAAAgAMAAAEAAAADAAAABQAAAJADAAABAAAAAwAAAAUAAACgAwAAAQAAAAMAAAAFAAAAsAMAAAEAAAADAAAABQAAAMADAAABAAAAAwAAAAUAAADQAwAAAQAAAAMAAAAFAAAA4AMAAAEAAAADAAAABQAAAPADAAABAAAAAwAAAAUAAAAABAAAAQAAAAMAAAAFAAAAEAQAAAEAAAADAAAABQAAACAEAAABAAAAAwAAAAUAAAAwBAAAAQAAAAMAAAAFAAAAQAQAAAEAAAADAAAABQAAAFAEAAABAAAAAwAAAAUAAABgBAAAAQAAAAMAAAAFAAAAcAQAAAEAAAADAAAABQAAAIAEAAABAAAAAwAAAAUAAACQBAAAAQAAAAMAAAAFAAAAoAQAAAEAAAADAAAABQAAALAEAAABAAAAAwAAAAUAAADABAAAAQAAAAMAAAAFAAAA0AQAAAEAAAADAAAABQAAAOAEAAABAAAAAAAAAAIAAADwBAAAAAAAAAMAAAAFAAAA8AQAAAEAAAADAAAABQAAAAAFAAABAAAAAwAAAAUAAAAQBQAAAQAAAAMAAAAFAAAAIAUAAAEAAAADAAAABQAAADAFAAABAAAAAwAAAAUAAABABQAAAQAAAAMAAAAFAAAAUAUAAAEAAAADAAAABQAAAGAFAAABAAAAAwAAAAUAAABwBQAAAQAAAAMAAAAFAAAAgAUAAAEAAAADAAAABQAAAJAFAAABAAAAAwAAAAUAAACgBQAAAQAAAAMAAAAFAAAAsAUAAAEAAAADAAAABQAAAMAFAAABAAAAAwAAAAUAAADQBQAAAQAAAAMAAAAFAAAA4AUAAAEAAAADAAAABQAAAPAFAAABAAAAAwAAAAUAAAAABgAAAQAAAAMAAAAFAAAAEAYAAAEAAAADAAAABQAAACAGAAABAAAAAwAAAAUAAAAwBgAAAQAAAAMAAAAFAAAAQAYAAAEAAAADAAAABQAAAFAGAAABAAAAAwAAAAUAAABgBgAAAQAAAAMAAAAFAAAAcAYAAAEAAAADAAAABQAAAIAGAAABAAAAAwAAAAUAAACQBgAAAQAAAAMAAAAFAAAAoAYAAAEAAAADAAAABQAAALAGAAABAAAAAwAAAAUAAADABgAAAQAAAAMAAAAFAAAA0AYAAAEAAAADAAAABQAAAOAGAAABAAAAAwAAAAUAAADwBgAAAQAAAAMAAAAFAAAAAAcAAAEAAAADAAAABQAAABAHAAABAAAAAwAAAAUAAAAgBwAAAQAAAAMAAAAFAAAAMAcAAAEAAAADAAAABQAAAEAHAAABAAAAAwAAAAUAAABQBwAAAQAAAAMAAAAFAAAAYAcAAAEAAAADAAAABQAAAHAHAAABAAAAAwAAAAUAAACABwAAAQAAAAMAAAAFAAAAkAcAAAEAAAADAAAABQAAAKAHAAABAAAAAwAAAAUAAACwBwAAAQAAAAMAAAAFAAAAwAcAAAEAAAADAAAABQAAANAHAAABAAAAAwAAAAUAAADgBwAAAQAAAAMAAAAFAAAA8AcAAAEAAAADAAAABQAAAAAIAAABAAAAAwAAAAUAAAAQCAAAAQAAAAMAAAAFAAAAIAgAAAEAAAADAAAABQAAADAIAAABAAAAAwAAAAUAAABACAAAAQAAAAMAAAAFAAAAUAgAAAEAAAADAAAABQAAAGAIAAABAAAAAAAAAAMAAABwCAAAAAAAAAUAAAAAAAAAcAgAAAEAAAAAAAAABAAAAIAIAAAAAAAAAAAAAAUAAACACAAAAAAAAAAAAAAGAAAAgAgAAAAAAAAAAAAABwAAAIAIAAAAAAAABgAAAAYAAACACAAAAQAAAAYAAAAGAAAAEhIAAAEAAAAGAAAABgAAAPYXAAABAAAABQAAAAAAAADoGAAAAQAAAAUAAAAAAAAA+BgAAAEAAAAAAAAACAAAAAgZAAAAAAAABQAAAAAAAAAIGQAAAQAAAAUAAAAAAAAAGBkAAAEAAAAFAAAAAAAAACgZAAABAAAACwAAAAAAAAAAAAEAAQABAAsAAAAAAAEAAAABAAEAAQALAAAAAAACAAAAAQABAAEACwAAAAAAAwAAAAEAAQABAAsAAAAAAAQAAAABAAEAAQALAAAAAAAFAAAAAQABAAEACwAAAAAABgAAAAEAAQABAAsAAAAAAAcAAAABAAEAAQALAAAAAAAIAAAAAQABAAEACwAAAAAACQAAAAEAAQABAAsAAAAAAAoAAAABAAEAAQALAAAAAAALAAAAAQABAAEACwAAAAAADAAAAAEAAQABAAsAAAAAAA0AAAABAAEAAQALAAAAAAAOAAAAAQABAAEACwAAAAAADwAAAAEAAQABAAsAAAAAABAAAAABAAEAAQALAAAAAAARAAAAAQABAAEACwAAAAAAEgAAAAEAAQABAAsAAAAAABMAAAABAAEAAQALAAAAAAAUAAAAAQABAAEACwAAAAAAFQAAAAEAAQABAAsAAAAAABYAAAABAAEAAQALAAAAAAAXAAAAAQABAAEACwAAAAAAGAAAAAEAAQABAAsAAAAAABkAAAABAAEAAQALAAAAAAAaAAAAAQABAAEACwAAAAAAGwAAAAEAAQABAAsAAAAAABwAAAABAAEAAQALAAAAAAAdAAAAAQABAAEACwAAAAAAHgAAAAEAAQABAAsAAAAAAB8AAAABAAEAAQALAAAAAAAgAAAAAQABAAEACwAAAAAAIQAAAAEAAQABAAsAAAAAACIAAAABAAEAAQALAAAAAAAjAAAAAQABAAEACwAAAAAAJAAAAAEAAQABAAsAAAAAACUAAAABAAEAAQALAAAAAAAmAAAAAQABAAEACwAAAAAAJwAAAAEAAQABAAsAAAAAACgAAAABAAEAAQALAAAAAAApAAAAAQABAAEACwAAAAAAKgAAAAEAAQABAAsAAAAAACsAAAABAAEAAQALAAAAAAAsAAAAAQABAAEACwAAAAAALQAAAAEAAQABAAsAAAAAAC4AAAABAAEAAQALAAAAAAAvAAAAAQABAAEACwAAAAAAMAAAAAEAAQABAAsAAAAAADEAAAABAAEAAQALAAAAAAAyAAAAAQABAAEACwAAAAAAMwAAAAEAAQABAAsAAAAAADQAAAABAAEAAQALAAAAAAA1AAAAAQABAAEACwAAAAAANgAAAAEAAQABAAsAAAAAADcAAAABAAEAAQALAAAAAAA4AAAAAQABAAEACwAAAAAAOQAAAAEAAQABAAsAAAAAADoAAAABAAEAAQALAAAAAAA7AAAAAQABAAEACwAAAAAAPAAAAAEAAQABAAsAAAAAAD0AAAABAAEAAQALAAAAAAA+AAAAAQABAAEACwAAAAAAPwAAAAEAAQABAAsAAAAAAEAAAAABAAEAAQALAAAAAABBAAAAAQABAAEACwAAAAAAQgAAAAEAAQABAAsAAAAAAEMAAAABAAEAAQALAAAAAABEAAAAAQABAAEACwAAAAAARQAAAAEAAQABAAsAAAAAAEYAAAABAAEAAQALAAAAAABHAAAAAQABAAEACwAAAAAASAAAAAEAAQABAAsAAAAAAEkAAAABAAEAAQALAAAAAABKAAAAAQABAAEACwAAAAAASwAAAAEAAQABAAsAAAAAAEwAAAABAAEAAQALAAAAAABNAAAAAQABAAEACwAAAAAATgAAAAEAAQABAAsAAAAAAE8AAAABAAEAAQALAAAAAABQAAAAAQABAAEACwAAAAAAUQAAAAEAAQABAAsAAAAAAFIAAAABAAEAAQALAAAAAABTAAAAAQABAAEACwAAAAAAVAAAAAEAAQABAAsAAAAAAFUAAAABAAEAAQALAAAAAABWAAAAAQABAAEACwAAAAAAVwAAAAEAAQABAAsAAAAAAFgAAAABAAEAAQALAAAAAABZAAAAAQABAAEACwAAAAAAWgAAAAEAAQABAAsAAAAAAFsAAAABAAEAAQALAAAAAABcAAAAAQABAAEACwAAAAAAXQAAAAEAAQABAAsAAAAAAF4AAAABAAEAAQALAAAAAABfAAAAAQABAAEACwAAAAAAYAAAAAEAAQABAAsAAAAAAGEAAAABAAEAAQALAAAAAABiAAAAAQABAAEACwAAAAAAYwAAAAEAAQABAAsAAAAAAGQAAAABAAEAAQALAAAAAABlAAAAAQABAAEACwAAAAAAZgAAAAEAAQABAAsAAAAAAGcAAAABAAEAAQALAAAAAABoAAAAAQABAAEACwAAAAAAaQAAAAEAAQABAAsAAAAAAGoAAAABAAEAAQALAAAAAABrAAAAAQABAAEACwAAAAAAbAAAAAEAAQABAAsAAAAAAG0AAAABAAEAAQALAAAAAABuAAAAAQABAAEACwAAAAAAbwAAAAEAAQABAAsAAAAAAHAAAAABAAEAAQALAAAAAABxAAAAAQABAAEACwAAAAAAcgAAAAEAAQABAAsAAAAAAHMAAAABAAEAAQALAAAAAAB0AAAAAQABAAEACwAAAAAAdQAAAAEAAQABAAsAAAAAAHYAAAABAAEAAQALAAAAAAB3AAAAAQABAAEACwAAAAAAeAAAAAEAAQABAAsAAAAAAHkAAAABAAEAAQALAAAAAAB6AAAAAQABAAEACwAAAAAAewAAAAEAAQABAAsAAAAAAHwAAAABAAEAAQALAAAAAAB9AAAAAQABAAEACwAAAAAAfgAAAAEAAQABAAsAAAAAAH8AAAABAAEAAQALAAAAAACAAAAAAQABAAEACwAAAAAAgQAAAAEAAQABAAsAAAAAAIIAAAABAAEAAQALAAAAAACDAAAAAQABAAEACwAAAAAAhAAAAAEAAQABAAsAAAAAAIUAAAABAAEAAQALAAAAAACGAAAAAQABAAEAGgEAAAcAAAAAAAoAAAAAAAYAHQEAAAoAAAAAAAoATwAAAIcAAAACAAAAAAACAAAAPAAAAAIAAAAAAAMAAACIAAAAAgAAAAAABAAAAIkAAAACAAAAAAAFAAAAigAAAAIAAAAAAAYAAACLAAAAAgAAAAAABwAAAIwAAAACAAAAAAAIAAAAjQAAAAIAAAAAAAkAAACOAAAAAgAAAAAACgAAAI8AAAACAAAAAAALAAAAkAAAAAIAAAAAAAwAAACRAAAAAgAAAAAADQAAAE0AAAACAAAAAAAOAAAAkgAAAAIAAAAAAA8AAACTAAAAAgAAAAAAEAAAAJQAAAACAAAAAAARAAAAlQAAAAIAAAAAABIAAACWAAAAAgAAAAAAEwAAAJcAAAACAAAAAAAUAAAAmAAAAAIAAAAAABUAAACZAAAAAgAAAAAAFgAAAJoAAAACAAAAAAAXAAAAmwAAAAIAAAAAABgAAACcAAAAAgAAAAAAGQAAAJ0AAAACAAAAAAAaAAAAngAAAAIAAAAAABsAAACfAAAAAgAAAAAAHAAAAKAAAAACAAAAAAAdAAAAoQAAAAIAAAAAAB4AAACiAAAAAgAAAAAAHwAAAKMAAAACAAAAAAAgAAAApAAAAAIAAAAAACEAAAClAAAAAgAAAAAAIgAAAKYAAAACAAAAAAAjAAAApwAAAAIAAAAAACQAAACoAAAAAgAAAAAAJQAAAKkAAAACAAAAAAAmAAAAqgAAAAIAAAAAACcAAACrAAAAAgAAAAAAKAAAAKwAAAACAAAAAAApAAAArQAAAAIAAAAAACoAAACuAAAAAgAAAAAAKwAAAK8AAAACAAAAAAAsAAAAsAAAAAIAAAAAAC0AAACxAAAAAgAAAAAALgAAALIAAAACAAAAAAAvAAAAswAAAAIAAAAAADAAAAC0AAAAAgAAAAAAMQAAALUAAAACAAAAAAAyAAAAtgAAAAIAAAAAADMAAAC3AAAAAgAAAAAANAAAALgAAAACAAAAAAA1AAAAuQAAAAIAAAAAADYAAAC6AAAAAgAAAAAANwAAALsAAAACAAAAAAA4AAAAvAAAAAIAAAAAADkAAAC9AAAAAgAAAAAAOgAAAL4AAAACAAAAAAA7AAAAvwAAAAIAAAAAADwAAADAAAAAAgAAAAAAPQAAAMEAAAACAAAAAAA+AAAAwgAAAAIAAAAAAD8AAADDAAAAAgAAAAAAQAAAAMQAAAACAAAAAABBAAAAxQAAAAIAAAAAAEIAAADGAAAAAgAAAAAAQwAAAMcAAAACAAAAAABEAAAAyAAAAAIAAAAAAEUAAADJAAAAAgAAAAAARgAAAMoAAAACAAAAAABHAAAAywAAAAIAAAAAAEgAAADMAAAAAgAAAAAASQAAAM0AAAACAAAAAABKAAAAzgAAAAIAAAAAAEsAAADPAAAAAgAAAAAATAAAANAAAAACAAAAAABNAAAA0QAAAAIAAAAAAE4AAADSAAAAAgAAAAAATwAAANMAAAACAAAAAABQAAAABwBPAAAAAgAAAAAAAgAAAAIAAAAAAAMAAAACAAAAAAAEAAAAAgAAAAAABQAAAAIAAAAAAAYAAAACAAAAAAAHAAAAAgAAAAAACAAAAAIAAAAAAAkAAAACAAAAAAAKAAAAAgAAAAAACwAAAAIAAAAAAAwAAAACAAAAAAANAAAAAgAAAAAADgAAAAIAAAAAAA8AAAACAAAAAAAQAAAAAgAAAAAAEQAAAAIAAAAAABIAAAACAAAAAAATAAAAAgAAAAAAFAAAAAIAAAAAABUAAAACAAAAAAAWAAAAAgAAAAAAFwAAAAIAAAAAABgAAAACAAAAAAAZAAAAAgAAAAAAGgAAAAIAAAAAABsAAAACAAAAAAAcAAAAAgAAAAAAHQAAAAIAAAAAAB4AAAACAAAAAAAfAAAAAgAAAAAAIAAAAAIAAAAAACEAAAACAAAAAAAiAAAAAgAAAAAAIwAAAAIAAAAAACQAAAACAAAAAAAlAAAAAgAAAAAAJgAAAAIAAAAAACcAAAACAAAAAAAoAAAAAgAAAAAAKQAAAAIAAAAAACoAAAACAAAAAAArAAAAAgAAAAAALAAAAAIAAAAAAC0AAAACAAAAAAAuAAAAAgAAAAAALwAAAAIAAAAAADAAAAACAAAAAAAxAAAAAgAAAAAAMgAAAAIAAAAAADMAAAACAAAAAAA0AAAAAgAAAAAANQAAAAIAAAAAADYAAAACAAAAAAA3AAAAAgAAAAAAOAAAAAIAAAAAADkAAAACAAAAAAA6AAAAAgAAAAAAOwAAAAIAAAAAADwAAAACAAAAAAA9AAAAAgAAAAAAPgAAAAIAAAAAAD8AAAACAAAAAABAAAAAAgAAAAAAQQAAAAIAAAAAAEIAAAACAAAAAABDAAAAAgAAAAAARAAAAAIAAAAAAEUAAAACAAAAAABGAAAAAgAAAAAARwAAAAIAAAAAAEgAAAACAAAAAABJAAAAAgAAAAAASgAAAAIAAAAAAEsAAAACAAAAAABMAAAAAgAAAAAATQAAAAIAAAAAAE4AAAACAAAAAABPAAAAAgAAAAAAUAAAAAcAAAAAAAcAAQAAAAIABAAAAAEAAAAHAAAAAAABAAcAAAAAAAoAAAAAAAQAAQAAAAAAAAAHAAQAAAACAAAAAAABAAAAAgAEAAAAAQAAAAIAAQAAAFEAAAACAAMAAAAHAAAABwAAAAAACgAAAAAACgAAAAAABAAAAAAAAAAAAAQAAAAAAAAAAAAHAAoAAAAHAAQAAAAEAAEAAAAAAAAAAgABAAAAUQAAAAYAHgEAAAYA1AAAAAcABAAAAAQAAQAAAAAAAAACAAEAAABRAAAABgAjAAAABgDVAAAABwAEAAAABAABAAAAAAAAAAIAAQAAAFEAAAAGACQAAAAGANYAAAAHAAQAAAAEAAEAAAAAAAAAAgABAAAAUQAAAAYAJQAAAAYA1wAAAAcABAAAAAQAAQAAAAAAAAACAAEAAABRAAAABgAfAQAABgDYAAAABwAEAAAABAABAAAAAAAAAAIAAQAAAFEAAAAGACABAAAGANkAAAAHAAQAAAAEAAEAAAAAAAAAAgABAAAAUQAAAAYAIQEAAAYA2gAAAAcABAAAAAQAAQAAAAAAAAACAAEAAABRAAAABgAiAQAABgDbAAAABwAEAAAABAABAAAAAAAAAAIAAQAAAFEAAAAGACMBAAAGANwAAAAHAAQAAAAEAAEAAAAAAAAAAgABAAAAUQAAAAYAJAEAAAYA3QAAAAcAAAAAAAEABgAlAQAACgAAAAAACgA4AAAAjAAAAAIAAAAAAFIAAACNAAAAAgAAAAAAUwAAAI4AAAACAAAAAABUAAAAjwAAAAIAAAAAAFUAAACQAAAAAgAAAAAAVgAAAJEAAAACAAAAAABXAAAATQAAAAIAAAAAAFgAAACSAAAAAgAAAAAAWQAAAJMAAAACAAAAAABaAAAAlAAAAAIAAAAAAFsAAACWAAAAAgAAAAAAXAAAAJcAAAACAAAAAABdAAAAmAAAAAIAAAAAAF4AAACaAAAAAgAAAAAAXwAAAJ0AAAACAAAAAABgAAAAngAAAAIAAAAAAGEAAACfAAAAAgAAAAAAYgAAAKAAAAACAAAAAABjAAAAoQAAAAIAAAAAAGQAAACiAAAAAgAAAAAAZQAAAKMAAAACAAAAAABmAAAApAAAAAIAAAAAAGcAAAClAAAAAgAAAAAAaAAAAKYAAAACAAAAAABpAAAAqQAAAAIAAAAAAGoAAACqAAAAAgAAAAAAawAAAKsAAAACAAAAAABsAAAArAAAAAIAAAAAAG0AAACtAAAAAgAAAAAAbgAAALIAAAACAAAAAABvAAAAswAAAAIAAAAAAHAAAACwAAAAAgAAAAAAcQAAALYAAAACAAAAAAByAAAAtwAAAAIAAAAAAHMAAAC4AAAAAgAAAAAAdAAAALkAAAACAAAAAAB1AAAAugAAAAIAAAAAAHYAAAC7AAAAAgAAAAAAdwAAALwAAAACAAAAAAB4AAAAvQAAAAIAAAAAAHkAAAC+AAAAAgAAAAAAegAAAL8AAAACAAAAAAB7AAAAwAAAAAIAAAAAAHwAAADGAAAAAgAAAAAAfQAAAMgAAAACAAAAAAB+AAAAyQAAAAIAAAAAAH8AAADKAAAAAgAAAAAAgAAAAMsAAAACAAAAAACBAAAAzAAAAAIAAAAAAIIAAADNAAAAAgAAAAAAgwAAAIoAAAACAAAAAACEAAAAiwAAAAIAAAAAAIUAAADOAAAAAgAAAAAAhgAAAM8AAAACAAAAAACHAAAA4QAAAAIAAAAAAIgAAADiAAAAAgAAAAAAiQAAAAcAOAAAAAIAAAAAAFIAAAACAAAAAABTAAAAAgAAAAAAVAAAAAIAAAAAAFUAAAACAAAAAABWAAAAAgAAAAAAVwAAAAIAAAAAAFgAAAACAAAAAABZAAAAAgAAAAAAWgAAAAIAAAAAAFsAAAACAAAAAABcAAAAAgAAAAAAXQAAAAIAAAAAAF4AAAACAAAAAABfAAAAAgAAAAAAYAAAAAIAAAAAAGEAAAACAAAAAABiAAAAAgAAAAAAYwAAAAIAAAAAAGQAAAACAAAAAABlAAAAAgAAAAAAZgAAAAIAAAAAAGcAAAACAAAAAABoAAAAAgAAAAAAaQAAAAIAAAAAAGoAAAACAAAAAABrAAAAAgAAAAAAbAAAAAIAAAAAAG0AAAACAAAAAABuAAAAAgAAAAAAbwAAAAIAAAAAAHAAAAACAAAAAABxAAAAAgAAAAAAcgAAAAIAAAAAAHMAAAACAAAAAAB0AAAAAgAAAAAAdQAAAAIAAAAAAHYAAAACAAAAAAB3AAAAAgAAAAAAeAAAAAIAAAAAAHkAAAACAAAAAAB6AAAAAgAAAAAAewAAAAIAAAAAAHwAAAACAAAAAAB9AAAAAgAAAAAAfgAAAAIAAAAAAH8AAAACAAAAAACAAAAAAgAAAAAAgQAAAAIAAAAAAIIAAAACAAAAAACDAAAAAgAAAAAAhAAAAAIAAAAAAIUAAAACAAAAAACGAAAAAgAAAAAAhwAAAAIAAAAAAIgAAAACAAAAAACJAAAABwAAAAAABwABAAAAAgAEAAAAPQAAAAcAAAAAAAEABwAAAAAACgAAAAAABAABAAAAAAAAAAcAAwAAAAIAAAAAAFEAAAACAAQAAAA9AAAAAgADAAAABwAAAAcAAAAAAAoAAAAAAAoAAAAAAAQAAAAAAAAAAAAEAAAAAAAAAAAABwAAAAAABwAAAAAAAQAGACYBAAAKAAAAAAAKAAAAAAAHAAAAAAAHAAAAAAAHAAEAAAACAAQAAABfAAAABwAAAAAAAQAHAAAAAAAKAAAAAAAEAAEAAAAAAAAABwADAAAAAgAAAAAAigAAAAIABAAAAF8AAAACAAMAAAAHAAAABwAAAAAACgAAAAAACgAAAAAABAAAAAAAAAAAAAQAAAAAAAAAAAAHAAIAAAAHAAIAAAAEAAAAAAAAAAAAAgAEAAAAYQAAAAcAAgAAAAQAAAAAAAAAAAACAAQAAABhAAAABwABAAAABwACAAAABAAAAAAAAAAAAAIABAAAAGEAAAABAAIAAAAHAAAAAAAKAAAAAAADAAAABwAAAAAACgAAAAAACwAAAAcAAAAAAAoAAAAAAAwAAAAHAAAAAAAKAAAAAABDAQAABwAAAAAACgAAAAAA", cur_sc, $P5003, $P5005
+    .const "LexInfo" $P5001 = "cuid_1_1346277621.774"
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 0
+    $P5003 = $P5001."set_static_lexpad_value"("GLOBALish", $P5002)
+    .const "LexInfo" $P5004 = "cuid_1_1346277621.774"
+    $P5005 = $P5004."finish_static_lexpad"()
+    .const "LexInfo" $P5001 = "cuid_1_1346277621.774"
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 0
+    $P5003 = $P5001."set_static_lexpad_value"("$?PACKAGE", $P5002)
+    .const "LexInfo" $P5004 = "cuid_1_1346277621.774"
+    $P5005 = $P5004."finish_static_lexpad"()
+    .const 'Sub' $P5001 = "cuid_2_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 2
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_3_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 3
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_5_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 4
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_6_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 5
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_7_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 6
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_8_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 7
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_9_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 8
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_10_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 9
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_11_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 10
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_12_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 11
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_13_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 12
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_14_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 13
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_16_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 14
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_18_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 15
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_19_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 16
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_21_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 17
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_22_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 18
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_23_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 19
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_24_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 20
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_25_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 21
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_29_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 22
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_30_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 23
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_32_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 24
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_33_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 25
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_34_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 26
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_35_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 27
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_36_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 28
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_37_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 29
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_38_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 30
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_39_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 31
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_40_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 32
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_41_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 33
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_42_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 34
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_43_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 35
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_44_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 36
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_45_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 37
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_46_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 38
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_47_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 39
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_48_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 40
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_49_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 41
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_50_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 42
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_51_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 43
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_52_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 44
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_53_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 45
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_54_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 46
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_55_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 47
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_56_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 48
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_57_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 49
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_58_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 50
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_59_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 51
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_60_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 52
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_61_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 53
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_62_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 54
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_63_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 55
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_64_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 56
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_65_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 57
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_66_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 58
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_67_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 59
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_68_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 60
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_69_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 61
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_70_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 62
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_71_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 63
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_72_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 64
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_73_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 65
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_74_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 66
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_75_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 67
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_76_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 68
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_78_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 69
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_80_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 70
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_81_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 71
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_82_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 72
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_84_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 73
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_86_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 74
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_93_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 75
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_95_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 76
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_96_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 77
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_97_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 78
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_98_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 79
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_99_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 80
+    set_sub_code_object $P5001, $P5002
+    .const "LexInfo" $P5001 = "cuid_100_1346277621.774"
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 1
+    $P5003 = $P5001."set_static_lexpad_value"("$?PACKAGE", $P5002)
+    .const "LexInfo" $P5004 = "cuid_100_1346277621.774"
+    $P5005 = $P5004."finish_static_lexpad"()
+    .const "LexInfo" $P5001 = "cuid_100_1346277621.774"
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 1
+    $P5003 = $P5001."set_static_lexpad_value"("$?CLASS", $P5002)
+    .const "LexInfo" $P5004 = "cuid_100_1346277621.774"
+    $P5005 = $P5004."finish_static_lexpad"()
+    .const 'Sub' $P5001 = "cuid_101_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 82
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_102_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 83
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_103_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 84
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_104_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 85
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_105_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 86
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_106_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 87
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_107_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 88
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_108_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 89
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_109_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 90
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_110_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 91
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_111_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 92
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_112_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 93
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_113_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 94
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_114_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 95
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_115_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 96
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_116_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 97
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_117_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 98
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_118_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 99
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_119_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 100
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_120_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 101
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_121_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 102
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_122_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 103
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_123_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 104
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_124_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 105
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_125_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 106
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_126_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 107
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_127_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 108
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_128_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 109
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_129_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 110
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_130_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 111
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_131_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 112
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_132_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 113
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_133_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 114
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_134_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 115
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_135_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 116
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_136_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 117
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_137_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 118
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_138_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 119
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_139_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 120
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_140_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 121
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_141_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 122
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_142_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 123
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_143_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 124
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_144_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 125
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_145_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 126
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_146_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 127
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_147_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 128
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_148_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 129
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_149_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 130
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_150_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 131
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_151_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 132
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_152_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 133
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_153_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 134
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_154_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 135
+    set_sub_code_object $P5001, $P5002
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 81
+    get_who $P5001, $P5002
+    .const 'Sub' $P5003 = "cuid_167_1346277621.774" 
+    set $P5001["buildsub"], $P5003
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 81
+    get_who $P5001, $P5002
+    .const 'Sub' $P5003 = "cuid_170_1346277621.774" 
+    set $P5001["qbuildsub"], $P5003
+    .const 'Sub' $P5001 = "cuid_155_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 136
+    set_sub_code_object $P5001, $P5002
+    .const 'Sub' $P5001 = "cuid_156_1346277621.774" 
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 137
+    set_sub_code_object $P5001, $P5002
+    .const "LexInfo" $P5001 = "cuid_157_1346277621.774"
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 81
+    $P5003 = $P5001."set_static_lexpad_value"("$?PACKAGE", $P5002)
+    .const "LexInfo" $P5004 = "cuid_157_1346277621.774"
+    $P5005 = $P5004."finish_static_lexpad"()
+    .const "LexInfo" $P5001 = "cuid_157_1346277621.774"
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 81
+    $P5003 = $P5001."set_static_lexpad_value"("$?CLASS", $P5002)
+    .const "LexInfo" $P5004 = "cuid_157_1346277621.774"
+    $P5005 = $P5004."finish_static_lexpad"()
+    .const "LexInfo" $P5001 = "cuid_158_1346277621.774"
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 138
+    $P5003 = $P5001."set_static_lexpad_value"("$?PACKAGE", $P5002)
+    .const "LexInfo" $P5004 = "cuid_158_1346277621.774"
+    $P5005 = $P5004."finish_static_lexpad"()
+    .const "LexInfo" $P5001 = "cuid_158_1346277621.774"
+    nqp_get_sc_object $P5002, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 138
+    $P5003 = $P5001."set_static_lexpad_value"("$?CLASS", $P5002)
+    .const "LexInfo" $P5004 = "cuid_158_1346277621.774"
+    $P5005 = $P5004."finish_static_lexpad"()
+    nqp_get_sc_object $P5001, "CFB984DF95ACEC0885E1D037E3123D5A32471909-1346277621.81", 0
+    set_hll_global "GLOBAL", $P5001
     .return () 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_212_1346233469.934") :anon :lex :outer("cuid_213_1346233469.934")
+.sub "" :subid("cuid_212_1346277621.774") :anon :lex :outer("cuid_213_1346277621.774")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P501, 'ResizablePMCArray'
-    .const 'Sub' $P502 = "cuid_2_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_3_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_5_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_6_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_7_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_8_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_9_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_10_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_11_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_12_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_13_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_14_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_16_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_18_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_19_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_21_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_22_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_23_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_24_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_25_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_29_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_30_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_32_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_33_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_34_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_35_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_36_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_37_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_38_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_39_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_40_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_41_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_42_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_43_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_44_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_45_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_46_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_47_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_48_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_49_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_50_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_51_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_52_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_53_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_54_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_55_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_56_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_57_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_58_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_59_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_60_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_61_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_62_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_63_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_64_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_65_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_66_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_67_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_68_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_69_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_70_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_71_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_72_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_73_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_74_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_75_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_76_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_78_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_80_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_81_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_82_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_84_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_86_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_93_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_95_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_96_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_97_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_98_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_99_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_101_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_102_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_103_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_104_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_105_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_106_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_107_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_108_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_109_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_110_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_111_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_112_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_113_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_114_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_115_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_116_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_117_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_118_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_119_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_120_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_121_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_122_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_123_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_124_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_125_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_126_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_127_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_128_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_129_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_130_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_131_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_132_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_133_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_134_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_135_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_136_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_137_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_138_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_139_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_140_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_141_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_142_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_143_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_144_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_145_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_146_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_147_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_148_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_149_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_150_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_151_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_152_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_153_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_154_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_155_1346233469.934" 
-    push $P501, $P502
-    .const 'Sub' $P502 = "cuid_156_1346233469.934" 
-    push $P501, $P502
-    .return ($P501) 
+    new $P5001, 'ResizablePMCArray'
+    .const 'Sub' $P5002 = "cuid_2_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_3_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_5_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_6_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_7_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_8_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_9_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_10_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_11_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_12_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_13_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_14_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_16_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_18_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_19_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_21_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_22_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_23_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_24_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_25_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_29_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_30_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_32_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_33_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_34_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_35_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_36_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_37_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_38_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_39_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_40_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_41_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_42_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_43_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_44_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_45_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_46_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_47_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_48_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_49_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_50_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_51_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_52_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_53_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_54_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_55_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_56_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_57_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_58_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_59_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_60_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_61_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_62_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_63_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_64_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_65_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_66_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_67_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_68_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_69_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_70_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_71_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_72_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_73_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_74_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_75_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_76_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_78_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_80_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_81_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_82_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_84_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_86_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_93_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_95_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_96_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_97_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_98_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_99_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_101_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_102_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_103_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_104_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_105_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_106_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_107_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_108_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_109_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_110_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_111_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_112_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_113_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_114_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_115_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_116_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_117_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_118_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_119_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_120_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_121_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_122_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_123_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_124_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_125_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_126_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_127_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_128_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_129_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_130_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_131_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_132_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_133_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_134_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_135_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_136_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_137_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_138_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_139_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_140_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_141_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_142_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_143_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_144_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_145_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_146_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_147_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_148_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_149_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_150_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_151_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_152_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_153_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_154_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_155_1346277621.774" 
+    push $P5001, $P5002
+    .const 'Sub' $P5002 = "cuid_156_1346277621.774" 
+    push $P5001, $P5002
+    .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_214_1346233469.934") :load
+.sub "" :subid("cuid_214_1346277621.774") :load
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    .const 'Sub' $P501 = "cuid_1_1346233469.934" 
-    $P502 = $P501()
-    .return ($P502) 
+    .const 'Sub' $P5001 = "cuid_1_1346277621.774" 
+    $P5002 = $P5001()
+    .return ($P5002) 
 .end
