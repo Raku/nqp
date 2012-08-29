@@ -212,6 +212,7 @@ class NQP::World is HLL::World {
         # XXX Lexical environment.
         my $stub_code := sub (*@args, *%named) {
             # Do the compilation.
+            $past.unshift(self.libs());
             my $nqpcomp  := pir::compreg__Ps('nqp');
             my $post     := $nqpcomp.post(QAST::CompUnit.new( :hll('nqp'), $past ));
             my $pir      := $nqpcomp.pir($post);
@@ -456,7 +457,7 @@ class NQP::World is HLL::World {
     }
     
     # Adds libraries that NQP code depends on.
-    method add_libs($block) {
+    method libs() {
         # Need to load the NQP dynops/dympmcs, plus any extras requested.
         my @loadlibs := ['nqp_group', 'nqp_ops', 'nqp_bigint_ops', 'trans_ops', 'io_ops'];
         if %*COMPILING<%?OPTIONS><vmlibs> {
@@ -464,7 +465,7 @@ class NQP::World is HLL::World {
                 @loadlibs.push($_);
             }
         }
-        $block.push(QAST::VM.new( loadlibs => @loadlibs ));
+        QAST::VM.new( loadlibs => @loadlibs );
     }
     
     # Adds some initial tasks.

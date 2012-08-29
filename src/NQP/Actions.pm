@@ -111,7 +111,7 @@ class NQP::Actions is HLL::Actions {
         $unit.push($mainline);
 
         # Load the needed libraries.
-        $*W.add_libs($unit);
+        $unit.push($*W.libs());
         
         # Wrap everything in a QAST::CompUnit.
         my $compunit := QAST::CompUnit.new(
