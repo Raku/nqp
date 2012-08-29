@@ -285,19 +285,7 @@ knowhow NQPClassHOW {
                     if nqp::defined($dispatcher) {
                         # Found a possible - make sure it's a dispatcher, not
                         # an only.
-                        if pir::is_dispatcher__IP($dispatcher) {
-                            # Clone it and install it in our method table.
-                            my @new_dispatchees;
-                            @new_dispatchees[0] := $code;
-                            my $new_disp := pir::create_dispatch_and_add_candidates__PPP($dispatcher, @new_dispatchees);
-                            my $clone_callback := pir::getprop__PPs($dispatcher, 'CLONE_CALLBACK');
-                            if nqp::defined($clone_callback) {
-                                $clone_callback($dispatcher, $new_disp);
-                            }
-                            %!methods{$name} := $new_disp;
-                            $found := 1;
-                        }
-                        elsif nqp::can($dispatcher, 'is_dispatcher') && $dispatcher.is_dispatcher {
+                        if nqp::can($dispatcher, 'is_dispatcher') && $dispatcher.is_dispatcher {
                             my $new_disp := $dispatcher.derive_dispatcher();
                             $new_disp.add_dispatchee($code);
                             %!methods{$name} := $new_disp;
