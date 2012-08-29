@@ -1214,7 +1214,12 @@ class NQP::Actions is HLL::Actions {
         # See if it's a lexical symbol (known in any outer scope).
         my $var;
         if $*W.is_lexical(~$<name>) {
-            $var := QAST::Var.new( :name(~$<name>), :scope('lexical') );
+            try {
+                $var := QAST::WVal.new( :value($*W.find_sym([~$<name>])) );
+                CATCH {
+                    $var := QAST::Var.new( :name(~$<name>), :scope('lexical') );
+                }
+            }
         }
         else {
             my @ns := nqp::clone($<name><identifier>);
