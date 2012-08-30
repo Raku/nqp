@@ -1159,6 +1159,30 @@ inline op repr_bind_pos_num(invar PMC, in INT, in NUM) :base_core {
             "Can only use repr_bind_pos_num on a SixModelObject");
 }
 
+/*
+
+=item repr_elems()
+
+Returns the number of elements, as determined by the REPR (not the VTABLE)
+
+=cut
+
+*/
+
+inline op repr_elems(out INT, invar PMC) :base_core {
+    PMC *obj = decontainerize(interp, $2);
+    if (obj->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(obj))
+            $1 = REPR(obj)->idx_funcs->elems(interp, STABLE(obj), OBJECT_BODY(obj));
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot do repr_elems on a type object");
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_elems on a SixModelObject");
+}
+
 
 /*
 
