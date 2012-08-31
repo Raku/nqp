@@ -91,7 +91,8 @@ static void SC_write_barrier_st(PARROT_INTERP, STable *st) {
 static INTVAL
 nqp_islist(PMC *pmc) {
     INTVAL type = pmc->vtable->base_type;
-    return (INTVAL)(type == qrpa_id || type == enum_class_ResizablePMCArray);
+    return (INTVAL)(type == qrpa_id || type == enum_class_ResizablePMCArray
+                                    || type == enum_class_ResizableStringArray);
 }
 
 /* Test for something being a list (RPA or QRPA).  */
