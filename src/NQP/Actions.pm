@@ -524,7 +524,9 @@ class NQP::Actions is HLL::Actions {
         my $past;
         if $<postcircumfix> {
             $past := $<postcircumfix>.ast;
-            $past.unshift( QAST::Var.new( :name('$/'), :scope('lexical') ) );
+            $past.unshift(QAST::VarWithFallback.new(
+                :name('$/'), :scope('lexical'), :fallback(default_for('$'))
+            ));
         }
         else {
             my @name := NQP::Compiler.parse_name(~$/);
