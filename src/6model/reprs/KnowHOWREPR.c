@@ -59,6 +59,8 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
 /* This Parrot-specific addition to the API is used to mark an object. */
 static void gc_mark(PARROT_INTERP, STable *st, void *data) {
     KnowHOWREPRBody *body = (KnowHOWREPRBody *)data;
+    if (!STRING_IS_NULL(body->name))
+        Parrot_gc_mark_STRING_alive(interp, body->name);
     if (!PMC_IS_NULL(body->methods))
         Parrot_gc_mark_PMC_alive(interp, body->methods);
     if (!PMC_IS_NULL(body->attributes))
