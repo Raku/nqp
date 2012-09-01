@@ -26,8 +26,6 @@ pir::const::INTERPINFO_TOTAL_MEM_USED
 pir::const::INTERPINFO_TOTAL_PMCS
 
 can be done now by lizmat
-pir::getattribute__PPPs  -> nqp::getattr
-pir::getattribute__ppps  -> nqp::getattr
 pir::set_who__vPP        -> nqp::setwho
 pir::get_who__PP         -> nqp::who
 pir::does
