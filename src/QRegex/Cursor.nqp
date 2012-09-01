@@ -118,10 +118,10 @@ role NQPCursorRole {
         $!cstack := [] unless nqp::defined($!cstack);
         nqp::push($!cstack, $capture);
         nqp::bindattr($capture, $?CLASS, '$!name', $name);
-        pir::push__vPi($!bstack, 0);
-        pir::push__vPi($!bstack, $!pos);
-        pir::push__vPi($!bstack, 0);
-        pir::push__vPi($!bstack, nqp::elems($!cstack));
+        nqp::push_i($!bstack, 0);
+        nqp::push_i($!bstack, $!pos);
+        nqp::push_i($!bstack, 0);
+        nqp::push_i($!bstack, nqp::elems($!cstack));
         $!cstack;
     }
     
