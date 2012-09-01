@@ -532,7 +532,7 @@ class NQPCursor does NQPCursorRole {
     }
 
     method !INTERPOLATE($var) {
-        if pir::does($var, 'array') {
+        if nqp::islist($var) {
             my $maxlen := -1;
             my $cur := self.'!cursor_start'();
             my $pos := nqp::getattr_i($cur, $?CLASS, '$!from');
@@ -573,7 +573,7 @@ class NQPCursor does NQPCursorRole {
     method !INTERPOLATE_REGEX($var) {
         unless pir::is_invokable__IP($var) {
             my $rxcompiler := pir::compreg__Ps('QRegex::P6Regex');
-            if pir::does($var, 'array') {
+            if nqp::islist($var) {
                 my $res := [];
                 for $var {
                     my $elem := $_;

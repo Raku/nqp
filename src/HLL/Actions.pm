@@ -7,7 +7,7 @@ class HLL::Actions {
     }
 
     method ints_to_string($ints) {
-        if pir::does($ints, 'array') {
+        if nqp::islist($ints) {
             my $result := '';
             for $ints {
                 $result := $result ~ nqp::chr($_.ast);

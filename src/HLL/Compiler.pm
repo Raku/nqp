@@ -383,7 +383,7 @@ class HLL::Compiler {
     method evalfiles($files, *@args, *%adverbs) {
         my $target := nqp::lc(%adverbs<target>);
         my $encoding := %adverbs<encoding>;
-        my @files := pir::does($files, 'array') ?? $files !! [$files];
+        my @files := nqp::islist($files) ?? $files !! [$files];
         $!user_progname := nqp::join(',', @files);
         my @codes;
         for @files {
