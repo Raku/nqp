@@ -44,7 +44,7 @@ knowhow NQPAttribute {
         #    my $method := nqp::substr($long_name, 1);
         #    unless has_method($obj, $method, 0) {
         #        $obj.HOW.add_method($obj.WHAT, $method, method ($value?) {
-        #                pir::setattribute__vppsp(self, $obj.WHAT, $long_name, $value)
+        #                nqp::bindattr(self, $obj.WHAT, $long_name, $value)
         #                    if nqp::defined($value);
         #                pir::getattribute__ppps(self, $obj.WHAT, $long_name);
         #            }
