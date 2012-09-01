@@ -122,11 +122,11 @@ class HLL::Compiler {
                 %blank_pad);
             pir::getinterp__P(){'context'};
         }
-        blank_context.set_outer(nqp::null());
+        &blank_context.set_outer(nqp::null());
         my $interactive_ctx := blank_context();
         my %interactive_pad := 
             pir::getattribute__PPs($interactive_ctx, 'lex_pad');
-     
+
         my $target := nqp::lc(%adverbs<target>);
 
         pir::getinterp__P().stderr_handle().print(self.interactive_banner);
