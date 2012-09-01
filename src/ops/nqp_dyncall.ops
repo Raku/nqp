@@ -843,14 +843,50 @@ inline op nqp_native_call_build(invar PMC, in STR, in STR, in STR, invar PMC, in
     char *sym_name    = Parrot_str_to_cstring(interp, $3);
     PMC  *arg_info    = $5;
     PMC  *ret_info    = $6;
+    size_t lib_len    = strlen(lib_name);
     int   i;
     
     /* Initialize the object; grab native call part of its body. */
     NativeCallBody *body = get_nc_body(interp, $1);
     
     /* Try to load the library. */
-    body->lib_name = lib_name;
-    body->lib_handle = dlLoadLibrary(strlen(lib_name) ? lib_name : NULL);
+    if(lib_len) {
+        /* First we try to load the library with the PARROT_LOAD_EXT. */
+        size_t load_len = strlen(PARROT_LOAD_EXT);
+        char *full_lib = mem_sys_allocate_zeroed(lib_len + load_len + 1);
+        strcat(full_lib, lib_name);
+        strcat(full_lib, PARROT_LOAD_EXT);
+        body->lib_handle = dlLoadLibrary(full_lib);
+
+        /* If LOAD_EXT and SHARE_EXT are different, fall back to SHARE_EXT on
+         * failure. Always free the lib name on failure. */
+        if(!body->lib_handle) {
+            mem_sys_free(full_lib);
+
+            if(strcmp(PARROT_LOAD_EXT, PARROT_SHARE_EXT)) {
+                load_len = strlen(PARROT_SHARE_EXT);
+                full_lib = mem_sys_allocate_zeroed(lib_len + load_len + 1);
+                strcat(full_lib, lib_name);
+                strcat(full_lib, PARROT_SHARE_EXT);
+                body->lib_handle = dlLoadLibrary(full_lib);
+
+                if(!body->lib_handle) {
+                    mem_sys_free(full_lib);
+                }
+                else {
+                    body->lib_name = full_lib;
+                }
+            }
+        }
+        else {
+            body->lib_name = full_lib;
+        }
+    }
+    else {
+        body->lib_name   = lib_name;
+        body->lib_handle = dlLoadLibrary(NULL);
+    }
+
     if (!body->lib_handle) {
         Parrot_str_free_cstring(sym_name);
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
