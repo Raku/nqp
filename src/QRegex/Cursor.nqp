@@ -118,10 +118,10 @@ role NQPCursorRole {
         $!cstack := [] unless nqp::defined($!cstack);
         nqp::push($!cstack, $capture);
         nqp::bindattr($capture, $?CLASS, '$!name', $name);
-        pir::push__vPi($!bstack, 0);
-        pir::push__vPi($!bstack, $!pos);
-        pir::push__vPi($!bstack, 0);
-        pir::push__vPi($!bstack, nqp::elems($!cstack));
+        nqp::push_i($!bstack, 0);
+        nqp::push_i($!bstack, $!pos);
+        nqp::push_i($!bstack, 0);
+        nqp::push_i($!bstack, nqp::elems($!cstack));
         $!cstack;
     }
     
@@ -533,7 +533,7 @@ class NQPCursor does NQPCursorRole {
     }
 
     method !INTERPOLATE($var) {
-        if pir::does__IPs($var, 'array') {
+        if nqp::islist($var) {
             my $maxlen := -1;
             my $cur := self.'!cursor_start'();
             my $pos := nqp::getattr_i($cur, $?CLASS, '$!from');
@@ -574,7 +574,7 @@ class NQPCursor does NQPCursorRole {
     method !INTERPOLATE_REGEX($var) {
         unless pir::is_invokable__IP($var) {
             my $rxcompiler := pir::compreg__Ps('QRegex::P6Regex');
-            if pir::does__IPs($var, 'array') {
+            if nqp::islist($var) {
                 my $res := [];
                 for $var {
                     my $elem := $_;

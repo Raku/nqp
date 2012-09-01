@@ -111,7 +111,7 @@ knowhow ModuleLoader {
                     for pir::get_who__PP($source) {
                         %WHO_clone{$_.key} := $_.value;
                     }
-                    pir::set_who__vPP($source_clone, %WHO_clone);
+                    nqp::setwho($source_clone, %WHO_clone);
                     ($target.WHO){$sym} := $source_clone;
                 }
                 else {

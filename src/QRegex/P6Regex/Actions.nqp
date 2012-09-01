@@ -378,7 +378,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             my $loc := nqp::index(%*RX<name>, ':sym<');
             $loc := nqp::index(%*RX<name>, ':sym«')
                 if $loc < 0;
-            my $rxname := pir::chopn__Ssi(nqp::substr(%*RX<name>, $loc + 5), 1);
+            my $rxname := nqp::substr(%*RX<name>, $loc + 5);
+            $rxname := nqp::substr( $rxname, 0, nqp::chars($rxname) - 1);
             $qast := QAST::Regex.new(:name('sym'), :rxtype<subcapture>, :node($/),
                 QAST::Regex.new(:rxtype<literal>, $rxname, :node($/)));
         }

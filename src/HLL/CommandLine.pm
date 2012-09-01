@@ -109,7 +109,7 @@ class HLL::CommandLine::Result {
         # how I miss p6's Hash.push
 
         if nqp::existskey(%!options, $name) {
-            if pir::does__IPs(%!options{$name}, 'array') {
+            if nqp::islist(%!options{$name}) {
                 nqp::push(%!options{$name}, $value);
             } else {
                 %!options{$name} := [ %!options{$name}, $value ];
