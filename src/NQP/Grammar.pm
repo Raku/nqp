@@ -227,6 +227,7 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     token statement_control:sym<for> {
+        :my $*CONTROL_USED := 0;
         <sym> \s :s
         <xblock>
     }

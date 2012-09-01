@@ -622,14 +622,21 @@ for ('', 'repeat_') -> $repness {
 }
 
 QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
-    if +$op.list != 2 {
+    my $handler := 1;
+    my @operands;
+    for $op.list {
+        if $_.named eq 'nohandler' { $handler := 0; }
+        else { @operands.push($_) }
+    }
+    
+    if +@operands != 2 {
         nqp::die("Operation 'for' needs 2 operands");
     }
-    unless nqp::istype($op[1], QAST::Block) {
+    unless nqp::istype(@operands[1], QAST::Block) {
         nqp::die("Operation 'for' expects a block as its second operand");
     }
-    if $op[1].blocktype eq 'immediate' {
-        $op[1].blocktype('declaration');
+    if @operands[1].blocktype eq 'immediate' {
+        @operands[1].blocktype('declaration');
     }
     
     # Evaluate the thing we'll iterate over and the block.
@@ -637,8 +644,8 @@ QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
     my $curval    := $*REGALLOC.fresh_p();
     my $iter      := $*REGALLOC.fresh_p();
     my $ops       := PIRT::Ops.new();
-    my $listpost  := $qastcomp.coerce($qastcomp.as_post($op[0]), "P");
-    my $blockpost := $qastcomp.coerce($qastcomp.as_post($op[1]), "P");
+    my $listpost  := $qastcomp.coerce($qastcomp.as_post(@operands[0]), "P");
+    my $blockpost := $qastcomp.coerce($qastcomp.as_post(@operands[1]), "P");
     $ops.push($listpost);
     
     # Get the iterator.
@@ -646,7 +653,6 @@ QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
     $ops.push_pirop('iter', $iter, $listpost);
     
     # Set up exception handler.
-    my $handler := 1;
     my $exc_reg;
     my $hand_lbl;
     if $handler {
@@ -667,7 +673,7 @@ QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
     
     # Fetch values.
     my @valreg;
-    my $arity := $op[1].arity || 1;
+    my $arity := @operands[1].arity || 1;
     while $arity > 0 {
         my $reg := $*REGALLOC.fresh_p();
         $ops.push_pirop('shift', $reg, $iter);
