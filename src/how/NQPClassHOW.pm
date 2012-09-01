@@ -222,12 +222,8 @@ knowhow NQPClassHOW {
             self.add_parent($obj, $!default_parent)
         }
 
-        # Some things we only do if we weren't already composed once, like building
-        # the MRO.
-        unless $!composed {
-            @!mro := compute_c3_mro($obj);
-            $!composed := 1;
-        }
+        # Compute the MRO.
+        @!mro := compute_c3_mro($obj);
 
         # Incorporate any new multi candidates (needs MRO built).
         self.incorporate_multi_candidates($obj);
@@ -246,6 +242,9 @@ knowhow NQPClassHOW {
         
         # Create BUILDPLAN.
         self.create_BUILDPLAN($obj);
+        
+        # Mark as composed.
+        $!composed := 1;
 
         $obj
     }
