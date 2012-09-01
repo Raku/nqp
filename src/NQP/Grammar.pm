@@ -24,11 +24,12 @@ grammar NQP::Grammar is HLL::Grammar {
             NQP::World.new(:handle($source_id)) !!
             NQP::World.new(:handle($source_id), :description($file));
 
-        my $*SCOPE       := '';
-        my $*MULTINESS   := '';
-        my $*PKGDECL     := '';
-        my $*INVOCANT_OK := 0;
-        my $*RETURN_USED := 0;
+        my $*SCOPE        := '';
+        my $*MULTINESS    := '';
+        my $*PKGDECL      := '';
+        my $*INVOCANT_OK  := 0;
+        my $*RETURN_USED  := 0;
+        my $*CONTROL_USED := 0;
         my %*HANDLERS;
         self.comp_unit;
     }
@@ -211,11 +212,13 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     token statement_control:sym<while> {
+        :my $*CONTROL_USED := 0;
         $<sym>=[while|until] \s :s
         <xblock>
     }
 
     token statement_control:sym<repeat> {
+        :my $*CONTROL_USED := 0;
         <sym> \s :s
         [
         | $<wu>=[while|until]\s <xblock>
@@ -730,9 +733,9 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token prefix:sym<return> { <sym> \s <O('%list_prefix')> { $*RETURN_USED := 1 } }
     token prefix:sym<make>   { <sym> \s <O('%list_prefix')> }
-    token term:sym<last>     { <sym> }
-    token term:sym<next>     { <sym> }
-    token term:sym<redo>     { <sym> }
+    token term:sym<last>     { <sym> { $*CONTROL_USED := 1 } }
+    token term:sym<next>     { <sym> { $*CONTROL_USED := 1 } }
+    token term:sym<redo>     { <sym> { $*CONTROL_USED := 1 } }
 
     method smartmatch($/) {
         # swap rhs into invocant position

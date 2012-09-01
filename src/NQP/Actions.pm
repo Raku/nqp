@@ -339,6 +339,9 @@ class NQP::Actions is HLL::Actions {
     method statement_control:sym<while>($/) {
         my $past := xblock_immediate( $<xblock>.ast );
         $past.op(~$<sym>);
+        unless $*CONTROL_USED {
+            $past.push(QAST::IVal.new( :value(1), :named('nohandler') ));
+        }
         make $past;
     }
 
@@ -352,6 +355,9 @@ class NQP::Actions is HLL::Actions {
         else {
             $past := QAST::Op.new( $<EXPR>.ast, block_immediate( $<pblock>.ast ),
                                    :op($op), :node($/) );
+        }
+        unless $*CONTROL_USED {
+            $past.push(QAST::IVal.new( :value(1), :named('nohandler') ));
         }
         make $past;
     }

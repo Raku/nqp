@@ -612,6 +612,9 @@ for ('', 'repeat_') -> $repness {
                 $ops.push($done_lbl);
                 $ops.push_pirop('pop_eh');
             }
+            else {
+                $ops.push($done_lbl);
+            }
 
             $ops;
         });

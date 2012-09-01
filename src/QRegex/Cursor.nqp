@@ -182,6 +182,7 @@ role NQPCursorRole {
             if !nqp::isnull($actions) && nqp::can($actions, $name);
     }
 
+    my @EMPTY := [];
     method !protoregex($name) {
         # Obtain and run NFA.
         my $nfa := self.HOW.cache(self, $name, { self.'!protoregex_nfa'($name) });
@@ -195,7 +196,7 @@ role NQPCursorRole {
             $rxname := nqp::atpos(@rxfate, nqp::pop_i(@fates));
             #nqp::say("invoking $rxname");
             $cur := self."$rxname"();
-            last if nqp::getattr_i($cur, $?CLASS, '$!pos') >= 0;
+            @fates := @EMPTY if nqp::getattr_i($cur, $?CLASS, '$!pos') >= 0;
         }
         $cur // self."!cursor_start"();
     }
