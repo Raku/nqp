@@ -466,62 +466,58 @@ knowhow NQPClassHOW {
     # nested array is an "op" representing the task to perform:
     #   0 code = call specified BUILD method
     #   1 class name attr_name = try to find initialization value
-    #   
-    #   2 class attr_name code = call default value closure if needed
+    #   2 class name attr_name = try to find initialization value, or set nqp::list()
+    #   3 class name attr_name = try to find initialization value, or set nqp::hash()
+    #   4 class attr_name code = call default value closure if needed
     method create_BUILDPLAN($obj) {
-        # Get MRO, then work from least derived to most derived.
-        my @all_plan;
+        # First, we'll create the build plan for just this class.
         my @plan;
-        my @mro := self.mro($obj);
-        my $i := +@mro;
-        while $i > 0 {
-            # Get current class to consider and its attrs.
-            $i := $i - 1;
-            my $class := @mro[$i];
-            my @attrs := $class.HOW.attributes($class, :local(1));
-            
-            # Does it have its own BUILD?
-            my $build := $class.HOW.find_method($class, 'BUILD', :no_fallback(1));
-            if nqp::defined($build) {
-                # We'll call the custom one.
-                my $entry := [0, $build];
-                @all_plan[+@all_plan] := $entry;
-                if $i == 0 {
-                    @plan[+@plan] := $entry;
-                }
-            }
-            else {
-                # No custom BUILD. Rather than having an actual BUILD
-                # in Mu, we produce ops here per attribute that may
-                # need initializing.
-                for @attrs {
-                    my $attr_name := $_.name;
-                    my $name      := nqp::substr($attr_name, 2);
-                    my $sigil     := nqp::substr($attr_name, 0, 1);
-                    my $sigop     := $sigil eq '@' ?? 2 !! $sigil eq '%' ?? 3 !! 1;
-                    my $entry     := [$sigop, $class, $name, $attr_name];
-                    @all_plan[+@all_plan] := $entry;
-                    if $i == 0 {
-                        @plan[+@plan] := $entry;
-                    }
-                }
-            }
-            
-            # Check if there's any default values to put in place.
+        my @attrs := $obj.HOW.attributes($obj, :local(1));
+        
+        # Does it have its own BUILD?
+        my $build := $obj.HOW.find_method($obj, 'BUILD', :no_fallback(1));
+        if nqp::defined($build) {
+            # We'll call the custom one.
+            @plan[+@plan] := [0, $build];
+        }
+        else {
+            # No custom BUILD. Rather than having an actual BUILD
+            # in Mu, we produce ops here per attribute that may
+            # need initializing.
             for @attrs {
-                if nqp::can($_, 'build') {
-                    my $default := $_.build;
-                    if nqp::defined($default) {
-                        my $entry := [4, $class, $_.name, $default];
-                        @all_plan[+@all_plan] := $entry;
-                        if $i == 0 {
-                            @plan[+@plan] := $entry;
-                        }
-                    }
+                my $attr_name := $_.name;
+                my $name      := nqp::substr($attr_name, 2);
+                my $sigil     := nqp::substr($attr_name, 0, 1);
+                my $sigop     := $sigil eq '@' ?? 2 !! $sigil eq '%' ?? 3 !! 1;
+                @plan[+@plan] := [$sigop, $obj, $name, $attr_name];
+            }
+        }
+        
+        # Check if there's any default values to put in place.
+        for @attrs {
+            if nqp::can($_, 'build') {
+                my $default := $_.build;
+                if nqp::defined($default) {
+                    @plan[+@plan] := [4, $obj, $_.name, $default];
                 }
             }
         }
+        
+        # Install plan for this class.
         @!BUILDPLAN := @plan;
+        
+        # Now create the full plan by getting the MRO, and working from
+        # least derived to most derived, copying the plans.
+        my @all_plan;
+        my @mro := self.mro($obj);
+        my $i := +@mro;
+        while $i > 0 {
+            $i := $i - 1;
+            my $class := @mro[$i];
+            for $class.HOW.BUILDPLAN($class) {
+                nqp::push(@all_plan, $_);
+            }
+        }
         @!BUILDALLPLAN := @all_plan;
     }
     
