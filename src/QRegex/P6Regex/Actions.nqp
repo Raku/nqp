@@ -125,7 +125,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method metachar:sym<ws>($/) {
         my $qast := %*RX<s>
-                    ?? QAST::Regex.new(PAST::Node.new('ws'), :rxtype<ws>, :subtype<method>, :node($/))
+                    ?? QAST::Regex.new(:rxtype<ws>, :subtype<method>, :node($/),
+                            QAST::Node.new(QAST::SVal.new( :value('ws') )))
                     !! 0;
         make $qast;
     }
@@ -187,14 +188,18 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method metachar:sym<from>($/) {
         make QAST::Regex.new( :rxtype<subrule>, :subtype<capture>,
-            :backtrack<r>,
-            :name<$!from>, PAST::Node.new('!LITERAL', ''), :node($/) );
+            :backtrack<r>, :name<$!from>, :node($/),
+            QAST::Node.new(
+                QAST::SVal.new( :value('!LITERAL') ),
+                QAST::SVal.new( :value('') ) ) );
     }
 
     method metachar:sym<to>($/) {
         make QAST::Regex.new( :rxtype<subrule>, :subtype<capture>,
-            :backtrack<r>,
-            :name<$!to>, PAST::Node.new('!LITERAL', ''), :node($/) );
+            :backtrack<r>, :name<$!to>, :node($/),
+            QAST::Node.new(
+                QAST::SVal.new( :value('!LITERAL') ),
+                QAST::SVal.new( :value('') ) ) );
     }
 
     method metachar:sym<bs>($/) {
@@ -352,8 +357,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         elsif $name eq 'w' {
             $qast := QAST::Regex.new(:rxtype<subrule>, :subtype<method>,
-                                     :node($/), PAST::Node.new('wb'), 
-                                     :name('') );
+                                     :node($/), :name(''),
+                                     QAST::Node.new(QAST::SVal.new( :value('wb') )) );
         }
         make $qast;
     }
@@ -383,8 +388,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         else {
             $qast := QAST::Regex.new(:rxtype<subrule>, :subtype<capture>,
-                                     :node($/), PAST::Node.new($name), 
-                                     :name($name) );
+                                     :node($/), :name($name),
+                                     QAST::Node.new(QAST::SVal.new( :value($name) )));
             if $<arglist> {
                 for $<arglist>[0].ast.list { $qast[0].push( $_ ) }
             }
@@ -423,7 +428,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
     
     method arg($/) {
-        make $<quote_EXPR> ?? $<quote_EXPR>.ast !! +$<val>;
+        make $<quote_EXPR>
+            ?? $<quote_EXPR>.ast
+            !! QAST::NVal.new( :value(+$<val>) );
     }
 
     method arglist($/) {
@@ -437,8 +444,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         my $qast;
         if $<name> {
             my $name := ~$<name>;
-            $qast := QAST::Regex.new( PAST::Node.new($name), :rxtype<subrule>, :subtype<method>,
-                                      :negate( $<sign> eq '-' ), :node($/) );
+            $qast := QAST::Regex.new( :rxtype<subrule>, :subtype<method>,
+                                      :negate( $<sign> eq '-' ), :node($/),
+                                      QAST::Node.new(QAST::SVal.new( :value($name) )) );
         }
         elsif $<uniprop> {
             my $uniprop := ~$<uniprop>;
