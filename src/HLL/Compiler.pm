@@ -434,7 +434,6 @@ class HLL::Compiler {
 
     method post($source, *%adverbs) {
         my $*PASTCOMPILER := pir::compreg__Ps('PAST');
-        my $*PIRT := 1;
         QAST::Compiler.as_post($source)
     }
 
@@ -451,14 +450,7 @@ class HLL::Compiler {
     }
   
     method pir($source, *%adverbs) {
-        if nqp::can($source, 'pir') {
-            my $*PIRT := 1;
-            self.pirbegin() ~ $source.pir()
-        }
-        else {
-            my $*PIRT := 0;
-            self.pirbegin() ~ pir::compreg__Ps('POST').to_pir($source, |%adverbs)
-        }
+        self.pirbegin() ~ $source.pir()
     }
 
     method evalpmc($source, *%adverbs) {

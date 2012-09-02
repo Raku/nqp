@@ -1095,23 +1095,14 @@ class QAST::Compiler is HLL::Compiler {
     }
 
     method post_children($node) {
-        if $*PIRT {
-            my $posts := PIRT::Ops.new();
-            my @results;
-            for @($node) {
-                my $sval := self.as_post(QAST::SVal.new( :value(~$_) ));
-                $posts.push($sval);
-                nqp::push(@results, $sval.result);
-            }
-            [$posts, @results]
+        my $posts := PIRT::Ops.new();
+        my @results;
+        for @($node) {
+            my $sval := self.as_post(QAST::SVal.new( :value(~$_) ));
+            $posts.push($sval);
+            nqp::push(@results, $sval.result);
         }
-        else {
-            Q:PIR {
-                $P0 = find_dynamic_lex '$*PASTCOMPILER'
-                $P1 = find_lex '$node'
-                (%r :slurpy) = $P0.'post_children'($P1)
-            }
-        }
+        [$posts, @results]
     }
     
     method children($node) {
@@ -1126,25 +1117,12 @@ class QAST::Compiler is HLL::Compiler {
     }
 
     method regex_post($node) {
-        return $*PASTCOMPILER.as_post($node) if $node ~~ PAST::Node;
         my $rxtype := $node.rxtype() || 'concat';
         self."$rxtype"($node);
     }
 
     method post_new($type, *@args, *%options) {
-        if $*PIRT {
-            (PIRT.WHO){$type}.new(|@args, |%options)
-        }
-        else {
-            Q:PIR {
-                $P0 = find_lex '$type'
-                $S0 = $P0
-                $P0 = get_root_global ['parrot';'POST'], $S0
-                $P1 = find_lex '@args'
-                $P2 = find_lex '%options'
-                %r = $P0.'new'($P1 :flat, $P2 :flat :named)
-            }
-        }
+        (PIRT.WHO){$type}.new(|@args, |%options)
     }
 
     method alt($node) {
@@ -1567,16 +1545,7 @@ class QAST::Compiler is HLL::Compiler {
     }
 
     multi method as_post($unknown) {
-        # XXX pir::typeof for now to catch accidental PAST nodes while we
-        # transition stuff to 6model fully.
-        if $unknown ~~ PAST::Op {
-            nqp::die("Unknown QAST node type " ~ pir::typeof__SP($unknown) ~
-                " (name = '" ~ $unknown.name() ~
-                "', pirop = '" ~ $unknown.pirop ~ "')");
-        }
-        else {
-            nqp::die("Unknown QAST node type " ~ pir::typeof__SP($unknown));
-        }
+        nqp::die("Unknown QAST node type " ~ $unknown.HOW.name($unknown));
     }
     
     method operations() { QAST::Operations }
