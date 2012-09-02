@@ -50,7 +50,7 @@ class HLL::Compiler {
         
     method get_exports($module, :$tagset, *@symbols) {
         # convert a module name to something hash-like, if needed
-        if (!pir::does__IPs($module, 'hash')) {
+        if (!nqp::ishash($module)) {
             $module := self.get_module($module);
         }
 

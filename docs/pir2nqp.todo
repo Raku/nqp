@@ -29,7 +29,6 @@ after jnthn's toqast branch is merged
 nqp::defined      ->  nqp::isconcrete
 pir::defined__IP  ->  nqp::isconcrete
 pir::get_who__PP  ->  nqp::who
-pir::does         ->  2nd=hash then nqp::ishash
 pir::isa
   2nd arg = ResizablePMCArray, then nqp::islist
   2nd arg = hash then nqp::ishash
