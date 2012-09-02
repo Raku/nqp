@@ -424,7 +424,7 @@ class HLL::Compiler {
             my $timestamp := nqp::time_n();
             $result := self."$_"($result, |%adverbs);
             my $diff := nqp::time_n() - $timestamp;
-            if pir::defined__IP($stagestats) {
+            if nqp::defined($stagestats) {
                 $stderr.print(nqp::sprintf("Stage %-11s: %7.3f", [$_, $diff]));
                 pir::sweep__0i(1) if nqp::bitand_i($stagestats, 0x4);
                 $stderr.print(nqp::sprintf(" %11d %11d %9d %9d", self.vmstat()))

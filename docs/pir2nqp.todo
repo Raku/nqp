@@ -26,14 +26,13 @@ pir::const::INTERPINFO_TOTAL_MEM_USED
 pir::const::INTERPINFO_TOTAL_PMCS
 
 after jnthn's toqast branch is merged
-nqp::defined      ->  nqp::isconcrete
-pir::defined__IP  ->  nqp::isconcrete
 pir::isa
   2nd arg = ResizablePMCArray, then nqp::islist
   2nd arg = hash then nqp::ishash
   specifically undef as 2nd is WRONG, check with jnthn
 
 to be eliminated / handled by jnthn
+nqp::defined      ->  nqp::isconcrete
 pir::is_dispatcher__IP
 pir::create_dispatch_and_add_candidates__PPP
 pir::push_dispatchee__0PP
