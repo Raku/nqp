@@ -149,8 +149,8 @@ class QRegex::P5Regex::Actions is HLL::Actions {
 
     method p5backslash:sym<b>($/) {
         make QAST::Regex.new(:rxtype<subrule>, :subtype<method>,
-                             :node($/), PAST::Node.new('wb'), 
-                             :negate($<sym> eq 'B'), :name('') );
+                             :node($/), :negate($<sym> eq 'B'), :name(''),
+                             QAST::Node.new( QAST::SVal.new( :value('wb') ) ));
     }
     
     method p5backslash:sym<misc>($/) {
@@ -193,7 +193,8 @@ class QRegex::P5Regex::Actions is HLL::Actions {
 
     method metachar:sym<ws>($/) {
         my $qast := %*RX<s>
-                    ?? QAST::Regex.new(PAST::Node.new('ws'), :rxtype<ws>, :subtype<method>, :node($/))
+                    ?? QAST::Regex.new(:rxtype<ws>, :subtype<method>, :node($/),
+                            QAST::Node.new( QAST::SVal.new( :value('ws') ) ))
                     !! 0;
         make $qast;
     }
@@ -212,7 +213,6 @@ class QRegex::P5Regex::Actions is HLL::Actions {
 
     method metachar:sym<'>($/) {
         my $quote := $<quote_EXPR>.ast;
-        if PAST::Val.ACCEPTS($quote) { $quote := $quote.value; }
         if QAST::SVal.ACCEPTS($quote) { $quote := $quote.value; }
         my $qast := QAST::Regex.new( $quote, :rxtype<literal>, :node($/) );
         $qast.subtype('ignorecase') if %*RX<i>;
@@ -221,7 +221,6 @@ class QRegex::P5Regex::Actions is HLL::Actions {
 
     method metachar:sym<">($/) {
         my $quote := $<quote_EXPR>.ast;
-        if PAST::Val.ACCEPTS($quote) { $quote := $quote.value; }
         if QAST::SVal.ACCEPTS($quote) { $quote := $quote.value; }
         my $qast := QAST::Regex.new( $quote, :rxtype<literal>, :node($/) );
         $qast.subtype('ignorecase') if %*RX<i>;
@@ -238,14 +237,18 @@ class QRegex::P5Regex::Actions is HLL::Actions {
 
     method metachar:sym<from>($/) {
         make QAST::Regex.new( :rxtype<subrule>, :subtype<capture>,
-            :backtrack<r>,
-            :name<$!from>, PAST::Node.new('!LITERAL', ''), :node($/) );
+            :backtrack<r>, :name<$!from>, :node($/),
+            QAST::Node.new(
+                QAST::SVal.new( :value('!LITERAL') ),
+                QAST::SVal.new( :value('') ) ) );
     }
 
     method metachar:sym<to>($/) {
         make QAST::Regex.new( :rxtype<subrule>, :subtype<capture>,
-            :backtrack<r>,
-            :name<$!to>, PAST::Node.new('!LITERAL', ''), :node($/) );
+            :backtrack<r>, :name<$!to>, :node($/),
+            QAST::Node.new(
+                QAST::SVal.new( :value('!LITERAL') ),
+                QAST::SVal.new( :value('') ) ) );
     }
 
     method metachar:sym<assert>($/) {
@@ -269,8 +272,10 @@ class QRegex::P5Regex::Actions is HLL::Actions {
             }
         }
         else {
-            $qast := QAST::Regex.new( PAST::Node.new('!BACKREF', $name),
-                         :rxtype<subrule>, :subtype<method>, :node($/));
+            $qast := QAST::Regex.new( :rxtype<subrule>, :subtype<method>, :node($/),
+                QAST::Node.new(
+                    QAST::SVal.new( :value('!BACKREF') ),
+                    QAST::SVal.new( :value($name) ) ) );
         }
         make $qast;
     }
@@ -403,7 +408,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
     }
 
     method arglist($/) {
-        my $past := PAST::Op.new( :pasttype('list') );
+        my $past := QAST::Op.new( :op('list') );
         for $<arg> { $past.push( $_.ast ); }
         make $past;
     }
