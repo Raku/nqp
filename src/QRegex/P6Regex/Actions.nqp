@@ -227,8 +227,10 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             }
         }
         else {
-            $qast := QAST::Regex.new( PAST::Node.new('!BACKREF', $name),
-                         :rxtype<subrule>, :subtype<method>, :node($/));
+            $qast := QAST::Regex.new( :rxtype<subrule>, :subtype<method>, :node($/),
+                QAST::Node.new(
+                    QAST::SVal.new( :value('!BACKREF') ),
+                    QAST::SVal.new( :value($name) ) ) );
         }
         make $qast;
     }
@@ -238,8 +240,10 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             $<EXPR>.ast,
             QAST::Regex.new(
                 $<GOAL>.ast,
-                QAST::Regex.new( PAST::Node.new('FAILGOAL', ~$<GOAL>),
-                                 :rxtype<subrule>, :subtype<method> ),
+                QAST::Regex.new( :rxtype<subrule>, :subtype<method>,
+                    QAST::Node.new(
+                        QAST::SVal.new( :value('FAILGOAL') ),
+                        QAST::SVal.new( :value(~$<GOAL>) ) ) ),
                 :rxtype<altseq>
             ),
             :rxtype<concat>
