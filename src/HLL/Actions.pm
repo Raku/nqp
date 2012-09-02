@@ -95,22 +95,19 @@ class HLL::Actions {
     method quote_EXPR($/) {
         my $past := $<quote_delimited>.ast;
         if %*QUOTEMOD<w> {
-            if PAST::Node.ACCEPTS($past) {
-                $/.CURSOR.panic("Can't form :w list from non-constant strings (yet)");
-            }
-            else {
-                my @words := HLL::Grammar::split_words($/, $past);
+            if nqp::istype($past, QAST::SVal) {
+                my @words := HLL::Grammar::split_words($/, $past.value);
                 if +@words != 1 {
-                    $past := PAST::Op.new( :pasttype('list'), :node($/) );
-                    for @words { $past.push($_); }
+                    $past := QAST::Op.new( :op('list'), :node($/) );
+                    for @words { $past.push(QAST::SVal.new( :value($_) )); }
                 }
                 else {
-                    $past := ~@words[0];
+                    $past := QAST::SVal.new( :value(~@words[0]) );
                 }
             }
-        }
-        if !PAST::Node.ACCEPTS($past) {
-            $past := PAST::Val.new( :value(~$past) );
+            else {            
+                $/.CURSOR.panic("Can't form :w list from non-constant strings (yet)");
+            }
         }
         make $past;
     }
@@ -120,22 +117,26 @@ class HLL::Actions {
         my $lastlit := '';
         for $<quote_atom> {
             my $ast := $_.ast;
-            if !PAST::Node.ACCEPTS($ast) {
+            if !nqp::istype($ast, QAST::Node) {
                 $lastlit := $lastlit ~ $ast;
             }
-            elsif $ast.isa(PAST::Val) {
+            elsif nqp::istype($ast, QAST::SVal) {
                 $lastlit := $lastlit ~ $ast.value;
             }
             else {
-                if $lastlit gt '' { @parts.push($lastlit); }
-                @parts.push($ast);
+                if $lastlit gt '' {
+                    @parts.push(QAST::SVal.new( :value($lastlit) ));
+                }
+                @parts.push(nqp::istype($ast, QAST::Node)
+                    ?? $ast
+                    !! QAST::SVal.new( :value($ast) ));
                 $lastlit := '';
             }
         }
-        if $lastlit gt '' { @parts.push($lastlit); }
-        my $past := @parts ?? @parts.shift !! '';
+        if $lastlit gt '' { @parts.push(QAST::SVal.new( :value($lastlit) )); }
+        my $past := @parts ?? @parts.shift !! QAST::SVal.new( :value('') );
         while @parts {
-            $past := PAST::Op.new( $past, @parts.shift, :pirop('concat') );
+            $past := QAST::Op.new( $past, @parts.shift, :op('concat') );
         }
         make $past;
     }
