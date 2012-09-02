@@ -276,33 +276,6 @@ class NQP::Actions is HLL::Actions {
     method you_are_here($/) {
         make self.CTXSAVE();
     }
-    
-    # XXX Move to HLL::Actions after NQP gets QAST.
-    method CTXSAVE() {
-        QAST::Stmts.new(
-            QAST::Op.new(
-                :op('bind'),
-                QAST::Var.new( :name('ctxsave'), :scope('local'), :decl('var') ),
-                QAST::Var.new( :name('$*CTXSAVE'), :scope('contextual') )
-            ),
-            QAST::Op.new(
-                :op('unless'),
-                QAST::Op.new(
-                    :op('isnull'),
-                    QAST::Var.new( :name('ctxsave'), :scope('local') )
-                ),
-                QAST::Op.new(
-                    :op('if'),
-                    QAST::VM.new(
-                        :pirop('can IPs'),
-                        QAST::Var.new( :name('ctxsave'), :scope('local') ),
-                        QAST::SVal.new( :value('ctxsave') )
-                    ),
-                    QAST::Op.new(
-                        :op('callmethod'), :name('ctxsave'),
-                        QAST::Var.new( :name('ctxsave'), :scope('local')
-                    )))))
-    }
 
     ## Statement control
 
@@ -469,32 +442,6 @@ class NQP::Actions is HLL::Actions {
 
     method statement_mod_loop:sym<while>($/)  { make $<cond>.ast; }
     method statement_mod_loop:sym<until>($/)  { make $<cond>.ast; }
-
-    ## Expression handling.
-    
-    method EXPR($/, $key?) {
-        unless $key { return 0; }
-        my $past := $/.ast // $<OPER>.ast;
-        unless $past {
-            $past := QAST::Op.new( :node($/) );
-            if $<OPER><O><op> {
-                $past.op( ~$<OPER><O><op> );
-            }
-            if $key eq 'LIST' { $key := 'infix'; }
-            my $name := nqp::lc($key) ~ ':<' ~ $<OPER><sym> ~ '>';
-            $past.name('&' ~ $name);
-            unless $past.op {
-                $past.op('call');
-            }
-        }
-        if $key eq 'POSTFIX' {
-            $past.unshift($/[0].ast);
-        }
-        else {
-            for $/.list { if nqp::defined($_.ast) { $past.push($_.ast); } }
-        }
-        make $past;
-    }
     
     ## Terms
 

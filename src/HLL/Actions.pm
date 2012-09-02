@@ -17,22 +17,33 @@ class HLL::Actions {
             nqp::chr($ints.ast);
         }
     }
-
-
+    
     method CTXSAVE() {
-        PAST::Op.new(
-            :inline(
-                '    $P0 = find_dynamic_lex "$*CTXSAVE"',
-                '    if null $P0 goto ctxsave_done',
-                '    $I0 = can $P0, "ctxsave"',
-                '    unless $I0 goto ctxsave_done',
-                '    $P0."ctxsave"()',
-                '  ctxsave_done:'
-            )
-        );
+        QAST::Stmts.new(
+            QAST::Op.new(
+                :op('bind'),
+                QAST::Var.new( :name('ctxsave'), :scope('local'), :decl('var') ),
+                QAST::Var.new( :name('$*CTXSAVE'), :scope('contextual') )
+            ),
+            QAST::Op.new(
+                :op('unless'),
+                QAST::Op.new(
+                    :op('isnull'),
+                    QAST::Var.new( :name('ctxsave'), :scope('local') )
+                ),
+                QAST::Op.new(
+                    :op('if'),
+                    QAST::VM.new(
+                        :pirop('can IPs'),
+                        QAST::Var.new( :name('ctxsave'), :scope('local') ),
+                        QAST::SVal.new( :value('ctxsave') )
+                    ),
+                    QAST::Op.new(
+                        :op('callmethod'), :name('ctxsave'),
+                        QAST::Var.new( :name('ctxsave'), :scope('local')
+                    )))))
     }
-
-
+   
     method SET_BLOCK_OUTER_CTX($block) {
         my $outer_ctx := %*COMPILING<%?OPTIONS><outer_ctx>;
         if nqp::defined($outer_ctx) {
@@ -42,21 +53,24 @@ class HLL::Actions {
         }
     }
 
-
     method EXPR($/, $key?) {
         unless $key { return 0; }
         my $past := $/.ast // $<OPER>.ast;
         unless $past {
-            $past := PAST::Op.new( :node($/) );
-            if $<OPER><O><pasttype> { $past.pasttype( ~$<OPER><O><pasttype> ); }
-            elsif $<OPER><O><pirop>    { $past.pirop( ~$<OPER><O><pirop> ); }
-            unless $past.name {
-                if $key eq 'LIST' { $key := 'infix'; }
-                my $name := nqp::lc($key) ~ ':<' ~ $<OPER><sym> ~ '>';
-                $past.name('&' ~ $name);
+            $past := QAST::Op.new( :node($/) );
+            if $<OPER><O><op> {
+                $past.op( ~$<OPER><O><op> );
+            }
+            if $key eq 'LIST' { $key := 'infix'; }
+            my $name := nqp::lc($key) ~ ':<' ~ $<OPER><sym> ~ '>';
+            $past.name('&' ~ $name);
+            unless $past.op {
+                $past.op('call');
             }
         }
-        if $key eq 'POSTFIX' { $past.unshift($/[0].ast); }
+        if $key eq 'POSTFIX' {
+            $past.unshift($/[0].ast);
+        }
         else {
             for $/.list { if nqp::defined($_.ast) { $past.push($_.ast); } }
         }
