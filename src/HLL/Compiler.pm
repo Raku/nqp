@@ -41,45 +41,6 @@ class HLL::Compiler {
         %parrot_config := pir::getinterp__P()[pir::const::IGLOBALS_CONFIG_HASH];
         %!config     := nqp::hash();
     }
-    
-    my sub value_type($value) {
-        pir::isa__IPs($value, 'NameSpace')
-            ?? 'namespace'
-            !! (pir::isa__IPs($value, 'Sub') ?? 'sub' !! 'var')
-    }
-        
-    method get_exports($module, :$tagset, *@symbols) {
-        # convert a module name to something hash-like, if needed
-        if (!nqp::ishash($module)) {
-            $module := self.get_module($module);
-        }
-
-        $tagset := $tagset // (@symbols ?? 'ALL' !! 'DEFAULT');
-        my %exports;
-        my %source := $module{'EXPORT'}{~$tagset};
-        if !nqp::defined(%source) {
-            %source := $tagset eq 'ALL' ?? $module !! {};
-        }
-        if @symbols {
-            for @symbols {
-                my $value := %source{~$_};
-                %exports{value_type($value)}{$_} := $value;
-            }
-        }
-        else {
-            for %source {
-                my $value := $_.value;
-                %exports{value_type($value)}{$_.key} := $value;
-            }
-        }
-        %exports;
-    }
-
-    method get_module($name) {
-        my @name := self.parse_name($name);
-        @name.unshift(nqp::lc($!language));
-        pir::get_root_namespace__PP(@name);
-    }
 
     method language($name?) {
         if $name {
