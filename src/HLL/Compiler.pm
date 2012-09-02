@@ -428,20 +428,14 @@ class HLL::Compiler {
     method past($source, *%adverbs) {
         my $ast := $source.ast();
         self.panic("Unable to obtain ast from " ~ pir::typeof__SP($source))
-            unless $ast ~~ PAST::Node || $ast ~~ QAST::Node;
+            unless $ast ~~ QAST::Node;
         $ast;
     }
 
     method post($source, *%adverbs) {
         my $*PASTCOMPILER := pir::compreg__Ps('PAST');
-        if $source ~~ PAST::Node {
-            my $*PIRT := 0;
-            $*PASTCOMPILER.to_post($source, |%adverbs)
-        }
-        else {
-            my $*PIRT := 1;
-            QAST::Compiler.as_post($source)
-        }
+        my $*PIRT := 1;
+        QAST::Compiler.as_post($source)
     }
 
     method pirbegin() {
