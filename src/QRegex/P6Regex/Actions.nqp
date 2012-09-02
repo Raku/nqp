@@ -512,48 +512,6 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         $ast;
     }
 
-    our sub buildsub($qast, $block = PAST::Block.new(:blocktype<method>), :$anon) {
-        my $blockid := $block.subid;
-        my $hashpast := PAST::Op.new( :pasttype<hash> );
-        for capnames($qast, 0) {
-            if $_.key gt '' { 
-                $hashpast.push($_.key); 
-                $hashpast.push(
-                    nqp::iscclass(pir::const::CCLASS_NUMERIC, $_.key, 0) + ($_.value > 1) * 2); 
-            }
-        }
-        my $initpast := PAST::Stmts.new();
-        my $capblock := PAST::Block.new( :hll<nqp>, :namespace(['Sub']), :lexical(0),
-                                         :name($blockid ~ '_caps'),  $hashpast );
-        $initpast.push(PAST::Stmt.new($capblock));
-
-        my $nfapast := QRegex::NFA.new.addnode($qast).past;
-        if $nfapast {
-            my $nfablock := PAST::Block.new( 
-                                :hll<nqp>, :namespace(['Sub']), :lexical(0),
-                                :name($blockid ~ '_nfa'), $nfapast);
-            $initpast.push(PAST::Stmt.new($nfablock));
-        }
-        alt_nfas($qast, $blockid, $initpast);
-
-        unless $block.symbol('$¢') {
-            $initpast.push(PAST::Var.new(:name<$¢>, :scope<lexical>, :isdecl(1)));
-            $block.symbol('$¢', :scope<lexical>);
-        }
-
-        $block<orig_qast> := $qast;
-        
-        $qast := QAST::Regex.new( :rxtype<concat>,
-                     QAST::Regex.new( :rxtype<scan> ),
-                     $qast,
-                     ($anon ??
-                          QAST::Regex.new( :rxtype<pass> ) !!
-                          QAST::Regex.new( :rxtype<pass>, :name(%*RX<name>) )));
-        $block.push($initpast);
-        $block.push(PAST::QAST.new($qast));
-        $block;
-    }
-    
     our sub qbuildsub($qast, $block = QAST::Block.new(), :$anon, :$addself) {
         my $blockid := $block.cuid;
         my $hashpast := QAST::Op.new( :op<hash> );
@@ -644,28 +602,6 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         nqp::deletekey(%capnames, '$!from');
         nqp::deletekey(%capnames, '$!to');
         %capnames;
-    }
-    
-    sub alt_nfas($ast, $subid, $initpast) {
-        my $rxtype := $ast.rxtype;
-        if $rxtype eq 'alt' {
-            my $nfapast := PAST::Op.new( :pasttype('list') );
-            $ast.name(PAST::Node.unique('alt_nfa_') ~ '_' ~ ~nqp::time_n());
-            for $ast.list {
-                alt_nfas($_, $subid, $initpast);
-                $nfapast.push(QRegex::NFA.new.addnode($_).past(:non_empty));
-            }
-            my $nfablock := PAST::Block.new(
-                                :hll<nqp>, :namespace(['Sub']), :lexical(0),
-                                :name($subid ~ '_' ~ $ast.name), $nfapast);
-            $initpast.push(PAST::Stmt.new($nfablock));
-        }
-        elsif $rxtype eq 'subcapture' || $rxtype eq 'quant' {
-            alt_nfas($ast[0], $subid, $initpast)
-        }
-        elsif $rxtype eq 'concat' || $rxtype eq 'altseq' || $rxtype eq 'conj' || $rxtype eq 'conjseq' {
-            for $ast.list { alt_nfas($_, $subid, $initpast) }
-        }
     }
     
     sub qalt_nfas($ast, $subid, $initpast) {
