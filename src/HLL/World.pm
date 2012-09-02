@@ -72,49 +72,7 @@ class HLL::World {
         }
         $slot
     }
-    
-    # Gets a PAST node that accesses a given slot in the root objects. This
-    # is useful when building code that needs to grab a pre-built object (e.g.
-    # for doing installations in the package or lexpad, or when the object is
-    # a constant and we're using the SC as a constants table).
-    method get_slot_past_for_object($obj) {
-        my $slot := self.slot_for_object($obj);
-        my $past := PAST::Op.new( :pirop('nqp_get_sc_object Psi'), $!handle, $slot );
-        $past<has_compile_time_value> := 1;
-        $past<compile_time_value> := $obj;
-        $past
-    }
-    
-    # Gets a code ref from the SC.
-    method get_slot_past_for_code_ref_at($idx) {
-        PAST::Op.new( :pirop('nqp_get_sc_code_ref Psi'), $!handle, $idx );
-    }
-    
-    # Utility sub to wrap PAST with slot setting.
-    method set_slot_past($slot, $past_to_set) {
-        return PAST::Op.new( :pirop('nqp_set_sc_object vsiP'),
-            $!handle, $slot, $past_to_set);
-    }
-    
-    # Used when deserializing. Makes sure the object being
-    # deserialized has the current SC set.
-    method set_cur_sc($to_wrap) {
-        PAST::Op.new(
-            :pirop('nqp_set_sc_for_object__0PP'),
-            $to_wrap,
-            PAST::Var.new( :name('cur_sc'), :scope('register') )
-        )
-    }
-    
-    method add_object_to_cur_sc_past($slot, $to_wrap) {
-        PAST::Op.new(
-            :pirop('nqp_add_object_to_sc 2PiP'),
-            PAST::Var.new( :name('cur_sc'), :scope('register') ),
-            $slot,
-            $to_wrap
-        )
-    }
-    
+
     # Adds an object to the root set, along with a mapping.
     method add_object($obj) {
         pir::nqp_set_sc_for_object__vPP($obj, $!sc);
@@ -165,34 +123,6 @@ class HLL::World {
         }
     }
     
-    # Gets PAST for referencing an object in a serialization context,
-    # either the one being built or another one. If the object is not
-    # yet in an SC, adds it to the currnet one.
-    method get_ref($obj) {
-        # Get the object's serialization context; we're stuck if it
-        # has none.
-        my $sc := pir::nqp_get_sc_for_object__PP($obj);
-        unless nqp::defined($sc) {
-            self.add_object($obj);
-            $sc := $!sc;
-        }
-        
-        # If it's this context, dead easy. Otherwise, need to build a
-        # cross-reference, plus check it if it's the first time we are
-        # seeing it.
-        if $sc =:= $!sc {
-            self.get_slot_past_for_object($obj);
-        }
-        else {
-            my $handle := $sc.handle;
-            my $past := PAST::Op.new( :pirop('nqp_get_sc_object Psi'),
-                $handle, $sc.slot_index_for($obj) );
-            $past<has_compile_time_value> := 1;
-            $past<compile_time_value> := $obj;
-            $past
-        }
-    }
-    
     # Gets the built serialization context.
     method sc() {
         $!sc
@@ -215,48 +145,5 @@ class HLL::World {
     # Gets the list of tasks to do at fixup time.
     method fixup_tasks() {
         @!fixup_tasks
-    }
-    
-    # Serializes the SC to binary and a string heap. Then produces PAST to handle
-    # the deserialization.
-    method serialize_and_produce_deserialization_past($sc_reg) {
-        # Serialize.
-        my $sh := pir::new__Ps('ResizableStringArray');
-        my $serialized := pir::nqp_serialize_sc__SPP($!sc, $sh);
-        
-        # Now it's serialized, pop this SC off the compiling SC stack.
-        pir::nqp_pop_compiling_sc__v();
-        
-        # String heap PAST.
-        my $sh_past := PAST::Stmts.new(
-            PAST::Op.new(
-                :pasttype('bind'),
-                PAST::Var.new( :scope('register'), :name('string_heap'), :isdecl(1) ),
-                PAST::Op.new( :pirop('new Ps'), 'ResizableStringArray' )));
-         my $sh_elems := nqp::elems($sh);
-         my $i := 0;
-         while $i < $sh_elems {
-            $sh_past.push(PAST::Op.new(
-                :pirop('push vPs'),
-                PAST::Var.new( :scope('register'), :name('string_heap') ),
-                (nqp::isnull_s($sh[$i]) ?? PAST::Op.new( :pirop('null S') ) !! $sh[$i])));
-                $i := $i + 1;
-        }
-        $sh_past.push(PAST::Var.new( :scope('register'), :name('string_heap') ));
-        
-        # Code references.
-        my $cr_past := PAST::Op.new( :pasttype('list') );
-        for $!code_ref_blocks -> $block {
-            $cr_past.push(PAST::Val.new( :value($block), :returns('Sub') ));
-        }
-        
-        # Overall deserialization PAST.
-        PAST::Op.new(
-            :pirop('nqp_deserialize_sc__vSPPP'),
-            $serialized,
-            PAST::Var.new( :name($sc_reg), :scope('register') ),
-            $sh_past,
-            PAST::Block.new( :blocktype('immediate'), $cr_past )
-        )
     }
 }
