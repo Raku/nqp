@@ -990,7 +990,6 @@ class NQP::Actions is HLL::Actions {
         for @($routine[0]) {
             if nqp::istype($_, QAST::Var) && $_.decl eq 'param' {
                 $types.push($_.returns =:= NQPMu
-                        || pir::isa__IPs($_.returns, 'Undef') # XXX hack, goes away after QAST migration
                     ?? nqp::null()
                     !! $_.returns);
                 $definednesses.push($_<definedness> eq 'D' ?? 1 !!

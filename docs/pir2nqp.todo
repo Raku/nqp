@@ -29,7 +29,6 @@ after jnthn's toqast branch is merged
 pir::isa
   2nd arg = ResizablePMCArray, then nqp::islist
   2nd arg = hash then nqp::ishash
-  specifically undef as 2nd is WRONG, check with jnthn
 
 to be eliminated / handled by jnthn
 nqp::defined      ->  nqp::isconcrete
