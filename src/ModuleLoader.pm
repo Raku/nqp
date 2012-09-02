@@ -100,7 +100,7 @@ knowhow ModuleLoader {
                 try {
                     my $source_mo := $_.value.HOW;
                     $source_is_stub := $source_mo.WHAT.HOW.name($source_mo) eq $stub_how &&
-                        !nqp::isnull(pir::get_who__PP($_.value)) && pir::get_who__PP($_.value) &&
+                        !nqp::isnull(nqp::who($_.value)) && nqp::who($_.value) &&
                         $_.value.HOW.name($_.value) ne 'PAST';
                 }
                 if $source_is_stub {
@@ -108,7 +108,7 @@ knowhow ModuleLoader {
                     my $source_clone := $source.HOW.new_type(:name($source.HOW.name($source)));
                     $source_clone.HOW.compose($source_clone);
                     my %WHO_clone;
-                    for pir::get_who__PP($source) {
+                    for nqp::who($source) {
                         %WHO_clone{$_.key} := $_.value;
                     }
                     nqp::setwho($source_clone, %WHO_clone);
