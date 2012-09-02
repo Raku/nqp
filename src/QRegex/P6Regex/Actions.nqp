@@ -1,6 +1,6 @@
 class QRegex::P6Regex::Actions is HLL::Actions {
     method TOP($/) {
-        make buildsub($<nibbler>.ast);
+        make qbuildsub($<nibbler>.ast, :anon(1), :addself(1));
     }
 
     method nibbler($/) { make $<termaltseq>.ast }
@@ -135,7 +135,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method metachar:sym<( )>($/) {
-        my $subpast := PAST::Node.new(buildsub($<nibbler>.ast, :anon(1)));
+        my $subpast := QAST::Node.new(qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
         my $qast := QAST::Regex.new( $subpast, $<nibbler>.ast, :rxtype('subrule'),
                                      :subtype('capture'), :node($/) );
         make $qast;
@@ -143,7 +143,6 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method metachar:sym<'>($/) {
         my $quote := $<quote_EXPR>.ast;
-        if PAST::Val.ACCEPTS($quote) { $quote := $quote.value; }
         if QAST::SVal.ACCEPTS($quote) { $quote := $quote.value; }
         my $qast := QAST::Regex.new( $quote, :rxtype<literal>, :node($/) );
         $qast.subtype('ignorecase') if %*RX<i>;
@@ -152,7 +151,6 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method metachar:sym<">($/) {
         my $quote := $<quote_EXPR>.ast;
-        if PAST::Val.ACCEPTS($quote) { $quote := $quote.value; }
         if QAST::SVal.ACCEPTS($quote) { $quote := $quote.value; }
         my $qast := QAST::Regex.new( $quote, :rxtype<literal>, :node($/) );
         $qast.subtype('ignorecase') if %*RX<i>;
@@ -392,8 +390,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             }
             elsif $<nibbler> {
                 $name eq 'after' ??
-                    $qast[0].push(buildsub(self.flip_ast($<nibbler>[0].ast), :anon(1))) !!
-                    $qast[0].push(buildsub($<nibbler>[0].ast, :anon(1)));
+                    $qast[0].push(qbuildsub(self.flip_ast($<nibbler>[0].ast), :anon(1), :addself(1))) !!
+                    $qast[0].push(qbuildsub($<nibbler>[0].ast, :anon(1), :addself(1)));
             }
         }
         make $qast;
@@ -429,7 +427,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method arglist($/) {
-        my $past := PAST::Op.new( :pasttype('list') );
+        my $past := QAST::Op.new( :op('list') );
         for $<arg> { $past.push( $_.ast ); }
         make $past;
     }
