@@ -188,6 +188,14 @@ class QAST::Compiler is HLL::Compiler {
           have_qastcomp:
         };
     }
+
+    method post($source, *%adverbs) {
+        # Wrap $source in a QAST::Block if it's not already a viable root node.
+        $source := QAST::Block.new($source)
+            unless nqp::istype($source, QAST::CompUnit) || nqp::istype($source, QAST::Block);
+        # Now compile $source and return the result.
+        self.as_post($source);
+    }
     
     my @prim_to_reg := ['P', 'I', 'N', 'S'];
     sub type_to_register_type($type) {
