@@ -433,7 +433,6 @@ class HLL::Compiler {
     }
 
     method post($source, *%adverbs) {
-        my $*PASTCOMPILER := pir::compreg__Ps('PAST');
         QAST::Compiler.post($source)
     }
 
