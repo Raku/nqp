@@ -35,10 +35,6 @@
     $P2()
 .end
 
-.sub '' :init :load
-    load_bytecode 'P6object.pbc'
-.end
-
 .include 'src/cheats/parrot-callcontext.pir'
 .include 'src/cheats/parrot-sub.pir'
 
