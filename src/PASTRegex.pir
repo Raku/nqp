@@ -40,7 +40,6 @@
     load_bytecode 'PCT/PAST.pbc'
 .end
 
-.include 'src/PAST/NQP.pir'
 .include 'src/cheats/parrot-callcontext.pir'
 .include 'src/cheats/parrot-sub.pir'
 
