@@ -1344,7 +1344,7 @@ class QAST::Compiler is HLL::Compiler {
         my @backtrack := ["'backtrack'=>1"]
             if $node.backtrack ne 'r';
         if $node.name() {
-            my $name := $*PASTCOMPILER.as_post($node.name(), :rtype<~>);
+            my $name := self.escape($node.name());
             $ops.push_pirop('callmethod', '"!cursor_pass"', %*REG<cur>, %*REG<pos>, $name, |@backtrack);
         }
         else {
@@ -1449,7 +1449,7 @@ class QAST::Compiler is HLL::Compiler {
         my $prefix := self.unique('rxcap');
         my $donelabel := self.post_new('Label', :name($prefix ~ '_done'));
         my $faillabel := self.post_new('Label', :name($prefix ~ '_fail'));
-        my $name := $*PASTCOMPILER.as_post($node.name, :rtype<*>);
+        my $name := self.escape($node.name);
         self.regex_mark($ops, $faillabel, %*REG<pos>, 0);
         $ops.push(self.regex_post($node[0]));
         self.regex_peek($ops, $faillabel, '$I11');
@@ -1466,7 +1466,7 @@ class QAST::Compiler is HLL::Compiler {
 
     method subrule($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
-        my $name := nqp::defined($node.name) ?? $*PASTCOMPILER.as_post($node.name, :rtype<*>) !! '';
+        my $name := nqp::defined($node.name) ?? self.escape($node.name) !! '';
         my $subtype := $node.subtype;
         my $cpn := nqp::istype($node[0], QAST::Node)
             ?? self.children($node[0])
