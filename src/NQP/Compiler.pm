@@ -19,14 +19,9 @@ sub MAIN(@ARGS) {
     @clo.push('no-regex-lib');
     @clo.push('old-regex-lib');
     
-    # Hack while we still use the old PAST classes to make sure they are
-    # loaded.
-    try {
-        pir::get_hll_global__Ps('ModuleLoader').load_module('PASTRegex', GLOBALish);
-    }
-    
     # Enter the compiler.
     $nqpcomp.command_line(@ARGS, :encoding('utf8'), :transcode('ascii iso-8859-1'));
+
     # Close event logging
     $nqpcomp.nqpevent();
 }
