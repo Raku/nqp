@@ -99,6 +99,7 @@ General notes:
     nqp::atkey                     pir::set__PQs
     nqp::existpos                  pir::exists__IQi
     nqp::existkey                  pir::exists__IQs
+    nqp::deletekey                 pir::delete__0Qs
     nqp::elems                     pir::elements__IP
 
   object:
