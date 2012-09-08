@@ -25,11 +25,6 @@
 .end
 
 .sub '' :load :init :outer('PAST_Outer')
-    # Create a serialization context for this compilation unit.
-    .local pmc sc
-    sc = nqp_create_sc "__PAST_CORE_SC__"
-    nqp_push_compiling_sc sc
-    
     # Run the main block.
     .const 'Sub' $P2 = 'PAST_Outer'
     $P2()
@@ -39,20 +34,5 @@
 .include 'src/cheats/parrot-sub.pir'
 
 .sub '' :anon :load :init :outer('PAST_Outer') :subid('Imports')
-    # Also want the dumper.
     load_bytecode 'dumper.pbc'
-    
-    .local pmc KnowHOW, how, PAST
-    KnowHOW = get_knowhow
-    PAST = KnowHOW."new_type"("name"=>"PAST")
-    how = get_how PAST
-    how."compose"(PAST)
-    
-    # Add PAST dummy NS to the SC.
-    $P0 = nqp_get_sc "__PAST_CORE_SC__"
-    nqp_set_sc_object "__PAST_CORE_SC__", 0, PAST
-    nqp_set_sc_for_object PAST, $P0
-    
-    # Pop SC off current SCs stack.
-    nqp_pop_compiling_sc
 .end
