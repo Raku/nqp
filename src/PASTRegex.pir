@@ -42,16 +42,11 @@
     # Also want the dumper.
     load_bytecode 'dumper.pbc'
     
-    ## Import PAST and _dumper to the HLL.
-    .local pmc GLOBALish, GLOBALishWHO, KnowHOW, how, PAST
-    GLOBALish = find_lex "GLOBALish"
-    GLOBALishWHO = get_who GLOBALish
-    
+    .local pmc KnowHOW, how, PAST
     KnowHOW = get_knowhow
     PAST = KnowHOW."new_type"("name"=>"PAST")
     how = get_how PAST
     how."compose"(PAST)
-    GLOBALishWHO["PAST"] = PAST
     
     # Add PAST dummy NS to the SC.
     $P0 = nqp_get_sc "__PAST_CORE_SC__"
