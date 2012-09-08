@@ -263,9 +263,6 @@ class NQP::World is HLL::World {
             %!code_stub_sc_idx{$past.cuid()} := $code_ref_idx;
             $past<compile_time_dummy> := $dummy;
             
-            # Attach PAST as a property to the stub code.
-            pir::setprop__vPsP($dummy, 'PAST', $past);
-            
             # Things with code objects may be methods in roles or multi-dispatch
             # routines. We need to handle their cloning and maintain the fixup
             # list.

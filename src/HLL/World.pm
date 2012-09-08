@@ -30,16 +30,16 @@ class HLL::World {
     # The number of code refs we've added to the code refs root so far.
     has $!num_code_refs;
     
-    # List of PAST blocks that map to the code refs table, for use in
+    # List of QAST blocks that map to the code refs table, for use in
     # building deserialization code.
     has $!code_ref_blocks;
 
-    # List of PAST nodes specifying dependency loading related tasks. These
+    # List of QAST nodes specifying dependency loading related tasks. These
     # are done before the deserialization of the current context, or if in
     # immediate run mode before any of the other fixup tasks.
     has @!load_dependency_tasks;
 
-    # List of PAST nodes specifying fixup tasks, either after deserialization
+    # List of QAST nodes specifying fixup tasks, either after deserialization
     # or between compile time and run time.
     has @!fixup_tasks;
     

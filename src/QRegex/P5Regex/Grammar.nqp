@@ -1,7 +1,6 @@
 use QRegex;
 use NQPHLL;
 use QAST;
-use PASTRegex;
 
 grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     token TOP {

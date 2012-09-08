@@ -506,7 +506,6 @@ class NQP::Actions is HLL::Actions {
                 );
             }
             elsif $<twigil>[0] eq '!' {
-                # Construct PAST.
                 my $name := ~@name.pop;
                 my $ch;
                 if $*PKGDECL eq 'role' {
@@ -872,7 +871,7 @@ class NQP::Actions is HLL::Actions {
 
     method method_def($/) {
         # If it's just got * as a body, make a multi-dispatch enterer.
-        # Otherwise, build method block PAST.
+        # Otherwise, build method block QAST.
         my $past;
         if $<onlystar> {
             $past := only_star_block();
@@ -1387,7 +1386,7 @@ class NQP::Actions is HLL::Actions {
     }
     
     # Takes a multi-part name that we know is in a package and generates
-    # PAST to look it up using NQP package semantics.
+    # QAST to look it up using NQP package semantics.
     sub lexical_package_lookup(@name, $/) {
         # Catch empty names and die helpfully.
         if +@name == 0 { $/.CURSOR.panic("Cannot compile empty name"); }
