@@ -570,7 +570,6 @@ for ('', 'repeat_') -> $repness {
             if $repness {
                 # It's a repeat_ variant, need to go straight into the
                 # loop body unconditionally.
-                $ops.push_pirop('null', $coerced.result);
                 $ops.push_pirop('goto', $redo_lbl);
             }
             $ops.push($test_lbl);
