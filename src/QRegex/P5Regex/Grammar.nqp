@@ -15,7 +15,6 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
         {
             for $OLDRX { %*RX{$_.key} := $_.value; }
         }
-        [ <.ws> ['||'|'|'|'&&'|'&'] ]?
         <termaltseq>
     }
     
