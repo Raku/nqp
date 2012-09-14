@@ -29,6 +29,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     }
     
     token quantified_atom {
+        <![|)}/]>
         <atom>
         [ <.ws> <quantifier=p5quantifier> ]?
         <.ws>
@@ -38,6 +39,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
         [
         | \w
         | <metachar=p5metachar>
+        | {} \W
         ]
     }
 
