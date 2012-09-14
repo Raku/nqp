@@ -148,7 +148,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
     }
 
     method p5backslash:sym<b>($/) {
-        make QAST::Regex.new(:rxtype<subrule>, :subtype<method>,
+        make QAST::Regex.new(:rxtype<subrule>, :subtype<zerowidth>,
                              :node($/), :negate($<sym> eq 'B'), :name(''),
                              QAST::Node.new( QAST::SVal.new( :value('wb') ) ));
     }
