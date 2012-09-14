@@ -39,3 +39,4 @@ a[[]b		a[b		y	first char of charclass special
 a[[]b		ab		n	first char of charclass special
 a[]]b		a]b		y	first char of charclass special
 a[]]b		ab		n	first char of charclass special
+a]			a]		y	unmatched ] is ok
