@@ -161,7 +161,7 @@ grammar NQP::Grammar is HLL::Grammar {
     token pblock {
         | <.lambda>
             <.newpad>
-            <signature>
+            <signature> <.ws>
             <blockoid>
         | <?[{]>
             <.newpad>
