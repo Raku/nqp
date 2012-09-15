@@ -1,5 +1,34 @@
 #include "pmc_nqplexinfo.h"
 
+/* Locates the register number for getting the specified name
+ * and type of lexical. */
+static INTVAL register_number_for_get(PARROT_INTERP, Hash *hash,
+        STRING *name, INTVAL reg_type) {
+    HashBucket *b = Parrot_hash_get_bucket(interp, hash, name);
+    if (!b)
+        return -1;
+    if (((INTVAL)b->value & 3) != reg_type)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LEX_NOT_FOUND,
+            "Lexical '%Ss' is of wrong register type in lexical lookup", name);
+
+    return ((INTVAL)b->value) >> 2;
+}
+
+/* Locates the register number for setting the specified name
+ * and type of lexical. */
+static INTVAL register_number_for_set(PARROT_INTERP, Hash *hash,
+        STRING *name, INTVAL reg_type) {
+    HashBucket *b = Parrot_hash_get_bucket(interp, hash, name);
+    if (!b)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LEX_NOT_FOUND,
+            "Lexical '%Ss' not found", name);
+    if (((INTVAL)b->value & 3) != reg_type)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LEX_NOT_FOUND,
+            "Lexical '%Ss' is of wrong register type in lexical lookup", name);
+
+    return ((INTVAL)b->value) >> 2;
+}
+
 pmclass NQPLexPad
     provides hash
     auto_attrs
@@ -9,6 +38,10 @@ pmclass NQPLexPad
 {
     ATTR PMC *lexinfo;
     ATTR PMC *ctx;
+    
+    /* Cache of the hash from the static lex info, so we needn't look it up
+     * every time. */
+    ATTR Hash *lexinfo_hash;
 
     VTABLE void init() {
         Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_INVALID_OPERATION,
@@ -73,7 +106,18 @@ Return the LexInfo PMC, if any or a Null PMC.
     VTABLE void set_pointer(void *ctx) {
         /* Check if we need to put any static values in place. */
         PMC *info;
+        Hash *hash;
         GET_ATTR_lexinfo(INTERP, SELF, info);
+        if (info->vtable->base_type != enum_class_LexInfo) {
+            PMC *name_map;
+            GETATTR_NQPLexInfo_name_to_register_map(INTERP, info, name_map);
+            hash = (Hash *)VTABLE_get_pointer(INTERP, name_map);
+        }
+        else {
+            hash = (Hash *)VTABLE_get_pointer(INTERP, info);
+        }
+        SET_ATTR_lexinfo_hash(INTERP, SELF, hash);
+        
         if (info->vtable->base_type != enum_class_LexInfo) {
             PMC *static_slots_cache;
             GETATTR_NQPLexInfo_static_slots_cache(INTERP, info, static_slots_cache);
@@ -125,30 +169,55 @@ Return the LexInfo PMC, if any or a Null PMC.
     }
 
     VTABLE PMC *get_pmc_keyed_str(STRING *name) {
-        PMC        *info, *name_map;
-        const Hash *hash;
-        PMC        *ctx;
-        HashBucket *b;
+        Hash *hash;
+        INTVAL  reg;
+        PMC    *ctx;
 
-        GET_ATTR_lexinfo(INTERP, SELF, info);
-        if (info->vtable->base_type != enum_class_LexInfo) {
-            GETATTR_NQPLexInfo_name_to_register_map(INTERP, info, name_map);
-            hash = (const Hash *)VTABLE_get_pointer(INTERP, name_map);
-        }
-        else {
-            hash = (const Hash *)VTABLE_get_pointer(INTERP, info);
-        }
-
-        if (!hash->entries)
-            return PMCNULL;
-
-        b = Parrot_hash_get_bucket(INTERP, hash, name);
-
-        if (!b)
-            return PMCNULL;
-
+        GET_ATTR_lexinfo_hash(INTERP, SELF, hash);
+        reg = register_number_for_get(INTERP, hash, name, REGNO_PMC);
+        if (reg < 0)
+            return 0;
         GET_ATTR_ctx(INTERP, SELF, ctx);
-        return CTX_REG_PMC(interp, ctx, ((INTVAL)b->value) >> 2);
+        return CTX_REG_PMC(interp, ctx, reg);
+    }
+
+    VTABLE INTVAL get_integer_keyed_str(STRING *name) {
+        Hash *hash;
+        INTVAL  reg;
+        PMC    *ctx;
+
+        GET_ATTR_lexinfo_hash(INTERP, SELF, hash);
+        reg = register_number_for_get(INTERP, hash, name, REGNO_INT);
+        if (reg < 0)
+            return 0;
+        GET_ATTR_ctx(INTERP, SELF, ctx);
+        return CTX_REG_INT(interp, ctx, reg);
+    }
+    
+    VTABLE FLOATVAL get_number_keyed_str(STRING *name) {
+        Hash *hash;
+        INTVAL  reg;
+        PMC    *ctx;
+
+        GET_ATTR_lexinfo_hash(INTERP, SELF, hash);
+        reg = register_number_for_get(INTERP, hash, name, REGNO_NUM);
+        if (reg < 0)
+            return 0.0;
+        GET_ATTR_ctx(INTERP, SELF, ctx);
+        return CTX_REG_NUM(interp, ctx, reg);
+    }
+    
+    VTABLE STRING *get_string_keyed_str(STRING *name) {
+        Hash *hash;
+        INTVAL  reg;
+        PMC    *ctx;
+
+        GET_ATTR_lexinfo_hash(INTERP, SELF, hash);
+        reg = register_number_for_get(INTERP, hash, name, REGNO_STR);
+        if (reg < 0)
+            return STRINGNULL;
+        GET_ATTR_ctx(INTERP, SELF, ctx);
+        return CTX_REG_STR(interp, ctx, reg);
     }
 
     VTABLE PMC *get_pmc_keyed(PMC *name) {
@@ -156,34 +225,85 @@ Return the LexInfo PMC, if any or a Null PMC.
         return SELF.get_pmc_keyed_str(s);
     }
 
+    VTABLE INTVAL get_integer_keyed(PMC *name) {
+        STRING * const s = VTABLE_get_string(INTERP, name);
+        return SELF.get_integer_keyed_str(s);
+    }
+    
+    VTABLE FLOATVAL get_number_keyed(PMC *name) {
+        STRING * const s = VTABLE_get_string(INTERP, name);
+        return SELF.get_number_keyed_str(s);
+    }
+
+    VTABLE STRING *get_string_keyed(PMC *name) {
+        STRING * const s = VTABLE_get_string(INTERP, name);
+        return SELF.get_string_keyed_str(s);
+    }
+
     VTABLE void set_pmc_keyed_str(STRING *name, PMC *value) {
-        PMC              *info, *name_map;
-        const Hash       *hash;
-        PMC              * ctx;
-        HashBucket       * b;
+        Hash *hash;
+        INTVAL  reg;
+        PMC    *ctx;
 
-        GET_ATTR_lexinfo(INTERP, SELF, info);
-        if (info->vtable->base_type != enum_class_LexInfo) {
-            GETATTR_NQPLexInfo_name_to_register_map(INTERP, info, name_map);
-            hash = (const Hash *)VTABLE_get_pointer(INTERP, name_map);
-        }
-        else {
-            hash = (const Hash *)VTABLE_get_pointer(INTERP, info);
-        }
-        
-        b    = Parrot_hash_get_bucket(INTERP, hash, name);
-        if (!b)
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_LEX_NOT_FOUND,
-                "Lexical '%Ss' not found", name);
-
+        GET_ATTR_lexinfo_hash(INTERP, SELF, hash);
+        reg = register_number_for_set(INTERP, hash, name, REGNO_PMC);
         GET_ATTR_ctx(INTERP, SELF, ctx);
-        CTX_REG_PMC(interp, ctx, ((INTVAL)b->value) >> 2) = value;
+        CTX_REG_PMC(interp, ctx, reg) = value;
+        PARROT_GC_WRITE_BARRIER(INTERP, ctx);
+    }
+    
+    VTABLE void set_integer_keyed_str(STRING *name, INTVAL value) {
+        Hash *hash;
+        INTVAL  reg;
+        PMC    *ctx;
+
+        GET_ATTR_lexinfo_hash(INTERP, SELF, hash);
+        reg = register_number_for_set(INTERP, hash, name, REGNO_INT);
+        GET_ATTR_ctx(INTERP, SELF, ctx);
+        CTX_REG_INT(interp, ctx, reg) = value;
+    }
+    
+    VTABLE void set_number_keyed_str(STRING *name, FLOATVAL value) {
+        Hash *hash;
+        INTVAL  reg;
+        PMC    *ctx;
+
+        GET_ATTR_lexinfo_hash(INTERP, SELF, hash);
+        reg = register_number_for_set(INTERP, hash, name, REGNO_NUM);
+        GET_ATTR_ctx(INTERP, SELF, ctx);
+        CTX_REG_NUM(interp, ctx, reg) = value;
+    }
+    
+    VTABLE void set_string_keyed_str(STRING *name, STRING *value) {
+        Hash *hash;
+        INTVAL  reg;
+        PMC    *ctx;
+
+        GET_ATTR_lexinfo_hash(INTERP, SELF, hash);
+        reg = register_number_for_set(INTERP, hash, name, REGNO_STR);
+        GET_ATTR_ctx(INTERP, SELF, ctx);
+        CTX_REG_STR(interp, ctx, reg) = value;
         PARROT_GC_WRITE_BARRIER(INTERP, ctx);
     }
 
     VTABLE void set_pmc_keyed(PMC *name, PMC *value) {
         STRING * const s = VTABLE_get_string(INTERP, name);
         SELF.set_pmc_keyed_str(s, value);
+    }
+
+    VTABLE void set_integer_keyed(PMC *name, INTVAL value) {
+        STRING * const s = VTABLE_get_string(INTERP, name);
+        SELF.set_integer_keyed_str(s, value);
+    }
+
+    VTABLE void set_number_keyed(PMC *name, FLOATVAL value) {
+        STRING * const s = VTABLE_get_string(INTERP, name);
+        SELF.set_number_keyed_str(s, value);
+    }
+
+    VTABLE void set_string_keyed(PMC *name, STRING *value) {
+        STRING * const s = VTABLE_get_string(INTERP, name);
+        SELF.set_string_keyed_str(s, value);
     }
 
     METHOD get_lexinfo() {
