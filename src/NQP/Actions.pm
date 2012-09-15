@@ -30,6 +30,12 @@ class NQP::Actions is HLL::Actions {
             $default
         }
     }
+    
+    sub default_value_for_prim($prim) {
+        $prim == 1 ?? QAST::IVal.new( :value(0) ) !!
+        $prim == 2 ?? QAST::NVal.new( :value(0.0) ) !!
+                      QAST::SVal.new( :value('') )
+    }
 
     method TOP($/) { make $<comp_unit>.ast; }
 
@@ -719,17 +725,37 @@ class NQP::Actions is HLL::Actions {
             # Depending on if this was already considered our scoped,
             # we may or may not have got a node in $var that's set up
             # right already. We build it here just to be sure.
+            if $<typename> {
+                $/.CURSOR.panic("Cannot put types on our-scoped variables");
+            }
             $name := ~$<variable>;
             $past := lexical_package_lookup([$name], $/);
             $BLOCK.symbol($name, :scope('package') );
         }
         else {
+            my $type;
+            my $default;
+            if $<typename> {
+                unless $sigil eq '$' {
+                    $/.CURSOR.panic("Only typed scalars are currently supported in NQP");
+                }
+                $type := $*W.find_sym([~$<typename>[0]]);
+                if pir::repr_get_primitive_type_spec__IP($type) -> $prim_spec {
+                    $default := default_value_for_prim($prim_spec);
+                }
+                else {
+                    $/.CURSOR.panic("Only native types are currently supported/checked");
+                }
+            }
+            else {
+                $default := default_for($sigil);
+            }
             $BLOCK[0].push(QAST::Op.new(
                 :op('bind'), :node($/),
-                QAST::Var.new( :name($name), :scope('lexical'), :decl('var') ),
-                default_for($sigil)
+                QAST::Var.new( :name($name), :scope('lexical'), :decl('var'), :returns($type) ),
+                $default
             ));
-            $BLOCK.symbol($name, :scope('lexical') );
+            $BLOCK.symbol($name, :scope('lexical'), :type($type) );
         }
 
         # Apply traits.
