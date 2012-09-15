@@ -1026,7 +1026,14 @@ class NQP::Actions is HLL::Actions {
 
         # Set the type of the parameter.
         if $<typename> {
-            $past.returns($<typename>[0].ast.value);
+            my $type := $<typename>[0].ast.value;
+            $past.returns($type);
+            if pir::repr_get_primitive_type_spec__IP($type) -> $prim {
+                $*W.cur_lexpad().symbol($past.name, :type($type));
+                if $past.default && !$<default_value> {
+                    $past.default(default_value_for_prim($prim));
+                }
+            }
         }
 
         # Set definedness flag (XXX want a better way to do this).
