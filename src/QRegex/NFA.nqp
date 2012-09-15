@@ -22,18 +22,18 @@ class QRegex::NFA {
     }
 
     method addstate() {
-        my $id := +$!states;
+        my int $id := +$!states;
         $!states[$id] := [];
         $id;
     }
 
-    method addedge($from, $to, $action, $value, :$newedge = 1) {
+    method addedge(int $from, int $to, $action, $value, :$newedge = 1) {
         $!edges := 1 if $newedge;
         $to := self.addstate() if $to < 0;
         my $st := $!states[$from];
         nqp::push($st, $action);
         nqp::push($st, $value);
-        nqp::push($st, $to+0);
+        nqp::push($st, $to);
         $to;
     }
 
@@ -44,26 +44,26 @@ class QRegex::NFA {
         self;
     }
 
-    method regex_nfa($node, $from, $to) {
+    method regex_nfa($node, int $from, int $to) {
         my $method := ($node.rxtype // 'concat');
         self.HOW.can(self, $method) 
          ?? self."$method"($node, $from, $to)
          !! self.fate($node, $from, $to);
     }
 
-    method fate($node, $from, $to) { 
+    method fate($node, int $from, int $to) { 
         self.addedge($from, 0, $EDGE_FATE, 0, :newedge(0)) 
     }
 
-    method alt($node, $from, $to) {
+    method alt($node, int $from, int $to) {
         for $node.list {
-            my $st := self.regex_nfa($_, $from, $to);
+            my int $st := self.regex_nfa($_, $from, $to);
             $to := $st if $to < 0 && $st > 0;
         }
         $to;
     }
 
-    method anchor($node, $from, $to) { 
+    method anchor($node, int $from, int $to) { 
         self.addedge($from, $to, $EDGE_EPSILON, 0);
     }
 
@@ -77,14 +77,14 @@ class QRegex::NFA {
         %cclass_code<nl> := pir::box__Pi(pir::const::CCLASS_NEWLINE);
     }
 
-    method cclass($node, $from, $to) {
+    method cclass($node, int $from, int $to) {
         self.addedge($from, $to, $EDGE_CHARCLASS + ?$node.negate,
                      %cclass_code{nqp::lc($node.subtype)});
     }
 
-    method concat($node, $from, $to) {
-        my $i := 0;
-        my $n := +$node.list - 1;
+    method concat($node, int $from, int $to) {
+        my int $i := 0;
+        my int $n := +$node.list - 1;
         while $from > 0 && $i < $n {
             $from := self.regex_nfa($node[$i], $from, -1);
             $i := $i + 1;
@@ -92,7 +92,7 @@ class QRegex::NFA {
         $from > 0 && $n >= 0 ?? self.regex_nfa($node[$i], $from, $to) !! $to;
     }
 
-    method enumcharlist($node, $from, $to) {
+    method enumcharlist($node, int $from, int $to) {
         my $charlist := $node[0];
         if $node.subtype eq 'zerowidth' {
             $from := self.addedge($from, -1, $EDGE_CHARLIST + ?$node.negate, $charlist);
@@ -103,10 +103,10 @@ class QRegex::NFA {
         }
     }
 
-    method literal($node, $from, $to) {
-        my $litconst := $node[0];
-        my $litlen   := nqp::chars($litconst) - 1;
-        my $i        := 0;
+    method literal($node, int $from, int $to) {
+        my str $litconst := $node[0];
+        my int $litlen   := nqp::chars($litconst) - 1;
+        my int $i        := 0;
         if $litlen >= 0 {
             while $i < $litlen {
                 $from := self.addedge($from, -1, $EDGE_CODEPOINT, nqp::ord($litconst, $i));
@@ -119,10 +119,10 @@ class QRegex::NFA {
         }
     }
 
-    method subrule($node, $from, $to) {
+    method subrule($node, int $from, int $to) {
         my $subtype := $node.subtype;
         if $node.name eq 'before' && !$node.negate {
-            my $end := self.addstate();
+            my int $end := self.addstate();
             self.regex_nfa($node[0][1]<orig_qast>, $from, $end);
             self.fate($node, $end, $to);
         }
@@ -139,7 +139,7 @@ class QRegex::NFA {
                 self.fate($node, $from, $to)
             }
             else {
-                my $end := self.addstate();
+                my int $end := self.addstate();
                 self.addedge($from, $end, $EDGE_SUBRULE, $node.name);
                 self.fate($node, $end, $to);
             }
@@ -151,17 +151,17 @@ class QRegex::NFA {
         }
     }
     
-    method quant($node, $from, $to) {
-        my $min := 0 + ($node.min // 0);
-        my $max := 0 + ($node.max // -1); # -1 means Inf
+    method quant($node, int $from, int $to) {
+        my int $min := 0 + ($node.min // 0);
+        my int $max := 0 + ($node.max // -1); # -1 means Inf
         
         if $max > 1 || $min > 1 {
-            my $count := 0;
-            my $st;
-            my $has_sep := nqp::defined($node[1]);
+            my int $count := 0;
+            my int $st;
+            my int $has_sep := nqp::defined($node[1]);
             while $count < $max || $count < $min {
                 if $count >= $min {
-                    my $f := self.addedge($from, $to, $EDGE_EPSILON, 0);
+                    my int $f := self.addedge($from, $to, $EDGE_EPSILON, 0);
                     $st := $st || $f;
                 }
                 if $has_sep && $count > 0 {
@@ -172,7 +172,7 @@ class QRegex::NFA {
             }
             self.addedge($from, $to, $EDGE_EPSILON, 0);
             if $max == -1 { # actually I think this is currently unreachable
-                my $start := self.addstate();
+                my int $start := self.addstate();
                 self.addedge($from, $start, $EDGE_EPSILON, 0);
                 $from := $start;
                 my $looper := self.addstate();
@@ -189,10 +189,10 @@ class QRegex::NFA {
         if $max == -1 {
             if $min == 0 { # * quantifier
                 if nqp::defined($node[1]) { # * %
-                    my $start := self.addstate();
+                    my int $start := self.addstate();
                     self.addedge($from, $start, $EDGE_EPSILON, 0);
-                    my $looper := self.addstate();
-                    my $st := self.regex_nfa($node[0], $start, $looper);
+                    my int $looper := self.addstate();
+                    my int $st := self.regex_nfa($node[0], $start, $looper);
                     self.regex_nfa($node[1], $looper, $start);
                     self.addedge($looper, $to, $EDGE_EPSILON, 0);
                     $st := self.addedge($from, $to, $EDGE_EPSILON, 0);
@@ -200,14 +200,14 @@ class QRegex::NFA {
                 }
                 else {
                     self.regex_nfa($node[0], $from, $from);
-                    my $st := self.addedge($from, $to, $EDGE_EPSILON, 0);
+                    my int $st := self.addedge($from, $to, $EDGE_EPSILON, 0);
                     $to := $st if $to < 0 && $st > 0;
                 }
             } else { # + quantifier
-                my $start := self.addstate();
+                my int $start := self.addstate();
                 self.addedge($from, $start, $EDGE_EPSILON, 0);
-                my $looper := self.addstate();
-                my $st := self.regex_nfa($node[0], $start, $looper);
+                my int $looper := self.addstate();
+                my int $st := self.regex_nfa($node[0], $start, $looper);
                 if nqp::defined($node[1]) {
                     self.regex_nfa($node[1], $looper, $start);
                 }
@@ -219,7 +219,7 @@ class QRegex::NFA {
             }
             $to;
         } elsif $min == 0 && $max == 1 { # ? quantifier
-            my $st := self.regex_nfa($node[0], $from, $to);
+            my int $st := self.regex_nfa($node[0], $from, $to);
             $to := $st if $to < 0 && $st > 0;
             $st := self.addedge($from, $to, $EDGE_EPSILON, 0);
             $to := $st if $to < 0 && $st > 0;
@@ -229,13 +229,13 @@ class QRegex::NFA {
         }
     }
     
-    method qastnode($node, $from, $to) {
+    method qastnode($node, int $from, int $to) {
         $node.subtype eq 'zerowidth' || $node.subtype eq 'declarative' ??
             self.addedge($from, $to, $EDGE_EPSILON, 0) !!
             self.fate($node, $from, $to);
     }
     
-    method subcapture($node, $from, $to) {
+    method subcapture($node, int $from, int $to) {
         self.regex_nfa($node[0], $from, $to);
     }
 
@@ -263,7 +263,7 @@ class QRegex::NFA {
         $past;
     }
 
-    method mergesubrule($start, $to, $fate, $cursor, $name, %caller_seen?) {
+    method mergesubrule(int $start, int $to, $fate, $cursor, str $name, %caller_seen?) {
         #nqp::say("adding $name");
         my %seen := nqp::clone(%caller_seen);
         my @substates;
@@ -276,9 +276,9 @@ class QRegex::NFA {
             if !@substates && !nqp::existskey(%seen, $name) {
                 # Maybe it's a protoregex, in which case states are an alternation
                 # of all of the possible rules.
-                my %protorx     := $cursor.HOW.cache($cursor, "!protoregex_table", { $cursor."!protoregex_table"() });
-                my $nfa         := QRegex::NFA.new;
-                my $gotmatch    := 0;
+                my %protorx      := $cursor.HOW.cache($cursor, "!protoregex_table", { $cursor."!protoregex_table"() });
+                my $nfa          := QRegex::NFA.new;
+                my int $gotmatch := 0;
                 if nqp::existskey(%protorx, $name) {
                     for %protorx{$name} -> $rxname {
                         $nfa.addedge(1, 0, $EDGE_SUBRULE, $rxname);
@@ -295,7 +295,7 @@ class QRegex::NFA {
     method mergesubstates($start, $to, $fate, @substates, $cursor, %seen?) {
         if @substates {
             # create an empty end state for the subrule's NFA
-            my $substart := self.addstate();
+            my int $substart := self.addstate();
             # Copy (yes, clone) @substates[1..*] into our states.
             # We have to clone because we'll be modifying the
             # values for use in this particular NFA.
@@ -307,12 +307,12 @@ class QRegex::NFA {
             #    apply $substart offset to target states
             #    adjust fate edges to be $fate
             #    append any subrules
-            my $subend := nqp::elems($!states);
-            my $i      := $substart;
+            my int $subend := nqp::elems($!states);
+            my int $i      := $substart;
             while $i < $subend {
                 my $substate := $!states[$i];
-                my $j := 0;
-                my $k := nqp::elems($substate);
+                my int $j := 0;
+                my int $k := nqp::elems($substate);
                 while $j < $k {
                     $substate[$j+2] := $substate[$j+2] + $substart;
                     $substate[$j+1] := $fate 
@@ -333,7 +333,7 @@ class QRegex::NFA {
         }
     }
 
-    method run($target, $offset) {
+    method run(str $target, int $offset) {
         # This does what the NQP below says, but these days an op is used since
         # it's hugely faster.
         #my $eos := nqp::chars($target);
@@ -383,7 +383,7 @@ class QRegex::NFA {
         pir::nqp_nfa_run_protoregex__PPSI($!states, $target, $offset)
     }
     
-    method run_alt($target, $offset, $bstack, $cstack) {
+    method run_alt(str $target, int $offset, $bstack, $cstack) {
         pir::nqp_nfa_run_alternation__vPSIPP($!states, $target, $offset, $bstack, $cstack)
     }
 
