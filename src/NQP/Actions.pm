@@ -60,16 +60,6 @@ class NQP::Actions is HLL::Actions {
     method comp_unit($/) {
         my $mainline := $<statementlist>.ast;
         my $unit     := $*W.pop_lexpad();
-        
-        # We'll install our view of GLOBAL as the main one; any other
-        # compilation unit that is using this one will then replace it
-        # with its view later (or be in a position to restore it).
-        my $global_install := QAST::VM.new(
-            pirop => 'set_hll_global vsP',
-            QAST::SVal.new( :value('GLOBAL') ),
-            QAST::WVal.new( :value($*PACKAGE) )
-        );
-        $*W.add_fixup_task(:deserialize_past($global_install), :fixup_past($global_install));
 
         # If our caller wants to know the mainline ctx, provide it here.
         # (CTXSAVE is inherited from HLL::Actions.) Don't do this when
@@ -264,19 +254,6 @@ class NQP::Actions is HLL::Actions {
                 %*HOW{$_.key} := $_.value;
             }
         }
-    }
-    
-    method GLOBALish($/) {
-        # Create GLOBALish - the current GLOBAL view, created cleanly
-        # for each compilation unit so we get separate compilation.
-        # XXX Uses KnowHOW for now; want something lighter really.
-        $*GLOBALish := $*W.pkg_create_mo(%*HOW<knowhow>, :name('GLOBALish'));
-        $*GLOBALish.HOW.compose($*GLOBALish);
-        $*W.install_lexical_symbol($*W.cur_lexpad(), 'GLOBALish', $*GLOBALish);
-        
-        # This is also the starting package.
-        $*PACKAGE := $*GLOBALish;
-        $*W.install_lexical_symbol($*W.cur_lexpad(), '$?PACKAGE', $*PACKAGE);
     }
 
     method you_are_here($/) {
@@ -1445,8 +1422,7 @@ class NQP::Actions is HLL::Actions {
                     :op('atkey'),
                     QAST::Op.new(
                         :op('who'),
-                        QAST::VM.new( pirop => 'get_hll_global Ps',
-                            QAST::SVal.new( :value('GLOBAL') ) )
+                        QAST::WVal.new( :value($*GLOBALish) )
                     ),
                     QAST::SVal.new( :value(~$final_name) )
                 ),
@@ -1468,8 +1444,7 @@ class NQP::Actions is HLL::Actions {
                 }
             }
             else {
-                $path := QAST::VM.new( pirop => 'get_hll_global Ps',
-                    QAST::SVal.new( :value('GLOBAL') ) );
+                $path := QAST::WVal.new( :value($*GLOBALish) );
             }
             if @name[0] eq 'GLOBAL' {
                 @name.shift();

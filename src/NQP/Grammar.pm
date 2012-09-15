@@ -109,9 +109,17 @@ grammar NQP::Grammar is HLL::Grammar {
         :my $*MAIN_SUB;
         :my $*UNIT := $*W.push_lexpad($/);
         
-        :my $*PACKAGE;
-        :my $*GLOBALish;
-        <.GLOBALish>
+        # Create GLOBALish - the current GLOBAL view, created fresh
+        # for each compilation unit so we get separate compilation.
+        :my $*GLOBALish := $*W.pkg_create_mo(%*HOW<knowhow>, :name('GLOBALish'));
+        {
+            $*GLOBALish.HOW.compose($*GLOBALish);
+            $*W.install_lexical_symbol($*W.cur_lexpad(), 'GLOBALish', $*GLOBALish);
+        }
+        
+        # This is also the starting package.
+        :my $*PACKAGE := $*GLOBALish;
+        { $*W.install_lexical_symbol($*W.cur_lexpad(), '$?PACKAGE', $*PACKAGE); }
         
         { $*W.add_initializations(); }
         
@@ -181,7 +189,6 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token newpad { <?> }
     token outerctx { <?> }
-    token GLOBALish { <?> }
     token finishpad { <?> }
     token you_are_here { <?> }
 
