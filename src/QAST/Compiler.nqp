@@ -788,7 +788,7 @@ class QAST::Compiler is HLL::Compiler {
             while nqp::istype($cur_block, BlockInfo) {
                 my %sym := $cur_block.qast.symbol($name);
                 if %sym {
-                    $scope := %sym<$scope>;
+                    $scope := %sym<scope>;
                     $cur_block := NQPMu;
                 }
                 else {
@@ -834,7 +834,17 @@ class QAST::Compiler is HLL::Compiler {
                 my $type := type_to_register_type($node.returns);
                 if $type eq 'P' {
                     # Consider the blocks for a declared native type.
-                    # XXX TODO
+                    my $cur_block := $*BLOCK;
+                    while nqp::istype($cur_block, BlockInfo) {
+                        my %sym := $cur_block.qast.symbol($name);
+                        if %sym {
+                            $type := type_to_register_type(%sym<type>);
+                            $cur_block := NQPMu;
+                        }
+                        else {
+                            $cur_block := $cur_block.outer();
+                        }
+                    }
                 }
                 
                 # Emit the lookup or bind.
