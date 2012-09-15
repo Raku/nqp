@@ -649,7 +649,7 @@ knowhow NQPClassHOW {
                 my $found := %meths{$name};
                 return $!trace && !$no_trace && nqp::substr($name, 0, 1) ne '!' ??
                     -> *@pos, *%named { 
-                        say(nqp::x('  ', $!trace_depth) ~ "Calling $name");
+                        nqp::say(nqp::x('  ', $!trace_depth) ~ "Calling $name");
                         $!trace_depth := $!trace_depth + 1;
                         my $result := $found(|@pos, |%named);
                         $!trace_depth := $!trace_depth - 1;
