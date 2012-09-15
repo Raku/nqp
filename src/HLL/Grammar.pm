@@ -165,15 +165,14 @@ Currently the only pairs recognized have the form C< :pair >,
 C< :!pair >, and C<< :pair<strval> >>.
 
 =end
-    method O($spec, $save?) {
+    method O(str $spec, $save?) {
         Q:PIR {
             .local pmc self, cur_class
             .local string spec, save
             .local int has_save
             self = find_lex 'self'
             cur_class = find_lex '$cursor_class'
-            $P0 = find_lex '$spec'
-            spec = $P0
+            spec = find_lex '$spec'
             has_save = 0
             $P0 = find_lex '$save'
             unless $P0 goto no_save
@@ -340,16 +339,14 @@ position C<pos>.
 
 =end
 
-    method peek_delimiters($target, $pos) {
+    method peek_delimiters(str $target, int $pos) {
         Q:PIR {
             .local pmc self
             self = find_lex 'self'
             .local string target
-            $P0 = find_lex '$target'
-            target = $P0
+            target = find_lex '$target'
             .local int pos
-            $P0 = find_lex '$pos'
-            pos = $P0
+            pos = find_lex '$pos'
 
             .local string brackets, start, stop
             $P0 = find_lex '$brackets'
@@ -451,7 +448,7 @@ position C<pos>.
         <quote_delimited>
     }
 
-    token quotemod_check($mod) {
+    token quotemod_check(str $mod) {
         <?{ %*QUOTEMOD{$mod} }>
     }
 
@@ -501,12 +498,11 @@ position C<pos>.
         };
     }
 
-    our method split_words($words) {
+    our method split_words(str $words) {
         Q:PIR {
             .include 'src/Regex/constants.pir'
             .local string words
-            $P0 = find_lex '$words'
-            words = $P0
+            words = find_lex '$words'
             .local int pos, eos
             .local pmc result
             pos = 0
@@ -534,15 +530,14 @@ An operator precedence parser.
 
 =end
 
-    method EXPR($preclim = '') {
+    method EXPR(str $preclim = '') {
         Q:PIR {
             .local pmc self, cur_class
             self = find_lex 'self'
             cur_class = find_lex '$cursor_class'
 
             .local string preclim
-            $P0 = find_lex '$preclim'
-            preclim = $P0
+            preclim = find_lex '$preclim'
             
             .local pmc here
             .local string tgt
@@ -812,7 +807,7 @@ An operator precedence parser.
         $match[1] := $match{'infix'}{'EXPR'};
     }
 
-    method MARKER($markname) {
+    method MARKER(str $markname) {
         my %markhash := Q:PIR {
             %r = get_global '%!MARKHASH'
             unless null %r goto have_markhash
@@ -825,7 +820,7 @@ An operator precedence parser.
         %markhash{$markname} := $cur;
     }
     
-    method MARKED($markname) {
+    method MARKED(str $markname) {
         my %markhash := Q:PIR {
             %r = get_global '%!MARKHASH'
             unless null %r goto have_markhash
