@@ -1086,6 +1086,14 @@ class NQP::Actions is HLL::Actions {
                 $*W.pkg_add_parrot_vtable_handler_mapping($package, $name, ~$match<variable>);
             };
         }
+        elsif $<longname> eq 'export' {
+            make -> $match {
+                my $ast  := $match.ast;
+                my $name := $ast<block_past>.name;
+                $*EXPORT.WHO<DEFAULT>.WHO{'&' ~ $name} := $ast<code_obj> //
+                    $*W.create_code($ast<block_past>, $name, 0);
+            };
+        }
         else {
             $/.CURSOR.panic("Trait '$<longname>' not implemented");
         }
