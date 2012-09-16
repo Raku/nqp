@@ -1,4 +1,4 @@
-role NQPCursorRole {
+role NQPCursorRole is export {
     has $!orig;
     has str $!target;
     has int $!from;
@@ -609,9 +609,4 @@ class NQPRegex is NQPRegexMethod {
         NQPCursor.parse($target, :rule(self), :c(0))
     }
 }
-
-my module EXPORT {
-    our module DEFAULT {
-        $?PACKAGE.WHO<NQPCursorRole> := NQPCursorRole;
-    }
-}
+ 
