@@ -114,12 +114,25 @@ grammar NQP::Grammar is HLL::Grammar {
         :my $*GLOBALish := $*W.pkg_create_mo(%*HOW<knowhow>, :name('GLOBALish'));
         {
             $*GLOBALish.HOW.compose($*GLOBALish);
-            $*W.install_lexical_symbol($*W.cur_lexpad(), 'GLOBALish', $*GLOBALish);
+            $*W.install_lexical_symbol($*UNIT, 'GLOBALish', $*GLOBALish);
         }
         
         # This is also the starting package.
         :my $*PACKAGE := $*GLOBALish;
-        { $*W.install_lexical_symbol($*W.cur_lexpad(), '$?PACKAGE', $*PACKAGE); }
+        { $*W.install_lexical_symbol($*UNIT, '$?PACKAGE', $*PACKAGE); }
+        
+        # Create EXPORT::DEFAULT.
+        :my $*EXPORT;
+        {
+            unless %*COMPILING<%?OPTIONS><setting> eq 'NULL' {
+                $*EXPORT := $*W.pkg_create_mo(%*HOW<knowhow>, :name('EXPORT'));
+                $*EXPORT.HOW.compose($*EXPORT);
+                $*W.install_lexical_symbol($*UNIT, 'EXPORT', $*EXPORT);
+                my $DEFAULT := $*W.pkg_create_mo(%*HOW<knowhow>, :name('DEFAULT'));
+                $DEFAULT.HOW.compose($DEFAULT);
+                ($*EXPORT.WHO)<DEFAULT> := $DEFAULT;
+            }
+        }
         
         { $*W.add_initializations(); }
         
@@ -389,6 +402,7 @@ grammar NQP::Grammar is HLL::Grammar {
             }
         }
         
+        [ $<export>=['is export'] ]?
         [ 'is' <parent=.name> ]?
         [ 'does' <role=.name> ]*
         [

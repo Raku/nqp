@@ -637,6 +637,11 @@ class NQP::Actions is HLL::Actions {
 
         # Finally, compose.
         $*W.pkg_compose($*PACKAGE);
+        
+        # Export if needed.
+        if $<export> {
+            $*EXPORT.WHO<DEFAULT>.WHO{$name} := $*PACKAGE;
+        }
 
         make $past;
     }
