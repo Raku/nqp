@@ -265,6 +265,9 @@ class NQP::Actions is HLL::Actions {
     method statement_control:sym<use>($/) {
         my $module := $*W.load_module(~$<name>, $*GLOBALish);
         if nqp::defined($module) {
+            $*W.import($module<EXPORT>.WHO<DEFAULT>.WHO)
+                if nqp::existskey($module, 'EXPORT') &&
+                    nqp::existskey($module<EXPORT>.WHO, 'DEFAULT');
             import_HOW_exports($module);
         }
         make QAST::Stmts.new();

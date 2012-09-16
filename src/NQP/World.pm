@@ -138,6 +138,13 @@ class NQP::World is HLL::World {
         return pir::getattribute__PPs($module, 'lex_pad');
     }
     
+    method import($stash) {
+        my $target := self.cur_lexpad();
+        for $stash {
+            self.install_lexical_symbol($target, $_.key, $_.value);
+        }
+    }
+    
     # Installs a symbol into the package. Does so immediately, and
     # makes sure this happens on deserialization also.
     method install_package_symbol($package, @sym, $obj) {
