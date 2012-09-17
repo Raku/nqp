@@ -204,13 +204,13 @@ class NQP::World is HLL::World {
     
     # Registers a code object, and gives it a dynamic compilation thunk.
     # Makes a real code object if it's a dispatcher.
-    method create_code($past, $name, $is_dispatcher) {
+    method create_code($past, $name, $is_dispatcher, :$code_type_name = 'NQPRoutine') {
         # See if NQPRoutine is available to wrap this up in.
         my $code_type;
         my $have_code_type := 0;
         try {
-            $code_type := self.find_sym(['NQPRoutine']);
-            $have_code_type := $*PACKAGE.HOW.name($*PACKAGE) ne 'NQPRoutine';
+            $code_type := self.find_sym([$code_type_name]);
+            $have_code_type := $*PACKAGE.HOW.name($*PACKAGE) ne $code_type_name;
         }
         
         # For code refs, we need a "stub" that we'll clone and use for the
