@@ -59,3 +59,15 @@ my knowhow NQPSignature {
     has $!types;
     has $!definednesses;
 }
+
+my knowhow NQPRegex {
+    has $!do;
+    method nqpattr($key) {
+        $!do.nqpattr($key)
+    }
+}
+pir::stable_publish_vtable_handler_mapping__vPP(NQPRegex,
+    nqp::hash(
+        'invoke', nqp::list(NQPRegex, '$!do'),
+        'get_string', nqp::list(NQPRegex, '$!do')));
+pir::set_boolification_spec__0PiP(NQPRegex, 5, nqp::null());
