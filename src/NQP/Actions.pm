@@ -1121,7 +1121,8 @@ class NQP::Actions is HLL::Actions {
                     )
                 );
                 for @($past) {
-                    $*W.pkg_add_method($*PACKAGE, 'add_method', $_.name(), $*W.create_code($_, $_.name(), 0));
+                    $*W.pkg_add_method($*PACKAGE, 'add_method', $_.name(),
+                        $*W.create_code($_, $_.name(), 0, :code_type_name<NQPRegex>));
                 }
         }
         else {
@@ -1140,7 +1141,8 @@ class NQP::Actions is HLL::Actions {
             
             if $*PKGDECL && nqp::can($*PACKAGE.HOW, 'add_method') {
                 # Add the actual method.
-                $*W.pkg_add_method($*PACKAGE, 'add_method', $name, $*W.create_code($regex, $name, 0));
+                $*W.pkg_add_method($*PACKAGE, 'add_method', $name,
+                    $*W.create_code($regex, $name, 0, :code_type_name<NQPRegex>));
             }
             
             # In sink context, we don't need the Regex::Regex object.
