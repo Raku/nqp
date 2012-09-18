@@ -142,12 +142,121 @@ Two keys have special significance to the QAST to VM compiler:
   variable is natively typed, since it influences the code generation
 
 ## QAST::Stmts and QAST::Stmt
+Often you will wish to execute a sequence of statements, one after the other. 
+This is what QAST::Stmts is for. It simply contains a sequence of other QAST
+nodes that will be executed in order. The QAST::Stmts node as a whole will
+evaluate to the last statement. For example, you may have a program along the
+lines of:
+
+    if pints < 4 {
+        say "MORE BEER!";
+        pint = pint + 1;
+    }
+
+There are two statements inside of the if node. This probably compiles to
+something like:
+
+    QAST::Op.new(
+        :op('if'),
+        
+        # Here comes the condition.
+        QAST::Op.new(
+            :op('lt_i'),
+            QAST::Var.new( :name('pints') ),
+            QAST::IVal.new( :value(4) )
+        ),
+        
+        # We want to do multiple statements if the condition is true,
+        # so wrap them in a QAST::Stmts.
+        QAST::Stmts.new(
+            QAST::Op.new(
+                :op('say'),
+                QAST::SVal.new( :value('MORE BEER!') )
+            ),
+            QAST::Op.new(
+                :op('bind'),
+                QAST::Var.new( :name('pints') ),
+                QAST::Op.new(
+                    :op('add_i'),
+                    QAST::Var.new( :name('pints') ),
+                    QAST::IVal.new( :value(1) )
+                )
+            )
+        )
+    )
+
+Occasionally, you may want the overall sequence of statements to evaluate
+to something other than the last child. In this case, use resultchild.
+
+    QAST::Op.new(
+        :op('say'),
+        QAST::Stmts.new(
+            :resultchild(0),
+            QAST::SVal.new( :value('omg a kangaroo!!!') ),
+            QAST::Op.new( :op('call'), :name('prepare_bbq') )
+        )
+    )
+
+Here, the call to 'prepare_bbq' will be run, but the 'say' operation will
+be given the SVal, not the result of the call. Essentially, resultchild is
+the zero-based index of which child to use as the result of the QAST::Stmts
+node overall.
+
+There is a variant of QAST::Stmts, which is QAST::Stmt. While the first has
+no impact on the allocation of temporaries, QAST::Stmt marks a register
+allocation boundary; beyond it, any temporaries are free to be reused. You
+do not need to use QAST::Stmt, but it can lead to better code generation if
+used correct. Incorrect use can, of course, lead to incorrect code generation.
+Like QAST::Stmts, it also can have multiple children and supports resultchild.
 
 ## QAST::IVal, QAST::NVal and QAST::SVal
+Perhaps the simplest nodes in QAST, these represent literal, native values.
+All of them expect the literal to be specified by setting value. QAST::IVal
+represents an integer literal, QAST::NVal represents a numeric (floating
+point) literal, and QAST::SVal represents a string literal.
 
-## QAST::Var
+    QAST::IVal.new( :value(42) )
+    
+    QAST::NVal.new( :value(3.14) )
+    
+    QAST::SVal.new( :value('keming') )
+
+And that's about all there is to say about them. Simples!
 
 ## QAST::Op
+This node captures the very general notion of "an operation". Operations range
+from addition to method calls to exception handling. The operations themselves
+are documented separately; the form of the node itself is pretty consistent,
+however. The children are the operands for the operation. For example:
+
+    QAST::Op.new(
+        :op('mul_i'),
+        QAST::IVal.new( :value(2) ),
+        QAST::IVal.new( :value(21) )
+    )
+
+Represents an integer multiplication. Some operations also take a name, such
+as callmethod:
+
+    QAST::Op.new(
+        # Call the method 'can_haz'...
+        :op('callmethod'), :name('can_haz'),
+        
+        # ...on the object in $i...
+        QAST::Var.new( :name('$i') ),
+        
+        # ...and pass a string argument, kthxbai.
+        QAST::SVal.new( :value('cheezburger') )
+    )
+
+There are hundreds of operations, and QAST::Op nodes will be amongst the most
+common in your trees. By the way, the nqp::op(...) syntax in the NQP language
+is actually just sugar for a QAST::Op node. This means that any op you've used
+when writing NQP code is now available to you when writing your compiler,
+which is a nice bit of knowledge re-use. It's almost like we designed this
+thing!
+
+## QAST::Var
 
 ## QAST::VarWithFallback
 
