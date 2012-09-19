@@ -42,7 +42,7 @@ $ops.add_hll_op('nqp', 'postinc', -> $qastcomp, $op {
         :resultchild(0),
         QAST::Op.new(
             :op('bind'),
-            QAST::Var.new( :name($tmp), :scope('local'), :decl('var') ),
+            QAST::Var.new( :name($tmp), :scope('local'), :decl('var'), :returns($var.returns) ),
             $var
         ),
         QAST::Op.new(
@@ -50,7 +50,7 @@ $ops.add_hll_op('nqp', 'postinc', -> $qastcomp, $op {
             $var,
             QAST::Op.new(
                 :op('add_n'),
-                QAST::Var.new( :name($tmp), :scope('local') ),
+                QAST::Var.new( :name($tmp), :scope('local'), :returns($var.returns)  ),
                 QAST::IVal.new( :value(1) )
             )
         )));
