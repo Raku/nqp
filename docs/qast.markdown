@@ -257,12 +257,98 @@ which is a nice bit of knowledge re-use. It's almost like we designed this
 thing!
 
 ## QAST::Var
+The QAST::Var node is used for declaring and lookup up variables. If you are
+using QAST's handling of parameters, then a QAST::Var node is also used to
+declare these. At its simplest, a QAST::Var node needs to specify the name of
+the variable to look up.
+
+    QAST::Var.new( :name('$bar') )
+
+In this case, the symbol table of the enclosing blocks must supply a scope. A
+variable can always be explicitly marked with its scope.
+
+    QAST::Var.new( :name('$bar'), :scope('lexical') )
+
+Variable declarations look similar:
+
+    QAST::Var.new( :name('$bar'), :scope('lexical'), :decl('var') )
+
+Note that the declaration for each variable should only show up once, and
+all subsequent usages should not set decl. A declaration evaluates to the
+variable itself, and can also be bound to.
+
+    QAST::Op.new(
+        :op('bind'),
+        QAST::Var.new( :name('$x'), :scope('lexical'), :decl('var'), :returns(int) ),
+        QAST::IVal.new( :value(0) )
+    )
+
+Note also that returns can be used to specify the type of the variable. It
+is not needed in general, but is important for native types. Note that you
+should supply a 6model type object for the type, not a string type name! It
+is only used to determine the type of storage to allocate for the variable,
+and type constraints besides those implied by the nature of the storage will
+not be enforced.
+
+Aside from lexicals, it is also possible to declare locals. These are not
+visible from nested blocks. They are cheaper than lexicals as a result of
+this, but naturally more restricted. A compiler may start out with everything
+lexical and in an optimization phase turn some of those into locals if it can
+prove that this will not be problematic for the execution of the program.
+They look pretty much the same as lexicals otherwise.
+
+    QAST::Op.new(
+        :op('bind'),
+        QAST::Var.new( :name('$nom'), :scope('local'), :decl('var'), :returns(str) ),
+        QAST::SVal.new( :value('bacon') )
+    )
+
+While you can rely on any object variables being initialized to null for you,
+there are no such promises for any of the native types. Thus if your language
+promises that a fresh integer variable will start with 0, you should set it
+(once again, possibly optimizing away that initialization if you can prove that
+a user assignment renders it useless).
+
+Parameters work in a similar way; just set decl to 'param' instead of 'var'.
+For example, the following block takes two positional parameters.
+
+    QAST::Block.new(
+        QAST::Var.new( :name('$x'), :scope('lexical'), :decl('param') ),
+        QAST::Var.new( :name('$y'), :scope('lexical'), :decl('param') ),
+        ...
+    )
 
 ## QAST::VarWithFallback
 
+
 ## QAST::BVal
+A QAST::Block can only appear once in the QAST tree. So what if you want to
+refer to a block from elsewhere? The answer is to use a QAST::BVal.
+
+    QAST::BVal.new( :block($some_block) )
+
+The $some_block should be a QAST::Block. Note that this only works if the
+block is in the same compilation unit as the one where the BVal is used
+(though it's hard to think of a typical situation where you'd end up trying
+to do anything else).
 
 ## QAST::WVal
+This node, known as a World Value, references an object that lives in a
+serialization context. It may be associated with the current compilation
+unit or some other compilation unit. QAST::WVal is typically used to talk
+about objects that you create to represent declarative elements of your
+program. For example, if the program declares a class, you would create an
+object describing that type as you compile the program, and then use a
+QAST::WVal to refer to the type from the compiled program code.
+
+Usage looks like:
+
+    QAST::WVal.new( :value($the_object) )
+
+While obscure at first, QAST::WVal is an extremely powerful tool. Much in
+NQP and even more in the Rakudo Perl 6 compiler hangs of the notion of
+bounded serialization and a World that builds up a model of the declarative
+aspects of a program.
 
 ## QAST::Want
 
