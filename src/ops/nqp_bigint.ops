@@ -186,6 +186,19 @@ inline op nqp_bigint_exp_mod(out PMC, in PMC, in PMC, in PMC, in PMC) :base_core
     mp_exptmod(a, b, c, get_bigint(interp, $1));
 }
 
+inline op nqp_bigint_is_prime(out INT, invar PMC, in INT) {
+    /* mp_prime_is_prime returns True for 1, and I think
+     * it's worth special-casing this particular number :-)
+     */
+    mp_int *a = get_bigint(interp, $2);
+    if (mp_cmp_d(a, 1) == MP_EQ) {
+        $1 = 0;
+    }
+    else {
+        mp_prime_is_prime(a, $3, (int *) &$1);
+    }
+}
+
 
 inline op nqp_bigint_neg(out PMC, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
