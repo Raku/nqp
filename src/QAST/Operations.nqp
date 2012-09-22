@@ -1283,6 +1283,7 @@ QAST::Operations.add_core_pirop_mapping('mod_i', 'mod', 'Iii', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('mod_I', 'nqp_bigint_mod', 'PPPP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('expmod_I', 'nqp_bigint_exp_mod', 'PPPPP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('isprime_I', 'nqp_bigint_is_prime', 'IPi', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('rand_I', 'nqp_bigint_rand', 'PPP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('mod_n', 'mod', 'Nnn', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('pow_n', 'pow', 'Nnn', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('pow_I', 'nqp_bigint_pow', 'PPPPP', :inlinable(1));

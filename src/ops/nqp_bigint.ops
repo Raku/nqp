@@ -199,6 +199,19 @@ inline op nqp_bigint_is_prime(out INT, invar PMC, in INT) {
     }
 }
 
+/* generates a pseudo random number up to $2 of type $3 */
+inline op nqp_bigint_rand(out PMC, invar PMC, invar PMC) :base_core {
+    mp_int *a = get_bigint(interp, $2);
+    mp_int *b = NULL;
+
+    $1 = REPR($3)->allocate(interp, STABLE($3));
+    REPR($1)->initialize(interp, STABLE($1), OBJECT_BODY($1));
+
+    b = get_bigint(interp, $1);
+    mp_rand(b, USED(a) + 1);
+    mp_mod(b, a, b);
+}
+
 
 inline op nqp_bigint_neg(out PMC, in PMC, in PMC) :base_core {
     mp_int *a = get_bigint(interp, $2);
