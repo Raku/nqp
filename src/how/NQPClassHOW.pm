@@ -576,7 +576,7 @@ knowhow NQPClassHOW {
         $!trace_depth
     }
 
-    method attributes($obj, :$local) {
+    method attributes($obj, :$local = 0) {
         my @attrs;
         if $local {
             for %!attributes {
