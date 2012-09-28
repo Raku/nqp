@@ -55,6 +55,11 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     token p5metachar:sym<$>  {
         '$' <?before \W | $>
     }
+    token p5metachar:sym<(? )> {
+        '(?' {} <assertion=p5assertion>
+        [ ')' || <.panic: "Perl 5 regex assertion not terminated by parenthesis"> ]
+    }
+    token p5metachar:sym<( )> { '(' {} <nibbler> ')' }
     token p5metachar:sym<[ ]> { <?before '['> <cclass> }
     
     token cclass {
@@ -121,7 +126,6 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     proto token metachar { <...> }
     token metachar:sym<ws> { <.normspace> }
     token metachar:sym<[ ]> { '[' <nibbler> ']' }
-    token metachar:sym<( )> { '(' <nibbler> ')' }
     token metachar:sym<'> { <?[']> <quote_EXPR: ':q'> }
     token metachar:sym<"> { <?["]> <quote_EXPR: ':qq'> }
     token metachar:sym<lwb> { $<sym>=['<<'|'«'] }
@@ -129,11 +133,6 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     token metachar:sym<from> { '<(' }
     token metachar:sym<to>   { ')>' }
     token metachar:sym<mod> { <mod_internal> }
-
-    token metachar:sym<assert> {
-        '<' <assertion>
-        [ '>' || <.panic: 'regex assertion not terminated by angle bracket'> ]
-    }
 
     token metachar:sym<var> {
         [

@@ -84,6 +84,10 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         );
     }
     
+    method p5metachar:sym<( )>($/) {
+        make QAST::Regex.new( $<nibbler>.ast, :rxtype<subcapture>, :node($/) );
+    }
+    
     method p5metachar:sym<[ ]>($/) {
         make $<cclass>.ast;
     }
@@ -260,7 +264,9 @@ class QRegex::P5Regex::Actions is HLL::Actions {
             }
         }
         elsif $rxtype eq 'subcapture' {
-            for nqp::split(' ', $ast.name) {
+            my $name := $ast.name;
+            if $name eq '' { $name := $count; $ast.name($name); }
+            for nqp::split(' ', $name) {
                 if $_ eq '0' || $_ > 0 { $count := $_ + 1; }
                 %capnames{$_} := 1;
             }
@@ -292,14 +298,6 @@ class QRegex::P5Regex::Actions is HLL::Actions {
 
     method metachar:sym<[ ]>($/) {
         make $<nibbler>.ast;
-    }
-
-    method metachar:sym<( )>($/) {
-        my $subpast := QAST::Node.new(
-            qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
-        my $qast := QAST::Regex.new( $subpast, $<nibbler>.ast, :rxtype('subrule'),
-                                     :subtype('capture'), :node($/) );
-        make $qast;
     }
 
     method metachar:sym<'>($/) {
