@@ -187,6 +187,97 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         elsif $mod eq '+' { $ast.backtrack('g') }
         $ast;
     }
+    
+    our sub qbuildsub($qast, $block = QAST::Block.new(), :$anon, :$addself) {
+        my $blockid := $block.cuid;
+        my $hashpast := QAST::Op.new( :op<hash> );
+        for capnames($qast, 0) {
+            if $_.key gt '' { 
+                $hashpast.push(QAST::SVal.new( :value($_.key) )); 
+                $hashpast.push(QAST::IVal.new( :value(
+                    nqp::iscclass(pir::const::CCLASS_NUMERIC, $_.key, 0) + ($_.value > 1) * 2) )); 
+            }
+        }
+        my $initpast := QAST::Stmts.new();
+        if $addself {
+            $initpast.push(QAST::Var.new( :name('self'), :scope('local'), :decl('param') ));
+        }
+        my $capblock := QAST::BlockMemo.new( :name($blockid ~ '_caps'),  $hashpast );
+        $initpast.push(QAST::Stmt.new($capblock));
+
+        my $nfapast := QRegex::NFA.new.addnode($qast).qast;
+        if $nfapast {
+            my $nfablock := QAST::BlockMemo.new( :name($blockid ~ '_nfa'), $nfapast);
+            $initpast.push(QAST::Stmt.new($nfablock));
+        }
+
+        unless $block.symbol('$¢') {
+            $initpast.push(QAST::Var.new(:name<$¢>, :scope<lexical>, :decl('var')));
+            $block.symbol('$¢', :scope<lexical>);
+        }
+
+        $block<orig_qast> := $qast;
+        
+        $qast := QAST::Regex.new( :rxtype<concat>,
+                     QAST::Regex.new( :rxtype<scan> ),
+                     $qast,
+                     ($anon ??
+                          QAST::Regex.new( :rxtype<pass> ) !!
+                          QAST::Regex.new( :rxtype<pass>, :name(%*RX<name>) )));
+        $block.push($initpast);
+        $block.push($qast);
+        $block;
+    }
+
+    sub capnames($ast, $count) {
+        my %capnames;
+        my $rxtype := $ast.rxtype;
+        if $rxtype eq 'concat' {
+            for $ast.list {
+                my %x := capnames($_, $count);
+                for %x { %capnames{$_.key} := +%capnames{$_.key} + $_.value; }
+                $count := %x{''};
+            } 
+        }
+        elsif $rxtype eq 'altseq' || $rxtype eq 'alt' {
+            my $max := $count;
+            for $ast.list {
+                my %x := capnames($_, $count);
+                for %x {
+                    %capnames{$_.key} := +%capnames{$_.key} < 2 && %x{$_.key} == 1 ?? 1 !! 2;
+                }
+                $max := %x{''} if %x{''} > $max;
+            }
+            $count := $max;
+        }
+        elsif $rxtype eq 'subrule' && $ast.subtype eq 'capture' {
+            my $name := $ast.name;
+            if $name eq '' { $name := $count; $ast.name($name); }
+            my @names := nqp::split('=', $name);
+            for @names {
+                if $_ eq '0' || $_ > 0 { $count := $_ + 1; }
+                %capnames{$_} := 1;
+            }
+        }
+        elsif $rxtype eq 'subcapture' {
+            for nqp::split(' ', $ast.name) {
+                if $_ eq '0' || $_ > 0 { $count := $_ + 1; }
+                %capnames{$_} := 1;
+            }
+            my %x := capnames($ast[0], $count);
+            for %x { %capnames{$_.key} := +%capnames{$_.key} + %x{$_.key} }
+            $count := %x{''};
+        }
+        elsif $rxtype eq 'quant' {
+            my %astcap := capnames($ast[0], $count);
+            for %astcap { %capnames{$_} := 2 }
+            $count := %astcap{''};
+        }
+        %capnames{''} := $count;
+        nqp::deletekey(%capnames, '$!from');
+        nqp::deletekey(%capnames, '$!to');
+        %capnames;
+    }
 
 
     # XXX Below here copied from p6regex; needs review
@@ -417,118 +508,6 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         my $n := $<n>[0] gt '' ?? +$<n>[0] !! 1;
         %*RX{ ~$<mod_ident><sym> } := $n;
         make 0;
-    }
-
-    our sub qbuildsub($qast, $block = QAST::Block.new(), :$anon, :$addself) {
-        my $blockid := $block.cuid;
-        my $hashpast := QAST::Op.new( :op<hash> );
-        for capnames($qast, 0) {
-            if $_.key gt '' { 
-                $hashpast.push(QAST::SVal.new( :value($_.key) )); 
-                $hashpast.push(QAST::IVal.new( :value(
-                    nqp::iscclass(pir::const::CCLASS_NUMERIC, $_.key, 0) + ($_.value > 1) * 2) )); 
-            }
-        }
-        my $initpast := QAST::Stmts.new();
-        if $addself {
-            $initpast.push(QAST::Var.new( :name('self'), :scope('local'), :decl('param') ));
-        }
-        my $capblock := QAST::BlockMemo.new( :name($blockid ~ '_caps'),  $hashpast );
-        $initpast.push(QAST::Stmt.new($capblock));
-
-        my $nfapast := QRegex::NFA.new.addnode($qast).qast;
-        if $nfapast {
-            my $nfablock := QAST::BlockMemo.new( :name($blockid ~ '_nfa'), $nfapast);
-            $initpast.push(QAST::Stmt.new($nfablock));
-        }
-        qalt_nfas($qast, $blockid, $initpast);
-
-        unless $block.symbol('$¢') {
-            $initpast.push(QAST::Var.new(:name<$¢>, :scope<lexical>, :decl('var')));
-            $block.symbol('$¢', :scope<lexical>);
-        }
-
-        $block<orig_qast> := $qast;
-        
-        $qast := QAST::Regex.new( :rxtype<concat>,
-                     QAST::Regex.new( :rxtype<scan> ),
-                     $qast,
-                     ($anon ??
-                          QAST::Regex.new( :rxtype<pass> ) !!
-                          QAST::Regex.new( :rxtype<pass>, :name(%*RX<name>) )));
-        $block.push($initpast);
-        $block.push($qast);
-        $block;
-    }
-
-    sub capnames($ast, $count) {
-        my %capnames;
-        my $rxtype := $ast.rxtype;
-        if $rxtype eq 'concat' {
-            for $ast.list {
-                my %x := capnames($_, $count);
-                for %x { %capnames{$_.key} := +%capnames{$_.key} + $_.value; }
-                $count := %x{''};
-            } 
-        }
-        elsif $rxtype eq 'altseq' || $rxtype eq 'alt' {
-            my $max := $count;
-            for $ast.list {
-                my %x := capnames($_, $count);
-                for %x {
-                    %capnames{$_.key} := +%capnames{$_.key} < 2 && %x{$_.key} == 1 ?? 1 !! 2;
-                }
-                $max := %x{''} if %x{''} > $max;
-            }
-            $count := $max;
-        }
-        elsif $rxtype eq 'subrule' && $ast.subtype eq 'capture' {
-            my $name := $ast.name;
-            if $name eq '' { $name := $count; $ast.name($name); }
-            my @names := nqp::split('=', $name);
-            for @names {
-                if $_ eq '0' || $_ > 0 { $count := $_ + 1; }
-                %capnames{$_} := 1;
-            }
-        }
-        elsif $rxtype eq 'subcapture' {
-            for nqp::split(' ', $ast.name) {
-                if $_ eq '0' || $_ > 0 { $count := $_ + 1; }
-                %capnames{$_} := 1;
-            }
-            my %x := capnames($ast[0], $count);
-            for %x { %capnames{$_.key} := +%capnames{$_.key} + %x{$_.key} }
-            $count := %x{''};
-        }
-        elsif $rxtype eq 'quant' {
-            my %astcap := capnames($ast[0], $count);
-            for %astcap { %capnames{$_} := 2 }
-            $count := %astcap{''};
-        }
-        %capnames{''} := $count;
-        nqp::deletekey(%capnames, '$!from');
-        nqp::deletekey(%capnames, '$!to');
-        %capnames;
-    }
-    
-    sub qalt_nfas($ast, $subid, $initpast) {
-        my $rxtype := $ast.rxtype;
-        if $rxtype eq 'alt' {
-            my $nfapast := QAST::Op.new( :op('list') );
-            $ast.name(QAST::Node.unique('alt_nfa_') ~ '_' ~ ~nqp::time_n());
-            for $ast.list {
-                qalt_nfas($_, $subid, $initpast);
-                $nfapast.push(QRegex::NFA.new.addnode($_).qast(:non_empty));
-            }
-            my $nfablock := QAST::BlockMemo.new( :name($subid ~ '_' ~ $ast.name), $nfapast);
-            $initpast.push(QAST::Stmt.new($nfablock));
-        }
-        elsif $rxtype eq 'subcapture' || $rxtype eq 'quant' {
-            qalt_nfas($ast[0], $subid, $initpast)
-        }
-        elsif $rxtype eq 'concat' || $rxtype eq 'altseq' || $rxtype eq 'conj' || $rxtype eq 'conjseq' {
-            for $ast.list { qalt_nfas($_, $subid, $initpast) }
-        }
     }
 
     method subrule_alias($ast, $name) {
