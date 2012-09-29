@@ -3,36 +3,41 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         make qbuildsub($<nibbler>.ast, :anon(1), :addself(1));
     }
 
-    method nibbler($/) { make $<termaltseq>.ast }
+    method nibbler($/) { make $<alternation>.ast }
 
-    method termaltseq($/) {
-        my $qast := $<termish>[0].ast;
-        if +$<termish> > 1 {
+    method alternation($/) {
+        my $qast := $<sequence>[0].ast;
+        if +$<sequence> > 1 {
             $qast := QAST::Regex.new( :rxtype<altseq>, :node($/) );
-            for $<termish> { $qast.push($_.ast); }
+            for $<sequence> { $qast.push($_.ast); }
         }
         make $qast;
     }
 
-    method termish($/) {
-        my $qast := QAST::Regex.new( :rxtype<concat>, :node($/) );
-        my $lastlit := 0;
-        for $<noun> {
-            my $ast := $_.ast;
-            if $ast {
-                if $lastlit && $ast.rxtype eq 'literal'
-                        && !QAST::Node.ACCEPTS($ast[0]) {
-                    $lastlit[0] := $lastlit[0] ~ $ast[0];
-                }
-                else {
-                    $qast.push($_.ast);
-                    $lastlit := $ast.rxtype eq 'literal' 
-                                && !QAST::Node.ACCEPTS($ast[0])
-                                  ?? $ast !! 0;
+    method sequence($/) {
+        if $<quantified_atom> {
+            my $qast := QAST::Regex.new( :rxtype<concat>, :node($/) );
+            my $lastlit := 0;
+            for $<quantified_atom> {
+                my $ast := $_.ast;
+                if $ast {
+                    if $lastlit && $ast.rxtype eq 'literal'
+                            && !QAST::Node.ACCEPTS($ast[0]) {
+                        $lastlit[0] := $lastlit[0] ~ $ast[0];
+                    }
+                    else {
+                        $qast.push($_.ast);
+                        $lastlit := $ast.rxtype eq 'literal' 
+                                    && !QAST::Node.ACCEPTS($ast[0])
+                                    ?? $ast !! 0;
+                    }
                 }
             }
+            make $qast;
         }
-        make $qast;
+        else {
+            make QAST::Regex.new( :rxtype<anchor>, :name<pass>, :node($/) );
+        }
     }
 
     method quantified_atom($/) {
@@ -86,9 +91,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
     
     method p5metachar:sym<( )>($/) {
         make QAST::Regex.new( :rxtype<subcapture>, :node($/),
-            $<nibbler>
-                ?? $<nibbler>[0].ast
-                !! QAST::Regex.new( :rxtype<anchor>, :subtype<pass> ) );
+            $<nibbler>.ast );
     }
     
     method p5metachar:sym<[ ]>($/) {

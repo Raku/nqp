@@ -15,17 +15,16 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
         {
             for $OLDRX { %*RX{$_.key} := $_.value; }
         }
-        <termaltseq>
+        <alternation>
     }
     
-    token termaltseq {
-        <termish>
-        [ '|' <![|]> [ <termish> || <.panic: 'Null pattern not allowed'> ] ]*
+    token alternation {
+        <sequence>+ % '|'
     }
     
-    token termish {
+    token sequence {
         <.ws>  # XXX assuming old /x here?
-        <noun=.quantified_atom>+
+        <quantified_atom>*
     }
     
     token quantified_atom {
@@ -59,7 +58,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
         '(?' {} <assertion=p5assertion>
         [ ')' || <.panic: "Perl 5 regex assertion not terminated by parenthesis"> ]
     }
-    token p5metachar:sym<( )> { '(' {} <nibbler>? ')' }
+    token p5metachar:sym<( )> { '(' {} <nibbler> ')' }
     token p5metachar:sym<[ ]> { <?before '['> <cclass> }
     
     token cclass {
