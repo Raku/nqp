@@ -279,7 +279,6 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         }
         elsif $rxtype eq 'quant' {
             my %astcap := capnames($ast[0], $count);
-            for %astcap { %capnames{$_} := 2 }
             $count := %astcap{''};
         }
         %capnames{''} := $count;
