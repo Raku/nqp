@@ -14,3 +14,5 @@ d()ef		zzzabcdefzzz	y			empty capture
 (a)b(c)		abc		y			multiple matches
 (a)b(c)		abc	<mob[0]: a @ 0>	basic $0
 (a)b(c)		abc	<mob[1]: c @ 2>	basic $1
+b(.)\1				bookkeeper	y			backreference
+b(.)\1(.)\2				bookkeeper	y			backreference

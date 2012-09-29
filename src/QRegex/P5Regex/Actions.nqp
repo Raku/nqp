@@ -164,8 +164,15 @@ class QRegex::P5Regex::Actions is HLL::Actions {
     }
     
     method p5backslash:sym<misc>($/) {
-        my $qast := QAST::Regex.new( ~$/ , :rxtype('literal'), :node($/) );
-        make $qast;
+        if $<litchar> {
+            make QAST::Regex.new( ~$<litchar> , :rxtype('literal'), :node($/) );
+        }
+        else {
+            make QAST::Regex.new( :rxtype<subrule>, :subtype<method>, :node($/),
+                QAST::Node.new(
+                    QAST::SVal.new( :value('!BACKREF') ),
+                    QAST::SVal.new( :value(~$<number> - 1) ) ) );
+        }
     }
     
     method p5quantifier:sym<*>($/) {

@@ -83,7 +83,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     
     token p5backslash:sym<b> { $<sym>=[<[bB]>] }
     token p5backslash:sym<s> { $<sym>=[<[dDnNsSwW]>] }
-    token p5backslash:sym<misc> { \W }
+    token p5backslash:sym<misc> { $<litchar>=(\W) | $<number>=(\d+) }
     token p5backslash:sym<oops> { <.panic: "Unrecognized Perl 5 regex backslash sequence"> }
 
     proto token p5assertion { <...> }
