@@ -59,7 +59,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
         '(?' {} <assertion=p5assertion>
         [ ')' || <.panic: "Perl 5 regex assertion not terminated by parenthesis"> ]
     }
-    token p5metachar:sym<( )> { '(' {} <nibbler> ')' }
+    token p5metachar:sym<( )> { '(' {} <nibbler>? ')' }
     token p5metachar:sym<[ ]> { <?before '['> <cclass> }
     
     token cclass {

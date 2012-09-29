@@ -85,7 +85,10 @@ class QRegex::P5Regex::Actions is HLL::Actions {
     }
     
     method p5metachar:sym<( )>($/) {
-        make QAST::Regex.new( $<nibbler>.ast, :rxtype<subcapture>, :node($/) );
+        make QAST::Regex.new( :rxtype<subcapture>, :node($/),
+            $<nibbler>
+                ?? $<nibbler>[0].ast
+                !! QAST::Regex.new( :rxtype<anchor>, :subtype<pass> ) );
     }
     
     method p5metachar:sym<[ ]>($/) {
