@@ -11,3 +11,6 @@ d()ef		zzzabcdefzzz	y			empty capture
 (a(b(c))(d))		abcd		<mob[1]: bc @ 1>	nested match
 (a(b(c))(d))		abcd		<mob[2]: c @ 2>	nested match
 (a(b(c))(d))		abcd		<mob[3]: d @ 3>	nested match
+(a)b(c)		abc		y			multiple matches
+(a)b(c)		abc	<mob[0]: a @ 0>	basic $0
+(a)b(c)		abc	<mob[1]: c @ 2>	basic $1
