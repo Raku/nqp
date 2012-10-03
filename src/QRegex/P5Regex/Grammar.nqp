@@ -88,6 +88,9 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
 
     proto token p5assertion { <...> }
     
+    token p5assertion:sym<=> { <sym> [ <?before ')'> | <nibbler> ] }
+    token p5assertion:sym<!> { <sym> [ <?before ')'> | <nibbler> ] }
+    
     token p5mod  { <[imox]>* }
     token p5mods { <on=p5mod> [ '-' <off=p5mod> ]? }
     token p5assertion:sym<mod> {
