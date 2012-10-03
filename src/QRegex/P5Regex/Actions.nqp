@@ -89,6 +89,10 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         );
     }
     
+    method p5metachar:sym<(? )>($/) {
+        make $<assertion>.ast;
+    }
+    
     method p5metachar:sym<( )>($/) {
         make QAST::Regex.new( :rxtype<subcapture>, :node($/),
             $<nibbler>.ast );
@@ -172,6 +176,29 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                 QAST::Node.new(
                     QAST::SVal.new( :value('!BACKREF') ),
                     QAST::SVal.new( :value(~$<number> - 1) ) ) );
+        }
+    }
+    
+    method p5mods($/) {
+        for nqp::split('', ~$<on>) {
+            %*RX{$_} := 1;
+        }
+        if $<off> {
+            for nqp::split('', ~$<off>[0]) {
+                %*RX{$_} := 0;
+            }
+        }
+    }
+    
+    method p5assertion:sym<mod>($/) {
+        if $<nibbler> {
+            make $<nibbler>[0].ast;
+        }
+        else {
+            for %*RX {
+                %*OLDRX{$_.key} := $_.value;
+            }
+            make 0;
         }
     }
     

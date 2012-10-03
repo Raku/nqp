@@ -87,6 +87,21 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     token p5backslash:sym<oops> { <.panic: "Unrecognized Perl 5 regex backslash sequence"> }
 
     proto token p5assertion { <...> }
+    
+    token p5mod  { <[imox]>* }
+    token p5mods { <on=p5mod> [ '-' <off=p5mod> ]? }
+    token p5assertion:sym<mod> {
+        :my %*OLDRX := pir::find_dynamic_lex__Ps('%*RX');
+        :my %*RX;
+        {
+            for %*OLDRX { %*RX{$_.key} := $_.value; }
+        }
+        <mods=p5mods>
+        [
+        | ':' <nibbler>?
+        | <?before ')' >
+        ]
+    }
 
     proto token p5quantifier { <...> }
     
@@ -101,8 +116,6 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     }
     
     token quantmod { [ '?' | '+' ]? }
-
-    proto token p5mod_internal { <...> }
 
     token ws { [ \s+ | '#' \N* ]* }
 

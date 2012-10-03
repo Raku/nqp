@@ -7,7 +7,8 @@ my @files := [
     'rx_quantifiers',
     'rx_charclass',
     'rx_metachars',
-    'rx_captures'
+    'rx_captures',
+    'rx_modifiers'
 ];
 
 my %expansions;
