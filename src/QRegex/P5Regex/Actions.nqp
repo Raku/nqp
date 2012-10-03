@@ -290,9 +290,8 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                 for %x {
                     %capnames{$_.key} := +%capnames{$_.key} < 2 && %x{$_.key} == 1 ?? 1 !! 2;
                 }
-                $max := %x{''} if %x{''} > $max;
+                $count := %x{''};
             }
-            $count := $max;
         }
         elsif $rxtype eq 'subrule' && $ast.subtype eq 'capture' {
             my $name := $ast.name;
