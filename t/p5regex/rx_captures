@@ -1,0 +1,17 @@
+(a.)..(..)		zzzabcdefzzz	y			basic match
+(a.)..(..)		zzzabcdefzzz	<mob: abcdef @ 3>	basic $0
+(a.)..(..)		zzzabcdefzzz	<mob[0]: ab @ 3>	basic $1
+(a.)..(..)		zzzabcdefzzz	<mob[1]: ef @ 7>	basic $2
+d()ef		zzzabcdefzzz	y			empty capture
+()ef		zzzabcdefzzz	y			empty capture at start
+(a(b(c))(d))		abcd		y			nested match
+(a(b(c))(d))		abcd		<mob: abcd @ 0>		nested match
+(a(b(c))(d))		abcd		<mob[0]: abcd @ 0>	nested match
+(a(b(c))(d))		abcd		<mob[1]: bc @ 1>	nested match
+(a(b(c))(d))		abcd		<mob[2]: c @ 2>	nested match
+(a(b(c))(d))		abcd		<mob[3]: d @ 3>	nested match
+(a)b(c)		abc		y			multiple matches
+(a)b(c)		abc	<mob[0]: a @ 0>	basic $0
+(a)b(c)		abc	<mob[1]: c @ 2>	basic $1
+b(.)\1				bookkeeper	y			backreference
+b(.)\1(.)\2				bookkeeper	y			backreference

@@ -532,7 +532,14 @@ class NQP::Actions is HLL::Actions {
                 $past.fallback( default_for( $<sigil> ) );
             }
             else {
-                $past := QAST::Var.new( :name(~@name.pop), :scope('lexical') );
+                my $name := ~@name.pop;
+                if $*IN_DECL eq 'variable' || $name eq '$_' || $name eq '$/'
+                || $name eq '$!' || $<twigil>[0] eq '?' || $*W.is_lexical($name) {
+                    $past := QAST::Var.new( :name($name), :scope('lexical') );
+                }
+                else {
+                    $/.CURSOR.panic("Use of undeclared variable '$name'");
+                }
             }
         }
         make $past;

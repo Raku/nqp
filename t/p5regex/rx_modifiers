@@ -1,0 +1,12 @@
+##  modifiers
+(?i)bcd			abcdef	y	ignorecase (:i)
+(?i)bcd			aBcdef	y	ignorecase (:i)
+(?i)bcd			abCdef	y	ignorecase (:i)
+(?i)bcd			abcDef	y	ignorecase (:i)
+(?i)bcd			abc-ef	n	ignorecase (:i)
+ab(?i:cd)ef		abcdef	y	ignorecase, lexical (:i)
+ab(?i:cd)ef		abCdef	y	ignorecase, lexical (:i)
+ab(?i:cd)ef		abcDef	y	ignorecase, lexical (:i)
+ab(?i:cd)ef		abCDef	y	ignorecase, lexical (:i)
+ab(?i:cd)ef		aBCDef	n	ignorecase, lexical (:i)
+ab(?i:cd)ef		abCDEf	n	ignorecase, lexical (:i)

@@ -15,17 +15,16 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
         {
             for $OLDRX { %*RX{$_.key} := $_.value; }
         }
-        <termaltseq>
+        <alternation>
     }
     
-    token termaltseq {
-        <termish>
-        [ '|' <![|]> [ <termish> || <.panic: 'Null pattern not allowed'> ] ]*
+    token alternation {
+        <sequence>+ % '|'
     }
     
-    token termish {
+    token sequence {
         <.ws>  # XXX assuming old /x here?
-        <noun=.quantified_atom>+
+        <quantified_atom>*
     }
     
     token quantified_atom {
@@ -55,6 +54,11 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     token p5metachar:sym<$>  {
         '$' <?before \W | $>
     }
+    token p5metachar:sym<(? )> {
+        '(?' {} <assertion=p5assertion>
+        [ ')' || <.panic: "Perl 5 regex assertion not terminated by parenthesis"> ]
+    }
+    token p5metachar:sym<( )> { '(' {} <nibbler> ')' }
     token p5metachar:sym<[ ]> { <?before '['> <cclass> }
     
     token cclass {
@@ -79,10 +83,28 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     
     token p5backslash:sym<b> { $<sym>=[<[bB]>] }
     token p5backslash:sym<s> { $<sym>=[<[dDnNsSwW]>] }
-    token p5backslash:sym<misc> { \W }
+    token p5backslash:sym<misc> { $<litchar>=(\W) | $<number>=(\d+) }
     token p5backslash:sym<oops> { <.panic: "Unrecognized Perl 5 regex backslash sequence"> }
 
     proto token p5assertion { <...> }
+    
+    token p5assertion:sym<=> { <sym> [ <?before ')'> | <nibbler> ] }
+    token p5assertion:sym<!> { <sym> [ <?before ')'> | <nibbler> ] }
+    
+    token p5mod  { <[imox]>* }
+    token p5mods { <on=p5mod> [ '-' <off=p5mod> ]? }
+    token p5assertion:sym<mod> {
+        :my %*OLDRX := pir::find_dynamic_lex__Ps('%*RX');
+        :my %*RX;
+        {
+            for %*OLDRX { %*RX{$_.key} := $_.value; }
+        }
+        <mods=p5mods>
+        [
+        | ':' <nibbler>?
+        | <?before ')' >
+        ]
+    }
 
     proto token p5quantifier { <...> }
     
@@ -97,8 +119,6 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     }
     
     token quantmod { [ '?' | '+' ]? }
-
-    proto token p5mod_internal { <...> }
 
     token ws { [ \s+ | '#' \N* ]* }
 
@@ -121,7 +141,6 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     proto token metachar { <...> }
     token metachar:sym<ws> { <.normspace> }
     token metachar:sym<[ ]> { '[' <nibbler> ']' }
-    token metachar:sym<( )> { '(' <nibbler> ')' }
     token metachar:sym<'> { <?[']> <quote_EXPR: ':q'> }
     token metachar:sym<"> { <?["]> <quote_EXPR: ':qq'> }
     token metachar:sym<lwb> { $<sym>=['<<'|'«'] }
@@ -129,11 +148,6 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     token metachar:sym<from> { '<(' }
     token metachar:sym<to>   { ')>' }
     token metachar:sym<mod> { <mod_internal> }
-
-    token metachar:sym<assert> {
-        '<' <assertion>
-        [ '>' || <.panic: 'regex assertion not terminated by angle bracket'> ]
-    }
 
     token metachar:sym<var> {
         [
