@@ -238,6 +238,14 @@ class QRegex::NFA {
     method subcapture($node, int $from, int $to) {
         self.regex_nfa($node[0], $from, $to);
     }
+    
+    method save(:$non_empty) {
+        unless $!edges {
+            return 0 unless $non_empty;
+            self.addedge(1, 0, $EDGE_FATE, 0, :newedge(1)) 
+        }
+        $!states
+    }
 
     method qast(:$non_empty) {
         unless $!edges {
