@@ -62,8 +62,30 @@ my knowhow NQPSignature {
 
 my knowhow NQPRegex {
     has $!do;
+    has $!caps;
+    has $!nfa;
+    has %!alt_nfas;
     method nqpattr($key) {
         $!do.nqpattr($key)
+    }
+    method SET_CAPS($caps) {
+        $!caps := $caps;
+    }
+    method SET_NFA($nfa) {
+        $!nfa := $nfa;
+    }
+    method SET_ALT_NFA($name, $nfa) {
+        nqp::ifnull(%!alt_nfas, %!alt_nfas := {});
+        %!alt_nfas{$name} := $nfa;
+    }
+    method CAPS() {
+        $!caps
+    }
+    method NFA() {
+        $!nfa
+    }
+    method ALT_NFA($name) {
+        %!alt_nfas{$name}
     }
 }
 pir::stable_publish_vtable_handler_mapping__vPP(NQPRegex,
