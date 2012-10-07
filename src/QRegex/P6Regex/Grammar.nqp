@@ -161,10 +161,6 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         [ <.ws> '=' <.ws> <quantified_atom> ]?
     }
 
-    token metachar:sym<PIR> {
-        ':PIR{{' $<pir>=[.*?] '}}'
-    }
-
     proto token backslash { <...> }
     token backslash:sym<s> { $<sym>=[<[dDnNsSwW]>] }
     token backslash:sym<b> { $<sym>=[<[bB]>] }
