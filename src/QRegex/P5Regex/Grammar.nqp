@@ -121,7 +121,12 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     
     token quantmod { [ '?' | '+' ]? }
 
-    token ws { [ \s+ | '#' \N* ]* }
+    token ws {
+        [
+        | '(?#' ~ ')' <-[)]>*
+        | <?{ %*RX<x> }> [ \s+ | '#' \N* ]
+        ]*
+    }
 
 
     # XXX Below here is straight from P6Regex and unreviewed.
@@ -141,7 +146,6 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     rule arglist { <arg> [ ',' <arg>]* }
 
     proto token metachar { <...> }
-    token metachar:sym<ws> { <.normspace> }
     token metachar:sym<'> { <?[']> <quote_EXPR: ':q'> }
     token metachar:sym<"> { <?["]> <quote_EXPR: ':qq'> }
     token metachar:sym<lwb> { $<sym>=['<<'|'«'] }

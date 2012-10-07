@@ -232,7 +232,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
             make 0;
         }
     }
-   
+
     method p5mods($/) {
         for nqp::split('', ~$<on>) {
             %*RX{$_} := 1;
@@ -395,14 +395,6 @@ class QRegex::P5Regex::Actions is HLL::Actions {
 
 
     # XXX Below here copied from p6regex; needs review
-
-    method metachar:sym<ws>($/) {
-        my $qast := %*RX<s>
-                    ?? QAST::Regex.new(:rxtype<ws>, :subtype<method>, :node($/),
-                            QAST::Node.new( QAST::SVal.new( :value('ws') ) ))
-                    !! 0;
-        make $qast;
-    }
 
     method metachar:sym<'>($/) {
         my $quote := $<quote_EXPR>.ast;
