@@ -1,6 +1,6 @@
 ##   Metacharacter tests
 .			a		y	dot (.)
-.			\n		y	dot (.)
+.			\n		n	dot (.)
 .			''		n	dot (.)
 a\s+f			abcdef		n	whitespace (\s)
 ab\s+cdef		ab  cdef	y	whitespace (\s)
