@@ -71,7 +71,9 @@ class QRegex::P5Regex::Actions is HLL::Actions {
     }
     
     method p5metachar:sym<.>($/) {
-        make QAST::Regex.new( :rxtype<cclass>, :subtype<.>, :node($/) );
+        make %*RX<s>
+            ?? QAST::Regex.new( :rxtype<cclass>, :subtype<.>, :node($/) )
+            !! QAST::Regex.new( :rxtype<cclass>, :subtype<nl>, :negate(1), :node($/) );
     }
 
     method p5metachar:sym<^>($/) {
