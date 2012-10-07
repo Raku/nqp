@@ -433,12 +433,14 @@ role NQPCursorRole is export {
         $cur;
     }
 
-    method FAILGOAL($goal) {
-        my $sub := Q:PIR {
-            %r = getinterp
-            %r = %r['sub';1]
-        };
-        nqp::die("Unable to parse " ~ ~$sub ~ ", couldn't find final $goal");
+    method FAILGOAL($goal, $dba?) {
+        unless $dba {
+            $dba := ~Q:PIR{
+                %r = getinterp
+                %r = %r['sub';1]
+            };
+        }
+        nqp::die("Unable to parse expression in $dba; couldn't find final $goal");
     }
 }
 

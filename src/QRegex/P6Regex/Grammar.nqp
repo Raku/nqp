@@ -225,7 +225,16 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token mod_internal {
         [
         | ':' $<n>=('!' | \d+)**1  <mod_ident> »
-        | ':' <mod_ident> [ '(' $<n>=[\d+] ')' ]?
+        | ':' <mod_ident>
+            [
+            '('
+                [
+                | $<n>=[\d+]
+                | <?[']> <quote_EXPR: ':q'>
+                | <?["]> <quote_EXPR: ':qq'>
+                ]
+                ')'
+            ]?
         ]
     }
 
@@ -233,4 +242,5 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token mod_ident:sym<ignorecase> { $<sym>=[i] 'gnorecase'? }
     token mod_ident:sym<ratchet>    { $<sym>=[r] 'atchet'? }
     token mod_ident:sym<sigspace>   { $<sym>=[s] 'igspace'? }
+    token mod_ident:sym<dba>        { <sym> }
 }

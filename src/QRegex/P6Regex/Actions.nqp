@@ -236,6 +236,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method metachar:sym<~>($/) {
+        my @dba := [QAST::SVal.new(:value(%*RX<dba>))] if nqp::existskey(%*RX, 'dba');
         make QAST::Regex.new(
             $<EXPR>.ast,
             QAST::Regex.new(
@@ -243,7 +244,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 QAST::Regex.new( :rxtype<subrule>, :subtype<method>,
                     QAST::Node.new(
                         QAST::SVal.new( :value('FAILGOAL') ),
-                        QAST::SVal.new( :value(~$<GOAL>) ) ) ),
+                        QAST::SVal.new( :value(~$<GOAL>) ),
+                        |@dba) ),
                 :rxtype<altseq>
             ),
             :rxtype<concat>
@@ -512,8 +514,18 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method mod_internal($/) {
-        my $n := $<n>[0] gt '' ?? +$<n>[0] !! 1;
-        %*RX{ ~$<mod_ident><sym> } := $n;
+        if $<quote_EXPR> {
+            if $<quote_EXPR>[0].ast ~~ QAST::SVal {
+                %*RX{ ~$<mod_ident><sym> } := $<quote_EXPR>[0].ast.value;
+            }
+            else {
+                $/.CURSOR.panic("Internal modifier strings must be literals");
+            }
+        }
+        else {
+            my $n := $<n>[0] gt '' ?? +$<n>[0] !! 1;
+            %*RX{ ~$<mod_ident><sym> } := $n;
+        }
         make 0;
     }
 
