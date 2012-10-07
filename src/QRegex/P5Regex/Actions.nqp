@@ -44,7 +44,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         my $qast := $<atom>.ast;
         if $<quantifier> {
             my $ast := $<quantifier>[0].ast;
-            $ast.unshift($qast);
+            $ast.unshift($qast || QAST::Regex.new( :rxtype<anchor>, :name<pass> ));
             $qast := $ast;
         }
         $qast.backtrack('r') if $qast && !$qast.backtrack && %*RX<r>;
