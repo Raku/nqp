@@ -131,18 +131,30 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                 else {
                     $rhs := ~$_[1][0][0];
                 }
-                my $ord0 := nqp::ord($lhs);
-                my $ord1 := nqp::ord($rhs);
-                $/.CURSOR.panic("Illegal reversed character range in regex: " ~ ~$_)
-                    if $ord0 > $ord1;
-                $str := nqp::concat($str, nqp::chr($ord0++)) while $ord0 <= $ord1;
+                sub add_range($from, $to) {
+                    my int $ord0 := nqp::ord($from);
+                    my int $ord1 := nqp::ord($to);
+                    $/.CURSOR.panic("Illegal reversed character range in regex: " ~ ~$_)
+                        if $ord0 > $ord1;
+                    $str := nqp::concat($str, nqp::chr($ord0++)) while $ord0 <= $ord1;
+                }
+                if %*RX<i> {
+                    add_range(nqp::lc($lhs), nqp::lc($rhs));
+                    add_range(nqp::uc($lhs), nqp::uc($rhs));
+                }
+                else {
+                    add_range($lhs, $rhs);
+                }
             }
             elsif $_[0]<backslash> {
                 my $bs := $_[0]<backslash>.ast;
                 $bs.negate(!$bs.negate) if $<sign> eq '^';
                 @alts.push($bs);
             }
-            else { $str := $str ~ ~$_[0]; }
+            else {
+                my $c := ~$_[0];
+                $str := $str ~ (%*RX<i> ?? nqp::lc($c) ~ nqp::uc($c) !! $c);
+            }
         }
         @alts.push(QAST::Regex.new( $str, :rxtype<enumcharlist>, :node($/), :negate( $<sign> eq '^' ) ))
             if nqp::chars($str);
