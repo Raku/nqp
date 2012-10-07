@@ -1113,24 +1113,19 @@ class NQP::Actions is HLL::Actions {
         my $name := ~$<deflongname>.ast;
         my $past;
         if $<proto> {
-            $past :=
-                QAST::Stmts.new(
-                    QAST::Block.new(
-                        :name($name),
-                        QAST::Op.new(
-                            QAST::Var.new( :name('self'), :scope('local'), :decl('param') ),
-                            QAST::SVal.new( :value($name) ),
-                            :name('!protoregex'),
-                            :op('callmethod')
-                        ),
-                        :blocktype('declaration'),
-                        :node($/)
-                    )
+            $past := QAST::Block.new(
+                    :name($name),
+                    QAST::Op.new(
+                        QAST::Var.new( :name('self'), :scope('local'), :decl('param') ),
+                        QAST::SVal.new( :value($name) ),
+                        :name('!protoregex'),
+                        :op('callmethod')
+                    ),
+                    :blocktype('declaration'),
+                    :node($/)
                 );
-                for @($past) {
-                    $*W.pkg_add_method($*PACKAGE, 'add_method', $_.name(),
-                        $*W.create_code($_, $_.name(), 0, :code_type_name<NQPRegex>));
-                }
+                $*W.pkg_add_method($*PACKAGE, 'add_method', $name,
+                    $*W.create_code($past, $name, 0, :code_type_name<NQPRegex>));
         }
         else {
             my $block := $*W.pop_lexpad();
