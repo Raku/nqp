@@ -374,10 +374,6 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         make $qast;
     }
 
-    method metachar:sym<[ ]>($/) {
-        make $<nibbler>.ast;
-    }
-
     method metachar:sym<'>($/) {
         my $quote := $<quote_EXPR>.ast;
         if QAST::SVal.ACCEPTS($quote) { $quote := $quote.value; }
@@ -506,38 +502,6 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         make QAST::Regex.new( $<charspec>.ast, :rxtype('literal'), :node($/) );
     }
 
-    method assertion:sym<?>($/) {
-        my $qast;
-        if $<assertion> {
-            $qast := $<assertion>.ast;
-            $qast.subtype('zerowidth');
-        }
-        else {
-            $qast := QAST::Regex.new( :rxtype<anchor>, :subtype<pass>, :node($/) );
-        }
-        make $qast;
-    }
-
-    method assertion:sym<!>($/) {
-        my $qast;
-        if $<assertion> {
-            $qast := $<assertion>.ast;
-            $qast.negate( !$qast.negate );
-            $qast.subtype('zerowidth');
-        }
-        else {
-            $qast := QAST::Regex.new( :rxtype<anchor>, :subtype<fail>, :node($/) );
-        }
-        make $qast;
-    }
-
-    method assertion:sym<method>($/) {
-        my $qast := $<assertion>.ast;
-        $qast.subtype('method');
-        $qast.name('');
-        make $qast;
-    }
-
     method assertion:sym<name>($/) {
         my $name := ~$<longname>;
         my $qast;
@@ -578,12 +542,6 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         my $past := QAST::Op.new( :op('list') );
         for $<arg> { $past.push( $_.ast ); }
         make $past;
-    }
-
-    method mod_internal($/) {
-        my $n := $<n>[0] gt '' ?? +$<n>[0] !! 1;
-        %*RX{ ~$<mod_ident><sym> } := $n;
-        make 0;
     }
 
     method subrule_alias($ast, $name) {

@@ -122,6 +122,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
 
     token ws { [ \s+ | '#' \N* ]* }
 
+
     # XXX Below here is straight from P6Regex and unreviewed.
 
     token normspace { <?before \s | '#' > <.ws> }
@@ -140,14 +141,12 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
 
     proto token metachar { <...> }
     token metachar:sym<ws> { <.normspace> }
-    token metachar:sym<[ ]> { '[' <nibbler> ']' }
     token metachar:sym<'> { <?[']> <quote_EXPR: ':q'> }
     token metachar:sym<"> { <?["]> <quote_EXPR: ':qq'> }
     token metachar:sym<lwb> { $<sym>=['<<'|'«'] }
     token metachar:sym<rwb> { $<sym>=['>>'|'»'] }
     token metachar:sym<from> { '<(' }
     token metachar:sym<to>   { ')>' }
-    token metachar:sym<mod> { <mod_internal> }
 
     token metachar:sym<var> {
         [
@@ -176,13 +175,6 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
 
     proto token assertion { <...> }
 
-    token assertion:sym<?> { '?' [ <?before '>' > | <assertion> ] }
-    token assertion:sym<!> { '!' [ <?before '>' > | <assertion> ] }
-
-    token assertion:sym<method> {
-        '.' <assertion>
-    }
-
     token assertion:sym<name> {
         <longname=.identifier>
             [
@@ -193,16 +185,4 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
             | <.normspace> <nibbler>
             ]?
     }
-
-    token mod_internal {
-        [
-        | ':' $<n>=('!' | \d+)**1  <mod_ident> »
-        | ':' <mod_ident> [ '(' $<n>=[\d+] ')' ]?
-        ]
-    }
-
-    proto token mod_ident { <...> }
-    token mod_ident:sym<ignorecase> { $<sym>=[i] 'gnorecase'? }
-    token mod_ident:sym<ratchet>    { $<sym>=[r] 'atchet'? }
-    token mod_ident:sym<sigspace>   { $<sym>=[s] 'igspace'? }
 }
