@@ -75,7 +75,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
     }
 
     method p5metachar:sym<^>($/) {
-        make QAST::Regex.new( :rxtype<anchor>, :subtype<bos>, :node($/) );
+        make QAST::Regex.new( :rxtype<anchor>, :subtype(%*RX<m> ?? 'bol' !! 'bos'), :node($/) );
     }
 
     method p5metachar:sym<$>($/) {
@@ -85,7 +85,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                 :rxtype('quant'), :min(0), :max(1),
                 QAST::Regex.new( :rxtype('literal'), "\n" )
             ),
-            QAST::Regex.new( :rxtype<anchor>, :subtype<eos>, :node($/) )
+            QAST::Regex.new( :rxtype<anchor>, :subtype(%*RX<m> ?? 'eol' !! 'eos'), :node($/) )
         );
     }
     
