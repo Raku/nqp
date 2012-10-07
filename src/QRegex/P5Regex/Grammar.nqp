@@ -88,6 +88,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
 
     proto token p5assertion { <...> }
     
+    token p5assertion:sym«<» { <sym> $<neg>=['='|'!'] [ <?before ')'> | <nibbler> ] }
     token p5assertion:sym<=> { <sym> [ <?before ')'> | <nibbler> ] }
     token p5assertion:sym<!> { <sym> [ <?before ')'> | <nibbler> ] }
     

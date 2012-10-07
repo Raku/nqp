@@ -190,6 +190,20 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                     QAST::SVal.new( :value(~$<number> - 1) ) ) );
         }
     }
+    
+    method p5assertion:sym«<»($/) {
+        if $<nibbler> {
+            make QAST::Regex.new(
+                :rxtype<subrule>, :subtype<zerowidth>, :negate($<neg> eq '!'), :node($/),
+                QAST::Node.new(
+                    QAST::SVal.new( :value('after') ),
+                    qbuildsub(self.flip_ast($<nibbler>.ast), :anon(1), :addself(1))
+                ));
+        }
+        else {
+            make 0;
+        }
+    }
    
     method p5assertion:sym<=>($/) {
         if $<nibbler> {
@@ -361,6 +375,22 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         nqp::deletekey(%capnames, '$!from');
         nqp::deletekey(%capnames, '$!to');
         %capnames;
+    }
+    
+    method flip_ast($qast) {
+        return $qast unless nqp::istype($qast, QAST::Regex);
+        if $qast.rxtype eq 'literal' {
+            $qast[0] := $qast[0].reverse();
+        }
+        elsif $qast.rxtype eq 'concat' {
+            my @tmp;
+            while +@($qast) { @tmp.push(@($qast).shift) }
+            while @tmp      { @($qast).push(self.flip_ast(@tmp.pop)) }
+        }
+        else {
+            for @($qast) { self.flip_ast($_) }
+        }
+        $qast
     }
 
 
@@ -548,21 +578,5 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         if $ast.name gt '' { $ast.name( $name ~ '=' ~ $ast.name ); }
         else { $ast.name($name); }
         $ast.subtype('capture');
-    }
-
-    method flip_ast($qast) {
-        return $qast unless nqp::istype($qast, QAST::Regex);
-        if $qast.rxtype eq 'literal' {
-            $qast[0] := $qast[0].reverse();
-        }
-        elsif $qast.rxtype eq 'concat' {
-            my @tmp;
-            while +@($qast) { @tmp.push(@($qast).shift) }
-            while @tmp      { @($qast).push(self.flip_ast(@tmp.pop)) }
-        }
-        else {
-            for @($qast) { self.flip_ast($_) }
-        }
-        $qast
     }
 }
