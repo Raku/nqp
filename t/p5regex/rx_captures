@@ -3,7 +3,6 @@
 (a.)..(..)		zzzabcdefzzz	<mob[0]: ab @ 3>	basic $1
 (a.)..(..)		zzzabcdefzzz	<mob[1]: ef @ 7>	basic $2
 d()ef		zzzabcdefzzz	y			empty capture
-# todo :pge<bug>
 ()ef		zzzabcdefzzz	y			empty capture at start
 (a(b(c))(d))		abcd		y			nested match
 (a(b(c))(d))		abcd		<mob: abcd @ 0>		nested match
