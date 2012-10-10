@@ -442,15 +442,19 @@ for <if unless> -> $op_name {
                 }
             }
         }
-        my $res_type := $operands == 3 ??
-            (@op_types[1] eq @op_types[2] ?? nqp::lc(@op_types[1]) !! 'p') !!
-            (@op_types[0] eq @op_types[1] ?? nqp::lc(@op_types[0]) !! 'p');
-        my $res_reg := $*REGALLOC."fresh_$res_type"();
+        my $res_type;
+        my $res_reg;
+        if $*WANT ne 'v' {
+            $res_type := $operands == 3 ??
+                (@op_types[1] eq @op_types[2] ?? nqp::lc(@op_types[1]) !! 'p') !!
+                (@op_types[0] eq @op_types[1] ?? nqp::lc(@op_types[0]) !! 'p');
+            $res_reg := $*REGALLOC."fresh_$res_type"();
+        }
         
         # Evaluate the condition first; store result if needed.
         my $ops := PIRT::Ops.new();
         my $cond_result;
-        if $operands == 2 {
+        if $res_reg && $operands == 2 {
             my $coerced := $qastcomp.coerce(@comp_ops[0], $res_type);
             $ops.push($coerced);
             $ops.push_pirop('set', $res_reg, $coerced.result);
@@ -472,22 +476,32 @@ for <if unless> -> $op_name {
             ($operands == 2 ?? $end_lbl.result !! $else_lbl.result));
         
         # Emit the then; stash the result.
-        my $then := $qastcomp.coerce(@comp_ops[1], $res_type);
-        $ops.push($then);
-        $ops.push_pirop('set', $res_reg, $then.result);
+        if $res_reg {
+            my $then := $qastcomp.coerce(@comp_ops[1], $res_type);
+            $ops.push($then);
+            $ops.push_pirop('set', $res_reg, $then.result);
+        }
+        else {
+            $ops.push(@comp_ops[1]);
+        }
         
         # Handle else branch if needed.
         if $operands == 3 {
-            my $else := $qastcomp.coerce(@comp_ops[2], $res_type);
             $ops.push_pirop('goto', $end_lbl.result);
             $ops.push($else_lbl);
-            $ops.push($else);
-            $ops.push_pirop('set', $res_reg, $else.result);
+            if $res_reg {
+                my $else := $qastcomp.coerce(@comp_ops[2], $res_type);
+                $ops.push($else);
+                $ops.push_pirop('set', $res_reg, $else.result);
+            }
+            else {
+                $ops.push(@comp_ops[2]);
+            }
         }
         
         # Emit end label and tag ops with result.
         $ops.push($end_lbl);
-        $ops.result($res_reg);
+        $ops.result($res_reg || 'null');
         $ops;
     });
 }
