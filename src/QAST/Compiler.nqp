@@ -369,6 +369,7 @@ class QAST::Compiler is HLL::Compiler {
                 my @*INNERS := @inners;
                 my $*HAVE_IMM_ARG := 0;
                 my $*QAST_BLOCK_NO_CLOSE := 0;
+                my $*WANT;
                 my $err;
                 try {
                     $stmts := self.compile_all_the_stmts($node.list);
@@ -588,6 +589,7 @@ class QAST::Compiler is HLL::Compiler {
             {
                 my $*BLOCK := $block;
                 my $*HLL := 'nqp';
+                my $*WANT;
                 $stmts := self.compile_all_the_stmts($node.list);
             }
             
@@ -633,10 +635,14 @@ class QAST::Compiler is HLL::Compiler {
         my $last;
         my $ops := PIRT::Ops.new();
         $ops.node($node) if $node;
-        my $i := 0;
-        my $n := +@stmts;
+        my int $i := 0;
+        my int $n := +@stmts;
+        my $all_void := $*WANT eq 'v';
+        unless nqp::defined($resultchild) {
+            $resultchild := $n - 1;
+        }
         for @stmts {
-            my $void := $i + 1 < $n;
+            my $void := $all_void || $i != $resultchild;
             if $void {
                 if nqp::istype($_, QAST::Want) {
                     $_ := want($_, 'v');
@@ -648,13 +654,10 @@ class QAST::Compiler is HLL::Compiler {
             }
             $ops.push($last)
                 unless $void && nqp::istype($_, QAST::Var);
-            if nqp::defined($resultchild) && $resultchild == $i {
+            if $resultchild == $i {
                 $ops.result($last.result);
             }
             $i := $i + 1;
-        }
-        if $last && !nqp::defined($resultchild) {
-            $ops.result($last.result);
         }
         $ops
     }
