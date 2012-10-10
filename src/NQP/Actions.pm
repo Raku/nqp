@@ -952,7 +952,7 @@ class NQP::Actions is HLL::Actions {
         my $types := nqp::list();
         my $definednesses := nqp::list();
         for @($routine[0]) {
-            if nqp::istype($_, QAST::Var) && $_.decl eq 'param' {
+            if nqp::istype($_, QAST::Var) && $_.decl eq 'param' && !$_.named {
                 $types.push($_.returns =:= NQPMu
                     ?? nqp::null()
                     !! $_.returns);
