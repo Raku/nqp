@@ -702,7 +702,7 @@ grammar NQP::Grammar is HLL::Grammar {
     token prefix:sym<~>   { <sym>  <O('%symbolic_unary, :op<stringify>')> }
     token prefix:sym<->   { <sym>  <![>]> <!number> <O('%symbolic_unary, :op<neg_n>')> }
     token prefix:sym<?>   { <sym>  <O('%symbolic_unary, :op<istrue>')> }
-    token prefix:sym<!>   { <sym>  <O('%symbolic_unary, :op<isfalse>')> }
+    token prefix:sym<!>   { <sym>  <O('%symbolic_unary, :op<falsey>')> }
     token prefix:sym<|>   { <sym>  <O('%symbolic_unary')> }
 
     token infix:sym<*>    { <sym>  <O('%multiplicative, :op<mul_n>')> }
