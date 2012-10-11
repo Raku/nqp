@@ -81,6 +81,9 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
 
     proto token p5backslash { <...> }
     
+    token p5backslash:sym<A> { <sym> }
+    token p5backslash:sym<z> { <sym> }
+    token p5backslash:sym<Z> { <sym> }
     token p5backslash:sym<b> { $<sym>=[<[bB]>] }
     token p5backslash:sym<s> { $<sym>=[<[dDnNsSwW]>] }
     token p5backslash:sym<misc> { $<litchar>=(\W) | $<number>=(\d+) }

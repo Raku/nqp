@@ -168,6 +168,11 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                 QAST::Regex.new( :rxtype<altseq>, |@alts );
         make $qast;
     }
+
+    method p5backslash:sym<A>($/) {
+                make QAST::Regex.new( :rxtype<anchor>, :subtype<bos>, :node($/) );
+
+    }
     
     method p5backslash:sym<s>($/) {
         make QAST::Regex.new(:rxtype<cclass>, '.CCLASS_WHITESPACE', 
@@ -181,6 +186,21 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                              QAST::Node.new( QAST::SVal.new( :value('wb') ) ));
     }
     
+    method p5backslash:sym<z>($/) {
+        make QAST::Regex.new( :rxtype<anchor>, :subtype<eos>, :node($/) );
+    }
+
+    method p5backslash:sym<Z>($/) {
+        make QAST::Regex.new(
+            :rxtype('concat'),
+            QAST::Regex.new(
+                :rxtype('quant'), :min(0), :max(1),
+                QAST::Regex.new( :rxtype('literal'), "\n" )
+            ),
+            QAST::Regex.new( :rxtype<anchor>, :subtype('eos'), :node($/) )
+        );
+    }
+
     method p5backslash:sym<misc>($/) {
         if $<litchar> {
             make QAST::Regex.new( ~$<litchar> , :rxtype('literal'), :node($/) );
