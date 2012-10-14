@@ -1,6 +1,6 @@
 #! nqp
 
-plan(30);
+plan(31);
 
 use NQPHLL;
 
@@ -81,3 +81,7 @@ ok($r.options<other> eq 'v3', 'long|short alias (short)');
 
 $r := $x.parse(['-w', 'A', '-w', 'B']);
 ok(nqp::join(',', $r.options<w>) eq 'A,B', 'multiple options with the same name');
+
+$x := HLL::CommandLine::Parser.new(['e=s']);
+$r := $x.parse(['-e', '-1 < 0']);
+ok($r.options<e> eq '-1 < 0', 'can have option values that start with a dash');
