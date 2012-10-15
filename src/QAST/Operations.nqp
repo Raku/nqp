@@ -876,16 +876,17 @@ QAST::Operations.add_core_op('call', -> $qastcomp, $op {
         handle_arg($_, $qastcomp, $ops, @pos_arg_results, @named_arg_results);
     }
     
-    # Figure out result register type and allocate a register for it.
-    my $res_type := $qastcomp.type_to_register_type($op.returns);
-    my $res_reg := $*REGALLOC."fresh_{nqp::lc($res_type)}"();
-    
-    # Generate call.
+    # Generate call, with a result register if we're not in void context.
     $ops.push($callee);
-    $ops.push_pirop('call', $callee.result, |@pos_arg_results, |@named_arg_results, :result($res_reg));
-    
-    # Result is the result of the call.
-    $ops.result($res_reg);
+    if $*WANT eq 'v' {
+        $ops.push_pirop('call', $callee.result, |@pos_arg_results, |@named_arg_results);
+    }
+    else {
+        my $res_type := $qastcomp.type_to_register_type($op.returns);
+        my $res_reg := $*REGALLOC."fresh_{nqp::lc($res_type)}"();
+        $ops.push_pirop('call', $callee.result, |@pos_arg_results, |@named_arg_results, :result($res_reg));
+        $ops.result($res_reg);
+    }
     $ops
 });
 QAST::Operations.add_core_op('callmethod', :inlinable(1), -> $qastcomp, $op {
@@ -925,16 +926,18 @@ QAST::Operations.add_core_op('callmethod', :inlinable(1), -> $qastcomp, $op {
         }
     }
     
-    # Figure out result register type and allocate a register for it.
-    my $res_type := $qastcomp.type_to_register_type($op.returns);
-    my $res_reg := $*REGALLOC."fresh_{nqp::lc($res_type)}"();
-    
-    # Generate method call.
+    # Generate call, with a result register if we're not in void context.
     $ops.push($name);
-    $ops.push_pirop('callmethod', $name.result, |@pos_arg_results, |@named_arg_results, :result($res_reg));
-    
-    # Result is the result of the call.
-    $ops.result($res_reg);
+    if $*WANT eq 'v' {
+        $ops.push_pirop('callmethod', $name.result, |@pos_arg_results, |@named_arg_results);
+    }
+    else {
+        my $res_type := $qastcomp.type_to_register_type($op.returns);
+        my $res_reg := $*REGALLOC."fresh_{nqp::lc($res_type)}"();
+        $ops.push_pirop('callmethod', $name.result, |@pos_arg_results, |@named_arg_results, :result($res_reg));
+        $ops.result($res_reg);
+    }
+
     $ops
 });
 
