@@ -1,15 +1,17 @@
 use QASTNode;
 
 class QRegex::NFA {
-    our $EDGE_FATE          := 0;
-    our $EDGE_EPSILON       := 1;
-    our $EDGE_CODEPOINT     := 2;
-    our $EDGE_CODEPOINT_NEG := 3;
-    our $EDGE_CHARCLASS     := 4;
-    our $EDGE_CHARCLASS_NEG := 5;
-    our $EDGE_CHARLIST      := 6;
-    our $EDGE_CHARLIST_NEG  := 7;
-    our $EDGE_SUBRULE       := 8;
+    our $EDGE_FATE            := 0;
+    our $EDGE_EPSILON         := 1;
+    our $EDGE_CODEPOINT       := 2;
+    our $EDGE_CODEPOINT_NEG   := 3;
+    our $EDGE_CHARCLASS       := 4;
+    our $EDGE_CHARCLASS_NEG   := 5;
+    our $EDGE_CHARLIST        := 6;
+    our $EDGE_CHARLIST_NEG    := 7;
+    our $EDGE_SUBRULE         := 8;
+    our $EDGE_CODEPOINT_I     := 9;
+    our $EDGE_CODEPOINT_I_NEG := 10;
 
     has $!states;
     has $!edges;
@@ -104,15 +106,28 @@ class QRegex::NFA {
     }
 
     method literal($node, int $from, int $to) {
-        my str $litconst := $node[0];
-        my int $litlen   := nqp::chars($litconst) - 1;
+        my int $litlen   := nqp::chars($node[0]) - 1;
         my int $i        := 0;
         if $litlen >= 0 {
-            while $i < $litlen {
-                $from := self.addedge($from, -1, $EDGE_CODEPOINT, nqp::ord($litconst, $i));
-                $i := $i + 1;
+            if $node.subtype eq 'ignorecase' {
+                my str $litconst_lc := nqp::lc($node[0]);
+                my str $litconst_uc := nqp::uc($node[0]);
+                while $i < $litlen {
+                    $from := self.addedge($from, -1, $EDGE_CODEPOINT_I,
+                        [nqp::ord($litconst_lc, $i), nqp::ord($litconst_uc, $i)]);
+                    $i := $i + 1;
+                }
+                self.addedge($from, $to, $EDGE_CODEPOINT_I,
+                    [nqp::ord($litconst_lc, $i), nqp::ord($litconst_uc, $i)]);
             }
-            self.addedge($from, $to, $EDGE_CODEPOINT, nqp::ord($litconst, $i));
+            else {
+                my str $litconst := $node[0];
+                while $i < $litlen {
+                    $from := self.addedge($from, -1, $EDGE_CODEPOINT, nqp::ord($litconst, $i));
+                    $i := $i + 1;
+                }
+                self.addedge($from, $to, $EDGE_CODEPOINT, nqp::ord($litconst, $i));
+            }
         }
         else {
             self.addedge($from, $to, $EDGE_EPSILON, 0);
@@ -248,7 +263,14 @@ class QRegex::NFA {
         for $!states -> @values {
             my $list := QAST::Op.new(:op<list>);
             for @values {
-                if $_ ~~ QAST::SVal {
+                if nqp::islist($_) {
+                    my $arglist := QAST::Op.new( :op('list_i') );
+                    for $_ -> $i {
+                        $arglist.push(QAST::IVal.new( :value($i) ));
+                    }
+                    $list.push($arglist);
+                }
+                elsif $_ ~~ QAST::SVal {
                     $list.push($_);
                 }
                 elsif +$_ eq $_ {
