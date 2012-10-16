@@ -239,8 +239,9 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     }
 
     proto token mod_ident { <...> }
-    token mod_ident:sym<ignorecase> { $<sym>=[i] 'gnorecase'? }
-    token mod_ident:sym<ratchet>    { $<sym>=[r] 'atchet'? }
-    token mod_ident:sym<sigspace>   { $<sym>=[s] 'igspace'? }
-    token mod_ident:sym<dba>        { <sym> }
+    token mod_ident:sym<ignorecase> { $<sym>=[i] 'gnorecase'? » }
+    token mod_ident:sym<ratchet>    { $<sym>=[r] 'atchet'? » }
+    token mod_ident:sym<sigspace>   { $<sym>=[s] 'igspace'? » }
+    token mod_ident:sym<dba>        { <sym> » }
+    token mod_ident:sym<oops>       { {} (\w+) { $/.CURSOR.panic('Unrecognized regex modifier :' ~ $/[0].Str) } }
 }
