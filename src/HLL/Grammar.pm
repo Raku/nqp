@@ -32,7 +32,6 @@ grammar HLL::Grammar {
     # Return <termish> if it matches, <nullterm_alt> otherwise.
     method nulltermish() { self.termish || self.nullterm_alt }
 
-    # token quote_EXPR is in src/cheats/hll-grammar.pir
     token quote_delimited {
         <starter> <quote_atom>* <stopper>
     }
@@ -41,7 +40,8 @@ grammar HLL::Grammar {
         <!stopper>
         [
         | <quote_escape>
-        | [ <-quote_escape-stopper> ]+
+        | [ <-quote_escape-stopper-starter> ]+
+        | <starter> <quote_atom>* <stopper>
         ]
     }
 
