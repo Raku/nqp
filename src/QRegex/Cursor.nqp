@@ -82,11 +82,12 @@ role NQPCursorRole is export {
 
     method !cursor_start() {
         my $new := nqp::create(self);
-        nqp::bindattr($new, $?CLASS, '$!orig', $!orig);
-        nqp::bindattr($new, $?CLASS, '$!regexsub', Q:PIR {
+        my $sub := Q:PIR {
             $P0 = getinterp
             %r = $P0['sub';1]
-        });
+        };
+        nqp::bindattr($new, $?CLASS, '$!orig', $!orig);
+        nqp::bindattr($new, $?CLASS, '$!regexsub', nqp::ifnull(nqp::getcodeobj($sub), $sub));
         if $!restart {
             nqp::bindattr_i($new, $?CLASS, '$!pos', $!pos);
             nqp::bindattr($new, $?CLASS, '$!cstack', nqp::clone($!cstack)) if $!cstack;
