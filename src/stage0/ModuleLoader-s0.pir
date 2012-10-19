@@ -14,11 +14,11 @@
 .loadlib "io_ops"
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_1_1349901723.41") :anon :lex
+.sub "" :subid("cuid_1_1350682385.132") :anon :lex
 .annotate 'file', "src\\ModuleLoader.pm"
     .param pmc _lex_param_0 :slurpy 
-    .const 'Sub' $P5015 = 'cuid_7_1349901723.41' 
-    capture_lex $P5015 
+    .const 'Sub' $P5012 = 'cuid_7_1350682385.132' 
+    capture_lex $P5012 
     .lex "GLOBALish", $P101 
     .lex "$?PACKAGE", $P102 
     .lex "ModuleLoader", $P103 
@@ -27,8 +27,6 @@
     find_dynamic_lex $P5001, "$*CTXSAVE"
     set ctxsave, $P5001
     isnull $I5001, ctxsave
-    box $P5006, $I5001
-    set $P5005, $P5006
     if $I5001 goto unless10_end11 
     can $I5002, ctxsave, "ctxsave"
     box $P5004, $I5002
@@ -37,41 +35,38 @@
     $P5002 = ctxsave."ctxsave"()
     set $P5003, $P5002
   if11_end13:
-    set $P5005, $P5003
   unless10_end11:
 .annotate 'line', 1
-    .const 'Sub' $P5007 = 'cuid_7_1349901723.41' 
-    capture_lex $P5007
-    $P5008 = $P5007()
-    nqp_get_sc_object $P5009, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1349901723.424", 1
-    set_hll_global "ModuleLoader", $P5009
-    set $P5014, _lex_param_0
+    .const 'Sub' $P5005 = 'cuid_7_1350682385.132' 
+    capture_lex $P5005
+    $P5006 = $P5005()
+    nqp_get_sc_object $P5007, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1350682385.147", 1
+    set_hll_global "ModuleLoader", $P5007
     unless _lex_param_0 goto if42_end114 
     load_bytecode "ModuleLoader.pbc"
-    get_hll_global $P5010, "ModuleLoader"
-    getinterp $P5012
-    set $P5011, $P5012["context"]
-    $P5013 = $P5010."set_mainline_module"($P5011)
-    set $P5014, $P5013
+    get_hll_global $P5008, "ModuleLoader"
+    getinterp $P5010
+    set $P5009, $P5010["context"]
+    $P5011 = $P5008."set_mainline_module"($P5009)
   if42_end114:
     .return () 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_7_1349901723.41") :anon :lex :outer("cuid_1_1349901723.41")
+.sub "" :subid("cuid_7_1350682385.132") :anon :lex :outer("cuid_1_1350682385.132")
 .annotate 'file', "src\\ModuleLoader.pm"
 .annotate 'line', 1
-    .const 'Sub' $P5011 = 'cuid_9_1349901723.41' 
+    .const 'Sub' $P5011 = 'cuid_9_1350682385.132' 
     capture_lex $P5011 
-    .const 'Sub' $P5011 = 'cuid_2_1349901723.41' 
+    .const 'Sub' $P5011 = 'cuid_2_1350682385.132' 
     capture_lex $P5011 
-    .const 'Sub' $P5011 = 'cuid_3_1349901723.41' 
+    .const 'Sub' $P5011 = 'cuid_3_1350682385.132' 
     capture_lex $P5011 
-    .const 'Sub' $P5011 = 'cuid_4_1349901723.41' 
+    .const 'Sub' $P5011 = 'cuid_4_1350682385.132' 
     capture_lex $P5011 
-    .const 'Sub' $P5011 = 'cuid_5_1349901723.41' 
+    .const 'Sub' $P5011 = 'cuid_5_1350682385.132' 
     capture_lex $P5011 
-    .const 'Sub' $P5011 = 'cuid_6_1349901723.41' 
+    .const 'Sub' $P5011 = 'cuid_6_1350682385.132' 
     capture_lex $P5011 
     .lex "%modules_loaded", $P101 
     .lex "%settings_loaded", $P102 
@@ -85,33 +80,33 @@
     set $P102, $P5002
     null $P5003
     set $P103, $P5003
-    .const 'Sub' $P5004 = 'cuid_9_1349901723.41' 
+    .const 'Sub' $P5004 = 'cuid_9_1350682385.132' 
     capture_lex $P5004
     set $P104, $P5004
-    .const 'Sub' $P5005 = 'cuid_2_1349901723.41' 
+    .const 'Sub' $P5005 = 'cuid_2_1350682385.132' 
     capture_lex $P5005
-    .const 'Sub' $P5006 = 'cuid_3_1349901723.41' 
+    .const 'Sub' $P5006 = 'cuid_3_1350682385.132' 
     capture_lex $P5006
-    .const 'Sub' $P5007 = 'cuid_4_1349901723.41' 
+    .const 'Sub' $P5007 = 'cuid_4_1350682385.132' 
     capture_lex $P5007
     box $P5008, "KnowHOW"
     set $P103, $P5008
-    .const 'Sub' $P5009 = 'cuid_5_1349901723.41' 
+    .const 'Sub' $P5009 = 'cuid_5_1350682385.132' 
     capture_lex $P5009
-    .const 'Sub' $P5010 = 'cuid_6_1349901723.41' 
+    .const 'Sub' $P5010 = 'cuid_6_1350682385.132' 
     capture_lex $P5010
     .return ($P5010) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "merge_globals" :subid("cuid_9_1349901723.41") :anon :lex :outer("cuid_7_1349901723.41")
+.sub "merge_globals" :subid("cuid_9_1350682385.132") :anon :lex :outer("cuid_7_1350682385.132")
 .annotate 'file', "src\\ModuleLoader.pm"
 .annotate 'line', 88
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
-    .const 'Sub' $P5014 = 'cuid_8_1349901723.41' 
+    .const 'Sub' $P5014 = 'cuid_8_1350682385.132' 
     capture_lex $P5014 
-    .const 'Sub' $P5014 = 'cuid_14_1349901723.41' 
+    .const 'Sub' $P5014 = 'cuid_14_1350682385.132' 
     capture_lex $P5014 
     .lex "%known_symbols", $P101 
     .lex "$target", _lex_param_0 
@@ -125,7 +120,7 @@
     unless $P5004, for_done16
     shift $P5007, $P5004
   for_redo15:
-    .const 'Sub' $P5006 = 'cuid_8_1349901723.41' 
+    .const 'Sub' $P5006 = 'cuid_8_1350682385.132' 
     capture_lex $P5006
     $P5002 = $P5006($P5007)
     goto for_next14
@@ -137,7 +132,7 @@
     unless $P5010, for_done41
     shift $P5013, $P5010
   for_redo40:
-    .const 'Sub' $P5012 = 'cuid_14_1349901723.41' 
+    .const 'Sub' $P5012 = 'cuid_14_1350682385.132' 
     capture_lex $P5012
     $P5008 = $P5012($P5013)
     goto for_next39
@@ -146,7 +141,7 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_8_1349901723.41") :anon :lex :outer("cuid_9_1349901723.41")
+.sub "" :subid("cuid_8_1350682385.132") :anon :lex :outer("cuid_9_1350682385.132")
 .annotate 'file', "src\\ModuleLoader.pm"
 .annotate 'line', 93
     .param pmc _lex_param_0 
@@ -161,14 +156,14 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_14_1349901723.41") :anon :lex :outer("cuid_9_1349901723.41")
+.sub "" :subid("cuid_14_1350682385.132") :anon :lex :outer("cuid_9_1350682385.132")
 .annotate 'file', "src\\ModuleLoader.pm"
 .annotate 'line', 96
     .param pmc _lex_param_0 
-    .const 'Sub' $P5017 = 'cuid_11_1349901723.41' 
-    capture_lex $P5017 
-    .const 'Sub' $P5017 = 'cuid_15_1349901723.41' 
-    capture_lex $P5017 
+    .const 'Sub' $P5016 = 'cuid_11_1350682385.132' 
+    capture_lex $P5016 
+    .const 'Sub' $P5016 = 'cuid_15_1350682385.132' 
+    capture_lex $P5016 
     .lex "$sym", $P101 
     .lex "$_", _lex_param_0 
     null $P5001
@@ -179,50 +174,49 @@
     find_lex $P5003, "%known_symbols"
     set $S5001, $P101
     exists $I5002, $P5003[$S5001]
-    box $P5004, $I5002
-    isfalse $I5001, $P5004
+    not $I5001, $I5002
     unless $I5001 goto if12_else17 
-    .const 'Sub' $P5005 = 'cuid_11_1349901723.41' 
-    capture_lex $P5005
-    $P5006 = $P5005()
-    set $P5016, $P5006
+    .const 'Sub' $P5004 = 'cuid_11_1350682385.132' 
+    capture_lex $P5004
+    $P5005 = $P5004()
+    set $P5015, $P5005
     goto if12_end18
   if12_else17:
-    find_lex $P5009, "$target"
-    get_who $P5008, $P5009
+    find_lex $P5008, "$target"
+    get_who $P5007, $P5008
     set $S5002, $P101
-    set $P5007, $P5008[$S5002]
-    unless_null $P5007, fallback32
-    null $P5010
-    set $P5007, $P5010
+    set $P5006, $P5007[$S5002]
+    unless_null $P5006, fallback32
+    null $P5009
+    set $P5006, $P5009
   fallback32:
-    get_id $I5004, $P5007
+    get_id $I5004, $P5006
 .annotate 'line', 120
-    $P5011 = _lex_param_0."value"()
-    get_id $I5005, $P5011
+    $P5010 = _lex_param_0."value"()
+    get_id $I5005, $P5010
     iseq $I5003, $I5004, $I5005
     unless $I5003 goto if18_else30 
-    null $P5012
-    set $P5015, $P5012
+    null $P5011
+    set $P5014, $P5011
     goto if18_end31
   if18_else30:
-    .const 'Sub' $P5013 = 'cuid_15_1349901723.41' 
-    capture_lex $P5013
-    $P5014 = $P5013()
-    set $P5015, $P5014
+    .const 'Sub' $P5012 = 'cuid_15_1350682385.132' 
+    capture_lex $P5012
+    $P5013 = $P5012()
+    set $P5014, $P5013
   if18_end31:
-    set $P5016, $P5015
+    set $P5015, $P5014
   if12_end18:
-    .return ($P5016) 
+    .return ($P5015) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_11_1349901723.41") :anon :lex :outer("cuid_14_1349901723.41")
+.sub "" :subid("cuid_11_1350682385.132") :anon :lex :outer("cuid_14_1350682385.132")
 .annotate 'file', "src\\ModuleLoader.pm"
 .annotate 'line', 98
-    .const 'Sub' $P5015 = 'cuid_10_1349901723.41' 
+    .const 'Sub' $P5015 = 'cuid_10_1350682385.132' 
     capture_lex $P5015 
-    .const 'Sub' $P5015 = 'cuid_13_1349901723.41' 
+    .const 'Sub' $P5015 = 'cuid_13_1350682385.132' 
     capture_lex $P5015 
     .lex "$source_is_stub", $P101 
     null $P5001
@@ -233,7 +227,7 @@
     set_label $P5005, catch_handler_1624
     $P5005.'handle_types_except'(.CONTROL_ALL)
     push_eh $P5005
-    .const 'Sub' $P5003 = 'cuid_10_1349901723.41' 
+    .const 'Sub' $P5003 = 'cuid_10_1350682385.132' 
     capture_lex $P5003
     $P5004 = $P5003()
     set $P5006, $P5004
@@ -251,7 +245,7 @@
     goto skip_handler_1523
   skip_handler_1523:
     unless $P101 goto if17_else25 
-    .const 'Sub' $P5007 = 'cuid_13_1349901723.41' 
+    .const 'Sub' $P5007 = 'cuid_13_1350682385.132' 
     capture_lex $P5007
     $P5008 = $P5007()
     set $P5014, $P5008
@@ -272,7 +266,7 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_10_1349901723.41") :anon :lex :outer("cuid_11_1349901723.41")
+.sub "" :subid("cuid_10_1350682385.132") :anon :lex :outer("cuid_11_1350682385.132")
 .annotate 'file', "src\\ModuleLoader.pm"
 .annotate 'line', 100
     .lex "$source_mo", $P101 
@@ -298,28 +292,27 @@
     $P5011 = $P5010."value"()
     get_who $P5009, $P5011
     isnull $I5003, $P5009
-    box $P5012, $I5003
-    isfalse $I5002, $P5012
+    not $I5002, $I5003
     set $I5004, $I5002
   if14_end22:
-    box $P5017, $I5004
-    set $P5016, $P5017
+    box $P5016, $I5004
+    set $P5015, $P5016
     unless $I5004 goto if13_end20 
-    find_lex $P5014, "$_"
-    $P5015 = $P5014."value"()
-    get_who $P5013, $P5015
-    set $P5016, $P5013
+    find_lex $P5013, "$_"
+    $P5014 = $P5013."value"()
+    get_who $P5012, $P5014
+    set $P5015, $P5012
   if13_end20:
-    store_lex "$source_is_stub", $P5016
-    .return ($P5016) 
+    store_lex "$source_is_stub", $P5015
+    .return ($P5015) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_13_1349901723.41") :anon :lex :outer("cuid_11_1349901723.41")
+.sub "" :subid("cuid_13_1350682385.132") :anon :lex :outer("cuid_11_1350682385.132")
 .annotate 'file', "src\\ModuleLoader.pm"
 .annotate 'line', 105
-    .const 'Sub' $P5021 = 'cuid_12_1349901723.41' 
-    capture_lex $P5021 
+    .const 'Sub' $P5020 = 'cuid_12_1350682385.132' 
+    capture_lex $P5020 
     .lex "$source", $P101 
     .lex "$source_clone", $P102 
     .lex "%WHO_clone", $P103 
@@ -341,30 +334,30 @@
     set $P102, $P5009
 .annotate 'line', 108
     get_how $P5010, $P102
-    $P5011 = $P5010."compose"($P102)
-    get_who $P5015, $P101
-    set $P5012, $P5015
-    iter $P5014, $P5015
+    $P5010."compose"($P102)
+    get_who $P5014, $P101
+    set $P5011, $P5014
+    iter $P5013, $P5014
   for_next27:
-    unless $P5014, for_done29
-    shift $P5017, $P5014
+    unless $P5013, for_done29
+    shift $P5016, $P5013
   for_redo28:
-    .const 'Sub' $P5016 = 'cuid_12_1349901723.41' 
-    capture_lex $P5016
-    $P5012 = $P5016($P5017)
+    .const 'Sub' $P5015 = 'cuid_12_1350682385.132' 
+    capture_lex $P5015
+    $P5011 = $P5015($P5016)
     goto for_next27
   for_done29:
     set_who $P102, $P103
-    find_lex $P5019, "$target"
-    get_who $P5018, $P5019
-    find_lex $P5020, "$sym"
-    set $S5001, $P5020
-    set $P5018[$S5001], $P102
+    find_lex $P5018, "$target"
+    get_who $P5017, $P5018
+    find_lex $P5019, "$sym"
+    set $S5001, $P5019
+    set $P5017[$S5001], $P102
     .return ($P102) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_12_1349901723.41") :anon :lex :outer("cuid_13_1349901723.41")
+.sub "" :subid("cuid_12_1350682385.132") :anon :lex :outer("cuid_13_1350682385.132")
 .annotate 'file', "src\\ModuleLoader.pm"
 .annotate 'line', 110
     .param pmc _lex_param_0 
@@ -379,7 +372,7 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_15_1349901723.41") :anon :lex :outer("cuid_14_1349901723.41")
+.sub "" :subid("cuid_15_1350682385.132") :anon :lex :outer("cuid_14_1350682385.132")
 .annotate 'file', "src\\ModuleLoader.pm"
 .annotate 'line', 123
     .lex "$source_mo", $P101 
@@ -464,13 +457,13 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "search_path" :subid("cuid_2_1349901723.41") :anon :lex :outer("cuid_7_1349901723.41")
+.sub "search_path" :subid("cuid_2_1350682385.132") :anon :lex :outer("cuid_7_1350682385.132")
 .annotate 'file', "src\\ModuleLoader.pm"
 .annotate 'line', 5
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
-    .const 'Sub' $P5035 = 'cuid_16_1349901723.41' 
-    capture_lex $P5035 
+    .const 'Sub' $P5030 = 'cuid_16_1350682385.132' 
+    capture_lex $P5030 
     .lex "@search_paths", $P101 
     .lex "$explicit", $P102 
     .lex "%conf", $P103 
@@ -489,11 +482,11 @@
 .annotate 'line', 11
     find_dynamic_lex $P5006, "%*COMPILING"
     unless_null $P5006, fallback42
-    nqp_get_sc_object $P5009, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1349901723.424", 0
+    nqp_get_sc_object $P5009, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1350682385.147", 0
     get_who $P5008, $P5009
     set $P5007, $P5008["%COMPILING"]
     unless_null $P5007, fallback43
-    nqp_get_sc_object $P5011, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1349901723.424", 0
+    nqp_get_sc_object $P5011, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1350682385.147", 0
     get_who $P5010, $P5011
     new $P5012, 'Hash'
     set $P5010["%COMPILING"], $P5012
@@ -533,57 +526,54 @@
     goto skip_handler_2247
   skip_handler_2247:
     isnull $I5002, $P102
-    box $P5018, $I5002
-    isfalse $I5001, $P5018
-    box $P5020, $I5001
-    set $P5019, $P5020
+    not $I5001, $I5002
+    box $P5019, $I5001
+    set $P5018, $P5019
     unless $I5001 goto if25_end52 
-    set $P5019, $P102
+    set $P5018, $P102
   if25_end52:
-    unless $P5019 goto if24_else49 
+    unless $P5018 goto if24_else49 
 .annotate 'line', 12
 .annotate 'line', 13
-    $P5021 = $P101."push"($P102)
-    set $P5024, $P5021
+    $P5020 = $P101."push"($P102)
     goto if24_end50
   if24_else49:
-    .const 'Sub' $P5022 = 'cuid_16_1349901723.41' 
-    capture_lex $P5022
-    $P5023 = $P5022()
-    set $P5024, $P5023
+    .const 'Sub' $P5021 = 'cuid_16_1350682385.132' 
+    capture_lex $P5021
+    $P5022 = $P5021()
   if24_end50:
 .annotate 'line', 23
-    $P5025 = $P101."push"(".")
+    $P101."push"(".")
 .annotate 'line', 24
-    $P5026 = $P101."push"("blib")
-    getinterp $P5028
-    set $P5027, $P5028[.IGLOBALS_CONFIG_HASH]
-    unless_null $P5027, fallback58
-    null $P5029
-    set $P5027, $P5029
+    $P101."push"("blib")
+    getinterp $P5024
+    set $P5023, $P5024[.IGLOBALS_CONFIG_HASH]
+    unless_null $P5023, fallback58
+    null $P5025
+    set $P5023, $P5025
   fallback58:
-    set $P103, $P5027
+    set $P103, $P5023
 .annotate 'line', 28
-    set $P5030, $P103["libdir"]
-    unless_null $P5030, fallback59
-    null $P5031
-    set $P5030, $P5031
+    set $P5026, $P103["libdir"]
+    unless_null $P5026, fallback59
+    null $P5027
+    set $P5026, $P5027
   fallback59:
-    set $S5004, $P5030
-    set $P5032, $P103["versiondir"]
-    unless_null $P5032, fallback60
-    null $P5033
-    set $P5032, $P5033
+    set $S5004, $P5026
+    set $P5028, $P103["versiondir"]
+    unless_null $P5028, fallback60
+    null $P5029
+    set $P5028, $P5029
   fallback60:
-    set $S5005, $P5032
+    set $S5005, $P5028
     concat $S5003, $S5004, $S5005
     concat $S5002, $S5003, "/languages/nqp/lib"
-    $P5034 = $P101."push"($S5002)
+    $P101."push"($S5002)
     .return ($P101) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_16_1349901723.41") :anon :lex :outer("cuid_2_1349901723.41")
+.sub "" :subid("cuid_16_1350682385.132") :anon :lex :outer("cuid_2_1350682385.132")
 .annotate 'file', "src\\ModuleLoader.pm"
 .annotate 'line', 15
     .lex "@lib_paths", $P101 
@@ -622,7 +612,7 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "ctxsave" :subid("cuid_3_1349901723.41") :anon :lex :outer("cuid_7_1349901723.41")
+.sub "ctxsave" :subid("cuid_3_1350682385.132") :anon :lex :outer("cuid_7_1350682385.132")
 .annotate 'file', "src\\ModuleLoader.pm"
 .annotate 'line', 34
     .param pmc _lex_param_0 
@@ -638,18 +628,18 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "load_module" :subid("cuid_4_1349901723.41") :anon :lex :outer("cuid_7_1349901723.41")
+.sub "load_module" :subid("cuid_4_1350682385.132") :anon :lex :outer("cuid_7_1350682385.132")
 .annotate 'file', "src\\ModuleLoader.pm"
 .annotate 'line', 43
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
     .param pmc _lex_param_2 :slurpy 
-    .const 'Sub' $P5027 = 'cuid_17_1349901723.41' 
-    capture_lex $P5027 
-    .const 'Sub' $P5027 = 'cuid_18_1349901723.41' 
-    capture_lex $P5027 
-    .const 'Sub' $P5027 = 'cuid_19_1349901723.41' 
-    capture_lex $P5027 
+    .const 'Sub' $P5024 = 'cuid_17_1350682385.132' 
+    capture_lex $P5024 
+    .const 'Sub' $P5024 = 'cuid_18_1350682385.132' 
+    capture_lex $P5024 
+    .const 'Sub' $P5024 = 'cuid_19_1350682385.132' 
+    capture_lex $P5024 
     .lex "$module_ctx", $P101 
     .lex "$path", $P102 
     .lex "@prefixes", $P103 
@@ -684,7 +674,7 @@
     unless $P5010, for_done68
     shift $P5013, $P5010
   for_redo67:
-    .const 'Sub' $P5011 = 'cuid_17_1349901723.41' 
+    .const 'Sub' $P5011 = 'cuid_17_1350682385.132' 
     capture_lex $P5011
     $P5008 = $P5011($P5013)
     goto for_next66
@@ -709,34 +699,29 @@
     set $P5015, $P5017
   fallback71:
     set $P101, $P5015
-    set $P5020, $P101
     goto if28_end70
   if28_else69:
-    .const 'Sub' $P5018 = 'cuid_18_1349901723.41' 
+    .const 'Sub' $P5018 = 'cuid_18_1350682385.132' 
     capture_lex $P5018
     $P5019 = $P5018()
-    set $P5020, $P5019
   if28_end70:
     defined $I5002, $P101
-    box $P5024, $I5002
-    set $P5023, $P5024
     unless $I5002 goto if30_end76 
-    .const 'Sub' $P5021 = 'cuid_19_1349901723.41' 
-    capture_lex $P5021
-    $P5022 = $P5021()
-    set $P5023, $P5022
+    .const 'Sub' $P5020 = 'cuid_19_1350682385.132' 
+    capture_lex $P5020
+    $P5021 = $P5020()
   if30_end76:
-    find_lex $P5025, "RETURN"
-    $P5026 = $P5025($P101)
+    find_lex $P5022, "RETURN"
+    $P5023 = $P5022($P101)
     goto lexotic_62
   lexotic_61:
-    .get_results ($P5026)
+    .get_results ($P5023)
   lexotic_62:
-    .return ($P5026) 
+    .return ($P5023) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_17_1349901723.41") :anon :lex :outer("cuid_4_1349901723.41")
+.sub "" :subid("cuid_17_1350682385.132") :anon :lex :outer("cuid_4_1350682385.132")
 .annotate 'file', "src\\ModuleLoader.pm"
 .annotate 'line', 50
     .param pmc _lex_param_0 
@@ -764,7 +749,7 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_18_1349901723.41") :anon :lex :outer("cuid_4_1349901723.41")
+.sub "" :subid("cuid_18_1350682385.132") :anon :lex :outer("cuid_4_1350682385.132")
 .annotate 'file', "src\\ModuleLoader.pm"
 .annotate 'line', 59
     .lex "$*CTXSAVE", $P101 
@@ -779,7 +764,7 @@
     find_lex $P5005, "self"
     nqp_decontainerize $P5004, $P5005
     set $P101, $P5004
-    nqp_get_sc_object $P5006, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1349901723.424", 1
+    nqp_get_sc_object $P5006, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1350682385.147", 1
     set $P102, $P5006
     get_hll_global $P5007, "GLOBAL"
     set $P103, $P5007
@@ -791,7 +776,7 @@
     find_lex $P5010, "$path"
     set $S5002, $P5010
     unless_null $P102, fallback72
-    nqp_get_sc_object $P5013, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1349901723.424", 0
+    nqp_get_sc_object $P5013, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1350682385.147", 0
     get_who $P5012, $P5013
     set $P5011, $P5012["$MAIN_CTX"]
     unless_null $P5011, fallback73
@@ -811,7 +796,7 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_19_1349901723.41") :anon :lex :outer("cuid_4_1349901723.41")
+.sub "" :subid("cuid_19_1350682385.132") :anon :lex :outer("cuid_4_1350682385.132")
 .annotate 'file', "src\\ModuleLoader.pm"
 .annotate 'line', 69
     .lex "$UNIT", $P101 
@@ -857,13 +842,13 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "load_setting" :subid("cuid_5_1349901723.41") :anon :lex :outer("cuid_7_1349901723.41")
+.sub "load_setting" :subid("cuid_5_1350682385.132") :anon :lex :outer("cuid_7_1350682385.132")
 .annotate 'file', "src\\ModuleLoader.pm"
 .annotate 'line', 139
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
-    .const 'Sub' $P5008 = 'cuid_21_1349901723.41' 
-    capture_lex $P5008 
+    .const 'Sub' $P5006 = 'cuid_21_1350682385.132' 
+    capture_lex $P5006 
     .lex "$setting", $P101 
     .lex "self", _lex_param_0 
     .lex "$setting_name", _lex_param_1 
@@ -874,31 +859,28 @@
     .lex "RETURN", $P102
     set $S5001, _lex_param_1
     isne $I5001, $S5001, "NULL"
-    box $P5005, $I5001
-    set $P5004, $P5005
     unless $I5001 goto if33_end87 
-    .const 'Sub' $P5002 = 'cuid_21_1349901723.41' 
+    .const 'Sub' $P5002 = 'cuid_21_1350682385.132' 
     capture_lex $P5002
     $P5003 = $P5002()
-    set $P5004, $P5003
   if33_end87:
-    find_lex $P5006, "RETURN"
-    $P5007 = $P5006($P101)
+    find_lex $P5004, "RETURN"
+    $P5005 = $P5004($P101)
     goto lexotic_85
   lexotic_84:
-    .get_results ($P5007)
+    .get_results ($P5005)
   lexotic_85:
-    .return ($P5007) 
+    .return ($P5005) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_21_1349901723.41") :anon :lex :outer("cuid_5_1349901723.41")
+.sub "" :subid("cuid_21_1350682385.132") :anon :lex :outer("cuid_5_1350682385.132")
 .annotate 'file', "src\\ModuleLoader.pm"
 .annotate 'line', 142
-    .const 'Sub' $P5022 = 'cuid_20_1349901723.41' 
-    capture_lex $P5022 
-    .const 'Sub' $P5022 = 'cuid_22_1349901723.41' 
-    capture_lex $P5022 
+    .const 'Sub' $P5020 = 'cuid_20_1350682385.132' 
+    capture_lex $P5020 
+    .const 'Sub' $P5020 = 'cuid_22_1350682385.132' 
+    capture_lex $P5020 
     .lex "$path", $P101 
     .lex "@prefixes", $P102 
     null $P5001
@@ -924,7 +906,7 @@
     unless $P5010, for_done93
     shift $P5013, $P5010
   for_redo92:
-    .const 'Sub' $P5011 = 'cuid_20_1349901723.41' 
+    .const 'Sub' $P5011 = 'cuid_20_1350682385.132' 
     capture_lex $P5011
     $P5008 = $P5011($P5013)
     goto for_next91
@@ -939,27 +921,24 @@
     find_lex $P5014, "%settings_loaded"
     set $S5003, $P101
     exists $I5001, $P5014[$S5003]
-    box $P5018, $I5001
-    set $P5017, $P5018
     if $I5001 goto unless35_end95 
-    .const 'Sub' $P5015 = 'cuid_22_1349901723.41' 
+    .const 'Sub' $P5015 = 'cuid_22_1350682385.132' 
     capture_lex $P5015
     $P5016 = $P5015()
-    set $P5017, $P5016
   unless35_end95:
-    find_lex $P5020, "%settings_loaded"
+    find_lex $P5018, "%settings_loaded"
     set $S5004, $P101
-    set $P5019, $P5020[$S5004]
-    unless_null $P5019, fallback104
-    null $P5021
-    set $P5019, $P5021
+    set $P5017, $P5018[$S5004]
+    unless_null $P5017, fallback104
+    null $P5019
+    set $P5017, $P5019
   fallback104:
-    store_lex "$setting", $P5019
-    .return ($P5019) 
+    store_lex "$setting", $P5017
+    .return ($P5017) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_20_1349901723.41") :anon :lex :outer("cuid_21_1349901723.41")
+.sub "" :subid("cuid_20_1350682385.132") :anon :lex :outer("cuid_21_1350682385.132")
 .annotate 'file', "src\\ModuleLoader.pm"
 .annotate 'line', 146
     .param pmc _lex_param_0 
@@ -987,7 +966,7 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_22_1349901723.41") :anon :lex :outer("cuid_21_1349901723.41")
+.sub "" :subid("cuid_22_1350682385.132") :anon :lex :outer("cuid_21_1350682385.132")
 .annotate 'file', "src\\ModuleLoader.pm"
 .annotate 'line', 154
     .lex "$*CTXSAVE", $P101 
@@ -1002,7 +981,7 @@
     find_lex $P5005, "self"
     nqp_decontainerize $P5004, $P5005
     set $P101, $P5004
-    nqp_get_sc_object $P5006, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1349901723.424", 1
+    nqp_get_sc_object $P5006, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1350682385.147", 1
     set $P102, $P5006
     get_hll_global $P5007, "GLOBAL"
     set $P103, $P5007
@@ -1011,7 +990,7 @@
     load_bytecode $S5001
     set_hll_global "GLOBAL", $P103
     unless_null $P102, fallback98
-    nqp_get_sc_object $P5011, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1349901723.424", 0
+    nqp_get_sc_object $P5011, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1350682385.147", 0
     get_who $P5010, $P5011
     set $P5009, $P5010["$MAIN_CTX"]
     unless_null $P5009, fallback99
@@ -1026,8 +1005,6 @@
     set $P102, $P5009
   fallback98:
     defined $I5001, $P102
-    box $P5017, $I5001
-    set $P5016, $P5017
     if $I5001 goto unless36_end97 
 .annotate 'line', 160
     find_lex $P5014, "$setting_name"
@@ -1036,32 +1013,31 @@
     concat $S5002, $S5003, "; maybe it is missing a YOU_ARE_HERE?"
     box $P5015, $S5002
     die $P5015
-    set $P5016, $P5015
   unless36_end97:
-    find_lex $P5018, "%settings_loaded"
-    find_lex $P5019, "$path"
-    set $S5005, $P5019
+    find_lex $P5016, "%settings_loaded"
+    find_lex $P5017, "$path"
+    set $S5005, $P5017
     unless_null $P102, fallback101
-    nqp_get_sc_object $P5022, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1349901723.424", 0
-    get_who $P5021, $P5022
-    set $P5020, $P5021["$MAIN_CTX"]
-    unless_null $P5020, fallback102
-    null $P5023
-    set $P5020, $P5023
+    nqp_get_sc_object $P5020, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1350682385.147", 0
+    get_who $P5019, $P5020
+    set $P5018, $P5019["$MAIN_CTX"]
+    unless_null $P5018, fallback102
+    null $P5021
+    set $P5018, $P5021
   fallback102:
-    unless_null $P5020, vivi_38103
+    unless_null $P5018, vivi_38103
     die "Contextual $*MAIN_CTX not found"
-    box $P5024, "Contextual $*MAIN_CTX not found"
-    set $P5020, $P5024
+    box $P5022, "Contextual $*MAIN_CTX not found"
+    set $P5018, $P5022
   vivi_38103:
-    set $P102, $P5020
+    set $P102, $P5018
   fallback101:
-    set $P5018[$S5005], $P102
+    set $P5016[$S5005], $P102
     .return ($P102) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "set_mainline_module" :subid("cuid_6_1349901723.41") :anon :lex :outer("cuid_7_1349901723.41")
+.sub "set_mainline_module" :subid("cuid_6_1350682385.132") :anon :lex :outer("cuid_7_1350682385.132")
 .annotate 'file', "src\\ModuleLoader.pm"
 .annotate 'line', 174
     .param pmc _lex_param_0 
@@ -1086,8 +1062,6 @@
     set $S5002, $P101
     substr $S5001, $S5002, 0, 2
     iseq $I5001, $S5001, "./"
-    box $P5009, $I5001
-    set $P5008, $P5009
     unless $I5001 goto if39_end108 
 .annotate 'line', 178
     set $S5004, $P101
@@ -1100,7 +1074,6 @@
     substr $S5003, $S5004, 2, $I5003
     box $P5007, $S5003
     set $P101, $P5007
-    set $P5008, $P101
   if39_end108:
     set $S5007, $P101
     set $S5008, $P101
@@ -1113,8 +1086,7 @@
     iseq $I5004, $S5006, ".pbc"
     unless $I5004 goto if40_else109 
 .annotate 'line', 181
-    null $P5010
-    set $P5014, $P5010
+    null $P5008
     goto if40_end110
   if40_else109:
     set $S5010, $P101
@@ -1137,30 +1109,29 @@
     set $I5011, $N5010
     substr $S5013, $S5014, 0, $I5011
     concat $S5012, $S5013, "pbc"
-    box $P5011, $S5012
-    set $P101, $P5011
-    set $P5013, $P101
+    box $P5009, $S5012
+    set $P101, $P5009
+    set $P5011, $P101
     goto if41_end112
   if41_else111:
 .annotate 'line', 188
     set $S5017, $P101
     concat $S5016, $S5017, ".pbc"
-    box $P5012, $S5016
-    set $P101, $P5012
-    set $P5013, $P101
+    box $P5010, $S5016
+    set $P101, $P5010
+    set $P5011, $P101
   if41_end112:
-    set $P5014, $P5013
   if40_end110:
-    find_lex $P5015, "%modules_loaded"
+    find_lex $P5012, "%modules_loaded"
     set $S5018, $P101
-    set $P5015[$S5018], _lex_param_1
+    set $P5012[$S5018], _lex_param_1
     .return (_lex_param_1) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_24_1349901723.41") :load :init
+.sub "" :subid("cuid_24_1350682385.132") :load :init
 .annotate 'file', "src\\ModuleLoader.pm"
-    .const 'Sub' $P5001 = 'cuid_23_1349901723.41' 
+    .const 'Sub' $P5001 = 'cuid_23_1350682385.132' 
     capture_lex $P5001 
     .local pmc cur_sc 
     nqp_dynop_setup 
@@ -1168,75 +1139,75 @@
     getinterp $P5001
     get_class $P5002, "LexPad"
     get_class $P5003, "NQPLexPad"
-    $P5004 = $P5001."hll_map"($P5002, $P5003)
-    nqp_create_sc $P5001, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1349901723.424"
+    $P5001."hll_map"($P5002, $P5003)
+    nqp_create_sc $P5001, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1350682385.147"
     set cur_sc, $P5001
-    $P5002 = cur_sc."set_description"("src\\ModuleLoader.pm")
-    new $P5003, 'ResizableStringArray'
+    cur_sc."set_description"("src\\ModuleLoader.pm")
+    new $P5002, 'ResizableStringArray'
     null $S5001
-    push $P5003, $S5001
-    push $P5003, "P6opaque"
-    push $P5003, "ModuleLoader"
-    push $P5003, "search_path"
-    push $P5003, "ctxsave"
-    push $P5003, "load_module"
-    push $P5003, "load_setting"
-    push $P5003, "set_mainline_module"
-    push $P5003, "__6MODEL_CORE__"
-    push $P5003, "GLOBALish"
-    .const 'Sub' $P5004 = 'cuid_23_1349901723.41' 
-    capture_lex $P5004
-    $P5005 = $P5004()
-    nqp_deserialize_sc "AQAAAEAAAAABAAAASAAAAAIAAABYAAAA4AEAAAQAAAAgAgAAhgIAAAAAAACGAgAAAAAAAIYCAACGAgAAAAAAAAgAAAAAAAAAAQAAAAAAAAABAAAAqAAAAAAAAAACAAAAAAAAAAAAAAAKAAEAAAACAAAAAgAAAAAAAQAAAAoAAAAAAAAAAAAAAAAAAQAAAAAAAAACAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////////////////////////////////AAAAAAAAAAABAAAAAAAAAAIAAAAAAAAAAAADAAAAAAADAAAAAAAAAAEAAAAKAAAAAAAKAAUAAAADAAAACwAAAAAAAAAAAAQAAAALAAAAAAABAAAABQAAAAsAAAAAAAIAAAAGAAAACwAAAAAAAwAAAAcAAAALAAAAAAAEAAAAAAAAAAAAAAABAAAAAAAAAAIAAAAAAAEAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///////////////////////////////8AAAAAAAAAAAEAAAAAAAAAAgAAAAAAAQAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAABAAAAAAAAAAAAAAABAAAAAQAAAAAAAAAQAAAAAQAAAAkAAAAHAAAAAAAKAAAAAAACAAAABwAAAAAACgAFAAAAAwAAAAsAAAAAAAAAAAAEAAAACwAAAAAAAQAAAAUAAAALAAAAAAACAAAABgAAAAsAAAAAAAMAAAAHAAAACwAAAAAABAAAAA==", cur_sc, $P5003, $P5005
-    .const "LexInfo" $P5001 = "cuid_1_1349901723.41"
-    nqp_get_sc_object $P5002, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1349901723.424", 0
-    $P5003 = $P5001."set_static_lexpad_value"("GLOBALish", $P5002)
-    .const "LexInfo" $P5004 = "cuid_1_1349901723.41"
-    $P5005 = $P5004."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_1_1349901723.41"
-    nqp_get_sc_object $P5002, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1349901723.424", 0
-    $P5003 = $P5001."set_static_lexpad_value"("$?PACKAGE", $P5002)
-    .const "LexInfo" $P5004 = "cuid_1_1349901723.41"
-    $P5005 = $P5004."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_1_1349901723.41"
-    nqp_get_sc_object $P5002, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1349901723.424", 1
-    $P5003 = $P5001."set_static_lexpad_value"("ModuleLoader", $P5002)
-    .const "LexInfo" $P5004 = "cuid_1_1349901723.41"
-    $P5005 = $P5004."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_7_1349901723.41"
-    nqp_get_sc_object $P5002, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1349901723.424", 1
-    $P5003 = $P5001."set_static_lexpad_value"("$?PACKAGE", $P5002)
-    .const "LexInfo" $P5004 = "cuid_7_1349901723.41"
-    $P5005 = $P5004."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_7_1349901723.41"
-    nqp_get_sc_object $P5002, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1349901723.424", 1
-    $P5003 = $P5001."set_static_lexpad_value"("$?CLASS", $P5002)
-    .const "LexInfo" $P5004 = "cuid_7_1349901723.41"
-    $P5005 = $P5004."finish_static_lexpad"()
-    .return ($P5005) 
+    push $P5002, $S5001
+    push $P5002, "P6opaque"
+    push $P5002, "ModuleLoader"
+    push $P5002, "search_path"
+    push $P5002, "ctxsave"
+    push $P5002, "load_module"
+    push $P5002, "load_setting"
+    push $P5002, "set_mainline_module"
+    push $P5002, "__6MODEL_CORE__"
+    push $P5002, "GLOBALish"
+    .const 'Sub' $P5003 = 'cuid_23_1350682385.132' 
+    capture_lex $P5003
+    $P5004 = $P5003()
+    nqp_deserialize_sc "AQAAAEAAAAABAAAASAAAAAIAAABYAAAA4AEAAAQAAAAgAgAAhgIAAAAAAACGAgAAAAAAAIYCAACGAgAAAAAAAAgAAAAAAAAAAQAAAAAAAAABAAAAqAAAAAAAAAACAAAAAAAAAAAAAAAKAAEAAAACAAAAAgAAAAAAAQAAAAoAAAAAAAAAAAAAAAAAAQAAAAAAAAACAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////////////////////////////////AAAAAAAAAAABAAAAAAAAAAIAAAAAAAAAAAADAAAAAAADAAAAAAAAAAEAAAAKAAAAAAAKAAUAAAADAAAACwAAAAAAAAAAAAQAAAALAAAAAAABAAAABQAAAAsAAAAAAAIAAAAGAAAACwAAAAAAAwAAAAcAAAALAAAAAAAEAAAAAAAAAAAAAAABAAAAAAAAAAIAAAAAAAEAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///////////////////////////////8AAAAAAAAAAAEAAAAAAAAAAgAAAAAAAQAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAABAAAAAAAAAAAAAAABAAAAAQAAAAAAAAAQAAAAAQAAAAkAAAAHAAAAAAAKAAAAAAACAAAABwAAAAAACgAFAAAAAwAAAAsAAAAAAAAAAAAEAAAACwAAAAAAAQAAAAUAAAALAAAAAAACAAAABgAAAAsAAAAAAAMAAAAHAAAACwAAAAAABAAAAA==", cur_sc, $P5002, $P5004
+    .const "LexInfo" $P5001 = "cuid_1_1350682385.132"
+    nqp_get_sc_object $P5002, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1350682385.147", 0
+    $P5001."set_static_lexpad_value"("GLOBALish", $P5002)
+    .const "LexInfo" $P5003 = "cuid_1_1350682385.132"
+    $P5003."finish_static_lexpad"()
+    .const "LexInfo" $P5001 = "cuid_1_1350682385.132"
+    nqp_get_sc_object $P5002, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1350682385.147", 0
+    $P5001."set_static_lexpad_value"("$?PACKAGE", $P5002)
+    .const "LexInfo" $P5003 = "cuid_1_1350682385.132"
+    $P5003."finish_static_lexpad"()
+    .const "LexInfo" $P5001 = "cuid_1_1350682385.132"
+    nqp_get_sc_object $P5002, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1350682385.147", 1
+    $P5001."set_static_lexpad_value"("ModuleLoader", $P5002)
+    .const "LexInfo" $P5003 = "cuid_1_1350682385.132"
+    $P5003."finish_static_lexpad"()
+    .const "LexInfo" $P5001 = "cuid_7_1350682385.132"
+    nqp_get_sc_object $P5002, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1350682385.147", 1
+    $P5001."set_static_lexpad_value"("$?PACKAGE", $P5002)
+    .const "LexInfo" $P5003 = "cuid_7_1350682385.132"
+    $P5003."finish_static_lexpad"()
+    .const "LexInfo" $P5001 = "cuid_7_1350682385.132"
+    nqp_get_sc_object $P5002, "6EBC33AD36BF21AA57CAA4B020565B7228223D55-1350682385.147", 1
+    $P5001."set_static_lexpad_value"("$?CLASS", $P5002)
+    .const "LexInfo" $P5003 = "cuid_7_1350682385.132"
+    $P5004 = $P5003."finish_static_lexpad"()
+    .return ($P5004) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_23_1349901723.41") :anon :lex :outer("cuid_24_1349901723.41")
+.sub "" :subid("cuid_23_1350682385.132") :anon :lex :outer("cuid_24_1350682385.132")
 .annotate 'file', "src\\ModuleLoader.pm"
     new $P5001, 'ResizablePMCArray'
-    .const 'Sub' $P5002 = "cuid_2_1349901723.41" 
+    .const 'Sub' $P5002 = "cuid_2_1350682385.132" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_3_1349901723.41" 
+    .const 'Sub' $P5002 = "cuid_3_1350682385.132" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_4_1349901723.41" 
+    .const 'Sub' $P5002 = "cuid_4_1350682385.132" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_5_1349901723.41" 
+    .const 'Sub' $P5002 = "cuid_5_1350682385.132" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_6_1349901723.41" 
+    .const 'Sub' $P5002 = "cuid_6_1350682385.132" 
     push $P5001, $P5002
     .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_25_1349901723.41") :load
+.sub "" :subid("cuid_25_1350682385.132") :load
 .annotate 'file', "src\\ModuleLoader.pm"
-    .const 'Sub' $P5001 = "cuid_1_1349901723.41" 
+    .const 'Sub' $P5001 = "cuid_1_1350682385.132" 
     $P5002 = $P5001()
     .return ($P5002) 
 .end
