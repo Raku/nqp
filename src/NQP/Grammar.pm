@@ -470,8 +470,10 @@ grammar NQP::Grammar is HLL::Grammar {
     rule method_def {
         :my $*RETURN_USED := 0;
         :my $*INVOCANT_OK := 1;
-        $<private>=['!'?]
-        <deflongname>?
+        [
+        || '::(' <latename=variable> ')'
+        || $<private>=['!'?] <deflongname>?
+        ]
         <.newpad>
         [ '(' <signature> ')'
             || <.panic: 'Routine declaration requires a signature'> ]
@@ -539,7 +541,10 @@ grammar NQP::Grammar is HLL::Grammar {
     token regex_declarator {
         [
         | $<proto>=[proto] :s [regex|token|rule]
-          <deflongname>
+          [
+          || '::(' <latename=variable> ')'
+          || <deflongname>
+          ]
           [ 
           || '{*}'<?ENDSTMT>
           || '{' '<...>' '}'<?ENDSTMT>
@@ -547,14 +552,17 @@ grammar NQP::Grammar is HLL::Grammar {
           || <.panic: "Proto regex body must be \{*\} (or <*> or <...>, which are deprecated)">
           ]
         | $<sym>=[regex|token|rule] :s
-          <deflongname>
+          [
+          || '::(' <latename=variable> ')'
+          || <deflongname>
+          ]
           <.newpad>
           [ '(' <signature> ')' ]?
           :my %*RX;
           {   
               %*RX<s>    := $<sym> eq 'rule'; 
               %*RX<r>    := $<sym> eq 'token' || $<sym> eq 'rule'; 
-              %*RX<name> := $<deflongname>.ast;
+              %*RX<name> := $<deflongname>.ast if $<deflongname>;
           }
           '{'<p6regex=.LANG('Regex','nibbler')>'}'<?ENDSTMT>
         ]

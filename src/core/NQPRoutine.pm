@@ -48,6 +48,9 @@ my knowhow NQPRoutine {
     method nqpattr($key) {
         $!do.nqpattr($key)
     }
+    method !set_name($name) {
+        pir::assign__0Ps($!do, $name);
+    }
 }
 pir::stable_publish_vtable_handler_mapping__vPP(NQPRoutine,
     nqp::hash(

@@ -609,6 +609,7 @@ class NQP::Actions is HLL::Actions {
                 }
             }
             $past.unshift($params);
+            $past.push(QAST::Op.new( :op('curlexpad') ));
             $past.symbol('$?CLASS', :scope('lexical'));
             $*W.pkg_set_body_block($*PACKAGE, $past);
             $*W.install_lexical_symbol($past, '$?PACKAGE', $*PACKAGE);
@@ -935,9 +936,18 @@ class NQP::Actions is HLL::Actions {
         $past.symbol('self', :scope('lexical') );
         
         # Install it where it should go (methods table / namespace).
+        my $name := "";
         if $<deflongname> {
+            $name := ~$<private> ~ ~$<deflongname>[0].ast;
+        }
+        elsif $<latename> {
+            if $*PKGDECL ne 'role' {
+                $/.CURSOR.panic("Late-bound method name only valid in role");
+            }
+            $name := "!!LATENAME!!" ~ ~$<latename>;
+        }
+        if $name ne "" {
             # Set name.
-            my $name := ~$<private> ~ ~$<deflongname>[0].ast;
             $past.name($name);
 
             # Insert it into the method table.
@@ -1133,7 +1143,16 @@ class NQP::Actions is HLL::Actions {
     }
 
     method regex_declarator($/, $key?) {
-        my $name := ~$<deflongname>.ast;
+        my $name;
+        if $<deflongname> {
+            $name := ~$<deflongname>.ast;
+        }
+        else {
+            if $*PKGDECL ne 'role' {
+                $/.CURSOR.panic("Late-bound method name only valid in role");
+            }
+            $name := "!!LATENAME!!" ~ ~$<latename>;
+        }
         my $past;
         if $<proto> {
             $past :=
