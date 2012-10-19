@@ -297,12 +297,7 @@ class QRegex::NFA {
         if nqp::can($cursor, $name) {
             if !nqp::existskey(%seen, $name) {
                 my $meth := $cursor.HOW.find_method($cursor, $name, :no_trace(1));
-                if nqp::can($meth, 'NFA') {
-                    @substates := $meth.NFA();
-                }
-                elsif nqp::can($meth, 'nqpattr') {
-                    @substates := $meth.nqpattr('nfa');
-                }
+                @substates := $meth.NFA() if nqp::can($meth, 'NFA');
                 @substates := [] if nqp::isnull(@substates);
             }
             if !@substates && !nqp::existskey(%seen, $name) {
