@@ -372,8 +372,8 @@ grammar NQP::Grammar is HLL::Grammar {
         :my $*PACKAGE;     # The type object for this package.
         :my $OUTER := $*W.cur_lexpad();
         
-        <.newpad>
         <name>
+        <.newpad>
         [ <?{ $*PKGDECL eq 'role' }> '[' ~ ']' <role_params> ]?
         [ 'is' 'repr(' <repr=.quote_EXPR> ')' ]?
         
