@@ -1,6 +1,6 @@
 class QRegex::P6Regex::Actions is HLL::Actions {
     method TOP($/) {
-        make qbuildsub($<nibbler>.ast, :anon(1), :addself(1));
+        make self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1));
     }
 
     method nibbler($/) { make $<termaltseq>.ast }
@@ -136,7 +136,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method metachar:sym<( )>($/) {
-        my $subpast := QAST::Node.new(qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
+        my $subpast := QAST::Node.new(self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
         my $qast := QAST::Regex.new( $subpast, $<nibbler>.ast, :rxtype('subrule'),
                                      :subtype('capture'), :node($/) );
         make $qast;
@@ -401,8 +401,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             }
             elsif $<nibbler> {
                 $name eq 'after' ??
-                    $qast[0].push(qbuildsub(self.flip_ast($<nibbler>[0].ast), :anon(1), :addself(1))) !!
-                    $qast[0].push(qbuildsub($<nibbler>[0].ast, :anon(1), :addself(1)));
+                    $qast[0].push(self.qbuildsub(self.flip_ast($<nibbler>[0].ast), :anon(1), :addself(1))) !!
+                    $qast[0].push(self.qbuildsub($<nibbler>[0].ast, :anon(1), :addself(1)));
             }
         }
         make $qast;
@@ -535,46 +535,37 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         elsif $backmod eq ':!' || $backmod eq '!' { $ast.backtrack('g') }
         $ast;
     }
+    
+    our sub qbuildsub(*@pos, *%named) {
+        QRegex::P6Regex::Actions.qbuildsub(|@pos, |%named)
+    }
 
-    our sub qbuildsub($qast, $block = QAST::Block.new(), :$anon, :$addself) {
-        my $blockid := $block.cuid;
-        my $hashpast := QAST::Op.new( :op<hash> );
-        for capnames($qast, 0) {
-            if $_.key gt '' { 
-                $hashpast.push(QAST::SVal.new( :value($_.key) )); 
-                $hashpast.push(QAST::IVal.new( :value(
-                    nqp::iscclass(pir::const::CCLASS_NUMERIC, $_.key, 0) + ($_.value > 1) * 2) )); 
-            }
-        }
-        my $initpast := QAST::Stmts.new();
+    method qbuildsub($qast, $block = QAST::Block.new(), :$anon, :$addself, *%rest) {
+        my $code_obj := nqp::existskey(%rest, 'code_obj')
+            ?? %rest<code_obj>
+            !! self.create_regex_code_object($block);
+
         if $addself {
-            $initpast.push(QAST::Var.new( :name('self'), :scope('local'), :decl('param') ));
+            $block.push(QAST::Var.new( :name('self'), :scope('local'), :decl('param') ));
         }
-        my $capblock := QAST::BlockMemo.new( :name($blockid ~ '_caps'),  $hashpast );
-        $initpast.push(QAST::Stmt.new($capblock));
-
-        my $nfapast := QRegex::NFA.new.addnode($qast).qast;
-        if $nfapast {
-            my $nfablock := QAST::BlockMemo.new( :name($blockid ~ '_nfa'), $nfapast);
-            $initpast.push(QAST::Stmt.new($nfablock));
-        }
-        qalt_nfas($qast, $blockid, $initpast);
-
         unless $block.symbol('$¢') {
-            $initpast.push(QAST::Var.new(:name<$¢>, :scope<lexical>, :decl('var')));
+            $block.push(QAST::Var.new(:name<$¢>, :scope<lexical>, :decl('var')));
             $block.symbol('$¢', :scope<lexical>);
         }
 
+        self.store_regex_caps($code_obj, $block, capnames($qast, 0));
+        self.store_regex_nfa($code_obj, $block, QRegex::NFA.new.addnode($qast));
+        self.alt_nfas($code_obj, $block, $qast);
+
         $block<orig_qast> := $qast;
-        
         $qast := QAST::Regex.new( :rxtype<concat>,
                      QAST::Regex.new( :rxtype<scan> ),
                      $qast,
                      ($anon ??
                           QAST::Regex.new( :rxtype<pass> ) !!
                           QAST::Regex.new( :rxtype<pass>, :name(%*RX<name>) )));
-        $block.push($initpast);
         $block.push($qast);
+        
         $block;
     }
 
@@ -628,23 +619,22 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         %capnames;
     }
     
-    sub qalt_nfas($ast, $subid, $initpast) {
+    method alt_nfas($code_obj, $block, $ast) {
         my $rxtype := $ast.rxtype;
         if $rxtype eq 'alt' {
-            my $nfapast := QAST::Op.new( :op('list') );
-            $ast.name(QAST::Node.unique('alt_nfa_') ~ '_' ~ ~nqp::time_n());
+            my @alternatives;
             for $ast.list {
-                qalt_nfas($_, $subid, $initpast);
-                $nfapast.push(QRegex::NFA.new.addnode($_).qast(:non_empty));
+                self.alt_nfas($code_obj, $block, $_);
+                nqp::push(@alternatives, QRegex::NFA.new.addnode($_));
             }
-            my $nfablock := QAST::BlockMemo.new( :name($subid ~ '_' ~ $ast.name), $nfapast);
-            $initpast.push(QAST::Stmt.new($nfablock));
+            $ast.name(QAST::Node.unique('alt_nfa_') ~ '_' ~ ~nqp::time_n());
+            self.store_regex_alt_nfa($code_obj, $block, $ast.name, @alternatives);
         }
         elsif $rxtype eq 'subcapture' || $rxtype eq 'quant' {
-            qalt_nfas($ast[0], $subid, $initpast)
+            self.alt_nfas($code_obj, $block, $ast[0])
         }
         elsif $rxtype eq 'concat' || $rxtype eq 'altseq' || $rxtype eq 'conj' || $rxtype eq 'conjseq' {
-            for $ast.list { qalt_nfas($_, $subid, $initpast) }
+            for $ast.list { self.alt_nfas($code_obj, $block, $_) }
         }
     }
 
@@ -668,5 +658,43 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             for @($qast) { self.flip_ast($_) }
         }
         $qast
+    }
+    
+    # This is overridden by a compiler that wants to create code objects
+    # for regexes.
+    method create_regex_code_object($block) {
+    }
+    
+    # Stores the captures info for a regex.
+    method store_regex_caps($code_obj, $block, %caps) {
+        my $hashpast := QAST::Op.new( :op<hash> );
+        for %caps {
+            if $_.key gt '' { 
+                $hashpast.push(QAST::SVal.new( :value($_.key) )); 
+                $hashpast.push(QAST::IVal.new( :value(
+                    nqp::iscclass(pir::const::CCLASS_NUMERIC, $_.key, 0) + ($_.value > 1) * 2) )); 
+            }
+        }
+        my $capblock := QAST::BlockMemo.new( :name($block.cuid ~ '_caps'),  $hashpast );
+        $block.push(QAST::Stmt.new($capblock));
+    }
+    
+    # Stores the NFA for a regex.
+    method store_regex_nfa($code_obj, $block, $nfa) {
+        my $nfaqast := $nfa.qast;
+        if $nfaqast {
+            my $nfablock := QAST::BlockMemo.new( :name($block.cuid ~ '_nfa'), $nfaqast);
+            $block.push(QAST::Stmt.new($nfablock));
+        }
+    }
+    
+    # Stores the NFA for a regex alternation.
+    method store_regex_alt_nfa($code_obj, $block, $key, @alternatives) {
+        my $nfaqast := QAST::Op.new( :op('list') );
+        for @alternatives {
+            $nfaqast.push($_.qast(:non_empty));
+        }
+        my $nfablock := QAST::BlockMemo.new( :name($block.cuid ~ '_' ~ $key), $nfaqast);
+        $block.push(QAST::Stmt.new($nfablock));
     }
 }
