@@ -1640,4 +1640,12 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
     method store_regex_caps($code_obj, $block, %caps) {
         $code_obj.SET_CAPS(%caps);
     }
+    
+    method store_regex_alt_nfa($code_obj, $block, $key, @alternatives) {
+        my @saved;
+        for @alternatives {
+            @saved.push($_.save(:non_empty));
+        }
+        $code_obj.SET_ALT_NFA($key, @saved);
+    }
 }

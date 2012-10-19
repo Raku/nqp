@@ -249,7 +249,9 @@ role NQPCursorRole is export {
         my @fates := $nfa.states[0];
         my int $start := 1;
         my int $fate := 0;
-        for $!regexsub.nqpattr($name) {
+        for nqp::ifnull(
+                nqp::can($!regexsub, 'ALT_NFA') ?? $!regexsub.ALT_NFA($name) !! nqp::null(),
+                $!regexsub.nqpattr($name)) {
             my $label := @labels[$fate];
             $fate := $fate + 1;
             @fates[$fate] := $label;

@@ -87,8 +87,8 @@ my knowhow NQPRegex {
     method NFA() {
         $!nfa
     }
-    method ALT_NFA($name) {
-        %!alt_nfas{$name}
+    method ALT_NFA(str $name) {
+        nqp::isnull(%!alt_nfas) ?? nqp::null() !! %!alt_nfas{$name}
     }
 }
 pir::stable_publish_vtable_handler_mapping__vPP(NQPRegex,
