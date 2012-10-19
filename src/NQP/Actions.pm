@@ -585,7 +585,14 @@ class NQP::Actions is HLL::Actions {
         my $how := %*HOW{$*PKGDECL};
 
         # Get the body code.
-        my $past := $<blockoid> ?? $<blockoid>.ast !! $<statementlist>.ast;
+        my $past;
+        if $<blockoid> {
+            $past := $<blockoid>.ast;
+        }
+        else {
+            $past := $*W.pop_lexpad();
+            $past.push($<statementlist>.ast);
+        }
 
         # Evaluate everything in the package in-line unless this is a generic
         # type in which case it needs delayed evaluation. Normally, $?CLASS is
