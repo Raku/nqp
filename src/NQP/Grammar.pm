@@ -370,8 +370,11 @@ grammar NQP::Grammar is HLL::Grammar {
 
     rule package_def {
         :my $*PACKAGE;     # The type object for this package.
+        :my $OUTER := $*W.cur_lexpad();
         
+        <.newpad>
         <name>
+        [ <?{ $*PKGDECL eq 'role' }> '[' ~ ']' <role_params> ]?
         [ 'is' 'repr(' <repr=.quote_EXPR> ')' ]?
         
         {
@@ -388,14 +391,14 @@ grammar NQP::Grammar is HLL::Grammar {
             if $*SCOPE eq 'our' || $*SCOPE eq '' {
                 $*W.install_package_symbol($*OUTERPACKAGE, $<name><identifier>, $*PACKAGE);
                 if +$<name><identifier> == 1 {
-                    $*W.install_lexical_symbol($*W.cur_lexpad(), $<name><identifier>[0], $*PACKAGE);
+                    $*W.install_lexical_symbol($OUTER, $<name><identifier>[0], $*PACKAGE);
                 }
             }
             elsif $*SCOPE eq 'my' {
                 if +$<name><identifier> != 1 {
                     $<name>.CURSOR.panic("A my scoped package cannot have a multi-part name yet");
                 }
-                $*W.install_lexical_symbol($*W.cur_lexpad(), $<name><identifier>[0], $*PACKAGE);
+                $*W.install_lexical_symbol($OUTER, $<name><identifier>[0], $*PACKAGE);
             }
             else {
                 $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
@@ -406,10 +409,16 @@ grammar NQP::Grammar is HLL::Grammar {
         [ 'is' <parent=.name> ]?
         [ 'does' <role=.name> ]*
         [
-        || ';' <comp_unit>
-        || <?[{]> <block>
+        || ';' <statementlist> [ $ || <.panic: 'Confused'> ]
+        || <?[{]> <blockoid>
         || <.panic: 'Malformed package declaration'>
         ]
+    }
+    
+    rule role_params {
+        :my $*SCOPE   := 'my';
+        :my $*IN_DECL := 'variable';
+        [ <variable> ]+ % [ ',' ]
     }
 
     proto token scope_declarator { <...> }

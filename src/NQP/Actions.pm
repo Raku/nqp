@@ -585,7 +585,7 @@ class NQP::Actions is HLL::Actions {
         my $how := %*HOW{$*PKGDECL};
 
         # Get the body code.
-        my $past := $<block> ?? $<block>.ast !! $<comp_unit>.ast;
+        my $past := $<blockoid> ?? $<blockoid>.ast !! $<statementlist>.ast;
 
         # Evaluate everything in the package in-line unless this is a generic
         # type in which case it needs delayed evaluation. Normally, $?CLASS is
@@ -593,8 +593,15 @@ class NQP::Actions is HLL::Actions {
         # for parametric types, pass along the role body block.
         if nqp::can($how, 'parametric') && $how.parametric($how) {
             $past.blocktype('declaration');
-            $past.unshift(QAST::Var.new( :name('$?CLASS'), :scope('lexical'),
-                :decl('param') ));
+            my $params := QAST::Stmts.new(
+                QAST::Var.new( :name('$?CLASS'), :scope('lexical'), :decl('param') )
+            );
+            if $<role_params> {
+                for $<role_params>[0]<variable> {
+                    $params.push($_.ast);
+                }
+            }
+            $past.unshift($params);
             $past.symbol('$?CLASS', :scope('lexical'));
             $*W.pkg_set_body_block($*PACKAGE, $past);
             $*W.install_lexical_symbol($past, '$?PACKAGE', $*PACKAGE);
@@ -654,6 +661,15 @@ class NQP::Actions is HLL::Actions {
         }
 
         make $past;
+    }
+    
+    method role_params($/) {
+        for $<variable> {
+            my $var := $_.ast;
+            $var.scope('lexical');
+            $var.decl('param');
+            $*W.cur_lexpad().symbol($var.name, :scope('lexical'));
+        }
     }
 
     method scope_declarator:sym<my>($/)  { make $<scoped>.ast; }
