@@ -1632,4 +1632,8 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
     method create_regex_code_object($block) {
         $*W.create_code($block, '', 0, :code_type_name<NQPRegex>);
     }
+    
+    method store_regex_nfa($code_obj, $block, $nfa) {
+        $code_obj.SET_NFA($nfa.save);
+    }
 }

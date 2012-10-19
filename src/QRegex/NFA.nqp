@@ -34,7 +34,7 @@ class QRegex::NFA {
         $to := self.addstate() if $to < 0;
         my $st := $!states[$from];
         nqp::push($st, $action);
-        nqp::push($st, $value);
+        nqp::push($st, nqp::istype($value, QAST::SVal) ?? $value.value !! $value);
         nqp::push($st, $to);
         $to;
     }
@@ -278,9 +278,6 @@ class QRegex::NFA {
                     }
                     $list.push($arglist);
                 }
-                elsif $_ ~~ QAST::SVal {
-                    $list.push($_);
-                }
                 elsif +$_ eq $_ {
                     $list.push(QAST::IVal.new( :value($_) ));
                 }
@@ -300,7 +297,12 @@ class QRegex::NFA {
         if nqp::can($cursor, $name) {
             if !nqp::existskey(%seen, $name) {
                 my $meth := $cursor.HOW.find_method($cursor, $name, :no_trace(1));
-                @substates := $meth.nqpattr('nfa') if nqp::can($meth, 'nqpattr');
+                if nqp::can($meth, 'NFA') {
+                    @substates := $meth.NFA();
+                }
+                elsif nqp::can($meth, 'nqpattr') {
+                    @substates := $meth.nqpattr('nfa');
+                }
                 @substates := [] if nqp::isnull(@substates);
             }
             if !@substates && !nqp::existskey(%seen, $name) {
