@@ -1555,6 +1555,8 @@ QAST::Operations.add_core_pirop_mapping('rebless', 'repr_change_type', '0PP', :i
 
 # code object related opcodes
 QAST::Operations.add_core_pirop_mapping('takeclosure', 'newclosure', 'PP');
+QAST::Operations.add_core_pirop_mapping('getcodeobj', 'get_sub_code_object', 'PP');
+QAST::Operations.add_core_pirop_mapping('setcodeobj', 'set_sub_code_object', '1PP');
 
 # serialization context related opcodes
 QAST::Operations.add_core_pirop_mapping('sha1', 'nqp_sha1', 'Ss');
