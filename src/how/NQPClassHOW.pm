@@ -61,7 +61,7 @@ knowhow NQPClassHOW {
     ##
 
     # Creates a new instance of this meta-class.
-    method new(:$name) {
+    method new(:$name = '<anon>') {
         my $obj := nqp::create(self);
         $obj.BUILD(:name($name));
         $obj
@@ -576,7 +576,7 @@ knowhow NQPClassHOW {
         $!trace_depth
     }
 
-    method attributes($obj, :$local) {
+    method attributes($obj, :$local = 0) {
         my @attrs;
         if $local {
             for %!attributes {

@@ -227,12 +227,13 @@ class QAST::Compiler is HLL::Compiler {
     method rxescape($str) { 'ucs4:"' ~ pir::escape__Ss($str) ~ '"' }
 
     proto method as_post($node, :$want) {
+        my $*WANT := $want;
         if $want {
             if nqp::istype($node, QAST::Want) {
                 self.coerce(self.as_post(want($node, $want)), $want)
             }
             else {
-                self.coerce(self.as_post($node), $want)
+                self.coerce({*}, $want)
             }
         }
         else {
@@ -240,7 +241,7 @@ class QAST::Compiler is HLL::Compiler {
         }
     }
     
-    multi method as_post(QAST::CompUnit $cu) {
+    multi method as_post(QAST::CompUnit $cu, :$want) {
         # Set HLL.
         my $*HLL := '';
         if $cu.hll {
@@ -349,7 +350,7 @@ class QAST::Compiler is HLL::Compiler {
         )
     }
 
-    multi method as_post(QAST::Block $node) {
+    multi method as_post(QAST::Block $node, :$want) {
         # Build the POST::Sub.
         my $sub;
         {
@@ -368,6 +369,7 @@ class QAST::Compiler is HLL::Compiler {
                 my @*INNERS := @inners;
                 my $*HAVE_IMM_ARG := 0;
                 my $*QAST_BLOCK_NO_CLOSE := 0;
+                my $*WANT;
                 my $err;
                 try {
                     $stmts := self.compile_all_the_stmts($node.list);
@@ -572,7 +574,7 @@ class QAST::Compiler is HLL::Compiler {
         $ops
     }
     
-    multi method as_post(QAST::BlockMemo $node) {
+    multi method as_post(QAST::BlockMemo $node, :$want) {
         # Build the POST::Sub.
         my $sub;
         {
@@ -587,6 +589,7 @@ class QAST::Compiler is HLL::Compiler {
             {
                 my $*BLOCK := $block;
                 my $*HLL := 'nqp';
+                my $*WANT;
                 $stmts := self.compile_all_the_stmts($node.list);
             }
             
@@ -616,11 +619,11 @@ class QAST::Compiler is HLL::Compiler {
         return $sub;
     }
     
-    multi method as_post(QAST::Stmts $node) {
+    multi method as_post(QAST::Stmts $node, :$want) {
         self.compile_all_the_stmts($node.list, $node.resultchild, :node($node.node))
     }
     
-    multi method as_post(QAST::Stmt $node) {
+    multi method as_post(QAST::Stmt $node, :$want) {
         my $orig_reg := $*REGALLOC;
         {
             my $*REGALLOC := RegAlloc.new($orig_reg);
@@ -632,23 +635,29 @@ class QAST::Compiler is HLL::Compiler {
         my $last;
         my $ops := PIRT::Ops.new();
         $ops.node($node) if $node;
-        my $i := 0;
-        my $n := +@stmts;
+        my int $i := 0;
+        my int $n := +@stmts;
+        my $all_void := $*WANT eq 'v';
+        unless nqp::defined($resultchild) {
+            $resultchild := $n - 1;
+        }
         for @stmts {
-            my $void := $i + 1 < $n;
-            if nqp::istype($_, QAST::Want) && $void {
-                $_ := want($_, 'v');
+            my $void := $all_void || $i != $resultchild;
+            if $void {
+                if nqp::istype($_, QAST::Want) {
+                    $_ := want($_, 'v');
+                }
+                $last := self.as_post($_, :want('v'));
             }
-            $last := self.as_post($_);
+            else {
+                $last := self.as_post($_);
+            }
             $ops.push($last)
                 unless $void && nqp::istype($_, QAST::Var);
-            if nqp::defined($resultchild) && $resultchild == $i {
+            if $resultchild == $i {
                 $ops.result($last.result);
             }
             $i := $i + 1;
-        }
-        if $last && !nqp::defined($resultchild) {
-            $ops.result($last.result);
         }
         $ops
     }
@@ -670,7 +679,7 @@ class QAST::Compiler is HLL::Compiler {
         $best
     }
     
-    multi method as_post(QAST::Op $node) {
+    multi method as_post(QAST::Op $node, :$want) {
         my $hll := '';
         my $result;
         my $err;
@@ -685,7 +694,7 @@ class QAST::Compiler is HLL::Compiler {
         $result
     }
     
-    multi method as_post(QAST::VM $node) {
+    multi method as_post(QAST::VM $node, :$want) {
         if $node.supports('parrot') {
             return self.as_post($node.alternative('parrot'))
         }
@@ -722,11 +731,11 @@ class QAST::Compiler is HLL::Compiler {
         }
     }
     
-    multi method as_post(QAST::Var $node) {
+    multi method as_post(QAST::Var $node, :$want) {
         self.compile_var($node)
     }
     
-    multi method as_post(QAST::VarWithFallback $node) {
+    multi method as_post(QAST::VarWithFallback $node, :$want) {
         my $post := self.compile_var($node);
         my $result;
         if $*BINDVAL {
@@ -928,27 +937,27 @@ class QAST::Compiler is HLL::Compiler {
         $want ?? self.as_post($node, :$want) !! self.as_post($node)
     }
     
-    multi method as_post(QAST::Want $node) {
+    multi method as_post(QAST::Want $node, :$want) {
         # If we're not in a coercive context, take the default.
         self.as_post($node[0])
     }
     
-    multi method as_post(QAST::IVal $node) {
+    multi method as_post(QAST::IVal $node, :$want) {
         PIRT::Ops.new(:result(~$node.value))
     }
     
-    multi method as_post(QAST::NVal $node) {
+    multi method as_post(QAST::NVal $node, :$want) {
         my $val := ~$node.value;
         $val := $val ~ '.0' unless nqp::index($val, '.', 0) >= 0 ||
                                    nqp::index($val, 'e', 0) > 0;
         PIRT::Ops.new(:result($val))
     }
     
-    multi method as_post(QAST::SVal $node) {
+    multi method as_post(QAST::SVal $node, :$want) {
         PIRT::Ops.new(:result(self.escape($node.value)))
     }
     
-    multi method as_post(QAST::BVal $node) {
+    multi method as_post(QAST::BVal $node, :$want) {
         my $cuid := self.escape($node.value.cuid);
         my $reg  := $*REGALLOC.fresh_p();
         my $ops  := PIRT::Ops.new(:result($reg));
@@ -956,7 +965,7 @@ class QAST::Compiler is HLL::Compiler {
         $ops;
     }
     
-    multi method as_post(QAST::WVal $node) {
+    multi method as_post(QAST::WVal $node, :$want) {
         my $val    := $node.value;
         my $sc     := pir::nqp_get_sc_for_object__PP($val);
         my $handle := $sc.handle;
@@ -968,6 +977,7 @@ class QAST::Compiler is HLL::Compiler {
     }
     
     method coerce($post, $desired) {
+        return $post if $desired eq 'v';
         my $result := self.infer_type($post.result());
         if $result eq $desired {
             # Exact match
@@ -1046,7 +1056,7 @@ class QAST::Compiler is HLL::Compiler {
         }
     }
     
-    multi method as_post(QAST::Regex $node) {
+    multi method as_post(QAST::Regex $node, :$want) {
         my $ops := self.post_new('Ops');
         $ops.node($node.node) if $node.node;
         my $prefix := self.unique('rx') ~ '_';
@@ -1563,7 +1573,7 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push_pirop('nqp_rxcommit', %*REG<bstack>, $mark);
     }
 
-    multi method as_post($unknown) {
+    multi method as_post($unknown, :$want) {
         nqp::die("Unknown QAST node type " ~ $unknown.HOW.name($unknown));
     }
     

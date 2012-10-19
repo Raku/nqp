@@ -19,7 +19,10 @@ role NQPCursorRole is export {
         my $caps    := nqp::hash();
         my %caplist := $NO_CAPS;
         my $iter;
-        my $curcap;
+        my str $curcap;
+        my $cs;
+        my int $csi;
+        my int $cselems;
         my $subcur;
         my $submatch;
         my $name;
@@ -29,15 +32,16 @@ role NQPCursorRole is export {
             if !nqp::isnull(%caplist) && %caplist {
                 $iter := nqp::iterator(%caplist);
                 while $iter {
-                    $curcap := ~nqp::shift($iter);
+                    $curcap := nqp::shift_s($iter);
                     $caps{$curcap} := nqp::list() if %caplist{$curcap} >= 2;
                 }
             }
         }
         if !nqp::isnull($!cstack) && $!cstack {
-            $iter := nqp::iterator($!cstack);
-            while $iter {
-                $subcur := nqp::shift($iter);
+            $cs      := $!cstack;
+            $cselems := nqp::elems($cs);
+            while $csi < $cselems {
+                $subcur := nqp::atpos($cs, $csi);
                 $submatch := $subcur.MATCH;
                 $name := nqp::getattr($subcur, $?CLASS, '$!name');
                 if !nqp::isnull($name) && nqp::defined($name) {
@@ -54,6 +58,7 @@ role NQPCursorRole is export {
                         }
                     }
                 }
+                $csi++;
             }
         } 
         $caps;

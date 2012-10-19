@@ -199,10 +199,6 @@ class HLL::CommandLine::Parser {
         sub get-value($opt) {
             if $i == $arg-count - 1 {
                 nqp::die("Option $opt needs a value");
-            } elsif self.is-option(@args[$i + 1]) {
-                nqp::die("Option $opt needs a value, but is followed by an option");
-            } elsif %!stopper{@args[$i + 1]} {
-                nqp::die("Option $opt needs a value, but is followed by a stopper");
             } else {
                 $i++;
                 @args[$i];

@@ -44,7 +44,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         my $qast := $<atom>.ast;
         if $<quantifier> {
             my $ast := $<quantifier>[0].ast;
-            $ast.unshift($qast);
+            $ast.unshift($qast || QAST::Regex.new( :rxtype<anchor>, :name<pass> ));
             $qast := $ast;
         }
         $qast.backtrack('r') if $qast && !$qast.backtrack && %*RX<r>;
@@ -71,11 +71,13 @@ class QRegex::P5Regex::Actions is HLL::Actions {
     }
     
     method p5metachar:sym<.>($/) {
-        make QAST::Regex.new( :rxtype<cclass>, :subtype<.>, :node($/) );
+        make %*RX<s>
+            ?? QAST::Regex.new( :rxtype<cclass>, :subtype<.>, :node($/) )
+            !! QAST::Regex.new( :rxtype<cclass>, :subtype<nl>, :negate(1), :node($/) );
     }
 
     method p5metachar:sym<^>($/) {
-        make QAST::Regex.new( :rxtype<anchor>, :subtype<bos>, :node($/) );
+        make QAST::Regex.new( :rxtype<anchor>, :subtype(%*RX<m> ?? 'bol' !! 'bos'), :node($/) );
     }
 
     method p5metachar:sym<$>($/) {
@@ -85,7 +87,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                 :rxtype('quant'), :min(0), :max(1),
                 QAST::Regex.new( :rxtype('literal'), "\n" )
             ),
-            QAST::Regex.new( :rxtype<anchor>, :subtype<eos>, :node($/) )
+            QAST::Regex.new( :rxtype<anchor>, :subtype(%*RX<m> ?? 'eol' !! 'eos'), :node($/) )
         );
     }
     
@@ -166,6 +168,11 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                 QAST::Regex.new( :rxtype<altseq>, |@alts );
         make $qast;
     }
+
+    method p5backslash:sym<A>($/) {
+                make QAST::Regex.new( :rxtype<anchor>, :subtype<bos>, :node($/) );
+
+    }
     
     method p5backslash:sym<s>($/) {
         make QAST::Regex.new(:rxtype<cclass>, '.CCLASS_WHITESPACE', 
@@ -179,6 +186,21 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                              QAST::Node.new( QAST::SVal.new( :value('wb') ) ));
     }
     
+    method p5backslash:sym<z>($/) {
+        make QAST::Regex.new( :rxtype<anchor>, :subtype<eos>, :node($/) );
+    }
+
+    method p5backslash:sym<Z>($/) {
+        make QAST::Regex.new(
+            :rxtype('concat'),
+            QAST::Regex.new(
+                :rxtype('quant'), :min(0), :max(1),
+                QAST::Regex.new( :rxtype('literal'), "\n" )
+            ),
+            QAST::Regex.new( :rxtype<anchor>, :subtype('eos'), :node($/) )
+        );
+    }
+
     method p5backslash:sym<misc>($/) {
         if $<litchar> {
             make QAST::Regex.new( ~$<litchar> , :rxtype('literal'), :node($/) );
@@ -188,6 +210,20 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                 QAST::Node.new(
                     QAST::SVal.new( :value('!BACKREF') ),
                     QAST::SVal.new( :value(~$<number> - 1) ) ) );
+        }
+    }
+    
+    method p5assertion:sym«<»($/) {
+        if $<nibbler> {
+            make QAST::Regex.new(
+                :rxtype<subrule>, :subtype<zerowidth>, :negate($<neg> eq '!'), :node($/),
+                QAST::Node.new(
+                    QAST::SVal.new( :value('after') ),
+                    qbuildsub(self.flip_ast($<nibbler>.ast), :anon(1), :addself(1))
+                ));
+        }
+        else {
+            make 0;
         }
     }
    
@@ -218,7 +254,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
             make 0;
         }
     }
-   
+
     method p5mods($/) {
         for nqp::split('', ~$<on>) {
             %*RX{$_} := 1;
@@ -362,21 +398,25 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         nqp::deletekey(%capnames, '$!to');
         %capnames;
     }
+    
+    method flip_ast($qast) {
+        return $qast unless nqp::istype($qast, QAST::Regex);
+        if $qast.rxtype eq 'literal' {
+            $qast[0] := $qast[0].reverse();
+        }
+        elsif $qast.rxtype eq 'concat' {
+            my @tmp;
+            while +@($qast) { @tmp.push(@($qast).shift) }
+            while @tmp      { @($qast).push(self.flip_ast(@tmp.pop)) }
+        }
+        else {
+            for @($qast) { self.flip_ast($_) }
+        }
+        $qast
+    }
 
 
     # XXX Below here copied from p6regex; needs review
-
-    method metachar:sym<ws>($/) {
-        my $qast := %*RX<s>
-                    ?? QAST::Regex.new(:rxtype<ws>, :subtype<method>, :node($/),
-                            QAST::Node.new( QAST::SVal.new( :value('ws') ) ))
-                    !! 0;
-        make $qast;
-    }
-
-    method metachar:sym<[ ]>($/) {
-        make $<nibbler>.ast;
-    }
 
     method metachar:sym<'>($/) {
         my $quote := $<quote_EXPR>.ast;
@@ -506,38 +546,6 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         make QAST::Regex.new( $<charspec>.ast, :rxtype('literal'), :node($/) );
     }
 
-    method assertion:sym<?>($/) {
-        my $qast;
-        if $<assertion> {
-            $qast := $<assertion>.ast;
-            $qast.subtype('zerowidth');
-        }
-        else {
-            $qast := QAST::Regex.new( :rxtype<anchor>, :subtype<pass>, :node($/) );
-        }
-        make $qast;
-    }
-
-    method assertion:sym<!>($/) {
-        my $qast;
-        if $<assertion> {
-            $qast := $<assertion>.ast;
-            $qast.negate( !$qast.negate );
-            $qast.subtype('zerowidth');
-        }
-        else {
-            $qast := QAST::Regex.new( :rxtype<anchor>, :subtype<fail>, :node($/) );
-        }
-        make $qast;
-    }
-
-    method assertion:sym<method>($/) {
-        my $qast := $<assertion>.ast;
-        $qast.subtype('method');
-        $qast.name('');
-        make $qast;
-    }
-
     method assertion:sym<name>($/) {
         my $name := ~$<longname>;
         my $qast;
@@ -580,31 +588,9 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         make $past;
     }
 
-    method mod_internal($/) {
-        my $n := $<n>[0] gt '' ?? +$<n>[0] !! 1;
-        %*RX{ ~$<mod_ident><sym> } := $n;
-        make 0;
-    }
-
     method subrule_alias($ast, $name) {
         if $ast.name gt '' { $ast.name( $name ~ '=' ~ $ast.name ); }
         else { $ast.name($name); }
         $ast.subtype('capture');
-    }
-
-    method flip_ast($qast) {
-        return $qast unless nqp::istype($qast, QAST::Regex);
-        if $qast.rxtype eq 'literal' {
-            $qast[0] := $qast[0].reverse();
-        }
-        elsif $qast.rxtype eq 'concat' {
-            my @tmp;
-            while +@($qast) { @tmp.push(@($qast).shift) }
-            while @tmp      { @($qast).push(self.flip_ast(@tmp.pop)) }
-        }
-        else {
-            for @($qast) { self.flip_ast($_) }
-        }
-        $qast
     }
 }

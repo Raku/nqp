@@ -442,15 +442,19 @@ for <if unless> -> $op_name {
                 }
             }
         }
-        my $res_type := $operands == 3 ??
-            (@op_types[1] eq @op_types[2] ?? nqp::lc(@op_types[1]) !! 'p') !!
-            (@op_types[0] eq @op_types[1] ?? nqp::lc(@op_types[0]) !! 'p');
-        my $res_reg := $*REGALLOC."fresh_$res_type"();
+        my $res_type;
+        my $res_reg;
+        if $*WANT ne 'v' {
+            $res_type := $operands == 3 ??
+                (@op_types[1] eq @op_types[2] ?? nqp::lc(@op_types[1]) !! 'p') !!
+                (@op_types[0] eq @op_types[1] ?? nqp::lc(@op_types[0]) !! 'p');
+            $res_reg := $*REGALLOC."fresh_$res_type"();
+        }
         
         # Evaluate the condition first; store result if needed.
         my $ops := PIRT::Ops.new();
         my $cond_result;
-        if $operands == 2 {
+        if $res_reg && $operands == 2 {
             my $coerced := $qastcomp.coerce(@comp_ops[0], $res_type);
             $ops.push($coerced);
             $ops.push_pirop('set', $res_reg, $coerced.result);
@@ -472,22 +476,32 @@ for <if unless> -> $op_name {
             ($operands == 2 ?? $end_lbl.result !! $else_lbl.result));
         
         # Emit the then; stash the result.
-        my $then := $qastcomp.coerce(@comp_ops[1], $res_type);
-        $ops.push($then);
-        $ops.push_pirop('set', $res_reg, $then.result);
+        if $res_reg {
+            my $then := $qastcomp.coerce(@comp_ops[1], $res_type);
+            $ops.push($then);
+            $ops.push_pirop('set', $res_reg, $then.result);
+        }
+        else {
+            $ops.push(@comp_ops[1]);
+        }
         
         # Handle else branch if needed.
         if $operands == 3 {
-            my $else := $qastcomp.coerce(@comp_ops[2], $res_type);
             $ops.push_pirop('goto', $end_lbl.result);
             $ops.push($else_lbl);
-            $ops.push($else);
-            $ops.push_pirop('set', $res_reg, $else.result);
+            if $res_reg {
+                my $else := $qastcomp.coerce(@comp_ops[2], $res_type);
+                $ops.push($else);
+                $ops.push_pirop('set', $res_reg, $else.result);
+            }
+            else {
+                $ops.push(@comp_ops[2]);
+            }
         }
         
         # Emit end label and tag ops with result.
         $ops.push($end_lbl);
-        $ops.result($res_reg);
+        $ops.result($res_reg || 'null');
         $ops;
     });
 }
@@ -862,16 +876,17 @@ QAST::Operations.add_core_op('call', -> $qastcomp, $op {
         handle_arg($_, $qastcomp, $ops, @pos_arg_results, @named_arg_results);
     }
     
-    # Figure out result register type and allocate a register for it.
-    my $res_type := $qastcomp.type_to_register_type($op.returns);
-    my $res_reg := $*REGALLOC."fresh_{nqp::lc($res_type)}"();
-    
-    # Generate call.
+    # Generate call, with a result register if we're not in void context.
     $ops.push($callee);
-    $ops.push_pirop('call', $callee.result, |@pos_arg_results, |@named_arg_results, :result($res_reg));
-    
-    # Result is the result of the call.
-    $ops.result($res_reg);
+    if $*WANT eq 'v' {
+        $ops.push_pirop('call', $callee.result, |@pos_arg_results, |@named_arg_results);
+    }
+    else {
+        my $res_type := $qastcomp.type_to_register_type($op.returns);
+        my $res_reg := $*REGALLOC."fresh_{nqp::lc($res_type)}"();
+        $ops.push_pirop('call', $callee.result, |@pos_arg_results, |@named_arg_results, :result($res_reg));
+        $ops.result($res_reg);
+    }
     $ops
 });
 QAST::Operations.add_core_op('callmethod', :inlinable(1), -> $qastcomp, $op {
@@ -911,16 +926,18 @@ QAST::Operations.add_core_op('callmethod', :inlinable(1), -> $qastcomp, $op {
         }
     }
     
-    # Figure out result register type and allocate a register for it.
-    my $res_type := $qastcomp.type_to_register_type($op.returns);
-    my $res_reg := $*REGALLOC."fresh_{nqp::lc($res_type)}"();
-    
-    # Generate method call.
+    # Generate call, with a result register if we're not in void context.
     $ops.push($name);
-    $ops.push_pirop('callmethod', $name.result, |@pos_arg_results, |@named_arg_results, :result($res_reg));
-    
-    # Result is the result of the call.
-    $ops.result($res_reg);
+    if $*WANT eq 'v' {
+        $ops.push_pirop('callmethod', $name.result, |@pos_arg_results, |@named_arg_results);
+    }
+    else {
+        my $res_type := $qastcomp.type_to_register_type($op.returns);
+        my $res_reg := $*REGALLOC."fresh_{nqp::lc($res_type)}"();
+        $ops.push_pirop('callmethod', $name.result, |@pos_arg_results, |@named_arg_results, :result($res_reg));
+        $ops.result($res_reg);
+    }
+
     $ops
 });
 
@@ -1534,6 +1551,7 @@ QAST::Operations.add_core_pirop_mapping('can', 'can', 'IPs', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('reprname', 'repr_name', 'SP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('newtype', 'repr_type_object_for', 'PPs', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('setwho', 'set_who', '0PP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('rebless', 'repr_change_type', '0PP', :inlinable(1));
 
 # code object related opcodes
 QAST::Operations.add_core_pirop_mapping('takeclosure', 'newclosure', 'PP');

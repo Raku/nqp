@@ -585,7 +585,14 @@ class NQP::Actions is HLL::Actions {
         my $how := %*HOW{$*PKGDECL};
 
         # Get the body code.
-        my $past := $<block> ?? $<block>.ast !! $<comp_unit>.ast;
+        my $past;
+        if $<blockoid> {
+            $past := $<blockoid>.ast;
+        }
+        else {
+            $past := $*W.pop_lexpad();
+            $past.push($<statementlist>.ast);
+        }
 
         # Evaluate everything in the package in-line unless this is a generic
         # type in which case it needs delayed evaluation. Normally, $?CLASS is
@@ -593,8 +600,16 @@ class NQP::Actions is HLL::Actions {
         # for parametric types, pass along the role body block.
         if nqp::can($how, 'parametric') && $how.parametric($how) {
             $past.blocktype('declaration');
-            $past.unshift(QAST::Var.new( :name('$?CLASS'), :scope('lexical'),
-                :decl('param') ));
+            my $params := QAST::Stmts.new(
+                QAST::Var.new( :name('$?CLASS'), :scope('lexical'), :decl('param') )
+            );
+            if $<role_params> {
+                for $<role_params>[0]<variable> {
+                    $params.push($_.ast);
+                }
+            }
+            $past.unshift($params);
+            $past.push(QAST::Op.new( :op('curlexpad') ));
             $past.symbol('$?CLASS', :scope('lexical'));
             $*W.pkg_set_body_block($*PACKAGE, $past);
             $*W.install_lexical_symbol($past, '$?PACKAGE', $*PACKAGE);
@@ -654,6 +669,15 @@ class NQP::Actions is HLL::Actions {
         }
 
         make $past;
+    }
+    
+    method role_params($/) {
+        for $<variable> {
+            my $var := $_.ast;
+            $var.scope('lexical');
+            $var.decl('param');
+            $*W.cur_lexpad().symbol($var.name, :scope('lexical'));
+        }
     }
 
     method scope_declarator:sym<my>($/)  { make $<scoped>.ast; }
@@ -912,9 +936,18 @@ class NQP::Actions is HLL::Actions {
         $past.symbol('self', :scope('lexical') );
         
         # Install it where it should go (methods table / namespace).
+        my $name := "";
         if $<deflongname> {
+            $name := ~$<private> ~ ~$<deflongname>[0].ast;
+        }
+        elsif $<latename> {
+            if $*PKGDECL ne 'role' {
+                $/.CURSOR.panic("Late-bound method name only valid in role");
+            }
+            $name := "!!LATENAME!!" ~ ~$<latename>;
+        }
+        if $name ne "" {
             # Set name.
-            my $name := ~$<private> ~ ~$<deflongname>[0].ast;
             $past.name($name);
 
             # Insert it into the method table.
@@ -952,7 +985,7 @@ class NQP::Actions is HLL::Actions {
         my $types := nqp::list();
         my $definednesses := nqp::list();
         for @($routine[0]) {
-            if nqp::istype($_, QAST::Var) && $_.decl eq 'param' {
+            if nqp::istype($_, QAST::Var) && $_.decl eq 'param' && !$_.named {
                 $types.push($_.returns =:= NQPMu
                     ?? nqp::null()
                     !! $_.returns);
@@ -1110,7 +1143,16 @@ class NQP::Actions is HLL::Actions {
     }
 
     method regex_declarator($/, $key?) {
-        my $name := ~$<deflongname>.ast;
+        my $name;
+        if $<deflongname> {
+            $name := ~$<deflongname>.ast;
+        }
+        else {
+            if $*PKGDECL ne 'role' {
+                $/.CURSOR.panic("Late-bound method name only valid in role");
+            }
+            $name := "!!LATENAME!!" ~ ~$<latename>;
+        }
         my $past;
         if $<proto> {
             $past := QAST::Block.new(

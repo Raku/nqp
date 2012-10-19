@@ -95,3 +95,19 @@ $ops.add_hll_op('nqp', 'eqaddr', -> $qastcomp, $op {
         QAST::Op.new( :op('where'), $op[1] )
     ))
 });
+
+$ops.add_hll_op('nqp', 'falsey', -> $qastcomp, $op {
+    my $res := $*REGALLOC.fresh_i();
+    my $ops := PIRT::Ops.new(:result($res));
+    my $arg_post := $qastcomp.as_post($op[0]);
+    if nqp::lc($qastcomp.infer_type($arg_post.result)) eq 'i' {
+        $ops.push($arg_post);
+        $ops.push_pirop('not', $res, $arg_post);
+    }
+    else {
+        $arg_post := $qastcomp.coerce($arg_post, 'P');
+        $ops.push($arg_post);
+        $ops.push_pirop('isfalse', $res, $arg_post);
+    }
+    $ops
+});

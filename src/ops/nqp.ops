@@ -39,14 +39,16 @@ static PMC *nqpevent_fh = NULL;
 static INTVAL nqpdebflags_i = 0;
 
 /* NFA constants. */
-#define EDGE_FATE            0
-#define EDGE_EPSILON         1
-#define EDGE_CODEPOINT       2
-#define EDGE_CODEPOINT_NEG   3
-#define EDGE_CHARCLASS       4
-#define EDGE_CHARCLASS_NEG   5
-#define EDGE_CHARLIST        6
-#define EDGE_CHARLIST_NEG    7
+#define EDGE_FATE              0
+#define EDGE_EPSILON           1
+#define EDGE_CODEPOINT         2
+#define EDGE_CODEPOINT_NEG     3
+#define EDGE_CHARCLASS         4
+#define EDGE_CHARCLASS_NEG     5
+#define EDGE_CHARLIST          6
+#define EDGE_CHARLIST_NEG      7
+#define EDGE_CODEPOINT_I       9
+#define EDGE_CODEPOINT_I_NEG   10
 
 /* Objects we use every time we run an NFA; since we always run one NFA
  * at a time, we can re-use these. */
@@ -249,6 +251,22 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, PMC *states, STRING *target, INTVAL o
                     STRING *arg = VTABLE_get_string_keyed_int(interp, edge_info, i + 1);
                     STRING *chr = STRING_substr(interp, target, offset, 1);
                     if (STRING_index(interp, arg, chr, 0) < 0)
+                        VTABLE_push_integer(interp, nextst, to);
+                }
+                else if (act == EDGE_CODEPOINT_I) {
+                    PMC     *arg    = VTABLE_get_pmc_keyed_int(interp, edge_info, i + 1);
+                    UINTVAL  lc_arg = VTABLE_get_integer_keyed_int(interp, arg, 0);
+                    UINTVAL  uc_arg = VTABLE_get_integer_keyed_int(interp, arg, 1);
+                    UINTVAL  ord    = STRING_ord(interp, target, offset);
+                    if (ord == lc_arg || ord == uc_arg)
+                        VTABLE_push_integer(interp, nextst, to);
+                }
+                else if (act == EDGE_CODEPOINT_I_NEG) {
+                    PMC     *arg    = VTABLE_get_pmc_keyed_int(interp, edge_info, i + 1);
+                    UINTVAL  lc_arg = VTABLE_get_integer_keyed_int(interp, arg, 0);
+                    UINTVAL  uc_arg = VTABLE_get_integer_keyed_int(interp, arg, 1);
+                    UINTVAL  ord    = STRING_ord(interp, target, offset);
+                    if (ord != lc_arg && ord != uc_arg)
                         VTABLE_push_integer(interp, nextst, to);
                 }
             }
@@ -972,11 +990,14 @@ inline op repr_change_type(invar PMC, invar PMC) :base_core {
     PMC *obj      = decontainerize(interp, $1);
     PMC *new_type = decontainerize(interp, $2);
     if (obj->vtable->base_type == smo_id && new_type->vtable->base_type == smo_id) {
-        if (REPR(obj)->change_type)
-            REPR(obj)->change_type(interp, obj, new_type);
-        else
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Representation does not implement change_type");
+        /* Don't rebless without need. */
+        if (STABLE(obj)->WHAT != new_type) {
+            if (REPR(obj)->change_type)
+                REPR(obj)->change_type(interp, obj, new_type);
+            else
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "Representation does not implement change_type");
+        }
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,

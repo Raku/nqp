@@ -108,13 +108,18 @@ knowhow NQPParametricRoleHOW {
     method parametric($obj) {
         1
     }
+    
+    # Curries this parametric role with arguments.
+    method curry($obj, *@args) {
+        NQPCurriedRoleHOW.new_type($obj, |@args)
+    }
 
     # This specializes the role for the given class and builds a concrete
     # role.
-    method specialize($obj, $class_arg) {
+    method specialize($obj, $class_arg, *@args) {
         # Run the body block to capture the arguments into the correct
         # type argument context.
-        $!body_block($class_arg);
+        my $pad := $!body_block($class_arg, |@args);
 
         # Construct a new concrete role.
         my $irole := NQPConcreteRoleHOW.new_type(:name($!name), :instance_of($obj));
@@ -127,7 +132,13 @@ knowhow NQPParametricRoleHOW {
 
         # Capture methods in the correct lexical context.
         for %!methods {
-            $irole.HOW.add_method($irole, $_.key, $_.value.clone());
+            my $name := $_.key;
+            my $meth := $_.value.clone();
+            if nqp::substr($name, 0, 12) eq '!!LATENAME!!' {
+                $name := nqp::atkey($pad, nqp::substr($name, 12));
+                $meth.'!set_name'($name);
+            }
+            $irole.HOW.add_method($irole, $name, $meth);
         }
         for @!multi_methods_to_incorporate {
             $irole.HOW.add_multi_method($irole, $_<name>, reify_method($_<code>));
