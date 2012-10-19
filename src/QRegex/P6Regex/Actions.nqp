@@ -535,10 +535,6 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         elsif $backmod eq ':!' || $backmod eq '!' { $ast.backtrack('g') }
         $ast;
     }
-    
-    our sub qbuildsub(*@pos, *%named) {
-        QRegex::P6Regex::Actions.qbuildsub(|@pos, |%named)
-    }
 
     method qbuildsub($qast, $block = QAST::Block.new(), :$anon, :$addself, *%rest) {
         my $code_obj := nqp::existskey(%rest, 'code_obj')

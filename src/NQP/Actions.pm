@@ -1180,7 +1180,7 @@ class NQP::Actions is HLL::Actions {
             $block[0].push(QAST::Var.new(:name<$/>, :scope<lexical>, :decl<var>));
             $block.symbol('$¢', :scope<lexical>);
             $block.symbol('$/', :scope<lexical>);
-            my $regex := QRegex::P6Regex::Actions::qbuildsub($<p6regex>.ast, $block);
+            my $regex := %*LANG<Regex-actions>.qbuildsub($<p6regex>.ast, $block);
             $regex.name($name);
             
             if $*PKGDECL && nqp::can($*PACKAGE.HOW, 'add_method') {
@@ -1410,7 +1410,7 @@ class NQP::Actions is HLL::Actions {
         $block.symbol('$¢', :scope<lexical>);
         $block.symbol('$/', :scope<lexical>);
 
-        my $regex := QRegex::P6Regex::Actions::qbuildsub($<p6regex>.ast, $block);
+        my $regex := %*LANG<Regex-actions>.qbuildsub($<p6regex>.ast, $block);
         my $past := QAST::Op.new(
             :op<callmethod>, :name<new>,
             lexical_package_lookup(['NQPRegex'], $/),
@@ -1597,7 +1597,7 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
     # XXX Overriden during QAST migration.
     method metachar:sym<( )>($/) {
         my $subpast := QAST::Node.new(
-            QRegex::P6Regex::Actions::qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
+            self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
         my $qast := QAST::Regex.new( $subpast, $<nibbler>.ast, :rxtype('subrule'),
                                      :subtype('capture'), :node($/) );
         make $qast;
@@ -1627,8 +1627,8 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
             }
             elsif $<nibbler> {
                 $name eq 'after' ??
-                    $qast[0].push(QRegex::P6Regex::Actions::qbuildsub(self.flip_ast($<nibbler>[0].ast), :anon(1), :addself(1))) !!
-                    $qast[0].push(QRegex::P6Regex::Actions::qbuildsub($<nibbler>[0].ast, :anon(1), :addself(1)));
+                    $qast[0].push(self.qbuildsub(self.flip_ast($<nibbler>[0].ast), :anon(1), :addself(1))) !!
+                    $qast[0].push(self.qbuildsub($<nibbler>[0].ast, :anon(1), :addself(1)));
             }
         }
         make $qast;
