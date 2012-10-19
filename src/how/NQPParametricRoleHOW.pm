@@ -108,13 +108,18 @@ knowhow NQPParametricRoleHOW {
     method parametric($obj) {
         1
     }
+    
+    # Curries this parametric role with arguments.
+    method curry($obj, *@args) {
+        NQPCurriedRoleHOW.new_type($obj, |@args)
+    }
 
     # This specializes the role for the given class and builds a concrete
     # role.
-    method specialize($obj, $class_arg) {
+    method specialize($obj, $class_arg, *@args) {
         # Run the body block to capture the arguments into the correct
         # type argument context.
-        $!body_block($class_arg);
+        $!body_block($class_arg, |@args);
 
         # Construct a new concrete role.
         my $irole := NQPConcreteRoleHOW.new_type(:name($!name), :instance_of($obj));
