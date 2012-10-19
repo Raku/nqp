@@ -1636,4 +1636,8 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
     method store_regex_nfa($code_obj, $block, $nfa) {
         $code_obj.SET_NFA($nfa.save);
     }
+    
+    method store_regex_caps($code_obj, $block, %caps) {
+        $code_obj.SET_CAPS(%caps);
+    }
 }

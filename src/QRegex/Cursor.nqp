@@ -28,7 +28,9 @@ role NQPCursorRole is export {
         my $name;
         
         if !nqp::isnull($!regexsub) && $!regexsub {
-            %caplist := $!regexsub.nqpattr('caps');
+            %caplist := nqp::ifnull(
+                nqp::can($!regexsub, 'CAPS') ?? $!regexsub.CAPS() !! nqp::null(),
+                $!regexsub.nqpattr('caps'));
             if !nqp::isnull(%caplist) && %caplist {
                 $iter := nqp::iterator(%caplist);
                 while $iter {
