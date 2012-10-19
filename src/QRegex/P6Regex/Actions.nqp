@@ -675,13 +675,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         $block.push(QAST::Stmt.new($capblock));
     }
     
-    # Stores the NFA for a regex.
+    # Override this to store the overall NFA for a regex. (Standalone mode doesn't need
+    # it, as it only supports executing individual regexes).
     method store_regex_nfa($code_obj, $block, $nfa) {
-        my $nfaqast := $nfa.qast;
-        if $nfaqast {
-            my $nfablock := QAST::BlockMemo.new( :name($block.cuid ~ '_nfa'), $nfaqast);
-            $block.push(QAST::Stmt.new($nfablock));
-        }
     }
     
     # Stores the NFA for a regex alternation.
