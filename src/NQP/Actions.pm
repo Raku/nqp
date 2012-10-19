@@ -1180,13 +1180,13 @@ class NQP::Actions is HLL::Actions {
             $block[0].push(QAST::Var.new(:name<$/>, :scope<lexical>, :decl<var>));
             $block.symbol('$¢', :scope<lexical>);
             $block.symbol('$/', :scope<lexical>);
-            my $regex := %*LANG<Regex-actions>.qbuildsub($<p6regex>.ast, $block);
+            my $code  := $*W.create_code($block, $name, 0, :code_type_name<NQPRegex>);
+            my $regex := %*LANG<Regex-actions>.qbuildsub($<p6regex>.ast, $block, code_obj => $code);
             $regex.name($name);
             
             if $*PKGDECL && nqp::can($*PACKAGE.HOW, 'add_method') {
                 # Add the actual method.
-                $*W.pkg_add_method($*PACKAGE, 'add_method', $name,
-                    $*W.create_code($regex, $name, 0, :code_type_name<NQPRegex>));
+                $*W.pkg_add_method($*PACKAGE, 'add_method', $name, $code);
             }
             
             # In sink context, we don't need the Regex::Regex object.
@@ -1627,5 +1627,9 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
     
     method arg($/) {
         make $<quote_EXPR>.ast;
+    }
+    
+    method create_regex_code_object($block) {
+        $*W.create_code($block, '', 0, :code_type_name<NQPRegex>);
     }
 }
