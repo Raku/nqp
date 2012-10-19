@@ -1594,15 +1594,6 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
         make $past;
     }
     
-    # XXX Overriden during QAST migration.
-    method metachar:sym<( )>($/) {
-        my $subpast := QAST::Node.new(
-            self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
-        my $qast := QAST::Regex.new( $subpast, $<nibbler>.ast, :rxtype('subrule'),
-                                     :subtype('capture'), :node($/) );
-        make $qast;
-    }
-    
     method assertion:sym<name>($/) {
         my $name := ~$<longname>;
         my $qast;
