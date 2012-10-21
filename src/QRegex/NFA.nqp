@@ -439,7 +439,7 @@ class QRegex::NFA {
         # Work out what we need to do to instantiate it by replacing any
         # generic edges.
         my int $from := 0;
-        for $!states -> @values {        
+        for @copied_states -> @values {        
             my @output_values;
             my int $i := 0;
             my int $n := nqp::elems(@values);
