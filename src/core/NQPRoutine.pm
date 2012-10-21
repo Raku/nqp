@@ -45,9 +45,6 @@ my knowhow NQPRoutine {
         
         $der
     }
-    method nqpattr($key) {
-        $!do.nqpattr($key)
-    }
     method !set_name($name) {
         pir::assign__0Ps($!do, $name);
     }
@@ -68,9 +65,6 @@ my knowhow NQPRegex {
     has $!caps;
     has $!nfa;
     has %!alt_nfas;
-    method nqpattr($key) {
-        $!do.nqpattr($key)
-    }
     method SET_CAPS($caps) {
         $!caps := $caps;
     }
