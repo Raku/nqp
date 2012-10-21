@@ -1,6 +1,14 @@
 class QRegex::P5Regex::Actions is HLL::Actions {
     method TOP($/) {
-        make qbuildsub($<nibbler>.ast, :anon(1), :addself(1));
+        make QAST::CompUnit.new(
+            :hll('P6Regex'),
+            :sc($*W.sc()),
+            :code_ref_blocks($*W.code_ref_blocks()),
+            :compilation_mode(0),
+            :pre_deserialize($*W.load_dependency_tasks()),
+            :post_deserialize($*W.fixup_tasks()),
+            self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1))
+        );
     }
 
     method nibbler($/) { make $<alternation>.ast }
@@ -219,7 +227,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                 :rxtype<subrule>, :subtype<zerowidth>, :negate($<neg> eq '!'), :node($/),
                 QAST::Node.new(
                     QAST::SVal.new( :value('after') ),
-                    qbuildsub(self.flip_ast($<nibbler>.ast), :anon(1), :addself(1))
+                    self.qbuildsub(self.flip_ast($<nibbler>.ast), :anon(1), :addself(1))
                 ));
         }
         else {
@@ -233,7 +241,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                 :rxtype<subrule>, :subtype<zerowidth>, :node($/),
                 QAST::Node.new(
                     QAST::SVal.new( :value('before') ),
-                    qbuildsub($<nibbler>.ast, :anon(1), :addself(1))
+                    self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1))
                 ));
         }
         else {
@@ -247,7 +255,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                 :rxtype<subrule>, :subtype<zerowidth>, :negate(1), :node($/),
                 QAST::Node.new(
                     QAST::SVal.new( :value('before') ),
-                    qbuildsub($<nibbler>.ast, :anon(1), :addself(1))
+                    self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1))
                 ));
         }
         else {
@@ -308,44 +316,31 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         $ast;
     }
     
-    our sub qbuildsub($qast, $block = QAST::Block.new(), :$anon, :$addself) {
-        my $blockid := $block.cuid;
-        my $hashpast := QAST::Op.new( :op<hash> );
-        for capnames($qast, 0) {
-            if $_.key gt '' { 
-                $hashpast.push(QAST::SVal.new( :value($_.key) )); 
-                $hashpast.push(QAST::IVal.new( :value(
-                    nqp::iscclass(pir::const::CCLASS_NUMERIC, $_.key, 0) + ($_.value > 1) * 2) )); 
-            }
-        }
-        my $initpast := QAST::Stmts.new();
+    method qbuildsub($qast, $block = QAST::Block.new(), :$anon, :$addself, *%rest) {
+        my $code_obj := nqp::existskey(%rest, 'code_obj')
+            ?? %rest<code_obj>
+            !! self.create_regex_code_object($block);
+
         if $addself {
-            $initpast.push(QAST::Var.new( :name('self'), :scope('local'), :decl('param') ));
+            $block.push(QAST::Var.new( :name('self'), :scope('local'), :decl('param') ));
         }
-        my $capblock := QAST::BlockMemo.new( :name($blockid ~ '_caps'),  $hashpast );
-        $initpast.push(QAST::Stmt.new($capblock));
-
-        my $nfapast := QRegex::NFA.new.addnode($qast).qast;
-        if $nfapast {
-            my $nfablock := QAST::BlockMemo.new( :name($blockid ~ '_nfa'), $nfapast);
-            $initpast.push(QAST::Stmt.new($nfablock));
-        }
-
         unless $block.symbol('$¢') {
-            $initpast.push(QAST::Var.new(:name<$¢>, :scope<lexical>, :decl('var')));
+            $block.push(QAST::Var.new(:name<$¢>, :scope<lexical>, :decl('var')));
             $block.symbol('$¢', :scope<lexical>);
         }
 
+        self.store_regex_caps($code_obj, $block, capnames($qast, 0));
+        self.store_regex_nfa($code_obj, $block, QRegex::NFA.new.addnode($qast));
+
         $block<orig_qast> := $qast;
-        
         $qast := QAST::Regex.new( :rxtype<concat>,
                      QAST::Regex.new( :rxtype<scan> ),
                      $qast,
                      ($anon ??
                           QAST::Regex.new( :rxtype<pass> ) !!
                           QAST::Regex.new( :rxtype<pass>, :name(%*RX<name>) )));
-        $block.push($initpast);
         $block.push($qast);
+        
         $block;
     }
 
@@ -414,7 +409,22 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         }
         $qast
     }
-
+    
+    # This is overridden by a compiler that wants to create code objects
+    # for regexes. We just use the standard NQP one in standalone mode.
+    method create_regex_code_object($block) {
+        $*W.create_code($block, $block.name);
+    }
+    
+    # Stores the captures info for a regex.
+    method store_regex_caps($code_obj, $block, %caps) {
+        $code_obj.SET_CAPS(%caps);
+    }
+    
+    # Override this to store the overall NFA for a regex. (Standalone mode doesn't need
+    # it, as it only supports executing individual regexes).
+    method store_regex_nfa($code_obj, $block, $nfa) {
+    }
 
     # XXX Below here copied from p6regex; needs review
 
@@ -571,8 +581,8 @@ class QRegex::P5Regex::Actions is HLL::Actions {
             }
             elsif $<nibbler> {
                 $name eq 'after' ??
-                    $qast[0].push(qbuildsub(self.flip_ast($<nibbler>[0].ast), :anon(1), :addself(1))) !!
-                    $qast[0].push(qbuildsub($<nibbler>[0].ast, :anon(1), :addself(1)));
+                    $qast[0].push(self.qbuildsub(self.flip_ast($<nibbler>[0].ast), :anon(1), :addself(1))) !!
+                    $qast[0].push(self.qbuildsub($<nibbler>[0].ast, :anon(1), :addself(1)));
             }
         }
         make $qast;
