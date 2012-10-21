@@ -12,9 +12,11 @@ class QRegex::NFA {
     our $EDGE_SUBRULE         := 8;
     our $EDGE_CODEPOINT_I     := 9;
     our $EDGE_CODEPOINT_I_NEG := 10;
+    our $EDGE_GENERIC_VAR     := 11;
 
     has $!states;
     has $!edges;
+    has int $!generic;
 
     method new() {
         my $new := self.bless(:states(nqp::list()), :edges(nqp::list()));
@@ -41,7 +43,7 @@ class QRegex::NFA {
 
     method states() { $!states }
 
-    method addnode($node) {
+    method addnode($node, :$*vars_as_generic) {
         self.regex_nfa($node, 1, 0);
         self;
     }
@@ -158,6 +160,12 @@ class QRegex::NFA {
                 self.addedge($from, $end, $EDGE_SUBRULE, $node.name);
                 self.fate($node, $end, $to);
             }
+        }
+        elsif $*vars_as_generic && $subtype eq 'method' &&
+                $node[0][0] ~~ QAST::SVal && $node[0][0].value eq '!INTERPOLATE' &&
+                $node[0][1] ~~ QAST::Var && $node[0][1].scope eq 'lexical' {
+            $!generic := 1;
+            self.addedge($from, $to, $EDGE_GENERIC_VAR, $node[0][1].name);
         }
         else {
             $subtype eq 'capture' && $node[1]
@@ -412,6 +420,54 @@ class QRegex::NFA {
     
     method run_alt(str $target, int $offset, $bstack, $cstack) {
         pir::nqp_nfa_run_alternation__vPSIPP($!states, $target, $offset, $bstack, $cstack)
+    }
+    
+    method generic() {
+        $!generic
+    }
+    
+    method instantiate_generic($env) {
+        # Create a copy.
+        my $copy := nqp::create(self);
+        my @copied_states;
+        for $!states -> @values {
+            nqp::push(@copied_states, nqp::clone(@values));
+        }
+        nqp::bindattr($copy, QRegex::NFA, '$!states', @copied_states);
+        nqp::bindattr($copy, QRegex::NFA, '$!edges', $!edges);
+     
+        # Work out what we need to do to instantiate it by replacing any
+        # generic edges.
+        my int $from := 0;
+        for $!states -> @values {        
+            my @output_values;
+            my int $i := 0;
+            my int $n := nqp::elems(@values);
+            while $i < $n {
+                my $act := @values[$i];
+                my $arg := @values[$i + 1];
+                my $to  := @values[$i + 2];
+                if $act == $EDGE_GENERIC_VAR {
+                    if nqp::existskey($env, $arg) {
+                        $copy.literal(
+                            QAST::Regex.new( :rxtype('literal'), nqp::atkey($env, $arg) ),
+                            $from, $to);
+                        @values[$i] := $EDGE_EPSILON;
+                        @values[$i + 1] := 0;
+                        @values[$i + 2] := 0;
+                    }
+                    else {
+                        @values[$i] := $EDGE_FATE;
+                        @values[$i + 1] := 0;
+                        @values[$i + 2] := 0;
+                    }
+                }
+                $i := $i + 3;
+            }
+            $from++;
+        }
+        
+        $copy
     }
 
     method __dump($dumper, $label) {

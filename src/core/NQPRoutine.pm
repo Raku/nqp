@@ -65,6 +65,7 @@ my knowhow NQPRegex {
     has $!caps;
     has $!nfa;
     has %!alt_nfas;
+    has $!generic_nfa;
     method SET_CAPS($caps) {
         $!caps := $caps;
     }
@@ -74,6 +75,9 @@ my knowhow NQPRegex {
     method SET_ALT_NFA($name, $nfa) {
         nqp::ifnull(%!alt_nfas, %!alt_nfas := {});
         %!alt_nfas{$name} := $nfa;
+    }
+    method SET_GENERIC_NFA($nfa) {
+        $!generic_nfa := $nfa;
     }
     method CAPS() {
         $!caps
@@ -100,6 +104,18 @@ my knowhow NQPRegex {
         }
         
         $der
+    }
+    method instantiate_generic($env) {
+        if nqp::isnull($!generic_nfa) || !nqp::can($!generic_nfa, 'instantiate_generic') {
+            self
+        }
+        else {
+            my $ins := self.clone();
+            nqp::bindattr($ins, NQPRegex, '$!nfa',
+                $!generic_nfa.instantiate_generic($env).save());
+            nqp::bindattr($ins, NQPRegex, '$!generic_nfa', nqp::null());
+            $ins
+        }
     }
     method !set_name($name) {
         pir::assign__0Ps($!do, $name);

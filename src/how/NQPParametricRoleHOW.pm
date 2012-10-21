@@ -133,7 +133,9 @@ knowhow NQPParametricRoleHOW {
         # Capture methods in the correct lexical context.
         for %!methods {
             my $name := $_.key;
-            my $meth := $_.value.clone();
+            my $meth := nqp::can($_.value, 'instantiate_generic')
+                ?? $_.value.instantiate_generic($pad)
+                !! $_.value.clone();
             if nqp::substr($name, 0, 12) eq '!!LATENAME!!' {
                 $name := nqp::atkey($pad, nqp::substr($name, 12));
                 $meth.'!set_name'($name);

@@ -1188,6 +1188,16 @@ class NQP::Actions is HLL::Actions {
                 # Add the actual method.
                 $*W.pkg_add_method($*PACKAGE, 'add_method', $name, $code);
             }
+
+            # If this appears in a role, its NFA may depend on generic args.
+            # If it does, we store the generic version of it.
+            if $*PKGDECL eq 'role' {
+                my $gen_nfa := QRegex::NFA.new();
+                $gen_nfa.addnode($<p6regex>.ast, :vars_as_generic);
+                if $gen_nfa.generic {
+                    $code.SET_GENERIC_NFA($gen_nfa);
+                }
+            }
             
             # In sink context, we don't need the Regex::Regex object.
             $past := QAST::Op.new(
