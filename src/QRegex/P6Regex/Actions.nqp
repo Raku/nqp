@@ -565,9 +565,17 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         $qast := QAST::Regex.new( :rxtype<concat>,
                      QAST::Regex.new( :rxtype<scan> ),
                      $qast,
-                     ($anon ??
-                          QAST::Regex.new( :rxtype<pass> ) !!
-                          QAST::Regex.new( :rxtype<pass>, :name(%*RX<name>) )));
+                     ($anon
+                          ?? QAST::Regex.new( :rxtype<pass> )
+                          !! (nqp::substr(%*RX<name>, 0, 12) ne '!!LATENAME!!'
+                                ?? QAST::Regex.new( :rxtype<pass>, :name(%*RX<name>) )
+                                !! QAST::Regex.new( :rxtype<pass>,
+                                       QAST::Var.new(
+                                           :name(nqp::substr(%*RX<name>, 12)),
+                                           :scope('lexical')
+                                       ) 
+                                   )
+                              )));
         $block.push($qast);
         
         $block;

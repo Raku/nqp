@@ -562,7 +562,7 @@ grammar NQP::Grammar is HLL::Grammar {
           {   
               %*RX<s>    := $<sym> eq 'rule'; 
               %*RX<r>    := $<sym> eq 'token' || $<sym> eq 'rule'; 
-              %*RX<name> := $<deflongname>.ast if $<deflongname>;
+              %*RX<name> := $<deflongname> ?? $<deflongname>.ast !! "!!LATENAME!!" ~ ~$<latename>;
           }
           '{'<p6regex=.LANG('Regex','nibbler')>'}'<?ENDSTMT>
         ]

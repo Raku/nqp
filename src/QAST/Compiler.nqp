@@ -1322,6 +1322,11 @@ class QAST::Compiler is HLL::Compiler {
             my $name := self.escape($node.name());
             $ops.push_pirop('callmethod', '"!cursor_pass"', %*REG<cur>, %*REG<pos>, $name, |@backtrack);
         }
+        elsif +@($node) == 1 {
+            my $dynname := self.coerce(self.as_post($node[0]), 'S');
+            $ops.push($dynname);
+            $ops.push_pirop('callmethod', '"!cursor_pass"', %*REG<cur>, %*REG<pos>, $dynname, |@backtrack);
+        }
         else {
             $ops.push_pirop('callmethod', '"!cursor_pass"', %*REG<cur>, %*REG<pos>, |@backtrack);
         }
