@@ -31,7 +31,6 @@
 .end
 
 .include 'src/cheats/parrot-callcontext.pir'
-.include 'src/cheats/parrot-sub.pir'
 
 .sub '' :anon :load :init :outer('PAST_Outer') :subid('Imports')
     load_bytecode 'dumper.pbc'
