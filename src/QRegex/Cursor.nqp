@@ -27,7 +27,7 @@ role NQPCursorRole is export {
         my $submatch;
         my $name;
         
-        if !nqp::isnull($!regexsub) && $!regexsub {
+        if !nqp::isnull($!regexsub) && nqp::defined($!regexsub) {
             %caplist := nqp::can($!regexsub, 'CAPS') ?? $!regexsub.CAPS() !! nqp::null();
             if !nqp::isnull(%caplist) && %caplist {
                 $iter := nqp::iterator(%caplist);
@@ -88,7 +88,7 @@ role NQPCursorRole is export {
         };
         nqp::bindattr($new, $?CLASS, '$!orig', $!orig);
         nqp::bindattr($new, $?CLASS, '$!regexsub', nqp::ifnull(nqp::getcodeobj($sub), $sub));
-        if $!restart {
+        if nqp::defined($!restart) {
             nqp::bindattr_i($new, $?CLASS, '$!pos', $!pos);
             nqp::bindattr($new, $?CLASS, '$!cstack', nqp::clone($!cstack)) if $!cstack;
             pir::return__0PsiPPi(
@@ -155,7 +155,7 @@ role NQPCursorRole is export {
     }
 
     method !cursor_next() {
-        if $!restart {
+        if nqp::defined($!restart) {
             $!restart(self);
         }
         else {
