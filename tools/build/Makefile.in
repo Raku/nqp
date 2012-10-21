@@ -85,7 +85,6 @@ QASTNODE_SOURCES = \
   src/QAST/Stmts.nqp \
   src/QAST/Stmt.nqp \
   src/QAST/Block.nqp \
-  src/QAST/BlockMemo.nqp \
   src/QAST/Unquote.nqp \
   src/QAST/CompUnit.nqp \
   src/QAST/InlinePlaceholder.nqp \

@@ -573,52 +573,7 @@ class QAST::Compiler is HLL::Compiler {
         }
         $ops
     }
-    
-    multi method as_post(QAST::BlockMemo $node, :$want) {
-        # Build the POST::Sub.
-        my $sub;
-        {
-            # Block gets completely fresh registers, and fresh BlockInfo.
-            my $*REGALLOC := RegAlloc.new();
-            my $*BLOCKRA  := $*REGALLOC;
-            my $*BINDVAL  := 0;
-            my $block     := BlockInfo.new($node, 0);
-            
-            # First need to compile all of the statements. Fake NQP HLL.
-            my $stmts;
-            {
-                my $*BLOCK := $block;
-                my $*HLL := 'nqp';
-                my $*WANT;
-                $stmts := self.compile_all_the_stmts($node.list);
-            }
-            
-            # Generate declarations.
-            my $decls := PIRT::Ops.new();
-            for $block.lexicals {
-                $decls.push_pirop('.lex ' ~ self.escape($_.name) ~ ', ' ~ $block.lex_reg($_.name));
-            }
-            for $block.locals {
-                $decls.push_pirop('.local ' ~ $block.local_type_long($_.name) ~ ' ' ~ $_.name);
-            }
-            
-            # Wrap all up in a POST::Sub.
-            $sub := PIRT::Sub.new();
-            $sub.push($decls);
-            $sub.push($stmts);
-            $sub.push_pirop(".return (" ~ $stmts.result ~ ")");
-            
-            # Set compilation unit ID, namespace (forced to Sub) and
-            # HLL (forced to NQP).
-            $sub.name($node.name);
-            $sub.subid($node.cuid);
-            $sub.namespace(['Sub']);
-            $sub.hll('nqp');
-        }
-        
-        return $sub;
-    }
-    
+
     multi method as_post(QAST::Stmts $node, :$want) {
         self.compile_all_the_stmts($node.list, $node.resultchild, :node($node.node))
     }
