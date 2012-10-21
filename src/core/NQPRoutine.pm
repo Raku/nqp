@@ -35,7 +35,7 @@ my knowhow NQPRoutine {
         # Clone and attach the code object.
         my $der := pir::repr_clone__PP(self);
         nqp::bindattr($der, NQPRoutine, '$!do', $do);
-        pir::set_sub_code_object__vPP($do, $der);
+        nqp::setcodeobj($do, $der);
         
         # If needed, arrange for a fixup of the cloned code-ref.
         my $clone_callback := pir::getprop__PPs($!do, 'CLONE_CALLBACK');
@@ -83,6 +83,26 @@ my knowhow NQPRegex {
     }
     method ALT_NFA(str $name) {
         nqp::isnull(%!alt_nfas) ?? nqp::null() !! %!alt_nfas{$name}
+    }
+    method clone() {
+        # Clone the underlying VM code ref.
+        my $do  := nqp::clone($!do);
+        
+        # Clone and attach the code object.
+        my $der := pir::repr_clone__PP(self);
+        nqp::bindattr($der, NQPRegex, '$!do', $do);
+        nqp::setcodeobj($do, $der);
+        
+        # If needed, arrange for a fixup of the cloned code-ref.
+        my $clone_callback := pir::getprop__PPs($!do, 'CLONE_CALLBACK');
+        if nqp::defined($clone_callback) {
+            $clone_callback($!do, $do, $der);
+        }
+        
+        $der
+    }
+    method !set_name($name) {
+        pir::assign__0Ps($!do, $name);
     }
 }
 pir::stable_publish_vtable_handler_mapping__vPP(NQPRegex,
