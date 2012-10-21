@@ -28,9 +28,7 @@ role NQPCursorRole is export {
         my $name;
         
         if !nqp::isnull($!regexsub) && $!regexsub {
-            %caplist := nqp::ifnull(
-                nqp::can($!regexsub, 'CAPS') ?? $!regexsub.CAPS() !! nqp::null(),
-                $!regexsub.nqpattr('caps'));
+            %caplist := nqp::can($!regexsub, 'CAPS') ?? $!regexsub.CAPS() !! nqp::null();
             if !nqp::isnull(%caplist) && %caplist {
                 $iter := nqp::iterator(%caplist);
                 while $iter {
@@ -249,9 +247,7 @@ role NQPCursorRole is export {
         my @fates := $nfa.states[0];
         my int $start := 1;
         my int $fate := 0;
-        for nqp::ifnull(
-                nqp::can($!regexsub, 'ALT_NFA') ?? $!regexsub.ALT_NFA($name) !! nqp::null(),
-                $!regexsub.nqpattr($name)) {
+        for $!regexsub.ALT_NFA($name) {
             my $label := @labels[$fate];
             $fate := $fate + 1;
             @fates[$fate] := $label;
