@@ -40,7 +40,7 @@ class QRegex::P5Regex::World is HLL::World {
 grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     token TOP {
         :my %*RX;
-        :my $*W := QRegex::P6Regex::World.new(:handle(nqp::sha1(self.target)));
+        :my $*W := QRegex::P5Regex::World.new(:handle(nqp::sha1(self.target)));
         <nibbler>
         [ $ || <.panic: 'Confused'> ]
     }

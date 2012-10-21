@@ -1,7 +1,7 @@
 class QRegex::P5Regex::Actions is HLL::Actions {
     method TOP($/) {
         make QAST::CompUnit.new(
-            :hll('P6Regex'),
+            :hll('P5Regex'),
             :sc($*W.sc()),
             :code_ref_blocks($*W.code_ref_blocks()),
             :compilation_mode(0),
