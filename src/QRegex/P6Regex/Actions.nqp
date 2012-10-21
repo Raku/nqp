@@ -675,9 +675,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         $code_obj.SET_CAPS(%caps);
     }
     
-    # Override this to store the overall NFA for a regex. (Standalone mode doesn't need
-    # it, as it only supports executing individual regexes).
+    # Stores the NFA for the regex overall.
     method store_regex_nfa($code_obj, $block, $nfa) {
+        $code_obj.SET_NFA($nfa.save);
     }
     
     # Stores the NFA for a regex alternation.
