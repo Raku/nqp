@@ -3,6 +3,41 @@ use NQPHLL;
 use QAST;
 use PASTRegex;
 
+class QRegex::P6Regex::World is HLL::World {
+    method create_code($past, $name) {
+        # Create a fresh stub code, and set its name.
+        my $dummy := pir::nqp_fresh_stub__PP(-> { nqp::die("Uncompiled code executed") });
+        pir::assign__vPS($dummy, $name);
+
+        # Tag it as a static code ref and add it to the root code refs set.
+        pir::setprop__vPsP($dummy, 'STATIC_CODE_REF', $dummy);
+        self.add_root_code_ref($dummy, $past);
+        
+        # Create code object.
+        my $code_obj := nqp::create(NQPRegex);
+        nqp::bindattr($code_obj, NQPRegex, '$!do', $dummy);
+        my $slot := self.add_object($code_obj);
+            
+        # Add fixup of the code object and the $!do attribute.
+        my $fixups := QAST::Stmt.new();
+        $fixups.push(QAST::Op.new(
+            :op('bindattr'),
+            QAST::WVal.new( :value($code_obj) ),
+            QAST::WVal.new( :value(NQPRegex) ),
+            QAST::SVal.new( :value('$!do') ),
+            QAST::BVal.new( :value($past) )
+        ));
+        $fixups.push(QAST::Op.new(
+            :op('setcodeobj'),
+            QAST::BVal.new( :value($past) ),
+            QAST::WVal.new( :value($code_obj) )
+        ));
+        self.add_fixup_task(:fixup_past($fixups));
+
+        $code_obj
+    }
+}
+
 grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     method obs ($old, $new, $when = ' in Perl 6') {
@@ -28,6 +63,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token TOP {
         :my %*RX;
+        :my $*W := QRegex::P6Regex::World.new(:handle(nqp::sha1(self.target)));
         <nibbler>
         [ $ || <.panic: 'Confused'> ]
     }

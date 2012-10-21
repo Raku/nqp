@@ -1,6 +1,14 @@
 class QRegex::P6Regex::Actions is HLL::Actions {
     method TOP($/) {
-        make self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1));
+        make QAST::CompUnit.new(
+            :hll('P6Regex'),
+            :sc($*W.sc()),
+            :code_ref_blocks($*W.code_ref_blocks()),
+            :compilation_mode(0),
+            :pre_deserialize($*W.load_dependency_tasks()),
+            :post_deserialize($*W.fixup_tasks()),
+            self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1))
+        );
     }
 
     method nibbler($/) { make $<termaltseq>.ast }
@@ -657,22 +665,14 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
     
     # This is overridden by a compiler that wants to create code objects
-    # for regexes.
+    # for regexes. We just use the standard NQP one in standalone mode.
     method create_regex_code_object($block) {
+        $*W.create_code($block, $block.name);
     }
     
     # Stores the captures info for a regex.
     method store_regex_caps($code_obj, $block, %caps) {
-        my $hashpast := QAST::Op.new( :op<hash> );
-        for %caps {
-            if $_.key gt '' { 
-                $hashpast.push(QAST::SVal.new( :value($_.key) )); 
-                $hashpast.push(QAST::IVal.new( :value(
-                    nqp::iscclass(pir::const::CCLASS_NUMERIC, $_.key, 0) + ($_.value > 1) * 2) )); 
-            }
-        }
-        my $capblock := QAST::BlockMemo.new( :name($block.cuid ~ '_caps'),  $hashpast );
-        $block.push(QAST::Stmt.new($capblock));
+        $code_obj.SET_CAPS(%caps);
     }
     
     # Override this to store the overall NFA for a regex. (Standalone mode doesn't need
@@ -682,11 +682,10 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     
     # Stores the NFA for a regex alternation.
     method store_regex_alt_nfa($code_obj, $block, $key, @alternatives) {
-        my $nfaqast := QAST::Op.new( :op('list') );
+        my @saved;
         for @alternatives {
-            $nfaqast.push($_.qast(:non_empty));
+            @saved.push($_.save(:non_empty));
         }
-        my $nfablock := QAST::BlockMemo.new( :name($block.cuid ~ '_' ~ $key), $nfaqast);
-        $block.push(QAST::Stmt.new($nfablock));
+        $code_obj.SET_ALT_NFA($key, @saved);
     }
 }
