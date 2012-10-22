@@ -256,6 +256,14 @@ role NQPCursorRole is export {
         $nfa
     }
 
+    method !precompute_nfas() {
+        # Pre-compute all of the proto-regex NFAs.
+        my %protorx := self.HOW.cache(self, "!protoregex_table", { self."!protoregex_table"() });
+        for %protorx {
+            self.HOW.cache(self, $_.key, { self.'!protoregex_nfa'($_.key) });
+        }
+    }
+
     method !BACKREF($name) {
         my $cur   := self."!cursor_start"();
         my int $n := $!cstack ?? nqp::elems($!cstack) - 1 !! -1;
