@@ -418,8 +418,8 @@ class QRegex::NFA {
         pir::nqp_nfa_run_protoregex__PPSI($!states, $target, $offset)
     }
     
-    method run_alt(str $target, int $offset, $bstack, $cstack) {
-        pir::nqp_nfa_run_alternation__vPSIPP($!states, $target, $offset, $bstack, $cstack)
+    method run_alt(str $target, int $offset, $bstack, $cstack, @labels) {
+        pir::nqp_nfa_run_alternation__vPSIPPP($!states, $target, $offset, $bstack, $cstack, @labels)
     }
     
     method generic() {

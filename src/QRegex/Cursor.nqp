@@ -238,20 +238,19 @@ role NQPCursorRole is export {
     }
 
     method !alt(int $pos, str $name, @labels = []) {
-        my $nfa := self.HOW.cache(self, $name, { self.'!alt_nfa'($name, @labels) });
-        $nfa.run_alt($!target, $pos, $!bstack, $!cstack);
+        my $nfa := self.HOW.cache(self, $name, { self.'!alt_nfa'($!regexsub, $name) });
+        $nfa.run_alt($!target, $pos, $!bstack, $!cstack, @labels);
     }
 
-    method !alt_nfa(str $name, @labels) {
+    method !alt_nfa($regex, str $name) {
         my $nfa := QRegex::NFA.new;
         my @fates := $nfa.states[0];
         my int $start := 1;
         my int $fate := 0;
-        for $!regexsub.ALT_NFA($name) {
-            my $label := @labels[$fate];
-            $fate := $fate + 1;
-            @fates[$fate] := $label;
+        for $regex.ALT_NFA($name) {
+            @fates[$fate] := $fate;
             $nfa.mergesubstates($start, 0, $fate, $_, self);
+            $fate++;
         }
         $nfa
     }
