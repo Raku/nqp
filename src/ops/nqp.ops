@@ -2340,30 +2340,6 @@ inline op nqp_nfa_run_protoregex(out PMC, invar PMC, in STR, in INT) :base_core 
     $1 = fatepmc;
 }
 
-inline op nqp_nfa_run_alternation(invar PMC, in STR, in INT, invar PMC, invar PMC) :base_core {
-    PMC    *states = $1;
-    STRING *target = $2;
-    INTVAL  offset = $3;
-    PMC    *bstack = $4;
-    PMC    *cstack = $5;
-    
-    /* Run the NFA. */
-    INTVAL  total_fates, i;
-    INTVAL *fates = nqp_nfa_run(interp, states, target, offset, &total_fates);
-    
-    /* Push the results onto the bstack. */
-    INTVAL  caps   = VTABLE_defined(interp, cstack) ? VTABLE_elements(interp, cstack) : 0;
-    PMC    *labels = VTABLE_get_pmc_keyed_int(interp, states, 0);
-    for (i = 0; i < total_fates; i++) {
-        VTABLE_push_integer(interp, bstack,
-            VTABLE_get_integer_keyed_int(interp, labels, fates[i]));
-        VTABLE_push_integer(interp, bstack, offset);
-        VTABLE_push_integer(interp, bstack, 0);
-        VTABLE_push_integer(interp, bstack, caps);
-    }
-    free(fates);
-}
-
 inline op nqp_nfa_run_alternation(invar PMC, in STR, in INT, invar PMC, invar PMC, invar PMC) :base_core {
     PMC    *states = $1;
     STRING *target = $2;
