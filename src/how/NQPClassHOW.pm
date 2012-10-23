@@ -37,7 +37,8 @@ knowhow NQPClassHOW {
     # the bootstrap for now since we end up with SC references back to the
     # previous build due to a parse altering the cache, and the SC WB getting
     # hit.
-    my %caches;
+    #my %caches;
+    has %!caches;
 
     # Parrot-specific vtable mapping hash. Maps vtable name to method.
     has %!parrot_vtable_mapping;
@@ -103,7 +104,7 @@ knowhow NQPClassHOW {
             nqp::die("Cannot add a null method '$name' to class '$!name'");
         }
         pir::set_method_cache_authoritativeness__vPi($obj, 0);
-        %caches{nqp::where(self)} := {};
+        %!caches{nqp::where(self)} := {} unless nqp::isnull(%!caches);
         @!method_order[+@!method_order] := %!methods{$name} := $code_obj;
     }
 
@@ -665,10 +666,10 @@ knowhow NQPClassHOW {
     ## Cache-related
     ##
     method cache($obj, $key, $value_generator) {
-        nqp::existskey(%caches, nqp::where(self)) || (%caches{nqp::where(self)} := {});
-        nqp::existskey(%caches{nqp::where(self)}, $key) ??
-            %caches{nqp::where(self)}{$key} !!
-            (%caches{nqp::where(self)}{$key} := $value_generator())
+        %!caches := nqp::hash() unless nqp::ishash(%!caches);
+        nqp::existskey(%!caches, $key) ??
+            %!caches{$key} !!
+            (%!caches{$key} := $value_generator())
     }
     
     
