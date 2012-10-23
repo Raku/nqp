@@ -663,6 +663,11 @@ class NQP::Actions is HLL::Actions {
         # Finally, compose.
         $*W.pkg_compose($*PACKAGE);
         
+        # If it's a grammar, pre-compute the NFAs.
+        if $*PKGDECL eq 'grammar' && nqp::can($*PACKAGE, '!precompute_nfas') {
+            $*PACKAGE.'!precompute_nfas'();
+        }
+        
         # Export if needed.
         if $<export> {
             $*EXPORT.WHO<DEFAULT>.WHO{$name} := $*PACKAGE;
@@ -1180,7 +1185,7 @@ class NQP::Actions is HLL::Actions {
             $block[0].push(QAST::Var.new(:name<$/>, :scope<lexical>, :decl<var>));
             $block.symbol('$¢', :scope<lexical>);
             $block.symbol('$/', :scope<lexical>);
-            my $code  := $*W.create_code($block, $name, 0, :code_type_name<NQPRegex>);
+            my $code  := %*RX<code>;
             my $regex := %*LANG<Regex-actions>.qbuildsub($<p6regex>.ast, $block, code_obj => $code);
             $regex.name($name);
             
@@ -1640,7 +1645,11 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
     }
     
     method create_regex_code_object($block) {
-        $*W.create_code($block, '', 0, :code_type_name<NQPRegex>);
+        my $code := $*W.create_code($block, '', 0, :code_type_name<NQPRegex>);
+        if nqp::existskey(%*RX, 'code') {
+            %*RX<code>.ADD_NESTED_CODE($code);
+        }
+        $code
     }
     
     method store_regex_nfa($code_obj, $block, $nfa) {

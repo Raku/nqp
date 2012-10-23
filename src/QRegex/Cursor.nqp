@@ -261,6 +261,23 @@ role NQPCursorRole is export {
         for %protorx {
             self.HOW.cache(self, $_.key, { self.'!protoregex_nfa'($_.key) });
         }
+
+        # Pre-compute all the alternation NFAs.
+        sub precomp_alt_nfas($meth) {
+            if nqp::can($meth, 'ALT_NFAS') {
+                for $meth.ALT_NFAS -> $name {
+                    self.HOW.cache(self, $name, { self.'!alt_nfa'($meth, $name) });
+                }
+            }
+        }
+        for self.HOW.methods(self) -> $meth {
+            precomp_alt_nfas($meth);
+            if nqp::can($meth, 'NESTED_CODES') {
+                for $meth.NESTED_CODES -> $code {
+                    precomp_alt_nfas($code);
+                }
+            }
+        }
     }
 
     method !BACKREF($name) {

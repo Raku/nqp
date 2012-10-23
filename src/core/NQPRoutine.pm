@@ -66,6 +66,7 @@ my knowhow NQPRegex {
     has $!nfa;
     has %!alt_nfas;
     has $!generic_nfa;
+    has @!nested_codes;
     method SET_CAPS($caps) {
         $!caps := $caps;
     }
@@ -79,14 +80,24 @@ my knowhow NQPRegex {
     method SET_GENERIC_NFA($nfa) {
         $!generic_nfa := $nfa;
     }
+    method ADD_NESTED_CODE($code) {
+        nqp::ifnull(@!nested_codes, @!nested_codes := nqp::list());
+        nqp::push(@!nested_codes, $code);
+    }
     method CAPS() {
         $!caps
     }
     method NFA() {
         $!nfa
     }
+    method ALT_NFAS() {
+        nqp::isnull(%!alt_nfas) ?? nqp::hash() !! %!alt_nfas
+    }
     method ALT_NFA(str $name) {
         nqp::isnull(%!alt_nfas) ?? nqp::null() !! %!alt_nfas{$name}
+    }
+    method NESTED_CODES() {
+        nqp::isnull(@!nested_codes) ?? nqp::list() !! @!nested_codes
     }
     method clone() {
         # Clone the underlying VM code ref.
