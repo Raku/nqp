@@ -29,6 +29,7 @@ static INTVAL stable_id = 0;
 static INTVAL smo_id    = 0;
 static INTVAL disp_id   = 0;
 static INTVAL qrpa_id   = 0;
+static INTVAL ohash_id  = 0;
 
 /* Built-in meta-objects. */
 static PMC *KnowHOW = NULL;
@@ -97,11 +98,11 @@ nqp_islist(PMC *pmc) {
                                     || type == enum_class_ResizableStringArray);
 }
 
-/* Test for something being a list (RPA or QRPA).  */
+/* Test for something being a hash.  */
 static INTVAL
 nqp_ishash(PMC *pmc) {
     INTVAL type = pmc->vtable->base_type;
-    return (INTVAL)(type == enum_class_Hash);
+    return (INTVAL)(type == enum_class_Hash || type == ohash_id);
 }
 
 /* This public-domain C quick sort implementation by Darel Rex Finley. */
@@ -313,6 +314,7 @@ inline op nqp_dynop_setup() :base_core {
         stable_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "STable", 0));
         smo_id    = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
         qrpa_id   = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "QRPA", 0));
+        ohash_id  = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "OwnedHash", 0));
 
         /* Initialize the object model. */
         SixModelObject_initialize(interp, &KnowHOW, &KnowHOWAttribute);
