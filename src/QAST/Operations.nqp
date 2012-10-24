@@ -1373,6 +1373,7 @@ QAST::Operations.add_core_pirop_mapping('lc', 'downcase', 'Ss', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('uc', 'upcase', 'Ss', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('x', 'repeat', 'Ssi', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('iscclass', 'is_cclass', 'Iisi', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('findcclass', 'find_cclass', 'Iisii', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('findnotcclass', 'find_not_cclass', 'Iisii', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('sprintf', 'sprintf', 'SsP', :inlinable(1));
 
