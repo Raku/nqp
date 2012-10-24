@@ -342,110 +342,70 @@ position C<pos>.
 =end
 
     method peek_delimiters(str $target, int $pos) {
-        Q:PIR {
-            .local pmc self
-            self = find_lex 'self'
-            .local string target
-            target = find_lex '$target'
-            .local int pos
-            pos = find_lex '$pos'
+        # peek at the next character
+        my str $start := nqp::substr($target, $pos, 1);
+    
+        # colon, word and whitespace characters aren't valid delimiters
+        if $start eq ':' {
+            self.panic('Colons may not be used to delimit quoting constructs');
+        }
+        if nqp::iscclass(pir::const::CCLASS_WORD, $start, 0) {
+            self.panic('Alphanumeric character is not allowed as a delimiter');
+        }
+        if nqp::iscclass(pir::const::CCLASS_WHITESPACE, $start, 0) {
+            self.panic('Whitespace character is not allowed as a delimiter');
+        }
 
-            .local string brackets, start, stop
-            $P0 = find_lex '$brackets'
-            brackets = $P0
-
-            # peek at the next character
-            start = substr target, pos, 1
-            # colon and word characters aren't valid delimiters
-            if start == ':' goto err_colon_delim
-            $I0 = is_cclass .CCLASS_WORD, start, 0
-            if $I0 goto err_word_delim
-            $I0 = is_cclass .CCLASS_WHITESPACE, start, 0
-            if $I0 goto err_ws_delim
-
-            # assume stop delim is same as start, for the moment
-            stop = start
-
-            # see if we have an opener or closer
-            $I0 = index brackets, start
-            if $I0 < 0 goto bracket_end
+        # assume stop delim is same as start, for the moment
+        my str $stop := $start;
+        my int $brac := nqp::index($brackets, $start);
+        if $brac >= 0 {
             # if it's a closing bracket, that's an error also
-            $I1 = $I0 % 2
-            if $I1 goto err_close
+            if $brac % 2 {
+                self.panic('Use of a closing delimiter for an opener is reserved');
+            }
+
             # it's an opener, so get the closing bracket
-            inc $I0
-            stop = substr brackets, $I0, 1
+            $stop := nqp::substr($brackets, $brac + 1, 1);
 
             # see if the opening bracket is repeated
-            .local int len
-            len = 0
-          bracket_loop:
-            inc pos
-            inc len
-            $S0 = substr target, pos, 1
-            if $S0 == start goto bracket_loop
-            if len == 1 goto bracket_end
-            start = repeat start, len
-            stop = repeat stop, len
-          bracket_end:
-            .return (start, stop, pos)
-
-          err_colon_delim:
-            self.'panic'('Colons may not be used to delimit quoting constructs')
-          err_word_delim:
-            self.'panic'('Alphanumeric character is not allowed as a delimiter')
-          err_ws_delim:
-            self.'panic'('Whitespace character is not allowed as a delimiter')
-          err_close:
-            self.'panic'('Use of a closing delimiter for an opener is reserved')
-        };
+            my int $len := 1;
+            while nqp::substr($target, ++$pos, 1) eq $start {
+                $len++;
+            }
+            if $len > 1 {
+                $start := nqp::x($start, $len);
+                $stop := nqp::x($stop, $len);
+            }
+          }
+          [$start, $stop]
     }
 
+    my $TRUE := 1;
     token quote_EXPR(*@args) {
         :my %*QUOTEMOD;
         :my $*QUOTE_START;
         :my $*QUOTE_STOP;
         {
-            Q:PIR {            
-                .local pmc self, cur_class, args
-                self = find_lex 'self'
-                cur_class = find_lex '$cursor_class'
-                args = find_lex '@args'
-
-                .local pmc quotemod, true
-                quotemod = find_lex '%*QUOTEMOD'
-                true = box 1
-
-              args_loop:
-                unless args goto args_done
-                .local string mod
-                mod = shift args
-                mod = substr mod, 1
-                quotemod[mod] = true
-                if mod == 'qq' goto opt_qq
-                if mod == 'b' goto opt_b
-                goto args_loop
-              opt_qq:
-                quotemod['s'] = true
-                quotemod['a'] = true
-                quotemod['h'] = true
-                quotemod['f'] = true
-                quotemod['c'] = true
-                quotemod['b'] = true
-              opt_b:
-                quotemod['q'] = true
-                goto args_loop
-              args_done:
-
-                .local pmc start, stop
-                .local string target
-                .local int pos
-                target = repr_get_attr_str self, cur_class, '$!target'
-                pos = repr_get_attr_int self, cur_class, '$!pos'
-                (start, stop) = self.'peek_delimiters'(target, pos)
-                store_lex '$*QUOTE_START', start
-                store_lex '$*QUOTE_STOP', stop
+            for @args -> $mod {
+                $mod := nqp::substr($mod, 1);
+                %*QUOTEMOD{$mod} := $TRUE;
+                if $mod eq 'qq' {
+                    %*QUOTEMOD{'s'} := $TRUE;
+                    %*QUOTEMOD{'a'} := $TRUE;
+                    %*QUOTEMOD{'h'} := $TRUE;
+                    %*QUOTEMOD{'f'} := $TRUE;
+                    %*QUOTEMOD{'c'} := $TRUE;
+                    %*QUOTEMOD{'b'} := $TRUE;
+                }
+                elsif $mod eq 'b' {
+                    %*QUOTEMOD{'q'} := $TRUE;
+                }
             }
+
+            my @delims := self.peek_delimiters(self.target, self.pos);
+            $*QUOTE_START := @delims[0];
+            $*QUOTE_STOP := @delims[1];
         }
         <quote_delimited>
     }
