@@ -461,27 +461,16 @@ position C<pos>.
     }
 
     our method split_words(str $words) {
-        Q:PIR {
-            .include 'src/Regex/constants.pir'
-            .local string words
-            words = find_lex '$words'
-            .local int pos, eos
-            .local pmc result
-            pos = 0
-            eos = length words
-            result = new ['ResizablePMCArray']
-          split_loop:
-            pos = find_not_cclass .CCLASS_WHITESPACE, words, pos, eos
-            unless pos < eos goto split_done
-            $I0 = find_cclass .CCLASS_WHITESPACE, words, pos, eos
-            $I1 = $I0 - pos
-            $S0 = substr words, pos, $I1
-            push result, $S0
-            pos = $I0
-            goto split_loop
-          split_done:
-            .return (result)
-        };
+        my @result;
+        my int $pos := 0;
+        my int $eos := nqp::chars($words);
+        my int $ws;
+        while ($pos := nqp::findnotcclass(pir::const::CCLASS_WHITESPACE, $words, $pos, $eos)) < $eos {
+            $ws := nqp::findcclass(pir::const::CCLASS_WHITESPACE, $words, $pos, $eos);
+            nqp::push(@result, nqp::substr($words, $pos, $ws - $pos));
+            $pos := $ws;
+        }
+        @result
     }
 
 =begin
