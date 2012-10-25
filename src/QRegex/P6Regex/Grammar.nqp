@@ -1,7 +1,6 @@
 use QRegex;
 use NQPHLL;
 use QAST;
-use PASTRegex;
 
 class QRegex::P6Regex::World is HLL::World {
     method create_code($past, $name) {
