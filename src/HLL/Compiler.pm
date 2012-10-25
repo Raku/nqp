@@ -127,8 +127,17 @@ class HLL::Compiler {
                     }
                 };
                 if nqp::defined($*MAIN_CTX) {
-                    for $*MAIN_CTX.lexpad_full() {
-                        %interactive_pad{$_.key} := $_.value;
+                    my $cur_ctx := $*MAIN_CTX;
+                    until nqp::isnull($cur_ctx) {
+                        my $pad := nqp::ctxlexpad($cur_ctx);
+                        unless nqp::isnull($pad) {
+                            for $pad {
+                                my str $key := ~$_;
+                                %interactive_pad{$key} := nqp::atkey($pad, $key)
+                                    unless nqp::existskey(%interactive_pad, $key);
+                            }
+                        }
+                        $cur_ctx := nqp::ctxouter($cur_ctx);
                     }
                     $save_ctx := $interactive_ctx;
                 }

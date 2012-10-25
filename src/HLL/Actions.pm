@@ -47,8 +47,16 @@ class HLL::Actions {
     method SET_BLOCK_OUTER_CTX($block) {
         my $outer_ctx := %*COMPILING<%?OPTIONS><outer_ctx>;
         if nqp::defined($outer_ctx) {
-            for $outer_ctx.lexpad_full {
-                $block.symbol($_.key, :scope<lexical>, :value($_.value));
+            until nqp::isnull($outer_ctx) {
+                my $pad := nqp::ctxlexpad($outer_ctx);
+                unless nqp::isnull($pad) {
+                    for $pad {
+                        my str $key := ~$_;
+                        $block.symbol($key, :scope<lexical>, :value(nqp::atkey($pad, $key)))
+                            unless $block.symbol($key);
+                    }
+                }
+                $outer_ctx := nqp::ctxouter($outer_ctx);
             }
         }
     }
