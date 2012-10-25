@@ -323,10 +323,7 @@ of the match.
     
     method FAILGOAL($goal, $dba?) {
         unless $dba {
-            $dba := ~Q:PIR{
-                %r = getinterp
-                %r = %r['sub';1]
-            };
+            $dba := ~nqp::callercode();
         }
         self.panic("Unable to parse expression in $dba; couldn't find final $goal");
     }

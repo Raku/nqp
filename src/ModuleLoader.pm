@@ -32,11 +32,7 @@ knowhow ModuleLoader {
     }
     
     method ctxsave() {
-        $*MAIN_CTX :=
-            Q:PIR {
-                $P0 = getinterp
-                %r = $P0['context';1]
-            };
+        $*MAIN_CTX := nqp::ctxcaller(nqp::ctx());
         $*CTXSAVE := 0;
     }
     

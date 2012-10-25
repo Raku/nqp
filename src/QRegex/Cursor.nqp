@@ -82,10 +82,7 @@ role NQPCursorRole is export {
 
     method !cursor_start() {
         my $new := nqp::create(self);
-        my $sub := Q:PIR {
-            $P0 = getinterp
-            %r = $P0['sub';1]
-        };
+        my $sub := nqp::callercode();
         nqp::bindattr($new, $?CLASS, '$!orig', $!orig);
         nqp::bindattr($new, $?CLASS, '$!regexsub', nqp::ifnull(nqp::getcodeobj($sub), $sub));
         if nqp::defined($!restart) {
@@ -465,10 +462,7 @@ role NQPCursorRole is export {
 
     method FAILGOAL($goal, $dba?) {
         unless $dba {
-            $dba := ~Q:PIR{
-                %r = getinterp
-                %r = %r['sub';1]
-            };
+            $dba := ~nqp::callercode();
         }
         nqp::die("Unable to parse expression in $dba; couldn't find final $goal");
     }
