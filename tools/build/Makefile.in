@@ -52,10 +52,6 @@ DYNEXT_DIR       = dynext
 PMC_DIR          = src/pmc
 OPS_DIR          = src/ops
 
-PAST_SOURCES = \
-  src/PASTRegex.pir \
-  src/cheats/parrot-callcontext.pir \
-
 HLL_SOURCES = \
   src/HLL/Grammar.pm \
   src/HLL/Actions.pm \
@@ -144,8 +140,6 @@ STAGE2 = src/stage2
 MODULE_LOADER_PBC = ModuleLoader.pbc
 
 REGEX_PBC       = NQPRegex.pbc
-
-PAST_PBC        = PASTRegex.pbc
 
 HLL_PBC          = NQPHLL.pbc
 HLL_COMBINED     = gen/NQPHLL.pm
@@ -492,7 +486,6 @@ CLEANUPS = \
   *.manifest \
   *.pdb \
   $(REGEX_PBC) \
-  $(PAST_PBC) \
   $(HLL_PBC) \
   $(P6REGEX_PBC) \
   $(NQP_MO_PBC) \
@@ -536,7 +529,6 @@ all: $(NQP_EXE) $(P5QREGEX_PBC)
 install: all
 	$(MKPATH)                   $(DESTDIR)$(PARROT_LIBRARY_DIR)
 	$(CP)  $(MODULE_LOADER_PBC) $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(MODULE_LOADER_PBC)
-	$(CP)  $(PAST_PBC)          $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(PAST_PBC)
 	$(MKPATH)                   $(DESTDIR)$(NQP_LANG_DIR)/lib
 	$(CP)  $(QAST_PBC)          $(DESTDIR)$(NQP_LANG_DIR)/lib/$(QAST_PBC)
 	$(CP)  $(QASTNODE_PBC)      $(DESTDIR)$(NQP_LANG_DIR)/lib/$(QASTNODE_PBC)
@@ -557,12 +549,9 @@ stage0: $(STAGE0)
 stage1: $(STAGE1)
 stage2: $(STAGE2)
 
-$(PAST_PBC): $(PAST_SOURCES) $(DYNEXT_TARGET)
-	$(PARROT) -o $(PAST_PBC) $(PAST_SOURCES)
-
 $(STAGE0): $(STAGE0_PBCS)
 
-$(STAGE0_PBCS): $(DYNEXT_TARGET) $(PAST_PBC) $(STAGE0_SOURCES)
+$(STAGE0_PBCS): $(DYNEXT_TARGET) $(STAGE0_SOURCES)
 	$(PARROT) -o $(STAGE0)/$(NQP_MO_PBC)       src/stage0/NQPMO-s0.pir
 	$(PARROT) -o $(STAGE0)/$(MODULE_LOADER_PBC) src/stage0/ModuleLoader-s0.pir
 	$(PARROT) -o $(STAGE0)/$(CORE_SETTING_PBC) src/stage0/NQPCORE.setting-s0.pir
