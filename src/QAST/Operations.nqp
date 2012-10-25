@@ -965,6 +965,41 @@ QAST::Operations.add_core_op('lexotic', -> $qastcomp, $op {
 });
 
 # Context introspection
+QAST::Operations.add_core_op('ctx', -> $qastcomp, $op {
+    my $reg := $*REGALLOC.fresh_p();
+    my $ops := PIRT::Ops.new();
+    $ops.push_pirop('getinterp', $reg);
+    $ops.push_pirop('set', $reg, $reg ~ "['context']");
+    $ops.result($reg);
+    $ops
+});
+QAST::Operations.add_core_op('ctxouter', -> $qastcomp, $op {
+    my $reg := $*REGALLOC.fresh_p();
+    my $ops := PIRT::Ops.new();
+    my $ctxpost := $qastcomp.coerce($qastcomp.as_post($op[0]), 'P');
+    $ops.push($ctxpost);
+    $ops.push_pirop('getattribute', $reg, $ctxpost, "'outer_ctx'");
+    $ops.result($reg);
+    $ops
+});
+QAST::Operations.add_core_op('ctxcaller', -> $qastcomp, $op {
+    my $reg := $*REGALLOC.fresh_p();
+    my $ops := PIRT::Ops.new();
+    my $ctxpost := $qastcomp.coerce($qastcomp.as_post($op[0]), 'P');
+    $ops.push($ctxpost);
+    $ops.push_pirop('getattribute', $reg, $ctxpost, "'caller_ctx'");
+    $ops.result($reg);
+    $ops
+});
+QAST::Operations.add_core_op('ctxlexpad', -> $qastcomp, $op {
+    my $reg := $*REGALLOC.fresh_p();
+    my $ops := PIRT::Ops.new();
+    my $ctxpost := $qastcomp.coerce($qastcomp.as_post($op[0]), 'P');
+    $ops.push($ctxpost);
+    $ops.push_pirop('getattribute', $reg, $ctxpost, "'lex_pad'");
+    $ops.result($reg);
+    $ops
+});
 QAST::Operations.add_core_op('curlexpad', -> $qastcomp, $op {
     my $reg := $*REGALLOC.fresh_p();
     my $ops := PIRT::Ops.new();
@@ -978,6 +1013,14 @@ QAST::Operations.add_core_op('curcode', -> $qastcomp, $op {
     my $ops := PIRT::Ops.new();
     $ops.push_pirop('getinterp', $reg);
     $ops.push_pirop('set', $reg, $reg ~ "['sub']");
+    $ops.result($reg);
+    $ops
+});
+QAST::Operations.add_core_op('callercode', -> $qastcomp, $op {
+    my $reg := $*REGALLOC.fresh_p();
+    my $ops := PIRT::Ops.new();
+    $ops.push_pirop('getinterp', $reg);
+    $ops.push_pirop('set', $reg, $reg ~ "['sub';1]");
     $ops.result($reg);
     $ops
 });
