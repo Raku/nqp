@@ -24,8 +24,5 @@ class B {
 my $b := B.new();
 $b.HOW.mixin($b, ParaNameTest.HOW.curry(ParaNameTest, "drink", "beer"));
 $b.HOW.mixin($b, ParaNameTest.HOW.curry(ParaNameTest, "meat", "beef"));
-for $b.HOW.method_table($b) {
-    say($_.key);
-}
 ok($b.drink eq "beer", "parametric method name handling works (1)");
 ok($b.meat eq "beef", "parametric method name handling works (2)");
