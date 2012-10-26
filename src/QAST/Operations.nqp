@@ -1597,6 +1597,18 @@ QAST::Operations.add_core_pirop_mapping('newtype', 'repr_type_object_for', 'PPs'
 QAST::Operations.add_core_pirop_mapping('setwho', 'set_who', '0PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('rebless', 'repr_change_type', '0PP', :inlinable(1));
 
+# lexical related opcodes
+QAST::Operations.add_core_pirop_mapping('getlex', 'find_lex', 'Ps');
+QAST::Operations.add_core_pirop_mapping('getlex_i', 'find_lex', 'Is');
+QAST::Operations.add_core_pirop_mapping('getlex_n', 'find_lex', 'Ns');
+QAST::Operations.add_core_pirop_mapping('getlex_s', 'find_lex', 'Ss');
+QAST::Operations.add_core_pirop_mapping('bindlex', 'store_lex', '1sP');
+QAST::Operations.add_core_pirop_mapping('bindlex_i', 'store_lex', '1si');
+QAST::Operations.add_core_pirop_mapping('bindlex_n', 'store_lex', '1sn');
+QAST::Operations.add_core_pirop_mapping('bindlex_s', 'store_lex', '1ss');
+QAST::Operations.add_core_pirop_mapping('getlexdyn', 'find_dynamic_lex', 'Ps');
+QAST::Operations.add_core_pirop_mapping('bindlexdyn', 'store_dynamic_lex', '1sP');
+
 # code object related opcodes
 QAST::Operations.add_core_pirop_mapping('takeclosure', 'newclosure', 'PP');
 QAST::Operations.add_core_pirop_mapping('getcodeobj', 'get_sub_code_object', 'PP');
