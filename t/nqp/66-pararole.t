@@ -1,4 +1,4 @@
-plan(4);
+plan(6);
 
 role ParaTest[$a] {
     method m() { $a }
@@ -26,3 +26,15 @@ $b.HOW.mixin($b, ParaNameTest.HOW.curry(ParaNameTest, "drink", "beer"));
 $b.HOW.mixin($b, ParaNameTest.HOW.curry(ParaNameTest, "meat", "beef"));
 ok($b.drink eq "beer", "parametric method name handling works (1)");
 ok($b.meat eq "beef", "parametric method name handling works (2)");
+
+grammar LolGrammar {
+    token TOP { <foo> }
+    proto token foo {*}
+    token foo:sym<a> { <sym> }
+}
+role AnotherFoo[$x] {
+    token foo:sym<more> { $x }
+}
+ok(LolGrammar.parse('abc') eq 'a', "parametric mixin/grammar/LTM interaction (sanity)");
+my $derived := LolGrammar.HOW.mixin(LolGrammar, AnotherFoo.HOW.curry(AnotherFoo, 'ab'));
+ok($derived.parse('abc') eq 'ab', "parametric mixin/grammar/LTM interaction");
