@@ -174,13 +174,13 @@ role NQPCursorRole is export {
     }
 
     method !reduce(str $name) {
-        my $actions := pir::find_dynamic_lex__Ps('$*ACTIONS');
+        my $actions := nqp::getlexdyn('$*ACTIONS');
         nqp::findmethod($actions, $name)($actions, self.MATCH)
             if !nqp::isnull($actions) && nqp::can($actions, $name);
     }
 
     method !reduce_with_match($name, $key, $match) {
-        my $actions := pir::find_dynamic_lex__Ps('$*ACTIONS');
+        my $actions := nqp::getlexdyn('$*ACTIONS');
         nqp::findmethod($actions, $name)($actions, $match, $key)
             if !nqp::isnull($actions) && nqp::can($actions, $name);
     }

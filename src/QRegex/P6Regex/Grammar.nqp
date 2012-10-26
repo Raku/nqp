@@ -68,7 +68,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     }
 
     token nibbler {
-        :my $OLDRX := pir::find_dynamic_lex__Ps('%*RX');
+        :my $OLDRX := nqp::getlexdyn('%*RX');
         :my %*RX;
         {
             for $OLDRX { %*RX{$_.key} := $_.value; }
