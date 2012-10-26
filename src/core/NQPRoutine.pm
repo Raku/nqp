@@ -78,7 +78,7 @@ my knowhow NQPRegex {
         %!alt_nfas{$name} := $nfa;
     }
     method SET_GENERIC_NFA($nfa) {
-        $!generic_nfa := $nfa;
+        $!generic_nfa := $nfa.save();
     }
     method ADD_NESTED_CODE($code) {
         nqp::ifnull(@!nested_codes, @!nested_codes := nqp::list());
@@ -116,14 +116,18 @@ my knowhow NQPRegex {
         
         $der
     }
+    my $nfa_type;
+    method SET_NFA_TYPE($type) {
+        $nfa_type := $type;
+    }
     method instantiate_generic($env) {
-        if nqp::isnull($!generic_nfa) || !nqp::can($!generic_nfa, 'instantiate_generic') {
+        if nqp::isnull($!generic_nfa) {
             self
         }
         else {
             my $ins := self.clone();
             nqp::bindattr($ins, NQPRegex, '$!nfa',
-                $!generic_nfa.instantiate_generic($env).save());
+                $nfa_type.from_saved($!generic_nfa).instantiate_generic($env).save());
             nqp::bindattr($ins, NQPRegex, '$!generic_nfa', nqp::null());
             $ins
         }

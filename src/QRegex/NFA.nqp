@@ -19,10 +19,14 @@ class QRegex::NFA {
     has int $!generic;
 
     method new() {
-        my $new := self.bless(:states(nqp::list()), :edges(nqp::list()));
+        my $new := self.bless(:states(nqp::list()), :edges(0));
         $new.addstate();
         $new.addstate();
         $new;
+    }
+    
+    method from_saved($saved) {
+        self.bless(:states($saved), :edges(1));
     }
 
     method addstate() {
@@ -481,4 +485,8 @@ class QRegex::NFA {
         $dumper.deleteIndent();
         print("\n", $dumper.indent, ']');
     }
+}
+
+INIT {
+    NQPRegex.SET_NFA_TYPE(QRegex::NFA);
 }
