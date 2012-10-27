@@ -19,7 +19,7 @@ class QAST::Op is QAST::Node {
     }
 
     method evaluate_unquotes(@unquotes) {
-        my $result := pir::repr_clone__PP(self);
+        my $result := self.shallow_clone();
         my $i := 0;
         my $elems := +@(self);
         while $i < $elems {
