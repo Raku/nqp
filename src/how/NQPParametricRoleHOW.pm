@@ -148,7 +148,7 @@ knowhow NQPParametricRoleHOW {
 
         # Copy roles, instantiating them as we go.
         for @!roles {
-            my $specialized := $irole.HOW.specialize($irole, $class_arg);
+            my $specialized := $_.HOW.specialize($_, $class_arg);
             $irole.HOW.add_role($irole, $specialized);
         }
 
