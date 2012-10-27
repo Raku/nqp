@@ -783,12 +783,12 @@ An operator precedence parser.
         $cur
     }
 
-    method LANG($lang, $regex) {
-        my $lang_cursor := %*LANG{$lang}.'!cursor_init'(self.target(), :p(self.pos()));
+    method LANG($lang, $regex, *@args) {
+        my $lang_cursor := %*LANG{$lang}.'!cursor_init'(self.orig(), :p(self.pos()));
         if self.HOW.traced(self) {
             $lang_cursor.HOW.trace-on($lang_cursor, self.HOW.trace_depth(self));
         }
         my $*ACTIONS    := %*LANG{$lang ~ '-actions'};
-        $lang_cursor."$regex"();  
+        $lang_cursor."$regex"(|@args);
     }
 }
