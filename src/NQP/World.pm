@@ -12,6 +12,9 @@ class NQP::World is HLL::World {
     # compilation unit ID to a list of code objects.
     has %!code_objects_to_fix_up;
     
+    # The types of those code objects.
+    has %!code_object_types;
+    
     # Mapping of QAST::Stmts node containing fixups, keyed by sub ID. If
     # we do dynamic compilation then we do the fixups immediately and
     # then clear this list.
@@ -23,6 +26,7 @@ class NQP::World is HLL::World {
     method BUILD(*%opts) {
         @!BLOCKS := nqp::list();
         %!code_objects_to_fix_up := nqp::hash();
+        %!code_object_types := nqp::hash();
         %!code_object_fixup_list := nqp::hash();
         %!code_stub_sc_idx := nqp::hash();
     }
@@ -235,9 +239,9 @@ class NQP::World is HLL::World {
                     # entry in the SC. Make sure the newly compiled code is marked
                     # as a static code ref.
                     my $static := %!code_objects_to_fix_up{$subid}.shift();
-                    nqp::bindattr($static, $code_type, '$!do', $compiled[$i]);
+                    nqp::bindattr($static, %!code_object_types{$subid}, '$!do', $compiled[$i]);
                     for %!code_objects_to_fix_up{$subid} {
-                        nqp::bindattr($_, $code_type, '$!do', nqp::clone($compiled[$i]));
+                        nqp::bindattr($_, %!code_object_types{$subid}, '$!do', nqp::clone($compiled[$i]));
                     }
                     pir::setprop__vPsP($compiled[$i], 'STATIC_CODE_REF', $compiled[$i]);
                     self.update_root_code_ref(%!code_stub_sc_idx{$subid}, $compiled[$i]);
@@ -340,6 +344,7 @@ class NQP::World is HLL::World {
             
             # Add it to the dynamic compilation fixup todo list.
             %!code_objects_to_fix_up{$past.cuid()} := [$code_obj];
+            %!code_object_types{$past.cuid()} := $code_type;
             
             $code_obj
         }
