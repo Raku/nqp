@@ -10,6 +10,7 @@ role NQPCursorRole is export {
     has $!regexsub;
     has $!restart;
 
+    method orig() { $!orig }
     method target() { $!target }
     method from() { $!from }
     method pos() { $!pos }
