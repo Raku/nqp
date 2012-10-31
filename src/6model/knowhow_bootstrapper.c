@@ -232,9 +232,12 @@ PMC * SixModelObject_bootstrap_knowhow(PARROT_INTERP, PMC *sc) {
     /* Set this built up HOW as the KnowHOW's HOW. */
     STABLE(knowhow_pmc)->HOW = knowhow_how_pmc;
     
-    /* Give it an authoritative method cache. */
+    /* Give it an authoritative method cache and type check list. */
     STABLE(knowhow_pmc)->method_cache = knowhow_how->body.methods;
     STABLE(knowhow_pmc)->mode_flags   = METHOD_CACHE_AUTHORITATIVE;
+    STABLE(knowhow_pmc)->type_check_cache_length = 1;
+    STABLE(knowhow_pmc)->type_check_cache        = (PMC **)mem_sys_allocate(sizeof(PMC *));
+    STABLE(knowhow_pmc)->type_check_cache[0]     = knowhow_pmc;
 
     /* Set up some string constants that the methods here use. */
     repr_str     = Parrot_str_new_constant(interp, "repr");
