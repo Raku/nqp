@@ -784,7 +784,7 @@ An operator precedence parser.
     }
 
     method LANG($lang, $regex, *@args) {
-        my $lang_cursor := %*LANG{$lang}.'!cursor_init'(self.orig(), :p(self.pos()));
+        my $lang_cursor := %*LANG{$lang}.'!cursor_init'(self.orig(), :p(self.pos()), :target(self.target()));
         if self.HOW.traced(self) {
             $lang_cursor.HOW.trace-on($lang_cursor, self.HOW.trace_depth(self));
         }

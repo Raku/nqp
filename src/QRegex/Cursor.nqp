@@ -65,11 +65,12 @@ role NQPCursorRole is export {
         $caps;
     }
 
-    method !cursor_init($target, :$p = 0, :$c) {
+    method !cursor_init($orig, :$p = 0, :$c, :$target) {
         my $new := self.CREATE();
-        nqp::bindattr($new, $?CLASS, '$!orig', $target);
-        $target := pir::trans_encoding__Ssi($target, pir::find_encoding__Is('ucs4'));
-        nqp::bindattr_s($new, $?CLASS, '$!target', $target);
+        nqp::bindattr($new, $?CLASS, '$!orig', $orig);
+        nqp::bindattr_s($new, $?CLASS, '$!target', $target
+            ?? $target
+            !! pir::trans_encoding__Ssi($orig, pir::find_encoding__Is('ucs4')));
         if nqp::defined($c) {
             nqp::bindattr_i($new, $?CLASS, '$!from', -1);
             nqp::bindattr_i($new, $?CLASS, '$!pos', $c);
