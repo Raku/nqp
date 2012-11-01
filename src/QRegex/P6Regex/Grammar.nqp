@@ -74,8 +74,25 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
             for $OLDRX { %*RX{$_.key} := $_.value; }
         }
         [ <.ws> ['||'|'|'|'&&'|'&'] ]?
-        <termaltseq>
+        <termaltseq> <.ws>
+        [
+        || <?infixstopper>
+        || $$ <.panic: "Regex not terminated">
+        || (\W) { $/.CURSOR.panic("Unrecognized regex metacharacter " ~ $/[0].Str ~ " (must be quoted to match literally)") }
+        || <.panic: "Regex not terminated">
+        ]
     }
+    
+    regex infixstopper {
+        :dba('infix stopper')
+        [
+        | <?before <[\) \} \]]> >
+        | <?before '>' <-[>]> >
+        | <?before <rxstopper> >
+        ]
+    }
+    
+    token rxstopper { $ }
 
     token termaltseq {
         <termconjseq>

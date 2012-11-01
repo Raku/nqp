@@ -784,6 +784,10 @@ grammar NQP::Grammar is HLL::Grammar {
 }
 
 grammar NQP::Regex is QRegex::P6Regex::Grammar {
+    token rxstopper {
+        <[ } / ]>
+    }
+    
     token metachar:sym<:my> {
         ':' <?before 'my'> <statement=.LANG('MAIN', 'statement')> <.ws> ';'
     }
