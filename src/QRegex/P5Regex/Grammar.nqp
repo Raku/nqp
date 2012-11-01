@@ -54,6 +54,8 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
         <alternation>
     }
     
+    token rxstopper { $ }
+    
     token alternation {
         <sequence>+ % '|'
     }
@@ -64,7 +66,8 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     }
     
     token quantified_atom {
-        <![|)}/]>
+        <![|)]>
+        <!rxstopper>
         <atom>
         [ <.ws> <quantifier=p5quantifier> ]?
         <.ws>
