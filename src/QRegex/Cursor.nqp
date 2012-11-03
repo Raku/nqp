@@ -152,6 +152,10 @@ role NQPCursorRole is export {
         $!bstack := nqp::null();
         $!pos    := -3;
     }
+    
+    method !cursor_pos(int $pos) {
+        $!pos := $pos;
+    }
 
     method !cursor_next() {
         if nqp::defined($!restart) {
