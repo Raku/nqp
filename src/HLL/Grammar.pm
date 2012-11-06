@@ -571,6 +571,7 @@ An operator precedence parser.
             $P0 = termish['term']
             push termstack, $P0
 
+          next_infix:
             # Now see if we can fetch an infix operator
             .local pmc wscur, infixcur, infix
             
@@ -597,19 +598,20 @@ An operator precedence parser.
             termishrx = 'termish'
           have_termishrx:
 
-            .local string inprec, inassoc, opprec
+            .local string inprec, inassoc, opprec, infake
             inprec = inO['prec']
             unless inprec goto err_inprec
             if inprec < preclim goto term_done
-            inassoc = inO['assoc']
 
             $P0 = inO['sub']
             if null $P0 goto subprec_done
             inO['prec'] = $P0
           subprec_done:
 
+          infake = inO['fake']
+
           reduce_loop:
-            unless opstack goto reduce_done
+            unless opstack goto reduce_gt_done
             $P0 = opstack[-1]
             $P0 = $P0['OPER']
             $P0 = $P0['O']
@@ -619,8 +621,15 @@ An operator precedence parser.
             goto reduce_loop
           reduce_gt_done:
 
+            unless infake goto fake_done
+            push opstack, infix
+            self.'EXPR_reduce'(termstack, opstack)
+            goto next_infix  # not really an infix, so keep trying
+          fake_done:
+          
             unless opprec == inprec goto reduce_done
             # equal precedence, use associativity to decide
+            inassoc = inO['assoc']
             unless inassoc == 'left' goto reduce_done
             # left associative, reduce immediately
             self.'EXPR_reduce'(termstack, opstack)
