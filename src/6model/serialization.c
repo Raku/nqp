@@ -1692,9 +1692,14 @@ static void repossess(PARROT_INTERP, SerializationReader *reader, INTVAL i) {
     Parrot_Int4 repo_type = read_int32(table_row, 0);
     if (repo_type == 0) {
         /* Get object to repossess. */
-        PMC *orig_obj = SC_get_object(interp,
-            locate_sc(interp, reader, read_int32(table_row, 8)),
-            read_int32(table_row, 12));
+        PMC *orig_sc  = locate_sc(interp, reader, read_int32(table_row, 8));
+        PMC *orig_obj = SC_get_object(interp, orig_sc, read_int32(table_row, 12));
+        
+        /* Make sure we don't have a reposession conflict. */
+        if (SC_PMC(orig_obj) != orig_sc)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Object conflict detected during deserialization\n"
+                "(Probable attempt to load two modules that cannot be loaded together).");
         
         /* Clear it up, since we'll re-allocate all the bits inside
          * it on deserialization. */
@@ -1706,9 +1711,14 @@ static void repossess(PARROT_INTERP, SerializationReader *reader, INTVAL i) {
     }
     else if (repo_type == 1) {
         /* Get STable to repossess. */
-        PMC *orig_st = SC_get_stable(interp,
-            locate_sc(interp, reader, read_int32(table_row, 8)),
-            read_int32(table_row, 12));
+        PMC *orig_sc = locate_sc(interp, reader, read_int32(table_row, 8));
+        PMC *orig_st = SC_get_stable(interp, orig_sc, read_int32(table_row, 12));
+        
+        /* Make sure we don't have a reposession conflict. */
+        if (STABLE_STRUCT(orig_st)->sc != orig_sc)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "STable conflict detected during deserialization.\n"
+                "(Probable attempt to load two modules that cannot be loaded together).");
         
         /* Clear it up, since we'll re-allocate all the bits inside
          * it on deserialization. */
