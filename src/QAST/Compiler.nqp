@@ -275,7 +275,8 @@ class QAST::Compiler is HLL::Compiler {
             
             # If we need to do deserialization, emit code for that.
             if $comp_mode {
-                $block.push(self.deserialization_code($cu.sc(), $cu.code_ref_blocks()));
+                $block.push(self.deserialization_code($cu.sc(), $cu.code_ref_blocks(),
+                    $cu.repo_conflict_resolver()));
             }
             
             # Add post-deserialization tasks.
@@ -306,7 +307,7 @@ class QAST::Compiler is HLL::Compiler {
         $block_post
     }
     
-    method deserialization_code($sc, @code_ref_blocks) {
+    method deserialization_code($sc, @code_ref_blocks, $repo_conf_res) {
         # Serialize it.
         my $sh := pir::new__Ps('ResizableStringArray');
         my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
@@ -328,6 +329,17 @@ class QAST::Compiler is HLL::Compiler {
         # Code references.
         my $cr_past := QAST::Op.new( :op('list_b'), |@code_ref_blocks );
         
+        # Handle repossession conflict resolution code, if any.
+        if $repo_conf_res {
+            $repo_conf_res.push(QAST::Var.new( :name('conflicts'), :scope('local') ));
+        }
+        else {
+            $repo_conf_res := QAST::Op.new(
+                :op('die_s'),
+                QAST::SVal.new( :value('Repossession conflicts occurred during deserialization') )
+            );
+        }
+        
         # Overall deserialization QAST.
         QAST::Stmt.new(
             QAST::Op.new(
@@ -341,11 +353,22 @@ class QAST::Compiler is HLL::Compiler {
                 QAST::SVal.new( :value($sc.description) )
             ),
             QAST::Op.new(
+                :op('bind'),
+                QAST::Var.new( :name('conflicts'), :scope('local'), :decl('var') ),
+                QAST::Op.new( :op('list') )
+            ),
+            QAST::Op.new(
                 :op('deserialize'),
                 QAST::SVal.new( :value($serialized) ),
                 QAST::Var.new( :name('cur_sc'), :scope('local') ),
                 $sh_ast,
-                QAST::Block.new( :blocktype('immediate'), $cr_past )
+                QAST::Block.new( :blocktype('immediate'), $cr_past ),
+                QAST::Var.new( :name('conflicts'), :scope('local') )
+            ),
+            QAST::Op.new(
+                :op('if'),
+                QAST::Var.new( :name('conflicts'), :scope('local') ),
+                $repo_conf_res
             )
         )
     }

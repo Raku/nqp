@@ -1617,7 +1617,7 @@ QAST::Operations.add_core_pirop_mapping('setcodeobj', 'set_sub_code_object', '1P
 # serialization context related opcodes
 QAST::Operations.add_core_pirop_mapping('sha1', 'nqp_sha1', 'Ss');
 QAST::Operations.add_core_pirop_mapping('createsc', 'nqp_create_sc', 'Ps');
-QAST::Operations.add_core_pirop_mapping('deserialize', 'nqp_deserialize_sc', 'vsPPP');
+QAST::Operations.add_core_pirop_mapping('deserialize', 'nqp_deserialize_sc', 'vsPPPP');
 
 # process related opcodes
 QAST::Operations.add_core_pirop_mapping('exit', 'exit', '0i', :inlinable(1));

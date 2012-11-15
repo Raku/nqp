@@ -62,6 +62,9 @@ typedef struct SerializationReader {
     PMC *codes_list;
     PMC *contexts_list;
     
+    /* The object repossession conflicts list. */
+    PMC *repo_conflicts_list;
+    
     /* Current offsets for the data chunks (also correspond to the amount of
      * data written in to them). */
     Parrot_Int4 stables_data_offset;
@@ -150,4 +153,4 @@ typedef struct SerializationWriter {
 
 /* Core serialize and deserialize functions. */
 STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap);
-void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *codes_static, STRING *data);
+void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *codes_static, PMC *repo_conflicts, STRING *data);

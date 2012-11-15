@@ -2558,7 +2558,24 @@ the compilation unit's static code refs in the list in $4.
 
 */
 inline op nqp_deserialize_sc(in STR, invar PMC, invar PMC, invar PMC) :base_core {
-    Serialization_deserialize(interp, $2, $3, $4, $1);
+    PMC *conlist_throwaway = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+    Serialization_deserialize(interp, $2, $3, $4, conlist_throwaway, $1);
+}
+
+/*
+
+=item nqp_deserialize_sc
+
+Deserializes the data in $1, populating the serialization context located in $2.
+Expects to find any required strings in the string heap, passed in $3, and any of
+the compilation unit's static code refs in the list in $4. $5 should be a list that
+will be populated with the object repossession conflict list.
+
+=cut
+
+*/
+inline op nqp_deserialize_sc(in STR, invar PMC, invar PMC, invar PMC, invar PMC) :base_core {
+    Serialization_deserialize(interp, $2, $3, $4, $5, $1);
 }
 
 /*

@@ -12,9 +12,13 @@ class QAST::CompUnit is QAST::Node {
     # case, just before everything else in this compilation unit).
     has @!pre_deserialize;
 
-    # Taks we should run after deserialization (or, in the non-precompiled
+    # Tasks we should run after deserialization (or, in the non-precompiled
     # case, right after the pre-deserialize tasks).
     has @!post_deserialize;
+    
+    # Call to the repossession conflict resolution mechanism, to be invoked
+    # on deserialization.
+    has $!repo_conflict_resolver;
     
     # The HLL name.
     has $!hll;
@@ -40,6 +44,9 @@ class QAST::CompUnit is QAST::Node {
     method post_deserialize(*@value) {
         @!post_deserialize := @value[0] if @value;
         nqp::isnull(@!post_deserialize) ?? [] !! @!post_deserialize
+    }
+    method repo_conflict_resolver(*@value) {
+        @value ?? ($!repo_conflict_resolver := @value[0]) !! $!repo_conflict_resolver
     }
     method code_ref_blocks(*@value) {
         $!code_ref_blocks := @value[0] if @value; $!code_ref_blocks
