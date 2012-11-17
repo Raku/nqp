@@ -9,4 +9,5 @@ class QAST::IVal is QAST::Node {
     method evaluate_unquotes(@unquotes) {
         self
     }
+    method dump_extra_node_info() { ~$!value }
 }

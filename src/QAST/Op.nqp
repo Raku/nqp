@@ -28,4 +28,6 @@ class QAST::Op is QAST::Node {
         }
         $result
     }
+
+    method dump_extra_node_info() { "$!op $!name"; }
 }
