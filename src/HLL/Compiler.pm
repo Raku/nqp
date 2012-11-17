@@ -463,6 +463,10 @@ class HLL::Compiler {
     }
 
     method dumper($obj, $name, *%options) {
+        if nqp::can($obj, 'dump') {
+            nqp::print($obj.dump());
+            return 0;
+        }
         if %options<dumper> {
             pir::load_bytecode__vs('PCT/Dumper.pbc');
             my $dumper := PCT::Dumper{nqp::lc(%options<dumper>)};

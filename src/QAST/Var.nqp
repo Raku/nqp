@@ -18,4 +18,8 @@ class QAST::Var is QAST::Node {
     method evaluate_unquotes(@unquotes) {
         self
     }
+
+    method dump_extra_node_info() {
+        "$!scope $!name";
+    }
 }
