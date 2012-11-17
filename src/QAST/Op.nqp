@@ -29,5 +29,9 @@ class QAST::Op is QAST::Node {
         $result
     }
 
-    method dump_extra_node_info() { "$!op $!name"; }
+    method dump_extra_node_info() {
+        nqp::chars($!name)
+            ?? "$!op $!name"
+            !! $!op;
+    }
 }
