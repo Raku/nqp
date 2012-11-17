@@ -478,14 +478,16 @@ An operator precedence parser.
 
 =end
 
-    method EXPR(str $preclim = '') {
+    method EXPR(str $preclim = '', int :$noinfix = 0) {
         Q:PIR {
             .local pmc self, cur_class
             self = find_lex 'self'
             cur_class = find_lex '$cursor_class'
 
             .local string preclim
+            .local int noinfix
             preclim = find_lex '$preclim'
+            noinfix = find_lex '$noinfix'
             
             .local pmc here
             .local string tgt
@@ -570,6 +572,8 @@ An operator precedence parser.
 
             $P0 = termish['term']
             push termstack, $P0
+            
+            if noinfix goto term_done
 
           next_infix:
             # Now see if we can fetch an infix operator
