@@ -204,8 +204,8 @@ get_calling_convention(PARROT_INTERP, STRING *name) {
 
 /* Map argument type id to dyncall character id. */
 static char
-get_signature_char(INTVAL typeid) {
-    switch (typeid & DYNCALL_ARG_TYPE_MASK) {
+get_signature_char(INTVAL type_id) {
+    switch (type_id & DYNCALL_ARG_TYPE_MASK) {
         case DYNCALL_ARG_VOID:
             return 'v';
         case DYNCALL_ARG_CHAR:
