@@ -110,7 +110,7 @@ Return the LexInfo PMC, if any or a Null PMC.
         GET_ATTR_lexinfo(INTERP, SELF, info);
         if (info->vtable->base_type != enum_class_LexInfo
 #ifdef PARROT_HAS_THREADS
-	    && info->vtable->base_type != enum_class_Proxy
+            && info->vtable->base_type != enum_class_Proxy
 #endif
 	    ) {
             PMC *name_map;
