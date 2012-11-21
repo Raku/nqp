@@ -108,7 +108,11 @@ Return the LexInfo PMC, if any or a Null PMC.
         PMC *info;
         Hash *hash;
         GET_ATTR_lexinfo(INTERP, SELF, info);
-        if (info->vtable->base_type != enum_class_LexInfo) {
+        if (info->vtable->base_type != enum_class_LexInfo
+#ifdef PARROT_HAS_THREADS
+	    && info->vtable->base_type != enum_class_Proxy
+#endif
+	    ) {
             PMC *name_map;
             GETATTR_NQPLexInfo_name_to_register_map(INTERP, info, name_map);
             hash = (Hash *)VTABLE_get_pointer(INTERP, name_map);
