@@ -120,7 +120,7 @@ Return the LexInfo PMC, if any or a Null PMC.
            info = PARROT_PROXY(info)->target;
            proxied = 1;
         }
-        if (info->vtable->base_type == pmc_class_NQPLexInfo) {
+        if (info->vtable->base_type == dynpmc_class_NQPLexInfo) {
             PMC *name_map;
             GETATTR_NQPLexInfo_name_to_register_map(INTERP, info, name_map);
             hash = (Hash *)VTABLE_get_pointer(INTERP, name_map);
@@ -131,7 +131,7 @@ Return the LexInfo PMC, if any or a Null PMC.
             SET_ATTR_lexinfo_hash(INTERP, SELF, hash);
         }
         
-        if (!proxied && info->vtable->base_type == pmc_class_NQPLexInfo) {
+        if (!proxied && info->vtable->base_type == dynpmc_class_NQPLexInfo) {
             PMC *static_slots_cache;
             GETATTR_NQPLexInfo_static_slots_cache(INTERP, info, static_slots_cache);
             if (!PMC_IS_NULL(static_slots_cache)) {
@@ -169,7 +169,7 @@ Return the LexInfo PMC, if any or a Null PMC.
         if (info->vtable->base_type == enum_class_Proxy) {
            info = PARROT_PROXY(info)->target;
         }
-        if (info->vtable->base_type == pmc_class_NQPLexInfo) {
+        if (info->vtable->base_type == dynpmc_class_NQPLexInfo) {
             GETATTR_NQPLexInfo_name_to_register_map(INTERP, info, name_map);
             hash = (const Hash *)VTABLE_get_pointer(INTERP, name_map);
         }
