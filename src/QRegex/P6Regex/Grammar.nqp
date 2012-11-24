@@ -44,6 +44,10 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
                    ~ ~$when ~ ' please use ' ~ ~$new);
     }
 
+    method throw_unrecognized_metachar ($char) {
+        self.panic('Unrecognized regex metacharacter ' ~ $char ~ ' (must be quoted to match literally)');
+    }
+
     token ws { [ \s+ | '#' \N* ]* }
 
     token normspace { <?before \s | '#' > <.ws> }
@@ -78,7 +82,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         [
         || <?infixstopper>
         || $$ <.panic: "Regex not terminated">
-        || (\W) { $/.CURSOR.panic("Unrecognized regex metacharacter " ~ $/[0].Str ~ " (must be quoted to match literally)") }
+        || (\W) { self.throw_unrecognized_metachar: ~$/[0] }
         || <.panic: "Regex not terminated">
         ]
     }
@@ -116,10 +120,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token termish {
         || <noun=.quantified_atom>+
-        || (\W) {
-            my $char := ~$/[0];
-            $/.CURSOR.panic("Unrecognized regex metacharacter $char (must be quoted to match literally)")
-            }
+        || (\W) { self.throw_unrecognized_metachar: ~$/[0] }
     }
 
     token quantified_atom {
