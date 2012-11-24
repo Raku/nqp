@@ -1,4 +1,9 @@
 #include "pmc_nqplexinfo.h"
+#ifdef PARROT_HAS_THREADS
+  #include "pmc_proxy.h"
+  /* requires pmc2c since parrot 4.11 */
+  #include "../../nqp_group.h"
+#endif
 
 /* Locates the register number for getting the specified name
  * and type of lexical. */
@@ -108,22 +113,25 @@ Return the LexInfo PMC, if any or a Null PMC.
         /* Check if we need to put any static values in place. */
         PMC *info;
         Hash *hash;
+        int proxied = 0;
+
         GET_ATTR_lexinfo(INTERP, SELF, info);
-        if (info->vtable->base_type != enum_class_LexInfo
-#ifdef enum_class_Proxy
-            && info->vtable->base_type != enum_class_Proxy
-#endif
-        ) {
+        if (info->vtable->base_type == enum_class_Proxy) {
+           info = PARROT_PROXY(info)->target;
+           proxied = 1;
+        }
+        if (info->vtable->base_type == pmc_class_NQPLexInfo) {
             PMC *name_map;
             GETATTR_NQPLexInfo_name_to_register_map(INTERP, info, name_map);
             hash = (Hash *)VTABLE_get_pointer(INTERP, name_map);
+            SET_ATTR_lexinfo_hash(INTERP, SELF, hash);
         }
-        else {
+        else if (info->vtable->base_type == enum_class_LexInfo) {
             hash = (Hash *)VTABLE_get_pointer(INTERP, info);
+            SET_ATTR_lexinfo_hash(INTERP, SELF, hash);
         }
-        SET_ATTR_lexinfo_hash(INTERP, SELF, hash);
         
-        if (info->vtable->base_type != enum_class_LexInfo) {
+        if (!proxied && info->vtable->base_type == pmc_class_NQPLexInfo) {
             PMC *static_slots_cache;
             GETATTR_NQPLexInfo_static_slots_cache(INTERP, info, static_slots_cache);
             if (!PMC_IS_NULL(static_slots_cache)) {
@@ -148,6 +156,9 @@ Return the LexInfo PMC, if any or a Null PMC.
     VTABLE INTVAL elements() {
         PMC *info;
         GET_ATTR_lexinfo(INTERP, SELF, info);
+        if (info->vtable->base_type == enum_class_Proxy) {
+           info = PARROT_PROXY(info)->target;
+        }
         return VTABLE_elements(interp, info);
     }
 
@@ -155,7 +166,10 @@ Return the LexInfo PMC, if any or a Null PMC.
         PMC *info, *name_map;
         const Hash *hash;
         GET_ATTR_lexinfo(INTERP, SELF, info);
-        if (info->vtable->base_type != enum_class_LexInfo) {
+        if (info->vtable->base_type == enum_class_Proxy) {
+           info = PARROT_PROXY(info)->target;
+        }
+        if (info->vtable->base_type == pmc_class_NQPLexInfo) {
             GETATTR_NQPLexInfo_name_to_register_map(INTERP, info, name_map);
             hash = (const Hash *)VTABLE_get_pointer(INTERP, name_map);
         }
@@ -312,9 +326,11 @@ Return the LexInfo PMC, if any or a Null PMC.
     }
 
     METHOD get_lexinfo() {
-        PMC *lexinfo;
-        GET_ATTR_lexinfo(INTERP, SELF, lexinfo);
-        RETURN(PMC *lexinfo);
+        PMC *info;
+        GET_ATTR_lexinfo(INTERP, SELF, info);
+        if (info->vtable->base_type == enum_class_Proxy)
+           info = PARROT_PROXY(info)->target;
+        RETURN(PMC *info);
     }
 
 /*
@@ -327,9 +343,11 @@ Get iterator for declared lexicals.
 
 */
     VTABLE PMC *get_iter() {
-        PMC *lexinfo;
-        GET_ATTR_lexinfo(INTERP, SELF, lexinfo);
-        return VTABLE_get_iter(INTERP, lexinfo);
+        PMC *info;
+        GET_ATTR_lexinfo(INTERP, SELF, info);
+        if (info->vtable->base_type == enum_class_Proxy)
+           info = PARROT_PROXY(info)->target;
+        return VTABLE_get_iter(INTERP, info);
     }
 
 }
