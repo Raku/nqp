@@ -44,8 +44,15 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
                    ~ ~$when ~ ' please use ' ~ ~$new);
     }
 
+    # errors are reported through methods, so that subclasses like Rakudo's
+    # Perl6::RegexGrammar can override them, and throw language-specific
+    # exceptions
     method throw_unrecognized_metachar ($char) {
         self.panic('Unrecognized regex metacharacter ' ~ $char ~ ' (must be quoted to match literally)');
+    }
+
+    method throw_null_pattern() {
+        self.panic('Null regex not allowed');
     }
 
     token ws { [ \s+ | '#' \N* ]* }
@@ -100,22 +107,22 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token termaltseq {
         <termconjseq>
-        [ '||' [ <termconjseq> || <.panic: 'Null pattern not allowed'> ] ]*
+        [ '||' [ <termconjseq> || <.throw_null_pattern> ] ]*
     }
 
     token termconjseq {
         <termalt>
-        [ '&&' [ <termalt> || <.panic: 'Null pattern not allowed'> ] ]*
+        [ '&&' [ <termalt> || <.throw_null_pattern> ] ]*
     }
 
     token termalt {
         <termconj>
-        [ '|' <![|]> [ <termconj> || <.panic: 'Null pattern not allowed'> ] ]*
+        [ '|' <![|]> [ <termconj> || <.throw_null_pattern> ] ]*
     }
 
     token termconj {
         <termish>
-        [ '&' <![&]> [ <termish> || <.panic: 'Null pattern not allowed'> ] ]*
+        [ '&' <![&]> [ <termish> || <.throw_null_pattern> ] ]*
     }
 
     token termish {
