@@ -25,10 +25,10 @@ src/ops/*.h
 src/ops/*.c
 src/pmc/pmc_*.h
 src/pmc/*.c
-nqp
-nqp.c
-nqp_group.c
-nqp_group.h
+/nqp
+/nqp.c
+/nqp_group.c
+/nqp_group.h
 src/gen/*.pir
 src/gen/*.nqp
 src/gen/*.pm
