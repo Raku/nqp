@@ -44,6 +44,7 @@ pmclass NQPLexPad
     ATTR Hash *lexinfo_hash;
 
     VTABLE void init() {
+        UNUSED(SELF);
         Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_INVALID_OPERATION,
             "Cannot create a NQPLexPad PMC without an initializer");
     }

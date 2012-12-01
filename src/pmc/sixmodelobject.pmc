@@ -143,6 +143,7 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     
     /* XXX Hack for Parrot issue which needs invokable on stuff. */
     VTABLE INTVAL does(STRING *what) {
+        UNUSED(SELF)
         return Parrot_str_equal(interp, what, CONST_STRING(interp, "invokable"));
     }
     
@@ -154,6 +155,7 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     }
     
     VTABLE PMC *clone() {
+        UNUSED(SELF)
         Parrot_ex_throw_from_c_args(interp, NULL, 1,
             "SixModelObject does not support the clone v-table; consider using the repr_clone op instead");
     }

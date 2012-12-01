@@ -23,6 +23,7 @@ pmclass STable manual_attrs dynpmc group nqp {
      * the supplied object. Leaves the rest to be filled out. Also
      * flags PMC as needing custom mark and destroy. */
     VTABLE void init_pmc(PMC *HOW) {
+        UNUSED(INTERP)
         /* Put underlying struct in place. */
         STable *st = mem_allocate_zeroed_typed(STable);
         st->type_cache_id = get_next_type_cache_id();
