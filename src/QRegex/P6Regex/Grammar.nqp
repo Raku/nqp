@@ -127,6 +127,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token termish {
         || <noun=.quantified_atom>+
+        || <?before <stopper> | <[&|~]> > <.throw_null_pattern>
         || (\W) { self.throw_unrecognized_metachar: ~$/[0] }
     }
 
