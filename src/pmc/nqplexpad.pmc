@@ -1,8 +1,8 @@
 #include "pmc_nqplexinfo.h"
-#ifdef PARROT_HAS_THREADS
+#ifdef PARROT_THREAD_H_GUARD
   #include "pmc_proxy.h"
-  /* requires pmc2c since parrot 4.11 */
-  #include "../../nqp_group.h"
+#else
+  static int enum_class_Proxy = 0;
 #endif
 
 /* Locates the register number for getting the specified name
@@ -49,7 +49,7 @@ pmclass NQPLexPad
     ATTR Hash *lexinfo_hash;
 
     VTABLE void init() {
-        UNUSED(SELF);
+        UNUSED(SELF)
         Parrot_ex_throw_from_c_args(INTERP, NULL, EXCEPTION_INVALID_OPERATION,
             "Cannot create a NQPLexPad PMC without an initializer");
     }
@@ -116,10 +116,12 @@ Return the LexInfo PMC, if any or a Null PMC.
         int proxied = 0;
 
         GET_ATTR_lexinfo(INTERP, SELF, info);
+#ifdef PARROT_THREAD_H_GUARD
         if (info->vtable->base_type == enum_class_Proxy) {
            info = PARROT_PROXY(info)->target;
            proxied = 1;
         }
+#endif
         if (info->vtable->base_type == dynpmc_class_NQPLexInfo) {
             PMC *name_map;
             GETATTR_NQPLexInfo_name_to_register_map(INTERP, info, name_map);
@@ -131,7 +133,7 @@ Return the LexInfo PMC, if any or a Null PMC.
             SET_ATTR_lexinfo_hash(INTERP, SELF, hash);
         }
         
-        if (!proxied && info->vtable->base_type == dynpmc_class_NQPLexInfo) {
+        if (info->vtable->base_type == dynpmc_class_NQPLexInfo) {
             PMC *static_slots_cache;
             GETATTR_NQPLexInfo_static_slots_cache(INTERP, info, static_slots_cache);
             if (!PMC_IS_NULL(static_slots_cache)) {
@@ -156,9 +158,10 @@ Return the LexInfo PMC, if any or a Null PMC.
     VTABLE INTVAL elements() {
         PMC *info;
         GET_ATTR_lexinfo(INTERP, SELF, info);
-        if (info->vtable->base_type == enum_class_Proxy) {
+#ifdef PARROT_THREAD_H_GUARD
+        if (info->vtable->base_type == enum_class_Proxy)
            info = PARROT_PROXY(info)->target;
-        }
+#endif
         return VTABLE_elements(interp, info);
     }
 
@@ -166,9 +169,10 @@ Return the LexInfo PMC, if any or a Null PMC.
         PMC *info, *name_map;
         const Hash *hash;
         GET_ATTR_lexinfo(INTERP, SELF, info);
-        if (info->vtable->base_type == enum_class_Proxy) {
+#ifdef PARROT_THREAD_H_GUARD
+        if (info->vtable->base_type == enum_class_Proxy)
            info = PARROT_PROXY(info)->target;
-        }
+#endif
         if (info->vtable->base_type == dynpmc_class_NQPLexInfo) {
             GETATTR_NQPLexInfo_name_to_register_map(INTERP, info, name_map);
             hash = (const Hash *)VTABLE_get_pointer(INTERP, name_map);
@@ -328,8 +332,10 @@ Return the LexInfo PMC, if any or a Null PMC.
     METHOD get_lexinfo() {
         PMC *info;
         GET_ATTR_lexinfo(INTERP, SELF, info);
+#ifdef PARROT_THREAD_H_GUARD
         if (info->vtable->base_type == enum_class_Proxy)
            info = PARROT_PROXY(info)->target;
+#endif
         RETURN(PMC *info);
     }
 
@@ -345,8 +351,10 @@ Get iterator for declared lexicals.
     VTABLE PMC *get_iter() {
         PMC *info;
         GET_ATTR_lexinfo(INTERP, SELF, info);
+#ifdef PARROT_THREAD_H_GUARD
         if (info->vtable->base_type == enum_class_Proxy)
            info = PARROT_PROXY(info)->target;
+#endif
         return VTABLE_get_iter(INTERP, info);
     }
 
