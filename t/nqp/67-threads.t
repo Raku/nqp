@@ -1,7 +1,7 @@
 plan(1);
 
 say("# Task 1");
-my $x := "ok";
+my $x := "ok 1";
 
 my $a := sub foo() {
     say($x);
