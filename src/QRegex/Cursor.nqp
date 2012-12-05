@@ -1,11 +1,11 @@
 # Some things that all cursors involved in a given parse share.
 my class ParseShared {
     has $!orig;
+    has str $!target;
 }
 
 role NQPCursorRole is export {
     has $!shared;
-    has str $!target;
     has int $!from;
     has int $!pos;
     has $!match;
@@ -16,7 +16,7 @@ role NQPCursorRole is export {
     has $!restart;
 
     method orig() { nqp::getattr($!shared, ParseShared, '$!orig') }
-    method target() { $!target }
+    method target() { nqp::getattr_s($!shared, ParseShared, '$!target') }
     method from() { $!from }
     method pos() { $!pos }
 
@@ -70,16 +70,15 @@ role NQPCursorRole is export {
         $caps;
     }
 
-    method !cursor_init($orig, :$p = 0, :$c, :$target, :$shared) {
+    method !cursor_init($orig, :$p = 0, :$c, :$shared) {
         my $new := self.CREATE();
         unless $shared {
             $shared := nqp::create(ParseShared);
             nqp::bindattr($shared, ParseShared, '$!orig', $orig);
+            nqp::bindattr_s($shared, ParseShared, '$!target',
+                pir::trans_encoding__Ssi($orig, pir::find_encoding__Is('ucs4')));
         }
         nqp::bindattr($new, $?CLASS, '$!shared', $shared);
-        nqp::bindattr_s($new, $?CLASS, '$!target', $target
-            ?? $target
-            !! pir::trans_encoding__Ssi($orig, pir::find_encoding__Is('ucs4')));
         if nqp::defined($c) {
             nqp::bindattr_i($new, $?CLASS, '$!from', -1);
             nqp::bindattr_i($new, $?CLASS, '$!pos', $c);
@@ -101,7 +100,7 @@ role NQPCursorRole is export {
             nqp::bindattr($new, $?CLASS, '$!cstack', nqp::clone($!cstack)) if $!cstack;
             pir::return__0PsiPPi(
                 $new,
-                nqp::bindattr_s($new, $?CLASS, '$!target', $!target),
+                nqp::getattr_s($!shared, ParseShared, '$!target'),
                 nqp::bindattr_i($new, $?CLASS, '$!from', $!from),
                 $?CLASS,
                 nqp::bindattr($new, $?CLASS, '$!bstack', nqp::clone($!bstack)),
@@ -109,8 +108,8 @@ role NQPCursorRole is export {
         }
         nqp::bindattr_i($new, $?CLASS, '$!pos', -3);
         pir::return__0PsiPPi(
-            $new, 
-            nqp::bindattr_s($new, $?CLASS, '$!target', $!target),
+            $new,
+            nqp::getattr_s($!shared, ParseShared, '$!target'),
             nqp::bindattr_i($new, $?CLASS, '$!from', $!pos),
             $?CLASS,
             nqp::bindattr($new, $?CLASS, '$!bstack', pir::new__Ps('ResizableIntegerArray')),
@@ -121,7 +120,6 @@ role NQPCursorRole is export {
     method !cursor_start_subcapture($from) {
         my $new := nqp::create(self);
         nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
-        nqp::bindattr_s($new, $?CLASS, '$!target', $!target);
         nqp::bindattr_i($new, $?CLASS, '$!from', $from);
         nqp::bindattr_i($new, $?CLASS, '$!pos', -3);
         $new;
@@ -181,7 +179,6 @@ role NQPCursorRole is export {
         return self."!cursor_next"() if %opts<ex>;
         my $new := self.CREATE();
         nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
-        nqp::bindattr_s($new, $?CLASS, '$!target', $!target);
         nqp::bindattr_i($new, $?CLASS, '$!from', -1);
         nqp::bindattr_i($new, $?CLASS, '$!pos',
             (%opts<ov> || $!from >= $!pos) ?? $!from+1 !! $!pos);
@@ -206,7 +203,7 @@ role NQPCursorRole is export {
     method !protoregex($name) {
         # Obtain and run NFA.
         my $nfa := self.HOW.cache(self, $name, { self.'!protoregex_nfa'($name) });
-        my @fates := $nfa.run($!target, $!pos);
+        my @fates := $nfa.run(nqp::getattr_s($!shared, ParseShared, '$!target'), $!pos);
         
         # Visit rules in fate order.
         my @rxfate := $nfa.states[0];
@@ -253,7 +250,7 @@ role NQPCursorRole is export {
 
     method !alt(int $pos, str $name, @labels = []) {
         my $nfa := self.HOW.cache(self, $name, { self.'!alt_nfa'($!regexsub, $name) });
-        $nfa.run_alt($!target, $pos, $!bstack, $!cstack, @labels);
+        $nfa.run_alt(nqp::getattr_s($!shared, ParseShared, '$!target'), $pos, $!bstack, $!cstack, @labels);
     }
 
     method !alt_nfa($regex, str $name) {
@@ -302,9 +299,10 @@ role NQPCursorRole is export {
         if $n >= 0 {
             my $subcur := $!cstack[$n];
             my int $litlen := $subcur.pos - $subcur.from;
+            my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
             $cur."!cursor_pass"($!pos + $litlen, '')
-              if nqp::substr($!target, $!pos, $litlen) 
-                   eq nqp::substr($!target, $subcur.from, $litlen);
+              if nqp::substr($target, $!pos, $litlen) 
+                   eq nqp::substr($target, $subcur.from, $litlen);
         }
         $cur;
     }
@@ -312,10 +310,11 @@ role NQPCursorRole is export {
     method !LITERAL(str $str, int $i = 0) {
         my $cur := self."!cursor_start"();
         my int $litlen := nqp::chars($str);
+        my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos + $litlen)
           if $litlen < 1 
-              ||  ($i ?? nqp::lc(nqp::substr($!target, $!pos, $litlen)) eq nqp::lc($str)
-                      !! nqp::substr($!target, $!pos, $litlen) eq $str);
+              ||  ($i ?? nqp::lc(nqp::substr($target, $!pos, $litlen)) eq nqp::lc($str)
+                      !! nqp::substr($target, $!pos, $litlen) eq $str);
         $cur;
     }
 
@@ -338,9 +337,12 @@ role NQPCursorRole is export {
     # compile.
     method after($regex) {
         my $cur := self."!cursor_start"();
-        nqp::bindattr_s($cur, $?CLASS, '$!target', $!target.reverse());
-        nqp::bindattr_i($cur, $?CLASS, '$!from', nqp::chars($!target) - $!pos);
-        nqp::bindattr_i($cur, $?CLASS, '$!pos', nqp::chars($!target) - $!pos);
+        my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
+        my $shared := pir::repr_clone__PP($!shared);
+        nqp::bindattr_s($shared, ParseShared, '$!target', $target.reverse());
+        nqp::bindattr($cur, $?CLASS, '$!shared', $shared);
+        nqp::bindattr_i($cur, $?CLASS, '$!from', nqp::chars($target) - $!pos);
+        nqp::bindattr_i($cur, $?CLASS, '$!pos', nqp::chars($target) - $!pos);
         nqp::getattr_i($regex($cur), $?CLASS, '$!pos') >= 0 ??
             $cur."!cursor_pass"($!pos, 'after') !!
             nqp::bindattr_i($cur, $?CLASS, '$!pos', -3);
@@ -349,131 +351,145 @@ role NQPCursorRole is export {
 
     method ws() {
         # skip over any whitespace, fail if between two word chars
+        my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         my $cur := self."!cursor_start"();
-        $!pos >= nqp::chars($!target)
+        $!pos >= nqp::chars($target)
           ?? $cur."!cursor_pass"($!pos, 'ws')
           !! ($!pos < 1
-              || !nqp::iscclass(pir::const::CCLASS_WORD, $!target, $!pos)
-              || !nqp::iscclass(pir::const::CCLASS_WORD, $!target, $!pos-1)
+              || !nqp::iscclass(pir::const::CCLASS_WORD, $target, $!pos)
+              || !nqp::iscclass(pir::const::CCLASS_WORD, $target, $!pos-1)
              ) && $cur."!cursor_pass"(
                       nqp::findnotcclass(
-                          pir::const::CCLASS_WHITESPACE, $!target, $!pos, nqp::chars($!target)),
+                          pir::const::CCLASS_WHITESPACE, $target, $!pos, nqp::chars($target)),
                       'ws');
         $cur;
     }
     
     method ww() {
         my $cur := self."!cursor_start"();
+        my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos, "ww")
             if $!pos > 0
-            && $!pos != nqp::chars($!target)
-            && nqp::iscclass(pir::const::CCLASS_WORD, $!target, $!pos)
-            && nqp::iscclass(pir::const::CCLASS_WORD, $!target, $!pos-1);
+            && $!pos != nqp::chars($target)
+            && nqp::iscclass(pir::const::CCLASS_WORD, $target, $!pos)
+            && nqp::iscclass(pir::const::CCLASS_WORD, $target, $!pos-1);
         $cur;
     }
 
     method wb() {
         my $cur := self."!cursor_start"();
+        my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos, "wb")
-            if ($!pos == 0 && nqp::iscclass(pir::const::CCLASS_WORD, $!target, $!pos))
-               || ($!pos == nqp::chars($!target)
-                   && nqp::iscclass(pir::const::CCLASS_WORD, $!target, $!pos-1))
-               || nqp::iscclass(pir::const::CCLASS_WORD, $!target, $!pos-1)
-                  != nqp::iscclass(pir::const::CCLASS_WORD, $!target, $!pos);
+            if ($!pos == 0 && nqp::iscclass(pir::const::CCLASS_WORD, $target, $!pos))
+               || ($!pos == nqp::chars($target)
+                   && nqp::iscclass(pir::const::CCLASS_WORD, $target, $!pos-1))
+               || nqp::iscclass(pir::const::CCLASS_WORD, $target, $!pos-1)
+                  != nqp::iscclass(pir::const::CCLASS_WORD, $target, $!pos);
         $cur;
     }
 
     method ident() {
         my $cur := self."!cursor_start"();
+        my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"(
                 nqp::findnotcclass(
                     pir::const::CCLASS_WORD,
-                    $!target, $!pos, nqp::chars($!target)))
-            if $!pos < nqp::chars($!target) &&
-                (nqp::ord($!target, $!pos) == 95
-                 || nqp::iscclass(pir::const::CCLASS_ALPHABETIC, $!target, $!pos));
+                    $target, $!pos, nqp::chars($target)))
+            if $!pos < nqp::chars($target) &&
+                (nqp::ord($target, $!pos) == 95
+                 || nqp::iscclass(pir::const::CCLASS_ALPHABETIC, $target, $!pos));
         $cur;
     }
 
     method alpha() {
         my $cur := self."!cursor_start"();
+        my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos+1, 'alpha')
-          if $!pos < nqp::chars($!target)
-             && (nqp::iscclass(pir::const::CCLASS_ALPHABETIC, $!target, $!pos)
-                 || nqp::ord($!target, $!pos) == 95);
+          if $!pos < nqp::chars($target)
+             && (nqp::iscclass(pir::const::CCLASS_ALPHABETIC, $target, $!pos)
+                 || nqp::ord($target, $!pos) == 95);
         $cur;
     }
 
     method alnum() {
         my $cur := self."!cursor_start"();
+        my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos+1, 'alnum')
-          if $!pos < nqp::chars($!target)
-             && (nqp::iscclass(pir::const::CCLASS_ALPHANUMERIC, $!target, $!pos)
-                 || nqp::ord($!target, $!pos) == 95);
+          if $!pos < nqp::chars($target)
+             && (nqp::iscclass(pir::const::CCLASS_ALPHANUMERIC, $target, $!pos)
+                 || nqp::ord($target, $!pos) == 95);
         $cur;
     }
 
     method upper() {
         my $cur := self."!cursor_start"();
+        my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos+1, 'upper')
-          if $!pos < nqp::chars($!target)
-             && nqp::iscclass(pir::const::CCLASS_UPPERCASE, $!target, $!pos);
+          if $!pos < nqp::chars($target)
+             && nqp::iscclass(pir::const::CCLASS_UPPERCASE, $target, $!pos);
         $cur;
     }
 
     method lower() {
         my $cur := self."!cursor_start"();
+        my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos+1, 'lower')
-          if $!pos < nqp::chars($!target)
-             && nqp::iscclass(pir::const::CCLASS_LOWERCASE, $!target, $!pos);
+          if $!pos < nqp::chars($target)
+             && nqp::iscclass(pir::const::CCLASS_LOWERCASE, $target, $!pos);
         $cur;
     }
 
     method digit() {
         my $cur := self."!cursor_start"();
+        my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos+1, 'digit')
-          if $!pos < nqp::chars($!target)
-             && nqp::iscclass(pir::const::CCLASS_NUMERIC, $!target, $!pos);
+          if $!pos < nqp::chars($target)
+             && nqp::iscclass(pir::const::CCLASS_NUMERIC, $target, $!pos);
         $cur;
     }
 
     method xdigit() {
         my $cur := self."!cursor_start"();
+        my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos+1, 'xdigit')
-          if $!pos < nqp::chars($!target)
-             && nqp::iscclass(pir::const::CCLASS_HEXADECIMAL, $!target, $!pos);
+          if $!pos < nqp::chars($target)
+             && nqp::iscclass(pir::const::CCLASS_HEXADECIMAL, $target, $!pos);
         $cur;
     }
 
     method space() {
         my $cur := self."!cursor_start"();
+        my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos+1, 'space')
-          if $!pos < nqp::chars($!target)
-             && nqp::iscclass(pir::const::CCLASS_WHITESPACE, $!target, $!pos);
+          if $!pos < nqp::chars($target)
+             && nqp::iscclass(pir::const::CCLASS_WHITESPACE, $target, $!pos);
         $cur;
     }
 
     method blank() {
         my $cur := self."!cursor_start"();
+        my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos+1, 'blank')
-          if $!pos < nqp::chars($!target)
-             && nqp::iscclass(pir::const::CCLASS_BLANK, $!target, $!pos);
+          if $!pos < nqp::chars($target)
+             && nqp::iscclass(pir::const::CCLASS_BLANK, $target, $!pos);
         $cur;
     }
 
     method cntrl() {
         my $cur := self."!cursor_start"();
+        my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos+1, 'cntrl')
-          if $!pos < nqp::chars($!target)
-             && nqp::iscclass(pir::const::CCLASS_CONTROL, $!target, $!pos);
+          if $!pos < nqp::chars($target)
+             && nqp::iscclass(pir::const::CCLASS_CONTROL, $target, $!pos);
         $cur;
     }
 
     method punct() {
         my $cur := self."!cursor_start"();
+        my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos+1, 'punct')
-          if $!pos < nqp::chars($!target)
-             && nqp::iscclass(pir::const::CCLASS_PUNCTUATION, $!target, $!pos);
+          if $!pos < nqp::chars($target)
+             && nqp::iscclass(pir::const::CCLASS_PUNCTUATION, $target, $!pos);
         $cur;
     }
 
