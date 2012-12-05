@@ -1,10 +1,10 @@
 # Some things that all cursors involved in a given parse share.
 my class ParseShared {
+    has $!orig;
 }
 
 role NQPCursorRole is export {
     has $!shared;
-    has $!orig;
     has str $!target;
     has int $!from;
     has int $!pos;
@@ -15,7 +15,7 @@ role NQPCursorRole is export {
     has $!regexsub;
     has $!restart;
 
-    method orig() { $!orig }
+    method orig() { nqp::getattr($!shared, ParseShared, '$!orig') }
     method target() { $!target }
     method from() { $!from }
     method pos() { $!pos }
@@ -72,9 +72,11 @@ role NQPCursorRole is export {
 
     method !cursor_init($orig, :$p = 0, :$c, :$target, :$shared) {
         my $new := self.CREATE();
-        $shared := nqp::create(ParseShared) unless $shared;
+        unless $shared {
+            $shared := nqp::create(ParseShared);
+            nqp::bindattr($shared, ParseShared, '$!orig', $orig);
+        }
         nqp::bindattr($new, $?CLASS, '$!shared', $shared);
-        nqp::bindattr($new, $?CLASS, '$!orig', $orig);
         nqp::bindattr_s($new, $?CLASS, '$!target', $target
             ?? $target
             !! pir::trans_encoding__Ssi($orig, pir::find_encoding__Is('ucs4')));
@@ -92,7 +94,7 @@ role NQPCursorRole is export {
     method !cursor_start() {
         my $new := nqp::create(self);
         my $sub := nqp::callercode();
-        nqp::bindattr($new, $?CLASS, '$!orig', $!orig);
+        nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
         nqp::bindattr($new, $?CLASS, '$!regexsub', nqp::ifnull(nqp::getcodeobj($sub), $sub));
         if nqp::defined($!restart) {
             nqp::bindattr_i($new, $?CLASS, '$!pos', $!pos);
@@ -118,7 +120,7 @@ role NQPCursorRole is export {
 
     method !cursor_start_subcapture($from) {
         my $new := nqp::create(self);
-        nqp::bindattr($new, $?CLASS, '$!orig', $!orig);
+        nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
         nqp::bindattr_s($new, $?CLASS, '$!target', $!target);
         nqp::bindattr_i($new, $?CLASS, '$!from', $from);
         nqp::bindattr_i($new, $?CLASS, '$!pos', -3);
@@ -178,7 +180,7 @@ role NQPCursorRole is export {
     method !cursor_more(*%opts) {
         return self."!cursor_next"() if %opts<ex>;
         my $new := self.CREATE();
-        nqp::bindattr($new, $?CLASS, '$!orig', $!orig);
+        nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
         nqp::bindattr_s($new, $?CLASS, '$!target', $!target);
         nqp::bindattr_i($new, $?CLASS, '$!from', -1);
         nqp::bindattr_i($new, $?CLASS, '$!pos',
@@ -534,7 +536,7 @@ class NQPCursor does NQPCursorRole {
             $match := nqp::create(NQPMatch);
             nqp::bindattr(self, NQPCursor, '$!match', $match);
             nqp::bindattr($match, NQPMatch, '$!cursor', self);
-            nqp::bindattr($match, NQPMatch, '$!orig', nqp::getattr(self, NQPCursor, '$!orig'));
+            nqp::bindattr($match, NQPMatch, '$!orig', self.orig());
             nqp::bindattr_i($match, NQPMatch, '$!from', nqp::getattr_i(self, NQPCursor, '$!from'));
             nqp::bindattr_i($match, NQPMatch, '$!to', nqp::getattr_i(self, NQPCursor, '$!pos'));
             my %ch := self.CAPHASH;
