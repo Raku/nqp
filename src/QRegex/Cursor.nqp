@@ -2,6 +2,7 @@
 my class ParseShared {
     has $!orig;
     has str $!target;
+    has int $!highwater;
 }
 
 role NQPCursorRole is export {
@@ -77,6 +78,7 @@ role NQPCursorRole is export {
             nqp::bindattr($shared, ParseShared, '$!orig', $orig);
             nqp::bindattr_s($shared, ParseShared, '$!target',
                 pir::trans_encoding__Ssi($orig, pir::find_encoding__Is('ucs4')));
+            nqp::bindattr_i($shared, ParseShared, '$!highwater', 0);
         }
         nqp::bindattr($new, $?CLASS, '$!shared', $shared);
         if nqp::defined($c) {
@@ -202,8 +204,15 @@ role NQPCursorRole is export {
     my @EMPTY := [];
     method !protoregex($name) {
         # Obtain and run NFA.
+        my $shared := $!shared;
         my $nfa := self.HOW.cache(self, $name, { self.'!protoregex_nfa'($name) });
-        my @fates := $nfa.run(nqp::getattr_s($!shared, ParseShared, '$!target'), $!pos);
+        my @fates := $nfa.run(nqp::getattr_s($shared, ParseShared, '$!target'), $!pos);
+        
+        # Update highwater mark.
+        my int $highwater := nqp::getattr_i($shared, ParseShared, '$!highwater');
+        if $!pos > $highwater {
+            nqp::bindattr_i($shared, ParseShared, '$!highwater', $!pos);
+        }
         
         # Visit rules in fate order.
         my @rxfate := $nfa.states[0];
@@ -249,8 +258,16 @@ role NQPCursorRole is export {
     }
 
     method !alt(int $pos, str $name, @labels = []) {
+        # Update highwater mark.
+        my $shared := $!shared;
+        my int $highwater := nqp::getattr_i($shared, ParseShared, '$!highwater');
+        if $pos > $highwater {
+            nqp::bindattr_i($shared, ParseShared, '$!highwater', $pos);
+        }
+        
+        # Evaluate the alternation.
         my $nfa := self.HOW.cache(self, $name, { self.'!alt_nfa'($!regexsub, $name) });
-        $nfa.run_alt(nqp::getattr_s($!shared, ParseShared, '$!target'), $pos, $!bstack, $!cstack, @labels);
+        $nfa.run_alt(nqp::getattr_s($shared, ParseShared, '$!target'), $pos, $!bstack, $!cstack, @labels);
     }
 
     method !alt_nfa($regex, str $name) {
@@ -290,6 +307,14 @@ role NQPCursorRole is export {
             }
         }
     }
+    
+    method !highwater() {
+        nqp::getattr_i($!shared, ParseShared, '$!highwater')
+    }
+    
+    method !clear_highwater() {
+        nqp::bindattr_i($!shared, ParseShared, '$!highwater', -1)
+    }
 
     method !BACKREF($name) {
         my $cur   := self."!cursor_start"();
@@ -325,17 +350,20 @@ role NQPCursorRole is export {
     }
 
     method before($regex) {
+        my int $orig_highwater := nqp::getattr_i($!shared, ParseShared, '$!highwater');
         my $cur := self."!cursor_start"();
         nqp::bindattr_i($cur, $?CLASS, '$!pos', $!pos);
         nqp::getattr_i($regex($cur), $?CLASS, '$!pos') >= 0 ??
             $cur."!cursor_pass"($!pos, 'before') !!
             nqp::bindattr_i($cur, $?CLASS, '$!pos', -3);
+        nqp::bindattr_i($!shared, ParseShared, '$!highwater', $orig_highwater);
         $cur;
     }
 
     # Expects to get a regex whose syntax tree was flipped during the
     # compile.
     method after($regex) {
+        my int $orig_highwater := nqp::getattr_i($!shared, ParseShared, '$!highwater');
         my $cur := self."!cursor_start"();
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         my $shared := pir::repr_clone__PP($!shared);
@@ -346,6 +374,7 @@ role NQPCursorRole is export {
         nqp::getattr_i($regex($cur), $?CLASS, '$!pos') >= 0 ??
             $cur."!cursor_pass"($!pos, 'after') !!
             nqp::bindattr_i($cur, $?CLASS, '$!pos', -3);
+        nqp::bindattr_i($!shared, ParseShared, '$!highwater', $orig_highwater);
         $cur;
     }
 
