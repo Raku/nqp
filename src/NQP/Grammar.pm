@@ -18,7 +18,7 @@ grammar NQP::Grammar is HLL::Grammar {
         # cross the compile-time/run-time boundary that are associated
         # with this compilation unit.
         my $file := pir::find_caller_lex__Ps('$?FILES');
-        my $source_id := nqp::sha1(nqp::getattr_s(self, NQPCursor, '$!target')) ~
+        my $source_id := nqp::sha1(self.target()) ~
             '-' ~ ~nqp::time_n();
         my $*W := nqp::isnull($file) ??
             NQP::World.new(:handle($source_id)) !!

@@ -316,7 +316,7 @@ of the match.
 
     method panic(*@args) {
         my $pos := self.pos();
-        my $target := nqp::getattr_s(self, NQPCursor, '$!target');
+        my $target := self.target();
         @args.push(' at line ');
         @args.push(HLL::Compiler.lineof($target, $pos) + 1);
         @args.push(', near "');
