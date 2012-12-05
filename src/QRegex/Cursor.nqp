@@ -1,4 +1,9 @@
+# Some things that all cursors involved in a given parse share.
+my class ParseShared {
+}
+
 role NQPCursorRole is export {
+    has $!shared;
     has $!orig;
     has str $!target;
     has int $!from;
@@ -65,8 +70,10 @@ role NQPCursorRole is export {
         $caps;
     }
 
-    method !cursor_init($orig, :$p = 0, :$c, :$target) {
+    method !cursor_init($orig, :$p = 0, :$c, :$target, :$shared) {
         my $new := self.CREATE();
+        $shared := nqp::create(ParseShared) unless $shared;
+        nqp::bindattr($new, $?CLASS, '$!shared', $shared);
         nqp::bindattr($new, $?CLASS, '$!orig', $orig);
         nqp::bindattr_s($new, $?CLASS, '$!target', $target
             ?? $target
@@ -190,6 +197,8 @@ role NQPCursorRole is export {
         nqp::findmethod($actions, $name)($actions, $match, $key)
             if !nqp::isnull($actions) && nqp::can($actions, $name);
     }
+    
+    method !shared() { $!shared }
 
     my @EMPTY := [];
     method !protoregex($name) {
