@@ -1241,8 +1241,9 @@ class QAST::Compiler is HLL::Compiler {
     }
     
     method dba($node) {
-        # Doesn't compile into another; really just for the NFA.
-        self.post_new('Ops', :result(%*REG<cur>))
+        my $ops := self.post_new('Ops', :result(%*REG<cur>));
+        $ops.push_pirop('callmethod', '"!dba"', %*REG<cur>, %*REG<pos>, self.escape($node.name));
+        $ops
     }
 
     my %cclass_code;

@@ -3,6 +3,7 @@ my class ParseShared {
     has $!orig;
     has str $!target;
     has int $!highwater;
+    has @!highexpect;
 }
 
 role NQPCursorRole is export {
@@ -79,6 +80,7 @@ role NQPCursorRole is export {
             nqp::bindattr_s($shared, ParseShared, '$!target',
                 pir::trans_encoding__Ssi($orig, pir::find_encoding__Is('ucs4')));
             nqp::bindattr_i($shared, ParseShared, '$!highwater', 0);
+            nqp::bindattr($shared, ParseShared, '@!highexpect', nqp::list());
         }
         nqp::bindattr($new, $?CLASS, '$!shared', $shared);
         if nqp::defined($c) {
@@ -308,11 +310,31 @@ role NQPCursorRole is export {
         }
     }
     
+    method !dba(int $pos, str $dba) {
+        my $shared := $!shared;
+        my int $highwater := nqp::getattr_i($shared, ParseShared, '$!highwater');
+        my $highexpect;
+        if $pos >= $highwater {
+            $highexpect := nqp::getattr($shared, ParseShared, '@!highexpect');
+            if $pos > $highwater {
+                pir::assign__0Pi($highexpect, 0);
+                nqp::bindattr_i($shared, ParseShared, '$!highwater', $pos);
+            }
+            nqp::push_s($highexpect, $dba);
+        }
+    }
+    
     method !highwater() {
         nqp::getattr_i($!shared, ParseShared, '$!highwater')
     }
     
+    method !highexpect() {
+        nqp::getattr($!shared, ParseShared, '@!highexpect')    
+    }
+    
     method !clear_highwater() {
+        my $highexpect := nqp::getattr($!shared, ParseShared, '@!highexpect');
+        pir::assign__0Pi($highexpect, 0);
         nqp::bindattr_i($!shared, ParseShared, '$!highwater', -1)
     }
 

@@ -74,6 +74,10 @@ class QRegex::NFA {
     method anchor($node, int $from, int $to) { 
         self.addedge($from, $to, $EDGE_EPSILON, 0);
     }
+    
+    method dba($node, int $from, int $to) { 
+        self.addedge($from, $to, $EDGE_EPSILON, 0);
+    }
 
     my %cclass_code;
     INIT {
