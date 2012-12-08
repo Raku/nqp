@@ -1239,6 +1239,11 @@ class QAST::Compiler is HLL::Compiler {
 
         $ops;
     }
+    
+    method dba($node) {
+        # Doesn't compile into another; really just for the NFA.
+        self.post_new('Ops', :result(%*REG<cur>))
+    }
 
     my %cclass_code;
     INIT {
