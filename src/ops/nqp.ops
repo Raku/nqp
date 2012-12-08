@@ -50,6 +50,7 @@ static INTVAL nqpdebflags_i = 0;
 #define EDGE_CHARLIST_NEG      7
 #define EDGE_CODEPOINT_I       9
 #define EDGE_CODEPOINT_I_NEG   10
+#define EDGE_DBA               12
 
 /* Objects we use every time we run an NFA; since we always run one NFA
  * at a time, we can re-use these. */
@@ -143,7 +144,7 @@ quicksort(INTVAL *arr, INTVAL elements) {
 
 /* Does a run of the NFA. Produces a list of integers indicating the
  * chosen ordering. */
-static INTVAL * nqp_nfa_run(PARROT_INTERP, PMC *states, STRING *target, INTVAL offset, INTVAL *total_fates_out) {
+static INTVAL * nqp_nfa_run(PARROT_INTERP, PMC *states, STRING *target, INTVAL offset, INTVAL *total_fates_out, PMC *high_expect) {
     INTVAL  eos     = Parrot_str_length(interp, target);
     INTVAL  gen     = 1;
     PMC    *curst   = nfa_curst;
@@ -217,6 +218,12 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, PMC *states, STRING *target, INTVAL o
                         fates[total_fates++] = arg;
                 }
                 else if (act == EDGE_EPSILON && to < num_states && done[to] != gen) {
+                    VTABLE_push_integer(interp, curst, to);
+                }
+                else if (act == EDGE_DBA) {
+                    if (!PMC_IS_NULL(high_expect))
+                        VTABLE_push_pmc(interp, high_expect,
+                            VTABLE_get_pmc_keyed_int(interp, edge_info, i + 1));
                     VTABLE_push_integer(interp, curst, to);
                 }
                 else if (offset >= eos) {
@@ -2257,14 +2264,14 @@ Pushes a label onto a list.
 
 =cut
 
-=item nqp_nfa_run_protoregex(fatepos, states, target, offset)
+=item nqp_nfa_run_protoregex(fatepos, states, target, offset, high_expect)
 
 Takes a set of states in $2, a target string in $3 and an offset in $4.
 Runs the NFA and puts the order to try the fates into $1.
 
 =cut
 
-=item nqp_nfa_run_alternation(states, target, offset, bstack, cstack)
+=item nqp_nfa_run_alternation(states, target, offset, bstack, cstack, high_expect)
 
 Takes a set of states in $1, a target string in $2 and an offset in $3.
 Updates the bstack in $4 with backtracking points to try the alternation
@@ -2331,7 +2338,7 @@ inline op nqp_push_label(invar PMC, in LABEL) :base_core {
 inline op nqp_nfa_run_protoregex(out PMC, invar PMC, in STR, in INT) :base_core {
     /* Run the NFA. */
     INTVAL  total_fates, i;
-    INTVAL *fates = nqp_nfa_run(interp, $2, $3, $4, &total_fates);
+    INTVAL *fates = nqp_nfa_run(interp, $2, $3, $4, &total_fates, PMCNULL);
     
     /* Copy results into an RIA. */
     PMC *fatepmc = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
@@ -2352,7 +2359,7 @@ inline op nqp_nfa_run_alternation(invar PMC, in STR, in INT, invar PMC, invar PM
     
     /* Run the NFA. */
     INTVAL  total_fates, i;
-    INTVAL *fates = nqp_nfa_run(interp, states, target, offset, &total_fates);
+    INTVAL *fates = nqp_nfa_run(interp, states, target, offset, &total_fates, PMCNULL);
     
     /* Push the results onto the bstack. */
     INTVAL  caps   = VTABLE_defined(interp, cstack) ? VTABLE_elements(interp, cstack) : 0;
@@ -2366,6 +2373,44 @@ inline op nqp_nfa_run_alternation(invar PMC, in STR, in INT, invar PMC, invar PM
     free(fates);
 }
 
+inline op nqp_nfa_run_protoregex(out PMC, invar PMC, in STR, in INT, invar PMC) :base_core {
+    /* Run the NFA. */
+    INTVAL  total_fates, i;
+    INTVAL *fates = nqp_nfa_run(interp, $2, $3, $4, &total_fates, $5);
+    
+    /* Copy results into an RIA. */
+    PMC *fatepmc = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
+    for (i = 0; i < total_fates; i++)
+        VTABLE_set_integer_keyed_int(interp, fatepmc, i, fates[i]);
+    free(fates);
+    
+    $1 = fatepmc;
+}
+
+inline op nqp_nfa_run_alternation(invar PMC, in STR, in INT, invar PMC, invar PMC, invar PMC, invar PMC) :base_core {
+    PMC    *states = $1;
+    STRING *target = $2;
+    INTVAL  offset = $3;
+    PMC    *bstack = $4;
+    PMC    *cstack = $5;
+    PMC    *labels = $6;
+    PMC    *highex = $7;
+    
+    /* Run the NFA. */
+    INTVAL  total_fates, i;
+    INTVAL *fates = nqp_nfa_run(interp, states, target, offset, &total_fates, highex);
+    
+    /* Push the results onto the bstack. */
+    INTVAL  caps   = VTABLE_defined(interp, cstack) ? VTABLE_elements(interp, cstack) : 0;
+    for (i = 0; i < total_fates; i++) {
+        VTABLE_push_integer(interp, bstack,
+            VTABLE_get_integer_keyed_int(interp, labels, fates[i]));
+        VTABLE_push_integer(interp, bstack, offset);
+        VTABLE_push_integer(interp, bstack, 0);
+        VTABLE_push_integer(interp, bstack, caps);
+    }
+    free(fates);
+}
 
 /*
 
