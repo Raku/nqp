@@ -2,7 +2,7 @@
 
 # check subs
 
-say('1..12');
+say('1..14');
 
 sub one ( ) {
     say("ok 1 # sub def and call");
@@ -75,3 +75,6 @@ say('ok ', Qstuff());
 
 sub term:sym<self>() { 12 }
 say('ok ', term:sym<self>());
+
+say( (!nqp::isinvokable(sub() {}) ?? 'ok 13' !! 'no 13' ) ~ '  nqp::isinvokable on sub');
+say( (!nqp::isinvokable(666) ?? 'ok 14' !! 'no 14' ) ~ '  nqp::isinvokable on non sub');

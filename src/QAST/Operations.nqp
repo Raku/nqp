@@ -1549,6 +1549,7 @@ QAST::Operations.add_core_pirop_mapping('unshift_n', 'unshift', '0Pn', :inlinabl
 QAST::Operations.add_core_pirop_mapping('splice', 'splice', '0PPii', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('islist', 'nqp_islist', 'IP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('ishash', 'nqp_ishash', 'IP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('isinvokable', 'is_invokable', 'IP', :inlinable(1));
 
 # repr-level aggregate operations
 QAST::Operations.add_core_pirop_mapping('r_atpos', 'repr_at_pos_obj', 'PPi', :inlinable(1));
