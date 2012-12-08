@@ -3,7 +3,6 @@ my class ParseShared {
     has $!orig;
     has str $!target;
     has int $!highwater;
-    has @!highexpect;
 }
 
 role NQPCursorRole is export {
@@ -80,7 +79,6 @@ role NQPCursorRole is export {
             nqp::bindattr_s($shared, ParseShared, '$!target',
                 pir::trans_encoding__Ssi($orig, pir::find_encoding__Is('ucs4')));
             nqp::bindattr_i($shared, ParseShared, '$!highwater', 0);
-            nqp::bindattr($shared, ParseShared, '@!highexpect', nqp::list());
         }
         nqp::bindattr($new, $?CLASS, '$!shared', $shared);
         if nqp::defined($c) {
@@ -205,21 +203,16 @@ role NQPCursorRole is export {
 
     my @EMPTY := [];
     method !protoregex($name) {
-        # Update highwater mark.
-        my $shared := $!shared;
-        my int $highwater := nqp::getattr_i($shared, ParseShared, '$!highwater');
-        my $highexpect := nqp::null();
-        if $!pos >= $highwater {
-            $highexpect := nqp::getattr($shared, ParseShared, '@!highexpect');
-            if $!pos > $highwater {
-                pir::assign__0Pi($highexpect, 0);
-                nqp::bindattr_i($shared, ParseShared, '$!highwater', $!pos);
-            }
-        }
-
         # Obtain and run NFA.
+        my $shared := $!shared;
         my $nfa := self.HOW.cache(self, $name, { self.'!protoregex_nfa'($name) });
-        my @fates := $nfa.run(nqp::getattr_s($shared, ParseShared, '$!target'), $!pos, $highexpect);
+        my @fates := $nfa.run(nqp::getattr_s($shared, ParseShared, '$!target'), $!pos);
+        
+        # Update highwater mark.
+        my int $highwater := nqp::getattr_i($shared, ParseShared, '$!highwater');
+        if $!pos > $highwater {
+            nqp::bindattr_i($shared, ParseShared, '$!highwater', $!pos);
+        }
         
         # Visit rules in fate order.
         my @rxfate := $nfa.states[0];
@@ -268,18 +261,13 @@ role NQPCursorRole is export {
         # Update highwater mark.
         my $shared := $!shared;
         my int $highwater := nqp::getattr_i($shared, ParseShared, '$!highwater');
-        my $highexpect := nqp::null();
-        if $pos >= $highwater {
-            $highexpect := nqp::getattr($shared, ParseShared, '@!highexpect');
-            if $pos > $highwater {
-                pir::assign__0Pi($highexpect, 0);
-                nqp::bindattr_i($shared, ParseShared, '$!highwater', $pos);
-            }
+        if $pos > $highwater {
+            nqp::bindattr_i($shared, ParseShared, '$!highwater', $pos);
         }
         
         # Evaluate the alternation.
         my $nfa := self.HOW.cache(self, $name, { self.'!alt_nfa'($!regexsub, $name) });
-        $nfa.run_alt(nqp::getattr_s($shared, ParseShared, '$!target'), $pos, $!bstack, $!cstack, @labels, $highexpect);
+        $nfa.run_alt(nqp::getattr_s($shared, ParseShared, '$!target'), $pos, $!bstack, $!cstack, @labels);
     }
 
     method !alt_nfa($regex, str $name) {
@@ -324,13 +312,7 @@ role NQPCursorRole is export {
         nqp::getattr_i($!shared, ParseShared, '$!highwater')
     }
     
-    method !highexpect() {
-        nqp::getattr($!shared, ParseShared, '@!highexpect')
-    }
-    
     method !clear_highwater() {
-        my $highexpect := nqp::getattr($!shared, ParseShared, '@!highexpect');
-        pir::assign__0Pi($highexpect, 0);
         nqp::bindattr_i($!shared, ParseShared, '$!highwater', -1)
     }
 

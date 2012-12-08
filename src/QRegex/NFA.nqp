@@ -13,7 +13,6 @@ class QRegex::NFA {
     our $EDGE_CODEPOINT_I     := 9;
     our $EDGE_CODEPOINT_I_NEG := 10;
     our $EDGE_GENERIC_VAR     := 11;
-    our $EDGE_DBA             := 12;
 
     has $!states;
     has $!edges;
@@ -74,10 +73,6 @@ class QRegex::NFA {
 
     method anchor($node, int $from, int $to) { 
         self.addedge($from, $to, $EDGE_EPSILON, 0);
-    }
-    
-    method dba($node, int $from, int $to) { 
-        self.addedge($from, $to, $EDGE_DBA, $node.name);
     }
 
     my %cclass_code;
@@ -349,7 +344,7 @@ class QRegex::NFA {
         }
     }
 
-    method run(str $target, int $offset, $highexpect) {
+    method run(str $target, int $offset) {
         # This does what the NQP below says, but these days an op is used since
         # it's hugely faster.
         #my $eos := nqp::chars($target);
@@ -396,11 +391,11 @@ class QRegex::NFA {
         #    $gen := $gen + 1;
         #}
         #@fates;
-        pir::nqp_nfa_run_protoregex__PPSIP($!states, $target, $offset, $highexpect)
+        pir::nqp_nfa_run_protoregex__PPSI($!states, $target, $offset)
     }
     
-    method run_alt(str $target, int $offset, $bstack, $cstack, @labels, $highexpect) {
-        pir::nqp_nfa_run_alternation__vPSIPPPP($!states, $target, $offset, $bstack, $cstack, @labels, $highexpect)
+    method run_alt(str $target, int $offset, $bstack, $cstack, @labels) {
+        pir::nqp_nfa_run_alternation__vPSIPPP($!states, $target, $offset, $bstack, $cstack, @labels)
     }
     
     method generic() {
