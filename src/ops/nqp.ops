@@ -533,8 +533,7 @@ inline op repr_defined(out INT, invar PMC) :base_core {
     if (var->vtable->base_type == smo_id)
         $1 = IS_CONCRETE(var);
     else
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Can only use repr_defined on a SixModelObject");
+        $1 = 1; /* Because other PMCs have no concept of type-object. */
 }
 
 /*
