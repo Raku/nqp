@@ -329,7 +329,17 @@ role NQPCursorRole is export {
     }
     
     method !highexpect() {
-        nqp::getattr($!shared, ParseShared, '@!highexpect')    
+        nqp::getattr($!shared, ParseShared, '@!highexpect')
+    }
+    
+    method !fresh_highexpect() {
+        my @old := nqp::getattr($!shared, ParseShared, '@!highexpect');
+        nqp::bindattr($!shared, ParseShared, '@!highexpect', []);
+        @old
+    }
+    
+    method !set_highexpect(@highexpect) {
+        nqp::bindattr($!shared, ParseShared, '@!highexpect', @highexpect)
     }
     
     method !clear_highwater() {
