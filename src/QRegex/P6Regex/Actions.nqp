@@ -259,6 +259,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             :rxtype<concat>
         );
     }
+    
+    method metachar:sym<mod>($/) { make $<mod_internal>.ast; }
 
     method backslash:sym<s>($/) {
         make QAST::Regex.new(:rxtype<cclass>, '.CCLASS_WHITESPACE', 
@@ -524,7 +526,12 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     method mod_internal($/) {
         if $<quote_EXPR> {
             if $<quote_EXPR>[0].ast ~~ QAST::SVal {
-                %*RX{ ~$<mod_ident><sym> } := $<quote_EXPR>[0].ast.value;
+                my $key := ~$<mod_ident><sym>;
+                my $val := $<quote_EXPR>[0].ast.value;
+                %*RX{$key} := $val;
+                make $key eq 'dba'
+                    ?? QAST::Regex.new( :rxtype('dba'), :name($val) )
+                    !! 0;
             }
             else {
                 $/.CURSOR.panic("Internal modifier strings must be literals");
@@ -533,8 +540,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         else {
             my $n := $<n>[0] gt '' ?? +$<n>[0] !! 1;
             %*RX{ ~$<mod_ident><sym> } := $n;
+            make 0;
         }
-        make 0;
     }
 
     sub backmod($ast, $backmod) {

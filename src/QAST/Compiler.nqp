@@ -1239,6 +1239,12 @@ class QAST::Compiler is HLL::Compiler {
 
         $ops;
     }
+    
+    method dba($node) {
+        my $ops := self.post_new('Ops', :result(%*REG<cur>));
+        $ops.push_pirop('callmethod', '"!dba"', %*REG<cur>, %*REG<pos>, self.escape($node.name));
+        $ops
+    }
 
     my %cclass_code;
     INIT {

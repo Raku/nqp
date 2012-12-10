@@ -74,6 +74,10 @@ class QRegex::NFA {
     method anchor($node, int $from, int $to) { 
         self.addedge($from, $to, $EDGE_EPSILON, 0);
     }
+    
+    method dba($node, int $from, int $to) { 
+        self.addedge($from, $to, $EDGE_EPSILON, 0);
+    }
 
     my %cclass_code;
     INIT {
@@ -272,34 +276,6 @@ class QRegex::NFA {
             self.addedge(1, 0, $EDGE_FATE, 0, :newedge(1)) 
         }
         $!states
-    }
-
-    method qast(:$non_empty) {
-        unless $!edges {
-            return 0 unless $non_empty;
-            self.addedge(1, 0, $EDGE_FATE, 0, :newedge(1)) 
-        }
-        my $past := QAST::Op.new(:op<list>);
-        for $!states -> @values {
-            my $list := QAST::Op.new(:op<list>);
-            for @values {
-                if nqp::islist($_) {
-                    my $arglist := QAST::Op.new( :op('list_i') );
-                    for $_ -> $i {
-                        $arglist.push(QAST::IVal.new( :value($i) ));
-                    }
-                    $list.push($arglist);
-                }
-                elsif +$_ eq $_ {
-                    $list.push(QAST::IVal.new( :value($_) ));
-                }
-                else {
-                    $list.push(QAST::SVal.new( :value($_) ));
-                }
-            }
-            $past.push($list);
-        }
-        $past;
     }
 
     method mergesubrule(int $start, int $to, $fate, $cursor, str $name, %caller_seen?) {
