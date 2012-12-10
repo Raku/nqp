@@ -803,7 +803,7 @@ QAST::Operations.add_core_op('xor', :inlinable(1), -> $qastcomp, $op {
         $ops.push_pirop('set', $ops, $fpost);
     }
     else {
-        $ops.'push_pirop'('new', $ops, '["Undef"]');
+        $ops.push_pirop('new', $ops, '["Undef"]');
     }
     
     $ops.push($endlabel);
@@ -950,7 +950,7 @@ QAST::Operations.add_core_op('lexotic', -> $qastcomp, $op {
     my $handler := $*BLOCK.fresh_lex_p();
     $ops.push_pirop('root_new', $handler, "['parrot';'Continuation']");
     $ops.push_pirop('set_label', $handler, $label1);
-    $ops.'push_pirop'('.lex', $lexname, $handler);
+    $ops.push_pirop('.lex', $lexname, $handler);
     
     my $cpost := $qastcomp.coerce($qastcomp.compile_all_the_stmts($op.list()), 'P');
     $ops.push($cpost);
