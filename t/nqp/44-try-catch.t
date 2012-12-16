@@ -2,7 +2,7 @@
 
 # Tests for try and catch
 
-plan(7);
+plan(8);
 
 sub oops($msg = "oops!") { # throw an exception
     nqp::die($msg);
@@ -24,6 +24,7 @@ sub foo() {
 
 ok(foo(), "control exceptions are not caught by a try block");
 
+ok((try 1532) == 1532,"statement prefix form works when not throwing an exception");
 ok(nqp::istype((try oops()), NQPMu), "statement prefix form of try works");
 
 {
