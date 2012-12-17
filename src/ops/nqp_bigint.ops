@@ -54,26 +54,38 @@ static void from_num(FLOATVAL d, mp_int *a) {
     FLOATVAL da      = fabs(d);
     FLOATVAL upper;
     FLOATVAL lower;
+    FLOATVAL lowest;
+    FLOATVAL rest;
     int      digits  = 0;
 
     mp_zero(a);
 
-    while (da > d_digit * d_digit) {;
+    while (da > d_digit * d_digit * d_digit) {;
         da /= d_digit;
         digits++;
     }
-    mp_grow(a, digits + 2);
+    mp_grow(a, digits + 3);
 
-    /* populate the top 2 digits */
-    upper = da / d_digit;
-    lower = fmod(da, d_digit);
+    /* populate the top 3 digits */
+    upper = da / (d_digit*d_digit);
+    rest = fmod(da, d_digit*d_digit);
+    lower = rest / d_digit;
+    lowest = fmod(rest,d_digit );
     if (upper >= 1) {
         mp_set_long(a, (unsigned long) upper);
         mp_mul_2d(a, DIGIT_BIT , a);
+        DIGIT(a, 0) = (mp_digit) lower;
+        mp_mul_2d(a, DIGIT_BIT , a);
     } else {
-        a->used = 1;
+        if (lower >= 1) {
+            mp_set_long(a, (unsigned long) lower);
+            mp_mul_2d(a, DIGIT_BIT , a);
+            a->used = 2;
+        } else {
+            a->used = 1;
+        }
     }
-    DIGIT(a, 0) = (mp_digit) lower;
+    DIGIT(a, 0) = (mp_digit) lowest;
 
     /* shift the rest */
     mp_mul_2d(a, DIGIT_BIT * digits, a);
