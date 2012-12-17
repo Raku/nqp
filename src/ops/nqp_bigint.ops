@@ -38,6 +38,12 @@ static FLOATVAL mp_get_double(mp_int *a) {
     d *= pow(2.0, DIGIT_BIT);
     d += (FLOATVAL) DIGIT(a, i);
 
+    if (USED(a) > 2) {
+        i--;
+        d *= pow(2.0, DIGIT_BIT);
+        d += (FLOATVAL) DIGIT(a, i);
+    }
+
     d *= pow(2.0, DIGIT_BIT * i);
     return sign * d;
 }
