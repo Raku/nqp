@@ -32,7 +32,7 @@ class NQP::World is HLL::World {
 
         if nqp::defined(%*COMPILING<%?OPTIONS><dynext>) {
             my $dynext_path  := %*COMPILING<%?OPTIONS><dynext>;
-            my @dynext_paths := pir::getinterp__P()[pir::const::IGLOBALS_LIB_PATHS][2];
+            my @dynext_paths := pir::getinterp__P()[pir::const::IGLOBALS_LIB_PATHS][pir::const::PARROT_LIB_PATH_DYNEXT];
 
             @dynext_paths.push($dynext_path);
         }
