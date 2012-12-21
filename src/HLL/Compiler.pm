@@ -451,6 +451,7 @@ class HLL::Compiler {
         ~ ".include 'sysinfo.pasm'\n"
         ~ ".include 'stat.pasm'\n"
         ~ ".include 'datatypes.pasm'\n"
+        ~ ".include 'libpaths.pasm'\n"
     }
   
     method pir($source, *%adverbs) {
