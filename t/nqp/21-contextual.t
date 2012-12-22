@@ -2,7 +2,7 @@
 
 # Tests for contextual variables
 
-plan(6);
+plan(7);
 
 sub foo() { $*VAR }
 
@@ -23,6 +23,8 @@ sub foo() { $*VAR }
         ok( foo() eq 'def', 'called subroutine sees caller $*VAR');
         ok( bar() eq 'def', 'called subroutine sees caller not outer');
     }
+
+    ok($*VAR eq 'abc', 'nested contextuals don\'t affect outer ones');
 }
 
 
