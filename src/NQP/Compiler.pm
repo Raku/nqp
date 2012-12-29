@@ -17,6 +17,7 @@ my @clo := $nqpcomp.commandline_options();
 @clo.push('vmlibs=s');
 @clo.push('no-regex-lib');
 @clo.push('old-regex-lib');
+@clo.push('dynext=s');
 
 sub MAIN(@ARGS) {
     # Enter the compiler.
