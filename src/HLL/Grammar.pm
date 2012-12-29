@@ -638,6 +638,13 @@ An operator precedence parser.
             unless opprec == inprec goto reduce_done
             # equal precedence, use associativity to decide
             inassoc = inO['assoc']
+            unless inassoc == 'non' goto assoc_ok
+            $P0 = opstack[-1]
+            $P0 = $P0['OPER']
+            $P0 = $P0['sym']
+            $P1 = infix.'Str'()
+            self.'EXPR_nonassoc'(infixcur, $P0, $P1)
+          assoc_ok:
             unless inassoc == 'left' goto reduce_done
             # left associative, reduce immediately
             self.'EXPR_reduce'(termstack, opstack)
@@ -765,6 +772,10 @@ An operator precedence parser.
           done:
             push termstack, op
         };
+    }
+    
+    method EXPR_nonassoc($cur, $op1, $op2) {
+        $cur.panic('"' ~ $op1 ~ '" and "' ~ $op2 ~ '" are non-associative and require parens');
     }
 
     method ternary($match) {
