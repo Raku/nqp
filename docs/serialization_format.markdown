@@ -224,7 +224,7 @@ reference to do so. The reason being that
     7 = VM Array of Variant References
     8 = VM Array of Strings
     9 = VM Array of Integers
-    10 = VM Array of Variant References with String Keys
+    10 = VM Hash of Variant References with String Keys
     11 = VM Static Code Reference
 
 ### Object references
