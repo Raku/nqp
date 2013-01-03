@@ -174,7 +174,7 @@ static void register_repr(PARROT_INTERP, STRING *name, REPROps *repr) {
 /* Dynamically registers a representation (that is, one defined outside of
  * the 6model core). */
 static INTVAL REPR_register_dynamic(PARROT_INTERP, STRING *name, REPROps * (*reg) (PARROT_INTERP, void *, void *)) {
-    REPROps *repr = reg(interp, wrap_object, create_stable);
+    REPROps *repr = reg(interp, (void*)wrap_object, (void*)create_stable);
     register_repr(interp, name, repr);
     return repr->ID;
 }
@@ -206,7 +206,7 @@ void REPR_initialize_registry(PARROT_INTERP) {
 
     /* Set up object for dynamically registering extra representations. */
     dyn_reg_func = Parrot_pmc_new(interp, enum_class_Pointer);
-    VTABLE_set_pointer(interp, dyn_reg_func, REPR_register_dynamic);
+    VTABLE_set_pointer(interp, dyn_reg_func, (void*)REPR_register_dynamic);
     VTABLE_set_pmc_keyed_str(interp, interp->root_namespace,
         Parrot_str_new_constant(interp, "_REGISTER_REPR"), dyn_reg_func);
 }

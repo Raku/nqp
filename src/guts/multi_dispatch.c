@@ -282,7 +282,7 @@ static NQP_md_cache *get_dispatch_cache(PARROT_INTERP, PMC *dispatcher) {
     if (dispatcher->vtable->base_type == enum_class_Sub && PARROT_SUB(dispatcher)->multi_signature->vtable->base_type == smo_id) {
         NQP_Routine *r = (NQP_Routine *)PMC_data(PARROT_SUB(dispatcher)->multi_signature);
         if (PMC_IS_NULL(r->dispatch_cache)) {
-            NQP_md_cache *c = mem_sys_allocate_zeroed(sizeof(NQP_md_cache));
+	  NQP_md_cache *c = (NQP_md_cache *)mem_sys_allocate_zeroed(sizeof(NQP_md_cache));
             cache_ptr = Parrot_pmc_new(interp, enum_class_Pointer);
             VTABLE_set_pointer(interp, cache_ptr, c);
             r->dispatch_cache = cache_ptr;
@@ -401,8 +401,8 @@ add_to_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num_args, 
 
     /* If there's no entries yet, need to do some allocation. */
     if (entries == 0) {
-        cache->arity_caches[num_args - 1].type_ids = mem_sys_allocate(num_args * sizeof(INTVAL) * MD_CACHE_MAX_ENTRIES);
-        cache->arity_caches[num_args - 1].results  = mem_sys_allocate(sizeof(PMC *) * MD_CACHE_MAX_ENTRIES);
+      cache->arity_caches[num_args - 1].type_ids = (INTVAL *)mem_sys_allocate(num_args * sizeof(INTVAL) * MD_CACHE_MAX_ENTRIES);
+        cache->arity_caches[num_args - 1].results  = (PMC **)mem_sys_allocate(sizeof(PMC *) * MD_CACHE_MAX_ENTRIES);
     }
 
     /* Add entry. */
