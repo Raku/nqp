@@ -145,10 +145,12 @@ END_OPS_PREAMBLE
 
 inline op nqp_bigint_setup() :base_core {
     /* Register the bigint representation. */
-    if (!bigint_repr_id)
+    if (!bigint_repr_id) {
         bigint_repr_id = REGISTER_DYNAMIC_REPR(interp,
             Parrot_str_new_constant(interp, "P6bigint"),
             P6bigint_initialize);
+        srand(time(NULL));
+    }
 }
 
 inline op nqp_bigint_add(out PMC, invar PMC, invar PMC, invar PMC) :base_core {
