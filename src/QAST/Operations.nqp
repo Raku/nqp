@@ -1597,6 +1597,10 @@ QAST::Operations.add_core_pirop_mapping('reprname', 'repr_name', 'SP', :inlinabl
 QAST::Operations.add_core_pirop_mapping('newtype', 'repr_type_object_for', 'PPs', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('setwho', 'set_who', '0PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('rebless', 'repr_change_type', '0PP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('setboolspec', 'set_boolification_spec', '0PiP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('setmethcache', 'publish_method_cache', '0PP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('setmethcacheauth', 'set_method_cache_authoritativeness', '0Pi', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('settypecache', 'publish_type_check_cache', '0PP', :inlinable(1));
 
 # lexical related opcodes
 QAST::Operations.add_core_pirop_mapping('getlex', 'find_lex', 'Ps');
