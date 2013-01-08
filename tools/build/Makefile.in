@@ -1,7 +1,7 @@
-# Copyright (C) 2006-2012, The Perl Foundation.
+# Copyright (C) 2006-2013, The Perl Foundation.
 # $Id$
 
-PARROT_ARGS      =
+PARROT_ARGS      = -L. -X.
 
 # values from parrot_config
 PARROT_BIN_DIR     = @bindir@
@@ -34,7 +34,7 @@ TOM           = 3rdparty/libtommath/bn
 DYNCALLINC    =
 
 # locations of parrot resources
-PARROT            = $(PARROT_BIN_DIR)/parrot$(EXE)
+PARROT            = $(PARROT_BIN_DIR)/parrot$(EXE) $(PARROT_ARGS)
 PARROT_DLL        = @dll@
 PARROT_DLL_COPY   = @dllcopy@
 PARROT_NQP        = $(PARROT_BIN_DIR)/parrot_nqp$(EXE)
