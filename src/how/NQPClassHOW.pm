@@ -103,7 +103,7 @@ knowhow NQPClassHOW {
         if nqp::isnull($code_obj) || !nqp::defined($code_obj) {
             nqp::die("Cannot add a null method '$name' to class '$!name'");
         }
-        pir::set_method_cache_authoritativeness__vPi($obj, 0);
+        nqp::setmethcacheauth($obj, 0);
         %!caches{nqp::where(self)} := {} unless nqp::isnull(%!caches);
         @!method_order[+@!method_order] := %!methods{$name} := $code_obj;
     }
@@ -118,7 +118,7 @@ knowhow NQPClassHOW {
         %todo<name> := $name;
         %todo<code> := $code_obj;
         @!multi_methods_to_incorporate[+@!multi_methods_to_incorporate] := %todo;
-        pir::set_method_cache_authoritativeness__vPi($obj, 0);
+        nqp::setmethcacheauth($obj, 0);
         $code_obj;
     }
 
@@ -399,7 +399,7 @@ knowhow NQPClassHOW {
         my @tc;
         for @!mro { @tc.push($_); }
         for @!done { @tc.push($_); }
-        pir::publish_type_check_cache__0PP($obj, @tc)
+        nqp::settypecache($obj, @tc)
     }
 
     method publish_method_cache($obj) {
@@ -413,17 +413,17 @@ knowhow NQPClassHOW {
                 %cache{$_.key} := $_.value;
             }
         }
-        pir::publish_method_cache__0PP($obj, %cache);
-        pir::set_method_cache_authoritativeness__0Pi($obj, 1);
+        nqp::setmethcache($obj, %cache);
+        nqp::setmethcacheauth($obj, 1);
     }
 
     method publish_boolification_spec($obj) {
         my $bool_meth := self.find_method($obj, 'Bool');
         if nqp::defined($bool_meth) {
-            pir::set_boolification_spec__0PiP($obj, 0, $bool_meth)
+            nqp::setboolspec($obj, 0, $bool_meth)
         }
         else {
-            pir::set_boolification_spec__0PiP($obj, 5, nqp::null())
+            nqp::setboolspec($obj, 5, nqp::null())
         }
     }
 
@@ -715,7 +715,7 @@ knowhow NQPClassHOW {
         # If the original object was concrete, change its type by calling a
         # low level op. Otherwise, we just return the new type object
         nqp::isconcrete($obj) ??
-            pir::repr_change_type__0PP($obj, $new_type) !!
+            nqp::rebless($obj, $new_type) !!
             $new_type
     }
     
@@ -725,8 +725,8 @@ knowhow NQPClassHOW {
     method trace-on($obj, $depth?) {
         $!trace := 1;
         $!trace_depth := $depth // 0;
-        pir::set_method_cache_authoritativeness__0Pi($obj, 0);
-        pir::publish_method_cache__0PP($obj, nqp::hash());
+        nqp::setmethcacheauth($obj, 0);
+        nqp::setmethcache($obj, nqp::hash());
     }
     method trace-off($obj) {
         $!trace := 0;

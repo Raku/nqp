@@ -40,8 +40,8 @@ knowhow NQPModuleHOW {
     }
 
     method compose($obj) {
-        pir::publish_method_cache__0PP($obj, my %empty);
-        pir::set_method_cache_authoritativeness__0Pi($obj, 1);
+        nqp::setmethcache($obj, my %empty);
+        nqp::setmethcacheauth($obj, 1);
         $!composed := 1;
     }
     

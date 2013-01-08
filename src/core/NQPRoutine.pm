@@ -53,7 +53,7 @@ pir::stable_publish_vtable_handler_mapping__vPP(NQPRoutine,
     nqp::hash(
         'invoke', nqp::list(NQPRoutine, '$!do'),
         'get_string', nqp::list(NQPRoutine, '$!do')));
-pir::set_boolification_spec__0PiP(NQPRoutine, 5, nqp::null());
+nqp::setboolspec(NQPRoutine, 5, nqp::null());
 
 my knowhow NQPSignature {
     has $!types;
@@ -140,4 +140,4 @@ pir::stable_publish_vtable_handler_mapping__vPP(NQPRegex,
     nqp::hash(
         'invoke', nqp::list(NQPRegex, '$!do'),
         'get_string', nqp::list(NQPRegex, '$!do')));
-pir::set_boolification_spec__0PiP(NQPRegex, 5, nqp::null());
+nqp::setboolspec(NQPRegex, 5, nqp::null());
