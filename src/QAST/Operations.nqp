@@ -1569,6 +1569,7 @@ QAST::Operations.add_core_pirop_mapping('getattr', 'getattribute', 'PPPs', :inli
 QAST::Operations.add_core_pirop_mapping('getattr_i', 'repr_get_attr_int', 'IPPs', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('getattr_n', 'repr_get_attr_num', 'NPPs', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('getattr_s', 'repr_get_attr_str', 'SPPs', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('attrinited', 'repr_is_attr_initialized', 'IPPs', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('create', 'repr_instance_of', 'PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('clone', 'clone', 'PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('isconcrete', 'repr_defined', 'IP', :inlinable(1));
