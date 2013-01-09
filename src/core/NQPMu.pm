@@ -16,19 +16,20 @@ my class NQPMu {
         my $i          := 0;
         while $i < $count {
             my $task := nqp::atpos($build_plan, $i);
+            my int $code := nqp::atpos($task, 0);
             $i := $i + 1;
-            if nqp::iseq_i(nqp::atpos($task, 0), 0) {
+            if nqp::iseq_i($code, 0) {
                 # Custom BUILD call.
                 nqp::atpos($task, 1)(self, |%attrinit);
             }
-            elsif nqp::iseq_i(nqp::atpos($task, 0), 1) {
+            elsif nqp::iseq_i($code, 1) {
                 # See if we have a value to initialize this attr with.
                 my $key_name := nqp::atpos($task, 2);
                 if nqp::existskey(%attrinit, $key_name) {
                     nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos_s($task, 3), %attrinit{$key_name});
                 }
             }
-            elsif nqp::iseq_i(nqp::atpos($task, 0), 2) {
+            elsif nqp::iseq_i($code, 2) {
                 # See if we have a value to initialize this attr with;
                 # if not, set it to an empty array.
                 my $key_name := nqp::atpos($task, 2);
@@ -39,7 +40,7 @@ my class NQPMu {
                     nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos_s($task, 3), nqp::list());
                 }
             }
-            elsif nqp::iseq_i(nqp::atpos($task, 0), 3) {
+            elsif nqp::iseq_i($code, 3) {
                 # See if we have a value to initialize this attr with;
                 # if not, set it to an empty array.
                 my $key_name := nqp::atpos($task, 2);
@@ -50,13 +51,13 @@ my class NQPMu {
                     nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos_s($task, 3), nqp::hash());
                 }
             }
-            # Uncomment if we get attribute initialization closures in NQP.
-            #elsif nqp::iseq_i(nqp::atpos($task, 0), 4) {
-            #    unless nqp::attrinited(self, nqp::atpos($task, 1), nqp::atpos($task, 2)) {
-            #        nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos($task, 2),
-            #            nqp::atpos($task, 3)(self, $attr));
-            #    }
-            #}
+            elsif nqp::iseq_i($code, 4) {
+                unless nqp::attrinited(self, nqp::atpos($task, 1), nqp::atpos($task, 2)) {
+                    nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos($task, 2),
+                        nqp::atpos($task, 3)(self,
+                            nqp::getattr(self, nqp::atpos($task, 1), nqp::atpos($task, 2))));
+                }
+            }
             else {
                 nqp::die("Invalid BUILDALLPLAN");
             }
