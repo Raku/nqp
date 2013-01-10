@@ -128,13 +128,16 @@ class HLL::Compiler {
                 };
                 if nqp::defined($*MAIN_CTX) {
                     my $cur_ctx := $*MAIN_CTX;
+                    my %seen;
                     until nqp::isnull($cur_ctx) {
                         my $pad := nqp::ctxlexpad($cur_ctx);
                         unless nqp::isnull($pad) {
                             for $pad {
                                 my str $key := ~$_;
-                                %interactive_pad{$key} := nqp::atkey($pad, $key)
-                                    unless nqp::existskey(%interactive_pad, $key);
+                                unless nqp::existskey(%seen, $key) {
+                                    %interactive_pad{$key} := nqp::atkey($pad, $key);
+                                    %seen{$key} := 1;
+                                }
                             }
                         }
                         $cur_ctx := nqp::ctxouter($cur_ctx);
