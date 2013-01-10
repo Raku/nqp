@@ -21,7 +21,6 @@ Makefile
 *.bundle
 *~
 *.pbc
-/MANIFEST.generated
 src/ops/*.h
 src/ops/*.c
 src/pmc/pmc_*.h
