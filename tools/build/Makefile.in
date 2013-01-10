@@ -197,7 +197,12 @@ DYNOPS          = $(OPS_DIR)/$(OPS)$(LOAD_EXT)
 PMC_SOURCES     = $(PMC_DIR)/stable.pmc $(PMC_DIR)/sixmodelobject.pmc \
                   $(PMC_DIR)/nqplexinfo.pmc $(PMC_DIR)/nqplexpad.pmc \
                   $(PMC_DIR)/serializationcontext.pmc $(PMC_DIR)/ownedhash.pmc \
-                  $(PMC_DIR)/ownedresizablepmcarray.pmc $(PMC_DIR)/qrpa.pmc \
+                  $(PMC_DIR)/ownedresizablepmcarray.pmc $(PMC_DIR)/qrpa.pmc
+
+DYNPMC_HEADERS  = $(PMC_DIR)/pmc_stable.h $(PMC_DIR)/pmc_sixmodelobject.h \
+                  $(PMC_DIR)/pmc_nqplexinfo.h $(PMC_DIR)/pmc_nqplexpad.h \
+                  $(PMC_DIR)/pmc_serializationcontext.h $(PMC_DIR)/pmc_ownedhash.h \
+                  $(PMC_DIR)/pmc_ownedresizablepmcarray.h $(PMC_DIR)/pmc_qrpa.h
 
 OPS_SOURCE      = nqp.ops
 
@@ -544,6 +549,8 @@ install: all
 	$(CHMOD)  755          $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
 	$(MKPATH)                     $(DESTDIR)$(PARROT_LIB_DIR)/dynext
 	$(CP)     $(DYNPMC) $(DYNOPS) $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT) $(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT) $(DESTDIR)$(PARROT_LIB_DIR)/dynext
+	$(MKPATH)                     $(DESTDIR)$(PARROT_INCLUDE_DIR)/dynpmc
+	$(CP)       $(DYNPMC_HEADERS) $(DESTDIR)$(PARROT_INCLUDE_DIR)/dynpmc
 
 stage0: $(STAGE0)
 stage1: $(STAGE1)
