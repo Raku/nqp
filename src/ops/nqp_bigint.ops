@@ -149,7 +149,7 @@ inline op nqp_bigint_setup() :base_core {
         bigint_repr_id = REGISTER_DYNAMIC_REPR(interp,
             Parrot_str_new_constant(interp, "P6bigint"),
             P6bigint_initialize);
-        srand(time(NULL));
+        srand((unsigned int) Parrot_util_int_rand(0));
     }
 }
 
