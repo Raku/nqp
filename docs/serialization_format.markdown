@@ -231,6 +231,9 @@ reference to do so. The reason being that
 These are stored as a 32-bit SC index (base 1 into the dependencies
 table, or 0 for current SC), followed by a 32-bit index into the
 selected SC.
+
+### VM NULL
+We store no extra info for those.
     
 ### VM Array of Variants
 These are stored as an element count as a 32-bit integer, followed by the variants.
