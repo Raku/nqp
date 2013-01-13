@@ -72,35 +72,16 @@ class NQP::Actions is HLL::Actions {
         # program will not explode). If we have a MAIN sub, call it at end of
         # mainline.
         $unit.unshift(QAST::Var.new( :scope('lexical'), :name('@ARGS'), :decl('param'), :slurpy(1) ));
-        my $main_tasks := QAST::Stmts.new(
-            QAST::VM.new(
-                :pirop('load_bytecode vs'),
-                QAST::SVal.new( :value('ModuleLoader.pbc') )
-            ),
-            QAST::Op.new(
-                :op('callmethod'), :name('set_mainline_module'),
-                QAST::VM.new(
-                    pirop => 'get_hll_global Ps',
-                    QAST::SVal.new( :value('ModuleLoader') )
-                ),
-                QAST::Op.new(
-                    :op('atkey'),
-                    QAST::VM.new( :pirop('getinterp P') ),
-                    QAST::SVal.new( :value('context') )
-                )
-            )
-        );
         if $*MAIN_SUB {
-            $main_tasks.push(QAST::Op.new(
-                :op('call'), QAST::BVal.new( :value($*MAIN_SUB) ),
-                QAST::Var.new( :scope('lexical'), :name('@ARGS'), :flat(1) )
+            $mainline.push(QAST::Op.new(
+                :op('if'),
+                QAST::Var.new( :scope('lexical'), :name('@ARGS') ),
+                QAST::Op.new(
+                    :op('call'), QAST::BVal.new( :value($*MAIN_SUB) ),
+                    QAST::Var.new( :scope('lexical'), :name('@ARGS'), :flat(1) )
+                )
             ));
         }
-        $mainline.push(QAST::Op.new(
-            :op('if'),
-            QAST::Var.new( :scope('lexical'), :name('@ARGS') ),
-            $main_tasks
-        ));
         
         # Push mainline statements into UNIT.
         $unit.push($mainline);
