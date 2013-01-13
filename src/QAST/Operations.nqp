@@ -1574,6 +1574,7 @@ QAST::Operations.add_core_pirop_mapping('create', 'repr_instance_of', 'PP', :inl
 QAST::Operations.add_core_pirop_mapping('clone', 'clone', 'PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('isconcrete', 'repr_defined', 'IP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('iscont', 'is_container', 'IP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('decont', 'nqp_decontainerize', 'PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('isnull', 'isnull', 'IP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('isnull_s', 'isnull', 'IS', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('istrue', 'istrue', 'IP', :inlinable(1));
