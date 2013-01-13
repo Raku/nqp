@@ -705,7 +705,7 @@ class QAST::Compiler is HLL::Compiler {
             PIRT::Ops.new();
         }
         else {
-            nqp::die("To compile on the Parrot backend, QAST::VM must have an alternative 'parrot', 'pirop', 'pir' or 'loadlibs'");
+            nqp::die("To compile on the Parrot backend, QAST::VM must have an alternative 'parrot', 'pirop', 'pir', 'pircosnt' or 'loadlibs'");
         }
     }
     
