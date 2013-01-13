@@ -164,30 +164,6 @@ knowhow ModuleLoader {
         
         return $setting;
     }
-    
-    # Called by the mainline of the module that we started execution in.
-    # Registers it as a module so we don't duplicate-load it.
-    method set_mainline_module($mainline_ctx) {
-        # May be fake executable, so may not end in .pbc. If so, add it.
-        # Strip any .exe.
-        my $module_name := ((pir::getinterp__P())[2])[0];
-        if nqp::substr($module_name, 0, 2) eq './' {
-            $module_name := nqp::substr($module_name, 2, nqp::chars($module_name) - 2);
-        }
-        if nqp::substr($module_name, nqp::chars($module_name) - 4, 4) eq '.pbc' {
-            # Fine as it is.
-        }
-        elsif nqp::substr($module_name, nqp::chars($module_name) - 4, 4) eq '.exe' {
-            # Replace exe with pbc.
-            $module_name := nqp::substr($module_name, 0, nqp::chars($module_name) - 3) ~ 'pbc';
-        }
-        else {
-            $module_name := $module_name ~ '.pbc';
-        }
-        
-        # Store context under this name.
-        %modules_loaded{$module_name} := $mainline_ctx;
-    }
 }
 
 # Since this *is* the module loader, we can't locate it the normal way by
