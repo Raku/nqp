@@ -107,6 +107,16 @@ class NQP::Actions is HLL::Actions {
                 :op('call'),
                 QAST::BVal.new( :value($unit) )
             )),
+            
+            # If we're executed as the mainline, get the command line args
+            # and pass them along.
+            :main(QAST::Stmts.new(
+                QAST::Op.new(
+                    :op('call'),
+                    QAST::BVal.new( :value($unit) ),
+                    QAST::Var.new( :name('ARGS'), :scope('local'), :decl('param'), :slurpy(1), :flat(1) )
+                )
+            )),
 
             # Finally, UNIT, which in turn contains all of the other program
             # elements.
