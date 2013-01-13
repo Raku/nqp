@@ -20,7 +20,7 @@ knowhow NQPCurriedRoleHOW {
     
     method new_type($curried_role!, *@pos_args) {
         my $meta := self.new(:curried_role($curried_role), :pos_args(@pos_args));
-        pir::repr_type_object_for__PPS($meta, 'Uninstantiable');
+        nqp::newtype($meta, 'Uninstantiable');
     }
     
     method specialize($obj, $class_arg) {
