@@ -44,7 +44,6 @@ class NQP::Actions is HLL::Actions {
              ?? ~$<identifier> ~ ':' ~ $<colonpair>[0].ast.named 
                     ~ '<' ~ colonpair_str($<colonpair>[0].ast) ~ '>'
              !! ~$/;
-        # make $<sym> ?? ~$<identifier> ~ ':sym<' ~ ~$<sym>[0] ~ '>' !! ~$/;
     }
 
     sub colonpair_str($ast) {
