@@ -493,7 +493,7 @@ class NQP::Actions is HLL::Actions {
                 }
                 $past := QAST::Var.new(
                     :name($name), :scope('attribute'),
-                    QAST::VM.new( :pirop('nqp_decontainerize PP'),
+                    QAST::Op.new( :op('decont'),
                         QAST::Var.new( :name('self'), :scope('lexical') ) ),
                     $ch
                 );
@@ -1233,7 +1233,7 @@ class NQP::Actions is HLL::Actions {
     ## Terms
 
     method term:sym<self>($/) {
-        make QAST::VM.new( :pirop('nqp_decontainerize PP'),
+        make QAST::Op.new( :op('decont'),
             QAST::Var.new( :name('self'), :scope('lexical') ) );
     }
 
