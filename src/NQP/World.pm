@@ -481,7 +481,9 @@ class NQP::World is HLL::World {
                 @loadlibs.push($_);
             }
         }
-        QAST::VM.new( loadlibs => @loadlibs );
+        QAST::VM.new(
+            loadlibs => @loadlibs,
+            jvm => QAST::Op.new( :op('null') ) );
     }
     
     # Adds some initial tasks.
