@@ -1624,7 +1624,38 @@ QAST::Operations.add_core_pirop_mapping('setcodeobj', 'set_sub_code_object', '1P
 # serialization context related opcodes
 QAST::Operations.add_core_pirop_mapping('sha1', 'nqp_sha1', 'Ss');
 QAST::Operations.add_core_pirop_mapping('createsc', 'nqp_create_sc', 'Ps');
-QAST::Operations.add_core_pirop_mapping('deserialize', 'nqp_deserialize_sc', 'vsPPPP');
+QAST::Operations.add_core_pirop_mapping('scsetobj', 'set', '1QiP');
+QAST::Operations.add_core_pirop_mapping('scsetcode', 'nqp_add_code_ref_to_sc', '2PiP');
+QAST::Operations.add_core_pirop_mapping('scgetobj', 'set', 'PQi');
+QAST::Operations.add_core_op('scgethandle', -> $qastcomp, $op {
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('handle'), :returns(str),
+        $op[0]
+    ))
+});
+QAST::Operations.add_core_op('scgetobjidx', -> $qastcomp, $op {
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('slot_index_for'), :returns(int),
+        $op[0], $op[1]
+    ))
+});
+QAST::Operations.add_core_op('scsetdesc', -> $qastcomp, $op {
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('set_description'),
+        $op[0], $op[1]
+    ))
+});
+QAST::Operations.add_core_op('scobjcount', -> $qastcomp, $op {
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('elems'),
+        $op[0]
+    ))
+});
+QAST::Operations.add_core_pirop_mapping('setobjsc', 'nqp_set_sc_for_object', '0PP');
+QAST::Operations.add_core_pirop_mapping('getobjsc', 'nqp_get_sc_for_object', 'PP');
+QAST::Operations.add_core_pirop_mapping('serialize', 'nqp_serialize_sc', 'SPP');
+QAST::Operations.add_core_pirop_mapping('deserialize', 'nqp_deserialize_sc', '0sPPPP');
+QAST::Operations.add_core_pirop_mapping('wval', 'nqp_get_sc_object', 'Psi');
 
 # process related opcodes
 QAST::Operations.add_core_pirop_mapping('exit', 'exit', '0i', :inlinable(1));
