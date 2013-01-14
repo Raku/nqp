@@ -164,7 +164,7 @@ knowhow NQPParametricRoleHOW {
     method methods($obj, :$local) {
         my @meths;
         for %!methods {
-            @meths.push($_.value);
+            nqp::push(@meths, $_.value);
         }
         @meths
     }
@@ -180,7 +180,7 @@ knowhow NQPParametricRoleHOW {
     method attributes($obj, :$local) {
         my @attrs;
         for %!attributes {
-            @attrs.push($_.value);
+            nqp::push(@attrs, $_.value);
         }
         @attrs
     }

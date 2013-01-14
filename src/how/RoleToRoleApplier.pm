@@ -21,7 +21,7 @@ knowhow RoleToRoleApplier {
                     }
                 }
                 unless $found {
-                    @meth_list.push($meth);
+                    nqp::push(@meth_list, $meth);
                 }
             }
         }
@@ -80,7 +80,7 @@ knowhow RoleToRoleApplier {
 
             # Build up full list.
             # XXX Not really right yet...
-            @all_roles.push($_);
+            nqp::push(@all_roles, $_);
         }
 
         return @all_roles;

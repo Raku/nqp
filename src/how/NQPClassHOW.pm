@@ -156,12 +156,12 @@ knowhow NQPClassHOW {
             nqp::die("Can only re-parent a class with exactly one parent");
         }
         for @!parents[0].HOW.mro(@!parents[0]) {
-            if +$_.HOW.attributes($_, :local) {
+            if nqp::elems($_.HOW.attributes($_, :local)) {
                 nqp::die("Can only re-parent a class whose parent has no attributes");
             }
         }
         for $new_parent.HOW.mro($new_parent) {
-            if +$_.HOW.attributes($_, :local) {
+            if nqp::elems($_.HOW.attributes($_, :local)) {
                 nqp::die("Can only re-parent to a class with no attributes");
             }
         }
@@ -210,7 +210,7 @@ knowhow NQPClassHOW {
             my @specialized_roles;
             for @!roles {
                 my $ins := $_.HOW.specialize($_, $obj);
-                @specialized_roles.push($ins);
+                nqp::push(@specialized_roles, $ins);
                 nqp::push(@!done, $_);
                 nqp::push(@!done, $ins);
             }
@@ -316,15 +316,15 @@ knowhow NQPClassHOW {
                 # immediate parents and merge.
                 my @merge_list;
                 for @immediate_parents {
-                    @merge_list.push(compute_c3_mro($_));
+                    nqp::push(@merge_list, compute_c3_mro($_));
                 }
-                @merge_list.push(@immediate_parents);
+                nqp::push(@merge_list, @immediate_parents);
                 @result := c3_merge(@merge_list);
             }
         }
 
         # Put this class on the start of the list, and we're done.
-        @result.unshift($class);
+        nqp::unshift(@result, $class);
         return @result;
     }
 
@@ -381,7 +381,7 @@ knowhow NQPClassHOW {
             my @new_list;
             for @merge_list[$i] {
                 unless $_ =:= $accepted {
-                    @new_list.push($_);
+                    nqp::push(@new_list, $_);
                 }
             }
             @merge_list[$i] := @new_list;
@@ -391,23 +391,28 @@ knowhow NQPClassHOW {
         # Need to merge what remains of the list, then put what was accepted on
         # the start of the list, and we're done.
         @result := c3_merge(@merge_list);
-        @result.unshift($accepted);
+        nqp::unshift(@result, $accepted);
         return @result;
     }
 
     method publish_type_cache($obj) {
         my @tc;
-        for @!mro { @tc.push($_); }
-        for @!done { @tc.push($_); }
+        for @!mro { nqp::push(@tc, $_); }
+        for @!done { nqp::push(@tc, $_); }
         nqp::settypecache($obj, @tc)
+    }
+    
+    sub reverse(@in) {
+        my @out;
+        for @in { nqp::unshift(@out, $_) }
+        @out
     }
 
     method publish_method_cache($obj) {
         # Walk MRO and add methods to cache, unless another method
         # lower in the class hierarchy "shadowed" it.
         my %cache;
-        my @mro_reversed := nqp::clone(@!mro);
-        @mro_reversed.reverse();
+        my @mro_reversed := reverse(@!mro);
         for @mro_reversed {
             for $_.HOW.method_table($_) {
                 %cache{$_.key} := $_.value;
@@ -448,8 +453,7 @@ knowhow NQPClassHOW {
 
     method publish_parrot_vtablee_handler_mapping($obj) {
         my %mapping;
-        my @mro_reversed := nqp::clone(@!mro);
-        @mro_reversed.reverse();
+        my @mro_reversed := reverse(@!mro);
         for @mro_reversed {
             for $_.HOW.parrot_vtable_handler_mappings($_, :local(1)) {
                 %mapping{$_.key} := $_.value;
@@ -554,7 +558,7 @@ knowhow NQPClassHOW {
             my @meths;
             for @!mro {
                 for $_.HOW.methods($_, :local) {
-                    @meths.push($_)
+                    nqp::push(@meths, $_)
                 }
             }
             @meths
@@ -581,13 +585,13 @@ knowhow NQPClassHOW {
         my @attrs;
         if $local {
             for %!attributes {
-                @attrs.push($_.value);
+                nqp::push(@attrs, $_.value);
             }
         }
         else {
             for @!mro {
                 for $_.HOW.attributes($_, :local) {
-                    @attrs.push($_);
+                    nqp::push(@attrs, $_);
                 }
             }
         }
