@@ -50,7 +50,7 @@ class HLL::World {
     
     method BUILD(:$handle!, :$description = '<unknown>') {
         # Initialize attributes.
-        $!sc              := pir::nqp_create_sc__PS($handle);
+        $!sc              := nqp::createsc($handle);
         $!handle          := $handle;
         %!addr_to_slot    := nqp::hash();
         @!fixup_tasks     := nqp::list();

@@ -329,8 +329,8 @@ class NQP::World is HLL::World {
 
             # Add deserialization fixup task.
             self.add_fixup_task(
-                :deserialize_past(QAST::VM.new(
-                    :pirop('set_sub_code_object vPP'),
+                :deserialize_past(QAST::Op.new(
+                    :op('setcodeobj'),
                     QAST::BVal.new( :value($past) ),
                     QAST::WVal.new( :value($code_obj) )
                 )));
@@ -343,8 +343,8 @@ class NQP::World is HLL::World {
                 QAST::SVal.new( :value('$!do') ),
                 QAST::BVal.new( :value($past) )
             ));
-            $fixups.push(QAST::VM.new(
-                :pirop('set_sub_code_object vPP'),
+            $fixups.push(QAST::Op.new(
+                :op('setcodeobj'),
                 QAST::BVal.new( :value($past) ),
                 QAST::WVal.new( :value($code_obj) )
             ));
