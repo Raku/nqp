@@ -4,33 +4,33 @@ plan(66);
 
 # Serializing an empty SC.
 {
-    my $sc := pir::nqp_create_sc__Ps('TEST_SC_1_IN');
-    my $sh := pir::new__Ps('ResizableStringArray');
+    my $sc := nqp::createsc('TEST_SC_1_IN');
+    my $sh := nqp::list_s();
     
-    my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+    my $serialized := nqp::serialize($sc, $sh);
     ok(nqp::chars($serialized) > 0,   'serialized empty SC to non-empty string');
     ok(nqp::chars($serialized) >= 36, 'output is at least as long as the header');
 
-    my $dsc := pir::nqp_create_sc__Ps('TEST_SC_1_OUT');
-    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, nqp::list());
+    my $dsc := nqp::createsc('TEST_SC_1_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
     
     ok(nqp::elems($dsc) == 0, 'deserialized SC is also empty');
 }
 
 # Serializing an SC with a single object with P6int REPR.
 {
-    my $sc := pir::nqp_create_sc__Ps('TEST_SC_2_IN');
-    my $sh := pir::new__Ps('ResizableStringArray');
+    my $sc := nqp::createsc('TEST_SC_2_IN');
+    my $sh := nqp::list_s();
     
     class T1 is repr('P6int') { }
     my $v1 := nqp::box_i(42, T1);
     pir::nqp_add_object_to_sc__vPiP($sc, 0, $v1);
 
-    my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+    my $serialized := nqp::serialize($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6int output longer than a header');
     
-    my $dsc := pir::nqp_create_sc__Ps('TEST_SC_2_OUT');
-    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, nqp::list());
+    my $dsc := nqp::createsc('TEST_SC_2_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
     
     ok(nqp::elems($dsc) == 1,       'deserialized SC has a single element');
     ok(nqp::istype($dsc[0], T1),    'deserialized object has correct type');
@@ -39,18 +39,18 @@ plan(66);
     
 # Serializing an SC with a single object with P6num REPR.
 {
-    my $sc := pir::nqp_create_sc__Ps('TEST_SC_3_IN');
-    my $sh := pir::new__Ps('ResizableStringArray');
+    my $sc := nqp::createsc('TEST_SC_3_IN');
+    my $sh := nqp::list_s();
     
     class T2 is repr('P6num') { }
     my $v := nqp::box_n(6.9, T2);
     pir::nqp_add_object_to_sc__vPiP($sc, 0, $v);
 
-    my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+    my $serialized := nqp::serialize($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6num output longer than a header');
     
-    my $dsc := pir::nqp_create_sc__Ps('TEST_SC_3_OUT');
-    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, nqp::list());
+    my $dsc := nqp::createsc('TEST_SC_3_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
     
     ok(nqp::elems($dsc) == 1,        'deserialized SC has a single element');
     ok(nqp::istype($dsc[0], T2),     'deserialized object has correct type');
@@ -59,18 +59,18 @@ plan(66);
 
 # Serializing an SC with a single object with P6str REPR.
 {
-    my $sc := pir::nqp_create_sc__Ps('TEST_SC_4_IN');
-    my $sh := pir::new__Ps('ResizableStringArray');
+    my $sc := nqp::createsc('TEST_SC_4_IN');
+    my $sh := nqp::list_s();
     
     class T3 is repr('P6str') { }
     my $v := nqp::box_s('dugong', T3);
     pir::nqp_add_object_to_sc__vPiP($sc, 0, $v);
 
-    my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+    my $serialized := nqp::serialize($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6str output longer than a header');
     
-    my $dsc := pir::nqp_create_sc__Ps('TEST_SC_4_OUT');
-    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, nqp::list());
+    my $dsc := nqp::createsc('TEST_SC_4_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
     
     ok(nqp::elems($dsc) == 1,             'deserialized SC has a single element');
     ok(nqp::istype($dsc[0], T3),          'deserialized object has correct type');
@@ -79,8 +79,8 @@ plan(66);
 
 # Serializing an SC with a P6opaque containing a P6int, P6num and P6str.
 {
-    my $sc := pir::nqp_create_sc__Ps('TEST_SC_5_IN');
-    my $sh := pir::new__Ps('ResizableStringArray');
+    my $sc := nqp::createsc('TEST_SC_5_IN');
+    my $sh := nqp::list_s();
     
     class T4 {
         has int $!a;
@@ -103,11 +103,11 @@ plan(66);
     my $v := T4.new();
     pir::nqp_add_object_to_sc__vPiP($sc, 0, $v);
 
-    my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+    my $serialized := nqp::serialize($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6opaque output longer than a header');
     
-    my $dsc := pir::nqp_create_sc__Ps('TEST_SC_5_OUT');
-    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, nqp::list());
+    my $dsc := nqp::createsc('TEST_SC_5_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
     ok(nqp::elems($dsc) == 1,             'deserialized SC has a single element');
     ok(nqp::istype($dsc[0], T4),          'deserialized object has correct type');
@@ -118,8 +118,8 @@ plan(66);
 
 # Serializing an SC with P6opaues and circular references
 {
-    my $sc := pir::nqp_create_sc__Ps('TEST_SC_6_IN');
-    my $sh := pir::new__Ps('ResizableStringArray');
+    my $sc := nqp::createsc('TEST_SC_6_IN');
+    my $sh := nqp::list_s();
     
     class T5 {
         has $!x;
@@ -135,11 +135,11 @@ plan(66);
     pir::nqp_add_object_to_sc__vPiP($sc, 0, $v1);
     pir::nqp_add_object_to_sc__vPiP($sc, 1, $v2);
 
-    my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+    my $serialized := nqp::serialize($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6opaque output longer than a header');
     
-    my $dsc := pir::nqp_create_sc__Ps('TEST_SC_6_OUT');
-    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, nqp::list());
+    my $dsc := nqp::createsc('TEST_SC_6_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
     
     ok(nqp::elems($dsc) == 2,       'deserialized SC has 2 element');
     ok(nqp::istype($dsc[0], T5),    'first deserialized object has correct type');
@@ -150,8 +150,8 @@ plan(66);
 
 # Tracing an object graph.
 {
-    my $sc := pir::nqp_create_sc__Ps('TEST_SC_7_IN');
-    my $sh := pir::new__Ps('ResizableStringArray');
+    my $sc := nqp::createsc('TEST_SC_7_IN');
+    my $sh := nqp::list_s();
     
     class T6 {
         has $!x;
@@ -175,10 +175,10 @@ plan(66);
     
     # Here, we only add *one* of the three explicitly to the SC.
     pir::nqp_add_object_to_sc__vPiP($sc, 0, $v1);
-    my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+    my $serialized := nqp::serialize($sc, $sh);
     
-    my $dsc := pir::nqp_create_sc__Ps('TEST_SC_7_OUT');
-    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, nqp::list());
+    my $dsc := nqp::createsc('TEST_SC_7_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
     
     ok(nqp::elems($dsc) == 3,       'deserialized SC has 3 elements - the one we added and two discovered');
     ok(nqp::istype($dsc[0], T6),    'first deserialized object has correct type');
@@ -193,8 +193,8 @@ plan(66);
 
 # Serializing an SC with a P6opaque containing VM Integer/Float/String
 {
-    my $sc := pir::nqp_create_sc__Ps('TEST_SC_8_IN');
-    my $sh := pir::new__Ps('ResizableStringArray');
+    my $sc := nqp::createsc('TEST_SC_8_IN');
+    my $sh := nqp::list_s();
     
     class T7 {
         has $!a;
@@ -217,10 +217,10 @@ plan(66);
     my $v := T7.new();
     pir::nqp_add_object_to_sc__vPiP($sc, 0, $v);
 
-    my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+    my $serialized := nqp::serialize($sc, $sh);
     
-    my $dsc := pir::nqp_create_sc__Ps('TEST_SC_8_OUT');
-    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, nqp::list());
+    my $dsc := nqp::createsc('TEST_SC_8_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
     ok(nqp::elems($dsc) == 1,             'deserialized SC has a single element');
     ok(nqp::istype($dsc[0], T7),          'deserialized object has correct type');
@@ -231,8 +231,8 @@ plan(66);
 
 # Array in an object attribute
 {
-    my $sc := pir::nqp_create_sc__Ps('TEST_SC_9_IN');
-    my $sh := pir::new__Ps('ResizableStringArray');
+    my $sc := nqp::createsc('TEST_SC_9_IN');
+    my $sh := nqp::list_s();
     
     class T8 {
         has $!a;
@@ -252,10 +252,10 @@ plan(66);
     my $v := T8.new();
     pir::nqp_add_object_to_sc__vPiP($sc, 0, $v);
 
-    my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+    my $serialized := nqp::serialize($sc, $sh);
     
-    my $dsc := pir::nqp_create_sc__Ps('TEST_SC_9_OUT');
-    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, nqp::list());
+    my $dsc := nqp::createsc('TEST_SC_9_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
     ok(nqp::istype($dsc[0], T8),          'deserialized object has correct type');
     ok(nqp::elems($dsc[0].a) == 3,        'array a came back with correct element count');
@@ -272,8 +272,8 @@ plan(66);
 
 # Hash in an object attribute.
 {
-    my $sc := pir::nqp_create_sc__Ps('TEST_SC_10_IN');
-    my $sh := pir::new__Ps('ResizableStringArray');
+    my $sc := nqp::createsc('TEST_SC_10_IN');
+    my $sh := nqp::list_s();
     
     class T9 {
         has $!a;
@@ -293,10 +293,10 @@ plan(66);
     my $v := T9.new();
     pir::nqp_add_object_to_sc__vPiP($sc, 0, $v);
 
-    my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+    my $serialized := nqp::serialize($sc, $sh);
     
-    my $dsc := pir::nqp_create_sc__Ps('TEST_SC_10_OUT');
-    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, nqp::list());
+    my $dsc := nqp::createsc('TEST_SC_10_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
     ok(nqp::istype($dsc[0], T9),          'deserialized object has correct type');
     ok(nqp::elems($dsc[0].a) == 2,        'hash came back with correct element count');
@@ -306,8 +306,8 @@ plan(66);
 
 # Integer array (probably needed for NFA serialization).
 {
-    my $sc := pir::nqp_create_sc__Ps('TEST_SC_11_IN');
-    my $sh := pir::new__Ps('ResizableStringArray');
+    my $sc := nqp::createsc('TEST_SC_11_IN');
+    my $sh := nqp::list_s();
     
     class T10 {
         has $!a;
@@ -328,10 +328,10 @@ plan(66);
     my $v := T10.new();
     pir::nqp_add_object_to_sc__vPiP($sc, 0, $v);
 
-    my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+    my $serialized := nqp::serialize($sc, $sh);
     
-    my $dsc := pir::nqp_create_sc__Ps('TEST_SC_11_OUT');
-    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, nqp::list());
+    my $dsc := nqp::createsc('TEST_SC_11_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
     ok(nqp::istype($dsc[0], T10),          'deserialized object has correct type');
     ok(nqp::elems($dsc[0].a) == 3,         'integer array came back with correct element count');
@@ -342,8 +342,8 @@ plan(66);
 
 # String array (used by Rakudo in signatures)
 {
-    my $sc := pir::nqp_create_sc__Ps('TEST_SC_12_IN');
-    my $sh := pir::new__Ps('ResizableStringArray');
+    my $sc := nqp::createsc('TEST_SC_12_IN');
+    my $sh := nqp::list_s();
     
     class T11 {
         has $!a;
@@ -353,7 +353,7 @@ plan(66);
             $obj;
         }
         method BUILD() {
-            my @a := pir::new__Ps('ResizableStringArray');
+            my @a := nqp::list_s();
             @a[0] := 'cow';
             @a[1] := 'sheep';
             @a[2] := 'pig';
@@ -364,10 +364,10 @@ plan(66);
     my $v := T11.new();
     pir::nqp_add_object_to_sc__vPiP($sc, 0, $v);
 
-    my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+    my $serialized := nqp::serialize($sc, $sh);
     
-    my $dsc := pir::nqp_create_sc__Ps('TEST_SC_12_OUT');
-    pir::nqp_deserialize_sc__vSPPP($serialized, $dsc, $sh, nqp::list());
+    my $dsc := nqp::createsc('TEST_SC_12_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
     ok(nqp::istype($dsc[0], T11),          'deserialized object has correct type');
     ok(nqp::elems($dsc[0].a) == 3,         'string array came back with correct element count');
