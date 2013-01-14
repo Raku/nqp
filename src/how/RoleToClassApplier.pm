@@ -18,7 +18,7 @@ knowhow RoleToClassApplier {
         # role first.
         my $to_compose;
         my $to_compose_meta;
-        if +@roles == 1 {
+        if nqp::elems(@roles) == 1 {
             $to_compose := @roles[0];
             $to_compose_meta := $to_compose.HOW;
         }

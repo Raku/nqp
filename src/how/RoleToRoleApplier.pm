@@ -42,7 +42,7 @@ knowhow RoleToRoleApplier {
             # methods we have from elsewhere.
             unless nqp::defined(%target_meth_info{$name}) {
                 # No methods in the target role. If only one, it's easy...
-                if +@add_meths == 1 {
+                if nqp::elems(@add_meths) == 1 {
                     $target.HOW.add_method($target, $name, @add_meths[0]);
                 }
                 else {

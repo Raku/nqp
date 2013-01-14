@@ -73,7 +73,7 @@ knowhow NQPParametricRoleHOW {
         my %todo;
         %todo<name> := $name;
         %todo<code> := $code_obj;
-        @!multi_methods_to_incorporate[+@!multi_methods_to_incorporate] := %todo;
+        nqp::push(@!multi_methods_to_incorporate, %todo);
         $code_obj;
     }
 
@@ -90,7 +90,7 @@ knowhow NQPParametricRoleHOW {
     }
 
     method add_role($obj, $role) {
-        @!roles[+@!roles] := $role;
+        nqp::push(@!roles, $role);
     }
 
     # Compose the role. Beyond this point, no changes are allowed.

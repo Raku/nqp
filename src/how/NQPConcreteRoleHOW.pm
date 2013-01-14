@@ -72,7 +72,7 @@ knowhow NQPConcreteRoleHOW {
         my %todo;
         %todo<name> := $name;
         %todo<code> := $code_obj;
-        @!multi_methods_to_incorporate[+@!multi_methods_to_incorporate] := %todo;
+        nqp::push(@!multi_methods_to_incorporate, %todo);
         $code_obj;
     }
 
@@ -89,11 +89,11 @@ knowhow NQPConcreteRoleHOW {
     }
 
     method add_role($obj, $role) {
-        @!roles[+@!roles] := $role;
+        nqp::push(@!roles, $role);
     }
 
     method add_collision($obj, $colliding_name) {
-        @!collisions[+@!collisions] := $colliding_name;
+        nqp::push(@!collisions, $colliding_name);
     }
 
     # Compose the role. Beyond this point, no changes are allowed.
@@ -102,8 +102,8 @@ knowhow NQPConcreteRoleHOW {
         # add to done list their instantiation source.
         if @!roles {
             for @!roles {
-                @!role_typecheck_list[+@!role_typecheck_list] := $_;
-                @!role_typecheck_list[+@!role_typecheck_list] := $_.HOW.instance_of($_);
+                nqp::push(@!role_typecheck_list, $_);
+                nqp::push(@!role_typecheck_list, $_.HOW.instance_of($_));
             }
             RoleToRoleApplier.apply($obj, @!roles);
         }
