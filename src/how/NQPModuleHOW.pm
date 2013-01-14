@@ -26,9 +26,7 @@ knowhow NQPModuleHOW {
     }
 
     method add_method($obj, $name, $code_obj) {
-        # XXX Commented out as in some places, module is used to try to
-        # shove methods into Parrot classes (which doesn't work any, mind).
-        #nqp::die("Modules may not have methods");
+        nqp::die("Modules may not have methods");
     }
 
     method add_multi_method($obj, $name, $code_obj) {
