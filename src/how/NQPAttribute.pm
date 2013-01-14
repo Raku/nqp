@@ -48,42 +48,6 @@ knowhow NQPAttribute {
     }
 
     method compose($obj) {
-        #my $long_name := ~$!name;
-        #if self.has_mutator {
-        #    my $method := nqp::substr($long_name, 1);
-        #    unless has_method($obj, $method, 0) {
-        #        $obj.HOW.add_method($obj.WHAT, $method, method ($value?) {
-        #                nqp::bindattr(self, $obj.WHAT, $long_name, $value)
-        #                    if nqp::defined($value);
-        #                nqp::getattr(self, $obj.WHAT, $long_name);
-        #            }
-        #        );
-        #    }
-        #}
-        #else {
-        #    my $method := nqp::substr($long_name, 2);
-        #    unless has_method($obj, $method, 0) {
-        #        $obj.HOW.add_method($obj, $method,
-        #            method () {
-        #                nqp::getattr(self, $obj.WHAT, $long_name);
-        #            }
-        #        );
-        #    }
-        #}
         $obj
     }
-
-    # Hack to check twigil.
-    method has_mutator() {
-        nqp::substr(~$!name, 1, 1) ne '!';
-    }
-
-    sub has_method($target, $name, $local) {
-        my @methods := $target.HOW.methods($target, :local($local));
-        for @methods {
-            if $_ eq $name { return 1; }
-        }
-        return 0;
-    }
-
 }
