@@ -309,8 +309,8 @@ class QAST::Compiler is HLL::Compiler {
     
     method deserialization_code($sc, @code_ref_blocks, $repo_conf_res) {
         # Serialize it.
-        my $sh := pir::new__Ps('ResizableStringArray');
-        my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+        my $sh := nqp::list_s();
+        my $serialized := nqp::serialize($sc, $sh);
         
         # Now it's serialized, pop this SC off the compiling SC stack.
         pir::nqp_pop_compiling_sc__v();
@@ -348,7 +348,7 @@ class QAST::Compiler is HLL::Compiler {
                 QAST::Op.new( :op('createsc'), QAST::SVal.new( :value($sc.handle()) ) )
             ),
             QAST::Op.new(
-                :op('callmethod'), :name('set_description'),
+                :op('scsetdesc'),
                 QAST::Var.new( :name('cur_sc'), :scope('local') ),
                 QAST::SVal.new( :value($sc.description) )
             ),
@@ -945,9 +945,9 @@ class QAST::Compiler is HLL::Compiler {
     
     multi method as_post(QAST::WVal $node, :$want) {
         my $val    := $node.value;
-        my $sc     := pir::nqp_get_sc_for_object__PP($val);
-        my $handle := $sc.handle;
-        my $idx    := $sc.slot_index_for($val);
+        my $sc     := nqp::getobjsc($val);
+        my $handle := nqp::scgethandle($sc);
+        my $idx    := nqp::scgetobjidx($sc, $val);
         my $reg    := $*REGALLOC.fresh_p();
         my $ops    := PIRT::Ops.new(:result($reg));
         $ops.push_pirop('nqp_get_sc_object', $reg, self.escape($handle), ~$idx);

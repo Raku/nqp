@@ -58,7 +58,7 @@ class HLL::World {
         $!precomp_mode    := %*COMPILING<%?OPTIONS><target> eq 'pir';
         $!num_code_refs   := 0;
         $!code_ref_blocks := [];
-        $!sc.set_description($description);
+        nqp::scsetdesc($!sc, $description);
         
         # Add to currently compiling SC stack.
         pir::nqp_push_compiling_sc__vP($!sc);
@@ -75,9 +75,9 @@ class HLL::World {
 
     # Adds an object to the root set, along with a mapping.
     method add_object($obj) {
-        pir::nqp_set_sc_for_object__vPP($obj, $!sc);
-        my $idx := $!sc.elems();
-        $!sc[$idx] := $obj;
+        nqp::setobjsc($obj, $!sc);
+        my $idx := nqp::scobjcount($!sc);
+        nqp::scsetobj($!sc, $idx, $obj);
         %!addr_to_slot{nqp::where($obj)} := $idx;
         $idx
     }
@@ -87,13 +87,13 @@ class HLL::World {
         my $code_ref_idx := $!num_code_refs;
         $!num_code_refs := $!num_code_refs + 1;
         $!code_ref_blocks.push($past_block);
-        pir::nqp_add_code_ref_to_sc__vPiP($!sc, $code_ref_idx, $code_ref);
+        nqp::scsetcode($!sc, $code_ref_idx, $code_ref);
         $code_ref_idx
     }
     
     # Updates a code reference in the root set.
     method update_root_code_ref($idx, $new_code_ref) {
-        pir::nqp_add_code_ref_to_sc__vPiP($!sc, $idx, $new_code_ref);
+        nqp::scsetcode($!sc, $idx, $new_code_ref);
     }
 
     # Checks if we are in pre-compilation mode.
