@@ -1529,7 +1529,6 @@ QAST::Operations.add_core_pirop_mapping('deletepos', 'delete', '0Qi', :inlinable
 QAST::Operations.add_core_pirop_mapping('existskey', 'exists', 'IQs', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('existspos', 'exists', 'IQi', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('elems', 'elements', 'IP', :inlinable(1));
-QAST::Operations.add_core_pirop_mapping('iterator', 'iter', 'PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('push', 'push', '0PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('push_s', 'push', '0Ps', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('push_i', 'push', '0Pi', :inlinable(1));
@@ -1550,6 +1549,13 @@ QAST::Operations.add_core_pirop_mapping('splice', 'splice', '0PPii', :inlinable(
 QAST::Operations.add_core_pirop_mapping('islist', 'nqp_islist', 'IP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('ishash', 'nqp_ishash', 'IP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('isinvokable', 'is_invokable', 'IP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('iterator', 'iter', 'PP', :inlinable(1));
+QAST::Operations.add_core_op('iterkey_s', -> $qastcomp, $op {
+    $qastcomp.as_post(QAST::Op.new( :op('callmethod'), :name('key'), $op[0] ))
+});
+QAST::Operations.add_core_op('iterval', -> $qastcomp, $op {
+    $qastcomp.as_post(QAST::Op.new( :op('callmethod'), :name('value'), $op[0] ))
+});
 
 # repr-level aggregate operations
 QAST::Operations.add_core_pirop_mapping('r_atpos', 'repr_at_pos_obj', 'PPi', :inlinable(1));
