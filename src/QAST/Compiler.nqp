@@ -1389,7 +1389,10 @@ class QAST::Compiler is HLL::Compiler {
 
         #$ops.push_pirop('inline', '  # rx %0 ** %1..%2', $prefix, $min, $max);
 
-        if $backtrack eq 'f' {
+        if $min == 0 && $max == 0 {
+            # Nothing to do, and nothing to backtrack into.
+        }
+        elsif $backtrack eq 'f' {
             my $seplabel  := self.post_new('Label', :name($prefix ~ '_sep'));
             my $ireg := '$I12';
             $ops.push_pirop('set', %*REG<rep>, 0);
