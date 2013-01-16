@@ -1626,6 +1626,8 @@ QAST::Operations.add_core_pirop_mapping('bindlexdyn', 'store_dynamic_lex', '1sP'
 QAST::Operations.add_core_pirop_mapping('takeclosure', 'newclosure', 'PP');
 QAST::Operations.add_core_pirop_mapping('getcodeobj', 'get_sub_code_object', 'PP');
 QAST::Operations.add_core_pirop_mapping('setcodeobj', 'set_sub_code_object', '1PP');
+QAST::Operations.add_core_pirop_mapping('getcodename', 'set', 'SP');
+QAST::Operations.add_core_pirop_mapping('setcodename', 'assign', '1Ps');
 
 # serialization context related opcodes
 QAST::Operations.add_core_pirop_mapping('sha1', 'nqp_sha1', 'Ss');
