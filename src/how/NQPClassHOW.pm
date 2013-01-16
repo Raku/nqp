@@ -33,11 +33,6 @@ knowhow NQPClassHOW {
     has @!done;
     
     # Cached values, which are thrown away if the class changes.
-    # XXX Should be an attribute later, but we get into some trouble with
-    # the bootstrap for now since we end up with SC references back to the
-    # previous build due to a parse altering the cache, and the SC WB getting
-    # hit.
-    #my %caches;
     has %!caches;
 
     # Parrot-specific vtable mapping hash. Maps vtable name to method.
