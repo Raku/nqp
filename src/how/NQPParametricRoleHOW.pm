@@ -127,15 +127,15 @@ knowhow NQPParametricRoleHOW {
         # Copy attributes. (Nothing to reify in NQP as we don't currently
         # have parametric types that may end up in the signature.)
         for %!attributes {
-            $irole.HOW.add_attribute($irole, $_.value);
+            $irole.HOW.add_attribute($irole, nqp::iterval($_));
         }
 
         # Capture methods in the correct lexical context.
         for %!methods {
-            my $name := $_.key;
-            my $meth := nqp::can($_.value, 'instantiate_generic')
-                ?? $_.value.instantiate_generic($pad)
-                !! $_.value.clone();
+            my $name := nqp::iterkey_s($_);
+            my $meth := nqp::can(nqp::iterval($_), 'instantiate_generic')
+                ?? nqp::iterval($_).instantiate_generic($pad)
+                !! nqp::iterval($_).clone();
             if nqp::substr($name, 0, 12) eq '!!LATENAME!!' {
                 $name := nqp::atkey($pad, nqp::substr($name, 12));
                 $meth.'!set_name'($name);
@@ -164,7 +164,7 @@ knowhow NQPParametricRoleHOW {
     method methods($obj, :$local) {
         my @meths;
         for %!methods {
-            nqp::push(@meths, $_.value);
+            nqp::push(@meths, nqp::iterval($_));
         }
         @meths
     }
@@ -180,7 +180,7 @@ knowhow NQPParametricRoleHOW {
     method attributes($obj, :$local) {
         my @attrs;
         for %!attributes {
-            nqp::push(@attrs, $_.value);
+            nqp::push(@attrs, nqp::iterval($_));
         }
         @attrs
     }

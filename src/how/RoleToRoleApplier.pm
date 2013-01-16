@@ -5,7 +5,7 @@ knowhow RoleToRoleApplier {
         for @roles {
             my @methods := $_.HOW.methods($_);
             for @methods {
-                my $name := ~$_;
+                my $name := nqp::can($_, 'name') ?? $_.name !! nqp::getcodename($_);
                 my $meth := $_;
                 my @meth_list;
                 if nqp::defined(%meth_info{$name}) {
@@ -30,12 +30,13 @@ knowhow RoleToRoleApplier {
         my %target_meth_info;
         my @target_meths := $target.HOW.methods($target);
         for @target_meths {
-            %target_meth_info{~$_} := $_;
+            my $name := nqp::can($_, 'name') ?? $_.name !! nqp::getcodename($_);
+            %target_meth_info{$name} := $_;
         }
 
         # Process method list.
         for %meth_info {
-            my $name := ~$_;
+            my $name := nqp::iterkey_s($_);
             my @add_meths := %meth_info{$name};
 
             # Do we already have a method of this name? If so, ignore all of the

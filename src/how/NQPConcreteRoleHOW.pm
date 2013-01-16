@@ -121,7 +121,7 @@ knowhow NQPConcreteRoleHOW {
     method methods($obj, :$local) {
         my @meths;
         for %!methods {
-            nqp::push(@meths, $_.value);
+            nqp::push(@meths, nqp::iterval($_));
         }
         @meths
     }
@@ -141,7 +141,7 @@ knowhow NQPConcreteRoleHOW {
     method attributes($obj, :$local) {
         my @attrs;
         for %!attributes {
-            nqp::push(@attrs, $_.value);
+            nqp::push(@attrs, nqp::iterval($_));
         }
         @attrs
     }
