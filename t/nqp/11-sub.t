@@ -2,7 +2,7 @@
 
 # check subs
 
-say('1..14');
+say('1..17');
 
 sub one ( ) {
     say("ok 1 # sub def and call");
@@ -78,3 +78,11 @@ say('ok ', term:sym<self>());
 
 say( (nqp::isinvokable(sub() {}) ?? 'ok 13' !! 'no 13' ) ~ '  nqp::isinvokable on sub');
 say( (!nqp::isinvokable(666) ?? 'ok 14' !! 'no 14' ) ~ '  nqp::isinvokable on non sub');
+
+# #73, test that a sub can start with last, next and redo
+sub last_() { 15 };
+say('ok ', last_());
+sub next_() { 16 };
+say('ok ', next_());
+sub redo_() { 17 };
+say('ok ', redo_());

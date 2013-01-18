@@ -773,9 +773,9 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token prefix:sym<return> { <sym> \s <O('%list_prefix')> { $*RETURN_USED := 1 } }
     token prefix:sym<make>   { <sym> \s <O('%list_prefix')> }
-    token term:sym<last>     { <sym> { $*CONTROL_USED := 1 } }
-    token term:sym<next>     { <sym> { $*CONTROL_USED := 1 } }
-    token term:sym<redo>     { <sym> { $*CONTROL_USED := 1 } }
+    token term:sym<last>     { <sym> <!before <identifier> > { $*CONTROL_USED := 1 } }
+    token term:sym<next>     { <sym> <!before <identifier> > { $*CONTROL_USED := 1 } }
+    token term:sym<redo>     { <sym> <!before <identifier> > { $*CONTROL_USED := 1 } }
 
     method smartmatch($/) {
         # swap rhs into invocant position
