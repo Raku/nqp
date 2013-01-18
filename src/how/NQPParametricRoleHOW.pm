@@ -96,6 +96,9 @@ knowhow NQPParametricRoleHOW {
     # Compose the role. Beyond this point, no changes are allowed.
     method compose($obj) {
         $!composed := 1;
+        nqp::settypecache($obj, [$obj.WHAT]);
+        nqp::setmethcache($obj, {});
+        nqp::setmethcacheauth($obj, 1);
         $obj
     }
 
