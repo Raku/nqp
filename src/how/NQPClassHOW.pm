@@ -33,11 +33,6 @@ knowhow NQPClassHOW {
     has @!done;
     
     # Cached values, which are thrown away if the class changes.
-    # XXX Should be an attribute later, but we get into some trouble with
-    # the bootstrap for now since we end up with SC references back to the
-    # previous build due to a parse altering the cache, and the SC WB getting
-    # hit.
-    #my %caches;
     has %!caches;
 
     # Parrot-specific vtable mapping hash. Maps vtable name to method.
@@ -347,7 +342,7 @@ knowhow NQPClassHOW {
                     unless $_ =:= @cand_list {
                         # Is current candidate in the tail? If so, reject.
                         my $cur_pos := 1;
-                        while $cur_pos <= +$_ {
+                        while $cur_pos <= nqp::elems($_) {
                             if $_[$cur_pos] =:= $cand_class {
                                 $rejected := 1;
                             }
@@ -415,7 +410,7 @@ knowhow NQPClassHOW {
         my @mro_reversed := reverse(@!mro);
         for @mro_reversed {
             for $_.HOW.method_table($_) {
-                %cache{$_.key} := $_.value;
+                %cache{nqp::iterkey_s($_)} := nqp::iterval($_);
             }
         }
         nqp::setmethcache($obj, %cache);
@@ -585,7 +580,7 @@ knowhow NQPClassHOW {
         my @attrs;
         if $local {
             for %!attributes {
-                nqp::push(@attrs, $_.value);
+                nqp::push(@attrs, nqp::iterval($_));
             }
         }
         else {
