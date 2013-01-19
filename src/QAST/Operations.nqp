@@ -1603,6 +1603,7 @@ QAST::Operations.add_core_pirop_mapping('defined', 'defined', 'IP', :inlinable(1
 QAST::Operations.add_core_pirop_mapping('can', 'can', 'IPs', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('reprname', 'repr_name', 'SP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('newtype', 'repr_type_object_for', 'PPs', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('composetype', 'repr_compose', '0PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('setwho', 'set_who', '0PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('rebless', 'repr_change_type', '0PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('setboolspec', 'set_boolification_spec', '0PiP', :inlinable(1));

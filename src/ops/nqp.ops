@@ -474,6 +474,20 @@ inline op repr_type_object_for(out PMC, invar PMC, in STR) :base_core {
 
 /*
 
+=item repr_compose(type_obj, repr_info)
+
+Triggers representation composition type for the specified type, passing the
+specified information for it to compose by.
+
+=cut
+
+*/
+inline op repr_compose(invar PMC, invar PMC) :base_core {
+    REPR($1)->compose(interp, STABLE($1), $2);
+}
+
+/*
+
 =item repr_instance_of()
 
 Instantiates a new object based on the given WHAT.
