@@ -25,6 +25,8 @@ static INTVAL smo_id = 0;
  * never move, and is unique per type object too. */
 #define CLASS_KEY(c) ((INTVAL)PMC_data(STABLE_PMC(c)))
 
+/* XXXXX From here goes away after REPR compose refactors. XXXXX */
+
 /* Helper to make an introspection call, possibly with :local. */
 static PMC * introspection_call(PARROT_INTERP, PMC *WHAT, PMC *HOW, STRING *name, INTVAL local) {
     PMC *old_ctx, *cappy;
@@ -78,7 +80,7 @@ static PMC * accessor_call(PARROT_INTERP, PMC *obj, STRING *name) {
  * list of attributes (populating the passed flat_list). Also builds
  * the index mapping for doing named lookups. Note index is not related
  * to the storage position. */
-static PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, P6opaqueREPRData *repr_data) {
+static PMC * index_mapping_and_flat_list_OLD(PARROT_INTERP, PMC *WHAT, P6opaqueREPRData *repr_data) {
     PMC    *flat_list      = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
     PMC    *class_list     = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
     PMC    *attr_map_list  = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
@@ -154,7 +156,7 @@ static PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, P6opaqueREPRD
 /* This works out an allocation strategy for the object. It takes care of
  * "inlining" storage of attributes that are natively typed, as well as
  * noting unbox targets. */
-static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRData *repr_data) {
+static void compute_allocation_strategy_OLD(PARROT_INTERP, PMC *WHAT, P6opaqueREPRData *repr_data) {
     STRING *type_str       = Parrot_str_new_constant(interp, "type");
     STRING *box_target_str = Parrot_str_new_constant(interp, "box_target");
     STRING *avcont_str     = Parrot_str_new_constant(interp, "auto_viv_container");
@@ -172,7 +174,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
     Parrot_block_GC_mark(interp);
 
     /* Compute index mapping table and get flat list of attributes. */
-    flat_list = index_mapping_and_flat_list(interp, WHAT, repr_data);
+    flat_list = index_mapping_and_flat_list_OLD(interp, WHAT, repr_data);
     
     /* If we have no attributes in the index mapping, then just the header. */
     if (repr_data->name_to_index_mapping[0].class_key == NULL) {
@@ -210,6 +212,244 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, P6opaqueREPRDa
             PMC *type       = accessor_call(interp, attr, type_str);
             PMC *box_target = accessor_call(interp, attr, box_target_str);
             PMC *av_cont    = accessor_call(interp, attr, avcont_str);
+
+            /* Work out what unboxed type it is, if any. Default to a boxed. */
+            INTVAL unboxed_type = STORAGE_SPEC_BP_NONE;
+            INTVAL bits         = sizeof(PMC *) * 8;
+            if (!PMC_IS_NULL(type)) {
+                /* Get the storage spec of the type and see what it wants. */
+                storage_spec spec = REPR(type)->get_storage_spec(interp, STABLE(type));
+                if (spec.inlineable == STORAGE_SPEC_INLINED) {
+                    /* Yes, it's something we'll flatten. */
+                    unboxed_type = spec.boxed_primitive;
+                    bits = spec.bits;
+                    repr_data->flattened_stables[i] = STABLE(type);
+                    
+                    /* Does it need special initialization? */
+                    if (REPR(type)->initialize) {
+                        if (!repr_data->initialize_slots)
+                            repr_data->initialize_slots = (INTVAL *) mem_sys_allocate_zeroed((info_alloc + 1) * sizeof(INTVAL));
+                        repr_data->initialize_slots[cur_init_slot] = i;
+                        cur_init_slot++;
+                    }
+                    
+                    /* Does it have special GC needs? */
+                    if (REPR(type)->gc_mark) {
+                        if (!repr_data->gc_mark_slots)
+                            repr_data->gc_mark_slots = (INTVAL *) mem_sys_allocate_zeroed((info_alloc + 1) * sizeof(INTVAL));
+                        repr_data->gc_mark_slots[cur_mark_slot] = i;
+                        cur_mark_slot++;
+                    }
+                    if (REPR(type)->gc_cleanup) {
+                        if (!repr_data->gc_cleanup_slots)
+                            repr_data->gc_cleanup_slots = (INTVAL *) mem_sys_allocate_zeroed((info_alloc + 1) * sizeof(INTVAL));
+                        repr_data->gc_cleanup_slots[cur_cleanup_slot] = i;
+                        cur_cleanup_slot++;
+                    }
+
+                    /* Is it a target for box/unbox operations? */
+                    if (!PMC_IS_NULL(box_target) && VTABLE_get_bool(interp, box_target)) {
+                        /* If it boxes a primitive, note that. */
+                        switch (unboxed_type) {
+                        case STORAGE_SPEC_BP_INT:
+                            if (repr_data->unbox_int_slot >= 0)
+                                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                                        "Duplicate box_target for native int");
+                            repr_data->unbox_int_slot = i;
+                            break;
+                        case STORAGE_SPEC_BP_NUM:
+                            if (repr_data->unbox_num_slot >= 0)
+                                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                                        "Duplicate box_target for native num");
+                            repr_data->unbox_num_slot = i;
+                            break;
+                        case STORAGE_SPEC_BP_STR:
+                            if (repr_data->unbox_str_slot >= 0)
+                                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                                        "Duplicate box_target for native str");
+                            repr_data->unbox_str_slot = i;
+                            break;
+                        default:
+                            /* nothing, just suppress 'missing default' warning */
+                            break;
+                        }
+                        
+                        /* Also list in the by-repr unbox list. */
+                        if (repr_data->unbox_slots == NULL)
+                            repr_data->unbox_slots = (P6opaqueBoxedTypeMap *) mem_sys_allocate_zeroed(info_alloc * sizeof(P6opaqueBoxedTypeMap));
+                        repr_data->unbox_slots[cur_unbox_slot].repr_id = REPR(type)->ID;
+                        repr_data->unbox_slots[cur_unbox_slot].slot = i;
+                        cur_unbox_slot++;
+                    }
+                }
+            }
+
+            /* Handle PMC attributes, which need marking and may have auto-viv needs. */
+            if (unboxed_type == STORAGE_SPEC_BP_NONE) {
+                if (!repr_data->gc_pmc_mark_offsets)
+                    repr_data->gc_pmc_mark_offsets = (INTVAL *) mem_sys_allocate_zeroed(info_alloc * sizeof(INTVAL));
+                repr_data->gc_pmc_mark_offsets[cur_pmc_attr] = cur_size;
+                cur_pmc_attr++;
+                if (!PMC_IS_NULL(av_cont)) {
+                    if (!repr_data->auto_viv_values)
+                        repr_data->auto_viv_values = (PMC **) mem_sys_allocate_zeroed(info_alloc * sizeof(PMC *));
+                    repr_data->auto_viv_values[i] = av_cont;
+                }
+            }
+            
+            /* Do allocation. */
+            /* XXX TODO Alignment! Important when we get int1, int8, etc. */
+            repr_data->attribute_offsets[i] = cur_size;
+            cur_size += bits / 8;
+        }
+
+        /* Finally, put computed allocation size in place; it's body size plus
+         * header size. Also number of markables and sentinels. */
+        repr_data->allocation_size = cur_size + sizeof(P6opaqueInstance);
+        repr_data->gc_pmc_mark_offsets_count = cur_pmc_attr;
+        if (repr_data->initialize_slots)
+            repr_data->initialize_slots[cur_init_slot] = -1;
+        if (repr_data->gc_mark_slots)
+            repr_data->gc_mark_slots[cur_mark_slot] = -1;
+        if (repr_data->gc_cleanup_slots)
+            repr_data->gc_cleanup_slots[cur_cleanup_slot] = -1;
+    }
+
+    Parrot_unblock_GC_mark(interp);
+}
+
+/* XXXXX To here goes away after REPR compose refactors. XXXXX */
+
+/* Locates all of the attributes. Puts them onto a flattened, ordered
+ * list of attributes (populating the passed flat_list). Also builds
+ * the index mapping for doing named lookups. Note index is not related
+ * to the storage position. */
+static PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *mro, P6opaqueREPRData *repr_data) {
+    PMC    *flat_list      = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+    PMC    *class_list     = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+    PMC    *attr_map_list  = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+    STRING *name_str       = Parrot_str_new_constant(interp, "name");
+    INTVAL  current_slot   = 0;
+    
+    INTVAL num_classes, i;
+    P6opaqueNameMap * result = NULL;
+
+    /* Walk through the MRO backwards. */
+    INTVAL mro_idx = VTABLE_elements(interp, mro);
+    while (mro_idx)
+    {
+        /* Get current type in MRO. */
+        PMC    *type_info     = VTABLE_get_pmc_keyed_int(interp, mro, --mro_idx);
+        PMC    *current_class = decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, type_info, 0));
+        
+        /* Get its local parents. */
+        PMC    *parents     = VTABLE_get_pmc_keyed_int(interp, type_info, 2);
+        INTVAL  num_parents = VTABLE_elements(interp, parents);
+
+        /* Get attributes and iterate over them. */
+        PMC *attributes = VTABLE_get_pmc_keyed_int(interp, type_info, 1);
+        PMC *attr_map   = PMCNULL;
+        PMC *attr_iter  = VTABLE_get_iter(interp, attributes);
+        while (VTABLE_get_bool(interp, attr_iter)) {
+            /* Get attribute. */
+            PMC * attr_hash = VTABLE_shift_pmc(interp, attr_iter);
+
+            /* Get its name. */
+            PMC    *name_pmc = VTABLE_get_pmc_keyed_str(interp, attr_hash, name_str);
+            STRING *name     = VTABLE_get_string(interp, name_pmc);
+
+            /* Allocate a slot. */
+            if (PMC_IS_NULL(attr_map))
+                attr_map = Parrot_pmc_new(interp, enum_class_Hash);
+            VTABLE_set_pmc_keyed_str(interp, attr_map, name,
+                Parrot_pmc_new_init_int(interp, enum_class_Integer, current_slot));
+            current_slot++;
+
+            /* Push attr onto the flat list. */
+            VTABLE_push_pmc(interp, flat_list, attr_hash);
+        }
+
+        /* Add to class list and map list. */
+        VTABLE_push_pmc(interp, class_list, current_class);
+        VTABLE_push_pmc(interp, attr_map_list, attr_map);
+
+        /* If there's more than one parent, flag that we in an MI
+         * situation. */
+        if (num_parents > 1)
+            repr_data->mi = 1;
+    }
+
+    /* We can now form the name map. */
+    num_classes = VTABLE_elements(interp, class_list);
+    result = (P6opaqueNameMap *) mem_sys_allocate_zeroed(sizeof(P6opaqueNameMap) * (1 + num_classes));
+    for (i = 0; i < num_classes; i++) {
+        result[i].class_key = VTABLE_get_pmc_keyed_int(interp, class_list, i);
+        result[i].name_map  = VTABLE_get_pmc_keyed_int(interp, attr_map_list, i);
+    }
+    repr_data->name_to_index_mapping = result;
+
+    return flat_list;
+}
+
+/* This works out an allocation strategy for the object. It takes care of
+ * "inlining" storage of attributes that are natively typed, as well as
+ * noting unbox targets. */
+static void compute_allocation_strategy(PARROT_INTERP, PMC *repr_info, P6opaqueREPRData *repr_data) {
+    STRING *type_str       = Parrot_str_new_constant(interp, "type");
+    STRING *box_target_str = Parrot_str_new_constant(interp, "box_target");
+    STRING *avcont_str     = Parrot_str_new_constant(interp, "auto_viv_container");
+    PMC    *flat_list;
+
+    /*
+     * We have to block GC mark here. Because "repr" is assotiated with some
+     * PMC which is not accessible in this function. And we have to write
+     * barrier this PMC because we are poking inside it guts directly. We
+     * do have WB in caller function, but it can be triggered too late is
+     * any of allocation will cause GC run.
+     *
+     * This is kind of minor evil until after I'll find better solution.
+     */
+    Parrot_block_GC_mark(interp);
+
+    /* Compute index mapping table and get flat list of attributes. */
+    flat_list = index_mapping_and_flat_list(interp, repr_info, repr_data);
+    
+    /* If we have no attributes in the index mapping, then just the header. */
+    if (repr_data->name_to_index_mapping[0].class_key == NULL) {
+        repr_data->allocation_size = sizeof(P6opaqueInstance);
+    }
+
+    /* Otherwise, we need to compute the allocation strategy.  */
+    else {
+        /* We track the size of the body part, since that's what we want offsets into. */
+        INTVAL cur_size = 0;
+        
+        /* Get number of attributes and set up various counters. */
+        INTVAL num_attrs        = VTABLE_elements(interp, flat_list);
+        INTVAL info_alloc       = num_attrs == 0 ? 1 : num_attrs;
+        INTVAL cur_pmc_attr     = 0;
+        INTVAL cur_init_slot    = 0;
+        INTVAL cur_mark_slot    = 0;
+        INTVAL cur_cleanup_slot = 0;
+        INTVAL cur_unbox_slot   = 0;
+        INTVAL i;
+
+        /* Allocate offset array and GC mark info arrays. */
+        repr_data->num_attributes      = num_attrs;
+        repr_data->attribute_offsets   = (INTVAL *) mem_sys_allocate(info_alloc * sizeof(INTVAL));
+        repr_data->flattened_stables   = (STable **) mem_sys_allocate_zeroed(info_alloc * sizeof(PMC *));
+        repr_data->unbox_int_slot      = -1;
+        repr_data->unbox_num_slot      = -1;
+        repr_data->unbox_str_slot      = -1;
+
+        /* Go over the attributes and arrange their allocation. */
+        for (i = 0; i < num_attrs; i++) {
+            PMC *attr_hash = VTABLE_get_pmc_keyed_int(interp, flat_list, i);
+
+            /* Fetch its type and box target flag, if available. */
+            PMC *type       = VTABLE_get_pmc_keyed_str(interp, attr_hash, type_str);
+            PMC *box_target = VTABLE_get_pmc_keyed_str(interp, attr_hash, box_target_str);
+            PMC *av_cont    = VTABLE_get_pmc_keyed_str(interp, attr_hash, avcont_str);
 
             /* Work out what unboxed type it is, if any. Default to a boxed. */
             INTVAL unboxed_type = STORAGE_SPEC_BP_NONE;
@@ -417,7 +657,9 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 
 /* Composes the representation. */
 static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
-    /* TODO: move allocation strategy here. */
+    P6opaqueREPRData * repr_data = (P6opaqueREPRData *) st->REPR_data;
+    compute_allocation_strategy(interp, repr_info, repr_data);
+    PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
 }
 
 /* Creates a new instance based on the type object. */
@@ -427,7 +669,7 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
     /* Compute allocation strategy if we've not already done so. */
     P6opaqueREPRData * repr_data = (P6opaqueREPRData *) st->REPR_data;
     if (!repr_data->allocation_size) {
-        compute_allocation_strategy(interp, st->WHAT, repr_data);
+        compute_allocation_strategy_OLD(interp, st->WHAT, repr_data);
         PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
     }
 
@@ -615,7 +857,7 @@ static INTVAL hint_for(PARROT_INTERP, STable *st, PMC *class_key, STRING *name) 
     INTVAL slot;
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     if (!repr_data->allocation_size) {
-        compute_allocation_strategy(interp, st->WHAT, repr_data);
+        compute_allocation_strategy_OLD(interp, st->WHAT, repr_data);
         PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
     }
     slot = try_get_slot(interp, repr_data, class_key, name);
@@ -871,7 +1113,7 @@ static void change_type(PARROT_INTERP, PMC *obj, PMC *new_type) {
     
     /* If the new REPR never calculated it's object layout, do so now. */
     if (!new_repr_data->allocation_size) {
-        compute_allocation_strategy(interp, new_type, new_repr_data);
+        compute_allocation_strategy_OLD(interp, new_type, new_repr_data);
         PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC(new_type));
     }
     
@@ -899,7 +1141,7 @@ static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter
     INTVAL num_attributes, i;
     
     if (!repr_data->allocation_size) {
-        compute_allocation_strategy(interp, st->WHAT, repr_data);
+        compute_allocation_strategy_OLD(interp, st->WHAT, repr_data);
         PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
     }
     
@@ -940,7 +1182,7 @@ static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *
     INTVAL i, num_classes;
     
     if (!repr_data->allocation_size) {
-        compute_allocation_strategy(interp, st->WHAT, repr_data);
+        compute_allocation_strategy_OLD(interp, st->WHAT, repr_data);
         PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
     }
     
