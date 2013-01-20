@@ -180,23 +180,11 @@ class NQP::World is HLL::World {
         $block[0].push(QAST::Var.new( :scope('lexical'), :name($name), :decl('var') ));
         
         # Fixup and deserialization task is the same.
-        my $fixup := QAST::Stmts.new(
-            QAST::Op.new(
-                :op('callmethod'), :name('set_static_lexpad_value'),
-                QAST::VM.new(
-                    pir => '    .const "LexInfo" %r = "' ~ $block.cuid() ~ '"'
-                ),
-                QAST::SVal.new( :value($name) ),
-                QAST::WVal.new( :value($obj) )
-            ),
-            # XXX Should only do this once per block we put static stuff
-            # in...or find a way to not do it at all.
-            QAST::Op.new(
-                :op('callmethod'), :name('finish_static_lexpad'),
-                QAST::VM.new(
-                    pir => '    .const "LexInfo" %r = "' ~ $block.cuid() ~ '"'
-                ),
-            )
+        my $fixup := QAST::Op.new(
+            :op('setstaticlex'),
+            $block,
+            QAST::SVal.new( :value($name) ),
+            QAST::WVal.new( :value($obj) )
         );
         self.add_fixup_task(:deserialize_past($fixup), :fixup_past($fixup));
     }
