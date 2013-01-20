@@ -55,7 +55,7 @@ class HLL::World {
         %!addr_to_slot    := nqp::hash();
         @!fixup_tasks     := nqp::list();
         @!load_dependency_tasks := nqp::list();
-        $!precomp_mode    := %*COMPILING<%?OPTIONS><target> eq 'pir';
+        $!precomp_mode    := %*COMPILING<%?OPTIONS><precomp>;
         $!num_code_refs   := 0;
         $!code_ref_blocks := [];
         nqp::scsetdesc($!sc, $description);
