@@ -256,10 +256,10 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
             
             /* Do allocation. */
             /* C structure needs careful alignment */
-            if(bits == 8)       { align = ALIGNOF(Parrot_Int1); }
-            else if(bits == 16) { align = ALIGNOF(Parrot_Int2); }
-            else if(bits == 32) { align = ALIGNOF(Parrot_Int4); }
-            else if(bits == 64) { align = ALIGNOF(Parrot_Int8); }
+            if(bits == 8)       { align = ALIGNOF1(Parrot_Int1); }
+            else if(bits == 16) { align = ALIGNOF1(Parrot_Int2); }
+            else if(bits == 32) { align = ALIGNOF1(Parrot_Int4); }
+            else if(bits == 64) { align = ALIGNOF1(Parrot_Int8); }
             else {
                 Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                     "CStruct representation can only handle 8, 16, 32 or 64 bit sized types");
@@ -649,7 +649,7 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
     spec.can_box = 0;
     spec.bits = sizeof(void *) * 8;
-    spec.align = ALIGNOF(void *);
+    spec.align = ALIGNOF1(void *);
     return spec;
 }
 
