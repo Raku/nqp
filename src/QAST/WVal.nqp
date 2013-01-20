@@ -8,4 +8,12 @@ class QAST::WVal is QAST::Node does QAST::CompileTimeValue {
     method substitute_inline_placeholders(@fillers) {
         self
     }
+
+    method evaluate_unquotes(@unquotes) {
+        self
+    }
+    method dump_extra_node_info() {
+        my $v := self.compile_time_value();
+        $v.HOW.name($v);
+    }
 }

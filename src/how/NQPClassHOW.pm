@@ -33,11 +33,7 @@ knowhow NQPClassHOW {
     has @!done;
     
     # Cached values, which are thrown away if the class changes.
-    # XXX Should be an attribute later, but we get into some trouble with
-    # the bootstrap for now since we end up with SC references back to the
-    # previous build due to a parse altering the cache, and the SC WB getting
-    # hit.
-    my %caches;
+    has %!caches;
 
     # Parrot-specific vtable mapping hash. Maps vtable name to method.
     has %!parrot_vtable_mapping;
@@ -61,14 +57,31 @@ knowhow NQPClassHOW {
     ##
 
     # Creates a new instance of this meta-class.
-    method new(:$name) {
+    method new(:$name = '<anon>') {
         my $obj := nqp::create(self);
         $obj.BUILD(:name($name));
         $obj
     }
 
-    method BUILD(:$name) {
+    method BUILD(:$name = '<anon>') {
         $!name := $name;
+        %!attributes := nqp::hash();
+        %!methods := nqp::hash();
+        @!method_order := nqp::list();
+        @!multi_methods_to_incorporate := nqp::list();
+        @!parents := nqp::list();
+        @!roles := nqp::list();
+        @!vtable := nqp::list();
+        %!method-vtable-slots := nqp::hash();
+        @!mro := nqp::list();
+        @!done := nqp::list();
+        %!parrot_vtable_mapping := nqp::hash();
+        %!parrot_vtable_handler_mapping := nqp::hash();
+        @!BUILDALLPLAN := nqp::list();
+        @!BUILDPLAN := nqp::list();
+        $!trace := 0;
+        $!trace_depth := 0;
+        $!composed := 0;
     }
 
     # Create a new meta-class instance, and then a new type object
@@ -79,15 +92,15 @@ knowhow NQPClassHOW {
     }
 
     method add_method($obj, $name, $code_obj) {
-        if %!methods{$name} {
+        if nqp::existskey(%!methods, $name) {
             nqp::die("This class already has a method named " ~ $name);
         }
         if nqp::isnull($code_obj) || !nqp::defined($code_obj) {
             nqp::die("Cannot add a null method '$name' to class '$!name'");
         }
-        pir::set_method_cache_authoritativeness__vPi($obj, 0);
-        %caches{nqp::where(self)} := {};
-        @!method_order[+@!method_order] := %!methods{$name} := $code_obj;
+        nqp::setmethcacheauth($obj, 0);
+        %!caches{nqp::where(self)} := {} unless nqp::isnull(%!caches);
+        nqp::push(@!method_order, %!methods{$name} := $code_obj);
     }
 
     method add_multi_method($obj, $name, $code_obj) {
@@ -99,14 +112,14 @@ knowhow NQPClassHOW {
         my %todo;
         %todo<name> := $name;
         %todo<code> := $code_obj;
-        @!multi_methods_to_incorporate[+@!multi_methods_to_incorporate] := %todo;
-        pir::set_method_cache_authoritativeness__vPi($obj, 0);
+        nqp::push(@!multi_methods_to_incorporate, %todo);
+        nqp::setmethcacheauth($obj, 0);
         $code_obj;
     }
 
     method add_attribute($obj, $meta_attr) {
         my $name := $meta_attr.name;
-        if %!attributes{$name} {
+        if nqp::existskey(%!attributes, $name) {
             nqp::die("This class already has an attribute named " ~ $name);
         }
         %!attributes{$name} := $meta_attr;
@@ -124,7 +137,7 @@ knowhow NQPClassHOW {
                 nqp::die("Already have " ~ $parent ~ " as a parent class.");
             }
         }
-        @!parents[+@!parents] := $parent;
+        nqp::push(@!parents, $parent);
     }
     
     method set_default_parent($obj, $parent) {
@@ -134,16 +147,16 @@ knowhow NQPClassHOW {
     # Changes the object's parent. Conditions: it has exactly one parent, and that
     # parent has no attributes, and nor does the new one.
     method reparent($obj, $new_parent) {
-        if +@!parents != 1 {
+        if nqp::elems(@!parents) != 1 {
             nqp::die("Can only re-parent a class with exactly one parent");
         }
         for @!parents[0].HOW.mro(@!parents[0]) {
-            if +$_.HOW.attributes($_, :local) {
+            if nqp::elems($_.HOW.attributes($_, :local)) {
                 nqp::die("Can only re-parent a class whose parent has no attributes");
             }
         }
         for $new_parent.HOW.mro($new_parent) {
-            if +$_.HOW.attributes($_, :local) {
+            if nqp::elems($_.HOW.attributes($_, :local)) {
                 nqp::die("Can only re-parent to a class with no attributes");
             }
         }
@@ -163,7 +176,7 @@ knowhow NQPClassHOW {
                 nqp::die("The role " ~ $role ~ " has already been added.");
             }
         }
-        @!roles[+@!roles] := $role;
+        nqp::push(@!roles, $role);
     }
 
     method add_parrot_vtable_mapping($obj, $name, $meth) {
@@ -192,25 +205,21 @@ knowhow NQPClassHOW {
             my @specialized_roles;
             for @!roles {
                 my $ins := $_.HOW.specialize($_, $obj);
-                @specialized_roles.push($ins);
-                @!done[+@!done] := $_;
-                @!done[+@!done] := $ins;
+                nqp::push(@specialized_roles, $ins);
+                nqp::push(@!done, $_);
+                nqp::push(@!done, $ins);
             }
             RoleToClassApplier.apply($obj, @specialized_roles);
         }
 
         # If we have no parents and we're not called NQPMu then add the
         # default parent.
-        if +@!parents == 0 && $!name ne 'NQPMu' {
+        if nqp::elems(@!parents) == 0 && $!name ne 'NQPMu' {
             self.add_parent($obj, $!default_parent)
         }
 
-        # Some things we only do if we weren't already composed once, like building
-        # the MRO.
-        unless $!composed {
-            @!mro := compute_c3_mro($obj);
-            $!composed := 1;
-        }
+        # Compute the MRO.
+        @!mro := compute_c3_mro($obj);
 
         # Incorporate any new multi candidates (needs MRO built).
         self.incorporate_multi_candidates($obj);
@@ -229,12 +238,58 @@ knowhow NQPClassHOW {
         
         # Create BUILDPLAN.
         self.create_BUILDPLAN($obj);
+        
+        # Compose the representation.
+        unless $!composed {
+            self.compose_repr($obj);
+        }
+        
+        # Mark as composed.
+        $!composed := 1;
 
         $obj
     }
+    
+    method compose_repr($obj) {
+        # Use any attribute information to produce attribute protocol
+        # data. The protocol consists of an array...
+        my @repr_info;
+        
+        # ...which contains an array per MRO entry...
+        for @!mro -> $type_obj {
+            my @type_info;
+            nqp::push(@repr_info, @type_info);
+
+            # ...which in turn contains the current type in the MRO...
+            nqp::push(@type_info, $type_obj);
+        
+            # ...then an array of hashes per attribute...
+            my @attrs;
+            nqp::push(@type_info, @attrs);
+            for $type_obj.HOW.attributes($type_obj, :local) -> $attr {
+                my %attr_info;
+                %attr_info<name> := $attr.name;
+                %attr_info<type> := $attr.type;
+                if $attr.box_target {
+                    # Merely having the key serves as a "yes".
+                    %attr_info<box_target> := 1;
+                }
+                if nqp::can($attr, 'auto_viv_container') {
+                    %attr_info<auto_viv_container> := $attr.auto_viv_container;
+                }
+                nqp::push(@attrs, %attr_info);
+            }
+        
+            # ...followed by a list of immediate parents.
+            nqp::push(@type_info, $type_obj.HOW.parents($type_obj, :local));
+        }
+        
+        # Compose the representation using it.
+        nqp::composetype($obj, @repr_info)
+    }
 
     method incorporate_multi_candidates($obj) {
-        my $num_todo := +@!multi_methods_to_incorporate;
+        my $num_todo := nqp::elems(@!multi_methods_to_incorporate);
         my $i := 0;
         while $i != $num_todo {
             # Get method name and code.
@@ -247,10 +302,7 @@ knowhow NQPClassHOW {
             if nqp::defined($dispatcher) {
                 # Yes. Only or dispatcher, though? If only, error. If
                 # dispatcher, simply add new dispatchee.
-                if pir::is_dispatcher__IP($dispatcher) {
-                    pir::push_dispatchee__0PP($dispatcher, $code);
-                }
-                elsif nqp::can($dispatcher, 'is_dispatcher') && $dispatcher.is_dispatcher {
+                if nqp::can($dispatcher, 'is_dispatcher') && $dispatcher.is_dispatcher {
                     $dispatcher.add_dispatchee($code);
                 }
                 else {
@@ -261,26 +313,14 @@ knowhow NQPClassHOW {
                 # Go hunting in the MRO for a proto.
                 my $j := 1;
                 my $found := 0;
-                while $j != +@!mro && !$found {
+                while $j != nqp::elems(@!mro) && !$found {
                     my $parent := @!mro[$j];
                     my %meths := $parent.HOW.method_table($parent);
                     my $dispatcher := %meths{$name};
                     if nqp::defined($dispatcher) {
                         # Found a possible - make sure it's a dispatcher, not
                         # an only.
-                        if pir::is_dispatcher__IP($dispatcher) {
-                            # Clone it and install it in our method table.
-                            my @new_dispatchees;
-                            @new_dispatchees[0] := $code;
-                            my $new_disp := pir::create_dispatch_and_add_candidates__PPP($dispatcher, @new_dispatchees);
-                            my $clone_callback := pir::getprop__PPs($dispatcher, 'CLONE_CALLBACK');
-                            if nqp::defined($clone_callback) {
-                                $clone_callback($dispatcher, $new_disp);
-                            }
-                            %!methods{$name} := $new_disp;
-                            $found := 1;
-                        }
-                        elsif nqp::can($dispatcher, 'is_dispatcher') && $dispatcher.is_dispatcher {
+                        if nqp::can($dispatcher, 'is_dispatcher') && $dispatcher.is_dispatcher {
                             my $new_disp := $dispatcher.derive_dispatcher();
                             $new_disp.add_dispatchee($code);
                             %!methods{$name} := $new_disp;
@@ -306,23 +346,23 @@ knowhow NQPClassHOW {
 
         # Provided we have immediate parents...
         my @result;
-        if +@immediate_parents {
-            if +@immediate_parents == 1 {
+        if @immediate_parents {
+            if nqp::elems(@immediate_parents) == 1 {
                 @result := compute_c3_mro(@immediate_parents[0]);
             } else {
                 # Build merge list of lineraizations of all our parents, add
                 # immediate parents and merge.
                 my @merge_list;
                 for @immediate_parents {
-                    @merge_list.push(compute_c3_mro($_));
+                    nqp::push(@merge_list, compute_c3_mro($_));
                 }
-                @merge_list.push(@immediate_parents);
+                nqp::push(@merge_list, @immediate_parents);
                 @result := c3_merge(@merge_list);
             }
         }
 
         # Put this class on the start of the list, and we're done.
-        @result.unshift($class);
+        nqp::unshift(@result, $class);
         return @result;
     }
 
@@ -336,7 +376,7 @@ knowhow NQPClassHOW {
         # Try to find something appropriate to add to the MRO.
         for @merge_list {
             my @cand_list := $_;
-            if +@cand_list {
+            if @cand_list {
                 my $rejected := 0;
                 my $cand_class := @cand_list[0];
                 $cand_count := $cand_count + 1;
@@ -345,7 +385,7 @@ knowhow NQPClassHOW {
                     unless $_ =:= @cand_list {
                         # Is current candidate in the tail? If so, reject.
                         my $cur_pos := 1;
-                        while $cur_pos <= +$_ {
+                        while $cur_pos <= nqp::elems($_) {
                             if $_[$cur_pos] =:= $cand_class {
                                 $rejected := 1;
                             }
@@ -375,11 +415,11 @@ knowhow NQPClassHOW {
 
         # Otherwise, remove what was accepted from the merge lists.
         my $i := 0;
-        while $i < +@merge_list {
+        while $i < nqp::elems(@merge_list) {
             my @new_list;
             for @merge_list[$i] {
                 unless $_ =:= $accepted {
-                    @new_list.push($_);
+                    nqp::push(@new_list, $_);
                 }
             }
             @merge_list[$i] := @new_list;
@@ -389,67 +429,76 @@ knowhow NQPClassHOW {
         # Need to merge what remains of the list, then put what was accepted on
         # the start of the list, and we're done.
         @result := c3_merge(@merge_list);
-        @result.unshift($accepted);
+        nqp::unshift(@result, $accepted);
         return @result;
     }
 
     method publish_type_cache($obj) {
         my @tc;
-        for @!mro { @tc.push($_); }
-        for @!done { @tc.push($_); }
-        pir::publish_type_check_cache($obj, @tc)
+        for @!mro { nqp::push(@tc, $_); }
+        for @!done { nqp::push(@tc, $_); }
+        nqp::settypecache($obj, @tc)
+    }
+    
+    sub reverse(@in) {
+        my @out;
+        for @in { nqp::unshift(@out, $_) }
+        @out
     }
 
     method publish_method_cache($obj) {
         # Walk MRO and add methods to cache, unless another method
         # lower in the class hierarchy "shadowed" it.
         my %cache;
-        my @mro_reversed := nqp::clone(@!mro);
-        @mro_reversed.reverse();
+        my @mro_reversed := reverse(@!mro);
         for @mro_reversed {
             for $_.HOW.method_table($_) {
-                %cache{$_.key} := $_.value;
+                %cache{nqp::iterkey_s($_)} := nqp::iterval($_);
             }
         }
-        pir::publish_method_cache($obj, %cache);
-        pir::set_method_cache_authoritativeness__0Pi($obj, 1);
+        nqp::setmethcache($obj, %cache);
+        nqp::setmethcacheauth($obj, 1);
     }
 
     method publish_boolification_spec($obj) {
         my $bool_meth := self.find_method($obj, 'Bool');
         if nqp::defined($bool_meth) {
-            pir::set_boolification_spec__0PiP($obj, 0, $bool_meth)
+            nqp::setboolspec($obj, 0, $bool_meth)
         }
         else {
-            pir::set_boolification_spec__0PiP($obj, 5, nqp::null())
+            nqp::setboolspec($obj, 5, nqp::null())
         }
     }
 
     method publish_parrot_vtable_mapping($obj) {
         my %mapping;
-        my @mro_reversed := nqp::clone(@!mro);
-        @mro_reversed.reverse();
-        for @mro_reversed {
+        my %seen_handlers;
+        for @!mro {
+            for $_.HOW.parrot_vtable_handler_mappings($_, :local(1)) {
+                %seen_handlers{$_.key} := 1;
+            }
             for $_.HOW.parrot_vtable_mappings($_, :local(1)) {
-                %mapping{$_.key} := $_.value;
+                unless nqp::existskey(%mapping, $_.key)
+                        || nqp::existskey(%seen_handlers, $_.key) {
+                    %mapping{$_.key} := $_.value;
+                }
             }
         }
         if +%mapping {
-            pir::stable_publish_vtable_mapping__vPP($obj, %mapping);
+            pir::stable_publish_vtable_mapping__0PP($obj, %mapping);
         }
     }
 
     method publish_parrot_vtablee_handler_mapping($obj) {
         my %mapping;
-        my @mro_reversed := nqp::clone(@!mro);
-        @mro_reversed.reverse();
+        my @mro_reversed := reverse(@!mro);
         for @mro_reversed {
             for $_.HOW.parrot_vtable_handler_mappings($_, :local(1)) {
                 %mapping{$_.key} := $_.value;
             }
         }
         if +%mapping {
-            pir::stable_publish_vtable_handler_mapping__vPP($obj, %mapping);
+            pir::stable_publish_vtable_handler_mapping__0PP($obj, %mapping);
         }
     }
     
@@ -460,59 +509,58 @@ knowhow NQPClassHOW {
     # nested array is an "op" representing the task to perform:
     #   0 code = call specified BUILD method
     #   1 class name attr_name = try to find initialization value
-    #   2 class attr_name code = call default value closure if needed
+    #   2 class name attr_name = try to find initialization value, or set nqp::list()
+    #   3 class name attr_name = try to find initialization value, or set nqp::hash()
+    #   4 class attr_name code = call default value closure if needed
     method create_BUILDPLAN($obj) {
-        # Get MRO, then work from least derived to most derived.
-        my @all_plan;
+        # First, we'll create the build plan for just this class.
         my @plan;
-        my @mro := self.mro($obj);
-        my $i := +@mro;
-        while $i > 0 {
-            # Get current class to consider and its attrs.
-            $i := $i - 1;
-            my $class := @mro[$i];
-            my @attrs := $class.HOW.attributes($class, :local(1));
-            
-            # Does it have its own BUILD?
-            my $build := $class.HOW.find_method($class, 'BUILD', :no_fallback(1));
-            if nqp::defined($build) {
-                # We'll call the custom one.
-                my $entry := [0, $build];
-                @all_plan[+@all_plan] := $entry;
-                if $i == 0 {
-                    @plan[+@plan] := $entry;
-                }
-            }
-            else {
-                # No custom BUILD. Rather than having an actual BUILD
-                # in Mu, we produce ops here per attribute that may
-                # need initializing.
-                for @attrs {
-                    my $attr_name := $_.name;
-                    my $name      := nqp::substr($attr_name, 2);
-                    my $entry     := [1, $class, $name, $attr_name];
-                    @all_plan[+@all_plan] := $entry;
-                    if $i == 0 {
-                        @plan[+@plan] := $entry;
-                    }
-                }
-            }
-            
-            # Check if there's any default values to put in place.
+        my @attrs := $obj.HOW.attributes($obj, :local(1));
+        
+        # Does it have its own BUILD?
+        my $build := $obj.HOW.find_method($obj, 'BUILD', :no_fallback(1));
+        if nqp::defined($build) {
+            # We'll call the custom one.
+            nqp::push(@plan, [0, $build]);
+        }
+        else {
+            # No custom BUILD. Rather than having an actual BUILD
+            # in Mu, we produce ops here per attribute that may
+            # need initializing.
             for @attrs {
-                if nqp::can($_, 'build') {
-                    my $default := $_.build;
-                    if nqp::defined($default) {
-                        my $entry := [2, $class, $_.name, $default];
-                        @all_plan[+@all_plan] := $entry;
-                        if $i == 0 {
-                            @plan[+@plan] := $entry;
-                        }
-                    }
+                my $attr_name := $_.name;
+                my $name      := nqp::substr($attr_name, 2);
+                my $sigil     := nqp::substr($attr_name, 0, 1);
+                my $sigop     := $sigil eq '@' ?? 2 !! $sigil eq '%' ?? 3 !! 1;
+                nqp::push(@plan, [$sigop, $obj, $name, $attr_name]);
+            }
+        }
+        
+        # Check if there's any default values to put in place.
+        for @attrs {
+            if nqp::can($_, 'build') {
+                my $default := $_.build;
+                if nqp::defined($default) {
+                    nqp::push(@plan, [4, $obj, $_.name, $default]);
                 }
             }
         }
+        
+        # Install plan for this class.
         @!BUILDPLAN := @plan;
+        
+        # Now create the full plan by getting the MRO, and working from
+        # least derived to most derived, copying the plans.
+        my @all_plan;
+        my @mro := self.mro($obj);
+        my $i := nqp::elems(@mro);
+        while $i > 0 {
+            $i := $i - 1;
+            my $class := @mro[$i];
+            for $class.HOW.BUILDPLAN($class) {
+                nqp::push(@all_plan, $_);
+            }
+        }
         @!BUILDALLPLAN := @all_plan;
     }
     
@@ -528,7 +576,7 @@ knowhow NQPClassHOW {
     ## Introspecty
     ##
 
-    method parents($obj, :$local) {
+    method parents($obj, :$local = 0) {
         $local ?? @!parents !! @!mro
     }
     
@@ -540,7 +588,7 @@ knowhow NQPClassHOW {
         @!roles
     }
 
-    method methods($obj, :$local) {
+    method methods($obj, :$local = 0) {
         if $local {
             @!method_order
         }
@@ -548,7 +596,7 @@ knowhow NQPClassHOW {
             my @meths;
             for @!mro {
                 for $_.HOW.methods($_, :local) {
-                    @meths.push($_)
+                    nqp::push(@meths, $_)
                 }
             }
             @meths
@@ -571,17 +619,17 @@ knowhow NQPClassHOW {
         $!trace_depth
     }
 
-    method attributes($obj, :$local) {
+    method attributes($obj, :$local = 0) {
         my @attrs;
         if $local {
             for %!attributes {
-                @attrs.push($_.value);
+                nqp::push(@attrs, nqp::iterval($_));
             }
         }
         else {
             for @!mro {
                 for $_.HOW.attributes($_, :local) {
-                    @attrs.push($_);
+                    nqp::push(@attrs, $_);
                 }
             }
         }
@@ -602,7 +650,7 @@ knowhow NQPClassHOW {
 
     method isa($obj, $check) {
         my $check-class := $check.WHAT;
-        my $i := +@!mro;
+        my $i := nqp::elems(@!mro);
         while $i > 0 {
             $i := $i - 1;
             if @!mro[$i] =:= $check-class {
@@ -613,7 +661,7 @@ knowhow NQPClassHOW {
     }
 
     method does($obj, $check) {
-        my $i := +@!done;
+        my $i := nqp::elems(@!done);
         while $i > 0 {
             $i := $i - 1;
             if @!done[$i] =:= $check {
@@ -637,14 +685,14 @@ knowhow NQPClassHOW {
     ##
     ## Dispatchy
     ##
-    method find_method($obj, $name, :$no_fallback, :$no_trace) {
+    method find_method($obj, $name, :$no_fallback = 0, :$no_trace = 0) {
         for @!mro {
             my %meths := $_.HOW.method_table($obj);
-            my $found := %meths{$name};
-            if nqp::defined($found) {
+            if nqp::existskey(%meths, $name) {
+                my $found := %meths{$name};
                 return $!trace && !$no_trace && nqp::substr($name, 0, 1) ne '!' ??
                     -> *@pos, *%named { 
-                        say(nqp::x('  ', $!trace_depth) ~ "Calling $name");
+                        nqp::say(nqp::x('  ', $!trace_depth) ~ "Calling $name");
                         $!trace_depth := $!trace_depth + 1;
                         my $result := $found(|@pos, |%named);
                         $!trace_depth := $!trace_depth - 1;
@@ -660,10 +708,10 @@ knowhow NQPClassHOW {
     ## Cache-related
     ##
     method cache($obj, $key, $value_generator) {
-        nqp::existskey(%caches, nqp::where(self)) || (%caches{nqp::where(self)} := {});
-        nqp::existskey(%caches{nqp::where(self)}, $key) ??
-            %caches{nqp::where(self)}{$key} !!
-            (%caches{nqp::where(self)}{$key} := $value_generator())
+        %!caches := nqp::hash() unless nqp::ishash(%!caches);
+        nqp::existskey(%!caches, $key) ??
+            %!caches{$key} !!
+            (%!caches{$key} := $value_generator())
     }
     
     
@@ -675,11 +723,13 @@ knowhow NQPClassHOW {
         # See if we mixed in before.
         my $found := 0;
         my $new_type;
-        for @!mixin_cache -> $c_role, $c_type {
-            if $c_role =:= $role {
-                $new_type := $c_type;
-                $found := 1;
-                last;
+        unless nqp::isnull(@!mixin_cache) {
+            for @!mixin_cache -> $c_role, $c_type {
+                if $c_role =:= $role {
+                    $new_type := $c_type;
+                    $found := 1;
+                    last;
+                }
             }
         }
         
@@ -696,14 +746,18 @@ knowhow NQPClassHOW {
             $new_type.HOW.compose($new_type);
             
             # Store the type.
-            @!mixin_cache[+@!mixin_cache] := $role;
-            @!mixin_cache[+@!mixin_cache] := $new_type;
+            pir::nqp_disable_sc_write_barrier__v();
+            @!mixin_cache := [] if nqp::isnull(@!mixin_cache);
+            nqp::push(@!mixin_cache, $role);
+            nqp::push(@!mixin_cache, $new_type);
+            pir::nqp_enable_sc_write_barrier__v();
+            1;
         }
         
         # If the original object was concrete, change its type by calling a
         # low level op. Otherwise, we just return the new type object
         nqp::isconcrete($obj) ??
-            pir::repr_change_type__0PP($obj, $new_type) !!
+            nqp::rebless($obj, $new_type) !!
             $new_type
     }
     
@@ -713,8 +767,8 @@ knowhow NQPClassHOW {
     method trace-on($obj, $depth?) {
         $!trace := 1;
         $!trace_depth := $depth // 0;
-        pir::set_method_cache_authoritativeness__0Pi($obj, 0);
-        pir::publish_method_cache($obj, nqp::hash());
+        nqp::setmethcacheauth($obj, 0);
+        nqp::setmethcache($obj, nqp::hash());
     }
     method trace-off($obj) {
         $!trace := 0;

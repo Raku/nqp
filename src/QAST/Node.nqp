@@ -1,5 +1,3 @@
-use NQPHLL;
-
 class QAST::Node {
     # For children.
     has @!array
@@ -66,31 +64,33 @@ class QAST::Node {
     method unshift($value) { nqp::unshift(self.list, $value) }
     
     method hash() {
-        %!hash
+        nqp::isnull(%!hash) ?? %!hash !! nqp::hash()
     }
     method ($key) is parrot_vtable('get_pmc_keyed_str') {
-        %!hash{$key}
+        nqp::isnull(%!hash) ?? NQPMu !! %!hash{$key}
     }
     method ($key) is parrot_vtable('get_pmc_keyed') {
-        %!hash{$key}
+        nqp::isnull(%!hash) ?? NQPMu !! %!hash{$key}
     }
     method ($key, $value) is parrot_vtable('set_pmc_keyed_str') {
+        %!hash := nqp::hash() if nqp::isnull(%!hash);
         %!hash{$key} := $value;
     }
     method ($key, $value) is parrot_vtable('set_pmc_keyed') {
+        %!hash := nqp::hash() if nqp::isnull(%!hash);
         %!hash{$key} := $value;
     }
     method ($key) is parrot_vtable('exists_keyed_str') {
-        nqp::existskey(%!hash, $key)
+        nqp::isnull(%!hash) ?? 0 !! nqp::existskey(%!hash, $key)
     }
     method ($key) is parrot_vtable('exists_keyed') {
-        nqp::existskey(%!hash, $key)
+        nqp::isnull(%!hash) ?? 0 !! nqp::existskey(%!hash, $key)
     }
     method ($key) is parrot_vtable('delete_keyed_str') {
-        nqp::deletekey(%!hash, $key)
+        nqp::deletekey(%!hash, $key) unless nqp::isnull(%!hash)
     }
     method ($key) is parrot_vtable('delete_keyed') {
-        nqp::deletekey(%!hash, $key)
+        nqp::deletekey(%!hash, $key) unless nqp::isnull(%!hash)
     }
     
     my %uniques;
@@ -110,4 +110,44 @@ class QAST::Node {
     method substitute_inline_placeholders(@fillers) {
         nqp::die(self.HOW.name(self) ~ " does not support inlining");
     }
+
+    method evaluate_unquotes(@unquotes) {
+        nqp::die(self.HOW.name(self) ~ " does not support evaluating unquotes");
+    }
+
+    method dump($indent?) {
+        unless nqp::defined($indent) {
+            $indent := 0;
+        }
+        my @chunks := [
+            nqp::x(' ', $indent), '- ', self.HOW.name(self),
+        ];
+        my $extra := self.dump_extra_node_info();
+        if nqp::chars($extra) {
+            nqp::push(@chunks, "($extra)");
+        }
+        if (self.node) {
+            nqp::push(@chunks, ' ');
+            nqp::push(@chunks, pir::escape__SS(self.node));
+        }
+        nqp::push(@chunks, "\n");
+        self.dump_children($indent + 2, @chunks);
+        return nqp::join('', @chunks);
+    }
+
+    method dump_children(int $indent, @onto) {
+        for @!array {
+            if nqp::istype($_, QAST::Node) {
+                nqp::push(@onto, $_.dump($indent));
+            }
+            else {
+                nqp::push(@onto, nqp::x(' ', $indent));
+                nqp::push(@onto, '- ');
+                nqp::push(@onto, ~$_);
+                nqp::push(@onto, "\n");
+            }
+        }
+    }
+
+    method dump_extra_node_info() { '' }
 }

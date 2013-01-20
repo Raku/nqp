@@ -25,6 +25,7 @@ pmclass STable manual_attrs dynpmc group nqp {
     VTABLE void init_pmc(PMC *HOW) {
         /* Put underlying struct in place. */
         STable *st = mem_allocate_zeroed_typed(STable);
+        UNUSED(INTERP)
         st->type_cache_id = get_next_type_cache_id();
         st->HOW = HOW;
         PMC_data(SELF) = st;

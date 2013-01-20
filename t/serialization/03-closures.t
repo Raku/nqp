@@ -7,8 +7,8 @@ plan(9);
 # Serializing a type where some methods are clones; no dependency on outers
 # just yet.
 {
-    my $sc := pir::nqp_create_sc__Ps('TEST_SC_1_IN');
-    my $sh := pir::new__Ps('ResizableStringArray');
+    my $sc := nqp::createsc('TEST_SC_1_IN');
+    my $sh := nqp::list_s();
     
     my $m1 := (method () { "success!" }).get_lexinfo().get_static_code();
     pir::nqp_add_code_ref_to_sc__vPiP($sc, 0, $m1);
@@ -23,11 +23,11 @@ plan(9);
     $type.HOW.compose($type);
     pir::nqp_add_object_to_sc__vPiP($sc, 0, $type);
     
-    my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+    my $serialized := nqp::serialize($sc, $sh);
 
-    my $dsc := pir::nqp_create_sc__Ps('TEST_SC_1_OUT');
+    my $dsc := nqp::createsc('TEST_SC_1_OUT');
     my $cr := nqp::list($m1);
-    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh, $cr);
+    nqp::deserialize($serialized, $dsc, $sh, $cr, nqp::null());
     
     ok(nqp::elems($dsc) >= 1,                 'deserialized SC has at least the type');
     ok(!nqp::isconcrete($dsc[0]),             'type object deserialized and is not concrete');
@@ -38,8 +38,8 @@ plan(9);
 # Serializing a type where some methods are clones and depend on lexical
 # environment. This is kinda faking up how roles work.
 {
-    my $sc := pir::nqp_create_sc__Ps('TEST_SC_2_IN');
-    my $sh := pir::new__Ps('ResizableStringArray');
+    my $sc := nqp::createsc('TEST_SC_2_IN');
+    my $sh := nqp::list_s();
     
     my $raw_sub := (sub make_meth_with($x) {
         my $m := method () { $x };
@@ -69,11 +69,11 @@ plan(9);
     $type2.HOW.compose($type2);
     pir::nqp_add_object_to_sc__vPiP($sc, 1, $type2);
     
-    my $serialized := pir::nqp_serialize_sc__SPP($sc, $sh);
+    my $serialized := nqp::serialize($sc, $sh);
 
-    my $dsc := pir::nqp_create_sc__Ps('TEST_SC_2_OUT');
+    my $dsc := nqp::createsc('TEST_SC_2_OUT');
     my $cr := nqp::list($raw_sub, $raw_meth);
-    pir::nqp_deserialize_sc__vSPP($serialized, $dsc, $sh, $cr);
+    nqp::deserialize($serialized, $dsc, $sh, $cr, nqp::null());
     
     ok(nqp::elems($dsc) >= 2,                 'deserialized SC has at least the two type');
     ok(!nqp::isconcrete($dsc[0]),             'first type object deserialized and is not concrete');

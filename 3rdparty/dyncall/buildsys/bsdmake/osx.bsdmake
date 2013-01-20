@@ -31,7 +31,8 @@ as_FLAGS	=
 
 LINK_DLL_CMD	= $(CXX) -o $(.TARGET) -dynamiclib $(LDFLAGS) $(.ALLSRC) $(LIBS)
 #LINK_DLL_CMD	= $(LD) -o $(.TARGET) -dylib $(LDFLAGS) $(.ALLSRC) $(LIBS)
-LINK_LIB_CMD	= libtool -static -o $(.TARGET) $(.ALLSRC)
+LINK_LIB_CMD	= /usr/bin/libtool -static -o $(.TARGET) $(.ALLSRC)
+#LINK_LIB_CMD   = ar -r $(.TARGET) $(.ALLSRC)
 
 .if $(BUILD_ARCH) == "universal"
 TARGET_ARCH	= -arch i386 -arch ppc -arch x86_64

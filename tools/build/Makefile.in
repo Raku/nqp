@@ -1,7 +1,7 @@
-# Copyright (C) 2006-2012, The Perl Foundation.
+# Copyright (C) 2006-2013, The Perl Foundation.
 # $Id$
 
-PARROT_ARGS      =
+PARROT_ARGS      = -L. -X.
 
 # values from parrot_config
 PARROT_BIN_DIR     = @bindir@
@@ -34,7 +34,7 @@ TOM           = 3rdparty/libtommath/bn
 DYNCALLINC    =
 
 # locations of parrot resources
-PARROT            = $(PARROT_BIN_DIR)/parrot$(EXE)
+PARROT            = $(PARROT_BIN_DIR)/parrot$(EXE) $(PARROT_ARGS)
 PARROT_DLL        = @dll@
 PARROT_DLL_COPY   = @dllcopy@
 PARROT_NQP        = $(PARROT_BIN_DIR)/parrot_nqp$(EXE)
@@ -52,13 +52,6 @@ DYNEXT_DIR       = dynext
 PMC_DIR          = src/pmc
 OPS_DIR          = src/ops
 
-PAST_SOURCES = \
-  src/PASTRegex.pir \
-  src/PAST/SixModelPASTExtensions.pir \
-  src/PAST/NQP.pir \
-  src/cheats/parrot-callcontext.pir \
-  src/cheats/parrot-sub.pir \
-
 HLL_SOURCES = \
   src/HLL/Grammar.pm \
   src/HLL/Actions.pm \
@@ -66,11 +59,10 @@ HLL_SOURCES = \
   src/HLL/CommandLine.pm \
   src/HLL/World.pm \
 
-QAST_COMBINED = QAST.nqp
-QAST_PIR = QAST.pir
-QAST_PBC = QAST.pbc
-QAST_SOURCES = \
-  src/QAST/PIRT.nqp \
+QASTNODE_COMBINED = QASTNode.nqp
+QASTNODE_PIR = QASTNode.pir
+QASTNODE_PBC = QASTNode.pbc
+QASTNODE_SOURCES = \
   src/QAST/CompileTimeValue.nqp \
   src/QAST/SpecialArg.nqp \
   src/QAST/Node.nqp \
@@ -82,15 +74,21 @@ QAST_SOURCES = \
   src/QAST/WVal.nqp \
   src/QAST/Want.nqp \
   src/QAST/Var.nqp \
+  src/QAST/VarWithFallback.nqp \
   src/QAST/Op.nqp \
   src/QAST/VM.nqp \
   src/QAST/Stmts.nqp \
   src/QAST/Stmt.nqp \
   src/QAST/Block.nqp \
-  src/QAST/BlockMemo.nqp \
   src/QAST/Unquote.nqp \
   src/QAST/CompUnit.nqp \
   src/QAST/InlinePlaceholder.nqp \
+
+QAST_COMBINED = QAST.nqp
+QAST_PIR = QAST.pir
+QAST_PBC = QAST.pbc
+QAST_SOURCES = \
+  src/QAST/PIRT.nqp \
   src/QAST/Operations.nqp \
   src/QAST/Compiler.nqp \
 
@@ -98,6 +96,11 @@ P6QREGEX_SOURCES = \
   src/QRegex/P6Regex/Grammar.nqp \
   src/QRegex/P6Regex/Actions.nqp \
   src/QRegex/P6Regex/Compiler.nqp \
+
+P5QREGEX_SOURCES = \
+  src/QRegex/P5Regex/Grammar.nqp \
+  src/QRegex/P5Regex/Actions.nqp \
+  src/QRegex/P5Regex/Compiler.nqp \
 
 QREGEX_COMBINED = QRegex.nqp
 QREGEX_PIR = QRegex.pir
@@ -120,16 +123,16 @@ CORE_SETTING_SOURCES = \
 CORE_SETTING_NQP = NQPCORE.setting
 
 STAGE0_SOURCES = \
-  	src/stage0/NQPMO-s0.pir \
+	src/stage0/NQPMO-s0.pir \
 	src/stage0/ModuleLoader-s0.pir \
 	src/stage0/NQPCORE.setting-s0.pir \
+	src/stage0/QASTNode-s0.pir \
 	src/stage0/QRegex-s0.pir \
 	src/stage0/HLL-s0.pir \
 	src/stage0/QAST-s0.pir \
 	src/stage0/P6QRegex-s0.pir \
 	src/stage0/NQP-s0.pir
-  
-  
+
 STAGE0 = src/stage0
 STAGE1 = src/stage1
 STAGE2 = src/stage2
@@ -137,8 +140,6 @@ STAGE2 = src/stage2
 MODULE_LOADER_PBC = ModuleLoader.pbc
 
 REGEX_PBC       = NQPRegex.pbc
-
-PAST_PBC        = PASTRegex.pbc
 
 HLL_PBC          = NQPHLL.pbc
 HLL_COMBINED     = gen/NQPHLL.pm
@@ -152,6 +153,10 @@ P6QREGEX_PBC          = NQPP6QRegex.pbc
 P6QREGEX_COMBINED     = gen/NQPP6QRegex.pm
 P6QREGEX_COMBINED_PIR = gen/NQPP6QRegex.pir
 
+P5QREGEX_PBC          = NQPP5QRegex.pbc
+P5QREGEX_COMBINED     = gen/NQPP5QRegex.pm
+P5QREGEX_COMBINED_PIR = gen/NQPP5QRegex.pir
+
 NQP_COMBINED     = gen/NQP.pm
 NQP_COMBINED_PIR = gen/NQP.pir
 NQP_PBC          = nqp.pbc
@@ -160,14 +165,16 @@ NQP_EXE          = nqp$(EXE)
 NQP_SOURCES = \
   src/NQP/World.pm \
   src/NQP/Grammar.pm \
+  src/NQP/Ops.pm \
   src/NQP/Actions.pm \
   src/NQP/Compiler.pm \
 
 NQP_MO_SOURCES = src/how/Archetypes.pm src/how/RoleToRoleApplier.pm \
                  src/how/NQPConcreteRoleHOW.pm src/how/RoleToClassApplier.pm \
-                 src/how/NQPParametricRoleHOW.pm src/how/NQPClassHOW.pm \
-                 src/how/NQPNativeHOW.pm src/how/NQPAttribute.pm \
-                 src/how/NQPModuleHOW.pm src/how/EXPORTHOW.pm \
+                 src/how/NQPCurriedRoleHOW.pm src/how/NQPParametricRoleHOW.pm \
+                 src/how/NQPClassHOW.pm src/how/NQPNativeHOW.pm \
+                 src/how/NQPAttribute.pm src/how/NQPModuleHOW.pm \
+                 src/how/EXPORTHOW.pm \
 
 NQP_MO_PBC      = nqpmo.pbc
 NQP_MO_PIR      = gen/nqp-mo.pir
@@ -176,10 +183,10 @@ NQP_MO_COMBINED = gen/nqp-mo.pm
 CORE_SETTING_PBC = NQPCORE.setting.pbc
 CORE_SETTING_PIR = gen/NQPCORE.setting.pir
 
-STAGE0_PBCS     = $(STAGE0)/$(NQP_MO_PBC) $(STAGE0)/$(MODULE_LOADER_PBC) $(STAGE0)/$(CORE_SETTING_PBC) $(STAGE0)/$(QREGEX_PBC) $(STAGE0)/$(HLL_PBC) $(STAGE0)/$(QAST_PBC) $(STAGE0)/$(P6QREGEX_PBC) $(STAGE0)/$(NQP_PBC)
-STAGE1_PBCS     = $(STAGE1)/$(NQP_MO_PBC) $(STAGE1)/$(MODULE_LOADER_PBC) $(STAGE1)/$(CORE_SETTING_PBC) $(STAGE1)/$(QREGEX_PBC) $(STAGE1)/$(HLL_PBC) $(STAGE1)/$(QAST_PBC) $(STAGE1)/$(P6QREGEX_PBC) $(STAGE1)/$(NQP_PBC)
-STAGE2_PBCS     = $(STAGE2)/$(NQP_MO_PBC) $(STAGE2)/$(MODULE_LOADER_PBC) $(STAGE2)/$(CORE_SETTING_PBC) $(STAGE2)/$(QREGEX_PBC) $(STAGE2)/$(HLL_PBC) $(STAGE2)/$(QAST_PBC) $(STAGE2)/$(P6QREGEX_PBC) $(STAGE2)/$(NQP_PBC)
-ALL_PBCS        = $(NQP_MO_PBC) $(MODULE_LOADER_PBC) $(CORE_SETTING_PBC) $(QREGEX_PBC) $(HLL_PBC) $(QAST_PBC) $(P6QREGEX_PBC) $(NQP_PBC)
+STAGE0_PBCS     = $(STAGE0)/$(NQP_MO_PBC) $(STAGE0)/$(MODULE_LOADER_PBC) $(STAGE0)/$(CORE_SETTING_PBC) $(STAGE0)/$(QASTNODE_PBC) $(STAGE0)/$(QREGEX_PBC) $(STAGE0)/$(HLL_PBC) $(STAGE0)/$(QAST_PBC) $(STAGE0)/$(P6QREGEX_PBC) $(STAGE0)/$(NQP_PBC)
+STAGE1_PBCS     = $(STAGE1)/$(NQP_MO_PBC) $(STAGE1)/$(MODULE_LOADER_PBC) $(STAGE1)/$(CORE_SETTING_PBC) $(STAGE1)/$(QASTNODE_PBC) $(STAGE1)/$(QREGEX_PBC) $(STAGE1)/$(HLL_PBC) $(STAGE1)/$(QAST_PBC) $(STAGE1)/$(P6QREGEX_PBC) $(STAGE1)/$(NQP_PBC)
+STAGE2_PBCS     = $(STAGE2)/$(NQP_MO_PBC) $(STAGE2)/$(MODULE_LOADER_PBC) $(STAGE2)/$(CORE_SETTING_PBC) $(STAGE2)/$(QASTNODE_PBC) $(STAGE2)/$(QREGEX_PBC) $(STAGE2)/$(HLL_PBC) $(STAGE2)/$(QAST_PBC) $(STAGE2)/$(P6QREGEX_PBC) $(STAGE2)/$(NQP_PBC)
+ALL_PBCS        = $(NQP_MO_PBC) $(MODULE_LOADER_PBC) $(CORE_SETTING_PBC) $(QASTNODE_PBC) $(QREGEX_PBC) $(HLL_PBC) $(QAST_PBC) $(P6QREGEX_PBC) $(NQP_PBC)
 
 GROUP           = nqp_group
 OPS             = nqp_ops
@@ -188,10 +195,14 @@ DYNPMC          = $(PMC_DIR)/$(GROUP)$(LOAD_EXT)
 DYNOPS          = $(OPS_DIR)/$(OPS)$(LOAD_EXT)
 
 PMC_SOURCES     = $(PMC_DIR)/stable.pmc $(PMC_DIR)/sixmodelobject.pmc \
-                  $(PMC_DIR)/dispatchersub.pmc $(PMC_DIR)/nqplexinfo.pmc \
-                  $(PMC_DIR)/nqplexpad.pmc $(PMC_DIR)/serializationcontext.pmc \
-                  $(PMC_DIR)/ownedhash.pmc $(PMC_DIR)/ownedresizablepmcarray.pmc \
-                  $(PMC_DIR)/qrpa.pmc \
+                  $(PMC_DIR)/nqplexinfo.pmc $(PMC_DIR)/nqplexpad.pmc \
+                  $(PMC_DIR)/serializationcontext.pmc $(PMC_DIR)/ownedhash.pmc \
+                  $(PMC_DIR)/ownedresizablepmcarray.pmc $(PMC_DIR)/qrpa.pmc
+
+DYNPMC_HEADERS  = $(PMC_DIR)/pmc_stable.h $(PMC_DIR)/pmc_sixmodelobject.h \
+                  $(PMC_DIR)/pmc_nqplexinfo.h $(PMC_DIR)/pmc_nqplexpad.h \
+                  $(PMC_DIR)/pmc_serializationcontext.h $(PMC_DIR)/pmc_ownedhash.h \
+                  $(PMC_DIR)/pmc_ownedresizablepmcarray.h $(PMC_DIR)/pmc_qrpa.h
 
 OPS_SOURCE      = nqp.ops
 
@@ -480,7 +491,6 @@ CLEANUPS = \
   *.manifest \
   *.pdb \
   $(REGEX_PBC) \
-  $(PAST_PBC) \
   $(HLL_PBC) \
   $(P6REGEX_PBC) \
   $(NQP_MO_PBC) \
@@ -519,15 +529,16 @@ CLEANUPS = \
   3rdparty/sha1/*$(O) \
   $(DYNEXT_DIR)/*$(LOAD_EXT) \
 
-all: $(NQP_EXE)
+all: $(NQP_EXE) $(P5QREGEX_PBC)
 
 install: all
 	$(MKPATH)                   $(DESTDIR)$(PARROT_LIBRARY_DIR)
 	$(CP)  $(MODULE_LOADER_PBC) $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(MODULE_LOADER_PBC)
-	$(CP)  $(PAST_PBC)          $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(PAST_PBC)
 	$(MKPATH)                   $(DESTDIR)$(NQP_LANG_DIR)/lib
 	$(CP)  $(QAST_PBC)          $(DESTDIR)$(NQP_LANG_DIR)/lib/$(QAST_PBC)
+	$(CP)  $(QASTNODE_PBC)      $(DESTDIR)$(NQP_LANG_DIR)/lib/$(QASTNODE_PBC)
 	$(CP)  $(P6QREGEX_PBC)      $(DESTDIR)$(NQP_LANG_DIR)/lib/$(P6QREGEX_PBC)
+	$(CP)  $(P5QREGEX_PBC)      $(DESTDIR)$(NQP_LANG_DIR)/lib/$(P5QREGEX_PBC)
 	$(CP)  $(HLL_PBC)           $(DESTDIR)$(NQP_LANG_DIR)/lib/$(HLL_PBC)
 	$(CP)  $(CORE_SETTING_PBC)  $(DESTDIR)$(NQP_LANG_DIR)/lib/$(CORE_SETTING_PBC)
 	$(CP)  $(NQP_MO_PBC)        $(DESTDIR)$(NQP_LANG_DIR)/lib/$(NQP_MO_PBC)
@@ -538,20 +549,20 @@ install: all
 	$(CHMOD)  755          $(DESTDIR)$(PARROT_BIN_DIR)/nqp$(EXE)
 	$(MKPATH)                     $(DESTDIR)$(PARROT_LIB_DIR)/dynext
 	$(CP)     $(DYNPMC) $(DYNOPS) $(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT) $(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT) $(DESTDIR)$(PARROT_LIB_DIR)/dynext
+	$(MKPATH)                     $(DESTDIR)$(PARROT_INCLUDE_DIR)/dynpmc
+	$(CP)       $(DYNPMC_HEADERS) $(DESTDIR)$(PARROT_INCLUDE_DIR)/dynpmc
 
 stage0: $(STAGE0)
 stage1: $(STAGE1)
 stage2: $(STAGE2)
 
-$(PAST_PBC): $(PAST_SOURCES) $(DYNEXT_TARGET)
-	$(PARROT) -o $(PAST_PBC) $(PAST_SOURCES)
-
 $(STAGE0): $(STAGE0_PBCS)
 
-$(STAGE0_PBCS): $(DYNEXT_TARGET) $(PAST_PBC) $(STAGE0_SOURCES)
+$(STAGE0_PBCS): $(DYNEXT_TARGET) $(STAGE0_SOURCES)
 	$(PARROT) -o $(STAGE0)/$(NQP_MO_PBC)       src/stage0/NQPMO-s0.pir
 	$(PARROT) -o $(STAGE0)/$(MODULE_LOADER_PBC) src/stage0/ModuleLoader-s0.pir
 	$(PARROT) -o $(STAGE0)/$(CORE_SETTING_PBC) src/stage0/NQPCORE.setting-s0.pir
+	$(PARROT) -o $(STAGE0)/$(QASTNODE_PBC)     src/stage0/QASTNode-s0.pir
 	$(PARROT) -o $(STAGE0)/$(QREGEX_PBC)       src/stage0/QRegex-s0.pir
 	$(PARROT) -o $(STAGE0)/$(HLL_PBC)          src/stage0/HLL-s0.pir
 	$(PARROT) -o $(STAGE0)/$(QAST_PBC)         src/stage0/QAST-s0.pir
@@ -585,7 +596,16 @@ $(STAGE1)/$(CORE_SETTING_PBC): $(STAGE0_PBCS) $(STAGE1)/$(NQP_MO_PBC) $(STAGE1)/
         $(STAGE1)/$(CORE_SETTING_NQP)
 	$(PARROT) -o $(STAGE1)/$(CORE_SETTING_PBC) $(STAGE1)/$(CORE_SETTING_PIR)
 
-$(STAGE1)/$(QREGEX_PBC): $(STAGE0_PBCS) $(STAGE1)/$(CORE_SETTING_PBC) $(QREGEX_SOURCES)
+$(STAGE1)/$(QASTNODE_PBC): $(STAGE0_PBCS) $(STAGE1)/$(CORE_SETTING_PBC) $(QASTNODE_SOURCES)
+	$(MKPATH) $(STAGE1)/gen
+	$(PERL) tools/build/gen-cat.pl $(QASTNODE_SOURCES) > $(STAGE1)/$(QASTNODE_COMBINED)
+	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
+	    --target=pir --output=$(STAGE1)/$(QASTNODE_PIR) \
+	    --module-path=$(STAGE1) --setting-path=$(STAGE1) --no-regex-lib \
+        $(STAGE1)/$(QASTNODE_COMBINED)
+	$(PARROT) -o $(STAGE1)/$(QASTNODE_PBC) $(STAGE1)/$(QASTNODE_PIR)
+
+$(STAGE1)/$(QREGEX_PBC): $(STAGE0_PBCS) $(STAGE1)/$(CORE_SETTING_PBC) $(STAGE1)/$(QASTNODE_PBC) $(QREGEX_SOURCES)
 	$(MKPATH) $(STAGE1)/gen
 	$(PERL) tools/build/gen-cat.pl $(QREGEX_SOURCES) > $(STAGE1)/$(QREGEX_COMBINED)
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
@@ -594,7 +614,7 @@ $(STAGE1)/$(QREGEX_PBC): $(STAGE0_PBCS) $(STAGE1)/$(CORE_SETTING_PBC) $(QREGEX_S
         $(STAGE1)/$(QREGEX_COMBINED)
 	$(PARROT) -o $(STAGE1)/$(QREGEX_PBC) $(STAGE1)/$(QREGEX_PIR)
 
-$(STAGE1)/$(HLL_PBC): $(STAGE0_PBCS) $(STAGE1)/$(QREGEX_PBC) $(STAGE1)/$(CORE_SETTING_PBC) $(HLL_SOURCES)
+$(STAGE1)/$(HLL_PBC): $(STAGE0_PBCS) $(STAGE1)/$(QREGEX_PBC) $(STAGE1)/$(QASTNODE_PBC) $(STAGE1)/$(CORE_SETTING_PBC) $(HLL_SOURCES)
 	$(MKPATH) $(STAGE1)/gen
 	$(PERL) tools/build/gen-cat.pl $(HLL_SOURCES) > $(STAGE1)/$(HLL_COMBINED)
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
@@ -659,7 +679,15 @@ $(STAGE2)/$(CORE_SETTING_PBC): $(STAGE1_PBCS) $(STAGE2)/$(NQP_MO_PBC) $(STAGE2)/
 	    --module-path=$(STAGE2) --setting=NULL $(STAGE2)/$(CORE_SETTING_NQP)
 	$(PARROT) -o $(STAGE2)/$(CORE_SETTING_PBC) $(STAGE2)/$(CORE_SETTING_PIR)
 
-$(STAGE2)/$(QREGEX_PBC): $(STAGE1_PBCS) $(STAGE2)/$(CORE_SETTING_PBC) $(QREGEX_SOURCES)
+$(STAGE2)/$(QASTNODE_PBC): $(STAGE1_PBCS) $(STAGE2)/$(CORE_SETTING_PBC) $(QASTNODE_SOURCES)
+	$(MKPATH) $(STAGE2)/gen
+	$(PERL) tools/build/gen-cat.pl $(QASTNODE_SOURCES) > $(STAGE2)/$(QASTNODE_COMBINED)
+	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
+	    --target=pir --output=$(STAGE2)/$(QASTNODE_PIR) --no-regex-lib \
+	    --module-path=$(STAGE2) --setting-path=$(STAGE2) $(STAGE2)/$(QASTNODE_COMBINED)
+	$(PARROT) -o $(STAGE2)/$(QASTNODE_PBC) $(STAGE2)/$(QASTNODE_PIR)
+
+$(STAGE2)/$(QREGEX_PBC): $(STAGE1_PBCS) $(STAGE2)/$(CORE_SETTING_PBC) $(STAGE2)/$(QASTNODE_PBC) $(QREGEX_SOURCES)
 	$(MKPATH) $(STAGE2)/gen
 	$(PERL) tools/build/gen-cat.pl $(QREGEX_SOURCES) > $(STAGE2)/$(QREGEX_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
@@ -667,7 +695,7 @@ $(STAGE2)/$(QREGEX_PBC): $(STAGE1_PBCS) $(STAGE2)/$(CORE_SETTING_PBC) $(QREGEX_S
 	    --module-path=$(STAGE2) --setting-path=$(STAGE2) $(STAGE2)/$(QREGEX_COMBINED)
 	$(PARROT) -o $(STAGE2)/$(QREGEX_PBC) $(STAGE2)/$(QREGEX_PIR)
 
-$(STAGE2)/$(HLL_PBC): $(STAGE1_PBCS) $(STAGE2)/$(CORE_SETTING_PBC) $(STAGE2)/$(QREGEX_PBC) $(HLL_SOURCES)
+$(STAGE2)/$(HLL_PBC): $(STAGE1_PBCS) $(STAGE2)/$(CORE_SETTING_PBC) $(STAGE2)/$(QREGEX_PBC) $(STAGE2)/$(QASTNODE_PBC) $(HLL_SOURCES)
 	$(MKPATH) $(STAGE2)/gen
 	$(PERL) tools/build/gen-cat.pl $(HLL_SOURCES) > $(STAGE2)/$(HLL_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
@@ -707,6 +735,7 @@ $(ALL_PBCS): $(STAGE2_PBCS)
 	$(CP) $(STAGE2)/$(NQP_MO_PBC) .
 	$(CP) $(STAGE2)/$(MODULE_LOADER_PBC) .
 	$(CP) $(STAGE2)/$(CORE_SETTING_PBC) .
+	$(CP) $(STAGE2)/$(QASTNODE_PBC) .
 	$(CP) $(STAGE2)/$(QREGEX_PBC) .
 	$(CP) $(STAGE2)/$(HLL_PBC) .
 	$(CP) $(STAGE2)/$(QAST_PBC) .
@@ -715,6 +744,13 @@ $(ALL_PBCS): $(STAGE2_PBCS)
 
 $(NQP_EXE): $(NQP_PBC) $(PARROT_DLL_COPY)
 	$(PBC_TO_EXE) $(NQP_PBC)
+
+$(P5QREGEX_PBC): $(NQP_EXE) $(P5QREGEX_SOURCES)
+	$(MKPATH) $(STAGE2)/gen
+	$(PERL) tools/build/gen-cat.pl $(P5QREGEX_SOURCES) > $(STAGE2)/$(P5QREGEX_COMBINED)
+	./$(NQP_EXE) --target=pir --output=$(STAGE2)/$(P5QREGEX_COMBINED_PIR) \
+	    $(STAGE2)/$(P5QREGEX_COMBINED)
+	$(PARROT) -o $(P5QREGEX_PBC) $(STAGE2)/$(P5QREGEX_COMBINED_PIR)
 
 @make_dllcopy@
 
@@ -1021,6 +1057,7 @@ bootstrap-files: $(STAGE2_PBCS) src/stage2/$(CORE_SETTING_NQP)
 	$(PERL) tools/build/gen-bootstrap.pl src/stage2/$(NQP_MO_PIR) >src/stage0/NQPMO-s0.pir
 	$(PERL) tools/build/gen-bootstrap.pl src/stage2/gen/module_loader.pir >src/stage0/ModuleLoader-s0.pir
 	$(PERL) tools/build/gen-bootstrap.pl src/stage2/$(CORE_SETTING_PIR) >src/stage0/NQPCORE.setting-s0.pir
+	$(PERL) tools/build/gen-bootstrap.pl src/stage2/$(QASTNODE_PIR) >src/stage0/QASTNode-s0.pir
 	$(PERL) tools/build/gen-bootstrap.pl src/stage2/$(QREGEX_PIR) >src/stage0/QRegex-s0.pir
 	$(PERL) tools/build/gen-bootstrap.pl src/stage2/$(HLL_COMBINED_PIR) >src/stage0/HLL-s0.pir
 	$(PERL) tools/build/gen-bootstrap.pl src/stage2/$(QAST_PIR) >src/stage0/QAST-s0.pir
@@ -1029,24 +1066,23 @@ bootstrap-files: $(STAGE2_PBCS) src/stage2/$(CORE_SETTING_NQP)
 
 ## testing
 
-test: all core-test setting-test qregex-test
+test: all
+	prove -r --exec ./$(NQP_EXE) t/nqp t/hll t/qregex t/p5regex t/qast t/serialization
 
-test-loud: all core-test-loud setting-test-loud
+test-loud: all
+	prove -r -v --exec ./$(NQP_EXE) t/nqp t/hll t/qregex t/p5regex t/qast t/serialization
 
 core-test: $(NQP_EXE)
-	prove -r --exec ./$(NQP_EXE) t/nqp t/qast t/hll
+	prove -r --exec ./$(NQP_EXE) t/nqp
 
 core-test-loud: $(NQP_EXE)
-	prove -r -v --exec ./$(NQP_EXE) t/nqp t/qast t/hll
+	prove -r -v --exec ./$(NQP_EXE) t/nqp
 
 qregex-test: $(NQP_EXE)
 	prove -r --exec ./$(NQP_EXE) t/qregex
 
-setting-test: $(NQP_EXE) $(SETTING_PBC)
-	prove -r --exec ./$(NQP_EXE) t/setting
-
-setting-test-loud: $(NQP_EXE) $(SETTING_PBC)
-	prove -r -v --exec ./$(NQP_EXE) t/setting
+qregex-test-loud: $(NQP_EXE)
+	prove -r -v --exec ./$(NQP_EXE) t/qregex
 
 ## cleaning
 
@@ -1059,6 +1095,17 @@ realclean: clean
 	$(RM_F) Makefile
 
 testclean:
+
+manifest:
+	echo MANIFEST >MANIFEST
+	git ls-files >>MANIFEST
+
+release: manifest
+	[ -n "$(VERSION)" ] || ( echo "\nTry 'make release VERSION=yyyy.mm'\n\n"; exit 1 )
+	[ -d nqp-$(VERSION) ] || ln -s . nqp-$(VERSION)
+	$(PERL) -ne 'print "nqp-$(VERSION)/$$_"' MANIFEST |\
+	    tar -zcv -T - -f nqp-$(VERSION).tar.gz
+	rm nqp-$(VERSION)
 
 # nqp::makefile <-- tells Configure.pm to convert / to \ in the above
 #                   template for Win32 systems

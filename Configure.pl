@@ -170,7 +170,8 @@ General Options:
     --prefix=dir       Install files in dir
     --with-parrot=path/to/bin/parrot
                        Parrot executable to use to build NQP
-    --gen-parrot       Download and build a copy of Parrot to use
+    --gen-parrot[=branch]
+                       Download and build a copy of Parrot to use
     --parrot-option='--option=value'
                        Options to pass to parrot configuration for --gen-parrot
 

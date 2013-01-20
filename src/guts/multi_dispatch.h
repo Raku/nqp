@@ -62,3 +62,4 @@ typedef struct Pcc_cell
 } Pcc_cell;
 
 PMC *nqp_multi_dispatch(PARROT_INTERP, PMC *dispatcher, PMC *capture);
+void nqp_set_nqpmu(PMC *nqpmu);

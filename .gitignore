@@ -25,7 +25,7 @@ src/ops/*.h
 src/ops/*.c
 src/pmc/pmc_*.h
 src/pmc/*.c
-nqp
+/nqp
 nqp.c
 nqp_group.c
 nqp_group.h

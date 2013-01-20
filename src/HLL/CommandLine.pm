@@ -109,7 +109,7 @@ class HLL::CommandLine::Result {
         # how I miss p6's Hash.push
 
         if nqp::existskey(%!options, $name) {
-            if pir::does(%!options{$name}, 'array') {
+            if nqp::islist(%!options{$name}) {
                 nqp::push(%!options{$name}, $value);
             } else {
                 %!options{$name} := [ %!options{$name}, $value ];
@@ -137,6 +137,9 @@ class HLL::CommandLine::Parser {
     }
 
     method BUILD(:@specs) {
+        @!specs   := nqp::list();
+        %!options := nqp::hash();
+        %!stopper := nqp::hash();
         %!stopper{'--'} := 1;
         $!stop-after-first-arg := 0;
         for @specs {
@@ -196,10 +199,6 @@ class HLL::CommandLine::Parser {
         sub get-value($opt) {
             if $i == $arg-count - 1 {
                 nqp::die("Option $opt needs a value");
-            } elsif self.is-option(@args[$i + 1]) {
-                nqp::die("Option $opt needs a value, but is followed by an option");
-            } elsif %!stopper{@args[$i + 1]} {
-                nqp::die("Option $opt needs a value, but is followed by a stopper");
             } else {
                 $i++;
                 @args[$i];

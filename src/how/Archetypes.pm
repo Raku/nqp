@@ -54,12 +54,12 @@ my knowhow Archetypes {
         $!parametric := $parametric;
     }
     
-    method nominal() { $!nominal }
-    method nominalizable() { $!nominalizable }
-    method inheritable() { $!inheritable }
-    method inheritalizable() { $!inheritalizable }
-    method composable() { $!composable }
-    method composalizable() { $!composalizable }
-    method generic() { $!generic }
-    method parametric() { $!parametric }
+    method nominal() { nqp::ifnull($!nominal, 0) }
+    method nominalizable() { nqp::ifnull($!nominalizable, 0) }
+    method inheritable() { nqp::ifnull($!inheritable, 0) }
+    method inheritalizable() { nqp::ifnull($!inheritalizable, 0) }
+    method composable() { nqp::ifnull($!composable, 0) }
+    method composalizable() { nqp::ifnull($!composalizable, 0) }
+    method generic() { nqp::ifnull($!generic, 0) }
+    method parametric() { nqp::ifnull($!parametric, 0) }
 }

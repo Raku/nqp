@@ -17,4 +17,21 @@ class QAST::Op is QAST::Node {
         }
         $result
     }
+
+    method evaluate_unquotes(@unquotes) {
+        my $result := self.shallow_clone();
+        my $i := 0;
+        my $elems := +@(self);
+        while $i < $elems {
+            $result[$i] := self[$i].evaluate_unquotes(@unquotes);
+            $i := $i + 1;
+        }
+        $result
+    }
+
+    method dump_extra_node_info() {
+        nqp::chars($!name)
+            ?? "$!op $!name"
+            !! $!op;
+    }
 }

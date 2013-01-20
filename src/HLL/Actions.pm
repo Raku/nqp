@@ -7,7 +7,7 @@ class HLL::Actions {
     }
 
     method ints_to_string($ints) {
-        if pir::does($ints, 'array') {
+        if nqp::islist($ints) {
             my $result := '';
             for $ints {
                 $result := $result ~ nqp::chr($_.ast);
@@ -17,46 +17,68 @@ class HLL::Actions {
             nqp::chr($ints.ast);
         }
     }
-
-
+    
     method CTXSAVE() {
-        PAST::Op.new(
-            :inline(
-                '    $P0 = find_dynamic_lex "$*CTXSAVE"',
-                '    if null $P0 goto ctxsave_done',
-                '    $I0 = can $P0, "ctxsave"',
-                '    unless $I0 goto ctxsave_done',
-                '    $P0."ctxsave"()',
-                '  ctxsave_done:'
-            )
-        );
+        QAST::Stmts.new(
+            QAST::Op.new(
+                :op('bind'),
+                QAST::Var.new( :name('ctxsave'), :scope('local'), :decl('var') ),
+                QAST::Var.new( :name('$*CTXSAVE'), :scope('contextual') )
+            ),
+            QAST::Op.new(
+                :op('unless'),
+                QAST::Op.new(
+                    :op('isnull'),
+                    QAST::Var.new( :name('ctxsave'), :scope('local') )
+                ),
+                QAST::Op.new(
+                    :op('if'),
+                    QAST::Op.new(
+                        :op('can'),
+                        QAST::Var.new( :name('ctxsave'), :scope('local') ),
+                        QAST::SVal.new( :value('ctxsave') )
+                    ),
+                    QAST::Op.new(
+                        :op('callmethod'), :name('ctxsave'),
+                        QAST::Var.new( :name('ctxsave'), :scope('local')
+                    )))))
     }
-
-
+   
     method SET_BLOCK_OUTER_CTX($block) {
         my $outer_ctx := %*COMPILING<%?OPTIONS><outer_ctx>;
         if nqp::defined($outer_ctx) {
-            for $outer_ctx.lexpad_full {
-                $block.symbol($_.key, :scope<lexical>, :value($_.value));
+            until nqp::isnull($outer_ctx) {
+                my $pad := nqp::ctxlexpad($outer_ctx);
+                unless nqp::isnull($pad) {
+                    for $pad {
+                        my str $key := ~$_;
+                        $block.symbol($key, :scope<lexical>, :value(nqp::atkey($pad, $key)))
+                            unless $block.symbol($key);
+                    }
+                }
+                $outer_ctx := nqp::ctxouter($outer_ctx);
             }
         }
     }
-
 
     method EXPR($/, $key?) {
         unless $key { return 0; }
         my $past := $/.ast // $<OPER>.ast;
         unless $past {
-            $past := PAST::Op.new( :node($/) );
-            if $<OPER><O><pasttype> { $past.pasttype( ~$<OPER><O><pasttype> ); }
-            elsif $<OPER><O><pirop>    { $past.pirop( ~$<OPER><O><pirop> ); }
-            unless $past.name {
-                if $key eq 'LIST' { $key := 'infix'; }
-                my $name := nqp::lc($key) ~ ':<' ~ $<OPER><sym> ~ '>';
-                $past.name('&' ~ $name);
+            $past := QAST::Op.new( :node($/) );
+            if $<OPER><O><op> {
+                $past.op( ~$<OPER><O><op> );
+            }
+            if $key eq 'LIST' { $key := 'infix'; }
+            my $name := nqp::lc($key) ~ ':<' ~ $<OPER><sym> ~ '>';
+            $past.name('&' ~ $name);
+            unless $past.op {
+                $past.op('call');
             }
         }
-        if $key eq 'POSTFIX' { $past.unshift($/[0].ast); }
+        if $key eq 'POSTFIX' {
+            $past.unshift($/[0].ast);
+        }
         else {
             for $/.list { if nqp::defined($_.ast) { $past.push($_.ast); } }
         }
@@ -81,22 +103,19 @@ class HLL::Actions {
     method quote_EXPR($/) {
         my $past := $<quote_delimited>.ast;
         if %*QUOTEMOD<w> {
-            if PAST::Node.ACCEPTS($past) {
-                $/.CURSOR.panic("Can't form :w list from non-constant strings (yet)");
-            }
-            else {
-                my @words := HLL::Grammar::split_words($/, $past);
+            if nqp::istype($past, QAST::SVal) {
+                my @words := HLL::Grammar::split_words($/, $past.value);
                 if +@words != 1 {
-                    $past := PAST::Op.new( :pasttype('list'), :node($/) );
-                    for @words { $past.push($_); }
+                    $past := QAST::Op.new( :op('list'), :node($/) );
+                    for @words { $past.push(QAST::SVal.new( :value($_) )); }
                 }
                 else {
-                    $past := ~@words[0];
+                    $past := QAST::SVal.new( :value(~@words[0]) );
                 }
             }
-        }
-        if !PAST::Node.ACCEPTS($past) {
-            $past := PAST::Val.new( :value(~$past) );
+            else {            
+                $/.CURSOR.panic("Can't form :w list from non-constant strings (yet)");
+            }
         }
         make $past;
     }
@@ -106,22 +125,26 @@ class HLL::Actions {
         my $lastlit := '';
         for $<quote_atom> {
             my $ast := $_.ast;
-            if !PAST::Node.ACCEPTS($ast) {
+            if !nqp::istype($ast, QAST::Node) {
                 $lastlit := $lastlit ~ $ast;
             }
-            elsif $ast.isa(PAST::Val) {
+            elsif nqp::istype($ast, QAST::SVal) {
                 $lastlit := $lastlit ~ $ast.value;
             }
             else {
-                if $lastlit gt '' { @parts.push($lastlit); }
-                @parts.push($ast);
+                if $lastlit gt '' {
+                    @parts.push(QAST::SVal.new( :value($lastlit) ));
+                }
+                @parts.push(nqp::istype($ast, QAST::Node)
+                    ?? $ast
+                    !! QAST::SVal.new( :value($ast) ));
                 $lastlit := '';
             }
         }
-        if $lastlit gt '' { @parts.push($lastlit); }
-        my $past := @parts ?? @parts.shift !! '';
+        if $lastlit gt '' { @parts.push(QAST::SVal.new( :value($lastlit) )); }
+        my $past := @parts ?? @parts.shift !! QAST::SVal.new( :value('') );
         while @parts {
-            $past := PAST::Op.new( $past, @parts.shift, :pirop('concat') );
+            $past := QAST::Op.new( $past, @parts.shift, :op('concat') );
         }
         make $past;
     }

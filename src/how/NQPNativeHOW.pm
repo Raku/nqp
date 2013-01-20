@@ -15,6 +15,7 @@ knowhow NQPNativeHOW {
 
     method BUILD(:$name) {
         $!name := $name;
+        $!composed := 0;
     }
 
     # Create a new meta-class instance, and then a new type object

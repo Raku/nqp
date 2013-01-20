@@ -3,7 +3,7 @@
 
 #include "../6model/sixmodelobject.h"
 
-pmclass OwnedResizablePMCArray extends ResizablePMCArray auto_attrs dynpmc group nqp {
+pmclass OwnedResizablePMCArray extends ResizablePMCArray provides array auto_attrs dynpmc group nqp {
     /* The object that owns this RPA. */
     ATTR PMC *owner;
     

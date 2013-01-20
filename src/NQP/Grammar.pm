@@ -17,18 +17,20 @@ grammar NQP::Grammar is HLL::Grammar {
         # Serialization context builder - keeps track of objects that
         # cross the compile-time/run-time boundary that are associated
         # with this compilation unit.
-        my $file := pir::find_caller_lex__ps('$?FILES');
-        my $source_id := nqp::sha1(nqp::getattr_s(self, NQPCursor, '$!target')) ~
+        my $file := pir::find_caller_lex__Ps('$?FILES');
+        my $source_id := nqp::sha1(self.target()) ~
             '-' ~ ~nqp::time_n();
         my $*W := nqp::isnull($file) ??
             NQP::World.new(:handle($source_id)) !!
             NQP::World.new(:handle($source_id), :description($file));
 
-        my $*SCOPE       := '';
-        my $*MULTINESS   := '';
-        my $*PKGDECL     := '';
-        my $*INVOCANT_OK := 0;
-        my $*RETURN_USED := 0;
+        my $*SCOPE        := '';
+        my $*MULTINESS    := '';
+        my $*PKGDECL      := '';
+        my $*INVOCANT_OK  := 0;
+        my $*RETURN_USED  := 0;
+        my $*CONTROL_USED := 0;
+        my %*HANDLERS;
         self.comp_unit;
     }
 
@@ -105,11 +107,34 @@ grammar NQP::Grammar is HLL::Grammar {
 
         :my $*HAS_YOU_ARE_HERE := 0;
         :my $*MAIN_SUB;
-        <.newpad>
+        :my $*UNIT := $*W.push_lexpad($/);
         
-        :my $*PACKAGE;
-        :my $*GLOBALish;
-        <.GLOBALish>
+        # Create GLOBALish - the current GLOBAL view, created fresh
+        # for each compilation unit so we get separate compilation.
+        :my $*GLOBALish := $*W.pkg_create_mo(%*HOW<knowhow>, :name('GLOBALish'));
+        {
+            $*GLOBALish.HOW.compose($*GLOBALish);
+            $*W.install_lexical_symbol($*UNIT, 'GLOBALish', $*GLOBALish);
+        }
+        
+        # This is also the starting package.
+        :my $*PACKAGE := $*GLOBALish;
+        { $*W.install_lexical_symbol($*UNIT, '$?PACKAGE', $*PACKAGE); }
+        
+        # Create EXPORT::DEFAULT.
+        :my $*EXPORT;
+        {
+            unless %*COMPILING<%?OPTIONS><setting> eq 'NULL' {
+                $*EXPORT := $*W.pkg_create_mo(%*HOW<knowhow>, :name('EXPORT'));
+                $*EXPORT.HOW.compose($*EXPORT);
+                $*W.install_lexical_symbol($*UNIT, 'EXPORT', $*EXPORT);
+                my $DEFAULT := $*W.pkg_create_mo(%*HOW<knowhow>, :name('DEFAULT'));
+                $DEFAULT.HOW.compose($DEFAULT);
+                ($*EXPORT.WHO)<DEFAULT> := $DEFAULT;
+            }
+        }
+        
+        { $*W.add_initializations(); }
         
         <.outerctx>
         
@@ -149,7 +174,7 @@ grammar NQP::Grammar is HLL::Grammar {
     token pblock {
         | <.lambda>
             <.newpad>
-            <signature>
+            <signature> <.ws>
             <blockoid>
         | <?[{]>
             <.newpad>
@@ -166,6 +191,7 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     token blockoid {
+        :my %*HANDLERS;
         <.finishpad>
         [
         || '{YOU_ARE_HERE}' <you_are_here>
@@ -176,7 +202,6 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token newpad { <?> }
     token outerctx { <?> }
-    token GLOBALish { <?> }
     token finishpad { <?> }
     token you_are_here { <?> }
 
@@ -207,11 +232,13 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     token statement_control:sym<while> {
+        :my $*CONTROL_USED := 0;
         $<sym>=[while|until] \s :s
         <xblock>
     }
 
     token statement_control:sym<repeat> {
+        :my $*CONTROL_USED := 0;
         <sym> \s :s
         [
         | $<wu>=[while|until]\s <xblock>
@@ -220,6 +247,7 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     token statement_control:sym<for> {
+        :my $*CONTROL_USED := 0;
         <sym> \s :s
         <xblock>
     }
@@ -342,8 +370,11 @@ grammar NQP::Grammar is HLL::Grammar {
 
     rule package_def {
         :my $*PACKAGE;     # The type object for this package.
+        :my $OUTER := $*W.cur_lexpad();
         
         <name>
+        <.newpad>
+        [ <?{ $*PKGDECL eq 'role' }> '[' ~ ']' <role_params> ]?
         [ 'is' 'repr(' <repr=.quote_EXPR> ')' ]?
         
         {
@@ -360,27 +391,34 @@ grammar NQP::Grammar is HLL::Grammar {
             if $*SCOPE eq 'our' || $*SCOPE eq '' {
                 $*W.install_package_symbol($*OUTERPACKAGE, $<name><identifier>, $*PACKAGE);
                 if +$<name><identifier> == 1 {
-                    $*W.install_lexical_symbol($*W.cur_lexpad(), $<name><identifier>[0], $*PACKAGE);
+                    $*W.install_lexical_symbol($OUTER, $<name><identifier>[0], $*PACKAGE);
                 }
             }
             elsif $*SCOPE eq 'my' {
                 if +$<name><identifier> != 1 {
                     $<name>.CURSOR.panic("A my scoped package cannot have a multi-part name yet");
                 }
-                $*W.install_lexical_symbol($*W.cur_lexpad(), $<name><identifier>[0], $*PACKAGE);
+                $*W.install_lexical_symbol($OUTER, $<name><identifier>[0], $*PACKAGE);
             }
             else {
                 $/.CURSOR.panic("$*SCOPE scoped packages are not supported");
             }
         }
         
+        [ $<export>=['is export'] ]?
         [ 'is' <parent=.name> ]?
         [ 'does' <role=.name> ]*
         [
-        || ';' <comp_unit>
-        || <?[{]> <block>
+        || ';' <statementlist> [ $ || <.panic: 'Confused'> ]
+        || <?[{]> <blockoid>
         || <.panic: 'Malformed package declaration'>
         ]
+    }
+    
+    rule role_params {
+        :my $*SCOPE   := 'my';
+        :my $*IN_DECL := 'variable';
+        [ <variable> ]+ % [ ',' ]
     }
 
     proto token scope_declarator { <...> }
@@ -432,8 +470,10 @@ grammar NQP::Grammar is HLL::Grammar {
     rule method_def {
         :my $*RETURN_USED := 0;
         :my $*INVOCANT_OK := 1;
-        $<private>=['!'?]
-        <deflongname>?
+        [
+        || '::(' <latename=variable> ')'
+        || $<private>=['!'?] <deflongname>?
+        ]
         <.newpad>
         [ '(' <signature> ')'
             || <.panic: 'Routine declaration requires a signature'> ]
@@ -501,7 +541,10 @@ grammar NQP::Grammar is HLL::Grammar {
     token regex_declarator {
         [
         | $<proto>=[proto] :s [regex|token|rule]
-          <deflongname>
+          [
+          || '::(' <latename=variable> ')'
+          || <deflongname>
+          ]
           [ 
           || '{*}'<?ENDSTMT>
           || '{' '<...>' '}'<?ENDSTMT>
@@ -509,14 +552,18 @@ grammar NQP::Grammar is HLL::Grammar {
           || <.panic: "Proto regex body must be \{*\} (or <*> or <...>, which are deprecated)">
           ]
         | $<sym>=[regex|token|rule] :s
-          <deflongname>
+          [
+          || '::(' <latename=variable> ')'
+          || <deflongname>
+          ]
           <.newpad>
           [ '(' <signature> ')' ]?
           :my %*RX;
           {   
               %*RX<s>    := $<sym> eq 'rule'; 
               %*RX<r>    := $<sym> eq 'token' || $<sym> eq 'rule'; 
-              %*RX<name> := $<deflongname>.ast;
+              %*RX<name> := $<deflongname> ?? $<deflongname>.ast !! "!!LATENAME!!" ~ ~$<latename>;
+              %*RX<code> := $*W.create_code($*W.cur_lexpad(), %*RX<name>, 0, :code_type_name<NQPRegex>);
           }
           '{'<p6regex=.LANG('Regex','nibbler')>'}'<?ENDSTMT>
         ]
@@ -661,75 +708,74 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token postfix:sym<.>  { <dotty> <O('%methodop')> }
 
-    token prefix:sym<++>  { <sym>  <O('%autoincrement, :pirop<inc>')> }
-    token prefix:sym<-->  { <sym>  <O('%autoincrement, :pirop<dec>')> }
+    token prefix:sym<++>  { <sym>  <O('%autoincrement, :op<preinc>')> }
+    token prefix:sym<-->  { <sym>  <O('%autoincrement, :op<predec>')> }
 
-    # see Actions.pm for postfix:<++> and postfix:<-->
-    token postfix:sym<++> { <sym>  <O('%autoincrement')> }
-    token postfix:sym<--> { <sym>  <O('%autoincrement')> }
+    token postfix:sym<++> { <sym>  <O('%autoincrement, :op<postinc>')> }
+    token postfix:sym<--> { <sym>  <O('%autoincrement, :op<postdec>')> }
 
-    token infix:sym<**>   { <sym>  <O('%exponentiation, :pirop<pow__NNN>')> }
+    token infix:sym<**>   { <sym>  <O('%exponentiation, :op<pow_n>')> }
 
-    token prefix:sym<+>   { <sym>  <O('%symbolic_unary, :pirop<set N*>')> }
-    token prefix:sym<~>   { <sym>  <O('%symbolic_unary, :pirop<set S*>')> }
-    token prefix:sym<->   { <sym>  <![>]> <!number> <O('%symbolic_unary, :pirop<neg>')> }
-    token prefix:sym<?>   { <sym>  <O('%symbolic_unary, :pirop<istrue>')> }
-    token prefix:sym<!>   { <sym>  <O('%symbolic_unary, :pirop<isfalse>')> }
+    token prefix:sym<+>   { <sym>  <O('%symbolic_unary, :op<numify>')> }
+    token prefix:sym<~>   { <sym>  <O('%symbolic_unary, :op<stringify>')> }
+    token prefix:sym<->   { <sym>  <![>]> <!number> <O('%symbolic_unary, :op<neg_n>')> }
+    token prefix:sym<?>   { <sym>  <O('%symbolic_unary, :op<istrue>')> }
+    token prefix:sym<!>   { <sym>  <O('%symbolic_unary, :op<falsey>')> }
     token prefix:sym<|>   { <sym>  <O('%symbolic_unary')> }
 
-    token infix:sym<*>    { <sym>  <O('%multiplicative, :pirop<mul>')> }
-    token infix:sym</>    { <sym>  <O('%multiplicative, :pirop<div>')> }
-    token infix:sym<%>    { <sym>  <O('%multiplicative, :pirop<mod>')> }
-    token infix:sym<+&>   { <sym>  <O('%multiplicative, :pirop<band III>')> }
+    token infix:sym<*>    { <sym>  <O('%multiplicative, :op<mul_n>')> }
+    token infix:sym</>    { <sym>  <O('%multiplicative, :op<div_n>')> }
+    token infix:sym<%>    { <sym>  <O('%multiplicative, :op<mod_n>')> }
+    token infix:sym<+&>   { <sym>  <O('%multiplicative, :op<bitand_i>')> }
 
-    token infix:sym<+>    { <sym>  <O('%additive, :pirop<add>')> }
-    token infix:sym<->    { <sym>  <O('%additive, :pirop<sub>')> }
-    token infix:sym<+|>   { <sym>  <O('%additive, :pirop<bor III>')> }
-    token infix:sym<+^>   { <sym>  <O('%additive, :pirop<bxor III>')> }
+    token infix:sym<+>    { <sym>  <O('%additive, :op<add_n>')> }
+    token infix:sym<->    { <sym>  <O('%additive, :op<sub_n>')> }
+    token infix:sym<+|>   { <sym>  <O('%additive, :op<bitor_i>')> }
+    token infix:sym<+^>   { <sym>  <O('%additive, :op<bitxor_i>')> }
 
-    token infix:sym<~>    { <sym>  <O('%concatenation , :pirop<concat>')> }
+    token infix:sym<~>    { <sym>  <O('%concatenation , :op<concat>')> }
 
-    token infix:sym«==»   { <sym>  <O('%relational, :pirop<iseq INn>')> }
-    token infix:sym«!=»   { <sym>  <O('%relational, :pirop<isne INn>')> }
-    token infix:sym«<=»   { <sym>  <O('%relational, :pirop<isle INn>')> }
-    token infix:sym«>=»   { <sym>  <O('%relational, :pirop<isge INn>')> }
-    token infix:sym«<»    { <sym>  <O('%relational, :pirop<islt INn>')> }
-    token infix:sym«>»    { <sym>  <O('%relational, :pirop<isgt INn>')> }
-    token infix:sym«eq»   { <sym>  <O('%relational, :pirop<iseq ISs>')> }
-    token infix:sym«ne»   { <sym>  <O('%relational, :pirop<isne ISs>')> }
-    token infix:sym«le»   { <sym>  <O('%relational, :pirop<isle ISs>')> }
-    token infix:sym«ge»   { <sym>  <O('%relational, :pirop<isge ISs>')> }
-    token infix:sym«lt»   { <sym>  <O('%relational, :pirop<islt ISs>')> }
-    token infix:sym«gt»   { <sym>  <O('%relational, :pirop<isgt ISs>')> }
-    token infix:sym«=:=»  { <sym>  <O('%relational, :pirop<issame>')> }
+    token infix:sym«==»   { <sym>  <O('%relational, :op<iseq_n>')> }
+    token infix:sym«!=»   { <sym>  <O('%relational, :op<isne_n>')> }
+    token infix:sym«<=»   { <sym>  <O('%relational, :op<isle_n>')> }
+    token infix:sym«>=»   { <sym>  <O('%relational, :op<isge_n>')> }
+    token infix:sym«<»    { <sym>  <O('%relational, :op<islt_n>')> }
+    token infix:sym«>»    { <sym>  <O('%relational, :op<isgt_n>')> }
+    token infix:sym«eq»   { <sym>  <O('%relational, :op<iseq_s>')> }
+    token infix:sym«ne»   { <sym>  <O('%relational, :op<isne_s>')> }
+    token infix:sym«le»   { <sym>  <O('%relational, :op<isle_s>')> }
+    token infix:sym«ge»   { <sym>  <O('%relational, :op<isge_s>')> }
+    token infix:sym«lt»   { <sym>  <O('%relational, :op<islt_s>')> }
+    token infix:sym«gt»   { <sym>  <O('%relational, :op<isgt_s>')> }
+    token infix:sym«=:=»  { <sym>  <O('%relational, :op<eqaddr>')> }
     token infix:sym<~~>   { <sym>  <O('%relational, :reducecheck<smartmatch>')> }
 
-    token infix:sym<&&>   { <sym>  <O('%tight_and, :pasttype<if>')> }
+    token infix:sym<&&>   { <sym>  <O('%tight_and, :op<if>')> }
 
-    token infix:sym<||>   { <sym>  <O('%tight_or, :pasttype<unless>')> }
-    token infix:sym<//>   { <sym>  <O('%tight_or, :pasttype<def_or>')> }
+    token infix:sym<||>   { <sym>  <O('%tight_or, :op<unless>')> }
+    token infix:sym<//>   { <sym>  <O('%tight_or, :op<defor>')> }
 
     token infix:sym<?? !!> {
         '??'
         <.ws>
         <EXPR('i=')>
         '!!'
-        <O('%conditional, :reducecheck<ternary>, :pasttype<if>')>
+        <O('%conditional, :reducecheck<ternary>, :op<if>')>
     }
 
     token infix:sym<=>    {
         <sym> <.panic: 'Assignment ("=") not supported in NQP, use ":=" instead'>
     }
-    token infix:sym<:=>   { <sym>  <O('%assignment, :pasttype<bind_6model>')> }
-    token infix:sym<::=>  { <sym>  <O('%assignment, :pasttype<bind_6model>')> }
+    token infix:sym<:=>   { <sym>  <O('%assignment, :op<bind>')> }
+    token infix:sym<::=>  { <sym>  <O('%assignment, :op<bind>')> }
 
-    token infix:sym<,>    { <sym>  <O('%comma, :pasttype<list>')> }
+    token infix:sym<,>    { <sym>  <O('%comma, :op<list>')> }
 
-    token prefix:sym<return> { <sym> \s <O('%list_prefix, :pasttype<return>')> { $*RETURN_USED := 1 } }
+    token prefix:sym<return> { <sym> \s <O('%list_prefix')> { $*RETURN_USED := 1 } }
     token prefix:sym<make>   { <sym> \s <O('%list_prefix')> }
-    token term:sym<last>     { <sym> }
-    token term:sym<next>     { <sym> }
-    token term:sym<redo>     { <sym> }
+    token term:sym<last>     { <sym> <!before <identifier> > { $*CONTROL_USED := 1 } }
+    token term:sym<next>     { <sym> <!before <identifier> > { $*CONTROL_USED := 1 } }
+    token term:sym<redo>     { <sym> <!before <identifier> > { $*CONTROL_USED := 1 } }
 
     method smartmatch($/) {
         # swap rhs into invocant position
@@ -738,6 +784,10 @@ grammar NQP::Grammar is HLL::Grammar {
 }
 
 grammar NQP::Regex is QRegex::P6Regex::Grammar {
+    token rxstopper {
+        <[ } / ]>
+    }
+    
     token metachar:sym<:my> {
         ':' <?before 'my'> <statement=.LANG('MAIN', 'statement')> <.ws> ';'
     }
@@ -778,6 +828,10 @@ grammar NQP::Regex is QRegex::P6Regex::Grammar {
 
     token codeblock {
         <block=.LANG('MAIN','pblock')>
+    }
+    
+    token arg {
+        <quote_EXPR=.LANG('MAIN','quote_EXPR')>
     }
 }
 

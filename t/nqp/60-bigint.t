@@ -1,7 +1,7 @@
 #! nqp
 use nqpmo;
 
-plan(34);
+plan(36);
 
 my $knowhow := pir::get_knowhow__P();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
@@ -80,6 +80,12 @@ ok(nqp::abs_n($big - $converted) / $big < 1e-4, 'bigint -> float, 1e16');
 my $float := 123456789e240;
 ok(nqp::iseq_n($float, nqp::tonum_I(nqp::fromnum_I($float, $bi_type))),
     'to_num and from_num round-trip');
+my $small_float := 1e3;
+ok(nqp::iseq_n($small_float, nqp::tonum_I(nqp::fromnum_I($small_float, $bi_type))),
+    'to_num and from_num round-trip on small floats');
+my $medium_float := 1e14;
+ok(nqp::iseq_n($medium_float, nqp::tonum_I(nqp::fromnum_I($medium_float, $bi_type))),
+    'to_num and from_num round-trip on medium sized floats');
 $float := -$float;
 ok(nqp::iseq_n($float, nqp::tonum_I(nqp::fromnum_I($float, $bi_type))),
     'to_num and from_num round-trip (negative number)');

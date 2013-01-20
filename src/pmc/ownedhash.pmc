@@ -3,7 +3,7 @@
 
 #include "../6model/sixmodelobject.h"
 
-pmclass OwnedHash extends Hash auto_attrs dynpmc group nqp {
+pmclass OwnedHash extends Hash provides hash auto_attrs dynpmc group nqp {
     /* The object that owns this hash. */
     ATTR PMC *owner;
     

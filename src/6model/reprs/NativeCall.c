@@ -32,6 +32,11 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
     return st->WHAT;
 }
 
+/* Composes the representation. */
+static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
+    /* Nothing to do. */
+}
+
 /* Creates a new instance based on the type object. */
 static PMC * allocate(PARROT_INTERP, STable *st) {
     NativeCallInstance *obj = mem_allocate_zeroed_typed(NativeCallInstance);
@@ -130,6 +135,7 @@ REPROps * NativeCall_initialize(PARROT_INTERP,
     /* Allocate and populate the representation function table. */
     this_repr = mem_allocate_zeroed_typed(REPROps);
     this_repr->type_object_for = type_object_for;
+    this_repr->compose = compose;
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
     this_repr->copy_to = copy_to;

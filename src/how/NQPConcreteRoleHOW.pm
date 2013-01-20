@@ -45,6 +45,13 @@ knowhow NQPConcreteRoleHOW {
     method BUILD(:$name!, :$instance_of!) {
         $!name := $name;
         $!instance_of := $instance_of;
+        %!attributes := nqp::hash();
+        %!methods := nqp::hash();
+        @!multi_methods_to_incorporate := nqp::list();
+        @!collisions := nqp::list();
+        @!roles := nqp::list();
+        @!role_typecheck_list := nqp::list();
+        $!composed := 0;
     }
 
     # Create a new meta-object instance, and then a new type object
@@ -55,7 +62,7 @@ knowhow NQPConcreteRoleHOW {
     }
 
     method add_method($obj, $name, $code_obj) {
-        if %!methods{$name} {
+        if nqp::existskey(%!methods, $name) {
             nqp::die("This role already has a method named " ~ $name);
         }
         %!methods{$name} := $code_obj;
@@ -65,13 +72,13 @@ knowhow NQPConcreteRoleHOW {
         my %todo;
         %todo<name> := $name;
         %todo<code> := $code_obj;
-        @!multi_methods_to_incorporate[+@!multi_methods_to_incorporate] := %todo;
+        nqp::push(@!multi_methods_to_incorporate, %todo);
         $code_obj;
     }
 
     method add_attribute($obj, $meta_attr) {
         my $name := $meta_attr.name;
-        if %!attributes{$name} {
+        if nqp::existskey(%!attributes, $name) {
             nqp::die("This role already has an attribute named " ~ $name);
         }
         %!attributes{$name} := $meta_attr;
@@ -82,11 +89,11 @@ knowhow NQPConcreteRoleHOW {
     }
 
     method add_role($obj, $role) {
-        @!roles[+@!roles] := $role;
+        nqp::push(@!roles, $role);
     }
 
     method add_collision($obj, $colliding_name) {
-        @!collisions[+@!collisions] := $colliding_name;
+        nqp::push(@!collisions, $colliding_name);
     }
 
     # Compose the role. Beyond this point, no changes are allowed.
@@ -95,14 +102,17 @@ knowhow NQPConcreteRoleHOW {
         # add to done list their instantiation source.
         if @!roles {
             for @!roles {
-                @!role_typecheck_list[+@!role_typecheck_list] := $_;
-                @!role_typecheck_list[+@!role_typecheck_list] := $_.HOW.instance_of($_);
+                nqp::push(@!role_typecheck_list, $_);
+                nqp::push(@!role_typecheck_list, $_.HOW.instance_of($_));
             }
             RoleToRoleApplier.apply($obj, @!roles);
         }
 
         # Mark composed.
         $!composed := 1;
+        nqp::settypecache($obj, [$obj.WHAT]);
+        nqp::setmethcache($obj, {});
+        nqp::setmethcacheauth($obj, 1);
         $obj
     }
 
@@ -114,7 +124,7 @@ knowhow NQPConcreteRoleHOW {
     method methods($obj, :$local) {
         my @meths;
         for %!methods {
-            @meths.push($_.value);
+            nqp::push(@meths, nqp::iterval($_));
         }
         @meths
     }
@@ -134,7 +144,7 @@ knowhow NQPConcreteRoleHOW {
     method attributes($obj, :$local) {
         my @attrs;
         for %!attributes {
-            @attrs.push($_.value);
+            nqp::push(@attrs, nqp::iterval($_));
         }
         @attrs
     }

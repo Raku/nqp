@@ -32,6 +32,11 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
     return st->WHAT;
 }
 
+/* Composes the representation. */
+static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
+    /* Nothing to do. */
+}
+
 /* Creates a new instance based on the type object. */
 static PMC * allocate(PARROT_INTERP, STable *st) {
     KnowHOWREPRInstance *obj = mem_allocate_zeroed_typed(KnowHOWREPRInstance);
@@ -59,6 +64,8 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
 /* This Parrot-specific addition to the API is used to mark an object. */
 static void gc_mark(PARROT_INTERP, STable *st, void *data) {
     KnowHOWREPRBody *body = (KnowHOWREPRBody *)data;
+    if (!STRING_IS_NULL(body->name))
+        Parrot_gc_mark_STRING_alive(interp, body->name);
     if (!PMC_IS_NULL(body->methods))
         Parrot_gc_mark_PMC_alive(interp, body->methods);
     if (!PMC_IS_NULL(body->attributes))
@@ -103,6 +110,7 @@ REPROps * KnowHOWREPR_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
     this_repr = mem_allocate_zeroed_typed(REPROps);
     this_repr->type_object_for = type_object_for;
+    this_repr->compose = compose;
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
     this_repr->copy_to = copy_to;

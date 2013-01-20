@@ -55,9 +55,9 @@ data blob) where various tables can be located.
     +---------------------------------------------------------+
 
 ## Dependencies Table
-This table describes the SCs that are required to already be loaded in
-order to load this one. The number of entries this table has is supplied
-by the header. Each entry looks as follows.
+This table describes the Serialization Contexts (SC) that are required to
+already be loaded in order to load this one. The number of entries this table
+has, is supplied by the header. Each entry looks as follows.
 
     +---------------------------------------------------------+
     | Index into the string heap of the SC unique ID          |
@@ -68,12 +68,12 @@ by the header. Each entry looks as follows.
     +---------------------------------------------------------+
 
 ## STables Table
-This table describes the STables that have been serialized. Each entry
+This table describes the 6model STables that have been serialized. Each entry
 contains the following items.
 
     +---------------------------------------------------------+
     | Index into the string heap a string holding the name of |
-    | the REPR that this STable points to.                    |
+    | the representation (REPR) that this STable points to.   |
     |    32-bit integer                                       |
     +---------------------------------------------------------+
     | Offset from the start of the STable data chunk where    |
@@ -122,11 +122,11 @@ contains the following items.
     |    32-bit integer                                       |
     +---------------------------------------------------------+
 
-The extact data stored for an object is up to its representation.
+The exact data stored for an object is up to its representation.
 
 ## Closures Table
 This table describes the closures we have taken during compilation and
-that need to be re-instnated during deserialization, along with
+that need to be re-instated during deserialization, along with
 references to their relevant outer contexts.
 
     +---------------------------------------------------------+
@@ -224,13 +224,16 @@ reference to do so. The reason being that
     7 = VM Array of Variant References
     8 = VM Array of Strings
     9 = VM Array of Integers
-    10 = VM Array of Variant References with String Keys
+    10 = VM Hash of Variant References with String Keys
     11 = VM Static Code Reference
 
 ### Object references
 These are stored as a 32-bit SC index (base 1 into the dependencies
 table, or 0 for current SC), followed by a 32-bit index into the
 selected SC.
+
+### VM NULL
+We store no extra info for those.
     
 ### VM Array of Variants
 These are stored as an element count as a 32-bit integer, followed by the variants.
@@ -262,7 +265,7 @@ code objects, pointing to the compiled code refs. These are indexed just as
 the dynamic compilation stubs were, so references to them can be resolved.
 This also works out in the cross-context case.
 
-### Dynaic Compilation
+### Dynamic Compilation
 When dynamic compilation is performed, the SC should be updated with the
 code ref to the now-compiled code. Additionally, this needs to be tagged
 as a static code reference (and will also be tagged with the SC in question).
@@ -283,7 +286,7 @@ We make an entry in the closures table indicating the static code ref that needs
 be cloned in order to start recreating the closure.
 
 Next, we consider the outer. There are two things involved here. One is the context,
-which represents the leixcals declared in that context. The second is the code object
+which represents the lexicals declared in that context. The second is the code object
 that is associated with the outer. There are some options for this.
 
 1) The outer points to a dynamic compilation boundary (tagged DYN_COMP_BOUNDARY).

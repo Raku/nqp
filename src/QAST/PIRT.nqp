@@ -177,34 +177,36 @@ class PIRT::Sub is PIRT::Node {
         my @parts;
         
         # Sub prelude.
-        for @!loadlibs {
-            nqp::push(@parts, ".loadlib " ~ self.escape($_));
+        unless nqp::isnull(@!loadlibs) {
+            for @!loadlibs {
+                nqp::push(@parts, ".loadlib " ~ self.escape($_));
+            }
         }
-        if $!hll {
+        if nqp::ifnull($!hll, '') {
             nqp::push(@parts, ".HLL " ~ self.escape($!hll));
         }
-        if @!namespace {
+        if nqp::isnull(@!namespace) {
+            nqp::push(@parts, ".namespace []");
+        }
+        else {
             my @ns;
             for @!namespace {
                 nqp::push(@ns, self.escape($_));
             }
             nqp::push(@parts, '.namespace [' ~ nqp::join(';', @ns) ~ ']');
         }
-        else {
-            nqp::push(@parts, ".namespace []");
-        }
         my $sub_decl := ".sub " ~ self.escape($!name || '');
-        if $!subid {
+        if nqp::ifnull($!subid, '') {
             $sub_decl := $sub_decl ~ " :subid(" ~ self.escape($!subid) ~ ")";
         }
-        if $!pirflags {
+        if nqp::ifnull($!pirflags, '') {
             $sub_decl := $sub_decl ~ ' ' ~ $!pirflags
         }
         nqp::push(@parts, $sub_decl);
         
         # File annotation, if there is one.
         my $file := pir::find_caller_lex__Ps('$?FILES');
-        if $file {
+        if nqp::ifnull($file, '') {
             nqp::push(@parts, ".annotate 'file', " ~ self.escape($file));
         }
         

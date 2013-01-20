@@ -5,9 +5,7 @@
 plan(8);
 
 sub oops($msg = "oops!") { # throw an exception
-    my $ex := Q:PIR { %r = new ['Exception'] };
-    $ex<message> := $msg;
-    nqp::throw($ex);
+    nqp::die($msg);
 }
 
 my $ok := 1;
@@ -15,7 +13,6 @@ try {
     oops();
     $ok := 0;
 }
-
 ok($ok, "exceptions exit a try block");
 
 sub foo() {
@@ -27,7 +24,8 @@ sub foo() {
 
 ok(foo(), "control exceptions are not caught by a try block");
 
-ok(try oops(), "statement prefix form of try works");
+ok((try 1532) == 1532,"statement prefix form works when not throwing an exception");
+ok(nqp::istype((try oops()), NQPMu), "statement prefix form of try works");
 
 {
     CATCH { ok(1, "CATCH blocks are invoked when an exception occurs"); }
@@ -47,12 +45,14 @@ $ok := 1;
 {
     {
         {
-            oops();
+            {
+                oops();
+                CATCH { $ok := $ok * 2; nqp::rethrow($!); }
+            }
             CATCH { $ok := $ok * 2; nqp::rethrow($!); }
         }
         CATCH { $ok := $ok * 2; nqp::rethrow($!); }
     }
-    CATCH { $ok := $ok * 2; nqp::rethrow($!); }
     CATCH { ok($ok == 8, "rethrow and multiple exception handlers work") }
 }
 
@@ -67,11 +67,3 @@ $ok := 1;
 }
 
 ok($ok == 16, "resuming from resumable exceptions works");
-
-$ok := 0;
-{
-    CATCH { $ok := -1; }
-    CONTROL { $ok := 1; }
-    return 5;
-}
-ok($ok == 1, "CONTROL blocks catch control exceptions");

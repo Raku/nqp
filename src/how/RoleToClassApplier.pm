@@ -18,7 +18,7 @@ knowhow RoleToClassApplier {
         # role first.
         my $to_compose;
         my $to_compose_meta;
-        if +@roles == 1 {
+        if nqp::elems(@roles) == 1 {
             $to_compose := @roles[0];
             $to_compose_meta := $to_compose.HOW;
         }
@@ -34,8 +34,9 @@ knowhow RoleToClassApplier {
         # Collisions?
         my @collisions := $to_compose_meta.collisions($to_compose);
         for @collisions {
-            unless has_method($target, ~$_, 1) {
-                nqp::die("Method '$_' collides and a resolution must be provided by the class '" ~
+            my $name := nqp::can($_, 'name') ?? $_.name !! nqp::getcodename($_);
+            unless has_method($target, $name, 1) {
+                nqp::die("Method '$name' collides and a resolution must be provided by the class '" ~
                     $target.HOW.name($target) ~ "'");
             }
         }
@@ -43,8 +44,9 @@ knowhow RoleToClassApplier {
         # Compose in any methods.
         my @methods := $to_compose_meta.methods($to_compose);
         for @methods {
-            unless has_method($target, ~$_, 0) {
-                $target.HOW.add_method($target, ~$_, $_);
+            my $name := nqp::can($_, 'name') ?? $_.name !! nqp::getcodename($_);
+            unless has_method($target, $name, 0) {
+                $target.HOW.add_method($target, $name, $_);
             }
         }
 

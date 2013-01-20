@@ -5,7 +5,7 @@ knowhow RoleToRoleApplier {
         for @roles {
             my @methods := $_.HOW.methods($_);
             for @methods {
-                my $name := ~$_;
+                my $name := nqp::can($_, 'name') ?? $_.name !! nqp::getcodename($_);
                 my $meth := $_;
                 my @meth_list;
                 if nqp::defined(%meth_info{$name}) {
@@ -21,7 +21,7 @@ knowhow RoleToRoleApplier {
                     }
                 }
                 unless $found {
-                    @meth_list.push($meth);
+                    nqp::push(@meth_list, $meth);
                 }
             }
         }
@@ -30,19 +30,20 @@ knowhow RoleToRoleApplier {
         my %target_meth_info;
         my @target_meths := $target.HOW.methods($target);
         for @target_meths {
-            %target_meth_info{~$_} := $_;
+            my $name := nqp::can($_, 'name') ?? $_.name !! nqp::getcodename($_);
+            %target_meth_info{$name} := $_;
         }
 
         # Process method list.
         for %meth_info {
-            my $name := ~$_;
+            my $name := nqp::iterkey_s($_);
             my @add_meths := %meth_info{$name};
 
             # Do we already have a method of this name? If so, ignore all of the
             # methods we have from elsewhere.
             unless nqp::defined(%target_meth_info{$name}) {
                 # No methods in the target role. If only one, it's easy...
-                if +@add_meths == 1 {
+                if nqp::elems(@add_meths) == 1 {
                     $target.HOW.add_method($target, $name, @add_meths[0]);
                 }
                 else {
@@ -80,7 +81,7 @@ knowhow RoleToRoleApplier {
 
             # Build up full list.
             # XXX Not really right yet...
-            @all_roles.push($_);
+            nqp::push(@all_roles, $_);
         }
 
         return @all_roles;

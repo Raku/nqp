@@ -10,7 +10,6 @@ BEGIN_OPS_PREAMBLE
 #include "../6model/repr_registry.h"
 #include "../6model/serialization_context.h"
 #include "../guts/multi_dispatch.h"
-#include "../pmc/pmc_dispatchersub.h"
 #include "../pmc/pmc_nqplexinfo.h"
 #include "pmc_sub.h"
 
@@ -30,6 +29,7 @@ static INTVAL stable_id = 0;
 static INTVAL smo_id    = 0;
 static INTVAL disp_id   = 0;
 static INTVAL qrpa_id   = 0;
+static INTVAL ohash_id  = 0;
 
 /* Built-in meta-objects. */
 static PMC *KnowHOW = NULL;
@@ -40,14 +40,16 @@ static PMC *nqpevent_fh = NULL;
 static INTVAL nqpdebflags_i = 0;
 
 /* NFA constants. */
-#define EDGE_FATE            0
-#define EDGE_EPSILON         1
-#define EDGE_CODEPOINT       2
-#define EDGE_CODEPOINT_NEG   3
-#define EDGE_CHARCLASS       4
-#define EDGE_CHARCLASS_NEG   5
-#define EDGE_CHARLIST        6
-#define EDGE_CHARLIST_NEG    7
+#define EDGE_FATE              0
+#define EDGE_EPSILON           1
+#define EDGE_CODEPOINT         2
+#define EDGE_CODEPOINT_NEG     3
+#define EDGE_CHARCLASS         4
+#define EDGE_CHARCLASS_NEG     5
+#define EDGE_CHARLIST          6
+#define EDGE_CHARLIST_NEG      7
+#define EDGE_CODEPOINT_I       9
+#define EDGE_CODEPOINT_I_NEG   10
 
 /* Objects we use every time we run an NFA; since we always run one NFA
  * at a time, we can re-use these. */
@@ -92,7 +94,15 @@ static void SC_write_barrier_st(PARROT_INTERP, STable *st) {
 static INTVAL
 nqp_islist(PMC *pmc) {
     INTVAL type = pmc->vtable->base_type;
-    return (INTVAL)(type == qrpa_id || type == enum_class_ResizablePMCArray);
+    return (INTVAL)(type == qrpa_id || type == enum_class_ResizablePMCArray
+                                    || type == enum_class_ResizableStringArray);
+}
+
+/* Test for something being a hash.  */
+static INTVAL
+nqp_ishash(PMC *pmc) {
+    INTVAL type = pmc->vtable->base_type;
+    return (INTVAL)(type == enum_class_Hash || type == ohash_id);
 }
 
 /* This public-domain C quick sort implementation by Darel Rex Finley. */
@@ -244,6 +254,22 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, PMC *states, STRING *target, INTVAL o
                     if (STRING_index(interp, arg, chr, 0) < 0)
                         VTABLE_push_integer(interp, nextst, to);
                 }
+                else if (act == EDGE_CODEPOINT_I) {
+                    PMC     *arg    = VTABLE_get_pmc_keyed_int(interp, edge_info, i + 1);
+                    UINTVAL  lc_arg = VTABLE_get_integer_keyed_int(interp, arg, 0);
+                    UINTVAL  uc_arg = VTABLE_get_integer_keyed_int(interp, arg, 1);
+                    UINTVAL  ord    = STRING_ord(interp, target, offset);
+                    if (ord == lc_arg || ord == uc_arg)
+                        VTABLE_push_integer(interp, nextst, to);
+                }
+                else if (act == EDGE_CODEPOINT_I_NEG) {
+                    PMC     *arg    = VTABLE_get_pmc_keyed_int(interp, edge_info, i + 1);
+                    UINTVAL  lc_arg = VTABLE_get_integer_keyed_int(interp, arg, 0);
+                    UINTVAL  uc_arg = VTABLE_get_integer_keyed_int(interp, arg, 1);
+                    UINTVAL  ord    = STRING_ord(interp, target, offset);
+                    if (ord != lc_arg && ord != uc_arg)
+                        VTABLE_push_integer(interp, nextst, to);
+                }
             }
         }
         
@@ -287,8 +313,8 @@ inline op nqp_dynop_setup() :base_core {
         /* Look up and cache some type IDs. */
         stable_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "STable", 0));
         smo_id    = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
-        disp_id   = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "DispatcherSub", 0));
         qrpa_id   = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "QRPA", 0));
+        ohash_id  = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "OwnedHash", 0));
 
         /* Initialize the object model. */
         SixModelObject_initialize(interp, &KnowHOW, &KnowHOWAttribute);
@@ -448,6 +474,20 @@ inline op repr_type_object_for(out PMC, invar PMC, in STR) :base_core {
 
 /*
 
+=item repr_compose(type_obj, repr_info)
+
+Triggers representation composition type for the specified type, passing the
+specified information for it to compose by.
+
+=cut
+
+*/
+inline op repr_compose(invar PMC, invar PMC) :base_core {
+    REPR($1)->compose(interp, STABLE($1), $2);
+}
+
+/*
+
 =item repr_instance_of()
 
 Instantiates a new object based on the given WHAT.
@@ -507,8 +547,7 @@ inline op repr_defined(out INT, invar PMC) :base_core {
     if (var->vtable->base_type == smo_id)
         $1 = IS_CONCRETE(var);
     else
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Can only use repr_defined on a SixModelObject");
+        $1 = 1; /* Because other PMCs have no concept of type-object. */
 }
 
 /*
@@ -1034,11 +1073,14 @@ inline op repr_change_type(invar PMC, invar PMC) :base_core {
     PMC *obj      = decontainerize(interp, $1);
     PMC *new_type = decontainerize(interp, $2);
     if (obj->vtable->base_type == smo_id && new_type->vtable->base_type == smo_id) {
-        if (REPR(obj)->change_type)
-            REPR(obj)->change_type(interp, obj, new_type);
-        else
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Representation does not implement change_type");
+        /* Don't rebless without need. */
+        if (STABLE(obj)->WHAT != new_type) {
+            if (REPR(obj)->change_type)
+                REPR(obj)->change_type(interp, obj, new_type);
+            else
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "Representation does not implement change_type");
+        }
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -1220,6 +1262,30 @@ inline op repr_bind_pos_num(invar PMC, in INT, in NUM) :base_core {
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use repr_bind_pos_num on a SixModelObject");
+}
+
+/*
+
+=item repr_elems()
+
+Returns the number of elements, as determined by the REPR (not the VTABLE)
+
+=cut
+
+*/
+
+inline op repr_elems(out INT, invar PMC) :base_core {
+    PMC *obj = decontainerize(interp, $2);
+    if (obj->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(obj))
+            $1 = REPR(obj)->idx_funcs->elems(interp, STABLE(obj), OBJECT_BODY(obj));
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot do repr_elems on a type object");
+    }
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_elems on a SixModelObject");
 }
 
 
@@ -1491,8 +1557,7 @@ inline op multi_dispatch_over_lexical_candidates(out PMC) :base_core {
     PMC *cur_ctx = CURRENT_CONTEXT(interp);
     while (!PMC_IS_NULL(cur_ctx)) {
         Parrot_Context *ctx_struct = CONTEXT_STRUCT(cur_ctx);
-        if (ctx_struct->current_sub->vtable->base_type == disp_id ||
-                ctx_struct->current_sub->vtable->base_type == enum_class_Sub &&
+        if (ctx_struct->current_sub->vtable->base_type == enum_class_Sub &&
                 PARROT_SUB(ctx_struct->current_sub)->multi_signature->vtable->base_type == smo_id &&
                 !PMC_IS_NULL(((NQP_Routine *)PMC_data(PARROT_SUB(ctx_struct->current_sub)->multi_signature))->dispatchees)) {
             /* Found a dispatcher. Enter the multi-dispatcher to find a the
@@ -1519,101 +1584,9 @@ inline op multi_dispatch_over_lexical_candidates(out PMC) :base_core {
     }
     if (!done)
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "multi_dispatch_over_lexical_candidates was unable to find a candidate list");
+            "multi_dispatch_over_lexical_candidates was unable to find a candidate list (probable sub: %Ss)",
+            VTABLE_get_string(interp, CONTEXT_STRUCT(CURRENT_CONTEXT(interp))->current_sub));
 }
-
-/*
-
-=item set_dispatchees()
-
-Sets the dispatchees of the code object in $1, which must be a DispatcherSub,
-to the array in $2.
-
-=cut
-
-*/
-inline op set_dispatchees(in PMC, in PMC) :base_core {
-    if ($1->vtable->base_type == disp_id) {
-        PARROT_DISPATCHERSUB($1)->dispatchees = $2;
-        PARROT_GC_WRITE_BARRIER(interp, $1);
-    }
-    else
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Can only use set_dispatchees if first operand is a DispatcherSub.");
-}
-
-/*
-
-=item create_dispatch_and_add_candidates()
-
-Creates an instantiation of the dispatch routine (or proto, which may
-serve as one) supplied and augments it with the provided candidates.
-It relies on being passed the instantiation of the dispatcher from the
-last outer scope that had an instantiation, and we thus take its
-candidates.
-
-$1 will be set to the new, augmented dispatch routine. $2 is the proto
-or instantiation of it to clone. $3 is an array of candidates to add.
-
-=cut
-
-*/
-inline op create_dispatch_and_add_candidates(out PMC, invar PMC, invar PMC) :base_core {
-    /* Ensure we have a dispatcher. */
-    if ($2->vtable->base_type == disp_id) {
-        /* Copy it (which makes an "instance") and add new candidates. */
-        PMC *  copy   = VTABLE_clone(interp, $2);
-        INTVAL i      = 0;
-        INTVAL to_add = VTABLE_elements(interp, $3);
-        PARROT_DISPATCHERSUB(copy)->dispatchees = VTABLE_clone(interp,
-                PARROT_DISPATCHERSUB($2)->dispatchees);
-        PARROT_GC_WRITE_BARRIER(interp, copy);
-        for (i = 0; i < to_add; i++)
-            VTABLE_push_pmc(interp, PARROT_DISPATCHERSUB(copy)->dispatchees,
-                    VTABLE_get_pmc_keyed_int(interp, $3, i));
-        $1 = copy;
-    }
-    else
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Can only use create_dispatch_and_add_candidates if first operand is a DispatcherSub.");
-}
-
-/*
-
-=item push_dispatchee()
-
-Adds a single new code object to the end of a dispatcher's dispatchee list.
-
-=cut
-
-*/
-inline op push_dispatchee(invar PMC, invar PMC) :base_core {
-    if ($1->vtable->base_type == disp_id) {
-        if (PMC_IS_NULL(PARROT_DISPATCHERSUB($1)->dispatchees)) {
-            PARROT_DISPATCHERSUB($1)->dispatchees = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
-            PARROT_GC_WRITE_BARRIER(interp, $1);
-        }
-        VTABLE_push_pmc(interp, PARROT_DISPATCHERSUB($1)->dispatchees, $2);
-    }
-    else
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Can only use push_dispatchee if first operand is a DispatcherSub.");
-}
-
-/*
-
-=item is_dispatcher()
-
-Checks if a routine is considered a dispatcher (that is, if it has a
-list of dispatchees).
-
-=cut
-
-*/
-inline op is_dispatcher(out INT, invar PMC) :base_core {
-    $1 = $2->vtable->base_type == disp_id;
-}
-
 
 /*
 
@@ -1653,6 +1626,25 @@ inline op set_sub_code_object(in PMC, invar PMC) :base_core {
     else
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use set_sub_code_object if first operand is a Sub.");
+}
+
+
+/*
+
+=item get_sub_code_object()
+
+Gets the high level code associated with the Parrot sub in $2, and places it
+into $1.
+
+=cut
+
+*/
+inline op get_sub_code_object(out PMC, invar PMC) :base_core {
+    if ($2->vtable->base_type == enum_class_Sub)
+        GETATTR_Sub_multi_signature(interp, $2, $1);
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use get_sub_code_object if second operand is a Sub.");
 }
 
 
@@ -2123,6 +2115,19 @@ inline op nqp_islist(out INT, invar PMC) :base_core {
 
 /*
 
+=item nqp_ishash
+
+Checks if the type of thing in $2 is a nqp hash.
+
+=cut
+
+*/
+inline op nqp_ishash(out INT, invar PMC) :base_core {
+    $1 = nqp_ishash($2)
+}
+
+/*
+
 =item is_container
 
 Checks if the type of thing in $2 is a container or not. Puts a non-zero
@@ -2248,7 +2253,7 @@ Logs an event.
 
 */
 inline op nqpevent_fh(out PMC, invar PMC) :base_core {
-    $1 = nqpevent_fh;
+    $1 = nqpevent_fh ? nqpevent_fh : PMCNULL;
     nqpevent_fh = $2;
 }
 inline op nqpevent(in STR) :base_core {
@@ -2418,12 +2423,13 @@ inline op nqp_nfa_run_protoregex(out PMC, invar PMC, in STR, in INT) :base_core 
     $1 = fatepmc;
 }
 
-inline op nqp_nfa_run_alternation(invar PMC, in STR, in INT, invar PMC, invar PMC) :base_core {
+inline op nqp_nfa_run_alternation(invar PMC, in STR, in INT, invar PMC, invar PMC, invar PMC) :base_core {
     PMC    *states = $1;
     STRING *target = $2;
     INTVAL  offset = $3;
     PMC    *bstack = $4;
     PMC    *cstack = $5;
+    PMC    *labels = $6;
     
     /* Run the NFA. */
     INTVAL  total_fates, i;
@@ -2431,7 +2437,6 @@ inline op nqp_nfa_run_alternation(invar PMC, in STR, in INT, invar PMC, invar PM
     
     /* Push the results onto the bstack. */
     INTVAL  caps   = VTABLE_defined(interp, cstack) ? VTABLE_elements(interp, cstack) : 0;
-    PMC    *labels = VTABLE_get_pmc_keyed_int(interp, states, 0);
     for (i = 0; i < total_fates; i++) {
         VTABLE_push_integer(interp, bstack,
             VTABLE_get_integer_keyed_int(interp, labels, fates[i]));
@@ -2634,7 +2639,24 @@ the compilation unit's static code refs in the list in $4.
 
 */
 inline op nqp_deserialize_sc(in STR, invar PMC, invar PMC, invar PMC) :base_core {
-    Serialization_deserialize(interp, $2, $3, $4, $1);
+    PMC *conlist_throwaway = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+    Serialization_deserialize(interp, $2, $3, $4, conlist_throwaway, $1);
+}
+
+/*
+
+=item nqp_deserialize_sc
+
+Deserializes the data in $1, populating the serialization context located in $2.
+Expects to find any required strings in the string heap, passed in $3, and any of
+the compilation unit's static code refs in the list in $4. $5 should be a list that
+will be populated with the object repossession conflict list.
+
+=cut
+
+*/
+inline op nqp_deserialize_sc(in STR, invar PMC, invar PMC, invar PMC, invar PMC) :base_core {
+    Serialization_deserialize(interp, $2, $3, $4, $5, $1);
 }
 
 /*
@@ -2685,4 +2707,17 @@ inline op nqp_fresh_stub(out PMC, invar PMC) :base_core {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "nqp_fresh_sub can only operate on a Parrot Sub");
     }
+}
+
+/*
+
+=item nqp_set_nqpmu
+
+Sets the NQPMu.
+
+=cut
+
+*/
+inline op nqp_set_nqpmu(invar PMC) :base_core {
+    nqp_set_nqpmu($1);
 }

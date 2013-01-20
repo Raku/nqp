@@ -44,6 +44,11 @@ knowhow NQPParametricRoleHOW {
 
     method BUILD(:$name!) {
         $!name := $name;
+        %!attributes := nqp::hash();
+        %!methods := nqp::hash();
+        @!multi_methods_to_incorporate := nqp::list();
+        @!roles := nqp::list();
+        $!composed := 0;
     }
 
     # Create a new meta-class instance, and then a new type object
@@ -58,7 +63,7 @@ knowhow NQPParametricRoleHOW {
     }
 
     method add_method($obj, $name, $code_obj) {
-        if %!methods{$name} {
+        if nqp::existskey(%!methods, $name) {
             nqp::die("This role already has a method named " ~ $name);
         }
         %!methods{$name} := $code_obj;
@@ -68,13 +73,13 @@ knowhow NQPParametricRoleHOW {
         my %todo;
         %todo<name> := $name;
         %todo<code> := $code_obj;
-        @!multi_methods_to_incorporate[+@!multi_methods_to_incorporate] := %todo;
+        nqp::push(@!multi_methods_to_incorporate, %todo);
         $code_obj;
     }
 
     method add_attribute($obj, $meta_attr) {
         my $name := $meta_attr.name;
-        if %!attributes{$name} {
+        if nqp::existskey(%!attributes, $name) {
             nqp::die("This role already has an attribute named " ~ $name);
         }
         %!attributes{$name} := $meta_attr;
@@ -85,12 +90,15 @@ knowhow NQPParametricRoleHOW {
     }
 
     method add_role($obj, $role) {
-        @!roles[+@!roles] := $role;
+        nqp::push(@!roles, $role);
     }
 
     # Compose the role. Beyond this point, no changes are allowed.
     method compose($obj) {
         $!composed := 1;
+        nqp::settypecache($obj, [$obj.WHAT]);
+        nqp::setmethcache($obj, {});
+        nqp::setmethcacheauth($obj, 1);
         $obj
     }
 
@@ -103,13 +111,18 @@ knowhow NQPParametricRoleHOW {
     method parametric($obj) {
         1
     }
+    
+    # Curries this parametric role with arguments.
+    method curry($obj, *@args) {
+        NQPCurriedRoleHOW.new_type($obj, |@args)
+    }
 
     # This specializes the role for the given class and builds a concrete
     # role.
-    method specialize($obj, $class_arg) {
+    method specialize($obj, $class_arg, *@args) {
         # Run the body block to capture the arguments into the correct
         # type argument context.
-        $!body_block($class_arg);
+        my $pad := $!body_block($class_arg, |@args);
 
         # Construct a new concrete role.
         my $irole := NQPConcreteRoleHOW.new_type(:name($!name), :instance_of($obj));
@@ -117,12 +130,20 @@ knowhow NQPParametricRoleHOW {
         # Copy attributes. (Nothing to reify in NQP as we don't currently
         # have parametric types that may end up in the signature.)
         for %!attributes {
-            $irole.HOW.add_attribute($irole, $_.value);
+            $irole.HOW.add_attribute($irole, nqp::iterval($_));
         }
 
         # Capture methods in the correct lexical context.
         for %!methods {
-            $irole.HOW.add_method($irole, $_.key, $_.value.clone());
+            my $name := nqp::iterkey_s($_);
+            my $meth := nqp::can(nqp::iterval($_), 'instantiate_generic')
+                ?? nqp::iterval($_).instantiate_generic($pad)
+                !! nqp::iterval($_).clone();
+            if nqp::substr($name, 0, 12) eq '!!LATENAME!!' {
+                $name := nqp::atkey($pad, nqp::substr($name, 12));
+                $meth.'!set_name'($name);
+            }
+            $irole.HOW.add_method($irole, $name, $meth);
         }
         for @!multi_methods_to_incorporate {
             $irole.HOW.add_multi_method($irole, $_<name>, reify_method($_<code>));
@@ -130,7 +151,7 @@ knowhow NQPParametricRoleHOW {
 
         # Copy roles, instantiating them as we go.
         for @!roles {
-            my $specialized := $irole.HOW.specialize($irole, $class_arg);
+            my $specialized := $_.HOW.specialize($_, $class_arg);
             $irole.HOW.add_role($irole, $specialized);
         }
 
@@ -146,7 +167,7 @@ knowhow NQPParametricRoleHOW {
     method methods($obj, :$local) {
         my @meths;
         for %!methods {
-            @meths.push($_.value);
+            nqp::push(@meths, nqp::iterval($_));
         }
         @meths
     }
@@ -162,7 +183,7 @@ knowhow NQPParametricRoleHOW {
     method attributes($obj, :$local) {
         my @attrs;
         for %!attributes {
-            @attrs.push($_.value);
+            nqp::push(@attrs, nqp::iterval($_));
         }
         @attrs
     }

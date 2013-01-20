@@ -747,7 +747,7 @@ is_qast(
 {
     my $block := QAST::Block.new();
     my $missing := $block.symbol('sabre-toothed tiger');
-    ok(!pir::defined($missing), 'QAST::Block.symbol on a nonexistent key returns an undefined value');
+    ok(!nqp::defined($missing), 'QAST::Block.symbol on a nonexistent key returns an undefined value');
 }
 
 {

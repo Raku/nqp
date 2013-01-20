@@ -10,33 +10,54 @@ my class NQPMu {
     }
 
     method BUILDALL(NQPMu:D $self: *%attrinit) {
-        # Get the build plan. Note that we do this "low level" to
-        # avoid the NQP type getting mapped to a Rakudo one, which
-        # would get expensive.
-        my $build_plan := nqp::findmethod(self.HOW, 'BUILDALLPLAN')(self.HOW, self);
+        # Get the build plan.
+        my $build_plan := self.HOW.BUILDALLPLAN(self);
         my $count      := nqp::elems($build_plan);
         my $i          := 0;
         while $i < $count {
             my $task := nqp::atpos($build_plan, $i);
+            my int $code := nqp::atpos($task, 0);
             $i := $i + 1;
-            if nqp::iseq_i(nqp::atpos($task, 0), 0) {
+            if nqp::iseq_i($code, 0) {
                 # Custom BUILD call.
                 nqp::atpos($task, 1)(self, |%attrinit);
             }
-            elsif nqp::iseq_i(nqp::atpos($task, 0), 1) {
+            elsif nqp::iseq_i($code, 1) {
                 # See if we have a value to initialize this attr with.
                 my $key_name := nqp::atpos($task, 2);
                 if nqp::existskey(%attrinit, $key_name) {
                     nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos_s($task, 3), %attrinit{$key_name});
                 }
             }
-            # Uncomment if we get attribute initialization closures in NQP.
-            #elsif nqp::iseq_i(nqp::atpos($task, 0), 2) {
-            #    unless nqp::attrinited(self, nqp::atpos($task, 1), nqp::atpos($task, 2)) {
-            #        nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos($task, 2),
-            #            nqp::atpos($task, 3)(self, $attr));
-            #    }
-            #}
+            elsif nqp::iseq_i($code, 2) {
+                # See if we have a value to initialize this attr with;
+                # if not, set it to an empty array.
+                my $key_name := nqp::atpos($task, 2);
+                if nqp::existskey(%attrinit, $key_name) {
+                    nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos_s($task, 3), %attrinit{$key_name});
+                }
+                else {
+                    nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos_s($task, 3), nqp::list());
+                }
+            }
+            elsif nqp::iseq_i($code, 3) {
+                # See if we have a value to initialize this attr with;
+                # if not, set it to an empty array.
+                my $key_name := nqp::atpos($task, 2);
+                if nqp::existskey(%attrinit, $key_name) {
+                    nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos_s($task, 3), %attrinit{$key_name});
+                }
+                else {
+                    nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos_s($task, 3), nqp::hash());
+                }
+            }
+            elsif nqp::iseq_i($code, 4) {
+                unless nqp::attrinited(self, nqp::atpos($task, 1), nqp::atpos($task, 2)) {
+                    nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos($task, 2),
+                        nqp::atpos($task, 3)(self,
+                            nqp::getattr(self, nqp::atpos($task, 1), nqp::atpos($task, 2))));
+                }
+            }
             else {
                 nqp::die("Invalid BUILDALLPLAN");
             }
@@ -50,7 +71,34 @@ my class NQPMu {
 
     proto method Str() is parrot_vtable('get_string') { * }
     multi method Str(NQPMu:U $self:) {
-        self.HOW.name(self) ~ '()'
+        ''
+    }
+    multi method Str(NQPMu:D $self:) {
+        self.HOW.name(self) ~ '<' ~ nqp::where(self) ~ '>'
+    }
+    
+    proto method Numeric() is parrot_vtable('get_number') { * }
+    multi method Numeric(NQPMu:U $self:) {
+        0.0
+    }
+    
+    proto method Int() is parrot_vtable('get_integer') { * }
+    multi method Int(NQPMu:U $self:) {
+        0
+    }
+    
+    proto method at_pos($pos) is parrot_vtable('get_pmc_keyed_int') { * }
+    multi method at_pos(NQPMu:U $self: $pos) {
+        NQPMu
+    }
+    
+    proto method at_key($key) is parrot_vtable('get_pmc_keyed_str') { * }
+    multi method at_key(NQPMu:U $self: $key) {
+        NQPMu
+    }
+    
+    method defined() is parrot_vtable('defined') {
+        nqp::isconcrete(self)
     }
 
     proto method ACCEPTS($topic) { * }

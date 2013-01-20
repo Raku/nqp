@@ -2,7 +2,6 @@
 #include "parrot/parrot.h"
 #include "parrot/extend.h"
 #include "../6model/sixmodelobject.h"
-#include "../pmc/pmc_dispatchersub.h"
 #include "pmc_sub.h"
 #include "multi_dispatch.h"
 
@@ -46,11 +45,21 @@ static INTVAL smo_id = 0;
 /* Register type. */
 #define BIND_VAL_OBJ 4
 
+/* The NQPMu. */
+static PMC *NQPMu;
+
+/* Sets the NQPMu object. */
+void nqp_set_nqpmu(PMC *nqpmu) {
+    NQPMu = nqpmu;
+}
+
 /* Compares two types to see if the first is narrower than the second. */
 static INTVAL is_narrower_type(PARROT_INTERP, PMC *a, PMC *b) {
     /* If one of the types is null, then we know that's automatically
      * wider than anything. Even wider than your mom! */
     if (PMC_IS_NULL(b) && !PMC_IS_NULL(a))
+        return 1;
+    else if (PMC_IS_NULL(a) && b == NQPMu)
         return 1;
     else if (PMC_IS_NULL(a) || PMC_IS_NULL(b))
         return 0;
@@ -260,7 +269,8 @@ static PMC *get_dispatchees(PARROT_INTERP, PMC *dispatcher) {
         return r->dispatchees;
     }
     else {
-        return PARROT_DISPATCHERSUB(dispatcher)->dispatchees;
+        Parrot_ex_throw_from_c_args(interp, 0, 1,
+            "Could not find multi-dispatch list");
     }
 }
 
@@ -283,16 +293,8 @@ static NQP_md_cache *get_dispatch_cache(PARROT_INTERP, PMC *dispatcher) {
         }
     }
     else {
-        if (PMC_IS_NULL(PARROT_DISPATCHERSUB(dispatcher)->dispatch_cache)) {
-            NQP_md_cache *c = mem_sys_allocate_zeroed(sizeof(NQP_md_cache));
-            cache_ptr = Parrot_pmc_new(interp, enum_class_Pointer);
-            VTABLE_set_pointer(interp, cache_ptr, c);
-            PARROT_DISPATCHERSUB(dispatcher)->dispatch_cache = cache_ptr;
-            PARROT_GC_WRITE_BARRIER(interp, dispatcher);
-        }
-        else {
-            cache_ptr = PARROT_DISPATCHERSUB(dispatcher)->dispatch_cache;
-        }
+        Parrot_ex_throw_from_c_args(interp, 0, 1,
+            "Could not find multi-dispatch list");
     }
     return (NQP_md_cache *)VTABLE_get_pointer(interp, cache_ptr);
 }
@@ -521,6 +523,7 @@ PMC *nqp_multi_dispatch(PARROT_INTERP, PMC *dispatcher, PMC *capture) {
     else if (possibles_count == 0) {
         /* Get signatures of all possible candidates. We dump them in the
          * order in which we search for them. */
+        PMC    *fail_cand  = candidates[0]->sub;
         STRING *signatures = Parrot_str_new(interp, "", 0);
         cur_candidate = candidates;
         while (1) {
@@ -536,7 +539,7 @@ PMC *nqp_multi_dispatch(PARROT_INTERP, PMC *dispatcher, PMC *capture) {
         mem_sys_free(possibles);
         Parrot_ex_throw_from_c_args(interp, NULL, 1,
             "No applicable candidates found to dispatch to for '%Ss'. Available candidates are:\n%Ss",
-                VTABLE_get_string(interp, candidates[0]->sub),
+                VTABLE_get_string(interp, fail_cand),
                 signatures);
     }
     else {

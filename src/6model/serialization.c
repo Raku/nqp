@@ -1692,34 +1692,58 @@ static void repossess(PARROT_INTERP, SerializationReader *reader, INTVAL i) {
     Parrot_Int4 repo_type = read_int32(table_row, 0);
     if (repo_type == 0) {
         /* Get object to repossess. */
-        PMC *orig_obj = SC_get_object(interp,
-            locate_sc(interp, reader, read_int32(table_row, 8)),
-            read_int32(table_row, 12));
-        
-        /* Clear it up, since we'll re-allocate all the bits inside
-         * it on deserialization. */
-        STABLE(orig_obj)->REPR->gc_free(interp, orig_obj);
+        PMC *orig_sc  = locate_sc(interp, reader, read_int32(table_row, 8));
+        PMC *orig_obj = SC_get_object(interp, orig_sc, read_int32(table_row, 12));
         
         /* Put it into objects root set at the apporpriate slot. */
         VTABLE_set_pmc_keyed_int(interp, reader->objects_list,
-            read_int32(table_row, 4), orig_obj);
+        read_int32(table_row, 4), orig_obj);
+        
+        /* Ensure we aren't already trying to repossess the object. */
+        if (PMC_data(orig_obj)) {
+            /* If we have a reposession conflict, make a copy of the original object
+            * and reference it from the conflicts list. Push the original (about to
+            * be overwritten) object reference too. */
+            if (SC_PMC(orig_obj) != orig_sc) {
+                PMC *backup = REPR(orig_obj)->allocate(interp, STABLE(orig_obj));
+                if (IS_CONCRETE(orig_obj))
+                    REPR(orig_obj)->copy_to(interp, STABLE(orig_obj), OBJECT_BODY(orig_obj), OBJECT_BODY(backup));
+                else
+                    MARK_AS_TYPE_OBJECT(backup);
+                PARROT_GC_WRITE_BARRIER(interp, backup);
+                VTABLE_push_pmc(interp, reader->repo_conflicts_list, backup);
+                VTABLE_push_pmc(interp, reader->repo_conflicts_list, orig_obj);
+            }
+    
+            /* Clear it up, since we'll re-allocate all the bits inside
+            * it on deserialization. */
+            STABLE(orig_obj)->REPR->gc_free(interp, orig_obj);
+        }
     }
     else if (repo_type == 1) {
         /* Get STable to repossess. */
-        PMC *orig_st = SC_get_stable(interp,
-            locate_sc(interp, reader, read_int32(table_row, 8)),
-            read_int32(table_row, 12));
-        
-        /* Clear it up, since we'll re-allocate all the bits inside
-         * it on deserialization. */
-        if (STABLE_STRUCT(orig_st)->REPR->gc_free_repr_data) {
-            STABLE_STRUCT(orig_st)->REPR->gc_free_repr_data(interp, STABLE_STRUCT(orig_st));
-            STABLE_STRUCT(orig_st)->REPR_data = NULL;
-        }
+        PMC *orig_sc = locate_sc(interp, reader, read_int32(table_row, 8));
+        PMC *orig_st = SC_get_stable(interp, orig_sc, read_int32(table_row, 12));
         
         /* Put it into STables root set at the apporpriate slot. */
         VTABLE_set_pmc_keyed_int(interp, reader->stables_list,
             read_int32(table_row, 4), orig_st);
+        
+        /* Ensure we aren't already trying to repossess the STable. */
+        if (PMC_data(orig_st)) {
+            /* Make sure we don't have a reposession conflict. */
+            if (STABLE_STRUCT(orig_st)->sc != orig_sc)
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "STable conflict detected during deserialization.\n"
+                    "(Probable attempt to load two modules that cannot be loaded together).");
+            
+            /* Clear it up, since we'll re-allocate all the bits inside
+            * it on deserialization. */
+            if (STABLE_STRUCT(orig_st)->REPR->gc_free_repr_data) {
+                STABLE_STRUCT(orig_st)->REPR->gc_free_repr_data(interp, STABLE_STRUCT(orig_st));
+                STABLE_STRUCT(orig_st)->REPR_data = NULL;
+            }
+        }
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -1743,7 +1767,7 @@ static void do_parrot_vtable_fixup_if_needed(PARROT_INTERP, PMC *obj, STRING *me
 /* Takes serialized data, an empty SerializationContext to deserialize it into,
  * a strings heap and the set of static code refs for the compilation unit.
  * Deserializes the data into the required objects and STables. */
-void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *static_codes, STRING *data) {
+void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *static_codes, PMC *repo_conflicts, STRING *data) {
     PMC    *stables   = PMCNULL;
     PMC    *objects   = PMCNULL;
     INTVAL  scodes    = VTABLE_elements(interp, static_codes);
@@ -1758,6 +1782,7 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *st
     reader->stables_list        = stables;
     reader->objects_list        = objects;
     reader->contexts_list       = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+    reader->repo_conflicts_list = repo_conflicts;
     reader->root.sc             = sc;
     reader->root.string_heap    = string_heap;
     reader->root.dependent_scs  = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);

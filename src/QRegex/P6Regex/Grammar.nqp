@@ -1,13 +1,58 @@
 use QRegex;
 use NQPHLL;
 use QAST;
-use PASTRegex;
+
+class QRegex::P6Regex::World is HLL::World {
+    method create_code($past, $name) {
+        # Create a fresh stub code, and set its name.
+        my $dummy := pir::nqp_fresh_stub__PP(-> { nqp::die("Uncompiled code executed") });
+        pir::assign__vPS($dummy, $name);
+
+        # Tag it as a static code ref and add it to the root code refs set.
+        pir::setprop__vPsP($dummy, 'STATIC_CODE_REF', $dummy);
+        self.add_root_code_ref($dummy, $past);
+        
+        # Create code object.
+        my $code_obj := nqp::create(NQPRegex);
+        nqp::bindattr($code_obj, NQPRegex, '$!do', $dummy);
+        my $slot := self.add_object($code_obj);
+            
+        # Add fixup of the code object and the $!do attribute.
+        my $fixups := QAST::Stmt.new();
+        $fixups.push(QAST::Op.new(
+            :op('bindattr'),
+            QAST::WVal.new( :value($code_obj) ),
+            QAST::WVal.new( :value(NQPRegex) ),
+            QAST::SVal.new( :value('$!do') ),
+            QAST::BVal.new( :value($past) )
+        ));
+        $fixups.push(QAST::Op.new(
+            :op('setcodeobj'),
+            QAST::BVal.new( :value($past) ),
+            QAST::WVal.new( :value($code_obj) )
+        ));
+        self.add_fixup_task(:fixup_past($fixups));
+
+        $code_obj
+    }
+}
 
 grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     method obs ($old, $new, $when = ' in Perl 6') {
         self.panic('Unsupported use of ' ~ ~$old ~ ';'
                    ~ ~$when ~ ' please use ' ~ ~$new);
+    }
+
+    # errors are reported through methods, so that subclasses like Rakudo's
+    # Perl6::RegexGrammar can override them, and throw language-specific
+    # exceptions
+    method throw_unrecognized_metachar ($char) {
+        self.panic('Unrecognized regex metacharacter ' ~ $char ~ ' (must be quoted to match literally)');
+    }
+
+    method throw_null_pattern() {
+        self.panic('Null regex not allowed');
     }
 
     token ws { [ \s+ | '#' \N* ]* }
@@ -28,46 +73,62 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token TOP {
         :my %*RX;
+        :my $*W := QRegex::P6Regex::World.new(:handle(nqp::sha1(self.target)));
         <nibbler>
         [ $ || <.panic: 'Confused'> ]
     }
 
     token nibbler {
-        :my $OLDRX := pir::find_dynamic_lex__Ps('%*RX');
+        :my $OLDRX := nqp::getlexdyn('%*RX');
         :my %*RX;
         {
             for $OLDRX { %*RX{$_.key} := $_.value; }
         }
         [ <.ws> ['||'|'|'|'&&'|'&'] ]?
-        <termaltseq>
+        <termaltseq> <.ws>
+        [
+        || <?infixstopper>
+        || $$ <.panic: "Regex not terminated">
+        || (\W) { self.throw_unrecognized_metachar: ~$/[0] }
+        || <.panic: "Regex not terminated">
+        ]
     }
+    
+    regex infixstopper {
+        :dba('infix stopper')
+        [
+        | <?before <[\) \} \]]> >
+        | <?before '>' <-[>]> >
+        | <?before <rxstopper> >
+        ]
+    }
+    
+    token rxstopper { $ }
 
     token termaltseq {
         <termconjseq>
-        [ '||' [ <termconjseq> || <.panic: 'Null pattern not allowed'> ] ]*
+        [ '||' [ <termconjseq> || <.throw_null_pattern> ] ]*
     }
 
     token termconjseq {
         <termalt>
-        [ '&&' [ <termalt> || <.panic: 'Null pattern not allowed'> ] ]*
+        [ '&&' [ <termalt> || <.throw_null_pattern> ] ]*
     }
 
     token termalt {
         <termconj>
-        [ '|' <![|]> [ <termconj> || <.panic: 'Null pattern not allowed'> ] ]*
+        [ '|' <![|]> [ <termconj> || <.throw_null_pattern> ] ]*
     }
 
     token termconj {
         <termish>
-        [ '&' <![&]> [ <termish> || <.panic: 'Null pattern not allowed'> ] ]*
+        [ '&' <![&]> [ <termish> || <.throw_null_pattern> ] ]*
     }
 
     token termish {
         || <noun=.quantified_atom>+
-        || (\W) {
-            my $char := ~$/[0];
-            $/.CURSOR.panic("Unrecognized regex metacharacter $char (must be quoted to match literally)")
-            }
+        || <?before <stopper> | <[&|~]> > <.throw_null_pattern>
+        || (\W) { self.throw_unrecognized_metachar: ~$/[0] }
     }
 
     token quantified_atom {
@@ -161,10 +222,6 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         [ <.ws> '=' <.ws> <quantified_atom> ]?
     }
 
-    token metachar:sym<PIR> {
-        ':PIR{{' $<pir>=[.*?] '}}'
-    }
-
     proto token backslash { <...> }
     token backslash:sym<s> { $<sym>=[<[dDnNsSwW]>] }
     token backslash:sym<b> { $<sym>=[<[bB]>] }
@@ -181,7 +238,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token backslash:sym<z> { 'z' <.obs: '\\z as end-of-string matcher', '$'> }
     token backslash:sym<Z> { 'Z' <.obs: '\\Z as end-of-string matcher', '\\n?$'> }
     token backslash:sym<Q> { 'Q' <.obs: '\\Q as quotemeta', 'quotes or literal variable match'> }
-    token backslash:sym<unrec> { {} \w <.panic: 'Unrecognized backslash sequence'> }
+    token backslash:sym<unrec> { {} (\w) { self.throw_unrecog_backslash_seq: $/[0].Str } }
     token backslash:sym<misc> { \W }
 
     proto token assertion { <...> }
@@ -229,12 +286,23 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token mod_internal {
         [
         | ':' $<n>=('!' | \d+)**1  <mod_ident> »
-        | ':' <mod_ident> [ '(' $<n>=[\d+] ')' ]?
+        | ':' <mod_ident>
+            [
+            '('
+                [
+                | $<n>=[\d+]
+                | <?[']> <quote_EXPR: ':q'>
+                | <?["]> <quote_EXPR: ':qq'>
+                ]
+                ')'
+            ]?
         ]
     }
 
     proto token mod_ident { <...> }
-    token mod_ident:sym<ignorecase> { $<sym>=[i] 'gnorecase'? }
-    token mod_ident:sym<ratchet>    { $<sym>=[r] 'atchet'? }
-    token mod_ident:sym<sigspace>   { $<sym>=[s] 'igspace'? }
+    token mod_ident:sym<ignorecase> { $<sym>=[i] 'gnorecase'? » }
+    token mod_ident:sym<ratchet>    { $<sym>=[r] 'atchet'? » }
+    token mod_ident:sym<sigspace>   { $<sym>=[s] 'igspace'? » }
+    token mod_ident:sym<dba>        { <sym> » }
+    token mod_ident:sym<oops>       { {} (\w+) { $/.CURSOR.panic('Unrecognized regex modifier :' ~ $/[0].Str) } }
 }

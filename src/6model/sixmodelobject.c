@@ -180,7 +180,7 @@ PMC * create_stable(PARROT_INTERP, REPROps *REPR, PMC *HOW) {
     return st_pmc;
 }
 
-/* Performs a decontainerizing operation onf the passed variable, using
+/* Performs a decontainerizing operation on the passed variable, using
  * the 6model container API. */
 PMC * decontainerize(PARROT_INTERP, PMC *var) {
     if (var->vtable->base_type == smo_id) {

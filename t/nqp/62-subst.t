@@ -1,7 +1,5 @@
 #! nqp
 
-pir::load_bytecode('nqp-setting.pbc' );
-
 plan(7);
 
 my $str := 'hello';

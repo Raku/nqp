@@ -1,6 +1,6 @@
 #! nqp
 
-plan(6);
+plan(7);
 
 my $count := 1;
 
@@ -16,3 +16,5 @@ $y('pointy block with optional + arg', 3);
 
 for <4 pointy4 5 pointy5 6 pointy6> -> $a, $b { ok($a == $count++, $b); }
 
+my $argless := -> { ok(1, 'argumentless pointy parses ok') }
+$argless();

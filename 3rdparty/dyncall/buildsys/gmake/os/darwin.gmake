@@ -20,7 +20,8 @@
 DLL_PREFIX=lib
 DLL_SUFFIX=.dylib
 
-LIBTOOL_STATIC=libtool -static -o $@ $^
+# darwin libtool only, not macports/gnu libtool
+LIBTOOL_STATIC=/usr/bin/libtool -static -o $@ $^
 
 ifdef BUILD_ARCH_universal
 TARGET_ARCH?=-arch i386 -arch ppc -arch x86_64

@@ -15,6 +15,7 @@ knowhow NQPModuleHOW {
 
     method BUILD(:$name) {
         $!name := $name;
+        $!composed := 0;
     }
 
     # Create a new meta-class instance, and then a new type object
@@ -25,9 +26,7 @@ knowhow NQPModuleHOW {
     }
 
     method add_method($obj, $name, $code_obj) {
-        # XXX Commented out as in some places, module is used to try to
-        # shove methods into Parrot classes (which doesn't work any, mind).
-        #nqp::die("Modules may not have methods");
+        nqp::die("Modules may not have methods");
     }
 
     method add_multi_method($obj, $name, $code_obj) {
@@ -39,8 +38,8 @@ knowhow NQPModuleHOW {
     }
 
     method compose($obj) {
-        pir::publish_method_cache($obj, my %empty);
-        pir::set_method_cache_authoritativeness__0Pi($obj, 1);
+        nqp::setmethcache($obj, my %empty);
+        nqp::setmethcacheauth($obj, 1);
         $!composed := 1;
     }
     

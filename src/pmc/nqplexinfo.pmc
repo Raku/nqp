@@ -92,6 +92,8 @@ pmclass NQPLexInfo
     }
     
     VTABLE void thaw(PMC *info) {
+        UNUSED(INTERP)
+        UNUSED(info)
         /* Need custom mark. */
         PObj_custom_mark_SET(SELF);
     }

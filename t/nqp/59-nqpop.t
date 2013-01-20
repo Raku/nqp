@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(92);
+plan(94);
 
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
@@ -124,3 +124,8 @@ ok( nqp::shift($qiter) eq 'b', 'nqp::iterator');
 ok( nqp::shift($qiter) == 3.0, 'nqp::iterator');
 ok( nqp::elems($qlist) == 3, "iterator doesn't modify qlist");
 ok( nqp::islist($qlist), "nqp::islist works");
+
+my %hash;
+%hash<foo> := 1;
+ok( nqp::existskey(%hash,"foo"),"existskey with existing key");
+ok( !nqp::existskey(%hash,"bar"),"existskey with missing key");

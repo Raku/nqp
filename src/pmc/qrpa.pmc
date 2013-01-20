@@ -148,6 +148,7 @@ Resizes the array to C<n> elements.
 
     VTABLE INTVAL elements() {
         Parrot_QRPA_attributes * const qrpa = PARROT_QRPA(SELF);
+        UNUSED(INTERP);
         return qrpa->elems;
     }
 
@@ -155,6 +156,7 @@ Resizes the array to C<n> elements.
     VTABLE INTVAL exists_keyed_int(INTVAL pos) {
         Parrot_QRPA_attributes * const qrpa = PARROT_QRPA(SELF);
         PMC    *value;
+        UNUSED(INTERP);
 
         if (pos < 0)
             pos += qrpa->elems;

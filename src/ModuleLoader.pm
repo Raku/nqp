@@ -9,7 +9,7 @@ knowhow ModuleLoader {
         # Otherwise see if --library was passed.
         my $explicit;
         try { $explicit := %*COMPILING<%?OPTIONS>{$explicit_path}; }
-        if $explicit {
+        if !nqp::isnull($explicit) && $explicit {
             @search_paths.push($explicit);
         }
         else {
@@ -32,11 +32,7 @@ knowhow ModuleLoader {
     }
     
     method ctxsave() {
-        $*MAIN_CTX :=
-            Q:PIR {
-                $P0 = getinterp
-                %r = $P0['context';1]
-            };
+        $*MAIN_CTX := nqp::ctxcaller(nqp::ctx());
         $*CTXSAVE := 0;
     }
     
@@ -53,14 +49,14 @@ knowhow ModuleLoader {
                 last;
             }
         }
-        if nqp::defined(%modules_loaded{$path}) {
+        if nqp::existskey(%modules_loaded, $path) {
             $module_ctx := %modules_loaded{$path};
         }
         else {
             my $*CTXSAVE := self;
-            my $*MAIN_CTX;
+            my $*MAIN_CTX := ModuleLoader;
             my $preserve_global := pir::get_hll_global__Ps('GLOBAL');
-            pir::load_bytecode($path);
+            pir::load_bytecode__vs($path);
             pir::set_hll_global__vsP('GLOBAL', $preserve_global);
             %modules_loaded{$path} := $module_ctx := $*MAIN_CTX;
         }
@@ -95,23 +91,22 @@ knowhow ModuleLoader {
         }
         for $source.WHO {
             my $sym := $_.key;
-            if !%known_symbols{$sym} {
+            if !nqp::existskey(%known_symbols, $sym) {
                 my $source_is_stub := 0;
                 try {
                     my $source_mo := $_.value.HOW;
                     $source_is_stub := $source_mo.WHAT.HOW.name($source_mo) eq $stub_how &&
-                        !nqp::isnull(pir::get_who__PP($_.value)) && pir::get_who__PP($_.value) &&
-                        $_.value.HOW.name($_.value) ne 'PAST';
+                        !nqp::isnull(nqp::who($_.value)) && nqp::who($_.value);
                 }
                 if $source_is_stub {
                     my $source := $_.value;
                     my $source_clone := $source.HOW.new_type(:name($source.HOW.name($source)));
                     $source_clone.HOW.compose($source_clone);
                     my %WHO_clone;
-                    for pir::get_who__PP($source) {
+                    for nqp::who($source) {
                         %WHO_clone{$_.key} := $_.value;
                     }
-                    pir::set_who__vPP($source_clone, %WHO_clone);
+                    nqp::setwho($source_clone, %WHO_clone);
                     ($target.WHO){$sym} := $source_clone;
                 }
                 else {
@@ -152,11 +147,11 @@ knowhow ModuleLoader {
             }
 
             # Unless we already did so, load the setting.
-            unless nqp::defined(%settings_loaded{$path}) {
+            unless nqp::existskey(%settings_loaded, $path) {
                 my $*CTXSAVE := self;
-                my $*MAIN_CTX;
+                my $*MAIN_CTX := ModuleLoader;
                 my $preserve_global := pir::get_hll_global__Ps('GLOBAL');
-                pir::load_bytecode($path);
+                pir::load_bytecode__vs($path);
                 pir::set_hll_global__vsP('GLOBAL', $preserve_global);
                 unless nqp::defined($*MAIN_CTX) {
                     nqp::die("Unable to load setting $setting_name; maybe it is missing a YOU_ARE_HERE?");
@@ -168,30 +163,6 @@ knowhow ModuleLoader {
         }
         
         return $setting;
-    }
-    
-    # Called by the mainline of the module that we started execution in.
-    # Registers it as a module so we don't duplicate-load it.
-    method set_mainline_module($mainline_ctx) {
-        # May be fake executable, so may not end in .pbc. If so, add it.
-        # Strip any .exe.
-        my $module_name := ((pir::getinterp__P())[2])[0];
-        if nqp::substr($module_name, 0, 2) eq './' {
-            $module_name := nqp::substr($module_name, 2, nqp::chars($module_name) - 2);
-        }
-        if nqp::substr($module_name, nqp::chars($module_name) - 4, 4) eq '.pbc' {
-            # Fine as it is.
-        }
-        elsif nqp::substr($module_name, nqp::chars($module_name) - 4, 4) eq '.exe' {
-            # Replace exe with pbc.
-            $module_name := nqp::substr($module_name, 0, nqp::chars($module_name) - 3) ~ 'pbc';
-        }
-        else {
-            $module_name := $module_name ~ '.pbc';
-        }
-        
-        # Store context under this name.
-        %modules_loaded{$module_name} := $mainline_ctx;
     }
 }
 
