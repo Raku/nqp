@@ -1693,6 +1693,12 @@ QAST::Operations.add_core_pirop_mapping('serialize', 'nqp_serialize_sc', 'SPP');
 QAST::Operations.add_core_pirop_mapping('deserialize', 'nqp_deserialize_sc', '0sPPPP');
 QAST::Operations.add_core_pirop_mapping('wval', 'nqp_get_sc_object', 'Psi');
 
+# hll related opcodes
+QAST::Operations.add_core_pirop_mapping('getcomp', 'compreg', 'Ps');
+QAST::Operations.add_core_pirop_mapping('bindcomp', 'compreg', '1sP');
+QAST::Operations.add_core_pirop_mapping('getcurhllsym', 'get_hll_global', 'Ps');
+QAST::Operations.add_core_pirop_mapping('bindcurhllsym', 'set_hll_global', '1sP');
+
 # process related opcodes
 QAST::Operations.add_core_pirop_mapping('exit', 'exit', '0i', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('sleep', 'sleep', '0n', :inlinable(1));
