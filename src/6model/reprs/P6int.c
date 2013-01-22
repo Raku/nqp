@@ -20,6 +20,9 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
     PMC *st_pmc = create_stable(interp, this_repr, HOW);
     STable *st  = STABLE_STRUCT(st_pmc);
 
+    /* Attach a REPR data object to the STable. */
+    st->REPR_data = mem_allocate_zeroed_typed(P6intREPRData);
+
     /* Create type object and point it back at the STable. */
     obj->common.stable = st_pmc;
     st->WHAT = wrap_object(interp, obj);
@@ -34,6 +37,11 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 /* Composes the representation. */
 static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
     /* Nothing to do yet (but later, size). */
+    /* TODO: Set bit width and alignment requirements. */
+    P6intREPRData *repr_data = (P6intREPRData *) st->REPR_data;
+    repr_data->bits = VTABLE_get_integer_keyed_str(interp, repr_info,
+        Parrot_str_new_constant(interp, "bits"));
+    printf("bits: %ld\n", repr_data->bits);
 }
 
 /* Creates a new instance based on the type object. */
