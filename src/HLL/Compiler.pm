@@ -242,6 +242,10 @@ class HLL::Compiler {
 
         %adverbs.update(%opts);
         self.usage($program-name) if %adverbs<help>  || %adverbs<h>;
+        
+        if !nqp::existskey(%adverbs, 'precomp') && %adverbs<target> eq 'pir' {
+            %adverbs<precomp> := 1;
+        }
 
         pir::load_bytecode__vs('dumper.pbc');
         pir::load_bytecode__vs('PGE/Dumper.pbc');

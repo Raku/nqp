@@ -1629,6 +1629,33 @@ QAST::Operations.add_core_pirop_mapping('getcodeobj', 'get_sub_code_object', 'PP
 QAST::Operations.add_core_pirop_mapping('setcodeobj', 'set_sub_code_object', '1PP');
 QAST::Operations.add_core_pirop_mapping('getcodename', 'set', 'SP');
 QAST::Operations.add_core_pirop_mapping('setcodename', 'assign', '1Ps');
+QAST::Operations.add_core_op('setstaticlex', -> $qastcomp, $op {
+    if +@($op) != 3 {
+        nqp::die('setstaticlex requires three operands');
+    }
+    unless nqp::istype($op[0], QAST::Block) {
+        nqp::die('First operand to setstaticlex must be a QAST::Block');
+    }
+    my $cuid := $op[0].cuid;
+    $qastcomp.as_post(QAST::Stmts.new(
+            QAST::Op.new(
+                :op('callmethod'), :name('set_static_lexpad_value'),
+                QAST::VM.new(
+                    pir => '    .const "LexInfo" %r = "' ~ $cuid ~ '"'
+                ),
+                $op[1],
+                $op[2]
+            ),
+            # XXX Should only do this once per block we put static stuff
+            # in...or find a way to not do it at all.
+            QAST::Op.new(
+                :op('callmethod'), :name('finish_static_lexpad'),
+                QAST::VM.new(
+                    pir => '    .const "LexInfo" %r = "' ~ $cuid ~ '"'
+                ),
+            )
+        ))
+});
 
 # serialization context related opcodes
 QAST::Operations.add_core_pirop_mapping('sha1', 'nqp_sha1', 'Ss');
@@ -1665,6 +1692,12 @@ QAST::Operations.add_core_pirop_mapping('getobjsc', 'nqp_get_sc_for_object', 'PP
 QAST::Operations.add_core_pirop_mapping('serialize', 'nqp_serialize_sc', 'SPP');
 QAST::Operations.add_core_pirop_mapping('deserialize', 'nqp_deserialize_sc', '0sPPPP');
 QAST::Operations.add_core_pirop_mapping('wval', 'nqp_get_sc_object', 'Psi');
+
+# hll related opcodes
+QAST::Operations.add_core_pirop_mapping('getcomp', 'compreg', 'Ps');
+QAST::Operations.add_core_pirop_mapping('bindcomp', 'compreg', '1sP');
+QAST::Operations.add_core_pirop_mapping('getcurhllsym', 'get_hll_global', 'Ps');
+QAST::Operations.add_core_pirop_mapping('bindcurhllsym', 'set_hll_global', '1sP');
 
 # process related opcodes
 QAST::Operations.add_core_pirop_mapping('exit', 'exit', '0i', :inlinable(1));

@@ -178,6 +178,10 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         make QAST::Regex.new( :rxtype<anchor>, :subtype<bol>, :node($/) );
     }
 
+    method metachar:sym<$( )>($/) {
+        make $<nibbler>.ast
+    }
+
     method metachar:sym<$>($/) {
         make QAST::Regex.new( :rxtype<anchor>, :subtype<eos>, :node($/) );
     }

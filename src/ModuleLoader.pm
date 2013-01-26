@@ -10,22 +10,22 @@ knowhow ModuleLoader {
         my $explicit;
         try { $explicit := %*COMPILING<%?OPTIONS>{$explicit_path}; }
         if !nqp::isnull($explicit) && $explicit {
-            @search_paths.push($explicit);
+            nqp::push(@search_paths, $explicit);
         }
         else {
             my @lib_paths := pir::getinterp__P()[pir::const::IGLOBALS_LIB_PATHS][1];
-            if +@lib_paths > 3 {
-                @search_paths.push(@lib_paths[0]);
+            if nqp::elems(@lib_paths) > 3 {
+                nqp::push(@search_paths, @lib_paths[0]);
             }
         }
         
         # Add CWD and blib.
-        @search_paths.push('.');
-        @search_paths.push('blib');
+        nqp::push(@search_paths, '.');
+        nqp::push(@search_paths, 'blib');
         
         # Add NQP langauge directory.
         my %conf := pir::getinterp__P()[pir::const::IGLOBALS_CONFIG_HASH];
-        @search_paths.push(%conf<libdir> ~ %conf<versiondir> ~
+        nqp::push(@search_paths, %conf<libdir> ~ %conf<versiondir> ~
             '/languages/nqp/lib');
     
         @search_paths
@@ -64,7 +64,7 @@ knowhow ModuleLoader {
         # Provided we have a mainline...
         if nqp::defined($module_ctx) {
             # Merge any globals.
-            my $UNIT := pir::getattribute__PPs($module_ctx, 'lex_pad');
+            my $UNIT := nqp::ctxlexpad($module_ctx);
             unless nqp::isnull($UNIT<GLOBALish>) {
                 if +@global_merge_target {
                     merge_globals(@global_merge_target[0], $UNIT<GLOBALish>);
@@ -87,43 +87,44 @@ knowhow ModuleLoader {
         # Obviously, just a first cut at this. :-)
         my %known_symbols;
         for $target.WHO {
-            %known_symbols{$_.key} := 1;
+            %known_symbols{nqp::iterkey_s($_)} := 1;
         }
         for $source.WHO {
-            my $sym := $_.key;
+            my $sym := nqp::iterkey_s($_);
+            my $val := nqp::iterval($_);
             if !nqp::existskey(%known_symbols, $sym) {
                 my $source_is_stub := 0;
                 try {
-                    my $source_mo := $_.value.HOW;
+                    my $source_mo := $val.HOW;
                     $source_is_stub := $source_mo.WHAT.HOW.name($source_mo) eq $stub_how &&
-                        !nqp::isnull(nqp::who($_.value)) && nqp::who($_.value);
+                        !nqp::isnull(nqp::who($val)) && nqp::who($val);
                 }
                 if $source_is_stub {
-                    my $source := $_.value;
+                    my $source := $val;
                     my $source_clone := $source.HOW.new_type(:name($source.HOW.name($source)));
                     $source_clone.HOW.compose($source_clone);
                     my %WHO_clone;
                     for nqp::who($source) {
-                        %WHO_clone{$_.key} := $_.value;
+                        %WHO_clone{nqp::iterkey_s($_)} := nqp::iterval($_);
                     }
                     nqp::setwho($source_clone, %WHO_clone);
                     ($target.WHO){$sym} := $source_clone;
                 }
                 else {
-                    ($target.WHO){$sym} := $_.value;
+                    ($target.WHO){$sym} := $val;
                 }
             }
-            elsif ($target.WHO){$sym} =:= $_.value {
+            elsif ($target.WHO){$sym} =:= $val {
                 # No problemo; a symbol can't conflict with itself.
             }
             else {
-                my $source_mo := $_.value.HOW;
+                my $source_mo := $val.HOW;
                 my $source_is_stub := $source_mo.WHAT.HOW.name($source_mo) eq $stub_how;
                 my $target_mo := ($target.WHO){$sym}.HOW;
                 my $target_is_stub := $target_mo.WHAT.HOW.name($target_mo) eq $stub_how;
                 if $source_is_stub && $target_is_stub {
                     # Leave target as is, and merge the nested symbols.
-                    merge_globals(($target.WHO){$sym}, $_.value);
+                    merge_globals(($target.WHO){$sym}, $val);
                 }
                 else {
                     nqp::die("Merging GLOBAL symbols failed: duplicate definition of symbol $sym");

@@ -180,23 +180,11 @@ class NQP::World is HLL::World {
         $block[0].push(QAST::Var.new( :scope('lexical'), :name($name), :decl('var') ));
         
         # Fixup and deserialization task is the same.
-        my $fixup := QAST::Stmts.new(
-            QAST::Op.new(
-                :op('callmethod'), :name('set_static_lexpad_value'),
-                QAST::VM.new(
-                    pir => '    .const "LexInfo" %r = "' ~ $block.cuid() ~ '"'
-                ),
-                QAST::SVal.new( :value($name) ),
-                QAST::WVal.new( :value($obj) )
-            ),
-            # XXX Should only do this once per block we put static stuff
-            # in...or find a way to not do it at all.
-            QAST::Op.new(
-                :op('callmethod'), :name('finish_static_lexpad'),
-                QAST::VM.new(
-                    pir => '    .const "LexInfo" %r = "' ~ $block.cuid() ~ '"'
-                ),
-            )
+        my $fixup := QAST::Op.new(
+            :op('setstaticlex'),
+            $block,
+            QAST::SVal.new( :value($name) ),
+            QAST::WVal.new( :value($obj) )
         );
         self.add_fixup_task(:deserialize_past($fixup), :fixup_past($fixup));
     }
@@ -488,15 +476,18 @@ class NQP::World is HLL::World {
     
     # Adds some initial tasks.
     method add_initializations() {
-        self.add_load_dependency_task(:deserialize_past(QAST::Stmts.new(
-            QAST::VM.new( :pirop('nqp_dynop_setup v') ),
-            QAST::VM.new( :pirop('nqp_bigint_setup v') ),
-            QAST::Op.new(
-                :op('callmethod'), :name('hll_map'),
-                QAST::VM.new( :pirop('getinterp P') ),
-                QAST::VM.new( :pirop('get_class Ps'), QAST::SVal.new( :value('LexPad') ) ),
-                QAST::VM.new( :pirop('get_class Ps'), QAST::SVal.new( :value('NQPLexPad') ) )
-            ))));
+        self.add_load_dependency_task(:deserialize_past(QAST::VM.new(
+            :parrot(QAST::Stmts.new(
+                QAST::VM.new( :pirop('nqp_dynop_setup v') ),
+                QAST::VM.new( :pirop('nqp_bigint_setup v') ),
+                QAST::Op.new(
+                    :op('callmethod'), :name('hll_map'),
+                    QAST::VM.new( :pirop('getinterp P') ),
+                    QAST::VM.new( :pirop('get_class Ps'), QAST::SVal.new( :value('LexPad') ) ),
+                    QAST::VM.new( :pirop('get_class Ps'), QAST::SVal.new( :value('NQPLexPad') ) )
+                ))),
+            :jvm(QAST::Op.new( :op('null') ))
+        )));
     }
     
     # Checks if the given name is known anywhere in the lexpad
