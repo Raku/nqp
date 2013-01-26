@@ -285,7 +285,9 @@ knowhow NQPClassHOW {
         }
         
         # Compose the representation using it.
-        nqp::composetype($obj, @repr_info)
+        my $info := nqp::hash();
+        $info<attribute> := @repr_info;
+        nqp::composetype($obj, $info)
     }
 
     method incorporate_multi_candidates($obj) {

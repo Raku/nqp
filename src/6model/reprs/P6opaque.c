@@ -658,7 +658,9 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 /* Composes the representation. */
 static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
     P6opaqueREPRData * repr_data = (P6opaqueREPRData *) st->REPR_data;
-    compute_allocation_strategy(interp, repr_info, repr_data);
+    PMC *attr_info = VTABLE_get_pmc_keyed_str(interp, repr_info,
+        Parrot_str_new_constant(interp, "attribute"));
+    compute_allocation_strategy(interp, attr_info, repr_data);
     PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
 }
 
