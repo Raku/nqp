@@ -55,9 +55,9 @@ knowhow ModuleLoader {
         else {
             my $*CTXSAVE := self;
             my $*MAIN_CTX := ModuleLoader;
-            my $preserve_global := pir::get_hll_global__Ps('GLOBAL');
-            pir::load_bytecode__vs($path);
-            pir::set_hll_global__vsP('GLOBAL', $preserve_global);
+            my $preserve_global := nqp::getcurhllsym('GLOBAL');
+            nqp::loadbytecode($path);
+            nqp::bindcurhllsym('GLOBAL', $preserve_global);
             %modules_loaded{$path} := $module_ctx := $*MAIN_CTX;
         }
 
@@ -151,9 +151,9 @@ knowhow ModuleLoader {
             unless nqp::existskey(%settings_loaded, $path) {
                 my $*CTXSAVE := self;
                 my $*MAIN_CTX := ModuleLoader;
-                my $preserve_global := pir::get_hll_global__Ps('GLOBAL');
-                pir::load_bytecode__vs($path);
-                pir::set_hll_global__vsP('GLOBAL', $preserve_global);
+                my $preserve_global := nqp::getcurhllsym('GLOBAL');
+                nqp::loadbytecode($path);
+                nqp::bindcurhllsym('GLOBAL', $preserve_global);
                 unless nqp::defined($*MAIN_CTX) {
                     nqp::die("Unable to load setting $setting_name; maybe it is missing a YOU_ARE_HERE?");
                 }
@@ -169,4 +169,4 @@ knowhow ModuleLoader {
 
 # Since this *is* the module loader, we can't locate it the normal way by
 # GLOBAL merging. So instead we stash it away in the Parrot namespace tree.
-pir::set_hll_global__vsP('ModuleLoader', ModuleLoader);
+nqp::bindcurhllsym('ModuleLoader', ModuleLoader);
