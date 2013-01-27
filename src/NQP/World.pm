@@ -82,30 +82,10 @@ class NQP::World is HLL::World {
             my $setting := %*COMPILING<%?OPTIONS><outer_ctx>
                         := $loader.load_setting($setting_name);
             
-            # Do load for pre-compiled situation.
-            if self.is_precompilation_mode() {
-                self.add_load_dependency_task(:deserialize_past(QAST::Stmts.new(
-                    QAST::Op.new(
-                        :op('loadbytecode'),
-                        QAST::SVal.new( :value('ModuleLoader.pbc') )
-                    ),
-                    QAST::Op.new(
-                        :op('callmethod'), :name('set_outer_ctx'),
-                        QAST::BVal.new( :value($*UNIT) ),
-                        QAST::Op.new(
-                            :op('callmethod'), :name('load_setting'),
-                            QAST::Op.new(
-                                :op('getcurhllsym'),
-                                QAST::SVal.new( :value('ModuleLoader') )
-                            ),
-                            QAST::SVal.new( :value($setting_name) )
-                        )
-                    )
-                )));
-            }
-            else {
-                # Needs fixup.
-                self.add_fixup_task(:fixup_past(QAST::Op.new(
+
+            # Emit fixup or loading code.
+            my $set_outer := QAST::VM.new(
+                :parrot(QAST::Op.new(
                     :op('callmethod'), :name('set_outer_ctx'),
                     QAST::BVal.new( :value($*UNIT) ),
                     QAST::Op.new(
@@ -115,8 +95,31 @@ class NQP::World is HLL::World {
                             QAST::SVal.new( :value('ModuleLoader') )
                         ),
                         QAST::SVal.new( :value($setting_name) )
-                    )
+                    ))),
+                :jvm(QAST::Op.new(
+                    :op('forceouterctx'),
+                    QAST::BVal.new( :value($*UNIT) ),
+                    QAST::Op.new(
+                        :op('callmethod'), :name('load_setting'),
+                        QAST::Op.new(
+                            :op('getcurhllsym'),
+                            QAST::SVal.new( :value('ModuleLoader') )
+                        ),
+                        QAST::SVal.new( :value($setting_name) )
+                    ))));
+            if self.is_precompilation_mode() {
+                self.add_load_dependency_task(:deserialize_past(QAST::Stmts.new(
+                    QAST::Op.new(
+                        :op('loadbytecode'),
+                        QAST::VM.new(
+                            :parrot(QAST::SVal.new( :value('ModuleLoader.pbc') )),
+                            :jvm(QAST::SVal.new( :value('ModuleLoader.class') ))
+                        )),
+                    $set_outer
                 )));
+            }
+            else {
+                self.add_fixup_task(:fixup_past($set_outer));
             }
             
             return pir::getattribute__PPs($setting, 'lex_pad');
@@ -134,8 +137,10 @@ class NQP::World is HLL::World {
             self.add_load_dependency_task(:deserialize_past(QAST::Stmts.new(
                 QAST::Op.new(
                     :op('loadbytecode'),
-                    QAST::SVal.new( :value('ModuleLoader.pbc') )
-                ),
+                    QAST::VM.new(
+                        :parrot(QAST::SVal.new( :value('ModuleLoader.pbc') )),
+                        :jvm(QAST::SVal.new( :value('ModuleLoader.class') ))
+                    )),
                 QAST::Op.new(
                    :op('callmethod'), :name('load_module'),
                    QAST::Op.new(
