@@ -18,6 +18,7 @@ my @clo := $nqpcomp.commandline_options();
 @clo.push('no-regex-lib');
 @clo.push('old-regex-lib');
 @clo.push('dynext=s');
+@clo.push('stable-sc');
 
 sub MAIN(@ARGS) {
     # Enter the compiler.
