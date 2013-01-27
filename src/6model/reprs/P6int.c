@@ -13,15 +13,18 @@ static REPROps *this_repr;
 /* Creates a new type object of this representation, and associates it with
  * the given HOW. */
 static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
-    /* Create new object instance. */
+    /* Create new object instance and REPR data. */
     P6intInstance *obj = mem_allocate_zeroed_typed(P6intInstance);
+    P6intREPRData *repr_data = mem_allocate_zeroed_typed(P6intREPRData);
 
     /* Build an STable. */
     PMC *st_pmc = create_stable(interp, this_repr, HOW);
     STable *st  = STABLE_STRUCT(st_pmc);
 
-    /* Attach a REPR data object to the STable. */
-    st->REPR_data = mem_allocate_zeroed_typed(P6intREPRData);
+    /* Set default bit width value in the REPR data and attach it to the
+     * STable. */
+    repr_data->bits = sizeof(INTVAL)*8;
+    st->REPR_data = repr_data;
 
     /* Create type object and point it back at the STable. */
     obj->common.stable = st_pmc;
@@ -37,11 +40,19 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 /* Composes the representation. */
 static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
     /* Nothing to do yet (but later, size). */
-    /* TODO: Set bit width and alignment requirements. */
     P6intREPRData *repr_data = (P6intREPRData *) st->REPR_data;
-    repr_data->bits = VTABLE_get_integer_keyed_str(interp, repr_info,
-        Parrot_str_new_constant(interp, "bits"));
-    printf("bits: %ld\n", repr_data->bits);
+    PMC *integer = VTABLE_get_pmc_keyed_str(interp, repr_info,
+        Parrot_str_new_constant(interp, "integer"));
+    INTVAL bits = sizeof(INTVAL)*8;
+
+    if(!PMC_IS_NULL(integer)) {
+        /* TODO: Handle possible unsigned key. How to handle it though, since
+         * Parrot's INTVAL is inherently signed? */
+        repr_data->bits = VTABLE_get_integer_keyed_str(interp, integer,
+            Parrot_str_new_constant(interp, "bits"));
+    }
+
+    repr_data->bits = bits;
 }
 
 /* Creates a new instance based on the type object. */
@@ -117,11 +128,37 @@ static void gc_free(PARROT_INTERP, PMC *obj) {
 
 /* Gets the storage specification for this representation. */
 static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
+    P6intREPRData *repr_data = (P6intREPRData *) st->REPR_data;
     storage_spec spec;
     spec.inlineable = STORAGE_SPEC_INLINED;
-    spec.bits = sizeof(INTVAL) * 8;
     spec.boxed_primitive = STORAGE_SPEC_BP_INT;
     spec.can_box = STORAGE_SPEC_CAN_BOX_INT;
+
+    if (repr_data && repr_data->bits) {
+        spec.bits = repr_data->bits;
+    }
+    else {
+        spec.bits = sizeof(INTVAL)*8;
+    }
+
+    switch (spec.bits) {
+    case 8:
+        spec.align = ALIGNOF1(Parrot_Int1);
+        break;
+    case 16:
+        spec.align = ALIGNOF1(Parrot_Int2);
+        break;
+    case 32:
+        spec.align = ALIGNOF1(Parrot_Int4);
+        break;
+    case 64:
+        spec.align = ALIGNOF1(Parrot_Int8);
+        break;
+    default:
+        /* TODO: Throw exception for unknown sizes. */
+        break;
+    }
+
     return spec;
 }
 
@@ -133,6 +170,30 @@ static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter
 /* Deserializes the data. */
 static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationReader *reader) {
     ((P6intBody *)data)->value = reader->read_int(interp, reader);
+}
+
+/* Serializes the REPR data. */
+static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *writer) {
+    P6intREPRData *repr_data = (P6intREPRData *) st->REPR_data;
+
+    /* Don't serialize any REPR data in version 1. */
+    if (writer->root.version >= 2) {
+        writer->write_int(interp, writer, repr_data->bits);
+    }
+}
+
+/* Serializes the REPR data. */
+static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader *reader) {
+    P6intREPRData *repr_data = (P6intREPRData *) (st->REPR_data = mem_allocate_zeroed_typed(P6intREPRData));
+
+    /* Only read in REPR data for serialization format greater than version 1.
+     * In version 1, just set default values. */
+    if (reader->root.version >= 2) {
+        repr_data->bits = reader->read_int(interp, reader);
+    }
+    else {
+        repr_data->bits = sizeof(INTVAL)*8;
+    }
 }
 
 /* Initializes the P6int representation. */
@@ -156,5 +217,7 @@ REPROps * P6int_initialize(PARROT_INTERP) {
     this_repr->get_storage_spec = get_storage_spec;
     this_repr->serialize = serialize;
     this_repr->deserialize = deserialize;
+    this_repr->serialize_repr_data = serialize_repr_data;
+    this_repr->deserialize_repr_data = deserialize_repr_data;
     return this_repr;
 }

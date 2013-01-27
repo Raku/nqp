@@ -12,11 +12,9 @@ typedef struct {
     P6intBody body;
 } P6intInstance;
 
-/* The bit width and alignment requirements is shared for all instances of the
- * same type.*/
+/* The bit width requirement is shared for all instances of the same type. */
 typedef struct {
     INTVAL bits;
-    INTVAL align;
 } P6intREPRData;
 
 /* Initializes the P6int REPR. */
