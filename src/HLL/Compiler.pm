@@ -269,7 +269,7 @@ class HLL::Compiler {
                 $!user_progname := '-e';
                 my $?FILES := '-e';
                 $result := self.eval(%adverbs<e>, '-e', |@a, |%adverbs);
-                unless $target eq '' || $target eq 'pir' {
+                unless $target eq '' || $target eq 'pir' || %adverbs<output> {
 					self.dumper($result, $target, |%adverbs);
 				}
             }
@@ -277,7 +277,7 @@ class HLL::Compiler {
             elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }
             else { $result := self.evalfiles(@a[0], |@a, |%adverbs) }
 
-            if !nqp::isnull($result) && $target eq 'pir' {
+            if !nqp::isnull($result) && ($target eq 'pir' || %adverbs<output>) {
                 my $output := %adverbs<output>;
                 my $fh := ($output eq '' || $output eq '-')
                         ?? pir::getinterp__P().stdout_handle()
@@ -366,7 +366,7 @@ class HLL::Compiler {
         my $code := nqp::join('', @codes);
         my $?FILES := nqp::join(' ', @files);
         my $r := self.eval($code, |@args, |%adverbs);
-        if $target eq '' || $target eq 'pir' {
+        if $target eq '' || $target eq 'pir' || %adverbs<output> {
             return $r;
         } else {
             return self.dumper($r, $target, |%adverbs);
