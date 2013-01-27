@@ -198,7 +198,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
             PMC    *type         = accessor_call(interp, attr, type_str);
             INTVAL  type_id      = REPR(type)->ID;
             INTVAL  bits         = sizeof(void *) * 8;
-            INTVAL  align;
+            INTVAL  align        = ALIGNOF1(void *);
             if (!PMC_IS_NULL(type)) {
                 /* See if it's a type that we know how to handle in a C struct. */
                 storage_spec spec = REPR(type)->get_storage_spec(interp, STABLE(type));
@@ -211,6 +211,8 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
                      * repurpose it to store the bit-width of the type, so
                      * that get_attribute_ref can find it later. */
                     bits = spec.bits;
+                    align = spec.align;
+                    printf("bits: %ld\n", bits);
                     repr_data->attribute_locations[i] = (bits << CSTRUCT_ATTR_SHIFT) | CSTRUCT_ATTR_IN_STRUCT;
                     repr_data->flattened_stables[i] = STABLE(type);
                     if (REPR(type)->initialize) {
@@ -256,15 +258,6 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
             
             /* Do allocation. */
             /* C structure needs careful alignment */
-            if(bits == 8)       { align = ALIGNOF1(Parrot_Int1); }
-            else if(bits == 16) { align = ALIGNOF1(Parrot_Int2); }
-            else if(bits == 32) { align = ALIGNOF1(Parrot_Int4); }
-            else if(bits == 64) { align = ALIGNOF1(Parrot_Int8); }
-            else {
-                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                    "CStruct representation can only handle 8, 16, 32 or 64 bit sized types");
-            }
-
             cur_size += cur_size % align;
 
             repr_data->struct_offsets[i] = cur_size;
