@@ -1698,6 +1698,7 @@ QAST::Operations.add_core_pirop_mapping('getcomp', 'compreg', 'Ps');
 QAST::Operations.add_core_pirop_mapping('bindcomp', 'compreg', '1sP');
 QAST::Operations.add_core_pirop_mapping('getcurhllsym', 'get_hll_global', 'Ps');
 QAST::Operations.add_core_pirop_mapping('bindcurhllsym', 'set_hll_global', '1sP');
+QAST::Operations.add_core_pirop_mapping('loadbytecode', 'load_bytecode', '0s');
 
 # process related opcodes
 QAST::Operations.add_core_pirop_mapping('exit', 'exit', '0i', :inlinable(1));
