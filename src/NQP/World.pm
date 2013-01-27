@@ -70,7 +70,7 @@ class NQP::World is HLL::World {
     # can't just use ...; it, which means we can't get the ModuleLoader symbol
     # merged into anywhere...anyway, we chop the circularity by finding it
     # through a Parrot namespace for now.
-    my $loader := pir::get_hll_global__Ps('ModuleLoader');
+    my $loader := nqp::getcurhllsym('ModuleLoader');
     
     # Loads the setting and emits code 
     method load_setting($setting_name) {
@@ -85,8 +85,8 @@ class NQP::World is HLL::World {
             # Do load for pre-compiled situation.
             if self.is_precompilation_mode() {
                 self.add_load_dependency_task(:deserialize_past(QAST::Stmts.new(
-                    QAST::VM.new(
-                        :pirop('load_bytecode vs'),
+                    QAST::Op.new(
+                        :op('loadbytecode'),
                         QAST::SVal.new( :value('ModuleLoader.pbc') )
                     ),
                     QAST::Op.new(
@@ -94,8 +94,8 @@ class NQP::World is HLL::World {
                         QAST::BVal.new( :value($*UNIT) ),
                         QAST::Op.new(
                             :op('callmethod'), :name('load_setting'),
-                            QAST::VM.new(
-                                pirop => 'get_hll_global Ps',
+                            QAST::Op.new(
+                                :op('getcurhllsym'),
                                 QAST::SVal.new( :value('ModuleLoader') )
                             ),
                             QAST::SVal.new( :value($setting_name) )
@@ -110,8 +110,8 @@ class NQP::World is HLL::World {
                     QAST::BVal.new( :value($*UNIT) ),
                     QAST::Op.new(
                         :op('callmethod'), :name('load_setting'),
-                        QAST::VM.new(
-                            pirop => 'get_hll_global Ps',
+                        QAST::Op.new(
+                            :op('getcurhllsym'),
                             QAST::SVal.new( :value('ModuleLoader') )
                         ),
                         QAST::SVal.new( :value($setting_name) )
@@ -132,14 +132,14 @@ class NQP::World is HLL::World {
         # Make sure we do the loading during deserialization.
         if self.is_precompilation_mode() {
             self.add_load_dependency_task(:deserialize_past(QAST::Stmts.new(
-                QAST::VM.new(
-                    :pirop('load_bytecode vs'),
+                QAST::Op.new(
+                    :op('loadbytecode'),
                     QAST::SVal.new( :value('ModuleLoader.pbc') )
                 ),
                 QAST::Op.new(
                    :op('callmethod'), :name('load_module'),
-                   QAST::VM.new(
-                        pirop => 'get_hll_global Ps',
+                   QAST::Op.new(
+                        :op('getcurhllsym'),
                         QAST::SVal.new( :value('ModuleLoader') )
                     ),
                     QAST::SVal.new( :value($module_name) )
@@ -219,7 +219,7 @@ class NQP::World is HLL::World {
         my $stub_code := sub (*@args, *%named) {
             # Do the compilation.
             $past.unshift(self.libs());
-            my $nqpcomp  := pir::compreg__Ps('nqp');
+            my $nqpcomp  := nqp::getcomp('nqp');
             my $post     := $nqpcomp.post(QAST::CompUnit.new( :hll('nqp'), $past ));
             my $pir      := $nqpcomp.pir($post);
             my $compiled := $nqpcomp.evalpmc($pir);
