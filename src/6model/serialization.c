@@ -17,8 +17,10 @@
 
 #define MAX(x, y) ((y) > (x) ? (y) : (x))
 
-/* Version of the serialization format that we are currently at. */
-#define CURRENT_VERSION 1
+/* Version of the serialization format that we are currently at and lowest
+ * version we support. */
+#define CURRENT_VERSION 2
+#define MIN_VERSION 1
 
 /* Various sizes (in bytes). */
 #define HEADER_SIZE                 4 * 16
@@ -1332,9 +1334,11 @@ static void check_and_disect_input(PARROT_INTERP, SerializationReader *reader, S
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Serialized data too short to read a version number (< 4 bytes)");
     reader->root.version = read_int32(data, 0);
-    if (reader->root.version != CURRENT_VERSION)
+    /*if (reader->root.version != CURRENT_VERSION)*/
+    if (reader->root.version < MIN_VERSION || reader->root.version > CURRENT_VERSION)
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Unknown serialization format version %d", reader->root.version);
+            "Unsupported serialization format version %d (current version is %d)",
+            reader->root.version, CURRENT_VERSION);
 
     /* Ensure that the data is at least as long as the header is expected to be. */
     if (data_len < HEADER_SIZE)
