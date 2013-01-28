@@ -220,7 +220,6 @@ typedef struct SixModel_REPROps_Indexing {
      * nothing is there, or throw to indicate out of bounds, or vivify. If
      * bits is a non-NULL pointer, the pointed-to INTVAL will contain the
      * bit-width of the attribute. */
-    /*void * (*at_pos_ref) (PARROT_INTERP, STable *st, void *data, INTVAL index, INTVAL *bits);*/
     void * (*at_pos_ref) (PARROT_INTERP, STable *st, void *data, INTVAL index);
 
     /* Get a boxed object representing the element at the specified position. If the
