@@ -212,7 +212,6 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
                      * that get_attribute_ref can find it later. */
                     bits = spec.bits;
                     align = spec.align;
-                    printf("bits: %ld\n", bits);
                     repr_data->attribute_locations[i] = (bits << CSTRUCT_ATTR_SHIFT) | CSTRUCT_ATTR_IN_STRUCT;
                     repr_data->flattened_stables[i] = STABLE(type);
                     if (REPR(type)->initialize) {
@@ -257,8 +256,12 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
             }
             
             /* Do allocation. */
-            /* C structure needs careful alignment */
-            cur_size += cur_size % align;
+            /* C structure needs careful alignment. If cur_size is not aligned
+             * to align bytes (cur_size % align), make sure it is before we
+             * add the next element. */
+            if (cur_size % align) {
+                cur_size += align - cur_size % align;
+            }
 
             repr_data->struct_offsets[i] = cur_size;
             cur_size += bits / 8;
