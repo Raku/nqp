@@ -50,6 +50,8 @@ static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
          * Parrot's INTVAL is inherently signed? */
         /* XXX: I should probably handle the case where no "bits" key is set
          * as well, which would set it to 0 (I think?). */
+        /* XXX: Also, Rakudo creates 1, 2, and 4 bit integer types. Those
+         * aren't gonna work right now. */
         repr_data->bits = VTABLE_get_integer_keyed_str(interp, integer,
             Parrot_str_new_constant(interp, "bits"));
     }
@@ -64,24 +66,65 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
 
 /* Initialize a new instance. */
 static void initialize(PARROT_INTERP, STable *st, void *data) {
-    ((P6intBody *)data)->value = 0;
+    /* A union is big enough to accomodate the largest of its members, so
+     * it'll be the size of an int64, and setting the int64 to 0 will set the
+     * whole thing to 0 (without memset). */
+    ((P6intBody *)data)->int64 = 0;
 }
 
 /* Copies to the body of one object to another. */
 static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
-    *((INTVAL *)dest) = *((INTVAL *)src);
+    P6intBody *from = (P6intBody *) src;
+    P6intBody *to   = (P6intBody *) dest;
+    to->int64 = from->int64;
 }
 
 /* Used with boxing. Sets an integer value, for representations that can hold
  * one. */
 static void set_int(PARROT_INTERP, STable *st, void *data, INTVAL value) {
-    ((P6intBody *)data)->value = value;
+    P6intREPRData *repr_data = (P6intREPRData *) st->REPR_data;
+    P6intBody *body = (P6intBody *) data;
+
+    /* XXX: This won't work with int{1,2,4} */
+    switch (repr_data->bits) {
+    case 8:
+        body->int8 = value;
+        break;
+    case 16:
+        body->int16 = value;
+        break;
+    case 32:
+        body->int32 = value;
+        break;
+    case 64:
+        body->int64 = value;
+        break;
+    default:
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "P6int can only handle 8, 16, 32 or 64 bit ints.");
+    }
 }
 
 /* Used with boxing. Gets an integer value, for representations that can
  * hold one. */
 static INTVAL get_int(PARROT_INTERP, STable *st, void *data) {
-    return ((P6intBody *)data)->value;
+    P6intREPRData *repr_data = (P6intREPRData *) st->REPR_data;
+    P6intBody *body = (P6intBody *) data;
+
+    /* XXX: This won't work with int{1,2,4} */
+    switch (repr_data->bits) {
+    case 8:
+        return body->int8;
+    case 16:
+        return body->int16;
+    case 32:
+        return body->int32;
+    case 64:
+        return body->int64;
+    default:
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "P6int can only handle 8, 16, 32 or 64 bit ints.");
+    }
 }
 
 /* Used with boxing. Sets a floating point value, for representations that can
@@ -164,12 +207,12 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
 
 /* Serializes the data. */
 static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter *writer) {
-    writer->write_int(interp, writer, ((P6intBody *)data)->value);
+    writer->write_int(interp, writer, get_int(interp, st, data));
 }
 
 /* Deserializes the data. */
 static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationReader *reader) {
-    ((P6intBody *)data)->value = reader->read_int(interp, reader);
+    set_int(interp, st, data, reader->read_int(interp, reader));
 }
 
 /* Serializes the REPR data. */
