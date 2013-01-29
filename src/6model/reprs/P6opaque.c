@@ -775,7 +775,7 @@ static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
     no_such_attribute(interp, "get", class_handle, name);
 }
 
-static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL *bits, INTVAL hint) {
+static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     INTVAL            slot;
 
@@ -783,8 +783,6 @@ static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *clas
     slot = hint >= 0 && !(repr_data->mi) ? hint :
         try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
-        if (bits)
-            *bits = 8*sizeof(void *);
         return ((char *)data) + repr_data->attribute_offsets[slot];
     }
     
@@ -792,6 +790,29 @@ static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *clas
     no_such_attribute(interp, "get", class_handle, name);
 }
 
+static STable *get_attribute_stable(PARROT_INTERP, STable *st, PMC *class_handle, STRING *name, INTVAL hint) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    INTVAL            slot;
+
+    /* Look up slot, then offset and compute address. */
+    slot = hint >= 0 && !(repr_data->mi) ? hint :
+        try_get_slot(interp, repr_data, class_handle, name);
+    if (slot >= 0) {
+        if (repr_data->flattened_stables[slot]) {
+            return repr_data->flattened_stables[slot];
+        }
+        else {
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "Can't get STable for unflattened attribute '%Ss' on class '%Ss'",
+                    name, VTABLE_get_string(interp, introspection_call(interp,
+                        class_handle, STABLE(class_handle)->HOW,
+                        Parrot_str_new_constant(interp, "name"), 0)));
+        }
+    }
+
+    /* Otherwise, complain that the attribute doesn't exist. */
+    no_such_attribute(interp, "get", class_handle, name);
+}
 
 /* Binds the given value to the specified attribute. */
 static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
@@ -1336,6 +1357,7 @@ REPROps * P6opaque_initialize(PARROT_INTERP) {
     this_repr->attr_funcs->bind_attribute_boxed = bind_attribute_boxed;
     this_repr->attr_funcs->bind_attribute_ref = bind_attribute_ref;
     this_repr->attr_funcs->is_attribute_initialized = is_attribute_initialized;
+    this_repr->attr_funcs->get_attribute_stable = get_attribute_stable;
     this_repr->attr_funcs->hint_for = hint_for;
     this_repr->box_funcs = mem_allocate_typed(REPROps_Boxing);
     this_repr->box_funcs->set_int = set_int;

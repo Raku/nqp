@@ -488,7 +488,7 @@ static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
     /* Otherwise, complain that the attribute doesn't exist. */
     no_such_attribute(interp, "get", class_handle, name);
 }
-static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL *bits, INTVAL hint) {
+static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
     CStructREPRData *repr_data = (CStructREPRData *)st->REPR_data;
     CStructBody     *body      = (CStructBody *)data;
     INTVAL           slot;
@@ -497,11 +497,32 @@ static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *clas
     slot = hint >= 0 ? hint :
         try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
-        if(bits)
-            *bits = repr_data->attribute_locations[slot] >> CSTRUCT_ATTR_SHIFT;
         return ((char *)body->cstruct) + repr_data->struct_offsets[slot];
     }
     
+    /* Otherwise, complain that the attribute doesn't exist. */
+    no_such_attribute(interp, "get", class_handle, name);
+}
+
+static STable *get_attribute_stable(PARROT_INTERP, STable *st, PMC *class_handle, STRING *name, INTVAL hint) {
+    CStructREPRData *repr_data = (CStructREPRData *) st->REPR_data;
+    INTVAL           slot;
+
+    slot = hint >= 0? hint :
+        try_get_slot(interp, repr_data, class_handle, name);
+    if (slot >= 0) {
+        if (repr_data->flattened_stables[slot]) {
+            return repr_data->flattened_stables[slot];
+        }
+        else {
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "Can't get STable for unflattened attribute '%Ss' on class '%Ss'",
+                    name, VTABLE_get_string(interp, introspection_call(interp,
+                        class_handle, STABLE(class_handle)->HOW,
+                        Parrot_str_new_constant(interp, "name"), 0)));
+        }
+    }
+
     /* Otherwise, complain that the attribute doesn't exist. */
     no_such_attribute(interp, "get", class_handle, name);
 }
@@ -682,6 +703,7 @@ REPROps * CStruct_initialize(PARROT_INTERP,
     this_repr->attr_funcs->bind_attribute_boxed = bind_attribute_boxed;
     this_repr->attr_funcs->bind_attribute_ref = bind_attribute_ref;
     this_repr->attr_funcs->is_attribute_initialized = is_attribute_initialized;
+    this_repr->attr_funcs->get_attribute_stable = get_attribute_stable;
     this_repr->attr_funcs->hint_for = hint_for;
     this_repr->gc_mark = gc_mark;
     this_repr->gc_free = gc_free;

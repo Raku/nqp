@@ -295,40 +295,6 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, PMC *states, STRING *target, INTVAL o
     return fates;
 }
 
-static INTVAL read_int_sized(PARROT_INTERP, void *ptr, INTVAL bits) {
-    switch(bits) {
-    case 8:
-        return (INTVAL) *((Parrot_Int1 *) ptr);
-        break;
-    case 16:
-        return (INTVAL) *((Parrot_Int2 *) ptr);
-        break;
-    case 32:
-        return (INTVAL) *((Parrot_Int4 *) ptr);
-        break;
-    case 64:
-        return (INTVAL) *((Parrot_Int8 *) ptr);
-        break;
-    default:
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "read_int_sized can only handle 8, 16, 32 and 64 bit ints");
-    }
-}
-
-static FLOATVAL read_num_sized(PARROT_INTERP, void *ptr, INTVAL bits) {
-    switch(bits) {
-    case 32:
-        return (FLOATVAL) *((Parrot_Float4 *) ptr);
-        break;
-    case 64:
-        return (FLOATVAL) *((Parrot_Float8 *) ptr);
-        break;
-    default:
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "read_num_sized can only handle 32 and 64 bit ints");
-    }
-}
-
 END_OPS_PREAMBLE
 
 /*
@@ -621,13 +587,14 @@ a native int - the repr is not obligated to do boxing/unboxing for you.
 
 */
 inline op repr_get_attr_int(out INT, invar PMC, invar PMC, in STR) :base_core {
+    PMC *obj = decontainerize(interp, $2);
     PMC *ch = decontainerize(interp, $3);
-    if ($2->vtable->base_type == smo_id) {
-        if (IS_CONCRETE($2)) {
-            INTVAL bits = 0;
-            void *ptr = REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, &bits, NO_HINT);
-            $1 = read_int_sized(interp, ptr, bits);
-        }
+    STRING *name = $4;
+    if (obj->vtable->base_type == smo_id) {
+        STable *attr_st = REPR(obj)->attr_funcs->get_attribute_stable(interp, STABLE(obj), ch, name, NO_HINT);
+        if (IS_CONCRETE(obj))
+            $1 = attr_st->REPR->box_funcs->get_int(interp, attr_st,
+                REPR(obj)->attr_funcs->get_attribute_ref(interp, STABLE(obj), OBJECT_BODY(obj), ch, name, NO_HINT));
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot look up attributes in a type object");
@@ -648,13 +615,14 @@ a native num - the repr is not obligated to do boxing/unboxing for you.
 
 */
 inline op repr_get_attr_num(out NUM, invar PMC, invar PMC, in STR) :base_core {
+    PMC *obj = decontainerize(interp, $2);
     PMC *ch = decontainerize(interp, $3);
-    if ($2->vtable->base_type == smo_id) {
-        if (IS_CONCRETE($2)) {
-            INTVAL bits = 0;
-            void *ptr = REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, &bits, NO_HINT);
-            $1 = read_num_sized(interp, ptr, bits);
-        }
+    STRING *name = $4;
+    if (obj->vtable->base_type == smo_id) {
+        STable *attr_st = REPR(obj)->attr_funcs->get_attribute_stable(interp, STABLE(obj), ch, name, NO_HINT);
+        if (IS_CONCRETE(obj))
+            $1 = attr_st->REPR->box_funcs->get_num(interp, attr_st,
+                REPR(obj)->attr_funcs->get_attribute_ref(interp, STABLE(obj), OBJECT_BODY(obj), ch, name, NO_HINT));
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot look up attributes in a type object");
@@ -678,10 +646,8 @@ a native str - the repr is not obligated to do boxing/unboxing for you.
 inline op repr_get_attr_str(out STR, invar PMC, invar PMC, in STR) :base_core {
     PMC *ch = decontainerize(interp, $3);
     if ($2->vtable->base_type == smo_id) {
-        if (IS_CONCRETE($2)) {
-            INTVAL bits = 0;
-            $1 = *((STRING **)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, &bits, NO_HINT));
-        }
+        if (IS_CONCRETE($2))
+            $1 = *((STRING **)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, NO_HINT));
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot look up attributes in a type object");
@@ -835,13 +801,14 @@ a native int - the repr is not obligated to do boxing/unboxing for you.
 
 */
 inline op repr_get_attr_int(out INT, invar PMC, invar PMC, in STR, in INT) :base_core {
+    PMC *obj = decontainerize(interp, $2);
     PMC *ch = decontainerize(interp, $3);
-    if ($2->vtable->base_type == smo_id) {
-        if (IS_CONCRETE($2)) {
-            INTVAL bits = 0;
-            void *ptr = REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, &bits, NO_HINT);
-            $1 = read_int_sized(interp, ptr, bits);
-        }
+    STRING *name = $4;
+    if (obj->vtable->base_type == smo_id) {
+        STable *attr_st = REPR(obj)->attr_funcs->get_attribute_stable(interp, STABLE(obj), ch, name, NO_HINT);
+        if (IS_CONCRETE(obj))
+            $1 = attr_st->REPR->box_funcs->get_int(interp, attr_st,
+                REPR(obj)->attr_funcs->get_attribute_ref(interp, STABLE(obj), OBJECT_BODY(obj), ch, name, NO_HINT));
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot look up attributes in a type object");
@@ -863,13 +830,14 @@ a native num - the repr is not obligated to do boxing/unboxing for you.
 
 */
 inline op repr_get_attr_num(out NUM, invar PMC, invar PMC, in STR, in INT) :base_core {
+    PMC *obj = decontainerize(interp, $2);
     PMC *ch = decontainerize(interp, $3);
-    if ($2->vtable->base_type == smo_id) {
-        if (IS_CONCRETE($2)) {
-            INTVAL bits = 0;
-            void *ptr = REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, &bits, NO_HINT);
-            $1 = read_num_sized(interp, ptr, bits);
-        }
+    STRING *name = $4;
+    if (obj->vtable->base_type == smo_id) {
+        STable *attr_st = REPR(obj)->attr_funcs->get_attribute_stable(interp, STABLE(obj), ch, name, NO_HINT);
+        if (IS_CONCRETE(obj))
+            $1 = attr_st->REPR->box_funcs->get_int(interp, attr_st,
+                REPR(obj)->attr_funcs->get_attribute_ref(interp, STABLE(obj), OBJECT_BODY(obj), ch, name, NO_HINT));
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot look up attributes in a type object");
@@ -893,10 +861,8 @@ a native str - the repr is not obligated to do boxing/unboxing for you.
 inline op repr_get_attr_str(out STR, invar PMC, invar PMC, in STR, in INT) :base_core {
     PMC *ch = decontainerize(interp, $3);
     if ($2->vtable->base_type == smo_id) {
-        if (IS_CONCRETE($2)) {
-            INTVAL bits = 0;
-            $1 = *((STRING **)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, &bits, $5));
-        }
+        if (IS_CONCRETE($2))
+            $1 = *((STRING **)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, $5));
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot look up attributes in a type object");

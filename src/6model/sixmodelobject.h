@@ -158,11 +158,9 @@ typedef struct SixModel_REPROps_Attribute {
         PMC *class_handle, STRING *name, INTVAL hint);
 
     /* Gets a reference to the memory location of an attribute. Note
-     * that this is only valid so long as the object itself is alive. If
-     * bits is a non-NULL pointer, the pointed-to INTVAL will contain the
-     * bit-width of the attribute. */
+     * that this is only valid so long as the object itself is alive. */
     void * (*get_attribute_ref) (PARROT_INTERP, STable *st, void *data,
-        PMC *class_handle, STRING *name, INTVAL *bits, INTVAL hint);
+        PMC *class_handle, STRING *name, INTVAL hint);
 
     /* Binds the given object value to the specified attribute. If it's
      * a reference type attribute, this just simply sets the value in 
@@ -184,6 +182,10 @@ typedef struct SixModel_REPROps_Attribute {
     /* Checks if an attribute has been initialized. */
     INTVAL (*is_attribute_initialized) (PARROT_INTERP, STable *st, void *data,
         PMC *class_handle, STRING *name, INTVAL hint);
+
+    /* Gets the STable representing the specified attribute. Only valid for
+     * attributes that are accessed with get_attribute_ref. */
+    STable * (*get_attribute_stable) (PARROT_INTERP, STable *st, PMC *class_handle, STRING *name, INTVAL hint);
 } REPROps_Attribute;
 typedef struct SixModel_REPROps_Boxing {
     /* Used with boxing. Sets an integer value, for representations that
