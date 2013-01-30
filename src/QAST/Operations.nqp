@@ -1024,6 +1024,15 @@ QAST::Operations.add_core_op('callercode', -> $qastcomp, $op {
     $ops.result($reg);
     $ops
 });
+QAST::Operations.add_core_op('lexprimspec', -> $qastcomp, $op {
+    unless +@($op) == 2 {
+        nqp::die("Operation 'lexprimspec' expects two operands");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('get_lex_type'), :returns(int),
+        $op[0], $op[1]
+    ))
+});
 
 # Exception handling/munging.
 my $exc_exclude := 0;
