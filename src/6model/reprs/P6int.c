@@ -10,6 +10,9 @@
 /* This representation's function pointer table. */
 static REPROps *this_repr;
 
+static void set_int(PARROT_INTERP, STable *st, void *data, INTVAL value);
+static INTVAL get_int(PARROT_INTERP, STable *st, void *data);
+
 /* Creates a new type object of this representation, and associates it with
  * the given HOW. */
 static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
@@ -48,6 +51,7 @@ static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
     if(!PMC_IS_NULL(integer)) {
         /* TODO: Handle possible unsigned key. How to handle it though, since
          * Parrot's INTVAL is inherently signed? */
+        /* XXX: Make sure bits is a value we actually support. */
         /* XXX: I should probably handle the case where no "bits" key is set
          * as well, which would set it to 0 (I think?). */
         repr_data->bits = VTABLE_get_integer_keyed_str(interp, integer,
@@ -64,24 +68,58 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
 
 /* Initialize a new instance. */
 static void initialize(PARROT_INTERP, STable *st, void *data) {
-    ((P6intBody *)data)->value = 0;
+    set_int(interp, st, data, 0);
 }
 
 /* Copies to the body of one object to another. */
 static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
-    *((INTVAL *)dest) = *((INTVAL *)src);
+    set_int(interp, st, dest, get_int(interp, st, src));
 }
 
 /* Used with boxing. Sets an integer value, for representations that can hold
  * one. */
 static void set_int(PARROT_INTERP, STable *st, void *data, INTVAL value) {
-    ((P6intBody *)data)->value = value;
+    P6intREPRData *repr_data = (P6intREPRData *) st->REPR_data;
+
+    /* XXX: This won't work with int{1,2,4} */
+    switch (repr_data->bits) {
+    case 8:
+        *(Parrot_Int1 *)data = value;
+        break;
+    case 16:
+        *(Parrot_Int2 *)data = value;
+        break;
+    case 32:
+        *(Parrot_Int4 *)data = value;
+        break;
+    case 64:
+        *(Parrot_Int8 *)data = value;
+        break;
+    default:
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "P6int can only handle 8, 16, 32 or 64 bit ints.");
+    }
 }
 
 /* Used with boxing. Gets an integer value, for representations that can
  * hold one. */
 static INTVAL get_int(PARROT_INTERP, STable *st, void *data) {
-    return ((P6intBody *)data)->value;
+    P6intREPRData *repr_data = (P6intREPRData *) st->REPR_data;
+
+    /* XXX: This won't work with int{1,2,4} */
+    switch (repr_data->bits) {
+    case 8:
+        return *(Parrot_Int1 *)data;
+    case 16:
+        return *(Parrot_Int2 *)data;
+    case 32:
+        return *(Parrot_Int4 *)data;
+    case 64:
+        return *(Parrot_Int8 *)data;
+    default:
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "P6int can only handle 8, 16, 32 or 64 bit ints.");
+    }
 }
 
 /* Used with boxing. Sets a floating point value, for representations that can
