@@ -65,31 +65,11 @@ class HLL::Compiler {
     }
 
     method autoprint($value) {
-        nqp::say(~$value)
+        self.interactive_result($value)
             unless (pir::getinterp__P()).stdout_handle().tell() > $*AUTOPRINTPOS;
     }
 
     method interactive(*%adverbs) {
-        # blank_context() serves as a cumulative "outer context"
-        # for code executed in this interactive REPL instance.
-        # It's invoked once to obtain a context, and the LexPad
-        # of that context is replaced with an empty Hash that
-        # we can use to cumulatively store lexicals.
-        sub blank_context() {
-            # transform context's pad into a Hash
-            my %blank_pad;
-            pir::copy__vPP(
-                pir::getattribute__PPs(pir::getinterp__P(){'context'}, 'lex_pad'),
-                %blank_pad);
-            pir::getinterp__P(){'context'};
-        }
-        &blank_context.set_outer(nqp::null());
-        my $interactive_ctx := blank_context();
-        my %interactive_pad := 
-            pir::getattribute__PPs($interactive_ctx, 'lex_pad');
-
-        my $target := nqp::lc(%adverbs<target>);
-
         pir::getinterp__P().stderr_handle().print(self.interactive_banner);
 
         my $stdin    := pir::getinterp__P().stdin_handle();
@@ -98,15 +78,14 @@ class HLL::Compiler {
             $stdin.encoding($encoding);
         }
 
+        my $target := nqp::lc(%adverbs<target>);
         my $save_ctx;
         while 1 {
             last unless $stdin;
 
             my $prompt := self.interactive_prompt // '> ';
             my $code := $stdin.readline_interactive(~$prompt);
-
-            last if nqp::isnull($code);
-            unless nqp::defined($code) {
+            if nqp::isnull($code) || !nqp::defined($code) {
                 nqp::print("\n");
                 last;
             }
@@ -122,27 +101,12 @@ class HLL::Compiler {
                 {
                     $output := self.eval($code, :outer_ctx($save_ctx), |%adverbs);
                     CATCH {
-                        nqp::print(~$! ~ "\n");
+                        self.interactive_exception($!);
                         next;
                     }
                 };
                 if nqp::defined($*MAIN_CTX) {
-                    my $cur_ctx := $*MAIN_CTX;
-                    my %seen;
-                    until nqp::isnull($cur_ctx) {
-                        my $pad := nqp::ctxlexpad($cur_ctx);
-                        unless nqp::isnull($pad) {
-                            for $pad {
-                                my str $key := ~$_;
-                                unless nqp::existskey(%seen, $key) {
-                                    %interactive_pad{$key} := nqp::atkey($pad, $key);
-                                    %seen{$key} := 1;
-                                }
-                            }
-                        }
-                        $cur_ctx := nqp::ctxouter($cur_ctx);
-                    }
-                    $save_ctx := $interactive_ctx;
+                    $save_ctx := $*MAIN_CTX;
                 }
                 next if nqp::isnull($output);
 
@@ -155,6 +119,14 @@ class HLL::Compiler {
                 }
             }
         }
+    }
+    
+    method interactive_result($value) {
+        nqp::say(~$value)
+    }
+    
+    method interactive_exception($ex) {
+        nqp::print(~$ex ~ "\n")
     }
 
     method eval($code, *@args, *%adverbs) {
