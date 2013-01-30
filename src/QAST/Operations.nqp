@@ -1619,6 +1619,7 @@ QAST::Operations.add_core_pirop_mapping('setboolspec', 'set_boolification_spec',
 QAST::Operations.add_core_pirop_mapping('setmethcache', 'publish_method_cache', '0PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('setmethcacheauth', 'set_method_cache_authoritativeness', '0Pi', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('settypecache', 'publish_type_check_cache', '0PP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('objprimspec', 'repr_get_primitive_type_spec', 'IP', :inlinable(1));
 
 # lexical related opcodes
 QAST::Operations.add_core_pirop_mapping('getlex', 'find_lex', 'Ps');
