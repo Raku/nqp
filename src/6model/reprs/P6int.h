@@ -1,12 +1,9 @@
 #ifndef P6INT_H_GUARD
 #define P6INT_H_GUARD
 
-/* The P6int body is just a union of the different int types. */
-typedef union {
-    Parrot_Int1 int8;
-    Parrot_Int2 int16;
-    Parrot_Int4 int32;
-    Parrot_Int8 int64;
+typedef struct {
+    /* Integer storage slot. */
+    INTVAL value;
 } P6intBody;
 
 /* This is how an instance with the P6int representation looks. */
