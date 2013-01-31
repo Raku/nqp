@@ -42,6 +42,20 @@ typedef struct {
     PMC *  method;
 } BoolificationSpec;
 
+/* Defines and struct we use to access inlined members. */
+#define NATIVE_VALUE_INT    1
+#define NATIVE_VALUE_FLOAT  2
+#define NATIVE_VALUE_STRING 3
+
+typedef struct {
+    union {
+        INTVAL    intval;
+        FLOATVAL  floatval;
+        STRING   *stringval;
+    } value;
+    INTVAL type;
+} NativeValue;
+
 /* Boolification mode flags. */
 #define BOOL_MODE_CALL_METHOD                   0
 #define BOOL_MODE_UNBOX_INT                     1
@@ -157,10 +171,12 @@ typedef struct SixModel_REPROps_Attribute {
     PMC * (*get_attribute_boxed) (PARROT_INTERP, STable *st, void *data,
         PMC *class_handle, STRING *name, INTVAL hint);
 
-    /* Gets a reference to the memory location of an attribute. Note
-     * that this is only valid so long as the object itself is alive. */
-    void * (*get_attribute_ref) (PARROT_INTERP, STable *st, void *data,
-        PMC *class_handle, STRING *name, INTVAL hint);
+    /* Fetch the value of the attribute into the value struct. The caller sets
+     * the type field of value to the type requested, and it's the caller's
+     * responsibility to make sure this is compatible with the stored
+     * attribute. */
+    void (*get_attribute_native) (PARROT_INTERP, STable *st, void *data,
+        PMC *class_handle, STRING *name, INTVAL hint, NativeValue *value);
 
     /* Binds the given object value to the specified attribute. If it's
      * a reference type attribute, this just simply sets the value in 
@@ -169,12 +185,11 @@ typedef struct SixModel_REPROps_Attribute {
     void (*bind_attribute_boxed) (PARROT_INTERP, STable *st, void *data,
         PMC *class_handle, STRING *name, INTVAL hint, PMC *value);
 
-    /* Binds a flattened in attribute to the value at the passed reference.
-     * Like with the get_attribute_ref function, presumably the thing calling
-     * this knows about the type of the attribute it is supplying data for.
-     * copy_to will be used to copy the data in to place. */
-    void (*bind_attribute_ref) (PARROT_INTERP, STable *st, void *data,
-        PMC *class_handle, STRING *name, INTVAL hint, void *value);
+    /* Set the value of a flattened attribute. It is the caller's
+     * responsibility to set value to a type compatible with the type of the
+     * attribute being set. */
+    void (*bind_attribute_native) (PARROT_INTERP, STable *st, void *data,
+        PMC *class_handle, STRING *name, INTVAL hint, NativeValue *value);
 
     /* Gets the hint for the given attribute ID. */
     INTVAL (*hint_for) (PARROT_INTERP, STable *st, PMC *class_handle, STRING *name);
@@ -182,10 +197,6 @@ typedef struct SixModel_REPROps_Attribute {
     /* Checks if an attribute has been initialized. */
     INTVAL (*is_attribute_initialized) (PARROT_INTERP, STable *st, void *data,
         PMC *class_handle, STRING *name, INTVAL hint);
-
-    /* Gets the STable representing the specified attribute. Only valid for
-     * attributes that are accessed with get_attribute_ref. */
-    STable * (*get_attribute_stable) (PARROT_INTERP, STable *st, PMC *class_handle, STRING *name, INTVAL hint);
 } REPROps_Attribute;
 typedef struct SixModel_REPROps_Boxing {
     /* Used with boxing. Sets an integer value, for representations that

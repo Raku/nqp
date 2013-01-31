@@ -33,13 +33,13 @@ static void die_no_attrs(PARROT_INTERP, STRING *repr_name) {
 static PMC * default_get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
     die_no_attrs(interp, st->REPR->name);
 }
-static void * default_get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
+static void * default_get_attribute_native(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, NativeValue *value) {
     die_no_attrs(interp, st->REPR->name);
 }
 static void default_bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
     die_no_attrs(interp, st->REPR->name);
 }
-static void default_bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, void *value) {
+static void default_bind_attribute_native(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, NativeValue *value) {
     die_no_attrs(interp, st->REPR->name);
 }
 static INTVAL default_is_attribute_initialized(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
@@ -47,9 +47,6 @@ static INTVAL default_is_attribute_initialized(PARROT_INTERP, STable *st, void *
 }
 static INTVAL default_hint_for(PARROT_INTERP, STable *st, PMC *class_handle, STRING *name) {
     return NO_HINT;
-}
-static STable *default_get_attribute_stable(PARROT_INTERP, STable *st, PMC *class_handle, STRING *name, INTVAL hint) {
-    die_no_attrs(interp, st->REPR->name);
 }
 static void default_set_int(PARROT_INTERP, STable *st, void *data, INTVAL value) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -119,12 +116,11 @@ static STable * default_get_elem_stable(PARROT_INTERP, STable *st) {
 static void add_default_attr_funcs(PARROT_INTERP, REPROps *repr) {
     repr->attr_funcs = mem_allocate_typed(REPROps_Attribute);
     repr->attr_funcs->get_attribute_boxed = default_get_attribute_boxed;
-    repr->attr_funcs->get_attribute_ref = default_get_attribute_ref;
+    repr->attr_funcs->get_attribute_native = default_get_attribute_native;
     repr->attr_funcs->bind_attribute_boxed = default_bind_attribute_boxed;
-    repr->attr_funcs->bind_attribute_ref = default_bind_attribute_ref;
+    repr->attr_funcs->bind_attribute_native = default_bind_attribute_native;
     repr->attr_funcs->is_attribute_initialized = default_is_attribute_initialized;
     repr->attr_funcs->hint_for = default_hint_for;
-    repr->attr_funcs->get_attribute_stable = default_get_attribute_stable;
 }
 
 /* Set default boxing functions on a REPR that lacks them. */

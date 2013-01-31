@@ -488,7 +488,7 @@ static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
     /* Otherwise, complain that the attribute doesn't exist. */
     no_such_attribute(interp, "get", class_handle, name);
 }
-static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
+static void * get_attribute_native(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, NativeValue *value) {
     CStructREPRData *repr_data = (CStructREPRData *)st->REPR_data;
     CStructBody     *body      = (CStructBody *)data;
     INTVAL           slot;
@@ -497,32 +497,34 @@ static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *clas
     slot = hint >= 0 ? hint :
         try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
-        return ((char *)body->cstruct) + repr_data->struct_offsets[slot];
-    }
-    
-    /* Otherwise, complain that the attribute doesn't exist. */
-    no_such_attribute(interp, "get", class_handle, name);
-}
-
-static STable *get_attribute_stable(PARROT_INTERP, STable *st, PMC *class_handle, STRING *name, INTVAL hint) {
-    CStructREPRData *repr_data = (CStructREPRData *) st->REPR_data;
-    INTVAL           slot;
-
-    slot = hint >= 0? hint :
-        try_get_slot(interp, repr_data, class_handle, name);
-    if (slot >= 0) {
-        if (repr_data->flattened_stables[slot]) {
-            return repr_data->flattened_stables[slot];
+        STable *st = repr_data->flattened_stables[slot];
+        void *ptr = ((char *)body->cstruct) + repr_data->struct_offsets[slot];
+        if (st) {
+            switch (value->type) {
+            case NATIVE_VALUE_INT:
+                value->value.intval = st->REPR->box_funcs->get_int(interp, st, ptr);
+                break;
+            case NATIVE_VALUE_FLOAT:
+                value->value.floatval = st->REPR->box_funcs->get_num(interp, st, ptr);
+                break;
+            case NATIVE_VALUE_STRING:
+                value->value.stringval = st->REPR->box_funcs->get_str(interp, st, ptr);
+                break;
+            default:
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "Bad value of NativeValue.type: %d", value->type);
+            }
+            return;
         }
         else {
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                    "Can't get STable for unflattened attribute '%Ss' on class '%Ss'",
-                    name, VTABLE_get_string(interp, introspection_call(interp,
-                        class_handle, STABLE(class_handle)->HOW,
-                        Parrot_str_new_constant(interp, "name"), 0)));
+                "Cannot read by reference from non-flattened attribute '%Ss' on class '%Ss'",
+                name, VTABLE_get_string(interp, introspection_call(interp,
+                    class_handle, STABLE(class_handle)->HOW,
+                    Parrot_str_new_constant(interp, "name"), 0)));
         }
     }
-
+    
     /* Otherwise, complain that the attribute doesn't exist. */
     no_such_attribute(interp, "get", class_handle, name);
 }
@@ -581,7 +583,7 @@ static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
         no_such_attribute(interp, "bind", class_handle, name);
     }
 }
-static void bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, void *value) {
+static void bind_attribute_native(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, NativeValue *value) {
     CStructREPRData *repr_data = (CStructREPRData *)st->REPR_data;
     CStructBody     *body      = (CStructBody *)data;
     INTVAL            slot;
@@ -591,8 +593,24 @@ static void bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class
         try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
         STable *st = repr_data->flattened_stables[slot];
-        if (st)
-            st->REPR->copy_to(interp, st, value, ((char *)body->cstruct) + repr_data->struct_offsets[slot]);
+        if (st) {
+            void *ptr = ((char *)body->cstruct) + repr_data->struct_offsets[slot];
+            switch (value->type) {
+            case NATIVE_VALUE_INT:
+                st->REPR->box_funcs->set_int(interp, st, ptr, value->value.intval);
+                break;
+            case NATIVE_VALUE_FLOAT:
+                st->REPR->box_funcs->set_num(interp, st, ptr, value->value.floatval);
+                break;
+            case NATIVE_VALUE_STRING:
+                st->REPR->box_funcs->set_str(interp, st, ptr, value->value.stringval);
+                break;
+            default:
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "Bad value of NativeValue.type: %d", value->type);
+            }
+            return;
+        }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Can not bind by reference to non-flattened attribute '%Ss' on class '%Ss'",
@@ -699,11 +717,10 @@ REPROps * CStruct_initialize(PARROT_INTERP,
     this_repr->copy_to = copy_to;
     this_repr->attr_funcs = mem_allocate_typed(REPROps_Attribute);
     this_repr->attr_funcs->get_attribute_boxed = get_attribute_boxed;
-    this_repr->attr_funcs->get_attribute_ref = get_attribute_ref;
+    this_repr->attr_funcs->get_attribute_native = get_attribute_native;
     this_repr->attr_funcs->bind_attribute_boxed = bind_attribute_boxed;
-    this_repr->attr_funcs->bind_attribute_ref = bind_attribute_ref;
+    this_repr->attr_funcs->bind_attribute_native = bind_attribute_native;
     this_repr->attr_funcs->is_attribute_initialized = is_attribute_initialized;
-    this_repr->attr_funcs->get_attribute_stable = get_attribute_stable;
     this_repr->attr_funcs->hint_for = hint_for;
     this_repr->gc_mark = gc_mark;
     this_repr->gc_free = gc_free;

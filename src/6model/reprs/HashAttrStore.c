@@ -63,7 +63,7 @@ static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
     HashAttrStoreBody *body = (HashAttrStoreBody *)data;
     return VTABLE_get_pmc_keyed_str(interp, body->store, name);
 }
-static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
+static void get_attribute_native(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, NativeValue *value) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "HashAttrStore representation does not support value type attributes");
 }
@@ -77,7 +77,7 @@ static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
     HashAttrStoreBody *body = (HashAttrStoreBody *)data;
     VTABLE_set_pmc_keyed_str(interp, body->store, name, value);
 }
-static void bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, void *value) {
+static void bind_attribute_native(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, NativeValue *value) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "HashAttrStore representation does not support native attribute storage");
 }
@@ -128,9 +128,9 @@ REPROps * HashAttrStore_initialize(PARROT_INTERP) {
     this_repr->copy_to = copy_to;
     this_repr->attr_funcs = mem_allocate_typed(REPROps_Attribute);
     this_repr->attr_funcs->get_attribute_boxed = get_attribute_boxed;
-    this_repr->attr_funcs->get_attribute_ref = get_attribute_ref;
+    this_repr->attr_funcs->get_attribute_native = get_attribute_native;
     this_repr->attr_funcs->bind_attribute_boxed = bind_attribute_boxed;
-    this_repr->attr_funcs->bind_attribute_ref = bind_attribute_ref;
+    this_repr->attr_funcs->bind_attribute_native = bind_attribute_native;
     this_repr->attr_funcs->is_attribute_initialized = is_attribute_initialized;
     this_repr->attr_funcs->hint_for = hint_for;
     this_repr->gc_mark = gc_mark;

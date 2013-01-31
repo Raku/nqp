@@ -556,42 +556,6 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *repr_info, P6opaqueR
     Parrot_unblock_GC_mark(interp);
 }
 
-/* Helper for reading an int at the specified offset. */
-static INTVAL get_int_at_offset(void *data, INTVAL offset) {
-    void *location = (char *)data + offset;
-    return *((INTVAL *)location);
-}
-
-/* Helper for writing an int at the specified offset. */
-static void set_int_at_offset(void *data, INTVAL offset, INTVAL value) {
-    void *location = (char *)data + offset;
-    *((INTVAL *)location) = value;
-}
-
-/* Helper for reading a num at the specified offset. */
-static FLOATVAL get_num_at_offset(void *data, INTVAL offset) {
-    void *location = (char *)data + offset;
-    return *((FLOATVAL *)location);
-}
-
-/* Helper for writing a num at the specified offset. */
-static void set_num_at_offset(void *data, INTVAL offset, FLOATVAL value) {
-    void *location = (char *)data + offset;
-    *((FLOATVAL *)location) = value;
-}
-
-/* Helper for reading a string at the specified offset. */
-static STRING * get_str_at_offset(void *data, INTVAL offset) {
-    void *location = (char *)data + offset;
-    return *((STRING **)location);
-}
-
-/* Helper for writing a string at the specified offset. */
-static void set_str_at_offset(void *data, INTVAL offset, STRING *value) {
-    void *location = (char *)data + offset;
-    *((STRING **)location) = value;
-}
-
 /* Helper for reading a PMC at the specified offset. */
 static PMC * get_pmc_at_offset(void *data, INTVAL offset) {
     void *location = (char *)data + offset;
@@ -775,7 +739,7 @@ static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
     no_such_attribute(interp, "get", class_handle, name);
 }
 
-static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
+static void get_attribute_native(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, NativeValue *value) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     INTVAL            slot;
 
@@ -783,33 +747,34 @@ static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *clas
     slot = hint >= 0 && !(repr_data->mi) ? hint :
         try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
-        return ((char *)data) + repr_data->attribute_offsets[slot];
-    }
-    
-    /* Otherwise, complain that the attribute doesn't exist. */
-    no_such_attribute(interp, "get", class_handle, name);
-}
-
-static STable *get_attribute_stable(PARROT_INTERP, STable *st, PMC *class_handle, STRING *name, INTVAL hint) {
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
-    INTVAL            slot;
-
-    /* Look up slot, then offset and compute address. */
-    slot = hint >= 0 && !(repr_data->mi) ? hint :
-        try_get_slot(interp, repr_data, class_handle, name);
-    if (slot >= 0) {
-        if (repr_data->flattened_stables[slot]) {
-            return repr_data->flattened_stables[slot];
+        STable *st = repr_data->flattened_stables[slot];
+        void *ptr = ((char *)data) + repr_data->attribute_offsets[slot];
+        if (st) {
+            switch (value->type) {
+            case NATIVE_VALUE_INT:
+                value->value.intval = st->REPR->box_funcs->get_int(interp, st, ptr);
+                break;
+            case NATIVE_VALUE_FLOAT:
+                value->value.floatval = st->REPR->box_funcs->get_num(interp, st, ptr);
+                break;
+            case NATIVE_VALUE_STRING:
+                value->value.stringval = st->REPR->box_funcs->get_str(interp, st, ptr);
+                break;
+            default:
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "Bad value of NativeValue.type: %d", value->type);
+            }
+            return;
         }
         else {
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                    "Can't get STable for unflattened attribute '%Ss' on class '%Ss'",
-                    name, VTABLE_get_string(interp, introspection_call(interp,
-                        class_handle, STABLE(class_handle)->HOW,
-                        Parrot_str_new_constant(interp, "name"), 0)));
+                "Cannot read by reference from non-flattened attribute '%Ss' on class '%Ss'",
+                name, VTABLE_get_string(interp, introspection_call(interp,
+                    class_handle, STABLE(class_handle)->HOW,
+                    Parrot_str_new_constant(interp, "name"), 0)));
         }
     }
-
+    
     /* Otherwise, complain that the attribute doesn't exist. */
     no_such_attribute(interp, "get", class_handle, name);
 }
@@ -844,7 +809,7 @@ static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
         no_such_attribute(interp, "bind", class_handle, name);
     }
 }
-static void bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, void *value) {
+static void bind_attribute_native(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, NativeValue *value) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     INTVAL            slot;
 
@@ -853,11 +818,27 @@ static void bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class
         try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
         STable *st = repr_data->flattened_stables[slot];
-        if (st)
-            st->REPR->copy_to(interp, st, value, (char *)data + repr_data->attribute_offsets[slot]);
+        void *ptr = (char *)data + repr_data->attribute_offsets[slot];
+        if (st) {
+            switch (value->type) {
+            case NATIVE_VALUE_INT:
+                st->REPR->box_funcs->set_int(interp, st, ptr, value->value.intval);
+                break;
+            case NATIVE_VALUE_FLOAT:
+                st->REPR->box_funcs->set_num(interp, st, ptr, value->value.floatval);
+                break;
+            case NATIVE_VALUE_STRING:
+                st->REPR->box_funcs->set_str(interp, st, ptr, value->value.stringval);
+                break;
+            default:
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "Bad value of NativeValue.type: %d", value->type);
+            }
+            return;
+        }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Can not bind by reference to non-flattened attribute '%Ss' on class '%Ss'",
+                "Cannot bind by reference to non-flattened attribute '%Ss' on class '%Ss'",
                 name, VTABLE_get_string(interp, introspection_call(interp,
                     class_handle, STABLE(class_handle)->HOW,
                     Parrot_str_new_constant(interp, "name"), 0)));
@@ -1353,11 +1334,10 @@ REPROps * P6opaque_initialize(PARROT_INTERP) {
     this_repr->copy_to = copy_to;
     this_repr->attr_funcs = mem_allocate_typed(REPROps_Attribute);
     this_repr->attr_funcs->get_attribute_boxed = get_attribute_boxed;
-    this_repr->attr_funcs->get_attribute_ref = get_attribute_ref;
+    this_repr->attr_funcs->get_attribute_native = get_attribute_native;
     this_repr->attr_funcs->bind_attribute_boxed = bind_attribute_boxed;
-    this_repr->attr_funcs->bind_attribute_ref = bind_attribute_ref;
+    this_repr->attr_funcs->bind_attribute_native = bind_attribute_native;
     this_repr->attr_funcs->is_attribute_initialized = is_attribute_initialized;
-    this_repr->attr_funcs->get_attribute_stable = get_attribute_stable;
     this_repr->attr_funcs->hint_for = hint_for;
     this_repr->box_funcs = mem_allocate_typed(REPROps_Boxing);
     this_repr->box_funcs->set_int = set_int;
