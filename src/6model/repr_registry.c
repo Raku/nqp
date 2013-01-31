@@ -33,7 +33,7 @@ static void die_no_attrs(PARROT_INTERP, STRING *repr_name) {
 static PMC * default_get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
     die_no_attrs(interp, st->REPR->name);
 }
-static void * default_get_attribute_native(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, NativeValue *value) {
+static void default_get_attribute_native(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, NativeValue *value) {
     die_no_attrs(interp, st->REPR->name);
 }
 static void default_bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
