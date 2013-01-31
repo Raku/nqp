@@ -57,4 +57,10 @@ sub say(*@args) {
     print(|@args, "\n");
 }
 
+sub join($delim, @things) {
+    my @strs;
+    for @things { nqp::push(@strs, ~$_) }
+    nqp::join($delim, @strs)
+}
+
 # vim: ft=perl6
