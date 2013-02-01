@@ -13,6 +13,11 @@ static REPROps *this_repr;
 static void set_num(PARROT_INTERP, STable *st, void *data, FLOATVAL value);
 static FLOATVAL get_num(PARROT_INTERP, STable *st, void *data);
 
+static void die_bad_bits(PARROT_INTERP) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "P6num can only handle 32 or 64 bit wide floats.");
+}
+
 /* Creates a new type object of this representation, and associates it with
  * the given HOW. */
 static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
@@ -49,11 +54,14 @@ static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
 
     repr_data->bits = sizeof(FLOATVAL)*8;
     if(!PMC_IS_NULL(info)) {
-        /* XXX: Make sure bits is a value we actually support. */
         /* XXX: I should probably handle the case where no "bits" key is set
          * as well, which would set it to 0 (I think?). */
         repr_data->bits = VTABLE_get_integer_keyed_str(interp, info,
             Parrot_str_new_constant(interp, "bits"));
+
+        if(repr_data->bits != 32 && repr_data->bits != 64) {
+            die_bad_bits(interp);
+        }
     }
 }
 
@@ -114,8 +122,7 @@ static void set_num(PARROT_INTERP, STable *st, void *data, FLOATVAL value) {
         *(Parrot_Float8 *)data = value;
         break;
     default:
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "P6num can only handle 32 or 64 bit floats.");
+        die_bad_bits(interp);
     }
 }
 
@@ -130,8 +137,7 @@ static FLOATVAL get_num(PARROT_INTERP, STable *st, void *data) {
     case 64:
         return *(Parrot_Float8 *)data;
     default:
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "P6num can only handle 32 or 64 bit floats.");
+        die_bad_bits(interp);
     }
 }
 
@@ -171,8 +177,6 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     spec.boxed_primitive = STORAGE_SPEC_BP_NUM;
     spec.can_box = STORAGE_SPEC_CAN_BOX_NUM;
 
-    /*spec.bits = sizeof(FLOATVAL) * 8;
-    spec.align = ALIGNOF1(void *);*/
     if (repr_data && repr_data->bits) {
         spec.bits = repr_data->bits;
     }
@@ -188,7 +192,7 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
         spec.align = ALIGNOF1(Parrot_Float8);
         break;
     default:
-        /* TODO: Throw exception for unknown sizes. */
+        die_bad_bits(interp);
         break;
     }
 

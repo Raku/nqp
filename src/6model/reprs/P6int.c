@@ -13,6 +13,11 @@ static REPROps *this_repr;
 static void set_int(PARROT_INTERP, STable *st, void *data, INTVAL value);
 static INTVAL get_int(PARROT_INTERP, STable *st, void *data);
 
+static void die_bad_bits(PARROT_INTERP) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "P6int can only handle 1, 2, 4, 8, 16, 32 or 64 bit wide ints.");
+}
+
 /* Creates a new type object of this representation, and associates it with
  * the given HOW. */
 static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
@@ -51,11 +56,16 @@ static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
     if(!PMC_IS_NULL(integer)) {
         /* TODO: Handle possible unsigned key. How to handle it though, since
          * Parrot's INTVAL is inherently signed? */
-        /* XXX: Make sure bits is a value we actually support. */
         /* XXX: I should probably handle the case where no "bits" key is set
          * as well, which would set it to 0 (I think?). */
         repr_data->bits = VTABLE_get_integer_keyed_str(interp, integer,
             Parrot_str_new_constant(interp, "bits"));
+
+        if (repr_data->bits !=  1 && repr_data->bits !=  2 && repr_data->bits !=  4
+         && repr_data->bits !=  8 && repr_data->bits != 16 && repr_data->bits != 32
+         && repr_data->bits != 64) {
+            die_bad_bits(interp);
+        }
     }
 }
 
@@ -81,8 +91,16 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
 static void set_int(PARROT_INTERP, STable *st, void *data, INTVAL value) {
     P6intREPRData *repr_data = (P6intREPRData *) st->REPR_data;
 
-    /* XXX: This won't work with int{1,2,4} */
     switch (repr_data->bits) {
+    case 1:
+        *(Parrot_Int1 *)data = value & 0x1;
+        break;
+    case 2:
+        *(Parrot_Int1 *)data = value & 0x3;
+        break;
+    case 4:
+        *(Parrot_Int1 *)data = value & 0xf;
+        break;
     case 8:
         *(Parrot_Int1 *)data = value;
         break;
@@ -96,8 +114,7 @@ static void set_int(PARROT_INTERP, STable *st, void *data, INTVAL value) {
         *(Parrot_Int8 *)data = value;
         break;
     default:
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "P6int can only handle 8, 16, 32 or 64 bit ints.");
+        die_bad_bits(interp);
     }
 }
 
@@ -106,8 +123,13 @@ static void set_int(PARROT_INTERP, STable *st, void *data, INTVAL value) {
 static INTVAL get_int(PARROT_INTERP, STable *st, void *data) {
     P6intREPRData *repr_data = (P6intREPRData *) st->REPR_data;
 
-    /* XXX: This won't work with int{1,2,4} */
     switch (repr_data->bits) {
+    case 1:
+        return (*(Parrot_Int1 *)data) & 0x1;
+    case 2:
+        return (*(Parrot_Int1 *)data) & 0x3;
+    case 4:
+        return (*(Parrot_Int1 *)data) & 0xf;
     case 8:
         return *(Parrot_Int1 *)data;
     case 16:
@@ -117,8 +139,7 @@ static INTVAL get_int(PARROT_INTERP, STable *st, void *data) {
     case 64:
         return *(Parrot_Int8 *)data;
     default:
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "P6int can only handle 8, 16, 32 or 64 bit ints.");
+        die_bad_bits(interp);
     }
 }
 
@@ -180,6 +201,11 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     }
 
     switch (spec.bits) {
+    /* XXX: Setting align to that of a byte for widths less than 1 byte might
+     * not be entirely the best choice. */
+    case 1:
+    case 2:
+    case 4:
     case 8:
         spec.align = ALIGNOF1(Parrot_Int1);
         break;
@@ -193,8 +219,7 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
         spec.align = ALIGNOF1(Parrot_Int8);
         break;
     default:
-        /* TODO: Throw exception for unknown sizes. */
-        break;
+        die_bad_bits(interp);
     }
 
     return spec;
