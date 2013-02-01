@@ -5,7 +5,7 @@ my knowhow NQPRoutine {
     has $!dispatch_cache;
     method add_dispatchee($code) {
         $!dispatch_cache := nqp::null();
-        $!dispatchees.push($code);
+        nqp::push($!dispatchees, $code);
     }
     method is_dispatcher() {
         nqp::defined($!dispatchees)
@@ -18,7 +18,7 @@ my knowhow NQPRoutine {
         my $der := pir::repr_clone__PP(self);
         nqp::bindattr($der, NQPRoutine, '$!do', $do);
         nqp::bindattr($der, NQPRoutine, '$!dispatchees', nqp::clone($!dispatchees));
-        pir::set_sub_code_object__vPP($do, $der);
+        nqp::setcodeobj($do, $der);
         
         # If needed, arrange for a fixup of the cloned code-ref.
         my $clone_callback := pir::getprop__PPs($!do, 'CLONE_CALLBACK');
@@ -46,7 +46,7 @@ my knowhow NQPRoutine {
         $der
     }
     method !set_name($name) {
-        pir::assign__0Ps($!do, $name);
+        nqp::setcodename($!do, $name);
     }
 }
 pir::stable_publish_vtable_handler_mapping__vPP(NQPRoutine,
@@ -133,7 +133,7 @@ my knowhow NQPRegex {
         }
     }
     method !set_name($name) {
-        pir::assign__0Ps($!do, $name);
+        nqp::setcodename($!do, $name);
     }
 }
 pir::stable_publish_vtable_handler_mapping__vPP(NQPRegex,
