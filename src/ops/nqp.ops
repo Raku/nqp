@@ -511,7 +511,8 @@ inline op repr_instance_of(out PMC, invar PMC) :base_core {
 
 =item repr_clone()
 
-Gets a REPR to clone itself.
+Clones an object. If it's a 6model object, uses repr_clone. If not, falls back to
+Parrot's clone vtable.
 
 =cut
 
@@ -527,8 +528,7 @@ inline op repr_clone(out PMC, invar PMC) :base_core {
         PARROT_GC_WRITE_BARRIER(interp, $1);
     }
     else {
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Can only use repr_clone on a SixModelObject");
+        $1 = VTABLE_clone(interp, var);
     }
 }
 
