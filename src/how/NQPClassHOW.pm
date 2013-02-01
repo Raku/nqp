@@ -346,7 +346,7 @@ knowhow NQPClassHOW {
 
         # Provided we have immediate parents...
         my @result;
-        if @immediate_parents {
+        if nqp::elems(@immediate_parents) {
             if nqp::elems(@immediate_parents) == 1 {
                 @result := compute_c3_mro(@immediate_parents[0]);
             } else {
