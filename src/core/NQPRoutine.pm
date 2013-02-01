@@ -15,7 +15,7 @@ my knowhow NQPRoutine {
         my $do  := nqp::clone($!do);
         
         # Clone and attach the code object.
-        my $der := pir::repr_clone__PP(self);
+        my $der := nqp::clone(self);
         nqp::bindattr($der, NQPRoutine, '$!do', $do);
         nqp::bindattr($der, NQPRoutine, '$!dispatchees', nqp::clone($!dispatchees));
         nqp::setcodeobj($do, $der);
@@ -33,7 +33,7 @@ my knowhow NQPRoutine {
         my $do  := nqp::clone($!do);
         
         # Clone and attach the code object.
-        my $der := pir::repr_clone__PP(self);
+        my $der := nqp::clone(self);
         nqp::bindattr($der, NQPRoutine, '$!do', $do);
         nqp::setcodeobj($do, $der);
         
@@ -47,6 +47,9 @@ my knowhow NQPRoutine {
     }
     method !set_name($name) {
         nqp::setcodename($!do, $name);
+    }
+    method name() {
+        nqp::getcodename($!do)
     }
 }
 nqp::setinvokespec(NQPRoutine, NQPRoutine, '$!do', nqp::null);
@@ -103,7 +106,7 @@ my knowhow NQPRegex {
         my $do  := nqp::clone($!do);
         
         # Clone and attach the code object.
-        my $der := pir::repr_clone__PP(self);
+        my $der := nqp::clone(self);
         nqp::bindattr($der, NQPRegex, '$!do', $do);
         nqp::setcodeobj($do, $der);
         
@@ -130,6 +133,9 @@ my knowhow NQPRegex {
             nqp::bindattr($ins, NQPRegex, '$!generic_nfa', nqp::null());
             $ins
         }
+    }
+    method name() {
+        nqp::getcodename($!do)
     }
     method !set_name($name) {
         nqp::setcodename($!do, $name);
