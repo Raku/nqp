@@ -49,11 +49,10 @@ my knowhow NQPRoutine {
         nqp::setcodename($!do, $name);
     }
 }
-pir::stable_publish_vtable_handler_mapping__vPP(NQPRoutine,
-    nqp::hash(
-        'invoke', nqp::list(NQPRoutine, '$!do'),
-        'get_string', nqp::list(NQPRoutine, '$!do')));
+nqp::setinvokespec(NQPRoutine, NQPRoutine, '$!do', nqp::null);
 nqp::setboolspec(NQPRoutine, 5, nqp::null());
+pir::stable_publish_vtable_handler_mapping__vPP(NQPRoutine,
+    nqp::hash('get_string', nqp::list(NQPRoutine, '$!do')));
 
 my knowhow NQPSignature {
     has $!types;
@@ -136,8 +135,7 @@ my knowhow NQPRegex {
         nqp::setcodename($!do, $name);
     }
 }
-pir::stable_publish_vtable_handler_mapping__vPP(NQPRegex,
-    nqp::hash(
-        'invoke', nqp::list(NQPRegex, '$!do'),
-        'get_string', nqp::list(NQPRegex, '$!do')));
+nqp::setinvokespec(NQPRegex, NQPRegex, '$!do', nqp::null);
 nqp::setboolspec(NQPRegex, 5, nqp::null());
+pir::stable_publish_vtable_handler_mapping__vPP(NQPRegex,
+    nqp::hash('get_string', nqp::list(NQPRegex, '$!do')));
