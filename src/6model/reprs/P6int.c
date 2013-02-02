@@ -56,10 +56,9 @@ static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
     if(!PMC_IS_NULL(integer)) {
         /* TODO: Handle possible unsigned key. How to handle it though, since
          * Parrot's INTVAL is inherently signed? */
-        /* XXX: I should probably handle the case where no "bits" key is set
-         * as well, which would set it to 0 (I think?). */
         repr_data->bits = VTABLE_get_integer_keyed_str(interp, integer,
             Parrot_str_new_constant(interp, "bits"));
+        if (!repr_data->bits) repr_data->bits = sizeof(INTVAL)*8;
 
         if (repr_data->bits !=  1 && repr_data->bits !=  2 && repr_data->bits !=  4
          && repr_data->bits !=  8 && repr_data->bits != 16 && repr_data->bits != 32

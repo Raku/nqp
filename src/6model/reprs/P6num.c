@@ -54,10 +54,9 @@ static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
 
     repr_data->bits = sizeof(FLOATVAL)*8;
     if(!PMC_IS_NULL(info)) {
-        /* XXX: I should probably handle the case where no "bits" key is set
-         * as well, which would set it to 0 (I think?). */
         repr_data->bits = VTABLE_get_integer_keyed_str(interp, info,
             Parrot_str_new_constant(interp, "bits"));
+        if (!repr_data->bits) repr_data->bits = sizeof(FLOATVAL)*8;
 
         if(repr_data->bits != 32 && repr_data->bits != 64) {
             die_bad_bits(interp);
