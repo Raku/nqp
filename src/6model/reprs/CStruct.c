@@ -45,63 +45,34 @@ static PMC * introspection_call(PARROT_INTERP, PMC *WHAT, PMC *HOW, STRING *name
     return VTABLE_get_pmc_keyed_int(interp, cappy, 0);
 }
 
-/* Helper to make an accessor call. */
-static PMC * accessor_call(PARROT_INTERP, PMC *obj, STRING *name) {
-    PMC *old_ctx, *cappy;
-    
-    /* Look up method; if there is none hand back a null. */
-    PMC *meth = VTABLE_find_method(interp, obj, name);
-    if (PMC_IS_NULL(meth))
-        return meth;
-
-    /* Set up call capture. */
-    old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
-    cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
-    VTABLE_push_pmc(interp, cappy, obj);
-
-    /* Call. */
-    Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
-
-    /* Grab result. */
-    cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
-    Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
-    return VTABLE_get_pmc_keyed_int(interp, cappy, 0);
-}
-
 /* Locates all of the attributes. Puts them onto a flattened, ordered
  * list of attributes (populating the passed flat_list). Also builds
  * the index mapping for doing named lookups. Note index is not related
  * to the storage position. */
-static PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, CStructREPRData *repr_data) {
+static PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *mro, CStructREPRData *repr_data) {
     PMC    *flat_list      = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
     PMC    *class_list     = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
     PMC    *attr_map_list  = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
-    STRING *attributes_str = Parrot_str_new_constant(interp, "attributes");
-    STRING *parents_str    = Parrot_str_new_constant(interp, "parents");
     STRING *name_str       = Parrot_str_new_constant(interp, "name");
-    STRING *mro_str        = Parrot_str_new_constant(interp, "mro");
     INTVAL  current_slot   = 0;
     
     INTVAL num_classes, i;
     CStructNameMap * result = NULL;
     
-    /* Get the MRO. */
-    PMC   *mro     = introspection_call(interp, WHAT, STABLE(WHAT)->HOW, mro_str, 0);
-    INTVAL mro_idx = VTABLE_elements(interp, mro);
-
     /* Walk through the parents list. */
+    INTVAL mro_idx = VTABLE_elements(interp, mro);
     while (mro_idx)
     {
         /* Get current class in MRO. */
-        PMC    *current_class = decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, mro, --mro_idx));
-        PMC    *HOW           = STABLE(current_class)->HOW;
+        PMC    *type_info     = VTABLE_get_pmc_keyed_int(interp, mro, --mro_idx);
+        PMC    *current_class = decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, type_info, 0));
         
         /* Get its local parents; make sure we're not doing MI. */
-        PMC    *parents     = introspection_call(interp, current_class, HOW, parents_str, 1);
+        PMC    *parents     = VTABLE_get_pmc_keyed_int(interp, type_info, 2);
         INTVAL  num_parents = VTABLE_elements(interp, parents);
         if (num_parents <= 1) {
             /* Get attributes and iterate over them. */
-            PMC *attributes = introspection_call(interp, current_class, HOW, attributes_str, 1);
+            PMC *attributes = VTABLE_get_pmc_keyed_int(interp, type_info, 1);
             PMC *attr_map   = PMCNULL;
             PMC *attr_iter  = VTABLE_get_iter(interp, attributes);
             while (VTABLE_get_bool(interp, attr_iter)) {
@@ -109,7 +80,7 @@ static PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, CStructREPRDa
                 PMC * attr = VTABLE_shift_pmc(interp, attr_iter);
 
                 /* Get its name. */
-                PMC    *name_pmc = accessor_call(interp, attr, name_str);
+                PMC    *name_pmc = VTABLE_get_pmc_keyed_str(interp, attr, name_str);
                 STRING *name     = VTABLE_get_string(interp, name_pmc);
 
                 /* Allocate a slot. */
@@ -148,7 +119,7 @@ static PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, CStructREPRDa
 /* This works out an allocation strategy for the object. It takes care of
  * "inlining" storage of attributes that are natively typed, as well as
  * noting unbox targets. */
-static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRData *repr_data) {
+static void compute_allocation_strategy(PARROT_INTERP, PMC *repr_info, CStructREPRData *repr_data) {
     STRING *type_str = Parrot_str_new_constant(interp, "type");
     PMC    *flat_list;
 
@@ -164,7 +135,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
     Parrot_block_GC_mark(interp);
 
     /* Compute index mapping table and get flat list of attributes. */
-    flat_list = index_mapping_and_flat_list(interp, WHAT, repr_data);
+    flat_list = index_mapping_and_flat_list(interp, repr_info, repr_data);
     
     /* If we have no attributes in the index mapping, then just the header. */
     if (repr_data->name_to_index_mapping[0].class_key == NULL) {
@@ -195,7 +166,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
         for (i = 0; i < num_attrs; i++) {
             /* Fetch its type; see if it's some kind of unboxed type. */
             PMC    *attr         = VTABLE_get_pmc_keyed_int(interp, flat_list, i);
-            PMC    *type         = accessor_call(interp, attr, type_str);
+            PMC    *type         = VTABLE_get_pmc_keyed_str(interp, attr, type_str);
             INTVAL  type_id      = REPR(type)->ID;
             INTVAL  bits         = sizeof(void *) * 8;
             INTVAL  align        = ALIGNOF1(void *);
@@ -363,19 +334,18 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 
 /* Composes the representation. */
 static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
-    /* TODO: move allocation strategy stuff here. */
+    /* Compute allocation strategy. */
+    CStructREPRData *repr_data = (CStructREPRData *) st->REPR_data;
+    PMC *attr_info = VTABLE_get_pmc_keyed_str(interp, repr_info,
+            Parrot_str_new_constant(interp, "attribute"));
+    compute_allocation_strategy(interp, attr_info, repr_data);
+    PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
 }
 
 /* Creates a new instance based on the type object. */
 static PMC * allocate(PARROT_INTERP, STable *st) {
     CStructInstance * obj;
-
-    /* Compute allocation strategy if we've not already done so. */
     CStructREPRData * repr_data = (CStructREPRData *) st->REPR_data;
-    if (!repr_data->struct_size) {
-        compute_allocation_strategy(interp, st->WHAT, repr_data);
-        PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
-    }
 
     /* Allocate and set up object instance. */
     obj = (CStructInstance *) Parrot_gc_allocate_fixed_size_storage(interp, sizeof(CStructInstance));
