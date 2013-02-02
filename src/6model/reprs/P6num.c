@@ -75,12 +75,11 @@ static PMC * allocate(PARROT_INTERP, STable *st) {
 static void initialize(PARROT_INTERP, STable *st, void *data) {
     P6numREPRData *repr_data = (P6numREPRData *)st->REPR_data;
 
+    double x = 0.0;
     if (repr_data->bits == 32) {
-        float x = 0.0;
         set_num(interp, st, data, 0.0/x);
     }
     else if (repr_data->bits == 64) {
-        double x = 0.0;
         set_num(interp, st, data, 0.0/x);
     }
     else {
@@ -115,10 +114,10 @@ static void set_num(PARROT_INTERP, STable *st, void *data, FLOATVAL value) {
 
     switch (repr_data->bits) {
     case 32:
-        *(Parrot_Float4 *)data = value;
+        *(Parrot_Float4 *)data = (Parrot_Float4) value;
         break;
     case 64:
-        *(Parrot_Float8 *)data = value;
+        *(Parrot_Float8 *)data = (Parrot_Float8) value;
         break;
     default:
         die_bad_bits(interp);

@@ -92,25 +92,25 @@ static void set_int(PARROT_INTERP, STable *st, void *data, INTVAL value) {
 
     switch (repr_data->bits) {
     case 1:
-        *(Parrot_Int1 *)data = value & 0x1;
+        *(Parrot_Int1 *)data = (Parrot_Int1) value & 0x1;
         break;
     case 2:
-        *(Parrot_Int1 *)data = value & 0x3;
+        *(Parrot_Int1 *)data = (Parrot_Int1) value & 0x3;
         break;
     case 4:
-        *(Parrot_Int1 *)data = value & 0xf;
+        *(Parrot_Int1 *)data = (Parrot_Int1) value & 0xf;
         break;
     case 8:
-        *(Parrot_Int1 *)data = value;
+        *(Parrot_Int1 *)data = (Parrot_Int1) value;
         break;
     case 16:
-        *(Parrot_Int2 *)data = value;
+        *(Parrot_Int2 *)data = (Parrot_Int2) value;
         break;
     case 32:
-        *(Parrot_Int4 *)data = value;
+        *(Parrot_Int4 *)data = (Parrot_Int4) value;
         break;
     case 64:
-        *(Parrot_Int8 *)data = value;
+        *(Parrot_Int8 *)data = (Parrot_Int8) value;
         break;
     default:
         die_bad_bits(interp);
