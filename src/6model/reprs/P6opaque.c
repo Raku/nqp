@@ -226,7 +226,9 @@ static void compute_allocation_strategy_OLD(PARROT_INTERP, PMC *WHAT, P6opaqueRE
                     bits = spec.bits;
                     align = spec.align;
                     repr_data->flattened_stables[i] = STABLE(type);
-                    
+
+                    if (bits % 8) bits += bits % 8;
+
                     /* Does it need special initialization? */
                     if (REPR(type)->initialize) {
                         if (!repr_data->initialize_slots)
@@ -471,6 +473,8 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *repr_info, P6opaqueR
                     align = spec.align;
                     repr_data->flattened_stables[i] = STABLE(type);
                     
+                    if (bits % 8) bits += bits % 8;
+
                     /* Does it need special initialization? */
                     if (REPR(type)->initialize) {
                         if (!repr_data->initialize_slots)
