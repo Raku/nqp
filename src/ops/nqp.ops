@@ -1138,9 +1138,12 @@ inline op repr_at_pos_int(out INT, invar PMC, in INT) :base_core {
     PMC *obj = decontainerize(interp, $2);
     if (obj->vtable->base_type == smo_id) {
         STable *elem_st = REPR(obj)->idx_funcs->get_elem_stable(interp, STABLE(obj));
-        if (IS_CONCRETE(obj))
-            $1 = elem_st->REPR->box_funcs->get_int(interp, elem_st,
-                REPR(obj)->idx_funcs->at_pos_ref(interp, STABLE(obj), OBJECT_BODY(obj), $3));
+        if (IS_CONCRETE(obj)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_INT;
+            REPR(obj)->idx_funcs->at_pos_native(interp, STABLE(obj), OBJECT_BODY(obj), $3, &value);
+            $1 = value.value.intval;
+        }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot do at_pos on a type object");
@@ -1164,9 +1167,12 @@ inline op repr_at_pos_num(out NUM, invar PMC, in INT) :base_core {
     PMC *obj = decontainerize(interp, $2);
     if (obj->vtable->base_type == smo_id) {
         STable *elem_st = REPR(obj)->idx_funcs->get_elem_stable(interp, STABLE(obj));
-        if (IS_CONCRETE(obj))
-            $1 = elem_st->REPR->box_funcs->get_num(interp, elem_st,
-                REPR(obj)->idx_funcs->at_pos_ref(interp, STABLE(obj), OBJECT_BODY(obj), $3));
+        if (IS_CONCRETE(obj)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_FLOAT;
+            REPR(obj)->idx_funcs->at_pos_native(interp, STABLE(obj), OBJECT_BODY(obj), $3, &value);
+            $1 = value.value.floatval;
+        }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot do at_pos on a type object");
@@ -1215,8 +1221,12 @@ Sets the element at the specified position to an integer.
 inline op repr_bind_pos_int(invar PMC, in INT, in INT) :base_core {
     PMC *obj = decontainerize(interp, $1);
     if (obj->vtable->base_type == smo_id) {
-        if (IS_CONCRETE(obj))
-            REPR(obj)->idx_funcs->bind_pos_ref(interp, STABLE(obj), OBJECT_BODY(obj), $2, &$3);
+        if (IS_CONCRETE(obj)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_INT;
+            value.value.intval = $3;
+            REPR(obj)->idx_funcs->bind_pos_native(interp, STABLE(obj), OBJECT_BODY(obj), $2, &value);
+        }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot do bind_pos on a type object");
@@ -1240,8 +1250,12 @@ Sets the element at the specified position to a floating point number.
 inline op repr_bind_pos_num(invar PMC, in INT, in NUM) :base_core {
     PMC *obj = decontainerize(interp, $1);
     if (obj->vtable->base_type == smo_id) {
-        if (IS_CONCRETE(obj))
-            REPR(obj)->idx_funcs->bind_pos_ref(interp, STABLE(obj), OBJECT_BODY(obj), $2, &$3);
+        if (IS_CONCRETE(obj)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_FLOAT;
+            value.value.floatval = $3;
+            REPR(obj)->idx_funcs->bind_pos_native(interp, STABLE(obj), OBJECT_BODY(obj), $2, &value);
+        }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot do bind_pos on a type object");
