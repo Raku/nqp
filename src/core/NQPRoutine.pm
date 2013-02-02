@@ -3,13 +3,21 @@ my knowhow NQPRoutine {
     has $!signature;
     has $!dispatchees;
     has $!dispatch_cache;
+    has $!dispatch_order;
+    
+    # Adds a multi-dispatch candidate.
     method add_dispatchee($code) {
         $!dispatch_cache := nqp::null();
+        $!dispatch_order := nqp::null();
         nqp::push($!dispatchees, $code);
     }
+    
+    # Checks if this code object is a dispatcher.
     method is_dispatcher() {
         nqp::defined($!dispatchees)
     }
+    
+    # Derives a new dispatcher.
     method derive_dispatcher() {
         # Clone the underlying VM code ref.
         my $do  := nqp::clone($!do);
@@ -28,6 +36,184 @@ my knowhow NQPRoutine {
         
         $der
     }
+    
+    # Sorts the dispatchees. Puts nulls between groups that are of equal weight.
+    # The most specific group comes first.
+    my $SLURPY_ARITY      := nqp::bitshiftl_i(1, 30);
+    my $EDGE_REMOVAL_TODO := -1;
+    my $EDGE_REMOVED      := -2;
+    my $NQPMu;
+    method SET_NQPMU($mu) { $NQPMu := $mu }
+    method sort_dispatchees() {
+        # Checks if one type is narrower than the other.
+        sub is_narrower_type($a, $b) {
+            # If one of the types is null, then we know that's automatically
+            # wider than anything.
+            if nqp::isnull($b) && !nqp::isnull($a) { 1 }
+            elsif nqp::isnull($a) && nqp::eqaddr($b, $NQPMu) { 1 }
+            elsif nqp::isnull($a) || nqp::isnull($b) { 0 }
+            else { nqp::istype($a, $b) }
+        }
+        
+        # Takes two candidates and determines if the first one is narrower than the
+        # second. Returns a true value if they are.
+        sub is_narrower(%a, %b) {
+            # Work out how many parameters to compare, factoring in slurpiness
+            # and optionals.
+            my $types_to_check;
+            if %a<num_types> == %b<num_types> {
+                $types_to_check := %a<num_types>;
+            }
+            elsif %a<min_arity> == %b<min_arity> {
+                $types_to_check := %a<num_types> > %b<num_types> ?? %b<num_types> !! %a<num_types>;
+            }
+            else {
+                return 0;
+            }
+
+            # Analyse each parameter in the two candidates.
+            my $i := 0;
+            my $narrower := 0;
+            my $tied := 0;
+            while $i < $types_to_check {
+                my $type_obj_a := %a<types>[$i];
+                my $type_obj_b := %b<types>[$i];
+                if nqp::eqaddr($type_obj_a, $type_obj_b) {
+                    $tied++;
+                }
+                elsif is_narrower_type($type_obj_a, $type_obj_b) {
+                    $narrower++;
+                }
+                elsif !is_narrower_type($type_obj_b, $type_obj_a) {
+                    $tied++;
+                }
+                $i++;
+            }
+
+            # If one is narrower than the other from current analysis, we're done.
+            if $narrower >= 1 && $narrower + $tied == $types_to_check {
+                return 1;
+            }
+
+            # If they aren't tied, we're also done.
+            elsif $tied != $types_to_check {
+                return 0;
+            }
+
+            # Otherwise, we see if one has a slurpy and the other not. A lack of
+            # slurpiness makes the candidate narrower. Otherwise, they're tied.
+            return %a<max_arity> != $SLURPY_ARITY && %b<max_arity> == $SLURPY_ARITY;
+        }
+
+        # Create a node for each candidate in the graph.
+        my @graph;
+        my $num_candidates := nqp::elems($!dispatchees);
+        my $i := 0;
+        while $i < $num_candidates {
+            # Get hold of signature, types and definednesses.
+            my $candidate := $!dispatchees[$i];
+            my $multi_sig := $candidate.signature;
+            my @types_list := $multi_sig.types;
+            my @definedness_list := $multi_sig.definednesses;
+            my $sig_elems := nqp::elems(@types_list);
+
+            # Type information.
+            my %info := nqp::hash(
+                'sub',           $candidate,
+                'types',         [],
+                'definednesses', [],
+                'min_arity',     0,
+                'max_arity',     0,
+                'num_types',     0
+            );
+            my %significant_param := 0;
+            my $j := 0;
+            while $j < $sig_elems {
+                # XXX TODO: Worry about optional and slurpy later.
+                %info<max_arity>++;
+                %info<min_arity>++;
+
+                # Record type info for this parameter. */
+                nqp::push(%info<types>, @types_list[$j]);
+                nqp::push(%info<definednesses>, @definedness_list[$j]);
+                %info<num_types>++;
+                
+                $j++;
+            }
+
+            # Add it to graph node, and initialize list of edges.
+            nqp::push(@graph, nqp::hash(
+                'info',      %info,
+                'edges',     [],
+                'edges_in',  0,
+                'edges_out', 0
+            ));
+
+            $i++;
+        }
+
+        # Now analyze type narrowness of the candidates relative to each other
+        # and create the edges.
+        $i := 0;
+        while $i < $num_candidates {
+            my $j := 0;
+            while $j < $num_candidates {
+                if ($i != $j) {
+                    if is_narrower(@graph[$i]<info>, @graph[$j]<info>) {
+                        @graph[$i]<edges>[@graph[$i]<edges_out>] := @graph[$j];
+                        @graph[$i]<edges_out>++;
+                        @graph[$j]<edges_in>++;
+                    }
+                }
+                $j++;
+            }
+            $i++;
+        }
+
+        # Perform the topological sort.
+        my @result;
+        my $candidates_to_sort := $num_candidates;
+        while $candidates_to_sort > 0 {
+            my $rem_results := nqp::elems(@result);
+
+            # Find any nodes that have no incoming edges and add them to
+            # results.
+            my $i := 0;
+            while $i < $num_candidates {
+                if @graph[$i]<edges_in> == 0 {
+                    # Add to results.
+                    nqp::push(@result, @graph[$i]<info>);
+                    $candidates_to_sort--;
+                    @graph[$i]<edges_in> := $EDGE_REMOVAL_TODO;
+                }
+                $i++;
+            }
+            if $rem_results == nqp::elems(@result) {
+                nqp::die("Circularity detected in multi sub types");
+            }
+
+            # Now we need to decrement edges in counts for things that had
+            # edges from candidates we added here.
+            $i := 0;
+            while $i < $num_candidates {
+                if @graph[$i]<edges_in> == $EDGE_REMOVAL_TODO {
+                    my $j := 0;
+                    while $j < @graph[$i]<edges_out> {
+                        @graph[$i]<edges>[$j]<edges_in>--;
+                        $j++;
+                    }
+                    @graph[$i]<edges_in> := $EDGE_REMOVED;
+                }
+                $i++;
+            }
+            
+            # Add gap between groups.
+            nqp::push(@result, nqp::null());
+        }
+
+        return @result;
+    }
+    
     method clone() {
         # Clone the underlying VM code ref.
         my $do  := nqp::clone($!do);
@@ -45,12 +231,16 @@ my knowhow NQPRoutine {
         
         $der
     }
+    
     method !set_name($name) {
         nqp::setcodename($!do, $name);
     }
+    
     method name() {
         nqp::getcodename($!do)
     }
+    
+    method signature() { $!signature }
 }
 nqp::setinvokespec(NQPRoutine, NQPRoutine, '$!do', nqp::null);
 nqp::setboolspec(NQPRoutine, 5, nqp::null());
@@ -60,6 +250,8 @@ pir::stable_publish_vtable_handler_mapping__vPP(NQPRoutine,
 my knowhow NQPSignature {
     has $!types;
     has $!definednesses;
+    method types() { $!types }
+    method definednesses() { $!definednesses }
 }
 
 my knowhow NQPRegex {
