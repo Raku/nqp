@@ -231,9 +231,11 @@ static void at_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, N
         case NATIVE_VALUE_INT:
             value->value.intval = 0;
             return;
-        case NATIVE_VALUE_FLOAT:
-            value->value.floatval = 0.0;
+        case NATIVE_VALUE_FLOAT: {
+            double x = 0.0;
+            value->value.floatval = 0.0/x;
             return;
+        }
         case NATIVE_VALUE_STRING:
             value->value.stringval = STRINGNULL;
             return;
