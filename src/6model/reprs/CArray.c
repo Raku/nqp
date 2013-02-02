@@ -367,8 +367,6 @@ static void bind_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index,
         body->elems = index + 1;
     switch (repr_data->elem_kind) {
         case CARRAY_ELEM_KIND_NUMERIC:
-            /* XXX: Dispatch to REPR here. */
-            /*type_st->REPR->copy_to(interp, type_st, value, ((char *)body->storage) + index * repr_data->elem_size);*/
             switch (value->type) {
             case NATIVE_VALUE_INT:
                 type_st->REPR->box_funcs->set_int(interp, type_st, ptr, value->value.intval);
