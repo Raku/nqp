@@ -216,6 +216,7 @@ static void compute_allocation_strategy_OLD(PARROT_INTERP, PMC *WHAT, P6opaqueRE
             /* Work out what unboxed type it is, if any. Default to a boxed. */
             INTVAL unboxed_type = STORAGE_SPEC_BP_NONE;
             INTVAL bits         = sizeof(PMC *) * 8;
+            INTVAL align        = ALIGNOF1(PMC *);
             if (!PMC_IS_NULL(type)) {
                 /* Get the storage spec of the type and see what it wants. */
                 storage_spec spec = REPR(type)->get_storage_spec(interp, STABLE(type));
@@ -223,6 +224,7 @@ static void compute_allocation_strategy_OLD(PARROT_INTERP, PMC *WHAT, P6opaqueRE
                     /* Yes, it's something we'll flatten. */
                     unboxed_type = spec.boxed_primitive;
                     bits = spec.bits;
+                    align = spec.align;
                     repr_data->flattened_stables[i] = STABLE(type);
                     
                     /* Does it need special initialization? */
@@ -297,8 +299,12 @@ static void compute_allocation_strategy_OLD(PARROT_INTERP, PMC *WHAT, P6opaqueRE
                 }
             }
             
-            /* Do allocation. */
-            /* XXX TODO Alignment! Important when we get int1, int8, etc. */
+            /* Do allocation. Before updating the size of the structure, we
+             * make sure the object will be aligned appropriately. */
+            if (cur_size % align) {
+                cur_size += align - cur_size % align;
+            }
+
             repr_data->attribute_offsets[i] = cur_size;
             cur_size += bits / 8;
         }
@@ -454,6 +460,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *repr_info, P6opaqueR
             /* Work out what unboxed type it is, if any. Default to a boxed. */
             INTVAL unboxed_type = STORAGE_SPEC_BP_NONE;
             INTVAL bits         = sizeof(PMC *) * 8;
+            INTVAL align        = ALIGNOF1(PMC *);
             if (!PMC_IS_NULL(type)) {
                 /* Get the storage spec of the type and see what it wants. */
                 storage_spec spec = REPR(type)->get_storage_spec(interp, STABLE(type));
@@ -461,6 +468,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *repr_info, P6opaqueR
                     /* Yes, it's something we'll flatten. */
                     unboxed_type = spec.boxed_primitive;
                     bits = spec.bits;
+                    align = spec.align;
                     repr_data->flattened_stables[i] = STABLE(type);
                     
                     /* Does it need special initialization? */
@@ -535,8 +543,12 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *repr_info, P6opaqueR
                 }
             }
             
-            /* Do allocation. */
-            /* XXX TODO Alignment! Important when we get int1, int8, etc. */
+            /* Do allocation. Before updating the size of the structure, we
+             * make sure the object will be aligned appropriately. */
+            if (cur_size % align) {
+                cur_size += align - cur_size % align;
+            }
+
             repr_data->attribute_offsets[i] = cur_size;
             cur_size += bits / 8;
         }
