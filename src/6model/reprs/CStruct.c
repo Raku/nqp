@@ -212,6 +212,12 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
                      * that get_attribute_ref can find it later. */
                     bits = spec.bits;
                     align = spec.align;
+
+                    if (bits % 8) {
+                        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                                "CStruct only supports native types that are a multiple of 8 bits wide (was passed: %ld)", bits);
+                    }
+
                     repr_data->attribute_locations[i] = (bits << CSTRUCT_ATTR_SHIFT) | CSTRUCT_ATTR_IN_STRUCT;
                     repr_data->flattened_stables[i] = STABLE(type);
                     if (REPR(type)->initialize) {
