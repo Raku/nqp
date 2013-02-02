@@ -226,10 +226,22 @@ static void at_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, N
     CArrayBody     *body      = (CArrayBody *)data;
     STable         *type_st   = STABLE(repr_data->elem_type);
     void           *ptr       = ((char *)body->storage) + index * repr_data->elem_size;
-    /* XXX: What to do here now? Used to return NULL pointer, but that's not
-     * an option anymore. */
-    if (body->managed && index >= body->elems)
-        return;
+    if (body->managed && index >= body->elems) {
+        switch (value->type) {
+        case NATIVE_VALUE_INT:
+            value->value.intval = 0;
+            return;
+        case NATIVE_VALUE_FLOAT:
+            value->value.floatval = 0.0;
+            return;
+        case NATIVE_VALUE_STRING:
+            value->value.stringval = STRINGNULL;
+            return;
+        default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Bad value of NativeValue.type: %d", value->type);
+        }
+    }
     switch (repr_data->elem_kind) {
         case CARRAY_ELEM_KIND_NUMERIC:
             switch (value->type) {
