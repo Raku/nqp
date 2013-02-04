@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(101);
+plan(116);
 
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
@@ -140,3 +140,30 @@ ok(!nqp::existspos(@arr, -2), 'existspos with missing pos');
 ok(!nqp::existspos(@arr, -100), 'existspos with absurd values');
 @arr[1] := NQPMu;
 ok(nqp::existspos(@arr, 1), 'existspos with still existing pos');
+
+# for deletepos
+my @arr2;
+@arr2[1] := 1;
+@arr2[3] := 1;
+ok(nqp::elems(@arr2) == 4, 'right number of elements');
+ok(!nqp::existspos(@arr2, 0), 'existspos with missing pos');
+ok(nqp::existspos(@arr2, 1), 'existspos with existing pos');
+ok(!nqp::existspos(@arr2, 2), 'existspos with missing pos');
+ok(nqp::existspos(@arr2, 3), 'existspos with existing pos');
+ok(!nqp::existspos(@arr2, 4), 'existspos with missing pos');
+
+nqp::deletepos(@arr2, 1);
+ok(nqp::elems(@arr2) == 3, 'right number of elements');
+ok(!nqp::existspos(@arr2, 0), 'existspos with existing pos');
+ok(!nqp::existspos(@arr2, 1), 'existspos with missing pos');
+ok(nqp::existspos(@arr2, 2), 'existspos with existing pos');
+ok(!nqp::existspos(@arr2, 3), 'existspos with missing pos');
+
+# deletepos at negative value always removes the 0th element in Parrot
+# don't ask me why
+nqp::deletepos(@arr2, -5);
+
+ok(nqp::elems(@arr2) == 2, 'right number of elements');
+ok(!nqp::existspos(@arr2, 0), 'existspos with existing pos');
+ok(nqp::existspos(@arr2, 1), 'existspos with missing pos');
+ok(!nqp::existspos(@arr2, 2), 'existspos with existing pos');
