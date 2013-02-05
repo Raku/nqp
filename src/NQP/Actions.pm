@@ -517,6 +517,12 @@ class NQP::Actions is HLL::Actions {
                     }
                 }
             }
+            elsif $<semilist> {
+                my $name := ~$<sigil> eq '@' ?? 'list' !!
+                            ~$<sigil> eq '%' ?? 'hash' !!
+                                                'item';
+                $past := QAST::Op.new( :op('callmethod'), :name($name), $<semilist>.ast );
+            }
             elsif $*W.is_package(~@name[0]) {
                 $past := lexical_package_lookup(@name, $/);
                 $past.fallback( default_for( $<sigil> ) );
@@ -1355,13 +1361,6 @@ class NQP::Actions is HLL::Actions {
         else {
             make default_for('%');
         }
-    }
-
-    method circumfix:sym<sigil>($/) {
-        my $name := ~$<sigil> eq '@' ?? 'list' !!
-                    ~$<sigil> eq '%' ?? 'hash' !!
-                                        'item';
-        make QAST::Op.new( :op('callmethod'), :name($name), $<semilist>.ast );
     }
 
     method semilist($/) { make $<statement>.ast }

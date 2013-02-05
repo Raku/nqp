@@ -321,13 +321,10 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token variable {
         | <sigil> <twigil>? <desigilname=.name>
-        | <sigil> <?[<[]> <postcircumfix>
+        | <sigil> <?[<]> <postcircumfix>
+        | <sigil> '(' ~ ')' <semilist>
         | $<sigil>=['$'] $<desigilname>=[<[/_!]>]
     }
-
-    token sigil { <[$@%&]> }
-
-    token twigil { <[*!?]> }
 
     proto token package_declarator { <...> }
     token package_declarator:sym<module> {
@@ -658,7 +655,6 @@ grammar NQP::Grammar is HLL::Grammar {
     token circumfix:sym<ang> { <?[<]>  <quote_EXPR: ':q', ':w'>  }
     token circumfix:sym<« »> { <?[«]>  <quote_EXPR: ':qq', ':w'>  }
     token circumfix:sym<{ }> { <?[{]> <pblock> }
-    token circumfix:sym<sigil> { <sigil> '(' ~ ')' <semilist> }
 
     rule semilist { <statement> }
 
@@ -797,7 +793,7 @@ grammar NQP::Regex is QRegex::P6Regex::Grammar {
     }
 
     token metachar:sym<nqpvar> {
-        <?before <[$@&]> [\W\w | \w]> <var=.LANG('MAIN', 'variable')>
+        <?before <sigil> [\W\w | \w]> <var=.LANG('MAIN', 'variable')>
     }
 
     token assertion:sym<{ }> {
