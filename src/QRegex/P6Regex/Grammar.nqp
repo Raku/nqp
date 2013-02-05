@@ -178,7 +178,6 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token metachar:sym<ws> { <.normspace> }
     token metachar:sym<[ ]> { '[' <nibbler> ']' }
     token metachar:sym<( )> { '(' <nibbler> ')' }
-    token metachar:sym<$( )> { '$(' <nibbler> ')' }
     token metachar:sym<'> { <?[']> <quote_EXPR: ':q'> }
     token metachar:sym<"> { <?["]> <quote_EXPR: ':qq'> }
     token metachar:sym<.> { <sym> }
