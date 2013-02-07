@@ -533,6 +533,13 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *repr_info, P6opaqueR
                     }
                 }
             }
+            
+            /* Do allocation. Before updating the size of the structure, we
+             * make sure the object will be aligned appropriately. */
+            if (cur_size % align) {
+                cur_size += align - cur_size % align;
+            }
+            repr_data->attribute_offsets[i] = cur_size;
 
             /* Handle PMC attributes, which need marking and may have auto-viv needs. */
             if (unboxed_type == STORAGE_SPEC_BP_NONE) {
@@ -547,13 +554,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *repr_info, P6opaqueR
                 }
             }
             
-            /* Do allocation. Before updating the size of the structure, we
-             * make sure the object will be aligned appropriately. */
-            if (cur_size % align) {
-                cur_size += align - cur_size % align;
-            }
-
-            repr_data->attribute_offsets[i] = cur_size;
+            /* Increment object size by the allocated bytes. */
             cur_size += bits / 8;
         }
 
@@ -1309,8 +1310,14 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
     cur_gc_mark_slot    = 0;
     cur_gc_cleanup_slot = 0;
     for (i = 0; i < repr_data->num_attributes; i++) {
-        repr_data->attribute_offsets[i] = cur_offset;
         if (repr_data->flattened_stables[i] == NULL) {
+            /* Align and store position. */
+            INTVAL align = ALIGNOF1(PMC *);
+            if (cur_offset % align) {
+                cur_offset += align - cur_offset % align;
+            }
+            repr_data->attribute_offsets[i] = cur_offset;
+            
             /* Reference type. Needs marking. */
             repr_data->gc_pmc_mark_offsets[repr_data->gc_pmc_mark_offsets_count] = cur_offset;
             repr_data->gc_pmc_mark_offsets_count++;
@@ -1319,8 +1326,15 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
             cur_offset += sizeof(PMC *);
         }
         else {
-            /* Set up flags for initialization and GC. */
+            /* Align and store position. */
             STable *cur_st = repr_data->flattened_stables[i];
+            INTVAL align = cur_st->REPR->get_storage_spec(interp, cur_st).align;
+            if (cur_offset % align) {
+                cur_offset += align - cur_offset % align;
+            }
+            repr_data->attribute_offsets[i] = cur_offset;
+
+            /* Set up flags for initialization and GC. */
             if (cur_st->REPR->initialize)
                 repr_data->initialize_slots[cur_initialize_slot++] = i;
             if (cur_st->REPR->gc_mark)
@@ -1329,7 +1343,7 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
                 repr_data->gc_cleanup_slots[cur_gc_cleanup_slot++] = i;
             
             /* Increment by size reported by representation. */
-            cur_offset += cur_st->REPR->get_storage_spec(interp, st).bits / 8;
+            cur_offset += cur_st->REPR->get_storage_spec(interp, cur_st).bits / 8;
         }
     }
     repr_data->initialize_slots[cur_initialize_slot] = -1;
