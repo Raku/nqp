@@ -326,6 +326,10 @@ grammar NQP::Grammar is HLL::Grammar {
         | $<sigil>=['$'] $<desigilname>=[<[/_!]>]
     }
 
+    token sigil { <[$@%&]> }
+
+    token twigil { <[*!?]> }
+
     proto token package_declarator { <...> }
     token package_declarator:sym<module> {
         :my $*OUTERPACKAGE := $*PACKAGE;

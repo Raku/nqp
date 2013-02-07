@@ -213,6 +213,8 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         [ '>' || <.panic: 'regex assertion not terminated by angle bracket'> ]
     }
 
+    token sigil { <[$@%&]> }
+
     token metachar:sym<var> {
         [
         | '$<' $<name>=[<-[>]>+] '>'

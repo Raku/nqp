@@ -49,10 +49,6 @@ grammar HLL::Grammar {
         ]
     }
 
-    token sigil { <[$@%&]> }
-
-    token twigil { <[*!?]> }
-
     token decint  { [\d+]+ % '_' }
     token decints { [<.ws><decint><.ws>]+ % ',' }
 
