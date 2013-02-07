@@ -223,7 +223,7 @@ my knowhow NQPRoutine {
     
     method dispatch($capture) {
         # Count arguments.
-        my $num_args := nqp::captueposelems($capture);
+        my $num_args := nqp::captureposelems($capture);
 
         # Get list and number of candidates, triggering a sort if there are none.
         my @candidates := $!dispatch_order;
@@ -276,7 +276,7 @@ my knowhow NQPRoutine {
             $type_mismatch := 0;
             $i := 0;
             while $i < $type_check_count {
-                my $param := nqp::captueposarg($capture, $i);
+                my $param := nqp::captureposarg($capture, $i);
                 my $param_type := pir::what_or_null__PP($param); # Parrot hack; just .WHAT on JVM etc.
                 my $type_obj := $cur_candidate<types>[$i];
                 my $definedness := $cur_candidate<definednesses>[$i];
