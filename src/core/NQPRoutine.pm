@@ -40,13 +40,10 @@ my knowhow NQPRoutine {
     }
     
     # Checks if one type is narrower than the other.
-    my $NQPMu;
-    method SET_NQPMU($mu) { $NQPMu := $mu }
     sub is_narrower_type($a, $b) {
         # If one of the types is null, then we know that's automatically
         # wider than anything.
         if nqp::isnull($b) && !nqp::isnull($a) { 1 }
-        elsif nqp::isnull($a) && nqp::eqaddr($b, $NQPMu) { 1 }
         elsif nqp::isnull($a) || nqp::isnull($b) { 0 }
         else { nqp::istype($a, $b) }
     }
