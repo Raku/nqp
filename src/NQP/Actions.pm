@@ -1008,9 +1008,21 @@ class NQP::Actions is HLL::Actions {
         $past.push(QAST::Op.new(
             :op('invokewithcapture'),
             QAST::Op.new(
-                :op('callmethod'), :name('dispatch'),
-                QAST::Op.new( :op('getcodeobj'), QAST::Op.new( :op('curcode') ) ),
-                QAST::Op.new( :op('usecapture') )
+                :op('ifnull'),
+                QAST::Op.new(
+                    :op('multicachefind'),
+                    QAST::Var.new(
+                        :name('$!dispatch_cache'), :scope('attribute'),
+                        QAST::Op.new( :op('getcodeobj'), QAST::Op.new( :op('curcode') ) ),
+                        QAST::WVal.new( :value($*W.find_sym(['NQPRoutine'])) ),
+                    ),
+                    QAST::Op.new( :op('usecapture') )
+                ),
+                QAST::Op.new(
+                    :op('callmethod'), :name('dispatch'),
+                    QAST::Op.new( :op('getcodeobj'), QAST::Op.new( :op('curcode') ) ),
+                    QAST::Op.new( :op('usecapture') )
+                )
             ),
             QAST::Op.new( :op('usecapture') )
         ));
@@ -1338,9 +1350,21 @@ class NQP::Actions is HLL::Actions {
             QAST::Op.new(
                 :op('invokewithcapture'),
                 QAST::Op.new(
-                    :op('callmethod'), :name('dispatch'),
-                    QAST::Var.new( :name('&*CURRENT_DISPATCHER'), :scope('lexical') ),
-                    QAST::Var.new( :name($dc_name), :scope('local') )
+                    :op('ifnull'),
+                    QAST::Op.new(
+                        :op('multicachefind'),
+                        QAST::Var.new(
+                            :name('$!dispatch_cache'), :scope('attribute'),
+                            QAST::Var.new( :name('&*CURRENT_DISPATCHER'), :scope('lexical') ),
+                            QAST::WVal.new( :value($*W.find_sym(['NQPRoutine'])) ),
+                        ),
+                        QAST::Var.new( :name($dc_name), :scope('local') )
+                    ),
+                    QAST::Op.new(
+                        :op('callmethod'), :name('dispatch'),
+                        QAST::Var.new( :name('&*CURRENT_DISPATCHER'), :scope('lexical') ),
+                        QAST::Var.new( :name($dc_name), :scope('local') )
+                    )
                 ),
                 QAST::Var.new( :name($dc_name), :scope('local') )
             ));

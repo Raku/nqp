@@ -368,6 +368,10 @@ void add_to_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num_a
     INTVAL i, entries, ins_type;
     struct Pcc_cell * pc_positionals;
     
+    /* Make sure 6model type ID is set. */
+    if (!smo_id)
+        smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
+    
     /* If it's zero arity, just stick it in that slot. */
     if (num_args == 0) {
         cache->zero_arity = result;

@@ -1661,7 +1661,7 @@ Tries to find a candidate in the multi-dispatch cache. Returns PMCNULL if none f
 =cut
 
 */
-inline op multi_cache_find(out PMC, in PMC, in PMC, in PMC) :base_core {
+inline op multi_cache_find(out PMC, in PMC, in PMC) :base_core {
     PMC *cache_ptr = $2;
     if (cache_ptr->vtable->base_type == enum_class_Pointer) {
         PMC *result = find_in_cache(interp, (NQP_md_cache *)VTABLE_get_pointer(interp, cache_ptr),

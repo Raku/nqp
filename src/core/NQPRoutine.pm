@@ -307,10 +307,11 @@ my knowhow NQPRoutine {
 
         # Cache the result if there's a single chosen one and return it.
         if nqp::elems(@possibles) == 1 {
-            # XXX TODO
-            # add_to_cache(interp, disp_cache, capture, num_args, possibles[0]->sub);
-            
-            @possibles[0]<sub>
+            my $result := @possibles[0]<sub>;
+            pir::nqp_disable_sc_write_barrier__v();
+            $!dispatch_cache := nqp::multicacheadd($!dispatch_cache, $capture, $result);
+            pir::nqp_enable_sc_write_barrier__v();
+            $result
         }
         elsif nqp::elems(@possibles) == 0 {
             # XXX Include possible candidate signatures.
