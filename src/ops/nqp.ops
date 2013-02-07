@@ -1563,52 +1563,6 @@ inline op repr_box_num(out PMC, in NUM, invar PMC) :base_core {
             "Can only use repr_box_num with a SixModelObject as the box target");
 }
 
-/*
-
-=item multi_dispatch_over_lexical_candidates()
-
-Entry point to multi-dispatch over the current dispatchee list.
-
-=cut
-
-*/
-inline op multi_dispatch_over_lexical_candidates(out PMC) :base_core {
-    INTVAL done = 0;
-    PMC *cur_ctx = CURRENT_CONTEXT(interp);
-    while (!PMC_IS_NULL(cur_ctx)) {
-        Parrot_Context *ctx_struct = CONTEXT_STRUCT(cur_ctx);
-        if (ctx_struct->current_sub->vtable->base_type == enum_class_Sub &&
-                PARROT_SUB(ctx_struct->current_sub)->multi_signature->vtable->base_type == smo_id &&
-                !PMC_IS_NULL(((NQP_Routine *)PMC_data(PARROT_SUB(ctx_struct->current_sub)->multi_signature))->dispatchees)) {
-            /* Found a dispatcher. Enter the multi-dispatcher to find a the
-             * best candidate, if any. */
-            PMC *chosen = nqp_multi_dispatch(interp, ctx_struct->current_sub, cur_ctx);
-            if (!PMC_IS_NULL(chosen)) {
-                /* Invoke the chosen candidate using a copy of the original args. */
-                PMC *arg_copy = VTABLE_clone(interp, cur_ctx);
-                PMC *result;
-                PMC *prev_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
-                Parrot_pcc_invoke_from_sig_object(interp, chosen, arg_copy);
-                result = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
-                Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), prev_ctx);
-                $1 = VTABLE_get_pmc_keyed_int(interp, result, 0);
-            }
-            else {
-                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                        "Multiple dispatcher returned a null candidate.");
-            }
-            done = 1;
-            break;
-        }
-        cur_ctx = ctx_struct->outer_ctx;
-    }
-    if (!done)
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "multi_dispatch_over_lexical_candidates was unable to find a candidate list (probable sub: %Ss)",
-            VTABLE_get_string(interp, CONTEXT_STRUCT(CURRENT_CONTEXT(interp))->current_sub));
-}
-
-
 
 /*
 
@@ -1671,25 +1625,6 @@ inline op multi_cache_find(out PMC, in PMC, in PMC) :base_core {
     else {
         $1 = PMCNULL;
     }
-}
-
-/*
-
-=item set_sub_multisig()
-
-Sets a sub's multi_signature. $1 is the sub, $2 is the signature object.
-
-=cut
-
-*/
-inline op set_sub_multisig(invar PMC, invar PMC) :base_core {
-    if ($1->vtable->base_type == enum_class_Sub) {
-        SETATTR_Sub_multi_signature(interp, $1, $2);
-        PARROT_GC_WRITE_BARRIER(interp, $1);
-    }
-    else
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Can only use set_sub_multisig if first operand is a Sub.");
 }
 
 
@@ -2831,17 +2766,4 @@ inline op nqp_fresh_stub(out PMC, invar PMC) :base_core {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "nqp_fresh_sub can only operate on a Parrot Sub");
     }
-}
-
-/*
-
-=item nqp_set_nqpmu
-
-Sets the NQPMu.
-
-=cut
-
-*/
-inline op nqp_set_nqpmu(invar PMC) :base_core {
-    nqp_set_nqpmu($1);
 }

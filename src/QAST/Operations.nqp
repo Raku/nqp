@@ -1056,8 +1056,6 @@ QAST::Operations.add_core_op('savecapture', -> $qastcomp, $op {
     $ops.result($reg);
     $ops
 });
-QAST::Operations.add_core_pirop_mapping('captueposelems', 'elements', 'IP');
-QAST::Operations.add_core_pirop_mapping('captueposarg', 'set', 'PQi');
 QAST::Operations.add_core_pirop_mapping('captureposelems', 'elements', 'IP');
 QAST::Operations.add_core_pirop_mapping('captureposarg', 'set', 'PQi');
 QAST::Operations.add_core_pirop_mapping('captureposarg_i', 'set', 'IQi');

@@ -1,21 +1,3 @@
-/* This is how an NQPRoutine looks on the inside. */
-typedef struct {
-    PMC    *st;                 /* S-table, though we don't care about that here. */
-    PMC    *sc;                 /* Serialization context, though we don't care about that here. */
-    PMC    *_do;                /* Lower-level code object. */
-    PMC    *signature;          /* Signature object. */
-    PMC    *dispatchees;        /* List of dispatchees, if any. */
-    PMC    *dispatch_cache;     /* Holder for any dispatcher cache. */
-} NQP_Routine;
-
-/* This is how an NQPSignature looks on the inside. */
-typedef struct {
-    PMC    *st;                 /* S-table, though we don't care about that here. */
-    PMC    *sc;                 /* Serialization context, though we don't care about that here. */
-    PMC    *types;              /* Set of types for arguments. */
-    PMC    *definednesses;      /* Set of definedness flags for arguments. */
-} NQP_Signature;
-
 /* Maximum positional arity we cache up to. (Good to make it a
  * power of 2.) */
 #define MD_CACHE_MAX_ARITY 4
@@ -61,7 +43,5 @@ typedef struct Pcc_cell
     INTVAL type;
 } Pcc_cell;
 
-PMC *nqp_multi_dispatch(PARROT_INTERP, PMC *dispatcher, PMC *capture);
-void nqp_set_nqpmu(PMC *nqpmu);
 void add_to_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num_args, PMC *result);
 PMC * find_in_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num_args);
