@@ -1064,6 +1064,7 @@ QAST::Operations.add_core_pirop_mapping('captureposarg_i', 'set', 'IQi');
 QAST::Operations.add_core_pirop_mapping('captureposarg_n', 'set', 'NQi');
 QAST::Operations.add_core_pirop_mapping('captureposarg_s', 'set', 'SQi');
 QAST::Operations.add_core_pirop_mapping('captureposprimspec', 'captureposprimspec', 'IPi');
+QAST::Operations.add_core_pirop_mapping('invokewithcapture', 'invoke_with_capture', 'PPP');
 
 # Exception handling/munging.
 my $exc_exclude := 0;

@@ -1608,6 +1608,28 @@ inline op multi_dispatch_over_lexical_candidates(out PMC) :base_core {
             VTABLE_get_string(interp, CONTEXT_STRUCT(CURRENT_CONTEXT(interp))->current_sub));
 }
 
+
+
+/*
+
+=item invoke_with_capture()
+
+Invokes the specified target with the specified capture.
+
+=cut
+
+*/
+inline op invoke_with_capture(out PMC, in PMC, in PMC) :base_core {
+    PMC *arg_copy = VTABLE_clone(interp, $3);
+    PMC *result;
+    PMC *prev_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    Parrot_pcc_invoke_from_sig_object(interp, $2, arg_copy);
+    result = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), prev_ctx);
+    $1 = VTABLE_get_pmc_keyed_int(interp, result, 0);
+}
+
+
 /*
 
 =item set_sub_multisig()
