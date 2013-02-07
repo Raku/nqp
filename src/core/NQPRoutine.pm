@@ -37,24 +37,26 @@ my knowhow NQPRoutine {
         $der
     }
     
+    # Checks if one type is narrower than the other.
+    my $NQPMu;
+    method SET_NQPMU($mu) { $NQPMu := $mu }
+    sub is_narrower_type($a, $b) {
+        # If one of the types is null, then we know that's automatically
+        # wider than anything.
+        if nqp::isnull($b) && !nqp::isnull($a) { 1 }
+        elsif nqp::isnull($a) && nqp::eqaddr($b, $NQPMu) { 1 }
+        elsif nqp::isnull($a) || nqp::isnull($b) { 0 }
+        else { nqp::istype($a, $b) }
+    }
+    
     # Sorts the dispatchees. Puts nulls between groups that are of equal weight.
     # The most specific group comes first.
     my $SLURPY_ARITY      := nqp::bitshiftl_i(1, 30);
     my $EDGE_REMOVAL_TODO := -1;
     my $EDGE_REMOVED      := -2;
-    my $NQPMu;
-    method SET_NQPMU($mu) { $NQPMu := $mu }
-    method sort_dispatchees() {
-        # Checks if one type is narrower than the other.
-        sub is_narrower_type($a, $b) {
-            # If one of the types is null, then we know that's automatically
-            # wider than anything.
-            if nqp::isnull($b) && !nqp::isnull($a) { 1 }
-            elsif nqp::isnull($a) && nqp::eqaddr($b, $NQPMu) { 1 }
-            elsif nqp::isnull($a) || nqp::isnull($b) { 0 }
-            else { nqp::istype($a, $b) }
-        }
-        
+    my $DEFINED_ONLY      := 1;
+    my $UNDEFINED_ONLY    := 2;
+    method sort_dispatchees() {        
         # Takes two candidates and determines if the first one is narrower than the
         # second. Returns a true value if they are.
         sub is_narrower(%a, %b) {
@@ -210,8 +212,109 @@ my knowhow NQPRoutine {
             # Add gap between groups.
             nqp::push(@result, nqp::null());
         }
+        
+        # Add final null sentinel.
+        nqp::push(@result, nqp::null());
 
         return @result;
+    }
+    
+    method dispatch($capture) {
+        # Count arguments.
+        my $num_args := nqp::captueposelems($capture);
+
+        # Get list and number of candidates, triggering a sort if there are none.
+        my @candidates := $!dispatch_order;
+        if nqp::isnull(@candidates) {
+            @candidates := $!dispatch_order := self.sort_dispatchees();
+        }
+        my $num_candidates := nqp::elems(@candidates);
+
+        # Initialize dispatcher state.
+        my @possibles;
+
+        # Go thorugh candidates.
+        my $type_mismatch;
+        my $type_check_count;
+        my $i;
+        my $cur_idx := 0;
+        my $cur_candidate;
+        while 1 {
+            $cur_candidate := @candidates[$cur_idx];
+            
+            if nqp::isnull($cur_candidate) {
+                # If we have some possible candidate(s), we're done in this loop.
+                if nqp::elems(@possibles) {
+                    last;
+                }
+
+                # Otherwise, we keep looping and looking, unless we really hit the end.
+                $cur_idx++;
+                if nqp::isnull(@candidates[$cur_idx]) {
+                    last;
+                }
+                else {
+                    next;
+                }
+            }
+
+            # Check if it's admissable by arity.
+            if $num_args < $cur_candidate<min_arity> || $num_args > $cur_candidate<max_arity> {
+                $cur_idx++;
+                next;
+            }
+
+            # Check if it's admissable by type.
+            $type_check_count := $cur_candidate<num_types> > $num_args
+                             ?? $num_args
+                             !! $cur_candidate<num_types>;
+            $type_mismatch := 0;
+            $i := 0;
+            while $i < $type_check_count {
+                my $param := nqp::captueposarg($capture, $i);
+                my $param_type := pir::what_or_null__PP($param); # Parrot hack; just .WHAT on JVM etc.
+                my $type_obj := $cur_candidate<types>[$i];
+                my $definedness := $cur_candidate<definednesses>[$i];
+                unless nqp::eqaddr($param_type, $type_obj) || is_narrower_type($param_type, $type_obj) {
+                    $type_mismatch := 1;
+                    last;
+                }
+                if $definedness {
+                    # Have a constraint on the definedness.
+                    my $defined := nqp::isnull($param_type) ?? nqp::defined($param) !! nqp::isconcrete($param);
+                    if (!$defined && $definedness == $DEFINED_ONLY) || ($defined && $definedness == $UNDEFINED_ONLY) {
+                        $type_mismatch := 1;
+                        last;
+                    }
+                }
+                $i++;
+            }
+
+            if $type_mismatch {
+                $cur_idx++;
+                next;
+            }
+
+            # If we get here, it's an admissable candidate; add to list. */
+            nqp::push(@possibles, $cur_candidate);
+            $cur_idx++;
+        }
+
+        # Cache the result if there's a single chosen one and return it.
+        if nqp::elems(@possibles) == 1 {
+            # XXX TODO
+            # add_to_cache(interp, disp_cache, capture, num_args, possibles[0]->sub);
+            
+            @possibles[0]<sub>
+        }
+        elsif nqp::elems(@possibles) == 0 {
+            # XXX Include possible candidate signatures.
+            nqp::die("No applicable candidates found to dispatch to for '" ~ self.name ~ "'.")
+        }
+        else {
+            # XXX Include ambiguous candidate signatures.
+            nqp::die("Ambiguous dispatch to multi '" ~ self.name ~ "'.")
+        }
     }
     
     method clone() {

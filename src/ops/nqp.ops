@@ -420,6 +420,24 @@ inline op get_what(out PMC, invar PMC) :base_core {
 
 /*
 
+=item what_or_null(obj)
+
+Gets the WHAT for a 6model Object, returns PMCNULL otherwise.
+
+=cut
+
+*/
+inline op what_or_null(out PMC, invar PMC) :base_core {
+    PMC *var = decontainerize(interp, $2);
+    if (var->vtable->base_type == smo_id)
+        $1 = STABLE(var)->WHAT;
+    else
+        $1 = PMCNULL;
+}
+
+
+/*
+
 =item get_who(obj)
 
 Gets the WHO for a 6model Object.
