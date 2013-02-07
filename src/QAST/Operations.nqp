@@ -1058,10 +1058,12 @@ QAST::Operations.add_core_op('savecapture', -> $qastcomp, $op {
 });
 QAST::Operations.add_core_pirop_mapping('captueposelems', 'elements', 'IP');
 QAST::Operations.add_core_pirop_mapping('captueposarg', 'set', 'PQi');
-QAST::Operations.add_core_pirop_mapping('captueposarg_i', 'set', 'IQi');
-QAST::Operations.add_core_pirop_mapping('captueposarg_n', 'set', 'NQi');
-QAST::Operations.add_core_pirop_mapping('captueposarg_s', 'set', 'SQi');
-QAST::Operations.add_core_pirop_mapping('captueposprimspec', 'captueposprimspec', 'IPi');
+QAST::Operations.add_core_pirop_mapping('captureposelems', 'elements', 'IP');
+QAST::Operations.add_core_pirop_mapping('captureposarg', 'set', 'PQi');
+QAST::Operations.add_core_pirop_mapping('captureposarg_i', 'set', 'IQi');
+QAST::Operations.add_core_pirop_mapping('captureposarg_n', 'set', 'NQi');
+QAST::Operations.add_core_pirop_mapping('captureposarg_s', 'set', 'SQi');
+QAST::Operations.add_core_pirop_mapping('captureposprimspec', 'captureposprimspec', 'IPi');
 
 # Exception handling/munging.
 my $exc_exclude := 0;
