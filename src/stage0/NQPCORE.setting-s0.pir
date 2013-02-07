@@ -15,54 +15,54 @@
 .loadlib "io_ops"
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_53_1360250807.22") :anon :lex
+.sub "" :subid("cuid_53_1360256342.611") :anon :lex
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
     .param pmc _lex_param_0 :slurpy 
-    .const 'Sub' $P5063 = 'cuid_52_1360250807.22' 
+    .const 'Sub' $P5063 = 'cuid_52_1360256342.611' 
     capture_lex $P5063 
-    .const 'Sub' $P5063 = 'cuid_54_1360250807.22' 
+    .const 'Sub' $P5063 = 'cuid_54_1360256342.611' 
     capture_lex $P5063 
-    .const 'Sub' $P5063 = 'cuid_55_1360250807.22' 
+    .const 'Sub' $P5063 = 'cuid_55_1360256342.611' 
     capture_lex $P5063 
-    .const 'Sub' $P5063 = 'cuid_56_1360250807.22' 
+    .const 'Sub' $P5063 = 'cuid_56_1360256342.611' 
     capture_lex $P5063 
-    .const 'Sub' $P5063 = 'cuid_58_1360250807.22' 
+    .const 'Sub' $P5063 = 'cuid_58_1360256342.611' 
     capture_lex $P5063 
-    .const 'Sub' $P5063 = 'cuid_59_1360250807.22' 
+    .const 'Sub' $P5063 = 'cuid_59_1360256342.611' 
     capture_lex $P5063 
-    .const 'Sub' $P5063 = 'cuid_61_1360250807.22' 
+    .const 'Sub' $P5063 = 'cuid_61_1360256342.611' 
     capture_lex $P5063 
-    .const 'Sub' $P5063 = 'cuid_63_1360250807.22' 
+    .const 'Sub' $P5063 = 'cuid_63_1360256342.611' 
     capture_lex $P5063 
-    .const 'Sub' $P5063 = 'cuid_65_1360250807.22' 
+    .const 'Sub' $P5063 = 'cuid_65_1360256342.611' 
     capture_lex $P5063 
-    .const 'Sub' $P5063 = 'cuid_66_1360250807.22' 
+    .const 'Sub' $P5063 = 'cuid_66_1360256342.611' 
     capture_lex $P5063 
-    .const 'Sub' $P5063 = 'cuid_67_1360250807.22' 
+    .const 'Sub' $P5063 = 'cuid_67_1360256342.611' 
     capture_lex $P5063 
-    .const 'Sub' $P5063 = 'cuid_68_1360250807.22' 
+    .const 'Sub' $P5063 = 'cuid_68_1360256342.611' 
     capture_lex $P5063 
-    .const 'Sub' $P5063 = 'cuid_69_1360250807.22' 
+    .const 'Sub' $P5063 = 'cuid_69_1360256342.611' 
     capture_lex $P5063 
-    .const 'Sub' $P5063 = 'cuid_70_1360250807.22' 
+    .const 'Sub' $P5063 = 'cuid_70_1360256342.611' 
     capture_lex $P5063 
-    .const 'Sub' $P5063 = 'cuid_71_1360250807.22' 
+    .const 'Sub' $P5063 = 'cuid_71_1360256342.611' 
     capture_lex $P5063 
-    .const 'Sub' $P5063 = 'cuid_72_1360250807.22' 
+    .const 'Sub' $P5063 = 'cuid_72_1360256342.611' 
     capture_lex $P5063 
-    .const 'Sub' $P5063 = 'cuid_73_1360250807.22' 
+    .const 'Sub' $P5063 = 'cuid_73_1360256342.611' 
     capture_lex $P5063 
-    .const 'Sub' $P5063 = 'cuid_74_1360250807.22' 
+    .const 'Sub' $P5063 = 'cuid_74_1360256342.611' 
     capture_lex $P5063 
-    .const 'Sub' $P5063 = 'cuid_76_1360250807.22' 
+    .const 'Sub' $P5063 = 'cuid_76_1360256342.611' 
     capture_lex $P5063 
-    .const 'Sub' $P5063 = 'cuid_85_1360250807.22' 
+    .const 'Sub' $P5063 = 'cuid_86_1360256342.611' 
     capture_lex $P5063 
-    .const 'Sub' $P5063 = 'cuid_86_1360250807.22' 
+    .const 'Sub' $P5063 = 'cuid_87_1360256342.611' 
     capture_lex $P5063 
-    .const 'Sub' $P5063 = 'cuid_88_1360250807.22' 
+    .const 'Sub' $P5063 = 'cuid_89_1360256342.611' 
     capture_lex $P5063 
-    .const 'Sub' $P5063 = 'cuid_95_1360250807.22' 
+    .const 'Sub' $P5063 = 'cuid_96_1360256342.611' 
     capture_lex $P5063 
     .lex "GLOBALish", $P101 
     .lex "$?PACKAGE", $P102 
@@ -94,112 +94,112 @@
     .lex "&skip", $P128 
     .lex "@ARGS", _lex_param_0 
     .local pmc ctxsave 
-    .const 'Sub' $P5001 = 'cuid_52_1360250807.22' 
+    .const 'Sub' $P5001 = 'cuid_52_1360256342.611' 
     capture_lex $P5001
     set $P112, $P5001
-    .const 'Sub' $P5002 = 'cuid_54_1360250807.22' 
+    .const 'Sub' $P5002 = 'cuid_54_1360256342.611' 
     capture_lex $P5002
     set $P113, $P5002
-    .const 'Sub' $P5003 = 'cuid_55_1360250807.22' 
+    .const 'Sub' $P5003 = 'cuid_55_1360256342.611' 
     capture_lex $P5003
     set $P114, $P5003
-    .const 'Sub' $P5004 = 'cuid_56_1360250807.22' 
+    .const 'Sub' $P5004 = 'cuid_56_1360256342.611' 
     capture_lex $P5004
     set $P115, $P5004
-    .const 'Sub' $P5005 = 'cuid_58_1360250807.22' 
+    .const 'Sub' $P5005 = 'cuid_58_1360256342.611' 
     capture_lex $P5005
     set $P116, $P5005
-    .const 'Sub' $P5006 = 'cuid_59_1360250807.22' 
+    .const 'Sub' $P5006 = 'cuid_59_1360256342.611' 
     capture_lex $P5006
     set $P117, $P5006
-    .const 'Sub' $P5007 = 'cuid_61_1360250807.22' 
+    .const 'Sub' $P5007 = 'cuid_61_1360256342.611' 
     capture_lex $P5007
     set $P118, $P5007
-    .const 'Sub' $P5008 = 'cuid_63_1360250807.22' 
+    .const 'Sub' $P5008 = 'cuid_63_1360256342.611' 
     capture_lex $P5008
     set $P119, $P5008
-    .const 'Sub' $P5009 = 'cuid_65_1360250807.22' 
+    .const 'Sub' $P5009 = 'cuid_65_1360256342.611' 
     capture_lex $P5009
     set $P120, $P5009
-    .const 'Sub' $P5010 = 'cuid_66_1360250807.22' 
+    .const 'Sub' $P5010 = 'cuid_66_1360256342.611' 
     capture_lex $P5010
     set $P121, $P5010
-    nqp_get_sc_object $P5011, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5011, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P122, $P5011
-    nqp_get_sc_object $P5012, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5012, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P123, $P5012
-    nqp_get_sc_object $P5013, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5013, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P124, $P5013
-    .const 'Sub' $P5014 = 'cuid_67_1360250807.22' 
+    .const 'Sub' $P5014 = 'cuid_67_1360256342.611' 
     capture_lex $P5014
     set $P125, $P5014
-    .const 'Sub' $P5015 = 'cuid_68_1360250807.22' 
+    .const 'Sub' $P5015 = 'cuid_68_1360256342.611' 
     capture_lex $P5015
     set $P126, $P5015
-    .const 'Sub' $P5016 = 'cuid_69_1360250807.22' 
+    .const 'Sub' $P5016 = 'cuid_69_1360256342.611' 
     capture_lex $P5016
     set $P127, $P5016
-    .const 'Sub' $P5017 = 'cuid_70_1360250807.22' 
+    .const 'Sub' $P5017 = 'cuid_70_1360256342.611' 
     capture_lex $P5017
     set $P128, $P5017
 .annotate 'line', 1
-    .const 'Sub' $P5018 = 'cuid_71_1360250807.22' 
+    .const 'Sub' $P5018 = 'cuid_71_1360256342.611' 
     capture_lex $P5018
     $P5019 = $P5018()
-    .const 'Sub' $P5020 = 'cuid_72_1360250807.22' 
+    .const 'Sub' $P5020 = 'cuid_72_1360256342.611' 
     capture_lex $P5020
     $P5021 = $P5020()
-    .const 'Sub' $P5022 = 'cuid_73_1360250807.22' 
+    .const 'Sub' $P5022 = 'cuid_73_1360256342.611' 
     capture_lex $P5022
     $P5023 = $P5022()
-    .const 'Sub' $P5024 = 'cuid_74_1360250807.22' 
+    .const 'Sub' $P5024 = 'cuid_74_1360256342.611' 
     capture_lex $P5024
     $P5025 = $P5024()
-    .const 'Sub' $P5026 = 'cuid_76_1360250807.22' 
+    .const 'Sub' $P5026 = 'cuid_76_1360256342.611' 
     capture_lex $P5026
     $P5027 = $P5026()
-    nqp_get_sc_object $P5028, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
-    nqp_get_sc_object $P5029, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5028, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
+    nqp_get_sc_object $P5029, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     null $P5030
     set_invocation_spec $P5028, $P5029, "$!do", $P5030
-    nqp_get_sc_object $P5031, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5031, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     null $P5032
     set_boolification_spec $P5031, 5, $P5032
-    nqp_get_sc_object $P5033, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5033, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     new $P5034, 'Hash'
     new $P5035, 'ResizablePMCArray'
-    nqp_get_sc_object $P5036, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5036, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     push $P5035, $P5036
     box $P5037, "$!do"
     push $P5035, $P5037
     set $P5034["get_string"], $P5035
     stable_publish_vtable_handler_mapping $P5033, $P5034
-    .const 'Sub' $P5038 = 'cuid_85_1360250807.22' 
+    .const 'Sub' $P5038 = 'cuid_86_1360256342.611' 
     capture_lex $P5038
     $P5039 = $P5038()
-    .const 'Sub' $P5040 = 'cuid_86_1360250807.22' 
+    .const 'Sub' $P5040 = 'cuid_87_1360256342.611' 
     capture_lex $P5040
     $P5041 = $P5040()
-    nqp_get_sc_object $P5042, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
-    nqp_get_sc_object $P5043, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5042, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
+    nqp_get_sc_object $P5043, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     null $P5044
     set_invocation_spec $P5042, $P5043, "$!do", $P5044
-    nqp_get_sc_object $P5045, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5045, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     null $P5046
     set_boolification_spec $P5045, 5, $P5046
-    nqp_get_sc_object $P5047, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5047, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     new $P5048, 'Hash'
     new $P5049, 'ResizablePMCArray'
-    nqp_get_sc_object $P5050, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5050, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     push $P5049, $P5050
     box $P5051, "$!do"
     push $P5049, $P5051
     set $P5048["get_string"], $P5049
     stable_publish_vtable_handler_mapping $P5047, $P5048
-    .const 'Sub' $P5052 = 'cuid_88_1360250807.22' 
+    .const 'Sub' $P5052 = 'cuid_89_1360256342.611' 
     capture_lex $P5052
     $P5053 = $P5052()
-    .const 'Sub' $P5054 = 'cuid_95_1360250807.22' 
+    .const 'Sub' $P5054 = 'cuid_96_1360256342.611' 
     capture_lex $P5054
     $P5055 = $P5054()
     box $P5056, 0
@@ -211,22 +211,22 @@
     find_dynamic_lex $P5059, "$*CTXSAVE"
     set ctxsave, $P5059
     isnull $I5001, ctxsave
-    if $I5001 goto unless105_end337 
+    if $I5001 goto unless111_end343 
     can $I5002, ctxsave, "ctxsave"
     box $P5062, $I5002
     set $P5061, $P5062
-    unless $I5002 goto if106_end339 
+    unless $I5002 goto if112_end345 
     $P5060 = ctxsave."ctxsave"()
     set $P5061, $P5060
-  if106_end339:
-  unless105_end337:
+  if112_end345:
+  unless111_end343:
     .return () 
 .end
 .HLL "nqp"
 .namespace []
-.sub "open" :subid("cuid_52_1360250807.22") :anon :lex :outer("cuid_53_1360250807.22")
+.sub "open" :subid("cuid_52_1360256342.611") :anon :lex :outer("cuid_53_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 669
+.annotate 'line', 670
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 :named("r") :optional 
     .param int haz_param_1 :opt_flag 
@@ -237,19 +237,19 @@
     .param pmc _lex_param_4 :named("bin") :optional 
     .param int haz_param_4 :opt_flag 
     if haz_param_1, default16
-    nqp_get_sc_object $P5005, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5005, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set _lex_param_1, $P5005
   default16:
     if haz_param_2, default17
-    nqp_get_sc_object $P5006, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5006, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set _lex_param_2, $P5006
   default17:
     if haz_param_3, default18
-    nqp_get_sc_object $P5007, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5007, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set _lex_param_3, $P5007
   default18:
     if haz_param_4, default19
-    nqp_get_sc_object $P5008, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5008, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set _lex_param_4, $P5008
   default19:
     .lex "$mode", $P101 
@@ -259,9 +259,9 @@
     .lex "$w", _lex_param_2 
     .lex "$a", _lex_param_3 
     .lex "$bin", _lex_param_4 
-    nqp_get_sc_object $P5001, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5001, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P101, $P5001
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P102, $P5002
     unless _lex_param_2 goto if10_else10 
     set $S5002, "w"
@@ -279,9 +279,9 @@
     set $P101, $P5003
     new $P5004, "FileHandle"
     set $P102, $P5004
-.annotate 'line', 672
-    $P102."open"(_lex_param_0, $P101)
 .annotate 'line', 673
+    $P102."open"(_lex_param_0, $P101)
+.annotate 'line', 674
     unless _lex_param_4 goto if12_else14 
     set $S5003, "binary"
     goto if12_end15
@@ -293,66 +293,66 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "close" :subid("cuid_54_1360250807.22") :anon :lex :outer("cuid_53_1360250807.22")
+.sub "close" :subid("cuid_54_1360256342.611") :anon :lex :outer("cuid_53_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 681
+.annotate 'line', 682
     .param pmc _lex_param_0 
     .lex "$handle", _lex_param_0 
-.annotate 'line', 682
+.annotate 'line', 683
     $P5001 = _lex_param_0."close"()
     .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "slurp" :subid("cuid_55_1360250807.22") :anon :lex :outer("cuid_53_1360250807.22")
+.sub "slurp" :subid("cuid_55_1360256342.611") :anon :lex :outer("cuid_53_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 689
+.annotate 'line', 690
     .param pmc _lex_param_0 
     .lex "$handle", $P101 
     .lex "$contents", $P102 
     .lex "$filename", _lex_param_0 
-    nqp_get_sc_object $P5001, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5001, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P101, $P5001
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P102, $P5002
-.annotate 'line', 690
+.annotate 'line', 691
     $P5003 = "&open"(_lex_param_0, 1 :named("r"))
     set $P101, $P5003
-.annotate 'line', 691
+.annotate 'line', 692
     $P5004 = $P101."readall"()
     set $P102, $P5004
-.annotate 'line', 692
+.annotate 'line', 693
     $P101."close"()
     .return ($P102) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "spew" :subid("cuid_56_1360250807.22") :anon :lex :outer("cuid_53_1360250807.22")
+.sub "spew" :subid("cuid_56_1360256342.611") :anon :lex :outer("cuid_53_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 701
+.annotate 'line', 702
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
     .lex "$handle", $P101 
     .lex "$filename", _lex_param_0 
     .lex "$contents", _lex_param_1 
-    nqp_get_sc_object $P5001, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5001, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P101, $P5001
-.annotate 'line', 702
+.annotate 'line', 703
     $P5002 = "&open"(_lex_param_0, 1 :named("w"))
     set $P101, $P5002
-.annotate 'line', 703
-    $P101."print"(_lex_param_1)
 .annotate 'line', 704
+    $P101."print"(_lex_param_1)
+.annotate 'line', 705
     $P5003 = $P101."close"()
     .return ($P5003) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "print" :subid("cuid_58_1360250807.22") :anon :lex :outer("cuid_53_1360250807.22")
+.sub "print" :subid("cuid_58_1360256342.611") :anon :lex :outer("cuid_53_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 707
+.annotate 'line', 708
     .param pmc _lex_param_0 :slurpy 
-    .const 'Sub' $P5006 = 'cuid_57_1360250807.22' 
+    .const 'Sub' $P5006 = 'cuid_57_1360256342.611' 
     capture_lex $P5006 
     .lex "@args", _lex_param_0 
     set $P5001, _lex_param_0
@@ -361,7 +361,7 @@
     unless $P5003, for_done22
     shift $P5005, $P5003
   for_redo21:
-    .const 'Sub' $P5004 = 'cuid_57_1360250807.22' 
+    .const 'Sub' $P5004 = 'cuid_57_1360256342.611' 
     capture_lex $P5004
     $P5001 = $P5004($P5005)
     goto for_next20
@@ -370,9 +370,9 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_57_1360250807.22") :anon :lex :outer("cuid_58_1360250807.22")
+.sub "" :subid("cuid_57_1360256342.611") :anon :lex :outer("cuid_58_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 708
+.annotate 'line', 709
     .param pmc _lex_param_0 
     .lex "$_", _lex_param_0 
     set $S5001, _lex_param_0
@@ -381,23 +381,23 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "say" :subid("cuid_59_1360250807.22") :anon :lex :outer("cuid_53_1360250807.22")
+.sub "say" :subid("cuid_59_1360256342.611") :anon :lex :outer("cuid_53_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 714
+.annotate 'line', 715
     .param pmc _lex_param_0 :slurpy 
     .lex "@args", _lex_param_0 
-.annotate 'line', 715
+.annotate 'line', 716
     $P5001 = "&print"(_lex_param_0 :flat, "\n")
     .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "join" :subid("cuid_61_1360250807.22") :anon :lex :outer("cuid_53_1360250807.22")
+.sub "join" :subid("cuid_61_1360256342.611") :anon :lex :outer("cuid_53_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 718
+.annotate 'line', 719
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
-    .const 'Sub' $P5007 = 'cuid_60_1360250807.22' 
+    .const 'Sub' $P5007 = 'cuid_60_1360256342.611' 
     capture_lex $P5007 
     .lex "@strs", $P101 
     .lex "$delim", _lex_param_0 
@@ -410,7 +410,7 @@
     unless $P5004, for_done25
     shift $P5006, $P5004
   for_redo24:
-    .const 'Sub' $P5005 = 'cuid_60_1360250807.22' 
+    .const 'Sub' $P5005 = 'cuid_60_1360256342.611' 
     capture_lex $P5005
     $P5002 = $P5005($P5006)
     goto for_next23
@@ -421,9 +421,9 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_60_1360250807.22") :anon :lex :outer("cuid_61_1360250807.22")
+.sub "" :subid("cuid_60_1360256342.611") :anon :lex :outer("cuid_61_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 720
+.annotate 'line', 721
     .param pmc _lex_param_0 
     .lex "$_", _lex_param_0 
     find_lex $P5001, "@strs"
@@ -434,36 +434,36 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "match" :subid("cuid_63_1360250807.22") :anon :lex :outer("cuid_53_1360250807.22")
+.sub "match" :subid("cuid_63_1360256342.611") :anon :lex :outer("cuid_53_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 738
+.annotate 'line', 739
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
     .param pmc _lex_param_2 :named("global") :optional 
     .param int haz_param_5 :opt_flag 
-    .const 'Sub' $P5007 = 'cuid_62_1360250807.22' 
+    .const 'Sub' $P5007 = 'cuid_62_1360256342.611' 
     capture_lex $P5007 
     if haz_param_5, default33
-    nqp_get_sc_object $P5006, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5006, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set _lex_param_2, $P5006
   default33:
     .lex "$match", $P101 
     .lex "$text", _lex_param_0 
     .lex "$regex", _lex_param_1 
     .lex "$global", _lex_param_2 
-    nqp_get_sc_object $P5001, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5001, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P101, $P5001
-.annotate 'line', 739
+.annotate 'line', 740
     $P5002 = _lex_param_1."ACCEPTS"(_lex_param_0)
     set $P101, $P5002
     unless _lex_param_2 goto if13_else26 
-    .const 'Sub' $P5003 = 'cuid_62_1360250807.22' 
+    .const 'Sub' $P5003 = 'cuid_62_1360256342.611' 
     capture_lex $P5003
     $P5004 = $P5003()
     set $P5005, $P5004
     goto if13_end27
   if13_else26:
-.annotate 'line', 748
+.annotate 'line', 749
 
     set $P5005, $P101
   if13_end27:
@@ -471,9 +471,9 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_62_1360250807.22") :anon :lex :outer("cuid_63_1360250807.22")
+.sub "" :subid("cuid_62_1360256342.611") :anon :lex :outer("cuid_63_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 740
+.annotate 'line', 741
     .lex "@matches", $P101 
     new $P5001, 'ResizablePMCArray'
     set $P101, $P5001
@@ -482,11 +482,11 @@
     set $P5011, $P5002
     unless $P5002 goto while14_done32 
   while14_redo30:
-.annotate 'line', 742
 .annotate 'line', 743
+.annotate 'line', 744
     find_lex $P5003, "$match"
     $P101."push"($P5003)
-.annotate 'line', 744
+.annotate 'line', 745
     find_lex $P5004, "$match"
     $P5005 = $P5004."CURSOR"()
     find_lex $P5006, "$text"
@@ -502,18 +502,18 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "subst" :subid("cuid_65_1360250807.22") :anon :lex :outer("cuid_53_1360250807.22")
+.sub "subst" :subid("cuid_65_1360256342.611") :anon :lex :outer("cuid_53_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 760
+.annotate 'line', 761
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
     .param pmc _lex_param_2 
     .param pmc _lex_param_3 :named("global") :optional 
     .param int haz_param_6 :opt_flag 
-    .const 'Sub' $P5020 = 'cuid_64_1360250807.22' 
+    .const 'Sub' $P5020 = 'cuid_64_1360256342.611' 
     capture_lex $P5020 
     if haz_param_6, default47
-    nqp_get_sc_object $P5019, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5019, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set _lex_param_3, $P5019
   default47:
     .lex "@matches", $P101 
@@ -527,22 +527,22 @@
     .lex "$global", _lex_param_3 
     new $P5001, 'ResizablePMCArray'
     set $P101, $P5001
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P102, $P5002
-    nqp_get_sc_object $P5003, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5003, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P103, $P5003
-    nqp_get_sc_object $P5004, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5004, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P104, $P5004
-    nqp_get_sc_object $P5005, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5005, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P105, $P5005
     unless _lex_param_3 goto if15_else34 
-.annotate 'line', 761
+.annotate 'line', 762
     $P5006 = "&match"(_lex_param_0, _lex_param_1, 1 :named("global"))
     set $P5009, $P5006
     goto if15_end35
   if15_else34:
     new $P5007, 'ResizablePMCArray'
-.annotate 'line', 762
+.annotate 'line', 763
     $P5008 = _lex_param_1."ACCEPTS"(_lex_param_0)
     push $P5007, $P5008
     set $P5009, $P5007
@@ -561,7 +561,7 @@
     unless $P5015, for_done44
     shift $P5017, $P5015
   for_redo43:
-    .const 'Sub' $P5016 = 'cuid_64_1360250807.22' 
+    .const 'Sub' $P5016 = 'cuid_64_1360256342.611' 
     capture_lex $P5016
     $P5013 = $P5016($P5017)
     goto for_next42
@@ -585,15 +585,15 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_64_1360250807.22") :anon :lex :outer("cuid_65_1360250807.22")
+.sub "" :subid("cuid_64_1360256342.611") :anon :lex :outer("cuid_65_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 767
+.annotate 'line', 768
     .param pmc _lex_param_0 
     .lex "$match", _lex_param_0 
     set $P5015, _lex_param_0
     unless _lex_param_0 goto if16_end37 
-.annotate 'line', 768
-.annotate 'line', 770
+.annotate 'line', 769
+.annotate 'line', 771
     $P5001 = _lex_param_0."from"()
     set $N5001, $P5001
     find_lex $P5002, "$offset"
@@ -605,7 +605,7 @@
     set $S5002, $P5004
     find_lex $P5005, "$offset"
     set $I5002, $P5005
-.annotate 'line', 769
+.annotate 'line', 770
     $P5006 = _lex_param_0."from"()
     set $N5004, $P5006
     find_lex $P5007, "$offset"
@@ -618,7 +618,7 @@
     find_lex $P5008, "$result"
     find_lex $P5009, "$is_code"
     unless $P5009 goto if18_else40 
-.annotate 'line', 771
+.annotate 'line', 772
     find_lex $P5010, "$repl"
     $P5011 = $P5010(_lex_param_0)
     set $P5013, $P5011
@@ -629,7 +629,7 @@
   if18_end41:
     set $S5003, $P5013
     push $P5008, $S5003
-.annotate 'line', 772
+.annotate 'line', 773
     $P5014 = _lex_param_0."to"()
     store_lex "$offset", $P5014
     set $P5015, $P5014
@@ -638,21 +638,21 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "hash" :subid("cuid_66_1360250807.22") :anon :lex :outer("cuid_53_1360250807.22")
+.sub "hash" :subid("cuid_66_1360256342.611") :anon :lex :outer("cuid_53_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 786
+.annotate 'line', 787
     .param pmc _lex_param_0 :slurpy :named 
     .lex "%new", _lex_param_0 
     .return (_lex_param_0) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "plan" :subid("cuid_67_1360250807.22") :anon :lex :outer("cuid_53_1360250807.22")
+.sub "plan" :subid("cuid_67_1360256342.611") :anon :lex :outer("cuid_53_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 795
+.annotate 'line', 796
     .param pmc _lex_param_0 
     .lex "$quantity", _lex_param_0 
-.annotate 'line', 796
+.annotate 'line', 797
     set $S5002, _lex_param_0
     concat $S5001, "1..", $S5002
     $P5001 = "&say"($S5001)
@@ -660,14 +660,14 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "ok" :subid("cuid_68_1360250807.22") :anon :lex :outer("cuid_53_1360250807.22")
+.sub "ok" :subid("cuid_68_1360256342.611") :anon :lex :outer("cuid_53_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 799
+.annotate 'line', 800
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 :optional 
     .param int haz_param_7 :opt_flag 
     if haz_param_7, default56
-    nqp_get_sc_object $P5010, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5010, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set _lex_param_1, $P5010
   default56:
     .lex "$condition", _lex_param_0 
@@ -679,18 +679,18 @@
     box $P5002, $N5001
     store_lex "$test_counter", $P5002
     if _lex_param_0 goto unless20_end49 
-.annotate 'line', 802
 .annotate 'line', 803
+.annotate 'line', 804
     $P5003 = "&print"("not ")
   unless20_end49:
-.annotate 'line', 805
+.annotate 'line', 806
     find_lex $P5004, "$test_counter"
     set $S5002, $P5004
     concat $S5001, "ok ", $S5002
     "&print"($S5001)
     unless _lex_param_1 goto if21_end51 
-.annotate 'line', 806
 .annotate 'line', 807
+.annotate 'line', 808
     set $S5004, _lex_param_1
     concat $S5003, " - ", $S5004
     $P5005 = "&print"($S5003)
@@ -701,12 +701,12 @@
     set $N5005, $P5007
     isle $I5001, $N5004, $N5005
     unless $I5001 goto if22_end53 
-.annotate 'line', 809
 .annotate 'line', 810
+.annotate 'line', 811
     find_lex $P5008, "$todo_reason"
     $P5009 = "&print"($P5008)
   if22_end53:
-.annotate 'line', 812
+.annotate 'line', 813
     "&print"("\n")
     unless _lex_param_0 goto if23_else54 
     set $I5002, 1
@@ -718,9 +718,9 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "todo" :subid("cuid_69_1360250807.22") :anon :lex :outer("cuid_53_1360250807.22")
+.sub "todo" :subid("cuid_69_1360256342.611") :anon :lex :outer("cuid_53_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 817
+.annotate 'line', 818
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
     .lex "$reason", _lex_param_0 
@@ -739,9 +739,9 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "skip" :subid("cuid_70_1360250807.22") :anon :lex :outer("cuid_53_1360250807.22")
+.sub "skip" :subid("cuid_70_1360256342.611") :anon :lex :outer("cuid_53_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 822
+.annotate 'line', 823
     .param pmc _lex_param_0 
     .lex "$desc", _lex_param_0 
     find_lex $P5001, "$test_counter"
@@ -750,7 +750,7 @@
     add $N5001, $N5002, $N5003
     box $P5002, $N5001
     store_lex "$test_counter", $P5002
-.annotate 'line', 824
+.annotate 'line', 825
     find_lex $P5003, "$test_counter"
     set $S5005, $P5003
     concat $S5004, "ok ", $S5005
@@ -763,7 +763,7 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_71_1360250807.22") :anon :lex :outer("cuid_53_1360250807.22")
+.sub "" :subid("cuid_71_1360256342.611") :anon :lex :outer("cuid_53_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
 .annotate 'line', 12
     .lex "$?PACKAGE", $P101 
@@ -772,7 +772,7 @@
     get_who $P5003, $P101
     set $P5002, $P5003["NQPModuleHOW"]
     unless_null $P5002, fallback57
-    nqp_get_sc_object $P5006, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 0
+    nqp_get_sc_object $P5006, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 0
     get_who $P5005, $P5006
     set $P5004, $P5005["NQPModuleHOW"]
     unless_null $P5004, vivi_2458
@@ -786,7 +786,7 @@
     get_who $P5010, $P101
     set $P5009, $P5010["NQPClassHOW"]
     unless_null $P5009, fallback59
-    nqp_get_sc_object $P5013, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 0
+    nqp_get_sc_object $P5013, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 0
     get_who $P5012, $P5013
     set $P5011, $P5012["NQPClassHOW"]
     unless_null $P5011, vivi_2560
@@ -800,7 +800,7 @@
     get_who $P5017, $P101
     set $P5016, $P5017["NQPAttribute"]
     unless_null $P5016, fallback61
-    nqp_get_sc_object $P5020, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 0
+    nqp_get_sc_object $P5020, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 0
     get_who $P5019, $P5020
     set $P5018, $P5019["NQPAttribute"]
     unless_null $P5018, vivi_2662
@@ -814,7 +814,7 @@
     get_who $P5024, $P101
     set $P5023, $P5024["NQPClassHOW"]
     unless_null $P5023, fallback63
-    nqp_get_sc_object $P5027, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 0
+    nqp_get_sc_object $P5027, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 0
     get_who $P5026, $P5027
     set $P5025, $P5026["NQPClassHOW"]
     unless_null $P5025, vivi_2764
@@ -828,7 +828,7 @@
     get_who $P5031, $P101
     set $P5030, $P5031["NQPAttribute"]
     unless_null $P5030, fallback65
-    nqp_get_sc_object $P5034, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 0
+    nqp_get_sc_object $P5034, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 0
     get_who $P5033, $P5034
     set $P5032, $P5033["NQPAttribute"]
     unless_null $P5032, vivi_2866
@@ -842,7 +842,7 @@
     get_who $P5038, $P101
     set $P5037, $P5038["NQPParametricRoleHOW"]
     unless_null $P5037, fallback67
-    nqp_get_sc_object $P5041, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 0
+    nqp_get_sc_object $P5041, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 0
     get_who $P5040, $P5041
     set $P5039, $P5040["NQPParametricRoleHOW"]
     unless_null $P5039, vivi_2968
@@ -856,7 +856,7 @@
     get_who $P5045, $P101
     set $P5044, $P5045["NQPAttribute"]
     unless_null $P5044, fallback69
-    nqp_get_sc_object $P5048, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 0
+    nqp_get_sc_object $P5048, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 0
     get_who $P5047, $P5048
     set $P5046, $P5047["NQPAttribute"]
     unless_null $P5046, vivi_3070
@@ -870,7 +870,7 @@
     get_who $P5052, $P101
     set $P5051, $P5052["NQPNativeHOW"]
     unless_null $P5051, fallback71
-    nqp_get_sc_object $P5055, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 0
+    nqp_get_sc_object $P5055, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 0
     get_who $P5054, $P5055
     set $P5053, $P5054["NQPNativeHOW"]
     unless_null $P5053, vivi_3172
@@ -884,7 +884,7 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_72_1360250807.22") :anon :lex :outer("cuid_53_1360250807.22")
+.sub "" :subid("cuid_72_1360256342.611") :anon :lex :outer("cuid_53_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
 .annotate 'line', 23
     .lex "$?PACKAGE", $P101 
@@ -894,7 +894,7 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_73_1360250807.22") :anon :lex :outer("cuid_53_1360250807.22")
+.sub "" :subid("cuid_73_1360256342.611") :anon :lex :outer("cuid_53_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
 .annotate 'line', 25
     .lex "$?PACKAGE", $P101 
@@ -904,7 +904,7 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_74_1360250807.22") :anon :lex :outer("cuid_53_1360250807.22")
+.sub "" :subid("cuid_74_1360256342.611") :anon :lex :outer("cuid_53_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
 .annotate 'line', 27
     .lex "$?PACKAGE", $P101 
@@ -914,30 +914,30 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_76_1360250807.22") :anon :lex :outer("cuid_53_1360250807.22")
+.sub "" :subid("cuid_76_1360256342.611") :anon :lex :outer("cuid_53_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
 .annotate 'line', 30
-    .const 'Sub' $P5023 = 'cuid_75_1360250807.22' 
+    .const 'Sub' $P5023 = 'cuid_75_1360256342.611' 
     capture_lex $P5023 
-    .const 'Sub' $P5023 = 'cuid_1_1360250807.22' 
+    .const 'Sub' $P5023 = 'cuid_1_1360256342.611' 
     capture_lex $P5023 
-    .const 'Sub' $P5023 = 'cuid_2_1360250807.22' 
+    .const 'Sub' $P5023 = 'cuid_2_1360256342.611' 
     capture_lex $P5023 
-    .const 'Sub' $P5023 = 'cuid_3_1360250807.22' 
+    .const 'Sub' $P5023 = 'cuid_3_1360256342.611' 
     capture_lex $P5023 
-    .const 'Sub' $P5023 = 'cuid_4_1360250807.22' 
+    .const 'Sub' $P5023 = 'cuid_4_1360256342.611' 
     capture_lex $P5023 
-    .const 'Sub' $P5023 = 'cuid_5_1360250807.22' 
+    .const 'Sub' $P5023 = 'cuid_5_1360256342.611' 
     capture_lex $P5023 
-    .const 'Sub' $P5023 = 'cuid_6_1360250807.22' 
+    .const 'Sub' $P5023 = 'cuid_6_1360256342.611' 
     capture_lex $P5023 
-    .const 'Sub' $P5023 = 'cuid_7_1360250807.22' 
+    .const 'Sub' $P5023 = 'cuid_7_1360256342.611' 
     capture_lex $P5023 
-    .const 'Sub' $P5023 = 'cuid_8_1360250807.22' 
+    .const 'Sub' $P5023 = 'cuid_8_1360256342.611' 
     capture_lex $P5023 
-    .const 'Sub' $P5023 = 'cuid_9_1360250807.22' 
+    .const 'Sub' $P5023 = 'cuid_9_1360256342.611' 
     capture_lex $P5023 
-    .const 'Sub' $P5023 = 'cuid_10_1360250807.22' 
+    .const 'Sub' $P5023 = 'cuid_10_1360256342.611' 
     capture_lex $P5023 
     .lex "$NQPMu", $P101 
     .lex "&is_narrower_type", $P102 
@@ -950,7 +950,7 @@
     .lex "$?CLASS", $P109 
     null $P5001
     set $P101, $P5001
-    .const 'Sub' $P5002 = 'cuid_75_1360250807.22' 
+    .const 'Sub' $P5002 = 'cuid_75_1360256342.611' 
     capture_lex $P5002
     set $P102, $P5002
     null $P5003
@@ -963,13 +963,13 @@
     set $P106, $P5006
     null $P5007
     set $P107, $P5007
-    .const 'Sub' $P5008 = 'cuid_1_1360250807.22' 
+    .const 'Sub' $P5008 = 'cuid_1_1360256342.611' 
     capture_lex $P5008
-    .const 'Sub' $P5009 = 'cuid_2_1360250807.22' 
+    .const 'Sub' $P5009 = 'cuid_2_1360256342.611' 
     capture_lex $P5009
-    .const 'Sub' $P5010 = 'cuid_3_1360250807.22' 
+    .const 'Sub' $P5010 = 'cuid_3_1360256342.611' 
     capture_lex $P5010
-    .const 'Sub' $P5011 = 'cuid_4_1360250807.22' 
+    .const 'Sub' $P5011 = 'cuid_4_1360256342.611' 
     capture_lex $P5011
     shl $I5001, 1, 30
     box $P5012, $I5001
@@ -982,23 +982,23 @@
     set $P106, $P5015
     box $P5016, 2
     set $P107, $P5016
-    .const 'Sub' $P5017 = 'cuid_5_1360250807.22' 
+    .const 'Sub' $P5017 = 'cuid_5_1360256342.611' 
     capture_lex $P5017
-    .const 'Sub' $P5018 = 'cuid_6_1360250807.22' 
+    .const 'Sub' $P5018 = 'cuid_6_1360256342.611' 
     capture_lex $P5018
-    .const 'Sub' $P5019 = 'cuid_7_1360250807.22' 
+    .const 'Sub' $P5019 = 'cuid_7_1360256342.611' 
     capture_lex $P5019
-    .const 'Sub' $P5020 = 'cuid_8_1360250807.22' 
+    .const 'Sub' $P5020 = 'cuid_8_1360256342.611' 
     capture_lex $P5020
-    .const 'Sub' $P5021 = 'cuid_9_1360250807.22' 
+    .const 'Sub' $P5021 = 'cuid_9_1360256342.611' 
     capture_lex $P5021
-    .const 'Sub' $P5022 = 'cuid_10_1360250807.22' 
+    .const 'Sub' $P5022 = 'cuid_10_1360256342.611' 
     capture_lex $P5022
     .return ($P5022) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "is_narrower_type" :subid("cuid_75_1360250807.22") :anon :lex :outer("cuid_76_1360250807.22")
+.sub "is_narrower_type" :subid("cuid_75_1360256342.611") :anon :lex :outer("cuid_76_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
 .annotate 'line', 74
     .param pmc _lex_param_0 
@@ -1092,7 +1092,7 @@
 .loadlib "io_ops"
 .HLL "nqp"
 .namespace []
-.sub "add_dispatchee" :subid("cuid_1_1360250807.22") :anon :lex :outer("cuid_76_1360250807.22")
+.sub "add_dispatchee" :subid("cuid_1_1360256342.611") :anon :lex :outer("cuid_76_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
 .annotate 'line', 38
     .param pmc _lex_param_0 
@@ -1101,15 +1101,15 @@
     .lex "$code", _lex_param_1 
     nqp_disable_sc_write_barrier 
     nqp_decontainerize $P5001, _lex_param_0
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     null $P5003
     repr_bind_attr_obj $P5001, $P5002, "$!dispatch_cache", $P5003
     nqp_decontainerize $P5004, _lex_param_0
-    nqp_get_sc_object $P5005, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5005, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     null $P5006
     repr_bind_attr_obj $P5004, $P5005, "$!dispatch_order", $P5006
     nqp_decontainerize $P5007, _lex_param_0
-    nqp_get_sc_object $P5008, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5008, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     repr_get_attr_obj $P5009, $P5007, $P5008, "$!dispatchees"
     push $P5009, _lex_param_1
     nqp_enable_sc_write_barrier 
@@ -1152,20 +1152,20 @@
 .loadlib "io_ops"
 .HLL "nqp"
 .namespace []
-.sub "is_dispatcher" :subid("cuid_2_1360250807.22") :anon :lex :outer("cuid_76_1360250807.22")
+.sub "is_dispatcher" :subid("cuid_2_1360256342.611") :anon :lex :outer("cuid_76_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
 .annotate 'line', 47
     .param pmc _lex_param_0 
     .lex "self", _lex_param_0 
     nqp_decontainerize $P5001, _lex_param_0
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     repr_get_attr_obj $P5003, $P5001, $P5002, "$!dispatchees"
     defined $I5001, $P5003
     .return ($I5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "derive_dispatcher" :subid("cuid_3_1360250807.22") :anon :lex :outer("cuid_76_1360250807.22")
+.sub "derive_dispatcher" :subid("cuid_3_1360256342.611") :anon :lex :outer("cuid_76_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
 .annotate 'line', 52
     .param pmc _lex_param_0 
@@ -1180,24 +1180,24 @@
     null $P5003
     set $P103, $P5003
     nqp_decontainerize $P5005, _lex_param_0
-    nqp_get_sc_object $P5006, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5006, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     repr_get_attr_obj $P5007, $P5005, $P5006, "$!do"
     repr_clone $P5004, $P5007
     set $P101, $P5004
     nqp_decontainerize $P5009, _lex_param_0
     repr_clone $P5008, $P5009
     set $P102, $P5008
-    nqp_get_sc_object $P5010, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5010, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     setattribute $P102, $P5010, "$!do", $P101
-    nqp_get_sc_object $P5011, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5011, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     nqp_decontainerize $P5013, _lex_param_0
-    nqp_get_sc_object $P5014, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5014, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     repr_get_attr_obj $P5015, $P5013, $P5014, "$!dispatchees"
     repr_clone $P5012, $P5015
     setattribute $P102, $P5011, "$!dispatchees", $P5012
     set_sub_code_object $P101, $P102
     nqp_decontainerize $P5017, _lex_param_0
-    nqp_get_sc_object $P5018, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5018, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     repr_get_attr_obj $P5019, $P5017, $P5018, "$!do"
     getprop $P5016, $P5019, "CLONE_CALLBACK"
     set $P103, $P5016
@@ -1206,7 +1206,7 @@
 .annotate 'line', 64
 .annotate 'line', 65
     nqp_decontainerize $P5020, _lex_param_0
-    nqp_get_sc_object $P5021, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5021, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     repr_get_attr_obj $P5022, $P5020, $P5021, "$!do"
     $P5023 = $P103($P5022, $P101, $P102)
   if38_end86:
@@ -1214,7 +1214,7 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "SET_NQPMU" :subid("cuid_4_1360250807.22") :anon :lex :outer("cuid_76_1360250807.22")
+.sub "SET_NQPMU" :subid("cuid_4_1360256342.611") :anon :lex :outer("cuid_76_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
 .annotate 'line', 73
     .param pmc _lex_param_0 
@@ -1226,17 +1226,17 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "sort_dispatchees" :subid("cuid_5_1360250807.22") :anon :lex :outer("cuid_76_1360250807.22")
+.sub "sort_dispatchees" :subid("cuid_5_1360256342.611") :anon :lex :outer("cuid_76_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
 .annotate 'line', 90
     .param pmc _lex_param_0 
-    .const 'Sub' $P5028 = 'cuid_78_1360250807.22' 
+    .const 'Sub' $P5028 = 'cuid_78_1360256342.611' 
     capture_lex $P5028 
-    .const 'Sub' $P5028 = 'cuid_79_1360250807.22' 
+    .const 'Sub' $P5028 = 'cuid_79_1360256342.611' 
     capture_lex $P5028 
-    .const 'Sub' $P5028 = 'cuid_80_1360250807.22' 
+    .const 'Sub' $P5028 = 'cuid_80_1360256342.611' 
     capture_lex $P5028 
-    .const 'Sub' $P5028 = 'cuid_82_1360250807.22' 
+    .const 'Sub' $P5028 = 'cuid_82_1360256342.611' 
     capture_lex $P5028 
     .lex "&is_narrower", $P101 
     .lex "@graph", $P102 
@@ -1245,7 +1245,7 @@
     .lex "@result", $P105 
     .lex "$candidates_to_sort", $P106 
     .lex "self", _lex_param_0 
-    .const 'Sub' $P5001 = 'cuid_78_1360250807.22' 
+    .const 'Sub' $P5001 = 'cuid_78_1360256342.611' 
     capture_lex $P5001
     set $P101, $P5001
     new $P5002, 'ResizablePMCArray'
@@ -1262,7 +1262,7 @@
     set_label $P107, lexotic_129
     .lex "RETURN", $P107
     nqp_decontainerize $P5007, _lex_param_0
-    nqp_get_sc_object $P5008, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5008, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     repr_get_attr_obj $P5009, $P5007, $P5008, "$!dispatchees"
     elements $I5001, $P5009
     box $P5010, $I5001
@@ -1277,7 +1277,7 @@
     set $P5014, $P5015
     unless $I5002 goto while50_done135 
   while50_redo133:
-    .const 'Sub' $P5012 = 'cuid_79_1360250807.22' 
+    .const 'Sub' $P5012 = 'cuid_79_1360256342.611' 
     capture_lex $P5012
     $P5013 = $P5012()
     set $P5014, $P5013
@@ -1293,7 +1293,7 @@
     set $P5019, $P5020
     unless $I5003 goto while52_done153 
   while52_redo151:
-    .const 'Sub' $P5017 = 'cuid_80_1360250807.22' 
+    .const 'Sub' $P5017 = 'cuid_80_1360256342.611' 
     capture_lex $P5017
     $P5018 = $P5017()
     set $P5019, $P5018
@@ -1308,7 +1308,7 @@
     set $P5023, $P5024
     unless $I5004 goto while56_done182 
   while56_redo180:
-    .const 'Sub' $P5021 = 'cuid_82_1360250807.22' 
+    .const 'Sub' $P5021 = 'cuid_82_1360256342.611' 
     capture_lex $P5021
     $P5022 = $P5021()
     set $P5023, $P5022
@@ -1326,12 +1326,12 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "is_narrower" :subid("cuid_78_1360250807.22") :anon :lex :outer("cuid_5_1360250807.22")
+.sub "is_narrower" :subid("cuid_78_1360256342.611") :anon :lex :outer("cuid_5_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
 .annotate 'line', 93
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
-    .const 'Sub' $P5048 = 'cuid_77_1360250807.22' 
+    .const 'Sub' $P5048 = 'cuid_77_1360256342.611' 
     capture_lex $P5048 
     .lex "$types_to_check", $P101 
     .lex "$i", $P102 
@@ -1441,7 +1441,7 @@
     set $P5032, $P5033
     unless $I5004 goto while42_done108 
   while42_redo106:
-    .const 'Sub' $P5030 = 'cuid_77_1360250807.22' 
+    .const 'Sub' $P5030 = 'cuid_77_1360256342.611' 
     capture_lex $P5030
     $P5031 = $P5030()
     set $P5032, $P5031
@@ -1509,7 +1509,7 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_77_1360250807.22") :anon :lex :outer("cuid_78_1360250807.22")
+.sub "" :subid("cuid_77_1360256342.611") :anon :lex :outer("cuid_78_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
 .annotate 'line', 111
     .lex "$type_obj_a", $P101 
@@ -1606,7 +1606,7 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_79_1360250807.22") :anon :lex :outer("cuid_5_1360250807.22")
+.sub "" :subid("cuid_79_1360256342.611") :anon :lex :outer("cuid_5_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
 .annotate 'line', 145
     .lex "$candidate", $P101 
@@ -1640,7 +1640,7 @@
     set $P108, $P5008
     find_lex $P5011, "self"
     nqp_decontainerize $P5010, $P5011
-    nqp_get_sc_object $P5012, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5012, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     repr_get_attr_obj $P5013, $P5010, $P5012, "$!dispatchees"
     find_lex $P5014, "$i"
     set $I5001, $P5014
@@ -1775,7 +1775,7 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_80_1360250807.22") :anon :lex :outer("cuid_5_1360250807.22")
+.sub "" :subid("cuid_80_1360256342.611") :anon :lex :outer("cuid_5_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
 .annotate 'line', 191
     .lex "$j", $P101 
@@ -1942,10 +1942,10 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_82_1360250807.22") :anon :lex :outer("cuid_5_1360250807.22")
+.sub "" :subid("cuid_82_1360256342.611") :anon :lex :outer("cuid_5_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
 .annotate 'line', 209
-    .const 'Sub' $P5040 = 'cuid_81_1360250807.22' 
+    .const 'Sub' $P5040 = 'cuid_81_1360256342.611' 
     capture_lex $P5040 
     .lex "$rem_results", $P101 
     .lex "$i", $P102 
@@ -2068,7 +2068,7 @@
     set $N5010, $P5033
     iseq $I5010, $N5009, $N5010
     unless $I5010 goto if61_end203 
-    .const 'Sub' $P5034 = 'cuid_81_1360250807.22' 
+    .const 'Sub' $P5034 = 'cuid_81_1360256342.611' 
     capture_lex $P5034
     $P5035 = $P5034()
   if61_end203:
@@ -2088,7 +2088,7 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_81_1360250807.22") :anon :lex :outer("cuid_82_1360250807.22")
+.sub "" :subid("cuid_81_1360256342.611") :anon :lex :outer("cuid_82_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
 .annotate 'line', 232
     .lex "$j", $P101 
@@ -2192,13 +2192,15 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "dispatch" :subid("cuid_6_1360250807.22") :anon :lex :outer("cuid_76_1360250807.22")
+.sub "dispatch" :subid("cuid_6_1360256342.611") :anon :lex :outer("cuid_76_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
 .annotate 'line', 253
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
-    .const 'Sub' $P5055 = 'cuid_84_1360250807.22' 
-    capture_lex $P5055 
+    .const 'Sub' $P5053 = 'cuid_84_1360256342.611' 
+    capture_lex $P5053 
+    .const 'Sub' $P5053 = 'cuid_85_1360256342.611' 
+    capture_lex $P5053 
     .lex "$num_args", $P101 
     .lex "@candidates", $P102 
     .lex "$num_candidates", $P103 
@@ -2236,7 +2238,7 @@
     box $P5010, $I5001
     set $P101, $P5010
     nqp_decontainerize $P5011, _lex_param_0
-    nqp_get_sc_object $P5012, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5012, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     repr_get_attr_obj $P5013, $P5011, $P5012, "$!dispatch_order"
     set $P102, $P5013
     isnull $I5002, $P102
@@ -2244,7 +2246,7 @@
 .annotate 'line', 259
     nqp_disable_sc_write_barrier 
     nqp_decontainerize $P5014, _lex_param_0
-    nqp_get_sc_object $P5015, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5015, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
 .annotate 'line', 261
     nqp_decontainerize $P5016, _lex_param_0
     $P5017 = $P5016."sort_dispatchees"()
@@ -2370,7 +2372,7 @@
     set $P5037, $P5039
     unless $I5014 goto while71_done250 
   while71_redo248:
-    .const 'Sub' $P5035 = 'cuid_84_1360250807.22' 
+    .const 'Sub' $P5035 = 'cuid_84_1360256342.611' 
     capture_lex $P5035
     $P5036 = $P5035()
     set $P5037, $P5036
@@ -2415,18 +2417,10 @@
     set $N5010, 1
     iseq $I5015, $N5009, $N5010
     unless $I5015 goto if81_else273 
-.annotate 'line', 338
-    set $P5044, $P104[0]
-    unless_null $P5044, fallback275
-    null $P5045
-    set $P5044, $P5045
-  fallback275:
-    set $P5043, $P5044["sub"]
-    unless_null $P5043, fallback276
-    null $P5046
-    set $P5043, $P5046
-  fallback276:
-    set $P5054, $P5043
+    .const 'Sub' $P5043 = 'cuid_85_1360256342.611' 
+    capture_lex $P5043
+    $P5044 = $P5043()
+    set $P5052, $P5044
     goto if81_end274
   if81_else273:
     elements $I5018, $P104
@@ -2434,39 +2428,39 @@
     set $N5012, 0
     iseq $I5017, $N5011, $N5012
     unless $I5017 goto if82_else277 
-.annotate 'line', 344
-.annotate 'line', 346
-    nqp_decontainerize $P5047, _lex_param_0
-    $P5048 = $P5047."name"()
-    set $S5003, $P5048
+.annotate 'line', 345
+.annotate 'line', 347
+    nqp_decontainerize $P5045, _lex_param_0
+    $P5046 = $P5045."name"()
+    set $S5003, $P5046
     concat $S5002, "No applicable candidates found to dispatch to for '", $S5003
     concat $S5001, $S5002, "'."
-    box $P5049, $S5001
-    die $P5049
-    set $P5053, $P5049
+    box $P5047, $S5001
+    die $P5047
+    set $P5051, $P5047
     goto if82_end278
   if82_else277:
-.annotate 'line', 348
-.annotate 'line', 350
-    nqp_decontainerize $P5050, _lex_param_0
-    $P5051 = $P5050."name"()
-    set $S5006, $P5051
+.annotate 'line', 349
+.annotate 'line', 351
+    nqp_decontainerize $P5048, _lex_param_0
+    $P5049 = $P5048."name"()
+    set $S5006, $P5049
     concat $S5005, "Ambiguous dispatch to multi '", $S5006
     concat $S5004, $S5005, "'."
-    box $P5052, $S5004
-    die $P5052
-    set $P5053, $P5052
+    box $P5050, $S5004
+    die $P5050
+    set $P5051, $P5050
   if82_end278:
-    set $P5054, $P5053
+    set $P5052, $P5051
   if81_end274:
-    .return ($P5054) 
+    .return ($P5052) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_84_1360250807.22") :anon :lex :outer("cuid_6_1360250807.22")
+.sub "" :subid("cuid_84_1360256342.611") :anon :lex :outer("cuid_6_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
 .annotate 'line', 307
-    .const 'Sub' $P5027 = 'cuid_83_1360250807.22' 
+    .const 'Sub' $P5027 = 'cuid_83_1360256342.611' 
     capture_lex $P5027 
     .lex "$param", $P101 
     .lex "$param_type", $P102 
@@ -2532,7 +2526,7 @@
     die 0, .CONTROL_LOOP_LAST
   unless72_end256:
     unless $P104 goto if74_end260 
-    .const 'Sub' $P5025 = 'cuid_83_1360250807.22' 
+    .const 'Sub' $P5025 = 'cuid_83_1360256342.611' 
     capture_lex $P5025
     $P5026 = $P5025()
   if74_end260:
@@ -2547,7 +2541,7 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_83_1360250807.22") :anon :lex :outer("cuid_84_1360250807.22")
+.sub "" :subid("cuid_83_1360256342.611") :anon :lex :outer("cuid_84_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
 .annotate 'line', 316
     .lex "$defined", $P101 
@@ -2605,9 +2599,43 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "clone" :subid("cuid_7_1360250807.22") :anon :lex :outer("cuid_76_1360250807.22")
+.sub "" :subid("cuid_85_1360256342.611") :anon :lex :outer("cuid_6_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 354
+.annotate 'line', 338
+    .lex "$result", $P101 
+    null $P5001
+    set $P101, $P5001
+    find_lex $P5004, "@possibles"
+    set $P5003, $P5004[0]
+    unless_null $P5003, fallback275
+    null $P5005
+    set $P5003, $P5005
+  fallback275:
+    set $P5002, $P5003["sub"]
+    unless_null $P5002, fallback276
+    null $P5006
+    set $P5002, $P5006
+  fallback276:
+    set $P101, $P5002
+    nqp_disable_sc_write_barrier 
+    find_lex $P5008, "self"
+    nqp_decontainerize $P5007, $P5008
+    nqp_get_sc_object $P5009, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
+    find_lex $P5012, "self"
+    nqp_decontainerize $P5011, $P5012
+    nqp_get_sc_object $P5013, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
+    repr_get_attr_obj $P5014, $P5011, $P5013, "$!dispatch_cache"
+    find_lex $P5015, "$capture"
+    multi_cache_add $P5010, $P5014, $P5015, $P101
+    repr_bind_attr_obj $P5007, $P5009, "$!dispatch_cache", $P5010
+    nqp_enable_sc_write_barrier 
+    .return ($P101) 
+.end
+.HLL "nqp"
+.namespace []
+.sub "clone" :subid("cuid_7_1360256342.611") :anon :lex :outer("cuid_76_1360256342.611")
+.annotate 'file', "src\\stage2\\NQPCORE.setting"
+.annotate 'line', 355
     .param pmc _lex_param_0 
     .lex "$do", $P101 
     .lex "$der", $P102 
@@ -2620,27 +2648,27 @@
     null $P5003
     set $P103, $P5003
     nqp_decontainerize $P5005, _lex_param_0
-    nqp_get_sc_object $P5006, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5006, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     repr_get_attr_obj $P5007, $P5005, $P5006, "$!do"
     repr_clone $P5004, $P5007
     set $P101, $P5004
     nqp_decontainerize $P5009, _lex_param_0
     repr_clone $P5008, $P5009
     set $P102, $P5008
-    nqp_get_sc_object $P5010, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5010, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     setattribute $P102, $P5010, "$!do", $P101
     set_sub_code_object $P101, $P102
     nqp_decontainerize $P5012, _lex_param_0
-    nqp_get_sc_object $P5013, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5013, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     repr_get_attr_obj $P5014, $P5012, $P5013, "$!do"
     getprop $P5011, $P5014, "CLONE_CALLBACK"
     set $P103, $P5011
     defined $I5001, $P103
     unless $I5001 goto if83_end280 
-.annotate 'line', 365
 .annotate 'line', 366
+.annotate 'line', 367
     nqp_decontainerize $P5015, _lex_param_0
-    nqp_get_sc_object $P5016, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5016, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     repr_get_attr_obj $P5017, $P5015, $P5016, "$!do"
     $P5018 = $P103($P5017, $P101, $P102)
   if83_end280:
@@ -2648,15 +2676,15 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "!set_name" :subid("cuid_8_1360250807.22") :anon :lex :outer("cuid_76_1360250807.22")
+.sub "!set_name" :subid("cuid_8_1360256342.611") :anon :lex :outer("cuid_76_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 372
+.annotate 'line', 373
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
     .lex "self", _lex_param_0 
     .lex "$name", _lex_param_1 
     nqp_decontainerize $P5001, _lex_param_0
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     repr_get_attr_obj $P5003, $P5001, $P5002, "$!do"
     set $S5001, _lex_param_1
     assign $P5003, $S5001
@@ -2664,175 +2692,175 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "name" :subid("cuid_9_1360250807.22") :anon :lex :outer("cuid_76_1360250807.22")
+.sub "name" :subid("cuid_9_1360256342.611") :anon :lex :outer("cuid_76_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 376
+.annotate 'line', 377
     .param pmc _lex_param_0 
     .lex "self", _lex_param_0 
     nqp_decontainerize $P5001, _lex_param_0
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     repr_get_attr_obj $P5003, $P5001, $P5002, "$!do"
     set $S5001, $P5003
     .return ($S5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "signature" :subid("cuid_10_1360250807.22") :anon :lex :outer("cuid_76_1360250807.22")
+.sub "signature" :subid("cuid_10_1360256342.611") :anon :lex :outer("cuid_76_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 380
+.annotate 'line', 381
     .param pmc _lex_param_0 
     .lex "self", _lex_param_0 
     nqp_decontainerize $P5001, _lex_param_0
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     repr_get_attr_obj $P5003, $P5001, $P5002, "$!signature"
     .return ($P5003) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_85_1360250807.22") :anon :lex :outer("cuid_53_1360250807.22")
+.sub "" :subid("cuid_86_1360256342.611") :anon :lex :outer("cuid_53_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 387
-    .const 'Sub' $P5003 = 'cuid_11_1360250807.22' 
+.annotate 'line', 388
+    .const 'Sub' $P5003 = 'cuid_11_1360256342.611' 
     capture_lex $P5003 
-    .const 'Sub' $P5003 = 'cuid_12_1360250807.22' 
+    .const 'Sub' $P5003 = 'cuid_12_1360256342.611' 
     capture_lex $P5003 
     .lex "$?PACKAGE", $P101 
     .lex "$?CLASS", $P102 
-    .const 'Sub' $P5001 = 'cuid_11_1360250807.22' 
+    .const 'Sub' $P5001 = 'cuid_11_1360256342.611' 
     capture_lex $P5001
-    .const 'Sub' $P5002 = 'cuid_12_1360250807.22' 
+    .const 'Sub' $P5002 = 'cuid_12_1360256342.611' 
     capture_lex $P5002
     .return ($P5002) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "types" :subid("cuid_11_1360250807.22") :anon :lex :outer("cuid_85_1360250807.22")
-.annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 390
-    .param pmc _lex_param_0 
-    .lex "self", _lex_param_0 
-    nqp_decontainerize $P5001, _lex_param_0
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 6
-    repr_get_attr_obj $P5003, $P5001, $P5002, "$!types"
-    .return ($P5003) 
-.end
-.HLL "nqp"
-.namespace []
-.sub "definednesses" :subid("cuid_12_1360250807.22") :anon :lex :outer("cuid_85_1360250807.22")
+.sub "types" :subid("cuid_11_1360256342.611") :anon :lex :outer("cuid_86_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
 .annotate 'line', 391
     .param pmc _lex_param_0 
     .lex "self", _lex_param_0 
     nqp_decontainerize $P5001, _lex_param_0
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 6
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 6
+    repr_get_attr_obj $P5003, $P5001, $P5002, "$!types"
+    .return ($P5003) 
+.end
+.HLL "nqp"
+.namespace []
+.sub "definednesses" :subid("cuid_12_1360256342.611") :anon :lex :outer("cuid_86_1360256342.611")
+.annotate 'file', "src\\stage2\\NQPCORE.setting"
+.annotate 'line', 392
+    .param pmc _lex_param_0 
+    .lex "self", _lex_param_0 
+    nqp_decontainerize $P5001, _lex_param_0
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 6
     repr_get_attr_obj $P5003, $P5001, $P5002, "$!definednesses"
     .return ($P5003) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_86_1360250807.22") :anon :lex :outer("cuid_53_1360250807.22")
+.sub "" :subid("cuid_87_1360256342.611") :anon :lex :outer("cuid_53_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 394
-    .const 'Sub' $P5017 = 'cuid_13_1360250807.22' 
+.annotate 'line', 395
+    .const 'Sub' $P5017 = 'cuid_13_1360256342.611' 
     capture_lex $P5017 
-    .const 'Sub' $P5017 = 'cuid_14_1360250807.22' 
+    .const 'Sub' $P5017 = 'cuid_14_1360256342.611' 
     capture_lex $P5017 
-    .const 'Sub' $P5017 = 'cuid_15_1360250807.22' 
+    .const 'Sub' $P5017 = 'cuid_15_1360256342.611' 
     capture_lex $P5017 
-    .const 'Sub' $P5017 = 'cuid_16_1360250807.22' 
+    .const 'Sub' $P5017 = 'cuid_16_1360256342.611' 
     capture_lex $P5017 
-    .const 'Sub' $P5017 = 'cuid_17_1360250807.22' 
+    .const 'Sub' $P5017 = 'cuid_17_1360256342.611' 
     capture_lex $P5017 
-    .const 'Sub' $P5017 = 'cuid_18_1360250807.22' 
+    .const 'Sub' $P5017 = 'cuid_18_1360256342.611' 
     capture_lex $P5017 
-    .const 'Sub' $P5017 = 'cuid_19_1360250807.22' 
+    .const 'Sub' $P5017 = 'cuid_19_1360256342.611' 
     capture_lex $P5017 
-    .const 'Sub' $P5017 = 'cuid_20_1360250807.22' 
+    .const 'Sub' $P5017 = 'cuid_20_1360256342.611' 
     capture_lex $P5017 
-    .const 'Sub' $P5017 = 'cuid_21_1360250807.22' 
+    .const 'Sub' $P5017 = 'cuid_21_1360256342.611' 
     capture_lex $P5017 
-    .const 'Sub' $P5017 = 'cuid_22_1360250807.22' 
+    .const 'Sub' $P5017 = 'cuid_22_1360256342.611' 
     capture_lex $P5017 
-    .const 'Sub' $P5017 = 'cuid_23_1360250807.22' 
+    .const 'Sub' $P5017 = 'cuid_23_1360256342.611' 
     capture_lex $P5017 
-    .const 'Sub' $P5017 = 'cuid_24_1360250807.22' 
+    .const 'Sub' $P5017 = 'cuid_24_1360256342.611' 
     capture_lex $P5017 
-    .const 'Sub' $P5017 = 'cuid_25_1360250807.22' 
+    .const 'Sub' $P5017 = 'cuid_25_1360256342.611' 
     capture_lex $P5017 
-    .const 'Sub' $P5017 = 'cuid_26_1360250807.22' 
+    .const 'Sub' $P5017 = 'cuid_26_1360256342.611' 
     capture_lex $P5017 
-    .const 'Sub' $P5017 = 'cuid_27_1360250807.22' 
+    .const 'Sub' $P5017 = 'cuid_27_1360256342.611' 
     capture_lex $P5017 
     .lex "$nfa_type", $P101 
     .lex "$?PACKAGE", $P102 
     .lex "$?CLASS", $P103 
     null $P5001
     set $P101, $P5001
-    .const 'Sub' $P5002 = 'cuid_13_1360250807.22' 
+    .const 'Sub' $P5002 = 'cuid_13_1360256342.611' 
     capture_lex $P5002
-    .const 'Sub' $P5003 = 'cuid_14_1360250807.22' 
+    .const 'Sub' $P5003 = 'cuid_14_1360256342.611' 
     capture_lex $P5003
-    .const 'Sub' $P5004 = 'cuid_15_1360250807.22' 
+    .const 'Sub' $P5004 = 'cuid_15_1360256342.611' 
     capture_lex $P5004
-    .const 'Sub' $P5005 = 'cuid_16_1360250807.22' 
+    .const 'Sub' $P5005 = 'cuid_16_1360256342.611' 
     capture_lex $P5005
-    .const 'Sub' $P5006 = 'cuid_17_1360250807.22' 
+    .const 'Sub' $P5006 = 'cuid_17_1360256342.611' 
     capture_lex $P5006
-    .const 'Sub' $P5007 = 'cuid_18_1360250807.22' 
+    .const 'Sub' $P5007 = 'cuid_18_1360256342.611' 
     capture_lex $P5007
-    .const 'Sub' $P5008 = 'cuid_19_1360250807.22' 
+    .const 'Sub' $P5008 = 'cuid_19_1360256342.611' 
     capture_lex $P5008
-    .const 'Sub' $P5009 = 'cuid_20_1360250807.22' 
+    .const 'Sub' $P5009 = 'cuid_20_1360256342.611' 
     capture_lex $P5009
-    .const 'Sub' $P5010 = 'cuid_21_1360250807.22' 
+    .const 'Sub' $P5010 = 'cuid_21_1360256342.611' 
     capture_lex $P5010
-    .const 'Sub' $P5011 = 'cuid_22_1360250807.22' 
+    .const 'Sub' $P5011 = 'cuid_22_1360256342.611' 
     capture_lex $P5011
-    .const 'Sub' $P5012 = 'cuid_23_1360250807.22' 
+    .const 'Sub' $P5012 = 'cuid_23_1360256342.611' 
     capture_lex $P5012
-    .const 'Sub' $P5013 = 'cuid_24_1360250807.22' 
+    .const 'Sub' $P5013 = 'cuid_24_1360256342.611' 
     capture_lex $P5013
-    .const 'Sub' $P5014 = 'cuid_25_1360250807.22' 
+    .const 'Sub' $P5014 = 'cuid_25_1360256342.611' 
     capture_lex $P5014
-    .const 'Sub' $P5015 = 'cuid_26_1360250807.22' 
+    .const 'Sub' $P5015 = 'cuid_26_1360256342.611' 
     capture_lex $P5015
-    .const 'Sub' $P5016 = 'cuid_27_1360250807.22' 
+    .const 'Sub' $P5016 = 'cuid_27_1360256342.611' 
     capture_lex $P5016
     .return ($P5016) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "SET_CAPS" :subid("cuid_13_1360250807.22") :anon :lex :outer("cuid_86_1360250807.22")
+.sub "SET_CAPS" :subid("cuid_13_1360256342.611") :anon :lex :outer("cuid_87_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 401
+.annotate 'line', 402
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
     .lex "self", _lex_param_0 
     .lex "$caps", _lex_param_1 
     nqp_decontainerize $P5001, _lex_param_0
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     repr_bind_attr_obj $P5001, $P5002, "$!caps", _lex_param_1
     .return (_lex_param_1) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "SET_NFA" :subid("cuid_14_1360250807.22") :anon :lex :outer("cuid_86_1360250807.22")
+.sub "SET_NFA" :subid("cuid_14_1360256342.611") :anon :lex :outer("cuid_87_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 404
+.annotate 'line', 405
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
     .lex "self", _lex_param_0 
     .lex "$nfa", _lex_param_1 
     nqp_decontainerize $P5001, _lex_param_0
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     repr_bind_attr_obj $P5001, $P5002, "$!nfa", _lex_param_1
     .return (_lex_param_1) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "SET_ALT_NFA" :subid("cuid_15_1360250807.22") :anon :lex :outer("cuid_86_1360250807.22")
+.sub "SET_ALT_NFA" :subid("cuid_15_1360256342.611") :anon :lex :outer("cuid_87_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 407
+.annotate 'line', 408
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
     .param pmc _lex_param_2 
@@ -2840,17 +2868,17 @@
     .lex "$name", _lex_param_1 
     .lex "$nfa", _lex_param_2 
     nqp_decontainerize $P5001, _lex_param_0
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     repr_get_attr_obj $P5003, $P5001, $P5002, "%!alt_nfas"
     unless_null $P5003, vivi_84281
     nqp_decontainerize $P5004, _lex_param_0
-    nqp_get_sc_object $P5005, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5005, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     new $P5006, 'Hash'
     repr_bind_attr_obj $P5004, $P5005, "%!alt_nfas", $P5006
     set $P5003, $P5006
   vivi_84281:
     nqp_decontainerize $P5007, _lex_param_0
-    nqp_get_sc_object $P5008, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5008, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     repr_get_attr_obj $P5009, $P5007, $P5008, "%!alt_nfas"
     set $S5001, _lex_param_1
     set $P5009[$S5001], _lex_param_2
@@ -2858,78 +2886,78 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "SET_GENERIC_NFA" :subid("cuid_16_1360250807.22") :anon :lex :outer("cuid_86_1360250807.22")
+.sub "SET_GENERIC_NFA" :subid("cuid_16_1360256342.611") :anon :lex :outer("cuid_87_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 411
+.annotate 'line', 412
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
     .lex "self", _lex_param_0 
     .lex "$nfa", _lex_param_1 
     nqp_decontainerize $P5001, _lex_param_0
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
-.annotate 'line', 412
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
+.annotate 'line', 413
     $P5003 = _lex_param_1."save"()
     repr_bind_attr_obj $P5001, $P5002, "$!generic_nfa", $P5003
     .return ($P5003) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "ADD_NESTED_CODE" :subid("cuid_17_1360250807.22") :anon :lex :outer("cuid_86_1360250807.22")
+.sub "ADD_NESTED_CODE" :subid("cuid_17_1360256342.611") :anon :lex :outer("cuid_87_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 414
+.annotate 'line', 415
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
     .lex "self", _lex_param_0 
     .lex "$code", _lex_param_1 
     nqp_decontainerize $P5001, _lex_param_0
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     repr_get_attr_obj $P5003, $P5001, $P5002, "@!nested_codes"
     unless_null $P5003, vivi_85282
     nqp_decontainerize $P5004, _lex_param_0
-    nqp_get_sc_object $P5005, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5005, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     new $P5006, 'ResizablePMCArray'
     repr_bind_attr_obj $P5004, $P5005, "@!nested_codes", $P5006
     set $P5003, $P5006
   vivi_85282:
     nqp_decontainerize $P5007, _lex_param_0
-    nqp_get_sc_object $P5008, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5008, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     repr_get_attr_obj $P5009, $P5007, $P5008, "@!nested_codes"
     push $P5009, _lex_param_1
     .return ($P5009) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "CAPS" :subid("cuid_18_1360250807.22") :anon :lex :outer("cuid_86_1360250807.22")
+.sub "CAPS" :subid("cuid_18_1360256342.611") :anon :lex :outer("cuid_87_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 418
+.annotate 'line', 419
     .param pmc _lex_param_0 
     .lex "self", _lex_param_0 
     nqp_decontainerize $P5001, _lex_param_0
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     repr_get_attr_obj $P5003, $P5001, $P5002, "$!caps"
     .return ($P5003) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "NFA" :subid("cuid_19_1360250807.22") :anon :lex :outer("cuid_86_1360250807.22")
+.sub "NFA" :subid("cuid_19_1360256342.611") :anon :lex :outer("cuid_87_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 421
+.annotate 'line', 422
     .param pmc _lex_param_0 
     .lex "self", _lex_param_0 
     nqp_decontainerize $P5001, _lex_param_0
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     repr_get_attr_obj $P5003, $P5001, $P5002, "$!nfa"
     .return ($P5003) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "ALT_NFAS" :subid("cuid_20_1360250807.22") :anon :lex :outer("cuid_86_1360250807.22")
+.sub "ALT_NFAS" :subid("cuid_20_1360256342.611") :anon :lex :outer("cuid_87_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 424
+.annotate 'line', 425
     .param pmc _lex_param_0 
     .lex "self", _lex_param_0 
     nqp_decontainerize $P5001, _lex_param_0
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     repr_get_attr_obj $P5003, $P5001, $P5002, "%!alt_nfas"
     isnull $I5001, $P5003
     unless $I5001 goto if86_else283 
@@ -2938,7 +2966,7 @@
     goto if86_end284
   if86_else283:
     nqp_decontainerize $P5005, _lex_param_0
-    nqp_get_sc_object $P5006, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5006, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     repr_get_attr_obj $P5007, $P5005, $P5006, "%!alt_nfas"
     set $P5008, $P5007
   if86_end284:
@@ -2946,15 +2974,15 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "ALT_NFA" :subid("cuid_21_1360250807.22") :anon :lex :outer("cuid_86_1360250807.22")
+.sub "ALT_NFA" :subid("cuid_21_1360256342.611") :anon :lex :outer("cuid_87_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 427
+.annotate 'line', 428
     .param pmc _lex_param_0 
     .param string _lex_param_1 
     .lex "self", _lex_param_0 
     .lex "$name", _lex_param_1 
     nqp_decontainerize $P5001, _lex_param_0
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     repr_get_attr_obj $P5003, $P5001, $P5002, "%!alt_nfas"
     isnull $I5001, $P5003
     unless $I5001 goto if87_else285 
@@ -2963,7 +2991,7 @@
     goto if87_end286
   if87_else285:
     nqp_decontainerize $P5006, _lex_param_0
-    nqp_get_sc_object $P5007, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5007, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     repr_get_attr_obj $P5008, $P5006, $P5007, "%!alt_nfas"
     set $P5005, $P5008[_lex_param_1]
     unless_null $P5005, fallback287
@@ -2976,13 +3004,13 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "NESTED_CODES" :subid("cuid_22_1360250807.22") :anon :lex :outer("cuid_86_1360250807.22")
+.sub "NESTED_CODES" :subid("cuid_22_1360256342.611") :anon :lex :outer("cuid_87_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 430
+.annotate 'line', 431
     .param pmc _lex_param_0 
     .lex "self", _lex_param_0 
     nqp_decontainerize $P5001, _lex_param_0
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     repr_get_attr_obj $P5003, $P5001, $P5002, "@!nested_codes"
     isnull $I5001, $P5003
     unless $I5001 goto if88_else288 
@@ -2991,7 +3019,7 @@
     goto if88_end289
   if88_else288:
     nqp_decontainerize $P5005, _lex_param_0
-    nqp_get_sc_object $P5006, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5006, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     repr_get_attr_obj $P5007, $P5005, $P5006, "@!nested_codes"
     set $P5008, $P5007
   if88_end289:
@@ -2999,9 +3027,9 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "clone" :subid("cuid_23_1360250807.22") :anon :lex :outer("cuid_86_1360250807.22")
+.sub "clone" :subid("cuid_23_1360256342.611") :anon :lex :outer("cuid_87_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 433
+.annotate 'line', 434
     .param pmc _lex_param_0 
     .lex "$do", $P101 
     .lex "$der", $P102 
@@ -3014,27 +3042,27 @@
     null $P5003
     set $P103, $P5003
     nqp_decontainerize $P5005, _lex_param_0
-    nqp_get_sc_object $P5006, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5006, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     repr_get_attr_obj $P5007, $P5005, $P5006, "$!do"
     repr_clone $P5004, $P5007
     set $P101, $P5004
     nqp_decontainerize $P5009, _lex_param_0
     repr_clone $P5008, $P5009
     set $P102, $P5008
-    nqp_get_sc_object $P5010, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5010, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     setattribute $P102, $P5010, "$!do", $P101
     set_sub_code_object $P101, $P102
     nqp_decontainerize $P5012, _lex_param_0
-    nqp_get_sc_object $P5013, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5013, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     repr_get_attr_obj $P5014, $P5012, $P5013, "$!do"
     getprop $P5011, $P5014, "CLONE_CALLBACK"
     set $P103, $P5011
     defined $I5001, $P103
     unless $I5001 goto if89_end291 
-.annotate 'line', 444
 .annotate 'line', 445
+.annotate 'line', 446
     nqp_decontainerize $P5015, _lex_param_0
-    nqp_get_sc_object $P5016, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5016, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     repr_get_attr_obj $P5017, $P5015, $P5016, "$!do"
     $P5018 = $P103($P5017, $P101, $P102)
   if89_end291:
@@ -3042,9 +3070,9 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "SET_NFA_TYPE" :subid("cuid_24_1360250807.22") :anon :lex :outer("cuid_86_1360250807.22")
+.sub "SET_NFA_TYPE" :subid("cuid_24_1360256342.611") :anon :lex :outer("cuid_87_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 451
+.annotate 'line', 452
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
     .lex "self", _lex_param_0 
@@ -3054,26 +3082,26 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "instantiate_generic" :subid("cuid_25_1360250807.22") :anon :lex :outer("cuid_86_1360250807.22")
+.sub "instantiate_generic" :subid("cuid_25_1360256342.611") :anon :lex :outer("cuid_87_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 454
+.annotate 'line', 455
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
-    .const 'Sub' $P5008 = 'cuid_87_1360250807.22' 
+    .const 'Sub' $P5008 = 'cuid_88_1360256342.611' 
     capture_lex $P5008 
     .lex "self", _lex_param_0 
     .lex "$env", _lex_param_1 
     nqp_decontainerize $P5001, _lex_param_0
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     repr_get_attr_obj $P5003, $P5001, $P5002, "$!generic_nfa"
     isnull $I5001, $P5003
     unless $I5001 goto if90_else292 
-.annotate 'line', 455
+.annotate 'line', 456
     nqp_decontainerize $P5004, _lex_param_0
     set $P5007, $P5004
     goto if90_end293
   if90_else292:
-    .const 'Sub' $P5005 = 'cuid_87_1360250807.22' 
+    .const 'Sub' $P5005 = 'cuid_88_1360256342.611' 
     capture_lex $P5005
     $P5006 = $P5005()
     set $P5007, $P5006
@@ -3082,58 +3110,58 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_87_1360250807.22") :anon :lex :outer("cuid_25_1360250807.22")
+.sub "" :subid("cuid_88_1360256342.611") :anon :lex :outer("cuid_25_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 458
+.annotate 'line', 459
     .lex "$ins", $P101 
     null $P5001
     set $P101, $P5001
-.annotate 'line', 459
+.annotate 'line', 460
     find_lex $P5003, "self"
     nqp_decontainerize $P5002, $P5003
     $P5004 = $P5002."clone"()
     set $P101, $P5004
-    nqp_get_sc_object $P5005, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
-.annotate 'line', 461
+    nqp_get_sc_object $P5005, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
+.annotate 'line', 462
     find_lex $P5006, "$nfa_type"
     find_lex $P5008, "self"
     nqp_decontainerize $P5007, $P5008
-    nqp_get_sc_object $P5009, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5009, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     repr_get_attr_obj $P5010, $P5007, $P5009, "$!generic_nfa"
     $P5011 = $P5006."from_saved"($P5010)
     find_lex $P5012, "$env"
     $P5013 = $P5011."instantiate_generic"($P5012)
     $P5014 = $P5013."save"()
     setattribute $P101, $P5005, "$!nfa", $P5014
-    nqp_get_sc_object $P5015, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5015, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     null $P5016
     setattribute $P101, $P5015, "$!generic_nfa", $P5016
     .return ($P101) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "name" :subid("cuid_26_1360250807.22") :anon :lex :outer("cuid_86_1360250807.22")
+.sub "name" :subid("cuid_26_1360256342.611") :anon :lex :outer("cuid_87_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 466
+.annotate 'line', 467
     .param pmc _lex_param_0 
     .lex "self", _lex_param_0 
     nqp_decontainerize $P5001, _lex_param_0
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     repr_get_attr_obj $P5003, $P5001, $P5002, "$!do"
     set $S5001, $P5003
     .return ($S5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "!set_name" :subid("cuid_27_1360250807.22") :anon :lex :outer("cuid_86_1360250807.22")
+.sub "!set_name" :subid("cuid_27_1360256342.611") :anon :lex :outer("cuid_87_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 469
+.annotate 'line', 470
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
     .lex "self", _lex_param_0 
     .lex "$name", _lex_param_1 
     nqp_decontainerize $P5001, _lex_param_0
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     repr_get_attr_obj $P5003, $P5001, $P5002, "$!do"
     set $S5001, _lex_param_1
     assign $P5003, $S5001
@@ -3141,98 +3169,98 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_88_1360250807.22") :anon :lex :outer("cuid_53_1360250807.22")
+.sub "" :subid("cuid_89_1360256342.611") :anon :lex :outer("cuid_53_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 479
-    .const 'Sub' $P5021 = 'cuid_28_1360250807.22' 
+.annotate 'line', 480
+    .const 'Sub' $P5021 = 'cuid_28_1360256342.611' 
     capture_lex $P5021 
-    .const 'Sub' $P5021 = 'cuid_29_1360250807.22' 
+    .const 'Sub' $P5021 = 'cuid_29_1360256342.611' 
     capture_lex $P5021 
-    .const 'Sub' $P5021 = 'cuid_30_1360250807.22' 
+    .const 'Sub' $P5021 = 'cuid_30_1360256342.611' 
     capture_lex $P5021 
-    .const 'Sub' $P5021 = 'cuid_31_1360250807.22' 
+    .const 'Sub' $P5021 = 'cuid_31_1360256342.611' 
     capture_lex $P5021 
-    .const 'Sub' $P5021 = 'cuid_32_1360250807.22' 
+    .const 'Sub' $P5021 = 'cuid_32_1360256342.611' 
     capture_lex $P5021 
-    .const 'Sub' $P5021 = 'cuid_33_1360250807.22' 
+    .const 'Sub' $P5021 = 'cuid_33_1360256342.611' 
     capture_lex $P5021 
-    .const 'Sub' $P5021 = 'cuid_34_1360250807.22' 
+    .const 'Sub' $P5021 = 'cuid_34_1360256342.611' 
     capture_lex $P5021 
-    .const 'Sub' $P5021 = 'cuid_35_1360250807.22' 
+    .const 'Sub' $P5021 = 'cuid_35_1360256342.611' 
     capture_lex $P5021 
-    .const 'Sub' $P5021 = 'cuid_36_1360250807.22' 
+    .const 'Sub' $P5021 = 'cuid_36_1360256342.611' 
     capture_lex $P5021 
-    .const 'Sub' $P5021 = 'cuid_37_1360250807.22' 
+    .const 'Sub' $P5021 = 'cuid_37_1360256342.611' 
     capture_lex $P5021 
-    .const 'Sub' $P5021 = 'cuid_38_1360250807.22' 
+    .const 'Sub' $P5021 = 'cuid_38_1360256342.611' 
     capture_lex $P5021 
-    .const 'Sub' $P5021 = 'cuid_39_1360250807.22' 
+    .const 'Sub' $P5021 = 'cuid_39_1360256342.611' 
     capture_lex $P5021 
-    .const 'Sub' $P5021 = 'cuid_40_1360250807.22' 
+    .const 'Sub' $P5021 = 'cuid_40_1360256342.611' 
     capture_lex $P5021 
-    .const 'Sub' $P5021 = 'cuid_41_1360250807.22' 
+    .const 'Sub' $P5021 = 'cuid_41_1360256342.611' 
     capture_lex $P5021 
-    .const 'Sub' $P5021 = 'cuid_42_1360250807.22' 
+    .const 'Sub' $P5021 = 'cuid_42_1360256342.611' 
     capture_lex $P5021 
-    .const 'Sub' $P5021 = 'cuid_43_1360250807.22' 
+    .const 'Sub' $P5021 = 'cuid_43_1360256342.611' 
     capture_lex $P5021 
-    .const 'Sub' $P5021 = 'cuid_44_1360250807.22' 
+    .const 'Sub' $P5021 = 'cuid_44_1360256342.611' 
     capture_lex $P5021 
-    .const 'Sub' $P5021 = 'cuid_45_1360250807.22' 
+    .const 'Sub' $P5021 = 'cuid_45_1360256342.611' 
     capture_lex $P5021 
-    .const 'Sub' $P5021 = 'cuid_46_1360250807.22' 
+    .const 'Sub' $P5021 = 'cuid_46_1360256342.611' 
     capture_lex $P5021 
-    .const 'Sub' $P5021 = 'cuid_47_1360250807.22' 
+    .const 'Sub' $P5021 = 'cuid_47_1360256342.611' 
     capture_lex $P5021 
     .lex "$?PACKAGE", $P101 
     .lex "$?CLASS", $P102 
-    .const 'Sub' $P5001 = 'cuid_28_1360250807.22' 
+    .const 'Sub' $P5001 = 'cuid_28_1360256342.611' 
     capture_lex $P5001
-    .const 'Sub' $P5002 = 'cuid_29_1360250807.22' 
+    .const 'Sub' $P5002 = 'cuid_29_1360256342.611' 
     capture_lex $P5002
-    .const 'Sub' $P5003 = 'cuid_30_1360250807.22' 
+    .const 'Sub' $P5003 = 'cuid_30_1360256342.611' 
     capture_lex $P5003
-    .const 'Sub' $P5004 = 'cuid_31_1360250807.22' 
+    .const 'Sub' $P5004 = 'cuid_31_1360256342.611' 
     capture_lex $P5004
-    .const 'Sub' $P5005 = 'cuid_32_1360250807.22' 
+    .const 'Sub' $P5005 = 'cuid_32_1360256342.611' 
     capture_lex $P5005
-    .const 'Sub' $P5006 = 'cuid_33_1360250807.22' 
+    .const 'Sub' $P5006 = 'cuid_33_1360256342.611' 
     capture_lex $P5006
-    .const 'Sub' $P5007 = 'cuid_34_1360250807.22' 
+    .const 'Sub' $P5007 = 'cuid_34_1360256342.611' 
     capture_lex $P5007
-    .const 'Sub' $P5008 = 'cuid_35_1360250807.22' 
+    .const 'Sub' $P5008 = 'cuid_35_1360256342.611' 
     capture_lex $P5008
-    .const 'Sub' $P5009 = 'cuid_36_1360250807.22' 
+    .const 'Sub' $P5009 = 'cuid_36_1360256342.611' 
     capture_lex $P5009
-    .const 'Sub' $P5010 = 'cuid_37_1360250807.22' 
+    .const 'Sub' $P5010 = 'cuid_37_1360256342.611' 
     capture_lex $P5010
-    .const 'Sub' $P5011 = 'cuid_38_1360250807.22' 
+    .const 'Sub' $P5011 = 'cuid_38_1360256342.611' 
     capture_lex $P5011
-    .const 'Sub' $P5012 = 'cuid_39_1360250807.22' 
+    .const 'Sub' $P5012 = 'cuid_39_1360256342.611' 
     capture_lex $P5012
-    .const 'Sub' $P5013 = 'cuid_40_1360250807.22' 
+    .const 'Sub' $P5013 = 'cuid_40_1360256342.611' 
     capture_lex $P5013
-    .const 'Sub' $P5014 = 'cuid_41_1360250807.22' 
+    .const 'Sub' $P5014 = 'cuid_41_1360256342.611' 
     capture_lex $P5014
-    .const 'Sub' $P5015 = 'cuid_42_1360250807.22' 
+    .const 'Sub' $P5015 = 'cuid_42_1360256342.611' 
     capture_lex $P5015
-    .const 'Sub' $P5016 = 'cuid_43_1360250807.22' 
+    .const 'Sub' $P5016 = 'cuid_43_1360256342.611' 
     capture_lex $P5016
-    .const 'Sub' $P5017 = 'cuid_44_1360250807.22' 
+    .const 'Sub' $P5017 = 'cuid_44_1360256342.611' 
     capture_lex $P5017
-    .const 'Sub' $P5018 = 'cuid_45_1360250807.22' 
+    .const 'Sub' $P5018 = 'cuid_45_1360256342.611' 
     capture_lex $P5018
-    .const 'Sub' $P5019 = 'cuid_46_1360250807.22' 
+    .const 'Sub' $P5019 = 'cuid_46_1360256342.611' 
     capture_lex $P5019
-    .const 'Sub' $P5020 = 'cuid_47_1360250807.22' 
+    .const 'Sub' $P5020 = 'cuid_47_1360256342.611' 
     capture_lex $P5020
     .return ($P5020) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "CREATE" :subid("cuid_28_1360250807.22") :anon :lex :outer("cuid_88_1360250807.22")
+.sub "CREATE" :subid("cuid_28_1360256342.611") :anon :lex :outer("cuid_89_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 480
+.annotate 'line', 481
     .param pmc _lex_param_0 
     .lex "self", _lex_param_0 
     nqp_decontainerize $P5002, _lex_param_0
@@ -3241,9 +3269,9 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "bless" :subid("cuid_29_1360250807.22") :anon :lex :outer("cuid_88_1360250807.22")
+.sub "bless" :subid("cuid_29_1360256342.611") :anon :lex :outer("cuid_89_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 484
+.annotate 'line', 485
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 :slurpy :named 
     .lex "self", $P101 
@@ -3251,24 +3279,24 @@
     .lex "$self", _lex_param_0 
     .lex "%attributes", _lex_param_1 
     set $P101, _lex_param_0
-    nqp_get_sc_object $P5001, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5001, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P102, $P5001
-.annotate 'line', 485
+.annotate 'line', 486
     nqp_decontainerize $P5002, $P101
     $P5003 = $P5002."CREATE"()
     set $P102, $P5003
-.annotate 'line', 486
+.annotate 'line', 487
     $P102."BUILDALL"(_lex_param_1 :flat :named)
     .return ($P102) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "BUILDALL" :subid("cuid_30_1360250807.22") :anon :lex :outer("cuid_88_1360250807.22")
+.sub "BUILDALL" :subid("cuid_30_1360256342.611") :anon :lex :outer("cuid_89_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 490
+.annotate 'line', 491
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 :slurpy :named 
-    .const 'Sub' $P5015 = 'cuid_90_1360250807.22' 
+    .const 'Sub' $P5015 = 'cuid_91_1360256342.611' 
     capture_lex $P5015 
     .lex "self", $P101 
     .lex "$build_plan", $P102 
@@ -3277,13 +3305,13 @@
     .lex "$self", _lex_param_0 
     .lex "%attrinit", _lex_param_1 
     set $P101, _lex_param_0
-    nqp_get_sc_object $P5001, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5001, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P102, $P5001
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P103, $P5002
-    nqp_get_sc_object $P5003, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5003, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P104, $P5003
-.annotate 'line', 492
+.annotate 'line', 493
     nqp_decontainerize $P5005, $P101
     get_how $P5004, $P5005
     nqp_decontainerize $P5006, $P101
@@ -3302,7 +3330,7 @@
     set $P5012, $P5013
     unless $I5002 goto while91_done298 
   while91_redo296:
-    .const 'Sub' $P5010 = 'cuid_90_1360250807.22' 
+    .const 'Sub' $P5010 = 'cuid_91_1360256342.611' 
     capture_lex $P5010
     $P5011 = $P5010()
     set $P5012, $P5011
@@ -3313,18 +3341,18 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_90_1360250807.22") :anon :lex :outer("cuid_30_1360250807.22")
+.sub "" :subid("cuid_91_1360256342.611") :anon :lex :outer("cuid_30_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 495
-    .const 'Sub' $P5044 = 'cuid_89_1360250807.22' 
+.annotate 'line', 496
+    .const 'Sub' $P5044 = 'cuid_90_1360256342.611' 
     capture_lex $P5044 
-    .const 'Sub' $P5044 = 'cuid_91_1360250807.22' 
+    .const 'Sub' $P5044 = 'cuid_92_1360256342.611' 
     capture_lex $P5044 
-    .const 'Sub' $P5044 = 'cuid_92_1360250807.22' 
+    .const 'Sub' $P5044 = 'cuid_93_1360256342.611' 
     capture_lex $P5044 
     .lex "$task", $P101 
     .lex "$code", $I101 
-    nqp_get_sc_object $P5001, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5001, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P101, $P5001
     set $I101, 0
     find_lex $P5003, "$build_plan"
@@ -3343,8 +3371,8 @@
     store_lex "$i", $P5007
     iseq $I5003, $I101, 0
     unless $I5003 goto if92_else299 
-.annotate 'line', 499
-.annotate 'line', 501
+.annotate 'line', 500
+.annotate 'line', 502
     find_lex $P5010, "self"
     nqp_decontainerize $P5009, $P5010
     find_lex $P5011, "%attrinit"
@@ -3355,7 +3383,7 @@
   if92_else299:
     iseq $I5004, $I101, 1
     unless $I5004 goto if93_else301 
-    .const 'Sub' $P5013 = 'cuid_89_1360250807.22' 
+    .const 'Sub' $P5013 = 'cuid_90_1360256342.611' 
     capture_lex $P5013
     $P5014 = $P5013()
     set $P5042, $P5014
@@ -3363,7 +3391,7 @@
   if93_else301:
     iseq $I5005, $I101, 2
     unless $I5005 goto if95_else306 
-    .const 'Sub' $P5015 = 'cuid_91_1360250807.22' 
+    .const 'Sub' $P5015 = 'cuid_92_1360256342.611' 
     capture_lex $P5015
     $P5016 = $P5015()
     set $P5041, $P5016
@@ -3371,7 +3399,7 @@
   if95_else306:
     iseq $I5006, $I101, 3
     unless $I5006 goto if97_else311 
-    .const 'Sub' $P5017 = 'cuid_92_1360250807.22' 
+    .const 'Sub' $P5017 = 'cuid_93_1360256342.611' 
     capture_lex $P5017
     $P5018 = $P5017()
     set $P5040, $P5018
@@ -3379,7 +3407,7 @@
   if97_else311:
     iseq $I5007, $I101, 4
     unless $I5007 goto if99_else316 
-.annotate 'line', 532
+.annotate 'line', 533
     find_lex $P5020, "self"
     nqp_decontainerize $P5019, $P5020
     set $P5021, $P101[1]
@@ -3389,13 +3417,13 @@
     box $P5037, $I5008
     set $P5036, $P5037
     if $I5008 goto unless100_end319 
-.annotate 'line', 533
+.annotate 'line', 534
     find_lex $P5024, "self"
     nqp_decontainerize $P5023, $P5024
     set $P5025, $P101[1]
     set $P5026, $P101[2]
     set $S5002, $P5026
-.annotate 'line', 535
+.annotate 'line', 536
     find_lex $P5029, "self"
     nqp_decontainerize $P5028, $P5029
     find_lex $P5032, "self"
@@ -3412,7 +3440,7 @@
     set $P5039, $P5036
     goto if99_end317
   if99_else316:
-.annotate 'line', 539
+.annotate 'line', 540
     box $P5038, "Invalid BUILDALLPLAN"
     die $P5038
     set $P5039, $P5038
@@ -3429,11 +3457,11 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_89_1360250807.22") :anon :lex :outer("cuid_90_1360250807.22")
+.sub "" :subid("cuid_90_1360256342.611") :anon :lex :outer("cuid_91_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 503
+.annotate 'line', 504
     .lex "$key_name", $P101 
-    nqp_get_sc_object $P5001, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5001, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P101, $P5001
     find_lex $P5003, "$task"
     set $P5002, $P5003[2]
@@ -3444,7 +3472,7 @@
     box $P5014, $I5001
     set $P5013, $P5014
     unless $I5001 goto if94_end304 
-.annotate 'line', 506
+.annotate 'line', 507
     find_lex $P5006, "self"
     nqp_decontainerize $P5005, $P5006
     find_lex $P5008, "$task"
@@ -3455,7 +3483,7 @@
     set $S5003, $P101
     set $P5010, $P5011[$S5003]
     unless_null $P5010, fallback305
-    nqp_get_sc_object $P5012, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5012, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P5010, $P5012
   fallback305:
     setattribute $P5005, $P5007, $S5002, $P5010
@@ -3465,11 +3493,11 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_91_1360250807.22") :anon :lex :outer("cuid_90_1360250807.22")
+.sub "" :subid("cuid_92_1360256342.611") :anon :lex :outer("cuid_91_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 510
+.annotate 'line', 511
     .lex "$key_name", $P101 
-    nqp_get_sc_object $P5001, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5001, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P101, $P5001
     find_lex $P5003, "$task"
     set $P5002, $P5003[2]
@@ -3478,7 +3506,7 @@
     set $S5001, $P101
     exists $I5001, $P5004[$S5001]
     unless $I5001 goto if96_else308 
-.annotate 'line', 514
+.annotate 'line', 515
     find_lex $P5006, "self"
     nqp_decontainerize $P5005, $P5006
     find_lex $P5008, "$task"
@@ -3489,14 +3517,14 @@
     set $S5003, $P101
     set $P5010, $P5011[$S5003]
     unless_null $P5010, fallback310
-    nqp_get_sc_object $P5012, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5012, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P5010, $P5012
   fallback310:
     setattribute $P5005, $P5007, $S5002, $P5010
     set $P5019, $P5010
     goto if96_end309
   if96_else308:
-.annotate 'line', 517
+.annotate 'line', 518
     find_lex $P5014, "self"
     nqp_decontainerize $P5013, $P5014
     find_lex $P5016, "$task"
@@ -3511,11 +3539,11 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_92_1360250807.22") :anon :lex :outer("cuid_90_1360250807.22")
+.sub "" :subid("cuid_93_1360256342.611") :anon :lex :outer("cuid_91_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 521
+.annotate 'line', 522
     .lex "$key_name", $P101 
-    nqp_get_sc_object $P5001, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5001, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P101, $P5001
     find_lex $P5003, "$task"
     set $P5002, $P5003[2]
@@ -3524,7 +3552,7 @@
     set $S5001, $P101
     exists $I5001, $P5004[$S5001]
     unless $I5001 goto if98_else313 
-.annotate 'line', 525
+.annotate 'line', 526
     find_lex $P5006, "self"
     nqp_decontainerize $P5005, $P5006
     find_lex $P5008, "$task"
@@ -3535,14 +3563,14 @@
     set $S5003, $P101
     set $P5010, $P5011[$S5003]
     unless_null $P5010, fallback315
-    nqp_get_sc_object $P5012, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5012, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P5010, $P5012
   fallback315:
     setattribute $P5005, $P5007, $S5002, $P5010
     set $P5019, $P5010
     goto if98_end314
   if98_else313:
-.annotate 'line', 528
+.annotate 'line', 529
     find_lex $P5014, "self"
     nqp_decontainerize $P5013, $P5014
     find_lex $P5016, "$task"
@@ -3557,23 +3585,23 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "new" :subid("cuid_31_1360250807.22") :anon :lex :outer("cuid_88_1360250807.22")
+.sub "new" :subid("cuid_31_1360256342.611") :anon :lex :outer("cuid_89_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 546
+.annotate 'line', 547
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 :slurpy :named 
     .lex "self", _lex_param_0 
     .lex "%attributes", _lex_param_1 
-.annotate 'line', 547
+.annotate 'line', 548
     nqp_decontainerize $P5001, _lex_param_0
     $P5002 = $P5001."bless"(_lex_param_1 :flat :named)
     .return ($P5002) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "Str" :subid("cuid_32_1360250807.22") :anon :lex :outer("cuid_88_1360250807.22")
+.sub "Str" :subid("cuid_32_1360256342.611") :anon :lex :outer("cuid_89_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 550
+.annotate 'line', 551
     .param pmc _lex_param_0 
     .lex "CURRENT_DISPATCH_CAPTURE", $P101 
     .lex "&*CURRENT_DISPATCHER", $P102 
@@ -3585,22 +3613,33 @@
     set $P5003, $P5003['sub']
     get_sub_code_object $P5002, $P5003
     set $P102, $P5002
-    getinterp $P5006
-    set $P5006, $P5006['sub']
-    get_sub_code_object $P5005, $P5006
     getinterp $P5007
-    set $P5007, $P5007['context']
-    $P5008 = $P5005."dispatch"($P5007)
-    getinterp $P5009
-    set $P5009, $P5009['context']
-    invoke_with_capture $P5004, $P5008, $P5009
+    set $P5007, $P5007['sub']
+    get_sub_code_object $P5006, $P5007
+    nqp_get_sc_object $P5008, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
+    repr_get_attr_obj $P5009, $P5006, $P5008, "$!dispatch_cache"
+    getinterp $P5010
+    set $P5010, $P5010['context']
+    multi_cache_find $P5005, $P5009, $P5010
+    unless_null $P5005, vivi_101320
+    getinterp $P5012
+    set $P5012, $P5012['sub']
+    get_sub_code_object $P5011, $P5012
+    getinterp $P5013
+    set $P5013, $P5013['context']
+    $P5014 = $P5011."dispatch"($P5013)
+    set $P5005, $P5014
+  vivi_101320:
+    getinterp $P5015
+    set $P5015, $P5015['context']
+    invoke_with_capture $P5004, $P5005, $P5015
     .return ($P5004) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "Str" :subid("cuid_33_1360250807.22") :anon :lex :outer("cuid_88_1360250807.22")
+.sub "Str" :subid("cuid_33_1360256342.611") :anon :lex :outer("cuid_89_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 551
+.annotate 'line', 552
     .param pmc _lex_param_0 
     .lex "self", $P101 
     .lex "$self", _lex_param_0 
@@ -3609,14 +3648,14 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "Str" :subid("cuid_34_1360250807.22") :anon :lex :outer("cuid_88_1360250807.22")
+.sub "Str" :subid("cuid_34_1360256342.611") :anon :lex :outer("cuid_89_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 554
+.annotate 'line', 555
     .param pmc _lex_param_0 
     .lex "self", $P101 
     .lex "$self", _lex_param_0 
     set $P101, _lex_param_0
-.annotate 'line', 555
+.annotate 'line', 556
     nqp_decontainerize $P5002, $P101
     get_how $P5001, $P5002
     nqp_decontainerize $P5003, $P101
@@ -3632,9 +3671,9 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "Numeric" :subid("cuid_35_1360250807.22") :anon :lex :outer("cuid_88_1360250807.22")
+.sub "Numeric" :subid("cuid_35_1360256342.611") :anon :lex :outer("cuid_89_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 558
+.annotate 'line', 559
     .param pmc _lex_param_0 
     .lex "CURRENT_DISPATCH_CAPTURE", $P101 
     .lex "&*CURRENT_DISPATCHER", $P102 
@@ -3646,22 +3685,33 @@
     set $P5003, $P5003['sub']
     get_sub_code_object $P5002, $P5003
     set $P102, $P5002
-    getinterp $P5006
-    set $P5006, $P5006['sub']
-    get_sub_code_object $P5005, $P5006
     getinterp $P5007
-    set $P5007, $P5007['context']
-    $P5008 = $P5005."dispatch"($P5007)
-    getinterp $P5009
-    set $P5009, $P5009['context']
-    invoke_with_capture $P5004, $P5008, $P5009
+    set $P5007, $P5007['sub']
+    get_sub_code_object $P5006, $P5007
+    nqp_get_sc_object $P5008, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
+    repr_get_attr_obj $P5009, $P5006, $P5008, "$!dispatch_cache"
+    getinterp $P5010
+    set $P5010, $P5010['context']
+    multi_cache_find $P5005, $P5009, $P5010
+    unless_null $P5005, vivi_102321
+    getinterp $P5012
+    set $P5012, $P5012['sub']
+    get_sub_code_object $P5011, $P5012
+    getinterp $P5013
+    set $P5013, $P5013['context']
+    $P5014 = $P5011."dispatch"($P5013)
+    set $P5005, $P5014
+  vivi_102321:
+    getinterp $P5015
+    set $P5015, $P5015['context']
+    invoke_with_capture $P5004, $P5005, $P5015
     .return ($P5004) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "Numeric" :subid("cuid_36_1360250807.22") :anon :lex :outer("cuid_88_1360250807.22")
+.sub "Numeric" :subid("cuid_36_1360256342.611") :anon :lex :outer("cuid_89_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 559
+.annotate 'line', 560
     .param pmc _lex_param_0 
     .lex "self", $P101 
     .lex "$self", _lex_param_0 
@@ -3670,9 +3720,9 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "Int" :subid("cuid_37_1360250807.22") :anon :lex :outer("cuid_88_1360250807.22")
+.sub "Int" :subid("cuid_37_1360256342.611") :anon :lex :outer("cuid_89_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 563
+.annotate 'line', 564
     .param pmc _lex_param_0 
     .lex "CURRENT_DISPATCH_CAPTURE", $P101 
     .lex "&*CURRENT_DISPATCHER", $P102 
@@ -3684,22 +3734,33 @@
     set $P5003, $P5003['sub']
     get_sub_code_object $P5002, $P5003
     set $P102, $P5002
-    getinterp $P5006
-    set $P5006, $P5006['sub']
-    get_sub_code_object $P5005, $P5006
     getinterp $P5007
-    set $P5007, $P5007['context']
-    $P5008 = $P5005."dispatch"($P5007)
-    getinterp $P5009
-    set $P5009, $P5009['context']
-    invoke_with_capture $P5004, $P5008, $P5009
+    set $P5007, $P5007['sub']
+    get_sub_code_object $P5006, $P5007
+    nqp_get_sc_object $P5008, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
+    repr_get_attr_obj $P5009, $P5006, $P5008, "$!dispatch_cache"
+    getinterp $P5010
+    set $P5010, $P5010['context']
+    multi_cache_find $P5005, $P5009, $P5010
+    unless_null $P5005, vivi_103322
+    getinterp $P5012
+    set $P5012, $P5012['sub']
+    get_sub_code_object $P5011, $P5012
+    getinterp $P5013
+    set $P5013, $P5013['context']
+    $P5014 = $P5011."dispatch"($P5013)
+    set $P5005, $P5014
+  vivi_103322:
+    getinterp $P5015
+    set $P5015, $P5015['context']
+    invoke_with_capture $P5004, $P5005, $P5015
     .return ($P5004) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "Int" :subid("cuid_38_1360250807.22") :anon :lex :outer("cuid_88_1360250807.22")
+.sub "Int" :subid("cuid_38_1360256342.611") :anon :lex :outer("cuid_89_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 564
+.annotate 'line', 565
     .param pmc _lex_param_0 
     .lex "self", $P101 
     .lex "$self", _lex_param_0 
@@ -3708,52 +3769,63 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "at_pos" :subid("cuid_39_1360250807.22") :anon :lex :outer("cuid_88_1360250807.22")
-.annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 568
-    .param pmc _lex_param_0 
-    .param pmc _lex_param_1 
-    .lex "CURRENT_DISPATCH_CAPTURE", $P101 
-    .lex "&*CURRENT_DISPATCHER", $P102 
-    .lex "self", _lex_param_0 
-    .lex "$pos", _lex_param_1 
-    getinterp $P5001
-    set $P5001, $P5001['context']
-    set $P101, $P5001
-    getinterp $P5003
-    set $P5003, $P5003['sub']
-    get_sub_code_object $P5002, $P5003
-    set $P102, $P5002
-    getinterp $P5006
-    set $P5006, $P5006['sub']
-    get_sub_code_object $P5005, $P5006
-    getinterp $P5007
-    set $P5007, $P5007['context']
-    $P5008 = $P5005."dispatch"($P5007)
-    getinterp $P5009
-    set $P5009, $P5009['context']
-    invoke_with_capture $P5004, $P5008, $P5009
-    .return ($P5004) 
-.end
-.HLL "nqp"
-.namespace []
-.sub "at_pos" :subid("cuid_40_1360250807.22") :anon :lex :outer("cuid_88_1360250807.22")
+.sub "at_pos" :subid("cuid_39_1360256342.611") :anon :lex :outer("cuid_89_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
 .annotate 'line', 569
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
+    .lex "CURRENT_DISPATCH_CAPTURE", $P101 
+    .lex "&*CURRENT_DISPATCHER", $P102 
+    .lex "self", _lex_param_0 
+    .lex "$pos", _lex_param_1 
+    getinterp $P5001
+    set $P5001, $P5001['context']
+    set $P101, $P5001
+    getinterp $P5003
+    set $P5003, $P5003['sub']
+    get_sub_code_object $P5002, $P5003
+    set $P102, $P5002
+    getinterp $P5007
+    set $P5007, $P5007['sub']
+    get_sub_code_object $P5006, $P5007
+    nqp_get_sc_object $P5008, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
+    repr_get_attr_obj $P5009, $P5006, $P5008, "$!dispatch_cache"
+    getinterp $P5010
+    set $P5010, $P5010['context']
+    multi_cache_find $P5005, $P5009, $P5010
+    unless_null $P5005, vivi_104323
+    getinterp $P5012
+    set $P5012, $P5012['sub']
+    get_sub_code_object $P5011, $P5012
+    getinterp $P5013
+    set $P5013, $P5013['context']
+    $P5014 = $P5011."dispatch"($P5013)
+    set $P5005, $P5014
+  vivi_104323:
+    getinterp $P5015
+    set $P5015, $P5015['context']
+    invoke_with_capture $P5004, $P5005, $P5015
+    .return ($P5004) 
+.end
+.HLL "nqp"
+.namespace []
+.sub "at_pos" :subid("cuid_40_1360256342.611") :anon :lex :outer("cuid_89_1360256342.611")
+.annotate 'file', "src\\stage2\\NQPCORE.setting"
+.annotate 'line', 570
+    .param pmc _lex_param_0 
+    .param pmc _lex_param_1 
     .lex "self", $P101 
     .lex "$self", _lex_param_0 
     .lex "$pos", _lex_param_1 
     set $P101, _lex_param_0
-    nqp_get_sc_object $P5001, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5001, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "at_key" :subid("cuid_41_1360250807.22") :anon :lex :outer("cuid_88_1360250807.22")
+.sub "at_key" :subid("cuid_41_1360256342.611") :anon :lex :outer("cuid_89_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 573
+.annotate 'line', 574
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
     .lex "CURRENT_DISPATCH_CAPTURE", $P101 
@@ -3767,36 +3839,47 @@
     set $P5003, $P5003['sub']
     get_sub_code_object $P5002, $P5003
     set $P102, $P5002
-    getinterp $P5006
-    set $P5006, $P5006['sub']
-    get_sub_code_object $P5005, $P5006
     getinterp $P5007
-    set $P5007, $P5007['context']
-    $P5008 = $P5005."dispatch"($P5007)
-    getinterp $P5009
-    set $P5009, $P5009['context']
-    invoke_with_capture $P5004, $P5008, $P5009
+    set $P5007, $P5007['sub']
+    get_sub_code_object $P5006, $P5007
+    nqp_get_sc_object $P5008, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
+    repr_get_attr_obj $P5009, $P5006, $P5008, "$!dispatch_cache"
+    getinterp $P5010
+    set $P5010, $P5010['context']
+    multi_cache_find $P5005, $P5009, $P5010
+    unless_null $P5005, vivi_105324
+    getinterp $P5012
+    set $P5012, $P5012['sub']
+    get_sub_code_object $P5011, $P5012
+    getinterp $P5013
+    set $P5013, $P5013['context']
+    $P5014 = $P5011."dispatch"($P5013)
+    set $P5005, $P5014
+  vivi_105324:
+    getinterp $P5015
+    set $P5015, $P5015['context']
+    invoke_with_capture $P5004, $P5005, $P5015
     .return ($P5004) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "at_key" :subid("cuid_42_1360250807.22") :anon :lex :outer("cuid_88_1360250807.22")
+.sub "at_key" :subid("cuid_42_1360256342.611") :anon :lex :outer("cuid_89_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 574
+.annotate 'line', 575
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
     .lex "self", $P101 
     .lex "$self", _lex_param_0 
     .lex "$key", _lex_param_1 
     set $P101, _lex_param_0
-    nqp_get_sc_object $P5001, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5001, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "defined" :subid("cuid_43_1360250807.22") :anon :lex :outer("cuid_88_1360250807.22")
+.sub "defined" :subid("cuid_43_1360256342.611") :anon :lex :outer("cuid_89_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 578
+.annotate 'line', 579
     .param pmc _lex_param_0 
     .lex "self", _lex_param_0 
     nqp_decontainerize $P5001, _lex_param_0
@@ -3805,9 +3888,9 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "ACCEPTS" :subid("cuid_44_1360250807.22") :anon :lex :outer("cuid_88_1360250807.22")
+.sub "ACCEPTS" :subid("cuid_44_1360256342.611") :anon :lex :outer("cuid_89_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 582
+.annotate 'line', 583
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
     .lex "CURRENT_DISPATCH_CAPTURE", $P101 
@@ -3821,22 +3904,33 @@
     set $P5003, $P5003['sub']
     get_sub_code_object $P5002, $P5003
     set $P102, $P5002
-    getinterp $P5006
-    set $P5006, $P5006['sub']
-    get_sub_code_object $P5005, $P5006
     getinterp $P5007
-    set $P5007, $P5007['context']
-    $P5008 = $P5005."dispatch"($P5007)
-    getinterp $P5009
-    set $P5009, $P5009['context']
-    invoke_with_capture $P5004, $P5008, $P5009
+    set $P5007, $P5007['sub']
+    get_sub_code_object $P5006, $P5007
+    nqp_get_sc_object $P5008, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
+    repr_get_attr_obj $P5009, $P5006, $P5008, "$!dispatch_cache"
+    getinterp $P5010
+    set $P5010, $P5010['context']
+    multi_cache_find $P5005, $P5009, $P5010
+    unless_null $P5005, vivi_106325
+    getinterp $P5012
+    set $P5012, $P5012['sub']
+    get_sub_code_object $P5011, $P5012
+    getinterp $P5013
+    set $P5013, $P5013['context']
+    $P5014 = $P5011."dispatch"($P5013)
+    set $P5005, $P5014
+  vivi_106325:
+    getinterp $P5015
+    set $P5015, $P5015['context']
+    invoke_with_capture $P5004, $P5005, $P5015
     .return ($P5004) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "ACCEPTS" :subid("cuid_45_1360250807.22") :anon :lex :outer("cuid_88_1360250807.22")
+.sub "ACCEPTS" :subid("cuid_45_1360256342.611") :anon :lex :outer("cuid_89_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 583
+.annotate 'line', 584
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
     .lex "self", $P101 
@@ -3850,14 +3944,14 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "isa" :subid("cuid_46_1360250807.22") :anon :lex :outer("cuid_88_1360250807.22")
+.sub "isa" :subid("cuid_46_1360256342.611") :anon :lex :outer("cuid_89_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 587
+.annotate 'line', 588
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
     .lex "self", _lex_param_0 
     .lex "$type", _lex_param_1 
-.annotate 'line', 588
+.annotate 'line', 589
     nqp_decontainerize $P5002, _lex_param_0
     get_how $P5001, $P5002
     nqp_decontainerize $P5003, _lex_param_0
@@ -3866,106 +3960,106 @@
 .end
 .HLL "nqp"
 .namespace []
-.sub "__dump" :subid("cuid_47_1360250807.22") :anon :lex :outer("cuid_88_1360250807.22")
+.sub "__dump" :subid("cuid_47_1360256342.611") :anon :lex :outer("cuid_89_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 591
+.annotate 'line', 592
     .param pmc _lex_param_0 
     .param pmc _lex_param_1 
     .param pmc _lex_param_2 
-    .const 'Sub' $P5017 = 'cuid_94_1360250807.22' 
+    .const 'Sub' $P5017 = 'cuid_95_1360256342.611' 
     capture_lex $P5017 
     .lex "$subindent", $P101 
     .lex "self", _lex_param_0 
     .lex "$dumper", _lex_param_1 
     .lex "$label", _lex_param_2 
-    nqp_get_sc_object $P5001, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5001, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P101, $P5001
     root_new $P102, ['parrot';'Continuation']
-    set_label $P102, lexotic_320
+    set_label $P102, lexotic_326
     .lex "RETURN", $P102
     nqp_decontainerize $P5002, _lex_param_0
     repr_defined $I5001, $P5002
-    if $I5001 goto unless101_end323 
+    if $I5001 goto unless107_end329 
     find_lex $P5003, "RETURN"
     $P5004 = $P5003(0)
-  unless101_end323:
-.annotate 'line', 593
+  unless107_end329:
+.annotate 'line', 594
     $P5005 = _lex_param_1."newIndent"()
     set $P101, $P5005
-.annotate 'line', 594
-    "&print"("{")
 .annotate 'line', 595
+    "&print"("{")
+.annotate 'line', 596
     nqp_decontainerize $P5010, _lex_param_0
     get_how $P5009, $P5010
     nqp_decontainerize $P5011, _lex_param_0
     $P5012 = $P5009."parents"($P5011)
     set $P5006, $P5012
     iter $P5008, $P5012
-  for_next333:
-    unless $P5008, for_done335
+  for_next339:
+    unless $P5008, for_done341
     shift $P5014, $P5008
-  for_redo334:
-    .const 'Sub' $P5013 = 'cuid_94_1360250807.22' 
+  for_redo340:
+    .const 'Sub' $P5013 = 'cuid_95_1360256342.611' 
     capture_lex $P5013
     $P5006 = $P5013($P5014)
-    goto for_next333
-  for_done335:
-.annotate 'line', 614
-    _lex_param_1."deleteIndent"()
+    goto for_next339
+  for_done341:
 .annotate 'line', 615
+    _lex_param_1."deleteIndent"()
+.annotate 'line', 616
     $P5015 = _lex_param_1."indent"()
     $P5016 = "&print"("\n", $P5015, "}")
-    goto lexotic_321
-  lexotic_320:
+    goto lexotic_327
+  lexotic_326:
     .get_results ($P5016)
-  lexotic_321:
+  lexotic_327:
     .return ($P5016) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_94_1360250807.22") :anon :lex :outer("cuid_47_1360250807.22")
+.sub "" :subid("cuid_95_1360256342.611") :anon :lex :outer("cuid_47_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 595
+.annotate 'line', 596
     .param pmc _lex_param_0 
-    .const 'Sub' $P5008 = 'cuid_93_1360250807.22' 
+    .const 'Sub' $P5008 = 'cuid_94_1360256342.611' 
     capture_lex $P5008 
     .lex "$type", _lex_param_0 
-.annotate 'line', 596
+.annotate 'line', 597
     get_how $P5004, _lex_param_0
     $P5005 = $P5004."attributes"(_lex_param_0, 1 :named("local"))
     set $P5001, $P5005
     iter $P5003, $P5005
-  for_next330:
-    unless $P5003, for_done332
+  for_next336:
+    unless $P5003, for_done338
     shift $P5007, $P5003
-  for_redo331:
-    .const 'Sub' $P5006 = 'cuid_93_1360250807.22' 
+  for_redo337:
+    .const 'Sub' $P5006 = 'cuid_94_1360256342.611' 
     capture_lex $P5006
     $P5001 = $P5006($P5007)
-    goto for_next330
-  for_done332:
+    goto for_next336
+  for_done338:
     .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_93_1360250807.22") :anon :lex :outer("cuid_94_1360250807.22")
+.sub "" :subid("cuid_94_1360256342.611") :anon :lex :outer("cuid_95_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 596
+.annotate 'line', 597
     .param pmc _lex_param_0 
     .lex "$name", $P101 
     .lex "$attrtype", $P102 
     .lex "$_", _lex_param_0 
-    nqp_get_sc_object $P5001, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5001, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P101, $P5001
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P102, $P5002
-.annotate 'line', 597
+.annotate 'line', 598
     $P5003 = _lex_param_0."name"()
     set $P101, $P5003
-.annotate 'line', 598
+.annotate 'line', 599
     $P5004 = _lex_param_0."type"()
     set $P102, $P5004
-.annotate 'line', 599
+.annotate 'line', 600
     find_lex $P5005, "$subindent"
     find_lex $P5007, "$type"
     get_how $P5006, $P5007
@@ -3973,12 +4067,12 @@
     $P5009 = $P5006."name"($P5008)
     "&print"("\n", $P5005, $P5009, "::", $P101, " => ")
     get_id $I5002, $P102
-    nqp_get_sc_object $P5010, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 2
+    nqp_get_sc_object $P5010, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 2
     get_id $I5003, $P5010
     iseq $I5001, $I5002, $I5003
-    unless $I5001 goto if102_else324 
-.annotate 'line', 600
+    unless $I5001 goto if108_else330 
 .annotate 'line', 601
+.annotate 'line', 602
     find_lex $P5011, "$dumper"
     find_lex $P5012, "$label"
     find_lex $P5014, "self"
@@ -3988,15 +4082,15 @@
     repr_get_attr_int $I5004, $P5013, $P5015, $S5001
     $P5016 = $P5011."dump"($P5012, $I5004)
     set $P5040, $P5016
-    goto if102_end325
-  if102_else324:
+    goto if108_end331
+  if108_else330:
     get_id $I5006, $P102
-    nqp_get_sc_object $P5017, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 3
+    nqp_get_sc_object $P5017, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 3
     get_id $I5007, $P5017
     iseq $I5005, $I5006, $I5007
-    unless $I5005 goto if103_else326 
-.annotate 'line', 603
+    unless $I5005 goto if109_else332 
 .annotate 'line', 604
+.annotate 'line', 605
     find_lex $P5018, "$dumper"
     find_lex $P5019, "$label"
     find_lex $P5021, "self"
@@ -4006,15 +4100,15 @@
     repr_get_attr_num $N5001, $P5020, $P5022, $S5002
     $P5023 = $P5018."dump"($P5019, $N5001)
     set $P5039, $P5023
-    goto if103_end327
-  if103_else326:
+    goto if109_end333
+  if109_else332:
     get_id $I5009, $P102
-    nqp_get_sc_object $P5024, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 4
+    nqp_get_sc_object $P5024, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 4
     get_id $I5010, $P5024
     iseq $I5008, $I5009, $I5010
-    unless $I5008 goto if104_else328 
-.annotate 'line', 606
+    unless $I5008 goto if110_else334 
 .annotate 'line', 607
+.annotate 'line', 608
     find_lex $P5025, "$dumper"
     find_lex $P5026, "$label"
     find_lex $P5028, "self"
@@ -4024,10 +4118,10 @@
     repr_get_attr_str $S5003, $P5027, $P5029, $S5004
     $P5030 = $P5025."dump"($P5026, $S5003)
     set $P5038, $P5030
-    goto if104_end329
-  if104_else328:
-.annotate 'line', 609
+    goto if110_end335
+  if110_else334:
 .annotate 'line', 610
+.annotate 'line', 611
     find_lex $P5031, "$dumper"
     find_lex $P5032, "$label"
     find_lex $P5035, "self"
@@ -4037,102 +4131,102 @@
     getattribute $P5033, $P5034, $P5036, $S5005
     $P5037 = $P5031."dump"($P5032, $P5033)
     set $P5038, $P5037
-  if104_end329:
+  if110_end335:
     set $P5039, $P5038
-  if103_end327:
+  if109_end333:
     set $P5040, $P5039
-  if102_end325:
+  if108_end331:
     .return ($P5040) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_95_1360250807.22") :anon :lex :outer("cuid_53_1360250807.22")
+.sub "" :subid("cuid_96_1360256342.611") :anon :lex :outer("cuid_53_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 620
-    .const 'Sub' $P5005 = 'cuid_48_1360250807.22' 
+.annotate 'line', 621
+    .const 'Sub' $P5005 = 'cuid_48_1360256342.611' 
     capture_lex $P5005 
-    .const 'Sub' $P5005 = 'cuid_49_1360250807.22' 
+    .const 'Sub' $P5005 = 'cuid_49_1360256342.611' 
     capture_lex $P5005 
-    .const 'Sub' $P5005 = 'cuid_50_1360250807.22' 
+    .const 'Sub' $P5005 = 'cuid_50_1360256342.611' 
     capture_lex $P5005 
-    .const 'Sub' $P5005 = 'cuid_51_1360250807.22' 
+    .const 'Sub' $P5005 = 'cuid_51_1360256342.611' 
     capture_lex $P5005 
     .lex "$?PACKAGE", $P101 
     .lex "$?CLASS", $P102 
-    .const 'Sub' $P5001 = 'cuid_48_1360250807.22' 
+    .const 'Sub' $P5001 = 'cuid_48_1360256342.611' 
     capture_lex $P5001
-    .const 'Sub' $P5002 = 'cuid_49_1360250807.22' 
+    .const 'Sub' $P5002 = 'cuid_49_1360256342.611' 
     capture_lex $P5002
-    .const 'Sub' $P5003 = 'cuid_50_1360250807.22' 
+    .const 'Sub' $P5003 = 'cuid_50_1360256342.611' 
     capture_lex $P5003
-    .const 'Sub' $P5004 = 'cuid_51_1360250807.22' 
+    .const 'Sub' $P5004 = 'cuid_51_1360256342.611' 
     capture_lex $P5004
     .return ($P5004) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "new" :subid("cuid_48_1360250807.22") :anon :lex :outer("cuid_95_1360250807.22")
+.sub "new" :subid("cuid_48_1360256342.611") :anon :lex :outer("cuid_96_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 641
+.annotate 'line', 642
     .param pmc _lex_param_0 
     .lex "$n", $P101 
     .lex "self", _lex_param_0 
-    nqp_get_sc_object $P5001, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    nqp_get_sc_object $P5001, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     set $P101, $P5001
-.annotate 'line', 642
+.annotate 'line', 643
     nqp_decontainerize $P5002, _lex_param_0
     $P5003 = $P5002."CREATE"()
     set $P101, $P5003
-.annotate 'line', 643
+.annotate 'line', 644
     $P101."BUILD"()
     .return ($P101) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "BUILD" :subid("cuid_49_1360250807.22") :anon :lex :outer("cuid_95_1360250807.22")
+.sub "BUILD" :subid("cuid_49_1360256342.611") :anon :lex :outer("cuid_96_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 647
+.annotate 'line', 648
     .param pmc _lex_param_0 
     .lex "self", _lex_param_0 
     nqp_decontainerize $P5001, _lex_param_0
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 46
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 46
     new $P5003, 'ResizablePMCArray'
     repr_bind_attr_obj $P5001, $P5002, "@!array", $P5003
     nqp_decontainerize $P5004, _lex_param_0
-    nqp_get_sc_object $P5005, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 46
+    nqp_get_sc_object $P5005, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 46
     new $P5006, 'Hash'
     repr_bind_attr_obj $P5004, $P5005, "%!hash", $P5006
     .return ($P5006) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "list" :subid("cuid_50_1360250807.22") :anon :lex :outer("cuid_95_1360250807.22")
+.sub "list" :subid("cuid_50_1360256342.611") :anon :lex :outer("cuid_96_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 652
+.annotate 'line', 653
     .param pmc _lex_param_0 
     .lex "self", _lex_param_0 
     nqp_decontainerize $P5001, _lex_param_0
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 46
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 46
     repr_get_attr_obj $P5003, $P5001, $P5002, "@!array"
     .return ($P5003) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "hash" :subid("cuid_51_1360250807.22") :anon :lex :outer("cuid_95_1360250807.22")
+.sub "hash" :subid("cuid_51_1360256342.611") :anon :lex :outer("cuid_96_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-.annotate 'line', 654
+.annotate 'line', 655
     .param pmc _lex_param_0 
     .lex "self", _lex_param_0 
     nqp_decontainerize $P5001, _lex_param_0
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 46
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 46
     repr_get_attr_obj $P5003, $P5001, $P5002, "%!hash"
     .return ($P5003) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_97_1360250807.22") :load :init
+.sub "" :subid("cuid_98_1360256342.611") :load :init
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-    .const 'Sub' $P5001 = 'cuid_96_1360250807.22' 
+    .const 'Sub' $P5001 = 'cuid_97_1360256342.611' 
     capture_lex $P5001 
     .local pmc cur_sc 
     .local pmc conflicts 
@@ -4145,7 +4239,7 @@
     load_bytecode "ModuleLoader.pbc"
     get_hll_global $P5001, "ModuleLoader"
     $P5001."load_module"("nqpmo")
-    nqp_create_sc $P5001, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246"
+    nqp_create_sc $P5001, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637"
     set cur_sc, $P5001
     $P5002 = cur_sc."set_description"("src\\stage2\\NQPCORE.setting")
     new $P5003, 'ResizablePMCArray'
@@ -4155,7 +4249,7 @@
     push $P5004, $S5001
     push $P5004, "P6opaque"
     push $P5004, "RoleToRoleApplier"
-    push $P5004, "6F207129B0708369A315ED3D47DFB8B452CF56E2-1360250803.755"
+    push $P5004, "6F207129B0708369A315ED3D47DFB8B452CF56E2-1360256337.469"
     push $P5004, "src\\stage2\\gen\\nqp-mo.pm"
     push $P5004, "NQPConcreteRoleHOW"
     push $P5004, "RoleToClassApplier"
@@ -4252,406 +4346,406 @@
     push $P5004, "exists_keyed_str"
     push $P5004, "delete_keyed"
     push $P5004, "delete_keyed_str"
-    .const 'Sub' $P5005 = 'cuid_96_1360250807.22' 
+    .const 'Sub' $P5005 = 'cuid_97_1360256342.611' 
     capture_lex $P5005
     $P5006 = $P5005()
     nqp_deserialize_sc "AgAAAEAAAAACAAAAUAAAAAoAAACgAAAAYgoAAFMAAACSDwAArBwAAAAAAACsHAAAAAAAAKwcAACsHAAAAAAAAAMAAAAEAAAARwAAAAAAAAABAAAAAAAAAA0AAAAYAQAADgAAAFwBAAAPAAAApAEAABAAAADsAQAAAQAAACwCAAABAAAAxAMAAAEAAACqBAAAAQAAAJ4GAAABAAAA+AcAAAAAAAAzAAAAAAAAAAAAAAAKAAkAAAACAAAAAgABAAAAAgAAAAUAAAACAAEAAAADAAAABgAAAAIAAQAAAAQAAAAHAAAAAgABAAAABQAAAAgAAAACAAEAAAAGAAAACQAAAAIAAQAAAAcAAAAKAAAAAgABAAAACAAAAAsAAAACAAEAAAAJAAAADAAAAAIAAQAAAAoAAAAKAAAAAAAAAAAAAAAAAAEAAAAAAAAAAgAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///////////////////////////////wAAAAAAAAAAAQAAAAAAAAACAAAAAAAAAAAAAwAAAAAANAAAAAAAAAABAAAACgAAAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1AAAAAAAAAAIAAAAKAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA2AAAAAAAAAAMAAAAKAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA3AAAAAAAAAAQAAAAKAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOAAAAAAAAAAFAAAACgAAAAAACgAKAAAAEQAAAAsAAAAAAAAAAAASAAAACwAAAAAAAQAAABMAAAALAAAAAAACAAAAFAAAAAsAAAAAAAMAAAAVAAAACwAAAAAABAAAABYAAAALAAAAAAAFAAAAFwAAAAsAAAAAAAYAAAAYAAAACwAAAAAABwAAABkAAAALAAAAAAAIAAAAGgAAAAsAAAAAAAkAAAAAAAAAAAAAAAEAAAAAAAAAAgAAAAAABQAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///////////////////////////////8AAAAAAAAAAAEAAAAAAAAAAgAAAAAABQAAAAoABQAAABsAAAAEAAAAAAAAAAAAHAAAAAQAAQAAAAAAAAAdAAAABAACAAAAAAAAAB4AAAAEAAMAAAAAAAAAHwAAAAQABAAAAAAAAAAAAAAAOQAAAAAAAAAGAAAACgAAAAAACgACAAAAIAAAAAIAAAAAAAcAAAAhAAAAAgAAAAAACAAAAAAAAAAAAAAAAQAAAAAAAAACAAAAAAAGAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///////////////////////////////wAAAAAAAAAAAQAAAAAAAAACAAAAAAAGAAAACgACAAAAIgAAAAQAAAAAAAAAAAAjAAAABAABAAAAAAAAAAAAAAA6AAAAAAAAAAkAAAAKAAAAAAAKAA8AAAAkAAAAAgAAAAAACgAAACUAAAACAAAAAAALAAAAJgAAAAIAAAAAAAwAAAAnAAAAAgAAAAAADQAAACgAAAACAAAAAAAOAAAAKQAAAAIAAAAAAA8AAAAqAAAAAgAAAAAAEAAAACsAAAACAAAAAAARAAAALAAAAAIAAAAAABIAAAAtAAAAAgAAAAAAEwAAABcAAAACAAAAAAAUAAAALgAAAAIAAAAAABUAAAAvAAAAAgAAAAAAFgAAABkAAAACAAAAAAAXAAAAGAAAAAIAAAAAABgAAAAAAAAAAAAAAAEAAAAAAAAAAgAAAAAACQAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP///////////////////////////////wAAAAAAAAAAAQAAAAAAAAACAAAAAAAJAAAACgAGAAAAGwAAAAQAAAAAAAAAAAAwAAAABAABAAAAAAAAADEAAAAEAAIAAAAAAAAAMgAAAAQAAwAAAAAAAAAzAAAABAAEAAAAAAAAADQAAAAEAAUAAAAAAAAAAAAAADsAAAAAAAAAGQAAAAoAAAAAAAoADQAAADUAAAACAAAAAAAaAAAANgAAAAIAAAAAABsAAAA3AAAAAgAAAAAAHAAAADgAAAACAAAAAAAdAAAAOQAAAAIAAAAAAB4AAAA6AAAAAgAAAAAAIQAAADsAAAACAAAAAAAjAAAAPAAAAAIAAAAAACUAAAA9AAAAAgAAAAAAJwAAAD4AAAACAAAAAAApAAAAPwAAAAIAAAAAACoAAABAAAAAAgAAAAAALAAAAEEAAAACAAAAAAAtAAAAAAAAAAAAAAABAAAAAAAAAAIAAAAAABkAAAAEAAAAAAAAAAEAAAAAAAAABQAAAAAAAAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////////////////////////////////AAAAAAAAAAABAAAAAAAAAAIAAAAAABkAAAADAAAAAAA8AAAAAAAAAC4AAAAKAAAAAAAKABAAAAA1AAAAAgAAAAAAGgAAADYAAAACAAAAAAAbAAAANwAAAAIAAAAAABwAAAA4AAAAAgAAAAAALwAAADkAAAACAAAAAAAeAAAAOgAAAAIAAAAAACEAAAA7AAAAAgAAAAAAIwAAADwAAAACAAAAAAAlAAAAPQAAAAIAAAAAACcAAAA+AAAAAgAAAAAAKQAAAD8AAAACAAAAAAAqAAAAQAAAAAIAAAAAACwAAABBAAAAAgAAAAAALQAAAEIAAAACAAAAAAAwAAAAQwAAAAIAAAAAADEAAABEAAAAAgAAAAAAMgAAAAAAAAAAAAAAAgAAAAAAAAACAAAAAAAuAAAAAgAAAAAAGQAAAAQAAAAAAAAAAQAAAAAAAAAFAAAAAAAAAAMAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////////////////////////////////AAAAAAAAAAACAAAAAAAAAAIAAAAAABkAAAADAAIAAAAAAC4AAAAKAAIAAABFAAAABAAAAAAAAAAAAEYAAAAEAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAFAAAAAAAAAAEAAAAAAAAABQAAABIAAAABAAAAAAAAAAcAAAAkAAAAAAAAAAAAAAAFAAAAJAAAAAEAAAAAAAAABQAAADYAAAABAAAAAAAAAAUAAABIAAAAAQAAAAAAAAAFAAAAWgAAAAEAAAAAAAAABQAAAGwAAAABAAAAAAAAAAUAAAB+AAAAAQAAAAAAAAAFAAAAkAAAAAEAAAAAAAAABQAAAKIAAAABAAAAAAAAAAUAAAC0AAAAAQAAAAAAAAAFAAAAxgAAAAEAAAAAAAAABQAAANgAAAABAAAAAAAAAAUAAADqAAAAAQAAAAAAAAAFAAAA/AAAAAEAAAAAAAAABQAAAA4BAAABAAAAAAAAAAUAAAAgAQAAAQAAAAAAAAAIAAAAMgEAAAAAAAAAAAAABQAAADIBAAABAAAAAAAAAAUAAABEAQAAAQAAAAAAAAAFAAAAVgEAAAEAAAAAAAAABQAAAGgBAAABAAAAAAAAAAUAAAB6AQAAAQAAAAAAAAAFAAAApAEAAAEAAAAAAAAABQAAAL4BAAABAAAAAAAAAAUAAADYAQAAAQAAAAAAAAAFAAAA+AEAAAEAAAAAAAAABQAAABICAAABAAAAAAAAAAUAAAAyAgAAAQAAAAAAAAAFAAAATAIAAAEAAAAAAAAABQAAAGwCAAABAAAAAAAAAAUAAACGAgAAAQAAAAAAAAAFAAAApgIAAAEAAAAAAAAABQAAAMACAAABAAAAAAAAAAUAAADSAgAAAQAAAAAAAAAFAAAA8gIAAAEAAAAAAAAABQAAAAwDAAABAAAAAAAAAAUAAAAeAwAAAQAAAAAAAAAJAAAAMAMAAAAAAAAAAAAABQAAADADAAABAAAAAAAAAAUAAABCAwAAAQAAAAAAAAAFAAAAVAMAAAEAAAAAAAAABQAAAGYDAAABAAAAAgAAAAAAAAB4AwAAAQAAAAEAAAAKAAAAiAMAAAEAAAABAAAACAAAAJgDAAABAAAAAQAAAAgAAACoAwAAAQAAAAEAAAAIAAAAuAMAAAEAAAACAAAAAAAAAMgDAAABAAAAAgAAAAAAAACWBAAAAQAAAAIAAAAAAAAA1gQAAAEAAAABAAAABwAAAPQFAAABAAAAAQAAAAcAAADiCAAAAQAAAAAAAAAGAAAAogsAAAEAAAAAAAAABgAAAMILAAABAAAAAAAAAAYAAADiCwAAAQAAAAAAAAAGAAAAAgwAAAEAAAAAAAAABgAAACIMAAABAAAAAAAAAAYAAABODAAAAQAAAAAAAAAGAAAAegwAAAEAAAACAAAAAgAAAKYMAAABAAAAAgAAAAIAAACqDAAAAQAAAAIAAAACAAAArgwAAAEAAAACAAAAAgAAALIMAAABAAAAAgAAAAIAAAC2DAAAAQAAAAIAAAACAAAAugwAAAEAAAACAAAAAgAAAL4MAAABAAAAAgAAAAIAAADCDAAAAQAAAAIAAAACAAAAxgwAAAEAAAACAAAAAgAAAMoMAAABAAAAAgAAAAIAAADODAAAAQAAAAIAAAACAAAA0gwAAAEAAAACAAAAAgAAANYMAAABAAAAAQAAAAkAAADaDAAAAQAAAAEAAAAJAAAA+gwAAAEAAAALAAAAAAAKAAAAAQABAAEAAQALAAAAAAALAAAAAQABAAEAAQALAAAAAAAMAAAAAQABAAEAAQALAAAAAAANAAAAAQABAAEAAQALAAAAAAAOAAAAAQABAAEAAQALAAAAAAAPAAAAAQABAAEAAQALAAAAAAAQAAAAAQABAAEAAQALAAAAAAARAAAAAQABAAEAAQALAAAAAAASAAAAAQABAAEAAQALAAAAAAATAAAAAQABAAEAAQALAAAAAAAUAAAAAQABAAEAAQALAAAAAAAVAAAAAQABAAEAAQALAAAAAAAWAAAAAQABAAEAAQALAAAAAAAXAAAAAQABAAEAAQALAAAAAAAYAAAAAQABAAEAAQALAAAAAAAZAAAAAQABAAEAAQALAAAAAAAaAAAAAQABAAEAAQALAAAAAAAbAAAAAQABAAEAAQALAAAAAAAcAAAAAQABAAEAAQALAAAAAAAdAAAAAQABAAEAAQALAAAAAAAeAAAAAQABAAEAAQALAAAAAAAfAAAAAQAHAAIAAAACAAAAAAAfAAAAAgAAAAAAIAAAAAMAAwALAAAAAAAgAAAAAgAAAAAAPQAAAAEAAQABAAsAAAAAACEAAAACAAAAAAA+AAAAAQABAAEACwAAAAAAIgAAAAEABwABAAAAAgAAAAAAIgAAAAMAAwALAAAAAAAjAAAAAgAAAAAAPwAAAAEAAQABAAsAAAAAACQAAAABAAcAAQAAAAIAAAAAACQAAAADAAMACwAAAAAAJQAAAAIAAAAAAEAAAAABAAEAAQALAAAAAAAmAAAAAQAHAAEAAAACAAAAAAAmAAAAAwADAAsAAAAAACcAAAACAAAAAABBAAAAAQABAAEACwAAAAAAKAAAAAEABwABAAAAAgAAAAAAKAAAAAMAAwALAAAAAAApAAAAAgAAAAAAQgAAAAEAAQABAAsAAAAAACoAAAABAAEAAQABAAsAAAAAACsAAAABAAcAAQAAAAIAAAAAACsAAAADAAMACwAAAAAALAAAAAIAAAAAAEMAAAABAAEAAQALAAAAAAAtAAAAAQABAAEAAQALAAAAAAAuAAAAAQABAAEAAQALAAAAAAAvAAAAAQABAAEAAQALAAAAAAAwAAAAAQABAAEAAQALAAAAAAAxAAAAAQABAAEAAQALAAAAAAAyAAAAAQABAAEAAQBIAAAABwAAAAAACgAAAAAABgBJAAAABAABAAAAAAAAAAYASgAAAAQAAQAAAAAAAAAGAEsAAAAEAAEAAAAAAAAABgBMAAAABAABAAAAAAAAAE0AAAAHAAUAAAACAAAAAABEAAAAAgAAAAAARQAAAAIAAAAAAEYAAAACAAAAAABHAAAAAgAAAAAASAAAAAoACgAAABEAAAALAAAAAAAAAAAAEgAAAAsAAAAAAAEAAAATAAAACwAAAAAAAgAAABQAAAALAAAAAAADAAAAFQAAAAsAAAAAAAQAAAAWAAAACwAAAAAABQAAABcAAAALAAAAAAAGAAAAGAAAAAsAAAAAAAcAAAAZAAAACwAAAAAACAAAABoAAAALAAAAAAAJAAAATgAAAAcAAgAAAAIAAAAAAEkAAAACAAAAAABKAAAACgACAAAAIAAAAAIAAAAAAAcAAAAhAAAAAgAAAAAACAAAAE8AAAAHAAYAAAACAAAAAABLAAAAAgAAAAAATAAAAAIAAAAAAE0AAAACAAAAAABOAAAAAgAAAAAATwAAAAIAAAAAAFAAAAAKAA8AAAAkAAAAAgAAAAAACgAAACUAAAACAAAAAAALAAAAJgAAAAIAAAAAAAwAAAAnAAAAAgAAAAAADQAAACgAAAACAAAAAAAOAAAAKQAAAAIAAAAAAA8AAAAqAAAAAgAAAAAAEAAAACsAAAACAAAAAAARAAAALAAAAAIAAAAAABIAAAAtAAAAAgAAAAAAEwAAABcAAAACAAAAAAAUAAAALgAAAAIAAAAAABUAAAAvAAAAAgAAAAAAFgAAABkAAAACAAAAAAAXAAAAGAAAAAIAAAAAABgAAAAGAFAAAAAKAAAAAAAKAA0AAAA1AAAAAgAAAAAAGgAAADYAAAACAAAAAAAbAAAANwAAAAIAAAAAABwAAAA4AAAAAgAAAAAAHQAAADkAAAACAAAAAAAeAAAAOgAAAAIAAAAAACEAAAA7AAAAAgAAAAAAIwAAADwAAAACAAAAAAAlAAAAPQAAAAIAAAAAACcAAAA+AAAAAgAAAAAAKQAAAD8AAAACAAAAAAAqAAAAQAAAAAIAAAAAACwAAABBAAAAAgAAAAAALQAAAAcADQAAAAIAAAAAABoAAAACAAAAAAAbAAAAAgAAAAAAHAAAAAIAAAAAAB0AAAACAAAAAAAeAAAAAgAAAAAAIQAAAAIAAAAAACMAAAACAAAAAAAlAAAAAgAAAAAAJwAAAAIAAAAAACkAAAACAAAAAAAqAAAAAgAAAAAALAAAAAIAAAAAAC0AAAAHAAcAAAAKAAIAAAAZAAAABgA5AAAAUQAAAAIAAAAAAB8AAAAKAAIAAAAZAAAABgA5AAAAUQAAAAIAAAAAACAAAAAKAAIAAAAZAAAABgA6AAAAUQAAAAIAAAAAACIAAAAKAAIAAAAZAAAABgA7AAAAUQAAAAIAAAAAACQAAAAKAAIAAAAZAAAABgA8AAAAUQAAAAIAAAAAACYAAAAKAAIAAAAZAAAABgA9AAAAUQAAAAIAAAAAACgAAAAKAAIAAAAZAAAABgA/AAAAUQAAAAIAAAAAACsAAAAHAAAAAAAHAAAAAAACAAAAAAAZAAAABwAAAAAACgAAAAAABAABAAAAAAAAAAcAAQAAAAIAAAAAABkAAAAHAAAAAAABAAoABgAAAFIAAAACAAAAAAAeAAAAUwAAAAIAAAAAACEAAABUAAAAAgAAAAAAIwAAAFUAAAACAAAAAAAlAAAAVgAAAAIAAAAAACcAAAA+AAAAAgAAAAAAKQAAAAoAAAAAAAQAAAAAAAAAAAAEAAAAAAAAAAAABwAAAAAABwAAAAAAAQAGAFcAAAAKAAIAAABFAAAAAgAAAAAAUQAAAEYAAAACAAAAAABSAAAACgAEAAAAOAAAAAIAAAAAAC8AAABCAAAAAgAAAAAAMAAAAEMAAAACAAAAAAAxAAAARAAAAAIAAAAAADIAAAAHAAQAAAACAAAAAAAvAAAAAgAAAAAAMAAAAAIAAAAAADEAAAACAAAAAAAyAAAABwAAAAAABwABAAAAAgAAAAAAGQAAAAcAAAAAAAIAAAAAABkAAAAHAAAAAAAKAAAAAAAEAAEAAAAAAAAABwACAAAAAgAAAAAALgAAAAIAAAAAABkAAAAHAAAAAAABAAoAAAAAAAoADgAAAFUAAAAHAAIAAAACAAAAAAAuAAAABgBFAAAAWAAAAAcAAgAAAAIAAAAAAC4AAAAGAEUAAABZAAAABwACAAAAAgAAAAAALgAAAAYARQAAAFoAAAAHAAIAAAACAAAAAAAuAAAABgBFAAAAWwAAAAcAAgAAAAIAAAAAAC4AAAAGAEUAAABcAAAABwACAAAAAgAAAAAALgAAAAYARQAAAFYAAAAHAAIAAAACAAAAAAAuAAAABgBGAAAAXQAAAAcAAgAAAAIAAAAAAC4AAAAGAEYAAABeAAAABwACAAAAAgAAAAAALgAAAAYARgAAAF8AAAAHAAIAAAACAAAAAAAuAAAABgBGAAAAYAAAAAcAAgAAAAIAAAAAAC4AAAAGAEYAAABhAAAABwACAAAAAgAAAAAALgAAAAYARgAAAGIAAAAHAAIAAAACAAAAAAAuAAAABgBGAAAAYwAAAAcAAgAAAAIAAAAAAC4AAAAGAEYAAAAEAAAAAAAAAAAABAAAAAAAAAAAAAcAAQAAAAcAAgAAAAQAAAAAAAAAAAACAAAAAAAwAAAABwABAAAABwACAAAABAAAAAAAAAAAAAIAAAAAADAAAAABAAcAAQAAAAIAAAAAABkAAAAHAAEAAAAEAAIAAAAAAAAABwABAAAAAgAAAAAAGQAAAAcAAQAAAAQAAQAAAAAAAAAHAAEAAAACAAAAAAAZAAAABwABAAAABAACAAAAAAAAAAcAAQAAAAIAAAAAABkAAAAHAAEAAAAEAAIAAAAAAAAABwACAAAAAgAAAAAAGQAAAAMABwACAAAABAACAAAAAAAAAAQAAAAAAAAAAAAHAAIAAAACAAAAAAAZAAAAAwAHAAIAAAAEAAIAAAAAAAAABAAAAAAAAAAAAAcAAgAAAAIAAAAAABkAAAADAAcAAgAAAAQAAgAAAAAAAAAEAAAAAAAAAAAAGwAAABwAAAAdAAAAHgAAAB8AAAAiAAAAIwAAABsAAAAwAAAAMQAAADIAAAAzAAAANAAAAAYARQAAAAMABAAAAAAAAAAAAAMAAwAEAAAAAAAAAAAABgBGAAAAAwAEAAAAAAAAAAAAAwADAAQAAAAAAAAAAAA=", cur_sc, $P5004, $P5006, conflicts
-    unless conflicts goto if107_end341 
+    unless conflicts goto if113_end347 
     die "Repossession conflicts occurred during deserialization"
-  if107_end341:
-    .const "LexInfo" $P5001 = "cuid_53_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 0
+  if113_end347:
+    .const "LexInfo" $P5001 = "cuid_53_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 0
     $P5001."set_static_lexpad_value"("GLOBALish", $P5002)
-    .const "LexInfo" $P5003 = "cuid_53_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_53_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_53_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 0
+    .const "LexInfo" $P5001 = "cuid_53_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 0
     $P5001."set_static_lexpad_value"("$?PACKAGE", $P5002)
-    .const "LexInfo" $P5003 = "cuid_53_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_53_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_53_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 1
+    .const "LexInfo" $P5001 = "cuid_53_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 1
     $P5001."set_static_lexpad_value"("EXPORTHOW", $P5002)
-    .const "LexInfo" $P5003 = "cuid_53_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_53_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_71_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 1
+    .const "LexInfo" $P5001 = "cuid_71_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 1
     $P5001."set_static_lexpad_value"("$?PACKAGE", $P5002)
-    .const "LexInfo" $P5003 = "cuid_71_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_71_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_71_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 1
+    .const "LexInfo" $P5001 = "cuid_71_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 1
     $P5001."set_static_lexpad_value"("$?CLASS", $P5002)
-    .const "LexInfo" $P5003 = "cuid_71_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_71_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_53_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 2
+    .const "LexInfo" $P5001 = "cuid_53_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 2
     $P5001."set_static_lexpad_value"("int", $P5002)
-    .const "LexInfo" $P5003 = "cuid_53_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_53_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_72_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 2
+    .const "LexInfo" $P5001 = "cuid_72_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 2
     $P5001."set_static_lexpad_value"("$?PACKAGE", $P5002)
-    .const "LexInfo" $P5003 = "cuid_72_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_72_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_72_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 2
+    .const "LexInfo" $P5001 = "cuid_72_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 2
     $P5001."set_static_lexpad_value"("$?CLASS", $P5002)
-    .const "LexInfo" $P5003 = "cuid_72_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_72_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_53_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 3
+    .const "LexInfo" $P5001 = "cuid_53_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 3
     $P5001."set_static_lexpad_value"("num", $P5002)
-    .const "LexInfo" $P5003 = "cuid_53_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_53_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_73_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 3
+    .const "LexInfo" $P5001 = "cuid_73_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 3
     $P5001."set_static_lexpad_value"("$?PACKAGE", $P5002)
-    .const "LexInfo" $P5003 = "cuid_73_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_73_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_73_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 3
+    .const "LexInfo" $P5001 = "cuid_73_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 3
     $P5001."set_static_lexpad_value"("$?CLASS", $P5002)
-    .const "LexInfo" $P5003 = "cuid_73_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_73_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_53_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 4
+    .const "LexInfo" $P5001 = "cuid_53_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 4
     $P5001."set_static_lexpad_value"("str", $P5002)
-    .const "LexInfo" $P5003 = "cuid_53_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_53_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_74_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 4
+    .const "LexInfo" $P5001 = "cuid_74_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 4
     $P5001."set_static_lexpad_value"("$?PACKAGE", $P5002)
-    .const "LexInfo" $P5003 = "cuid_74_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_74_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_74_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 4
+    .const "LexInfo" $P5001 = "cuid_74_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 4
     $P5001."set_static_lexpad_value"("$?CLASS", $P5002)
-    .const "LexInfo" $P5003 = "cuid_74_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_74_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_53_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    .const "LexInfo" $P5001 = "cuid_53_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     $P5001."set_static_lexpad_value"("NQPRoutine", $P5002)
-    .const "LexInfo" $P5003 = "cuid_53_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_53_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_76_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    .const "LexInfo" $P5001 = "cuid_76_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     $P5001."set_static_lexpad_value"("$?PACKAGE", $P5002)
-    .const "LexInfo" $P5003 = "cuid_76_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_76_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_76_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 5
+    .const "LexInfo" $P5001 = "cuid_76_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 5
     $P5001."set_static_lexpad_value"("$?CLASS", $P5002)
-    .const "LexInfo" $P5003 = "cuid_76_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_76_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_53_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 6
+    .const "LexInfo" $P5001 = "cuid_53_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 6
     $P5001."set_static_lexpad_value"("NQPSignature", $P5002)
-    .const "LexInfo" $P5003 = "cuid_53_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_53_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const 'Sub' $P5001 = "cuid_11_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 7
+    .const 'Sub' $P5001 = "cuid_11_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 7
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_12_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 8
+    .const 'Sub' $P5001 = "cuid_12_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 8
     set_sub_code_object $P5001, $P5002
-    .const "LexInfo" $P5001 = "cuid_85_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 6
+    .const "LexInfo" $P5001 = "cuid_86_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 6
     $P5001."set_static_lexpad_value"("$?PACKAGE", $P5002)
-    .const "LexInfo" $P5003 = "cuid_85_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_86_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_85_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 6
+    .const "LexInfo" $P5001 = "cuid_86_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 6
     $P5001."set_static_lexpad_value"("$?CLASS", $P5002)
-    .const "LexInfo" $P5003 = "cuid_85_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_86_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_53_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    .const "LexInfo" $P5001 = "cuid_53_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     $P5001."set_static_lexpad_value"("NQPRegex", $P5002)
-    .const "LexInfo" $P5003 = "cuid_53_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_53_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const 'Sub' $P5001 = "cuid_13_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 10
+    .const 'Sub' $P5001 = "cuid_13_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 10
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_14_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 11
+    .const 'Sub' $P5001 = "cuid_14_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 11
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_15_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 12
+    .const 'Sub' $P5001 = "cuid_15_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 12
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_16_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 13
+    .const 'Sub' $P5001 = "cuid_16_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 13
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_17_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 14
+    .const 'Sub' $P5001 = "cuid_17_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 14
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_18_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 15
+    .const 'Sub' $P5001 = "cuid_18_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 15
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_19_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 16
+    .const 'Sub' $P5001 = "cuid_19_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 16
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_20_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 17
+    .const 'Sub' $P5001 = "cuid_20_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 17
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_21_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 18
+    .const 'Sub' $P5001 = "cuid_21_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 18
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_22_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 19
+    .const 'Sub' $P5001 = "cuid_22_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 19
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_23_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 20
+    .const 'Sub' $P5001 = "cuid_23_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 20
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_24_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 21
+    .const 'Sub' $P5001 = "cuid_24_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 21
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_25_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 22
+    .const 'Sub' $P5001 = "cuid_25_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 22
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_26_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 23
+    .const 'Sub' $P5001 = "cuid_26_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 23
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_27_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 24
+    .const 'Sub' $P5001 = "cuid_27_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 24
     set_sub_code_object $P5001, $P5002
-    .const "LexInfo" $P5001 = "cuid_86_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    .const "LexInfo" $P5001 = "cuid_87_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     $P5001."set_static_lexpad_value"("$?PACKAGE", $P5002)
-    .const "LexInfo" $P5003 = "cuid_86_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_87_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_86_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 9
+    .const "LexInfo" $P5001 = "cuid_87_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 9
     $P5001."set_static_lexpad_value"("$?CLASS", $P5002)
-    .const "LexInfo" $P5003 = "cuid_86_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_87_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_53_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    .const "LexInfo" $P5001 = "cuid_53_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     $P5001."set_static_lexpad_value"("NQPMu", $P5002)
-    .const "LexInfo" $P5003 = "cuid_53_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_53_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const 'Sub' $P5001 = "cuid_28_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 26
+    .const 'Sub' $P5001 = "cuid_28_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 26
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_29_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 27
+    .const 'Sub' $P5001 = "cuid_29_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 27
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_30_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 28
+    .const 'Sub' $P5001 = "cuid_30_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 28
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_31_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 29
+    .const 'Sub' $P5001 = "cuid_31_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 29
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_32_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 30
+    .const 'Sub' $P5001 = "cuid_32_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 30
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_33_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 31
+    .const 'Sub' $P5001 = "cuid_33_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 31
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_34_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 32
+    .const 'Sub' $P5001 = "cuid_34_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 32
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_35_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 33
+    .const 'Sub' $P5001 = "cuid_35_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 33
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_36_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 34
+    .const 'Sub' $P5001 = "cuid_36_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 34
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_37_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 35
+    .const 'Sub' $P5001 = "cuid_37_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 35
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_38_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 36
+    .const 'Sub' $P5001 = "cuid_38_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 36
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_39_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 37
+    .const 'Sub' $P5001 = "cuid_39_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 37
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_40_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 38
+    .const 'Sub' $P5001 = "cuid_40_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 38
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_41_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 39
+    .const 'Sub' $P5001 = "cuid_41_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 39
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_42_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 40
+    .const 'Sub' $P5001 = "cuid_42_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 40
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_43_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 41
+    .const 'Sub' $P5001 = "cuid_43_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 41
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_44_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 42
+    .const 'Sub' $P5001 = "cuid_44_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 42
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_45_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 43
+    .const 'Sub' $P5001 = "cuid_45_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 43
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_46_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 44
+    .const 'Sub' $P5001 = "cuid_46_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 44
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_47_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 45
+    .const 'Sub' $P5001 = "cuid_47_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 45
     set_sub_code_object $P5001, $P5002
-    .const "LexInfo" $P5001 = "cuid_88_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    .const "LexInfo" $P5001 = "cuid_89_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     $P5001."set_static_lexpad_value"("$?PACKAGE", $P5002)
-    .const "LexInfo" $P5003 = "cuid_88_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_89_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_88_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 25
+    .const "LexInfo" $P5001 = "cuid_89_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 25
     $P5001."set_static_lexpad_value"("$?CLASS", $P5002)
-    .const "LexInfo" $P5003 = "cuid_88_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_89_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_53_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 46
+    .const "LexInfo" $P5001 = "cuid_53_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 46
     $P5001."set_static_lexpad_value"("NQPCapture", $P5002)
-    .const "LexInfo" $P5003 = "cuid_53_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_53_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const 'Sub' $P5001 = "cuid_48_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 47
+    .const 'Sub' $P5001 = "cuid_48_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 47
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_49_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 48
+    .const 'Sub' $P5001 = "cuid_49_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 48
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_50_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 49
+    .const 'Sub' $P5001 = "cuid_50_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 49
     set_sub_code_object $P5001, $P5002
-    .const 'Sub' $P5001 = "cuid_51_1360250807.22" 
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 50
+    .const 'Sub' $P5001 = "cuid_51_1360256342.611" 
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 50
     set_sub_code_object $P5001, $P5002
-    .const "LexInfo" $P5001 = "cuid_95_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 46
+    .const "LexInfo" $P5001 = "cuid_96_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 46
     $P5001."set_static_lexpad_value"("$?PACKAGE", $P5002)
-    .const "LexInfo" $P5003 = "cuid_95_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_96_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
-    .const "LexInfo" $P5001 = "cuid_95_1360250807.22"
-    nqp_get_sc_object $P5002, "63BC5C3C3B49A11397913835E804F3A225A91F3E-1360250807.246", 46
+    .const "LexInfo" $P5001 = "cuid_96_1360256342.611"
+    nqp_get_sc_object $P5002, "7124EB0A4F2237DE17B284B8CB3CA81CA1BF5C73-1360256342.637", 46
     $P5001."set_static_lexpad_value"("$?CLASS", $P5002)
-    .const "LexInfo" $P5003 = "cuid_95_1360250807.22"
+    .const "LexInfo" $P5003 = "cuid_96_1360256342.611"
     $P5004 = $P5003."finish_static_lexpad"()
     .return ($P5004) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_96_1360250807.22") :anon :lex :outer("cuid_97_1360250807.22")
+.sub "" :subid("cuid_97_1360256342.611") :anon :lex :outer("cuid_98_1360256342.611")
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
     new $P5001, 'ResizablePMCArray'
-    .const 'Sub' $P5002 = "cuid_1_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_1_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_2_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_2_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_3_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_3_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_4_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_4_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_5_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_5_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_6_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_6_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_7_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_7_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_8_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_8_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_9_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_9_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_10_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_10_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_11_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_11_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_12_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_12_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_13_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_13_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_14_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_14_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_15_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_15_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_16_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_16_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_17_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_17_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_18_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_18_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_19_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_19_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_20_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_20_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_21_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_21_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_22_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_22_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_23_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_23_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_24_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_24_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_25_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_25_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_26_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_26_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_27_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_27_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_28_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_28_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_29_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_29_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_30_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_30_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_31_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_31_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_32_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_32_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_33_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_33_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_34_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_34_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_35_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_35_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_36_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_36_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_37_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_37_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_38_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_38_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_39_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_39_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_40_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_40_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_41_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_41_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_42_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_42_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_43_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_43_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_44_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_44_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_45_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_45_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_46_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_46_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_47_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_47_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_48_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_48_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_49_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_49_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_50_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_50_1360256342.611" 
     push $P5001, $P5002
-    .const 'Sub' $P5002 = "cuid_51_1360250807.22" 
+    .const 'Sub' $P5002 = "cuid_51_1360256342.611" 
     push $P5001, $P5002
     .return ($P5001) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_98_1360250807.22") :load
+.sub "" :subid("cuid_99_1360256342.611") :load
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
-    .const 'Sub' $P5001 = "cuid_53_1360250807.22" 
+    .const 'Sub' $P5001 = "cuid_53_1360256342.611" 
     $P5002 = $P5001()
     .return ($P5002) 
 .end
 .HLL "nqp"
 .namespace []
-.sub "" :subid("cuid_99_1360250807.22") :main
+.sub "" :subid("cuid_100_1360256342.611") :main
 .annotate 'file', "src\\stage2\\NQPCORE.setting"
     .param pmc ARGS :slurpy 
-    .const 'Sub' $P5001 = "cuid_53_1360250807.22" 
+    .const 'Sub' $P5001 = "cuid_53_1360256342.611" 
     $P5002 = $P5001(ARGS :flat)
     .return ($P5002) 
 .end
