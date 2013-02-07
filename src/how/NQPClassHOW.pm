@@ -241,7 +241,7 @@ knowhow NQPClassHOW {
         
         # Compose the representation.
         unless $!composed {
-            #self.compose_repr($obj);
+            self.compose_repr($obj);
         }
         
         # Mark as composed.
