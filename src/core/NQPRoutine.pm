@@ -7,9 +7,11 @@ my knowhow NQPRoutine {
     
     # Adds a multi-dispatch candidate.
     method add_dispatchee($code) {
+        pir::nqp_disable_sc_write_barrier__v();
         $!dispatch_cache := nqp::null();
         $!dispatch_order := nqp::null();
         nqp::push($!dispatchees, $code);
+        pir::nqp_enable_sc_write_barrier__v();
     }
     
     # Checks if this code object is a dispatcher.
@@ -226,7 +228,10 @@ my knowhow NQPRoutine {
         # Get list and number of candidates, triggering a sort if there are none.
         my @candidates := $!dispatch_order;
         if nqp::isnull(@candidates) {
+            pir::nqp_disable_sc_write_barrier__v();
             @candidates := $!dispatch_order := self.sort_dispatchees();
+            pir::nqp_enable_sc_write_barrier__v();
+            1;
         }
         my $num_candidates := nqp::elems(@candidates);
 
