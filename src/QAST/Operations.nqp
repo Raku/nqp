@@ -1034,6 +1034,35 @@ QAST::Operations.add_core_op('lexprimspec', -> $qastcomp, $op {
     ))
 });
 
+# Argument capture processing, for writing things like multi-dispatchers in
+# high level languages.
+QAST::Operations.add_core_op('usecapture', -> $qastcomp, $op {
+    # On Parrot, the current CallContext has the current args, so just use it.
+    my $reg := $*REGALLOC.fresh_p();
+    my $ops := PIRT::Ops.new();
+    $ops.push_pirop('getinterp', $reg);
+    $ops.push_pirop('set', $reg, $reg ~ "['context']");
+    $ops.result($reg);
+    $ops
+});
+QAST::Operations.add_core_op('savecapture', -> $qastcomp, $op {
+    # On Parrot, CallContext contains the args and is immutable, so we
+    # don't need to do anything more than map this to returning the
+    # current context.
+    my $reg := $*REGALLOC.fresh_p();
+    my $ops := PIRT::Ops.new();
+    $ops.push_pirop('getinterp', $reg);
+    $ops.push_pirop('set', $reg, $reg ~ "['context']");
+    $ops.result($reg);
+    $ops
+});
+QAST::Operations.add_core_pirop_mapping('captueposelems', 'elements', 'IP');
+QAST::Operations.add_core_pirop_mapping('captueposarg', 'set', 'PQi');
+QAST::Operations.add_core_pirop_mapping('captueposarg_i', 'set', 'IQi');
+QAST::Operations.add_core_pirop_mapping('captueposarg_n', 'set', 'NQi');
+QAST::Operations.add_core_pirop_mapping('captueposarg_s', 'set', 'SQi');
+QAST::Operations.add_core_pirop_mapping('captueposprimspec', 'captueposprimspec', 'IPi');
+
 # Exception handling/munging.
 my $exc_exclude := 0;
 my $exc_include := 1;
