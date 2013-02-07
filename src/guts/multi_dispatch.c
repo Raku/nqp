@@ -308,8 +308,7 @@ Looks for an entry in the multi-dispatch cache.
 =cut
 
 */
-static PMC *
-find_in_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num_args) {
+PMC * find_in_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num_args) {
     INTVAL arg_tup[MD_CACHE_MAX_ARITY];
     INTVAL i, j, entries, t_pos;
     struct Pcc_cell * pc_positionals;
@@ -364,8 +363,7 @@ Adds an entry to the multi-dispatch cache.
 =cut
 
 */
-static void
-add_to_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num_args, PMC *result) {
+void add_to_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num_args, PMC *result) {
     INTVAL arg_tup[MD_CACHE_MAX_ARITY];
     INTVAL i, entries, ins_type;
     struct Pcc_cell * pc_positionals;

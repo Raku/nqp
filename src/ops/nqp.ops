@@ -1632,6 +1632,49 @@ inline op invoke_with_capture(out PMC, in PMC, in PMC) :base_core {
 
 /*
 
+=item multi_cache_add()
+
+Adds a candidate to the multi-dispatch cache.
+
+=cut
+
+*/
+inline op multi_cache_add(out PMC, in PMC, in PMC, in PMC) :base_core {
+    PMC *cache_ptr = $2;
+    if (cache_ptr->vtable->base_type != enum_class_Pointer) {
+        NQP_md_cache *c = mem_sys_allocate_zeroed(sizeof(NQP_md_cache));
+        cache_ptr = Parrot_pmc_new(interp, enum_class_Pointer);
+        VTABLE_set_pointer(interp, cache_ptr, c);
+    }
+    add_to_cache(interp, (NQP_md_cache *)VTABLE_get_pointer(interp, cache_ptr),
+        $3, VTABLE_elements(interp, $3), $4);
+    $1 = cache_ptr;
+}
+
+
+/*
+
+=item multi_cache_find()
+
+Tries to find a candidate in the multi-dispatch cache. Returns PMCNULL if none found.
+
+=cut
+
+*/
+inline op multi_cache_find(out PMC, in PMC, in PMC, in PMC) :base_core {
+    PMC *cache_ptr = $2;
+    if (cache_ptr->vtable->base_type == enum_class_Pointer) {
+        PMC *result = find_in_cache(interp, (NQP_md_cache *)VTABLE_get_pointer(interp, cache_ptr),
+            $3, VTABLE_elements(interp, $3));
+        $1 = result ? result : PMCNULL;
+    }
+    else {
+        $1 = PMCNULL;
+    }
+}
+
+/*
+
 =item set_sub_multisig()
 
 Sets a sub's multi_signature. $1 is the sub, $2 is the signature object.

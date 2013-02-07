@@ -63,3 +63,5 @@ typedef struct Pcc_cell
 
 PMC *nqp_multi_dispatch(PARROT_INTERP, PMC *dispatcher, PMC *capture);
 void nqp_set_nqpmu(PMC *nqpmu);
+void add_to_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num_args, PMC *result);
+PMC * find_in_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num_args);
