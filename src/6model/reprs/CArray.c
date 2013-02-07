@@ -196,6 +196,7 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
     spec.can_box = 0;
     spec.bits = sizeof(void *) * 8;
+    spec.align = ALIGNOF1(void *);
     return spec;
 }
 
@@ -220,17 +221,49 @@ static void expand(PARROT_INTERP, CArrayREPRData *repr_data, CArrayBody *body, I
         body->child_objs = (PMC **) mem_sys_realloc_zeroed(body->child_objs, next_size * sizeof(PMC *), body->allocated * sizeof(PMC *));
     body->allocated = next_size;
 }
-static void * at_pos_ref(PARROT_INTERP, STable *st, void *data, INTVAL index) {
+static void at_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, NativeValue *value) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody     *body      = (CArrayBody *)data;
-    if (body->managed && index >= body->elems)
-        return NULL;
-    switch (repr_data->elem_kind) {
-        case CARRAY_ELEM_KIND_NUMERIC:
-            return ((char *)body->storage) + index * repr_data->elem_size;
+    STable         *type_st   = STABLE(repr_data->elem_type);
+    void           *ptr       = ((char *)body->storage) + index * repr_data->elem_size;
+    if (body->managed && index >= body->elems) {
+        switch (value->type) {
+        case NATIVE_VALUE_INT:
+            value->value.intval = 0;
+            return;
+        case NATIVE_VALUE_FLOAT: {
+            double x = 0.0;
+            value->value.floatval = 0.0/x;
+            return;
+        }
+        case NATIVE_VALUE_STRING:
+            value->value.stringval = STRINGNULL;
+            return;
         default:
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "at_pos_ref on CArray REPR only usable with numeric element types");
+                "Bad value of NativeValue.type: %d", value->type);
+        }
+    }
+    switch (repr_data->elem_kind) {
+        case CARRAY_ELEM_KIND_NUMERIC:
+            switch (value->type) {
+            case NATIVE_VALUE_INT:
+                value->value.intval = type_st->REPR->box_funcs->get_int(interp, type_st, ptr);
+                break;
+            case NATIVE_VALUE_FLOAT:
+                value->value.floatval = type_st->REPR->box_funcs->get_num(interp, type_st, ptr);
+                break;
+            case NATIVE_VALUE_STRING:
+                value->value.stringval = type_st->REPR->box_funcs->get_str(interp, type_st, ptr);
+                break;
+            default:
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "Bad value of NativeValue.type: %d", value->type);
+            }
+            break;
+        default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "at_pos_native on CArray REPR only usable with numeric element types");
     }
 }
 static PMC * make_object(PARROT_INTERP, STable *st, void *data) {
@@ -325,21 +358,35 @@ static PMC * at_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index) {
         }
     }
 }
-static void bind_pos_ref(PARROT_INTERP, STable *st, void *data, INTVAL index, void *value) {
+static void bind_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, NativeValue *value) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     CArrayBody     *body      = (CArrayBody *)data;
     STable         *type_st   = STABLE(repr_data->elem_type);
+    void           *ptr       = ((char *)body->storage) + index * repr_data->elem_size;
     if (body->managed && index >= body->allocated)
         expand(interp, repr_data, body, index + 1);
     if (index >= body->elems)
         body->elems = index + 1;
     switch (repr_data->elem_kind) {
         case CARRAY_ELEM_KIND_NUMERIC:
-            type_st->REPR->copy_to(interp, type_st, value, ((char *)body->storage) + index * repr_data->elem_size);
+            switch (value->type) {
+            case NATIVE_VALUE_INT:
+                type_st->REPR->box_funcs->set_int(interp, type_st, ptr, value->value.intval);
+                break;
+            case NATIVE_VALUE_FLOAT:
+                type_st->REPR->box_funcs->set_num(interp, type_st, ptr, value->value.floatval);
+                break;
+            case NATIVE_VALUE_STRING:
+                type_st->REPR->box_funcs->set_str(interp, type_st, ptr, value->value.stringval);
+                break;
+            default:
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "Bad value of NativeValue.type: %d", value->type);
+            }
             break;
         default:
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "bind_pos_ref on CArray REPR only usable with numeric element types");
+                "bind_pos_native on CArray REPR only usable with numeric element types");
     }
 }
 static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, PMC *obj) {
@@ -464,9 +511,9 @@ REPROps * CArray_initialize(PARROT_INTERP,
     this_repr->gc_mark = gc_mark;
     this_repr->get_storage_spec = get_storage_spec;
     this_repr->idx_funcs = mem_allocate_zeroed_typed(REPROps_Indexing);
-    this_repr->idx_funcs->at_pos_ref = at_pos_ref;
+    this_repr->idx_funcs->at_pos_native = at_pos_native;
     this_repr->idx_funcs->at_pos_boxed = at_pos_boxed;
-    this_repr->idx_funcs->bind_pos_ref = bind_pos_ref;
+    this_repr->idx_funcs->bind_pos_native = bind_pos_native;
     this_repr->idx_funcs->bind_pos_boxed = bind_pos_boxed;
     this_repr->idx_funcs->elems = elems;
     this_repr->idx_funcs->preallocate = preallocate;

@@ -587,10 +587,16 @@ a native int - the repr is not obligated to do boxing/unboxing for you.
 
 */
 inline op repr_get_attr_int(out INT, invar PMC, invar PMC, in STR) :base_core {
+    PMC *obj = decontainerize(interp, $2);
     PMC *ch = decontainerize(interp, $3);
-    if ($2->vtable->base_type == smo_id) {
-        if (IS_CONCRETE($2))
-            $1 = *((INTVAL *)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, NO_HINT));
+    STRING *name = $4;
+    if (obj->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(obj)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_INT;
+            REPR(obj)->attr_funcs->get_attribute_native(interp, STABLE(obj), OBJECT_BODY(obj), ch, name, NO_HINT, &value);
+            $1 = value.value.intval;
+        }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot look up attributes in a type object");
@@ -611,10 +617,16 @@ a native num - the repr is not obligated to do boxing/unboxing for you.
 
 */
 inline op repr_get_attr_num(out NUM, invar PMC, invar PMC, in STR) :base_core {
+    PMC *obj = decontainerize(interp, $2);
     PMC *ch = decontainerize(interp, $3);
-    if ($2->vtable->base_type == smo_id) {
-        if (IS_CONCRETE($2))
-            $1 = *((FLOATVAL *)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, NO_HINT));
+    STRING *name = $4;
+    if (obj->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(obj)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_FLOAT;
+            REPR(obj)->attr_funcs->get_attribute_native(interp, STABLE(obj), OBJECT_BODY(obj), ch, name, NO_HINT, &value);
+            $1 = value.value.floatval;
+        }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot look up attributes in a type object");
@@ -638,8 +650,12 @@ a native str - the repr is not obligated to do boxing/unboxing for you.
 inline op repr_get_attr_str(out STR, invar PMC, invar PMC, in STR) :base_core {
     PMC *ch = decontainerize(interp, $3);
     if ($2->vtable->base_type == smo_id) {
-        if (IS_CONCRETE($2))
-            $1 = *((STRING **)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, NO_HINT));
+        if (IS_CONCRETE($2)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_STRING;
+            REPR($2)->attr_funcs->get_attribute_native(interp, STABLE($2), OBJECT_BODY($2), ch, $4, NO_HINT, &value);
+            $1 = value.value.stringval;
+        }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot look up attributes in a type object");
@@ -691,8 +707,12 @@ a native int - the repr is not obligated to do boxing/unboxing for you.
 inline op repr_bind_attr_int(invar PMC, invar PMC, in STR, in INT) :base_core {
     PMC *ch = decontainerize(interp, $2);
     if ($1->vtable->base_type == smo_id) {
-        if (IS_CONCRETE($1))
-            REPR($1)->attr_funcs->bind_attribute_ref(interp, STABLE($1), OBJECT_BODY($1), ch, $3, NO_HINT, &$4);
+        if (IS_CONCRETE($1)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_INT;
+            value.value.intval = $4;
+            REPR($1)->attr_funcs->bind_attribute_native(interp, STABLE($1), OBJECT_BODY($1), ch, $3, NO_HINT, &value);
+        }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot bind to attributes in a type object");
@@ -717,8 +737,12 @@ a native num - the repr is not obligated to do boxing/unboxing for you.
 inline op repr_bind_attr_num(invar PMC, invar PMC, in STR, in NUM) :base_core {
     PMC *ch = decontainerize(interp, $2);
     if ($1->vtable->base_type == smo_id) {
-        if (IS_CONCRETE($1))
-            REPR($1)->attr_funcs->bind_attribute_ref(interp, STABLE($1), OBJECT_BODY($1), ch, $3, NO_HINT, &$4);
+        if (IS_CONCRETE($1)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_FLOAT;
+            value.value.floatval = $4;
+            REPR($1)->attr_funcs->bind_attribute_native(interp, STABLE($1), OBJECT_BODY($1), ch, $3, NO_HINT, &value);
+        }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot bind to attributes in a type object");
@@ -743,8 +767,12 @@ a native str - the repr is not obligated to do boxing/unboxing for you.
 inline op repr_bind_attr_str(invar PMC, invar PMC, in STR, in STR) :base_core {
     PMC *ch = decontainerize(interp, $2);
     if ($1->vtable->base_type == smo_id) {
-        if (IS_CONCRETE($1))
-            REPR($1)->attr_funcs->bind_attribute_ref(interp, STABLE($1), OBJECT_BODY($1), ch, $3, NO_HINT, &$4);
+        if (IS_CONCRETE($1)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_STRING;
+            value.value.stringval = $4;
+            REPR($1)->attr_funcs->bind_attribute_native(interp, STABLE($1), OBJECT_BODY($1), ch, $3, NO_HINT, &value);
+        }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot bind to attributes in a type object");
@@ -793,10 +821,16 @@ a native int - the repr is not obligated to do boxing/unboxing for you.
 
 */
 inline op repr_get_attr_int(out INT, invar PMC, invar PMC, in STR, in INT) :base_core {
+    PMC *obj = decontainerize(interp, $2);
     PMC *ch = decontainerize(interp, $3);
-    if ($2->vtable->base_type == smo_id) {
-        if (IS_CONCRETE($2))
-            $1 = *((INTVAL *)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, $5));
+    STRING *name = $4;
+    if (obj->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(obj)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_INT;
+            REPR(obj)->attr_funcs->get_attribute_native(interp, STABLE(obj), OBJECT_BODY(obj), ch, name, NO_HINT, &value);
+            $1 = value.value.intval;
+        }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot look up attributes in a type object");
@@ -818,10 +852,16 @@ a native num - the repr is not obligated to do boxing/unboxing for you.
 
 */
 inline op repr_get_attr_num(out NUM, invar PMC, invar PMC, in STR, in INT) :base_core {
+    PMC *obj = decontainerize(interp, $2);
     PMC *ch = decontainerize(interp, $3);
-    if ($2->vtable->base_type == smo_id) {
-        if (IS_CONCRETE($2))
-            $1 = *((FLOATVAL *)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, $5));
+    STRING *name = $4;
+    if (obj->vtable->base_type == smo_id) {
+        if (IS_CONCRETE(obj)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_FLOAT;
+            REPR(obj)->attr_funcs->get_attribute_native(interp, STABLE(obj), OBJECT_BODY(obj), ch, name, NO_HINT, &value);
+            $1 = value.value.floatval;
+        }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot look up attributes in a type object");
@@ -845,8 +885,12 @@ a native str - the repr is not obligated to do boxing/unboxing for you.
 inline op repr_get_attr_str(out STR, invar PMC, invar PMC, in STR, in INT) :base_core {
     PMC *ch = decontainerize(interp, $3);
     if ($2->vtable->base_type == smo_id) {
-        if (IS_CONCRETE($2))
-            $1 = *((STRING **)REPR($2)->attr_funcs->get_attribute_ref(interp, STABLE($2), OBJECT_BODY($2), ch, $4, $5));
+        if (IS_CONCRETE($2)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_STRING;
+            REPR($2)->attr_funcs->get_attribute_native(interp, STABLE($2), OBJECT_BODY($2), ch, $4, $5, &value);
+            $1 = value.value.stringval;
+        }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot look up attributes in a type object");
@@ -898,8 +942,12 @@ a native int - the repr is not obligated to do boxing/unboxing for you.
 inline op repr_bind_attr_int(invar PMC, invar PMC, in STR, in INT, in INT) :base_core {
     PMC *ch = decontainerize(interp, $2);
     if ($1->vtable->base_type == smo_id) {
-        if (IS_CONCRETE($1))
-            REPR($1)->attr_funcs->bind_attribute_ref(interp, STABLE($1), OBJECT_BODY($1), ch, $3, $4, &$5);
+        if (IS_CONCRETE($1)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_INT;
+            value.value.intval = $5;
+            REPR($1)->attr_funcs->bind_attribute_native(interp, STABLE($1), OBJECT_BODY($1), ch, $3, $4, &value);
+        }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot bind to attributes in a type object");
@@ -924,8 +972,12 @@ a native num - the repr is not obligated to do boxing/unboxing for you.
 inline op repr_bind_attr_num(invar PMC, invar PMC, in STR, in INT, in NUM) :base_core {
     PMC *ch = decontainerize(interp, $2);
     if ($1->vtable->base_type == smo_id) {
-        if (IS_CONCRETE($1))
-            REPR($1)->attr_funcs->bind_attribute_ref(interp, STABLE($1), OBJECT_BODY($1), ch, $3, $4, &$5);
+        if (IS_CONCRETE($1)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_FLOAT;
+            value.value.floatval = $5;
+            REPR($1)->attr_funcs->bind_attribute_native(interp, STABLE($1), OBJECT_BODY($1), ch, $3, $4, &value);
+        }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot bind to attributes in a type object");
@@ -950,8 +1002,12 @@ a native str - the repr is not obligated to do boxing/unboxing for you.
 inline op repr_bind_attr_str(invar PMC, invar PMC, in STR, in INT, in STR) :base_core {
     PMC *ch = decontainerize(interp, $2);
     if ($1->vtable->base_type == smo_id) {
-        if (IS_CONCRETE($1))
-            REPR($1)->attr_funcs->bind_attribute_ref(interp, STABLE($1), OBJECT_BODY($1), ch, $3, $4, &$5);
+        if (IS_CONCRETE($1)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_STRING;
+            value.value.stringval = $5;
+            REPR($1)->attr_funcs->bind_attribute_native(interp, STABLE($1), OBJECT_BODY($1), ch, $3, $4, &value);
+        }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot bind to attributes in a type object");
@@ -1082,9 +1138,12 @@ inline op repr_at_pos_int(out INT, invar PMC, in INT) :base_core {
     PMC *obj = decontainerize(interp, $2);
     if (obj->vtable->base_type == smo_id) {
         STable *elem_st = REPR(obj)->idx_funcs->get_elem_stable(interp, STABLE(obj));
-        if (IS_CONCRETE(obj))
-            $1 = elem_st->REPR->box_funcs->get_int(interp, elem_st,
-                REPR(obj)->idx_funcs->at_pos_ref(interp, STABLE(obj), OBJECT_BODY(obj), $3));
+        if (IS_CONCRETE(obj)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_INT;
+            REPR(obj)->idx_funcs->at_pos_native(interp, STABLE(obj), OBJECT_BODY(obj), $3, &value);
+            $1 = value.value.intval;
+        }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot do at_pos on a type object");
@@ -1108,9 +1167,12 @@ inline op repr_at_pos_num(out NUM, invar PMC, in INT) :base_core {
     PMC *obj = decontainerize(interp, $2);
     if (obj->vtable->base_type == smo_id) {
         STable *elem_st = REPR(obj)->idx_funcs->get_elem_stable(interp, STABLE(obj));
-        if (IS_CONCRETE(obj))
-            $1 = elem_st->REPR->box_funcs->get_num(interp, elem_st,
-                REPR(obj)->idx_funcs->at_pos_ref(interp, STABLE(obj), OBJECT_BODY(obj), $3));
+        if (IS_CONCRETE(obj)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_FLOAT;
+            REPR(obj)->idx_funcs->at_pos_native(interp, STABLE(obj), OBJECT_BODY(obj), $3, &value);
+            $1 = value.value.floatval;
+        }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot do at_pos on a type object");
@@ -1159,8 +1221,12 @@ Sets the element at the specified position to an integer.
 inline op repr_bind_pos_int(invar PMC, in INT, in INT) :base_core {
     PMC *obj = decontainerize(interp, $1);
     if (obj->vtable->base_type == smo_id) {
-        if (IS_CONCRETE(obj))
-            REPR(obj)->idx_funcs->bind_pos_ref(interp, STABLE(obj), OBJECT_BODY(obj), $2, &$3);
+        if (IS_CONCRETE(obj)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_INT;
+            value.value.intval = $3;
+            REPR(obj)->idx_funcs->bind_pos_native(interp, STABLE(obj), OBJECT_BODY(obj), $2, &value);
+        }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot do bind_pos on a type object");
@@ -1184,8 +1250,12 @@ Sets the element at the specified position to a floating point number.
 inline op repr_bind_pos_num(invar PMC, in INT, in NUM) :base_core {
     PMC *obj = decontainerize(interp, $1);
     if (obj->vtable->base_type == smo_id) {
-        if (IS_CONCRETE(obj))
-            REPR(obj)->idx_funcs->bind_pos_ref(interp, STABLE(obj), OBJECT_BODY(obj), $2, &$3);
+        if (IS_CONCRETE(obj)) {
+            NativeValue value;
+            value.type = NATIVE_VALUE_FLOAT;
+            value.value.floatval = $3;
+            REPR(obj)->idx_funcs->bind_pos_native(interp, STABLE(obj), OBJECT_BODY(obj), $2, &value);
+        }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot do bind_pos on a type object");

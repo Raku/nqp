@@ -12,6 +12,11 @@ typedef struct {
     P6intBody body;
 } P6intInstance;
 
+/* The bit width requirement is shared for all instances of the same type. */
+typedef struct {
+    INTVAL bits;
+} P6intREPRData;
+
 /* Initializes the P6int REPR. */
 REPROps * P6int_initialize(PARROT_INTERP);
 

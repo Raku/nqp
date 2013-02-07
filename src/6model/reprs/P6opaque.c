@@ -216,6 +216,7 @@ static void compute_allocation_strategy_OLD(PARROT_INTERP, PMC *WHAT, P6opaqueRE
             /* Work out what unboxed type it is, if any. Default to a boxed. */
             INTVAL unboxed_type = STORAGE_SPEC_BP_NONE;
             INTVAL bits         = sizeof(PMC *) * 8;
+            INTVAL align        = ALIGNOF1(PMC *);
             if (!PMC_IS_NULL(type)) {
                 /* Get the storage spec of the type and see what it wants. */
                 storage_spec spec = REPR(type)->get_storage_spec(interp, STABLE(type));
@@ -223,8 +224,11 @@ static void compute_allocation_strategy_OLD(PARROT_INTERP, PMC *WHAT, P6opaqueRE
                     /* Yes, it's something we'll flatten. */
                     unboxed_type = spec.boxed_primitive;
                     bits = spec.bits;
+                    align = spec.align;
                     repr_data->flattened_stables[i] = STABLE(type);
-                    
+
+                    if (bits % 8) bits += 8 - bits%8;
+
                     /* Does it need special initialization? */
                     if (REPR(type)->initialize) {
                         if (!repr_data->initialize_slots)
@@ -297,8 +301,12 @@ static void compute_allocation_strategy_OLD(PARROT_INTERP, PMC *WHAT, P6opaqueRE
                 }
             }
             
-            /* Do allocation. */
-            /* XXX TODO Alignment! Important when we get int1, int8, etc. */
+            /* Do allocation. Before updating the size of the structure, we
+             * make sure the object will be aligned appropriately. */
+            if (cur_size % align) {
+                cur_size += align - cur_size % align;
+            }
+
             repr_data->attribute_offsets[i] = cur_size;
             cur_size += bits / 8;
         }
@@ -454,6 +462,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *repr_info, P6opaqueR
             /* Work out what unboxed type it is, if any. Default to a boxed. */
             INTVAL unboxed_type = STORAGE_SPEC_BP_NONE;
             INTVAL bits         = sizeof(PMC *) * 8;
+            INTVAL align        = ALIGNOF1(PMC *);
             if (!PMC_IS_NULL(type)) {
                 /* Get the storage spec of the type and see what it wants. */
                 storage_spec spec = REPR(type)->get_storage_spec(interp, STABLE(type));
@@ -461,8 +470,11 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *repr_info, P6opaqueR
                     /* Yes, it's something we'll flatten. */
                     unboxed_type = spec.boxed_primitive;
                     bits = spec.bits;
+                    align = spec.align;
                     repr_data->flattened_stables[i] = STABLE(type);
                     
+                    if (bits % 8) bits += 8 - bits%8;
+
                     /* Does it need special initialization? */
                     if (REPR(type)->initialize) {
                         if (!repr_data->initialize_slots)
@@ -535,8 +547,12 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *repr_info, P6opaqueR
                 }
             }
             
-            /* Do allocation. */
-            /* XXX TODO Alignment! Important when we get int1, int8, etc. */
+            /* Do allocation. Before updating the size of the structure, we
+             * make sure the object will be aligned appropriately. */
+            if (cur_size % align) {
+                cur_size += align - cur_size % align;
+            }
+
             repr_data->attribute_offsets[i] = cur_size;
             cur_size += bits / 8;
         }
@@ -554,42 +570,6 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *repr_info, P6opaqueR
     }
 
     Parrot_unblock_GC_mark(interp);
-}
-
-/* Helper for reading an int at the specified offset. */
-static INTVAL get_int_at_offset(void *data, INTVAL offset) {
-    void *location = (char *)data + offset;
-    return *((INTVAL *)location);
-}
-
-/* Helper for writing an int at the specified offset. */
-static void set_int_at_offset(void *data, INTVAL offset, INTVAL value) {
-    void *location = (char *)data + offset;
-    *((INTVAL *)location) = value;
-}
-
-/* Helper for reading a num at the specified offset. */
-static FLOATVAL get_num_at_offset(void *data, INTVAL offset) {
-    void *location = (char *)data + offset;
-    return *((FLOATVAL *)location);
-}
-
-/* Helper for writing a num at the specified offset. */
-static void set_num_at_offset(void *data, INTVAL offset, FLOATVAL value) {
-    void *location = (char *)data + offset;
-    *((FLOATVAL *)location) = value;
-}
-
-/* Helper for reading a string at the specified offset. */
-static STRING * get_str_at_offset(void *data, INTVAL offset) {
-    void *location = (char *)data + offset;
-    return *((STRING **)location);
-}
-
-/* Helper for writing a string at the specified offset. */
-static void set_str_at_offset(void *data, INTVAL offset, STRING *value) {
-    void *location = (char *)data + offset;
-    *((STRING **)location) = value;
 }
 
 /* Helper for reading a PMC at the specified offset. */
@@ -658,7 +638,9 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 /* Composes the representation. */
 static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
     P6opaqueREPRData * repr_data = (P6opaqueREPRData *) st->REPR_data;
-    compute_allocation_strategy(interp, repr_info, repr_data);
+    PMC *attr_info = VTABLE_get_pmc_keyed_str(interp, repr_info,
+        Parrot_str_new_constant(interp, "attribute"));
+    compute_allocation_strategy(interp, attr_info, repr_data);
     PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
 }
 
@@ -773,20 +755,45 @@ static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
     no_such_attribute(interp, "get", class_handle, name);
 }
 
-static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
+static void get_attribute_native(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, NativeValue *value) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     INTVAL            slot;
 
     /* Look up slot, then offset and compute address. */
     slot = hint >= 0 && !(repr_data->mi) ? hint :
         try_get_slot(interp, repr_data, class_handle, name);
-    if (slot >= 0)
-        return ((char *)data) + repr_data->attribute_offsets[slot];
+    if (slot >= 0) {
+        STable *st = repr_data->flattened_stables[slot];
+        void *ptr = ((char *)data) + repr_data->attribute_offsets[slot];
+        if (st) {
+            switch (value->type) {
+            case NATIVE_VALUE_INT:
+                value->value.intval = st->REPR->box_funcs->get_int(interp, st, ptr);
+                break;
+            case NATIVE_VALUE_FLOAT:
+                value->value.floatval = st->REPR->box_funcs->get_num(interp, st, ptr);
+                break;
+            case NATIVE_VALUE_STRING:
+                value->value.stringval = st->REPR->box_funcs->get_str(interp, st, ptr);
+                break;
+            default:
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "Bad value of NativeValue.type: %d", value->type);
+            }
+            return;
+        }
+        else {
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot read by reference from non-flattened attribute '%Ss' on class '%Ss'",
+                name, VTABLE_get_string(interp, introspection_call(interp,
+                    class_handle, STABLE(class_handle)->HOW,
+                    Parrot_str_new_constant(interp, "name"), 0)));
+        }
+    }
     
     /* Otherwise, complain that the attribute doesn't exist. */
     no_such_attribute(interp, "get", class_handle, name);
 }
-
 
 /* Binds the given value to the specified attribute. */
 static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, PMC *value) {
@@ -818,7 +825,7 @@ static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
         no_such_attribute(interp, "bind", class_handle, name);
     }
 }
-static void bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, void *value) {
+static void bind_attribute_native(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, NativeValue *value) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     INTVAL            slot;
 
@@ -827,11 +834,27 @@ static void bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class
         try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
         STable *st = repr_data->flattened_stables[slot];
-        if (st)
-            st->REPR->copy_to(interp, st, value, (char *)data + repr_data->attribute_offsets[slot]);
+        void *ptr = (char *)data + repr_data->attribute_offsets[slot];
+        if (st) {
+            switch (value->type) {
+            case NATIVE_VALUE_INT:
+                st->REPR->box_funcs->set_int(interp, st, ptr, value->value.intval);
+                break;
+            case NATIVE_VALUE_FLOAT:
+                st->REPR->box_funcs->set_num(interp, st, ptr, value->value.floatval);
+                break;
+            case NATIVE_VALUE_STRING:
+                st->REPR->box_funcs->set_str(interp, st, ptr, value->value.stringval);
+                break;
+            default:
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "Bad value of NativeValue.type: %d", value->type);
+            }
+            return;
+        }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Can not bind by reference to non-flattened attribute '%Ss' on class '%Ss'",
+                "Cannot bind by reference to non-flattened attribute '%Ss' on class '%Ss'",
                 name, VTABLE_get_string(interp, introspection_call(interp,
                     class_handle, STABLE(class_handle)->HOW,
                     Parrot_str_new_constant(interp, "name"), 0)));
@@ -1058,6 +1081,8 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     spec.inlineable = STORAGE_SPEC_REFERENCE;
     spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
     spec.can_box = 0;
+    spec.bits = sizeof(void *);
+    spec.align = ALIGNOF1(void *);
     if (repr_data->unbox_int_slot >= 0)
         spec.can_box += STORAGE_SPEC_CAN_BOX_INT;
     if (repr_data->unbox_num_slot >= 0)
@@ -1325,9 +1350,9 @@ REPROps * P6opaque_initialize(PARROT_INTERP) {
     this_repr->copy_to = copy_to;
     this_repr->attr_funcs = mem_allocate_typed(REPROps_Attribute);
     this_repr->attr_funcs->get_attribute_boxed = get_attribute_boxed;
-    this_repr->attr_funcs->get_attribute_ref = get_attribute_ref;
+    this_repr->attr_funcs->get_attribute_native = get_attribute_native;
     this_repr->attr_funcs->bind_attribute_boxed = bind_attribute_boxed;
-    this_repr->attr_funcs->bind_attribute_ref = bind_attribute_ref;
+    this_repr->attr_funcs->bind_attribute_native = bind_attribute_native;
     this_repr->attr_funcs->is_attribute_initialized = is_attribute_initialized;
     this_repr->attr_funcs->hint_for = hint_for;
     this_repr->box_funcs = mem_allocate_typed(REPROps_Boxing);

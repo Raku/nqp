@@ -45,63 +45,34 @@ static PMC * introspection_call(PARROT_INTERP, PMC *WHAT, PMC *HOW, STRING *name
     return VTABLE_get_pmc_keyed_int(interp, cappy, 0);
 }
 
-/* Helper to make an accessor call. */
-static PMC * accessor_call(PARROT_INTERP, PMC *obj, STRING *name) {
-    PMC *old_ctx, *cappy;
-    
-    /* Look up method; if there is none hand back a null. */
-    PMC *meth = VTABLE_find_method(interp, obj, name);
-    if (PMC_IS_NULL(meth))
-        return meth;
-
-    /* Set up call capture. */
-    old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
-    cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
-    VTABLE_push_pmc(interp, cappy, obj);
-
-    /* Call. */
-    Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
-
-    /* Grab result. */
-    cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
-    Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
-    return VTABLE_get_pmc_keyed_int(interp, cappy, 0);
-}
-
 /* Locates all of the attributes. Puts them onto a flattened, ordered
  * list of attributes (populating the passed flat_list). Also builds
  * the index mapping for doing named lookups. Note index is not related
  * to the storage position. */
-static PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, CStructREPRData *repr_data) {
+static PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *mro, CStructREPRData *repr_data) {
     PMC    *flat_list      = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
     PMC    *class_list     = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
     PMC    *attr_map_list  = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
-    STRING *attributes_str = Parrot_str_new_constant(interp, "attributes");
-    STRING *parents_str    = Parrot_str_new_constant(interp, "parents");
     STRING *name_str       = Parrot_str_new_constant(interp, "name");
-    STRING *mro_str        = Parrot_str_new_constant(interp, "mro");
     INTVAL  current_slot   = 0;
     
     INTVAL num_classes, i;
     CStructNameMap * result = NULL;
     
-    /* Get the MRO. */
-    PMC   *mro     = introspection_call(interp, WHAT, STABLE(WHAT)->HOW, mro_str, 0);
-    INTVAL mro_idx = VTABLE_elements(interp, mro);
-
     /* Walk through the parents list. */
+    INTVAL mro_idx = VTABLE_elements(interp, mro);
     while (mro_idx)
     {
         /* Get current class in MRO. */
-        PMC    *current_class = decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, mro, --mro_idx));
-        PMC    *HOW           = STABLE(current_class)->HOW;
+        PMC    *type_info     = VTABLE_get_pmc_keyed_int(interp, mro, --mro_idx);
+        PMC    *current_class = decontainerize(interp, VTABLE_get_pmc_keyed_int(interp, type_info, 0));
         
         /* Get its local parents; make sure we're not doing MI. */
-        PMC    *parents     = introspection_call(interp, current_class, HOW, parents_str, 1);
+        PMC    *parents     = VTABLE_get_pmc_keyed_int(interp, type_info, 2);
         INTVAL  num_parents = VTABLE_elements(interp, parents);
         if (num_parents <= 1) {
             /* Get attributes and iterate over them. */
-            PMC *attributes = introspection_call(interp, current_class, HOW, attributes_str, 1);
+            PMC *attributes = VTABLE_get_pmc_keyed_int(interp, type_info, 1);
             PMC *attr_map   = PMCNULL;
             PMC *attr_iter  = VTABLE_get_iter(interp, attributes);
             while (VTABLE_get_bool(interp, attr_iter)) {
@@ -109,7 +80,7 @@ static PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, CStructREPRDa
                 PMC * attr = VTABLE_shift_pmc(interp, attr_iter);
 
                 /* Get its name. */
-                PMC    *name_pmc = accessor_call(interp, attr, name_str);
+                PMC    *name_pmc = VTABLE_get_pmc_keyed_str(interp, attr, name_str);
                 STRING *name     = VTABLE_get_string(interp, name_pmc);
 
                 /* Allocate a slot. */
@@ -148,7 +119,7 @@ static PMC * index_mapping_and_flat_list(PARROT_INTERP, PMC *WHAT, CStructREPRDa
 /* This works out an allocation strategy for the object. It takes care of
  * "inlining" storage of attributes that are natively typed, as well as
  * noting unbox targets. */
-static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRData *repr_data) {
+static void compute_allocation_strategy(PARROT_INTERP, PMC *repr_info, CStructREPRData *repr_data) {
     STRING *type_str = Parrot_str_new_constant(interp, "type");
     PMC    *flat_list;
 
@@ -164,7 +135,7 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
     Parrot_block_GC_mark(interp);
 
     /* Compute index mapping table and get flat list of attributes. */
-    flat_list = index_mapping_and_flat_list(interp, WHAT, repr_data);
+    flat_list = index_mapping_and_flat_list(interp, repr_info, repr_data);
     
     /* If we have no attributes in the index mapping, then just the header. */
     if (repr_data->name_to_index_mapping[0].class_key == NULL) {
@@ -195,9 +166,10 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
         for (i = 0; i < num_attrs; i++) {
             /* Fetch its type; see if it's some kind of unboxed type. */
             PMC    *attr         = VTABLE_get_pmc_keyed_int(interp, flat_list, i);
-            PMC    *type         = accessor_call(interp, attr, type_str);
+            PMC    *type         = VTABLE_get_pmc_keyed_str(interp, attr, type_str);
             INTVAL  type_id      = REPR(type)->ID;
             INTVAL  bits         = sizeof(void *) * 8;
+            INTVAL  align        = ALIGNOF1(void *);
             if (!PMC_IS_NULL(type)) {
                 /* See if it's a type that we know how to handle in a C struct. */
                 storage_spec spec = REPR(type)->get_storage_spec(interp, STABLE(type));
@@ -205,11 +177,19 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
                         (spec.boxed_primitive == STORAGE_SPEC_BP_INT ||
                          spec.boxed_primitive == STORAGE_SPEC_BP_NUM)) {
                     /* It's a boxed int or num; pretty easy. It'll just live in the
-                     * body of the struct. */
-                    /* XXX: We could mask in i here as well, but it's not
-                     * really necessary. */
-                    repr_data->attribute_locations[i] = CSTRUCT_ATTR_IN_STRUCT;
+                     * body of the struct. Instead of masking in i here (which
+                     * would be the parallel to how we handle boxed types) we
+                     * repurpose it to store the bit-width of the type, so
+                     * that get_attribute_ref can find it later. */
                     bits = spec.bits;
+                    align = spec.align;
+
+                    if (bits % 8) {
+                        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                                "CStruct only supports native types that are a multiple of 8 bits wide (was passed: %ld)", bits);
+                    }
+
+                    repr_data->attribute_locations[i] = (bits << CSTRUCT_ATTR_SHIFT) | CSTRUCT_ATTR_IN_STRUCT;
                     repr_data->flattened_stables[i] = STABLE(type);
                     if (REPR(type)->initialize) {
                         if (!repr_data->initialize_slots)
@@ -253,7 +233,13 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *WHAT, CStructREPRDat
             }
             
             /* Do allocation. */
-            /* XXX TODO C structure needs careful alignment */
+            /* C structure needs careful alignment. If cur_size is not aligned
+             * to align bytes (cur_size % align), make sure it is before we
+             * add the next element. */
+            if (cur_size % align) {
+                cur_size += align - cur_size % align;
+            }
+
             repr_data->struct_offsets[i] = cur_size;
             cur_size += bits / 8;
         }
@@ -348,19 +334,18 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 
 /* Composes the representation. */
 static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
-    /* TODO: move allocation strategy stuff here. */
+    /* Compute allocation strategy. */
+    CStructREPRData *repr_data = (CStructREPRData *) st->REPR_data;
+    PMC *attr_info = VTABLE_get_pmc_keyed_str(interp, repr_info,
+            Parrot_str_new_constant(interp, "attribute"));
+    compute_allocation_strategy(interp, attr_info, repr_data);
+    PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
 }
 
 /* Creates a new instance based on the type object. */
 static PMC * allocate(PARROT_INTERP, STable *st) {
     CStructInstance * obj;
-
-    /* Compute allocation strategy if we've not already done so. */
     CStructREPRData * repr_data = (CStructREPRData *) st->REPR_data;
-    if (!repr_data->struct_size) {
-        compute_allocation_strategy(interp, st->WHAT, repr_data);
-        PARROT_GC_WRITE_BARRIER(interp, st->stable_pmc);
-    }
 
     /* Allocate and set up object instance. */
     obj = (CStructInstance *) Parrot_gc_allocate_fixed_size_storage(interp, sizeof(CStructInstance));
@@ -479,7 +464,7 @@ static PMC * get_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
     /* Otherwise, complain that the attribute doesn't exist. */
     no_such_attribute(interp, "get", class_handle, name);
 }
-static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint) {
+static void get_attribute_native(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, NativeValue *value) {
     CStructREPRData *repr_data = (CStructREPRData *)st->REPR_data;
     CStructBody     *body      = (CStructBody *)data;
     INTVAL           slot;
@@ -487,8 +472,34 @@ static void * get_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *clas
     /* Look up slot, then offset and compute address. */
     slot = hint >= 0 ? hint :
         try_get_slot(interp, repr_data, class_handle, name);
-    if (slot >= 0)
-        return ((char *)body->cstruct) + repr_data->struct_offsets[slot];
+    if (slot >= 0) {
+        STable *st = repr_data->flattened_stables[slot];
+        void *ptr = ((char *)body->cstruct) + repr_data->struct_offsets[slot];
+        if (st) {
+            switch (value->type) {
+            case NATIVE_VALUE_INT:
+                value->value.intval = st->REPR->box_funcs->get_int(interp, st, ptr);
+                break;
+            case NATIVE_VALUE_FLOAT:
+                value->value.floatval = st->REPR->box_funcs->get_num(interp, st, ptr);
+                break;
+            case NATIVE_VALUE_STRING:
+                value->value.stringval = st->REPR->box_funcs->get_str(interp, st, ptr);
+                break;
+            default:
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "Bad value of NativeValue.type: %d", value->type);
+            }
+            return;
+        }
+        else {
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot read by reference from non-flattened attribute '%Ss' on class '%Ss'",
+                name, VTABLE_get_string(interp, introspection_call(interp,
+                    class_handle, STABLE(class_handle)->HOW,
+                    Parrot_str_new_constant(interp, "name"), 0)));
+        }
+    }
     
     /* Otherwise, complain that the attribute doesn't exist. */
     no_such_attribute(interp, "get", class_handle, name);
@@ -548,7 +559,7 @@ static void bind_attribute_boxed(PARROT_INTERP, STable *st, void *data, PMC *cla
         no_such_attribute(interp, "bind", class_handle, name);
     }
 }
-static void bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, void *value) {
+static void bind_attribute_native(PARROT_INTERP, STable *st, void *data, PMC *class_handle, STRING *name, INTVAL hint, NativeValue *value) {
     CStructREPRData *repr_data = (CStructREPRData *)st->REPR_data;
     CStructBody     *body      = (CStructBody *)data;
     INTVAL            slot;
@@ -558,8 +569,24 @@ static void bind_attribute_ref(PARROT_INTERP, STable *st, void *data, PMC *class
         try_get_slot(interp, repr_data, class_handle, name);
     if (slot >= 0) {
         STable *st = repr_data->flattened_stables[slot];
-        if (st)
-            st->REPR->copy_to(interp, st, value, ((char *)body->cstruct) + repr_data->struct_offsets[slot]);
+        if (st) {
+            void *ptr = ((char *)body->cstruct) + repr_data->struct_offsets[slot];
+            switch (value->type) {
+            case NATIVE_VALUE_INT:
+                st->REPR->box_funcs->set_int(interp, st, ptr, value->value.intval);
+                break;
+            case NATIVE_VALUE_FLOAT:
+                st->REPR->box_funcs->set_num(interp, st, ptr, value->value.floatval);
+                break;
+            case NATIVE_VALUE_STRING:
+                st->REPR->box_funcs->set_str(interp, st, ptr, value->value.stringval);
+                break;
+            default:
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "Bad value of NativeValue.type: %d", value->type);
+            }
+            return;
+        }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Can not bind by reference to non-flattened attribute '%Ss' on class '%Ss'",
@@ -633,6 +660,7 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
     spec.can_box = 0;
     spec.bits = sizeof(void *) * 8;
+    spec.align = ALIGNOF1(void *);
     return spec;
 }
 
@@ -665,9 +693,9 @@ REPROps * CStruct_initialize(PARROT_INTERP,
     this_repr->copy_to = copy_to;
     this_repr->attr_funcs = mem_allocate_typed(REPROps_Attribute);
     this_repr->attr_funcs->get_attribute_boxed = get_attribute_boxed;
-    this_repr->attr_funcs->get_attribute_ref = get_attribute_ref;
+    this_repr->attr_funcs->get_attribute_native = get_attribute_native;
     this_repr->attr_funcs->bind_attribute_boxed = bind_attribute_boxed;
-    this_repr->attr_funcs->bind_attribute_ref = bind_attribute_ref;
+    this_repr->attr_funcs->bind_attribute_native = bind_attribute_native;
     this_repr->attr_funcs->is_attribute_initialized = is_attribute_initialized;
     this_repr->attr_funcs->hint_for = hint_for;
     this_repr->gc_mark = gc_mark;
