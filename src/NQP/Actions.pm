@@ -863,6 +863,19 @@ class NQP::Actions is HLL::Actions {
                         $past
                     ));
                     $BLOCK.symbol('&' ~ $name, :scope('lexical'), :proto(1), :value($code) );
+                    
+                    # Also stash the current lexical dispatcher and capture, for the {*}
+                    # to resolve.
+                    $block[0].push(QAST::Op.new(
+                        :op('bind'),
+                        QAST::Var.new( :name('CURRENT_DISPATCH_CAPTURE'), :scope('lexical'), :decl('var') ),
+                        QAST::Op.new( :op('savecapture') )
+                    ));
+                    $block[0].push(QAST::Op.new(
+                        :op('bind'),
+                        QAST::Var.new( :name('&*CURRENT_DISPATCHER'), :scope('lexical'), :decl('var') ),
+                        QAST::Op.new( :op('getcodeobj'), QAST::Op.new( :op('curcode') ) )
+                    ));
                 }
                 else {
                     my $BLOCK := $*W.cur_lexpad();
@@ -910,8 +923,7 @@ class NQP::Actions is HLL::Actions {
             for $<trait> { $_.ast()($/); }
         }
     }
-
-
+    
     method method_def($/) {
         # If it's just got * as a body, make a multi-dispatch enterer.
         # Otherwise, build method block QAST.
@@ -963,6 +975,21 @@ class NQP::Actions is HLL::Actions {
             if $*SCOPE eq 'our' {
                 $*W.install_package_routine($*PACKAGE, $name, $past);
             }
+                    
+            # If it's a proto, also stash the current lexical dispatcher, for the {*}
+            # to resolve.
+            if $is_dispatcher {
+                $past[0].push(QAST::Op.new(
+                    :op('bind'),
+                    QAST::Var.new( :name('CURRENT_DISPATCH_CAPTURE'), :scope('lexical'), :decl('var') ),
+                    QAST::Op.new( :op('savecapture') )
+                ));
+                $past[0].push(QAST::Op.new(
+                    :op('bind'),
+                    QAST::Var.new( :name('&*CURRENT_DISPATCHER'), :scope('lexical'), :decl('var') ),
+                    QAST::Op.new( :op('getcodeobj'), QAST::Op.new( :op('curcode') ) )
+                ));
+            }
         }
 
         # Install AST node in match object, then apply traits.
@@ -978,7 +1005,15 @@ class NQP::Actions is HLL::Actions {
 
     sub only_star_block() {
         my $past := $*W.pop_lexpad();
-        $past.push(QAST::Op.new( :op('nqpmultidispatch') ));
+        $past.push(QAST::Op.new(
+            :op('invokewithcapture'),
+            QAST::Op.new(
+                :op('callmethod'), :name('dispatch'),
+                QAST::Op.new( :op('getcodeobj'), QAST::Op.new( :op('curcode') ) ),
+                QAST::Op.new( :op('usecapture') )
+            ),
+            QAST::Op.new( :op('usecapture') )
+        ));
         $past
     }
 
@@ -1293,7 +1328,22 @@ class NQP::Actions is HLL::Actions {
     }
 
     method term:sym<onlystar>($/) {
-        make QAST::Op.new( :op('nqpmultidispatch') );
+        my $dc_name := QAST::Node.unique('dispatch_cap');
+        make QAST::Stmts.new(
+            QAST::Op.new(
+                :op('bind'),
+                QAST::Var.new( :name($dc_name), :scope('local'), :decl('var') ),
+                QAST::Var.new( :name('CURRENT_DISPATCH_CAPTURE'), :scope('lexical') )
+            ),
+            QAST::Op.new(
+                :op('invokewithcapture'),
+                QAST::Op.new(
+                    :op('callmethod'), :name('dispatch'),
+                    QAST::Var.new( :name('&*CURRENT_DISPATCHER'), :scope('lexical') ),
+                    QAST::Var.new( :name($dc_name), :scope('local') )
+                ),
+                QAST::Var.new( :name($dc_name), :scope('local') )
+            ));
     }
 
     method args($/) { make $<arglist>.ast; }
