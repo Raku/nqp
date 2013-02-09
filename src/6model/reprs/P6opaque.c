@@ -129,6 +129,8 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *repr_info, P6opaqueR
     STRING *type_str       = Parrot_str_new_constant(interp, "type");
     STRING *box_target_str = Parrot_str_new_constant(interp, "box_target");
     STRING *avcont_str     = Parrot_str_new_constant(interp, "auto_viv_container");
+    STRING *pos_del_str    = Parrot_str_new_constant(interp, "positional_delegate");
+    STRING *ass_del_str    = Parrot_str_new_constant(interp, "associative_delegate");
     PMC    *flat_list;
 
     /*
@@ -172,6 +174,8 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *repr_info, P6opaqueR
         repr_data->unbox_int_slot      = -1;
         repr_data->unbox_num_slot      = -1;
         repr_data->unbox_str_slot      = -1;
+        repr_data->pos_del_slot        = -1;
+        repr_data->ass_del_slot        = -1;
 
         /* Go over the attributes and arrange their allocation. */
         for (i = 0; i < num_attrs; i++) {
@@ -275,6 +279,28 @@ static void compute_allocation_strategy(PARROT_INTERP, PMC *repr_info, P6opaqueR
                         repr_data->auto_viv_values = (PMC **) mem_sys_allocate_zeroed(info_alloc * sizeof(PMC *));
                     repr_data->auto_viv_values[i] = av_cont;
                 }
+            }
+            
+            /* Is it a positional or associative delegate? */
+            if (VTABLE_exists_keyed_str(interp, attr_hash, pos_del_str)) {
+                if (repr_data->pos_del_slot != -1)
+                    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                        "Duplicate positional delegate attribute");
+                if (unboxed_type == STORAGE_SPEC_BP_NONE)
+                    repr_data->pos_del_slot = i;
+                else
+                    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                        "Positional delegate attribute must be a reference type");
+            }
+            if (VTABLE_exists_keyed_str(interp, attr_hash, ass_del_str)) {
+                if (repr_data->ass_del_slot != -1)
+                    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                        "Duplicate associative delegate attribute");
+                if (unboxed_type == STORAGE_SPEC_BP_NONE)
+                    repr_data->ass_del_slot = i;
+                else
+                    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                        "Associative delegate attribute must be a reference type");
             }
             
             /* Increment object size by the allocated bytes. */
@@ -971,6 +997,11 @@ static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *
         writer->write_ref(interp, writer, repr_data->name_to_index_mapping[i].class_key);
         writer->write_ref(interp, writer, repr_data->name_to_index_mapping[i].name_map);
     }
+    
+    if (writer->root.version >= 3) {
+        writer->write_int(interp, writer, repr_data->pos_del_slot);
+        writer->write_int(interp, writer, repr_data->ass_del_slot);
+    }
 }
 
 /* Deserializes the data. */
@@ -1012,6 +1043,15 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
     for (i = 0; i < num_classes; i++) {
         repr_data->name_to_index_mapping[i].class_key = reader->read_ref(interp, reader);
         repr_data->name_to_index_mapping[i].name_map = reader->read_ref(interp, reader);
+    }
+    
+    if (reader->root.version >= 3) {
+        repr_data->pos_del_slot = reader->read_int(interp, reader);
+        repr_data->ass_del_slot = reader->read_int(interp, reader);
+    }
+    else {
+        repr_data->pos_del_slot = -1;
+        repr_data->ass_del_slot = -1;
     }
     
     /* Re-calculate the remaining info, which is platform specific or

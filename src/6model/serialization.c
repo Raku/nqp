@@ -19,7 +19,7 @@
 
 /* Version of the serialization format that we are currently at and lowest
  * version we support. */
-#define CURRENT_VERSION 2
+#define CURRENT_VERSION 3
 #define MIN_VERSION 1
 
 /* Various sizes (in bytes). */
