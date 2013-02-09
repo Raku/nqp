@@ -86,12 +86,7 @@ my class NQPMu {
     multi method Int(NQPMu:U $self:) {
         0
     }
-    
-    proto method at_key($key) is parrot_vtable('get_pmc_keyed_str') { * }
-    multi method at_key(NQPMu:U $self: $key) {
-        NQPMu
-    }
-    
+
     method defined() is parrot_vtable('defined') {
         nqp::isconcrete(self)
     }
