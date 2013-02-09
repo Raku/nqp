@@ -4,6 +4,7 @@ my knowhow NQPRoutine {
     has $!dispatchees;
     has $!dispatch_cache;
     has $!dispatch_order;
+    has $!clone_callback;
     
     # Adds a multi-dispatch candidate.
     method add_dispatchee($code) {
@@ -34,6 +35,9 @@ my knowhow NQPRoutine {
         my $clone_callback := pir::getprop__PPs($!do, 'CLONE_CALLBACK');
         if nqp::defined($clone_callback) {
             $clone_callback($!do, $do, $der);
+        }
+        unless nqp::isnull($!clone_callback) {
+            $!clone_callback($!do, $do, $der);
         }
         
         $der
@@ -334,6 +338,9 @@ my knowhow NQPRoutine {
         if nqp::defined($clone_callback) {
             $clone_callback($!do, $do, $der);
         }
+        unless nqp::isnull($!clone_callback) {
+            $!clone_callback($!do, $do, $der);
+        }
         
         $der
     }
@@ -367,6 +374,7 @@ my knowhow NQPRegex {
     has %!alt_nfas;
     has $!generic_nfa;
     has @!nested_codes;
+    has $!clone_callback;
     method SET_CAPS($caps) {
         $!caps := $caps;
     }
@@ -412,6 +420,9 @@ my knowhow NQPRegex {
         my $clone_callback := pir::getprop__PPs($!do, 'CLONE_CALLBACK');
         if nqp::defined($clone_callback) {
             $clone_callback($!do, $do, $der);
+        }
+        unless nqp::isnull($!clone_callback) {
+            $!clone_callback($!do, $do, $der);
         }
         
         $der

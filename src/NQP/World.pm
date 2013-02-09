@@ -23,12 +23,16 @@ class NQP::World is HLL::World {
     # Mapping of sub IDs to SC indexes of code stubs.
     has %!code_stub_sc_idx;
     
+    # Clear-up tasks.
+    has @!clearup_tasks; 
+    
     method BUILD(*%opts) {
         @!BLOCKS := nqp::list();
         %!code_objects_to_fix_up := nqp::hash();
         %!code_object_types := nqp::hash();
         %!code_object_fixup_list := nqp::hash();
         %!code_stub_sc_idx := nqp::hash();
+        @!clearup_tasks := nqp::list();
 
         if nqp::defined(%*COMPILING<%?OPTIONS><dynext>) {
             my $dynext_path  := %*COMPILING<%?OPTIONS><dynext>;
@@ -256,6 +260,12 @@ class NQP::World is HLL::World {
             $compiled(|@args, |%named);
         };
         
+        # Create code object, if we'll need one.
+        my $code_obj;
+        if $have_code_type {
+            $code_obj := nqp::create($code_type);
+        }
+        
         # See if we already have our compile-time dummy. If not, create it.
         my $fixups := QAST::Stmts.new();
         my $dummy;
@@ -319,7 +329,6 @@ class NQP::World is HLL::World {
         # code object.
         if $have_code_type {
             # Create it now.
-            my $code_obj := nqp::create($code_type);
             nqp::bindattr($code_obj, $code_type, '$!do', $dummy);
             nqp::bindattr($code_obj, $code_type, '$!dispatchees', nqp::list())
                 if $is_dispatcher;
@@ -498,6 +507,11 @@ class NQP::World is HLL::World {
                 ))),
             :jvm(QAST::Op.new( :op('null') ))
         )));
+    }
+    
+    # Does cleanups.
+    method cleanup() {
+        for @!clearup_tasks { $_() }
     }
     
     # Checks if the given name is known anywhere in the lexpad

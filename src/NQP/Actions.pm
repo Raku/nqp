@@ -123,6 +123,8 @@ class NQP::Actions is HLL::Actions {
             $unit
         );
         
+        $*W.cleanup();
+        
         make $compunit;
     }
 
