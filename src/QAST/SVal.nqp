@@ -10,6 +10,6 @@ class QAST::SVal is QAST::Node {
         self
     }
     method dump_extra_node_info() {
-        pir::escape__SS($!value);
+        nqp::escape($!value);
     }
 }

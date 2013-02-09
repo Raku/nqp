@@ -67,7 +67,7 @@ class QAST::Node {
     }
     
     method shallow_clone() {
-        my $clone := pir::repr_clone__PP(self);
+        my $clone := nqp::clone(self);
         nqp::bindattr($clone, QAST::Node, '@!array', nqp::clone(@!array));
         $clone
     }
@@ -93,7 +93,7 @@ class QAST::Node {
         }
         if (self.node) {
             nqp::push(@chunks, ' ');
-            nqp::push(@chunks, pir::escape__SS(self.node));
+            nqp::push(@chunks, nqp::escape(self.node));
         }
         nqp::push(@chunks, "\n");
         self.dump_children($indent + 2, @chunks);
