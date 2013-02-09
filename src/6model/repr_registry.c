@@ -77,39 +77,56 @@ static void * default_get_boxed_ref(PARROT_INTERP, STable *st, void *data, INTVA
             "%Ss cannot box other types", st->REPR->name);
 }
 PARROT_DOES_NOT_RETURN
-static void die_no_idx(PARROT_INTERP, STRING *repr_name) {
+static void die_no_pos(PARROT_INTERP, STRING *repr_name) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "%Ss representation does not support indexed storage", repr_name);
+            "%Ss representation does not support positional storage", repr_name);
 }
 static void default_at_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, NativeValue *value) {
-    die_no_idx(interp, st->REPR->name);
+    die_no_pos(interp, st->REPR->name);
 }
 static PMC * default_at_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index) {
-    die_no_idx(interp, st->REPR->name);
+    die_no_pos(interp, st->REPR->name);
 }
 static void default_bind_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, NativeValue *value) {
-    die_no_idx(interp, st->REPR->name);
+    die_no_pos(interp, st->REPR->name);
 }
 static void default_bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, PMC *obj) {
-    die_no_idx(interp, st->REPR->name);
+    die_no_pos(interp, st->REPR->name);
 }
 static INTVAL default_elems(PARROT_INTERP, STable *st, void *data) {
-    die_no_idx(interp, st->REPR->name);
+    die_no_pos(interp, st->REPR->name);
 }
 static void default_push_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
-    die_no_idx(interp, st->REPR->name);
+    die_no_pos(interp, st->REPR->name);
 }
 static PMC * default_pop_boxed(PARROT_INTERP, STable *st, void *data) {
-    die_no_idx(interp, st->REPR->name);
+    die_no_pos(interp, st->REPR->name);
 }
 static void default_unshift_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
-    die_no_idx(interp, st->REPR->name);
+    die_no_pos(interp, st->REPR->name);
 }
 static PMC * default_shift_boxed(PARROT_INTERP, STable *st, void *data) {
-    die_no_idx(interp, st->REPR->name);
+    die_no_pos(interp, st->REPR->name);
 }
 static STable * default_get_elem_stable(PARROT_INTERP, STable *st) {
-    die_no_idx(interp, st->REPR->name);
+    die_no_pos(interp, st->REPR->name);
+}
+PARROT_DOES_NOT_RETURN
+static void die_no_ass(PARROT_INTERP, STRING *repr_name) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "%Ss representation does not support associative storage", repr_name);
+}
+static PMC * default_at_key_boxed(PARROT_INTERP, STable *st, void *data, STRING *key) {
+    die_no_ass(interp, st->REPR->name);
+}
+static void default_bind_key_boxed(PARROT_INTERP, STable *st, void *data, STRING *key, PMC *value) {
+    die_no_ass(interp, st->REPR->name);
+}
+static INTVAL default_exists_key(PARROT_INTERP, STable *st, void *data, STRING *key) {
+    die_no_ass(interp, st->REPR->name);
+}
+static void default_delete_key(PARROT_INTERP, STable *st, void *data, STRING *key) {
+    die_no_ass(interp, st->REPR->name);
 }
 
 /* Set default attribute functions on a REPR that lacks them. */
@@ -150,6 +167,15 @@ static void add_default_pos_funcs(PARROT_INTERP, REPROps *repr) {
     repr->pos_funcs->get_elem_stable = default_get_elem_stable;
 }
 
+/* Set default associative functions on a REPR that lacks them. */
+static void add_default_ass_funcs(PARROT_INTERP, REPROps *repr) {
+    repr->ass_funcs = mem_allocate_typed(REPROps_Associative);
+    repr->ass_funcs->at_key_boxed = default_at_key_boxed;
+    repr->ass_funcs->bind_key_boxed = default_bind_key_boxed;
+    repr->ass_funcs->exists_key = default_exists_key;
+    repr->ass_funcs->delete_key = default_delete_key;
+}
+
 /* Registers a representation. It this is ever made public, it should first be
  * made thread-safe. */
 static void register_repr(PARROT_INTERP, STRING *name, REPROps *repr) {
@@ -169,6 +195,8 @@ static void register_repr(PARROT_INTERP, STRING *name, REPROps *repr) {
         add_default_box_funcs(interp, repr);
     if (!repr->pos_funcs)
         add_default_pos_funcs(interp, repr);
+    if (!repr->ass_funcs)
+        add_default_ass_funcs(interp, repr);
 }
 
 /* Dynamically registers a representation (that is, one defined outside of

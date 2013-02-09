@@ -274,6 +274,19 @@ typedef struct SixModel_REPROps_Positional {
     /* Gets the STable representing the declared element type. */
     STable * (*get_elem_stable) (PARROT_INTERP, STable *st);
 } REPROps_Positional;
+typedef struct SixModel_REPROps_Associative {
+    /* Gets the value at the specified key. */
+    PMC * (*at_key_boxed) (PARROT_INTERP, STable *st, void *data, STRING *key);
+    
+    /* Binds a value to the specified key. */
+    void (*bind_key_boxed) (PARROT_INTERP, STable *st, void *data, STRING *key, PMC *value);
+    
+    /* Checks if the specified key exists. */
+    INTVAL (*exists_key) (PARROT_INTERP, STable *st, void *data, STRING *key);
+    
+    /* Deletes the specified key. */
+    void (*delete_key) (PARROT_INTERP, STable *st, void *data, STRING *key);
+} REPROps_Associative;
 struct SixModel_REPROps {
     /* Creates a new type object of this representation, and
      * associates it with the given HOW. Also sets up a new
@@ -310,6 +323,9 @@ struct SixModel_REPROps {
 
     /* Positional REPR function table. */
     struct SixModel_REPROps_Positional *pos_funcs;
+
+    /* Associative REPR function table. */
+    struct SixModel_REPROps_Associative *ass_funcs;
     
     /* Gets the storage specification for this representation. */
     storage_spec (*get_storage_spec) (PARROT_INTERP, STable *st);
