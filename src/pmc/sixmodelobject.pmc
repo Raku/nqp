@@ -101,19 +101,31 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     }
 
     VTABLE PMC* get_attr_keyed(PMC *class_handle, STRING *name) {
-        PMC *handle = decontainerize(interp, class_handle);
-        PMC *result = get_attr(interp, SELF, handle, name, NO_HINT);
-        PARROT_GC_WRITE_BARRIER(interp, SELF);
-        return result;
+        if (class_handle->vtable->base_type == SELF->vtable->base_type) {
+            PMC *handle = decontainerize(interp, class_handle);
+            PMC *result = get_attr(interp, SELF, handle, name, NO_HINT);
+            PARROT_GC_WRITE_BARRIER(interp, SELF);
+            return result;
+        }
+        else {
+            Parrot_ex_throw_from_c_args(interp, NULL, 1,
+                "Class handle in attribute lookup must be a SixModelObject");
+        }
     }
 
     VTABLE void set_attr_keyed(PMC *class_handle, STRING *name, PMC *value) {
-        PMC *handle = decontainerize(interp, class_handle);
-        if (IS_CONCRETE(SELF))
-            REPR(SELF)->attr_funcs->bind_attribute_boxed(interp, STABLE(SELF), OBJECT_BODY(SELF), handle, name, NO_HINT, value);
-        else
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "Cannot bind attributes in a type object");
+        if (class_handle->vtable->base_type == SELF->vtable->base_type) {
+            PMC *handle = decontainerize(interp, class_handle);
+            if (IS_CONCRETE(SELF))
+                REPR(SELF)->attr_funcs->bind_attribute_boxed(interp, STABLE(SELF), OBJECT_BODY(SELF), handle, name, NO_HINT, value);
+            else
+                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "Cannot bind attributes in a type object");
+        }
+        else {
+            Parrot_ex_throw_from_c_args(interp, NULL, 1,
+                "Class handle in attribute bind must be a SixModelObject");
+        }
     }
     
     VTABLE STRING * name() {
