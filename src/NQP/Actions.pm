@@ -1181,10 +1181,10 @@ class NQP::Actions is HLL::Actions {
             };
         }
         elsif $<longname> eq 'positional_delegate' {
-            $*DECLARAND_ATTR.positional_delegate(1);
+            make -> $m { $*DECLARAND_ATTR.set_positional_delegate(1) };
         }
         elsif $<longname> eq 'associative_delegate' {
-            $*DECLARAND_ATTR.associative_delegate(1);
+            make -> $m { $*DECLARAND_ATTR.set_associative_delegate(1) };
         }
         elsif $<longname> eq 'export' {
             make -> $match {
