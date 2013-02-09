@@ -270,6 +270,7 @@ class NQP::World is HLL::World {
             
             # Tag it as a static code ref and add it to the root code refs set.
             pir::setprop__vPsP($dummy, 'STATIC_CODE_REF', $dummy);
+            pir::setprop__vPsP($dummy, 'COMPILER_STUB', $dummy);
             $code_ref_idx := self.add_root_code_ref($dummy, $past);
             %!code_stub_sc_idx{$past.cuid()} := $code_ref_idx;
             $past<compile_time_dummy> := $dummy;
@@ -282,6 +283,10 @@ class NQP::World is HLL::World {
                 if self.is_precompilation_mode() {
                     pir::setprop__0PsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone, $code_obj) {
                         %!code_objects_to_fix_up{$past.cuid()}.push($code_obj);
+                        if $have_code_type {
+                            my $do := nqp::getattr($code_obj, $code_type, '$!do');
+                            pir::setprop__vPsP($do, 'COMPILER_STUB', $do);
+                        }
                     });
                 }
                 else {
