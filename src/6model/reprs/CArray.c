@@ -449,26 +449,6 @@ static INTVAL elems(PARROT_INTERP, STable *st, void *data) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
         "Don't know how many elements a C array returned from a library has");
 }
-static void preallocate(PARROT_INTERP, STable *st, void *data, INTVAL count) {
-    CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
-    CArrayBody     *body      = (CArrayBody *)data;
-    die_idx_nyi(interp);
-}
-static void trim_to(PARROT_INTERP, STable *st, void *data, INTVAL count) {
-    CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
-    CArrayBody     *body      = (CArrayBody *)data;
-    die_idx_nyi(interp);
-}
-static void make_hole(PARROT_INTERP, STable *st, void *data, INTVAL at_index, INTVAL count) {
-    CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
-    CArrayBody     *body      = (CArrayBody *)data;
-    die_idx_nyi(interp);
-}
-static void delete_elems(PARROT_INTERP, STable *st, void *data, INTVAL at_index, INTVAL count) {
-    CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
-    CArrayBody     *body      = (CArrayBody *)data;
-    die_idx_nyi(interp);
-}
 static STable * get_elem_stable(PARROT_INTERP, STable *st) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     return STABLE(repr_data->elem_type);
@@ -516,10 +496,6 @@ REPROps * CArray_initialize(PARROT_INTERP,
     this_repr->pos_funcs->bind_pos_native = bind_pos_native;
     this_repr->pos_funcs->bind_pos_boxed = bind_pos_boxed;
     this_repr->pos_funcs->elems = elems;
-    this_repr->pos_funcs->preallocate = preallocate;
-    this_repr->pos_funcs->trim_to = trim_to;
-    this_repr->pos_funcs->make_hole = make_hole;
-    this_repr->pos_funcs->delete_elems = delete_elems;
     this_repr->pos_funcs->get_elem_stable = get_elem_stable;
     this_repr->serialize_repr_data = serialize_repr_data;
     this_repr->deserialize_repr_data = deserialize_repr_data;

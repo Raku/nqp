@@ -143,10 +143,6 @@ static void add_default_pos_funcs(PARROT_INTERP, REPROps *repr) {
     repr->pos_funcs->bind_pos_native = default_bind_pos_native;
     repr->pos_funcs->bind_pos_boxed = default_bind_pos_boxed;
     repr->pos_funcs->elems = default_elems;
-    repr->pos_funcs->preallocate = default_preallocate;
-    repr->pos_funcs->trim_to = default_trim_to;
-    repr->pos_funcs->make_hole = default_make_hole;
-    repr->pos_funcs->delete_elems = default_delete_elems;
     repr->pos_funcs->get_elem_stable = default_get_elem_stable;
 }
 

@@ -259,21 +259,6 @@ typedef struct SixModel_REPROps_Positional {
     /* Gets the number of elements. */
     INTVAL (*elems) (PARROT_INTERP, STable *st, void *data);
 
-    /* Pre-allocates the specified number of slots. */
-    void (*preallocate) (PARROT_INTERP, STable *st, void *data, INTVAL count);
-
-    /* Trim to the specified number of slots. */
-    void (*trim_to) (PARROT_INTERP, STable *st, void *data, INTVAL count);
-
-    /* Make a "hole" the specified number of elements in size at the specified index.
-     * Used for implementing things like unshift, splice, etc. */
-    void (*make_hole) (PARROT_INTERP, STable *st, void *data, INTVAL at_index, INTVAL count);
-
-    /* Delete the specified number of elements (that is, actually shuffle the ones
-     * after them into their place). Used for implementing things like shift, splice,
-     * etc. */
-    void (*delete_elems) (PARROT_INTERP, STable *st, void *data, INTVAL at_index, INTVAL count);
-
     /* Gets the STable representing the declared element type. */
     STable * (*get_elem_stable) (PARROT_INTERP, STable *st);
 } REPROps_Positional;
