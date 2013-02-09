@@ -244,8 +244,10 @@ class NQP::World is HLL::World {
                     # as a static code ref.
                     my $static := %!code_objects_to_fix_up{$subid}.shift();
                     nqp::bindattr($static, %!code_object_types{$subid}, '$!do', $compiled[$i]);
+                    nqp::bindattr($static, %!code_object_types{$subid}, '$!clone_callback', nqp::null());
                     for %!code_objects_to_fix_up{$subid} {
                         nqp::bindattr($_, %!code_object_types{$subid}, '$!do', nqp::clone($compiled[$i]));
+                        nqp::bindattr($_, %!code_object_types{$subid}, '$!clone_callback', nqp::null());
                     }
                     pir::setprop__vPsP($compiled[$i], 'STATIC_CODE_REF', $compiled[$i]);
                     self.update_root_code_ref(%!code_stub_sc_idx{$subid}, $compiled[$i]);
@@ -291,16 +293,19 @@ class NQP::World is HLL::World {
             if $have_code_type {
                 %!code_object_fixup_list{$past.cuid()} := $fixups;
                 if self.is_precompilation_mode() {
-                    pir::setprop__0PsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone, $code_obj) {
+                    my $cb := sub ($orig, $clone, $code_obj) {
                         %!code_objects_to_fix_up{$past.cuid()}.push($code_obj);
-                        if $have_code_type {
-                            my $do := nqp::getattr($code_obj, $code_type, '$!do');
-                            pir::setprop__vPsP($do, 'COMPILER_STUB', $do);
-                        }
+                        nqp::bindattr($code_obj, $code_type, '$!clone_callback', nqp::null());
+                        my $do := nqp::getattr($code_obj, $code_type, '$!do');
+                        pir::setprop__vPsP($do, 'COMPILER_STUB', $do);
+                    }
+                    nqp::bindattr($code_obj, $code_type, '$!clone_callback', $cb);
+                    nqp::push(@!clearup_tasks, sub () {
+                        nqp::bindattr($code_obj, $code_type, '$!clone_callback', nqp::null());
                     });
                 }
                 else {
-                    pir::setprop__0PsP($dummy, 'CLONE_CALLBACK', sub ($orig, $clone, $code_obj) {
+                    my $cb := sub ($orig, $clone, $code_obj) {
                         # Emit fixup code.
                         self.add_object($code_obj);
                         $fixups.push(QAST::Op.new(
@@ -317,6 +322,10 @@ class NQP::World is HLL::World {
                             
                         # Add to dynamic compilation fixup list.
                         %!code_objects_to_fix_up{$past.cuid()}.push($code_obj);
+                    };
+                    nqp::bindattr($code_obj, $code_type, '$!clone_callback', $cb);
+                    nqp::push(@!clearup_tasks, sub () {
+                        nqp::bindattr($code_obj, $code_type, '$!clone_callback', nqp::null());
                     });
                 }
             }
