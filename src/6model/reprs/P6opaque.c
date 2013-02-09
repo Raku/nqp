@@ -736,6 +736,87 @@ static void * get_boxed_ref(PARROT_INTERP, STable *st, void *data, INTVAL repr_i
     return NULL;
 }
 
+/* Positional delegation. */
+PARROT_DOES_NOT_RETURN
+static void die_no_pos_del(PARROT_INTERP) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+        "This type does not support positional operations");
+}
+static void at_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, NativeValue *value) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    if (repr_data->pos_del_slot == -1)
+        die_no_pos_del(interp);
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+        "This type does not support at_pos_native");
+}
+static PMC * at_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    if (repr_data->pos_del_slot == -1)
+        die_no_pos_del(interp);
+    return VTABLE_get_pmc_keyed_int(interp,
+        get_pmc_at_offset(data, repr_data->attribute_offsets[repr_data->pos_del_slot]),
+        index);
+}
+static void bind_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, NativeValue *value) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    if (repr_data->pos_del_slot == -1)
+        die_no_pos_del(interp);
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+        "This type does not support bind_pos_native");
+}
+static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, PMC *obj) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    if (repr_data->pos_del_slot == -1)
+        die_no_pos_del(interp);
+    VTABLE_set_pmc_keyed_int(interp,
+        get_pmc_at_offset(data, repr_data->attribute_offsets[repr_data->pos_del_slot]),
+        index, obj);
+}
+static INTVAL elems(PARROT_INTERP, STable *st, void *data) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    if (repr_data->pos_del_slot == -1)
+        die_no_pos_del(interp);
+    return VTABLE_elements(interp,
+        get_pmc_at_offset(data, repr_data->attribute_offsets[repr_data->pos_del_slot]));
+}
+static void push_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    if (repr_data->pos_del_slot == -1)
+        die_no_pos_del(interp);
+    VTABLE_push_pmc(interp,
+        get_pmc_at_offset(data, repr_data->attribute_offsets[repr_data->pos_del_slot]),
+        obj);
+}
+static PMC * pop_boxed(PARROT_INTERP, STable *st, void *data) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    if (repr_data->pos_del_slot == -1)
+        die_no_pos_del(interp);
+    return VTABLE_pop_pmc(interp,
+        get_pmc_at_offset(data, repr_data->attribute_offsets[repr_data->pos_del_slot]));
+}
+static void unshift_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    if (repr_data->pos_del_slot == -1)
+        die_no_pos_del(interp);
+    VTABLE_unshift_pmc(interp,
+        get_pmc_at_offset(data, repr_data->attribute_offsets[repr_data->pos_del_slot]),
+        obj);
+}
+static PMC * shift_boxed(PARROT_INTERP, STable *st, void *data) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    if (repr_data->pos_del_slot == -1)
+        die_no_pos_del(interp);
+    return VTABLE_shift_pmc(interp,
+        get_pmc_at_offset(data, repr_data->attribute_offsets[repr_data->pos_del_slot]));
+}
+static STable * get_elem_stable(PARROT_INTERP, STable *st) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    if (repr_data->pos_del_slot == -1)
+        die_no_pos_del(interp);
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+        "This type does not support get_elem_stable");
+}
+
 /* This Parrot-specific addition to the API is used to mark an object. */
 static void gc_mark(PARROT_INTERP, STable *st, void *data) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
@@ -1134,6 +1215,17 @@ REPROps * P6opaque_initialize(PARROT_INTERP) {
     this_repr->box_funcs->set_str = set_str;
     this_repr->box_funcs->get_str = get_str;
     this_repr->box_funcs->get_boxed_ref = get_boxed_ref;
+    this_repr->pos_funcs = mem_allocate_zeroed_typed(REPROps_Positional);
+    this_repr->pos_funcs->at_pos_native = at_pos_native;
+    this_repr->pos_funcs->at_pos_boxed = at_pos_boxed;
+    this_repr->pos_funcs->bind_pos_native = bind_pos_native;
+    this_repr->pos_funcs->bind_pos_boxed = bind_pos_boxed;
+    this_repr->pos_funcs->elems = elems;
+    this_repr->pos_funcs->push_boxed = push_boxed;
+    this_repr->pos_funcs->pop_boxed = pop_boxed;
+    this_repr->pos_funcs->unshift_boxed = unshift_boxed;
+    this_repr->pos_funcs->shift_boxed = shift_boxed;
+    this_repr->pos_funcs->get_elem_stable = get_elem_stable;
     this_repr->gc_mark = gc_mark;
     this_repr->gc_free = gc_free;
     this_repr->gc_mark_repr_data = gc_mark_repr_data;

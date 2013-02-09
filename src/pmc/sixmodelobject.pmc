@@ -366,8 +366,8 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             return VTABLE_get_pmc_keyed_int(interp, val, key);
         }
         else
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "SixModelObject does not implement get_pmc_keyed_int");
+            return REPR(decont)->pos_funcs->at_pos_boxed(interp, STABLE(decont),
+                OBJECT_BODY(decont), key);
     }
 
     VTABLE PMC * get_pmc_keyed_str(STRING *key) {
@@ -453,8 +453,8 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             VTABLE_set_pmc_keyed_int(interp, val, key, value);
         }
         else
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "SixModelObject does not implement set_pmc_keyed_int");
+            REPR(decont)->pos_funcs->bind_pos_boxed(interp, STABLE(decont),
+                OBJECT_BODY(decont), key, value);
     }
     
     VTABLE void set_pmc_keyed_str(STRING *key, PMC *value) {
@@ -660,7 +660,8 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             VTABLE_unshift_pmc(interp, val, value);
         }
         else
-            SUPER(value);
+            REPR(decont)->pos_funcs->unshift_boxed(interp, STABLE(decont),
+                OBJECT_BODY(decont), value);
     }
     
     VTABLE void push_pmc(PMC *value) {
@@ -685,7 +686,8 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             VTABLE_push_pmc(interp, val, value);
         }
         else
-            SUPER(value);
+            REPR(decont)->pos_funcs->push_boxed(interp, STABLE(decont),
+                OBJECT_BODY(decont), value);
     }
 
     VTABLE opcode_t *invoke(void *next) {
