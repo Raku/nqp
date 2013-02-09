@@ -2,8 +2,8 @@ class QAST::Node {
     # For children.
     has @!array is positional_delegate;
 
-    # For annotations, lazily allocated.
-    has %!hash;
+    # For annotations.
+    has %!hash is associative_delegate;
     
     has $!node;
     has $!returns;
@@ -12,6 +12,7 @@ class QAST::Node {
     method new(*@children, *%options) {
         my $new := self.CREATE();
         nqp::bindattr($new, QAST::Node, '@!array', @children);
+        nqp::bindattr($new, QAST::Node, '%!hash', nqp::hash());
         for %options {
             nqp::findmethod($new, $_.key)($new, $_.value);
         }
@@ -50,41 +51,12 @@ class QAST::Node {
         self.set_compile_time_value($value);
     }
     
+    method hash()          { %!hash }
     method list()          { @!array }
-    method pop()           { nqp::pop(self.list) }
-    method push($value)    { nqp::push(self.list, $value) }
-    method shift()         { nqp::shift(self.list) }
-    method unshift($value) { nqp::unshift(self.list, $value) }
-    
-    method hash() {
-        nqp::isnull(%!hash) ?? %!hash !! nqp::hash()
-    }
-    method ($key) is parrot_vtable('get_pmc_keyed_str') {
-        nqp::isnull(%!hash) ?? NQPMu !! %!hash{$key}
-    }
-    method ($key) is parrot_vtable('get_pmc_keyed') {
-        nqp::isnull(%!hash) ?? NQPMu !! %!hash{$key}
-    }
-    method ($key, $value) is parrot_vtable('set_pmc_keyed_str') {
-        %!hash := nqp::hash() if nqp::isnull(%!hash);
-        %!hash{$key} := $value;
-    }
-    method ($key, $value) is parrot_vtable('set_pmc_keyed') {
-        %!hash := nqp::hash() if nqp::isnull(%!hash);
-        %!hash{$key} := $value;
-    }
-    method ($key) is parrot_vtable('exists_keyed_str') {
-        nqp::isnull(%!hash) ?? 0 !! nqp::existskey(%!hash, $key)
-    }
-    method ($key) is parrot_vtable('exists_keyed') {
-        nqp::isnull(%!hash) ?? 0 !! nqp::existskey(%!hash, $key)
-    }
-    method ($key) is parrot_vtable('delete_keyed_str') {
-        nqp::deletekey(%!hash, $key) unless nqp::isnull(%!hash)
-    }
-    method ($key) is parrot_vtable('delete_keyed') {
-        nqp::deletekey(%!hash, $key) unless nqp::isnull(%!hash)
-    }
+    method pop()           { nqp::pop(@!array) }
+    method push($value)    { nqp::push(@!array, $value) }
+    method shift()         { nqp::shift(@!array) }
+    method unshift($value) { nqp::unshift(@!array, $value) }
     
     my %uniques;
     method unique($prefix) {

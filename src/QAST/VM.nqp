@@ -4,6 +4,7 @@ class QAST::VM is QAST::Node {
     method new(*@children, *%alternatives) {
         my $obj := nqp::create(self);
         nqp::bindattr($obj, QAST::Node, '@!array', @children);
+        nqp::bindattr($obj, QAST::Node, '%!hash', nqp::hash());
         nqp::bindattr($obj, QAST::VM, '%!alternatives', %alternatives);
         $obj
     }
