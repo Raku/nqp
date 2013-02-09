@@ -93,9 +93,6 @@ static void default_bind_pos_native(PARROT_INTERP, STable *st, void *data, INTVA
 static void default_bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, PMC *obj) {
     die_no_pos(interp, st->REPR->name);
 }
-static INTVAL default_elems(PARROT_INTERP, STable *st, void *data) {
-    die_no_pos(interp, st->REPR->name);
-}
 static void default_push_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
     die_no_pos(interp, st->REPR->name);
 }
@@ -128,6 +125,10 @@ static INTVAL default_exists_key(PARROT_INTERP, STable *st, void *data, STRING *
 static void default_delete_key(PARROT_INTERP, STable *st, void *data, STRING *key) {
     die_no_ass(interp, st->REPR->name);
 }
+static INTVAL default_elems(PARROT_INTERP, STable *st, void *data) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+        "%Ss representation does not support elems", st->REPR->name);
+}
 
 /* Set default attribute functions on a REPR that lacks them. */
 static void add_default_attr_funcs(PARROT_INTERP, REPROps *repr) {
@@ -159,7 +160,6 @@ static void add_default_pos_funcs(PARROT_INTERP, REPROps *repr) {
     repr->pos_funcs->at_pos_boxed = default_at_pos_boxed;
     repr->pos_funcs->bind_pos_native = default_bind_pos_native;
     repr->pos_funcs->bind_pos_boxed = default_bind_pos_boxed;
-    repr->pos_funcs->elems = default_elems;
     repr->pos_funcs->push_boxed = default_push_boxed;
     repr->pos_funcs->pop_boxed = default_pop_boxed;
     repr->pos_funcs->unshift_boxed = default_unshift_boxed;
@@ -197,6 +197,8 @@ static void register_repr(PARROT_INTERP, STRING *name, REPROps *repr) {
         add_default_pos_funcs(interp, repr);
     if (!repr->ass_funcs)
         add_default_ass_funcs(interp, repr);
+    if (!repr->elems)
+        repr->elems = default_elems;
 }
 
 /* Dynamically registers a representation (that is, one defined outside of

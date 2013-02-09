@@ -772,13 +772,6 @@ static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, 
         get_pmc_at_offset(data, repr_data->attribute_offsets[repr_data->pos_del_slot]),
         index, obj);
 }
-static INTVAL elems(PARROT_INTERP, STable *st, void *data) {
-    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
-    if (repr_data->pos_del_slot == -1)
-        die_no_pos_del(interp);
-    return VTABLE_elements(interp,
-        get_pmc_at_offset(data, repr_data->attribute_offsets[repr_data->pos_del_slot]));
-}
 static void push_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
     if (repr_data->pos_del_slot == -1)
@@ -815,6 +808,13 @@ static STable * get_elem_stable(PARROT_INTERP, STable *st) {
         die_no_pos_del(interp);
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
         "This type does not support get_elem_stable");
+}
+static INTVAL elems(PARROT_INTERP, STable *st, void *data) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    if (repr_data->pos_del_slot == -1)
+        die_no_pos_del(interp);
+    return VTABLE_elements(interp,
+        get_pmc_at_offset(data, repr_data->attribute_offsets[repr_data->pos_del_slot]));
 }
 
 /* This Parrot-specific addition to the API is used to mark an object. */
@@ -1220,12 +1220,12 @@ REPROps * P6opaque_initialize(PARROT_INTERP) {
     this_repr->pos_funcs->at_pos_boxed = at_pos_boxed;
     this_repr->pos_funcs->bind_pos_native = bind_pos_native;
     this_repr->pos_funcs->bind_pos_boxed = bind_pos_boxed;
-    this_repr->pos_funcs->elems = elems;
     this_repr->pos_funcs->push_boxed = push_boxed;
     this_repr->pos_funcs->pop_boxed = pop_boxed;
     this_repr->pos_funcs->unshift_boxed = unshift_boxed;
     this_repr->pos_funcs->shift_boxed = shift_boxed;
     this_repr->pos_funcs->get_elem_stable = get_elem_stable;
+    this_repr->elems = elems;
     this_repr->gc_mark = gc_mark;
     this_repr->gc_free = gc_free;
     this_repr->gc_mark_repr_data = gc_mark_repr_data;

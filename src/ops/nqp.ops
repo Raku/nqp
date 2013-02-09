@@ -1299,7 +1299,7 @@ inline op repr_elems(out INT, invar PMC) :base_core {
     PMC *obj = decontainerize(interp, $2);
     if (obj->vtable->base_type == smo_id) {
         if (IS_CONCRETE(obj))
-            $1 = REPR(obj)->pos_funcs->elems(interp, STABLE(obj), OBJECT_BODY(obj));
+            $1 = REPR(obj)->elems(interp, STABLE(obj), OBJECT_BODY(obj));
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot do repr_elems on a type object");

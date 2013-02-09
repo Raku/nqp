@@ -442,13 +442,6 @@ static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, 
     body->child_objs[index] = obj;
     storage[index] = cptr;
 }
-static INTVAL elems(PARROT_INTERP, STable *st, void *data) {
-    CArrayBody     *body      = (CArrayBody *)data;
-    if (body->managed)
-        return body->elems;
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-        "Don't know how many elements a C array returned from a library has");
-}
 static STable * get_elem_stable(PARROT_INTERP, STable *st) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     return STABLE(repr_data->elem_type);
@@ -464,6 +457,13 @@ static void unshift_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
 }
 static PMC * shift_boxed(PARROT_INTERP, STable *st, void *data) {
     die_pos_nyi(interp);
+}
+static INTVAL elems(PARROT_INTERP, STable *st, void *data) {
+    CArrayBody     *body      = (CArrayBody *)data;
+    if (body->managed)
+        return body->elems;
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+        "Don't know how many elements a C array returned from a library has");
 }
 
 /* Serializes the REPR data. */
@@ -507,12 +507,12 @@ REPROps * CArray_initialize(PARROT_INTERP,
     this_repr->pos_funcs->at_pos_boxed = at_pos_boxed;
     this_repr->pos_funcs->bind_pos_native = bind_pos_native;
     this_repr->pos_funcs->bind_pos_boxed = bind_pos_boxed;
-    this_repr->pos_funcs->elems = elems;
     this_repr->pos_funcs->push_boxed = push_boxed;
     this_repr->pos_funcs->pop_boxed = pop_boxed;
     this_repr->pos_funcs->unshift_boxed = unshift_boxed;
     this_repr->pos_funcs->shift_boxed = shift_boxed;
     this_repr->pos_funcs->get_elem_stable = get_elem_stable;
+    this_repr->elems = elems;
     this_repr->serialize_repr_data = serialize_repr_data;
     this_repr->deserialize_repr_data = deserialize_repr_data;
     

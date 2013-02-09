@@ -255,9 +255,6 @@ typedef struct SixModel_REPROps_Positional {
     /* Binds the object at the specified address into the array at the specified index.
      * For arrays of non-reference types, expects a compatible type. */
     void (*bind_pos_boxed) (PARROT_INTERP, STable *st, void *data, INTVAL index, PMC *obj);
-
-    /* Gets the number of elements. */
-    INTVAL (*elems) (PARROT_INTERP, STable *st, void *data);
     
     /* Pushes an object. */
     void (*push_boxed) (PARROT_INTERP, STable *st, void *data, PMC *obj);
@@ -326,6 +323,9 @@ struct SixModel_REPROps {
 
     /* Associative REPR function table. */
     struct SixModel_REPROps_Associative *ass_funcs;
+    
+    /* Gets the number of elements, if it's relevant. */
+    INTVAL (*elems) (PARROT_INTERP, STable *st, void *data);
     
     /* Gets the storage specification for this representation. */
     storage_spec (*get_storage_spec) (PARROT_INTERP, STable *st);
