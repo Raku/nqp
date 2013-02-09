@@ -57,17 +57,16 @@ plan(31);
                                               'attribute declared in P6opaque-based type is OK');
 }
 
-# Serializing a P6opaque type with natively typed attributes, again using knowhow.
-# Serializing a type using P6opaque, which declares a couple of attributes, along
-# with an instance of it.
+# Serializing a P6opaque type with natively typed attributes, this time using NQPClassHOW.
 {
     my $sc := nqp::createsc('TEST_SC_3_IN');
     my $sh := nqp::list_s();
     
-    my $type := pir::get_knowhow__P().new_type(:name('Badger'), :repr('P6opaque'));
+    my $type := NQPClassHOW.new_type(:name('Badger'), :repr('P6opaque'));
     $type.HOW.add_attribute($type, NQPAttribute.new(name => '$!eats', type => str));
     $type.HOW.add_attribute($type, NQPAttribute.new(name => '$!age', type => int));
     $type.HOW.add_attribute($type, NQPAttribute.new(name => '$!weight', type => num));
+    $type.HOW.add_parent($type, NQPMu);
     $type.HOW.compose($type);
     pir::nqp_add_object_to_sc__vPiP($sc, 0, $type);
     
@@ -108,7 +107,7 @@ plan(31);
                                               'num attribute in new instance OK');
 }
 
-# Serializing a type with methods (P6opaque REPR, knowhow)
+# Serializing a type with methods (P6opaque REPR, NQPClassHOW)
 {
     my $sc := nqp::createsc('TEST_SC_4_IN');
     my $sh := nqp::list_s();
@@ -120,10 +119,11 @@ plan(31);
     pir::setprop__vPsP($m1, 'STATIC_CODE_REF', $m1);
     pir::setprop__vPsP($m2, 'STATIC_CODE_REF', $m2);
     
-    my $type := pir::get_knowhow__P().new_type(:name('Llama'), :repr('P6opaque'));
+    my $type := NQPClassHOW.new_type(:name('Llama'), :repr('P6opaque'));
     $type.HOW.add_attribute($type, NQPAttribute.new(name => '$!name'));
     $type.HOW.add_method($type, 'smell', $m1);
     $type.HOW.add_method($type, 'intro', $m2);
+    $type.HOW.add_parent($type, NQPMu);
     $type.HOW.compose($type);
     pir::nqp_add_object_to_sc__vPiP($sc, 0, $type);
     
