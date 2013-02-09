@@ -1462,6 +1462,7 @@ QAST::Operations.add_core_pirop_mapping('iscclass', 'is_cclass', 'Iisi', :inlina
 QAST::Operations.add_core_pirop_mapping('findcclass', 'find_cclass', 'Iisii', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('findnotcclass', 'find_not_cclass', 'Iisii', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('sprintf', 'sprintf', 'SsP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('escape', 'escape', 'Ss', :inlinable(1));
 
 # substr can take 2 or 3 args, so needs special handling.
 QAST::Operations.add_core_pirop_mapping('substr2', 'substr', 'Ssi', :inlinable(1));
