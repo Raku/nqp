@@ -39,10 +39,11 @@ ok(iseq(nqp::bitand_I(nqp::fromstr_I('-1073741825', $one), $one, $one), 1),
     'Bit ops (RT 109740)');
 
 # Now we'll create a type that boxes a P6bigint.
-my $bi_boxer := $knowhow.new_type(:name('TestPerl6Int'), :repr('P6opaque'));
+my $bi_boxer := NQPClassHOW.new_type(:name('TestPerl6Int'), :repr('P6opaque'));
 $bi_boxer.HOW.add_attribute($bi_boxer, NQPAttribute.new(
     :name('$!value'), :type($bi_type), :box_target(1)
 ));
+$bi_boxer.HOW.add_parent($bi_boxer, NQPMu);
 $bi_boxer.HOW.compose($bi_boxer);
 
 # Try some basic operations with it.
