@@ -532,13 +532,6 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
             return VTABLE_get_integer_keyed_int(interp, cappy, 0);
         }
-        else if (vth && vth[PARROT_VTABLE_SLOT_EXISTS_KEYED_INT].class_handle) {
-            PMC *val = get_attr(interp, decont,
-                                vth[PARROT_VTABLE_SLOT_EXISTS_KEYED_INT].class_handle,
-                                vth[PARROT_VTABLE_SLOT_EXISTS_KEYED_INT].attr_name,
-                                vth[PARROT_VTABLE_SLOT_EXISTS_KEYED_INT].hint);
-            return VTABLE_exists_keyed_int(interp, val, key);
-        }
         else
             return SUPER(key);
     }
@@ -615,13 +608,6 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
             cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
-        }
-        else if (vth && vth[PARROT_VTABLE_SLOT_DELETE_KEYED_INT].class_handle) {
-            PMC *val = get_attr(interp, decont,
-                                vth[PARROT_VTABLE_SLOT_DELETE_KEYED_INT].class_handle,
-                                vth[PARROT_VTABLE_SLOT_DELETE_KEYED_INT].attr_name,
-                                vth[PARROT_VTABLE_SLOT_DELETE_KEYED_INT].hint);
-            VTABLE_delete_keyed_int(interp, val, key);
         }
         else
             SUPER(key);

@@ -3,8 +3,6 @@ class QAST::Node {
     has @!array
 		is parrot_vtable_handler('get_pmc_keyed_int')
 		is parrot_vtable_handler('set_pmc_keyed_int')
-		is parrot_vtable_handler('exists_keyed_int')
-		is parrot_vtable_handler('delete_keyed_int')
 		is parrot_vtable_handler('unshift_pmc')
 		is parrot_vtable_handler('push_pmc')
 		;
