@@ -11,10 +11,11 @@
 #include "knowhow_bootstrapper.h"
 
 /* Cached string constants. */
-static STRING *repr_str     = NULL;
-static STRING *name_str     = NULL;
-static STRING *empty_str    = NULL;
-static STRING *p6opaque_str = NULL;
+static STRING *repr_str      = NULL;
+static STRING *name_str      = NULL;
+static STRING *empty_str     = NULL;
+static STRING *p6opaque_str  = NULL;
+static STRING *attribute_str = NULL;
 
 /* Creates a new type with this HOW as its meta-object. */
 static void new_type(PARROT_INTERP, PMC *nci) {
@@ -98,15 +99,38 @@ static void find_method(PARROT_INTERP, PMC *nci) {
 
 /* Composes the meta-object. */
 static void compose(PARROT_INTERP, PMC *nci) {
-    PMC * unused;
-    PMC    *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
-    PMC    *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
-    PMC    *obj     = VTABLE_get_pmc_keyed_int(interp, capture, 1);
+    PMC *repr_info_hash, *repr_info, *type_info, *attr_list, *attr_iter, *unused;
+    PMC *capture = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    PMC *self    = VTABLE_get_pmc_keyed_int(interp, capture, 0);
+    PMC *obj     = VTABLE_get_pmc_keyed_int(interp, capture, 1);
+    
+    /* Do REPR composition. */
+    repr_info = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+    type_info = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+    VTABLE_push_pmc(interp, repr_info, type_info);
+    VTABLE_push_pmc(interp, type_info, obj);
+    attr_list = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
+    attr_iter = VTABLE_get_iter(interp, ((KnowHOWREPRInstance *)PMC_data(self))->body.attributes);
+    while (VTABLE_get_bool(interp, attr_iter)) {
+        PMC *attr = VTABLE_shift_pmc(interp, attr_iter);
+        PMC *attr_hash = Parrot_pmc_new(interp, enum_class_Hash);;
+        VTABLE_set_string_keyed_str(interp, attr_hash, name_str,
+            REPR(attr)->box_funcs->get_str(interp, STABLE(attr), OBJECT_BODY(attr)));
+        VTABLE_push_pmc(interp, attr_list, attr_hash);
+    }
+    VTABLE_push_pmc(interp, type_info, attr_list);
+    VTABLE_push_pmc(interp, type_info, Parrot_pmc_new(interp, enum_class_ResizablePMCArray));
+    repr_info_hash = Parrot_pmc_new(interp, enum_class_Hash);
+    VTABLE_set_pmc_keyed_str(interp, repr_info_hash, attribute_str, repr_info);
+    REPR(obj)->compose(interp, STABLE(obj), repr_info_hash);
+    
+    /* Set up method and type caches. */
     STABLE(obj)->method_cache            = ((KnowHOWREPRInstance *)PMC_data(self))->body.methods;
     STABLE(obj)->mode_flags              = METHOD_CACHE_AUTHORITATIVE;
     STABLE(obj)->type_check_cache_length = 1;
     STABLE(obj)->type_check_cache        = (PMC **)mem_sys_allocate(sizeof(PMC *));
     STABLE(obj)->type_check_cache[0]     = obj;
+    
     unused = Parrot_pcc_build_call_from_c_args(interp, capture, "P", obj);
 }
 
@@ -240,10 +264,11 @@ PMC * SixModelObject_bootstrap_knowhow(PARROT_INTERP, PMC *sc) {
     STABLE(knowhow_pmc)->type_check_cache[0]     = knowhow_pmc;
 
     /* Set up some string constants that the methods here use. */
-    repr_str     = Parrot_str_new_constant(interp, "repr");
-    name_str     = Parrot_str_new_constant(interp, "name");
-    empty_str    = Parrot_str_new_constant(interp, "");
-    p6opaque_str = Parrot_str_new_constant(interp, "P6opaque");
+    repr_str      = Parrot_str_new_constant(interp, "repr");
+    name_str      = Parrot_str_new_constant(interp, "name");
+    empty_str     = Parrot_str_new_constant(interp, "");
+    p6opaque_str  = Parrot_str_new_constant(interp, "P6opaque");
+    attribute_str = Parrot_str_new_constant(interp, "attribute");
 
     /* Associate the created objects with the intial core serialization
      * context. */
