@@ -473,7 +473,11 @@ class QAST::Compiler is HLL::Compiler {
                         
                         # Generate code to set the default if nothing was passed.
                         my $lbl := PIRT::Label.new( :name('default') );
-                        my $def := self.as_post($_.default, :want($reg_type));
+                        my $def;
+                        {
+                            my $*BLOCK := $block;
+                            $def := self.as_post($_.default, :want($reg_type));
+                        }
                         $opts.push_pirop('if', $o_flag, $lbl);
                         $opts.push($def);
                         $opts.push_pirop('set', @param[2], $def.result);
@@ -491,9 +495,6 @@ class QAST::Compiler is HLL::Compiler {
                 $decls.push_pirop(".const 'Sub' $cap_lex_reg = '$_'");
                 $decls.push_pirop("capture_lex $cap_lex_reg");
             }
-            
-            # Add optionals handling code.
-            $decls.push($opts);
 
             # Generate declarations.
             for $block.lexicals {
@@ -505,6 +506,9 @@ class QAST::Compiler is HLL::Compiler {
             for $block.locals {
                 $decls.push_pirop('.local ' ~ $block.local_type_long($_.name) ~ ' ' ~ $_.name);
             }
+            
+            # Add optionals handling code.
+            $decls.push($opts);
             
             # Create a PIRT::Sub and apply HLL if any.
             $sub := PIRT::Sub.new();
@@ -714,14 +718,13 @@ class QAST::Compiler is HLL::Compiler {
     }
     
     multi method as_post(QAST::VarWithFallback $node, :$want) {
-        my $post := self.compile_var($node);
-        my $result;
         if $*BINDVAL {
-            $result := $post;
+            self.compile_var($node)
         }
-        else {
+        elsif $node.scope ne 'positional' && $node.scope ne 'associative' {
+            my $post := self.compile_var($node);
             my $lbl := PIRT::Label.new(:name('fallback'));
-            $result := PIRT::Ops.new(:result($post));
+            my $result := PIRT::Ops.new(:result($post));
             $result.push($post);
             if nqp::lc(self.infer_type($post)) eq 'p' {
                 my $fbpost := self.as_post($node.fallback, :want('P'));
@@ -730,8 +733,32 @@ class QAST::Compiler is HLL::Compiler {
                 $result.push_pirop('set', $post, $fbpost);
                 $result.push($lbl);
             }
+            $result
         }
-        $result
+        else {
+            my $fb_temp := $node.unique('fb_tmp');
+            self.as_post(QAST::Op.new(
+                :op('ifnull'),
+                QAST::Op.new(
+                    :op('if'),
+                    QAST::Op.new(
+                        :op('isconcrete'),
+                        QAST::Op.new(
+                            :op('bind'),
+                            QAST::Var.new( :name($fb_temp), :scope('local'), :decl('var') ),
+                            $node[0]
+                        )
+                    ),
+                    QAST::Var.new(
+                        :scope($node.scope),
+                        QAST::Var.new( :name($fb_temp), :scope('local') ),
+                        $node[1]
+                    ),
+                    QAST::Op.new( :op('null') )
+                 ),
+                $node.fallback
+            ))
+        }
     }
     
     method compile_var($node) {
