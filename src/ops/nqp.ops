@@ -2040,6 +2040,7 @@ inline op nqp_get_package_through_who(out PMC, invar PMC, in STR) :base_core {
              * pkg = KnowHOW.new_type(:name($3))
              * XXX For now just create a KnowHOW; we can switch to a lighter
              * package temp type later. */
+            PMC *how;
             PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             PMC *meth    = VTABLE_find_method(interp, KnowHOW, Parrot_str_new(interp, "new_type", 0));
             PMC *cappy   = Parrot_pmc_new(interp, enum_class_CallContext);
@@ -2049,6 +2050,17 @@ inline op nqp_get_package_through_who(out PMC, invar PMC, in STR) :base_core {
             cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
             Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
             pkg = VTABLE_get_pmc_keyed_int(interp, cappy, 0);
+            
+            /* Compose the package. */
+            how = STABLE(pkg)->HOW;
+            old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+            meth = VTABLE_find_method(interp, how, Parrot_str_new(interp, "compose", 0));
+            cappy = Parrot_pmc_new(interp, enum_class_CallContext);
+            VTABLE_push_pmc(interp, cappy, how);
+            VTABLE_push_pmc(interp, cappy, pkg);
+            Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
+            cappy = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+            Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
             
             /* Install it in the outer package's .WHO. */
             VTABLE_set_pmc_keyed_str(interp, who, $3, pkg);
