@@ -1131,7 +1131,7 @@ inline op repr_at_pos_obj(out PMC, invar PMC, in INT) :base_core {
     PMC *obj = decontainerize(interp, $2);
     if (obj->vtable->base_type == smo_id) {
         if (IS_CONCRETE(obj))
-            $1 = REPR(obj)->idx_funcs->at_pos_boxed(interp, STABLE(obj), OBJECT_BODY(obj), $3);
+            $1 = REPR(obj)->pos_funcs->at_pos_boxed(interp, STABLE(obj), OBJECT_BODY(obj), $3);
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot do at_pos on a type object");
@@ -1156,11 +1156,11 @@ Gets an element from the specified position, as an integer.
 inline op repr_at_pos_int(out INT, invar PMC, in INT) :base_core {
     PMC *obj = decontainerize(interp, $2);
     if (obj->vtable->base_type == smo_id) {
-        STable *elem_st = REPR(obj)->idx_funcs->get_elem_stable(interp, STABLE(obj));
+        STable *elem_st = REPR(obj)->pos_funcs->get_elem_stable(interp, STABLE(obj));
         if (IS_CONCRETE(obj)) {
             NativeValue value;
             value.type = NATIVE_VALUE_INT;
-            REPR(obj)->idx_funcs->at_pos_native(interp, STABLE(obj), OBJECT_BODY(obj), $3, &value);
+            REPR(obj)->pos_funcs->at_pos_native(interp, STABLE(obj), OBJECT_BODY(obj), $3, &value);
             $1 = value.value.intval;
         }
         else
@@ -1185,11 +1185,11 @@ Gets an element from the specified position, as an floating point number.
 inline op repr_at_pos_num(out NUM, invar PMC, in INT) :base_core {
     PMC *obj = decontainerize(interp, $2);
     if (obj->vtable->base_type == smo_id) {
-        STable *elem_st = REPR(obj)->idx_funcs->get_elem_stable(interp, STABLE(obj));
+        STable *elem_st = REPR(obj)->pos_funcs->get_elem_stable(interp, STABLE(obj));
         if (IS_CONCRETE(obj)) {
             NativeValue value;
             value.type = NATIVE_VALUE_FLOAT;
-            REPR(obj)->idx_funcs->at_pos_native(interp, STABLE(obj), OBJECT_BODY(obj), $3, &value);
+            REPR(obj)->pos_funcs->at_pos_native(interp, STABLE(obj), OBJECT_BODY(obj), $3, &value);
             $1 = value.value.floatval;
         }
         else
@@ -1215,7 +1215,7 @@ inline op repr_bind_pos_obj(invar PMC, in INT, invar PMC) :base_core {
     PMC *obj = decontainerize(interp, $1);
     if (obj->vtable->base_type == smo_id) {
         if (IS_CONCRETE(obj))
-            REPR(obj)->idx_funcs->bind_pos_boxed(interp, STABLE(obj), OBJECT_BODY(obj), $2, $3);
+            REPR(obj)->pos_funcs->bind_pos_boxed(interp, STABLE(obj), OBJECT_BODY(obj), $2, $3);
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot do bind_pos on a type object");
@@ -1244,7 +1244,7 @@ inline op repr_bind_pos_int(invar PMC, in INT, in INT) :base_core {
             NativeValue value;
             value.type = NATIVE_VALUE_INT;
             value.value.intval = $3;
-            REPR(obj)->idx_funcs->bind_pos_native(interp, STABLE(obj), OBJECT_BODY(obj), $2, &value);
+            REPR(obj)->pos_funcs->bind_pos_native(interp, STABLE(obj), OBJECT_BODY(obj), $2, &value);
         }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -1273,7 +1273,7 @@ inline op repr_bind_pos_num(invar PMC, in INT, in NUM) :base_core {
             NativeValue value;
             value.type = NATIVE_VALUE_FLOAT;
             value.value.floatval = $3;
-            REPR(obj)->idx_funcs->bind_pos_native(interp, STABLE(obj), OBJECT_BODY(obj), $2, &value);
+            REPR(obj)->pos_funcs->bind_pos_native(interp, STABLE(obj), OBJECT_BODY(obj), $2, &value);
         }
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -1299,7 +1299,7 @@ inline op repr_elems(out INT, invar PMC) :base_core {
     PMC *obj = decontainerize(interp, $2);
     if (obj->vtable->base_type == smo_id) {
         if (IS_CONCRETE(obj))
-            $1 = REPR(obj)->idx_funcs->elems(interp, STABLE(obj), OBJECT_BODY(obj));
+            $1 = REPR(obj)->pos_funcs->elems(interp, STABLE(obj), OBJECT_BODY(obj));
         else
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot do repr_elems on a type object");

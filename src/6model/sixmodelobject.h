@@ -239,7 +239,7 @@ typedef struct SixModel_REPROps_Boxing {
      * them. */
     void * (*get_boxed_ref) (PARROT_INTERP, STable *st, void *data, INTVAL repr_id);
 } REPROps_Boxing;
-typedef struct SixModel_REPROps_Indexing {
+typedef struct SixModel_REPROps_Positional {
     /* Get a flattened native value, of the type specified in value->type. It
      * is the caller's responsibility to make sure the stored data is of the
      * appropriate type. May throw to indicate out of bounds, or vivify. */
@@ -276,7 +276,7 @@ typedef struct SixModel_REPROps_Indexing {
 
     /* Gets the STable representing the declared element type. */
     STable * (*get_elem_stable) (PARROT_INTERP, STable *st);
-} REPROps_Indexing;
+} REPROps_Positional;
 struct SixModel_REPROps {
     /* Creates a new type object of this representation, and
      * associates it with the given HOW. Also sets up a new
@@ -311,8 +311,8 @@ struct SixModel_REPROps {
     /* Boxing REPR function table. */
     struct SixModel_REPROps_Boxing *box_funcs;
 
-    /* Indexing REPR function table. */
-    struct SixModel_REPROps_Indexing *idx_funcs;
+    /* Positional REPR function table. */
+    struct SixModel_REPROps_Positional *pos_funcs;
     
     /* Gets the storage specification for this representation. */
     storage_spec (*get_storage_spec) (PARROT_INTERP, STable *st);
