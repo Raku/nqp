@@ -32,10 +32,6 @@ my knowhow NQPRoutine {
         nqp::setcodeobj($do, $der);
         
         # If needed, arrange for a fixup of the cloned code-ref.
-        my $clone_callback := pir::getprop__PPs($!do, 'CLONE_CALLBACK');
-        if nqp::defined($clone_callback) {
-            $clone_callback($!do, $do, $der);
-        }
         unless nqp::isnull($!clone_callback) {
             $!clone_callback($!do, $do, $der);
         }
@@ -334,10 +330,6 @@ my knowhow NQPRoutine {
         nqp::setcodeobj($do, $der);
         
         # If needed, arrange for a fixup of the cloned code-ref.
-        my $clone_callback := pir::getprop__PPs($!do, 'CLONE_CALLBACK');
-        if nqp::defined($clone_callback) {
-            $clone_callback($!do, $do, $der);
-        }
         unless nqp::isnull($!clone_callback) {
             $!clone_callback($!do, $do, $der);
         }
@@ -417,10 +409,6 @@ my knowhow NQPRegex {
         nqp::setcodeobj($do, $der);
         
         # If needed, arrange for a fixup of the cloned code-ref.
-        my $clone_callback := pir::getprop__PPs($!do, 'CLONE_CALLBACK');
-        if nqp::defined($clone_callback) {
-            $clone_callback($!do, $do, $der);
-        }
         unless nqp::isnull($!clone_callback) {
             $!clone_callback($!do, $do, $der);
         }
