@@ -87,11 +87,6 @@ my class NQPMu {
         0
     }
     
-    proto method at_pos($pos) is parrot_vtable('get_pmc_keyed_int') { * }
-    multi method at_pos(NQPMu:U $self: $pos) {
-        NQPMu
-    }
-    
     proto method at_key($key) is parrot_vtable('get_pmc_keyed_str') { * }
     multi method at_key(NQPMu:U $self: $key) {
         NQPMu
