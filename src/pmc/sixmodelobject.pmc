@@ -338,8 +338,8 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
                 return VTABLE_get_pmc_keyed(interp, val, key);
             }
             else
-                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                    "SixModelObject does not implement get_pmc_keyed");
+                return REPR(decont)->ass_funcs->at_key_boxed(interp, STABLE(decont),
+                    OBJECT_BODY(decont), VTABLE_get_string(interp, key));
         }
     }
     
@@ -393,8 +393,8 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             return VTABLE_get_pmc_keyed_str(interp, val, key);
         }
         else
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "SixModelObject does not implement get_pmc_keyed_str");
+            return REPR(decont)->ass_funcs->at_key_boxed(interp, STABLE(decont),
+                OBJECT_BODY(decont), key);
     }
     
     VTABLE void set_pmc_keyed(PMC *key, PMC *value) {
@@ -426,8 +426,8 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
                 VTABLE_set_pmc_keyed(interp, val, key, value);
             }
             else
-              Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                                          "SixModelObject does not implement set_pmc_keyed");
+              REPR(decont)->ass_funcs->bind_key_boxed(interp, STABLE(decont),
+                OBJECT_BODY(decont), VTABLE_get_string(interp, key), value);
         }
     }
     
@@ -479,8 +479,8 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             VTABLE_set_pmc_keyed_str(interp, val, key, value);
         }
         else
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "SixModelObject does not implement set_pmc_keyed_str");
+            REPR(decont)->ass_funcs->bind_key_boxed(interp, STABLE(decont),
+                OBJECT_BODY(decont), key, value);
     }
 
     VTABLE INTVAL exists_keyed(PMC *key) {
@@ -513,7 +513,8 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
                 return VTABLE_exists_keyed(interp, val, key);
             }
             else
-                return SUPER(key);
+                return REPR(decont)->ass_funcs->exists_key(interp, STABLE(decont),
+                    OBJECT_BODY(decont), VTABLE_get_string(interp, key));
         }
     }
 
@@ -559,7 +560,8 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             return VTABLE_exists_keyed_str(interp, val, key);
         }
         else
-            return SUPER(key);
+            return REPR(decont)->ass_funcs->exists_key(interp, STABLE(decont),
+                OBJECT_BODY(decont), key);
     }
 
     VTABLE void delete_keyed(PMC *key) {
@@ -591,7 +593,8 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
                 VTABLE_delete_keyed(interp, val, key);
             }
             else
-                SUPER(key);
+                REPR(decont)->ass_funcs->delete_key(interp, STABLE(decont),
+                    OBJECT_BODY(decont), VTABLE_get_string(interp, key));
         }
     }
 
@@ -635,7 +638,8 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             VTABLE_delete_keyed_str(interp, val, key);
         }
         else
-            SUPER(key);
+            REPR(decont)->ass_funcs->delete_key(interp, STABLE(decont),
+                OBJECT_BODY(decont), key);
     }
     
     VTABLE void unshift_pmc(PMC *value) {

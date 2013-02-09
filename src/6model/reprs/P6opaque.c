@@ -809,12 +809,54 @@ static STable * get_elem_stable(PARROT_INTERP, STable *st) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
         "This type does not support get_elem_stable");
 }
+PARROT_DOES_NOT_RETURN
+static void die_no_ass_del(PARROT_INTERP) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+        "This type does not support associative operations");
+}
+static PMC * at_key_boxed(PARROT_INTERP, STable *st, void *data, STRING *key) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    if (repr_data->ass_del_slot == -1)
+        die_no_ass_del(interp);
+    return VTABLE_get_pmc_keyed_str(interp,
+        get_pmc_at_offset(data, repr_data->attribute_offsets[repr_data->ass_del_slot]),
+        key);
+}
+static void bind_key_boxed(PARROT_INTERP, STable *st, void *data, STRING *key, PMC *value) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    if (repr_data->ass_del_slot == -1)
+        die_no_ass_del(interp);
+    VTABLE_set_pmc_keyed_str(interp,
+        get_pmc_at_offset(data, repr_data->attribute_offsets[repr_data->ass_del_slot]),
+        key, value);
+}
+static INTVAL exists_key(PARROT_INTERP, STable *st, void *data, STRING *key) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    if (repr_data->ass_del_slot == -1)
+        die_no_ass_del(interp);
+    return VTABLE_exists_keyed_str(interp,
+        get_pmc_at_offset(data, repr_data->attribute_offsets[repr_data->ass_del_slot]),
+        key);
+}
+static void delete_key(PARROT_INTERP, STable *st, void *data, STRING *key) {
+    P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
+    if (repr_data->ass_del_slot == -1)
+        die_no_ass_del(interp);
+    VTABLE_delete_keyed_str(interp,
+        get_pmc_at_offset(data, repr_data->attribute_offsets[repr_data->ass_del_slot]),
+        key);
+}
 static INTVAL elems(PARROT_INTERP, STable *st, void *data) {
     P6opaqueREPRData *repr_data = (P6opaqueREPRData *)st->REPR_data;
-    if (repr_data->pos_del_slot == -1)
-        die_no_pos_del(interp);
-    return VTABLE_elements(interp,
-        get_pmc_at_offset(data, repr_data->attribute_offsets[repr_data->pos_del_slot]));
+    if (repr_data->pos_del_slot >= 0)
+        return VTABLE_elements(interp,
+            get_pmc_at_offset(data, repr_data->attribute_offsets[repr_data->pos_del_slot]));
+    else if (repr_data->ass_del_slot >= 0)
+        return VTABLE_elements(interp,
+            get_pmc_at_offset(data, repr_data->attribute_offsets[repr_data->ass_del_slot]));
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "This type does not support elems");
 }
 
 /* This Parrot-specific addition to the API is used to mark an object. */
@@ -1225,6 +1267,11 @@ REPROps * P6opaque_initialize(PARROT_INTERP) {
     this_repr->pos_funcs->unshift_boxed = unshift_boxed;
     this_repr->pos_funcs->shift_boxed = shift_boxed;
     this_repr->pos_funcs->get_elem_stable = get_elem_stable;
+    this_repr->ass_funcs = mem_allocate_typed(REPROps_Associative);
+    this_repr->ass_funcs->at_key_boxed = at_key_boxed;
+    this_repr->ass_funcs->bind_key_boxed = bind_key_boxed;
+    this_repr->ass_funcs->exists_key = exists_key;
+    this_repr->ass_funcs->delete_key = delete_key;
     this_repr->elems = elems;
     this_repr->gc_mark = gc_mark;
     this_repr->gc_free = gc_free;
