@@ -5,6 +5,8 @@ knowhow NQPAttribute {
     has $!box_target;
     has $!default;
     has $!has_default;
+    has $!positional_delegate;
+    has $!associative_delegate;
 
     method new(:$name!, :$box_target, *%extra) {
         my $attr := nqp::create(self);
@@ -45,6 +47,22 @@ knowhow NQPAttribute {
     
     method auto_viv_container() {
         $!has_default ?? $!default !! nqp::null()
+    }
+    
+    method set_positional_delegate($value) {
+        $!positional_delegate := $value;
+    }
+    
+    method set_associative_delegate($value) {
+        $!associative_delegate := $value;
+    }
+    
+    method positional_delegate() {
+        !nqp::isnull($!positional_delegate) && $!positional_delegate ?? 1 !! 0
+    }
+    
+    method associative_delegate() {
+        !nqp::isnull($!associative_delegate) && $!associative_delegate ?? 1 !! 0
     }
 
     method compose($obj) {

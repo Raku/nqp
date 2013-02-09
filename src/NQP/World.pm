@@ -409,6 +409,7 @@ class NQP::World is HLL::World {
     method pkg_add_attribute($obj, $meta_attr, %lit_args, %obj_args) {
         my $attr := $meta_attr.new(|%lit_args, |%obj_args);
         $obj.HOW.add_attribute($obj, $attr);
+        $attr
     }
     
     # Adds a method to the meta-object.

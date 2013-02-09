@@ -709,6 +709,7 @@ class NQP::Actions is HLL::Actions {
         my $sigil := $<variable><sigil>;
         my $name := $past.name;
         my $BLOCK := $*W.cur_lexpad();
+        my $*DECLARAND_ATTR;
         if $name && $BLOCK.symbol($name) {
             $/.CURSOR.panic("Redeclaration of symbol ", $name);
         }
@@ -735,7 +736,7 @@ class NQP::Actions is HLL::Actions {
             }
             
             # Add it.
-            $*W.pkg_add_attribute($*PACKAGE, %*HOW{$*PKGDECL ~ '-attr'},
+            $*DECLARAND_ATTR := $*W.pkg_add_attribute($*PACKAGE, %*HOW{$*PKGDECL ~ '-attr'},
                 %lit_args, %obj_args);
 
             $past := QAST::Stmts.new();
@@ -1178,6 +1179,12 @@ class NQP::Actions is HLL::Actions {
             make -> $match {
                 $*W.pkg_add_parrot_vtable_handler_mapping($package, $name, ~$match<variable>);
             };
+        }
+        elsif $<longname> eq 'positional_delegate' {
+            $*DECLARAND_ATTR.positional_delegate(1);
+        }
+        elsif $<longname> eq 'associative_delegate' {
+            $*DECLARAND_ATTR.associative_delegate(1);
         }
         elsif $<longname> eq 'export' {
             make -> $match {
