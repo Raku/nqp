@@ -201,9 +201,9 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
 }
 
 PARROT_DOES_NOT_RETURN
-static void die_idx_nyi(PARROT_INTERP) {
+static void die_pos_nyi(PARROT_INTERP) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-        "CArray representation does not fully indexed storage yet");
+        "CArray representation does not fully positional storage yet");
 }
 static void expand(PARROT_INTERP, CArrayREPRData *repr_data, CArrayBody *body, INTVAL min_size) {
     INTVAL is_complex = 0;
@@ -453,6 +453,18 @@ static STable * get_elem_stable(PARROT_INTERP, STable *st) {
     CArrayREPRData *repr_data = (CArrayREPRData *)st->REPR_data;
     return STABLE(repr_data->elem_type);
 }
+static void push_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
+    die_pos_nyi(interp);
+}
+static PMC * pop_boxed(PARROT_INTERP, STable *st, void *data) {
+    die_pos_nyi(interp);
+}
+static void unshift_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
+    die_pos_nyi(interp);
+}
+static PMC * shift_boxed(PARROT_INTERP, STable *st, void *data) {
+    die_pos_nyi(interp);
+}
 
 /* Serializes the REPR data. */
 static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *writer) {
@@ -496,6 +508,10 @@ REPROps * CArray_initialize(PARROT_INTERP,
     this_repr->pos_funcs->bind_pos_native = bind_pos_native;
     this_repr->pos_funcs->bind_pos_boxed = bind_pos_boxed;
     this_repr->pos_funcs->elems = elems;
+    this_repr->pos_funcs->push_boxed = push_boxed;
+    this_repr->pos_funcs->pop_boxed = pop_boxed;
+    this_repr->pos_funcs->unshift_boxed = unshift_boxed;
+    this_repr->pos_funcs->shift_boxed = shift_boxed;
     this_repr->pos_funcs->get_elem_stable = get_elem_stable;
     this_repr->serialize_repr_data = serialize_repr_data;
     this_repr->deserialize_repr_data = deserialize_repr_data;

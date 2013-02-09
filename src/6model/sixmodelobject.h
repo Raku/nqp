@@ -258,7 +258,19 @@ typedef struct SixModel_REPROps_Positional {
 
     /* Gets the number of elements. */
     INTVAL (*elems) (PARROT_INTERP, STable *st, void *data);
-
+    
+    /* Pushes an object. */
+    void (*push_boxed) (PARROT_INTERP, STable *st, void *data, PMC *obj);
+    
+    /* Pops an object. */
+    PMC * (*pop_boxed) (PARROT_INTERP, STable *st, void *data);
+    
+    /* Unshifts an object. */
+    void (*unshift_boxed) (PARROT_INTERP, STable *st, void *data, PMC *obj);
+    
+    /* Shifts an object. */
+    PMC * (*shift_boxed) (PARROT_INTERP, STable *st, void *data);
+    
     /* Gets the STable representing the declared element type. */
     STable * (*get_elem_stable) (PARROT_INTERP, STable *st);
 } REPROps_Positional;

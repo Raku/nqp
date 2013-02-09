@@ -96,16 +96,16 @@ static void default_bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL
 static INTVAL default_elems(PARROT_INTERP, STable *st, void *data) {
     die_no_idx(interp, st->REPR->name);
 }
-static void default_preallocate(PARROT_INTERP, STable *st, void *data, INTVAL count) {
+static void default_push_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
     die_no_idx(interp, st->REPR->name);
 }
-static void default_trim_to(PARROT_INTERP, STable *st, void *data, INTVAL count) {
+static PMC * default_pop_boxed(PARROT_INTERP, STable *st, void *data) {
     die_no_idx(interp, st->REPR->name);
 }
-static void default_make_hole(PARROT_INTERP, STable *st, void *data, INTVAL at_index, INTVAL count) {
+static void default_unshift_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
     die_no_idx(interp, st->REPR->name);
 }
-static void default_delete_elems(PARROT_INTERP, STable *st, void *data, INTVAL at_index, INTVAL count) {
+static PMC * default_shift_boxed(PARROT_INTERP, STable *st, void *data) {
     die_no_idx(interp, st->REPR->name);
 }
 static STable * default_get_elem_stable(PARROT_INTERP, STable *st) {
@@ -143,6 +143,10 @@ static void add_default_pos_funcs(PARROT_INTERP, REPROps *repr) {
     repr->pos_funcs->bind_pos_native = default_bind_pos_native;
     repr->pos_funcs->bind_pos_boxed = default_bind_pos_boxed;
     repr->pos_funcs->elems = default_elems;
+    repr->pos_funcs->push_boxed = default_push_boxed;
+    repr->pos_funcs->pop_boxed = default_pop_boxed;
+    repr->pos_funcs->unshift_boxed = default_unshift_boxed;
+    repr->pos_funcs->shift_boxed = default_shift_boxed;
     repr->pos_funcs->get_elem_stable = default_get_elem_stable;
 }
 
