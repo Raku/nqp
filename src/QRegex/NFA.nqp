@@ -14,9 +14,18 @@ class QRegex::NFA {
     our $EDGE_CODEPOINT_I_NEG := 10;
     our $EDGE_GENERIC_VAR     := 11;
 
+    # The build-time set of states, with element zero being the fate name
+    # list.
     has $!states;
+    
+    # Non-zero if this NFA has some edges added.
     has $!edges;
+    
+    # Non-zero if this NFA is generic.
     has int $!generic;
+    
+    # The NFA we will actually run (with NFA REPR).
+    has $!nfa_object;
 
     method new() {
         my $new := self.bless(:states(nqp::list()), :edges(0));
@@ -347,6 +356,9 @@ class QRegex::NFA {
             self.addedge($start, 0, $EDGE_FATE, $fate);
         }
     }
+    
+    # NFA type.
+    my knowhow NFAType is repr('NFA') { }
 
     method run(str $target, int $offset) {
         # This does what the NQP below says, but these days an op is used since
@@ -395,11 +407,23 @@ class QRegex::NFA {
         #    $gen := $gen + 1;
         #}
         #@fates;
-        pir::nqp_nfa_run_protoregex__PPSI($!states, $target, $offset)
+        unless nqp::isconcrete($!nfa_object) {
+            pir::nqp_disable_sc_write_barrier__v();
+            $!nfa_object := nqp::nfafromstatelist($!states, NFAType);
+            pir::nqp_enable_sc_write_barrier__v();
+            1;
+        }
+        nqp::nfarunproto($!nfa_object, $target, $offset)
     }
     
     method run_alt(str $target, int $offset, $bstack, $cstack, @labels) {
-        pir::nqp_nfa_run_alternation__vPSIPPP($!states, $target, $offset, $bstack, $cstack, @labels)
+        unless nqp::isconcrete($!nfa_object) {
+            pir::nqp_disable_sc_write_barrier__v();
+            $!nfa_object := nqp::nfafromstatelist($!states, NFAType);
+            pir::nqp_enable_sc_write_barrier__v();
+            1;
+        }
+        nqp::nfarunalt($!nfa_object, $target, $offset, $bstack, $cstack, @labels)
     }
     
     method generic() {
