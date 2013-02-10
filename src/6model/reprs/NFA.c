@@ -7,10 +7,6 @@
 /* This representation's function pointer table. */
 static REPROps *this_repr;
 
-/* Some functions we have to get references to. */
-static wrap_object_t   wrap_object_func;
-static create_stable_t create_stable_func;
-
 /* Creates a new type object of this representation, and associates it with
  * the given HOW. */
 static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
@@ -18,12 +14,12 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
     NFAInstance *obj = mem_allocate_zeroed_typed(NFAInstance);
 
     /* Build an STable. */
-    PMC *st_pmc = create_stable_func(interp, this_repr, HOW);
+    PMC *st_pmc = create_stable(interp, this_repr, HOW);
     STable *st  = STABLE_STRUCT(st_pmc);
 
     /* Create type object and point it back at the STable. */
     obj->common.stable = st_pmc;
-    st->WHAT = wrap_object_func(interp, obj);
+    st->WHAT = wrap_object(interp, obj);
     PARROT_GC_WRITE_BARRIER(interp, st_pmc);
 
     /* Flag it as a type object. */
@@ -41,7 +37,7 @@ static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
 static PMC * allocate(PARROT_INTERP, STable *st) {
     NFAInstance *obj = mem_allocate_zeroed_typed(NFAInstance);
     obj->common.stable = st->stable_pmc;
-    return wrap_object_func(interp, obj);
+    return wrap_object(interp, obj);
 }
 
 /* Initialize a new instance. */
@@ -58,15 +54,18 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     dest_body->fates = src_body->fates;
     dest_body->num_states = src_body->num_states;
     
-    dest_body->num_state_edges = mem_sys_allocate(dest_body->num_states * sizeof(INTVAL));
+    if (dest_body->num_state_edges > 0)
+        dest_body->num_state_edges = mem_sys_allocate(dest_body->num_states * sizeof(INTVAL));
     for (i = 0; i < dest_body->num_states; i++)
         dest_body->num_state_edges[i] = src_body->num_state_edges[i];
 
     dest_body->states = mem_sys_allocate(dest_body->num_states * sizeof(NFAStateInfo *));
     for (i = 0; i < dest_body->num_states; i++) {
         INTVAL size = dest_body->num_state_edges[i] * sizeof(NFAStateInfo);
-        dest_body->states[i] = mem_sys_allocate(size);
-        memcpy(dest_body->states[i], src_body->states[i], size);
+        if (size > 0) {
+            dest_body->states[i] = mem_sys_allocate(size);
+            memcpy(dest_body->states[i], src_body->states[i], size);
+        }
     }
 }
 
@@ -95,7 +94,8 @@ static void gc_free(PARROT_INTERP, PMC *obj) {
     NFAInstance *nfa = (NFAInstance *)PMC_data(obj);
     INTVAL i;
     for (i = 0; i < nfa->body.num_states; i++)
-        mem_sys_free(nfa->body.states[i]);
+        if (nfa->body.states[i])
+            mem_sys_free(nfa->body.states[i]);
     mem_sys_free(nfa->body.num_state_edges);
     mem_sys_free(nfa);
     PMC_data(obj) = NULL;
@@ -113,13 +113,7 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
 }
 
 /* Initializes the NFA representation. */
-REPROps * NFA_initialize(PARROT_INTERP,
-        wrap_object_t wrap_object_func_ptr,
-        create_stable_t create_stable_func_ptr) {
-    /* Stash away functions passed wrapping functions. */
-    wrap_object_func = wrap_object_func_ptr;
-    create_stable_func = create_stable_func_ptr;
-
+REPROps * NFA_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
     this_repr = mem_allocate_zeroed_typed(REPROps);
     this_repr->type_object_for = type_object_for;

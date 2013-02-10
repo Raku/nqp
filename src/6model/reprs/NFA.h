@@ -21,9 +21,9 @@ typedef struct {
         INTVAL  i;
         STRING *s;
         struct {
-            Parrot_Int4 lc;
             Parrot_Int4 uc;
-        } lcuc;
+            Parrot_Int4 lc;
+        } uclc;
     } arg;
 } NFAStateInfo;
 
@@ -42,8 +42,6 @@ typedef struct {
 } NFAInstance;
 
 /* Initializes the NFA REPR. */
-REPROps * NFA_initialize(PARROT_INTERP,
-        PMC * (* wrap_object_func_ptr) (PARROT_INTERP, void *obj),
-        PMC * (* create_stable_func_ptr) (PARROT_INTERP, REPROps *REPR, PMC *HOW));
+REPROps * NFA_initialize(PARROT_INTERP);
 
 #endif
