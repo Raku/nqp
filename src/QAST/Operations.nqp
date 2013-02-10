@@ -1747,6 +1747,12 @@ QAST::Operations.add_core_pirop_mapping('getcurhllsym', 'get_hll_global', 'Ps');
 QAST::Operations.add_core_pirop_mapping('bindcurhllsym', 'set_hll_global', '1sP');
 QAST::Operations.add_core_pirop_mapping('loadbytecode', 'load_bytecode', '0s');
 
+# regex engine related opcodes
+QAST::Operations.add_core_pirop_mapping('nfafromstatelist', 'nqp_nfa_from_statelist', 'PPP');
+QAST::Operations.add_core_pirop_mapping('nfatostatelist', 'nqp_nfa_to_statelist', 'PP');
+QAST::Operations.add_core_pirop_mapping('nfarunproto', 'nqp_nfa_run_proto', 'PPsi');
+QAST::Operations.add_core_pirop_mapping('nfarunalt', 'nqp_nfa_run_alt', '0PsiPPP');
+
 # process related opcodes
 QAST::Operations.add_core_pirop_mapping('exit', 'exit', '0i', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('sleep', 'sleep', '0n', :inlinable(1));
