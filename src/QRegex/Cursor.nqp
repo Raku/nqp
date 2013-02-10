@@ -116,7 +116,7 @@ role NQPCursorRole is export {
             nqp::getattr_s($!shared, ParseShared, '$!target'),
             nqp::bindattr_i($new, $?CLASS, '$!from', $!pos),
             $?CLASS,
-            nqp::bindattr($new, $?CLASS, '$!bstack', pir::new__Ps('ResizableIntegerArray')),
+            nqp::bindattr($new, $?CLASS, '$!bstack', nqp::list_i()),
             0
         )
     }
@@ -403,7 +403,7 @@ role NQPCursorRole is export {
         nqp::bindattr($!shared, ParseShared, '@!highexpect', []);
         my $cur := self."!cursor_start"();
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
-        my $shared := pir::repr_clone__PP($!shared);
+        my $shared := nqp::clone($!shared);
         nqp::bindattr_s($shared, ParseShared, '$!target', $target.reverse());
         nqp::bindattr($cur, $?CLASS, '$!shared', $shared);
         nqp::bindattr_i($cur, $?CLASS, '$!from', nqp::chars($target) - $!pos);
@@ -423,11 +423,11 @@ role NQPCursorRole is export {
         $!pos >= nqp::chars($target)
           ?? $cur."!cursor_pass"($!pos, 'ws')
           !! ($!pos < 1
-              || !nqp::iscclass(pir::const::CCLASS_WORD, $target, $!pos)
-              || !nqp::iscclass(pir::const::CCLASS_WORD, $target, $!pos-1)
+              || !nqp::iscclass(nqp::const::CCLASS_WORD, $target, $!pos)
+              || !nqp::iscclass(nqp::const::CCLASS_WORD, $target, $!pos-1)
              ) && $cur."!cursor_pass"(
                       nqp::findnotcclass(
-                          pir::const::CCLASS_WHITESPACE, $target, $!pos, nqp::chars($target)),
+                          nqp::const::CCLASS_WHITESPACE, $target, $!pos, nqp::chars($target)),
                       'ws');
         $cur;
     }
@@ -438,8 +438,8 @@ role NQPCursorRole is export {
         $cur."!cursor_pass"($!pos, "ww")
             if $!pos > 0
             && $!pos != nqp::chars($target)
-            && nqp::iscclass(pir::const::CCLASS_WORD, $target, $!pos)
-            && nqp::iscclass(pir::const::CCLASS_WORD, $target, $!pos-1);
+            && nqp::iscclass(nqp::const::CCLASS_WORD, $target, $!pos)
+            && nqp::iscclass(nqp::const::CCLASS_WORD, $target, $!pos-1);
         $cur;
     }
 
@@ -447,11 +447,11 @@ role NQPCursorRole is export {
         my $cur := self."!cursor_start"();
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos, "wb")
-            if ($!pos == 0 && nqp::iscclass(pir::const::CCLASS_WORD, $target, $!pos))
+            if ($!pos == 0 && nqp::iscclass(nqp::const::CCLASS_WORD, $target, $!pos))
                || ($!pos == nqp::chars($target)
-                   && nqp::iscclass(pir::const::CCLASS_WORD, $target, $!pos-1))
-               || nqp::iscclass(pir::const::CCLASS_WORD, $target, $!pos-1)
-                  != nqp::iscclass(pir::const::CCLASS_WORD, $target, $!pos);
+                   && nqp::iscclass(nqp::const::CCLASS_WORD, $target, $!pos-1))
+               || nqp::iscclass(nqp::const::CCLASS_WORD, $target, $!pos-1)
+                  != nqp::iscclass(nqp::const::CCLASS_WORD, $target, $!pos);
         $cur;
     }
 
@@ -460,11 +460,11 @@ role NQPCursorRole is export {
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"(
                 nqp::findnotcclass(
-                    pir::const::CCLASS_WORD,
+                    nqp::const::CCLASS_WORD,
                     $target, $!pos, nqp::chars($target)))
             if $!pos < nqp::chars($target) &&
                 (nqp::ord($target, $!pos) == 95
-                 || nqp::iscclass(pir::const::CCLASS_ALPHABETIC, $target, $!pos));
+                 || nqp::iscclass(nqp::const::CCLASS_ALPHABETIC, $target, $!pos));
         $cur;
     }
 
@@ -473,7 +473,7 @@ role NQPCursorRole is export {
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos+1, 'alpha')
           if $!pos < nqp::chars($target)
-             && (nqp::iscclass(pir::const::CCLASS_ALPHABETIC, $target, $!pos)
+             && (nqp::iscclass(nqp::const::CCLASS_ALPHABETIC, $target, $!pos)
                  || nqp::ord($target, $!pos) == 95);
         $cur;
     }
@@ -483,7 +483,7 @@ role NQPCursorRole is export {
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos+1, 'alnum')
           if $!pos < nqp::chars($target)
-             && (nqp::iscclass(pir::const::CCLASS_ALPHANUMERIC, $target, $!pos)
+             && (nqp::iscclass(nqp::const::CCLASS_ALPHANUMERIC, $target, $!pos)
                  || nqp::ord($target, $!pos) == 95);
         $cur;
     }
@@ -493,7 +493,7 @@ role NQPCursorRole is export {
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos+1, 'upper')
           if $!pos < nqp::chars($target)
-             && nqp::iscclass(pir::const::CCLASS_UPPERCASE, $target, $!pos);
+             && nqp::iscclass(nqp::const::CCLASS_UPPERCASE, $target, $!pos);
         $cur;
     }
 
@@ -502,7 +502,7 @@ role NQPCursorRole is export {
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos+1, 'lower')
           if $!pos < nqp::chars($target)
-             && nqp::iscclass(pir::const::CCLASS_LOWERCASE, $target, $!pos);
+             && nqp::iscclass(nqp::const::CCLASS_LOWERCASE, $target, $!pos);
         $cur;
     }
 
@@ -511,7 +511,7 @@ role NQPCursorRole is export {
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos+1, 'digit')
           if $!pos < nqp::chars($target)
-             && nqp::iscclass(pir::const::CCLASS_NUMERIC, $target, $!pos);
+             && nqp::iscclass(nqp::const::CCLASS_NUMERIC, $target, $!pos);
         $cur;
     }
 
@@ -520,7 +520,7 @@ role NQPCursorRole is export {
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos+1, 'xdigit')
           if $!pos < nqp::chars($target)
-             && nqp::iscclass(pir::const::CCLASS_HEXADECIMAL, $target, $!pos);
+             && nqp::iscclass(nqp::const::CCLASS_HEXADECIMAL, $target, $!pos);
         $cur;
     }
 
@@ -529,7 +529,7 @@ role NQPCursorRole is export {
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos+1, 'space')
           if $!pos < nqp::chars($target)
-             && nqp::iscclass(pir::const::CCLASS_WHITESPACE, $target, $!pos);
+             && nqp::iscclass(nqp::const::CCLASS_WHITESPACE, $target, $!pos);
         $cur;
     }
 
@@ -538,7 +538,7 @@ role NQPCursorRole is export {
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos+1, 'blank')
           if $!pos < nqp::chars($target)
-             && nqp::iscclass(pir::const::CCLASS_BLANK, $target, $!pos);
+             && nqp::iscclass(nqp::const::CCLASS_BLANK, $target, $!pos);
         $cur;
     }
 
@@ -547,7 +547,7 @@ role NQPCursorRole is export {
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos+1, 'cntrl')
           if $!pos < nqp::chars($target)
-             && nqp::iscclass(pir::const::CCLASS_CONTROL, $target, $!pos);
+             && nqp::iscclass(nqp::const::CCLASS_CONTROL, $target, $!pos);
         $cur;
     }
 
@@ -556,7 +556,7 @@ role NQPCursorRole is export {
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos+1, 'punct')
           if $!pos < nqp::chars($target)
-             && nqp::iscclass(pir::const::CCLASS_PUNCTUATION, $target, $!pos);
+             && nqp::iscclass(nqp::const::CCLASS_PUNCTUATION, $target, $!pos);
         $cur;
     }
 
@@ -601,7 +601,7 @@ class NQPMatch is NQPCapture {
             }
             $str;
         }
-        my $str := $key ~ ': ' ~ pir::escape__Ss(self.Str) ~ ' @ ' ~ self.from ~ "\n";
+        my $str := $key ~ ': ' ~ nqp::escape(self.Str) ~ ' @ ' ~ self.from ~ "\n";
         $str := $str ~ dump_array($key, self.list);
         for self.hash { $str := $str ~ dump_array($key ~ '<' ~ $_.key ~ '>', $_.value); }
         $str;
@@ -613,7 +613,7 @@ class NQPCursor does NQPCursorRole {
     my $EMPTY_MATCH_HASH := nqp::hash();
     method MATCH() {
         my $match := nqp::getattr(self, NQPCursor, '$!match');
-        unless nqp::istype($match, NQPMatch) || pir::nqp_ishash__IP($match) {
+        unless nqp::istype($match, NQPMatch) || nqp::ishash($match) {
             my $list := $EMPTY_MATCH_LIST;
             my $hash := $EMPTY_MATCH_HASH;
             $match := nqp::create(NQPMatch);
@@ -630,7 +630,7 @@ class NQPCursor does NQPCursorRole {
                 if $key eq '$!from' || $key eq '$!to' {
                     nqp::bindattr_i($match, NQPMatch, $key, %ch{$key}.from);
                 }
-                elsif nqp::iscclass(pir::const::CCLASS_NUMERIC, $key, 0) {
+                elsif nqp::iscclass(nqp::const::CCLASS_NUMERIC, $key, 0) {
                     $list := nqp::list() unless $list;
                     nqp::bindpos($list, $key, %ch{$key});
                 }
@@ -653,7 +653,7 @@ class NQPCursor does NQPCursorRole {
     method parse($target, :$rule = 'TOP', :$actions, *%options) {
         my $*ACTIONS := $actions;
         my $cur := self.'!cursor_init'($target, |%options);
-        pir::is_invokable__IP($rule) ??
+        nqp::isinvokable($rule) ??
             $rule($cur).MATCH() !!
             nqp::findmethod($cur, $rule)($cur).MATCH()
     }
@@ -666,7 +666,7 @@ class NQPCursor does NQPCursorRole {
             my str $tgt := $cur.target;
             my int $eos := nqp::chars($tgt);
             for $var {
-                if pir::is_invokable__IP($_) {
+                if nqp::isinvokable($_) {
                     my $res := $_(self);
                     if $res {
                         my int $adv := nqp::getattr_i($res, $?CLASS, '$!pos');
@@ -684,7 +684,7 @@ class NQPCursor does NQPCursorRole {
             return $cur;
         }
         else {
-            return $var(self) if pir::is_invokable__IP($var);
+            return $var(self) if nqp::isinvokable($var);
             my $cur := self.'!cursor_start'();
             my int $pos := nqp::getattr_i($cur, $?CLASS, '$!from');
             my str $tgt := $cur.target;
@@ -698,13 +698,13 @@ class NQPCursor does NQPCursorRole {
     }
 
     method !INTERPOLATE_REGEX($var) {
-        unless pir::is_invokable__IP($var) {
-            my $rxcompiler := pir::compreg__Ps('QRegex::P6Regex');
+        unless nqp::isinvokable($var) {
+            my $rxcompiler := nqp::getcomp('QRegex::P6Regex');
             if nqp::islist($var) {
                 my $res := [];
                 for $var {
                     my $elem := $_;
-                    $elem := $rxcompiler.compile($elem) unless pir::is_invokable__IP($elem);
+                    $elem := $rxcompiler.compile($elem) unless nqp::isinvokable($elem);
                     nqp::push($res, $elem);
                 }
                 $var := $res;

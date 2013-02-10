@@ -90,12 +90,12 @@ class QRegex::NFA {
 
     my %cclass_code;
     INIT {
-        %cclass_code<.>  := pir::box__Pi(pir::const::CCLASS_ANY);
-        %cclass_code<d>  := pir::box__Pi(pir::const::CCLASS_NUMERIC);
-        %cclass_code<s>  := pir::box__Pi(pir::const::CCLASS_WHITESPACE);
-        %cclass_code<w>  := pir::box__Pi(pir::const::CCLASS_WORD);
-        %cclass_code<n>  := pir::box__Pi(pir::const::CCLASS_NEWLINE);
-        %cclass_code<nl> := pir::box__Pi(pir::const::CCLASS_NEWLINE);
+        %cclass_code<.>  := nqp::const::CCLASS_ANY;
+        %cclass_code<d>  := nqp::const::CCLASS_NUMERIC;
+        %cclass_code<s>  := nqp::const::CCLASS_WHITESPACE;
+        %cclass_code<w>  := nqp::const::CCLASS_WORD;
+        %cclass_code<n>  := nqp::const::CCLASS_NEWLINE;
+        %cclass_code<nl> := nqp::const::CCLASS_NEWLINE;
     }
 
     method cclass($node, int $from, int $to) {
@@ -165,7 +165,7 @@ class QRegex::NFA {
                     $subtype eq 'method' &&
                     ($node[0][0] ~~ QAST::SVal ?? $node[0][0].value !! $node[0][0]) eq 'alpha') {
             $to := self.addedge($from, $to, $EDGE_CHARCLASS + $node.negate,
-                pir::const::CCLASS_ALPHABETIC);
+                nqp::const::CCLASS_ALPHABETIC);
             self.addedge($from, $to, $EDGE_CODEPOINT + $node.negate, 95);
         }
         elsif $subtype eq 'zerowidth' {
