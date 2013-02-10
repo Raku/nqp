@@ -1068,6 +1068,33 @@ QAST::Operations.add_core_pirop_mapping('invokewithcapture', 'invoke_with_captur
 QAST::Operations.add_core_pirop_mapping('multicacheadd', 'multi_cache_add', 'PPPP');
 QAST::Operations.add_core_pirop_mapping('multicachefind', 'multi_cache_find', 'PPP');
 
+# Constant mapping.
+my %const_map := nqp::hash(
+    'CCLASS_ANY',           pir::const::CCLASS_ANY,
+    'CCLASS_NUMERIC',       pir::const::CCLASS_NUMERIC,
+    'CCLASS_WHITESPACE',    pir::const::CCLASS_WHITESPACE,
+    'CCLASS_WORD',          pir::const::CCLASS_WORD,
+    'CCLASS_NEWLINE',       pir::const::CCLASS_NEWLINE,
+    'CCLASS_NEWLINE',       pir::const::CCLASS_NEWLINE,
+    'CCLASS_ALPHABETIC',    pir::const::CCLASS_ALPHABETIC,
+    'CCLASS_UPPERCASE',     pir::const::CCLASS_UPPERCASE,
+    'CCLASS_LOWERCASE',     pir::const::CCLASS_LOWERCASE,
+    'CCLASS_NUMERIC',       pir::const::CCLASS_NUMERIC,
+    'CCLASS_HEXADECIMAL',   pir::const::CCLASS_HEXADECIMAL,
+    'CCLASS_BLANK',         pir::const::CCLASS_BLANK,
+    'CCLASS_CONTROL',       pir::const::CCLASS_CONTROL,
+    'CCLASS_PUNCTUATION',   pir::const::CCLASS_PUNCTUATION,
+    'CCLASS_ALPHANUMERIC',  pir::const::CCLASS_ALPHANUMERIC
+);
+QAST::Operations.add_core_op('const', -> $qastcomp, $op {
+    if nqp::existskey(%const_map, $op.name) {
+        $qastcomp.as_post(QAST::IVal.new( :value(%const_map{$op.name}) ))
+    }
+    else {
+        nqp::die("Unknown constant '" ~ $op.name ~ "'");
+    }
+});
+
 # Exception handling/munging.
 my $exc_exclude := 0;
 my $exc_include := 1;

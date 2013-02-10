@@ -1348,6 +1348,10 @@ class NQP::Actions is HLL::Actions {
         make $past;
     }
 
+    method term:sym<nqp::const>($/) {
+        make QAST::Op.new( :op('const'), :name(~$<const>) );
+    }
+
     method term:sym<onlystar>($/) {
         my $dc_name := QAST::Node.unique('dispatch_cap');
         make QAST::Stmts.new(

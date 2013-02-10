@@ -605,6 +605,10 @@ grammar NQP::Grammar is HLL::Grammar {
         'nqp::' $<op>=[\w+] <args>?
     }
 
+    token term:sym<nqp::const> {
+        'nqp::const::' $<const>=[\w+]
+    }
+
     token term:sym<onlystar> {
         '{*}' <?ENDSTMT>
         [ <?{ $*MULTINESS eq 'proto' }> || <.panic: '{*} may only appear in proto'> ]
