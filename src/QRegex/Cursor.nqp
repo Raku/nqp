@@ -93,33 +93,6 @@ role NQPCursorRole is export {
         }
         $new;
     }
-
-    method !cursor_start() {
-        my $new := nqp::create(self);
-        my $sub := nqp::callercode();
-        nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
-        nqp::bindattr($new, $?CLASS, '$!regexsub', nqp::ifnull(nqp::getcodeobj($sub), $sub));
-        if nqp::defined($!restart) {
-            nqp::bindattr_i($new, $?CLASS, '$!pos', $!pos);
-            nqp::bindattr($new, $?CLASS, '$!cstack', nqp::clone($!cstack)) if $!cstack;
-            pir::return__0PsiPPi(
-                $new,
-                nqp::getattr_s($!shared, ParseShared, '$!target'),
-                nqp::bindattr_i($new, $?CLASS, '$!from', $!from),
-                $?CLASS,
-                nqp::bindattr($new, $?CLASS, '$!bstack', nqp::clone($!bstack)),
-                1);
-        }
-        nqp::bindattr_i($new, $?CLASS, '$!pos', -3);
-        pir::return__0PsiPPi(
-            $new,
-            nqp::getattr_s($!shared, ParseShared, '$!target'),
-            nqp::bindattr_i($new, $?CLASS, '$!from', $!pos),
-            $?CLASS,
-            nqp::bindattr($new, $?CLASS, '$!bstack', nqp::list_i()),
-            0
-        )
-    }
     
     # Starts a new Cursor, returning all information relating to it in an array.
     # The array is valid until the next call to !cursor_start_all.
