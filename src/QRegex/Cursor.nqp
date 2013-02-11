@@ -120,6 +120,54 @@ role NQPCursorRole is export {
             0
         )
     }
+    
+    # Starts a new Cursor, returning all information relating to it in an array.
+    # The array is valid until the next call to !cursor_start_all.
+    my $NO_RESTART := 0;
+    my $RESTART := 1;
+    my @start_result;
+    method !cursor_start_all() {
+        my $new := nqp::create(self);
+        my $sub := nqp::callercode();
+        nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
+        nqp::bindattr($new, $?CLASS, '$!regexsub', nqp::ifnull(nqp::getcodeobj($sub), $sub));
+        if nqp::defined($!restart) {
+            nqp::bindattr_i($new, $?CLASS, '$!pos', $!pos);
+            nqp::bindattr($new, $?CLASS, '$!cstack', nqp::clone($!cstack)) if $!cstack;
+            nqp::bindpos(@start_result, 0, $new);
+            nqp::bindpos(@start_result, 1, nqp::getattr_s($!shared, ParseShared, '$!target'));
+            nqp::bindpos(@start_result, 2, nqp::bindattr_i($new, $?CLASS, '$!from', $!from));
+            nqp::bindpos(@start_result, 3, $?CLASS);
+            nqp::bindpos(@start_result, 4, nqp::bindattr($new, $?CLASS, '$!bstack', nqp::clone($!bstack)));
+            nqp::bindpos(@start_result, 5, $RESTART);
+            @start_result
+        }
+        else {
+            nqp::bindattr_i($new, $?CLASS, '$!pos', -3);
+            nqp::bindpos(@start_result, 0, $new);
+            nqp::bindpos(@start_result, 1, nqp::getattr_s($!shared, ParseShared, '$!target'));
+            nqp::bindpos(@start_result, 2, nqp::bindattr_i($new, $?CLASS, '$!from', $!pos));
+            nqp::bindpos(@start_result, 3, $?CLASS);
+            nqp::bindpos(@start_result, 4, nqp::bindattr($new, $?CLASS, '$!bstack', nqp::list_i()));
+            nqp::bindpos(@start_result, 5, $NO_RESTART);
+            @start_result
+        }
+    }
+    
+    # Starts a new cursor, returning nothing but the cursor.
+    method !cursor_start_cur() {
+        my $new := nqp::create(self);
+        my $sub := nqp::callercode();
+        nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
+        nqp::bindattr($new, $?CLASS, '$!regexsub', nqp::ifnull(nqp::getcodeobj($sub), $sub));
+        if nqp::defined($!restart) {
+            nqp::die("!cursor_start_cur cannot restart a cursor");
+        }
+        nqp::bindattr_i($new, $?CLASS, '$!pos', -3);
+        nqp::bindattr_i($new, $?CLASS, '$!from', $!pos);
+        nqp::bindattr($new, $?CLASS, '$!bstack', nqp::list_i());
+        $new
+    }
 
     method !cursor_start_subcapture($from) {
         my $new := nqp::create(self);
