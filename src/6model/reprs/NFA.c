@@ -112,6 +112,99 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     return spec;
 }
 
+/* Serializes the data. */
+static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter *writer) {
+    NFABody *body = (NFABody *)data;
+    INTVAL i, j;
+    
+    /* Write fates. */
+    writer->write_ref(interp, writer, body->fates);
+    
+    /* Write number of states. */
+    writer->write_int(interp, writer, body->num_states);
+    
+    /* Write state edge list counts. */
+    for (i = 0; i < body->num_states; i++)
+        writer->write_int(interp, writer, body->num_state_edges[i]);
+
+    /* Write state graph. */
+    for (i = 0; i < body->num_states; i++) {
+        for (j = 0; j < body->num_state_edges[i]; j++) {
+            writer->write_int(interp, writer, body->states[i][j].act);
+            writer->write_int(interp, writer, body->states[i][j].to);
+            switch (body->states[i][j].act) {
+            case EDGE_FATE:
+            case EDGE_CODEPOINT:
+            case EDGE_CODEPOINT_NEG:
+            case EDGE_CHARCLASS:
+            case EDGE_CHARCLASS_NEG:
+                writer->write_int(interp, writer, body->states[i][j].arg.i);
+                break;
+            case EDGE_CHARLIST:
+            case EDGE_CHARLIST_NEG:
+                writer->write_str(interp, writer, body->states[i][j].arg.s);
+                break;
+            case EDGE_CODEPOINT_I:
+            case EDGE_CODEPOINT_I_NEG: {
+                writer->write_int(interp, writer, body->states[i][j].arg.uclc.lc);
+                writer->write_int(interp, writer, body->states[i][j].arg.uclc.uc);
+                break;
+            }
+            }
+        }
+    }
+}
+
+/* Deserializes the data. */
+static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationReader *reader) {
+    NFABody *body = (NFABody *)data;
+    INTVAL i, j;
+    
+    /* Read fates. */
+    body->fates = reader->read_ref(interp, reader);
+    
+    /* Read number of states. */
+    body->num_states = reader->read_int(interp, reader);
+    
+    if (body->num_states > 0) {
+        /* Read state edge list counts. */
+        body->num_state_edges = mem_sys_allocate(body->num_states * sizeof(INTVAL));
+        for (i = 0; i < body->num_states; i++)
+            body->num_state_edges[i] = reader->read_int(interp, reader);
+            
+        /* Read state graph. */
+        body->states = mem_sys_allocate(body->num_states * sizeof(NFAStateInfo *));
+        for (i = 0; i < body->num_states; i++) {
+            INTVAL edges = body->num_state_edges[i];
+            if (edges > 0)
+                body->states[i] = mem_sys_allocate(edges * sizeof(NFAStateInfo));
+            for (j = 0; j < edges; j++) {
+                body->states[i][j].act = reader->read_int(interp, reader);
+                body->states[i][j].to = reader->read_int(interp, reader);
+                switch (body->states[i][j].act) {
+                case EDGE_FATE:
+                case EDGE_CODEPOINT:
+                case EDGE_CODEPOINT_NEG:
+                case EDGE_CHARCLASS:
+                case EDGE_CHARCLASS_NEG:
+                    body->states[i][j].arg.i = reader->read_int(interp, reader);
+                    break;
+                case EDGE_CHARLIST:
+                case EDGE_CHARLIST_NEG:
+                    body->states[i][j].arg.s = reader->read_str(interp, reader);
+                    break;
+                case EDGE_CODEPOINT_I:
+                case EDGE_CODEPOINT_I_NEG: {
+                    body->states[i][j].arg.uclc.lc = reader->read_int(interp, reader);
+                    body->states[i][j].arg.uclc.uc = reader->read_int(interp, reader);
+                    break;
+                }
+                }
+            }
+        }
+    }
+}
+
 /* Initializes the NFA representation. */
 REPROps * NFA_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
@@ -121,6 +214,8 @@ REPROps * NFA_initialize(PARROT_INTERP) {
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
     this_repr->copy_to = copy_to;
+    this_repr->serialize = serialize;
+    this_repr->deserialize = deserialize;
     this_repr->gc_mark = gc_mark;
     this_repr->gc_free = gc_free;
     this_repr->get_storage_spec = get_storage_spec;
