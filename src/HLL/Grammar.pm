@@ -288,7 +288,9 @@ C< :!pair >, and C<< :pair<strval> >>.
             # If we've been called as a subrule, then build a pass-cursor
             # to indicate success and set the hash as the subrule's match object.
             if has_save goto save_hash
-            ($P0, $S0, $I0) = self.'!cursor_start'()
+            $P1 = self.'!cursor_start_all'()
+            $P0 = $P1[0]
+            $I0 = $P1[2]
             $P0.'!cursor_pass'($I0, '')
             setattribute $P0, cur_class, '$!match', hash
             .return ($P0)
@@ -422,7 +424,10 @@ position C<pos>.
             .local int pos
             self = find_lex 'self'
 
-            (cur, target, pos) = self.'!cursor_start'()
+            $P0 = self.'!cursor_start_all'()
+            cur = $P0[0]
+            target = $P0[1]
+            pos = $P0[2]
 
             $P0 = find_dynamic_lex '$*QUOTE_START'
             if null $P0 goto fail
@@ -445,7 +450,10 @@ position C<pos>.
             .local int pos
             self = find_lex 'self'
 
-            (cur, target, pos) = self.'!cursor_start'()
+            $P0 = self.'!cursor_start_all'()
+            cur = $P0[0]
+            target = $P0[1]
+            pos = $P0[2]
 
             $P0 = find_dynamic_lex '$*QUOTE_STOP'
             if null $P0 goto fail
@@ -496,7 +504,10 @@ An operator precedence parser.
             .local pmc here
             .local string tgt
             .local int pos
-            (here, tgt, pos) = self.'!cursor_start'()
+            $P0 = self.'!cursor_start_all'()
+            here = $P0[0]
+            tgt = $P0[1]
+            pos = $P0[2]
 
             .local string termishrx
             termishrx = 'termish'
@@ -669,7 +680,7 @@ An operator precedence parser.
             .local pmc term
             term = pop termstack
             pos = here.'pos'()
-            here = self.'!cursor_start'()
+            here = self.'!cursor_start_cur'()
             here.'!cursor_pass'(pos)
             repr_bind_attr_int here, cur_class, '$!pos', pos
             setattribute here, cur_class, '$!match', term
@@ -791,7 +802,7 @@ An operator precedence parser.
             set_global '%!MARKHASH', %r
           have_markhash:
         };
-        my $cur := self."!cursor_start"();
+        my $cur := self."!cursor_start_cur"();
         $cur."!cursor_pass"(self.pos());
         %markhash{$markname} := $cur;
     }
@@ -806,7 +817,7 @@ An operator precedence parser.
         };
         my $cur := %markhash{$markname};
         unless nqp::istype($cur, NQPCursor) && $cur.pos() == self.pos() {
-            $cur := self."!cursor_start"();
+            $cur := self."!cursor_start_cur"();
         }
         $cur
     }
