@@ -1,18 +1,18 @@
 use QASTNode;
 
 class QRegex::NFA {
-    our $EDGE_FATE            := 0;
-    our $EDGE_EPSILON         := 1;
-    our $EDGE_CODEPOINT       := 2;
-    our $EDGE_CODEPOINT_NEG   := 3;
-    our $EDGE_CHARCLASS       := 4;
-    our $EDGE_CHARCLASS_NEG   := 5;
-    our $EDGE_CHARLIST        := 6;
-    our $EDGE_CHARLIST_NEG    := 7;
-    our $EDGE_SUBRULE         := 8;
-    our $EDGE_CODEPOINT_I     := 9;
-    our $EDGE_CODEPOINT_I_NEG := 10;
-    our $EDGE_GENERIC_VAR     := 11;
+    my $EDGE_FATE            := 0;
+    my $EDGE_EPSILON         := 1;
+    my $EDGE_CODEPOINT       := 2;
+    my $EDGE_CODEPOINT_NEG   := 3;
+    my $EDGE_CHARCLASS       := 4;
+    my $EDGE_CHARCLASS_NEG   := 5;
+    my $EDGE_CHARLIST        := 6;
+    my $EDGE_CHARLIST_NEG    := 7;
+    my $EDGE_SUBRULE         := 8;
+    my $EDGE_CODEPOINT_I     := 9;
+    my $EDGE_CODEPOINT_I_NEG := 10;
+    my $EDGE_GENERIC_VAR     := 11;
 
     # The build-time set of states, with element zero being the fate name
     # list.
