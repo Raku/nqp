@@ -173,7 +173,17 @@ class NQP::World is HLL::World {
         # Install symbol immediately.
         my $target := $package;
         for @sym {
-            $target := pir::nqp_get_package_through_who__PPs($target, $_);
+            if nqp::existskey($target.WHO, $_) {
+                $target := nqp::atkey($target.WHO, $_);
+            }
+            else {
+                my $pkgtype := nqp::existskey(%*HOW, 'package')
+                    ?? nqp::atkey(%*HOW, 'package')
+                    !! nqp::atkey(%*HOW, 'knowhow');
+                my $pkg := $pkgtype.new_type(:name($_));
+                $pkg.HOW.compose($pkg);
+                $target := nqp::bindkey($target.WHO, $_, $pkg);
+            }
         }
         ($target.WHO){$name} := $obj;
     }
