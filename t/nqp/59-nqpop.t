@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(116);
+plan(121);
 
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
@@ -24,6 +24,15 @@ ok( nqp::chr(120) eq 'x', 'nqp::chr');
 ok( nqp::ord('xyz') eq 120, 'nqp::ord');
 ok( nqp::lc('Hello World') eq 'hello world', 'nqp::downcase');
 ok( nqp::uc("Don't Panic") eq "DON'T PANIC", 'nqp::upcase');
+
+my @items := nqp::split(' ', 'a little lamb');
+ok( nqp::elems(@items) == 3 && @items[0] eq 'a' && @items[1] eq 'little' && @items[2] eq 'lamb', 'nqp::split');
+ok( nqp::elems(nqp::split(' ', '')) == 0, 'nqp::split zero length string');
+ok( nqp::elems(nqp::split('\\s', 'Mary had a little lamb')) == 1, 'nqp::split no match');
+@items := nqp::split('', 'a man a plan');
+ok( nqp::elems(@items) == 12, 'nqp::split zero length delimiter');
+@items := nqp::split('a', 'a man a plan a canal panama');
+ok( nqp::elems(@items) == 11 && @items[0] eq '' && @items[10] eq '', 'nqp::split delimiter at ends');
 
 ok( nqp::iseq_i(2, 2) == 1, 'nqp::iseq_i');
 
