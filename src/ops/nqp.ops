@@ -2074,7 +2074,8 @@ inline op is_invokable(out INT, in PMC) :base_core {
         PMC **vt = STABLE($2)->parrot_vtable_mapping;
         AttributeIdentifier *vth = STABLE($2)->parrot_vtable_handler_mapping;
         $1 = (vt && !PMC_IS_NULL(vt[PARROT_VTABLE_SLOT_INVOKE])) ||
-             (vth && !PMC_IS_NULL(vth[PARROT_VTABLE_SLOT_INVOKE].class_handle));
+             (vth && !PMC_IS_NULL(vth[PARROT_VTABLE_SLOT_INVOKE].class_handle)) ||
+             STABLE($2)->invocation_spec;
     }
     else {
         $1 = VTABLE_does(interp, $2, Parrot_str_new(interp, "invokable", 0));

@@ -741,7 +741,7 @@ class NQPCursor does NQPCursorRole {
 }
 
 class NQPRegexMethod {
-    has $!code is parrot_vtable_handler('invoke');
+    has $!code;
     method new($code) {
         self.bless(:code($code));
     }
