@@ -1131,17 +1131,6 @@ class QAST::Compiler is HLL::Compiler {
         $ops.result(%*REG<cur>);
         $ops;
     }
-
-    method post_children($node) {
-        my $posts := PIRT::Ops.new();
-        my @results;
-        for @($node) {
-            my $sval := self.as_post(QAST::SVal.new( :value(~$_) ));
-            $posts.push($sval);
-            nqp::push(@results, $sval.result);
-        }
-        [$posts, @results]
-    }
     
     method children($node) {
         my $posts := PIRT::Ops.new();
@@ -1513,9 +1502,7 @@ class QAST::Compiler is HLL::Compiler {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
         my $name := nqp::defined($node.name) ?? self.escape($node.name) !! '';
         my $subtype := $node.subtype;
-        my $cpn := nqp::istype($node[0], QAST::Node)
-            ?? self.children($node[0])
-            !! self.post_children($node[0]);
+        my $cpn := self.children($node[0]);
         my @pargs := $cpn[1] // [];
         my @nargs := $cpn[2] // [];
         my $subpost := nqp::shift(@pargs);
