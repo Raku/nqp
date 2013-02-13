@@ -70,10 +70,9 @@ class NQP::World is HLL::World {
         @x
     }
 
-    # XXX We need to load the module loader to load modules, which means we
-    # can't just use ...; it, which means we can't get the ModuleLoader symbol
-    # merged into anywhere...anyway, we chop the circularity by finding it
-    # through a Parrot namespace for now.
+    # We need to load the module loader to load modules, which means we
+    # can't just use ...; it; we break the circularity by using the global
+    # HLL symbol stash.
     my $loader := nqp::getcurhllsym('ModuleLoader');
     
     # Loads the setting and emits code 
