@@ -1603,16 +1603,39 @@ class NQP::Actions is HLL::Actions {
                 @name.shift();
             }
             for @name {
-                $path := QAST::VM.new(
-                    :pirop('nqp_get_package_through_who PPs'),
-                    $path, QAST::SVal.new( :value(~$_) ));
+                my $path_temp := QAST::Node.unique('pkg_lookup_tmp');
+                $path := QAST::Stmts.new(
+                    QAST::Op.new(
+                        :op('bind'),
+                        QAST::Var.new( :name($path_temp), :scope('local'), :decl('var') ),
+                        $path
+                    ),
+                    QAST::Op.new(
+                        :op('if'),
+                        QAST::Op.new(
+                            :op('existskey'),
+                            QAST::Op.new( :op('who'), QAST::Var.new( :name($path_temp), :scope('local') ) ),
+                            QAST::SVal.new( :value(~$_) )
+                        ),
+                        QAST::Op.new(
+                            :op('atkey'),
+                            QAST::Op.new( :op('who'), QAST::Var.new( :name($path_temp), :scope('local') ) ),
+                            QAST::SVal.new( :value(~$_) )
+                        ),
+                        default_for('$')
+                    ));
             }
             $lookup.unshift(QAST::Op.new(:op('who'), $path));
             my $sigil := nqp::substr(~$final_name, 0, 1);
             if $sigil eq '@' || $sigil eq '%' {
+                my $viv_temp := QAST::Node.unique('pkg_viv_tmp');
+                $lookup[0] := QAST::Op.new(
+                    :op('bind'),
+                    QAST::Var.new( :name($viv_temp), :scope('local'), :decl('var') ),
+                    $lookup[0]);
                 $lookup.fallback(QAST::Op.new(
                     :op('bindkey'),
-                    $lookup[0],
+                    QAST::Var.new( :name($viv_temp), :scope('local') ),
                     $lookup[1],
                     default_for($sigil)
                 ));
