@@ -40,8 +40,8 @@ role NQPCursorRole is export {
             if !nqp::isnull(%caplist) && %caplist {
                 $iter := nqp::iterator(%caplist);
                 while $iter {
-                    $curcap := nqp::shift_s($iter);
-                    $caps{$curcap} := nqp::list() if %caplist{$curcap} >= 2;
+                    $curcap := nqp::iterkey_s(nqp::shift($iter));
+                    $caps{$curcap} := nqp::list() if nqp::atkey(%caplist, $curcap) >= 2;
                 }
             }
         }
@@ -269,7 +269,7 @@ role NQPCursorRole is export {
     method !protoregex_table() {
         my %protorx;
         for self.HOW.methods(self) -> $meth {
-            my str $methname := ~$meth;
+            my str $methname := $meth.name();
             my int $sympos   := nqp::index($methname, ':sym<');
             if $sympos > 0 {
                 my str $prefix := nqp::substr($methname, 0, $sympos);
@@ -583,7 +583,7 @@ role NQPCursorRole is export {
 
     method FAILGOAL($goal, $dba?) {
         unless $dba {
-            $dba := ~nqp::callercode();
+            $dba := nqp::getcodename(nqp::callercode());
         }
         nqp::die("Unable to parse expression in $dba; couldn't find final $goal");
     }
@@ -602,8 +602,8 @@ class NQPMatch is NQPCapture {
     method to()   { $!to }
     method CURSOR() { $!cursor }
     method Str() is parrot_vtable('get_string')  { nqp::substr($!orig, $!from, $!to-$!from) }
-    method ()    is parrot_vtable('get_integer') { +self.Str() }
-    method ()    is parrot_vtable('get_number')  { +self.Str() }
+    method Int() is parrot_vtable('get_integer') { +self.Str() }
+    method Num() is parrot_vtable('get_number')  { +self.Str() }
     method Bool() { $!to >= $!from }
     method chars() { $!to >= $!from ?? $!to - $!from !! 0 }
     
@@ -644,20 +644,22 @@ class NQPCursor does NQPCursorRole {
             nqp::bindattr_i($match, NQPMatch, '$!from', nqp::getattr_i(self, NQPCursor, '$!from'));
             nqp::bindattr_i($match, NQPMatch, '$!to', nqp::getattr_i(self, NQPCursor, '$!pos'));
             my %ch := self.CAPHASH;
+            my $curcap;
             my str $key;
             my $iter := nqp::iterator(%ch);
             while $iter {
-                $key := ~nqp::shift($iter);
+                $curcap := nqp::shift($iter);
+                $key := nqp::iterkey_s($curcap);
                 if $key eq '$!from' || $key eq '$!to' {
-                    nqp::bindattr_i($match, NQPMatch, $key, %ch{$key}.from);
+                    nqp::bindattr_i($match, NQPMatch, $key, nqp::iterval($curcap).from);
                 }
                 elsif nqp::iscclass(nqp::const::CCLASS_NUMERIC, $key, 0) {
                     $list := nqp::list() unless $list;
-                    nqp::bindpos($list, $key, %ch{$key});
+                    nqp::bindpos($list, $key, nqp::iterval($curcap));
                 }
                 else {
                     $hash := nqp::hash() unless $hash;
-                    nqp::bindkey($hash, $key, %ch{$key});
+                    nqp::bindkey($hash, $key, nqp::iterval($curcap));
                 }
             }
             nqp::bindattr($match, NQPCapture, '@!array', $list);
@@ -747,13 +749,14 @@ class NQPRegexMethod {
         NQPCursor.parse($target, :rule(self))
     }
     method Str() is parrot_vtable('get_string') {
-        ~$!code
+        nqp::getcodename($!code)
     }
 }
+nqp::setinvokespec(NQPRegexMethod, NQPRegexMethod, '$!code', nqp::null);
 
 class NQPRegex is NQPRegexMethod {
     method ACCEPTS($target) {
         NQPCursor.parse($target, :rule(self), :c(0))
     }
 }
- 
+nqp::setinvokespec(NQPRegex, NQPRegexMethod, '$!code', nqp::null);
