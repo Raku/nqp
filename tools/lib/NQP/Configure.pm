@@ -83,7 +83,7 @@ sub read_config {
     my %config = ();
     for my $file (@config_src) {
         no warnings;
-        if (open my $CONFIG, '-|', "$file --show-config") {
+        if (open my $CONFIG, '-|', qq["$file" --show-config]) {
             while (<$CONFIG>) {
                 if (/^([\w:]+)=(.*)/) { $config{$1} = $2 }
             }
@@ -132,7 +132,7 @@ END
             }
             close($PARROT_CONFIG) or die $!;
         }
-        elsif (open my $PARROT, '-|', "$file parrot-config.pir") {
+        elsif (open my $PARROT, '-|', qq["$file" parrot-config.pir]) {
             while (<$PARROT>) {
                 if (/^([\w:]+)=(.*)/) { $config{$1} = $2 }
             }
@@ -290,7 +290,7 @@ sub gen_nqp {
         return $nqp_exe;
     }
 
-    my @cmd = ($^X, 'Configure.pl', "--with-parrot=$with_parrot",
+    my @cmd = ($^X, 'Configure.pl', qq[--with-parrot="$with_parrot"],
                "--make-install");
     print "Building NQP ...\n";
     chdir("$startdir/nqp");
