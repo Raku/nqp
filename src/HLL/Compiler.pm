@@ -30,7 +30,7 @@ class HLL::Compiler {
 
     method BUILD() {
         # Default stages.
-        @!stages     := nqp::split(' ', 'start parse past post pir evalpmc');
+        @!stages     := nqp::split(' ', 'start parse past post pir packfile');
         
         # Command options and usage.
         @!cmdoptions := nqp::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile profile-compile');
@@ -435,7 +435,7 @@ class HLL::Compiler {
         self.pirbegin() ~ $source.pir()
     }
 
-    method evalpmc($source, *%adverbs) {
+    method packfile($source, *%adverbs) {
         my $compiler := pir::compreg__Ps('PIR');
         my $packfile := $compiler.compile($source);
         for $packfile.subs_by_tag('init') -> $sub { $sub(); }

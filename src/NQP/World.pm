@@ -240,7 +240,7 @@ class NQP::World is HLL::World {
             my $nqpcomp  := nqp::getcomp('nqp');
             my $post     := $nqpcomp.post(QAST::CompUnit.new( :hll('nqp'), $past ));
             my $pir      := $nqpcomp.pir($post);
-            my $compiled := $nqpcomp.evalpmc($pir);
+            my $compiled := $nqpcomp.packfile($pir);
 
             # Fix up any code objects holding stubs with the real compiled thing.
             my @all_subs := $compiled.all_subs();
