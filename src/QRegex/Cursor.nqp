@@ -727,7 +727,8 @@ class NQPCursor does NQPCursorRole {
                 my $res := [];
                 for $var {
                     my $elem := $_;
-                    $elem := $rxcompiler.compile($elem) unless nqp::isinvokable($elem);
+                    $elem := $rxcompiler.compile($elem).main_sub()
+                        unless nqp::isinvokable($elem);
                     nqp::push($res, $elem);
                 }
                 $var := $res;
