@@ -7,7 +7,7 @@ sub compile_qast($qast) {
     my $*QAST_BLOCK_NO_CLOSE := 1;
     my $pirt := QAST::Compiler.as_post($qast);
     my $pir := $pirt.pir();
-    QAST::Compiler.packfile($pir).main_sub();
+    QAST::Compiler.compile_and_init($pir).main_sub();
 }
 sub is_qast($qast, $value, $desc) {
     try {

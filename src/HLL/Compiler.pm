@@ -30,8 +30,8 @@ class HLL::Compiler {
 
     method BUILD() {
         # Default stages.
-        @!stages     := nqp::split(' ', 'start parse past post pir packfile');
-        
+        @!stages     := nqp::split(' ', 'start parse past post pir pbc init');
+
         # Command options and usage.
         @!cmdoptions := nqp::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile profile-compile');
         $!usage := "This compiler is based on HLL::Compiler.\n\nOptions:\n";
@@ -224,8 +224,9 @@ class HLL::Compiler {
 
         %adverbs.update(%opts);
         self.usage($program-name) if %adverbs<help>  || %adverbs<h>;
-        
-        if !nqp::existskey(%adverbs, 'precomp') && %adverbs<target> eq 'pir' {
+
+        if !nqp::existskey(%adverbs, 'precomp')
+            && (%adverbs<target> eq 'pir' || %adverbs<target> eq 'pbc') {
             %adverbs<precomp> := 1;
         }
 
@@ -430,17 +431,30 @@ class HLL::Compiler {
         ~ ".include 'datatypes.pasm'\n"
         ~ ".include 'libpaths.pasm'\n"
     }
-  
+
     method pir($source, *%adverbs) {
         self.pirbegin() ~ $source.pir()
     }
 
-    method packfile($source, *%adverbs) {
-        my $compiler := pir::compreg__Ps('PIR');
-        my $packfile := $compiler.compile($source);
+    method pbc($source, *%adverbs) {
+        my $packfile := pir::compreg__Ps('PIR').compile($source);
+        my $output := %adverbs<output> || %adverbs<o>;
+        $packfile.write_to_file($output) if $output;
+        $packfile
+    }
+
+    method init($source, *%adverbs) {
+        self.init_packfile($source)
+    }
+
+    method init_packfile($packfile) {
         for $packfile.subs_by_tag('init') -> $sub { $sub(); }
         $packfile.mark_initialized('init');
         $packfile
+    }
+
+    method compile_and_init($source) {
+        self.init_packfile(pir::compreg__Ps('PIR').compile($source))
     }
 
     method dumper($obj, $name, *%options) {
