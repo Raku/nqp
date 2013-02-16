@@ -45,7 +45,7 @@ sub test_line($line) {
 
     my $rxcomp := pir::compreg__Ps('QRegex::P6Regex');
     try {
-        my $rxsub  := $rxcomp.compile($regex);
+        my $rxsub  := $rxcomp.compile($regex).main_sub();
         my $cursor := NQPCursor."!cursor_init"($target, :c(0));
         my $match  := $rxsub($cursor).MATCH;
         if $expect_substr {

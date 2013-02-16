@@ -733,7 +733,7 @@ class NQPCursor does NQPCursorRole {
                 $var := $res;
             }
             else {
-                $var := $rxcompiler.compile($var);
+                $var := $rxcompiler.compile($var).main_sub();
             }
         }
         return self.'!INTERPOLATE'($var);
