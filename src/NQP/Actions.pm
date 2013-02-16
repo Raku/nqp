@@ -226,7 +226,6 @@ class NQP::Actions is HLL::Actions {
             unless %*COMPILING<%?OPTIONS><setting> eq 'NULL' {
                 import_HOW_exports($SETTING);
                 unless %*COMPILING<%?OPTIONS><no-regex-lib> {
-                    $*W.load_module('QRegex', $*GLOBALish);
                     $*W.load_module('NQPP6QRegex', $*GLOBALish);
                 }
             }
