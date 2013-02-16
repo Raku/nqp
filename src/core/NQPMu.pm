@@ -42,7 +42,7 @@ my class NQPMu {
             }
             elsif nqp::iseq_i($code, 3) {
                 # See if we have a value to initialize this attr with;
-                # if not, set it to an empty array.
+                # if not, set it to an empty hash.
                 my $key_name := nqp::atpos($task, 2);
                 if nqp::existskey(%attrinit, $key_name) {
                     nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos_s($task, 3), %attrinit{$key_name});
