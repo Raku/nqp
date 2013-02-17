@@ -1766,6 +1766,25 @@ QAST::Operations.add_core_pirop_mapping('getobjsc', 'nqp_get_sc_for_object', 'PP
 QAST::Operations.add_core_pirop_mapping('serialize', 'nqp_serialize_sc', 'SPP');
 QAST::Operations.add_core_pirop_mapping('deserialize', 'nqp_deserialize_sc', '0sPPPP');
 QAST::Operations.add_core_pirop_mapping('wval', 'nqp_get_sc_object', 'Psi');
+QAST::Operations.add_core_op('scwbdisable', -> $qastcomp, $op {
+    my $ops := PIRT::Ops.new();
+    $ops.push_pirop('nqp_disable_sc_write_barrier');
+    $ops.result('null');
+    $ops
+});
+QAST::Operations.add_core_op('scwbenable', -> $qastcomp, $op {
+    my $ops := PIRT::Ops.new();
+    $ops.push_pirop('nqp_enable_sc_write_barrier');
+    $ops.result('null');
+    $ops
+});
+QAST::Operations.add_core_pirop_mapping('pushcompsc', 'nqp_push_compiling_sc', '0P');
+QAST::Operations.add_core_op('popcompsc', -> $qastcomp, $op {
+    my $ops := PIRT::Ops.new();
+    $ops.push_pirop('nqp_pop_compiling_sc');
+    $ops.result('null');
+    $ops
+});
 
 # hll related opcodes
 QAST::Operations.add_core_pirop_mapping('getcomp', 'compreg', 'Ps');
