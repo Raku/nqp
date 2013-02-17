@@ -78,7 +78,7 @@ class HLL::Compiler {
             $stdin.encoding($encoding);
         }
 
-        my $target := nqp::lc(%adverbs<target>);
+        my $target := %adverbs<target>;
         my $save_ctx;
         while 1 {
             last unless $stdin;
@@ -222,8 +222,15 @@ class HLL::Compiler {
         my %opts := $res.options;
         my @a    := $res.arguments;
 
+        # fixup options
+        %opts<target> := nqp::lc(%opts<target>);
+        %opts<help> := %opts<h> unless %opts<help>;
+        %opts<output> := %opts<o> unless %opts<output>;
+        %opts<version> := %opts<v> unless %opts<version>;
+        %opts<verbose-config> := %opts<V> unless %opts<verbose-config>;
+
         %adverbs.update(%opts);
-        self.usage($program-name) if %adverbs<help>  || %adverbs<h>;
+        self.usage($program-name) if %adverbs<help>;
 
         if !nqp::existskey(%adverbs, 'precomp')
             && (%adverbs<target> eq 'pir' || %adverbs<target> eq 'pbc') {
@@ -238,36 +245,42 @@ class HLL::Compiler {
 
 
     method command_eval(*@a, *%adverbs) {
-        self.version              if %adverbs<version> || %adverbs<v>;
-        self.verbose-config       if %adverbs<verbose-config> || %adverbs<V>
-                                     || %adverbs<show-config>;
+        self.version if %adverbs<version>;
+        self.verbose-config if %adverbs<verbose-config> || %adverbs<show-config>;
         self.nqpevent(%adverbs<nqpevent>) if %adverbs<nqpevent>;
 
         my $result;
         my $error;
         my $has_error := 0;
-        my $target := nqp::lc(%adverbs<target>);
+        my $target := %adverbs<target>;
         try {
             if nqp::defined(%adverbs<e>) {
                 $!user_progname := '-e';
                 my $?FILES := '-e';
                 $result := self.eval(%adverbs<e>, '-e', |@a, |%adverbs);
-                unless $target eq '' || $target eq 'pir' || %adverbs<output> {
-					self.dumper($result, $target, |%adverbs);
-				}
+                unless $target eq '' || $target eq 'pir' || $target eq 'pbc'
+                    || %adverbs<output> {
+                    self.dumper($result, $target, |%adverbs);
+                }
             }
             elsif !@a { $result := self.interactive(|%adverbs) }
             elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }
             else { $result := self.evalfiles(@a[0], |@a, |%adverbs) }
 
-            if !nqp::isnull($result) && ($target eq 'pir' || %adverbs<output>) {
-                my $output := %adverbs<output>;
-                my $fh := ($output eq '' || $output eq '-')
-                        ?? pir::getinterp__P().stdout_handle()
-                        !! pir::new__Ps('FileHandle').open($output, 'w');
-                self.panic("Cannot write to $output") unless $fh;
-                $fh.print($result);
-                $fh.close()
+            if !nqp::isnull($result) && $target ne '' {
+                if $target eq 'pbc' {
+                    my $output := %adverbs<output>;
+                    $result.write_to_file($output) if $output;
+                }
+                else {
+                    my $output := %adverbs<output>;
+                    my $fh := ($output eq '' || $output eq '-')
+                            ?? pir::getinterp__P().stdout_handle()
+                            !! pir::new__Ps('FileHandle').open($output, 'w');
+                    self.panic("Cannot write to $output") unless $fh;
+                    $fh.print($result);
+                    $fh.close();
+                }
             }
             CATCH {
                 $has_error := 1;
@@ -325,7 +338,7 @@ class HLL::Compiler {
     }
 
     method evalfiles($files, *@args, *%adverbs) {
-        my $target := nqp::lc(%adverbs<target>);
+        my $target := %adverbs<target>;
         my $encoding := %adverbs<encoding>;
         my @files := nqp::islist($files) ?? $files !! [$files];
         $!user_progname := nqp::join(',', @files);
@@ -359,7 +372,7 @@ class HLL::Compiler {
     method compile($source, *%adverbs) {
         my %*COMPILING<%?OPTIONS> := %adverbs;
 
-        my $target := nqp::lc(%adverbs<target>);
+        my $target := %adverbs<target>;
         my $result := $source;
         my $stderr := pir::getinterp__P().stderr_handle;
         my $stdin  := pir::getinterp__P().stdin_handle;
@@ -437,10 +450,7 @@ class HLL::Compiler {
     }
 
     method pbc($source, *%adverbs) {
-        my $packfile := pir::compreg__Ps('PIR').compile($source);
-        my $output := %adverbs<output> || %adverbs<o>;
-        $packfile.write_to_file($output) if $output;
-        $packfile
+        pir::compreg__Ps('PIR').compile($source)
     }
 
     method init($source, *%adverbs) {
