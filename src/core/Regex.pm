@@ -42,7 +42,7 @@ sub subst ($text, $regex, $repl, :$global?) {
         if $match {
             nqp::push(@result, nqp::substr($text, $offset, $match.from - $offset))
                 if $match.from > $offset;
-            nqp::push(@result, $is_code ?? $repl($match) !! $repl);
+            nqp::push(@result, $is_code ?? ~$repl($match) !! ~$repl);
             $offset := $match.to;
         }
     }
