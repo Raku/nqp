@@ -418,55 +418,17 @@ position C<pos>.
     }
 
     method starter() {
-        Q:PIR {
-            .local pmc self, cur
-            .local string target, start
-            .local int pos
-            self = find_lex 'self'
-
-            $P0 = self.'!cursor_start_all'()
-            cur = $P0[0]
-            target = $P0[1]
-            pos = $P0[2]
-
-            $P0 = find_dynamic_lex '$*QUOTE_START'
-            if null $P0 goto fail
-            start = $P0
-
-            $I0 = length start
-            $S0 = substr target, pos, $I0
-            unless $S0 == start goto fail
-            pos += $I0
-            cur.'!cursor_pass'(pos, 'starter')
-          fail:
-            .return (cur)
-        };
+        my $start := $*QUOTE_START;
+        nqp::isnull($start)
+            ?? self.'!cursor_start_cur'()
+            !! self.'!LITERAL'($start)
     }
 
     method stopper() {
-        Q:PIR {
-            .local pmc self, cur
-            .local string target, stop
-            .local int pos
-            self = find_lex 'self'
-
-            $P0 = self.'!cursor_start_all'()
-            cur = $P0[0]
-            target = $P0[1]
-            pos = $P0[2]
-
-            $P0 = find_dynamic_lex '$*QUOTE_STOP'
-            if null $P0 goto fail
-            stop = $P0
-
-            $I0 = length stop
-            $S0 = substr target, pos, $I0
-            unless $S0 == stop goto fail
-            pos += $I0
-            cur.'!cursor_pass'(pos, 'stopper')
-          fail:
-            .return (cur)
-        };
+        my $stop := $*QUOTE_STOP;
+        nqp::isnull($stop)
+            ?? self.'!cursor_start_cur'()
+            !! self.'!LITERAL'($stop)
     }
 
     our method split_words(str $words) {
