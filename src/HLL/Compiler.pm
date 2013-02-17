@@ -216,7 +216,6 @@ class HLL::Compiler {
         }
 
         pir::load_bytecode__vs('dumper.pbc');
-        pir::load_bytecode__vs('PGE/Dumper.pbc');
 
         self.command_eval(|@a, |%adverbs);
     }
