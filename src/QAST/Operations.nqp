@@ -1737,6 +1737,7 @@ QAST::Operations.add_core_pirop_mapping('createsc', 'nqp_create_sc', 'Ps');
 QAST::Operations.add_core_pirop_mapping('scsetobj', 'set', '1QiP');
 QAST::Operations.add_core_pirop_mapping('scsetcode', 'nqp_add_code_ref_to_sc', '2PiP');
 QAST::Operations.add_core_pirop_mapping('scgetobj', 'set', 'PQi');
+QAST::Operations.add_core_pirop_mapping('scgetcode', 'nqp_get_sc_code_ref', 'Psi');
 QAST::Operations.add_core_op('scgethandle', -> $qastcomp, $op {
     $qastcomp.as_post(QAST::Op.new(
         :op('callmethod'), :name('handle'), :returns(str),
