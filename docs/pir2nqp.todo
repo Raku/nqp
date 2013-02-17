@@ -38,10 +38,6 @@ pir::push_dispatchee__0PP
 pir::getinterp__P
 pir::getattribute__PPs
 
-to become nqp::escape
-pir::escape__SS
-pir::escape__Ss
-
 to become nqp::load
 pir::load_bytecode
 

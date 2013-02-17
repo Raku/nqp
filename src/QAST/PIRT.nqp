@@ -120,7 +120,7 @@ class PIRT::Sub is PIRT::Node {
     has str $!cached_pir;
     
     method escape($str) {
-        my $esc := pir::escape__Ss($str);
+        my $esc := nqp::escape($str);
         nqp::index($esc, '\x', 0) >= 0 ??
             'utf8:"' ~ $esc ~ '"' !!
                 (nqp::index($esc, '\u', 0) >= 0 ??
