@@ -225,12 +225,11 @@ class NQP::Actions is HLL::Actions {
             # this in the setting as Regex depends on the setting).
             unless %*COMPILING<%?OPTIONS><setting> eq 'NULL' {
                 import_HOW_exports($SETTING);
-                if %*COMPILING<%?OPTIONS><old-regex-lib> {
-                    $*W.load_module('NQPRegex', $*GLOBALish);
-                }
                 unless %*COMPILING<%?OPTIONS><no-regex-lib> {
-                    $*W.load_module('QRegex', $*GLOBALish);
-                    unless %*COMPILING<%?OPTIONS><old-regex-lib> {
+                    if %*COMPILING<%?OPTIONS><custom-regex-lib> -> $lib {
+                        $*W.load_module($lib, $*GLOBALish);
+                    }
+                    else {
                         $*W.load_module('NQPP6QRegex', $*GLOBALish);
                     }
                 }
