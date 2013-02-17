@@ -6,7 +6,8 @@ sub is_pirt_result($producer, $expected, $desc) {
     my $pirt := $producer();
     my $pir := $pirt.pir();
     #say($pir);
-    my $sub := QAST::Compiler.compile_and_init($pir).main_sub();
+    my $pbc := QAST::Compiler.pbc($pir);
+    my $sub := QAST::Compiler.init($pbc);
     ok($sub() eq $expected, $desc);
 }
 
