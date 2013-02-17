@@ -318,15 +318,15 @@ class NQP::World is HLL::World {
                         # Emit fixup code.
                         self.add_object($code_obj);
                         $fixups.push(QAST::Op.new(
-                            :op('bindattr'),
-                            QAST::WVal.new( :value($code_obj) ),
-                            QAST::WVal.new( :value($code_type) ),
-                            QAST::SVal.new( :value('$!do') ),
-                            QAST::VM.new(
-                                :pirop('set_sub_code_object 0PP'),
-                                QAST::Op.new( :op('clone'), QAST::BVal.new( :value($past) ) ),
-                                QAST::WVal.new( :value($code_obj) )
-                            )
+                            :op('setcodeobj'),
+                            QAST::Op.new(
+                                :op('bindattr'),
+                                QAST::WVal.new( :value($code_obj) ),
+                                QAST::WVal.new( :value($code_type) ),
+                                QAST::SVal.new( :value('$!do') ),
+                                QAST::Op.new( :op('clone'), QAST::BVal.new( :value($past) ) )
+                            ),
+                            QAST::WVal.new( :value($code_obj) )
                         ));
                             
                         # Add to dynamic compilation fixup list.
@@ -385,8 +385,8 @@ class NQP::World is HLL::World {
             # we actually compiled into the one that went into the SC.
             $fixups.push(QAST::VM.new(
                 :pirop('assign vPP'),
-                QAST::VM.new(
-                    :pirop('nqp_get_sc_code_ref Psi'),
+                QAST::Op.new(
+                    :op('scgetcode'),
                     QAST::SVal.new( :value(self.handle()) ),
                     QAST::IVal.new( :value($code_ref_idx) )
                 ),
