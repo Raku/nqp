@@ -125,7 +125,7 @@ class NQP::World is HLL::World {
                 self.add_fixup_task(:fixup_past($set_outer));
             }
             
-            return pir::getattribute__PPs($setting, 'lex_pad');
+            return nqp::ctxlexpad($setting, 'lex_pad');
         }
     }
     
@@ -154,7 +154,7 @@ class NQP::World is HLL::World {
                 ))));
         }
 
-        return pir::getattribute__PPs($module, 'lex_pad');
+        return nqp::ctxlexpad($module, 'lex_pad');
     }
     
     method import($stash) {
@@ -287,7 +287,7 @@ class NQP::World is HLL::World {
         else {
             # Create a fresh stub code, and set its name.
             $dummy := pir::nqp_fresh_stub__PP($stub_code);
-            pir::assign__vPS($dummy, $name);
+            nqp::setcodename($dummy, $name);
             
             # Tag it as a static code ref and add it to the root code refs set.
             pir::setprop__vPsP($dummy, 'STATIC_CODE_REF', $dummy);
