@@ -10,7 +10,7 @@ ok($str                  eq 'hello', '.. withouth side effect');
 ok(subst($str, /l/, 'r', :global) eq 'herro', 'We can use subst to replace all matches');
 
 my $i := 0;
-ok(subst($str, /l/, {$i++}) eq 'he0lo', 'We can have a closure as replacement');
+ok(subst($str, /l/, -> $m {$i++}) eq 'he0lo', 'We can have a closure as replacement');
 ok($i == 1, '.. and $i updated');
 
 ok(subst($str, /FOO/, 'BAR') eq 'hello', "Non-existing string doesn't clobber string");
