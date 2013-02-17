@@ -1730,6 +1730,8 @@ QAST::Operations.add_core_op('setstaticlex', -> $qastcomp, $op {
             )
         ))
 });
+QAST::Operations.add_core_pirop_mapping('freshcoderef', 'nqp_fresh_stub', 'PP');
+QAST::Operations.add_core_pirop_mapping('replacecoderef', 'assign', '0PP');
 
 # serialization context related opcodes
 QAST::Operations.add_core_pirop_mapping('sha1', 'nqp_sha1', 'Ss');
