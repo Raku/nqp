@@ -1,7 +1,3 @@
-INIT {
-    pir::load_bytecode__vS('Parrot/Exception.pbc');
-}
-
 # This incorporates both the code that used to be in PCT::HLLCompiler as well
 # as various additional things that initially appeared in the nqp-rx HLL::Compiler.
 # Conversion of it all the NQP is a work in progress; for now, many methods are
