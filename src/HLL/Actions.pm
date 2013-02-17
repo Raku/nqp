@@ -101,7 +101,7 @@ class HLL::Actions {
     method term:sym<circumfix>($/) { make $<circumfix>.ast }
 
     method termish($/) { make $<term>.ast; }
-    method nullterm($/) { make pir::new__Ps('Undef') }
+    method nullterm($/) { make NQPMu; }
     method nullterm_alt($/) { make $<term>.ast; }
 
     method integer($/) { make $<VALUE>.ast; }

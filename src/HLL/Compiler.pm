@@ -45,13 +45,13 @@ class HLL::Compiler {
     method language($name?) {
         if $name {
             $!language := $name;
-            pir::compreg__0sP($name, self);
+            nqp::bindcomp($name, self);
         }
         $!language;
     }
 
     method compiler($name) {
-        pir::compreg__Ps($name);
+        nqp::getcomp($name);
     }
 
     method config() { %!config };
@@ -59,8 +59,8 @@ class HLL::Compiler {
     method load_module($name) {
         my $base := nqp::join('/', self.parse_name($name));
         my $loaded := 0;
-        try { pir::load_bytecode__vS("$base.pbc"); $loaded := 1 };
-        unless $loaded { pir::load_bytecode__vS("$base.pir"); $loaded := 1 }
+        try { nqp::loadbytecode("$base.pbc"); $loaded := 1 };
+        unless $loaded { nqp::loadbytecode("$base.pir"); $loaded := 1 }
         self.get_module($name);
     }
 
@@ -399,13 +399,13 @@ class HLL::Compiler {
 
     method past($source, *%adverbs) {
         my $ast := $source.ast();
-        self.panic("Unable to obtain ast from " ~ pir::typeof__SP($source))
+        self.panic("Unable to obtain ast from " ~ $source.HOW.name($source))
             unless $ast ~~ QAST::Node;
         $ast;
     }
 
     method post($source, *%adverbs) {
-        pir::compreg__Ps('QAST').post($source)
+        nqp::getcomp('QAST').post($source)
     }
 
     method pirbegin() {
@@ -426,7 +426,7 @@ class HLL::Compiler {
     }
 
     method evalpmc($source, *%adverbs) {
-        my $compiler := pir::compreg__Ps('PIR');
+        my $compiler := nqp::getcomp('PIR');
         $compiler($source)
     }
 
@@ -506,7 +506,7 @@ class HLL::Compiler {
     }
 
     method removestage($stagename) {
-        my @new_stages := pir::new__Ps('ResizableStringArray');
+        my @new_stages := nqp::list_s();
         for @!stages {
             if $_ ne $stagename {
                 @new_stages.push($_);
@@ -530,7 +530,7 @@ class HLL::Compiler {
             self.stages(@new-stages);
             return 1;
         }
-        my @new-stages := pir::new__Ps('ResizableStringArray');
+        my @new-stages := nqp::list_s();
         for self.stages {
             if $_ eq $where {
                 if $position eq 'before' {

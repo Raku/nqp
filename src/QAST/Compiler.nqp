@@ -199,7 +199,7 @@ class QAST::Compiler is HLL::Compiler {
     
     my @prim_to_reg := ['P', 'I', 'N', 'S'];
     sub type_to_register_type($type) {
-        @prim_to_reg[pir::repr_get_primitive_type_spec__IP($type)]
+        @prim_to_reg[nqp::objprimspec($type)]
     }
     method type_to_register_type($type) {
         type_to_register_type($type)
@@ -207,7 +207,7 @@ class QAST::Compiler is HLL::Compiler {
     
     my @prim_to_lookup_name := ['obj', 'int', 'num', 'str'];
     sub type_to_lookup_name($type) {
-        @prim_to_lookup_name[pir::repr_get_primitive_type_spec__IP($type)]
+        @prim_to_lookup_name[nqp::objprimspec($type)]
     }
     
     my %hll_force_return_boxing;
@@ -217,14 +217,14 @@ class QAST::Compiler is HLL::Compiler {
 
     method unique($prefix = '') { $prefix ~ $serno++ }
     method escape($str) {
-        my $esc := pir::escape__Ss($str);
+        my $esc := nqp::escape($str);
         nqp::index($esc, '\x', 0) >= 0 ??
             'utf8:"' ~ $esc ~ '"' !!
                 (nqp::index($esc, '\u', 0) >= 0 ??
                  'unicode:"' ~ $esc ~ '"' !!
                  '"' ~ $esc ~ '"')
     }
-    method rxescape($str) { 'ucs4:"' ~ pir::escape__Ss($str) ~ '"' }
+    method rxescape($str) { 'ucs4:"' ~ nqp::escape($str) ~ '"' }
 
     proto method as_post($node, :$want) {
         my $*WANT := $want;

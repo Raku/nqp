@@ -759,7 +759,7 @@ class NQP::Actions is HLL::Actions {
                     $/.CURSOR.panic("Only typed scalars are currently supported in NQP");
                 }
                 $type := $*W.find_sym([~$<typename>[0]]);
-                if pir::repr_get_primitive_type_spec__IP($type) -> $prim_spec {
+                if nqp::objprimspec($type) -> $prim_spec {
                     $default := default_value_for_prim($prim_spec);
                 }
                 else {
@@ -1103,7 +1103,7 @@ class NQP::Actions is HLL::Actions {
         if $<typename> {
             my $type := $<typename>[0].ast.value;
             $past.returns($type);
-            if pir::repr_get_primitive_type_spec__IP($type) -> $prim {
+            if nqp::objprimspec($type) -> $prim {
                 $*W.cur_lexpad().symbol($past.name, :type($type));
                 if $past.default && !$<default_value> {
                     $past.default(default_value_for_prim($prim));

@@ -322,7 +322,7 @@ of the match.
         @args.push(' at line ');
         @args.push(HLL::Compiler.lineof($target, $pos) + 1);
         @args.push(', near "');
-        @args.push(pir::escape__SS(nqp::substr($target, $pos, 10)));
+        @args.push(nqp::escape(nqp::substr($target, $pos, 10)));
         @args.push('"');
         nqp::die(nqp::join('', @args))
     }
@@ -352,10 +352,10 @@ position C<pos>.
         if $start eq ':' {
             self.panic('Colons may not be used to delimit quoting constructs');
         }
-        if nqp::iscclass(pir::const::CCLASS_WORD, $start, 0) {
+        if nqp::iscclass(nqp::const::CCLASS_WORD, $start, 0) {
             self.panic('Alphanumeric character is not allowed as a delimiter');
         }
-        if nqp::iscclass(pir::const::CCLASS_WHITESPACE, $start, 0) {
+        if nqp::iscclass(nqp::const::CCLASS_WHITESPACE, $start, 0) {
             self.panic('Whitespace character is not allowed as a delimiter');
         }
 
@@ -474,8 +474,8 @@ position C<pos>.
         my int $pos := 0;
         my int $eos := nqp::chars($words);
         my int $ws;
-        while ($pos := nqp::findnotcclass(pir::const::CCLASS_WHITESPACE, $words, $pos, $eos)) < $eos {
-            $ws := nqp::findcclass(pir::const::CCLASS_WHITESPACE, $words, $pos, $eos);
+        while ($pos := nqp::findnotcclass(nqp::const::CCLASS_WHITESPACE, $words, $pos, $eos)) < $eos {
+            $ws := nqp::findcclass(nqp::const::CCLASS_WHITESPACE, $words, $pos, $eos);
             nqp::push(@result, nqp::substr($words, $pos, $ws - $pos));
             $pos := $ws;
         }

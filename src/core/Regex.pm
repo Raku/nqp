@@ -34,24 +34,24 @@ perform the replacement on all matches of C<$text>.
 sub subst ($text, $regex, $repl, :$global?) {
     my @matches := $global ?? match($text, $regex, :global)
                            !! [ $text ~~ $regex ];
-    my $is_code := pir::isa__IPs($repl, 'Sub');
+    my $is_code := nqp::isinvokable($repl);
     my $offset  := 0;
-    my $result  := pir::new__Ps('StringBuilder');
+    my @result;
 
     for @matches -> $match {
         if $match {
-            nqp::push_s($result, nqp::substr($text, $offset, $match.from - $offset))
+            nqp::push(@result, nqp::substr($text, $offset, $match.from - $offset))
                 if $match.from > $offset;
-            nqp::push_s($result, $is_code ?? $repl($match) !! $repl);
+            nqp::push(@result, $is_code ?? $repl($match) !! $repl);
             $offset := $match.to;
         }
     }
 
     my $chars := nqp::chars($text);
-    nqp::push_s($result, nqp::substr($text, $offset, $chars))
+    nqp::push(@result, nqp::substr($text, $offset, $chars))
         if $chars > $offset;
 
-    ~$result;
+    nqp::join("", @result);
 }
 
 # vim: ft=perl6
