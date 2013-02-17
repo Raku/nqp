@@ -240,10 +240,11 @@ class NQP::World is HLL::World {
             my $nqpcomp  := nqp::getcomp('nqp');
             my $post     := $nqpcomp.post(QAST::CompUnit.new( :hll('nqp'), $past ));
             my $pir      := $nqpcomp.pir($post);
-            my $compiled := $nqpcomp.compile_and_init($pir);
+            my $pbc      := $nqpcomp.pbc($pir);
+            my $main     := $nqpcomp.init($pbc);
 
             # Fix up any code objects holding stubs with the real compiled thing.
-            my @all_subs := $compiled.all_subs();
+            my @all_subs := $pbc.all_subs();
             my $c := nqp::elems(@all_subs);
             my $i := 0;
             while $i < $c {
@@ -269,8 +270,7 @@ class NQP::World is HLL::World {
                 $i := $i + 1;
             }
             
-            my $main_sub := $compiled.main_sub();
-            $main_sub(|@args, |%named);
+            $main(|@args, |%named);
         };
         
         # Create code object, if we'll need one.

@@ -149,17 +149,7 @@ class HLL::Compiler {
                 pir::set_runcore__0s("subprof_hll");
             }
             pir::trace__vI(%adverbs<trace>);
-                        
-            # Execute :init subs
-            if !$output.is_initialized('init') {
-                for $output.subs_by_tag('init') -> $sub { $sub(); }
-                $output.mark_initialized('init');
-            }
-            
-            # Now execute the :main sub
-            my $main_sub := $output.main_sub();
-            $output := $main_sub(|@args);
-            
+            $output := $output(|@args);
             pir::trace__0i(0);
         }
         pir::set_runcore__vs($old_runcore);
@@ -454,17 +444,11 @@ class HLL::Compiler {
     }
 
     method init($source, *%adverbs) {
-        self.init_packfile($source)
-    }
-
-    method init_packfile($packfile) {
-        for $packfile.subs_by_tag('init') -> $sub { $sub(); }
-        $packfile.mark_initialized('init');
-        $packfile
-    }
-
-    method compile_and_init($source) {
-        self.init_packfile(pir::compreg__Ps('PIR').compile($source))
+        unless $source.is_initialized('init') {
+            for $source.subs_by_tag('init') -> $sub { $sub() }
+            $source.mark_initialized('init');
+        }
+        $source.main_sub()
     }
 
     method dumper($obj, $name, *%options) {
