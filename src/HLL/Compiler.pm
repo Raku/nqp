@@ -448,7 +448,12 @@ class HLL::Compiler {
             for $source.subs_by_tag('init') -> $sub { $sub() }
             $source.mark_initialized('init');
         }
-        $source.main_sub()
+
+        # FIXME: should use a custom tag
+        # changes to code generator still pending
+        #
+        # $source.first_sub_by_tag('mainline')
+        $source.first_sub()
     }
 
     method dumper($obj, $name, *%options) {
