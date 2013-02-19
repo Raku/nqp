@@ -241,7 +241,7 @@ class NQP::World is HLL::World {
             my $post     := $nqpcomp.post(QAST::CompUnit.new( :hll('nqp'), $past ));
             my $pir      := $nqpcomp.pir($post);
             my $pbc      := $nqpcomp.pbc($pir);
-            my $main     := $nqpcomp.init($pbc);
+            my $mainline := $nqpcomp.init($pbc);
 
             # Fix up any code objects holding stubs with the real compiled thing.
             my @all_subs := $pbc.all_subs();
@@ -270,7 +270,7 @@ class NQP::World is HLL::World {
                 $i := $i + 1;
             }
             
-            $main(|@args, |%named);
+            $mainline(|@args, |%named);
         };
         
         # Create code object, if we'll need one.
