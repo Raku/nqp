@@ -452,8 +452,8 @@ class HLL::Compiler {
         # FIXME: should use a custom tag
         # changes to code generator still pending
         #
-        # $source.first_sub_by_tag('mainline')
-        $source.first_sub()
+        # $source.single_sub_by_tag('mainline')
+        $source.first_sub_in_const_table()
     }
 
     method dumper($obj, $name, *%options) {
