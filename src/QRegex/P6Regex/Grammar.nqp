@@ -81,10 +81,16 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     token nibbler {
         :my $OLDRX := nqp::getlexdyn('%*RX');
         :my %*RX;
+        :my $*SEQ := 0;
         {
             for $OLDRX { %*RX{$_.key} := $_.value; }
         }
-        [ <.ws> ['||'|'|'|'&&'|'&'] ]?
+        [ <.ws> [
+                |  '||' { $*SEQ := 1; }
+                |  '|'
+                |  '&&'
+                |  '&'
+                ] ]?
         <termaltseq> <.ws>
         [
         || <?infixstopper>
@@ -107,22 +113,22 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     token termaltseq {
         <termconjseq>
-        [ '||' [ <termconjseq> || <.throw_null_pattern> ] ]*
+        [ '||' [  { $*SEQ := 1; } <termconjseq> || <.throw_null_pattern> ] ]*
     }
 
     token termconjseq {
         <termalt>
-        [ '&&' [ <termalt> || <.throw_null_pattern> ] ]*
+        [ '&&' [ { $*SEQ := 0; } <termalt> || <.throw_null_pattern> ] ]*
     }
 
     token termalt {
         <termconj>
-        [ '|' <![|]> [ <termconj> || <.throw_null_pattern> ] ]*
+        [ '|' <![|]> [ { $*SEQ := 0; } <termconj> || <.throw_null_pattern> ] ]*
     }
 
     token termconj {
         <termish>
-        [ '&' <![&]> [ <termish> || <.throw_null_pattern> ] ]*
+        [ '&' <![&]> [ { $*SEQ := 0; } <termish> || <.throw_null_pattern> ] ]*
     }
 
     token termish {

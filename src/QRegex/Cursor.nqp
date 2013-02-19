@@ -681,7 +681,7 @@ class NQPCursor does NQPCursorRole {
             nqp::findmethod($cur, $rule)($cur).MATCH()
     }
 
-    method !INTERPOLATE($var) {
+    method !INTERPOLATE($var, $s = 0) {
         if nqp::islist($var) {
             my int $maxlen := -1;
             my $cur := self.'!cursor_start_cur'();
@@ -702,6 +702,7 @@ class NQPCursor does NQPCursorRole {
                     $maxlen := $len if $len > $maxlen && $pos + $len <= $eos
                         && nqp::substr($tgt, $pos, $len) eq $_;
                 }
+                last if $s && $maxlen > -1;
             }
             $cur.'!cursor_pass'($pos + $maxlen, '') if $maxlen >= 0;
             return $cur;

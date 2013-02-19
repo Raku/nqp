@@ -1,6 +1,6 @@
 #! nqp
 
-plan(33);
+plan(37);
 
 my $b := "b+";
 my @foo := [ "b+", "c+" ];
@@ -19,6 +19,11 @@ ok(("abd" ~~ / @ltm /) eq 'b', 'array finds longest match 1');
 ok(("abbd" ~~ / @ltm /) eq 'bb', 'array finds longest match 2');
 ok(("abbcd" ~~ / @ltm /) eq 'bbc', 'array finds longest match 3');
 ok(("abccd" ~~ / @ltm /) eq 'bc', 'array finds longest match 4');
+
+ok(("abd" ~~ / || @ltm /) eq 'b', '|| array hits first match 1');
+ok(("abbd" ~~ / || @ltm /) eq 'b', '|| array hits first match 2');
+ok(("abbcd" ~~ / || @ltm /) eq 'b', '|| array hits first match 3');
+ok(("abccd" ~~ / || @ltm /) eq 'b', '|| array hits first match 4');
 
 ok(!("ab+d"  ~~ /a <$b> d/), 'scalar assertion interpolates as regex 1');
 ok("abbbbbd" ~~ /a <$b> d/, 'scalar assertion interpolates as regex 2');

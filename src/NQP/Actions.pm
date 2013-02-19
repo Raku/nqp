@@ -1664,7 +1664,8 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
     method metachar:sym<nqpvar>($/) {
         make QAST::Regex.new( QAST::Node.new(
                                   QAST::SVal.new( :value('!INTERPOLATE') ),
-                                  $<var>.ast), 
+                                  $<var>.ast,
+                                  QAST::IVal.new( :value($*SEQ ?? 1 !! 0) ) ),
                               :rxtype<subrule>, :subtype<method>, :node($/));
     }
 
