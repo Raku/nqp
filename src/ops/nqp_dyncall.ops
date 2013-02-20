@@ -1040,7 +1040,6 @@ inline op nqp_native_call(out PMC, invar PMC, invar PMC, invar PMC) :base_core {
             case DYNCALL_ARG_CSTRUCT:
                 dyncall_wb_cs(interp, value);
                 break;
-            default: /* Noop to eliminate warning. */
         }
     }
     
