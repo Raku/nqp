@@ -1,9 +1,10 @@
 # Some things that all cursors involved in a given parse share.
-my class ParseShared {
+my class ParseShared is export {
     has $!orig;
     has str $!target;
     has int $!highwater;
     has @!highexpect;
+    has %!marks;
 }
 
 role NQPCursorRole is export {
@@ -81,6 +82,7 @@ role NQPCursorRole is export {
                 pir::trans_encoding__Ssi($orig, pir::find_encoding__Is('ucs4')));
             nqp::bindattr_i($shared, ParseShared, '$!highwater', 0);
             nqp::bindattr($shared, ParseShared, '@!highexpect', nqp::list());
+            nqp::bindattr($shared, ParseShared, '%!marks', nqp::hash());
         }
         nqp::bindattr($new, $?CLASS, '$!shared', $shared);
         if nqp::defined($c) {

@@ -709,27 +709,19 @@ An operator precedence parser.
     }
 
     method MARKER(str $markname) {
-        my %markhash := Q:PIR {
-            %r = get_global '%!MARKHASH'
-            unless null %r goto have_markhash
-            %r = new ['Hash']
-            set_global '%!MARKHASH', %r
-          have_markhash:
-        };
+        my %markhash := nqp::getattr(
+            nqp::getattr(self, $cursor_class, '$!shared'),
+            ParseShared, '%!marks');
         my $cur := self."!cursor_start_cur"();
         $cur."!cursor_pass"(self.pos());
-        %markhash{$markname} := $cur;
+        nqp::bindkey(%markhash, $markname, $cur);
     }
     
     method MARKED(str $markname) {
-        my %markhash := Q:PIR {
-            %r = get_global '%!MARKHASH'
-            unless null %r goto have_markhash
-            %r = new ['Hash']
-            set_global '%!MARKHASH', %r
-          have_markhash:
-        };
-        my $cur := %markhash{$markname};
+        my %markhash := nqp::getattr(
+            nqp::getattr(self, $cursor_class, '$!shared'),
+            ParseShared, '%!marks');
+        my $cur := nqp::atkey(%markhash, $markname);
         unless nqp::istype($cur, NQPCursor) && $cur.pos() == self.pos() {
             $cur := self."!cursor_start_cur"();
         }
