@@ -127,10 +127,6 @@ grammar HLL::Grammar {
         ]
     }
 
-    # XXX Everything that follows is a "cheat" because it's still partially in
-    # PIR. They used to live in a separate file, but in the 6model transition got
-    # moved here, since it was the easier way.
-
 =begin 
 
 =item O(spec [, save])
