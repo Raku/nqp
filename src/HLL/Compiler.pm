@@ -1,7 +1,4 @@
-# This incorporates both the code that used to be in PCT::HLLCompiler as well
-# as various additional things that initially appeared in the nqp-rx HLL::Compiler.
-# Conversion of it all the NQP is a work in progress; for now, many methods are
-# simply NQP wrappers around inline PIR.
+# Provides base functionality for a compiler object.
 class HLL::Compiler {
     has @!stages;
     has $!parsegrammar;
@@ -29,7 +26,7 @@ class HLL::Compiler {
         @!stages     := nqp::split(' ', 'start parse past post pir evalpmc');
         
         # Command options and usage.
-        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s dumper=s trace|t=s encoding=s output|o=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile profile-compile');
+        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile profile-compile');
         $!usage := "This compiler is based on HLL::Compiler.\n\nOptions:\n";
         for @!cmdoptions {
             $!usage := $!usage ~ "    $_\n";
@@ -428,12 +425,6 @@ class HLL::Compiler {
     method dumper($obj, $name, *%options) {
         if nqp::can($obj, 'dump') {
             nqp::print($obj.dump());
-            return 0;
-        }
-        if %options<dumper> {
-            pir::load_bytecode__vs('PCT/Dumper.pbc');
-            my $dumper := PCT::Dumper{nqp::lc(%options<dumper>)};
-            $dumper($obj, $name)
         }
         else {
             (Q:PIR { %r = get_root_global ['parrot'], '_dumper' })($obj, $name)
