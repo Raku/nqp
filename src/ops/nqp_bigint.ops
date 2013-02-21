@@ -541,7 +541,7 @@ inline op nqp_bigint_pow(out PMC, invar PMC, invar PMC, invar PMC, invar PMC) :b
 
 
             /* XXX a bit ugly that it reuses cmp, but safe for now */
-            cmp = mp_cmp_d(base, 0)
+            cmp = mp_cmp_d(base, 0);
             if (MP_EQ == cmp || MP_EQ == mp_cmp_d(base, 1)) {
                 /* 0 ** $big_number and 1 ** big_number are easy to do: */
                 $1 = REPR($2)->allocate(interp, STABLE($2));
