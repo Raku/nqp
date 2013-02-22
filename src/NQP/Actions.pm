@@ -362,11 +362,14 @@ class NQP::Actions is HLL::Actions {
                 $block,
                 QAST::Op.new( :op('exception') ),
             ),
-            QAST::Op.new(
-                :op('bindkey_i'),
-                QAST::Op.new( :op('exception') ),
-                QAST::SVal.new( :value('handled') ),
-                QAST::IVal.new( :value(1) )
+            QAST::VM.new(
+                :parrot(QAST::Op.new(
+                    :op('bindkey_i'),
+                    QAST::Op.new( :op('exception') ),
+                    QAST::SVal.new( :value('handled') ),
+                    QAST::IVal.new( :value(1) )
+                )),
+                :jvm(QAST::Op.new( :op('null') ))
             ),
             default_for('$'));
     }
@@ -396,11 +399,14 @@ class NQP::Actions is HLL::Actions {
             $past,
             'CATCH',
             QAST::Stmts.new(
-                QAST::Op.new(
-                    :op('bindkey_i'),
-                    QAST::Op.new( :op('exception') ),
-                    QAST::SVal.new( :value('handled') ),
-                    QAST::IVal.new( :value(1) )
+                QAST::VM.new(
+                    :parrot(QAST::Op.new(
+                        :op('bindkey_i'),
+                        QAST::Op.new( :op('exception') ),
+                        QAST::SVal.new( :value('handled') ),
+                        QAST::IVal.new( :value(1) )
+                    )),
+                    :jvm(QAST::Op.new( :op('null') ))
                 ),
                 default_for('$')
             ));
