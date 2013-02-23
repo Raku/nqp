@@ -1528,6 +1528,21 @@ QAST::Operations.add_core_op('rindex', :inlinable(1), -> $qastcomp, $op {
         !! QAST::Op.new( :op('rindexfrom'), |@operands ));
 });
 
+QAST::Operations.add_core_op('codepointfromname', :inlinable(1), -> $qastcomp, $op {
+    my @operands := $op.list;
+    nqp::die("codepointfromname expects a single child") unless @operands == 1;
+    my $i_reg := $*REGALLOC.fresh_i();
+    my $s_reg := $*REGALLOC.fresh_s();
+    my $ops := PIRT::Ops.new();
+    my $name := $qastcomp.coerce($qastcomp.as_post($op[0]), 'S');
+    $ops.push($name);
+    $ops.push_pirop('find_encoding', $i_reg, "'utf8'");
+    $ops.push_pirop('trans_encoding', $s_reg, $name, $i_reg);
+    $ops.push_pirop('find_codepoint', $i_reg, $s_reg);
+    $ops.result($i_reg);
+    $ops
+});
+
 # relational opcodes
 QAST::Operations.add_core_pirop_mapping('cmp_i', 'cmp', 'Iii', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('iseq_i', 'iseq', 'Iii', :inlinable(1));
