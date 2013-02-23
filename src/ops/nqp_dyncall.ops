@@ -1041,7 +1041,7 @@ inline op nqp_native_call(out PMC, invar PMC, invar PMC, invar PMC) :base_core {
                 dyncall_wb_cs(interp, value);
                 break;
             default: /* Noop to eliminate warning. */
-                Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION, "Internal error: unhandled dyncall argument type");
+                continue;
         }
     }
     
