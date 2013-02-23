@@ -14,13 +14,6 @@ class HLL::Compiler {
 
     our %parrot_config;
 
-    # XXX HACK!!! Need a Mu. :-)
-    method new() {
-        my $obj := nqp::create(self);
-        $obj.BUILD();
-        $obj
-    }
-
     method BUILD() {
         # Default stages.
         @!stages     := nqp::split(' ', 'start parse past post pir evalpmc');
