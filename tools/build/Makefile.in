@@ -4,12 +4,12 @@
 PARROT_ARGS      = -L. -X.
 
 # values from parrot_config
-PARROT_BIN_DIR     = @bindir@
-PARROT_LIB_SHARED  = @libparrot_shared@
-PARROT_VERSION     = @versiondir@
-PARROT_INCLUDE_DIR = @includedir@$(PARROT_VERSION)
-PARROT_LIB_DIR     = @libdir@$(PARROT_VERSION)
-PARROT_SRC_DIR     = @srcdir@$(PARROT_VERSION)
+PARROT_BIN_DIR     = @@bindir@@
+PARROT_LIB_SHARED  = @@libparrot_shared@@
+PARROT_VERSION     = @@versiondir@@
+PARROT_INCLUDE_DIR = @@includedir@@$(PARROT_VERSION)
+PARROT_LIB_DIR     = @@libdir@@$(PARROT_VERSION)
+PARROT_SRC_DIR     = @@srcdir@@$(PARROT_VERSION)
 PARROT_LIBRARY_DIR = $(PARROT_LIB_DIR)/library
 NQP_LANG_DIR       = $(PARROT_LIB_DIR)/languages/nqp
 HAS_ICU            = @has_icu@

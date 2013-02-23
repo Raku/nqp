@@ -163,6 +163,13 @@ sub fill_template_text {
     my $text = shift;
     my %config = @_;
 
+    my $escape = sub {
+        my $str = $_[0];
+        $str =~ s{ }{\\\\ }g;
+        $str;
+    };
+
+    $text =~ s/@@([:\w]+)@@/$escape->($config{$1} || $config{"parrot::$1"} || '')/ge;
     $text =~ s/@([:\w]+)@/$config{$1} || $config{"parrot::$1"} || ''/ge;
     if ($text =~ /nqp::makefile/) {
         if ($^O eq 'MSWin32') {
