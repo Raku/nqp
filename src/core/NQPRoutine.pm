@@ -8,11 +8,11 @@ my knowhow NQPRoutine {
     
     # Adds a multi-dispatch candidate.
     method add_dispatchee($code) {
-        pir::nqp_disable_sc_write_barrier__v();
+        nqp::scwbdisable();
         $!dispatch_cache := nqp::null();
         $!dispatch_order := nqp::null();
         nqp::push($!dispatchees, $code);
-        pir::nqp_enable_sc_write_barrier__v();
+        nqp::scwbenable();
     }
     
     # Checks if this code object is a dispatcher.
@@ -225,10 +225,9 @@ my knowhow NQPRoutine {
         # Get list and number of candidates, triggering a sort if there are none.
         my @candidates := $!dispatch_order;
         if nqp::isnull(@candidates) {
-            pir::nqp_disable_sc_write_barrier__v();
+            nqp::scwbdisable();
             @candidates := $!dispatch_order := self.sort_dispatchees();
-            pir::nqp_enable_sc_write_barrier__v();
-            1;
+            nqp::scwbenable();
         }
         my $num_candidates := nqp::elems(@candidates);
 
@@ -305,9 +304,9 @@ my knowhow NQPRoutine {
         # Cache the result if there's a single chosen one and return it.
         if nqp::elems(@possibles) == 1 {
             my $result := @possibles[0]<sub>;
-            pir::nqp_disable_sc_write_barrier__v();
+            nqp::scwbdisable();
             $!dispatch_cache := nqp::multicacheadd($!dispatch_cache, $capture, $result);
-            pir::nqp_enable_sc_write_barrier__v();
+            nqp::scwbenable();
             $result
         }
         elsif nqp::elems(@possibles) == 0 {

@@ -754,11 +754,11 @@ knowhow NQPClassHOW {
             $new_type.HOW.compose($new_type);
             
             # Store the type.
-            pir::nqp_disable_sc_write_barrier__v();
+            nqp::scwbdisable();
             @!mixin_cache := [] if nqp::isnull(@!mixin_cache);
             nqp::push(@!mixin_cache, $role);
             nqp::push(@!mixin_cache, $new_type);
-            pir::nqp_enable_sc_write_barrier__v();
+            nqp::scwbenable();
             1;
         }
         

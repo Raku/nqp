@@ -313,7 +313,7 @@ class QAST::Compiler is HLL::Compiler {
         my $serialized := nqp::serialize($sc, $sh);
         
         # Now it's serialized, pop this SC off the compiling SC stack.
-        pir::nqp_pop_compiling_sc__v();
+        nqp::popcompsc();
         
         # String heap QAST.
         my $sh_ast := QAST::Op.new( :op('list_s') );
