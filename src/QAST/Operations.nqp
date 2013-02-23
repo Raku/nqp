@@ -1787,20 +1787,20 @@ QAST::Operations.add_core_pirop_mapping('wval', 'nqp_get_sc_object', 'Psi');
 QAST::Operations.add_core_op('scwbdisable', -> $qastcomp, $op {
     my $ops := PIRT::Ops.new();
     $ops.push_pirop('nqp_disable_sc_write_barrier');
-    $ops.result('null');
+    $ops.result('0');
     $ops
 });
 QAST::Operations.add_core_op('scwbenable', -> $qastcomp, $op {
     my $ops := PIRT::Ops.new();
     $ops.push_pirop('nqp_enable_sc_write_barrier');
-    $ops.result('null');
+    $ops.result('0');
     $ops
 });
 QAST::Operations.add_core_pirop_mapping('pushcompsc', 'nqp_push_compiling_sc', '0P');
 QAST::Operations.add_core_op('popcompsc', -> $qastcomp, $op {
     my $ops := PIRT::Ops.new();
     $ops.push_pirop('nqp_pop_compiling_sc');
-    $ops.result('null');
+    $ops.result('0');
     $ops
 });
 
