@@ -1314,16 +1314,31 @@ class NQP::Actions is HLL::Actions {
         # See if it's a lexical symbol (known in any outer scope).
         my $var;
         if $*W.is_lexical(~$<name>) {
-            try {
-                $var := QAST::WVal.new( :value($*W.find_sym([~$<name>])) );
-                CATCH {
-                    $var := QAST::Var.new( :name(~$<name>), :scope('lexical') );
+            unless $<args> {
+                try {
+                    my $sym := $*W.find_sym([~$<name>]);
+                    unless nqp::isnull(nqp::getobjsc($sym)) {
+                        $var := QAST::WVal.new( :value($sym) );
+                    }
                 }
+            }
+            unless $var {
+                $var := QAST::Var.new( :name(~$<name>), :scope('lexical') );
             }
         }
         else {
             my @ns := nqp::clone($<name><identifier>);
-            $var := lexical_package_lookup(@ns, $/);
+            unless $<args> {
+                try {
+                    my $sym := $*W.find_sym(@ns);
+                    unless nqp::isnull(nqp::getobjsc($sym)) {
+                        $var := QAST::WVal.new( :value($sym) );
+                    }
+                }
+            }
+            unless $var {
+                $var := lexical_package_lookup(@ns, $/);
+            }
         }
         
         # If it's a call, add the arguments.
