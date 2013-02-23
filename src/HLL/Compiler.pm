@@ -23,7 +23,7 @@ class HLL::Compiler {
 
     method BUILD() {
         # Default stages.
-        @!stages     := nqp::split(' ', 'start parse past post pir evalpmc');
+        @!stages     := nqp::split(' ', 'start parse past post pir pbc init');
         
         # Command options and usage.
         @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile profile-compile');
@@ -208,7 +208,8 @@ class HLL::Compiler {
         %adverbs.update(%opts);
         self.usage($program-name) if %adverbs<help>  || %adverbs<h>;
         
-        if !nqp::existskey(%adverbs, 'precomp') && %adverbs<target> eq 'pir' {
+        if !nqp::existskey(%adverbs, 'precomp')
+            && (%adverbs<target> eq 'pir' || %adverbs<target> eq 'pbc') {
             %adverbs<precomp> := 1;
         }
 
@@ -233,22 +234,29 @@ class HLL::Compiler {
                 $!user_progname := '-e';
                 my $?FILES := '-e';
                 $result := self.eval(%adverbs<e>, '-e', |@a, |%adverbs);
-                unless $target eq '' || $target eq 'pir' || %adverbs<output> {
-					self.dumper($result, $target, |%adverbs);
-				}
+                unless $target eq '' || $target eq 'pir' || $target eq 'pbc'
+                    || %adverbs<output> {
+                    self.dumper($result, $target, |%adverbs);
+                }
             }
             elsif !@a { $result := self.interactive(|%adverbs) }
             elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }
             else { $result := self.evalfiles(@a[0], |@a, |%adverbs) }
 
-            if !nqp::isnull($result) && ($target eq 'pir' || %adverbs<output>) {
-                my $output := %adverbs<output>;
-                my $fh := ($output eq '' || $output eq '-')
-                        ?? pir::getinterp__P().stdout_handle()
-                        !! pir::new__Ps('FileHandle').open($output, 'w');
-                self.panic("Cannot write to $output") unless $fh;
-                $fh.print($result);
-                $fh.close()
+            if !nqp::isnull($result) && $target ne '' {
+                if $target eq 'pbc' {
+                    my $output := %adverbs<output>;
+                    $result.write_to_file($output) if $output;
+                }
+                else {
+                    my $output := %adverbs<output>;
+                    my $fh := ($output eq '' || $output eq '-')
+                            ?? pir::getinterp__P().stdout_handle()
+                            !! pir::new__Ps('FileHandle').open($output, 'w');
+                    self.panic("Cannot write to $output") unless $fh;
+                    $fh.print($result);
+                    $fh.close();
+                }
             }
             CATCH {
                 $has_error := 1;
@@ -417,9 +425,21 @@ class HLL::Compiler {
         self.pirbegin() ~ $source.pir()
     }
 
-    method evalpmc($source, *%adverbs) {
-        my $compiler := nqp::getcomp('PIR');
-        $compiler($source)
+    method pbc($source, *%adverbs) {
+        pir::compreg__Ps('PIR').compile($source)
+    }
+
+    method init($source, *%adverbs) {
+        unless $source.is_initialized('init') {
+            for $source.subs_by_tag('init') -> $sub { $sub() }
+            $source.mark_initialized('init');
+        }
+
+        # FIXME: should use a custom tag
+        # changes to code generator still pending
+        #
+        # $source.single_sub_by_tag('mainline')
+        $source.first_sub_in_const_table()
     }
 
     method dumper($obj, $name, *%options) {

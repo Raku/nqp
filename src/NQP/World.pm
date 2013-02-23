@@ -240,26 +240,28 @@ class NQP::World is HLL::World {
             my $nqpcomp  := nqp::getcomp('nqp');
             my $post     := $nqpcomp.post(QAST::CompUnit.new( :hll('nqp'), $past ));
             my $pir      := $nqpcomp.pir($post);
-            my $compiled := $nqpcomp.evalpmc($pir);
+            my $pbc      := $nqpcomp.pbc($pir);
+            my $mainline := $nqpcomp.init($pbc);
 
             # Fix up any code objects holding stubs with the real compiled thing.
-            my $c := nqp::elems($compiled);
+            my @all_subs := $pbc.all_subs();
+            my $c := nqp::elems(@all_subs);
             my $i := 0;
             while $i < $c {
-                my $subid := $compiled[$i].get_subid();
+                my $subid := @all_subs[$i].get_subid();
                 if nqp::existskey(%!code_objects_to_fix_up, $subid) {
                     # First, go over the code objects. Update the $!do, and the
                     # entry in the SC. Make sure the newly compiled code is marked
                     # as a static code ref.
                     my $static := %!code_objects_to_fix_up{$subid}.shift();
-                    nqp::bindattr($static, %!code_object_types{$subid}, '$!do', $compiled[$i]);
+                    nqp::bindattr($static, %!code_object_types{$subid}, '$!do', @all_subs[$i]);
                     nqp::bindattr($static, %!code_object_types{$subid}, '$!clone_callback', nqp::null());
                     for %!code_objects_to_fix_up{$subid} {
-                        nqp::bindattr($_, %!code_object_types{$subid}, '$!do', nqp::clone($compiled[$i]));
+                        nqp::bindattr($_, %!code_object_types{$subid}, '$!do', nqp::clone(@all_subs[$i]));
                         nqp::bindattr($_, %!code_object_types{$subid}, '$!clone_callback', nqp::null());
                     }
-                    pir::setprop__vPsP($compiled[$i], 'STATIC_CODE_REF', $compiled[$i]);
-                    self.update_root_code_ref(%!code_stub_sc_idx{$subid}, $compiled[$i]);
+                    pir::setprop__vPsP(@all_subs[$i], 'STATIC_CODE_REF', @all_subs[$i]);
+                    self.update_root_code_ref(%!code_stub_sc_idx{$subid}, @all_subs[$i]);
                     
                     # Clear up the fixup statements.
                     my $fixup_stmts := %!code_object_fixup_list{$subid};
@@ -268,7 +270,7 @@ class NQP::World is HLL::World {
                 $i := $i + 1;
             }
             
-            $compiled(|@args, |%named);
+            $mainline(|@args, |%named);
         };
         
         # Create code object, if we'll need one.
