@@ -1949,11 +1949,14 @@ is none.
 
 */
 inline op nqp_get_sc_for_object(out PMC, invar PMC) :base_core {
-    if ($2->vtable->base_type == smo_id)
-        $1 = SC_PMC($2);
-    else
+    if ($2->vtable->base_type == smo_id) {
+        PMC *result = SC_PMC($2);
+        $1 = result ? result : PMCNULL;
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use nqp_get_sc_for_object with a SixModelObject");
+    }
 }
 
 
