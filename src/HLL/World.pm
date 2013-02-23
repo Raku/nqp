@@ -61,7 +61,7 @@ class HLL::World {
         nqp::scsetdesc($!sc, $description);
         
         # Add to currently compiling SC stack.
-        pir::nqp_push_compiling_sc__vP($!sc);
+        nqp::pushcompsc($!sc);
     }
     
     # Gets the slot for a given object. Dies if it is not in the context.
