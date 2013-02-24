@@ -14,6 +14,9 @@
 #include "reprs/HashAttrStore.h"
 #include "reprs/Uninstantiable.h"
 #include "reprs/NFA.h"
+#include "reprs/VMArray.h"
+#include "reprs/VMHash.h"
+#include "reprs/VMIter.h"
 #include "repr_registry.h"
 
 /* An array mapping representation IDs to function tables. */
