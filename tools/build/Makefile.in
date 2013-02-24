@@ -217,6 +217,9 @@ METAMODEL_SOURCE = src/6model/sixmodelobject.h src/6model/sixmodelobject.c \
                    src/6model/reprs/HashAttrStore.h src/6model/reprs/HashAttrStore.c \
                    src/6model/reprs/Uninstantiable.h src/6model/reprs/Uninstantiable.c \
                    src/6model/reprs/NFA.h src/6model/reprs/NFA.c \
+                   src/6model/reprs/VMArray.h src/6model/reprs/VMArray.c \
+                   src/6model/reprs/VMHash.h src/6model/reprs/VMHash.c \
+                   src/6model/reprs/VMIter.h src/6model/reprs/VMIter.c \
                    src/6model/storage_spec.h src/6model/serialization_context.c \
                    src/6model/serialization_context.h src/6model/serialization.c \
                    src/6model/serialization.h src/guts/multi_dispatch.h \
@@ -227,9 +230,10 @@ METAMODEL_OBJS   = ../6model/sixmodelobject$(O) ../6model/repr_registry$(O) \
                    ../6model/reprs/P6opaque$(O) ../6model/reprs/P6int$(O) \
                    ../6model/reprs/P6str$(O) ../6model/reprs/P6num$(O) \
                    ../6model/reprs/HashAttrStore$(O) ../6model/reprs/Uninstantiable$(O) \
-                   ../6model/reprs/NFA$(O) ../6model/serialization_context$(O) \
+                   ../6model/reprs/NFA$(O) ../6model/reprs/VMArray$(O) \
+                   ../6model/reprs/VMHash$(O) ../6model/reprs/VMIter$(O) \
+                   ../6model/serialization_context$(O) ../6model/base64$(O) \
                    ../6model/serialization$(O) ../guts/multi_dispatch$(O) \
-                   ../6model/base64$(O)
 
 LIBTOMMATH_BIN = $(TOM)core$(O) \
         $(TOM)_error$(O) \
@@ -786,6 +790,9 @@ $(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS_SOURCE) $(DYNPMC)
 	cd src/6model/reprs && $(CC) -c @cc_o_out@HashAttrStore$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) HashAttrStore.c
 	cd src/6model/reprs && $(CC) -c @cc_o_out@Uninstantiable$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) Uninstantiable.c
 	cd src/6model/reprs && $(CC) -c @cc_o_out@NFA$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) NFA.c
+	cd src/6model/reprs && $(CC) -c @cc_o_out@VMArray$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) VMArray.c
+	cd src/6model/reprs && $(CC) -c @cc_o_out@VMHash$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) VMHash.c
+	cd src/6model/reprs && $(CC) -c @cc_o_out@VMIter$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) VMIter.c
 	cd src/6model && $(CC) -c @cc_o_out@serialization_context$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) serialization_context.c
 	cd src/6model && $(CC) -c @cc_o_out@serialization$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) serialization.c
 	cd src/6model && $(CC) -c @cc_o_out@base64$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) base64.c

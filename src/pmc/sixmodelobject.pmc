@@ -30,7 +30,7 @@
  * but this will do for now. */
 #include "../../3rdparty/libtommath/tommath.h"
 #include "../6model/reprs/P6bigint.h"
-#define bigint_repr_id 8
+#define bigint_repr_id 11
 
 PMC * decontainerize(PARROT_INTERP, PMC *var) {
     ContainerSpec *spec = STABLE(var)->container_spec;

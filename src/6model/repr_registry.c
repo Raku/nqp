@@ -236,6 +236,12 @@ void REPR_initialize_registry(PARROT_INTERP) {
         Uninstantiable_initialize(interp));
     register_repr(interp, Parrot_str_new_constant(interp, "NFA"),
         NFA_initialize(interp));
+    register_repr(interp, Parrot_str_new_constant(interp, "VMArray"),
+        VMArray_initialize(interp));
+    register_repr(interp, Parrot_str_new_constant(interp, "VMHash"),
+        VMHash_initialize(interp));
+    register_repr(interp, Parrot_str_new_constant(interp, "VMIter"),
+        VMIter_initialize(interp));
 
     /* Set up object for dynamically registering extra representations. */
     dyn_reg_func = Parrot_pmc_new(interp, enum_class_Pointer);
