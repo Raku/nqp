@@ -1810,6 +1810,12 @@ QAST::Operations.add_core_pirop_mapping('bindcomp', 'compreg', '1sP');
 QAST::Operations.add_core_pirop_mapping('getcurhllsym', 'get_hll_global', 'Ps');
 QAST::Operations.add_core_pirop_mapping('bindcurhllsym', 'set_hll_global', '1sP');
 QAST::Operations.add_core_pirop_mapping('loadbytecode', 'load_bytecode', '0s');
+QAST::Operations.add_core_op('sethllconfig', -> $qastcomp, $op {
+    # XXX Not really implemented here.
+    my $ops := PIRT::Ops.new();
+    $ops.result('0');
+    $ops
+});
 
 # regex engine related opcodes
 QAST::Operations.add_core_pirop_mapping('nfafromstatelist', 'nqp_nfa_from_statelist', 'PPP');
