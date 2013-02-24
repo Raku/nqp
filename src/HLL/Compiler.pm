@@ -545,71 +545,54 @@ class HLL::Compiler {
         }
         @actual_ns;
     }
-
-    method lineof($target, $pos, :$cache) {
-        Q:PIR {
-            .local pmc target, linepos
-            .local int pos, cache
-            target = find_lex '$target'
-            $P0 = find_lex '$pos'
-            pos = $P0
-            $P0 = find_lex '$cache'
-            cache = $P0
-
-            # If we've previously cached C<linepos> for target, we use it.
-            unless cache goto linepos_build
-            linepos = getprop target, '!linepos'
-            unless null linepos goto linepos_done
-
-            # calculate a new linepos array.
-        linepos_build:
-            linepos = new ['ResizableIntegerArray']
-            unless cache goto linepos_build_1
-            setprop target, '!linepos', linepos
-        linepos_build_1:
-            .local string s
-            .local int jpos, eos
-            s = target
-            eos = length s
-            jpos = 0
-            # Search for all of the newline markers in C<target>.  When we
-            # find one, mark the ending offset of the line in C<linepos>.
-        linepos_loop:
-            jpos = find_cclass .CCLASS_NEWLINE, s, jpos, eos
-            unless jpos < eos goto linepos_done_1
-            $I0 = ord s, jpos
-            inc jpos
-            push linepos, jpos
-            # Treat \r\n as a single logical newline.
-            if $I0 != 13 goto linepos_loop
-            $I0 = ord s, jpos
-            if $I0 != 10 goto linepos_loop
-            inc jpos
-            goto linepos_loop
-        linepos_done_1:
-        linepos_done:
-
-            # We have C<linepos>, so now we (binary) search the array
-            # for the largest element that is not greater than C<pos>.
-            .local int lo, hi, line
-            lo = 0
-            hi = elements linepos
-        binary_loop:
-            if lo >= hi goto binary_done
-            line = lo + hi
-            line = line / 2
-            $I0 = linepos[line]
-            if $I0 > pos goto binary_hi
-            lo = line + 1
-            goto binary_loop
-        binary_hi:
-            hi = line
-            goto binary_loop
-        binary_done:
-            inc lo
-            .return (lo)
-        };
-    }
+	
+	method lineof($target, int $pos, int :$cache = 0) {
+		my $linepos := nqp::null();
+		if $cache {
+			# if we've previously cached c<linepos> for target, we use it.
+			$linepos := pir::getprop__PPs($target, '!linepos');
+		}
+		if nqp::isnull($linepos) {
+			# calculate a new linepos array.
+			$linepos := nqp::list_i();
+			if $cache {
+				pir::setprop__0PsP($target, '!linepos', $linepos);
+			}
+			my str $s := ~$target;
+			my int $eos := nqp::chars($s);
+			my int $jpos := 0;
+			my int $ord;
+			# search for all of the newline markers in c<target>.  when we
+			# find one, mark the ending offset of the line in c<linepos>.
+			while nqp::islt_i($jpos := nqp::findcclass(nqp::const::CCLASS_NEWLINE,
+													   $s, $jpos, $eos), $eos)
+			{
+				$ord := nqp::ord($s, $jpos);
+				$jpos := nqp::add_i($jpos, 1);
+				nqp::push_i($linepos, $jpos);
+				# treat \r\n as a single logical newline.
+				if nqp::iseq_i($ord, 13) && nqp::iseq_i(nqp::ord($s, $jpos), 10)
+				{
+					$jpos := nqp::add_i($jpos, 1);
+				}
+			}
+		}
+		
+		# We have c<linepos>, so now we (binary) search the array
+		# for the largest element that is not greater than c<pos>.
+		my int $lo := 0;
+		my int $hi := nqp::elems($linepos);
+		my int $line;
+		while nqp::islt_i($lo, $hi) {
+			$line := nqp::div_i(nqp::add_i($lo, $hi), 2);
+			if nqp::isgt_i(nqp::atpos_i($linepos, $line), $pos) {
+				$hi := $line;
+			} else {
+				$lo := nqp::add_i($line, 1);
+			}
+		}
+		nqp::add_i($lo, 1);
+	}
 
     # the name of the file(s) that are executed, or -e  or 'interactive'
     method user-progname() { $!user_progname // 'interactive' }
