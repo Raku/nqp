@@ -247,11 +247,17 @@ void REPR_initialize_registry(PARROT_INTERP) {
 /* Get a representation's ID from its name. Note that the IDs may change so
  * it's best not to store references to them in e.g. the bytecode stream. */
 INTVAL REPR_name_to_id(PARROT_INTERP, STRING *name) {
+    if (!VTABLE_exists_keyed_str(interp, repr_name_to_id_map, name))
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Representation '%Ss' does not exist", name);
     return VTABLE_get_integer_keyed_str(interp, repr_name_to_id_map, name);
 }
 
 /* Gets a representation by ID. */
 REPROps * REPR_get_by_id(PARROT_INTERP, INTVAL id) {
+    if (id < 0 || id >= num_reprs)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Invalid representation index");
     return repr_registry[id];
 }
 
