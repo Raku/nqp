@@ -1,4 +1,4 @@
 #!nqp
 
-pir::load_bytecode('PGE.pbc');
+nqp::loadbytecode('PGE.pbc');
 say("Loaded Parrot Grammar Engine");

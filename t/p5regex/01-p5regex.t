@@ -37,7 +37,7 @@ sub test_line($line) {
                            ?? pir::chopn__Ssi(nqp::substr($expect, 1), 1)
                            !! '';
 
-    my $rxcomp := pir::compreg__Ps('QRegex::P5Regex');
+    my $rxcomp := nqp::getcomp('QRegex::P5Regex');
     try {
         my $rxsub  := $rxcomp.compile($regex);
         my $cursor := NQPCursor."!cursor_init"($target, :c(0));

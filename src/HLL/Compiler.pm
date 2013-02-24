@@ -205,7 +205,7 @@ class HLL::Compiler {
             %adverbs<precomp> := 1;
         }
 
-        pir::load_bytecode__vs('dumper.pbc');
+        nqp::loadbytecode('dumper.pbc');
 
         self.command_eval(|@a, |%adverbs);
     }

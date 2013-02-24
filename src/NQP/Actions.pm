@@ -1737,10 +1737,11 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
             self.subrule_alias($qast, $name);
         }
         elsif $name eq 'sym' {
-            my $loc := nqp::index(%*RX<name>, ':sym<');
-            $loc := nqp::index(%*RX<name>, ':sym«')
+            my str $fullrxname := %*RX<name>;
+            my int $loc := nqp::index($fullrxname, ':sym<');
+            $loc := nqp::index($fullrxname, ':sym«')
                 if $loc < 0;
-            my $rxname := pir::chopn__Ssi(nqp::substr(%*RX<name>, $loc + 5), 1);
+            my str $rxname := nqp::substr($fullrxname, $loc + 5, nqp::chars($fullrxname) - $loc - 6);
             $qast := QAST::Regex.new(:name('sym'), :rxtype<subcapture>, :node($/),
                 QAST::Regex.new(:rxtype<literal>, $rxname, :node($/)));
         }
