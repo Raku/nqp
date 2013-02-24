@@ -3,7 +3,7 @@ use nqpmo;
 
 plan(36);
 
-my $knowhow := pir::get_knowhow__P();
+my $knowhow := nqp::knowhow();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
 $bi_type.HOW.compose($bi_type);
 sub str($x) { nqp::tostr_I($x) };

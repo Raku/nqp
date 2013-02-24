@@ -15,7 +15,7 @@ sub add_to_sc($sc, $idx, $obj) {
     my $sc := nqp::createsc('TEST_SC_1_IN');
     my $sh := nqp::list_s();
     
-    my $type := pir::get_knowhow__P().new_type(:name('Badger'), :repr('P6int'));
+    my $type := nqp::knowhow().new_type(:name('Badger'), :repr('P6int'));
     $type.HOW.compose($type);
     add_to_sc($sc, 0, $type);
     add_to_sc($sc, 1, nqp::box_i(42, $type));
@@ -39,8 +39,8 @@ sub add_to_sc($sc, $idx, $obj) {
     my $sc := nqp::createsc('TEST_SC_2_IN');
     my $sh := nqp::list_s();
     
-    my $type := pir::get_knowhow__P().new_type(:name('Dugong'), :repr('P6opaque'));
-    $type.HOW.add_attribute($type, pir::get_knowhow_attribute__P().new(name => '$!home'));
+    my $type := nqp::knowhow().new_type(:name('Dugong'), :repr('P6opaque'));
+    $type.HOW.add_attribute($type, nqp::knowhowattr().new(name => '$!home'));
     $type.HOW.compose($type);
     add_to_sc($sc, 0, $type);
     

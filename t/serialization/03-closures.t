@@ -22,7 +22,7 @@ sub add_to_sc($sc, $idx, $obj) {
     # Here we make a clone of it, which is what we're testing.
     my $m2 := nqp::clone($m1);
     
-    my $type := pir::get_knowhow__P().new_type(:name('SimpleCloneTest'), :repr('P6opaque'));
+    my $type := nqp::knowhow().new_type(:name('SimpleCloneTest'), :repr('P6opaque'));
     $type.HOW.add_method($type, 'original', $m1);
     $type.HOW.add_method($type, 'cloned', $m2);
     $type.HOW.compose($type);
@@ -64,12 +64,12 @@ sub add_to_sc($sc, $idx, $obj) {
     nqp::scsetcode($sc, 1, $raw_meth);
     pir::setprop__vPsP($raw_meth, 'STATIC_CODE_REF', $raw_meth);
     
-    my $type1 := pir::get_knowhow__P().new_type(:name('RoleLikeTest1'), :repr('P6opaque'));
+    my $type1 := nqp::knowhow().new_type(:name('RoleLikeTest1'), :repr('P6opaque'));
     $type1.HOW.add_method($type1, 'm', $m1);
     $type1.HOW.compose($type1);
     add_to_sc($sc, 0, $type1);
     
-    my $type2 := pir::get_knowhow__P().new_type(:name('RoleLikeTest2'), :repr('P6opaque'));
+    my $type2 := nqp::knowhow().new_type(:name('RoleLikeTest2'), :repr('P6opaque'));
     $type2.HOW.add_method($type2, 'm', $m2);
     $type2.HOW.compose($type2);
     add_to_sc($sc, 1, $type2);
