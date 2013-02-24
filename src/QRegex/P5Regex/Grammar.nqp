@@ -5,7 +5,7 @@ use QAST;
 class QRegex::P5Regex::World is HLL::World {
     method create_code($past, $name) {
         # Create a fresh stub code, and set its name.
-        my $dummy := pir::nqp_fresh_stub__PP(-> { nqp::die("Uncompiled code executed") });
+        my $dummy := nqp::freshcoderef(-> { nqp::die("Uncompiled code executed") });
         nqp::setcodename($dummy, $name);
 
         # Tag it as a static code ref and add it to the root code refs set.

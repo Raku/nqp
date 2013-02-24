@@ -286,7 +286,7 @@ class NQP::World is HLL::World {
         }
         else {
             # Create a fresh stub code, and set its name.
-            $dummy := pir::nqp_fresh_stub__PP($stub_code);
+            $dummy := nqp::freshcoderef($stub_code);
             nqp::setcodename($dummy, $name);
             
             # Tag it as a static code ref and add it to the root code refs set.
@@ -487,10 +487,10 @@ class NQP::World is HLL::World {
         
         # Compile and run it.
         my $code := self.create_code($wrapper, 'BEGIN block', 0);
-        my $old_global := pir::get_hll_global__PPs(nqp::list(), 'GLOBAL');
-        pir::set_hll_global__vPsP(nqp::list(), 'GLOBAL', $*GLOBALish);
+        my $old_global := nqp::getcurhllsym('GLOBAL');
+        nqp::bindcurhllsym('GLOBAL', $*GLOBALish);
         $code();
-        pir::set_hll_global__vPsP(nqp::list(), 'GLOBAL', $old_global);
+        nqp::bindcurhllsym('GLOBAL', $old_global);
         
         # Need any nested blocks inside the BEGIN block to make it into the
         # output code.
