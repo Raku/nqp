@@ -33,13 +33,6 @@ class NQP::World is HLL::World {
         %!code_object_fixup_list := nqp::hash();
         %!code_stub_sc_idx := nqp::hash();
         @!clearup_tasks := nqp::list();
-
-        if nqp::defined(%*COMPILING<%?OPTIONS><dynext>) {
-            my $dynext_path  := %*COMPILING<%?OPTIONS><dynext>;
-            my @dynext_paths := pir::getinterp__P()[pir::const::IGLOBALS_LIB_PATHS][pir::const::PARROT_LIB_PATH_DYNEXT];
-
-            @dynext_paths.push($dynext_path);
-        }
     }
     
     # Creates a new lexical scope and puts it on top of the stack.
