@@ -205,7 +205,7 @@ class PIRT::Sub is PIRT::Node {
         nqp::push(@parts, $sub_decl);
         
         # File annotation, if there is one.
-        my $file := pir::find_caller_lex__Ps('$?FILES');
+        my $file := nqp::getlexdyn('$?FILES');
         if nqp::ifnull($file, '') {
             nqp::push(@parts, ".annotate 'file', " ~ self.escape($file));
         }
