@@ -432,7 +432,12 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         while $i < $n {
             my $ast := $clist[$i].ast;
             if $ast.negate {
-                $ast.subtype('zerowidth');
+                if $ast.rxtype eq 'cclass' {
+                    $ast := QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, $ast );
+                }
+                else {
+                    $ast.subtype('zerowidth');
+                }
                 $qast := QAST::Regex.new( $ast, $qast, :rxtype<concat>, :node($/));
             }
             else {
