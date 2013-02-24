@@ -9,7 +9,7 @@ class QRegex::P6Regex::World is HLL::World {
         nqp::setcodename($dummy, $name);
 
         # Tag it as a static code ref and add it to the root code refs set.
-        pir::setprop__vPsP($dummy, 'STATIC_CODE_REF', $dummy);
+        nqp::markcodestatic($dummy);
         self.add_root_code_ref($dummy, $past);
         
         # Create code object.

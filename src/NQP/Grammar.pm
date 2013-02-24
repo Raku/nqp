@@ -11,8 +11,8 @@ grammar NQP::Grammar is HLL::Grammar {
         # one universal KnowHOW from the 6model core, and an attribute
         # meta-object to go with it.
         my %*HOW;
-        %*HOW<knowhow>      := pir::get_knowhow__P();
-        %*HOW<knowhow-attr> := pir::get_knowhow_attribute__P();
+        %*HOW<knowhow>      := nqp::knowhow();
+        %*HOW<knowhow-attr> := nqp::knowhowattr();
         
         # Serialization context builder - keeps track of objects that
         # cross the compile-time/run-time boundary that are associated

@@ -251,7 +251,7 @@ class NQP::World is HLL::World {
                         nqp::bindattr($_, %!code_object_types{$subid}, '$!do', nqp::clone($compiled[$i]));
                         nqp::bindattr($_, %!code_object_types{$subid}, '$!clone_callback', nqp::null());
                     }
-                    pir::setprop__vPsP($compiled[$i], 'STATIC_CODE_REF', $compiled[$i]);
+                    nqp::markcodestatic($compiled[$i]);
                     self.update_root_code_ref(%!code_stub_sc_idx{$subid}, $compiled[$i]);
                     
                     # Clear up the fixup statements.
@@ -283,8 +283,8 @@ class NQP::World is HLL::World {
             nqp::setcodename($dummy, $name);
             
             # Tag it as a static code ref and add it to the root code refs set.
-            pir::setprop__vPsP($dummy, 'STATIC_CODE_REF', $dummy);
-            pir::setprop__vPsP($dummy, 'COMPILER_STUB', $dummy);
+            nqp::markcodestatic($dummy);
+            nqp::markcodestub($dummy);
             $code_ref_idx := self.add_root_code_ref($dummy, $past);
             %!code_stub_sc_idx{$past.cuid()} := $code_ref_idx;
             $past<compile_time_dummy> := $dummy;
@@ -299,7 +299,7 @@ class NQP::World is HLL::World {
                         %!code_objects_to_fix_up{$past.cuid()}.push($code_obj);
                         nqp::bindattr($code_obj, $code_type, '$!clone_callback', nqp::null());
                         my $do := nqp::getattr($code_obj, $code_type, '$!do');
-                        pir::setprop__vPsP($do, 'COMPILER_STUB', $do);
+                        nqp::markcodestub($do);
                     }
                     nqp::bindattr($code_obj, $code_type, '$!clone_callback', $cb);
                     nqp::push(@!clearup_tasks, sub () {
