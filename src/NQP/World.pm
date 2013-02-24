@@ -118,7 +118,7 @@ class NQP::World is HLL::World {
                 self.add_fixup_task(:fixup_past($set_outer));
             }
             
-            return nqp::ctxlexpad($setting, 'lex_pad');
+            return nqp::ctxlexpad($setting);
         }
     }
     
@@ -147,7 +147,7 @@ class NQP::World is HLL::World {
                 ))));
         }
 
-        return nqp::ctxlexpad($module, 'lex_pad');
+        return nqp::ctxlexpad($module);
     }
     
     method import($stash) {
