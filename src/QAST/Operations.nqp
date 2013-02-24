@@ -1692,6 +1692,8 @@ QAST::Operations.add_core_pirop_mapping('newtype', 'repr_type_object_for', 'PPs'
 QAST::Operations.add_core_pirop_mapping('composetype', 'repr_compose', '0PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('setwho', 'set_who', '0PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('rebless', 'repr_change_type', '0PP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('knowhow', 'get_knowhow', 'P', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('knowhowattr', 'get_knowhow_attribute', 'P', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('setboolspec', 'set_boolification_spec', '0PiP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('setmethcache', 'publish_method_cache', '0PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('setmethcacheauth', 'set_method_cache_authoritativeness', '0Pi', :inlinable(1));
