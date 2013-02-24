@@ -2,6 +2,11 @@
 
 plan(66);
 
+sub add_to_sc($sc, $idx, $obj) {
+    nqp::scsetobj($sc, $idx, $obj);
+    nqp::setobjsc($obj, $sc);
+}
+
 # Serializing an empty SC.
 {
     my $sc := nqp::createsc('TEST_SC_1_IN');
@@ -24,7 +29,7 @@ plan(66);
     
     class T1 is repr('P6int') { }
     my $v1 := nqp::box_i(42, T1);
-    pir::nqp_add_object_to_sc__vPiP($sc, 0, $v1);
+    add_to_sc($sc, 0, $v1);
 
     my $serialized := nqp::serialize($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6int output longer than a header');
@@ -44,7 +49,7 @@ plan(66);
     
     class T2 is repr('P6num') { }
     my $v := nqp::box_n(6.9, T2);
-    pir::nqp_add_object_to_sc__vPiP($sc, 0, $v);
+    add_to_sc($sc, 0, $v);
 
     my $serialized := nqp::serialize($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6num output longer than a header');
@@ -64,7 +69,7 @@ plan(66);
     
     class T3 is repr('P6str') { }
     my $v := nqp::box_s('dugong', T3);
-    pir::nqp_add_object_to_sc__vPiP($sc, 0, $v);
+    add_to_sc($sc, 0, $v);
 
     my $serialized := nqp::serialize($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6str output longer than a header');
@@ -101,7 +106,7 @@ plan(66);
         method c() { $!c }
     }
     my $v := T4.new();
-    pir::nqp_add_object_to_sc__vPiP($sc, 0, $v);
+    add_to_sc($sc, 0, $v);
 
     my $serialized := nqp::serialize($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6opaque output longer than a header');
@@ -132,8 +137,8 @@ plan(66);
     my $v2 := T5.new();
     $v1.set_x($v2);
     $v2.set_x($v1);
-    pir::nqp_add_object_to_sc__vPiP($sc, 0, $v1);
-    pir::nqp_add_object_to_sc__vPiP($sc, 1, $v2);
+    add_to_sc($sc, 0, $v1);
+    add_to_sc($sc, 1, $v2);
 
     my $serialized := nqp::serialize($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6opaque output longer than a header');
@@ -174,7 +179,7 @@ plan(66);
     $v3.set_v(40);
     
     # Here, we only add *one* of the three explicitly to the SC.
-    pir::nqp_add_object_to_sc__vPiP($sc, 0, $v1);
+    add_to_sc($sc, 0, $v1);
     my $serialized := nqp::serialize($sc, $sh);
     
     my $dsc := nqp::createsc('TEST_SC_7_OUT');
@@ -215,7 +220,7 @@ plan(66);
         method c() { $!c }
     }
     my $v := T7.new();
-    pir::nqp_add_object_to_sc__vPiP($sc, 0, $v);
+    add_to_sc($sc, 0, $v);
 
     my $serialized := nqp::serialize($sc, $sh);
     
@@ -250,7 +255,7 @@ plan(66);
         method b() { $!b }
     }
     my $v := T8.new();
-    pir::nqp_add_object_to_sc__vPiP($sc, 0, $v);
+    add_to_sc($sc, 0, $v);
 
     my $serialized := nqp::serialize($sc, $sh);
     
@@ -291,7 +296,7 @@ plan(66);
         method a() { $!a }
     }
     my $v := T9.new();
-    pir::nqp_add_object_to_sc__vPiP($sc, 0, $v);
+    add_to_sc($sc, 0, $v);
 
     my $serialized := nqp::serialize($sc, $sh);
     
@@ -326,7 +331,7 @@ plan(66);
         method a() { $!a }
     }
     my $v := T10.new();
-    pir::nqp_add_object_to_sc__vPiP($sc, 0, $v);
+    add_to_sc($sc, 0, $v);
 
     my $serialized := nqp::serialize($sc, $sh);
     
@@ -362,7 +367,7 @@ plan(66);
         method a() { $!a }
     }
     my $v := T11.new();
-    pir::nqp_add_object_to_sc__vPiP($sc, 0, $v);
+    add_to_sc($sc, 0, $v);
 
     my $serialized := nqp::serialize($sc, $sh);
     

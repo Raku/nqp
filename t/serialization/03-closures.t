@@ -4,6 +4,11 @@ use nqpmo;
 
 plan(9);
 
+sub add_to_sc($sc, $idx, $obj) {
+    nqp::scsetobj($sc, $idx, $obj);
+    nqp::setobjsc($obj, $sc);
+}
+
 # Serializing a type where some methods are clones; no dependency on outers
 # just yet.
 {
@@ -21,7 +26,7 @@ plan(9);
     $type.HOW.add_method($type, 'original', $m1);
     $type.HOW.add_method($type, 'cloned', $m2);
     $type.HOW.compose($type);
-    pir::nqp_add_object_to_sc__vPiP($sc, 0, $type);
+    add_to_sc($sc, 0, $type);
     
     my $serialized := nqp::serialize($sc, $sh);
 
@@ -62,12 +67,12 @@ plan(9);
     my $type1 := pir::get_knowhow__P().new_type(:name('RoleLikeTest1'), :repr('P6opaque'));
     $type1.HOW.add_method($type1, 'm', $m1);
     $type1.HOW.compose($type1);
-    pir::nqp_add_object_to_sc__vPiP($sc, 0, $type1);
+    add_to_sc($sc, 0, $type1);
     
     my $type2 := pir::get_knowhow__P().new_type(:name('RoleLikeTest2'), :repr('P6opaque'));
     $type2.HOW.add_method($type2, 'm', $m2);
     $type2.HOW.compose($type2);
-    pir::nqp_add_object_to_sc__vPiP($sc, 1, $type2);
+    add_to_sc($sc, 1, $type2);
     
     my $serialized := nqp::serialize($sc, $sh);
 

@@ -4,6 +4,11 @@ use nqpmo;
 
 plan(31);
 
+sub add_to_sc($sc, $idx, $obj) {
+    nqp::scsetobj($sc, $idx, $obj);
+    nqp::setobjsc($obj, $sc);
+}
+
 # Serializing a knowhow with no attributes and no methods; P6int REPR
 # (very simple REPR).
 {
@@ -12,8 +17,8 @@ plan(31);
     
     my $type := pir::get_knowhow__P().new_type(:name('Badger'), :repr('P6int'));
     $type.HOW.compose($type);
-    pir::nqp_add_object_to_sc__vPiP($sc, 0, $type);
-    pir::nqp_add_object_to_sc__vPiP($sc, 1, nqp::box_i(42, $type));
+    add_to_sc($sc, 0, $type);
+    add_to_sc($sc, 1, nqp::box_i(42, $type));
     
     my $serialized := nqp::serialize($sc, $sh);
     
@@ -37,11 +42,11 @@ plan(31);
     my $type := pir::get_knowhow__P().new_type(:name('Dugong'), :repr('P6opaque'));
     $type.HOW.add_attribute($type, pir::get_knowhow_attribute__P().new(name => '$!home'));
     $type.HOW.compose($type);
-    pir::nqp_add_object_to_sc__vPiP($sc, 0, $type);
+    add_to_sc($sc, 0, $type);
     
     my $instance := nqp::create($type);
     nqp::bindattr($instance, $type, '$!home', 'Sea');
-    pir::nqp_add_object_to_sc__vPiP($sc, 1, $instance);
+    add_to_sc($sc, 1, $instance);
     
     my $serialized := nqp::serialize($sc, $sh);
     
@@ -68,13 +73,13 @@ plan(31);
     $type.HOW.add_attribute($type, NQPAttribute.new(name => '$!weight', type => num));
     $type.HOW.add_parent($type, NQPMu);
     $type.HOW.compose($type);
-    pir::nqp_add_object_to_sc__vPiP($sc, 0, $type);
+    add_to_sc($sc, 0, $type);
     
     my $instance := nqp::create($type);
     nqp::bindattr_s($instance, $type, '$!eats', 'mushrooms');
     nqp::bindattr_i($instance, $type, '$!age', 5);
     nqp::bindattr_n($instance, $type, '$!weight', 2.3);
-    pir::nqp_add_object_to_sc__vPiP($sc, 1, $instance);
+    add_to_sc($sc, 1, $instance);
     
     my $serialized := nqp::serialize($sc, $sh);
     
@@ -125,11 +130,11 @@ plan(31);
     $type.HOW.add_method($type, 'intro', $m2);
     $type.HOW.add_parent($type, NQPMu);
     $type.HOW.compose($type);
-    pir::nqp_add_object_to_sc__vPiP($sc, 0, $type);
+    add_to_sc($sc, 0, $type);
     
     my $instance := nqp::create($type);
     nqp::bindattr($instance, $type, '$!name', 'Bob');
-    pir::nqp_add_object_to_sc__vPiP($sc, 1, $instance);
+    add_to_sc($sc, 1, $instance);
     
     my $serialized := nqp::serialize($sc, $sh);
     
