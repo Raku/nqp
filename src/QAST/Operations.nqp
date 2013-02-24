@@ -1749,6 +1749,28 @@ QAST::Operations.add_core_op('setstaticlex', -> $qastcomp, $op {
 });
 QAST::Operations.add_core_pirop_mapping('freshcoderef', 'nqp_fresh_stub', 'PP');
 QAST::Operations.add_core_pirop_mapping('replacecoderef', 'assign', '0PP');
+QAST::Operations.add_core_op('markcodestatic', -> $qastcomp, $op {
+    if +@($op) != 1 {
+        nqp::die('markcodestatic requires one operand');
+    }
+    my $ops := PIRT::Ops.new();
+    my $code := $qastcomp.coerce($qastcomp.as_post($op[0]), 'P');
+    $ops.push($code);
+    $ops.push_pirop('setprop', $code, "'STATIC_CODE_REF'", $code);
+    $ops.result($code);
+    $ops
+});
+QAST::Operations.add_core_op('markcodestub', -> $qastcomp, $op {
+    if +@($op) != 1 {
+        nqp::die('markcodestatic requires one operand');
+    }
+    my $ops := PIRT::Ops.new();
+    my $code := $qastcomp.coerce($qastcomp.as_post($op[0]), 'P');
+    $ops.push($code);
+    $ops.push_pirop('setprop', $code, "'COMPILER_STUB'", $code);
+    $ops.result($code);
+    $ops
+});
 
 # serialization context related opcodes
 QAST::Operations.add_core_pirop_mapping('sha1', 'nqp_sha1', 'Ss');
