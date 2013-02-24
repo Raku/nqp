@@ -43,7 +43,7 @@ sub test_line($line) {
                            ?? pir::chopn__Ssi(nqp::substr($expect, 1), 1)
                            !! '';
 
-    my $rxcomp := pir::compreg__Ps('QRegex::P6Regex');
+    my $rxcomp := nqp::getcomp('QRegex::P6Regex');
     try {
         my $rxsub  := $rxcomp.compile($regex);
         my $cursor := NQPCursor."!cursor_init"($target, :c(0));

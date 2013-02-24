@@ -317,7 +317,7 @@ plan(66);
             $obj;
         }
         method BUILD() {
-            my @a := pir::new__Ps('ResizableIntegerArray');
+            my @a := nqp::list_i();
             @a[0] := 101;
             @a[1] := 102;
             @a[2] := 103;
