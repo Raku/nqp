@@ -17,7 +17,7 @@ sub add_to_sc($sc, $idx, $obj) {
     
     my $m1 := (method () { "success!" }).get_lexinfo().get_static_code();
     nqp::scsetcode($sc, 0, $m1);
-    pir::setprop__vPsP($m1, 'STATIC_CODE_REF', $m1);
+    nqp::markcodestatic($m1);
     
     # Here we make a clone of it, which is what we're testing.
     my $m2 := nqp::clone($m1);
@@ -58,11 +58,11 @@ sub add_to_sc($sc, $idx, $obj) {
     $raw_sub('XXX');
     
     nqp::scsetcode($sc, 0, $raw_sub);
-    pir::setprop__vPsP($raw_sub, 'STATIC_CODE_REF', $raw_sub);
+    nqp::markcodestatic($raw_sub);
     
     my $raw_meth := $m1.get_lexinfo().get_static_code();
     nqp::scsetcode($sc, 1, $raw_meth);
-    pir::setprop__vPsP($raw_meth, 'STATIC_CODE_REF', $raw_meth);
+    nqp::markcodestatic($raw_meth);
     
     my $type1 := nqp::knowhow().new_type(:name('RoleLikeTest1'), :repr('P6opaque'));
     $type1.HOW.add_method($type1, 'm', $m1);

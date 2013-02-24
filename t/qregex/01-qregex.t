@@ -40,7 +40,7 @@ sub test_line($line) {
     $target := unescape($target);
 
     my $expect_substr := nqp::substr($expect, 0, 1) eq '<'
-                           ?? pir::chopn__Ssi(nqp::substr($expect, 1), 1)
+                           ?? nqp::substr($expect, 1, nqp::chars($expect) - 2)
                            !! '';
 
     my $rxcomp := nqp::getcomp('QRegex::P6Regex');

@@ -121,8 +121,8 @@ sub add_to_sc($sc, $idx, $obj) {
     my $m2 := method () { "Hi, I'm " ~ nqp::getattr(self, self.WHAT, '$!name') };
     nqp::scsetcode($sc, 0, $m1);
     nqp::scsetcode($sc, 1, $m2);
-    pir::setprop__vPsP($m1, 'STATIC_CODE_REF', $m1);
-    pir::setprop__vPsP($m2, 'STATIC_CODE_REF', $m2);
+    nqp::markcodestatic($m1);
+    nqp::markcodestatic($m2);
     
     my $type := NQPClassHOW.new_type(:name('Llama'), :repr('P6opaque'));
     $type.HOW.add_attribute($type, NQPAttribute.new(name => '$!name'));
