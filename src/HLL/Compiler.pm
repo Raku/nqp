@@ -1,5 +1,80 @@
+# Backend class for Parrot.
+class HLL::Backend::Parrot {
+    our %parrot_config := pir::getinterp__P()[pir::const::IGLOBALS_CONFIG_HASH];
+    
+    method config() {
+        %parrot_config
+    }
+    
+    method force_gc() {
+        pir::sweep__0i(1)
+    }
+    
+    method name() {
+        'parrot'
+    }
+
+    method nqpevent($spec?) {
+        ## close out the current event log, if any
+        pir::nqpevent__vs('nqpevent: log finished');
+        my $fh := pir::nqpevent_fh__PP(nqp::null());
+        $fh.flush() if !nqp::isnull($fh) && $fh;
+
+        ## start a new event log
+        if $spec {
+            $spec := nqp::split(';', $spec);
+            my $file := $spec[0];
+            my $flags := $spec[1];
+            if $file gt '' {
+                my $fh := nqp::open($file, 'w') || self.panic("Cannot write to $file");
+                pir::nqpevent_fh__PP($fh);
+            }
+            else {
+                pir::nqpevent_fh__PP(nqp::getstderr());
+            }
+            pir::nqpdebflags__Ii($flags eq '' ?? 0x1f !! $flags);
+            pir::nqpevent__0s("nqpevent: log started");
+        }
+    }
+    
+    method run_profiled($what) {
+        my $old_runcore := pir::interpinfo__Si(pir::const::INTERPINFO_CURRENT_RUNCORE);
+        pir::set_runcore__0s("subprof_hll");
+        my $res := $what();
+        pir::set_runcore__vs($old_runcore);
+        $res
+    }
+    
+    method run_traced($level, $what) {
+        pir::trace__vI($level);
+        my $res := $what();
+        pir::trace__0i(0);
+        $res
+    }
+    
+    method version_string() {
+        my $parver  := %parrot_config<VERSION>;
+        my $parrev  := %parrot_config<git_describe> // '(unknown)';
+        return "parrot $parver revision $parrev";
+    }
+    
+    method vmstat() {
+        nqp::sprintf(" %11d %11d %9d %9d",
+            [ pir::interpinfo__Ii(pir::const::INTERPINFO_TOTAL_MEM_ALLOC),
+            pir::interpinfo__Ii(pir::const::INTERPINFO_TOTAL_MEM_USED),
+            pir::interpinfo__Ii(pir::const::INTERPINFO_TOTAL_PMCS),
+            pir::interpinfo__Ii(pir::const::INTERPINFO_ACTIVE_PMCS),
+            ]);
+    }
+}
+
+# Role specifying the default backend for this build.
+role HLL::Backend::Default {
+    method default_backend() { HLL::Backend::Parrot }
+}
+
 # Provides base functionality for a compiler object.
-class HLL::Compiler {
+class HLL::Compiler does HLL::Backend::Default {
     has @!stages;
     has $!parsegrammar;
     has $!parseactions;
@@ -11,10 +86,12 @@ class HLL::Compiler {
     has $!user_progname;
     has @!cli-arguments;
     has %!cli-options;
-
-    our %parrot_config;
+    has $!backend;
 
     method BUILD() {
+        # Backend is set to the default one, by default.
+        $!backend    := self.default_backend();
+        
         # Default stages.
         @!stages     := nqp::split(' ', 'start parse past post pir evalpmc');
         
@@ -24,7 +101,6 @@ class HLL::Compiler {
         for @!cmdoptions {
             $!usage := $!usage ~ "    $_\n";
         }
-        %parrot_config := pir::getinterp__P()[pir::const::IGLOBALS_CONFIG_HASH];
         %!config     := nqp::hash();
     }
 
@@ -118,11 +194,14 @@ class HLL::Compiler {
     method eval($code, *@args, *%adverbs) {
         my $output;
 
-        my $old_runcore := pir::interpinfo__Si(pir::const::INTERPINFO_CURRENT_RUNCORE);
         if (%adverbs<profile-compile>) {
-            pir::set_runcore__0s("subprof_hll");
+            $output := $!backend.run_profiled({
+                self.compile($code, |%adverbs);
+            });
         }
-        $output := self.compile($code, |%adverbs);
+        else {
+            $output := self.compile($code, |%adverbs);
+        }
 
         if !pir::isa__IPs($output, 'String')
                 && %adverbs<target> eq '' {
@@ -132,13 +211,15 @@ class HLL::Compiler {
             }
 
             if (%adverbs<profile>) {
-                pir::set_runcore__0s("subprof_hll");
+                $output := $!backend.run_profiled({ $output(|@args) });
             }
-            pir::trace__vI(%adverbs<trace>);
-            $output := $output(|@args);
-            pir::trace__0i(0);
+            elsif %adverbs<trace> {
+                $output := $!backend.run_traced(%adverbs<trace>, { $output(|@args) });
+            }
+            else {
+                $output := $output(|@args);
+            }
         }
-        pir::set_runcore__vs($old_runcore);
 
         $output;
     }
@@ -341,8 +422,8 @@ class HLL::Compiler {
             my $diff := nqp::time_n() - $timestamp;
             if nqp::defined($stagestats) {
                 nqp::printfh($stderr, nqp::sprintf("Stage %-11s: %7.3f", [$_, $diff]));
-                pir::sweep__0i(1) if nqp::bitand_i($stagestats, 0x4);
-                nqp::printfh($stderr, nqp::sprintf(" %11d %11d %9d %9d", self.vmstat()))
+                $!backend.force_gc() if nqp::bitand_i($stagestats, 0x4);
+                nqp::printfh($stderr, $!backend.vmstat())
                     if nqp::bitand_i($stagestats, 0x2);
                 nqp::printfh($stderr, "\n");
                 if nqp::bitand_i($stagestats, 0x8) {
@@ -431,53 +512,26 @@ class HLL::Compiler {
 
     method version() {
         my $version := %!config<version>;
-        my $parver  := %parrot_config<VERSION>;
-        my $parrev  := %parrot_config<git_describe> // '(unknown)';
-        nqp::say("This is $!language version $version built on parrot $parver revision $parrev");
+        my $backver := $!backend.version_string();
+        nqp::say("This is $!language version $version built on $backver");
         nqp::exit(0);
     }
 
     method show-config() { self.verbose-config(); }
 
     method verbose-config() {
-        for %parrot_config {
-            nqp::say('parrot::' ~ $_.key ~ '=' ~ $_.value);
+        my $bname := $!backend.name;
+        for $!backend.config {
+            nqp::say($bname ~ '::' ~ $_.key ~ '=' ~ $_.value);
         }
         for %!config {
             nqp::say($!language ~ '::' ~ $_.key ~ '=' ~ $_.value);
         }
         nqp::exit(0);
     }
-
-    method vmstat() {
-        [ pir::interpinfo__Ii(pir::const::INTERPINFO_TOTAL_MEM_ALLOC),
-          pir::interpinfo__Ii(pir::const::INTERPINFO_TOTAL_MEM_USED),
-          pir::interpinfo__Ii(pir::const::INTERPINFO_TOTAL_PMCS),
-          pir::interpinfo__Ii(pir::const::INTERPINFO_ACTIVE_PMCS),
-        ];
-    }
-
-    method nqpevent($spec?) {
-        ## close out the current event log, if any
-        pir::nqpevent__vs('nqpevent: log finished');
-        my $fh := pir::nqpevent_fh__PP(nqp::null());
-        $fh.flush() if !nqp::isnull($fh) && $fh;
-
-        ## start a new event log
-        if $spec {
-            $spec := nqp::split(';', $spec);
-            my $file := $spec[0];
-            my $flags := $spec[1];
-            if $file gt '' {
-                my $fh := nqp::open($file, 'w') || self.panic("Cannot write to $file");
-                pir::nqpevent_fh__PP($fh);
-            }
-            else {
-                pir::nqpevent_fh__PP(nqp::getstderr());
-            }
-            pir::nqpdebflags__Ii($flags eq '' ?? 0x1f !! $flags);
-            pir::nqpevent__0s("nqpevent: log started");
-        }
+    
+    method nqpevent(*@pos) {
+        $!backend.nqpevent(|@pos)
     }
 
     method removestage($stagename) {
