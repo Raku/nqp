@@ -10,9 +10,8 @@ Open file.
 
 sub open($filename, :$r, :$w, :$a, :$bin) {
     my $mode := $w ?? 'w' !! ($a ?? 'wa' !! 'r');
-    my $handle := pir::new__Ps('FileHandle');
-    $handle.open($filename, $mode);
-    $handle.encoding($bin ?? 'binary' !! 'utf8');
+    my $handle := nqp::open($filename, $mode);
+    nqp::setencoding($handle, $bin ?? 'binary' !! 'utf8');
     $handle;
 }
 
@@ -21,7 +20,7 @@ Close handle
 =end item
 
 sub close($handle) {
-    $handle.close();
+    nqp::closefh($handle);
 }
 
 =begin item slurp
@@ -30,8 +29,8 @@ Returns the contents of C<$filename> as a single string.
 
 sub slurp ($filename) {
     my $handle := open($filename, :r);
-    my $contents := $handle.readall;
-    $handle.close();
+    my $contents := nqp::readallfh($handle);
+    nqp::closefh($handle);
     $contents;
 }
 
@@ -42,8 +41,8 @@ Write the string value of C<$contents> to C<$filename>.
 
 sub spew($filename, $contents) {
     my $handle := open($filename, :w);
-    $handle.print($contents);
-    $handle.close();
+    nqp::printfh($handle, $contents);
+    nqp::closefh($handle);
 }
 
 sub print(*@args) {
