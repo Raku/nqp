@@ -52,32 +52,32 @@ class HLL::Compiler {
 
     method autoprint($value) {
         self.interactive_result($value)
-            unless (pir::getinterp__P()).stdout_handle().tell() > $*AUTOPRINTPOS;
+            unless nqp::tellfh(nqp::getstdout()) > $*AUTOPRINTPOS;
     }
 
     method interactive(*%adverbs) {
-        pir::getinterp__P().stderr_handle().print(self.interactive_banner);
+        nqp::printfh(nqp::getstderr(), self.interactive_banner);
 
-        my $stdin    := pir::getinterp__P().stdin_handle();
+        my $stdin    := nqp::getstdin();
         my $encoding := ~%adverbs<encoding>;
         if $encoding && $encoding ne 'fixed_8' {
-            $stdin.encoding($encoding);
+            nqp::setencoding($stdin, $encoding);
         }
 
         my $target := nqp::lc(%adverbs<target>);
         my $save_ctx;
         while 1 {
-            last unless $stdin;
+            last if nqp::eoffh($stdin);
 
             my $prompt := self.interactive_prompt // '> ';
-            my $code := $stdin.readline_interactive(~$prompt);
+            my $code := nqp::readlineintfh($stdin, ~$prompt);
             if nqp::isnull($code) || !nqp::defined($code) {
                 nqp::print("\n");
                 last;
             }
 
             # Set the current position of stdout for autoprinting control
-            my $*AUTOPRINTPOS := (pir::getinterp__P()).stdout_handle().tell();
+            my $*AUTOPRINTPOS := nqp::tellfh(nqp::getstdout());
             my $*CTXSAVE := self;
             my $*MAIN_CTX;
 
@@ -237,11 +237,11 @@ class HLL::Compiler {
             if !nqp::isnull($result) && ($target eq 'pir' || %adverbs<output>) {
                 my $output := %adverbs<output>;
                 my $fh := ($output eq '' || $output eq '-')
-                        ?? pir::getinterp__P().stdout_handle()
-                        !! pir::new__Ps('FileHandle').open($output, 'w');
+                        ?? nqp::getstdout()
+                        !! nqp::open($output, 'w');
                 self.panic("Cannot write to $output") unless $fh;
-                $fh.print($result);
-                $fh.close()
+                nqp::printfh($fh, $result);
+                nqp::closefh($fh);
             }
             CATCH {
                 $has_error := 1;
@@ -259,10 +259,10 @@ class HLL::Compiler {
         }
         if ($has_error) {
             if %adverbs<ll-exception> || !nqp::can(self, 'handle-exception') {
-                my $err := pir::getstderr__P();
-                $err.print($error);
-                $err.print("\n");
-                $err.print(nqp::join("\n", $error.backtrace_strings));
+                my $err := nqp::getstderr();
+                nqp::printfh($err, $error);
+                nqp::printfh($err, "\n");
+                nqp::printfh($err, nqp::join("\n", $error.backtrace_strings));
                 nqp::exit(1);
             } else {
                 self.handle-exception($error);
@@ -305,15 +305,12 @@ class HLL::Compiler {
         $!user_progname := nqp::join(',', @files);
         my @codes;
         for @files {
-            my $in-handle := pir::new__Ps('FileHandle');
             my $err := 0;
             try {
-                # the PIR version checked for utf8 specifically...
-                # dunno why it was this way, and why it doesn't work in nqp
-#                $in-handle.encoding($encoding) unless $encoding eq 'utf8';
-                $in-handle.encoding($encoding);
-                nqp::push_s(@codes, $in-handle.readall($_));
-                $in-handle.close;
+                my $in-handle := nqp::open($_, 'r');
+                nqp::setencoding($in-handle, $encoding);
+                nqp::push_s(@codes, nqp::readallfh($in-handle));
+                nqp::closefh($in-handle);
                 CATCH {
                     $err := "Error while reading from file: $_";
                 }
@@ -335,22 +332,22 @@ class HLL::Compiler {
 
         my $target := nqp::lc(%adverbs<target>);
         my $result := $source;
-        my $stderr := pir::getinterp__P().stderr_handle;
-        my $stdin  := pir::getinterp__P().stdin_handle;
+        my $stderr := nqp::getstderr();
+        my $stdin  := nqp::getstdin();
         my $stagestats := %adverbs<stagestats>;
         for self.stages() {
             my $timestamp := nqp::time_n();
             $result := self."$_"($result, |%adverbs);
             my $diff := nqp::time_n() - $timestamp;
             if nqp::defined($stagestats) {
-                $stderr.print(nqp::sprintf("Stage %-11s: %7.3f", [$_, $diff]));
+                nqp::printfh($stderr, nqp::sprintf("Stage %-11s: %7.3f", [$_, $diff]));
                 pir::sweep__0i(1) if nqp::bitand_i($stagestats, 0x4);
-                $stderr.print(nqp::sprintf(" %11d %11d %9d %9d", self.vmstat()))
+                nqp::printfh($stderr, nqp::sprintf(" %11d %11d %9d %9d", self.vmstat()))
                     if nqp::bitand_i($stagestats, 0x2);
-                $stderr.print("\n");
+                nqp::printfh($stderr, "\n");
                 if nqp::bitand_i($stagestats, 0x8) {
-                   $stderr.print("continue> ");
-                   $stdin.readline();
+                   nqp::printfh($stderr, "continue> ");
+                   nqp::readlinefh($stdin);
                 }
             }
             last if $_ eq $target;
@@ -472,12 +469,11 @@ class HLL::Compiler {
             my $file := $spec[0];
             my $flags := $spec[1];
             if $file gt '' {
-                my $fh := pir::new__Ps('FileHandle');
-                $fh.open($file, 'w') || self.panic("Cannot write to $file");
+                my $fh := nqp::open($file, 'w') || self.panic("Cannot write to $file");
                 pir::nqpevent_fh__PP($fh);
             }
             else {
-                pir::nqpevent_fh__PP(pir::getinterp__P().stderr_handle());
+                pir::nqpevent_fh__PP(nqp::getstderr());
             }
             pir::nqpdebflags__Ii($flags eq '' ?? 0x1f !! $flags);
             pir::nqpevent__0s("nqpevent: log started");
