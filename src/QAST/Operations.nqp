@@ -1388,8 +1388,113 @@ QAST::Operations.add_core_pirop_mapping('associative_bind', 'set', '1QsP', :inli
 # I/O opcodes
 QAST::Operations.add_core_pirop_mapping('print', 'print', '0s', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('say', 'say', '0s', :inlinable(1));
-QAST::Operations.add_core_pirop_mapping('stat', 'stat', 'Isi', :inlinable(1)); # (?)
-QAST::Operations.add_core_pirop_mapping('open', 'open', 'Pss', :inlinable(1)); # (?)
+QAST::Operations.add_core_pirop_mapping('stat', 'stat', 'Isi', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('open', 'open', 'Pss', :inlinable(1));
+QAST::Operations.add_core_op('getstdin', -> $qastcomp, $op {
+    if +$op.list != 0 {
+        nqp::die("The 'getstdin' op expects no operands");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('stdin_handle'),
+        QAST::VM.new( :pirop('getinterp__P') )
+    ))
+});
+QAST::Operations.add_core_op('getstdout', -> $qastcomp, $op {
+    if +$op.list != 0 {
+        nqp::die("The 'getstdout' op expects no operands");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('stdout_handle'),
+        QAST::VM.new( :pirop('getinterp__P') )
+    ))
+});
+QAST::Operations.add_core_op('getstderr', -> $qastcomp, $op {
+    if +$op.list != 0 {
+        nqp::die("The 'getstderr' op expects no operands");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('stderr_handle'),
+        QAST::VM.new( :pirop('getinterp__P') )
+    ))
+});
+QAST::Operations.add_core_op('setencoding', -> $qastcomp, $op {
+    if +$op.list != 2 {
+        nqp::die("The 'setencoding' op expects two operands");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('encoding'),
+        $op[0], $op[1]
+    ))
+});
+QAST::Operations.add_core_op('tellfh', -> $qastcomp, $op {
+    if +$op.list != 1 {
+        nqp::die("The 'tellfh' op expects one operand");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('tell'),
+        $op[0]
+    ))
+});
+QAST::Operations.add_core_op('printfh', -> $qastcomp, $op {
+    if +$op.list != 2 {
+        nqp::die("The 'printfh' op expects two operands");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('print'),
+        $op[0], $op[1]
+    ))
+});
+QAST::Operations.add_core_op('sayfh', -> $qastcomp, $op {
+    if +$op.list != 2 {
+        nqp::die("The 'printfh' op expects two operands");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('print'),
+        $op[0], $op[1]
+    ))
+});
+QAST::Operations.add_core_op('readlinefh', -> $qastcomp, $op {
+    if +$op.list != 1 {
+        nqp::die("The 'readlinefh' op expects one operand");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('readline'),
+        $op[0]
+    ))
+});
+QAST::Operations.add_core_op('readlineintfh', -> $qastcomp, $op {
+    if +$op.list != 2 {
+        nqp::die("The 'readlineintfh' op expects two operands");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('readline_interactive'),
+        $op[0], $op[1]
+    ))
+});
+QAST::Operations.add_core_op('readallfh', -> $qastcomp, $op {
+    if +$op.list != 1 {
+        nqp::die("The 'readallfh' op expects one operand");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('readall'),
+        $op[0]
+    ))
+});
+QAST::Operations.add_core_op('eoffh', -> $qastcomp, $op {
+    if +$op.list != 1 {
+        nqp::die("The 'eoffh' op expects one operand");
+    }
+    $qastcomp.as_post(QAST::Op.new( :op('isfalse'), $op[0] ))
+});
+QAST::Operations.add_core_op('closefh', -> $qastcomp, $op {
+    if +$op.list != 1 {
+        nqp::die("The 'closefh' op expects one operand");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('close'),
+        $op[0]
+    ))
+});
 
 # terms
 QAST::Operations.add_core_pirop_mapping('time_i', 'time', 'I', :inlinable(1));
