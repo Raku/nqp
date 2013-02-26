@@ -81,6 +81,15 @@ class HLL::Backend::Parrot {
         'post pir evalpmc'
     }
     
+    method is_precomp_stage($stage) {
+        # XXX PBC goes here also in the future
+        $stage eq 'pir'
+    }
+    
+    method is_textual_stage($stage) {
+        $stage eq 'pir'
+    }
+    
     method post($source, *%adverbs) {
         nqp::getcomp('QAST').post($source)
     }
@@ -222,7 +231,7 @@ class HLL::Compiler does HLL::Backend::Default {
 
                 if !$target {
                     self.autoprint($output);
-                } elsif $target eq 'pir' {
+                } elsif $!backend.is_textual_stage($target) {
                    nqp::say($output);
                 } else {
                    self.dumper($output, $target, |%adverbs);
@@ -330,7 +339,7 @@ class HLL::Compiler does HLL::Backend::Default {
         %adverbs.update(%opts);
         self.usage($program-name) if %adverbs<help>  || %adverbs<h>;
         
-        if !nqp::existskey(%adverbs, 'precomp') && %adverbs<target> eq 'pir' {
+        if $!backend.is_precomp_stage(%adverbs<target>) {
             %adverbs<precomp> := 1;
         }
 
@@ -355,7 +364,7 @@ class HLL::Compiler does HLL::Backend::Default {
                 $!user_progname := '-e';
                 my $?FILES := '-e';
                 $result := self.eval(%adverbs<e>, '-e', |@a, |%adverbs);
-                unless $target eq '' || $target eq 'pir' || %adverbs<output> {
+                unless $target eq '' || $!backend.is_textual_stage($target) || %adverbs<output> {
 					self.dumper($result, $target, |%adverbs);
 				}
             }
@@ -363,7 +372,7 @@ class HLL::Compiler does HLL::Backend::Default {
             elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }
             else { $result := self.evalfiles(@a[0], |@a, |%adverbs) }
 
-            if !nqp::isnull($result) && ($target eq 'pir' || %adverbs<output>) {
+            if !nqp::isnull($result) && ($!backend.is_textual_stage($target) || %adverbs<output>) {
                 my $output := %adverbs<output>;
                 my $fh := ($output eq '' || $output eq '-')
                         ?? nqp::getstdout()
@@ -449,7 +458,7 @@ class HLL::Compiler does HLL::Backend::Default {
         my $code := nqp::join('', @codes);
         my $?FILES := nqp::join(' ', @files);
         my $r := self.eval($code, |@args, |%adverbs);
-        if $target eq '' || $target eq 'pir' || %adverbs<output> {
+        if $target eq '' || $!backend.is_textual_stage($target) || %adverbs<output> {
             return $r;
         } else {
             return self.dumper($r, $target, |%adverbs);
