@@ -175,14 +175,6 @@ class HLL::Compiler does HLL::Backend::Default {
 
     method config() { %!config };
 
-    method load_module($name) {
-        my $base := nqp::join('/', self.parse_name($name));
-        my $loaded := 0;
-        try { nqp::loadbytecode("$base.pbc"); $loaded := 1 };
-        unless $loaded { nqp::loadbytecode("$base.pir"); $loaded := 1 }
-        self.get_module($name);
-    }
-
     method autoprint($value) {
         self.interactive_result($value)
             unless nqp::tellfh(nqp::getstdout()) > $*AUTOPRINTPOS;
