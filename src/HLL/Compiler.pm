@@ -143,6 +143,14 @@ class HLL::Compiler does HLL::Backend::Default {
         }
         %!config     := nqp::hash();
     }
+    
+    method backend(*@value) {
+        if @value {
+            $!backend := @value[0];
+            @!stages  := nqp::split(' ', 'start parse ast ' ~ $!backend.stages());
+        }
+        $!backend
+    }
 
     method language($name?) {
         if $name {
