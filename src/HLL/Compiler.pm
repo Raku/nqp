@@ -2,6 +2,16 @@
 class HLL::Backend::Parrot {
     our %parrot_config := pir::getinterp__P()[pir::const::IGLOBALS_CONFIG_HASH];
     
+    method apply_transcodings($s, $transcode) {
+        for nqp::split(' ', $transcode) {
+            try {
+                $s := pir::trans_encoding__Ssi($s,
+                        pir::find_encoding__Is($_));
+            }
+        }
+        return $s;
+    }
+    
     method config() {
         %parrot_config
     }
@@ -443,12 +453,7 @@ class HLL::Compiler does HLL::Backend::Default {
     method parse($source, *%adverbs) {
         my $s := $source;
         if %adverbs<transcode> {
-            for nqp::split(' ', %adverbs<transcode>) {
-                try {
-                    $s := pir::trans_encoding__Ssi($s,
-                            pir::find_encoding__Is($_));
-                }
-            }
+            $s := $!backend.apply_transcodings($s, %adverbs<transcode>);
         }
         my $grammar := self.parsegrammar;
         my $actions;
