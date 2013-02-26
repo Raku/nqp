@@ -103,7 +103,7 @@ class HLL::Compiler does HLL::Backend::Default {
         $!backend    := self.default_backend();
         
         # Default stages.
-        @!stages     := nqp::split(' ', 'start parse past post pir evalpmc');
+        @!stages     := nqp::split(' ', 'start parse ast post pir evalpmc');
         
         # Command options and usage.
         @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile profile-compile');
@@ -465,9 +465,9 @@ class HLL::Compiler does HLL::Backend::Default {
         return $match;
     }
 
-    method past($source, *%adverbs) {
+    method ast($source, *%adverbs) {
         my $ast := $source.ast();
-        self.panic("Unable to obtain ast from " ~ $source.HOW.name($source))
+        self.panic("Unable to obtain AST from " ~ $source.HOW.name($source))
             unless $ast ~~ QAST::Node;
         $ast;
     }
