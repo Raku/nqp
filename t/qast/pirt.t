@@ -6,7 +6,7 @@ sub is_pirt_result($producer, $expected, $desc) {
     my $pirt := $producer();
     my $pir := $pirt.pir();
     #say($pir);
-    my $pbc := QAST::Compiler.evalpmc($pir);
+    my $pbc := nqp::getcomp('nqp').compile($pir, :from('pir'));
     ok($pbc() eq $expected, $desc);
 }
 

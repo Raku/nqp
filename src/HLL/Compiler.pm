@@ -76,6 +76,36 @@ class HLL::Backend::Parrot {
             pir::interpinfo__Ii(pir::const::INTERPINFO_ACTIVE_PMCS),
             ]);
     }
+    
+    method stages() {
+        'post pir evalpmc'
+    }
+    
+    method post($source, *%adverbs) {
+        nqp::getcomp('QAST').post($source)
+    }
+
+    method pirbegin() {
+        ".include 'cclass.pasm'\n"
+        ~ ".include 'except_severity.pasm'\n"
+        ~ ".include 'except_types.pasm'\n"
+        ~ ".include 'iglobals.pasm'\n"
+        ~ ".include 'interpinfo.pasm'\n"
+        ~ ".include 'iterator.pasm'\n"
+        ~ ".include 'sysinfo.pasm'\n"
+        ~ ".include 'stat.pasm'\n"
+        ~ ".include 'datatypes.pasm'\n"
+        ~ ".include 'libpaths.pasm'\n"
+    }
+  
+    method pir($source, *%adverbs) {
+        self.pirbegin() ~ $source.pir()
+    }
+
+    method evalpmc($source, *%adverbs) {
+        my $compiler := nqp::getcomp('PIR');
+        $compiler($source)
+    }
 }
 
 # Role specifying the default backend for this build.
@@ -103,7 +133,7 @@ class HLL::Compiler does HLL::Backend::Default {
         $!backend    := self.default_backend();
         
         # Default stages.
-        @!stages     := nqp::split(' ', 'start parse ast post pir evalpmc');
+        @!stages     := nqp::split(' ', 'start parse ast ' ~ $!backend.stages());
         
         # Command options and usage.
         @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile profile-compile');
@@ -417,8 +447,18 @@ class HLL::Compiler does HLL::Backend::Default {
             return self.dumper($r, $target, |%adverbs);
         }
     }
+    
+    method exists_stage($stage) {
+        my $found := 0;
+        for self.stages() {
+            if $_ eq $stage {
+                return 1;
+            }
+        }
+        return 0;
+    }
 
-    method compile($source, *%adverbs) {
+    method compile($source, :$from, *%adverbs) {
         my %*COMPILING<%?OPTIONS> := %adverbs;
 
         my $target := nqp::lc(%adverbs<target>);
@@ -426,11 +466,31 @@ class HLL::Compiler does HLL::Backend::Default {
         my $stderr := nqp::getstderr();
         my $stdin  := nqp::getstdin();
         my $stagestats := %adverbs<stagestats>;
+        unless $from eq '' || self.exists_stage($from) {
+            nqp::die("Unknown compilation input '$_'");
+        }
+        unless $target eq '' || self.exists_stage($target) {
+            nqp::die("Unknown compilation target '$_'");
+        }
         for self.stages() {
+            if $from ne '' {
+                if $_ eq $from {
+                    $from := '';
+                }
+                next;
+            }
             my $timestamp := nqp::time_n();
-            $result := self."$_"($result, |%adverbs);
+            if nqp::can(self, $_) {
+                $result := self."$_"($result, |%adverbs);
+            }
+            elsif nqp::can($!backend, $_) {
+                $result := $!backend."$_"($result, |%adverbs);
+            }
+            else {
+                nqp::die("Unknown compilation stage '$_'");
+            }
             my $diff := nqp::time_n() - $timestamp;
-            if nqp::defined($stagestats) {
+            if nqp::defined($stagestats) && $from eq '' {
                 nqp::printfh($stderr, nqp::sprintf("Stage %-11s: %7.3f", [$_, $diff]));
                 $!backend.force_gc() if nqp::bitand_i($stagestats, 0x4);
                 nqp::printfh($stderr, $!backend.vmstat())
@@ -470,32 +530,6 @@ class HLL::Compiler does HLL::Backend::Default {
         self.panic("Unable to obtain AST from " ~ $source.HOW.name($source))
             unless $ast ~~ QAST::Node;
         $ast;
-    }
-
-    method post($source, *%adverbs) {
-        nqp::getcomp('QAST').post($source)
-    }
-
-    method pirbegin() {
-        ".include 'cclass.pasm'\n"
-        ~ ".include 'except_severity.pasm'\n"
-        ~ ".include 'except_types.pasm'\n"
-        ~ ".include 'iglobals.pasm'\n"
-        ~ ".include 'interpinfo.pasm'\n"
-        ~ ".include 'iterator.pasm'\n"
-        ~ ".include 'sysinfo.pasm'\n"
-        ~ ".include 'stat.pasm'\n"
-        ~ ".include 'datatypes.pasm'\n"
-        ~ ".include 'libpaths.pasm'\n"
-    }
-  
-    method pir($source, *%adverbs) {
-        self.pirbegin() ~ $source.pir()
-    }
-
-    method evalpmc($source, *%adverbs) {
-        my $compiler := nqp::getcomp('PIR');
-        $compiler($source)
     }
 
     method dumper($obj, $name, *%options) {
