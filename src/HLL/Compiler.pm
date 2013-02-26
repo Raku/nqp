@@ -467,10 +467,10 @@ class HLL::Compiler does HLL::Backend::Default {
         my $stdin  := nqp::getstdin();
         my $stagestats := %adverbs<stagestats>;
         unless $from eq '' || self.exists_stage($from) {
-            nqp::die("Unknown compilation input '$_'");
+            nqp::die("Unknown compilation input '$from'");
         }
         unless $target eq '' || self.exists_stage($target) {
-            nqp::die("Unknown compilation target '$_'");
+            nqp::die("Unknown compilation target '$target'");
         }
         for self.stages() {
             if $from ne '' {
@@ -490,7 +490,7 @@ class HLL::Compiler does HLL::Backend::Default {
                 nqp::die("Unknown compilation stage '$_'");
             }
             my $diff := nqp::time_n() - $timestamp;
-            if nqp::defined($stagestats) && $from eq '' {
+            if nqp::defined($stagestats) {
                 nqp::printfh($stderr, nqp::sprintf("Stage %-11s: %7.3f", [$_, $diff]));
                 $!backend.force_gc() if nqp::bitand_i($stagestats, 0x4);
                 nqp::printfh($stderr, $!backend.vmstat())
