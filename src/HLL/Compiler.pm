@@ -328,7 +328,9 @@ class HLL::Compiler does HLL::Backend::Default {
         my %opts := $res.options;
         my @a    := $res.arguments;
 
-        %adverbs.update(%opts);
+        for %opts {
+            %adverbs{$_.key} := $_.value;
+        }
         self.usage($program-name) if %adverbs<help>  || %adverbs<h>;
         
         if $!backend.is_precomp_stage(%adverbs<target>) {
