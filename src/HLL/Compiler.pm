@@ -115,6 +115,18 @@ class HLL::Backend::Parrot {
         my $compiler := nqp::getcomp('PIR');
         $compiler($source)
     }
+    
+    method is_compunit($cuish) {
+        !pir::isa__IPs($cuish, 'String')
+    }
+    
+    method compunit_mainline($cu) {
+        $cu[0]
+    }
+    
+    method compunit_coderefs($cu) {
+        $cu
+    }
 }
 
 # Role specifying the default backend for this build.
@@ -252,11 +264,10 @@ class HLL::Compiler does HLL::Backend::Default {
             $output := self.compile($code, |%adverbs);
         }
 
-        if !pir::isa__IPs($output, 'String')
-                && %adverbs<target> eq '' {
+        if $!backend.is_compunit($output) && %adverbs<target> eq '' {
             my $outer_ctx := %adverbs<outer_ctx>;
             if nqp::defined($outer_ctx) {
-                $output[0].set_outer_ctx($outer_ctx);
+                $!backend.compunit_mainline($output).set_outer_ctx($outer_ctx);
             }
 
             if (%adverbs<profile>) {

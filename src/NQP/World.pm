@@ -230,28 +230,30 @@ class NQP::World is HLL::World {
         my $stub_code := sub (*@args, *%named) {
             # Do the compilation.
             $past.unshift(self.libs());
-            my $compiled := nqp::getcomp('nqp').compile(
+            my $compiler := nqp::getcomp('nqp');
+            my $compiled := $compiler.compile(
                 QAST::CompUnit.new( :hll('nqp'), $past ),
                 :from<ast>);
 
             # Fix up any code objects holding stubs with the real compiled thing.
-            my $c := nqp::elems($compiled);
+            my @allcodes := $compiler.backend.compunit_coderefs($compiled);
+            my $c := nqp::elems(@allcodes);
             my $i := 0;
             while $i < $c {
-                my $subid := $compiled[$i].get_subid();
+                my $subid := @allcodes[$i].get_subid();
                 if nqp::existskey(%!code_objects_to_fix_up, $subid) {
                     # First, go over the code objects. Update the $!do, and the
                     # entry in the SC. Make sure the newly compiled code is marked
                     # as a static code ref.
                     my $static := %!code_objects_to_fix_up{$subid}.shift();
-                    nqp::bindattr($static, %!code_object_types{$subid}, '$!do', $compiled[$i]);
+                    nqp::bindattr($static, %!code_object_types{$subid}, '$!do', @allcodes[$i]);
                     nqp::bindattr($static, %!code_object_types{$subid}, '$!clone_callback', nqp::null());
                     for %!code_objects_to_fix_up{$subid} {
-                        nqp::bindattr($_, %!code_object_types{$subid}, '$!do', nqp::clone($compiled[$i]));
+                        nqp::bindattr($_, %!code_object_types{$subid}, '$!do', nqp::clone(@allcodes[$i]));
                         nqp::bindattr($_, %!code_object_types{$subid}, '$!clone_callback', nqp::null());
                     }
-                    nqp::markcodestatic($compiled[$i]);
-                    self.update_root_code_ref(%!code_stub_sc_idx{$subid}, $compiled[$i]);
+                    nqp::markcodestatic(@allcodes[$i]);
+                    self.update_root_code_ref(%!code_stub_sc_idx{$subid}, @allcodes[$i]);
                     
                     # Clear up the fixup statements.
                     my $fixup_stmts := %!code_object_fixup_list{$subid};
@@ -260,7 +262,8 @@ class NQP::World is HLL::World {
                 $i := $i + 1;
             }
             
-            $compiled(|@args, |%named);
+            my $mainline := $compiler.backend.compunit_mainline($compiled);
+            $mainline(|@args, |%named);
         };
         
         # Create code object, if we'll need one.
