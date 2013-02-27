@@ -80,29 +80,17 @@ class NQP::World is HLL::World {
             
 
             # Emit fixup or loading code.
-            my $set_outer := QAST::VM.new(
-                :parrot(QAST::Op.new(
-                    :op('callmethod'), :name('set_outer_ctx'),
-                    QAST::BVal.new( :value($*UNIT) ),
+            my $set_outer := QAST::Op.new(
+                :op('forceouterctx'),
+                QAST::BVal.new( :value($*UNIT) ),
+                QAST::Op.new(
+                    :op('callmethod'), :name('load_setting'),
                     QAST::Op.new(
-                        :op('callmethod'), :name('load_setting'),
-                        QAST::Op.new(
-                            :op('getcurhllsym'),
-                            QAST::SVal.new( :value('ModuleLoader') )
-                        ),
-                        QAST::SVal.new( :value($setting_name) )
-                    ))),
-                :jvm(QAST::Op.new(
-                    :op('forceouterctx'),
-                    QAST::BVal.new( :value($*UNIT) ),
-                    QAST::Op.new(
-                        :op('callmethod'), :name('load_setting'),
-                        QAST::Op.new(
-                            :op('getcurhllsym'),
-                            QAST::SVal.new( :value('ModuleLoader') )
-                        ),
-                        QAST::SVal.new( :value($setting_name) )
-                    ))));
+                        :op('getcurhllsym'),
+                        QAST::SVal.new( :value('ModuleLoader') )
+                    ),
+                    QAST::SVal.new( :value($setting_name) )
+                ));
             if self.is_precompilation_mode() {
                 self.add_load_dependency_task(:deserialize_past(QAST::Stmts.new(
                     QAST::Op.new(
@@ -240,7 +228,7 @@ class NQP::World is HLL::World {
             my $c := nqp::elems(@allcodes);
             my $i := 0;
             while $i < $c {
-                my $subid := @allcodes[$i].get_subid();
+                my $subid := nqp::getcodecuid(@allcodes[$i]);
                 if nqp::existskey(%!code_objects_to_fix_up, $subid) {
                     # First, go over the code objects. Update the $!do, and the
                     # entry in the SC. Make sure the newly compiled code is marked

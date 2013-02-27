@@ -267,7 +267,7 @@ class HLL::Compiler does HLL::Backend::Default {
         if $!backend.is_compunit($output) && %adverbs<target> eq '' {
             my $outer_ctx := %adverbs<outer_ctx>;
             if nqp::defined($outer_ctx) {
-                $!backend.compunit_mainline($output).set_outer_ctx($outer_ctx);
+                nqp::forceouterctx($!backend.compunit_mainline($output), $outer_ctx);
             }
 
             if (%adverbs<profile>) {
