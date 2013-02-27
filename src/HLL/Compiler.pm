@@ -337,8 +337,6 @@ class HLL::Compiler does HLL::Backend::Default {
             %adverbs<precomp> := 1;
         }
 
-        nqp::loadbytecode('dumper.pbc');
-
         self.command_eval(|@a, |%adverbs);
     }
 
@@ -548,7 +546,7 @@ class HLL::Compiler does HLL::Backend::Default {
             nqp::print($obj.dump());
         }
         else {
-            (Q:PIR { %r = get_root_global ['parrot'], '_dumper' })($obj, $name)
+            nqp::die("Cannot dump this object; no dump method");
         }
     }
 

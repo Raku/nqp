@@ -99,31 +99,4 @@ my class NQPMu {
     method isa($type) {
         self.HOW.isa(self, $type)
     }
-
-    method __dump($dumper, $label) {
-        return 0 unless nqp::isconcrete(self);
-        my $subindent := $dumper.'newIndent'();
-        print('{');
-        for self.HOW.parents(self) -> $type {
-            for $type.HOW.attributes($type, :local) {
-                my $name := $_.name;
-                my $attrtype := $_.type;
-                print("\n", $subindent, $type.HOW.name($type), "::", $name, " => ");
-                if $attrtype =:= int {
-                    $dumper.'dump'($label, nqp::getattr_i(self, $type, $name));
-                }
-                elsif $attrtype =:= num {
-                    $dumper.'dump'($label, nqp::getattr_n(self, $type, $name));
-                }
-                elsif $attrtype =:= str {
-                    $dumper.'dump'($label, nqp::getattr_s(self, $type, $name));
-                }
-                else {
-                    $dumper.'dump'($label, nqp::getattr(self, $type, $name));
-                }
-            }
-        }
-        $dumper.deleteIndent();
-        print("\n", $dumper.indent, '}');
-    }
 }

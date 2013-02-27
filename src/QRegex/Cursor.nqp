@@ -611,7 +611,65 @@ class NQPMatch is NQPCapture {
     
     method !make($ast) { $!ast := $ast }
     method ast()       { $!ast }
-
+    
+    method dump($indent?) {
+        unless nqp::defined($indent) {
+            $indent := 0;
+        }
+        if self.Bool() {
+            my @chunks;
+            
+            sub dump_match($key, $value) {
+                nqp::push(@chunks, nqp::x(' ', $indent));
+                nqp::push(@chunks, '- ');
+                nqp::push(@chunks, $key);
+                nqp::push(@chunks, ': ');
+                if nqp::can($value, 'Str') {
+                    nqp::push(@chunks, $value.Str());
+                }
+                else {
+                    nqp::push(@chunks, '<object>');
+                }
+                nqp::push(@chunks, "\n");
+                if nqp::can($value, 'dump') {
+                    nqp::push(@chunks, $value.dump($indent + 2));
+                }
+            }
+            
+            sub dump_match_array($key, @matches) {
+                nqp::push(@chunks, nqp::x(' ', $indent));
+                nqp::push(@chunks, '- ');
+                nqp::push(@chunks, $key);
+                nqp::push(@chunks, ': ');
+                nqp::push(@chunks, ~+@matches);
+                nqp::push(@chunks, " matches\n");
+                for @matches {
+                    nqp::push(@chunks, $_.dump($indent + 2));
+                }
+            }
+            
+            my int $i := 0;
+            for self.list() {
+                if $_ {
+                    nqp::islist($_)
+                        ?? dump_match_array($i, $_)
+                        !! dump_match($i, $_);
+                }
+            }
+            for self.hash() {
+                if $_.value {
+                    nqp::islist($_.value)
+                        ?? dump_match_array($_.key, $_.value)
+                        !! dump_match($_.key, $_.value);
+                }
+            }
+            return nqp::join('', @chunks);
+        }
+        else {
+            return nqp::x(' ', $indent) ~ "- NO MATCH\n";
+        }
+    }
+    
     method !dump_str($key) {
         sub dump_array($key, $item) {
             my $str := '';
