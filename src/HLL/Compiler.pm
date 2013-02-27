@@ -480,6 +480,7 @@ class HLL::Compiler does HLL::Backend::Default {
 
     method compile($source, :$from, *%adverbs) {
         my %*COMPILING<%?OPTIONS> := %adverbs;
+        my $*LINEPOSCACHE;
 
         my $target := nqp::lc(%adverbs<target>);
         my $result := $source;
@@ -656,16 +657,16 @@ class HLL::Compiler does HLL::Backend::Default {
     }
 	
 	method lineof($target, int $pos, int :$cache = 0) {
-		my $linepos := nqp::null();
+		my $linepos;
 		if $cache {
 			# if we've previously cached c<linepos> for target, we use it.
-			$linepos := pir::getprop__PPs($target, '!linepos');
+			$linepos := $*LINEPOSCACHE;
 		}
-		if nqp::isnull($linepos) {
+		unless nqp::defined($linepos) {
 			# calculate a new linepos array.
 			$linepos := nqp::list_i();
 			if $cache {
-				pir::setprop__0PsP($target, '!linepos', $linepos);
+				$*LINEPOSCACHE := $linepos;
 			}
 			my str $s := ~$target;
 			my int $eos := nqp::chars($s);
