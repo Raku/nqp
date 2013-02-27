@@ -1825,6 +1825,15 @@ QAST::Operations.add_core_pirop_mapping('getcodeobj', 'get_sub_code_object', 'PP
 QAST::Operations.add_core_pirop_mapping('setcodeobj', 'set_sub_code_object', '1PP');
 QAST::Operations.add_core_pirop_mapping('getcodename', 'set', 'SP');
 QAST::Operations.add_core_pirop_mapping('setcodename', 'assign', '1Ps');
+QAST::Operations.add_core_op('getcodecuid', -> $qastcomp, $op {
+    if +@($op) != 1 {
+        nqp::die('getcodecuid requires one operand');
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('get_subid'),
+        $op[0]
+    ))
+});
 QAST::Operations.add_core_op('setstaticlex', -> $qastcomp, $op {
     if +@($op) != 3 {
         nqp::die('setstaticlex requires three operands');
@@ -1851,6 +1860,15 @@ QAST::Operations.add_core_op('setstaticlex', -> $qastcomp, $op {
                 ),
             )
         ))
+});
+QAST::Operations.add_core_op('forceouterctx', -> $qastcomp, $op {
+    if +@($op) != 2 {
+        nqp::die('forceouterctx requires two operands');
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('set_outer_ctx'),
+        $op[0], $op[1]
+    ))
 });
 QAST::Operations.add_core_pirop_mapping('freshcoderef', 'nqp_fresh_stub', 'PP');
 QAST::Operations.add_core_pirop_mapping('replacecoderef', 'assign', '0PP');
