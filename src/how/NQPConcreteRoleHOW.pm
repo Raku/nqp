@@ -12,7 +12,7 @@ knowhow NQPConcreteRoleHOW {
     has $!instance_of;
 
     # Attributes and methods.
-    has %!attributes;
+    has @!attributes;
     has %!methods;
     has @!multi_methods_to_incorporate;
     has @!collisions;
@@ -45,7 +45,7 @@ knowhow NQPConcreteRoleHOW {
     method BUILD(:$name!, :$instance_of!) {
         $!name := $name;
         $!instance_of := $instance_of;
-        %!attributes := nqp::hash();
+        @!attributes := nqp::list();
         %!methods := nqp::hash();
         @!multi_methods_to_incorporate := nqp::list();
         @!collisions := nqp::list();
@@ -78,10 +78,12 @@ knowhow NQPConcreteRoleHOW {
 
     method add_attribute($obj, $meta_attr) {
         my $name := $meta_attr.name;
-        if nqp::existskey(%!attributes, $name) {
-            nqp::die("This role already has an attribute named " ~ $name);
+        for @!attributes {
+            if $_.name eq $name {
+                nqp::die("This role already has an attribute named " ~ $name);
+            }
         }
-        %!attributes{$name} := $meta_attr;
+        nqp::push(@!attributes, $meta_attr);
     }
 
     method add_parent($obj, $parent) {
@@ -143,8 +145,8 @@ knowhow NQPConcreteRoleHOW {
 
     method attributes($obj, :$local) {
         my @attrs;
-        for %!attributes {
-            nqp::push(@attrs, nqp::iterval($_));
+        for @!attributes {
+            nqp::push(@attrs, $_);
         }
         @attrs
     }

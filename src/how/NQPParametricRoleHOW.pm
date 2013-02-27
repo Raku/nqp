@@ -11,7 +11,7 @@ knowhow NQPParametricRoleHOW {
     has $!name;
 
     # Attributes and methods.
-    has %!attributes;
+    has @!attributes;
     has %!methods;
     has @!multi_methods_to_incorporate;
 
@@ -44,7 +44,7 @@ knowhow NQPParametricRoleHOW {
 
     method BUILD(:$name!) {
         $!name := $name;
-        %!attributes := nqp::hash();
+        @!attributes := nqp::list();
         %!methods := nqp::hash();
         @!multi_methods_to_incorporate := nqp::list();
         @!roles := nqp::list();
@@ -79,10 +79,12 @@ knowhow NQPParametricRoleHOW {
 
     method add_attribute($obj, $meta_attr) {
         my $name := $meta_attr.name;
-        if nqp::existskey(%!attributes, $name) {
-            nqp::die("This role already has an attribute named " ~ $name);
+        for @!attributes {
+            if $_.name eq $name {
+                nqp::die("This role already has an attribute named " ~ $name);
+            }
         }
-        %!attributes{$name} := $meta_attr;
+        nqp::push(@!attributes, $meta_attr);
     }
 
     method add_parent($obj, $parent) {
@@ -129,8 +131,8 @@ knowhow NQPParametricRoleHOW {
 
         # Copy attributes. (Nothing to reify in NQP as we don't currently
         # have parametric types that may end up in the signature.)
-        for %!attributes {
-            $irole.HOW.add_attribute($irole, nqp::iterval($_));
+        for @!attributes {
+            $irole.HOW.add_attribute($irole, $_);
         }
 
         # Capture methods in the correct lexical context.
@@ -182,8 +184,8 @@ knowhow NQPParametricRoleHOW {
 
     method attributes($obj, :$local) {
         my @attrs;
-        for %!attributes {
-            nqp::push(@attrs, nqp::iterval($_));
+        for @!attributes {
+            nqp::push(@attrs, $_);
         }
         @attrs
     }

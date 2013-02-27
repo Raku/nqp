@@ -11,7 +11,7 @@ knowhow NQPClassHOW {
     has $!name;
 
     # Attributes, methods, parents and roles directly added.
-    has %!attributes;
+    has @!attributes;
     has %!methods;
     has @!method_order;
     has @!multi_methods_to_incorporate;
@@ -65,7 +65,7 @@ knowhow NQPClassHOW {
 
     method BUILD(:$name = '<anon>') {
         $!name := $name;
-        %!attributes := nqp::hash();
+        @!attributes := nqp::list();
         %!methods := nqp::hash();
         @!method_order := nqp::list();
         @!multi_methods_to_incorporate := nqp::list();
@@ -119,10 +119,12 @@ knowhow NQPClassHOW {
 
     method add_attribute($obj, $meta_attr) {
         my $name := $meta_attr.name;
-        if nqp::existskey(%!attributes, $name) {
-            nqp::die("This class already has an attribute named " ~ $name);
+        for @!attributes {
+            if $_.name eq $name {
+                nqp::die("This class already has an attribute named " ~ $name);
+            }
         }
-        %!attributes{$name} := $meta_attr;
+        nqp::push(@!attributes, $meta_attr);
     }
 
     method add_parent($obj, $parent) {
@@ -630,8 +632,8 @@ knowhow NQPClassHOW {
     method attributes($obj, :$local = 0) {
         my @attrs;
         if $local {
-            for %!attributes {
-                nqp::push(@attrs, nqp::iterval($_));
+            for @!attributes {
+                nqp::push(@attrs, $_);
             }
         }
         else {
