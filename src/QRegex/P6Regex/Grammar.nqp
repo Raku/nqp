@@ -172,9 +172,11 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
                 $<max>=[ 
                        || \d+ 
                        || '*' 
+                       || \-\d+ <.panic: "Negative numbers are not allowed as range quantifier endpoint">
                        || <.panic: "Only integers or '*' allowed as range quantifier endpoint"> 
                        ] 
             ]?
+        || \-\d+ <.panic: "Negative numbers are not allowed as range quantifier endpoint">
         ]
     }
 
