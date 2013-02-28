@@ -13,7 +13,7 @@ static REPROps *this_repr;
 static void set_int(PARROT_INTERP, STable *st, void *data, INTVAL value);
 static INTVAL get_int(PARROT_INTERP, STable *st, void *data);
 
-static void die_bad_bits(PARROT_INTERP) {
+PARROT_DOES_NOT_RETURN static void die_bad_bits(PARROT_INTERP) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6int can only handle 1, 2, 4, 8, 16, 32 or 64 bit wide ints.");
 }

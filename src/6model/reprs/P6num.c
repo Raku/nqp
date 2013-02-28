@@ -13,7 +13,7 @@ static REPROps *this_repr;
 static void set_num(PARROT_INTERP, STable *st, void *data, FLOATVAL value);
 static FLOATVAL get_num(PARROT_INTERP, STable *st, void *data);
 
-static void die_bad_bits(PARROT_INTERP) {
+PARROT_DOES_NOT_RETURN static void die_bad_bits(PARROT_INTERP) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "P6num can only handle 32 or 64 bit wide floats.");
 }
