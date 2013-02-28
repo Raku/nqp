@@ -20,6 +20,7 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
     /* Create type object and point it back at the STable. */
     obj->common.stable = st_pmc;
     st->WHAT = wrap_object(interp, obj);
+    st->REPR_data = mem_allocate_zeroed_typed(VMArrayREPRData);
     PARROT_GC_WRITE_BARRIER(interp, st_pmc);
 
     /* Flag it as a type object. */
@@ -31,6 +32,22 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 /* Composes the representation. */
 static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
     /* Nothing to do yet, but should handle type in the future. */
+    VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
+    PMC *array = VTABLE_get_pmc_keyed_str(interp, repr_info,
+        Parrot_str_new_constant(interp, "array"));
+
+    if(!PMC_IS_NULL(array)) {
+        PMC *type = VTABLE_get_pmc_keyed_str(interp, array,
+            Parrot_str_new_constant(interp, "type"));
+        storage_spec spec = REPR(type)->get_storage_spec(interp, STABLE(type));
+        repr_data->elem_type = type;
+
+        if(spec.inlineable == STORAGE_SPEC_INLINED &&
+                (spec.boxed_primitive == STORAGE_SPEC_BP_INT ||
+                 spec.boxed_primitive == STORAGE_SPEC_BP_NUM)) {
+            repr_data->elem_size = spec.bits;
+        }
+    }
 }
 
 /* Creates a new instance based on the type object. */

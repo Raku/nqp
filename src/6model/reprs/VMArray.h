@@ -15,6 +15,11 @@ typedef struct {
     VMArrayBody body;
 } VMArrayInstance;
 
+typedef struct {
+    PMC *elem_type;
+    INTVAL elem_size;
+} VMArrayREPRData;
+
 /* Initializes the VMArray REPR. */
 REPROps * VMArray_initialize(PARROT_INTERP);
 
