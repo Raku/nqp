@@ -1310,6 +1310,15 @@ QAST::Operations.add_core_op('setmessage', -> $qastcomp, $op {
     $ops.result($message.result);
     $ops
 });
+QAST::Operations.add_core_op('backtracestrings', -> $qastcomp, $op {
+    if +$op.list != 1 {
+        nqp::die("The 'backtracestrings' op expects one child");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('backtrace_strings'),
+        $op[0]
+    ))
+});
 QAST::Operations.add_core_op('newexception', -> $qastcomp, $op {
     if +$op.list != 0 {
         nqp::die("The 'newexception' op expects no children");
