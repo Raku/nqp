@@ -1274,21 +1274,20 @@ class QAST::Compiler is HLL::Compiler {
         %cclass_code<s>  := '.CCLASS_WHITESPACE';
         %cclass_code<w>  := '.CCLASS_WORD';
         %cclass_code<n>  := '.CCLASS_NEWLINE';
-        %cclass_code<nl> := '.CCLASS_NEWLINE';
     }
 
     method cclass($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
-        my $subtype := $node.subtype;
+        my $subtype := $node.name;
         $ops.push_pirop('ge', %*REG<pos>, %*REG<eos>, %*REG<fail>);
-        my $cclass := %cclass_code{nqp::lc($subtype)};
+        my $cclass := %cclass_code{ $subtype };
         self.panic("Unrecognized subtype '$subtype' in QAST::Regex cclass")
             unless $cclass;
         if $cclass ne '.CCLASS_ANY' {
             my $testop := $node.negate ?? 'if' !! 'unless';
             $ops.push_pirop('is_cclass', '$I11', $cclass, %*REG<tgt>, %*REG<pos>);
             $ops.push_pirop($testop, '$I11', %*REG<fail>); 
-            if $subtype eq 'nl' {
+            if $cclass eq '.CCLASS_NEWLINE' {
                 $ops.push_pirop('substr', '$S10', %*REG<tgt>, %*REG<pos>, 2);
                 $ops.push_pirop('iseq', '$I11', '$S10', '"\r\n"');
                 $ops.push_pirop('add', %*REG<pos>, '$I11');

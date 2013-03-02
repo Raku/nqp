@@ -80,8 +80,8 @@ class QRegex::P5Regex::Actions is HLL::Actions {
     
     method p5metachar:sym<.>($/) {
         make %*RX<s>
-            ?? QAST::Regex.new( :rxtype<cclass>, :subtype<.>, :node($/) )
-            !! QAST::Regex.new( :rxtype<cclass>, :subtype<nl>, :negate(1), :node($/) );
+            ?? QAST::Regex.new( :rxtype<cclass>, :name<.>, :node($/) )
+            !! QAST::Regex.new( :rxtype<cclass>, :name<n>, :negate(1), :node($/) );
     }
 
     method p5metachar:sym<^>($/) {
@@ -159,6 +159,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
             elsif $_[0]<backslash> {
                 my $bs := $_[0]<backslash>.ast;
                 $bs.negate(!$bs.negate) if $<sign> eq '^';
+                $bs.subtype('zerowidth') if $bs.negate;
                 @alts.push($bs);
             }
             else {
@@ -172,7 +173,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
             $<sign> eq '^' ??
                 QAST::Regex.new( :rxtype<concat>, :node($/),
                     QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, |@alts ), 
-                    QAST::Regex.new( :rxtype<cclass>, :subtype<.> ) ) !!
+                    QAST::Regex.new( :rxtype<cclass>, :name<.> ) ) !!
                 QAST::Regex.new( :rxtype<altseq>, |@alts );
         make $qast;
     }
@@ -183,8 +184,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
     }
     
     method p5backslash:sym<s>($/) {
-        make QAST::Regex.new(:rxtype<cclass>, '.CCLASS_WHITESPACE', 
-                             :subtype($<sym> eq 'n' ?? 'nl' !! ~$<sym>),
+        make QAST::Regex.new(:rxtype<cclass>, :name( nqp::lc(~$<sym>) ),
                              :negate($<sym> le 'Z'), :node($/));
     }
 
