@@ -433,7 +433,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             my $ast := $clist[$i].ast;
             if $ast.negate || $ast.rxtype eq 'cclass' && ~$ast.node le 'Z' {
                 $ast.subtype('zerowidth');
-                $qast := QAST::Regex.new( :rxtype<concat>, :node($/),
+                $qast := QAST::Regex.new( :rxtype<concat>, :node($/), :subtype<zerowidth>, :negate(1),
                         QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, $ast ), 
                         $qast );
             }
@@ -517,7 +517,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 if nqp::chars($str);
             $qast := +@alts == 1 ?? @alts[0] !!
                 $<sign> eq '-' ??
-                    QAST::Regex.new( :rxtype<concat>, :node($/),
+                    QAST::Regex.new( :rxtype<concat>, :node($/), :subtype<zerowidth>, :negate(1),
                         QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, |@alts ), 
                         QAST::Regex.new( :rxtype<cclass>, :name<.> ) ) !!
                     QAST::Regex.new( :rxtype<altseq>, |@alts );
