@@ -511,7 +511,10 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     $bs.subtype('zerowidth') if $bs.negate;
                     @alts.push($bs);
                 }
-                else { $str := $str ~ ~$_[0]; }
+                else {
+                    my $c := ~$_[0];
+                    $str := $str ~ (%*RX<i> ?? nqp::lc($c) ~ nqp::uc($c) !! $c);
+                }
             }
             @alts.push(QAST::Regex.new( $str, :rxtype<enumcharlist>, :node($/), :negate( $<sign> eq '-' ) ))
                 if nqp::chars($str);
