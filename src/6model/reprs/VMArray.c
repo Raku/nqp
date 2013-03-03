@@ -31,7 +31,6 @@ static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
 
 /* Composes the representation. */
 static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
-    /* Nothing to do yet, but should handle type in the future. */
     VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
     PMC *array = VTABLE_get_pmc_keyed_str(interp, repr_info,
         Parrot_str_new_constant(interp, "array"));
