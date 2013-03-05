@@ -224,13 +224,24 @@ static void at_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, N
 }
 
 static PMC *at_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index) {
+    VMArrayBody *body = (VMArrayBody *) data;
     VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
+    PMC **objs = (PMC **) body->slots;
 
     if(!repr_data->elem_size)
         die_no_native(interp, "set");
 
-    /* TODO */
-    return PMCNULL;
+    if(pos < 0) {
+        pos += body->elems;
+        if(pos < 0)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_OUT_OF_BOUNDS,
+                    "VMArray: index out of bounds");
+    }
+    else if(pos >= body->elems) {
+        return PMCNULL;
+    }
+
+    return objs[index];
 }
 
 static void bind_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, NativeValue *value) {
