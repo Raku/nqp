@@ -3,10 +3,10 @@
 
 /* Body of a VMArray. */
 typedef struct {
-    INTVAL   elems;
-    INTVAL   start;
-    INTVAL   ssize;
-    PMC    **slots;
+    INTVAL  elems;
+    INTVAL  start;
+    INTVAL  ssize;
+    void   *slots;
 } VMArrayBody;
 
 /* This is how an instance with the VMArray representation looks. */
@@ -18,6 +18,7 @@ typedef struct {
 typedef struct {
     PMC *elem_type;
     INTVAL elem_size;
+    INTVAL elem_kind;
 } VMArrayREPRData;
 
 /* Initializes the VMArray REPR. */

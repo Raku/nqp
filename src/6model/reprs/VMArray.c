@@ -45,6 +45,7 @@ static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
                 (spec.boxed_primitive == STORAGE_SPEC_BP_INT ||
                  spec.boxed_primitive == STORAGE_SPEC_BP_NUM)) {
             repr_data->elem_size = spec.bits;
+            repr_data->elem_kind = spec.boxed_primitive;
         }
     }
 }
@@ -85,36 +86,207 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     return spec;
 }
 
+PARROT_DOES_NOT_RETURN static void die_no_native(PARROT_INTERP, const char *operation) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "VMArray: Can't perform native %s when containing boxed types", operation);
+}
+
+PARROT_DOES_NOT_RETURN static void die_no_boxed(PARROT_INTERP, const char *operation) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "VMArray: Can't perform native %s when containing native types", operation);
+}
+
+/* Wrapper functions to set an array offset to a value for the various types
+ * we support. */
+static void set_pos_int1(Parrot_Int1 *slots, INTVAL offset, Parrot_Int1 val) { slots[offset] = val; }
+static void set_pos_int2(Parrot_Int2 *slots, INTVAL offset, Parrot_Int2 val) { slots[offset] = val; }
+static void set_pos_int4(Parrot_Int4 *slots, INTVAL offset, Parrot_Int4 val) { slots[offset] = val; }
+static void set_pos_int8(Parrot_Int8 *slots, INTVAL offset, Parrot_Int8 val) { slots[offset] = val; }
+static void set_pos_float4(Parrot_Float4 *slots, INTVAL offset, Parrot_Float4 val) { slots[offset] = val; }
+static void set_pos_float8(Parrot_Float8 *slots, INTVAL offset, Parrot_Float8 val) { slots[offset] = val; }
+static void set_pos_pmc(PMC **slots, INTVAL offset, PMC *obj) { slots[offset] = obj; }
+
+/* Convenience method to set a given offset to a sensible NULL value. */
+static void null_pos(PARROT_INTERP, VMArrayREPRData *repr_data, void *slots, INTVAL offset) {
+    if(!repr_data->elem_size) {
+        set_pos_pmc((PMC **) slots, offset, PMCNULL);
+    }
+    else if(repr_data->elem_kind == STORAGE_SPEC_BP_INT) {
+        switch(repr_data->elem_size) {
+        case 8:
+            set_pos_int1((Parrot_Int1 *) slots, offset, 0);
+            break;
+        case 16:
+            set_pos_int2((Parrot_Int2 *) slots, offset, 0);
+            break;
+        case 32:
+            set_pos_int4((Parrot_Int4 *) slots, offset, 0);
+            break;
+        case 64:
+            set_pos_int8((Parrot_Int8 *) slots, offset, 0);
+            break;
+        default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "VMArray: Only supports 8, 16, 32 and 64 bit integers.");
+        }
+    }
+    else if(repr_data->elem_kind == STORAGE_SPEC_BP_NUM) {
+        switch(repr_data->elem_size) {
+        case 32:
+            set_pos_float4((Parrot_Float4 *) slots, offset, 0.0);
+            break;
+        case 64:
+            set_pos_float8((Parrot_Float8 *) slots, offset, 0.0);
+            break;
+        default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "VMArray: Only supports 32 and 64 bit floats.");
+        }
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "VMArray: Only flattened ints and floats.");
+    }
+}
+
+/* Ensure that the array has enough size  */
+static void ensure_size(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_data, INTVAL n) {
+    INTVAL elems = body->elems;
+    INTVAL start = body->start;
+    INTVAL ssize = body->ssize;
+    void *slots  = body->slots;
+
+    if(n < 0) {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "VMArray: Can't resize to negative size");
+    }
+
+    if(n == elems) { return; }
+
+    /* If there aren't enough slots at the end, shift off empty slots
+        * from the beginning first */
+    if (start > 0 && n + start > ssize) {
+        if (elems > 0) {
+            INTVAL elem_size = repr_data->elem_size/8;
+            void *dest = ((char *) slots) + start*elem_size;
+            memmove(slots, slots + start, elems * elem_size);
+        }
+        body->start = 0;
+        /* fill out any unused slots with PMCNULL pointers */
+        while (elems < ssize) {
+            null_pos(interp, repr_data, slots, elems);
+            elems++;
+        }
+    }
+
+    body->elems = n;
+    if (n <= ssize) {
+        /* We already have n slots available, we can just return */
+        return;
+    }
+
+    /* We need more slots.  If the current slot size is less
+     * than 8K, use the larger of twice the current slot size
+     * or the actual number of elements needed.  Otherwise,
+     * grow the slots to the next multiple of 4096 (0x1000). */
+    if (ssize < 8192) {
+        ssize *= 2;
+        if (n > ssize) ssize = n;
+        if (ssize < 8) ssize = 8;
+    }
+    else {
+        ssize = (n + 0x1000) & ~0xfff;
+    }
+
+    /* Now allocate the new slot buffer */
+    slots = (slots)
+            /* XXX: Change these to allocate non-GCed memory? */
+            ? mem_gc_realloc_n_typed(interp, slots, ssize, PMC *)
+            : mem_gc_allocate_n_typed(interp, ssize, PMC *);
+
+    /* Fill out any unused slots with PMCNULL pointers */
+    while (elems < ssize) {
+        null_pos(interp, repr_data, slots, elems);
+        elems++;
+    }
+
+    body->ssize = ssize;
+    body->slots = slots;
+}
+
 static void at_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, NativeValue *value) {
+    VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
+
+    if(!repr_data->elem_size)
+        die_no_native(interp, "get");
+
     /* TODO */
 }
 
 static PMC *at_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index) {
+    VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
+
+    if(!repr_data->elem_size)
+        die_no_native(interp, "set");
+
     /* TODO */
+    return PMCNULL;
 }
 
 static void bind_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, NativeValue *value) {
+    VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
+
+    if(!repr_data->elem_size)
+        die_no_boxed(interp, "get");
+
     /* TODO */
 }
 
 static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, PMC *obj) {
+    VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
+
+    if(!repr_data->elem_size)
+        die_no_boxed(interp, "set");
+
     /* TODO */
 }
 
 static void push_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
+    VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
+
+    if(!repr_data->elem_size)
+        die_no_boxed(interp, "push");
+
     /* TODO */
 }
 
-static void pop_boxed(PARROT_INTERP, STable *st, void *data) {
+static PMC *pop_boxed(PARROT_INTERP, STable *st, void *data) {
+    VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
+
+    if(!repr_data->elem_size)
+        die_no_boxed(interp, "pop");
+
     /* TODO */
+    return PMCNULL;
 }
 
 static void unshift_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
+    VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
+
+    if(!repr_data->elem_size)
+        die_no_boxed(interp, "unshift");
+
     /* TODO */
 }
 
-static void shift_boxed(PARROT_INTERP, STable *st, void *data) {
+static PMC *shift_boxed(PARROT_INTERP, STable *st, void *data) {
+    VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
+
+    if(!repr_data->elem_size)
+        die_no_boxed(interp, "shift");
+
     /* TODO */
+    return PMCNULL;
 }
 
 /* Initializes the VMArray representation. */
