@@ -85,6 +85,38 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     return spec;
 }
 
+static void at_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, NativeValue *value) {
+    /* TODO */
+}
+
+static PMC *at_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index) {
+    /* TODO */
+}
+
+static void bind_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, NativeValue *value) {
+    /* TODO */
+}
+
+static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, PMC *obj) {
+    /* TODO */
+}
+
+static void push_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
+    /* TODO */
+}
+
+static void pop_boxed(PARROT_INTERP, STable *st, void *data) {
+    /* TODO */
+}
+
+static void unshift_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
+    /* TODO */
+}
+
+static void shift_boxed(PARROT_INTERP, STable *st, void *data) {
+    /* TODO */
+}
+
 /* Initializes the VMArray representation. */
 REPROps * VMArray_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
@@ -96,5 +128,14 @@ REPROps * VMArray_initialize(PARROT_INTERP) {
     this_repr->copy_to = copy_to;
     this_repr->gc_free = gc_free;
     this_repr->get_storage_spec = get_storage_spec;
+    this_repr->pos_funcs = mem_allocate_zeroed_typed(REPROps_Positional);
+    this_repr->pos_funcs->at_pos_native = at_pos_native;
+    this_repr->pos_funcs->at_pos_boxed = at_pos_boxed;
+    this_repr->pos_funcs->bind_pos_native = bind_pos_native;
+    this_repr->pos_funcs->bind_pos_boxed = bind_pos_boxed;
+    this_repr->pos_funcs->push_boxed = push_boxed;
+    this_repr->pos_funcs->pop_boxed = pop_boxed;
+    this_repr->pos_funcs->unshift_boxed = unshift_boxed;
+    this_repr->pos_funcs->shift_boxed = shift_boxed;
     return this_repr;
 }
