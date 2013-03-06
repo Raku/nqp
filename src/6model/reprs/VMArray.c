@@ -96,8 +96,8 @@ PARROT_DOES_NOT_RETURN static void die_no_boxed(PARROT_INTERP, const char *opera
             "VMArray: Can't perform boxed %s when containing native types", operation);
 }
 
-/* Wrapper functions to set an array offset to a value for the various types
- * we support. */
+/* Wrapper functions to set and get an array offset to a value for the various
+ * types we support. */
 static void set_pos_int1(Parrot_Int1 *slots, INTVAL offset, Parrot_Int1 val) { slots[offset] = val; }
 static void set_pos_int2(Parrot_Int2 *slots, INTVAL offset, Parrot_Int2 val) { slots[offset] = val; }
 static void set_pos_int4(Parrot_Int4 *slots, INTVAL offset, Parrot_Int4 val) { slots[offset] = val; }
@@ -105,6 +105,14 @@ static void set_pos_int8(Parrot_Int8 *slots, INTVAL offset, Parrot_Int8 val) { s
 static void set_pos_float4(Parrot_Float4 *slots, INTVAL offset, Parrot_Float4 val) { slots[offset] = val; }
 static void set_pos_float8(Parrot_Float8 *slots, INTVAL offset, Parrot_Float8 val) { slots[offset] = val; }
 static void set_pos_pmc(PMC **slots, INTVAL offset, PMC *obj) { slots[offset] = obj; }
+
+static INTVAL get_pos_int1(Parrot_Int1 *slots, INTVAL offset)       { return slots[offset]; }
+static INTVAL get_pos_int2(Parrot_Int2 *slots, INTVAL offset)       { return slots[offset]; }
+static INTVAL get_pos_int4(Parrot_Int4 *slots, INTVAL offset)       { return slots[offset]; }
+static INTVAL get_pos_int8(Parrot_Int8 *slots, INTVAL offset)       { return slots[offset]; }
+static FLOATVAL get_pos_float4(Parrot_Float4 *slots, INTVAL offset) { return slots[offset]; }
+static FLOATVAL get_pos_float8(Parrot_Float8 *slots, INTVAL offset) { return slots[offset]; }
+static PMC *get_pos_pmc(PMC **slots, INTVAL offset)                 { return slots[offset]; }
 
 /* Convenience method to set a given offset to a sensible NULL value. */
 static void null_pos(PARROT_INTERP, VMArrayREPRData *repr_data, void *slots, INTVAL offset) {
@@ -145,7 +153,7 @@ static void null_pos(PARROT_INTERP, VMArrayREPRData *repr_data, void *slots, INT
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "VMArray: Only flattened ints and floats.");
+                "VMArray: unsupported elem_kind (%d) in null_pos", repr_data->elem_kind);
     }
 }
 
@@ -215,18 +223,57 @@ static void ensure_size(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_
 }
 
 static void at_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, NativeValue *value) {
+    VMArrayBody *body = (VMArrayBody *) data;
     VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
 
     if(!repr_data->elem_size)
         die_no_native(interp, "get");
 
-    /* TODO */
+    if(value->type == NATIVE_VALUE_STRING)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "VMArray: Can't get unboxed string value");
+
+    if(repr_data->elem_kind == STORAGE_SPEC_BP_INT) {
+        switch(repr_data->elem_size) {
+        case 8:
+            value->value.intval = get_pos_int1((Parrot_Int1 *) body->slots, index);
+            break;
+        case 16:
+            value->value.intval = get_pos_int2((Parrot_Int2 *) body->slots, index);
+            break;
+        case 32:
+            value->value.intval = get_pos_int4((Parrot_Int4 *) body->slots, index);
+            break;
+        case 64:
+            value->value.intval = get_pos_int8((Parrot_Int8 *) body->slots, index);
+            break;
+        default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "VMArray: Only supports 8, 16, 32 and 64 bit integers.");
+        }
+    }
+    else if(repr_data->elem_kind == STORAGE_SPEC_BP_NUM) {
+        switch(repr_data->elem_size) {
+        case 32:
+            value->value.floatval = get_pos_float4((Parrot_Float4 *) body->slots, index);
+            break;
+        case 64:
+            value->value.floatval = get_pos_float8((Parrot_Float8 *) body->slots, index);
+            break;
+        default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "VMArray: Only supports 32 and 64 bit floats.");
+        }
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "VMArray: unsupported elem_kind (%d) in bind_pos_native", repr_data->elem_kind);
+    }
 }
 
 static PMC *at_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index) {
     VMArrayBody *body = (VMArrayBody *) data;
     VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
-    PMC **objs = (PMC **) body->slots;
 
     if(repr_data->elem_size)
         die_no_boxed(interp, "set");
@@ -241,16 +288,66 @@ static PMC *at_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index) {
         return PMCNULL;
     }
 
-    return objs[index];
+    return get_pos_pmc((PMC **) body->slots, index);
 }
 
 static void bind_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, NativeValue *value) {
+    VMArrayBody *body = (VMArrayBody *) data;
     VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
 
     if(!repr_data->elem_size)
         die_no_native(interp, "get");
 
-    /* TODO */
+    if(value->type == NATIVE_VALUE_STRING)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "VMArray: Can't bind unboxed string value");
+
+    if(index < 0) {
+        index += body->elems;
+        if(index < 0)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_OUT_OF_BOUNDS,
+                    "VMArray: index out of bounds");
+    }
+    else if(index >= body->elems) {
+        ensure_size(interp, body, repr_data, index+1);
+    }
+
+    if(repr_data->elem_kind == STORAGE_SPEC_BP_INT) {
+        switch(repr_data->elem_size) {
+        case 8:
+            set_pos_int1((Parrot_Int1 *) body->slots, index, value->value.intval);
+            break;
+        case 16:
+            set_pos_int2((Parrot_Int2 *) body->slots, index, value->value.intval);
+            break;
+        case 32:
+            set_pos_int4((Parrot_Int4 *) body->slots, index, value->value.intval);
+            break;
+        case 64:
+            set_pos_int8((Parrot_Int8 *) body->slots, index, value->value.intval);
+            break;
+        default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "VMArray: Only supports 8, 16, 32 and 64 bit integers.");
+        }
+    }
+    else if(repr_data->elem_kind == STORAGE_SPEC_BP_NUM) {
+        switch(repr_data->elem_size) {
+        case 32:
+            set_pos_float4((Parrot_Float4 *) body->slots, index, value->value.floatval);
+            break;
+        case 64:
+            set_pos_float8((Parrot_Float8 *) body->slots, index, value->value.floatval);
+            break;
+        default:
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                    "VMArray: Only supports 32 and 64 bit floats.");
+        }
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "VMArray: unsupported elem_kind (%d) in bind_pos_native", repr_data->elem_kind);
+    }
 }
 
 static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, PMC *obj) {
