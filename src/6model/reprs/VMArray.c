@@ -371,41 +371,78 @@ static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, 
 }
 
 static void push_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
+    VMArrayBody *body = (VMArrayBody *) data;
     VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
 
     if(repr_data->elem_size)
         die_no_boxed(interp, "push");
 
-    /* TODO */
+    ensure_size(interp, body, repr_data, body->elems+1);
+    set_pos_pmc((PMC **) body->slots, body->start + body->elems-1, obj);
 }
 
 static PMC *pop_boxed(PARROT_INTERP, STable *st, void *data) {
+    VMArrayBody *body = (VMArrayBody *) data;
     VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
 
     if(repr_data->elem_size)
         die_no_boxed(interp, "pop");
 
-    /* TODO */
-    return PMCNULL;
+    if(body->elems < 1)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_OUT_OF_BOUNDS,
+                "VMArray: Can't pop from an empty array!");
+
+    body->elems--;
+    return get_pos_pmc((PMC **) body->slots, body->start + body->elems);
 }
 
 static void unshift_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
+    VMArrayBody *body = (VMArrayBody *) data;
     VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
 
     if(repr_data->elem_size)
         die_no_boxed(interp, "unshift");
 
-    /* TODO */
+    /* If we don't have room at the beginning of the slots, make some room (8
+     * slots) for unshifting */
+    if (body->start < 1) {
+        INTVAL n = 8;
+        INTVAL elems = body->elems;
+        INTVAL i;
+
+        /* Grow the array */
+        ensure_size(interp, body, repr_data, elems + n);
+        /* Move elements and set start */
+        memmove(body->slots + n, body->slots, elems * sizeof (PMC *));
+        body->start = n;
+        body->elems = elems;
+        /* Clear out beginning elements */
+        for (i = 0; i < n; i++)
+            set_pos_pmc((PMC **) body->slots, i, PMCNULL);
+    }
+
+    /* Now do the unshift */
+    body->start--;
+    set_pos_pmc((PMC **) body->slots, body->start, obj);
+    body->elems++;
 }
 
 static PMC *shift_boxed(PARROT_INTERP, STable *st, void *data) {
+    VMArrayBody *body = (VMArrayBody *) data;
     VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
+    PMC *value;
 
     if(repr_data->elem_size)
         die_no_boxed(interp, "shift");
 
-    /* TODO */
-    return PMCNULL;
+    if(body->elems < 1)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_OUT_OF_BOUNDS,
+                "VMArray: Can't shift from an empty array!");
+
+    value = get_pos_pmc((PMC **) body->slots, body->start);
+    body->start++;
+    body->elems--;
+    return value;
 }
 
 /* Initializes the VMArray representation. */
