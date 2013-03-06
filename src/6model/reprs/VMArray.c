@@ -254,12 +254,23 @@ static void bind_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index,
 }
 
 static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, PMC *obj) {
+    VMArrayBody *body = (VMArrayBody *) data;
     VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
 
     if(repr_data->elem_size)
         die_no_boxed(interp, "set");
 
-    /* TODO */
+    if(index < 0) {
+        index += body->elems;
+        if(index < 0)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_OUT_OF_BOUNDS,
+                    "VMArray: index out of bounds");
+    }
+    else if(index >= body->elems) {
+        ensure_size(interp, body, repr_data, index+1);
+    }
+
+    set_pos_pmc((PMC **) body->slots, index, obj);
 }
 
 static void push_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
