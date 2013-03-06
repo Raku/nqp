@@ -159,7 +159,6 @@ class QRegex::P5Regex::Actions is HLL::Actions {
             elsif $_[0]<backslash> {
                 my $bs := $_[0]<backslash>.ast;
                 $bs.negate(!$bs.negate) if $<sign> eq '^';
-                $bs.subtype('zerowidth') if $bs.negate;
                 @alts.push($bs);
             }
             else {

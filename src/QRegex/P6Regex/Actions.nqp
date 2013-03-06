@@ -508,7 +508,6 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 elsif $_[0]<backslash> {
                     my $bs := $_[0]<backslash>.ast;
                     $bs.negate(!$bs.negate) if $<sign> eq '-';
-                    $bs.subtype('zerowidth') if $bs.negate;
                     @alts.push($bs);
                 }
                 else {
@@ -520,7 +519,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 if nqp::chars($str);
             $qast := +@alts == 1 ?? @alts[0] !!
                 $<sign> eq '-' ??
-                    QAST::Regex.new( :rxtype<concat>, :node($/), :subtype<zerowidth>, :negate(1),
+                    QAST::Regex.new( :rxtype<concat>, :node($/), :negate(1),
                         QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, |@alts ), 
                         QAST::Regex.new( :rxtype<cclass>, :name<.> ) ) !!
                     QAST::Regex.new( :rxtype<altseq>, |@alts );
