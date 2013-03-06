@@ -93,7 +93,7 @@ PARROT_DOES_NOT_RETURN static void die_no_native(PARROT_INTERP, const char *oper
 
 PARROT_DOES_NOT_RETURN static void die_no_boxed(PARROT_INTERP, const char *operation) {
     Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "VMArray: Can't perform native %s when containing native types", operation);
+            "VMArray: Can't perform boxed %s when containing native types", operation);
 }
 
 /* Wrapper functions to set an array offset to a value for the various types
@@ -228,16 +228,16 @@ static PMC *at_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index) {
     VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
     PMC **objs = (PMC **) body->slots;
 
-    if(!repr_data->elem_size)
-        die_no_native(interp, "set");
+    if(repr_data->elem_size)
+        die_no_boxed(interp, "set");
 
-    if(pos < 0) {
-        pos += body->elems;
-        if(pos < 0)
+    if(index < 0) {
+        index += body->elems;
+        if(index < 0)
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_OUT_OF_BOUNDS,
                     "VMArray: index out of bounds");
     }
-    else if(pos >= body->elems) {
+    else if(index >= body->elems) {
         return PMCNULL;
     }
 
@@ -248,7 +248,7 @@ static void bind_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index,
     VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
 
     if(!repr_data->elem_size)
-        die_no_boxed(interp, "get");
+        die_no_native(interp, "get");
 
     /* TODO */
 }
@@ -256,7 +256,7 @@ static void bind_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index,
 static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, PMC *obj) {
     VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
 
-    if(!repr_data->elem_size)
+    if(repr_data->elem_size)
         die_no_boxed(interp, "set");
 
     /* TODO */
@@ -265,7 +265,7 @@ static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, 
 static void push_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
     VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
 
-    if(!repr_data->elem_size)
+    if(repr_data->elem_size)
         die_no_boxed(interp, "push");
 
     /* TODO */
@@ -274,7 +274,7 @@ static void push_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
 static PMC *pop_boxed(PARROT_INTERP, STable *st, void *data) {
     VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
 
-    if(!repr_data->elem_size)
+    if(repr_data->elem_size)
         die_no_boxed(interp, "pop");
 
     /* TODO */
@@ -284,7 +284,7 @@ static PMC *pop_boxed(PARROT_INTERP, STable *st, void *data) {
 static void unshift_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
     VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
 
-    if(!repr_data->elem_size)
+    if(repr_data->elem_size)
         die_no_boxed(interp, "unshift");
 
     /* TODO */
@@ -293,7 +293,7 @@ static void unshift_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
 static PMC *shift_boxed(PARROT_INTERP, STable *st, void *data) {
     VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
 
-    if(!repr_data->elem_size)
+    if(repr_data->elem_size)
         die_no_boxed(interp, "shift");
 
     /* TODO */
