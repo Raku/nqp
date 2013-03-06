@@ -236,16 +236,16 @@ static void at_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, N
     if(repr_data->elem_kind == STORAGE_SPEC_BP_INT) {
         switch(repr_data->elem_size) {
         case 8:
-            value->value.intval = get_pos_int1((Parrot_Int1 *) body->slots, index);
+            value->value.intval = get_pos_int1((Parrot_Int1 *) body->slots, body->start + index);
             break;
         case 16:
-            value->value.intval = get_pos_int2((Parrot_Int2 *) body->slots, index);
+            value->value.intval = get_pos_int2((Parrot_Int2 *) body->slots, body->start + index);
             break;
         case 32:
-            value->value.intval = get_pos_int4((Parrot_Int4 *) body->slots, index);
+            value->value.intval = get_pos_int4((Parrot_Int4 *) body->slots, body->start + index);
             break;
         case 64:
-            value->value.intval = get_pos_int8((Parrot_Int8 *) body->slots, index);
+            value->value.intval = get_pos_int8((Parrot_Int8 *) body->slots, body->start + index);
             break;
         default:
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -255,10 +255,10 @@ static void at_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, N
     else if(repr_data->elem_kind == STORAGE_SPEC_BP_NUM) {
         switch(repr_data->elem_size) {
         case 32:
-            value->value.floatval = get_pos_float4((Parrot_Float4 *) body->slots, index);
+            value->value.floatval = get_pos_float4((Parrot_Float4 *) body->slots, body->start + index);
             break;
         case 64:
-            value->value.floatval = get_pos_float8((Parrot_Float8 *) body->slots, index);
+            value->value.floatval = get_pos_float8((Parrot_Float8 *) body->slots, body->start + index);
             break;
         default:
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -288,7 +288,7 @@ static PMC *at_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index) {
         return PMCNULL;
     }
 
-    return get_pos_pmc((PMC **) body->slots, index);
+    return get_pos_pmc((PMC **) body->slots, body->start + index);
 }
 
 static void bind_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, NativeValue *value) {
@@ -315,16 +315,16 @@ static void bind_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index,
     if(repr_data->elem_kind == STORAGE_SPEC_BP_INT) {
         switch(repr_data->elem_size) {
         case 8:
-            set_pos_int1((Parrot_Int1 *) body->slots, index, value->value.intval);
+            set_pos_int1((Parrot_Int1 *) body->slots, body->start + index, value->value.intval);
             break;
         case 16:
-            set_pos_int2((Parrot_Int2 *) body->slots, index, value->value.intval);
+            set_pos_int2((Parrot_Int2 *) body->slots, body->start + index, value->value.intval);
             break;
         case 32:
-            set_pos_int4((Parrot_Int4 *) body->slots, index, value->value.intval);
+            set_pos_int4((Parrot_Int4 *) body->slots, body->start + index, value->value.intval);
             break;
         case 64:
-            set_pos_int8((Parrot_Int8 *) body->slots, index, value->value.intval);
+            set_pos_int8((Parrot_Int8 *) body->slots, body->start + index, value->value.intval);
             break;
         default:
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -334,10 +334,10 @@ static void bind_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index,
     else if(repr_data->elem_kind == STORAGE_SPEC_BP_NUM) {
         switch(repr_data->elem_size) {
         case 32:
-            set_pos_float4((Parrot_Float4 *) body->slots, index, value->value.floatval);
+            set_pos_float4((Parrot_Float4 *) body->slots, body->start + index, value->value.floatval);
             break;
         case 64:
-            set_pos_float8((Parrot_Float8 *) body->slots, index, value->value.floatval);
+            set_pos_float8((Parrot_Float8 *) body->slots, body->start + index, value->value.floatval);
             break;
         default:
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -367,7 +367,7 @@ static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, 
         ensure_size(interp, body, repr_data, index+1);
     }
 
-    set_pos_pmc((PMC **) body->slots, index, obj);
+    set_pos_pmc((PMC **) body->slots, body->start + index, obj);
 }
 
 static void push_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
