@@ -71,8 +71,11 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
 
 /* This Parrot-specific addition to the API is used to free an object. */
 static void gc_free(PARROT_INTERP, PMC *obj) {
-    mem_sys_free(PMC_data(obj));
+    VMArrayInstance *instance = (VMArrayInstance *) PMC_data(obj);
     PMC_data(obj) = NULL;
+    if(instance->body.slots)
+        mem_sys_free(instance->body.slots);
+    mem_sys_free(instance);
 }
 
 /* Gets the storage specification for this representation. */
@@ -163,6 +166,7 @@ static void ensure_size(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_
     INTVAL start = body->start;
     INTVAL ssize = body->ssize;
     void *slots  = body->slots;
+    INTVAL elem_size = repr_data->elem_size/8;
 
     if(n < 0) {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -175,9 +179,8 @@ static void ensure_size(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_
         * from the beginning first */
     if (start > 0 && n + start > ssize) {
         if (elems > 0) {
-            INTVAL elem_size = repr_data->elem_size/8;
-            void *dest = ((char *) slots) + start*elem_size;
-            memmove(slots, slots + start, elems * elem_size);
+            void *src = ((char *) slots) + start*elem_size;
+            memmove(slots, src, elems * elem_size);
         }
         body->start = 0;
         /* fill out any unused slots with PMCNULL pointers */
@@ -208,9 +211,8 @@ static void ensure_size(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_
 
     /* Now allocate the new slot buffer */
     slots = (slots)
-            /* XXX: Change these to allocate non-GCed memory? */
-            ? mem_gc_realloc_n_typed(interp, slots, ssize, PMC *)
-            : mem_gc_allocate_n_typed(interp, ssize, PMC *);
+            ? mem_sys_realloc(slots, ssize*elem_size)
+            : mem_sys_allocate(ssize*elem_size);
 
     /* Fill out any unused slots with PMCNULL pointers */
     while (elems < ssize) {
@@ -409,16 +411,17 @@ static void unshift_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
         INTVAL n = 8;
         INTVAL elems = body->elems;
         INTVAL i;
+        PMC **pmcslots = (PMC **) body->slots;
 
         /* Grow the array */
         ensure_size(interp, body, repr_data, elems + n);
         /* Move elements and set start */
-        memmove(body->slots + n, body->slots, elems * sizeof (PMC *));
+        memmove(pmcslots + n, pmcslots, elems * sizeof (PMC *));
         body->start = n;
         body->elems = elems;
         /* Clear out beginning elements */
         for (i = 0; i < n; i++)
-            set_pos_pmc((PMC **) body->slots, i, PMCNULL);
+            set_pos_pmc(pmcslots, i, PMCNULL);
     }
 
     /* Now do the unshift */
