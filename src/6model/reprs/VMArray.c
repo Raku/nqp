@@ -85,19 +85,6 @@ static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader
     /* TODO */
 }
 
-static void gc_mark(PARROT_INTERP, STable *st, void *data) {
-    /* TODO: If we contain PMC, mark all of them that are non-NULL. */
-}
-
-/* This Parrot-specific addition to the API is used to free an object. */
-static void gc_free(PARROT_INTERP, PMC *obj) {
-    VMArrayInstance *instance = (VMArrayInstance *) PMC_data(obj);
-    PMC_data(obj) = NULL;
-    if(instance->body.slots)
-        mem_sys_free(instance->body.slots);
-    mem_sys_free(instance);
-}
-
 /* Gets the storage specification for this representation. */
 static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     storage_spec spec;
@@ -136,6 +123,33 @@ static INTVAL get_pos_int8(Parrot_Int8 *slots, INTVAL offset)       { return slo
 static FLOATVAL get_pos_float4(Parrot_Float4 *slots, INTVAL offset) { return slots[offset]; }
 static FLOATVAL get_pos_float8(Parrot_Float8 *slots, INTVAL offset) { return slots[offset]; }
 static PMC *get_pos_pmc(PMC **slots, INTVAL offset)                 { return slots[offset]; }
+
+static void gc_mark(PARROT_INTERP, STable *st, void *data) {
+    /* TODO: If we contain PMC, mark all of them that are non-NULL. */
+    VMArrayBody *body = (VMArrayBody *) data;
+    VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
+    INTVAL i;
+
+    /* No need to do anything if we contain native types. */
+    if(repr_data->elem_size)
+        return;
+
+    /* Mark all non-null objects in the array. */
+    for(i = body->start; i < body->start + body->elems ; i++) {
+        PMC *obj = get_pos_pmc((PMC **) body->slots, i);
+        if(!PMC_IS_NULL(obj))
+            Parrot_gc_mark_PMC_alive(interp, obj);
+    }
+}
+
+/* This Parrot-specific addition to the API is used to free an object. */
+static void gc_free(PARROT_INTERP, PMC *obj) {
+    VMArrayInstance *instance = (VMArrayInstance *) PMC_data(obj);
+    PMC_data(obj) = NULL;
+    if(instance->body.slots)
+        mem_sys_free(instance->body.slots);
+    mem_sys_free(instance);
+}
 
 /* Convenience method to set a given offset to a sensible NULL value. */
 static void null_pos(PARROT_INTERP, VMArrayREPRData *repr_data, void *slots, INTVAL offset) {
