@@ -69,6 +69,26 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     /* Nothing to do yet. */
 }
 
+static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter *writer) {
+    /* TODO */
+}
+
+static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationReader *reader) {
+    /* TODO */
+}
+
+static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *writer) {
+    /* TODO */
+}
+
+static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader *reader) {
+    /* TODO */
+}
+
+static void gc_mark(PARROT_INTERP, STable *st, void *data) {
+    /* TODO: If we contain PMC, mark all of them that are non-NULL. */
+}
+
 /* This Parrot-specific addition to the API is used to free an object. */
 static void gc_free(PARROT_INTERP, PMC *obj) {
     VMArrayInstance *instance = (VMArrayInstance *) PMC_data(obj);
@@ -457,6 +477,10 @@ REPROps * VMArray_initialize(PARROT_INTERP) {
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
     this_repr->copy_to = copy_to;
+    this_repr->serialize = serialize;
+    this_repr->deserialize = deserialize;
+    this_repr->serialize_repr_data = serialize_repr_data;
+    this_repr->deserialize_repr_data = deserialize_repr_data;
     this_repr->gc_free = gc_free;
     this_repr->get_storage_spec = get_storage_spec;
     this_repr->pos_funcs = mem_allocate_zeroed_typed(REPROps_Positional);
