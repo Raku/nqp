@@ -34,10 +34,10 @@ sub add_to_sc($sc, $idx, $obj) {
     my $cr := nqp::list($m1);
     nqp::deserialize($serialized, $dsc, $sh, $cr, nqp::null());
     
-    ok(nqp::elems($dsc) >= 1,                 'deserialized SC has at least the type');
-    ok(!nqp::isconcrete($dsc[0]),             'type object deserialized and is not concrete');
-    ok($dsc[0].original eq 'success!',        'method call on static code object ok');
-    ok($dsc[0].cloned eq 'success!',          'method call on cloned code object ok');
+    ok(nqp::scobjcount($dsc) >= 1,                    'deserialized SC has at least the type');
+    ok(!nqp::isconcrete(nqp::scgetobj($dsc, 0)),      'type object deserialized and is not concrete');
+    ok(nqp::scgetobj($dsc, 0).original eq 'success!', 'method call on static code object ok');
+    ok(nqp::scgetobj($dsc, 0).cloned eq 'success!',   'method call on cloned code object ok');
 }
 
 # Serializing a type where some methods are clones and depend on lexical
@@ -80,9 +80,9 @@ sub add_to_sc($sc, $idx, $obj) {
     my $cr := nqp::list($raw_sub, $raw_meth);
     nqp::deserialize($serialized, $dsc, $sh, $cr, nqp::null());
     
-    ok(nqp::elems($dsc) >= 2,                 'deserialized SC has at least the two type');
-    ok(!nqp::isconcrete($dsc[0]),             'first type object deserialized and is not concrete');
-    ok(!nqp::isconcrete($dsc[1]),             'second type object deserialized and is not concrete');
-    ok($dsc[0].m eq 'dolphin',                'first method call got correct deserialized outer');
-    ok($dsc[1].m eq 'whale',                  'second method call got correct deserialized outer');
+    ok(nqp::scobjcount($dsc) >= 2,               'deserialized SC has at least the two type');
+    ok(!nqp::isconcrete(nqp::scgetobj($dsc, 0)), 'first type object deserialized and is not concrete');
+    ok(!nqp::isconcrete(nqp::scgetobj($dsc, 1)), 'second type object deserialized and is not concrete');
+    ok(nqp::scgetobj($dsc, 0).m eq 'dolphin',    'first method call got correct deserialized outer');
+    ok(nqp::scgetobj($dsc, 1).m eq 'whale',      'second method call got correct deserialized outer');
 }
