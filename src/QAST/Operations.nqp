@@ -1903,6 +1903,17 @@ QAST::Operations.add_core_op('markcodestub', -> $qastcomp, $op {
     $ops.result($code);
     $ops
 });
+QAST::Operations.add_core_op('getstaticcode', -> $qastcomp, $op {
+    if +@($op) != 1 {
+        nqp::die('getcodecuid requires one operand');
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('get_static_code'),
+        QAST::Op.new(
+            :op('callmethod'), :name('get_lexinfo'),
+            $op[0]
+        )))
+});
 
 # serialization context related opcodes
 QAST::Operations.add_core_pirop_mapping('sha1', 'nqp_sha1', 'Ss');
