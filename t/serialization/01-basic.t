@@ -323,9 +323,9 @@ sub add_to_sc($sc, $idx, $obj) {
         }
         method BUILD() {
             my @a := nqp::list_i();
-            @a[0] := 101;
-            @a[1] := 102;
-            @a[2] := 103;
+            nqp::bindpos_i(@a, 0, 101);
+            nqp::bindpos_i(@a, 1, 102);
+            nqp::bindpos_i(@a, 2, 103);
             $!a := @a;
         }
         method a() { $!a }
@@ -340,9 +340,9 @@ sub add_to_sc($sc, $idx, $obj) {
 
     ok(nqp::istype(nqp::scgetobj($dsc, 0), T10),          'deserialized object has correct type');
     ok(nqp::elems(nqp::scgetobj($dsc, 0).a) == 3,         'integer array came back with correct element count');
-    ok(nqp::scgetobj($dsc, 0).a[0] == 101,                'integer array first element is correct');
-    ok(nqp::scgetobj($dsc, 0).a[1] == 102,                'integer array second element is correct');
-    ok(nqp::scgetobj($dsc, 0).a[2] == 103,                'integer array third element is correct');
+    ok(nqp::atpos_i(nqp::scgetobj($dsc, 0).a, 0) == 101,  'integer array first element is correct');
+    ok(nqp::atpos_i(nqp::scgetobj($dsc, 0).a, 1) == 102,  'integer array second element is correct');
+    ok(nqp::atpos_i(nqp::scgetobj($dsc, 0).a, 2) == 103,  'integer array third element is correct');
 }
 
 # String array (used by Rakudo in signatures)
@@ -359,9 +359,9 @@ sub add_to_sc($sc, $idx, $obj) {
         }
         method BUILD() {
             my @a := nqp::list_s();
-            @a[0] := 'cow';
-            @a[1] := 'sheep';
-            @a[2] := 'pig';
+            nqp::bindpos_s(@a, 0, 'cow');
+            nqp::bindpos_s(@a, 1, 'sheep');
+            nqp::bindpos_s(@a, 2, 'pig');
             $!a := @a;
         }
         method a() { $!a }
@@ -374,9 +374,9 @@ sub add_to_sc($sc, $idx, $obj) {
     my $dsc := nqp::createsc('TEST_SC_12_OUT');
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
-    ok(nqp::istype(nqp::scgetobj($dsc, 0), T11),          'deserialized object has correct type');
-    ok(nqp::elems(nqp::scgetobj($dsc, 0).a) == 3,         'string array came back with correct element count');
-    ok(nqp::scgetobj($dsc, 0).a[0] eq 'cow',              'string array first element is correct');
-    ok(nqp::scgetobj($dsc, 0).a[1] eq 'sheep',            'string array second element is correct');
-    ok(nqp::scgetobj($dsc, 0).a[2] eq 'pig',              'string array third element is correct');
+    ok(nqp::istype(nqp::scgetobj($dsc, 0), T11),             'deserialized object has correct type');
+    ok(nqp::elems(nqp::scgetobj($dsc, 0).a) == 3,            'string array came back with correct element count');
+    ok(nqp::atpos_s(nqp::scgetobj($dsc, 0).a, 0) eq 'cow',   'string array first element is correct');
+    ok(nqp::atpos_s(nqp::scgetobj($dsc, 0).a, 1) eq 'sheep', 'string array second element is correct');
+    ok(nqp::atpos_s(nqp::scgetobj($dsc, 0).a, 2) eq 'pig',   'string array third element is correct');
 }
