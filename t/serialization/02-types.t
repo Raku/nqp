@@ -25,12 +25,12 @@ sub add_to_sc($sc, $idx, $obj) {
     my $dsc := nqp::createsc('TEST_SC_1_OUT');
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
     
-    ok(nqp::elems($dsc) >= 2,                 'deserialized SC has at least the knowhow type and its instance');
-    ok(!nqp::isconcrete($dsc[0]),             'type object deserialized and is not concrete');
-    ok(nqp::isconcrete($dsc[1]),              'instance deserialized and is concrete');
-    ok(nqp::unbox_i($dsc[1]) == 42,           'serialized P6int instance has correct value');
-    ok(nqp::istype($dsc[1], $dsc[0]),         'type checking is OK after deserialization');
-    ok($dsc[0].HOW.name($dsc[0]) eq 'Badger', 'meta-object deserialized along with name');
+    ok(nqp::scobjcount($dsc) >= 2,                 'deserialized SC has at least the knowhow type and its instance');
+    ok(!nqp::isconcrete(nqp::scgetobj($dsc, 0)),   'type object deserialized and is not concrete');
+    ok(nqp::isconcrete(nqp::scgetobj($dsc, 1)),    'instance deserialized and is concrete');
+    ok(nqp::unbox_i(nqp::scgetobj($dsc, 1)) == 42, 'serialized P6int instance has correct value');
+    ok(nqp::istype(nqp::scgetobj($dsc, 1), nqp::scgetobj($dsc, 0)),         'type checking is OK after deserialization');
+    ok(nqp::scgetobj($dsc, 0).HOW.name(nqp::scgetobj($dsc, 0)) eq 'Badger', 'meta-object deserialized along with name');
 }
 
 # Serializing a type using P6opaque, which declares an attribute, along
@@ -53,13 +53,13 @@ sub add_to_sc($sc, $idx, $obj) {
     my $dsc := nqp::createsc('TEST_SC_2_OUT');
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
     
-    ok(nqp::elems($dsc) >= 2,                 'deserialized SC has at least the knowhow type and its instance');
-    ok(!nqp::isconcrete($dsc[0]),             'type object deserialized and is not concrete');
-    ok(nqp::isconcrete($dsc[1]),              'instance deserialized and is concrete');
-    ok(nqp::istype($dsc[1], $dsc[0]),         'type checking is OK after deserialization');
-    ok($dsc[0].HOW.name($dsc[0]) eq 'Dugong', 'meta-object deserialized along with name');
-    ok(nqp::getattr($dsc[1], $dsc[0], '$!home') eq 'Sea',
-                                              'attribute declared in P6opaque-based type is OK');
+    ok(nqp::scobjcount($dsc) >= 2,                 'deserialized SC has at least the knowhow type and its instance');
+    ok(!nqp::isconcrete(nqp::scgetobj($dsc, 0)),   'type object deserialized and is not concrete');
+    ok(nqp::isconcrete(nqp::scgetobj($dsc, 1)),    'instance deserialized and is concrete');
+    ok(nqp::istype(nqp::scgetobj($dsc, 1), nqp::scgetobj($dsc, 0)),         'type checking is OK after deserialization');
+    ok(nqp::scgetobj($dsc, 0).HOW.name(nqp::scgetobj($dsc, 0)) eq 'Dugong', 'meta-object deserialized along with name');
+    ok(nqp::getattr(nqp::scgetobj($dsc, 1), nqp::scgetobj($dsc, 0), '$!home') eq 'Sea',
+        'attribute declared in P6opaque-based type is OK');
 }
 
 # Serializing a P6opaque type with natively typed attributes, this time using NQPClassHOW.
@@ -86,29 +86,29 @@ sub add_to_sc($sc, $idx, $obj) {
     my $dsc := nqp::createsc('TEST_SC_3_OUT');
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
     
-    ok(nqp::elems($dsc) >= 2,                 'deserialized SC has at least the knowhow type and its instance');
-    ok(!nqp::isconcrete($dsc[0]),             'type object deserialized and is not concrete');
-    ok(nqp::isconcrete($dsc[1]),              'instance deserialized and is concrete');
-    ok(nqp::istype($dsc[1], $dsc[0]),         'type checking is OK after deserialization');
-    ok($dsc[0].HOW.name($dsc[0]) eq 'Badger', 'meta-object deserialized along with name');
-    ok(nqp::getattr_s($dsc[1], $dsc[0], '$!eats') eq 'mushrooms',
+    ok(nqp::scobjcount($dsc) >= 2,                 'deserialized SC has at least the knowhow type and its instance');
+    ok(!nqp::isconcrete(nqp::scgetobj($dsc, 0)),   'type object deserialized and is not concrete');
+    ok(nqp::isconcrete(nqp::scgetobj($dsc, 1)),    'instance deserialized and is concrete');
+    ok(nqp::istype(nqp::scgetobj($dsc, 1), nqp::scgetobj($dsc, 0)),         'type checking is OK after deserialization');
+    ok(nqp::scgetobj($dsc, 0).HOW.name(nqp::scgetobj($dsc, 0)) eq 'Badger', 'meta-object deserialized along with name');
+    ok(nqp::getattr_s(nqp::scgetobj($dsc, 1), nqp::scgetobj($dsc, 0), '$!eats') eq 'mushrooms',
                                               'str attribute declared in P6opaque-based type is OK');
-    ok(nqp::getattr_i($dsc[1], $dsc[0], '$!age') == 5,
+    ok(nqp::getattr_i(nqp::scgetobj($dsc, 1), nqp::scgetobj($dsc, 0), '$!age') == 5,
                                               'int attribute declared in P6opaque-based type is OK');
-    ok(nqp::getattr_n($dsc[1], $dsc[0], '$!weight') == 2.3,
+    ok(nqp::getattr_n(nqp::scgetobj($dsc, 1), nqp::scgetobj($dsc, 0), '$!weight') == 2.3,
                                               'num attribute declared in P6opaque-based type is OK');
 
-    my $other_instance := nqp::create($dsc[0]);
+    my $other_instance := nqp::create(nqp::scgetobj($dsc, 0));
     ok(nqp::isconcrete($other_instance), 'can make new instance of deserialized type');
     
-    nqp::bindattr_s($other_instance, $dsc[0], '$!eats', 'snakes');
-    nqp::bindattr_i($other_instance, $dsc[0], '$!age', 10);
-    nqp::bindattr_n($other_instance, $dsc[0], '$!weight', 3.4);
-    ok(nqp::getattr_s($other_instance, $dsc[0], '$!eats') eq 'snakes',
+    nqp::bindattr_s($other_instance, nqp::scgetobj($dsc, 0), '$!eats', 'snakes');
+    nqp::bindattr_i($other_instance, nqp::scgetobj($dsc, 0), '$!age', 10);
+    nqp::bindattr_n($other_instance, nqp::scgetobj($dsc, 0), '$!weight', 3.4);
+    ok(nqp::getattr_s($other_instance, nqp::scgetobj($dsc, 0), '$!eats') eq 'snakes',
                                               'str attribute in new instance OK');
-    ok(nqp::getattr_i($other_instance, $dsc[0], '$!age') == 10,
+    ok(nqp::getattr_i($other_instance, nqp::scgetobj($dsc, 0), '$!age') == 10,
                                               'int attribute in new instance OK');
-    ok(nqp::getattr_n($other_instance, $dsc[0], '$!weight') == 3.4,
+    ok(nqp::getattr_n($other_instance, nqp::scgetobj($dsc, 0), '$!weight') == 3.4,
                                               'num attribute in new instance OK');
 }
 
@@ -142,11 +142,11 @@ sub add_to_sc($sc, $idx, $obj) {
     my $cr := nqp::list($m1, $m2);
     nqp::deserialize($serialized, $dsc, $sh, $cr, nqp::null());
     
-    ok(nqp::elems($dsc) >= 2,                 'deserialized SC has at least the knowhow type and its instance');
-    ok(!nqp::isconcrete($dsc[0]),             'type object deserialized and is not concrete');
-    ok(nqp::isconcrete($dsc[1]),              'instance deserialized and is concrete');
-    ok(nqp::istype($dsc[1], $dsc[0]),         'type checking is OK after deserialization');
-    ok($dsc[0].smell eq 'awful',              'method call on deserialized type object ok');
-    ok($dsc[1].smell eq 'awful',              'method call on deserialized instance object ok');
-    ok($dsc[1].intro eq "Hi, I'm Bob",        'method call accessing instance attributes ok');
+    ok(nqp::scobjcount($dsc) >= 2,                 'deserialized SC has at least the knowhow type and its instance');
+    ok(!nqp::isconcrete(nqp::scgetobj($dsc, 0)),   'type object deserialized and is not concrete');
+    ok(nqp::isconcrete(nqp::scgetobj($dsc, 1)),    'instance deserialized and is concrete');
+    ok(nqp::istype(nqp::scgetobj($dsc, 1), nqp::scgetobj($dsc, 0)), 'type checking is OK after deserialization');
+    ok(nqp::scgetobj($dsc, 0).smell eq 'awful',       'method call on deserialized type object ok');
+    ok(nqp::scgetobj($dsc, 1).smell eq 'awful',       'method call on deserialized instance object ok');
+    ok(nqp::scgetobj($dsc, 1).intro eq "Hi, I'm Bob", 'method call accessing instance attributes ok');
 }
