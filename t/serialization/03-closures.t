@@ -46,10 +46,10 @@ sub add_to_sc($sc, $idx, $obj) {
     my $sc := nqp::createsc('TEST_SC_2_IN');
     my $sh := nqp::list_s();
     
-    my $raw_sub := (sub make_meth_with($x) {
+    my $raw_sub := nqp::getstaticcode(sub make_meth_with($x) {
         my $m := method () { $x };
         $m;
-    }).get_lexinfo().get_static_code();
+    });
     
     my $m1 := $raw_sub('dolphin');
     my $m2 := $raw_sub('whale');
