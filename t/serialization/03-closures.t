@@ -15,7 +15,7 @@ sub add_to_sc($sc, $idx, $obj) {
     my $sc := nqp::createsc('TEST_SC_1_IN');
     my $sh := nqp::list_s();
     
-    my $m1 := (method () { "success!" }).get_lexinfo().get_static_code();
+    my $m1 := nqp::getstaticcode(method () { "success!" });
     nqp::scsetcode($sc, 0, $m1);
     nqp::markcodestatic($m1);
     
@@ -60,7 +60,7 @@ sub add_to_sc($sc, $idx, $obj) {
     nqp::scsetcode($sc, 0, $raw_sub);
     nqp::markcodestatic($raw_sub);
     
-    my $raw_meth := $m1.get_lexinfo().get_static_code();
+    my $raw_meth := nqp::getstaticcode($m1);
     nqp::scsetcode($sc, 1, $raw_meth);
     nqp::markcodestatic($raw_meth);
     
