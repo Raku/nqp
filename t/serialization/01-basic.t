@@ -19,7 +19,7 @@ sub add_to_sc($sc, $idx, $obj) {
     my $dsc := nqp::createsc('TEST_SC_1_OUT');
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
     
-    ok(nqp::elems($dsc) == 0, 'deserialized SC is also empty');
+    ok(nqp::scobjcount($dsc) == 0, 'deserialized SC is also empty');
 }
 
 # Serializing an SC with a single object with P6int REPR.
@@ -37,7 +37,7 @@ sub add_to_sc($sc, $idx, $obj) {
     my $dsc := nqp::createsc('TEST_SC_2_OUT');
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
     
-    ok(nqp::elems($dsc) == 1,       'deserialized SC has a single element');
+    ok(nqp::scobjcount($dsc) == 1,  'deserialized SC has a single object');
     ok(nqp::istype($dsc[0], T1),    'deserialized object has correct type');
     ok(nqp::unbox_i($dsc[0]) == 42, 'deserialized object has correct value');
 }
@@ -57,7 +57,7 @@ sub add_to_sc($sc, $idx, $obj) {
     my $dsc := nqp::createsc('TEST_SC_3_OUT');
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
     
-    ok(nqp::elems($dsc) == 1,        'deserialized SC has a single element');
+    ok(nqp::scobjcount($dsc) == 1,   'deserialized SC has a single object');
     ok(nqp::istype($dsc[0], T2),     'deserialized object has correct type');
     ok(nqp::unbox_n($dsc[0]) == 6.9, 'deserialized object has correct value');
 }
@@ -77,7 +77,7 @@ sub add_to_sc($sc, $idx, $obj) {
     my $dsc := nqp::createsc('TEST_SC_4_OUT');
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
     
-    ok(nqp::elems($dsc) == 1,             'deserialized SC has a single element');
+    ok(nqp::scobjcount($dsc) == 1,        'deserialized SC has a single object');
     ok(nqp::istype($dsc[0], T3),          'deserialized object has correct type');
     ok(nqp::unbox_s($dsc[0]) eq 'dugong', 'deserialized object has correct value');
 }
@@ -114,7 +114,7 @@ sub add_to_sc($sc, $idx, $obj) {
     my $dsc := nqp::createsc('TEST_SC_5_OUT');
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
-    ok(nqp::elems($dsc) == 1,             'deserialized SC has a single element');
+    ok(nqp::scobjcount($dsc) == 1,        'deserialized SC has a single object');
     ok(nqp::istype($dsc[0], T4),          'deserialized object has correct type');
     ok($dsc[0].a == 42,                   'P6int attribute has correct value');
     ok($dsc[0].b == 6.9,                  'P6num attribute has correct value');
@@ -146,7 +146,7 @@ sub add_to_sc($sc, $idx, $obj) {
     my $dsc := nqp::createsc('TEST_SC_6_OUT');
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
     
-    ok(nqp::elems($dsc) == 2,       'deserialized SC has 2 element');
+    ok(nqp::scobjcount($dsc) == 2,  'deserialized SC has 2 objects');
     ok(nqp::istype($dsc[0], T5),    'first deserialized object has correct type');
     ok(nqp::istype($dsc[1], T5),    'second deserialized object has correct type');
     ok($dsc[0].x =:= $dsc[1],       'reference from first object to second ok');
@@ -185,7 +185,7 @@ sub add_to_sc($sc, $idx, $obj) {
     my $dsc := nqp::createsc('TEST_SC_7_OUT');
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
     
-    ok(nqp::elems($dsc) == 3,       'deserialized SC has 3 elements - the one we added and two discovered');
+    ok(nqp::scobjcount($dsc) == 3,  'deserialized SC has 3 objects - the one we added and two discovered');
     ok(nqp::istype($dsc[0], T6),    'first deserialized object has correct type');
     ok(nqp::istype($dsc[1], T6),    'second deserialized object has correct type');
     ok(nqp::istype($dsc[2], T6),    'third deserialized object has correct type');
@@ -227,7 +227,7 @@ sub add_to_sc($sc, $idx, $obj) {
     my $dsc := nqp::createsc('TEST_SC_8_OUT');
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
-    ok(nqp::elems($dsc) == 1,             'deserialized SC has a single element');
+    ok(nqp::scobjcount($dsc) == 1,        'deserialized SC has a single object');
     ok(nqp::istype($dsc[0], T7),          'deserialized object has correct type');
     ok($dsc[0].a == 42,                   'Integer survived serialization');
     ok($dsc[0].b == 6.9,                  'Float survived serialization');
