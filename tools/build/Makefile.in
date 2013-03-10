@@ -114,6 +114,7 @@ CORE_SETTING_SOURCES = \
   src/core/NQPRoutine.pm \
   src/core/NQPMu.pm \
   src/core/NQPCapture.pm \
+  src/core/NQPArray.pm \
   src/core/IO.pm \
   src/core/Regex.pm \
   src/core/Hash.pm \
