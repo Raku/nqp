@@ -528,7 +528,7 @@ knowhow NQPClassHOW {
         my @attrs := $obj.HOW.attributes($obj, :local(1));
         
         # Does it have its own BUILD?
-        my $build := $obj.HOW.find_method($obj, 'BUILD', :no_fallback(1));
+        my $build := $obj.HOW.method_table($obj)<BUILD>;
         if nqp::defined($build) {
             # We'll call the custom one.
             nqp::push(@plan, [0, $build]);
