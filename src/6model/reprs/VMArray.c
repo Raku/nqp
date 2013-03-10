@@ -78,11 +78,26 @@ static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationRead
 }
 
 static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *writer) {
-    /* TODO */
+    VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
+    writer->write_ref(interp, writer, repr_data->elem_type);
 }
 
 static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader *reader) {
-    /* TODO */
+    VMArrayREPRData *repr_data = mem_allocate_zeroed_typed(VMArrayREPRData);
+    PMC *type = reader->read_ref(interp, reader);
+
+    repr_data->elem_type = type;
+    if(!PMC_IS_NULL(type)) {
+        storage_spec spec = REPR(type)->get_storage_spec(interp, STABLE(type));
+        if(spec.inlineable == STORAGE_SPEC_INLINED &&
+                (spec.boxed_primitive == STORAGE_SPEC_BP_INT ||
+                 spec.boxed_primitive == STORAGE_SPEC_BP_NUM)) {
+            repr_data->elem_size = spec.bits;
+            repr_data->elem_kind = spec.boxed_primitive;
+        }
+    }
+
+    st->REPR_data = repr_data;
 }
 
 /* Gets the storage specification for this representation. */
