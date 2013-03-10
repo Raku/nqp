@@ -123,12 +123,40 @@ PARROT_DOES_NOT_RETURN static void die_no_boxed(PARROT_INTERP, const char *opera
 
 /* Wrapper functions to set and get an array offset to a value for the various
  * types we support. */
-static void set_pos_int1(Parrot_Int1 *slots, INTVAL offset, Parrot_Int1 val) { slots[offset] = val; }
-static void set_pos_int2(Parrot_Int2 *slots, INTVAL offset, Parrot_Int2 val) { slots[offset] = val; }
-static void set_pos_int4(Parrot_Int4 *slots, INTVAL offset, Parrot_Int4 val) { slots[offset] = val; }
-static void set_pos_int8(Parrot_Int8 *slots, INTVAL offset, Parrot_Int8 val) { slots[offset] = val; }
-static void set_pos_float4(Parrot_Float4 *slots, INTVAL offset, Parrot_Float4 val) { slots[offset] = val; }
-static void set_pos_float8(Parrot_Float8 *slots, INTVAL offset, Parrot_Float8 val) { slots[offset] = val; }
+static void set_pos_int(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_data, INTVAL offset, INTVAL val) {
+    switch(repr_data->elem_size) {
+    case 8:
+        ((Parrot_Int1 *) body->slots)[offset] = (Parrot_Int1) val;
+        break;
+    case 16:
+        ((Parrot_Int2 *) body->slots)[offset] = (Parrot_Int2) val;
+        break;
+    case 32:
+        ((Parrot_Int4 *) body->slots)[offset] = (Parrot_Int4) val;
+        break;
+    case 64:
+        ((Parrot_Int8 *) body->slots)[offset] = (Parrot_Int8) val;
+        break;
+    default:
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "VMArray: Only supports 8, 16, 32 and 64 bit integers.");
+    }
+}
+
+static void set_pos_float(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_data, INTVAL offset, FLOATVAL val) {
+    switch(repr_data->elem_size) {
+    case 32:
+        ((Parrot_Float4 *) body->slots)[offset] = (Parrot_Float4) val;
+        break;
+    case 64:
+        ((Parrot_Float8 *) body->slots)[offset] = (Parrot_Float8) val;
+        break;
+    default:
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "VMArray: Only supports 32 and 64 bit floats.");
+    }
+}
+
 static void set_pos_pmc(PMC **slots, INTVAL offset, PMC *obj) { slots[offset] = obj; }
 
 static INTVAL get_pos_int(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_data, INTVAL offset) {
@@ -189,41 +217,15 @@ static void gc_free(PARROT_INTERP, PMC *obj) {
 }
 
 /* Convenience method to set a given offset to a sensible NULL value. */
-static void null_pos(PARROT_INTERP, VMArrayREPRData *repr_data, void *slots, INTVAL offset) {
+static void null_pos(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_data, INTVAL offset) {
     if(!repr_data->elem_size) {
-        set_pos_pmc((PMC **) slots, offset, PMCNULL);
+        set_pos_pmc((PMC **) body->slots, offset, PMCNULL);
     }
     else if(repr_data->elem_kind == STORAGE_SPEC_BP_INT) {
-        switch(repr_data->elem_size) {
-        case 8:
-            set_pos_int1((Parrot_Int1 *) slots, offset, 0);
-            break;
-        case 16:
-            set_pos_int2((Parrot_Int2 *) slots, offset, 0);
-            break;
-        case 32:
-            set_pos_int4((Parrot_Int4 *) slots, offset, 0);
-            break;
-        case 64:
-            set_pos_int8((Parrot_Int8 *) slots, offset, 0);
-            break;
-        default:
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                    "VMArray: Only supports 8, 16, 32 and 64 bit integers.");
-        }
+        set_pos_int(interp, body, repr_data, offset, 0);
     }
     else if(repr_data->elem_kind == STORAGE_SPEC_BP_NUM) {
-        switch(repr_data->elem_size) {
-        case 32:
-            set_pos_float4((Parrot_Float4 *) slots, offset, 0.0);
-            break;
-        case 64:
-            set_pos_float8((Parrot_Float8 *) slots, offset, 0.0);
-            break;
-        default:
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                    "VMArray: Only supports 32 and 64 bit floats.");
-        }
+        set_pos_float(interp, body, repr_data, offset, 0.0);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -256,7 +258,7 @@ static void ensure_size(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_
         body->start = 0;
         /* fill out any unused slots with PMCNULL pointers */
         while (elems < ssize) {
-            null_pos(interp, repr_data, slots, elems);
+            null_pos(interp, body, repr_data, elems);
             elems++;
         }
     }
@@ -287,7 +289,7 @@ static void ensure_size(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_
 
     /* Fill out any unused slots with PMCNULL pointers */
     while (elems < ssize) {
-        null_pos(interp, repr_data, slots, elems);
+        null_pos(interp, body, repr_data, elems);
         elems++;
     }
 
@@ -360,36 +362,10 @@ static void bind_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index,
     }
 
     if(repr_data->elem_kind == STORAGE_SPEC_BP_INT) {
-        switch(repr_data->elem_size) {
-        case 8:
-            set_pos_int1((Parrot_Int1 *) body->slots, body->start + index, value->value.intval);
-            break;
-        case 16:
-            set_pos_int2((Parrot_Int2 *) body->slots, body->start + index, value->value.intval);
-            break;
-        case 32:
-            set_pos_int4((Parrot_Int4 *) body->slots, body->start + index, value->value.intval);
-            break;
-        case 64:
-            set_pos_int8((Parrot_Int8 *) body->slots, body->start + index, value->value.intval);
-            break;
-        default:
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                    "VMArray: Only supports 8, 16, 32 and 64 bit integers.");
-        }
+        set_pos_int(interp, body, repr_data, body->start + index, value->value.intval);
     }
     else if(repr_data->elem_kind == STORAGE_SPEC_BP_NUM) {
-        switch(repr_data->elem_size) {
-        case 32:
-            set_pos_float4((Parrot_Float4 *) body->slots, body->start + index, value->value.floatval);
-            break;
-        case 64:
-            set_pos_float8((Parrot_Float8 *) body->slots, body->start + index, value->value.floatval);
-            break;
-        default:
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                    "VMArray: Only supports 32 and 64 bit floats.");
-        }
+        set_pos_float(interp, body, repr_data, body->start + index, value->value.floatval);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
