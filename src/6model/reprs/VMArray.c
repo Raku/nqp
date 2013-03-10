@@ -131,13 +131,35 @@ static void set_pos_float4(Parrot_Float4 *slots, INTVAL offset, Parrot_Float4 va
 static void set_pos_float8(Parrot_Float8 *slots, INTVAL offset, Parrot_Float8 val) { slots[offset] = val; }
 static void set_pos_pmc(PMC **slots, INTVAL offset, PMC *obj) { slots[offset] = obj; }
 
-static INTVAL get_pos_int1(Parrot_Int1 *slots, INTVAL offset)       { return slots[offset]; }
-static INTVAL get_pos_int2(Parrot_Int2 *slots, INTVAL offset)       { return slots[offset]; }
-static INTVAL get_pos_int4(Parrot_Int4 *slots, INTVAL offset)       { return slots[offset]; }
-static INTVAL get_pos_int8(Parrot_Int8 *slots, INTVAL offset)       { return slots[offset]; }
-static FLOATVAL get_pos_float4(Parrot_Float4 *slots, INTVAL offset) { return slots[offset]; }
-static FLOATVAL get_pos_float8(Parrot_Float8 *slots, INTVAL offset) { return slots[offset]; }
-static PMC *get_pos_pmc(PMC **slots, INTVAL offset)                 { return slots[offset]; }
+static INTVAL get_pos_int(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_data, INTVAL offset) {
+    switch(repr_data->elem_size) {
+    case 8:
+        return ((Parrot_Int1 *) body->slots)[offset];
+    case 16:
+        return ((Parrot_Int2 *) body->slots)[offset];
+    case 32:
+        return ((Parrot_Int4 *) body->slots)[offset];
+    case 64:
+        return ((Parrot_Int8 *) body->slots)[offset];
+    default:
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "VMArray: Only supports 8, 16, 32 and 64 bit integers.");
+    }
+}
+
+static FLOATVAL get_pos_float(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_data, INTVAL offset) {
+    switch(repr_data->elem_size) {
+    case 32:
+        return ((Parrot_Float4 *) body->slots)[offset];
+    case 64:
+        return ((Parrot_Float8 *) body->slots)[offset];
+    default:
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "VMArray: Only supports 32 and 64 bit floats.");
+    }
+}
+
+static PMC *get_pos_pmc(PMC **slots, INTVAL offset) { return slots[offset]; }
 
 static void gc_mark(PARROT_INTERP, STable *st, void *data) {
     /* TODO: If we contain PMC, mark all of them that are non-NULL. */
@@ -285,36 +307,10 @@ static void at_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, N
                 "VMArray: Can't get unboxed string value");
 
     if(repr_data->elem_kind == STORAGE_SPEC_BP_INT) {
-        switch(repr_data->elem_size) {
-        case 8:
-            value->value.intval = get_pos_int1((Parrot_Int1 *) body->slots, body->start + index);
-            break;
-        case 16:
-            value->value.intval = get_pos_int2((Parrot_Int2 *) body->slots, body->start + index);
-            break;
-        case 32:
-            value->value.intval = get_pos_int4((Parrot_Int4 *) body->slots, body->start + index);
-            break;
-        case 64:
-            value->value.intval = get_pos_int8((Parrot_Int8 *) body->slots, body->start + index);
-            break;
-        default:
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                    "VMArray: Only supports 8, 16, 32 and 64 bit integers.");
-        }
+        value->value.intval = get_pos_int(interp, body, repr_data, body->start + index);
     }
     else if(repr_data->elem_kind == STORAGE_SPEC_BP_NUM) {
-        switch(repr_data->elem_size) {
-        case 32:
-            value->value.floatval = get_pos_float4((Parrot_Float4 *) body->slots, body->start + index);
-            break;
-        case 64:
-            value->value.floatval = get_pos_float8((Parrot_Float8 *) body->slots, body->start + index);
-            break;
-        default:
-            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                    "VMArray: Only supports 32 and 64 bit floats.");
-        }
+        value->value.floatval = get_pos_float(interp, body, repr_data, body->start + index);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
