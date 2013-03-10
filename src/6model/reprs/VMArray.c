@@ -7,120 +7,6 @@
 /* This representation's function pointer table. */
 static REPROps *this_repr;
 
-/* Creates a new type object of this representation, and associates it with
- * the given HOW. */
-static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
-    /* Create new object instance. */
-    VMArrayInstance *obj = mem_allocate_zeroed_typed(VMArrayInstance);
-
-    /* Build an STable. */
-    PMC *st_pmc = create_stable(interp, this_repr, HOW);
-    STable *st  = STABLE_STRUCT(st_pmc);
-
-    /* Create type object and point it back at the STable. */
-    obj->common.stable = st_pmc;
-    st->WHAT = wrap_object(interp, obj);
-    st->REPR_data = mem_allocate_zeroed_typed(VMArrayREPRData);
-    PARROT_GC_WRITE_BARRIER(interp, st_pmc);
-
-    /* Flag it as a type object. */
-    MARK_AS_TYPE_OBJECT(st->WHAT);
-
-    return st->WHAT;
-}
-
-/* Composes the representation. */
-static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
-    VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
-    PMC *array = VTABLE_get_pmc_keyed_str(interp, repr_info,
-        Parrot_str_new_constant(interp, "array"));
-
-    if(!PMC_IS_NULL(array)) {
-        PMC *type = VTABLE_get_pmc_keyed_str(interp, array,
-            Parrot_str_new_constant(interp, "type"));
-        storage_spec spec = REPR(type)->get_storage_spec(interp, STABLE(type));
-        repr_data->elem_type = type;
-
-        if(spec.inlineable == STORAGE_SPEC_INLINED &&
-                (spec.boxed_primitive == STORAGE_SPEC_BP_INT ||
-                 spec.boxed_primitive == STORAGE_SPEC_BP_NUM)) {
-            repr_data->elem_size = spec.bits;
-            repr_data->elem_kind = spec.boxed_primitive;
-        }
-    }
-}
-
-/* Creates a new instance based on the type object. */
-static PMC * allocate(PARROT_INTERP, STable *st) {
-    VMArrayInstance *obj = mem_allocate_zeroed_typed(VMArrayInstance);
-    obj->common.stable = st->stable_pmc;
-    return wrap_object(interp, obj);
-}
-
-/* Initialize a new instance. */
-static void initialize(PARROT_INTERP, STable *st, void *data) {
-    /* Nothing to do here. */
-}
-
-/* Copies to the body of one object to another. */
-static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
-    VMArrayBody *src_body = (VMArrayBody *)src;
-    VMArrayBody *dest_body = (VMArrayBody *)dest;
-    /* Nothing to do yet. */
-}
-
-static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter *writer) {
-    /* TODO */
-}
-
-static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationReader *reader) {
-    /* TODO */
-}
-
-static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *writer) {
-    VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
-    writer->write_ref(interp, writer, repr_data->elem_type);
-}
-
-static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader *reader) {
-    VMArrayREPRData *repr_data = mem_allocate_zeroed_typed(VMArrayREPRData);
-    PMC *type = reader->read_ref(interp, reader);
-
-    repr_data->elem_type = type;
-    if(!PMC_IS_NULL(type)) {
-        storage_spec spec = REPR(type)->get_storage_spec(interp, STABLE(type));
-        if(spec.inlineable == STORAGE_SPEC_INLINED &&
-                (spec.boxed_primitive == STORAGE_SPEC_BP_INT ||
-                 spec.boxed_primitive == STORAGE_SPEC_BP_NUM)) {
-            repr_data->elem_size = spec.bits;
-            repr_data->elem_kind = spec.boxed_primitive;
-        }
-    }
-
-    st->REPR_data = repr_data;
-}
-
-/* Gets the storage specification for this representation. */
-static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
-    storage_spec spec;
-    spec.inlineable = STORAGE_SPEC_REFERENCE;
-    spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
-    spec.can_box = 0;
-    spec.bits = sizeof(void *) * 8;
-    spec.align = ALIGNOF1(void *);
-    return spec;
-}
-
-PARROT_DOES_NOT_RETURN static void die_no_native(PARROT_INTERP, const char *operation) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "VMArray: Can't perform native %s when containing boxed types", operation);
-}
-
-PARROT_DOES_NOT_RETURN static void die_no_boxed(PARROT_INTERP, const char *operation) {
-    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "VMArray: Can't perform boxed %s when containing native types", operation);
-}
-
 /* Wrapper functions to set and get an array offset to a value for the various
  * types we support. */
 static void set_pos_int(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_data, INTVAL offset, INTVAL val) {
@@ -158,63 +44,6 @@ static void set_pos_float(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *rep
 }
 
 static void set_pos_pmc(PMC **slots, INTVAL offset, PMC *obj) { slots[offset] = obj; }
-
-static INTVAL get_pos_int(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_data, INTVAL offset) {
-    switch(repr_data->elem_size) {
-    case 8:
-        return ((Parrot_Int1 *) body->slots)[offset];
-    case 16:
-        return ((Parrot_Int2 *) body->slots)[offset];
-    case 32:
-        return ((Parrot_Int4 *) body->slots)[offset];
-    case 64:
-        return ((Parrot_Int8 *) body->slots)[offset];
-    default:
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "VMArray: Only supports 8, 16, 32 and 64 bit integers.");
-    }
-}
-
-static FLOATVAL get_pos_float(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_data, INTVAL offset) {
-    switch(repr_data->elem_size) {
-    case 32:
-        return ((Parrot_Float4 *) body->slots)[offset];
-    case 64:
-        return ((Parrot_Float8 *) body->slots)[offset];
-    default:
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-                "VMArray: Only supports 32 and 64 bit floats.");
-    }
-}
-
-static PMC *get_pos_pmc(PMC **slots, INTVAL offset) { return slots[offset]; }
-
-static void gc_mark(PARROT_INTERP, STable *st, void *data) {
-    /* TODO: If we contain PMC, mark all of them that are non-NULL. */
-    VMArrayBody *body = (VMArrayBody *) data;
-    VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
-    INTVAL i;
-
-    /* No need to do anything if we contain native types. */
-    if(repr_data->elem_size)
-        return;
-
-    /* Mark all non-null objects in the array. */
-    for(i = body->start; i < body->start + body->elems ; i++) {
-        PMC *obj = get_pos_pmc((PMC **) body->slots, i);
-        if(!PMC_IS_NULL(obj))
-            Parrot_gc_mark_PMC_alive(interp, obj);
-    }
-}
-
-/* This Parrot-specific addition to the API is used to free an object. */
-static void gc_free(PARROT_INTERP, PMC *obj) {
-    VMArrayInstance *instance = (VMArrayInstance *) PMC_data(obj);
-    PMC_data(obj) = NULL;
-    if(instance->body.slots)
-        mem_sys_free(instance->body.slots);
-    mem_sys_free(instance);
-}
 
 /* Convenience method to set a given offset to a sensible NULL value. */
 static void null_pos(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_data, INTVAL offset) {
@@ -295,6 +124,212 @@ static void ensure_size(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_
 
     body->ssize = ssize;
     body->slots = slots;
+}
+
+static INTVAL get_pos_int(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_data, INTVAL offset) {
+    switch(repr_data->elem_size) {
+    case 8:
+        return ((Parrot_Int1 *) body->slots)[offset];
+    case 16:
+        return ((Parrot_Int2 *) body->slots)[offset];
+    case 32:
+        return ((Parrot_Int4 *) body->slots)[offset];
+    case 64:
+        return ((Parrot_Int8 *) body->slots)[offset];
+    default:
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "VMArray: Only supports 8, 16, 32 and 64 bit integers.");
+    }
+}
+
+static FLOATVAL get_pos_float(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_data, INTVAL offset) {
+    switch(repr_data->elem_size) {
+    case 32:
+        return ((Parrot_Float4 *) body->slots)[offset];
+    case 64:
+        return ((Parrot_Float8 *) body->slots)[offset];
+    default:
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "VMArray: Only supports 32 and 64 bit floats.");
+    }
+}
+
+static PMC *get_pos_pmc(PMC **slots, INTVAL offset) { return slots[offset]; }
+
+/* Creates a new type object of this representation, and associates it with
+ * the given HOW. */
+static PMC * type_object_for(PARROT_INTERP, PMC *HOW) {
+    /* Create new object instance. */
+    VMArrayInstance *obj = mem_allocate_zeroed_typed(VMArrayInstance);
+
+    /* Build an STable. */
+    PMC *st_pmc = create_stable(interp, this_repr, HOW);
+    STable *st  = STABLE_STRUCT(st_pmc);
+
+    /* Create type object and point it back at the STable. */
+    obj->common.stable = st_pmc;
+    st->WHAT = wrap_object(interp, obj);
+    st->REPR_data = mem_allocate_zeroed_typed(VMArrayREPRData);
+    PARROT_GC_WRITE_BARRIER(interp, st_pmc);
+
+    /* Flag it as a type object. */
+    MARK_AS_TYPE_OBJECT(st->WHAT);
+
+    return st->WHAT;
+}
+
+/* Composes the representation. */
+static void compose(PARROT_INTERP, STable *st, PMC *repr_info) {
+    VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
+    PMC *array = VTABLE_get_pmc_keyed_str(interp, repr_info,
+        Parrot_str_new_constant(interp, "array"));
+
+    if(!PMC_IS_NULL(array)) {
+        PMC *type = VTABLE_get_pmc_keyed_str(interp, array,
+            Parrot_str_new_constant(interp, "type"));
+        storage_spec spec = REPR(type)->get_storage_spec(interp, STABLE(type));
+        repr_data->elem_type = type;
+
+        if(spec.inlineable == STORAGE_SPEC_INLINED &&
+                (spec.boxed_primitive == STORAGE_SPEC_BP_INT ||
+                 spec.boxed_primitive == STORAGE_SPEC_BP_NUM)) {
+            repr_data->elem_size = spec.bits;
+            repr_data->elem_kind = spec.boxed_primitive;
+        }
+    }
+}
+
+/* Creates a new instance based on the type object. */
+static PMC * allocate(PARROT_INTERP, STable *st) {
+    VMArrayInstance *obj = mem_allocate_zeroed_typed(VMArrayInstance);
+    obj->common.stable = st->stable_pmc;
+    return wrap_object(interp, obj);
+}
+
+/* Initialize a new instance. */
+static void initialize(PARROT_INTERP, STable *st, void *data) {
+    /* Nothing to do here. */
+}
+
+/* Copies to the body of one object to another. */
+static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
+    VMArrayBody *src_body = (VMArrayBody *)src;
+    VMArrayBody *dest_body = (VMArrayBody *)dest;
+    /* Nothing to do yet. */
+}
+
+static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter *writer) {
+    VMArrayBody *body = (VMArrayBody *) data;
+    VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
+    INTVAL i;
+
+    writer->write_int(interp, writer, body->elems);
+    for(i = 0; i < body->elems; i++) {
+        INTVAL offset = body->start + i;
+        if(repr_data->elem_size && repr_data->elem_kind == STORAGE_SPEC_BP_INT) {
+            writer->write_int(interp, writer, get_pos_int(interp, body, repr_data, offset));
+        }
+        else if(repr_data->elem_size && repr_data->elem_kind == STORAGE_SPEC_BP_NUM) {
+            writer->write_num(interp, writer, get_pos_float(interp, body, repr_data, offset));
+        }
+        else {
+            writer->write_ref(interp, writer, get_pos_pmc((PMC **) body->slots, offset));
+        }
+    }
+}
+
+static void deserialize(PARROT_INTERP, STable *st, void *data, SerializationReader *reader) {
+    VMArrayBody *body = (VMArrayBody *) data;
+    VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
+    INTVAL elems = reader->read_int(interp, reader);
+    INTVAL i;
+
+    ensure_size(interp, body, repr_data, elems);
+    body->elems = elems;
+
+    for(i = 0; i < body->elems; i++) {
+        INTVAL offset = body->start + i;
+        if(repr_data->elem_size && repr_data->elem_kind == STORAGE_SPEC_BP_INT) {
+            set_pos_int(interp, body, repr_data, offset, reader->read_int(interp, reader));
+        }
+        else if(repr_data->elem_size && repr_data->elem_kind == STORAGE_SPEC_BP_NUM) {
+            set_pos_float(interp, body, repr_data, offset, reader->read_num(interp, reader));
+        }
+        else {
+            set_pos_pmc((PMC **) body->slots, offset, reader->read_ref(interp, reader));
+        }
+    }
+}
+
+static void serialize_repr_data(PARROT_INTERP, STable *st, SerializationWriter *writer) {
+    VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
+    writer->write_ref(interp, writer, repr_data->elem_type);
+}
+
+static void deserialize_repr_data(PARROT_INTERP, STable *st, SerializationReader *reader) {
+    VMArrayREPRData *repr_data = mem_allocate_zeroed_typed(VMArrayREPRData);
+    PMC *type = reader->read_ref(interp, reader);
+
+    repr_data->elem_type = type;
+    if(!PMC_IS_NULL(type)) {
+        storage_spec spec = REPR(type)->get_storage_spec(interp, STABLE(type));
+        if(spec.inlineable == STORAGE_SPEC_INLINED &&
+                (spec.boxed_primitive == STORAGE_SPEC_BP_INT ||
+                 spec.boxed_primitive == STORAGE_SPEC_BP_NUM)) {
+            repr_data->elem_size = spec.bits;
+            repr_data->elem_kind = spec.boxed_primitive;
+        }
+    }
+
+    st->REPR_data = repr_data;
+}
+
+/* Gets the storage specification for this representation. */
+static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
+    storage_spec spec;
+    spec.inlineable = STORAGE_SPEC_REFERENCE;
+    spec.boxed_primitive = STORAGE_SPEC_BP_NONE;
+    spec.can_box = 0;
+    spec.bits = sizeof(void *) * 8;
+    spec.align = ALIGNOF1(void *);
+    return spec;
+}
+
+PARROT_DOES_NOT_RETURN static void die_no_native(PARROT_INTERP, const char *operation) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "VMArray: Can't perform native %s when containing boxed types", operation);
+}
+
+PARROT_DOES_NOT_RETURN static void die_no_boxed(PARROT_INTERP, const char *operation) {
+    Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "VMArray: Can't perform boxed %s when containing native types", operation);
+}
+
+static void gc_mark(PARROT_INTERP, STable *st, void *data) {
+    /* TODO: If we contain PMC, mark all of them that are non-NULL. */
+    VMArrayBody *body = (VMArrayBody *) data;
+    VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
+    INTVAL i;
+
+    /* No need to do anything if we contain native types. */
+    if(repr_data->elem_size)
+        return;
+
+    /* Mark all non-null objects in the array. */
+    for(i = body->start; i < body->start + body->elems ; i++) {
+        PMC *obj = get_pos_pmc((PMC **) body->slots, i);
+        if(!PMC_IS_NULL(obj))
+            Parrot_gc_mark_PMC_alive(interp, obj);
+    }
+}
+
+/* This Parrot-specific addition to the API is used to free an object. */
+static void gc_free(PARROT_INTERP, PMC *obj) {
+    VMArrayInstance *instance = (VMArrayInstance *) PMC_data(obj);
+    PMC_data(obj) = NULL;
+    if(instance->body.slots)
+        mem_sys_free(instance->body.slots);
+    mem_sys_free(instance);
 }
 
 static void at_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, NativeValue *value) {
