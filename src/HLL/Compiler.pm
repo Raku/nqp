@@ -446,10 +446,6 @@ class HLL::Compiler does HLL::Backend::Default {
         $!user_progname := nqp::join(',', @files);
         my @codes;
         for @files -> $filename {
-            if !nqp::stat($filename, 0) {
-                nqp::say("Could not stat $filename: No such file or directory.");
-                nqp::exit(1);
-            }
             my $err := 0;
             my $in-handle;
             try {
