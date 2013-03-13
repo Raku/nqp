@@ -27,6 +27,10 @@ PMC * find_in_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num
     /* If it's zero-arity, return result right off. */
     if (num_args == 0)
         return cache->zero_arity;
+        
+    /* If there's more args than the maximum, won't be in the cache. */
+    if (num_args > MD_CACHE_MAX_ARITY)
+        return NULL;
 
     /* Create arg tuple. */
     if (capture->vtable->base_type == enum_class_CallContext)
@@ -88,6 +92,10 @@ void add_to_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num_a
         cache->zero_arity = result;
         return;
     }
+    
+    /* If there's more args than the maximum, we can't cache it. */
+    if (num_args > MD_CACHE_MAX_ARITY)
+        return;
     
     /* If the cache is saturated, don't do anything (we could instead do a random
      * replacement). */
