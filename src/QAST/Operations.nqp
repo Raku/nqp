@@ -257,6 +257,15 @@ class QAST::Operations {
 }
 
 # Data structures
+QAST::Operations.add_core_op('hlllist', :inlinable(1), -> $qastcomp, $op {
+    # Just invoke nqp::getlex to find the "NQPArray" type
+    $qastcomp.as_post(QAST::Op.new(
+        :op('getlex'),
+        #$qastcomp.coerce('NQPArray', 's')
+        QAST::SVal.new(:value('NQPArray'))
+        ));
+});
+
 QAST::Operations.add_core_op('list', :inlinable(1), -> $qastcomp, $op {
     # Create register for the resulting list and make an empty one.
     my $list_reg := $*REGALLOC.fresh_p();
