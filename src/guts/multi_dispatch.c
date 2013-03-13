@@ -35,7 +35,7 @@ PMC * find_in_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num
         return NULL;
     for (i = 0; i < num_args; i++) {
         if (pc_positionals[i].type == BIND_VAL_OBJ) {
-            PMC *arg = pc_positionals[i].u.p;
+            PMC *arg = decontainerize(interp, pc_positionals[i].u.p);
             if (arg->vtable->base_type != smo_id)
                 return NULL;
             arg_tup[i] = STABLE(arg)->type_cache_id | (IS_CONCRETE(arg) ? 1 : 0);
@@ -102,7 +102,7 @@ void add_to_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num_a
         return;
     for (i = 0; i < num_args; i++) {
         if (pc_positionals[i].type == BIND_VAL_OBJ) {
-            PMC *arg = pc_positionals[i].u.p;
+            PMC *arg = decontainerize(interp, pc_positionals[i].u.p);
             if (arg->vtable->base_type != smo_id)
                 return;
             arg_tup[i] = STABLE(arg)->type_cache_id | (IS_CONCRETE(arg) ? 1 : 0);
