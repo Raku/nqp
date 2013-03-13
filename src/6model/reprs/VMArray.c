@@ -68,7 +68,7 @@ static void ensure_size(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_
     INTVAL start = body->start;
     INTVAL ssize = body->ssize;
     void *slots  = body->slots;
-    INTVAL elem_size = repr_data->elem_size/8;
+    INTVAL elem_size = repr_data->elem_size? repr_data->elem_size/8 : sizeof(void *);
 
     if(n < 0) {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
@@ -116,14 +116,14 @@ static void ensure_size(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_
             ? mem_sys_realloc(slots, ssize*elem_size)
             : mem_sys_allocate(ssize*elem_size);
 
+    body->ssize = ssize;
+    body->slots = slots;
+
     /* Fill out any unused slots with PMCNULL pointers */
     while (elems < ssize) {
         null_pos(interp, body, repr_data, elems);
         elems++;
     }
-
-    body->ssize = ssize;
-    body->slots = slots;
 }
 
 static INTVAL get_pos_int(PARROT_INTERP, VMArrayBody *body, VMArrayREPRData *repr_data, INTVAL offset) {
@@ -518,6 +518,7 @@ REPROps * VMArray_initialize(PARROT_INTERP) {
     this_repr->serialize_repr_data = serialize_repr_data;
     this_repr->deserialize_repr_data = deserialize_repr_data;
     this_repr->gc_free = gc_free;
+    this_repr->gc_mark = gc_mark;
     this_repr->get_storage_spec = get_storage_spec;
     this_repr->pos_funcs = mem_allocate_zeroed_typed(REPROps_Positional);
     this_repr->pos_funcs->at_pos_native = at_pos_native;
