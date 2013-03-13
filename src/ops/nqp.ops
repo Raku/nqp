@@ -282,6 +282,12 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
     return fates;
 }
 
+/* Constants for values the type field above may have. */
+#define BIND_VAL_INT 1
+#define BIND_VAL_NUM 2
+#define BIND_VAL_STR 3
+#define BIND_VAL_OBJ 4
+
 END_OPS_PREAMBLE
 
 /*
@@ -2831,5 +2837,43 @@ inline op nqp_fresh_stub(out PMC, invar PMC) :base_core {
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "nqp_fresh_sub can only operate on a Parrot Sub");
+    }
+}
+
+/*
+
+=item captureposprimspec
+
+Takes a CallContext in $2 and an index in $3, and returns the primitive
+type specification for the specified positional argument (is it an object
+or one of the native types).
+
+=cut
+
+*/
+inline op captureposprimspec(out INT, invar PMC, in INT) :base_core {
+    PMC *cc = $2;
+    if (cc->vtable->base_type == enum_class_CallContext) {
+        INTVAL i = $3;
+        struct Pcc_cell * pc_positionals;
+        GETATTR_CallContext_positionals(interp, cc, pc_positionals);
+        switch (pc_positionals[i].type) {
+            case BIND_VAL_INT:
+                $1 = STORAGE_SPEC_BP_INT;
+                break;
+            case BIND_VAL_NUM:
+                $1 = STORAGE_SPEC_BP_NUM;
+                break;
+            case BIND_VAL_STR:
+                $1 = STORAGE_SPEC_BP_STR;
+                break;
+            default:
+                $1 = STORAGE_SPEC_BP_NONE;
+                break;
+        }
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "captureposprimspec can only operate on a CallContext");
     }
 }
