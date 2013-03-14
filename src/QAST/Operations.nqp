@@ -1978,6 +1978,27 @@ QAST::Operations.add_core_pirop_mapping('bindcomp', 'compreg', '1sP');
 QAST::Operations.add_core_pirop_mapping('getcurhllsym', 'get_hll_global', 'Ps');
 QAST::Operations.add_core_pirop_mapping('bindcurhllsym', 'set_hll_global', '1sP');
 QAST::Operations.add_core_pirop_mapping('loadbytecode', 'load_bytecode', '0s');
+QAST::Operations.add_core_op('gethllsym', -> $qastcomp, $op {
+    if +@($op) != 2 {
+        nqp::die('gethllsym requires two operands');
+    }
+    $qastcomp.as_post(QAST::VM.new(
+        :pirop('get_root_global__PPs'),
+        QAST::Op.new( :op('list_s'), $op[0] ),
+        $op[1]
+    ))
+});
+QAST::Operations.add_core_op('bindhllsym', -> $qastcomp, $op {
+    if +@($op) != 3 {
+        nqp::die('bindhllsym requires three operands');
+    }
+    $qastcomp.as_post(QAST::VM.new(
+        :pirop('set_root_global__2PsP'),
+        QAST::Op.new( :op('list_s'), $op[0] ),
+        $op[1],
+        $op[2]
+    ))
+});
 QAST::Operations.add_core_op('sethllconfig', -> $qastcomp, $op {
     # XXX Not really implemented here.
     my $ops := PIRT::Ops.new();
