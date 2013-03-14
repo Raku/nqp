@@ -261,25 +261,31 @@ QAST::Operations.add_core_op('hlllist', :inlinable(1), -> $qastcomp, $op {
     # Just invoke nqp::getlex to find the "NQPArray" type
     $qastcomp.as_post(QAST::Op.new(
         :op('getlex'),
-        #$qastcomp.coerce('NQPArray', 's')
         QAST::SVal.new(:value('NQPArray'))
         ));
 });
 
 QAST::Operations.add_core_op('list', :inlinable(1), -> $qastcomp, $op {
     # Create register for the resulting list and make an empty one.
-    my $list_reg := $*REGALLOC.fresh_p();
-    my $ops := PIRT::Ops.new(:result($list_reg));
-    $ops.push_pirop('new', $list_reg, "'ResizablePMCArray'");
+    my $arr := $qastcomp.as_post(QAST::Op.new(:op('create'), QAST::Op.new(:op('hlllist'))));
     
     # Push all the things.
-    for $op.list {
-        my $post := $qastcomp.coerce($qastcomp.as_post($_), 'P');
-        $ops.push($post);
-        $ops.push_pirop('push', $list_reg, $post.result);
+    if +$op.list {
+        my $list_reg := $*REGALLOC.fresh_p();
+        my $ops := PIRT::Ops.new(:result($list_reg));
+        $ops.push_pirop('assign', $list_reg, $arr);
+
+        for $op.list {
+            my $post := $qastcomp.coerce($qastcomp.as_post($_), 'P');
+            $ops.push($post);
+            $ops.push_pirop('push', $list_reg, $post.result);
+        }
+
+        $ops
     }
-    
-    $ops
+    else {
+        $arr
+    }
 });
 
 QAST::Operations.add_core_op('qlist', :inlinable(1), -> $qastcomp, $op {
