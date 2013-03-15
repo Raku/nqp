@@ -139,7 +139,7 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
     PMC    *curst   = nfa_curst;
     PMC    *nextst  = nfa_nextst;
     INTVAL *done, *fates;
-    INTVAL  i, num_states, total_fates, prev_fates;
+    INTVAL  i, fate_arr_len, num_states, total_fates, prev_fates;
     
     /* Allocate a "done states" array. */
     num_states = nfa->num_states;
@@ -150,8 +150,8 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
     VTABLE_set_integer_native(interp, nextst, 0);
     
     /* Allocate fates array. */
-    fates = (INTVAL *)mem_sys_allocate(
-        sizeof(INTVAL) * (1 + VTABLE_elements(interp, nfa->fates)));
+    fate_arr_len = 1 + VTABLE_elements(interp, nfa->fates);
+    fates = (INTVAL *)mem_sys_allocate(sizeof(INTVAL) * fate_arr_len);
     total_fates = 0;
     
     VTABLE_push_integer(interp, nextst, 1);
@@ -200,10 +200,17 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
                                 prev_fates--;
                         }
                     }
-                    if (found_fate)
+                    if (found_fate) {
                         fates[total_fates - 1] = arg;
-                    else
+                    }
+                    else {
+                        if (total_fates >= fate_arr_len) {
+                            fate_arr_len = total_fates + 1;
+                            fates = (INTVAL *)mem_sys_realloc(fates,
+                                sizeof(INTVAL) * fate_arr_len);
+                        }
                         fates[total_fates++] = arg;
+                    }
                 }
                 else if (act == EDGE_EPSILON && to <= num_states && done[to] != gen) {
                     VTABLE_push_integer(interp, curst, to);
