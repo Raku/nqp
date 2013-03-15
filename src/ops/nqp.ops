@@ -31,6 +31,7 @@ static INTVAL smo_id    = 0;
 static INTVAL disp_id   = 0;
 static INTVAL qrpa_id   = 0;
 static INTVAL ohash_id  = 0;
+static INTVAL vmarray_repr_id = 0;
 
 /* Built-in meta-objects. */
 static PMC *KnowHOW = NULL;
@@ -78,14 +79,6 @@ static void SC_write_barrier_st(PARROT_INTERP, STable *st) {
                 Parrot_str_cstring(interp, VTABLE_name(interp, st->WHAT)));*/
         }
     }
-}
-
-/* Test for something being a list (RPA or QRPA).  */
-static INTVAL
-nqp_islist(PMC *pmc) {
-    INTVAL type = pmc->vtable->base_type;
-    return (INTVAL)(type == qrpa_id || type == enum_class_ResizablePMCArray
-                                    || type == enum_class_ResizableStringArray);
 }
 
 /* Test for something being a hash.  */
@@ -306,6 +299,9 @@ inline op nqp_dynop_setup() :base_core {
         /* Initialize the object model. */
         SixModelObject_initialize(interp, &KnowHOW, &KnowHOWAttribute);
         
+        /* Cache the VMArray REPR ID. */
+        vmarray_repr_id = REPR_name_to_id(interp, Parrot_str_new(interp, "VMArray", 0));
+
         /* Initialize compiling SCs list. */
         compiling_scs = Parrot_pmc_new(interp, enum_class_ResizablePMCArray);
         Parrot_pmc_gc_register(interp, compiling_scs);
@@ -2111,7 +2107,15 @@ Checks if the type of thing in $2 is a nqp list (either QRPA or RPA).
 
 */
 inline op nqp_islist(out INT, invar PMC) :base_core {
-    $1 = nqp_islist($2);
+    PMC *obj = decontainerize(interp, $2);
+    INTVAL pmc_type = obj->vtable->base_type;
+    if (pmc_type == smo_id) {
+        $1 = (INTVAL)(REPR(obj)->ID == vmarray_repr_id);
+    }
+    else {
+        $1 = (INTVAL)(pmc_type == qrpa_id || pmc_type == enum_class_ResizableStringArray
+                                          || pmc_type == enum_class_ResizablePMCArray);
+    }
 }
 
 /*
