@@ -1334,6 +1334,18 @@ QAST::Operations.add_core_pirop_mapping('die_s', 'die', '0s');
 QAST::Operations.add_core_pirop_mapping('die', 'die', '0P');
 QAST::Operations.add_core_pirop_mapping('throw', 'throw', '0P');
 QAST::Operations.add_core_pirop_mapping('rethrow', 'rethrow', '0P');
+QAST::Operations.add_core_op('resume', -> $qastcomp, $op {
+    if +$op.list != 1 {
+        nqp::die("The 'resume' op expects 1 child");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('call'),
+        QAST::Op.new(
+            :op('atkey'),
+            $op[0],
+            QAST::SVal.new( :value('resume') )
+        )))
+});
 
 # Control exception throwing.
 my %control_map := nqp::hash(
