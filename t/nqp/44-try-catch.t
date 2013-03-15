@@ -63,7 +63,7 @@ $ok := 1;
         $ok := $ok * 2;
         oops();
     }
-    CATCH { my &c := $!<resume>; &c(); }
+    CATCH { nqp::resume($!); }
 }
 
 ok($ok == 16, "resuming from resumable exceptions works");
