@@ -583,7 +583,14 @@ for ('', 'repeat_') -> $repness {
             my $coerced := $qastcomp.coerce(@comp_ops[0], $res_type);
             if $repness {
                 # It's a repeat_ variant, need to go straight into the
-                # loop body unconditionally.
+                # loop body unconditionally. Be sure to set the register
+                # for the result to something first.
+                if $res_type eq 'p' || $res_type eq 's' {
+                    $ops.push_pirop('null', $res_reg);
+                }
+                else {
+                    $ops.push_pirop('set', $res_reg, '0');
+                }
                 $ops.push_pirop('goto', $redo_lbl);
             }
             $ops.push($test_lbl);
@@ -594,7 +601,7 @@ for ('', 'repeat_') -> $repness {
 
             # Handle immediate blocks wanting the value as an arg.
             if $*IMM_ARG {
-                $*IMM_ARG($coerced.result);
+                $*IMM_ARG($res_reg);
             }
 
             # Emit the loop body; stash the result.
