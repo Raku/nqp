@@ -337,19 +337,17 @@ QAST::Operations.add_core_op('list_s', :inlinable(1), -> $qastcomp, $op {
 });
 
 QAST::Operations.add_core_op('list_b', :inlinable(1), -> $qastcomp, $op {
-    # Create register for the resulting list and make an empty one.
-    my $list_reg := $*REGALLOC.fresh_p();
-    my $ops := PIRT::Ops.new(:result($list_reg));
-    $ops.push_pirop('new', $list_reg, "'ResizablePMCArray'");
-    
-    # Push all the things.
+    my $list := $qastcomp.as_post(QAST::Op.new(:op('list')));
+    my $list_reg  := $*REGALLOC.fresh_p();
     my $block_reg := $*REGALLOC.fresh_p();
+    my $ops := PIRT::Ops.new(:result($list_reg));
+    $ops.push_pirop('assign', $list_reg, $list);
     for $op.list {
         my $cuid := $_.cuid;
         $ops.push_pirop(".const 'Sub' $block_reg = \"$cuid\"");
         $ops.push_pirop('push', $list_reg, $block_reg);
     }
-    
+
     $ops
 });
 
