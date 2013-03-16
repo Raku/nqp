@@ -261,13 +261,13 @@ QAST::Operations.add_core_pirop_mapping('hlllist', 'hlllist', 'P');
 
 QAST::Operations.add_core_op('list', :inlinable(1), -> $qastcomp, $op {
     # Create register for the resulting list and make an empty one.
-    my $arr := $qastcomp.as_post(QAST::Op.new(:op('create'), QAST::Op.new(:op('hlllist'))));
+    my $list := $qastcomp.as_post(QAST::Op.new(:op('create'), QAST::Op.new(:op('hlllist'))));
     
     # Push all the things.
     if +$op.list {
-        my $list_reg := $*REGALLOC.fresh_p();
+        my $list_reg := $list.result;
         my $ops := PIRT::Ops.new(:result($list_reg));
-        $ops.push_pirop('assign', $list_reg, $arr);
+        $ops.push($list);
 
         for $op.list {
             my $post := $qastcomp.coerce($qastcomp.as_post($_), 'P');
@@ -278,7 +278,7 @@ QAST::Operations.add_core_op('list', :inlinable(1), -> $qastcomp, $op {
         $ops
     }
     else {
-        $arr
+        $list
     }
 });
 
@@ -332,10 +332,11 @@ QAST::Operations.add_core_op('list_s', :inlinable(1), -> $qastcomp, $op {
 
 QAST::Operations.add_core_op('list_b', :inlinable(1), -> $qastcomp, $op {
     my $list := $qastcomp.as_post(QAST::Op.new(:op('list')));
-    my $list_reg  := $*REGALLOC.fresh_p();
     my $block_reg := $*REGALLOC.fresh_p();
+    my $list_reg := $list.result;
     my $ops := PIRT::Ops.new(:result($list_reg));
-    $ops.push_pirop('assign', $list_reg, $list);
+    $ops.push($list);
+
     for $op.list {
         my $cuid := $_.cuid;
         $ops.push_pirop(".const 'Sub' $block_reg = \"$cuid\"");
