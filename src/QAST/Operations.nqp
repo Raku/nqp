@@ -1072,7 +1072,24 @@ QAST::Operations.add_core_pirop_mapping('captureexistsnamed', 'exists', 'IQs');
 QAST::Operations.add_core_pirop_mapping('captureposprimspec', 'captureposprimspec', 'IPi');
 
 # Multiple dispatch related.
-QAST::Operations.add_core_pirop_mapping('invokewithcapture', 'invoke_with_capture', 'PPP');
+QAST::Operations.add_core_op('invokewithcapture', -> $qastcomp, $op {
+    unless $op.list == 2 {
+        nqp::die("The 'invokewithcapture' op requires two children");
+    }
+    my $pos_reg  := $*REGALLOC.fresh_p();
+    my $nam_reg  := $*REGALLOC.fresh_p();
+    my $res_reg  := $*REGALLOC.fresh_p();
+    my $inv_post := $qastcomp.coerce($qastcomp.as_post($op[0]), 'P');
+    my $cap_post := $qastcomp.coerce($qastcomp.as_post($op[1]), 'P');
+    my $ops      := PIRT::Ops.new();
+    $ops.push($inv_post);
+    $ops.push($cap_post);
+    $ops.push_pirop('deconstruct_capture', $cap_post.result, $pos_reg, $nam_reg);
+    $ops.push_pirop('call', $inv_post.result, $pos_reg ~ ' :flat',
+        $nam_reg ~ ' :flat :named', :result($res_reg));
+    $ops.result($res_reg);
+    $ops
+});
 QAST::Operations.add_core_pirop_mapping('multicacheadd', 'multi_cache_add', 'PPPP');
 QAST::Operations.add_core_pirop_mapping('multicachefind', 'multi_cache_find', 'PPP');
 

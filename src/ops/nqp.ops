@@ -54,6 +54,9 @@ PMC *compiling_scs = NULL;
  * number of nested enable/disable we are in. */
 INTVAL sc_write_barrier_off_depth = 0;
 
+/* Empty hash, used in deconstruct op. */
+static PMC *empty_hash = NULL;
+
 /* SC write barrier for objects. */
 static void SC_write_barrier_obj(PARROT_INTERP, PMC *obj) {
     if (!sc_write_barrier_off_depth && VTABLE_get_bool(interp, compiling_scs)) {
@@ -339,6 +342,10 @@ inline op nqp_dynop_setup() :base_core {
         Parrot_pmc_gc_register(interp, nfa_curst);
         nfa_nextst = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
         Parrot_pmc_gc_register(interp, nfa_nextst);
+        
+        /* Create and anchor empty hash. */
+        empty_hash = Parrot_pmc_new(interp, enum_class_Hash);
+        Parrot_pmc_gc_register(interp, empty_hash);
         
         /* Mark initialized. */
         initialized = 1;
@@ -1576,11 +1583,61 @@ Invokes the specified target with the specified capture.
 inline op invoke_with_capture(out PMC, in PMC, in PMC) :base_core {
     PMC *arg_copy = VTABLE_clone(interp, $3);
     PMC *result;
-    PMC *prev_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    /*PMC *prev_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));*/
     Parrot_pcc_invoke_from_sig_object(interp, $2, arg_copy);
     result = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
-    Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), prev_ctx);
+    /*Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), prev_ctx);*/
     $1 = VTABLE_get_pmc_keyed_int(interp, result, 0);
+}
+
+
+/*
+
+=item deconstruct_capture()
+
+Puts something that will flatten to the position part of the capture in $1
+into $2, and soemthing that will flatten to the named part into $3.
+
+=cut
+
+*/
+inline op deconstruct_capture(invar PMC, out PMC, out PMC) :base_core {
+    PMC *capture = $1;
+    if (capture->vtable->base_type == enum_class_CallContext) {
+        Hash *nameds;
+        INTVAL has_nameds;
+        
+        /* The call context itself will do for the positionals. */
+        $2 = capture;
+        
+        /* See if there are any nameds */
+        GETATTR_CallContext_hash(interp, capture, nameds);
+        has_nameds = nameds && Parrot_hash_size(interp, nameds) ? 1 : 0;
+        
+        /* If there's a named part, create a hash with the values. */
+        if (has_nameds) {
+            PMC *result = Parrot_pmc_new(interp, enum_class_Hash);
+            PMC *named_names = VTABLE_get_attr_str(interp, capture,
+                Parrot_str_new_constant(interp, "named"));
+            INTVAL n = VTABLE_elements(interp, named_names);
+            INTVAL i;
+            for (i = 0; i < n; i++) {
+                STRING *name = VTABLE_get_string_keyed_int(interp, named_names, i);
+                VTABLE_set_pmc_keyed_str(interp, result, name,
+                    VTABLE_get_pmc_keyed_str(interp, capture, name));
+            }
+            $3 = result;
+        }
+        
+        /* Otherwise, use empty hash. */
+        else {
+            $3 = empty_hash;
+        }
+    }
+    else {
+        $2 = $1;
+        $3 = empty_hash;
+    }
 }
 
 
