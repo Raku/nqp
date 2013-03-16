@@ -461,6 +461,21 @@ inline op set_who(invar PMC, invar PMC) :base_core {
 
 /*
 
+=item hlllist()
+
+Returns the HLL list type.
+
+=cut
+
+*/
+inline op hlllist(invar PMC) :base_core {
+    /* TODO: This op needs to actually respect the HLL config stuff. Of
+     * course, we'll have to implement stuff to do that. =) */
+    $1 = BOOTArray;
+}
+
+/*
+
 =item repr_type_object_for(how, repr_name)
 
 Creates a type object associated with the given HOW and of the given
