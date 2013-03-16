@@ -5,6 +5,7 @@
 #include "repr_registry.h"
 #include "knowhow_bootstrapper.h"
 #include "serialization_context.h"
+#include "reprs/KnowHOWREPR.h"
 
 /* Cached type IDs. */
 static INTVAL stable_id = 0;
@@ -16,8 +17,32 @@ static STRING *find_method_str = NULL;
 static STRING *type_check_str = NULL;
 static STRING *accepts_type_str = NULL;
 
+static PMC *boot_type(PARROT_INTERP, PMC *knowhow, char *type_name, char *repr_name, INTVAL index) {
+    PMC *knowhow_how = STABLE(knowhow)->HOW;
+    PMC *meta_obj = REPR(knowhow_how)->allocate(interp, STABLE(knowhow_how));
+    PMC *sc = SC_get_sc(interp, Parrot_str_new_constant(interp, "__6MODEL_CORE__"));
+    REPROps *repr;
+    PMC *type_obj;
+
+    REPR(meta_obj)->initialize(interp, STABLE(meta_obj), OBJECT_BODY(meta_obj));
+    ((KnowHOWREPRInstance *)PMC_data(meta_obj))->body.name = Parrot_str_new_constant(interp, type_name);
+    repr = REPR_get_by_name(interp, Parrot_str_new_constant(interp, repr_name));
+    type_obj = repr->type_object_for(interp, meta_obj);
+    STABLE(type_obj)->method_cache = ((KnowHOWREPRInstance *)PMC_data(meta_obj))->body.methods;
+    STABLE(type_obj)->mode_flags = METHOD_CACHE_AUTHORITATIVE;
+
+    VTABLE_set_pmc_keyed_int(interp, sc, index, type_obj);
+    SC_PMC(type_obj) = sc;
+    STABLE(type_obj)->sc = sc;
+    VTABLE_set_pmc_keyed_int(interp, sc, index+1, STABLE(type_obj)->HOW);
+    SC_PMC(STABLE(type_obj)->HOW) = sc;
+    STABLE(STABLE(type_obj)->HOW)->sc = sc;
+
+    return type_obj;
+}
+
 /* Initializes 6model and produces the KnowHOW core meta-object. */
-void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attribute) {
+void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attribute, PMC **boot_array) {
     PMC    *initial_sc;
     STRING *initial_sc_name;
     
@@ -43,6 +68,8 @@ void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attri
     
     /* Set up the simple KnowHOWAttribute. */
     *knowhow_attribute = SixModelObject_setup_knowhow_attribute(interp, initial_sc, *knowhow);
+
+    *boot_array = boot_type(interp, *knowhow, "BOOTArray", "VMArray", 2);
 }
 
 /* Sets the object that we'll wrap the next allocation in. */

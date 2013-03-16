@@ -36,6 +36,7 @@ static INTVAL vmarray_repr_id = 0;
 /* Built-in meta-objects. */
 static PMC *KnowHOW = NULL;
 static PMC *KnowHOWAttribute = NULL;
+static PMC *BOOTArray = NULL;
 
 /* FileHandle PMC for nqpevent */
 static PMC *nqpevent_fh = NULL;
@@ -297,7 +298,7 @@ inline op nqp_dynop_setup() :base_core {
         ohash_id  = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "OwnedHash", 0));
 
         /* Initialize the object model. */
-        SixModelObject_initialize(interp, &KnowHOW, &KnowHOWAttribute);
+        SixModelObject_initialize(interp, &KnowHOW, &KnowHOWAttribute, &BOOTArray);
         
         /* Cache the VMArray REPR ID. */
         vmarray_repr_id = REPR_name_to_id(interp, Parrot_str_new(interp, "VMArray", 0));
