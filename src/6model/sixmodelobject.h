@@ -414,7 +414,7 @@ typedef void (* st_sc_barrier_func) (PARROT_INTERP, STable *st);
     }
 
 /* Object model initialization. */
-void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attribute, PMC **boot_array);
+void SixModelObject_initialize(PARROT_INTERP);
 
 /* Some utility functions. */
 void set_wrapping_object(PMC *wrapper);

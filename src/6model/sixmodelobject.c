@@ -42,9 +42,14 @@ static PMC *boot_type(PARROT_INTERP, PMC *knowhow, char *type_name, char *repr_n
 }
 
 /* Initializes 6model and produces the KnowHOW core meta-object. */
-void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attribute, PMC **boot_array) {
+/*void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attribute, PMC **boot_array) {*/
+void SixModelObject_initialize(PARROT_INTERP) {
     PMC    *initial_sc;
     STRING *initial_sc_name;
+    PMC    *global_context = Parrot_pmc_new(interp, enum_class_Hash);
+    PMC    *knowhow;
+    PMC    *knowhow_attribute;
+    PMC    *boot_array;
     
     /* Look up and cache some type IDs and strings. */
     stable_id        = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "STable", 0));
@@ -64,14 +69,27 @@ void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attri
     REPR_initialize_registry(interp);
 
     /* Bootstrap the KnowHOW. */
-    *knowhow = SixModelObject_bootstrap_knowhow(interp, initial_sc);
+    knowhow = SixModelObject_bootstrap_knowhow(interp, initial_sc);
     
     /* Set up the simple KnowHOWAttribute. */
-    *knowhow_attribute = SixModelObject_setup_knowhow_attribute(interp, initial_sc, *knowhow);
+    knowhow_attribute = SixModelObject_setup_knowhow_attribute(interp, initial_sc, knowhow);
 
-    *boot_array = boot_type(interp, *knowhow, "BOOTArray", "VMArray", 2);
+    /* Set up the BOOT* types. */
+    boot_array = boot_type(interp, knowhow, "BOOTArray", "VMArray", 2);
 
-    set_boolification_spec(interp, *boot_array, BOOL_MODE_HAS_ELEMS, NULL);
+    /* Set boolification specs for the BOOT types. */
+    set_boolification_spec(interp, boot_array, BOOL_MODE_HAS_ELEMS, NULL);
+
+    /* Save the global context to the Parrot root namespace and store all the
+     * things we just created in it. */
+    VTABLE_set_pmc_keyed_str(interp, interp->root_namespace,
+        Parrot_str_new_constant(interp, "_GLOBAL_CONTEXT"), global_context);
+    VTABLE_set_pmc_keyed_str(interp, global_context,
+        Parrot_str_new_constant(interp, "KnowHOW"), knowhow);
+    VTABLE_set_pmc_keyed_str(interp, global_context,
+        Parrot_str_new_constant(interp, "KnowHOWAttribute"), knowhow_attribute);
+    VTABLE_set_pmc_keyed_str(interp, global_context,
+        Parrot_str_new_constant(interp, "BOOTArray"), boot_array);
 }
 
 /* Sets the object that we'll wrap the next allocation in. */

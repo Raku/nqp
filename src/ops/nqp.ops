@@ -290,6 +290,7 @@ Does various setup tasks for the benefit of the other dynops.
 inline op nqp_dynop_setup() :base_core {
     if (!initialized) {
         PMC *obj_sc_barrier, *st_sc_barrier;
+        PMC *global_context;
 
         /* Look up and cache some type IDs. */
         stable_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "STable", 0));
@@ -297,8 +298,16 @@ inline op nqp_dynop_setup() :base_core {
         qrpa_id   = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "QRPA", 0));
         ohash_id  = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "OwnedHash", 0));
 
-        /* Initialize the object model. */
-        SixModelObject_initialize(interp, &KnowHOW, &KnowHOWAttribute, &BOOTArray);
+        /* Initialize the object model and fetch the bootstrapped objects. */
+        SixModelObject_initialize(interp);
+        global_context = VTABLE_get_pmc_keyed_str(interp, interp->root_namespace,
+            Parrot_str_new_constant(interp, "_GLOBAL_CONTEXT"));
+        KnowHOW = VTABLE_get_pmc_keyed_str(interp, global_context,
+            Parrot_str_new_constant(interp, "KnowHOW"));
+        KnowHOWAttribute = VTABLE_get_pmc_keyed_str(interp, global_context,
+            Parrot_str_new_constant(interp, "KnowHOWAttribute"));
+        BOOTArray = VTABLE_get_pmc_keyed_str(interp, global_context,
+            Parrot_str_new_constant(interp, "BOOTArray"));
         
         /* Cache the VMArray REPR ID. */
         vmarray_repr_id = REPR_name_to_id(interp, Parrot_str_new(interp, "VMArray", 0));
