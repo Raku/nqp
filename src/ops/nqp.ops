@@ -2277,19 +2277,7 @@ inline op set_boolification_spec(invar PMC, in INT, invar PMC) :base_core {
             "Boolification mode for type is set to 'call method', but method not specified");
     }
     if (target->vtable->base_type == smo_id) {
-        STable *st = STABLE(target);
-        
-        /* Allocate and populate new boolification spec. */
-        BoolificationSpec *new_spec = mem_allocate_zeroed_typed(BoolificationSpec);
-        new_spec->mode = $2;
-        new_spec->method = $3;
-
-        /* Free any existing spec and put the new one in place. */
-        if (st->boolification_spec)
-            mem_sys_free(st->boolification_spec);
-        st->boolification_spec = new_spec;
-        PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC($1));
-        /*ST_SC_WRITE_BARRIER(st);*/
+        set_boolification_spec(interp, $1, $2, $3);
     }
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,

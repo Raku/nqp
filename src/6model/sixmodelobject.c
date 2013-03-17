@@ -94,6 +94,22 @@ PMC * wrap_object(PARROT_INTERP, void *obj) {
     return obj_pmc;
 }
 
+void set_boolification_spec(PARROT_INTERP, PMC *target, INTVAL mode, PMC *method) {
+    STable *st = STABLE(decontainerize(interp, target));
+
+    /* Allocate and populate new boolification spec. */
+    BoolificationSpec *new_spec = mem_allocate_zeroed_typed(BoolificationSpec);
+    new_spec->mode = mode;
+    new_spec->method = method;
+
+    /* Free any existing spec and put the new one in place. */
+    if (st->boolification_spec)
+        mem_sys_free(st->boolification_spec);
+    st->boolification_spec = new_spec;
+    PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC(target));
+    /*ST_SC_WRITE_BARRIER(st);*/
+}
+
 /* This is the default method dispatch code. It tries to use the
  * v-table first, then falls back to a lookup. */
 static PMC * default_find_method(PARROT_INTERP, PMC *obj, STRING *name, INTVAL hint) {
