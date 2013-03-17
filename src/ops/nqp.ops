@@ -56,6 +56,9 @@ PMC *compiling_scs = NULL;
  * number of nested enable/disable we are in. */
 INTVAL sc_write_barrier_off_depth = 0;
 
+/* Empty hash, used in deconstruct op. */
+static PMC *empty_hash = NULL;
+
 /* SC write barrier for objects. */
 static void SC_write_barrier_obj(PARROT_INTERP, PMC *obj) {
     if (!sc_write_barrier_off_depth && VTABLE_get_bool(interp, compiling_scs)) {
@@ -133,7 +136,7 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
     PMC    *curst   = nfa_curst;
     PMC    *nextst  = nfa_nextst;
     INTVAL *done, *fates;
-    INTVAL  i, num_states, total_fates, prev_fates;
+    INTVAL  i, fate_arr_len, num_states, total_fates, prev_fates;
     
     /* Allocate a "done states" array. */
     num_states = nfa->num_states;
@@ -144,8 +147,8 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
     VTABLE_set_integer_native(interp, nextst, 0);
     
     /* Allocate fates array. */
-    fates = (INTVAL *)mem_sys_allocate(
-        sizeof(INTVAL) * (1 + VTABLE_elements(interp, nfa->fates)));
+    fate_arr_len = 1 + VTABLE_elements(interp, nfa->fates);
+    fates = (INTVAL *)mem_sys_allocate(sizeof(INTVAL) * fate_arr_len);
     total_fates = 0;
     
     VTABLE_push_integer(interp, nextst, 1);
@@ -194,10 +197,17 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
                                 prev_fates--;
                         }
                     }
-                    if (found_fate)
+                    if (found_fate) {
                         fates[total_fates - 1] = arg;
-                    else
+                    }
+                    else {
+                        if (total_fates >= fate_arr_len) {
+                            fate_arr_len = total_fates + 1;
+                            fates = (INTVAL *)mem_sys_realloc(fates,
+                                sizeof(INTVAL) * fate_arr_len);
+                        }
                         fates[total_fates++] = arg;
+                    }
                 }
                 else if (act == EDGE_EPSILON && to <= num_states && done[to] != gen) {
                     VTABLE_push_integer(interp, curst, to);
@@ -276,6 +286,12 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
     return fates;
 }
 
+/* Constants for values the type field above may have. */
+#define BIND_VAL_INT 1
+#define BIND_VAL_NUM 2
+#define BIND_VAL_STR 3
+#define BIND_VAL_OBJ 4
+
 END_OPS_PREAMBLE
 
 /*
@@ -332,6 +348,10 @@ inline op nqp_dynop_setup() :base_core {
         Parrot_pmc_gc_register(interp, nfa_curst);
         nfa_nextst = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
         Parrot_pmc_gc_register(interp, nfa_nextst);
+        
+        /* Create and anchor empty hash. */
+        empty_hash = Parrot_pmc_new(interp, enum_class_Hash);
+        Parrot_pmc_gc_register(interp, empty_hash);
         
         /* Mark initialized. */
         initialized = 1;
@@ -1584,11 +1604,61 @@ Invokes the specified target with the specified capture.
 inline op invoke_with_capture(out PMC, in PMC, in PMC) :base_core {
     PMC *arg_copy = VTABLE_clone(interp, $3);
     PMC *result;
-    PMC *prev_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+    /*PMC *prev_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));*/
     Parrot_pcc_invoke_from_sig_object(interp, $2, arg_copy);
     result = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
-    Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), prev_ctx);
+    /*Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), prev_ctx);*/
     $1 = VTABLE_get_pmc_keyed_int(interp, result, 0);
+}
+
+
+/*
+
+=item deconstruct_capture()
+
+Puts something that will flatten to the position part of the capture in $1
+into $2, and soemthing that will flatten to the named part into $3.
+
+=cut
+
+*/
+inline op deconstruct_capture(invar PMC, out PMC, out PMC) :base_core {
+    PMC *capture = $1;
+    if (capture->vtable->base_type == enum_class_CallContext) {
+        Hash *nameds;
+        INTVAL has_nameds;
+        
+        /* The call context itself will do for the positionals. */
+        $2 = capture;
+        
+        /* See if there are any nameds */
+        GETATTR_CallContext_hash(interp, capture, nameds);
+        has_nameds = nameds && Parrot_hash_size(interp, nameds) ? 1 : 0;
+        
+        /* If there's a named part, create a hash with the values. */
+        if (has_nameds) {
+            PMC *result = Parrot_pmc_new(interp, enum_class_Hash);
+            PMC *named_names = VTABLE_get_attr_str(interp, capture,
+                Parrot_str_new_constant(interp, "named"));
+            INTVAL n = VTABLE_elements(interp, named_names);
+            INTVAL i;
+            for (i = 0; i < n; i++) {
+                STRING *name = VTABLE_get_string_keyed_int(interp, named_names, i);
+                VTABLE_set_pmc_keyed_str(interp, result, name,
+                    VTABLE_get_pmc_keyed_str(interp, capture, name));
+            }
+            $3 = result;
+        }
+        
+        /* Otherwise, use empty hash. */
+        else {
+            $3 = empty_hash;
+        }
+    }
+    else {
+        $2 = $1;
+        $3 = empty_hash;
+    }
 }
 
 
@@ -2848,5 +2918,43 @@ inline op nqp_fresh_stub(out PMC, invar PMC) :base_core {
     else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "nqp_fresh_sub can only operate on a Parrot Sub");
+    }
+}
+
+/*
+
+=item captureposprimspec
+
+Takes a CallContext in $2 and an index in $3, and returns the primitive
+type specification for the specified positional argument (is it an object
+or one of the native types).
+
+=cut
+
+*/
+inline op captureposprimspec(out INT, invar PMC, in INT) :base_core {
+    PMC *cc = $2;
+    if (cc->vtable->base_type == enum_class_CallContext) {
+        INTVAL i = $3;
+        struct Pcc_cell * pc_positionals;
+        GETATTR_CallContext_positionals(interp, cc, pc_positionals);
+        switch (pc_positionals[i].type) {
+            case BIND_VAL_INT:
+                $1 = STORAGE_SPEC_BP_INT;
+                break;
+            case BIND_VAL_NUM:
+                $1 = STORAGE_SPEC_BP_NUM;
+                break;
+            case BIND_VAL_STR:
+                $1 = STORAGE_SPEC_BP_STR;
+                break;
+            default:
+                $1 = STORAGE_SPEC_BP_NONE;
+                break;
+        }
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "captureposprimspec can only operate on a CallContext");
     }
 }

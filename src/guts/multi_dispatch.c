@@ -23,19 +23,28 @@ PMC * find_in_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num
     INTVAL arg_tup[MD_CACHE_MAX_ARITY];
     INTVAL i, j, entries, t_pos;
     struct Pcc_cell * pc_positionals;
+    Hash *nameds;
+    char has_nameds;
+    
+    /* See if there are any nameds */
+    if (capture->vtable->base_type != enum_class_CallContext)
+        return NULL;
+    GETATTR_CallContext_hash(interp, capture, nameds);
+    has_nameds = nameds && Parrot_hash_size(interp, nameds) ? 1 : 0;
     
     /* If it's zero-arity, return result right off. */
-    if (num_args == 0)
+    if (num_args == 0 && !has_nameds)
         return cache->zero_arity;
+        
+    /* If there's more args than the maximum, won't be in the cache. */
+    if (num_args > MD_CACHE_MAX_ARITY)
+        return NULL;
 
     /* Create arg tuple. */
-    if (capture->vtable->base_type == enum_class_CallContext)
-        GETATTR_CallContext_positionals(interp, capture, pc_positionals);
-    else
-        return NULL;
+    GETATTR_CallContext_positionals(interp, capture, pc_positionals);
     for (i = 0; i < num_args; i++) {
         if (pc_positionals[i].type == BIND_VAL_OBJ) {
-            PMC *arg = pc_positionals[i].u.p;
+            PMC *arg = decontainerize(interp, pc_positionals[i].u.p);
             if (arg->vtable->base_type != smo_id)
                 return NULL;
             arg_tup[i] = STABLE(arg)->type_cache_id | (IS_CONCRETE(arg) ? 1 : 0);
@@ -56,8 +65,11 @@ PMC * find_in_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num
                 break;
             }
         }
-        if (match)
-            return cache->arity_caches[num_args - 1].results[i];
+        if (match) {
+            char match_nameds = cache->arity_caches[num_args - 1].named_ok[i];
+            if (has_nameds == match_nameds)
+                return cache->arity_caches[num_args - 1].results[i];
+        }
         t_pos += num_args;
     }
 
@@ -78,6 +90,14 @@ void add_to_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num_a
     INTVAL arg_tup[MD_CACHE_MAX_ARITY];
     INTVAL i, entries, ins_type;
     struct Pcc_cell * pc_positionals;
+    Hash *nameds;
+    char has_nameds;
+    
+    /* See if there are any nameds */
+    if (capture->vtable->base_type != enum_class_CallContext)
+        return;
+    GETATTR_CallContext_hash(interp, capture, nameds);
+    has_nameds = nameds && Parrot_hash_size(interp, nameds) ? 1 : 0;
     
     /* Make sure 6model type ID is set. */
     if (!smo_id)
@@ -89,6 +109,10 @@ void add_to_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num_a
         return;
     }
     
+    /* If there's more args than the maximum, we can't cache it. */
+    if (num_args > MD_CACHE_MAX_ARITY)
+        return;
+    
     /* If the cache is saturated, don't do anything (we could instead do a random
      * replacement). */
     entries = cache->arity_caches[num_args - 1].num_entries;
@@ -96,13 +120,10 @@ void add_to_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num_a
         return;
     
     /* Create arg tuple. */
-    if (capture->vtable->base_type == enum_class_CallContext)
-        GETATTR_CallContext_positionals(interp, capture, pc_positionals);
-    else
-        return;
+    GETATTR_CallContext_positionals(interp, capture, pc_positionals);
     for (i = 0; i < num_args; i++) {
         if (pc_positionals[i].type == BIND_VAL_OBJ) {
-            PMC *arg = pc_positionals[i].u.p;
+            PMC *arg = decontainerize(interp, pc_positionals[i].u.p);
             if (arg->vtable->base_type != smo_id)
                 return;
             arg_tup[i] = STABLE(arg)->type_cache_id | (IS_CONCRETE(arg) ? 1 : 0);
@@ -115,6 +136,7 @@ void add_to_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num_a
     /* If there's no entries yet, need to do some allocation. */
     if (entries == 0) {
         cache->arity_caches[num_args - 1].type_ids = mem_sys_allocate(num_args * sizeof(INTVAL) * MD_CACHE_MAX_ENTRIES);
+        cache->arity_caches[num_args - 1].named_ok = mem_sys_allocate(sizeof(char) * MD_CACHE_MAX_ENTRIES);
         cache->arity_caches[num_args - 1].results  = mem_sys_allocate(sizeof(PMC *) * MD_CACHE_MAX_ENTRIES);
     }
 
@@ -123,5 +145,6 @@ void add_to_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num_a
     for (i = 0; i < num_args; i++)
         cache->arity_caches[num_args - 1].type_ids[ins_type + i] = arg_tup[i];
     cache->arity_caches[num_args - 1].results[entries] = result;
+    cache->arity_caches[num_args - 1].named_ok[entries] = has_nameds;
     cache->arity_caches[num_args - 1].num_entries = entries + 1;
 }

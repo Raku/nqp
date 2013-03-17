@@ -591,7 +591,14 @@ for ('', 'repeat_') -> $repness {
             my $coerced := $qastcomp.coerce(@comp_ops[0], $res_type);
             if $repness {
                 # It's a repeat_ variant, need to go straight into the
-                # loop body unconditionally.
+                # loop body unconditionally. Be sure to set the register
+                # for the result to something first.
+                if $res_type eq 'p' || $res_type eq 's' {
+                    $ops.push_pirop('null', $res_reg);
+                }
+                else {
+                    $ops.push_pirop('set', $res_reg, '0');
+                }
                 $ops.push_pirop('goto', $redo_lbl);
             }
             $ops.push($test_lbl);
@@ -602,7 +609,7 @@ for ('', 'repeat_') -> $repness {
 
             # Handle immediate blocks wanting the value as an arg.
             if $*IMM_ARG {
-                $*IMM_ARG($coerced.result);
+                $*IMM_ARG($res_reg);
             }
 
             # Emit the loop body; stash the result.
@@ -1069,10 +1076,28 @@ QAST::Operations.add_core_pirop_mapping('captureposarg', 'set', 'PQi');
 QAST::Operations.add_core_pirop_mapping('captureposarg_i', 'set', 'IQi');
 QAST::Operations.add_core_pirop_mapping('captureposarg_n', 'set', 'NQi');
 QAST::Operations.add_core_pirop_mapping('captureposarg_s', 'set', 'SQi');
+QAST::Operations.add_core_pirop_mapping('captureexistsnamed', 'exists', 'IQs');
 QAST::Operations.add_core_pirop_mapping('captureposprimspec', 'captureposprimspec', 'IPi');
 
 # Multiple dispatch related.
-QAST::Operations.add_core_pirop_mapping('invokewithcapture', 'invoke_with_capture', 'PPP');
+QAST::Operations.add_core_op('invokewithcapture', -> $qastcomp, $op {
+    unless $op.list == 2 {
+        nqp::die("The 'invokewithcapture' op requires two children");
+    }
+    my $pos_reg  := $*REGALLOC.fresh_p();
+    my $nam_reg  := $*REGALLOC.fresh_p();
+    my $res_reg  := $*REGALLOC.fresh_p();
+    my $inv_post := $qastcomp.coerce($qastcomp.as_post($op[0]), 'P');
+    my $cap_post := $qastcomp.coerce($qastcomp.as_post($op[1]), 'P');
+    my $ops      := PIRT::Ops.new();
+    $ops.push($inv_post);
+    $ops.push($cap_post);
+    $ops.push_pirop('deconstruct_capture', $cap_post.result, $pos_reg, $nam_reg);
+    $ops.push_pirop('call', $inv_post.result, $pos_reg ~ ' :flat',
+        $nam_reg ~ ' :flat :named', :result($res_reg));
+    $ops.result($res_reg);
+    $ops
+});
 QAST::Operations.add_core_pirop_mapping('multicacheadd', 'multi_cache_add', 'PPPP');
 QAST::Operations.add_core_pirop_mapping('multicachefind', 'multi_cache_find', 'PPP');
 
@@ -1341,6 +1366,18 @@ QAST::Operations.add_core_pirop_mapping('die_s', 'die', '0s');
 QAST::Operations.add_core_pirop_mapping('die', 'die', '0P');
 QAST::Operations.add_core_pirop_mapping('throw', 'throw', '0P');
 QAST::Operations.add_core_pirop_mapping('rethrow', 'rethrow', '0P');
+QAST::Operations.add_core_op('resume', -> $qastcomp, $op {
+    if +$op.list != 1 {
+        nqp::die("The 'resume' op expects 1 child");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('call'),
+        QAST::Op.new(
+            :op('atkey'),
+            $op[0],
+            QAST::SVal.new( :value('resume') )
+        )))
+});
 
 # Control exception throwing.
 my %control_map := nqp::hash(
@@ -1985,6 +2022,27 @@ QAST::Operations.add_core_pirop_mapping('bindcomp', 'compreg', '1sP');
 QAST::Operations.add_core_pirop_mapping('getcurhllsym', 'get_hll_global', 'Ps');
 QAST::Operations.add_core_pirop_mapping('bindcurhllsym', 'set_hll_global', '1sP');
 QAST::Operations.add_core_pirop_mapping('loadbytecode', 'load_bytecode', '0s');
+QAST::Operations.add_core_op('gethllsym', -> $qastcomp, $op {
+    if +@($op) != 2 {
+        nqp::die('gethllsym requires two operands');
+    }
+    $qastcomp.as_post(QAST::VM.new(
+        :pirop('get_root_global__PPs'),
+        QAST::Op.new( :op('list_s'), $op[0] ),
+        $op[1]
+    ))
+});
+QAST::Operations.add_core_op('bindhllsym', -> $qastcomp, $op {
+    if +@($op) != 3 {
+        nqp::die('bindhllsym requires three operands');
+    }
+    $qastcomp.as_post(QAST::VM.new(
+        :pirop('set_root_global__2PsP'),
+        QAST::Op.new( :op('list_s'), $op[0] ),
+        $op[1],
+        $op[2]
+    ))
+});
 QAST::Operations.add_core_op('sethllconfig', -> $qastcomp, $op {
     # XXX Not really implemented here.
     my $ops := PIRT::Ops.new();

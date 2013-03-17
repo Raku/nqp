@@ -14,6 +14,13 @@ typedef struct {
     /* This is a bunch of type IDs. We allocate it arity * MAX_ENTRIES
      * big and go through it in arity sized chunks. */
     INTVAL *type_ids;
+    
+    /* Whether the entry is allowed to have named arguments. Doesn't say
+     * anything about which ones, though. Something that is ambivalent
+     * about named arguments to the degree it doesn't care about them 
+     * even tie-breaking (like NQP) can just throw such entries into the
+     * cache. Things that do care should not make such cache entries. */
+    char *named_ok;
 
     /* The results we return from the cache. */
     PMC **results;

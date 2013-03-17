@@ -445,10 +445,18 @@ class HLL::Compiler does HLL::Backend::Default {
         my @files := nqp::islist($files) ?? $files !! [$files];
         $!user_progname := nqp::join(',', @files);
         my @codes;
-        for @files {
+        for @files -> $filename {
             my $err := 0;
+            my $in-handle;
             try {
-                my $in-handle := nqp::open($_, 'r');
+                $in-handle := nqp::open($filename, 'r');
+                CATCH {
+                    nqp::say("Could not open $filename. $_");
+                    $err := 1;
+                }
+            }
+            nqp::exit(1) if $err;
+            try {
                 nqp::setencoding($in-handle, $encoding);
                 nqp::push_s(@codes, nqp::readallfh($in-handle));
                 nqp::closefh($in-handle);
