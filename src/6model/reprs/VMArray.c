@@ -211,6 +211,11 @@ static void initialize(PARROT_INTERP, STable *st, void *data) {
     /* Nothing to do here. */
 }
 
+static INTVAL elems(PARROT_INTERP, STable *st, void *data) {
+    VMArrayBody *body =(VMArrayBody* ) data;
+    return body->elems;
+}
+
 /* Copies to the body of one object to another. */
 static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     VMArrayBody *src_body = (VMArrayBody *)src;
@@ -512,6 +517,7 @@ REPROps * VMArray_initialize(PARROT_INTERP) {
     this_repr->compose = compose;
     this_repr->allocate = allocate;
     this_repr->initialize = initialize;
+    this_repr->elems = elems;
     this_repr->copy_to = copy_to;
     this_repr->serialize = serialize;
     this_repr->deserialize = deserialize;
