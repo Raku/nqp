@@ -42,14 +42,13 @@ static PMC *boot_type(PARROT_INTERP, PMC *knowhow, char *type_name, char *repr_n
 }
 
 /* Initializes 6model and produces the KnowHOW core meta-object. */
-/*void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attribute, PMC **boot_array) {*/
 void SixModelObject_initialize(PARROT_INTERP) {
     PMC    *initial_sc;
     STRING *initial_sc_name;
     PMC    *global_context = Parrot_pmc_new(interp, enum_class_Hash);
     PMC    *knowhow;
     PMC    *knowhow_attribute;
-    PMC    *boot_array;
+    PMC    *boot_array, *boot_iter;
     
     /* Look up and cache some type IDs and strings. */
     stable_id        = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "STable", 0));
@@ -76,9 +75,12 @@ void SixModelObject_initialize(PARROT_INTERP) {
 
     /* Set up the BOOT* types. */
     boot_array = boot_type(interp, knowhow, "BOOTArray", "VMArray", 2);
+    /* TODO: BOOTHash types goes here with index 4. */
+    boot_iter  = boot_type(interp, knowhow, "BOOTIter", "VMIter", 6);
 
     /* Set boolification specs for the BOOT types. */
     set_boolification_spec(interp, boot_array, BOOL_MODE_HAS_ELEMS, NULL);
+    set_boolification_spec(interp, boot_iter, BOOL_MODE_ITER, NULL);
 
     /* Save the global context to the Parrot root namespace and store all the
      * things we just created in it. */
@@ -90,6 +92,8 @@ void SixModelObject_initialize(PARROT_INTERP) {
         Parrot_str_new_constant(interp, "KnowHOWAttribute"), knowhow_attribute);
     VTABLE_set_pmc_keyed_str(interp, global_context,
         Parrot_str_new_constant(interp, "BOOTArray"), boot_array);
+    VTABLE_set_pmc_keyed_str(interp, global_context,
+        Parrot_str_new_constant(interp, "BOOTIter"), boot_iter);
 }
 
 /* Sets the object that we'll wrap the next allocation in. */

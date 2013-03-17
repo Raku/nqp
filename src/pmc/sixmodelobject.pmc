@@ -25,6 +25,7 @@
 #include "parrot/exceptions.h"
 #include "parrot/events.h"
 #include "../6model/sixmodelobject.h"
+#include "../6model/reprs/VMIter.h"
 
 /* We need to know how to boolify bigints. Really need something better,
  * but this will do for now. */
@@ -298,6 +299,12 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
                         else
                             return !mp_iszero(&((P6bigintBody *)r->box_funcs->get_boxed_ref(interp,
                                 STABLE(decont), OBJECT_BODY(decont), bigint_repr_id))->i);
+                    }
+                    return 0;
+                case BOOL_MODE_ITER:
+                    if (IS_CONCRETE(decont)) {
+                        VMIterBody *body = (VMIterBody *) OBJECT_BODY(decont);
+                        return body->idx + 1 < body->limit;
                     }
                     return 0;
                 case BOOL_MODE_HAS_ELEMS:
