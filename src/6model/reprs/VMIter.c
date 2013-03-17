@@ -69,6 +69,26 @@ static storage_spec get_storage_spec(PARROT_INTERP, STable *st) {
     return spec;
 }
 
+static PMC *shift_boxed(PARROT_INTERP, STable *st, void *data) {
+    VMIterBody *body = (VMIterBody *) data;
+    PMC *target = body->target;
+
+    switch (body->mode) {
+    case VMITER_MODE_ARRAY:
+        body->idx++;
+        if (body->idx >= body->limit)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_OUT_OF_BOUNDS,
+                    "VMIter: Iteration past end of array");
+        return REPR(target)->pos_funcs->at_pos_boxed(interp, STABLE(target), OBJECT_BODY(target), body->idx);
+    case VMITER_MODE_HASH:
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "VMIter: Hash iteration not implemented yet.");
+    default:
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "VMIter: Unknow iteration mode %d", body->mode);
+    }
+}
+
 /* Initializes the VMIter representation. */
 REPROps * VMIter_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
@@ -80,5 +100,7 @@ REPROps * VMIter_initialize(PARROT_INTERP) {
     this_repr->copy_to = copy_to;
     this_repr->gc_free = gc_free;
     this_repr->get_storage_spec = get_storage_spec;
+    this_repr->pos_funcs = mem_allocate_zeroed_typed(REPROps_Positional);
+    this_repr->pos_funcs->shift_boxed = shift_boxed;
     return this_repr;
 }
