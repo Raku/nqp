@@ -472,10 +472,11 @@ static void unshift_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
         INTVAL n = 8;
         INTVAL elems = body->elems;
         INTVAL i;
-        PMC **pmcslots = (PMC **) body->slots;
+        PMC **pmcslots;
 
         /* Grow the array */
         ensure_size(interp, body, repr_data, elems + n);
+        pmcslots = (PMC **) body->slots;
         /* Move elements and set start */
         memmove(pmcslots + n, pmcslots, elems * sizeof (PMC *));
         body->start = n;
