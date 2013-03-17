@@ -70,6 +70,8 @@ void SixModelObject_initialize(PARROT_INTERP, PMC **knowhow, PMC **knowhow_attri
     *knowhow_attribute = SixModelObject_setup_knowhow_attribute(interp, initial_sc, *knowhow);
 
     *boot_array = boot_type(interp, *knowhow, "BOOTArray", "VMArray", 2);
+
+    set_boolification_spec(interp, *boot_array, BOOL_MODE_HAS_ELEMS, NULL);
 }
 
 /* Sets the object that we'll wrap the next allocation in. */

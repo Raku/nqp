@@ -300,6 +300,9 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
                                 STABLE(decont), OBJECT_BODY(decont), bigint_repr_id))->i);
                     }
                     return 0;
+                case BOOL_MODE_HAS_ELEMS:
+                    return IS_CONCRETE(decont) &&
+                        REPR(decont)->elems(interp, STABLE(decont), OBJECT_BODY(decont));
                 default:
                     return SUPER();
             }
