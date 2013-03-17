@@ -1856,7 +1856,8 @@ inline op stable_publish_vtable_handler_mapping(invar PMC, invar PMC) :base_core
             }
             if (idx >= 0) {
                 PMC *class_handle = VTABLE_get_pmc_keyed_int(interp, slot, 0);
-                STRING *attr_name = VTABLE_get_string_keyed_int(interp, slot, 1);
+                PMC *attr_pmc = VTABLE_get_pmc_keyed_int(interp, slot, 1);
+                STRING *attr_name = VTABLE_get_string(interp, attr_pmc);
                 st->parrot_vtable_handler_mapping[idx].class_handle = class_handle;
                 st->parrot_vtable_handler_mapping[idx].attr_name = attr_name;
                 st->parrot_vtable_handler_mapping[idx].hint =
