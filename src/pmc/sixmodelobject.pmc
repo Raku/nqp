@@ -825,6 +825,25 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
                                 vth[PARROT_VTABLE_SLOT_GET_ITER].hint);
             return VTABLE_get_iter(interp, val);
         }
+        else if (!Parrot_str_compare(interp, REPR(decont)->name, Parrot_str_new_constant(interp, "VMArray"))) {
+            PMC *global_context = VTABLE_get_pmc_keyed_str(interp, interp->root_namespace,
+                Parrot_str_new_constant(interp, "_GLOBAL_CONTEXT"));
+            /* TODO: We probably want to create the current HLL's iter type
+             * here, rather than BOOTIter. */
+            PMC *iter_type = VTABLE_get_pmc_keyed_str(interp, global_context,
+                Parrot_str_new_constant(interp, "BOOTIter"));
+
+            VMIterBody *iter_body;
+            PMC *iter = REPR(iter_type)->allocate(interp, STABLE(iter_type));
+
+            iter_body = (VMIterBody *) OBJECT_BODY(iter);
+            iter_body->target = decont;
+            iter_body->idx = -1;
+            iter_body->limit = REPR(decont)->elems(interp, STABLE(decont), OBJECT_BODY(decont));
+            iter_body->mode = VMITER_MODE_ARRAY;
+
+            return iter;
+        }
         else
             return SUPER();
     }
