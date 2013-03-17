@@ -95,7 +95,7 @@ void add_to_cache(PARROT_INTERP, NQP_md_cache *cache, PMC *capture, INTVAL num_a
     
     /* See if there are any nameds */
     if (capture->vtable->base_type != enum_class_CallContext)
-        return NULL;
+        return;
     GETATTR_CallContext_hash(interp, capture, nameds);
     has_nameds = nameds && Parrot_hash_size(interp, nameds) ? 1 : 0;
     
