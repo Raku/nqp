@@ -3,26 +3,26 @@ use NQPHLL;
 class QAST::Operations {
     # Maps operations to code that will handle them. Hash of code.
     my %core_ops;
-    
+
     # Maps HLL-specific operations to code that will handle them.
     # Hash of hash of code.
     my %hll_ops;
-    
+
     # Cached pirop compilers.
     my %cached_pirops;
-    
+
     # Mapping of how to box/unbox by HLL.
     my %hll_box;
     my %hll_unbox;
-    
+
     # What we know about inlinability.
     my %core_inlinability;
     my %hll_inlinability;
-    
+
     # What we know about op native results types.
     my %core_result_type;
     my %hll_result_type;
-    
+
     # Compiles an operation to POST.
     method compile_op($qastcomp, $hll, $op) {
         my $name := $op.op;
@@ -36,7 +36,7 @@ class QAST::Operations {
         }
         nqp::die("No registered operation handler for '$name'");
     }
-    
+
     # Compiles a PIR operation.
     method compile_pirop($qastcomp, $op_name, @op_args) {
         if nqp::index($op_name, ' ') {
@@ -48,20 +48,20 @@ class QAST::Operations {
         }
         %cached_pirops{$op_name}($qastcomp, $op_name, @op_args)
     }
-    
+
     # Adds a core op handler.
     method add_core_op($op, $handler, :$inlinable = 0) {
         %core_ops{$op} := $handler;
         self.set_core_op_inlinability($op, $inlinable);
     }
-    
+
     # Adds a HLL op handler.
     method add_hll_op($hll, $op, $handler, :$inlinable = 0) {
         %hll_ops{$hll} := {} unless nqp::existskey(%hll_ops, $hll);
         %hll_ops{$hll}{$op} := $handler;
         self.set_hll_op_inlinability($hll, $op, $inlinable);
     }
-    
+
     # Adds a core op that maps to a PIR op.
     method add_core_pirop_mapping($op, $pirop, $sig, :$inlinable = 0) {
         my $pirop_mapper := pirop_mapper($pirop, $sig);
@@ -71,7 +71,7 @@ class QAST::Operations {
         self.set_core_op_inlinability($op, $inlinable);
         self.set_core_op_result_type($op, nqp::substr($sig, 0, 1));
     }
-    
+
     # Adds a HLL op that maps to a PIR op.
     method add_hll_pirop_mapping($hll, $op, $pirop, $sig, :$inlinable = 0) {
         my $pirop_mapper := pirop_mapper($pirop, $sig);
@@ -82,19 +82,19 @@ class QAST::Operations {
         self.set_hll_op_inlinability($hll, $op, $inlinable);
         self.set_hll_op_result_type($hll, $op, nqp::substr($sig, 0, 1));
     }
-    
+
     # Sets op inlinability at a core level.
     method set_core_op_inlinability($op, $inlinable) {
         %core_inlinability{$op} := $inlinable;
     }
-    
+
     # Sets op inlinability at a HLL level. (Can override at HLL level whether
     # or not the HLL overrides the op itself.)
     method set_hll_op_inlinability($hll, $op, $inlinable) {
         %hll_inlinability{$hll} := {} unless nqp::existskey(%hll_inlinability, $hll);
         %hll_inlinability{$hll}{$op} := $inlinable;
     }
-    
+
     # Checks if an op is considered inlinable.
     method is_inlinable($hll, $op) {
         if nqp::existskey(%hll_inlinability, $hll) {
@@ -104,7 +104,7 @@ class QAST::Operations {
         }
         return %core_inlinability{$op} // 0;
     }
-    
+
     # Sets op native result type at a core level.
     method set_core_op_result_type($op, $type_char) {
         if $type_char eq 'I' {
@@ -117,7 +117,7 @@ class QAST::Operations {
             %core_result_type{$op} := str;
         }
     }
-    
+
     # Sets op inlinability at a HLL level. (Can override at HLL level whether
     # or not the HLL overrides the op itself.)
     method set_hll_op_result_type($hll, $op, $type_char) {
@@ -132,7 +132,7 @@ class QAST::Operations {
             %hll_result_type{$hll}{$op} := str;
         }
     }
-    
+
     # Sets returns on an op node if we it has a native result type.
     method attach_result_type($hll, $node) {
         my $op := $node.op;
@@ -164,33 +164,33 @@ class QAST::Operations {
         %hll_unbox{$hll} := {} unless nqp::existskey(%hll_unbox, $hll);
         %hll_unbox{$hll}{$type} := $handler;
     }
-    
+
     # Generates a box. Takes a POST tree.
     method box($qastcomp, $hll, $type, $post) {
         %hll_box{$hll}{$type}($qastcomp, $post)
     }
-    
+
     # Generates an unbox. Takes a POST tree.
     method unbox($qastcomp, $hll, $type, $post) {
         %hll_unbox{$hll}{$type}($qastcomp, $post)
     }
-    
+
     # Returns a mapper closure for turning an operation into a PIR op.
     sub pirop_mapper($pirop, $sig) {
         # Parse arg types out.
         my @arg_types := nqp::split('', $sig);
         my $ret_type  := @arg_types.shift();
-        
+
         # Work out register method for return type, if any.
         my $ret_meth;
         if $ret_type eq 'P'    { $ret_meth := "fresh_p"; }
         elsif $ret_type eq 'S' { $ret_meth := "fresh_s"; }
         elsif $ret_type eq 'I' { $ret_meth := "fresh_i"; }
         elsif $ret_type eq 'N' { $ret_meth := "fresh_n"; }
-        
+
         -> $qastcomp, $op_name, @op_args {
             my $ops := PIRT::Ops.new();
-            
+
             # If we need a result register, create it and make it the
             # first argument.
             my @args;
@@ -199,7 +199,7 @@ class QAST::Operations {
                 @args.push($reg);
                 $ops.result($reg);
             }
-            
+
             # Build the arguments list.
             my $num_args := +@op_args;
             if +@arg_types != $num_args {
@@ -237,7 +237,7 @@ class QAST::Operations {
                 }
                 $i := $i + 1;
             }
-            
+
             # If we have an integer as the return type, find the arg that
             # becomes the result.
             if !$ret_meth && $ret_type ne 'v' && +$ret_type eq $ret_type {
@@ -248,7 +248,7 @@ class QAST::Operations {
                 }
                 $ops.result($rreg);
             }
-            
+
             # Construct and return the op.
             $ops.push_pirop($pirop, |@args);
             $ops
@@ -262,14 +262,14 @@ QAST::Operations.add_core_op('list', :inlinable(1), -> $qastcomp, $op {
     my $list_reg := $*REGALLOC.fresh_p();
     my $ops := PIRT::Ops.new(:result($list_reg));
     $ops.push_pirop('new', $list_reg, "'ResizablePMCArray'");
-    
+
     # Push all the things.
     for $op.list {
         my $post := $qastcomp.coerce($qastcomp.as_post($_), 'P');
         $ops.push($post);
         $ops.push_pirop('push', $list_reg, $post.result);
     }
-    
+
     $ops
 });
 
@@ -278,14 +278,14 @@ QAST::Operations.add_core_op('qlist', :inlinable(1), -> $qastcomp, $op {
     my $list_reg := $*REGALLOC.fresh_p();
     my $ops := PIRT::Ops.new(:result($list_reg));
     $ops.push_pirop('new', $list_reg, "'QRPA'");
-    
+
     # Push all the things.
     for $op.list {
         my $post := $qastcomp.coerce($qastcomp.as_post($_), 'P');
         $ops.push($post);
         $ops.push_pirop('push', $list_reg, $post.result);
     }
-    
+
     $ops
 });
 
@@ -326,7 +326,7 @@ QAST::Operations.add_core_op('list_b', :inlinable(1), -> $qastcomp, $op {
     my $list_reg := $*REGALLOC.fresh_p();
     my $ops := PIRT::Ops.new(:result($list_reg));
     $ops.push_pirop('new', $list_reg, "'ResizablePMCArray'");
-    
+
     # Push all the things.
     my $block_reg := $*REGALLOC.fresh_p();
     for $op.list {
@@ -334,7 +334,7 @@ QAST::Operations.add_core_op('list_b', :inlinable(1), -> $qastcomp, $op {
         $ops.push_pirop(".const 'Sub' $block_reg = \"$cuid\"");
         $ops.push_pirop('push', $list_reg, $block_reg);
     }
-    
+
     $ops
 });
 
@@ -371,24 +371,24 @@ QAST::Operations.add_core_op('chain', :inlinable(1), -> $qastcomp, $op {
         nqp::push(@clist, $cpast);
         $cpast := $cpast[0];
     }
-    
+
     my $ops := PIRT::Ops.new(:result($*REGALLOC.fresh_p()));
     my $endlabel := PIRT::Label.new(:name($qastcomp.unique('chain_end_')));
-    
+
     $cpast := nqp::pop(@clist);
     my $apast := $cpast[0];
     my $apost := $qastcomp.coerce($qastcomp.as_post($apast), 'P');
     $ops.push($apost);
-    
+
     my $more := 1;
     while $more {
         my $bpast := $cpast[1];
         my $bpost := $qastcomp.coerce($qastcomp.as_post($bpast), 'P');
         $ops.push($bpost);
-        
+
         my $name := $qastcomp.escape($cpast.name());
         $ops.push_pirop('call', $name, $apost, $bpost, :result($ops));
-        
+
         if @clist {
             $ops.push_pirop('unless', $ops, $endlabel);
             $cpast := nqp::pop(@clist);
@@ -396,9 +396,9 @@ QAST::Operations.add_core_op('chain', :inlinable(1), -> $qastcomp, $op {
         }
         else {
             $more := 0;
-        }  
+        }
     }
-    
+
     $ops.push($endlabel);
     $ops
 });
@@ -416,12 +416,12 @@ for <if unless> -> $op_name {
         my $operands := +$op.list;
         nqp::die("Operation '$op_name' needs either 2 or 3 operands")
             if $operands < 2 || $operands > 3;
-        
+
         # Create labels.
         my $if_id    := $qastcomp.unique($op_name);
         my $else_lbl := PIRT::Label.new(:name($if_id ~ '_else'));
         my $end_lbl  := PIRT::Label.new(:name($if_id ~ '_end'));
-        
+
         # Compile each of the children; we'll need to look at the result
         # types and pick an overall result type if in non-void context.
         my @comp_ops;
@@ -450,7 +450,7 @@ for <if unless> -> $op_name {
                 (@op_types[0] eq @op_types[1] ?? nqp::lc(@op_types[0]) !! 'p');
             $res_reg := $*REGALLOC."fresh_$res_type"();
         }
-        
+
         # Evaluate the condition first; store result if needed.
         my $ops := PIRT::Ops.new();
         my $cond_result;
@@ -464,17 +464,17 @@ for <if unless> -> $op_name {
             $ops.push(@comp_ops[0]);
             $cond_result := @comp_ops[0];
         }
-        
+
         # If needed, set up passing condition value to blocks.
         for @im_args {
             $_($cond_result.result);
         }
-        
+
         # Emit the jump.
         $ops.push_pirop(($op_name eq 'if' ?? 'unless ' !! 'if ') ~
             @comp_ops[0].result ~ ' goto ' ~
             ($operands == 2 ?? $end_lbl.result !! $else_lbl.result));
-        
+
         # Emit the then; stash the result.
         if $res_reg {
             my $then := $qastcomp.coerce(@comp_ops[1], $res_type);
@@ -484,7 +484,7 @@ for <if unless> -> $op_name {
         else {
             $ops.push(@comp_ops[1]);
         }
-        
+
         # Handle else branch if needed.
         if $operands == 3 {
             $ops.push_pirop('goto', $end_lbl.result);
@@ -498,7 +498,7 @@ for <if unless> -> $op_name {
                 $ops.push(@comp_ops[2]);
             }
         }
-        
+
         # Emit end label and tag ops with result.
         $ops.push($end_lbl);
         $ops.result($res_reg || 'null');
@@ -511,12 +511,12 @@ QAST::Operations.add_core_op('ifnull', :inlinable(1), -> $qastcomp, $op {
     if +$op.list != 2 {
         nqp::die("The 'ifnull' op expects two children");
     }
-    
+
     my $exprpost := $qastcomp.as_post($op[0]);
     my $vivipost := $qastcomp.coerce($qastcomp.as_post($op[1]),
         $qastcomp.infer_type($exprpost.result));
     my $vivlabel := PIRT::Label.new(:name($qastcomp.unique('vivi_')));
-    
+
     my $ops := PIRT::Ops.new();
     $ops.push($exprpost);
     $ops.push_pirop('unless_null', $exprpost, $vivlabel);
@@ -577,7 +577,7 @@ for ('', 'repeat_') -> $repness {
                 $ops.push_pirop('set_label', $exc_reg, $hand_lbl);
                 $ops.push_pirop('push_eh', $exc_reg);
             }
-            
+
             # Test the condition and jump to the loop end if it's
             # not met.
             my $coerced := $qastcomp.coerce(@comp_ops[0], $res_type);
@@ -609,7 +609,7 @@ for ('', 'repeat_') -> $repness {
             $ops.push($redo_lbl);
             $ops.push($body);
             $ops.push_pirop('set', $res_reg, $body.result);
-            
+
             # If there's a third child, evaluate it as part of the
             # "next".
             if $operands == 3 {
@@ -648,7 +648,7 @@ QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
         if $_.named eq 'nohandler' { $handler := 0; }
         else { @operands.push($_) }
     }
-    
+
     if +@operands != 2 {
         nqp::die("Operation 'for' needs 2 operands");
     }
@@ -658,7 +658,7 @@ QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
     if @operands[1].blocktype eq 'immediate' {
         @operands[1].blocktype('declaration');
     }
-    
+
     # Evaluate the thing we'll iterate over and the block.
     my $res       := $*REGALLOC.fresh_p();
     my $curval    := $*REGALLOC.fresh_p();
@@ -667,11 +667,11 @@ QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
     my $listpost  := $qastcomp.coerce($qastcomp.as_post(@operands[0]), "P");
     my $blockpost := $qastcomp.coerce($qastcomp.as_post(@operands[1]), "P");
     $ops.push($listpost);
-    
+
     # Get the iterator.
     $ops.push_pirop('set', $res, $listpost);
     $ops.push_pirop('iter', $iter, $listpost);
-    
+
     # Set up exception handler.
     my $exc_reg;
     my $hand_lbl;
@@ -683,14 +683,14 @@ QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
         $ops.push_pirop('set_label', $exc_reg, $hand_lbl);
         $ops.push_pirop('push_eh', $exc_reg);
     }
-    
+
     # Loop while we still have values.
     my $lbl_next := PIRT::Label.new(:name('for_next'));
     my $lbl_redo := PIRT::Label.new(:name('for_redo'));
     my $lbl_done := PIRT::Label.new(:name('for_done'));
     $ops.push($lbl_next);
     $ops.push_pirop('unless', $iter, $lbl_done);
-    
+
     # Fetch values.
     my @valreg;
     my $arity := @operands[1].arity || 1;
@@ -700,12 +700,12 @@ QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
         nqp::push(@valreg, $reg);
         $arity := $arity - 1;
     }
-    
+
     # Emit call.
     $ops.push($lbl_redo);
     $ops.push($blockpost);
     $ops.push_pirop('call', $blockpost, |@valreg, :result($res));
-    
+
     # Loop.
     $ops.push_pirop('goto', $lbl_next);
 
@@ -723,7 +723,7 @@ QAST::Operations.add_core_op('for', :inlinable(1), -> $qastcomp, $op {
     else {
         $ops.push($lbl_done);
     }
-    
+
     # Set result.
     $ops.result($res);
     $ops
@@ -756,7 +756,7 @@ QAST::Operations.add_core_op('xor', :inlinable(1), -> $qastcomp, $op {
 
     my $falselabel := PIRT::Label.new(:name('xor_false'));
     my $endlabel   := PIRT::Label.new(:name('xor_end'));
-    
+
     my @childlist;
     my $fpast;
     for $op.list {
@@ -767,17 +767,17 @@ QAST::Operations.add_core_op('xor', :inlinable(1), -> $qastcomp, $op {
             nqp::push(@childlist, $_);
         }
     }
-    
+
     my $i := $*REGALLOC.fresh_i();
     my $t := $*REGALLOC.fresh_i();
     my $u := $*REGALLOC.fresh_i();
-    
+
     my $apast := nqp::shift(@childlist);
     my $apost := $qastcomp.coerce($qastcomp.as_post($apast), 'P');
     $ops.push($apost);
     $ops.push_pirop('set', $ops, $apost);
     $ops.push_pirop('istrue', $t, $apost);
-    
+
     my $have_middle_child := 1;
     my $bpost;
     while $have_middle_child {
@@ -798,12 +798,12 @@ QAST::Operations.add_core_op('xor', :inlinable(1), -> $qastcomp, $op {
             $have_middle_child := 0;
         }
     }
-    
+
     $ops.push_pirop('if', $t, $endlabel);
     $ops.push_pirop('set', $ops, $bpost);
     $ops.push_pirop('goto', $endlabel);
     $ops.push($falselabel);
-    
+
     if $fpast {
         my $fpost := $qastcomp.coerce($qastcomp.as_post($fpast), 'P');
         $ops.push($fpost);
@@ -812,9 +812,9 @@ QAST::Operations.add_core_op('xor', :inlinable(1), -> $qastcomp, $op {
     else {
         $ops.push_pirop('new', $ops, '["Undef"]');
     }
-    
+
     $ops.push($endlabel);
-    
+
     $ops
 });
 
@@ -828,7 +828,7 @@ QAST::Operations.add_core_op('bind', :inlinable(1), -> $qastcomp, $op {
     unless nqp::istype(@children[0], QAST::Var) {
         nqp::die("First child of a 'bind' op must be a QAST::Var");
     }
-    
+
     # Set the QAST of the think we're to bind, then delegate to
     # the compilation of the QAST::Var to handle the rest.
     my $*BINDVAL := @children[1];
@@ -873,7 +873,7 @@ QAST::Operations.add_core_op('call', -> $qastcomp, $op {
     else {
         nqp::die("No name for call and empty children list");
     }
-    
+
     # Process arguments.
     my $ops := PIRT::Ops.new();
     $ops.node($op.node) if $op.node;
@@ -882,7 +882,7 @@ QAST::Operations.add_core_op('call', -> $qastcomp, $op {
     for @args {
         handle_arg($_, $qastcomp, $ops, @pos_arg_results, @named_arg_results);
     }
-    
+
     # Generate call, with a result register if we're not in void context.
     $ops.push($callee);
     if $*WANT eq 'v' {
@@ -902,7 +902,7 @@ QAST::Operations.add_core_op('callmethod', :inlinable(1), -> $qastcomp, $op {
     if +@args == 0 {
         nqp::die('Method call node requires at least one child');
     }
-    
+
     # Where is the name coming from?
     my $name;
     if $op.name {
@@ -916,7 +916,7 @@ QAST::Operations.add_core_op('callmethod', :inlinable(1), -> $qastcomp, $op {
     else {
         nqp::die("Method call must either supply a name or have a child node that evaluates to the name");
     }
-    
+
     # Process arguments.
     my $ops := PIRT::Ops.new();
     $ops.node($op.node) if $op.node;
@@ -932,7 +932,7 @@ QAST::Operations.add_core_op('callmethod', :inlinable(1), -> $qastcomp, $op {
             handle_arg($_, $qastcomp, $ops, @pos_arg_results, @named_arg_results);
         }
     }
-    
+
     # Generate call, with a result register if we're not in void context.
     $ops.push($name);
     if $*WANT eq 'v' {
@@ -958,11 +958,11 @@ QAST::Operations.add_core_op('lexotic', -> $qastcomp, $op {
     $ops.push_pirop('root_new', $handler, "['parrot';'Continuation']");
     $ops.push_pirop('set_label', $handler, $label1);
     $ops.push_pirop('.lex', $lexname, $handler);
-    
+
     my $cpost := $qastcomp.coerce($qastcomp.compile_all_the_stmts($op.list()), 'P');
     $ops.push($cpost);
     $ops.result($cpost);
-    
+
     $ops.push_pirop('goto', $label2);
     $ops.push($label1);
     $ops.push_pirop('.get_results', '(' ~ $ops.result() ~ ')');
@@ -1131,14 +1131,14 @@ my %handler_names := nqp::hash(
     'REDO',    '.CONTROL_LOOP_REDO',
     'TAKE',    '.CONTROL_TAKE',
     'SUCCEED', '.CONTROL_BREAK',
-    'PROCEED', '.CONTROL_CONTINUE' 
+    'PROCEED', '.CONTROL_CONTINUE'
 );
 QAST::Operations.add_core_op('handle', -> $qastcomp, $op {
     my @children := nqp::clone($op.list());
     if @children == 0 {
         nqp::die("The 'handle' op requires at least one child");
     }
-    
+
     # Compile the protected statements. If we've no handlers at all
     # then that's it.
     my $protected := @children.shift();
@@ -1146,7 +1146,7 @@ QAST::Operations.add_core_op('handle', -> $qastcomp, $op {
     unless @children {
         return $procpost;
     }
-    
+
     # Process handlers.
     my %handlers;
     my $catch;
@@ -1172,7 +1172,7 @@ QAST::Operations.add_core_op('handle', -> $qastcomp, $op {
             nqp::die("Invalid handler type '$name'");
         }
     }
-    
+
     # Handler prelude.
     my $catch_label;
     my $control_label;
@@ -1206,7 +1206,7 @@ QAST::Operations.add_core_op('handle', -> $qastcomp, $op {
         $ops.push_pirop('push_eh', $reg);
         $num_pops := $num_pops + 1;
     }
-    
+
     # Protected code.
     my $res_type := nqp::lc($qastcomp.infer_type($procpost.result));
     my $res_reg := $*REGALLOC."fresh_$res_type"();
@@ -1217,7 +1217,7 @@ QAST::Operations.add_core_op('handle', -> $qastcomp, $op {
         $num_pops := $num_pops - 1;
     }
     $ops.push_pirop('goto', $skip_handler_label);
-    
+
     # Now emit the handlers.
     my $orig_alloc := $*REGALLOC;
     {
@@ -1244,7 +1244,7 @@ QAST::Operations.add_core_op('handle', -> $qastcomp, $op {
             my $type_reg := $*REGALLOC.fresh_i();
             $ops.push($other_label);
             $ops.push_pirop(".get_results ($reg)");
-            
+
             # Create labels for each type and emit type selection ladder.
             my %type_labels;
             $ops.push_pirop('set', $type_reg, $reg ~ '["type"]');
@@ -1253,7 +1253,7 @@ QAST::Operations.add_core_op('handle', -> $qastcomp, $op {
                 $ops.push_pirop('eq', $type_reg, %handler_names{$_}, $lbl);
                 %type_labels{$_} := $lbl;
             }
-            
+
             # Emit handler for each type.
             for @other {
                 my $handler_post := $qastcomp.coerce($qastcomp.as_post(%handlers{$_}), 'P');
@@ -1271,7 +1271,7 @@ QAST::Operations.add_core_op('handle', -> $qastcomp, $op {
     # Postlude.
     $ops.push($skip_handler_label);
     $ops.result($res_reg);
-    
+
     $ops
 });
 QAST::Operations.add_core_op('exception', -> $qastcomp, $op {
