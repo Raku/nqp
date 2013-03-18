@@ -1399,31 +1399,15 @@ for <i n s> {
         $ops.result($reg);
         $ops
     });
+    QAST::Operations.add_hll_unbox('nqp', $_, -> $qastcomp, $post {
+        my $reg := $*REGALLOC."fresh_$_"();
+        my $ops := PIRT::Ops.new();
+        $ops.push($post);
+        $ops.push_pirop('set', $reg, $post);
+        $ops.result($reg);
+        $ops
+    });
 }
-QAST::Operations.add_hll_unbox('nqp', 'i', -> $qastcomp, $post {
-    my $reg := $*REGALLOC.fresh_i();
-    my $ops := PIRT::Ops.new();
-    $ops.push($post);
-    $ops.push_pirop('set', $reg, $post);
-    $ops.result($reg);
-    $ops
-});
-QAST::Operations.add_hll_unbox('nqp', 'n', -> $qastcomp, $post {
-    my $reg := $*REGALLOC.fresh_n();
-    my $ops := PIRT::Ops.new();
-    $ops.push($post);
-    $ops.push_pirop('set', $reg, $post);
-    $ops.result($reg);
-    $ops
-});
-QAST::Operations.add_hll_unbox('nqp', 's', -> $qastcomp, $post {
-    my $reg := $*REGALLOC.fresh_s();
-    my $ops := PIRT::Ops.new();
-    $ops.push($post);
-    $ops.push_pirop('set', $reg, $post);
-    $ops.result($reg);
-    $ops
-});
 
 # Default way to do positional and associative lookups.
 QAST::Operations.add_core_pirop_mapping('positional_get', 'set', 'PQi', :inlinable(1));
