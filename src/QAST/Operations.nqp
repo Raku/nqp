@@ -176,6 +176,16 @@ class QAST::Operations {
     }
     
     # Returns a mapper closure for turning an operation into a PIR op.
+    # The signature argument consists of characters indicating the
+    # register types and conversions.  The characters are:
+    #    P,S,I,N   PMC, string, int, or num register
+    #    Q         keyed PMC, next character indicates type of key
+    #    s         string register or constant
+    #    i         int register or constant
+    #    n         num register or constant
+    #    r         any register result
+    #    v         void (no result)
+    #    0-9       use the nth input operand as the output result of this operation
     sub pirop_mapper($pirop, $sig) {
         # Parse arg types out.
         my @arg_types := nqp::split('', $sig);
