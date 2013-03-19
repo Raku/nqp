@@ -476,4 +476,12 @@ typedef INTVAL (* rf) (PARROT_INTERP, STRING *name, REPROps * (*reg) (PARROT_INT
             VTABLE_get_pmc_keyed_str(interp, interp->root_namespace, \
                 Parrot_str_new_constant(interp, "_REGISTER_REPR"))))(interp, name, reg_func)
 
+/* Dynamic container configuration registration. */
+typedef void (*cspec_conf) (PARROT_INTERP, STRING *name, ContainerConfigurer *configurer);
+#define REGISTER_DYNAMIC_CONTAINER_CONFIG(interp, name, configurer) \
+    ((cspec_conf) \
+        VTABLE_get_pointer(interp, \
+            VTABLE_get_pmc_keyed_str(interp, interp->root_namespace, \
+                Parrot_str_new_constant(interp, "_REGISTER_CONTCONF"))))(interp, name, configurer)
+
 #endif

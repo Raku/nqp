@@ -130,6 +130,12 @@ ContainerConfigurer * SixModelObject_get_container_config(PARROT_INTERP, STRING 
 /* Does initial setup work of the container registry, including registering
  * the various built-in container types. */
 void SixModelObject_containers_setup(PARROT_INTERP) {
+    /* Set up object for dynamically registering extra configurers. */
+    PMC *dyn_reg_func = Parrot_pmc_new(interp, enum_class_Pointer);
+    VTABLE_set_pointer(interp, dyn_reg_func, SixModelObject_add_container_config);
+    VTABLE_set_pmc_keyed_str(interp, interp->root_namespace,
+        Parrot_str_new_constant(interp, "_REGISTER_CONTCONF"), dyn_reg_func);
+    
     /* Initialize registry. */
     container_registry = Parrot_pmc_new(interp, enum_class_Hash);
     Parrot_pmc_gc_register(interp, container_registry);
