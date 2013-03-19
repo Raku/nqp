@@ -2231,44 +2231,6 @@ inline op nqp_decontainerize(out PMC, invar PMC) :base_core {
 
 /*
 
-=item set_container_spec
-
-Sets the container spec for the type in $1 (it actaully sets it on
-the s-table, so the type object or any instance of the type will do).
-
-Either set $2 and $3 to a class handle and an attribute name, or set
-$4 to a code ref for the FETCH method. Generally, $2/$3 take precedence
-over $4.
-
-=cut
-
-*/
-inline op set_container_spec(invar PMC, invar PMC, in STR, invar PMC) :base_core {
-    if ($1->vtable->base_type == smo_id) {
-        STable *st = STABLE($1);
-        
-        /* Allocate and populate new container spec. */
-        ContainerSpec *new_spec = mem_allocate_zeroed_typed(ContainerSpec);
-        new_spec->value_slot.class_handle = $2;
-        new_spec->value_slot.attr_name    = $3;
-        new_spec->fetch_method            = $4;
-
-        /* Free any existing spec and put the new one in place. */
-        if (st->container_spec)
-            mem_sys_free(st->container_spec);
-        st->container_spec = new_spec;
-        PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC($1));
-        ST_SC_WRITE_BARRIER(st);
-    }
-    else {
-        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
-            "Can only use set_container_spec with a SixModelObject");
-    }
-}
-
-
-/*
-
 =item set_invocation_spec
 
 Sets the invocation spec for the type in $1 (it actaully sets it on
