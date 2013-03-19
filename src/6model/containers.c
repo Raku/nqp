@@ -89,6 +89,7 @@ static ContainerConfigurer * initialize_code_pair_spec(PARROT_INTERP) {
     code_pair_spec->name = Parrot_str_new_constant(interp, "code_pair");
     code_pair_spec->fetch = code_pair_fetch;
     code_pair_spec->store = code_pair_store;
+    code_pair_spec->store_unchecked = code_pair_store;
     code_pair_spec->gc_mark_data = code_pair_gc_mark_data;
     code_pair_spec->gc_free_data = code_pair_gc_free_data;
     code_pair_spec->serialize = code_pair_serialize;

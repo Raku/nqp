@@ -41,6 +41,11 @@ typedef struct {
     /* Stores a value in a container. Used for assignment. */
     void (*store) (PARROT_INTERP, PMC *cont, PMC *obj);
     
+    /* Stores a value in a container, without any checking of it (this
+     * assumes an optimizer or something else already did it). Used for
+     * assignment. */
+    void (*store_unchecked) (PARROT_INTERP, PMC *cont, PMC *obj);
+    
     /* Name of this container specification. */
     STRING *name;
     

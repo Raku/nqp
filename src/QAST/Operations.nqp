@@ -1855,6 +1855,7 @@ QAST::Operations.add_core_pirop_mapping('setcontspec', 'set_container_spec', '0P
 QAST::Operations.add_core_pirop_mapping('iscont', 'is_container', 'IP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('decont', 'nqp_decontainerize', 'PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('assign', 'nqp_assign', '0PP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('assignunchecked', 'nqp_assignunchecked', '0PP', :inlinable(1));
 
 # lexical related opcodes
 QAST::Operations.add_core_pirop_mapping('getlex', 'find_lex', 'Ps');

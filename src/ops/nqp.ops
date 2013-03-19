@@ -2263,6 +2263,35 @@ inline op nqp_assign(invar PMC, invar PMC) :base_core {
 
 /*
 
+=item nqp_assignunchecked
+
+If the thing in $2 is a container, does a decontainerizing operation
+and puts the contained value in $1. Indicates that the type checking of
+the assignment was already done at compile time, so no checks are needed
+here.
+
+=cut
+
+*/
+inline op nqp_assignunchecked(invar PMC, invar PMC) :base_core {
+    PMC *cont  = $1;
+    PMC *value = decontainerize(interp, $2);
+    INTVAL ok  = 0;
+    if (cont->vtable->base_type == smo_id) {
+        ContainerSpec *spec = STABLE(cont)->container_spec;
+        if (spec) {
+            spec->store_unchecked(interp, cont, value);
+            ok = 1;
+        }
+    }
+    if (!ok)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Cannot assign to an immutable value");
+}
+
+
+/*
+
 =item set_container_spec
 
 Sets the container spec for the type in $1. $2 is the name of the container
