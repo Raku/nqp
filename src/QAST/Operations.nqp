@@ -1095,21 +1095,21 @@ QAST::Operations.add_core_pirop_mapping('multicachefind', 'multi_cache_find', 'P
 
 # Constant mapping.
 my %const_map := nqp::hash(
-    'CCLASS_ANY',           nqp::const::CCLASS_ANY,
-    'CCLASS_NUMERIC',       nqp::const::CCLASS_NUMERIC,
-    'CCLASS_WHITESPACE',    nqp::const::CCLASS_WHITESPACE,
-    'CCLASS_WORD',          nqp::const::CCLASS_WORD,
-    'CCLASS_NEWLINE',       nqp::const::CCLASS_NEWLINE,
-    'CCLASS_NEWLINE',       nqp::const::CCLASS_NEWLINE,
-    'CCLASS_ALPHABETIC',    nqp::const::CCLASS_ALPHABETIC,
-    'CCLASS_UPPERCASE',     nqp::const::CCLASS_UPPERCASE,
-    'CCLASS_LOWERCASE',     nqp::const::CCLASS_LOWERCASE,
-    'CCLASS_NUMERIC',       nqp::const::CCLASS_NUMERIC,
-    'CCLASS_HEXADECIMAL',   nqp::const::CCLASS_HEXADECIMAL,
-    'CCLASS_BLANK',         nqp::const::CCLASS_BLANK,
-    'CCLASS_CONTROL',       nqp::const::CCLASS_CONTROL,
-    'CCLASS_PUNCTUATION',   nqp::const::CCLASS_PUNCTUATION,
-    'CCLASS_ALPHANUMERIC',  nqp::const::CCLASS_ALPHANUMERIC
+    'CCLASS_ANY',           pir::const::CCLASS_ANY,
+    'CCLASS_NUMERIC',       pir::const::CCLASS_NUMERIC,
+    'CCLASS_WHITESPACE',    pir::const::CCLASS_WHITESPACE,
+    'CCLASS_WORD',          pir::const::CCLASS_WORD,
+    'CCLASS_NEWLINE',       pir::const::CCLASS_NEWLINE,
+    'CCLASS_NEWLINE',       pir::const::CCLASS_NEWLINE,
+    'CCLASS_ALPHABETIC',    pir::const::CCLASS_ALPHABETIC,
+    'CCLASS_UPPERCASE',     pir::const::CCLASS_UPPERCASE,
+    'CCLASS_LOWERCASE',     pir::const::CCLASS_LOWERCASE,
+    'CCLASS_NUMERIC',       pir::const::CCLASS_NUMERIC,
+    'CCLASS_HEXADECIMAL',   pir::const::CCLASS_HEXADECIMAL,
+    'CCLASS_BLANK',         pir::const::CCLASS_BLANK,
+    'CCLASS_CONTROL',       pir::const::CCLASS_CONTROL,
+    'CCLASS_PUNCTUATION',   pir::const::CCLASS_PUNCTUATION,
+    'CCLASS_ALPHANUMERIC',  pir::const::CCLASS_ALPHANUMERIC
 );
 QAST::Operations.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
