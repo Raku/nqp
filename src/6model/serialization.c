@@ -19,7 +19,7 @@
 
 /* Version of the serialization format that we are currently at and lowest
  * version we support. */
-#define CURRENT_VERSION 3
+#define CURRENT_VERSION 4
 #define MIN_VERSION 1
 
 /* Various sizes (in bytes). */
@@ -748,10 +748,11 @@ static void serialize_stable(PARROT_INTERP, SerializationWriter *writer, PMC *st
     /* Container spec. */
     write_int_func(interp, writer, st->container_spec != NULL);
     if (st->container_spec) {
-        write_ref_func(interp, writer, st->container_spec->value_slot.class_handle);
-        write_str_func(interp, writer, st->container_spec->value_slot.attr_name);
-        write_int_func(interp, writer, st->container_spec->value_slot.hint);
-        write_ref_func(interp, writer, st->container_spec->fetch_method);
+        /* Write container spec name. */
+        write_str_func(interp, writer, st->container_spec->name);
+        
+        /* Give container spec a chance to serialize any data it wishes. */
+        st->container_spec->serialize(interp, st, writer);
     }
     
     /* If the REPR has a function to serialize representation data, call it. */
@@ -1617,11 +1618,15 @@ static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVA
 
     /* Container spec. */
     if (read_int_func(interp, reader)) {
-        st->container_spec = (ContainerSpec *)mem_sys_allocate(sizeof(ContainerSpec));
-        st->container_spec->value_slot.class_handle = read_ref_func(interp, reader);
-        st->container_spec->value_slot.attr_name = read_str_func(interp, reader);
-        st->container_spec->value_slot.hint = read_int_func(interp, reader);
-        st->container_spec->fetch_method = read_ref_func(interp, reader);
+        /* Depends on version. If before 4, we don't try to read it. */
+        if (reader->root.version < 4)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Unable to deserialize old container spec format");
+        
+        /* Otherwise, resolve the container spec by name and get it
+         * set up. */
+        read_str_func(interp, reader);
+        /* XXX TODO: The rest of this. */
     }
 
     /* Mark it as being in the SC we're currently deserializing. */

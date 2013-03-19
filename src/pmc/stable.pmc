@@ -65,14 +65,10 @@ pmclass STable manual_attrs dynpmc group nqp {
         if (st->boolification_spec && !PMC_IS_NULL(st->boolification_spec->method))
             Parrot_gc_mark_PMC_alive(interp, st->boolification_spec->method);
             
-        /* Mark the container spec, if needed. */
+        /* Mark the container spec data, if needed. */
         if (st->container_spec) {
-            if (!PMC_IS_NULL(st->container_spec->value_slot.class_handle))
-                Parrot_gc_mark_PMC_alive(interp, st->container_spec->value_slot.class_handle);
-            if (!STRING_IS_NULL(st->container_spec->value_slot.attr_name))
-                Parrot_gc_mark_STRING_alive(interp, st->container_spec->value_slot.attr_name);
-            if (!PMC_IS_NULL(st->container_spec->fetch_method))
-                Parrot_gc_mark_PMC_alive(interp, st->container_spec->fetch_method);
+            Parrot_gc_mark_STRING_alive(interp, st->container_spec->name);
+            st->container_spec->gc_mark_data(interp, st);
         }
         
         /* Mark the invocation spec, if needed. */
@@ -109,6 +105,10 @@ pmclass STable manual_attrs dynpmc group nqp {
             mem_sys_free(st->parrot_vtable_mapping);
             st->parrot_vtable_mapping = NULL;
         }
+        
+        /* Free the container spec data, if needed. */
+        if (st->container_spec)
+            st->container_spec->gc_free_data(interp, st);
         
         /* Free the underlying struct. */
         mem_sys_free(PMC_data(SELF));
