@@ -1,4 +1,4 @@
-plan(4);
+plan(5);
 
 # code_pair container spec
 {
@@ -21,4 +21,7 @@ plan(4);
     ok(nqp::decont($cont) == 101, 'assigned value stuck');
     
     ok($value == 101, 'updated captured value also');
+    
+    nqp::assignunchecked($cont, 69);
+    ok(nqp::decont($cont) == 69, 'assignunchecked value stuck');
 }
