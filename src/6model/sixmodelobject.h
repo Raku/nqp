@@ -57,6 +57,16 @@ typedef struct {
     void (*deserialize) (PARROT_INTERP, STable *st, SerializationReader *reader);
 } ContainerSpec;
 
+/* A container configurer knows how to attach a certain type of container
+ * to an STable and configure it. */
+typedef struct {
+    /* Sets this container spec in place for the specified STable. */ 
+    void (*set_container_spec) (PARROT_INTERP, STable *st);
+    
+    /* Configures the container spec with the specified info. */
+    void (*configure_container_spec) (PARROT_INTERP, STable *st, PMC *config);
+} ContainerConfigurer;
+
 /* How do we invoke this thing? Specifies either an attribute to look at for
  * an invokable thing, or alternatively a method to call. */
 typedef struct {
