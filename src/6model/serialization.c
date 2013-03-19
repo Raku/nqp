@@ -8,6 +8,7 @@
 #include "sixmodelobject.h"
 #include "repr_registry.h"
 #include "serialization_context.h"
+#include "containers.h"
 #include "pmc_serializationcontext.h"
 #include "pmc_nqplexinfo.h"
 #include "pmc_ownedhash.h"
@@ -1619,14 +1620,18 @@ static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVA
     /* Container spec. */
     if (read_int_func(interp, reader)) {
         /* Depends on version. If before 4, we don't try to read it. */
-        if (reader->root.version < 4)
+        if (reader->root.version < 4) {
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Unable to deserialize old container spec format");
-        
-        /* Otherwise, resolve the container spec by name and get it
-         * set up. */
-        read_str_func(interp, reader);
-        /* XXX TODO: The rest of this. */
+        }
+        else {
+            /* Otherwise, resolve the container spec by name and get it
+             * set up. */
+            ContainerConfigurer *cc = SixModelObject_get_container_config(interp,
+                read_str_func(interp, reader));
+            cc->set_container_spec(interp, st);
+            st->container_spec->deserialize(interp, st, reader);
+        }
     }
 
     /* Mark it as being in the SC we're currently deserializing. */
