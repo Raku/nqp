@@ -218,9 +218,17 @@ static INTVAL elems(PARROT_INTERP, STable *st, void *data) {
 
 /* Copies to the body of one object to another. */
 static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
-    VMArrayBody *src_body = (VMArrayBody *)src;
-    VMArrayBody *dest_body = (VMArrayBody *)dest;
-    /* Nothing to do yet. */
+    VMArrayBody *src_body = (VMArrayBody *) src;
+    VMArrayBody *dest_body = (VMArrayBody *) dest;
+    VMArrayREPRData *repr_data = st->REPR_data;
+    INTVAL elem_size = repr_data->elem_size? repr_data->elem_size/8 : sizeof(void *);
+    INTVAL bytes = elem_size*src_body->ssize;
+
+    dest_body->elems = src_body->elems;
+    dest_body->start = src_body->start;
+    dest_body->ssize = src_body->ssize;
+    dest_body->slots = mem_sys_allocate(bytes);
+    memcpy(dest_body->slots, src_body->slots, bytes);
 }
 
 static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter *writer) {
