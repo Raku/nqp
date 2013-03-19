@@ -420,7 +420,7 @@ struct SixModel_REPROps {
 #define MARK_AS_TYPE_OBJECT(o) PObj_flag_SET(private0, (o))
 
 /* Macro for decontainerization. */
-#define DECONT(interp, o) (STABLE(o)->container_spec ? \
+#define DECONT(interp, o) (IS_CONCRETE(o) && STABLE(o)->container_spec ? \
     STABLE(o)->container_spec->fetch(interp, o) : \
     o)
 
