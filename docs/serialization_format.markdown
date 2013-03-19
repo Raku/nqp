@@ -80,6 +80,13 @@ contains the following items.
     | the data for this STable has been serialized            |
     |    32-bit integer                                       |
     +---------------------------------------------------------+
+    | Offset from the start of the STable data chunk where    |
+    | the REPR data for this STable has been serialized (you  |
+    | can get there by reading everything from the previous   |
+    | offset, but it may not be efficient if you want to get  |
+    | an idea of the object size first)                       |
+    |    32-bit integer                                       |
+    +---------------------------------------------------------+
 
 ## STables Data
 The STable is serialized just by a sequence of primitives, in the
