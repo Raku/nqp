@@ -2233,6 +2233,67 @@ inline op nqp_decontainerize(out PMC, invar PMC) :base_core {
     $1 = decontainerize(interp, $2);
 }
 
+
+/*
+
+=item nqp_assign
+
+If the thing in $2 is a container, does a decontainerizing operation
+and puts the contained value in $1.
+
+=cut
+
+*/
+inline op nqp_assign(invar PMC, invar PMC) :base_core {
+    PMC *cont  = $1;
+    PMC *value = decontainerize(interp, $2);
+    INTVAL ok  = 0;
+    if (cont->vtable->base_type == smo_id) {
+        ContainerSpec *spec = STABLE(cont)->container_spec;
+        if (spec) {
+            spec->store(interp, cont, value);
+            ok = 1;
+        }
+    }
+    if (!ok)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Cannot assign to an immutable value");
+}
+
+
+/*
+
+=item set_container_spec
+
+Sets the container spec for the type in $1. $2 is the name of the container
+specification to put in place. $2 is (possibly optional) configuration for
+the container specification selected.
+
+=cut
+
+*/
+inline op set_container_spec(in PMC, in STR, in PMC) :base_core {
+    PMC *target = decontainerize(interp, $1);
+    if ($1->vtable->base_type == smo_id) {
+        STable *st = STABLE($1);
+        ContainerConfigurer *cc = SixModelObject_get_container_config(interp, $2);
+        
+        if (st->container_spec)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot change a type's container specification");
+
+        cc->set_container_spec(interp, st);
+        cc->configure_container_spec(interp, st, $3);
+        
+        PARROT_GC_WRITE_BARRIER(interp, STABLE_PMC($1));
+    }
+    else {
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use set_container_spec with a SixModelObject");
+    }
+}
+
+
 /*
 
 =item set_invocation_spec

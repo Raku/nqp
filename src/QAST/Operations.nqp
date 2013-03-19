@@ -1816,8 +1816,6 @@ QAST::Operations.add_core_pirop_mapping('attrinited', 'repr_is_attr_initialized'
 QAST::Operations.add_core_pirop_mapping('create', 'repr_instance_of', 'PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('clone', 'repr_clone', 'PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('isconcrete', 'repr_defined', 'IP', :inlinable(1));
-QAST::Operations.add_core_pirop_mapping('iscont', 'is_container', 'IP', :inlinable(1));
-QAST::Operations.add_core_pirop_mapping('decont', 'nqp_decontainerize', 'PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('isnull', 'isnull', 'IP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('isnull_s', 'isnull', 'IS', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('istrue', 'istrue', 'IP', :inlinable(1));
@@ -1851,6 +1849,12 @@ QAST::Operations.add_core_pirop_mapping('setmethcacheauth', 'set_method_cache_au
 QAST::Operations.add_core_pirop_mapping('settypecache', 'publish_type_check_cache', '0PP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('objprimspec', 'repr_get_primitive_type_spec', 'IP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('setinvokespec', 'set_invocation_spec', '0PPsP', :inlinable(1));
+
+# container related
+QAST::Operations.add_core_pirop_mapping('setcontspec', 'set_container_spec', '0PsP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('iscont', 'is_container', 'IP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('decont', 'nqp_decontainerize', 'PP', :inlinable(1));
+QAST::Operations.add_core_pirop_mapping('assign', 'nqp_assign', '0PP', :inlinable(1));
 
 # lexical related opcodes
 QAST::Operations.add_core_pirop_mapping('getlex', 'find_lex', 'Ps');
