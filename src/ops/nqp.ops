@@ -1,5 +1,7 @@
 BEGIN_OPS_PREAMBLE
 
+#include <errno.h>
+
 /* Parroty includes. */
 #include "parrot/parrot.h"
 #include "parrot/extend.h"
@@ -2902,6 +2904,19 @@ inline op nqp_fresh_stub(out PMC, invar PMC) :base_core {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "nqp_fresh_sub can only operate on a Parrot Sub");
     }
+}
+
+/*
+
+=item nqp_posixerrno
+
+Returns the value of errno.
+
+=cut
+
+*/
+inline op nqp_posixerrno(out INT) :base_core {
+    $1 = errno;
 }
 
 /*

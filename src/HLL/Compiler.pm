@@ -105,6 +105,7 @@ class HLL::Backend::Parrot {
         ~ ".include 'stat.pasm'\n"
         ~ ".include 'datatypes.pasm'\n"
         ~ ".include 'libpaths.pasm'\n"
+        ~ ".include 'nqp_const.pir'\n"
     }
   
     method pir($source, *%adverbs) {
