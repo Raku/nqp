@@ -542,7 +542,9 @@ all: $(NQP_EXE) $(P5QREGEX_PBC)
 
 install: all
 	$(MKPATH)                   $(DESTDIR)$(PARROT_LIBRARY_DIR)
+	$(MKPATH)                   $(DESTDIR)$(PARROT_LIB_DIR)/include
 	$(CP)  $(MODULE_LOADER_PBC) $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(MODULE_LOADER_PBC)
+	$(CP)  $(NQP_CONST_PIR)     $(DESTDIR)$(PARROT_LIB_DIR)/include/$(NQP_CONST_PIR)
 	$(MKPATH)                   $(DESTDIR)$(NQP_LANG_DIR)/lib
 	$(CP)  $(QAST_PBC)          $(DESTDIR)$(NQP_LANG_DIR)/lib/$(QAST_PBC)
 	$(CP)  $(QASTNODE_PBC)      $(DESTDIR)$(NQP_LANG_DIR)/lib/$(QASTNODE_PBC)
