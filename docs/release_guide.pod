@@ -75,8 +75,12 @@ Tag NQP by its release month ("YYYY.MM")
 
 =item 7.
 
-Upload the release tarball to Github's download area at
-L<http://github.com/perl6/nqp/downloads>.
+Uplaod the release tarball to L<http://rakudo.org/downloads/rakudo>:
+
+  $ scp nqp-2013.12.tar.gz rakudo@rakudo.org:public_html/downloads/nqp/
+
+If you do not have permissions for that, ask one of (pmichaud, jnthn,
+masak, tadzik, moritz, PerlJam) on #perl6 to do it for you.
 
 =item 8.
 
