@@ -327,7 +327,7 @@ class HLL::Compiler does HLL::Backend::Default {
 
     
     method commandline_options(@value?) {
-        if +@value {
+        if nqp::elems(@value) {
             @!cmdoptions := @value;
         }
         @!cmdoptions;

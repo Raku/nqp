@@ -39,7 +39,7 @@ class QRegex::NFA {
     }
 
     method addstate() {
-        my int $id := +$!states;
+        my int $id := nqp::elems($!states);
         $!states[$id] := [];
         $id;
     }
