@@ -1068,7 +1068,7 @@ class QAST::Compiler is HLL::Compiler {
         my %*REG;
 
         # build the list of (unique) registers we need
-        my $reglist := nqp::split(' ', 'start pmc tgt string pos int off int eos int rep int cur pmc curclass pmc bstack pmc cstack pmc');
+        my $reglist := nqp::split(' ', 'start pmc tgtp pmc tgt string posp pmc pos int off int eos int rep int cur pmc curclass pmc bstack pmc cstack pmc');
         while $reglist {
             my $reg := nqp::shift($reglist);
             my $name := %*REG{$reg} := $prefix ~ $reg;
@@ -1088,11 +1088,14 @@ class QAST::Compiler is HLL::Compiler {
         # common prologue
         $ops.push_pirop('callmethod', '"!cursor_start_all"', 'self', :result(%*REG<start>));
         $ops.push_pirop('set', %*REG<cur>, %*REG<start> ~ '[0]');
-        $ops.push_pirop('set', %*REG<tgt>, %*REG<start> ~ '[1]');
-        $ops.push_pirop('set', %*REG<pos>, %*REG<start> ~ '[2]');
+        $ops.push_pirop('set', %*REG<tgtp>, %*REG<start> ~ '[1]');
+        $ops.push_pirop('set', %*REG<tgt>, %*REG<tgtp>);
+        $ops.push_pirop('set', %*REG<posp>, %*REG<start> ~ '[2]');
+        $ops.push_pirop('set', %*REG<pos>, %*REG<posp>);
         $ops.push_pirop('set', %*REG<curclass>, %*REG<start> ~ '[3]');
         $ops.push_pirop('set', %*REG<bstack>, %*REG<start> ~ '[4]');
-        $ops.push_pirop('set', '$I19', %*REG<start> ~ '[5]');
+        $ops.push_pirop('set', '$P19', %*REG<start> ~ '[5]');
+        $ops.push_pirop('set', '$I19', '$P19');
         $ops.push_pirop('store_lex', 'unicode:"$\x{a2}"', %*REG<cur>);
         $ops.push_pirop('length', %*REG<eos>, %*REG<tgt>);
         $ops.push_pirop('eq', '$I19', 1, $restartlabel);
