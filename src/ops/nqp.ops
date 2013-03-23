@@ -2959,3 +2959,64 @@ inline op captureposprimspec(out INT, invar PMC, in INT) :base_core {
             "captureposprimspec can only operate on a CallContext");
     }
 }
+
+/*
+
+=item smart_numify
+
+A clever way of numifying objects. Delegates to a Num method is it exists, or
+falls back to the box_funcs (int, num or str) if not. Finally gets the number
+of elements if it's VMArray or VMHash REPRd. On objects that aren't sixmodel
+objects, just calls the get_number VTABLE.
+
+=cut
+
+*/
+inline op smart_numify(out NUM, invar PMC) {
+    PMC *decont = decontainerize(interp, $2);
+
+    if (decont->vtable->base_type == smo_id) {
+        storage_spec spec = REPR(decont)->get_storage_spec(interp, STABLE(decont));
+
+        /* If it has a Num method, that wins. */
+        /* XXX: Not entirely sure if this is the proper way to interact with the method cache... */
+        if (!PMC_IS_NULL(STABLE(decont)->method_cache)
+         && !PMC_IS_NULL(VTABLE_get_pmc_keyed_str(interp, STABLE(decont)->method_cache,
+                Parrot_str_new_constant(interp, "Num")))) {
+            PMC *old_ctx = Parrot_pcc_get_signature(interp, CURRENT_CONTEXT(interp));
+            PMC *meth = VTABLE_get_pmc_keyed_str(interp, STABLE(decont)->method_cache,
+                Parrot_str_new_constant(interp, "Num"));
+            PMC *cappy = Parrot_pmc_new(interp, enum_class_CallContext);
+            VTABLE_push_pmc(interp, cappy, decont);
+            Parrot_pcc_invoke_from_sig_object(interp, meth, cappy);
+            $1 = VTABLE_get_number_keyed_int(interp, cappy, 0);
+            Parrot_pcc_set_signature(interp, CURRENT_CONTEXT(interp), old_ctx);
+        }
+        /* If it's a type object, 0.0. */
+        else if (!IS_CONCRETE(decont)) {
+            $1 = 0.0;
+        }
+        /* See if it can unbox to a primitive we can numify. */
+        else if (spec.can_box & STORAGE_SPEC_CAN_BOX_INT) {
+            $1 = (FLOATVAL) REPR(decont)->box_funcs->get_int(interp, STABLE(decont), OBJECT_BODY(decont));
+        }
+        else if (spec.can_box & STORAGE_SPEC_CAN_BOX_NUM) {
+            $1 = REPR(decont)->box_funcs->get_num(interp, STABLE(decont), OBJECT_BODY(decont));
+        }
+        else if (spec.can_box & STORAGE_SPEC_CAN_BOX_STR) {
+            $1 = Parrot_str_to_num(interp,
+                REPR(decont)->box_funcs->get_str(interp, STABLE(decont), OBJECT_BODY(decont)));
+        }
+        else if (Parrot_str_equal(interp, REPR(decont)->name, Parrot_str_new_constant(interp, "VMArray"))
+              || Parrot_str_equal(interp, REPR(decont)->name, Parrot_str_new_constant(interp, "VMHash"))) {
+            $1 = (FLOATVAL) REPR(decont)->elems(interp, STABLE(decont), OBJECT_BODY(decont));
+        }
+        /* If anything else, die. */
+        else {
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Can't numify this");
+        }
+    }
+    else
+        $1 = VTABLE_get_number(interp, decont);
+}
