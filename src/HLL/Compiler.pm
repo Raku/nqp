@@ -442,9 +442,9 @@ class HLL::Compiler does HLL::Backend::Default {
     method evalfiles($files, *@args, *%adverbs) {
         my $target := nqp::lc(%adverbs<target>);
         my $encoding := %adverbs<encoding>;
-        my @files := nqp::islist($files) ?? $files !! [$files];
+        my @files := nqp::islist($files) ?? nqp::list_s(|$files) !! nqp::list_s($files);
         $!user_progname := nqp::join(',', @files);
-        my @codes;
+        my @codes := nqp::list_s();
         for @files -> $filename {
             my $err := 0;
             my $in-handle;
