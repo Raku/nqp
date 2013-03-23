@@ -156,8 +156,19 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
     
     /* XXX Hack for Parrot issue which needs invokable on stuff. */
     VTABLE INTVAL does(STRING *what) {
-        UNUSED(SELF)
-        return Parrot_str_equal(interp, what, CONST_STRING(interp, "invokable"));
+        PMC *decont = decontainerize(interp, SELF);
+
+        if (Parrot_str_equal(interp, what, CONST_STRING(interp, "invokable"))) {
+            return 1;
+        }
+        else if (Parrot_str_equal(interp, what, CONST_STRING(interp, "array"))) {
+            return Parrot_str_equal(interp, REPR(decont)->name, CONST_STRING(interp, "VMArray"));
+        }
+        else if (Parrot_str_equal(interp, what, CONST_STRING(interp, "hash"))) {
+            return Parrot_str_equal(interp, REPR(decont)->name, CONST_STRING(interp, "VMHash"));
+        }
+
+        return 0;
     }
     
     VTABLE INTVAL can(STRING *name) {
