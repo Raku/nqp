@@ -380,6 +380,17 @@ inline op nqp_dynop_setup() :base_core {
     }
 }
 
+inline op sethllconfig(out PMC, in STR, invar PMC) {
+    PMC *config = get_hll_config(interp, $2);
+
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "list"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "listType"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "list")));
+    }
+
+    $1 = config;
+}
+
 
 /*
 
