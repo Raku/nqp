@@ -337,6 +337,11 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
                 "Cannot count elements in a type object");
     }
+
+    VTABLE void set_integer_native(INTVAL n) {
+        PMC *decont = decontainerize(interp, SELF);
+        REPR(decont)->pos_funcs->set_elems(interp, STABLE(decont), OBJECT_BODY(decont), n);
+    }
     
     VTABLE PMC * get_pmc_keyed(PMC *key) {
         if (key->vtable->base_type == enum_class_Key) {
