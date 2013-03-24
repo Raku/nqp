@@ -286,6 +286,28 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
     return fates;
 }
 
+static PMC *get_hll_config(PARROT_INTERP, STRING *hll) {
+    PMC *global_context = VTABLE_get_pmc_keyed_str(interp, interp->root_namespace,
+        Parrot_str_new_constant(interp, "_GLOBAL_CONTEXT"));
+    PMC *config = VTABLE_get_pmc_keyed_str(interp,
+        VTABLE_get_pmc_keyed_str(interp, global_context, Parrot_str_new_constant(interp, "hllConfig")),
+        hll);
+
+    if (PMC_IS_NULL(config)) {
+        config = Parrot_pmc_new(interp, enum_class_Hash);
+        /* TODO: All the other boot types have to be added here, once they're
+         * implemented. */
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "listType"), BOOTArray);
+
+        VTABLE_set_pmc_keyed_str(interp,
+            VTABLE_get_pmc_keyed_str(interp, global_context, Parrot_str_new_constant(interp, "hllConfig")),
+            hll,
+            config);
+    }
+
+    return config;
+}
+
 /* Constants for values the type field above may have. */
 #define BIND_VAL_INT 1
 #define BIND_VAL_NUM 2
@@ -500,7 +522,11 @@ Returns the HLL list type.
 inline op hlllist(invar PMC) :base_core {
     /* TODO: This op needs to actually respect the HLL config stuff. Of
      * course, we'll have to implement stuff to do that. =) */
-    $1 = BOOTArray;
+    INTVAL hll_id = Parrot_pcc_get_HLL(interp, CURRENT_CONTEXT(interp));
+    STRING *hll_name = Parrot_hll_get_HLL_name(interp, hll_id);
+    PMC *config = get_hll_config(interp, hll_name);
+
+    $1 = VTABLE_get_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "listType"));
 }
 
 /*

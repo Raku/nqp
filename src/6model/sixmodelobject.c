@@ -87,6 +87,8 @@ void SixModelObject_initialize(PARROT_INTERP) {
     VTABLE_set_pmc_keyed_str(interp, interp->root_namespace,
         Parrot_str_new_constant(interp, "_GLOBAL_CONTEXT"), global_context);
     VTABLE_set_pmc_keyed_str(interp, global_context,
+        Parrot_str_new_constant(interp, "hllConfig"), Parrot_pmc_new(interp, enum_class_Hash));
+    VTABLE_set_pmc_keyed_str(interp, global_context,
         Parrot_str_new_constant(interp, "KnowHOW"), knowhow);
     VTABLE_set_pmc_keyed_str(interp, global_context,
         Parrot_str_new_constant(interp, "KnowHOWAttribute"), knowhow_attribute);
