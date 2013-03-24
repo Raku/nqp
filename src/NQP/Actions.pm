@@ -48,8 +48,8 @@ class NQP::Actions is HLL::Actions {
 
     sub colonpair_str($ast) {
         if nqp::istype($ast, QAST::Op) {
-            my @parts;
-            for $ast.list { @parts.push($_.value) }
+            my @parts := nqp::list_s();
+            for $ast.list { nqp::push_s(@parts, $_.value) }
             nqp::join(' ', @parts)
         } else {
             $ast.value

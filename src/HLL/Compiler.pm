@@ -657,7 +657,7 @@ class HLL::Compiler does HLL::Backend::Default {
 
         # remove any empty items from the list
         # maybe replace with a grep() once we have the setting for sure
-        my @actual_ns;
+        my @actual_ns := nqp::list_s();
         for @ns {
             nqp::push_s(@actual_ns, $_) unless $_ eq '';
         }
