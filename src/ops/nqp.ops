@@ -2659,8 +2659,12 @@ inline op nqp_nfa_from_statelist(out PMC, invar PMC, invar PMC) :base_core {
             nfa->states[i] = mem_sys_allocate(edges * sizeof(NFAStateInfo));
         
         for (j = 0; j < elems; j += 3) {
-            INTVAL act = VTABLE_get_integer_keyed_int(interp, edge_info, j);
-            INTVAL to  = VTABLE_get_integer_keyed_int(interp, edge_info, j + 2);
+            PMC *actp = VTABLE_get_pmc_keyed_int(interp, edge_info, j);
+            PMC *top  = VTABLE_get_pmc_keyed_int(interp, edge_info, j + 2);
+            INTVAL act = VTABLE_get_integer(interp, actp);
+            INTVAL to  = VTABLE_get_integer(interp, top);
+            /*INTVAL act = VTABLE_get_integer_keyed_int(interp, edge_info, j);
+            INTVAL to  = VTABLE_get_integer_keyed_int(interp, edge_info, j + 2);*/
             
             nfa->states[i][cur_edge].act = act;
             nfa->states[i][cur_edge].to = to;
@@ -2670,13 +2674,17 @@ inline op nqp_nfa_from_statelist(out PMC, invar PMC, invar PMC) :base_core {
             case EDGE_CODEPOINT:
             case EDGE_CODEPOINT_NEG:
             case EDGE_CHARCLASS:
-            case EDGE_CHARCLASS_NEG:
-                nfa->states[i][cur_edge].arg.i = VTABLE_get_integer_keyed_int(interp, edge_info, j + 1);
+            case EDGE_CHARCLASS_NEG: {
+                PMC *ip = VTABLE_get_pmc_keyed_int(interp, edge_info, j + 1);
+                nfa->states[i][cur_edge].arg.i = VTABLE_get_integer(interp, ip);
                 break;
+            }
             case EDGE_CHARLIST:
-            case EDGE_CHARLIST_NEG:
-                nfa->states[i][cur_edge].arg.s = VTABLE_get_string_keyed_int(interp, edge_info, j + 1);
+            case EDGE_CHARLIST_NEG: {
+                PMC *sp = VTABLE_get_pmc_keyed_int(interp, edge_info, j + 1);
+                nfa->states[i][cur_edge].arg.s = VTABLE_get_string(interp, sp);
                 break;
+            }
             case EDGE_CODEPOINT_I:
             case EDGE_CODEPOINT_I_NEG: {
                 PMC *arg = VTABLE_get_pmc_keyed_int(interp, edge_info, j + 1);
