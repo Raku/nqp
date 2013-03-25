@@ -4,7 +4,7 @@
 
 plan(3);
 
-say( pir::join__SsP('', ('o', 'k', ' ', 1) ) );
+say( pir::join__SsP('', nqp::list_s('o', 'k', ' ', 1) ) );
 
 say( 'ok ', pir::div__Iii(6,3) );
 
