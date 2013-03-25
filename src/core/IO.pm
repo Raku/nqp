@@ -57,8 +57,8 @@ sub say(*@args) {
 }
 
 sub join($delim, @things) {
-    my @strs;
-    for @things { nqp::push(@strs, ~$_) }
+    my @strs := nqp::list_s();
+    for @things { nqp::push_s(@strs, ~$_) }
     nqp::join($delim, @strs)
 }
 
