@@ -465,6 +465,28 @@ static void bind_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index, 
     set_pos_pmc((PMC **) body->slots, body->start + index, obj);
 }
 
+static void delete_pos(PARROT_INTERP, STable *st, void *data, INTVAL index) {
+    VMArrayBody *body = (VMArrayBody *) data;
+    VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
+
+    if(index < 0) {
+        index += body->elems;
+        if(index < 0)
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_OUT_OF_BOUNDS,
+                    "VMArray: index out of bounds");
+    }
+
+    if(index >= body->elems)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_OUT_OF_BOUNDS,
+                "VMArray: index out of bounds");
+
+    null_pos(interp, body, repr_data, body->start + index);
+
+    /* Shrink the length by one if we're deleting the last item. */
+    if(index == body->elems - 1)
+        body->elems--;
+}
+
 static void push_boxed(PARROT_INTERP, STable *st, void *data, PMC *obj) {
     VMArrayBody *body = (VMArrayBody *) data;
     VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
@@ -572,6 +594,7 @@ REPROps * VMArray_initialize(PARROT_INTERP) {
     this_repr->pos_funcs->exists_pos = exists_pos;
     this_repr->pos_funcs->bind_pos_native = bind_pos_native;
     this_repr->pos_funcs->bind_pos_boxed = bind_pos_boxed;
+    this_repr->pos_funcs->delete_pos = delete_pos;
     this_repr->pos_funcs->push_boxed = push_boxed;
     this_repr->pos_funcs->pop_boxed = pop_boxed;
     this_repr->pos_funcs->unshift_boxed = unshift_boxed;

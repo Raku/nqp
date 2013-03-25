@@ -260,6 +260,9 @@ typedef struct SixModel_REPROps_Positional {
     /* Binds the object at the specified address into the array at the specified index.
      * For arrays of non-reference types, expects a compatible type. */
     void (*bind_pos_boxed) (PARROT_INTERP, STable *st, void *data, INTVAL index, PMC *obj);
+
+    /* Delete the object at the given position. */
+    void (*delete_pos) (PARROT_INTERP, STable *st, void *data, INTVAL index);
     
     /* Pushes an object. */
     void (*push_boxed) (PARROT_INTERP, STable *st, void *data, PMC *obj);
