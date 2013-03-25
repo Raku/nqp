@@ -58,11 +58,11 @@ class PIRT::Node {
         });
     
     method children_pir(@children) {
-        my @parts;
+        my @parts := nqp::list_s();
         for @children {
             if nqp::islist($_) {
                 my $op_name := $_[0];
-                my @op_args;
+                my @op_args := nqp::list_s();
                 my $i := 1;
                 my $c := nqp::elems($_);
                 my $arg;
@@ -71,25 +71,25 @@ class PIRT::Node {
                 while $i < $c {
                     $arg := $_[$i];
                     if nqp::istype($arg, PIRT::Node) {
-                        nqp::push(@op_args, $arg.result);
+                        nqp::push_s(@op_args, $arg.result);
                     }
                     elsif nqp::istype($arg, PIRT::CallResult) {
                         $result := $arg.result;
                         $*HAS_RESULT := 1;
                     }
                     else {
-                        nqp::push(@op_args, $arg);
+                        nqp::push_s(@op_args, $arg);
                     }
                     $i := $i + 1;
                 }
                 if $*HAS_RESULT {
-                    nqp::unshift(@op_args, $result);
+                    nqp::unshift_s(@op_args, $result);
                 }
                 if nqp::existskey(%op_compilers, $op_name) {
-                    nqp::push(@parts, %op_compilers{$op_name}(@op_args));
+                    nqp::push_s(@parts, %op_compilers{$op_name}(@op_args));
                 }
                 else {
-                    nqp::push(@parts, '    ' ~ $op_name ~ ' ' ~ nqp::join(", ", @op_args));
+                    nqp::push_s(@parts, '    ' ~ $op_name ~ ' ' ~ nqp::join(", ", @op_args));
                 }
             }
             elsif nqp::istype($_, PIRT::Sub) {
@@ -97,7 +97,7 @@ class PIRT::Node {
             }
             elsif nqp::istype($_, PIRT::Node) {
                 my $pir := $_.pir;
-                nqp::push(@parts, $pir) unless $pir eq '';
+                nqp::push_s(@parts, $pir) unless $pir eq '';
             }
             else {
                 nqp::die("Unexpected object in PIRT tree");
@@ -174,26 +174,26 @@ class PIRT::Sub is PIRT::Node {
     }
     
     method close_sub() {
-        my @parts;
+        my @parts := nqp::list_s();
         
         # Sub prelude.
         unless nqp::isnull(@!loadlibs) {
             for @!loadlibs {
-                nqp::push(@parts, ".loadlib " ~ self.escape($_));
+                nqp::push_s(@parts, ".loadlib " ~ self.escape($_));
             }
         }
         if nqp::ifnull($!hll, '') {
-            nqp::push(@parts, ".HLL " ~ self.escape($!hll));
+            nqp::push_s(@parts, ".HLL " ~ self.escape($!hll));
         }
         if nqp::isnull(@!namespace) {
-            nqp::push(@parts, ".namespace []");
+            nqp::push_s(@parts, ".namespace []");
         }
         else {
             my @ns;
             for @!namespace {
                 nqp::push(@ns, self.escape($_));
             }
-            nqp::push(@parts, '.namespace [' ~ nqp::join(';', @ns) ~ ']');
+            nqp::push_s(@parts, '.namespace [' ~ nqp::join(';', @ns) ~ ']');
         }
         my $sub_decl := ".sub " ~ self.escape($!name || '');
         if nqp::ifnull($!subid, '') {
@@ -202,21 +202,21 @@ class PIRT::Sub is PIRT::Node {
         if nqp::ifnull($!pirflags, '') {
             $sub_decl := $sub_decl ~ ' ' ~ $!pirflags
         }
-        nqp::push(@parts, $sub_decl);
+        nqp::push_s(@parts, $sub_decl);
         
         # File annotation, if there is one.
         my $file := nqp::getlexdyn('$?FILES');
         if nqp::ifnull($file, '') {
-            nqp::push(@parts, ".annotate 'file', " ~ self.escape($file));
+            nqp::push_s(@parts, ".annotate 'file', " ~ self.escape($file));
         }
         
         # Compile sub contents, collecting any nested blocks.
         my @*PIRT_BLOCKS;
         my $*SUB_LINE := -1;
-        nqp::push(@parts, self.children_pir(@!children));
+        nqp::push_s(@parts, self.children_pir(@!children));
         
         # Sub postlude.
-        nqp::push(@parts, ".end");
+        nqp::push_s(@parts, ".end");
         
         # Store the compiled PIR and collected inner blocks. Also, null out
         # the children array, to free up memory.
@@ -226,7 +226,7 @@ class PIRT::Sub is PIRT::Node {
     }
 
     method pir() {
-        my @parts;
+        my @parts := nqp::list_s();
         self.collect_sub_pir_into(@parts);
         nqp::join("\n", @parts)
     }

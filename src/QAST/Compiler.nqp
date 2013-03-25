@@ -436,35 +436,35 @@ class QAST::Compiler is HLL::Compiler {
                 nqp::push(@sorted_params, $_) for @named_params;
                 nqp::push(@sorted_params, $slurpy_named) if $slurpy_named;
                 for @sorted_params {
-                    my @param := ['.param'];
+                    my @param := nqp::list_s('.param');
                     
                     my $reg_type;
                     if $_.scope eq 'local'{
-                        nqp::push(@param, $block.local_type_long($_.name));
-                        nqp::push(@param, $_.name);
+                        nqp::push_s(@param, $block.local_type_long($_.name));
+                        nqp::push_s(@param, $_.name);
                         $reg_type := $block.local_type($_.name);
                     }
                     else {
                         my $reg := $block.lex_reg($_.name);
-                        nqp::push(@param, $block.lexical_type_long($_.name));
-                        nqp::push(@param, $reg);
+                        nqp::push_s(@param, $block.lexical_type_long($_.name));
+                        nqp::push_s(@param, $reg);
                         %lex_params{$_.name} := $reg;
                         $reg_type := $block.lexical_type($_.name);
                     }
                     
                     if $_.slurpy {
-                        nqp::push(@param, ':slurpy');
+                        nqp::push_s(@param, ':slurpy');
                         if $_.named {
-                            nqp::push(@param, ':named');
+                            nqp::push_s(@param, ':named');
                         }
                     }
                     elsif $_.named {
-                        nqp::push(@param, ':named(' ~ self.escape($_.named) ~ ')');
+                        nqp::push_s(@param, ':named(' ~ self.escape($_.named) ~ ')');
                     }
                     
                     if $_.default {
                         # Add an optional to the parameter and add it.
-                        nqp::push(@param, ':optional');
+                        nqp::push_s(@param, ':optional');
                         $decls.push_pirop(nqp::join(' ', @param));
                         
                         # Add an optional flag.

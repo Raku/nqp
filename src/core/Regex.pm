@@ -36,19 +36,19 @@ sub subst ($text, $regex, $repl, :$global?) {
                            !! [ $text ~~ $regex ];
     my $is_code := nqp::isinvokable($repl);
     my $offset  := 0;
-    my @result;
+    my @result := nqp::list_s();
 
     for @matches -> $match {
         if $match {
-            nqp::push(@result, nqp::substr($text, $offset, $match.from - $offset))
+            nqp::push_s(@result, nqp::substr($text, $offset, $match.from - $offset))
                 if $match.from > $offset;
-            nqp::push(@result, $is_code ?? ~$repl($match) !! ~$repl);
+            nqp::push_s(@result, $is_code ?? ~$repl($match) !! ~$repl);
             $offset := $match.to;
         }
     }
 
     my $chars := nqp::chars($text);
-    nqp::push(@result, nqp::substr($text, $offset, $chars))
+    nqp::push_s(@result, nqp::substr($text, $offset, $chars))
         if $chars > $offset;
 
     nqp::join("", @result);
