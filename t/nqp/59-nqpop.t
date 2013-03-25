@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(123);
+plan(125);
 
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
@@ -161,18 +161,20 @@ ok(!nqp::existspos(@arr2, 0), 'existspos with missing pos');
 ok(nqp::existspos(@arr2, 1), 'existspos with existing pos');
 ok(!nqp::existspos(@arr2, 2), 'existspos with missing pos');
 ok(nqp::existspos(@arr2, 3), 'existspos with existing pos');
-ok(!nqp::existspos(@arr2, 4), 'existspos with missing pos');
+ok(!nqp::existspos(@arr2, 4), 'existspos with out of bounds pos');
 
 nqp::deletepos(@arr2, 1);
-ok(nqp::elems(@arr2) == 3, 'right number of elements');
-ok(!nqp::existspos(@arr2, 0), 'existspos with existing pos');
+ok(nqp::elems(@arr2) == 4, 'right number of elements');
+ok(!nqp::existspos(@arr2, 0), 'existspos with missing pos');
 ok(!nqp::existspos(@arr2, 1), 'existspos with missing pos');
-ok(nqp::existspos(@arr2, 2), 'existspos with existing pos');
-ok(!nqp::existspos(@arr2, 3), 'existspos with missing pos');
+ok(!nqp::existspos(@arr2, 2), 'existspos with missing pos');
+ok(nqp::existspos(@arr2, 3), 'existspos with existing pos');
+ok(!nqp::existspos(@arr2, 4), 'existspos with out of bounds pos');
 
-nqp::deletepos(@arr2, 0);
+nqp::deletepos(@arr2, 3);
 
-ok(nqp::elems(@arr2) == 2, 'right number of elements');
-ok(!nqp::existspos(@arr2, 0), 'existspos with existing pos');
-ok(nqp::existspos(@arr2, 1), 'existspos with missing pos');
-ok(!nqp::existspos(@arr2, 2), 'existspos with existing pos');
+ok(nqp::elems(@arr2) == 3, 'right number of elements');
+ok(!nqp::existspos(@arr2, 0), 'existspos with missing pos');
+ok(!nqp::existspos(@arr2, 1), 'existspos with missing pos');
+ok(!nqp::existspos(@arr2, 2), 'existspos with missing pos');
+ok(!nqp::existspos(@arr2, 3), 'existspos with out of bounds pos');
