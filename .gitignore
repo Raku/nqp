@@ -39,3 +39,4 @@ config.status
 config.default
 3rdparty/dyncall/ConfigVars
 3rdparty/dyncall/*/*.a
+/nqp_const.pir

@@ -189,6 +189,19 @@ class QAST::Compiler is HLL::Compiler {
         };
     }
 
+    method source_for_node($node) {
+        my $source := $node.node
+                        ?? ~ nqp::escape($node.node.Str)
+                        !! '';
+        if nqp::chars($source) > 103 {
+            $source := nqp::substr($source, 0, 100) ~ '...';
+        }
+        if nqp::chars($source) {
+            $source := qq[ (source text: "$source")];
+        }
+        $source;
+    }
+
     method post($source, *%adverbs) {
         # Wrap $source in a QAST::Block if it's not already a viable root node.
         $source := QAST::Block.new($source)
@@ -399,7 +412,8 @@ class QAST::Compiler is HLL::Compiler {
                     CATCH { $err := $! }
                 }
                 if $err {
-                    nqp::die("Error while compiling block " ~ $node.name ~ ": $err");
+                    my $source := self.source_for_node($node);
+                    nqp::die("Error while compiling block " ~ $node.name ~ "$source: $err");
                 }
             }
             
@@ -671,7 +685,8 @@ class QAST::Compiler is HLL::Compiler {
             CATCH { $err := $! }
         }
         if $err {
-            nqp::die("Error while compiling op " ~ $node.op ~ ": $err");
+            my $source := self.source_for_node($node);
+            nqp::die("Error while compiling op " ~ $node.op ~ "$source: $err");
         }
         $result
     }

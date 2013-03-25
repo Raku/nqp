@@ -176,6 +176,16 @@ class QAST::Operations {
     }
     
     # Returns a mapper closure for turning an operation into a PIR op.
+    # The signature argument consists of characters indicating the
+    # register types and conversions.  The characters are:
+    #    P,S,I,N   PMC, string, int, or num register
+    #    Q         keyed PMC, next character indicates type of key
+    #    s         string register or constant
+    #    i         int register or constant
+    #    n         num register or constant
+    #    r         any register result
+    #    v         void (no result)
+    #    0-9       use the nth input operand as the output result of this operation
     sub pirop_mapper($pirop, $sig) {
         # Parse arg types out.
         my @arg_types := nqp::split('', $sig);
@@ -1103,21 +1113,21 @@ QAST::Operations.add_core_pirop_mapping('multicachefind', 'multi_cache_find', 'P
 
 # Constant mapping.
 my %const_map := nqp::hash(
-    'CCLASS_ANY',           nqp::const::CCLASS_ANY,
-    'CCLASS_NUMERIC',       nqp::const::CCLASS_NUMERIC,
-    'CCLASS_WHITESPACE',    nqp::const::CCLASS_WHITESPACE,
-    'CCLASS_WORD',          nqp::const::CCLASS_WORD,
-    'CCLASS_NEWLINE',       nqp::const::CCLASS_NEWLINE,
-    'CCLASS_NEWLINE',       nqp::const::CCLASS_NEWLINE,
-    'CCLASS_ALPHABETIC',    nqp::const::CCLASS_ALPHABETIC,
-    'CCLASS_UPPERCASE',     nqp::const::CCLASS_UPPERCASE,
-    'CCLASS_LOWERCASE',     nqp::const::CCLASS_LOWERCASE,
-    'CCLASS_NUMERIC',       nqp::const::CCLASS_NUMERIC,
-    'CCLASS_HEXADECIMAL',   nqp::const::CCLASS_HEXADECIMAL,
-    'CCLASS_BLANK',         nqp::const::CCLASS_BLANK,
-    'CCLASS_CONTROL',       nqp::const::CCLASS_CONTROL,
-    'CCLASS_PUNCTUATION',   nqp::const::CCLASS_PUNCTUATION,
-    'CCLASS_ALPHANUMERIC',  nqp::const::CCLASS_ALPHANUMERIC
+    'CCLASS_ANY',           pir::const::CCLASS_ANY,
+    'CCLASS_NUMERIC',       pir::const::CCLASS_NUMERIC,
+    'CCLASS_WHITESPACE',    pir::const::CCLASS_WHITESPACE,
+    'CCLASS_WORD',          pir::const::CCLASS_WORD,
+    'CCLASS_NEWLINE',       pir::const::CCLASS_NEWLINE,
+    'CCLASS_NEWLINE',       pir::const::CCLASS_NEWLINE,
+    'CCLASS_ALPHABETIC',    pir::const::CCLASS_ALPHABETIC,
+    'CCLASS_UPPERCASE',     pir::const::CCLASS_UPPERCASE,
+    'CCLASS_LOWERCASE',     pir::const::CCLASS_LOWERCASE,
+    'CCLASS_NUMERIC',       pir::const::CCLASS_NUMERIC,
+    'CCLASS_HEXADECIMAL',   pir::const::CCLASS_HEXADECIMAL,
+    'CCLASS_BLANK',         pir::const::CCLASS_BLANK,
+    'CCLASS_CONTROL',       pir::const::CCLASS_CONTROL,
+    'CCLASS_PUNCTUATION',   pir::const::CCLASS_PUNCTUATION,
+    'CCLASS_ALPHANUMERIC',  pir::const::CCLASS_ALPHANUMERIC
 );
 QAST::Operations.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
@@ -1748,6 +1758,7 @@ QAST::Operations.add_core_pirop_mapping('tonum_I', 'nqp_bigint_to_num', 'NP', :i
 QAST::Operations.add_core_pirop_mapping('buildnativecall', 'nqp_native_call_build', 'vPsssPP');
 QAST::Operations.add_core_pirop_mapping('nativecall', 'nqp_native_call', 'PPPP');
 QAST::Operations.add_core_pirop_mapping('nativecallrefresh', 'nqp_native_call_wb', 'vP');
+QAST::Operations.add_core_pirop_mapping('x_posixerrno', 'nqp_posixerrno', 'I');
 
 # boolean opcodes
 QAST::Operations.add_core_pirop_mapping('not_i', 'not', 'Ii', :inlinable(1));

@@ -19,13 +19,13 @@
 
 /* Version of the serialization format that we are currently at and lowest
  * version we support. */
-#define CURRENT_VERSION 3
+#define CURRENT_VERSION 4
 #define MIN_VERSION 1
 
 /* Various sizes (in bytes). */
 #define HEADER_SIZE                 4 * 16
 #define DEP_TABLE_ENTRY_SIZE        8
-#define STABLES_TABLE_ENTRY_SIZE    8
+#define STABLES_TABLE_ENTRY_SIZE    (version == 4 ? 12 : 8)
 #define OBJECTS_TABLE_ENTRY_SIZE    16
 #define CLOSURES_TABLE_ENTRY_SIZE   24
 #define CONTEXTS_TABLE_ENTRY_SIZE   16
@@ -596,6 +596,7 @@ static STRING * concatenate_outputs(PARROT_INTERP, SerializationWriter *writer) 
     char        *output_b64  = NULL;
     Parrot_Int4  output_size = 0;
     Parrot_Int4  offset      = 0;
+    Parrot_Int4  version     = writer->root.version;
     
     /* Calculate total size. */
     output_size += HEADER_SIZE;
@@ -698,6 +699,7 @@ static STRING * concatenate_outputs(PARROT_INTERP, SerializationWriter *writer) 
  * its representation data also. */
 static void serialize_stable(PARROT_INTERP, SerializationWriter *writer, PMC *st_pmc) {
     STable *st = STABLE_STRUCT(st_pmc);
+    Parrot_Int4 version = writer->root.version;
     INTVAL  i;
     
     /* Ensure there's space in the STables table; grow if not. */
@@ -753,6 +755,9 @@ static void serialize_stable(PARROT_INTERP, SerializationWriter *writer, PMC *st
         write_int_func(interp, writer, st->container_spec->value_slot.hint);
         write_ref_func(interp, writer, st->container_spec->fetch_method);
     }
+    
+    /* Store offset we save REPR data at. */
+    write_int32(writer->root.stables_table, offset + 8, writer->stables_data_offset);
     
     /* If the REPR has a function to serialize representation data, call it. */
     if (st->REPR->serialize_repr_data)
@@ -966,6 +971,7 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     PMC         *codes    = PMCNULL;
     STRING      *result   = STRINGNULL;
     Parrot_Int4  sc_elems = (Parrot_Int4)VTABLE_elements(interp, sc);
+    Parrot_Int4  version  = CURRENT_VERSION;
     
     /* Set up writer with some initial settings. */
     SerializationWriter *writer = mem_allocate_zeroed_typed(SerializationWriter);
@@ -1316,6 +1322,7 @@ static STable * read_stable_ref_func(PARROT_INTERP, SerializationReader *reader)
  * the reader data structure more fully. */
 static void check_and_disect_input(PARROT_INTERP, SerializationReader *reader, STRING *data_str) {
     /* Grab data from string. */
+    Parrot_Int4 version;
     size_t  data_len;
     char   *data_b64 = (char *)Parrot_str_to_cstring(interp, data_str);
     char   *data     = (char *)base64_decode(data_b64, &data_len);
@@ -1333,8 +1340,7 @@ static void check_and_disect_input(PARROT_INTERP, SerializationReader *reader, S
     if (data_len < 4)
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Serialized data too short to read a version number (< 4 bytes)");
-    reader->root.version = read_int32(data, 0);
-    /*if (reader->root.version != CURRENT_VERSION)*/
+    reader->root.version = version = read_int32(data, 0);
     if (reader->root.version < MIN_VERSION || reader->root.version > CURRENT_VERSION)
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Unsupported serialization format version %d (current version is %d)",
@@ -1570,6 +1576,7 @@ static void attach_context_outer(PARROT_INTERP, SerializationReader *reader, INT
 /* Deserializes a single STable, along with its REPR data. */
 static void deserialize_stable(PARROT_INTERP, SerializationReader *reader, INTVAL i, PMC *st_pmc) {
     STable *st = STABLE_STRUCT(st_pmc);
+    Parrot_Int4 version = reader->root.version;
 
     /* Calculate location of STable's table row. */
     char *st_table_row = reader->root.stables_table + i * STABLES_TABLE_ENTRY_SIZE;

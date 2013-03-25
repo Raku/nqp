@@ -494,6 +494,8 @@ DYNCALL_BIN = 3rdparty/dyncall/dyncall/libdyncall_s$(A) \
 DYNCALL_OPS        = nqp_dyncall_ops
 DYNCALL_OPS_SOURCE = nqp_dyncall.ops
 
+NQP_CONST_PIR = nqp_const.pir
+
 CLEANUPS = \
   *.manifest \
   *.pdb \
@@ -535,12 +537,15 @@ CLEANUPS = \
   3rdparty/libtommath/*$(O) \
   3rdparty/sha1/*$(O) \
   $(DYNEXT_DIR)/*$(LOAD_EXT) \
+  $(NQP_CONST_PIR) \
 
 all: $(NQP_EXE) $(P5QREGEX_PBC)
 
 install: all
 	$(MKPATH)                   $(DESTDIR)$(PARROT_LIBRARY_DIR)
+	$(MKPATH)                   $(DESTDIR)$(PARROT_LIB_DIR)/include
 	$(CP)  $(MODULE_LOADER_PBC) $(DESTDIR)$(PARROT_LIBRARY_DIR)/$(MODULE_LOADER_PBC)
+	$(CP)  $(NQP_CONST_PIR)     $(DESTDIR)$(PARROT_LIB_DIR)/include/$(NQP_CONST_PIR)
 	$(MKPATH)                   $(DESTDIR)$(NQP_LANG_DIR)/lib
 	$(CP)  $(QAST_PBC)          $(DESTDIR)$(NQP_LANG_DIR)/lib/$(QAST_PBC)
 	$(CP)  $(QASTNODE_PBC)      $(DESTDIR)$(NQP_LANG_DIR)/lib/$(QASTNODE_PBC)
@@ -578,7 +583,7 @@ $(STAGE0_PBCS): $(DYNEXT_TARGET) $(STAGE0_SOURCES)
 
 $(STAGE1): $(STAGE1_PBCS)
 
-$(STAGE1)/$(NQP_MO_PBC): $(STAGE0_PBCS) $(NQP_MO_SOURCES)
+$(STAGE1)/$(NQP_MO_PBC): $(NQP_CONST_PIR) $(STAGE0_PBCS) $(NQP_MO_SOURCES)
 	$(MKPATH) $(STAGE1)/gen
 	$(PERL) tools/build/gen-cat.pl $(NQP_MO_SOURCES) > $(STAGE1)/$(NQP_MO_COMBINED)
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
@@ -1063,6 +1068,9 @@ $(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT): $(OPS_DIR)/$(DYNCALL_OPS_SOURCE) $(DYNCALL
 	cd src/6model/reprs && $(CC) -c @cc_o_out@CArray$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) CArray.c
 	cd src/6model/reprs && $(CC) -c @cc_o_out@CStr$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) CStr.c
 	cd $(OPS_DIR) && $(LD) @ld_out@$(DYNCALL_OPS)$(LOAD_EXT) $(DYNCALL_OPS)$(O) ../6model/reprs/NativeCall$(O) ../6model/reprs/CStruct$(O) ../6model/reprs/CPointer$(O) ../6model/reprs/CArray$(O) ../6model/reprs/CStr$(O) ../../3rdparty/dyncall/dyncall/libdyncall_s$(A) ../../3rdparty/dyncall/dyncallback/libdyncallback_s$(A) ../../3rdparty/dyncall/dynload/libdynload_s$(A) $(LINKARGS)
+
+$(NQP_CONST_PIR):
+	perl tools/build/generate-constants.pl > $@
 
 bootstrap-files: $(STAGE2_PBCS) src/stage2/$(CORE_SETTING_NQP)
 	$(PERL) tools/build/gen-bootstrap.pl src/stage2/$(NQP_MO_PIR) >src/stage0/NQPMO-s0.pir
