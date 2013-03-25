@@ -39,8 +39,8 @@ ok(!nqp::existskey($h, 'foo'), 'delete');
 class Arrayy {
     has @!a;
     method init() { @!a := nqp::list() }
-    method ($k)     is parrot_vtable('get_pmc_keyed_int') { @!a{$k}}
-    method ($k, $v) is parrot_vtable('set_pmc_keyed_int') { @!a{$k} := $v }
+    method ($k)     is parrot_vtable('get_pmc_keyed_int') { @!a[$k]}
+    method ($k, $v) is parrot_vtable('set_pmc_keyed_int') { @!a[$k] := $v }
     method ($k)     is parrot_vtable('exists_keyed_int')  { nqp::existspos(@!a, $k)      }
     method ($k)     is parrot_vtable('delete_keyed_int')  { nqp::deletepos(@!a, $k)      }
 }
