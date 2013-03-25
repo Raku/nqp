@@ -389,6 +389,29 @@ static PMC *at_pos_boxed(PARROT_INTERP, STable *st, void *data, INTVAL index) {
     return get_pos_pmc((PMC **) body->slots, body->start + index);
 }
 
+static INTVAL exists_pos(PARROT_INTERP, STable *st, void *data, INTVAL index) {
+    VMArrayBody *body = (VMArrayBody *) data;
+    VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
+
+    if(index < 0)
+        index += body->elems;
+
+    if(index < 0 || index >= body->elems)
+        return 0;
+
+    if(repr_data->elem_size) {
+        if(repr_data->elem_kind == STORAGE_SPEC_BP_INT || repr_data->elem_kind == STORAGE_SPEC_BP_NUM) {
+            /* Since the previous checks guarantee that we're within the
+             * bounds of the array, we can always return true. */
+            return 1;
+        }
+        /* TODO: Strings */
+    }
+    else {
+        return !PMC_IS_NULL(get_pos_pmc((PMC **) body->slots, body->start + index));
+    }
+}
+
 static void bind_pos_native(PARROT_INTERP, STable *st, void *data, INTVAL index, NativeValue *value) {
     VMArrayBody *body = (VMArrayBody *) data;
     VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
@@ -546,6 +569,7 @@ REPROps * VMArray_initialize(PARROT_INTERP) {
     this_repr->pos_funcs = mem_allocate_zeroed_typed(REPROps_Positional);
     this_repr->pos_funcs->at_pos_native = at_pos_native;
     this_repr->pos_funcs->at_pos_boxed = at_pos_boxed;
+    this_repr->pos_funcs->exists_pos = exists_pos;
     this_repr->pos_funcs->bind_pos_native = bind_pos_native;
     this_repr->pos_funcs->bind_pos_boxed = bind_pos_boxed;
     this_repr->pos_funcs->push_boxed = push_boxed;

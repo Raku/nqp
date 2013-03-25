@@ -564,7 +564,8 @@ pmclass SixModelObject manual_attrs dynpmc group nqp {
             return VTABLE_get_integer_keyed_int(interp, cappy, 0);
         }
         else
-            return SUPER(key);
+            REPR(decont)->pos_funcs->exists_pos(interp, STABLE(decont),
+                OBJECT_BODY(decont), key);
     }
 
     VTABLE INTVAL exists_keyed_str(STRING *key) {

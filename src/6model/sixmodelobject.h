@@ -251,6 +251,9 @@ typedef struct SixModel_REPROps_Positional {
      * object is already a reference type, simply returns that. */
     PMC * (*at_pos_boxed) (PARROT_INTERP, STable *st, void *data, INTVAL index);
 
+    /* Is there an object at the given index? */
+    INTVAL (*exists_pos) (PARROT_INTERP, STable *st, void *data, INTVAL index);
+
     /* Sets the value at the specified index of the array. May auto-vivify or throw. */
     void (*bind_pos_native) (PARROT_INTERP, STable *st, void *data, INTVAL index, NativeValue *value);
 
