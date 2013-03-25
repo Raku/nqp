@@ -1373,6 +1373,29 @@ inline op repr_elems(out INT, invar PMC) :base_core {
             "Can only use repr_elems on a SixModelObject");
 }
 
+/*
+
+=item repr_set_elems(obj, new_size)
+
+Resize an object backed by a positional REPR.
+
+=cut
+
+*/
+
+inline op repr_set_elems(invar PMC, in INT) :base_core {
+    PMC *obj = decontainerize(interp, $1);
+    if (obj->vtable->base_type == smo_id)
+        if (IS_CONCRETE(obj))
+            REPR(obj)->pos_funcs->set_elems(interp, STABLE(obj), OBJECT_BODY(obj), $2);
+        else
+            Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+                "Cannot do repr_set_elems on a type object");
+    else
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
+            "Can only use repr_set_elems on a SixModelObject");
+}
+
 
 /*
 

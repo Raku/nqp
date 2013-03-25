@@ -1125,7 +1125,7 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push_pirop('dec', '$I18');
         $ops.push_pirop('set', '$I18', %*REG<bstack>~'[$I18]');
         $ops.push($cutlabel);
-        $ops.push_pirop('assign', %*REG<cstack>, '$I18');
+        $ops.push_pirop('repr_set_elems', %*REG<cstack>, '$I18');
         $ops.push($jumplabel);
         $ops.push_pirop('jump', '$I19');
         $ops.push($donelabel);

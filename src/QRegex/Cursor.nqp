@@ -340,6 +340,8 @@ role NQPCursorRole is export {
         if $pos >= $highwater {
             $highexpect := nqp::getattr($shared, ParseShared, '@!highexpect');
             if $pos > $highwater {
+                # TODO: When list_s (which @!highexpect is) is a VMArray list,
+                # this next line has to be changed to nqp::r_setelems.
                 pir::assign__0Pi($highexpect, 0);
                 nqp::bindattr_i($shared, ParseShared, '$!highwater', $pos);
             }
@@ -367,6 +369,8 @@ role NQPCursorRole is export {
     
     method !clear_highwater() {
         my $highexpect := nqp::getattr($!shared, ParseShared, '@!highexpect');
+        # TODO: When list_s (which @!highexpect is) is a VMArray list, this
+        # next line has to be changed to nqp::r_setelems.
         pir::assign__0Pi($highexpect, 0);
         nqp::bindattr_i($!shared, ParseShared, '$!highwater', -1)
     }
