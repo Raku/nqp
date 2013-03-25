@@ -227,8 +227,9 @@ static void copy_to(PARROT_INTERP, STable *st, void *src, void *dest) {
     dest_body->elems = src_body->elems;
     dest_body->start = src_body->start;
     dest_body->ssize = src_body->ssize;
-    dest_body->slots = mem_sys_allocate(bytes);
-    memcpy(dest_body->slots, src_body->slots, bytes);
+    dest_body->slots = bytes? mem_sys_allocate(bytes) : NULL;
+    if(bytes)
+        memcpy(dest_body->slots, src_body->slots, bytes);
 }
 
 static void serialize(PARROT_INTERP, STable *st, void *data, SerializationWriter *writer) {
