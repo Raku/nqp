@@ -17,7 +17,7 @@ ok( nqp::div_n(5,2) == 2.5e0, 'nqp::div_n');
 
 ok( nqp::chars('hello') == 5, 'nqp::chars');
 ok( nqp::concat('hello ', 'world') eq 'hello world', 'nqp::concat');
-ok( nqp::join(' ', ('abc', 'def', 'ghi')) eq 'abc def ghi', 'nqp::join');
+ok( nqp::join(' ', nqp::list_s('abc', 'def', 'ghi')) eq 'abc def ghi', 'nqp::join');
 ok( nqp::index('rakudo', 'do') == 4, 'nqp::index found');
 ok( nqp::index('rakudo', 'dont') == -1, 'nqp::index not found');
 ok( nqp::chr(120) eq 'x', 'nqp::chr');
