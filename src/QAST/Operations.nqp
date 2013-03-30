@@ -1215,8 +1215,8 @@ QAST::Operations.add_core_op('handle', -> $qastcomp, $op {
         $num_pops := $num_pops + 1;
     }
     if @other {
-        my @hnames;
-        for @other { nqp::push(@hnames, %handler_names{$_}); }
+        my @hnames := nqp::list_s();
+        for @other { nqp::push_s(@hnames, %handler_names{$_}); }
         $other_label := PIRT::Label.new(:name($qastcomp.unique('catch_handler_')));
         $ops.push_pirop('new', $reg, "'ExceptionHandler'",
             "[" ~ nqp::join(", ", @hnames) ~ "]");
