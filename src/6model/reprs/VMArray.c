@@ -571,6 +571,88 @@ static void set_elems(PARROT_INTERP, STable *st, void *data, INTVAL n) {
     ensure_size(interp, body, repr_data, n);
 }
 
+static void splice(PARROT_INTERP, STable *st, void *data, PMC *from, INTVAL offset, INTVAL count) {
+    VMArrayBody *body = (VMArrayBody *) data;
+    VMArrayREPRData *repr_data = (VMArrayREPRData *) st->REPR_data;
+    INTVAL elems0 = body->elems;
+    INTVAL elems1 = VTABLE_elements(interp, from);
+    PMC **slots = NULL;
+    INTVAL start;
+    INTVAL tail;
+
+    /* XXX: This code assumes we store PMCs. Should fix that at some point. */
+    if (repr_data->elem_size)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_OUT_OF_BOUNDS,
+            "VMArray: Can't splice natively typed array");
+
+    if (offset < 0)
+        offset += elems0;
+
+    if (offset < 0)
+        Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_OUT_OF_BOUNDS,
+            "VMArray: illegal splice offset");
+
+    /* When offset == 0, then we may be able to reduce the memmove calls and
+     * reallocs by adjusting start, elems0, and count to better match the
+     * incoming splice. In particular, we're seeking to adjust C<count> to as
+     * close to C<elems1> as we can. */
+    if (offset == 0) {
+        INTVAL n = elems1 - count;
+        INTVAL start = body->start;
+        if (n > start) n = start;
+        if (n <= -elems0) {
+            elems0 = 0;
+            count = 0;
+            body->start = 0;
+            body->elems = elems0;
+        }
+        else if (n != 0) {
+            elems0 += n;
+            count += n;
+            body->start = start - n;
+            body->elems = elems0;
+        }
+    }
+
+    /* If count == 0 and elems == 0, there's nothing left to copy of remove,
+     * so the splice is done! */
+    if (count == 0 && elems1 == 0)
+        return;
+
+    /* The number of elements to right og splice (the "tail"). */
+    tail = elems0 - offset - count;
+    if (tail < 0) tail = 0;
+
+    if (tail > 0 && count > elems1) {
+        /* We're shrinking the array, so first move the tail left. */
+        slots = (PMC **) body->slots;
+        start = body->start;
+        memmove(slots + start + offset + elems1,
+                slots + start + offset + count,
+                tail * sizeof(PMC *));
+    }
+
+    /* Now, resize the array. */
+    ensure_size(interp, body, repr_data, offset + elems1 + tail);
+
+    slots = (PMC **) body->slots;
+    start = body->start;
+    if (tail > 0 && count < elems1) {
+        /* The array grew, so move the tail to the right. */
+        memmove(slots + start + offset + elems1,
+                slots + start + offset + count,
+                tail * sizeof (PMC *));
+    }
+
+    /* Now, copy from's elements into the array. */
+    if (elems1 > 0) {
+        PMC *iter = VTABLE_get_iter(interp, from);
+        INTVAL i;
+        for (i = 0; i < elems1; i++)
+            set_pos_pmc(slots, start + offset + i, VTABLE_shift_pmc(interp, iter));
+    }
+}
+
 /* Initializes the VMArray representation. */
 REPROps * VMArray_initialize(PARROT_INTERP) {
     /* Allocate and populate the representation function table. */
@@ -600,5 +682,6 @@ REPROps * VMArray_initialize(PARROT_INTERP) {
     this_repr->pos_funcs->unshift_boxed = unshift_boxed;
     this_repr->pos_funcs->shift_boxed = shift_boxed;
     this_repr->pos_funcs->set_elems = set_elems;
+    this_repr->pos_funcs->splice = splice;
     return this_repr;
 }

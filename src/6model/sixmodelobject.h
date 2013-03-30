@@ -278,6 +278,10 @@ typedef struct SixModel_REPROps_Positional {
 
     /* Set the number of elements in the array. */
     void (*set_elems) (PARROT_INTERP, STable *st, void *data, INTVAL n);
+
+    /* Splice from into the list at position offset, replacing count elements
+     * of the original list. */
+    void (*splice) (PARROT_INTERP, STable *st, void *data, PMC *from, INTVAL offset, INTVAL count);
     
     /* Gets the STable representing the declared element type. */
     STable * (*get_elem_stable) (PARROT_INTERP, STable *st);
