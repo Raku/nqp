@@ -200,8 +200,110 @@ PMC * hllize(PARROT_INTERP, PMC *obj, INTVAL hll_id) {
     
     /* Is the input type a 6model type? */
     if (obj->vtable->base_type == smo_id) {
-        /* XXX TODO: appropriate mapping. */
-        return obj;
+        /* Go by what role it plays. */
+        switch (STABLE(obj)->hll_role) {
+            case HLL_ROLE_INT:
+                if (VTABLE_exists_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_type_int"))) {
+                    PMC *type = VTABLE_get_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_type_int"));
+                    PMC *result = REPR(type)->allocate(interp, STABLE(type));
+                    REPR(result)->initialize(interp, STABLE(result), OBJECT_BODY(result));
+                    REPR(result)->box_funcs->set_int(interp, STABLE(result), OBJECT_BODY(result),
+                        REPR(obj)->box_funcs->get_int(interp, STABLE(obj), OBJECT_BODY(obj)));
+                    return result;
+                }
+                else if (VTABLE_exists_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_int"))) {
+                    PMC *result;
+                    PMC *code = VTABLE_get_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_int"));
+                    Parrot_ext_call(interp, code, "I->P",
+                        REPR(obj)->box_funcs->get_int(interp, STABLE(obj), OBJECT_BODY(obj)),
+                        &result);
+                    return result;
+                }
+                else {
+                    return obj;
+                }
+            case HLL_ROLE_NUM:
+                if (VTABLE_exists_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_type_num"))) {
+                    PMC *type = VTABLE_get_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_type_num"));
+                    PMC *result = REPR(type)->allocate(interp, STABLE(type));
+                    REPR(result)->initialize(interp, STABLE(result), OBJECT_BODY(result));
+                    REPR(result)->box_funcs->set_num(interp, STABLE(result), OBJECT_BODY(result),
+                        REPR(obj)->box_funcs->get_num(interp, STABLE(obj), OBJECT_BODY(obj)));
+                    return result;
+                }
+                else if (VTABLE_exists_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_num"))) {
+                    PMC *result;
+                    PMC *code = VTABLE_get_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_num"));
+                    Parrot_ext_call(interp, code, "N->P",
+                        REPR(obj)->box_funcs->get_num(interp, STABLE(obj), OBJECT_BODY(obj)),
+                        &result);
+                    return result;
+                }
+                else {
+                    return obj;
+                }
+            case HLL_ROLE_STR:
+                if (VTABLE_exists_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_type_str"))) {
+                    PMC *type = VTABLE_get_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_type_str"));
+                    PMC *result = REPR(type)->allocate(interp, STABLE(type));
+                    REPR(result)->initialize(interp, STABLE(result), OBJECT_BODY(result));
+                    REPR(result)->box_funcs->set_str(interp, STABLE(result), OBJECT_BODY(result),
+                        REPR(obj)->box_funcs->get_str(interp, STABLE(obj), OBJECT_BODY(obj)));
+                    PARROT_GC_WRITE_BARRIER(interp, result);
+                    return result;
+                }
+                else if (VTABLE_exists_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_str"))) {
+                    PMC *result;
+                    PMC *code = VTABLE_get_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_str"));
+                    Parrot_ext_call(interp, code, "S->P",
+                        REPR(obj)->box_funcs->get_str(interp, STABLE(obj), OBJECT_BODY(obj)),
+                        &result);
+                    return result;
+                }
+                else {
+                    return obj;
+                }
+            case HLL_ROLE_ARRAY:
+                if (VTABLE_exists_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_array"))) {
+                    PMC *result;
+                    PMC *code = VTABLE_get_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_array"));
+                    Parrot_ext_call(interp, code, "P->P", obj, &result);
+                    return result;
+                }
+                else {
+                    return obj;
+                }
+            case HLL_ROLE_HASH:
+                if (VTABLE_exists_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_hash"))) {
+                    PMC *result;
+                    PMC *code = VTABLE_get_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_hash"));
+                    Parrot_ext_call(interp, code, "P->P", obj, &result);
+                    return result;
+                }
+                else {
+                    return obj;
+                }
+            case HLL_ROLE_CODE:
+                if (VTABLE_exists_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_code"))) {
+                    PMC *result;
+                    PMC *code = VTABLE_get_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_code"));
+                    Parrot_ext_call(interp, code, "P->P", obj, &result);
+                    return result;
+                }
+                else {
+                    return obj;
+                }
+            default:
+                if (VTABLE_exists_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_any"))) {
+                    PMC *result;
+                    PMC *code = VTABLE_get_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_any"));
+                    Parrot_ext_call(interp, code, "P->P", obj, &result);
+                    return result;
+                }
+                else {
+                    return obj;
+                }
+        }
     }
     
     /* Otherwise, it's a Parrot type. */
