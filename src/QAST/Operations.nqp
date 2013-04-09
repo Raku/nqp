@@ -2046,12 +2046,7 @@ QAST::Operations.add_core_op('bindhllsym', -> $qastcomp, $op {
         $op[2]
     ))
 });
-QAST::Operations.add_core_op('sethllconfig', -> $qastcomp, $op {
-    # XXX Not really implemented here.
-    my $ops := PIRT::Ops.new();
-    $ops.result('0');
-    $ops
-});
+QAST::Operations.add_core_pirop_mapping('sethllconfig', 'sethllconfig', 'PsP');
 
 # regex engine related opcodes
 QAST::Operations.add_core_pirop_mapping('nfafromstatelist', 'nqp_nfa_from_statelist', 'PPP');

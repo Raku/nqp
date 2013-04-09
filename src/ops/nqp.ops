@@ -294,6 +294,26 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
     return fates;
 }
 
+static PMC *get_hll_config(PARROT_INTERP, STRING *hll) {
+    PMC *global_context = VTABLE_get_pmc_keyed_str(interp, interp->root_namespace,
+        Parrot_str_new_constant(interp, "_GLOBAL_CONTEXT"));
+    PMC *config = VTABLE_get_pmc_keyed_str(interp,
+        VTABLE_get_pmc_keyed_str(interp, global_context, Parrot_str_new_constant(interp, "hllConfig")),
+        hll);
+
+    if (PMC_IS_NULL(config)) {
+        config = Parrot_pmc_new(interp, enum_class_Hash);
+        /* TODO: Populate with initial values. */
+
+        VTABLE_set_pmc_keyed_str(interp,
+            VTABLE_get_pmc_keyed_str(interp, global_context, Parrot_str_new_constant(interp, "hllConfig")),
+            hll,
+            config);
+    }
+
+    return config;
+}
+
 /* Constants for values the type field above may have. */
 #define BIND_VAL_INT 1
 #define BIND_VAL_NUM 2
@@ -313,7 +333,7 @@ Does various setup tasks for the benefit of the other dynops.
 */
 inline op nqp_dynop_setup() :base_core {
     if (!initialized) {
-        PMC *obj_sc_barrier, *st_sc_barrier;
+        PMC *obj_sc_barrier, *st_sc_barrier, *global_context;
 
         /* Look up and cache some type IDs. */
         stable_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "STable", 0));
@@ -348,6 +368,14 @@ inline op nqp_dynop_setup() :base_core {
         /* Create and anchor empty hash. */
         empty_hash = Parrot_pmc_new(interp, enum_class_Hash);
         Parrot_pmc_gc_register(interp, empty_hash);
+        
+        /* Save the global context to the Parrot root namespace and store all the
+         * things we just created in it. */
+        global_context = Parrot_pmc_new(interp, enum_class_Hash);
+        VTABLE_set_pmc_keyed_str(interp, interp->root_namespace,
+            Parrot_str_new_constant(interp, "_GLOBAL_CONTEXT"), global_context);
+        VTABLE_set_pmc_keyed_str(interp, global_context,
+            Parrot_str_new_constant(interp, "hllConfig"), Parrot_pmc_new(interp, enum_class_Hash));
         
         /* Mark initialized. */
         initialized = 1;
@@ -2955,4 +2983,58 @@ inline op captureposprimspec(out INT, invar PMC, in INT) :base_core {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "captureposprimspec can only operate on a CallContext");
     }
+}
+
+inline op sethllconfig(out PMC, in STR, invar PMC) {
+    PMC *config = get_hll_config(interp, $2);
+
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "list"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "listType"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "list")));
+    }
+    
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_type_int"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_type_int"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_type_int")));
+    }
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_type_num"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_type_num"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_type_num")));
+    }
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_type_str"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_type_str"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_type_str")));
+    }
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_type_any"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_type_any"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_type_any")));
+    }
+    
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_int"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_int"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_int")));
+    }
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_num"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_num"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_num")));
+    }
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_str"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_str"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_str")));
+    }
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_array"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_array"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_array")));
+    }
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_hash"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_hash"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_hash")));
+    }
+    
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "null_value"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "null_value"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "null_value")));
+    }
+
+    $1 = config;
 }
