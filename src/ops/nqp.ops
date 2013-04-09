@@ -2985,10 +2985,6 @@ inline op nqp_sethllconfig(out PMC, in STR, invar PMC) {
         VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_type_str"),
             VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_type_str")));
     }
-    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_type_any"))) {
-        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_type_any"),
-            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_type_any")));
-    }
     
     if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_int"))) {
         VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_int"),
@@ -3009,6 +3005,14 @@ inline op nqp_sethllconfig(out PMC, in STR, invar PMC) {
     if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_hash"))) {
         VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_hash"),
             VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_hash")));
+    }
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_code"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_code"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_code")));
+    }
+    if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_any"))) {
+        VTABLE_set_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_any"),
+            VTABLE_get_pmc_keyed_str(interp, $3, Parrot_str_new_constant(interp, "foreign_transform_any")));
     }
     
     if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "null_value"))) {

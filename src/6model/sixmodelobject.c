@@ -291,6 +291,17 @@ PMC * hllize(PARROT_INTERP, PMC *obj, INTVAL hll_id) {
             return obj;
         }
     }
+    else if (obj->vtable->base_type == enum_class_Sub) {
+        if (VTABLE_exists_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_code")))  {
+            PMC *result;
+            PMC *code = VTABLE_get_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_code"));
+            Parrot_ext_call(interp, code, "P->P", obj, &result);
+            return result;
+        }
+        else {
+            return obj;
+        }
+    }
     else if (obj->vtable->base_type == enum_class_Null) {
         if (VTABLE_exists_keyed_str(interp, config, Parrot_str_new_constant(interp, "null_value")))
             return VTABLE_get_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "null_value"));
