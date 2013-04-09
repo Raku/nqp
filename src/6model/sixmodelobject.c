@@ -7,9 +7,12 @@
 #include "serialization_context.h"
 
 /* Cached type IDs. */
-static INTVAL stable_id = 0;
-static INTVAL smo_id    = 0;
-static INTVAL sc_id     = 0;
+static INTVAL stable_id    = 0;
+static INTVAL smo_id       = 0;
+static INTVAL sc_id        = 0;
+static INTVAL ownedrpa_id  = 0;
+static INTVAL qrpa_id      = 0;
+static INTVAL ownedhash_id = 0;
 
 /* Cached strings. */
 static STRING *find_method_str = NULL;
@@ -167,6 +170,136 @@ static INTVAL default_type_check (PARROT_INTERP, PMC *to_check, PMC *wanted) {
     
     /* If we get here, type check failed. */
     return 0;
+}
+
+/* Gets configuration hash for a HLL. */
+PMC * get_hll_config(PARROT_INTERP, STRING *hll) {
+    PMC *global_context = VTABLE_get_pmc_keyed_str(interp, interp->root_namespace,
+        Parrot_str_new_constant(interp, "_GLOBAL_CONTEXT"));
+    PMC *config = VTABLE_get_pmc_keyed_str(interp,
+        VTABLE_get_pmc_keyed_str(interp, global_context, Parrot_str_new_constant(interp, "hllConfig")),
+        hll);
+
+    if (PMC_IS_NULL(config)) {
+        config = Parrot_pmc_new(interp, enum_class_Hash);
+        /* TODO: Populate with initial values. */
+
+        VTABLE_set_pmc_keyed_str(interp,
+            VTABLE_get_pmc_keyed_str(interp, global_context, Parrot_str_new_constant(interp, "hllConfig")),
+            hll,
+            config);
+    }
+
+    return config;
+}
+
+/* Does a HLL interop transformation as needed. */
+PMC * hllize(PARROT_INTERP, PMC *obj, INTVAL hll_id) {
+    /* Look up HLL mapping information. */
+    PMC *config = get_hll_config(interp, Parrot_hll_get_HLL_name(interp, hll_id));
+    
+    /* Is the input type a 6model type? */
+    if (obj->vtable->base_type == smo_id) {
+        /* XXX TODO: appropriate mapping. */
+        return obj;
+    }
+    
+    /* Otherwise, it's a Parrot type. */
+    if (ownedrpa_id == 0)
+        ownedrpa_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "OwnedResizablePMCArray", 0));
+    if (qrpa_id == 0)
+        qrpa_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "QRPA", 0));
+    if (ownedhash_id == 0)
+        ownedhash_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "OwnedHash", 0));
+    if (obj->vtable->base_type == enum_class_String) {
+        if (VTABLE_exists_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_type_str"))) {
+            PMC *type = VTABLE_get_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_type_str"));
+            PMC *result = REPR(type)->allocate(interp, STABLE(type));
+            REPR(result)->initialize(interp, STABLE(result), OBJECT_BODY(result));
+            REPR(result)->box_funcs->set_str(interp, STABLE(result), OBJECT_BODY(result), VTABLE_get_string(interp, obj));
+            PARROT_GC_WRITE_BARRIER(interp, result);
+            return result;
+        }
+        else if (VTABLE_exists_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_str"))) {
+            PMC *result;
+            PMC *code = VTABLE_get_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_str"));
+            Parrot_ext_call(interp, code, "S->P", VTABLE_get_string(interp, obj), &result);
+            return result;
+        }
+        else {
+            return obj;
+        }
+    }
+    else if (obj->vtable->base_type == enum_class_Integer) {
+        if (VTABLE_exists_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_type_int"))) {
+            PMC *type = VTABLE_get_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_type_int"));
+            PMC *result = REPR(type)->allocate(interp, STABLE(type));
+            REPR(result)->initialize(interp, STABLE(result), OBJECT_BODY(result));
+            REPR(result)->box_funcs->set_int(interp, STABLE(result), OBJECT_BODY(result), VTABLE_get_integer(interp, obj));
+            return result;
+        }
+        else if (VTABLE_exists_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_int"))) {
+            PMC *result;
+            PMC *code = VTABLE_get_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_int"));
+            Parrot_ext_call(interp, code, "I->P", VTABLE_get_integer(interp, obj), &result);
+            return result;
+        }
+        else {
+            return obj;
+        }
+    }
+    else if (obj->vtable->base_type == enum_class_Float) {
+        if (VTABLE_exists_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_type_num"))) {
+            PMC *type = VTABLE_get_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_type_num"));
+            PMC *result = REPR(type)->allocate(interp, STABLE(type));
+            REPR(result)->initialize(interp, STABLE(result), OBJECT_BODY(result));
+            REPR(result)->box_funcs->set_num(interp, STABLE(result), OBJECT_BODY(result), VTABLE_get_number(interp, obj));
+            return result;
+        }
+        else if (VTABLE_exists_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_num"))) {
+            PMC *result;
+            PMC *code = VTABLE_get_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_num"));
+            Parrot_ext_call(interp, code, "N->P", VTABLE_get_number(interp, obj), &result);
+            return result;
+        }
+        else {
+            return obj;
+        }
+    }
+    else if (obj->vtable->base_type == enum_class_ResizablePMCArray
+         ||  obj->vtable->base_type == ownedrpa_id
+         ||  obj->vtable->base_type == qrpa_id) {
+        if (VTABLE_exists_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_array"))) {
+            PMC *result;
+            PMC *code = VTABLE_get_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_array"));
+            Parrot_ext_call(interp, code, "P->P", obj, &result);
+            return result;
+        }
+        else {
+            return obj;
+        }
+    }
+    else if (obj->vtable->base_type == enum_class_Hash
+         ||  obj->vtable->base_type == ownedhash_id) {
+        if (VTABLE_exists_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_hash"))) {
+            PMC *result;
+            PMC *code = VTABLE_get_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "foreign_transform_hash"));
+            Parrot_ext_call(interp, code, "P->P", obj, &result);
+            return result;
+        }
+        else {
+            return obj;
+        }
+    }
+    else if (obj->vtable->base_type == enum_class_Null) {
+        if (VTABLE_exists_keyed_str(interp, config, Parrot_str_new_constant(interp, "null_value")))
+            return VTABLE_get_pmc_keyed_str(interp, config, Parrot_str_new_constant(interp, "null_value"));
+        else
+            return obj;
+    }
+    else {
+        return obj;
+    }
 }
 
 /* Creates an STable that references the given REPR and HOW. */

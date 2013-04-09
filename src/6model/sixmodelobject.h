@@ -88,6 +88,15 @@ typedef struct {
 /* This flag is set if we consider the method cche authoritative. */
 #define METHOD_CACHE_AUTHORITATIVE     4
 
+/* HLL type roles. */
+#define HLL_ROLE_NONE       0
+#define HLL_ROLE_INT        1
+#define HLL_ROLE_NUM        2
+#define HLL_ROLE_STR        3
+#define HLL_ROLE_ARRAY      4
+#define HLL_ROLE_HASH       5
+#define HLL_ROLE_CODE       6
+
 /* S-Tables (short for Shared Table) contains the commonalities shared between
  * a (HOW, REPR) pairing (for example, (HOW for the class Dog, P6Opaque). */
 typedef struct SixModel_REPROps REPROps;
@@ -165,6 +174,12 @@ struct SixModel_STable {
     
     /* The PMC that wraps this s-table. */
     PMC *stable_pmc;
+    
+    /* The HLL that this type is owned by, if any. */
+    INTVAL hll_owner;
+    
+    /* The role that the type plays in the HLL, if any. */
+    INTVAL hll_role;
 };
 
 /* A representation is what controls the layout of an object and access and
@@ -420,6 +435,8 @@ void set_wrapping_object(PMC *wrapper);
 PMC * wrap_object(PARROT_INTERP, void *obj);
 PMC * create_stable(PARROT_INTERP, REPROps *REPR, PMC *HOW);
 PMC * decontainerize(PARROT_INTERP, PMC *var);
+PMC * get_hll_config(PARROT_INTERP, STRING *hll);
+PMC * hllize(PARROT_INTERP, PMC *obj, INTVAL hll_id);
 
 /* Dynamic representation registration. */
 typedef PMC * (*wrap_object_t)(PARROT_INTERP, void *obj);

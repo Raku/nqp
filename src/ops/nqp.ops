@@ -294,26 +294,6 @@ static INTVAL * nqp_nfa_run(PARROT_INTERP, NFABody *nfa, STRING *target, INTVAL 
     return fates;
 }
 
-static PMC *get_hll_config(PARROT_INTERP, STRING *hll) {
-    PMC *global_context = VTABLE_get_pmc_keyed_str(interp, interp->root_namespace,
-        Parrot_str_new_constant(interp, "_GLOBAL_CONTEXT"));
-    PMC *config = VTABLE_get_pmc_keyed_str(interp,
-        VTABLE_get_pmc_keyed_str(interp, global_context, Parrot_str_new_constant(interp, "hllConfig")),
-        hll);
-
-    if (PMC_IS_NULL(config)) {
-        config = Parrot_pmc_new(interp, enum_class_Hash);
-        /* TODO: Populate with initial values. */
-
-        VTABLE_set_pmc_keyed_str(interp,
-            VTABLE_get_pmc_keyed_str(interp, global_context, Parrot_str_new_constant(interp, "hllConfig")),
-            hll,
-            config);
-    }
-
-    return config;
-}
-
 /* Constants for values the type field above may have. */
 #define BIND_VAL_INT 1
 #define BIND_VAL_NUM 2
@@ -2985,7 +2965,7 @@ inline op captureposprimspec(out INT, invar PMC, in INT) :base_core {
     }
 }
 
-inline op sethllconfig(out PMC, in STR, invar PMC) {
+inline op nqp_sethllconfig(out PMC, in STR, invar PMC) {
     PMC *config = get_hll_config(interp, $2);
 
     if (VTABLE_exists_keyed_str(interp, $3, Parrot_str_new_constant(interp, "list"))) {
@@ -3037,4 +3017,37 @@ inline op sethllconfig(out PMC, in STR, invar PMC) {
     }
 
     $1 = config;
+}
+
+inline op nqp_settypehll(invar PMC, in STR) {
+    INTVAL hll_id = Parrot_hll_register_HLL(interp, $2);
+    STABLE($1)->hll_owner = hll_id;
+}
+
+inline op nqp_settypehllrole(invar PMC, in INT) {
+    STABLE($1)->hll_role = $2;
+}
+
+inline op nqp_hllize(out PMC, invar PMC) {
+    INTVAL obj_hll = $2->vtable->base_type == smo_id
+        ? STABLE($2)->hll_owner
+        : 0;
+    PMC *  cur_sub = Parrot_pcc_get_sub(interp, CURRENT_CONTEXT(interp));
+    INTVAL cur_hll;
+    GETATTR_Sub_HLL_id(interp, cur_sub, cur_hll);
+    if (obj_hll == cur_hll)
+        $1 = $2;
+    else
+        $1 = hllize(interp, $2, cur_hll);
+}
+
+inline op nqp_hllizefor(out PMC, invar PMC, in STR) {
+    INTVAL obj_hll = $2->vtable->base_type == smo_id
+        ? STABLE($2)->hll_owner
+        : 0;
+    INTVAL tgt_hll = Parrot_hll_register_HLL(interp, $3);
+    if (obj_hll == tgt_hll)
+        $1 = $2;
+    else
+        $1 = hllize(interp, $2, tgt_hll);
 }

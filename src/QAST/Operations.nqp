@@ -1119,7 +1119,14 @@ my %const_map := nqp::hash(
     'CCLASS_BLANK',         pir::const::CCLASS_BLANK,
     'CCLASS_CONTROL',       pir::const::CCLASS_CONTROL,
     'CCLASS_PUNCTUATION',   pir::const::CCLASS_PUNCTUATION,
-    'CCLASS_ALPHANUMERIC',  pir::const::CCLASS_ALPHANUMERIC
+    'CCLASS_ALPHANUMERIC',  pir::const::CCLASS_ALPHANUMERIC,
+    'HLL_ROLE_NONE',        0,
+    'HLL_ROLE_INT',         1,
+    'HLL_ROLE_NUM',         2,
+    'HLL_ROLE_STR',         3,
+    'HLL_ROLE_ARRAY',       4,
+    'HLL_ROLE_HASH',        5,
+    'HLL_ROLE_CODE',        6
 );
 QAST::Operations.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
@@ -2046,7 +2053,11 @@ QAST::Operations.add_core_op('bindhllsym', -> $qastcomp, $op {
         $op[2]
     ))
 });
-QAST::Operations.add_core_pirop_mapping('sethllconfig', 'sethllconfig', 'PsP');
+QAST::Operations.add_core_pirop_mapping('sethllconfig', 'nqp_sethllconfig', 'PsP');
+QAST::Operations.add_core_pirop_mapping('settypehll', 'nqp_settypehll', '0Ps');
+QAST::Operations.add_core_pirop_mapping('settypehllrole', 'nqp_settypehllrole', '0Pi');
+QAST::Operations.add_core_pirop_mapping('hllize', 'nqp_hllize', 'PP');
+QAST::Operations.add_core_pirop_mapping('hllizefor', 'nqp_hllizefor', 'PPs');
 
 # regex engine related opcodes
 QAST::Operations.add_core_pirop_mapping('nfafromstatelist', 'nqp_nfa_from_statelist', 'PPP');
