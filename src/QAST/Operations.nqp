@@ -1126,7 +1126,32 @@ my %const_map := nqp::hash(
     'HLL_ROLE_STR',         3,
     'HLL_ROLE_ARRAY',       4,
     'HLL_ROLE_HASH',        5,
-    'HLL_ROLE_CODE',        6
+    'HLL_ROLE_CODE',        6,
+
+    'STAT_EXISTS',             pir::const::STAT_EXISTS,
+    'STAT_FILESIZE',           pir::const::STAT_FILESIZE,
+    'STAT_ISDIR',              pir::const::STAT_ISDIR,
+    'STAT_ISREG',              pir::const::STAT_ISREG,
+    'STAT_ISDEV',              pir::const::STAT_ISDEV,
+    'STAT_CREATETIME',         pir::const::STAT_CREATETIME,
+    'STAT_ACCESSTIME',         pir::const::STAT_ACCESSTIME,
+    'STAT_MODIFYTIME',         pir::const::STAT_MODIFYTIME,
+    'STAT_CHANGETIME',         pir::const::STAT_CHANGETIME,
+    'STAT_BACKUPTIME',         pir::const::STAT_BACKUPTIME,
+    'STAT_PLATFORM_DEV',       pir::const::STAT_PLATFORM_DEV,
+    'STAT_PLATFORM_INODE',     pir::const::STAT_PLATFORM_INODE,
+    'STAT_PLATFORM_MODE',      pir::const::STAT_PLATFORM_MODE,
+    'STAT_PLATFORM_NLINKS',    pir::const::STAT_PLATFORM_NLINKS,
+    'STAT_PLATFORM_DEVTYPE',   pir::const::STAT_PLATFORM_DEVTYPE,
+    'STAT_PLATFORM_BLOCKSIZE', pir::const::STAT_PLATFORM_BLOCKSIZE,
+    'STAT_PLATFORM_BLOCKS',    pir::const::STAT_PLATFORM_BLOCKS,
+
+    'STAT_TYPE_UNKNOWN',       pir::const::STAT_TYPE_UNKNOWN,
+    'STAT_TYPE_FILE',          pir::const::STAT_TYPE_FILE,
+    'STAT_TYPE_DIRECTORY',     pir::const::STAT_TYPE_DIRECTORY,
+    'STAT_TYPE_PIPE',          pir::const::STAT_TYPE_PIPE,
+    'STAT_TYPE_LINK',          pir::const::STAT_TYPE_LINK,
+    'STAT_TYPE_DEVICE',        pir::const::STAT_TYPE_DEVICE
 );
 QAST::Operations.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
