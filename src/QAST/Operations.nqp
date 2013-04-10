@@ -1584,6 +1584,98 @@ QAST::Operations.add_core_op('closefh', -> $qastcomp, $op {
     ))
 });
 
+QAST::Operations.add_core_op('chmod', -> $qastcomp, $op {
+    if +$op.list != 2 {
+        nqp::die("The 'chmod' op expects two operands");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'),
+        :name('chmod'),
+        QAST::VM.new( :pirop('new__Ps'),
+                      QAST::SVal.new( :value('OS') ) ),
+        $op[0],
+        $op[1]) );
+});
+QAST::Operations.add_core_op('unlink', -> $qastcomp, $op {
+    if +$op.list != 1 {
+        nqp::die("The 'unlink' op expects one operand");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'),
+        :name('unlink'),
+        QAST::VM.new( :pirop('new__Ps'),
+                      QAST::SVal.new( :value('OS') ) ),
+        $op[0] ) );
+});
+QAST::Operations.add_core_op('rmdir', -> $qastcomp, $op {
+    if +$op.list != 1 {
+        nqp::die("The 'rmdir' op expects one operand");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'),
+        :name('rmdir'),
+        QAST::VM.new( :pirop('new__Ps'),
+                      QAST::SVal.new( :value('OS') ) ),
+        $op[0] ) );
+});
+QAST::Operations.add_core_op('cwd', -> $qastcomp, $op {
+    if +$op.list != 0 {
+        nqp::die("The 'cwd' op expects no operands");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'),
+        :name('cwd'),
+        QAST::VM.new( :pirop('new__Ps'),
+                      QAST::SVal.new( :value('OS') ) ) ) );
+});
+QAST::Operations.add_core_op('chdir', -> $qastcomp, $op {
+    if +$op.list != 1 {
+        nqp::die("The 'chdir' op expects one operand");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'),
+        :name('chdir'),
+        QAST::VM.new( :pirop('new__Ps'),
+                      QAST::SVal.new( :value('OS') ) ),
+        $op[0] ) );
+});
+QAST::Operations.add_core_op('mkdir', -> $qastcomp, $op {
+    if +$op.list != 2 {
+        nqp::die("The 'mkdir' op expects two operands");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'),
+        :name('mkdir'),
+        QAST::VM.new( :pirop('new__Ps'),
+                      QAST::SVal.new( :value('OS') ) ),
+        $op[0],
+        $op[1]) );
+});
+QAST::Operations.add_core_op('rename', -> $qastcomp, $op {
+    if +$op.list != 2 {
+        nqp::die("The 'rename' op expects two operands");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'),
+        :name('rename'),
+        QAST::VM.new( :pirop('new__Ps'),
+                      QAST::SVal.new( :value('OS') ) ),
+        $op[0],
+        $op[1]) );
+});
+QAST::Operations.add_core_op('copy', -> $qastcomp, $op {
+    if +$op.list != 2 {
+        nqp::die("The 'copy' op expects two operands");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'),
+        :name('copy'),
+        QAST::VM.new( :pirop('new__Ps'),
+                      QAST::SVal.new( :value('OS') ) ),
+        $op[0],
+        $op[1]) );
+});
+
 # terms
 QAST::Operations.add_core_pirop_mapping('time_i', 'time', 'I', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('time_n', 'time', 'N', :inlinable(1));
