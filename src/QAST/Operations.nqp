@@ -1684,6 +1684,19 @@ QAST::Operations.add_core_pirop_mapping('findnotcclass', 'find_not_cclass', 'Iis
 QAST::Operations.add_core_pirop_mapping('sprintf', 'sprintf', 'SsP', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('escape', 'escape', 'Ss', :inlinable(1));
 
+QAST::Operations.add_core_op('flip', :inlinable(1), -> $qastcomp, $op {
+    if +@($op) != 1 {
+        nqp::die('flip requires one operand');
+    }
+    $qastcomp.as_post(
+        QAST::VM.new( :pirop('set__SP'),
+                      QAST::Op.new( :op('callmethod'),
+                                    :name('reverse'),
+                                    QAST::VM.new( :pirop('box__PS'), $op[0] ) ) )
+                    );
+});
+
+
 # substr can take 2 or 3 args, so needs special handling.
 QAST::Operations.add_core_pirop_mapping('substr2', 'substr', 'Ssi', :inlinable(1));
 QAST::Operations.add_core_pirop_mapping('substr3', 'substr', 'Ssii', :inlinable(1));

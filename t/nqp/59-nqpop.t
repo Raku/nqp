@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(123);
+plan(124);
 
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
@@ -24,6 +24,7 @@ ok( nqp::chr(120) eq 'x', 'nqp::chr');
 ok( nqp::ord('xyz') eq 120, 'nqp::ord');
 ok( nqp::lc('Hello World') eq 'hello world', 'nqp::downcase');
 ok( nqp::uc("Don't Panic") eq "DON'T PANIC", 'nqp::upcase');
+ok( nqp::flip("foo") eq "oof", "nqp::flip");
 
 my @items := nqp::split(' ', 'a little lamb');
 ok( nqp::elems(@items) == 3 && @items[0] eq 'a' && @items[1] eq 'little' && @items[2] eq 'lamb', 'nqp::split');
