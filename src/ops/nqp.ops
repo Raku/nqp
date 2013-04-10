@@ -1728,11 +1728,15 @@ into $1.
 
 */
 inline op get_sub_code_object(out PMC, invar PMC) :base_core {
-    if ($2->vtable->base_type == enum_class_Sub)
-        GETATTR_Sub_multi_signature(interp, $2, $1);
-    else
+    if ($2->vtable->base_type == enum_class_Sub) {
+        PMC *obj;
+        GETATTR_Sub_multi_signature(interp, $2, obj);
+        $1 = obj ? obj : PMCNULL;
+    }
+    else {
         Parrot_ex_throw_from_c_args(interp, NULL, EXCEPTION_INVALID_OPERATION,
             "Can only use get_sub_code_object if second operand is a Sub.");
+    }
 }
 
 
