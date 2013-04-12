@@ -1671,7 +1671,7 @@ QAST::Operations.add_core_op('copy', -> $qastcomp, $op {
         :op('callmethod'),
         :name('copy'),
         QAST::VM.new( :pirop('new__Ps'),
-                      QAST::SVal.new( :value('OS') ) ),
+                      QAST::SVal.new( :value('File') ) ),
         $op[0],
         $op[1]) );
 });
