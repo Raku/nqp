@@ -1676,6 +1676,30 @@ QAST::Operations.add_core_op('copy', -> $qastcomp, $op {
         $op[0],
         $op[1]) );
 });
+QAST::Operations.add_core_op('symlink', -> $qastcomp, $op {
+    if +$op.list != 2 {
+        nqp::die("The 'symlink' op expects two operands");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'),
+        :name('symlink'),
+        QAST::VM.new( :pirop('new__Ps'),
+                      QAST::SVal.new( :value('OS') ) ),
+        $op[0],
+        $op[1]) );
+});
+QAST::Operations.add_core_op('link', -> $qastcomp, $op {
+    if +$op.list != 2 {
+        nqp::die("The 'link' op expects two operands");
+    }
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'),
+        :name('link'),
+        QAST::VM.new( :pirop('new__Ps'),
+                      QAST::SVal.new( :value('OS') ) ),
+        $op[0],
+        $op[1]) );
+});
 
 # terms
 QAST::Operations.add_core_pirop_mapping('time_i', 'time', 'I', :inlinable(1));
