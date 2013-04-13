@@ -33,8 +33,7 @@ knowhow RoleToClassApplier {
 
         # Collisions?
         my @collisions := $to_compose_meta.collisions($to_compose);
-        for @collisions {
-            my $name := nqp::can($_, 'name') ?? $_.name !! nqp::getcodename($_);
+        for @collisions -> $name {
             unless has_method($target, $name, 1) {
                 nqp::die("Method '$name' collides and a resolution must be provided by the class '" ~
                     $target.HOW.name($target) ~ "'");
