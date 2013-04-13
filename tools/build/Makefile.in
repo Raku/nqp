@@ -55,6 +55,7 @@ OPS_DIR          = src/vm/parrot/ops
 HLL_SOURCES = \
   src/HLL/Grammar.nqp \
   src/HLL/Actions.nqp \
+  src/vm/parrot/HLL/Backend.nqp \
   src/HLL/Compiler.nqp \
   src/HLL/CommandLine.nqp \
   src/HLL/World.nqp \
