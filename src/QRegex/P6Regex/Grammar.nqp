@@ -71,9 +71,11 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     rule arglist { <arg> [ ',' <arg>]* }
 
+    my $cur_handle := 0;
     token TOP {
         :my %*RX;
-        :my $*W := QRegex::P6Regex::World.new(:handle(nqp::sha1(self.target)));
+        :my $handle := '__QREGEX_P6REGEX__' ~ $cur_handle++;
+        :my $*W := QRegex::P6Regex::World.new(:$handle);
         <nibbler>
         [ $ || <.panic: 'Confused'> ]
     }
