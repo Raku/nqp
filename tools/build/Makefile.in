@@ -49,8 +49,8 @@ LINKARGS          = $(LDFLAGS) $(LD_LOAD_FLAGS) $(LIBPARROT) @libs@ @icu_shared@
 
 # nqp directories
 DYNEXT_DIR       = dynext
-PMC_DIR          = src/pmc
-OPS_DIR          = src/ops
+PMC_DIR          = src/vm/parrot/pmc
+OPS_DIR          = src/vm/parrot/ops
 
 HLL_SOURCES = \
   src/HLL/Grammar.nqp \
@@ -206,24 +206,24 @@ DYNPMC_HEADERS  = $(PMC_DIR)/pmc_stable.h $(PMC_DIR)/pmc_sixmodelobject.h \
 
 OPS_SOURCE      = nqp.ops
 
-METAMODEL_SOURCE = src/6model/sixmodelobject.h src/6model/sixmodelobject.c \
-                   src/6model/repr_registry.h src/6model/repr_registry.c \
-                   src/6model/knowhow_bootstrapper.h src/6model/knowhow_bootstrapper.c \
-                   src/6model/reprs/KnowHOWREPR.h src/6model/reprs/KnowHOWREPR.c \
-                   src/6model/reprs/P6opaque.h src/6model/reprs/P6opaque.c \
-                   src/6model/reprs/P6int.h src/6model/reprs/P6int.c \
-                   src/6model/reprs/P6str.h src/6model/reprs/P6str.c \
-                   src/6model/reprs/P6num.h src/6model/reprs/P6num.c \
-                   src/6model/reprs/HashAttrStore.h src/6model/reprs/HashAttrStore.c \
-                   src/6model/reprs/Uninstantiable.h src/6model/reprs/Uninstantiable.c \
-                   src/6model/reprs/NFA.h src/6model/reprs/NFA.c \
-                   src/6model/reprs/VMArray.h src/6model/reprs/VMArray.c \
-                   src/6model/reprs/VMHash.h src/6model/reprs/VMHash.c \
-                   src/6model/reprs/VMIter.h src/6model/reprs/VMIter.c \
-                   src/6model/storage_spec.h src/6model/serialization_context.c \
-                   src/6model/serialization_context.h src/6model/serialization.c \
-                   src/6model/serialization.h src/guts/multi_dispatch.h \
-                   src/guts/multi_dispatch.c src/6model/base64.c src/6model/base64.h \
+METAMODEL_SOURCE = src/vm/parrot/6model/sixmodelobject.h src/vm/parrot/6model/sixmodelobject.c \
+                   src/vm/parrot/6model/repr_registry.h src/vm/parrot/6model/repr_registry.c \
+                   src/vm/parrot/6model/knowhow_bootstrapper.h src/vm/parrot/6model/knowhow_bootstrapper.c \
+                   src/vm/parrot/6model/reprs/KnowHOWREPR.h src/vm/parrot/6model/reprs/KnowHOWREPR.c \
+                   src/vm/parrot/6model/reprs/P6opaque.h src/vm/parrot/6model/reprs/P6opaque.c \
+                   src/vm/parrot/6model/reprs/P6int.h src/vm/parrot/6model/reprs/P6int.c \
+                   src/vm/parrot/6model/reprs/P6str.h src/vm/parrot/6model/reprs/P6str.c \
+                   src/vm/parrot/6model/reprs/P6num.h src/vm/parrot/6model/reprs/P6num.c \
+                   src/vm/parrot/6model/reprs/HashAttrStore.h src/vm/parrot/6model/reprs/HashAttrStore.c \
+                   src/vm/parrot/6model/reprs/Uninstantiable.h src/vm/parrot/6model/reprs/Uninstantiable.c \
+                   src/vm/parrot/6model/reprs/NFA.h src/vm/parrot/6model/reprs/NFA.c \
+                   src/vm/parrot/6model/reprs/VMArray.h src/vm/parrot/6model/reprs/VMArray.c \
+                   src/vm/parrot/6model/reprs/VMHash.h src/vm/parrot/6model/reprs/VMHash.c \
+                   src/vm/parrot/6model/reprs/VMIter.h src/vm/parrot/6model/reprs/VMIter.c \
+                   src/vm/parrot/6model/storage_spec.h src/vm/parrot/6model/serialization_context.c \
+                   src/vm/parrot/6model/serialization_context.h src/vm/parrot/6model/serialization.c \
+                   src/vm/parrot/6model/serialization.h src/vm/parrot/guts/multi_dispatch.h \
+                   src/vm/parrot/guts/multi_dispatch.c src/vm/parrot/6model/base64.c src/vm/parrot/6model/base64.h \
 
 METAMODEL_OBJS   = ../6model/sixmodelobject$(O) ../6model/repr_registry$(O) \
                    ../6model/knowhow_bootstrapper$(O) ../6model/reprs/KnowHOWREPR$(O) \
@@ -533,10 +533,19 @@ CLEANUPS = \
   $(OPS_DIR)/*.c \
   $(OPS_DIR)/*$(O) \
   $(OPS_DIR)/*$(LOAD_EXT) \
+  $(OPS_DIR)/*.exp \
+  $(OPS_DIR)/*.lib \
+  $(OPS_DIR)/*.pdb \
   3rdparty/libtommath/*$(O) \
   3rdparty/sha1/*$(O) \
   $(DYNEXT_DIR)/*$(LOAD_EXT) \
   $(NQP_CONST_PIR) \
+  src/vm/parrot/guts/*$(O) \
+  src/vm/parrot/guts/*.pdb \
+  src/vm/parrot/6model/*$(O) \
+  src/vm/parrot/6model/*.pdb \
+  src/vm/parrot/6model/reprs/*$(O) \
+  src/vm/parrot/6model/reprs/*.pdb \
 
 all: $(NQP_EXE) $(P5QREGEX_PBC)
 
@@ -778,32 +787,32 @@ $(DYNPMC): $(PMC_SOURCES) $(METAMODEL_SOURCE)
 	$(PMC2C) --no-lines --c $(PMC2C_INCLUDES) $(PMC_SOURCES)
 	$(PMC2C) --no-lines --library $(GROUP) --c $(PMC_SOURCES)
 	$(CC) -c @cc_o_out@$(GROUP)$(O) -I$(PMC_DIR) $(CINCLUDES) $(CFLAGS) $(GROUP).c
-	cd $(PMC_DIR) && $(CC) -c $(CINCLUDES) -I../../3rdparty/libtommath $(CFLAGS) *.c
-	$(LD) @ld_out@$(DYNPMC) $(GROUP)$(O) src/pmc/*$(O) $(LINKARGS)
+	cd $(PMC_DIR) && $(CC) -c $(CINCLUDES) -I../../../../3rdparty/libtommath $(CFLAGS) *.c
+	$(LD) @ld_out@$(DYNPMC) $(GROUP)$(O) src/vm/parrot/pmc/*$(O) $(LINKARGS)
 
 $(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS_SOURCE) $(DYNPMC)
 	cd $(OPS_DIR) && $(OPS2C) C --dynamic $(OPS_SOURCE)
 	cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(OPS)$(O) $(CINCLUDES) $(CFLAGS) $(OPS).c
-	cd src/6model && $(CC) -c @cc_o_out@sixmodelobject$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) sixmodelobject.c
-	cd src/6model && $(CC) -c @cc_o_out@repr_registry$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) repr_registry.c
-	cd src/6model && $(CC) -c @cc_o_out@knowhow_bootstrapper$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) knowhow_bootstrapper.c
-	cd src/6model/reprs && $(CC) -c @cc_o_out@KnowHOWREPR$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) KnowHOWREPR.c
-	cd src/6model/reprs && $(CC) -c @cc_o_out@P6opaque$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6opaque.c
-	cd src/6model/reprs && $(CC) -c @cc_o_out@P6int$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6int.c
-	cd src/6model/reprs && $(CC) -c @cc_o_out@P6str$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6str.c
-	cd src/6model/reprs && $(CC) -c @cc_o_out@P6num$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6num.c
-	cd src/6model/reprs && $(CC) -c @cc_o_out@HashAttrStore$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) HashAttrStore.c
-	cd src/6model/reprs && $(CC) -c @cc_o_out@Uninstantiable$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) Uninstantiable.c
-	cd src/6model/reprs && $(CC) -c @cc_o_out@NFA$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) NFA.c
-	cd src/6model/reprs && $(CC) -c @cc_o_out@VMArray$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) VMArray.c
-	cd src/6model/reprs && $(CC) -c @cc_o_out@VMHash$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) VMHash.c
-	cd src/6model/reprs && $(CC) -c @cc_o_out@VMIter$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) VMIter.c
-	cd src/6model && $(CC) -c @cc_o_out@serialization_context$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) serialization_context.c
-	cd src/6model && $(CC) -c @cc_o_out@serialization$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) serialization.c
-	cd src/6model && $(CC) -c @cc_o_out@base64$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) base64.c
-	cd src/guts && $(CC) -c @cc_o_out@multi_dispatch$(O) -I../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) multi_dispatch.c
+	cd src/vm/parrot/6model && $(CC) -c @cc_o_out@sixmodelobject$(O) -I../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) sixmodelobject.c
+	cd src/vm/parrot/6model && $(CC) -c @cc_o_out@repr_registry$(O) -I../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) repr_registry.c
+	cd src/vm/parrot/6model && $(CC) -c @cc_o_out@knowhow_bootstrapper$(O) -I../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) knowhow_bootstrapper.c
+	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@KnowHOWREPR$(O) -I../../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) KnowHOWREPR.c
+	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@P6opaque$(O) -I../../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6opaque.c
+	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@P6int$(O) -I../../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6int.c
+	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@P6str$(O) -I../../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6str.c
+	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@P6num$(O) -I../../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) P6num.c
+	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@HashAttrStore$(O) -I../../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) HashAttrStore.c
+	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@Uninstantiable$(O) -I../../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) Uninstantiable.c
+	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@NFA$(O) -I../../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) NFA.c
+	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@VMArray$(O) -I../../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) VMArray.c
+	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@VMHash$(O) -I../../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) VMHash.c
+	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@VMIter$(O) -I../../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) VMIter.c
+	cd src/vm/parrot/6model && $(CC) -c @cc_o_out@serialization_context$(O) -I../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) serialization_context.c
+	cd src/vm/parrot/6model && $(CC) -c @cc_o_out@serialization$(O) -I../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) serialization.c
+	cd src/vm/parrot/6model && $(CC) -c @cc_o_out@base64$(O) -I../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) base64.c
+	cd src/vm/parrot/guts && $(CC) -c @cc_o_out@multi_dispatch$(O) -I../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) multi_dispatch.c
 	cd 3rdparty/sha1 && $(CC) -c @cc_o_out@sha1$(O) $(CINCLUDES) $(CFLAGS) sha1.c
-	cd $(OPS_DIR) && $(LD) @ld_out@$(OPS)$(LOAD_EXT) $(OPS)$(O) $(METAMODEL_OBJS) ../../3rdparty/sha1/sha1$(O) $(LINKARGS)
+	cd $(OPS_DIR) && $(LD) @ld_out@$(OPS)$(LOAD_EXT) $(OPS)$(O) $(METAMODEL_OBJS) ../../../../3rdparty/sha1/sha1$(O) $(LINKARGS)
 
 
 3rdparty/libtommath/bncore$(O): 3rdparty/libtommath/bncore.c $(LIBTOMMATH_H)
@@ -1049,24 +1058,24 @@ $(OPS_DIR)/$(OPS)$(LOAD_EXT): $(OPS_DIR)/$(OPS_SOURCE) $(DYNPMC)
 3rdparty/libtommath/bn_s_mp_sub$(O): 3rdparty/libtommath/bn_s_mp_sub.c $(LIBTOMMATH_H)
 	cd 3rdparty/libtommath && $(CC) -c @cc_o_out@bn_s_mp_sub$(O) -I. $(CFLAGS) bn_s_mp_sub.c
 
-$(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT): $(OPS_DIR)/$(BIGINT_OPS_SOURCE) $(LIBTOMMATH_BIN) $(LIBTOMMATH_H) src/6model/reprs/P6bigint.h src/6model/reprs/P6bigint.c
+$(OPS_DIR)/$(BIGINT_OPS)$(LOAD_EXT): $(OPS_DIR)/$(BIGINT_OPS_SOURCE) $(LIBTOMMATH_BIN) $(LIBTOMMATH_H) src/vm/parrot/6model/reprs/P6bigint.h src/vm/parrot/6model/reprs/P6bigint.c
 	cd $(OPS_DIR) && $(OPS2C) C --dynamic $(BIGINT_OPS_SOURCE)
-	cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(BIGINT_OPS)$(O) $(CINCLUDES) -I../../3rdparty/libtommath $(CFLAGS) $(BIGINT_OPS).c
-	cd src/6model/reprs && $(CC) -c @cc_o_out@P6bigint$(O) -I../../../$(PMC_DIR) -I../../../3rdparty/libtommath $(CINCLUDES) $(CFLAGS) P6bigint.c
-	cd $(OPS_DIR) && $(LD) @ld_out@$(BIGINT_OPS)$(LOAD_EXT) $(BIGINT_OPS)$(O) ../../3rdparty/libtommath/*$(O) ../6model/reprs/P6bigint$(O) $(LINKARGS)
+	cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(BIGINT_OPS)$(O) $(CINCLUDES) -I../../../../3rdparty/libtommath $(CFLAGS) $(BIGINT_OPS).c
+	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@P6bigint$(O) -I../../../../../../$(PMC_DIR) -I../../../../../3rdparty/libtommath $(CINCLUDES) $(CFLAGS) P6bigint.c
+	cd $(OPS_DIR) && $(LD) @ld_out@$(BIGINT_OPS)$(LOAD_EXT) $(BIGINT_OPS)$(O) ../../../../3rdparty/libtommath/*$(O) ../6model/reprs/P6bigint$(O) $(LINKARGS)
 
 $(DYNCALL_BIN):
 	@dyncall_build@
 
-$(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT): $(OPS_DIR)/$(DYNCALL_OPS_SOURCE) $(DYNCALL_BIN) src/6model/reprs/NativeCall.c src/6model/reprs/NativeCall.h src/6model/reprs/CStruct.c src/6model/reprs/CStruct.h src/6model/reprs/CPointer.c src/6model/reprs/CPointer.h src/6model/reprs/CArray.c src/6model/reprs/CArray.h src/6model/reprs/CStr.c src/6model/reprs/CStr.h
+$(OPS_DIR)/$(DYNCALL_OPS)$(LOAD_EXT): $(OPS_DIR)/$(DYNCALL_OPS_SOURCE) $(DYNCALL_BIN) src/vm/parrot/6model/reprs/NativeCall.c src/vm/parrot/6model/reprs/NativeCall.h src/vm/parrot/6model/reprs/CStruct.c src/vm/parrot/6model/reprs/CStruct.h src/vm/parrot/6model/reprs/CPointer.c src/vm/parrot/6model/reprs/CPointer.h src/vm/parrot/6model/reprs/CArray.c src/vm/parrot/6model/reprs/CArray.h src/vm/parrot/6model/reprs/CStr.c src/vm/parrot/6model/reprs/CStr.h
 	cd $(OPS_DIR) && $(OPS2C) C --dynamic $(DYNCALL_OPS_SOURCE)
-	cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(DYNCALL_OPS)$(O) $(CINCLUDES) -I../../3rdparty/dyncall/dyncall -I../../3rdparty/dyncall/dyncallback -I../../3rdparty/dyncall/dynload $(CFLAGS) $(DYNCALL_OPS).c
-	cd src/6model/reprs && $(CC) -c @cc_o_out@NativeCall$(O) -I../../../$(PMC_DIR) -I../../../3rdparty/dyncall/dyncall -I../../../3rdparty/dyncall/dyncallback -I../../../3rdparty/dyncall/dynload $(CINCLUDES) $(CFLAGS) NativeCall.c
-	cd src/6model/reprs && $(CC) -c @cc_o_out@CStruct$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) CStruct.c
-	cd src/6model/reprs && $(CC) -c @cc_o_out@CPointer$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) CPointer.c
-	cd src/6model/reprs && $(CC) -c @cc_o_out@CArray$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) CArray.c
-	cd src/6model/reprs && $(CC) -c @cc_o_out@CStr$(O) -I../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) CStr.c
-	cd $(OPS_DIR) && $(LD) @ld_out@$(DYNCALL_OPS)$(LOAD_EXT) $(DYNCALL_OPS)$(O) ../6model/reprs/NativeCall$(O) ../6model/reprs/CStruct$(O) ../6model/reprs/CPointer$(O) ../6model/reprs/CArray$(O) ../6model/reprs/CStr$(O) ../../3rdparty/dyncall/dyncall/libdyncall_s$(A) ../../3rdparty/dyncall/dyncallback/libdyncallback_s$(A) ../../3rdparty/dyncall/dynload/libdynload_s$(A) $(LINKARGS)
+	cd $(OPS_DIR) && $(CC) -c @cc_o_out@$(DYNCALL_OPS)$(O) $(CINCLUDES) -I../../../../3rdparty/dyncall/dyncall -I../../../../3rdparty/dyncall/dyncallback -I../../../../3rdparty/dyncall/dynload $(CFLAGS) $(DYNCALL_OPS).c
+	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@NativeCall$(O) -I../../../../../../../$(PMC_DIR) -I../../../../../3rdparty/dyncall/dyncall -I../../../../../3rdparty/dyncall/dyncallback -I../../../../../3rdparty/dyncall/dynload $(CINCLUDES) $(CFLAGS) NativeCall.c
+	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@CStruct$(O) -I../../../../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) CStruct.c
+	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@CPointer$(O) -I../../../../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) CPointer.c
+	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@CArray$(O) -I../../../../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) CArray.c
+	cd src/vm/parrot/6model/reprs && $(CC) -c @cc_o_out@CStr$(O) -I../../../../../../../$(PMC_DIR) $(CINCLUDES) $(CFLAGS) CStr.c
+	cd $(OPS_DIR) && $(LD) @ld_out@$(DYNCALL_OPS)$(LOAD_EXT) $(DYNCALL_OPS)$(O) ../6model/reprs/NativeCall$(O) ../6model/reprs/CStruct$(O) ../6model/reprs/CPointer$(O) ../6model/reprs/CArray$(O) ../6model/reprs/CStr$(O) ../../../../3rdparty/dyncall/dyncall/libdyncall_s$(A) ../../../../3rdparty/dyncall/dyncallback/libdyncallback_s$(A) ../../../../3rdparty/dyncall/dynload/libdynload_s$(A) $(LINKARGS)
 
 $(NQP_CONST_PIR):
 	perl tools/build/generate-constants.pl > $@

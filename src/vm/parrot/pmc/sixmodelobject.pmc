@@ -28,7 +28,7 @@
 
 /* We need to know how to boolify bigints. Really need something better,
  * but this will do for now. */
-#include "../../3rdparty/libtommath/tommath.h"
+#include "../../../../3rdparty/libtommath/tommath.h"
 #include "../6model/reprs/P6bigint.h"
 #define bigint_repr_id 11
 
