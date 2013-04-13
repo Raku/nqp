@@ -26,7 +26,7 @@ my class NQPMu {
                 # See if we have a value to initialize this attr with.
                 my $key_name := nqp::atpos($task, 2);
                 if nqp::existskey(%attrinit, $key_name) {
-                    nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos_s($task, 3), %attrinit{$key_name});
+                    nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos($task, 3), %attrinit{$key_name});
                 }
             }
             elsif nqp::iseq_i($code, 2) {
@@ -34,21 +34,21 @@ my class NQPMu {
                 # if not, set it to an empty array.
                 my $key_name := nqp::atpos($task, 2);
                 if nqp::existskey(%attrinit, $key_name) {
-                    nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos_s($task, 3), %attrinit{$key_name});
+                    nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos($task, 3), %attrinit{$key_name});
                 }
                 else {
-                    nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos_s($task, 3), nqp::list());
+                    nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos($task, 3), nqp::list());
                 }
             }
             elsif nqp::iseq_i($code, 3) {
                 # See if we have a value to initialize this attr with;
-                # if not, set it to an empty hash.
+                # if not, set it to an empty array.
                 my $key_name := nqp::atpos($task, 2);
                 if nqp::existskey(%attrinit, $key_name) {
-                    nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos_s($task, 3), %attrinit{$key_name});
+                    nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos($task, 3), %attrinit{$key_name});
                 }
                 else {
-                    nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos_s($task, 3), nqp::hash());
+                    nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos($task, 3), nqp::hash());
                 }
             }
             elsif nqp::iseq_i($code, 4) {

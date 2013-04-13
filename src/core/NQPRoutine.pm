@@ -276,7 +276,7 @@ my knowhow NQPRoutine {
                 my $param_type := pir::what_or_null__PP($param); # Parrot hack; just .WHAT on JVM etc.
                 my $type_obj := $cur_candidate<types>[$i];
                 my $definedness := $cur_candidate<definednesses>[$i];
-                unless nqp::eqaddr($param_type, $type_obj) || is_narrower_type($param_type, $type_obj) {
+                unless nqp::eqaddr($param_type, $type_obj) || nqp::isnull($type_obj) || is_narrower_type($param_type, $type_obj) {
                     $type_mismatch := 1;
                     last;
                 }
@@ -348,8 +348,6 @@ my knowhow NQPRoutine {
 }
 nqp::setinvokespec(NQPRoutine, NQPRoutine, '$!do', nqp::null);
 nqp::setboolspec(NQPRoutine, 5, nqp::null());
-pir::stable_publish_vtable_handler_mapping__vPP(NQPRoutine,
-    nqp::hash('get_string', nqp::list(NQPRoutine, '$!do')));
 
 my knowhow NQPSignature {
     has $!types;
@@ -439,5 +437,3 @@ my knowhow NQPRegex {
 }
 nqp::setinvokespec(NQPRegex, NQPRegex, '$!do', nqp::null);
 nqp::setboolspec(NQPRegex, 5, nqp::null());
-pir::stable_publish_vtable_handler_mapping__vPP(NQPRegex,
-    nqp::hash('get_string', nqp::list(NQPRegex, '$!do')));

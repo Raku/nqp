@@ -14,7 +14,7 @@ sub match ($text, $regex, :$global?) {
     if $global {
         my @matches;
         while $match {
-            @matches.push($match);
+            nqp::push(@matches, $match);
             $match := $match.CURSOR.parse($text, :rule($regex), :c($match.to));
         }
         @matches;
