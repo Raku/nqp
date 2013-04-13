@@ -88,9 +88,9 @@ QAST_COMBINED = QAST.nqp
 QAST_PIR = QAST.pir
 QAST_PBC = QAST.pbc
 QAST_SOURCES = \
-  src/QAST/PIRT.nqp \
-  src/QAST/Operations.nqp \
-  src/QAST/Compiler.nqp \
+  src/vm/parrot/QAST/PIRT.nqp \
+  src/vm/parrot/QAST/Operations.nqp \
+  src/vm/parrot/QAST/Compiler.nqp \
 
 P6QREGEX_SOURCES = \
   src/QRegex/P6Regex/Grammar.nqp \
