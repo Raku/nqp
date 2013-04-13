@@ -21,10 +21,10 @@ Makefile
 *.bundle
 *~
 *.pbc
-src/ops/*.h
-src/ops/*.c
-src/pmc/pmc_*.h
-src/pmc/*.c
+src/vm/parrot/ops/*.h
+src/vm/parrot/ops/*.c
+src/vm/parrot/pmc/pmc_*.h
+src/vm/parrot/pmc/*.c
 /nqp
 nqp.c
 nqp_group.c
