@@ -600,10 +600,10 @@ $(STAGE1)/$(NQP_MO_PBC): $(NQP_CONST_PIR) $(STAGE0_PBCS) $(NQP_MO_SOURCES)
 	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(NQP_MO_PBC) \
 	    $(STAGE1)/$(NQP_MO_PIR)
 
-$(STAGE1)/$(MODULE_LOADER_PBC): $(STAGE0_PBCS) src/ModuleLoader.nqp
+$(STAGE1)/$(MODULE_LOADER_PBC): $(STAGE0_PBCS) src/vm/parrot/ModuleLoader.nqp
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE1)/gen/module_loader.pir \
-	    --setting=NULL --no-regex-lib src/ModuleLoader.nqp
+	    --setting=NULL --no-regex-lib src/vm/parrot/ModuleLoader.nqp
 	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(MODULE_LOADER_PBC) \
 	    $(STAGE1)/gen/module_loader.pir
 
@@ -684,10 +684,10 @@ $(STAGE2)/$(NQP_MO_PBC): $(STAGE1_PBCS) $(NQP_MO_SOURCES)
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(NQP_MO_PBC) \
 	    $(STAGE2)/$(NQP_MO_PIR)
 
-$(STAGE2)/$(MODULE_LOADER_PBC): $(STAGE1_PBCS) src/ModuleLoader.nqp
+$(STAGE2)/$(MODULE_LOADER_PBC): $(STAGE1_PBCS) src/vm/parrot/ModuleLoader.nqp
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/gen/module_loader.pir \
-	    --setting=NULL src/ModuleLoader.nqp
+	    --setting=NULL src/vm/parrot/ModuleLoader.nqp
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(MODULE_LOADER_PBC) \
 	    $(STAGE2)/gen/module_loader.pir
 
