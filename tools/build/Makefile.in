@@ -53,11 +53,11 @@ PMC_DIR          = src/pmc
 OPS_DIR          = src/ops
 
 HLL_SOURCES = \
-  src/HLL/Grammar.pm \
-  src/HLL/Actions.pm \
-  src/HLL/Compiler.pm \
-  src/HLL/CommandLine.pm \
-  src/HLL/World.pm \
+  src/HLL/Grammar.nqp \
+  src/HLL/Actions.nqp \
+  src/HLL/Compiler.nqp \
+  src/HLL/CommandLine.nqp \
+  src/HLL/World.nqp \
 
 QASTNODE_COMBINED = QASTNode.nqp
 QASTNODE_PIR = QASTNode.pir
@@ -110,15 +110,15 @@ QREGEX_SOURCES = \
   src/QRegex/Cursor.nqp \
 
 CORE_SETTING_SOURCES = \
-  src/core/NativeTypes.pm \
-  src/core/NQPRoutine.pm \
-  src/core/NQPMu.pm \
-  src/core/NQPCapture.pm \
-  src/core/IO.pm \
-  src/core/Regex.pm \
-  src/core/Hash.pm \
-  src/core/testing.pm \
-  src/core/YOUAREHERE.pm \
+  src/core/NativeTypes.nqp \
+  src/core/NQPRoutine.nqp \
+  src/core/NQPMu.nqp \
+  src/core/NQPCapture.nqp \
+  src/core/IO.nqp \
+  src/core/Regex.nqp \
+  src/core/Hash.nqp \
+  src/core/testing.nqp \
+  src/core/YOUAREHERE.nqp \
 
 CORE_SETTING_NQP = NQPCORE.setting
 
@@ -142,43 +142,43 @@ MODULE_LOADER_PBC = ModuleLoader.pbc
 REGEX_PBC       = NQPRegex.pbc
 
 HLL_PBC          = NQPHLL.pbc
-HLL_COMBINED     = gen/NQPHLL.pm
+HLL_COMBINED     = gen/NQPHLL.nqp
 HLL_COMBINED_PIR = gen/NQPHLL.pir
 
 P6REGEX_PBC          = NQPP6Regex.pbc
-P6REGEX_COMBINED     = gen/NQPP6Regex.pm
+P6REGEX_COMBINED     = gen/NQPP6Regex.nqp
 P6REGEX_COMBINED_PIR = gen/NQPP6Regex.pir
 
 P6QREGEX_PBC          = NQPP6QRegex.pbc
-P6QREGEX_COMBINED     = gen/NQPP6QRegex.pm
+P6QREGEX_COMBINED     = gen/NQPP6QRegex.nqp
 P6QREGEX_COMBINED_PIR = gen/NQPP6QRegex.pir
 
 P5QREGEX_PBC          = NQPP5QRegex.pbc
-P5QREGEX_COMBINED     = gen/NQPP5QRegex.pm
+P5QREGEX_COMBINED     = gen/NQPP5QRegex.nqp
 P5QREGEX_COMBINED_PIR = gen/NQPP5QRegex.pir
 
-NQP_COMBINED     = gen/NQP.pm
+NQP_COMBINED     = gen/NQP.nqp
 NQP_COMBINED_PIR = gen/NQP.pir
 NQP_PBC          = nqp.pbc
 NQP_EXE          = nqp$(EXE)
 
 NQP_SOURCES = \
-  src/NQP/World.pm \
-  src/NQP/Grammar.pm \
-  src/NQP/Ops.pm \
-  src/NQP/Actions.pm \
-  src/NQP/Compiler.pm \
+  src/NQP/World.nqp \
+  src/NQP/Grammar.nqp \
+  src/NQP/Ops.nqp \
+  src/NQP/Actions.nqp \
+  src/NQP/Compiler.nqp \
 
-NQP_MO_SOURCES = src/how/Archetypes.pm src/how/RoleToRoleApplier.pm \
-                 src/how/NQPConcreteRoleHOW.pm src/how/RoleToClassApplier.pm \
-                 src/how/NQPCurriedRoleHOW.pm src/how/NQPParametricRoleHOW.pm \
-                 src/how/NQPClassHOW.pm src/how/NQPNativeHOW.pm \
-                 src/how/NQPAttribute.pm src/how/NQPModuleHOW.pm \
-                 src/how/EXPORTHOW.pm \
+NQP_MO_SOURCES = src/how/Archetypes.nqp src/how/RoleToRoleApplier.nqp \
+                 src/how/NQPConcreteRoleHOW.nqp src/how/RoleToClassApplier.nqp \
+                 src/how/NQPCurriedRoleHOW.nqp src/how/NQPParametricRoleHOW.nqp \
+                 src/how/NQPClassHOW.nqp src/how/NQPNativeHOW.nqp \
+                 src/how/NQPAttribute.nqp src/how/NQPModuleHOW.nqp \
+                 src/how/EXPORTHOW.nqp \
 
 NQP_MO_PBC      = nqpmo.pbc
 NQP_MO_PIR      = gen/nqp-mo.pir
-NQP_MO_COMBINED = gen/nqp-mo.pm
+NQP_MO_COMBINED = gen/nqp-mo.nqp
 
 CORE_SETTING_PBC = NQPCORE.setting.pbc
 CORE_SETTING_PIR = gen/NQPCORE.setting.pir
@@ -517,7 +517,7 @@ CLEANUPS = \
   src/stage2/*.pbc \
   src/gen/*.pir \
   src/gen/*.nqp \
-  src/gen/*.pm \
+  src/gen/*.nqp \
   $(PMC_DIR)/pmc_*.h \
   $(PMC_DIR)/*.c \
   $(PMC_DIR)/*.dump \
@@ -591,10 +591,10 @@ $(STAGE1)/$(NQP_MO_PBC): $(NQP_CONST_PIR) $(STAGE0_PBCS) $(NQP_MO_SOURCES)
 	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(NQP_MO_PBC) \
 	    $(STAGE1)/$(NQP_MO_PIR)
 
-$(STAGE1)/$(MODULE_LOADER_PBC): $(STAGE0_PBCS) src/ModuleLoader.pm
+$(STAGE1)/$(MODULE_LOADER_PBC): $(STAGE0_PBCS) src/ModuleLoader.nqp
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE1)/gen/module_loader.pir \
-	    --setting=NULL --no-regex-lib src/ModuleLoader.pm
+	    --setting=NULL --no-regex-lib src/ModuleLoader.nqp
 	$(PARROT) --include=$(STAGE1) -o $(STAGE1)/$(MODULE_LOADER_PBC) \
 	    $(STAGE1)/gen/module_loader.pir
 
@@ -656,8 +656,8 @@ $(STAGE1)/$(P6QREGEX_PBC): $(STAGE0_PBCS) $(STAGE1)/$(HLL_PBC) $(STAGE1)/$(QREGE
 
 $(STAGE1)/$(NQP_PBC): $(STAGE0_PBCS) $(STAGE1)/$(CORE_SETTING_PBC) $(STAGE1)/$(P6QREGEX_PBC) $(NQP_SOURCES)
 	$(MKPATH) $(STAGE1)/gen
-	$(PERL) tools/build/gen-version.pl >src/gen/nqp-config.pm
-	$(PERL) tools/build/gen-cat.pl $(NQP_SOURCES) src/gen/nqp-config.pm > $(STAGE1)/$(NQP_COMBINED)
+	$(PERL) tools/build/gen-version.pl >src/gen/nqp-config.nqp
+	$(PERL) tools/build/gen-cat.pl $(NQP_SOURCES) src/gen/nqp-config.nqp > $(STAGE1)/$(NQP_COMBINED)
 	$(PARROT) --library=$(STAGE0) $(STAGE0)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE1)/$(NQP_COMBINED_PIR) \
 	    --module-path=$(STAGE1) --setting-path=$(STAGE1) $(STAGE1)/$(NQP_COMBINED)
@@ -675,10 +675,10 @@ $(STAGE2)/$(NQP_MO_PBC): $(STAGE1_PBCS) $(NQP_MO_SOURCES)
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(NQP_MO_PBC) \
 	    $(STAGE2)/$(NQP_MO_PIR)
 
-$(STAGE2)/$(MODULE_LOADER_PBC): $(STAGE1_PBCS) src/ModuleLoader.pm
+$(STAGE2)/$(MODULE_LOADER_PBC): $(STAGE1_PBCS) src/ModuleLoader.nqp
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/gen/module_loader.pir \
-	    --setting=NULL src/ModuleLoader.pm
+	    --setting=NULL src/ModuleLoader.nqp
 	$(PARROT) --include=$(STAGE2) -o $(STAGE2)/$(MODULE_LOADER_PBC) \
 	    $(STAGE2)/gen/module_loader.pir
 
@@ -734,8 +734,8 @@ $(STAGE2)/$(P6QREGEX_PBC): $(STAGE1_PBCS) $(STAGE2)/$(HLL_PBC) $(STAGE2)/$(QAST_
 
 $(STAGE2)/$(NQP_PBC): $(STAGE1_PBCS) $(STAGE2)/$(P6QREGEX_PBC) $(NQP_SOURCES)
 	$(MKPATH) $(STAGE2)/gen
-	$(PERL) tools/build/gen-version.pl >src/gen/nqp-config.pm
-	$(PERL) tools/build/gen-cat.pl $(NQP_SOURCES) src/gen/nqp-config.pm > $(STAGE2)/$(NQP_COMBINED)
+	$(PERL) tools/build/gen-version.pl >src/gen/nqp-config.nqp
+	$(PERL) tools/build/gen-cat.pl $(NQP_SOURCES) src/gen/nqp-config.nqp > $(STAGE2)/$(NQP_COMBINED)
 	$(PARROT) --library=$(STAGE1) $(STAGE1)/$(NQP_PBC) \
 	    --target=pir --output=$(STAGE2)/$(NQP_COMBINED_PIR) \
 	    --module-path=$(STAGE2) --setting-path=$(STAGE2) $(STAGE2)/$(NQP_COMBINED)
