@@ -272,7 +272,7 @@ of the match.
         @args.push(', near "');
         @args.push(nqp::escape(nqp::substr($target, $pos, 10)));
         @args.push('"');
-        nqp::die(nqp::join('', @args))
+        nqp::die(join('', @args))
     }
     
     method FAILGOAL($goal, $dba?) {
