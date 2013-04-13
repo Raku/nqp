@@ -2,8 +2,8 @@ class HLL::Actions {
     our sub string_to_int($src, $base) {
         my $res := nqp::radix($base, $src, 0, 2);
         $src.CURSOR.panic("'$src' is not a valid number")
-            unless nqp::atkey($res, 2) == nqp::chars($src);
-        nqp::atkey($res, 0);
+            unless nqp::atpos($res, 2) == nqp::chars($src);
+        nqp::atpos($res, 0);
     }
 
     method ints_to_string($ints) {
