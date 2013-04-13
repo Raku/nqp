@@ -361,57 +361,10 @@ class QRegex::NFA {
     my knowhow NFAType is repr('NFA') { }
 
     method run(str $target, int $offset) {
-        # This does what the NQP below says, but these days an op is used since
-        # it's hugely faster.
-        #my $eos := nqp::chars($target);
-        #my @fates;
-        #my @nextst := [1];
-        #my $gen := 1;
-        #my @done;
-        #while @nextst && $offset <= $eos {
-        #    my @curst := @nextst;
-        #    @nextst := [];
-        #    while @curst {
-        #        my $st := nqp::pop(@curst);
-        #        next if @done[$st] == $gen;
-        #        @done[$st] := $gen;
-        #        for $!states[$st] -> $act, $arg, $to {
-        #            if $act == $EDGE_FATE {
-        #                @fates.push($arg);
-        #            }
-        #            elsif $act == $EDGE_EPSILON && @done[$to] != $gen {
-        #                nqp::push(@curst, $to);
-        #            }
-        #            elsif $offset >= $eos { }
-        #            elsif $act == $EDGE_CODEPOINT {
-        #                nqp::push(@nextst, $to) if nqp::ord($target, $offset) == $arg;
-        #            }
-        #            elsif $act == $EDGE_CODEPOINT_NEG {
-        #                nqp::push(@nextst, $to) unless nqp::ord($target, $offset) == $arg;
-        #            }
-        #            elsif $act == $EDGE_CHARCLASS {
-        #                nqp::push(@nextst, $to) if nqp::iscclass($arg, $target, $offset);
-        #            }
-        #            elsif $act == $EDGE_CHARCLASS_NEG {
-        #                nqp::push(@nextst, $to) unless nqp::iscclass($arg, $target, $offset);
-        #            }
-        #            elsif $act == $EDGE_CHARLIST {
-        #                nqp::push(@nextst, $to) if nqp::index($arg, nqp::substr($target, $offset, 1)) >= 0;
-        #            }
-        #            elsif $act == $EDGE_CHARLIST_NEG {
-        #                nqp::push(@nextst, $to) unless nqp::index($arg, nqp::substr($target, $offset, 1)) >= 0;
-        #            }
-        #        }
-        #    }
-        #    $offset := $offset + 1;
-        #    $gen := $gen + 1;
-        #}
-        #@fates;
         unless nqp::isconcrete($!nfa_object) {
             nqp::scwbdisable();
             $!nfa_object := nqp::nfafromstatelist($!states, NFAType);
             nqp::scwbenable();
-            1;
         }
         nqp::nfarunproto($!nfa_object, $target, $offset)
     }
