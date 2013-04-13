@@ -221,7 +221,7 @@ class NQP::World is HLL::World {
             my $compiler := nqp::getcomp('nqp');
             my $compiled := $compiler.compile(
                 QAST::CompUnit.new( :hll('nqp'), $past ),
-                :from<ast>);
+                :from<ast>, :compunit_ok(1));
 
             # Fix up any code objects holding stubs with the real compiled thing.
             my @allcodes := $compiler.backend.compunit_coderefs($compiled);
@@ -608,7 +608,7 @@ class NQP::World is HLL::World {
             }
             else {
                 nqp::die("Could not locate compile-time value for symbol " ~
-                    nqp::join('::', @name));
+                    join('::', @name));
             }
         }
         

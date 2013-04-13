@@ -258,17 +258,18 @@ class HLL::Compiler does HLL::Backend::Default {
 
         if (%adverbs<profile-compile>) {
             $output := $!backend.run_profiled({
-                self.compile($code, |%adverbs);
+                self.compile($code, :compunit_ok(1), |%adverbs);
             });
         }
         else {
-            $output := self.compile($code, |%adverbs);
+            $output := self.compile($code, :compunit_ok(1), |%adverbs);
         }
 
         if $!backend.is_compunit($output) && %adverbs<target> eq '' {
             my $outer_ctx := %adverbs<outer_ctx>;
+            $output := $!backend.compunit_mainline($output);
             if nqp::defined($outer_ctx) {
-                nqp::forceouterctx($!backend.compunit_mainline($output), $outer_ctx);
+                nqp::forceouterctx($output, $outer_ctx);
             }
 
             if (%adverbs<profile>) {
@@ -291,7 +292,7 @@ class HLL::Compiler does HLL::Backend::Default {
     }
 
     method panic(*@args) {
-        nqp::die(nqp::join('', @args))
+        nqp::die(join('', @args))
     }
 
     method stages(@value?) {
@@ -402,7 +403,7 @@ class HLL::Compiler does HLL::Backend::Default {
         if ($has_error) {
             if %adverbs<ll-exception> || !nqp::can(self, 'handle-exception') {
                 my $err := nqp::getstderr();
-                nqp::printfh($err, $error);
+                nqp::printfh($err, nqp::getmessage($error));
                 nqp::printfh($err, "\n");
                 nqp::printfh($err, nqp::join("\n", $error.backtrace_strings));
                 nqp::exit(1);
@@ -444,7 +445,7 @@ class HLL::Compiler does HLL::Backend::Default {
         my $target := nqp::lc(%adverbs<target>);
         my $encoding := %adverbs<encoding>;
         my @files := nqp::islist($files) ?? $files !! [$files];
-        $!user_progname := nqp::join(',', @files);
+        $!user_progname := join(',', @files);
         my @codes;
         for @files -> $filename {
             my $err := 0;
@@ -459,7 +460,7 @@ class HLL::Compiler does HLL::Backend::Default {
             nqp::exit(1) if $err;
             try {
                 nqp::setencoding($in-handle, $encoding);
-                nqp::push_s(@codes, nqp::readallfh($in-handle));
+                nqp::push(@codes, nqp::readallfh($in-handle));
                 nqp::closefh($in-handle);
                 CATCH {
                     $err := "Error while reading from file: $_";
@@ -467,8 +468,8 @@ class HLL::Compiler does HLL::Backend::Default {
             }
             nqp::die($err) if $err;
         }
-        my $code := nqp::join('', @codes);
-        my $?FILES := nqp::join(' ', @files);
+        my $code := join('', @codes);
+        my $?FILES := join(' ', @files);
         my $r := self.eval($code, |@args, |%adverbs);
         if $target eq '' || $!backend.is_textual_stage($target) || %adverbs<output> {
             return $r;
@@ -533,7 +534,13 @@ class HLL::Compiler does HLL::Backend::Default {
             }
             last if $_ eq $target;
         }
-        return $result;
+        
+        if %adverbs<compunit_ok> {
+            return $result
+        }
+        else {
+            return $!backend.compunit_mainline($result);
+        }
     }
 
     method start($source, *%adverbs) {
@@ -624,22 +631,22 @@ class HLL::Compiler does HLL::Backend::Default {
             $position := 'after';
         } else {
             my @new-stages := nqp::clone(self.stages);
-            nqp::push_s(@new-stages, $stagename);
+            nqp::push(@new-stages, $stagename);
             self.stages(@new-stages);
             return 1;
         }
-        my @new-stages := nqp::list_s();
+        my @new-stages := nqp::list();
         for self.stages {
             if $_ eq $where {
                 if $position eq 'before' {
-                    nqp::push_s(@new-stages, $stagename);
-                    nqp::push_s(@new-stages, $_);
+                    nqp::push(@new-stages, $stagename);
+                    nqp::push(@new-stages, $_);
                 } else {
-                    nqp::push_s(@new-stages, $_);
-                    nqp::push_s(@new-stages, $stagename);
+                    nqp::push(@new-stages, $_);
+                    nqp::push(@new-stages, $stagename);
                 }
             } else {
-                nqp::push_s(@new-stages, $_)
+                nqp::push(@new-stages, $_)
             }
         }
         self.stages(@new-stages);
@@ -660,7 +667,7 @@ class HLL::Compiler does HLL::Backend::Default {
         # maybe replace with a grep() once we have the setting for sure
         my @actual_ns;
         for @ns {
-            nqp::push_s(@actual_ns, $_) unless $_ eq '';
+            nqp::push(@actual_ns, $_) unless $_ eq '';
         }
         @actual_ns;
     }

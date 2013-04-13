@@ -50,7 +50,7 @@ class NQP::Actions is HLL::Actions {
         if nqp::istype($ast, QAST::Op) {
             my @parts;
             for $ast.list { @parts.push($_.value) }
-            nqp::join(' ', @parts)
+            join(' ', @parts)
         } else {
             $ast.value
         }
@@ -1353,7 +1353,7 @@ class NQP::Actions is HLL::Actions {
     method term:sym<pir::op>($/) {
         my @args := $<args> ?? $<args>[0].ast.list !! [];
         my $pirop := ~$<op>;
-        $pirop := nqp::join(' ', nqp::split('__', $pirop));
+        $pirop := join(' ', nqp::split('__', $pirop));
         make QAST::VM.new( :pirop($pirop), :node($/), |@args );
     }
 
