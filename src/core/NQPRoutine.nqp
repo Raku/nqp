@@ -273,7 +273,12 @@ my knowhow NQPRoutine {
             $i := 0;
             while $i < $type_check_count {
                 my $param := nqp::captureposarg($capture, $i);
-                my $param_type := pir::what_or_null__PP($param); # Parrot hack; just .WHAT on JVM etc.
+#?if parrot
+                my $param_type := pir::what_or_null__PP($param);
+#?endif
+#?if !parrot
+                my $param_type := $param.WHAT;
+#?endif
                 my $type_obj := $cur_candidate<types>[$i];
                 my $definedness := $cur_candidate<definednesses>[$i];
                 unless nqp::eqaddr($param_type, $type_obj) || nqp::isnull($type_obj) || is_narrower_type($param_type, $type_obj) {

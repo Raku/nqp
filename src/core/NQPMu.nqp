@@ -69,6 +69,7 @@ my class NQPMu {
         self.bless(|%attributes);
     }
 
+#?if parrot
     proto method Str() is parrot_vtable('get_string') { * }
     multi method Str(NQPMu:U $self:) {
         ''
@@ -90,6 +91,12 @@ my class NQPMu {
     method defined() is parrot_vtable('defined') {
         nqp::isconcrete(self)
     }
+#?endif
+#?if !parrot
+    method defined() {
+        nqp::isconcrete(self)
+    }
+#?endif
 
     proto method ACCEPTS($topic) { * }
     multi method ACCEPTS(NQPMu:U $self: $topic) {
@@ -100,3 +107,29 @@ my class NQPMu {
         self.HOW.isa(self, $type)
     }
 }
+
+#?if !parrot
+# A few bits when we're bootstrapping everything 6model-style rather than using
+# Parrot-supplied things.
+my class NQPArray is repr('VMArray') {
+    method push($value) { nqp::push(self, $value) }
+    method pop() { nqp::pop(self) }
+    method unshift($value) { nqp::unshift(self, $value) }
+    method shift() { nqp::shift(self) }
+}
+nqp::setboolspec(NQPArray, 8, nqp::null());
+my class NQPArrayIter is repr('VMIter') { }
+nqp::setboolspec(NQPArrayIter, 7, nqp::null());
+my class NQPHashIter is repr('VMIter') {
+    method key() { nqp::iterkey_s(self) }
+    method value() { nqp::iterval(self) }
+    method Str() { nqp::iterkey_s(self) }
+}
+nqp::setboolspec(NQPHashIter, 7, nqp::null());
+nqp::sethllconfig('nqp', nqp::hash(
+    'list', NQPArray,
+    'slurpy_array', NQPArray,
+    'array_iter', NQPArrayIter,
+    'hash_iter', NQPHashIter
+));
+#?endif
