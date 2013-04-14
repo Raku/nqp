@@ -32,10 +32,13 @@ public class P6OpaqueBaseInstance extends SixModelObject {
 	
 	public SixModelObject clone(ThreadContext tc) {
 		try {
+			SixModelObject cloned;
 			if (this.delegate != null)
-				return this.delegate.clone(tc);
+				cloned = this.delegate.clone(tc);
 			else
-				return (SixModelObject)this.clone();
+				cloned = (SixModelObject)this.clone();
+			cloned.sc = null;
+			return cloned;
 		} catch (CloneNotSupportedException e) {
 			throw new RuntimeException(e);
 		}
