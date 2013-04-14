@@ -7,10 +7,10 @@ knowhow ModuleLoader {
         
         # Put any explicitly specified path on the start of the list.
         my $explicit;
-        if !nqp::isnull($explicit) {
-            try { $explicit := %*COMPILING<%?OPTIONS>{$explicit_path}; }
+        if !nqp::isnull($explicit_path) {
+            try { my $hack; $explicit := %*COMPILING<%?OPTIONS>{$explicit_path}; }
         }
-        if nqp::defined($explicit) {
+        if !nqp::isnull($explicit) && nqp::defined($explicit) {
             nqp::push(@search_paths, $explicit);
         }
         else {
