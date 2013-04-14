@@ -2140,6 +2140,12 @@ QAST::Operations.add_core_op('scgethandle', -> $qastcomp, $op {
         $op[0]
     ))
 });
+QAST::Operations.add_core_op('scgetdesc', -> $qastcomp, $op {
+    $qastcomp.as_post(QAST::Op.new(
+        :op('callmethod'), :name('description'), :returns(str),
+        $op[0]
+    ))
+});
 QAST::Operations.add_core_op('scgetobjidx', -> $qastcomp, $op {
     $qastcomp.as_post(QAST::Op.new(
         :op('callmethod'), :name('slot_index_for'), :returns(int),
