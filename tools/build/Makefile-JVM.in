@@ -33,7 +33,52 @@ NQP_MO_SOURCES  = src/how/Archetypes.nqp src/how/RoleToRoleApplier.nqp \
 
 MODULE_LOADER_CLASS = ModuleLoader.class
 
-STAGE1_OUTPUT = $(STAGE1)/$(NQP_MO_CLASS) $(STAGE1)/$(MODULE_LOADER_CLASS)
+CORE_SETTING_CLASS    = NQPCORE.setting.class
+CORE_SETTING_COMBINED = gen/NQPCORE.setting
+CORE_SETTING_SOURCES  = \
+  src/core/NativeTypes.nqp \
+  src/core/NQPRoutine.nqp \
+  src/core/NQPMu.nqp \
+  src/core/NQPCapture.nqp \
+  src/core/IO.nqp \
+  src/core/Regex.nqp \
+  src/core/Hash.nqp \
+  src/core/testing.nqp \
+  src/core/YOUAREHERE.nqp \
+
+QASTNODE_CLASS    = QASTNode.class
+QASTNODE_COMBINED = gen/QASTNode.nqp
+QASTNODE_SOURCES  = \
+  src/QAST/CompileTimeValue.nqp \
+  src/QAST/SpecialArg.nqp \
+  src/QAST/Node.nqp \
+  src/QAST/Regex.nqp \
+  src/QAST/IVal.nqp \
+  src/QAST/NVal.nqp \
+  src/QAST/SVal.nqp \
+  src/QAST/BVal.nqp \
+  src/QAST/WVal.nqp \
+  src/QAST/Want.nqp \
+  src/QAST/Var.nqp \
+  src/QAST/VarWithFallback.nqp \
+  src/QAST/Op.nqp \
+  src/QAST/VM.nqp \
+  src/QAST/Stmts.nqp \
+  src/QAST/Stmt.nqp \
+  src/QAST/Block.nqp \
+  src/QAST/Unquote.nqp \
+  src/QAST/CompUnit.nqp \
+  src/QAST/InlinePlaceholder.nqp \
+
+QREGEX_CLASS    = QRegex.class
+QREGEX_COMBINED = gen/QRegex.nqp
+QREGEX_SOURCES = \
+  src/QRegex/NFA.nqp \
+  src/QRegex/Cursor.nqp \
+
+STAGE1_OUTPUT = $(STAGE1)/$(NQP_MO_CLASS) $(STAGE1)/$(MODULE_LOADER_CLASS) \
+                $(STAGE1)/$(CORE_SETTING_CLASS) $(STAGE1)/$(QASTNODE_CLASS) \
+                $(STAGE1)/$(QREGEX_CLASS)
 
 all: $(RUNTIME_JAR) $(STAGE1_OUTPUT)
 
@@ -54,3 +99,23 @@ $(STAGE1)/$(NQP_MO_CLASS): $(STAGE0) $(NQP_MO_SOURCES)
 $(STAGE1)/$(MODULE_LOADER_CLASS): $(STAGE0) src/vm/jvm/ModuleLoader.nqp
 	$(STAGE0_NQP) --setting=NULL --no-regex-lib --target=classfile \
 	    --output=$(STAGE1)/$(MODULE_LOADER_CLASS) src/vm/jvm/ModuleLoader.nqp
+
+$(STAGE1)/$(CORE_SETTING_CLASS): $(STAGE0) $(CORE_SETTING_SOURCES) $(STAGE1)/$(NQP_MO_CLASS) $(STAGE1)/$(MODULE_LOADER_CLASS)
+	$(MKPATH) $(STAGE1)/gen
+	$(PERL) tools/build/gen-cat.pl jvm $(CORE_SETTING_SOURCES) > $(STAGE1)/$(CORE_SETTING_COMBINED)
+	$(STAGE0_NQP) --module-path=$(STAGE1) --setting=NULL --no-regex-lib --target=classfile \
+	    --output=$(STAGE1)/$(CORE_SETTING_CLASS) $(STAGE1)/$(CORE_SETTING_COMBINED)
+
+$(STAGE1)/$(QASTNODE_CLASS): $(STAGE0) $(QASTNODE_SOURCES) $(STAGE1)/$(CORE_SETTING_CLASS)
+	$(MKPATH) $(STAGE1)/gen
+	$(PERL) tools/build/gen-cat.pl jvm $(QASTNODE_SOURCES) > $(STAGE1)/$(QASTNODE_COMBINED)
+	$(STAGE0_NQP) --module-path=$(STAGE1) --setting-path=$(STAGE1) \
+         --setting=NQPCORE --no-regex-lib --target=classfile \
+	    --output=$(STAGE1)/$(QASTNODE_CLASS) $(STAGE1)/$(QASTNODE_COMBINED)
+
+$(STAGE1)/$(QREGEX_CLASS): $(STAGE0) $(QREGEX_SOURCES) $(STAGE1)/$(QASTNODE_CLASS)
+	$(MKPATH) $(STAGE1)/gen
+	$(PERL) tools/build/gen-cat.pl jvm $(QREGEX_SOURCES) > $(STAGE1)/$(QREGEX_COMBINED)
+	$(STAGE0_NQP) --module-path=$(STAGE1) --setting-path=$(STAGE1) \
+         --setting=NQPCORE --no-regex-lib --target=classfile \
+	    --output=$(STAGE1)/$(QREGEX_CLASS) $(STAGE1)/$(QREGEX_COMBINED)
