@@ -4,8 +4,20 @@ JAR    = jar
 PERL   = perl
 PROVE  = prove
 
-all:
-	echo TODO
+RUNTIME_JAVAS = \
+  src/vm/jvm/runtime/org/perl6/nqp/jast2bc/*.java \
+  src/vm/jvm/runtime/org/perl6/nqp/runtime/*.java \
+  src/vm/jvm/runtime/org/perl6/nqp/sixmodel/*.java \
+  src/vm/jvm/runtime/org/perl6/nqp/sixmodel/reprs/*.java
+
+RUNTIME_JAR = nqp-runtime.jar
+
+$(RUNTIME_JAR): $(RUNTIME_JAVAS)
+	$(PERL) -MExtUtils::Command -e mkpath bin
+	$(JAVAC) -source 1.7 -cp 3rdparty/asm/asm-4.1.jar -g -d bin $(RUNTIME_JAVAS)
+	$(JAR) cf0 nqp-runtime.jar -C bin/ .
+
+all: $(RUNTIME_JAR)
 
 clean:
 	$(PERL) -MExtUtils::Command -e rm_rf *.class *.jar src/stage1 src/stage2 bin
