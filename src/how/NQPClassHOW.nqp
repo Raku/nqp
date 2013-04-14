@@ -35,10 +35,12 @@ knowhow NQPClassHOW {
     # Cached values, which are thrown away if the class changes.
     has %!caches;
 
+#?if parrot
     # Parrot-specific vtable mapping hash. Maps vtable name to method.
     has %!parrot_vtable_mapping;
-	has %!parrot_vtable_handler_mapping;
-    
+    has %!parrot_vtable_handler_mapping;
+#?endif
+
     # Call tracing.
     has $!trace;
     has $!trace_depth;
@@ -75,8 +77,10 @@ knowhow NQPClassHOW {
         %!method-vtable-slots := nqp::hash();
         @!mro := nqp::list();
         @!done := nqp::list();
+#?if parrot
         %!parrot_vtable_mapping := nqp::hash();
         %!parrot_vtable_handler_mapping := nqp::hash();
+#?endif
         @!BUILDALLPLAN := nqp::list();
         @!BUILDPLAN := nqp::list();
         $!trace := 0;
@@ -167,8 +171,10 @@ knowhow NQPClassHOW {
         self.publish_type_cache($obj);
         self.publish_method_cache($obj);
         self.publish_boolification_spec($obj);
+#?if parrot
         self.publish_parrot_vtable_mapping($obj);
 		self.publish_parrot_vtablee_handler_mapping($obj);
+#?endif
         1;
     }
 
@@ -181,6 +187,7 @@ knowhow NQPClassHOW {
         nqp::push(@!roles, $role);
     }
 
+#?if parrot
     method add_parrot_vtable_mapping($obj, $name, $meth) {
         if nqp::defined(%!parrot_vtable_mapping{$name}) {
             nqp::die("Class '" ~ $!name ~
@@ -198,6 +205,7 @@ knowhow NQPClassHOW {
         }
         %!parrot_vtable_handler_mapping{$name} := [ $obj, $att_name ];
     }
+#?endif
 
     method compose($obj) {
         # Incorporate roles. First, specialize them with the type object
@@ -234,9 +242,11 @@ knowhow NQPClassHOW {
         self.publish_method_cache($obj);
         self.publish_boolification_spec($obj);
 
+#?if parrot
         # Install Parrot v-table mapping.
         self.publish_parrot_vtable_mapping($obj);
 		self.publish_parrot_vtablee_handler_mapping($obj);
+#?endif
         
         # Create BUILDPLAN.
         self.create_BUILDPLAN($obj);
@@ -480,6 +490,7 @@ knowhow NQPClassHOW {
         }
     }
 
+#?if parrot
     method publish_parrot_vtable_mapping($obj) {
         my %mapping;
         my %seen_handlers;
@@ -511,7 +522,8 @@ knowhow NQPClassHOW {
             pir::stable_publish_vtable_handler_mapping__0PP($obj, %mapping);
         }
     }
-    
+#?endif
+
     # Creates the plan for building up the object. This works
     # out what we'll need to do up front, so we can just zip
     # through the "todo list" each time we need to make an object.
@@ -646,6 +658,7 @@ knowhow NQPClassHOW {
         @attrs
     }
 
+#?if parrot
     method parrot_vtable_mappings($obj, :$local!) {
         %!parrot_vtable_mapping
     }
@@ -653,6 +666,7 @@ knowhow NQPClassHOW {
     method parrot_vtable_handler_mappings($obj, :$local!) {
         %!parrot_vtable_handler_mapping
     }
+#?endif
 
     ##
     ## Checky
