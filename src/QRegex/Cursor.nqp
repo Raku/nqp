@@ -79,7 +79,12 @@ role NQPCursorRole is export {
             $shared := nqp::create(ParseShared);
             nqp::bindattr($shared, ParseShared, '$!orig', $orig);
             nqp::bindattr_s($shared, ParseShared, '$!target',
+#?if parrot
                 pir::trans_encoding__Ssi($orig, pir::find_encoding__Is('ucs4')));
+#?endif
+#?if !parrot
+                $orig);
+#?endif
             nqp::bindattr_i($shared, ParseShared, '$!highwater', 0);
             nqp::bindattr($shared, ParseShared, '@!highexpect', nqp::list_s());
             nqp::bindattr($shared, ParseShared, '%!marks', nqp::hash());
@@ -603,9 +608,16 @@ class NQPMatch is NQPCapture {
     method orig() { $!orig }
     method to()   { $!to }
     method CURSOR() { $!cursor }
+#?if parrot
     method Str() is parrot_vtable('get_string')  { nqp::substr($!orig, $!from, $!to-$!from) }
     method Int() is parrot_vtable('get_integer') { +self.Str() }
     method Num() is parrot_vtable('get_number')  { +self.Str() }
+#?endif
+#?if !parrot
+    method Str() { nqp::substr($!orig, $!from, $!to-$!from) }
+    method Int() { +self.Str() }
+    method Num() { +self.Str() }
+#?endif
     method Bool() { $!to >= $!from }
     method chars() { $!to >= $!from ?? $!to - $!from !! 0 }
     
