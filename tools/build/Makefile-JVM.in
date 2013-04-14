@@ -3,6 +3,9 @@ JAVAC  = javac
 JAR    = jar
 PERL   = perl
 PROVE  = prove
+ASM    = 3rdparty/asm/
+
+MKPATH = $(PERL) -MExtUtils::Command -e mkpath
 
 RUNTIME_JAVAS = \
   src/vm/jvm/runtime/org/perl6/nqp/jast2bc/*.java \
@@ -12,12 +15,42 @@ RUNTIME_JAVAS = \
 
 RUNTIME_JAR = nqp-runtime.jar
 
+STAGE0 = src/vm/jvm/stage0
+STAGE1 = src/stage1
+STAGE2 = src/stage2
+
+STAGE0_NQP = $(JAVA) -cp $(STAGE0)@cpsep@nqp-runtime.jar@cpsep@3rdparty/asm/asm-4.1.jar NQPJVM
+STAGE1_NQP = $(JAVA) -cp $(STAGE1)@cpsep@nqp-runtime.jar@cpsep@3rdparty/asm/asm-4.1.jar NQP
+
+NQP_MO_CLASS    = nqpmo.class
+NQP_MO_COMBINED = gen/nqpmo.nqp
+NQP_MO_SOURCES  = src/how/Archetypes.nqp src/how/RoleToRoleApplier.nqp \
+                  src/how/NQPConcreteRoleHOW.nqp src/how/RoleToClassApplier.nqp \
+                  src/how/NQPCurriedRoleHOW.nqp src/how/NQPParametricRoleHOW.nqp \
+                  src/how/NQPClassHOW.nqp src/how/NQPNativeHOW.nqp \
+                  src/how/NQPAttribute.nqp src/how/NQPModuleHOW.nqp \
+                  src/how/EXPORTHOW.nqp \
+
+MODULE_LOADER_CLASS = ModuleLoader.class
+
+STAGE1_OUTPUT = $(STAGE1)/$(NQP_MO_CLASS) $(STAGE1)/$(MODULE_LOADER_CLASS)
+
+all: $(RUNTIME_JAR) $(STAGE1_OUTPUT)
+
 $(RUNTIME_JAR): $(RUNTIME_JAVAS)
 	$(PERL) -MExtUtils::Command -e mkpath bin
 	$(JAVAC) -source 1.7 -cp 3rdparty/asm/asm-4.1.jar -g -d bin $(RUNTIME_JAVAS)
 	$(JAR) cf0 nqp-runtime.jar -C bin/ .
 
-all: $(RUNTIME_JAR)
-
 clean:
 	$(PERL) -MExtUtils::Command -e rm_rf *.class *.jar src/stage1 src/stage2 bin
+
+$(STAGE1)/$(NQP_MO_CLASS): $(STAGE0) $(NQP_MO_SOURCES)
+	$(MKPATH) $(STAGE1)/gen
+	$(PERL) tools/build/gen-cat.pl jvm $(NQP_MO_SOURCES) > $(STAGE1)/$(NQP_MO_COMBINED)
+	$(STAGE0_NQP) --setting=NULL --no-regex-lib --target=classfile \
+	    --output=$(STAGE1)/$(NQP_MO_CLASS) $(STAGE1)/$(NQP_MO_COMBINED)
+
+$(STAGE1)/$(MODULE_LOADER_CLASS): $(STAGE0) src/vm/jvm/ModuleLoader.nqp
+	$(STAGE0_NQP) --setting=NULL --no-regex-lib --target=classfile \
+	    --output=$(STAGE1)/$(MODULE_LOADER_CLASS) src/vm/jvm/ModuleLoader.nqp

@@ -77,6 +77,7 @@ MAIN: {
     $config{'stagestats'} = '--stagestats' if $options{'makefile-timing'};
     $config{'shell'} = $^O eq 'MSWin32' ? 'cmd' : 'sh';
     $config{'make'} = $^O eq 'MSWin32' ? 'nmake' : 'make';
+    $config{'cpsep'} = $^O eq 'MSWin32' ? ';' : ':';
 
     fill_template_file('tools/build/Makefile-JVM.in', 'Makefile', %config);
     
