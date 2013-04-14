@@ -324,7 +324,7 @@ role NQPCursorRole is export {
         sub precomp_alt_nfas($meth) {
             if nqp::can($meth, 'ALT_NFAS') {
                 for $meth.ALT_NFAS -> $name {
-                    self.HOW.cache(self, $name, { self.'!alt_nfa'($meth, $name) });
+                    self.HOW.cache(self, $name, { self.'!alt_nfa'($meth, $name.key) });
                 }
             }
         }
