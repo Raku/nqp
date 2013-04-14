@@ -709,9 +709,13 @@ public class SerializationWriter {
 	/* Grows a buffer as needed to hold more data. */
 	private void growToHold(int idx, int required) {
 		ByteBuffer check = this.outputs[idx];
-		if (check.position() + required >= check.capacity()) {
+        int position = check.position();
+		if (position + required >= check.capacity()) {
 			ByteBuffer replacement = ByteBuffer.allocate(check.capacity() * 2);
+            replacement.order(ByteOrder.LITTLE_ENDIAN);
+            check.position(0);
 			replacement.put(check);
+            replacement.position(position);
 			this.outputs[idx] = replacement;
 		}
 	}
