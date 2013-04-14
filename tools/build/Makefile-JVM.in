@@ -1,0 +1,11 @@
+JAVA   = java
+JAVAC  = javac
+JAR    = jar
+PERL   = perl
+PROVE  = prove
+
+all:
+	echo TODO
+
+clean:
+	$(PERL) -MExtUtils::Command -e rm_rf *.class *.jar src/stage1 src/stage2 bin
