@@ -1609,7 +1609,7 @@ QAST::OperationsJAST.map_classlib_core_op('join', $TYPE_OPS, 'join', [$RT_STR, $
 QAST::OperationsJAST.map_classlib_core_op('split', $TYPE_OPS, 'split', [$RT_STR, $RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('findcclass', $TYPE_OPS, 'findcclass', [$RT_INT, $RT_STR, $RT_INT, $RT_INT], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('findnotcclass', $TYPE_OPS, 'findnotcclass', [$RT_INT, $RT_STR, $RT_INT, $RT_INT], $RT_INT);
-QAST::OperationsJAST.map_classlib_core_op('sprintf', $TYPE_OPS, 'sprintf', [$RT_STR, $RT_OBJ], $RT_STR);
+QAST::OperationsJAST.map_classlib_core_op('sprintf', $TYPE_OPS, 'sprintf', [$RT_STR, $RT_OBJ], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('escape', $TYPE_OPS, 'escape', [$RT_STR], $RT_STR);
 QAST::OperationsJAST.map_classlib_core_op('flip', $TYPE_OPS, 'flip', [$RT_STR], $RT_STR);
 
