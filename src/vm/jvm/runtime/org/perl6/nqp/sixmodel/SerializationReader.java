@@ -86,6 +86,7 @@ public class SerializationReader {
 		
 		// Put code refs in place.
 		for (int i = 0; i < cr.length; i++) {
+			cr[i].isStaticCodeRef = true;
 			cr[i].sc = sc;
 			sc.root_codes.add(cr[i]);
 		}
