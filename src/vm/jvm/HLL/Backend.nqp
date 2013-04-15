@@ -55,7 +55,8 @@ class HLL::Backend::JVM {
     }
     
     method jast($qast, *%adverbs) {
-        nqp::getcomp('qast').jast($qast, :classname(nqp::sha1('eval-at-' ~ nqp::time_n())));
+        my $classname := %*COMPILING<%?OPTIONS><javaclass> || nqp::sha1('eval-at-' ~ nqp::time_n());
+        nqp::getcomp('qast').jast($qast, :$classname);
     }
     
     method classfile($jast, *%adverbs) {

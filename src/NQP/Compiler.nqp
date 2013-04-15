@@ -14,10 +14,16 @@ my @clo := $nqpcomp.commandline_options();
 @clo.push('setting=s');
 @clo.push('setting-path=s');
 @clo.push('module-path=s');
-@clo.push('vmlibs=s');
 @clo.push('no-regex-lib');
-@clo.push('dynext=s');
 @clo.push('stable-sc');
+#?if parrot
+@clo.push('vmlibs=s');
+@clo.push('dynext=s');
+#?endif
+#?if jvm
+@clo.push('javaclass=s');
+$nqpcomp.addstage('classname', :after<start>);
+#?endif
 
 sub MAIN(@ARGS) {
     # Enter the compiler.
