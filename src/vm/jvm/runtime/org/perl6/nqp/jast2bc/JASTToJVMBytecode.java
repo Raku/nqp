@@ -29,7 +29,8 @@ public class JASTToJVMBytecode {
         
         try
         {
-            BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(argv[0])));
+            BufferedReader in = new BufferedReader(new InputStreamReader(
+            		new FileInputStream(argv[0]), "UTF-8"));
             JavaClass c = buildClassFrom(in);
             in.close();
             FileOutputStream fos = new FileOutputStream(argv[1]);
