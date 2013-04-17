@@ -17,7 +17,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         my $qast := $<sequence>[0].ast;
         if +$<sequence> > 1 {
             $qast := QAST::Regex.new( :rxtype<altseq>, :node($/) );
-            for $<sequence> { $qast.push($_.ast); }
+            for $<sequence> { nqp::push($qast, $_.ast); }
         }
         make $qast;
     }
@@ -34,7 +34,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                         $lastlit[0] := $lastlit[0] ~ $ast[0];
                     }
                     else {
-                        $qast.push($_.ast);
+                        nqp::push($qast, $_.ast);
                         $lastlit := $ast.rxtype eq 'literal' 
                                     && !QAST::Node.ACCEPTS($ast[0])
                                     ?? $ast !! 0;
@@ -52,7 +52,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         my $qast := $<atom>.ast;
         if $<quantifier> {
             my $ast := $<quantifier>[0].ast;
-            $ast.unshift($qast || QAST::Regex.new( :rxtype<anchor>, :name<pass> ));
+            nqp::unshift($ast, $qast || QAST::Regex.new( :rxtype<anchor>, :name<pass> ));
             $qast := $ast;
         }
         $qast.backtrack('r') if $qast && !$qast.backtrack && %*RX<r>;
@@ -159,14 +159,14 @@ class QRegex::P5Regex::Actions is HLL::Actions {
             elsif $_[0]<backslash> {
                 my $bs := $_[0]<backslash>.ast;
                 $bs.negate(!$bs.negate) if $<sign> eq '^';
-                @alts.push($bs);
+                nqp::push(@alts, $bs);
             }
             else {
                 my $c := ~$_[0];
                 $str := $str ~ (%*RX<i> ?? nqp::lc($c) ~ nqp::uc($c) !! $c);
             }
         }
-        @alts.push(QAST::Regex.new( $str, :rxtype<enumcharlist>, :node($/), :negate( $<sign> eq '^' ) ))
+        nqp::push(@alts, QAST::Regex.new( $str, :rxtype<enumcharlist>, :node($/), :negate( $<sign> eq '^' ) ))
             if nqp::chars($str);
         $qast := +@alts == 1 ?? @alts[0] !!
             $<sign> eq '^' ??
@@ -321,10 +321,10 @@ class QRegex::P5Regex::Actions is HLL::Actions {
             !! self.create_regex_code_object($block);
 
         if $addself {
-            $block.push(QAST::Var.new( :name('self'), :scope('local'), :decl('param') ));
+            nqp::push($block, QAST::Var.new( :name('self'), :scope('local'), :decl('param') ));
         }
         unless $block.symbol('$¢') {
-            $block.push(QAST::Var.new(:name<$¢>, :scope<lexical>, :decl('var')));
+            nqp::push($block, QAST::Var.new(:name<$¢>, :scope<lexical>, :decl('var')));
             $block.symbol('$¢', :scope<lexical>);
         }
 
@@ -338,8 +338,8 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                      ($anon ??
                           QAST::Regex.new( :rxtype<pass> ) !!
                           QAST::Regex.new( :rxtype<pass>, :name(%*RX<name>) )));
-        $block.push($qast);
-        
+        nqp::push($block, $qast);
+
         $block;
     }
 
@@ -400,8 +400,8 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         }
         elsif $qast.rxtype eq 'concat' {
             my @tmp;
-            while +@($qast) { @tmp.push(@($qast).shift) }
-            while @tmp      { @($qast).push(self.flip_ast(@tmp.pop)) }
+            while +@($qast) { nqp::push(@tmp, nqp::shift($qast)) }
+            while @tmp      { nqp::push($qast, self.flip_ast(nqp::pop(@tmp))) }
         }
         else {
             for @($qast) { self.flip_ast($_) }
@@ -576,12 +576,12 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                                      :node($/), :name($name),
                                      QAST::Node.new(QAST::SVal.new( :value($name) )));
             if $<arglist> {
-                for $<arglist>[0].ast.list { $qast[0].push( $_ ) }
+                for $<arglist>[0].ast.list { nqp::push($qast[0], $_ ) }
             }
             elsif $<nibbler> {
                 $name eq 'after' ??
-                    $qast[0].push(self.qbuildsub(self.flip_ast($<nibbler>[0].ast), :anon(1), :addself(1))) !!
-                    $qast[0].push(self.qbuildsub($<nibbler>[0].ast, :anon(1), :addself(1)));
+                    nqp::push($qast[0], self.qbuildsub(self.flip_ast($<nibbler>[0].ast), :anon(1), :addself(1))) !!
+                    nqp::push($qast[0], self.qbuildsub($<nibbler>[0].ast, :anon(1), :addself(1)));
             }
         }
         make $qast;
@@ -593,7 +593,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
 
     method arglist($/) {
         my $past := QAST::Op.new( :op('list') );
-        for $<arg> { $past.push( $_.ast ); }
+        for $<arg> { nqp::push($past, $_.ast ); }
         make $past;
     }
 

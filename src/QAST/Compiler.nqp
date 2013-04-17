@@ -283,38 +283,38 @@ class QAST::Compiler is HLL::Compiler {
             
             # Add pre-deserialization tasks, each as a QAST::Stmt.
             for @pre_des {
-                $block.push(QAST::Stmt.new($_));
+                nqp::push($block, QAST::Stmt.new($_));
             }
             
             # If we need to do deserialization, emit code for that.
             if $comp_mode {
-                $block.push(self.deserialization_code($cu.sc(), $cu.code_ref_blocks(),
+                nqp::push($block, self.deserialization_code($cu.sc(), $cu.code_ref_blocks(),
                     $cu.repo_conflict_resolver()));
             }
             
             # Add post-deserialization tasks.
             for @post_des {
-                $block.push(QAST::Stmt.new($_));
+                nqp::push($block, QAST::Stmt.new($_));
             }
             
             # Compile to POST and add in the flags to load it.
             my $sc_post := self.as_post($block);
             $sc_post.pirflags(':load :init');
-            $block_post.push($sc_post);
+            nqp::push($block_post, $sc_post);
         }
         
         # Compile and include load-time logic, if any.
         if nqp::defined($cu.load) {
             my $load_post := self.as_post(QAST::Block.new( :blocktype('raw'), $cu.load ));
             $load_post.pirflags(':load');
-            $block_post.push($load_post);
+            nqp::push($block_post, $load_post);
         }
         
         # Compile and include main-time logic, if any.
         if nqp::defined($cu.main) {
             my $main_post := self.as_post(QAST::Block.new( :blocktype('raw'), $cu.main ));
             $main_post.pirflags(':main');
-            $block_post.push($main_post);
+            nqp::push($block_post, $main_post);
         }
 
         $block_post
@@ -333,7 +333,7 @@ class QAST::Compiler is HLL::Compiler {
         my $sh_elems := nqp::elems($sh);
         my $i := 0;
         while $i < $sh_elems {
-            $sh_ast.push(nqp::isnull_s($sh[$i])
+            nqp::push($sh_ast, nqp::isnull_s($sh[$i])
                 ?? QAST::Op.new( :op('null_s') )
                 !! QAST::SVal.new( :value($sh[$i]) ));
             $i := $i + 1;
@@ -522,7 +522,7 @@ class QAST::Compiler is HLL::Compiler {
             }
             
             # Add optionals handling code.
-            $decls.push($opts);
+            nqp::push($decls, $opts);
             
             # Create a PIRT::Sub and apply HLL if any.
             $sub := PIRT::Sub.new();
@@ -533,18 +533,18 @@ class QAST::Compiler is HLL::Compiler {
             }
             
             # Emit declarations, statements and and emit return instruction.
-            $sub.push($decls);
+            nqp::push($sub, $decls);
             {
                 my $*BLOCK := $block;
                 my $ret_type := 'P';
                 try $ret_type := self.infer_type($stmts.result);
                 if $ret_type ne 'P' && %hll_force_return_boxing{$hll} {
                     my $boxed := self.coerce($stmts, 'P');
-                    $sub.push($boxed);
+                    nqp::push($sub, $boxed);
                     $sub.push_pirop(".return (" ~ $boxed.result ~ ")");
                 }
                 else {
-                    $sub.push($stmts);
+                    nqp::push($sub, $stmts);
                     $sub.push_pirop(".return (" ~ $stmts.result ~ ")");
                 }
             }
@@ -577,11 +577,11 @@ class QAST::Compiler is HLL::Compiler {
         # What we evaluate to depends on whether it's a declaration or an
         # immediate.
         my $ops := PIRT::Ops.new();
-        $ops.push($sub);
+        nqp::push($ops, $sub);
         my $blocktype := $node.blocktype;
         if $blocktype eq 'immediate' {
             # Look up and capture the block.
-            try @*INNERS.push($node.cuid());
+            try nqp::push(@*INNERS, $node.cuid());
             my $breg := $*REGALLOC.fresh_p();
             $ops.push_pirop(".const 'Sub' $breg = '" ~ $node.cuid() ~ "'");
             $ops.push_pirop("capture_lex", $breg);
@@ -606,7 +606,7 @@ class QAST::Compiler is HLL::Compiler {
         }
         elsif $blocktype eq 'declaration' || $blocktype eq '' {
             # Get the block and newclosure it.
-            try @*INNERS.push($node.cuid());
+            try nqp::push(@*INNERS, $node.cuid());
             my $breg := $*REGALLOC.fresh_p();
             $ops.push_pirop(".const 'Sub' $breg = '" ~ $node.cuid() ~ "'");
             $ops.push_pirop("capture_lex", $breg);
@@ -648,7 +648,7 @@ class QAST::Compiler is HLL::Compiler {
             else {
                 $last := self.as_post($_);
             }
-            $ops.push($last)
+            nqp::push($ops, $last)
                 unless $void && nqp::istype($_, QAST::Var);
             if $resultchild == $i {
                 $ops.result($last.result);
@@ -836,7 +836,7 @@ class QAST::Compiler is HLL::Compiler {
             if $*BLOCK.local_type($name) -> $type {
                 if $*BINDVAL {
                     my $valpost := self.as_post_clear_bindval($*BINDVAL, :want(nqp::lc($type)));
-                    $ops.push($valpost);
+                    nqp::push($ops, $valpost);
                     $ops.push_pirop('set', $name, $valpost.result);
                 }
                 $ops.result($name);
@@ -853,7 +853,7 @@ class QAST::Compiler is HLL::Compiler {
                 my $reg := $*BLOCK.lex_reg($name);
                 if $*BINDVAL {
                     my $valpost := self.as_post_clear_bindval($*BINDVAL, :want(nqp::lc($type)));
-                    $ops.push($valpost);
+                    nqp::push($ops, $valpost);
                     $ops.push_pirop('set', $reg, $valpost.result);
                 }
                 $ops.result($reg);
@@ -880,7 +880,7 @@ class QAST::Compiler is HLL::Compiler {
                 if $scope eq 'lexical' {
                     if $*BINDVAL {
                         my $valpost := self.as_post_clear_bindval($*BINDVAL, :want(nqp::lc($type)));
-                        $ops.push($valpost);
+                        nqp::push($ops, $valpost);
                         $ops.push_pirop('store_lex', self.escape($node.name), $valpost.result);
                         $ops.result($valpost.result);
                     }
@@ -893,7 +893,7 @@ class QAST::Compiler is HLL::Compiler {
                 else {
                     if $*BINDVAL {
                         my $valpost := self.as_post_clear_bindval($*BINDVAL, :want('P'));
-                        $ops.push($valpost);
+                        nqp::push($ops, $valpost);
                         $ops.push_pirop('store_dynamic_lex', self.escape($name), $valpost.result);
                         $ops.result($valpost.result);
                     }
@@ -915,15 +915,15 @@ class QAST::Compiler is HLL::Compiler {
             # Compile object and handle.
             my $obj := self.as_post_clear_bindval(@args[0], :want('P'));
             my $han := self.as_post_clear_bindval(@args[1], :want('P'));
-            $ops.push($obj);
-            $ops.push($han);
+            nqp::push($ops, $obj);
+            nqp::push($ops, $han);
             
             # Go by whether it's a bind or lookup.
             my $type    := type_to_register_type($node.returns);
             my $op_type := type_to_lookup_name($node.returns);
             if $*BINDVAL {
                 my $valpost := self.as_post_clear_bindval($*BINDVAL, :want(nqp::lc($type)));
-                $ops.push($valpost);
+                nqp::push($ops, $valpost);
                 $ops.push_pirop("repr_bind_attr_$op_type", $obj.result, $han.result,
                     self.escape($name), $valpost.result);
                 $ops.result($valpost.result);
@@ -1016,7 +1016,7 @@ class QAST::Compiler is HLL::Compiler {
             # Correct type, but we need a register.
             my $ops := PIRT::Ops.new();
             my $reg := $*REGALLOC."fresh_$result"();
-            $ops.push($post);
+            nqp::push($ops, $post);
             $ops.push_pirop('set', $reg, $post);
             $ops.result($reg);
             return $ops;
@@ -1036,7 +1036,7 @@ class QAST::Compiler is HLL::Compiler {
             my $ops := PIRT::Ops.new();
             my $rtype := nqp::lc($desired);
             my $reg := $*REGALLOC."fresh_$rtype"();
-            $ops.push($post);
+            nqp::push($ops, $post);
             $ops.push_pirop('set', $reg, $post);
             $ops.result($reg);
             return $ops;
@@ -1112,17 +1112,17 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push_pirop('length', %*REG<eos>, %*REG<tgt>);
         $ops.push_pirop('eq', '$I19', 1, $restartlabel);
         $ops.push_pirop('gt', %*REG<pos>, %*REG<eos>, %*REG<fail>);
-        $ops.push(self.regex_post($node));
-        $ops.push($restartlabel);
+        nqp::push($ops, self.regex_post($node));
+        nqp::push($ops, $restartlabel);
         $ops.push_pirop('repr_get_attr_obj', %*REG<cstack>, %*REG<cur>, %*REG<curclass>, '"$!cstack"');
-        $ops.push($faillabel);
+        nqp::push($ops, $faillabel);
         $ops.push_pirop('unless', %*REG<bstack>, $donelabel);
         $ops.push_pirop('pop', '$I19', %*REG<bstack>);
         $ops.push_pirop('if_null', %*REG<cstack>, $cstacklabel);
         $ops.push_pirop('unless', %*REG<cstack>, $cstacklabel);
         $ops.push_pirop('dec', '$I19');
         $ops.push_pirop('set', '$P11', %*REG<cstack> ~ '[$I19]');
-        $ops.push($cstacklabel);
+        nqp::push($ops, $cstacklabel);
         $ops.push_pirop('pop', %*REG<rep>, %*REG<bstack>);
         $ops.push_pirop('pop', %*REG<pos>, %*REG<bstack>);
         $ops.push_pirop('pop', '$I19', %*REG<bstack>);
@@ -1136,11 +1136,11 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push_pirop('le', '$I18', 0, $cutlabel);
         $ops.push_pirop('dec', '$I18');
         $ops.push_pirop('set', '$I18', %*REG<bstack>~'[$I18]');
-        $ops.push($cutlabel);
+        nqp::push($ops, $cutlabel);
         $ops.push_pirop('assign', %*REG<cstack>, '$I18');
-        $ops.push($jumplabel);
+        nqp::push($ops, $jumplabel);
         $ops.push_pirop('jump', '$I19');
-        $ops.push($donelabel);
+        nqp::push($ops, $donelabel);
         $ops.push_pirop('callmethod', '"!cursor_fail"', %*REG<cur>);
 
         $ops.result(%*REG<cur>);
@@ -1179,7 +1179,7 @@ class QAST::Compiler is HLL::Compiler {
         my $label_list_ops := self.post_new('Ops', :result<$P11>);
         $label_list_ops.push_pirop('new', '$P11', '"ResizableIntegerArray"');
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
-        $ops.push($label_list_ops);
+        nqp::push($ops, $label_list_ops);
         self.regex_mark($ops, $endlabel, -1, 0);
         $ops.push_pirop('callmethod', '"!alt"', %*REG<cur>, %*REG<pos>,
             self.escape($node.name), $label_list_ops.result);
@@ -1191,13 +1191,13 @@ class QAST::Compiler is HLL::Compiler {
         while $iter {
             my $altlabel := self.post_new('Label', :name($prefix ~ $altcount));
             my $apost    := self.regex_post(nqp::shift($iter));
-            $ops.push($altlabel);
-            $ops.push($apost);
+            nqp::push($ops, $altlabel);
+            nqp::push($ops, $apost);
             $ops.push_pirop('goto', $endlabel);
             $label_list_ops.push_pirop('nqp_push_label', $label_list_ops.result, $altlabel.result);
             $altcount++;
         }
-        $ops.push($endlabel);
+        nqp::push($ops, $endlabel);
         self.regex_commit($ops, $endlabel) if $node.backtrack eq 'r';
         $ops;
     }
@@ -1211,17 +1211,17 @@ class QAST::Compiler is HLL::Compiler {
         my $altlabel := self.post_new('Label', :name($prefix ~ $altcount));
         my $apost    := self.regex_post(nqp::shift($iter));
         while $iter {
-            $ops.push($altlabel);
+            nqp::push($ops, $altlabel);
             $altcount++;
             $altlabel := self.post_new('Label', :name($prefix ~ $altcount));
             self.regex_mark($ops, $altlabel, %*REG<pos>, 0);
-            $ops.push($apost);
+            nqp::push($ops, $apost);
             $ops.push_pirop('goto', $endlabel);
             $apost := self.regex_post(nqp::shift($iter));
         }
-        $ops.push($altlabel);
-        $ops.push($apost);
-        $ops.push($endlabel);
+        nqp::push($ops, $altlabel);
+        nqp::push($ops, $apost);
+        nqp::push($ops, $endlabel);
         $ops;
     }
 
@@ -1257,7 +1257,7 @@ class QAST::Compiler is HLL::Compiler {
             $ops.push_pirop('sub', '$I11', %*REG<pos>, 1);
             $ops.push_pirop('is_cclass', '$I11', '.CCLASS_NEWLINE', %*REG<tgt>, '$I11');
             $ops.push_pirop('unless', '$I11', %*REG<fail>);
-            $ops.push($donelabel);
+            nqp::push($ops, $donelabel);
         }
         elsif $subtype eq 'eol' {
             $ops.push_pirop('is_cclass', '$I11', '.CCLASS_NEWLINE', %*REG<tgt>, %*REG<pos>);
@@ -1267,7 +1267,7 @@ class QAST::Compiler is HLL::Compiler {
             $ops.push_pirop('sub', '$I11', %*REG<pos>, 1);
             $ops.push_pirop('is_cclass', '$I11', '.CCLASS_NEWLINE', %*REG<tgt>, '$I11');
             $ops.push_pirop('if', '$I11', %*REG<fail>);
-            $ops.push($donelabel);
+            nqp::push($ops, $donelabel);
         }
         elsif $subtype eq 'fail' {
             $ops.push_pirop('goto', %*REG<fail>);
@@ -1314,7 +1314,7 @@ class QAST::Compiler is HLL::Compiler {
 
     method concat($node) {
         my $ops := self.post_new('Ops', :result(%*REG<cur>));
-        for $node.list { $ops.push(self.regex_post($_)); }
+        for $node.list { nqp::push($ops, self.regex_post($_)); }
         $ops;
     }
 
@@ -1329,18 +1329,18 @@ class QAST::Compiler is HLL::Compiler {
         # make a mark that holds our starting position in the pos slot
         self.regex_mark($ops, $conjlabel, %*REG<pos>, 0);
         $ops.push_pirop('goto', $firstlabel);
-        $ops.push($conjlabel);
+        nqp::push($ops, $conjlabel);
         $ops.push_pirop('goto', %*REG<fail>);
         # call the first child
-        $ops.push($firstlabel);
-        $ops.push(self.regex_post(nqp::shift($iter)));
+        nqp::push($ops, $firstlabel);
+        nqp::push($ops, self.regex_post(nqp::shift($iter)));
         # use previous mark to make one with pos=start, rep=end
         self.regex_peek($ops, $conjlabel, '$I11');
         self.regex_mark($ops, $conjlabel, '$I11', %*REG<pos>);
 
         while $iter {
             $ops.push_pirop('set', %*REG<pos>, '$I11');
-            $ops.push(self.regex_post(nqp::shift($iter)));
+            nqp::push($ops, self.regex_post(nqp::shift($iter)));
             self.regex_peek($ops, $conjlabel, '$I11', '$I12');
             $ops.push_pirop('ne', %*REG<pos>, '$I12', %*REG<fail>);
         }
@@ -1388,7 +1388,7 @@ class QAST::Compiler is HLL::Compiler {
         }
         elsif +@($node) == 1 {
             my $dynname := self.coerce(self.as_post($node[0]), 'S');
-            $ops.push($dynname);
+            nqp::push($ops, $dynname);
             $ops.push_pirop('callmethod', '"!cursor_pass"', %*REG<cur>, %*REG<pos>, $dynname, |@backtrack);
         }
         else {
@@ -1403,7 +1403,7 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push_pirop('repr_bind_attr_int', %*REG<cur>, %*REG<curclass>, '"$!pos"', %*REG<pos>);
         $ops.push_pirop('store_lex', 'unicode:"$\x{a2}"', %*REG<cur>);
         my $cpost := self.coerce(self.as_post($node[0]), 'P');
-        $ops.push($cpost);
+        nqp::push($ops, $cpost);
         if $node.subtype eq 'zerowidth' {
             $ops.push_pirop($node.negate ?? 'if' !! 'unless', $cpost, %*REG<fail>);
         }
@@ -1436,23 +1436,23 @@ class QAST::Compiler is HLL::Compiler {
                 $ops.push_pirop('goto', $donelabel);
             }
             $ops.push_pirop('goto', $seplabel) if $sep;
-            $ops.push($looplabel);
+            nqp::push($ops, $looplabel);
             $ops.push_pirop('set', $ireg, %*REG<rep>);
-            $ops.push(self.regex_post($sep)) if $sep;
-            $ops.push($seplabel) if $sep;
-            $ops.push(self.regex_post($node[0]));
+            nqp::push($ops, self.regex_post($sep)) if $sep;
+            nqp::push($ops, $seplabel) if $sep;
+            nqp::push($ops, self.regex_post($node[0]));
             $ops.push_pirop('set', %*REG<rep>, $ireg);
             $ops.push_pirop('inc', %*REG<rep>);
             $ops.push_pirop('lt', %*REG<rep>, $min, $looplabel) if $min > 1;
             $ops.push_pirop('ge', %*REG<rep>, $max, $donelabel) if $max > 1;
             self.regex_mark($ops, $looplabel, %*REG<pos>, %*REG<rep>) if $max != 1;
-            $ops.push($donelabel);
+            nqp::push($ops, $donelabel);
         }
         else {
             if $min == 0 { self.regex_mark($ops, $donelabel, %*REG<pos>, 0); }
             elsif $needmark { self.regex_mark($ops, $donelabel, -1, 0); }
-            $ops.push($looplabel);
-            $ops.push(self.regex_post($node[0]));
+            nqp::push($ops, $looplabel);
+            nqp::push($ops, self.regex_post($node[0]));
             if $needmark {
                 self.regex_peek($ops, $donelabel, '*', %*REG<rep>);
                 self.regex_commit($ops, $donelabel) if $backtrack eq 'r';
@@ -1462,10 +1462,10 @@ class QAST::Compiler is HLL::Compiler {
             }
             unless $max == 1 {
                 self.regex_mark($ops, $donelabel, %*REG<pos>, %*REG<rep>);
-                $ops.push(self.regex_post($sep)) if $sep;
+                nqp::push($ops, self.regex_post($sep)) if $sep;
                 $ops.push_pirop('goto', $looplabel);
             }
-            $ops.push($donelabel);
+            nqp::push($ops, $donelabel);
             $ops.push_pirop('lt', %*REG<rep>, +$node.min, %*REG<fail>)
                 if $min > 1;
         }
@@ -1481,13 +1481,13 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push_pirop('repr_get_attr_int', '$I11', 'self', %*REG<curclass>, '"$!from"');
         $ops.push_pirop('ne', '$I11', -1, $donelabel);
         $ops.push_pirop('goto', $scanlabel);
-        $ops.push($looplabel);
+        nqp::push($ops, $looplabel);
         $ops.push_pirop('inc', %*REG<pos>);
         $ops.push_pirop('gt', %*REG<pos>, %*REG<eos>, %*REG<fail>);
         $ops.push_pirop('repr_bind_attr_int', %*REG<cur>, %*REG<curclass>, '"$!from"', %*REG<pos>);
-        $ops.push($scanlabel);
+        nqp::push($ops, $scanlabel);
         self.regex_mark($ops, $looplabel, %*REG<pos>, 0);
-        $ops.push($donelabel);
+        nqp::push($ops, $donelabel);
         $ops;
     }
 
@@ -1498,7 +1498,7 @@ class QAST::Compiler is HLL::Compiler {
         my $faillabel := self.post_new('Label', :name($prefix ~ '_fail'));
         my $name := self.escape($node.name);
         self.regex_mark($ops, $faillabel, %*REG<pos>, 0);
-        $ops.push(self.regex_post($node[0]));
+        nqp::push($ops, self.regex_post($node[0]));
         self.regex_peek($ops, $faillabel, '$I11');
         $ops.push_pirop('repr_bind_attr_int', %*REG<cur>, %*REG<curclass>, '"$!pos"', %*REG<pos>);
         $ops.push_pirop('callmethod', '"!cursor_start_subcapture"', %*REG<cur>, '$I11', :result<$P11>);
@@ -1506,9 +1506,9 @@ class QAST::Compiler is HLL::Compiler {
         $ops.push_pirop('callmethod', '"!cursor_capture"', %*REG<cur>, 
                         '$P11', $name, :result(%*REG<cstack>));
         $ops.push_pirop('goto', $donelabel);
-        $ops.push($faillabel);
+        nqp::push($ops, $faillabel);
         $ops.push_pirop('goto', %*REG<fail>);
-        $ops.push($donelabel);
+        nqp::push($ops, $donelabel);
         $ops;
     }
 
@@ -1522,7 +1522,7 @@ class QAST::Compiler is HLL::Compiler {
         my $subpost := nqp::shift(@pargs);
         my $testop := $node.negate ?? 'ge' !! 'lt';
         my $captured := 0;
-        $ops.push($cpn[0]);
+        nqp::push($ops, $cpn[0]);
         $ops.push_pirop('repr_bind_attr_int', %*REG<cur>, %*REG<curclass>, '"$!pos"', %*REG<pos>);
         $ops.push_pirop('callmethod', $subpost, %*REG<cur>, |@pargs, |@nargs, :result<$P11>);
         $ops.push_pirop('repr_get_attr_int', '$I11', '$P11', %*REG<curclass>, '"$!pos"');
@@ -1533,17 +1533,17 @@ class QAST::Compiler is HLL::Compiler {
             if $node.backtrack eq 'r' {
                 unless $subtype eq 'method' {
                     self.regex_mark($ops, $passlabel, -1, 0);
-                    $ops.push($passlabel);
+                    nqp::push($ops, $passlabel);
                 }
             }
             else {
                 my $backlabel := self.post_new('Label', :name($rxname ~ '_back'));
                 $ops.push_pirop('goto', $passlabel);
-                $ops.push($backlabel);
+                nqp::push($ops, $backlabel);
                 $ops.push_pirop('callmethod', '"!cursor_next"', '$P11', :result('$P11'));
                 $ops.push_pirop('repr_get_attr_int', '$I11', '$P11', %*REG<curclass>, '"$!pos"');
                 $ops.push_pirop($testop, '$I11', '0', %*REG<fail>);
-                $ops.push($passlabel);
+                nqp::push($ops, $passlabel);
                 if $subtype eq 'capture' {
                     $ops.push_pirop('callmethod', '"!cursor_capture"', %*REG<cur>, 
                                     '$P11', $name, :result(%*REG<cstack>));
