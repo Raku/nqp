@@ -635,7 +635,7 @@ class HLL::Compiler does HLL::Backend::Default {
             self.stages(@new-stages);
             return 1;
         }
-        my @new-stages := nqp::list();
+        my @new-stages := nqp::qlist();
         for self.stages {
             if $_ eq $where {
                 if $position eq 'before' {

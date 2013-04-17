@@ -9,7 +9,7 @@ my class NQPCapture {
     }
 
     method BUILD() {
-        @!array := nqp::list();
+        @!array := nqp::qlist();
         %!hash := nqp::hash();
     }
     

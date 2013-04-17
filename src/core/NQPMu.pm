@@ -37,7 +37,7 @@ my class NQPMu {
                     nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos($task, 3), %attrinit{$key_name});
                 }
                 else {
-                    nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos($task, 3), nqp::list());
+                    nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos($task, 3), nqp::qlist());
                 }
             }
             elsif nqp::iseq_i($code, 3) {

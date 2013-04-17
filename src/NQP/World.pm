@@ -27,12 +27,12 @@ class NQP::World is HLL::World {
     has @!clearup_tasks; 
     
     method BUILD(*%opts) {
-        @!BLOCKS := nqp::list();
+        @!BLOCKS := nqp::qlist();
         %!code_objects_to_fix_up := nqp::hash();
         %!code_object_types := nqp::hash();
         %!code_object_fixup_list := nqp::hash();
         %!code_stub_sc_idx := nqp::hash();
-        @!clearup_tasks := nqp::list();
+        @!clearup_tasks := nqp::qlist();
     }
     
     # Creates a new lexical scope and puts it on top of the stack.
@@ -48,7 +48,7 @@ class NQP::World is HLL::World {
     
     # Pops a lexical scope off the stack.
     method pop_lexpad() {
-        @!BLOCKS.pop()
+        nqp::pop(@!BLOCKS)
     }
     
     # Gets the top lexpad.
@@ -331,7 +331,7 @@ class NQP::World is HLL::World {
         if $have_code_type {
             # Create it now.
             nqp::bindattr($code_obj, $code_type, '$!do', $dummy);
-            nqp::bindattr($code_obj, $code_type, '$!dispatchees', nqp::list())
+            nqp::bindattr($code_obj, $code_type, '$!dispatchees', nqp::qlist())
                 if $is_dispatcher;
             my $slot := self.add_object($code_obj);
 

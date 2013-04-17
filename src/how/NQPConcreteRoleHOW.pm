@@ -45,12 +45,12 @@ knowhow NQPConcreteRoleHOW {
     method BUILD(:$name!, :$instance_of!) {
         $!name := $name;
         $!instance_of := $instance_of;
-        @!attributes := nqp::list();
+        @!attributes := nqp::qlist();
         %!methods := nqp::hash();
-        @!multi_methods_to_incorporate := nqp::list();
-        @!collisions := nqp::list();
-        @!roles := nqp::list();
-        @!role_typecheck_list := nqp::list();
+        @!multi_methods_to_incorporate := nqp::qlist();
+        @!collisions := nqp::qlist();
+        @!roles := nqp::qlist();
+        @!role_typecheck_list := nqp::qlist();
         $!composed := 0;
     }
 

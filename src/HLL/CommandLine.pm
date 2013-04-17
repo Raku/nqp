@@ -137,7 +137,7 @@ class HLL::CommandLine::Parser {
     }
 
     method BUILD(:@specs) {
-        @!specs   := nqp::list();
+        @!specs   := nqp::qlist();
         %!options := nqp::hash();
         %!stopper := nqp::hash();
         %!stopper{'--'} := 1;

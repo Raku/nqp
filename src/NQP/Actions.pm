@@ -1038,14 +1038,14 @@ class NQP::Actions is HLL::Actions {
     }
 
     sub attach_multi_signature($code_obj, $routine) {
-        my $types := nqp::list();
-        my $definednesses := nqp::list();
+        my $types := nqp::qlist();
+        my $definednesses := nqp::qlist();
         for @($routine[0]) {
             if nqp::istype($_, QAST::Var) && $_.decl eq 'param' && !$_.named {
-                $types.push($_.returns =:= NQPMu
+                nqp::push($types, $_.returns =:= NQPMu
                     ?? nqp::null()
                     !! $_.returns);
-                $definednesses.push($_<definedness> eq 'D' ?? 1 !!
+                nqp::push($definednesses, $_<definedness> eq 'D' ?? 1 !!
                                     $_<definedness> eq 'U' ?? 2 !! 0);
             }
         }
