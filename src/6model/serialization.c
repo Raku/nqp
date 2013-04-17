@@ -11,6 +11,7 @@
 #include "pmc_serializationcontext.h"
 #include "pmc_nqplexinfo.h"
 #include "pmc_ownedhash.h"
+#include "pmc_qrpa.h"
 #include "pmc_ownedresizablepmcarray.h"
 #include "pmc/pmc_sub.h"
 #include "base64.h"
@@ -52,6 +53,7 @@
 #define REFVAR_VM_HASH_STR_VAR      10
 #define REFVAR_STATIC_CODEREF       11
 #define REFVAR_CLONED_CODEREF       12
+#define REFVAR_QRPA                 13
 
 /* Cached type IDs. */
 static INTVAL smo_id = 0;
@@ -60,6 +62,7 @@ static INTVAL perl6_lexpad_id = 0;
 static INTVAL ctmthunk_id = 0;
 static INTVAL ownedhash_id = 0;
 static INTVAL ownedrpa_id = 0;
+static INTVAL qrpa_id = 0;
 
 /* Endian translation (file format is little endian, so on big endian we need
  * to twiddle. */
@@ -237,6 +240,22 @@ static void write_obj_ref(PARROT_INTERP, SerializationWriter *writer, PMC *ref) 
 /* Writes an array where each item is a variant reference. */
 void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref);
 static void write_array_var(PARROT_INTERP, SerializationWriter *writer, PMC *arr) {
+    Parrot_Int4 elems = (Parrot_Int4)VTABLE_elements(interp, arr);
+    Parrot_Int4 i;
+    
+    /* Write out element count. */
+    expand_storage_if_needed(interp, writer, 4);
+    write_int32(*(writer->cur_write_buffer), *(writer->cur_write_offset), elems);
+    *(writer->cur_write_offset) += 4;
+    
+    /* Write elements. */
+    for (i = 0; i < elems; i++)
+        write_ref_func(interp, writer, VTABLE_get_pmc_keyed_int(interp, arr, i));
+}
+
+/* Writes an array where each item is a variant reference. */
+void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref);
+static void write_qrpa(PARROT_INTERP, SerializationWriter *writer, PMC *arr) {
     Parrot_Int4 elems = (Parrot_Int4)VTABLE_elements(interp, arr);
     Parrot_Int4 i;
     
@@ -491,6 +510,9 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
     else if (ref->vtable->base_type == ownedrpa_id) {
         discrim = REFVAR_VM_ARR_VAR;
     }
+    else if (ref->vtable->base_type == qrpa_id) {
+        discrim = REFVAR_QRPA;
+    }
     else if (ref->vtable->base_type == enum_class_ResizableIntegerArray) {
         discrim = REFVAR_VM_ARR_INT;
     }
@@ -558,6 +580,9 @@ void write_ref_func(PARROT_INTERP, SerializationWriter *writer, PMC *ref) {
             break;
         case REFVAR_VM_ARR_VAR:
             write_array_var(interp, writer, ref);
+            break;
+        case REFVAR_QRPA:
+            write_qrpa(interp, writer, ref);
             break;
         case REFVAR_VM_ARR_INT:
             write_array_int(interp, writer, ref);
@@ -1023,6 +1048,7 @@ STRING * Serialization_serialize(PARROT_INTERP, PMC *sc, PMC *empty_string_heap)
     ctmthunk_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "CTMThunk", 0));
     ownedhash_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "OwnedHash", 0));
     ownedrpa_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "OwnedResizablePMCArray", 0));
+    qrpa_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "QRPA", 0));
     
     /* Initialize string heap so first entry is the NULL string. */
     VTABLE_push_string(interp, empty_string_heap, STRINGNULL);
@@ -1188,6 +1214,26 @@ static PMC * read_array_var(PARROT_INTERP, SerializationReader *reader) {
     return result;
 }
 
+/* Reads in a QRPA of variant references. */
+PMC * read_ref_func(PARROT_INTERP, SerializationReader *reader);
+static PMC * read_qrpa(PARROT_INTERP, SerializationReader *reader) {
+    PMC *result = Parrot_pmc_new(interp, qrpa_id);
+    Parrot_Int4 elems, i;
+
+    /* Read the element count. */
+    assert_can_read(interp, reader, 4);
+    elems = read_int32(*(reader->cur_read_buffer), *(reader->cur_read_offset));
+    *(reader->cur_read_offset) += 4;
+
+    /* Read in the elements. */
+    for (i = 0; i < elems; i++)
+        VTABLE_set_pmc_keyed_int(interp, result, i, read_ref_func(interp, reader));
+
+    /*PARROT_QRPA(result)->owner = reader->cur_object;*/
+
+    return result;
+}
+
 /* Reads in an array of integers. */
 static PMC * read_array_int(PARROT_INTERP, SerializationReader *reader) {
     PMC *result = Parrot_pmc_new(interp, enum_class_ResizableIntegerArray);
@@ -1293,6 +1339,8 @@ PMC * read_ref_func(PARROT_INTERP, SerializationReader *reader) {
             return read_array_int(interp, reader);
         case REFVAR_VM_ARR_STR:
             return read_array_str(interp, reader);
+        case REFVAR_QRPA:
+            return read_qrpa(interp, reader);
         case REFVAR_VM_HASH_STR_VAR:
             return read_hash_str_var(interp, reader);
         case REFVAR_STATIC_CODEREF:
@@ -1814,6 +1862,7 @@ void Serialization_deserialize(PARROT_INTERP, PMC *sc, PMC *string_heap, PMC *st
     smo_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "SixModelObject", 0));
     ownedhash_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "OwnedHash", 0));
     ownedrpa_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "OwnedResizablePMCArray", 0));
+    qrpa_id = Parrot_pmc_get_type_str(interp, Parrot_str_new(interp, "QRPA", 0));
     
     /* Read header and disect the data into its parts. */
     check_and_disect_input(interp, reader, data);
