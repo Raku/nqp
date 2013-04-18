@@ -78,6 +78,7 @@ MAIN: {
     $config{'shell'} = $^O eq 'MSWin32' ? 'cmd' : 'sh';
     $config{'make'} = $^O eq 'MSWin32' ? 'nmake' : 'make';
     $config{'cpsep'} = $^O eq 'MSWin32' ? ';' : ':';
+    $config{'runner'} = $^O eq 'MSWin32' ? 'nqp.bat' : 'nqp.sh';
 
     fill_template_file('tools/build/Makefile-JVM.in', 'Makefile', %config);
     

@@ -7,6 +7,7 @@ ASM    = 3rdparty/asm/
 
 MKPATH = $(PERL) -MExtUtils::Command -e mkpath
 CP     = $(PERL) -MExtUtils::Command -e cp
+CHMOD  = $(PERL) -MExtUtils::Command -e chmod
 
 RUNTIME_JAVAS = \
   src/vm/jvm/runtime/org/perl6/nqp/jast2bc/*.java \
@@ -131,7 +132,9 @@ ALL_OUTPUT = $(NQP_MO_CLASS) $(MODULE_LOADER_CLASS) \
              $(JASTNODES_CLASS) $(QAST_CLASS) \
              $(P6QREGEX_CLASS) $(NQP_CLASS) \
 
-all: $(ALL_OUTPUT)
+RUNNER = @runner@
+
+all: $(ALL_OUTPUT) $(RUNNER)
 
 $(RUNTIME_JAR): $(RUNTIME_JAVAS)
 	$(PERL) -MExtUtils::Command -e mkpath bin
@@ -290,3 +293,7 @@ $(ALL_OUTPUT): $(STAGE2_OUTPUT)
 	$(CP) $(STAGE2)/$(QAST_CLASS) .
 	$(CP) $(STAGE2)/$(P6QREGEX_CLASS) .
 	$(CP) $(STAGE2)/$(NQP_CLASS) .
+
+$(RUNNER):
+	$(CP) src/vm/jvm/$(RUNNER) .
+	$(CHMOD) 755 $(RUNNER)

@@ -43,3 +43,5 @@ config.default
 bin
 nqp-runtime.jar
 *.class
+/nqp.bat
+/nqp.sh
