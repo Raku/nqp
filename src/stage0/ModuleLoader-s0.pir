@@ -486,7 +486,7 @@
     .local pmc fb_tmp_10 
     .local pmc fb_tmp_11 
     .local pmc fb_tmp_12 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     null $P5002
     set $P102, $P5002
@@ -649,7 +649,7 @@
     .local pmc fb_tmp_7 
     .local pmc fb_tmp_8 
     .local pmc fb_tmp_9 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     getinterp $P5002
     set fb_tmp_8, $P5002
@@ -749,7 +749,7 @@
     set $P101, $P5001
     null $P5002
     set $P102, $P5002
-    new $P5003, 'ResizablePMCArray'
+    new $P5003, 'QRPA'
     set $P103, $P5003
     root_new $P104, ['parrot';'Continuation']
     set_label $P104, lexotic_85
@@ -1034,7 +1034,7 @@
     .local pmc fb_tmp_20 
     null $P5001
     set $P101, $P5001
-    new $P5002, 'ResizablePMCArray'
+    new $P5002, 'QRPA'
     set $P102, $P5002
     find_lex $P5003, "$setting_name"
     set $S5002, $P5003
@@ -1230,7 +1230,7 @@
     nqp_create_sc $P5001, "29B143430EE886CB38D06CAA1BF4390F62EA895A-1365879959.396"
     set cur_sc, $P5001
     $P5002 = cur_sc."set_description"("src\\ModuleLoader.pm")
-    new $P5003, 'ResizablePMCArray'
+    new $P5003, 'QRPA'
     set conflicts, $P5003
     new $P5004, 'ResizableStringArray'
     null $S5001
@@ -1281,7 +1281,7 @@
 .namespace []
 .sub "" :subid("cuid_22_1365879959.373") :anon :lex :outer("cuid_23_1365879959.373")
 .annotate 'file', "src\\ModuleLoader.pm"
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     .const 'Sub' $P5002 = "cuid_1_1365879959.373" 
     push $P5001, $P5002
     .const 'Sub' $P5002 = "cuid_2_1365879959.373" 

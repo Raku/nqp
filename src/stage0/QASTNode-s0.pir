@@ -890,7 +890,7 @@
     nqp_get_sc_object $P5025, "D36D7A49EFB8A9F0BFC5D1E2F9B2F549157B62F8-1365879959.979", 25
     set _lex_param_1, $P5025
   default67:
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     nqp_get_sc_object $P5002, "D36D7A49EFB8A9F0BFC5D1E2F9B2F549157B62F8-1365879959.979", 25
     set $P102, $P5002
@@ -903,7 +903,7 @@
     box $P5003, 0
     set _lex_param_1, $P5003
   unless37_end62:
-    new $P5004, 'ResizablePMCArray'
+    new $P5004, 'QRPA'
     set $I5002, _lex_param_1
     repeat $S5001, " ", $I5002
     box $P5005, $S5001
@@ -4085,7 +4085,7 @@
     repr_get_attr_obj $P5009, $P5007, $P5008, "@!pre_deserialize"
     isnull $I5002, $P5009
     unless $I5002 goto if205_else382 
-    new $P5010, 'ResizablePMCArray'
+    new $P5010, 'QRPA'
     set $P5014, $P5010
     goto if205_end383
   if205_else382:
@@ -4130,7 +4130,7 @@
     repr_get_attr_obj $P5009, $P5007, $P5008, "@!post_deserialize"
     isnull $I5002, $P5009
     unless $I5002 goto if209_else389 
-    new $P5010, 'ResizablePMCArray'
+    new $P5010, 'QRPA'
     set $P5014, $P5010
     goto if209_end390
   if209_else389:
@@ -4402,7 +4402,7 @@
     nqp_create_sc $P5001, "F054B153354B5DBC27BD80BD112E1D4B6145EB63-1365879961.93"
     set cur_sc, $P5001
     $P5002 = cur_sc."set_description"("src\\stage2\\QASTNode.nqp")
-    new $P5003, 'ResizablePMCArray'
+    new $P5003, 'QRPA'
     set conflicts, $P5003
     new $P5004, 'ResizableStringArray'
     null $S5001
@@ -5106,7 +5106,7 @@
 .namespace []
 .sub "" :subid("cuid_129_1365879961.906") :anon :lex :outer("cuid_130_1365879961.906")
 .annotate 'file', "src\\stage2\\QASTNode.nqp"
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     .const 'Sub' $P5002 = "cuid_1_1365879961.906" 
     push $P5001, $P5002
     .const 'Sub' $P5002 = "cuid_2_1365879961.906" 

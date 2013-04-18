@@ -12798,7 +12798,7 @@
     .lex "@names", $P102 
     nqp_get_sc_object $P5001, "D36D7A49EFB8A9F0BFC5D1E2F9B2F549157B62F8-1365879959.979", 25
     set $P101, $P5001
-    new $P5002, 'ResizablePMCArray'
+    new $P5002, 'QRPA'
     set $P102, $P5002
 .annotate 'line', 941
     find_lex $P5003, "$ast"
@@ -15743,7 +15743,7 @@
     .local pmc fb_tmp_107 
     .local pmc fb_tmp_108 
     .local pmc fb_tmp_109 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     find_dynamic_lex $P5002, "%*RX"
     unless_null $P5002, fallback2059
@@ -15774,7 +15774,7 @@
   fallback2059:
     exists $I5001, $P5002["dba"]
     unless $I5001 goto if759_end2058 
-    new $P5010, 'ResizablePMCArray'
+    new $P5010, 'QRPA'
 .annotate 'line', 571
     nqp_get_sc_object $P5011, "F054B153354B5DBC27BD80BD112E1D4B6145EB63-1365879961.93", 52
     find_dynamic_lex $P5012, "%*RX"
@@ -17990,7 +17990,7 @@
     .local pmc fb_tmp_201 
     .local pmc fb_tmp_202 
     .local pmc fb_tmp_203 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     find_lex $P5005, "$/"
     unless_null $P5005, fallback2384
@@ -19608,7 +19608,7 @@
     .const 'Sub' $P5019 = 'cuid_230_1365879990.382' 
     capture_lex $P5019 
     .lex "@alternatives", $P101 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
 .annotate 'line', 973
     find_lex $P5005, "$ast"
@@ -19796,7 +19796,7 @@
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
 .annotate 'line', 999
     .lex "@tmp", $P101 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
   while1084_test2668:
     find_lex $P5002, "$qast"
@@ -19936,7 +19936,7 @@
     .lex "$block", _lex_param_2 
     .lex "$key", _lex_param_3 
     .lex "@alternatives", _lex_param_4 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     set $P5002, _lex_param_4
     iter $P5004, _lex_param_4
@@ -20007,7 +20007,7 @@
     nqp_create_sc $P5001, "9695343AB2BEC3801FF399D28AAA45968E1B1970-1365879990.406"
     set cur_sc, $P5001
     $P5002 = cur_sc."set_description"("src\\stage2\\gen\\NQPP6QRegex.pm")
-    new $P5003, 'ResizablePMCArray'
+    new $P5003, 'QRPA'
     set conflicts, $P5003
     new $P5004, 'ResizableStringArray'
     null $S5001
@@ -21061,7 +21061,7 @@
 .namespace []
 .sub "" :subid("cuid_237_1365879990.382") :anon :lex :outer("cuid_238_1365879990.382")
 .annotate 'file', "src\\stage2\\gen\\NQPP6QRegex.pm"
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     .const 'Sub' $P5002 = "cuid_1_1365879990.382" 
     push $P5001, $P5002
     .const 'Sub' $P5002 = "cuid_2_1365879990.382" 

@@ -65,7 +65,7 @@
     set $P104, $P5001
     nqp_get_sc_object $P5002, "D36D7A49EFB8A9F0BFC5D1E2F9B2F549157B62F8-1365879959.979", 25
     set $P105, $P5002
-    new $P5003, 'ResizablePMCArray'
+    new $P5003, 'QRPA'
     set $P106, $P5003
     .const 'Sub' $P5004 = 'cuid_373_1365879995.227' 
     capture_lex $P5004
@@ -357,7 +357,7 @@
     .lex "%opts", _lex_param_1 
     nqp_decontainerize $P5001, _lex_param_0
     nqp_get_sc_object $P5002, "744C7ED774769C466927C755238AD24292064564-1365879995.253", 3
-    new $P5003, 'ResizablePMCArray'
+    new $P5003, 'QRPA'
     repr_bind_attr_obj $P5001, $P5002, "@!BLOCKS", $P5003
     nqp_decontainerize $P5004, _lex_param_0
     nqp_get_sc_object $P5005, "744C7ED774769C466927C755238AD24292064564-1365879995.253", 3
@@ -377,7 +377,7 @@
     repr_bind_attr_obj $P5013, $P5014, "%!code_stub_sc_idx", $P5015
     nqp_decontainerize $P5016, _lex_param_0
     nqp_get_sc_object $P5017, "744C7ED774769C466927C755238AD24292064564-1365879995.253", 3
-    new $P5018, 'ResizablePMCArray'
+    new $P5018, 'QRPA'
     repr_bind_attr_obj $P5016, $P5017, "@!clearup_tasks", $P5018
     .return ($P5018) 
 .end
@@ -499,7 +499,7 @@
     .param pmc _lex_param_0 
     .lex "@x", $P101 
     .lex "self", _lex_param_0 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     nqp_decontainerize $P5003, _lex_param_0
     nqp_get_sc_object $P5004, "744C7ED774769C466927C755238AD24292064564-1365879995.253", 3
@@ -1146,7 +1146,7 @@
 .annotate 'line', 213
 .annotate 'line', 214
     nqp_decontainerize $P5009, _lex_param_0
-    new $P5010, 'ResizablePMCArray'
+    new $P5010, 'QRPA'
     push $P5010, _lex_param_4
     $P5011 = $P5009."find_sym"($P5010)
     set $P101, $P5011
@@ -1376,7 +1376,7 @@
     set $P101, $P5001
     nqp_get_sc_object $P5002, "D36D7A49EFB8A9F0BFC5D1E2F9B2F549157B62F8-1365879959.979", 25
     set $P102, $P5002
-    new $P5003, 'ResizablePMCArray'
+    new $P5003, 'QRPA'
     set $P103, $P5003
     nqp_get_sc_object $P5004, "D36D7A49EFB8A9F0BFC5D1E2F9B2F549157B62F8-1365879959.979", 25
     set $P104, $P5004
@@ -2005,7 +2005,7 @@
     unless $P5005 goto if91_end164 
     find_lex $P5006, "$code_obj"
     find_lex $P5007, "$code_type"
-    new $P5008, 'ResizablePMCArray'
+    new $P5008, 'QRPA'
     setattribute $P5006, $P5007, "$!dispatchees", $P5008
   if91_end164:
 .annotate 'line', 340
@@ -2070,7 +2070,7 @@
     find_lex $P5050, "$past"
     $P5051 = $P5050."cuid"()
     set $S5001, $P5051
-    new $P5052, 'ResizablePMCArray'
+    new $P5052, 'QRPA'
     find_lex $P5053, "$code_obj"
     push $P5052, $P5053
     set $P5049[$S5001], $P5052
@@ -2214,14 +2214,14 @@
     set $P103, $P5003
 .annotate 'line', 418
     nqp_decontainerize $P5004, _lex_param_0
-    new $P5005, 'ResizablePMCArray'
+    new $P5005, 'QRPA'
     box $P5006, "NQPSignature"
     push $P5005, $P5006
     $P5007 = $P5004."find_sym"($P5005)
     set $P101, $P5007
 .annotate 'line', 419
     nqp_decontainerize $P5008, _lex_param_0
-    new $P5009, 'ResizablePMCArray'
+    new $P5009, 'QRPA'
     box $P5010, "NQPRoutine"
     push $P5009, $P5010
     $P5011 = $P5008."find_sym"($P5009)
@@ -2589,9 +2589,9 @@
     .local pmc fb_tmp_38 
     .local pmc fb_tmp_39 
     .local pmc pkg_viv_tmp_6 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
-    new $P5002, 'ResizablePMCArray'
+    new $P5002, 'QRPA'
     box $P5003, "nqp_group"
     push $P5002, $P5003
     box $P5004, "nqp_ops"
@@ -31872,7 +31872,7 @@
   vivi_17204094:
     set $P5003, $P5008
   fallback4090:
-    new $P5011, 'ResizablePMCArray'
+    new $P5011, 'QRPA'
     box $P5012, "NQPMu"
     push $P5011, $P5012
     $P5013 = $P5003."find_sym"($P5011)
@@ -31995,7 +31995,7 @@
     .const 'Sub' $P5009 = 'cuid_434_1365879995.227' 
     capture_lex $P5009 
     .lex "@parts", $P101 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
 .annotate 'line', 1631
     find_lex $P5005, "$ast"
@@ -32331,7 +32331,7 @@
   vivi_17474144:
     set $P5020, $P5025
   fallback4140:
-    new $P5028, 'ResizablePMCArray'
+    new $P5028, 'QRPA'
     box $P5029, "NQPRoutine"
     push $P5028, $P5029
     $P5030 = $P5020."find_sym"($P5028)
@@ -32379,9 +32379,9 @@
     set $P101, $P5001
     nqp_get_sc_object $P5002, "D36D7A49EFB8A9F0BFC5D1E2F9B2F549157B62F8-1365879959.979", 25
     set $P102, $P5002
-    new $P5003, 'ResizablePMCArray'
+    new $P5003, 'QRPA'
     set $P101, $P5003
-    new $P5004, 'ResizablePMCArray'
+    new $P5004, 'QRPA'
     set $P102, $P5004
     set fb_tmp_184, _lex_param_1
     repr_defined $I5001, fb_tmp_184
@@ -32873,7 +32873,7 @@
   vivi_17764199:
     set $P5005, $P5010
   fallback4195:
-    new $P5013, 'ResizablePMCArray'
+    new $P5013, 'QRPA'
     push $P5013, $P101
     $P5014 = $P5005."find_sym"($P5013)
     $P5015 = $P5004."new"($P5014 :named("value"))
@@ -37258,7 +37258,7 @@
     .local pmc fb_tmp_357 
     .local pmc fb_tmp_358 
     .local pmc fb_tmp_359 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
 .annotate 'line', 2050
     nqp_get_sc_object $P5003, "744C7ED774769C466927C755238AD24292064564-1365879995.253", 0
@@ -37542,7 +37542,7 @@
 .annotate 'line', 2058
     nqp_get_sc_object $P5002, "F054B153354B5DBC27BD80BD112E1D4B6145EB63-1365879961.93", 82
 .annotate 'line', 2060
-    new $P5003, 'ResizablePMCArray'
+    new $P5003, 'QRPA'
     box $P5004, "GLOBAL"
     push $P5003, $P5004
     find_lex $P5005, "$/"
@@ -39061,7 +39061,7 @@
     .local pmc fb_tmp_446 
     .local pmc fb_tmp_447 
     .local pmc fb_tmp_448 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     nqp_get_sc_object $P5002, "D36D7A49EFB8A9F0BFC5D1E2F9B2F549157B62F8-1365879959.979", 25
     set $P102, $P5002
@@ -40261,13 +40261,13 @@
     set $S5001, $P5002
     iseq $I5001, $S5001, "grammar"
     unless $I5001 goto if2404_else5338 
-    new $P5010, 'ResizablePMCArray'
+    new $P5010, 'QRPA'
     box $P5011, "NQPCursor"
     push $P5010, $P5011
     set $P5014, $P5010
     goto if2404_end5339
   if2404_else5338:
-    new $P5012, 'ResizablePMCArray'
+    new $P5012, 'QRPA'
     box $P5013, "NQPMu"
     push $P5012, $P5013
     set $P5014, $P5012
@@ -41328,7 +41328,7 @@
     box $P5072, $S5003
     set $P103, $P5072
 .annotate 'line', 2336
-    new $P5073, 'ResizablePMCArray'
+    new $P5073, 'QRPA'
     push $P5073, $P103
     $P5074 = "&lexical_package_lookup"($P5073, _lex_param_1)
     set $P101, $P5074
@@ -41563,7 +41563,7 @@
   vivi_25435596:
     set $P5037, $P5042
   fallback5592:
-    new $P5045, 'ResizablePMCArray'
+    new $P5045, 'QRPA'
     find_lex $P5046, "$/"
     unless_null $P5046, fallback5601
     nqp_get_sc_object $P5047, "D36D7A49EFB8A9F0BFC5D1E2F9B2F549157B62F8-1365879959.979", 25
@@ -41685,7 +41685,7 @@
   vivi_25575621:
     set $P5070, $P5075
   fallback5617:
-    new $P5078, 'ResizablePMCArray'
+    new $P5078, 'QRPA'
     box $P5079, "NQPMu"
     push $P5078, $P5079
     $P5080 = $P5070."find_sym"($P5078)
@@ -41909,7 +41909,7 @@
   vivi_25895676:
     set $P5013, $P5018
   fallback5672:
-    new $P5021, 'ResizablePMCArray'
+    new $P5021, 'QRPA'
     find_lex $P5022, "$/"
     unless_null $P5022, fallback5681
     nqp_get_sc_object $P5023, "D36D7A49EFB8A9F0BFC5D1E2F9B2F549157B62F8-1365879959.979", 25
@@ -43414,7 +43414,7 @@
   vivi_27105891:
     nqp_get_sc_object $P5052, "F054B153354B5DBC27BD80BD112E1D4B6145EB63-1365879961.93", 82
 .annotate 'line', 2481
-    new $P5053, 'ResizablePMCArray'
+    new $P5053, 'QRPA'
     find_lex $P5054, "$name"
     push $P5053, $P5054
     find_lex $P5055, "$/"
@@ -45232,7 +45232,7 @@
     .lex "$found", $P102 
     .lex "self", _lex_param_0 
     .lex "$/", _lex_param_1 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     nqp_get_sc_object $P5002, "D36D7A49EFB8A9F0BFC5D1E2F9B2F549157B62F8-1365879959.979", 25
     set $P102, $P5002
@@ -46833,7 +46833,7 @@
 .annotate 'line', 2844
     nqp_get_sc_object $P5121, "F054B153354B5DBC27BD80BD112E1D4B6145EB63-1365879961.93", 82
 .annotate 'line', 2846
-    new $P5122, 'ResizablePMCArray'
+    new $P5122, 'QRPA'
     box $P5123, "NQPRegexMethod"
     push $P5122, $P5123
     find_lex $P5124, "$/"
@@ -47490,7 +47490,7 @@
   vivi_30876575:
     set $P5002, $P5007
   fallback6571:
-    new $P5010, 'ResizablePMCArray'
+    new $P5010, 'QRPA'
     find_lex $P5011, "$/"
     unless_null $P5011, fallback6578
     nqp_get_sc_object $P5012, "D36D7A49EFB8A9F0BFC5D1E2F9B2F549157B62F8-1365879959.979", 25
@@ -47540,7 +47540,7 @@
     .local pmc fb_tmp_678 
     .local pmc fb_tmp_679 
     .local pmc fb_tmp_680 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     find_lex $P5003, "$/"
     unless_null $P5003, fallback6594
@@ -47699,7 +47699,7 @@
     .local pmc fb_tmp_686 
     .local pmc fb_tmp_687 
     .local pmc fb_tmp_688 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     nqp_get_sc_object $P5002, "D36D7A49EFB8A9F0BFC5D1E2F9B2F549157B62F8-1365879959.979", 25
     set $P102, $P5002
@@ -47760,7 +47760,7 @@
     set $P5020, $P5018
     goto if3117_end6628
   if3117_else6627:
-    new $P5019, 'ResizablePMCArray'
+    new $P5019, 'QRPA'
     set $P5020, $P5019
   if3117_end6628:
     set $P101, $P5020
@@ -47849,7 +47849,7 @@
     .local pmc fb_tmp_693 
     nqp_get_sc_object $P5001, "D36D7A49EFB8A9F0BFC5D1E2F9B2F549157B62F8-1365879959.979", 25
     set $P101, $P5001
-    new $P5002, 'ResizablePMCArray'
+    new $P5002, 'QRPA'
     set $P102, $P5002
     nqp_get_sc_object $P5003, "D36D7A49EFB8A9F0BFC5D1E2F9B2F549157B62F8-1365879959.979", 25
     set $P103, $P5003
@@ -47931,7 +47931,7 @@
     set $P5027, $P5025
     goto if3130_end6653
   if3130_else6652:
-    new $P5026, 'ResizablePMCArray'
+    new $P5026, 'QRPA'
     set $P5027, $P5026
   if3130_end6653:
     set $P102, $P5027
@@ -48044,7 +48044,7 @@
   vivi_31416673:
     set $P5018, $P5023
   fallback6669:
-    new $P5026, 'ResizablePMCArray'
+    new $P5026, 'QRPA'
     box $P5027, "NQPRoutine"
     push $P5026, $P5027
     $P5028 = $P5018."find_sym"($P5026)
@@ -49738,7 +49738,7 @@
 .annotate 'line', 3104
     nqp_get_sc_object $P5060, "F054B153354B5DBC27BD80BD112E1D4B6145EB63-1365879961.93", 82
 .annotate 'line', 3106
-    new $P5061, 'ResizablePMCArray'
+    new $P5061, 'QRPA'
     box $P5062, "NQPRegex"
     push $P5061, $P5062
     $P5063 = "&lexical_package_lookup"($P5061, _lex_param_1)
@@ -51034,7 +51034,7 @@
     .lex "$block", _lex_param_2 
     .lex "$key", _lex_param_3 
     .lex "@alternatives", _lex_param_4 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     set $P5002, _lex_param_4
     iter $P5004, _lex_param_4
@@ -51105,7 +51105,7 @@
     nqp_create_sc $P5001, "744C7ED774769C466927C755238AD24292064564-1365879995.253"
     set cur_sc, $P5001
     $P5002 = cur_sc."set_description"("src\\stage2\\gen\\NQP.pm")
-    new $P5003, 'ResizablePMCArray'
+    new $P5003, 'QRPA'
     set conflicts, $P5003
     new $P5004, 'ResizableStringArray'
     null $S5001
@@ -53047,7 +53047,7 @@
 .namespace []
 .sub "" :subid("cuid_509_1365879995.227") :anon :lex :outer("cuid_510_1365879995.227")
 .annotate 'file', "src\\stage2\\gen\\NQP.pm"
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     .const 'Sub' $P5002 = "cuid_1_1365879995.227" 
     push $P5001, $P5002
     .const 'Sub' $P5002 = "cuid_2_1365879995.227" 

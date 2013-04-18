@@ -415,9 +415,9 @@
     set $P101, $P5001
     new $P5002, 'Hash'
     set $P102, $P5002
-    new $P5003, 'ResizablePMCArray'
+    new $P5003, 'QRPA'
     set $P103, $P5003
-    new $P5004, 'ResizablePMCArray'
+    new $P5004, 'QRPA'
     set $P104, $P5004
     root_new $P105, ['parrot';'Continuation']
     set_label $P105, lexotic_30
@@ -488,7 +488,7 @@
     capture_lex $P5009 
     .lex "@methods", $P101 
     .lex "$_", _lex_param_0 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
 .annotate 'line', 77
     get_how $P5002, _lex_param_0
@@ -526,7 +526,7 @@
     set $P101, $P5001
     null $P5002
     set $P102, $P5002
-    new $P5003, 'ResizablePMCArray'
+    new $P5003, 'QRPA'
     set $P103, $P5003
     null $P5004
     set $P104, $P5004
@@ -669,7 +669,7 @@
     .local pmc fb_tmp_5 
     null $P5001
     set $P101, $P5001
-    new $P5002, 'ResizablePMCArray'
+    new $P5002, 'QRPA'
     set $P102, $P5002
     $P5003 = _lex_param_0."key"()
     set $P101, $P5003
@@ -764,7 +764,7 @@
     .lex "$_", _lex_param_0 
     null $P5001
     set $P101, $P5001
-    new $P5002, 'ResizablePMCArray'
+    new $P5002, 'QRPA'
     set $P102, $P5002
     get_how $P5003, _lex_param_0
     set $P101, $P5003
@@ -802,7 +802,7 @@
     set $P101, $P5001
     null $P5002
     set $P102, $P5002
-    new $P5003, 'ResizablePMCArray'
+    new $P5003, 'QRPA'
     set $P103, $P5003
     set $P101, _lex_param_0
     box $P5004, 0
@@ -1020,7 +1020,7 @@
     repr_bind_attr_obj $P5003, $P5004, "$!instance_of", _lex_param_2
     nqp_decontainerize $P5005, _lex_param_0
     nqp_get_sc_object $P5006, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 3
-    new $P5007, 'ResizablePMCArray'
+    new $P5007, 'QRPA'
     repr_bind_attr_obj $P5005, $P5006, "@!attributes", $P5007
     nqp_decontainerize $P5008, _lex_param_0
     nqp_get_sc_object $P5009, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 3
@@ -1028,19 +1028,19 @@
     repr_bind_attr_obj $P5008, $P5009, "%!methods", $P5010
     nqp_decontainerize $P5011, _lex_param_0
     nqp_get_sc_object $P5012, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 3
-    new $P5013, 'ResizablePMCArray'
+    new $P5013, 'QRPA'
     repr_bind_attr_obj $P5011, $P5012, "@!multi_methods_to_incorporate", $P5013
     nqp_decontainerize $P5014, _lex_param_0
     nqp_get_sc_object $P5015, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 3
-    new $P5016, 'ResizablePMCArray'
+    new $P5016, 'QRPA'
     repr_bind_attr_obj $P5014, $P5015, "@!collisions", $P5016
     nqp_decontainerize $P5017, _lex_param_0
     nqp_get_sc_object $P5018, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 3
-    new $P5019, 'ResizablePMCArray'
+    new $P5019, 'QRPA'
     repr_bind_attr_obj $P5017, $P5018, "@!roles", $P5019
     nqp_decontainerize $P5020, _lex_param_0
     nqp_get_sc_object $P5021, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 3
-    new $P5022, 'ResizablePMCArray'
+    new $P5022, 'QRPA'
     repr_bind_attr_obj $P5020, $P5021, "@!role_typecheck_list", $P5022
     nqp_decontainerize $P5023, _lex_param_0
     nqp_get_sc_object $P5024, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 3
@@ -1284,7 +1284,7 @@
     nqp_get_sc_object $P5018, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 3
     box $P5019, 1
     repr_bind_attr_obj $P5017, $P5018, "$!composed", $P5019
-    new $P5020, 'ResizablePMCArray'
+    new $P5020, 'QRPA'
     get_what $P5021, _lex_param_1
     push $P5020, $P5021
     publish_type_check_cache _lex_param_1, $P5020
@@ -1334,7 +1334,7 @@
     null $P5010
     set _lex_param_2, $P5010
   default107:
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     nqp_decontainerize $P5005, _lex_param_0
     nqp_get_sc_object $P5006, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 3
@@ -1425,7 +1425,7 @@
     null $P5010
     set _lex_param_2, $P5010
   default111:
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     nqp_decontainerize $P5005, _lex_param_0
     nqp_get_sc_object $P5006, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 3
@@ -1555,7 +1555,7 @@
     .lex "@attributes", $P101 
     .lex "$target", _lex_param_0 
     .lex "$name", _lex_param_1 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     root_new $P102, ['parrot';'Continuation']
     set_label $P102, lexotic_112
@@ -1636,13 +1636,13 @@
     set $P101, $P5001
     null $P5002
     set $P102, $P5002
-    new $P5003, 'ResizablePMCArray'
+    new $P5003, 'QRPA'
     set $P103, $P5003
-    new $P5004, 'ResizablePMCArray'
+    new $P5004, 'QRPA'
     set $P104, $P5004
-    new $P5005, 'ResizablePMCArray'
+    new $P5005, 'QRPA'
     set $P105, $P5005
-    new $P5006, 'ResizablePMCArray'
+    new $P5006, 'QRPA'
     set $P106, $P5006
     elements $I5002, _lex_param_2
     set $N5001, $I5002
@@ -2180,7 +2180,7 @@
     repr_bind_attr_obj $P5001, $P5002, "$!name", _lex_param_1
     nqp_decontainerize $P5003, _lex_param_0
     nqp_get_sc_object $P5004, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 6
-    new $P5005, 'ResizablePMCArray'
+    new $P5005, 'QRPA'
     repr_bind_attr_obj $P5003, $P5004, "@!attributes", $P5005
     nqp_decontainerize $P5006, _lex_param_0
     nqp_get_sc_object $P5007, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 6
@@ -2188,11 +2188,11 @@
     repr_bind_attr_obj $P5006, $P5007, "%!methods", $P5008
     nqp_decontainerize $P5009, _lex_param_0
     nqp_get_sc_object $P5010, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 6
-    new $P5011, 'ResizablePMCArray'
+    new $P5011, 'QRPA'
     repr_bind_attr_obj $P5009, $P5010, "@!multi_methods_to_incorporate", $P5011
     nqp_decontainerize $P5012, _lex_param_0
     nqp_get_sc_object $P5013, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 6
-    new $P5014, 'ResizablePMCArray'
+    new $P5014, 'QRPA'
     repr_bind_attr_obj $P5012, $P5013, "@!roles", $P5014
     nqp_decontainerize $P5015, _lex_param_0
     nqp_get_sc_object $P5016, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 6
@@ -2407,7 +2407,7 @@
     nqp_get_sc_object $P5002, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 6
     box $P5003, 1
     repr_bind_attr_obj $P5001, $P5002, "$!composed", $P5003
-    new $P5004, 'ResizablePMCArray'
+    new $P5004, 'QRPA'
     get_what $P5005, _lex_param_1
     push $P5004, $P5005
     publish_type_check_cache _lex_param_1, $P5004
@@ -2704,7 +2704,7 @@
     null $P5010
     set _lex_param_2, $P5010
   default183:
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     nqp_decontainerize $P5005, _lex_param_0
     nqp_get_sc_object $P5006, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 6
@@ -2781,7 +2781,7 @@
     null $P5010
     set _lex_param_2, $P5010
   default187:
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     nqp_decontainerize $P5005, _lex_param_0
     nqp_get_sc_object $P5006, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 6
@@ -3042,9 +3042,9 @@
     .lex "@result", $P102 
     .lex "$class", _lex_param_0 
     .local pmc fb_tmp_10 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
-    new $P5002, 'ResizablePMCArray'
+    new $P5002, 'QRPA'
     set $P102, $P5002
     root_new $P103, ['parrot';'Continuation']
     set_label $P103, lexotic_188
@@ -3105,7 +3105,7 @@
     .const 'Sub' $P5010 = 'cuid_166_1365879956.027' 
     capture_lex $P5010 
     .lex "@merge_list", $P101 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     find_lex $P5005, "@immediate_parents"
     set $P5002, $P5005
@@ -3155,7 +3155,7 @@
     .lex "$cand_count", $P104 
     .lex "$i", $P105 
     .lex "@merge_list", _lex_param_0 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     null $P5002
     set $P102, $P5002
@@ -3245,7 +3245,7 @@
     capture_lex $P5005 
     .lex "@cand_list", $P101 
     .lex "$_", _lex_param_0 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     set $P101, _lex_param_0
     set $P5004, $P101
@@ -3408,7 +3408,7 @@
     capture_lex $P5017 
     .lex "@new_list", $P101 
     .local pmc fb_tmp_13 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     find_lex $P5005, "@merge_list"
     set fb_tmp_13, $P5005
@@ -3481,7 +3481,7 @@
     capture_lex $P5007 
     .lex "@out", $P101 
     .lex "@in", _lex_param_0 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     set $P5002, _lex_param_0
     iter $P5004, _lex_param_0
@@ -3560,7 +3560,7 @@
     repr_bind_attr_obj $P5001, $P5002, "$!name", _lex_param_1
     nqp_decontainerize $P5003, _lex_param_0
     nqp_get_sc_object $P5004, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 7
-    new $P5005, 'ResizablePMCArray'
+    new $P5005, 'QRPA'
     repr_bind_attr_obj $P5003, $P5004, "@!attributes", $P5005
     nqp_decontainerize $P5006, _lex_param_0
     nqp_get_sc_object $P5007, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 7
@@ -3568,23 +3568,23 @@
     repr_bind_attr_obj $P5006, $P5007, "%!methods", $P5008
     nqp_decontainerize $P5009, _lex_param_0
     nqp_get_sc_object $P5010, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 7
-    new $P5011, 'ResizablePMCArray'
+    new $P5011, 'QRPA'
     repr_bind_attr_obj $P5009, $P5010, "@!method_order", $P5011
     nqp_decontainerize $P5012, _lex_param_0
     nqp_get_sc_object $P5013, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 7
-    new $P5014, 'ResizablePMCArray'
+    new $P5014, 'QRPA'
     repr_bind_attr_obj $P5012, $P5013, "@!multi_methods_to_incorporate", $P5014
     nqp_decontainerize $P5015, _lex_param_0
     nqp_get_sc_object $P5016, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 7
-    new $P5017, 'ResizablePMCArray'
+    new $P5017, 'QRPA'
     repr_bind_attr_obj $P5015, $P5016, "@!parents", $P5017
     nqp_decontainerize $P5018, _lex_param_0
     nqp_get_sc_object $P5019, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 7
-    new $P5020, 'ResizablePMCArray'
+    new $P5020, 'QRPA'
     repr_bind_attr_obj $P5018, $P5019, "@!roles", $P5020
     nqp_decontainerize $P5021, _lex_param_0
     nqp_get_sc_object $P5022, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 7
-    new $P5023, 'ResizablePMCArray'
+    new $P5023, 'QRPA'
     repr_bind_attr_obj $P5021, $P5022, "@!vtable", $P5023
     nqp_decontainerize $P5024, _lex_param_0
     nqp_get_sc_object $P5025, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 7
@@ -3592,11 +3592,11 @@
     repr_bind_attr_obj $P5024, $P5025, "%!method-vtable-slots", $P5026
     nqp_decontainerize $P5027, _lex_param_0
     nqp_get_sc_object $P5028, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 7
-    new $P5029, 'ResizablePMCArray'
+    new $P5029, 'QRPA'
     repr_bind_attr_obj $P5027, $P5028, "@!mro", $P5029
     nqp_decontainerize $P5030, _lex_param_0
     nqp_get_sc_object $P5031, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 7
-    new $P5032, 'ResizablePMCArray'
+    new $P5032, 'QRPA'
     repr_bind_attr_obj $P5030, $P5031, "@!done", $P5032
     nqp_decontainerize $P5033, _lex_param_0
     nqp_get_sc_object $P5034, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 7
@@ -3608,11 +3608,11 @@
     repr_bind_attr_obj $P5036, $P5037, "%!parrot_vtable_handler_mapping", $P5038
     nqp_decontainerize $P5039, _lex_param_0
     nqp_get_sc_object $P5040, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 7
-    new $P5041, 'ResizablePMCArray'
+    new $P5041, 'QRPA'
     repr_bind_attr_obj $P5039, $P5040, "@!BUILDALLPLAN", $P5041
     nqp_decontainerize $P5042, _lex_param_0
     nqp_get_sc_object $P5043, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 7
-    new $P5044, 'ResizablePMCArray'
+    new $P5044, 'QRPA'
     repr_bind_attr_obj $P5042, $P5043, "@!BUILDPLAN", $P5044
     nqp_decontainerize $P5045, _lex_param_0
     nqp_get_sc_object $P5046, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 7
@@ -4239,7 +4239,7 @@
     nqp_get_sc_object $P5013, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 7
     repr_get_attr_obj $P5014, $P5012, $P5013, "%!parrot_vtable_handler_mapping"
     set $S5008, _lex_param_2
-    new $P5015, 'ResizablePMCArray'
+    new $P5015, 'QRPA'
     push $P5015, _lex_param_1
     push $P5015, _lex_param_3
     set $P5014[$S5008], $P5015
@@ -4354,7 +4354,7 @@
     .const 'Sub' $P5014 = 'cuid_184_1365879956.027' 
     capture_lex $P5014 
     .lex "@specialized_roles", $P101 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     find_lex $P5006, "self"
     nqp_decontainerize $P5005, $P5006
@@ -4430,7 +4430,7 @@
     .lex "$info", $P102 
     .lex "self", _lex_param_0 
     .lex "$obj", _lex_param_1 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     null $P5002
     set $P102, $P5002
@@ -4465,9 +4465,9 @@
     .lex "@type_info", $P101 
     .lex "@attrs", $P102 
     .lex "$type_obj", _lex_param_0 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
-    new $P5002, 'ResizablePMCArray'
+    new $P5002, 'QRPA'
     set $P102, $P5002
     find_lex $P5003, "@repr_info"
     push $P5003, $P101
@@ -4919,7 +4919,7 @@
     .lex "@tc", $P101 
     .lex "self", _lex_param_0 
     .lex "$obj", _lex_param_1 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     nqp_decontainerize $P5005, _lex_param_0
     nqp_get_sc_object $P5006, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 7
@@ -4989,7 +4989,7 @@
     .lex "$obj", _lex_param_1 
     new $P5001, 'Hash'
     set $P101, $P5001
-    new $P5002, 'ResizablePMCArray'
+    new $P5002, 'QRPA'
     set $P102, $P5002
 .annotate 'line', 1099
     nqp_decontainerize $P5003, _lex_param_0
@@ -5227,7 +5227,7 @@
     .lex "$obj", _lex_param_1 
     new $P5001, 'Hash'
     set $P101, $P5001
-    new $P5002, 'ResizablePMCArray'
+    new $P5002, 'QRPA'
     set $P102, $P5002
 .annotate 'line', 1140
     nqp_decontainerize $P5003, _lex_param_0
@@ -5318,15 +5318,15 @@
     .lex "self", _lex_param_0 
     .lex "$obj", _lex_param_1 
     .local pmc fb_tmp_25 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
-    new $P5002, 'ResizablePMCArray'
+    new $P5002, 'QRPA'
     set $P102, $P5002
     null $P5003
     set $P103, $P5003
-    new $P5004, 'ResizablePMCArray'
+    new $P5004, 'QRPA'
     set $P104, $P5004
-    new $P5005, 'ResizablePMCArray'
+    new $P5005, 'QRPA'
     set $P105, $P5005
     null $P5006
     set $P106, $P5006
@@ -5355,7 +5355,7 @@
     defined $I5002, $P103
     unless $I5002 goto if142_else422 
 .annotate 'line', 1168
-    new $P5015, 'ResizablePMCArray'
+    new $P5015, 'QRPA'
     box $P5016, 0
     push $P5015, $P5016
     push $P5015, $P103
@@ -5464,7 +5464,7 @@
     box $P5008, $I5004
     set $P104, $P5008
     find_lex $P5009, "@plan"
-    new $P5010, 'ResizablePMCArray'
+    new $P5010, 'QRPA'
     push $P5010, $P104
     find_lex $P5011, "$obj"
     push $P5010, $P5011
@@ -5511,7 +5511,7 @@
     unless $I5001 goto if146_end434 
 .annotate 'line', 1189
     find_lex $P5004, "@plan"
-    new $P5005, 'ResizablePMCArray'
+    new $P5005, 'QRPA'
     box $P5006, 4
     push $P5005, $P5006
     find_lex $P5007, "$obj"
@@ -5717,7 +5717,7 @@
     .const 'Sub' $P5011 = 'cuid_208_1365879956.027' 
     capture_lex $P5011 
     .lex "@meths", $P101 
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     find_lex $P5006, "self"
     nqp_decontainerize $P5005, $P5006
@@ -5849,7 +5849,7 @@
     box $P5018, 0
     set _lex_param_2, $P5018
   default472:
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     set $P101, $P5001
     unless _lex_param_2 goto if152_else461 
 .annotate 'line', 1270
@@ -6623,7 +6623,7 @@
     find_lex $P5032, "self"
     nqp_decontainerize $P5031, $P5032
     nqp_get_sc_object $P5033, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051", 7
-    new $P5034, 'ResizablePMCArray'
+    new $P5034, 'QRPA'
     repr_bind_attr_obj $P5031, $P5033, "@!mixin_cache", $P5034
   if177_end543:
     find_lex $P5036, "self"
@@ -7551,7 +7551,7 @@
     nqp_create_sc $P5001, "240369A269C8B2F7269F4921670E12E13C5F801B-1365879956.051"
     set cur_sc, $P5001
     $P5002 = cur_sc."set_description"("src\\stage2\\gen\\nqp-mo.pm")
-    new $P5003, 'ResizablePMCArray'
+    new $P5003, 'QRPA'
     set conflicts, $P5003
     new $P5004, 'ResizableStringArray'
     null $S5001
@@ -7869,7 +7869,7 @@
 .namespace []
 .sub "" :subid("cuid_223_1365879956.027") :anon :lex :outer("cuid_224_1365879956.027")
 .annotate 'file', "src\\stage2\\gen\\nqp-mo.pm"
-    new $P5001, 'ResizablePMCArray'
+    new $P5001, 'QRPA'
     .const 'Sub' $P5002 = "cuid_1_1365879956.027" 
     push $P5001, $P5002
     .const 'Sub' $P5002 = "cuid_2_1365879956.027" 
