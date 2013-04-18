@@ -233,7 +233,7 @@ class NQP::World is HLL::World {
                     # First, go over the code objects. Update the $!do, and the
                     # entry in the SC. Make sure the newly compiled code is marked
                     # as a static code ref.
-                    my $static := %!code_objects_to_fix_up{$subid}.shift();
+                    my $static := nqp::shift(%!code_objects_to_fix_up{$subid});
                     nqp::bindattr($static, %!code_object_types{$subid}, '$!do', @allcodes[$i]);
                     nqp::bindattr($static, %!code_object_types{$subid}, '$!clone_callback', nqp::null());
                     for %!code_objects_to_fix_up{$subid} {
@@ -286,7 +286,7 @@ class NQP::World is HLL::World {
                 %!code_object_fixup_list{$past.cuid()} := $fixups;
                 if self.is_precompilation_mode() {
                     my $cb := sub ($orig, $clone, $code_obj) {
-                        %!code_objects_to_fix_up{$past.cuid()}.push($code_obj);
+                        nqp::push(%!code_objects_to_fix_up{$past.cuid()}, $code_obj);
                         nqp::bindattr($code_obj, $code_type, '$!clone_callback', nqp::null());
                         my $do := nqp::getattr($code_obj, $code_type, '$!do');
                         nqp::markcodestub($do);
@@ -313,7 +313,7 @@ class NQP::World is HLL::World {
                         ));
                             
                         # Add to dynamic compilation fixup list.
-                        %!code_objects_to_fix_up{$past.cuid()}.push($code_obj);
+                        nqp::push(%!code_objects_to_fix_up{$past.cuid()}, $code_obj);
                     };
                     nqp::bindattr($code_obj, $code_type, '$!clone_callback', $cb);
                     nqp::push(@!clearup_tasks, sub () {
