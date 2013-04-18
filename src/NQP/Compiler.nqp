@@ -22,10 +22,17 @@ my @clo := $nqpcomp.commandline_options();
 #?endif
 #?if jvm
 @clo.push('javaclass=s');
+@clo.push('bootstrap');
 $nqpcomp.addstage('classname', :after<start>);
 #?endif
 
+#?if parrot
+# XXX FIX ME
 sub MAIN(@ARGS) {
+#?endif
+#?if !parrot
+sub MAIN(*@ARGS) {
+#?endif
     # Enter the compiler.
     $nqpcomp.command_line(@ARGS, :encoding('utf8'), :transcode('ascii iso-8859-1'));
 
