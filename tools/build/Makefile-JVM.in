@@ -6,6 +6,7 @@ PROVE  = prove
 ASM    = 3rdparty/asm/
 
 MKPATH = $(PERL) -MExtUtils::Command -e mkpath
+CP     = $(PERL) -MExtUtils::Command -e cp
 
 RUNTIME_JAVAS = \
   src/vm/jvm/runtime/org/perl6/nqp/jast2bc/*.java \
@@ -124,7 +125,13 @@ STAGE2_OUTPUT = $(STAGE2)/$(NQP_MO_CLASS) $(STAGE2)/$(MODULE_LOADER_CLASS) \
                 $(STAGE2)/$(JASTNODES_CLASS) $(STAGE2)/$(QAST_CLASS) \
                 $(STAGE2)/$(P6QREGEX_CLASS) $(STAGE2)/$(NQP_CLASS) \
 
-all: $(RUNTIME_JAR) $(STAGE2_OUTPUT)
+ALL_OUTPUT = $(NQP_MO_CLASS) $(MODULE_LOADER_CLASS) \
+             $(CORE_SETTING_CLASS) $(QASTNODE_CLASS) \
+             $(QREGEX_CLASS) $(HLL_CLASS) \
+             $(JASTNODES_CLASS) $(QAST_CLASS) \
+             $(P6QREGEX_CLASS) $(NQP_CLASS) \
+
+all: $(ALL_OUTPUT)
 
 $(RUNTIME_JAR): $(RUNTIME_JAVAS)
 	$(PERL) -MExtUtils::Command -e mkpath bin
@@ -133,6 +140,8 @@ $(RUNTIME_JAR): $(RUNTIME_JAVAS)
 
 clean:
 	$(PERL) -MExtUtils::Command -e rm_rf *.class *.jar src/stage1 src/stage2 bin
+
+$(STAGE0): $(RUNTIME_JAR)
 
 $(STAGE1): $(STAGE1_OUTPUT)
 
@@ -202,6 +211,8 @@ $(STAGE1)/$(NQP_CLASS): $(STAGE0) $(NQP_SOURCES) $(STAGE1)/$(P6QREGEX_CLASS)
          --setting=NQPCORE --target=classfile --no-regex-lib --javaclass=nqp \
 	    --output=$(STAGE1)/$(NQP_CLASS) $(STAGE1)/$(NQP_COMBINED)
 
+$(STAGE2): $(STAGE2_OUTPUT)
+
 $(STAGE2)/$(NQP_MO_CLASS): $(STAGE1) $(NQP_MO_SOURCES)
 	$(MKPATH) $(STAGE2)/gen
 	$(PERL) tools/build/gen-cat.pl jvm $(NQP_MO_SOURCES) > $(STAGE2)/$(NQP_MO_COMBINED)
@@ -267,3 +278,15 @@ $(STAGE2)/$(NQP_CLASS): $(STAGE1) $(NQP_SOURCES) $(STAGE2)/$(P6QREGEX_CLASS)
 	$(STAGE1_NQP) --module-path=$(STAGE2) --setting-path=$(STAGE2) \
          --setting=NQPCORE --target=classfile --no-regex-lib --javaclass=nqp \
 	    --output=$(STAGE2)/$(NQP_CLASS) $(STAGE2)/$(NQP_COMBINED)
+
+$(ALL_OUTPUT): $(STAGE2_OUTPUT)
+	$(CP) $(STAGE2)/$(NQP_MO_CLASS) .
+	$(CP) $(STAGE2)/$(MODULE_LOADER_CLASS) .
+	$(CP) $(STAGE2)/$(CORE_SETTING_CLASS) .
+	$(CP) $(STAGE2)/$(QASTNODE_CLASS) .
+	$(CP) $(STAGE2)/$(QREGEX_CLASS) .
+	$(CP) $(STAGE2)/$(HLL_CLASS) .
+	$(CP) $(STAGE2)/$(JASTNODES_CLASS) .
+	$(CP) $(STAGE2)/$(QAST_CLASS) .
+	$(CP) $(STAGE2)/$(P6QREGEX_CLASS) .
+	$(CP) $(STAGE2)/$(NQP_CLASS) .
