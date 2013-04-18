@@ -4,6 +4,93 @@
  * algorithm instead of the O(n) version that RPA has.
  * It also means that splice can be performed a lot more
  * efficiently in many common cases. */
+ 
+typedef struct Parrot_NCI_attributes {
+    PMC       * signature;
+    void      * func;
+    PMC       * fb_info;
+    void      * orig_func;
+    STRING    * pcc_params_signature;
+    STRING    * pcc_return_signature;
+    INTVAL arity;
+    STRING    * long_signature;
+    PMC       * multi_sig;
+} Parrot_NCI_attributes;
+
+#define PARROT_NCI(o) ((Parrot_NCI_attributes *) PMC_data(o))
+typedef INTVAL (*sort_func_t)(PARROT_INTERP, void *, void *);
+
+static INTVAL
+COMPARE(PARROT_INTERP, ARGIN(void *_a), ARGIN(void *_b),
+        ARGIN(PMC *cmp),
+        ARGIN(const char * cmp_signature))
+{
+    ASSERT_ARGS(COMPARE)
+    INTVAL result = 0;
+    if (PMC_IS_NULL(cmp))
+        return VTABLE_cmp(interp, (PMC *)_a, (PMC *)_b);
+
+    if (cmp->vtable->base_type == enum_class_NCI) {
+        const sort_func_t f = (sort_func_t)D2FPTR(PARROT_NCI(cmp)->func);
+        return f(interp, _a, _b);
+    }
+
+    Parrot_ext_call(interp, cmp, cmp_signature, _a, _b, &result);
+    return result;
+}
+
+void
+Parrot_util_quicksort(PARROT_INTERP, ARGMOD(void **data), UINTVAL n,
+        ARGIN(PMC *cmp),
+        ARGIN(const char * cmp_signature))
+{
+    ASSERT_ARGS(Parrot_util_quicksort)
+    while (n > 1) {
+        UINTVAL i, j, ln, rn;
+        void *temp;
+
+        /* Swap */
+        temp      = data[0];
+        data[0]   = data[n/2];
+        data[n/2] = temp;
+
+        for (i = 0, j = n; ;) {
+            do
+                --j;
+            while (j > 0 && COMPARE(interp, data[j], data[0], cmp, cmp_signature) > 0);
+
+            do
+                ++i;
+            while (i < j && COMPARE(interp, data[i], data[0], cmp, cmp_signature) < 0);
+
+            if (i >= j)
+                break;
+
+            /* Swap */
+            temp    = data[i];
+            data[i] = data[j];
+            data[j] = temp;
+        }
+
+        /* Swap */
+        temp    = data[j];
+        data[j] = data[0];
+        data[0] = temp;
+
+        ln = j;
+        rn = n - ++j;
+
+        if (ln < rn) {
+            Parrot_util_quicksort(interp, data, ln, cmp, cmp_signature);
+            data += j;
+            n = rn;
+        }
+        else {
+            Parrot_util_quicksort(interp, data + j, rn, cmp, cmp_signature);
+            n = ln;
+        }
+    }
+}
 
 pmclass QRPA 
     provides array 
@@ -184,6 +271,9 @@ Resizes the array to C<n> elements.
         return SELF.elements();
     }
 
+    VTABLE STRING *get_string() {
+        return Parrot_str_from_int(INTERP, SELF.elements());
+    }
 
     VTABLE PMC * get_iter() {
         return Parrot_pmc_new_init(INTERP, enum_class_ArrayIterator, SELF);
@@ -404,7 +494,23 @@ Resizes the array to C<n> elements.
                 slots[start + offset + i] = VTABLE_shift_pmc(INTERP, iter);
         }
     }
-  
+
+    METHOD sort(PMC *cmp_func :optional) {
+        const INTVAL n = SELF.elements();
+        Parrot_QRPA_attributes * const qrpa = PARROT_QRPA(SELF);
+
+        if (n > 1) {
+            /* XXX Workaround for TT #218 */
+            /*if (PObj_is_object_TEST(SELF)) {*/
+                /*PMC * const parent = SELF.get_attr_str(CONST_STRING(INTERP, "proxy"));*/
+                /*Parrot_pcc_invoke_method_from_c_args(INTERP, parent, CONST_STRING(INTERP, "sort"), "P->", cmp_func);*/
+            /*}*/
+            /*else*/
+                Parrot_util_quicksort(INTERP, (void **)qrpa->slots, n, cmp_func, "PP->I");
+        }
+        RETURN(PMC *SELF);
+    }
+
 
     VTABLE INTVAL get_integer_keyed(PMC *key) {
         PMC * const val = SELF.get_pmc_keyed(key);
