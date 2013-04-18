@@ -3359,12 +3359,16 @@ public final class Ops {
     	JASTToJVMBytecode.writeClassFromString(dump, filename);
     	return dump;
     }
-    public static SixModelObject loadcompunit(SixModelObject obj, ThreadContext tc) {
+    public static SixModelObject loadcompunit(SixModelObject obj, long compileeHLL, ThreadContext tc) {
     	try {
 	    	EvalResult res = (EvalResult)obj;
 	    	ByteClassLoader cl = new ByteClassLoader(res.jc.bytes);
 	    	res.cu = (CompilationUnit)cl.findClass(res.jc.name).newInstance();
+	    	if (compileeHLL != 0)
+	    		usecompileehllconfig(tc);
 	    	res.cu.initializeCompilationUnit(tc);
+	    	if (compileeHLL != 0)
+	    		usecompilerhllconfig(tc);
 	    	res.jc = null;
 	    	return obj;
     	}
@@ -3398,5 +3402,19 @@ public final class Ops {
     	for (int i = 0; i < cps.length; i++)
     		result.push_boxed(tc, box_s(cps[i], Str, tc));
     	return result;
+    }
+    
+    private static int compileeDepth = 0;
+    public static long usecompileehllconfig(ThreadContext tc) {
+    	if (compileeDepth == 0)
+    		tc.gc.useCompileeHLLConfig();
+    	compileeDepth++;
+    	return 1;
+    }
+    public static long usecompilerhllconfig(ThreadContext tc) {
+    	compileeDepth--;
+    	if (compileeDepth == 0)
+    		tc.gc.useCompilerHLLConfig();
+    	return 1;
     }
 }

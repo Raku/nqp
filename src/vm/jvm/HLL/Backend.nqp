@@ -70,7 +70,7 @@ class HLL::Backend::JVM {
     }
     
     method jvm($cu, *%adverbs) {
-        nqp::loadcompunit($cu)
+        nqp::loadcompunit($cu, , %adverbs<bootstrap> ?? 1 !! 0)
     }
     
     method is_compunit($cuish) {

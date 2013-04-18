@@ -96,9 +96,20 @@ public class GlobalContext {
     public ThreadContext mainThread;
     
     /**
-     * HLL configuration (maps HLL name to the configuration).
+     * Active HLL configuration (maps HLL name to the configuration).
      */
     private HashMap<String, HLLConfig> hllConfiguration;
+    
+    /**
+     * HLL configuration of the compiler. We need to distinguish it from
+     * the HLL configuration of the code being compiled in bootstrap.
+     */
+    private HashMap<String, HLLConfig> compilerHLLConfiguration;
+    
+    /**
+     * HLL configuration of the compilee (see above).
+     */
+    private HashMap<String, HLLConfig> compileeHLLConfiguration;
     
     /**
      * HLL global symbols.
@@ -125,7 +136,13 @@ public class GlobalContext {
      */
     public GlobalContext()
     {
-        hllConfiguration = new HashMap<String, HLLConfig>();
+    	compileeHLLConfiguration = new HashMap<String, HLLConfig>();
+    	hllConfiguration = compileeHLLConfiguration;
+    	getHLLConfigFor("");
+    	compilerHLLConfiguration = new HashMap<String, HLLConfig>();
+    	hllConfiguration = compilerHLLConfiguration;
+    	getHLLConfigFor("");
+		
         scs = new HashMap<String, SerializationContext>();
         scRefs = new HashMap<String, SixModelObject>();
         compilerRegistry = new HashMap<String, SixModelObject>();
@@ -135,7 +152,8 @@ public class GlobalContext {
         KnowHOWBootstrapper.bootstrap(mainThread);
         
         // BOOT* not available earlier; fixup some stuff.
-        setupConfig(hllConfiguration.get(""));
+        setupConfig(compileeHLLConfiguration.get(""));
+        setupConfig(compilerHLLConfiguration.get(""));
         mainThread.savedCC = (CallCaptureInstance)CallCapture.st.REPR.allocate(mainThread, CallCapture.st);
         mainThread.savedCC.initialize(mainThread);
     }
@@ -168,4 +186,12 @@ public class GlobalContext {
         config.exceptionType = BOOTException;
         config.ioType = BOOTIO;
     }
+
+	public void useCompileeHLLConfig() {
+		this.hllConfiguration = this.compileeHLLConfiguration;
+	}
+
+	public void useCompilerHLLConfig() {
+		this.hllConfiguration = this.compilerHLLConfiguration;
+	}
 }

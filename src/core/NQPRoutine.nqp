@@ -370,17 +370,36 @@ my knowhow NQPRegex {
     has @!nested_codes;
     has $!clone_callback;
     method SET_CAPS($caps) {
-        $!caps := $caps;
+        my %h_caps;
+        for $caps {
+            %h_caps{$_.key} := $_.value;
+        }
+        $!caps := %h_caps;
     }
     method SET_NFA($nfa) {
-        $!nfa := $nfa;
+        $!nfa := self.'!hllize_nfa'($nfa);
     }
     method SET_ALT_NFA($name, $nfa) {
         nqp::ifnull(%!alt_nfas, %!alt_nfas := {});
-        %!alt_nfas{$name} := $nfa;
+        %!alt_nfas{$name} := self.'!hllize_nfa'($nfa);
     }
     method SET_GENERIC_NFA($nfa) {
-        $!generic_nfa := $nfa.save();
+        $!generic_nfa := self.'!hllize_nfa'($nfa.save());
+    }
+    method !hllize_nfa($nfa) {
+        sub hll_list($l) {
+            if nqp::islist($l) {
+                my @h_l := nqp::list();
+                for $l -> $elem {
+                    nqp::push(@h_l, hll_list($elem));
+                }
+                @h_l
+            }
+            else {
+                $l
+            }
+        }
+        hll_list($nfa)
     }
     method ADD_NESTED_CODE($code) {
         nqp::ifnull(@!nested_codes, @!nested_codes := nqp::list());
