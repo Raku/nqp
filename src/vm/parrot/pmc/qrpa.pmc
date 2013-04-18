@@ -543,6 +543,23 @@ Resizes the array to C<n> elements.
         SELF.unshift_pmc(val);
     }
 
+    METHOD shift() {
+        PMC * const value = VTABLE_shift_pmc(INTERP, SELF);
+        RETURN(PMC *value);
+    }
+
+    METHOD pop() {
+        PMC * const value = VTABLE_pop_pmc(INTERP, SELF);
+        RETURN(PMC *value);
+    }
+
+    METHOD unshift(PMC* value) {
+        VTABLE_unshift_pmc(INTERP, SELF, value);
+    }
+
+    METHOD push(PMC* value) {
+        VTABLE_push_pmc(INTERP, SELF, value);
+    }
 }
 
 /*
