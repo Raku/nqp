@@ -21,7 +21,7 @@ STAGE0 = src/vm/jvm/stage0
 STAGE1 = src/stage1
 STAGE2 = src/stage2
 
-STAGE0_NQP = $(JAVA) -cp $(STAGE0)@cpsep@nqp-runtime.jar@cpsep@3rdparty/asm/asm-4.1.jar NQPJVM --bootstrap
+STAGE0_NQP = $(JAVA) -cp $(STAGE0)@cpsep@nqp-runtime.jar@cpsep@3rdparty/asm/asm-4.1.jar nqp --bootstrap
 STAGE1_NQP = $(JAVA) -cp $(STAGE1)@cpsep@nqp-runtime.jar@cpsep@3rdparty/asm/asm-4.1.jar nqp --bootstrap
 
 NQP_MO_CLASS    = nqpmo.class
@@ -297,6 +297,18 @@ $(ALL_OUTPUT): $(STAGE2_OUTPUT)
 $(RUNNER):
 	$(CP) src/vm/jvm/$(RUNNER) .
 	$(CHMOD) 755 $(RUNNER)
+
+bootstrap-files: $(STAGE2_OUTPUT)
+	$(CP) $(STAGE2)/$(NQP_MO_CLASS) $(STAGE0)
+	$(CP) $(STAGE2)/$(MODULE_LOADER_CLASS) $(STAGE0)
+	$(CP) $(STAGE2)/$(CORE_SETTING_CLASS) $(STAGE0)
+	$(CP) $(STAGE2)/$(QASTNODE_CLASS) $(STAGE0)
+	$(CP) $(STAGE2)/$(QREGEX_CLASS) $(STAGE0)
+	$(CP) $(STAGE2)/$(HLL_CLASS) $(STAGE0)
+	$(CP) $(STAGE2)/$(JASTNODES_CLASS) $(STAGE0)
+	$(CP) $(STAGE2)/$(QAST_CLASS) $(STAGE0)
+	$(CP) $(STAGE2)/$(P6QREGEX_CLASS) $(STAGE0)
+	$(CP) $(STAGE2)/$(NQP_CLASS) $(STAGE0)
 
 ## testing
 
