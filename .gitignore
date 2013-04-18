@@ -42,3 +42,4 @@ config.default
 /nqp_const.pir
 bin
 nqp-runtime.jar
+*.class
